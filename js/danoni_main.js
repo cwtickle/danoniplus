@@ -141,6 +141,14 @@ function createDiv(_id, _x, _y, _width, _height){
 	div.style.width  = _width + "px";
 	div.style.height = _height + "px";
 	div.style.position = "absolute";
+
+	div.style.userSelect = "none";
+	div.style.webkitUserSelect = "none";
+	div.style.msUserSelect = "none";
+	div.style.mozUserSelect = "none";
+	div.style.khtmlUserSelect = "none";
+	div.style.webkitTouchCallout = "none";
+
 	return div;
 }
 
