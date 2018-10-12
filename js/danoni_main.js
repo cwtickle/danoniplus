@@ -1,6 +1,6 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.1.9
+ * Ver 0.1.10
  * 
  * Source by tickle
  * created : 2018/10/08
@@ -306,14 +306,15 @@ function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align){
 
 /**
  * タイトル文字描画
- * @param {string} _ctx ラベルを作成する場所のコンテキスト名
- * @param {string} _titlename タイトル名称
- * @param {number} _width 幅
- * @param {number} _height 高さ
+ * @param {string} _id 
+ * @param {string} _titlename 
+ * @param {number} _x 
+ * @param {number} _y 
  */
-function getTitleLabel(_ctx, _titlename, _width, _height){
-	createLabel(_ctx, _titlename, _width, _height, 
-				C_LBL_TITLESIZE, C_LBL_BASICFONT, C_CLR_TITLE, C_ALIGN_CENTER);
+function getTitleDivLabel(_id, _titlename, _x, _y){
+	var div = createDivLabel(_id, _x, _y, 500, 50, C_LBL_BTNSIZE, C_CLR_TITLE, _titlename);
+	div.style.align = C_ALIGN_CENTER;
+	return div;
 }
 
 /**
@@ -401,7 +402,9 @@ function titleInit(){
 	}
 	
 	// タイトル文字描画
-	getTitleLabel(l1ctx, "Dancing☆Onigiri", sWidth/2, 50);
+	var lblTitle = getTitleDivLabel("lblTitle", 
+	"<span style='color:#6666ff;font-size:40px;'>D</span>ANCING<span style='color:#ffff66;font-size:40px;'>☆</span><span style='color:#ff6666;font-size:40px;'>O</span>NIGIRI", 0, 15);
+	divRoot.appendChild(lblTitle);
 
 	// ボタン描画
 	var btnStart = createButton({
@@ -543,6 +546,33 @@ function headerConvert(_dosObj){
 	return obj;
 }
 
+/**
+ * 譜面データの分解
+ * @param {object} _dosObj 
+ * @param {string} _scoreNo
+ */
+function scoreConvert(_dosObj, _keys, _scoreNo){
+
+	// 矢印群の格納先
+	var obj = {};
+
+	var speedFooter = (_keys == "5" ? "_data" : "_change");
+	if(_dosObj["speed_" + _scoreNo + speedFooter] != undefined){
+		obj["speed_data"] = _dosObj["speed_" + _scoreNo + speedFooter].split(",");
+	}
+	if(_dosObj["boost_" + _scoreNo + "data"] != undefined){
+		obj["boost_data"] = _dosObj["boost_" + _scoreNo + "data"].split(",");
+	}
+	if(_dosObj["color_" + _scoreNo + "data"] != undefined){
+		obj["color_data"] = _dosObj["color_" + _scoreNo + "data"].split(",");
+	}
+	if(_dosObj["acolor_" + _scoreNo + "data"] != undefined){
+		obj["acolor_data"] = _dosObj["acolor_" + _scoreNo + "data"].split(",");
+	}
+
+	return obj;
+}
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -563,7 +593,9 @@ function optionInit(){
 	var stage = document.getElementById("canvas-frame");
 
 	// タイトル文字描画
-	getTitleLabel(l1ctx, "Option", sWidth/2, 50);
+	var lblTitle = getTitleDivLabel("lblTitle", 
+	"<span style='color:#6666ff;font-size:40px;'>O</span>PTION", 0, 15);
+	divRoot.appendChild(lblTitle);
 
 	// オプションボタン用の設置
 	createOptionWindow("divRoot");
@@ -619,7 +651,8 @@ function optionInit(){
 		hoverColor: C_CLR_NEXT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		// TODO: メイン画面への遷移メソッド
+		clearWindow();
+		loadingScoreInit();
 	});
 	divRoot.appendChild(btnPlay);
 }
@@ -788,7 +821,9 @@ function keyConfigInit(){
 	var divRoot = document.getElementById("divRoot");
 
 	// タイトル文字描画
-	getTitleLabel(l1ctx, "KeyConfig", sWidth/2, 50);
+	var lblTitle = getTitleDivLabel("lblTitle", 
+	"<span style='color:#6666ff;font-size:40px;'>K</span>EY<span style='color:#ff6666;font-size:40px;'>C</span>ONFIG", 0, 15);
+	divRoot.appendChild(lblTitle);
 
 	// 戻るボタン描画
 	var btnBack = createButton({
@@ -845,7 +880,32 @@ function loadingScoreInit(){
 	var sHeight = layer0.height;
 	var divRoot = document.getElementById("divRoot");
 
+	// 譜面データの読み込み
+	var scoreIdHeader = "";
+	if(stateObj.scoreId > 0){
+		scoreIdHeader = Number(stateObj.scoreId) + 1;
+	}
+	scoreObj = scoreConvert(rootObj, headerObj["keyLabels"][stateObj.scoreId], scoreIdHeader);
 
+
+	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
+	var btnBack = createButton({
+		id: "btnBack", 
+		name: "Back", 
+		x: 0, 
+		y: sHeight-100, 
+		width: sWidth/2, 
+		height: C_BTN_HEIGHT, 
+		fontsize: C_LBL_BTNSIZE,
+		normalColor: C_CLR_DEFAULT, 
+		hoverColor: C_CLR_BACK, 
+		align: C_ALIGN_CENTER
+	}, function(){
+		// オプション画面へ戻る
+		clearWindow();
+		optionInit();
+	});
+	divRoot.appendChild(btnBack);
 }
 
 /*-----------------------------------------------------------*/
@@ -867,7 +927,9 @@ function resultInit(){
 	var divRoot = document.getElementById("divRoot");
 
 	// タイトル文字描画
-	getTitleLabel(l1ctx, "Result", sWidth/2, 50);
+	var lblTitle = getTitleDivLabel("lblTitle", 
+	"<span style='color:#6666ff;font-size:40px;'>R</span>ESULT", 0, 15);
+	divRoot.appendChild(lblTitle);
 
 	// 戻るボタン描画
 	var btnBack = createButton({
