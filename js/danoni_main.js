@@ -4,7 +4,7 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/11
+ * Revised : 2018/10/12
  */
 
 /**
@@ -684,7 +684,11 @@ function createOptionWindow(_splite){
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		//
+		// 難易度変更ボタン押下時は譜面名及び初期速度を変更
+		stateObj.scoreId = (stateObj.scoreId < headerObj["keyLabels"].length-1 ? ++stateObj.scoreId : 0);
+		lnkDifficulty.innerHTML = headerObj["keyLabels"][stateObj.scoreId] + " key / " + headerObj["difLabels"][stateObj.scoreId];
+		stateObj.speed = headerObj["initSpeeds"][stateObj.scoreId];
+		lnkSpeed.innerHTML = stateObj.speed + " x";
 	});
 	optionSplite.appendChild(lnkDifficulty);
 
@@ -704,7 +708,7 @@ function createOptionWindow(_splite){
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		stateObj.speed = (stateObj.speed >= 10 ? stateObj.speed + 0.25 : 1);
+		stateObj.speed = (Number(stateObj.speed) < 10 ? Number(stateObj.speed) + 0.25 : 1);
 		lnkSpeed.innerHTML = stateObj.speed + " x";
 	});
 	optionSplite.appendChild(lnkSpeed);
