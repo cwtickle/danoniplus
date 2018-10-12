@@ -1,0 +1,10 @@
+@charset "UTF-8";
+#canvas-frame {
+	width:500px;
+	height:500px;
+    position: relative;
+}
+#canvas-frame canvas {
+    position: absolute;
+    left:0;
+}
