@@ -1,6 +1,6 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.1.13
+ * Ver 0.1.14
  * 
  * Source by tickle
  * created : 2018/10/08
@@ -234,7 +234,7 @@ var keyObj = {
 	chara12: ["oni","left","leftdia","down","space","up","rightdia","right",
 		"sleft","sdown","sup","sright"],
 	chara14: ["oni","left","leftdia","down","space","up","rightdia","right",
-		"sleftdia","sleft","sdown","sup","sright","sleftdia"],
+		"sleftdia","sleft","sdown","sup","sright","srightdia"],
 
 	stepRtn5: [0, -90, 90, 180, "onigiri"],
 	stepRtn7: [0, -45, -90, "onigiri", 90, 135, 180],
@@ -839,18 +839,43 @@ function scoreConvert(_dosObj, _keys, _scoreNo){
 	// 矢印群の格納先
 	var obj = {};
 
+	var keyNum = keyObj["chara" + _keys].length;
+	obj.data = new Array();
+	var frzName;
+	for(var j=0; j<keyNum; j++){
+		if(_dosObj[keyObj["chara" + _keys][j] + _scoreNo + "_data"] != undefined){
+			obj.data[j] = _dosObj[keyObj["chara" + _keys][j] + _scoreNo + "_data"].split(",");
+		}
+		
+		frzName = keyObj["chara" + _keys][j].replace("leftdia","frzLdia");
+		frzName = frzName.replace("rightdia","frzRdia");
+		frzName = frzName.replace("left","frzLeft");
+		frzName = frzName.replace("down","frzDown");
+		frzName = frzName.replace("up","frzUp");
+		frzName = frzName.replace("right","frzRight");
+		frzName = frzName.replace("space","frzSpace");
+		frzName = frzName.replace("iyo","frzIyo");
+		frzName = frzName.replace("gor","frzGor");
+		frzName = frzName.replace("oni","foni");
+
+		if(_dosObj[frzName + _scoreNo + "_data"] != undefined){
+			obj.data[j + keyNum] = _dosObj[frzName + _scoreNo + "_data"].split(",");
+		}
+		
+	}
+
 	var speedFooter = (_keys == "5" ? "_data" : "_change");
-	if(_dosObj["speed_" + _scoreNo + speedFooter] != undefined){
-		obj["speed_data"] = _dosObj["speed_" + _scoreNo + speedFooter].split(",");
+	if(_dosObj["speed" + _scoreNo + "_" + speedFooter] != undefined){
+		obj["speedData"] = _dosObj["speed" + _scoreNo + "_" + speedFooter].split(",");
 	}
 	if(_dosObj["boost_" + _scoreNo + "data"] != undefined){
-		obj["boost_data"] = _dosObj["boost_" + _scoreNo + "data"].split(",");
+		obj["boostData"] = _dosObj["boost" + _scoreNo + "_data"].split(",");
 	}
 	if(_dosObj["color_" + _scoreNo + "data"] != undefined){
-		obj["color_data"] = _dosObj["color_" + _scoreNo + "data"].split(",");
+		obj["colorData"] = _dosObj["color" + _scoreNo + "_data"].split(",");
 	}
 	if(_dosObj["acolor_" + _scoreNo + "data"] != undefined){
-		obj["acolor_data"] = _dosObj["acolor_" + _scoreNo + "data"].split(",");
+		obj["acolorData"] = _dosObj["acolor" + _scoreNo + "_data"].split(",");
 	}
 
 	return obj;
@@ -1111,8 +1136,8 @@ function keyConfigInit(){
 	"<span style='color:#6666ff;font-size:40px;'>K</span>EY<span style='color:#ff6666;font-size:40px;'>C</span>ONFIG", 0, 15);
 	divRoot.appendChild(lblTitle);
 
-	var kcDesc = createDivLabel("kcDesc", 0, 65, g_sWidth, 20, 16, C_CLR_DEFHOVER,
-		"[BackSpaceキー：スキップ、Deleteキー：(代替キーのみ)キー無効化]");
+	var kcDesc = createDivLabel("kcDesc", 0, 65, g_sWidth, 20, 16, C_CLR_TITLE,
+		"[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]");
 	kcDesc.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcDesc);
 
