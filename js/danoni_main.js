@@ -1,6 +1,6 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.1.12
+ * Ver 0.1.13
  * 
  * Source by tickle
  * created : 2018/10/08
@@ -77,6 +77,7 @@ var C_SPRITE_ROOT = "divRoot";
 
 // 画像ファイル
 var C_IMG_ARROW = "../img/arrow_500.png";
+var C_IMG_ONIGIRI = "../img/onigiri_600.png";
 
 // 譜面データ持ち回り用
 var g_rootObj = {};
@@ -91,9 +92,13 @@ var g_stateObj = {
 	adjustment: 0
 };
 
-// 
+// サイズ(後で指定)
 var g_sWidth;
 var g_sHeight;
+
+// キーコンフィグカーソル
+var g_currentj = 0;
+var g_currentk = 0;
 
 // キーコード
 var g_kCd = new Array();
@@ -214,36 +219,62 @@ g_kCd[240] = "CapsLk";
 // キー別の設定（一旦ここで定義）
 // ステップゾーンの位置関係は自動化を想定
 var keyObj = {
+
+	chara5: ["left","down","up","right","space"],
 	chara7: ["left","leftdia","down","space","up","rightdia","right"],
 	chara7i: ["left","leftdia","down","space","up","rightdia","right"],
+	chara8: ["left","leftdia","down","space","up","rightdia","right","sleft"],
 	chara9A: ["left","down","up","right","space","sleft","sdown","sup","sright"],
 	chara9B: ["left","down","up","right","space","sleft","sdown","sup","sright"],
 	chara11: ["left","leftdia","down","space","up","rightdia","right",
 		"sleft","sdown","sup","sright"],
+	chara11L: ["left","leftdia","down","space","up","rightdia","right",
+		"sleft","sdown","sup","sright"],
+	chara12: ["oni","left","leftdia","down","space","up","rightdia","right",
+		"sleft","sdown","sup","sright"],
 	chara14: ["oni","left","leftdia","down","space","up","rightdia","right",
-		"sleft","sdown","sup","sright","sleftdia","sright"],
+		"sleftdia","sleft","sdown","sup","sright","sleftdia"],
 
-
-	stepRtn7: [0, -45, -90, 0, 90, 135, 180],
-	stepRtn7i: [0, 0, 0, 0, -90, 90, 180],
-	stepRtn9A: [0, -90, 90, 180, 0, 0, -90, 90, 180],
-	stepRtn9B: [0, -90, 90, 180, 0, 0, -90, 90, 180],
-	stepRtn11: [0, -45, -90, 0, 90, 135, 180, 0, -90, 90, 180],
-	stepRtn14: [0, 0, 30, 60, 90, 120, 150, 180, 45, 0, -90, 90, 180, 135],
+	stepRtn5: [0, -90, 90, 180, "onigiri"],
+	stepRtn7: [0, -45, -90, "onigiri", 90, 135, 180],
+	stepRtn7i: ["onigiri", "onigiri", "onigiri", 0, -90, 90, 180],
+	stepRtn8: [0, -45, -90, "onigiri", 90, 135, 180, "onigiri"],
+	stepRtn9A: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
+	stepRtn9B: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
+	stepRtn11: [0, -45, -90, "onigiri", 90, 135, 180, 0, -90, 90, 180],
+	stepRtn11L: [0, -45, -90, "onigiri", 90, 135, 180, 0, -90, 90, 180],
+	stepRtn12: ["onigiri", 0, 30, 60, 90, 120, 150, 180, 0, -90, 90, 180],
+	stepRtn14: ["onigiri", 0, 30, 60, 90, 120, 150, 180, 45, 0, -90, 90, 180, 135],
 	
-
+	div5: 5,
 	div7: 7,
 	div7i: 7,
+	div8: 8,
 	div9A: 9,
 	div9B: 9,
 	div11: 7,
+	div11L: 7,
+	div12: 8,
 	div14: 8,
 
-	keyCtrl7: [83,68,70,32,74,75,76],
-	keyCtrl9A:[83,68,69,70,32,74,75,73,76],
-	keyCtrl9B:[65,83,68,70,32,74,75,76,187],
-	keyCtrl11:[83,68,70,32,74,75,76,37,40,38,39],
-	keyCtrl14:[32,78,74,77,75,188,76,190,84,85,73,56,79,192]
+	keyCtrl5: [[37],[40],[38,0],[39],[32,0]],
+	keyCtrl7: [[83],[68,0],[70],[32,0],[74],[75,0],[76]],
+	keyCtrl8: [[83],[68,0],[70],[32,0],[74],[75,0],[76],[32,0]],
+	keyCtrl9A:[[83],[68],[69,82],[70],[32],[74],[75],[73,0],[76]],
+	keyCtrl9B:[[65],[83],[68],[70],[32],[74],[75],[76],[187]],
+	keyCtrl11:[[83],[68],[70],[32],[74],[75],[76],[37],[40],[38,0],[39]],
+	keyCtrl11L:[[83],[68],[70],[32],[74],[75],[76],[87],[69],[51,52],[82]],
+	keyCtrl12:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[85],[73],[56,57],[79]],
+	keyCtrl14:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[84,89],[85],[73],[56,55,57,48],[79],[192,80]],
+
+	keyCtrl5_1d: [[37],[40],[38,0],[39],[32,0]],
+	keyCtrl7_1d: [[83],[68,0],[70],[32,0],[74],[75,0],[76]],
+	keyCtrl9A_1d:[[83],[68],[69,82],[70],[32],[74],[75],[73,0],[76]],
+	keyCtrl9B_1d:[[65],[83],[68],[70],[32],[74],[75],[76],[187]],
+	keyCtrl11_1d:[[83],[68],[70],[32],[74],[75],[76],[37],[40],[38,0],[39]],
+	keyCtrl11L_1d:[[83],[68],[70],[32],[74],[75],[76],[87],[69],[51,52],[82]],
+	keyCtrl12_1d:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[85],[73],[56,57],[79]],
+	keyCtrl14_1d:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[84,89],[85],[73],[56,55,57,48],[79],[192,80]]
 };
 
 /**
@@ -335,6 +366,23 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text){
 	return div;
 }
 
+/**
+ * 画像表示
+ * @param {string} _id 
+ * @param {string} _imgPath 
+ * @param {number} _x 
+ * @param {number} _y 
+ * @param {number} _width 
+ * @param {number} _height 
+ */
+function createImg(_id, _imgPath, _x, _y, _width, _height){
+	var div = createDiv(_id, _x, _y, _width, _height);
+	div.innerHTML = "<img src='" + _imgPath +
+		"' style='width:" + _width + "px;height:" + _height +
+		"px;' id=" + _id + "img>";
+	
+	return div;
+}
 
 /**
  * 矢印オブジェクトの作成（色付きマスク版）
@@ -345,10 +393,25 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text){
  * @param {number} _x 
  * @param {number} _y 
  * @param {number} _size 
- * @param {number} _rotate 
+ * @param {number, string} _rotate 
  */
 function createArrowEffect(_id, _color, _x, _y, _size, _rotate){
-	var div = createDiv(_id, _x, _y, _size, _size);
+
+	// 矢印・おにぎり判定
+	if(_rotate == "onigiri"){
+		var rotate = 0;
+		var charaStyle = "onigiri";
+		var charaImg = C_IMG_ONIGIRI;
+		var sizeX = _size * 1.2; 
+	}else{
+		var rotate = _rotate;
+		var charaStyle = "arrow";
+		var charaImg = C_IMG_ARROW;
+		var sizeX = _size;
+	}
+
+	var div = createDiv(_id, _x, _y, sizeX, _size);
+	div.align = C_ALIGN_CENTER;
 
 	// ブラウザ判定
 	var userAgent = window.navigator.userAgent.toLowerCase();
@@ -357,17 +420,17 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate){
 	if(userAgent.indexOf('msie') != -1 ||
 		userAgent.indexOf('trident') != -1 ||
 		userAgent.indexOf('edge') != -1) {
-			div.innerHTML = "<img src='" + C_IMG_ARROW +
-				"' style='width:" + _size + "px;height:" + _size +
-				"px;transform:rotate(" + _rotate + "deg);' id=" + _id + "img>";
+			div.innerHTML = "<img src='" + charaImg +
+				"' style='width:" + sizeX + "px;height:" + _size +
+				"px;transform:rotate(" + rotate + "deg);' id=" + _id + "img>";
 
 	// それ以外は指定された色でマスク
 	}else{
 		if(_color != ""){
 			div.style.backgroundColor = _color;
 		}
-		div.className = "arrow";
-		div.style.transform = "rotate(" + _rotate +"deg)";
+		div.className = charaStyle;
+		div.style.transform = "rotate(" + rotate +"deg)";
 	}
 
 	return div;
@@ -1061,6 +1124,8 @@ function keyConfigInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		// オプション画面へ戻る
+		g_currentj = 0;
+		g_currentk = 0;
 		clearWindow();
 		optionInit();
 	});
@@ -1079,7 +1144,23 @@ function keyConfigInit(){
 		hoverColor: C_CLR_RESET, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		// TODO:キーコンフィグリセット
+		if(window.confirm('キーを初期配置に戻します。よろしいですか？')){
+			var keyLabel = g_headerObj["keyLabels"][g_stateObj.scoreId];
+			var keyNum = Number(keyLabel.replace(/[^0-9]/g, ""));
+
+			for(var j=0; j<keyNum; j++){
+				for(var k=0;k<keyObj["keyCtrl"+ keyLabel][j].length;k++){
+					keyObj["keyCtrl"+ keyLabel][j][k] = keyObj["keyCtrl"+ keyLabel + "_1d"][j][k];
+					document.getElementById("keycon" + j + "_" + k).innerHTML = g_kCd[keyObj["keyCtrl"+ keyLabel][j][k]];
+				}
+			}
+			var cursor = document.getElementById("cursor");
+			cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10) + "px";
+			cursor.style.top = "45px";
+
+			g_currentj = 0;
+			g_currentk = 0;
+		}
 	});
 	divRoot.appendChild(btnReset);
 
@@ -1091,18 +1172,58 @@ function keyConfigInit(){
 	var keyNum = Number(keyLabel.replace(/[^0-9]/g, ""));
 	
 	for(var j=0; j<keyNum; j++){
-		
+	
+		// キーコンフィグ表示用の矢印・おにぎりを表示
 		keyconSprite.appendChild(createArrowEffect("arrow" + j, "#cccccc", 
-			50 * ((j % keyObj["div"+ keyLabel]) - keyObj["div"+ keyLabel]/2) + kWidth/2, 
+			55 * ((j % keyObj["div"+ keyLabel]) - keyObj["div"+ keyLabel]/2) + kWidth/2, 
 			120 * Math.floor(j / keyObj["div"+ keyLabel]), 50, 
 			keyObj["stepRtn" + keyLabel][j]));
-		eval("arrow" + j).style.opacity = j + 2;
 
-		keyconSprite.appendChild(createDivLabel("keycon" + j, 
-			50 * ((j % keyObj["div"+ keyLabel]) - keyObj["div"+ keyLabel]/2) + kWidth/2, 
-			50 + 120 * Math.floor(j / keyObj["div"+ keyLabel]),
-			50, 20, 20, "#cccccc", g_kCd[keyObj["keyCtrl"+ keyLabel][j]]));
-		eval("keycon" + j).align = C_ALIGN_CENTER;
+		// 対応キーに応じた値を表示
+		for(var k=0;k<keyObj["keyCtrl"+ keyLabel][j].length;k++){
+			keyconSprite.appendChild(createDivLabel("keycon" + j + "_" + k, 
+				55 * ((j % keyObj["div"+ keyLabel]) - keyObj["div"+ keyLabel]/2) + kWidth/2, 
+				50 + 20 * k + 120 * Math.floor(j / keyObj["div"+ keyLabel]),
+				50, 20, 16, "#cccccc", g_kCd[keyObj["keyCtrl"+ keyLabel][j][k]]));
+		}
+	}
+
+	// カーソルの作成
+	var cursor = keyconSprite.appendChild(createImg("cursor", "../img/cursor.png", 
+		kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10, 45, 15, 30 ));
+	
+	// キーボード押下時処理
+	document.onkeydown = function(){
+		var keyCdObj = document.getElementById("keycon" + g_currentj + "_" + g_currentk);
+		var cursor = document.getElementById("cursor");
+		keyCdObj.innerHTML = g_kCd[event.keyCode];
+		keyObj["keyCtrl"+ keyLabel][g_currentj][g_currentk] = event.keyCode;
+
+		// 後続に代替キーが存在する場合
+		if(g_currentk < keyObj["keyCtrl"+ keyLabel][g_currentj].length -1){
+			g_currentk++;
+			cursor.style.top = (parseInt(cursor.style.top) + 20) + "px";
+
+		// 他の代替キーが存在せず、次の矢印がある場合
+		}else if(g_currentj < keyObj["keyCtrl"+ keyLabel].length -1){
+			g_currentj++;
+			g_currentk = 0;
+
+			if(g_currentj % keyObj["div"+ keyLabel] == 0){
+				cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10) + "px";
+				cursor.style.top = (parseInt(cursor.style.top) + 120) + "px";
+			}else{
+				cursor.style.left = (parseInt(cursor.style.left) + 55) + "px";
+				cursor.style.top = (50 + 120 * Math.floor(g_currentj / keyObj["div"+ keyLabel])) + "px";
+			}
+
+		// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
+		}else{
+			g_currentj = 0;
+			g_currentk = 0;
+			cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10) + "px";
+			cursor.style.top = "45px";
+		}
 	}
 }
 

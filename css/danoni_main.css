@@ -12,5 +12,10 @@
 	mask-size: contain;
 	-webkit-mask-image: url("../img/arrow_500.png");
 	-webkit-mask-size: contain;
-	-ms-mask-image: url("../img/arrow_500.png");
+}
+.onigiri {
+	mask-image: url("../img/onigiri_600.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/onigiri_600.png");
+	-webkit-mask-size: contain;
 }
