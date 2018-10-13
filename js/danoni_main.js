@@ -99,6 +99,7 @@ var g_sHeight;
 // キーコンフィグカーソル
 var g_currentj = 0;
 var g_currentk = 0;
+var g_prevKey = -1;
 
 // キーコード
 var g_kCd = new Array();
@@ -1110,6 +1111,11 @@ function keyConfigInit(){
 	"<span style='color:#6666ff;font-size:40px;'>K</span>EY<span style='color:#ff6666;font-size:40px;'>C</span>ONFIG", 0, 15);
 	divRoot.appendChild(lblTitle);
 
+	var kcDesc = createDivLabel("kcDesc", 0, 65, g_sWidth, 20, 16, C_CLR_DEFHOVER,
+		"[BackSpaceキー：スキップ、Deleteキー：(代替キーのみ)キー無効化]");
+	kcDesc.style.align = C_ALIGN_CENTER;
+	divRoot.appendChild(kcDesc);
+
 	// 戻るボタン描画
 	var btnBack = createButton({
 		id: "btnBack", 
@@ -1126,6 +1132,7 @@ function keyConfigInit(){
 		// オプション画面へ戻る
 		g_currentj = 0;
 		g_currentk = 0;
+		g_prevKey = 0;
 		clearWindow();
 		optionInit();
 	});
@@ -1160,6 +1167,7 @@ function keyConfigInit(){
 
 			g_currentj = 0;
 			g_currentk = 0;
+			g_prevKey = -1;
 		}
 	});
 	divRoot.appendChild(btnReset);
@@ -1196,33 +1204,50 @@ function keyConfigInit(){
 	document.onkeydown = function(){
 		var keyCdObj = document.getElementById("keycon" + g_currentj + "_" + g_currentk);
 		var cursor = document.getElementById("cursor");
-		keyCdObj.innerHTML = g_kCd[event.keyCode];
-		keyObj["keyCtrl"+ keyLabel][g_currentj][g_currentk] = event.keyCode;
 
-		// 後続に代替キーが存在する場合
-		if(g_currentk < keyObj["keyCtrl"+ keyLabel][g_currentj].length -1){
-			g_currentk++;
-			cursor.style.top = (parseInt(cursor.style.top) + 20) + "px";
+		var setKey = event.keyCode;
 
-		// 他の代替キーが存在せず、次の矢印がある場合
-		}else if(g_currentj < keyObj["keyCtrl"+ keyLabel].length -1){
-			g_currentj++;
-			g_currentk = 0;
-
-			if(g_currentj % keyObj["div"+ keyLabel] == 0){
-				cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10) + "px";
-				cursor.style.top = (parseInt(cursor.style.top) + 120) + "px";
+		// 全角切替、BackSpace、Deleteキーは割り当て禁止
+		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
+		if(setKey == 229 || setKey == 242 || setKey == 243 || setKey == 244 || 
+			setKey == 91 || setKey == 29 || setKey == 28 || 
+			(setKey == 46 && g_currentk == 0) || setKey == g_prevKey){
+		}else{
+			if(setKey == 8){
 			}else{
-				cursor.style.left = (parseInt(cursor.style.left) + 55) + "px";
-				cursor.style.top = (50 + 120 * Math.floor(g_currentj / keyObj["div"+ keyLabel])) + "px";
+				if(setKey == 46){
+					setKey = 0;
+				}
+				keyCdObj.innerHTML = g_kCd[setKey];
+				keyObj["keyCtrl"+ keyLabel][g_currentj][g_currentk] = setKey;
+				g_prevKey = setKey;
 			}
 
-		// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
-		}else{
-			g_currentj = 0;
-			g_currentk = 0;
-			cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10) + "px";
-			cursor.style.top = "45px";
+			// 後続に代替キーが存在する場合
+			if(g_currentk < keyObj["keyCtrl"+ keyLabel][g_currentj].length -1){
+				g_currentk++;
+				cursor.style.top = (parseInt(cursor.style.top) + 20) + "px";
+
+			// 他の代替キーが存在せず、次の矢印がある場合
+			}else if(g_currentj < keyObj["keyCtrl"+ keyLabel].length -1){
+				g_currentj++;
+				g_currentk = 0;
+
+				if(g_currentj % keyObj["div"+ keyLabel] == 0){
+					cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10) + "px";
+					cursor.style.top = (parseInt(cursor.style.top) + 120) + "px";
+				}else{
+					cursor.style.left = (parseInt(cursor.style.left) + 55) + "px";
+					cursor.style.top = (50 + 120 * Math.floor(g_currentj / keyObj["div"+ keyLabel])) + "px";
+				}
+
+			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
+			}else{
+				g_currentj = 0;
+				g_currentk = 0;
+				cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10) + "px";
+				cursor.style.top = "45px";
+			}
 		}
 	}
 }
