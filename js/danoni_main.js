@@ -1,10 +1,10 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.1.10
+ * Ver 0.1.11
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/12
+ * Revised : 2018/10/13
  */
 
 /**
@@ -28,14 +28,18 @@
  *  [背景]や[マスク]層はカスタムしやすいようにする予定。
  * 
  * ▽ スプライトの親子関係
- *  基本的にdiv要素で管理。最下層を[difRoot]とし、createSplite()でdiv子要素を作成していく。
+ *  基本的にdiv要素で管理。最下層を[difRoot]とし、createSprite()でdiv子要素を作成していく。
  *  clearWindow()で[difRoot]以外の全てのスプライトを削除できる。
- *  特定のスプライトに限り削除する場合は deleteChildSpliteAll() で実現。
+ *  特定のスプライトに限り削除する場合は deleteChildspriteAll() で実現。
  */
 
 window.onload = function(){
 	titleInit();
 }
+
+/*-----------------------------------------------------------*/
+/* Scene : COMMON [water] */
+/*-----------------------------------------------------------*/
 
 /**
  * 汎用定数定義
@@ -69,7 +73,10 @@ var C_BTN_HEIGHT = 50;
 var C_LNK_HEIGHT = 20;
 
 // スプライト（ムービークリップ相当）のルート
-var C_SPLITE_ROOT = "divRoot";
+var C_sprite_ROOT = "divRoot";
+
+// 画像ファイル
+var C_IMG_ARROW = "../img/arrow_500.png";
 
 // 譜面データ持ち回り用
 var rootObj = {};
@@ -82,6 +89,157 @@ var stateObj = {
 	reverse: "OFF",
 	auto: "OFF",
 	adjustment: 0
+};
+
+// キーコード
+var kCd = new Array();
+for(var j=0; j<255; j++){
+	kCd[j] = "";
+}
+kCd[0] = "×";
+kCd[8] = "BS";
+kCd[9] = "Tab";
+kCd[12] = "Clear";
+kCd[13] = "Enter";
+kCd[16] = "Shift";
+kCd[17] = "Ctrl";
+kCd[18] = "Alt";
+kCd[19] = "Pause";
+kCd[27] = "Esc";
+kCd[29] = "noCh";
+kCd[32] = "Space";
+kCd[33] = "PgUp";
+kCd[34] = "PgDown";
+kCd[35] = "End";
+kCd[36] = "Home";
+kCd[37] = "←";
+kCd[38] = "↑";
+kCd[39] = "→";
+kCd[40] = "↓";
+kCd[44] = "PS";
+kCd[45] = "Insert";
+kCd[46] = "Delete";
+kCd[47] = "Help";
+kCd[48] = "0";
+kCd[49] = "1";
+kCd[50] = "2";
+kCd[51] = "3";
+kCd[52] = "4";
+kCd[53] = "5";
+kCd[54] = "6";
+kCd[55] = "7";
+kCd[56] = "8";
+kCd[57] = "9";
+kCd[65] = "A";
+kCd[66] = "B";
+kCd[67] = "C";
+kCd[68] = "D";
+kCd[69] = "E";
+kCd[70] = "F";
+kCd[71] = "G";
+kCd[72] = "H";
+kCd[73] = "I";
+kCd[74] = "J";
+kCd[75] = "K";
+kCd[76] = "L";
+kCd[77] = "M";
+kCd[78] = "N";
+kCd[79] = "O";
+kCd[80] = "P";
+kCd[81] = "Q";
+kCd[82] = "R";
+kCd[83] = "S";
+kCd[84] = "T";
+kCd[85] = "U";
+kCd[86] = "V";
+kCd[87] = "W";
+kCd[88] = "X";
+kCd[89] = "Y";
+kCd[90] = "Z";
+kCd[91] = "Window";
+kCd[93] = "Appli";
+kCd[96] = "T0";
+kCd[97] = "T1";
+kCd[98] = "T2";
+kCd[99] = "T3";
+kCd[100] = "T4";
+kCd[101] = "T5";
+kCd[102] = "T6";
+kCd[103] = "T7";
+kCd[104] = "T8";
+kCd[105] = "T9";
+kCd[106] = "T*";
+kCd[107] = "T+";
+kCd[108] = "TEnter";
+kCd[109] = "T-";
+kCd[110] = "T_";
+kCd[111] = "T/";
+kCd[112] = "F1";
+kCd[113] = "F2";
+kCd[114] = "F3";
+kCd[115] = "F4";
+kCd[116] = "F5";
+kCd[117] = "F6";
+kCd[118] = "F7";
+kCd[119] = "F8";
+kCd[120] = "F9";
+kCd[121] = "F10";
+kCd[122] = "F11";
+kCd[123] = "F12";
+kCd[124] = "F13";
+kCd[125] = "F14";
+kCd[126] = "F15";
+kCd[134] = "FN";
+kCd[144] = "NumLk";
+kCd[145] = "SL";
+kCd[186] = "： *";
+kCd[187] = "; +";
+kCd[188] = ", <";
+kCd[189] = "- =";
+kCd[190] = ". >";
+kCd[191] = "/ ?";
+kCd[192] = "@ `";
+kCd[219] = "[ {";
+kCd[220] = "\\ |";
+kCd[221] = "] }";
+kCd[222] = "^ ~";
+kCd[226] = "\\ _";
+kCd[229] = "Z/H";
+kCd[240] = "CapsLk";
+
+// キー別の設定（一旦ここで定義）
+// ステップゾーンの位置関係は自動化を想定
+var keyObj = {
+	chara7: ["left","leftdia","down","space","up","rightdia","right"],
+	chara7i: ["left","leftdia","down","space","up","rightdia","right"],
+	chara9A: ["left","down","up","right","space","sleft","sdown","sup","sright"],
+	chara9B: ["left","down","up","right","space","sleft","sdown","sup","sright"],
+	chara11: ["left","leftdia","down","space","up","rightdia","right",
+		"sleft","sdown","sup","sright"],
+	chara14: ["oni","left","leftdia","down","space","up","rightdia","right",
+		"sleft","sdown","sup","sright","sleftdia","sright"],
+
+
+	stepRtn7: [0, -45, -90, 0, 90, 135, 180],
+	stepRtn7i: [0, 0, 0, 0, -90, 90, 180],
+	stepRtn9A: [0, -90, 90, 180, 0, 0, -90, 90, 180],
+	stepRtn9B: [0, -90, 90, 180, 0, 0, -90, 90, 180],
+	stepRtn11: [0, -45, -90, 0, 90, 135, 180, 0, -90, 90, 180],
+	stepRtn14: [0, 0, 30, 60, 90, 120, 150, 180, 45, 0, -90, 90, 180, 135],
+	
+
+	div7: 7,
+	div7i: 7,
+	div9A: 9,
+	div9B: 9,
+	div11: 7,
+	div14: 8,
+
+	keyCtrl7: [83,68,70,32,74,75,76],
+	keyCtrl9A:[83,68,69,70,32,74,75,73,76],
+	keyCtrl9B:[65,83,68,70,32,74,75,76,187],
+	keyCtrl11:[83,68,70,32,74,75,76,37,40,38,39],
+	keyCtrl14:[32,78,74,77,75,188,76,190,84,85,73,56,79,192]
 };
 
 /**
@@ -173,6 +331,44 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text){
 	return div;
 }
 
+
+/**
+ * 矢印オブジェクトの作成（色付きマスク版）
+ * - cssスタイルに mask-image を使っているため、Chrome/Safari/FirefoxとIE/Edgeで処理を振り分ける。
+ * - IE/Edgeは色指定なし。
+ * @param {string} _id 
+ * @param {string} _color 
+ * @param {number} _x 
+ * @param {number} _y 
+ * @param {number} _size 
+ * @param {number} _rotate 
+ */
+function createArrowEffect(_id, _color, _x, _y, _size, _rotate){
+	var div = createDiv(_id, _x, _y, _size, _size);
+
+	// ブラウザ判定
+	var userAgent = window.navigator.userAgent.toLowerCase();
+
+	// IE/Edgeの場合は色なし版を表示
+	if(userAgent.indexOf('msie') != -1 ||
+		userAgent.indexOf('trident') != -1 ||
+		userAgent.indexOf('edge') != -1) {
+			div.innerHTML = "<img src='" + C_IMG_ARROW +
+				"' style='width:" + _size + "px;height:" + _size +
+				"px;transform:rotate(" + _rotate + "deg);' id=" + _id + "img>";
+
+	// それ以外は指定された色でマスク
+	}else{
+		if(_color != ""){
+			div.style.backgroundColor = _color;
+		}
+		div.className = "arrow";
+		div.style.transform = "rotate(" + _rotate +"deg)";
+	}
+
+	return div;
+}
+
 /**
  * 空スプライト(ムービークリップ相当)の作成
  * - 作成済みの場合はすでに作成済のスプライトを返却する
@@ -184,29 +380,29 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text){
  * @param {number} _width 幅
  * @param {number} _height 高さ
  */
-function createSplite(_parentObjName, _newObjName, _x, _y, _width, _height){
+function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height){
 	if(document.getElementById(_newObjName) == null){
-		var parentSplite = document.getElementById(_parentObjName);
-		var newSplite = createDiv(_newObjName, _x, _y, _width, _height);
-		parentSplite.appendChild(newSplite);
+		var parentsprite = document.getElementById(_parentObjName);
+		var newsprite = createDiv(_newObjName, _x, _y, _width, _height);
+		parentsprite.appendChild(newsprite);
 	}else{
-		var newSplite = document.getElementById(_newObjName);
+		var newsprite = document.getElementById(_newObjName);
 	}
-	return newSplite;
+	return newsprite;
 }
 
 /**
  * 親スプライト配下の子スプライトを全削除
  * @param {object} _parentObjName 親スプライト名
  */
-function deleteChildSpliteAll(_parentObjName){
+function deleteChildspriteAll(_parentObjName){
 
-	var parentSplite = document.getElementById(_parentObjName);
-	while (parentSplite.hasChildNodes()){
-		handler.removeListener(parentSplite.firstChild.getAttribute("lsnrkey"));
-		handler.removeListener(parentSplite.firstChild.getAttribute("lsnrkeyTS"));
-		handler.removeListener(parentSplite.firstChild.getAttribute("lsnrkeyTE"));
-		parentSplite.removeChild(parentSplite.firstChild);
+	var parentsprite = document.getElementById(_parentObjName);
+	while (parentsprite.hasChildNodes()){
+		handler.removeListener(parentsprite.firstChild.getAttribute("lsnrkey"));
+		handler.removeListener(parentsprite.firstChild.getAttribute("lsnrkeyTS"));
+		handler.removeListener(parentsprite.firstChild.getAttribute("lsnrkeyTE"));
+		parentsprite.removeChild(parentsprite.firstChild);
 	}
 }
 
@@ -362,11 +558,11 @@ function clearWindow(){
 	}
 
 	// 画面背景を指定 (background-color)
-	var grd = l1ctx.createLinearGradient(0,0,0,sHeight);
+	var grd = l0ctx.createLinearGradient(0,0,0,sHeight);
 	grd.addColorStop(0, "#000000");
 	grd.addColorStop(1, "#222222");
-	l1ctx.fillStyle=grd;
-	l1ctx.fillRect(0,0,sHeight,sHeight);
+	l0ctx.fillStyle=grd;
+	l0ctx.fillRect(0,0,sHeight,sHeight);
 
 	// 線画 (title-line)
 	l1ctx.beginPath();
@@ -383,6 +579,8 @@ function clearWindow(){
 	
 }
 
+/*-----------------------------------------------------------*/
+/* Scene : TITLE [melon] */
 /*-----------------------------------------------------------*/
 
 /**
@@ -408,10 +606,11 @@ function titleInit(){
 	}else{
 		var divRoot = document.getElementById("divRoot");
 	}
-	
+
 	// タイトル文字描画
 	var lblTitle = getTitleDivLabel("lblTitle", 
 	"<span style='color:#6666ff;font-size:40px;'>D</span>ANCING<span style='color:#ffff66;font-size:40px;'>☆</span><span style='color:#ff6666;font-size:40px;'>O</span>NIGIRI", 0, 15);
+	lblTitle.style.zIndex = 1;
 	divRoot.appendChild(lblTitle);
 
 	// ボタン描画
@@ -430,12 +629,20 @@ function titleInit(){
 		clearWindow();
 		optionInit();
 	});
+	btnStart.style.zIndex = 1;
 	divRoot.appendChild(btnStart);
 
 	// 譜面データの読み込み
 	var dos = document.getElementById("dos").value;
 	rootObj = dosConvert(dos);
 	headerObj = headerConvert(rootObj);
+
+	// 背景の矢印オブジェクトを表示
+	var lblArrow = createArrowEffect("lblArrow", headerObj["setColor"][0], 0, -15, 500, 180);
+	lblArrow.style.opacity = 0.25;
+	lblArrow.style.zIndex = 0;
+	divRoot.appendChild(lblArrow);
+	
 
 	// 曲名文字描画（曲名は譜面データから取得）
 	// TEST:試験的に矢印色の1番目と3番目を使ってタイトルをグラデーション
@@ -582,6 +789,8 @@ function scoreConvert(_dosObj, _keys, _scoreNo){
 }
 
 /*-----------------------------------------------------------*/
+/* Scene : OPTION [lime] */
+/*-----------------------------------------------------------*/
 
 /**
  * オプション画面初期化
@@ -668,17 +877,17 @@ function optionInit(){
 
 /**
  * オプション画面のラベル・ボタン処理の描画
- * @param {Object} _splite 基準とするスプライト(ここで指定する座標は、そのスプライトからの相対位置)
+ * @param {Object} _sprite 基準とするスプライト(ここで指定する座標は、そのスプライトからの相対位置)
  */
-function createOptionWindow(_splite){
+function createOptionWindow(_sprite){
 
 	// 各ボタン用のスプライトを作成
-	var optionSplite = createSplite(_splite, "optionSplite", 50, 100, 400, 300);
+	var optionsprite = createSprite(_sprite, "optionsprite", 50, 100, 400, 300);
 
 	// 難易度(Difficulty)
 	var lblDifficulty = createDivLabel("lblDifficulty", 0, 0, 100, 30, 20, C_CLR_TITLE, 
 					"<span style='color:#ff9999'>D</span>ifficulty");
-	optionSplite.appendChild(lblDifficulty);
+	optionsprite.appendChild(lblDifficulty);
 
 	var lnkDifficulty = createButton({
 		id: "lnkDifficulty", 
@@ -698,12 +907,12 @@ function createOptionWindow(_splite){
 		stateObj.speed = headerObj["initSpeeds"][stateObj.scoreId];
 		lnkSpeed.innerHTML = stateObj.speed + " x";
 	});
-	optionSplite.appendChild(lnkDifficulty);
+	optionsprite.appendChild(lnkDifficulty);
 
 	// 速度(Speed)
 	var lblSpeed = createDivLabel("lblSpeed", 0, 30, 100, 30, 20, C_CLR_TITLE, 
 				"<span style='color:#ff9977'>S</span>peed");
-	optionSplite.appendChild(lblSpeed);
+	optionsprite.appendChild(lblSpeed);
 	var lnkSpeed = createButton({
 		id: "lnkSpeed", 
 		name: stateObj.speed + " x", 
@@ -719,12 +928,12 @@ function createOptionWindow(_splite){
 		stateObj.speed = (Number(stateObj.speed) < 10 ? Number(stateObj.speed) + 0.25 : 1);
 		lnkSpeed.innerHTML = stateObj.speed + " x";
 	});
-	optionSplite.appendChild(lnkSpeed);
+	optionsprite.appendChild(lnkSpeed);
 
 	// 速度モーション (Motion)
 	var lblMotion = createDivLabel("lblMotion", 0, 60, 100, 30, 20, C_CLR_TITLE, 
 				"<span style='color:#ffff66'>M</span>otion");
-	optionSplite.appendChild(lblMotion);
+	optionsprite.appendChild(lblMotion);
 	var lnkMotion = createButton({
 		id: "lnkMotion", 
 		name: stateObj.motion, 
@@ -747,12 +956,12 @@ function createOptionWindow(_splite){
 		}
 		lnkMotion.innerHTML = stateObj.motion;
 	});
-	optionSplite.appendChild(lnkMotion);
+	optionsprite.appendChild(lnkMotion);
 
 	// リバース
 	var lblReverse = createDivLabel("lblReverse", 0, 90, 100, 30, 20, C_CLR_TITLE, 
 				"<span style='color:#66ffff'>R</span>everse");
-	optionSplite.appendChild(lblReverse);
+	optionsprite.appendChild(lblReverse);
 	var lnkReverse = createButton({
 		id: "lnkReverse", 
 		name: stateObj.reverse, 
@@ -768,12 +977,12 @@ function createOptionWindow(_splite){
 		stateObj.reverse = (stateObj.reverse == "OFF" ? "ON" : "OFF");
 		lnkReverse.innerHTML = stateObj.reverse;
 	});
-	optionSplite.appendChild(lnkReverse);
+	optionsprite.appendChild(lnkReverse);
 
 	// 鑑賞モード設定 (AutoPlay)
 	var lblAutoPlay = createDivLabel("lblAutoPlay", 0, 120, 100, 30, 20, C_CLR_TITLE, 
 				"<span style='color:#999999'>A</span>utoPlay");
-	optionSplite.appendChild(lblAutoPlay);
+	optionsprite.appendChild(lblAutoPlay);
 	var lnkAutoPlay = createButton({
 		id: "lnkAutoPlay", 
 		name: stateObj.auto, 
@@ -789,12 +998,12 @@ function createOptionWindow(_splite){
 		stateObj.auto = (stateObj.auto == "OFF" ? "ON" : "OFF");
 		lnkAutoPlay.innerHTML = stateObj.auto;
 	});
-	optionSplite.appendChild(lnkAutoPlay);
+	optionsprite.appendChild(lnkAutoPlay);
 
 	// タイミング調整 (Adjustment)
 	var lblAdjustment = createDivLabel("lblAdjustment", 0, 150, 100, 30, 20, C_CLR_TITLE, 
 				"<span style='color:#cc66ff'>A</span>djustment");
-	optionSplite.appendChild(lblAdjustment);
+	optionsprite.appendChild(lblAdjustment);
 	var lnkAdjustment = createButton({
 		id: "lnkAutoPlay", 
 		name: stateObj.adjustment, 
@@ -810,10 +1019,12 @@ function createOptionWindow(_splite){
 		stateObj.adjustment = (stateObj.adjustment == 15 ? -15 : ++stateObj.adjustment);
 		lnkAdjustment.innerHTML = stateObj.adjustment;
 	});
-	optionSplite.appendChild(lnkAdjustment);
+	optionsprite.appendChild(lnkAdjustment);
 
 }
 
+/*-----------------------------------------------------------*/
+/* Scene : KEYCONFIG [orange] */
 /*-----------------------------------------------------------*/
 
 /**
@@ -872,8 +1083,36 @@ function keyConfigInit(){
 		// TODO:キーコンフィグリセット
 	});
 	divRoot.appendChild(btnReset);
+
+	// キーの一覧を表示
+	var keyconSprite = createSprite("divRoot","keyconSprite",50,100,400,300);
+	var kWidth = parseInt(keyconSprite.style.width);
+	
+	var keyLabel = headerObj["keyLabels"][stateObj.scoreId];
+	var keyNum = Number(keyLabel.replace(/[^0-9]/g, ""));
+	
+	for(var j=0; j<keyNum; j++){
+		
+		keyconSprite.appendChild(createArrowEffect("arrow" + j, "#cccccc", 
+			50 * ((j % keyObj["div"+ keyLabel]) - keyObj["div"+ keyLabel]/2) + kWidth/2, 
+			120 * Math.floor(j / keyObj["div"+ keyLabel]), 50, 
+			keyObj["stepRtn" + keyLabel][j]));
+		eval("arrow" + j).style.opacity = j + 2;
+
+		keyconSprite.appendChild(createDivLabel("keycon" + j, 
+			50 * ((j % keyObj["div"+ keyLabel]) - keyObj["div"+ keyLabel]/2) + kWidth/2, 
+			50 + 120 * Math.floor(j / keyObj["div"+ keyLabel]),
+			50, 20, 20, "#cccccc", kCd[keyObj["keyCtrl"+ keyLabel][j]]));
+		eval("keycon" + j).align = C_ALIGN_CENTER;
+	}
 }
 
+function createArrowRoot(_parentObjName){
+
+}
+
+/*-----------------------------------------------------------*/
+/* Scene : LOAGING [strawberry] */
 /*-----------------------------------------------------------*/
 
 /**
@@ -920,6 +1159,12 @@ function loadingScoreInit(){
 	divRoot.appendChild(btnBack);
 }
 
+/*-----------------------------------------------------------*/
+/* Scene : MAIN [banana] */
+/*-----------------------------------------------------------*/
+
+/*-----------------------------------------------------------*/
+/* Scene : RESULT [grape] */
 /*-----------------------------------------------------------*/
 
 /**

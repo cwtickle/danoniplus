@@ -8,3 +8,10 @@
     position: absolute;
     left:0;
 }
+.arrow {
+	mask-image: url("../img/arrow_500.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/arrow_500.png");
+	-webkit-mask-size: contain;
+	-ms-mask-image: url("../img/arrow_500.png");
+}
