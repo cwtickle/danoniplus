@@ -1,12 +1,11 @@
 @charset "UTF-8";
 #canvas-frame {
-	width:500px;
 	height:500px;
     position: relative;
 }
 #canvas-frame canvas {
-    position: absolute;
-    left:0;
+	position: absolute;
+	left:0;
 }
 .arrow {
 	mask-image: url("../img/arrow_500.png");

@@ -1,6 +1,6 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.1.11
+ * Ver 0.1.12
  * 
  * Source by tickle
  * created : 2018/10/08
@@ -73,16 +73,16 @@ var C_BTN_HEIGHT = 50;
 var C_LNK_HEIGHT = 20;
 
 // スプライト（ムービークリップ相当）のルート
-var C_sprite_ROOT = "divRoot";
+var C_SPRITE_ROOT = "divRoot";
 
 // 画像ファイル
 var C_IMG_ARROW = "../img/arrow_500.png";
 
 // 譜面データ持ち回り用
-var rootObj = {};
-var headerObj = {};
-var scoreObj = {};
-var stateObj = {
+var g_rootObj = {};
+var g_headerObj = {};
+var g_scoreObj = {};
+var g_stateObj = {
 	scoreId: 0,
 	speed: 3.5,
 	motion: "OFF",
@@ -91,121 +91,125 @@ var stateObj = {
 	adjustment: 0
 };
 
+// 
+var g_sWidth;
+var g_sHeight;
+
 // キーコード
-var kCd = new Array();
+var g_kCd = new Array();
 for(var j=0; j<255; j++){
-	kCd[j] = "";
+	g_kCd[j] = "";
 }
-kCd[0] = "×";
-kCd[8] = "BS";
-kCd[9] = "Tab";
-kCd[12] = "Clear";
-kCd[13] = "Enter";
-kCd[16] = "Shift";
-kCd[17] = "Ctrl";
-kCd[18] = "Alt";
-kCd[19] = "Pause";
-kCd[27] = "Esc";
-kCd[29] = "noCh";
-kCd[32] = "Space";
-kCd[33] = "PgUp";
-kCd[34] = "PgDown";
-kCd[35] = "End";
-kCd[36] = "Home";
-kCd[37] = "←";
-kCd[38] = "↑";
-kCd[39] = "→";
-kCd[40] = "↓";
-kCd[44] = "PS";
-kCd[45] = "Insert";
-kCd[46] = "Delete";
-kCd[47] = "Help";
-kCd[48] = "0";
-kCd[49] = "1";
-kCd[50] = "2";
-kCd[51] = "3";
-kCd[52] = "4";
-kCd[53] = "5";
-kCd[54] = "6";
-kCd[55] = "7";
-kCd[56] = "8";
-kCd[57] = "9";
-kCd[65] = "A";
-kCd[66] = "B";
-kCd[67] = "C";
-kCd[68] = "D";
-kCd[69] = "E";
-kCd[70] = "F";
-kCd[71] = "G";
-kCd[72] = "H";
-kCd[73] = "I";
-kCd[74] = "J";
-kCd[75] = "K";
-kCd[76] = "L";
-kCd[77] = "M";
-kCd[78] = "N";
-kCd[79] = "O";
-kCd[80] = "P";
-kCd[81] = "Q";
-kCd[82] = "R";
-kCd[83] = "S";
-kCd[84] = "T";
-kCd[85] = "U";
-kCd[86] = "V";
-kCd[87] = "W";
-kCd[88] = "X";
-kCd[89] = "Y";
-kCd[90] = "Z";
-kCd[91] = "Window";
-kCd[93] = "Appli";
-kCd[96] = "T0";
-kCd[97] = "T1";
-kCd[98] = "T2";
-kCd[99] = "T3";
-kCd[100] = "T4";
-kCd[101] = "T5";
-kCd[102] = "T6";
-kCd[103] = "T7";
-kCd[104] = "T8";
-kCd[105] = "T9";
-kCd[106] = "T*";
-kCd[107] = "T+";
-kCd[108] = "TEnter";
-kCd[109] = "T-";
-kCd[110] = "T_";
-kCd[111] = "T/";
-kCd[112] = "F1";
-kCd[113] = "F2";
-kCd[114] = "F3";
-kCd[115] = "F4";
-kCd[116] = "F5";
-kCd[117] = "F6";
-kCd[118] = "F7";
-kCd[119] = "F8";
-kCd[120] = "F9";
-kCd[121] = "F10";
-kCd[122] = "F11";
-kCd[123] = "F12";
-kCd[124] = "F13";
-kCd[125] = "F14";
-kCd[126] = "F15";
-kCd[134] = "FN";
-kCd[144] = "NumLk";
-kCd[145] = "SL";
-kCd[186] = "： *";
-kCd[187] = "; +";
-kCd[188] = ", <";
-kCd[189] = "- =";
-kCd[190] = ". >";
-kCd[191] = "/ ?";
-kCd[192] = "@ `";
-kCd[219] = "[ {";
-kCd[220] = "\\ |";
-kCd[221] = "] }";
-kCd[222] = "^ ~";
-kCd[226] = "\\ _";
-kCd[229] = "Z/H";
-kCd[240] = "CapsLk";
+g_kCd[0] = "×";
+g_kCd[8] = "BS";
+g_kCd[9] = "Tab";
+g_kCd[12] = "Clear";
+g_kCd[13] = "Enter";
+g_kCd[16] = "Shift";
+g_kCd[17] = "Ctrl";
+g_kCd[18] = "Alt";
+g_kCd[19] = "Pause";
+g_kCd[27] = "Esc";
+g_kCd[29] = "noCh";
+g_kCd[32] = "Space";
+g_kCd[33] = "PgUp";
+g_kCd[34] = "PgDown";
+g_kCd[35] = "End";
+g_kCd[36] = "Home";
+g_kCd[37] = "←";
+g_kCd[38] = "↑";
+g_kCd[39] = "→";
+g_kCd[40] = "↓";
+g_kCd[44] = "PS";
+g_kCd[45] = "Insert";
+g_kCd[46] = "Delete";
+g_kCd[47] = "Help";
+g_kCd[48] = "0";
+g_kCd[49] = "1";
+g_kCd[50] = "2";
+g_kCd[51] = "3";
+g_kCd[52] = "4";
+g_kCd[53] = "5";
+g_kCd[54] = "6";
+g_kCd[55] = "7";
+g_kCd[56] = "8";
+g_kCd[57] = "9";
+g_kCd[65] = "A";
+g_kCd[66] = "B";
+g_kCd[67] = "C";
+g_kCd[68] = "D";
+g_kCd[69] = "E";
+g_kCd[70] = "F";
+g_kCd[71] = "G";
+g_kCd[72] = "H";
+g_kCd[73] = "I";
+g_kCd[74] = "J";
+g_kCd[75] = "K";
+g_kCd[76] = "L";
+g_kCd[77] = "M";
+g_kCd[78] = "N";
+g_kCd[79] = "O";
+g_kCd[80] = "P";
+g_kCd[81] = "Q";
+g_kCd[82] = "R";
+g_kCd[83] = "S";
+g_kCd[84] = "T";
+g_kCd[85] = "U";
+g_kCd[86] = "V";
+g_kCd[87] = "W";
+g_kCd[88] = "X";
+g_kCd[89] = "Y";
+g_kCd[90] = "Z";
+g_kCd[91] = "Window";
+g_kCd[93] = "Appli";
+g_kCd[96] = "T0";
+g_kCd[97] = "T1";
+g_kCd[98] = "T2";
+g_kCd[99] = "T3";
+g_kCd[100] = "T4";
+g_kCd[101] = "T5";
+g_kCd[102] = "T6";
+g_kCd[103] = "T7";
+g_kCd[104] = "T8";
+g_kCd[105] = "T9";
+g_kCd[106] = "T*";
+g_kCd[107] = "T+";
+g_kCd[108] = "TEnter";
+g_kCd[109] = "T-";
+g_kCd[110] = "T_";
+g_kCd[111] = "T/";
+g_kCd[112] = "F1";
+g_kCd[113] = "F2";
+g_kCd[114] = "F3";
+g_kCd[115] = "F4";
+g_kCd[116] = "F5";
+g_kCd[117] = "F6";
+g_kCd[118] = "F7";
+g_kCd[119] = "F8";
+g_kCd[120] = "F9";
+g_kCd[121] = "F10";
+g_kCd[122] = "F11";
+g_kCd[123] = "F12";
+g_kCd[124] = "F13";
+g_kCd[125] = "F14";
+g_kCd[126] = "F15";
+g_kCd[134] = "FN";
+g_kCd[144] = "NumLk";
+g_kCd[145] = "SL";
+g_kCd[186] = "： *";
+g_kCd[187] = "; +";
+g_kCd[188] = ", <";
+g_kCd[189] = "- =";
+g_kCd[190] = ". >";
+g_kCd[191] = "/ ?";
+g_kCd[192] = "@ `";
+g_kCd[219] = "[ {";
+g_kCd[220] = "\\ |";
+g_kCd[221] = "] }";
+g_kCd[222] = "^ ~";
+g_kCd[226] = "\\ _";
+g_kCd[229] = "Z/H";
+g_kCd[240] = "CapsLk";
 
 // キー別の設定（一旦ここで定義）
 // ステップゾーンの位置関係は自動化を想定
@@ -421,9 +425,9 @@ function deleteChildspriteAll(_parentObjName){
  *			// 作成先のx座標 (appendChildする親に対する位置)
  *			x: 0,
  *			// 作成先のy座標 (appendChildする親に対する位置)
- *			y: sHeight-100,
+ *			y: g_sHeight-100,
  *			// 幅
- *			width: sWidth/3, 
+ *			width: g_sWidth/3, 
  *			// 高さ
  *			height: C_BTN_HEIGHT, 
  *			// フォントサイズ
@@ -516,7 +520,7 @@ function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align){
  * @param {number} _y 
  */
 function getTitleDivLabel(_id, _titlename, _x, _y){
-	var div = createDivLabel(_id, _x, _y, 500, 50, C_LBL_BTNSIZE, C_CLR_TITLE, _titlename);
+	var div = createDivLabel(_id, _x, _y, g_sWidth, 50, C_LBL_BTNSIZE, C_CLR_TITLE, _titlename);
 	div.style.align = C_ALIGN_CENTER;
 	return div;
 }
@@ -536,14 +540,14 @@ function clearWindow(){
 	var l1ctx = layer1.getContext("2d");
 	var layer2 = document.getElementById("layer2");
 	var l2ctx = layer2.getContext("2d");
-	var sWidth = layer0.width;
-	var sHeight = layer0.height;
+	g_sWidth = layer0.width;
+	g_sHeight = layer0.height;
 	var C_MARGIN = 10;
 
 	// 線画、図形をクリア
-	l0ctx.clearRect(0,0,sWidth,sHeight);
-	l1ctx.clearRect(0,0,sWidth,sHeight);
-	l2ctx.clearRect(0,0,sWidth,sHeight);
+	l0ctx.clearRect(0,0,g_sWidth,g_sHeight);
+	l1ctx.clearRect(0,0,g_sWidth,g_sHeight);
+	l2ctx.clearRect(0,0,g_sWidth,g_sHeight);
 
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
 	var divRoot = document.getElementById("divRoot");
@@ -558,23 +562,23 @@ function clearWindow(){
 	}
 
 	// 画面背景を指定 (background-color)
-	var grd = l0ctx.createLinearGradient(0,0,0,sHeight);
+	var grd = l0ctx.createLinearGradient(0,0,0,g_sHeight);
 	grd.addColorStop(0, "#000000");
 	grd.addColorStop(1, "#222222");
 	l0ctx.fillStyle=grd;
-	l0ctx.fillRect(0,0,sHeight,sHeight);
+	l0ctx.fillRect(0,0,g_sWidth,g_sHeight);
 
 	// 線画 (title-line)
 	l1ctx.beginPath();
 	l1ctx.strokeStyle="#cccccc";
 	l1ctx.moveTo(C_MARGIN,C_MARGIN);
-	l1ctx.lineTo(sHeight-C_MARGIN,C_MARGIN);
+	l1ctx.lineTo(g_sWidth-C_MARGIN,C_MARGIN);
 	l1ctx.stroke();
 	
 	l1ctx.beginPath();
 	l1ctx.strokeStyle="#cccccc";
-	l1ctx.moveTo(C_MARGIN,sHeight-C_MARGIN);
-	l1ctx.lineTo(sHeight-C_MARGIN,sHeight-C_MARGIN);
+	l1ctx.moveTo(C_MARGIN,g_sHeight-C_MARGIN);
+	l1ctx.lineTo(g_sWidth-C_MARGIN,g_sHeight-C_MARGIN);
 	l1ctx.stroke();
 	
 }
@@ -595,12 +599,12 @@ function titleInit(){
 	var l1ctx = layer1.getContext("2d");
 	var layer2 = document.getElementById("layer2");
 	var l2ctx = layer2.getContext("2d");
-	var sWidth = layer0.width;
-	var sHeight = layer0.height;
+	g_sWidth = layer0.width;
+	g_sHeight = layer0.height;
 
 	if(document.getElementById("divRoot") == null){
 		var stage = document.getElementById("canvas-frame");
-		var divRoot = createDiv("divRoot",0,0,sWidth,sHeight);
+		var divRoot = createDiv("divRoot",0,0,g_sWidth,g_sHeight);
 		stage.appendChild(divRoot);
 		clearWindow();
 	}else{
@@ -618,8 +622,8 @@ function titleInit(){
 		id: "btnStart", 
 		name: "Click Here!!", 
 		x: 0, 
-		y: sHeight-100, 
-		width: sWidth, 
+		y: g_sHeight-100, 
+		width: g_sWidth, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_TITLESIZE,
 		normalColor: C_CLR_DEFAULT, 
@@ -634,11 +638,11 @@ function titleInit(){
 
 	// 譜面データの読み込み
 	var dos = document.getElementById("dos").value;
-	rootObj = dosConvert(dos);
-	headerObj = headerConvert(rootObj);
+	g_rootObj = dosConvert(dos);
+	g_headerObj = headerConvert(g_rootObj);
 
 	// 背景の矢印オブジェクトを表示
-	var lblArrow = createArrowEffect("lblArrow", headerObj["setColor"][0], 0, -15, 500, 180);
+	var lblArrow = createArrowEffect("lblArrow", g_headerObj["setColor"][0], (g_sWidth-500)/2, -15, 500, 180);
 	lblArrow.style.opacity = 0.25;
 	lblArrow.style.zIndex = 0;
 	divRoot.appendChild(lblArrow);
@@ -646,52 +650,52 @@ function titleInit(){
 
 	// 曲名文字描画（曲名は譜面データから取得）
 	// TEST:試験的に矢印色の1番目と3番目を使ってタイトルをグラデーション
-	var grd = l1ctx.createLinearGradient(0,0,sHeight,0);
-	if(headerObj["setColor"][0]!=undefined){
-		grd.addColorStop(0, headerObj["setColor"][0]);
+	var grd = l1ctx.createLinearGradient(0,0,g_sHeight,0);
+	if(g_headerObj["setColor"][0]!=undefined){
+		grd.addColorStop(0, g_headerObj["setColor"][0]);
 	}else{
 		grd.addColorStop(0, "#ffffff");
 	}
-	if(headerObj["setColor"][2]!=undefined){
-		grd.addColorStop(1, headerObj["setColor"][2]);
+	if(g_headerObj["setColor"][2]!=undefined){
+		grd.addColorStop(1, g_headerObj["setColor"][2]);
 	}else{
 		grd.addColorStop(1, "#66ffff");
 	}
-	var titlefontsize = 64 * (12 / headerObj["musicTitle"].length);
-	createLabel(l1ctx, headerObj["musicTitle"], sWidth/2, sHeight/2, 
+	var titlefontsize = 64 * (12 / g_headerObj["musicTitle"].length);
+	createLabel(l1ctx, g_headerObj["musicTitle"], g_sWidth/2, g_sHeight/2, 
 		titlefontsize, "Century Gothic", grd, C_ALIGN_CENTER);
 
 	// 製作者表示
 	var lnkMaker = createButton({
 		id: "lnkMaker", 
-		name: "Maker: "+ headerObj["tuning"], 
+		name: "Maker: "+ g_headerObj["tuning"], 
 		x: 20, 
-		y: sHeight-40, 
-		width: sWidth/2-10, 
+		y: g_sHeight-40, 
+		width: g_sWidth/2-10, 
 		height: C_LNK_HEIGHT, 
 		fontsize: C_LBL_LNKSIZE,
 		normalColor: C_CLR_LNK, 
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_LEFT
 	}, function(){
-		window.open(headerObj["creatorUrl"], '_blank');
+		window.open(g_headerObj["creatorUrl"], '_blank');
 	});
 	divRoot.appendChild(lnkMaker);
 
 	// 作曲者リンク表示
 	var lnkArtist = createButton({
 		id: "lnkArtist", 
-		name: "Artist: " + headerObj["artistName"], 
-		x: sWidth/2, 
-		y: sHeight-40, 
-		width: sWidth/2-10, 
+		name: "Artist: " + g_headerObj["artistName"], 
+		x: g_sWidth/2, 
+		y: g_sHeight-40, 
+		width: g_sWidth/2-10, 
 		height: C_LNK_HEIGHT, 
 		fontsize: C_LBL_LNKSIZE,
 		normalColor: C_CLR_LNK, 
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_LEFT
 	}, function(){
-		window.open(headerObj["artistUrl"], '_blank');
+		window.open(g_headerObj["artistUrl"], '_blank');
 	});
 	divRoot.appendChild(lnkArtist);
 
@@ -804,10 +808,7 @@ function optionInit(){
 	var l1ctx = layer1.getContext("2d");
 	var layer2 = document.getElementById("layer2");
 	var l2ctx = layer2.getContext("2d");
-	var sWidth = layer0.width;
-	var sHeight = layer0.height;
 	var divRoot = document.getElementById("divRoot");
-	var stage = document.getElementById("canvas-frame");
 
 	// タイトル文字描画
 	var lblTitle = getTitleDivLabel("lblTitle", 
@@ -822,8 +823,8 @@ function optionInit(){
 		id: "btnBack", 
 		name: "Back", 
 		x: 0, 
-		y: sHeight-100, 
-		width: sWidth/3, 
+		y: g_sHeight-100, 
+		width: g_sWidth/3, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULT, 
@@ -840,9 +841,9 @@ function optionInit(){
 	var btnKeyConfig = createButton({
 		id: "btnKeyConfig", 
 		name: "KeyConfig", 
-		x: sWidth/3, 
-		y: sHeight-100, 
-		width: sWidth/3, 
+		x: g_sWidth/3, 
+		y: g_sHeight-100, 
+		width: g_sWidth/3, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULT, 
@@ -859,9 +860,9 @@ function optionInit(){
 	var btnPlay = createButton({
 		id: "btnPlay", 
 		name: "Play", 
-		x: sWidth/3 * 2, 
-		y: sHeight-100, 
-		width: sWidth/3, 
+		x: g_sWidth/3 * 2, 
+		y: g_sHeight-100, 
+		width: g_sWidth/3, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULT, 
@@ -882,7 +883,7 @@ function optionInit(){
 function createOptionWindow(_sprite){
 
 	// 各ボタン用のスプライトを作成
-	var optionsprite = createSprite(_sprite, "optionsprite", 50, 100, 400, 300);
+	var optionsprite = createSprite(_sprite, "optionsprite", (g_sWidth-400)/2, 100, 400, 300);
 
 	// 難易度(Difficulty)
 	var lblDifficulty = createDivLabel("lblDifficulty", 0, 0, 100, 30, 20, C_CLR_TITLE, 
@@ -891,7 +892,7 @@ function createOptionWindow(_sprite){
 
 	var lnkDifficulty = createButton({
 		id: "lnkDifficulty", 
-		name: headerObj["keyLabels"][stateObj.scoreId] + " key / " + headerObj["difLabels"][stateObj.scoreId], 
+		name: g_headerObj["keyLabels"][g_stateObj.scoreId] + " key / " + g_headerObj["difLabels"][g_stateObj.scoreId], 
 		x: 170, 
 		y: 0, 
 		width: 250, 
@@ -902,10 +903,10 @@ function createOptionWindow(_sprite){
 		align: C_ALIGN_CENTER
 	}, function(){
 		// 難易度変更ボタン押下時は譜面名及び初期速度を変更
-		stateObj.scoreId = (stateObj.scoreId < headerObj["keyLabels"].length-1 ? ++stateObj.scoreId : 0);
-		lnkDifficulty.innerHTML = headerObj["keyLabels"][stateObj.scoreId] + " key / " + headerObj["difLabels"][stateObj.scoreId];
-		stateObj.speed = headerObj["initSpeeds"][stateObj.scoreId];
-		lnkSpeed.innerHTML = stateObj.speed + " x";
+		g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj["keyLabels"].length-1 ? ++g_stateObj.scoreId : 0);
+		lnkDifficulty.innerHTML = g_headerObj["keyLabels"][g_stateObj.scoreId] + " key / " + g_headerObj["difLabels"][g_stateObj.scoreId];
+		g_stateObj.speed = g_headerObj["initSpeeds"][g_stateObj.scoreId];
+		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 	});
 	optionsprite.appendChild(lnkDifficulty);
 
@@ -915,7 +916,7 @@ function createOptionWindow(_sprite){
 	optionsprite.appendChild(lblSpeed);
 	var lnkSpeed = createButton({
 		id: "lnkSpeed", 
-		name: stateObj.speed + " x", 
+		name: g_stateObj.speed + " x", 
 		x: 170, 
 		y: 30, 
 		width: 250, 
@@ -925,8 +926,8 @@ function createOptionWindow(_sprite){
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		stateObj.speed = (Number(stateObj.speed) < 10 ? Number(stateObj.speed) + 0.25 : 1);
-		lnkSpeed.innerHTML = stateObj.speed + " x";
+		g_stateObj.speed = (Number(g_stateObj.speed) < 10 ? Number(g_stateObj.speed) + 0.25 : 1);
+		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 	});
 	optionsprite.appendChild(lnkSpeed);
 
@@ -936,7 +937,7 @@ function createOptionWindow(_sprite){
 	optionsprite.appendChild(lblMotion);
 	var lnkMotion = createButton({
 		id: "lnkMotion", 
-		name: stateObj.motion, 
+		name: g_stateObj.motion, 
 		x: 170, 
 		y: 60, 
 		width: 250, 
@@ -946,15 +947,15 @@ function createOptionWindow(_sprite){
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		switch(stateObj.motion){
+		switch(g_stateObj.motion){
 			case "OFF": 
-				stateObj.motion = "Boost";	break;
+				g_stateObj.motion = "Boost";	break;
 			case "Boost":
-				stateObj.motion = "Brake";	break;
+				g_stateObj.motion = "Brake";	break;
 			case "Brake":
-				stateObj.motion = "OFF";	break;
+				g_stateObj.motion = "OFF";	break;
 		}
-		lnkMotion.innerHTML = stateObj.motion;
+		lnkMotion.innerHTML = g_stateObj.motion;
 	});
 	optionsprite.appendChild(lnkMotion);
 
@@ -964,7 +965,7 @@ function createOptionWindow(_sprite){
 	optionsprite.appendChild(lblReverse);
 	var lnkReverse = createButton({
 		id: "lnkReverse", 
-		name: stateObj.reverse, 
+		name: g_stateObj.reverse, 
 		x: 170, 
 		y: 90, 
 		width: 250, 
@@ -974,8 +975,8 @@ function createOptionWindow(_sprite){
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		stateObj.reverse = (stateObj.reverse == "OFF" ? "ON" : "OFF");
-		lnkReverse.innerHTML = stateObj.reverse;
+		g_stateObj.reverse = (g_stateObj.reverse == "OFF" ? "ON" : "OFF");
+		lnkReverse.innerHTML = g_stateObj.reverse;
 	});
 	optionsprite.appendChild(lnkReverse);
 
@@ -985,7 +986,7 @@ function createOptionWindow(_sprite){
 	optionsprite.appendChild(lblAutoPlay);
 	var lnkAutoPlay = createButton({
 		id: "lnkAutoPlay", 
-		name: stateObj.auto, 
+		name: g_stateObj.auto, 
 		x: 170, 
 		y: 120, 
 		width: 250, 
@@ -995,8 +996,8 @@ function createOptionWindow(_sprite){
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		stateObj.auto = (stateObj.auto == "OFF" ? "ON" : "OFF");
-		lnkAutoPlay.innerHTML = stateObj.auto;
+		g_stateObj.auto = (g_stateObj.auto == "OFF" ? "ON" : "OFF");
+		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	});
 	optionsprite.appendChild(lnkAutoPlay);
 
@@ -1006,7 +1007,7 @@ function createOptionWindow(_sprite){
 	optionsprite.appendChild(lblAdjustment);
 	var lnkAdjustment = createButton({
 		id: "lnkAutoPlay", 
-		name: stateObj.adjustment, 
+		name: g_stateObj.adjustment, 
 		x: 170, 
 		y: 150, 
 		width: 250, 
@@ -1016,8 +1017,8 @@ function createOptionWindow(_sprite){
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		stateObj.adjustment = (stateObj.adjustment == 15 ? -15 : ++stateObj.adjustment);
-		lnkAdjustment.innerHTML = stateObj.adjustment;
+		g_stateObj.adjustment = (g_stateObj.adjustment == 15 ? -15 : ++g_stateObj.adjustment);
+		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	});
 	optionsprite.appendChild(lnkAdjustment);
 
@@ -1039,8 +1040,6 @@ function keyConfigInit(){
 	var l1ctx = layer1.getContext("2d");
 	var layer2 = document.getElementById("layer2");
 	var l2ctx = layer2.getContext("2d");
-	var sWidth = layer0.width;
-	var sHeight = layer0.height;
 	var divRoot = document.getElementById("divRoot");
 
 	// タイトル文字描画
@@ -1053,8 +1052,8 @@ function keyConfigInit(){
 		id: "btnBack", 
 		name: "Back", 
 		x: 0, 
-		y: sHeight-100, 
-		width: sWidth/2, 
+		y: g_sHeight-100, 
+		width: g_sWidth/2, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULT, 
@@ -1071,9 +1070,9 @@ function keyConfigInit(){
 	var btnReset = createButton({
 		id: "btnReset", 
 		name: "Reset", 
-		x: sWidth/2, 
-		y: sHeight-100, 
-		width: sWidth/2, 
+		x: g_sWidth/2, 
+		y: g_sHeight-100, 
+		width: g_sWidth/2, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULT, 
@@ -1085,10 +1084,10 @@ function keyConfigInit(){
 	divRoot.appendChild(btnReset);
 
 	// キーの一覧を表示
-	var keyconSprite = createSprite("divRoot","keyconSprite",50,100,400,300);
+	var keyconSprite = createSprite("divRoot","keyconSprite",(g_sWidth-400)/2,100,400,300);
 	var kWidth = parseInt(keyconSprite.style.width);
 	
-	var keyLabel = headerObj["keyLabels"][stateObj.scoreId];
+	var keyLabel = g_headerObj["keyLabels"][g_stateObj.scoreId];
 	var keyNum = Number(keyLabel.replace(/[^0-9]/g, ""));
 	
 	for(var j=0; j<keyNum; j++){
@@ -1102,7 +1101,7 @@ function keyConfigInit(){
 		keyconSprite.appendChild(createDivLabel("keycon" + j, 
 			50 * ((j % keyObj["div"+ keyLabel]) - keyObj["div"+ keyLabel]/2) + kWidth/2, 
 			50 + 120 * Math.floor(j / keyObj["div"+ keyLabel]),
-			50, 20, 20, "#cccccc", kCd[keyObj["keyCtrl"+ keyLabel][j]]));
+			50, 20, 20, "#cccccc", g_kCd[keyObj["keyCtrl"+ keyLabel][j]]));
 		eval("keycon" + j).align = C_ALIGN_CENTER;
 	}
 }
@@ -1127,16 +1126,14 @@ function loadingScoreInit(){
 	var l1ctx = layer1.getContext("2d");
 	var layer2 = document.getElementById("layer2");
 	var l2ctx = layer2.getContext("2d");
-	var sWidth = layer0.width;
-	var sHeight = layer0.height;
 	var divRoot = document.getElementById("divRoot");
 
 	// 譜面データの読み込み
 	var scoreIdHeader = "";
-	if(stateObj.scoreId > 0){
-		scoreIdHeader = Number(stateObj.scoreId) + 1;
+	if(g_stateObj.scoreId > 0){
+		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
 	}
-	scoreObj = scoreConvert(rootObj, headerObj["keyLabels"][stateObj.scoreId], scoreIdHeader);
+	g_scoreObj = scoreConvert(g_rootObj, g_headerObj["keyLabels"][g_stateObj.scoreId], scoreIdHeader);
 
 
 	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
@@ -1144,8 +1141,8 @@ function loadingScoreInit(){
 		id: "btnBack", 
 		name: "Back", 
 		x: 0, 
-		y: sHeight-100, 
-		width: sWidth/2, 
+		y: g_sHeight-100, 
+		width: g_sWidth/2, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULT, 
@@ -1179,8 +1176,6 @@ function resultInit(){
 	var l1ctx = layer1.getContext("2d");
 	var layer2 = document.getElementById("layer2");
 	var l2ctx = layer2.getContext("2d");
-	var sWidth = layer0.width;
-	var sHeight = layer0.height;
 	var divRoot = document.getElementById("divRoot");
 
 	// タイトル文字描画
@@ -1193,8 +1188,8 @@ function resultInit(){
 		id: "btnBack", 
 		name: "Back", 
 		x: 0, 
-		y: sHeight-100, 
-		width: sWidth/3, 
+		y: g_sHeight-100, 
+		width: g_sWidth/3, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULT, 
@@ -1211,9 +1206,9 @@ function resultInit(){
 	var btnTweet = createButton({
 		id: "btnTweet", 
 		name: "Tweet", 
-		x: sWidth/3, 
-		y: sHeight-100, 
-		width: sWidth/3, 
+		x: g_sWidth/3, 
+		y: g_sHeight-100, 
+		width: g_sWidth/3, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULT, 
@@ -1228,9 +1223,9 @@ function resultInit(){
 	var btnRetry = createButton({
 		id: "btnRetry", 
 		name: "Retry", 
-		x: sWidth/3 * 2, 
-		y: sHeight-100, 
-		width: sWidth/3, 
+		x: g_sWidth/3 * 2, 
+		y: g_sHeight-100, 
+		width: g_sWidth/3, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULT, 
