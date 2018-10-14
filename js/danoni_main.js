@@ -1,6 +1,6 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.1.17
+ * Ver 0.1.18
  * 
  * Source by tickle
  * created : 2018/10/08
@@ -256,7 +256,7 @@ var g_keyObj = {
 	// - AAキャラクタの場合、キャラクタ名を指定
 	stepRtn5_0: [0, -90, 90, 180, "onigiri"],
 	stepRtn7_0: [0, -45, -90, "onigiri", 90, 135, 180],
-	stepRtn7i_0: ["giko", "iyo", "onigiri", 0, -90, 90, 180],
+	stepRtn7i_0: ["giko", "onigiri", "iyo", 0, -90, 90, 180],
 	stepRtn8_0: [0, -45, -90, "onigiri", 90, 135, 180, "onigiri"],
 	stepRtn9A_0: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
 	stepRtn9B_0: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
@@ -1318,7 +1318,7 @@ function keyConfigInit(){
 	var stdPos = 0;
 	/** 行位置 */
 	var dividePos = 0;
-	
+
 	for(var j=0; j<keyNum; j++){
 
 		leftCnt = (j >= divideCnt ? j - divideCnt : j);
