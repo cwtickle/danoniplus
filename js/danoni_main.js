@@ -234,23 +234,36 @@ var g_keyObj = {
 	// キー別ヘッダー
 	// - 譜面データ中に出てくる矢印(ノーツ)の種類と順番(ステップゾーン表示順)を管理する。
 	// - ここで出てくる順番は、この後のstepRtn, keyCtrlとも対応している。 
-	chara5: ["left","down","up","right","space"],
-	chara7: ["left","leftdia","down","space","up","rightdia","right"],
-	chara7i: ["left","leftdia","down","space","up","rightdia","right"],
-	chara8: ["left","leftdia","down","space","up","rightdia","right","sleft"],
-	chara9A: ["left","down","up","right","space","sleft","sdown","sup","sright"],
-	chara9B: ["left","down","up","right","space","sleft","sdown","sup","sright"],
-	chara9i: ["left","down","up","right","space","sleft","sdown","sup","sright"],
-	chara11: ["sleft","sdown","sup","sright",
+	chara5_0: ["left","down","up","right","space"],
+	chara7_0: ["left","leftdia","down","space","up","rightdia","right"],
+	chara7i_0: ["left","leftdia","down","space","up","rightdia","right"],
+	chara8_0: ["left","leftdia","down","space","up","rightdia","right","sleft"],
+	chara9A_0: ["left","down","up","right","space","sleft","sdown","sup","sright"],
+	chara9B_0: ["left","down","up","right","space","sleft","sdown","sup","sright"],
+	chara9i_0: ["left","down","up","right","space","sleft","sdown","sup","sright"],
+	chara11_0: ["sleft","sdown","sup","sright",
 		"left","leftdia","down","space","up","rightdia","right"],
-	chara11L: ["sleft","sdown","sup","sright",
+	chara11L_0: ["sleft","sdown","sup","sright",
 		"left","leftdia","down","space","up","rightdia","right"],
-	chara12: ["sleft","sdown","sup","sright",
+	chara12_0: ["sleft","sdown","sup","sright",
 		"oni","left","leftdia","down","space","up","rightdia","right"],
-	chara14: ["sleftdia","sleft","sdown","sup","sright","srightdia",
+	chara14_0: ["sleftdia","sleft","sdown","sup","sright","srightdia",
 		"oni","left","leftdia","down","space","up","rightdia","right"],
-	chara17: ["aleft","bleft","adown","bdown","aup","bup","aright","bright","space",
+	chara17_0: ["aleft","bleft","adown","bdown","aup","bup","aright","bright","space",
 		"cleft","dleft","cdown","ddown","cup","dup","cright","dright"],
+
+	chara5_1: ["space","left","down","up","right"],
+	chara9A_1: ["left","down","up","right","space","sleft","sdown","sup","sright"],
+	chara11_1: ["space","sleft","sdown","sup","sright",
+		"left","leftdia","down","up","rightdia","right"],
+	chara11L_1: ["sleft","sdown","sup","sright","space",
+		"left","leftdia","down","up","rightdia","right"],
+	chara12_1: ["sleft","sdown","sup","sright",
+		"oni","left","leftdia","down","space","up","rightdia","right"],
+	chara14_1: ["sleftdia","sleft","sdown","sup","sright","srightdia",
+		"oni","left","leftdia","down","space","up","rightdia","right"],
+
+	chara5_2: ["left","down","space","up","right"],
 
 	// 基本パターン (矢印回転、AAキャラクタ)
 	// - AAキャラクタの場合、キャラクタ名を指定
@@ -273,8 +286,8 @@ var g_keyObj = {
 	// - 配列の数は、通常パターンと同数で無くてはいけない（keyCtrlも同様）
 	stepRtn5_1: ["onigiri", 0, -90, 90, 180],
 	stepRtn9A_1: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
-//	stepRtn11_1: ["onigiri", 0, -90, 90, 180, 0, -45, -90, 90, 135, 180],
-//	stepRtn11L_1: [0, -90, 90, 180, "onigiri", 0, -45, -90, 90, 135, 180],
+	stepRtn11_1: ["onigiri", 0, -90, 90, 180, 0, -45, -90, 90, 135, 180],
+	stepRtn11L_1: [0, -90, 90, 180, "onigiri", 0, -45, -90, 90, 135, 180],
 	stepRtn12_1: [0, -90, 90, 180, "onigiri", 0, 30, 60, 90, 120, 150, 180],
 	stepRtn14_1: [45, 0, -90, 90, 180, 135, "onigiri", 0, 30, 60, 90, 120, 150, 180],
 
@@ -296,8 +309,8 @@ var g_keyObj = {
 
 	div5_1: 5,
 	div9A_1: 9,
-//	div11_1: 5,
-//	div11L_1: 5,
+	div11_1: 5,
+	div11L_1: 5,
 	div12_1: 4,
 	div14_1: 6,
 
@@ -338,11 +351,15 @@ var g_keyObj = {
 	// - 配列数は合わせる必要はあるが、代替キーの数は _X, _Xdで揃っていれば合わせる必要はない。
 	keyCtrl5_1: [[32,0],[37],[40],[38,0],[39]],
 	keyCtrl9A_1:[[83],[68],[69,82],[70],[32],[37],[40],[38,0],[39]],
+	keyCtrl11_1:[[32],[37],[40],[38,0],[39],[83],[68],[70],[74],[75],[76]],
+	keyCtrl11L_1:[[87],[69],[51,52],[82],[32],[83],[68],[70],[74],[75],[76]],
 	keyCtrl12_1:[[89],[85,73],[56,55,57],[79],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
 	keyCtrl14_1:[[82,84],[89],[85,73],[56,54,55,57,48],[79],[192,80],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
 
 	keyCtrl5_1d: [[32,0],[37],[40],[38,0],[39]],
 	keyCtrl9A_1d:[[83],[68],[69,82],[70],[32],[37],[40],[38,0],[39]],
+	keyCtrl11_1d:[[32],[37],[40],[38,0],[39],[83],[68],[70],[74],[75],[76]],
+	keyCtrl11L_1d:[[87],[69],[51,52],[82],[32],[83],[68],[70],[74],[75],[76]],
 	keyCtrl12_1d:[[89],[85,73],[56,55,57],[79],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
 	keyCtrl14_1d:[[82,84],[89],[85,73],[56,54,55,57,48],[79],[192,80],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
 
@@ -910,20 +927,21 @@ function headerConvert(_dosObj){
  * @param {object} _dosObj 
  * @param {string} _scoreNo
  */
-function scoreConvert(_dosObj, _keys, _scoreNo){
+function scoreConvert(_dosObj, _scoreNo){
 
 	// 矢印群の格納先
 	var obj = {};
 
-	var keyNum = g_keyObj["chara" + _keys].length;
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 	obj.data = new Array();
 	var frzName;
 	for(var j=0; j<keyNum; j++){
-		if(_dosObj[g_keyObj["chara" + _keys][j] + _scoreNo + "_data"] != undefined){
-			obj.data[j] = _dosObj[g_keyObj["chara" + _keys][j] + _scoreNo + "_data"].split(",");
+		if(_dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"] != undefined){
+			obj.data[j] = _dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"].split(",");
 		}
 		
-		frzName = g_keyObj["chara" + _keys][j].replace("leftdia","frzLdia");
+		frzName = g_keyObj["chara" + keyCtrlPtn][j].replace("leftdia","frzLdia");
 		frzName = frzName.replace("rightdia","frzRdia");
 		frzName = frzName.replace("left","frzLeft");
 		frzName = frzName.replace("down","frzDown");
@@ -940,7 +958,7 @@ function scoreConvert(_dosObj, _keys, _scoreNo){
 		
 	}
 
-	var speedFooter = (_keys == "5" ? "_data" : "_change");
+	var speedFooter = (g_keyObj.currentKey == "5" ? "_data" : "_change");
 	if(_dosObj["speed" + _scoreNo + "_" + speedFooter] != undefined){
 		obj["speedData"] = _dosObj["speed" + _scoreNo + "_" + speedFooter].split(",");
 	}
@@ -1283,8 +1301,8 @@ function keyConfigInit(){
 	}, function(){
 		if(window.confirm('キーを初期配置に戻します。よろしいですか？')){
 			g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
-			var keyNum = g_keyObj["chara" + g_keyObj.currentKey].length;
 			var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+			var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 			var divideCnt = g_keyObj["div"+ keyCtrlPtn];
 
 			for(var j=0; j<keyNum; j++){
@@ -1308,8 +1326,8 @@ function keyConfigInit(){
 	var keyconSprite = createSprite("divRoot","keyconSprite",(g_sWidth-400)/2,100,400,300);
 	var kWidth = parseInt(keyconSprite.style.width);
 	
-	var keyNum = g_keyObj["chara" + g_keyObj.currentKey].length;
 	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 	var divideCnt = g_keyObj["div"+ keyCtrlPtn];
 
 	/** 同行の左から数えた場合の位置(x座標) */
@@ -1428,7 +1446,7 @@ function loadingScoreInit(){
 	if(g_stateObj.scoreId > 0){
 		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
 	}
-	g_scoreObj = scoreConvert(g_rootObj, g_headerObj["keyLabels"][g_stateObj.scoreId], scoreIdHeader);
+	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader);
 
 
 	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
