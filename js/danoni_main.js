@@ -1,10 +1,10 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.1.14
+ * Ver 0.1.15
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/13
+ * Revised : 2018/10/14
  */
 
 /**
@@ -78,6 +78,11 @@ var C_SPRITE_ROOT = "divRoot";
 // 画像ファイル
 var C_IMG_ARROW = "../img/arrow_500.png";
 var C_IMG_ONIGIRI = "../img/onigiri_600.png";
+var C_IMG_GIKO = "../img/giko_600.png";
+var C_IMG_IYO = "../img/iyo_600.png";
+var C_IMG_C = "../img/c_600.png";
+var C_IMG_MORARA = "../img/morara_600.png";
+var C_IMG_MONAR = "../img/monar_600.png";
 
 // 譜面データ持ち回り用
 var g_rootObj = {};
@@ -221,12 +226,21 @@ g_kCd[240] = "CapsLk";
 // ステップゾーンの位置関係は自動化を想定
 var keyObj = {
 
+	// 現在の選択キー、選択パターン
+	// - キーとパターンの組み合わせで、ステップゾーンや対応キー等が決まる
+	currentKey: 7,
+	currentPtn: 0,
+
+	// キー別ヘッダー
+	// - 譜面データ中に出てくる矢印(ノーツ)の種類と順番(ステップゾーン表示順)を管理する。
+	// - ここで出てくる順番は、この後のstepRtn, keyCtrlとも対応している。 
 	chara5: ["left","down","up","right","space"],
 	chara7: ["left","leftdia","down","space","up","rightdia","right"],
 	chara7i: ["left","leftdia","down","space","up","rightdia","right"],
 	chara8: ["left","leftdia","down","space","up","rightdia","right","sleft"],
 	chara9A: ["left","down","up","right","space","sleft","sdown","sup","sright"],
 	chara9B: ["left","down","up","right","space","sleft","sdown","sup","sright"],
+	chara9i: ["left","down","up","right","space","sleft","sdown","sup","sright"],
 	chara11: ["left","leftdia","down","space","up","rightdia","right",
 		"sleft","sdown","sup","sright"],
 	chara11L: ["left","leftdia","down","space","up","rightdia","right",
@@ -235,47 +249,95 @@ var keyObj = {
 		"sleft","sdown","sup","sright"],
 	chara14: ["oni","left","leftdia","down","space","up","rightdia","right",
 		"sleftdia","sleft","sdown","sup","sright","srightdia"],
+	chara17: ["aleft","bleft","adown","bdown","aup","bup","aright","bright","space",
+		"cleft","dleft","cdown","ddown","cup","dup","cright","dright"],
 
-	stepRtn5: [0, -90, 90, 180, "onigiri"],
-	stepRtn7: [0, -45, -90, "onigiri", 90, 135, 180],
-	stepRtn7i: ["onigiri", "onigiri", "onigiri", 0, -90, 90, 180],
-	stepRtn8: [0, -45, -90, "onigiri", 90, 135, 180, "onigiri"],
-	stepRtn9A: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
-	stepRtn9B: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
-	stepRtn11: [0, -45, -90, "onigiri", 90, 135, 180, 0, -90, 90, 180],
-	stepRtn11L: [0, -45, -90, "onigiri", 90, 135, 180, 0, -90, 90, 180],
-	stepRtn12: ["onigiri", 0, 30, 60, 90, 120, 150, 180, 0, -90, 90, 180],
-	stepRtn14: ["onigiri", 0, 30, 60, 90, 120, 150, 180, 45, 0, -90, 90, 180, 135],
+	// 基本パターン (矢印回転、AAキャラクタ)
+	// - AAキャラクタの場合、キャラクタ名を指定
+	stepRtn5_0: [0, -90, 90, 180, "onigiri"],
+	stepRtn7_0: [0, -45, -90, "onigiri", 90, 135, 180],
+	stepRtn7i_0: ["giko", "iyo", "onigiri", 0, -90, 90, 180],
+	stepRtn8_0: [0, -45, -90, "onigiri", 90, 135, 180, "onigiri"],
+	stepRtn9A_0: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
+	stepRtn9B_0: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
+	stepRtn9i_0: ["monar", "giko", "c", "morara", "onigiri", 0, -90, 90, 180],
+	stepRtn11_0: [0, -45, -90, "onigiri", 90, 135, 180, 0, -90, 90, 180],
+	stepRtn11L_0: [0, -45, -90, "onigiri", 90, 135, 180, 0, -90, 90, 180],
+	stepRtn12_0: ["onigiri", 0, 30, 60, 90, 120, 150, 180, 0, -90, 90, 180],
+	stepRtn14_0: ["onigiri", 0, 30, 60, 90, 120, 150, 180, 45, 0, -90, 90, 180, 135],
+	stepRtn17_0: [0, -22.5, -45, -67.5, -90, -112.5, -135, -157.5, "onigiri", 
+		22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180],
 	
+	// 変則パターン (矢印回転、AAキャラクタ)
+	// - 末尾の番号をカウントアップさせることで実現できる。keyCtrlと合わせること
+	// - 配列の数は、通常パターンと同数で無くてはいけない（keyCtrlも同様）
+	stepRtn5_1: ["onigiri", 0, -90, 90, 180],
+	stepRtn9A_1: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
+	stepRtn12_1: ["onigiri", 0, 30, 60, 90, 120, 150, 180, 0, -90, 90, 180],
+	stepRtn14_1: ["onigiri", 0, 30, 60, 90, 120, 150, 180, 45, 0, -90, 90, 180, 135],
+
+	stepRtn5_2: [0, -90, "onigiri", 90, 180],
+
+	// 各キーの区切り位置
 	div5: 5,
 	div7: 7,
 	div7i: 7,
 	div8: 8,
 	div9A: 9,
 	div9B: 9,
+	div9i: 9,
 	div11: 7,
 	div11L: 7,
 	div12: 8,
 	div14: 8,
+	div17: 9,
 
-	keyCtrl5: [[37],[40],[38,0],[39],[32,0]],
-	keyCtrl7: [[83],[68,0],[70],[32,0],[74],[75,0],[76]],
-	keyCtrl8: [[83],[68,0],[70],[32,0],[74],[75,0],[76],[32,0]],
-	keyCtrl9A:[[83],[68],[69,82],[70],[32],[74],[75],[73,0],[76]],
-	keyCtrl9B:[[65],[83],[68],[70],[32],[74],[75],[76],[187]],
-	keyCtrl11:[[83],[68],[70],[32],[74],[75],[76],[37],[40],[38,0],[39]],
-	keyCtrl11L:[[83],[68],[70],[32],[74],[75],[76],[87],[69],[51,52],[82]],
-	keyCtrl12:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[85],[73],[56,57],[79]],
-	keyCtrl14:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[84,89],[85],[73],[56,55,57,48],[79],[192,80]],
+	// 基本パターン (キーコンフィグ)
+	// - 末尾dなし(実際の設定値)と末尾dあり(デフォルト値)は必ずセットで揃えること。配列数も合わせる。
+	// - 順番はchara, stepRtnと対応している。
+	// - 多次元配列内はステップに対応するキーコードを示す。カンマ区切りで複数指定できる。
+	keyCtrl5_0: [[37],[40],[38,0],[39],[32,0]],
+	keyCtrl7_0: [[83],[68,0],[70],[32,0],[74],[75,0],[76]],
+	keyCtrl7i_0: [[90],[88],[67],[37],[40],[38,0],[39]],
+	keyCtrl8_0: [[83],[68,0],[70],[32,0],[74],[75,0],[76],[32,0]],
+	keyCtrl9A_0:[[83],[68],[69,82],[70],[32],[74],[75],[73,0],[76]],
+	keyCtrl9B_0:[[65],[83],[68],[70],[32],[74],[75],[76],[187]],
+	keyCtrl9i_0:[[65],[83],[68],[70],[32],[37],[40],[38,0],[39]],
+	keyCtrl11_0:[[83],[68],[70],[32],[74],[75],[76],[37],[40],[38,0],[39]],
+	keyCtrl11L_0:[[83],[68],[70],[32],[74],[75],[76],[87],[69],[51,52],[82]],
+	keyCtrl12_0:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[85],[73],[56,57],[79]],
+	keyCtrl14_0:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[84,89],[85],[73],[56,55,57,48],[79],[192,80]],
+	keyCtrl17_0:[[65],[90],[83],[88],[68],[67],[70],[86],[32],[78],[74],[77],[75],[188],[76],[190],[187]],
 
-	keyCtrl5_1d: [[37],[40],[38,0],[39],[32,0]],
-	keyCtrl7_1d: [[83],[68,0],[70],[32,0],[74],[75,0],[76]],
-	keyCtrl9A_1d:[[83],[68],[69,82],[70],[32],[74],[75],[73,0],[76]],
-	keyCtrl9B_1d:[[65],[83],[68],[70],[32],[74],[75],[76],[187]],
-	keyCtrl11_1d:[[83],[68],[70],[32],[74],[75],[76],[37],[40],[38,0],[39]],
-	keyCtrl11L_1d:[[83],[68],[70],[32],[74],[75],[76],[87],[69],[51,52],[82]],
-	keyCtrl12_1d:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[85],[73],[56,57],[79]],
-	keyCtrl14_1d:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[84,89],[85],[73],[56,55,57,48],[79],[192,80]]
+	keyCtrl5_0d: [[37],[40],[38,0],[39],[32,0]],
+	keyCtrl7_0d: [[83],[68,0],[70],[32,0],[74],[75,0],[76]],
+	keyCtrl7i_0d: [[90],[88],[67],[37],[40],[38,0],[39]],
+	keyCtrl9A_0d:[[83],[68],[69,82],[70],[32],[74],[75],[73,0],[76]],
+	keyCtrl9B_0d:[[65],[83],[68],[70],[32],[74],[75],[76],[187]],
+	keyCtrl9i_0d:[[65],[83],[68],[70],[32],[37],[40],[38,0],[39]],
+	keyCtrl11_0d:[[83],[68],[70],[32],[74],[75],[76],[37],[40],[38,0],[39]],
+	keyCtrl11L_0d:[[83],[68],[70],[32],[74],[75],[76],[87],[69],[51,52],[82]],
+	keyCtrl12_0d:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[85],[73],[56,57],[79]],
+	keyCtrl14_0d:[[32],[78],[74],[77,0],[75,0],[188],[76],[190],[84,89],[85],[73],[56,55,57,48],[79],[192,80]],
+	keyCtrl17_0d:[[65],[90],[83],[88],[68],[67],[70],[86],[32],[78],[74],[77],[75],[188],[76],[190],[187]],
+
+	// 変則パターン (キーコンフィグ)
+	// - 末尾dなし(実際の設定値)と末尾dあり(デフォルト値)は必ずセットで揃えること。配列数も合わせる。
+	// - _0, _0dの数字部分をカウントアップすることで実現できる。
+	// - 配列数は合わせる必要はあるが、代替キーの数は _X, _Xdで揃っていれば合わせる必要はない。
+	keyCtrl5_1: [[32,0],[37],[40],[38,0],[39]],
+	keyCtrl9A_1:[[83],[68],[69,82],[70],[32],[37],[40],[38,0],[39]],
+	keyCtrl12_1:[[32],[66],[72],[78,77],[74,75],[188],[76],[190],[89],[85,73],[56,55,57],[79]],
+	keyCtrl14_1:[[32],[66],[72],[78,77],[74,75],[188],[76],[190],[82,84],[89],[85,73],[56,54,55,57,48],[79],[192,80]],
+
+	keyCtrl5_1d: [[32,0],[37],[40],[38,0],[39]],
+	keyCtrl9A_1d:[[83],[68],[69,82],[70],[32],[37],[40],[38,0],[39]],
+	keyCtrl12_1d:[[32],[66],[72],[78,77],[74,75],[188],[76],[190],[89],[85,73],[56,55,57],[79]],
+	keyCtrl14_1d:[[32],[66],[72],[78,77],[74,75],[188],[76],[190],[82,84],[89],[85,73],[56,54,55,57,48],[79],[192,80]],
+
+	keyCtrl5_2: [[37],[40],[32,0],[38,0],[39]],
+
+	keyCtrl5_2d: [[37],[40],[32,0],[38,0],[39]]
 };
 
 /**
@@ -399,11 +461,11 @@ function createImg(_id, _imgPath, _x, _y, _width, _height){
 function createArrowEffect(_id, _color, _x, _y, _size, _rotate){
 
 	// 矢印・おにぎり判定
-	if(_rotate == "onigiri"){
+	if(isNaN(Number(_rotate))){
 		var rotate = 0;
-		var charaStyle = "onigiri";
-		var charaImg = C_IMG_ONIGIRI;
-		var sizeX = _size * 1.2; 
+		var charaStyle = _rotate;
+		var charaImg = eval("C_IMG_" + _rotate.toUpperCase());
+		var sizeX = _size; 
 	}else{
 		var rotate = _rotate;
 		var charaStyle = "arrow";
@@ -705,6 +767,9 @@ function titleInit(){
 	g_rootObj = dosConvert(dos);
 	g_headerObj = headerConvert(g_rootObj);
 
+	keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
+	keyObj.currentPtn = 0;
+
 	// 背景の矢印オブジェクトを表示
 	var lblArrow = createArrowEffect("lblArrow", g_headerObj["setColor"][0], (g_sWidth-500)/2, -15, 500, 180);
 	lblArrow.style.opacity = 0.25;
@@ -996,6 +1061,8 @@ function createOptionWindow(_sprite){
 		lnkDifficulty.innerHTML = g_headerObj["keyLabels"][g_stateObj.scoreId] + " key / " + g_headerObj["difLabels"][g_stateObj.scoreId];
 		g_stateObj.speed = g_headerObj["initSpeeds"][g_stateObj.scoreId];
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
+		keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
+		keyObj.currentPtn = 0;
 	});
 	optionsprite.appendChild(lnkDifficulty);
 
@@ -1147,7 +1214,7 @@ function keyConfigInit(){
 		name: "Back", 
 		x: 0, 
 		y: g_sHeight-100, 
-		width: g_sWidth/2, 
+		width: g_sWidth/3, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULT, 
@@ -1162,14 +1229,41 @@ function keyConfigInit(){
 		optionInit();
 	});
 	divRoot.appendChild(btnBack);
+
+	// パターン変更ボタン描画
+	var btnPtnChange = createButton({
+		id: "btnPtnChange", 
+		name: "PtnChange", 
+		x: g_sWidth/3, 
+		y: g_sHeight-100, 
+		width: g_sWidth/3, 
+		height: C_BTN_HEIGHT, 
+		fontsize: C_LBL_BTNSIZE,
+		normalColor: C_CLR_DEFAULT, 
+		hoverColor: C_CLR_SETTING, 
+		align: C_ALIGN_CENTER
+	}, function(){
+		var tempPtn = keyObj.currentPtn + 1;
+		if(keyObj["keyCtrl"+ keyObj.currentKey + "_" + tempPtn] != undefined){
+			keyObj.currentPtn = tempPtn;
+		}else{
+			keyObj.currentPtn = 0;
+		}
+		clearWindow();
+		keyConfigInit();
+		g_currentj = 0;
+		g_currentk = 0;
+		g_prevKey = -1;
+	});
+	divRoot.appendChild(btnPtnChange);
 	
 	// キーコンフィグリセットボタン描画
 	var btnReset = createButton({
 		id: "btnReset", 
 		name: "Reset", 
-		x: g_sWidth/2, 
+		x: g_sWidth/3 * 2, 
 		y: g_sHeight-100, 
-		width: g_sWidth/2, 
+		width: g_sWidth/3, 
 		height: C_BTN_HEIGHT, 
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULT, 
@@ -1177,17 +1271,18 @@ function keyConfigInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		if(window.confirm('キーを初期配置に戻します。よろしいですか？')){
-			var keyLabel = g_headerObj["keyLabels"][g_stateObj.scoreId];
-			var keyNum = Number(keyLabel.replace(/[^0-9]/g, ""));
+			keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
+			var keyNum = keyObj["chara" + keyObj.currentKey].length;
+			var keyCtrlPtn = keyObj.currentKey + "_" + keyObj.currentPtn;
 
 			for(var j=0; j<keyNum; j++){
-				for(var k=0;k<keyObj["keyCtrl"+ keyLabel][j].length;k++){
-					keyObj["keyCtrl"+ keyLabel][j][k] = keyObj["keyCtrl"+ keyLabel + "_1d"][j][k];
-					document.getElementById("keycon" + j + "_" + k).innerHTML = g_kCd[keyObj["keyCtrl"+ keyLabel][j][k]];
+				for(var k=0;k<keyObj["keyCtrl"+ keyCtrlPtn][j].length;k++){
+					keyObj["keyCtrl"+ keyCtrlPtn][j][k] = keyObj["keyCtrl"+ keyCtrlPtn + "d"][j][k];
+					document.getElementById("keycon" + j + "_" + k).innerHTML = g_kCd[keyObj["keyCtrl"+ keyCtrlPtn][j][k]];
 				}
 			}
 			var cursor = document.getElementById("cursor");
-			cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10) + "px";
+			cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyObj.currentKey]/2) -10) + "px";
 			cursor.style.top = "45px";
 
 			g_currentj = 0;
@@ -1201,29 +1296,29 @@ function keyConfigInit(){
 	var keyconSprite = createSprite("divRoot","keyconSprite",(g_sWidth-400)/2,100,400,300);
 	var kWidth = parseInt(keyconSprite.style.width);
 	
-	var keyLabel = g_headerObj["keyLabels"][g_stateObj.scoreId];
-	var keyNum = Number(keyLabel.replace(/[^0-9]/g, ""));
+	var keyNum = keyObj["chara" + keyObj.currentKey].length;
+	var keyCtrlPtn = keyObj.currentKey + "_" + keyObj.currentPtn;
 	
 	for(var j=0; j<keyNum; j++){
 	
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		keyconSprite.appendChild(createArrowEffect("arrow" + j, "#cccccc", 
-			55 * ((j % keyObj["div"+ keyLabel]) - keyObj["div"+ keyLabel]/2) + kWidth/2, 
-			120 * Math.floor(j / keyObj["div"+ keyLabel]), 50, 
-			keyObj["stepRtn" + keyLabel][j]));
+			55 * ((j % keyObj["div"+ keyObj.currentKey]) - keyObj["div"+ keyObj.currentKey]/2) + kWidth/2, 
+			120 * Math.floor(j / keyObj["div"+ keyObj.currentKey]), 50, 
+			keyObj["stepRtn" + keyCtrlPtn][j]));
 
 		// 対応キーに応じた値を表示
-		for(var k=0;k<keyObj["keyCtrl"+ keyLabel][j].length;k++){
+		for(var k=0;k<keyObj["keyCtrl"+ keyCtrlPtn][j].length;k++){
 			keyconSprite.appendChild(createDivLabel("keycon" + j + "_" + k, 
-				55 * ((j % keyObj["div"+ keyLabel]) - keyObj["div"+ keyLabel]/2) + kWidth/2, 
-				50 + 20 * k + 120 * Math.floor(j / keyObj["div"+ keyLabel]),
-				50, 20, 16, "#cccccc", g_kCd[keyObj["keyCtrl"+ keyLabel][j][k]]));
+				55 * ((j % keyObj["div"+ keyObj.currentKey]) - keyObj["div"+ keyObj.currentKey]/2) + kWidth/2, 
+				50 + 20 * k + 120 * Math.floor(j / keyObj["div"+ keyObj.currentKey]),
+				50, 20, 16, "#cccccc", g_kCd[keyObj["keyCtrl"+ keyCtrlPtn][j][k]]));
 		}
 	}
 
 	// カーソルの作成
 	var cursor = keyconSprite.appendChild(createImg("cursor", "../img/cursor.png", 
-		kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10, 45, 15, 30 ));
+		kWidth/2 - 55 * (keyObj["div"+ keyObj.currentKey]/2) -10, 45, 15, 30 ));
 	
 	// キーボード押下時処理
 	document.onkeydown = function(){
@@ -1244,33 +1339,33 @@ function keyConfigInit(){
 					setKey = 0;
 				}
 				keyCdObj.innerHTML = g_kCd[setKey];
-				keyObj["keyCtrl"+ keyLabel][g_currentj][g_currentk] = setKey;
+				keyObj["keyCtrl"+ keyCtrlPtn][g_currentj][g_currentk] = setKey;
 				g_prevKey = setKey;
 			}
 
 			// 後続に代替キーが存在する場合
-			if(g_currentk < keyObj["keyCtrl"+ keyLabel][g_currentj].length -1){
+			if(g_currentk < keyObj["keyCtrl"+ keyCtrlPtn][g_currentj].length -1){
 				g_currentk++;
 				cursor.style.top = (parseInt(cursor.style.top) + 20) + "px";
 
 			// 他の代替キーが存在せず、次の矢印がある場合
-			}else if(g_currentj < keyObj["keyCtrl"+ keyLabel].length -1){
+			}else if(g_currentj < keyObj["keyCtrl"+ keyCtrlPtn].length -1){
 				g_currentj++;
 				g_currentk = 0;
 
-				if(g_currentj % keyObj["div"+ keyLabel] == 0){
-					cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10) + "px";
+				if(g_currentj % keyObj["div"+ keyObj.currentKey] == 0){
+					cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyObj.currentKey]/2) -10) + "px";
 					cursor.style.top = (parseInt(cursor.style.top) + 120) + "px";
 				}else{
 					cursor.style.left = (parseInt(cursor.style.left) + 55) + "px";
-					cursor.style.top = (50 + 120 * Math.floor(g_currentj / keyObj["div"+ keyLabel])) + "px";
+					cursor.style.top = (50 + 120 * Math.floor(g_currentj / keyObj["div"+ keyObj.currentKey])) + "px";
 				}
 
 			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
 			}else{
 				g_currentj = 0;
 				g_currentk = 0;
-				cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyLabel]/2) -10) + "px";
+				cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyObj.currentKey]/2) -10) + "px";
 				cursor.style.top = "45px";
 			}
 		}

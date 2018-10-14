@@ -19,3 +19,33 @@
 	-webkit-mask-image: url("../img/onigiri_600.png");
 	-webkit-mask-size: contain;
 }
+.giko {
+	mask-image: url("../img/giko_600.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/giko_600.png");
+	-webkit-mask-size: contain;
+}
+.iyo {
+	mask-image: url("../img/iyo_600.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/iyo_600.png");
+	-webkit-mask-size: contain;
+}
+.c {
+	mask-image: url("../img/c_600.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/c_600.png");
+	-webkit-mask-size: contain;
+}
+.morara {
+	mask-image: url("../img/morara_600.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/morara_600.png");
+	-webkit-mask-size: contain;
+}
+.monar {
+	mask-image: url("../img/monar_600.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/monar_600.png");
+	-webkit-mask-size: contain;
+}
