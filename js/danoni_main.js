@@ -1,22 +1,22 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.1.15
+ * Ver 0.1.16
  * 
  * Source by tickle
  * created : 2018/10/08
  * Revised : 2018/10/14
  */
-
+'use strict';
 /**
  * ▽ ソースコーディングルール
  * - 定数・変数名はわかりやすく、名前で判断がつくように。
- * -- 定数　　　： "C_(カテゴリ)_(名前)"の形式。全て英大文字、数字、アンダースコアのみを使用。
- * -- 関数の引数： アンダースコア始まりのキャメル表記。
+ * -- 定数　　　　　： "C_(カテゴリ)_(名前)"の形式。全て英大文字、数字、アンダースコアのみを使用。
+ * -- グローバル変数： 変数の頭に"g_"をつける。
+ * -- 関数の引数　　： アンダースコア始まりのキャメル表記。
  * 
  * - 構造はシンプルに。繰り返しが多いときは関数化を検討する。
  * - コメントは処理単位ごとに簡潔に記述。ただの英訳は極力避ける。
  * - 画面の見取りがわかるように詳細設定やロジックは別関数化し、実行内容を明確にする。
- * 
  * 
  * ▽ 画面の構成
  *  [タイトル]-[オプション]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]
@@ -224,7 +224,7 @@ g_kCd[240] = "CapsLk";
 
 // キー別の設定（一旦ここで定義）
 // ステップゾーンの位置関係は自動化を想定
-var keyObj = {
+var g_keyObj = {
 
 	// 現在の選択キー、選択パターン
 	// - キーとパターンの組み合わせで、ステップゾーンや対応キー等が決まる
@@ -347,7 +347,7 @@ var keyObj = {
  * - イベントリスナー作成時にリスナーキー(key)を発行する
  * - 削除時は発行したリスナーキーを指定して削除する
  */
-var handler = (function(){
+var g_handler = (function(){
 	var events = {},
 	key = 0;
 
@@ -529,9 +529,9 @@ function deleteChildspriteAll(_parentObjName){
 
 	var parentsprite = document.getElementById(_parentObjName);
 	while (parentsprite.hasChildNodes()){
-		handler.removeListener(parentsprite.firstChild.getAttribute("lsnrkey"));
-		handler.removeListener(parentsprite.firstChild.getAttribute("lsnrkeyTS"));
-		handler.removeListener(parentsprite.firstChild.getAttribute("lsnrkeyTE"));
+		g_handler.removeListener(parentsprite.firstChild.getAttribute("lsnrkey"));
+		g_handler.removeListener(parentsprite.firstChild.getAttribute("lsnrkeyTS"));
+		g_handler.removeListener(parentsprite.firstChild.getAttribute("lsnrkeyTE"));
 		parentsprite.removeChild(parentsprite.firstChild);
 	}
 }
@@ -592,7 +592,7 @@ function createButton(_obj, _func){
 		div.style.backgroundColor = _obj.hoverColor;
 		div.style.cursor = "pointer";
 	}
-	var lsnrkeyTS = handler.addListener(div, "touchstart", function(){
+	var lsnrkeyTS = g_handler.addListener(div, "touchstart", function(){
 		div.style.backgroundColor = _obj.hoverColor;
 		div.style.cursor = "pointer";
 	}, false);
@@ -602,13 +602,13 @@ function createButton(_obj, _func){
 		div.style.backgroundColor = _obj.normalColor;
 		div.style.cursor = "default";
 	}
-	var lsnrkeyTE = handler.addListener(div, "touchend", function(){
+	var lsnrkeyTE = g_handler.addListener(div, "touchend", function(){
 		div.style.backgroundColor = _obj.normalColor;
 		div.style.cursor = "default";
 	}, false);
 
 	// ボタンを押したときの動作
-	var lsnrkey = handler.addListener(div, "click", function(){
+	var lsnrkey = g_handler.addListener(div, "click", function(){
 		_func();
 	}, false);
 
@@ -681,9 +681,9 @@ function clearWindow(){
 		/*
 		alert(divRoot.firstChild.getAttribute("lsnrkey"));
 		*/
-		handler.removeListener(divRoot.firstChild.getAttribute("lsnrkey"));
-		handler.removeListener(divRoot.firstChild.getAttribute("lsnrkeyTS"));
-		handler.removeListener(divRoot.firstChild.getAttribute("lsnrkeyTE"));
+		g_handler.removeListener(divRoot.firstChild.getAttribute("lsnrkey"));
+		g_handler.removeListener(divRoot.firstChild.getAttribute("lsnrkeyTS"));
+		g_handler.removeListener(divRoot.firstChild.getAttribute("lsnrkeyTE"));
 		divRoot.removeChild(divRoot.firstChild);
 	}
 
@@ -767,8 +767,8 @@ function titleInit(){
 	g_rootObj = dosConvert(dos);
 	g_headerObj = headerConvert(g_rootObj);
 
-	keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
-	keyObj.currentPtn = 0;
+	g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
+	g_keyObj.currentPtn = 0;
 
 	// 背景の矢印オブジェクトを表示
 	var lblArrow = createArrowEffect("lblArrow", g_headerObj["setColor"][0], (g_sWidth-500)/2, -15, 500, 180);
@@ -904,15 +904,15 @@ function scoreConvert(_dosObj, _keys, _scoreNo){
 	// 矢印群の格納先
 	var obj = {};
 
-	var keyNum = keyObj["chara" + _keys].length;
+	var keyNum = g_keyObj["chara" + _keys].length;
 	obj.data = new Array();
 	var frzName;
 	for(var j=0; j<keyNum; j++){
-		if(_dosObj[keyObj["chara" + _keys][j] + _scoreNo + "_data"] != undefined){
-			obj.data[j] = _dosObj[keyObj["chara" + _keys][j] + _scoreNo + "_data"].split(",");
+		if(_dosObj[g_keyObj["chara" + _keys][j] + _scoreNo + "_data"] != undefined){
+			obj.data[j] = _dosObj[g_keyObj["chara" + _keys][j] + _scoreNo + "_data"].split(",");
 		}
 		
-		frzName = keyObj["chara" + _keys][j].replace("leftdia","frzLdia");
+		frzName = g_keyObj["chara" + _keys][j].replace("leftdia","frzLdia");
 		frzName = frzName.replace("rightdia","frzRdia");
 		frzName = frzName.replace("left","frzLeft");
 		frzName = frzName.replace("down","frzDown");
@@ -1061,8 +1061,8 @@ function createOptionWindow(_sprite){
 		lnkDifficulty.innerHTML = g_headerObj["keyLabels"][g_stateObj.scoreId] + " key / " + g_headerObj["difLabels"][g_stateObj.scoreId];
 		g_stateObj.speed = g_headerObj["initSpeeds"][g_stateObj.scoreId];
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
-		keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
-		keyObj.currentPtn = 0;
+		g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
+		g_keyObj.currentPtn = 0;
 	});
 	optionsprite.appendChild(lnkDifficulty);
 
@@ -1243,11 +1243,11 @@ function keyConfigInit(){
 		hoverColor: C_CLR_SETTING, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		var tempPtn = keyObj.currentPtn + 1;
-		if(keyObj["keyCtrl"+ keyObj.currentKey + "_" + tempPtn] != undefined){
-			keyObj.currentPtn = tempPtn;
+		var tempPtn = g_keyObj.currentPtn + 1;
+		if(g_keyObj["keyCtrl"+ g_keyObj.currentKey + "_" + tempPtn] != undefined){
+			g_keyObj.currentPtn = tempPtn;
 		}else{
-			keyObj.currentPtn = 0;
+			g_keyObj.currentPtn = 0;
 		}
 		clearWindow();
 		keyConfigInit();
@@ -1271,18 +1271,18 @@ function keyConfigInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		if(window.confirm('キーを初期配置に戻します。よろしいですか？')){
-			keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
-			var keyNum = keyObj["chara" + keyObj.currentKey].length;
-			var keyCtrlPtn = keyObj.currentKey + "_" + keyObj.currentPtn;
+			g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
+			var keyNum = g_keyObj["chara" + g_keyObj.currentKey].length;
+			var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 
 			for(var j=0; j<keyNum; j++){
-				for(var k=0;k<keyObj["keyCtrl"+ keyCtrlPtn][j].length;k++){
-					keyObj["keyCtrl"+ keyCtrlPtn][j][k] = keyObj["keyCtrl"+ keyCtrlPtn + "d"][j][k];
-					document.getElementById("keycon" + j + "_" + k).innerHTML = g_kCd[keyObj["keyCtrl"+ keyCtrlPtn][j][k]];
+				for(var k=0;k<g_keyObj["keyCtrl"+ keyCtrlPtn][j].length;k++){
+					g_keyObj["keyCtrl"+ keyCtrlPtn][j][k] = g_keyObj["keyCtrl"+ keyCtrlPtn + "d"][j][k];
+					document.getElementById("keycon" + j + "_" + k).innerHTML = g_kCd[g_keyObj["keyCtrl"+ keyCtrlPtn][j][k]];
 				}
 			}
 			var cursor = document.getElementById("cursor");
-			cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyObj.currentKey]/2) -10) + "px";
+			cursor.style.left = (kWidth/2 - 55 * (g_keyObj["div"+ g_keyObj.currentKey]/2) -10) + "px";
 			cursor.style.top = "45px";
 
 			g_currentj = 0;
@@ -1296,29 +1296,29 @@ function keyConfigInit(){
 	var keyconSprite = createSprite("divRoot","keyconSprite",(g_sWidth-400)/2,100,400,300);
 	var kWidth = parseInt(keyconSprite.style.width);
 	
-	var keyNum = keyObj["chara" + keyObj.currentKey].length;
-	var keyCtrlPtn = keyObj.currentKey + "_" + keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + g_keyObj.currentKey].length;
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 	
 	for(var j=0; j<keyNum; j++){
 	
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		keyconSprite.appendChild(createArrowEffect("arrow" + j, "#cccccc", 
-			55 * ((j % keyObj["div"+ keyObj.currentKey]) - keyObj["div"+ keyObj.currentKey]/2) + kWidth/2, 
-			120 * Math.floor(j / keyObj["div"+ keyObj.currentKey]), 50, 
-			keyObj["stepRtn" + keyCtrlPtn][j]));
+			55 * ((j % g_keyObj["div"+ g_keyObj.currentKey]) - g_keyObj["div"+ g_keyObj.currentKey]/2) + kWidth/2, 
+			120 * Math.floor(j / g_keyObj["div"+ g_keyObj.currentKey]), 50, 
+			g_keyObj["stepRtn" + keyCtrlPtn][j]));
 
 		// 対応キーに応じた値を表示
-		for(var k=0;k<keyObj["keyCtrl"+ keyCtrlPtn][j].length;k++){
+		for(var k=0;k<g_keyObj["keyCtrl"+ keyCtrlPtn][j].length;k++){
 			keyconSprite.appendChild(createDivLabel("keycon" + j + "_" + k, 
-				55 * ((j % keyObj["div"+ keyObj.currentKey]) - keyObj["div"+ keyObj.currentKey]/2) + kWidth/2, 
-				50 + 20 * k + 120 * Math.floor(j / keyObj["div"+ keyObj.currentKey]),
-				50, 20, 16, "#cccccc", g_kCd[keyObj["keyCtrl"+ keyCtrlPtn][j][k]]));
+				55 * ((j % g_keyObj["div"+ g_keyObj.currentKey]) - g_keyObj["div"+ g_keyObj.currentKey]/2) + kWidth/2, 
+				50 + 20 * k + 120 * Math.floor(j / g_keyObj["div"+ g_keyObj.currentKey]),
+				50, 20, 16, "#cccccc", g_kCd[g_keyObj["keyCtrl"+ keyCtrlPtn][j][k]]));
 		}
 	}
 
 	// カーソルの作成
 	var cursor = keyconSprite.appendChild(createImg("cursor", "../img/cursor.png", 
-		kWidth/2 - 55 * (keyObj["div"+ keyObj.currentKey]/2) -10, 45, 15, 30 ));
+		kWidth/2 - 55 * (g_keyObj["div"+ g_keyObj.currentKey]/2) -10, 45, 15, 30 ));
 	
 	// キーボード押下時処理
 	document.onkeydown = function(){
@@ -1339,33 +1339,33 @@ function keyConfigInit(){
 					setKey = 0;
 				}
 				keyCdObj.innerHTML = g_kCd[setKey];
-				keyObj["keyCtrl"+ keyCtrlPtn][g_currentj][g_currentk] = setKey;
+				g_keyObj["keyCtrl"+ keyCtrlPtn][g_currentj][g_currentk] = setKey;
 				g_prevKey = setKey;
 			}
 
 			// 後続に代替キーが存在する場合
-			if(g_currentk < keyObj["keyCtrl"+ keyCtrlPtn][g_currentj].length -1){
+			if(g_currentk < g_keyObj["keyCtrl"+ keyCtrlPtn][g_currentj].length -1){
 				g_currentk++;
 				cursor.style.top = (parseInt(cursor.style.top) + 20) + "px";
 
 			// 他の代替キーが存在せず、次の矢印がある場合
-			}else if(g_currentj < keyObj["keyCtrl"+ keyCtrlPtn].length -1){
+			}else if(g_currentj < g_keyObj["keyCtrl"+ keyCtrlPtn].length -1){
 				g_currentj++;
 				g_currentk = 0;
 
-				if(g_currentj % keyObj["div"+ keyObj.currentKey] == 0){
-					cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyObj.currentKey]/2) -10) + "px";
+				if(g_currentj % g_keyObj["div"+ g_keyObj.currentKey] == 0){
+					cursor.style.left = (kWidth/2 - 55 * (g_keyObj["div"+ g_keyObj.currentKey]/2) -10) + "px";
 					cursor.style.top = (parseInt(cursor.style.top) + 120) + "px";
 				}else{
 					cursor.style.left = (parseInt(cursor.style.left) + 55) + "px";
-					cursor.style.top = (50 + 120 * Math.floor(g_currentj / keyObj["div"+ keyObj.currentKey])) + "px";
+					cursor.style.top = (50 + 120 * Math.floor(g_currentj / g_keyObj["div"+ g_keyObj.currentKey])) + "px";
 				}
 
 			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
 			}else{
 				g_currentj = 0;
 				g_currentk = 0;
-				cursor.style.left = (kWidth/2 - 55 * (keyObj["div"+ keyObj.currentKey]/2) -10) + "px";
+				cursor.style.left = (kWidth/2 - 55 * (g_keyObj["div"+ g_keyObj.currentKey]/2) -10) + "px";
 				cursor.style.top = "45px";
 			}
 		}
