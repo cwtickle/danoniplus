@@ -1,6 +1,6 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.1.18
+ * Ver 0.1.19
  * 
  * Source by tickle
  * created : 2018/10/08
@@ -264,6 +264,29 @@ var g_keyObj = {
 		"oni","left","leftdia","down","space","up","rightdia","right"],
 
 	chara5_2: ["left","down","space","up","right"],
+
+	// カラーパターン
+	color5_0: [0,0,0,0,2],
+	color7_0: [0,1,0,2,0,1,0],
+	color7i_0: [2,2,2,0,0,0,0],
+	color8_0: [0,1,0,2,0,1,0,0],
+	color9A_0: [0,0,0,0,2,3,3,3,3],
+	color9B_0: [1,0,1,0,2,0,1,0,1],
+	color9i_0: [2,2,2,2,2,0,0,0,0],
+	color11_0: [3,3,3,3,0,1,0,2,0,1,0],
+	color11L_0: [3,3,3,3,0,1,0,2,0,1,0],
+	color12_0: [3,3,3,3,2,0,1,0,1,0,1,0],
+	color14_0: [4,3,3,3,3,4,2,0,1,0,1,0,1,0],
+	color17_0: [0,1,0,1,0,1,0,1,2,1,0,1,0,1,0,1,0],
+
+	color5_1: [2,0,0,0,0],
+	color9A_1: [0,0,0,0,2,3,3,3,3],
+	color11_1: [2,3,3,3,3,0,1,0,0,1,0],
+	color11L_1: [3,3,3,3,2,0,1,0,0,1,0],
+	color12_1: [3,3,3,3,2,0,1,0,1,0,1,0],
+	color14_1: [4,3,3,3,3,4,2,0,1,0,1,0,1,0],
+
+	color5_2: [0,0,2,0,0],
 
 	// 基本パターン (矢印回転、AAキャラクタ)
 	// - AAキャラクタの場合、キャラクタ名を指定
@@ -794,6 +817,7 @@ function titleInit(){
 	var dos = document.getElementById("dos").value;
 	g_rootObj = dosConvert(dos);
 	g_headerObj = headerConvert(g_rootObj);
+	keysConvert(g_rootObj);
 
 	g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
 	g_keyObj.currentPtn = 0;
@@ -920,6 +944,74 @@ function headerConvert(_dosObj){
 	// TODO:フリーズアロー色など他のヘッダー情報の分解
 
 	return obj;
+}
+
+/**
+ * 一時的な追加キーの設定
+ * @param {object} _dosObj 
+ */
+function keysConvert(_dosObj){
+
+	var newKey = "";
+
+	if(_dosObj.keyExtraList != undefined){
+		var keyExtraList = _dosObj.keyExtraList.split(",");
+		var tempKeyCtrl = new Array();
+		var tempKeyPtn = new Array();
+
+		for(var j=0; j<keyExtraList.length; j++){
+			newKey = keyExtraList[j];
+
+			if(_dosObj["arrBaseMC" + newKey] != undefined){
+				g_keyObj["color" + newKey + "_0"] = _dosObj["arrBaseMC" + newKey].split(",");
+			}else{
+				alert("新しいキー:" + newKey + "の[arrBaseMC]が未定義です。");
+			}
+			if(_dosObj["headerDat" + newKey] != undefined){
+				g_keyObj["chara" + newKey + "_0"] = _dosObj["headerDat" + newKey].split(",");
+				g_keyObj["chara" + newKey + "_0d"] = _dosObj["headerDat" + newKey].split(",");
+			}else{
+				alert("新しいキー:" + newKey + "の[headerDat]が未定義です。");
+			}
+			if(isNaN(Number(_dosObj["div" + newKey]))){
+				alert("新しいキー:" + newKey + "の[div]が未定義か、数値ではありません。");
+			}else{
+				g_keyObj["div" + newKey + "_0"] = _dosObj["div" + newKey];
+			}
+			if(_dosObj["stepRtn" + newKey] != undefined){
+				g_keyObj["stepRtn" + newKey + "_0"] = _dosObj["stepRtn" + newKey].split(",");
+				g_keyObj["stepRtn" + newKey + "_0d"] = _dosObj["stepRtn" + newKey].split(",");
+				for(var k=0; k<g_keyObj["stepRtn" + newKey + "_0"].length; k++){
+					if(isNaN(Number(g_keyObj["stepRtn" + newKey + "_0"][k]))){
+					}else{
+						g_keyObj["stepRtn" + newKey + "_0"][k] = parseFloat(g_keyObj["stepRtn" + newKey + "_0"][k]);
+						g_keyObj["stepRtn" + newKey + "_0d"][k] = parseFloat(g_keyObj["stepRtn" + newKey + "_0d"][k]);
+					}
+				}
+			}else{
+				alert("新しいキー:" + newKey + "の[stepRtn]が未定義です。");
+			}
+			if(_dosObj["keyCtrl" + newKey] != undefined){
+				tempKeyCtrl = _dosObj["keyCtrl" + newKey].split(",");
+
+				g_keyObj["keyCtrl" + newKey + "_0"] = new Array();
+				g_keyObj["keyCtrl" + newKey + "_0d"] = new Array();
+
+				for(var k=0; k<tempKeyCtrl.length; k++){
+					tempKeyPtn = tempKeyCtrl[k].split("/");
+					g_keyObj["keyCtrl" + newKey + "_0"][k] = new Array();
+					g_keyObj["keyCtrl" + newKey + "_0d"][k] = new Array();
+
+					for(var m=0; m<tempKeyPtn.length; m++){
+						g_keyObj["keyCtrl" + newKey + "_0"][k][m] = tempKeyPtn[m];
+						g_keyObj["keyCtrl" + newKey + "_0d"][k][m] = tempKeyPtn[m];
+					}
+				}
+			}else{
+				alert("新しいキー:" + newKey + "の[keyCtrl]が未定義です。");
+			}
+		}
+	}
 }
 
 /**
@@ -1342,9 +1434,9 @@ function keyConfigInit(){
 		leftCnt = (j >= divideCnt ? j - divideCnt : j);
 		stdPos  = (j >= divideCnt ? leftCnt - (keyNum - divideCnt)/2 : leftCnt - divideCnt / 2);
 		dividePos = (j >= divideCnt ? 1 : 0);
-	
+
 		// キーコンフィグ表示用の矢印・おにぎりを表示
-		keyconSprite.appendChild(createArrowEffect("arrow" + j, "#cccccc", 
+		keyconSprite.appendChild(createArrowEffect("arrow" + j, g_headerObj.setColor[g_keyObj["color" + keyCtrlPtn][j]], 
 			55 * stdPos + kWidth/2, 
 			150 * dividePos, 50, 
 			g_keyObj["stepRtn" + keyCtrlPtn][j]));
