@@ -957,7 +957,7 @@ function titleInit(){
 		}else{
 			var setKey = event.keyCode;
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
+		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40) || (setKey >= 112 && setKey <= 126)){
 			return false;
 		}
 	}
@@ -1213,7 +1213,7 @@ function optionInit(){
 		}else{
 			var setKey = event.keyCode;
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
+		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40) || (setKey >= 112 && setKey <= 126)){
 			return false;
 		}
 	}
@@ -1589,7 +1589,7 @@ function keyConfigInit(){
 				cursor.style.top = "45px";
 			}
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
+		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40) || (setKey >= 112 && setKey <= 126)){
 			return false;
 		}
 	}
@@ -1652,7 +1652,7 @@ function loadingScoreInit(){
 		}else{
 			var setKey = event.keyCode;
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
+		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40) || (setKey >= 112 && setKey <= 126)){
 			return false;
 		}
 	}
@@ -1884,7 +1884,7 @@ function resultInit(){
 		}else{
 			var setKey = event.keyCode;
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
+		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40) || (setKey >= 112 && setKey <= 126)){
 			return false;
 		}
 	}
