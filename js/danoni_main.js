@@ -1,12 +1,17 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.20.0
+ * Ver 0.21.0
  * 
  * Source by tickle
  * created : 2018/10/08
  * Revised : 2018/10/15
  */
 'use strict';
+
+// ショートカット用文字列(↓の文字列を検索することで対称箇所へジャンプできます)
+//  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
+//  シーンジャンプ:Scene
+
 /**
  * ▽ ソースコーディングルール
  * - 定数・変数名はわかりやすく、名前で判断がつくように。
@@ -228,6 +233,7 @@ var g_keyObj = {
 
 	// 現在の選択キー、選択パターン
 	// - キーとパターンの組み合わせで、ステップゾーンや対応キー等が決まる
+	// - 原則、キー×パターンの数だけ設定が必要
 	currentKey: 7,
 	currentPtn: 0,
 
@@ -269,7 +275,7 @@ var g_keyObj = {
 	color5_0: [0,0,0,0,2],
 	color7_0: [0,1,0,2,0,1,0],
 	color7i_0: [2,2,2,0,0,0,0],
-	color8_0: [0,1,0,2,0,1,0,0],
+	color8_0: [0,1,0,2,0,1,0,2],
 	color9A_0: [0,0,0,0,2,3,3,3,3],
 	color9B_0: [1,0,1,0,2,0,1,0,1],
 	color9i_0: [2,2,2,2,2,0,0,0,0],
@@ -295,7 +301,7 @@ var g_keyObj = {
 	stepRtn7i_0: ["giko", "onigiri", "iyo", 0, -90, 90, 180],
 	stepRtn8_0: [0, -45, -90, "onigiri", 90, 135, 180, "onigiri"],
 	stepRtn9A_0: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
-	stepRtn9B_0: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
+	stepRtn9B_0: [45, 0, -45, -90, "onigiri", 90, 135, 180, 225],
 	stepRtn9i_0: ["monar", "giko", "c", "morara", "onigiri", 0, -90, 90, 180],
 	stepRtn11_0: [0, -90, 90, 180, 0, -45, -90, "onigiri", 90, 135, 180],
 	stepRtn11L_0: [0, -90, 90, 180, 0, -45, -90, "onigiri", 90, 135, 180],
@@ -370,7 +376,7 @@ var g_keyObj = {
 	keyCtrl5_0: [[37],[40],[38,0],[39],[32,0]],
 	keyCtrl7_0: [[83],[68,0],[70],[32,0],[74],[75,0],[76]],
 	keyCtrl7i_0: [[90],[88],[67],[37],[40],[38,0],[39]],
-	keyCtrl8_0: [[83],[68,0],[70],[32,0],[74],[75,0],[76],[32,0]],
+	keyCtrl8_0: [[83],[68,0],[70],[32,0],[74],[75,0],[76],[13,0]],
 	keyCtrl9A_0:[[83],[68],[69,82],[70],[32],[74],[75],[73,0],[76]],
 	keyCtrl9B_0:[[65],[83],[68],[70],[32],[74],[75],[76],[187]],
 	keyCtrl9i_0:[[65],[83],[68],[70],[32],[37],[40],[38,0],[39]],
@@ -383,6 +389,7 @@ var g_keyObj = {
 	keyCtrl5_0d: [[37],[40],[38,0],[39],[32,0]],
 	keyCtrl7_0d: [[83],[68,0],[70],[32,0],[74],[75,0],[76]],
 	keyCtrl7i_0d: [[90],[88],[67],[37],[40],[38,0],[39]],
+	keyCtrl8_0d: [[83],[68,0],[70],[32,0],[74],[75,0],[76],[13,0]],
 	keyCtrl9A_0d:[[83],[68],[69,82],[70],[32],[74],[75],[73,0],[76]],
 	keyCtrl9B_0d:[[65],[83],[68],[70],[32],[74],[75],[76],[187]],
 	keyCtrl9i_0d:[[65],[83],[68],[70],[32],[37],[40],[38,0],[39]],
@@ -412,8 +419,13 @@ var g_keyObj = {
 
 	keyCtrl5_2: [[37],[40],[32,0],[38,0],[39]],
 
-	keyCtrl5_2d: [[37],[40],[32,0],[38,0],[39]]
+	keyCtrl5_2d: [[37],[40],[32,0],[38,0],[39]],
+
+	dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
+
+var g_workObj = {};
+var g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 /**
  * イベントハンドラ用オブジェクト
@@ -551,13 +563,10 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate){
 	var div = createDiv(_id, _x, _y, sizeX, _size);
 	div.align = C_ALIGN_CENTER;
 
-	// ブラウザ判定
-	var userAgent = window.navigator.userAgent.toLowerCase();
-
 	// IE/Edgeの場合は色なし版を表示
-	if(userAgent.indexOf('msie') != -1 ||
-		userAgent.indexOf('trident') != -1 ||
-		userAgent.indexOf('edge') != -1) {
+	if(g_userAgent.indexOf('msie') != -1 ||
+		g_userAgent.indexOf('trident') != -1 ||
+		g_userAgent.indexOf('edge') != -1) {
 			div.innerHTML = "<img src='" + charaImg +
 				"' style='width:" + sizeX + "px;height:" + _size +
 				"px;transform:rotate(" + rotate + "deg);' id=" + _id + "img>";
@@ -938,32 +947,40 @@ function headerConvert(_dosObj){
 	var obj = {};
 
 	// 曲名
-	var musics = _dosObj["musicTitle"].split(",");
-	obj["musicTitle"] = musics[0];
-	obj["artistName"] = musics[1];
-	obj["artistUrl"]  = musics[2];
+	var musics = _dosObj.musicTitle.split(",");
+	obj.musicTitle = musics[0];
+	obj.artistName = musics[1];
+	obj.artistUrl  = musics[2];
 
 	// 譜面情報
-	var difs = _dosObj["difData"].split("$");
-	obj["keyLabels"] = new Array();
-	obj["difLabels"] = new Array();
-	obj["initSpeeds"] = new Array();
+	var difs = _dosObj.difData.split("$");
+	obj.keyLabels = new Array();
+	obj.difLabels = new Array();
+	obj.initSpeeds = new Array();
 	for(var j=0; j<difs.length; j++){
 		var difDetails = difs[j].split(",");
-		obj["keyLabels"].push(difDetails[0]);
-		obj["difLabels"].push(difDetails[1]);
-		obj["initSpeeds"].push(difDetails[2]);
+		obj.keyLabels.push(difDetails[0]);
+		obj.difLabels.push(difDetails[1]);
+		obj.initSpeeds.push(difDetails[2]);
 	}
 	// 初期色情報
-	obj["setColor"] = _dosObj["setColor"].split(",");
-	for(var j=0; j<obj["setColor"].length; j++){
-		obj["setColor"][j] = obj["setColor"][j].replace("0x","#");
+	obj.setColor = _dosObj.setColor.split(",");
+	for(var j=0; j<obj.setColor.length; j++){
+		obj.setColor[j] = obj.setColor[j].replace("0x","#");
 	}
 
 	// 製作者表示
-	var tunings = _dosObj["tuning"].split(",");
-	obj["tuning"] = tunings[0];
-	obj["creatorUrl"] = tunings[1];
+	var tunings = _dosObj.tuning.split(",");
+	obj.tuning = tunings[0];
+	obj.creatorUrl = tunings[1];
+
+	// 無音のフレーム数
+	obj.blankFrame = 200;
+	if(isNaN(parseFloat(_dosObj.blankFrame))){
+	}else{
+		obj.blankFrame = parseFloat(_dosObj.blankFrame);
+	}
+	
 
 	// TODO:フリーズアロー色など他のヘッダー情報の分解
 
@@ -998,7 +1015,7 @@ function keysConvert(_dosObj){
 				alert("新しいキー:" + newKey + "の[headerDat]が未定義です。");
 			}
 			if(isNaN(Number(_dosObj["div" + newKey]))){
-				alert("新しいキー:" + newKey + "の[div]が未定義か、数値ではありません。");
+				g_keyObj["div" + newKey + "_0"] = g_keyObj["chara" + newKey + "_0"].length;
 			}else{
 				g_keyObj["div" + newKey + "_0"] = _dosObj["div" + newKey];
 			}
@@ -1014,6 +1031,14 @@ function keysConvert(_dosObj){
 				}
 			}else{
 				alert("新しいキー:" + newKey + "の[stepRtn]が未定義です。");
+			}
+			if(_dosObj["pos" + newKey] != undefined){
+				g_keyObj["pos" + newKey + "_0"] = _dosObj["pos" + newKey].split(",");
+			}else{
+				g_keyObj["pos" + newKey + "_0"] = new Array();
+				for(var k=0; k<g_keyObj["chara" + newKey + "_0"].length; k++){
+					g_keyObj["pos" + newKey + "_0"][k] = k;
+				}
 			}
 			if(_dosObj["keyCtrl" + newKey] != undefined){
 				tempKeyCtrl = _dosObj["keyCtrl" + newKey].split(",");
@@ -1038,63 +1063,6 @@ function keysConvert(_dosObj){
 	}
 }
 
-/**
- * 譜面データの分解
- * @param {object} _dosObj 
- * @param {string} _scoreNo
- */
-function scoreConvert(_dosObj, _scoreNo){
-
-	// 矢印群の格納先
-	var obj = {};
-
-	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
-	obj.data = new Array();
-	var frzName;
-	var tmpData;
-	for(var j=0; j<keyNum; j++){
-		if(_dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"] != undefined){
-			tmpData = _dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"].replace("\r","");
-			tmpData = tmpData.replace("\n","");
-			obj.data[j] = tmpData.split(",");
-		}
-		
-		frzName = g_keyObj["chara" + keyCtrlPtn][j].replace("leftdia","frzLdia");
-		frzName = frzName.replace("rightdia","frzRdia");
-		frzName = frzName.replace("left","frzLeft");
-		frzName = frzName.replace("down","frzDown");
-		frzName = frzName.replace("up","frzUp");
-		frzName = frzName.replace("right","frzRight");
-		frzName = frzName.replace("space","frzSpace");
-		frzName = frzName.replace("iyo","frzIyo");
-		frzName = frzName.replace("gor","frzGor");
-		frzName = frzName.replace("oni","foni");
-
-		if(_dosObj[frzName + _scoreNo + "_data"] != undefined){
-			tmpData = _dosObj[frzName + _scoreNo + "_data"].replace("\r","");
-			tmpData = tmpData.replace("\n","");
-			obj.data[j + keyNum] = _dosObj[frzName + _scoreNo + "_data"].split(",");
-		}
-		
-	}
-
-	var speedFooter = (g_keyObj.currentKey == "5" ? "_data" : "_change");
-	if(_dosObj["speed" + _scoreNo + "_" + speedFooter] != undefined){
-		obj["speedData"] = _dosObj["speed" + _scoreNo + "_" + speedFooter].split(",");
-	}
-	if(_dosObj["boost_" + _scoreNo + "data"] != undefined){
-		obj["boostData"] = _dosObj["boost" + _scoreNo + "_data"].split(",");
-	}
-	if(_dosObj["color_" + _scoreNo + "data"] != undefined){
-		obj["colorData"] = _dosObj["color" + _scoreNo + "_data"].split(",");
-	}
-	if(_dosObj["acolor_" + _scoreNo + "data"] != undefined){
-		obj["acolorData"] = _dosObj["acolor" + _scoreNo + "_data"].split(",");
-	}
-
-	return obj;
-}
 
 /*-----------------------------------------------------------*/
 /* Scene : OPTION [lime] */
@@ -1353,7 +1321,7 @@ function keyConfigInit(){
 	"<span style='color:#6666ff;font-size:40px;'>K</span>EY<span style='color:#ff6666;font-size:40px;'>C</span>ONFIG", 0, 15);
 	divRoot.appendChild(lblTitle);
 
-	var kcDesc = createDivLabel("kcDesc", 0, 65, g_sWidth, 20, 16, C_CLR_TITLE,
+	var kcDesc = createDivLabel("kcDesc", 0, 65, g_sWidth, 20, 14, C_CLR_TITLE,
 		"[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]");
 	kcDesc.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcDesc);
@@ -1490,11 +1458,16 @@ function keyConfigInit(){
 
 	
 	// キーボード押下時処理
-	document.onkeydown = function(){
+	document.onkeydown = function(evt){
 		var keyCdObj = document.getElementById("keycon" + g_currentj + "_" + g_currentk);
 		var cursor = document.getElementById("cursor");
 
-		var setKey = event.keyCode;
+		// ブラウザ判定
+		if(g_userAgent.indexOf("firefox") != -1){
+			var setKey = evt.which;
+		}else{
+			var setKey = event.keyCode;
+		}
 
 		// 全角切替、BackSpace、Deleteキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -1575,8 +1548,8 @@ function loadingScoreInit(){
 		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
 	}
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader);
-
-	alert(g_scoreObj.data[0]);
+	var finalFrame = getFinalFrame(g_scoreObj) + g_headerObj.blankFrame;
+	alert(finalFrame);
 
 	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
 	var btnBack = createButton({
@@ -1596,6 +1569,144 @@ function loadingScoreInit(){
 		optionInit();
 	});
 	divRoot.appendChild(btnBack);
+}
+
+/**
+ * 譜面データの分解
+ * @param {object} _dosObj 
+ * @param {string} _scoreNo
+ */
+function scoreConvert(_dosObj, _scoreNo){
+
+	// 矢印群の格納先
+	var obj = {};
+
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	obj.arrowData = new Array();
+	obj.frzData = new Array();
+	var frzName;
+	var tmpData;
+	for(var j=0, k=0; j<keyNum; j++){
+
+		// 矢印データの分解
+		if(_dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"] != undefined){
+			tmpData = _dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"].replace("\r","");
+			tmpData = tmpData.replace("\n","");
+
+			if(tmpData != undefined){
+				obj.arrowData[j] = new Array();
+				obj.arrowData[j] = tmpData.split(",");
+				for(k=0; k<obj.arrowData[j].length; k++){
+					obj.arrowData[j][k] = parseFloat(obj.arrowData[j][k]) + parseFloat(g_stateObj.adjustment);
+				}
+			}
+		}
+		
+		// 矢印名からフリーズアロー名への変換
+		frzName = g_keyObj["chara" + keyCtrlPtn][j].replace("leftdia","frzLdia");
+		frzName = frzName.replace("rightdia","frzRdia");
+		frzName = frzName.replace("left","frzLeft");
+		frzName = frzName.replace("down","frzDown");
+		frzName = frzName.replace("up","frzUp");
+		frzName = frzName.replace("right","frzRight");
+		frzName = frzName.replace("space","frzSpace");
+		frzName = frzName.replace("iyo","frzIyo");
+		frzName = frzName.replace("gor","frzGor");
+		frzName = frzName.replace("oni","foni");
+
+		// フリーズアローデータの分解
+		if(_dosObj[frzName + _scoreNo + "_data"] != undefined){
+			tmpData = _dosObj[frzName + _scoreNo + "_data"].replace("\r","");
+			tmpData = tmpData.replace("\n","");
+
+			if(tmpData != undefined){
+				obj.frzData[j] = new Array();
+				obj.frzData[j] = tmpData.split(",");
+				for(k=0; k<obj.frzData[j].length; k++){
+					obj.frzData[j][k] = parseFloat(obj.frzData[j][k]) + parseFloat(g_stateObj.adjustment);
+				}
+			}
+		}
+	}
+
+	// 速度変化・色変化データの分解
+	var speedFooter = (g_keyObj.currentKey == "5" ? "_data" : "_change");
+	if(_dosObj["speed" + _scoreNo + "_" + speedFooter] != undefined){
+		obj.speedData = _dosObj["speed" + _scoreNo + "_" + speedFooter].split(",");
+		for(k=0; k<obj.speedData.length; k+=2){
+			obj.speedData[k] = parseFloat(obj.speedData[k]) + parseFloat(g_stateObj.adjustment);
+			obj.speedData[k+1] = parseFloat(obj.speedData[k+1]);
+		}
+	}
+	if(_dosObj["boost_" + _scoreNo + "data"] != undefined){
+		obj.boostData = _dosObj["boost" + _scoreNo + "_data"].split(",");
+		for(k=0; k<obj.boostData.length; k+=2){
+			obj.boostData[k] = parseFloat(obj.boostData[k]) + parseFloat(g_stateObj.adjustment);
+			obj.boostData[k+1] = parseFloat(obj.boostData[k+1]);
+		}
+	}
+	if(_dosObj["color_" + _scoreNo + "data"] != undefined){
+		obj.colorData = _dosObj["color" + _scoreNo + "_data"].split(",");
+		for(k=0; k<obj.colorData.length; k+=3){
+			obj.colorData[k] = parseFloat(obj.colorData[k]) + parseFloat(g_stateObj.adjustment);
+			obj.colorData[k+1] = parseFloat(obj.colorData[k+1]);
+		}
+	}
+	if(_dosObj["acolor_" + _scoreNo + "data"] != undefined){
+		obj.acolorData = _dosObj["acolor" + _scoreNo + "_data"].split(",");
+		for(k=0; k<obj.acolorData.length; k+=3){
+			obj.acolorData[k] = parseFloat(obj.acolorData[k]) + parseFloat(g_stateObj.adjustment);
+			obj.acolorData[k+1] = parseFloat(obj.acolorData[k+1]);
+		}
+	}
+
+	// 歌詞データの分解
+	if(_dosObj["word_" + _scoreNo + "data"] != undefined){
+		tmpData = _dosObj["word_" + _scoreNo + "data"].replace("\r","");
+		tmpData = tmpData.replace("\n","");
+		obj.wordData = new Array();
+
+		if(tmpData != undefined){
+			var tmpWordData = tmpData.split(",");
+			for(k=0; k<tmpWordData.length; k+=3){
+				tmpWordData[k] = parseFloat(tmpWordData[k]) + parseFloat(g_stateObj.adjustment);
+				tmpWordData[k+1] = parseFloat(tmpWordData[k+1]);
+
+				if(obj.wordData[tmpWordData[k]] != undefined){
+					obj.wordData[tmpWordData[k]] = new Array();
+				}
+				obj.wordData[tmpWordData[k]].push(tmpWordData[k+1],tmpWordData[k+2]);
+			}
+		}
+	}
+
+	return obj;
+}
+
+/**
+ * 最終フレーム数の取得
+ * @param {object} _dataObj 
+ */
+function getFinalFrame(_dataObj){
+	
+	var tmpFinalNum = 0;
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	
+	for(var j=0; j<keyNum; j++){
+		if(_dataObj.arrowData[j] != undefined){
+			if(_dataObj.arrowData[j][_dataObj.arrowData[j].length -1] > tmpFinalNum){
+				tmpFinalNum = _dataObj.arrowData[j][_dataObj.arrowData[j].length -1];
+			}
+		}
+		if(_dataObj.frzData[j] != undefined){
+			if(_dataObj.frzData[j][_dataObj.frzData[j].length -1] > tmpFinalNum){
+				tmpFinalNum = _dataObj.frzData[j][_dataObj.frzData[j].length -1];
+			}
+		}
+	}
+	return tmpFinalNum;
 }
 
 /*-----------------------------------------------------------*/
