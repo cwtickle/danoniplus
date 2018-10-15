@@ -1,6 +1,6 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.21.0
+ * Ver 0.21.1
  * 
  * Source by tickle
  * created : 2018/10/08
@@ -913,7 +913,18 @@ function titleInit(){
 	});
 	divRoot.appendChild(lnkArtist);
 
-	
+	// キー操作イベント（デフォルト）
+	document.onkeydown = function(evt){
+		// ブラウザ判定
+		if(g_userAgent.indexOf("firefox") != -1){
+			var setKey = evt.which;
+		}else{
+			var setKey = event.keyCode;
+		}
+		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
+			return false;
+		}
+	}
 }
 
 /**
@@ -1145,6 +1156,19 @@ function optionInit(){
 		loadingScoreInit();
 	});
 	divRoot.appendChild(btnPlay);
+
+	// キー操作イベント（デフォルト）
+	document.onkeydown = function(evt){
+		// ブラウザ判定
+		if(g_userAgent.indexOf("firefox") != -1){
+			var setKey = evt.which;
+		}else{
+			var setKey = event.keyCode;
+		}
+		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
+			return false;
+		}
+	}
 }
 
 
@@ -1517,6 +1541,9 @@ function keyConfigInit(){
 				cursor.style.top = "45px";
 			}
 		}
+		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
+			return false;
+		}
 	}
 }
 
@@ -1569,6 +1596,19 @@ function loadingScoreInit(){
 		optionInit();
 	});
 	divRoot.appendChild(btnBack);
+
+	// キー操作イベント（デフォルト）
+	document.onkeydown = function(evt){
+		// ブラウザ判定
+		if(g_userAgent.indexOf("firefox") != -1){
+			var setKey = evt.which;
+		}else{
+			var setKey = event.keyCode;
+		}
+		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
+			return false;
+		}
+	}
 }
 
 /**
@@ -1788,6 +1828,19 @@ function resultInit(){
 		// TODO:メイン画面への遷移
 	});
 	divRoot.appendChild(btnRetry);
+
+	// キー操作イベント（デフォルト）
+	document.onkeydown = function(evt){
+		// ブラウザ判定
+		if(g_userAgent.indexOf("firefox") != -1){
+			var setKey = evt.which;
+		}else{
+			var setKey = event.keyCode;
+		}
+		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
+			return false;
+		}
+	}
 }
 
 /*-----------------------------------------------------------*/
