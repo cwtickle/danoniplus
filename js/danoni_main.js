@@ -427,6 +427,8 @@ var g_keyObj = {
 var g_workObj = {};
 var g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
+var g_audio = new Audio();
+
 /**
  * イベントハンドラ用オブジェクト
  * 参考: http://webkatu.com/remove-eventlistener/
@@ -827,25 +829,6 @@ function titleInit(){
 	lblTitle.style.zIndex = 1;
 	divRoot.appendChild(lblTitle);
 
-	// ボタン描画
-	var btnStart = createButton({
-		id: "btnStart", 
-		name: "Click Here!!", 
-		x: 0, 
-		y: g_sHeight-100, 
-		width: g_sWidth, 
-		height: C_BTN_HEIGHT, 
-		fontsize: C_LBL_TITLESIZE,
-		normalColor: C_CLR_DEFAULT, 
-		hoverColor: C_CLR_DEFHOVER, 
-		align: C_ALIGN_CENTER
-	}, function(){
-		clearWindow();
-		optionInit();
-	});
-	btnStart.style.zIndex = 1;
-	divRoot.appendChild(btnStart);
-
 	// 譜面データの読み込み
 	var dos = document.getElementById("dos").value;
 	g_rootObj = dosConvert(dos);
@@ -878,6 +861,59 @@ function titleInit(){
 	var titlefontsize = 64 * (12 / g_headerObj["musicTitle"].length);
 	createLabel(l1ctx, g_headerObj["musicTitle"], g_sWidth/2, g_sHeight/2, 
 		titlefontsize, "Century Gothic", grd, C_ALIGN_CENTER);
+
+	// オーディオ読込テスト
+	g_audio.src = "../music/" + g_headerObj.musicUrl;
+	g_audio.load();
+	
+	if(g_audio.readyState == 4){
+		// audioの読み込みが終わった後の処理
+
+		// ボタン描画
+		var btnStart = createButton({
+			id: "btnStart", 
+			name: "Click Here!!", 
+			x: 0, 
+			y: g_sHeight-100, 
+			width: g_sWidth, 
+			height: C_BTN_HEIGHT, 
+			fontsize: C_LBL_TITLESIZE,
+			normalColor: C_CLR_DEFAULT, 
+			hoverColor: C_CLR_DEFHOVER, 
+			align: C_ALIGN_CENTER
+		}, function(){
+			clearWindow();
+			optionInit();
+		});
+		btnStart.style.zIndex = 1;
+		divRoot.appendChild(btnStart);
+	}else{
+		// 読込中の状態
+		g_audio.addEventListener('canplaythrough', (function(){
+			return function f(){
+				g_audio.removeEventListener('canplaythrough',f,false);
+				
+				// ボタン描画
+				var btnStart = createButton({
+					id: "btnStart", 
+					name: "Click Here!!", 
+					x: 0, 
+					y: g_sHeight-100, 
+					width: g_sWidth, 
+					height: C_BTN_HEIGHT, 
+					fontsize: C_LBL_TITLESIZE,
+					normalColor: C_CLR_DEFAULT, 
+					hoverColor: C_CLR_DEFHOVER, 
+					align: C_ALIGN_CENTER
+				}, function(){
+					clearWindow();
+					optionInit();
+				});
+				btnStart.style.zIndex = 1;
+				divRoot.appendChild(btnStart);
+			}
+		})(),false);
+	}
 
 	// 製作者表示
 	var lnkMaker = createButton({
@@ -992,6 +1028,10 @@ function headerConvert(_dosObj){
 		obj.blankFrame = parseFloat(_dosObj.blankFrame);
 	}
 	
+	// 楽曲URL
+	if(_dosObj.musicUrl != undefined){
+		obj.musicUrl = _dosObj.musicUrl;
+	}
 
 	// TODO:フリーズアロー色など他のヘッダー情報の分解
 
@@ -1101,6 +1141,8 @@ function optionInit(){
 	// オプションボタン用の設置
 	createOptionWindow("divRoot");
 
+//	g_audio.play();
+
 	// 戻るボタン描画
 	var btnBack = createButton({
 		id: "btnBack", 
@@ -1115,6 +1157,8 @@ function optionInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		// タイトル画面へ戻る
+//		g_audio.pause();
+//		g_audio.currentTime = 0;
 		clearWindow();
 		titleInit();
 	});
@@ -1134,6 +1178,8 @@ function optionInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		// キーコンフィグ画面へ遷移
+//		g_audio.pause();
+//		g_audio.currentTime = 0;
 		clearWindow();
 		keyConfigInit();
 	});
@@ -1152,6 +1198,8 @@ function optionInit(){
 		hoverColor: C_CLR_NEXT, 
 		align: C_ALIGN_CENTER
 	}, function(){
+//		g_audio.pause();
+//		g_audio.currentTime = 0;
 		clearWindow();
 		loadingScoreInit();
 	});
@@ -1576,7 +1624,6 @@ function loadingScoreInit(){
 	}
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader);
 	var finalFrame = getFinalFrame(g_scoreObj) + g_headerObj.blankFrame;
-	alert(finalFrame);
 
 	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
 	var btnBack = createButton({
