@@ -1,10 +1,10 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.21.2
+ * Ver 0.22.0
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/15
+ * Revised : 2018/10/16
  */
 'use strict';
 
@@ -1027,6 +1027,11 @@ function headerConvert(_dosObj){
 	}else{
 		obj.blankFrame = parseFloat(_dosObj.blankFrame);
 	}
+
+	// フェードインフレーム数
+	if(_dosObj.startFrame != undefined){
+		obj.startFrame = parseInt(_dosObj.startFrame);
+	}
 	
 	// 楽曲URL
 	if(_dosObj.musicUrl != undefined){
@@ -1613,8 +1618,6 @@ function loadingScoreInit(){
 	var l0ctx = layer0.getContext("2d");
 	var layer1 = document.getElementById("layer1");
 	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
 	var divRoot = document.getElementById("divRoot");
 
 	// 譜面データの読み込み
@@ -1623,7 +1626,19 @@ function loadingScoreInit(){
 		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
 	}
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader);
-	var finalFrame = getFinalFrame(g_scoreObj) + g_headerObj.blankFrame;
+
+	// 最終フレーム数の取得
+	var lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
+
+	// 開始フレーム数の取得(フェードイン加味)
+	g_scoreObj.frameNum = getStartFrame(lastFrame);
+
+	// フレームごとの速度を取得（配列形式）
+	var speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
+
+	// Motionオプション適用時の矢印別の速度を取得（配列形式）
+	var motionOnFrame = setMotionOnFrame();
+
 
 	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
 	var btnBack = createButton({
@@ -1775,25 +1790,107 @@ function scoreConvert(_dosObj, _scoreNo){
  * 最終フレーム数の取得
  * @param {object} _dataObj 
  */
-function getFinalFrame(_dataObj){
+function getLastFrame(_dataObj){
 	
-	var tmpFinalNum = 0;
+	var tmpLastNum = 0;
 	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 	
 	for(var j=0; j<keyNum; j++){
 		if(_dataObj.arrowData[j] != undefined){
-			if(_dataObj.arrowData[j][_dataObj.arrowData[j].length -1] > tmpFinalNum){
-				tmpFinalNum = _dataObj.arrowData[j][_dataObj.arrowData[j].length -1];
+			if(_dataObj.arrowData[j][_dataObj.arrowData[j].length -1] > tmpLastNum){
+				tmpLastNum = _dataObj.arrowData[j][_dataObj.arrowData[j].length -1];
 			}
 		}
 		if(_dataObj.frzData[j] != undefined){
-			if(_dataObj.frzData[j][_dataObj.frzData[j].length -1] > tmpFinalNum){
-				tmpFinalNum = _dataObj.frzData[j][_dataObj.frzData[j].length -1];
+			if(_dataObj.frzData[j][_dataObj.frzData[j].length -1] > tmpLastNum){
+				tmpLastNum = _dataObj.frzData[j][_dataObj.frzData[j].length -1];
 			}
 		}
 	}
-	return tmpFinalNum;
+	return tmpLastNum;
+}
+
+/**
+ * 開始フレームの取得
+ * @param {number} _lastFrame 
+ */
+function getStartFrame(_lastFrame){
+	var frameNum = 0;
+	if(g_headerObj.startFrame != undefined){
+		frameNum = g_headerObj.startFrame;
+	}
+	if(_lastFrame >= g_headerObj.startFrame){
+//		frameNum = Math.round(fadePos/100 * (_lastFrame - frameNum)) + frameNum;
+	}
+	return frameNum;
+}
+
+/**
+ * 各フレームごとの速度を格納
+ * @param {object} _speedData 
+ * @param {number} _lastFrame 
+ */
+function setSpeedOnFrame(_speedData, _lastFrame){
+
+	var speedOnFrame = new Array();
+	var currentSpeed = g_stateObj.speed * 2;
+
+	for(var frm=0, s=0; frm<=_lastFrame; frm++){
+		if(_speedData != undefined && frm == _speedData[s]){
+			currentSpeed = _speedData[s+1] * g_stateObj.speed * 2;
+			s+=2;
+		}else{
+			speedOnFrame[frm] = currentSpeed;
+		}
+	}
+	return speedOnFrame;
+}
+
+/**
+ * Motionオプション適用時の矢印別の速度設定
+ * - 配列の数字は小さいほどステップゾーンに近いことを示す。
+ * - 16がステップゾーン上、0～15は矢印の枠外管理用
+ */
+function setMotionOnFrame(){
+
+	var motionOnFrame = new Array();
+
+	// 矢印が表示される最大フレーム数
+	var motionLastFrame = g_sHeight * 20;
+	var brakeLastFrame  = g_sHeight / 2;
+
+	for(var j=0; j<=motionLastFrame; j++){
+		motionOnFrame[j] = 0;
+	}
+
+	if(g_stateObj.motion == "OFF"){
+	}else if(g_stateObj.motion == "Boost"){
+		// ステップゾーンに近づくにつれて加速量を大きくする
+		for(var j=16; j<85; j++){
+			motionOnFrame[j] = (85 - j) * g_stateObj.speed * 2 / 50;
+		}
+	}else if(g_stateObj.motion == "Brake"){
+		// 初期は+2x、ステップゾーンに近づくにつれて加速量を下げる
+		for(var j=20; j<34; j++){
+			motionOnFrame[j] = (j - 15) * 4 / 14;
+		}
+		for(var j=34; j<=brakeLastFrame; j++){
+			motionOnFrame[j] = 4;
+		}
+	}
+	
+	return motionOnFrame;
+}
+
+/**
+ * 矢印・フリーズアロー格納処理
+ * @param {object} _dataObj 
+ * @param {object} _speedOnFrame 
+ * @param {object} _motionOnFrame 
+ */
+function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame){
+
 }
 
 /*-----------------------------------------------------------*/
