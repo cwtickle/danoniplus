@@ -89,6 +89,9 @@ var C_IMG_C = "../img/c_600.png";
 var C_IMG_MORARA = "../img/morara_600.png";
 var C_IMG_MONAR = "../img/monar_600.png";
 
+// Motionオプション配列の基準位置
+var C_MOTION_STD_POS = 15;
+
 // 譜面データ持ち回り用
 var g_rootObj = {};
 var g_headerObj = {};
@@ -105,6 +108,11 @@ var g_stateObj = {
 // サイズ(後で指定)
 var g_sWidth;
 var g_sHeight;
+
+// ステップゾーン位置、到達距離(後で指定)
+var C_STEP_Y = 70;
+var g_stepY;
+var g_distY;
 
 // キーコンフィグカーソル
 var g_currentj = 0;
@@ -1032,6 +1040,14 @@ function headerConvert(_dosObj){
 	if(_dosObj.startFrame != undefined){
 		obj.startFrame = parseInt(_dosObj.startFrame);
 	}
+
+	// ステップゾーン位置
+	if(isNaN(parseFloat(_dosObj.stepY))){
+		g_stepY = C_STEP_Y;
+	}else{
+		g_stepY = parseFloat(_dosObj.stepY);
+	}
+	g_distY = g_sHeight - g_stepY;
 	
 	// 楽曲URL
 	if(_dosObj.musicUrl != undefined){
@@ -1631,7 +1647,7 @@ function loadingScoreInit(){
 	var lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
 
 	// 開始フレーム数の取得(フェードイン加味)
-	g_scoreObj.frameNum = getStartFrame(lastFrame);
+	g_scoreObj.frameNum = getStartFrame(lastFrame) + g_headerObj.blankFrame;
 
 	// フレームごとの速度を取得（配列形式）
 	var speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
@@ -1639,6 +1655,10 @@ function loadingScoreInit(){
 	// Motionオプション適用時の矢印別の速度を取得（配列形式）
 	var motionOnFrame = setMotionOnFrame();
 
+	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
+	var arrivalFrame = getFirstArrivalFrame(g_scoreObj.frameNum, speedOnFrame, motionOnFrame);
+	
+	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
 
 	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
 	var btnBack = createButton({
@@ -1850,7 +1870,7 @@ function setSpeedOnFrame(_speedData, _lastFrame){
 /**
  * Motionオプション適用時の矢印別の速度設定
  * - 配列の数字は小さいほどステップゾーンに近いことを示す。
- * - 16がステップゾーン上、0～15は矢印の枠外管理用
+ * - 15がステップゾーン上、0～14は矢印の枠外管理用
  */
 function setMotionOnFrame(){
 
@@ -1866,16 +1886,16 @@ function setMotionOnFrame(){
 
 	if(g_stateObj.motion == "OFF"){
 	}else if(g_stateObj.motion == "Boost"){
-		// ステップゾーンに近づくにつれて加速量を大きくする
-		for(var j=16; j<85; j++){
-			motionOnFrame[j] = (85 - j) * g_stateObj.speed * 2 / 50;
+		// ステップゾーンに近づくにつれて加速量を大きくする (16 → 85)
+		for(var j=C_MOTION_STD_POS+1; j<C_MOTION_STD_POS+70; j++){
+			motionOnFrame[j] = (C_MOTION_STD_POS+70 - j) * g_stateObj.speed * 2 / 50;
 		}
 	}else if(g_stateObj.motion == "Brake"){
-		// 初期は+2x、ステップゾーンに近づくにつれて加速量を下げる
-		for(var j=20; j<34; j++){
+		// 初期は+2x、ステップゾーンに近づくにつれて加速量を下げる (20 → 34)
+		for(var j=C_MOTION_STD_POS+5; j<C_MOTION_STD_POS+19; j++){
 			motionOnFrame[j] = (j - 15) * 4 / 14;
 		}
-		for(var j=34; j<=brakeLastFrame; j++){
+		for(var j=C_MOTION_STD_POS+19; j<=brakeLastFrame; j++){
 			motionOnFrame[j] = 4;
 		}
 	}
@@ -1884,13 +1904,169 @@ function setMotionOnFrame(){
 }
 
 /**
+ * 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
+ * @param {number} _startFrame 
+ * @param {object} _speedOnFrame 
+ * @param {object} _motionOnFrame 
+ */
+function getFirstArrivalFrame(_startFrame, _speedOnFrame, _motionOnFrame){
+	var startY = 0;
+	var frm = _startFrame;
+	var motionFrm = C_MOTION_STD_POS;
+
+	while(g_distY - startY > 0){
+		startY += _speedOnFrame[frm];
+
+		if(_speedOnFrame[frm]!=0){
+			startY += _motionOnFrame[motionFrm];
+			motionFrm++;
+		}
+		frm++;
+	}
+	return frm;
+}
+
+/**
  * 矢印・フリーズアロー格納処理
  * @param {object} _dataObj 
  * @param {object} _speedOnFrame 
  * @param {object} _motionOnFrame 
+ * @param {number} _firstArrivalFrame
  */
-function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame){
+function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame){
 
+	var startPoint = new Array();
+	var frzStartPoint = new Array();
+
+	g_workObj.mkArrow = new Array();
+
+	/**	矢印の移動距離 */
+	g_workObj.initY = new Array();
+	/** 矢印がステップゾーンに到達するまでのフレーム数 */
+	g_workObj.arrivalFrame = new Array();
+	/** Motionの適用フレーム数 */
+	g_workObj.motionFrame = new Array();
+
+	var spdNext = Infinity;
+	var spdPrev = 0;
+	var spdk;
+	var lastk;
+	var tmpObj;
+	var arrowArrivalFrm;
+	var frmPrev;
+
+	for(var j=0; j<_dataObj.arrowData.length; j++){
+
+		// 矢印の出現フレーム数計算
+		if(_dataObj.arrowData[j] != undefined){
+
+			startPoint[j] = new Array();
+			if(_dataObj.speedData != undefined){
+				spdk = _dataObj.speedData.length -2;
+				spdPrev = _dataObj.speedData[spdk];
+			}else{
+				spdPrev = 0;
+			}
+			spdNext = Infinity;
+
+			// 最後尾のデータから計算して格納
+			lastk = _dataObj.arrowData[j].length -1;
+			arrowArrivalFrm = _dataObj.arrowData[j][lastk];
+			tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+			startPoint[j][lastk] = tmpObj.frm;
+			frmPrev = tmpObj.frm;
+			g_workObj.initY[frmPrev] = tmpObj.startY;
+			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+			g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+
+			if(g_workObj.mkArrow[startPoint[j][lastk]] == undefined){
+				g_workObj.mkArrow[startPoint[j][lastk]] = new Array();
+			}
+			g_workObj.mkArrow[startPoint[j][lastk]].push(j);
+
+			for(var k=lastk -1; k>=0; k--){
+				arrowArrivalFrm = _dataObj.arrowData[j][k];
+
+				// 矢印の出現位置が開始前の場合は除外
+				if(arrowArrivalFrm < _firstArrivalFrame){
+					break;
+
+				// 最初から最後まで同じスピードのときは前回のデータを流用
+				}else if((arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev] > spdPrev)
+					&& arrowArrivalFrm < spdNext){
+
+					var tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
+					startPoint[j][k] = tmpFrame;
+					g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
+					g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
+					g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
+
+				}else{
+					// 速度変化が間に入るときは再計算
+					if(arrowArrivalFrm < spdPrev){
+						spdk -= 2;
+						spdNext = spdPrev;
+						spdPrev = _dataObj.speedData[spdk];
+
+						tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+						startPoint[j][k] = tmpObj.frm;
+						frmPrev = tmpObj.frm;
+						g_workObj.initY[frmPrev] = tmpObj.startY;
+						g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+						g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+
+					}else{
+						tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+						startPoint[j][k] = tmpObj.frm;
+						frmPrev = tmpObj.frm;
+						g_workObj.initY[frmPrev] = tmpObj.startY;
+						g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+						g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+					}
+				}
+
+				// 矢印の出現タイミングを保存
+				if(startPoint[j][k] >= _firstArrivalFrame){
+					if(g_workObj.mkArrow[startPoint[j][k]] == undefined){
+						g_workObj.mkArrow[startPoint[j][k]] = new Array();
+					}
+					g_workObj.mkArrow[startPoint[j][k]].push(j);
+				}
+			}
+		}
+	}
+}
+
+/**
+ * ステップゾーン到達地点から逆算して開始フレームを取得
+ * @param {number} _frame 
+ * @param {object} _speedOnFrame 
+ * @param {object} _motionOnFrame 
+ */
+function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame){
+
+	var obj = {
+		frm: _frame,
+		startY: 0,
+		arrivalFrm: 0,
+		motionFrm: C_MOTION_STD_POS
+	};
+
+	while(g_distY - obj.startY > 0){
+		obj.startY += _speedOnFrame[obj.frm];
+
+		if(_speedOnFrame[obj.frm]!=0){
+			obj.startY += _motionOnFrame[obj.motionFrm];
+			obj.motionFrm++;
+		}
+		obj.frm--;
+		obj.arrivalFrm++;
+	}
+
+	return obj;
 }
 
 /*-----------------------------------------------------------*/
