@@ -1939,8 +1939,10 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	var frzStartPoint = new Array();
 
 	g_workObj.mkArrow = new Array();
+	g_workObj.mkFrzArrow = new Array();
+	g_workObj.mkFrzLength = new Array();
 
-	/**	矢印の移動距離 */
+	/** 矢印の移動距離 */
 	g_workObj.initY = new Array();
 	/** 矢印がステップゾーンに到達するまでのフレーム数 */
 	g_workObj.arrivalFrame = new Array();
@@ -2037,6 +2039,93 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 			}
 		}
+
+		// フリーズアローの出現フレーム数計算
+		if(_dataObj.frzData[j] != undefined){
+
+			frzStartPoint[j] = new Array();
+			g_workObj.mkFrzLength[j] = new Array();
+			if(_dataObj.speedData != undefined){
+				spdk = _dataObj.speedData.length -2;
+				spdPrev = _dataObj.speedData[spdk];
+			}else{
+				spdPrev = 0;
+			}
+			spdNext = Infinity;
+
+			// 最後尾のデータから計算して格納
+			lastk = _dataObj.frzData[j].length -2;
+			arrowArrivalFrm = _dataObj.frzData[j][lastk];
+			tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+			frzStartPoint[j][lastk] = tmpObj.frm;
+			frmPrev = tmpObj.frm;
+			g_workObj.initY[frmPrev] = tmpObj.startY;
+			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+			g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+			g_workObj.mkFrzLength[j][lastk] = getFrzLength(_speedOnFrame, 
+				_dataObj.frzData[j][lastk], _dataObj.frzData[j][lastk +1]);
+
+			if(g_workObj.mkFrzArrow[frzStartPoint[j][lastk]] == undefined){
+				g_workObj.mkFrzArrow[frzStartPoint[j][lastk]] = new Array();
+			}
+			g_workObj.mkFrzArrow[frzStartPoint[j][lastk]].push(j);
+
+			// フリーズアローは2つで1セット
+			for(var k=lastk -2; k>=0; k-=2){
+				arrowArrivalFrm = _dataObj.arrowData[j][k];
+
+				// フリーズアローの出現位置が開始前の場合は除外
+				if(arrowArrivalFrm < _firstArrivalFrame){
+					break;
+
+				// 最初から最後まで同じスピードのときは前回のデータを流用
+				}else if((arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev] > spdPrev)
+					&& arrowArrivalFrm < spdNext){
+
+					var tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
+					frzStartPoint[j][k] = tmpFrame;
+					g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
+					g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
+					g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
+
+				}else{
+					// 速度変化が間に入るときは再計算
+					if(arrowArrivalFrm < spdPrev){
+						spdk -= 2;
+						spdNext = spdPrev;
+						spdPrev = _dataObj.speedData[spdk];
+
+						tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+						frzStartPoint[j][k] = tmpObj.frm;
+						frmPrev = tmpObj.frm;
+						g_workObj.initY[frmPrev] = tmpObj.startY;
+						g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+						g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+
+					}else{
+						tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+						frzStartPoint[j][k] = tmpObj.frm;
+						frmPrev = tmpObj.frm;
+						g_workObj.initY[frmPrev] = tmpObj.startY;
+						g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+						g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+					}
+				}
+
+				// フリーズアローの出現タイミングを保存
+				if(frzStartPoint[j][k] >= _firstArrivalFrame){
+					g_workObj.mkFrzLength[j][k] = getFrzLength(_speedOnFrame, 
+						_dataObj.frzData[j][k], _dataObj.frzData[j][k +1]);
+					if(g_workObj.mkFrzArrow[frzStartPoint[j][k]] == undefined){
+						g_workObj.mkFrzArrow[frzStartPoint[j][k]] = new Array();
+					}
+					g_workObj.mkFrzArrow[frzStartPoint[j][k]].push(j);
+				}
+			}
+		}
 	}
 }
 
@@ -2067,6 +2156,21 @@ function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame){
 	}
 
 	return obj;
+}
+
+/**
+ * 速度を加味したフリーズアローの長さを取得
+ * @param {object} _speedOnFrame 
+ * @param {number} _startFrame 
+ * @param {number} _endFrame 
+ */
+function getFrzLength(_speedOnFrame, _startFrame, _endFrame){
+	var frzLength = 0;
+
+	for(var frm=_startFrame; frm<_endFrame; frm++){
+		frzLength += _speedOnFrame[frm];
+	}
+	return frzLength;
 }
 
 /*-----------------------------------------------------------*/
