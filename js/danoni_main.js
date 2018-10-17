@@ -1,6 +1,6 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.22.0
+ * Ver 0.23.0
  * 
  * Source by tickle
  * created : 2018/10/08
@@ -91,6 +91,9 @@ var C_IMG_MONAR = "../img/monar_600.png";
 
 // Motionオプション配列の基準位置
 var C_MOTION_STD_POS = 15;
+
+// キーブロック対象(キーコードを指定)
+var C_BLOCK_KEYS = [8, 9, 13, 32, 37, 38, 39, 40, 46, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126];
 
 // 譜面データ持ち回り用
 var g_rootObj = {};
@@ -965,8 +968,10 @@ function titleInit(){
 		}else{
 			var setKey = event.keyCode;
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40) || (setKey >= 112 && setKey <= 126)){
-			return false;
+		for(var j=0; j<C_BLOCK_KEYS.length; j++){
+			if(setKey == C_BLOCK_KEYS[j]){
+				return false;
+			}
 		}
 	}
 }
@@ -1234,8 +1239,10 @@ function optionInit(){
 		}else{
 			var setKey = event.keyCode;
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40) || (setKey >= 112 && setKey <= 126)){
-			return false;
+		for(var j=0; j<C_BLOCK_KEYS.length; j++){
+			if(setKey == C_BLOCK_KEYS[j]){
+				return false;
+			}
 		}
 	}
 }
@@ -1610,8 +1617,10 @@ function keyConfigInit(){
 				cursor.style.top = "45px";
 			}
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40) || (setKey >= 112 && setKey <= 126)){
-			return false;
+		for(var j=0; j<C_BLOCK_KEYS.length; j++){
+			if(setKey == C_BLOCK_KEYS[j]){
+				return false;
+			}
 		}
 	}
 }
@@ -1632,6 +1641,7 @@ function loadingScoreInit(){
 	var l1ctx = layer1.getContext("2d");
 	var divRoot = document.getElementById("divRoot");
 
+	var startTime = new Date();
 	// 譜面データの読み込み
 	var scoreIdHeader = "";
 	if(g_stateObj.scoreId > 0){
@@ -1657,39 +1667,11 @@ function loadingScoreInit(){
 	// 矢印・フリーズアロー・速度/色変化格納処理
 	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
 
+	var endTime = new Date();
+	//alert('経過時間：' + (endTime.getTime() - startTime.getTime()) + 'ミリ秒');
 
-
-	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
-	var btnBack = createButton({
-		id: "btnBack", 
-		name: "Back", 
-		x: 0, 
-		y: g_sHeight-100, 
-		width: g_sWidth/2, 
-		height: C_BTN_HEIGHT, 
-		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT, 
-		hoverColor: C_CLR_BACK, 
-		align: C_ALIGN_CENTER
-	}, function(){
-		// オプション画面へ戻る
-		clearWindow();
-		optionInit();
-	});
-	divRoot.appendChild(btnBack);
-
-	// キー操作イベント（デフォルト）
-	document.onkeydown = function(evt){
-		// ブラウザ判定
-		if(g_userAgent.indexOf("firefox") != -1){
-			var setKey = evt.which;
-		}else{
-			var setKey = event.keyCode;
-		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40) || (setKey >= 112 && setKey <= 126)){
-			return false;
-		}
-	}
+	clearWindow();
+	MainInit();
 }
 
 /**
@@ -2295,6 +2277,108 @@ function pushColors(_header, _frame, _val, _colorCd){
 /* Scene : MAIN [banana] */
 /*-----------------------------------------------------------*/
 
+/**
+ * メイン画面初期化
+ */
+function MainInit(){
+
+	// レイヤー情報取得
+	var layer0 = document.getElementById("layer0");
+	var l0ctx = layer0.getContext("2d");
+	var layer1 = document.getElementById("layer1");
+	var l1ctx = layer1.getContext("2d");
+	var divRoot = document.getElementById("divRoot");
+
+	// キーの一覧を表示
+	var mainSprite = createSprite("divRoot","mainSprite",0,0,g_sWidth,g_sHeight);
+	var mWidth = parseInt(mainSprite.style.width);
+	
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	var posMax = g_keyObj["pos" + keyCtrlPtn][keyNum-1] +1;
+	var divideCnt = g_keyObj["div"+ keyCtrlPtn];
+
+	/** 同行の左から数えた場合の位置(x座標) */
+	var leftCnt = 0;
+	/** 同行の中心から見た場合の位置(x座標) */
+	var stdPos = 0;
+	/** 行位置 */
+	var dividePos = 0;
+	var posj = 0;
+
+	for(var j=0; j<keyNum; j++){
+
+		posj = g_keyObj["pos" + keyCtrlPtn][j];
+		leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
+		stdPos  = (posj >= divideCnt ? leftCnt - (posMax - divideCnt)/2 : leftCnt - divideCnt / 2);
+		if(g_stateObj.reverse == "ON"){
+			dividePos = (posj >= divideCnt ? 0 : 1);
+		}else{
+			dividePos = (posj >= divideCnt ? 1 : 0);
+		}
+
+		// ステップゾーンを表示（仮実装）
+		var step = createArrowEffect("step" + j, "#cccccc", 
+			55 * stdPos + mWidth/2, 
+			g_stepY + (g_distY - g_stepY - 50) * dividePos, 50, 
+			g_keyObj["stepRtn" + keyCtrlPtn][j]);
+
+		mainSprite.appendChild(step);
+	}
+
+	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
+	var btnBack = createButton({
+		id: "btnBack", 
+		name: "Back", 
+		x: 0, 
+		y: g_sHeight-100, 
+		width: g_sWidth/8, 
+		height: C_BTN_HEIGHT/2, 
+		fontsize: C_LBL_BTNSIZE,
+		normalColor: C_CLR_DEFAULT, 
+		hoverColor: C_CLR_BACK, 
+		align: C_ALIGN_CENTER
+	}, function(){
+		// オプション画面へ戻る
+		clearWindow();
+		optionInit();
+	});
+	divRoot.appendChild(btnBack);
+
+	// キー操作イベント（デフォルト）
+	document.onkeydown = function(evt){
+		// ブラウザ判定
+		if(g_userAgent.indexOf("firefox") != -1){
+			var setKey = evt.which;
+		}else{
+			var setKey = event.keyCode;
+		}
+		var matchKeys = g_keyObj["keyCtrl" + keyCtrlPtn];
+		
+		for(var j=0; j<keyNum; j++){
+			for(var k=0; k<matchKeys[j].length; k++){
+				if(setKey == matchKeys[j][k]){
+					var stepDiv = document.getElementById("step" + j);
+					stepDiv.style.backgroundColor = "#66ffff";
+				}
+			}
+		}
+
+		for(var j=0; j<C_BLOCK_KEYS.length; j++){
+			if(setKey == C_BLOCK_KEYS[j]){
+				return false;
+			}
+		}
+	}
+
+	document.onkeyup = function(evt){
+		for(var j=0; j<keyNum; j++){
+			var stepDiv = document.getElementById("step" + j);
+			stepDiv.style.backgroundColor = "#cccccc";
+		}
+	}
+}
+
 /*-----------------------------------------------------------*/
 /* Scene : RESULT [grape] */
 /*-----------------------------------------------------------*/
@@ -2379,8 +2463,10 @@ function resultInit(){
 		}else{
 			var setKey = event.keyCode;
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40) || (setKey >= 112 && setKey <= 126)){
-			return false;
+		for(var j=0; j<C_BLOCK_KEYS.length; j++){
+			if(setKey == C_BLOCK_KEYS[j]){
+				return false;
+			}
 		}
 	}
 }
