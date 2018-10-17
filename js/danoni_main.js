@@ -4,7 +4,7 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/16
+ * Revised : 2018/10/17
  */
 'use strict';
 
@@ -1616,10 +1616,6 @@ function keyConfigInit(){
 	}
 }
 
-function createArrowRoot(_parentObjName){
-
-}
-
 /*-----------------------------------------------------------*/
 /* Scene : LOAGING [strawberry] */
 /*-----------------------------------------------------------*/
@@ -1642,7 +1638,7 @@ function loadingScoreInit(){
 		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
 	}
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader);
-
+	
 	// 最終フレーム数の取得
 	var lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
 
@@ -1654,11 +1650,14 @@ function loadingScoreInit(){
 
 	// Motionオプション適用時の矢印別の速度を取得（配列形式）
 	var motionOnFrame = setMotionOnFrame();
-
+	
 	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
 	var arrivalFrame = getFirstArrivalFrame(g_scoreObj.frameNum, speedOnFrame, motionOnFrame);
 	
+	// 矢印・フリーズアロー・速度/色変化格納処理
 	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
+
+
 
 	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
 	var btnBack = createButton({
@@ -1754,8 +1753,8 @@ function scoreConvert(_dosObj, _scoreNo){
 
 	// 速度変化・色変化データの分解
 	var speedFooter = (g_keyObj.currentKey == "5" ? "_data" : "_change");
-	if(_dosObj["speed" + _scoreNo + "_" + speedFooter] != undefined){
-		obj.speedData = _dosObj["speed" + _scoreNo + "_" + speedFooter].split(",");
+	if(_dosObj["speed" + _scoreNo + speedFooter] != undefined){
+		obj.speedData = _dosObj["speed" + _scoreNo + speedFooter].split(",");
 		for(k=0; k<obj.speedData.length; k+=2){
 			obj.speedData[k] = parseFloat(obj.speedData[k]) + parseFloat(g_stateObj.adjustment);
 			obj.speedData[k+1] = parseFloat(obj.speedData[k+1]);
@@ -1782,7 +1781,7 @@ function scoreConvert(_dosObj, _scoreNo){
 			obj.acolorData[k+1] = parseFloat(obj.acolorData[k+1]);
 		}
 	}
-
+	
 	// 歌詞データの分解
 	if(_dosObj["word_" + _scoreNo + "data"] != undefined){
 		tmpData = _dosObj["word_" + _scoreNo + "data"].replace("\r","");
@@ -1795,7 +1794,7 @@ function scoreConvert(_dosObj, _scoreNo){
 				tmpWordData[k] = parseFloat(tmpWordData[k]) + parseFloat(g_stateObj.adjustment);
 				tmpWordData[k+1] = parseFloat(tmpWordData[k+1]);
 
-				if(obj.wordData[tmpWordData[k]] != undefined){
+				if(obj.wordData[tmpWordData[k]] == undefined){
 					obj.wordData[tmpWordData[k]] = new Array();
 				}
 				obj.wordData[tmpWordData[k]].push(tmpWordData[k+1],tmpWordData[k+2]);
@@ -1927,7 +1926,7 @@ function getFirstArrivalFrame(_startFrame, _speedOnFrame, _motionOnFrame){
 }
 
 /**
- * 矢印・フリーズアロー格納処理
+ * 矢印・フリーズアロー・速度/色変化格納処理
  * @param {object} _dataObj 
  * @param {object} _speedOnFrame 
  * @param {object} _motionOnFrame 
@@ -1938,9 +1937,18 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	var startPoint = new Array();
 	var frzStartPoint = new Array();
 
+	// 矢印・フリーズアロー・速度/色変化用 フレーム別処理配列
 	g_workObj.mkArrow = new Array();
 	g_workObj.mkFrzArrow = new Array();
 	g_workObj.mkFrzLength = new Array();
+	g_workObj.mkColor = new Array();
+	g_workObj.mkColorCd = new Array();
+	g_workObj.mkFColor = new Array();
+	g_workObj.mkFColorCd = new Array();
+	g_workObj.mkAColor = new Array();
+	g_workObj.mkAColorCd = new Array();
+	g_workObj.mkFAColor = new Array();
+	g_workObj.mkFAColorCd = new Array();
 
 	/** 矢印の移動距離 */
 	g_workObj.initY = new Array();
@@ -2010,24 +2018,14 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 						spdk -= 2;
 						spdNext = spdPrev;
 						spdPrev = _dataObj.speedData[spdk];
-
-						tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
-
-						startPoint[j][k] = tmpObj.frm;
-						frmPrev = tmpObj.frm;
-						g_workObj.initY[frmPrev] = tmpObj.startY;
-						g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-						g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-
-					}else{
-						tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
-
-						startPoint[j][k] = tmpObj.frm;
-						frmPrev = tmpObj.frm;
-						g_workObj.initY[frmPrev] = tmpObj.startY;
-						g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-						g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
 					}
+					tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+					startPoint[j][k] = tmpObj.frm;
+					frmPrev = tmpObj.frm;
+					g_workObj.initY[frmPrev] = tmpObj.startY;
+					g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+					g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
 				}
 
 				// 矢印の出現タイミングを保存
@@ -2095,24 +2093,14 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 						spdk -= 2;
 						spdNext = spdPrev;
 						spdPrev = _dataObj.speedData[spdk];
-
-						tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
-
-						frzStartPoint[j][k] = tmpObj.frm;
-						frmPrev = tmpObj.frm;
-						g_workObj.initY[frmPrev] = tmpObj.startY;
-						g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-						g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-
-					}else{
-						tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
-
-						frzStartPoint[j][k] = tmpObj.frm;
-						frmPrev = tmpObj.frm;
-						g_workObj.initY[frmPrev] = tmpObj.startY;
-						g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-						g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
 					}
+					tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+					frzStartPoint[j][k] = tmpObj.frm;
+					frmPrev = tmpObj.frm;
+					g_workObj.initY[frmPrev] = tmpObj.startY;
+					g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+					g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
 				}
 
 				// フリーズアローの出現タイミングを保存
@@ -2125,6 +2113,82 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 					g_workObj.mkFrzArrow[frzStartPoint[j][k]].push(j);
 				}
 			}
+		}
+	}
+
+	// 個別加速のタイミング更新
+	if(_dataObj.boostData != undefined){
+
+		var delBoostIdx = 0;
+		for(var k=_dataObj.boostData.length -2; k>=0; k-=2){
+			if(_dataObj.boostData[k] < g_scoreObj.frameNum){
+				delBoostIdx = k;
+				break;
+			}else{
+				tmpObj = getArrowStartFrame(_dataObj.boostData[k], _speedOnFrame, _motionOnFrame);
+				_dataObj.boostData[k] = tmpObj.frm;
+			}
+		}
+		for(var k=0; k< delBoostIdx; k++){
+			_dataObj.boostData.shift();
+		}
+		g_workObj.boostData = new Array();
+		g_workObj.boostData = _dataObj.boostData.concat();
+	}
+
+	// 個別色変化のタイミング更新
+	if(_dataObj.colorData != undefined){
+		
+		if(_dataObj.speedData != undefined){
+			spdk = _dataObj.speedData.length -2;
+			spdPrev = _dataObj.speedData[spdk];
+		}else{
+			spdPrev = 0;
+		}
+		spdNext = Infinity;
+
+		lastk = _dataObj.colorData.length -3;
+		tmpObj = getArrowStartFrame(_dataObj.colorData[k], _speedOnFrame, _motionOnFrame);
+		frmPrev = tmpObj.frm;
+		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+		pushColors("", tmpObj.frm, _dataObj.colorData[lastk +1], _dataObj.colorData[lastk +2].replace("0x","#"));
+
+		for(var k=lastk -3; k>=0; k-=3){
+
+			if(_dataObj.colorData[k] < g_scoreObj.frameNum){
+				break;
+			}else if((_dataObj.colorData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
+				&& _dataObj.colorData[k] < spdNext)){
+				_dataObj.colorData[k] -= g_workObj.arrivalFrame[frmPrev];
+			}else{
+				if(_dataObj.colorData[k] < spdPrev){
+					spdk -= 2;
+					spdNext = spdPrev;
+					spdPrev = _dataObj.speedData[spdk];
+				}
+				tmpObj = getArrowStartFrame(_dataObj.colorData[k], _speedOnFrame, _motionOnFrame);
+				frmPrev = tmpObj.frm;
+				_dataObj.colorData[k] = tmpObj.frm;
+				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+			}
+			pushColors("", _dataObj.colorData[k], _dataObj.colorData[k+1], _dataObj.colorData[k+2].replace("0x","#"));
+		}
+	}
+
+	// 全体色変化のタイミング更新
+	if(_dataObj.acolorData != undefined){
+
+		for(var k=_dataObj.acolorData.length -3; k>=0; k-=3){
+			pushColors("A", _dataObj.acolorData[k], _dataObj.acolorData[k+1], _dataObj.acolorData[k+2].replace("0x","#"));
+		}
+	}
+
+	// 実際に処理させる途中変速配列を作成
+	g_workObj.speedData = new Array();
+	if(_dataObj.speedData != undefined){
+		for(var k=0; k<_dataObj.speedData.length; k+=2){
+			g_workObj.speedData.push(_dataObj.speedData[k]);
+			g_workObj.speedData.push(_speedOnFrame[_dataObj.speedData[k]]);
 		}
 	}
 }
@@ -2171,6 +2235,60 @@ function getFrzLength(_speedOnFrame, _startFrame, _endFrame){
 		frzLength += _speedOnFrame[frm];
 	}
 	return frzLength;
+}
+
+/**
+ * 色情報の格納
+ * @param {string} _header 
+ * @param {number} _frame 
+ * @param {number} _val 
+ * @param {string} _colorCd 
+ */
+function pushColors(_header, _frame, _val, _colorCd){
+
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+
+	if(_val < 30){
+		// 矢印の色変化
+		if(g_workObj["mk" + _header + "Color"][_frame] == undefined){
+			g_workObj["mk" + _header + "Color"][_frame] = new Array();
+			g_workObj["mk" + _header + "ColorCd"][_frame] = new Array();
+		}
+		if(_val < 20){
+			g_workObj["mk" + _header + "Color"][_frame].push(_val);
+			g_workObj["mk" + _header + "ColorCd"][_frame].push(_colorCd);
+		}else if(_val >= 20){
+			var colorNum = _val - 20;
+			for(var j=0; j<keyNum; j++){
+				if(g_keyObj["color" + keyCtrlPtn] == colorNum){
+					g_workObj["mk" + _header + "Color"][_frame].push(j);
+					g_workObj["mk" + _header + "ColorCd"][_frame].push(_colorCd);
+				}
+			}
+		}
+	}else{
+		// フリーズアローの色変化
+		if(g_workObj["mkF" + _header + "Color"][_frame] == undefined){
+			g_workObj["mkF" + _header + "Color"][_frame] = new Array();
+			g_workObj["mkF" + _header + "ColorCd"][_frame] = new Array();
+		}
+		if(_val < 50){
+			g_workObj["mkF" + _header + "Color"][_frame].push(_val % 30);
+			g_workObj["mkF" + _header + "ColorCd"][_frame].push(_colorCd);
+		}else if(_val < 60){
+			var tmpVal = (_val % 50) * 2;
+			g_workObj["mkF" + _header + "Color"][_frame].push(tmpVal, tmpVal+1);
+			g_workObj["mkF" + _header + "ColorCd"][_frame].push(_colorCd, _colorCd);
+		}else{
+			if(_val == 60){
+				g_workObj["mkF" + _header + "Color"][_frame].push(0,1,2,3,4,5,6,7);
+			}else{
+				g_workObj["mkF" + _header + "Color"][_frame].push(10,11,12,13,14,15,16,17);
+			}
+			g_workObj["mkF" + _header + "ColorCd"][_frame].push(_colorCd, _colorCd, _colorCd, _colorCd, _colorCd, _colorCd, _colorCd, _colorCd);
+		}
+	}
 }
 
 /*-----------------------------------------------------------*/
