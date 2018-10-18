@@ -1,6 +1,6 @@
 ﻿/**
  * Dancing☆Onigiri
- * Ver 0.23.0
+ * Ver 0.24.0
  * 
  * Source by tickle
  * created : 2018/10/08
@@ -683,6 +683,7 @@ function createButton(_obj, _func){
 	div.style.verticalAlign = C_VALIGN_MIDDLE;
 	div.style.color = C_CLR_TEXT;
 	div.style.backgroundColor = _obj.normalColor;
+	div.style.transition = "background-color 0.25s linear";
 
 	// オンマウス・タップ時の挙動 (背景色変更、カーソル変化)
 	div.onmouseover = function(){
@@ -2168,6 +2169,9 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	// 実際に処理させる途中変速配列を作成
 	g_workObj.speedData = new Array();
 	if(_dataObj.speedData != undefined){
+		g_workObj.speedData.push(g_scoreObj.frameNum);
+		g_workObj.speedData.push(_speedOnFrame[0]);
+
 		for(var k=0; k<_dataObj.speedData.length; k+=2){
 			g_workObj.speedData.push(_dataObj.speedData[k]);
 			g_workObj.speedData.push(_speedOnFrame[_dataObj.speedData[k]]);
@@ -2305,6 +2309,7 @@ function MainInit(){
 	/** 行位置 */
 	var dividePos = 0;
 	var posj = 0;
+	var scrollDir = new Array();
 
 	for(var j=0; j<keyNum; j++){
 
@@ -2313,8 +2318,10 @@ function MainInit(){
 		stdPos  = (posj >= divideCnt ? leftCnt - (posMax - divideCnt)/2 : leftCnt - divideCnt / 2);
 		if(g_stateObj.reverse == "ON"){
 			dividePos = (posj >= divideCnt ? 0 : 1);
+			scrollDir[j] = (posj >= divideCnt ? 1 : -1);
 		}else{
 			dividePos = (posj >= divideCnt ? 1 : 0);
+			scrollDir[j] = (posj >= divideCnt ? -1 : 1);
 		}
 
 		// ステップゾーンを表示（仮実装）
@@ -2322,9 +2329,12 @@ function MainInit(){
 			55 * stdPos + mWidth/2, 
 			g_stepY + (g_distY - g_stepY - 50) * dividePos, 50, 
 			g_keyObj["stepRtn" + keyCtrlPtn][j]);
-
 		mainSprite.appendChild(step);
 	}
+
+	var lblframe = createDivLabel("lblframe", 0, 0, 100, 30, 20, C_CLR_TITLE, 
+		g_scoreObj.frameNum);
+	divRoot.appendChild(lblframe);
 
 	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
 	var btnBack = createButton({
@@ -2344,6 +2354,25 @@ function MainInit(){
 		optionInit();
 	});
 	divRoot.appendChild(btnBack);
+
+	// 進むボタン描画 (本来は不要だがデバッグ用に作成)
+	var btnPlay = createButton({
+		id: "btnPlay", 
+		name: "Play", 
+		x: g_sWidth/8 * 7, 
+		y: g_sHeight-100, 
+		width: g_sWidth/8, 
+		height: C_BTN_HEIGHT/2, 
+		fontsize: C_LBL_BTNSIZE,
+		normalColor: C_CLR_DEFAULT, 
+		hoverColor: C_CLR_NEXT, 
+		align: C_ALIGN_CENTER
+	}, function(){
+		// オプション画面へ戻る
+		clearWindow();
+		resultInit();
+	});
+	divRoot.appendChild(btnPlay);
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = function(evt){
@@ -2377,6 +2406,70 @@ function MainInit(){
 			stepDiv.style.backgroundColor = "#cccccc";
 		}
 	}
+
+	// 矢印生成　暫定版
+	var startTime = new Date();
+	var mkArrowEvt = 0;
+	var arrowCnts = new Array();
+	var curminArrowCnts = new Array();
+	for(var j=0; j<keyNum; j++){
+		arrowCnts[j] = 0;
+		curminArrowCnts[j] = 1;
+	}
+	var speedCnts = 0;
+	var currentSpeed = 2;
+	
+	function flowTimeline(){
+		lblframe.innerHTML = g_scoreObj.frameNum;
+
+		if(g_scoreObj.frameNum == g_workObj.speedData[speedCnts]){
+			currentSpeed = g_workObj.speedData[speedCnts+1];
+			speedCnts+=2;
+		}
+
+		if(g_workObj.mkArrow[g_scoreObj.frameNum]!=undefined){
+			for(var j=0; j<g_workObj.mkArrow[g_scoreObj.frameNum].length; j++){
+
+				var targetj = g_workObj.mkArrow[g_scoreObj.frameNum][j];
+
+				posj = g_keyObj["pos" + keyCtrlPtn][targetj];
+				leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
+				stdPos  = (posj >= divideCnt ? leftCnt - (posMax - divideCnt)/2 : leftCnt - divideCnt / 2);
+				if(g_stateObj.reverse == "ON"){
+					dividePos = (posj >= divideCnt ? 0 : 1);
+				}else{
+					dividePos = (posj >= divideCnt ? 1 : 0);
+				}
+
+				var step = createArrowEffect("arrow" + targetj + "_" + (++arrowCnts[targetj]), g_headerObj.setColor[g_keyObj["color" + keyCtrlPtn][targetj]], 
+				55 * stdPos + mWidth/2, 
+				g_stepY + (g_distY - g_stepY - 50) * dividePos + g_distY * scrollDir[targetj], 50, 
+				g_keyObj["stepRtn" + keyCtrlPtn][targetj]);
+
+				mainSprite.appendChild(step);
+			}
+		}
+
+		for(var j=0; j<keyNum; j++){
+			for(var k=curminArrowCnts[j]; k<=arrowCnts[j]; k++){
+				var arrow = document.getElementById("arrow" + j + "_" + k);
+				arrow.style.top = (parseFloat(arrow.style.top) - currentSpeed * scrollDir[j]) + "px";
+
+				if(scrollDir[j] == 1 && parseFloat(arrow.style.top) < g_stepY -5){
+					curminArrowCnts[j]++;
+					mainSprite.removeChild(arrow);
+				}else if(scrollDir[j] == -1 && parseFloat(arrow.style.top) > g_distY - 50 + 5){
+					curminArrowCnts[j]++;
+					mainSprite.removeChild(arrow);
+				}
+			}
+		}
+
+		g_scoreObj.frameNum++;
+		mkArrowEvt = setTimeout(function(){flowTimeline()}, 1000/ 60);
+	}
+
+	mkArrowEvt = setTimeout(flowTimeline(), 1000/ 60);
 }
 
 /*-----------------------------------------------------------*/
