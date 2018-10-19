@@ -535,6 +535,7 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text){
 	var div = createDiv(_id, _x, _y, _width, _height);
 	div.style.font = _fontsize + "px '" + C_LBL_BASICFONT + "'";
 	div.style.color = _color;
+	div.style.textAlign = C_ALIGN_CENTER;
 	div.innerHTML = _text;
 
 	return div;
@@ -756,7 +757,7 @@ function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align){
  */
 function getTitleDivLabel(_id, _titlename, _x, _y){
 	var div = createDivLabel(_id, _x, _y, g_sWidth, 50, C_LBL_BTNSIZE, C_CLR_TITLE, _titlename);
-	div.style.align = C_ALIGN_CENTER;
+	div.style.textAlign = C_ALIGN_CENTER;
 	return div;
 }
 
@@ -2180,10 +2181,10 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	// 実際に処理させる途中変速配列を作成
 	g_workObj.speedData = new Array();
-	if(_dataObj.speedData != undefined){
-		g_workObj.speedData.push(g_scoreObj.frameNum);
-		g_workObj.speedData.push(_speedOnFrame[0]);
+	g_workObj.speedData.push(g_scoreObj.frameNum);
+	g_workObj.speedData.push(_speedOnFrame[0]);
 
+	if(_dataObj.speedData != undefined){
 		for(var k=0; k<_dataObj.speedData.length; k+=2){
 			g_workObj.speedData.push(_dataObj.speedData[k]);
 			g_workObj.speedData.push(_speedOnFrame[_dataObj.speedData[k]]);
@@ -2454,6 +2455,7 @@ function MainInit(){
 			speedCnts+=2;
 		}
 
+		// 矢印生成
 		if(g_workObj.mkArrow[g_scoreObj.frameNum]!=undefined){
 			for(var j=0; j<g_workObj.mkArrow[g_scoreObj.frameNum].length; j++){
 
@@ -2480,6 +2482,7 @@ function MainInit(){
 			//delete g_workObj.mkArrow[g_scoreObj.frameNum];
 		}
 
+		// 矢印消去 (暫定。本来はキープッシュと同時に消したい)
 		for(var j=0; j<keyNum; j++){
 			for(var k=curminArrowCnts[j]; k<=arrowCnts[j]; k++){
 				var arrow = document.getElementById("arrow" + j + "_" + k);
@@ -2497,6 +2500,7 @@ function MainInit(){
 			}
 		}
 
+		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
 		thisTime = new Date();
 		buffTime = (thisTime.getTime() - mainStartTime.getTime() - g_scoreObj.frameNum * 1000 / 60);
 		g_scoreObj.frameNum++;
