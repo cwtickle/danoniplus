@@ -479,6 +479,17 @@ var g_handler = (function(){
 	}
 })();
 
+window.requestAnimFrame = (function(){
+	return window.requestAnimationFrame ||
+	window.webkitRequestAnimationFrame ||
+	window.mozRequestAnimationFrame ||
+	window.oRequestAnimationFrame ||
+	window.msRequestAnimationFrame ||
+	function(callback){
+		window.setTimeout(callback, 1000 / 60);
+	}
+})
+
 /**
  * 図形の描画
  * - div子要素の作成。呼び出しただけでは使用できないので、親divよりappendChildすること。
@@ -1654,13 +1665,14 @@ function loadingScoreInit(){
 	var lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
 
 	// 開始フレーム数の取得(フェードイン加味)
-	g_scoreObj.frameNum = getStartFrame(lastFrame) + g_headerObj.blankFrame;
+	g_scoreObj.frameNum = getStartFrame(lastFrame);
 
 	// フレームごとの速度を取得（配列形式）
 	var speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
 
 	// Motionオプション適用時の矢印別の速度を取得（配列形式）
 	var motionOnFrame = setMotionOnFrame();
+	g_workObj.motionOnFrames = motionOnFrame.concat();
 	
 	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
 	var arrivalFrame = getFirstArrivalFrame(g_scoreObj.frameNum, speedOnFrame, motionOnFrame);
@@ -2350,6 +2362,7 @@ function MainInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		// オプション画面へ戻る
+		g_audio.pause();
 		clearWindow();
 		optionInit();
 	});
@@ -2369,6 +2382,7 @@ function MainInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		// オプション画面へ戻る
+		g_audio.pause();
 		clearWindow();
 		resultInit();
 	});
@@ -2418,9 +2432,22 @@ function MainInit(){
 	}
 	var speedCnts = 0;
 	var currentSpeed = 2;
+	var firstFrame = g_scoreObj.frameNum;
+	if(firstFrame < g_headerObj.blankFrame){
+		var musicStartFrame = g_headerObj.blankFrame;
+	}else{
+		var musicStartFrame = firstFrame;
+	}
+	var thisTime;
+	var buffTime;
 	
 	function flowTimeline(){
 		lblframe.innerHTML = g_scoreObj.frameNum;
+
+		if(g_scoreObj.frameNum == musicStartFrame){
+			g_audio.play();
+			g_audio.currentTime = 0;
+		}
 
 		if(g_scoreObj.frameNum == g_workObj.speedData[speedCnts]){
 			currentSpeed = g_workObj.speedData[speedCnts+1];
@@ -2443,17 +2470,22 @@ function MainInit(){
 
 				var step = createArrowEffect("arrow" + targetj + "_" + (++arrowCnts[targetj]), g_headerObj.setColor[g_keyObj["color" + keyCtrlPtn][targetj]], 
 				55 * stdPos + mWidth/2, 
-				g_stepY + (g_distY - g_stepY - 50) * dividePos + g_distY * scrollDir[targetj], 50, 
+//				g_stepY + (g_distY - g_stepY - 50) * dividePos + g_distY * scrollDir[targetj], 50, 
+				g_stepY + (g_distY - g_stepY - 50) * dividePos + g_workObj.initY[g_scoreObj.frameNum] * scrollDir[targetj], 50, 
 				g_keyObj["stepRtn" + keyCtrlPtn][targetj]);
-
+				step.setAttribute("boostCnt",g_workObj.motionFrame[g_scoreObj.frameNum]);
+				
 				mainSprite.appendChild(step);
 			}
+			//delete g_workObj.mkArrow[g_scoreObj.frameNum];
 		}
 
 		for(var j=0; j<keyNum; j++){
 			for(var k=curminArrowCnts[j]; k<=arrowCnts[j]; k++){
 				var arrow = document.getElementById("arrow" + j + "_" + k);
-				arrow.style.top = (parseFloat(arrow.style.top) - currentSpeed * scrollDir[j]) + "px";
+				var boostCnt = arrow.getAttribute("boostCnt");
+				arrow.style.top = (parseFloat(arrow.style.top) - (currentSpeed + g_workObj.motionOnFrames[boostCnt] )* scrollDir[j]  ) + "px";
+				arrow.setAttribute("boostCnt", --boostCnt);
 
 				if(scrollDir[j] == 1 && parseFloat(arrow.style.top) < g_stepY -5){
 					curminArrowCnts[j]++;
@@ -2465,10 +2497,12 @@ function MainInit(){
 			}
 		}
 
+		thisTime = new Date();
+		buffTime = (thisTime.getTime() - mainStartTime.getTime() - g_scoreObj.frameNum * 1000 / 60);
 		g_scoreObj.frameNum++;
-		mkArrowEvt = setTimeout(function(){flowTimeline()}, 1000/ 60);
+		mkArrowEvt = setTimeout(function(){flowTimeline()}, 1000/ 60 - buffTime);
 	}
-
+	var mainStartTime = new Date();
 	mkArrowEvt = setTimeout(flowTimeline(), 1000/ 60);
 }
 
