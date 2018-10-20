@@ -1,12 +1,12 @@
-﻿/**
+﻿'use strict';
+/**
  * Dancing☆Onigiri
- * Ver 0.21.1
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/15
+ * Revised : 2018/10/21
  */
-'use strict';
+var g_version =  "Ver 0.27.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対称箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -89,6 +89,12 @@ var C_IMG_C = "../img/c_600.png";
 var C_IMG_MORARA = "../img/morara_600.png";
 var C_IMG_MONAR = "../img/monar_600.png";
 
+// Motionオプション配列の基準位置
+var C_MOTION_STD_POS = 15;
+
+// キーブロック対象(キーコードを指定)
+var C_BLOCK_KEYS = [8, 9, 13, 32, 37, 38, 39, 40, 46, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126];
+
 // 譜面データ持ち回り用
 var g_rootObj = {};
 var g_headerObj = {};
@@ -105,6 +111,11 @@ var g_stateObj = {
 // サイズ(後で指定)
 var g_sWidth;
 var g_sHeight;
+
+// ステップゾーン位置、到達距離(後で指定)
+var C_STEP_Y = 70;
+var g_stepY;
+var g_distY;
 
 // キーコンフィグカーソル
 var g_currentj = 0;
@@ -394,7 +405,7 @@ var g_keyObj = {
 	keyCtrl9B_0d:[[65],[83],[68],[70],[32],[74],[75],[76],[187]],
 	keyCtrl9i_0d:[[65],[83],[68],[70],[32],[37],[40],[38,0],[39]],
 	keyCtrl11_0d:[[37],[40],[38,0],[39],[83],[68],[70],[32],[74],[75],[76]],
-	keyCtrl11L_0d:[[83],[68],[70],[32],[74],[75],[76],[87],[69],[51,52],[82]],
+	keyCtrl11L_0d:[[87],[69],[51,52],[82],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl12_0d:[[85],[73],[56,57],[79],[32],[78],[74],[77,0],[75,0],[188],[76],[190]],
 	keyCtrl14_0d:[[84,89],[85],[73],[56,55,57,48],[79],[192,80],[32],[78],[74],[77,0],[75,0],[188],[76],[190]],
 	keyCtrl17_0d:[[65],[90],[83],[88],[68],[67],[70],[86],[32],[78],[74],[77],[75],[188],[76],[190],[187]],
@@ -424,8 +435,44 @@ var g_keyObj = {
 	dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
 
+/** メイン画面用共通オブジェクト */
 var g_workObj = {};
+g_workObj.stepX = new Array();
+g_workObj.stepRtn = new Array();
+g_workObj.keyCtrl = new Array();
+g_workObj.scrollDir = new Array();
+g_workObj.dividePos = new Array();
+
+/** 判定系共通オブジェクト */
+var g_judgObj = {
+	arrowJ: [2,4,6,8],
+	frzJ: [2,4,8]
+};
+var C_JDG_II = 0;
+var C_JDG_SHAKIN = 1;
+var C_JDG_MATARI = 2;
+var C_JDG_UWAN = 3;
+var C_JDG_KITA = 0;
+var C_JDG_SFSF = 1;
+var C_JDG_IKNAI = 2;
+
+/** 結果画面用共通オブジェクト */
+var g_resultObj = {
+	ii: 0,
+	shakin: 0,
+	matari: 0,
+	uwan: 0,
+	kita: 0,
+	sfsf: 0,
+	iknai: 0,
+	maxCombo: 0,
+	frzCombo: 0,
+	score: 0
+};
+
 var g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
+
+var g_audio = new Audio();
 
 /**
  * イベントハンドラ用オブジェクト
@@ -465,6 +512,7 @@ var g_handler = (function(){
 		}
 	}
 })();
+
 
 /**
  * 図形の描画
@@ -511,6 +559,7 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text){
 	var div = createDiv(_id, _x, _y, _width, _height);
 	div.style.font = _fontsize + "px '" + C_LBL_BASICFONT + "'";
 	div.style.color = _color;
+	div.style.textAlign = C_ALIGN_CENTER;
 	div.innerHTML = _text;
 
 	return div;
@@ -670,6 +719,7 @@ function createButton(_obj, _func){
 	div.style.verticalAlign = C_VALIGN_MIDDLE;
 	div.style.color = C_CLR_TEXT;
 	div.style.backgroundColor = _obj.normalColor;
+	div.style.transition = "background-color 0.25s linear";
 
 	// オンマウス・タップ時の挙動 (背景色変更、カーソル変化)
 	div.onmouseover = function(){
@@ -731,7 +781,7 @@ function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align){
  */
 function getTitleDivLabel(_id, _titlename, _x, _y){
 	var div = createDivLabel(_id, _x, _y, g_sWidth, 50, C_LBL_BTNSIZE, C_CLR_TITLE, _titlename);
-	div.style.align = C_ALIGN_CENTER;
+	div.style.textAlign = C_ALIGN_CENTER;
 	return div;
 }
 
@@ -752,7 +802,7 @@ function clearWindow(){
 	var l2ctx = layer2.getContext("2d");
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
-	var C_MARGIN = 10;
+	var C_MARGIN = 0;
 
 	// 線画、図形をクリア
 	l0ctx.clearRect(0,0,g_sWidth,g_sHeight);
@@ -827,25 +877,6 @@ function titleInit(){
 	lblTitle.style.zIndex = 1;
 	divRoot.appendChild(lblTitle);
 
-	// ボタン描画
-	var btnStart = createButton({
-		id: "btnStart", 
-		name: "Click Here!!", 
-		x: 0, 
-		y: g_sHeight-100, 
-		width: g_sWidth, 
-		height: C_BTN_HEIGHT, 
-		fontsize: C_LBL_TITLESIZE,
-		normalColor: C_CLR_DEFAULT, 
-		hoverColor: C_CLR_DEFHOVER, 
-		align: C_ALIGN_CENTER
-	}, function(){
-		clearWindow();
-		optionInit();
-	});
-	btnStart.style.zIndex = 1;
-	divRoot.appendChild(btnStart);
-
 	// 譜面データの読み込み
 	var dos = document.getElementById("dos").value;
 	g_rootObj = dosConvert(dos);
@@ -876,15 +907,71 @@ function titleInit(){
 		grd.addColorStop(1, "#66ffff");
 	}
 	var titlefontsize = 64 * (12 / g_headerObj["musicTitle"].length);
+	if(titlefontsize >= 64){
+		titlefontsize = 64;
+	}
 	createLabel(l1ctx, g_headerObj["musicTitle"], g_sWidth/2, g_sHeight/2, 
 		titlefontsize, "Century Gothic", grd, C_ALIGN_CENTER);
+
+	// オーディオ読込テスト
+	g_audio.src = "../music/" + g_headerObj.musicUrl;
+	g_audio.load();
+	
+	if(g_audio.readyState == 4){
+		// audioの読み込みが終わった後の処理
+
+		// ボタン描画
+		var btnStart = createButton({
+			id: "btnStart", 
+			name: "Click Here!!", 
+			x: 0, 
+			y: g_sHeight-100, 
+			width: g_sWidth, 
+			height: C_BTN_HEIGHT, 
+			fontsize: C_LBL_TITLESIZE,
+			normalColor: C_CLR_DEFAULT, 
+			hoverColor: C_CLR_DEFHOVER, 
+			align: C_ALIGN_CENTER
+		}, function(){
+			clearWindow();
+			optionInit();
+		});
+		btnStart.style.zIndex = 1;
+		divRoot.appendChild(btnStart);
+	}else{
+		// 読込中の状態
+		g_audio.addEventListener('canplaythrough', (function(){
+			return function f(){
+				g_audio.removeEventListener('canplaythrough',f,false);
+				
+				// ボタン描画
+				var btnStart = createButton({
+					id: "btnStart", 
+					name: "Click Here!!", 
+					x: 0, 
+					y: g_sHeight-100, 
+					width: g_sWidth, 
+					height: C_BTN_HEIGHT, 
+					fontsize: C_LBL_TITLESIZE,
+					normalColor: C_CLR_DEFAULT, 
+					hoverColor: C_CLR_DEFHOVER, 
+					align: C_ALIGN_CENTER
+				}, function(){
+					clearWindow();
+					optionInit();
+				});
+				btnStart.style.zIndex = 1;
+				divRoot.appendChild(btnStart);
+			}
+		})(),false);
+	}
 
 	// 製作者表示
 	var lnkMaker = createButton({
 		id: "lnkMaker", 
 		name: "Maker: "+ g_headerObj["tuning"], 
 		x: 20, 
-		y: g_sHeight-40, 
+		y: g_sHeight-45, 
 		width: g_sWidth/2-10, 
 		height: C_LNK_HEIGHT, 
 		fontsize: C_LBL_LNKSIZE,
@@ -901,7 +988,7 @@ function titleInit(){
 		id: "lnkArtist", 
 		name: "Artist: " + g_headerObj["artistName"], 
 		x: g_sWidth/2, 
-		y: g_sHeight-40, 
+		y: g_sHeight-45, 
 		width: g_sWidth/2-10, 
 		height: C_LNK_HEIGHT, 
 		fontsize: C_LBL_LNKSIZE,
@@ -913,6 +1000,13 @@ function titleInit(){
 	});
 	divRoot.appendChild(lnkArtist);
 
+	// バージョン描画
+	var lblVersion = createDivLabel("lblResult", g_sWidth/2, g_sHeight-25, g_sWidth/2-10, 
+	C_LNK_HEIGHT, 14, "#cccccc", 
+	"HTML5 Source by ティックル, " + g_version);
+	lblVersion.style.textAlign = C_ALIGN_RIGHT;
+	divRoot.appendChild(lblVersion);
+
 	// キー操作イベント（デフォルト）
 	document.onkeydown = function(evt){
 		// ブラウザ判定
@@ -921,8 +1015,10 @@ function titleInit(){
 		}else{
 			var setKey = event.keyCode;
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
-			return false;
+		for(var j=0; j<C_BLOCK_KEYS.length; j++){
+			if(setKey == C_BLOCK_KEYS[j]){
+				return false;
+			}
 		}
 	}
 }
@@ -991,7 +1087,24 @@ function headerConvert(_dosObj){
 	}else{
 		obj.blankFrame = parseFloat(_dosObj.blankFrame);
 	}
+
+	// フェードインフレーム数
+	if(_dosObj.startFrame != undefined){
+		obj.startFrame = parseInt(_dosObj.startFrame);
+	}
+
+	// ステップゾーン位置
+	if(isNaN(parseFloat(_dosObj.stepY))){
+		g_stepY = C_STEP_Y;
+	}else{
+		g_stepY = parseFloat(_dosObj.stepY);
+	}
+	g_distY = g_sHeight - g_stepY;
 	
+	// 楽曲URL
+	if(_dosObj.musicUrl != undefined){
+		obj.musicUrl = _dosObj.musicUrl;
+	}
 
 	// TODO:フリーズアロー色など他のヘッダー情報の分解
 
@@ -1101,6 +1214,8 @@ function optionInit(){
 	// オプションボタン用の設置
 	createOptionWindow("divRoot");
 
+//	g_audio.play();
+
 	// 戻るボタン描画
 	var btnBack = createButton({
 		id: "btnBack", 
@@ -1115,6 +1230,8 @@ function optionInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		// タイトル画面へ戻る
+//		g_audio.pause();
+//		g_audio.currentTime = 0;
 		clearWindow();
 		titleInit();
 	});
@@ -1134,6 +1251,8 @@ function optionInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		// キーコンフィグ画面へ遷移
+//		g_audio.pause();
+//		g_audio.currentTime = 0;
 		clearWindow();
 		keyConfigInit();
 	});
@@ -1152,6 +1271,8 @@ function optionInit(){
 		hoverColor: C_CLR_NEXT, 
 		align: C_ALIGN_CENTER
 	}, function(){
+//		g_audio.pause();
+//		g_audio.currentTime = 0;
 		clearWindow();
 		loadingScoreInit();
 	});
@@ -1165,8 +1286,10 @@ function optionInit(){
 		}else{
 			var setKey = event.keyCode;
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
-			return false;
+		for(var j=0; j<C_BLOCK_KEYS.length; j++){
+			if(setKey == C_BLOCK_KEYS[j]){
+				return false;
+			}
 		}
 	}
 }
@@ -1466,7 +1589,6 @@ function keyConfigInit(){
 			150 * dividePos, 50, 
 			g_keyObj["stepRtn" + keyCtrlPtn][j]));
 
-		// 対応キーに応じた値を表示
 		for(var k=0;k<g_keyObj["keyCtrl"+ keyCtrlPtn][j].length;k++){
 			keyconSprite.appendChild(createDivLabel("keycon" + j + "_" + k, 
 				55 * stdPos + kWidth/2, 
@@ -1541,14 +1663,12 @@ function keyConfigInit(){
 				cursor.style.top = "45px";
 			}
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
-			return false;
+		for(var j=0; j<C_BLOCK_KEYS.length; j++){
+			if(setKey == C_BLOCK_KEYS[j]){
+				return false;
+			}
 		}
 	}
-}
-
-function createArrowRoot(_parentObjName){
-
 }
 
 /*-----------------------------------------------------------*/
@@ -1565,50 +1685,42 @@ function loadingScoreInit(){
 	var l0ctx = layer0.getContext("2d");
 	var layer1 = document.getElementById("layer1");
 	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
 	var divRoot = document.getElementById("divRoot");
 
+	var startTime = new Date();
 	// 譜面データの読み込み
 	var scoreIdHeader = "";
 	if(g_stateObj.scoreId > 0){
 		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
 	}
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader);
-	var finalFrame = getFinalFrame(g_scoreObj) + g_headerObj.blankFrame;
-	alert(finalFrame);
+	
+	// 最終フレーム数の取得
+	var lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
 
-	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
-	var btnBack = createButton({
-		id: "btnBack", 
-		name: "Back", 
-		x: 0, 
-		y: g_sHeight-100, 
-		width: g_sWidth/2, 
-		height: C_BTN_HEIGHT, 
-		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT, 
-		hoverColor: C_CLR_BACK, 
-		align: C_ALIGN_CENTER
-	}, function(){
-		// オプション画面へ戻る
-		clearWindow();
-		optionInit();
-	});
-	divRoot.appendChild(btnBack);
+	// 開始フレーム数の取得(フェードイン加味)
+	g_scoreObj.frameNum = getStartFrame(lastFrame);
 
-	// キー操作イベント（デフォルト）
-	document.onkeydown = function(evt){
-		// ブラウザ判定
-		if(g_userAgent.indexOf("firefox") != -1){
-			var setKey = evt.which;
-		}else{
-			var setKey = event.keyCode;
-		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
-			return false;
-		}
-	}
+	// フレームごとの速度を取得（配列形式）
+	var speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
+
+	// Motionオプション適用時の矢印別の速度を取得（配列形式）
+	var motionOnFrame = setMotionOnFrame();
+	g_workObj.motionOnFrames = motionOnFrame.concat();
+	
+	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
+	var arrivalFrame = getFirstArrivalFrame(g_scoreObj.frameNum, speedOnFrame, motionOnFrame);
+	
+	// 矢印・フリーズアロー・速度/色変化格納処理
+	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
+
+	getArrowSettings();
+
+	var endTime = new Date();
+	//alert('経過時間：' + (endTime.getTime() - startTime.getTime()) + 'ミリ秒');
+
+	clearWindow();
+	MainInit();
 }
 
 /**
@@ -1631,8 +1743,8 @@ function scoreConvert(_dosObj, _scoreNo){
 
 		// 矢印データの分解
 		if(_dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"] != undefined){
-			tmpData = _dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"].replace("\r","");
-			tmpData = tmpData.replace("\n","");
+			tmpData = _dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"].split("\r").join("");
+			tmpData = tmpData.split("\n").join("");
 
 			if(tmpData != undefined){
 				obj.arrowData[j] = new Array();
@@ -1657,8 +1769,8 @@ function scoreConvert(_dosObj, _scoreNo){
 
 		// フリーズアローデータの分解
 		if(_dosObj[frzName + _scoreNo + "_data"] != undefined){
-			tmpData = _dosObj[frzName + _scoreNo + "_data"].replace("\r","");
-			tmpData = tmpData.replace("\n","");
+			tmpData = _dosObj[frzName + _scoreNo + "_data"].split("\r").join("");
+			tmpData = tmpData.split("\n").join("");
 
 			if(tmpData != undefined){
 				obj.frzData[j] = new Array();
@@ -1672,8 +1784,8 @@ function scoreConvert(_dosObj, _scoreNo){
 
 	// 速度変化・色変化データの分解
 	var speedFooter = (g_keyObj.currentKey == "5" ? "_data" : "_change");
-	if(_dosObj["speed" + _scoreNo + "_" + speedFooter] != undefined){
-		obj.speedData = _dosObj["speed" + _scoreNo + "_" + speedFooter].split(",");
+	if(_dosObj["speed" + _scoreNo + speedFooter] != undefined){
+		obj.speedData = _dosObj["speed" + _scoreNo + speedFooter].split(",");
 		for(k=0; k<obj.speedData.length; k+=2){
 			obj.speedData[k] = parseFloat(obj.speedData[k]) + parseFloat(g_stateObj.adjustment);
 			obj.speedData[k+1] = parseFloat(obj.speedData[k+1]);
@@ -1700,12 +1812,12 @@ function scoreConvert(_dosObj, _scoreNo){
 			obj.acolorData[k+1] = parseFloat(obj.acolorData[k+1]);
 		}
 	}
-
+	
 	// 歌詞データの分解
+	obj.wordData = new Array();
 	if(_dosObj["word_" + _scoreNo + "data"] != undefined){
-		tmpData = _dosObj["word_" + _scoreNo + "data"].replace("\r","");
-		tmpData = tmpData.replace("\n","");
-		obj.wordData = new Array();
+		tmpData = _dosObj["word_" + _scoreNo + "data"].split("\r").join("");
+		tmpData = tmpData.split("\n").join("");
 
 		if(tmpData != undefined){
 			var tmpWordData = tmpData.split(",");
@@ -1713,7 +1825,7 @@ function scoreConvert(_dosObj, _scoreNo){
 				tmpWordData[k] = parseFloat(tmpWordData[k]) + parseFloat(g_stateObj.adjustment);
 				tmpWordData[k+1] = parseFloat(tmpWordData[k+1]);
 
-				if(obj.wordData[tmpWordData[k]] != undefined){
+				if(obj.wordData[tmpWordData[k]] == undefined){
 					obj.wordData[tmpWordData[k]] = new Array();
 				}
 				obj.wordData[tmpWordData[k]].push(tmpWordData[k+1],tmpWordData[k+2]);
@@ -1728,30 +1840,836 @@ function scoreConvert(_dosObj, _scoreNo){
  * 最終フレーム数の取得
  * @param {object} _dataObj 
  */
-function getFinalFrame(_dataObj){
+function getLastFrame(_dataObj){
 	
-	var tmpFinalNum = 0;
+	var tmpLastNum = 0;
 	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 	
 	for(var j=0; j<keyNum; j++){
 		if(_dataObj.arrowData[j] != undefined){
-			if(_dataObj.arrowData[j][_dataObj.arrowData[j].length -1] > tmpFinalNum){
-				tmpFinalNum = _dataObj.arrowData[j][_dataObj.arrowData[j].length -1];
+			if(_dataObj.arrowData[j][_dataObj.arrowData[j].length -1] > tmpLastNum){
+				tmpLastNum = _dataObj.arrowData[j][_dataObj.arrowData[j].length -1];
 			}
 		}
 		if(_dataObj.frzData[j] != undefined){
-			if(_dataObj.frzData[j][_dataObj.frzData[j].length -1] > tmpFinalNum){
-				tmpFinalNum = _dataObj.frzData[j][_dataObj.frzData[j].length -1];
+			if(_dataObj.frzData[j][_dataObj.frzData[j].length -1] > tmpLastNum){
+				tmpLastNum = _dataObj.frzData[j][_dataObj.frzData[j].length -1];
 			}
 		}
 	}
-	return tmpFinalNum;
+	return tmpLastNum;
+}
+
+/**
+ * 開始フレームの取得
+ * @param {number} _lastFrame 
+ */
+function getStartFrame(_lastFrame){
+	var frameNum = 0;
+	if(g_headerObj.startFrame != undefined){
+		frameNum = g_headerObj.startFrame;
+	}
+	if(_lastFrame >= g_headerObj.startFrame){
+//		frameNum = Math.round(fadePos/100 * (_lastFrame - frameNum)) + frameNum;
+	}
+	return frameNum;
+}
+
+/**
+ * 各フレームごとの速度を格納
+ * @param {object} _speedData 
+ * @param {number} _lastFrame 
+ */
+function setSpeedOnFrame(_speedData, _lastFrame){
+
+	var speedOnFrame = new Array();
+	var currentSpeed = g_stateObj.speed * 2;
+
+	for(var frm=0, s=0; frm<=_lastFrame; frm++){
+		if(_speedData != undefined && frm == _speedData[s]){
+			currentSpeed = _speedData[s+1] * g_stateObj.speed * 2;
+			s+=2;
+		}
+		speedOnFrame[frm] = currentSpeed;
+	}
+	return speedOnFrame;
+}
+
+/**
+ * Motionオプション適用時の矢印別の速度設定
+ * - 配列の数字は小さいほどステップゾーンに近いことを示す。
+ * - 15がステップゾーン上、0～14は矢印の枠外管理用
+ */
+function setMotionOnFrame(){
+
+	var motionOnFrame = new Array();
+
+	// 矢印が表示される最大フレーム数
+	var motionLastFrame = g_sHeight * 20;
+	var brakeLastFrame  = g_sHeight / 2;
+
+	for(var j=0; j<=motionLastFrame; j++){
+		motionOnFrame[j] = 0;
+	}
+
+	if(g_stateObj.motion == "OFF"){
+	}else if(g_stateObj.motion == "Boost"){
+		// ステップゾーンに近づくにつれて加速量を大きくする (16 → 85)
+		for(var j=C_MOTION_STD_POS+1; j<C_MOTION_STD_POS+70; j++){
+			motionOnFrame[j] = (C_MOTION_STD_POS+70 - j) * g_stateObj.speed * 2 / 50;
+		}
+	}else if(g_stateObj.motion == "Brake"){
+		// 初期は+2x、ステップゾーンに近づくにつれて加速量を下げる (20 → 34)
+		for(var j=C_MOTION_STD_POS+5; j<C_MOTION_STD_POS+19; j++){
+			motionOnFrame[j] = (j - 15) * 4 / 14;
+		}
+		for(var j=C_MOTION_STD_POS+19; j<=brakeLastFrame; j++){
+			motionOnFrame[j] = 4;
+		}
+	}
+	
+	return motionOnFrame;
+}
+
+/**
+ * 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
+ * @param {number} _startFrame 
+ * @param {object} _speedOnFrame 
+ * @param {object} _motionOnFrame 
+ */
+function getFirstArrivalFrame(_startFrame, _speedOnFrame, _motionOnFrame){
+	var startY = 0;
+	var frm = _startFrame;
+	var motionFrm = C_MOTION_STD_POS;
+
+	while(g_distY - startY > 0){
+		startY += _speedOnFrame[frm];
+
+		if(_speedOnFrame[frm]!=0){
+			startY += _motionOnFrame[motionFrm];
+			motionFrm++;
+		}
+		frm++;
+	}
+	return frm;
+}
+
+/**
+ * 矢印・フリーズアロー・速度/色変化格納処理
+ * @param {object} _dataObj 
+ * @param {object} _speedOnFrame 
+ * @param {object} _motionOnFrame 
+ * @param {number} _firstArrivalFrame
+ */
+function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame){
+
+	var startPoint = new Array();
+	var frzStartPoint = new Array();
+
+	// 矢印・フリーズアロー・速度/色変化用 フレーム別処理配列
+	g_workObj.mkArrow = new Array();
+	g_workObj.mkFrzArrow = new Array();
+	g_workObj.mkFrzLength = new Array();
+	g_workObj.mkColor = new Array();
+	g_workObj.mkColorCd = new Array();
+	g_workObj.mkFColor = new Array();
+	g_workObj.mkFColorCd = new Array();
+	g_workObj.mkAColor = new Array();
+	g_workObj.mkAColorCd = new Array();
+	g_workObj.mkFAColor = new Array();
+	g_workObj.mkFAColorCd = new Array();
+
+	/** 矢印の移動距離 */
+	g_workObj.initY = new Array();
+	/** 矢印がステップゾーンに到達するまでのフレーム数 */
+	g_workObj.arrivalFrame = new Array();
+	/** Motionの適用フレーム数 */
+	g_workObj.motionFrame = new Array();
+
+	var spdNext = Infinity;
+	var spdPrev = 0;
+	var spdk;
+	var lastk;
+	var tmpObj;
+	var arrowArrivalFrm;
+	var frmPrev;
+
+	for(var j=0; j<_dataObj.arrowData.length; j++){
+
+		// 矢印の出現フレーム数計算
+		if(_dataObj.arrowData[j] != undefined){
+
+			startPoint[j] = new Array();
+			if(_dataObj.speedData != undefined){
+				spdk = _dataObj.speedData.length -2;
+				spdPrev = _dataObj.speedData[spdk];
+			}else{
+				spdPrev = 0;
+			}
+			spdNext = Infinity;
+
+			// 最後尾のデータから計算して格納
+			lastk = _dataObj.arrowData[j].length -1;
+			arrowArrivalFrm = _dataObj.arrowData[j][lastk];
+			tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+			startPoint[j][lastk] = tmpObj.frm;
+			frmPrev = tmpObj.frm;
+			g_workObj.initY[frmPrev] = tmpObj.startY;
+			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+			g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+
+			if(g_workObj.mkArrow[startPoint[j][lastk]] == undefined){
+				g_workObj.mkArrow[startPoint[j][lastk]] = new Array();
+			}
+			g_workObj.mkArrow[startPoint[j][lastk]].push(j);
+
+			for(var k=lastk -1; k>=0; k--){
+				arrowArrivalFrm = _dataObj.arrowData[j][k];
+
+				// 矢印の出現位置が開始前の場合は除外
+				if(arrowArrivalFrm < _firstArrivalFrame){
+					break;
+
+				// 最初から最後まで同じスピードのときは前回のデータを流用
+				}else if((arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev] > spdPrev)
+					&& arrowArrivalFrm < spdNext){
+
+					var tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
+					startPoint[j][k] = tmpFrame;
+					g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
+					g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
+					g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
+
+				}else{
+					// 速度変化が間に入るときは再計算
+					if(arrowArrivalFrm < spdPrev){
+						spdk -= 2;
+						spdNext = spdPrev;
+						spdPrev = _dataObj.speedData[spdk];
+					}
+					tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+					startPoint[j][k] = tmpObj.frm;
+					frmPrev = tmpObj.frm;
+					g_workObj.initY[frmPrev] = tmpObj.startY;
+					g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+					g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+				}
+
+				// 矢印の出現タイミングを保存
+				if(startPoint[j][k] >= _firstArrivalFrame){
+					if(g_workObj.mkArrow[startPoint[j][k]] == undefined){
+						g_workObj.mkArrow[startPoint[j][k]] = new Array();
+					}
+					g_workObj.mkArrow[startPoint[j][k]].push(j);
+				}
+			}
+		}
+
+		// フリーズアローの出現フレーム数計算
+		if(_dataObj.frzData[j] != undefined){
+
+			frzStartPoint[j] = new Array();
+			g_workObj.mkFrzLength[j] = new Array();
+			if(_dataObj.speedData != undefined){
+				spdk = _dataObj.speedData.length -2;
+				spdPrev = _dataObj.speedData[spdk];
+			}else{
+				spdPrev = 0;
+			}
+			spdNext = Infinity;
+
+			// 最後尾のデータから計算して格納
+			lastk = _dataObj.frzData[j].length -2;
+			arrowArrivalFrm = _dataObj.frzData[j][lastk];
+			tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+			frzStartPoint[j][lastk] = tmpObj.frm;
+			frmPrev = tmpObj.frm;
+			g_workObj.initY[frmPrev] = tmpObj.startY;
+			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+			g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+			g_workObj.mkFrzLength[j][lastk] = getFrzLength(_speedOnFrame, 
+				_dataObj.frzData[j][lastk], _dataObj.frzData[j][lastk +1]);
+
+			if(g_workObj.mkFrzArrow[frzStartPoint[j][lastk]] == undefined){
+				g_workObj.mkFrzArrow[frzStartPoint[j][lastk]] = new Array();
+			}
+			g_workObj.mkFrzArrow[frzStartPoint[j][lastk]].push(j);
+
+			// フリーズアローは2つで1セット
+			for(var k=lastk -2; k>=0; k-=2){
+				arrowArrivalFrm = _dataObj.arrowData[j][k];
+
+				// フリーズアローの出現位置が開始前の場合は除外
+				if(arrowArrivalFrm < _firstArrivalFrame){
+					break;
+
+				// 最初から最後まで同じスピードのときは前回のデータを流用
+				}else if((arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev] > spdPrev)
+					&& arrowArrivalFrm < spdNext){
+
+					var tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
+					frzStartPoint[j][k] = tmpFrame;
+					g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
+					g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
+					g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
+
+				}else{
+					// 速度変化が間に入るときは再計算
+					if(arrowArrivalFrm < spdPrev){
+						spdk -= 2;
+						spdNext = spdPrev;
+						spdPrev = _dataObj.speedData[spdk];
+					}
+					tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+					frzStartPoint[j][k] = tmpObj.frm;
+					frmPrev = tmpObj.frm;
+					g_workObj.initY[frmPrev] = tmpObj.startY;
+					g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+					g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+				}
+
+				// フリーズアローの出現タイミングを保存
+				if(frzStartPoint[j][k] >= _firstArrivalFrame){
+					g_workObj.mkFrzLength[j][k] = getFrzLength(_speedOnFrame, 
+						_dataObj.frzData[j][k], _dataObj.frzData[j][k +1]);
+					if(g_workObj.mkFrzArrow[frzStartPoint[j][k]] == undefined){
+						g_workObj.mkFrzArrow[frzStartPoint[j][k]] = new Array();
+					}
+					g_workObj.mkFrzArrow[frzStartPoint[j][k]].push(j);
+				}
+			}
+		}
+	}
+
+	// 個別加速のタイミング更新
+	if(_dataObj.boostData != undefined){
+
+		var delBoostIdx = 0;
+		for(var k=_dataObj.boostData.length -2; k>=0; k-=2){
+			if(_dataObj.boostData[k] < g_scoreObj.frameNum){
+				delBoostIdx = k;
+				break;
+			}else{
+				tmpObj = getArrowStartFrame(_dataObj.boostData[k], _speedOnFrame, _motionOnFrame);
+				_dataObj.boostData[k] = tmpObj.frm;
+			}
+		}
+		for(var k=0; k< delBoostIdx; k++){
+			_dataObj.boostData.shift();
+		}
+		g_workObj.boostData = new Array();
+		g_workObj.boostData = _dataObj.boostData.concat();
+	}
+
+	// 個別色変化のタイミング更新
+	if(_dataObj.colorData != undefined){
+		
+		if(_dataObj.speedData != undefined){
+			spdk = _dataObj.speedData.length -2;
+			spdPrev = _dataObj.speedData[spdk];
+		}else{
+			spdPrev = 0;
+		}
+		spdNext = Infinity;
+
+		lastk = _dataObj.colorData.length -3;
+		tmpObj = getArrowStartFrame(_dataObj.colorData[k], _speedOnFrame, _motionOnFrame);
+		frmPrev = tmpObj.frm;
+		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+		pushColors("", tmpObj.frm, _dataObj.colorData[lastk +1], _dataObj.colorData[lastk +2].replace("0x","#"));
+
+		for(var k=lastk -3; k>=0; k-=3){
+
+			if(_dataObj.colorData[k] < g_scoreObj.frameNum){
+				break;
+			}else if((_dataObj.colorData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
+				&& _dataObj.colorData[k] < spdNext)){
+				_dataObj.colorData[k] -= g_workObj.arrivalFrame[frmPrev];
+			}else{
+				if(_dataObj.colorData[k] < spdPrev){
+					spdk -= 2;
+					spdNext = spdPrev;
+					spdPrev = _dataObj.speedData[spdk];
+				}
+				tmpObj = getArrowStartFrame(_dataObj.colorData[k], _speedOnFrame, _motionOnFrame);
+				frmPrev = tmpObj.frm;
+				_dataObj.colorData[k] = tmpObj.frm;
+				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+			}
+			pushColors("", _dataObj.colorData[k], _dataObj.colorData[k+1], _dataObj.colorData[k+2].replace("0x","#"));
+		}
+	}
+
+	// 全体色変化のタイミング更新
+	if(_dataObj.acolorData != undefined){
+
+		for(var k=_dataObj.acolorData.length -3; k>=0; k-=3){
+			pushColors("A", _dataObj.acolorData[k], _dataObj.acolorData[k+1], _dataObj.acolorData[k+2].replace("0x","#"));
+		}
+	}
+
+	// 実際に処理させる途中変速配列を作成
+	g_workObj.speedData = new Array();
+	g_workObj.speedData.push(g_scoreObj.frameNum);
+	g_workObj.speedData.push(_speedOnFrame[0]);
+
+	if(_dataObj.speedData != undefined){
+		for(var k=0; k<_dataObj.speedData.length; k+=2){
+			g_workObj.speedData.push(_dataObj.speedData[k]);
+			g_workObj.speedData.push(_speedOnFrame[_dataObj.speedData[k]]);
+		}
+	}
+}
+
+/**
+ * ステップゾーン到達地点から逆算して開始フレームを取得
+ * @param {number} _frame 
+ * @param {object} _speedOnFrame 
+ * @param {object} _motionOnFrame 
+ */
+function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame){
+
+	var obj = {
+		frm: _frame,
+		startY: 0,
+		arrivalFrm: 0,
+		motionFrm: C_MOTION_STD_POS
+	};
+
+	while(g_distY - obj.startY > 0){
+		obj.startY += _speedOnFrame[obj.frm];
+
+		if(_speedOnFrame[obj.frm]!=0){
+			obj.startY += _motionOnFrame[obj.motionFrm];
+			obj.motionFrm++;
+		}
+		obj.frm--;
+		obj.arrivalFrm++;
+	}
+
+	return obj;
+}
+
+/**
+ * 速度を加味したフリーズアローの長さを取得
+ * @param {object} _speedOnFrame 
+ * @param {number} _startFrame 
+ * @param {number} _endFrame 
+ */
+function getFrzLength(_speedOnFrame, _startFrame, _endFrame){
+	var frzLength = 0;
+
+	for(var frm=_startFrame; frm<_endFrame; frm++){
+		frzLength += _speedOnFrame[frm];
+	}
+	return frzLength;
+}
+
+/**
+ * 色情報の格納
+ * @param {string} _header 
+ * @param {number} _frame 
+ * @param {number} _val 
+ * @param {string} _colorCd 
+ */
+function pushColors(_header, _frame, _val, _colorCd){
+
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+
+	if(_val < 30){
+		// 矢印の色変化
+		if(g_workObj["mk" + _header + "Color"][_frame] == undefined){
+			g_workObj["mk" + _header + "Color"][_frame] = new Array();
+			g_workObj["mk" + _header + "ColorCd"][_frame] = new Array();
+		}
+		if(_val < 20){
+			g_workObj["mk" + _header + "Color"][_frame].push(_val);
+			g_workObj["mk" + _header + "ColorCd"][_frame].push(_colorCd);
+		}else if(_val >= 20){
+			var colorNum = _val - 20;
+			for(var j=0; j<keyNum; j++){
+				if(g_keyObj["color" + keyCtrlPtn] == colorNum){
+					g_workObj["mk" + _header + "Color"][_frame].push(j);
+					g_workObj["mk" + _header + "ColorCd"][_frame].push(_colorCd);
+				}
+			}
+		}
+	}else{
+		// フリーズアローの色変化
+		if(g_workObj["mkF" + _header + "Color"][_frame] == undefined){
+			g_workObj["mkF" + _header + "Color"][_frame] = new Array();
+			g_workObj["mkF" + _header + "ColorCd"][_frame] = new Array();
+		}
+		if(_val < 50){
+			g_workObj["mkF" + _header + "Color"][_frame].push(_val % 30);
+			g_workObj["mkF" + _header + "ColorCd"][_frame].push(_colorCd);
+		}else if(_val < 60){
+			var tmpVal = (_val % 50) * 2;
+			g_workObj["mkF" + _header + "Color"][_frame].push(tmpVal, tmpVal+1);
+			g_workObj["mkF" + _header + "ColorCd"][_frame].push(_colorCd, _colorCd);
+		}else{
+			if(_val == 60){
+				g_workObj["mkF" + _header + "Color"][_frame].push(0,1,2,3,4,5,6,7);
+			}else{
+				g_workObj["mkF" + _header + "Color"][_frame].push(10,11,12,13,14,15,16,17);
+			}
+			g_workObj["mkF" + _header + "ColorCd"][_frame].push(_colorCd, _colorCd, _colorCd, _colorCd, _colorCd, _colorCd, _colorCd, _colorCd);
+		}
+	}
+}
+
+function getArrowSettings(){
+
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	var posMax = g_keyObj["pos" + keyCtrlPtn][keyNum-1] +1;
+	var divideCnt = g_keyObj["div"+ keyCtrlPtn];
+
+
+	g_workObj.stepX = [];
+	g_workObj.scrollDir = [];
+	g_workObj.dividePos = [];
+	g_workObj.stepRtn = g_keyObj["stepRtn" + keyCtrlPtn].concat();
+	g_workObj.keyCtrl = g_keyObj["keyCtrl" + keyCtrlPtn].concat();
+	g_workObj.judgArrowCnt = new Array();
+	g_workObj.judgFrzCnt = new Array();
+	g_judgObj.lockFlgs = new Array();
+
+	for(var j=0; j<keyNum; j++){
+
+		var posj = g_keyObj["pos" + keyCtrlPtn][j];
+		var leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
+		var stdPos  = (posj >= divideCnt ? leftCnt - (posMax - divideCnt)/2 : leftCnt - divideCnt / 2);
+		g_workObj.stepX[j] = 55 * stdPos + g_sWidth/2;
+
+		if(g_stateObj.reverse == "ON"){
+			g_workObj.dividePos[j] = (posj >= divideCnt ? 0 : 1);
+			g_workObj.scrollDir[j] = (posj >= divideCnt ? 1 : -1);
+		}else{
+			g_workObj.dividePos[j] = (posj >= divideCnt ? 1 : 0);
+			g_workObj.scrollDir[j] = (posj >= divideCnt ? -1 : 1);
+		}
+
+		g_workObj.judgArrowCnt[j] = 1;
+		g_workObj.judgFrzCnt[j] = 1;
+		g_judgObj.lockFlgs[j] = false;
+	}
+
+	g_resultObj.ii = 0;
+	g_resultObj.shakin = 0;
+	g_resultObj.matari = 0;
+	g_resultObj.uwan = 0;
+	g_resultObj.kita = 0;
+	g_resultObj.sfsf = 0;
+	g_resultObj.iknai = 0;
+
 }
 
 /*-----------------------------------------------------------*/
 /* Scene : MAIN [banana] */
 /*-----------------------------------------------------------*/
+
+/**
+ * メイン画面初期化
+ */
+function MainInit(){
+
+	// レイヤー情報取得
+	var layer0 = document.getElementById("layer0");
+	var l0ctx = layer0.getContext("2d");
+	var layer1 = document.getElementById("layer1");
+	var l1ctx = layer1.getContext("2d");
+	var divRoot = document.getElementById("divRoot");
+
+	g_workObj.word0Data = "";
+	g_workObj.word1Data = "";
+
+	// ステップゾーン、矢印のメインスプライトを作成
+	var mainSprite = createSprite("divRoot","mainSprite",0,0,g_sWidth,g_sHeight);
+	
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+
+	// ステップゾーンを表示
+	for(var j=0; j<keyNum; j++){
+		var step = createArrowEffect("step" + j, "#cccccc",
+			g_workObj.stepX[j],
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], 50, 
+			g_workObj.stepRtn[j]);
+		mainSprite.appendChild(step);
+
+		var stepHit = createArrowEffect("stepHit" + j, "#999999",
+			g_workObj.stepX[j] -10,
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] -10, 70, 
+			g_workObj.stepRtn[j]);
+		stepHit.style.opacity = 0;
+		mainSprite.appendChild(stepHit);
+	}
+
+	// フレーム数
+	var lblframe = createDivLabel("lblframe", 0, 0, 100, 30, 20, C_CLR_TITLE, 
+		g_scoreObj.frameNum);
+	divRoot.appendChild(lblframe);
+
+	// 判定系表示
+	var lblIi = createDivLabel("lblIi", g_sWidth - 100, 20, 100, 20, 16, "#66ffff", 
+		g_resultObj.ii);
+	lblIi.style.textAlign = C_ALIGN_RIGHT;
+	mainSprite.appendChild(lblIi);
+
+	var lblShakin = createDivLabel("lblShakin", g_sWidth - 100, 40, 100, 20, 16, "#99ff99", 
+		g_resultObj.shakin);
+	lblShakin.style.textAlign = C_ALIGN_RIGHT;
+	mainSprite.appendChild(lblShakin);
+
+	var lblMatari = createDivLabel("lblMatari", g_sWidth - 100, 60, 100, 20, 16, "#ff9966", 
+		g_resultObj.matari);
+	lblMatari.style.textAlign = C_ALIGN_RIGHT;
+	mainSprite.appendChild(lblMatari);
+
+	var lblUwan = createDivLabel("lblUwan", g_sWidth - 100, 80, 100, 20, 16, "#ff9999", 
+		g_resultObj.uwan);
+	lblUwan.style.textAlign = C_ALIGN_RIGHT;
+	mainSprite.appendChild(lblUwan);
+
+	// 歌詞表示1
+	var lblWord0 = createDivLabel("lblword0", g_sWidth/2 -200, 10, 400, 20, 16, "#ffffff", 
+		g_workObj.word0Data);
+	lblWord0.style.textAlign = C_ALIGN_LEFT;
+	mainSprite.appendChild(lblWord0);
+
+	// 歌詞表示2
+	var lblWord1 = createDivLabel("lblword1", g_sWidth/2 -200, g_sHeight-50, 400, 20, 16, "#ffffff", 
+		g_workObj.word1Data);
+	lblWord1.style.textAlign = C_ALIGN_LEFT;
+	mainSprite.appendChild(lblWord1);
+
+	// 曲名・アーティスト名表示
+	var lblCredit = createDivLabel("lblCredit", g_sWidth/2 - 150, g_sHeight-30, 400, 20, 16, "#cccccc", 
+		g_headerObj.musicTitle + "/" + g_headerObj.artistName);
+	lblCredit.style.textAlign = C_ALIGN_CENTER;
+	mainSprite.appendChild(lblCredit);
+
+	// 曲時間表示
+	var lblTime1 = createDivLabel("lblTime1", g_sWidth/2 -250, g_sHeight-30, 100, 20, 16, "#cccccc", 
+		"-:-- / -:--");
+		lblTime1.style.textAlign = C_ALIGN_LEFT;
+	mainSprite.appendChild(lblTime1);
+
+	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
+	var btnBack = createButton({
+		id: "btnBack", 
+		name: "Back", 
+		x: 0, 
+		y: g_sHeight-100, 
+		width: g_sWidth/8, 
+		height: C_BTN_HEIGHT/2, 
+		fontsize: C_LBL_BTNSIZE,
+		normalColor: C_CLR_DEFAULT, 
+		hoverColor: C_CLR_BACK, 
+		align: C_ALIGN_CENTER
+	}, function(){
+		// オプション画面へ戻る
+		g_audio.pause();
+		clearWindow();
+		optionInit();
+	});
+	divRoot.appendChild(btnBack);
+
+	// 進むボタン描画 (本来は不要だがデバッグ用に作成)
+	var btnPlay = createButton({
+		id: "btnPlay", 
+		name: "Play", 
+		x: g_sWidth/8 * 7, 
+		y: g_sHeight-100, 
+		width: g_sWidth/8, 
+		height: C_BTN_HEIGHT/2, 
+		fontsize: C_LBL_BTNSIZE,
+		normalColor: C_CLR_DEFAULT, 
+		hoverColor: C_CLR_NEXT, 
+		align: C_ALIGN_CENTER
+	}, function(){
+		// オプション画面へ戻る
+		g_audio.pause();
+		clearWindow();
+		resultInit();
+	});
+	divRoot.appendChild(btnPlay);
+
+	// キー操作イベント（デフォルト）
+	document.onkeydown = function(evt){
+		// ブラウザ判定
+		if(g_userAgent.indexOf("firefox") != -1){
+			var setKey = evt.which;
+		}else{
+			var setKey = event.keyCode;
+		}
+		var matchKeys = g_keyObj["keyCtrl" + keyCtrlPtn];
+		
+		for(var j=0; j<keyNum; j++){
+			for(var k=0; k<matchKeys[j].length; k++){
+				if(setKey == matchKeys[j][k]){
+					var stepDiv = document.getElementById("step" + j);
+					stepDiv.style.backgroundColor = "#66ffff";
+					judgeArrow(j);
+				}
+			}
+		}
+
+		for(var j=0; j<C_BLOCK_KEYS.length; j++){
+			if(setKey == C_BLOCK_KEYS[j]){
+				return false;
+			}
+		}
+	}
+
+	document.onkeyup = function(evt){
+		for(var j=0; j<keyNum; j++){
+			var stepDiv = document.getElementById("step" + j);
+			stepDiv.style.backgroundColor = "#cccccc";
+			var stepDivHit = document.getElementById("stepHit" + j);
+			stepDivHit.style.opacity = 0;
+		}
+	}
+
+	// 矢印生成　暫定版
+	var mkArrowEvt = 0;
+	var arrowCnts = new Array();
+	var curminArrowCnts = new Array();
+	for(var j=0; j<keyNum; j++){
+		arrowCnts[j] = 0;
+	}
+	var speedCnts = 0;
+	g_workObj.currentSpeed = 2;
+	var firstFrame = g_scoreObj.frameNum;
+	if(firstFrame < g_headerObj.blankFrame){
+		var musicStartFrame = g_headerObj.blankFrame;
+	}else{
+		var musicStartFrame = firstFrame + g_headerObj.blankFrame;
+	}
+	var thisTime;
+	var buffTime;
+	
+	/**
+	 * フレーム処理(譜面台)
+	 */
+	function flowTimeline(){
+		lblframe.innerHTML = g_scoreObj.frameNum;
+
+		if(g_scoreObj.frameNum == musicStartFrame){
+			g_audio.play();
+			g_audio.currentTime = firstFrame / 60 ;
+		}
+
+		if(g_scoreObj.frameNum == g_workObj.speedData[speedCnts]){
+			g_workObj.currentSpeed = g_workObj.speedData[speedCnts+1];
+			speedCnts+=2;
+		}
+
+		// 矢印生成
+		if(g_workObj.mkArrow[g_scoreObj.frameNum]!=undefined){
+			for(var j=0; j<g_workObj.mkArrow[g_scoreObj.frameNum].length; j++){
+
+				var targetj = g_workObj.mkArrow[g_scoreObj.frameNum][j];
+
+				var step = createArrowEffect("arrow" + targetj + "_" + (++arrowCnts[targetj]), g_headerObj.setColor[g_keyObj["color" + keyCtrlPtn][targetj]], 
+				g_workObj.stepX[targetj],
+				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * g_workObj.scrollDir[targetj], 50, 
+				g_workObj.stepRtn[targetj]);
+				step.setAttribute("cnt",g_workObj.arrivalFrame[g_scoreObj.frameNum]);
+				step.setAttribute("boostCnt",g_workObj.motionFrame[g_scoreObj.frameNum]);
+				step.setAttribute("judgEndFlg","false");
+				
+				mainSprite.appendChild(step);
+			}
+			//delete g_workObj.mkArrow[g_scoreObj.frameNum];
+		}
+
+		// 矢印移動＆消去 (暫定。本来はキープッシュと同時に消したい)
+		for(var j=0; j<keyNum; j++){
+			for(var k=g_workObj.judgArrowCnt[j]; k<=arrowCnts[j]; k++){
+				var arrow = document.getElementById("arrow" + j + "_" + k);
+				var boostCnt = arrow.getAttribute("boostCnt");
+				var cnt = arrow.getAttribute("cnt");
+				arrow.style.top = (parseFloat(arrow.style.top) - (g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt] )* g_workObj.scrollDir[j]  ) + "px";
+				arrow.setAttribute("boostCnt", --boostCnt);
+				arrow.setAttribute("cnt", --cnt);
+
+				if(cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]){
+					g_resultObj.uwan++;
+					document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
+					g_workObj.judgArrowCnt[j]++;
+					mainSprite.removeChild(arrow);
+				}
+			}
+		}
+
+		if(g_scoreObj.wordData[g_scoreObj.frameNum]!=undefined){
+			var wordDir = g_scoreObj.wordData[g_scoreObj.frameNum][0];
+			g_workObj["word" + wordDir + "Data"] = g_scoreObj.wordData[g_scoreObj.frameNum][1];
+			var wordSprite = document.getElementById("lblword" + wordDir);
+			wordSprite.innerHTML = g_scoreObj.wordData[g_scoreObj.frameNum][1];
+		}
+
+		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
+		thisTime = new Date();
+		buffTime = (thisTime.getTime() - mainStartTime.getTime() - (g_scoreObj.frameNum - firstFrame) * 1000 / 60);
+		g_scoreObj.frameNum++;
+		mkArrowEvt = setTimeout(function(){flowTimeline()}, 1000/ 60 - buffTime);
+	}
+	var mainStartTime = new Date();
+	mkArrowEvt = setTimeout(flowTimeline(), 1000/ 60);
+}
+
+/**
+ * 矢印判定
+ * @param {*} _j 対象矢印
+ */
+function judgeArrow(_j){
+
+	if(g_judgObj.lockFlgs[_j] == false){
+		g_judgObj.lockFlgs[_j] = true;
+
+		var mainSprite = document.getElementById("mainSprite");
+		var currentNo = g_workObj.judgArrowCnt[_j];
+		var stepDivHit = document.getElementById("stepHit" + _j);
+
+		var judgArrow = document.getElementById("arrow" + _j + "_" + currentNo);
+		if(judgArrow != null){
+			var difCnt = Math.abs(judgArrow.getAttribute("cnt"));
+			var judgEndFlg = judgArrow.getAttribute("judgEndFlg");
+
+			if(difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg == "false"){
+				stepDivHit.style.opacity = 100;
+
+				if(difCnt <= g_judgObj.arrowJ[C_JDG_II]){
+					g_resultObj.ii++;
+					document.getElementById("lblIi").innerHTML = g_resultObj.ii;
+				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]){
+					g_resultObj.shakin++;
+					document.getElementById("lblShakin").innerHTML = g_resultObj.shakin;
+				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]){
+					g_resultObj.matari++;
+					document.getElementById("lblMatari").innerHTML = g_resultObj.matari;
+				}else{
+					g_resultObj.uwan++;
+					document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
+				}
+
+	//			judgArrow.setAttribute("judgEndFlg","true");
+				mainSprite.removeChild(judgArrow);
+				g_workObj.judgArrowCnt[_j]++;
+			}
+		}
+		g_judgObj.lockFlgs[_j] = false;
+	}
+}
 
 /*-----------------------------------------------------------*/
 /* Scene : RESULT [grape] */
@@ -1775,6 +2693,43 @@ function resultInit(){
 	var lblTitle = getTitleDivLabel("lblTitle", 
 	"<span style='color:#6666ff;font-size:40px;'>R</span>ESULT", 0, 15);
 	divRoot.appendChild(lblTitle);
+
+	// 結果描画
+	var resultData = "<span style='color:#66ffff'>(・∀・)ｲｲ!!</span>" +
+	"<br><span style='color:#99ff99'>(`・ω・)ｼｬｷﾝ</span>" +
+	"<br><span style='color:#ff9966'>( ´∀`)ﾏﾀｰﾘ</span>" +
+	"<br><span style='color:#ff9999'>( `Д´)ｳﾜｧﾝ!!</span>";
+
+	var scoreData = g_resultObj.ii +
+	"<br>" + g_resultObj.shakin +
+	"<br>" + g_resultObj.matari +
+	"<br>" + g_resultObj.uwan;
+
+	// スコア計算(一括)
+	var scoreTmp = g_resultObj.ii * 8 +
+	g_resultObj.shakin * 4 +
+	g_resultObj.matari * 2 +
+	g_resultObj.kita * 8 +
+	g_resultObj.sfsf * 4 +
+	g_resultObj.maxCombo * 2 +
+	g_resultObj.frzCombo * 2;
+
+	// Twitter用リザルト
+	var tweetResultTmp = "【#danoni】" + g_headerObj.musicTitle + "(" + 
+	g_headerObj["difLabels"][g_stateObj.scoreId] + ")/" +
+	g_headerObj.tuning + "/" +
+	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan;
+	var tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
+
+	var lblResult = createDivLabel("lblResult", g_sWidth/2 - 150, 100, 150, 20, 20, "#ffffff", 
+	resultData);
+	lblResult.style.textAlign = C_ALIGN_LEFT;
+	divRoot.appendChild(lblResult);
+
+	var lblScore = createDivLabel("lblScore", g_sWidth/2 + 50, 100, 100, 20, 20, "#ffffff", 
+	scoreData);
+	lblScore.style.textAlign = C_ALIGN_RIGHT;
+	divRoot.appendChild(lblScore);
 
 	// 戻るボタン描画
 	var btnBack = createButton({
@@ -1808,7 +2763,7 @@ function resultInit(){
 		hoverColor: C_CLR_TWEET, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		// TODO:Tweet画面へ
+		window.open(tweetResult, '_blank');
 	});
 	divRoot.appendChild(btnTweet);
 	
@@ -1825,7 +2780,8 @@ function resultInit(){
 		hoverColor: C_CLR_RESET, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		// TODO:メイン画面への遷移
+		clearWindow();
+		loadingScoreInit();
 	});
 	divRoot.appendChild(btnRetry);
 
@@ -1837,8 +2793,10 @@ function resultInit(){
 		}else{
 			var setKey = event.keyCode;
 		}
-		if(setKey == 8 || setKey == 46 || setKey == 9 || (setKey >= 37 && setKey <= 40)){
-			return false;
+		for(var j=0; j<C_BLOCK_KEYS.length; j++){
+			if(setKey == C_BLOCK_KEYS[j]){
+				return false;
+			}
 		}
 	}
 }
