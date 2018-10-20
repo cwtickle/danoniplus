@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/20
+ * Revised : 2018/10/21
  */
-var g_version =  "Ver 0.25.0";
+var g_version =  "Ver 0.26.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対称箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -464,7 +464,10 @@ var g_resultObj = {
 	uwan: 0,
 	kita: 0,
 	sfsf: 0,
-	iknai: 0
+	iknai: 0,
+	maxCombo: 0,
+	frzCombo: 0,
+	score: 0
 };
 
 var g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
@@ -904,6 +907,9 @@ function titleInit(){
 		grd.addColorStop(1, "#66ffff");
 	}
 	var titlefontsize = 64 * (12 / g_headerObj["musicTitle"].length);
+	if(titlefontsize >= 64){
+		titlefontsize = 64;
+	}
 	createLabel(l1ctx, g_headerObj["musicTitle"], g_sWidth/2, g_sHeight/2, 
 		titlefontsize, "Century Gothic", grd, C_ALIGN_CENTER);
 
@@ -1808,10 +1814,10 @@ function scoreConvert(_dosObj, _scoreNo){
 	}
 	
 	// 歌詞データの分解
+	obj.wordData = new Array();
 	if(_dosObj["word_" + _scoreNo + "data"] != undefined){
 		tmpData = _dosObj["word_" + _scoreNo + "data"].split("\r").join("");
 		tmpData = tmpData.split("\n").join("");
-		obj.wordData = new Array();
 
 		if(tmpData != undefined){
 			var tmpWordData = tmpData.split(",");
@@ -1884,9 +1890,8 @@ function setSpeedOnFrame(_speedData, _lastFrame){
 		if(_speedData != undefined && frm == _speedData[s]){
 			currentSpeed = _speedData[s+1] * g_stateObj.speed * 2;
 			s+=2;
-		}else{
-			speedOnFrame[frm] = currentSpeed;
 		}
+		speedOnFrame[frm] = currentSpeed;
 	}
 	return speedOnFrame;
 }
@@ -2382,6 +2387,9 @@ function MainInit(){
 	var l1ctx = layer1.getContext("2d");
 	var divRoot = document.getElementById("divRoot");
 
+	g_workObj.word0Data = "";
+	g_workObj.word1Data = "";
+
 	// ステップゾーン、矢印のメインスプライトを作成
 	var mainSprite = createSprite("divRoot","mainSprite",0,0,g_sWidth,g_sHeight);
 	
@@ -2429,6 +2437,30 @@ function MainInit(){
 		g_resultObj.uwan);
 	lblUwan.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblUwan);
+
+	// 歌詞表示1
+	var lblWord0 = createDivLabel("lblword0", g_sWidth/2 -200, 10, 400, 20, 16, "#ffffff", 
+		g_workObj.word0Data);
+	lblWord0.style.textAlign = C_ALIGN_LEFT;
+	mainSprite.appendChild(lblWord0);
+
+	// 歌詞表示2
+	var lblWord1 = createDivLabel("lblword1", g_sWidth/2 -200, g_sHeight-50, 400, 20, 16, "#ffffff", 
+		g_workObj.word1Data);
+	lblWord1.style.textAlign = C_ALIGN_LEFT;
+	mainSprite.appendChild(lblWord1);
+
+	// 曲名・アーティスト名表示
+	var lblCredit = createDivLabel("lblCredit", g_sWidth/2 - 150, g_sHeight-30, 400, 20, 16, "#cccccc", 
+		g_headerObj.musicTitle + "/" + g_headerObj.artistName);
+	lblCredit.style.textAlign = C_ALIGN_CENTER;
+	mainSprite.appendChild(lblCredit);
+
+	// 曲時間表示
+	var lblTime1 = createDivLabel("lblTime1", g_sWidth/2 -250, g_sHeight-30, 100, 20, 16, "#cccccc", 
+		"-:-- / -:--");
+		lblTime1.style.textAlign = C_ALIGN_LEFT;
+	mainSprite.appendChild(lblTime1);
 
 	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
 	var btnBack = createButton({
@@ -2514,7 +2546,7 @@ function MainInit(){
 		arrowCnts[j] = 0;
 	}
 	var speedCnts = 0;
-	var currentSpeed = 2;
+	g_workObj.currentSpeed = 2;
 	var firstFrame = g_scoreObj.frameNum;
 	if(firstFrame < g_headerObj.blankFrame){
 		var musicStartFrame = g_headerObj.blankFrame;
@@ -2536,7 +2568,7 @@ function MainInit(){
 		}
 
 		if(g_scoreObj.frameNum == g_workObj.speedData[speedCnts]){
-			currentSpeed = g_workObj.speedData[speedCnts+1];
+			g_workObj.currentSpeed = g_workObj.speedData[speedCnts+1];
 			speedCnts+=2;
 		}
 
@@ -2565,7 +2597,7 @@ function MainInit(){
 				var arrow = document.getElementById("arrow" + j + "_" + k);
 				var boostCnt = arrow.getAttribute("boostCnt");
 				var cnt = arrow.getAttribute("cnt");
-				arrow.style.top = (parseFloat(arrow.style.top) - (currentSpeed + g_workObj.motionOnFrames[boostCnt] )* g_workObj.scrollDir[j]  ) + "px";
+				arrow.style.top = (parseFloat(arrow.style.top) - (g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt] )* g_workObj.scrollDir[j]  ) + "px";
 				arrow.setAttribute("boostCnt", --boostCnt);
 				arrow.setAttribute("cnt", --cnt);
 
@@ -2576,6 +2608,13 @@ function MainInit(){
 					mainSprite.removeChild(arrow);
 				}
 			}
+		}
+
+		if(g_scoreObj.wordData[g_scoreObj.frameNum]!=undefined){
+			var wordDir = g_scoreObj.wordData[g_scoreObj.frameNum][0];
+			g_workObj["word" + wordDir + "Data"] = g_scoreObj.wordData[g_scoreObj.frameNum][1];
+			var wordSprite = document.getElementById("lblword" + wordDir);
+			wordSprite.innerHTML = g_scoreObj.wordData[g_scoreObj.frameNum][1];
 		}
 
 		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
@@ -2666,6 +2705,22 @@ function resultInit(){
 	"<br>" + g_resultObj.matari +
 	"<br>" + g_resultObj.uwan;
 
+	// スコア計算(一括)
+	var scoreTmp = g_resultObj.ii * 8 +
+	g_resultObj.shakin * 4 +
+	g_resultObj.matari * 2 +
+	g_resultObj.kita * 8 +
+	g_resultObj.sfsf * 4 +
+	g_resultObj.maxCombo * 2 +
+	g_resultObj.frzCombo * 2;
+
+	// Twitter用リザルト
+	var tweetResultTmp = "【#danoni】" + g_headerObj.musicTitle + "(" + 
+	g_headerObj["difLabels"][g_stateObj.scoreId] + ")/" +
+	g_headerObj.tuning + "/" +
+	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan;
+	var tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
+
 	var lblResult = createDivLabel("lblResult", g_sWidth/2 - 150, 100, 150, 20, 20, "#ffffff", 
 	resultData);
 	lblResult.style.textAlign = C_ALIGN_LEFT;
@@ -2708,7 +2763,7 @@ function resultInit(){
 		hoverColor: C_CLR_TWEET, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		// TODO:Tweet画面へ
+		window.open(tweetResult, '_blank');
 	});
 	divRoot.appendChild(btnTweet);
 	
