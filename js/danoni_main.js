@@ -1,12 +1,12 @@
-﻿/**
+﻿'use strict';
+/**
  * Dancing☆Onigiri
- * Ver 0.24.0
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/17
+ * Revised : 2018/10/20
  */
-'use strict';
+var g_version =  "Ver 0.25.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対称箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -435,7 +435,38 @@ var g_keyObj = {
 	dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
 
+/** メイン画面用共通オブジェクト */
 var g_workObj = {};
+g_workObj.stepX = new Array();
+g_workObj.stepRtn = new Array();
+g_workObj.keyCtrl = new Array();
+g_workObj.scrollDir = new Array();
+g_workObj.dividePos = new Array();
+
+/** 判定系共通オブジェクト */
+var g_judgObj = {
+	arrowJ: [2,4,6,8],
+	frzJ: [2,4,8]
+};
+var C_JDG_II = 0;
+var C_JDG_SHAKIN = 1;
+var C_JDG_MATARI = 2;
+var C_JDG_UWAN = 3;
+var C_JDG_KITA = 0;
+var C_JDG_SFSF = 1;
+var C_JDG_IKNAI = 2;
+
+/** 結果画面用共通オブジェクト */
+var g_resultObj = {
+	ii: 0,
+	shakin: 0,
+	matari: 0,
+	uwan: 0,
+	kita: 0,
+	sfsf: 0,
+	iknai: 0
+};
+
 var g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 var g_audio = new Audio();
@@ -479,16 +510,6 @@ var g_handler = (function(){
 	}
 })();
 
-window.requestAnimFrame = (function(){
-	return window.requestAnimationFrame ||
-	window.webkitRequestAnimationFrame ||
-	window.mozRequestAnimationFrame ||
-	window.oRequestAnimationFrame ||
-	window.msRequestAnimationFrame ||
-	function(callback){
-		window.setTimeout(callback, 1000 / 60);
-	}
-})
 
 /**
  * 図形の描画
@@ -778,7 +799,7 @@ function clearWindow(){
 	var l2ctx = layer2.getContext("2d");
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
-	var C_MARGIN = 10;
+	var C_MARGIN = 0;
 
 	// 線画、図形をクリア
 	l0ctx.clearRect(0,0,g_sWidth,g_sHeight);
@@ -944,7 +965,7 @@ function titleInit(){
 		id: "lnkMaker", 
 		name: "Maker: "+ g_headerObj["tuning"], 
 		x: 20, 
-		y: g_sHeight-40, 
+		y: g_sHeight-45, 
 		width: g_sWidth/2-10, 
 		height: C_LNK_HEIGHT, 
 		fontsize: C_LBL_LNKSIZE,
@@ -961,7 +982,7 @@ function titleInit(){
 		id: "lnkArtist", 
 		name: "Artist: " + g_headerObj["artistName"], 
 		x: g_sWidth/2, 
-		y: g_sHeight-40, 
+		y: g_sHeight-45, 
 		width: g_sWidth/2-10, 
 		height: C_LNK_HEIGHT, 
 		fontsize: C_LBL_LNKSIZE,
@@ -972,6 +993,13 @@ function titleInit(){
 		window.open(g_headerObj["artistUrl"], '_blank');
 	});
 	divRoot.appendChild(lnkArtist);
+
+	// バージョン描画
+	var lblVersion = createDivLabel("lblResult", g_sWidth/2, g_sHeight-25, g_sWidth/2-10, 
+	C_LNK_HEIGHT, 14, "#cccccc", 
+	"HTML5 Source by ティックル, " + g_version);
+	lblVersion.style.textAlign = C_ALIGN_RIGHT;
+	divRoot.appendChild(lblVersion);
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = function(evt){
@@ -1555,7 +1583,6 @@ function keyConfigInit(){
 			150 * dividePos, 50, 
 			g_keyObj["stepRtn" + keyCtrlPtn][j]));
 
-		// 対応キーに応じた値を表示
 		for(var k=0;k<g_keyObj["keyCtrl"+ keyCtrlPtn][j].length;k++){
 			keyconSprite.appendChild(createDivLabel("keycon" + j + "_" + k, 
 				55 * stdPos + kWidth/2, 
@@ -1681,6 +1708,8 @@ function loadingScoreInit(){
 	// 矢印・フリーズアロー・速度/色変化格納処理
 	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
 
+	getArrowSettings();
+
 	var endTime = new Date();
 	//alert('経過時間：' + (endTime.getTime() - startTime.getTime()) + 'ミリ秒');
 
@@ -1708,8 +1737,8 @@ function scoreConvert(_dosObj, _scoreNo){
 
 		// 矢印データの分解
 		if(_dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"] != undefined){
-			tmpData = _dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"].replace("\r","");
-			tmpData = tmpData.replace("\n","");
+			tmpData = _dosObj[g_keyObj["chara" + keyCtrlPtn][j] + _scoreNo + "_data"].split("\r").join("");
+			tmpData = tmpData.split("\n").join("");
 
 			if(tmpData != undefined){
 				obj.arrowData[j] = new Array();
@@ -1734,8 +1763,8 @@ function scoreConvert(_dosObj, _scoreNo){
 
 		// フリーズアローデータの分解
 		if(_dosObj[frzName + _scoreNo + "_data"] != undefined){
-			tmpData = _dosObj[frzName + _scoreNo + "_data"].replace("\r","");
-			tmpData = tmpData.replace("\n","");
+			tmpData = _dosObj[frzName + _scoreNo + "_data"].split("\r").join("");
+			tmpData = tmpData.split("\n").join("");
 
 			if(tmpData != undefined){
 				obj.frzData[j] = new Array();
@@ -1780,8 +1809,8 @@ function scoreConvert(_dosObj, _scoreNo){
 	
 	// 歌詞データの分解
 	if(_dosObj["word_" + _scoreNo + "data"] != undefined){
-		tmpData = _dosObj["word_" + _scoreNo + "data"].replace("\r","");
-		tmpData = tmpData.replace("\n","");
+		tmpData = _dosObj["word_" + _scoreNo + "data"].split("\r").join("");
+		tmpData = tmpData.split("\n").join("");
 		obj.wordData = new Array();
 
 		if(tmpData != undefined){
@@ -2290,6 +2319,53 @@ function pushColors(_header, _frame, _val, _colorCd){
 	}
 }
 
+function getArrowSettings(){
+
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	var posMax = g_keyObj["pos" + keyCtrlPtn][keyNum-1] +1;
+	var divideCnt = g_keyObj["div"+ keyCtrlPtn];
+
+
+	g_workObj.stepX = [];
+	g_workObj.scrollDir = [];
+	g_workObj.dividePos = [];
+	g_workObj.stepRtn = g_keyObj["stepRtn" + keyCtrlPtn].concat();
+	g_workObj.keyCtrl = g_keyObj["keyCtrl" + keyCtrlPtn].concat();
+	g_workObj.judgArrowCnt = new Array();
+	g_workObj.judgFrzCnt = new Array();
+	g_judgObj.lockFlgs = new Array();
+
+	for(var j=0; j<keyNum; j++){
+
+		var posj = g_keyObj["pos" + keyCtrlPtn][j];
+		var leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
+		var stdPos  = (posj >= divideCnt ? leftCnt - (posMax - divideCnt)/2 : leftCnt - divideCnt / 2);
+		g_workObj.stepX[j] = 55 * stdPos + g_sWidth/2;
+
+		if(g_stateObj.reverse == "ON"){
+			g_workObj.dividePos[j] = (posj >= divideCnt ? 0 : 1);
+			g_workObj.scrollDir[j] = (posj >= divideCnt ? 1 : -1);
+		}else{
+			g_workObj.dividePos[j] = (posj >= divideCnt ? 1 : 0);
+			g_workObj.scrollDir[j] = (posj >= divideCnt ? -1 : 1);
+		}
+
+		g_workObj.judgArrowCnt[j] = 1;
+		g_workObj.judgFrzCnt[j] = 1;
+		g_judgObj.lockFlgs[j] = false;
+	}
+
+	g_resultObj.ii = 0;
+	g_resultObj.shakin = 0;
+	g_resultObj.matari = 0;
+	g_resultObj.uwan = 0;
+	g_resultObj.kita = 0;
+	g_resultObj.sfsf = 0;
+	g_resultObj.iknai = 0;
+
+}
+
 /*-----------------------------------------------------------*/
 /* Scene : MAIN [banana] */
 /*-----------------------------------------------------------*/
@@ -2306,48 +2382,53 @@ function MainInit(){
 	var l1ctx = layer1.getContext("2d");
 	var divRoot = document.getElementById("divRoot");
 
-	// キーの一覧を表示
+	// ステップゾーン、矢印のメインスプライトを作成
 	var mainSprite = createSprite("divRoot","mainSprite",0,0,g_sWidth,g_sHeight);
-	var mWidth = parseInt(mainSprite.style.width);
 	
 	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
-	var posMax = g_keyObj["pos" + keyCtrlPtn][keyNum-1] +1;
-	var divideCnt = g_keyObj["div"+ keyCtrlPtn];
 
-	/** 同行の左から数えた場合の位置(x座標) */
-	var leftCnt = 0;
-	/** 同行の中心から見た場合の位置(x座標) */
-	var stdPos = 0;
-	/** 行位置 */
-	var dividePos = 0;
-	var posj = 0;
-	var scrollDir = new Array();
-
+	// ステップゾーンを表示
 	for(var j=0; j<keyNum; j++){
-
-		posj = g_keyObj["pos" + keyCtrlPtn][j];
-		leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-		stdPos  = (posj >= divideCnt ? leftCnt - (posMax - divideCnt)/2 : leftCnt - divideCnt / 2);
-		if(g_stateObj.reverse == "ON"){
-			dividePos = (posj >= divideCnt ? 0 : 1);
-			scrollDir[j] = (posj >= divideCnt ? 1 : -1);
-		}else{
-			dividePos = (posj >= divideCnt ? 1 : 0);
-			scrollDir[j] = (posj >= divideCnt ? -1 : 1);
-		}
-
-		// ステップゾーンを表示（仮実装）
-		var step = createArrowEffect("step" + j, "#cccccc", 
-			55 * stdPos + mWidth/2, 
-			g_stepY + (g_distY - g_stepY - 50) * dividePos, 50, 
-			g_keyObj["stepRtn" + keyCtrlPtn][j]);
+		var step = createArrowEffect("step" + j, "#cccccc",
+			g_workObj.stepX[j],
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], 50, 
+			g_workObj.stepRtn[j]);
 		mainSprite.appendChild(step);
+
+		var stepHit = createArrowEffect("stepHit" + j, "#999999",
+			g_workObj.stepX[j] -10,
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] -10, 70, 
+			g_workObj.stepRtn[j]);
+		stepHit.style.opacity = 0;
+		mainSprite.appendChild(stepHit);
 	}
 
+	// フレーム数
 	var lblframe = createDivLabel("lblframe", 0, 0, 100, 30, 20, C_CLR_TITLE, 
 		g_scoreObj.frameNum);
 	divRoot.appendChild(lblframe);
+
+	// 判定系表示
+	var lblIi = createDivLabel("lblIi", g_sWidth - 100, 20, 100, 20, 16, "#66ffff", 
+		g_resultObj.ii);
+	lblIi.style.textAlign = C_ALIGN_RIGHT;
+	mainSprite.appendChild(lblIi);
+
+	var lblShakin = createDivLabel("lblShakin", g_sWidth - 100, 40, 100, 20, 16, "#99ff99", 
+		g_resultObj.shakin);
+	lblShakin.style.textAlign = C_ALIGN_RIGHT;
+	mainSprite.appendChild(lblShakin);
+
+	var lblMatari = createDivLabel("lblMatari", g_sWidth - 100, 60, 100, 20, 16, "#ff9966", 
+		g_resultObj.matari);
+	lblMatari.style.textAlign = C_ALIGN_RIGHT;
+	mainSprite.appendChild(lblMatari);
+
+	var lblUwan = createDivLabel("lblUwan", g_sWidth - 100, 80, 100, 20, 16, "#ff9999", 
+		g_resultObj.uwan);
+	lblUwan.style.textAlign = C_ALIGN_RIGHT;
+	mainSprite.appendChild(lblUwan);
 
 	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
 	var btnBack = createButton({
@@ -2404,6 +2485,7 @@ function MainInit(){
 				if(setKey == matchKeys[j][k]){
 					var stepDiv = document.getElementById("step" + j);
 					stepDiv.style.backgroundColor = "#66ffff";
+					judgeArrow(j);
 				}
 			}
 		}
@@ -2419,17 +2501,17 @@ function MainInit(){
 		for(var j=0; j<keyNum; j++){
 			var stepDiv = document.getElementById("step" + j);
 			stepDiv.style.backgroundColor = "#cccccc";
+			var stepDivHit = document.getElementById("stepHit" + j);
+			stepDivHit.style.opacity = 0;
 		}
 	}
 
 	// 矢印生成　暫定版
-	var startTime = new Date();
 	var mkArrowEvt = 0;
 	var arrowCnts = new Array();
 	var curminArrowCnts = new Array();
 	for(var j=0; j<keyNum; j++){
 		arrowCnts[j] = 0;
-		curminArrowCnts[j] = 1;
 	}
 	var speedCnts = 0;
 	var currentSpeed = 2;
@@ -2442,6 +2524,9 @@ function MainInit(){
 	var thisTime;
 	var buffTime;
 	
+	/**
+	 * フレーム処理(譜面台)
+	 */
 	function flowTimeline(){
 		lblframe.innerHTML = g_scoreObj.frameNum;
 
@@ -2461,40 +2546,33 @@ function MainInit(){
 
 				var targetj = g_workObj.mkArrow[g_scoreObj.frameNum][j];
 
-				posj = g_keyObj["pos" + keyCtrlPtn][targetj];
-				leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-				stdPos  = (posj >= divideCnt ? leftCnt - (posMax - divideCnt)/2 : leftCnt - divideCnt / 2);
-				if(g_stateObj.reverse == "ON"){
-					dividePos = (posj >= divideCnt ? 0 : 1);
-				}else{
-					dividePos = (posj >= divideCnt ? 1 : 0);
-				}
-
 				var step = createArrowEffect("arrow" + targetj + "_" + (++arrowCnts[targetj]), g_headerObj.setColor[g_keyObj["color" + keyCtrlPtn][targetj]], 
-				55 * stdPos + mWidth/2, 
-//				g_stepY + (g_distY - g_stepY - 50) * dividePos + g_distY * scrollDir[targetj], 50, 
-				g_stepY + (g_distY - g_stepY - 50) * dividePos + g_workObj.initY[g_scoreObj.frameNum] * scrollDir[targetj], 50, 
-				g_keyObj["stepRtn" + keyCtrlPtn][targetj]);
+				g_workObj.stepX[targetj],
+				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * g_workObj.scrollDir[targetj], 50, 
+				g_workObj.stepRtn[targetj]);
+				step.setAttribute("cnt",g_workObj.arrivalFrame[g_scoreObj.frameNum]);
 				step.setAttribute("boostCnt",g_workObj.motionFrame[g_scoreObj.frameNum]);
+				step.setAttribute("judgEndFlg","false");
 				
 				mainSprite.appendChild(step);
 			}
 			//delete g_workObj.mkArrow[g_scoreObj.frameNum];
 		}
 
-		// 矢印消去 (暫定。本来はキープッシュと同時に消したい)
+		// 矢印移動＆消去 (暫定。本来はキープッシュと同時に消したい)
 		for(var j=0; j<keyNum; j++){
-			for(var k=curminArrowCnts[j]; k<=arrowCnts[j]; k++){
+			for(var k=g_workObj.judgArrowCnt[j]; k<=arrowCnts[j]; k++){
 				var arrow = document.getElementById("arrow" + j + "_" + k);
 				var boostCnt = arrow.getAttribute("boostCnt");
-				arrow.style.top = (parseFloat(arrow.style.top) - (currentSpeed + g_workObj.motionOnFrames[boostCnt] )* scrollDir[j]  ) + "px";
+				var cnt = arrow.getAttribute("cnt");
+				arrow.style.top = (parseFloat(arrow.style.top) - (currentSpeed + g_workObj.motionOnFrames[boostCnt] )* g_workObj.scrollDir[j]  ) + "px";
 				arrow.setAttribute("boostCnt", --boostCnt);
+				arrow.setAttribute("cnt", --cnt);
 
-				if(scrollDir[j] == 1 && parseFloat(arrow.style.top) < g_stepY -5){
-					curminArrowCnts[j]++;
-					mainSprite.removeChild(arrow);
-				}else if(scrollDir[j] == -1 && parseFloat(arrow.style.top) > g_distY - 50 + 5){
-					curminArrowCnts[j]++;
+				if(cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]){
+					g_resultObj.uwan++;
+					document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
+					g_workObj.judgArrowCnt[j]++;
 					mainSprite.removeChild(arrow);
 				}
 			}
@@ -2508,6 +2586,50 @@ function MainInit(){
 	}
 	var mainStartTime = new Date();
 	mkArrowEvt = setTimeout(flowTimeline(), 1000/ 60);
+}
+
+/**
+ * 矢印判定
+ * @param {*} _j 対象矢印
+ */
+function judgeArrow(_j){
+
+	if(g_judgObj.lockFlgs[_j] == false){
+		g_judgObj.lockFlgs[_j] = true;
+
+		var mainSprite = document.getElementById("mainSprite");
+		var currentNo = g_workObj.judgArrowCnt[_j];
+		var stepDivHit = document.getElementById("stepHit" + _j);
+
+		var judgArrow = document.getElementById("arrow" + _j + "_" + currentNo);
+		if(judgArrow != null){
+			var difCnt = Math.abs(judgArrow.getAttribute("cnt"));
+			var judgEndFlg = judgArrow.getAttribute("judgEndFlg");
+
+			if(difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg == "false"){
+				stepDivHit.style.opacity = 100;
+
+				if(difCnt <= g_judgObj.arrowJ[C_JDG_II]){
+					g_resultObj.ii++;
+					document.getElementById("lblIi").innerHTML = g_resultObj.ii;
+				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]){
+					g_resultObj.shakin++;
+					document.getElementById("lblShakin").innerHTML = g_resultObj.shakin;
+				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]){
+					g_resultObj.matari++;
+					document.getElementById("lblMatari").innerHTML = g_resultObj.matari;
+				}else{
+					g_resultObj.uwan++;
+					document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
+				}
+
+	//			judgArrow.setAttribute("judgEndFlg","true");
+				mainSprite.removeChild(judgArrow);
+				g_workObj.judgArrowCnt[_j]++;
+			}
+		}
+		g_judgObj.lockFlgs[_j] = false;
+	}
 }
 
 /*-----------------------------------------------------------*/
@@ -2532,6 +2654,27 @@ function resultInit(){
 	var lblTitle = getTitleDivLabel("lblTitle", 
 	"<span style='color:#6666ff;font-size:40px;'>R</span>ESULT", 0, 15);
 	divRoot.appendChild(lblTitle);
+
+	// 結果描画
+	var resultData = "<span style='color:#66ffff'>(・∀・)ｲｲ!!</span>" +
+	"<br><span style='color:#99ff99'>(`・ω・)ｼｬｷﾝ</span>" +
+	"<br><span style='color:#ff9966'>( ´∀`)ﾏﾀｰﾘ</span>" +
+	"<br><span style='color:#ff9999'>( `Д´)ｳﾜｧﾝ!!</span>";
+
+	var scoreData = g_resultObj.ii +
+	"<br>" + g_resultObj.shakin +
+	"<br>" + g_resultObj.matari +
+	"<br>" + g_resultObj.uwan;
+
+	var lblResult = createDivLabel("lblResult", g_sWidth/2 - 150, 100, 150, 20, 20, "#ffffff", 
+	resultData);
+	lblResult.style.textAlign = C_ALIGN_LEFT;
+	divRoot.appendChild(lblResult);
+
+	var lblScore = createDivLabel("lblScore", g_sWidth/2 + 50, 100, 100, 20, 20, "#ffffff", 
+	scoreData);
+	lblScore.style.textAlign = C_ALIGN_RIGHT;
+	divRoot.appendChild(lblScore);
 
 	// 戻るボタン描画
 	var btnBack = createButton({
@@ -2582,7 +2725,8 @@ function resultInit(){
 		hoverColor: C_CLR_RESET, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		// TODO:メイン画面への遷移
+		clearWindow();
+		loadingScoreInit();
 	});
 	divRoot.appendChild(btnRetry);
 
