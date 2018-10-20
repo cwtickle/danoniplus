@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/21
  */
-var g_version =  "Ver 0.27.0";
+var g_version =  "Ver 0.28.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対称箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -473,6 +473,7 @@ var g_resultObj = {
 var g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 var g_audio = new Audio();
+var g_timeoutEvtId = 0;
 
 /**
  * イベントハンドラ用オブジェクト
@@ -913,58 +914,27 @@ function titleInit(){
 	createLabel(l1ctx, g_headerObj["musicTitle"], g_sWidth/2, g_sHeight/2, 
 		titlefontsize, "Century Gothic", grd, C_ALIGN_CENTER);
 
-	// オーディオ読込テスト
+	// オーディオファイル指定
 	g_audio.src = "../music/" + g_headerObj.musicUrl;
-	g_audio.load();
 	
-	if(g_audio.readyState == 4){
-		// audioの読み込みが終わった後の処理
-
-		// ボタン描画
-		var btnStart = createButton({
-			id: "btnStart", 
-			name: "Click Here!!", 
-			x: 0, 
-			y: g_sHeight-100, 
-			width: g_sWidth, 
-			height: C_BTN_HEIGHT, 
-			fontsize: C_LBL_TITLESIZE,
-			normalColor: C_CLR_DEFAULT, 
-			hoverColor: C_CLR_DEFHOVER, 
-			align: C_ALIGN_CENTER
-		}, function(){
-			clearWindow();
-			optionInit();
-		});
-		btnStart.style.zIndex = 1;
-		divRoot.appendChild(btnStart);
-	}else{
-		// 読込中の状態
-		g_audio.addEventListener('canplaythrough', (function(){
-			return function f(){
-				g_audio.removeEventListener('canplaythrough',f,false);
-				
-				// ボタン描画
-				var btnStart = createButton({
-					id: "btnStart", 
-					name: "Click Here!!", 
-					x: 0, 
-					y: g_sHeight-100, 
-					width: g_sWidth, 
-					height: C_BTN_HEIGHT, 
-					fontsize: C_LBL_TITLESIZE,
-					normalColor: C_CLR_DEFAULT, 
-					hoverColor: C_CLR_DEFHOVER, 
-					align: C_ALIGN_CENTER
-				}, function(){
-					clearWindow();
-					optionInit();
-				});
-				btnStart.style.zIndex = 1;
-				divRoot.appendChild(btnStart);
-			}
-		})(),false);
-	}
+	// ボタン描画
+	var btnStart = createButton({
+		id: "btnStart", 
+		name: "Click Here!!", 
+		x: 0, 
+		y: g_sHeight-100, 
+		width: g_sWidth, 
+		height: C_BTN_HEIGHT, 
+		fontsize: C_LBL_TITLESIZE,
+		normalColor: C_CLR_DEFAULT, 
+		hoverColor: C_CLR_DEFHOVER, 
+		align: C_ALIGN_CENTER
+	}, function(){
+		clearWindow();
+		optionInit();
+	});
+	btnStart.style.zIndex = 1;
+	divRoot.appendChild(btnStart);
 
 	// 製作者表示
 	var lnkMaker = createButton({
@@ -1030,7 +1000,8 @@ function titleInit(){
 function dosConvert(_dos){
 
 	var obj = {};
-	var params = _dos.split("&");
+	var paramsTmp = _dos.split("&").join("|");
+	var params = paramsTmp.split("|");
 	for(var j=0; j<params.length; j++){
 		var pos = params[j].indexOf("=");
 		if(pos > 0){
@@ -1274,7 +1245,20 @@ function optionInit(){
 //		g_audio.pause();
 //		g_audio.currentTime = 0;
 		clearWindow();
-		loadingScoreInit();
+		g_audio.load();
+	
+		if(g_audio.readyState == 4){
+			// audioの読み込みが終わった後の処理
+			loadingScoreInit();
+		}else{
+			// 読込中の状態
+			g_audio.addEventListener('canplaythrough', (function(){
+				return function f(){
+					g_audio.removeEventListener('canplaythrough',f,false);
+					loadingScoreInit();
+				}
+			})(),false);
+		}
 	});
 	divRoot.appendChild(btnPlay);
 
@@ -2462,26 +2446,6 @@ function MainInit(){
 		lblTime1.style.textAlign = C_ALIGN_LEFT;
 	mainSprite.appendChild(lblTime1);
 
-	// 戻るボタン描画 (本来は不要だがデバッグ用に作成)
-	var btnBack = createButton({
-		id: "btnBack", 
-		name: "Back", 
-		x: 0, 
-		y: g_sHeight-100, 
-		width: g_sWidth/8, 
-		height: C_BTN_HEIGHT/2, 
-		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT, 
-		hoverColor: C_CLR_BACK, 
-		align: C_ALIGN_CENTER
-	}, function(){
-		// オプション画面へ戻る
-		g_audio.pause();
-		clearWindow();
-		optionInit();
-	});
-	divRoot.appendChild(btnBack);
-
 	// 進むボタン描画 (本来は不要だがデバッグ用に作成)
 	var btnPlay = createButton({
 		id: "btnPlay", 
@@ -2497,6 +2461,7 @@ function MainInit(){
 	}, function(){
 		// オプション画面へ戻る
 		g_audio.pause();
+		delete document.onkeydown;
 		clearWindow();
 		resultInit();
 	});
@@ -2522,6 +2487,32 @@ function MainInit(){
 			}
 		}
 
+		// 曲中リトライ、タイトルバック
+		if(setKey == 8){
+			g_audio.pause();
+			clearTimeout(g_timeoutEvtId);
+			clearWindow();
+			g_audio.load();
+	
+			if(g_audio.readyState == 4){
+				// audioの読み込みが終わった後の処理
+				loadingScoreInit();
+			}else{
+				// 読込中の状態
+				g_audio.addEventListener('canplaythrough', (function(){
+					return function f(){
+						g_audio.removeEventListener('canplaythrough',f,false);
+						loadingScoreInit();
+					}
+				})(),false);
+			}
+		}else if(setKey == 46){
+			g_audio.pause();
+			delete document.onkeydown;
+			clearWindow();
+			titleInit();
+		}
+
 		for(var j=0; j<C_BLOCK_KEYS.length; j++){
 			if(setKey == C_BLOCK_KEYS[j]){
 				return false;
@@ -2539,9 +2530,7 @@ function MainInit(){
 	}
 
 	// 矢印生成　暫定版
-	var mkArrowEvt = 0;
 	var arrowCnts = new Array();
-	var curminArrowCnts = new Array();
 	for(var j=0; j<keyNum; j++){
 		arrowCnts[j] = 0;
 	}
@@ -2621,10 +2610,10 @@ function MainInit(){
 		thisTime = new Date();
 		buffTime = (thisTime.getTime() - mainStartTime.getTime() - (g_scoreObj.frameNum - firstFrame) * 1000 / 60);
 		g_scoreObj.frameNum++;
-		mkArrowEvt = setTimeout(function(){flowTimeline()}, 1000/ 60 - buffTime);
+		g_timeoutEvtId = setTimeout(function(){flowTimeline()}, 1000/ 60 - buffTime);
 	}
 	var mainStartTime = new Date();
-	mkArrowEvt = setTimeout(flowTimeline(), 1000/ 60);
+	g_timeoutEvtId = setTimeout(flowTimeline(), 1000/ 60);
 }
 
 /**
@@ -2781,7 +2770,20 @@ function resultInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		clearWindow();
-		loadingScoreInit();
+		g_audio.load();
+	
+		if(g_audio.readyState == 4){
+			// audioの読み込みが終わった後の処理
+			loadingScoreInit();
+		}else{
+			// 読込中の状態
+			g_audio.addEventListener('canplaythrough', (function(){
+				return function f(){
+					g_audio.removeEventListener('canplaythrough',f,false);
+					loadingScoreInit();
+				}
+			})(),false);
+		}
 	});
 	divRoot.appendChild(btnRetry);
 
