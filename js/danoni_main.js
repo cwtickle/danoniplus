@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/21
  */
-var g_version =  "Ver 0.26.0";
+var g_version =  "Ver 0.27.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対称箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2551,7 +2551,7 @@ function MainInit(){
 	if(firstFrame < g_headerObj.blankFrame){
 		var musicStartFrame = g_headerObj.blankFrame;
 	}else{
-		var musicStartFrame = firstFrame;
+		var musicStartFrame = firstFrame + g_headerObj.blankFrame;
 	}
 	var thisTime;
 	var buffTime;
@@ -2564,7 +2564,7 @@ function MainInit(){
 
 		if(g_scoreObj.frameNum == musicStartFrame){
 			g_audio.play();
-			g_audio.currentTime = 0;
+			g_audio.currentTime = firstFrame / 60 ;
 		}
 
 		if(g_scoreObj.frameNum == g_workObj.speedData[speedCnts]){
@@ -2619,7 +2619,7 @@ function MainInit(){
 
 		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
 		thisTime = new Date();
-		buffTime = (thisTime.getTime() - mainStartTime.getTime() - g_scoreObj.frameNum * 1000 / 60);
+		buffTime = (thisTime.getTime() - mainStartTime.getTime() - (g_scoreObj.frameNum - firstFrame) * 1000 / 60);
 		g_scoreObj.frameNum++;
 		mkArrowEvt = setTimeout(function(){flowTimeline()}, 1000/ 60 - buffTime);
 	}
