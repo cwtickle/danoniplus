@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/21
+ * Revised : 2018/10/22
  */
-var g_version =  "Ver 0.29.0";
+var g_version =  "Ver 0.30.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -465,8 +465,10 @@ var g_resultObj = {
 	kita: 0,
 	sfsf: 0,
 	iknai: 0,
+	combo: 0,
 	maxCombo: 0,
-	frzCombo: 0,
+	fCombo: 0,
+	fmaxCombo: 0,
 	score: 0
 };
 
@@ -2397,10 +2399,14 @@ function getArrowSettings(){
 	g_resultObj.shakin = 0;
 	g_resultObj.matari = 0;
 	g_resultObj.uwan = 0;
+	g_resultObj.combo = 0;
+	g_resultObj.maxCombo = 0;
+
 	g_resultObj.kita = 0;
 	g_resultObj.sfsf = 0;
 	g_resultObj.iknai = 0;
-
+	g_resultObj.fCombo = 0;
+	g_resultObj.fmaxCombo = 0;
 }
 
 /*-----------------------------------------------------------*/
@@ -2470,15 +2476,25 @@ function MainInit(){
 	lblUwan.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblUwan);
 
-	var lblKita = createDivLabel("lblKita", g_sWidth - 100, 120, 100, 20, 16, "#ffff66", 
+	var lblMCombo = createDivLabel("lblMCombo", g_sWidth - 100, 100, 100, 20, 16, "#ffffff", 
+		g_resultObj.maxCombo);
+	lblMCombo.style.textAlign = C_ALIGN_RIGHT;
+	mainSprite.appendChild(lblMCombo);
+
+	var lblKita = createDivLabel("lblKita", g_sWidth - 100, 140, 100, 20, 16, "#ffff66", 
 		g_resultObj.kita);
 	lblKita.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblKita);
 
-	var lblIknai = createDivLabel("lblIknai", g_sWidth - 100, 140, 100, 20, 16, "#99ff66", 
+	var lblIknai = createDivLabel("lblIknai", g_sWidth - 100, 160, 100, 20, 16, "#99ff66", 
 		g_resultObj.iknai);
 	lblIknai.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblIknai);
+
+	var lblFCombo = createDivLabel("lblFCombo", g_sWidth - 100, 180, 100, 20, 16, "#ffffff", 
+		g_resultObj.fmaxCombo);
+	lblFCombo.style.textAlign = C_ALIGN_RIGHT;
+	mainSprite.appendChild(lblFCombo);
 
 	// 歌詞表示1
 	var lblWord0 = createDivLabel("lblword0", g_sWidth/2 -200, 10, 400, 20, 16, "#ffffff", 
@@ -2655,6 +2671,7 @@ function MainInit(){
 				if(cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]){
 					g_resultObj.uwan++;
 					document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
+					g_resultObj.combo = 0;
 					g_workObj.judgArrowCnt[j]++;
 					mainSprite.removeChild(arrow);
 				}
@@ -2676,6 +2693,7 @@ function MainInit(){
 				frzRoot.setAttribute("boostCnt",g_workObj.motionFrame[g_scoreObj.frameNum]);
 				frzRoot.setAttribute("judgEndFlg","false");
 				frzRoot.setAttribute("isMoving","true");
+				frzRoot.setAttribute("frzBarLength",frzLength);
 				mainSprite.appendChild(frzRoot);
 
 				var frzBar = createColorObject("frzBar" + targetj + "_" + (frzCnts[targetj]), "#6666ff",
@@ -2707,37 +2725,67 @@ function MainInit(){
 				var boostCnt = frzRoot.getAttribute("boostCnt");
 				var cnt = frzRoot.getAttribute("cnt");
 
-				if(frzRoot.getAttribute("isMoving") == "true"){
-					if(g_workObj.currentSpeed != 0){
-						frzRoot.style.top = (parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt] )* g_workObj.scrollDir[j]  ) + "px";
-						frzRoot.setAttribute("boostCnt", --boostCnt);
-					}
-					frzRoot.setAttribute("cnt", --cnt);
-				}else{
-					var frzBar = document.getElementById("frzBar" + j + "_" + k);
-					var frzBtm = document.getElementById("frzBtm" + j + "_" + k);
-					var frzBtmShadow = document.getElementById("frzBtmShadow" + j + "_" + k);
-
-					if(parseFloat(frzBar.style.height) > 0){
-						frzBar.style.height = (parseFloat(frzBar.style.height) - g_workObj.currentSpeed) + "px";
-						frzBar.style.top = (parseFloat(frzBar.style.top) + g_workObj.currentSpeed * g_workObj.dividePos[j]) + "px";
-						frzBtm.style.top = (parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * g_workObj.scrollDir[j]) + "px";
-						frzBtmShadow.style.top = (parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * g_workObj.scrollDir[j]) + "px";
+				var frzBar = document.getElementById("frzBar" + j + "_" + k);
+				var frzBtm = document.getElementById("frzBtm" + j + "_" + k);
+				var frzBarLength = frzRoot.getAttribute("frzBarLength");
+				
+				if(frzRoot.getAttribute("judgEndFlg") == "false"){
+					if(frzRoot.getAttribute("isMoving") == "true"){
+						if(g_workObj.currentSpeed != 0){
+							frzRoot.style.top = (parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt] )* g_workObj.scrollDir[j]  ) + "px";
+							frzRoot.setAttribute("boostCnt", --boostCnt);
+						}
+						frzRoot.setAttribute("cnt", --cnt);
 					}else{
-						g_resultObj.kita++;
-						document.getElementById("lblKita").innerHTML = g_resultObj.kita;
-						g_workObj.judgFrzCnt[j]++;
+						var frzBtmShadow = document.getElementById("frzBtmShadow" + j + "_" + k);
+
+						if(frzBarLength > 0){
+							frzBarLength = parseFloat(frzBar.style.height) - g_workObj.currentSpeed;
+							frzRoot.setAttribute("frzBarLength",frzBarLength);
+							frzBar.style.height = frzBarLength + "px";
+							frzBar.style.top = (parseFloat(frzBar.style.top) + g_workObj.currentSpeed * g_workObj.dividePos[j]) + "px";
+							frzBtm.style.top = (parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * g_workObj.scrollDir[j]) + "px";
+							frzBtmShadow.style.top = (parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * g_workObj.scrollDir[j]) + "px";
+						}else{
+							g_resultObj.kita++;
+							document.getElementById("lblKita").innerHTML = g_resultObj.kita;
+							if(++g_resultObj.fCombo > g_resultObj.fmaxCombo){
+								g_resultObj.fmaxCombo = g_resultObj.fCombo;
+								document.getElementById("lblFCombo").innerHTML = g_resultObj.fmaxCombo;
+							}
+							g_workObj.judgFrzCnt[j]++;
+							frzRoot.setAttribute("judgEndFlg","true");
+							mainSprite.removeChild(frzRoot);
+						}
+					}
+					
+					if(cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]){
+						g_resultObj.iknai++;
+						document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
+						g_resultObj.fCombo = 0;
 						frzRoot.setAttribute("judgEndFlg","true");
+
+						var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
+						frzTopShadow.style.backgroundColor = "#000000";
+						frzTopShadow.style.top = "0px";
+						frzTopShadow.style.left = "0px";
+						frzTopShadow.style.width = "50px";
+						frzTopShadow.style.height = "50px";
+						frzTopShadow.style.opacity = 100;
+						document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
+						document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
+						document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
+						document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+					}
+				}else{
+					frzBarLength -= g_workObj.currentSpeed;
+					frzRoot.setAttribute("frzBarLength",frzBarLength);
+					frzRoot.style.top = (parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed )* g_workObj.scrollDir[j]  ) + "px";
+
+					if(frzBarLength <= 0){
+						g_workObj.judgFrzCnt[j]++;
 						mainSprite.removeChild(frzRoot);
 					}
-				}
-				
-				if(cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]){
-					g_resultObj.iknai++;
-					document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
-					g_workObj.judgFrzCnt[j]++;
-					frzRoot.setAttribute("judgEndFlg","true");
-					mainSprite.removeChild(frzRoot);
 				}
 			}
 		}
@@ -2762,8 +2810,8 @@ function MainInit(){
 }
 
 /**
- * 矢印判定
- * @param {*} _j 対象矢印
+ * 矢印・フリーズアロー判定
+ * @param {*} _j 対象矢印・フリーズアロー
  */
 function judgeArrow(_j){
 
@@ -2787,15 +2835,24 @@ function judgeArrow(_j){
 				if(difCnt <= g_judgObj.arrowJ[C_JDG_II]){
 					g_resultObj.ii++;
 					document.getElementById("lblIi").innerHTML = g_resultObj.ii;
+					if(++g_resultObj.combo > g_resultObj.maxCombo){
+						g_resultObj.maxCombo = g_resultObj.combo;
+						document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
+					}
 				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]){
 					g_resultObj.shakin++;
 					document.getElementById("lblShakin").innerHTML = g_resultObj.shakin;
+					if(++g_resultObj.combo > g_resultObj.maxCombo){
+						g_resultObj.maxCombo = g_resultObj.combo;
+						document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
+					}
 				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]){
 					g_resultObj.matari++;
 					document.getElementById("lblMatari").innerHTML = g_resultObj.matari;
 				}else{
 					g_resultObj.uwan++;
 					document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
+					g_resultObj.combo = 0;
 				}
 
 	//			judgArrow.setAttribute("judgEndFlg","true");
@@ -2828,6 +2885,7 @@ function judgeArrow(_j){
 				}else{
 					g_resultObj.iknai++;
 					document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
+					g_resultObj.fCombo = 0;
 				}
 
 	//			judgArrow.setAttribute("judgEndFlg","true");
@@ -2866,14 +2924,18 @@ function resultInit(){
 	"<br><span style='color:#ff9966'>( ´∀`)ﾏﾀｰﾘ</span>" +
 	"<br><span style='color:#ff9999'>( `Д´)ｳﾜｧﾝ!!</span>" +
 	"<br><span style='color:#ffff99'>(ﾟ∀ﾟ)ｷﾀ-!!</span>" +
-	"<br><span style='color:#99ff66'>(・A・)ｲｸﾅｲ</span>";
+	"<br><span style='color:#99ff66'>(・A・)ｲｸﾅｲ</span>" +
+	"<br><span style='color:#ffffff'>MaxCombo</span>" +
+	"<br><span style='color:#ffffff'>FreezeCombo</span>" ;
 
 	var scoreData = g_resultObj.ii +
 	"<br>" + g_resultObj.shakin +
 	"<br>" + g_resultObj.matari +
 	"<br>" + g_resultObj.uwan +
 	"<br>" + g_resultObj.kita +
-	"<br>" + g_resultObj.iknai ;
+	"<br>" + g_resultObj.iknai +
+	"<br>" + g_resultObj.maxCombo +
+	"<br>" + g_resultObj.fmaxCombo ;
 
 	// スコア計算(一括)
 	var scoreTmp = g_resultObj.ii * 8 +
@@ -2888,7 +2950,9 @@ function resultInit(){
 	var tweetResultTmp = "【#danoni】" + g_headerObj.musicTitle + "(" + 
 	g_headerObj["difLabels"][g_stateObj.scoreId] + ")/" +
 	g_headerObj.tuning + "/" +
-	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan + " " + g_resultObj.kita + "-" + g_resultObj.iknai;
+	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan + " " +
+	 g_resultObj.kita + "-" + g_resultObj.iknai + " " +
+	 g_resultObj.maxCombo + "-" + g_resultObj.fmaxCombo;
 	var tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
 
 	var lblResult = createDivLabel("lblResult", g_sWidth/2 - 150, 100, 150, 20, 20, "#ffffff", 
