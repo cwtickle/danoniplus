@@ -6,9 +6,9 @@
  * created : 2018/10/08
  * Revised : 2018/10/21
  */
-var g_version =  "Ver 0.28.0";
+var g_version =  "Ver 0.29.0";
 
-// ショートカット用文字列(↓の文字列を検索することで対称箇所へジャンプできます)
+// ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
 //  シーンジャンプ:Scene
 
@@ -972,7 +972,7 @@ function titleInit(){
 
 	// バージョン描画
 	var lblVersion = createDivLabel("lblResult", g_sWidth/2, g_sHeight-25, g_sWidth/2-10, 
-	C_LNK_HEIGHT, 14, "#cccccc", 
+	C_LNK_HEIGHT, 12, "#cccccc", 
 	"HTML5 Source by ティックル, " + g_version);
 	lblVersion.style.textAlign = C_ALIGN_RIGHT;
 	divRoot.appendChild(lblVersion);
@@ -1201,8 +1201,6 @@ function optionInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		// タイトル画面へ戻る
-//		g_audio.pause();
-//		g_audio.currentTime = 0;
 		clearWindow();
 		titleInit();
 	});
@@ -1222,8 +1220,6 @@ function optionInit(){
 		align: C_ALIGN_CENTER
 	}, function(){
 		// キーコンフィグ画面へ遷移
-//		g_audio.pause();
-//		g_audio.currentTime = 0;
 		clearWindow();
 		keyConfigInit();
 	});
@@ -1242,8 +1238,6 @@ function optionInit(){
 		hoverColor: C_CLR_NEXT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-//		g_audio.pause();
-//		g_audio.currentTime = 0;
 		clearWindow();
 		g_audio.load();
 	
@@ -1330,10 +1324,15 @@ function createOptionWindow(_sprite){
 		normalColor: C_CLR_LNK, 
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_CENTER
-	}, function(){
+	}, function(e){
 		g_stateObj.speed = (Number(g_stateObj.speed) < 10 ? Number(g_stateObj.speed) + 0.25 : 1);
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 	});
+	lnkSpeed.oncontextmenu = function(){
+		g_stateObj.speed = (Number(g_stateObj.speed) > 1 ? Number(g_stateObj.speed) - 0.25 : 10);
+		lnkSpeed.innerHTML = g_stateObj.speed + " x";
+		return false;
+	}
 	optionsprite.appendChild(lnkSpeed);
 
 	// 速度モーション (Motion)
@@ -1425,7 +1424,16 @@ function createOptionWindow(_sprite){
 		g_stateObj.adjustment = (g_stateObj.adjustment == 15 ? -15 : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	});
+	lnkAdjustment.oncontextmenu = function(){
+		g_stateObj.adjustment = (g_stateObj.adjustment == -15 ? 15 : --g_stateObj.adjustment);
+		lnkAdjustment.innerHTML = g_stateObj.adjustment;
+		return false;
+	}
 	optionsprite.appendChild(lnkAdjustment);
+
+	optionsprite.oncontextmenu = function(){
+		return false;
+	}
 
 }
 
@@ -2461,7 +2469,7 @@ function MainInit(){
 	}, function(){
 		// オプション画面へ戻る
 		g_audio.pause();
-		delete document.onkeydown;
+		clearTimeout(g_timeoutEvtId);
 		clearWindow();
 		resultInit();
 	});
@@ -2508,7 +2516,7 @@ function MainInit(){
 			}
 		}else if(setKey == 46){
 			g_audio.pause();
-			delete document.onkeydown;
+			clearTimeout(g_timeoutEvtId);
 			clearWindow();
 			titleInit();
 		}
