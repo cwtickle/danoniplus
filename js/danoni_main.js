@@ -2864,12 +2864,16 @@ function resultInit(){
 	var resultData = "<span style='color:#66ffff'>(・∀・)ｲｲ!!</span>" +
 	"<br><span style='color:#99ff99'>(`・ω・)ｼｬｷﾝ</span>" +
 	"<br><span style='color:#ff9966'>( ´∀`)ﾏﾀｰﾘ</span>" +
-	"<br><span style='color:#ff9999'>( `Д´)ｳﾜｧﾝ!!</span>";
+	"<br><span style='color:#ff9999'>( `Д´)ｳﾜｧﾝ!!</span>" +
+	"<br><span style='color:#ffff99'>(ﾟ∀ﾟ)ｷﾀ-!!</span>" +
+	"<br><span style='color:#99ff66'>(・A・)ｲｸﾅｲ</span>";
 
 	var scoreData = g_resultObj.ii +
 	"<br>" + g_resultObj.shakin +
 	"<br>" + g_resultObj.matari +
-	"<br>" + g_resultObj.uwan;
+	"<br>" + g_resultObj.uwan +
+	"<br>" + g_resultObj.kita +
+	"<br>" + g_resultObj.iknai ;
 
 	// スコア計算(一括)
 	var scoreTmp = g_resultObj.ii * 8 +
@@ -2884,7 +2888,7 @@ function resultInit(){
 	var tweetResultTmp = "【#danoni】" + g_headerObj.musicTitle + "(" + 
 	g_headerObj["difLabels"][g_stateObj.scoreId] + ")/" +
 	g_headerObj.tuning + "/" +
-	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan;
+	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan + " " + g_resultObj.kita + "-" + g_resultObj.iknai;
 	var tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
 
 	var lblResult = createDivLabel("lblResult", g_sWidth/2 - 150, 100, 150, 20, 20, "#ffffff", 
