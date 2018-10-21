@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/21
  */
-var g_version =  "Ver 0.28.0";
+var g_version =  "Ver 0.28.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対称箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2461,7 +2461,7 @@ function MainInit(){
 	}, function(){
 		// オプション画面へ戻る
 		g_audio.pause();
-		delete document.onkeydown;
+		clearTimeout(g_timeoutEvtId);
 		clearWindow();
 		resultInit();
 	});
@@ -2508,7 +2508,7 @@ function MainInit(){
 			}
 		}else if(setKey == 46){
 			g_audio.pause();
-			delete document.onkeydown;
+			clearTimeout(g_timeoutEvtId);
 			clearWindow();
 			titleInit();
 		}
