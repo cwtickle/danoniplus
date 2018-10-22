@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/22
  */
-var g_version =  "Ver 0.30.0";
+var g_version =  "Ver 0.31.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -93,7 +93,7 @@ var C_IMG_MONAR = "../img/monar_600.png";
 var C_MOTION_STD_POS = 15;
 
 // キーブロック対象(キーコードを指定)
-var C_BLOCK_KEYS = [8, 9, 13, 32, 37, 38, 39, 40, 46, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126];
+var C_BLOCK_KEYS = [8, 9, 13, 17, 18, 32, 37, 38, 39, 40, 46, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126];
 
 // 譜面データ持ち回り用
 var g_rootObj = {};
@@ -2541,7 +2541,7 @@ function MainInit(){
 	});
 	divRoot.appendChild(btnPlay);
 
-	// キー操作イベント（デフォルト）
+	// キー操作イベント
 	document.onkeydown = function(evt){
 		// ブラウザ判定
 		if(g_userAgent.indexOf("firefox") != -1){
@@ -2600,6 +2600,32 @@ function MainInit(){
 			stepDiv.style.backgroundColor = "#cccccc";
 			var stepDivHit = document.getElementById("stepHit" + j);
 			stepDivHit.style.opacity = 0;
+
+			// フリーズアローを離したときの処理
+			var k = g_workObj.judgFrzCnt[j];
+			var frzRoot = document.getElementById("frz" + j + "_" + k);
+			if(frzRoot != null){
+				if(frzRoot.getAttribute("judgEndFlg") == "false"){
+					if(frzRoot.getAttribute("isMoving") == "false"){
+						g_resultObj.iknai++;
+						document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
+						g_resultObj.fCombo = 0;
+						frzRoot.setAttribute("judgEndFlg","true");
+
+						var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
+						frzTopShadow.style.backgroundColor = "#000000";
+						frzTopShadow.style.top = "0px";
+						frzTopShadow.style.left = "0px";
+						frzTopShadow.style.width = "50px";
+						frzTopShadow.style.height = "50px";
+						frzTopShadow.style.opacity = 100;
+						document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
+						document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
+						document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
+						document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+					}
+				}
+			}
 		}
 	}
 
@@ -2668,7 +2694,14 @@ function MainInit(){
 				}
 				arrow.setAttribute("cnt", --cnt);
 
-				if(cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]){
+				if(g_stateObj.auto == "ON" && cnt ==0){
+					g_resultObj.ii++;
+					document.getElementById("lblIi").innerHTML = g_resultObj.ii;
+					g_resultObj.combo = 0;
+					g_workObj.judgArrowCnt[j]++;
+					mainSprite.removeChild(arrow);
+
+				}else if(cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]){
 					g_resultObj.uwan++;
 					document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
 					g_resultObj.combo = 0;
@@ -2694,24 +2727,33 @@ function MainInit(){
 				frzRoot.setAttribute("judgEndFlg","false");
 				frzRoot.setAttribute("isMoving","true");
 				frzRoot.setAttribute("frzBarLength",frzLength);
+				frzRoot.setAttribute("frzAttempt",0);
 				mainSprite.appendChild(frzRoot);
 
+				// フリーズアローは、下記の順で作成する。
+				// 後に作成するほど前面に表示される。
+
+				// フリーズアロー帯(frzBar)
 				var frzBar = createColorObject("frzBar" + targetj + "_" + (frzCnts[targetj]), "#6666ff",
 				5, 25 - frzLength * g_workObj.dividePos[targetj], 40, frzLength, 0, "frzBar", "../img/frzBar.png");
 				frzRoot.appendChild(frzBar);
 
+				// 開始矢印の塗り部分。ヒット時は前面に出て光る。
 				var frzTopShadow = createColorObject("frzTopShadow" + targetj + "_" + (frzCnts[targetj]), "#000000",
 				0, 0, 50, 50, g_workObj.stepRtn[targetj], "arrowShadow", "../img/arrowshadow_500.png");
 				frzRoot.appendChild(frzTopShadow);
 
+				// 開始矢印。ヒット時は隠れる。
 				var frzTop = createArrowEffect("frzTop" + targetj + "_" + (frzCnts[targetj]), "#66ffff",
 				0, 0, 50, g_workObj.stepRtn[targetj]);
 				frzRoot.appendChild(frzTop);
 
+				// 後発矢印の塗り部分
 				var frzBtmShadow = createColorObject("frzBtmShadow" + targetj + "_" + (frzCnts[targetj]), "#000000",
 				0, frzLength * rev, 50, 50, g_workObj.stepRtn[targetj], "arrowShadow", "../img/arrowshadow_500.png");
 				frzRoot.appendChild(frzBtmShadow);
 
+				// 後発矢印
 				var frzBtm = createArrowEffect("frzBtm" + targetj + "_" + (frzCnts[targetj]), "#66ffff",
 				0, frzLength * rev, 50, g_workObj.stepRtn[targetj]);
 				frzRoot.appendChild(frzBtm);
@@ -2739,6 +2781,7 @@ function MainInit(){
 					}else{
 						var frzBtmShadow = document.getElementById("frzBtmShadow" + j + "_" + k);
 
+						// フリーズアローがヒット中の処理
 						if(frzBarLength > 0){
 							frzBarLength = parseFloat(frzBar.style.height) - g_workObj.currentSpeed;
 							frzRoot.setAttribute("frzBarLength",frzBarLength);
@@ -2759,6 +2802,7 @@ function MainInit(){
 						}
 					}
 					
+					// フリーズアローが枠外に出たときの処理
 					if(cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]){
 						g_resultObj.iknai++;
 						document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
