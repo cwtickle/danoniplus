@@ -1,16 +1,30 @@
 @charset "UTF-8";
 #canvas-frame {
 	height:500px;
-    position: relative;
+	position: relative;
+	overflow: hidden;
 }
 #canvas-frame canvas {
 	position: absolute;
 	left:0;
+	overflow: hidden;
 }
 .arrow {
 	mask-image: url("../img/arrow_500.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/arrow_500.png");
+	-webkit-mask-size: contain;
+}
+.arrowShadow {
+	mask-image: url("../img/arrowShadow_500.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/arrowShadow_500.png");
+	-webkit-mask-size: contain;
+}
+.frzBar {
+	mask-image: url("../img/frzbar.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/frzbar.png");
 	-webkit-mask-size: contain;
 }
 .onigiri {
