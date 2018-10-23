@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/23
  */
-var g_version =  "Ver 0.32.2";
+var g_version =  "Ver 0.33.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -267,11 +267,12 @@ var g_keyObj = {
 		"oni","left","leftdia","down","space","up","rightdia","right"],
 	chara14_0: ["sleftdia","sleft","sdown","sup","sright","srightdia",
 		"oni","left","leftdia","down","space","up","rightdia","right"],
-	chara17_0: ["aleft","bleft","adown","bdown","aup","bup","aright","bright","space",
+	chara17_1: ["aleft","bleft","adown","bdown","aup","bup","aright","bright","space",
 		"cleft","dleft","cdown","ddown","cup","dup","cright","dright"],
-
+	
 	chara5_1: ["space","left","down","up","right"],
 	chara9A_1: ["left","down","up","right","space","sleft","sdown","sup","sright"],
+	chara9i_1: ["sleft","sdown","sup","sright","left","down","up","right","space"],
 	chara11_1: ["space","sleft","sdown","sup","sright",
 		"left","leftdia","down","up","rightdia","right"],
 	chara11L_1: ["sleft","sdown","sup","sright","space",
@@ -280,7 +281,9 @@ var g_keyObj = {
 		"oni","left","leftdia","down","space","up","rightdia","right"],
 	chara14_1: ["sleftdia","sleft","sdown","sup","sright","srightdia",
 		"oni","left","leftdia","down","space","up","rightdia","right"],
-
+	chara17_0: ["aleft","adown","aup","aright","space","dleft","ddown","dup","dright",
+		"bleft","bdown","bup","bright","cleft","cdown","cup","cright"],
+			
 	chara5_2: ["left","down","space","up","right"],
 
 	// カラーパターン
@@ -295,15 +298,17 @@ var g_keyObj = {
 	color11L_0: [3,3,3,3,0,1,0,2,0,1,0],
 	color12_0: [3,3,3,3,2,0,1,0,1,0,1,0],
 	color14_0: [4,3,3,3,3,4,2,0,1,0,1,0,1,0],
-	color17_0: [0,1,0,1,0,1,0,1,2,1,0,1,0,1,0,1,0],
+	color17_1: [0,1,0,1,0,1,0,1,2,3,4,3,4,3,4,3,4],
 
 	color5_1: [2,0,0,0,0],
 	color9A_1: [0,0,0,0,2,3,3,3,3],
+	color9i_1: [0,0,0,0,2,2,2,2,2],
 	color11_1: [2,3,3,3,3,0,1,0,0,1,0],
 	color11L_1: [3,3,3,3,2,0,1,0,0,1,0],
 	color12_1: [3,3,3,3,2,0,1,0,1,0,1,0],
 	color14_1: [4,3,3,3,3,4,2,0,1,0,1,0,1,0],
-
+	color17_0: [0,0,0,0,2,4,4,4,4,1,1,1,1,3,3,3,3],
+	
 	color5_2: [0,0,2,0,0],
 
 	// 基本パターン (矢印回転、AAキャラクタ)
@@ -319,18 +324,21 @@ var g_keyObj = {
 	stepRtn11L_0: [0, -90, 90, 180, 0, -45, -90, "onigiri", 90, 135, 180],
 	stepRtn12_0: [0, -90, 90, 180, "onigiri", 0, 30, 60, 90, 120, 150, 180],
 	stepRtn14_0: [45, 0, -90, 90, 180, 135, "onigiri", 0, 30, 60, 90, 120, 150, 180],
-	stepRtn17_0: [0, -22.5, -45, -67.5, -90, -112.5, -135, -157.5, "onigiri", 
+	stepRtn17_1: [0, -22.5, -45, -67.5, -90, -112.5, -135, -157.5, "onigiri", 
 		22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180],
-	
+
 	// 変則パターン (矢印回転、AAキャラクタ)
 	// - 末尾の番号をカウントアップさせることで実現できる。keyCtrlと合わせること
 	// - 配列の数は、通常パターンと同数で無くてはいけない（keyCtrlも同様）
 	stepRtn5_1: ["onigiri", 0, -90, 90, 180],
 	stepRtn9A_1: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
+	stepRtn9i_1: [0, -90, 90, 180, "monar", "giko", "c", "morara", "onigiri"],
 	stepRtn11_1: ["onigiri", 0, -90, 90, 180, 0, -45, -90, 90, 135, 180],
 	stepRtn11L_1: [0, -90, 90, 180, "onigiri", 0, -45, -90, 90, 135, 180],
 	stepRtn12_1: [0, -90, 90, 180, "onigiri", 0, 30, 60, 90, 120, 150, 180],
 	stepRtn14_1: [45, 0, -90, 90, 180, 135, "onigiri", 0, 30, 60, 90, 120, 150, 180],
+	stepRtn17_0: [0, -45, -90, -135, "onigiri", 45, 90, 135, 180,
+		-22.5, -67.5, -112.5, -157.5, 22.5, 67.5, 112.5, 157.5],
 
 	stepRtn5_2: [0, -90, "onigiri", 90, 180],
 
@@ -346,14 +354,16 @@ var g_keyObj = {
 	div11L_0: 6,
 	div12_0: 5,
 	div14_0: 7,
-	div17_0: 9,
+	div17_1: 17,
 
 	div5_1: 5,
 	div9A_1: 9,
+	div9i_1: 6,
 	div11_1: 6,
 	div11L_1: 6,
 	div12_1: 5,
 	div14_1: 7,
+	div17_0: 9,
 
 	div5_2: 5,
 
@@ -369,14 +379,16 @@ var g_keyObj = {
 	pos11L_0: [0,1,2,3,6,7,8,9,10,11,12],
 	pos12_0: [1,2,3,4,5,6,7,8,9,10,11,12],
 	pos14_0: [1,2,3,4,5,6,7,8,9,10,11,12,13,14],
-	pos17_0: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+	pos17_1: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
 
 	pos5_1: [0,1,2,3,4],
 	pos9A_1: [0,1,2,3,4,5,6,7,8],
+	pos9i_1: [2,3,4,5,6,7,8,9,10],
 	pos11_1: [1,2,3,4,5,6,7,8,10,11,12],
 	pos11L_1: [0,1,2,3,4,6,7,8,10,11,12],
 	pos12_1: [1,2,3,4,5,6,7,8,9,10,11,12],
 	pos14_1: [1,2,3,4,5,6,7,8,9,10,11,12,13,14],
+	pos17_0: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
 
 	pos5_2: [0,1,2,3,4],
 
@@ -396,8 +408,8 @@ var g_keyObj = {
 	keyCtrl11L_0:[[87],[69],[51,52],[82],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl12_0:[[85],[73],[56,57],[79],[32],[78],[74],[77,0],[75,0],[188],[76],[190]],
 	keyCtrl14_0:[[84,89],[85],[73],[56,55,57,48],[79],[192,80],[32],[78],[74],[77,0],[75,0],[188],[76],[190]],
-	keyCtrl17_0:[[65],[90],[83],[88],[68],[67],[70],[86],[32],[78],[74],[77],[75],[188],[76],[190],[187]],
-
+	keyCtrl17_1:[[65],[90],[83],[88],[68],[67],[70],[86],[32],[78],[74],[77],[75],[188],[76],[190],[187]],
+	
 	keyCtrl5_0d: [[37],[40],[38,0],[39],[32,0]],
 	keyCtrl7_0d: [[83],[68,0],[70],[32,0],[74],[75,0],[76]],
 	keyCtrl7i_0d: [[90],[88],[67],[37],[40],[38,0],[39]],
@@ -409,29 +421,38 @@ var g_keyObj = {
 	keyCtrl11L_0d:[[87],[69],[51,52],[82],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl12_0d:[[85],[73],[56,57],[79],[32],[78],[74],[77,0],[75,0],[188],[76],[190]],
 	keyCtrl14_0d:[[84,89],[85],[73],[56,55,57,48],[79],[192,80],[32],[78],[74],[77,0],[75,0],[188],[76],[190]],
-	keyCtrl17_0d:[[65],[90],[83],[88],[68],[67],[70],[86],[32],[78],[74],[77],[75],[188],[76],[190],[187]],
-
+	keyCtrl17_1d:[[65],[90],[83],[88],[68],[67],[70],[86],[32],[78],[74],[77],[75],[188],[76],[190],[187]],
+	
 	// 変則パターン (キーコンフィグ)
 	// - 末尾dなし(実際の設定値)と末尾dあり(デフォルト値)は必ずセットで揃えること。配列数も合わせる。
 	// - _0, _0dの数字部分をカウントアップすることで実現できる。
 	// - 配列数は合わせる必要はあるが、代替キーの数は _X, _Xdで揃っていれば合わせる必要はない。
 	keyCtrl5_1: [[32,0],[37],[40],[38,0],[39]],
 	keyCtrl9A_1:[[83],[68],[69,82],[70],[32],[37],[40],[38,0],[39]],
+	keyCtrl9i_1:[[37],[40],[38,0],[39],[65],[83],[68],[70],[32]],
 	keyCtrl11_1:[[32],[37],[40],[38,0],[39],[83],[68],[70],[74],[75],[76]],
 	keyCtrl11L_1:[[87],[69],[51,52],[82],[32],[83],[68],[70],[74],[75],[76]],
 	keyCtrl12_1:[[89],[85,73],[56,55,57],[79],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
 	keyCtrl14_1:[[82,84],[89],[85,73],[56,54,55,57,48],[79],[192,80],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
-
+	keyCtrl17_0:[[65],[83],[68],[70],[32],[74],[75],[76],[187],[90],[88],[67],[86],[78],[77],[188],[190]],
+	
 	keyCtrl5_1d: [[32,0],[37],[40],[38,0],[39]],
 	keyCtrl9A_1d:[[83],[68],[69,82],[70],[32],[37],[40],[38,0],[39]],
+	keyCtrl9i_1d:[[37],[40],[38,0],[39],[65],[83],[68],[70],[32]],
 	keyCtrl11_1d:[[32],[37],[40],[38,0],[39],[83],[68],[70],[74],[75],[76]],
 	keyCtrl11L_1d:[[87],[69],[51,52],[82],[32],[83],[68],[70],[74],[75],[76]],
 	keyCtrl12_1d:[[89],[85,73],[56,55,57],[79],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
 	keyCtrl14_1d:[[82,84],[89],[85,73],[56,54,55,57,48],[79],[192,80],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
-
+	keyCtrl17_0d:[[65],[83],[68],[70],[32],[74],[75],[76],[187],[90],[88],[67],[86],[78],[77],[188],[190]],
+	
 	keyCtrl5_2: [[37],[40],[32,0],[38,0],[39]],
 
 	keyCtrl5_2d: [[37],[40],[32,0],[38,0],[39]],
+
+	// 矢印間隔補正
+	blank: 55,
+	blank_def: 55,
+	blank17_1: 45,
 
 	dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
@@ -1617,7 +1638,7 @@ function keyConfigInit(){
 			posj = g_keyObj["pos" + keyCtrlPtn][0];
 
 			var cursor = document.getElementById("cursor");
-			cursor.style.left = (kWidth/2 + 55 * (posj - divideCnt/2) -10) + "px";
+			cursor.style.left = (kWidth/2 + g_keyObj.blank * (posj - divideCnt/2) -10) + "px";
 			cursor.style.top = "45px";
 		}
 	});
@@ -1631,6 +1652,11 @@ function keyConfigInit(){
 	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 	var posMax = g_keyObj["pos" + keyCtrlPtn][keyNum-1] +1;
 	var divideCnt = g_keyObj["div"+ keyCtrlPtn];
+	if(g_keyObj["blank"+ keyCtrlPtn] != undefined){
+		g_keyObj.blank = g_keyObj["blank"+ keyCtrlPtn];
+	}else{
+		g_keyObj.blank = g_keyObj.blank_def;
+	}
 
 	/** 同行の左から数えた場合の位置(x座標) */
 	var leftCnt = 0;
@@ -1649,13 +1675,13 @@ function keyConfigInit(){
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		keyconSprite.appendChild(createArrowEffect("arrow" + j, g_headerObj.setColor[g_keyObj["color" + keyCtrlPtn][j]], 
-			55 * stdPos + kWidth/2, 
+			g_keyObj.blank * stdPos + kWidth/2, 
 			150 * dividePos, 50, 
 			g_keyObj["stepRtn" + keyCtrlPtn][j]));
 
 		for(var k=0;k<g_keyObj["keyCtrl"+ keyCtrlPtn][j].length;k++){
 			keyconSprite.appendChild(createDivLabel("keycon" + j + "_" + k, 
-				55 * stdPos + kWidth/2, 
+				g_keyObj.blank * stdPos + kWidth/2, 
 				50 + 20 * k + 150 * dividePos,
 				50, 20, 16, "#cccccc", g_kCd[g_keyObj["keyCtrl"+ keyCtrlPtn][j][k]]));
 		}
@@ -1664,7 +1690,7 @@ function keyConfigInit(){
 
 	// カーソルの作成
 	var cursor = keyconSprite.appendChild(createImg("cursor", "../img/cursor.png", 
-		kWidth/2 + 55 * (posj - divideCnt/2) -10, 45, 15, 30 ));
+		kWidth/2 + g_keyObj.blank * (posj - divideCnt/2) -10, 45, 15, 30 ));
 
 	
 	// キーボード押下時処理
@@ -1711,7 +1737,7 @@ function keyConfigInit(){
 				dividePos = (posj >= divideCnt ? 1 : 0);
 
 				if(posj == divideCnt){
-					cursor.style.left = (kWidth/2 + 55 * stdPos -10) + "px";
+					cursor.style.left = (kWidth/2 + g_keyObj.blank * stdPos -10) + "px";
 					cursor.style.top = (50 + 150) + "px";
 				}else{
 					cursor.style.left = (parseInt(cursor.style.left) + 55) + "px";
@@ -1723,7 +1749,7 @@ function keyConfigInit(){
 				g_currentj = 0;
 				g_currentk = 0;
 				var posj = g_keyObj["pos" + keyCtrlPtn][g_currentj];
-				cursor.style.left = (kWidth/2 + 55 * (posj - divideCnt/2) -10) + "px";
+				cursor.style.left = (kWidth/2 + g_keyObj.blank * (posj - divideCnt/2) -10) + "px";
 				cursor.style.top = "45px";
 			}
 		}
@@ -2406,7 +2432,11 @@ function getArrowSettings(){
 	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 	var posMax = g_keyObj["pos" + keyCtrlPtn][keyNum-1] +1;
 	var divideCnt = g_keyObj["div"+ keyCtrlPtn];
-
+	if(g_keyObj["blank"+ keyCtrlPtn] != undefined){
+		g_keyObj.blank = g_keyObj["blank"+ keyCtrlPtn];
+	}else{
+		g_keyObj.blank = g_keyObj.blank_def;
+	}
 
 	g_workObj.stepX = [];
 	g_workObj.scrollDir = [];
@@ -2422,7 +2452,7 @@ function getArrowSettings(){
 		var posj = g_keyObj["pos" + keyCtrlPtn][j];
 		var leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
 		var stdPos  = (posj >= divideCnt ? leftCnt - (posMax - divideCnt)/2 : leftCnt - divideCnt / 2);
-		g_workObj.stepX[j] = 55 * stdPos + g_sWidth/2;
+		g_workObj.stepX[j] = g_keyObj.blank * stdPos + g_sWidth/2;
 
 		if(g_stateObj.reverse == "ON"){
 			g_workObj.dividePos[j] = (posj >= divideCnt ? 0 : 1);
@@ -2579,31 +2609,31 @@ function MainInit(){
 	mainSprite.appendChild(lblFCombo);
 
 	// 歌詞表示1
-	var lblWord0 = createDivLabel("lblword0", g_sWidth/2 -200, 10, 400, 20, 16, "#ffffff", 
+	var lblWord0 = createDivLabel("lblword0", g_sWidth/2 -200, 10, g_sWidth -100, 20, 16, "#ffffff", 
 		g_workObj.word0Data);
 	lblWord0.style.textAlign = C_ALIGN_LEFT;
 	mainSprite.appendChild(lblWord0);
 
 	// 歌詞表示2
-	var lblWord1 = createDivLabel("lblword1", g_sWidth/2 -200, g_sHeight-50, 400, 20, 16, "#ffffff", 
+	var lblWord1 = createDivLabel("lblword1", g_sWidth/2 -200, g_sHeight-60, g_sWidth -100, 20, 14, "#ffffff", 
 		g_workObj.word1Data);
 	lblWord1.style.textAlign = C_ALIGN_LEFT;
 	mainSprite.appendChild(lblWord1);
 
 	// 曲名・アーティスト名表示
-	var lblCredit = createDivLabel("lblCredit", g_sWidth/2 - 125, g_sHeight-30, 400, 20, 16, "#cccccc", 
+	var lblCredit = createDivLabel("lblCredit", 125, g_sHeight-30, g_sWidth - 125, 20, 14, "#cccccc", 
 		g_headerObj.musicTitle + " / " + g_headerObj.artistName);
 	lblCredit.style.textAlign = C_ALIGN_LEFT;
 	mainSprite.appendChild(lblCredit);
 
 	// 曲時間表示1
-	var lblTime1 = createDivLabel("lblTime1", g_sWidth/2 -250, g_sHeight-30, 50, 20, 16, "#cccccc", 
+	var lblTime1 = createDivLabel("lblTime1", 0, g_sHeight-30, 50, 20, 14, "#cccccc", 
 	"-:--");
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblTime1);
 
 	// 曲時間表示2
-	var lblTime2 = createDivLabel("lblTime2", g_sWidth/2 -190, g_sHeight-30, 50, 20, 16, "#cccccc", 
+	var lblTime2 = createDivLabel("lblTime2", 60, g_sHeight-30, 50, 20, 14, "#cccccc", 
 	"/ " + fullTime);
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblTime2);
