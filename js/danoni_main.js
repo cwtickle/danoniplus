@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/22
+ * Revised : 2018/10/23
  */
-var g_version =  "Ver 0.31.0";
+var g_version =  "Ver 0.32.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -105,7 +105,8 @@ var g_stateObj = {
 	motion: "OFF",
 	reverse: "OFF",
 	auto: "OFF",
-	adjustment: 0
+	adjustment: 0,
+	volume: 100
 };
 
 // サイズ(後で指定)
@@ -1103,6 +1104,11 @@ function headerConvert(_dosObj){
 		obj.startFrame = parseInt(_dosObj.startFrame);
 	}
 
+	// フェードアウトフレーム数(譜面別)
+	if(_dosObj.fadeFrame != undefined){
+		obj.fadeFrame = _dosObj.fadeFrame.split("$");
+	}
+
 	// ステップゾーン位置
 	if(isNaN(parseFloat(_dosObj.stepY))){
 		g_stepY = C_STEP_Y;
@@ -1449,7 +1455,7 @@ function createOptionWindow(_sprite){
 				"<span style='color:#cc66ff'>A</span>djustment");
 	optionsprite.appendChild(lblAdjustment);
 	var lnkAdjustment = createButton({
-		id: "lnkAutoPlay", 
+		id: "lnkAdjustment", 
 		name: g_stateObj.adjustment, 
 		x: 170, 
 		y: 150, 
@@ -1469,6 +1475,33 @@ function createOptionWindow(_sprite){
 		return false;
 	}
 	optionsprite.appendChild(lnkAdjustment);
+
+
+	// ボリューム
+	var lblVolume = createDivLabel("lblVolume", 0, 180, 100, 30, 20, C_CLR_TITLE, 
+	"<span style='color:#9999ff'>V</span>olume");
+	optionsprite.appendChild(lblVolume);
+	var lnkVolume = createButton({
+		id: "lnkVolume", 
+		name: g_stateObj.volume, 
+		x: 170, 
+		y: 180, 
+		width: 250, 
+		height: 30, 
+		fontsize: 20,
+		normalColor: C_CLR_LNK, 
+		hoverColor: C_CLR_DEFAULT, 
+		align: C_ALIGN_CENTER
+	}, function(){
+		g_stateObj.volume = (g_stateObj.volume == 0 ? 100 : --g_stateObj.volume);
+		lnkVolume.innerHTML = g_stateObj.volume + "%";
+	});
+	lnkVolume.oncontextmenu = function(){
+		g_stateObj.volume = (g_stateObj.volume == 100 ? 0 : ++g_stateObj.volume);
+		lnkVolume.innerHTML = g_stateObj.volume + "%";
+		return false;
+	}
+	optionsprite.appendChild(lnkVolume);
 
 	optionsprite.oncontextmenu = function(){
 		return false;
@@ -1740,7 +1773,8 @@ function loadingScoreInit(){
 	g_workObj.motionOnFrames = motionOnFrame.concat();
 	
 	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
-	var arrivalFrame = getFirstArrivalFrame(g_scoreObj.frameNum, speedOnFrame, motionOnFrame);
+	var firstFrame = (g_scoreObj.frameNum == 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
+	var arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
 	
 	// 矢印・フリーズアロー・速度/色変化格納処理
 	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
@@ -2139,6 +2173,9 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 				// フリーズアローの出現位置が開始前の場合は除外
 				if(arrowArrivalFrm < _firstArrivalFrame){
+					if(g_workObj.mkFrzLength[j] != undefined){
+						g_workObj.mkFrzLength[j] = g_workObj.mkFrzLength[j].slice(k +2).concat();
+					}
 					break;
 
 				// 最初から最後まで同じスピードのときは前回のデータを流用
@@ -2175,6 +2212,11 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 						g_workObj.mkFrzArrow[frzStartPoint[j][k]] = new Array();
 					}
 					g_workObj.mkFrzArrow[frzStartPoint[j][k]].push(j);
+				
+				}else{
+					if(g_workObj.mkFrzLength[j] != undefined){
+						g_workObj.mkFrzLength[j] = g_workObj.mkFrzLength[j].slice(k +2).concat();
+					}
 				}
 			}
 		}
@@ -2450,6 +2492,46 @@ function MainInit(){
 		mainSprite.appendChild(stepHit);
 	}
 
+	// 矢印生成　初期化
+	var arrowCnts = new Array();
+	var frzCnts = new Array();
+	for(var j=0; j<keyNum; j++){
+		arrowCnts[j] = 0;
+		frzCnts[j] = 0;
+	}
+	var speedCnts = 0;
+	g_workObj.currentSpeed = 2;
+	var firstFrame = g_scoreObj.frameNum;
+	if(firstFrame < g_headerObj.blankFrame){
+		var musicStartFrame = g_headerObj.blankFrame;
+		g_audio.volume = g_stateObj.volume / 100;
+	}else{
+		var musicStartFrame = firstFrame + g_headerObj.blankFrame;
+		g_audio.volume = 0;
+	}
+	var thisTime;
+	var buffTime;
+	var musicStartFlg = false;
+
+	// 終了時間の設定
+	var fullSecond = Math.floor(g_headerObj.blankFrame / 60 + g_audio.duration);
+	var fullMin = Math.floor(fullSecond / 60);
+	var fullSec = ("00" + Math.floor(fullSecond % 60)).slice(-2);
+	var fullTime = fullMin + ":" + fullSec;
+	var fadeOutFrame = Infinity;
+
+	// フェードアウト時間指定の場合、その10秒後に終了する
+	if(g_headerObj.fadeFrame != undefined){
+		if(isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))){
+		}else{
+			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]);
+
+			fullMin = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 600) / 3600);
+			fullSec = ("00" + ((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 600) / 60) % 60).slice(-2);
+			fullTime = fullMin + ":" + fullSec;
+		}
+	}
+
 	// フレーム数
 	var lblframe = createDivLabel("lblframe", 0, 0, 100, 30, 20, C_CLR_TITLE, 
 		g_scoreObj.frameNum);
@@ -2509,16 +2591,22 @@ function MainInit(){
 	mainSprite.appendChild(lblWord1);
 
 	// 曲名・アーティスト名表示
-	var lblCredit = createDivLabel("lblCredit", g_sWidth/2 - 150, g_sHeight-30, 400, 20, 16, "#cccccc", 
-		g_headerObj.musicTitle + "/" + g_headerObj.artistName);
-	lblCredit.style.textAlign = C_ALIGN_CENTER;
+	var lblCredit = createDivLabel("lblCredit", g_sWidth/2 - 125, g_sHeight-30, 400, 20, 16, "#cccccc", 
+		g_headerObj.musicTitle + " / " + g_headerObj.artistName);
+	lblCredit.style.textAlign = C_ALIGN_LEFT;
 	mainSprite.appendChild(lblCredit);
 
-	// 曲時間表示
-	var lblTime1 = createDivLabel("lblTime1", g_sWidth/2 -250, g_sHeight-30, 100, 20, 16, "#cccccc", 
-		"-:-- / -:--");
-		lblTime1.style.textAlign = C_ALIGN_LEFT;
+	// 曲時間表示1
+	var lblTime1 = createDivLabel("lblTime1", g_sWidth/2 -250, g_sHeight-30, 50, 20, 16, "#cccccc", 
+	"-:--");
+	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblTime1);
+
+	// 曲時間表示2
+	var lblTime2 = createDivLabel("lblTime2", g_sWidth/2 -190, g_sHeight-30, 50, 20, 16, "#cccccc", 
+	"/ " + fullTime);
+	lblTime1.style.textAlign = C_ALIGN_RIGHT;
+	mainSprite.appendChild(lblTime2);
 
 	// 進むボタン描画 (本来は不要だがデバッグ用に作成)
 	var btnPlay = createButton({
@@ -2533,7 +2621,6 @@ function MainInit(){
 		hoverColor: C_CLR_NEXT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		// オプション画面へ戻る
 		g_audio.pause();
 		clearTimeout(g_timeoutEvtId);
 		clearWindow();
@@ -2629,24 +2716,6 @@ function MainInit(){
 		}
 	}
 
-	// 矢印生成　暫定版
-	var arrowCnts = new Array();
-	var frzCnts = new Array();
-	for(var j=0; j<keyNum; j++){
-		arrowCnts[j] = 0;
-		frzCnts[j] = 0;
-	}
-	var speedCnts = 0;
-	g_workObj.currentSpeed = 2;
-	var firstFrame = g_scoreObj.frameNum;
-	if(firstFrame < g_headerObj.blankFrame){
-		var musicStartFrame = g_headerObj.blankFrame;
-	}else{
-		var musicStartFrame = firstFrame + g_headerObj.blankFrame;
-	}
-	var thisTime;
-	var buffTime;
-	
 	/**
 	 * フレーム処理(譜面台)
 	 */
@@ -2655,7 +2724,51 @@ function MainInit(){
 
 		if(g_scoreObj.frameNum == musicStartFrame){
 			g_audio.play();
+			musicStartFlg = true;
 			g_audio.currentTime = firstFrame / 60 ;
+		}
+
+		// フェードイン・アウト
+		if(g_audio.volume >= g_stateObj.volume / 100){
+			musicStartFlg = false;
+			if(g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + 600){
+				var tmpVolume = (g_audio.volume - 5 / 1000);
+				if(tmpVolume < 0){
+					g_audio.volume = 0;
+				}else{
+					g_audio.volume = tmpVolume;
+				}
+			}
+		}else{
+			if(musicStartFlg == true){
+				var tmpVolume = (g_audio.volume + 5 / 1000);
+				if(tmpVolume > 1){
+					g_audio.volume = 1;
+				}else{
+					g_audio.volume = tmpVolume;
+				}
+			}else if(g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + 600){
+				var tmpVolume = (g_audio.volume - 5 / 1000);
+				if(tmpVolume < 0){
+					g_audio.volume = 0;
+				}else{
+					g_audio.volume = tmpVolume;
+				}
+			}
+		}
+
+		if(g_scoreObj.frameNum % 60 == 0){
+			var currentMin = Math.floor(g_scoreObj.frameNum / 3600);
+			var currentSec = ("00" + (g_scoreObj.frameNum / 60) % 60).slice(-2);
+			var currentTime = currentMin + ":" + currentSec;
+			lblTime1.innerHTML = currentTime;
+
+			if(currentTime == fullTime){
+				g_audio.pause();
+				clearTimeout(g_timeoutEvtId);
+				clearWindow();
+				resultInit();
+			}
 		}
 
 		if(g_scoreObj.frameNum == g_workObj.speedData[speedCnts]){
