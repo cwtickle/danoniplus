@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/23
  */
-var g_version =  "Ver 0.32.1";
+var g_version =  "Ver 0.32.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2608,25 +2608,6 @@ function MainInit(){
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblTime2);
 
-	// 進むボタン描画 (本来は不要だがデバッグ用に作成)
-	var btnPlay = createButton({
-		id: "btnPlay", 
-		name: "Play", 
-		x: g_sWidth/8 * 7, 
-		y: g_sHeight-100, 
-		width: g_sWidth/8, 
-		height: C_BTN_HEIGHT/2, 
-		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT, 
-		hoverColor: C_CLR_NEXT, 
-		align: C_ALIGN_CENTER
-	}, function(){
-		g_audio.pause();
-		clearTimeout(g_timeoutEvtId);
-		clearWindow();
-		resultInit();
-	});
-	divRoot.appendChild(btnPlay);
 
 	// キー操作イベント
 	document.onkeydown = function(evt){
