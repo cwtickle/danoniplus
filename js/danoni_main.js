@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/23
+ * Revised : 2018/10/24
  */
-var g_version =  "Ver 0.33.0";
+var g_version =  "Ver 0.33.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -551,19 +551,21 @@ var g_handler = (function(){
  */
 function createDiv(_id, _x, _y, _width, _height){
 	var div = document.createElement("div");
-	div.id = _id;
-	div.style.left   = _x + "px";
-	div.style.top    = _y + "px";
-	div.style.width  = _width + "px";
-	div.style.height = _height + "px";
-	div.style.position = "absolute";
 
-	div.style.userSelect = "none";
-	div.style.webkitUserSelect = "none";
-	div.style.msUserSelect = "none";
-	div.style.mozUserSelect = "none";
-	div.style.khtmlUserSelect = "none";
-	div.style.webkitTouchCallout = "none";
+	div.id = _id;
+	var style = div.style;
+	style.left   = _x + "px";
+	style.top    = _y + "px";
+	style.width  = _width + "px";
+	style.height = _height + "px";
+	style.position = "absolute";
+
+	style.userSelect = "none";
+	style.webkitUserSelect = "none";
+	style.msUserSelect = "none";
+	style.mozUserSelect = "none";
+	style.khtmlUserSelect = "none";
+	style.webkitTouchCallout = "none";
 
 	return div;
 }
@@ -582,9 +584,10 @@ function createDiv(_id, _x, _y, _width, _height){
  */
 function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text){
 	var div = createDiv(_id, _x, _y, _width, _height);
-	div.style.font = _fontsize + "px '" + C_LBL_BASICFONT + "'";
-	div.style.color = _color;
-	div.style.textAlign = C_ALIGN_CENTER;
+	var style = div.style;
+	style.font = _fontsize + "px '" + C_LBL_BASICFONT + "'";
+	style.color = _color;
+	style.textAlign = C_ALIGN_CENTER;
 	div.innerHTML = _text;
 
 	return div;
@@ -775,32 +778,33 @@ function createButton(_obj, _func){
 	var div = createDiv(_obj.id, _obj.x, _obj.y, _obj.width, _obj.height);
 
 	// ボタンの装飾を定義
-	div.style.font = _obj.fontsize + "px '" + C_LBL_BASICFONT + "'";
+	var style = div.style;
+	style.font = _obj.fontsize + "px '" + C_LBL_BASICFONT + "'";
 	div.innerHTML = _obj.name;
-	div.style.textAlign = _obj.align;
-	div.style.verticalAlign = C_VALIGN_MIDDLE;
-	div.style.color = C_CLR_TEXT;
-	div.style.backgroundColor = _obj.normalColor;
-	div.style.transition = "background-color 0.25s linear";
+	style.textAlign = _obj.align;
+	style.verticalAlign = C_VALIGN_MIDDLE;
+	style.color = C_CLR_TEXT;
+	style.backgroundColor = _obj.normalColor;
+	style.transition = "background-color 0.25s linear";
 
 	// オンマウス・タップ時の挙動 (背景色変更、カーソル変化)
 	div.onmouseover = function(){
-		div.style.backgroundColor = _obj.hoverColor;
-		div.style.cursor = "pointer";
+		style.backgroundColor = _obj.hoverColor;
+		style.cursor = "pointer";
 	}
 	var lsnrkeyTS = g_handler.addListener(div, "touchstart", function(){
-		div.style.backgroundColor = _obj.hoverColor;
-		div.style.cursor = "pointer";
+		style.backgroundColor = _obj.hoverColor;
+		style.cursor = "pointer";
 	}, false);
 
 	// 通常時の挙動 (背景色変更、カーソル変化)
 	div.onmouseout = function(){
-		div.style.backgroundColor = _obj.normalColor;
-		div.style.cursor = "default";
+		style.backgroundColor = _obj.normalColor;
+		style.cursor = "default";
 	}
 	var lsnrkeyTE = g_handler.addListener(div, "touchend", function(){
-		div.style.backgroundColor = _obj.normalColor;
-		div.style.cursor = "default";
+		style.backgroundColor = _obj.normalColor;
+		style.cursor = "default";
 	}, false);
 
 	// ボタンを押したときの動作
@@ -2711,12 +2715,13 @@ function MainInit(){
 						frzRoot.setAttribute("judgEndFlg","true");
 
 						var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
-						frzTopShadow.style.backgroundColor = "#000000";
-						frzTopShadow.style.top = "0px";
-						frzTopShadow.style.left = "0px";
-						frzTopShadow.style.width = "50px";
-						frzTopShadow.style.height = "50px";
-						frzTopShadow.style.opacity = 100;
+						var fstyle = frzTopShadow.style;
+						fstyle.backgroundColor = "#000000";
+						fstyle.top = "0px";
+						fstyle.left = "0px";
+						fstyle.width = "50px";
+						fstyle.height = "50px";
+						fstyle.opacity = 100;
 						document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
 						document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
 						document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
@@ -2934,12 +2939,13 @@ function MainInit(){
 						frzRoot.setAttribute("judgEndFlg","true");
 
 						var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
-						frzTopShadow.style.backgroundColor = "#000000";
-						frzTopShadow.style.top = "0px";
-						frzTopShadow.style.left = "0px";
-						frzTopShadow.style.width = "50px";
-						frzTopShadow.style.height = "50px";
-						frzTopShadow.style.opacity = 100;
+						var fstyle = frzTopShadow.style;
+						fstyle.backgroundColor = "#000000";
+						fstyle.top = "0px";
+						fstyle.left = "0px";
+						fstyle.width = "50px";
+						fstyle.height = "50px";
+						fstyle.opacity = 100;
 						document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
 						document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
 						document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
