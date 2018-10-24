@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/24
+ * Revised : 2018/10/25
  */
-var g_version =  "Ver 0.33.1";
+var g_version =  "Ver 0.34.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -494,10 +494,15 @@ var g_resultObj = {
 	score: 0
 };
 
+var g_allArrow = 0;
+var g_allFrz = 0;
+
 var g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 var g_audio = new Audio();
 var g_timeoutEvtId = 0;
+var g_inputKeyBuffer = new Array();
+
 
 /**
  * イベントハンドラ用オブジェクト
@@ -1827,6 +1832,8 @@ function scoreConvert(_dosObj, _scoreNo){
 
 	// 矢印群の格納先
 	var obj = {};
+	g_allArrow = 0;
+	g_allFrz = 0;
 
 	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
@@ -1844,8 +1851,12 @@ function scoreConvert(_dosObj, _scoreNo){
 			if(tmpData != undefined){
 				obj.arrowData[j] = new Array();
 				obj.arrowData[j] = tmpData.split(",");
-				for(k=0; k<obj.arrowData[j].length; k++){
-					obj.arrowData[j][k] = parseFloat(obj.arrowData[j][k]) + parseFloat(g_stateObj.adjustment);
+				if(isNaN(parseFloat(obj.arrowData[j][0]))){
+				}else{
+					g_allArrow += obj.arrowData[j].length;
+					for(k=0; k<obj.arrowData[j].length; k++){
+						obj.arrowData[j][k] = parseFloat(obj.arrowData[j][k]) + parseFloat(g_stateObj.adjustment);
+					}
 				}
 			}
 		}
@@ -1872,6 +1883,7 @@ function scoreConvert(_dosObj, _scoreNo){
 				obj.frzData[j] = tmpData.split(",");
 				if(isNaN(parseFloat(obj.frzData[j][0]))){
 				}else{
+					g_allFrz += obj.arrowData[j].length;
 					for(k=0; k<obj.frzData[j].length; k++){
 						obj.frzData[j][k] = parseFloat(obj.frzData[j][k]) + parseFloat(g_stateObj.adjustment);
 					}
@@ -1889,21 +1901,21 @@ function scoreConvert(_dosObj, _scoreNo){
 			obj.speedData[k+1] = parseFloat(obj.speedData[k+1]);
 		}
 	}
-	if(_dosObj["boost_" + _scoreNo + "data"] != undefined){
+	if(_dosObj["boost" + _scoreNo + "_data"] != undefined){
 		obj.boostData = _dosObj["boost" + _scoreNo + "_data"].split(",");
 		for(k=0; k<obj.boostData.length; k+=2){
 			obj.boostData[k] = parseFloat(obj.boostData[k]) + parseFloat(g_stateObj.adjustment);
 			obj.boostData[k+1] = parseFloat(obj.boostData[k+1]);
 		}
 	}
-	if(_dosObj["color_" + _scoreNo + "data"] != undefined){
+	if(_dosObj["color" + _scoreNo + "_data"] != undefined){
 		obj.colorData = _dosObj["color" + _scoreNo + "_data"].split(",");
 		for(k=0; k<obj.colorData.length; k+=3){
 			obj.colorData[k] = parseFloat(obj.colorData[k]) + parseFloat(g_stateObj.adjustment);
 			obj.colorData[k+1] = parseFloat(obj.colorData[k+1]);
 		}
 	}
-	if(_dosObj["acolor_" + _scoreNo + "data"] != undefined){
+	if(_dosObj["acolor" + _scoreNo + "_data"] != undefined){
 		obj.acolorData = _dosObj["acolor" + _scoreNo + "_data"].split(",");
 		for(k=0; k<obj.acolorData.length; k+=3){
 			obj.acolorData[k] = parseFloat(obj.acolorData[k]) + parseFloat(g_stateObj.adjustment);
@@ -1913,8 +1925,9 @@ function scoreConvert(_dosObj, _scoreNo){
 	
 	// 歌詞データの分解
 	obj.wordData = new Array();
-	if(_dosObj["word_" + _scoreNo + "data"] != undefined){
-		tmpData = _dosObj["word_" + _scoreNo + "data"].split("\r").join("");
+	if(_dosObj["word" + _scoreNo + "_data"] != undefined){
+
+		tmpData = _dosObj["word" + _scoreNo + "_data"].split("\r").join("");
 		tmpData = tmpData.split("\n").join("");
 
 		if(tmpData != undefined){
@@ -1929,6 +1942,7 @@ function scoreConvert(_dosObj, _scoreNo){
 				obj.wordData[tmpWordData[k]].push(tmpWordData[k+1],tmpWordData[k+2]);
 			}
 		}
+		
 	}
 
 	return obj;
@@ -2547,6 +2561,8 @@ function MainInit(){
 	var buffTime;
 	var musicStartFlg = false;
 
+	g_inputKeyBuffer = [];
+
 	// 終了時間の設定
 	var fullSecond = Math.floor(g_headerObj.blankFrame / 60 + g_audio.duration);
 	var fullMin = Math.floor(fullSecond / 60);
@@ -2613,7 +2629,7 @@ function MainInit(){
 	mainSprite.appendChild(lblFCombo);
 
 	// 歌詞表示1
-	var lblWord0 = createDivLabel("lblword0", g_sWidth/2 -200, 10, g_sWidth -100, 20, 16, "#ffffff", 
+	var lblWord0 = createDivLabel("lblword0", g_sWidth/2 -200, 10, g_sWidth -100, 30, 14, "#ffffff", 
 		g_workObj.word0Data);
 	lblWord0.style.textAlign = C_ALIGN_LEFT;
 	mainSprite.appendChild(lblWord0);
@@ -2645,12 +2661,14 @@ function MainInit(){
 
 	// キー操作イベント
 	document.onkeydown = function(evt){
+
 		// ブラウザ判定
 		if(g_userAgent.indexOf("firefox") != -1){
 			var setKey = evt.which;
 		}else{
 			var setKey = event.keyCode;
 		}
+		g_inputKeyBuffer[setKey] = true;
 		var matchKeys = g_keyObj["keyCtrl" + keyCtrlPtn];
 		
 		for(var j=0; j<keyNum; j++){
@@ -2697,35 +2715,55 @@ function MainInit(){
 	}
 
 	document.onkeyup = function(evt){
+		// ブラウザ判定
+		if(g_userAgent.indexOf("firefox") != -1){
+			var setKey = evt.which;
+		}else{
+			var setKey = event.keyCode;
+		}
+		g_inputKeyBuffer[setKey] = false;
+
 		for(var j=0; j<keyNum; j++){
-			var stepDiv = document.getElementById("step" + j);
-			stepDiv.style.backgroundColor = "#cccccc";
-			var stepDivHit = document.getElementById("stepHit" + j);
-			stepDivHit.style.opacity = 0;
 
-			// フリーズアローを離したときの処理
-			var k = g_workObj.judgFrzCnt[j];
-			var frzRoot = document.getElementById("frz" + j + "_" + k);
-			if(frzRoot != null){
-				if(frzRoot.getAttribute("judgEndFlg") == "false"){
-					if(frzRoot.getAttribute("isMoving") == "false"){
-						g_resultObj.iknai++;
-						document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
-						g_resultObj.fCombo = 0;
-						frzRoot.setAttribute("judgEndFlg","true");
+			var keyDownFlg = false;
+			for(var m=0, len=g_workObj.keyCtrl[j].length; m<len; m++){
+				if(keyIsDown(g_workObj.keyCtrl[j][m])){
+					keyDownFlg = true;
+					break;
+				}
+			}
+			if(keyDownFlg == false){
 
-						var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
-						var fstyle = frzTopShadow.style;
-						fstyle.backgroundColor = "#000000";
-						fstyle.top = "0px";
-						fstyle.left = "0px";
-						fstyle.width = "50px";
-						fstyle.height = "50px";
-						fstyle.opacity = 100;
-						document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
-						document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
-						document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
-						document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+				// ステップゾーンに対応するキーを離したとき
+				var stepDiv = document.getElementById("step" + j);
+				stepDiv.style.backgroundColor = "#cccccc";
+				var stepDivHit = document.getElementById("stepHit" + j);
+				stepDivHit.style.opacity = 0;
+				
+				// フリーズアローを離したとき
+				var k = g_workObj.judgFrzCnt[j];
+				var frzRoot = document.getElementById("frz" + j + "_" + k);
+				if(frzRoot != null){
+					if(frzRoot.getAttribute("judgEndFlg") == "false"){
+						if(frzRoot.getAttribute("isMoving") == "false"){
+							g_resultObj.iknai++;
+							document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
+							g_resultObj.fCombo = 0;
+							frzRoot.setAttribute("judgEndFlg","true");
+
+							var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
+							var fstyle = frzTopShadow.style;
+							fstyle.backgroundColor = "#000000";
+							fstyle.top = "0px";
+							fstyle.left = "0px";
+							fstyle.width = "50px";
+							fstyle.height = "50px";
+							fstyle.opacity = 100;
+							document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
+							document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
+							document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
+							document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+						}
 					}
 				}
 			}
@@ -2983,6 +3021,10 @@ function MainInit(){
 	g_timeoutEvtId = setTimeout(flowTimeline(), 1000/ 60);
 }
 
+function keyIsDown(_keyCode){
+	return g_inputKeyBuffer[_keyCode];
+}
+
 /**
  * 矢印・フリーズアロー判定
  * @param {*} _j 対象矢印・フリーズアロー
@@ -3100,16 +3142,8 @@ function resultInit(){
 	"<br><span style='color:#ffff99'>(ﾟ∀ﾟ)ｷﾀ-!!</span>" +
 	"<br><span style='color:#99ff66'>(・A・)ｲｸﾅｲ</span>" +
 	"<br><span style='color:#ffffff'>MaxCombo</span>" +
-	"<br><span style='color:#ffffff'>FreezeCombo</span>" ;
-
-	var scoreData = g_resultObj.ii +
-	"<br>" + g_resultObj.shakin +
-	"<br>" + g_resultObj.matari +
-	"<br>" + g_resultObj.uwan +
-	"<br>" + g_resultObj.kita +
-	"<br>" + g_resultObj.iknai +
-	"<br>" + g_resultObj.maxCombo +
-	"<br>" + g_resultObj.fmaxCombo ;
+	"<br><span style='color:#ffffff'>FreezeCombo</span>" +
+	"<br><br><span style='color:#ffffff'>Score</span>" ;
 
 	// スコア計算(一括)
 	var scoreTmp = g_resultObj.ii * 8 +
@@ -3118,14 +3152,28 @@ function resultInit(){
 	g_resultObj.kita * 8 +
 	g_resultObj.sfsf * 4 +
 	g_resultObj.maxCombo * 2 +
-	g_resultObj.frzCombo * 2;
+	g_resultObj.fmaxCombo * 2;
+
+	var allScore = (g_allArrow + g_allFrz) * 10;
+	var resultScore = Math.round(scoreTmp / allScore * 1000000);
+
+	var scoreData = g_resultObj.ii +
+	"<br>" + g_resultObj.shakin +
+	"<br>" + g_resultObj.matari +
+	"<br>" + g_resultObj.uwan +
+	"<br>" + g_resultObj.kita +
+	"<br>" + g_resultObj.iknai +
+	"<br>" + g_resultObj.maxCombo +
+	"<br>" + g_resultObj.fmaxCombo +
+	"<br><br>" + resultScore ;
 
 	// Twitter用リザルト
 	var tweetResultTmp = "【#danoni】" + g_headerObj.musicTitle + "(" + 
-	g_headerObj["difLabels"][g_stateObj.scoreId] + ")/" +
+	g_headerObj.keyLabels[g_stateObj.scoreId] + "k-" + g_headerObj.difLabels[g_stateObj.scoreId] + ")/" +
 	g_headerObj.tuning + "/" +
-	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan + " " +
-	 g_resultObj.kita + "-" + g_resultObj.iknai + " " +
+	"Score:" + resultScore + "/" +
+	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan + "/" +
+	 g_resultObj.kita + "-" + g_resultObj.iknai + "/" +
 	 g_resultObj.maxCombo + "-" + g_resultObj.fmaxCombo;
 	var tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
 
