@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/25
+ * Revised : 2018/10/26
  */
-var g_version =  "Ver 0.34.0";
+var g_version =  "Ver 0.34.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -496,6 +496,22 @@ var g_resultObj = {
 
 var g_allArrow = 0;
 var g_allFrz = 0;
+var g_rankObj = {
+	rankMarks: ["SS","S","SA","AAA","AA","A","B"],
+	rankRate:  [97, 90, 85, 80, 75, 70, 50],
+	rankColor: ["#00ccff","#6600ff","#ff9900","#ff0000","#00ff00","#ff00ff","#cc00ff"],
+
+	rankMarkPF: "PF",
+	rankColorPF: "#cccc00",
+	rankMarkC: "C",
+	rankColorC:  "#cc9933",
+	rankMarkF: "F",
+	rankColorF:  "#999999",
+	rankMarkX: "X",
+	rankColorX:  "#996600"
+}
+
+var g_gameOverFlg = false;
 
 var g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
@@ -591,6 +607,17 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text){
 	var div = createDiv(_id, _x, _y, _width, _height);
 	var style = div.style;
 	style.font = _fontsize + "px '" + C_LBL_BASICFONT + "'";
+	style.color = _color;
+	style.textAlign = C_ALIGN_CENTER;
+	div.innerHTML = _text;
+
+	return div;
+}
+
+function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text, _font){
+	var div = createDiv(_id, _x, _y, _width, _height);
+	var style = div.style;
+	style.font = _fontsize + "px '" + _font + "'";
 	style.color = _color;
 	style.textAlign = C_ALIGN_CENTER;
 	div.innerHTML = _text;
@@ -1883,7 +1910,7 @@ function scoreConvert(_dosObj, _scoreNo){
 				obj.frzData[j] = tmpData.split(",");
 				if(isNaN(parseFloat(obj.frzData[j][0]))){
 				}else{
-					g_allFrz += obj.arrowData[j].length;
+					g_allFrz += obj.frzData[j].length;
 					for(k=0; k<obj.frzData[j].length; k++){
 						obj.frzData[j][k] = parseFloat(obj.frzData[j][k]) + parseFloat(g_stateObj.adjustment);
 					}
@@ -2704,7 +2731,12 @@ function MainInit(){
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			clearWindow();
-			titleInit();
+			if(keyIsDown(16)){
+				g_gameOverFlg = true;
+				resultInit();	
+			}else{
+				titleInit();
+			}
 		}
 
 		for(var j=0; j<C_BLOCK_KEYS.length; j++){
@@ -3102,6 +3134,20 @@ function judgeArrow(_j){
 					g_resultObj.iknai++;
 					document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
 					g_resultObj.fCombo = 0;
+					judgFrz.setAttribute("judgEndFlg","true");
+
+					var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + fcurrentNo);
+					var fstyle = frzTopShadow.style;
+					fstyle.backgroundColor = "#000000";
+					fstyle.top = "0px";
+					fstyle.left = "0px";
+					fstyle.width = "50px";
+					fstyle.height = "50px";
+					fstyle.opacity = 100;
+					document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.opacity = 100;
+					document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.backgroundColor = "#cccccc";
+					document.getElementById("frzBar" + _j + "_" + fcurrentNo).style.backgroundColor = "#999999";
+					document.getElementById("frzBtm" + _j + "_" + fcurrentNo).style.backgroundColor = "#cccccc";
 				}
 
 	//			judgArrow.setAttribute("judgEndFlg","true");
@@ -3167,10 +3213,40 @@ function resultInit(){
 	"<br>" + g_resultObj.fmaxCombo +
 	"<br><br>" + resultScore ;
 
+	// ランク計算
+	var rankMark = "";
+	var rankColor = "";
+	if(g_gameOverFlg == true){
+		rankMark = g_rankObj.rankMarkF;
+		rankColor = g_rankObj.rankColorF;
+	}else if(g_headerObj.startFrame == 0){
+		if(g_resultObj.matari + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai == 0){
+			rankMark = g_rankObj.rankMarkPF;
+			rankColor = g_rankObj.rankColorPF;
+		}else{
+			for(var j=0, len=g_rankObj.rankRate.length; j<len; j++){			
+				if(resultScore / 10000 >= g_rankObj.rankRate[j]){
+					rankMark = g_rankObj.rankMarks[j];
+					rankColor = g_rankObj.rankColor[j];
+					break;
+				}
+			}
+			if(resultScore / 10000 < g_rankObj.rankRate[len-1]){
+				rankMark = g_rankObj.rankMarkC;
+				rankColor = g_rankObj.rankColorC;
+			}
+		}
+	}else{
+		rankMark = g_rankObj.rankMarkX;
+		rankColor = g_rankObj.rankColorX;
+	}
+
+
 	// Twitter用リザルト
 	var tweetResultTmp = "【#danoni】" + g_headerObj.musicTitle + "(" + 
 	g_headerObj.keyLabels[g_stateObj.scoreId] + "k-" + g_headerObj.difLabels[g_stateObj.scoreId] + ")/" +
 	g_headerObj.tuning + "/" +
+	"Rank:" + rankMark + "/" +
 	"Score:" + resultScore + "/" +
 	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan + "/" +
 	 g_resultObj.kita + "-" + g_resultObj.iknai + "/" +
@@ -3182,10 +3258,15 @@ function resultInit(){
 	lblResult.style.textAlign = C_ALIGN_LEFT;
 	divRoot.appendChild(lblResult);
 
-	var lblScore = createDivLabel("lblScore", g_sWidth/2 + 50, 100, 100, 20, 20, "#ffffff", 
+	var lblScore = createDivLabel("lblScore", g_sWidth/2 + 20, 100, 100, 20, 20, "#ffffff", 
 	scoreData);
 	lblScore.style.textAlign = C_ALIGN_RIGHT;
 	divRoot.appendChild(lblScore);
+
+	var lblRank = createDivCustomLabel("lblRank", g_sWidth/2 + 130, 310, 70, 20, 50, "#ffffff", 
+	"<span style='color:" + rankColor + ";'>" + rankMark + "</span>","Bookman Old Style");
+	lblRank.style.textAlign = C_ALIGN_CENTER;
+	divRoot.appendChild(lblRank);
 
 	// 戻るボタン描画
 	var btnBack = createButton({
