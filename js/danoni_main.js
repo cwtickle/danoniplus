@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/26
  */
-var g_version =  "Ver 0.35.1";
+var g_version =  "Ver 0.35.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -501,6 +501,22 @@ var C_JDG_UWAN = 3;
 var C_JDG_KITA = 0;
 var C_JDG_SFSF = 1;
 var C_JDG_IKNAI = 2;
+
+var C_JCR_II = "(・∀・)ｲｲ!!";
+var C_JCR_SHAKIN = "(`・ω・)ｼｬｷﾝ";
+var C_JCR_MATARI = "( ´∀`)ﾏﾀｰﾘ";
+var C_JCR_UWAN = "( `Д´)ｳﾜｧﾝ!!";
+var C_JCR_KITA = "(ﾟ∀ﾟ)ｷﾀ-!!";
+var C_JCR_SFSF = "";
+var C_JCR_IKNAI = "(・A・)ｲｸﾅｲ";
+
+var C_CLR_II = "#66ffff";
+var C_CLR_SHAKIN = "#99ff99";
+var C_CLR_MATARI = "#ff9966";
+var C_CLR_UWAN = "#ff9999";
+var C_CLR_KITA = "#ffff99";
+var C_CLR_SFSF = "";
+var C_CLR_IKNAI = "#99ff66";
 
 /** 結果画面用共通オブジェクト */
 var g_resultObj = {
@@ -2828,23 +2844,32 @@ function MainInit(){
 							g_resultObj.fCombo = 0;
 							frzRoot.setAttribute("judgEndFlg","true");
 
-							var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
-							var fstyle = frzTopShadow.style;
-							fstyle.backgroundColor = "#000000";
-							fstyle.top = "0px";
-							fstyle.left = "0px";
-							fstyle.width = "50px";
-							fstyle.height = "50px";
-							fstyle.opacity = 100;
-							document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
-							document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
-							document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
-							document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+							changeFailedFrz(j, k);
 						}
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * フリーズアロー失敗時の描画変更
+	 * @param {number} j 
+	 * @param {number} k 
+	 */
+	function changeFailedFrz(j, k){
+		var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
+		var fstyle = frzTopShadow.style;
+		fstyle.backgroundColor = "#000000";
+		fstyle.top = "0px";
+		fstyle.left = "0px";
+		fstyle.width = "50px";
+		fstyle.height = "50px";
+		fstyle.opacity = 100;
+		document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
+		document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
+		document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
+		document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
 	}
 
 	/**
@@ -3053,18 +3078,7 @@ function MainInit(){
 						g_resultObj.fCombo = 0;
 						frzRoot.setAttribute("judgEndFlg","true");
 
-						var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
-						var fstyle = frzTopShadow.style;
-						fstyle.backgroundColor = "#000000";
-						fstyle.top = "0px";
-						fstyle.left = "0px";
-						fstyle.width = "50px";
-						fstyle.height = "50px";
-						fstyle.opacity = 100;
-						document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
-						document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
-						document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
-						document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+						changeFailedFrz(j, k);
 					}
 				}else{
 					frzBarLength -= g_workObj.currentSpeed;
@@ -3181,18 +3195,7 @@ function judgeArrow(_j){
 					g_resultObj.fCombo = 0;
 					judgFrz.setAttribute("judgEndFlg","true");
 
-					var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + fcurrentNo);
-					var fstyle = frzTopShadow.style;
-					fstyle.backgroundColor = "#000000";
-					fstyle.top = "0px";
-					fstyle.left = "0px";
-					fstyle.width = "50px";
-					fstyle.height = "50px";
-					fstyle.opacity = 100;
-					document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.opacity = 100;
-					document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.backgroundColor = "#cccccc";
-					document.getElementById("frzBar" + _j + "_" + fcurrentNo).style.backgroundColor = "#999999";
-					document.getElementById("frzBtm" + _j + "_" + fcurrentNo).style.backgroundColor = "#cccccc";
+					changeFailedFrz(_j, fcurrentNo);
 				}
 
 	//			judgArrow.setAttribute("judgEndFlg","true");
@@ -3226,12 +3229,12 @@ function resultInit(){
 	divRoot.appendChild(lblTitle);
 
 	// 結果描画
-	var resultData = "<span style='color:#66ffff'>(・∀・)ｲｲ!!</span>" +
-	"<br><span style='color:#99ff99'>(`・ω・)ｼｬｷﾝ</span>" +
-	"<br><span style='color:#ff9966'>( ´∀`)ﾏﾀｰﾘ</span>" +
-	"<br><span style='color:#ff9999'>( `Д´)ｳﾜｧﾝ!!</span>" +
-	"<br><span style='color:#ffff99'>(ﾟ∀ﾟ)ｷﾀ-!!</span>" +
-	"<br><span style='color:#99ff66'>(・A・)ｲｸﾅｲ</span>" +
+	var resultData = "<span style='color:" + C_CLR_II + "'>" + C_JCR_II +"</span>" +
+	"<br><span style='color:" + C_CLR_SHAKIN + "'>" + C_JCR_SHAKIN +"</span>" +
+	"<br><span style='color:" + C_CLR_MATARI + "'>" + C_JCR_MATARI + "</span>" +
+	"<br><span style='color:" + C_CLR_UWAN + "'>" + C_JCR_UWAN + "</span>" +
+	"<br><span style='color:" + C_CLR_KITA + "'>" + C_JCR_KITA + "</span>" +
+	"<br><span style='color:" + C_CLR_IKNAI + "'>" + C_JCR_IKNAI + "</span>" +
 	"<br><span style='color:#ffffff'>MaxCombo</span>" +
 	"<br><span style='color:#ffffff'>FreezeCombo</span>" +
 	"<br><br><span style='color:#ffffff'>Score</span>" ;
