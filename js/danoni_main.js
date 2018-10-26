@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/26
+ * Revised : 2018/10/27
  */
-var g_version =  "Ver 0.35.0";
+var g_version =  "Ver 0.36.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -258,7 +258,7 @@ var g_keyObj = {
 	chara8_0: ["left","leftdia","down","space","up","rightdia","right","sleft"],
 	chara9A_0: ["left","down","up","right","space","sleft","sdown","sup","sright"],
 	chara9B_0: ["left","down","up","right","space","sleft","sdown","sup","sright"],
-	chara9i_0: ["left","down","up","right","space","sleft","sdown","sup","sright"],
+	chara9i_0: ["sleft","sdown","sup","sright","left","down","up","right","space"],
 	chara11_0: ["sleft","sdown","sup","sright",
 		"left","leftdia","down","space","up","rightdia","right"],
 	chara11L_0: ["sleft","sdown","sup","sright",
@@ -276,7 +276,7 @@ var g_keyObj = {
 	
 	chara5_1: ["space","left","down","up","right"],
 	chara9A_1: ["left","down","up","right","space","sleft","sdown","sup","sright"],
-	chara9i_1: ["sleft","sdown","sup","sright","left","down","up","right","space"],
+	chara9i_1: ["left","down","up","right","space","sleft","sdown","sup","sright"],
 	chara11_1: ["space","sleft","sdown","sup","sright",
 		"left","leftdia","down","up","rightdia","right"],
 	chara11L_1: ["sleft","sdown","sup","sright","space",
@@ -299,7 +299,7 @@ var g_keyObj = {
 	color8_0: [0,1,0,2,0,1,0,2],
 	color9A_0: [0,0,0,0,2,3,3,3,3],
 	color9B_0: [1,0,1,0,2,0,1,0,1],
-	color9i_0: [2,2,2,2,2,0,0,0,0],
+	color9i_0: [0,0,0,0,2,2,2,2,2],
 	color11_0: [3,3,3,3,0,1,0,2,0,1,0],
 	color11L_0: [3,3,3,3,0,1,0,2,0,1,0],
 	color11W_0: [2,3,3,2,0,1,0,2,0,1,0],
@@ -310,7 +310,7 @@ var g_keyObj = {
 
 	color5_1: [2,0,0,0,0],
 	color9A_1: [0,0,0,0,2,3,3,3,3],
-	color9i_1: [0,0,0,0,2,2,2,2,2],
+	color9i_1: [2,2,2,2,2,0,0,0,0],
 	color11_1: [2,3,3,3,3,0,1,0,0,1,0],
 	color11L_1: [3,3,3,3,2,0,1,0,0,1,0],
 	color12_1: [3,3,3,3,2,0,1,0,1,0,1,0],
@@ -328,7 +328,7 @@ var g_keyObj = {
 	stepRtn8_0: [0, -45, -90, "onigiri", 90, 135, 180, "onigiri"],
 	stepRtn9A_0: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
 	stepRtn9B_0: [45, 0, -45, -90, "onigiri", 90, 135, 180, 225],
-	stepRtn9i_0: ["monar", "giko", "c", "morara", "onigiri", 0, -90, 90, 180],
+	stepRtn9i_0: [0, -90, 90, 180, "monar", "giko", "c", "morara", "onigiri"],
 	stepRtn11_0: [0, -90, 90, 180, 0, -45, -90, "onigiri", 90, 135, 180],
 	stepRtn11L_0: [0, -90, 90, 180, 0, -45, -90, "onigiri", 90, 135, 180],
 	stepRtn11W_0: ["giko", 135, 45, "iyo", 0, -45, -90, "onigiri", 90, 135, 180],
@@ -343,7 +343,7 @@ var g_keyObj = {
 	// - 配列の数は、通常パターンと同数で無くてはいけない（keyCtrlも同様）
 	stepRtn5_1: ["onigiri", 0, -90, 90, 180],
 	stepRtn9A_1: [0, -90, 90, 180, "onigiri", 0, -90, 90, 180],
-	stepRtn9i_1: [0, -90, 90, 180, "monar", "giko", "c", "morara", "onigiri"],
+	stepRtn9i_1: ["monar", "giko", "c", "morara", "onigiri", 0, -90, 90, 180],
 	stepRtn11_1: ["onigiri", 0, -90, 90, 180, 0, -45, -90, 90, 135, 180],
 	stepRtn11L_1: [0, -90, 90, 180, "onigiri", 0, -45, -90, 90, 135, 180],
 	stepRtn12_1: [0, -90, 90, 180, "onigiri", 0, 30, 60, 90, 120, 150, 180],
@@ -361,7 +361,7 @@ var g_keyObj = {
 	div8_0: 8,
 	div9A_0: 9,
 	div9B_0: 9,
-	div9i_0: 9,
+	div9i_0: 6,
 	div11_0: 6,
 	div11L_0: 6,
 	div11W_0: 6,
@@ -372,7 +372,7 @@ var g_keyObj = {
 
 	div5_1: 5,
 	div9A_1: 9,
-	div9i_1: 6,
+	div9i_1: 9,
 	div11_1: 6,
 	div11L_1: 6,
 	div12_1: 5,
@@ -389,7 +389,7 @@ var g_keyObj = {
 	pos8_0: [0,1,2,3,4,5,6,7],
 	pos9A_0: [0,1,2,3,4,5,6,7,8],
 	pos9B_0: [0,1,2,3,4,5,6,7,8],
-	pos9i_0: [0,1,2,3,4,5,6,7,8],
+	pos9i_0: [2,3,4,5,6,7,8,9,10],
 	pos11_0: [2,3,4,5,6,7,8,9,10,11,12],
 	pos11L_0: [0,1,2,3,6,7,8,9,10,11,12],
 	pos11W_0: [0,2,3,5,6,7,8,9,10,11,12],
@@ -400,7 +400,7 @@ var g_keyObj = {
 
 	pos5_1: [0,1,2,3,4],
 	pos9A_1: [0,1,2,3,4,5,6,7,8],
-	pos9i_1: [2,3,4,5,6,7,8,9,10],
+	pos9i_1: [0,1,2,3,4,5,6,7,8],
 	pos11_1: [1,2,3,4,5,6,7,8,10,11,12],
 	pos11L_1: [0,1,2,3,4,6,7,8,10,11,12],
 	pos12_1: [1,2,3,4,5,6,7,8,9,10,11,12],
@@ -421,7 +421,7 @@ var g_keyObj = {
 	keyCtrl8_0: [[83],[68,0],[70],[32,0],[74],[75,0],[76],[13,0]],
 	keyCtrl9A_0:[[83],[68],[69,82],[70],[32],[74],[75],[73,0],[76]],
 	keyCtrl9B_0:[[65],[83],[68],[70],[32],[74],[75],[76],[187]],
-	keyCtrl9i_0:[[65],[83],[68],[70],[32],[37],[40],[38,0],[39]],
+	keyCtrl9i_0:[[37],[40],[38,0],[39],[65],[83],[68],[70],[32]],
 	keyCtrl11_0:[[37],[40],[38,0],[39],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl11L_0:[[87],[69],[51,52],[82],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl11W_0:[[49,50],[84],[89],[48,189],[83],[68],[70],[32],[74],[75],[76]],
@@ -436,7 +436,7 @@ var g_keyObj = {
 	keyCtrl8_0d: [[83],[68,0],[70],[32,0],[74],[75,0],[76],[13,0]],
 	keyCtrl9A_0d:[[83],[68],[69,82],[70],[32],[74],[75],[73,0],[76]],
 	keyCtrl9B_0d:[[65],[83],[68],[70],[32],[74],[75],[76],[187]],
-	keyCtrl9i_0d:[[65],[83],[68],[70],[32],[37],[40],[38,0],[39]],
+	keyCtrl9i_0d:[[37],[40],[38,0],[39],[65],[83],[68],[70],[32]],
 	keyCtrl11_0d:[[37],[40],[38,0],[39],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl11L_0d:[[87],[69],[51,52],[82],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl11W_0d:[[49,50],[84],[89],[48,189],[83],[68],[70],[32],[74],[75],[76]],
@@ -451,7 +451,7 @@ var g_keyObj = {
 	// - 配列数は合わせる必要はあるが、代替キーの数は _X, _Xdで揃っていれば合わせる必要はない。
 	keyCtrl5_1: [[32,0],[37],[40],[38,0],[39]],
 	keyCtrl9A_1:[[83],[68],[69,82],[70],[32],[37],[40],[38,0],[39]],
-	keyCtrl9i_1:[[37],[40],[38,0],[39],[65],[83],[68],[70],[32]],
+	keyCtrl9i_1:[[65],[83],[68],[70],[32],[37],[40],[38,0],[39]],
 	keyCtrl11_1:[[32],[37],[40],[38,0],[39],[83],[68],[70],[74],[75],[76]],
 	keyCtrl11L_1:[[87],[69],[51,52],[82],[32],[83],[68],[70],[74],[75],[76]],
 	keyCtrl12_1:[[89],[85,73],[56,55,57],[79],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
@@ -461,7 +461,7 @@ var g_keyObj = {
 	
 	keyCtrl5_1d: [[32,0],[37],[40],[38,0],[39]],
 	keyCtrl9A_1d:[[83],[68],[69,82],[70],[32],[37],[40],[38,0],[39]],
-	keyCtrl9i_1d:[[37],[40],[38,0],[39],[65],[83],[68],[70],[32]],
+	keyCtrl9i_1d:[[65],[83],[68],[70],[32],[37],[40],[38,0],[39]],
 	keyCtrl11_1d:[[32],[37],[40],[38,0],[39],[83],[68],[70],[74],[75],[76]],
 	keyCtrl11L_1d:[[87],[69],[51,52],[82],[32],[83],[68],[70],[74],[75],[76]],
 	keyCtrl12_1d:[[89],[85,73],[56,55,57],[79],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
@@ -501,6 +501,22 @@ var C_JDG_UWAN = 3;
 var C_JDG_KITA = 0;
 var C_JDG_SFSF = 1;
 var C_JDG_IKNAI = 2;
+
+var C_JCR_II = "(・∀・)ｲｲ!!";
+var C_JCR_SHAKIN = "(`・ω・)ｼｬｷﾝ";
+var C_JCR_MATARI = "( ´∀`)ﾏﾀｰﾘ";
+var C_JCR_UWAN = "( `Д´)ｳﾜｧﾝ!!";
+var C_JCR_KITA = "(ﾟ∀ﾟ)ｷﾀ-!!";
+var C_JCR_SFSF = "";
+var C_JCR_IKNAI = "(・A・)ｲｸﾅｲ";
+
+var C_CLR_II = "#66ffff";
+var C_CLR_SHAKIN = "#99ff99";
+var C_CLR_MATARI = "#ff9966";
+var C_CLR_UWAN = "#ff9999";
+var C_CLR_KITA = "#ffff99";
+var C_CLR_SFSF = "";
+var C_CLR_IKNAI = "#99ff66";
 
 /** 結果画面用共通オブジェクト */
 var g_resultObj = {
@@ -1843,7 +1859,7 @@ function keyConfigInit(){
 }
 
 /*-----------------------------------------------------------*/
-/* Scene : LOAGING [strawberry] */
+/* Scene : LOADING [strawberry] */
 /*-----------------------------------------------------------*/
 
 /**
@@ -2730,6 +2746,33 @@ function MainInit(){
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblTime2);
 
+	// 判定キャラクタ表示：矢印
+	var charaJ = createDivLabel("charaJ", g_sWidth/2 - 200, g_sHeight/2 - 50, 200, 20, 20, C_CLR_II, 
+	"");
+	charaJ.style.textAlign = C_ALIGN_CENTER;
+	charaJ.style.opacity = 70;
+	mainSprite.appendChild(charaJ);
+
+	// コンボ表示：矢印
+	var comboJ = createDivLabel("comboJ", g_sWidth/2 - 50, g_sHeight/2 - 50, 200, 20, 20, C_CLR_KITA, 
+	"");
+	comboJ.style.textAlign = C_ALIGN_CENTER;
+	comboJ.style.opacity = 70;
+	mainSprite.appendChild(comboJ);
+
+	// 判定キャラクタ表示：フリーズアロー
+	var charaFJ = createDivLabel("charaFJ", g_sWidth/2 - 100, g_sHeight/2, 200, 20, 20, C_CLR_KITA, 
+	"");
+	charaFJ.style.textAlign = C_ALIGN_CENTER;
+	charaFJ.style.opacity = 70;
+	mainSprite.appendChild(charaFJ);
+
+	// コンボ表示：フリーズアロー
+	var comboFJ = createDivLabel("comboFJ", g_sWidth/2 + 50, g_sHeight/2, 200, 20, 20, C_CLR_II, 
+	"");
+	comboFJ.style.textAlign = C_ALIGN_CENTER;
+	comboFJ.style.opacity = 70;
+	mainSprite.appendChild(comboFJ);
 
 	// キー操作イベント
 	document.onkeydown = function(evt){
@@ -2823,28 +2866,35 @@ function MainInit(){
 				if(frzRoot != null){
 					if(frzRoot.getAttribute("judgEndFlg") == "false"){
 						if(frzRoot.getAttribute("isMoving") == "false"){
-							g_resultObj.iknai++;
-							document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
-							g_resultObj.fCombo = 0;
+							judgeIknai();
 							frzRoot.setAttribute("judgEndFlg","true");
 
-							var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
-							var fstyle = frzTopShadow.style;
-							fstyle.backgroundColor = "#000000";
-							fstyle.top = "0px";
-							fstyle.left = "0px";
-							fstyle.width = "50px";
-							fstyle.height = "50px";
-							fstyle.opacity = 100;
-							document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
-							document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
-							document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
-							document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+							changeFailedFrz(j, k);
 						}
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * フリーズアロー失敗時の描画変更
+	 * @param {number} j 
+	 * @param {number} k 
+	 */
+	function changeFailedFrz(j, k){
+		var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
+		var fstyle = frzTopShadow.style;
+		fstyle.backgroundColor = "#000000";
+		fstyle.top = "0px";
+		fstyle.left = "0px";
+		fstyle.width = "50px";
+		fstyle.height = "50px";
+		fstyle.opacity = 100;
+		document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
+		document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
+		document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
+		document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
 	}
 
 	/**
@@ -2946,9 +2996,7 @@ function MainInit(){
 					mainSprite.removeChild(arrow);
 
 				}else if(cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]){
-					g_resultObj.uwan++;
-					document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
-					g_resultObj.combo = 0;
+					judgeUwan();
 					g_workObj.judgArrowCnt[j]++;
 					mainSprite.removeChild(arrow);
 				}
@@ -3034,12 +3082,8 @@ function MainInit(){
 							frzBtm.style.top = (parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * g_workObj.scrollDir[j]) + "px";
 							frzBtmShadow.style.top = (parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * g_workObj.scrollDir[j]) + "px";
 						}else{
-							g_resultObj.kita++;
-							document.getElementById("lblKita").innerHTML = g_resultObj.kita;
-							if(++g_resultObj.fCombo > g_resultObj.fmaxCombo){
-								g_resultObj.fmaxCombo = g_resultObj.fCombo;
-								document.getElementById("lblFCombo").innerHTML = g_resultObj.fmaxCombo;
-							}
+							judgeKita();
+					
 							g_workObj.judgFrzCnt[j]++;
 							frzRoot.setAttribute("judgEndFlg","true");
 							mainSprite.removeChild(frzRoot);
@@ -3048,23 +3092,10 @@ function MainInit(){
 					
 					// フリーズアローが枠外に出たときの処理
 					if(cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]){
-						g_resultObj.iknai++;
-						document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
-						g_resultObj.fCombo = 0;
+						judgeIknai();
 						frzRoot.setAttribute("judgEndFlg","true");
 
-						var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
-						var fstyle = frzTopShadow.style;
-						fstyle.backgroundColor = "#000000";
-						fstyle.top = "0px";
-						fstyle.left = "0px";
-						fstyle.width = "50px";
-						fstyle.height = "50px";
-						fstyle.opacity = 100;
-						document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
-						document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
-						document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
-						document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+						changeFailedFrz(j, k);
 					}
 				}else{
 					frzBarLength -= g_workObj.currentSpeed;
@@ -3124,33 +3155,22 @@ function judgeArrow(_j){
 
 			if(difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg == "false"){
 				stepDivHit.style.opacity = 100;
+				var charaJ = document.getElementById("charaJ");
 
 				if(difCnt <= g_judgObj.arrowJ[C_JDG_II]){
-					g_resultObj.ii++;
-					document.getElementById("lblIi").innerHTML = g_resultObj.ii;
-					if(++g_resultObj.combo > g_resultObj.maxCombo){
-						g_resultObj.maxCombo = g_resultObj.combo;
-						document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
-					}
+					judgeIi();
 				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]){
-					g_resultObj.shakin++;
-					document.getElementById("lblShakin").innerHTML = g_resultObj.shakin;
-					if(++g_resultObj.combo > g_resultObj.maxCombo){
-						g_resultObj.maxCombo = g_resultObj.combo;
-						document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
-					}
+					judgeShakin();
 				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]){
-					g_resultObj.matari++;
-					document.getElementById("lblMatari").innerHTML = g_resultObj.matari;
+					judgeMatari();
 				}else{
-					g_resultObj.uwan++;
-					document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
-					g_resultObj.combo = 0;
+					judgeUwan();
 				}
 
 	//			judgArrow.setAttribute("judgEndFlg","true");
 				mainSprite.removeChild(judgArrow);
 				g_workObj.judgArrowCnt[_j]++;
+
 			}
 		}
 
@@ -3160,46 +3180,102 @@ function judgeArrow(_j){
 			var difCnt = Math.abs(judgFrz.getAttribute("cnt"));
 			var judgEndFlg = judgFrz.getAttribute("judgEndFlg");
 
-			if(difCnt <= g_judgObj.frzJ[C_JDG_IKNAI] && judgEndFlg == "false"){
+			if(difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg == "false"){
 
-				if(difCnt <= g_judgObj.frzJ[C_JDG_SFSF]){
-					var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + fcurrentNo);
-					frzTopShadow.style.backgroundColor = "#ffffff";
-					frzTopShadow.style.top = "-10px";
-					frzTopShadow.style.left = "-10px";
-					frzTopShadow.style.width = "70px";
-					frzTopShadow.style.height = "70px";
-					frzTopShadow.style.opacity = 70;
-					document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.opacity = 0;
-					
-					document.getElementById("frzBar" + _j + "_" + fcurrentNo).style.backgroundColor = "#ffff99";
-					document.getElementById("frzBtm" + _j + "_" + fcurrentNo).style.backgroundColor = "#ffff99";
-					judgFrz.setAttribute("isMoving", "false");
-				}else{
-					g_resultObj.iknai++;
-					document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
-					g_resultObj.fCombo = 0;
-					judgFrz.setAttribute("judgEndFlg","true");
+				var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + fcurrentNo);
+				frzTopShadow.style.backgroundColor = "#ffffff";
+				frzTopShadow.style.top = "-10px";
+				frzTopShadow.style.left = "-10px";
+				frzTopShadow.style.width = "70px";
+				frzTopShadow.style.height = "70px";
+				frzTopShadow.style.opacity = 70;
+				document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.opacity = 0;
+				
+				var frzBar = document.getElementById("frzBar" + _j + "_" + fcurrentNo);
+				frzBar.style.backgroundColor = "#ffff99";
+				document.getElementById("frzBtm" + _j + "_" + fcurrentNo).style.backgroundColor = "#ffff99";
+				judgFrz.setAttribute("isMoving", "false");
 
-					var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + fcurrentNo);
-					var fstyle = frzTopShadow.style;
-					fstyle.backgroundColor = "#000000";
-					fstyle.top = "0px";
-					fstyle.left = "0px";
-					fstyle.width = "50px";
-					fstyle.height = "50px";
-					fstyle.opacity = 100;
-					document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.opacity = 100;
-					document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.backgroundColor = "#cccccc";
-					document.getElementById("frzBar" + _j + "_" + fcurrentNo).style.backgroundColor = "#999999";
-					document.getElementById("frzBtm" + _j + "_" + fcurrentNo).style.backgroundColor = "#cccccc";
-				}
+	//			judgFrz.style.top = (parseFloat(judgFrz.style.top) - judgFrz.getAttribute("cnt") * g_workObj.currentSpeed * g_workObj.scrollDir[_j]) + "px";
+	//			var frzBarLength = parseFloat(frzBar.style.height) + g_workObj.currentSpeed * judgFrz.getAttribute("cnt");
+	//			judgFrz.setAttribute("frzBarLength",frzBarLength);
+	//			frzBar.style.height = frzBarLength + "px";
 
 	//			judgArrow.setAttribute("judgEndFlg","true");
 			}
 		}
 		g_judgObj.lockFlgs[_j] = false;
 	}
+}
+
+function judgeIi(){
+	g_resultObj.ii++;
+	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_II + "'>" + C_JCR_II + "</span>";
+
+//	charaJ.style.transform = "translateX(10px)";
+	document.getElementById("lblIi").innerHTML = g_resultObj.ii;
+	if(++g_resultObj.combo > g_resultObj.maxCombo){
+		g_resultObj.maxCombo = g_resultObj.combo;
+		document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
+	}
+	document.getElementById("comboJ").innerHTML = g_resultObj.combo + " Combo!!";
+	document.getElementById("charaFJ").innerHTML = "";
+	document.getElementById("comboFJ").innerHTML = "";
+}
+
+function judgeShakin(){
+	g_resultObj.shakin++;
+	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_SHAKIN + "'>" + C_JCR_SHAKIN + "</span>";
+	document.getElementById("lblShakin").innerHTML = g_resultObj.shakin;
+	if(++g_resultObj.combo > g_resultObj.maxCombo){
+		g_resultObj.maxCombo = g_resultObj.combo;
+		document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
+	}
+	document.getElementById("comboJ").innerHTML = g_resultObj.combo + " Combo!!";
+}
+
+function judgeMatari(){
+	g_resultObj.matari++;
+	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_MATARI + "'>" + C_JCR_MATARI + "</span>";
+	document.getElementById("lblMatari").innerHTML = g_resultObj.matari;
+	document.getElementById("comboJ").innerHTML = "";
+	document.getElementById("charaFJ").innerHTML = "";
+	document.getElementById("comboFJ").innerHTML = "";
+}
+
+function judgeUwan(){
+	g_resultObj.uwan++;
+	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_UWAN + "'>" + C_JCR_UWAN + "</span>";
+	document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
+	g_resultObj.combo = 0;
+	document.getElementById("comboJ").innerHTML = "";
+	document.getElementById("charaFJ").innerHTML = "";
+	document.getElementById("comboFJ").innerHTML = "";
+}
+
+function judgeKita(){
+	g_resultObj.kita++;
+	document.getElementById("lblKita").innerHTML = g_resultObj.kita;
+	document.getElementById("charaFJ").innerHTML = "<span style='color:" + C_CLR_KITA + "'>" + C_JCR_KITA + "</span>";
+	
+	if(++g_resultObj.fCombo > g_resultObj.fmaxCombo){
+		g_resultObj.fmaxCombo = g_resultObj.fCombo;
+		document.getElementById("lblFCombo").innerHTML = g_resultObj.fmaxCombo;
+	}
+	document.getElementById("comboFJ").innerHTML = g_resultObj.fCombo + " Combo!!";
+	document.getElementById("charaJ").innerHTML = "";
+	document.getElementById("comboJ").innerHTML = "";
+}
+
+function judgeIknai(){
+	g_resultObj.iknai++;
+	document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
+	document.getElementById("charaFJ").innerHTML = "<span style='color:" + C_CLR_IKNAI + "'>" + C_JCR_IKNAI + "</span>";
+	document.getElementById("comboFJ").innerHTML = "";
+	g_resultObj.fCombo = 0;
+
+	document.getElementById("charaJ").innerHTML = "";
+	document.getElementById("comboJ").innerHTML = "";
 }
 
 /*-----------------------------------------------------------*/
@@ -3226,12 +3302,12 @@ function resultInit(){
 	divRoot.appendChild(lblTitle);
 
 	// 結果描画
-	var resultData = "<span style='color:#66ffff'>(・∀・)ｲｲ!!</span>" +
-	"<br><span style='color:#99ff99'>(`・ω・)ｼｬｷﾝ</span>" +
-	"<br><span style='color:#ff9966'>( ´∀`)ﾏﾀｰﾘ</span>" +
-	"<br><span style='color:#ff9999'>( `Д´)ｳﾜｧﾝ!!</span>" +
-	"<br><span style='color:#ffff99'>(ﾟ∀ﾟ)ｷﾀ-!!</span>" +
-	"<br><span style='color:#99ff66'>(・A・)ｲｸﾅｲ</span>" +
+	var resultData = "<span style='color:" + C_CLR_II + "'>" + C_JCR_II +"</span>" +
+	"<br><span style='color:" + C_CLR_SHAKIN + "'>" + C_JCR_SHAKIN +"</span>" +
+	"<br><span style='color:" + C_CLR_MATARI + "'>" + C_JCR_MATARI + "</span>" +
+	"<br><span style='color:" + C_CLR_UWAN + "'>" + C_JCR_UWAN + "</span>" +
+	"<br><span style='color:" + C_CLR_KITA + "'>" + C_JCR_KITA + "</span>" +
+	"<br><span style='color:" + C_CLR_IKNAI + "'>" + C_JCR_IKNAI + "</span>" +
 	"<br><span style='color:#ffffff'>MaxCombo</span>" +
 	"<br><span style='color:#ffffff'>FreezeCombo</span>" +
 	"<br><br><span style='color:#ffffff'>Score</span>" ;
@@ -3245,7 +3321,7 @@ function resultInit(){
 	g_resultObj.maxCombo * 2 +
 	g_resultObj.fmaxCombo * 2;
 
-	var allScore = (g_allArrow + g_allFrz) * 10;
+	var allScore = (g_allArrow + g_allFrz / 2) * 10;
 	var resultScore = Math.round(scoreTmp / allScore * 1000000);
 
 	var scoreData = g_resultObj.ii +
