@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/23
+ * Revised : 2018/10/26
  */
-var g_version =  "Ver 0.33.0";
+var g_version =  "Ver 0.35.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -263,10 +263,14 @@ var g_keyObj = {
 		"left","leftdia","down","space","up","rightdia","right"],
 	chara11L_0: ["sleft","sdown","sup","sright",
 		"left","leftdia","down","space","up","rightdia","right"],
+	chara11W_0: ["sleft","sdown","sup","sright",
+		"left","leftdia","down","space","up","rightdia","right"],
 	chara12_0: ["sleft","sdown","sup","sright",
 		"oni","left","leftdia","down","space","up","rightdia","right"],
 	chara14_0: ["sleftdia","sleft","sdown","sup","sright","srightdia",
 		"oni","left","leftdia","down","space","up","rightdia","right"],
+	chara15A_0: ["sleft","sdown","sup","sright","tleft","tdown","tup","tright",
+		"left","leftdia","down","space","up","rightdia","right"],
 	chara17_1: ["aleft","bleft","adown","bdown","aup","bup","aright","bright","space",
 		"cleft","dleft","cdown","ddown","cup","dup","cright","dright"],
 	
@@ -281,6 +285,8 @@ var g_keyObj = {
 		"oni","left","leftdia","down","space","up","rightdia","right"],
 	chara14_1: ["sleftdia","sleft","sdown","sup","sright","srightdia",
 		"oni","left","leftdia","down","space","up","rightdia","right"],
+	chara15A_1: ["sleft","sdown","sup","sright","tleft","tdown","tup","tright",
+		"left","leftdia","down","space","up","rightdia","right"],
 	chara17_0: ["aleft","adown","aup","aright","space","dleft","ddown","dup","dright",
 		"bleft","bdown","bup","bright","cleft","cdown","cup","cright"],
 			
@@ -296,8 +302,10 @@ var g_keyObj = {
 	color9i_0: [2,2,2,2,2,0,0,0,0],
 	color11_0: [3,3,3,3,0,1,0,2,0,1,0],
 	color11L_0: [3,3,3,3,0,1,0,2,0,1,0],
+	color11W_0: [2,3,3,2,0,1,0,2,0,1,0],
 	color12_0: [3,3,3,3,2,0,1,0,1,0,1,0],
 	color14_0: [4,3,3,3,3,4,2,0,1,0,1,0,1,0],
+	color15A_0: [3,3,3,3,4,4,4,4,0,1,0,2,0,1,0],
 	color17_1: [0,1,0,1,0,1,0,1,2,3,4,3,4,3,4,3,4],
 
 	color5_1: [2,0,0,0,0],
@@ -307,6 +315,7 @@ var g_keyObj = {
 	color11L_1: [3,3,3,3,2,0,1,0,0,1,0],
 	color12_1: [3,3,3,3,2,0,1,0,1,0,1,0],
 	color14_1: [4,3,3,3,3,4,2,0,1,0,1,0,1,0],
+	color15A_1: [3,3,3,3,4,4,4,4,0,1,0,2,0,1,0],
 	color17_0: [0,0,0,0,2,4,4,4,4,1,1,1,1,3,3,3,3],
 	
 	color5_2: [0,0,2,0,0],
@@ -322,8 +331,10 @@ var g_keyObj = {
 	stepRtn9i_0: ["monar", "giko", "c", "morara", "onigiri", 0, -90, 90, 180],
 	stepRtn11_0: [0, -90, 90, 180, 0, -45, -90, "onigiri", 90, 135, 180],
 	stepRtn11L_0: [0, -90, 90, 180, 0, -45, -90, "onigiri", 90, 135, 180],
+	stepRtn11W_0: ["giko", 135, 45, "iyo", 0, -45, -90, "onigiri", 90, 135, 180],
 	stepRtn12_0: [0, -90, 90, 180, "onigiri", 0, 30, 60, 90, 120, 150, 180],
 	stepRtn14_0: [45, 0, -90, 90, 180, 135, "onigiri", 0, 30, 60, 90, 120, 150, 180],
+	stepRtn15A_0: [0, -90, 90, 180, 0, -90, 90, 180, 0, -45, -90, "onigiri", 90, 135, 180],
 	stepRtn17_1: [0, -22.5, -45, -67.5, -90, -112.5, -135, -157.5, "onigiri", 
 		22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180],
 
@@ -337,6 +348,7 @@ var g_keyObj = {
 	stepRtn11L_1: [0, -90, 90, 180, "onigiri", 0, -45, -90, 90, 135, 180],
 	stepRtn12_1: [0, -90, 90, 180, "onigiri", 0, 30, 60, 90, 120, 150, 180],
 	stepRtn14_1: [45, 0, -90, 90, 180, 135, "onigiri", 0, 30, 60, 90, 120, 150, 180],
+	stepRtn15A_1: [0, -90, 90, 180, 0, -90, 90, 180, 0, -45, -90, "onigiri", 90, 135, 180],
 	stepRtn17_0: [0, -45, -90, -135, "onigiri", 45, 90, 135, 180,
 		-22.5, -67.5, -112.5, -157.5, 22.5, 67.5, 112.5, 157.5],
 
@@ -352,8 +364,10 @@ var g_keyObj = {
 	div9i_0: 9,
 	div11_0: 6,
 	div11L_0: 6,
+	div11W_0: 6,
 	div12_0: 5,
 	div14_0: 7,
+	div15A_0: 8,
 	div17_1: 17,
 
 	div5_1: 5,
@@ -363,6 +377,7 @@ var g_keyObj = {
 	div11L_1: 6,
 	div12_1: 5,
 	div14_1: 7,
+	div15A_1: 8,
 	div17_0: 9,
 
 	div5_2: 5,
@@ -377,7 +392,9 @@ var g_keyObj = {
 	pos9i_0: [0,1,2,3,4,5,6,7,8],
 	pos11_0: [2,3,4,5,6,7,8,9,10,11,12],
 	pos11L_0: [0,1,2,3,6,7,8,9,10,11,12],
+	pos11W_0: [0,2,3,5,6,7,8,9,10,11,12],
 	pos12_0: [1,2,3,4,5,6,7,8,9,10,11,12],
+	pos15A_0: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],
 	pos14_0: [1,2,3,4,5,6,7,8,9,10,11,12,13,14],
 	pos17_1: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
 
@@ -388,6 +405,7 @@ var g_keyObj = {
 	pos11L_1: [0,1,2,3,4,6,7,8,10,11,12],
 	pos12_1: [1,2,3,4,5,6,7,8,9,10,11,12],
 	pos14_1: [1,2,3,4,5,6,7,8,9,10,11,12,13,14],
+	pos15A_1: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],
 	pos17_0: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
 
 	pos5_2: [0,1,2,3,4],
@@ -406,8 +424,10 @@ var g_keyObj = {
 	keyCtrl9i_0:[[65],[83],[68],[70],[32],[37],[40],[38,0],[39]],
 	keyCtrl11_0:[[37],[40],[38,0],[39],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl11L_0:[[87],[69],[51,52],[82],[83],[68],[70],[32],[74],[75],[76]],
+	keyCtrl11W_0:[[49,50],[84],[89],[48,189],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl12_0:[[85],[73],[56,57],[79],[32],[78],[74],[77,0],[75,0],[188],[76],[190]],
 	keyCtrl14_0:[[84,89],[85],[73],[56,55,57,48],[79],[192,80],[32],[78],[74],[77,0],[75,0],[188],[76],[190]],
+	keyCtrl15A_0:[[87],[69],[51,52],[82],[37],[40],[38,0],[39],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl17_1:[[65],[90],[83],[88],[68],[67],[70],[86],[32],[78],[74],[77],[75],[188],[76],[190],[187]],
 	
 	keyCtrl5_0d: [[37],[40],[38,0],[39],[32,0]],
@@ -419,8 +439,10 @@ var g_keyObj = {
 	keyCtrl9i_0d:[[65],[83],[68],[70],[32],[37],[40],[38,0],[39]],
 	keyCtrl11_0d:[[37],[40],[38,0],[39],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl11L_0d:[[87],[69],[51,52],[82],[83],[68],[70],[32],[74],[75],[76]],
+	keyCtrl11W_0d:[[49,50],[84],[89],[48,189],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl12_0d:[[85],[73],[56,57],[79],[32],[78],[74],[77,0],[75,0],[188],[76],[190]],
 	keyCtrl14_0d:[[84,89],[85],[73],[56,55,57,48],[79],[192,80],[32],[78],[74],[77,0],[75,0],[188],[76],[190]],
+	keyCtrl15A_0d:[[87],[69],[51,52],[82],[37],[40],[38,0],[39],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl17_1d:[[65],[90],[83],[88],[68],[67],[70],[86],[32],[78],[74],[77],[75],[188],[76],[190],[187]],
 	
 	// 変則パターン (キーコンフィグ)
@@ -434,6 +456,7 @@ var g_keyObj = {
 	keyCtrl11L_1:[[87],[69],[51,52],[82],[32],[83],[68],[70],[74],[75],[76]],
 	keyCtrl12_1:[[89],[85,73],[56,55,57],[79],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
 	keyCtrl14_1:[[82,84],[89],[85,73],[56,54,55,57,48],[79],[192,80],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
+	keyCtrl15A_1:[[87],[69],[51,52],[82],[85],[73],[56,57],[79],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl17_0:[[65],[83],[68],[70],[32],[74],[75],[76],[187],[90],[88],[67],[86],[78],[77],[188],[190]],
 	
 	keyCtrl5_1d: [[32,0],[37],[40],[38,0],[39]],
@@ -443,6 +466,7 @@ var g_keyObj = {
 	keyCtrl11L_1d:[[87],[69],[51,52],[82],[32],[83],[68],[70],[74],[75],[76]],
 	keyCtrl12_1d:[[89],[85,73],[56,55,57],[79],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
 	keyCtrl14_1d:[[82,84],[89],[85,73],[56,54,55,57,48],[79],[192,80],[32],[66],[72],[78,77],[74,75],[188],[76],[190]],
+	keyCtrl15A_1d:[[87],[69],[51,52],[82],[85],[73],[56,57],[79],[83],[68],[70],[32],[74],[75],[76]],
 	keyCtrl17_0d:[[65],[83],[68],[70],[32],[74],[75],[76],[187],[90],[88],[67],[86],[78],[77],[188],[190]],
 	
 	keyCtrl5_2: [[37],[40],[32,0],[38,0],[39]],
@@ -494,10 +518,31 @@ var g_resultObj = {
 	score: 0
 };
 
+var g_allArrow = 0;
+var g_allFrz = 0;
+var g_rankObj = {
+	rankMarks: ["SS","S","SA","AAA","AA","A","B"],
+	rankRate:  [97, 90, 85, 80, 75, 70, 50],
+	rankColor: ["#00ccff","#6600ff","#ff9900","#ff0000","#00ff00","#ff00ff","#cc00ff"],
+
+	rankMarkPF: "PF",
+	rankColorPF: "#cccc00",
+	rankMarkC: "C",
+	rankColorC:  "#cc9933",
+	rankMarkF: "F",
+	rankColorF:  "#999999",
+	rankMarkX: "X",
+	rankColorX:  "#996600"
+}
+
+var g_gameOverFlg = false;
+
 var g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 var g_audio = new Audio();
 var g_timeoutEvtId = 0;
+var g_inputKeyBuffer = new Array();
+
 
 /**
  * イベントハンドラ用オブジェクト
@@ -551,19 +596,21 @@ var g_handler = (function(){
  */
 function createDiv(_id, _x, _y, _width, _height){
 	var div = document.createElement("div");
-	div.id = _id;
-	div.style.left   = _x + "px";
-	div.style.top    = _y + "px";
-	div.style.width  = _width + "px";
-	div.style.height = _height + "px";
-	div.style.position = "absolute";
 
-	div.style.userSelect = "none";
-	div.style.webkitUserSelect = "none";
-	div.style.msUserSelect = "none";
-	div.style.mozUserSelect = "none";
-	div.style.khtmlUserSelect = "none";
-	div.style.webkitTouchCallout = "none";
+	div.id = _id;
+	var style = div.style;
+	style.left   = _x + "px";
+	style.top    = _y + "px";
+	style.width  = _width + "px";
+	style.height = _height + "px";
+	style.position = "absolute";
+
+	style.userSelect = "none";
+	style.webkitUserSelect = "none";
+	style.msUserSelect = "none";
+	style.mozUserSelect = "none";
+	style.khtmlUserSelect = "none";
+	style.webkitTouchCallout = "none";
 
 	return div;
 }
@@ -582,9 +629,21 @@ function createDiv(_id, _x, _y, _width, _height){
  */
 function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text){
 	var div = createDiv(_id, _x, _y, _width, _height);
-	div.style.font = _fontsize + "px '" + C_LBL_BASICFONT + "'";
-	div.style.color = _color;
-	div.style.textAlign = C_ALIGN_CENTER;
+	var style = div.style;
+	style.font = _fontsize + "px '" + C_LBL_BASICFONT + "'";
+	style.color = _color;
+	style.textAlign = C_ALIGN_CENTER;
+	div.innerHTML = _text;
+
+	return div;
+}
+
+function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text, _font){
+	var div = createDiv(_id, _x, _y, _width, _height);
+	var style = div.style;
+	style.font = _fontsize + "px '" + _font + "'";
+	style.color = _color;
+	style.textAlign = C_ALIGN_CENTER;
 	div.innerHTML = _text;
 
 	return div;
@@ -775,32 +834,33 @@ function createButton(_obj, _func){
 	var div = createDiv(_obj.id, _obj.x, _obj.y, _obj.width, _obj.height);
 
 	// ボタンの装飾を定義
-	div.style.font = _obj.fontsize + "px '" + C_LBL_BASICFONT + "'";
+	var style = div.style;
+	style.font = _obj.fontsize + "px '" + C_LBL_BASICFONT + "'";
 	div.innerHTML = _obj.name;
-	div.style.textAlign = _obj.align;
-	div.style.verticalAlign = C_VALIGN_MIDDLE;
-	div.style.color = C_CLR_TEXT;
-	div.style.backgroundColor = _obj.normalColor;
-	div.style.transition = "background-color 0.25s linear";
+	style.textAlign = _obj.align;
+	style.verticalAlign = C_VALIGN_MIDDLE;
+	style.color = C_CLR_TEXT;
+	style.backgroundColor = _obj.normalColor;
+	style.transition = "background-color 0.25s linear";
 
 	// オンマウス・タップ時の挙動 (背景色変更、カーソル変化)
 	div.onmouseover = function(){
-		div.style.backgroundColor = _obj.hoverColor;
-		div.style.cursor = "pointer";
+		style.backgroundColor = _obj.hoverColor;
+		style.cursor = "pointer";
 	}
 	var lsnrkeyTS = g_handler.addListener(div, "touchstart", function(){
-		div.style.backgroundColor = _obj.hoverColor;
-		div.style.cursor = "pointer";
+		style.backgroundColor = _obj.hoverColor;
+		style.cursor = "pointer";
 	}, false);
 
 	// 通常時の挙動 (背景色変更、カーソル変化)
 	div.onmouseout = function(){
-		div.style.backgroundColor = _obj.normalColor;
-		div.style.cursor = "default";
+		style.backgroundColor = _obj.normalColor;
+		style.cursor = "default";
 	}
 	var lsnrkeyTE = g_handler.addListener(div, "touchend", function(){
-		div.style.backgroundColor = _obj.normalColor;
-		div.style.cursor = "default";
+		style.backgroundColor = _obj.normalColor;
+		style.cursor = "default";
 	}, false);
 
 	// ボタンを押したときの動作
@@ -1045,6 +1105,10 @@ function titleInit(){
 			var setKey = evt.which;
 		}else{
 			var setKey = event.keyCode;
+		}
+		if(setKey == 13){
+			clearWindow();
+			optionInit();
 		}
 		for(var j=0; j<C_BLOCK_KEYS.length; j++){
 			if(setKey == C_BLOCK_KEYS[j]){
@@ -1329,6 +1393,23 @@ function optionInit(){
 			var setKey = evt.which;
 		}else{
 			var setKey = event.keyCode;
+		}
+		if(setKey == 13){
+			clearWindow();
+			g_audio.load();
+		
+			if(g_audio.readyState == 4){
+				// audioの読み込みが終わった後の処理
+				loadingScoreInit();
+			}else{
+				// 読込中の状態
+				g_audio.addEventListener('canplaythrough', (function(){
+					return function f(){
+						g_audio.removeEventListener('canplaythrough',f,false);
+						loadingScoreInit();
+					}
+				})(),false);
+			}
 		}
 		for(var j=0; j<C_BLOCK_KEYS.length; j++){
 			if(setKey == C_BLOCK_KEYS[j]){
@@ -1823,6 +1904,8 @@ function scoreConvert(_dosObj, _scoreNo){
 
 	// 矢印群の格納先
 	var obj = {};
+	g_allArrow = 0;
+	g_allFrz = 0;
 
 	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
@@ -1840,8 +1923,12 @@ function scoreConvert(_dosObj, _scoreNo){
 			if(tmpData != undefined){
 				obj.arrowData[j] = new Array();
 				obj.arrowData[j] = tmpData.split(",");
-				for(k=0; k<obj.arrowData[j].length; k++){
-					obj.arrowData[j][k] = parseFloat(obj.arrowData[j][k]) + parseFloat(g_stateObj.adjustment);
+				if(isNaN(parseFloat(obj.arrowData[j][0]))){
+				}else{
+					g_allArrow += obj.arrowData[j].length;
+					for(k=0; k<obj.arrowData[j].length; k++){
+						obj.arrowData[j][k] = parseFloat(obj.arrowData[j][k]) + parseFloat(g_stateObj.adjustment);
+					}
 				}
 			}
 		}
@@ -1868,6 +1955,7 @@ function scoreConvert(_dosObj, _scoreNo){
 				obj.frzData[j] = tmpData.split(",");
 				if(isNaN(parseFloat(obj.frzData[j][0]))){
 				}else{
+					g_allFrz += obj.frzData[j].length;
 					for(k=0; k<obj.frzData[j].length; k++){
 						obj.frzData[j][k] = parseFloat(obj.frzData[j][k]) + parseFloat(g_stateObj.adjustment);
 					}
@@ -1885,21 +1973,21 @@ function scoreConvert(_dosObj, _scoreNo){
 			obj.speedData[k+1] = parseFloat(obj.speedData[k+1]);
 		}
 	}
-	if(_dosObj["boost_" + _scoreNo + "data"] != undefined){
+	if(_dosObj["boost" + _scoreNo + "_data"] != undefined){
 		obj.boostData = _dosObj["boost" + _scoreNo + "_data"].split(",");
 		for(k=0; k<obj.boostData.length; k+=2){
 			obj.boostData[k] = parseFloat(obj.boostData[k]) + parseFloat(g_stateObj.adjustment);
 			obj.boostData[k+1] = parseFloat(obj.boostData[k+1]);
 		}
 	}
-	if(_dosObj["color_" + _scoreNo + "data"] != undefined){
+	if(_dosObj["color" + _scoreNo + "_data"] != undefined){
 		obj.colorData = _dosObj["color" + _scoreNo + "_data"].split(",");
 		for(k=0; k<obj.colorData.length; k+=3){
 			obj.colorData[k] = parseFloat(obj.colorData[k]) + parseFloat(g_stateObj.adjustment);
 			obj.colorData[k+1] = parseFloat(obj.colorData[k+1]);
 		}
 	}
-	if(_dosObj["acolor_" + _scoreNo + "data"] != undefined){
+	if(_dosObj["acolor" + _scoreNo + "_data"] != undefined){
 		obj.acolorData = _dosObj["acolor" + _scoreNo + "_data"].split(",");
 		for(k=0; k<obj.acolorData.length; k+=3){
 			obj.acolorData[k] = parseFloat(obj.acolorData[k]) + parseFloat(g_stateObj.adjustment);
@@ -1909,8 +1997,9 @@ function scoreConvert(_dosObj, _scoreNo){
 	
 	// 歌詞データの分解
 	obj.wordData = new Array();
-	if(_dosObj["word_" + _scoreNo + "data"] != undefined){
-		tmpData = _dosObj["word_" + _scoreNo + "data"].split("\r").join("");
+	if(_dosObj["word" + _scoreNo + "_data"] != undefined){
+
+		tmpData = _dosObj["word" + _scoreNo + "_data"].split("\r").join("");
 		tmpData = tmpData.split("\n").join("");
 
 		if(tmpData != undefined){
@@ -1925,6 +2014,7 @@ function scoreConvert(_dosObj, _scoreNo){
 				obj.wordData[tmpWordData[k]].push(tmpWordData[k+1],tmpWordData[k+2]);
 			}
 		}
+		
 	}
 
 	return obj;
@@ -2543,6 +2633,8 @@ function MainInit(){
 	var buffTime;
 	var musicStartFlg = false;
 
+	g_inputKeyBuffer = [];
+
 	// 終了時間の設定
 	var fullSecond = Math.floor(g_headerObj.blankFrame / 60 + g_audio.duration);
 	var fullMin = Math.floor(fullSecond / 60);
@@ -2609,7 +2701,7 @@ function MainInit(){
 	mainSprite.appendChild(lblFCombo);
 
 	// 歌詞表示1
-	var lblWord0 = createDivLabel("lblword0", g_sWidth/2 -200, 10, g_sWidth -100, 20, 16, "#ffffff", 
+	var lblWord0 = createDivLabel("lblword0", g_sWidth/2 -200, 10, g_sWidth -100, 30, 14, "#ffffff", 
 		g_workObj.word0Data);
 	lblWord0.style.textAlign = C_ALIGN_LEFT;
 	mainSprite.appendChild(lblWord0);
@@ -2641,12 +2733,14 @@ function MainInit(){
 
 	// キー操作イベント
 	document.onkeydown = function(evt){
+
 		// ブラウザ判定
 		if(g_userAgent.indexOf("firefox") != -1){
 			var setKey = evt.which;
 		}else{
 			var setKey = event.keyCode;
 		}
+		g_inputKeyBuffer[setKey] = true;
 		var matchKeys = g_keyObj["keyCtrl" + keyCtrlPtn];
 		
 		for(var j=0; j<keyNum; j++){
@@ -2682,7 +2776,12 @@ function MainInit(){
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			clearWindow();
-			titleInit();
+			if(keyIsDown(16)){
+				g_gameOverFlg = true;
+				resultInit();	
+			}else{
+				titleInit();
+			}
 		}
 
 		for(var j=0; j<C_BLOCK_KEYS.length; j++){
@@ -2693,34 +2792,55 @@ function MainInit(){
 	}
 
 	document.onkeyup = function(evt){
+		// ブラウザ判定
+		if(g_userAgent.indexOf("firefox") != -1){
+			var setKey = evt.which;
+		}else{
+			var setKey = event.keyCode;
+		}
+		g_inputKeyBuffer[setKey] = false;
+
 		for(var j=0; j<keyNum; j++){
-			var stepDiv = document.getElementById("step" + j);
-			stepDiv.style.backgroundColor = "#cccccc";
-			var stepDivHit = document.getElementById("stepHit" + j);
-			stepDivHit.style.opacity = 0;
 
-			// フリーズアローを離したときの処理
-			var k = g_workObj.judgFrzCnt[j];
-			var frzRoot = document.getElementById("frz" + j + "_" + k);
-			if(frzRoot != null){
-				if(frzRoot.getAttribute("judgEndFlg") == "false"){
-					if(frzRoot.getAttribute("isMoving") == "false"){
-						g_resultObj.iknai++;
-						document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
-						g_resultObj.fCombo = 0;
-						frzRoot.setAttribute("judgEndFlg","true");
+			var keyDownFlg = false;
+			for(var m=0, len=g_workObj.keyCtrl[j].length; m<len; m++){
+				if(keyIsDown(g_workObj.keyCtrl[j][m])){
+					keyDownFlg = true;
+					break;
+				}
+			}
+			if(keyDownFlg == false){
 
-						var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
-						frzTopShadow.style.backgroundColor = "#000000";
-						frzTopShadow.style.top = "0px";
-						frzTopShadow.style.left = "0px";
-						frzTopShadow.style.width = "50px";
-						frzTopShadow.style.height = "50px";
-						frzTopShadow.style.opacity = 100;
-						document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
-						document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
-						document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
-						document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+				// ステップゾーンに対応するキーを離したとき
+				var stepDiv = document.getElementById("step" + j);
+				stepDiv.style.backgroundColor = "#cccccc";
+				var stepDivHit = document.getElementById("stepHit" + j);
+				stepDivHit.style.opacity = 0;
+				
+				// フリーズアローを離したとき
+				var k = g_workObj.judgFrzCnt[j];
+				var frzRoot = document.getElementById("frz" + j + "_" + k);
+				if(frzRoot != null){
+					if(frzRoot.getAttribute("judgEndFlg") == "false"){
+						if(frzRoot.getAttribute("isMoving") == "false"){
+							g_resultObj.iknai++;
+							document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
+							g_resultObj.fCombo = 0;
+							frzRoot.setAttribute("judgEndFlg","true");
+
+							var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
+							var fstyle = frzTopShadow.style;
+							fstyle.backgroundColor = "#000000";
+							fstyle.top = "0px";
+							fstyle.left = "0px";
+							fstyle.width = "50px";
+							fstyle.height = "50px";
+							fstyle.opacity = 100;
+							document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
+							document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
+							document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
+							document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+						}
 					}
 				}
 			}
@@ -2934,12 +3054,13 @@ function MainInit(){
 						frzRoot.setAttribute("judgEndFlg","true");
 
 						var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
-						frzTopShadow.style.backgroundColor = "#000000";
-						frzTopShadow.style.top = "0px";
-						frzTopShadow.style.left = "0px";
-						frzTopShadow.style.width = "50px";
-						frzTopShadow.style.height = "50px";
-						frzTopShadow.style.opacity = 100;
+						var fstyle = frzTopShadow.style;
+						fstyle.backgroundColor = "#000000";
+						fstyle.top = "0px";
+						fstyle.left = "0px";
+						fstyle.width = "50px";
+						fstyle.height = "50px";
+						fstyle.opacity = 100;
 						document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
 						document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
 						document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
@@ -2975,6 +3096,10 @@ function MainInit(){
 	}
 	var mainStartTime = new Date();
 	g_timeoutEvtId = setTimeout(flowTimeline(), 1000/ 60);
+}
+
+function keyIsDown(_keyCode){
+	return g_inputKeyBuffer[_keyCode];
 }
 
 /**
@@ -3054,6 +3179,20 @@ function judgeArrow(_j){
 					g_resultObj.iknai++;
 					document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
 					g_resultObj.fCombo = 0;
+					judgFrz.setAttribute("judgEndFlg","true");
+
+					var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + fcurrentNo);
+					var fstyle = frzTopShadow.style;
+					fstyle.backgroundColor = "#000000";
+					fstyle.top = "0px";
+					fstyle.left = "0px";
+					fstyle.width = "50px";
+					fstyle.height = "50px";
+					fstyle.opacity = 100;
+					document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.opacity = 100;
+					document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.backgroundColor = "#cccccc";
+					document.getElementById("frzBar" + _j + "_" + fcurrentNo).style.backgroundColor = "#999999";
+					document.getElementById("frzBtm" + _j + "_" + fcurrentNo).style.backgroundColor = "#cccccc";
 				}
 
 	//			judgArrow.setAttribute("judgEndFlg","true");
@@ -3094,16 +3233,8 @@ function resultInit(){
 	"<br><span style='color:#ffff99'>(ﾟ∀ﾟ)ｷﾀ-!!</span>" +
 	"<br><span style='color:#99ff66'>(・A・)ｲｸﾅｲ</span>" +
 	"<br><span style='color:#ffffff'>MaxCombo</span>" +
-	"<br><span style='color:#ffffff'>FreezeCombo</span>" ;
-
-	var scoreData = g_resultObj.ii +
-	"<br>" + g_resultObj.shakin +
-	"<br>" + g_resultObj.matari +
-	"<br>" + g_resultObj.uwan +
-	"<br>" + g_resultObj.kita +
-	"<br>" + g_resultObj.iknai +
-	"<br>" + g_resultObj.maxCombo +
-	"<br>" + g_resultObj.fmaxCombo ;
+	"<br><span style='color:#ffffff'>FreezeCombo</span>" +
+	"<br><br><span style='color:#ffffff'>Score</span>" ;
 
 	// スコア計算(一括)
 	var scoreTmp = g_resultObj.ii * 8 +
@@ -3112,14 +3243,58 @@ function resultInit(){
 	g_resultObj.kita * 8 +
 	g_resultObj.sfsf * 4 +
 	g_resultObj.maxCombo * 2 +
-	g_resultObj.frzCombo * 2;
+	g_resultObj.fmaxCombo * 2;
+
+	var allScore = (g_allArrow + g_allFrz) * 10;
+	var resultScore = Math.round(scoreTmp / allScore * 1000000);
+
+	var scoreData = g_resultObj.ii +
+	"<br>" + g_resultObj.shakin +
+	"<br>" + g_resultObj.matari +
+	"<br>" + g_resultObj.uwan +
+	"<br>" + g_resultObj.kita +
+	"<br>" + g_resultObj.iknai +
+	"<br>" + g_resultObj.maxCombo +
+	"<br>" + g_resultObj.fmaxCombo +
+	"<br><br>" + resultScore ;
+
+	// ランク計算
+	var rankMark = "";
+	var rankColor = "";
+	if(g_gameOverFlg == true){
+		rankMark = g_rankObj.rankMarkF;
+		rankColor = g_rankObj.rankColorF;
+	}else if(g_headerObj.startFrame == 0){
+		if(g_resultObj.matari + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai == 0){
+			rankMark = g_rankObj.rankMarkPF;
+			rankColor = g_rankObj.rankColorPF;
+		}else{
+			for(var j=0, len=g_rankObj.rankRate.length; j<len; j++){			
+				if(resultScore / 10000 >= g_rankObj.rankRate[j]){
+					rankMark = g_rankObj.rankMarks[j];
+					rankColor = g_rankObj.rankColor[j];
+					break;
+				}
+			}
+			if(resultScore / 10000 < g_rankObj.rankRate[len-1]){
+				rankMark = g_rankObj.rankMarkC;
+				rankColor = g_rankObj.rankColorC;
+			}
+		}
+	}else{
+		rankMark = g_rankObj.rankMarkX;
+		rankColor = g_rankObj.rankColorX;
+	}
+
 
 	// Twitter用リザルト
 	var tweetResultTmp = "【#danoni】" + g_headerObj.musicTitle + "(" + 
-	g_headerObj["difLabels"][g_stateObj.scoreId] + ")/" +
+	g_headerObj.keyLabels[g_stateObj.scoreId] + "k-" + g_headerObj.difLabels[g_stateObj.scoreId] + ")/" +
 	g_headerObj.tuning + "/" +
-	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan + " " +
-	 g_resultObj.kita + "-" + g_resultObj.iknai + " " +
+	"Rank:" + rankMark + "/" +
+	"Score:" + resultScore + "/" +
+	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan + "/" +
+	 g_resultObj.kita + "-" + g_resultObj.iknai + "/" +
 	 g_resultObj.maxCombo + "-" + g_resultObj.fmaxCombo;
 	var tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
 
@@ -3128,10 +3303,15 @@ function resultInit(){
 	lblResult.style.textAlign = C_ALIGN_LEFT;
 	divRoot.appendChild(lblResult);
 
-	var lblScore = createDivLabel("lblScore", g_sWidth/2 + 50, 100, 100, 20, 20, "#ffffff", 
+	var lblScore = createDivLabel("lblScore", g_sWidth/2 + 20, 100, 100, 20, 20, "#ffffff", 
 	scoreData);
 	lblScore.style.textAlign = C_ALIGN_RIGHT;
 	divRoot.appendChild(lblScore);
+
+	var lblRank = createDivCustomLabel("lblRank", g_sWidth/2 + 130, 310, 70, 20, 50, "#ffffff", 
+	"<span style='color:" + rankColor + ";'>" + rankMark + "</span>","Bookman Old Style");
+	lblRank.style.textAlign = C_ALIGN_CENTER;
+	divRoot.appendChild(lblRank);
 
 	// 戻るボタン描画
 	var btnBack = createButton({
