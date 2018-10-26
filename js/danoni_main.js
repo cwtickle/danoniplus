@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/26
+ * Revised : 2018/10/27
  */
-var g_version =  "Ver 0.35.2";
+var g_version =  "Ver 0.36.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2746,6 +2746,33 @@ function MainInit(){
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblTime2);
 
+	// 判定キャラクタ表示：矢印
+	var charaJ = createDivLabel("charaJ", g_sWidth/2 - 200, g_sHeight/2 - 50, 200, 20, 20, C_CLR_II, 
+	"");
+	charaJ.style.textAlign = C_ALIGN_CENTER;
+	charaJ.style.opacity = 70;
+	mainSprite.appendChild(charaJ);
+
+	// コンボ表示：矢印
+	var comboJ = createDivLabel("comboJ", g_sWidth/2 - 50, g_sHeight/2 - 50, 200, 20, 20, C_CLR_KITA, 
+	"");
+	comboJ.style.textAlign = C_ALIGN_CENTER;
+	comboJ.style.opacity = 70;
+	mainSprite.appendChild(comboJ);
+
+	// 判定キャラクタ表示：フリーズアロー
+	var charaFJ = createDivLabel("charaFJ", g_sWidth/2 - 100, g_sHeight/2, 200, 20, 20, C_CLR_KITA, 
+	"");
+	charaFJ.style.textAlign = C_ALIGN_CENTER;
+	charaFJ.style.opacity = 70;
+	mainSprite.appendChild(charaFJ);
+
+	// コンボ表示：フリーズアロー
+	var comboFJ = createDivLabel("comboFJ", g_sWidth/2 + 50, g_sHeight/2, 200, 20, 20, C_CLR_II, 
+	"");
+	comboFJ.style.textAlign = C_ALIGN_CENTER;
+	comboFJ.style.opacity = 70;
+	mainSprite.appendChild(comboFJ);
 
 	// キー操作イベント
 	document.onkeydown = function(evt){
@@ -2839,9 +2866,7 @@ function MainInit(){
 				if(frzRoot != null){
 					if(frzRoot.getAttribute("judgEndFlg") == "false"){
 						if(frzRoot.getAttribute("isMoving") == "false"){
-							g_resultObj.iknai++;
-							document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
-							g_resultObj.fCombo = 0;
+							judgeIknai();
 							frzRoot.setAttribute("judgEndFlg","true");
 
 							changeFailedFrz(j, k);
@@ -2971,9 +2996,7 @@ function MainInit(){
 					mainSprite.removeChild(arrow);
 
 				}else if(cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]){
-					g_resultObj.uwan++;
-					document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
-					g_resultObj.combo = 0;
+					judgeUwan();
 					g_workObj.judgArrowCnt[j]++;
 					mainSprite.removeChild(arrow);
 				}
@@ -3059,12 +3082,8 @@ function MainInit(){
 							frzBtm.style.top = (parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * g_workObj.scrollDir[j]) + "px";
 							frzBtmShadow.style.top = (parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * g_workObj.scrollDir[j]) + "px";
 						}else{
-							g_resultObj.kita++;
-							document.getElementById("lblKita").innerHTML = g_resultObj.kita;
-							if(++g_resultObj.fCombo > g_resultObj.fmaxCombo){
-								g_resultObj.fmaxCombo = g_resultObj.fCombo;
-								document.getElementById("lblFCombo").innerHTML = g_resultObj.fmaxCombo;
-							}
+							judgeKita();
+					
 							g_workObj.judgFrzCnt[j]++;
 							frzRoot.setAttribute("judgEndFlg","true");
 							mainSprite.removeChild(frzRoot);
@@ -3073,9 +3092,7 @@ function MainInit(){
 					
 					// フリーズアローが枠外に出たときの処理
 					if(cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]){
-						g_resultObj.iknai++;
-						document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
-						g_resultObj.fCombo = 0;
+						judgeIknai();
 						frzRoot.setAttribute("judgEndFlg","true");
 
 						changeFailedFrz(j, k);
@@ -3138,33 +3155,22 @@ function judgeArrow(_j){
 
 			if(difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg == "false"){
 				stepDivHit.style.opacity = 100;
+				var charaJ = document.getElementById("charaJ");
 
 				if(difCnt <= g_judgObj.arrowJ[C_JDG_II]){
-					g_resultObj.ii++;
-					document.getElementById("lblIi").innerHTML = g_resultObj.ii;
-					if(++g_resultObj.combo > g_resultObj.maxCombo){
-						g_resultObj.maxCombo = g_resultObj.combo;
-						document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
-					}
+					judgeIi();
 				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]){
-					g_resultObj.shakin++;
-					document.getElementById("lblShakin").innerHTML = g_resultObj.shakin;
-					if(++g_resultObj.combo > g_resultObj.maxCombo){
-						g_resultObj.maxCombo = g_resultObj.combo;
-						document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
-					}
+					judgeShakin();
 				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]){
-					g_resultObj.matari++;
-					document.getElementById("lblMatari").innerHTML = g_resultObj.matari;
+					judgeMatari();
 				}else{
-					g_resultObj.uwan++;
-					document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
-					g_resultObj.combo = 0;
+					judgeUwan();
 				}
 
 	//			judgArrow.setAttribute("judgEndFlg","true");
 				mainSprite.removeChild(judgArrow);
 				g_workObj.judgArrowCnt[_j]++;
+
 			}
 		}
 
@@ -3174,35 +3180,102 @@ function judgeArrow(_j){
 			var difCnt = Math.abs(judgFrz.getAttribute("cnt"));
 			var judgEndFlg = judgFrz.getAttribute("judgEndFlg");
 
-			if(difCnt <= g_judgObj.frzJ[C_JDG_IKNAI] && judgEndFlg == "false"){
+			if(difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg == "false"){
 
-				if(difCnt <= g_judgObj.frzJ[C_JDG_SFSF]){
-					var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + fcurrentNo);
-					frzTopShadow.style.backgroundColor = "#ffffff";
-					frzTopShadow.style.top = "-10px";
-					frzTopShadow.style.left = "-10px";
-					frzTopShadow.style.width = "70px";
-					frzTopShadow.style.height = "70px";
-					frzTopShadow.style.opacity = 70;
-					document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.opacity = 0;
-					
-					document.getElementById("frzBar" + _j + "_" + fcurrentNo).style.backgroundColor = "#ffff99";
-					document.getElementById("frzBtm" + _j + "_" + fcurrentNo).style.backgroundColor = "#ffff99";
-					judgFrz.setAttribute("isMoving", "false");
-				}else{
-					g_resultObj.iknai++;
-					document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
-					g_resultObj.fCombo = 0;
-					judgFrz.setAttribute("judgEndFlg","true");
+				var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + fcurrentNo);
+				frzTopShadow.style.backgroundColor = "#ffffff";
+				frzTopShadow.style.top = "-10px";
+				frzTopShadow.style.left = "-10px";
+				frzTopShadow.style.width = "70px";
+				frzTopShadow.style.height = "70px";
+				frzTopShadow.style.opacity = 70;
+				document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.opacity = 0;
+				
+				var frzBar = document.getElementById("frzBar" + _j + "_" + fcurrentNo);
+				frzBar.style.backgroundColor = "#ffff99";
+				document.getElementById("frzBtm" + _j + "_" + fcurrentNo).style.backgroundColor = "#ffff99";
+				judgFrz.setAttribute("isMoving", "false");
 
-					changeFailedFrz(_j, fcurrentNo);
-				}
+	//			judgFrz.style.top = (parseFloat(judgFrz.style.top) - judgFrz.getAttribute("cnt") * g_workObj.currentSpeed * g_workObj.scrollDir[_j]) + "px";
+	//			var frzBarLength = parseFloat(frzBar.style.height) + g_workObj.currentSpeed * judgFrz.getAttribute("cnt");
+	//			judgFrz.setAttribute("frzBarLength",frzBarLength);
+	//			frzBar.style.height = frzBarLength + "px";
 
 	//			judgArrow.setAttribute("judgEndFlg","true");
 			}
 		}
 		g_judgObj.lockFlgs[_j] = false;
 	}
+}
+
+function judgeIi(){
+	g_resultObj.ii++;
+	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_II + "'>" + C_JCR_II + "</span>";
+
+//	charaJ.style.transform = "translateX(10px)";
+	document.getElementById("lblIi").innerHTML = g_resultObj.ii;
+	if(++g_resultObj.combo > g_resultObj.maxCombo){
+		g_resultObj.maxCombo = g_resultObj.combo;
+		document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
+	}
+	document.getElementById("comboJ").innerHTML = g_resultObj.combo + " Combo!!";
+	document.getElementById("charaFJ").innerHTML = "";
+	document.getElementById("comboFJ").innerHTML = "";
+}
+
+function judgeShakin(){
+	g_resultObj.shakin++;
+	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_SHAKIN + "'>" + C_JCR_SHAKIN + "</span>";
+	document.getElementById("lblShakin").innerHTML = g_resultObj.shakin;
+	if(++g_resultObj.combo > g_resultObj.maxCombo){
+		g_resultObj.maxCombo = g_resultObj.combo;
+		document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
+	}
+	document.getElementById("comboJ").innerHTML = g_resultObj.combo + " Combo!!";
+}
+
+function judgeMatari(){
+	g_resultObj.matari++;
+	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_MATARI + "'>" + C_JCR_MATARI + "</span>";
+	document.getElementById("lblMatari").innerHTML = g_resultObj.matari;
+	document.getElementById("comboJ").innerHTML = "";
+	document.getElementById("charaFJ").innerHTML = "";
+	document.getElementById("comboFJ").innerHTML = "";
+}
+
+function judgeUwan(){
+	g_resultObj.uwan++;
+	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_UWAN + "'>" + C_JCR_UWAN + "</span>";
+	document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
+	g_resultObj.combo = 0;
+	document.getElementById("comboJ").innerHTML = "";
+	document.getElementById("charaFJ").innerHTML = "";
+	document.getElementById("comboFJ").innerHTML = "";
+}
+
+function judgeKita(){
+	g_resultObj.kita++;
+	document.getElementById("lblKita").innerHTML = g_resultObj.kita;
+	document.getElementById("charaFJ").innerHTML = "<span style='color:" + C_CLR_KITA + "'>" + C_JCR_KITA + "</span>";
+	
+	if(++g_resultObj.fCombo > g_resultObj.fmaxCombo){
+		g_resultObj.fmaxCombo = g_resultObj.fCombo;
+		document.getElementById("lblFCombo").innerHTML = g_resultObj.fmaxCombo;
+	}
+	document.getElementById("comboFJ").innerHTML = g_resultObj.fCombo + " Combo!!";
+	document.getElementById("charaJ").innerHTML = "";
+	document.getElementById("comboJ").innerHTML = "";
+}
+
+function judgeIknai(){
+	g_resultObj.iknai++;
+	document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
+	document.getElementById("charaFJ").innerHTML = "<span style='color:" + C_CLR_IKNAI + "'>" + C_JCR_IKNAI + "</span>";
+	document.getElementById("comboFJ").innerHTML = "";
+	g_resultObj.fCombo = 0;
+
+	document.getElementById("charaJ").innerHTML = "";
+	document.getElementById("comboJ").innerHTML = "";
 }
 
 /*-----------------------------------------------------------*/
