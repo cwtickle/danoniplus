@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/27
+ * Revised : 2018/10/28
  */
-var g_version =  "Ver 0.41.1";
+var g_version =  "Ver 0.41.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1238,9 +1238,9 @@ function headerConvert(_dosObj){
 		obj.musicUrl = _dosObj.musicUrl;
 	}
 
-	// twitURL
-	if(_dosObj.TwitURL != undefined){
-		obj.twitUrl = _dosObj.TwitURL;
+	// hashTag
+	if(_dosObj.hashTag != undefined){
+		obj.hashTag = _dosObj.hashTag;
 	}
 	// TODO:フリーズアロー色など他のヘッダー情報の分解
 
@@ -3506,7 +3506,12 @@ function resultInit(){
 
 
 	// Twitter用リザルト
-	var tweetResultTmp = "【#danoni】" + g_headerObj.musicTitle + "(" + 
+	if(g_headerObj.hashTag != undefined){
+		var hashTag = " " + g_headerObj.hashTag;
+	}else{
+		var hashTag = "";
+	}
+	var tweetResultTmp = "【#danoni" + hashTag + "】" + g_headerObj.musicTitle + "(" + 
 	g_headerObj.keyLabels[g_stateObj.scoreId] + "k-" + g_headerObj.difLabels[g_stateObj.scoreId] + ")/" +
 	g_headerObj.tuning + "/" +
 	"Rank:" + rankMark + "/" +
@@ -3514,7 +3519,7 @@ function resultInit(){
 	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan + "/" +
 	 g_resultObj.kita + "-" + g_resultObj.iknai + "/" +
 	 g_resultObj.maxCombo + "-" + g_resultObj.fmaxCombo + " " +
-	 g_headerObj.twitUrl;
+	 location.href;
 	var tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
 
 	var lblResult = createDivLabel("lblResult", g_sWidth/2 - 150, 100, 150, 20, 20, "#ffffff", 
