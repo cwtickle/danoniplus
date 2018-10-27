@@ -149,5 +149,11 @@ function customResultInit(){
 	var layer2 = document.getElementById("layer2");
 	var l2ctx = layer2.getContext("2d");
 	
+	// 画面背景を指定 (background-color)
+	var grd = l0ctx.createLinearGradient(0,0,0,g_sHeight);
+	grd.addColorStop(0, "#000000");
+	grd.addColorStop(1, "#222222");
+	l0ctx.fillStyle=grd;
+	l0ctx.fillRect(0,0,g_sWidth,g_sHeight);
 	
 }
