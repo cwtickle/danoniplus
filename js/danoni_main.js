@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/27
  */
-var g_version =  "Ver 0.39.0";
+var g_version =  "Ver 0.41.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -39,7 +39,7 @@ var g_version =  "Ver 0.39.0";
  */
 
 window.onload = function(){
-	titleInit();
+	initialControl();
 }
 
 /*-----------------------------------------------------------*/
@@ -962,13 +962,6 @@ function clearWindow(){
 		divRoot.removeChild(divRoot.firstChild);
 	}
 
-	// 画面背景を指定 (background-color)
-	var grd = l0ctx.createLinearGradient(0,0,0,g_sHeight);
-	grd.addColorStop(0, "#000000");
-	grd.addColorStop(1, "#222222");
-	l0ctx.fillStyle=grd;
-	l0ctx.fillRect(0,0,g_sWidth,g_sHeight);
-
 	// 線画 (title-line)
 	l1ctx.beginPath();
 	l1ctx.strokeStyle="#cccccc";
@@ -984,9 +977,50 @@ function clearWindow(){
 	
 }
 
+function loadScript(url, callback){
+	var script = document.createElement("script");
+	script.type = "text/javascript";
+	script.src = url;
+
+	if(script.readyState){
+		script.onreadystatechange = function(){
+			if(script.readyState === "loaded" || script.readyState === "complete"){
+				script.onreadystatechange = null;
+				callback();
+			}
+		};
+	}else{
+		script.onload = function(){
+			callback();
+		};
+	}
+	document.getElementsByTagName("head")[0].appendChild(script);
+}
+
 /*-----------------------------------------------------------*/
 /* Scene : TITLE [melon] */
 /*-----------------------------------------------------------*/
+
+function initialControl(){
+
+	var layer0 = document.getElementById("layer0");
+	var l0ctx = layer0.getContext("2d");
+	g_sWidth = layer0.width;
+	g_sHeight = layer0.height;
+
+	// 譜面データの読み込み
+	var dos = document.getElementById("dos").value;
+	g_rootObj = dosConvert(dos);
+	g_headerObj = headerConvert(g_rootObj);
+	keysConvert(g_rootObj);
+
+	g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
+	g_keyObj.currentPtn = 0;
+	
+	loadScript("../js/" + g_headerObj.customjs, function(){
+		titleInit();
+	});
+}
 
 /**
  *  タイトル画面初期化
@@ -1018,41 +1052,8 @@ function titleInit(){
 	lblTitle.style.zIndex = 1;
 	divRoot.appendChild(lblTitle);
 
-	// 譜面データの読み込み
-	var dos = document.getElementById("dos").value;
-	g_rootObj = dosConvert(dos);
-	g_headerObj = headerConvert(g_rootObj);
-	keysConvert(g_rootObj);
-
-	g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
-	g_keyObj.currentPtn = 0;
-
-	// 背景の矢印オブジェクトを表示
-	var lblArrow = createArrowEffect("lblArrow", g_headerObj["setColor"][0], (g_sWidth-500)/2, -15, 500, 180);
-	lblArrow.style.opacity = 0.25;
-	lblArrow.style.zIndex = 0;
-	divRoot.appendChild(lblArrow);
-	
-
-	// 曲名文字描画（曲名は譜面データから取得）
-	// TEST:試験的に矢印色の1番目と3番目を使ってタイトルをグラデーション
-	var grd = l1ctx.createLinearGradient(0,0,g_sHeight,0);
-	if(g_headerObj["setColor"][0]!=undefined){
-		grd.addColorStop(0, g_headerObj["setColor"][0]);
-	}else{
-		grd.addColorStop(0, "#ffffff");
-	}
-	if(g_headerObj["setColor"][2]!=undefined){
-		grd.addColorStop(1, g_headerObj["setColor"][2]);
-	}else{
-		grd.addColorStop(1, "#66ffff");
-	}
-	var titlefontsize = 64 * (12 / g_headerObj["musicTitle"].length);
-	if(titlefontsize >= 64){
-		titlefontsize = 64;
-	}
-	createLabel(l1ctx, g_headerObj["musicTitle"], g_sWidth/2, g_sHeight/2, 
-		titlefontsize, "Century Gothic", grd, C_ALIGN_CENTER);
+	// ユーザカスタムイベント(初期)
+	customTitleInit();
 
 	// オーディオファイル指定
 	g_audio.src = "../music/" + g_headerObj.musicUrl;
@@ -1213,6 +1214,13 @@ function headerConvert(_dosObj){
 		obj.fadeFrame = _dosObj.fadeFrame.split("$");
 	}
 
+	// 外部jsファイルの指定
+	if(_dosObj.customjs != undefined){
+		obj.customjs = _dosObj.customjs;
+	}else{
+		obj.customjs = "danoni_custom.js";
+	}
+
 	// ステップゾーン位置
 	if(isNaN(parseFloat(_dosObj.stepY))){
 		g_stepY = C_STEP_Y;
@@ -1226,6 +1234,10 @@ function headerConvert(_dosObj){
 		obj.musicUrl = _dosObj.musicUrl;
 	}
 
+	// twitURL
+	if(_dosObj.twitURL != undefined){
+		obj.twitUrl = _dosObj.twitURL;
+	}
 	// TODO:フリーズアロー色など他のヘッダー情報の分解
 
 	return obj;
@@ -1334,7 +1346,8 @@ function optionInit(){
 	// オプションボタン用の設置
 	createOptionWindow("divRoot");
 
-//	g_audio.play();
+	// ユーザカスタムイベント(初期)
+	customOptionInit();
 
 	// 戻るボタン描画
 	var btnBack = createButton({
@@ -1657,6 +1670,9 @@ function keyConfigInit(){
 		"[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]");
 	kcDesc.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcDesc);
+
+	// ユーザカスタムイベント(初期)
+	customKeyConfigInit();
 
 	// 戻るボタン描画
 	var btnBack = createButton({
@@ -2783,6 +2799,9 @@ function MainInit(){
 	finishView.style.textAlign = C_ALIGN_CENTER;
 	mainSprite.appendChild(finishView);
 
+	// ユーザカスタムイベント(初期)
+	customMainInit();
+
 	// キー操作イベント
 	document.onkeydown = function(evt){
 
@@ -2955,6 +2974,9 @@ function MainInit(){
 				}
 			}
 		}
+
+		// ユーザカスタムイベント(フレーム毎)
+		customMainEnterFrame();
 
 		if(g_scoreObj.frameNum % 60 == 0){
 			var currentMin = Math.floor(g_scoreObj.frameNum / 3600);
@@ -3487,7 +3509,8 @@ function resultInit(){
 	"Score:" + resultScore + "/" +
 	g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan + "/" +
 	 g_resultObj.kita + "-" + g_resultObj.iknai + "/" +
-	 g_resultObj.maxCombo + "-" + g_resultObj.fmaxCombo;
+	 g_resultObj.maxCombo + "-" + g_resultObj.fmaxCombo + " " +
+	 g_headerObj.twitUrl;
 	var tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
 
 	var lblResult = createDivLabel("lblResult", g_sWidth/2 - 150, 100, 150, 20, 20, "#ffffff", 
@@ -3504,6 +3527,9 @@ function resultInit(){
 	"<span style='color:" + rankColor + ";'>" + rankMark + "</span>","Bookman Old Style");
 	lblRank.style.textAlign = C_ALIGN_CENTER;
 	divRoot.appendChild(lblRank);
+
+	// ユーザカスタムイベント(初期)
+	customResultInit();
 
 	// 戻るボタン描画
 	var btnBack = createButton({
