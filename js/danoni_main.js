@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/27
  */
-var g_version =  "Ver 0.37.0";
+var g_version =  "Ver 0.38.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -536,6 +536,7 @@ var g_resultObj = {
 
 var g_allArrow = 0;
 var g_allFrz = 0;
+var g_currentArrows = 0;
 var g_rankObj = {
 	rankMarks: ["SS","S","SA","AAA","AA","A","B"],
 	rankRate:  [97, 90, 85, 80, 75, 70, 50],
@@ -1962,6 +1963,7 @@ function scoreConvert(_dosObj, _scoreNo){
 		frzName = frzName.replace("iyo","frzIyo");
 		frzName = frzName.replace("gor","frzGor");
 		frzName = frzName.replace("oni","foni");
+		frzName = frzName.replace("arrow","frzArrow");
 
 		// フリーズアローデータの分解
 		if(_dosObj[frzName + _scoreNo + "_data"] != undefined){
@@ -2607,6 +2609,7 @@ function MainInit(){
 
 	g_workObj.word0Data = "";
 	g_workObj.word1Data = "";
+	g_currentArrows = 0;
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	var mainSprite = createSprite("divRoot","mainSprite",0,0,g_sWidth,g_sHeight);
@@ -2771,6 +2774,12 @@ function MainInit(){
 	"");
 	comboFJ.style.textAlign = C_ALIGN_CENTER;
 	mainSprite.appendChild(comboFJ);
+
+	// パーフェクト演出
+	var finishView = createDivLabel("finishView", g_sWidth/2 -150, g_sHeight/2 -50, 300, 20, 50, C_CLR_KITA, 
+	"");
+	finishView.style.textAlign = C_ALIGN_CENTER;
+	mainSprite.appendChild(finishView);
 
 	// キー操作イベント
 	document.onkeydown = function(evt){
@@ -3084,7 +3093,7 @@ function MainInit(){
 						}
 						frzRoot.setAttribute("cnt", --cnt);
 
-						if(g_stateObj.auto == "ON" && cnt ==0){
+						if(g_stateObj.auto == "ON" && cnt == 0){
 							changeHitFrz(j, k);
 						}
 					}else{
@@ -3263,6 +3272,7 @@ function judgeArrow(_j){
 
 function judgeIi(){
 	g_resultObj.ii++;
+	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_II + "'>" + C_JCR_II + "</span>";
 
 //	charaJ.style.transform = "translateX(10px)";
@@ -3274,10 +3284,13 @@ function judgeIi(){
 	document.getElementById("comboJ").innerHTML = g_resultObj.combo + " Combo!!";
 	document.getElementById("charaFJ").innerHTML = "";
 	document.getElementById("comboFJ").innerHTML = "";
+
+	finishViewing();
 }
 
 function judgeShakin(){
 	g_resultObj.shakin++;
+	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_SHAKIN + "'>" + C_JCR_SHAKIN + "</span>";
 	document.getElementById("lblShakin").innerHTML = g_resultObj.shakin;
 	if(++g_resultObj.combo > g_resultObj.maxCombo){
@@ -3285,19 +3298,25 @@ function judgeShakin(){
 		document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
 	}
 	document.getElementById("comboJ").innerHTML = g_resultObj.combo + " Combo!!";
+
+	finishViewing();
 }
 
 function judgeMatari(){
 	g_resultObj.matari++;
+	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_MATARI + "'>" + C_JCR_MATARI + "</span>";
 	document.getElementById("lblMatari").innerHTML = g_resultObj.matari;
 	document.getElementById("comboJ").innerHTML = "";
 	document.getElementById("charaFJ").innerHTML = "";
 	document.getElementById("comboFJ").innerHTML = "";
+
+	finishViewing();
 }
 
 function judgeUwan(){
 	g_resultObj.uwan++;
+	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_UWAN + "'>" + C_JCR_UWAN + "</span>";
 	document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
 	g_resultObj.combo = 0;
@@ -3308,6 +3327,7 @@ function judgeUwan(){
 
 function judgeKita(){
 	g_resultObj.kita++;
+	g_currentArrows++;
 	document.getElementById("lblKita").innerHTML = g_resultObj.kita;
 	document.getElementById("charaFJ").innerHTML = "<span style='color:" + C_CLR_KITA + "'>" + C_JCR_KITA + "</span>";
 	
@@ -3318,10 +3338,13 @@ function judgeKita(){
 	document.getElementById("comboFJ").innerHTML = g_resultObj.fCombo + " Combo!!";
 	document.getElementById("charaJ").innerHTML = "";
 	document.getElementById("comboJ").innerHTML = "";
+
+	finishViewing();
 }
 
 function judgeIknai(){
 	g_resultObj.iknai++;
+	g_currentArrows++;
 	document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
 	document.getElementById("charaFJ").innerHTML = "<span style='color:" + C_CLR_IKNAI + "'>" + C_JCR_IKNAI + "</span>";
 	document.getElementById("comboFJ").innerHTML = "";
@@ -3329,6 +3352,34 @@ function judgeIknai(){
 
 	document.getElementById("charaJ").innerHTML = "";
 	document.getElementById("comboJ").innerHTML = "";
+}
+
+function finishViewing(){
+	if(g_currentArrows == g_allArrow + g_allFrz /2){
+		var fullArrows = g_allArrow + g_allFrz /2;
+		if(g_resultObj.ii + g_resultObj.kita == fullArrows){
+			document.getElementById("finishView").innerHTML = "<span style='color:#ffffff;'>All Perfect!!</span>";
+			document.getElementById("finishView").style.opacity = 100;
+			document.getElementById("charaJ").innerHTML = "";
+			document.getElementById("comboJ").innerHTML = "";
+			document.getElementById("charaFJ").innerHTML = "";
+			document.getElementById("comboFJ").innerHTML = "";
+		}else if(g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita == fullArrows){
+			document.getElementById("finishView").innerHTML = "Perfect!!";
+			document.getElementById("finishView").style.opacity = 100;
+			document.getElementById("charaJ").innerHTML = "";
+			document.getElementById("comboJ").innerHTML = "";
+			document.getElementById("charaFJ").innerHTML = "";
+			document.getElementById("comboFJ").innerHTML = "";
+		}else if(g_resultObj.uwan == 0 && g_resultObj.iknai == 0){
+			document.getElementById("finishView").innerHTML = "<span style='color:#66ffff;'>FullCombo!</span>";
+			document.getElementById("finishView").style.opacity = 100;
+			document.getElementById("charaJ").innerHTML = "";
+			document.getElementById("comboJ").innerHTML = "";
+			document.getElementById("charaFJ").innerHTML = "";
+			document.getElementById("comboFJ").innerHTML = "";
+		}
+	}
 }
 
 /*-----------------------------------------------------------*/
