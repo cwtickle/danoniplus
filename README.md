@@ -13,11 +13,11 @@ Flash版の同ゲームのHTML5版を制作しています。
 [sample3]:http://cw7.sakura.ne.jp/work/danonijs/test/danoni3.html "sample3"  
 
 ## Flash版との差異について
-[Flash版との差異]  
 [Flash版との差異]:http://cw7.sakura.ne.jp/work/danonijs/test/danoni_flash_vs_html5.html "Flash版との差異"  
 
 ## 簡単な作り方 (how-to-make)　※作成中
 以下の階層になるようにフォルダを準備します。
+
 [root]
 　├ [img]　←　画像一式
   ├ [js]
