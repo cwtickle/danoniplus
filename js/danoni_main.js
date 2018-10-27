@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/28
  */
-var g_version =  "Ver 0.41.2";
+var g_version =  "Ver 0.42.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1216,6 +1216,11 @@ function headerConvert(_dosObj){
 	// フェードアウトフレーム数(譜面別)
 	if(_dosObj.fadeFrame != undefined){
 		obj.fadeFrame = _dosObj.fadeFrame.split("$");
+	}
+
+	// 終了フレーム数
+	if(_dosObj.endFrame != undefined){
+		obj.endFrame = parseInt(_dosObj.endFrame);
 	}
 
 	// 外部jsファイルの指定
@@ -2693,6 +2698,14 @@ function MainInit(){
 
 			fullMin = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 600) / 3600);
 			fullSec = ("00" + ((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 600) / 60) % 60).slice(-2);
+			fullTime = fullMin + ":" + fullSec;
+		}
+	// 終了時間指定の場合、その値を適用する
+	}else if(g_headerObj.endFrame != undefined){
+		if(isNaN(parseInt(g_headerObj.endFrame))){
+		}else{
+			fullMin = Math.floor((parseInt(g_headerObj.endFrame)) / 3600);
+			fullSec = ("00" + ((parseInt(g_headerObj.endFrame) / 60) % 60)).slice(-2);
 			fullTime = fullMin + ":" + fullSec;
 		}
 	}
