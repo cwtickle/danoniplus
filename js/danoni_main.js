@@ -1235,7 +1235,7 @@ function headerConvert(_dosObj){
 	}
 
 	// twitURL
-	if(_dosObj.twitURL != undefined){
+	if(_dosObj.TwitURL != undefined){
 		obj.twitUrl = _dosObj.twitURL;
 	}
 	// TODO:フリーズアロー色など他のヘッダー情報の分解
