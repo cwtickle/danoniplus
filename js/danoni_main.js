@@ -1186,6 +1186,10 @@ function headerConvert(_dosObj){
 		obj.difLabels.push(difDetails[1]);
 		obj.initSpeeds.push(difDetails[2]);
 	}
+	if(obj.initSpeeds[0] != undefined){
+		g_stateObj.speed = obj.initSpeeds[0];
+	}
+
 	// 初期色情報
 	obj.setColor = _dosObj.setColor.split(",");
 	for(var j=0; j<obj.setColor.length; j++){
