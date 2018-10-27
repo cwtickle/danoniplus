@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/27
  */
-var g_version =  "Ver 0.41.0";
+var g_version =  "Ver 0.41.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1186,6 +1186,10 @@ function headerConvert(_dosObj){
 		obj.difLabels.push(difDetails[1]);
 		obj.initSpeeds.push(difDetails[2]);
 	}
+	if(obj.initSpeeds[0] != undefined){
+		g_stateObj.speed = obj.initSpeeds[0];
+	}
+
 	// 初期色情報
 	obj.setColor = _dosObj.setColor.split(",");
 	for(var j=0; j<obj.setColor.length; j++){
@@ -1235,8 +1239,8 @@ function headerConvert(_dosObj){
 	}
 
 	// twitURL
-	if(_dosObj.twitURL != undefined){
-		obj.twitUrl = _dosObj.twitURL;
+	if(_dosObj.TwitURL != undefined){
+		obj.twitUrl = _dosObj.TwitURL;
 	}
 	// TODO:フリーズアロー色など他のヘッダー情報の分解
 
