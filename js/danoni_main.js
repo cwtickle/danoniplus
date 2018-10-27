@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/27
  */
-var g_version =  "Ver 0.36.1";
+var g_version =  "Ver 0.37.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -735,18 +735,20 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate){
 function createColorObject(_id, _color, _x, _y, _width, _height, 
 	_rotate, _styleName, _imgName){
 
+	var div = createDiv(_id, _x, _y, _width, _height);
+
 	// 矢印・おにぎり判定
 	if(isNaN(Number(_rotate))){
 		var rotate = 0;
-		var charaStyle = _rotate;
+		var charaStyle = _rotate + _styleName;
 		var charaImg = eval("C_IMG_" + _rotate.toUpperCase());
+		div.setAttribute("type", "AA");
 	}else{
 		var rotate = _rotate;
 		var charaStyle = _styleName;
 		var charaImg = _imgName;
+		div.setAttribute("type", "arrow");
 	}
-
-	var div = createDiv(_id, _x, _y, _width, _height);
 	div.align = C_ALIGN_CENTER;
 
 	// IE/Edgeの場合は色なし版を表示
@@ -2614,15 +2616,15 @@ function MainInit(){
 
 	// ステップゾーンを表示
 	for(var j=0; j<keyNum; j++){
-		var step = createArrowEffect("step" + j, "#cccccc",
+		var step = createArrowEffect("step" + j, "#999999",
 			g_workObj.stepX[j],
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], 50, 
 			g_workObj.stepRtn[j]);
 		mainSprite.appendChild(step);
 
 		var stepHit = createArrowEffect("stepHit" + j, "#999999",
-			g_workObj.stepX[j] -10,
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] -10, 70, 
+			g_workObj.stepX[j] -15,
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] -15, 80, 
 			g_workObj.stepRtn[j]);
 		stepHit.style.opacity = 0;
 		mainSprite.appendChild(stepHit);
@@ -2750,28 +2752,24 @@ function MainInit(){
 	var charaJ = createDivLabel("charaJ", g_sWidth/2 - 200, g_sHeight/2 - 50, 200, 20, 20, C_CLR_II, 
 	"");
 	charaJ.style.textAlign = C_ALIGN_CENTER;
-	charaJ.style.opacity = 70;
 	mainSprite.appendChild(charaJ);
 
 	// コンボ表示：矢印
 	var comboJ = createDivLabel("comboJ", g_sWidth/2 - 50, g_sHeight/2 - 50, 200, 20, 20, C_CLR_KITA, 
 	"");
 	comboJ.style.textAlign = C_ALIGN_CENTER;
-	comboJ.style.opacity = 70;
 	mainSprite.appendChild(comboJ);
 
 	// 判定キャラクタ表示：フリーズアロー
 	var charaFJ = createDivLabel("charaFJ", g_sWidth/2 - 100, g_sHeight/2, 200, 20, 20, C_CLR_KITA, 
 	"");
 	charaFJ.style.textAlign = C_ALIGN_CENTER;
-	charaFJ.style.opacity = 70;
 	mainSprite.appendChild(charaFJ);
 
 	// コンボ表示：フリーズアロー
 	var comboFJ = createDivLabel("comboFJ", g_sWidth/2 + 50, g_sHeight/2, 200, 20, 20, C_CLR_II, 
 	"");
 	comboFJ.style.textAlign = C_ALIGN_CENTER;
-	comboFJ.style.opacity = 70;
 	mainSprite.appendChild(comboFJ);
 
 	// キー操作イベント
@@ -2784,17 +2782,8 @@ function MainInit(){
 			var setKey = event.keyCode;
 		}
 		g_inputKeyBuffer[setKey] = true;
-		var matchKeys = g_keyObj["keyCtrl" + keyCtrlPtn];
 		
-		for(var j=0; j<keyNum; j++){
-			for(var k=0; k<matchKeys[j].length; k++){
-				if(setKey == matchKeys[j][k]){
-					var stepDiv = document.getElementById("step" + j);
-					stepDiv.style.backgroundColor = "#66ffff";
-					judgeArrow(j);
-				}
-			}
-		}
+		eval("mainKeyDownAct" + g_stateObj.auto)(setKey);
 
 		// 曲中リトライ、タイトルバック
 		if(setKey == 8){
@@ -2834,6 +2823,30 @@ function MainInit(){
 		}
 	}
 
+	/**
+	 * キーを押したときの処理 (AutoPlay:OFF時)
+	 * @param {number} _keyCode 
+	 */
+	function mainKeyDownActOFF(_keyCode){
+		var matchKeys = g_keyObj["keyCtrl" + keyCtrlPtn];
+		
+		for(var j=0; j<keyNum; j++){
+			for(var k=0; k<matchKeys[j].length; k++){
+				if(_keyCode == matchKeys[j][k]){
+					judgeArrow(j);
+				}
+			}
+		}
+	}
+
+	/**
+	 * キーを押したときの処理 (AutoPlay:ON時)
+	 * @param {number} _keyCode 
+	 */
+	function mainKeyDownActON(_keyCode){
+
+	}
+
 	document.onkeyup = function(evt){
 		// ブラウザ判定
 		if(g_userAgent.indexOf("firefox") != -1){
@@ -2843,8 +2856,15 @@ function MainInit(){
 		}
 		g_inputKeyBuffer[setKey] = false;
 
-		for(var j=0; j<keyNum; j++){
+		eval("mainKeyUpAct" + g_stateObj.auto)();
+	}
 
+	/**
+	 * キーを離したときの処理 (AutoPlay:OFF時)
+	 */
+	function mainKeyUpActOFF(){
+		for(var j=0; j<keyNum; j++){
+	
 			var keyDownFlg = false;
 			for(var m=0, len=g_workObj.keyCtrl[j].length; m<len; m++){
 				if(keyIsDown(g_workObj.keyCtrl[j][m])){
@@ -2853,10 +2873,10 @@ function MainInit(){
 				}
 			}
 			if(keyDownFlg == false){
-
+	
 				// ステップゾーンに対応するキーを離したとき
 				var stepDiv = document.getElementById("step" + j);
-				stepDiv.style.backgroundColor = "#cccccc";
+				stepDiv.style.backgroundColor = "#999999";
 				var stepDivHit = document.getElementById("stepHit" + j);
 				stepDivHit.style.opacity = 0;
 				
@@ -2868,7 +2888,7 @@ function MainInit(){
 						if(frzRoot.getAttribute("isMoving") == "false"){
 							judgeIknai();
 							frzRoot.setAttribute("judgEndFlg","true");
-
+	
 							changeFailedFrz(j, k);
 						}
 					}
@@ -2878,23 +2898,10 @@ function MainInit(){
 	}
 
 	/**
-	 * フリーズアロー失敗時の描画変更
-	 * @param {number} j 
-	 * @param {number} k 
+	 * キーを離したときの処理 (AutoPlay:ON時)
 	 */
-	function changeFailedFrz(j, k){
-		var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
-		var fstyle = frzTopShadow.style;
-		fstyle.backgroundColor = "#000000";
-		fstyle.top = "0px";
-		fstyle.left = "0px";
-		fstyle.width = "50px";
-		fstyle.height = "50px";
-		fstyle.opacity = 100;
-		document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
-		document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
-		document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
-		document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+	function mainKeyUpActON(){
+
 	}
 
 	/**
@@ -2988,12 +2995,18 @@ function MainInit(){
 				}
 				arrow.setAttribute("cnt", --cnt);
 
-				if(g_stateObj.auto == "ON" && cnt ==0){
-					g_resultObj.ii++;
-					document.getElementById("lblIi").innerHTML = g_resultObj.ii;
-					g_resultObj.combo = 0;
-					g_workObj.judgArrowCnt[j]++;
-					mainSprite.removeChild(arrow);
+				if(g_stateObj.auto == "ON"){
+					if(cnt == 0){
+						judgeIi();
+						arrow.style.opacity = 0;
+						var stepDivHit = document.getElementById("stepHit" + j);
+						stepDivHit.style.opacity = 100;
+					}else if(cnt == -4){
+						g_workObj.judgArrowCnt[j]++;
+						var stepDivHit = document.getElementById("stepHit" + j);
+						stepDivHit.style.opacity = 0;
+						mainSprite.removeChild(arrow);
+					}
 
 				}else if(cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]){
 					judgeUwan();
@@ -3070,6 +3083,10 @@ function MainInit(){
 							frzRoot.setAttribute("boostCnt", --boostCnt);
 						}
 						frzRoot.setAttribute("cnt", --cnt);
+
+						if(g_stateObj.auto == "ON" && cnt ==0){
+							changeHitFrz(j, k);
+						}
 					}else{
 						var frzBtmShadow = document.getElementById("frzBtmShadow" + j + "_" + k);
 
@@ -3129,6 +3146,56 @@ function MainInit(){
 	g_timeoutEvtId = setTimeout(flowTimeline(), 1000/ 60);
 }
 
+/**
+ * フリーズアローヒット時の描画変更
+ * @param {number} j 
+ * @param {number} k 
+ */
+function changeHitFrz(j, k){
+	var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
+	if(frzTopShadow.getAttribute("type") == "arrow"){
+		var fstyle = frzTopShadow.style;
+		fstyle.backgroundColor = "#ffffff";
+		fstyle.top = "-10px";
+		fstyle.left = "-10px";
+		fstyle.width = "70px";
+		fstyle.height = "70px";
+		fstyle.opacity = 70;
+		document.getElementById("frzTop" + j + "_" + k).style.opacity = 0;
+	}else{
+		document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#ffff99";
+	}
+	
+	var frzBar = document.getElementById("frzBar" + j + "_" + k);
+	frzBar.style.backgroundColor = "#ffff99";
+	document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#ffff99";
+	document.getElementById("frz" + j + "_" + k).setAttribute("isMoving", "false");
+}
+
+/**
+ * フリーズアロー失敗時の描画変更
+ * @param {number} j 
+ * @param {number} k 
+ */
+function changeFailedFrz(j, k){
+	var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
+	var fstyle = frzTopShadow.style;
+	fstyle.backgroundColor = "#000000";
+	fstyle.top = "0px";
+	fstyle.left = "0px";
+	fstyle.width = "50px";
+	fstyle.height = "50px";
+	fstyle.opacity = 100;
+	document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
+	document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
+	document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
+	document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+}
+
+/**
+ * キーを押したかどうかを判定
+ * @param {number} _keyCode 
+ */
 function keyIsDown(_keyCode){
 	return g_inputKeyBuffer[_keyCode];
 }
@@ -3171,6 +3238,8 @@ function judgeArrow(_j){
 				mainSprite.removeChild(judgArrow);
 				g_workObj.judgArrowCnt[_j]++;
 
+				g_judgObj.lockFlgs[_j] = false;
+				return;
 			}
 		}
 
@@ -3181,29 +3250,13 @@ function judgeArrow(_j){
 			var judgEndFlg = judgFrz.getAttribute("judgEndFlg");
 
 			if(difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg == "false"){
-
-				var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + fcurrentNo);
-				frzTopShadow.style.backgroundColor = "#ffffff";
-				frzTopShadow.style.top = "-10px";
-				frzTopShadow.style.left = "-10px";
-				frzTopShadow.style.width = "70px";
-				frzTopShadow.style.height = "70px";
-				frzTopShadow.style.opacity = 70;
-				document.getElementById("frzTop" + _j + "_" + fcurrentNo).style.opacity = 0;
-				
-				var frzBar = document.getElementById("frzBar" + _j + "_" + fcurrentNo);
-				frzBar.style.backgroundColor = "#ffff99";
-				document.getElementById("frzBtm" + _j + "_" + fcurrentNo).style.backgroundColor = "#ffff99";
-				judgFrz.setAttribute("isMoving", "false");
-
-	//			judgFrz.style.top = (parseFloat(judgFrz.style.top) - judgFrz.getAttribute("cnt") * g_workObj.currentSpeed * g_workObj.scrollDir[_j]) + "px";
-	//			var frzBarLength = parseFloat(frzBar.style.height) + g_workObj.currentSpeed * judgFrz.getAttribute("cnt");
-	//			judgFrz.setAttribute("frzBarLength",frzBarLength);
-	//			frzBar.style.height = frzBarLength + "px";
-
-	//			judgArrow.setAttribute("judgEndFlg","true");
+				changeHitFrz(_j, fcurrentNo);
+				g_judgObj.lockFlgs[_j] = false;
+				return;
 			}
 		}
+		var stepDiv = document.getElementById("step" + _j);
+		stepDiv.style.backgroundColor = "#66ffff";
 		g_judgObj.lockFlgs[_j] = false;
 	}
 }
@@ -3340,7 +3393,7 @@ function resultInit(){
 	if(g_gameOverFlg == true){
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
-	}else if(g_headerObj.startFrame == 0){
+	}else if(g_headerObj.startFrame == 0 && g_stateObj.auto == "OFF"){
 		if(g_resultObj.matari + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai == 0){
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;

@@ -33,10 +33,22 @@
 	-webkit-mask-image: url("../img/onigiri_600.png");
 	-webkit-mask-size: contain;
 }
+.onigiriarrowShadow {
+	mask-image: url("../img/aaShadow_500.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/aaShadow_500.png");
+	-webkit-mask-size: contain;
+}
 .giko {
 	mask-image: url("../img/giko_600.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/giko_600.png");
+	-webkit-mask-size: contain;
+}
+.gikoarrowShadow {
+	mask-image: url("../img/aaShadow_500.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/aaShadow_500.png");
 	-webkit-mask-size: contain;
 }
 .iyo {
@@ -45,13 +57,31 @@
 	-webkit-mask-image: url("../img/iyo_600.png");
 	-webkit-mask-size: contain;
 }
+.iyoarrowShadow {
+	mask-image: url("../img/aaShadow_500.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/aaShadow_500.png");
+	-webkit-mask-size: contain;
+}
 .c {
 	mask-image: url("../img/c_600.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/c_600.png");
 	-webkit-mask-size: contain;
 }
+.carrowShadow {
+	mask-image: url("../img/aaShadow_500.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/aaShadow_500.png");
+	-webkit-mask-size: contain;
+}
 .morara {
+	mask-image: url("../img/morara_600.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/morara_600.png");
+	-webkit-mask-size: contain;
+}
+.moraraarrowShadow {
 	mask-image: url("../img/morara_600.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/morara_600.png");
@@ -61,5 +91,11 @@
 	mask-image: url("../img/monar_600.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/monar_600.png");
+	-webkit-mask-size: contain;
+}
+.monararrowShadow {
+	mask-image: url("../img/morara_600.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/morara_600.png");
 	-webkit-mask-size: contain;
 }
