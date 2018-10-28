@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/28
  */
-var g_version =  "Ver 0.43.2";
+var g_version =  "Ver 0.43.3";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1225,7 +1225,7 @@ function headerConvert(_dosObj){
 
 	// 終了フレーム数
 	if(_dosObj.endFrame != undefined){
-		obj.endFrame = parseInt(_dosObj.endFrame);
+		obj.endFrame = parseInt(_dosObj.endFrame / 60) * 60;
 	}
 
 	// 外部jsファイルの指定
@@ -2697,8 +2697,6 @@ function MainInit(){
 
 	g_inputKeyBuffer = [];
 
-
-
 	// 終了時間の設定
 	var fullSecond = Math.floor(g_headerObj.blankFrame / 60 + g_audio.duration);
 	var fullMin = Math.floor(fullSecond / 60);
@@ -2711,9 +2709,10 @@ function MainInit(){
 		if(isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))){
 		}else{
 			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]);
+			var fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 600) /60) * 60;
 
-			fullMin = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 600) / 3600);
-			fullSec = ("00" + ((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 600) / 60) % 60).slice(-2);
+			fullMin = Math.floor(fadeTmp / 3600);
+			fullSec = ("00" + (fadeTmp / 60) % 60).slice(-2);
 			fullTime = fullMin + ":" + fullSec;
 		}
 	// 終了時間指定の場合、その値を適用する
