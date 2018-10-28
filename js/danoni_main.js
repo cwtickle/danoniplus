@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/28
  */
-var g_version =  "Ver 0.43.4";
+var g_version =  "Ver 0.43.5";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1727,6 +1727,55 @@ function keyConfigInit(){
 	kcDesc.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcDesc);
 
+
+	// キーの一覧を表示
+	var keyconSprite = createSprite("divRoot","keyconSprite",(g_sWidth-400)/2,100,400,300);
+	var kWidth = parseInt(keyconSprite.style.width);
+	
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	var posMax = g_keyObj["pos" + keyCtrlPtn][keyNum-1] +1;
+	var divideCnt = g_keyObj["div"+ keyCtrlPtn];
+	if(g_keyObj["blank"+ keyCtrlPtn] != undefined){
+		g_keyObj.blank = g_keyObj["blank"+ keyCtrlPtn];
+	}else{
+		g_keyObj.blank = g_keyObj.blank_def;
+	}
+
+	/** 同行の左から数えた場合の位置(x座標) */
+	var leftCnt = 0;
+	/** 同行の中心から見た場合の位置(x座標) */
+	var stdPos = 0;
+	/** 行位置 */
+	var dividePos = 0;
+	var posj = 0;
+
+	for(var j=0; j<keyNum; j++){
+
+		posj = g_keyObj["pos" + keyCtrlPtn][j];
+		leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
+		stdPos  = (posj >= divideCnt ? leftCnt - (posMax - divideCnt)/2 : leftCnt - divideCnt / 2);
+		dividePos = (posj >= divideCnt ? 1 : 0);
+
+		// キーコンフィグ表示用の矢印・おにぎりを表示
+		keyconSprite.appendChild(createArrowEffect("arrow" + j, g_headerObj.setColor[g_keyObj["color" + keyCtrlPtn][j]], 
+			g_keyObj.blank * stdPos + kWidth/2, 
+			150 * dividePos, 50, 
+			g_keyObj["stepRtn" + keyCtrlPtn][j]));
+
+		for(var k=0;k<g_keyObj["keyCtrl"+ keyCtrlPtn][j].length;k++){
+			keyconSprite.appendChild(createDivLabel("keycon" + j + "_" + k, 
+				g_keyObj.blank * stdPos + kWidth/2, 
+				50 + 20 * k + 150 * dividePos,
+				50, 20, 16, "#cccccc", g_kCd[g_keyObj["keyCtrl"+ keyCtrlPtn][j][k]]));
+		}
+	}
+	posj = g_keyObj["pos" + keyCtrlPtn][0];
+
+	// カーソルの作成
+	var cursor = keyconSprite.appendChild(createImg("cursor", "../img/cursor.png", 
+		kWidth/2 + g_keyObj.blank * (posj - divideCnt/2) -10, 45, 15, 30 ));
+
 	// ユーザカスタムイベント(初期)
 	if(typeof customKeyConfigInit == "function"){
 		customKeyConfigInit();
@@ -1817,54 +1866,6 @@ function keyConfigInit(){
 		}
 	});
 	divRoot.appendChild(btnReset);
-
-	// キーの一覧を表示
-	var keyconSprite = createSprite("divRoot","keyconSprite",(g_sWidth-400)/2,100,400,300);
-	var kWidth = parseInt(keyconSprite.style.width);
-	
-	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
-	var posMax = g_keyObj["pos" + keyCtrlPtn][keyNum-1] +1;
-	var divideCnt = g_keyObj["div"+ keyCtrlPtn];
-	if(g_keyObj["blank"+ keyCtrlPtn] != undefined){
-		g_keyObj.blank = g_keyObj["blank"+ keyCtrlPtn];
-	}else{
-		g_keyObj.blank = g_keyObj.blank_def;
-	}
-
-	/** 同行の左から数えた場合の位置(x座標) */
-	var leftCnt = 0;
-	/** 同行の中心から見た場合の位置(x座標) */
-	var stdPos = 0;
-	/** 行位置 */
-	var dividePos = 0;
-	var posj = 0;
-
-	for(var j=0; j<keyNum; j++){
-
-		posj = g_keyObj["pos" + keyCtrlPtn][j];
-		leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-		stdPos  = (posj >= divideCnt ? leftCnt - (posMax - divideCnt)/2 : leftCnt - divideCnt / 2);
-		dividePos = (posj >= divideCnt ? 1 : 0);
-
-		// キーコンフィグ表示用の矢印・おにぎりを表示
-		keyconSprite.appendChild(createArrowEffect("arrow" + j, g_headerObj.setColor[g_keyObj["color" + keyCtrlPtn][j]], 
-			g_keyObj.blank * stdPos + kWidth/2, 
-			150 * dividePos, 50, 
-			g_keyObj["stepRtn" + keyCtrlPtn][j]));
-
-		for(var k=0;k<g_keyObj["keyCtrl"+ keyCtrlPtn][j].length;k++){
-			keyconSprite.appendChild(createDivLabel("keycon" + j + "_" + k, 
-				g_keyObj.blank * stdPos + kWidth/2, 
-				50 + 20 * k + 150 * dividePos,
-				50, 20, 16, "#cccccc", g_kCd[g_keyObj["keyCtrl"+ keyCtrlPtn][j][k]]));
-		}
-	}
-	posj = g_keyObj["pos" + keyCtrlPtn][0];
-
-	// カーソルの作成
-	var cursor = keyconSprite.appendChild(createImg("cursor", "../img/cursor.png", 
-		kWidth/2 + g_keyObj.blank * (posj - divideCnt/2) -10, 45, 15, 30 ));
 
 	
 	// キーボード押下時処理
