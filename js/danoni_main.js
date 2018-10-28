@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/28
  */
-var g_version =  "Ver 0.42.0";
+var g_version =  "Ver 0.43.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1053,7 +1053,9 @@ function titleInit(){
 	divRoot.appendChild(lblTitle);
 
 	// ユーザカスタムイベント(初期)
-	customTitleInit();
+	if(typeof customTitleInit == "function"){
+		customTitleInit();
+	}
 
 	// オーディオファイル指定
 	g_audio.src = "../music/" + g_headerObj.musicUrl;
@@ -1356,7 +1358,9 @@ function optionInit(){
 	createOptionWindow("divRoot");
 
 	// ユーザカスタムイベント(初期)
-	customOptionInit();
+	if(typeof customOptionInit == "function"){
+		customOptionInit();
+	}
 
 	// 戻るボタン描画
 	var btnBack = createButton({
@@ -1681,7 +1685,9 @@ function keyConfigInit(){
 	divRoot.appendChild(kcDesc);
 
 	// ユーザカスタムイベント(初期)
-	customKeyConfigInit();
+	if(typeof customKeyConfigInit == "function"){
+		customKeyConfigInit();
+	}
 
 	// 戻るボタン描画
 	var btnBack = createButton({
@@ -1902,7 +1908,6 @@ function loadingScoreInit(){
 	var l1ctx = layer1.getContext("2d");
 	var divRoot = document.getElementById("divRoot");
 
-	var startTime = new Date();
 	// 譜面データの読み込み
 	var scoreIdHeader = "";
 	if(g_stateObj.scoreId > 0){
@@ -1930,11 +1935,14 @@ function loadingScoreInit(){
 	// 矢印・フリーズアロー・速度/色変化格納処理
 	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
 
+	// メインに入る前の最終初期化処理
 	getArrowSettings();
 
-	var endTime = new Date();
-	//alert('経過時間：' + (endTime.getTime() - startTime.getTime()) + 'ミリ秒');
-
+	// ユーザカスタムイベント
+	if(typeof customLoadingInit == "function"){
+		customLoadingInit();
+	}
+	
 	clearWindow();
 	MainInit();
 }
@@ -2817,7 +2825,9 @@ function MainInit(){
 	mainSprite.appendChild(finishView);
 
 	// ユーザカスタムイベント(初期)
-	customMainInit();
+	if(typeof customMainInit == "function"){
+		customMainInit();
+	}
 
 	// キー操作イベント
 	document.onkeydown = function(evt){
@@ -2993,7 +3003,9 @@ function MainInit(){
 		}
 
 		// ユーザカスタムイベント(フレーム毎)
-		customMainEnterFrame();
+		if(typeof customMainFrame == "function"){
+			customMainEnterFrame();
+		}
 
 		if(g_scoreObj.frameNum % 60 == 0){
 			var currentMin = Math.floor(g_scoreObj.frameNum / 3600);
@@ -3551,7 +3563,9 @@ function resultInit(){
 	divRoot.appendChild(lblRank);
 
 	// ユーザカスタムイベント(初期)
-	customResultInit();
+	if(typeof customResultInit == "function"){
+		customResultInit();
+	}
 
 	// 戻るボタン描画
 	var btnBack = createButton({
