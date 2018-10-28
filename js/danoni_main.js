@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/28
  */
-var g_version =  "Ver 0.43.0";
+var g_version =  "Ver 0.43.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1213,6 +1213,8 @@ function headerConvert(_dosObj){
 	// フェードインフレーム数
 	if(_dosObj.startFrame != undefined){
 		obj.startFrame = parseInt(_dosObj.startFrame);
+	}else{
+		obj.startFrame = 0;
 	}
 
 	// フェードアウトフレーム数(譜面別)
@@ -1867,13 +1869,8 @@ function keyConfigInit(){
 				stdPos  = (posj >= divideCnt ? leftCnt - (posMax - divideCnt)/2 : leftCnt - divideCnt / 2);
 				dividePos = (posj >= divideCnt ? 1 : 0);
 
-				if(posj == divideCnt){
-					cursor.style.left = (kWidth/2 + g_keyObj.blank * stdPos -10) + "px";
-					cursor.style.top = (50 + 150) + "px";
-				}else{
-					cursor.style.left = (parseInt(cursor.style.left) + 55) + "px";
-					cursor.style.top = (50 + 150 * dividePos) + "px";
-				}
+				cursor.style.left = (kWidth/2 + g_keyObj.blank * stdPos -10) + "px";
+				cursor.style.top = (50 + 150 * dividePos) + "px";
 
 			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
 			}else{
