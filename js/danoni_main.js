@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/28
  */
-var g_version =  "Ver 0.43.3";
+var g_version =  "Ver 0.43.4";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1173,36 +1173,76 @@ function headerConvert(_dosObj){
 	var obj = {};
 
 	// 曲名
-	var musics = _dosObj.musicTitle.split(",");
-	obj.musicTitle = musics[0];
-	obj.artistName = musics[1];
-	obj.artistUrl  = musics[2];
+	if(_dosObj.musicTitle != undefined && _dosObj.musicTitle != ""){
+		var musics = _dosObj.musicTitle.split(",");
+		obj.musicTitle = musics[0];
+		if(musics.length > 1){
+			obj.artistName = musics[1];
+		}else{
+			alert("アーティスト名が未入力です。");
+			obj.artistName = "artistName";
+		}
+		if(musics.length > 2){
+			obj.artistUrl  = musics[2];
+		}else{
+			obj.artistUrl  = location.href;
+		}
+	}else{
+		alert("曲名情報が無いか、フォーマットが間違っています。");
+		obj.musicTitle = "musicName";
+		obj.artistName = "artistName";
+		obj.artistUrl = location.href;
+	}
 
 	// 譜面情報
-	var difs = _dosObj.difData.split("$");
-	obj.keyLabels = new Array();
-	obj.difLabels = new Array();
-	obj.initSpeeds = new Array();
-	for(var j=0; j<difs.length; j++){
-		var difDetails = difs[j].split(",");
-		obj.keyLabels.push(difDetails[0]);
-		obj.difLabels.push(difDetails[1]);
-		obj.initSpeeds.push(difDetails[2]);
+	if(_dosObj.difData != undefined && _dosObj.difData != ""){
+		var difs = _dosObj.difData.split("$");
+		obj.keyLabels = new Array();
+		obj.difLabels = new Array();
+		obj.initSpeeds = new Array();
+		for(var j=0; j<difs.length; j++){
+			var difDetails = difs[j].split(",");
+			obj.keyLabels.push(difDetails[0]);
+			obj.difLabels.push(difDetails[1]);
+			obj.initSpeeds.push(difDetails[2]);
+		}
+	}else{
+		obj.keyLabels = ["7"];
+		obj.difLabels = ["Normal"];
+		obj.initSpeeds = [3.5];
 	}
 	if(obj.initSpeeds[0] != undefined){
 		g_stateObj.speed = obj.initSpeeds[0];
 	}
 
 	// 初期色情報
-	obj.setColor = _dosObj.setColor.split(",");
-	for(var j=0; j<obj.setColor.length; j++){
-		obj.setColor[j] = obj.setColor[j].replace("0x","#");
+	obj.setColorDef = ["#cccccc","#9999ff","#ffffff","#ffff99","#99ff99"];
+
+	if(_dosObj.setColor != undefined && _dosObj.setColor != ""){
+		obj.setColor = _dosObj.setColor.split(",");
+		for(var j=0; j<obj.setColor.length; j++){
+			obj.setColor[j] = obj.setColor[j].replace("0x","#");
+		}
+		for(var j=obj.setColor.length; j<obj.setColorDef.length; j++){
+			obj.setColor[j] = obj.setColorDef[j];
+		}
+	}else{
+		obj.setColor = obj.setColorDef.concat();
 	}
 
 	// 製作者表示
-	var tunings = _dosObj.tuning.split(",");
-	obj.tuning = tunings[0];
-	obj.creatorUrl = tunings[1];
+	if(_dosObj.tuning != undefined && _dosObj.tuning != ""){
+		var tunings = _dosObj.tuning.split(",");
+		obj.tuning = tunings[0];
+		if(tunings.length > 1){
+			obj.creatorUrl = tunings[1];
+		}else{
+			obj.creatorUrl = location.href;
+		}
+	}else{
+		obj.tuning = "name";
+		obj.creatorUrl = location.href;
+	}
 
 	// 無音のフレーム数
 	obj.blankFrame = 200;
