@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/28
  */
-var g_version =  "Ver 0.43.1";
+var g_version =  "Ver 0.43.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -486,6 +486,7 @@ var g_workObj = {};
 g_workObj.stepX = new Array();
 g_workObj.stepRtn = new Array();
 g_workObj.keyCtrl = new Array();
+g_workObj.keyHitFlg = new Array();
 g_workObj.scrollDir = new Array();
 g_workObj.dividePos = new Array();
 
@@ -2583,6 +2584,14 @@ function getArrowSettings(){
 	g_workObj.dividePos = [];
 	g_workObj.stepRtn = g_keyObj["stepRtn" + keyCtrlPtn].concat();
 	g_workObj.keyCtrl = g_keyObj["keyCtrl" + keyCtrlPtn].concat();
+	g_workObj.keyHitFlg = [];
+	for(var j=0; j<g_workObj.keyCtrl.length; j++){
+		g_workObj.keyHitFlg[j] = [];
+		for(var k=0; k<g_workObj.keyCtrl[j].length; k++){
+			g_workObj.keyHitFlg[j][k] = false;
+		}
+	}
+
 	g_workObj.judgArrowCnt = new Array();
 	g_workObj.judgFrzCnt = new Array();
 	g_judgObj.lockFlgs = new Array();
@@ -2687,6 +2696,8 @@ function MainInit(){
 	var musicStartFlg = false;
 
 	g_inputKeyBuffer = [];
+
+
 
 	// 終了時間の設定
 	var fullSecond = Math.floor(g_headerObj.blankFrame / 60 + g_audio.duration);
@@ -2886,7 +2897,7 @@ function MainInit(){
 		
 		for(var j=0; j<keyNum; j++){
 			for(var k=0; k<matchKeys[j].length; k++){
-				if(_keyCode == matchKeys[j][k]){
+				if(_keyCode == matchKeys[j][k] && g_workObj.keyHitFlg[j][k] == false){
 					judgeArrow(j);
 				}
 			}
@@ -2963,6 +2974,13 @@ function MainInit(){
 	 */
 	function flowTimeline(){
 		lblframe.innerHTML = g_scoreObj.frameNum;
+
+		// キーの押下状態を取得
+		for(var j=0; j<keyNum; j++){
+			for(var m=0, len=g_workObj.keyCtrl[j].length; m<len; m++){
+				g_workObj.keyHitFlg[j][m] = keyIsDown(g_workObj.keyCtrl[j][m]);
+			}
+		}
 
 		if(g_scoreObj.frameNum == musicStartFrame){
 			g_audio.play();
