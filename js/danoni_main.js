@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/29
+ * Revised : 2018/10/30
  */
-var g_version =  "Ver 0.44.0";
+var g_version =  "Ver 0.46.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -551,7 +551,7 @@ var g_rankObj = {
 	rankColorF:  "#999999",
 	rankMarkX: "X",
 	rankColorX:  "#996600"
-}
+};
 
 var g_gameOverFlg = false;
 
@@ -561,6 +561,16 @@ var g_audio = new Audio();
 var g_timeoutEvtId = 0;
 var g_inputKeyBuffer = new Array();
 
+// 歌詞制御
+var g_wordObj = {
+	wordDir: 0,
+	wordDat: "",
+	fadeInFlg0: false,
+	fadeInFlg1: false,
+	fadeOutFlg0: false,
+	fadeOutFlg1: false
+};
+var g_wordSprite;
 
 /**
  * イベントハンドラ用オブジェクト
@@ -2123,14 +2133,14 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame){
 			obj.boostData[k+1] = parseFloat(obj.boostData[k+1]);
 		}
 	}
-	if(_dosObj["color" + _scoreNo + "_data"] != undefined){
+	if(_dosObj["color" + _scoreNo + "_data"] != undefined && _dosObj["color" + _scoreNo + "_data"] != ""){
 		obj.colorData = _dosObj["color" + _scoreNo + "_data"].split(",");
 		for(k=0; k<obj.colorData.length; k+=3){
 			obj.colorData[k] = parseFloat(obj.colorData[k]) + parseFloat(g_stateObj.adjustment)+ _preblankFrame;
 			obj.colorData[k+1] = parseFloat(obj.colorData[k+1]);
 		}
 	}
-	if(_dosObj["acolor" + _scoreNo + "_data"] != undefined){
+	if(_dosObj["acolor" + _scoreNo + "_data"] != undefined && _dosObj["acolor" + _scoreNo + "data"] != ""){
 		obj.acolorData = _dosObj["acolor" + _scoreNo + "_data"].split(",");
 		for(k=0; k<obj.acolorData.length; k+=3){
 			obj.acolorData[k] = parseFloat(obj.acolorData[k]) + parseFloat(g_stateObj.adjustment)+ _preblankFrame;
@@ -2145,7 +2155,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame){
 		tmpData = _dosObj["word" + _scoreNo + "_data"].split("\r").join("");
 		tmpData = tmpData.split("\n").join("");
 
-		if(tmpData != undefined){
+		if(tmpData != undefined && tmpData != ""){
 			var tmpWordData = tmpData.split(",");
 			for(k=0; k<tmpWordData.length; k+=3){
 				tmpWordData[k] = parseFloat(tmpWordData[k]) + parseFloat(g_stateObj.adjustment)+ _preblankFrame;
@@ -2806,6 +2816,8 @@ function MainInit(){
 		var musicStartFrame = firstFrame + g_headerObj.blankFrame;
 		g_audio.volume = 0;
 	}
+
+	// 曲時間制御変数
 	var thisTime;
 	var buffTime;
 	var musicStartFlg = false;
@@ -3198,7 +3210,7 @@ function MainInit(){
 						judgeIi();
 						arrow.style.opacity = 0;
 						var stepDivHit = document.getElementById("stepHit" + j);
-						stepDivHit.style.opacity = 100;
+						stepDivHit.style.opacity = 1;
 					}else if(cnt == -4){
 						g_workObj.judgArrowCnt[j]++;
 						var stepDivHit = document.getElementById("stepHit" + j);
@@ -3331,11 +3343,33 @@ function MainInit(){
 
 		// 歌詞表示
 		if(g_scoreObj.wordData[g_scoreObj.frameNum]!=undefined){
-			var wordDir = g_scoreObj.wordData[g_scoreObj.frameNum][0];
-			g_workObj["word" + wordDir + "Data"] = g_scoreObj.wordData[g_scoreObj.frameNum][1];
-			var wordSprite = document.getElementById("lblword" + wordDir);
-			wordSprite.innerHTML = g_scoreObj.wordData[g_scoreObj.frameNum][1];
+			g_wordObj.wordDir = g_scoreObj.wordData[g_scoreObj.frameNum][0];
+			g_wordObj.wordDat = g_scoreObj.wordData[g_scoreObj.frameNum][1];
+			g_wordSprite = document.getElementById("lblword" + g_wordObj.wordDir);
+
+			if(g_wordObj.wordDat == "[fadein]"){
+				g_wordObj["fadeInFlg" + g_wordObj.wordDir] = true;
+				g_wordObj["fadeOutFlg" + g_wordObj.wordDir] = false;
+				g_wordSprite.style.opacity = 0;
+
+			}else if(g_wordObj.wordDat == "[fadeout]"){
+				g_wordObj["fadeInFlg" + g_wordObj.wordDir] = false;
+				g_wordObj["fadeOutFlg" + g_wordObj.wordDir] = true;
+				g_wordSprite.style.opacity = 1;
+
+			}else{
+				if(g_wordObj["fadeOutFlg" + g_wordObj.wordDir] == false 
+					&& g_wordSprite.style.opacity == 0){
+						g_wordSprite.style.opacity = 1;
+				}
+				g_workObj["word" + g_wordObj.wordDir + "Data"] = g_wordObj.wordDat;
+				g_wordSprite.innerHTML = g_wordObj.wordDat;
+			}
 		}
+
+		// 歌詞フェードイン・アウト
+		fadeWord("0");
+		fadeWord("1");
 
 		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
 		thisTime = new Date();
@@ -3345,6 +3379,33 @@ function MainInit(){
 	}
 	var mainStartTime = new Date();
 	g_timeoutEvtId = setTimeout(flowTimeline(), 1000/ 60);
+}
+
+/**
+ * 歌詞のフェードイン・アウト
+ * @param {string} _wordDir 
+ */
+function fadeWord(_wordDir){
+	
+	if(g_wordObj["fadeInFlg" + _wordDir] == true){
+		var wordAlpha = parseFloat(document.getElementById("lblword" + _wordDir).style.opacity);
+		if(wordAlpha + 0.04 >= 0.99){
+			g_wordObj["fadeInFlg" + _wordDir] = false;
+			document.getElementById("lblword" + _wordDir).style.opacity = 1;
+		}else{
+			wordAlpha += 0.04;
+			document.getElementById("lblword" + _wordDir).style.opacity = wordAlpha;
+		}
+	}else if(g_wordObj["fadeOutFlg" + _wordDir] == true){
+		var wordAlpha = parseFloat(document.getElementById("lblword" + _wordDir).style.opacity);
+		if(wordAlpha - 0.04 <= 0.01){
+			g_wordObj["fadeOutFlg" + _wordDir] = false;
+			document.getElementById("lblword" + _wordDir).style.opacity = 0;
+		}else{
+			wordAlpha -= 0.04;
+			document.getElementById("lblword" + _wordDir).style.opacity = wordAlpha;
+		}
+	}
 }
 
 /**
@@ -3386,8 +3447,8 @@ function changeFailedFrz(j, k){
 	fstyle.left = "0px";
 	fstyle.width = "50px";
 	fstyle.height = "50px";
-	fstyle.opacity = 100;
-	document.getElementById("frzTop" + j + "_" + k).style.opacity = 100;
+	fstyle.opacity = 1;
+	document.getElementById("frzTop" + j + "_" + k).style.opacity = 1;
 	document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
 	document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
 	document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
@@ -3422,7 +3483,7 @@ function judgeArrow(_j){
 			var judgEndFlg = judgArrow.getAttribute("judgEndFlg");
 
 			if(difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg == "false"){
-				stepDivHit.style.opacity = 100;
+				stepDivHit.style.opacity = 1;
 				var charaJ = document.getElementById("charaJ");
 
 				if(difCnt <= g_judgObj.arrowJ[C_JDG_II]){
@@ -3467,7 +3528,6 @@ function judgeIi(){
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_II + "'>" + C_JCR_II + "</span>";
 
-//	charaJ.style.transform = "translateX(10px)";
 	document.getElementById("lblIi").innerHTML = g_resultObj.ii;
 	if(++g_resultObj.combo > g_resultObj.maxCombo){
 		g_resultObj.maxCombo = g_resultObj.combo;
@@ -3551,21 +3611,21 @@ function finishViewing(){
 		var fullArrows = g_allArrow + g_allFrz /2;
 		if(g_resultObj.ii + g_resultObj.kita == fullArrows){
 			document.getElementById("finishView").innerHTML = "<span style='color:#ffffff;'>All Perfect!!</span>";
-			document.getElementById("finishView").style.opacity = 100;
+			document.getElementById("finishView").style.opacity = 1;
 			document.getElementById("charaJ").innerHTML = "";
 			document.getElementById("comboJ").innerHTML = "";
 			document.getElementById("charaFJ").innerHTML = "";
 			document.getElementById("comboFJ").innerHTML = "";
 		}else if(g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita == fullArrows){
 			document.getElementById("finishView").innerHTML = "Perfect!!";
-			document.getElementById("finishView").style.opacity = 100;
+			document.getElementById("finishView").style.opacity = 1;
 			document.getElementById("charaJ").innerHTML = "";
 			document.getElementById("comboJ").innerHTML = "";
 			document.getElementById("charaFJ").innerHTML = "";
 			document.getElementById("comboFJ").innerHTML = "";
 		}else if(g_resultObj.uwan == 0 && g_resultObj.iknai == 0){
 			document.getElementById("finishView").innerHTML = "<span style='color:#66ffff;'>FullCombo!</span>";
-			document.getElementById("finishView").style.opacity = 100;
+			document.getElementById("finishView").style.opacity = 1;
 			document.getElementById("charaJ").innerHTML = "";
 			document.getElementById("comboJ").innerHTML = "";
 			document.getElementById("charaFJ").innerHTML = "";
