@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/30
  */
-var g_version =  "Ver 0.46.0";
+var g_version =  "Ver 0.47.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1226,19 +1226,59 @@ function headerConvert(_dosObj){
 	}
 
 	// 初期色情報
-	obj.setColorDef = ["#cccccc","#9999ff","#ffffff","#ffff99","#99ff99"];
+	obj.setColorInit = ["#cccccc","#9999ff","#ffffff","#ffff99","#99ff99"];
 
 	if(_dosObj.setColor != undefined && _dosObj.setColor != ""){
 		obj.setColor = _dosObj.setColor.split(",");
 		for(var j=0; j<obj.setColor.length; j++){
 			obj.setColor[j] = obj.setColor[j].replace("0x","#");
 		}
-		for(var j=obj.setColor.length; j<obj.setColorDef.length; j++){
-			obj.setColor[j] = obj.setColorDef[j];
+		for(var j=obj.setColor.length; j<obj.setColorInit.length; j++){
+			obj.setColor[j] = obj.setColorInit[j];
 		}
 	}else{
-		obj.setColor = obj.setColorDef.concat();
+		obj.setColor = obj.setColorInit.concat();
 	}
+	//obj.setColorDef = obj.setColor.concat();
+
+
+	// フリーズアロー初期色情報
+	obj.frzColorInit = ["#66ffff","#6600ff","#ffff66","#ffff99"];
+	obj.frzColor = new Array();
+	obj.frzColorDef = new Array();
+
+	if(_dosObj.frzColor != undefined && _dosObj.frzColor != ""){
+		var tmpFrzColors = _dosObj.frzColor.split("$");
+		for(var j=0, len=tmpFrzColors.length; j<len; j++){
+			obj.frzColor[j] = new Array();
+			obj.frzColor[j] = tmpFrzColors[j].split(",");
+
+			for(var k=0; k<obj.frzColor[j].length; k++){
+				obj.frzColor[j][k] = obj.frzColor[j][k].replace("0x","#");
+			}
+			for(var k=obj.frzColor[j].length; k<obj.frzColorInit.length; k++){
+				obj.frzColor[j][k] = obj.frzColorInit[k];
+			}
+
+			obj.frzColorDef[j] = new Array();
+			obj.frzColorDef[j] = obj.frzColor[j].concat();
+		}
+		for(var j=tmpFrzColors.length, len=obj.setColorInit.length; j<len; j++){
+			obj.frzColor[j] = new Array();
+			obj.frzColor[j] = obj.frzColor[0].concat();
+			obj.frzColorDef[j] = new Array();
+			obj.frzColorDef[j] = obj.frzColor[j].concat();
+		}
+		
+	}else{
+		for(var j=0, len=obj.setColorInit.length; j<len; j++){
+			obj.frzColor[j] = new Array();
+			obj.frzColor[j] = obj.frzColorInit.concat();
+			obj.frzColorDef[j] = new Array();
+			obj.frzColorDef[j] = obj.frzColor[j].concat();
+		}
+	}
+	
 
 	// 製作者表示
 	if(_dosObj.tuning != undefined && _dosObj.tuning != ""){
@@ -2720,6 +2760,11 @@ function getArrowSettings(){
 	g_workObj.judgArrowCnt = new Array();
 	g_workObj.judgFrzCnt = new Array();
 	g_judgObj.lockFlgs = new Array();
+	g_workObj.arrowColors = new Array();
+	g_workObj.frzNormalColors = new Array();
+	g_workObj.frzNormalBarColors = new Array();
+	g_workObj.frzHitColors = new Array();
+	g_workObj.frzHitBarColors = new Array();
 
 	for(var j=0; j<keyNum; j++){
 
@@ -2739,6 +2784,13 @@ function getArrowSettings(){
 		g_workObj.judgArrowCnt[j] = 1;
 		g_workObj.judgFrzCnt[j] = 1;
 		g_judgObj.lockFlgs[j] = false;
+
+		g_workObj.arrowColors[j] = g_headerObj.setColor[g_keyObj["color" + keyCtrlPtn][j]];
+
+		g_workObj.frzNormalColors[j] = g_headerObj.frzColor[g_keyObj["color" + keyCtrlPtn][j]][0];
+		g_workObj.frzNormalBarColors[j] = g_headerObj.frzColor[g_keyObj["color" + keyCtrlPtn][j]][1];
+		g_workObj.frzHitColors[j] = g_headerObj.frzColor[g_keyObj["color" + keyCtrlPtn][j]][2];
+		g_workObj.frzHitBarColors[j] = g_headerObj.frzColor[g_keyObj["color" + keyCtrlPtn][j]][3];
 	}
 
 	g_resultObj.ii = 0;
@@ -3177,7 +3229,7 @@ function MainInit(){
 
 				var targetj = g_workObj.mkArrow[g_scoreObj.frameNum][j];
 
-				var step = createArrowEffect("arrow" + targetj + "_" + (++arrowCnts[targetj]), g_headerObj.setColor[g_keyObj["color" + keyCtrlPtn][targetj]], 
+				var step = createArrowEffect("arrow" + targetj + "_" + (++arrowCnts[targetj]), g_workObj.arrowColors[targetj], 
 				g_workObj.stepX[targetj],
 				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd * g_workObj.scrollDir[targetj], 50, 
 				g_workObj.stepRtn[targetj]);
@@ -3250,7 +3302,7 @@ function MainInit(){
 				// 後に作成するほど前面に表示される。
 
 				// フリーズアロー帯(frzBar)
-				var frzBar = createColorObject("frzBar" + targetj + "_" + (frzCnts[targetj]), "#6666ff",
+				var frzBar = createColorObject("frzBar" + targetj + "_" + (frzCnts[targetj]), g_workObj.frzNormalBarColors[targetj],
 				5, 25 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[targetj], 40, frzLength * g_workObj.boostSpd, 0, "frzBar", "../img/frzBar.png");
 				frzRoot.appendChild(frzBar);
 
@@ -3260,7 +3312,7 @@ function MainInit(){
 				frzRoot.appendChild(frzTopShadow);
 
 				// 開始矢印。ヒット時は隠れる。
-				var frzTop = createArrowEffect("frzTop" + targetj + "_" + (frzCnts[targetj]), "#66ffff",
+				var frzTop = createArrowEffect("frzTop" + targetj + "_" + (frzCnts[targetj]), g_workObj.frzNormalColors[targetj],
 				0, 0, 50, g_workObj.stepRtn[targetj]);
 				frzRoot.appendChild(frzTop);
 
@@ -3270,7 +3322,7 @@ function MainInit(){
 				frzRoot.appendChild(frzBtmShadow);
 
 				// 後発矢印
-				var frzBtm = createArrowEffect("frzBtm" + targetj + "_" + (frzCnts[targetj]), "#66ffff",
+				var frzBtm = createArrowEffect("frzBtm" + targetj + "_" + (frzCnts[targetj]), g_workObj.frzNormalColors[targetj],
 				0, frzLength * g_workObj.boostSpd * rev, 50, g_workObj.stepRtn[targetj]);
 				frzRoot.appendChild(frzBtm);
 			}
@@ -3425,12 +3477,12 @@ function changeHitFrz(j, k){
 		fstyle.opacity = 70;
 		document.getElementById("frzTop" + j + "_" + k).style.opacity = 0;
 	}else{
-		document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#ffff99";
+		document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = g_workObj.frzHitColors[j];
 	}
 	
 	var frzBar = document.getElementById("frzBar" + j + "_" + k);
-	frzBar.style.backgroundColor = "#ffff99";
-	document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#ffff99";
+	frzBar.style.backgroundColor = g_workObj.frzHitBarColors[j];
+	document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = g_workObj.frzHitColors[j];
 	document.getElementById("frz" + j + "_" + k).setAttribute("isMoving", "false");
 }
 
