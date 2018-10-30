@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/31
  */
-var g_version =  "Ver 0.48.0";
+var g_version =  "Ver 0.49.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2702,7 +2702,7 @@ function pushColors(_header, _frame, _val, _colorCd){
 		}else if(_val >= 20){
 			var colorNum = _val - 20;
 			for(var j=0; j<keyNum; j++){
-				if(g_keyObj["color" + keyCtrlPtn] == colorNum){
+				if(g_keyObj["color" + keyCtrlPtn][j] == colorNum){
 					g_workObj["mk" + _header + "Color"][_frame].push(j);
 					g_workObj["mk" + _header + "ColorCd"][_frame].push(_colorCd);
 				}
@@ -3200,6 +3200,7 @@ function MainInit(){
 			customMainEnterFrame();
 		}
 
+		// タイマー、曲終了判定
 		if(g_scoreObj.frameNum % 60 == 0){
 			var currentMin = Math.floor(g_scoreObj.frameNum / 3600);
 			var currentSec = ("00" + (g_scoreObj.frameNum / 60) % 60).slice(-2);
@@ -3214,6 +3215,7 @@ function MainInit(){
 			}
 		}
 
+		// 速度変化 (途中変速, 個別加速)
 		if(g_scoreObj.frameNum == g_workObj.speedData[speedCnts]){
 			g_workObj.currentSpeed = g_workObj.speedData[speedCnts+1];
 			speedCnts+=2;
@@ -3224,57 +3226,18 @@ function MainInit(){
 		}
 
 		// 個別色変化 (矢印)
-		if(g_workObj.mkColor[g_scoreObj.frameNum]!=undefined){
-			for(var j=0, len=g_workObj.mkColor[g_scoreObj.frameNum].length; j<len; j++){
-
-				var targetj = g_workObj.mkcolor[g_scoreObj.frameNum][j];
-				g_workObj.arrowColors[targetj] = g_workObj.mkColorCd[g_scoreObj.frameNum][j];
-			}
-		}
+		changeArrowColors(g_workObj.mkColor[g_scoreObj.frameNum], g_workObj.mkColorCd[g_scoreObj.frameNum]);
 
 		// 個別色変化（フリーズアロー）
-		if(g_workObj.mkFColor[g_scoreObj.frameNum]!=undefined){
-			for(var j=0, len=g_workObj.mkFColor[g_scoreObj.frameNum].length; j<len; j++){
+		changeFrzColors(g_workObj.mkFColor[g_scoreObj.frameNum], g_workObj.mkFColorCd[g_scoreObj.frameNum], 
+			g_keyObj["color" + keyCtrlPtn], keyNum);
 
-				var targetj = g_workObj.mkFColor[g_scoreObj.frameNum][j];
+		// 全体色変化 (矢印)
+		changeArrowColors(g_workObj.mkAColor[g_scoreObj.frameNum], g_workObj.mkAColorCd[g_scoreObj.frameNum]);
 
-				// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
-				if(targetj < 10){
-					// 矢印 (通常)
-					if(targetj % 2 == 0){
-						for(var k=0; k<keyNum; k++){
-							if(targetj / 2 == g_keyObj["color" + keyCtrlPtn][k]){
-								g_workObj.frzNormalColors[k] = g_workObj.mkFColorCd[g_scoreObj.frameNum][j];
-							}
-						}
-					// 帯 (通常)
-					}else{
-						for(var k=0; k<keyNum; k++){
-							if((targetj - 1) / 2 == g_keyObj["color" + keyCtrlPtn][k]){
-								g_workObj.frzNormalBarColors[k] = g_workObj.mkFColorCd[g_scoreObj.frameNum][j];
-							}
-						}
-					}
-				}else{
-					targetj -= 10;
-					// 矢印 (ヒット時)
-					if(targetj % 2 == 0){
-						for(var k=0; k<keyNum; k++){
-							if(targetj / 2 == g_keyObj["color" + keyCtrlPtn][k]){
-								g_workObj.frzHitColors[k] = g_workObj.mkFColorCd[g_scoreObj.frameNum][j];
-							}
-						}
-					// 帯 (ヒット時)
-					}else{
-						for(var k=0; k<keyNum; k++){
-							if((targetj - 1) / 2 == g_keyObj["color" + keyCtrlPtn][k]){
-								g_workObj.frzHitBarColors[k] = g_workObj.mkFColorCd[g_scoreObj.frameNum][j];
-							}
-						}
-					}
-				}
-			}
-		}
+		// 全体色変化 (フリーズアロー)
+		changeFrzColors(g_workObj.mkFAColor[g_scoreObj.frameNum], g_workObj.mkFAColorCd[g_scoreObj.frameNum], 
+			g_keyObj["color" + keyCtrlPtn], keyNum);
 
 		// 矢印生成
 		if(g_workObj.mkArrow[g_scoreObj.frameNum]!=undefined){
@@ -3303,6 +3266,13 @@ function MainInit(){
 				var boostCnt = arrow.getAttribute("boostCnt");
 				var boostSpd = arrow.getAttribute("boostSpd");
 				var cnt = arrow.getAttribute("cnt");
+
+				// 全体色変化 (移動時)
+				if(arrow.style.backgroundColor != g_workObj.arrowColors[j]){
+					arrow.style.backgroundColor = g_workObj.arrowColors[j];
+				}
+
+				// 移動
 				if(g_workObj.currentSpeed != 0){
 					arrow.style.top = (parseFloat(arrow.style.top) - 
 						(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt] )* boostSpd * g_workObj.scrollDir[j]  ) + "px";
@@ -3389,12 +3359,24 @@ function MainInit(){
 				var boostSpd = frzRoot.getAttribute("boostSpd");
 				var cnt = frzRoot.getAttribute("cnt");
 
+				var frzTop = document.getElementById("frzTop" + j + "_" + k);
 				var frzBar = document.getElementById("frzBar" + j + "_" + k);
 				var frzBtm = document.getElementById("frzBtm" + j + "_" + k);
 				var frzBarLength = frzRoot.getAttribute("frzBarLength");
 				
 				if(frzRoot.getAttribute("judgEndFlg") == "false"){
 					if(frzRoot.getAttribute("isMoving") == "true"){
+
+						// 全体色変化 (通常時)
+						if(frzBtm.style.backgroundColor != g_workObj.frzNormalColors[j]){
+							frzTop.style.backgroundColor = g_workObj.frzNormalColors[j];
+							frzBtm.style.backgroundColor = g_workObj.frzNormalColors[j];
+						}
+						if(frzBar.style.backgroundColor != g_workObj.frzNormalBarColors[j]){
+							frzBar.style.backgroundColor = g_workObj.frzNormalBarColors[j];
+						}
+
+						// 移動
 						if(g_workObj.currentSpeed != 0){
 							frzRoot.style.top = (parseFloat(frzRoot.style.top) -
 								 (g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt] )* boostSpd * g_workObj.scrollDir[j]  ) + "px";
@@ -3407,6 +3389,14 @@ function MainInit(){
 						}
 					}else{
 						var frzBtmShadow = document.getElementById("frzBtmShadow" + j + "_" + k);
+
+						// 全体色変化 (ヒット時)
+						if(frzBtm.style.backgroundColor != g_workObj.frzHitColors[j]){
+							frzBtm.style.backgroundColor = g_workObj.frzHitColors[j];
+						}
+						if(frzBar.style.backgroundColor != g_workObj.frzHitBarColors[j]){
+							frzBar.style.backgroundColor = g_workObj.frzHitBarColors[j];
+						}
 
 						// フリーズアローがヒット中の処理
 						if(frzBarLength > 0){
@@ -3484,6 +3474,75 @@ function MainInit(){
 	}
 	var mainStartTime = new Date();
 	g_timeoutEvtId = setTimeout(flowTimeline(), 1000/ 60);
+}
+
+/**
+ * 個別色変化 (矢印)
+ * @param {array} _mkColor 
+ * @param {array} _mkColorCd 
+ */
+function changeArrowColors(_mkColor, _mkColorCd){
+
+	if(_mkColor != undefined){
+		for(var j=0, len=_mkColor.length; j<len; j++){
+
+			var targetj = _mkColor[j];
+			g_workObj.arrowColors[targetj] = _mkColorCd[j];
+		}
+	}
+}
+
+/**
+ * 個別色変化 (フリーズアロー)
+ * @param {array} _mkColor 
+ * @param {array} _mkColorCd 
+ * @param {array} _colorPatterns 
+ * @param {number} _keyNum 
+ */
+function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum){
+
+	if(_mkColor != undefined){
+		for(var j=0, len=_mkColor.length; j<len; j++){
+
+			var targetj = _mkColor[j];
+
+			// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
+			if(targetj < 10){
+				// 矢印 (通常)
+				if(targetj % 2 == 0){
+					for(var k=0; k<_keyNum; k++){
+						if(targetj / 2 == _colorPatterns[k]){
+							g_workObj.frzNormalColors[k] = _mkColorCd[j];
+						}
+					}
+				// 帯 (通常)
+				}else{
+					for(var k=0; k<_keyNum; k++){
+						if((targetj - 1) / 2 == _colorPatterns[k]){
+							g_workObj.frzNormalBarColors[k] = _mkColorCd[j];
+						}
+					}
+				}
+			}else{
+				targetj -= 10;
+				// 矢印 (ヒット時)
+				if(targetj % 2 == 0){
+					for(var k=0; k<_keyNum; k++){
+						if(targetj / 2 == _colorPatterns[k]){
+							g_workObj.frzHitColors[k] = _mkColorCd[j];
+						}
+					}
+				// 帯 (ヒット時)
+				}else{
+					for(var k=0; k<_keyNum; k++){
+						if((targetj - 1) / 2 == _colorPatterns[k]){
+							g_workObj.frzHitBarColors[k] = _mkColorCd[j];
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 /**
