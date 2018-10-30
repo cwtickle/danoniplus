@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/30
+ * Revised : 2018/10/31
  */
-var g_version =  "Ver 0.47.0";
+var g_version =  "Ver 0.48.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -3223,9 +3223,62 @@ function MainInit(){
 			boostCnts+=2;
 		}
 
+		// 個別色変化 (矢印)
+		if(g_workObj.mkColor[g_scoreObj.frameNum]!=undefined){
+			for(var j=0, len=g_workObj.mkColor[g_scoreObj.frameNum].length; j<len; j++){
+
+				var targetj = g_workObj.mkcolor[g_scoreObj.frameNum][j];
+				g_workObj.arrowColors[targetj] = g_workObj.mkColorCd[g_scoreObj.frameNum][j];
+			}
+		}
+
+		// 個別色変化（フリーズアロー）
+		if(g_workObj.mkFColor[g_scoreObj.frameNum]!=undefined){
+			for(var j=0, len=g_workObj.mkFColor[g_scoreObj.frameNum].length; j<len; j++){
+
+				var targetj = g_workObj.mkFColor[g_scoreObj.frameNum][j];
+
+				// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
+				if(targetj < 10){
+					// 矢印 (通常)
+					if(targetj % 2 == 0){
+						for(var k=0; k<keyNum; k++){
+							if(targetj / 2 == g_keyObj["color" + keyCtrlPtn][k]){
+								g_workObj.frzNormalColors[k] = g_workObj.mkFColorCd[g_scoreObj.frameNum][j];
+							}
+						}
+					// 帯 (通常)
+					}else{
+						for(var k=0; k<keyNum; k++){
+							if((targetj - 1) / 2 == g_keyObj["color" + keyCtrlPtn][k]){
+								g_workObj.frzNormalBarColors[k] = g_workObj.mkFColorCd[g_scoreObj.frameNum][j];
+							}
+						}
+					}
+				}else{
+					targetj -= 10;
+					// 矢印 (ヒット時)
+					if(targetj % 2 == 0){
+						for(var k=0; k<keyNum; k++){
+							if(targetj / 2 == g_keyObj["color" + keyCtrlPtn][k]){
+								g_workObj.frzHitColors[k] = g_workObj.mkFColorCd[g_scoreObj.frameNum][j];
+							}
+						}
+					// 帯 (ヒット時)
+					}else{
+						for(var k=0; k<keyNum; k++){
+							if((targetj - 1) / 2 == g_keyObj["color" + keyCtrlPtn][k]){
+								g_workObj.frzHitBarColors[k] = g_workObj.mkFColorCd[g_scoreObj.frameNum][j];
+							}
+						}
+					}
+				}
+			}
+		}
+
 		// 矢印生成
 		if(g_workObj.mkArrow[g_scoreObj.frameNum]!=undefined){
-			for(var j=0; j<g_workObj.mkArrow[g_scoreObj.frameNum].length; j++){
+			for(var j=0, len=g_workObj.mkArrow[g_scoreObj.frameNum].length; j<len; j++){
 
 				var targetj = g_workObj.mkArrow[g_scoreObj.frameNum][j];
 
@@ -3280,7 +3333,7 @@ function MainInit(){
 
 		// フリーズアロー生成
 		if(g_workObj.mkFrzArrow[g_scoreObj.frameNum]!=undefined){
-			for(var j=0; j<g_workObj.mkFrzArrow[g_scoreObj.frameNum].length; j++){
+			for(var j=0, len=g_workObj.mkFrzArrow[g_scoreObj.frameNum].length; j<len; j++){
 				var targetj = g_workObj.mkFrzArrow[g_scoreObj.frameNum][j];
 				var frzLength = g_workObj.mkFrzLength[targetj][frzCnts[targetj] * 2];
 				var rev = g_workObj.scrollDir[targetj];
