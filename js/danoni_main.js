@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/10/31
  */
-var g_version =  "Ver 0.49.0";
+var g_version =  "Ver 0.49.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2882,13 +2882,14 @@ function MainInit(){
 	var fullSec = ("00" + Math.floor(fullSecond % 60)).slice(-2);
 	var fullTime = fullMin + ":" + fullSec;
 	var fadeOutFrame = Infinity;
+	var preblankFrame = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
 
 	// フェードアウト時間指定の場合、その10秒後に終了する
 	if(g_headerObj.fadeFrame != undefined){
 		if(isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))){
 		}else{
 			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]);
-			var fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 600) /60) * 60;
+			var fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 600 + preblankFrame) /60) * 60;
 
 			fullMin = Math.floor(fadeTmp / 3600);
 			fullSec = ("00" + (fadeTmp / 60) % 60).slice(-2);
@@ -2898,8 +2899,10 @@ function MainInit(){
 	}else if(g_headerObj.endFrame != undefined){
 		if(isNaN(parseInt(g_headerObj.endFrame))){
 		}else{
-			fullMin = Math.floor((parseInt(g_headerObj.endFrame)) / 3600);
-			fullSec = ("00" + ((parseInt(g_headerObj.endFrame) / 60) % 60)).slice(-2);
+			var fullTmp = Math.floor((parseInt(g_headerObj.endFrame) + preblankFrame) /60) * 60;
+
+			fullMin = Math.floor(fullTmp / 3600);
+			fullSec = ("00" + (fullTmp / 60) % 60).slice(-2);
 			fullTime = fullMin + ":" + fullSec;
 		}
 	}
@@ -3196,7 +3199,7 @@ function MainInit(){
 		}
 
 		// ユーザカスタムイベント(フレーム毎)
-		if(typeof customMainFrame == "function"){
+		if(typeof customMainEnterFrame == "function"){
 			customMainEnterFrame();
 		}
 
