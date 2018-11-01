@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/10/31
+ * Revised : 2018/11/01
  */
-var g_version =  "Ver 0.49.1";
+var g_version =  "Ver 0.50.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -106,8 +106,12 @@ var g_stateObj = {
 	reverse: "OFF",
 	auto: "OFF",
 	adjustment: 0,
+	fadein: 0,
 	volume: 100
 };
+
+var g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
+var g_volumeNum = 0;
 
 // サイズ(後で指定)
 var g_sWidth;
@@ -1696,7 +1700,7 @@ function createOptionWindow(_sprite){
 
 	// タイミング調整 (Adjustment)
 	var lblAdjustment = createDivLabel("lblAdjustment", 0, 150, 100, 30, 20, C_CLR_TITLE, 
-				"<span style='color:#cc66ff'>A</span>djustment");
+				"<span style='color:#99ff66'>A</span>djustment");
 	optionsprite.appendChild(lblAdjustment);
 	var lnkAdjustment = createButton({
 		id: "lnkAdjustment", 
@@ -1721,13 +1725,13 @@ function createOptionWindow(_sprite){
 	optionsprite.appendChild(lnkAdjustment);
 
 
-	// ボリューム
-	var lblVolume = createDivLabel("lblVolume", 0, 180, 100, 30, 20, C_CLR_TITLE, 
-	"<span style='color:#9999ff'>V</span>olume");
-	optionsprite.appendChild(lblVolume);
-	var lnkVolume = createButton({
-		id: "lnkVolume", 
-		name: g_stateObj.volume + "%", 
+	// フェードイン (Fadein)
+	var lblFadein = createDivLabel("lblFadein", 0, 180, 100, 30, 20, C_CLR_TITLE, 
+				"<span style='color:#cc66ff'>F</span>adein");
+	optionsprite.appendChild(lblFadein);
+	var lnkFadein = createButton({
+		id: "lnkFadein", 
+		name: g_stateObj.fadein + "%", 
 		x: 170, 
 		y: 180, 
 		width: 250, 
@@ -1737,11 +1741,39 @@ function createOptionWindow(_sprite){
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		g_stateObj.volume = (g_stateObj.volume == 0 ? 100 : --g_stateObj.volume);
+		g_stateObj.fadein = (g_stateObj.fadein == 100 ? 0 : g_stateObj.fadein + 5);
+		lnkFadein.innerHTML = g_stateObj.fadein + "%";
+	});
+	lnkFadein.oncontextmenu = function(){
+		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 100 : g_stateObj.fadein - 5);
+		lnkFadein.innerHTML = g_stateObj.fadein + "%";
+		return false;
+	}
+	optionsprite.appendChild(lnkFadein);
+
+	// ボリューム
+	var lblVolume = createDivLabel("lblVolume", 0, 210, 100, 30, 20, C_CLR_TITLE, 
+	"<span style='color:#9999ff'>V</span>olume");
+	optionsprite.appendChild(lblVolume);
+	var lnkVolume = createButton({
+		id: "lnkVolume", 
+		name: g_stateObj.volume + "%", 
+		x: 170, 
+		y: 210, 
+		width: 250, 
+		height: 30, 
+		fontsize: 20,
+		normalColor: C_CLR_LNK, 
+		hoverColor: C_CLR_DEFAULT, 
+		align: C_ALIGN_CENTER
+	}, function(){
+		g_volumeNum = (g_volumeNum == g_volumes.length -1 ? 0 : ++g_volumeNum);
+		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = g_stateObj.volume + "%";
 	});
 	lnkVolume.oncontextmenu = function(){
-		g_stateObj.volume = (g_stateObj.volume == 100 ? 0 : ++g_stateObj.volume);
+		g_volumeNum = (g_volumeNum == 0 ? g_volumes.length -1 : --g_volumeNum);
+		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = g_stateObj.volume + "%";
 		return false;
 	}
@@ -2271,7 +2303,7 @@ function getStartFrame(_lastFrame){
 	var frameNum = 0;
 	frameNum = g_headerObj.startFrame;
 	if(_lastFrame >= g_headerObj.startFrame){
-//		frameNum = Math.round(fadePos/100 * (_lastFrame - frameNum)) + frameNum;
+		frameNum = Math.round(g_stateObj.fadein /100 * (_lastFrame - frameNum)) + frameNum;
 	}
 	return frameNum;
 }
@@ -2624,12 +2656,14 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	// 実際に処理させる途中変速配列を作成
 	g_workObj.speedData = new Array();
 	g_workObj.speedData.push(g_scoreObj.frameNum);
-	g_workObj.speedData.push(_speedOnFrame[0]);
+	g_workObj.speedData.push(_speedOnFrame[g_scoreObj.frameNum]);
 
 	if(_dataObj.speedData != undefined){
 		for(var k=0; k<_dataObj.speedData.length; k+=2){
-			g_workObj.speedData.push(_dataObj.speedData[k]);
-			g_workObj.speedData.push(_speedOnFrame[_dataObj.speedData[k]]);
+			if(_dataObj.speedData[k] >= g_scoreObj.frameNum){
+				g_workObj.speedData.push(_dataObj.speedData[k]);
+				g_workObj.speedData.push(_speedOnFrame[_dataObj.speedData[k]]);
+			}
 		}
 	}
 }
@@ -2884,12 +2918,12 @@ function MainInit(){
 	var fadeOutFrame = Infinity;
 	var preblankFrame = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
 
-	// フェードアウト時間指定の場合、その10秒後に終了する
+	// フェードアウト時間指定の場合、その7秒後に終了する
 	if(g_headerObj.fadeFrame != undefined){
 		if(isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))){
 		}else{
 			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]);
-			var fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 600 + preblankFrame) /60) * 60;
+			var fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 420 + preblankFrame) /60) * 60;
 
 			fullMin = Math.floor(fadeTmp / 3600);
 			fullSec = ("00" + (fadeTmp / 60) % 60).slice(-2);
@@ -3173,7 +3207,7 @@ function MainInit(){
 		if(g_audio.volume >= g_stateObj.volume / 100){
 			musicStartFlg = false;
 			if(g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + 600){
-				var tmpVolume = (g_audio.volume - 5 / 1000);
+				var tmpVolume = (g_audio.volume - (2.5 * g_stateObj.volume / 100) / 1000);
 				if(tmpVolume < 0){
 					g_audio.volume = 0;
 				}else{
