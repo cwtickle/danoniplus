@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/11/01
  */
-var g_version =  "Ver 0.50.0";
+var g_version =  "Ver 0.51.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2880,6 +2880,7 @@ function MainInit(){
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] -15, 80, 
 			g_workObj.stepRtn[j]);
 		stepHit.style.opacity = 0;
+		stepHit.setAttribute("cnt",0);
 		mainSprite.appendChild(stepHit);
 	}
 
@@ -3021,24 +3022,28 @@ function MainInit(){
 	var charaJ = createDivLabel("charaJ", g_sWidth/2 - 200, g_sHeight/2 - 50, 200, 20, 20, C_CLR_II, 
 	"");
 	charaJ.style.textAlign = C_ALIGN_CENTER;
+	charaJ.setAttribute("cnt", 0);
 	mainSprite.appendChild(charaJ);
 
 	// コンボ表示：矢印
 	var comboJ = createDivLabel("comboJ", g_sWidth/2 - 50, g_sHeight/2 - 50, 200, 20, 20, C_CLR_KITA, 
 	"");
 	comboJ.style.textAlign = C_ALIGN_CENTER;
+	comboJ.setAttribute("cnt", 0);
 	mainSprite.appendChild(comboJ);
 
 	// 判定キャラクタ表示：フリーズアロー
 	var charaFJ = createDivLabel("charaFJ", g_sWidth/2 - 100, g_sHeight/2, 200, 20, 20, C_CLR_KITA, 
 	"");
 	charaFJ.style.textAlign = C_ALIGN_CENTER;
+	charaFJ.setAttribute("cnt", 0);
 	mainSprite.appendChild(charaFJ);
 
 	// コンボ表示：フリーズアロー
 	var comboFJ = createDivLabel("comboFJ", g_sWidth/2 + 50, g_sHeight/2, 200, 20, 20, C_CLR_II, 
 	"");
 	comboFJ.style.textAlign = C_ALIGN_CENTER;
+	comboFJ.setAttribute("cnt", 0);
 	mainSprite.appendChild(comboFJ);
 
 	// パーフェクト演出
@@ -3157,8 +3162,6 @@ function MainInit(){
 				// ステップゾーンに対応するキーを離したとき
 				var stepDiv = document.getElementById("step" + j);
 				stepDiv.style.backgroundColor = "#999999";
-				var stepDivHit = document.getElementById("stepHit" + j);
-				stepDivHit.style.opacity = 0;
 				
 				// フリーズアローを離したとき
 				var k = g_workObj.judgFrzCnt[j];
@@ -3298,6 +3301,9 @@ function MainInit(){
 
 		// 矢印移動＆消去
 		for(var j=0; j<keyNum; j++){
+
+			var stepDivHit = document.getElementById("stepHit" + j);
+
 			for(var k=g_workObj.judgArrowCnt[j]; k<=arrowCnts[j]; k++){
 				var arrow = document.getElementById("arrow" + j + "_" + k);
 				var boostCnt = arrow.getAttribute("boostCnt");
@@ -3321,11 +3327,9 @@ function MainInit(){
 					if(cnt == 0){
 						judgeIi();
 						arrow.style.opacity = 0;
-						var stepDivHit = document.getElementById("stepHit" + j);
 						stepDivHit.style.opacity = 1;
 					}else if(cnt == -4){
 						g_workObj.judgArrowCnt[j]++;
-						var stepDivHit = document.getElementById("stepHit" + j);
 						stepDivHit.style.opacity = 0;
 						mainSprite.removeChild(arrow);
 					}
@@ -3334,6 +3338,13 @@ function MainInit(){
 					judgeUwan();
 					g_workObj.judgArrowCnt[j]++;
 					mainSprite.removeChild(arrow);
+				}
+			}
+			var hitCnt = stepDivHit.getAttribute("cnt");
+			if(hitCnt > 0){
+				stepDivHit.setAttribute("cnt", --hitCnt);
+				if(hitCnt == 0){
+					stepDivHit.style.opacity = 0;
 				}
 			}
 		}
@@ -3502,6 +3513,24 @@ function MainInit(){
 		// 歌詞フェードイン・アウト
 		fadeWord("0");
 		fadeWord("1");
+
+		// 判定キャラクタ消去
+		var charaJCnt = document.getElementById("charaJ").getAttribute("cnt");
+		if(charaJCnt > 0){
+			document.getElementById("charaJ").setAttribute("cnt", --charaJCnt);
+			if(charaJCnt == 0){
+				document.getElementById("charaJ").innerHTML = "";
+				document.getElementById("comboJ").innerHTML = "";
+			}
+		}
+		var charaFJCnt = document.getElementById("charaFJ").getAttribute("cnt");
+		if(charaFJCnt > 0){
+			document.getElementById("charaFJ").setAttribute("cnt", --charaFJCnt);
+			if(charaFJCnt == 0){
+				document.getElementById("charaFJ").innerHTML = "";
+				document.getElementById("comboFJ").innerHTML = "";
+			}
+		}
 
 		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
 		thisTime = new Date();
@@ -3684,18 +3713,23 @@ function judgeArrow(_j){
 			var judgEndFlg = judgArrow.getAttribute("judgEndFlg");
 
 			if(difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg == "false"){
-				stepDivHit.style.opacity = 1;
+				stepDivHit.style.opacity = 0.75;
 				var charaJ = document.getElementById("charaJ");
 
 				if(difCnt <= g_judgObj.arrowJ[C_JDG_II]){
 					judgeIi();
+					stepDivHit.style.background = C_CLR_II;
 				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]){
 					judgeShakin();
+					stepDivHit.style.background = C_CLR_SHAKIN;
 				}else if(difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]){
 					judgeMatari();
+					stepDivHit.style.background = C_CLR_MATARI;
 				}else{
 					judgeUwan();
+					stepDivHit.style.background = C_CLR_UWAN;
 				}
+				stepDivHit.setAttribute("cnt", 4);
 
 	//			judgArrow.setAttribute("judgEndFlg","true");
 				mainSprite.removeChild(judgArrow);
@@ -3728,6 +3762,7 @@ function judgeIi(){
 	g_resultObj.ii++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_II + "'>" + C_JCR_II + "</span>";
+	document.getElementById("charaJ").setAttribute("cnt", 60);
 
 	document.getElementById("lblIi").innerHTML = g_resultObj.ii;
 	if(++g_resultObj.combo > g_resultObj.maxCombo){
@@ -3735,8 +3770,6 @@ function judgeIi(){
 		document.getElementById("lblMCombo").innerHTML = g_resultObj.maxCombo;
 	}
 	document.getElementById("comboJ").innerHTML = g_resultObj.combo + " Combo!!";
-	document.getElementById("charaFJ").innerHTML = "";
-	document.getElementById("comboFJ").innerHTML = "";
 
 	finishViewing();
 }
@@ -3745,6 +3778,8 @@ function judgeShakin(){
 	g_resultObj.shakin++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_SHAKIN + "'>" + C_JCR_SHAKIN + "</span>";
+	document.getElementById("charaJ").setAttribute("cnt", 60);
+	
 	document.getElementById("lblShakin").innerHTML = g_resultObj.shakin;
 	if(++g_resultObj.combo > g_resultObj.maxCombo){
 		g_resultObj.maxCombo = g_resultObj.combo;
@@ -3759,10 +3794,10 @@ function judgeMatari(){
 	g_resultObj.matari++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_MATARI + "'>" + C_JCR_MATARI + "</span>";
+	document.getElementById("charaJ").setAttribute("cnt", 60);
+
 	document.getElementById("lblMatari").innerHTML = g_resultObj.matari;
 	document.getElementById("comboJ").innerHTML = "";
-	document.getElementById("charaFJ").innerHTML = "";
-	document.getElementById("comboFJ").innerHTML = "";
 
 	finishViewing();
 }
@@ -3771,11 +3806,11 @@ function judgeUwan(){
 	g_resultObj.uwan++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_UWAN + "'>" + C_JCR_UWAN + "</span>";
+	document.getElementById("charaJ").setAttribute("cnt", 60);
+
 	document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
 	g_resultObj.combo = 0;
 	document.getElementById("comboJ").innerHTML = "";
-	document.getElementById("charaFJ").innerHTML = "";
-	document.getElementById("comboFJ").innerHTML = "";
 }
 
 function judgeKita(){
@@ -3783,14 +3818,13 @@ function judgeKita(){
 	g_currentArrows++;
 	document.getElementById("lblKita").innerHTML = g_resultObj.kita;
 	document.getElementById("charaFJ").innerHTML = "<span style='color:" + C_CLR_KITA + "'>" + C_JCR_KITA + "</span>";
-	
+	document.getElementById("charaFJ").setAttribute("cnt", 60);
+
 	if(++g_resultObj.fCombo > g_resultObj.fmaxCombo){
 		g_resultObj.fmaxCombo = g_resultObj.fCombo;
 		document.getElementById("lblFCombo").innerHTML = g_resultObj.fmaxCombo;
 	}
 	document.getElementById("comboFJ").innerHTML = g_resultObj.fCombo + " Combo!!";
-	document.getElementById("charaJ").innerHTML = "";
-	document.getElementById("comboJ").innerHTML = "";
 
 	finishViewing();
 }
@@ -3800,11 +3834,9 @@ function judgeIknai(){
 	g_currentArrows++;
 	document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
 	document.getElementById("charaFJ").innerHTML = "<span style='color:" + C_CLR_IKNAI + "'>" + C_JCR_IKNAI + "</span>";
+	document.getElementById("charaFJ").setAttribute("cnt", 60);
 	document.getElementById("comboFJ").innerHTML = "";
 	g_resultObj.fCombo = 0;
-
-	document.getElementById("charaJ").innerHTML = "";
-	document.getElementById("comboJ").innerHTML = "";
 }
 
 function finishViewing(){
