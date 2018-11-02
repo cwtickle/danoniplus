@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/11/01
  */
-var g_version =  "Ver 0.51.0";
+var g_version =  "Ver 0.51.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -744,6 +744,7 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate){
 		div.className = charaStyle;
 		div.style.transform = "rotate(" + rotate +"deg)";
 	}
+	div.setAttribute("color",_color);
 
 	return div;
 }
@@ -783,6 +784,7 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 		div.className = charaStyle;
 		div.style.transform = "rotate(" + rotate +"deg)";
 	}
+	div.setAttribute("color",_color);
 
 	return div;
 }
@@ -2618,7 +2620,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		spdNext = Infinity;
 
 		lastk = _dataObj.colorData.length -3;
-		tmpObj = getArrowStartFrame(_dataObj.colorData[k], _speedOnFrame, _motionOnFrame);
+		tmpObj = getArrowStartFrame(_dataObj.colorData[lastk], _speedOnFrame, _motionOnFrame);
 		frmPrev = tmpObj.frm;
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 		pushColors("", tmpObj.frm, _dataObj.colorData[lastk +1], _dataObj.colorData[lastk +2].replace("0x","#"));
@@ -2794,11 +2796,18 @@ function getArrowSettings(){
 	g_workObj.judgArrowCnt = new Array();
 	g_workObj.judgFrzCnt = new Array();
 	g_judgObj.lockFlgs = new Array();
+
 	g_workObj.arrowColors = new Array();
 	g_workObj.frzNormalColors = new Array();
 	g_workObj.frzNormalBarColors = new Array();
 	g_workObj.frzHitColors = new Array();
 	g_workObj.frzHitBarColors = new Array();
+
+	g_workObj.arrowColorsAll = new Array();
+	g_workObj.frzNormalColorsAll = new Array();
+	g_workObj.frzNormalBarColorsAll = new Array();
+	g_workObj.frzHitColorsAll = new Array();
+	g_workObj.frzHitBarColorsAll = new Array();
 
 	for(var j=0; j<keyNum; j++){
 
@@ -2825,6 +2834,13 @@ function getArrowSettings(){
 		g_workObj.frzNormalBarColors[j] = g_headerObj.frzColor[g_keyObj["color" + keyCtrlPtn][j]][1];
 		g_workObj.frzHitColors[j] = g_headerObj.frzColor[g_keyObj["color" + keyCtrlPtn][j]][2];
 		g_workObj.frzHitBarColors[j] = g_headerObj.frzColor[g_keyObj["color" + keyCtrlPtn][j]][3];
+
+		g_workObj.arrowColorsAll[j] = g_headerObj.setColor[g_keyObj["color" + keyCtrlPtn][j]];
+
+		g_workObj.frzNormalColorsAll[j] = g_headerObj.frzColor[g_keyObj["color" + keyCtrlPtn][j]][0];
+		g_workObj.frzNormalBarColorsAll[j] = g_headerObj.frzColor[g_keyObj["color" + keyCtrlPtn][j]][1];
+		g_workObj.frzHitColorsAll[j] = g_headerObj.frzColor[g_keyObj["color" + keyCtrlPtn][j]][2];
+		g_workObj.frzHitBarColorsAll[j] = g_headerObj.frzColor[g_keyObj["color" + keyCtrlPtn][j]][3];
 	}
 
 	g_resultObj.ii = 0;
@@ -3266,18 +3282,18 @@ function MainInit(){
 		}
 
 		// 個別色変化 (矢印)
-		changeArrowColors(g_workObj.mkColor[g_scoreObj.frameNum], g_workObj.mkColorCd[g_scoreObj.frameNum]);
+		changeArrowColors(g_workObj.mkColor[g_scoreObj.frameNum], g_workObj.mkColorCd[g_scoreObj.frameNum],"");
 
 		// 個別色変化（フリーズアロー）
 		changeFrzColors(g_workObj.mkFColor[g_scoreObj.frameNum], g_workObj.mkFColorCd[g_scoreObj.frameNum], 
-			g_keyObj["color" + keyCtrlPtn], keyNum);
+			g_keyObj["color" + keyCtrlPtn], keyNum, "");
 
 		// 全体色変化 (矢印)
-		changeArrowColors(g_workObj.mkAColor[g_scoreObj.frameNum], g_workObj.mkAColorCd[g_scoreObj.frameNum]);
+		changeArrowColors(g_workObj.mkAColor[g_scoreObj.frameNum], g_workObj.mkAColorCd[g_scoreObj.frameNum], "A");
 
 		// 全体色変化 (フリーズアロー)
 		changeFrzColors(g_workObj.mkFAColor[g_scoreObj.frameNum], g_workObj.mkFAColorCd[g_scoreObj.frameNum], 
-			g_keyObj["color" + keyCtrlPtn], keyNum);
+			g_keyObj["color" + keyCtrlPtn], keyNum, "A");
 
 		// 矢印生成
 		if(g_workObj.mkArrow[g_scoreObj.frameNum]!=undefined){
@@ -3311,8 +3327,13 @@ function MainInit(){
 				var cnt = arrow.getAttribute("cnt");
 
 				// 全体色変化 (移動時)
-				if(arrow.style.backgroundColor != g_workObj.arrowColors[j]){
-					arrow.style.backgroundColor = g_workObj.arrowColors[j];
+				if(g_workObj.mkAColor[g_scoreObj.frameNum] != undefined){
+					if(arrow.getAttribute("color") != g_workObj.arrowColors[j]){
+						if(g_workObj.arrowColors[j] == g_workObj.arrowColorsAll[j]){
+							arrow.style.backgroundColor = g_workObj.arrowColorsAll[j];
+							arrow.setAttribute("color", g_workObj.arrowColorsAll[j]);
+						}
+					}
 				}
 
 				// 移動
@@ -3416,12 +3437,20 @@ function MainInit(){
 					if(frzRoot.getAttribute("isMoving") == "true"){
 
 						// 全体色変化 (通常時)
-						if(frzBtm.style.backgroundColor != g_workObj.frzNormalColors[j]){
-							frzTop.style.backgroundColor = g_workObj.frzNormalColors[j];
-							frzBtm.style.backgroundColor = g_workObj.frzNormalColors[j];
-						}
-						if(frzBar.style.backgroundColor != g_workObj.frzNormalBarColors[j]){
-							frzBar.style.backgroundColor = g_workObj.frzNormalBarColors[j];
+						if(g_workObj.mkFAColor[g_scoreObj.frameNum] != undefined){
+							if(frzBtm.getAttribute("color") != g_workObj.frzNormalColors[j]){
+								if(g_workObj.frzNormalColors[j] == g_workObj.frzNormalColorsAll[j]){
+									frzTop.style.backgroundColor = g_workObj.frzNormalColorsAll[j];
+									frzBtm.style.backgroundColor = g_workObj.frzNormalColorsAll[j];
+									frzBtm.setAttribute("color", g_workObj.frzNormalColorsAll[j]);
+								}
+							}
+							if(frzBar.getAttribute("color") != g_workObj.frzNormalBarColors[j]){
+								if(g_workObj.frzNormalBarColors[j] == g_workObj.frzNormalBarColorsAll[j]){
+									frzBar.style.backgroundColor = g_workObj.frzNormalBarColorsAll[j];
+									frzBar.setAttribute("color", g_workObj.frzNormalBarColorsAll[j]);
+								}
+							}
 						}
 
 						// 移動
@@ -3439,11 +3468,19 @@ function MainInit(){
 						var frzBtmShadow = document.getElementById("frzBtmShadow" + j + "_" + k);
 
 						// 全体色変化 (ヒット時)
-						if(frzBtm.style.backgroundColor != g_workObj.frzHitColors[j]){
-							frzBtm.style.backgroundColor = g_workObj.frzHitColors[j];
-						}
-						if(frzBar.style.backgroundColor != g_workObj.frzHitBarColors[j]){
-							frzBar.style.backgroundColor = g_workObj.frzHitBarColors[j];
+						if(g_workObj.mkFAColor[g_scoreObj.frameNum] != undefined){
+							if(frzBtm.getAttribute("color") != g_workObj.frzHitColors[j]){
+								if(g_workObj.frzHitColors[j] == g_workObj.frzHitColorsAll[j]){
+									frzBtm.style.backgroundColor = g_workObj.frzHitColorsAll[j];
+									frzBtm.setAttribute("color", g_workObj.frzHitColorsAll[j]);
+								}
+							}
+							if(frzBar.getAttribute("color") != g_workObj.frzHitBarColors[j]){
+								if(g_workObj.frzHitBarColors[j] == g_workObj.frzHitBarColorsAll[j]){
+									frzBar.style.backgroundColor = g_workObj.frzHitBarColorsAll[j];
+									frzBar.setAttribute("color", g_workObj.frzHitBarColorsAll[j]);
+								}
+							}
 						}
 
 						// フリーズアローがヒット中の処理
@@ -3547,13 +3584,15 @@ function MainInit(){
  * @param {array} _mkColor 
  * @param {array} _mkColorCd 
  */
-function changeArrowColors(_mkColor, _mkColorCd){
+function changeArrowColors(_mkColor, _mkColorCd, _allFlg){
 
 	if(_mkColor != undefined){
 		for(var j=0, len=_mkColor.length; j<len; j++){
-
 			var targetj = _mkColor[j];
 			g_workObj.arrowColors[targetj] = _mkColorCd[j];
+			if(_allFlg == "A"){
+				g_workObj.arrowColorsAll[targetj] = _mkColorCd[j];
+			}
 		}
 	}
 }
@@ -3564,8 +3603,9 @@ function changeArrowColors(_mkColor, _mkColorCd){
  * @param {array} _mkColorCd 
  * @param {array} _colorPatterns 
  * @param {number} _keyNum 
+ * @param {number} _allFlg
  */
-function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum){
+function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg){
 
 	if(_mkColor != undefined){
 		for(var j=0, len=_mkColor.length; j<len; j++){
@@ -3579,6 +3619,9 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum){
 					for(var k=0; k<_keyNum; k++){
 						if(targetj / 2 == _colorPatterns[k]){
 							g_workObj.frzNormalColors[k] = _mkColorCd[j];
+							if(_allFlg == "A"){
+								g_workObj.frzNormalColorsAll[k] = _mkColorCd[j];
+							}
 						}
 					}
 				// 帯 (通常)
@@ -3586,6 +3629,9 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum){
 					for(var k=0; k<_keyNum; k++){
 						if((targetj - 1) / 2 == _colorPatterns[k]){
 							g_workObj.frzNormalBarColors[k] = _mkColorCd[j];
+							if(_allFlg == "A"){
+								g_workObj.frzNormalBarColorsAll[k] = _mkColorCd[j];
+							}
 						}
 					}
 				}
@@ -3596,6 +3642,9 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum){
 					for(var k=0; k<_keyNum; k++){
 						if(targetj / 2 == _colorPatterns[k]){
 							g_workObj.frzHitColors[k] = _mkColorCd[j];
+							if(_allFlg == "A"){
+								g_workObj.frzHitColorsAll[k] = _mkColorCd[j];
+							}
 						}
 					}
 				// 帯 (ヒット時)
@@ -3603,6 +3652,9 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum){
 					for(var k=0; k<_keyNum; k++){
 						if((targetj - 1) / 2 == _colorPatterns[k]){
 							g_workObj.frzHitBarColors[k] = _mkColorCd[j];
+							if(_allFlg == "A"){
+								g_workObj.frzHitBarColorsAll[k] = _mkColorCd[j];
+							}
 						}
 					}
 				}
@@ -4043,6 +4095,7 @@ function resultInit(){
 	
 		if(g_audio.readyState == 4){
 			// audioの読み込みが終わった後の処理
+			g_gameOverFlg = false;
 			loadingScoreInit();
 		}else{
 			// 読込中の状態
