@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/11/01
+ * Revised : 2018/11/03
  */
-var g_version =  "Ver 0.51.1";
+var g_version =  "Ver 0.52.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1154,6 +1154,10 @@ function titleInit(){
 				return false;
 			}
 		}
+	}
+
+	divRoot.oncontextmenu = function(){
+		return false;
 	}
 }
 
