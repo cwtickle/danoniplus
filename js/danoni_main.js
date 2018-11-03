@@ -4,9 +4,9 @@
  * 
  * Source by tickle
  * created : 2018/10/08
- * Revised : 2018/11/03
+ * Revised : 2018/11/04
  */
-var g_version =  "Ver 0.52.0";
+var g_version =  "Ver 0.52.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1747,11 +1747,11 @@ function createOptionWindow(_sprite){
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		g_stateObj.fadein = (g_stateObj.fadein == 100 ? 0 : g_stateObj.fadein + 5);
+		g_stateObj.fadein = (g_stateObj.fadein == 95 ? 0 : g_stateObj.fadein + 5);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 	});
 	lnkFadein.oncontextmenu = function(){
-		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 100 : g_stateObj.fadein - 5);
+		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 95 : g_stateObj.fadein - 5);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 		return false;
 	}
@@ -2968,22 +2968,22 @@ function MainInit(){
 	divRoot.appendChild(lblframe);
 
 	// 判定系表示
-	var lblIi = createDivLabel("lblIi", g_sWidth - 100, 20, 100, 20, 16, "#66ffff", 
+	var lblIi = createDivLabel("lblIi", g_sWidth - 100, 20, 100, 20, 16, C_CLR_II, 
 		g_resultObj.ii);
 	lblIi.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblIi);
 
-	var lblShakin = createDivLabel("lblShakin", g_sWidth - 100, 40, 100, 20, 16, "#99ff99", 
+	var lblShakin = createDivLabel("lblShakin", g_sWidth - 100, 40, 100, 20, 16, C_CLR_SHAKIN, 
 		g_resultObj.shakin);
 	lblShakin.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblShakin);
 
-	var lblMatari = createDivLabel("lblMatari", g_sWidth - 100, 60, 100, 20, 16, "#ff9966", 
+	var lblMatari = createDivLabel("lblMatari", g_sWidth - 100, 60, 100, 20, 16, C_CLR_MATARI, 
 		g_resultObj.matari);
 	lblMatari.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblMatari);
 
-	var lblUwan = createDivLabel("lblUwan", g_sWidth - 100, 80, 100, 20, 16, "#ff9999", 
+	var lblUwan = createDivLabel("lblUwan", g_sWidth - 100, 80, 100, 20, 16, C_CLR_UWAN, 
 		g_resultObj.uwan);
 	lblUwan.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblUwan);
@@ -2993,12 +2993,12 @@ function MainInit(){
 	lblMCombo.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblMCombo);
 
-	var lblKita = createDivLabel("lblKita", g_sWidth - 100, 140, 100, 20, 16, "#ffff66", 
+	var lblKita = createDivLabel("lblKita", g_sWidth - 100, 140, 100, 20, 16, C_CLR_KITA, 
 		g_resultObj.kita);
 	lblKita.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblKita);
 
-	var lblIknai = createDivLabel("lblIknai", g_sWidth - 100, 160, 100, 20, 16, "#99ff66", 
+	var lblIknai = createDivLabel("lblIknai", g_sWidth - 100, 160, 100, 20, 16, C_CLR_IKNAI, 
 		g_resultObj.iknai);
 	lblIknai.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblIknai);
@@ -3258,21 +3258,6 @@ function MainInit(){
 		// ユーザカスタムイベント(フレーム毎)
 		if(typeof customMainEnterFrame == "function"){
 			customMainEnterFrame();
-		}
-
-		// タイマー、曲終了判定
-		if(g_scoreObj.frameNum % 60 == 0){
-			var currentMin = Math.floor(g_scoreObj.frameNum / 3600);
-			var currentSec = ("00" + (g_scoreObj.frameNum / 60) % 60).slice(-2);
-			var currentTime = currentMin + ":" + currentSec;
-			lblTime1.innerHTML = currentTime;
-
-			if(currentTime == fullTime){
-				g_audio.pause();
-				clearTimeout(g_timeoutEvtId);
-				clearWindow();
-				resultInit();
-			}
 		}
 
 		// 速度変化 (途中変速, 個別加速)
@@ -3570,6 +3555,21 @@ function MainInit(){
 			if(charaFJCnt == 0){
 				document.getElementById("charaFJ").innerHTML = "";
 				document.getElementById("comboFJ").innerHTML = "";
+			}
+		}
+
+		// タイマー、曲終了判定
+		if(g_scoreObj.frameNum % 60 == 0){
+			var currentMin = Math.floor(g_scoreObj.frameNum / 3600);
+			var currentSec = ("00" + (g_scoreObj.frameNum / 60) % 60).slice(-2);
+			var currentTime = currentMin + ":" + currentSec;
+			lblTime1.innerHTML = currentTime;
+
+			if(currentTime == fullTime){
+				g_audio.pause();
+				clearTimeout(g_timeoutEvtId);
+				clearWindow();
+				resultInit();
 			}
 		}
 
