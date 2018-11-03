@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/11/04
  */
-var g_version =  "Ver 0.52.1";
+var g_version =  "Ver 0.52.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1747,11 +1747,11 @@ function createOptionWindow(_sprite){
 		hoverColor: C_CLR_DEFAULT, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		g_stateObj.fadein = (g_stateObj.fadein == 100 ? 0 : g_stateObj.fadein + 5);
+		g_stateObj.fadein = (g_stateObj.fadein == 95 ? 0 : g_stateObj.fadein + 5);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 	});
 	lnkFadein.oncontextmenu = function(){
-		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 100 : g_stateObj.fadein - 5);
+		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 95 : g_stateObj.fadein - 5);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 		return false;
 	}
