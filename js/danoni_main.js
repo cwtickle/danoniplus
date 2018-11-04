@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/11/04
  */
-var g_version =  "Ver 0.53.3";
+var g_version =  "Ver 0.54.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1807,11 +1807,11 @@ function createOptionWindow(_sprite){
 	optionsprite.appendChild(lblAdjustment);
 
 	var lnkAdjustment = makeSettingLblButton("lnkAdjustment", g_stateObj.adjustment, 7, function(){
-		g_stateObj.adjustment = (g_stateObj.adjustment == 15 ? -15 : ++g_stateObj.adjustment);
+		g_stateObj.adjustment = (g_stateObj.adjustment == 30 ? -30 : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	});
 	lnkAdjustment.oncontextmenu = function(){
-		g_stateObj.adjustment = (g_stateObj.adjustment == -15 ? 15 : --g_stateObj.adjustment);
+		g_stateObj.adjustment = (g_stateObj.adjustment == -30 ? 30 : --g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 		return false;
 	}
@@ -1853,10 +1853,18 @@ function createOptionWindow(_sprite){
 	optionsprite.appendChild(lnkFadein);
 
 	optionsprite.appendChild(makeMiniButton("lnkFadein", "R", 8, function(){
-		g_stateObj.fadein = (g_stateObj.fadein == 95 ? 0 : g_stateObj.fadein + 5);
+		g_stateObj.fadein = (g_stateObj.fadein >= 75 ? (g_stateObj.fadein == 95 ? 0 : 95) : g_stateObj.fadein + 25);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkFadein", "L", 8, function(){
+		g_stateObj.fadein = (g_stateObj.fadein <= 25 ? (g_stateObj.fadein == 0 ? 95 : 0) : g_stateObj.fadein - 25);
+		lnkFadein.innerHTML = g_stateObj.fadein + "%";
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkFadein", "RR", 8, function(){
+		g_stateObj.fadein = (g_stateObj.fadein == 95 ? 0 : g_stateObj.fadein + 5);
+		lnkFadein.innerHTML = g_stateObj.fadein + "%";
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkFadein", "LL", 8, function(){
 		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 95 : g_stateObj.fadein - 5);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 	}));
