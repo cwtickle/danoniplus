@@ -5,8 +5,10 @@
  * Source by tickle
  * Created : 2018/10/08
  * Revised : 2018/11/04
+ * 
+ * https://github.com/cwtickle/danoniplus
  */
-var g_version =  "Ver 0.54.1";
+var g_version =  "Ver 0.54.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1168,11 +1170,21 @@ function titleInit(){
 	divRoot.appendChild(lnkArtist);
 
 	// バージョン描画
-	var lblVersion = createDivLabel("lblResult", g_sWidth/2, g_sHeight-25, g_sWidth/2-10, 
-	C_LNK_HEIGHT, 12, "#cccccc", 
-	"Source by ティックル, CW " + g_version);
-	lblVersion.style.textAlign = C_ALIGN_RIGHT;
-	divRoot.appendChild(lblVersion);
+	var lnkVersion = createButton({
+		id: "lnkVersion", 
+		name: "Copyright (c) 2018 ティックル, CW " + g_version, 
+		x: g_sWidth/2, 
+		y: g_sHeight-20, 
+		width: g_sWidth/2-10, 
+		height: 16, 
+		fontsize: 12,
+		normalColor: C_CLR_DEFAULT, 
+		hoverColor: C_CLR_TWEET, 
+		align: C_ALIGN_RIGHT
+	}, function(){
+		window.open("https://github.com/cwtickle/danoniplus", '_blank');
+	});
+	divRoot.appendChild(lnkVersion);
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = function(evt){
