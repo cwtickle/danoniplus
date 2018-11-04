@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/11/04
  */
-var g_version =  "Ver 0.53.1";
+var g_version =  "Ver 0.53.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1170,7 +1170,7 @@ function titleInit(){
 	// バージョン描画
 	var lblVersion = createDivLabel("lblResult", g_sWidth/2, g_sHeight-25, g_sWidth/2-10, 
 	C_LNK_HEIGHT, 12, "#cccccc", 
-	"HTML5 Source by ティックル, " + g_version);
+	"Source by ティックル, CW " + g_version);
 	lblVersion.style.textAlign = C_ALIGN_RIGHT;
 	divRoot.appendChild(lblVersion);
 
@@ -2241,19 +2241,19 @@ function loadingScoreInit(){
 					g_scoreObj.frzData[j] = tmpObj.frzData[j].concat();
 				}
 			}
-			if(tmpObj.speedData != undefined){
+			if(tmpObj.speedData != undefined && tmpObj.speedData.length >= 2){
 				g_scoreObj.speedData = tmpObj.speedData.concat();
 			}
-			if(tmpObj.boostData != undefined){
+			if(tmpObj.boostData != undefined && tmpObj.boostData.length >= 2){
 				g_scoreObj.boostData = tmpObj.boostData.concat();
 			}
-			if(tmpObj.colorData != undefined){
+			if(tmpObj.colorData != undefined && tmpObj.colorData.length >= 3){
 				g_scoreObj.colorData = tmpObj.colorData.concat();
 			}
-			if(tmpObj.acolorData != undefined){
+			if(tmpObj.acolorData != undefined && tmpObj.acolorData.length >= 3){
 				g_scoreObj.acolorData = tmpObj.acolorData.concat();
 			}
-			if(tmpObj.wordData != undefined){
+			if(tmpObj.wordData != undefined && tmpObj.wordData.length >= 3){
 				g_scoreObj.wordData = tmpObj.wordData.concat();
 			}
 
@@ -2752,7 +2752,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 個別加速のタイミング更新
-	if(_dataObj.boostData != undefined){
+	if(_dataObj.boostData != undefined && _dataObj.boostData.length >= 2){
 
 		var delBoostIdx = 0;
 		for(var k=_dataObj.boostData.length -2; k>=0; k-=2){
@@ -2772,8 +2772,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 個別色変化のタイミング更新
-	if(_dataObj.colorData != undefined){
-		
+	if(_dataObj.colorData != undefined && _dataObj.colorData.length >= 3){
 		if(_dataObj.speedData != undefined){
 			spdk = _dataObj.speedData.length -2;
 			spdPrev = _dataObj.speedData[spdk];
@@ -2811,7 +2810,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 全体色変化のタイミング更新
-	if(_dataObj.acolorData != undefined){
+	if(_dataObj.acolorData != undefined && _dataObj.acolorData.length >= 3){
 
 		for(var k=_dataObj.acolorData.length -3; k>=0; k-=3){
 			pushColors("A", _dataObj.acolorData[k], _dataObj.acolorData[k+1], _dataObj.acolorData[k+2].replace("0x","#"));
@@ -3430,11 +3429,11 @@ function MainInit(){
 		}
 
 		// 速度変化 (途中変速, 個別加速)
-		if(g_scoreObj.frameNum == g_workObj.speedData[speedCnts]){
+		if(g_workObj.speedData != undefined && g_scoreObj.frameNum == g_workObj.speedData[speedCnts]){
 			g_workObj.currentSpeed = g_workObj.speedData[speedCnts+1];
 			speedCnts+=2;
 		}
-		if(g_scoreObj.frameNum == g_workObj.boostData[boostCnts]){
+		if(g_workObj.boostData != undefined && g_scoreObj.frameNum == g_workObj.boostData[boostCnts]){
 			g_workObj.boostSpd = g_workObj.boostData[boostCnts+1];
 			boostCnts+=2;
 		}
