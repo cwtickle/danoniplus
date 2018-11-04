@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/11/04
  */
-var g_version =  "Ver 0.53.2";
+var g_version =  "Ver 0.53.3";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -3305,7 +3305,9 @@ function MainInit(){
 		
 		for(var j=0; j<keyNum; j++){
 			for(var k=0; k<matchKeys[j].length; k++){
+				console.log(g_workObj.keyHitFlg[j][k]);
 				if(_keyCode == matchKeys[j][k] && g_workObj.keyHitFlg[j][k] == false){
+					console.log("currentNo:" + j + "|" + g_workObj.judgArrowCnt[j]);
 					judgeArrow(j);
 				}
 			}
@@ -3755,6 +3757,7 @@ function MainInit(){
  * 個別色変化 (矢印)
  * @param {array} _mkColor 
  * @param {array} _mkColorCd 
+ * @param {string} _allFlg
  */
 function changeArrowColors(_mkColor, _mkColorCd, _allFlg){
 
@@ -3775,7 +3778,7 @@ function changeArrowColors(_mkColor, _mkColorCd, _allFlg){
  * @param {array} _mkColorCd 
  * @param {array} _colorPatterns 
  * @param {number} _keyNum 
- * @param {number} _allFlg
+ * @param {string} _allFlg
  */
 function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg){
 
@@ -3864,11 +3867,12 @@ function fadeWord(_wordDir){
 
 /**
  * フリーズアローヒット時の描画変更
- * @param {number} j 
- * @param {number} k 
+ * @param {number} _j 
+ * @param {number} _k 
  */
-function changeHitFrz(j, k){
-	var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
+function changeHitFrz(_j, _k){
+
+	var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + _k);
 	if(frzTopShadow.getAttribute("type") == "arrow"){
 		var fstyle = frzTopShadow.style;
 		fstyle.backgroundColor = "#ffffff";
@@ -3877,24 +3881,24 @@ function changeHitFrz(j, k){
 		fstyle.width = "70px";
 		fstyle.height = "70px";
 		fstyle.opacity = 70;
-		document.getElementById("frzTop" + j + "_" + k).style.opacity = 0;
+		document.getElementById("frzTop" + _j + "_" + _k).style.opacity = 0;
 	}else{
-		document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = g_workObj.frzHitColors[j];
+		document.getElementById("frzTop" + _j + "_" + _k).style.backgroundColor = g_workObj.frzHitColors[_j];
 	}
 	
-	var frzBar = document.getElementById("frzBar" + j + "_" + k);
-	frzBar.style.backgroundColor = g_workObj.frzHitBarColors[j];
-	document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = g_workObj.frzHitColors[j];
-	document.getElementById("frz" + j + "_" + k).setAttribute("isMoving", "false");
+	var frzBar = document.getElementById("frzBar" + _j + "_" + _k);
+	frzBar.style.backgroundColor = g_workObj.frzHitBarColors[_j];
+	document.getElementById("frzBtm" + _j + "_" + _k).style.backgroundColor = g_workObj.frzHitColors[_j];
+	document.getElementById("frz" + _j + "_" + _k).setAttribute("isMoving", "false");
 }
 
 /**
  * フリーズアロー失敗時の描画変更
- * @param {number} j 
- * @param {number} k 
+ * @param {number} _j 
+ * @param {number} _k 
  */
-function changeFailedFrz(j, k){
-	var frzTopShadow = document.getElementById("frzTopShadow" + j + "_" + k);
+function changeFailedFrz(_j, _k){
+	var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + _k);
 	var fstyle = frzTopShadow.style;
 	fstyle.backgroundColor = "#000000";
 	fstyle.top = "0px";
@@ -3902,10 +3906,10 @@ function changeFailedFrz(j, k){
 	fstyle.width = "50px";
 	fstyle.height = "50px";
 	fstyle.opacity = 1;
-	document.getElementById("frzTop" + j + "_" + k).style.opacity = 1;
-	document.getElementById("frzTop" + j + "_" + k).style.backgroundColor = "#cccccc";
-	document.getElementById("frzBar" + j + "_" + k).style.backgroundColor = "#999999";
-	document.getElementById("frzBtm" + j + "_" + k).style.backgroundColor = "#cccccc";
+	document.getElementById("frzTop" + _j + "_" + _k).style.opacity = 1;
+	document.getElementById("frzTop" + _j + "_" + _k).style.backgroundColor = "#cccccc";
+	document.getElementById("frzBar" + _j + "_" + _k).style.backgroundColor = "#999999";
+	document.getElementById("frzBtm" + _j + "_" + _k).style.backgroundColor = "#cccccc";
 }
 
 /**
@@ -3913,7 +3917,7 @@ function changeFailedFrz(j, k){
  * @param {number} _keyCode 
  */
 function keyIsDown(_keyCode){
-	return g_inputKeyBuffer[_keyCode];
+	return (g_inputKeyBuffer[_keyCode] ? true : false);
 }
 
 /**
