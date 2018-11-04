@@ -6,10 +6,10 @@
  * created : 2018/10/08
  * Revised : 2018/11/04
  */
-var g_version =  "Ver 0.52.2";
+var g_version =  "Ver 0.53.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
-//  タイトル:melon  オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
+//  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
 //  シーンジャンプ:Scene
 
 /**
@@ -24,7 +24,7 @@ var g_version =  "Ver 0.52.2";
  * - 画面の見取りがわかるように詳細設定やロジックは別関数化し、実行内容を明確にする。
  * 
  * ▽ 画面の構成
- *  [タイトル]-[オプション]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]
+ *  [タイトル]-[設定・オプション]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]
  *  ⇒　各画面に Init がついたものが画面の基本構成(ルート)を表す。
  * 
  * ▽ レイヤーの考え方
@@ -93,7 +93,11 @@ var C_IMG_MONAR = "../img/monar_600.png";
 var C_MOTION_STD_POS = 15;
 
 // キーブロック対象(キーコードを指定)
-var C_BLOCK_KEYS = [8, 9, 13, 17, 18, 32, 37, 38, 39, 40, 46, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126];
+var C_BLOCK_KEYS = [
+	8, 9, 13, 17, 18, 32, /* BackSpace, Tab, Enter, Ctrl, Alt, Space */
+	37, 38, 39, 40, 46,   /* Left, Down, Up, Right, Delete */
+	112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126 /* F1～F15 */
+];
 
 // 譜面データ持ち回り用
 var g_rootObj = {};
@@ -485,6 +489,26 @@ var g_keyObj = {
 	dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
 
+/** 設定・オプション画面用共通 */
+var C_LEN_SETLBL_LEFT = 170;
+var C_LEN_SETLBL_WIDTH = 250;
+var C_LEN_SETLBL_HEIGHT = 25;
+var C_SIZ_SETLBL = 18;
+var C_LEN_SETDIFLBL_HEIGHT = 25;
+var C_SIZ_SETDIFLBL = 18;
+var C_LEN_SETMINI_WIDTH = 40;
+var C_SIZ_SETMINI = 18;
+
+var C_LBL_SETMINIL = "<";
+var C_LEN_SETMINIL_LEFT = 150;
+var C_LBL_SETMINILL = "<";
+var C_LEN_SETMINILL_LEFT = C_LEN_SETMINIL_LEFT + C_LEN_SETMINI_WIDTH;
+var C_LBL_SETMINIR = ">";
+var C_LBL_SETMINIRR = ">";
+var C_LEN_SETMINIR_LEFT = 400;
+var C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
+
+
 /** メイン画面用共通オブジェクト */
 var g_workObj = {};
 g_workObj.stepX = new Array();
@@ -493,6 +517,8 @@ g_workObj.keyCtrl = new Array();
 g_workObj.keyHitFlg = new Array();
 g_workObj.scrollDir = new Array();
 g_workObj.dividePos = new Array();
+
+var C_FRM_AFTERFADE = 420;
 
 /** 判定系共通オブジェクト */
 var g_judgObj = {
@@ -522,6 +548,17 @@ var C_CLR_UWAN = "#ff9999";
 var C_CLR_KITA = "#ffff99";
 var C_CLR_SFSF = "";
 var C_CLR_IKNAI = "#99ff66";
+
+var C_LEN_JDGCHARA_WIDTH = 200;
+var C_LEN_JDGCHARA_HEIGHT = 20;
+var C_SIZ_JDGCHARA = 20;
+
+var C_LEN_JDGCNTS_WIDTH = 100;
+var C_LEN_JDGCNTS_HEIGHT = 20;
+var C_SIZ_JDGCNTS = 16;
+
+var C_FRM_HITMOTION = 4;
+var C_FRM_JDGMOTION = 60;
 
 /** 結果画面用共通オブジェクト */
 var g_resultObj = {
@@ -1439,11 +1476,11 @@ function keysConvert(_dosObj){
 
 
 /*-----------------------------------------------------------*/
-/* Scene : OPTION [lime] */
+/* Scene : SETTINGS [lime] */
 /*-----------------------------------------------------------*/
 
 /**
- * オプション画面初期化
+ * 設定・オプション画面初期化
  */
 function optionInit(){
 
@@ -1458,7 +1495,7 @@ function optionInit(){
 
 	// タイトル文字描画
 	var lblTitle = getTitleDivLabel("lblTitle", 
-	"<span style='color:#6666ff;font-size:40px;'>O</span>PTION", 0, 15);
+	"<span style='color:#6666ff;font-size:40px;'>S</span>ETTINGS", 0, 15);
 	divRoot.appendChild(lblTitle);
 
 	// オプションボタン用の設置
@@ -1573,7 +1610,7 @@ function optionInit(){
 
 
 /**
- * オプション画面のラベル・ボタン処理の描画
+ * 設定・オプション画面のラベル・ボタン処理の描画
  * @param {Object} _sprite 基準とするスプライト(ここで指定する座標は、そのスプライトからの相対位置)
  */
 function createOptionWindow(_sprite){
@@ -1582,48 +1619,50 @@ function createOptionWindow(_sprite){
 	var optionsprite = createSprite(_sprite, "optionsprite", (g_sWidth-400)/2, 100, 400, 300);
 
 	// 難易度(Difficulty)
-	var lblDifficulty = createDivLabel("lblDifficulty", 0, 0, 100, 30, 20, C_CLR_TITLE, 
-					"<span style='color:#ff9999'>D</span>ifficulty");
+	var lblDifficulty = createDivLabel("lblDifficulty", 0, C_LEN_SETLBL_HEIGHT * 0, 
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETDIFLBL, C_CLR_TITLE, 
+		"<span style='color:#ff9999'>D</span>ifficulty");
 	optionsprite.appendChild(lblDifficulty);
 
-	var lnkDifficulty = createButton({
-		id: "lnkDifficulty", 
-		name: g_headerObj["keyLabels"][g_stateObj.scoreId] + " key / " + g_headerObj["difLabels"][g_stateObj.scoreId], 
-		x: 170, 
-		y: 0, 
-		width: 250, 
-		height: 30, 
-		fontsize: 20,
-		normalColor: C_CLR_LNK, 
-		hoverColor: C_CLR_DEFAULT, 
-		align: C_ALIGN_CENTER
-	}, function(){
-		// 難易度変更ボタン押下時は譜面名及び初期速度を変更
+	var lnkDifficulty = makeSettingLblButton("lnkDifficulty", 
+	g_headerObj["keyLabels"][g_stateObj.scoreId] + " key / " + g_headerObj["difLabels"][g_stateObj.scoreId], 0, function(){
 		g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj["keyLabels"].length-1 ? ++g_stateObj.scoreId : 0);
+		setDifficulty();
+	});
+	lnkDifficulty.oncontextmenu = function(){
+		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj["keyLabels"].length-1);
+		setDifficulty();
+		return false;
+	}
+	optionsprite.appendChild(lnkDifficulty);
+
+	optionsprite.appendChild(makeMiniButton("lnkDifficulty", "R", 0, function(){
+		g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj["keyLabels"].length-1 ? ++g_stateObj.scoreId : 0);
+		setDifficulty();
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkDifficulty", "L", 0, function(){
+		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj["keyLabels"].length-1);
+		setDifficulty();
+	}));
+
+	/**
+	 * 難易度変更ボタン押下時処理：譜面名及び初期速度を変更
+	 */
+	function setDifficulty(){
 		lnkDifficulty.innerHTML = g_headerObj["keyLabels"][g_stateObj.scoreId] + " key / " + g_headerObj["difLabels"][g_stateObj.scoreId];
 		g_stateObj.speed = g_headerObj["initSpeeds"][g_stateObj.scoreId];
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 		g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
 		g_keyObj.currentPtn = 0;
-	});
-	optionsprite.appendChild(lnkDifficulty);
+	}
 
 	// 速度(Speed)
-	var lblSpeed = createDivLabel("lblSpeed", 0, 30, 100, 30, 20, C_CLR_TITLE, 
-				"<span style='color:#ff9977'>S</span>peed");
+	var lblSpeed = createDivLabel("lblSpeed", 0, C_LEN_SETLBL_HEIGHT * 2, 
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE, 
+		"<span style='color:#ffff99'>S</span>peed");
 	optionsprite.appendChild(lblSpeed);
-	var lnkSpeed = createButton({
-		id: "lnkSpeed", 
-		name: g_stateObj.speed + " x", 
-		x: 170, 
-		y: 30, 
-		width: 250, 
-		height: 30, 
-		fontsize: 20,
-		normalColor: C_CLR_LNK, 
-		hoverColor: C_CLR_DEFAULT, 
-		align: C_ALIGN_CENTER
-	}, function(e){
+
+	var lnkSpeed = makeSettingLblButton("lnkSpeed", g_stateObj.speed + " x", 2, function(){
 		g_stateObj.speed = (Number(g_stateObj.speed) < 10 ? Number(g_stateObj.speed) + 0.25 : 1);
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 	});
@@ -1634,22 +1673,31 @@ function createOptionWindow(_sprite){
 	}
 	optionsprite.appendChild(lnkSpeed);
 
+	optionsprite.appendChild(makeMiniButton("lnkSpeed", "R", 2, function(){
+		g_stateObj.speed = (Number(g_stateObj.speed) < 9 ? Number(g_stateObj.speed) + 1 : (Number(g_stateObj.speed) == 10 ? 1 : 10));
+		lnkSpeed.innerHTML = g_stateObj.speed + " x";
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkSpeed", "L", 2, function(){
+		g_stateObj.speed = (Number(g_stateObj.speed) > 2 ? Number(g_stateObj.speed) - 1 : (Number(g_stateObj.speed) == 1 ? 10 : 1));
+		lnkSpeed.innerHTML = g_stateObj.speed + " x";
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkSpeed", "RR", 2, function(){
+		g_stateObj.speed = (Number(g_stateObj.speed) < 10 ? Number(g_stateObj.speed) + 0.25 : 1);
+		lnkSpeed.innerHTML = g_stateObj.speed + " x";
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkSpeed", "LL", 2, function(){
+		g_stateObj.speed = (Number(g_stateObj.speed) > 1 ? Number(g_stateObj.speed) - 0.25 : 10);
+		lnkSpeed.innerHTML = g_stateObj.speed + " x";
+	}));
+
+
 	// 速度モーション (Motion)
-	var lblMotion = createDivLabel("lblMotion", 0, 60, 100, 30, 20, C_CLR_TITLE, 
-				"<span style='color:#ffff66'>M</span>otion");
+	var lblMotion = createDivLabel("lblMotion", 0, C_LEN_SETLBL_HEIGHT * 3, 
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE, 
+		"<span style='color:#eeff99'>M</span>otion");
 	optionsprite.appendChild(lblMotion);
-	var lnkMotion = createButton({
-		id: "lnkMotion", 
-		name: g_stateObj.motion, 
-		x: 170, 
-		y: 60, 
-		width: 250, 
-		height: 30, 
-		fontsize: 20,
-		normalColor: C_CLR_LNK, 
-		hoverColor: C_CLR_DEFAULT, 
-		align: C_ALIGN_CENTER
-	}, function(){
+
+	var lnkMotion = makeSettingLblButton("lnkMotion", g_stateObj.motion, 3, function(){
 		switch(g_stateObj.motion){
 			case "OFF": 
 				g_stateObj.motion = "Boost";	break;
@@ -1660,66 +1708,105 @@ function createOptionWindow(_sprite){
 		}
 		lnkMotion.innerHTML = g_stateObj.motion;
 	});
+	lnkMotion.oncontextmenu = function(){
+		switch(g_stateObj.motion){
+			case "OFF": 
+				g_stateObj.motion = "Brake";	break;
+			case "Boost":
+				g_stateObj.motion = "OFF";	break;
+			case "Brake":
+				g_stateObj.motion = "Boost";	break;
+		}
+		lnkMotion.innerHTML = g_stateObj.motion;
+		return false;
+	}
 	optionsprite.appendChild(lnkMotion);
 
+	optionsprite.appendChild(makeMiniButton("lnkMotion", "R", 3, function(){
+		switch(g_stateObj.motion){
+			case "OFF": 
+				g_stateObj.motion = "Boost";	break;
+			case "Boost":
+				g_stateObj.motion = "Brake";	break;
+			case "Brake":
+				g_stateObj.motion = "OFF";	break;
+		}
+		lnkMotion.innerHTML = g_stateObj.motion;
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkMotion", "L", 3, function(){
+		switch(g_stateObj.motion){
+			case "OFF": 
+				g_stateObj.motion = "Brake";	break;
+			case "Boost":
+				g_stateObj.motion = "OFF";	break;
+			case "Brake":
+				g_stateObj.motion = "Boost";	break;
+		}
+		lnkMotion.innerHTML = g_stateObj.motion;
+	}));
+
+
 	// リバース
-	var lblReverse = createDivLabel("lblReverse", 0, 90, 100, 30, 20, C_CLR_TITLE, 
-				"<span style='color:#66ffff'>R</span>everse");
+	var lblReverse = createDivLabel("lblReverse", 0, C_LEN_SETLBL_HEIGHT * 4, 
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE, 
+		"<span style='color:#ddff99'>R</span>everse");
 	optionsprite.appendChild(lblReverse);
-	var lnkReverse = createButton({
-		id: "lnkReverse", 
-		name: g_stateObj.reverse, 
-		x: 170, 
-		y: 90, 
-		width: 250, 
-		height: 30, 
-		fontsize: 20,
-		normalColor: C_CLR_LNK, 
-		hoverColor: C_CLR_DEFAULT, 
-		align: C_ALIGN_CENTER
-	}, function(){
+
+	var lnkReverse = makeSettingLblButton("lnkReverse", g_stateObj.reverse, 4, function(){
 		g_stateObj.reverse = (g_stateObj.reverse == "OFF" ? "ON" : "OFF");
 		lnkReverse.innerHTML = g_stateObj.reverse;
 	});
+	lnkReverse.oncontextmenu = function(){
+		g_stateObj.reverse = (g_stateObj.reverse == "OFF" ? "ON" : "OFF");
+		lnkReverse.innerHTML = g_stateObj.reverse;
+		return false;
+	}
 	optionsprite.appendChild(lnkReverse);
 
+	optionsprite.appendChild(makeMiniButton("lnkReverse", "R", 4, function(){
+		g_stateObj.reverse = (g_stateObj.reverse == "OFF" ? "ON" : "OFF");
+		lnkReverse.innerHTML = g_stateObj.reverse;
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkReverse", "L", 4, function(){
+		g_stateObj.reverse = (g_stateObj.reverse == "OFF" ? "ON" : "OFF");
+		lnkReverse.innerHTML = g_stateObj.reverse;
+	}));
+
+
 	// 鑑賞モード設定 (AutoPlay)
-	var lblAutoPlay = createDivLabel("lblAutoPlay", 0, 120, 100, 30, 20, C_CLR_TITLE, 
-				"<span style='color:#999999'>A</span>utoPlay");
+	var lblAutoPlay = createDivLabel("lblAutoPlay", 0, C_LEN_SETLBL_HEIGHT * 5, 
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE, 
+		"<span style='color:#ccff99'>A</span>utoPlay");
 	optionsprite.appendChild(lblAutoPlay);
-	var lnkAutoPlay = createButton({
-		id: "lnkAutoPlay", 
-		name: g_stateObj.auto, 
-		x: 170, 
-		y: 120, 
-		width: 250, 
-		height: 30, 
-		fontsize: 20,
-		normalColor: C_CLR_LNK, 
-		hoverColor: C_CLR_DEFAULT, 
-		align: C_ALIGN_CENTER
-	}, function(){
+
+	var lnkAutoPlay = makeSettingLblButton("lnkAutoPlay", g_stateObj.auto, 5, function(){
 		g_stateObj.auto = (g_stateObj.auto == "OFF" ? "ON" : "OFF");
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	});
+	lnkAutoPlay.oncontextmenu = function(){
+		g_stateObj.auto = (g_stateObj.auto == "OFF" ? "ON" : "OFF");
+		lnkAutoPlay.innerHTML = g_stateObj.auto;
+		return false;
+	}
 	optionsprite.appendChild(lnkAutoPlay);
 
+	optionsprite.appendChild(makeMiniButton("lnkAutoPlay", "R", 5, function(){
+		g_stateObj.auto = (g_stateObj.auto == "OFF" ? "ON" : "OFF");
+		lnkAutoPlay.innerHTML = g_stateObj.auto;
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkAutoPlay", "L", 5, function(){
+		g_stateObj.auto = (g_stateObj.auto == "OFF" ? "ON" : "OFF");
+		lnkAutoPlay.innerHTML = g_stateObj.auto;
+	}));
+
+
 	// タイミング調整 (Adjustment)
-	var lblAdjustment = createDivLabel("lblAdjustment", 0, 150, 100, 30, 20, C_CLR_TITLE, 
-				"<span style='color:#99ff66'>A</span>djustment");
+	var lblAdjustment = createDivLabel("lblAdjustment", 0, C_LEN_SETLBL_HEIGHT * 7, 
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE, 
+		"<span style='color:#99ffff'>A</span>djustment");
 	optionsprite.appendChild(lblAdjustment);
-	var lnkAdjustment = createButton({
-		id: "lnkAdjustment", 
-		name: g_stateObj.adjustment, 
-		x: 170, 
-		y: 150, 
-		width: 250, 
-		height: 30, 
-		fontsize: 20,
-		normalColor: C_CLR_LNK, 
-		hoverColor: C_CLR_DEFAULT, 
-		align: C_ALIGN_CENTER
-	}, function(){
+
+	var lnkAdjustment = makeSettingLblButton("lnkAdjustment", g_stateObj.adjustment, 7, function(){
 		g_stateObj.adjustment = (g_stateObj.adjustment == 15 ? -15 : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	});
@@ -1730,23 +1817,31 @@ function createOptionWindow(_sprite){
 	}
 	optionsprite.appendChild(lnkAdjustment);
 
+	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "R", 7, function(){
+		g_stateObj.adjustment = (g_stateObj.adjustment >= 25 ? (g_stateObj.adjustment == 30 ? -30 : 30) : g_stateObj.adjustment + 5);
+		lnkAdjustment.innerHTML = g_stateObj.adjustment;
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "L", 7, function(){
+		g_stateObj.adjustment = (g_stateObj.adjustment <= -25 ? (g_stateObj.adjustment == -30 ? 30 : -30) : g_stateObj.adjustment - 5);
+		lnkAdjustment.innerHTML = g_stateObj.adjustment;
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "RR", 7, function(){
+		g_stateObj.adjustment = (g_stateObj.adjustment == 30 ? -30 : ++g_stateObj.adjustment);
+		lnkAdjustment.innerHTML = g_stateObj.adjustment;
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "LL", 7, function(){
+		g_stateObj.adjustment = (g_stateObj.adjustment == -30 ? 30 : --g_stateObj.adjustment);
+		lnkAdjustment.innerHTML = g_stateObj.adjustment;
+	}));
+
 
 	// フェードイン (Fadein)
-	var lblFadein = createDivLabel("lblFadein", 0, 180, 100, 30, 20, C_CLR_TITLE, 
-				"<span style='color:#cc66ff'>F</span>adein");
+	var lblFadein = createDivLabel("lblFadein", 0, C_LEN_SETLBL_HEIGHT * 8, 
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE, 
+		"<span style='color:#99eeff'>F</span>adein");
 	optionsprite.appendChild(lblFadein);
-	var lnkFadein = createButton({
-		id: "lnkFadein", 
-		name: g_stateObj.fadein + "%", 
-		x: 170, 
-		y: 180, 
-		width: 250, 
-		height: 30, 
-		fontsize: 20,
-		normalColor: C_CLR_LNK, 
-		hoverColor: C_CLR_DEFAULT, 
-		align: C_ALIGN_CENTER
-	}, function(){
+
+	var lnkFadein = makeSettingLblButton("lnkFadein", g_stateObj.fadein + "%", 8, function(){
 		g_stateObj.fadein = (g_stateObj.fadein == 95 ? 0 : g_stateObj.fadein + 5);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 	});
@@ -1757,33 +1852,93 @@ function createOptionWindow(_sprite){
 	}
 	optionsprite.appendChild(lnkFadein);
 
+	optionsprite.appendChild(makeMiniButton("lnkFadein", "R", 8, function(){
+		g_stateObj.fadein = (g_stateObj.fadein == 95 ? 0 : g_stateObj.fadein + 5);
+		lnkFadein.innerHTML = g_stateObj.fadein + "%";
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkFadein", "L", 8, function(){
+		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 95 : g_stateObj.fadein - 5);
+		lnkFadein.innerHTML = g_stateObj.fadein + "%";
+	}));
+
+
 	// ボリューム
-	var lblVolume = createDivLabel("lblVolume", 0, 210, 100, 30, 20, C_CLR_TITLE, 
-	"<span style='color:#9999ff'>V</span>olume");
+	var lblVolume = createDivLabel("lblVolume", 0, C_LEN_SETLBL_HEIGHT * 9, 
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE, 
+		"<span style='color:#99ddff'>V</span>olume");
 	optionsprite.appendChild(lblVolume);
-	var lnkVolume = createButton({
-		id: "lnkVolume", 
-		name: g_stateObj.volume + "%", 
-		x: 170, 
-		y: 210, 
-		width: 250, 
-		height: 30, 
-		fontsize: 20,
-		normalColor: C_CLR_LNK, 
-		hoverColor: C_CLR_DEFAULT, 
-		align: C_ALIGN_CENTER
-	}, function(){
-		g_volumeNum = (g_volumeNum == g_volumes.length -1 ? 0 : ++g_volumeNum);
+
+	var lnkVolume = makeSettingLblButton("lnkVolume", g_stateObj.volume + "%", 9, function(){
+		g_volumeNum = (g_volumeNum == 0 ? g_volumes.length -1 : --g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = g_stateObj.volume + "%";
 	});
 	lnkVolume.oncontextmenu = function(){
-		g_volumeNum = (g_volumeNum == 0 ? g_volumes.length -1 : --g_volumeNum);
+		g_volumeNum = (g_volumeNum == g_volumes.length -1 ? 0 : ++g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = g_stateObj.volume + "%";
 		return false;
 	}
 	optionsprite.appendChild(lnkVolume);
+
+	optionsprite.appendChild(makeMiniButton("lnkVolume", "R", 9, function(){
+		g_volumeNum = (g_volumeNum == 0 ? g_volumes.length -1 : --g_volumeNum);
+		g_stateObj.volume = g_volumes[g_volumeNum];
+		lnkVolume.innerHTML = g_stateObj.volume + "%";
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkVolume", "L", 9, function(){
+		g_volumeNum = (g_volumeNum == g_volumes.length -1 ? 0 : ++g_volumeNum);
+		g_stateObj.volume = g_volumes[g_volumeNum];
+		lnkVolume.innerHTML = g_stateObj.volume + "%";
+	}));
+
+	/**
+	 * 設定・オプション表示用ボタン
+	 * @param {string} _id 
+	 * @param {string} _name 初期設定文字
+	 * @param {number} _heightPos 上からの配置順
+	 * @param {function} _func 
+	 */
+	function makeSettingLblButton(_id, _name, _heightPos, _func){
+		var settingLblButton = createButton({
+			id: _id, 
+			name: _name, 
+			x: C_LEN_SETLBL_LEFT, 
+			y: C_LEN_SETLBL_HEIGHT * _heightPos, 
+			width: C_LEN_SETLBL_WIDTH, 
+			height: C_LEN_SETLBL_HEIGHT, 
+			fontsize: C_SIZ_SETLBL,
+			normalColor: C_CLR_LNK, 
+			hoverColor: C_CLR_DEFAULT, 
+			align: C_ALIGN_CENTER
+		}, _func);
+
+		return settingLblButton;
+	}
+
+	/**
+	 * 設定・オプション用の設定変更ミニボタン
+	 * @param {string} _id 
+	 * @param {string} _directionFlg 表示用ボタンのどちら側に置くかを設定。(R, RR:右、L, LL:左)
+	 * @param {number} _heightPos 上からの配置順
+	 * @param {function} _func 
+	 */
+	function makeMiniButton(_id, _directionFlg, _heightPos, _func){
+		var miniButton = createButton({
+			id: _id + _directionFlg, 
+			name: eval("C_LBL_SETMINI" + _directionFlg), 
+			x: eval("C_LEN_SETMINI" + _directionFlg + "_LEFT"), 
+			y: C_LEN_SETLBL_HEIGHT * _heightPos, 
+			width: C_LEN_SETMINI_WIDTH, 
+			height: C_LEN_SETLBL_HEIGHT, 
+			fontsize: C_SIZ_SETLBL,
+			normalColor: C_CLR_DEFAULT, 
+			hoverColor: C_CLR_SETTING, 
+			align: C_ALIGN_CENTER
+		}, _func);
+
+		return miniButton;
+	}
 
 	optionsprite.oncontextmenu = function(){
 		return false;
@@ -1886,7 +2041,7 @@ function keyConfigInit(){
 		hoverColor: C_CLR_BACK, 
 		align: C_ALIGN_CENTER
 	}, function(){
-		// オプション画面へ戻る
+		// 設定・オプション画面へ戻る
 		g_currentj = 0;
 		g_currentk = 0;
 		g_prevKey = 0;
@@ -2772,6 +2927,9 @@ function pushColors(_header, _frame, _val, _colorCd){
 	}
 }
 
+/**
+ * メイン画面前の初期化処理
+ */
 function getArrowSettings(){
 
 	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
@@ -2801,12 +2959,14 @@ function getArrowSettings(){
 	g_workObj.judgFrzCnt = new Array();
 	g_judgObj.lockFlgs = new Array();
 
+	// 矢印色管理 (個別)
 	g_workObj.arrowColors = new Array();
 	g_workObj.frzNormalColors = new Array();
 	g_workObj.frzNormalBarColors = new Array();
 	g_workObj.frzHitColors = new Array();
 	g_workObj.frzHitBarColors = new Array();
 
+	// 矢印色管理 (全体)
 	g_workObj.arrowColorsAll = new Array();
 	g_workObj.frzNormalColorsAll = new Array();
 	g_workObj.frzNormalBarColorsAll = new Array();
@@ -2904,7 +3064,7 @@ function MainInit(){
 		mainSprite.appendChild(stepHit);
 	}
 
-	// 矢印生成　初期化
+	// 矢印・フリーズアロー・速度変化 移動/判定/変化対象の初期化
 	var arrowCnts = new Array();
 	var frzCnts = new Array();
 	for(var j=0; j<keyNum; j++){
@@ -2913,8 +3073,12 @@ function MainInit(){
 	}
 	var speedCnts = 0;
 	var boostCnts = 0;
+
+	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
 	g_workObj.boostSpd = 1;
+
+	// 開始位置、楽曲再生位置の設定
 	var firstFrame = g_scoreObj.frameNum;
 	if(firstFrame < g_headerObj.blankFrame){
 		var musicStartFrame = g_headerObj.blankFrame;
@@ -2939,12 +3103,12 @@ function MainInit(){
 	var fadeOutFrame = Infinity;
 	var preblankFrame = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
 
-	// フェードアウト時間指定の場合、その7秒後に終了する
+	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
 	if(g_headerObj.fadeFrame != undefined){
 		if(isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))){
 		}else{
 			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]);
-			var fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + 420 + preblankFrame) /60) * 60;
+			var fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + C_FRM_AFTERFADE + preblankFrame) /60) * 60;
 
 			fullMin = Math.floor(fadeTmp / 3600);
 			fullSec = ("00" + (fadeTmp / 60) % 60).slice(-2);
@@ -2967,43 +3131,44 @@ function MainInit(){
 		g_scoreObj.frameNum);
 	divRoot.appendChild(lblframe);
 
-	// 判定系表示
-	var lblIi = createDivLabel("lblIi", g_sWidth - 100, 20, 100, 20, 16, C_CLR_II, 
-		g_resultObj.ii);
+	// 判定カウンタ表示
+	var lblIi = createDivLabel("lblIi", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT, C_LEN_JDGCNTS_WIDTH, 
+		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_II, g_resultObj.ii);
 	lblIi.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblIi);
 
-	var lblShakin = createDivLabel("lblShakin", g_sWidth - 100, 40, 100, 20, 16, C_CLR_SHAKIN, 
-		g_resultObj.shakin);
+	var lblShakin = createDivLabel("lblShakin", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 2, C_LEN_JDGCNTS_WIDTH, 
+		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_SHAKIN, g_resultObj.shakin);
 	lblShakin.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblShakin);
 
-	var lblMatari = createDivLabel("lblMatari", g_sWidth - 100, 60, 100, 20, 16, C_CLR_MATARI, 
-		g_resultObj.matari);
+	var lblMatari = createDivLabel("lblMatari", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 3, C_LEN_JDGCNTS_WIDTH, 
+		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_MATARI, g_resultObj.matari);
 	lblMatari.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblMatari);
 
-	var lblUwan = createDivLabel("lblUwan", g_sWidth - 100, 80, 100, 20, 16, C_CLR_UWAN, 
-		g_resultObj.uwan);
+	var lblUwan = createDivLabel("lblUwan", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 4, C_LEN_JDGCNTS_WIDTH, 
+		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_UWAN, g_resultObj.uwan);
 	lblUwan.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblUwan);
 
-	var lblMCombo = createDivLabel("lblMCombo", g_sWidth - 100, 100, 100, 20, 16, "#ffffff", 
-		g_resultObj.maxCombo);
+	var lblMCombo = createDivLabel("lblMCombo", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 5, C_LEN_JDGCNTS_WIDTH,
+		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, "#ffffff", g_resultObj.maxCombo);
 	lblMCombo.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblMCombo);
 
-	var lblKita = createDivLabel("lblKita", g_sWidth - 100, 140, 100, 20, 16, C_CLR_KITA, 
-		g_resultObj.kita);
+	var lblKita = createDivLabel("lblKita", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 7, C_LEN_JDGCNTS_WIDTH, 
+		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_KITA, g_resultObj.kita);
 	lblKita.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblKita);
 
-	var lblIknai = createDivLabel("lblIknai", g_sWidth - 100, 160, 100, 20, 16, C_CLR_IKNAI, 
-		g_resultObj.iknai);
+	var lblIknai = createDivLabel("lblIknai", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 8, C_LEN_JDGCNTS_WIDTH, 
+		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_IKNAI, g_resultObj.iknai);
 	lblIknai.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblIknai);
 
-	var lblFCombo = createDivLabel("lblFCombo", g_sWidth - 100, 180, 100, 20, 16, "#ffffff", 
+	var lblFCombo = createDivLabel("lblFCombo", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 9, C_LEN_JDGCNTS_WIDTH, 
+		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, "#ffffff", 
 		g_resultObj.fmaxCombo);
 	lblFCombo.style.textAlign = C_ALIGN_RIGHT;
 	mainSprite.appendChild(lblFCombo);
@@ -3039,36 +3204,36 @@ function MainInit(){
 	mainSprite.appendChild(lblTime2);
 
 	// 判定キャラクタ表示：矢印
-	var charaJ = createDivLabel("charaJ", g_sWidth/2 - 200, g_sHeight/2 - 50, 200, 20, 20, C_CLR_II, 
-	"");
+	var charaJ = createDivLabel("charaJ", g_sWidth/2 - 200, g_sHeight/2 - 50, 
+		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_II, "");
 	charaJ.style.textAlign = C_ALIGN_CENTER;
 	charaJ.setAttribute("cnt", 0);
 	mainSprite.appendChild(charaJ);
 
 	// コンボ表示：矢印
-	var comboJ = createDivLabel("comboJ", g_sWidth/2 - 50, g_sHeight/2 - 50, 200, 20, 20, C_CLR_KITA, 
-	"");
+	var comboJ = createDivLabel("comboJ", g_sWidth/2 - 50, g_sHeight/2 - 50, 
+		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_KITA, "");
 	comboJ.style.textAlign = C_ALIGN_CENTER;
 	comboJ.setAttribute("cnt", 0);
 	mainSprite.appendChild(comboJ);
 
 	// 判定キャラクタ表示：フリーズアロー
-	var charaFJ = createDivLabel("charaFJ", g_sWidth/2 - 100, g_sHeight/2, 200, 20, 20, C_CLR_KITA, 
-	"");
+	var charaFJ = createDivLabel("charaFJ", g_sWidth/2 - 100, g_sHeight/2, 
+		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_KITA, "");
 	charaFJ.style.textAlign = C_ALIGN_CENTER;
 	charaFJ.setAttribute("cnt", 0);
 	mainSprite.appendChild(charaFJ);
 
 	// コンボ表示：フリーズアロー
-	var comboFJ = createDivLabel("comboFJ", g_sWidth/2 + 50, g_sHeight/2, 200, 20, 20, C_CLR_II, 
-	"");
+	var comboFJ = createDivLabel("comboFJ", g_sWidth/2 + 50, g_sHeight/2, 
+		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_II, "");
 	comboFJ.style.textAlign = C_ALIGN_CENTER;
 	comboFJ.setAttribute("cnt", 0);
 	mainSprite.appendChild(comboFJ);
 
 	// パーフェクト演出
-	var finishView = createDivLabel("finishView", g_sWidth/2 -150, g_sHeight/2 -50, 300, 20, 50, C_CLR_KITA, 
-	"");
+	var finishView = createDivLabel("finishView", g_sWidth/2 -150, g_sHeight/2 -50, 
+		300, 20, 50, C_CLR_KITA, "");
 	finishView.style.textAlign = C_ALIGN_CENTER;
 	mainSprite.appendChild(finishView);
 
@@ -3229,7 +3394,7 @@ function MainInit(){
 		// フェードイン・アウト
 		if(g_audio.volume >= g_stateObj.volume / 100){
 			musicStartFlg = false;
-			if(g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + 600){
+			if(g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + C_FRM_AFTERFADE){
 				var tmpVolume = (g_audio.volume - (2.5 * g_stateObj.volume / 100) / 1000);
 				if(tmpVolume < 0){
 					g_audio.volume = 0;
@@ -3245,7 +3410,7 @@ function MainInit(){
 				}else{
 					g_audio.volume = tmpVolume;
 				}
-			}else if(g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + 600){
+			}else if(g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + C_FRM_AFTERFADE){
 				var tmpVolume = (g_audio.volume - 5 / 1000);
 				if(tmpVolume < 0){
 					g_audio.volume = 0;
@@ -3336,11 +3501,9 @@ function MainInit(){
 				if(g_stateObj.auto == "ON"){
 					if(cnt == 0){
 						judgeIi();
-						arrow.style.opacity = 0;
 						stepDivHit.style.opacity = 1;
-					}else if(cnt == -4){
+						stepDivHit.setAttribute("cnt", C_FRM_HITMOTION);
 						g_workObj.judgArrowCnt[j]++;
-						stepDivHit.style.opacity = 0;
 						mainSprite.removeChild(arrow);
 					}
 
@@ -3350,6 +3513,8 @@ function MainInit(){
 					mainSprite.removeChild(arrow);
 				}
 			}
+
+			// ステップゾーンのヒット領域は一定時間で非表示化
 			var hitCnt = stepDivHit.getAttribute("cnt");
 			if(hitCnt > 0){
 				stepDivHit.setAttribute("cnt", --hitCnt);
@@ -3785,7 +3950,7 @@ function judgeArrow(_j){
 					judgeUwan();
 					stepDivHit.style.background = C_CLR_UWAN;
 				}
-				stepDivHit.setAttribute("cnt", 4);
+				stepDivHit.setAttribute("cnt", C_FRM_HITMOTION);
 
 	//			judgArrow.setAttribute("judgEndFlg","true");
 				mainSprite.removeChild(judgArrow);
@@ -3818,7 +3983,7 @@ function judgeIi(){
 	g_resultObj.ii++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_II + "'>" + C_JCR_II + "</span>";
-	document.getElementById("charaJ").setAttribute("cnt", 60);
+	document.getElementById("charaJ").setAttribute("cnt", C_FRM_JDGMOTION);
 
 	document.getElementById("lblIi").innerHTML = g_resultObj.ii;
 	if(++g_resultObj.combo > g_resultObj.maxCombo){
@@ -3834,7 +3999,7 @@ function judgeShakin(){
 	g_resultObj.shakin++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_SHAKIN + "'>" + C_JCR_SHAKIN + "</span>";
-	document.getElementById("charaJ").setAttribute("cnt", 60);
+	document.getElementById("charaJ").setAttribute("cnt", C_FRM_JDGMOTION);
 	
 	document.getElementById("lblShakin").innerHTML = g_resultObj.shakin;
 	if(++g_resultObj.combo > g_resultObj.maxCombo){
@@ -3850,7 +4015,7 @@ function judgeMatari(){
 	g_resultObj.matari++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_MATARI + "'>" + C_JCR_MATARI + "</span>";
-	document.getElementById("charaJ").setAttribute("cnt", 60);
+	document.getElementById("charaJ").setAttribute("cnt", C_FRM_JDGMOTION);
 
 	document.getElementById("lblMatari").innerHTML = g_resultObj.matari;
 	document.getElementById("comboJ").innerHTML = "";
@@ -3862,7 +4027,7 @@ function judgeUwan(){
 	g_resultObj.uwan++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_UWAN + "'>" + C_JCR_UWAN + "</span>";
-	document.getElementById("charaJ").setAttribute("cnt", 60);
+	document.getElementById("charaJ").setAttribute("cnt", C_FRM_JDGMOTION);
 
 	document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
 	g_resultObj.combo = 0;
@@ -3874,7 +4039,7 @@ function judgeKita(){
 	g_currentArrows++;
 	document.getElementById("lblKita").innerHTML = g_resultObj.kita;
 	document.getElementById("charaFJ").innerHTML = "<span style='color:" + C_CLR_KITA + "'>" + C_JCR_KITA + "</span>";
-	document.getElementById("charaFJ").setAttribute("cnt", 60);
+	document.getElementById("charaFJ").setAttribute("cnt", C_FRM_JDGMOTION);
 
 	if(++g_resultObj.fCombo > g_resultObj.fmaxCombo){
 		g_resultObj.fmaxCombo = g_resultObj.fCombo;
@@ -3890,7 +4055,7 @@ function judgeIknai(){
 	g_currentArrows++;
 	document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
 	document.getElementById("charaFJ").innerHTML = "<span style='color:" + C_CLR_IKNAI + "'>" + C_JCR_IKNAI + "</span>";
-	document.getElementById("charaFJ").setAttribute("cnt", 60);
+	document.getElementById("charaFJ").setAttribute("cnt", C_FRM_JDGMOTION);
 	document.getElementById("comboFJ").innerHTML = "";
 	g_resultObj.fCombo = 0;
 }
