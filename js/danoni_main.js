@@ -3305,9 +3305,7 @@ function MainInit(){
 		
 		for(var j=0; j<keyNum; j++){
 			for(var k=0; k<matchKeys[j].length; k++){
-				console.log(g_workObj.keyHitFlg[j][k]);
 				if(_keyCode == matchKeys[j][k] && g_workObj.keyHitFlg[j][k] == false){
-					console.log("currentNo:" + j + "|" + g_workObj.judgArrowCnt[j]);
 					judgeArrow(j);
 				}
 			}
