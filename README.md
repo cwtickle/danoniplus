@@ -1,6 +1,6 @@
-# Dancing☆Onigiri(for HTML5)
+# Dancing☆Onigiri(CW Edition)
 
-リズムゲームDancing☆Onigiri(for HTML5)のソース作成場所です。
+リズムゲームDancing☆Onigiri(CW Edition)のソース作成・配布場所です。
 Flash版の同ゲームのHTML5版を制作しています。
 
 ## サンプル (sample - under construction)
