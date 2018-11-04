@@ -6,7 +6,7 @@
  * created : 2018/10/08
  * Revised : 2018/11/04
  */
-var g_version =  "Ver 0.53.0";
+var g_version =  "Ver 0.53.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2351,6 +2351,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame){
 	}
 
 	// 速度変化・色変化データの分解
+	obj.speedData = [];
 	var speedFooter = (g_keyObj.currentKey == "5" ? "_data" : "_change");
 	if(_dosObj["speed" + _scoreNo + speedFooter] != undefined){
 		obj.speedData = _dosObj["speed" + _scoreNo + speedFooter].split(",");
@@ -2359,6 +2360,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame){
 			obj.speedData[k+1] = parseFloat(obj.speedData[k+1]);
 		}
 	}
+	obj.boostData = [];
 	if(_dosObj["boost" + _scoreNo + "_data"] != undefined){
 		obj.boostData = _dosObj["boost" + _scoreNo + "_data"].split(",");
 		for(k=0; k<obj.boostData.length; k+=2){
@@ -2366,6 +2368,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame){
 			obj.boostData[k+1] = parseFloat(obj.boostData[k+1]);
 		}
 	}
+	obj.colorData = [];
 	if(_dosObj["color" + _scoreNo + "_data"] != undefined && _dosObj["color" + _scoreNo + "_data"] != ""){
 		obj.colorData = _dosObj["color" + _scoreNo + "_data"].split(",");
 		for(k=0; k<obj.colorData.length; k+=3){
@@ -2373,6 +2376,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame){
 			obj.colorData[k+1] = parseFloat(obj.colorData[k+1]);
 		}
 	}
+	obj.acolorData = [];
 	if(_dosObj["acolor" + _scoreNo + "_data"] != undefined && _dosObj["acolor" + _scoreNo + "data"] != ""){
 		obj.acolorData = _dosObj["acolor" + _scoreNo + "_data"].split(",");
 		for(k=0; k<obj.acolorData.length; k+=3){
