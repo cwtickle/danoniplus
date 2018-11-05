@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version =  "Ver 0.54.2";
+var g_version =  "Ver 0.55.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -492,7 +492,7 @@ var g_keyObj = {
 };
 
 /** 設定・オプション画面用共通 */
-var C_LEN_SETLBL_LEFT = 170;
+var C_LEN_SETLBL_LEFT = 140;
 var C_LEN_SETLBL_WIDTH = 250;
 var C_LEN_SETLBL_HEIGHT = 25;
 var C_SIZ_SETLBL = 18;
@@ -502,12 +502,12 @@ var C_LEN_SETMINI_WIDTH = 40;
 var C_SIZ_SETMINI = 18;
 
 var C_LBL_SETMINIL = "<";
-var C_LEN_SETMINIL_LEFT = 150;
+var C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH /2;
 var C_LBL_SETMINILL = "<";
 var C_LEN_SETMINILL_LEFT = C_LEN_SETMINIL_LEFT + C_LEN_SETMINI_WIDTH;
 var C_LBL_SETMINIR = ">";
 var C_LBL_SETMINIRR = ">";
-var C_LEN_SETMINIR_LEFT = 400;
+var C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH /2;
 var C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
 
 
@@ -1172,7 +1172,7 @@ function titleInit(){
 	// バージョン描画
 	var lnkVersion = createButton({
 		id: "lnkVersion", 
-		name: "Copyright (c) 2018 ティックル, CW " + g_version, 
+		name: "&copy; 2018 ティックル, CW " + g_version, 
 		x: g_sWidth/2, 
 		y: g_sHeight-20, 
 		width: g_sWidth/2-10, 
@@ -3066,6 +3066,9 @@ function MainInit(){
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	var mainSprite = createSprite("divRoot","mainSprite",0,0,g_sWidth,g_sHeight);
+
+	// 判定系スプライトを作成（メインスプライトより上位）
+	var judgeSprite = createSprite("divRoot","judgeSprite",0,0,g_sWidth,g_sHeight);
 	
 	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
@@ -3231,34 +3234,34 @@ function MainInit(){
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_II, "");
 	charaJ.style.textAlign = C_ALIGN_CENTER;
 	charaJ.setAttribute("cnt", 0);
-	mainSprite.appendChild(charaJ);
+	judgeSprite.appendChild(charaJ);
 
 	// コンボ表示：矢印
 	var comboJ = createDivLabel("comboJ", g_sWidth/2 - 50, g_sHeight/2 - 50, 
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_KITA, "");
 	comboJ.style.textAlign = C_ALIGN_CENTER;
 	comboJ.setAttribute("cnt", 0);
-	mainSprite.appendChild(comboJ);
+	judgeSprite.appendChild(comboJ);
 
 	// 判定キャラクタ表示：フリーズアロー
 	var charaFJ = createDivLabel("charaFJ", g_sWidth/2 - 100, g_sHeight/2, 
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_KITA, "");
 	charaFJ.style.textAlign = C_ALIGN_CENTER;
 	charaFJ.setAttribute("cnt", 0);
-	mainSprite.appendChild(charaFJ);
+	judgeSprite.appendChild(charaFJ);
 
 	// コンボ表示：フリーズアロー
 	var comboFJ = createDivLabel("comboFJ", g_sWidth/2 + 50, g_sHeight/2, 
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_II, "");
 	comboFJ.style.textAlign = C_ALIGN_CENTER;
 	comboFJ.setAttribute("cnt", 0);
-	mainSprite.appendChild(comboFJ);
+	judgeSprite.appendChild(comboFJ);
 
 	// パーフェクト演出
 	var finishView = createDivLabel("finishView", g_sWidth/2 -150, g_sHeight/2 -50, 
 		300, 20, 50, C_CLR_KITA, "");
 	finishView.style.textAlign = C_ALIGN_CENTER;
-	mainSprite.appendChild(finishView);
+	judgeSprite.appendChild(finishView);
 
 	// ユーザカスタムイベント(初期)
 	if(typeof customMainInit == "function"){
