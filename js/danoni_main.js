@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version =  "Ver 0.56.1";
+var g_version =  "Ver 0.57.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -73,7 +73,7 @@ var C_CLR_TITLE = "#cccccc";
 var C_LBL_TITLESIZE = 32;
 var C_LBL_BTNSIZE = 28;
 var C_LBL_LNKSIZE = 16;
-var C_LBL_BASICFONT = "Meiryo UI";
+var C_LBL_BASICFONT = "'Meiryo UI', sans-serif";
 
 var C_CLR_LNK = "#111111";
 var C_BTN_HEIGHT = 50;
@@ -701,8 +701,9 @@ function createDiv(_id, _x, _y, _width, _height){
 function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text){
 	var div = createDiv(_id, _x, _y, _width, _height);
 	var style = div.style;
-	style.font = _fontsize + "px '" + C_LBL_BASICFONT + "'";
+	style.fontSize = _fontsize + "px";
 	style.color = _color;
+	style.fontFamily = C_LBL_BASICFONT;
 	style.textAlign = C_ALIGN_CENTER;
 	div.innerHTML = _text;
 
@@ -712,8 +713,9 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text){
 function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text, _font){
 	var div = createDiv(_id, _x, _y, _width, _height);
 	var style = div.style;
-	style.font = _fontsize + "px '" + _font + "'";
+	style.fontSize = _fontsize + "px";
 	style.color = _color;
+	style.fontFamily = _font;
 	style.textAlign = C_ALIGN_CENTER;
 	div.innerHTML = _text;
 
@@ -910,11 +912,12 @@ function createButton(_obj, _func){
 
 	// ボタンの装飾を定義
 	var style = div.style;
-	style.font = _obj.fontsize + "px '" + C_LBL_BASICFONT + "'";
 	div.innerHTML = _obj.name;
 	style.textAlign = _obj.align;
 	style.verticalAlign = C_VALIGN_MIDDLE;
 	style.color = C_CLR_TEXT;
+	style.fontSize = _obj.fontsize + "px";
+	style.fontFamily = C_LBL_BASICFONT;
 	style.backgroundColor = _obj.normalColor;
 	style.transition = "background-color 0.25s linear";
 
@@ -1102,16 +1105,16 @@ function titleInit(){
 		var divRoot = document.getElementById("divRoot");
 	}
 
+	// ユーザカスタムイベント(初期)
+	if(typeof customTitleInit == "function"){
+		customTitleInit();
+	}
+
 	// タイトル文字描画
 	var lblTitle = getTitleDivLabel("lblTitle", 
 	"<span style='color:#6666ff;font-size:40px;'>D</span>ANCING<span style='color:#ffff66;font-size:40px;'>☆</span><span style='color:#ff6666;font-size:40px;'>O</span>NIGIRI", 0, 15);
 	lblTitle.style.zIndex = 1;
 	divRoot.appendChild(lblTitle);
-
-	// ユーザカスタムイベント(初期)
-	if(typeof customTitleInit == "function"){
-		customTitleInit();
-	}
 
 	// オーディオファイル指定
 	g_audio.src = "../music/" + g_headerObj.musicUrl;
@@ -4127,16 +4130,7 @@ function resultInit(){
 	"<span style='color:#6666ff;font-size:40px;'>R</span>ESULT", 0, 15);
 	divRoot.appendChild(lblTitle);
 
-	// 結果描画
-	var resultData = "<span style='color:" + C_CLR_II + "'>" + C_JCR_II +"</span>" +
-	"<br><span style='color:" + C_CLR_SHAKIN + "'>" + C_JCR_SHAKIN +"</span>" +
-	"<br><span style='color:" + C_CLR_MATARI + "'>" + C_JCR_MATARI + "</span>" +
-	"<br><span style='color:" + C_CLR_UWAN + "'>" + C_JCR_UWAN + "</span>" +
-	"<br><span style='color:" + C_CLR_KITA + "'>" + C_JCR_KITA + "</span>" +
-	"<br><span style='color:" + C_CLR_IKNAI + "'>" + C_JCR_IKNAI + "</span>" +
-	"<br><span style='color:#ffffff'>MaxCombo</span>" +
-	"<br><span style='color:#ffffff'>FreezeCombo</span>" +
-	"<br><br><span style='color:#ffffff'>Score</span>" ;
+	var resultWindow = createSprite("divRoot","resultWindow", g_sWidth/2 - 150, 100, 300, 310);
 
 	// スコア計算(一括)
 	var scoreTmp = g_resultObj.ii * 8 +
@@ -4149,16 +4143,6 @@ function resultInit(){
 
 	var allScore = (g_allArrow + g_allFrz / 2) * 10;
 	var resultScore = Math.round(scoreTmp / allScore * 1000000);
-
-	var scoreData = g_resultObj.ii +
-	"<br>" + g_resultObj.shakin +
-	"<br>" + g_resultObj.matari +
-	"<br>" + g_resultObj.uwan +
-	"<br>" + g_resultObj.kita +
-	"<br>" + g_resultObj.iknai +
-	"<br>" + g_resultObj.maxCombo +
-	"<br>" + g_resultObj.fmaxCombo +
-	"<br><br>" + resultScore ;
 
 	// ランク計算
 	var rankMark = "";
@@ -4206,20 +4190,35 @@ function resultInit(){
 	 location.href;
 	var tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
 
-	var lblResult = createDivLabel("lblResult", g_sWidth/2 - 150, 100, 150, 20, 20, "#ffffff", 
-	resultData);
-	lblResult.style.textAlign = C_ALIGN_LEFT;
-	divRoot.appendChild(lblResult);
+	// キャラクタ描画
+	resultWindow.appendChild(makeResultSymbol("lblIi", 0, C_CLR_II, 0, C_JCR_II, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblShakin", 0, C_CLR_SHAKIN, 1, C_JCR_SHAKIN, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblMatari", 0, C_CLR_MATARI, 2, C_JCR_MATARI, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblUwan", 0, C_CLR_UWAN, 3, C_JCR_UWAN, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblKita", 0, C_CLR_KITA, 4, C_JCR_KITA, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblIknai", 0, C_CLR_IKNAI, 5, C_JCR_IKNAI, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblMCombo", 0, "#ffffff", 6, "MaxCombo", C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblFCombo", 0, "#ffffff", 7, "FreezeCombo", C_ALIGN_LEFT));
 
-	var lblScore = createDivLabel("lblScore", g_sWidth/2 + 20, 100, 100, 20, 20, "#ffffff", 
-	scoreData);
-	lblScore.style.textAlign = C_ALIGN_RIGHT;
-	divRoot.appendChild(lblScore);
+	resultWindow.appendChild(makeResultSymbol("lblScore", 0, "#ffffff", 9, "Score", C_ALIGN_LEFT));
 
-	var lblRank = createDivCustomLabel("lblRank", g_sWidth/2 + 130, 310, 70, 20, 50, "#ffffff", 
-	"<span style='color:" + rankColor + ";'>" + rankMark + "</span>","Bookman Old Style");
+	// スコア描画
+	resultWindow.appendChild(makeResultSymbol("lblIiS", 130, "#ffffff", 0, g_resultObj.ii, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblShakinS", 130, "#ffffff", 1, g_resultObj.shakin, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblMatariS", 130, "#ffffff", 2, g_resultObj.matari, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblUwanS", 130, "#ffffff", 3, g_resultObj.uwan, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblKitaS", 130, "#ffffff", 4, g_resultObj.kita, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblIknaiS", 130, "#ffffff", 5, g_resultObj.iknai, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblMComboS", 130, "#ffffff", 6, g_resultObj.maxCombo, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblFComboS", 130, "#ffffff", 7, g_resultObj.fmaxCombo, C_ALIGN_RIGHT));
+
+	resultWindow.appendChild(makeResultSymbol("lblScoreS", 130, "#ffffff", 9, g_resultObj.score, C_ALIGN_RIGHT));
+
+	// ランク描画
+	var lblRank = createDivCustomLabel("lblRank", 300, 200, 70, 20, 50, "#ffffff", 
+	"<span style='color:" + rankColor + ";'>" + rankMark + "</span>","'Bookman Old Style', 'Meiryo UI', sans-serif");
 	lblRank.style.textAlign = C_ALIGN_CENTER;
-	divRoot.appendChild(lblRank);
+	resultWindow.appendChild(lblRank);
 
 	// ユーザカスタムイベント(初期)
 	if(typeof customResultInit == "function"){
@@ -4308,6 +4307,22 @@ function resultInit(){
 			}
 		}
 	}
+}
+
+/**
+ * 結果表示作成
+ * @param {string} _id 
+ * @param {number} _x
+ * @param {string} _color 
+ * @param {number} _heightPos 
+ * @param {string, number} _text
+ */
+function makeResultSymbol(_id, _x, _color, _heightPos, _text, _align){
+	var symbol = createDivLabel(_id, _x, 24 * _heightPos, 
+		150, 24, 20, _color, _text);
+	symbol.style.textAlign = _align;
+	
+	return symbol;
 }
 
 // ライセンス原文、以下は削除しないでください
