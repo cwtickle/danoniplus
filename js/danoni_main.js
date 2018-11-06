@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version =  "Ver 0.56.0";
+var g_version =  "Ver 0.56.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -3161,41 +3161,27 @@ function MainInit(){
 	divRoot.appendChild(lblframe);
 
 	// 判定カウンタ表示
-	infoSprite.appendChild(makeCounter("lblIi", C_CLR_II, 1));
-	infoSprite.appendChild(makeCounter("lblShakin", C_CLR_SHAKIN, 2));
-	infoSprite.appendChild(makeCounter("lblMatari", C_CLR_MATARI, 3));
-	infoSprite.appendChild(makeCounter("lblUwan", C_CLR_UWAN, 4));
-	infoSprite.appendChild(makeCounter("lblMCombo", "#ffffff", 5));
+	infoSprite.appendChild(makeCounterSymbol("lblIi", g_sWidth - 110, C_CLR_II, 1, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblShakin", g_sWidth - 110, C_CLR_SHAKIN, 2, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblMatari", g_sWidth - 110, C_CLR_MATARI, 3, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblUwan", g_sWidth - 110, C_CLR_UWAN, 4, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblMCombo", g_sWidth - 110, "#ffffff", 5, 0));
 
-	infoSprite.appendChild(makeCounter("lblKita", C_CLR_KITA, 7));
-	infoSprite.appendChild(makeCounter("lblIknai", C_CLR_IKNAI, 8));
-	infoSprite.appendChild(makeCounter("lblFCombo", "#ffffff", 9));
-
-	/**
-	 * 判定カウンタ表示作成
-	 * @param {string} _id 
-	 * @param {string} _color 
-	 * @param {number} _heightPos 
-	 */
-	function makeCounter(_id, _color, _heightPos){
-		var counter = createDivLabel(_id, g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * _heightPos, 
-			C_LEN_JDGCNTS_WIDTH, C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, _color, 0);
-		counter.style.textAlign = C_ALIGN_RIGHT;
-		
-		return counter;
-	}
+	infoSprite.appendChild(makeCounterSymbol("lblKita", g_sWidth - 110, C_CLR_KITA, 7, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblIknai", g_sWidth - 110, C_CLR_IKNAI, 8, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblFCombo", g_sWidth - 110, "#ffffff", 9, 0));
 
 	// 歌詞表示1
 	var lblWord0 = createDivLabel("lblword0", g_sWidth/2 -200, 10, g_sWidth -100, 30, 14, "#ffffff", 
 		g_workObj.word0Data);
 	lblWord0.style.textAlign = C_ALIGN_LEFT;
-	infoSprite.appendChild(lblWord0);
+	judgeSprite.appendChild(lblWord0);
 
 	// 歌詞表示2
 	var lblWord1 = createDivLabel("lblword1", g_sWidth/2 -200, g_sHeight-60, g_sWidth -100, 20, 14, "#ffffff", 
 		g_workObj.word1Data);
 	lblWord1.style.textAlign = C_ALIGN_LEFT;
-	infoSprite.appendChild(lblWord1);
+	judgeSprite.appendChild(lblWord1);
 
 	// 曲名・アーティスト名表示
 	var lblCredit = createDivLabel("lblCredit", 125, g_sHeight-30, g_sWidth - 125, 20, 14, "#cccccc", 
@@ -3758,6 +3744,22 @@ function MainInit(){
 	}
 	var mainStartTime = new Date();
 	g_timeoutEvtId = setTimeout(flowTimeline(), 1000/ 60);
+}
+
+/**
+ * 判定カウンタ表示作成
+ * @param {string} _id 
+ * @param {number} _x
+ * @param {string} _color 
+ * @param {number} _heightPos 
+ * @param {string, number} _text
+ */
+function makeCounterSymbol(_id, _x, _color, _heightPos, _text){
+	var counter = createDivLabel(_id, _x, C_LEN_JDGCNTS_HEIGHT * _heightPos, 
+		C_LEN_JDGCNTS_WIDTH, C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, _color, _text);
+	counter.style.textAlign = C_ALIGN_RIGHT;
+	
+	return counter;
 }
 
 /**
