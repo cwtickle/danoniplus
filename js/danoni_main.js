@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/04
+ * Revised : 2018/11/06
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version =  "Ver 0.55.0";
+var g_version =  "Ver 0.56.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -3067,6 +3067,9 @@ function MainInit(){
 	// ステップゾーン、矢印のメインスプライトを作成
 	var mainSprite = createSprite("divRoot","mainSprite",0,0,g_sWidth,g_sHeight);
 
+	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
+	var infoSprite = createSprite("divRoot","infoSprite",0,0,g_sWidth,g_sHeight);
+	
 	// 判定系スプライトを作成（メインスプライトより上位）
 	var judgeSprite = createSprite("divRoot","judgeSprite",0,0,g_sWidth,g_sHeight);
 	
@@ -3158,76 +3161,59 @@ function MainInit(){
 	divRoot.appendChild(lblframe);
 
 	// 判定カウンタ表示
-	var lblIi = createDivLabel("lblIi", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT, C_LEN_JDGCNTS_WIDTH, 
-		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_II, g_resultObj.ii);
-	lblIi.style.textAlign = C_ALIGN_RIGHT;
-	mainSprite.appendChild(lblIi);
+	infoSprite.appendChild(makeCounter("lblIi", C_CLR_II, 1));
+	infoSprite.appendChild(makeCounter("lblShakin", C_CLR_SHAKIN, 2));
+	infoSprite.appendChild(makeCounter("lblMatari", C_CLR_MATARI, 3));
+	infoSprite.appendChild(makeCounter("lblUwan", C_CLR_UWAN, 4));
+	infoSprite.appendChild(makeCounter("lblMCombo", "#ffffff", 5));
 
-	var lblShakin = createDivLabel("lblShakin", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 2, C_LEN_JDGCNTS_WIDTH, 
-		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_SHAKIN, g_resultObj.shakin);
-	lblShakin.style.textAlign = C_ALIGN_RIGHT;
-	mainSprite.appendChild(lblShakin);
+	infoSprite.appendChild(makeCounter("lblKita", C_CLR_KITA, 7));
+	infoSprite.appendChild(makeCounter("lblIknai", C_CLR_IKNAI, 8));
+	infoSprite.appendChild(makeCounter("lblFCombo", "#ffffff", 9));
 
-	var lblMatari = createDivLabel("lblMatari", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 3, C_LEN_JDGCNTS_WIDTH, 
-		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_MATARI, g_resultObj.matari);
-	lblMatari.style.textAlign = C_ALIGN_RIGHT;
-	mainSprite.appendChild(lblMatari);
-
-	var lblUwan = createDivLabel("lblUwan", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 4, C_LEN_JDGCNTS_WIDTH, 
-		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_UWAN, g_resultObj.uwan);
-	lblUwan.style.textAlign = C_ALIGN_RIGHT;
-	mainSprite.appendChild(lblUwan);
-
-	var lblMCombo = createDivLabel("lblMCombo", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 5, C_LEN_JDGCNTS_WIDTH,
-		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, "#ffffff", g_resultObj.maxCombo);
-	lblMCombo.style.textAlign = C_ALIGN_RIGHT;
-	mainSprite.appendChild(lblMCombo);
-
-	var lblKita = createDivLabel("lblKita", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 7, C_LEN_JDGCNTS_WIDTH, 
-		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_KITA, g_resultObj.kita);
-	lblKita.style.textAlign = C_ALIGN_RIGHT;
-	mainSprite.appendChild(lblKita);
-
-	var lblIknai = createDivLabel("lblIknai", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 8, C_LEN_JDGCNTS_WIDTH, 
-		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, C_CLR_IKNAI, g_resultObj.iknai);
-	lblIknai.style.textAlign = C_ALIGN_RIGHT;
-	mainSprite.appendChild(lblIknai);
-
-	var lblFCombo = createDivLabel("lblFCombo", g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * 9, C_LEN_JDGCNTS_WIDTH, 
-		C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, "#ffffff", 
-		g_resultObj.fmaxCombo);
-	lblFCombo.style.textAlign = C_ALIGN_RIGHT;
-	mainSprite.appendChild(lblFCombo);
+	/**
+	 * 判定カウンタ表示作成
+	 * @param {string} _id 
+	 * @param {string} _color 
+	 * @param {number} _heightPos 
+	 */
+	function makeCounter(_id, _color, _heightPos){
+		var counter = createDivLabel(_id, g_sWidth - 120, C_LEN_JDGCNTS_HEIGHT * _heightPos, 
+			C_LEN_JDGCNTS_WIDTH, C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, _color, 0);
+		counter.style.textAlign = C_ALIGN_RIGHT;
+		
+		return counter;
+	}
 
 	// 歌詞表示1
 	var lblWord0 = createDivLabel("lblword0", g_sWidth/2 -200, 10, g_sWidth -100, 30, 14, "#ffffff", 
 		g_workObj.word0Data);
 	lblWord0.style.textAlign = C_ALIGN_LEFT;
-	mainSprite.appendChild(lblWord0);
+	infoSprite.appendChild(lblWord0);
 
 	// 歌詞表示2
 	var lblWord1 = createDivLabel("lblword1", g_sWidth/2 -200, g_sHeight-60, g_sWidth -100, 20, 14, "#ffffff", 
 		g_workObj.word1Data);
 	lblWord1.style.textAlign = C_ALIGN_LEFT;
-	mainSprite.appendChild(lblWord1);
+	infoSprite.appendChild(lblWord1);
 
 	// 曲名・アーティスト名表示
 	var lblCredit = createDivLabel("lblCredit", 125, g_sHeight-30, g_sWidth - 125, 20, 14, "#cccccc", 
 		g_headerObj.musicTitle + " / " + g_headerObj.artistName);
 	lblCredit.style.textAlign = C_ALIGN_LEFT;
-	mainSprite.appendChild(lblCredit);
+	infoSprite.appendChild(lblCredit);
 
 	// 曲時間表示1
 	var lblTime1 = createDivLabel("lblTime1", 0, g_sHeight-30, 50, 20, 14, "#cccccc", 
 	"-:--");
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
-	mainSprite.appendChild(lblTime1);
+	infoSprite.appendChild(lblTime1);
 
 	// 曲時間表示2
 	var lblTime2 = createDivLabel("lblTime2", 60, g_sHeight-30, 50, 20, 14, "#cccccc", 
 	"/ " + fullTime);
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
-	mainSprite.appendChild(lblTime2);
+	infoSprite.appendChild(lblTime2);
 
 	// 判定キャラクタ表示：矢印
 	var charaJ = createDivLabel("charaJ", g_sWidth/2 - 200, g_sHeight/2 - 50, 
