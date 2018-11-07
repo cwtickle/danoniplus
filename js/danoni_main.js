@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/06
+ * Revised : 2018/11/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version =  "Ver 0.57.0";
+var g_version =  "Ver 0.57.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -4143,6 +4143,7 @@ function resultInit(){
 
 	var allScore = (g_allArrow + g_allFrz / 2) * 10;
 	var resultScore = Math.round(scoreTmp / allScore * 1000000);
+	g_resultObj.score = resultScore;
 
 	// ランク計算
 	var rankMark = "";
