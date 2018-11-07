@@ -3,7 +3,7 @@
 リズムゲームDancing☆Onigiri (CW Edition)のソース作成・配布場所です。  
 Flash版の同ゲームのHTML5版を制作しています。 
 (旧名:Dancing☆Onigiri for HTML5)  
-ライセンス
+
 ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作品の後継、  
 置き換え先の受け皿として作成しています。
 
