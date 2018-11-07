@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.58.1";
+var g_version = "Ver 0.58.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -534,6 +534,7 @@ var g_keyObj = {
 	// 矢印間隔補正
 	blank: 55,
 	blank_def: 55,
+	blank11i_0: 50,
 	blank17_1: 45,
 
 	dummy: 0	// ダミー(カンマ抜け落ち防止)
