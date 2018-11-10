@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/07
+ * Revised : 2018/11/10
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.59.0";
+var g_version = "Ver 0.59.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -678,6 +678,15 @@ var C_MSG_E_0021 = "譜面情報が未指定か、フォーマットが間違っ
 	"|difData=キー数,譜面名,初期速度|";
 var C_MSG_E_0031 = "楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>" +
 	"|musicUrl=****.mp3|";
+
+var C_MSG_E_0101 = "新しいキー:{0}の[arrBaseMC]が未定義です。(E-0101)<br>" +
+	"|arrBaseMC{0}=0,1,0,1,0,2|";
+var C_MSG_E_0102 = "新しいキー:{0}の[headerDat]が未定義です。(E-0102)<br>" +
+	"|headerDat{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|";
+var C_MSG_E_0103 = "新しいキー:{0}の[stepRtn]が未定義です。(E-0103)<br>" +
+	"|stepRtn{0}=0,45,-90,135,180,onigiri|";
+var C_MSG_E_0104 = "新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>" +
+	"|keyCtrl{0}=75,79,76,80,187,32/0|";
 
 /**
  * イベントハンドラ用オブジェクト
@@ -1611,13 +1620,13 @@ function keysConvert(_dosObj) {
 			if (_dosObj["arrBaseMC" + newKey] != undefined) {
 				g_keyObj["color" + newKey + "_0"] = _dosObj["arrBaseMC" + newKey].split(",");
 			} else {
-				alert("新しいキー:" + newKey + "の[arrBaseMC]が未定義です。");
+				makeWarningWindow(C_MSG_E_0101.split("{0}").join(newKey));
 			}
 			if (_dosObj["headerDat" + newKey] != undefined) {
 				g_keyObj["chara" + newKey + "_0"] = _dosObj["headerDat" + newKey].split(",");
 				g_keyObj["chara" + newKey + "_0d"] = _dosObj["headerDat" + newKey].split(",");
 			} else {
-				alert("新しいキー:" + newKey + "の[headerDat]が未定義です。");
+				makeWarningWindow(C_MSG_E_0102.split("{0}").join(newKey));
 			}
 			if (isNaN(Number(_dosObj["div" + newKey]))) {
 				g_keyObj["div" + newKey + "_0"] = g_keyObj["chara" + newKey + "_0"].length;
@@ -1635,14 +1644,16 @@ function keysConvert(_dosObj) {
 					}
 				}
 			} else {
-				alert("新しいキー:" + newKey + "の[stepRtn]が未定義です。");
+				makeWarningWindow(C_MSG_E_0103.split("{0}").join(newKey));
 			}
 			if (_dosObj["pos" + newKey] != undefined) {
 				g_keyObj["pos" + newKey + "_0"] = _dosObj["pos" + newKey].split(",");
 			} else {
 				g_keyObj["pos" + newKey + "_0"] = new Array();
-				for (var k = 0; k < g_keyObj["chara" + newKey + "_0"].length; k++) {
-					g_keyObj["pos" + newKey + "_0"][k] = k;
+				if (g_keyObj["chara" + newKey + "_0"] != undefined) {
+					for (var k = 0; k < g_keyObj["chara" + newKey + "_0"].length; k++) {
+						g_keyObj["pos" + newKey + "_0"][k] = k;
+					}
 				}
 			}
 			if (_dosObj["keyCtrl" + newKey] != undefined) {
@@ -1662,7 +1673,7 @@ function keysConvert(_dosObj) {
 					}
 				}
 			} else {
-				alert("新しいキー:" + newKey + "の[keyCtrl]が未定義です。");
+				makeWarningWindow(C_MSG_E_0104.split("{0}").join(newKey));
 			}
 		}
 	}
