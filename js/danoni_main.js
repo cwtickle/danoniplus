@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.60.1";
+var g_version = "Ver 0.61.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1262,16 +1262,16 @@ function titleInit() {
 
 	var divRoot = document.getElementById("divRoot");
 
-	// ユーザカスタムイベント(初期)
-	if (typeof customTitleInit == "function") {
-		customTitleInit();
-	}
-
 	// タイトル文字描画
 	var lblTitle = getTitleDivLabel("lblTitle",
 		"<span style='color:#6666ff;font-size:40px;'>D</span>ANCING<span style='color:#ffff66;font-size:40px;'>☆</span><span style='color:#ff6666;font-size:40px;'>O</span>NIGIRI", 0, 15);
 	lblTitle.style.zIndex = 1;
 	divRoot.appendChild(lblTitle);
+
+	// ユーザカスタムイベント(初期)
+	if (typeof customTitleInit == "function") {
+		customTitleInit();
+	}
 
 	// ブラウザチェック
 	if (g_userAgent.indexOf('msie') != -1 ||
@@ -1283,7 +1283,7 @@ function titleInit() {
 	}
 
 	// オーディオファイル指定
-	g_audio.src = "../music/" + g_headerObj.musicUrl;
+	g_audio.src = "../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl;
 
 	// ボタン描画
 	var btnStart = createButton({
@@ -1586,6 +1586,9 @@ function headerConvert(_dosObj) {
 		g_stepY = parseFloat(_dosObj.stepY);
 	}
 	g_distY = g_sHeight - g_stepY;
+
+	// musicフォルダ設定
+	obj.musicFolder = setVal(_dosObj.musicFolder, "music", "string");
 
 	// 楽曲URL
 	if (_dosObj.musicUrl != undefined) {
