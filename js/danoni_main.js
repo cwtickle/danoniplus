@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/10
+ * Revised : 2018/11/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.61.1";
+var g_version = "Ver 0.61.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2324,7 +2324,7 @@ function keyConfigInit() {
 		}
 		clearWindow();
 		keyConfigInit();
-		eval("resetCursor" + g_kcType)(kWidth, divideCnt, g_keyObj.currentPtn);
+		eval("resetCursor" + g_kcType)(kWidth, divideCnt, g_keyObj.currentKey + "_" + g_keyObj.currentPtn);
 	});
 	divRoot.appendChild(btnPtnChange);
 
