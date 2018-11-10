@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.59.1";
+var g_version = "Ver 0.60.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -559,6 +559,8 @@ var C_LBL_SETMINIRR = ">";
 var C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH / 2;
 var C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
 
+/** キーコンフィグ設定 */
+var g_kcType = "Main";
 
 /** メイン画面用共通オブジェクト */
 var g_workObj = {};
@@ -1744,6 +1746,7 @@ function optionInit() {
 		align: C_ALIGN_CENTER
 	}, function () {
 		// キーコンフィグ画面へ遷移
+		g_kcType = "Main";
 		clearWindow();
 		keyConfigInit();
 	});
@@ -2105,58 +2108,58 @@ function createOptionWindow(_sprite) {
 		lnkVolume.innerHTML = g_stateObj.volume + "%";
 	}));
 
-	/**
-	 * 設定・オプション表示用ボタン
-	 * @param {string} _id 
-	 * @param {string} _name 初期設定文字
-	 * @param {number} _heightPos 上からの配置順
-	 * @param {function} _func 
-	 */
-	function makeSettingLblButton(_id, _name, _heightPos, _func) {
-		var settingLblButton = createButton({
-			id: _id,
-			name: _name,
-			x: C_LEN_SETLBL_LEFT,
-			y: C_LEN_SETLBL_HEIGHT * _heightPos,
-			width: C_LEN_SETLBL_WIDTH,
-			height: C_LEN_SETLBL_HEIGHT,
-			fontsize: C_SIZ_SETLBL,
-			normalColor: C_CLR_LNK,
-			hoverColor: C_CLR_DEFAULT,
-			align: C_ALIGN_CENTER
-		}, _func);
-
-		return settingLblButton;
-	}
-
-	/**
-	 * 設定・オプション用の設定変更ミニボタン
-	 * @param {string} _id 
-	 * @param {string} _directionFlg 表示用ボタンのどちら側に置くかを設定。(R, RR:右、L, LL:左)
-	 * @param {number} _heightPos 上からの配置順
-	 * @param {function} _func 
-	 */
-	function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
-		var miniButton = createButton({
-			id: _id + _directionFlg,
-			name: eval("C_LBL_SETMINI" + _directionFlg),
-			x: eval("C_LEN_SETMINI" + _directionFlg + "_LEFT"),
-			y: C_LEN_SETLBL_HEIGHT * _heightPos,
-			width: C_LEN_SETMINI_WIDTH,
-			height: C_LEN_SETLBL_HEIGHT,
-			fontsize: C_SIZ_SETLBL,
-			normalColor: C_CLR_DEFAULT,
-			hoverColor: C_CLR_SETTING,
-			align: C_ALIGN_CENTER
-		}, _func);
-
-		return miniButton;
-	}
-
 	optionsprite.oncontextmenu = function () {
 		return false;
 	}
 
+}
+
+/**
+ * 設定・オプション表示用ボタン
+ * @param {string} _id 
+ * @param {string} _name 初期設定文字
+ * @param {number} _heightPos 上からの配置順
+ * @param {function} _func 
+ */
+function makeSettingLblButton(_id, _name, _heightPos, _func) {
+	var settingLblButton = createButton({
+		id: _id,
+		name: _name,
+		x: C_LEN_SETLBL_LEFT,
+		y: C_LEN_SETLBL_HEIGHT * _heightPos,
+		width: C_LEN_SETLBL_WIDTH,
+		height: C_LEN_SETLBL_HEIGHT,
+		fontsize: C_SIZ_SETLBL,
+		normalColor: C_CLR_LNK,
+		hoverColor: C_CLR_DEFAULT,
+		align: C_ALIGN_CENTER
+	}, _func);
+
+	return settingLblButton;
+}
+
+/**
+ * 設定・オプション用の設定変更ミニボタン
+ * @param {string} _id 
+ * @param {string} _directionFlg 表示用ボタンのどちら側に置くかを設定。(R, RR:右、L, LL:左)
+ * @param {number} _heightPos 上からの配置順
+ * @param {function} _func 
+ */
+function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
+	var miniButton = createButton({
+		id: _id + _directionFlg,
+		name: eval("C_LBL_SETMINI" + _directionFlg),
+		x: eval("C_LEN_SETMINI" + _directionFlg + "_LEFT"),
+		y: C_LEN_SETLBL_HEIGHT * _heightPos,
+		width: C_LEN_SETMINI_WIDTH,
+		height: C_LEN_SETLBL_HEIGHT,
+		fontsize: C_SIZ_SETLBL,
+		normalColor: C_CLR_DEFAULT,
+		hoverColor: C_CLR_SETTING,
+		align: C_ALIGN_CENTER
+	}, _func);
+
+	return miniButton;
 }
 
 /*-----------------------------------------------------------*/
@@ -2236,6 +2239,37 @@ function keyConfigInit() {
 	var cursor = keyconSprite.appendChild(createImg("cursor", "../img/cursor.png",
 		kWidth / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 
+	// キーコンフィグタイプ切替ボタン
+	var lblKcType = createDivLabel("lblKcType", 30, 10,
+		70, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
+		"<span style='color:#99ddff'>C</span>onfigType");
+	divRoot.appendChild(lblKcType);
+
+	var lnkKcType = makeSettingLblButton("lnkKcType", g_kcType, 0, function () {
+		switch (g_kcType) {
+			case "Main":
+				g_kcType = "Replaced";
+				resetCursorReplaced(kWidth, divideCnt, keyCtrlPtn);
+				break;
+
+			case "Replaced":
+				g_kcType = "ALL";
+				resetCursorALL(kWidth, divideCnt, keyCtrlPtn);
+				break;
+
+			case "ALL":
+				g_kcType = "Main";
+				resetCursorMain(kWidth, divideCnt, keyCtrlPtn);
+				break;
+		}
+		lnkKcType.innerHTML = g_kcType;
+	});
+	lnkKcType.style.width = "100px";
+	lnkKcType.style.left = "30px";
+	lnkKcType.style.top = "35px";
+	divRoot.appendChild(lnkKcType);
+
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customKeyConfigInit == "function") {
 		customKeyConfigInit();
@@ -2284,9 +2318,7 @@ function keyConfigInit() {
 		}
 		clearWindow();
 		keyConfigInit();
-		g_currentj = 0;
-		g_currentk = 0;
-		g_prevKey = -1;
+		eval("resetCursor" + g_kcType)(kWidth, divideCnt, keyCtrlPtn);
 	});
 	divRoot.appendChild(btnPtnChange);
 
@@ -2315,14 +2347,7 @@ function keyConfigInit() {
 					document.getElementById("keycon" + j + "_" + k).innerHTML = g_kCd[g_keyObj["keyCtrl" + keyCtrlPtn][j][k]];
 				}
 			}
-			g_currentj = 0;
-			g_currentk = 0;
-			g_prevKey = -1;
-			posj = g_keyObj["pos" + keyCtrlPtn][0];
-
-			var cursor = document.getElementById("cursor");
-			cursor.style.left = (kWidth / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10) + "px";
-			cursor.style.top = "45px";
+			eval("resetCursor" + g_kcType)(kWidth, divideCnt, keyCtrlPtn);
 		}
 	});
 	divRoot.appendChild(btnReset);
@@ -2357,14 +2382,35 @@ function keyConfigInit() {
 			}
 
 			// 後続に代替キーが存在する場合
-			if (g_currentk < g_keyObj["keyCtrl" + keyCtrlPtn][g_currentj].length - 1) {
+			if (g_currentk < g_keyObj["keyCtrl" + keyCtrlPtn][g_currentj].length - 1 &&
+				g_kcType != "Main") {
 				g_currentk++;
 				cursor.style.top = (parseInt(cursor.style.top) + 20) + "px";
 
-				// 他の代替キーが存在せず、次の矢印がある場合
 			} else if (g_currentj < g_keyObj["keyCtrl" + keyCtrlPtn].length - 1) {
+				// 他の代替キーが存在せず、次の矢印がある場合
 				g_currentj++;
 				g_currentk = 0;
+
+				// 代替キーのみの場合は次の代替キーがあるキーを探す
+				if (g_kcType == "Replaced") {
+					for (var j = g_currentj, len = g_keyObj["keyCtrl" + keyCtrlPtn].length; j < len; j++) {
+						if (g_keyObj["keyCtrl" + keyCtrlPtn][j][1] != undefined) {
+							g_currentj = j;
+							g_currentk = 1;
+							break;
+						}
+					}
+					if (g_currentk == 0) {
+						for (var j = 0, len = g_currentj; j < len; j++) {
+							if (g_keyObj["keyCtrl" + keyCtrlPtn][j][1] != undefined) {
+								g_currentj = j;
+								g_currentk = 1;
+								break;
+							}
+						}
+					}
+				}
 				var posj = g_keyObj["pos" + keyCtrlPtn][g_currentj];
 
 				leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
@@ -2373,14 +2419,13 @@ function keyConfigInit() {
 
 				cursor.style.left = (kWidth / 2 + g_keyObj.blank * stdPos - 10) + "px";
 				cursor.style.top = (50 + 150 * dividePos) + "px";
+				if (g_kcType == "Replaced") {
+					cursor.style.top = (parseFloat(cursor.style.top) + 20) + "px";
+				}
 
-				// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
 			} else {
-				g_currentj = 0;
-				g_currentk = 0;
-				var posj = g_keyObj["pos" + keyCtrlPtn][g_currentj];
-				cursor.style.left = (kWidth / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10) + "px";
-				cursor.style.top = "45px";
+				// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
+				eval("resetCursor" + g_kcType)(kWidth, divideCnt, keyCtrlPtn);
 			}
 		}
 		for (var j = 0; j < C_BLOCK_KEYS.length; j++) {
@@ -2389,6 +2434,73 @@ function keyConfigInit() {
 			}
 		}
 	}
+}
+
+/**
+ * キーコンフィグ用カーソルのリセット(ConfigType:Main)
+ * @param {number} _width 
+ * @param {number} _divideCnt 
+ * @param {string} _keyCtrlPtn 
+ */
+function resetCursorMain(_width, _divideCnt, _keyCtrlPtn) {
+
+	g_currentj = 0;
+	g_currentk = 0;
+	g_prevKey = -1;
+	var posj = g_keyObj["pos" + _keyCtrlPtn][0];
+
+	var cursor = document.getElementById("cursor");
+	cursor.style.left = (_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10) + "px";
+	cursor.style.top = "45px";
+}
+
+/**
+ * キーコンフィグ用カーソルのリセット(ConfigType:Replaced)
+ * @param {number} _width 
+ * @param {number} _divideCnt 
+ * @param {string} _keyCtrlPtn 
+ */
+function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
+	g_currentj = 0;
+	g_currentk = 0;
+	g_prevKey = -1;
+	var keyNum = g_keyObj["chara" + _keyCtrlPtn].length;
+
+	for (var j = 0; j < keyNum; j++) {
+		if (g_keyObj["keyCtrl" + _keyCtrlPtn][j][1] != undefined) {
+			g_currentj = j;
+			g_currentk = 1;
+			break;
+		}
+	}
+	var posj = g_keyObj["pos" + _keyCtrlPtn][g_currentj];
+
+	var cursor = document.getElementById("cursor");
+	cursor.style.left = (_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10) + "px";
+	if (g_currentk == 1) {
+		cursor.style.top = "65px";
+	} else {
+		g_kcType = "ALL";
+		cursor.style.top = "45px";
+	}
+}
+
+/**
+ * キーコンフィグ用カーソルのリセット(ConfigType:ALL)
+ * @param {number} _width 
+ * @param {number} _divideCnt 
+ * @param {string} _keyCtrlPtn 
+ */
+function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
+
+	g_currentj = 0;
+	g_currentk = 0;
+	g_prevKey = -1;
+	var posj = g_keyObj["pos" + _keyCtrlPtn][0];
+
+	var cursor = document.getElementById("cursor");
+	cursor.style.left = (_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10) + "px";
+	cursor.style.top = "45px";
 }
 
 /*-----------------------------------------------------------*/
