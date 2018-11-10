@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.61.0";
+var g_version = "Ver 0.61.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -785,12 +785,15 @@ function checkArrayVal(_checkArray, _type, _minLength) {
 	if (_type == "float") {
 		// 数値型(小数可)の場合
 		var isNaNflg = isNaN(parseFloat(_checkArray[0]));
-		return (isNaNflg == true ? false : true);
-
+		if (isNaNflg == true) {
+			return false;
+		}
 	} else if (_type == "number") {
 		// 数値型(整数のみ)の場合
 		var isNaNflg = isNaN(parseInt(_checkArray[0]));
-		return (isNaNflg == true ? false : true);
+		if (isNaNflg == true) {
+			return false;
+		}
 	}
 
 	// 配列長のチェック
