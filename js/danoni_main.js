@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.58.2";
+var g_version = "Ver 0.59.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -664,6 +664,21 @@ var g_wordObj = {
 };
 var g_wordSprite;
 
+/** 
+ * メッセージ定義 
+ * - 変数名は "C_MSG_X_YYYY" の形で、末尾に (X-YYYY) をつける。
+ * - 記述不正の場合、書き方を2行目に指定すると親切。
+*/
+var C_MSG_W_0001 = "お使いのブラウザは動作保証外です。<br>" +
+	"Chrome/Opera/Vivaldiなど、WebKit系ブラウザの利用を推奨します。(W-0001)";
+var C_MSG_E_0011 = "アーティスト名が未入力です。(E-0011)";
+var C_MSG_E_0012 = "曲名情報が未設定です。(E-0012)<br>" +
+	"|musicTitle=曲名,アーティスト名,アーティストURL|";
+var C_MSG_E_0021 = "譜面情報が未指定か、フォーマットが間違っています。(E-0021)<br>" +
+	"|difData=キー数,譜面名,初期速度|";
+var C_MSG_E_0031 = "楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>" +
+	"|musicUrl=****.mp3|";
+
 /**
  * イベントハンドラ用オブジェクト
  * 参考: http://webkatu.com/remove-eventlistener/
@@ -703,6 +718,73 @@ var g_handler = (function () {
 	}
 })();
 
+/**
+ * 文字列を想定された型に変換
+ * - _type は "float"(小数)、"number"(整数)、"string"(文字列)から選択
+ * - 型に合わない場合は _defaultStr を返却するが、_defaultStr自体の型チェック・変換は行わない
+ * @param {string} _checkStr 
+ * @param {string} _defaultStr 
+ * @param {string} _type 
+ */
+function setVal(_checkStr, _defaultStr, _type) {
+
+	// 値がundefined相当の場合は無条件でデフォルト値を返却
+	if (_checkStr == undefined && _checkStr != "") {
+		return _defaultStr;
+	}
+
+	if (_type == "float") {
+		// 数値型(小数可)の場合
+		var isNaNflg = isNaN(parseFloat(_checkStr));
+		return (isNaNflg == true ? _defaultStr : parseFloat(_checkStr));
+
+	} else if (_type == "number") {
+		// 数値型(整数のみ)の場合
+		var isNaNflg = isNaN(parseInt(_checkStr));
+		return (isNaNflg == true ? _defaultStr : parseInt(_checkStr));
+
+	}
+
+	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
+	return _checkStr;
+}
+
+/**
+ * 配列の型及び最小配列長のチェック
+ * - チェックのみで変換は行わないため、変換が必要な場合は別途処理を組むこと。
+ * - 型は最初の要素のみチェックを行う。
+ * @param {array} _checkArray 
+ * @param {string} _type 
+ * @param {number} _minLength 最小配列長
+ */
+function checkArrayVal(_checkArray, _type, _minLength) {
+
+	// 値がundefined相当の場合は無条件でデフォルト値を返却
+	if (_checkArray == undefined && _checkArray != "") {
+		return false;
+	}
+	// 配列かどうかをチェック
+	if (Object.prototype.toString.call(_checkArray) != "[Object Array]") {
+		return false;
+	}
+	// 最小配列長が不正の場合は強制的に1を設定
+	if (isNaN(parseFloat(_minLength))) {
+		_minLength = 1;
+	}
+	if (_type == "float") {
+		// 数値型(小数可)の場合
+		var isNaNflg = isNaN(parseFloat(_checkArray[0]));
+		return (isNaNflg == true ? false : true);
+
+	} else if (_type == "number") {
+		// 数値型(整数のみ)の場合
+		var isNaNflg = isNaN(parseInt(_checkArray[0]));
+		return (isNaNflg == true ? false : true);
+	}
+
+	// 配列長のチェック
+	return (_checkArray.length >= _minLength ? true : false);
+}
 
 /**
  * 図形の描画
@@ -759,6 +841,19 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text) 
 	return div;
 }
 
+/**
+ * 子div要素のラベル文字作成
+ * - createDivLabelに加えて、独自フォントが指定できる形式。
+ * @param {string} _id 
+ * @param {number} _x 
+ * @param {number} _y 
+ * @param {number} _width 
+ * @param {number} _height 
+ * @param {number} _fontsize 
+ * @param {string} _color 
+ * @param {string} _text 
+ * @param {string} _font 
+ */
 function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text, _font) {
 	var div = createDiv(_id, _x, _y, _width, _height);
 	var style = div.style;
@@ -1116,6 +1211,15 @@ function initialControl() {
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
 
+	if (document.getElementById("divRoot") == null) {
+		var stage = document.getElementById("canvas-frame");
+		var divRoot = createDiv("divRoot", 0, 0, g_sWidth, g_sHeight);
+		stage.appendChild(divRoot);
+		clearWindow();
+	} else {
+		var divRoot = document.getElementById("divRoot");
+	}
+
 	// 譜面データの読み込み
 	var dos = document.getElementById("dos").value;
 	g_rootObj = dosConvert(dos);
@@ -1145,14 +1249,7 @@ function titleInit() {
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
 
-	if (document.getElementById("divRoot") == null) {
-		var stage = document.getElementById("canvas-frame");
-		var divRoot = createDiv("divRoot", 0, 0, g_sWidth, g_sHeight);
-		stage.appendChild(divRoot);
-		clearWindow();
-	} else {
-		var divRoot = document.getElementById("divRoot");
-	}
+	var divRoot = document.getElementById("divRoot");
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customTitleInit == "function") {
@@ -1164,6 +1261,15 @@ function titleInit() {
 		"<span style='color:#6666ff;font-size:40px;'>D</span>ANCING<span style='color:#ffff66;font-size:40px;'>☆</span><span style='color:#ff6666;font-size:40px;'>O</span>NIGIRI", 0, 15);
 	lblTitle.style.zIndex = 1;
 	divRoot.appendChild(lblTitle);
+
+	// ブラウザチェック
+	if (g_userAgent.indexOf('msie') != -1 ||
+		g_userAgent.indexOf('trident') != -1 ||
+		g_userAgent.indexOf('edge') != -1 ||
+		g_userAgent.indexOf('firefox') != -1) {
+
+		makeWarningWindow(C_MSG_W_0001);
+	}
 
 	// オーディオファイル指定
 	g_audio.src = "../music/" + g_headerObj.musicUrl;
@@ -1263,6 +1369,33 @@ function titleInit() {
 }
 
 /**
+ * 警告用ウィンドウ（汎用）を表示
+ * @param {string} _id 
+ * @param {string} _text 
+ */
+function makeWarningWindow(_text) {
+	var lblWarning;
+	if (document.getElementById("lblWarning") == null) {
+		lblWarning = getTitleDivLabel("lblWarning", "<p>" + _text + "</p>", 0, 70);
+		lblWarning.style.backgroundColor = "#ffcccc";
+		lblWarning.style.opacity = 0.9;
+	} else {
+		lblWarning = document.getElementById("lblWarning");
+		lblWarning.innerHTML += "<p>" + _text + "</p>";
+	}
+	var len = lblWarning.innerHTML.split("<br>").length + lblWarning.innerHTML.split("<p>").length - 1;
+	var warnHeight = 21 * len;
+	lblWarning.style.height = warnHeight + "px";
+	lblWarning.style.lineHeight = "15px";
+	lblWarning.style.fontSize = "14px";
+	lblWarning.style.color = "#660000";
+	lblWarning.style.textAlign = C_ALIGN_LEFT;
+	lblWarning.style.fontFamily = C_LBL_BASICFONT;
+
+	divRoot.appendChild(lblWarning);
+}
+
+/**
  * 譜面データを分割して値を取得
  * @param {string} _dos 譜面データ
  */
@@ -1300,7 +1433,7 @@ function headerConvert(_dosObj) {
 		if (musics.length > 1) {
 			obj.artistName = musics[1];
 		} else {
-			alert("アーティスト名が未入力です。");
+			makeWarningWindow(C_MSG_E_0011);
 			obj.artistName = "artistName";
 		}
 		if (musics.length > 2) {
@@ -1309,7 +1442,7 @@ function headerConvert(_dosObj) {
 			obj.artistUrl = location.href;
 		}
 	} else {
-		alert("曲名情報が無いか、フォーマットが間違っています。");
+		makeWarningWindow(C_MSG_E_0012);
 		obj.musicTitle = "musicName";
 		obj.artistName = "artistName";
 		obj.artistUrl = location.href;
@@ -1323,11 +1456,12 @@ function headerConvert(_dosObj) {
 		obj.initSpeeds = new Array();
 		for (var j = 0; j < difs.length; j++) {
 			var difDetails = difs[j].split(",");
-			obj.keyLabels.push(difDetails[0]);
-			obj.difLabels.push(difDetails[1]);
-			obj.initSpeeds.push(difDetails[2]);
+			obj.keyLabels.push(setVal(difDetails[0], "7", "string"));
+			obj.difLabels.push(setVal(difDetails[1], "Normal", "string"));
+			obj.initSpeeds.push(setVal(difDetails[2], 3.5, "float"));
 		}
 	} else {
+		makeWarningWindow(C_MSG_E_0021);
 		obj.keyLabels = ["7"];
 		obj.difLabels = ["Normal"];
 		obj.initSpeeds = [3.5];
@@ -1427,16 +1561,12 @@ function headerConvert(_dosObj) {
 	}
 
 	// 終了フレーム数
-	if (_dosObj.endFrame != undefined) {
+	if (setVal(_dosObj.endFrame, 0, "number") != 0) {
 		obj.endFrame = parseInt(_dosObj.endFrame / 60) * 60;
 	}
 
 	// 外部jsファイルの指定
-	if (_dosObj.customjs != undefined) {
-		obj.customjs = _dosObj.customjs;
-	} else {
-		obj.customjs = "danoni_custom.js";
-	}
+	obj.customjs = setVal(_dosObj.customjs, "danoni_custom.js", "string");
 
 	// ステップゾーン位置
 	if (isNaN(parseFloat(_dosObj.stepY))) {
@@ -1450,7 +1580,7 @@ function headerConvert(_dosObj) {
 	if (_dosObj.musicUrl != undefined) {
 		obj.musicUrl = _dosObj.musicUrl;
 	} else {
-		alert("楽曲ファイルが指定されていません！ |musicUrl=****.mp3|のように指定してください。");
+		makeWarningWindow(C_MSG_E_0031);
 	}
 
 	// hashTag
