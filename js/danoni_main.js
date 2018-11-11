@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.61.2";
+var g_version = "Ver 0.62.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -681,10 +681,10 @@ var C_MSG_E_0021 = "譜面情報が未指定か、フォーマットが間違っ
 var C_MSG_E_0031 = "楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>" +
 	"|musicUrl=****.mp3|";
 
-var C_MSG_E_0101 = "新しいキー:{0}の[arrBaseMC]が未定義です。(E-0101)<br>" +
-	"|arrBaseMC{0}=0,1,0,1,0,2|";
-var C_MSG_E_0102 = "新しいキー:{0}の[headerDat]が未定義です。(E-0102)<br>" +
-	"|headerDat{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|";
+var C_MSG_E_0101 = "新しいキー:{0}の[color]が未定義です。(E-0101)<br>" +
+	"|color{0}=0,1,0,1,0,2|";
+var C_MSG_E_0102 = "新しいキー:{0}の[chara]が未定義です。(E-0102)<br>" +
+	"|chara{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|";
 var C_MSG_E_0103 = "新しいキー:{0}の[stepRtn]が未定義です。(E-0103)<br>" +
 	"|stepRtn{0}=0,45,-90,135,180,onigiri|";
 var C_MSG_E_0104 = "新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>" +
@@ -771,13 +771,15 @@ function setVal(_checkStr, _defaultStr, _type) {
 function checkArrayVal(_checkArray, _type, _minLength) {
 
 	// 値がundefined相当の場合は無条件でデフォルト値を返却
-	if (_checkArray == undefined && _checkArray != "") {
+	if (_checkArray == undefined || _checkArray == "") {
 		return false;
 	}
+
 	// 配列かどうかをチェック
-	if (Object.prototype.toString.call(_checkArray) != "[Object Array]") {
+	if (Object.prototype.toString.call(_checkArray) != "[object Array]") {
 		return false;
 	}
+
 	// 最小配列長が不正の場合は強制的に1を設定
 	if (isNaN(parseFloat(_minLength))) {
 		_minLength = 1;
@@ -1619,65 +1621,108 @@ function keysConvert(_dosObj) {
 
 	if (_dosObj.keyExtraList != undefined) {
 		var keyExtraList = _dosObj.keyExtraList.split(",");
-		var tempKeyCtrl = new Array();
-		var tempKeyPtn = new Array();
+		var tmpKeyCtrl = new Array();
+		var tmpKeyPtn = new Array();
+		var tmpMinPatterns = 1;
 
 		for (var j = 0; j < keyExtraList.length; j++) {
 			newKey = keyExtraList[j];
 
-			if (_dosObj["arrBaseMC" + newKey] != undefined) {
-				g_keyObj["color" + newKey + "_0"] = _dosObj["arrBaseMC" + newKey].split(",");
+			if (_dosObj["color" + newKey] != undefined) {
+				var tmpColors = _dosObj["color" + newKey].split("$");
+				if (checkArrayVal(tmpColors, "string", 1)) {
+					for (var k = 0, len = tmpColors.length; k < len; k++) {
+						g_keyObj["color" + newKey + "_" + k] = tmpColors[k].split(",");
+					}
+					tmpMinPatterns = tmpColors.length;
+				}
 			} else {
 				makeWarningWindow(C_MSG_E_0101.split("{0}").join(newKey));
 			}
-			if (_dosObj["headerDat" + newKey] != undefined) {
-				g_keyObj["chara" + newKey + "_0"] = _dosObj["headerDat" + newKey].split(",");
-				g_keyObj["chara" + newKey + "_0d"] = _dosObj["headerDat" + newKey].split(",");
+
+			if (_dosObj["chara" + newKey] != undefined) {
+				var tmpCharas = _dosObj["chara" + newKey].split("$");
+				if (checkArrayVal(tmpCharas, "string", 1)) {
+					for (var k = 0, len = tmpCharas.length; k < len; k++) {
+						g_keyObj["chara" + newKey + "_" + k] = tmpCharas[k].split(",");
+						g_keyObj["chara" + newKey + "_" + k + "d"] = tmpCharas[k].split(",");
+					}
+				}
 			} else {
 				makeWarningWindow(C_MSG_E_0102.split("{0}").join(newKey));
 			}
-			if (isNaN(Number(_dosObj["div" + newKey]))) {
-				g_keyObj["div" + newKey + "_0"] = g_keyObj["chara" + newKey + "_0"].length;
-			} else {
-				g_keyObj["div" + newKey + "_0"] = _dosObj["div" + newKey];
+
+			if (_dosObj["div" + newKey] != undefined) {
+				var tmpDivs = _dosObj["div" + newKey].split("$");
+				if (checkArrayVal(tmpDivs, "string", 1)) {
+					for (var k = 0, len = tmpDivs.length; k < len; k++) {
+						if (isNaN(Number(tmpDivs[k]))) {
+							g_keyObj["div" + newKey + "_" + k] = minLength;
+						} else {
+							g_keyObj["div" + newKey + "_" + k] = tmpDivs[k];
+						}
+					}
+				}
 			}
+
 			if (_dosObj["stepRtn" + newKey] != undefined) {
-				g_keyObj["stepRtn" + newKey + "_0"] = _dosObj["stepRtn" + newKey].split(",");
-				g_keyObj["stepRtn" + newKey + "_0d"] = _dosObj["stepRtn" + newKey].split(",");
-				for (var k = 0; k < g_keyObj["stepRtn" + newKey + "_0"].length; k++) {
-					if (isNaN(Number(g_keyObj["stepRtn" + newKey + "_0"][k]))) {
-					} else {
-						g_keyObj["stepRtn" + newKey + "_0"][k] = parseFloat(g_keyObj["stepRtn" + newKey + "_0"][k]);
-						g_keyObj["stepRtn" + newKey + "_0d"][k] = parseFloat(g_keyObj["stepRtn" + newKey + "_0d"][k]);
+				var tmpStepRtns = _dosObj["stepRtn" + newKey].split("$");
+				if (checkArrayVal(tmpStepRtns, "string", 1)) {
+					for (var k = 0, len = tmpStepRtns.length; k < len; k++) {
+						g_keyObj["stepRtn" + newKey + "_" + k] = tmpStepRtns[k].split(",");
+						g_keyObj["stepRtn" + newKey + "_" + k + "d"] = tmpStepRtns[k].split(",");
+
+						for (var m = 0, lenc = g_keyObj["stepRtn" + newKey + "_" + k].length; m < lenc; m++) {
+							if (isNaN(Number(g_keyObj["stepRtn" + newKey + "_" + k][m]))) {
+							} else {
+								g_keyObj["stepRtn" + newKey + "_" + k][m] = parseFloat(g_keyObj["stepRtn" + newKey + "_" + k][m]);
+								g_keyObj["stepRtn" + newKey + "_" + k + "d"][m] = g_keyObj["stepRtn" + newKey + "_" + k][m];
+							}
+						}
 					}
 				}
 			} else {
 				makeWarningWindow(C_MSG_E_0103.split("{0}").join(newKey));
 			}
 			if (_dosObj["pos" + newKey] != undefined) {
-				g_keyObj["pos" + newKey + "_0"] = _dosObj["pos" + newKey].split(",");
+				var tmpPoss = _dosObj["pos" + newKey].split("$");
+				if (checkArrayVal(tmpPoss, "string", 1)) {
+					for (var k = 0, len = tmpPoss.length; k < len; k++) {
+						g_keyObj["pos" + newKey + "_" + k] = tmpPoss[k].split(",");
+					}
+				}
+
 			} else {
-				g_keyObj["pos" + newKey + "_0"] = new Array();
-				if (g_keyObj["chara" + newKey + "_0"] != undefined) {
-					for (var k = 0; k < g_keyObj["chara" + newKey + "_0"].length; k++) {
-						g_keyObj["pos" + newKey + "_0"][k] = k;
+				for (var j = 0; j < tmpMinPatterns; j++) {
+					g_keyObj["pos" + newKey + "_" + j] = new Array();
+					if (g_keyObj["color" + newKey + "_" + j] != undefined) {
+						for (var k = 0; k < g_keyObj["color" + newKey + "_" + j].length; k++) {
+							g_keyObj["pos" + newKey + "_" + j][k] = k;
+						}
 					}
 				}
 			}
+
 			if (_dosObj["keyCtrl" + newKey] != undefined) {
-				tempKeyCtrl = _dosObj["keyCtrl" + newKey].split(",");
+				var tmpKeyCtrls = _dosObj["keyCtrl" + newKey].split("$");
 
-				g_keyObj["keyCtrl" + newKey + "_0"] = new Array();
-				g_keyObj["keyCtrl" + newKey + "_0d"] = new Array();
+				if (checkArrayVal(tmpKeyCtrls, "string", 1)) {
+					for (var p = 0, len = tmpKeyCtrls.length; p < len; p++) {
+						tmpKeyCtrl = tmpKeyCtrls[p].split(",");
 
-				for (var k = 0; k < tempKeyCtrl.length; k++) {
-					tempKeyPtn = tempKeyCtrl[k].split("/");
-					g_keyObj["keyCtrl" + newKey + "_0"][k] = new Array();
-					g_keyObj["keyCtrl" + newKey + "_0d"][k] = new Array();
+						g_keyObj["keyCtrl" + newKey + "_" + p] = new Array();
+						g_keyObj["keyCtrl" + newKey + "_" + p + "d"] = new Array();
 
-					for (var m = 0; m < tempKeyPtn.length; m++) {
-						g_keyObj["keyCtrl" + newKey + "_0"][k][m] = tempKeyPtn[m];
-						g_keyObj["keyCtrl" + newKey + "_0d"][k][m] = tempKeyPtn[m];
+						for (var k = 0; k < tmpKeyCtrl.length; k++) {
+							tmpKeyPtn = tmpKeyCtrl[k].split("/");
+							g_keyObj["keyCtrl" + newKey + "_" + p][k] = new Array();
+							g_keyObj["keyCtrl" + newKey + "_" + p + "d"][k] = new Array();
+
+							for (var m = 0; m < tmpKeyPtn.length; m++) {
+								g_keyObj["keyCtrl" + newKey + "_" + p][k][m] = tmpKeyPtn[m];
+								g_keyObj["keyCtrl" + newKey + "_" + p + "d"][k][m] = tmpKeyPtn[m];
+							}
+						}
 					}
 				}
 			} else {
@@ -2324,7 +2369,8 @@ function keyConfigInit() {
 		}
 		clearWindow();
 		keyConfigInit();
-		eval("resetCursor" + g_kcType)(kWidth, divideCnt, g_keyObj.currentKey + "_" + g_keyObj.currentPtn);
+		var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+		eval("resetCursor" + g_kcType)(kWidth, g_keyObj["div" + keyCtrlPtn], keyCtrlPtn);
 	});
 	divRoot.appendChild(btnPtnChange);
 
