@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/11
+ * Revised : 2018/11/13
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.63.0";
+var g_version = "Ver 0.63.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2602,6 +2602,9 @@ function loadingScoreInit() {
 	var firstFrame = (g_scoreObj.frameNum == 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
 	var arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
 
+	// キーパターン(デフォルト)に対応する矢印番号を格納
+	convertreplaceNums();
+
 	// フレーム・曲開始位置調整
 	var preblankFrame = 0;
 	if (g_scoreObj.frameNum == 0) {
@@ -3254,6 +3257,27 @@ function getFrzLength(_speedOnFrame, _startFrame, _endFrame) {
 }
 
 /**
+ * キーパターン(デフォルト)に対応する矢印番号を格納
+ */
+function convertreplaceNums() {
+	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	var baseCharas = g_keyObj["chara" + g_keyObj.currentKey + "_0"];
+	var convCharas = g_keyObj["chara" + keyCtrlPtn];
+
+	g_workObj.replaceNums = new Array();
+
+	for (var j = 0; j < keyNum; j++) {
+		for (var k = 0; k < keyNum; k++) {
+			if (baseCharas[j] == convCharas[k]) {
+				g_workObj.replaceNums[j] = k;
+				continue;
+			}
+		}
+	}
+}
+
+/**
  * 色情報の格納
  * @param {string} _header 
  * @param {number} _frame 
@@ -3272,7 +3296,8 @@ function pushColors(_header, _frame, _val, _colorCd) {
 			g_workObj["mk" + _header + "ColorCd"][_frame] = new Array();
 		}
 		if (_val < 20) {
-			g_workObj["mk" + _header + "Color"][_frame].push(_val);
+			var realVal = g_workObj.replaceNums[_val];
+			g_workObj["mk" + _header + "Color"][_frame].push(realVal);
 			g_workObj["mk" + _header + "ColorCd"][_frame].push(_colorCd);
 		} else if (_val >= 20) {
 			var colorNum = _val - 20;
