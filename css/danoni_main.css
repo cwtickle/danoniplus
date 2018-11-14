@@ -99,3 +99,41 @@
 	-webkit-mask-image: url("../img/aaShadow_500.png");
 	-webkit-mask-size: contain;
 }
+@keyframes upToDown {
+	0% {
+		opacity: 0;/* 透明 */
+		transform: translateY(-50px);
+	}
+	100% {
+		opacity: 1;/* 不透明 */
+		transform: translateY(0);
+	}
+}
+@keyframes leftToRight {
+	0% {
+		opacity: 0;/* 透明 */
+		transform: translateX(-50px);
+	}
+	100% {
+		opacity: 1;/* 不透明 */
+		transform: translateX(0);
+	}
+}
+@keyframes leftToRightFade {
+	0% {
+		opacity: 0;/* 透明 */
+		transform: translateX(-30px);
+	}
+	30% {
+		opacity: 1;/* 不透明 */
+		transform: translateX(0);
+	}
+	60% {
+		opacity: 1;/* 不透明 */
+		transform: translateX(0);
+	}
+	100% {
+		opacity: 0;/* 透明 */
+		transform: translateX(30px);
+	}
+}
