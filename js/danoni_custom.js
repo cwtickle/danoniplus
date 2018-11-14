@@ -26,10 +26,6 @@ function customTitleInit() {
 	// レイヤー情報取得
 	var layer0 = document.getElementById("layer0");
 	var l0ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
 
 	// 画面背景を指定 (background-color)
 	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
@@ -47,7 +43,7 @@ function customTitleInit() {
 
 	// 曲名文字描画（曲名は譜面データから取得）
 	// TEST:試験的に矢印色の1番目と3番目を使ってタイトルをグラデーション
-	var grd = l1ctx.createLinearGradient(0, 0, g_sHeight, 0);
+	var grd = l0ctx.createLinearGradient(0, 0, g_sHeight, 0);
 	if (g_headerObj["setColor"][0] != undefined) {
 		grd.addColorStop(0, g_headerObj["setColor"][0]);
 	} else {
@@ -62,7 +58,7 @@ function customTitleInit() {
 	if (titlefontsize >= 64) {
 		titlefontsize = 64;
 	}
-	createLabel(l1ctx, g_headerObj["musicTitle"], g_sWidth / 2, g_sHeight / 2,
+	createLabel(l0ctx, g_headerObj["musicTitle"], g_sWidth / 2, g_sHeight / 2,
 		titlefontsize, "メイリオ", grd, "center");
 }
 
@@ -73,10 +69,6 @@ function customOptionInit() {
 	// レイヤー情報取得
 	var layer0 = document.getElementById("layer0");
 	var l0ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
 
 	// 画面背景を指定 (background-color)
 	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
@@ -94,10 +86,6 @@ function customKeyConfigInit() {
 	// レイヤー情報取得
 	var layer0 = document.getElementById("layer0");
 	var l0ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
 
 	// 画面背景を指定 (background-color)
 	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
@@ -124,10 +112,6 @@ function customMainInit() {
 	// レイヤー情報取得
 	var layer0 = document.getElementById("layer0");
 	var l0ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
 
 	// 画面背景を指定 (background-color)
 	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
@@ -161,10 +145,6 @@ function customResultInit() {
 	// レイヤー情報取得
 	var layer0 = document.getElementById("layer0");
 	var l0ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
 
 	// 画面背景を指定 (background-color)
 	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);

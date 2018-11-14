@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/13
+ * Revised : 2018/11/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.63.1";
+var g_version = "Ver 0.64.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -28,11 +28,6 @@ var g_version = "Ver 0.63.1";
  * ▽ 画面の構成
  *  [タイトル]-[設定・オプション]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]
  *  ⇒　各画面に Init がついたものが画面の基本構成(ルート)を表す。
- * 
- * ▽ レイヤーの考え方
- *  [マスク]-[メイン]-[背景]の3層を想定。
- *  ここで指定するものは基本的に中間の[メイン]に配置する。
- *  [背景]や[マスク]層はカスタムしやすいようにする予定。
  * 
  * ▽ スプライトの親子関係
  *  基本的にdiv要素で管理。最下層を[difRoot]とし、createSprite()でdiv子要素を作成していく。
@@ -1156,18 +1151,37 @@ function clearWindow() {
 	// レイヤー情報取得
 	var layer0 = document.getElementById("layer0");
 	var l0ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
+
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
 	var C_MARGIN = 0;
 
 	// 線画、図形をクリア
 	l0ctx.clearRect(0, 0, g_sWidth, g_sHeight);
-	l1ctx.clearRect(0, 0, g_sWidth, g_sHeight);
-	l2ctx.clearRect(0, 0, g_sWidth, g_sHeight);
+
+	if (document.getElementById("layer1") != null) {
+		var layer1 = document.getElementById("layer1");
+		var l1ctx = layer1.getContext("2d");
+		l1ctx.clearRect(0, 0, g_sWidth, g_sHeight);
+
+		// 線画 (title-line)
+		l1ctx.beginPath();
+		l1ctx.strokeStyle = "#cccccc";
+		l1ctx.moveTo(C_MARGIN, C_MARGIN);
+		l1ctx.lineTo(g_sWidth - C_MARGIN, C_MARGIN);
+		l1ctx.stroke();
+
+		l1ctx.beginPath();
+		l1ctx.strokeStyle = "#cccccc";
+		l1ctx.moveTo(C_MARGIN, g_sHeight - C_MARGIN);
+		l1ctx.lineTo(g_sWidth - C_MARGIN, g_sHeight - C_MARGIN);
+		l1ctx.stroke();
+	}
+	if (document.getElementById("layer2") != null) {
+		var layer2 = document.getElementById("layer2");
+		var l2ctx = layer2.getContext("2d");
+		l2ctx.clearRect(0, 0, g_sWidth, g_sHeight);
+	}
 
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
 	var divRoot = document.getElementById("divRoot");
@@ -1180,19 +1194,6 @@ function clearWindow() {
 		g_handler.removeListener(divRoot.firstChild.getAttribute("lsnrkeyTE"));
 		divRoot.removeChild(divRoot.firstChild);
 	}
-
-	// 線画 (title-line)
-	l1ctx.beginPath();
-	l1ctx.strokeStyle = "#cccccc";
-	l1ctx.moveTo(C_MARGIN, C_MARGIN);
-	l1ctx.lineTo(g_sWidth - C_MARGIN, C_MARGIN);
-	l1ctx.stroke();
-
-	l1ctx.beginPath();
-	l1ctx.strokeStyle = "#cccccc";
-	l1ctx.moveTo(C_MARGIN, g_sHeight - C_MARGIN);
-	l1ctx.lineTo(g_sWidth - C_MARGIN, g_sHeight - C_MARGIN);
-	l1ctx.stroke();
 
 }
 
@@ -1222,8 +1223,6 @@ function loadScript(url, callback) {
 
 function initialControl() {
 
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
 
@@ -1255,13 +1254,6 @@ function initialControl() {
  */
 function titleInit() {
 
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
 
@@ -1742,13 +1734,6 @@ function keysConvert(_dosObj) {
  */
 function optionInit() {
 
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l1ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
 	var divRoot = document.getElementById("divRoot");
 
 	// タイトル文字描画
@@ -2222,13 +2207,6 @@ function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
  */
 function keyConfigInit() {
 
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
 	var divRoot = document.getElementById("divRoot");
 
 	// タイトル文字描画
@@ -2564,11 +2542,6 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
  */
 function loadingScoreInit() {
 
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
 	var divRoot = document.getElementById("divRoot");
 
 	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
@@ -3435,11 +3408,6 @@ function getArrowSettings() {
  */
 function MainInit() {
 
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
 	var divRoot = document.getElementById("divRoot");
 
 	g_workObj.word0Data = "";
@@ -4495,13 +4463,6 @@ function finishViewing() {
  */
 function resultInit() {
 
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
-	var layer1 = document.getElementById("layer1");
-	var l1ctx = layer1.getContext("2d");
-	var layer2 = document.getElementById("layer2");
-	var l2ctx = layer2.getContext("2d");
 	var divRoot = document.getElementById("divRoot");
 
 	// タイトル文字描画
