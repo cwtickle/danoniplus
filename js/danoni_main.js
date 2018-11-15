@@ -2762,7 +2762,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 
 	}
 
-	// 背景データの分解 ()
+	// 背景データの分解 (10個1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,animationName,animationDuration]
 	obj.backData = new Array();
 	if (_dosObj["back" + _scoreNo + "_data"] != undefined) {
@@ -2784,23 +2784,32 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				var tmpY = setVal(tmpBackData[5], 0, "number");
 				var tmpWidth = setVal(tmpBackData[6], 0, "number");
 				var tmpHeight = setVal(tmpBackData[7], 0, "number");
-				var tmpAnimetionName = setVal(tmpBackData[8], "none", "string");
+				var tmpAnimationName = setVal(tmpBackData[8], "none", "string");
 				var tmpAnimationDuration = setVal(tmpBackData[9], "none", "string");
 
 				var addFrame = 0;
 				if (obj.backData[tmpFrame] == undefined) {
-					obj.backData[tmpFrame] = new Array();
+					obj.backData[tmpFrame] = {};
 				} else {
 					for (var j = tmpFrame + 1; ; j++) {
 						if (obj.backData[tmpFrame + j] == undefined) {
-							obj.backData[tmpFrame + j] = new Array();
+							obj.backData[tmpFrame + j] = {};
 							addFrame = j;
 							break;
 						}
 					}
 				}
-				obj.backData[tmpFrame + addFrame].push(tmpClass, tmpX, tmpY, tmpWidth, tmpHeight,
-					tmpAnimationName, tmpAnimationDuration);
+				obj.backData[tmpFrame + addFrame] = {
+					depth: tmpDepth,
+					path: tmpPath,
+					class: tmpClass,
+					left: tmpX,
+					top: tmpY,
+					width: tmpWidth,
+					height: tmpHeight,
+					animationName: tmpAnimationName,
+					animationDuration: tmpAnimationDuration
+				};
 			}
 		}
 	}
