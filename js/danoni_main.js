@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/14
+ * Revised : 2018/11/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.64.0";
+var g_version = "Ver 0.65.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2651,6 +2651,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	obj.frzData = new Array();
 	var frzName;
 	var tmpData;
+	var tmpArrayData = new Array();
+
 	for (var j = 0, k = 0; j < keyNum; j++) {
 
 		// 矢印データの分解
@@ -2684,7 +2686,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 		frzName = frzName.replace("oni", "foni");
 		frzName = frzName.replace("arrow", "frzArrow");
 
-		// フリーズアローデータの分解
+		// フリーズアローデータの分解 (2つで1セット)
 		if (_dosObj[frzName + _scoreNo + "_data"] != undefined) {
 			tmpData = _dosObj[frzName + _scoreNo + "_data"].split("\r").join("");
 			tmpData = tmpData.split("\n").join("");
@@ -2703,7 +2705,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 		}
 	}
 
-	// 速度変化・色変化データの分解
+	// 速度変化・色変化データの分解 (2つで1セット)
 	obj.speedData = [];
 	var speedFooter = (g_keyObj.currentKey == "5" ? "_data" : "_change");
 	if (_dosObj["speed" + _scoreNo + speedFooter] != undefined) {
@@ -2738,7 +2740,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 		}
 	}
 
-	// 歌詞データの分解
+	// 歌詞データの分解 (3つで1セット)
 	obj.wordData = new Array();
 	if (_dosObj["word" + _scoreNo + "_data"] != undefined) {
 
@@ -2758,6 +2760,49 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 			}
 		}
 
+	}
+
+	// 背景データの分解 ()
+	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,animationName,animationDuration]
+	obj.backData = new Array();
+	if (_dosObj["back" + _scoreNo + "_data"] != undefined) {
+
+		tmpArrayData = _dosObj["back" + _scoreNo + "_data"].split("\r").join("");
+		tmpArrayData = tmpData.split("\n");
+
+		for (var j = 0, len = tmpArrayData.length; j < len; j++) {
+			tmpData = tmpArrayData[j];
+
+			if (tmpData != undefined && tmpData != "") {
+				var tmpBackData = tmpData.split(",");
+
+				var tmpFrame = setVal(tmpBackData[0], 200, "number") + parseFloat(g_stateObj.adjustment) + _preblankFrame;
+				var tmpDepth = setVal(tmpBackData[1], 0, "number");
+				var tmpPath = setVal(tmpBackData[2], "", "string");
+				var tmpClass = setVal(tmpBackData[3], "", "string");
+				var tmpX = setVal(tmpBackData[4], 0, "number");
+				var tmpY = setVal(tmpBackData[5], 0, "number");
+				var tmpWidth = setVal(tmpBackData[6], 0, "number");
+				var tmpHeight = setVal(tmpBackData[7], 0, "number");
+				var tmpAnimetionName = setVal(tmpBackData[8], "none", "string");
+				var tmpAnimationDuration = setVal(tmpBackData[9], "none", "string");
+
+				var addFrame = 0;
+				if (obj.backData[tmpFrame] == undefined) {
+					obj.backData[tmpFrame] = new Array();
+				} else {
+					for (var j = tmpFrame + 1; ; j++) {
+						if (obj.backData[tmpFrame + j] == undefined) {
+							obj.backData[tmpFrame + j] = new Array();
+							addFrame = j;
+							break;
+						}
+					}
+				}
+				obj.backData[tmpFrame + addFrame].push(tmpClass, tmpX, tmpY, tmpWidth, tmpHeight,
+					tmpAnimationName, tmpAnimationDuration);
+			}
+		}
 	}
 
 	return obj;
