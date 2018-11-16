@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.65.0";
+var g_version = "Ver 0.65.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -4137,13 +4137,23 @@ function MainInit() {
 			var tmpObj = g_scoreObj.backData[g_scoreObj.frameNum];
 			var backSprite = document.getElementById("backSprite" + tmpObj.depth);
 			if (tmpObj.path != "") {
-				backSprite.innerHTML = "<img src='" + tmpObj.path + "' class='" + tmpObj.className + "' " +
-					"style='position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top +
-					"px; width:" + (tmpObj.width == 0 ? g_sWidth : tmpObj.width) +
-					"px; height:" + (tmpObj.height == 0 ? g_sHeight : tmpObj.height) +
-					"px; animation-name:" + tmpObj.animationName +
-					"; animation-duration:" + tmpObj.animationDuration +
-					"s; opacity:" + tmpObj.opacity + ";'>";
+				if (tmpObj.path.indexOf(".png") != -1 || tmpObj.path.indexOf(".gif") != -1 ||
+					tmpObj.path.indexOf(".bmp") != -1 || tmpObj.path.indexOf(".jpg") != -1) {
+					backSprite.innerHTML = "<img src='" + tmpObj.path + "' class='" + tmpObj.className + "' " +
+						"style='position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top +
+						"px; width:" + (tmpObj.width == 0 ? g_sWidth : tmpObj.width) +
+						"px; height:" + (tmpObj.height == 0 ? g_sHeight : tmpObj.height) +
+						"px; animation-name:" + tmpObj.animationName +
+						"; animation-duration:" + tmpObj.animationDuration +
+						"s; opacity:" + tmpObj.opacity + ";'>";
+				} else {
+					backSprite.innerHTML = "<span class='" + tmpObj.className + "' " +
+						"style='display:inline-block;position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top +
+						"px; font-size:" + (tmpObj.width == 0 ? C_SIZ_SETLBL : tmpObj.width) +
+						"px; animation-name:" + tmpObj.animationName +
+						"; animation-duration:" + tmpObj.animationDuration +
+						"s; opacity:" + tmpObj.opacity + ";'>" + tmpObj.path + "</span>";
+				}
 			} else {
 				backSprite.innerHTML = "";
 			}
