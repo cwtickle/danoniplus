@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.64.1";
+var g_version = "Ver 0.64.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2755,7 +2755,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				if (obj.wordData[tmpWordData[k]] == undefined) {
 					obj.wordData[tmpWordData[k]] = new Array();
 				} else {
-					for (var m = 0; ; m++) {
+					for (var m = 1; ; m++) {
 						if (obj.wordData[tmpWordData[k] + m] == undefined) {
 							obj.wordData[tmpWordData[k] + m] = new Array();
 							addFrame = m;
@@ -2987,14 +2987,14 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			for (var k = lastk - 1; k >= 0; k--) {
 				arrowArrivalFrm = _dataObj.arrowData[j][k];
 
-				// 矢印の出現位置が開始前の場合は除外
 				if (arrowArrivalFrm < _firstArrivalFrame) {
+					// 矢印の出現位置が開始前の場合は除外
 					break;
 
-					// 最初から最後まで同じスピードのときは前回のデータを流用
 				} else if ((arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev] > spdPrev)
 					&& arrowArrivalFrm < spdNext) {
 
+					// 最初から最後まで同じスピードのときは前回のデータを流用
 					var tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
 					startPoint[j][k] = tmpFrame;
 					g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
@@ -3002,6 +3002,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 					g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
 
 				} else {
+
 					// 速度変化が間に入るときは再計算
 					if (arrowArrivalFrm < spdPrev) {
 						spdk -= 2;
@@ -3062,17 +3063,18 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			for (var k = lastk - 2; k >= 0; k -= 2) {
 				arrowArrivalFrm = _dataObj.frzData[j][k];
 
-				// フリーズアローの出現位置が開始前の場合は除外
 				if (arrowArrivalFrm < _firstArrivalFrame) {
+
+					// フリーズアローの出現位置が開始前の場合は除外
 					if (g_workObj.mkFrzLength[j] != undefined) {
 						g_workObj.mkFrzLength[j] = g_workObj.mkFrzLength[j].slice(k + 2).concat();
 					}
 					break;
 
-					// 最初から最後まで同じスピードのときは前回のデータを流用
 				} else if ((arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev] > spdPrev)
 					&& arrowArrivalFrm < spdNext) {
 
+					// 最初から最後まで同じスピードのときは前回のデータを流用
 					var tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
 					frzStartPoint[j][k] = tmpFrame;
 					g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
@@ -3080,6 +3082,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 					g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
 
 				} else {
+
 					// 速度変化が間に入るときは再計算
 					if (arrowArrivalFrm < spdPrev) {
 						spdk -= 2;
