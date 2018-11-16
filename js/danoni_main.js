@@ -2774,10 +2774,11 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	// 背景データの分解 (10個1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,animationName,animationDuration]
 	obj.backData = new Array();
+	obj.backMaxDepth = -1;
 	if (_dosObj["back" + _scoreNo + "_data"] != undefined) {
 
-		tmpArrayData = _dosObj["back" + _scoreNo + "_data"].split("\r").join("");
-		tmpArrayData = tmpData.split("\n");
+		tmpArrayData = _dosObj["back" + _scoreNo + "_data"].split("\r").join("\n");
+		tmpArrayData = tmpArrayData.split("\n");
 
 		for (var j = 0, len = tmpArrayData.length; j < len; j++) {
 			tmpData = tmpArrayData[j];
@@ -2793,17 +2794,22 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				var tmpY = setVal(tmpBackData[5], 0, "number");
 				var tmpWidth = setVal(tmpBackData[6], 0, "number");
 				var tmpHeight = setVal(tmpBackData[7], 0, "number");
-				var tmpAnimationName = setVal(tmpBackData[8], "none", "string");
-				var tmpAnimationDuration = setVal(tmpBackData[9], "none", "string");
+				var tmpOpacity = setVal(tmpBackData[8], 1, "number");
+				var tmpAnimationName = setVal(tmpBackData[9], "none", "string");
+				var tmpAnimationDuration = setVal(tmpBackData[10], "none", "string");
+
+				if (tmpDepth > obj.backMaxDepth) {
+					obj.backMaxDepth = tmpDepth;
+				}
 
 				var addFrame = 0;
 				if (obj.backData[tmpFrame] == undefined) {
 					obj.backData[tmpFrame] = {};
 				} else {
-					for (var j = tmpFrame + 1; ; j++) {
-						if (obj.backData[tmpFrame + j] == undefined) {
-							obj.backData[tmpFrame + j] = {};
-							addFrame = j;
+					for (var m = 1; ; m++) {
+						if (obj.backData[tmpFrame + m] == undefined) {
+							obj.backData[tmpFrame + m] = {};
+							addFrame = m;
 							break;
 						}
 					}
@@ -2816,6 +2822,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 					top: tmpY,
 					width: tmpWidth,
 					height: tmpHeight,
+					opacity: tmpOpacity,
 					animationName: tmpAnimationName,
 					animationDuration: tmpAnimationDuration
 				};
@@ -3477,6 +3484,12 @@ function MainInit() {
 	g_workObj.word1Data = "";
 	g_currentArrows = 0;
 
+	// 背景スプライトを作成
+	var backSprite = createSprite("divRoot", "backSprite", 0, 0, g_sWidth, g_sHeight);
+	for (var j = 0; j <= g_scoreObj.backMaxDepth; j++) {
+		createSprite("backSprite", "backSprite" + j, 0, 0, g_sWidth, g_sHeight);
+	}
+
 	// ステップゾーン、矢印のメインスプライトを作成
 	var mainSprite = createSprite("divRoot", "mainSprite", 0, 0, g_sWidth, g_sHeight);
 
@@ -4116,6 +4129,23 @@ function MainInit() {
 		// 歌詞フェードイン・アウト
 		fadeWord("0");
 		fadeWord("1");
+
+		if (g_scoreObj.backData[g_scoreObj.frameNum] != undefined) {
+			var tmpObj = g_scoreObj.backData[g_scoreObj.frameNum];
+			var backSprite = document.getElementById("backSprite" + tmpObj.depth);
+			if (tmpObj.path != "") {
+				backSprite.innerHTML = "<img src='" + tmpObj.path + "' class='" + tmpObj.className + "' " +
+					"style='position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top +
+					"px; width:" + (tmpObj.width == 0 ? g_sWidth : tmpObj.width) +
+					"px; height:" + (tmpObj.height == 0 ? g_sHeight : tmpObj.height) +
+					"px; animation-name:" + tmpObj.animationName +
+					"; animation-duration:" + tmpObj.animationDuration +
+					"s; opacity:" + tmpObj.opacity + ";'>";
+			} else {
+				backSprite.innerHTML = "";
+			}
+
+		}
 
 		// 判定キャラクタ消去
 		var charaJCnt = document.getElementById("charaJ").getAttribute("cnt");
