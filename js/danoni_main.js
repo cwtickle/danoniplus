@@ -2771,8 +2771,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 
 	}
 
-	// 背景データの分解 (10個1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,animationName,animationDuration]
+	// 背景データの分解 (下記すべてで1セット、改行区切り)
+	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	obj.backData = new Array();
 	obj.backMaxDepth = -1;
 	if (_dosObj["back" + _scoreNo + "_data"] != undefined) {
