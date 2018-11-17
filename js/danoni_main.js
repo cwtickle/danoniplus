@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.70.1";
+var g_version = "Ver 0.70.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -4896,9 +4896,11 @@ function resultInit() {
 	}
 	document.onkeyup = function (evt) {
 	}
-	if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
-	} else {
-		g_timeoutEvtId = setInterval("resultFadeOut()", 1000 / 60);
+	if (g_headerObj.fadeFrame != undefined && g_headerObj.fadeFrame != "") {
+		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
+		} else {
+			g_timeoutEvtId = setInterval("resultFadeOut()", 1000 / 60);
+		}
 	}
 }
 
