@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.67.2";
+var g_version = "Ver 0.68.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -3647,8 +3647,10 @@ function MainInit() {
 			fullSec = ("00" + (fadeTmp / 60) % 60).slice(-2);
 			fullTime = fullMin + ":" + fullSec;
 		}
-		// 終了時間指定の場合、その値を適用する
-	} else if (g_headerObj.endFrame != undefined) {
+	}
+
+	// 終了時間指定の場合、その値を適用する
+	if (g_headerObj.endFrame != undefined) {
 		if (isNaN(parseInt(g_headerObj.endFrame))) {
 		} else {
 			var fullTmp = Math.floor((parseInt(g_headerObj.endFrame) + preblankFrame) / 60) * 60;
@@ -4289,7 +4291,9 @@ function MainInit() {
 			lblTime1.innerHTML = currentTime;
 
 			if (currentTime == fullTime) {
-				g_audio.pause();
+				if (fadeOutFrame == Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
+					g_audio.pause();
+				}
 				clearTimeout(g_timeoutEvtId);
 				setTimeout(function () {
 					clearWindow();
@@ -4786,6 +4790,7 @@ function resultInit() {
 		align: C_ALIGN_CENTER
 	}, function () {
 		// タイトル画面へ戻る
+		g_audio.pause();
 		clearWindow();
 		titleInit();
 	});
@@ -4821,6 +4826,7 @@ function resultInit() {
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, function () {
+		g_audio.pause();
 		clearWindow();
 		g_audio.load();
 
@@ -4855,6 +4861,21 @@ function resultInit() {
 		}
 	}
 	document.onkeyup = function (evt) {
+	}
+	if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
+	} else {
+		g_timeoutEvtId = setInterval("resultFadeOut()", 1000 / 60);
+	}
+}
+
+function resultFadeOut() {
+	var tmpVolume = (g_audio.volume - 5 / 1000);
+	if (tmpVolume < 0) {
+		g_audio.volume = 0;
+		clearInterval(g_timeoutEvtId);
+		g_audio.pause();
+	} else {
+		g_audio.volume = tmpVolume;
 	}
 }
 
