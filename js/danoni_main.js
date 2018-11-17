@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/16
+ * Revised : 2018/11/17
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.66.0";
+var g_version = "Ver 0.67.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -79,12 +79,16 @@ var C_SPRITE_ROOT = "divRoot";
 
 // 画像ファイル
 var C_IMG_ARROW = "../img/arrow_500.png";
+var C_IMG_ARROWSD = "../img/arrowShadow_500.png";
 var C_IMG_ONIGIRI = "../img/onigiri_600.png";
+var C_IMG_AASD = "../img/aaShadow_500.png";
 var C_IMG_GIKO = "../img/giko_600.png";
 var C_IMG_IYO = "../img/iyo_600.png";
 var C_IMG_C = "../img/c_600.png";
 var C_IMG_MORARA = "../img/morara_600.png";
 var C_IMG_MONAR = "../img/monar_600.png";
+var C_IMG_CURSOR = "../img/cursor.png";
+var C_IMG_FRZBAR = "../img/frzbar.png";
 
 // Motionオプション配列の基準位置
 var C_MOTION_STD_POS = 15;
@@ -798,6 +802,27 @@ function checkArrayVal(_checkArray, _type, _minLength) {
 }
 
 /**
+ * プリロードするファイルの設定
+ * @param {string} _as 
+ * @param {string} _href 
+ * @param {string} _type 
+ * @param {string} _crossOrigin 
+ */
+function preloadFile(_as, _href, _type, _crossOrigin) {
+	var link = document.createElement('link');
+	link.rel = 'preload';
+	link.as = _as;
+	link.href = _href;
+	if (_type != "") {
+		link.type = _type;
+	}
+	if (_crossOrigin != "") {
+		link.crossOrigin = _crossOrigin
+	}
+	document.head.appendChild(link);
+}
+
+/**
  * 図形の描画
  * - div子要素の作成。呼び出しただけでは使用できないので、親divよりappendChildすること。
  * - 詳細は @see {@link createButton} も参照のこと。 
@@ -1244,6 +1269,26 @@ function initialControl() {
 	g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
 	g_keyObj.currentPtn = 0;
 
+	// 画像ファイルの読み込み
+	preloadFile("image", C_IMG_ARROW, "", "");
+	preloadFile("image", C_IMG_ARROWSD, "", "");
+	preloadFile("image", C_IMG_ONIGIRI, "", "");
+	preloadFile("image", C_IMG_AASD, "", "");
+	preloadFile("image", C_IMG_GIKO, "", "");
+	preloadFile("image", C_IMG_IYO, "", "");
+	preloadFile("image", C_IMG_C, "", "");
+	preloadFile("image", C_IMG_MORARA, "", "");
+	preloadFile("image", C_IMG_MONAR, "", "");
+	preloadFile("image", C_IMG_CURSOR, "", "");
+	preloadFile("image", C_IMG_FRZBAR, "", "");
+
+	// その他の画像ファイルの読み込み
+	for (var j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
+		if (setVal(g_headerObj.preloadImages[j], "", "string") != "") {
+			preloadFile("image", g_headerObj.preloadImages[j], "", "");
+		}
+	}
+
 	loadScript("../js/" + g_headerObj.customjs, function () {
 		titleInit();
 	});
@@ -1598,7 +1643,18 @@ function headerConvert(_dosObj) {
 	if (_dosObj.hashTag != undefined) {
 		obj.hashTag = _dosObj.hashTag;
 	}
-	// TODO:フリーズアロー色など他のヘッダー情報の分解
+
+	// 読込対象の画像を指定(rel:preload)と同じ
+	obj.preloadImages = new Array();
+	if (_dosObj.preloadImages != undefined) {
+		var preloadImgs = preloadImages.split(",");
+
+		for (var j = 0, len = preloadImgs.length; j < len; j++) {
+			if (setVal(preloadImgs[j], "", "string") != "") {
+				obj.preloadImages[j] = preloadImgs[j];
+			}
+		}
+	}
 
 	return obj;
 }
@@ -2797,7 +2853,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				var tmpHeight = escapeHtml(setVal(tmpBackData[7], "", "string"));	// spanタグの場合は color(文字列可)
 				var tmpOpacity = setVal(tmpBackData[8], 1, "number");
 				var tmpAnimationName = escapeHtml(setVal(tmpBackData[9], "none", "string"));
-				var tmpAnimationDuration = setVal(tmpBackData[10], 0, "number");
+				var tmpAnimationDuration = setVal(tmpBackData[10], 0, "number") / 60;
 
 				if (tmpDepth > obj.backMaxDepth) {
 					obj.backMaxDepth = tmpDepth;
