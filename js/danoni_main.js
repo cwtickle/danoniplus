@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.65.1";
+var g_version = "Ver 0.66.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2786,17 +2786,18 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 			if (tmpData != undefined && tmpData != "") {
 				var tmpBackData = tmpData.split(",");
 
+				// 値チェックとエスケープ処理
 				var tmpFrame = setVal(tmpBackData[0], 200, "number") + parseFloat(g_stateObj.adjustment) + _preblankFrame;
 				var tmpDepth = setVal(tmpBackData[1], 0, "number");
-				var tmpPath = setVal(tmpBackData[2], "", "string");
-				var tmpClass = setVal(tmpBackData[3], "", "string");
+				var tmpPath = escapeHtml(setVal(tmpBackData[2], "", "string"));
+				var tmpClass = escapeHtml(setVal(tmpBackData[3], "", "string"));
 				var tmpX = setVal(tmpBackData[4], 0, "number");
 				var tmpY = setVal(tmpBackData[5], 0, "number");
-				var tmpWidth = setVal(tmpBackData[6], 0, "number");
-				var tmpHeight = setVal(tmpBackData[7], 0, "number");
+				var tmpWidth = setVal(tmpBackData[6], 0, "number");					// spanタグの場合は font-size
+				var tmpHeight = escapeHtml(setVal(tmpBackData[7], "", "string"));	// spanタグの場合は color(文字列可)
 				var tmpOpacity = setVal(tmpBackData[8], 1, "number");
-				var tmpAnimationName = setVal(tmpBackData[9], "none", "string");
-				var tmpAnimationDuration = setVal(tmpBackData[10], "none", "string");
+				var tmpAnimationName = escapeHtml(setVal(tmpBackData[9], "none", "string"));
+				var tmpAnimationDuration = setVal(tmpBackData[10], 0, "number");
 
 				if (tmpDepth > obj.backMaxDepth) {
 					obj.backMaxDepth = tmpDepth;
@@ -2831,6 +2832,19 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	}
 
 	return obj;
+}
+
+/**
+ * 文字列のエスケープ処理
+ * @param {string} _str 
+ */
+function escapeHtml(_str) {
+	var newstr = _str.split("<").join("&lt;");
+	newstr = newstr.split(">").join("&gt;");
+	newstr = newstr.split('"').join("&quot;");
+	newstr = newstr.split('&').join("&amp;");
+
+	return newstr;
 }
 
 /**
@@ -4139,20 +4153,40 @@ function MainInit() {
 			if (tmpObj.path != "") {
 				if (tmpObj.path.indexOf(".png") != -1 || tmpObj.path.indexOf(".gif") != -1 ||
 					tmpObj.path.indexOf(".bmp") != -1 || tmpObj.path.indexOf(".jpg") != -1) {
-					backSprite.innerHTML = "<img src='" + tmpObj.path + "' class='" + tmpObj.className + "' " +
-						"style='position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top +
-						"px; width:" + (tmpObj.width == 0 ? g_sWidth : tmpObj.width) +
-						"px; height:" + (tmpObj.height == 0 ? g_sHeight : tmpObj.height) +
-						"px; animation-name:" + tmpObj.animationName +
+
+					// imgタグの場合
+					var tmpInnerHTML = "<img src='" + tmpObj.path + "' class='" + tmpObj.class + "' " +
+						"style='position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top + "px;";
+					if (tmpObj.width != 0 && tmpObj.width > 0) {
+						tmpInnerHTML += "width:" + tmpObj.width + "px;";
+					}
+					if (tmpObj.height != "" && setVal(tmpObj.height, 0, "number") > 0) {
+						tmpInnerHTML += "height:" + tmpObj.height + "px;";
+					}
+					tmpInnerHTML += "animation-name:" + tmpObj.animationName +
 						"; animation-duration:" + tmpObj.animationDuration +
 						"s; opacity:" + tmpObj.opacity + ";'>";
+					backSprite.innerHTML = tmpInnerHTML;
+
 				} else {
-					backSprite.innerHTML = "<span class='" + tmpObj.className + "' " +
-						"style='display:inline-block;position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top +
-						"px; font-size:" + (tmpObj.width == 0 ? C_SIZ_SETLBL : tmpObj.width) +
-						"px; animation-name:" + tmpObj.animationName +
+
+					// spanタグの場合
+					var tmpInnerHTML = "<span class='" + tmpObj.class + "' " +
+						"style='display:inline-block;position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top + "px;";
+
+					// この場合のwidthは font-size と解釈する
+					if (tmpObj.width != 0 && tmpObj.width > 0) {
+						tmpInnerHTML += "font-size:" + tmpObj.width + "px;";
+					}
+
+					// この場合のheightは color と解釈する
+					if (tmpObj.height != "") {
+						tmpInnerHTML += "color:" + tmpObj.height + ";";
+					}
+					tmpInnerHTML += "animation-name:" + tmpObj.animationName +
 						"; animation-duration:" + tmpObj.animationDuration +
 						"s; opacity:" + tmpObj.opacity + ";'>" + tmpObj.path + "</span>";
+					backSprite.innerHTML = tmpInnerHTML;
 				}
 			} else {
 				backSprite.innerHTML = "";
