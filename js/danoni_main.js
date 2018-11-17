@@ -2797,7 +2797,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				var tmpHeight = escapeHtml(setVal(tmpBackData[7], "", "string"));	// spanタグの場合は color(文字列可)
 				var tmpOpacity = setVal(tmpBackData[8], 1, "number");
 				var tmpAnimationName = escapeHtml(setVal(tmpBackData[9], "none", "string"));
-				var tmpAnimationDuration = setVal(tmpBackData[10], 0, "number");
+				var tmpAnimationDuration = setVal(tmpBackData[10], 0, "number") / 60;
 
 				if (tmpDepth > obj.backMaxDepth) {
 					obj.backMaxDepth = tmpDepth;
