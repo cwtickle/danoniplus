@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.68.0";
+var g_version = "Ver 0.69.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -574,13 +574,15 @@ var C_FRM_AFTERFADE = 420;
 
 /** 判定系共通オブジェクト */
 var g_judgObj = {
-	arrowJ: [2, 4, 6, 8],
+	arrowJ: [2, 4, 6, 8, 8],
 	frzJ: [2, 4, 8]
 };
 var C_JDG_II = 0;
 var C_JDG_SHAKIN = 1;
 var C_JDG_MATARI = 2;
-var C_JDG_UWAN = 3;
+var C_JDG_SHOBON = 3;
+var C_JDG_UWAN = 4;
+
 var C_JDG_KITA = 0;
 var C_JDG_SFSF = 1;
 var C_JDG_IKNAI = 2;
@@ -588,7 +590,9 @@ var C_JDG_IKNAI = 2;
 var C_JCR_II = "(・∀・)ｲｲ!!";
 var C_JCR_SHAKIN = "(`・ω・)ｼｬｷﾝ";
 var C_JCR_MATARI = "( ´∀`)ﾏﾀｰﾘ";
+var C_JCR_SHOBON = "(´・ω・`)ｼｮﾎﾞｰﾝ";
 var C_JCR_UWAN = "( `Д´)ｳﾜｧﾝ!!";
+
 var C_JCR_KITA = "(ﾟ∀ﾟ)ｷﾀ-!!";
 var C_JCR_SFSF = "";
 var C_JCR_IKNAI = "(・A・)ｲｸﾅｲ";
@@ -597,6 +601,7 @@ var C_CLR_II = "#66ffff";
 var C_CLR_SHAKIN = "#99ff99";
 var C_CLR_MATARI = "#ff9966";
 var C_CLR_UWAN = "#ff9999";
+var C_CLR_SHOBON = "#ccccff";
 var C_CLR_KITA = "#ffff99";
 var C_CLR_SFSF = "";
 var C_CLR_IKNAI = "#99ff66";
@@ -617,6 +622,7 @@ var g_resultObj = {
 	ii: 0,
 	shakin: 0,
 	matari: 0,
+	shobon: 0,
 	uwan: 0,
 	kita: 0,
 	sfsf: 0,
@@ -3536,6 +3542,7 @@ function getArrowSettings() {
 	g_resultObj.ii = 0;
 	g_resultObj.shakin = 0;
 	g_resultObj.matari = 0;
+	g_resultObj.shobon = 0;
 	g_resultObj.uwan = 0;
 	g_resultObj.combo = 0;
 	g_resultObj.maxCombo = 0;
@@ -3670,12 +3677,13 @@ function MainInit() {
 	infoSprite.appendChild(makeCounterSymbol("lblIi", g_sWidth - 110, C_CLR_II, 1, 0));
 	infoSprite.appendChild(makeCounterSymbol("lblShakin", g_sWidth - 110, C_CLR_SHAKIN, 2, 0));
 	infoSprite.appendChild(makeCounterSymbol("lblMatari", g_sWidth - 110, C_CLR_MATARI, 3, 0));
-	infoSprite.appendChild(makeCounterSymbol("lblUwan", g_sWidth - 110, C_CLR_UWAN, 4, 0));
-	infoSprite.appendChild(makeCounterSymbol("lblMCombo", g_sWidth - 110, "#ffffff", 5, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblShobon", g_sWidth - 110, C_CLR_SHOBON, 4, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblUwan", g_sWidth - 110, C_CLR_UWAN, 5, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblMCombo", g_sWidth - 110, "#ffffff", 6, 0));
 
-	infoSprite.appendChild(makeCounterSymbol("lblKita", g_sWidth - 110, C_CLR_KITA, 7, 0));
-	infoSprite.appendChild(makeCounterSymbol("lblIknai", g_sWidth - 110, C_CLR_IKNAI, 8, 0));
-	infoSprite.appendChild(makeCounterSymbol("lblFCombo", g_sWidth - 110, "#ffffff", 9, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblKita", g_sWidth - 110, C_CLR_KITA, 8, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblIknai", g_sWidth - 110, C_CLR_IKNAI, 9, 0));
+	infoSprite.appendChild(makeCounterSymbol("lblFCombo", g_sWidth - 110, "#ffffff", 10, 0));
 
 	// 歌詞表示1
 	var lblWord0 = createDivLabel("lblword0", g_sWidth / 2 - 200, 10, g_sWidth - 100, 30, 14, "#ffffff",
@@ -4524,8 +4532,8 @@ function judgeArrow(_j) {
 					judgeMatari();
 					stepDivHit.style.background = C_CLR_MATARI;
 				} else {
-					judgeUwan();
-					stepDivHit.style.background = C_CLR_UWAN;
+					judgeShobon();
+					stepDivHit.style.background = C_CLR_SHOBON;
 				}
 				stepDivHit.setAttribute("cnt", C_FRM_HITMOTION);
 
@@ -4599,6 +4607,17 @@ function judgeMatari() {
 	finishViewing();
 }
 
+function judgeShobon() {
+	g_resultObj.shobon++;
+	g_currentArrows++;
+	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_SHOBON + "'>" + C_JCR_SHOBON + "</span>";
+	document.getElementById("charaJ").setAttribute("cnt", C_FRM_JDGMOTION);
+
+	document.getElementById("lblShobon").innerHTML = g_resultObj.shobon;
+	g_resultObj.combo = 0;
+	document.getElementById("comboJ").innerHTML = "";
+}
+
 function judgeUwan() {
 	g_resultObj.uwan++;
 	g_currentArrows++;
@@ -4653,7 +4672,7 @@ function finishViewing() {
 			document.getElementById("comboJ").innerHTML = "";
 			document.getElementById("charaFJ").innerHTML = "";
 			document.getElementById("comboFJ").innerHTML = "";
-		} else if (g_resultObj.uwan == 0 && g_resultObj.iknai == 0) {
+		} else if (g_resultObj.uwan == 0 && g_resultObj.shobon == 0 && g_resultObj.iknai == 0) {
 			document.getElementById("finishView").innerHTML = "<span style='color:#66ffff;'>FullCombo!</span>";
 			document.getElementById("finishView").style.opacity = 1;
 			document.getElementById("charaJ").innerHTML = "";
@@ -4702,7 +4721,7 @@ function resultInit() {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
 	} else if (g_headerObj.startFrame == 0 && g_stateObj.auto == "OFF") {
-		if (g_resultObj.matari + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai == 0) {
+		if (g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai == 0) {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
 		} else {
@@ -4735,7 +4754,7 @@ function resultInit() {
 		g_headerObj.tuning + "/" +
 		"Rank:" + rankMark + "/" +
 		"Score:" + resultScore + "/" +
-		g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.uwan + "/" +
+		g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.shobon + "-" + g_resultObj.uwan + "/" +
 		g_resultObj.kita + "-" + g_resultObj.iknai + "/" +
 		g_resultObj.maxCombo + "-" + g_resultObj.fmaxCombo + " " +
 		location.href;
@@ -4745,28 +4764,30 @@ function resultInit() {
 	resultWindow.appendChild(makeResultSymbol("lblIi", 0, C_CLR_II, 0, C_JCR_II, C_ALIGN_LEFT));
 	resultWindow.appendChild(makeResultSymbol("lblShakin", 0, C_CLR_SHAKIN, 1, C_JCR_SHAKIN, C_ALIGN_LEFT));
 	resultWindow.appendChild(makeResultSymbol("lblMatari", 0, C_CLR_MATARI, 2, C_JCR_MATARI, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol("lblUwan", 0, C_CLR_UWAN, 3, C_JCR_UWAN, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol("lblKita", 0, C_CLR_KITA, 4, C_JCR_KITA, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol("lblIknai", 0, C_CLR_IKNAI, 5, C_JCR_IKNAI, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol("lblMCombo", 0, "#ffffff", 6, "MaxCombo", C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol("lblFCombo", 0, "#ffffff", 7, "FreezeCombo", C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblShobon", 0, C_CLR_SHOBON, 3, C_JCR_SHOBON, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblUwan", 0, C_CLR_UWAN, 4, C_JCR_UWAN, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblKita", 0, C_CLR_KITA, 5, C_JCR_KITA, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblIknai", 0, C_CLR_IKNAI, 6, C_JCR_IKNAI, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblMCombo", 0, "#ffffff", 7, "MaxCombo", C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblFCombo", 0, "#ffffff", 8, "FreezeCombo", C_ALIGN_LEFT));
 
-	resultWindow.appendChild(makeResultSymbol("lblScore", 0, "#ffffff", 9, "Score", C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol("lblScore", 0, "#ffffff", 10, "Score", C_ALIGN_LEFT));
 
 	// スコア描画
 	resultWindow.appendChild(makeResultSymbol("lblIiS", 130, "#ffffff", 0, g_resultObj.ii, C_ALIGN_RIGHT));
 	resultWindow.appendChild(makeResultSymbol("lblShakinS", 130, "#ffffff", 1, g_resultObj.shakin, C_ALIGN_RIGHT));
 	resultWindow.appendChild(makeResultSymbol("lblMatariS", 130, "#ffffff", 2, g_resultObj.matari, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol("lblUwanS", 130, "#ffffff", 3, g_resultObj.uwan, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol("lblKitaS", 130, "#ffffff", 4, g_resultObj.kita, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol("lblIknaiS", 130, "#ffffff", 5, g_resultObj.iknai, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol("lblMComboS", 130, "#ffffff", 6, g_resultObj.maxCombo, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol("lblFComboS", 130, "#ffffff", 7, g_resultObj.fmaxCombo, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblShobonS", 130, "#ffffff", 3, g_resultObj.shobon, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblUwanS", 130, "#ffffff", 4, g_resultObj.uwan, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblKitaS", 130, "#ffffff", 5, g_resultObj.kita, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblIknaiS", 130, "#ffffff", 6, g_resultObj.iknai, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblMComboS", 130, "#ffffff", 7, g_resultObj.maxCombo, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblFComboS", 130, "#ffffff", 8, g_resultObj.fmaxCombo, C_ALIGN_RIGHT));
 
-	resultWindow.appendChild(makeResultSymbol("lblScoreS", 130, "#ffffff", 9, g_resultObj.score, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol("lblScoreS", 130, "#ffffff", 10, g_resultObj.score, C_ALIGN_RIGHT));
 
 	// ランク描画
-	var lblRank = createDivCustomLabel("lblRank", 300, 200, 70, 20, 50, "#ffffff",
+	var lblRank = createDivCustomLabel("lblRank", 300, 225, 70, 20, 50, "#ffffff",
 		"<span style='color:" + rankColor + ";'>" + rankMark + "</span>", "'Bookman Old Style', 'Meiryo UI', sans-serif");
 	lblRank.style.textAlign = C_ALIGN_CENTER;
 	resultWindow.appendChild(lblRank);
