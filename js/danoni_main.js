@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.67.1";
+var g_version = "Ver 0.67.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1416,6 +1416,9 @@ function titleInit() {
 		}
 	}
 
+	document.onkeyup = function (evt) {
+	}
+
 	divRoot.oncontextmenu = function () {
 		return false;
 	}
@@ -1905,6 +1908,8 @@ function optionInit() {
 				return false;
 			}
 		}
+	}
+	document.onkeyup = function (evt) {
 	}
 }
 
@@ -3774,13 +3779,15 @@ function MainInit() {
 		} else if (setKey == 46) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			clearWindow();
-			if (keyIsDown(16)) {
-				g_gameOverFlg = true;
-				resultInit();
-			} else {
-				titleInit();
-			}
+			setTimeout(function () {
+				clearWindow();
+				if (keyIsDown(16)) {
+					g_gameOverFlg = true;
+					resultInit();
+				} else {
+					titleInit();
+				}
+			}, 100);
 		}
 
 		for (var j = 0; j < C_BLOCK_KEYS.length; j++) {
@@ -4268,6 +4275,12 @@ function MainInit() {
 			}
 		}
 
+		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
+		thisTime = new Date();
+		buffTime = (thisTime.getTime() - mainStartTime.getTime() - (g_scoreObj.frameNum - firstFrame) * 1000 / 60);
+		g_scoreObj.frameNum++;
+		g_timeoutEvtId = setTimeout(function () { flowTimeline() }, 1000 / 60 - buffTime);
+
 		// タイマー、曲終了判定
 		if (g_scoreObj.frameNum % 60 == 0) {
 			var currentMin = Math.floor(g_scoreObj.frameNum / 3600);
@@ -4278,16 +4291,13 @@ function MainInit() {
 			if (currentTime == fullTime) {
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
-				clearWindow();
-				resultInit();
+				setTimeout(function () {
+					clearWindow();
+					resultInit();
+				}, 100);
 			}
 		}
 
-		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
-		thisTime = new Date();
-		buffTime = (thisTime.getTime() - mainStartTime.getTime() - (g_scoreObj.frameNum - firstFrame) * 1000 / 60);
-		g_scoreObj.frameNum++;
-		g_timeoutEvtId = setTimeout(function () { flowTimeline() }, 1000 / 60 - buffTime);
 	}
 	var mainStartTime = new Date();
 	g_timeoutEvtId = setTimeout(flowTimeline(), 1000 / 60);
@@ -4843,6 +4853,8 @@ function resultInit() {
 				return false;
 			}
 		}
+	}
+	document.onkeyup = function (evt) {
 	}
 }
 
