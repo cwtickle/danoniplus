@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.69.0";
+var g_version = "Ver 0.70.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -571,6 +571,7 @@ g_workObj.scrollDir = new Array();
 g_workObj.dividePos = new Array();
 
 var C_FRM_AFTERFADE = 420;
+var C_FRM_FRZATTEMPT = 5;
 
 /** 判定系共通オブジェクト */
 var g_judgObj = {
@@ -3862,19 +3863,6 @@ function MainInit() {
 				var stepDiv = document.getElementById("step" + j);
 				stepDiv.style.backgroundColor = "#999999";
 
-				// フリーズアローを離したとき
-				var k = g_workObj.judgFrzCnt[j];
-				var frzRoot = document.getElementById("frz" + j + "_" + k);
-				if (frzRoot != null) {
-					if (frzRoot.getAttribute("judgEndFlg") == "false") {
-						if (frzRoot.getAttribute("isMoving") == "false") {
-							judgeIknai();
-							frzRoot.setAttribute("judgEndFlg", "true");
-
-							changeFailedFrz(j, k);
-						}
-					}
-				}
 			}
 		}
 	}
@@ -4096,6 +4084,7 @@ function MainInit() {
 				var boostCnt = frzRoot.getAttribute("boostCnt");
 				var boostSpd = frzRoot.getAttribute("boostSpd");
 				var cnt = frzRoot.getAttribute("cnt");
+				var frzAttempt = frzRoot.getAttribute("frzAttempt");
 
 				var frzTop = document.getElementById("frzTop" + j + "_" + k);
 				var frzBar = document.getElementById("frzBar" + j + "_" + k);
@@ -4160,6 +4149,30 @@ function MainInit() {
 							frzBar.style.top = (parseFloat(frzBar.style.top) + g_workObj.currentSpeed * boostSpd * g_workObj.dividePos[j]) + "px";
 							frzBtm.style.top = (parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpd * g_workObj.scrollDir[j]) + "px";
 							frzBtmShadow.style.top = (parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpd * g_workObj.scrollDir[j]) + "px";
+
+							var keyDownFlg = false;
+							for (var m = 0, len = g_workObj.keyCtrl[j].length; m < len; m++) {
+								if (g_workObj.keyHitFlg[j][m]) {
+									keyDownFlg = true;
+									break;
+								}
+							}
+							if (keyDownFlg == false) {
+								frzRoot.setAttribute("frzAttempt", ++frzAttempt);
+
+								if (frzAttempt > C_FRM_FRZATTEMPT) {
+
+									// フリーズアローを離したとき
+									if (frzRoot.getAttribute("judgEndFlg") == "false") {
+										if (frzRoot.getAttribute("isMoving") == "false") {
+											judgeIknai();
+											frzRoot.setAttribute("judgEndFlg", "true");
+
+											changeFailedFrz(j, k);
+										}
+									}
+								}
+							}
 						} else {
 							judgeKita();
 
