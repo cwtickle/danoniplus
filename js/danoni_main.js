@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.70.3";
+var g_version = "Ver 0.71.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1298,9 +1298,18 @@ function initialControl() {
 		}
 	}
 
-	loadScript("../js/" + g_headerObj.customjs, function () {
-		titleInit();
-	});
+	// customjsの読み込み
+	if (g_headerObj.customjs2 != "") {
+		loadScript("../js/" + g_headerObj.customjs2, function () {
+			loadScript("../js/" + g_headerObj.customjs, function () {
+				titleInit();
+			});
+		});
+	} else {
+		loadScript("../js/" + g_headerObj.customjs, function () {
+			titleInit();
+		});
+	}
 }
 
 /**
@@ -1316,6 +1325,9 @@ function titleInit() {
 	// ユーザカスタムイベント(初期)
 	if (typeof customTitleInit == "function") {
 		customTitleInit();
+		if (typeof customTitleInit2 == "function") {
+			customTitleInit2();
+		}
 	}
 
 	// タイトル文字描画
@@ -1631,7 +1643,18 @@ function headerConvert(_dosObj) {
 	}
 
 	// 外部jsファイルの指定
-	obj.customjs = setVal(_dosObj.customjs, "danoni_custom.js", "string");
+	if (_dosObj.customjs != undefined && _dosObj.customjs != "") {
+		var customjss = _dosObj.customjs.split(",");
+		if (customjss.length > 1) {
+			obj.customjs2 = customjss[1];
+		} else {
+			obj.customjs2 = "";
+		}
+		obj.customjs = setVal(customjss[0], "danoni_custom.js", "string");
+	} else {
+		obj.customjs = "danoni_custom.js";
+		obj.customjs2 = "";
+	}
 
 	// ステップゾーン位置
 	if (isNaN(parseFloat(_dosObj.stepY))) {
@@ -1815,6 +1838,9 @@ function optionInit() {
 	// ユーザカスタムイベント(初期)
 	if (typeof customOptionInit == "function") {
 		customOptionInit();
+		if (typeof customOptionInit2 == "function") {
+			customOptionInit2();
+		}
 	}
 
 	// 戻るボタン描画
@@ -2372,6 +2398,9 @@ function keyConfigInit() {
 	// ユーザカスタムイベント(初期)
 	if (typeof customKeyConfigInit == "function") {
 		customKeyConfigInit();
+		if (typeof customKeyConfigInit2 == "function") {
+			customKeyConfigInit2();
+		}
 	}
 
 	// 戻るボタン描画
@@ -2697,6 +2726,9 @@ function loadingScoreInit() {
 	// ユーザカスタムイベント
 	if (typeof customLoadingInit == "function") {
 		customLoadingInit();
+		if (typeof customLoadingInit2 == "function") {
+			customLoadingInit2();
+		}
 	}
 
 	clearWindow();
@@ -3755,6 +3787,9 @@ function MainInit() {
 	// ユーザカスタムイベント(初期)
 	if (typeof customMainInit == "function") {
 		customMainInit();
+		if (typeof customMainInit2 == "function") {
+			customMainInit2();
+		}
 	}
 
 	// キー操作イベント
@@ -3928,6 +3963,9 @@ function MainInit() {
 		// ユーザカスタムイベント(フレーム毎)
 		if (typeof customMainEnterFrame == "function") {
 			customMainEnterFrame();
+			if (typeof customMainEnterFrame2 == "function") {
+				customMainEnterFrame2();
+			}
 		}
 
 		// 速度変化 (途中変速, 個別加速)
@@ -4809,6 +4847,9 @@ function resultInit() {
 	// ユーザカスタムイベント(初期)
 	if (typeof customResultInit == "function") {
 		customResultInit();
+		if (typeof customResultInit2 == "function") {
+			customResultInit2();
+		}
 	}
 
 	// 戻るボタン描画
