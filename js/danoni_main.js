@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.70.2";
+var g_version = "Ver 0.70.3";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1261,6 +1261,8 @@ function initialControl() {
 	if (document.getElementById("divRoot") == null) {
 		var stage = document.getElementById("canvas-frame");
 		var divRoot = createDiv("divRoot", 0, 0, g_sWidth, g_sHeight);
+		stage.style.margin = "auto";
+		stage.style.letterSpacing = "normal";
 		stage.appendChild(divRoot);
 		clearWindow();
 	} else {
@@ -3898,7 +3900,7 @@ function MainInit() {
 		if (g_audio.volume >= g_stateObj.volume / 100) {
 			musicStartFlg = false;
 			if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + C_FRM_AFTERFADE) {
-				var tmpVolume = (g_audio.volume - (2.5 * g_stateObj.volume / 100) / 1000);
+				var tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
 				if (tmpVolume < 0) {
 					g_audio.volume = 0;
 				} else {
@@ -3907,14 +3909,14 @@ function MainInit() {
 			}
 		} else {
 			if (musicStartFlg == true) {
-				var tmpVolume = (g_audio.volume + 5 / 1000);
+				var tmpVolume = (g_audio.volume + (3 * g_stateObj.volume / 100) / 1000);
 				if (tmpVolume > 1) {
 					g_audio.volume = 1;
 				} else {
 					g_audio.volume = tmpVolume;
 				}
 			} else if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + C_FRM_AFTERFADE) {
-				var tmpVolume = (g_audio.volume - 5 / 1000);
+				var tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
 				if (tmpVolume < 0) {
 					g_audio.volume = 0;
 				} else {
@@ -4471,7 +4473,6 @@ function changeHitFrz(_j, _k) {
 		fstyle.left = "-10px";
 		fstyle.width = "70px";
 		fstyle.height = "70px";
-		fstyle.opacity = 70;
 		document.getElementById("frzTop" + _j + "_" + _k).style.opacity = 0;
 	} else {
 		document.getElementById("frzTop" + _j + "_" + _k).style.backgroundColor = g_workObj.frzHitColors[_j];
