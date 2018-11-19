@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.73.0";
+var g_version = "Ver 0.73.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -90,20 +90,20 @@ const C_IMG_MONAR = "../img/monar_600.png";
 const C_IMG_CURSOR = "../img/cursor.png";
 const C_IMG_FRZBAR = "../img/frzbar.png";
 
-var C_IMG_ARROWSHADOW = "../img/arrowShadow_500.png";
-var C_IMG_ONIGIRIARROWSHADOW = "../img/aaShadow_500.png";
-var C_IMG_GIKOARROWSHADOW = "../img/aaShadow_500.png";
-var C_IMG_IYOARROWSHADOW = "../img/aaShadow_500.png";
-var C_IMG_CARROWSHADOW = "../img/aaShadow_500.png";
-var C_IMG_MORARAARROWSHADOW = "../img/aaShadow_500.png";
-var C_IMG_MONARARROWSHADOW = "../img/aaShadow_500.png";
+const C_IMG_ARROWSHADOW = "../img/arrowShadow_500.png";
+const C_IMG_ONIGIRIARROWSHADOW = "../img/aaShadow_500.png";
+const C_IMG_GIKOARROWSHADOW = "../img/aaShadow_500.png";
+const C_IMG_IYOARROWSHADOW = "../img/aaShadow_500.png";
+const C_IMG_CARROWSHADOW = "../img/aaShadow_500.png";
+const C_IMG_MORARAARROWSHADOW = "../img/aaShadow_500.png";
+const C_IMG_MONARARROWSHADOW = "../img/aaShadow_500.png";
 
-var C_IMG_ONIGIRIFRZBAR = "../img/frzbar.png";
-var C_IMG_GIKOFRZBAR = "../img/frzbar.png";
-var C_IMG_IYOFRZBAR = "../img/frzbar.png";
-var C_IMG_CFRZBAR = "../img/frzbar.png";
-var C_IMG_MORARAFRZBAR = "../img/frzbar.png";
-var C_IMG_MONARFRZBAR = "../img/frzbar.png";
+const C_IMG_ONIGIRIFRZBAR = "../img/frzbar.png";
+const C_IMG_GIKOFRZBAR = "../img/frzbar.png";
+const C_IMG_IYOFRZBAR = "../img/frzbar.png";
+const C_IMG_CFRZBAR = "../img/frzbar.png";
+const C_IMG_MORARAFRZBAR = "../img/frzbar.png";
+const C_IMG_MONARFRZBAR = "../img/frzbar.png";
 
 // Motionオプション配列の基準位置
 const C_MOTION_STD_POS = 15;
@@ -116,9 +116,9 @@ const C_BLOCK_KEYS = [
 ];
 
 // 譜面データ持ち回り用
-let   g_rootObj = {};
-let   g_headerObj = {};
-let   g_scoreObj = {};
+let g_rootObj = {};
+let g_headerObj = {};
+let g_scoreObj = {};
 const g_stateObj = {
 	scoreId: 0,
 	speed: 3.5,
@@ -141,21 +141,21 @@ let C_CLR_CLEARLIFE = "#002222";
 let C_CLR_DEFAULTLIFE = "#222222";
 
 const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
-let   g_volumeNum = 0;
+let g_volumeNum = 0;
 
 // サイズ(後で指定)
-let   g_sWidth;
-let   g_sHeight;
+let g_sWidth;
+let g_sHeight;
 
 // ステップゾーン位置、到達距離(後で指定)
 const C_STEP_Y = 70;
-let   g_stepY;
-let   g_distY;
+let g_stepY;
+let g_distY;
 
 // キーコンフィグカーソル
-let   g_currentj = 0;
-let   g_currentk = 0;
-let   g_prevKey = -1;
+let g_currentj = 0;
+let g_currentk = 0;
+let g_prevKey = -1;
 
 // キーコード
 const g_kCd = new Array();
@@ -584,7 +584,7 @@ const C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMI
 const C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
 
 /** キーコンフィグ設定 */
-let   g_kcType = "Main";
+let g_kcType = "Main";
 
 /** メイン画面用共通オブジェクト */
 const g_workObj = {};
@@ -660,9 +660,9 @@ const g_resultObj = {
 	score: 0
 };
 
-let   g_allArrow = 0;
-let   g_allFrz = 0;
-let   g_currentArrows = 0;
+let g_allArrow = 0;
+let g_allFrz = 0;
+let g_currentArrows = 0;
 const g_rankObj = {
 	rankMarks: ["SS", "S", "SA", "AAA", "AA", "A", "B"],
 	rankRate: [97, 90, 85, 80, 75, 70, 50],
@@ -678,13 +678,13 @@ const g_rankObj = {
 	rankColorX: "#996600"
 };
 
-let   g_gameOverFlg = false;
+let g_gameOverFlg = false;
 
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 const g_audio = new Audio();
-let   g_timeoutEvtId = 0;
-let   g_inputKeyBuffer = new Array();
+let g_timeoutEvtId = 0;
+let g_inputKeyBuffer = new Array();
 
 // 歌詞制御
 const g_wordObj = {
@@ -695,7 +695,7 @@ const g_wordObj = {
 	fadeOutFlg0: false,
 	fadeOutFlg1: false
 };
-let   g_wordSprite;
+let g_wordSprite;
 
 /** 
  * メッセージ定義 
@@ -730,7 +730,7 @@ const C_MSG_E_0104 = "新しいキー:{0}の[keyCtrl]が未定義です。(E-010
  */
 const g_handler = (function () {
 	const events = {};
-	let   key = 0;
+	let key = 0;
 
 	return {
 		addListener: function (_target, _type, _listener, _capture) {
@@ -775,7 +775,7 @@ function setVal(_checkStr, _defaultStr, _type) {
 		return _defaultStr;
 	}
 
-	let   isNaNflg;
+	let isNaNflg;
 	if (_type == "float") {
 		// 数値型(小数可)の場合
 		isNaNflg = isNaN(parseFloat(_checkStr));
@@ -817,7 +817,7 @@ function checkArrayVal(_checkArray, _type, _minLength) {
 		_minLength = 1;
 	}
 
-	let   isNaNflg;
+	let isNaNflg;
 	if (_type == "float") {
 		// 数値型(小数可)の場合
 		isNaNflg = isNaN(parseFloat(_checkArray[0]));
@@ -969,10 +969,10 @@ function createImg(_id, _imgPath, _x, _y, _width, _height) {
 function createArrowEffect(_id, _color, _x, _y, _size, _rotate) {
 
 	// 矢印・おにぎり判定
-	let   rotate;
-	let   charaStyle;
-	let   charaImg;
-	let   sizeX;
+	let rotate;
+	let charaStyle;
+	let charaImg;
+	let sizeX;
 	if (isNaN(Number(_rotate))) {
 		rotate = 0;
 		charaStyle = _rotate;
@@ -1015,9 +1015,9 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	const div = createDiv(_id, _x, _y, _width, _height);
 
 	// 矢印・おにぎり判定
-	let   rotate;
-	let   charaStyle;
-	let   charaImg;
+	let rotate;
+	let charaStyle;
+	let charaImg;
 	if (isNaN(Number(_rotate))) {
 		rotate = 0;
 		charaStyle = _rotate + _styleName;
@@ -1063,7 +1063,7 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
  * @param {number} _height 高さ
  */
 function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height) {
-	let   newsprite;
+	let newsprite;
 	if (document.getElementById(_newObjName) == null) {
 		const parentsprite = document.getElementById(_parentObjName);
 		newsprite = createDiv(_newObjName, _x, _y, _width, _height);
@@ -1457,7 +1457,7 @@ function titleInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = function (evt) {
 		// ブラウザ判定
-		let   setKey;
+		let setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
 			setKey = evt.which;
 		} else {
@@ -1488,7 +1488,7 @@ function titleInit() {
  * @param {string} _text 
  */
 function makeWarningWindow(_text) {
-	let   lblWarning;
+	let lblWarning;
 	if (document.getElementById("lblWarning") == null) {
 		lblWarning = getTitleDivLabel("lblWarning", "<p>" + _text + "</p>", 0, 70);
 		lblWarning.style.backgroundColor = "#ffcccc";
@@ -1763,13 +1763,13 @@ function headerConvert(_dosObj) {
  */
 function keysConvert(_dosObj) {
 
-	let   newKey = "";
+	let newKey = "";
 
 	if (_dosObj.keyExtraList != undefined) {
 		const keyExtraList = _dosObj.keyExtraList.split(",");
-		let   tmpKeyCtrl = new Array();
-		let   tmpKeyPtn = new Array();
-		let   tmpMinPatterns = 1;
+		let tmpKeyCtrl = new Array();
+		let tmpKeyPtn = new Array();
+		let tmpMinPatterns = 1;
 
 		for (var j = 0; j < keyExtraList.length; j++) {
 			newKey = keyExtraList[j];
@@ -1979,7 +1979,7 @@ function optionInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = function (evt) {
 		// ブラウザ判定
-		let   setKey;
+		let setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
 			setKey = evt.which;
 		} else {
@@ -2405,12 +2405,12 @@ function keyConfigInit() {
 	}
 
 	/** 同行の左から数えた場合の位置(x座標) */
-	let   leftCnt = 0;
+	let leftCnt = 0;
 	/** 同行の中心から見た場合の位置(x座標) */
-	let   stdPos = 0;
+	let stdPos = 0;
 	/** 行位置 */
-	let   dividePos = 0;
-	let   posj = 0;
+	let dividePos = 0;
+	let posj = 0;
 
 	for (var j = 0; j < keyNum; j++) {
 
@@ -2562,7 +2562,7 @@ function keyConfigInit() {
 		const cursor = document.getElementById("cursor");
 
 		// ブラウザ判定
-		let   setKey;
+		let setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
 			setKey = evt.which;
 		} else {
@@ -2723,7 +2723,7 @@ function loadingScoreInit() {
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
 	// 譜面データの読み込み
-	let   scoreIdHeader = "";
+	let scoreIdHeader = "";
 	if (g_stateObj.scoreId > 0) {
 		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
 	}
@@ -2829,9 +2829,9 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 	obj.arrowData = new Array();
 	obj.frzData = new Array();
-	let   frzName;
-	let   tmpData;
-	let   tmpArrayData = new Array();
+	let frzName;
+	let tmpData;
+	let tmpArrayData = new Array();
 
 	for (var j = 0, k = 0; j < keyNum; j++) {
 
@@ -2933,7 +2933,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				tmpWordData[k] = parseFloat(tmpWordData[k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
 				tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
 
-				let   addFrame = 0;
+				let addFrame = 0;
 				if (obj.wordData[tmpWordData[k]] == undefined) {
 					obj.wordData[tmpWordData[k]] = new Array();
 				} else {
@@ -2983,7 +2983,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 					obj.backMaxDepth = tmpDepth;
 				}
 
-				let   addFrame = 0;
+				let addFrame = 0;
 				if (obj.backData[tmpFrame] == undefined) {
 					obj.backData[tmpFrame] = {};
 				} else {
@@ -3019,7 +3019,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
  * @param {string} _str 
  */
 function escapeHtml(_str) {
-	let   newstr = _str.split("<").join("&lt;");
+	let newstr = _str.split("<").join("&lt;");
 	newstr = newstr.split(">").join("&gt;");
 	newstr = newstr.split('"').join("&quot;");
 	newstr = newstr.split('&').join("&amp;");
@@ -3059,7 +3059,7 @@ function calcLifeVal(_val, _allArrows) {
  */
 function getLastFrame(_dataObj) {
 
-	let   tmpLastNum = 0;
+	let tmpLastNum = 0;
 	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 
@@ -3084,7 +3084,7 @@ function getLastFrame(_dataObj) {
  */
 function getFirstArrowFrame(_dataObj) {
 
-	let   tmpFirstNum = Infinity;
+	let tmpFirstNum = Infinity;
 	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 
@@ -3108,7 +3108,7 @@ function getFirstArrowFrame(_dataObj) {
  * @param {number} _lastFrame 
  */
 function getStartFrame(_lastFrame) {
-	let   frameNum = 0;
+	let frameNum = 0;
 	frameNum = g_headerObj.startFrame;
 	if (_lastFrame >= g_headerObj.startFrame) {
 		frameNum = Math.round(g_stateObj.fadein / 100 * (_lastFrame - frameNum)) + frameNum;
@@ -3179,9 +3179,9 @@ function setMotionOnFrame() {
  * @param {object} _motionOnFrame 
  */
 function getFirstArrivalFrame(_startFrame, _speedOnFrame, _motionOnFrame) {
-	let   startY = 0;
-	let   frm = _startFrame;
-	let   motionFrm = C_MOTION_STD_POS;
+	let startY = 0;
+	let frm = _startFrame;
+	let motionFrm = C_MOTION_STD_POS;
 
 	while (g_distY - startY > 0) {
 		startY += _speedOnFrame[frm];
@@ -3227,13 +3227,13 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	/** Motionの適用フレーム数 */
 	g_workObj.motionFrame = new Array();
 
-	let   spdNext = Infinity;
-	let   spdPrev = 0;
-	let   spdk;
-	let   lastk;
-	let   tmpObj;
-	let   arrowArrivalFrm;
-	let   frmPrev;
+	let spdNext = Infinity;
+	let spdPrev = 0;
+	let spdk;
+	let lastk;
+	let tmpObj;
+	let arrowArrivalFrm;
+	let frmPrev;
 
 	for (var j = 0; j < _dataObj.arrowData.length; j++) {
 
@@ -3400,7 +3400,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	// 個別加速のタイミング更新
 	if (_dataObj.boostData != undefined && _dataObj.boostData.length >= 2) {
 
-		let   delBoostIdx = 0;
+		let delBoostIdx = 0;
 		for (var k = _dataObj.boostData.length - 2; k >= 0; k -= 2) {
 			if (_dataObj.boostData[k] < g_scoreObj.frameNum) {
 				delBoostIdx = k;
@@ -3514,7 +3514,7 @@ function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame) {
  * @param {number} _endFrame 
  */
 function getFrzLength(_speedOnFrame, _startFrame, _endFrame) {
-	let   frzLength = 0;
+	let frzLength = 0;
 
 	for (var frm = _startFrame; frm < _endFrame; frm++) {
 		frzLength += _speedOnFrame[frm];
@@ -3752,8 +3752,8 @@ function MainInit() {
 		arrowCnts[j] = 0;
 		frzCnts[j] = 0;
 	}
-	let   speedCnts = 0;
-	let   boostCnts = 0;
+	let speedCnts = 0;
+	let boostCnts = 0;
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
@@ -3761,7 +3761,7 @@ function MainInit() {
 
 	// 開始位置、楽曲再生位置の設定
 	const firstFrame = g_scoreObj.frameNum;
-	let   musicStartFrame;
+	let musicStartFrame;
 	if (firstFrame < g_headerObj.blankFrame) {
 		musicStartFrame = g_headerObj.blankFrame;
 		g_audio.volume = g_stateObj.volume / 100;
@@ -3771,18 +3771,18 @@ function MainInit() {
 	}
 
 	// 曲時間制御変数
-	let   thisTime;
-	let   buffTime;
-	let   musicStartFlg = false;
+	let thisTime;
+	let buffTime;
+	let musicStartFlg = false;
 
 	g_inputKeyBuffer = [];
 
 	// 終了時間の設定
 	const fullSecond = Math.floor(g_headerObj.blankFrame / 60 + g_audio.duration);
-	let   fullMin = Math.floor(fullSecond / 60);
-	let   fullSec = ("00" + Math.floor(fullSecond % 60)).slice(-2);
-	let   fullTime = fullMin + ":" + fullSec;
-	let   fadeOutFrame = Infinity;
+	let fullMin = Math.floor(fullSecond / 60);
+	let fullSec = ("00" + Math.floor(fullSecond % 60)).slice(-2);
+	let fullTime = fullMin + ":" + fullSec;
+	let fadeOutFrame = Infinity;
 	const preblankFrame = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
 
 	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
@@ -3915,7 +3915,7 @@ function MainInit() {
 	document.onkeydown = function (evt) {
 
 		// ブラウザ判定
-		let   setKey;
+		let setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
 			setKey = evt.which;
 		} else {
@@ -3991,7 +3991,7 @@ function MainInit() {
 
 	document.onkeyup = function (evt) {
 		// ブラウザ判定
-		let   setKey;
+		let setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
 			setKey = evt.which;
 		} else {
@@ -4008,7 +4008,7 @@ function MainInit() {
 	function mainKeyUpActOFF() {
 		for (var j = 0; j < keyNum; j++) {
 
-			let   keyDownFlg = false;
+			let keyDownFlg = false;
 			for (var m = 0, len = g_workObj.keyCtrl[j].length; m < len; m++) {
 				if (keyIsDown(g_workObj.keyCtrl[j][m])) {
 					keyDownFlg = true;
@@ -4140,9 +4140,9 @@ function MainInit() {
 
 			for (var k = g_workObj.judgArrowCnt[j]; k <= arrowCnts[j]; k++) {
 				const arrow = document.getElementById("arrow" + j + "_" + k);
-				let   boostCnt = arrow.getAttribute("boostCnt");
+				let boostCnt = arrow.getAttribute("boostCnt");
 				const boostSpd = arrow.getAttribute("boostSpd");
-				let   cnt = arrow.getAttribute("cnt");
+				let cnt = arrow.getAttribute("cnt");
 
 				// 全体色変化 (移動時)
 				if (g_workObj.mkAColor[g_scoreObj.frameNum] != undefined) {
@@ -4179,7 +4179,7 @@ function MainInit() {
 			}
 
 			// ステップゾーンのヒット領域は一定時間で非表示化
-			let   hitCnt = stepDivHit.getAttribute("cnt");
+			let hitCnt = stepDivHit.getAttribute("cnt");
 			if (hitCnt > 0) {
 				stepDivHit.setAttribute("cnt", --hitCnt);
 				if (hitCnt == 0) {
@@ -4242,15 +4242,15 @@ function MainInit() {
 		for (var j = 0; j < keyNum; j++) {
 			for (var k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
 				const frzRoot = document.getElementById("frz" + j + "_" + k);
-				let   boostCnt = frzRoot.getAttribute("boostCnt");
+				let boostCnt = frzRoot.getAttribute("boostCnt");
 				const boostSpd = frzRoot.getAttribute("boostSpd");
-				let   cnt = frzRoot.getAttribute("cnt");
-				let   frzAttempt = frzRoot.getAttribute("frzAttempt");
+				let cnt = frzRoot.getAttribute("cnt");
+				let frzAttempt = frzRoot.getAttribute("frzAttempt");
 
 				const frzTop = document.getElementById("frzTop" + j + "_" + k);
 				const frzBar = document.getElementById("frzBar" + j + "_" + k);
 				const frzBtm = document.getElementById("frzBtm" + j + "_" + k);
-				let   frzBarLength = frzRoot.getAttribute("frzBarLength");
+				let frzBarLength = frzRoot.getAttribute("frzBarLength");
 
 				if (frzRoot.getAttribute("judgEndFlg") == "false") {
 					if (frzRoot.getAttribute("isMoving") == "true") {
@@ -4311,7 +4311,7 @@ function MainInit() {
 							frzBtm.style.top = (parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpd * g_workObj.scrollDir[j]) + "px";
 							frzBtmShadow.style.top = (parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpd * g_workObj.scrollDir[j]) + "px";
 
-							let   keyDownFlg = false;
+							let keyDownFlg = false;
 							for (var m = 0, len = g_workObj.keyCtrl[j].length; m < len; m++) {
 								if (g_workObj.keyHitFlg[j][m]) {
 									keyDownFlg = true;
@@ -4402,7 +4402,7 @@ function MainInit() {
 					tmpObj.path.indexOf(".bmp") != -1 || tmpObj.path.indexOf(".jpg") != -1) {
 
 					// imgタグの場合
-					let   tmpInnerHTML = "<img src='" + tmpObj.path + "' class='" + tmpObj.class + "' " +
+					let tmpInnerHTML = "<img src='" + tmpObj.path + "' class='" + tmpObj.class + "' " +
 						"style='position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top + "px;";
 					if (tmpObj.width != 0 && tmpObj.width > 0) {
 						tmpInnerHTML += "width:" + tmpObj.width + "px;";
@@ -4418,7 +4418,7 @@ function MainInit() {
 				} else {
 
 					// spanタグの場合
-					let   tmpInnerHTML = "<span class='" + tmpObj.class + "' " +
+					let tmpInnerHTML = "<span class='" + tmpObj.class + "' " +
 						"style='display:inline-block;position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top + "px;";
 
 					// この場合のwidthは font-size と解釈する
@@ -4442,7 +4442,7 @@ function MainInit() {
 		}
 
 		// 判定キャラクタ消去
-		let   charaJCnt = document.getElementById("charaJ").getAttribute("cnt");
+		let charaJCnt = document.getElementById("charaJ").getAttribute("cnt");
 		if (charaJCnt > 0) {
 			document.getElementById("charaJ").setAttribute("cnt", --charaJCnt);
 			if (charaJCnt == 0) {
@@ -4450,7 +4450,7 @@ function MainInit() {
 				document.getElementById("comboJ").innerHTML = "";
 			}
 		}
-		let   charaFJCnt = document.getElementById("charaFJ").getAttribute("cnt");
+		let charaFJCnt = document.getElementById("charaFJ").getAttribute("cnt");
 		if (charaFJCnt > 0) {
 			document.getElementById("charaFJ").setAttribute("cnt", --charaFJCnt);
 			if (charaFJCnt == 0) {
@@ -4920,8 +4920,8 @@ function resultInit() {
 	g_resultObj.score = resultScore;
 
 	// ランク計算
-	let   rankMark = "";
-	let   rankColor = "";
+	let rankMark = "";
+	let rankColor = "";
 	if (g_gameOverFlg == true) {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
@@ -4949,7 +4949,7 @@ function resultInit() {
 
 
 	// Twitter用リザルト
-	let   hashTag;
+	let hashTag;
 	if (g_headerObj.hashTag != undefined) {
 		hashTag = " " + g_headerObj.hashTag;
 	} else {
@@ -5079,7 +5079,7 @@ function resultInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = function (evt) {
 		// ブラウザ判定
-		let   setKey;
+		let setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
 			setKey = evt.which;
 		} else {
