@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/19
+ * Revised : 2018/11/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.72.1";
+var g_version = "Ver 0.72.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -90,6 +90,21 @@ var C_IMG_MONAR = "../img/monar_600.png";
 var C_IMG_CURSOR = "../img/cursor.png";
 var C_IMG_FRZBAR = "../img/frzbar.png";
 
+var C_IMG_ARROWSHADOW = "../img/arrowShadow_500.png";
+var C_IMG_ONIGIRIARROWSHADOW = "../img/aaShadow_500.png";
+var C_IMG_GIKOARROWSHADOW = "../img/aaShadow_500.png";
+var C_IMG_IYOARROWSHADOW = "../img/aaShadow_500.png";
+var C_IMG_CARROWSHADOW = "../img/aaShadow_500.png";
+var C_IMG_MORARAARROWSHADOW = "../img/aaShadow_500.png";
+var C_IMG_MONARARROWSHADOW = "../img/aaShadow_500.png";
+
+var C_IMG_ONIGIRIFRZBAR = "../img/frzbar.png";
+var C_IMG_GIKOFRZBAR = "../img/frzbar.png";
+var C_IMG_IYOFRZBAR = "../img/frzbar.png";
+var C_IMG_CFRZBAR = "../img/frzbar.png";
+var C_IMG_MORARAFRZBAR = "../img/frzbar.png";
+var C_IMG_MONARFRZBAR = "../img/frzbar.png";
+
 // Motionオプション配列の基準位置
 var C_MOTION_STD_POS = 15;
 
@@ -121,6 +136,9 @@ var g_stateObj = {
 };
 
 var C_VAL_MAXLIFE = 1000;
+var C_CLR_MAXLIFE = "#222200";
+var C_CLR_CLEARLIFE = "#002222";
+var C_CLR_DEFAULTLIFE = "#222222";
 
 var g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
 var g_volumeNum = 0;
@@ -985,7 +1003,7 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate) {
 }
 
 function createColorObject(_id, _color, _x, _y, _width, _height,
-	_rotate, _styleName, _imgName) {
+	_rotate, _styleName) {
 
 	var div = createDiv(_id, _x, _y, _width, _height);
 
@@ -993,14 +1011,13 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	if (isNaN(Number(_rotate))) {
 		var rotate = 0;
 		var charaStyle = _rotate + _styleName;
-		var charaImg = eval("C_IMG_" + _rotate.toUpperCase());
 		div.setAttribute("type", "AA");
 	} else {
 		var rotate = _rotate;
 		var charaStyle = _styleName;
-		var charaImg = _imgName;
 		div.setAttribute("type", "arrow");
 	}
+	var charaImg = eval("C_IMG_" + charaStyle.toUpperCase());
 	div.align = C_ALIGN_CENTER;
 
 	// IE/Edgeの場合は色なし版を表示
@@ -2404,7 +2421,7 @@ function keyConfigInit() {
 	posj = g_keyObj["pos" + keyCtrlPtn][0];
 
 	// カーソルの作成
-	var cursor = keyconSprite.appendChild(createImg("cursor", "../img/cursor.png",
+	var cursor = keyconSprite.appendChild(createImg("cursor", C_IMG_CURSOR,
 		kWidth / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 
 	// キーコンフィグタイプ切替ボタン
@@ -3786,11 +3803,11 @@ function MainInit() {
 	var lblLife = createDivLabel("lblLife", 0, 30, 70, 20, 16, C_CLR_TITLE,
 		g_workObj.lifeVal);
 	if (g_workObj.lifeVal == C_VAL_MAXLIFE) {
-		lblLife.style.backgroundColor = "#222200";
+		lblLife.style.backgroundColor = C_CLR_MAXLIFE;
 	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
-		lblLife.style.backgroundColor = "#002222";
+		lblLife.style.backgroundColor = C_CLR_CLEARLIFE;
 	} else {
-		lblLife.style.backgroundColor = "#222222";
+		lblLife.style.backgroundColor = C_CLR_DEFAULTLIFE;
 	}
 	divRoot.appendChild(lblLife);
 
@@ -4178,12 +4195,12 @@ function MainInit() {
 
 				// フリーズアロー帯(frzBar)
 				var frzBar = createColorObject("frzBar" + targetj + "_" + (frzCnts[targetj]), g_workObj.frzNormalBarColors[targetj],
-					5, 25 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[targetj], 40, frzLength * g_workObj.boostSpd, 0, "frzBar", "../img/frzBar.png");
+					5, 25 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[targetj], 40, frzLength * g_workObj.boostSpd, 0, "frzBar");
 				frzRoot.appendChild(frzBar);
 
 				// 開始矢印の塗り部分。ヒット時は前面に出て光る。
 				var frzTopShadow = createColorObject("frzTopShadow" + targetj + "_" + (frzCnts[targetj]), "#000000",
-					0, 0, 50, 50, g_workObj.stepRtn[targetj], "arrowShadow", "../img/arrowshadow_500.png");
+					0, 0, 50, 50, g_workObj.stepRtn[targetj], "arrowShadow");
 				frzRoot.appendChild(frzTopShadow);
 
 				// 開始矢印。ヒット時は隠れる。
@@ -4193,7 +4210,7 @@ function MainInit() {
 
 				// 後発矢印の塗り部分
 				var frzBtmShadow = createColorObject("frzBtmShadow" + targetj + "_" + (frzCnts[targetj]), "#000000",
-					0, frzLength * g_workObj.boostSpd * rev, 50, 50, g_workObj.stepRtn[targetj], "arrowShadow", "../img/arrowshadow_500.png");
+					0, frzLength * g_workObj.boostSpd * rev, 50, 50, g_workObj.stepRtn[targetj], "arrowShadow");
 				frzRoot.appendChild(frzBtmShadow);
 
 				// 後発矢印
@@ -4705,9 +4722,9 @@ function lifeRecovery() {
 	g_workObj.lifeVal += g_workObj.lifeRcv;
 	if (g_workObj.lifeVal >= C_VAL_MAXLIFE) {
 		g_workObj.lifeVal = C_VAL_MAXLIFE;
-		document.getElementById("lblLife").style.backgroundColor = "#222200";
+		document.getElementById("lblLife").style.backgroundColor = C_CLR_MAXLIFE;
 	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
-		document.getElementById("lblLife").style.backgroundColor = "#002222";
+		document.getElementById("lblLife").style.backgroundColor = C_CLR_CLEARLIFE;
 	}
 	document.getElementById("lblLife").innerHTML = Math.round(g_workObj.lifeVal);
 }
@@ -4717,9 +4734,9 @@ function lifeDamage() {
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
-		document.getElementById("lblLife").style.backgroundColor = "#222222";
+		document.getElementById("lblLife").style.backgroundColor = C_CLR_DEFAULTLIFE;
 	} else {
-		document.getElementById("lblLife").style.backgroundColor = "#002222";
+		document.getElementById("lblLife").style.backgroundColor = C_CLR_CLEARLIFE;
 	}
 	document.getElementById("lblLife").innerHTML = Math.round(g_workObj.lifeVal);
 }
