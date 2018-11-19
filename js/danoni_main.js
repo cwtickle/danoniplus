@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.73.1";
+var g_version = "Ver 0.73.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -4597,7 +4597,7 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 function fadeWord(_wordDir) {
 
 	if (g_wordObj["fadeInFlg" + _wordDir] == true) {
-		const wordAlpha = parseFloat(document.getElementById("lblword" + _wordDir).style.opacity);
+		let wordAlpha = parseFloat(document.getElementById("lblword" + _wordDir).style.opacity);
 		if (wordAlpha + 0.04 >= 0.99) {
 			g_wordObj["fadeInFlg" + _wordDir] = false;
 			document.getElementById("lblword" + _wordDir).style.opacity = 1;
@@ -4606,7 +4606,7 @@ function fadeWord(_wordDir) {
 			document.getElementById("lblword" + _wordDir).style.opacity = wordAlpha;
 		}
 	} else if (g_wordObj["fadeOutFlg" + _wordDir] == true) {
-		const wordAlpha = parseFloat(document.getElementById("lblword" + _wordDir).style.opacity);
+		let wordAlpha = parseFloat(document.getElementById("lblword" + _wordDir).style.opacity);
 		if (wordAlpha - 0.04 <= 0.01) {
 			g_wordObj["fadeOutFlg" + _wordDir] = false;
 			document.getElementById("lblword" + _wordDir).style.opacity = 0;
