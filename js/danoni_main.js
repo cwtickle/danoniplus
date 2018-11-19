@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/17
+ * Revised : 2018/11/19
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.71.0";
+var g_version = "Ver 0.72.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -112,8 +112,15 @@ var g_stateObj = {
 	auto: "OFF",
 	adjustment: 0,
 	fadein: 0,
-	volume: 100
+	volume: 100,
+	lifeRcv: 2,
+	lifeDmg: 7,
+	lifeMode: "Border",
+	lifeBorder: 70,
+	lifeInit: 25
 };
+
+var C_VAL_MAXLIFE = 1000;
 
 var g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
 var g_volumeNum = 0;
@@ -1531,21 +1538,47 @@ function headerConvert(_dosObj) {
 		obj.keyLabels = new Array();
 		obj.difLabels = new Array();
 		obj.initSpeeds = new Array();
+		obj.lifeBorders = new Array();
+		obj.lifeRecoverys = new Array();
+		obj.lifeDamages = new Array();
+		obj.lifeInits = new Array();
 		for (var j = 0; j < difs.length; j++) {
 			var difDetails = difs[j].split(",");
 			obj.keyLabels.push(setVal(difDetails[0], "7", "string"));
 			obj.difLabels.push(setVal(difDetails[1], "Normal", "string"));
 			obj.initSpeeds.push(setVal(difDetails[2], 3.5, "float"));
+			if (difDetails.length > 3 && difDetails[3] != "x") {
+				obj.lifeBorders.push(setVal(difDetails[3], 70, "number"));
+			} else {
+				obj.lifeBorders.push("x");
+			}
+			obj.lifeRecoverys.push(setVal(difDetails[4], 2, "float"));
+			obj.lifeDamages.push(setVal(difDetails[5], 7, "float"));
+			obj.lifeInits.push(setVal(difDetails[6], 25, "float"));
 		}
 	} else {
 		makeWarningWindow(C_MSG_E_0021);
 		obj.keyLabels = ["7"];
 		obj.difLabels = ["Normal"];
 		obj.initSpeeds = [3.5];
+		obj.lifeBorders = [70];
+		obj.lifeRecoverys = [2];
+		obj.lifeDamages = [7];
+		obj.lifeInits = [25];
 	}
 	if (obj.initSpeeds[0] != undefined) {
 		g_stateObj.speed = obj.initSpeeds[0];
 	}
+	if (obj.lifeBorders[0] == "x") {
+		g_stateObj.lifeBorder = 0;
+		g_stateObj.lifeMode = "Survival";
+	} else {
+		g_stateObj.lifeBorder = obj.lifeBorders[0];
+		g_stateObj.lifeMode = "Border";
+	}
+	g_stateObj.lifeRcv = obj.lifeRecoverys[0];
+	g_stateObj.lifeDmg = obj.lifeDamages[0];
+	g_stateObj.lifeInit = obj.lifeInits[0];
 
 	// 初期色情報
 	obj.setColorInit = ["#cccccc", "#9999ff", "#ffffff", "#ffff99", "#99ff99"];
@@ -1994,6 +2027,16 @@ function createOptionWindow(_sprite) {
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 		g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
 		g_keyObj.currentPtn = 0;
+		if (g_headerObj.lifeBorders[g_stateObj.scoreId] == "x") {
+			g_stateObj.lifeBorder = 0;
+			g_stateObj.lifeMode = "Survival";
+		} else {
+			g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
+			g_stateObj.lifeMode = "Border";
+		}
+		g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
+		g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
+
 	}
 
 	// 速度(Speed)
@@ -2654,6 +2697,9 @@ function loadingScoreInit() {
 	}
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0);
 
+	// ライフ回復・ダメージ量の計算
+	calcLifeVals(g_allArrow + g_allFrz);
+
 	// 最終フレーム数の取得
 	var lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
 
@@ -2947,6 +2993,32 @@ function escapeHtml(_str) {
 	newstr = newstr.split('&').join("&amp;");
 
 	return newstr;
+}
+
+/**
+ * ライフ回復量・ダメージ量の算出
+ * @param {number} _allArrows 
+ */
+function calcLifeVals(_allArrows) {
+
+	if (g_stateObj.lifeMode == "Border") {
+		g_workObj.lifeRcv = calcLifeVal(g_stateObj.lifeRcv, _allArrows);
+		g_workObj.lifeDmg = calcLifeVal(g_stateObj.lifeDmg, _allArrows);
+	} else {
+		g_workObj.lifeRcv = g_stateObj.lifeRcv;
+		g_workObj.lifeDmg = g_stateObj.lifeDmg;
+	}
+	g_workObj.lifeBorder = C_VAL_MAXLIFE * g_stateObj.lifeBorder / 100;
+	g_workObj.lifeInit = C_VAL_MAXLIFE * g_stateObj.lifeInit / 100;
+}
+
+/**
+ * ライフ回復量・ダメージ量の算出
+ * @param {number} _val 
+ * @param {number} _allArrows 
+ */
+function calcLifeVal(_val, _allArrows) {
+	return Math.round(_val * 100000 / _allArrows) / 100;
 }
 
 /**
@@ -3587,6 +3659,8 @@ function getArrowSettings() {
 	g_resultObj.iknai = 0;
 	g_resultObj.fCombo = 0;
 	g_resultObj.fmaxCombo = 0;
+
+	g_workObj.lifeVal = g_workObj.lifeInit;
 }
 
 /*-----------------------------------------------------------*/
@@ -3707,6 +3781,18 @@ function MainInit() {
 	var lblframe = createDivLabel("lblframe", 0, 0, 100, 30, 20, C_CLR_TITLE,
 		g_scoreObj.frameNum);
 	divRoot.appendChild(lblframe);
+
+	// ライフ(数字)
+	var lblLife = createDivLabel("lblLife", 0, 30, 70, 20, 16, C_CLR_TITLE,
+		g_workObj.lifeVal);
+	if (g_workObj.lifeVal == C_VAL_MAXLIFE) {
+		lblLife.style.backgroundColor = "#222200";
+	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
+		lblLife.style.backgroundColor = "#002222";
+	} else {
+		lblLife.style.backgroundColor = "#222222";
+	}
+	divRoot.appendChild(lblLife);
 
 	// 判定カウンタ表示
 	infoSprite.appendChild(makeCounterSymbol("lblIi", g_sWidth - 110, C_CLR_II, 1, 0));
@@ -4615,6 +4701,29 @@ function judgeArrow(_j) {
 	}
 }
 
+function lifeRecovery() {
+	g_workObj.lifeVal += g_workObj.lifeRcv;
+	if (g_workObj.lifeVal >= C_VAL_MAXLIFE) {
+		g_workObj.lifeVal = C_VAL_MAXLIFE;
+		document.getElementById("lblLife").style.backgroundColor = "#222200";
+	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
+		document.getElementById("lblLife").style.backgroundColor = "#002222";
+	}
+	document.getElementById("lblLife").innerHTML = Math.round(g_workObj.lifeVal);
+}
+
+function lifeDamage() {
+	g_workObj.lifeVal -= g_workObj.lifeDmg;
+	if (g_workObj.lifeVal <= 0) {
+		g_workObj.lifeVal = 0;
+	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
+		document.getElementById("lblLife").style.backgroundColor = "#222222";
+	} else {
+		document.getElementById("lblLife").style.backgroundColor = "#002222";
+	}
+	document.getElementById("lblLife").innerHTML = Math.round(g_workObj.lifeVal);
+}
+
 function judgeIi() {
 	g_resultObj.ii++;
 	g_currentArrows++;
@@ -4628,6 +4737,7 @@ function judgeIi() {
 	}
 	document.getElementById("comboJ").innerHTML = g_resultObj.combo + " Combo!!";
 
+	lifeRecovery();
 	finishViewing();
 }
 
@@ -4644,6 +4754,7 @@ function judgeShakin() {
 	}
 	document.getElementById("comboJ").innerHTML = g_resultObj.combo + " Combo!!";
 
+	lifeRecovery();
 	finishViewing();
 }
 
@@ -4668,6 +4779,8 @@ function judgeShobon() {
 	document.getElementById("lblShobon").innerHTML = g_resultObj.shobon;
 	g_resultObj.combo = 0;
 	document.getElementById("comboJ").innerHTML = "";
+
+	lifeDamage();
 }
 
 function judgeUwan() {
@@ -4679,6 +4792,8 @@ function judgeUwan() {
 	document.getElementById("lblUwan").innerHTML = g_resultObj.uwan;
 	g_resultObj.combo = 0;
 	document.getElementById("comboJ").innerHTML = "";
+
+	lifeDamage();
 }
 
 function judgeKita() {
@@ -4694,6 +4809,7 @@ function judgeKita() {
 	}
 	document.getElementById("comboFJ").innerHTML = g_resultObj.fCombo + " Combo!!";
 
+	lifeRecovery();
 	finishViewing();
 }
 
@@ -4705,6 +4821,8 @@ function judgeIknai() {
 	document.getElementById("charaFJ").setAttribute("cnt", C_FRM_JDGMOTION);
 	document.getElementById("comboFJ").innerHTML = "";
 	g_resultObj.fCombo = 0;
+
+	lifeDamage();
 }
 
 function finishViewing() {
