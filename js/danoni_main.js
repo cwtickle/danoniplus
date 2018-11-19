@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.72.2";
+var g_version = "Ver 0.73.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -47,48 +47,48 @@ window.onload = function () {
  * 汎用定数定義
  */
 // 表示位置
-var C_ALIGN_LEFT = "left";
-var C_ALIGN_CENTER = "center";
-var C_ALIGN_RIGHT = "right";
-var C_VALIGN_TOP = "top";
-var C_VALIGN_MIDDLE = "middle";
-var C_VALIGN_BOTTOM = "bottom";
+const C_ALIGN_LEFT = "left";
+const C_ALIGN_CENTER = "center";
+const C_ALIGN_RIGHT = "right";
+const C_VALIGN_TOP = "top";
+const C_VALIGN_MIDDLE = "middle";
+const C_VALIGN_BOTTOM = "bottom";
 
 // ユーザインタフェース
-var C_CLR_DEFAULT = "#333333";
-var C_CLR_DEFHOVER = "#666666";
-var C_CLR_BACK = "#000033";
-var C_CLR_NEXT = "#330000";
-var C_CLR_SETTING = "#333300";
-var C_CLR_RESET = "#003300";
-var C_CLR_TWEET = "#003333";
-var C_CLR_TEXT = "#ffffff";
-var C_CLR_TITLE = "#cccccc";
+const C_CLR_DEFAULT = "#333333";
+const C_CLR_DEFHOVER = "#666666";
+const C_CLR_BACK = "#000033";
+const C_CLR_NEXT = "#330000";
+const C_CLR_SETTING = "#333300";
+const C_CLR_RESET = "#003300";
+const C_CLR_TWEET = "#003333";
+const C_CLR_TEXT = "#ffffff";
+const C_CLR_TITLE = "#cccccc";
 
-var C_LBL_TITLESIZE = 32;
-var C_LBL_BTNSIZE = 28;
-var C_LBL_LNKSIZE = 16;
-var C_LBL_BASICFONT = "'Meiryo UI', sans-serif";
+const C_LBL_TITLESIZE = 32;
+const C_LBL_BTNSIZE = 28;
+const C_LBL_LNKSIZE = 16;
+const C_LBL_BASICFONT = "'Meiryo UI', sans-serif";
 
-var C_CLR_LNK = "#111111";
-var C_BTN_HEIGHT = 50;
-var C_LNK_HEIGHT = 20;
+const C_CLR_LNK = "#111111";
+const C_BTN_HEIGHT = 50;
+const C_LNK_HEIGHT = 20;
 
 // スプライト（ムービークリップ相当）のルート
-var C_SPRITE_ROOT = "divRoot";
+const C_SPRITE_ROOT = "divRoot";
 
 // 画像ファイル
-var C_IMG_ARROW = "../img/arrow_500.png";
-var C_IMG_ARROWSD = "../img/arrowShadow_500.png";
-var C_IMG_ONIGIRI = "../img/onigiri_600.png";
-var C_IMG_AASD = "../img/aaShadow_500.png";
-var C_IMG_GIKO = "../img/giko_600.png";
-var C_IMG_IYO = "../img/iyo_600.png";
-var C_IMG_C = "../img/c_600.png";
-var C_IMG_MORARA = "../img/morara_600.png";
-var C_IMG_MONAR = "../img/monar_600.png";
-var C_IMG_CURSOR = "../img/cursor.png";
-var C_IMG_FRZBAR = "../img/frzbar.png";
+const C_IMG_ARROW = "../img/arrow_500.png";
+const C_IMG_ARROWSD = "../img/arrowShadow_500.png";
+const C_IMG_ONIGIRI = "../img/onigiri_600.png";
+const C_IMG_AASD = "../img/aaShadow_500.png";
+const C_IMG_GIKO = "../img/giko_600.png";
+const C_IMG_IYO = "../img/iyo_600.png";
+const C_IMG_C = "../img/c_600.png";
+const C_IMG_MORARA = "../img/morara_600.png";
+const C_IMG_MONAR = "../img/monar_600.png";
+const C_IMG_CURSOR = "../img/cursor.png";
+const C_IMG_FRZBAR = "../img/frzbar.png";
 
 var C_IMG_ARROWSHADOW = "../img/arrowShadow_500.png";
 var C_IMG_ONIGIRIARROWSHADOW = "../img/aaShadow_500.png";
@@ -106,20 +106,20 @@ var C_IMG_MORARAFRZBAR = "../img/frzbar.png";
 var C_IMG_MONARFRZBAR = "../img/frzbar.png";
 
 // Motionオプション配列の基準位置
-var C_MOTION_STD_POS = 15;
+const C_MOTION_STD_POS = 15;
 
 // キーブロック対象(キーコードを指定)
-var C_BLOCK_KEYS = [
+const C_BLOCK_KEYS = [
 	8, 9, 13, 17, 18, 32, /* BackSpace, Tab, Enter, Ctrl, Alt, Space */
 	37, 38, 39, 40, 46,   /* Left, Down, Up, Right, Delete */
 	112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126 /* F1～F15 */
 ];
 
 // 譜面データ持ち回り用
-var g_rootObj = {};
-var g_headerObj = {};
-var g_scoreObj = {};
-var g_stateObj = {
+let   g_rootObj = {};
+let   g_headerObj = {};
+let   g_scoreObj = {};
+const g_stateObj = {
 	scoreId: 0,
 	speed: 3.5,
 	motion: "OFF",
@@ -135,30 +135,30 @@ var g_stateObj = {
 	lifeInit: 25
 };
 
-var C_VAL_MAXLIFE = 1000;
-var C_CLR_MAXLIFE = "#222200";
-var C_CLR_CLEARLIFE = "#002222";
-var C_CLR_DEFAULTLIFE = "#222222";
+const C_VAL_MAXLIFE = 1000;
+let C_CLR_MAXLIFE = "#222200";
+let C_CLR_CLEARLIFE = "#002222";
+let C_CLR_DEFAULTLIFE = "#222222";
 
-var g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
-var g_volumeNum = 0;
+const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
+let   g_volumeNum = 0;
 
 // サイズ(後で指定)
-var g_sWidth;
-var g_sHeight;
+let   g_sWidth;
+let   g_sHeight;
 
 // ステップゾーン位置、到達距離(後で指定)
-var C_STEP_Y = 70;
-var g_stepY;
-var g_distY;
+const C_STEP_Y = 70;
+let   g_stepY;
+let   g_distY;
 
 // キーコンフィグカーソル
-var g_currentj = 0;
-var g_currentk = 0;
-var g_prevKey = -1;
+let   g_currentj = 0;
+let   g_currentk = 0;
+let   g_prevKey = -1;
 
 // キーコード
-var g_kCd = new Array();
+const g_kCd = new Array();
 for (var j = 0; j < 255; j++) {
 	g_kCd[j] = "";
 }
@@ -275,7 +275,7 @@ g_kCd[240] = "CapsLk";
 
 // キー別の設定（一旦ここで定義）
 // ステップゾーンの位置関係は自動化を想定
-var g_keyObj = {
+const g_keyObj = {
 
 	// 現在の選択キー、選択パターン
 	// - キーとパターンの組み合わせで、ステップゾーンや対応キー等が決まる
@@ -565,29 +565,29 @@ var g_keyObj = {
 };
 
 /** 設定・オプション画面用共通 */
-var C_LEN_SETLBL_LEFT = 140;
-var C_LEN_SETLBL_WIDTH = 250;
-var C_LEN_SETLBL_HEIGHT = 25;
-var C_SIZ_SETLBL = 18;
-var C_LEN_SETDIFLBL_HEIGHT = 25;
-var C_SIZ_SETDIFLBL = 18;
-var C_LEN_SETMINI_WIDTH = 40;
-var C_SIZ_SETMINI = 18;
+const C_LEN_SETLBL_LEFT = 140;
+const C_LEN_SETLBL_WIDTH = 250;
+const C_LEN_SETLBL_HEIGHT = 25;
+const C_SIZ_SETLBL = 18;
+const C_LEN_SETDIFLBL_HEIGHT = 25;
+const C_SIZ_SETDIFLBL = 18;
+const C_LEN_SETMINI_WIDTH = 40;
+const C_SIZ_SETMINI = 18;
 
-var C_LBL_SETMINIL = "<";
-var C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH / 2;
-var C_LBL_SETMINILL = "<";
-var C_LEN_SETMINILL_LEFT = C_LEN_SETMINIL_LEFT + C_LEN_SETMINI_WIDTH;
-var C_LBL_SETMINIR = ">";
-var C_LBL_SETMINIRR = ">";
-var C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH / 2;
-var C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
+const C_LBL_SETMINIL = "<";
+const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH / 2;
+const C_LBL_SETMINILL = "<";
+const C_LEN_SETMINILL_LEFT = C_LEN_SETMINIL_LEFT + C_LEN_SETMINI_WIDTH;
+const C_LBL_SETMINIR = ">";
+const C_LBL_SETMINIRR = ">";
+const C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH / 2;
+const C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
 
 /** キーコンフィグ設定 */
-var g_kcType = "Main";
+let   g_kcType = "Main";
 
 /** メイン画面用共通オブジェクト */
-var g_workObj = {};
+const g_workObj = {};
 g_workObj.stepX = new Array();
 g_workObj.stepRtn = new Array();
 g_workObj.keyCtrl = new Array();
@@ -595,56 +595,56 @@ g_workObj.keyHitFlg = new Array();
 g_workObj.scrollDir = new Array();
 g_workObj.dividePos = new Array();
 
-var C_FRM_AFTERFADE = 420;
-var C_FRM_FRZATTEMPT = 5;
+const C_FRM_AFTERFADE = 420;
+const C_FRM_FRZATTEMPT = 5;
 
 /** 判定系共通オブジェクト */
-var g_judgObj = {
+const g_judgObj = {
 	arrowJ: [2, 4, 6, 8, 8],
 	frzJ: [2, 4, 8]
 };
-var C_JDG_II = 0;
-var C_JDG_SHAKIN = 1;
-var C_JDG_MATARI = 2;
-var C_JDG_SHOBON = 3;
-var C_JDG_UWAN = 4;
+const C_JDG_II = 0;
+const C_JDG_SHAKIN = 1;
+const C_JDG_MATARI = 2;
+const C_JDG_SHOBON = 3;
+const C_JDG_UWAN = 4;
 
-var C_JDG_KITA = 0;
-var C_JDG_SFSF = 1;
-var C_JDG_IKNAI = 2;
+const C_JDG_KITA = 0;
+const C_JDG_SFSF = 1;
+const C_JDG_IKNAI = 2;
 
-var C_JCR_II = "(・∀・)ｲｲ!!";
-var C_JCR_SHAKIN = "(`・ω・)ｼｬｷﾝ";
-var C_JCR_MATARI = "( ´∀`)ﾏﾀｰﾘ";
-var C_JCR_SHOBON = "(´・ω・`)ｼｮﾎﾞｰﾝ";
-var C_JCR_UWAN = "( `Д´)ｳﾜｧﾝ!!";
+const C_JCR_II = "(・∀・)ｲｲ!!";
+const C_JCR_SHAKIN = "(`・ω・)ｼｬｷﾝ";
+const C_JCR_MATARI = "( ´∀`)ﾏﾀｰﾘ";
+const C_JCR_SHOBON = "(´・ω・`)ｼｮﾎﾞｰﾝ";
+const C_JCR_UWAN = "( `Д´)ｳﾜｧﾝ!!";
 
-var C_JCR_KITA = "(ﾟ∀ﾟ)ｷﾀ-!!";
-var C_JCR_SFSF = "";
-var C_JCR_IKNAI = "(・A・)ｲｸﾅｲ";
+const C_JCR_KITA = "(ﾟ∀ﾟ)ｷﾀ-!!";
+const C_JCR_SFSF = "";
+const C_JCR_IKNAI = "(・A・)ｲｸﾅｲ";
 
-var C_CLR_II = "#66ffff";
-var C_CLR_SHAKIN = "#99ff99";
-var C_CLR_MATARI = "#ff9966";
-var C_CLR_UWAN = "#ff9999";
-var C_CLR_SHOBON = "#ccccff";
-var C_CLR_KITA = "#ffff99";
-var C_CLR_SFSF = "";
-var C_CLR_IKNAI = "#99ff66";
+const C_CLR_II = "#66ffff";
+const C_CLR_SHAKIN = "#99ff99";
+const C_CLR_MATARI = "#ff9966";
+const C_CLR_UWAN = "#ff9999";
+const C_CLR_SHOBON = "#ccccff";
+const C_CLR_KITA = "#ffff99";
+const C_CLR_SFSF = "";
+const C_CLR_IKNAI = "#99ff66";
 
-var C_LEN_JDGCHARA_WIDTH = 200;
-var C_LEN_JDGCHARA_HEIGHT = 20;
-var C_SIZ_JDGCHARA = 20;
+const C_LEN_JDGCHARA_WIDTH = 200;
+const C_LEN_JDGCHARA_HEIGHT = 20;
+const C_SIZ_JDGCHARA = 20;
 
-var C_LEN_JDGCNTS_WIDTH = 100;
-var C_LEN_JDGCNTS_HEIGHT = 20;
-var C_SIZ_JDGCNTS = 16;
+const C_LEN_JDGCNTS_WIDTH = 100;
+const C_LEN_JDGCNTS_HEIGHT = 20;
+const C_SIZ_JDGCNTS = 16;
 
-var C_FRM_HITMOTION = 4;
-var C_FRM_JDGMOTION = 60;
+const C_FRM_HITMOTION = 4;
+const C_FRM_JDGMOTION = 60;
 
 /** 結果画面用共通オブジェクト */
-var g_resultObj = {
+const g_resultObj = {
 	ii: 0,
 	shakin: 0,
 	matari: 0,
@@ -660,10 +660,10 @@ var g_resultObj = {
 	score: 0
 };
 
-var g_allArrow = 0;
-var g_allFrz = 0;
-var g_currentArrows = 0;
-var g_rankObj = {
+let   g_allArrow = 0;
+let   g_allFrz = 0;
+let   g_currentArrows = 0;
+const g_rankObj = {
 	rankMarks: ["SS", "S", "SA", "AAA", "AA", "A", "B"],
 	rankRate: [97, 90, 85, 80, 75, 70, 50],
 	rankColor: ["#00ccff", "#6600ff", "#ff9900", "#ff0000", "#00ff00", "#ff00ff", "#cc00ff"],
@@ -678,16 +678,16 @@ var g_rankObj = {
 	rankColorX: "#996600"
 };
 
-var g_gameOverFlg = false;
+let   g_gameOverFlg = false;
 
-var g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
+const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
-var g_audio = new Audio();
-var g_timeoutEvtId = 0;
-var g_inputKeyBuffer = new Array();
+const g_audio = new Audio();
+let   g_timeoutEvtId = 0;
+let   g_inputKeyBuffer = new Array();
 
 // 歌詞制御
-var g_wordObj = {
+const g_wordObj = {
 	wordDir: 0,
 	wordDat: "",
 	fadeInFlg0: false,
@@ -695,30 +695,30 @@ var g_wordObj = {
 	fadeOutFlg0: false,
 	fadeOutFlg1: false
 };
-var g_wordSprite;
+let   g_wordSprite;
 
 /** 
  * メッセージ定義 
  * - 変数名は "C_MSG_X_YYYY" の形で、末尾に (X-YYYY) をつける。
  * - 記述不正の場合、書き方を2行目に指定すると親切。
 */
-var C_MSG_W_0001 = "お使いのブラウザは動作保証外です。<br>" +
+const C_MSG_W_0001 = "お使いのブラウザは動作保証外です。<br>" +
 	"Chrome/Opera/Vivaldiなど、WebKit系ブラウザの利用を推奨します。(W-0001)";
-var C_MSG_E_0011 = "アーティスト名が未入力です。(E-0011)";
-var C_MSG_E_0012 = "曲名情報が未設定です。(E-0012)<br>" +
+const C_MSG_E_0011 = "アーティスト名が未入力です。(E-0011)";
+const C_MSG_E_0012 = "曲名情報が未設定です。(E-0012)<br>" +
 	"|musicTitle=曲名,アーティスト名,アーティストURL|";
-var C_MSG_E_0021 = "譜面情報が未指定か、フォーマットが間違っています。(E-0021)<br>" +
+const C_MSG_E_0021 = "譜面情報が未指定か、フォーマットが間違っています。(E-0021)<br>" +
 	"|difData=キー数,譜面名,初期速度|";
-var C_MSG_E_0031 = "楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>" +
+const C_MSG_E_0031 = "楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>" +
 	"|musicUrl=****.mp3|";
 
-var C_MSG_E_0101 = "新しいキー:{0}の[color]が未定義です。(E-0101)<br>" +
+const C_MSG_E_0101 = "新しいキー:{0}の[color]が未定義です。(E-0101)<br>" +
 	"|color{0}=0,1,0,1,0,2|";
-var C_MSG_E_0102 = "新しいキー:{0}の[chara]が未定義です。(E-0102)<br>" +
+const C_MSG_E_0102 = "新しいキー:{0}の[chara]が未定義です。(E-0102)<br>" +
 	"|chara{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|";
-var C_MSG_E_0103 = "新しいキー:{0}の[stepRtn]が未定義です。(E-0103)<br>" +
+const C_MSG_E_0103 = "新しいキー:{0}の[stepRtn]が未定義です。(E-0103)<br>" +
 	"|stepRtn{0}=0,45,-90,135,180,onigiri|";
-var C_MSG_E_0104 = "新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>" +
+const C_MSG_E_0104 = "新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>" +
 	"|keyCtrl{0}=75,79,76,80,187,32/0|";
 
 /**
@@ -728,9 +728,9 @@ var C_MSG_E_0104 = "新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)
  * - イベントリスナー作成時にリスナーキー(key)を発行する
  * - 削除時は発行したリスナーキーを指定して削除する
  */
-var g_handler = (function () {
-	var events = {},
-		key = 0;
+const g_handler = (function () {
+	const events = {};
+	let   key = 0;
 
 	return {
 		addListener: function (_target, _type, _listener, _capture) {
@@ -749,7 +749,7 @@ var g_handler = (function () {
 		},
 		removeListener: function (key) {
 			if (key in events) {
-				var e = events[key];
+				const e = events[key];
 				if (window.removeEventListener) {
 					e.target.removeEventListener(e.type, e.listener, e.capture);
 				} else if (window.detachEvent) {
@@ -775,14 +775,15 @@ function setVal(_checkStr, _defaultStr, _type) {
 		return _defaultStr;
 	}
 
+	let   isNaNflg;
 	if (_type == "float") {
 		// 数値型(小数可)の場合
-		var isNaNflg = isNaN(parseFloat(_checkStr));
+		isNaNflg = isNaN(parseFloat(_checkStr));
 		return (isNaNflg == true ? _defaultStr : parseFloat(_checkStr));
 
 	} else if (_type == "number") {
 		// 数値型(整数のみ)の場合
-		var isNaNflg = isNaN(parseInt(_checkStr));
+		isNaNflg = isNaN(parseInt(_checkStr));
 		return (isNaNflg == true ? _defaultStr : parseInt(_checkStr));
 
 	}
@@ -815,15 +816,17 @@ function checkArrayVal(_checkArray, _type, _minLength) {
 	if (isNaN(parseFloat(_minLength))) {
 		_minLength = 1;
 	}
+
+	let   isNaNflg;
 	if (_type == "float") {
 		// 数値型(小数可)の場合
-		var isNaNflg = isNaN(parseFloat(_checkArray[0]));
+		isNaNflg = isNaN(parseFloat(_checkArray[0]));
 		if (isNaNflg == true) {
 			return false;
 		}
 	} else if (_type == "number") {
 		// 数値型(整数のみ)の場合
-		var isNaNflg = isNaN(parseInt(_checkArray[0]));
+		isNaNflg = isNaN(parseInt(_checkArray[0]));
 		if (isNaNflg == true) {
 			return false;
 		}
@@ -841,7 +844,7 @@ function checkArrayVal(_checkArray, _type, _minLength) {
  * @param {string} _crossOrigin 
  */
 function preloadFile(_as, _href, _type, _crossOrigin) {
-	var link = document.createElement('link');
+	const link = document.createElement('link');
 	link.rel = 'preload';
 	link.as = _as;
 	link.href = _href;
@@ -865,10 +868,10 @@ function preloadFile(_as, _href, _type, _crossOrigin) {
  * @param {number} _height 
  */
 function createDiv(_id, _x, _y, _width, _height) {
-	var div = document.createElement("div");
+	const div = document.createElement("div");
 
 	div.id = _id;
-	var style = div.style;
+	const style = div.style;
 	style.left = _x + "px";
 	style.top = _y + "px";
 	style.width = _width + "px";
@@ -898,8 +901,8 @@ function createDiv(_id, _x, _y, _width, _height) {
  * @param {string} _text 
  */
 function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text) {
-	var div = createDiv(_id, _x, _y, _width, _height);
-	var style = div.style;
+	const div = createDiv(_id, _x, _y, _width, _height);
+	const style = div.style;
 	style.fontSize = _fontsize + "px";
 	style.color = _color;
 	style.fontFamily = C_LBL_BASICFONT;
@@ -923,8 +926,8 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text) 
  * @param {string} _font 
  */
 function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text, _font) {
-	var div = createDiv(_id, _x, _y, _width, _height);
-	var style = div.style;
+	const div = createDiv(_id, _x, _y, _width, _height);
+	const style = div.style;
 	style.fontSize = _fontsize + "px";
 	style.color = _color;
 	style.fontFamily = _font;
@@ -944,7 +947,7 @@ function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _
  * @param {number} _height 
  */
 function createImg(_id, _imgPath, _x, _y, _width, _height) {
-	var div = createDiv(_id, _x, _y, _width, _height);
+	const div = createDiv(_id, _x, _y, _width, _height);
 	div.innerHTML = "<img src='" + _imgPath +
 		"' style='width:" + _width + "px;height:" + _height +
 		"px;' id=" + _id + "img>";
@@ -966,19 +969,23 @@ function createImg(_id, _imgPath, _x, _y, _width, _height) {
 function createArrowEffect(_id, _color, _x, _y, _size, _rotate) {
 
 	// 矢印・おにぎり判定
+	let   rotate;
+	let   charaStyle;
+	let   charaImg;
+	let   sizeX;
 	if (isNaN(Number(_rotate))) {
-		var rotate = 0;
-		var charaStyle = _rotate;
-		var charaImg = eval("C_IMG_" + _rotate.toUpperCase());
-		var sizeX = _size;
+		rotate = 0;
+		charaStyle = _rotate;
+		charaImg = eval("C_IMG_" + _rotate.toUpperCase());
+		sizeX = _size;
 	} else {
-		var rotate = _rotate;
-		var charaStyle = "arrow";
-		var charaImg = C_IMG_ARROW;
-		var sizeX = _size;
+		rotate = _rotate;
+		charaStyle = "arrow";
+		charaImg = C_IMG_ARROW;
+		sizeX = _size;
 	}
 
-	var div = createDiv(_id, _x, _y, sizeX, _size);
+	const div = createDiv(_id, _x, _y, sizeX, _size);
 	div.align = C_ALIGN_CENTER;
 
 	// IE/Edgeの場合は色なし版を表示
@@ -1005,19 +1012,22 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate) {
 function createColorObject(_id, _color, _x, _y, _width, _height,
 	_rotate, _styleName) {
 
-	var div = createDiv(_id, _x, _y, _width, _height);
+	const div = createDiv(_id, _x, _y, _width, _height);
 
 	// 矢印・おにぎり判定
+	let   rotate;
+	let   charaStyle;
+	let   charaImg;
 	if (isNaN(Number(_rotate))) {
-		var rotate = 0;
-		var charaStyle = _rotate + _styleName;
+		rotate = 0;
+		charaStyle = _rotate + _styleName;
 		div.setAttribute("type", "AA");
 	} else {
-		var rotate = _rotate;
-		var charaStyle = _styleName;
+		rotate = _rotate;
+		charaStyle = _styleName;
 		div.setAttribute("type", "arrow");
 	}
-	var charaImg = eval("C_IMG_" + charaStyle.toUpperCase());
+	charaImg = eval("C_IMG_" + charaStyle.toUpperCase());
 	div.align = C_ALIGN_CENTER;
 
 	// IE/Edgeの場合は色なし版を表示
@@ -1053,12 +1063,13 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
  * @param {number} _height 高さ
  */
 function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height) {
+	let   newsprite;
 	if (document.getElementById(_newObjName) == null) {
-		var parentsprite = document.getElementById(_parentObjName);
-		var newsprite = createDiv(_newObjName, _x, _y, _width, _height);
+		const parentsprite = document.getElementById(_parentObjName);
+		newsprite = createDiv(_newObjName, _x, _y, _width, _height);
 		parentsprite.appendChild(newsprite);
 	} else {
-		var newsprite = document.getElementById(_newObjName);
+		newsprite = document.getElementById(_newObjName);
 	}
 	return newsprite;
 }
@@ -1069,7 +1080,7 @@ function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height) {
  */
 function deleteChildspriteAll(_parentObjName) {
 
-	var parentsprite = document.getElementById(_parentObjName);
+	const parentsprite = document.getElementById(_parentObjName);
 	while (parentsprite.hasChildNodes()) {
 		g_handler.removeListener(parentsprite.firstChild.getAttribute("lsnrkey"));
 		g_handler.removeListener(parentsprite.firstChild.getAttribute("lsnrkeyTS"));
@@ -1085,7 +1096,7 @@ function deleteChildspriteAll(_parentObjName) {
  * - ボタンの表示テキスト及びフォントは固定
  * 
  * -  使い方：
- *		var btnBack = createButton({
+ *		const btnBack = createButton({
  *			// ボタンオブジェクト名
  *			id: "btnBack",
  *			// ボタンに表示する名前
@@ -1119,10 +1130,10 @@ function deleteChildspriteAll(_parentObjName) {
 function createButton(_obj, _func) {
 
 	// ボタン用の子要素divを作成
-	var div = createDiv(_obj.id, _obj.x, _obj.y, _obj.width, _obj.height);
+	const div = createDiv(_obj.id, _obj.x, _obj.y, _obj.width, _obj.height);
 
 	// ボタンの装飾を定義
-	var style = div.style;
+	const style = div.style;
 	div.innerHTML = _obj.name;
 	style.textAlign = _obj.align;
 	style.verticalAlign = C_VALIGN_MIDDLE;
@@ -1137,7 +1148,7 @@ function createButton(_obj, _func) {
 		style.backgroundColor = _obj.hoverColor;
 		style.cursor = "pointer";
 	}
-	var lsnrkeyTS = g_handler.addListener(div, "touchstart", function () {
+	const lsnrkeyTS = g_handler.addListener(div, "touchstart", function () {
 		style.backgroundColor = _obj.hoverColor;
 		style.cursor = "pointer";
 	}, false);
@@ -1147,13 +1158,13 @@ function createButton(_obj, _func) {
 		style.backgroundColor = _obj.normalColor;
 		style.cursor = "default";
 	}
-	var lsnrkeyTE = g_handler.addListener(div, "touchend", function () {
+	const lsnrkeyTE = g_handler.addListener(div, "touchend", function () {
 		style.backgroundColor = _obj.normalColor;
 		style.cursor = "default";
 	}, false);
 
 	// ボタンを押したときの動作
-	var lsnrkey = g_handler.addListener(div, "click", function () {
+	const lsnrkey = g_handler.addListener(div, "click", function () {
 		_func();
 	}, false);
 
@@ -1191,7 +1202,7 @@ function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align) 
  * @param {number} _y 
  */
 function getTitleDivLabel(_id, _titlename, _x, _y) {
-	var div = createDivLabel(_id, _x, _y, g_sWidth, 50, C_LBL_BTNSIZE, C_CLR_TITLE, _titlename);
+	const div = createDivLabel(_id, _x, _y, g_sWidth, 50, C_LBL_BTNSIZE, C_CLR_TITLE, _titlename);
 	div.style.textAlign = C_ALIGN_CENTER;
 	return div;
 }
@@ -1205,19 +1216,19 @@ function getTitleDivLabel(_id, _titlename, _x, _y) {
 function clearWindow() {
 
 	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
+	const layer0 = document.getElementById("layer0");
+	const l0ctx = layer0.getContext("2d");
 
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
-	var C_MARGIN = 0;
+	const C_MARGIN = 0;
 
 	// 線画、図形をクリア
 	l0ctx.clearRect(0, 0, g_sWidth, g_sHeight);
 
 	if (document.getElementById("layer1") != null) {
-		var layer1 = document.getElementById("layer1");
-		var l1ctx = layer1.getContext("2d");
+		const layer1 = document.getElementById("layer1");
+		const l1ctx = layer1.getContext("2d");
 		l1ctx.clearRect(0, 0, g_sWidth, g_sHeight);
 
 		// 線画 (title-line)
@@ -1234,13 +1245,13 @@ function clearWindow() {
 		l1ctx.stroke();
 	}
 	if (document.getElementById("layer2") != null) {
-		var layer2 = document.getElementById("layer2");
-		var l2ctx = layer2.getContext("2d");
+		const layer2 = document.getElementById("layer2");
+		const l2ctx = layer2.getContext("2d");
 		l2ctx.clearRect(0, 0, g_sWidth, g_sHeight);
 	}
 
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
-	var divRoot = document.getElementById("divRoot");
+	const divRoot = document.getElementById("divRoot");
 	while (divRoot.hasChildNodes()) {
 		/*
 		alert(divRoot.firstChild.getAttribute("lsnrkey"));
@@ -1254,7 +1265,7 @@ function clearWindow() {
 }
 
 function loadScript(url, callback) {
-	var script = document.createElement("script");
+	const script = document.createElement("script");
 	script.type = "text/javascript";
 	script.src = url;
 
@@ -1282,19 +1293,20 @@ function initialControl() {
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
 
+	let divRoot;
 	if (document.getElementById("divRoot") == null) {
-		var stage = document.getElementById("canvas-frame");
-		var divRoot = createDiv("divRoot", 0, 0, g_sWidth, g_sHeight);
+		const stage = document.getElementById("canvas-frame");
+		divRoot = createDiv("divRoot", 0, 0, g_sWidth, g_sHeight);
 		stage.style.margin = "auto";
 		stage.style.letterSpacing = "normal";
 		stage.appendChild(divRoot);
 		clearWindow();
 	} else {
-		var divRoot = document.getElementById("divRoot");
+		divRoot = document.getElementById("divRoot");
 	}
 
 	// 譜面データの読み込み
-	var dos = document.getElementById("dos").value;
+	const dos = document.getElementById("dos").value;
 	g_rootObj = dosConvert(dos);
 	g_headerObj = headerConvert(g_rootObj);
 	keysConvert(g_rootObj);
@@ -1344,7 +1356,7 @@ function titleInit() {
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
 
-	var divRoot = document.getElementById("divRoot");
+	const divRoot = document.getElementById("divRoot");
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customTitleInit == "function") {
@@ -1355,7 +1367,7 @@ function titleInit() {
 	}
 
 	// タイトル文字描画
-	var lblTitle = getTitleDivLabel("lblTitle",
+	const lblTitle = getTitleDivLabel("lblTitle",
 		"<span style='color:#6666ff;font-size:40px;'>D</span>ANCING<span style='color:#ffff66;font-size:40px;'>☆</span><span style='color:#ff6666;font-size:40px;'>O</span>NIGIRI", 0, 15);
 	lblTitle.style.zIndex = 1;
 	divRoot.appendChild(lblTitle);
@@ -1373,7 +1385,7 @@ function titleInit() {
 	g_audio.src = "../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl;
 
 	// ボタン描画
-	var btnStart = createButton({
+	const btnStart = createButton({
 		id: "btnStart",
 		name: "Click Here!!",
 		x: 0,
@@ -1392,7 +1404,7 @@ function titleInit() {
 	divRoot.appendChild(btnStart);
 
 	// 製作者表示
-	var lnkMaker = createButton({
+	const lnkMaker = createButton({
 		id: "lnkMaker",
 		name: "Maker: " + g_headerObj["tuning"],
 		x: 20,
@@ -1409,7 +1421,7 @@ function titleInit() {
 	divRoot.appendChild(lnkMaker);
 
 	// 作曲者リンク表示
-	var lnkArtist = createButton({
+	const lnkArtist = createButton({
 		id: "lnkArtist",
 		name: "Artist: " + g_headerObj["artistName"],
 		x: g_sWidth / 2,
@@ -1426,7 +1438,7 @@ function titleInit() {
 	divRoot.appendChild(lnkArtist);
 
 	// バージョン描画
-	var lnkVersion = createButton({
+	const lnkVersion = createButton({
 		id: "lnkVersion",
 		name: "&copy; 2018 ティックル, CW " + g_version,
 		x: g_sWidth / 2,
@@ -1445,10 +1457,11 @@ function titleInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = function (evt) {
 		// ブラウザ判定
+		let   setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
-			var setKey = evt.which;
+			setKey = evt.which;
 		} else {
-			var setKey = event.keyCode;
+			setKey = event.keyCode;
 		}
 		if (setKey == 13) {
 			clearWindow();
@@ -1475,7 +1488,7 @@ function titleInit() {
  * @param {string} _text 
  */
 function makeWarningWindow(_text) {
-	var lblWarning;
+	let   lblWarning;
 	if (document.getElementById("lblWarning") == null) {
 		lblWarning = getTitleDivLabel("lblWarning", "<p>" + _text + "</p>", 0, 70);
 		lblWarning.style.backgroundColor = "#ffcccc";
@@ -1484,8 +1497,8 @@ function makeWarningWindow(_text) {
 		lblWarning = document.getElementById("lblWarning");
 		lblWarning.innerHTML += "<p>" + _text + "</p>";
 	}
-	var len = lblWarning.innerHTML.split("<br>").length + lblWarning.innerHTML.split("<p>").length - 1;
-	var warnHeight = 21 * len;
+	const len = lblWarning.innerHTML.split("<br>").length + lblWarning.innerHTML.split("<p>").length - 1;
+	const warnHeight = 21 * len;
 	lblWarning.style.height = warnHeight + "px";
 	lblWarning.style.lineHeight = "15px";
 	lblWarning.style.fontSize = "14px";
@@ -1502,14 +1515,14 @@ function makeWarningWindow(_text) {
  */
 function dosConvert(_dos) {
 
-	var obj = {};
-	var paramsTmp = _dos.split("&").join("|");
-	var params = paramsTmp.split("|");
+	const obj = {};
+	const paramsTmp = _dos.split("&").join("|");
+	const params = paramsTmp.split("|");
 	for (var j = 0; j < params.length; j++) {
-		var pos = params[j].indexOf("=");
+		const pos = params[j].indexOf("=");
 		if (pos > 0) {
-			var pKey = params[j].substring(0, pos);
-			var pValue = params[j].substring(pos + 1);
+			const pKey = params[j].substring(0, pos);
+			const pValue = params[j].substring(pos + 1);
 			if (pKey != undefined) {
 				obj[pKey] = pValue;
 			}
@@ -1525,11 +1538,11 @@ function dosConvert(_dos) {
 function headerConvert(_dosObj) {
 
 	// ヘッダー群の格納先
-	var obj = {};
+	const obj = {};
 
 	// 曲名
 	if (_dosObj.musicTitle != undefined && _dosObj.musicTitle != "") {
-		var musics = _dosObj.musicTitle.split(",");
+		const musics = _dosObj.musicTitle.split(",");
 		obj.musicTitle = musics[0];
 		if (musics.length > 1) {
 			obj.artistName = musics[1];
@@ -1551,7 +1564,7 @@ function headerConvert(_dosObj) {
 
 	// 譜面情報
 	if (_dosObj.difData != undefined && _dosObj.difData != "") {
-		var difs = _dosObj.difData.split("$");
+		const difs = _dosObj.difData.split("$");
 		obj.keyLabels = new Array();
 		obj.difLabels = new Array();
 		obj.initSpeeds = new Array();
@@ -1560,7 +1573,7 @@ function headerConvert(_dosObj) {
 		obj.lifeDamages = new Array();
 		obj.lifeInits = new Array();
 		for (var j = 0; j < difs.length; j++) {
-			var difDetails = difs[j].split(",");
+			const difDetails = difs[j].split(",");
 			obj.keyLabels.push(setVal(difDetails[0], "7", "string"));
 			obj.difLabels.push(setVal(difDetails[1], "Normal", "string"));
 			obj.initSpeeds.push(setVal(difDetails[2], 3.5, "float"));
@@ -1620,7 +1633,7 @@ function headerConvert(_dosObj) {
 	obj.frzColorDef = new Array();
 
 	if (_dosObj.frzColor != undefined && _dosObj.frzColor != "") {
-		var tmpFrzColors = _dosObj.frzColor.split("$");
+		const tmpFrzColors = _dosObj.frzColor.split("$");
 		for (var j = 0, len = tmpFrzColors.length; j < len; j++) {
 			obj.frzColor[j] = new Array();
 			obj.frzColor[j] = tmpFrzColors[j].split(",");
@@ -1654,7 +1667,7 @@ function headerConvert(_dosObj) {
 
 	// 製作者表示
 	if (_dosObj.tuning != undefined && _dosObj.tuning != "") {
-		var tunings = _dosObj.tuning.split(",");
+		const tunings = _dosObj.tuning.split(",");
 		obj.tuning = tunings[0];
 		if (tunings.length > 1) {
 			obj.creatorUrl = tunings[1];
@@ -1694,7 +1707,7 @@ function headerConvert(_dosObj) {
 
 	// 外部jsファイルの指定
 	if (_dosObj.customjs != undefined && _dosObj.customjs != "") {
-		var customjss = _dosObj.customjs.split(",");
+		const customjss = _dosObj.customjs.split(",");
 		if (customjss.length > 1) {
 			obj.customjs2 = customjss[1];
 		} else {
@@ -1732,7 +1745,7 @@ function headerConvert(_dosObj) {
 	// 読込対象の画像を指定(rel:preload)と同じ
 	obj.preloadImages = new Array();
 	if (_dosObj.preloadImages != undefined) {
-		var preloadImgs = preloadImages.split(",");
+		const preloadImgs = preloadImages.split(",");
 
 		for (var j = 0, len = preloadImgs.length; j < len; j++) {
 			if (setVal(preloadImgs[j], "", "string") != "") {
@@ -1750,19 +1763,19 @@ function headerConvert(_dosObj) {
  */
 function keysConvert(_dosObj) {
 
-	var newKey = "";
+	let   newKey = "";
 
 	if (_dosObj.keyExtraList != undefined) {
-		var keyExtraList = _dosObj.keyExtraList.split(",");
-		var tmpKeyCtrl = new Array();
-		var tmpKeyPtn = new Array();
-		var tmpMinPatterns = 1;
+		const keyExtraList = _dosObj.keyExtraList.split(",");
+		let   tmpKeyCtrl = new Array();
+		let   tmpKeyPtn = new Array();
+		let   tmpMinPatterns = 1;
 
 		for (var j = 0; j < keyExtraList.length; j++) {
 			newKey = keyExtraList[j];
 
 			if (_dosObj["color" + newKey] != undefined) {
-				var tmpColors = _dosObj["color" + newKey].split("$");
+				const tmpColors = _dosObj["color" + newKey].split("$");
 				if (checkArrayVal(tmpColors, "string", 1)) {
 					for (var k = 0, len = tmpColors.length; k < len; k++) {
 						g_keyObj["color" + newKey + "_" + k] = tmpColors[k].split(",");
@@ -1774,7 +1787,7 @@ function keysConvert(_dosObj) {
 			}
 
 			if (_dosObj["chara" + newKey] != undefined) {
-				var tmpCharas = _dosObj["chara" + newKey].split("$");
+				const tmpCharas = _dosObj["chara" + newKey].split("$");
 				if (checkArrayVal(tmpCharas, "string", 1)) {
 					for (var k = 0, len = tmpCharas.length; k < len; k++) {
 						g_keyObj["chara" + newKey + "_" + k] = tmpCharas[k].split(",");
@@ -1786,7 +1799,7 @@ function keysConvert(_dosObj) {
 			}
 
 			if (_dosObj["div" + newKey] != undefined) {
-				var tmpDivs = _dosObj["div" + newKey].split("$");
+				const tmpDivs = _dosObj["div" + newKey].split("$");
 				if (checkArrayVal(tmpDivs, "string", 1)) {
 					for (var k = 0, len = tmpDivs.length; k < len; k++) {
 						if (isNaN(Number(tmpDivs[k]))) {
@@ -1799,7 +1812,7 @@ function keysConvert(_dosObj) {
 			}
 
 			if (_dosObj["stepRtn" + newKey] != undefined) {
-				var tmpStepRtns = _dosObj["stepRtn" + newKey].split("$");
+				const tmpStepRtns = _dosObj["stepRtn" + newKey].split("$");
 				if (checkArrayVal(tmpStepRtns, "string", 1)) {
 					for (var k = 0, len = tmpStepRtns.length; k < len; k++) {
 						g_keyObj["stepRtn" + newKey + "_" + k] = tmpStepRtns[k].split(",");
@@ -1818,7 +1831,7 @@ function keysConvert(_dosObj) {
 				makeWarningWindow(C_MSG_E_0103.split("{0}").join(newKey));
 			}
 			if (_dosObj["pos" + newKey] != undefined) {
-				var tmpPoss = _dosObj["pos" + newKey].split("$");
+				const tmpPoss = _dosObj["pos" + newKey].split("$");
 				if (checkArrayVal(tmpPoss, "string", 1)) {
 					for (var k = 0, len = tmpPoss.length; k < len; k++) {
 						g_keyObj["pos" + newKey + "_" + k] = tmpPoss[k].split(",");
@@ -1837,7 +1850,7 @@ function keysConvert(_dosObj) {
 			}
 
 			if (_dosObj["keyCtrl" + newKey] != undefined) {
-				var tmpKeyCtrls = _dosObj["keyCtrl" + newKey].split("$");
+				const tmpKeyCtrls = _dosObj["keyCtrl" + newKey].split("$");
 
 				if (checkArrayVal(tmpKeyCtrls, "string", 1)) {
 					for (var p = 0, len = tmpKeyCtrls.length; p < len; p++) {
@@ -1875,10 +1888,10 @@ function keysConvert(_dosObj) {
  */
 function optionInit() {
 
-	var divRoot = document.getElementById("divRoot");
+	const divRoot = document.getElementById("divRoot");
 
 	// タイトル文字描画
-	var lblTitle = getTitleDivLabel("lblTitle",
+	const lblTitle = getTitleDivLabel("lblTitle",
 		"<span style='color:#6666ff;font-size:40px;'>S</span>ETTINGS", 0, 15);
 	divRoot.appendChild(lblTitle);
 
@@ -1894,7 +1907,7 @@ function optionInit() {
 	}
 
 	// 戻るボタン描画
-	var btnBack = createButton({
+	const btnBack = createButton({
 		id: "btnBack",
 		name: "Back",
 		x: 0,
@@ -1913,7 +1926,7 @@ function optionInit() {
 	divRoot.appendChild(btnBack);
 
 	// キーコンフィグボタン描画
-	var btnKeyConfig = createButton({
+	const btnKeyConfig = createButton({
 		id: "btnKeyConfig",
 		name: "KeyConfig",
 		x: g_sWidth / 3,
@@ -1933,7 +1946,7 @@ function optionInit() {
 	divRoot.appendChild(btnKeyConfig);
 
 	// 進むボタン描画
-	var btnPlay = createButton({
+	const btnPlay = createButton({
 		id: "btnPlay",
 		name: "Play",
 		x: g_sWidth / 3 * 2,
@@ -1966,10 +1979,11 @@ function optionInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = function (evt) {
 		// ブラウザ判定
+		let   setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
-			var setKey = evt.which;
+			setKey = evt.which;
 		} else {
-			var setKey = event.keyCode;
+			setKey = event.keyCode;
 		}
 		if (setKey == 13) {
 			clearWindow();
@@ -2006,15 +2020,15 @@ function optionInit() {
 function createOptionWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	var optionsprite = createSprite(_sprite, "optionsprite", (g_sWidth - 400) / 2, 100, 400, 300);
+	const optionsprite = createSprite(_sprite, "optionsprite", (g_sWidth - 400) / 2, 100, 400, 300);
 
 	// 難易度(Difficulty)
-	var lblDifficulty = createDivLabel("lblDifficulty", 0, C_LEN_SETLBL_HEIGHT * 0,
+	const lblDifficulty = createDivLabel("lblDifficulty", 0, C_LEN_SETLBL_HEIGHT * 0,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETDIFLBL, C_CLR_TITLE,
 		"<span style='color:#ff9999'>D</span>ifficulty");
 	optionsprite.appendChild(lblDifficulty);
 
-	var lnkDifficulty = makeSettingLblButton("lnkDifficulty",
+	const lnkDifficulty = makeSettingLblButton("lnkDifficulty",
 		g_headerObj["keyLabels"][g_stateObj.scoreId] + " key / " + g_headerObj["difLabels"][g_stateObj.scoreId], 0, function () {
 			g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj["keyLabels"].length - 1 ? ++g_stateObj.scoreId : 0);
 			setDifficulty();
@@ -2057,12 +2071,12 @@ function createOptionWindow(_sprite) {
 	}
 
 	// 速度(Speed)
-	var lblSpeed = createDivLabel("lblSpeed", 0, C_LEN_SETLBL_HEIGHT * 2,
+	const lblSpeed = createDivLabel("lblSpeed", 0, C_LEN_SETLBL_HEIGHT * 2,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		"<span style='color:#ffff99'>S</span>peed");
 	optionsprite.appendChild(lblSpeed);
 
-	var lnkSpeed = makeSettingLblButton("lnkSpeed", g_stateObj.speed + " x", 2, function () {
+	const lnkSpeed = makeSettingLblButton("lnkSpeed", g_stateObj.speed + " x", 2, function () {
 		g_stateObj.speed = (Number(g_stateObj.speed) < 10 ? Number(g_stateObj.speed) + 0.25 : 1);
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 	});
@@ -2092,12 +2106,12 @@ function createOptionWindow(_sprite) {
 
 
 	// 速度モーション (Motion)
-	var lblMotion = createDivLabel("lblMotion", 0, C_LEN_SETLBL_HEIGHT * 3,
+	const lblMotion = createDivLabel("lblMotion", 0, C_LEN_SETLBL_HEIGHT * 3,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		"<span style='color:#eeff99'>M</span>otion");
 	optionsprite.appendChild(lblMotion);
 
-	var lnkMotion = makeSettingLblButton("lnkMotion", g_stateObj.motion, 3, function () {
+	const lnkMotion = makeSettingLblButton("lnkMotion", g_stateObj.motion, 3, function () {
 		switch (g_stateObj.motion) {
 			case "OFF":
 				g_stateObj.motion = "Boost"; break;
@@ -2147,12 +2161,12 @@ function createOptionWindow(_sprite) {
 
 
 	// リバース
-	var lblReverse = createDivLabel("lblReverse", 0, C_LEN_SETLBL_HEIGHT * 4,
+	const lblReverse = createDivLabel("lblReverse", 0, C_LEN_SETLBL_HEIGHT * 4,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		"<span style='color:#ddff99'>R</span>everse");
 	optionsprite.appendChild(lblReverse);
 
-	var lnkReverse = makeSettingLblButton("lnkReverse", g_stateObj.reverse, 4, function () {
+	const lnkReverse = makeSettingLblButton("lnkReverse", g_stateObj.reverse, 4, function () {
 		g_stateObj.reverse = (g_stateObj.reverse == "OFF" ? "ON" : "OFF");
 		lnkReverse.innerHTML = g_stateObj.reverse;
 	});
@@ -2174,12 +2188,12 @@ function createOptionWindow(_sprite) {
 
 
 	// 鑑賞モード設定 (AutoPlay)
-	var lblAutoPlay = createDivLabel("lblAutoPlay", 0, C_LEN_SETLBL_HEIGHT * 5,
+	const lblAutoPlay = createDivLabel("lblAutoPlay", 0, C_LEN_SETLBL_HEIGHT * 5,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		"<span style='color:#ccff99'>A</span>utoPlay");
 	optionsprite.appendChild(lblAutoPlay);
 
-	var lnkAutoPlay = makeSettingLblButton("lnkAutoPlay", g_stateObj.auto, 5, function () {
+	const lnkAutoPlay = makeSettingLblButton("lnkAutoPlay", g_stateObj.auto, 5, function () {
 		g_stateObj.auto = (g_stateObj.auto == "OFF" ? "ON" : "OFF");
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	});
@@ -2201,12 +2215,12 @@ function createOptionWindow(_sprite) {
 
 
 	// タイミング調整 (Adjustment)
-	var lblAdjustment = createDivLabel("lblAdjustment", 0, C_LEN_SETLBL_HEIGHT * 7,
+	const lblAdjustment = createDivLabel("lblAdjustment", 0, C_LEN_SETLBL_HEIGHT * 7,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		"<span style='color:#99ffff'>A</span>djustment");
 	optionsprite.appendChild(lblAdjustment);
 
-	var lnkAdjustment = makeSettingLblButton("lnkAdjustment", g_stateObj.adjustment, 7, function () {
+	const lnkAdjustment = makeSettingLblButton("lnkAdjustment", g_stateObj.adjustment, 7, function () {
 		g_stateObj.adjustment = (g_stateObj.adjustment == 30 ? -30 : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	});
@@ -2236,12 +2250,12 @@ function createOptionWindow(_sprite) {
 
 
 	// フェードイン (Fadein)
-	var lblFadein = createDivLabel("lblFadein", 0, C_LEN_SETLBL_HEIGHT * 8,
+	const lblFadein = createDivLabel("lblFadein", 0, C_LEN_SETLBL_HEIGHT * 8,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		"<span style='color:#99eeff'>F</span>adein");
 	optionsprite.appendChild(lblFadein);
 
-	var lnkFadein = makeSettingLblButton("lnkFadein", g_stateObj.fadein + "%", 8, function () {
+	const lnkFadein = makeSettingLblButton("lnkFadein", g_stateObj.fadein + "%", 8, function () {
 		g_stateObj.fadein = (g_stateObj.fadein == 95 ? 0 : g_stateObj.fadein + 5);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 	});
@@ -2271,12 +2285,12 @@ function createOptionWindow(_sprite) {
 
 
 	// ボリューム
-	var lblVolume = createDivLabel("lblVolume", 0, C_LEN_SETLBL_HEIGHT * 9,
+	const lblVolume = createDivLabel("lblVolume", 0, C_LEN_SETLBL_HEIGHT * 9,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		"<span style='color:#99ddff'>V</span>olume");
 	optionsprite.appendChild(lblVolume);
 
-	var lnkVolume = makeSettingLblButton("lnkVolume", g_stateObj.volume + "%", 9, function () {
+	const lnkVolume = makeSettingLblButton("lnkVolume", g_stateObj.volume + "%", 9, function () {
 		g_volumeNum = (g_volumeNum == 0 ? g_volumes.length - 1 : --g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = g_stateObj.volume + "%";
@@ -2314,7 +2328,7 @@ function createOptionWindow(_sprite) {
  * @param {function} _func 
  */
 function makeSettingLblButton(_id, _name, _heightPos, _func) {
-	var settingLblButton = createButton({
+	const settingLblButton = createButton({
 		id: _id,
 		name: _name,
 		x: C_LEN_SETLBL_LEFT,
@@ -2338,7 +2352,7 @@ function makeSettingLblButton(_id, _name, _heightPos, _func) {
  * @param {function} _func 
  */
 function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
-	var miniButton = createButton({
+	const miniButton = createButton({
 		id: _id + _directionFlg,
 		name: eval("C_LBL_SETMINI" + _directionFlg),
 		x: eval("C_LEN_SETMINI" + _directionFlg + "_LEFT"),
@@ -2363,27 +2377,27 @@ function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
  */
 function keyConfigInit() {
 
-	var divRoot = document.getElementById("divRoot");
+	const divRoot = document.getElementById("divRoot");
 
 	// タイトル文字描画
-	var lblTitle = getTitleDivLabel("lblTitle",
+	const lblTitle = getTitleDivLabel("lblTitle",
 		"<span style='color:#6666ff;font-size:40px;'>K</span>EY<span style='color:#ff6666;font-size:40px;'>C</span>ONFIG", 0, 15);
 	divRoot.appendChild(lblTitle);
 
-	var kcDesc = createDivLabel("kcDesc", 0, 65, g_sWidth, 20, 14, C_CLR_TITLE,
+	const kcDesc = createDivLabel("kcDesc", 0, 65, g_sWidth, 20, 14, C_CLR_TITLE,
 		"[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]");
 	kcDesc.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcDesc);
 
 
 	// キーの一覧を表示
-	var keyconSprite = createSprite("divRoot", "keyconSprite", (g_sWidth - 400) / 2, 100, 400, 300);
-	var kWidth = parseInt(keyconSprite.style.width);
+	const keyconSprite = createSprite("divRoot", "keyconSprite", (g_sWidth - 400) / 2, 100, 400, 300);
+	const kWidth = parseInt(keyconSprite.style.width);
 
-	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
-	var posMax = g_keyObj["pos" + keyCtrlPtn][keyNum - 1] + 1;
-	var divideCnt = g_keyObj["div" + keyCtrlPtn];
+	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	const posMax = g_keyObj["pos" + keyCtrlPtn][keyNum - 1] + 1;
+	const divideCnt = g_keyObj["div" + keyCtrlPtn];
 	if (g_keyObj["blank" + keyCtrlPtn] != undefined) {
 		g_keyObj.blank = g_keyObj["blank" + keyCtrlPtn];
 	} else {
@@ -2391,12 +2405,12 @@ function keyConfigInit() {
 	}
 
 	/** 同行の左から数えた場合の位置(x座標) */
-	var leftCnt = 0;
+	let   leftCnt = 0;
 	/** 同行の中心から見た場合の位置(x座標) */
-	var stdPos = 0;
+	let   stdPos = 0;
 	/** 行位置 */
-	var dividePos = 0;
-	var posj = 0;
+	let   dividePos = 0;
+	let   posj = 0;
 
 	for (var j = 0; j < keyNum; j++) {
 
@@ -2421,16 +2435,16 @@ function keyConfigInit() {
 	posj = g_keyObj["pos" + keyCtrlPtn][0];
 
 	// カーソルの作成
-	var cursor = keyconSprite.appendChild(createImg("cursor", C_IMG_CURSOR,
+	const cursor = keyconSprite.appendChild(createImg("cursor", C_IMG_CURSOR,
 		kWidth / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 
 	// キーコンフィグタイプ切替ボタン
-	var lblKcType = createDivLabel("lblKcType", 30, 10,
+	const lblKcType = createDivLabel("lblKcType", 30, 10,
 		70, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		"<span style='color:#99ddff'>C</span>onfigType");
 	divRoot.appendChild(lblKcType);
 
-	var lnkKcType = makeSettingLblButton("lnkKcType", g_kcType, 0, function () {
+	const lnkKcType = makeSettingLblButton("lnkKcType", g_kcType, 0, function () {
 		switch (g_kcType) {
 			case "Main":
 				g_kcType = "Replaced";
@@ -2464,7 +2478,7 @@ function keyConfigInit() {
 	}
 
 	// 戻るボタン描画
-	var btnBack = createButton({
+	const btnBack = createButton({
 		id: "btnBack",
 		name: "Back",
 		x: 0,
@@ -2486,7 +2500,7 @@ function keyConfigInit() {
 	divRoot.appendChild(btnBack);
 
 	// パターン変更ボタン描画
-	var btnPtnChange = createButton({
+	const btnPtnChange = createButton({
 		id: "btnPtnChange",
 		name: "PtnChange",
 		x: g_sWidth / 3,
@@ -2498,7 +2512,7 @@ function keyConfigInit() {
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER
 	}, function () {
-		var tempPtn = g_keyObj.currentPtn + 1;
+		const tempPtn = g_keyObj.currentPtn + 1;
 		if (g_keyObj["keyCtrl" + g_keyObj.currentKey + "_" + tempPtn] != undefined) {
 			g_keyObj.currentPtn = tempPtn;
 		} else {
@@ -2506,13 +2520,13 @@ function keyConfigInit() {
 		}
 		clearWindow();
 		keyConfigInit();
-		var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+		const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 		eval("resetCursor" + g_kcType)(kWidth, g_keyObj["div" + keyCtrlPtn], keyCtrlPtn);
 	});
 	divRoot.appendChild(btnPtnChange);
 
 	// キーコンフィグリセットボタン描画
-	var btnReset = createButton({
+	const btnReset = createButton({
 		id: "btnReset",
 		name: "Reset",
 		x: g_sWidth / 3 * 2,
@@ -2526,9 +2540,9 @@ function keyConfigInit() {
 	}, function () {
 		if (window.confirm('キーを初期配置に戻します。よろしいですか？')) {
 			g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
-			var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-			var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
-			var divideCnt = g_keyObj["div" + keyCtrlPtn];
+			const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+			const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+			const divideCnt = g_keyObj["div" + keyCtrlPtn];
 
 			for (var j = 0; j < keyNum; j++) {
 				for (var k = 0; k < g_keyObj["keyCtrl" + keyCtrlPtn][j].length; k++) {
@@ -2544,14 +2558,15 @@ function keyConfigInit() {
 
 	// キーボード押下時処理
 	document.onkeydown = function (evt) {
-		var keyCdObj = document.getElementById("keycon" + g_currentj + "_" + g_currentk);
-		var cursor = document.getElementById("cursor");
+		const keyCdObj = document.getElementById("keycon" + g_currentj + "_" + g_currentk);
+		const cursor = document.getElementById("cursor");
 
 		// ブラウザ判定
+		let   setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
-			var setKey = evt.which;
+			setKey = evt.which;
 		} else {
-			var setKey = event.keyCode;
+			setKey = event.keyCode;
 		}
 
 		// 全角切替、BackSpace、Deleteキーは割り当て禁止
@@ -2600,7 +2615,7 @@ function keyConfigInit() {
 						}
 					}
 				}
-				var posj = g_keyObj["pos" + keyCtrlPtn][g_currentj];
+				const posj = g_keyObj["pos" + keyCtrlPtn][g_currentj];
 
 				leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
 				stdPos = (posj >= divideCnt ? leftCnt - (posMax - divideCnt) / 2 : leftCnt - divideCnt / 2);
@@ -2636,9 +2651,9 @@ function resetCursorMain(_width, _divideCnt, _keyCtrlPtn) {
 	g_currentj = 0;
 	g_currentk = 0;
 	g_prevKey = -1;
-	var posj = g_keyObj["pos" + _keyCtrlPtn][0];
+	const posj = g_keyObj["pos" + _keyCtrlPtn][0];
 
-	var cursor = document.getElementById("cursor");
+	const cursor = document.getElementById("cursor");
 	cursor.style.left = (_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10) + "px";
 	cursor.style.top = "45px";
 }
@@ -2653,7 +2668,7 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
 	g_currentj = 0;
 	g_currentk = 0;
 	g_prevKey = -1;
-	var keyNum = g_keyObj["chara" + _keyCtrlPtn].length;
+	const keyNum = g_keyObj["chara" + _keyCtrlPtn].length;
 
 	for (var j = 0; j < keyNum; j++) {
 		if (g_keyObj["keyCtrl" + _keyCtrlPtn][j][1] != undefined) {
@@ -2662,9 +2677,9 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
 			break;
 		}
 	}
-	var posj = g_keyObj["pos" + _keyCtrlPtn][g_currentj];
+	const posj = g_keyObj["pos" + _keyCtrlPtn][g_currentj];
 
-	var cursor = document.getElementById("cursor");
+	const cursor = document.getElementById("cursor");
 	cursor.style.left = (_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10) + "px";
 	if (g_currentk == 1) {
 		cursor.style.top = "65px";
@@ -2685,9 +2700,9 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
 	g_currentj = 0;
 	g_currentk = 0;
 	g_prevKey = -1;
-	var posj = g_keyObj["pos" + _keyCtrlPtn][0];
+	const posj = g_keyObj["pos" + _keyCtrlPtn][0];
 
-	var cursor = document.getElementById("cursor");
+	const cursor = document.getElementById("cursor");
 	cursor.style.left = (_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10) + "px";
 	cursor.style.top = "45px";
 }
@@ -2701,14 +2716,14 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
  */
 function loadingScoreInit() {
 
-	var divRoot = document.getElementById("divRoot");
+	const divRoot = document.getElementById("divRoot");
 
-	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
 	// 譜面データの読み込み
-	var scoreIdHeader = "";
+	let   scoreIdHeader = "";
 	if (g_stateObj.scoreId > 0) {
 		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
 	}
@@ -2718,36 +2733,36 @@ function loadingScoreInit() {
 	calcLifeVals(g_allArrow + g_allFrz);
 
 	// 最終フレーム数の取得
-	var lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
+	const lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
 
 	// 最初の矢印データがあるフレーム数を取得
-	var firstArrowFrame = getFirstArrowFrame(g_scoreObj);
+	const firstArrowFrame = getFirstArrowFrame(g_scoreObj);
 
 	// 開始フレーム数の取得(フェードイン加味)
 	g_scoreObj.frameNum = getStartFrame(lastFrame);
 
 	// フレームごとの速度を取得（配列形式）
-	var speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
+	const speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
 
 	// Motionオプション適用時の矢印別の速度を取得（配列形式）
-	var motionOnFrame = setMotionOnFrame();
+	const motionOnFrame = setMotionOnFrame();
 	g_workObj.motionOnFrames = motionOnFrame.concat();
 
 	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
-	var firstFrame = (g_scoreObj.frameNum == 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
-	var arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
+	const firstFrame = (g_scoreObj.frameNum == 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
+	const arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
 
 	// キーパターン(デフォルト)に対応する矢印番号を格納
 	convertreplaceNums();
 
 	// フレーム・曲開始位置調整
-	var preblankFrame = 0;
+	const preblankFrame = 0;
 	if (g_scoreObj.frameNum == 0) {
 		if (firstArrowFrame < arrivalFrame) {
 			preblankFrame = arrivalFrame - firstArrowFrame + 10;
 
 			// 譜面データの再読み込み
-			var tmpObj = scoreConvert(g_rootObj, scoreIdHeader, preblankFrame);
+			const tmpObj = scoreConvert(g_rootObj, scoreIdHeader, preblankFrame);
 			for (var j = 0; j < keyNum; j++) {
 				if (tmpObj.arrowData[j] != undefined) {
 					g_scoreObj.arrowData[j] = tmpObj.arrowData[j].concat();
@@ -2806,17 +2821,17 @@ function loadingScoreInit() {
 function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 
 	// 矢印群の格納先
-	var obj = {};
+	const obj = {};
 	g_allArrow = 0;
 	g_allFrz = 0;
 
-	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 	obj.arrowData = new Array();
 	obj.frzData = new Array();
-	var frzName;
-	var tmpData;
-	var tmpArrayData = new Array();
+	let   frzName;
+	let   tmpData;
+	let   tmpArrayData = new Array();
 
 	for (var j = 0, k = 0; j < keyNum; j++) {
 
@@ -2831,7 +2846,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				if (isNaN(parseFloat(obj.arrowData[j][0]))) {
 				} else {
 					g_allArrow += obj.arrowData[j].length;
-					for (k = 0; k < obj.arrowData[j].length; k++) {
+					for (var k = 0; k < obj.arrowData[j].length; k++) {
 						obj.arrowData[j][k] = parseInt(obj.arrowData[j][k]) + parseInt(g_stateObj.adjustment) + _preblankFrame;
 					}
 				}
@@ -2862,7 +2877,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				if (isNaN(parseFloat(obj.frzData[j][0]))) {
 				} else {
 					g_allFrz += obj.frzData[j].length;
-					for (k = 0; k < obj.frzData[j].length; k++) {
+					for (var k = 0; k < obj.frzData[j].length; k++) {
 						obj.frzData[j][k] = parseFloat(obj.frzData[j][k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
 					}
 				}
@@ -2872,10 +2887,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 
 	// 速度変化・色変化データの分解 (2つで1セット)
 	obj.speedData = [];
-	var speedFooter = (g_keyObj.currentKey == "5" ? "_data" : "_change");
+	const speedFooter = (g_keyObj.currentKey == "5" ? "_data" : "_change");
 	if (_dosObj["speed" + _scoreNo + speedFooter] != undefined) {
 		obj.speedData = _dosObj["speed" + _scoreNo + speedFooter].split(",");
-		for (k = 0; k < obj.speedData.length; k += 2) {
+		for (var k = 0; k < obj.speedData.length; k += 2) {
 			obj.speedData[k] = parseFloat(obj.speedData[k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
 			obj.speedData[k + 1] = parseFloat(obj.speedData[k + 1]);
 		}
@@ -2883,7 +2898,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	obj.boostData = [];
 	if (_dosObj["boost" + _scoreNo + "_data"] != undefined) {
 		obj.boostData = _dosObj["boost" + _scoreNo + "_data"].split(",");
-		for (k = 0; k < obj.boostData.length; k += 2) {
+		for (var k = 0; k < obj.boostData.length; k += 2) {
 			obj.boostData[k] = parseFloat(obj.boostData[k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
 			obj.boostData[k + 1] = parseFloat(obj.boostData[k + 1]);
 		}
@@ -2891,7 +2906,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	obj.colorData = [];
 	if (_dosObj["color" + _scoreNo + "_data"] != undefined && _dosObj["color" + _scoreNo + "_data"] != "") {
 		obj.colorData = _dosObj["color" + _scoreNo + "_data"].split(",");
-		for (k = 0; k < obj.colorData.length; k += 3) {
+		for (var k = 0; k < obj.colorData.length; k += 3) {
 			obj.colorData[k] = parseFloat(obj.colorData[k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
 			obj.colorData[k + 1] = parseFloat(obj.colorData[k + 1]);
 		}
@@ -2899,7 +2914,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	obj.acolorData = [];
 	if (_dosObj["acolor" + _scoreNo + "_data"] != undefined && _dosObj["acolor" + _scoreNo + "data"] != "") {
 		obj.acolorData = _dosObj["acolor" + _scoreNo + "_data"].split(",");
-		for (k = 0; k < obj.acolorData.length; k += 3) {
+		for (var k = 0; k < obj.acolorData.length; k += 3) {
 			obj.acolorData[k] = parseFloat(obj.acolorData[k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
 			obj.acolorData[k + 1] = parseFloat(obj.acolorData[k + 1]);
 		}
@@ -2913,12 +2928,12 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 		tmpData = tmpData.split("\n").join("");
 
 		if (tmpData != undefined && tmpData != "") {
-			var tmpWordData = tmpData.split(",");
-			for (k = 0; k < tmpWordData.length; k += 3) {
+			const tmpWordData = tmpData.split(",");
+			for (var k = 0; k < tmpWordData.length; k += 3) {
 				tmpWordData[k] = parseFloat(tmpWordData[k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
 				tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
 
-				var addFrame = 0;
+				let   addFrame = 0;
 				if (obj.wordData[tmpWordData[k]] == undefined) {
 					obj.wordData[tmpWordData[k]] = new Array();
 				} else {
@@ -2949,26 +2964,26 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 			tmpData = tmpArrayData[j];
 
 			if (tmpData != undefined && tmpData != "") {
-				var tmpBackData = tmpData.split(",");
+				const tmpBackData = tmpData.split(",");
 
 				// 値チェックとエスケープ処理
-				var tmpFrame = setVal(tmpBackData[0], 200, "number") + parseFloat(g_stateObj.adjustment) + _preblankFrame;
-				var tmpDepth = setVal(tmpBackData[1], 0, "number");
-				var tmpPath = escapeHtml(setVal(tmpBackData[2], "", "string"));
-				var tmpClass = escapeHtml(setVal(tmpBackData[3], "", "string"));
-				var tmpX = setVal(tmpBackData[4], 0, "number");
-				var tmpY = setVal(tmpBackData[5], 0, "number");
-				var tmpWidth = setVal(tmpBackData[6], 0, "number");					// spanタグの場合は font-size
-				var tmpHeight = escapeHtml(setVal(tmpBackData[7], "", "string"));	// spanタグの場合は color(文字列可)
-				var tmpOpacity = setVal(tmpBackData[8], 1, "number");
-				var tmpAnimationName = escapeHtml(setVal(tmpBackData[9], "none", "string"));
-				var tmpAnimationDuration = setVal(tmpBackData[10], 0, "number") / 60;
+				const tmpFrame = setVal(tmpBackData[0], 200, "number") + parseFloat(g_stateObj.adjustment) + _preblankFrame;
+				const tmpDepth = setVal(tmpBackData[1], 0, "number");
+				const tmpPath = escapeHtml(setVal(tmpBackData[2], "", "string"));
+				const tmpClass = escapeHtml(setVal(tmpBackData[3], "", "string"));
+				const tmpX = setVal(tmpBackData[4], 0, "number");
+				const tmpY = setVal(tmpBackData[5], 0, "number");
+				const tmpWidth = setVal(tmpBackData[6], 0, "number");					// spanタグの場合は font-size
+				const tmpHeight = escapeHtml(setVal(tmpBackData[7], "", "string"));	// spanタグの場合は color(文字列可)
+				const tmpOpacity = setVal(tmpBackData[8], 1, "number");
+				const tmpAnimationName = escapeHtml(setVal(tmpBackData[9], "none", "string"));
+				const tmpAnimationDuration = setVal(tmpBackData[10], 0, "number") / 60;
 
 				if (tmpDepth > obj.backMaxDepth) {
 					obj.backMaxDepth = tmpDepth;
 				}
 
-				var addFrame = 0;
+				let   addFrame = 0;
 				if (obj.backData[tmpFrame] == undefined) {
 					obj.backData[tmpFrame] = {};
 				} else {
@@ -3004,7 +3019,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
  * @param {string} _str 
  */
 function escapeHtml(_str) {
-	var newstr = _str.split("<").join("&lt;");
+	let   newstr = _str.split("<").join("&lt;");
 	newstr = newstr.split(">").join("&gt;");
 	newstr = newstr.split('"').join("&quot;");
 	newstr = newstr.split('&').join("&amp;");
@@ -3044,9 +3059,9 @@ function calcLifeVal(_val, _allArrows) {
  */
 function getLastFrame(_dataObj) {
 
-	var tmpLastNum = 0;
-	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	let   tmpLastNum = 0;
+	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 
 	for (var j = 0; j < keyNum; j++) {
 		if (_dataObj.arrowData[j] != undefined && _dataObj.arrowData[j] != "") {
@@ -3069,9 +3084,9 @@ function getLastFrame(_dataObj) {
  */
 function getFirstArrowFrame(_dataObj) {
 
-	var tmpFirstNum = Infinity;
-	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	let   tmpFirstNum = Infinity;
+	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 
 	for (var j = 0; j < keyNum; j++) {
 		if (_dataObj.arrowData[j] != undefined && _dataObj.arrowData[j] != "") {
@@ -3093,7 +3108,7 @@ function getFirstArrowFrame(_dataObj) {
  * @param {number} _lastFrame 
  */
 function getStartFrame(_lastFrame) {
-	var frameNum = 0;
+	let   frameNum = 0;
 	frameNum = g_headerObj.startFrame;
 	if (_lastFrame >= g_headerObj.startFrame) {
 		frameNum = Math.round(g_stateObj.fadein / 100 * (_lastFrame - frameNum)) + frameNum;
@@ -3108,8 +3123,8 @@ function getStartFrame(_lastFrame) {
  */
 function setSpeedOnFrame(_speedData, _lastFrame) {
 
-	var speedOnFrame = new Array();
-	var currentSpeed = g_stateObj.speed * 2;
+	const speedOnFrame = new Array();
+	const currentSpeed = g_stateObj.speed * 2;
 
 	for (var frm = 0, s = 0; frm <= _lastFrame; frm++) {
 		if (_speedData != undefined && frm == _speedData[s]) {
@@ -3128,11 +3143,11 @@ function setSpeedOnFrame(_speedData, _lastFrame) {
  */
 function setMotionOnFrame() {
 
-	var motionOnFrame = new Array();
+	const motionOnFrame = new Array();
 
 	// 矢印が表示される最大フレーム数
-	var motionLastFrame = g_sHeight * 20;
-	var brakeLastFrame = g_sHeight / 2;
+	const motionLastFrame = g_sHeight * 20;
+	const brakeLastFrame = g_sHeight / 2;
 
 	for (var j = 0; j <= motionLastFrame; j++) {
 		motionOnFrame[j] = 0;
@@ -3164,9 +3179,9 @@ function setMotionOnFrame() {
  * @param {object} _motionOnFrame 
  */
 function getFirstArrivalFrame(_startFrame, _speedOnFrame, _motionOnFrame) {
-	var startY = 0;
-	var frm = _startFrame;
-	var motionFrm = C_MOTION_STD_POS;
+	let   startY = 0;
+	let   frm = _startFrame;
+	let   motionFrm = C_MOTION_STD_POS;
 
 	while (g_distY - startY > 0) {
 		startY += _speedOnFrame[frm];
@@ -3189,8 +3204,8 @@ function getFirstArrivalFrame(_startFrame, _speedOnFrame, _motionOnFrame) {
  */
 function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame) {
 
-	var startPoint = new Array();
-	var frzStartPoint = new Array();
+	const startPoint = new Array();
+	const frzStartPoint = new Array();
 
 	// 矢印・フリーズアロー・速度/色変化用 フレーム別処理配列
 	g_workObj.mkArrow = new Array();
@@ -3212,13 +3227,13 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	/** Motionの適用フレーム数 */
 	g_workObj.motionFrame = new Array();
 
-	var spdNext = Infinity;
-	var spdPrev = 0;
-	var spdk;
-	var lastk;
-	var tmpObj;
-	var arrowArrivalFrm;
-	var frmPrev;
+	let   spdNext = Infinity;
+	let   spdPrev = 0;
+	let   spdk;
+	let   lastk;
+	let   tmpObj;
+	let   arrowArrivalFrm;
+	let   frmPrev;
 
 	for (var j = 0; j < _dataObj.arrowData.length; j++) {
 
@@ -3261,7 +3276,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 					&& arrowArrivalFrm < spdNext) {
 
 					// 最初から最後まで同じスピードのときは前回のデータを流用
-					var tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
+					const tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
 					startPoint[j][k] = tmpFrame;
 					g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
 					g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
@@ -3341,7 +3356,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 					&& arrowArrivalFrm < spdNext) {
 
 					// 最初から最後まで同じスピードのときは前回のデータを流用
-					var tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
+					const tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
 					frzStartPoint[j][k] = tmpFrame;
 					g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
 					g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
@@ -3385,7 +3400,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	// 個別加速のタイミング更新
 	if (_dataObj.boostData != undefined && _dataObj.boostData.length >= 2) {
 
-		var delBoostIdx = 0;
+		let   delBoostIdx = 0;
 		for (var k = _dataObj.boostData.length - 2; k >= 0; k -= 2) {
 			if (_dataObj.boostData[k] < g_scoreObj.frameNum) {
 				delBoostIdx = k;
@@ -3471,7 +3486,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
  */
 function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame) {
 
-	var obj = {
+	const obj = {
 		frm: _frame,
 		startY: 0,
 		arrivalFrm: 0,
@@ -3499,7 +3514,7 @@ function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame) {
  * @param {number} _endFrame 
  */
 function getFrzLength(_speedOnFrame, _startFrame, _endFrame) {
-	var frzLength = 0;
+	let   frzLength = 0;
 
 	for (var frm = _startFrame; frm < _endFrame; frm++) {
 		frzLength += _speedOnFrame[frm];
@@ -3511,10 +3526,10 @@ function getFrzLength(_speedOnFrame, _startFrame, _endFrame) {
  * キーパターン(デフォルト)に対応する矢印番号を格納
  */
 function convertreplaceNums() {
-	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
-	var baseCharas = g_keyObj["chara" + g_keyObj.currentKey + "_0"];
-	var convCharas = g_keyObj["chara" + keyCtrlPtn];
+	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	const baseCharas = g_keyObj["chara" + g_keyObj.currentKey + "_0"];
+	const convCharas = g_keyObj["chara" + keyCtrlPtn];
 
 	g_workObj.replaceNums = new Array();
 
@@ -3537,8 +3552,8 @@ function convertreplaceNums() {
  */
 function pushColors(_header, _frame, _val, _colorCd) {
 
-	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 
 	if (_val < 30) {
 		// 矢印の色変化
@@ -3547,11 +3562,11 @@ function pushColors(_header, _frame, _val, _colorCd) {
 			g_workObj["mk" + _header + "ColorCd"][_frame] = new Array();
 		}
 		if (_val < 20) {
-			var realVal = g_workObj.replaceNums[_val];
+			const realVal = g_workObj.replaceNums[_val];
 			g_workObj["mk" + _header + "Color"][_frame].push(realVal);
 			g_workObj["mk" + _header + "ColorCd"][_frame].push(_colorCd);
 		} else if (_val >= 20) {
-			var colorNum = _val - 20;
+			const colorNum = _val - 20;
 			for (var j = 0; j < keyNum; j++) {
 				if (g_keyObj["color" + keyCtrlPtn][j] == colorNum) {
 					g_workObj["mk" + _header + "Color"][_frame].push(j);
@@ -3569,7 +3584,7 @@ function pushColors(_header, _frame, _val, _colorCd) {
 			g_workObj["mkF" + _header + "Color"][_frame].push(_val % 30);
 			g_workObj["mkF" + _header + "ColorCd"][_frame].push(_colorCd);
 		} else if (_val < 60) {
-			var tmpVal = (_val % 50) * 2;
+			const tmpVal = (_val % 50) * 2;
 			g_workObj["mkF" + _header + "Color"][_frame].push(tmpVal, tmpVal + 1);
 			g_workObj["mkF" + _header + "ColorCd"][_frame].push(_colorCd, _colorCd);
 		} else {
@@ -3588,10 +3603,10 @@ function pushColors(_header, _frame, _val, _colorCd) {
  */
 function getArrowSettings() {
 
-	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
-	var posMax = g_keyObj["pos" + keyCtrlPtn][keyNum - 1] + 1;
-	var divideCnt = g_keyObj["div" + keyCtrlPtn];
+	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	const posMax = g_keyObj["pos" + keyCtrlPtn][keyNum - 1] + 1;
+	const divideCnt = g_keyObj["div" + keyCtrlPtn];
 	if (g_keyObj["blank" + keyCtrlPtn] != undefined) {
 		g_keyObj.blank = g_keyObj["blank" + keyCtrlPtn];
 	} else {
@@ -3631,9 +3646,9 @@ function getArrowSettings() {
 
 	for (var j = 0; j < keyNum; j++) {
 
-		var posj = g_keyObj["pos" + keyCtrlPtn][j];
-		var leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-		var stdPos = (posj >= divideCnt ? leftCnt - (posMax - divideCnt) / 2 : leftCnt - divideCnt / 2);
+		const posj = g_keyObj["pos" + keyCtrlPtn][j];
+		const leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
+		const stdPos = (posj >= divideCnt ? leftCnt - (posMax - divideCnt) / 2 : leftCnt - divideCnt / 2);
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + g_sWidth / 2;
 
 		if (g_stateObj.reverse == "ON") {
@@ -3689,39 +3704,39 @@ function getArrowSettings() {
  */
 function MainInit() {
 
-	var divRoot = document.getElementById("divRoot");
+	const divRoot = document.getElementById("divRoot");
 
 	g_workObj.word0Data = "";
 	g_workObj.word1Data = "";
 	g_currentArrows = 0;
 
 	// 背景スプライトを作成
-	var backSprite = createSprite("divRoot", "backSprite", 0, 0, g_sWidth, g_sHeight);
+	const backSprite = createSprite("divRoot", "backSprite", 0, 0, g_sWidth, g_sHeight);
 	for (var j = 0; j <= g_scoreObj.backMaxDepth; j++) {
 		createSprite("backSprite", "backSprite" + j, 0, 0, g_sWidth, g_sHeight);
 	}
 
 	// ステップゾーン、矢印のメインスプライトを作成
-	var mainSprite = createSprite("divRoot", "mainSprite", 0, 0, g_sWidth, g_sHeight);
+	const mainSprite = createSprite("divRoot", "mainSprite", 0, 0, g_sWidth, g_sHeight);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
-	var infoSprite = createSprite("divRoot", "infoSprite", 0, 0, g_sWidth, g_sHeight);
+	const infoSprite = createSprite("divRoot", "infoSprite", 0, 0, g_sWidth, g_sHeight);
 
 	// 判定系スプライトを作成（メインスプライトより上位）
-	var judgeSprite = createSprite("divRoot", "judgeSprite", 0, 0, g_sWidth, g_sHeight);
+	const judgeSprite = createSprite("divRoot", "judgeSprite", 0, 0, g_sWidth, g_sHeight);
 
-	var keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
-	var keyNum = g_keyObj["chara" + keyCtrlPtn].length;
+	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
+	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 
 	// ステップゾーンを表示
 	for (var j = 0; j < keyNum; j++) {
-		var step = createArrowEffect("step" + j, "#999999",
+		const step = createArrowEffect("step" + j, "#999999",
 			g_workObj.stepX[j],
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], 50,
 			g_workObj.stepRtn[j]);
 		mainSprite.appendChild(step);
 
-		var stepHit = createArrowEffect("stepHit" + j, "#999999",
+		const stepHit = createArrowEffect("stepHit" + j, "#999999",
 			g_workObj.stepX[j] - 15,
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] - 15, 80,
 			g_workObj.stepRtn[j]);
@@ -3731,50 +3746,51 @@ function MainInit() {
 	}
 
 	// 矢印・フリーズアロー・速度変化 移動/判定/変化対象の初期化
-	var arrowCnts = new Array();
-	var frzCnts = new Array();
+	const arrowCnts = new Array();
+	const frzCnts = new Array();
 	for (var j = 0; j < keyNum; j++) {
 		arrowCnts[j] = 0;
 		frzCnts[j] = 0;
 	}
-	var speedCnts = 0;
-	var boostCnts = 0;
+	let   speedCnts = 0;
+	let   boostCnts = 0;
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
 	g_workObj.boostSpd = 1;
 
 	// 開始位置、楽曲再生位置の設定
-	var firstFrame = g_scoreObj.frameNum;
+	const firstFrame = g_scoreObj.frameNum;
+	let   musicStartFrame;
 	if (firstFrame < g_headerObj.blankFrame) {
-		var musicStartFrame = g_headerObj.blankFrame;
+		musicStartFrame = g_headerObj.blankFrame;
 		g_audio.volume = g_stateObj.volume / 100;
 	} else {
-		var musicStartFrame = firstFrame + g_headerObj.blankFrame;
+		musicStartFrame = firstFrame + g_headerObj.blankFrame;
 		g_audio.volume = 0;
 	}
 
 	// 曲時間制御変数
-	var thisTime;
-	var buffTime;
-	var musicStartFlg = false;
+	let   thisTime;
+	let   buffTime;
+	let   musicStartFlg = false;
 
 	g_inputKeyBuffer = [];
 
 	// 終了時間の設定
-	var fullSecond = Math.floor(g_headerObj.blankFrame / 60 + g_audio.duration);
-	var fullMin = Math.floor(fullSecond / 60);
-	var fullSec = ("00" + Math.floor(fullSecond % 60)).slice(-2);
-	var fullTime = fullMin + ":" + fullSec;
-	var fadeOutFrame = Infinity;
-	var preblankFrame = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
+	const fullSecond = Math.floor(g_headerObj.blankFrame / 60 + g_audio.duration);
+	let   fullMin = Math.floor(fullSecond / 60);
+	let   fullSec = ("00" + Math.floor(fullSecond % 60)).slice(-2);
+	let   fullTime = fullMin + ":" + fullSec;
+	let   fadeOutFrame = Infinity;
+	const preblankFrame = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
 
 	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
 	if (g_headerObj.fadeFrame != undefined) {
 		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
 		} else {
 			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]);
-			var fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + C_FRM_AFTERFADE + preblankFrame) / 60) * 60;
+			const fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + C_FRM_AFTERFADE + preblankFrame) / 60) * 60;
 
 			fullMin = Math.floor(fadeTmp / 3600);
 			fullSec = ("00" + (fadeTmp / 60) % 60).slice(-2);
@@ -3786,7 +3802,7 @@ function MainInit() {
 	if (g_headerObj.endFrame != undefined) {
 		if (isNaN(parseInt(g_headerObj.endFrame))) {
 		} else {
-			var fullTmp = Math.floor((parseInt(g_headerObj.endFrame) + preblankFrame) / 60) * 60;
+			const fullTmp = Math.floor((parseInt(g_headerObj.endFrame) + preblankFrame) / 60) * 60;
 
 			fullMin = Math.floor(fullTmp / 3600);
 			fullSec = ("00" + (fullTmp / 60) % 60).slice(-2);
@@ -3795,12 +3811,12 @@ function MainInit() {
 	}
 
 	// フレーム数
-	var lblframe = createDivLabel("lblframe", 0, 0, 100, 30, 20, C_CLR_TITLE,
+	const lblframe = createDivLabel("lblframe", 0, 0, 100, 30, 20, C_CLR_TITLE,
 		g_scoreObj.frameNum);
 	divRoot.appendChild(lblframe);
 
 	// ライフ(数字)
-	var lblLife = createDivLabel("lblLife", 0, 30, 70, 20, 16, C_CLR_TITLE,
+	const lblLife = createDivLabel("lblLife", 0, 30, 70, 20, 16, C_CLR_TITLE,
 		g_workObj.lifeVal);
 	if (g_workObj.lifeVal == C_VAL_MAXLIFE) {
 		lblLife.style.backgroundColor = C_CLR_MAXLIFE;
@@ -3824,65 +3840,65 @@ function MainInit() {
 	infoSprite.appendChild(makeCounterSymbol("lblFCombo", g_sWidth - 110, "#ffffff", 10, 0));
 
 	// 歌詞表示1
-	var lblWord0 = createDivLabel("lblword0", g_sWidth / 2 - 200, 10, g_sWidth - 100, 30, 14, "#ffffff",
+	const lblWord0 = createDivLabel("lblword0", g_sWidth / 2 - 200, 10, g_sWidth - 100, 30, 14, "#ffffff",
 		g_workObj.word0Data);
 	lblWord0.style.textAlign = C_ALIGN_LEFT;
 	judgeSprite.appendChild(lblWord0);
 
 	// 歌詞表示2
-	var lblWord1 = createDivLabel("lblword1", g_sWidth / 2 - 200, g_sHeight - 60, g_sWidth - 100, 20, 14, "#ffffff",
+	const lblWord1 = createDivLabel("lblword1", g_sWidth / 2 - 200, g_sHeight - 60, g_sWidth - 100, 20, 14, "#ffffff",
 		g_workObj.word1Data);
 	lblWord1.style.textAlign = C_ALIGN_LEFT;
 	judgeSprite.appendChild(lblWord1);
 
 	// 曲名・アーティスト名表示
-	var lblCredit = createDivLabel("lblCredit", 125, g_sHeight - 30, g_sWidth - 125, 20, 14, "#cccccc",
+	const lblCredit = createDivLabel("lblCredit", 125, g_sHeight - 30, g_sWidth - 125, 20, 14, "#cccccc",
 		g_headerObj.musicTitle + " / " + g_headerObj.artistName);
 	lblCredit.style.textAlign = C_ALIGN_LEFT;
 	infoSprite.appendChild(lblCredit);
 
 	// 曲時間表示1
-	var lblTime1 = createDivLabel("lblTime1", 0, g_sHeight - 30, 50, 20, 14, "#cccccc",
+	const lblTime1 = createDivLabel("lblTime1", 0, g_sHeight - 30, 50, 20, 14, "#cccccc",
 		"-:--");
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	infoSprite.appendChild(lblTime1);
 
 	// 曲時間表示2
-	var lblTime2 = createDivLabel("lblTime2", 60, g_sHeight - 30, 50, 20, 14, "#cccccc",
+	const lblTime2 = createDivLabel("lblTime2", 60, g_sHeight - 30, 50, 20, 14, "#cccccc",
 		"/ " + fullTime);
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	infoSprite.appendChild(lblTime2);
 
 	// 判定キャラクタ表示：矢印
-	var charaJ = createDivLabel("charaJ", g_sWidth / 2 - 200, g_sHeight / 2 - 50,
+	const charaJ = createDivLabel("charaJ", g_sWidth / 2 - 200, g_sHeight / 2 - 50,
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_II, "");
 	charaJ.style.textAlign = C_ALIGN_CENTER;
 	charaJ.setAttribute("cnt", 0);
 	judgeSprite.appendChild(charaJ);
 
 	// コンボ表示：矢印
-	var comboJ = createDivLabel("comboJ", g_sWidth / 2 - 50, g_sHeight / 2 - 50,
+	const comboJ = createDivLabel("comboJ", g_sWidth / 2 - 50, g_sHeight / 2 - 50,
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_KITA, "");
 	comboJ.style.textAlign = C_ALIGN_CENTER;
 	comboJ.setAttribute("cnt", 0);
 	judgeSprite.appendChild(comboJ);
 
 	// 判定キャラクタ表示：フリーズアロー
-	var charaFJ = createDivLabel("charaFJ", g_sWidth / 2 - 100, g_sHeight / 2,
+	const charaFJ = createDivLabel("charaFJ", g_sWidth / 2 - 100, g_sHeight / 2,
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_KITA, "");
 	charaFJ.style.textAlign = C_ALIGN_CENTER;
 	charaFJ.setAttribute("cnt", 0);
 	judgeSprite.appendChild(charaFJ);
 
 	// コンボ表示：フリーズアロー
-	var comboFJ = createDivLabel("comboFJ", g_sWidth / 2 + 50, g_sHeight / 2,
+	const comboFJ = createDivLabel("comboFJ", g_sWidth / 2 + 50, g_sHeight / 2,
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, C_CLR_II, "");
 	comboFJ.style.textAlign = C_ALIGN_CENTER;
 	comboFJ.setAttribute("cnt", 0);
 	judgeSprite.appendChild(comboFJ);
 
 	// パーフェクト演出
-	var finishView = createDivLabel("finishView", g_sWidth / 2 - 150, g_sHeight / 2 - 50,
+	const finishView = createDivLabel("finishView", g_sWidth / 2 - 150, g_sHeight / 2 - 50,
 		300, 20, 50, C_CLR_KITA, "");
 	finishView.style.textAlign = C_ALIGN_CENTER;
 	judgeSprite.appendChild(finishView);
@@ -3899,10 +3915,11 @@ function MainInit() {
 	document.onkeydown = function (evt) {
 
 		// ブラウザ判定
+		let   setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
-			var setKey = evt.which;
+			setKey = evt.which;
 		} else {
-			var setKey = event.keyCode;
+			setKey = event.keyCode;
 		}
 		g_inputKeyBuffer[setKey] = true;
 
@@ -3953,7 +3970,7 @@ function MainInit() {
 	 * @param {number} _keyCode 
 	 */
 	function mainKeyDownActOFF(_keyCode) {
-		var matchKeys = g_keyObj["keyCtrl" + keyCtrlPtn];
+		const matchKeys = g_keyObj["keyCtrl" + keyCtrlPtn];
 
 		for (var j = 0; j < keyNum; j++) {
 			for (var k = 0; k < matchKeys[j].length; k++) {
@@ -3974,10 +3991,11 @@ function MainInit() {
 
 	document.onkeyup = function (evt) {
 		// ブラウザ判定
+		let   setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
-			var setKey = evt.which;
+			setKey = evt.which;
 		} else {
-			var setKey = event.keyCode;
+			setKey = event.keyCode;
 		}
 		g_inputKeyBuffer[setKey] = false;
 
@@ -3990,7 +4008,7 @@ function MainInit() {
 	function mainKeyUpActOFF() {
 		for (var j = 0; j < keyNum; j++) {
 
-			var keyDownFlg = false;
+			let   keyDownFlg = false;
 			for (var m = 0, len = g_workObj.keyCtrl[j].length; m < len; m++) {
 				if (keyIsDown(g_workObj.keyCtrl[j][m])) {
 					keyDownFlg = true;
@@ -4000,7 +4018,7 @@ function MainInit() {
 			if (keyDownFlg == false) {
 
 				// ステップゾーンに対応するキーを離したとき
-				var stepDiv = document.getElementById("step" + j);
+				const stepDiv = document.getElementById("step" + j);
 				stepDiv.style.backgroundColor = "#999999";
 
 			}
@@ -4038,7 +4056,7 @@ function MainInit() {
 		if (g_audio.volume >= g_stateObj.volume / 100) {
 			musicStartFlg = false;
 			if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + C_FRM_AFTERFADE) {
-				var tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
+				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
 				if (tmpVolume < 0) {
 					g_audio.volume = 0;
 				} else {
@@ -4047,14 +4065,14 @@ function MainInit() {
 			}
 		} else {
 			if (musicStartFlg == true) {
-				var tmpVolume = (g_audio.volume + (3 * g_stateObj.volume / 100) / 1000);
+				const tmpVolume = (g_audio.volume + (3 * g_stateObj.volume / 100) / 1000);
 				if (tmpVolume > 1) {
 					g_audio.volume = 1;
 				} else {
 					g_audio.volume = tmpVolume;
 				}
 			} else if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + C_FRM_AFTERFADE) {
-				var tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
+				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
 				if (tmpVolume < 0) {
 					g_audio.volume = 0;
 				} else {
@@ -4099,9 +4117,9 @@ function MainInit() {
 		if (g_workObj.mkArrow[g_scoreObj.frameNum] != undefined) {
 			for (var j = 0, len = g_workObj.mkArrow[g_scoreObj.frameNum].length; j < len; j++) {
 
-				var targetj = g_workObj.mkArrow[g_scoreObj.frameNum][j];
+				const targetj = g_workObj.mkArrow[g_scoreObj.frameNum][j];
 
-				var step = createArrowEffect("arrow" + targetj + "_" + (++arrowCnts[targetj]), g_workObj.arrowColors[targetj],
+				const step = createArrowEffect("arrow" + targetj + "_" + (++arrowCnts[targetj]), g_workObj.arrowColors[targetj],
 					g_workObj.stepX[targetj],
 					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd * g_workObj.scrollDir[targetj], 50,
 					g_workObj.stepRtn[targetj]);
@@ -4118,13 +4136,13 @@ function MainInit() {
 		// 矢印移動＆消去
 		for (var j = 0; j < keyNum; j++) {
 
-			var stepDivHit = document.getElementById("stepHit" + j);
+			const stepDivHit = document.getElementById("stepHit" + j);
 
 			for (var k = g_workObj.judgArrowCnt[j]; k <= arrowCnts[j]; k++) {
-				var arrow = document.getElementById("arrow" + j + "_" + k);
-				var boostCnt = arrow.getAttribute("boostCnt");
-				var boostSpd = arrow.getAttribute("boostSpd");
-				var cnt = arrow.getAttribute("cnt");
+				const arrow = document.getElementById("arrow" + j + "_" + k);
+				let   boostCnt = arrow.getAttribute("boostCnt");
+				const boostSpd = arrow.getAttribute("boostSpd");
+				let   cnt = arrow.getAttribute("cnt");
 
 				// 全体色変化 (移動時)
 				if (g_workObj.mkAColor[g_scoreObj.frameNum] != undefined) {
@@ -4161,7 +4179,7 @@ function MainInit() {
 			}
 
 			// ステップゾーンのヒット領域は一定時間で非表示化
-			var hitCnt = stepDivHit.getAttribute("cnt");
+			let   hitCnt = stepDivHit.getAttribute("cnt");
 			if (hitCnt > 0) {
 				stepDivHit.setAttribute("cnt", --hitCnt);
 				if (hitCnt == 0) {
@@ -4173,11 +4191,11 @@ function MainInit() {
 		// フリーズアロー生成
 		if (g_workObj.mkFrzArrow[g_scoreObj.frameNum] != undefined) {
 			for (var j = 0, len = g_workObj.mkFrzArrow[g_scoreObj.frameNum].length; j < len; j++) {
-				var targetj = g_workObj.mkFrzArrow[g_scoreObj.frameNum][j];
-				var frzLength = g_workObj.mkFrzLength[targetj][frzCnts[targetj] * 2];
-				var rev = g_workObj.scrollDir[targetj];
+				const targetj = g_workObj.mkFrzArrow[g_scoreObj.frameNum][j];
+				const frzLength = g_workObj.mkFrzLength[targetj][frzCnts[targetj] * 2];
+				const rev = g_workObj.scrollDir[targetj];
 
-				var frzRoot = createSprite("mainSprite", "frz" + targetj + "_" + (++frzCnts[targetj]),
+				const frzRoot = createSprite("mainSprite", "frz" + targetj + "_" + (++frzCnts[targetj]),
 					g_workObj.stepX[targetj],
 					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd * rev,
 					50, 100 + frzLength);
@@ -4194,27 +4212,27 @@ function MainInit() {
 				// 後に作成するほど前面に表示される。
 
 				// フリーズアロー帯(frzBar)
-				var frzBar = createColorObject("frzBar" + targetj + "_" + (frzCnts[targetj]), g_workObj.frzNormalBarColors[targetj],
+				const frzBar = createColorObject("frzBar" + targetj + "_" + (frzCnts[targetj]), g_workObj.frzNormalBarColors[targetj],
 					5, 25 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[targetj], 40, frzLength * g_workObj.boostSpd, 0, "frzBar");
 				frzRoot.appendChild(frzBar);
 
 				// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-				var frzTopShadow = createColorObject("frzTopShadow" + targetj + "_" + (frzCnts[targetj]), "#000000",
+				const frzTopShadow = createColorObject("frzTopShadow" + targetj + "_" + (frzCnts[targetj]), "#000000",
 					0, 0, 50, 50, g_workObj.stepRtn[targetj], "arrowShadow");
 				frzRoot.appendChild(frzTopShadow);
 
 				// 開始矢印。ヒット時は隠れる。
-				var frzTop = createArrowEffect("frzTop" + targetj + "_" + (frzCnts[targetj]), g_workObj.frzNormalColors[targetj],
+				const frzTop = createArrowEffect("frzTop" + targetj + "_" + (frzCnts[targetj]), g_workObj.frzNormalColors[targetj],
 					0, 0, 50, g_workObj.stepRtn[targetj]);
 				frzRoot.appendChild(frzTop);
 
 				// 後発矢印の塗り部分
-				var frzBtmShadow = createColorObject("frzBtmShadow" + targetj + "_" + (frzCnts[targetj]), "#000000",
+				const frzBtmShadow = createColorObject("frzBtmShadow" + targetj + "_" + (frzCnts[targetj]), "#000000",
 					0, frzLength * g_workObj.boostSpd * rev, 50, 50, g_workObj.stepRtn[targetj], "arrowShadow");
 				frzRoot.appendChild(frzBtmShadow);
 
 				// 後発矢印
-				var frzBtm = createArrowEffect("frzBtm" + targetj + "_" + (frzCnts[targetj]), g_workObj.frzNormalColors[targetj],
+				const frzBtm = createArrowEffect("frzBtm" + targetj + "_" + (frzCnts[targetj]), g_workObj.frzNormalColors[targetj],
 					0, frzLength * g_workObj.boostSpd * rev, 50, g_workObj.stepRtn[targetj]);
 				frzRoot.appendChild(frzBtm);
 			}
@@ -4223,16 +4241,16 @@ function MainInit() {
 		// フリーズアロー移動＆消去
 		for (var j = 0; j < keyNum; j++) {
 			for (var k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
-				var frzRoot = document.getElementById("frz" + j + "_" + k);
-				var boostCnt = frzRoot.getAttribute("boostCnt");
-				var boostSpd = frzRoot.getAttribute("boostSpd");
-				var cnt = frzRoot.getAttribute("cnt");
-				var frzAttempt = frzRoot.getAttribute("frzAttempt");
+				const frzRoot = document.getElementById("frz" + j + "_" + k);
+				let   boostCnt = frzRoot.getAttribute("boostCnt");
+				const boostSpd = frzRoot.getAttribute("boostSpd");
+				let   cnt = frzRoot.getAttribute("cnt");
+				let   frzAttempt = frzRoot.getAttribute("frzAttempt");
 
-				var frzTop = document.getElementById("frzTop" + j + "_" + k);
-				var frzBar = document.getElementById("frzBar" + j + "_" + k);
-				var frzBtm = document.getElementById("frzBtm" + j + "_" + k);
-				var frzBarLength = frzRoot.getAttribute("frzBarLength");
+				const frzTop = document.getElementById("frzTop" + j + "_" + k);
+				const frzBar = document.getElementById("frzBar" + j + "_" + k);
+				const frzBtm = document.getElementById("frzBtm" + j + "_" + k);
+				let   frzBarLength = frzRoot.getAttribute("frzBarLength");
 
 				if (frzRoot.getAttribute("judgEndFlg") == "false") {
 					if (frzRoot.getAttribute("isMoving") == "true") {
@@ -4266,7 +4284,7 @@ function MainInit() {
 							changeHitFrz(j, k);
 						}
 					} else {
-						var frzBtmShadow = document.getElementById("frzBtmShadow" + j + "_" + k);
+						const frzBtmShadow = document.getElementById("frzBtmShadow" + j + "_" + k);
 
 						// 全体色変化 (ヒット時)
 						if (g_workObj.mkFAColor[g_scoreObj.frameNum] != undefined) {
@@ -4293,7 +4311,7 @@ function MainInit() {
 							frzBtm.style.top = (parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpd * g_workObj.scrollDir[j]) + "px";
 							frzBtmShadow.style.top = (parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpd * g_workObj.scrollDir[j]) + "px";
 
-							var keyDownFlg = false;
+							let   keyDownFlg = false;
 							for (var m = 0, len = g_workObj.keyCtrl[j].length; m < len; m++) {
 								if (g_workObj.keyHitFlg[j][m]) {
 									keyDownFlg = true;
@@ -4377,14 +4395,14 @@ function MainInit() {
 		fadeWord("1");
 
 		if (g_scoreObj.backData[g_scoreObj.frameNum] != undefined) {
-			var tmpObj = g_scoreObj.backData[g_scoreObj.frameNum];
-			var backSprite = document.getElementById("backSprite" + tmpObj.depth);
+			const tmpObj = g_scoreObj.backData[g_scoreObj.frameNum];
+			const backSprite = document.getElementById("backSprite" + tmpObj.depth);
 			if (tmpObj.path != "") {
 				if (tmpObj.path.indexOf(".png") != -1 || tmpObj.path.indexOf(".gif") != -1 ||
 					tmpObj.path.indexOf(".bmp") != -1 || tmpObj.path.indexOf(".jpg") != -1) {
 
 					// imgタグの場合
-					var tmpInnerHTML = "<img src='" + tmpObj.path + "' class='" + tmpObj.class + "' " +
+					let   tmpInnerHTML = "<img src='" + tmpObj.path + "' class='" + tmpObj.class + "' " +
 						"style='position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top + "px;";
 					if (tmpObj.width != 0 && tmpObj.width > 0) {
 						tmpInnerHTML += "width:" + tmpObj.width + "px;";
@@ -4400,7 +4418,7 @@ function MainInit() {
 				} else {
 
 					// spanタグの場合
-					var tmpInnerHTML = "<span class='" + tmpObj.class + "' " +
+					let   tmpInnerHTML = "<span class='" + tmpObj.class + "' " +
 						"style='display:inline-block;position:absolute; left:" + tmpObj.left + "px; top:" + tmpObj.top + "px;";
 
 					// この場合のwidthは font-size と解釈する
@@ -4424,7 +4442,7 @@ function MainInit() {
 		}
 
 		// 判定キャラクタ消去
-		var charaJCnt = document.getElementById("charaJ").getAttribute("cnt");
+		let   charaJCnt = document.getElementById("charaJ").getAttribute("cnt");
 		if (charaJCnt > 0) {
 			document.getElementById("charaJ").setAttribute("cnt", --charaJCnt);
 			if (charaJCnt == 0) {
@@ -4432,7 +4450,7 @@ function MainInit() {
 				document.getElementById("comboJ").innerHTML = "";
 			}
 		}
-		var charaFJCnt = document.getElementById("charaFJ").getAttribute("cnt");
+		let   charaFJCnt = document.getElementById("charaFJ").getAttribute("cnt");
 		if (charaFJCnt > 0) {
 			document.getElementById("charaFJ").setAttribute("cnt", --charaFJCnt);
 			if (charaFJCnt == 0) {
@@ -4449,9 +4467,9 @@ function MainInit() {
 
 		// タイマー、曲終了判定
 		if (g_scoreObj.frameNum % 60 == 0) {
-			var currentMin = Math.floor(g_scoreObj.frameNum / 3600);
-			var currentSec = ("00" + (g_scoreObj.frameNum / 60) % 60).slice(-2);
-			var currentTime = currentMin + ":" + currentSec;
+			const currentMin = Math.floor(g_scoreObj.frameNum / 3600);
+			const currentSec = ("00" + (g_scoreObj.frameNum / 60) % 60).slice(-2);
+			const currentTime = currentMin + ":" + currentSec;
 			lblTime1.innerHTML = currentTime;
 
 			if (currentTime == fullTime) {
@@ -4467,7 +4485,7 @@ function MainInit() {
 		}
 
 	}
-	var mainStartTime = new Date();
+	const mainStartTime = new Date();
 	g_timeoutEvtId = setTimeout(flowTimeline(), 1000 / 60);
 }
 
@@ -4480,7 +4498,7 @@ function MainInit() {
  * @param {string, number} _text
  */
 function makeCounterSymbol(_id, _x, _color, _heightPos, _text) {
-	var counter = createDivLabel(_id, _x, C_LEN_JDGCNTS_HEIGHT * _heightPos,
+	const counter = createDivLabel(_id, _x, C_LEN_JDGCNTS_HEIGHT * _heightPos,
 		C_LEN_JDGCNTS_WIDTH, C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, _color, _text);
 	counter.style.textAlign = C_ALIGN_RIGHT;
 
@@ -4497,7 +4515,7 @@ function changeArrowColors(_mkColor, _mkColorCd, _allFlg) {
 
 	if (_mkColor != undefined) {
 		for (var j = 0, len = _mkColor.length; j < len; j++) {
-			var targetj = _mkColor[j];
+			const targetj = _mkColor[j];
 			g_workObj.arrowColors[targetj] = _mkColorCd[j];
 			if (_allFlg == "A") {
 				g_workObj.arrowColorsAll[targetj] = _mkColorCd[j];
@@ -4519,7 +4537,7 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 	if (_mkColor != undefined) {
 		for (var j = 0, len = _mkColor.length; j < len; j++) {
 
-			var targetj = _mkColor[j];
+			const targetj = _mkColor[j];
 
 			// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
 			if (targetj < 10) {
@@ -4579,7 +4597,7 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 function fadeWord(_wordDir) {
 
 	if (g_wordObj["fadeInFlg" + _wordDir] == true) {
-		var wordAlpha = parseFloat(document.getElementById("lblword" + _wordDir).style.opacity);
+		const wordAlpha = parseFloat(document.getElementById("lblword" + _wordDir).style.opacity);
 		if (wordAlpha + 0.04 >= 0.99) {
 			g_wordObj["fadeInFlg" + _wordDir] = false;
 			document.getElementById("lblword" + _wordDir).style.opacity = 1;
@@ -4588,7 +4606,7 @@ function fadeWord(_wordDir) {
 			document.getElementById("lblword" + _wordDir).style.opacity = wordAlpha;
 		}
 	} else if (g_wordObj["fadeOutFlg" + _wordDir] == true) {
-		var wordAlpha = parseFloat(document.getElementById("lblword" + _wordDir).style.opacity);
+		const wordAlpha = parseFloat(document.getElementById("lblword" + _wordDir).style.opacity);
 		if (wordAlpha - 0.04 <= 0.01) {
 			g_wordObj["fadeOutFlg" + _wordDir] = false;
 			document.getElementById("lblword" + _wordDir).style.opacity = 0;
@@ -4606,9 +4624,9 @@ function fadeWord(_wordDir) {
  */
 function changeHitFrz(_j, _k) {
 
-	var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + _k);
+	const frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + _k);
 	if (frzTopShadow.getAttribute("type") == "arrow") {
-		var fstyle = frzTopShadow.style;
+		const fstyle = frzTopShadow.style;
 		fstyle.backgroundColor = "#ffffff";
 		fstyle.top = "-10px";
 		fstyle.left = "-10px";
@@ -4619,7 +4637,7 @@ function changeHitFrz(_j, _k) {
 		document.getElementById("frzTop" + _j + "_" + _k).style.backgroundColor = g_workObj.frzHitColors[_j];
 	}
 
-	var frzBar = document.getElementById("frzBar" + _j + "_" + _k);
+	const frzBar = document.getElementById("frzBar" + _j + "_" + _k);
 	frzBar.style.backgroundColor = g_workObj.frzHitBarColors[_j];
 	document.getElementById("frzBtm" + _j + "_" + _k).style.backgroundColor = g_workObj.frzHitColors[_j];
 	document.getElementById("frz" + _j + "_" + _k).setAttribute("isMoving", "false");
@@ -4631,8 +4649,8 @@ function changeHitFrz(_j, _k) {
  * @param {number} _k 
  */
 function changeFailedFrz(_j, _k) {
-	var frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + _k);
-	var fstyle = frzTopShadow.style;
+	const frzTopShadow = document.getElementById("frzTopShadow" + _j + "_" + _k);
+	const fstyle = frzTopShadow.style;
 	fstyle.backgroundColor = "#000000";
 	fstyle.top = "0px";
 	fstyle.left = "0px";
@@ -4662,20 +4680,20 @@ function judgeArrow(_j) {
 	if (g_judgObj.lockFlgs[_j] == false) {
 		g_judgObj.lockFlgs[_j] = true;
 
-		var mainSprite = document.getElementById("mainSprite");
-		var currentNo = g_workObj.judgArrowCnt[_j];
-		var stepDivHit = document.getElementById("stepHit" + _j);
-		var judgArrow = document.getElementById("arrow" + _j + "_" + currentNo);
+		const mainSprite = document.getElementById("mainSprite");
+		const currentNo = g_workObj.judgArrowCnt[_j];
+		const stepDivHit = document.getElementById("stepHit" + _j);
+		const judgArrow = document.getElementById("arrow" + _j + "_" + currentNo);
 
-		var fcurrentNo = g_workObj.judgFrzCnt[_j];
+		const fcurrentNo = g_workObj.judgFrzCnt[_j];
 
 		if (judgArrow != null) {
-			var difCnt = Math.abs(judgArrow.getAttribute("cnt"));
-			var judgEndFlg = judgArrow.getAttribute("judgEndFlg");
+			const difCnt = Math.abs(judgArrow.getAttribute("cnt"));
+			const judgEndFlg = judgArrow.getAttribute("judgEndFlg");
 
 			if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg == "false") {
 				stepDivHit.style.opacity = 0.75;
-				var charaJ = document.getElementById("charaJ");
+				const charaJ = document.getElementById("charaJ");
 
 				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 					judgeIi();
@@ -4700,11 +4718,11 @@ function judgeArrow(_j) {
 			}
 		}
 
-		var judgFrz = document.getElementById("frz" + _j + "_" + fcurrentNo);
+		const judgFrz = document.getElementById("frz" + _j + "_" + fcurrentNo);
 
 		if (judgFrz != null) {
-			var difCnt = Math.abs(judgFrz.getAttribute("cnt"));
-			var judgEndFlg = judgFrz.getAttribute("judgEndFlg");
+			const difCnt = Math.abs(judgFrz.getAttribute("cnt"));
+			const judgEndFlg = judgFrz.getAttribute("judgEndFlg");
 
 			if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg == "false") {
 				changeHitFrz(_j, fcurrentNo);
@@ -4712,7 +4730,7 @@ function judgeArrow(_j) {
 				return;
 			}
 		}
-		var stepDiv = document.getElementById("step" + _j);
+		const stepDiv = document.getElementById("step" + _j);
 		stepDiv.style.backgroundColor = "#66ffff";
 		g_judgObj.lockFlgs[_j] = false;
 	}
@@ -4844,7 +4862,7 @@ function judgeIknai() {
 
 function finishViewing() {
 	if (g_currentArrows == g_allArrow + g_allFrz / 2) {
-		var fullArrows = g_allArrow + g_allFrz / 2;
+		const fullArrows = g_allArrow + g_allFrz / 2;
 		if (g_resultObj.ii + g_resultObj.kita == fullArrows) {
 			document.getElementById("finishView").innerHTML = "<span style='color:#ffffff;'>All Perfect!!</span>";
 			document.getElementById("finishView").style.opacity = 1;
@@ -4879,17 +4897,17 @@ function finishViewing() {
  */
 function resultInit() {
 
-	var divRoot = document.getElementById("divRoot");
+	const divRoot = document.getElementById("divRoot");
 
 	// タイトル文字描画
-	var lblTitle = getTitleDivLabel("lblTitle",
+	const lblTitle = getTitleDivLabel("lblTitle",
 		"<span style='color:#6666ff;font-size:40px;'>R</span>ESULT", 0, 15);
 	divRoot.appendChild(lblTitle);
 
-	var resultWindow = createSprite("divRoot", "resultWindow", g_sWidth / 2 - 150, 100, 300, 310);
+	const resultWindow = createSprite("divRoot", "resultWindow", g_sWidth / 2 - 150, 100, 300, 310);
 
 	// スコア計算(一括)
-	var scoreTmp = g_resultObj.ii * 8 +
+	const scoreTmp = g_resultObj.ii * 8 +
 		g_resultObj.shakin * 4 +
 		g_resultObj.matari * 2 +
 		g_resultObj.kita * 8 +
@@ -4897,13 +4915,13 @@ function resultInit() {
 		g_resultObj.maxCombo * 2 +
 		g_resultObj.fmaxCombo * 2;
 
-	var allScore = (g_allArrow + g_allFrz / 2) * 10;
-	var resultScore = Math.round(scoreTmp / allScore * 1000000);
+	const allScore = (g_allArrow + g_allFrz / 2) * 10;
+	const resultScore = Math.round(scoreTmp / allScore * 1000000);
 	g_resultObj.score = resultScore;
 
 	// ランク計算
-	var rankMark = "";
-	var rankColor = "";
+	let   rankMark = "";
+	let   rankColor = "";
 	if (g_gameOverFlg == true) {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
@@ -4931,12 +4949,13 @@ function resultInit() {
 
 
 	// Twitter用リザルト
+	let   hashTag;
 	if (g_headerObj.hashTag != undefined) {
-		var hashTag = " " + g_headerObj.hashTag;
+		hashTag = " " + g_headerObj.hashTag;
 	} else {
-		var hashTag = "";
+		hashTag = "";
 	}
-	var tweetResultTmp = "【#danoni" + hashTag + "】" + g_headerObj.musicTitle + "(" +
+	const tweetResultTmp = "【#danoni" + hashTag + "】" + g_headerObj.musicTitle + "(" +
 		g_headerObj.keyLabels[g_stateObj.scoreId] + "k-" + g_headerObj.difLabels[g_stateObj.scoreId] + ")/" +
 		g_headerObj.tuning + "/" +
 		"Rank:" + rankMark + "/" +
@@ -4945,7 +4964,7 @@ function resultInit() {
 		g_resultObj.kita + "-" + g_resultObj.iknai + "/" +
 		g_resultObj.maxCombo + "-" + g_resultObj.fmaxCombo + " " +
 		location.href;
-	var tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
+	const tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
 
 	// キャラクタ描画
 	resultWindow.appendChild(makeResultSymbol("lblIi", 0, C_CLR_II, 0, C_JCR_II, C_ALIGN_LEFT));
@@ -4974,7 +4993,7 @@ function resultInit() {
 	resultWindow.appendChild(makeResultSymbol("lblScoreS", 130, "#ffffff", 10, g_resultObj.score, C_ALIGN_RIGHT));
 
 	// ランク描画
-	var lblRank = createDivCustomLabel("lblRank", 300, 225, 70, 20, 50, "#ffffff",
+	const lblRank = createDivCustomLabel("lblRank", 300, 225, 70, 20, 50, "#ffffff",
 		"<span style='color:" + rankColor + ";'>" + rankMark + "</span>", "'Bookman Old Style', 'Meiryo UI', sans-serif");
 	lblRank.style.textAlign = C_ALIGN_CENTER;
 	resultWindow.appendChild(lblRank);
@@ -4988,7 +5007,7 @@ function resultInit() {
 	}
 
 	// 戻るボタン描画
-	var btnBack = createButton({
+	const btnBack = createButton({
 		id: "btnBack",
 		name: "Back",
 		x: 0,
@@ -5008,7 +5027,7 @@ function resultInit() {
 	divRoot.appendChild(btnBack);
 
 	// Tweetボタン描画
-	var btnTweet = createButton({
+	const btnTweet = createButton({
 		id: "btnTweet",
 		name: "Tweet",
 		x: g_sWidth / 3,
@@ -5025,7 +5044,7 @@ function resultInit() {
 	divRoot.appendChild(btnTweet);
 
 	// リトライボタン描画
-	var btnRetry = createButton({
+	const btnRetry = createButton({
 		id: "btnRetry",
 		name: "Retry",
 		x: g_sWidth / 3 * 2,
@@ -5060,10 +5079,11 @@ function resultInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = function (evt) {
 		// ブラウザ判定
+		let   setKey;
 		if (g_userAgent.indexOf("firefox") != -1) {
-			var setKey = evt.which;
+			setKey = evt.which;
 		} else {
-			var setKey = event.keyCode;
+			setKey = event.keyCode;
 		}
 		for (var j = 0; j < C_BLOCK_KEYS.length; j++) {
 			if (setKey == C_BLOCK_KEYS[j]) {
@@ -5082,7 +5102,7 @@ function resultInit() {
 }
 
 function resultFadeOut() {
-	var tmpVolume = (g_audio.volume - 5 / 1000);
+	const tmpVolume = (g_audio.volume - 5 / 1000);
 	if (tmpVolume < 0) {
 		g_audio.volume = 0;
 		clearInterval(g_timeoutEvtId);
@@ -5101,7 +5121,7 @@ function resultFadeOut() {
  * @param {string, number} _text
  */
 function makeResultSymbol(_id, _x, _color, _heightPos, _text, _align) {
-	var symbol = createDivLabel(_id, _x, 24 * _heightPos,
+	const symbol = createDivLabel(_id, _x, 24 * _heightPos,
 		150, 24, 20, _color, _text);
 	symbol.style.textAlign = _align;
 
