@@ -117,7 +117,7 @@ var g_stateObj = {
 	lifeDmg: 7,
 	lifeMode: "Border",
 	lifeBorder: 70,
-	lifeInit: 300
+	lifeInit: 25
 };
 
 var C_VAL_MAXLIFE = 1000;
@@ -1541,6 +1541,7 @@ function headerConvert(_dosObj) {
 		obj.lifeBorders = new Array();
 		obj.lifeRecoverys = new Array();
 		obj.lifeDamages = new Array();
+		obj.lifeInits = new Array();
 		for (var j = 0; j < difs.length; j++) {
 			var difDetails = difs[j].split(",");
 			obj.keyLabels.push(setVal(difDetails[0], "7", "string"));
@@ -1553,6 +1554,7 @@ function headerConvert(_dosObj) {
 			}
 			obj.lifeRecoverys.push(setVal(difDetails[4], 2, "float"));
 			obj.lifeDamages.push(setVal(difDetails[5], 7, "float"));
+			obj.lifeInits.push(setVal(difDetails[6], 25, "float"));
 		}
 	} else {
 		makeWarningWindow(C_MSG_E_0021);
@@ -1562,6 +1564,7 @@ function headerConvert(_dosObj) {
 		obj.lifeBorders = [70];
 		obj.lifeRecoverys = [2];
 		obj.lifeDamages = [7];
+		obj.lifeInits = [25];
 	}
 	if (obj.initSpeeds[0] != undefined) {
 		g_stateObj.speed = obj.initSpeeds[0];
@@ -1575,6 +1578,7 @@ function headerConvert(_dosObj) {
 	}
 	g_stateObj.lifeRcv = obj.lifeRecoverys[0];
 	g_stateObj.lifeDmg = obj.lifeDamages[0];
+	g_stateObj.lifeInit = obj.lifeInits[0];
 
 	// 初期色情報
 	obj.setColorInit = ["#cccccc", "#9999ff", "#ffffff", "#ffff99", "#99ff99"];
@@ -3005,6 +3009,7 @@ function calcLifeVals(_allArrows) {
 		g_workObj.lifeDmg = g_stateObj.lifeDmg;
 	}
 	g_workObj.lifeBorder = C_VAL_MAXLIFE * g_stateObj.lifeBorder / 100;
+	g_workObj.lifeInit = C_VAL_MAXLIFE * g_stateObj.lifeInit / 100;
 }
 
 /**
@@ -3655,7 +3660,7 @@ function getArrowSettings() {
 	g_resultObj.fCombo = 0;
 	g_resultObj.fmaxCombo = 0;
 
-	g_workObj.lifeVal = g_stateObj.lifeInit;
+	g_workObj.lifeVal = g_workObj.lifeInit;
 }
 
 /*-----------------------------------------------------------*/
@@ -3776,8 +3781,6 @@ function MainInit() {
 	var lblframe = createDivLabel("lblframe", 0, 0, 100, 30, 20, C_CLR_TITLE,
 		g_scoreObj.frameNum);
 	divRoot.appendChild(lblframe);
-
-	console.log(g_stateObj.lifeMode);
 
 	// ライフ(数字)
 	var lblLife = createDivLabel("lblLife", 0, 30, 70, 20, 16, C_CLR_TITLE,
