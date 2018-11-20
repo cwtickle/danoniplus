@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.73.2";
+var g_version = "Ver 0.73.3";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -3124,7 +3124,7 @@ function getStartFrame(_lastFrame) {
 function setSpeedOnFrame(_speedData, _lastFrame) {
 
 	const speedOnFrame = new Array();
-	const currentSpeed = g_stateObj.speed * 2;
+	let currentSpeed = g_stateObj.speed * 2;
 
 	for (var frm = 0, s = 0; frm <= _lastFrame; frm++) {
 		if (_speedData != undefined && frm == _speedData[s]) {
@@ -4394,6 +4394,7 @@ function MainInit() {
 		fadeWord("0");
 		fadeWord("1");
 
+		// 背景表示・背景モーション
 		if (g_scoreObj.backData[g_scoreObj.frameNum] != undefined) {
 			const tmpObj = g_scoreObj.backData[g_scoreObj.frameNum];
 			const backSprite = document.getElementById("backSprite" + tmpObj.depth);
