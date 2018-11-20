@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-var g_version = "Ver 0.73.3";
+const g_version = "Ver 0.73.4";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -4564,11 +4564,11 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 					}
 				}
 			} else {
-				targetj -= 10;
-				if (targetj % 2 == 0) {
+				const targetj2 = targetj - 10;
+				if (targetj2 % 2 == 0) {
 					// 矢印 (ヒット時)
 					for (var k = 0; k < _keyNum; k++) {
-						if (targetj / 2 == _colorPatterns[k]) {
+						if (targetj2 / 2 == _colorPatterns[k]) {
 							g_workObj.frzHitColors[k] = _mkColorCd[j];
 							if (_allFlg == "A") {
 								g_workObj.frzHitColorsAll[k] = _mkColorCd[j];
@@ -4578,7 +4578,7 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 				} else {
 					// 帯 (ヒット時)
 					for (var k = 0; k < _keyNum; k++) {
-						if ((targetj - 1) / 2 == _colorPatterns[k]) {
+						if ((targetj2 - 1) / 2 == _colorPatterns[k]) {
 							g_workObj.frzHitBarColors[k] = _mkColorCd[j];
 							if (_allFlg == "A") {
 								g_workObj.frzHitBarColorsAll[k] = _mkColorCd[j];
