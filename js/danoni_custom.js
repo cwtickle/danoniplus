@@ -58,6 +58,12 @@ function customTitleInit() {
 	if (titlefontsize >= 64) {
 		titlefontsize = 64;
 	}
+
+	// カスタム変数 titlesize の定義
+	if (g_rootObj.titlesize != undefined && g_rootObj.titlesize != "") {
+		titlefontsize = setVal(g_rootObj.titlesize, titlefontsize, "number");
+	}
+
 	createLabel(l0ctx, g_headerObj["musicTitle"], g_sWidth / 2, g_sHeight / 2,
 		titlefontsize, "メイリオ", grd, "center");
 }
@@ -120,7 +126,7 @@ function customMainInit() {
 	l0ctx.fillStyle = grd;
 	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 
-	// ここにカスタム処理を記述する
+	// Ready?表示
 	var lblReady = createDivLabel("lblReady", g_sWidth / 2 - 100, g_sHeight / 2 - 100,
 		200, 50, 40, C_CLR_TITLE,
 		"<span style='color:#9999ff;font-size:60px;'>R</span>EADY?");
@@ -128,6 +134,8 @@ function customMainInit() {
 	lblReady.style.animationDuration = "2.5s";
 	lblReady.style.animationName = "leftToRightFade";
 	lblReady.style.opacity = 0;
+
+	// ここにカスタム処理を記述する
 
 }
 
