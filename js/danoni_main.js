@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 0.73.4";
+const g_version = "Ver 0.73.5";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -3778,7 +3778,7 @@ function MainInit() {
 	g_inputKeyBuffer = [];
 
 	// 終了時間の設定
-	const fullSecond = Math.floor(g_headerObj.blankFrame / 60 + g_audio.duration);
+	const fullSecond = Math.ceil(g_headerObj.blankFrame / 60 + g_audio.duration);
 	let fullMin = Math.floor(fullSecond / 60);
 	let fullSec = ("00" + Math.floor(fullSecond % 60)).slice(-2);
 	let fullTime = fullMin + ":" + fullSec;
