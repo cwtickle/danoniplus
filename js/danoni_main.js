@@ -4461,8 +4461,8 @@ function MainInit() {
 		}
 
 		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
-		thisTime = new Date();
-		buffTime = (thisTime.getTime() - mainStartTime.getTime() - (g_scoreObj.frameNum - firstFrame) * 1000 / 60);
+		thisTime = performance.now();
+		buffTime = (thisTime - mainStartTime - (g_scoreObj.frameNum - firstFrame) * 1000 / 60);
 		g_scoreObj.frameNum++;
 		g_timeoutEvtId = setTimeout(function () { flowTimeline() }, 1000 / 60 - buffTime);
 
@@ -4486,7 +4486,7 @@ function MainInit() {
 		}
 
 	}
-	const mainStartTime = new Date();
+	const mainStartTime = performance.now();
 	g_timeoutEvtId = setTimeout(flowTimeline(), 1000 / 60);
 }
 
