@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 0.74.1";
+const g_version = "Ver 0.74.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2933,8 +2933,6 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
  */
 function loadingScoreInit() {
 
-	const divRoot = document.getElementById("divRoot");
-
 	const keyCtrlPtn = g_keyObj.currentKey + "_" + g_keyObj.currentPtn;
 	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
@@ -2950,16 +2948,16 @@ function loadingScoreInit() {
 	calcLifeVals(g_allArrow + g_allFrz);
 
 	// 最終フレーム数の取得
-	const lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
+	let lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
 
 	// 最初の矢印データがあるフレーム数を取得
-	const firstArrowFrame = getFirstArrowFrame(g_scoreObj);
+	let firstArrowFrame = getFirstArrowFrame(g_scoreObj);
 
 	// 開始フレーム数の取得(フェードイン加味)
 	g_scoreObj.frameNum = getStartFrame(lastFrame);
 
 	// フレームごとの速度を取得（配列形式）
-	const speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
+	let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
 
 	// Motionオプション適用時の矢印別の速度を取得（配列形式）
 	const motionOnFrame = setMotionOnFrame();
@@ -2967,13 +2965,13 @@ function loadingScoreInit() {
 
 	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
 	const firstFrame = (g_scoreObj.frameNum == 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
-	const arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
+	let arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
 
 	// キーパターン(デフォルト)に対応する矢印番号を格納
 	convertreplaceNums();
 
 	// フレーム・曲開始位置調整
-	const preblankFrame = 0;
+	let preblankFrame = 0;
 	if (g_scoreObj.frameNum == 0) {
 		if (firstArrowFrame < arrivalFrame) {
 			preblankFrame = arrivalFrame - firstArrowFrame + 10;
