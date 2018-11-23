@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/20
+ * Revised : 2018/11/23
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 0.74.0";
+const g_version = "Ver 0.74.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2570,8 +2570,8 @@ function createSettingsDisplayWindow(_sprite) {
 
 	function makeDisplayButton(_name, _heightPos) {
 		//const charStart = _name.slice(0, 1);
-		const lbl = createDivLabel("lbl" + _name, _heightPos, C_LEN_SETLBL_HEIGHT * _heightPos,
-			100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
+		const lbl = createDivLabel("lbl" + _name, -10, C_LEN_SETLBL_HEIGHT * _heightPos,
+			120, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 			"<span style='color:#999999'>" + _name.slice(0, 1).toUpperCase() + "</span>" + _name.slice(1));
 		optionsprite.appendChild(lbl);
 
