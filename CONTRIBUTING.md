@@ -1,4 +1,4 @@
-# ソースのfork, Pull Requestについて
+# fork, Pull Requestについて
 forkはMITライセンスの下、自由に行えます。  
 Pull RequestについてはMasterではなく、当面Developに対してPull Requestするようにしてください。  
 
