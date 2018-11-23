@@ -4,12 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/23
+ * Revised : 2018/11/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 0.74.4";
-const g_version_lifegauge = "ver 0.3.0.20181123";
+const g_version = "Ver 0.75.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
