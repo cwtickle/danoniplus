@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 0.74.2";
+const g_version = "Ver 0.74.3";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2559,7 +2559,7 @@ function createSettingsDisplayWindow(_sprite) {
 	// 各ボタン用のスプライトを作成
 	const optionsprite = createSprite(_sprite, "optionsprite", (g_sWidth - 400) / 2, 100, 400, 300);
 
-	makeDisplayButton("stepzone", 0);
+	makeDisplayButton("stepZone", 0);
 	makeDisplayButton("judgement", 1);
 	makeDisplayButton("lifeGauge", 2);
 	makeDisplayButton("musicInfo", 3);
@@ -4147,7 +4147,7 @@ function MainInit() {
 
 	// 曲情報OFF
 	if (g_stateObj.d_musicinfo == C_FLG_OFF) {
-		document.getElementById("lblCredit").style.display = C_DIS_NONE;
+		document.getElementById("lblCredit").style.left = "20px";
 		document.getElementById("lblTime1").style.display = C_DIS_NONE;
 		document.getElementById("lblTime2").style.display = C_DIS_NONE;
 	}
