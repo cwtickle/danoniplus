@@ -9,6 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 0.74.4";
+const g_version_lifegauge = "ver 0.3.0.20181123";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -89,6 +90,7 @@ const C_IMG_MORARA = "../img/morara_600.png";
 const C_IMG_MONAR = "../img/monar_600.png";
 const C_IMG_CURSOR = "../img/cursor.png";
 const C_IMG_FRZBAR = "../img/frzbar.png";
+const C_IMG_LIFEBAR = "../img/frzbar.png";
 
 const C_IMG_ARROWSHADOW = "../img/arrowShadow_500.png";
 const C_IMG_ONIGIRIARROWSHADOW = "../img/aaShadow_500.png";
@@ -150,9 +152,9 @@ const g_stateObj = {
 };
 
 const C_VAL_MAXLIFE = 1000;
-let C_CLR_MAXLIFE = "#222200";
-let C_CLR_CLEARLIFE = "#002222";
-let C_CLR_DEFAULTLIFE = "#222222";
+let C_CLR_MAXLIFE = "#444400";
+let C_CLR_CLEARLIFE = "#004444";
+let C_CLR_DEFAULTLIFE = "#444444";
 
 const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
 let g_volumeNum = 0;
@@ -4041,14 +4043,21 @@ function MainInit() {
 	// ライフ(数字)
 	const lblLife = createDivLabel("lblLife", 0, 30, 70, 20, 16, C_CLR_TITLE,
 		g_workObj.lifeVal);
+	let lblInitColor;
 	if (g_workObj.lifeVal == C_VAL_MAXLIFE) {
-		lblLife.style.backgroundColor = C_CLR_MAXLIFE;
+		lblInitColor = C_CLR_MAXLIFE;
 	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
-		lblLife.style.backgroundColor = C_CLR_CLEARLIFE;
+		lblInitColor = C_CLR_CLEARLIFE;
 	} else {
-		lblLife.style.backgroundColor = C_CLR_DEFAULTLIFE;
+		lblInitColor = C_CLR_DEFAULTLIFE;
 	}
+	lblLife.style.backgroundColor = lblInitColor;
 	divRoot.appendChild(lblLife);
+
+	const lifeBar = createColorObject("lifeBar", lblInitColor,
+		5, 50 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeVal) / C_VAL_MAXLIFE,
+		15, (g_sHeight - 100) * g_workObj.lifeVal / C_VAL_MAXLIFE, 0, "lifeBar");
+	infoSprite.appendChild(lifeBar);
 
 	// 判定カウンタ表示
 	infoSprite.appendChild(makeCounterSymbol("lblIi", g_sWidth - 110, C_CLR_II, 1, 0));
@@ -4155,6 +4164,7 @@ function MainInit() {
 	// ライフゲージOFF (フレーム数もテスト的に消す)
 	if (g_stateObj.d_lifegauge == C_FLG_OFF) {
 		document.getElementById("lblLife").style.display = C_DIS_NONE;
+		document.getElementById("lifeBar").style.display = C_DIS_NONE;
 		document.getElementById("lblframe").style.display = C_DIS_NONE;
 	}
 
@@ -4993,26 +5003,36 @@ function judgeArrow(_j) {
 }
 
 function lifeRecovery() {
+	let lifeColor;
 	g_workObj.lifeVal += g_workObj.lifeRcv;
 	if (g_workObj.lifeVal >= C_VAL_MAXLIFE) {
 		g_workObj.lifeVal = C_VAL_MAXLIFE;
-		document.getElementById("lblLife").style.backgroundColor = C_CLR_MAXLIFE;
+		lifeColor = C_CLR_MAXLIFE;
 	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
-		document.getElementById("lblLife").style.backgroundColor = C_CLR_CLEARLIFE;
+		lifeColor = C_CLR_CLEARLIFE;
 	}
+	document.getElementById("lblLife").style.backgroundColor = lifeColor;
 	document.getElementById("lblLife").innerHTML = Math.round(g_workObj.lifeVal);
+	document.getElementById("lifeBar").style.backgroundColor = lifeColor;
+	document.getElementById("lifeBar").style.top = (50 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeVal) / C_VAL_MAXLIFE) + "px";
+	document.getElementById("lifeBar").style.height = ((g_sHeight - 100) * g_workObj.lifeVal / C_VAL_MAXLIFE) + "px";
 }
 
 function lifeDamage() {
+	let lifeColor;
 	g_workObj.lifeVal -= g_workObj.lifeDmg;
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
-		document.getElementById("lblLife").style.backgroundColor = C_CLR_DEFAULTLIFE;
+		lifeColor = C_CLR_DEFAULTLIFE;
 	} else {
-		document.getElementById("lblLife").style.backgroundColor = C_CLR_CLEARLIFE;
+		lifeColor = C_CLR_CLEARLIFE;
 	}
+	document.getElementById("lblLife").style.backgroundColor = lifeColor;
 	document.getElementById("lblLife").innerHTML = Math.round(g_workObj.lifeVal);
+	document.getElementById("lifeBar").style.backgroundColor = lifeColor;
+	document.getElementById("lifeBar").style.top = (50 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeVal) / C_VAL_MAXLIFE) + "px";
+	document.getElementById("lifeBar").style.height = ((g_sHeight - 100) * g_workObj.lifeVal / C_VAL_MAXLIFE) + "px";
 }
 
 function judgeIi() {
