@@ -9,7 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 0.73.5";
-const g_version_feature_display = "Ver 0.1.0.20181123";	// リリース時は削除する内部バージョン
+const g_version_feature_display = "Ver 0.1.1.20181123";	// リリース時は削除する内部バージョン
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2418,9 +2418,9 @@ function settingsDisplayInit() {
 	createSettingsDisplayWindow("divRoot");
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customOptionInit == "function") {
+	if (typeof customSettingsDisplayInit == "function") {
 		customSettingsDisplayInit();
-		if (typeof customOptionInit2 == "function") {
+		if (typeof customSettingsDisplayInit2 == "function") {
 			customSettingsDisplayInit2();
 		}
 	}
