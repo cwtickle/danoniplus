@@ -35,6 +35,13 @@ function customOptionInit2() {
 }
 
 /**
+ * 表示変更(初期表示) [Scene: Settings-Display / Lemon]
+ */
+function customSettingsDisplayInit2() {
+
+}
+
+/**
  * キーコンフィグ画面(初期表示) [Scene: KeyConfig / Orange]
  */
 function customKeyConfigInit2() {
