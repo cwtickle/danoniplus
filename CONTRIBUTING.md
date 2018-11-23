@@ -7,6 +7,7 @@ Pull RequestについてはMasterではなく、当面Developに対してPull Re
 
 ## 変数・定数
 定数・変数名はわかりやすく、名前で判断がつくように。  
+forループを除き、danoni_main.js内は極力const/letで宣言する。  
 
 |カテゴリ|命名ルール|
 |----|----|
