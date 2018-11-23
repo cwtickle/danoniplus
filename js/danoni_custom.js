@@ -86,6 +86,23 @@ function customOptionInit() {
 }
 
 /**
+ * 表示変更(初期表示) [Scene: Settings-Display / Lemon]
+ */
+function customSettingsDisplayInit() {
+	// レイヤー情報取得
+	var layer0 = document.getElementById("layer0");
+	var l0ctx = layer0.getContext("2d");
+
+	// 画面背景を指定 (background-color)
+	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	grd.addColorStop(0, "#000000");
+	grd.addColorStop(1, "#222222");
+	l0ctx.fillStyle = grd;
+	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+
+}
+
+/**
  * キーコンフィグ画面(初期表示) [Scene: KeyConfig / Orange]
  */
 function customKeyConfigInit() {
