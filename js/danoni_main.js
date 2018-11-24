@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 0.77.0";
+const g_version = "Ver 0.77.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1344,6 +1344,7 @@ function initialControl() {
 	preloadFile("image", C_IMG_MONAR, "", "");
 	preloadFile("image", C_IMG_CURSOR, "", "");
 	preloadFile("image", C_IMG_FRZBAR, "", "");
+	preloadFile("image", C_IMG_LIFEBORDER, "", "");
 
 	// その他の画像ファイルの読み込み
 	for (var j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
