@@ -1,4 +1,4 @@
-@charset "UTF-8";
+﻿@charset "UTF-8";
 #canvas-frame {
 	height:500px;
 	position: relative;
@@ -25,6 +25,12 @@
 	mask-image: url("../img/frzbar.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/frzbar.png");
+	-webkit-mask-size: contain;
+}
+.lifeBorder {
+	mask-image: url("../img/borderline.png");
+	mask-size: contain;
+	-webkit-mask-image: url("../img/borderline.png");
 	-webkit-mask-size: contain;
 }
 .onigiri {
@@ -98,6 +104,34 @@
 	mask-size: contain;
 	-webkit-mask-image: url("../img/aaShadow_500.png");
 	-webkit-mask-size: contain;
+}
+input[type=range] {
+	-webkit-appearance: none;
+	background: transparent;
+	height: 20px;
+	width: 205px;
+}
+input[type=range]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	background: #606060;
+	height: 20px;
+	width: 20px;
+	opacity: 0.5;
+	border-radius: 50%;
+}
+input[type=range]::-moz-range-track{
+	height: 0;
+}
+input[type=range]::-moz-range-thumb{
+	background: #606060;
+	height: 20px;
+	width: 20px;
+	opacity: 0.5;
+	border: none;
+	border-radius: 50%;
+}
+input[type=range]:focus {
+	outline: 0;
 }
 @keyframes upToDown {
 	0% {

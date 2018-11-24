@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 0.75.0";
+const g_version = "Ver 0.76.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -90,6 +90,7 @@ const C_IMG_MONAR = "../img/monar_600.png";
 const C_IMG_CURSOR = "../img/cursor.png";
 const C_IMG_FRZBAR = "../img/frzbar.png";
 const C_IMG_LIFEBAR = "../img/frzbar.png";
+const C_IMG_LIFEBORDER = "../img/borderline.png";
 
 const C_IMG_ARROWSHADOW = "../img/arrowShadow_500.png";
 const C_IMG_ONIGIRIARROWSHADOW = "../img/aaShadow_500.png";
@@ -154,6 +155,8 @@ const C_VAL_MAXLIFE = 1000;
 let C_CLR_MAXLIFE = "#444400";
 let C_CLR_CLEARLIFE = "#004444";
 let C_CLR_DEFAULTLIFE = "#444444";
+let C_CLR_BORDER = "#555555";
+let C_CLR_BACKLIFE = "#222222";
 
 const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
 let g_volumeNum = 0;
@@ -2289,33 +2292,43 @@ function createOptionWindow(_sprite) {
 		"<span style='color:#99eeff'>F</span>adein");
 	optionsprite.appendChild(lblFadein);
 
-	const lnkFadein = makeSettingLblButton("lnkFadein", g_stateObj.fadein + "%", 8, function () {
-		g_stateObj.fadein = (g_stateObj.fadein == 95 ? 0 : g_stateObj.fadein + 5);
-		lnkFadein.innerHTML = g_stateObj.fadein + "%";
-	});
-	lnkFadein.oncontextmenu = function () {
-		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 95 : g_stateObj.fadein - 5);
-		lnkFadein.innerHTML = g_stateObj.fadein + "%";
-		return false;
-	}
+	const lnkFadein = createDivLabel("lblFadein", C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 8,
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, g_stateObj.fadein + "%");
 	optionsprite.appendChild(lnkFadein);
 
 	optionsprite.appendChild(makeMiniButton("lnkFadein", "R", 8, function () {
-		g_stateObj.fadein = (g_stateObj.fadein >= 75 ? (g_stateObj.fadein == 95 ? 0 : 95) : g_stateObj.fadein + 25);
+		g_stateObj.fadein = (g_stateObj.fadein == 99 ? 0 : g_stateObj.fadein + 1);
+		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkFadein", "L", 8, function () {
-		g_stateObj.fadein = (g_stateObj.fadein <= 25 ? (g_stateObj.fadein == 0 ? 95 : 0) : g_stateObj.fadein - 25);
+		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 99 : g_stateObj.fadein - 1);
+		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 	}));
-	optionsprite.appendChild(makeMiniButton("lnkFadein", "RR", 8, function () {
-		g_stateObj.fadein = (g_stateObj.fadein == 95 ? 0 : g_stateObj.fadein + 5);
+
+	let addXPos = 0;
+	let addYPos = 0;
+	if (g_userAgent.indexOf('firefox') != -1) {
+		addXPos = -8;
+		addYPos = 1;
+	}
+	const lblFadeinSlider = createDivLabel("lblFadeinBar", 160 + addXPos, 200 + addYPos, "", "", "", "",
+		"<input id='fadeinSlider' type='range' value='0' min='0' max='99' step='1'>");
+	optionsprite.appendChild(lblFadeinSlider);
+
+	const fadeinSlider = document.getElementById("fadeinSlider");
+	fadeinSlider.value = g_stateObj.fadein;
+
+	fadeinSlider.addEventListener("input", function () {
+		g_stateObj.fadein = parseInt(this.value);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
-	}));
-	optionsprite.appendChild(makeMiniButton("lnkFadein", "LL", 8, function () {
-		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 95 : g_stateObj.fadein - 5);
+	}, false);
+
+	fadeinSlider.addEventListener("change", function () {
+		g_stateObj.fadein = parseInt(this.value);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
-	}));
+	}, false);
 
 
 	// ボリューム
@@ -4053,10 +4066,31 @@ function MainInit() {
 	lblLife.style.backgroundColor = lblInitColor;
 	divRoot.appendChild(lblLife);
 
+	// ライフ背景
+	const lifeBackObj = createColorObject("lifeBackObj", C_CLR_BACKLIFE,
+		5, 50,
+		15, g_sHeight - 100, 0, "lifeBar");
+	infoSprite.appendChild(lifeBackObj);
+
+	// ライフ本体
 	const lifeBar = createColorObject("lifeBar", lblInitColor,
 		5, 50 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeVal) / C_VAL_MAXLIFE,
 		15, (g_sHeight - 100) * g_workObj.lifeVal / C_VAL_MAXLIFE, 0, "lifeBar");
 	infoSprite.appendChild(lifeBar);
+
+	// ライフ：ボーダーライン
+	// この背景の画像は40x16で作成しているが、"padding-right:5px"があるためサイズを35x16で作成
+	const lifeBorderObj = createColorObject("lifeBorderObj", C_CLR_BORDER,
+		5, 46 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeBorder) / C_VAL_MAXLIFE,
+		35, 16, 0, "lifeBorder");
+	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
+	lifeBorderObj.style.textAlign = C_ALIGN_RIGHT;
+	lifeBorderObj.style.paddingRight = "5px";
+	infoSprite.appendChild(lifeBorderObj);
+
+	if (g_stateObj.lifeMode == "Survival" || g_workObj.lifeVal == C_VAL_MAXLIFE) {
+		lifeBorderObj.style.display = C_DIS_NONE;
+	}
 
 	// 判定カウンタ表示
 	infoSprite.appendChild(makeCounterSymbol("lblIi", g_sWidth - 110, C_CLR_II, 1, 0));
@@ -4163,7 +4197,9 @@ function MainInit() {
 	// ライフゲージOFF (フレーム数もテスト的に消す)
 	if (g_stateObj.d_lifegauge == C_FLG_OFF) {
 		document.getElementById("lblLife").style.display = C_DIS_NONE;
-		document.getElementById("lifeBar").style.display = C_DIS_NONE;
+		document.getElementById("lifeBackObj").style.display = C_DIS_NONE;
+		document.getElementById("lifeBarObj").style.display = C_DIS_NONE;
+		document.getElementById("lifeBorderObj").style.display = C_DIS_NONE;
 		document.getElementById("lblframe").style.display = C_DIS_NONE;
 	}
 
