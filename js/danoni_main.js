@@ -2292,33 +2292,43 @@ function createOptionWindow(_sprite) {
 		"<span style='color:#99eeff'>F</span>adein");
 	optionsprite.appendChild(lblFadein);
 
-	const lnkFadein = makeSettingLblButton("lnkFadein", g_stateObj.fadein + "%", 8, function () {
-		g_stateObj.fadein = (g_stateObj.fadein == 95 ? 0 : g_stateObj.fadein + 5);
-		lnkFadein.innerHTML = g_stateObj.fadein + "%";
-	});
-	lnkFadein.oncontextmenu = function () {
-		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 95 : g_stateObj.fadein - 5);
-		lnkFadein.innerHTML = g_stateObj.fadein + "%";
-		return false;
-	}
+	const lnkFadein = createDivLabel("lblFadein", C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 8,
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, g_stateObj.fadein + "%");
 	optionsprite.appendChild(lnkFadein);
 
 	optionsprite.appendChild(makeMiniButton("lnkFadein", "R", 8, function () {
-		g_stateObj.fadein = (g_stateObj.fadein >= 75 ? (g_stateObj.fadein == 95 ? 0 : 95) : g_stateObj.fadein + 25);
+		g_stateObj.fadein = (g_stateObj.fadein == 99 ? 0 : g_stateObj.fadein + 1);
+		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkFadein", "L", 8, function () {
-		g_stateObj.fadein = (g_stateObj.fadein <= 25 ? (g_stateObj.fadein == 0 ? 95 : 0) : g_stateObj.fadein - 25);
+		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 99 : g_stateObj.fadein - 1);
+		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 	}));
-	optionsprite.appendChild(makeMiniButton("lnkFadein", "RR", 8, function () {
-		g_stateObj.fadein = (g_stateObj.fadein == 95 ? 0 : g_stateObj.fadein + 5);
+
+	let addXPos = 0;
+	let	addYPos = 0;
+	if (g_userAgent.indexOf('firefox') != -1) {
+		addXPos = -8;
+		addYPos = 1;
+	}
+	const lblFadeinSlider = createDivLabel("lblFadeinBar", 160 + addXPos, 200 + addYPos, "", "", "", "",
+		"<input id='fadeinSlider' type='range' value='0' min='0' max='99' step='1'>");
+	optionsprite.appendChild(lblFadeinSlider);
+
+	const fadeinSlider = document.getElementById("fadeinSlider");
+	fadeinSlider.value = g_stateObj.fadein;
+
+	fadeinSlider.addEventListener("input", function() {
+		g_stateObj.fadein = parseInt(this.value);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
-	}));
-	optionsprite.appendChild(makeMiniButton("lnkFadein", "LL", 8, function () {
-		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 95 : g_stateObj.fadein - 5);
+  }, false);
+
+  fadeinSlider.addEventListener("change", function() {
+		g_stateObj.fadein = parseInt(this.value);
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
-	}));
+  }, false);
 
 
 	// ボリューム
