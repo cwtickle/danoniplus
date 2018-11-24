@@ -9,6 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 0.77.2";
+const g_version_result = "Ver 0.2.0.20181125";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2058,7 +2059,7 @@ function optionInit() {
 function createOptionWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionsprite = createSprite(_sprite, "optionsprite", (g_sWidth - 400) / 2, 100, 400, 300);
+	const optionsprite = createSprite(_sprite, "optionsprite", (g_sWidth - 400) / 2, 90, 400, 300);
 
 	// 難易度(Difficulty)
 	const lblDifficulty = createDivLabel("lblDifficulty", 0, C_LEN_SETLBL_HEIGHT * 0,
@@ -2099,10 +2100,14 @@ function createOptionWindow(_sprite) {
 		if (g_headerObj.lifeBorders[g_stateObj.scoreId] == "x") {
 			g_stateObj.lifeBorder = 0;
 			g_stateObj.lifeMode = "Survival";
+			lnkGauge.innerHTML = "Survival";
 		} else {
 			g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
 			g_stateObj.lifeMode = "Border";
+			lnkGauge.innerHTML = "Normal";
 		}
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+
 		g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
 		g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
 
@@ -2251,14 +2256,49 @@ function createOptionWindow(_sprite) {
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	}));
 
+	// ゲージ設定 (Gauge)
+	const lblGauge = createDivLabel("lblGauge", 0, C_LEN_SETLBL_HEIGHT * 6,
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
+		"<span style='color:#99ff99'>G</span>auge");
+	optionsprite.appendChild(lblGauge);
+
+	const lblGauge2 = createDivLabel("lblGauge2", C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 7 - 3,
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, 12, C_CLR_TITLE,
+		gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg));
+	optionsprite.appendChild(lblGauge2);
+
+	const lnkGauge = makeSettingLblButton("lnkGauge",
+		(g_stateObj.lifeMode == "Border" ? "Normal" : "Survival"), 6, function () {
+			//	lnkGauge.innerHTML = "Survival";
+		});
+	lnkGauge.oncontextmenu = function () {
+		//lnkGauge.innerHTML = "Survival";
+		return false;
+	}
+	optionsprite.appendChild(lnkGauge);
+
+	optionsprite.appendChild(makeMiniButton("lnkGauge", "R", 6, function () {
+		//lnkGauge.innerHTML = "Survival";
+	}));
+	optionsprite.appendChild(makeMiniButton("lnkGauge", "L", 6, function () {
+		//lnkGauge.innerHTML = "Survival";
+	}));
+
+	function gaugeFormat(_mode, _border, _rcv, _dmg) {
+		if (_mode == "Border") {
+			return "[" + _mode + ":" + _border + ", Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+		}
+		return _mode + "[Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+	}
+
 
 	// タイミング調整 (Adjustment)
-	const lblAdjustment = createDivLabel("lblAdjustment", 0, C_LEN_SETLBL_HEIGHT * 7,
+	const lblAdjustment = createDivLabel("lblAdjustment", 0, C_LEN_SETLBL_HEIGHT * 8,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		"<span style='color:#99ffff'>A</span>djustment");
 	optionsprite.appendChild(lblAdjustment);
 
-	const lnkAdjustment = makeSettingLblButton("lnkAdjustment", g_stateObj.adjustment, 7, function () {
+	const lnkAdjustment = makeSettingLblButton("lnkAdjustment", g_stateObj.adjustment, 8, function () {
 		g_stateObj.adjustment = (g_stateObj.adjustment == 30 ? -30 : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	});
@@ -2269,40 +2309,40 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkAdjustment);
 
-	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "R", 7, function () {
+	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "R", 8, function () {
 		g_stateObj.adjustment = (g_stateObj.adjustment >= 25 ? (g_stateObj.adjustment == 30 ? -30 : 30) : g_stateObj.adjustment + 5);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "L", 7, function () {
+	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "L", 8, function () {
 		g_stateObj.adjustment = (g_stateObj.adjustment <= -25 ? (g_stateObj.adjustment == -30 ? 30 : -30) : g_stateObj.adjustment - 5);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "RR", 7, function () {
+	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "RR", 8, function () {
 		g_stateObj.adjustment = (g_stateObj.adjustment == 30 ? -30 : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "LL", 7, function () {
+	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "LL", 8, function () {
 		g_stateObj.adjustment = (g_stateObj.adjustment == -30 ? 30 : --g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
 
 
 	// フェードイン (Fadein)
-	const lblFadein = createDivLabel("lblFadein", 0, C_LEN_SETLBL_HEIGHT * 8,
+	const lblFadein = createDivLabel("lblFadein", 0, C_LEN_SETLBL_HEIGHT * 9,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		"<span style='color:#99eeff'>F</span>adein");
 	optionsprite.appendChild(lblFadein);
 
-	const lnkFadein = createDivLabel("lblFadein", C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 8,
+	const lnkFadein = createDivLabel("lblFadein", C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 9,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, g_stateObj.fadein + "%");
 	optionsprite.appendChild(lnkFadein);
 
-	optionsprite.appendChild(makeMiniButton("lnkFadein", "R", 8, function () {
+	optionsprite.appendChild(makeMiniButton("lnkFadein", "R", 9, function () {
 		g_stateObj.fadein = (g_stateObj.fadein == 99 ? 0 : g_stateObj.fadein + 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
 	}));
-	optionsprite.appendChild(makeMiniButton("lnkFadein", "L", 8, function () {
+	optionsprite.appendChild(makeMiniButton("lnkFadein", "L", 9, function () {
 		g_stateObj.fadein = (g_stateObj.fadein == 0 ? 99 : g_stateObj.fadein - 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = g_stateObj.fadein + "%";
@@ -2314,7 +2354,7 @@ function createOptionWindow(_sprite) {
 		addXPos = -8;
 		addYPos = 1;
 	}
-	const lblFadeinSlider = createDivLabel("lblFadeinBar", 160 + addXPos, 200 + addYPos, "", "", "", "",
+	const lblFadeinSlider = createDivLabel("lblFadeinBar", 160 + addXPos, 225 + addYPos, "", "", "", "",
 		"<input id='fadeinSlider' type='range' value='0' min='0' max='99' step='1'>");
 	optionsprite.appendChild(lblFadeinSlider);
 
@@ -2333,12 +2373,12 @@ function createOptionWindow(_sprite) {
 
 
 	// ボリューム
-	const lblVolume = createDivLabel("lblVolume", 0, C_LEN_SETLBL_HEIGHT * 9,
+	const lblVolume = createDivLabel("lblVolume", 0, C_LEN_SETLBL_HEIGHT * 10,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		"<span style='color:#99ddff'>V</span>olume");
 	optionsprite.appendChild(lblVolume);
 
-	const lnkVolume = makeSettingLblButton("lnkVolume", g_stateObj.volume + "%", 9, function () {
+	const lnkVolume = makeSettingLblButton("lnkVolume", g_stateObj.volume + "%", 10, function () {
 		g_volumeNum = (g_volumeNum == 0 ? g_volumes.length - 1 : --g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = g_stateObj.volume + "%";
@@ -2351,12 +2391,12 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkVolume);
 
-	optionsprite.appendChild(makeMiniButton("lnkVolume", "R", 9, function () {
+	optionsprite.appendChild(makeMiniButton("lnkVolume", "R", 10, function () {
 		g_volumeNum = (g_volumeNum == 0 ? g_volumes.length - 1 : --g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = g_stateObj.volume + "%";
 	}));
-	optionsprite.appendChild(makeMiniButton("lnkVolume", "L", 9, function () {
+	optionsprite.appendChild(makeMiniButton("lnkVolume", "L", 10, function () {
 		g_volumeNum = (g_volumeNum == g_volumes.length - 1 ? 0 : ++g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = g_stateObj.volume + "%";
@@ -5216,7 +5256,8 @@ function resultInit() {
 		"<span style='color:#6666ff;font-size:40px;'>R</span>ESULT", 0, 15);
 	divRoot.appendChild(lblTitle);
 
-	const playDataWindow = createSprite("divRoot", "playDataWindow", g_sWidth / 2 - 225, 70, 450, 100);
+	const playDataWindow = createSprite("divRoot", "playDataWindow", g_sWidth / 2 - 225, 70, 450, 110);
+	playDataWindow.style.border = "solid 0.5px #666666";
 	const resultWindow = createSprite("divRoot", "resultWindow", g_sWidth / 2 - 150, 185, 300, 210);
 
 	// スコア計算(一括)
