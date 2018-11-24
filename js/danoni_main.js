@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 0.76.2";
+const g_version = "Ver 0.76.3";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -4081,7 +4081,7 @@ function MainInit() {
 	// ライフ：ボーダーライン
 	// この背景の画像は40x16で作成しているが、"padding-right:5px"があるためサイズを35x16で作成
 	const lifeBorderObj = createColorObject("lifeBorderObj", C_CLR_BORDER,
-		5, 46 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeBorder) / C_VAL_MAXLIFE,
+		5, 42 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeBorder) / C_VAL_MAXLIFE,
 		35, 16, 0, "lifeBorder");
 	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
 	lifeBorderObj.style.textAlign = C_ALIGN_RIGHT;
