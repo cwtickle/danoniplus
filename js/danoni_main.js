@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 0.76.3";
+const g_version = "Ver 0.77.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -5215,7 +5215,8 @@ function resultInit() {
 		"<span style='color:#6666ff;font-size:40px;'>R</span>ESULT", 0, 15);
 	divRoot.appendChild(lblTitle);
 
-	const resultWindow = createSprite("divRoot", "resultWindow", g_sWidth / 2 - 150, 100, 300, 310);
+	const playDataWindow = createSprite("divRoot", "playDataWindow", g_sWidth / 2 - 225, 70, 450, 100);
+	const resultWindow = createSprite("divRoot", "resultWindow", g_sWidth / 2 - 150, 185, 300, 210);
 
 	// スコア計算(一括)
 	const scoreTmp = g_resultObj.ii * 8 +
@@ -5277,6 +5278,97 @@ function resultInit() {
 		location.href;
 	const tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
 
+	// 曲名・オプション描画
+	playDataWindow.appendChild(makeResultPlayData("lblMusic", 20, "#999999", 0,
+		"Music", C_ALIGN_LEFT));
+	playDataWindow.appendChild(makeResultPlayData("lblMusicData", 60, "#cccccc", 0,
+		g_headerObj.musicTitle, C_ALIGN_CENTER));
+	playDataWindow.appendChild(makeResultPlayData("lblDifficulty", 20, "#999999", 2,
+		"Difficulty", C_ALIGN_LEFT));
+	playDataWindow.appendChild(makeResultPlayData("lblDifData", 60, "#cccccc", 2,
+		g_headerObj.keyLabels[g_stateObj.scoreId] + " key / " + g_headerObj.difLabels[g_stateObj.scoreId],
+		C_ALIGN_CENTER));
+	playDataWindow.appendChild(makeResultPlayData("lblStyle", 20, "#999999", 3,
+		"Playstyle", C_ALIGN_LEFT));
+
+	let playStyleData = "";
+	playStyleData = g_stateObj.speed + " x";
+	if (g_stateObj.motion != C_FLG_OFF) {
+		playStyleData += ", " + g_stateObj.motion;
+	}
+	if (g_stateObj.reverse != C_FLG_OFF) {
+		playStyleData += ", Reverse";
+	}
+	playDataWindow.appendChild(makeResultPlayData("lblStyleData", 60, "#cccccc", 3,
+		playStyleData, C_ALIGN_CENTER));
+
+	playDataWindow.appendChild(makeResultPlayData("lblDisplay", 20, "#999999", 4,
+		"Display", C_ALIGN_LEFT));
+
+	let displayData = "";
+	if (g_stateObj.d_stepzone != C_FLG_ON) {
+		if (displayData != "") {
+			displayData += ", ";
+		}
+		displayData += "Step";
+	}
+	if (g_stateObj.d_judgement != C_FLG_ON) {
+		if (displayData != "") {
+			displayData += ", ";
+		}
+		displayData += "Judge";
+	}
+	if (g_stateObj.d_lifegauge != C_FLG_ON) {
+		if (displayData != "") {
+			displayData += ", ";
+		}
+		displayData += "Life";
+	}
+	if (g_stateObj.d_musicinfo != C_FLG_ON) {
+		if (displayData != "") {
+			displayData += ", ";
+		}
+		displayData += "MusicInfo";
+	}
+	if (displayData == "") {
+		displayData = "All Visible";
+	} else {
+		displayData += " : OFF";
+	}
+	playDataWindow.appendChild(makeResultPlayData("lblDisplayData", 60, "#cccccc", 4,
+		displayData, C_ALIGN_CENTER));
+
+	let display2Data = "";
+	if (g_stateObj.d_speed != C_FLG_ON) {
+		if (display2Data != "") {
+			display2Data += ", ";
+		}
+		display2Data += "Speed";
+	}
+	if (g_stateObj.d_speed != C_FLG_ON) {
+		if (display2Data != "") {
+			display2Data += ", ";
+		}
+		display2Data += "Color";
+	}
+	if (g_stateObj.d_lyrics != C_FLG_ON) {
+		if (display2Data != "") {
+			display2Data += ", ";
+		}
+		display2Data += "Lyrics";
+	}
+	if (g_stateObj.d_background != C_FLG_ON) {
+		if (display2Data != "") {
+			display2Data += ", ";
+		}
+		display2Data += "Background";
+	}
+	if (display2Data != "") {
+		display2Data += " : OFF";
+	}
+	playDataWindow.appendChild(makeResultPlayData("lblDisplayData", 60, "#cccccc", 5,
+		display2Data, C_ALIGN_CENTER));
+
 	// キャラクタ描画
 	resultWindow.appendChild(makeResultSymbol("lblIi", 0, C_CLR_II, 0, C_JCR_II, C_ALIGN_LEFT));
 	resultWindow.appendChild(makeResultSymbol("lblShakin", 0, C_CLR_SHAKIN, 1, C_JCR_SHAKIN, C_ALIGN_LEFT));
@@ -5304,7 +5396,7 @@ function resultInit() {
 	resultWindow.appendChild(makeResultSymbol("lblScoreS", 130, "#ffffff", 10, g_resultObj.score, C_ALIGN_RIGHT));
 
 	// ランク描画
-	const lblRank = createDivCustomLabel("lblRank", 300, 225, 70, 20, 50, "#ffffff",
+	const lblRank = createDivCustomLabel("lblRank", 300, 160, 70, 20, 50, "#ffffff",
 		"<span style='color:" + rankColor + ";'>" + rankMark + "</span>", "'Bookman Old Style', 'Meiryo UI', sans-serif");
 	lblRank.style.textAlign = C_ALIGN_CENTER;
 	resultWindow.appendChild(lblRank);
@@ -5424,16 +5516,34 @@ function resultFadeOut() {
 }
 
 /**
- * 結果表示作成
+ * 結果表示作成（曲名、オプション）
  * @param {string} _id 
  * @param {number} _x
  * @param {string} _color 
  * @param {number} _heightPos 
  * @param {string, number} _text
+ * @param {string} _align
+ */
+function makeResultPlayData(_id, _x, _color, _heightPos, _text, _align) {
+	const symbol = createDivLabel(_id, _x, 18 * _heightPos,
+		400, 18, 14, _color, _text);
+	symbol.style.textAlign = _align;
+
+	return symbol;
+}
+
+/**
+ * 結果表示作成（キャラクタ）
+ * @param {string} _id 
+ * @param {number} _x
+ * @param {string} _color 
+ * @param {number} _heightPos 
+ * @param {string, number} _text
+ * @param {string} _align
  */
 function makeResultSymbol(_id, _x, _color, _heightPos, _text, _align) {
-	const symbol = createDivLabel(_id, _x, 24 * _heightPos,
-		150, 24, 20, _color, _text);
+	const symbol = createDivLabel(_id, _x, 18 * _heightPos,
+		150, 18, 16, _color, _text);
 	symbol.style.textAlign = _align;
 
 	return symbol;
