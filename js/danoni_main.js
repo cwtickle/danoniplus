@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/24
+ * Revised : 2018/11/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 0.78.0.pre";
-const g_version_result = "Ver 0.3.2.20181125";
+const g_version_result = "Ver 0.4.0.20181125";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -142,6 +142,7 @@ const g_stateObj = {
 	lifeBorder: 70,
 	lifeInit: 25,
 	lifeSetName: "Normal",
+	lifeId: 0,
 
 	d_stepzone: C_FLG_ON,
 	d_judgement: C_FLG_ON,
@@ -159,6 +160,29 @@ let C_CLR_CLEARLIFE = "#004444";
 let C_CLR_DEFAULTLIFE = "#444444";
 let C_CLR_BORDER = "#555555";
 let C_CLR_BACKLIFE = "#222222";
+const C_LFE_SURVIVAL = "Survival";
+const C_LFE_BORDER = "Border";
+
+const g_gaugeOptionObj = {
+	survival: ["Borderless", "No Recovery", "SuddenDeath"],
+	border: ["Normal", "No Recovery", "SuddenDeath"],
+
+	initSurvival: [250, C_VAL_MAXLIFE, C_VAL_MAXLIFE],
+	rcvSurvival: [6, 0, 0],
+	dmgSurvival: [40, 50, C_VAL_MAXLIFE],
+	typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
+	clearSurvival: [0, 0, 0],
+
+	initBorder: [250, C_VAL_MAXLIFE, C_VAL_MAXLIFE],
+	rcvBorder: [2, 0, 0],
+	dmgBorder: [7, 50, C_VAL_MAXLIFE],
+	typeBorder: [C_LFE_BORDER, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
+	clearBorder: [70, 0, 0]
+};
+let g_gaugeType;
+const C_GAG_DEFAULT = 0;
+const C_GAG_NORECOVERY = 1;
+const C_GAG_SUDDENDEATH = 2;
 
 const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
 let g_volumeNum = 0;
@@ -1605,7 +1629,7 @@ function headerConvert(_dosObj) {
 			}
 			obj.lifeRecoverys.push(setVal(difDetails[4], 2, "float"));
 			obj.lifeDamages.push(setVal(difDetails[5], 7, "float"));
-			obj.lifeInits.push(setVal(difDetails[6], 25, "float"));
+			obj.lifeInits.push(setVal(difDetails[6], 25, "float") * 10);
 		}
 	} else {
 		makeWarningWindow(C_MSG_E_0021);
@@ -1615,19 +1639,21 @@ function headerConvert(_dosObj) {
 		obj.lifeBorders = [70];
 		obj.lifeRecoverys = [2];
 		obj.lifeDamages = [7];
-		obj.lifeInits = [25];
+		obj.lifeInits = [250];
 	}
 	if (obj.initSpeeds[0] != undefined) {
 		g_stateObj.speed = obj.initSpeeds[0];
 	}
 	if (obj.lifeBorders[0] == "x") {
 		g_stateObj.lifeBorder = 0;
-		g_stateObj.lifeMode = "Survival";
+		g_stateObj.lifeMode = C_LFE_SURVIVAL;
 		g_stateObj.lifeSetName = "Borderless";
+		g_gaugeType = C_LFE_SURVIVAL;
 	} else {
 		g_stateObj.lifeBorder = obj.lifeBorders[0];
-		g_stateObj.lifeMode = "Border";
+		g_stateObj.lifeMode = C_LFE_BORDER;
 		g_stateObj.lifeSetName = "Normal";
+		g_gaugeType = C_LFE_BORDER;
 	}
 	g_stateObj.lifeRcv = obj.lifeRecoverys[0];
 	g_stateObj.lifeDmg = obj.lifeDamages[0];
@@ -2102,15 +2128,18 @@ function createOptionWindow(_sprite) {
 		g_keyObj.currentPtn = 0;
 		if (g_headerObj.lifeBorders[g_stateObj.scoreId] == "x") {
 			g_stateObj.lifeBorder = 0;
-			g_stateObj.lifeMode = "Survival";
+			g_stateObj.lifeMode = C_LFE_SURVIVAL;
 			g_stateObj.lifeSetName = "Borderless";
 			lnkGauge.innerHTML = g_stateObj.lifeSetName;
+			g_gaugeType = C_LFE_SURVIVAL;
 		} else {
 			g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
-			g_stateObj.lifeMode = "Border";
+			g_stateObj.lifeMode = C_LFE_BORDER;
 			g_stateObj.lifeSetName = "Normal";
 			lnkGauge.innerHTML = g_stateObj.lifeSetName;
+			g_gaugeType = C_LFE_BORDER;
 		}
+		g_stateObj.lifeId = 0;
 		g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
 		g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
 		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
@@ -2272,23 +2301,71 @@ function createOptionWindow(_sprite) {
 
 	const lnkGauge = makeSettingLblButton("lnkGauge",
 		g_stateObj.lifeSetName, 6, function () {
-			//	lnkGauge.innerHTML = "Survival";
+			g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
+			gaugeChange(g_stateObj.lifeId);
+
+			lnkGauge.innerHTML = g_stateObj.lifeSetName;
+			lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
 		});
 	lnkGauge.oncontextmenu = function () {
-		//lnkGauge.innerHTML = "Survival";
+		g_stateObj.lifeId = (g_stateObj.lifeId == 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
+		gaugeChange(g_stateObj.lifeId);
+
+		lnkGauge.innerHTML = g_stateObj.lifeSetName;
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
 		return false;
 	}
 	optionsprite.appendChild(lnkGauge);
 
 	optionsprite.appendChild(makeMiniButton("lnkGauge", "R", 6, function () {
-		//lnkGauge.innerHTML = "Survival";
+		g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
+		gaugeChange(g_stateObj.lifeId);
+
+		lnkGauge.innerHTML = g_stateObj.lifeSetName;
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkGauge", "L", 6, function () {
-		//lnkGauge.innerHTML = "Survival";
+		g_stateObj.lifeId = (g_stateObj.lifeId == 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
+		gaugeChange(g_stateObj.lifeId);
+
+		lnkGauge.innerHTML = g_stateObj.lifeSetName;
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
 	}));
 
+	/**
+	 * ゲージ設定の切替処理
+	 * @param {number} _lifeId 
+	 */
+	function gaugeChange(_lifeId) {
+		g_stateObj.lifeSetName = g_gaugeOptionObj[g_gaugeType.toLowerCase()][_lifeId];
+		g_stateObj.lifeMode = g_gaugeOptionObj["type" + g_gaugeType][_lifeId];
+
+		g_stateObj.lifeBorder = g_gaugeOptionObj["clear" + g_gaugeType][_lifeId];
+		g_stateObj.lifeInit = g_gaugeOptionObj["init" + g_gaugeType][_lifeId];
+		g_stateObj.lifeRcv = g_gaugeOptionObj["rcv" + g_gaugeType][_lifeId];
+		g_stateObj.lifeDmg = g_gaugeOptionObj["dmg" + g_gaugeType][_lifeId];
+
+		if (_lifeId == 0) {
+			if (g_headerObj.lifeBorders[g_stateObj.scoreId] != undefined) {
+				g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
+			}
+			if (g_headerObj.lifeInits[g_stateObj.scoreId] != undefined) {
+				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
+			}
+			if (g_headerObj.lifeRecoverys[g_stateObj.scoreId] != undefined) {
+				g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
+			}
+			if (g_headerObj.lifeDamages[g_stateObj.scoreId] != undefined) {
+				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
+			}
+		}
+	}
+
+	/**
+	 * ゲージ設定の詳細表示を整形
+	 */
 	function gaugeFormat(_mode, _border, _rcv, _dmg) {
-		if (_mode == "Border") {
+		if (_mode == C_LFE_BORDER) {
 			return "[" + _mode + ":" + _border + ", Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
 		}
 		return "[Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
@@ -2408,7 +2485,6 @@ function createOptionWindow(_sprite) {
 	optionsprite.oncontextmenu = function () {
 		return false;
 	}
-
 }
 
 /**
@@ -3309,7 +3385,7 @@ function escapeHtml(_str) {
  */
 function calcLifeVals(_allArrows) {
 
-	if (g_stateObj.lifeMode == "Border") {
+	if (g_stateObj.lifeMode == C_LFE_BORDER) {
 		g_workObj.lifeRcv = calcLifeVal(g_stateObj.lifeRcv, _allArrows);
 		g_workObj.lifeDmg = calcLifeVal(g_stateObj.lifeDmg, _allArrows);
 	} else {
@@ -3317,7 +3393,7 @@ function calcLifeVals(_allArrows) {
 		g_workObj.lifeDmg = g_stateObj.lifeDmg;
 	}
 	g_workObj.lifeBorder = C_VAL_MAXLIFE * g_stateObj.lifeBorder / 100;
-	g_workObj.lifeInit = C_VAL_MAXLIFE * g_stateObj.lifeInit / 100;
+	g_workObj.lifeInit = C_VAL_MAXLIFE * g_stateObj.lifeInit / 1000;
 }
 
 /**
@@ -3969,6 +4045,7 @@ function getArrowSettings() {
 	g_resultObj.fmaxCombo = 0;
 
 	g_workObj.lifeVal = g_workObj.lifeInit;
+	g_gameOverFlg = false;
 }
 
 /*-----------------------------------------------------------*/
@@ -4132,7 +4209,7 @@ function MainInit() {
 	lifeBorderObj.style.paddingRight = "5px";
 	infoSprite.appendChild(lifeBorderObj);
 
-	if (g_stateObj.lifeMode == "Survival" || g_workObj.lifeVal == C_VAL_MAXLIFE) {
+	if (g_stateObj.lifeMode == C_LFE_SURVIVAL || g_workObj.lifeVal == C_VAL_MAXLIFE) {
 		lifeBorderObj.style.display = C_DIS_NONE;
 	}
 
@@ -4299,7 +4376,7 @@ function MainInit() {
 				} else {
 					titleInit();
 				}
-			}, 100);
+			}, 200);
 		}
 
 		for (var j = 0; j < C_BLOCK_KEYS.length; j++) {
@@ -4821,6 +4898,9 @@ function MainInit() {
 				if (fadeOutFrame == Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
 					g_audio.pause();
 				}
+				if (g_stateObj.lifeMode == C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
+					g_gameOverFlg = true;
+				}
 				clearTimeout(g_timeoutEvtId);
 				setTimeout(function () {
 					clearWindow();
@@ -4828,10 +4908,9 @@ function MainInit() {
 				}, 100);
 			}
 		}
-
 	}
 	const mainStartTime = performance.now();
-	g_timeoutEvtId = setTimeout(flowTimeline(), 1000 / 60);
+	g_timeoutEvtId = setTimeout(function () { flowTimeline(); }, 1000 / 60);
 }
 
 /**
@@ -5102,6 +5181,15 @@ function lifeDamage() {
 	g_workObj.lifeVal -= g_workObj.lifeDmg;
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
+		if (g_stateObj.lifeMode == C_LFE_SURVIVAL) {
+			g_audio.pause();
+			clearTimeout(g_timeoutEvtId);
+			setTimeout(function () {
+				clearWindow();
+				g_gameOverFlg = true;
+				resultInit();
+			}, 200);
+		}
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
 		lifeColor = C_CLR_DEFAULTLIFE;
 	} else {
@@ -5344,7 +5432,9 @@ function resultInit() {
 	if (g_stateObj.reverse != C_FLG_OFF) {
 		playStyleData += ", Reverse";
 	}
-	playStyleData += ", " + g_stateObj.lifeSetName;
+	if (g_stateObj.lifeSetName != "Borderless" && g_stateObj.lifeSetName != "Normal") {
+		playStyleData += ", " + g_stateObj.lifeSetName;
+	}
 	playDataWindow.appendChild(makeResultPlayData("lblStyleData", 60, "#cccccc", 3,
 		playStyleData, C_ALIGN_CENTER));
 
@@ -5454,6 +5544,34 @@ function resultInit() {
 			customResultInit2();
 		}
 	}
+
+	// Cleared & Failed表示
+	const lblResultPre = createDivLabel("lblResultPre", g_sWidth / 2 - 150, g_sHeight / 2 - 160,
+		200, 50, 60, "#ffff66",
+		"<span style='font-size:80px'>C</span>LEARED!");
+	divRoot.appendChild(lblResultPre);
+	lblResultPre.style.opacity = 0;
+
+	const lblResultPre2 = createDivLabel("lblResultPre", g_sWidth / 2 + 50, 40,
+		200, 30, 20, "#ffff66",
+		"CLEARED!");
+	divRoot.appendChild(lblResultPre2);
+
+	if (g_gameOverFlg == false) {
+		lblResultPre.style.animationDuration = "2.5s";
+		lblResultPre.style.animationName = "leftToRightFade";
+	} else {
+		lblResultPre.style.animationDuration = "3s";
+		lblResultPre.innerHTML = "<span style='color:#ff6666;'><span style='font-size:80px;'>F</span>AILED...</span>";
+		lblResultPre.style.animationName = "upToDownFade";
+
+		lblResultPre2.innerHTML = "<span style='color:#ff6666;'>FAILED...</span>";
+	}
+
+	// プレイデータは Cleared & Failed に合わせて表示
+	playDataWindow.style.animationDuration = "3s";
+	playDataWindow.style.animationName = "slowlyAppearing";
+
 
 	// 戻るボタン描画
 	const btnBack = createButton({
