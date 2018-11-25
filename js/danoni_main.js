@@ -701,6 +701,14 @@ let g_gameOverFlg = false;
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 const g_audio = new Audio();
+const g_timeupdate = (function() {
+	if (g_userAgent.indexOf("trident") == -1) {
+		return new CustomEvent("timeupdate");
+	}
+	const event = document.createEvent("CustomEvent");
+	event.initCustomEvent("timeupdate", false, false, {});
+	return event;
+})();
 let g_timeoutEvtId = 0;
 let g_inputKeyBuffer = new Array();
 
@@ -4350,7 +4358,7 @@ function MainInit() {
 			g_audio.play();
 			musicStartFlg = true;
 			g_audio.currentTime = firstFrame / 60;
-			g_audio.dispatchEvent(new CustomEvent("timeupdate"));
+			g_audio.dispatchEvent(g_timeupdate);
 		}
 
 		// フェードイン・アウト
