@@ -8,8 +8,8 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 0.77.2";
-const g_version_result = "Ver 0.2.0.20181125";
+const g_version = "Ver 0.78.0.pre";
+const g_version_result = "Ver 0.3.0.20181125";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -141,6 +141,7 @@ const g_stateObj = {
 	lifeMode: "Border",
 	lifeBorder: 70,
 	lifeInit: 25,
+	lifeSetName: "Normal",
 
 	d_stepzone: C_FLG_ON,
 	d_judgement: C_FLG_ON,
@@ -1622,9 +1623,11 @@ function headerConvert(_dosObj) {
 	if (obj.lifeBorders[0] == "x") {
 		g_stateObj.lifeBorder = 0;
 		g_stateObj.lifeMode = "Survival";
+		g_stateObj.lifeSetName = "Borderless";
 	} else {
 		g_stateObj.lifeBorder = obj.lifeBorders[0];
 		g_stateObj.lifeMode = "Border";
+		g_stateObj.lifeSetName = "Normal";
 	}
 	g_stateObj.lifeRcv = obj.lifeRecoverys[0];
 	g_stateObj.lifeDmg = obj.lifeDamages[0];
@@ -2100,11 +2103,13 @@ function createOptionWindow(_sprite) {
 		if (g_headerObj.lifeBorders[g_stateObj.scoreId] == "x") {
 			g_stateObj.lifeBorder = 0;
 			g_stateObj.lifeMode = "Survival";
-			lnkGauge.innerHTML = "Survival";
+			g_stateObj.lifeSetName = "Borderless";
+			lnkGauge.innerHTML = g_stateObj.lifeSetName;
 		} else {
 			g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
 			g_stateObj.lifeMode = "Border";
-			lnkGauge.innerHTML = "Normal";
+			g_stateObj.lifeSetName = "Normal";
+			lnkGauge.innerHTML = g_stateObj.lifeSetName;
 		}
 		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
 
@@ -2268,7 +2273,7 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblGauge2);
 
 	const lnkGauge = makeSettingLblButton("lnkGauge",
-		(g_stateObj.lifeMode == "Border" ? "Normal" : "Survival"), 6, function () {
+		g_stateObj.lifeSetName, 6, function () {
 			//	lnkGauge.innerHTML = "Survival";
 		});
 	lnkGauge.oncontextmenu = function () {
@@ -5341,6 +5346,7 @@ function resultInit() {
 	if (g_stateObj.reverse != C_FLG_OFF) {
 		playStyleData += ", Reverse";
 	}
+	playStyleData += ", " + g_stateObj.lifeSetName;
 	playDataWindow.appendChild(makeResultPlayData("lblStyleData", 60, "#cccccc", 3,
 		playStyleData, C_ALIGN_CENTER));
 
