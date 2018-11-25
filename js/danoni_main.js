@@ -9,7 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 0.78.0.pre";
-const g_version_result = "Ver 0.3.0.20181125";
+const g_version_result = "Ver 0.3.2.20181125";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2111,11 +2111,9 @@ function createOptionWindow(_sprite) {
 			g_stateObj.lifeSetName = "Normal";
 			lnkGauge.innerHTML = g_stateObj.lifeSetName;
 		}
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
-
 		g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
 		g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
-
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
 	}
 
 	// 速度(Speed)
@@ -2293,7 +2291,7 @@ function createOptionWindow(_sprite) {
 		if (_mode == "Border") {
 			return "[" + _mode + ":" + _border + ", Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
 		}
-		return _mode + "[Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+		return "[Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
 	}
 
 
