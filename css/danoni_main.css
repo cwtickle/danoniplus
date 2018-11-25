@@ -171,3 +171,32 @@ input[type=range]:focus {
 		transform: translateX(30px);
 	}
 }
+@keyframes upToDownFade {
+	0% {
+		opacity: 0;/* 透明 */
+		transform: translateY(-30px);
+	}
+	30% {
+		opacity: 1;/* 不透明 */
+		transform: translateY(0);
+	}
+	80% {
+		opacity: 1;/* 不透明 */
+		transform: translateY(0);
+	}
+	100% {
+		opacity: 0;/* 透明 */
+		transform: translateY(10px);
+	}
+}
+@keyframes slowlyAppearing {
+	0% {
+		opacity: 0.5;/* 透明 */
+	}
+	80% {
+		opacity: 0.5;/* 透明 */
+	}
+	100% {
+		opacity: 1;/* 不透明 */
+	}
+}
