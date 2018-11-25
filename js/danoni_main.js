@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.0.0";
+const g_version = "Ver 1.0.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -723,6 +723,7 @@ const g_rankObj = {
 
 let g_gameOverFlg = false;
 
+const g_hostName = location.hostname;
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 const g_audio = new Audio();
@@ -1634,8 +1635,8 @@ function headerConvert(_dosObj) {
 			} else {
 				obj.lifeBorders.push("x");
 			}
-			obj.lifeRecoverys.push(setVal(difDetails[4], 2, "float"));
-			obj.lifeDamages.push(setVal(difDetails[5], 7, "float"));
+			obj.lifeRecoverys.push(setVal(difDetails[4], 6, "float"));
+			obj.lifeDamages.push(setVal(difDetails[5], 40, "float"));
 			obj.lifeInits.push(setVal(difDetails[6], 25, "float") * 10);
 		}
 	} else {
@@ -1643,9 +1644,9 @@ function headerConvert(_dosObj) {
 		obj.keyLabels = ["7"];
 		obj.difLabels = ["Normal"];
 		obj.initSpeeds = [3.5];
-		obj.lifeBorders = [70];
-		obj.lifeRecoverys = [2];
-		obj.lifeDamages = [7];
+		obj.lifeBorders = ["x"];
+		obj.lifeRecoverys = [6];
+		obj.lifeDamages = [40];
 		obj.lifeInits = [250];
 	}
 	if (obj.initSpeeds[0] != undefined) {
@@ -2353,16 +2354,20 @@ function createOptionWindow(_sprite) {
 		g_stateObj.lifeDmg = g_gaugeOptionObj["dmg" + g_gaugeType][_lifeId];
 
 		if (_lifeId == 0) {
-			if (g_headerObj.lifeBorders[g_stateObj.scoreId] != undefined) {
-				g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
+			if (setVal(g_headerObj.lifeBorders[g_stateObj.scoreId], "", "string") != "") {
+				if (g_headerObj.lifeBorders[g_stateObj.scoreId] == "x") {
+					g_stateObj.lifeBorder = 0;
+				} else {
+					g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
+				}
 			}
-			if (g_headerObj.lifeInits[g_stateObj.scoreId] != undefined) {
+			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], "", "number") != "") {
 				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
 			}
-			if (g_headerObj.lifeRecoverys[g_stateObj.scoreId] != undefined) {
+			if (setVal(g_headerObj.lifeRecoverys[g_stateObj.scoreId], "", "number") != "") {
 				g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
 			}
-			if (g_headerObj.lifeDamages[g_stateObj.scoreId] != undefined) {
+			if (setVal(g_headerObj.lifeDamages[g_stateObj.scoreId], "", "number") != "") {
 				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
 			}
 		}
@@ -4328,6 +4333,12 @@ function MainInit() {
 		document.getElementById("lifeBackObj").style.display = C_DIS_NONE;
 		document.getElementById("lifeBar").style.display = C_DIS_NONE;
 		document.getElementById("lifeBorderObj").style.display = C_DIS_NONE;
+		document.getElementById("lblframe").style.display = C_DIS_NONE;
+	}
+
+	// ローカル時のみフレーム数を残す
+	if (g_hostName == "localhost" || g_hostName == "127.0.0.1" || g_hostName == "") {
+	} else {
 		document.getElementById("lblframe").style.display = C_DIS_NONE;
 	}
 
