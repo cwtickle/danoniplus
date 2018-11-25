@@ -8,8 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 0.78.0.pre";
-const g_version_result = "Ver 0.4.0.20181125";
+const g_version = "Ver 1.0.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -727,7 +726,7 @@ let g_gameOverFlg = false;
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 const g_audio = new Audio();
-const g_timeupdate = (function() {
+const g_timeupdate = (function () {
 	if (g_userAgent.indexOf("trident") == -1) {
 		return new CustomEvent("timeupdate");
 	}
