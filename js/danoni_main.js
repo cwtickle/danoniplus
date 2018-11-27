@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/25
+ * Revised : 2018/11/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.0.1";
+const g_version = "Ver 1.0.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -2134,22 +2134,11 @@ function createOptionWindow(_sprite) {
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 		g_keyObj.currentKey = g_headerObj["keyLabels"][g_stateObj.scoreId];
 		g_keyObj.currentPtn = 0;
-		if (g_headerObj.lifeBorders[g_stateObj.scoreId] == "x") {
-			g_stateObj.lifeBorder = 0;
-			g_stateObj.lifeMode = C_LFE_SURVIVAL;
-			g_stateObj.lifeSetName = "Borderless";
-			lnkGauge.innerHTML = g_stateObj.lifeSetName;
-			g_gaugeType = C_LFE_SURVIVAL;
-		} else {
-			g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
-			g_stateObj.lifeMode = C_LFE_BORDER;
-			g_stateObj.lifeSetName = "Normal";
-			lnkGauge.innerHTML = g_stateObj.lifeSetName;
-			g_gaugeType = C_LFE_BORDER;
-		}
+
 		g_stateObj.lifeId = 0;
-		g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
-		g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
+		gaugeChange(g_stateObj.lifeId);
+
+		lnkGauge.innerHTML = g_stateObj.lifeSetName;
 		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
 	}
 
@@ -2356,9 +2345,15 @@ function createOptionWindow(_sprite) {
 		if (_lifeId == 0) {
 			if (setVal(g_headerObj.lifeBorders[g_stateObj.scoreId], "", "string") != "") {
 				if (g_headerObj.lifeBorders[g_stateObj.scoreId] == "x") {
+					g_gaugeType = C_LFE_SURVIVAL;
 					g_stateObj.lifeBorder = 0;
+					g_stateObj.lifeMode = C_LFE_SURVIVAL;
+					g_stateObj.lifeSetName = g_gaugeOptionObj[g_gaugeType.toLowerCase()][_lifeId];
 				} else {
+					g_gaugeType = C_LFE_BORDER;
 					g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
+					g_stateObj.lifeMode = C_LFE_BORDER;
+					g_stateObj.lifeSetName = g_gaugeOptionObj[g_gaugeType.toLowerCase()][_lifeId];
 				}
 			}
 			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], "", "number") != "") {
@@ -2378,7 +2373,7 @@ function createOptionWindow(_sprite) {
 	 */
 	function gaugeFormat(_mode, _border, _rcv, _dmg) {
 		if (_mode == C_LFE_BORDER) {
-			return "[" + _mode + ":" + _border + ", Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+			return "[" + _mode + ":" + _border + "%, Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
 		}
 		return "[Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
 	}
@@ -5082,6 +5077,7 @@ function changeHitFrz(_j, _k) {
 	const frzBar = document.getElementById("frzBar" + _j + "_" + _k);
 	frzBar.style.backgroundColor = g_workObj.frzHitBarColors[_j];
 	document.getElementById("frzBtm" + _j + "_" + _k).style.backgroundColor = g_workObj.frzHitColors[_j];
+	document.getElementById("frz" + _j + "_" + _k).style.top = document.getElementById("step" + _j).style.top;
 	document.getElementById("frz" + _j + "_" + _k).setAttribute("isMoving", "false");
 }
 
