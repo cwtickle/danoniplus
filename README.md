@@ -22,7 +22,7 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 キーボードを使って遊びます。  
 (This is rhythm game, using Keyboard. )  
 下記は7keyの例ですが、他にも5keyや11keyなど多様なプレイスタイルがあります。  
-(There are many playstyles in this rhythm Game. For example, 5keys, 7keys, 11keys, etc.)
+(There are many playstyles in the Dancing-Onigiri. For example, 5keys, 7keys, 11keys, etc.)
 
 ![HowtoPlay](http://cw7.sakura.ne.jp/danoni/wiki/howtoplay1.png)  
 (画像は開発中のものです）
