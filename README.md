@@ -21,7 +21,9 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 リズムに合わせてやってくる矢印・フリーズアローを、ステップゾーン上で押すリズムゲームです。  
 キーボードを使って遊びます。  
 下記は7keyの例ですが、他にも5keyや11keyなど多様なプレイスタイルがあります。  
-![HowtoPlay](http://cw7.sakura.ne.jp/danoni/wiki/howtoplay1.png)
+
+![HowtoPlay](http://cw7.sakura.ne.jp/danoni/wiki/howtoplay1.png)  
+(画像は開発中のものです）
 
 ## Flash版との差異について
 [Flash版との差異](http://cw7.sakura.ne.jp/work/danonijs/test/danoni_flash_vs_html5.html)  
