@@ -32,7 +32,7 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 Google Chrome, Opera, Vivaldi (WebKit), Firefox (Gecko)※  
 ※Firefoxの場合、環境により動作が安定しない場合があります。  
 
-## Flash版との差異について (Different from Flash Version)
+## Flash版との差異について (Difference from Flash Version)
 [Flash版との差異](http://cw7.sakura.ne.jp/work/danonijs/test/danoni_flash_vs_html5.html)  
 
 ## For Contributors
