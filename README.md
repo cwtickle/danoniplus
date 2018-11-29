@@ -29,7 +29,7 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 
 ## 動作環境 (Recommended system requirements)
 ブラウザで動作します。(Using browser.)  
-Google Chrome, Opera, Vivaldi (WebKit), Firefox (Gecko)※  
+- Google Chrome, Opera, Vivaldi (WebKit), Firefox (Gecko)※  
 ※Firefoxの場合、環境により動作が安定しない場合があります。  
 
 ## Flash版との差異について (Difference from Flash Version)
