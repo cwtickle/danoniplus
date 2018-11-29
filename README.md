@@ -13,9 +13,15 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 オリジナルのゲームデータを作ることができます。  
 
 ## Demo
-[Demo1](http://cw7.sakura.ne.jp/danoni/2009/0161_MidnightDance.html)  
-[Demo2](http://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html)  
-[Demo3](http://cw7.sakura.ne.jp/danoni/2013/0238_twinklestar.html)  
+- [Demo1](http://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / 木下たまき  
+- [Demo2](http://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) シャイニングスター / 魔王魂  
+- [Demo3](http://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) プチ・マギエ / Napi  
+
+## 遊び方 (How to Play)
+リズムに合わせてやってくる矢印・フリーズアローを、ステップゾーン上で押すリズムゲームです。  
+キーボードを使って遊びます。  
+下記は7keyの例ですが、他にも5keyや11keyなど多様なプレイスタイルがあります。  
+![HowtoPlay](http://cw7.sakura.ne.jp/danoni/wiki/howtoplay1.png)
 
 ## Flash版との差異について
 [Flash版との差異](http://cw7.sakura.ne.jp/work/danonijs/test/danoni_flash_vs_html5.html)  
