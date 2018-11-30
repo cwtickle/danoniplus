@@ -27,6 +27,11 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 ![HowtoPlay](http://cw7.sakura.ne.jp/danoni/wiki/howtoplay1.png)  
 (画像は開発中のものです）
 
+### ゲームのルール
+タイミング良くキーボードを押すと(・∀・)ｲｲ!!や(ﾟ∀ﾟ)ｷﾀｰ!!となり、ライフが上がります。  
+一方、タイミングを外すと(´・ω・\`)ｼｮﾎﾞｰﾝ、(\`Д´)ｳﾜｧﾝ、(・A・)ｲｸﾅｲとなり、ライフが下がります。  
+ゲーム終了までにライフゲージのライフが残っているか、ノルマ以上であればゲームクリアです。  
+
 ## 作り方 (How to Make)
 - [譜面の作成概要](https://github.com/cwtickle/danoniplus/wiki/HowToMake)
 - [ParaFla!ソース利用者向け移行方法](https://github.com/cwtickle/danoniplus/wiki/forParaFlaUser)
