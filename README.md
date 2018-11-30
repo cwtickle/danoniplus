@@ -20,7 +20,7 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 ## 遊び方 (How to Play)
 リズムに合わせてやってくる矢印・フリーズアローを、ステップゾーン上で押すリズムゲームです。  
 キーボードを使って遊びます。  
-(This is rhythm game, using Keyboard. )  
+(This is a rhythm game, using Keyboard on the website. )  
 下記は7keyの例ですが、他にも5keyや11keyなど多様なプレイスタイルがあります。  
 (There are many playstyles in the Dancing-Onigiri. For example, 5keys, 7keys, 11keys, etc.)
 
