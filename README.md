@@ -27,6 +27,10 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 ![HowtoPlay](http://cw7.sakura.ne.jp/danoni/wiki/howtoplay1.png)  
 (画像は開発中のものです）
 
+## 作り方 (How to Make)
+- [譜面の作成概要](https://github.com/cwtickle/danoniplus/wiki/HowToMake)
+- [ParaFla!ソース利用者向け移行方法](https://github.com/cwtickle/danoniplus/wiki/forParaFlaUser)
+
 ## 動作環境 (Recommended system requirements)
 ブラウザで動作します。(Using browser.)  
 - Google Chrome, Opera, Vivaldi (WebKit), Firefox (Gecko)※  
