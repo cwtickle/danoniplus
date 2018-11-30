@@ -1,6 +1,11 @@
-# Fork, Pull Requestについて
-ForkはMITライセンスの下、自由に行えます。  
-Pull RequestについてはMasterではなく、当面Developに対してPull Requestするようにしてください。  
+# How to Contribute
+Pull RequestについてはMasterではなく、当面Developに対してPull Requestしてください。  
+
+1. Fork it
+1. Create your feature branch (git checkout -b my-new-feature)
+1. Commit your changes (git commit -am 'Added some feature')
+1. Push to the branch (git push origin my-new-feature)
+1. Create new Pull Request
 
 # ソースのコーディングルール
 細かい縛りは入れない予定ですが、コード作法の混在を防ぐため、必要なルールは決めていきます。  
