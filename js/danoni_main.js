@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/12/01
+ * Revised : 2018/12/02
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.1.1";
+const g_version = "Ver 1.1.2";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -3256,6 +3256,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 
 	// 速度変化・色変化データの分解 (2つで1セット)
 	obj.speedData = [];
+	obj.speedData.length = 0;
 	const speedFooter = (g_keyObj.currentKey == "5" ? "_data" : "_change");
 	if (_dosObj["speed" + _scoreNo + speedFooter] != undefined && g_stateObj.d_speed == C_FLG_ON) {
 		obj.speedData = _dosObj["speed" + _scoreNo + speedFooter].split(",");
@@ -3265,6 +3266,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 		}
 	}
 	obj.boostData = [];
+	obj.boostData.length = 0;
 	if (_dosObj["boost" + _scoreNo + "_data"] != undefined && g_stateObj.d_speed == C_FLG_ON) {
 		obj.boostData = _dosObj["boost" + _scoreNo + "_data"].split(",");
 		for (var k = 0; k < obj.boostData.length; k += 2) {
@@ -3272,7 +3274,9 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 			obj.boostData[k + 1] = parseFloat(obj.boostData[k + 1]);
 		}
 	}
+
 	obj.colorData = [];
+	obj.colorData.length = 0;
 	if (_dosObj["color" + _scoreNo + "_data"] != undefined && _dosObj["color" + _scoreNo + "_data"] != "" && g_stateObj.d_color == C_FLG_ON) {
 		obj.colorData = _dosObj["color" + _scoreNo + "_data"].split(",");
 		for (var k = 0; k < obj.colorData.length; k += 3) {
@@ -3281,6 +3285,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 		}
 	}
 	obj.acolorData = [];
+	obj.acolorData.length = 0;
 	if (_dosObj["acolor" + _scoreNo + "_data"] != undefined && _dosObj["acolor" + _scoreNo + "data"] != "" && g_stateObj.d_color == C_FLG_ON) {
 		obj.acolorData = _dosObj["acolor" + _scoreNo + "_data"].split(",");
 		for (var k = 0; k < obj.acolorData.length; k += 3) {
@@ -3290,7 +3295,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	}
 
 	// 歌詞データの分解 (3つで1セット)
-	obj.wordData = new Array();
+	obj.wordData = [];
+	obj.wordData.length = 0;
 	if (_dosObj["word" + _scoreNo + "_data"] != undefined && g_stateObj.d_lyrics == C_FLG_ON) {
 
 		tmpData = _dosObj["word" + _scoreNo + "_data"].split("\r").join("");
@@ -3322,7 +3328,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 
 	// 背景データの分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	obj.backData = new Array();
+	obj.backData = [];
+	obj.backData.length = 0;
 	obj.backMaxDepth = -1;
 	if (_dosObj["back" + _scoreNo + "_data"] != undefined && g_stateObj.d_background == C_FLG_ON) {
 
@@ -3767,6 +3774,8 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 個別加速のタイミング更新
+	g_workObj.boostData = new Array();
+	g_workObj.boostData.length = 0;
 	if (_dataObj.boostData != undefined && _dataObj.boostData.length >= 2) {
 
 		let delBoostIdx = 0;
@@ -3782,7 +3791,6 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		for (var k = 0; k < delBoostIdx; k++) {
 			_dataObj.boostData.shift();
 		}
-		g_workObj.boostData = new Array();
 		g_workObj.boostData = _dataObj.boostData.concat();
 	}
 
@@ -3834,6 +3842,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	// 実際に処理させる途中変速配列を作成
 	g_workObj.speedData = new Array();
+	g_workObj.speedData.length = 0;
 	g_workObj.speedData.push(g_scoreObj.frameNum);
 	g_workObj.speedData.push(_speedOnFrame[g_scoreObj.frameNum]);
 
