@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/11/27
+ * Revised : 2018/12/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.0.2";
+const g_version = "Ver 1.1.0";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1040,16 +1040,21 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate) {
 	const div = createDiv(_id, _x, _y, sizeX, _size);
 	div.align = C_ALIGN_CENTER;
 
-	// IE/Edgeの場合は色なし版を表示
+	let edgeVersion = 0;
+	if (g_userAgent.indexOf('edge') != -1) {
+		edgeVersion = Math.floor(g_userAgent.slice(g_userAgent.indexOf('edge') + 5));
+	}
+
+	// IE/Edge(V17以前)の場合は色なし版を表示
 	if (g_userAgent.indexOf('msie') != -1 ||
 		g_userAgent.indexOf('trident') != -1 ||
-		g_userAgent.indexOf('edge') != -1) {
+		(g_userAgent.indexOf('edge') != -1 && edgeVersion < 18)) {
 		div.innerHTML = "<img src='" + charaImg +
 			"' style='width:" + sizeX + "px;height:" + _size +
 			"px;transform:rotate(" + rotate + "deg);' id=" + _id + "img>";
 
-		// それ以外は指定された色でマスク
 	} else {
+		// それ以外は指定された色でマスク
 		if (_color != "") {
 			div.style.backgroundColor = _color;
 		}
@@ -1082,16 +1087,21 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	charaImg = eval("C_IMG_" + charaStyle.toUpperCase());
 	div.align = C_ALIGN_CENTER;
 
-	// IE/Edgeの場合は色なし版を表示
+	let edgeVersion = 0;
+	if (g_userAgent.indexOf('edge') != -1) {
+		edgeVersion = Math.floor(g_userAgent.slice(g_userAgent.indexOf('edge') + 5));
+	}
+
+	// IE/Edge(V17以前)の場合は色なし版を表示
 	if (g_userAgent.indexOf('msie') != -1 ||
 		g_userAgent.indexOf('trident') != -1 ||
-		g_userAgent.indexOf('edge') != -1) {
+		(g_userAgent.indexOf('edge') != -1 && edgeVersion < 18)) {
 		div.innerHTML = "<img src='" + charaImg +
 			"' style='width:" + _width + "px;height:" + _height +
 			"px;transform:rotate(" + rotate + "deg);' id=" + _id + "img>";
 
-		// それ以外は指定された色でマスク
 	} else {
+		// それ以外は指定された色でマスク
 		if (_color != "") {
 			div.style.backgroundColor = _color;
 		}
@@ -4148,7 +4158,7 @@ function MainInit() {
 	let fullSec = ("00" + Math.floor(fullSecond % 60)).slice(-2);
 	let fullTime = fullMin + ":" + fullSec;
 	let fadeOutFrame = Infinity;
-	const preblankFrame = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
+	const preblankFrame = Number(g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment);
 
 	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
 	if (g_headerObj.fadeFrame != undefined) {
