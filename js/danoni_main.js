@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.1.0";
+const g_version = "Ver 1.1.1";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -5085,10 +5085,23 @@ function changeHitFrz(_j, _k) {
 	}
 
 	const frzBar = document.getElementById("frzBar" + _j + "_" + _k);
+	const frzRoot = document.getElementById("frz" + _j + "_" + _k);
+	const frzBtm = document.getElementById("frzBtm" + _j + "_" + _k);
+	const frzBtmShadow = document.getElementById("frzBtmShadow" + _j + "_" + _k);
+
 	frzBar.style.backgroundColor = g_workObj.frzHitBarColors[_j];
-	document.getElementById("frzBtm" + _j + "_" + _k).style.backgroundColor = g_workObj.frzHitColors[_j];
-	document.getElementById("frz" + _j + "_" + _k).style.top = document.getElementById("step" + _j).style.top;
-	document.getElementById("frz" + _j + "_" + _k).setAttribute("isMoving", "false");
+	frzBtm.style.backgroundColor = g_workObj.frzHitColors[_j];
+
+	// フリーズアロー位置の修正（ステップゾーン上に来るように）
+	const delFrzLength = parseFloat(document.getElementById("step" + _j).style.top) - parseFloat(frzRoot.style.top);
+
+	frzRoot.style.top = document.getElementById("step" + _j).style.top;
+	frzBtm.style.top = (parseFloat(frzBtm.style.top) - delFrzLength) + "px";
+	frzBtmShadow.style.top = (parseFloat(frzBtmShadow.style.top) - delFrzLength) + "px";
+	frzBar.style.top = (parseFloat(frzBar.style.top) - delFrzLength * g_workObj.dividePos[_j]) + "px";
+	frzBar.style.height = (parseFloat(frzBar.style.height) - delFrzLength * g_workObj.scrollDir[_j]) + "px";
+
+	frzRoot.setAttribute("isMoving", "false");
 }
 
 /**
