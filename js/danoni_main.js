@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.1.2";
+const g_version = "Ver 1.1.3";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1438,8 +1438,7 @@ function titleInit() {
 	// ブラウザチェック
 	if (g_userAgent.indexOf('msie') != -1 ||
 		g_userAgent.indexOf('trident') != -1 ||
-		g_userAgent.indexOf('edge') != -1 ||
-		g_userAgent.indexOf('firefox') != -1) {
+		g_userAgent.indexOf('edge') != -1) {
 
 		makeWarningWindow(C_MSG_W_0001);
 	}
@@ -2097,7 +2096,6 @@ function optionInit() {
 	document.onkeyup = function (evt) {
 	}
 }
-
 
 /**
  * 設定・オプション画面のラベル・ボタン処理の描画
@@ -3088,6 +3086,9 @@ function loadingScoreInit() {
 	const keyNum = g_keyObj["chara" + keyCtrlPtn].length;
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
+	// 楽曲データのバックグラウンド再生 (Firefoxのみ)
+	startPreloadingAudio();
+
 	// 譜面データの読み込み
 	let scoreIdHeader = "";
 	if (g_stateObj.scoreId > 0) {
@@ -3180,6 +3181,24 @@ function loadingScoreInit() {
 
 	clearWindow();
 	MainInit();
+}
+
+/**
+ * 楽曲データのバックグラウンド再生 (Firefoxのみ)
+ * - Firefoxのみ楽曲の読み込みが遅れることがあるため、先にミュートで再生させておく。
+ * - @see {@link prepareAudio} とセット。
+ */
+function startPreloadingAudio() {
+	if (g_userAgent.indexOf("msie") != -1 ||
+		g_userAgent.indexOf("trident") != -1 ||
+		g_userAgent.indexOf('edge') != -1 ||
+		g_userAgent.indexOf("chrome") != -1 ||
+		g_userAgent.indexOf("safari") != -1) {
+	} else if (g_userAgent.indexOf("firefox") != -1) {
+		g_audio.play();
+		g_audio.muted = true;
+	} else if (g_userAgent.indexOf("opera") != -1) {
+	}
 }
 
 /**
@@ -4486,6 +4505,25 @@ function MainInit() {
 	}
 
 	/**
+	 * 楽曲の再生処理
+	 * - Firefoxはすでに @see {@link startPreloadingAudio} で楽曲再生しているためミュートのみ外す。
+	 */
+	function prepareAudio() {
+		if (g_userAgent.indexOf("msie") != -1 ||
+			g_userAgent.indexOf("trident") != -1 ||
+			g_userAgent.indexOf('edge') != -1 ||
+			g_userAgent.indexOf("chrome") != -1 ||
+			g_userAgent.indexOf("safari") != -1) {
+
+			g_audio.play();
+		} else if (g_userAgent.indexOf("firefox") != -1) {
+			g_audio.muted = false;
+		} else if (g_userAgent.indexOf("opera") != -1) {
+			g_audio.play();
+		}
+	}
+
+	/**
 	 * フレーム処理(譜面台)
 	 */
 	function flowTimeline() {
@@ -4499,7 +4537,7 @@ function MainInit() {
 		}
 
 		if (g_scoreObj.frameNum == musicStartFrame) {
-			g_audio.play();
+			prepareAudio();
 			musicStartFlg = true;
 			g_audio.currentTime = firstFrame / 60;
 			g_audio.dispatchEvent(g_timeupdate);
