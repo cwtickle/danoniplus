@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.1.3";
+const g_version = "Ver 1.1.4";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1845,6 +1845,9 @@ function keysConvert(_dosObj) {
 				if (checkArrayVal(tmpColors, "string", 1)) {
 					for (var k = 0, len = tmpColors.length; k < len; k++) {
 						g_keyObj["color" + newKey + "_" + k] = tmpColors[k].split(",");
+						for (var m = 0, len2 = g_keyObj["color" + newKey + "_" + k].length; m < len2; m++) {
+							g_keyObj["color" + newKey + "_" + k][m] = Number(g_keyObj["color" + newKey + "_" + k][m]);
+						}
 					}
 					tmpMinPatterns = tmpColors.length;
 				}
@@ -1899,8 +1902,11 @@ function keysConvert(_dosObj) {
 			if (_dosObj["pos" + newKey] != undefined) {
 				const tmpPoss = _dosObj["pos" + newKey].split("$");
 				if (checkArrayVal(tmpPoss, "string", 1)) {
-					for (var k = 0, len = tmpPoss.length; k < len; k++) {
-						g_keyObj["pos" + newKey + "_" + k] = tmpPoss[k].split(",");
+					for (var j = 0, len = tmpPoss.length; j < len; j++) {
+						g_keyObj["pos" + newKey + "_" + j] = tmpPoss[j].split(",");
+						for (var k = 0, len2 = g_keyObj["pos" + newKey + "_" + j].length; k < len2; k++) {
+							g_keyObj["pos" + newKey + "_" + j][k] = Number(g_keyObj["pos" + newKey + "_" + j][k]);
+						}
 					}
 				}
 
@@ -1931,8 +1937,8 @@ function keysConvert(_dosObj) {
 							g_keyObj["keyCtrl" + newKey + "_" + p + "d"][k] = new Array();
 
 							for (var m = 0; m < tmpKeyPtn.length; m++) {
-								g_keyObj["keyCtrl" + newKey + "_" + p][k][m] = tmpKeyPtn[m];
-								g_keyObj["keyCtrl" + newKey + "_" + p + "d"][k][m] = tmpKeyPtn[m];
+								g_keyObj["keyCtrl" + newKey + "_" + p][k][m] = Number(tmpKeyPtn[m]);
+								g_keyObj["keyCtrl" + newKey + "_" + p + "d"][k][m] = Number(tmpKeyPtn[m]);
 							}
 						}
 					}
@@ -4288,14 +4294,14 @@ function MainInit() {
 	lblCredit.style.textAlign = C_ALIGN_LEFT;
 	infoSprite.appendChild(lblCredit);
 
-	// 曲時間表示1
-	const lblTime1 = createDivLabel("lblTime1", 0, g_sHeight - 30, 50, 20, 14, "#cccccc",
+	// 曲時間表示：現在時間
+	const lblTime1 = createDivLabel("lblTime1", 18, g_sHeight - 30, 40, 20, 14, "#cccccc",
 		"-:--");
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	infoSprite.appendChild(lblTime1);
 
-	// 曲時間表示2
-	const lblTime2 = createDivLabel("lblTime2", 60, g_sHeight - 30, 50, 20, 14, "#cccccc",
+	// 曲時間表示：総時間
+	const lblTime2 = createDivLabel("lblTime2", 60, g_sHeight - 30, 60, 20, 14, "#cccccc",
 		"/ " + fullTime);
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	infoSprite.appendChild(lblTime2);
