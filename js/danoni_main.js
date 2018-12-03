@@ -4294,14 +4294,14 @@ function MainInit() {
 	lblCredit.style.textAlign = C_ALIGN_LEFT;
 	infoSprite.appendChild(lblCredit);
 
-	// 曲時間表示1
-	const lblTime1 = createDivLabel("lblTime1", 0, g_sHeight - 30, 50, 20, 14, "#cccccc",
+	// 曲時間表示：現在時間
+	const lblTime1 = createDivLabel("lblTime1", 18, g_sHeight - 30, 40, 20, 14, "#cccccc",
 		"-:--");
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	infoSprite.appendChild(lblTime1);
 
-	// 曲時間表示2
-	const lblTime2 = createDivLabel("lblTime2", 60, g_sHeight - 30, 50, 20, 14, "#cccccc",
+	// 曲時間表示：総時間
+	const lblTime2 = createDivLabel("lblTime2", 60, g_sHeight - 30, 60, 20, 14, "#cccccc",
 		"/ " + fullTime);
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	infoSprite.appendChild(lblTime2);
