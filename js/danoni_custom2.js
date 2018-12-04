@@ -24,7 +24,8 @@
  * タイトル画面 [Scene: Title / Melon]
  */
 function customTitleInit2() {
-
+    // バージョン表記
+    g_localVersion2 = "";
 }
 
 /**

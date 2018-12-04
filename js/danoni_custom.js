@@ -17,11 +17,13 @@
  * 　画面遷移したときにきれいに消してくれます。
  */
 
-
 /**
  * タイトル画面 [Scene: Title / Melon]
  */
 function customTitleInit() {
+
+	// バージョン表記
+	g_localVersion = "";
 
 	// レイヤー情報取得
 	var layer0 = document.getElementById("layer0");
