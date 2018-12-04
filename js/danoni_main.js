@@ -4,11 +4,15 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/12/02
+ * Revised : 2018/12/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.1.4";
+const g_version = "Ver 1.2.0";
+
+// カスタム用バージョン (danoni_custom.js 等で指定可)
+let g_localVersion = "";
+let g_localVersion2 = "";
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
 //  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
@@ -1421,6 +1425,11 @@ function titleInit() {
 
 	const divRoot = document.getElementById("divRoot");
 
+	// タイトル文字描画
+	const lblTitle = getTitleDivLabel("lblTitle",
+		"<span style='color:#6666ff;font-size:40px;'>D</span>ANCING<span style='color:#ffff66;font-size:40px;'>☆</span><span style='color:#ff6666;font-size:40px;'>O</span>NIGIRI", 0, 15);
+	divRoot.appendChild(lblTitle);
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customTitleInit == "function") {
 		customTitleInit();
@@ -1428,12 +1437,6 @@ function titleInit() {
 			customTitleInit2();
 		}
 	}
-
-	// タイトル文字描画
-	const lblTitle = getTitleDivLabel("lblTitle",
-		"<span style='color:#6666ff;font-size:40px;'>D</span>ANCING<span style='color:#ffff66;font-size:40px;'>☆</span><span style='color:#ff6666;font-size:40px;'>O</span>NIGIRI", 0, 15);
-	lblTitle.style.zIndex = 1;
-	divRoot.appendChild(lblTitle);
 
 	// ブラウザチェック
 	if (g_userAgent.indexOf('msie') != -1 ||
@@ -1462,8 +1465,24 @@ function titleInit() {
 		clearWindow();
 		optionInit();
 	});
-	btnStart.style.zIndex = 1;
 	divRoot.appendChild(btnStart);
+
+	// リロードボタン
+	const btnReload = createButton({
+		id: "btnReload",
+		name: "R",
+		x: 10,
+		y: 10,
+		width: 30,
+		height: 30,
+		fontsize: 20,
+		normalColor: C_CLR_DEFAULT,
+		hoverColor: C_CLR_DEFHOVER,
+		align: C_ALIGN_CENTER
+	}, function () {
+		location.reload(true);
+	});
+	divRoot.appendChild(btnReload);
 
 	// 製作者表示
 	const lnkMaker = createButton({
@@ -1500,12 +1519,19 @@ function titleInit() {
 	divRoot.appendChild(lnkArtist);
 
 	// バージョン描画
+	let customVersion = "";
+	if (setVal(g_localVersion, "", "string") != "") {
+		customVersion = " / " + g_localVersion;
+	}
+	if (setVal(g_localVersion2, "", "string") != "") {
+		customVersion += " / " + g_localVersion2;
+	}
 	const lnkVersion = createButton({
 		id: "lnkVersion",
-		name: "&copy; 2018 ティックル, CW " + g_version,
-		x: g_sWidth / 2,
+		name: "&copy; 2018 ティックル, CW " + g_version + customVersion,
+		x: g_sWidth / 3,
 		y: g_sHeight - 20,
-		width: g_sWidth / 2 - 10,
+		width: g_sWidth * 2 / 3 - 10,
 		height: 16,
 		fontsize: 12,
 		normalColor: C_CLR_DEFAULT,
