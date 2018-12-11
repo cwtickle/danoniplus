@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/12/04
+ * Revised : 2018/12/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.2.0";
+const g_version = "Ver 1.3.0";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -167,14 +167,14 @@ const C_LFE_SURVIVAL = "Survival";
 const C_LFE_BORDER = "Border";
 
 const g_gaugeOptionObj = {
-	survival: ["Borderless", "No Recovery", "SuddenDeath"],
+	survival: ["Borderless", "No Recovery", "SuddenDeath", "Practice"],
 	border: ["Normal", "No Recovery", "SuddenDeath"],
 
-	initSurvival: [250, C_VAL_MAXLIFE, C_VAL_MAXLIFE],
-	rcvSurvival: [6, 0, 0],
-	dmgSurvival: [40, 50, C_VAL_MAXLIFE],
-	typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
-	clearSurvival: [0, 0, 0],
+	initSurvival: [250, C_VAL_MAXLIFE, C_VAL_MAXLIFE, C_VAL_MAXLIFE / 2],
+	rcvSurvival: [6, 0, 0, 0],
+	dmgSurvival: [40, 50, C_VAL_MAXLIFE, 0],
+	typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
+	clearSurvival: [0, 0, 0, 0],
 
 	initBorder: [250, C_VAL_MAXLIFE, C_VAL_MAXLIFE],
 	rcvBorder: [2, 0, 0],
@@ -911,6 +911,29 @@ function preloadFile(_as, _href, _type, _crossOrigin) {
 		link.crossOrigin = _crossOrigin
 	}
 	document.head.appendChild(link);
+}
+
+/**
+ * 半角換算の文字数を計算
+ * @param {string} str 
+ */
+function getStrLength(str) {
+	var result = 0;
+	for (var i = 0; i < str.length; i++) {
+		var chr = str.charCodeAt(i);
+		if ((chr >= 0x00 && chr < 0x81) ||
+			(chr === 0xf8f0) ||
+			(chr >= 0xff61 && chr < 0xffa0) ||
+			(chr >= 0xf8f1 && chr < 0xf8f4)) {
+			//半角文字の場合は1を加算
+			result += 1;
+		} else {
+			//それ以外の文字の場合は2を加算
+			result += 2;
+		}
+	}
+	//結果を返す
+	return result;
 }
 
 /**
@@ -1720,7 +1743,7 @@ function headerConvert(_dosObj) {
 
 
 	// フリーズアロー初期色情報
-	obj.frzColorInit = ["#66ffff", "#6600ff", "#ffff66", "#ffff99"];
+	obj.frzColorInit = ["#66ffff", "#6600ff", "#cccc33", "#999933"];
 	obj.frzColor = new Array();
 	obj.frzColorDef = new Array();
 
@@ -2180,6 +2203,12 @@ function createOptionWindow(_sprite) {
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
 		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+
+		if (getStrLength(l_lnkDifficulty.innerHTML) > 25) {
+			l_lnkDifficulty.style.fontSize = "14px";
+		} else if (getStrLength(l_lnkDifficulty.innerHTML) > 18) {
+			l_lnkDifficulty.style.fontSize = "16px";
+		}
 	}
 
 	// 速度(Speed)
@@ -2835,6 +2864,7 @@ function keyConfigInit() {
 	// カーソルの作成
 	const cursor = keyconSprite.appendChild(createImg("cursor", C_IMG_CURSOR,
 		kWidth / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
+	cursor.style.transitionDuration = "0.125s";
 
 	// キーコンフィグタイプ切替ボタン
 	const lblKcType = createDivLabel("lblKcType", 30, 10,
