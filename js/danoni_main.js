@@ -2172,6 +2172,11 @@ function createOptionWindow(_sprite) {
 			g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj["keyLabels"].length - 1 ? ++g_stateObj.scoreId : 0);
 			setDifficulty();
 		});
+	if (getStrLength(lnkDifficulty.innerHTML) > 25) {
+		lnkDifficulty.style.fontSize = "14px";
+	} else if (getStrLength(lnkDifficulty.innerHTML) > 18) {
+		lnkDifficulty.style.fontSize = "16px";
+	}
 	lnkDifficulty.oncontextmenu = function () {
 		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj["keyLabels"].length - 1);
 		setDifficulty();
@@ -2204,10 +2209,10 @@ function createOptionWindow(_sprite) {
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
 		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
 
-		if (getStrLength(l_lnkDifficulty.innerHTML) > 25) {
-			l_lnkDifficulty.style.fontSize = "14px";
-		} else if (getStrLength(l_lnkDifficulty.innerHTML) > 18) {
-			l_lnkDifficulty.style.fontSize = "16px";
+		if (getStrLength(lnkDifficulty.innerHTML) > 25) {
+			lnkDifficulty.style.fontSize = "14px";
+		} else if (getStrLength(lnkDifficulty.innerHTML) > 18) {
+			lnkDifficulty.style.fontSize = "16px";
 		}
 	}
 
