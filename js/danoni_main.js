@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.3.0";
+const g_version = "Ver 1.4.0";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -4940,7 +4940,7 @@ function MainInit() {
 
 			} else {
 				if (!g_wordObj["fadeOutFlg" + g_wordObj.wordDir]
-					&& g_wordSprite.style.opacity === 0) {
+					&& Number(g_wordSprite.style.opacity) === 0) {
 					g_wordSprite.style.opacity = 1;
 				}
 				g_workObj["word" + g_wordObj.wordDir + "Data"] = g_wordObj.wordDat;
