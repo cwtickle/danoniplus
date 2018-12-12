@@ -630,6 +630,10 @@ const C_LBL_SETMINIRR = ">";
 const C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH / 2;
 const C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
 
+const C_MAX_ADJUSTMENT = 30;
+const C_MAX_SPEED = 10;
+const C_MIN_SPEED = 1;
+
 /** キーコンフィグ設定 */
 let g_kcType = "Main";
 
@@ -2223,30 +2227,30 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblSpeed);
 
 	const lnkSpeed = makeSettingLblButton("lnkSpeed", g_stateObj.speed + " x", 2, function () {
-		g_stateObj.speed = (Number(g_stateObj.speed) < 10 ? Number(g_stateObj.speed) + 0.25 : 1);
+		g_stateObj.speed = (Number(g_stateObj.speed) < C_MAX_SPEED ? Number(g_stateObj.speed) + 0.25 : C_MIN_SPEED);
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 	});
 	lnkSpeed.oncontextmenu = function () {
-		g_stateObj.speed = (Number(g_stateObj.speed) > 1 ? Number(g_stateObj.speed) - 0.25 : 10);
+		g_stateObj.speed = (Number(g_stateObj.speed) > C_MIN_SPEED ? Number(g_stateObj.speed) - 0.25 : C_MAX_SPEED);
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 		return false;
 	}
 	optionsprite.appendChild(lnkSpeed);
 
 	optionsprite.appendChild(makeMiniButton("lnkSpeed", "R", 2, function () {
-		g_stateObj.speed = (Number(g_stateObj.speed) < 9 ? Number(g_stateObj.speed) + 1 : (Number(g_stateObj.speed) === 10 ? 1 : 10));
+		g_stateObj.speed = (Number(g_stateObj.speed) < C_MAX_SPEED - 1 ? Number(g_stateObj.speed) + 1 : (Number(g_stateObj.speed) === C_MAX_SPEED ? C_MIN_SPEED : C_MAX_SPEED));
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkSpeed", "L", 2, function () {
-		g_stateObj.speed = (Number(g_stateObj.speed) > 2 ? Number(g_stateObj.speed) - 1 : (Number(g_stateObj.speed) === 1 ? 10 : 1));
+		g_stateObj.speed = (Number(g_stateObj.speed) > C_MIN_SPEED + 1 ? Number(g_stateObj.speed) - 1 : (Number(g_stateObj.speed) === C_MIN_SPEED ? C_MAX_SPEED : C_MIN_SPEED));
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkSpeed", "RR", 2, function () {
-		g_stateObj.speed = (Number(g_stateObj.speed) < 10 ? Number(g_stateObj.speed) + 0.25 : 1);
+		g_stateObj.speed = (Number(g_stateObj.speed) < C_MAX_SPEED ? Number(g_stateObj.speed) + 0.25 : C_MIN_SPEED);
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkSpeed", "LL", 2, function () {
-		g_stateObj.speed = (Number(g_stateObj.speed) > 1 ? Number(g_stateObj.speed) - 0.25 : 10);
+		g_stateObj.speed = (Number(g_stateObj.speed) > C_MIN_SPEED ? Number(g_stateObj.speed) - 0.25 : C_MAX_SPEED);
 		lnkSpeed.innerHTML = g_stateObj.speed + " x";
 	}));
 
@@ -2460,30 +2464,30 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblAdjustment);
 
 	const lnkAdjustment = makeSettingLblButton("lnkAdjustment", g_stateObj.adjustment, 8, function () {
-		g_stateObj.adjustment = (g_stateObj.adjustment === 30 ? -30 : ++g_stateObj.adjustment);
+		g_stateObj.adjustment = (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	});
 	lnkAdjustment.oncontextmenu = function () {
-		g_stateObj.adjustment = (g_stateObj.adjustment === -30 ? 30 : --g_stateObj.adjustment);
+		g_stateObj.adjustment = (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : --g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 		return false;
 	}
 	optionsprite.appendChild(lnkAdjustment);
 
 	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "R", 8, function () {
-		g_stateObj.adjustment = (g_stateObj.adjustment >= 25 ? (g_stateObj.adjustment === 30 ? -30 : 30) : g_stateObj.adjustment + 5);
+		g_stateObj.adjustment = (g_stateObj.adjustment >= C_MAX_ADJUSTMENT - 5 ? (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : C_MAX_ADJUSTMENT) : g_stateObj.adjustment + 5);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "L", 8, function () {
-		g_stateObj.adjustment = (g_stateObj.adjustment <= -25 ? (g_stateObj.adjustment === -30 ? 30 : -30) : g_stateObj.adjustment - 5);
+		g_stateObj.adjustment = (g_stateObj.adjustment <= -(C_MAX_ADJUSTMENT - 5) ? (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : -C_MAX_ADJUSTMENT) : g_stateObj.adjustment - 5);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "RR", 8, function () {
-		g_stateObj.adjustment = (g_stateObj.adjustment === 30 ? -30 : ++g_stateObj.adjustment);
+		g_stateObj.adjustment = (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkAdjustment", "LL", 8, function () {
-		g_stateObj.adjustment = (g_stateObj.adjustment === -30 ? 30 : --g_stateObj.adjustment);
+		g_stateObj.adjustment = (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : --g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
 
