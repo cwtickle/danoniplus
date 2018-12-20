@@ -9,7 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 1.4.0";
-const g_version_gauge = "Ver 0.1.0.20181221";
+const g_version_gauge = "Ver 0.2.0.20181221";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -1718,14 +1718,13 @@ function headerConvert(_dosObj) {
 	if (obj.lifeBorders[0] === "x") {
 		g_stateObj.lifeBorder = 0;
 		g_stateObj.lifeMode = C_LFE_SURVIVAL;
-		g_stateObj.lifeSetName = "Borderless";
 		g_gaugeType = C_LFE_SURVIVAL;
 	} else {
 		g_stateObj.lifeBorder = obj.lifeBorders[0];
 		g_stateObj.lifeMode = C_LFE_BORDER;
-		g_stateObj.lifeSetName = "Normal";
 		g_gaugeType = C_LFE_BORDER;
 	}
+	g_stateObj.lifeSetName = g_gaugeOptionObj[g_gaugeType.toLowerCase()][g_stateObj.lifeId];
 	g_stateObj.lifeRcv = obj.lifeRecoverys[0];
 	g_stateObj.lifeDmg = obj.lifeDamages[0];
 	g_stateObj.lifeInit = obj.lifeInits[0];
@@ -2443,6 +2442,19 @@ function createOptionWindow(_sprite) {
 			}
 			if (setVal(g_headerObj.lifeDamages[g_stateObj.scoreId], "", "number") !== "") {
 				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
+			}
+
+		} else if (g_stateObj.lifeSetName == "Light" || g_stateObj.lifeSetName == "Easy") {
+			// ゲージ設定がLight/Easyのとき、Borderless/Normalに合わせて設定を見直す
+
+			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], "", "number") !== "") {
+				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
+			}
+			if (setVal(g_headerObj.lifeRecoverys[g_stateObj.scoreId], "", "number") !== "") {
+				g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
+			}
+			if (setVal(g_headerObj.lifeDamages[g_stateObj.scoreId], "", "number") !== "") {
+				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId] / 2;
 			}
 		}
 	}
