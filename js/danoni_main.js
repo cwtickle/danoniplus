@@ -9,7 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 1.4.0";
-const g_version_gauge = "Ver 0.2.0.20181221";
+const g_version_gauge = "Ver 0.2.1.20181221";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -184,9 +184,6 @@ const g_gaugeOptionObj = {
 	clearBorder: [70, 70, 0, 0]
 };
 let g_gaugeType;
-const C_GAG_DEFAULT = 0;
-const C_GAG_NORECOVERY = 1;
-const C_GAG_SUDDENDEATH = 2;
 
 const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
 let g_volumeNum = 0;
