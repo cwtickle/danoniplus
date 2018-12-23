@@ -9,7 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 1.4.0";
-const g_version_gauge = "Ver 0.4.0.20181223";
+const g_version_gauge = "Ver 0.4.1.20181223";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -4426,7 +4426,7 @@ function MainInit() {
 	lifeBorderObj.style.paddingRight = "5px";
 	infoSprite.appendChild(lifeBorderObj);
 
-	if (g_stateObj.lifeMode === C_LFE_SURVIVAL || g_workObj.lifeVal === C_VAL_MAXLIFE) {
+	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === C_VAL_MAXLIFE) {
 		lifeBorderObj.style.display = C_DIS_NONE;
 	}
 
