@@ -9,7 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 1.6.0";
-const g_version_gauge = "Ver 0.5.0.20181223";
+const g_version_gauge = "Ver 0.5.1.20181223";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -2551,10 +2551,10 @@ function createOptionWindow(_sprite) {
 
 		if (_mode === C_LFE_BORDER) {
 			if (borderVal !== 0) {
-				return "[Init:" + initVal + ", Border:" + borderVal + ", <br>Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+				return "[Start:" + initVal + ", Border:" + borderVal + ", <br>Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
 			}
 		}
-		return "[Init:" + initVal + ", Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+		return "[Start:" + initVal + ", Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
 	}
 
 
