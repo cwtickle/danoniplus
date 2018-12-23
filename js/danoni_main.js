@@ -9,7 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 1.5.0";
-const g_version_gauge = "Ver 0.4.2.20181223";
+const g_version_gauge = "Ver 0.4.3.20181223";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -180,7 +180,7 @@ const g_gaugeOptionObj = {
 	initBorder: [250, 250, C_VAL_MAXLIFE, C_VAL_MAXLIFE],
 	rcvBorder: [2, 2, 1, 0],
 	dmgBorder: [7, 4, 50, C_VAL_MAXLIFE],
-	typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_BORDER, C_LFE_BORDER],
+	typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL],
 	clearBorder: [70, 70, 0, 0]
 };
 let g_gaugeType;
