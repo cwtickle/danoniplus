@@ -9,7 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 1.4.0";
-const g_version_gauge = "Ver 0.2.1.20181221";
+const g_version_gauge = "Ver 0.3.0.20181223";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -2208,7 +2208,7 @@ function createOptionWindow(_sprite) {
 		gaugeChange(g_stateObj.lifeId);
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 
 		if (getStrLength(lnkDifficulty.innerHTML) > 25) {
 			lnkDifficulty.style.fontSize = "14px";
@@ -2367,8 +2367,8 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblGauge);
 
 	const lblGauge2 = createDivLabel("lblGauge2", C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 7 - 3,
-		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, 12, C_CLR_TITLE,
-		gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg));
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, 11, C_CLR_TITLE,
+		gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit));
 	optionsprite.appendChild(lblGauge2);
 
 	const lnkGauge = makeSettingLblButton("lnkGauge",
@@ -2377,14 +2377,14 @@ function createOptionWindow(_sprite) {
 			gaugeChange(g_stateObj.lifeId);
 
 			lnkGauge.innerHTML = g_stateObj.lifeSetName;
-			lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+			lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 		});
 	lnkGauge.oncontextmenu = function () {
 		g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
 		gaugeChange(g_stateObj.lifeId);
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 		return false;
 	}
 	optionsprite.appendChild(lnkGauge);
@@ -2394,14 +2394,14 @@ function createOptionWindow(_sprite) {
 		gaugeChange(g_stateObj.lifeId);
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkGauge", "L", 6, function () {
 		g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
 		gaugeChange(g_stateObj.lifeId);
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 	}));
 
 	/**
@@ -2457,13 +2457,18 @@ function createOptionWindow(_sprite) {
 	}
 
 	/**
-	 * ゲージ設定の詳細表示を整形
+	 * ゲージ設定の詳細表示を整形 C_VAL_MAXLIFE * g_stateObj.lifeBorder / 100
 	 */
-	function gaugeFormat(_mode, _border, _rcv, _dmg) {
+	function gaugeFormat(_mode, _border, _rcv, _dmg, _init) {
+		const initVal = C_VAL_MAXLIFE * _init / 1000;
+		const borderVal = C_VAL_MAXLIFE * _border / 100;
+
 		if (_mode === C_LFE_BORDER) {
-			return "[" + _mode + ":" + _border + "%, Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+			if (borderVal !== 0) {
+				return "[Init:" + initVal + ", Border:" + borderVal + ", <br>Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+			}
 		}
-		return "[Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+		return "[Init:" + initVal + ", Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
 	}
 
 
