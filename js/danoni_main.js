@@ -2510,10 +2510,10 @@ function createOptionWindow(_sprite) {
 				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
 			}
 			if (setVal(g_headerObj.lifeRecoverys[g_stateObj.scoreId], "", "number") !== "") {
-				g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
+				g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId] * 2;
 			}
 			if (setVal(g_headerObj.lifeDamages[g_stateObj.scoreId], "", "number") !== "") {
-				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId] / 2;
+				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
 			}
 		}
 
