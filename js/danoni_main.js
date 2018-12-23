@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/12/21
+ * Revised : 2018/12/23
  * 
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 1.4.0";
-const g_version_gauge = "Ver 0.2.1.20181221";
+const g_version_gauge = "Ver 0.4.1.20181223";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -1721,10 +1721,30 @@ function headerConvert(_dosObj) {
 		g_stateObj.lifeMode = C_LFE_BORDER;
 		g_gaugeType = C_LFE_BORDER;
 	}
+
+	// ノルマ制設定
+	for (var j = 0; j < g_gaugeOptionObj.border.length; j++) {
+		if (g_gaugeOptionObj.border[j] != "SuddenDeath") {
+			getGaugeSetting(_dosObj, g_gaugeOptionObj.border[j], obj);
+		}
+	}
+
 	g_stateObj.lifeSetName = g_gaugeOptionObj[g_gaugeType.toLowerCase()][g_stateObj.lifeId];
-	g_stateObj.lifeRcv = obj.lifeRecoverys[0];
-	g_stateObj.lifeDmg = obj.lifeDamages[0];
-	g_stateObj.lifeInit = obj.lifeInits[0];
+
+	if (g_gaugeOptionObj["gauge" + g_stateObj.lifeSetName + "s"] != undefined) {
+		if (g_gaugeOptionObj["gauge" + g_stateObj.lifeSetName + "s"].lifeBorders[0] === "x") {
+			g_stateObj.lifeBorder = 0;
+		} else {
+			g_stateObj.lifeBorder = g_gaugeOptionObj["gauge" + g_stateObj.lifeSetName + "s"].lifeBorders[0];
+		}
+		g_stateObj.lifeRcv = g_gaugeOptionObj["gauge" + g_stateObj.lifeSetName + "s"].lifeRecoverys[0];
+		g_stateObj.lifeDmg = g_gaugeOptionObj["gauge" + g_stateObj.lifeSetName + "s"].lifeDamages[0];
+		g_stateObj.lifeInit = g_gaugeOptionObj["gauge" + g_stateObj.lifeSetName + "s"].lifeInits[0];
+	} else {
+		g_stateObj.lifeRcv = obj.lifeRecoverys[0];
+		g_stateObj.lifeDmg = obj.lifeDamages[0];
+		g_stateObj.lifeInit = obj.lifeInits[0];
+	}
 
 	// 初期色情報
 	obj.setColorInit = ["#cccccc", "#9999ff", "#ffffff", "#ffff99", "#99ff99"];
@@ -1871,6 +1891,48 @@ function headerConvert(_dosObj) {
 	}
 
 	return obj;
+}
+
+/**
+ * ゲージ別個別設定の取得
+ * @param {object} _dosObj 
+ * @param {string} _name 
+ * @param {number} _headerObj
+ */
+function getGaugeSetting(_dosObj, _name, _headerObj) {
+
+	const difLength = _headerObj.keyLabels.length;
+
+	if (_dosObj["gauge" + _name] !== undefined && _dosObj["gauge" + _name] !== "") {
+		const gauges = _dosObj["gauge" + _name].split("$");
+
+		g_gaugeOptionObj["gauge" + _name + "s"] = {
+			lifeBorders: [],
+			lifeRecoverys: [],
+			lifeDamages: [],
+			lifeInits: []
+		};
+
+		for (var j = 0; j < gauges.length; j++) {
+			const gaugeDetails = gauges[j].split(",");
+			if (gaugeDetails[0] === "x") {
+				g_gaugeOptionObj["gauge" + _name + "s"].lifeBorders.push("x");
+			} else {
+				g_gaugeOptionObj["gauge" + _name + "s"].lifeBorders.push(setVal(gaugeDetails[0], 70, "float"));
+			}
+			g_gaugeOptionObj["gauge" + _name + "s"].lifeRecoverys.push(setVal(gaugeDetails[1], 2, "float"));
+			g_gaugeOptionObj["gauge" + _name + "s"].lifeDamages.push(setVal(gaugeDetails[2], 7, "float"));
+			g_gaugeOptionObj["gauge" + _name + "s"].lifeInits.push(C_VAL_MAXLIFE * setVal(gaugeDetails[3], 25, "float") / 100);
+		}
+		if (gauges.length < difLength) {
+			for (var j = gauges.length; j < difLength; j++) {
+				g_gaugeOptionObj["gauge" + _name + "s"].lifeBorders.push(_headerObj.lifeBorders[j]);
+				g_gaugeOptionObj["gauge" + _name + "s"].lifeRecoverys.push(_headerObj.lifeRecoverys[j]);
+				g_gaugeOptionObj["gauge" + _name + "s"].lifeDamages.push(_headerObj.lifeDamages[j]);
+				g_gaugeOptionObj["gauge" + _name + "s"].lifeInits.push(_headerObj.lifeInits[j]);
+			}
+		}
+	}
 }
 
 /**
@@ -2208,7 +2270,7 @@ function createOptionWindow(_sprite) {
 		gaugeChange(g_stateObj.lifeId);
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 
 		if (getStrLength(lnkDifficulty.innerHTML) > 25) {
 			lnkDifficulty.style.fontSize = "14px";
@@ -2367,8 +2429,8 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblGauge);
 
 	const lblGauge2 = createDivLabel("lblGauge2", C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 7 - 3,
-		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, 12, C_CLR_TITLE,
-		gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg));
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, 11, C_CLR_TITLE,
+		gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit));
 	optionsprite.appendChild(lblGauge2);
 
 	const lnkGauge = makeSettingLblButton("lnkGauge",
@@ -2377,14 +2439,14 @@ function createOptionWindow(_sprite) {
 			gaugeChange(g_stateObj.lifeId);
 
 			lnkGauge.innerHTML = g_stateObj.lifeSetName;
-			lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+			lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 		});
 	lnkGauge.oncontextmenu = function () {
 		g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
 		gaugeChange(g_stateObj.lifeId);
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 		return false;
 	}
 	optionsprite.appendChild(lnkGauge);
@@ -2394,14 +2456,14 @@ function createOptionWindow(_sprite) {
 		gaugeChange(g_stateObj.lifeId);
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 	}));
 	optionsprite.appendChild(makeMiniButton("lnkGauge", "L", 6, function () {
 		g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
 		gaugeChange(g_stateObj.lifeId);
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg);
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 	}));
 
 	/**
@@ -2454,16 +2516,45 @@ function createOptionWindow(_sprite) {
 				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId] / 2;
 			}
 		}
+
+		// ゲージ設定別に個別設定した場合はここで設定を上書き
+		const tmpScoreId = g_stateObj.scoreId;
+
+		if (g_gaugeOptionObj["gauge" + g_stateObj.lifeSetName + "s"] != undefined) {
+			const tmpGaugeObj = g_gaugeOptionObj["gauge" + g_stateObj.lifeSetName + "s"];
+
+			if (setVal(tmpGaugeObj.lifeBorders[tmpScoreId], "string") != "") {
+				if (tmpGaugeObj.lifeBorders[tmpScoreId] === "x") {
+					g_stateObj.lifeBorder = 0;
+				} else {
+					g_stateObj.lifeBorder = tmpGaugeObj.lifeBorders[tmpScoreId];
+				}
+			}
+			if (setVal(tmpGaugeObj.lifeRecoverys[tmpScoreId], "float") != "") {
+				g_stateObj.lifeRcv = tmpGaugeObj.lifeRecoverys[tmpScoreId];
+			}
+			if (setVal(tmpGaugeObj.lifeDamages[tmpScoreId], "float") != "") {
+				g_stateObj.lifeDmg = tmpGaugeObj.lifeDamages[tmpScoreId];
+			}
+			if (setVal(tmpGaugeObj.lifeInits[tmpScoreId], "float") != "") {
+				g_stateObj.lifeInit = tmpGaugeObj.lifeInits[tmpScoreId];
+			}
+		}
 	}
 
 	/**
-	 * ゲージ設定の詳細表示を整形
+	 * ゲージ設定の詳細表示を整形 C_VAL_MAXLIFE * g_stateObj.lifeBorder / 100
 	 */
-	function gaugeFormat(_mode, _border, _rcv, _dmg) {
+	function gaugeFormat(_mode, _border, _rcv, _dmg, _init) {
+		const initVal = C_VAL_MAXLIFE * _init / 1000;
+		const borderVal = C_VAL_MAXLIFE * _border / 100;
+
 		if (_mode === C_LFE_BORDER) {
-			return "[" + _mode + ":" + _border + "%, Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+			if (borderVal !== 0) {
+				return "[Init:" + initVal + ", Border:" + borderVal + ", <br>Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+			}
 		}
-		return "[Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+		return "[Init:" + initVal + ", Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
 	}
 
 
@@ -4335,7 +4426,7 @@ function MainInit() {
 	lifeBorderObj.style.paddingRight = "5px";
 	infoSprite.appendChild(lifeBorderObj);
 
-	if (g_stateObj.lifeMode === C_LFE_SURVIVAL || g_workObj.lifeVal === C_VAL_MAXLIFE) {
+	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === C_VAL_MAXLIFE) {
 		lifeBorderObj.style.display = C_DIS_NONE;
 	}
 
