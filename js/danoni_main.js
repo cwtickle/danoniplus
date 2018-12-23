@@ -9,7 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 1.5.0";
-const g_version_gauge = "Ver 0.4.1.20181223";
+const g_version_gauge = "Ver 0.4.2.20181223";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -2543,7 +2543,7 @@ function createOptionWindow(_sprite) {
 	}
 
 	/**
-	 * ゲージ設定の詳細表示を整形 C_VAL_MAXLIFE * g_stateObj.lifeBorder / 100
+	 * ゲージ設定の詳細表示を整形
 	 */
 	function gaugeFormat(_mode, _border, _rcv, _dmg, _init) {
 		const initVal = C_VAL_MAXLIFE * _init / 1000;
