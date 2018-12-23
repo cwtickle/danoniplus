@@ -8,8 +8,8 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.5.1";
-const g_version_gauge = "Ver 0.4.3.20181223";
+const g_version = "Ver 1.6.0";
+const g_version_gauge = "Ver 0.5.0.20181223";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -168,7 +168,7 @@ const C_LFE_SURVIVAL = "Survival";
 const C_LFE_BORDER = "Border";
 
 const g_gaugeOptionObj = {
-	survival: ["Borderless", "Light", "No Recovery", "SuddenDeath", "Practice"],
+	survival: ["Original", "Light", "No Recovery", "SuddenDeath", "Practice"],
 	border: ["Normal", "Easy", "Hard", "SuddenDeath"],
 
 	initSurvival: [250, 250, C_VAL_MAXLIFE, C_VAL_MAXLIFE, C_VAL_MAXLIFE / 2],
@@ -2504,7 +2504,7 @@ function createOptionWindow(_sprite) {
 			}
 
 		} else if (g_stateObj.lifeSetName == "Light" || g_stateObj.lifeSetName == "Easy") {
-			// ゲージ設定がLight/Easyのとき、Borderless/Normalに合わせて設定を見直す
+			// ゲージ設定がLight/Easyのとき、Original/Normalに合わせて設定を見直す
 
 			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], "", "number") !== "") {
 				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
@@ -5688,7 +5688,7 @@ function resultInit() {
 	if (g_stateObj.reverse !== C_FLG_OFF) {
 		playStyleData += ", Reverse";
 	}
-	if (g_stateObj.lifeSetName !== "Borderless" && g_stateObj.lifeSetName !== "Normal") {
+	if (g_stateObj.lifeSetName !== "Original" && g_stateObj.lifeSetName !== "Normal") {
 		playStyleData += ", " + g_stateObj.lifeSetName;
 	}
 	playDataWindow.appendChild(makeResultPlayData("lblStyleData", 60, "#cccccc", 3,
