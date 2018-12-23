@@ -4,12 +4,13 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/12/23
+ * Revised : 2018/12/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = "Ver 1.6.0";
 const g_version_gauge = "Ver 0.5.1.20181223";
+const g_version_musicEncoded = "Ver 0.1.0.20181224";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -111,6 +112,10 @@ const C_IMG_IYOFRZBAR = "../img/frzbar.png";
 const C_IMG_CFRZBAR = "../img/frzbar.png";
 const C_IMG_MORARAFRZBAR = "../img/frzbar.png";
 const C_IMG_MONARFRZBAR = "../img/frzbar.png";
+
+// 音楽ファイル エンコードフラグ
+let g_musicEncodedFlg = false;
+let g_musicdata = "";
 
 // Motionオプション配列の基準位置
 const C_MOTION_STD_POS = 15;
@@ -1426,18 +1431,28 @@ function initialControl() {
 		}
 	}
 
-	// customjsの読み込み
-	if (g_headerObj.customjs2 !== "") {
-		loadScript("../js/" + g_headerObj.customjs2, function () {
-			loadScript("../js/" + g_headerObj.customjs, function () {
-				titleInit();
+	// customjs、音楽ファイルの読み込み
+	loadScript("../js/" + g_headerObj.customjs, function () {
+		if (g_headerObj.customjs2 !== "") {
+			loadScript("../js/" + g_headerObj.customjs2, function () {
+				if (g_musicEncodedFlg) {
+					loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl, function () {
+						titleInit();
+					});
+				} else {
+					titleInit();
+				}
 			});
-		});
-	} else {
-		loadScript("../js/" + g_headerObj.customjs, function () {
-			titleInit();
-		});
-	}
+		} else {
+			if (g_musicEncodedFlg) {
+				loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl, function () {
+					titleInit();
+				});
+			} else {
+				titleInit();
+			}
+		}
+	});
 }
 
 /**
@@ -1472,7 +1487,16 @@ function titleInit() {
 	}
 
 	// オーディオファイル指定
-	g_audio.src = "../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl;
+	if (g_musicEncodedFlg) {
+		if (typeof musicInit === "function") {
+			musicInit();
+			g_audio.src = "data:audio/mp3;base64," + g_musicdata;
+		} else {
+			makeWarningWindow(C_MSG_E_0031);
+		}
+	} else {
+		g_audio.src = "../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl;
+	}
 
 	// ボタン描画
 	const btnStart = createButton({
@@ -1868,6 +1892,9 @@ function headerConvert(_dosObj) {
 
 	// 楽曲URL
 	if (_dosObj.musicUrl !== undefined) {
+		if (_dosObj.musicUrl.slice(-3) === ".js") {
+			g_musicEncodedFlg = true;
+		}
 		obj.musicUrl = _dosObj.musicUrl;
 	} else {
 		makeWarningWindow(C_MSG_E_0031);
