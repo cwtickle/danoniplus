@@ -2510,10 +2510,10 @@ function createOptionWindow(_sprite) {
 				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
 			}
 			if (setVal(g_headerObj.lifeRecoverys[g_stateObj.scoreId], "", "number") !== "") {
-				g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId] * 2;
+				g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
 			}
 			if (setVal(g_headerObj.lifeDamages[g_stateObj.scoreId], "", "number") !== "") {
-				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
+				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId] / 2;
 			}
 		}
 
@@ -2551,10 +2551,10 @@ function createOptionWindow(_sprite) {
 
 		if (_mode === C_LFE_BORDER) {
 			if (borderVal !== 0) {
-				return "[Start:" + initVal + ", Border:" + borderVal + ", <br>Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+				return "[Init:" + initVal + ", Border:" + borderVal + ", <br>Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
 			}
 		}
-		return "[Start:" + initVal + ", Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
+		return "[Init:" + initVal + ", Rcv:" + _rcv + ", Dmg:" + _dmg + "]";
 	}
 
 
