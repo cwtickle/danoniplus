@@ -10,7 +10,7 @@
  */
 const g_version = "Ver 1.7.0";
 const g_version_gauge = "Ver 0.5.1.20181223";
-const g_version_musicEncoded = "Ver 0.1.0.20181224";
+const g_version_musicEncoded = "Ver 0.1.1.20181224";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -1892,7 +1892,7 @@ function headerConvert(_dosObj) {
 
 	// 楽曲URL
 	if (_dosObj.musicUrl !== undefined) {
-		if (_dosObj.musicUrl.slice(-3) === ".js") {
+		if (_dosObj.musicUrl.slice(-3) === ".js" || _dosObj.musicUrl.slice(-4) === ".txt") {
 			g_musicEncodedFlg = true;
 		}
 		obj.musicUrl = _dosObj.musicUrl;
