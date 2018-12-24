@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.7.0";
+const g_version = "Ver 1.7.1";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 
