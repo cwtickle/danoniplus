@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/12/24
+ * Revised : 2018/12/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.7.1";
+const g_version = "Ver 1.8.0";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 
@@ -5675,25 +5675,6 @@ function resultInit() {
 		rankColor = g_rankObj.rankColorX;
 	}
 
-
-	// Twitter用リザルト
-	let hashTag;
-	if (g_headerObj.hashTag !== undefined) {
-		hashTag = " " + g_headerObj.hashTag;
-	} else {
-		hashTag = "";
-	}
-	const tweetResultTmp = "【#danoni" + hashTag + "】" + g_headerObj.musicTitle + "(" +
-		g_headerObj.keyLabels[g_stateObj.scoreId] + "k-" + g_headerObj.difLabels[g_stateObj.scoreId] + ")/" +
-		g_headerObj.tuning + "/" +
-		"Rank:" + rankMark + "/" +
-		"Score:" + resultScore + "/" +
-		g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.shobon + "-" + g_resultObj.uwan + "/" +
-		g_resultObj.kita + "-" + g_resultObj.iknai + "/" +
-		g_resultObj.maxCombo + "-" + g_resultObj.fmaxCombo + " " +
-		location.href;
-	const tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
-
 	// 曲名・オプション描画
 	playDataWindow.appendChild(makeResultPlayData("lblMusic", 20, "#999999", 0,
 		"Music", C_ALIGN_LEFT));
@@ -5708,7 +5689,7 @@ function resultInit() {
 		"Playstyle", C_ALIGN_LEFT));
 
 	let playStyleData = "";
-	playStyleData = g_stateObj.speed + " x";
+	playStyleData = g_stateObj.speed + "x";
 	if (g_stateObj.motion !== C_FLG_OFF) {
 		playStyleData += ", " + g_stateObj.motion;
 	}
@@ -5819,6 +5800,26 @@ function resultInit() {
 		"<span style='color:" + rankColor + ";'>" + rankMark + "</span>", "'Bookman Old Style', 'Meiryo UI', sans-serif");
 	lblRank.style.textAlign = C_ALIGN_CENTER;
 	resultWindow.appendChild(lblRank);
+
+	// Twitter用リザルト
+	let hashTag;
+	if (g_headerObj.hashTag !== undefined) {
+		hashTag = " " + g_headerObj.hashTag;
+	} else {
+		hashTag = "";
+	}
+	const tweetResultTmp = "【#danoni" + hashTag + "】" + g_headerObj.musicTitle + "(" +
+		g_headerObj.keyLabels[g_stateObj.scoreId] + "k-" + g_headerObj.difLabels[g_stateObj.scoreId] + ")/" +
+		g_headerObj.tuning + "/" +
+		"Rank:" + rankMark + "/" +
+		"Score:" + resultScore + "/" +
+		"Playstyle:" + playStyleData + "/" +
+		g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.shobon + "-" + g_resultObj.uwan + "/" +
+		g_resultObj.kita + "-" + g_resultObj.iknai + "/" +
+		g_resultObj.maxCombo + "-" + g_resultObj.fmaxCombo + " " +
+		location.href;
+	const tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
+
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customResultInit === "function") {
