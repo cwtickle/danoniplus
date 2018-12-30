@@ -11,7 +11,7 @@
 const g_version = "Ver 1.8.0";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
-const g_version_lyrics = "Ver 0.1.0.20181230";
+const g_version_lyrics = "Ver 0.2.0.20181230";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -4481,6 +4481,18 @@ function MainInit() {
 		g_workObj.word1Data);
 	lblWord1.style.textAlign = C_ALIGN_LEFT;
 	judgeSprite.appendChild(lblWord1);
+
+	// 歌詞表示3
+	const lblWord2 = createDivLabel("lblword2", 100, 10, g_sWidth - 200, 30, 14, "#ffffff",
+		g_workObj.word0Data);
+	lblWord2.style.textAlign = C_ALIGN_LEFT;
+	judgeSprite.appendChild(lblWord2);
+
+	// 歌詞表示4
+	const lblWord3 = createDivLabel("lblword3", 100, g_sHeight - 60, g_sWidth - 200, 20, 14, "#ffffff",
+		g_workObj.word1Data);
+	lblWord3.style.textAlign = C_ALIGN_LEFT;
+	judgeSprite.appendChild(lblWord3);
 
 	// 曲名・アーティスト名表示
 	const lblCredit = createDivLabel("lblCredit", 125, g_sHeight - 30, g_sWidth - 125, 20, 14, "#cccccc",
