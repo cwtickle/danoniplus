@@ -4,13 +4,14 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/12/25
+ * Revised : 2018/12/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.8.0";
+const g_version = "Ver 1.9.0";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
+const g_version_lyrics = "Ver 0.2.0.20181230";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -4470,16 +4471,28 @@ function MainInit() {
 	infoSprite.appendChild(makeCounterSymbol("lblFCombo", g_sWidth - 110, "#ffffff", 10, 0));
 
 	// 歌詞表示1
-	const lblWord0 = createDivLabel("lblword0", g_sWidth / 2 - 200, 10, g_sWidth - 100, 30, 14, "#ffffff",
+	const lblWord0 = createDivLabel("lblword0", 100, 10, g_sWidth - 200, 30, 14, "#ffffff",
 		g_workObj.word0Data);
 	lblWord0.style.textAlign = C_ALIGN_LEFT;
 	judgeSprite.appendChild(lblWord0);
 
 	// 歌詞表示2
-	const lblWord1 = createDivLabel("lblword1", g_sWidth / 2 - 200, g_sHeight - 60, g_sWidth - 100, 20, 14, "#ffffff",
+	const lblWord1 = createDivLabel("lblword1", 100, g_sHeight - 60, g_sWidth - 200, 20, 14, "#ffffff",
 		g_workObj.word1Data);
 	lblWord1.style.textAlign = C_ALIGN_LEFT;
 	judgeSprite.appendChild(lblWord1);
+
+	// 歌詞表示3
+	const lblWord2 = createDivLabel("lblword2", 100, 10, g_sWidth - 200, 30, 14, "#ffffff",
+		g_workObj.word0Data);
+	lblWord2.style.textAlign = C_ALIGN_LEFT;
+	judgeSprite.appendChild(lblWord2);
+
+	// 歌詞表示4
+	const lblWord3 = createDivLabel("lblword3", 100, g_sHeight - 60, g_sWidth - 200, 20, 14, "#ffffff",
+		g_workObj.word1Data);
+	lblWord3.style.textAlign = C_ALIGN_LEFT;
+	judgeSprite.appendChild(lblWord3);
 
 	// 曲名・アーティスト名表示
 	const lblCredit = createDivLabel("lblCredit", 125, g_sHeight - 30, g_sWidth - 125, 20, 14, "#cccccc",
@@ -5070,6 +5083,9 @@ function MainInit() {
 				g_wordObj["fadeOutFlg" + g_wordObj.wordDir] = true;
 				g_wordSprite.style.opacity = 1;
 
+			} else if (g_wordObj.wordDat === "[center]" ||
+				g_wordObj.wordDat === "[left]" || g_wordObj.wordDat === "[right]") {
+
 			} else {
 				if (!g_wordObj["fadeOutFlg" + g_wordObj.wordDir]
 					&& Number(g_wordSprite.style.opacity) === 0) {
@@ -5077,6 +5093,20 @@ function MainInit() {
 				}
 				g_workObj["word" + g_wordObj.wordDir + "Data"] = g_wordObj.wordDat;
 				g_wordSprite.innerHTML = g_wordObj.wordDat;
+			}
+
+			if (g_wordObj.wordDat === "[center]") {
+				g_wordSprite.style.textAlign = C_ALIGN_CENTER;
+				g_wordSprite.style.display = "block";
+				g_wordSprite.style.margin = "auto";
+			} else if (g_wordObj.wordDat === "[left]") {
+				g_wordSprite.style.textAlign = C_ALIGN_LEFT;
+				g_wordSprite.style.display = "inline";
+				g_wordSprite.style.margin = "0";
+			} else if (g_wordObj.wordDat === "[right]") {
+				g_wordSprite.style.textAlign = C_ALIGN_RIGHT;
+				g_wordSprite.style.display = "block";
+				g_wordSprite.style.margin = "auto";
 			}
 		}
 
