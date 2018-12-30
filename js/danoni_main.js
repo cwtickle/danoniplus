@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.9.0";
+const g_version = "Ver 1.10.0";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 const g_version_lyrics = "Ver 0.2.0.20181230";
@@ -1862,8 +1862,8 @@ function headerConvert(_dosObj) {
 	}
 
 	// 終了フレーム数
-	if (setVal(_dosObj.endFrame, 0, "number") !== 0) {
-		obj.endFrame = parseInt(_dosObj.endFrame / 60) * 60;
+	if (_dosObj.endFrame !== undefined) {
+		obj.endFrame = _dosObj.endFrame.split("$");
 	}
 
 	// 外部jsファイルの指定
@@ -4403,9 +4403,15 @@ function MainInit() {
 
 	// 終了時間指定の場合、その値を適用する
 	if (g_headerObj.endFrame !== undefined) {
-		if (isNaN(parseInt(g_headerObj.endFrame))) {
-		} else {
-			const fullTmp = Math.floor((parseInt(g_headerObj.endFrame) + preblankFrame) / 60) * 60;
+		if (!isNaN(parseInt(g_headerObj.endFrame[g_stateObj.scoreId]))) {
+			const fullTmp = Math.floor((parseInt(g_headerObj.endFrame[g_stateObj.scoreId]) + preblankFrame) / 60) * 60;
+
+			fullMin = Math.floor(fullTmp / 3600);
+			fullSec = ("00" + (fullTmp / 60) % 60).slice(-2);
+			fullTime = fullMin + ":" + fullSec;
+
+		} else if (!isNaN(parseInt(g_headerObj.endFrame[0]))) {
+			const fullTmp = Math.floor((parseInt(g_headerObj.endFrame[0]) + preblankFrame) / 60) * 60;
 
 			fullMin = Math.floor(fullTmp / 3600);
 			fullSec = ("00" + (fullTmp / 60) % 60).slice(-2);
