@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2018/12/30
+ * Revised : 2019/01/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.10.0";
+const g_version = "Ver 1.10.1";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 const g_version_lyrics = "Ver 0.2.0.20181230";
@@ -5119,6 +5119,8 @@ function MainInit() {
 		// 歌詞フェードイン・アウト
 		fadeWord("0");
 		fadeWord("1");
+		fadeWord("2");
+		fadeWord("3");
 
 		// 背景表示・背景モーション
 		if (g_scoreObj.backData[g_scoreObj.frameNum] !== undefined) {
