@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/01/01
+ * Revised : 2019/01/02
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.10.1";
+const g_version = "Ver 1.11.0";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 const g_version_lyrics = "Ver 0.2.0.20181230";
@@ -4458,6 +4458,8 @@ function MainInit() {
 	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
 	lifeBorderObj.style.textAlign = C_ALIGN_RIGHT;
 	lifeBorderObj.style.paddingRight = "5px";
+	lifeBorderObj.style.fontSize = "14px";
+	lifeBorderObj.style.color = "#cccccc";
 	infoSprite.appendChild(lifeBorderObj);
 
 	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === C_VAL_MAXLIFE) {
@@ -4873,7 +4875,7 @@ function MainInit() {
 
 				if (g_stateObj.auto === C_FLG_ON) {
 					if (cnt === 0) {
-						judgeIi();
+						judgeIi(cnt);
 						stepDivHit.style.opacity = 1;
 						stepDivHit.setAttribute("cnt", C_FRM_HITMOTION);
 						g_workObj.judgArrowCnt[j]++;
@@ -4881,7 +4883,7 @@ function MainInit() {
 					}
 
 				} else if (cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
-					judgeUwan();
+					judgeUwan(cnt);
 					g_workObj.judgArrowCnt[j]++;
 					mainSprite.removeChild(arrow);
 				}
@@ -5035,7 +5037,7 @@ function MainInit() {
 									// フリーズアローを離したとき
 									if (frzRoot.getAttribute("judgEndFlg") === "false") {
 										if (frzRoot.getAttribute("isMoving") === "false") {
-											judgeIknai();
+											judgeIknai(cnt);
 											frzRoot.setAttribute("judgEndFlg", "true");
 
 											changeFailedFrz(j, k);
@@ -5044,7 +5046,7 @@ function MainInit() {
 								}
 							}
 						} else {
-							judgeKita();
+							judgeKita(cnt);
 
 							g_workObj.judgFrzCnt[j]++;
 							frzRoot.setAttribute("judgEndFlg", "true");
@@ -5054,7 +5056,7 @@ function MainInit() {
 
 					// フリーズアローが枠外に出たときの処理
 					if (cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
-						judgeIknai();
+						judgeIknai(cnt);
 						frzRoot.setAttribute("judgEndFlg", "true");
 
 						changeFailedFrz(j, k);
@@ -5433,24 +5435,24 @@ function judgeArrow(_j) {
 		const fcurrentNo = g_workObj.judgFrzCnt[_j];
 
 		if (judgArrow !== null) {
+			const difFrame = Number(judgArrow.getAttribute("cnt"));
 			const difCnt = Math.abs(judgArrow.getAttribute("cnt"));
 			const judgEndFlg = judgArrow.getAttribute("judgEndFlg");
 
 			if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === "false") {
 				stepDivHit.style.opacity = 0.75;
-				const charaJ = document.getElementById("charaJ");
 
 				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-					judgeIi();
+					judgeIi(difFrame);
 					stepDivHit.style.background = C_CLR_II;
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-					judgeShakin();
+					judgeShakin(difFrame);
 					stepDivHit.style.background = C_CLR_SHAKIN;
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-					judgeMatari();
+					judgeMatari(difFrame);
 					stepDivHit.style.background = C_CLR_MATARI;
 				} else {
-					judgeShobon();
+					judgeShobon(difFrame);
 					stepDivHit.style.background = C_CLR_SHOBON;
 				}
 				stepDivHit.setAttribute("cnt", C_FRM_HITMOTION);
@@ -5491,7 +5493,7 @@ function lifeRecovery() {
 		lifeColor = C_CLR_CLEARLIFE;
 	}
 	document.getElementById("lblLife").style.backgroundColor = lifeColor;
-	document.getElementById("lblLife").innerHTML = Math.round(g_workObj.lifeVal);
+	document.getElementById("lblLife").innerHTML = Math.floor(g_workObj.lifeVal);
 	document.getElementById("lifeBar").style.backgroundColor = lifeColor;
 	document.getElementById("lifeBar").style.top = (50 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeVal) / C_VAL_MAXLIFE) + "px";
 	document.getElementById("lifeBar").style.height = ((g_sHeight - 100) * g_workObj.lifeVal / C_VAL_MAXLIFE) + "px";
@@ -5517,13 +5519,17 @@ function lifeDamage() {
 		lifeColor = C_CLR_CLEARLIFE;
 	}
 	document.getElementById("lblLife").style.backgroundColor = lifeColor;
-	document.getElementById("lblLife").innerHTML = Math.round(g_workObj.lifeVal);
+	document.getElementById("lblLife").innerHTML = Math.floor(g_workObj.lifeVal);
 	document.getElementById("lifeBar").style.backgroundColor = lifeColor;
 	document.getElementById("lifeBar").style.top = (50 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeVal) / C_VAL_MAXLIFE) + "px";
 	document.getElementById("lifeBar").style.height = ((g_sHeight - 100) * g_workObj.lifeVal / C_VAL_MAXLIFE) + "px";
 }
 
-function judgeIi() {
+/**
+ * 判定処理：イイ
+ * @param {number} difFrame 
+ */
+function judgeIi(difFrame) {
 	g_resultObj.ii++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_II + "'>" + C_JCR_II + "</span>";
@@ -5538,9 +5544,20 @@ function judgeIi() {
 
 	lifeRecovery();
 	finishViewing();
+
+	if (typeof customJudgeIi === "function") {
+		customJudgeIi(difFrame);
+		if (typeof customJudgeIi2 === "function") {
+			customJudgeIi2(difFrame);
+		}
+	}
 }
 
-function judgeShakin() {
+/**
+ * 判定処理：シャキン
+ * @param {number} difFrame 
+ */
+function judgeShakin(difFrame) {
 	g_resultObj.shakin++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_SHAKIN + "'>" + C_JCR_SHAKIN + "</span>";
@@ -5555,9 +5572,20 @@ function judgeShakin() {
 
 	lifeRecovery();
 	finishViewing();
+
+	if (typeof customJudgeShakin === "function") {
+		customJudgeShakin(difFrame);
+		if (typeof customJudgeShakin2 === "function") {
+			customJudgeShakin2(difFrame);
+		}
+	}
 }
 
-function judgeMatari() {
+/**
+ * 判定処理：マターリ
+ * @param {number} difFrame 
+ */
+function judgeMatari(difFrame) {
 	g_resultObj.matari++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_MATARI + "'>" + C_JCR_MATARI + "</span>";
@@ -5567,9 +5595,20 @@ function judgeMatari() {
 	document.getElementById("comboJ").innerHTML = "";
 
 	finishViewing();
+
+	if (typeof customJudgeMatari === "function") {
+		customJudgeMatari(difFrame);
+		if (typeof customJudgeMatari2 === "function") {
+			customJudgeMatari2(difFrame);
+		}
+	}
 }
 
-function judgeShobon() {
+/**
+ * 判定処理：ショボーン
+ * @param {number} difFrame 
+ */
+function judgeShobon(difFrame) {
 	g_resultObj.shobon++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_SHOBON + "'>" + C_JCR_SHOBON + "</span>";
@@ -5580,9 +5619,20 @@ function judgeShobon() {
 	document.getElementById("comboJ").innerHTML = "";
 
 	lifeDamage();
+
+	if (typeof customJudgeShobon === "function") {
+		customJudgeShobon(difFrame);
+		if (typeof customJudgeShobon2 === "function") {
+			customJudgeShobon2(difFrame);
+		}
+	}
 }
 
-function judgeUwan() {
+/**
+ * 判定処理：ウワァン
+ * @param {number} difFrame 
+ */
+function judgeUwan(difFrame) {
 	g_resultObj.uwan++;
 	g_currentArrows++;
 	document.getElementById("charaJ").innerHTML = "<span style='color:" + C_CLR_UWAN + "'>" + C_JCR_UWAN + "</span>";
@@ -5593,9 +5643,20 @@ function judgeUwan() {
 	document.getElementById("comboJ").innerHTML = "";
 
 	lifeDamage();
+
+	if (typeof customJudgeUwan === "function") {
+		customJudgeUwan(difFrame);
+		if (typeof customJudgeUwan2 === "function") {
+			customJudgeUwan2(difFrame);
+		}
+	}
 }
 
-function judgeKita() {
+/**
+ * 判定処理：キター
+ * @param {number} difFrame 
+ */
+function judgeKita(difFrame) {
 	g_resultObj.kita++;
 	g_currentArrows++;
 	document.getElementById("lblKita").innerHTML = g_resultObj.kita;
@@ -5610,9 +5671,20 @@ function judgeKita() {
 
 	lifeRecovery();
 	finishViewing();
+
+	if (typeof customJudgeKita === "function") {
+		customJudgeKita(difFrame);
+		if (typeof customJudgeKita2 === "function") {
+			customJudgeKita2(difFrame);
+		}
+	}
 }
 
-function judgeIknai() {
+/**
+ * 判定処理：イクナイ
+ * @param {number} difFrame 
+ */
+function judgeIknai(difFrame) {
 	g_resultObj.iknai++;
 	g_currentArrows++;
 	document.getElementById("lblIknai").innerHTML = g_resultObj.iknai;
@@ -5622,6 +5694,13 @@ function judgeIknai() {
 	g_resultObj.fCombo = 0;
 
 	lifeDamage();
+
+	if (typeof customJudgeIknai === "function") {
+		customJudgeIknai(difFrame);
+		if (typeof customJudgeIknai2 === "function") {
+			customJudgeIknai2(difFrame);
+		}
+	}
 }
 
 function finishViewing() {
