@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri カスタム用jsファイル
- * ver 0.43.0 以降向け
+ * ver 1.11.0 以降向け
  * 
  * このファイルは、作品個別に設定できる項目となっています。
  * 譜面データ側で下記のように作品別の外部jsファイルを指定することで、
@@ -181,3 +181,44 @@ function customResultInit() {
 	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 
 }
+
+/**
+ * 判定カスタム処理 (引数は共通で1つ保持)
+ * @param {number} difFrame タイミング誤差(フレーム数)
+ */
+/*
+// イイ
+function customJudgeIi(difFrame){
+
+}
+
+// シャキン
+function customJudgeShakin(difFrame){
+
+}
+
+// マターリ
+function customJudgeMatari(difFrame){
+
+}
+
+// ショボーン
+function customJudgeShobon(difFrame){
+
+}
+
+// ウワァン
+function customJudgeUwan(difFrame){
+
+}
+
+// キター
+function customJudgeKita(difFrame){
+
+}
+
+// イクナイ
+function customJudgeIknai(difFrame){
+
+}
+*/
