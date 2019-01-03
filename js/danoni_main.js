@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/01/02
+ * Revised : 2019/01/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.11.0";
+const g_version = "Ver 1.11.1";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 const g_version_lyrics = "Ver 0.2.0.20181230";
@@ -4386,14 +4386,14 @@ function MainInit() {
 	let fullSec = ("00" + Math.floor(fullSecond % 60)).slice(-2);
 	let fullTime = fullMin + ":" + fullSec;
 	let fadeOutFrame = Infinity;
-	const preblankFrame = Number(g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment);
+	const preblankFrameForTime = Number(g_headerObj.blankFrame - g_headerObj.blankFrameDef);
 
 	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
 	if (g_headerObj.fadeFrame !== undefined) {
 		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
 		} else {
 			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]);
-			const fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + C_FRM_AFTERFADE + preblankFrame) / 60) * 60;
+			const fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + C_FRM_AFTERFADE + preblankFrameForTime) / 60) * 60;
 
 			fullMin = Math.floor(fadeTmp / 3600);
 			fullSec = ("00" + (fadeTmp / 60) % 60).slice(-2);
@@ -4404,14 +4404,14 @@ function MainInit() {
 	// 終了時間指定の場合、その値を適用する
 	if (g_headerObj.endFrame !== undefined) {
 		if (!isNaN(parseInt(g_headerObj.endFrame[g_stateObj.scoreId]))) {
-			const fullTmp = Math.floor((parseInt(g_headerObj.endFrame[g_stateObj.scoreId]) + preblankFrame) / 60) * 60;
+			const fullTmp = Math.floor((parseInt(g_headerObj.endFrame[g_stateObj.scoreId]) + preblankFrameForTime) / 60) * 60;
 
 			fullMin = Math.floor(fullTmp / 3600);
 			fullSec = ("00" + (fullTmp / 60) % 60).slice(-2);
 			fullTime = fullMin + ":" + fullSec;
 
 		} else if (!isNaN(parseInt(g_headerObj.endFrame[0]))) {
-			const fullTmp = Math.floor((parseInt(g_headerObj.endFrame[0]) + preblankFrame) / 60) * 60;
+			const fullTmp = Math.floor((parseInt(g_headerObj.endFrame[0]) + preblankFrameForTime) / 60) * 60;
 
 			fullMin = Math.floor(fullTmp / 3600);
 			fullSec = ("00" + (fullTmp / 60) % 60).slice(-2);
