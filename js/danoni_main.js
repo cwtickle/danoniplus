@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/01/03
+ * Revised : 2019/01/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.11.1";
+const g_version = "Ver 1.12.0";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 const g_version_lyrics = "Ver 0.2.0.20181230";
@@ -835,7 +835,7 @@ const g_handler = (function () {
 function setVal(_checkStr, _defaultStr, _type) {
 
 	// 値がundefined相当の場合は無条件でデフォルト値を返却
-	if (_checkStr === undefined && _checkStr !== "") {
+	if (_checkStr === undefined || _checkStr === "") {
 		return _defaultStr;
 	}
 
@@ -922,6 +922,13 @@ function preloadFile(_as, _href, _type, _crossOrigin) {
 }
 
 /**
+ * 基本フォントを取得
+ */
+function getBasicFont() {
+	return (g_headerObj.customFont === "" ? C_LBL_BASICFONT : g_headerObj.customFont + "," + C_LBL_BASICFONT);
+}
+
+/**
  * 半角換算の文字数を計算
  * @param {string} str 
  */
@@ -992,7 +999,7 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text) 
 	const style = div.style;
 	style.fontSize = _fontsize + "px";
 	style.color = _color;
-	style.fontFamily = C_LBL_BASICFONT;
+	style.fontFamily = getBasicFont();
 	style.textAlign = C_ALIGN_CENTER;
 	div.innerHTML = _text;
 
@@ -1236,7 +1243,7 @@ function createButton(_obj, _func) {
 	style.verticalAlign = C_VALIGN_MIDDLE;
 	style.color = C_CLR_TEXT;
 	style.fontSize = _obj.fontsize + "px";
-	style.fontFamily = C_LBL_BASICFONT;
+	style.fontFamily = getBasicFont();
 	style.backgroundColor = _obj.normalColor;
 	style.transition = "background-color 0.25s linear";
 
@@ -1433,11 +1440,11 @@ function initialControl() {
 	}
 
 	// customjs、音楽ファイルの読み込み
-	loadScript("../js/" + g_headerObj.customjs, function () {
+	loadScript("../js/" + g_headerObj.customjs + "?" + Math.floor(Math.random() * 10000000), function () {
 		if (g_headerObj.customjs2 !== "") {
-			loadScript("../js/" + g_headerObj.customjs2, function () {
+			loadScript("../js/" + g_headerObj.customjs2 + "?" + Math.floor(Math.random() * 10000000), function () {
 				if (g_musicEncodedFlg) {
-					loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl, function () {
+					loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl + "?" + Math.floor(Math.random() * 10000000), function () {
 						titleInit();
 					});
 				} else {
@@ -1446,7 +1453,7 @@ function initialControl() {
 			});
 		} else {
 			if (g_musicEncodedFlg) {
-				loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl, function () {
+				loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl + "?" + Math.floor(Math.random() * 10000000), function () {
 					titleInit();
 				});
 			} else {
@@ -1642,7 +1649,7 @@ function makeWarningWindow(_text) {
 	lblWarning.style.fontSize = "14px";
 	lblWarning.style.color = "#660000";
 	lblWarning.style.textAlign = C_ALIGN_LEFT;
-	lblWarning.style.fontFamily = C_LBL_BASICFONT;
+	lblWarning.style.fontFamily = getBasicFont();
 
 	divRoot.appendChild(lblWarning);
 }
@@ -1917,6 +1924,9 @@ function headerConvert(_dosObj) {
 			}
 		}
 	}
+
+	// フォントの設定
+	obj.customFont = setVal(_dosObj.customFont, "", "string");
 
 	return obj;
 }
@@ -4458,6 +4468,7 @@ function MainInit() {
 	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
 	lifeBorderObj.style.textAlign = C_ALIGN_RIGHT;
 	lifeBorderObj.style.paddingRight = "5px";
+	lifeBorderObj.style.fontFamily = getBasicFont();
 	lifeBorderObj.style.fontSize = "14px";
 	lifeBorderObj.style.color = "#cccccc";
 	infoSprite.appendChild(lifeBorderObj);
