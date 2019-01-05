@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/01/04
+ * Revised : 2019/01/05
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.12.0";
+const g_version = "Ver 1.12.1";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 const g_version_lyrics = "Ver 0.2.0.20181230";
@@ -1440,11 +1440,12 @@ function initialControl() {
 	}
 
 	// customjs、音楽ファイルの読み込み
-	loadScript("../js/" + g_headerObj.customjs + "?" + Math.floor(Math.random() * 10000000), function () {
+	const randTime = new Date().getTime();
+	loadScript("../js/" + g_headerObj.customjs + "?" + randTime, function () {
 		if (g_headerObj.customjs2 !== "") {
-			loadScript("../js/" + g_headerObj.customjs2 + "?" + Math.floor(Math.random() * 10000000), function () {
+			loadScript("../js/" + g_headerObj.customjs2 + "?" + randTime, function () {
 				if (g_musicEncodedFlg) {
-					loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl + "?" + Math.floor(Math.random() * 10000000), function () {
+					loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl + "?" + randTime, function () {
 						titleInit();
 					});
 				} else {
@@ -1453,7 +1454,7 @@ function initialControl() {
 			});
 		} else {
 			if (g_musicEncodedFlg) {
-				loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl + "?" + Math.floor(Math.random() * 10000000), function () {
+				loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl + "?" + randTime, function () {
 					titleInit();
 				});
 			} else {
@@ -5940,7 +5941,7 @@ function resultInit() {
 		g_headerObj.keyLabels[g_stateObj.scoreId] + "k-" + g_headerObj.difLabels[g_stateObj.scoreId] + ")/" +
 		g_headerObj.tuning + "/" +
 		"Rank:" + rankMark + "/" +
-		"Score:" + resultScore + "/" +
+		"Score:" + g_resultObj.score + "/" +
 		"Playstyle:" + playStyleData + "/" +
 		g_resultObj.ii + "-" + g_resultObj.shakin + "-" + g_resultObj.matari + "-" + g_resultObj.shobon + "-" + g_resultObj.uwan + "/" +
 		g_resultObj.kita + "-" + g_resultObj.iknai + "/" +
