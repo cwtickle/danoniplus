@@ -1454,7 +1454,7 @@ function initialControl() {
 			});
 		} else {
 			if (g_musicEncodedFlg) {
-				loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl + "?" + Math.floor(Math.random() * 10000000), function () {
+				loadScript("../" + g_headerObj.musicFolder + "/" + g_headerObj.musicUrl + "?" + randTime, function () {
 					titleInit();
 				});
 			} else {
