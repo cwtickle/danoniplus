@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.12.1";
+const g_version = "Ver 1.13.0";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 const g_version_lyrics = "Ver 0.2.0.20181230";
@@ -668,15 +668,15 @@ const C_JDG_KITA = 0;
 const C_JDG_SFSF = 1;
 const C_JDG_IKNAI = 2;
 
-const C_JCR_II = "(・∀・)ｲｲ!!";
-const C_JCR_SHAKIN = "(`・ω・)ｼｬｷﾝ";
-const C_JCR_MATARI = "( ´∀`)ﾏﾀｰﾘ";
-const C_JCR_SHOBON = "(´・ω・`)ｼｮﾎﾞｰﾝ";
-const C_JCR_UWAN = "( `Д´)ｳﾜｧﾝ!!";
+let C_JCR_II = "(・∀・)ｲｲ!!";
+let C_JCR_SHAKIN = "(`・ω・)ｼｬｷﾝ";
+let C_JCR_MATARI = "( ´∀`)ﾏﾀｰﾘ";
+let C_JCR_SHOBON = "(´・ω・`)ｼｮﾎﾞｰﾝ";
+let C_JCR_UWAN = "( `Д´)ｳﾜｧﾝ!!";
 
-const C_JCR_KITA = "(ﾟ∀ﾟ)ｷﾀ-!!";
-const C_JCR_SFSF = "";
-const C_JCR_IKNAI = "(・A・)ｲｸﾅｲ";
+let C_JCR_KITA = "(ﾟ∀ﾟ)ｷﾀ-!!";
+let C_JCR_SFSF = "";
+let C_JCR_IKNAI = "(・A・)ｲｸﾅｲ";
 
 const C_CLR_II = "#66ffff";
 const C_CLR_SHAKIN = "#99ff99";
@@ -5930,6 +5930,14 @@ function resultInit() {
 	lblRank.style.textAlign = C_ALIGN_CENTER;
 	resultWindow.appendChild(lblRank);
 
+	// ユーザカスタムイベント(初期)
+	if (typeof customResultInit === "function") {
+		customResultInit();
+		if (typeof customResultInit2 === "function") {
+			customResultInit2();
+		}
+	}
+
 	// Twitter用リザルト
 	let hashTag;
 	if (g_headerObj.hashTag !== undefined) {
@@ -5950,14 +5958,6 @@ function resultInit() {
 	const tweetResult = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetResultTmp);
 
 
-	// ユーザカスタムイベント(初期)
-	if (typeof customResultInit === "function") {
-		customResultInit();
-		if (typeof customResultInit2 === "function") {
-			customResultInit2();
-		}
-	}
-
 	// Cleared & Failed表示
 	const lblResultPre = createDivLabel("lblResultPre", g_sWidth / 2 - 150, g_sHeight / 2 - 160,
 		200, 50, 60, "#ffff66",
@@ -5965,9 +5965,20 @@ function resultInit() {
 	divRoot.appendChild(lblResultPre);
 	lblResultPre.style.opacity = 0;
 
+	const fullArrows = g_allArrow + g_allFrz / 2;
+	let resultFlgTmp = "";
+	if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
+		resultFlgTmp = "<span style='color:#ffffff;'>All Perfect!!</span>";
+	} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
+		resultFlgTmp = "<span style='color:#ffffcc;'>Perfect!!</span>";
+	} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
+		resultFlgTmp = "<span style='color:#66ffff;'>FullCombo!</span>";
+	} else {
+		resultFlgTmp = "CLEARED!";
+	}
+
 	const lblResultPre2 = createDivLabel("lblResultPre", g_sWidth / 2 + 50, 40,
-		200, 30, 20, "#ffff66",
-		"CLEARED!");
+		200, 30, 20, "#ffff66", resultFlgTmp);
 	divRoot.appendChild(lblResultPre2);
 
 	if (!g_gameOverFlg) {
