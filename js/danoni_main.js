@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/01/05
+ * Revised : 2019/01/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.13.0";
+const g_version = "Ver 1.14.0";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 const g_version_lyrics = "Ver 0.2.0.20181230";
@@ -611,6 +611,12 @@ const g_keyObj = {
 	blank_def: 55,
 	blank11i_0: 50,
 	blank17_1: 45,
+	blank5_0: 57.5,
+	blank5_1: 57.5,
+	blank5_2: 57.5,
+	blank9A_0: 52.5,
+	blank9A_1: 52.5,
+	blank9B_0: 52.5,
 
 	dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
@@ -1991,6 +1997,7 @@ function keysConvert(_dosObj) {
 		for (var j = 0; j < keyExtraList.length; j++) {
 			newKey = keyExtraList[j];
 
+			// 矢印色パターン (colorX_Y)
 			if (_dosObj["color" + newKey] !== undefined) {
 				const tmpColors = _dosObj["color" + newKey].split("$");
 				if (checkArrayVal(tmpColors, "string", 1)) {
@@ -2002,10 +2009,11 @@ function keysConvert(_dosObj) {
 					}
 					tmpMinPatterns = tmpColors.length;
 				}
-			} else {
+			} else if (g_keyObj["color" + newKey + "_0"] === undefined) {
 				makeWarningWindow(C_MSG_E_0101.split("{0}").join(newKey));
 			}
 
+			// 読込変数の接頭辞 (charaX_Y)
 			if (_dosObj["chara" + newKey] !== undefined) {
 				const tmpCharas = _dosObj["chara" + newKey].split("$");
 				if (checkArrayVal(tmpCharas, "string", 1)) {
@@ -2014,10 +2022,11 @@ function keysConvert(_dosObj) {
 						g_keyObj["chara" + newKey + "_" + k + "d"] = tmpCharas[k].split(",");
 					}
 				}
-			} else {
+			} else if (g_keyObj["chara" + newKey + "_0"] === undefined) {
 				makeWarningWindow(C_MSG_E_0102.split("{0}").join(newKey));
 			}
 
+			// 各キーの区切り位置 (divX_Y)
 			if (_dosObj["div" + newKey] !== undefined) {
 				const tmpDivs = _dosObj["div" + newKey].split("$");
 				if (checkArrayVal(tmpDivs, "string", 1)) {
@@ -2031,6 +2040,7 @@ function keysConvert(_dosObj) {
 				}
 			}
 
+			// 矢印の回転量指定、キャラクタパターン (StepRtnX_Y)
 			if (_dosObj["stepRtn" + newKey] !== undefined) {
 				const tmpStepRtns = _dosObj["stepRtn" + newKey].split("$");
 				if (checkArrayVal(tmpStepRtns, "string", 1)) {
@@ -2047,31 +2057,34 @@ function keysConvert(_dosObj) {
 						}
 					}
 				}
-			} else {
+			} else if (g_keyObj["stepRtn" + newKey + "_0"] === undefined) {
 				makeWarningWindow(C_MSG_E_0103.split("{0}").join(newKey));
 			}
+
+			// ステップゾーン位置 (posX_Y)
 			if (_dosObj["pos" + newKey] !== undefined) {
 				const tmpPoss = _dosObj["pos" + newKey].split("$");
 				if (checkArrayVal(tmpPoss, "string", 1)) {
-					for (var j = 0, len = tmpPoss.length; j < len; j++) {
-						g_keyObj["pos" + newKey + "_" + j] = tmpPoss[j].split(",");
-						for (var k = 0, len2 = g_keyObj["pos" + newKey + "_" + j].length; k < len2; k++) {
-							g_keyObj["pos" + newKey + "_" + j][k] = Number(g_keyObj["pos" + newKey + "_" + j][k]);
+					for (var k = 0, len = tmpPoss.length; k < len; k++) {
+						g_keyObj["pos" + newKey + "_" + k] = tmpPoss[k].split(",");
+						for (var m = 0, len2 = g_keyObj["pos" + newKey + "_" + k].length; m < len2; m++) {
+							g_keyObj["pos" + newKey + "_" + k][m] = Number(g_keyObj["pos" + newKey + "_" + k][m]);
 						}
 					}
 				}
 
 			} else {
-				for (var j = 0; j < tmpMinPatterns; j++) {
-					g_keyObj["pos" + newKey + "_" + j] = new Array();
-					if (g_keyObj["color" + newKey + "_" + j] !== undefined) {
-						for (var k = 0; k < g_keyObj["color" + newKey + "_" + j].length; k++) {
-							g_keyObj["pos" + newKey + "_" + j][k] = k;
+				for (var k = 0; k < tmpMinPatterns; k++) {
+					g_keyObj["pos" + newKey + "_" + k] = new Array();
+					if (g_keyObj["color" + newKey + "_" + k] !== undefined) {
+						for (var m = 0; m < g_keyObj["color" + newKey + "_" + k].length; m++) {
+							g_keyObj["pos" + newKey + "_" + k][m] = m;
 						}
 					}
 				}
 			}
 
+			// キーコンフィグ (keyCtrlX_Y)
 			if (_dosObj["keyCtrl" + newKey] !== undefined) {
 				const tmpKeyCtrls = _dosObj["keyCtrl" + newKey].split("$");
 
@@ -2094,8 +2107,21 @@ function keysConvert(_dosObj) {
 						}
 					}
 				}
-			} else {
+			} else if (g_keyObj["keyCtrl" + newKey + "_0"] === undefined) {
 				makeWarningWindow(C_MSG_E_0104.split("{0}").join(newKey));
+			}
+
+			// ステップゾーン間隔 (blankX_Y)
+			if (_dosObj["blank" + newKey] !== undefined) {
+				const tmpBlanks = _dosObj["blank" + newKey].split("$");
+				if (checkArrayVal(tmpBlanks, "float", 1)) {
+					for (var k = 0, len = tmpBlanks.length; k < len; k++) {
+						if (isNaN(Number(tmpBlanks[k]))) {
+						} else {
+							g_keyObj["blank" + newKey + "_" + k] = parseFloat(tmpBlanks[k]);
+						}
+					}
+				}
 			}
 		}
 	}
