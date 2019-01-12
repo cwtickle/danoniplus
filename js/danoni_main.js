@@ -2000,8 +2000,11 @@ function keysConvert(_dosObj) {
 			// 矢印色パターン (colorX_Y)
 			if (_dosObj["color" + newKey] !== undefined) {
 				const tmpColors = _dosObj["color" + newKey].split("$");
-				if (checkArrayVal(tmpColors, "string", 1)) {
+				if (tmpColors.length > 0) {
 					for (var k = 0, len = tmpColors.length; k < len; k++) {
+						if (setVal(tmpColors[k], "", "string") === "" && g_keyObj["color" + newKey + "_" + k] !== undefined) {
+							continue;
+						}
 						g_keyObj["color" + newKey + "_" + k] = tmpColors[k].split(",");
 						for (var m = 0, len2 = g_keyObj["color" + newKey + "_" + k].length; m < len2; m++) {
 							g_keyObj["color" + newKey + "_" + k][m] = Number(g_keyObj["color" + newKey + "_" + k][m]);
@@ -2016,8 +2019,11 @@ function keysConvert(_dosObj) {
 			// 読込変数の接頭辞 (charaX_Y)
 			if (_dosObj["chara" + newKey] !== undefined) {
 				const tmpCharas = _dosObj["chara" + newKey].split("$");
-				if (checkArrayVal(tmpCharas, "string", 1)) {
+				if (tmpCharas.length > 0) {
 					for (var k = 0, len = tmpCharas.length; k < len; k++) {
+						if (setVal(tmpCharas[k], "", "string") === "" && g_keyObj["chara" + newKey + "_" + k] !== undefined) {
+							continue;
+						}
 						g_keyObj["chara" + newKey + "_" + k] = tmpCharas[k].split(",");
 						g_keyObj["chara" + newKey + "_" + k + "d"] = tmpCharas[k].split(",");
 					}
@@ -2029,10 +2035,14 @@ function keysConvert(_dosObj) {
 			// 各キーの区切り位置 (divX_Y)
 			if (_dosObj["div" + newKey] !== undefined) {
 				const tmpDivs = _dosObj["div" + newKey].split("$");
-				if (checkArrayVal(tmpDivs, "string", 1)) {
+				if (tmpDivs.length > 0) {
 					for (var k = 0, len = tmpDivs.length; k < len; k++) {
-						if (isNaN(Number(tmpDivs[k]))) {
-							g_keyObj["div" + newKey + "_" + k] = minLength;
+						if (setVal(tmpDivs[k], -1, "number") === -1) {
+							if (setVal(g_keyObj["div" + newKey + "_" + k], -1, "number") !== -1) {
+								continue;
+							} else if (g_keyObj["chara" + newKey + "_0"] !== undefined) {
+								g_keyObj["div" + newKey + "_" + k] = g_keyObj["chara" + newKey + "_0"].length;
+							}
 						} else {
 							g_keyObj["div" + newKey + "_" + k] = tmpDivs[k];
 						}
@@ -2043,8 +2053,11 @@ function keysConvert(_dosObj) {
 			// 矢印の回転量指定、キャラクタパターン (StepRtnX_Y)
 			if (_dosObj["stepRtn" + newKey] !== undefined) {
 				const tmpStepRtns = _dosObj["stepRtn" + newKey].split("$");
-				if (checkArrayVal(tmpStepRtns, "string", 1)) {
+				if (tmpStepRtns.length > 0) {
 					for (var k = 0, len = tmpStepRtns.length; k < len; k++) {
+						if (setVal(tmpStepRtns[k], "", "string") === "" && g_keyObj["stepRtn" + newKey + "_" + k] !== undefined) {
+							continue;
+						}
 						g_keyObj["stepRtn" + newKey + "_" + k] = tmpStepRtns[k].split(",");
 						g_keyObj["stepRtn" + newKey + "_" + k + "d"] = tmpStepRtns[k].split(",");
 
@@ -2064,8 +2077,11 @@ function keysConvert(_dosObj) {
 			// ステップゾーン位置 (posX_Y)
 			if (_dosObj["pos" + newKey] !== undefined) {
 				const tmpPoss = _dosObj["pos" + newKey].split("$");
-				if (checkArrayVal(tmpPoss, "string", 1)) {
+				if (tmpPoss.length > 0) {
 					for (var k = 0, len = tmpPoss.length; k < len; k++) {
+						if (setVal(tmpPoss[k], "", "string") === "" && g_keyObj["pos" + newKey + "_" + k] !== undefined) {
+							continue;
+						}
 						g_keyObj["pos" + newKey + "_" + k] = tmpPoss[k].split(",");
 						for (var m = 0, len2 = g_keyObj["pos" + newKey + "_" + k].length; m < len2; m++) {
 							g_keyObj["pos" + newKey + "_" + k][m] = Number(g_keyObj["pos" + newKey + "_" + k][m]);
@@ -2075,8 +2091,8 @@ function keysConvert(_dosObj) {
 
 			} else {
 				for (var k = 0; k < tmpMinPatterns; k++) {
-					g_keyObj["pos" + newKey + "_" + k] = new Array();
 					if (g_keyObj["color" + newKey + "_" + k] !== undefined) {
+						g_keyObj["pos" + newKey + "_" + k] = new Array();
 						for (var m = 0; m < g_keyObj["color" + newKey + "_" + k].length; m++) {
 							g_keyObj["pos" + newKey + "_" + k][m] = m;
 						}
@@ -2088,8 +2104,11 @@ function keysConvert(_dosObj) {
 			if (_dosObj["keyCtrl" + newKey] !== undefined) {
 				const tmpKeyCtrls = _dosObj["keyCtrl" + newKey].split("$");
 
-				if (checkArrayVal(tmpKeyCtrls, "string", 1)) {
+				if (tmpKeyCtrls.length > 0) {
 					for (var p = 0, len = tmpKeyCtrls.length; p < len; p++) {
+						if (setVal(tmpKeyCtrls[p], "", "string") === "" && g_keyObj["keyCtrl" + newKey + "_" + p] !== undefined) {
+							continue;
+						}
 						tmpKeyCtrl = tmpKeyCtrls[p].split(",");
 
 						g_keyObj["keyCtrl" + newKey + "_" + p] = new Array();
@@ -2114,7 +2133,7 @@ function keysConvert(_dosObj) {
 			// ステップゾーン間隔 (blankX_Y)
 			if (_dosObj["blank" + newKey] !== undefined) {
 				const tmpBlanks = _dosObj["blank" + newKey].split("$");
-				if (checkArrayVal(tmpBlanks, "float", 1)) {
+				if (tmpBlanks.length > 0) {
 					for (var k = 0, len = tmpBlanks.length; k < len; k++) {
 						if (isNaN(Number(tmpBlanks[k]))) {
 						} else {
