@@ -5765,7 +5765,7 @@ function judgeIknai(difFrame) {
 
 function finishViewing() {
 	if (g_currentArrows === g_allArrow + g_allFrz / 2) {
-		if (g_headerObj.finishView === C_DIS_NONE) {
+		if (g_headerObj.finishView !== C_DIS_NONE) {
 			const fullArrows = g_allArrow + g_allFrz / 2;
 			if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
 				document.getElementById("finishView").innerHTML = "<span style='color:#ffffff;'>All Perfect!!</span>";
