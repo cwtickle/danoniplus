@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/01/12
+ * Revised : 2019/01/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.14.0";
+const g_version = "Ver 1.15.0";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 const g_version_lyrics = "Ver 0.2.0.20181230";
@@ -1934,6 +1934,9 @@ function headerConvert(_dosObj) {
 
 	// フォントの設定
 	obj.customFont = setVal(_dosObj.customFont, "", "string");
+
+	// 最終演出表示有無（noneで無効化）
+	obj.finishView = setVal(_dosObj.finishView, "", "string");
 
 	return obj;
 }
@@ -5762,28 +5765,30 @@ function judgeIknai(difFrame) {
 
 function finishViewing() {
 	if (g_currentArrows === g_allArrow + g_allFrz / 2) {
-		const fullArrows = g_allArrow + g_allFrz / 2;
-		if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
-			document.getElementById("finishView").innerHTML = "<span style='color:#ffffff;'>All Perfect!!</span>";
-			document.getElementById("finishView").style.opacity = 1;
-			document.getElementById("charaJ").innerHTML = "";
-			document.getElementById("comboJ").innerHTML = "";
-			document.getElementById("charaFJ").innerHTML = "";
-			document.getElementById("comboFJ").innerHTML = "";
-		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
-			document.getElementById("finishView").innerHTML = "Perfect!!";
-			document.getElementById("finishView").style.opacity = 1;
-			document.getElementById("charaJ").innerHTML = "";
-			document.getElementById("comboJ").innerHTML = "";
-			document.getElementById("charaFJ").innerHTML = "";
-			document.getElementById("comboFJ").innerHTML = "";
-		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
-			document.getElementById("finishView").innerHTML = "<span style='color:#66ffff;'>FullCombo!</span>";
-			document.getElementById("finishView").style.opacity = 1;
-			document.getElementById("charaJ").innerHTML = "";
-			document.getElementById("comboJ").innerHTML = "";
-			document.getElementById("charaFJ").innerHTML = "";
-			document.getElementById("comboFJ").innerHTML = "";
+		if (g_headerObj.finishView !== C_DIS_NONE) {
+			const fullArrows = g_allArrow + g_allFrz / 2;
+			if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
+				document.getElementById("finishView").innerHTML = "<span style='color:#ffffff;'>All Perfect!!</span>";
+				document.getElementById("finishView").style.opacity = 1;
+				document.getElementById("charaJ").innerHTML = "";
+				document.getElementById("comboJ").innerHTML = "";
+				document.getElementById("charaFJ").innerHTML = "";
+				document.getElementById("comboFJ").innerHTML = "";
+			} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
+				document.getElementById("finishView").innerHTML = "Perfect!!";
+				document.getElementById("finishView").style.opacity = 1;
+				document.getElementById("charaJ").innerHTML = "";
+				document.getElementById("comboJ").innerHTML = "";
+				document.getElementById("charaFJ").innerHTML = "";
+				document.getElementById("comboFJ").innerHTML = "";
+			} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
+				document.getElementById("finishView").innerHTML = "<span style='color:#66ffff;'>FullCombo!</span>";
+				document.getElementById("finishView").style.opacity = 1;
+				document.getElementById("charaJ").innerHTML = "";
+				document.getElementById("comboJ").innerHTML = "";
+				document.getElementById("charaFJ").innerHTML = "";
+				document.getElementById("comboFJ").innerHTML = "";
+			}
 		}
 	}
 }
