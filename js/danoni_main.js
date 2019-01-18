@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/01/14
+ * Revised : 2019/01/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 1.15.0`;
+const g_version = `Ver 2.0.0`;
 const g_version_gauge = `Ver 0.5.1.20181223`;
 const g_version_musicEncoded = `Ver 0.1.1.20181224`;
 const g_version_lyrics = `Ver 0.2.0.20181230`;
@@ -1481,7 +1481,7 @@ function titleInit() {
 		`<span style=color:#6666ff;font-size:40px>D</span>ANCING
 		<span style=color:#ffff66;font-size:40px>☆</span>
 		<span style=color:#ff6666;font-size:40px>O</span>NIGIRI`
-		.replace(/[\t\n]/g, ``), 0, 15);
+			.replace(/[\t\n]/g, ``), 0, 15);
 	divRoot.appendChild(lblTitle);
 
 	// ユーザカスタムイベント(初期)
@@ -3006,7 +3006,7 @@ function keyConfigInit() {
 	const lblTitle = getTitleDivLabel(`lblTitle`,
 		`<span style=color:#6666ff;font-size:40px>K</span>EY
 		<span style=color:#ff6666;font-size:40px>C</span>ONFIG`
-		.replace(/[\t\n]/g, ``), 0, 15);
+			.replace(/[\t\n]/g, ``), 0, 15);
 	divRoot.appendChild(lblTitle);
 
 	const kcDesc = createDivLabel(`kcDesc`, 0, 65, g_sWidth, 20, 14, C_CLR_TITLE,
@@ -6197,7 +6197,7 @@ MIT License
 Copyright (c) 2018 tickle
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the `Software`), to deal
+of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
@@ -6206,7 +6206,7 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED `AS IS`, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
