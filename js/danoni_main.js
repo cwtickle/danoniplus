@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.0.2`;
+const g_version = `Ver 2.1.0`;
 const g_version_gauge = `Ver 0.5.1.20181223`;
 const g_version_musicEncoded = `Ver 0.1.1.20181224`;
 const g_version_lyrics = `Ver 0.2.0.20181230`;
@@ -1286,7 +1286,14 @@ function createButton(_obj, _func) {
  * @param {string} _align テキストの表示位置 (left, center, right)
  */
 function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align) {
-	_ctx.font = `${_fontsize}px "${_fontname}"`;
+	const fontFamilys = _fontname.split(`,`);
+	let fontView = ``;
+	for (var j = 0; j < fontFamilys.length; j++) {
+		fontView += `"${fontFamilys[j]}",`;
+	}
+	fontView += `sans-serif`;
+
+	_ctx.font = `${_fontsize}px ${fontView}`;
 	_ctx.textAlign = _align;
 	_ctx.fillStyle = _color;
 	_ctx.fillText(_text, _x, _y);
@@ -1581,9 +1588,13 @@ function titleInit() {
 	if (setVal(g_localVersion2, ``, `string`) !== ``) {
 		customVersion += ` / ${g_localVersion2}`;
 	}
+	let releaseDate = ``;
+	if (setVal(g_headerObj.releaseDate, ``, `string`) !== ``) {
+		releaseDate += ` @${g_headerObj.releaseDate}`;
+	}
 	const lnkVersion = createButton({
 		id: `lnkVersion`,
-		name: `&copy; 2018 ティックル, CW ${g_version}${customVersion}`,
+		name: `&copy; 2018 ティックル, CW ${g_version}${customVersion}${releaseDate}`,
 		x: g_sWidth / 3,
 		y: g_sHeight - 20,
 		width: g_sWidth * 2 / 3 - 10,
@@ -1906,7 +1917,7 @@ function headerConvert(_dosObj) {
 		makeWarningWindow(C_MSG_E_0031);
 	}
 
-	// hashTag
+	// ハッシュタグ
 	if (_dosObj.hashTag !== undefined) {
 		obj.hashTag = _dosObj.hashTag;
 	}
@@ -1928,6 +1939,9 @@ function headerConvert(_dosObj) {
 
 	// 最終演出表示有無（noneで無効化）
 	obj.finishView = setVal(_dosObj.finishView, ``, `string`);
+
+	// 更新日
+	obj.releaseDate = setVal(_dosObj.releaseDate, ``, `string`);
 
 	return obj;
 }

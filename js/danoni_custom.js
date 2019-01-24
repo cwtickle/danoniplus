@@ -45,29 +45,34 @@ function customTitleInit() {
 
 	// 曲名文字描画（曲名は譜面データから取得）
 	// TEST:試験的に矢印色の1番目と3番目を使ってタイトルをグラデーション
-	var grd = l0ctx.createLinearGradient(0, 0, g_sHeight, 0);
+	var grd2 = l0ctx.createLinearGradient(0, 0, g_sHeight, 0);
 	if (g_headerObj[`setColor`][0] != undefined) {
-		grd.addColorStop(0, g_headerObj[`setColor`][0]);
+		grd2.addColorStop(0, g_headerObj[`setColor`][0]);
 	} else {
-		grd.addColorStop(0, `#ffffff`);
+		grd2.addColorStop(0, `#ffffff`);
 	}
 	if (g_headerObj[`setColor`][2] != undefined) {
-		grd.addColorStop(1, g_headerObj[`setColor`][2]);
+		grd2.addColorStop(1, g_headerObj[`setColor`][2]);
 	} else {
-		grd.addColorStop(1, `#66ffff`);
+		grd2.addColorStop(1, `#66ffff`);
 	}
 	var titlefontsize = 64 * (12 / g_headerObj[`musicTitle`].length);
 	if (titlefontsize >= 64) {
 		titlefontsize = 64;
 	}
 
-	// カスタム変数 titlesize の定義
+	// カスタム変数 titlesize の定義 (使用例： |titlesize=40|)
 	if (g_rootObj.titlesize != undefined && g_rootObj.titlesize != ``) {
 		titlefontsize = setVal(g_rootObj.titlesize, titlefontsize, `number`);
 	}
+	// カスタム変数 titlefont の定義 (使用例： |titlefont=Century,Meiryo UI|)
+	let titlefontname = `メイリオ`;
+	if (g_rootObj.titlefont !== undefined && g_rootObj.titlefont !== ``) {
+		titlefontname = setVal(g_rootObj.titlefont, titlefontname, `string`);
+	}
 
 	createLabel(l0ctx, g_headerObj[`musicTitle`], g_sWidth / 2, g_sHeight / 2,
-		titlefontsize, `メイリオ`, grd, `center`);
+		titlefontsize, titlefontname, grd2, `center`);
 }
 
 /**
@@ -146,13 +151,15 @@ function customMainInit() {
 	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 
 	// Ready?表示
-	var lblReady = createDivLabel(`lblReady`, g_sWidth / 2 - 100, g_sHeight / 2 - 100,
-		200, 50, 40, C_CLR_TITLE,
-		`<span style='color:#9999ff;font-size:60px;'>R</span>EADY?`);
-	divRoot.appendChild(lblReady);
-	lblReady.style.animationDuration = `2.5s`;
-	lblReady.style.animationName = `leftToRightFade`;
-	lblReady.style.opacity = 0;
+	if (g_rootObj.customReady === undefined || g_rootObj.customReady !== `true`) {
+		var lblReady = createDivLabel(`lblReady`, g_sWidth / 2 - 100, g_sHeight / 2 - 75,
+			200, 50, 40, C_CLR_TITLE,
+			`<span style='color:#9999ff;font-size:60px;'>R</span>EADY?`);
+		divRoot.appendChild(lblReady);
+		lblReady.style.animationDuration = `2.5s`;
+		lblReady.style.animationName = `leftToRightFade`;
+		lblReady.style.opacity = 0;
+	}
 
 	// ここにカスタム処理を記述する
 
