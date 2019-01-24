@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.0.2`;
+const g_version = `Ver 2.1.0`;
 const g_version_gauge = `Ver 0.5.1.20181223`;
 const g_version_musicEncoded = `Ver 0.1.1.20181224`;
 const g_version_lyrics = `Ver 0.2.0.20181230`;
@@ -1286,7 +1286,14 @@ function createButton(_obj, _func) {
  * @param {string} _align テキストの表示位置 (left, center, right)
  */
 function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align) {
-	_ctx.font = `${_fontsize}px "${_fontname}"`;
+	const fontFamilys = _fontname.split(`,`);
+	let fontView = ``;
+	for (var j = 0; j < fontFamilys.length; j++) {
+		fontView += `"${fontFamilys[j]}",`;
+	}
+	fontView += `sans-serif`;
+
+	_ctx.font = `${_fontsize}px ${fontView}`;
 	_ctx.textAlign = _align;
 	_ctx.fillStyle = _color;
 	_ctx.fillText(_text, _x, _y);
@@ -1463,6 +1470,9 @@ function initialControl() {
  */
 function titleInit() {
 
+	// レイヤー情報取得
+	const layer0 = document.getElementById(`layer0`);
+	const l0ctx = layer0.getContext(`2d`);
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
 
@@ -1482,6 +1492,56 @@ function titleInit() {
 		if (typeof customTitleInit2 === `function`) {
 			customTitleInit2();
 		}
+	}
+
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (g_headerObj.customBackUse === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	}
+
+	// 背景の矢印オブジェクトを表示
+	if (g_headerObj.customTitleArrowUse === `false`) {
+		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj[`setColor`][0], (g_sWidth - 500) / 2, -15, 500, 180);
+		lblArrow.style.opacity = 0.25;
+		lblArrow.style.zIndex = 0;
+		divRoot.appendChild(lblArrow);
+	}
+
+	// 曲名文字描画（曲名は譜面データから取得）
+	// 矢印色の1番目と3番目を使ってタイトルをグラデーション
+	const grd2 = l0ctx.createLinearGradient(0, 0, g_sHeight, 0);
+	if (g_headerObj.customTitleUse === `false`) {
+
+		if (g_headerObj.setColor[0] != undefined) {
+			grd2.addColorStop(0, g_headerObj[`setColor`][0]);
+		} else {
+			grd2.addColorStop(0, `#ffffff`);
+		}
+		if (g_headerObj.setColor[2] != undefined) {
+			grd2.addColorStop(1, g_headerObj[`setColor`][2]);
+		} else {
+			grd2.addColorStop(1, `#66ffff`);
+		}
+		let titlefontsize = 64 * (12 / g_headerObj.musicTitle.length);
+		if (titlefontsize >= 64) {
+			titlefontsize = 64;
+		}
+
+		// カスタム変数 titlesize の定義 (使用例： |titlesize=40|)
+		if (g_headerObj.titlesize != ``) {
+			titlefontsize = setVal(g_headerObj.titlesize, titlefontsize, `number`);
+		}
+		// カスタム変数 titlefont の定義 (使用例： |titlefont=Century,Meiryo UI|)
+		let titlefontname = `メイリオ`;
+		if (g_headerObj.titlefont !== ``) {
+			titlefontname = setVal(g_headerObj.titlefont, titlefontname, `string`);
+		}
+		createLabel(l0ctx, g_headerObj.musicTitle, g_sWidth / 2, g_sHeight / 2,
+			titlefontsize, titlefontname, grd2, `center`);
 	}
 
 	// ブラウザチェック
@@ -1581,9 +1641,13 @@ function titleInit() {
 	if (setVal(g_localVersion2, ``, `string`) !== ``) {
 		customVersion += ` / ${g_localVersion2}`;
 	}
+	let releaseDate = ``;
+	if (setVal(g_headerObj.releaseDate, ``, `string`) !== ``) {
+		releaseDate += ` @${g_headerObj.releaseDate}`;
+	}
 	const lnkVersion = createButton({
 		id: `lnkVersion`,
-		name: `&copy; 2018 ティックル, CW ${g_version}${customVersion}`,
+		name: `&copy; 2018 ティックル, CW ${g_version}${customVersion}${releaseDate}`,
 		x: g_sWidth / 3,
 		y: g_sHeight - 20,
 		width: g_sWidth * 2 / 3 - 10,
@@ -1906,7 +1970,7 @@ function headerConvert(_dosObj) {
 		makeWarningWindow(C_MSG_E_0031);
 	}
 
-	// hashTag
+	// ハッシュタグ
 	if (_dosObj.hashTag !== undefined) {
 		obj.hashTag = _dosObj.hashTag;
 	}
@@ -1928,6 +1992,31 @@ function headerConvert(_dosObj) {
 
 	// 最終演出表示有無（noneで無効化）
 	obj.finishView = setVal(_dosObj.finishView, ``, `string`);
+
+	// 更新日
+	obj.releaseDate = setVal(_dosObj.releaseDate, ``, `string`);
+
+	// タイトル画面のデフォルト曲名表示の利用有無
+	obj.customTitleUse = setVal(_dosObj.customTitleUse, ``, `string`);
+
+	// タイトル画面のデフォルト背景矢印の利用有無
+	obj.customTitleArrowUse = setVal(_dosObj.customTitleArrowUse, ``, `string`);
+
+	// デフォルト背景の利用有無
+	obj.customBackUse = setVal(_dosObj.customBackUse, ``, `string`);
+
+	// デフォルト背景の利用有無（メイン画面のみ適用）
+	obj.customBackMainUse = setVal(_dosObj.customBackMainUse, ``, `string`);
+
+	// デフォルトReady表示の利用有無
+	obj.customReadyUse = setVal(_dosObj.customReadyUse, ``, `string`);
+
+	// デフォルト曲名表示のフォントサイズ
+	obj.titlesize = setVal(_dosObj.titlesize, ``, `number`);
+
+	// デフォルト曲名表示のフォント名
+	obj.titlefont = setVal(_dosObj.titlefont, ``, `string`);
+
 
 	return obj;
 }
@@ -2150,6 +2239,10 @@ function keysConvert(_dosObj) {
  */
 function optionInit() {
 
+	// レイヤー情報取得
+	const layer0 = document.getElementById(`layer0`);
+	const l0ctx = layer0.getContext(`2d`);
+
 	const divRoot = document.getElementById(`divRoot`);
 
 	// タイトル文字描画
@@ -2166,6 +2259,15 @@ function optionInit() {
 		if (typeof customOptionInit2 === `function`) {
 			customOptionInit2();
 		}
+	}
+
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (g_headerObj.customBackUse === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	}
 
 	// 戻るボタン描画
@@ -2804,6 +2906,11 @@ function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
 /*-----------------------------------------------------------*/
 
 function settingsDisplayInit() {
+
+	// レイヤー情報取得
+	const layer0 = document.getElementById(`layer0`);
+	const l0ctx = layer0.getContext(`2d`);
+
 	const divRoot = document.getElementById(`divRoot`);
 
 	// タイトル文字描画
@@ -2820,6 +2927,15 @@ function settingsDisplayInit() {
 		if (typeof customSettingsDisplayInit2 === `function`) {
 			customSettingsDisplayInit2();
 		}
+	}
+
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (g_headerObj.customBackUse === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	}
 
 	// 戻るボタン描画
@@ -2992,6 +3108,10 @@ function createSettingsDisplayWindow(_sprite) {
  */
 function keyConfigInit() {
 
+	// レイヤー情報取得
+	const layer0 = document.getElementById(`layer0`);
+	const l0ctx = layer0.getContext(`2d`);
+
 	const divRoot = document.getElementById(`divRoot`);
 
 	// タイトル文字描画
@@ -3005,7 +3125,6 @@ function keyConfigInit() {
 		`[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`);
 	kcDesc.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcDesc);
-
 
 	// キーの一覧を表示
 	const keyconSprite = createSprite(`divRoot`, `keyconSprite`, (g_sWidth - 400) / 2, 100, 400, 300);
@@ -3093,6 +3212,15 @@ function keyConfigInit() {
 		if (typeof customKeyConfigInit2 === `function`) {
 			customKeyConfigInit2();
 		}
+	}
+
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (g_headerObj.customBackUse === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	}
 
 	// 戻るボタン描画
@@ -4354,6 +4482,10 @@ function getArrowSettings() {
  */
 function MainInit() {
 
+	// レイヤー情報取得
+	const layer0 = document.getElementById(`layer0`);
+	const l0ctx = layer0.getContext(`2d`);
+
 	const divRoot = document.getElementById(`divRoot`);
 
 	g_workObj.word0Data = ``;
@@ -4654,6 +4786,26 @@ function MainInit() {
 		if (typeof customMainInit2 === `function`) {
 			customMainInit2();
 		}
+	}
+
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (g_headerObj.customBackUse === `false` || g_headerObj.customBackMainUse === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	}
+
+	// Ready?表示
+	if (g_rootObj.customReadyUse === `false`) {
+		const lblReady = createDivLabel(`lblReady`, g_sWidth / 2 - 100, g_sHeight / 2 - 75,
+			200, 50, 40, C_CLR_TITLE,
+			`<span style='color:` + g_headerObj.setColor[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
+		divRoot.appendChild(lblReady);
+		lblReady.style.animationDuration = `2.5s`;
+		lblReady.style.animationName = `leftToRightFade`;
+		lblReady.style.opacity = 0;
 	}
 
 	// キー操作イベント
@@ -5795,6 +5947,10 @@ function finishViewing() {
  */
 function resultInit() {
 
+	// レイヤー情報取得
+	const layer0 = document.getElementById(`layer0`);
+	const l0ctx = layer0.getContext(`2d`);
+
 	const divRoot = document.getElementById(`divRoot`);
 
 	// タイトル文字描画
@@ -5979,6 +6135,15 @@ function resultInit() {
 		if (typeof customResultInit2 === `function`) {
 			customResultInit2();
 		}
+	}
+
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (g_headerObj.customBackUse === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	}
 
 	// Twitter用リザルト
