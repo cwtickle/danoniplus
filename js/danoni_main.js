@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/01/14
+ * Revised : 2019/01/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.15.0";
+const g_version = "Ver 1.15.1";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 const g_version_lyrics = "Ver 0.2.0.20181230";
@@ -4348,7 +4348,7 @@ function getArrowSettings() {
 	g_resultObj.fCombo = 0;
 	g_resultObj.fmaxCombo = 0;
 
-	g_workObj.lifeVal = g_workObj.lifeInit;
+	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
 }
 
@@ -6143,7 +6143,7 @@ function resultInit() {
 }
 
 function resultFadeOut() {
-	const tmpVolume = (g_audio.volume - 5 / 1000);
+	const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
 	if (tmpVolume < 0) {
 		g_audio.volume = 0;
 		clearInterval(g_timeoutEvtId);
