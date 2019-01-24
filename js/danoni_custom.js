@@ -25,7 +25,7 @@ function customTitleInit() {
 	// バージョン表記
 	g_localVersion = ``;
 
-	// デフォルトの曲名表示を利用する場合は、下記を必要に応じてコメント or コメントアウトしてください。
+	// デフォルトの曲名表示を利用しない場合は、下記をコメント化してください。
 	// もう一方のcustomファイルを使って再上書きも可能です。
 
 	g_headerObj.customTitleUse = `false`;
