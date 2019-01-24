@@ -32,6 +32,7 @@ function customTitleInit() {
 	g_headerObj.customTitleArrowUse = `false`;
 	g_headerObj.customBackUse = `false`;
 	g_headerObj.customBackMainUse = `false`;
+	g_headerObj.customReadyUse = `false`;
 }
 
 /**
