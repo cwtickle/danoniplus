@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.1.0`;
+const g_version = `Ver 2.1.1`;
 const g_version_gauge = `Ver 0.5.1.20181223`;
 const g_version_musicEncoded = `Ver 0.1.1.20181224`;
 const g_version_lyrics = `Ver 0.2.0.20181230`;
@@ -1486,21 +1486,21 @@ function titleInit() {
 			.replace(/[\t\n]/g, ``), 0, 15);
 	divRoot.appendChild(lblTitle);
 
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (setVal(g_headerObj.customBackUse, ``, `string`) === `` || g_headerObj.customBackUse === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	}
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customTitleInit === `function`) {
 		customTitleInit();
 		if (typeof customTitleInit2 === `function`) {
 			customTitleInit2();
 		}
-	}
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	}
 
 	// 背景の矢印オブジェクトを表示
@@ -2253,14 +2253,6 @@ function optionInit() {
 	// オプションボタン用の設置
 	createOptionWindow(`divRoot`);
 
-	// ユーザカスタムイベント(初期)
-	if (typeof customOptionInit === `function`) {
-		customOptionInit();
-		if (typeof customOptionInit2 === `function`) {
-			customOptionInit2();
-		}
-	}
-
 	// 画面背景を指定 (background-color)
 	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
 	if (g_headerObj.customBackUse === `false`) {
@@ -2268,6 +2260,14 @@ function optionInit() {
 		grd.addColorStop(1, `#222222`);
 		l0ctx.fillStyle = grd;
 		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	}
+
+	// ユーザカスタムイベント(初期)
+	if (typeof customOptionInit === `function`) {
+		customOptionInit();
+		if (typeof customOptionInit2 === `function`) {
+			customOptionInit2();
+		}
 	}
 
 	// 戻るボタン描画
@@ -2921,14 +2921,6 @@ function settingsDisplayInit() {
 	// オプションボタン用の設置
 	createSettingsDisplayWindow(`divRoot`);
 
-	// ユーザカスタムイベント(初期)
-	if (typeof customSettingsDisplayInit === `function`) {
-		customSettingsDisplayInit();
-		if (typeof customSettingsDisplayInit2 === `function`) {
-			customSettingsDisplayInit2();
-		}
-	}
-
 	// 画面背景を指定 (background-color)
 	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
 	if (g_headerObj.customBackUse === `false`) {
@@ -2936,6 +2928,14 @@ function settingsDisplayInit() {
 		grd.addColorStop(1, `#222222`);
 		l0ctx.fillStyle = grd;
 		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	}
+
+	// ユーザカスタムイベント(初期)
+	if (typeof customSettingsDisplayInit === `function`) {
+		customSettingsDisplayInit();
+		if (typeof customSettingsDisplayInit2 === `function`) {
+			customSettingsDisplayInit2();
+		}
 	}
 
 	// 戻るボタン描画
@@ -3121,6 +3121,15 @@ function keyConfigInit() {
 			.replace(/[\t\n]/g, ``), 0, 15);
 	divRoot.appendChild(lblTitle);
 
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (g_headerObj.customBackUse === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	}
+
 	const kcDesc = createDivLabel(`kcDesc`, 0, 65, g_sWidth, 20, 14, C_CLR_TITLE,
 		`[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`);
 	kcDesc.style.align = C_ALIGN_CENTER;
@@ -3212,15 +3221,6 @@ function keyConfigInit() {
 		if (typeof customKeyConfigInit2 === `function`) {
 			customKeyConfigInit2();
 		}
-	}
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	}
 
 	// 戻るボタン描画
@@ -4488,6 +4488,15 @@ function MainInit() {
 
 	const divRoot = document.getElementById(`divRoot`);
 
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (g_headerObj.customBackUse === `false` || g_headerObj.customBackMainUse === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	}
+
 	g_workObj.word0Data = ``;
 	g_workObj.word1Data = ``;
 	g_currentArrows = 0;
@@ -4786,15 +4795,6 @@ function MainInit() {
 		if (typeof customMainInit2 === `function`) {
 			customMainInit2();
 		}
-	}
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false` || g_headerObj.customBackMainUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	}
 
 	// Ready?表示
@@ -5962,6 +5962,15 @@ function resultInit() {
 	playDataWindow.style.border = `solid 0.5px #666666`;
 	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 150, 185, 300, 210);
 
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (g_headerObj.customBackUse === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	}
+
 	// スコア計算(一括)
 	const scoreTmp = g_resultObj.ii * 8 +
 		g_resultObj.shakin * 4 +
@@ -6135,15 +6144,6 @@ function resultInit() {
 		if (typeof customResultInit2 === `function`) {
 			customResultInit2();
 		}
-	}
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	}
 
 	// Twitter用リザルト
