@@ -1488,7 +1488,7 @@ function titleInit() {
 
 	// 画面背景を指定 (background-color)
 	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
+	if (setVal(g_headerObj.customBackUse, ``, `string`) === `` || g_headerObj.customBackUse === `false`) {
 		grd.addColorStop(0, `#000000`);
 		grd.addColorStop(1, `#222222`);
 		l0ctx.fillStyle = grd;
