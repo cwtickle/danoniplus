@@ -1935,6 +1935,13 @@ function headerConvert(_dosObj) {
 		obj.endFrame = _dosObj.endFrame.split(`$`);
 	}
 
+	// タイミング調整
+	if (_dosObj.adjustment !== undefined) {
+		obj.adjustment = _dosObj.adjustment.split(`$`);
+	} else {
+		obj.adjustment = [0];
+	}
+
 	// 外部jsファイルの指定
 	if (_dosObj.customjs !== undefined && _dosObj.customjs !== ``) {
 		const customjss = _dosObj.customjs.split(`,`);
@@ -3600,6 +3607,9 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	let frzName;
 	let tmpData;
 	let tmpArrayData = new Array();
+	const headerAdjustment = parseInt(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
+	const realAdjustment = parseInt(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
+	g_stateObj.realAdjustment = realAdjustment;
 
 	for (var j = 0, k = 0; j < keyNum; j++) {
 
@@ -3615,7 +3625,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				} else {
 					g_allArrow += obj.arrowData[j].length;
 					for (var k = 0; k < obj.arrowData[j].length; k++) {
-						obj.arrowData[j][k] = parseInt(obj.arrowData[j][k]) + parseInt(g_stateObj.adjustment) + _preblankFrame;
+						obj.arrowData[j][k] = parseInt(obj.arrowData[j][k]) + realAdjustment
 					}
 				}
 			}
@@ -3646,7 +3656,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				} else {
 					g_allFrz += obj.frzData[j].length;
 					for (var k = 0; k < obj.frzData[j].length; k++) {
-						obj.frzData[j][k] = parseFloat(obj.frzData[j][k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
+						obj.frzData[j][k] = parseFloat(obj.frzData[j][k]) + realAdjustment
 					}
 				}
 			}
@@ -3660,7 +3670,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	if (_dosObj[`speed${_scoreNo}${speedFooter}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
 		obj.speedData = _dosObj[`speed${_scoreNo}${speedFooter}`].split(`,`);
 		for (var k = 0; k < obj.speedData.length; k += 2) {
-			obj.speedData[k] = parseFloat(obj.speedData[k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
+			obj.speedData[k] = parseFloat(obj.speedData[k]) + realAdjustment
 			obj.speedData[k + 1] = parseFloat(obj.speedData[k + 1]);
 		}
 	}
@@ -3669,7 +3679,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	if (_dosObj[`boost${_scoreNo}_data`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
 		obj.boostData = _dosObj[`boost${_scoreNo}_data`].split(`,`);
 		for (var k = 0; k < obj.boostData.length; k += 2) {
-			obj.boostData[k] = parseFloat(obj.boostData[k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
+			obj.boostData[k] = parseFloat(obj.boostData[k]) + realAdjustment
 			obj.boostData[k + 1] = parseFloat(obj.boostData[k + 1]);
 		}
 	}
@@ -3679,7 +3689,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	if (_dosObj[`color${_scoreNo}_data`] !== undefined && _dosObj[`color${_scoreNo}_data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
 		obj.colorData = _dosObj[`color${_scoreNo}_data`].split(`,`);
 		for (var k = 0; k < obj.colorData.length; k += 3) {
-			obj.colorData[k] = parseFloat(obj.colorData[k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
+			obj.colorData[k] = parseFloat(obj.colorData[k]) + realAdjustment
 			obj.colorData[k + 1] = parseFloat(obj.colorData[k + 1]);
 		}
 	}
@@ -3688,7 +3698,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	if (_dosObj[`acolor${_scoreNo}_data`] !== undefined && _dosObj[`acolor${_scoreNo}data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
 		obj.acolorData = _dosObj[`acolor${_scoreNo}_data`].split(`,`);
 		for (var k = 0; k < obj.acolorData.length; k += 3) {
-			obj.acolorData[k] = parseFloat(obj.acolorData[k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
+			obj.acolorData[k] = parseFloat(obj.acolorData[k]) + realAdjustment
 			obj.acolorData[k + 1] = parseFloat(obj.acolorData[k + 1]);
 		}
 	}
@@ -3704,7 +3714,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 		if (tmpData !== undefined && tmpData !== ``) {
 			const tmpWordData = tmpData.split(`,`);
 			for (var k = 0; k < tmpWordData.length; k += 3) {
-				tmpWordData[k] = parseFloat(tmpWordData[k]) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
+				tmpWordData[k] = parseFloat(tmpWordData[k]) + realAdjustment
 				tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
 
 				let addFrame = 0;
@@ -3742,7 +3752,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				const tmpBackData = tmpData.split(`,`);
 
 				// 値チェックとエスケープ処理
-				const tmpFrame = setVal(tmpBackData[0], 200, `number`) + parseFloat(g_stateObj.adjustment) + _preblankFrame;
+				const tmpFrame = setVal(tmpBackData[0], 200, `number`) + realAdjustment
 				const tmpDepth = setVal(tmpBackData[1], 0, `number`);
 				const tmpPath = escapeHtml(setVal(tmpBackData[2], ``, `string`));
 				const tmpClass = escapeHtml(setVal(tmpBackData[3], ``, `string`));
