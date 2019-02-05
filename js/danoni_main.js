@@ -3609,6 +3609,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	let tmpArrayData = new Array();
 	const headerAdjustment = parseInt(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
 	const realAdjustment = parseInt(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
+	g_stateObj.realAdjustment = realAdjustment;
 
 	for (var j = 0, k = 0; j < keyNum; j++) {
 
