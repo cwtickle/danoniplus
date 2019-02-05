@@ -118,6 +118,9 @@ const C_IMG_MONARFRZBAR = `../img/frzbar.png`;
 let g_musicEncodedFlg = false;
 let g_musicdata = ``;
 
+// 外部dosデータ
+let g_externalDos = ``;
+
 // Motionオプション配列の基準位置
 const C_MOTION_STD_POS = 15;
 
@@ -771,6 +774,12 @@ const C_MSG_E_0012 = `曲名情報が未設定です。(E-0012)<br>` +
 	`|musicTitle=曲名,アーティスト名,アーティストURL|`;
 const C_MSG_E_0021 = `譜面情報が未指定か、フォーマットが間違っています。(E-0021)<br>` +
 	`|difData=キー数,譜面名,初期速度|`;
+const C_MSG_E_0022 = `外部譜面ファイルのフォーマットが間違っています。(E-0022)<br>` +
+	`function externalDosInit() { g_externalDos = \`(譜面データ)\`; }`;
+const C_MSG_E_0023 = `譜面情報が未指定です。(E-0023)<br>` +
+	`以下のいずれか、または両方を指定してください。<br>` +
+	`&lt;input type="hidden" name="externalDos" id="externalDos" value="dos.txt"&gt;<br>` +
+	`&lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>` ;
 const C_MSG_E_0031 = `楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>` +
 	`|musicUrl=****.mp3|`;
 
@@ -1411,8 +1420,39 @@ function initialControl() {
 	}
 
 	// 譜面データの読み込み
-	const dos = document.getElementById(`dos`).value;
-	g_rootObj = dosConvert(dos);
+	const dosInput = document.getElementById(`dos`);
+	const externalDosInput = document.getElementById(`externalDos`);
+
+	if (dosInput === null && externalDosInput === null) {
+		makeWarningWindow(C_MSG_E_0023);
+		initAfterDosLoaded();
+	}
+
+	// HTML埋め込みdos
+	if (dosInput !== null) {
+		g_rootObj = dosConvert(dosInput.value);
+		if (externalDosInput === null) {
+			initAfterDosLoaded();
+		}
+	}
+
+	// 外部dos読み込み
+	if (externalDosInput !== null) {
+		const filename = externalDosInput.value.match(/.+\..*/)[0];
+		const randTime = new Date().getTime();
+		loadScript(`${filename}?${randTime}`, function () {
+			if (typeof externalDosInit === `function`) {
+				externalDosInit();
+				Object.assign(g_rootObj, dosConvert(g_externalDos.replace(`&`, `|`)));
+			} else {
+				makeWarningWindow(C_MSG_E_0022);
+			}
+			initAfterDosLoaded();
+		});
+	}
+}
+
+function initAfterDosLoaded() {
 	g_headerObj = headerConvert(g_rootObj);
 	keysConvert(g_rootObj);
 
