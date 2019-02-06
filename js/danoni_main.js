@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/05
+ * Revised : 2019/02/06
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.2.0`;
+const g_version = `Ver 2.3.0`;
 const g_version_gauge = `Ver 0.5.1.20181223`;
 const g_version_musicEncoded = `Ver 0.1.1.20181224`;
 const g_version_lyrics = `Ver 0.2.0.20181230`;
@@ -779,7 +779,7 @@ const C_MSG_E_0022 = `外部譜面ファイルのフォーマットが間違っ�
 const C_MSG_E_0023 = `譜面情報が未指定です。(E-0023)<br>` +
 	`以下のいずれか、または両方を指定してください。<br>` +
 	`&lt;input type="hidden" name="externalDos" id="externalDos" value="dos.txt"&gt;<br>` +
-	`&lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>` ;
+	`&lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>`;
 const C_MSG_E_0031 = `楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>` +
 	`|musicUrl=****.mp3|`;
 
