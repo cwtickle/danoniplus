@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/06
+ * Revised : 2019/02/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.3.0`;
+const g_version = `Ver 2.4.0`;
 const g_version_gauge = `Ver 0.5.1.20181223`;
 const g_version_musicEncoded = `Ver 0.1.1.20181224`;
 const g_version_lyrics = `Ver 0.2.0.20181230`;
@@ -1703,7 +1703,7 @@ function titleInit() {
 		}
 	}
 
-	document.onkeyup = evt => {}
+	document.onkeyup = evt => { }
 
 	divRoot.oncontextmenu = _ => false;
 }
@@ -2407,7 +2407,7 @@ function optionInit() {
 			}
 		}
 	}
-	document.onkeyup = evt => {}
+	document.onkeyup = evt => { }
 }
 
 /**
@@ -3069,7 +3069,7 @@ function settingsDisplayInit() {
 			}
 		}
 	}
-	document.onkeyup = evt => {}
+	document.onkeyup = evt => { }
 }
 
 /**
@@ -6293,7 +6293,7 @@ function resultInit() {
 			}
 		}
 	}
-	document.onkeyup = evt => {}
+	document.onkeyup = evt => { }
 	if (g_headerObj.fadeFrame !== undefined && g_headerObj.fadeFrame !== ``) {
 		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
 		} else {
