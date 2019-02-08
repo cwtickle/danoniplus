@@ -1374,20 +1374,21 @@ function clearWindow() {
 
 }
 
-function loadScript(url, callback) {
+function loadScript(_url, _callback, _charset = `UTF-8`) {
 	const script = document.createElement(`script`);
 	script.type = `text/javascript`;
-	script.src = url;
+	script.src = _url;
+	script.charset = _charset;
 
 	if (script.readyState) {
 		script.onreadystatechange = _ => {
 			if (script.readyState === `loaded` || script.readyState === `complete`) {
 				script.onreadystatechange = null;
-				callback();
+				_callback();
 			}
 		};
 	} else {
-		script.onload = _ => callback();
+		script.onload = _ => _callback();
 	}
 	document.querySelector(`head`).appendChild(script);
 }
@@ -1432,6 +1433,12 @@ function initialControl() {
 
 	// 外部dos読み込み
 	if (externalDosInput !== null) {
+		let charset = document.characterSet;
+		const charsetInput = document.querySelector(`#externalDosCharset`);
+		if (charsetInput !== null) {
+			charset = charsetInput.value;
+		}
+
 		const filename = externalDosInput.value.match(/.+\..*/)[0];
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
@@ -1442,7 +1449,7 @@ function initialControl() {
 				makeWarningWindow(C_MSG_E_0022);
 			}
 			initAfterDosLoaded();
-		});
+		}, charset);
 	}
 }
 
