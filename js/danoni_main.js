@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/08
+ * Revised : 2019/02/09
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.5.2`;
+const g_version = `Ver 2.5.3`;
 const g_version_gauge = `Ver 0.5.1.20181223`;
 const g_version_musicEncoded = `Ver 0.1.1.20181224`;
 const g_version_lyrics = `Ver 0.2.0.20181230`;
@@ -2829,14 +2829,14 @@ function createOptionWindow(_sprite) {
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
 	fadeinSlider.value = g_stateObj.fadein;
 
-	// フェードインのスライダー処理 (アロー関数使用禁止)
-	fadeinSlider.addEventListener(`input`, function () {
-		g_stateObj.fadein = parseInt(this.value);
+	// フェードインのスライダー処理
+	fadeinSlider.addEventListener(`input`, _ => {
+		g_stateObj.fadein = parseInt(fadeinSlider.value);
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}, false);
 
-	fadeinSlider.addEventListener(`change`, function () {
-		g_stateObj.fadein = parseInt(this.value);
+	fadeinSlider.addEventListener(`change`, _ => {
+		g_stateObj.fadein = parseInt(fadeinSlider.value);
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}, false);
 
