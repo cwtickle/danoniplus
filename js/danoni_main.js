@@ -69,6 +69,7 @@ const C_CLR_RESET = `#003300`;
 const C_CLR_TWEET = `#003333`;
 const C_CLR_TEXT = `#ffffff`;
 const C_CLR_TITLE = `#cccccc`;
+const C_CLR_LOADING_BAR = `#eeeeee`;
 
 const C_LBL_TITLESIZE = 32;
 const C_LBL_BTNSIZE = 28;
@@ -780,6 +781,9 @@ const C_MSG_E_0023 = `譜面情報が未指定です。(E-0023)<br>
 	&lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>`;
 const C_MSG_E_0031 = `楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>
 	|musicUrl=****.mp3|`;
+const C_MSG_E_0032 = `楽曲ファイルの読み込みに失敗しました。(E-0032)`;
+const C_MSG_E_0033 = `楽曲ファイルの読み込み中に接続がタイムアウトしました。(E-0033)`;
+const C_MSG_E_0034 = `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`;
 
 const C_MSG_E_0101 = `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
 	|color{0}=0,1,0,1,0,2|`;
@@ -1398,7 +1402,7 @@ function loadScript(_url, _callback, _charset = `UTF-8`) {
 /*-----------------------------------------------------------*/
 
 function initialControl() {
-
+	const layer0 = document.querySelector(`#layer0`);
 	g_sWidth = layer0.width;
 	g_sHeight = layer0.height;
 
@@ -1413,6 +1417,19 @@ function initialControl() {
 	} else {
 		divRoot = document.querySelector(`#divRoot`);
 	}
+
+	// 背景の表示
+	const l0ctx = layer0.getContext(`2d`);
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	grd.addColorStop(0, `#000000`);
+	grd.addColorStop(1, `#222222`);
+	l0ctx.fillStyle = grd;
+	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+
+	// Now Loadingを表示
+	const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight / 2 - 40,
+		g_sWidth, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `Now Loading...`);
+	divRoot.appendChild(lblLoading);
 
 	// 譜面データの読み込み
 	const dosInput = document.querySelector(`#dos`);
@@ -1486,20 +1503,83 @@ function initAfterDosLoaded() {
 	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
 		if (g_headerObj.customjs2 !== ``) {
 			loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
-				if (g_musicEncodedFlg) {
-					loadScript(`../${g_headerObj.musicFolder}/${g_headerObj.musicUrl}?${randTime}`, _ => titleInit());
-				} else {
-					titleInit();
-				}
+				loadMusic();
 			});
 		} else {
-			if (g_musicEncodedFlg) {
-				loadScript(`../${g_headerObj.musicFolder}/${g_headerObj.musicUrl}?${randTime}`, _ => titleInit());
-			} else {
-				titleInit();
-			}
+			loadMusic();
 		}
 	});
+}
+
+function loadMusic() {
+	const url = `../${g_headerObj.musicFolder}/${g_headerObj.musicUrl}`;
+
+	// ローカル動作時
+	if (location.href.match(`^file`)) {
+		clearWindow();
+		setAudio(url);
+	  return;
+	}
+
+	// XHRで読み込み
+	const request = new XMLHttpRequest();
+	request.open(`GET`, url, true);
+	request.responseType = `blob`;
+
+	// 読み込み完了時
+	request.addEventListener(`load`, _ => {
+		if (request.status >= 200 && request.status < 300) {
+			const blobUrl = URL.createObjectURL(request.response);
+			clearWindow();
+			setAudio(blobUrl);
+		} else {
+			makeWarningWindow(`${C_MSG_E_0032}<br>(${request.status} ${request.statusText})`);
+		}
+	});
+
+	// 進捗時
+	request.addEventListener(`progress`, _event => {
+		const lblLoading = document.querySelector(`#lblLoading`);
+
+		if (_event.lengthComputable) {
+			const rate = _event.loaded / _event.total;
+			const layer0 = document.querySelector(`#layer0`);
+			const l0ctx = layer0.getContext(`2d`);
+			l0ctx.fillStyle = C_CLR_LOADING_BAR;
+			l0ctx.fillRect(0, layer0.height / 2 - 10, layer0.width * rate, 20);
+			lblLoading.innerText = `Now Loading... ${Math.floor(rate * 100)}%`;
+		} else {
+			lblLoading.innerText = `Now Loading... ${_event.loaded}Bytes`;
+		}
+	});
+
+	// エラー処理
+	request.addEventListener(`timeout`, _ => {
+		makeWarningWindow(`${C_MSG_E_0033}`);
+	});
+
+	request.addEventListener(`error`, _ => {
+		makeWarningWindow(`${C_MSG_E_0034}`);
+	});
+
+	request.send();
+}
+
+function setAudio(_url) {
+	if (g_musicEncodedFlg) {
+		loadScript(_url, _ => {
+			if (typeof musicInit === `function`) {
+				musicInit();
+				g_audio.src = `data:audio/mp3;base64,${g_musicdata}`;
+			} else {
+				makeWarningWindow(C_MSG_E_0031);
+			}
+			titleInit();
+		});
+	} else {
+		g_audio.src = _url;
+		titleInit();
+	}
 }
 
 /**
@@ -1587,18 +1667,6 @@ function titleInit() {
 		g_userAgent.indexOf(`edge`) !== -1) {
 
 		makeWarningWindow(C_MSG_W_0001);
-	}
-
-	// オーディオファイル指定
-	if (g_musicEncodedFlg) {
-		if (typeof musicInit === `function`) {
-			musicInit();
-			g_audio.src = `data:audio/mp3;base64,${g_musicdata}`;
-		} else {
-			makeWarningWindow(C_MSG_E_0031);
-		}
-	} else {
-		g_audio.src = `../${g_headerObj.musicFolder}/${g_headerObj.musicUrl}`;
 	}
 
 	// ボタン描画
