@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.5.1`;
+const g_version = `Ver 2.5.2`;
 const g_version_gauge = `Ver 0.5.1.20181223`;
 const g_version_musicEncoded = `Ver 0.1.1.20181224`;
 const g_version_lyrics = `Ver 0.2.0.20181230`;
@@ -6010,14 +6010,16 @@ function resultInit() {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
 		} else {
+			let rankPos = g_rankObj.rankRate.length;
 			for (let j = 0, len = g_rankObj.rankRate.length; j < len; j++) {
+				rankPos = len;
 				if (resultScore / 10000 >= g_rankObj.rankRate[j]) {
 					rankMark = g_rankObj.rankMarks[j];
 					rankColor = g_rankObj.rankColor[j];
 					break;
 				}
 			}
-			if (resultScore / 10000 < g_rankObj.rankRate[len - 1]) {
+			if (resultScore / 10000 < g_rankObj.rankRate[rankPos - 1]) {
 				rankMark = g_rankObj.rankMarkC;
 				rankColor = g_rankObj.rankColorC;
 			}
