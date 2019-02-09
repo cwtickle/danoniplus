@@ -2829,14 +2829,14 @@ function createOptionWindow(_sprite) {
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
 	fadeinSlider.value = g_stateObj.fadein;
 
-	// フェードインのスライダー処理 (アロー関数使用禁止)
-	fadeinSlider.addEventListener(`input`, function () {
-		g_stateObj.fadein = parseInt(this.value);
+	// フェードインのスライダー処理
+	fadeinSlider.addEventListener(`input`, _ => {
+		g_stateObj.fadein = parseInt(fadeinSlider.value);
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}, false);
 
-	fadeinSlider.addEventListener(`change`, function () {
-		g_stateObj.fadein = parseInt(this.value);
+	fadeinSlider.addEventListener(`change`, _ => {
+		g_stateObj.fadein = parseInt(fadeinSlider.value);
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}, false);
 
