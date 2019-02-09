@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.5.0`;
+const g_version = `Ver 2.5.1`;
 const g_version_gauge = `Ver 0.5.1.20181223`;
 const g_version_musicEncoded = `Ver 0.1.1.20181224`;
 const g_version_lyrics = `Ver 0.2.0.20181230`;
@@ -2829,12 +2829,14 @@ function createOptionWindow(_sprite) {
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
 	fadeinSlider.value = g_stateObj.fadein;
 
-	fadeinSlider.addEventListener(`input`, _ => {
+	// フェードインのスライダー処理 (アロー関数使用禁止)
+	fadeinSlider.addEventListener(`input`, function () {
 		g_stateObj.fadein = parseInt(this.value);
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}, false);
 
-	fadeinSlider.addEventListener(`change`, _ => {
+	fadeinSlider.addEventListener(`change`, function () {
+		console.log(this.value);
 		g_stateObj.fadein = parseInt(this.value);
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}, false);
