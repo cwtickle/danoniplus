@@ -2836,7 +2836,6 @@ function createOptionWindow(_sprite) {
 	}, false);
 
 	fadeinSlider.addEventListener(`change`, function () {
-		console.log(this.value);
 		g_stateObj.fadein = parseInt(this.value);
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}, false);
