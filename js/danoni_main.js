@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/09
+ * Revised : 2019/02/10
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.5.3`;
+const g_version = `Ver 2.6.0`;
 const g_version_gauge = `Ver 0.5.1.20181223`;
 const g_version_musicEncoded = `Ver 0.1.1.20181224`;
 const g_version_lyrics = `Ver 0.2.0.20181230`;
@@ -1427,8 +1427,9 @@ function initialControl() {
 	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 
 	// Now Loadingを表示
-	const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight / 2 - 40,
+	const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight - 40,
 		g_sWidth, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `Now Loading...`);
+	lblLoading.style.textAlign = C_ALIGN_RIGHT;
 	divRoot.appendChild(lblLoading);
 
 	// 譜面データの読み込み
@@ -1518,7 +1519,7 @@ function loadMusic() {
 	if (location.href.match(`^file`)) {
 		clearWindow();
 		setAudio(url);
-	  return;
+		return;
 	}
 
 	// XHRで読み込み
@@ -1546,7 +1547,7 @@ function loadMusic() {
 			const layer0 = document.querySelector(`#layer0`);
 			const l0ctx = layer0.getContext(`2d`);
 			l0ctx.fillStyle = C_CLR_LOADING_BAR;
-			l0ctx.fillRect(0, layer0.height / 2 - 10, layer0.width * rate, 20);
+			l0ctx.fillRect(0, layer0.height - 10, layer0.width * rate, 10);
 			lblLoading.innerText = `Now Loading... ${Math.floor(rate * 100)}%`;
 		} else {
 			lblLoading.innerText = `Now Loading... ${_event.loaded}Bytes`;
