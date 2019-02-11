@@ -4643,13 +4643,10 @@ function MainInit() {
 
 	// 開始位置、楽曲再生位置の設定
 	const firstFrame = g_scoreObj.frameNum;
-	let musicStartFrame;
-	if (firstFrame < g_headerObj.blankFrame) {
-		musicStartFrame = g_headerObj.blankFrame;
+	const musicStartFrame = firstFrame + g_headerObj.blankFrame;
+	g_audio.volume = 0;
+	if (firstFrame === 0) {
 		g_audio.volume = g_stateObj.volume / 100;
-	} else {
-		musicStartFrame = firstFrame + g_headerObj.blankFrame;
-		g_audio.volume = 0;
 	}
 
 	// 曲時間制御変数
