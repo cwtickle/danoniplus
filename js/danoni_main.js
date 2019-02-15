@@ -4,14 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/12
+ * Revised : 2019/02/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.6.1`;
-const g_version_gauge = `Ver 0.5.1.20181223`;
-const g_version_musicEncoded = `Ver 0.1.1.20181224`;
-const g_version_lyrics = `Ver 0.2.0.20181230`;
+const g_version = `Ver 2.7.0`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -746,7 +743,7 @@ let g_gameOverFlg = false;
 const g_hostName = location.hostname;
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
-const g_audio = new Audio();
+let g_audio = new Audio();
 let g_timeoutEvtId = 0;
 let g_inputKeyBuffer = [];
 
@@ -1397,6 +1394,55 @@ function loadScript(_url, _callback, _charset = `UTF-8`) {
 	document.querySelector(`head`).appendChild(script);
 }
 
+// WebAudioAPIでAudio要素風に再生するクラス
+class AudioPlayer {
+	constructor(_arrayBuffer) {
+		this._context = new AudioContext();
+		this._gain = this._context.createGain();
+		this._gain.connect(this._context.destination);
+		this._startTime = 0;
+		this._fadeinPosition = 0;
+		this._context.decodeAudioData(_arrayBuffer, _buffer => {
+			this._duration = _buffer.duration;
+			this._buffer = _buffer;
+		})
+	}
+
+	play() {
+		this._source = this._context.createBufferSource();
+		this._source.buffer = this._buffer;
+		this._source.connect(this._gain);
+		this._startTime = this._context.currentTime;
+		this._source.start(this._context.currentTime, this._fadeinPosition);
+	}
+
+	pause() {
+		if (this._source) {
+			this._source.stop(0);
+		}
+	}
+
+	set currentTime(_currentTime) {
+		this._fadeinPosition = _currentTime;
+	}
+
+	get volume() {
+		return this._gain.gain.value;
+	}
+
+	set volume(_volume) {
+		this._gain.gain.value = _volume;
+	}
+
+	get duration() {
+		return this._duration;
+	}
+
+	load() { }
+	get readyState() { return 4; }
+	dispatchEvent() { }
+}
+
 /*-----------------------------------------------------------*/
 /* Scene : TITLE [melon] */
 /*-----------------------------------------------------------*/
@@ -1566,20 +1612,32 @@ function loadMusic() {
 	request.send();
 }
 
+// Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備
+function initWebAudioAPI(_url) {
+	fetch(_url).then(_response => {
+		return _response.arrayBuffer();
+	}).then(_arrayBuffer => {
+		g_audio = new AudioPlayer(_arrayBuffer);
+		titleInit();
+	})
+}
+
 function setAudio(_url) {
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === `function`) {
 				musicInit();
-				g_audio.src = `data:audio/mp3;base64,${g_musicdata}`;
+				initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
 			} else {
 				makeWarningWindow(C_MSG_E_0031);
+				titleInit();
 			}
-			titleInit();
 		});
-	} else {
+	} else if (location.href.match(`^file`)) {
 		g_audio.src = _url;
 		titleInit();
+	} else {
+		initWebAudioAPI(_url);
 	}
 }
 
@@ -3551,9 +3609,6 @@ function loadingScoreInit() {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
-	// 楽曲データのバックグラウンド再生 (Firefoxのみ)
-	startPreloadingAudio();
-
 	// 譜面データの読み込み
 	let scoreIdHeader = ``;
 	if (g_stateObj.scoreId > 0) {
@@ -3646,24 +3701,6 @@ function loadingScoreInit() {
 
 	clearWindow();
 	MainInit();
-}
-
-/**
- * 楽曲データのバックグラウンド再生 (Firefoxのみ)
- * - Firefoxのみ楽曲の読み込みが遅れることがあるため、先にミュートで再生させておく。
- * - @see {@link prepareAudio} とセット。
- */
-function startPreloadingAudio() {
-	if (g_userAgent.indexOf(`msie`) !== -1 ||
-		g_userAgent.indexOf(`trident`) !== -1 ||
-		g_userAgent.indexOf(`edge`) !== -1 ||
-		g_userAgent.indexOf(`chrome`) !== -1 ||
-		g_userAgent.indexOf(`safari`) !== -1) {
-	} else if (g_userAgent.indexOf(`firefox`) !== -1) {
-		g_audio.play();
-		g_audio.muted = true;
-	} else if (g_userAgent.indexOf(`opera`) !== -1) {
-	}
 }
 
 /**
@@ -5011,25 +5048,6 @@ function MainInit() {
 	}
 
 	/**
-	 * 楽曲の再生処理
-	 * - Firefoxはすでに @see {@link startPreloadingAudio} で楽曲再生しているためミュートのみ外す。
-	 */
-	function prepareAudio() {
-		if (g_userAgent.indexOf(`msie`) !== -1 ||
-			g_userAgent.indexOf(`trident`) !== -1 ||
-			g_userAgent.indexOf(`edge`) !== -1 ||
-			g_userAgent.indexOf(`chrome`) !== -1 ||
-			g_userAgent.indexOf(`safari`) !== -1) {
-
-			g_audio.play();
-		} else if (g_userAgent.indexOf(`firefox`) !== -1) {
-			g_audio.muted = false;
-		} else if (g_userAgent.indexOf(`opera`) !== -1) {
-			g_audio.play();
-		}
-	}
-
-	/**
 	 * フレーム処理(譜面台)
 	 */
 	function flowTimeline() {
@@ -5043,9 +5061,9 @@ function MainInit() {
 		}
 
 		if (g_scoreObj.frameNum === musicStartFrame) {
-			prepareAudio();
 			musicStartFlg = true;
 			g_audio.currentTime = firstFrame / 60;
+			g_audio.play();
 			g_audio.dispatchEvent(new CustomEvent(`timeupdate`));
 		}
 
