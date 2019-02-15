@@ -4,14 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/12
+ * Revised : 2019/02/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.6.1`;
-const g_version_gauge = `Ver 0.5.1.20181223`;
-const g_version_musicEncoded = `Ver 0.1.1.20181224`;
-const g_version_lyrics = `Ver 0.2.0.20181230`;
+const g_version = `Ver 2.7.0`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1406,8 +1403,8 @@ class AudioPlayer {
 		this._startTime = 0;
 		this._fadeinPosition = 0;
 		this._context.decodeAudioData(_arrayBuffer, _buffer => {
-		  this._duration = _buffer.duration;
-		  this._buffer = _buffer;
+			this._duration = _buffer.duration;
+			this._buffer = _buffer;
 		})
 	}
 
@@ -1441,9 +1438,9 @@ class AudioPlayer {
 		return this._duration;
 	}
 
-	load() {}
+	load() { }
 	get readyState() { return 4; }
-	dispatchEvent() {}
+	dispatchEvent() { }
 }
 
 /*-----------------------------------------------------------*/
