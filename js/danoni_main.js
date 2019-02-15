@@ -4689,6 +4689,7 @@ function MainInit() {
 	// 曲時間制御変数
 	let thisTime;
 	let buffTime;
+	let musicStartTime;
 	let musicStartFlg = false;
 
 	g_inputKeyBuffer = [];
@@ -5064,6 +5065,7 @@ function MainInit() {
 			musicStartFlg = true;
 			g_audio.currentTime = firstFrame / 60;
 			g_audio.play();
+			musicStartTime = performance.now();
 			g_audio.dispatchEvent(new CustomEvent(`timeupdate`));
 		}
 
@@ -5496,7 +5498,10 @@ function MainInit() {
 
 		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
 		thisTime = performance.now();
-		buffTime = (thisTime - mainStartTime - (g_scoreObj.frameNum - firstFrame) * 1000 / 60);
+		buffTime = 0;
+		if (g_scoreObj.frameNum >= musicStartFrame) {
+			buffTime = (thisTime - musicStartTime - (g_scoreObj.frameNum - musicStartFrame) * 1000 / 60);
+		}
 		g_scoreObj.frameNum++;
 		g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60 - buffTime);
 
@@ -5522,7 +5527,6 @@ function MainInit() {
 			}
 		}
 	}
-	const mainStartTime = performance.now();
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60);
 }
 
