@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/15
+ * Revised : 2019/02/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.7.0`;
+const g_version = `Ver 2.7.1`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -740,7 +740,6 @@ const g_rankObj = {
 
 let g_gameOverFlg = false;
 
-const g_hostName = location.hostname;
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 let g_audio = new Audio();
@@ -1720,10 +1719,12 @@ function titleInit() {
 			titlefontsize, titlefontname, grd2, `center`);
 	}
 
-	// ブラウザチェック
+	// 非推奨ブラウザに対して警告文を表示
+	// Firefoxはローカル環境時、Ver65以降矢印が表示されなくなるため非推奨表示
 	if (g_userAgent.indexOf(`msie`) !== -1 ||
 		g_userAgent.indexOf(`trident`) !== -1 ||
-		g_userAgent.indexOf(`edge`) !== -1) {
+		g_userAgent.indexOf(`edge`) !== -1 ||
+		(g_userAgent.indexOf(`firefox`) !== -1 && location.href.match(`^file`))) {
 
 		makeWarningWindow(C_MSG_W_0001);
 	}
@@ -4689,6 +4690,7 @@ function MainInit() {
 	// 曲時間制御変数
 	let thisTime;
 	let buffTime;
+	let musicStartTime;
 	let musicStartFlg = false;
 
 	g_inputKeyBuffer = [];
@@ -4904,7 +4906,7 @@ function MainInit() {
 	}
 
 	// ローカル時のみフレーム数を残す
-	if (g_hostName === `localhost` || g_hostName === `127.0.0.1` || g_hostName === ``) {
+	if (location.href.match(`^file`)) {
 	} else {
 		document.querySelector(`#lblframe`).style.display = C_DIS_NONE;
 	}
@@ -5064,6 +5066,7 @@ function MainInit() {
 			musicStartFlg = true;
 			g_audio.currentTime = firstFrame / 60;
 			g_audio.play();
+			musicStartTime = performance.now();
 			g_audio.dispatchEvent(new CustomEvent(`timeupdate`));
 		}
 
@@ -5496,7 +5499,10 @@ function MainInit() {
 
 		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
 		thisTime = performance.now();
-		buffTime = (thisTime - mainStartTime - (g_scoreObj.frameNum - firstFrame) * 1000 / 60);
+		buffTime = 0;
+		if (g_scoreObj.frameNum >= musicStartFrame) {
+			buffTime = (thisTime - musicStartTime - (g_scoreObj.frameNum - musicStartFrame) * 1000 / 60);
+		}
 		g_scoreObj.frameNum++;
 		g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60 - buffTime);
 
@@ -5522,7 +5528,6 @@ function MainInit() {
 			}
 		}
 	}
-	const mainStartTime = performance.now();
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60);
 }
 
