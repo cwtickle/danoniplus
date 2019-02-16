@@ -1401,6 +1401,7 @@ class AudioPlayer {
 		this._gain.connect(this._context.destination);
 		this._startTime = 0;
 		this._fadeinPosition = 0;
+		this.playbackRate = 1;
 		this._context.decodeAudioData(_arrayBuffer, _buffer => {
 			this._duration = _buffer.duration;
 			this._buffer = _buffer;
@@ -1410,6 +1411,7 @@ class AudioPlayer {
 	play() {
 		this._source = this._context.createBufferSource();
 		this._source.buffer = this._buffer;
+		this._source.playbackRate.value = this.playbackRate;
 		this._source.connect(this._gain);
 		this._startTime = this._context.currentTime;
 		this._source.start(this._context.currentTime, this._fadeinPosition);
@@ -2089,6 +2091,9 @@ function headerConvert(_dosObj) {
 	} else {
 		obj.adjustment = [0];
 	}
+
+	// 再生速度
+	obj.playbackRate = setVal(_dosObj.playbackRate, 1, `float`);
 
 	// 外部jsファイルの指定
 	if (_dosObj.customjs !== undefined && _dosObj.customjs !== ``) {
@@ -3726,6 +3731,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	const headerAdjustment = parseInt(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
 	const realAdjustment = parseInt(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
 	g_stateObj.realAdjustment = realAdjustment;
+	const blankFrame = g_headerObj.blankFrame;
+	const calcFrame = _frame => Math.round((parseInt(_frame) - blankFrame) / g_headerObj.playbackRate + blankFrame + realAdjustment);
 
 	for (let j = 0, k = 0; j < keyNum; j++) {
 
@@ -3740,7 +3747,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				} else {
 					g_allArrow += obj.arrowData[j].length;
 					for (let k = 0; k < obj.arrowData[j].length; k++) {
-						obj.arrowData[j][k] = parseInt(obj.arrowData[j][k]) + realAdjustment
+						obj.arrowData[j][k] = calcFrame(obj.arrowData[j][k]);
 					}
 				}
 			}
@@ -3770,7 +3777,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				} else {
 					g_allFrz += obj.frzData[j].length;
 					for (let k = 0; k < obj.frzData[j].length; k++) {
-						obj.frzData[j][k] = parseFloat(obj.frzData[j][k]) + realAdjustment
+						obj.frzData[j][k] = calcFrame(obj.frzData[j][k]);
 					}
 				}
 			}
@@ -3784,7 +3791,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	if (_dosObj[`speed${_scoreNo}${speedFooter}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
 		obj.speedData = _dosObj[`speed${_scoreNo}${speedFooter}`].split(`,`);
 		for (let k = 0; k < obj.speedData.length; k += 2) {
-			obj.speedData[k] = parseFloat(obj.speedData[k]) + realAdjustment
+			obj.speedData[k] = calcFrame(obj.speedData[k]);
 			obj.speedData[k + 1] = parseFloat(obj.speedData[k + 1]);
 		}
 	}
@@ -3793,7 +3800,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	if (_dosObj[`boost${_scoreNo}_data`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
 		obj.boostData = _dosObj[`boost${_scoreNo}_data`].split(`,`);
 		for (let k = 0; k < obj.boostData.length; k += 2) {
-			obj.boostData[k] = parseFloat(obj.boostData[k]) + realAdjustment
+			obj.boostData[k] = calcFrame(obj.boostData[k]);
 			obj.boostData[k + 1] = parseFloat(obj.boostData[k + 1]);
 		}
 	}
@@ -3803,7 +3810,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	if (_dosObj[`color${_scoreNo}_data`] !== undefined && _dosObj[`color${_scoreNo}_data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
 		obj.colorData = _dosObj[`color${_scoreNo}_data`].split(`,`);
 		for (let k = 0; k < obj.colorData.length; k += 3) {
-			obj.colorData[k] = parseFloat(obj.colorData[k]) + realAdjustment
+			obj.colorData[k] = calcFrame(obj.colorData[k]);
 			obj.colorData[k + 1] = parseFloat(obj.colorData[k + 1]);
 		}
 	}
@@ -3812,7 +3819,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	if (_dosObj[`acolor${_scoreNo}_data`] !== undefined && _dosObj[`acolor${_scoreNo}data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
 		obj.acolorData = _dosObj[`acolor${_scoreNo}_data`].split(`,`);
 		for (let k = 0; k < obj.acolorData.length; k += 3) {
-			obj.acolorData[k] = parseFloat(obj.acolorData[k]) + realAdjustment
+			obj.acolorData[k] = calcFrame(obj.acolorData[k]);
 			obj.acolorData[k + 1] = parseFloat(obj.acolorData[k + 1]);
 		}
 	}
@@ -3828,7 +3835,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 		if (tmpData !== undefined && tmpData !== ``) {
 			const tmpWordData = tmpData.split(`,`);
 			for (let k = 0; k < tmpWordData.length; k += 3) {
-				tmpWordData[k] = parseFloat(tmpWordData[k]) + realAdjustment
+				tmpWordData[k] = calcFrame(tmpWordData[k]);
 				tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
 
 				let addFrame = 0;
@@ -3866,7 +3873,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				const tmpBackData = tmpData.split(`,`);
 
 				// 値チェックとエスケープ処理
-				const tmpFrame = setVal(tmpBackData[0], 200, `number`) + realAdjustment
+				const tmpFrame = calcFranme(setVal(tmpBackData[0], 200, `number`));
 				const tmpDepth = setVal(tmpBackData[1], 0, `number`);
 				const tmpPath = escapeHtml(setVal(tmpBackData[2], ``, `string`));
 				const tmpClass = escapeHtml(setVal(tmpBackData[3], ``, `string`));
@@ -4696,10 +4703,7 @@ function MainInit() {
 	g_inputKeyBuffer = [];
 
 	// 終了時間の設定
-	const fullSecond = Math.ceil(g_headerObj.blankFrame / 60 + g_audio.duration);
-	let fullMin = Math.floor(fullSecond / 60);
-	let fullSec = `00${Math.floor(fullSecond % 60)}`.slice(-2);
-	let fullTime = `${fullMin}:${fullSec}`;
+	let duration = g_audio.duration;
 	let fadeOutFrame = Infinity;
 	const preblankFrameForTime = Number(g_headerObj.blankFrame - g_headerObj.blankFrameDef);
 
@@ -4708,31 +4712,23 @@ function MainInit() {
 		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
 		} else {
 			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]);
-			const fadeTmp = Math.floor((parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + C_FRM_AFTERFADE + preblankFrameForTime) / 60) * 60;
-
-			fullMin = Math.floor(fadeTmp / 3600);
-			fullSec = `00${(fadeTmp / 60) % 60}`.slice(-2);
-			fullTime = `${fullMin}:${fullSec}`;
+			duration = (fadeOutFrame + C_FRM_AFTERFADE + preblankFrameForTime - g_headerObj.blankFrame) / 60;
 		}
 	}
 
 	// 終了時間指定の場合、その値を適用する
 	if (g_headerObj.endFrame !== undefined) {
 		if (!isNaN(parseInt(g_headerObj.endFrame[g_stateObj.scoreId]))) {
-			const fullTmp = Math.floor((parseInt(g_headerObj.endFrame[g_stateObj.scoreId]) + preblankFrameForTime) / 60) * 60;
-
-			fullMin = Math.floor(fullTmp / 3600);
-			fullSec = `00${(fullTmp / 60) % 60}`.slice(-2);
-			fullTime = `${fullMin}:${fullSec}`;
-
+			duration = (parseInt(g_headerObj.endFrame[g_stateObj.scoreId]) - g_headerObj.blankFrame) / 60;
 		} else if (!isNaN(parseInt(g_headerObj.endFrame[0]))) {
-			const fullTmp = Math.floor((parseInt(g_headerObj.endFrame[0]) + preblankFrameForTime) / 60) * 60;
-
-			fullMin = Math.floor(fullTmp / 3600);
-			fullSec = `00${(fullTmp / 60) % 60}`.slice(-2);
-			fullTime = `${fullMin}:${fullSec}`;
+			duration = (parseInt(g_headerObj.endFrame[0]) - g_headerObj.blankFrame) / 60;
 		}
 	}
+
+	const fullSecond = Math.ceil(g_headerObj.blankFrame / 60 + duration / g_headerObj.playbackRate);
+	const fullMin = Math.floor(fullSecond / 60);
+	const fullSec = `00${Math.floor(fullSecond % 60)}`.slice(-2);
+	const fullTime = `${fullMin}:${fullSec}`;
 
 	// フレーム数
 	const lblframe = createDivLabel(`lblframe`, 0, 0, 100, 30, 20, C_CLR_TITLE,
@@ -5064,7 +5060,8 @@ function MainInit() {
 
 		if (g_scoreObj.frameNum === musicStartFrame) {
 			musicStartFlg = true;
-			g_audio.currentTime = firstFrame / 60;
+			g_audio.currentTime = firstFrame / 60 * g_headerObj.playbackRate;
+			g_audio.playbackRate = g_headerObj.playbackRate;
 			g_audio.play();
 			musicStartTime = performance.now();
 			g_audio.dispatchEvent(new CustomEvent(`timeupdate`));
@@ -5508,12 +5505,13 @@ function MainInit() {
 
 		// タイマー、曲終了判定
 		if (g_scoreObj.frameNum % 60 === 0) {
+			const currentSecond = Math.ceil(g_scoreObj.frameNum / 60);
 			const currentMin = Math.floor(g_scoreObj.frameNum / 3600);
 			const currentSec = `00${(g_scoreObj.frameNum / 60) % 60}`.slice(-2);
 			const currentTime = `${currentMin}:${currentSec}`;
 			lblTime1.innerHTML = currentTime;
 
-			if (currentTime === fullTime) {
+			if (currentSecond >= fullSecond) {
 				if (fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
 					g_audio.pause();
 				}
