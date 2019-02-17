@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.8.1`;
+const g_version = `Ver 2.9.0`;
 const g_revisedDate = `2019/02/17`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -35,8 +35,8 @@ let g_localVersion2 = ``;
  *  ⇒　各画面に Init がついたものが画面の基本構成(ルート)を表す。
  * 
  * ▽ スプライトの親子関係
- *  基本的にdiv要素で管理。最下層を[difRoot]とし、createSprite()でdiv子要素を作成していく。
- *  clearWindow()で[difRoot]以外の全てのスプライトを削除できる。
+ *  基本的にdiv要素で管理。最下層を[divRoot]とし、createSprite()でdiv子要素を作成していく。
+ *  clearWindow()で[divRoot]以外の全てのスプライトを削除できる。
  *  特定のスプライトに限り削除する場合は deleteChildspriteAll() で実現。
  */
 
@@ -1599,6 +1599,13 @@ function loadMusic() {
 			lblLoading.innerText = `Now Loading... ${Math.floor(rate * 100)}%`;
 		} else {
 			lblLoading.innerText = `Now Loading... ${_event.loaded}Bytes`;
+		}
+		// ユーザカスタムイベント
+		if (typeof customLoadingProgress === `function`) {
+			customLoadingProgress(_event);
+			if (typeof customLoadingProgress2 === `function`) {
+				customLoadingProgress2(_event);
+			}
 		}
 	});
 
