@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.8.0`;
+const g_version = `Ver 2.8.1`;
 const g_revisedDate = `2019/02/17`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4713,7 +4713,8 @@ function MainInit() {
 		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
 		} else {
 			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]);
-			duration = (fadeOutFrame + C_FRM_AFTERFADE + preblankFrameForTime - g_headerObj.blankFrame) / 60;
+			duration = (fadeOutFrame + preblankFrameForTime - g_headerObj.blankFrame) / 60;
+			fadeOutFrame = (fadeOutFrame - g_headerObj.blankFrame) / g_headerObj.playbackRate + g_headerObj.blankFrame;
 		}
 	}
 
@@ -4726,7 +4727,11 @@ function MainInit() {
 		}
 	}
 
-	const fullSecond = Math.ceil(g_headerObj.blankFrame / 60 + duration / g_headerObj.playbackRate);
+	let fullSecond = Math.ceil(g_headerObj.blankFrame / 60 + duration / g_headerObj.playbackRate);
+	if (fadeOutFrame !== Infinity) {
+		fullSecond += Math.ceil(C_FRM_AFTERFADE / 60);
+	}
+
 	const fullMin = Math.floor(fullSecond / 60);
 	const fullSec = `00${Math.floor(fullSecond % 60)}`.slice(-2);
 	const fullTime = `${fullMin}:${fullSec}`;
