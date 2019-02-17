@@ -9,6 +9,7 @@
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = `Ver 2.8.0`;
+const g_revisedDate = `2019/02/17`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1808,10 +1809,10 @@ function titleInit() {
 	}
 	const lnkVersion = createButton({
 		id: `lnkVersion`,
-		name: `&copy; 2018 ティックル, CW ${g_version}${customVersion}${releaseDate}`,
-		x: g_sWidth / 3,
+		name: `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${customVersion}${releaseDate}`,
+		x: g_sWidth / 4,
 		y: g_sHeight - 20,
-		width: g_sWidth * 2 / 3 - 10,
+		width: g_sWidth * 3 / 4 - 10,
 		height: 16,
 		fontsize: 12,
 		normalColor: C_CLR_DEFAULT,
