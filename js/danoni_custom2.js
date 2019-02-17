@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri カスタム用jsファイル
- * ver 1.11.0 以降向け (custom:Type2)
+ * ver 2.9.0 以降向け (custom:Type2)
  * 
  * このファイルは、作品個別に設定できる項目となっています。
  * 譜面データ側で下記のように作品別の外部jsファイルを指定することで、
@@ -19,6 +19,15 @@
  * 
  */
 
+/**
+ * ローディング中処理
+ * @param {event} _event ローディングプロパティ
+ * 	_event.loaded 読込済バイト数
+ * 	_event.total  読込総バイト数 
+ */
+function customLoadingProgress2(_event) {
+
+}
 
 /**
  * タイトル画面 [Scene: Title / Melon]
