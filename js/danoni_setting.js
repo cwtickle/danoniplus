@@ -20,7 +20,7 @@ const g_presetGauge = {
 	Recovery: 2, // 回復量
 	Damage: 7,   // ダメージ量
 	Init: 25,    // 初期値
-}
+};
 
 // ゲージ設定（デフォルト以外）
 const g_presetGaugeCustom = {
@@ -36,4 +36,12 @@ const g_presetGaugeCustom = {
 		Damage: 50,
 		Init: 100,
 	},
-}
+};
+
+// オプション利用設定（デフォルト）
+// 一律使用させたくない場合は `false` を指定（デフォルトは `true`）
+const g_presetSettingUse = {
+	motion: `true`,
+	shuffle: `true`,
+	autoPlay: `true`
+};
