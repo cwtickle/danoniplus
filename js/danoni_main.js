@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.0.0`;
+const g_version = `Ver 3.1.0`;
 const g_revisedDate = `2019/02/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -430,20 +430,20 @@ const g_keyObj = {
 	// シャッフルグループ
 	//  - Mirror, Random, S-Random使用時、同じグループ同士で入れ替えます
 	//  - 同じ数字が同じグループになります
-	shuffle5_0: [0, 0, 0, 0, 1], 
-	shuffle7_0: [0, 0, 0, 1, 0, 0, 0], 
-	shuffle7i_0: [0, 0, 0, 1, 1, 1, 1], 
-	shuffle8_0: [0, 0, 0, 1, 0, 0, 0, 2], 
-	shuffle9A_0: [0, 0, 0, 0, 1, 2, 2, 2, 2], 
-	shuffle9B_0: [0, 0, 0, 0, 1, 0, 0, 0, 0], 
-	shuffle9i_0: [0, 0, 0, 0, 1, 1, 1, 1, 1], 
-	shuffle11_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1], 
-	shuffle11L_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1], 
-	shuffle11W_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1], 
-	shuffle11i_0: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3], 
-	shuffle12_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2], 
-	shuffle13_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 3, 3, 3, 3], 
-	shuffle14_0: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2], 
+	shuffle5_0: [0, 0, 0, 0, 1],
+	shuffle7_0: [0, 0, 0, 1, 0, 0, 0],
+	shuffle7i_0: [0, 0, 0, 1, 1, 1, 1],
+	shuffle8_0: [0, 0, 0, 1, 0, 0, 0, 2],
+	shuffle9A_0: [0, 0, 0, 0, 1, 2, 2, 2, 2],
+	shuffle9B_0: [0, 0, 0, 0, 1, 0, 0, 0, 0],
+	shuffle9i_0: [0, 0, 0, 0, 1, 1, 1, 1, 1],
+	shuffle11_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
+	shuffle11L_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
+	shuffle11W_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
+	shuffle11i_0: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
+	shuffle12_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+	shuffle13_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 3, 3, 3, 3],
+	shuffle14_0: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
 	shuffle14i_0: [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
 	shuffle15A_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
 	shuffle15B_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
@@ -664,10 +664,10 @@ const g_keyObj = {
 /** 設定・オプション画面用共通 */
 const C_LEN_SETLBL_LEFT = 140;
 const C_LEN_SETLBL_WIDTH = 250;
-const C_LEN_SETLBL_HEIGHT = 25;
-const C_SIZ_SETLBL = 18;
+const C_LEN_SETLBL_HEIGHT = 23;
+const C_SIZ_SETLBL = 17;
 const C_LEN_SETDIFLBL_HEIGHT = 25;
-const C_SIZ_SETDIFLBL = 18;
+const C_SIZ_SETDIFLBL = 17;
 const C_LEN_SETMINI_WIDTH = 40;
 const C_SIZ_SETMINI = 18;
 
@@ -2804,12 +2804,12 @@ function createOptionWindow(_sprite) {
 	}));
 
 	// ミラー・ランダム
-	const lblShuffle = createDivLabel(`lblShuffle`, 0, C_LEN_SETLBL_HEIGHT * 5,
+	const lblShuffle = createDivLabel(`lblShuffle`, 0, C_LEN_SETLBL_HEIGHT * 5.5,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#ccff99>S</span>huffle`);
+		`<span style=color:#99ff99>S</span>huffle`);
 	optionsprite.appendChild(lblShuffle);
 
-	const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, 5, _ => {
+	const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, 5.5, _ => {
 		g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
 		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
 		lnkShuffle.innerHTML = g_stateObj.shuffle;
@@ -2822,24 +2822,24 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkShuffle);
 
-	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `R`, 5, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `R`, 5.5, _ => {
 		g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
 		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
 		lnkShuffle.innerHTML = g_stateObj.shuffle;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `L`, 5, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `L`, 5.5, _ => {
 		g_shuffleNum = (g_shuffleNum === 0 ? g_shuffles.length - 1 : --g_shuffleNum);
 		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
 		lnkShuffle.innerHTML = g_stateObj.shuffle;
 	}));
 
 	// 鑑賞モード設定 (AutoPlay)
-	const lblAutoPlay = createDivLabel(`lblAutoPlay`, 0, C_LEN_SETLBL_HEIGHT * 6,
+	const lblAutoPlay = createDivLabel(`lblAutoPlay`, 0, C_LEN_SETLBL_HEIGHT * 6.5,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#bbff99>A</span>utoPlay`);
+		`<span style=color:#99ffbb>A</span>utoPlay`);
 	optionsprite.appendChild(lblAutoPlay);
 
-	const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.auto, 6, _ => {
+	const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.auto, 6.5, _ => {
 		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	});
@@ -2850,28 +2850,28 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkAutoPlay);
 
-	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `R`, 6, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `R`, 6.5, _ => {
 		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `L`, 6, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `L`, 6.5, _ => {
 		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	}));
 
 	// ゲージ設定 (Gauge)
-	const lblGauge = createDivLabel(`lblGauge`, 0, C_LEN_SETLBL_HEIGHT * 7,
+	const lblGauge = createDivLabel(`lblGauge`, 0, C_LEN_SETLBL_HEIGHT * 7.5,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99ff99>G</span>auge`);
+		`<span style=color:#99ffdd>G</span>auge`);
 	optionsprite.appendChild(lblGauge);
 
-	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 8 - 3,
+	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 8.5 - 3,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, 11, C_CLR_TITLE,
 		gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit));
 	optionsprite.appendChild(lblGauge2);
 
 	const lnkGauge = makeSettingLblButton(`lnkGauge`,
-		g_stateObj.lifeSetName, 7, _ => {
+		g_stateObj.lifeSetName, 7.5, _ => {
 			g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
 			gaugeChange(g_stateObj.lifeId);
 
@@ -2888,14 +2888,14 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkGauge);
 
-	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `R`, 7, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `R`, 7.5, _ => {
 		g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
 		gaugeChange(g_stateObj.lifeId);
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
 		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `L`, 7, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `L`, 7.5, _ => {
 		g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
 		gaugeChange(g_stateObj.lifeId);
 
@@ -2996,12 +2996,12 @@ function createOptionWindow(_sprite) {
 
 
 	// タイミング調整 (Adjustment)
-	const lblAdjustment = createDivLabel(`lblAdjustment`, 0, C_LEN_SETLBL_HEIGHT * 9,
+	const lblAdjustment = createDivLabel(`lblAdjustment`, 0, C_LEN_SETLBL_HEIGHT * 10,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99ffff>A</span>djustment`);
 	optionsprite.appendChild(lblAdjustment);
 
-	const lnkAdjustment = makeSettingLblButton(`lnkAdjustment`, g_stateObj.adjustment, 9, _ => {
+	const lnkAdjustment = makeSettingLblButton(`lnkAdjustment`, g_stateObj.adjustment, 10, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	});
@@ -3012,40 +3012,40 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkAdjustment);
 
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `R`, 9, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `R`, 10, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment >= C_MAX_ADJUSTMENT - 5 ? (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : C_MAX_ADJUSTMENT) : g_stateObj.adjustment + 5);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `L`, 9, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `L`, 10, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment <= -(C_MAX_ADJUSTMENT - 5) ? (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : -C_MAX_ADJUSTMENT) : g_stateObj.adjustment - 5);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `RR`, 9, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `RR`, 10, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `LL`, 9, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `LL`, 10, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : --g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
 
 
 	// フェードイン (Fadein)
-	const lblFadein = createDivLabel(`lblFadein`, 0, C_LEN_SETLBL_HEIGHT * 10,
+	const lblFadein = createDivLabel(`lblFadein`, 0, C_LEN_SETLBL_HEIGHT * 11,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99eeff>F</span>adein`);
 	optionsprite.appendChild(lblFadein);
 
-	const lnkFadein = createDivLabel(`lblFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 10,
+	const lnkFadein = createDivLabel(`lblFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 11,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `${g_stateObj.fadein}%`);
 	optionsprite.appendChild(lnkFadein);
 
-	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `R`, 10, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `R`, 11, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 99 ? 0 : g_stateObj.fadein + 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `L`, 10, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `L`, 11, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 0 ? 99 : g_stateObj.fadein - 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
@@ -3057,7 +3057,7 @@ function createOptionWindow(_sprite) {
 		addXPos = -8;
 		addYPos = 1;
 	}
-	const lblFadeinSlider = createDivLabel(`lblFadeinBar`, 160 + addXPos, C_LEN_SETLBL_HEIGHT * 10 + addYPos, ``, ``, ``, ``,
+	const lblFadeinSlider = createDivLabel(`lblFadeinBar`, 160 + addXPos, C_LEN_SETLBL_HEIGHT * 11 + addYPos, ``, ``, ``, ``,
 		`<input id=fadeinSlider type=range value=0 min=0 max=99 step=1>`);
 	optionsprite.appendChild(lblFadeinSlider);
 
@@ -3077,12 +3077,12 @@ function createOptionWindow(_sprite) {
 
 
 	// ボリューム
-	const lblVolume = createDivLabel(`lblVolume`, 0, C_LEN_SETLBL_HEIGHT * 11,
+	const lblVolume = createDivLabel(`lblVolume`, 0, C_LEN_SETLBL_HEIGHT * 12,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99ddff>V</span>olume`);
 	optionsprite.appendChild(lblVolume);
 
-	const lnkVolume = makeSettingLblButton(`lnkVolume`, `${g_stateObj.volume}%`, 11, _ => {
+	const lnkVolume = makeSettingLblButton(`lnkVolume`, `${g_stateObj.volume}%`, 12, _ => {
 		g_volumeNum = (g_volumeNum === 0 ? g_volumes.length - 1 : --g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
@@ -3095,12 +3095,12 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkVolume);
 
-	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `R`, 11, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `R`, 12, _ => {
 		g_volumeNum = (g_volumeNum === 0 ? g_volumes.length - 1 : --g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `L`, 11, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `L`, 12, _ => {
 		g_volumeNum = (g_volumeNum === g_volumes.length - 1 ? 0 : ++g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
@@ -3797,7 +3797,7 @@ function loadingScoreInit() {
 	if (g_keyObj[`shuffle${keyCtrlPtn}`] === undefined) {
 		g_keyObj[`shuffle${keyCtrlPtn}`] = [...Array(keyNum)].fill(0);
 	}
-	
+
 	// シャッフルグループを扱いやすくする
 	// [0, 0, 0, 1, 0, 0, 0] -> [[0, 1, 2, 4, 5, 6], [3]]
 	const shuffleGroupMap = {};
@@ -3851,7 +3851,7 @@ function applyShuffle(_keyNum, _shuffleGroup, _style) {
 	// index[i]番目のキーの譜面がi番目のキーに流れるようになります
 	const index = [...Array(_keyNum).keys()];
 	for (let i = 0; i < _shuffleGroup.length; i++) {
-		for (let j=0; j<_shuffleGroup[i].length; j++) {
+		for (let j = 0; j < _shuffleGroup[i].length; j++) {
 			index[_shuffleGroup[i][j]] = _style[i][j];
 		}
 	}
@@ -3911,7 +3911,7 @@ function applySRandom(_keyNum, _shuffleGroup) {
 		_group.forEach(_key => {
 			const frzData = g_scoreObj.frzData[_key] || [];
 			for (let i = 0; i < frzData.length; i += 2) {
-				allFreezeArrows.push({begin: frzData[i], end: frzData[i + 1]});
+				allFreezeArrows.push({ begin: frzData[i], end: frzData[i + 1] });
 			}
 		});
 		allFreezeArrows.sort((_a, _b) => _a.begin - _b.begin);
@@ -3928,7 +3928,7 @@ function applySRandom(_keyNum, _shuffleGroup) {
 		});
 
 		// 通常矢印の配置
-		const allArrows = _group.map(_key =>  g_scoreObj.arrowData[_key]).flat();
+		const allArrows = _group.map(_key => g_scoreObj.arrowData[_key]).flat();
 		allArrows.sort((_a, _b) => _a - _b);
 		allArrows.forEach(_arrow => {
 			// 置ける場所を検索
@@ -6508,7 +6508,7 @@ function resultInit() {
 	}
 	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_stateObj.shuffle !== `Default`) {
-		tweetDifData += `/${g_stateObj.shuffle}]`;
+		tweetDifData += `/${g_stateObj.shuffle}`;
 	}
 	const tweetResultTmp = `【#danoni${hashTag}】${g_headerObj.musicTitle}(${tweetDifData})/
 		${g_headerObj.tuning}/
