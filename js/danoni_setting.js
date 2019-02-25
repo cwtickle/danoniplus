@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿`use strict`;
 /**
  * Dancing☆Onigiri 設定用jsファイル
  * 
