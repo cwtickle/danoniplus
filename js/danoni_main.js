@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.9.2`;
+const g_version = `Ver 2.9.3`;
 const g_revisedDate = `2019/02/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -803,12 +803,8 @@ const g_handler = (_ => {
 	let key = 0;
 
 	return {
-		addListener: (_target, _type, _listener, _capture) => {
-			if (window.addEventListener) {
-				_target.addEventListener(_type, _listener, _capture);
-			} else if (window.attachEvent) {
-				_target.attachment(`on${_type}`, _listener);
-			}
+		addListener: (_target, _type, _listener, _capture = false) => {
+			_target.addEventListener(_type, _listener, _capture);
 			events[key] = {
 				target: _target,
 				type: _type,
@@ -820,11 +816,7 @@ const g_handler = (_ => {
 		removeListener: key => {
 			if (key in events) {
 				const e = events[key];
-				if (window.removeEventListener) {
-					e.target.removeEventListener(e.type, e.listener, e.capture);
-				} else if (window.detachEvent) {
-					e.target.detachEvent(`on${e.type}`, e.listener);
-				}
+				e.target.removeEventListener(e.type, e.listener, e.capture);
 			}
 		}
 	}
@@ -1257,7 +1249,7 @@ function createButton(_obj, _func) {
 	const lsnrkeyTS = g_handler.addListener(div, `touchstart`, _ => {
 		style.backgroundColor = _obj.hoverColor;
 		style.cursor = `pointer`;
-	}, false);
+	});
 
 	// 通常時の挙動 (背景色変更、カーソル変化)
 	div.onmouseout = _ => {
@@ -1267,10 +1259,10 @@ function createButton(_obj, _func) {
 	const lsnrkeyTE = g_handler.addListener(div, `touchend`, _ => {
 		style.backgroundColor = _obj.normalColor;
 		style.cursor = `default`;
-	}, false);
+	});
 
 	// ボタンを押したときの動作
-	const lsnrkey = g_handler.addListener(div, `click`, _ => _func(), false);
+	const lsnrkey = g_handler.addListener(div, `click`, _ => _func());
 
 	// イベントリスナー用のキーをセット
 	div.setAttribute(`lsnrkey`, lsnrkey);
@@ -1375,22 +1367,18 @@ function clearWindow() {
 
 }
 
+/**
+ * 外部jsファイルの読込
+ * @param {string} _url 
+ * @param {function} _callback 
+ * @param {string} _charset (default : UTF-8)
+ */
 function loadScript(_url, _callback, _charset = `UTF-8`) {
 	const script = document.createElement(`script`);
 	script.type = `text/javascript`;
 	script.src = _url;
 	script.charset = _charset;
-
-	if (script.readyState) {
-		script.onreadystatechange = _ => {
-			if (script.readyState === `loaded` || script.readyState === `complete`) {
-				script.onreadystatechange = null;
-				_callback();
-			}
-		};
-	} else {
-		script.onload = _ => _callback();
-	}
+	script.onload = _ => _callback();
 	document.querySelector(`head`).appendChild(script);
 }
 
