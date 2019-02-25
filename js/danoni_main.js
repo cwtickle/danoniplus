@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.9.3`;
+const g_version = `Ver 3.0.0`;
 const g_revisedDate = `2019/02/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1485,7 +1485,10 @@ function initialControl() {
 	if (dosInput !== null) {
 		g_rootObj = dosConvert(dosInput.value);
 		if (externalDosInput === null) {
-			initAfterDosLoaded();
+			const randTime = new Date().getTime();
+			loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
+				initAfterDosLoaded();
+			});
 		}
 	}
 
@@ -1506,7 +1509,10 @@ function initialControl() {
 			} else {
 				makeWarningWindow(C_MSG_E_0022);
 			}
-			initAfterDosLoaded();
+			const randTime = new Date().getTime();
+			loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
+				initAfterDosLoaded();
+			});
 		}, charset);
 	}
 }
@@ -1935,17 +1941,21 @@ function headerConvert(_dosObj) {
 		obj.lifeInits = [];
 		for (let j = 0; j < difs.length; j++) {
 			const difDetails = difs[j].split(`,`);
+			const border = (difDetails[3]) ? difDetails[3] : g_presetGauge.Border;
+			const recovery = (difDetails[4]) ? difDetails[4] : g_presetGauge.Recovery;
+			const damage = (difDetails[5]) ? difDetails[5] : g_presetGauge.Damage;
+			const init = (difDetails[6]) ? difDetails[6] : g_presetGauge.Init;
 			obj.keyLabels.push(setVal(difDetails[0], `7`, `string`));
 			obj.difLabels.push(setVal(difDetails[1], `Normal`, `string`));
 			obj.initSpeeds.push(setVal(difDetails[2], 3.5, `float`));
-			if (difDetails.length > 3 && difDetails[3] !== `x`) {
-				obj.lifeBorders.push(setVal(difDetails[3], 70, `number`));
+			if (border !== `x`) {
+				obj.lifeBorders.push(setVal(border, 70, `number`));
 			} else {
 				obj.lifeBorders.push(`x`);
 			}
-			obj.lifeRecoverys.push(setVal(difDetails[4], 6, `float`));
-			obj.lifeDamages.push(setVal(difDetails[5], 40, `float`));
-			obj.lifeInits.push(setVal(difDetails[6], 25, `float`) * 10);
+			obj.lifeRecoverys.push(setVal(recovery, 6, `float`));
+			obj.lifeDamages.push(setVal(damage, 40, `float`));
+			obj.lifeInits.push(setVal(init, 25, `float`) * 10);
 		}
 	} else {
 		makeWarningWindow(C_MSG_E_0021);
@@ -2053,8 +2063,8 @@ function headerConvert(_dosObj) {
 			obj.creatorUrl = location.href;
 		}
 	} else {
-		obj.tuning = `name`;
-		obj.creatorUrl = location.href;
+		obj.tuning = (g_presetTuning) ? g_presetTuning : `name`;
+		obj.creatorUrl = (g_presetTuningUrl) ? g_presetTuningUrl : location.href;
 	}
 
 	// 無音のフレーム数
@@ -2217,6 +2227,23 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 				g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(_headerObj.lifeDamages[j]);
 				g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(_headerObj.lifeInits[j]);
 			}
+		}
+	} else if (g_presetGaugeCustom[_name]) {
+		g_gaugeOptionObj[`gauge${_name}s`] = {
+			lifeBorders: [],
+			lifeRecoverys: [],
+			lifeDamages: [],
+			lifeInits: []
+		};
+		for (let j = 0; j < difLength; j++) {
+			if (g_presetGaugeCustom[_name].Border === `x`) {
+				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(`x`);
+			} else {
+				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(setVal(g_presetGaugeCustom[_name].Border, 70, `float`));
+			}
+			g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(setVal(g_presetGaugeCustom[_name].Recovery, 2, `float`));
+			g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(setVal(g_presetGaugeCustom[_name].Damage, 7, `float`));
+			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(C_VAL_MAXLIFE * setVal(g_presetGaugeCustom[_name].Init, 25, `float`) / 100);
 		}
 	}
 }
