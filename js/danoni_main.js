@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/25
+ * Revised : 2019/02/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
 const g_version = `Ver 3.1.0`;
-const g_revisedDate = `2019/02/25`;
+const g_revisedDate = `2019/02/26`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -194,6 +194,9 @@ let g_gaugeType;
 
 const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
 let g_volumeNum = 0;
+
+const g_motions = [`OFF`, `Boost`, `Brake`];
+let g_motionNum = 0;
 
 const g_shuffles = [`OFF`, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
 let g_shuffleNum = 0;
@@ -2226,13 +2229,13 @@ function headerConvert(_dosObj) {
 
 	// オプション利用可否設定
 	// Motion
-	obj.motionUse = setVal(_dosObj.motionUse, `enabled`, `string`);
-
-	// Reverse
-	obj.reverseUse = setVal(_dosObj.reverseUse, `enabled`, `string`);
+	obj.motionUse = setVal(_dosObj.motionUse, setVal(g_presetSettingUse.motion, `true`, `string`), `string`);
 
 	// Shuffle
-	obj.shuffleUse = setVal(_dosObj.shuffleUse, `enabled`, `string`);
+	obj.shuffleUse = setVal(_dosObj.shuffleUse, setVal(g_presetSettingUse.shuffle, `true`, `string`), `string`);
+
+	// AutoPlay
+	obj.autoPlayUse = setVal(_dosObj.autoPlayUse, setVal(g_presetSettingUse.autoPlay, `true`, `string`), `string`);
 
 	return obj;
 }
@@ -2752,27 +2755,15 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#eeff99>M</span>otion`);
 	optionsprite.appendChild(lblMotion);
 
-	if (g_headerObj.motionUse === `enabled`) {
+	if (g_headerObj.motionUse !== `false`) {
 		const lnkMotion = makeSettingLblButton(`lnkMotion`, g_stateObj.motion, setNoMotion, _ => {
-			switch (g_stateObj.motion) {
-				case C_FLG_OFF:
-					g_stateObj.motion = `Boost`; break;
-				case `Boost`:
-					g_stateObj.motion = `Brake`; break;
-				case `Brake`:
-					g_stateObj.motion = C_FLG_OFF; break;
-			}
+			g_motionNum = (g_motionNum === g_motions.length - 1 ? 0 : ++g_motionNum);
+			g_stateObj.motion = g_motions[g_motionNum];
 			lnkMotion.innerHTML = g_stateObj.motion;
 		});
 		lnkMotion.oncontextmenu = _ => {
-			switch (g_stateObj.motion) {
-				case C_FLG_OFF:
-					g_stateObj.motion = `Brake`; break;
-				case `Boost`:
-					g_stateObj.motion = C_FLG_OFF; break;
-				case `Brake`:
-					g_stateObj.motion = `Boost`; break;
-			}
+			g_motionNum = (g_motionNum === 0 ? g_motions.length - 1 : --g_motionNum);
+			g_stateObj.motion = g_motions[g_motionNum];
 			lnkMotion.innerHTML = g_stateObj.motion;
 			return false;
 		}
@@ -2780,30 +2771,18 @@ function createOptionWindow(_sprite) {
 
 		// 右回し・左回しボタン
 		optionsprite.appendChild(makeMiniButton(`lnkMotion`, `R`, setNoMotion, _ => {
-			switch (g_stateObj.motion) {
-				case C_FLG_OFF:
-					g_stateObj.motion = `Boost`; break;
-				case `Boost`:
-					g_stateObj.motion = `Brake`; break;
-				case `Brake`:
-					g_stateObj.motion = C_FLG_OFF; break;
-			}
+			g_motionNum = (g_motionNum === g_motions.length - 1 ? 0 : ++g_motionNum);
+			g_stateObj.motion = g_motions[g_motionNum];
 			lnkMotion.innerHTML = g_stateObj.motion;
 		}));
 		optionsprite.appendChild(makeMiniButton(`lnkMotion`, `L`, setNoMotion, _ => {
-			switch (g_stateObj.motion) {
-				case C_FLG_OFF:
-					g_stateObj.motion = `Brake`; break;
-				case `Boost`:
-					g_stateObj.motion = C_FLG_OFF; break;
-				case `Brake`:
-					g_stateObj.motion = `Boost`; break;
-			}
+			g_motionNum = (g_motionNum === 0 ? g_motions.length - 1 : --g_motionNum);
+			g_stateObj.motion = g_motions[g_motionNum];
 			lnkMotion.innerHTML = g_stateObj.motion;
 		}));
 	} else {
 		lblMotion.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lblMotionNon`, setNoMotion));
+		optionsprite.appendChild(makeDisabledLabel(`lblMotionNon`, setNoMotion, g_stateObj.motion));
 	}
 
 	// ---------------------------------------------------
@@ -2815,31 +2794,26 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#ddff99>R</span>everse`);
 	optionsprite.appendChild(lblReverse);
 
-	if (g_headerObj.reverseUse === `enabled`) {
-		const lnkReverse = makeSettingLblButton(`lnkReverse`, g_stateObj.reverse, setNoReverse, _ => {
-			g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-			lnkReverse.innerHTML = g_stateObj.reverse;
-		});
-		lnkReverse.oncontextmenu = _ => {
-			g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-			lnkReverse.innerHTML = g_stateObj.reverse;
-			return false;
-		}
-		optionsprite.appendChild(lnkReverse);
-
-		// 右回し・左回しボタン
-		optionsprite.appendChild(makeMiniButton(`lnkReverse`, `R`, setNoReverse, _ => {
-			g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-			lnkReverse.innerHTML = g_stateObj.reverse;
-		}));
-		optionsprite.appendChild(makeMiniButton(`lnkReverse`, `L`, setNoReverse, _ => {
-			g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-			lnkReverse.innerHTML = g_stateObj.reverse;
-		}));
-	} else {
-		lblReverse.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lblReverseNon`, setNoReverse));
+	const lnkReverse = makeSettingLblButton(`lnkReverse`, g_stateObj.reverse, setNoReverse, _ => {
+		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+		lnkReverse.innerHTML = g_stateObj.reverse;
+	});
+	lnkReverse.oncontextmenu = _ => {
+		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+		lnkReverse.innerHTML = g_stateObj.reverse;
+		return false;
 	}
+	optionsprite.appendChild(lnkReverse);
+
+	// 右回し・左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `R`, setNoReverse, _ => {
+		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+		lnkReverse.innerHTML = g_stateObj.reverse;
+	}));
+	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `L`, setNoReverse, _ => {
+		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+		lnkReverse.innerHTML = g_stateObj.reverse;
+	}));
 
 	// ---------------------------------------------------
 	// ミラー・ランダム (Shuffle)
@@ -2850,7 +2824,7 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#99ff99>S</span>huffle`);
 	optionsprite.appendChild(lblShuffle);
 
-	if (g_headerObj.shuffleUse === `enabled`) {
+	if (g_headerObj.shuffleUse !== `false`) {
 		const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, setNoShuffle, _ => {
 			g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
 			g_stateObj.shuffle = g_shuffles[g_shuffleNum];
@@ -2877,7 +2851,7 @@ function createOptionWindow(_sprite) {
 		}));
 	} else {
 		lblShuffle.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lblShuffleNon`, setNoShuffle));
+		optionsprite.appendChild(makeDisabledLabel(`lblShuffleNon`, setNoShuffle, g_stateObj.shuffle));
 	}
 
 	// ---------------------------------------------------
@@ -2889,26 +2863,31 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#99ffbb>A</span>utoPlay`);
 	optionsprite.appendChild(lblAutoPlay);
 
-	const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.auto, setNoAutoPlay, _ => {
-		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkAutoPlay.innerHTML = g_stateObj.auto;
-	});
-	lnkAutoPlay.oncontextmenu = _ => {
-		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkAutoPlay.innerHTML = g_stateObj.auto;
-		return false;
-	}
-	optionsprite.appendChild(lnkAutoPlay);
+	if (g_headerObj.autoPlayUse !== `false`) {
+		const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.auto, setNoAutoPlay, _ => {
+			g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+			lnkAutoPlay.innerHTML = g_stateObj.auto;
+		});
+		lnkAutoPlay.oncontextmenu = _ => {
+			g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+			lnkAutoPlay.innerHTML = g_stateObj.auto;
+			return false;
+		}
+		optionsprite.appendChild(lnkAutoPlay);
 
-	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `R`, setNoAutoPlay, _ => {
-		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkAutoPlay.innerHTML = g_stateObj.auto;
-	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `L`, setNoAutoPlay, _ => {
-		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkAutoPlay.innerHTML = g_stateObj.auto;
-	}));
+		// 右回し・左回しボタン
+		optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `R`, setNoAutoPlay, _ => {
+			g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+			lnkAutoPlay.innerHTML = g_stateObj.auto;
+		}));
+		optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `L`, setNoAutoPlay, _ => {
+			g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+			lnkAutoPlay.innerHTML = g_stateObj.auto;
+		}));
+	} else {
+		lblAutoPlay.style.color = `#666666`;
+		optionsprite.appendChild(makeDisabledLabel(`lblAutoPlayNon`, setNoAutoPlay, g_stateObj.auto));
+	}
 
 	// ---------------------------------------------------
 	// ゲージ設定 (Gauge)
@@ -3173,11 +3152,16 @@ function createOptionWindow(_sprite) {
 	}));
 
 	// ---------------------------------------------------
-	// 無効化用ラベル作成
-	function makeDisabledLabel(_id, _heightPos) {
+	/**
+	 * 無効化用ラベル作成
+	 * @param {string} _id 
+	 * @param {number} _heightPos 
+	 * @param {string} _defaultStr 
+	 */
+	function makeDisabledLabel(_id, _heightPos, _defaultStr) {
 		const lbl = createDivLabel(_id, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * _heightPos,
-			C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-			`- - -`);
+			C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `#666666`,
+			_defaultStr);
 		lbl.style.textAlign = C_ALIGN_CENTER;
 		return lbl;
 	}
