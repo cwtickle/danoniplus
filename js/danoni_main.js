@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/21
+ * Revised : 2019/02/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.9.1`;
-const g_revisedDate = `2019/02/21`;
+const g_version = `Ver 2.9.2`;
+const g_revisedDate = `2019/02/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1398,12 +1398,16 @@ function loadScript(_url, _callback, _charset = `UTF-8`) {
 class AudioPlayer {
 	constructor(_arrayBuffer) {
 		this._context = new AudioContext();
+		this._arrayBuffer = _arrayBuffer;
 		this._gain = this._context.createGain();
 		this._gain.connect(this._context.destination);
 		this._startTime = 0;
 		this._fadeinPosition = 0;
 		this.playbackRate = 1;
-		this._context.decodeAudioData(_arrayBuffer, _buffer => {
+	}
+
+	async init() {
+		await this._context.decodeAudioData(this._arrayBuffer, _buffer => {
 			this._duration = _buffer.duration;
 			this._buffer = _buffer;
 		})
@@ -1565,7 +1569,6 @@ function loadMusic() {
 
 	// ローカル動作時
 	if (location.href.match(`^file`)) {
-		clearWindow();
 		setAudio(url);
 		return;
 	}
@@ -1579,7 +1582,6 @@ function loadMusic() {
 	request.addEventListener(`load`, _ => {
 		if (request.status >= 200 && request.status < 300) {
 			const blobUrl = URL.createObjectURL(request.response);
-			clearWindow();
 			setAudio(blobUrl);
 		} else {
 			makeWarningWindow(`${C_MSG_E_0032}<br>(${request.status} ${request.statusText})`);
@@ -1622,13 +1624,12 @@ function loadMusic() {
 }
 
 // Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備
-function initWebAudioAPI(_url) {
-	fetch(_url).then(_response => {
-		return _response.arrayBuffer();
-	}).then(_arrayBuffer => {
-		g_audio = new AudioPlayer(_arrayBuffer);
-		titleInit();
-	})
+async function initWebAudioAPI(_url) {
+	const promise = await fetch(_url);
+	const arrayBuffer = await promise.arrayBuffer();
+	g_audio = new AudioPlayer(arrayBuffer);
+	await g_audio.init();
+	titleInit();
 }
 
 function setAudio(_url) {
@@ -1654,6 +1655,7 @@ function setAudio(_url) {
  *  タイトル画面初期化
  */
 function titleInit() {
+	clearWindow();
 
 	// レイヤー情報取得
 	const layer0 = document.querySelector(`#layer0`);
