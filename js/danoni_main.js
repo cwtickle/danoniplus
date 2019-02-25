@@ -153,6 +153,7 @@ const g_stateObj = {
 	lifeInit: 25,
 	lifeSetName: `Normal`,
 	lifeId: 0,
+	shuffle: `Default`,
 
 	d_stepzone: C_FLG_ON,
 	d_judgement: C_FLG_ON,
@@ -193,6 +194,9 @@ let g_gaugeType;
 
 const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
 let g_volumeNum = 0;
+
+const g_shuffles = [`Default`, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
+let g_shuffleNum = 0;
 
 // サイズ(後で指定)
 let g_sWidth;
@@ -422,6 +426,42 @@ const g_keyObj = {
 	color17_0: [0, 0, 0, 0, 2, 4, 4, 4, 4, 1, 1, 1, 1, 3, 3, 3, 3],
 
 	color5_2: [0, 0, 2, 0, 0],
+
+	// シャッフルグループ
+	//  - Mirror, Random, S-Random使用時、同じグループ同士で入れ替えます
+	//  - 同じ数字が同じグループになります
+	shuffle5_0: [0, 0, 0, 0, 1], 
+	shuffle7_0: [0, 0, 0, 1, 0, 0, 0], 
+	shuffle7i_0: [0, 0, 0, 1, 1, 1, 1], 
+	shuffle8_0: [0, 0, 0, 1, 0, 0, 0, 2], 
+	shuffle9A_0: [0, 0, 0, 0, 1, 2, 2, 2, 2], 
+	shuffle9B_0: [0, 0, 0, 0, 1, 0, 0, 0, 0], 
+	shuffle9i_0: [0, 0, 0, 0, 1, 1, 1, 1, 1], 
+	shuffle11_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1], 
+	shuffle11L_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1], 
+	shuffle11W_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1], 
+	shuffle11i_0: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3], 
+	shuffle12_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2], 
+	shuffle13_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 3, 3, 3, 3], 
+	shuffle14_0: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2], 
+	shuffle14i_0: [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
+	shuffle15A_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
+	shuffle15B_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
+	shuffle16i_0: [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 2, 2, 2, 2],
+	shuffle17_1: [0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2],
+
+	shuffle5_1: [1, 0, 0, 0, 0],
+	shuffle9A_1: [0, 0, 0, 0, 1, 2, 2, 2, 2],
+	shuffle9i_1: [0, 0, 0, 0, 0, 1, 1, 1, 1],
+	shuffle11_1: [2, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+	shuffle11L_1: [0, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1],
+	shuffle12_1: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+	shuffle14_1: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+	shuffle15A_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
+	shuffle15B_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
+	shuffle17_0: [0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2],
+
+	shuffle5_2: [0, 0, 1, 0, 0],
 
 	// 基本パターン (矢印回転、AAキャラクタ)
 	// - AAキャラクタの場合、キャラクタ名を指定
@@ -2410,6 +2450,14 @@ function keysConvert(_dosObj) {
 					}
 				}
 			}
+
+			// シャッフルグループ (shuffleX_Y)
+			if (_dosObj[`shuffle${newKey}`] !== undefined) {
+				const tmpshuffles = _dosObj[`shuffle${newKey}`].split(`$`);
+				for (let k = 0; k < tmpshuffles.length; k++) {
+					g_keyObj[`shuffle${newKey}_${k}`] = tmpshuffles[k].split(`,`).map(parseInt);
+				}
+			}
 		}
 	}
 }
@@ -2755,14 +2803,43 @@ function createOptionWindow(_sprite) {
 		lnkReverse.innerHTML = g_stateObj.reverse;
 	}));
 
+	// ミラー・ランダム
+	const lblShuffle = createDivLabel(`lblShuffle`, 0, C_LEN_SETLBL_HEIGHT * 5,
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
+		`<span style=color:#ccff99>S</span>huffle`);
+	optionsprite.appendChild(lblShuffle);
+
+	const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, 5, _ => {
+		g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
+		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
+		lnkShuffle.innerHTML = g_stateObj.shuffle;
+	});
+	lnkShuffle.oncontextmenu = _ => {
+		g_shuffleNum = (g_shuffleNum === 0 ? g_shuffles.length - 1 : --g_shuffleNum);
+		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
+		lnkShuffle.innerHTML = g_stateObj.shuffle;
+		return false;
+	}
+	optionsprite.appendChild(lnkShuffle);
+
+	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `R`, 5, _ => {
+		g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
+		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
+		lnkShuffle.innerHTML = g_stateObj.shuffle;
+	}));
+	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `L`, 5, _ => {
+		g_shuffleNum = (g_shuffleNum === 0 ? g_shuffles.length - 1 : --g_shuffleNum);
+		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
+		lnkShuffle.innerHTML = g_stateObj.shuffle;
+	}));
 
 	// 鑑賞モード設定 (AutoPlay)
-	const lblAutoPlay = createDivLabel(`lblAutoPlay`, 0, C_LEN_SETLBL_HEIGHT * 5,
+	const lblAutoPlay = createDivLabel(`lblAutoPlay`, 0, C_LEN_SETLBL_HEIGHT * 6,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#ccff99>A</span>utoPlay`);
+		`<span style=color:#bbff99>A</span>utoPlay`);
 	optionsprite.appendChild(lblAutoPlay);
 
-	const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.auto, 5, _ => {
+	const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.auto, 6, _ => {
 		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	});
@@ -2773,28 +2850,28 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkAutoPlay);
 
-	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `R`, 5, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `R`, 6, _ => {
 		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `L`, 5, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `L`, 6, _ => {
 		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	}));
 
 	// ゲージ設定 (Gauge)
-	const lblGauge = createDivLabel(`lblGauge`, 0, C_LEN_SETLBL_HEIGHT * 6,
+	const lblGauge = createDivLabel(`lblGauge`, 0, C_LEN_SETLBL_HEIGHT * 7,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99ff99>G</span>auge`);
 	optionsprite.appendChild(lblGauge);
 
-	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 7 - 3,
+	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 8 - 3,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, 11, C_CLR_TITLE,
 		gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit));
 	optionsprite.appendChild(lblGauge2);
 
 	const lnkGauge = makeSettingLblButton(`lnkGauge`,
-		g_stateObj.lifeSetName, 6, _ => {
+		g_stateObj.lifeSetName, 7, _ => {
 			g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
 			gaugeChange(g_stateObj.lifeId);
 
@@ -2811,14 +2888,14 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkGauge);
 
-	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `R`, 6, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `R`, 7, _ => {
 		g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
 		gaugeChange(g_stateObj.lifeId);
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
 		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `L`, 6, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `L`, 7, _ => {
 		g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
 		gaugeChange(g_stateObj.lifeId);
 
@@ -2919,12 +2996,12 @@ function createOptionWindow(_sprite) {
 
 
 	// タイミング調整 (Adjustment)
-	const lblAdjustment = createDivLabel(`lblAdjustment`, 0, C_LEN_SETLBL_HEIGHT * 8,
+	const lblAdjustment = createDivLabel(`lblAdjustment`, 0, C_LEN_SETLBL_HEIGHT * 9,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99ffff>A</span>djustment`);
 	optionsprite.appendChild(lblAdjustment);
 
-	const lnkAdjustment = makeSettingLblButton(`lnkAdjustment`, g_stateObj.adjustment, 8, _ => {
+	const lnkAdjustment = makeSettingLblButton(`lnkAdjustment`, g_stateObj.adjustment, 9, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	});
@@ -2935,40 +3012,40 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkAdjustment);
 
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `R`, 8, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `R`, 9, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment >= C_MAX_ADJUSTMENT - 5 ? (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : C_MAX_ADJUSTMENT) : g_stateObj.adjustment + 5);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `L`, 8, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `L`, 9, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment <= -(C_MAX_ADJUSTMENT - 5) ? (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : -C_MAX_ADJUSTMENT) : g_stateObj.adjustment - 5);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `RR`, 8, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `RR`, 9, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `LL`, 8, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `LL`, 9, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : --g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
 
 
 	// フェードイン (Fadein)
-	const lblFadein = createDivLabel(`lblFadein`, 0, C_LEN_SETLBL_HEIGHT * 9,
+	const lblFadein = createDivLabel(`lblFadein`, 0, C_LEN_SETLBL_HEIGHT * 10,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99eeff>F</span>adein`);
 	optionsprite.appendChild(lblFadein);
 
-	const lnkFadein = createDivLabel(`lblFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 9,
+	const lnkFadein = createDivLabel(`lblFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 10,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `${g_stateObj.fadein}%`);
 	optionsprite.appendChild(lnkFadein);
 
-	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `R`, 9, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `R`, 10, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 99 ? 0 : g_stateObj.fadein + 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `L`, 9, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `L`, 10, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 0 ? 99 : g_stateObj.fadein - 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
@@ -2980,7 +3057,7 @@ function createOptionWindow(_sprite) {
 		addXPos = -8;
 		addYPos = 1;
 	}
-	const lblFadeinSlider = createDivLabel(`lblFadeinBar`, 160 + addXPos, 225 + addYPos, ``, ``, ``, ``,
+	const lblFadeinSlider = createDivLabel(`lblFadeinBar`, 160 + addXPos, C_LEN_SETLBL_HEIGHT * 10 + addYPos, ``, ``, ``, ``,
 		`<input id=fadeinSlider type=range value=0 min=0 max=99 step=1>`);
 	optionsprite.appendChild(lblFadeinSlider);
 
@@ -3000,12 +3077,12 @@ function createOptionWindow(_sprite) {
 
 
 	// ボリューム
-	const lblVolume = createDivLabel(`lblVolume`, 0, C_LEN_SETLBL_HEIGHT * 10,
+	const lblVolume = createDivLabel(`lblVolume`, 0, C_LEN_SETLBL_HEIGHT * 11,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99ddff>V</span>olume`);
 	optionsprite.appendChild(lblVolume);
 
-	const lnkVolume = makeSettingLblButton(`lnkVolume`, `${g_stateObj.volume}%`, 10, _ => {
+	const lnkVolume = makeSettingLblButton(`lnkVolume`, `${g_stateObj.volume}%`, 11, _ => {
 		g_volumeNum = (g_volumeNum === 0 ? g_volumes.length - 1 : --g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
@@ -3018,12 +3095,12 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkVolume);
 
-	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `R`, 10, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `R`, 11, _ => {
 		g_volumeNum = (g_volumeNum === 0 ? g_volumes.length - 1 : --g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `L`, 10, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `L`, 11, _ => {
 		g_volumeNum = (g_volumeNum === g_volumes.length - 1 ? 0 : ++g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
@@ -3716,6 +3793,35 @@ function loadingScoreInit() {
 		}
 	}
 
+	// シャッフルグループ未定義の場合
+	if (g_keyObj[`shuffle${keyCtrlPtn}`] === undefined) {
+		g_keyObj[`shuffle${keyCtrlPtn}`] = [...Array(keyNum)].fill(0);
+	}
+	
+	// シャッフルグループを扱いやすくする
+	// [0, 0, 0, 1, 0, 0, 0] -> [[0, 1, 2, 4, 5, 6], [3]]
+	const shuffleGroupMap = {};
+	g_keyObj[`shuffle${keyCtrlPtn}`].forEach((_val, _i) => {
+		if (shuffleGroupMap[_val] === undefined) {
+			shuffleGroupMap[_val] = [];
+		};
+		shuffleGroupMap[_val].push(_i);
+	});
+	const shuffleGroup = Object.values(shuffleGroupMap);
+
+	// Mirror,Random,S-Randomの適用
+	if (g_stateObj.shuffle === `Mirror`) {
+		applyMirror(keyNum, shuffleGroup);
+	} else if (g_stateObj.shuffle === `Random`) {
+		applyRandom(keyNum, shuffleGroup);
+	} else if (g_stateObj.shuffle === `Random+`) {
+		applyRandom(keyNum, [[...Array(keyNum).keys()]]);
+	} else if (g_stateObj.shuffle === `S-Random`) {
+		applySRandom(keyNum, shuffleGroup);
+	} else if (g_stateObj.shuffle === `S-Random+`) {
+		applySRandom(keyNum, [[...Array(keyNum).keys()]]);
+	}
+
 	// 矢印・フリーズアロー・速度/色変化格納処理
 	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
 
@@ -3732,6 +3838,116 @@ function loadingScoreInit() {
 
 	clearWindow();
 	MainInit();
+}
+
+/**
+ * Mirror,Randomの適用
+ * @param {number} _keyNum
+ * @param {array} _shuffleGroup
+ * @param {array} _style
+ */
+function applyShuffle(_keyNum, _shuffleGroup, _style) {
+	// 並べ替え用の配列を作成
+	// index[i]番目のキーの譜面がi番目のキーに流れるようになります
+	const index = [...Array(_keyNum).keys()];
+	for (let i = 0; i < _shuffleGroup.length; i++) {
+		for (let j=0; j<_shuffleGroup[i].length; j++) {
+			index[_shuffleGroup[i][j]] = _style[i][j];
+		}
+	}
+
+	// indexに従って並べ替え
+	const tmpArrowData = JSON.parse(JSON.stringify(g_scoreObj.arrowData));
+	const tmpFrzData = JSON.parse(JSON.stringify(g_scoreObj.frzData));
+	for (let i = 0; i < _keyNum; i++) {
+		g_scoreObj.arrowData[i] = tmpArrowData[index[i]] || [];
+		g_scoreObj.frzData[i] = tmpFrzData[index[i]] || [];
+	}
+}
+
+/**
+ * Mirrorの適用
+ * @param {number} _keyNum
+ * @param {array} _shuffleGroup
+ */
+function applyMirror(_keyNum, _shuffleGroup) {
+	// シャッフルグループごとにミラー
+	const style = JSON.parse(JSON.stringify(_shuffleGroup)).map(_group => _group.reverse());
+	applyShuffle(_keyNum, _shuffleGroup, style);
+}
+
+/**
+ * Randomの適用
+ * @param {number} _keyNum
+ * @param {array} _shuffleGroup
+ */
+function applyRandom(_keyNum, _shuffleGroup) {
+	// シャッフルグループごとにシャッフル(Fisher-Yates)
+	const style = JSON.parse(JSON.stringify(_shuffleGroup)).map(_group => {
+		for (let i = _group.length - 1; i > 0; i--) {
+			const random = Math.floor(Math.random() * (i + 1));
+			const tmp = _group[i];
+			_group[i] = _group[random];
+			_group[random] = tmp;
+		}
+		return _group;
+	});
+	applyShuffle(_keyNum, _shuffleGroup, style);
+}
+
+/**
+ * S-Randomの適用
+ * @param {number} _keyNum
+ * @param {array} _shuffleGroup
+ */
+function applySRandom(_keyNum, _shuffleGroup) {
+	const tmpArrowData = [...Array(_keyNum)].map(_ => []);
+	const tmpFrzData = [...Array(_keyNum)].map(_ => []);
+
+	// シャッフルグループごとに処理
+	_shuffleGroup.forEach(_group => {
+		// 全フリーズを開始フレーム順に並べる
+		const allFreezeArrows = [];
+		_group.forEach(_key => {
+			const frzData = g_scoreObj.frzData[_key] || [];
+			for (let i = 0; i < frzData.length; i += 2) {
+				allFreezeArrows.push({begin: frzData[i], end: frzData[i + 1]});
+			}
+		});
+		allFreezeArrows.sort((_a, _b) => _a.begin - _b.begin);
+
+		// 重ならないようにフリーズを配置
+		allFreezeArrows.forEach(_freeze => {
+			// 置ける場所を検索
+			const freeSpaces = _group.filter(
+				_key => tmpFrzData[_key].find(_other => _freeze.begin <= _other.end) === undefined
+			);
+			// ランダムに配置
+			const random = Math.floor(Math.random() * freeSpaces.length);
+			tmpFrzData[freeSpaces[random]].push(_freeze);
+		});
+
+		// 通常矢印の配置
+		const allArrows = _group.map(_key =>  g_scoreObj.arrowData[_key]).flat();
+		allArrows.sort((_a, _b) => _a - _b);
+		allArrows.forEach(_arrow => {
+			// 置ける場所を検索
+			const freeSpaces = _group.filter(_key =>
+				// フリーズと重ならない
+				tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin && _arrow <= _freeze.end) === undefined
+				// 通常矢印と重ならない
+				&& tmpArrowData[_key].find(_other => _arrow === _other) === undefined
+			);
+			// ランダムに配置
+			const random = Math.floor(Math.random() * freeSpaces.length);
+			tmpArrowData[freeSpaces[random]].push(_arrow);
+		})
+	});
+
+	g_scoreObj.arrowData = tmpArrowData;
+	g_scoreObj.frzData = tmpFrzData.map(_freezes =>
+		_freezes.map(_freeze => [_freeze.begin, _freeze.end]).flat()
+	);
 }
 
 /**
@@ -6153,8 +6369,11 @@ function resultInit() {
 		g_headerObj.musicTitle, C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `#999999`, 2,
 		`Difficulty`, C_ALIGN_LEFT));
-	playDataWindow.appendChild(makeResultPlayData(`lblDifData`, 60, `#cccccc`, 2,
-		`${g_headerObj.keyLabels[g_stateObj.scoreId]} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
+	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	if (g_stateObj.shuffle !== `Default`) {
+		difData += ` [${g_stateObj.shuffle}]`;
+	}
+	playDataWindow.appendChild(makeResultPlayData(`lblDifData`, 60, `#cccccc`, 2, difData,
 		C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeResultPlayData(`lblStyle`, 20, `#999999`, 3,
 		`Playstyle`, C_ALIGN_LEFT));
@@ -6287,8 +6506,11 @@ function resultInit() {
 	} else {
 		hashTag = ``;
 	}
-	const tweetResultTmp = `【#danoni${hashTag}】${g_headerObj.musicTitle}(
-		${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]})/
+	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	if (g_stateObj.shuffle !== `Default`) {
+		tweetDifData += `/${g_stateObj.shuffle}]`;
+	}
+	const tweetResultTmp = `【#danoni${hashTag}】${g_headerObj.musicTitle}(${tweetDifData})/
 		${g_headerObj.tuning}/
 		Rank:${rankMark}/
 		Score:${g_resultObj.score}/
