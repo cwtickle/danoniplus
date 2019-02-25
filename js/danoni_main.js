@@ -153,7 +153,7 @@ const g_stateObj = {
 	lifeInit: 25,
 	lifeSetName: `Normal`,
 	lifeId: 0,
-	shuffle: `Default`,
+	shuffle: `OFF`,
 
 	d_stepzone: C_FLG_ON,
 	d_judgement: C_FLG_ON,
@@ -195,7 +195,7 @@ let g_gaugeType;
 const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
 let g_volumeNum = 0;
 
-const g_shuffles = [`Default`, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
+const g_shuffles = [`OFF`, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
 let g_shuffleNum = 0;
 
 // サイズ(後で指定)
@@ -2058,7 +2058,6 @@ function headerConvert(_dosObj) {
 	} else {
 		obj.setColor = JSON.parse(JSON.stringify(obj.setColorInit));
 	}
-	//obj.setColorDef = JSON.parse(JSON.stringify(obj.setColor));
 
 
 	// フリーズアロー初期色情報
@@ -2225,6 +2224,15 @@ function headerConvert(_dosObj) {
 	// デフォルト曲名表示のフォント名
 	obj.titlefont = setVal(_dosObj.titlefont, ``, `string`);
 
+	// オプション利用可否設定
+	// Motion
+	obj.motionUse = setVal(_dosObj.motionUse, `enabled`, `string`);
+
+	// Reverse
+	obj.reverseUse = setVal(_dosObj.reverseUse, `enabled`, `string`);
+
+	// Shuffle
+	obj.shuffleUse = setVal(_dosObj.shuffleUse, `enabled`, `string`);
 
 	return obj;
 }
@@ -2744,54 +2752,59 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#eeff99>M</span>otion`);
 	optionsprite.appendChild(lblMotion);
 
-	const lnkMotion = makeSettingLblButton(`lnkMotion`, g_stateObj.motion, setNoMotion, _ => {
-		switch (g_stateObj.motion) {
-			case C_FLG_OFF:
-				g_stateObj.motion = `Boost`; break;
-			case `Boost`:
-				g_stateObj.motion = `Brake`; break;
-			case `Brake`:
-				g_stateObj.motion = C_FLG_OFF; break;
+	if (g_headerObj.motionUse === `enabled`) {
+		const lnkMotion = makeSettingLblButton(`lnkMotion`, g_stateObj.motion, setNoMotion, _ => {
+			switch (g_stateObj.motion) {
+				case C_FLG_OFF:
+					g_stateObj.motion = `Boost`; break;
+				case `Boost`:
+					g_stateObj.motion = `Brake`; break;
+				case `Brake`:
+					g_stateObj.motion = C_FLG_OFF; break;
+			}
+			lnkMotion.innerHTML = g_stateObj.motion;
+		});
+		lnkMotion.oncontextmenu = _ => {
+			switch (g_stateObj.motion) {
+				case C_FLG_OFF:
+					g_stateObj.motion = `Brake`; break;
+				case `Boost`:
+					g_stateObj.motion = C_FLG_OFF; break;
+				case `Brake`:
+					g_stateObj.motion = `Boost`; break;
+			}
+			lnkMotion.innerHTML = g_stateObj.motion;
+			return false;
 		}
-		lnkMotion.innerHTML = g_stateObj.motion;
-	});
-	lnkMotion.oncontextmenu = _ => {
-		switch (g_stateObj.motion) {
-			case C_FLG_OFF:
-				g_stateObj.motion = `Brake`; break;
-			case `Boost`:
-				g_stateObj.motion = C_FLG_OFF; break;
-			case `Brake`:
-				g_stateObj.motion = `Boost`; break;
-		}
-		lnkMotion.innerHTML = g_stateObj.motion;
-		return false;
-	}
-	optionsprite.appendChild(lnkMotion);
+		optionsprite.appendChild(lnkMotion);
 
-	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkMotion`, `R`, setNoMotion, _ => {
-		switch (g_stateObj.motion) {
-			case C_FLG_OFF:
-				g_stateObj.motion = `Boost`; break;
-			case `Boost`:
-				g_stateObj.motion = `Brake`; break;
-			case `Brake`:
-				g_stateObj.motion = C_FLG_OFF; break;
-		}
-		lnkMotion.innerHTML = g_stateObj.motion;
-	}));
-	optionsprite.appendChild(makeMiniButton(`lnkMotion`, `L`, setNoMotion, _ => {
-		switch (g_stateObj.motion) {
-			case C_FLG_OFF:
-				g_stateObj.motion = `Brake`; break;
-			case `Boost`:
-				g_stateObj.motion = C_FLG_OFF; break;
-			case `Brake`:
-				g_stateObj.motion = `Boost`; break;
-		}
-		lnkMotion.innerHTML = g_stateObj.motion;
-	}));
+		// 右回し・左回しボタン
+		optionsprite.appendChild(makeMiniButton(`lnkMotion`, `R`, setNoMotion, _ => {
+			switch (g_stateObj.motion) {
+				case C_FLG_OFF:
+					g_stateObj.motion = `Boost`; break;
+				case `Boost`:
+					g_stateObj.motion = `Brake`; break;
+				case `Brake`:
+					g_stateObj.motion = C_FLG_OFF; break;
+			}
+			lnkMotion.innerHTML = g_stateObj.motion;
+		}));
+		optionsprite.appendChild(makeMiniButton(`lnkMotion`, `L`, setNoMotion, _ => {
+			switch (g_stateObj.motion) {
+				case C_FLG_OFF:
+					g_stateObj.motion = `Brake`; break;
+				case `Boost`:
+					g_stateObj.motion = C_FLG_OFF; break;
+				case `Brake`:
+					g_stateObj.motion = `Boost`; break;
+			}
+			lnkMotion.innerHTML = g_stateObj.motion;
+		}));
+	} else {
+		lblMotion.style.color = `#666666`;
+		optionsprite.appendChild(makeDisabledLabel(`lblMotionNon`, setNoMotion));
+	}
 
 	// ---------------------------------------------------
 	// リバース (Reverse)
@@ -2802,26 +2815,31 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#ddff99>R</span>everse`);
 	optionsprite.appendChild(lblReverse);
 
-	const lnkReverse = makeSettingLblButton(`lnkReverse`, g_stateObj.reverse, setNoReverse, _ => {
-		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkReverse.innerHTML = g_stateObj.reverse;
-	});
-	lnkReverse.oncontextmenu = _ => {
-		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkReverse.innerHTML = g_stateObj.reverse;
-		return false;
-	}
-	optionsprite.appendChild(lnkReverse);
+	if (g_headerObj.reverseUse === `enabled`) {
+		const lnkReverse = makeSettingLblButton(`lnkReverse`, g_stateObj.reverse, setNoReverse, _ => {
+			g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+			lnkReverse.innerHTML = g_stateObj.reverse;
+		});
+		lnkReverse.oncontextmenu = _ => {
+			g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+			lnkReverse.innerHTML = g_stateObj.reverse;
+			return false;
+		}
+		optionsprite.appendChild(lnkReverse);
 
-	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `R`, setNoReverse, _ => {
-		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkReverse.innerHTML = g_stateObj.reverse;
-	}));
-	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `L`, setNoReverse, _ => {
-		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkReverse.innerHTML = g_stateObj.reverse;
-	}));
+		// 右回し・左回しボタン
+		optionsprite.appendChild(makeMiniButton(`lnkReverse`, `R`, setNoReverse, _ => {
+			g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+			lnkReverse.innerHTML = g_stateObj.reverse;
+		}));
+		optionsprite.appendChild(makeMiniButton(`lnkReverse`, `L`, setNoReverse, _ => {
+			g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+			lnkReverse.innerHTML = g_stateObj.reverse;
+		}));
+	} else {
+		lblReverse.style.color = `#666666`;
+		optionsprite.appendChild(makeDisabledLabel(`lblReverseNon`, setNoReverse));
+	}
 
 	// ---------------------------------------------------
 	// ミラー・ランダム (Shuffle)
@@ -2832,30 +2850,35 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#99ff99>S</span>huffle`);
 	optionsprite.appendChild(lblShuffle);
 
-	const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, setNoShuffle, _ => {
-		g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
-		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
-		lnkShuffle.innerHTML = g_stateObj.shuffle;
-	});
-	lnkShuffle.oncontextmenu = _ => {
-		g_shuffleNum = (g_shuffleNum === 0 ? g_shuffles.length - 1 : --g_shuffleNum);
-		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
-		lnkShuffle.innerHTML = g_stateObj.shuffle;
-		return false;
-	}
-	optionsprite.appendChild(lnkShuffle);
+	if (g_headerObj.shuffleUse === `enabled`) {
+		const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, setNoShuffle, _ => {
+			g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
+			g_stateObj.shuffle = g_shuffles[g_shuffleNum];
+			lnkShuffle.innerHTML = g_stateObj.shuffle;
+		});
+		lnkShuffle.oncontextmenu = _ => {
+			g_shuffleNum = (g_shuffleNum === 0 ? g_shuffles.length - 1 : --g_shuffleNum);
+			g_stateObj.shuffle = g_shuffles[g_shuffleNum];
+			lnkShuffle.innerHTML = g_stateObj.shuffle;
+			return false;
+		}
+		optionsprite.appendChild(lnkShuffle);
 
-	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `R`, setNoShuffle, _ => {
-		g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
-		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
-		lnkShuffle.innerHTML = g_stateObj.shuffle;
-	}));
-	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `L`, setNoShuffle, _ => {
-		g_shuffleNum = (g_shuffleNum === 0 ? g_shuffles.length - 1 : --g_shuffleNum);
-		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
-		lnkShuffle.innerHTML = g_stateObj.shuffle;
-	}));
+		// 右回し・左回しボタン
+		optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `R`, setNoShuffle, _ => {
+			g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
+			g_stateObj.shuffle = g_shuffles[g_shuffleNum];
+			lnkShuffle.innerHTML = g_stateObj.shuffle;
+		}));
+		optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `L`, setNoShuffle, _ => {
+			g_shuffleNum = (g_shuffleNum === 0 ? g_shuffles.length - 1 : --g_shuffleNum);
+			g_stateObj.shuffle = g_shuffles[g_shuffleNum];
+			lnkShuffle.innerHTML = g_stateObj.shuffle;
+		}));
+	} else {
+		lblShuffle.style.color = `#666666`;
+		optionsprite.appendChild(makeDisabledLabel(`lblShuffleNon`, setNoShuffle));
+	}
 
 	// ---------------------------------------------------
 	// 鑑賞モード設定 (AutoPlay)
@@ -3148,6 +3171,16 @@ function createOptionWindow(_sprite) {
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
 	}));
+
+	// ---------------------------------------------------
+	// 無効化用ラベル作成
+	function makeDisabledLabel(_id, _heightPos) {
+		const lbl = createDivLabel(_id, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * _heightPos,
+			C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
+			`- - -`);
+		lbl.style.textAlign = C_ALIGN_CENTER;
+		return lbl;
+	}
 
 	optionsprite.oncontextmenu = _ => false;
 }
@@ -6413,7 +6446,7 @@ function resultInit() {
 	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `#999999`, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-	if (g_stateObj.shuffle !== `Default`) {
+	if (g_stateObj.shuffle !== `OFF`) {
 		difData += ` [${g_stateObj.shuffle}]`;
 	}
 	playDataWindow.appendChild(makeResultPlayData(`lblDifData`, 60, `#cccccc`, 2, difData,
@@ -6550,7 +6583,7 @@ function resultInit() {
 		hashTag = ``;
 	}
 	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-	if (g_stateObj.shuffle !== `Default`) {
+	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `/${g_stateObj.shuffle}`;
 	}
 	const tweetResultTmp = `【#danoni${hashTag}】${g_headerObj.musicTitle}(${tweetDifData})/
