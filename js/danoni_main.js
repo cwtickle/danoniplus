@@ -2630,16 +2630,19 @@ function optionInit() {
 function createOptionWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 90, 400, 300);
+	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 85, 400, 300);
 
-	// 難易度(Difficulty)
-	const lblDifficulty = createDivLabel(`lblDifficulty`, 0, C_LEN_SETLBL_HEIGHT * 0,
+	// ---------------------------------------------------
+	// 難易度 (Difficulty)
+	// 縦位置: 0 
+	const setNoDifficulty = 0;
+	const lblDifficulty = createDivLabel(`lblDifficulty`, 0, C_LEN_SETLBL_HEIGHT * setNoDifficulty,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETDIFLBL, C_CLR_TITLE,
 		`<span style=color:#ff9999>D</span>ifficulty`);
 	optionsprite.appendChild(lblDifficulty);
 
 	const lnkDifficulty = makeSettingLblButton(`lnkDifficulty`,
-		`${g_headerObj.keyLabels[g_stateObj.scoreId]} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`, 0, _ => {
+		`${g_headerObj.keyLabels[g_stateObj.scoreId]} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`, setNoDifficulty, _ => {
 			g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
 			setDifficulty();
 		});
@@ -2655,11 +2658,12 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkDifficulty);
 
-	optionsprite.appendChild(makeMiniButton(`lnkDifficulty`, `R`, 0, _ => {
+	// 右回し・左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkDifficulty`, `R`, setNoDifficulty, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
 		setDifficulty();
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkDifficulty`, `L`, 0, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkDifficulty`, `L`, setNoDifficulty, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
 		setDifficulty();
 	}));
@@ -2687,13 +2691,20 @@ function createOptionWindow(_sprite) {
 		}
 	}
 
+	// ---------------------------------------------------
+	// ハイスコア機能実装時に使用予定のスペース
+	// 縦位置: 1
+
+	// ---------------------------------------------------
 	// 速度(Speed)
-	const lblSpeed = createDivLabel(`lblSpeed`, 0, C_LEN_SETLBL_HEIGHT * 2,
+	// 縦位置: 2  短縮ショートカットあり
+	const setNoSpeed = 2;
+	const lblSpeed = createDivLabel(`lblSpeed`, 0, C_LEN_SETLBL_HEIGHT * setNoSpeed,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#ffff99>S</span>peed`);
 	optionsprite.appendChild(lblSpeed);
 
-	const lnkSpeed = makeSettingLblButton(`lnkSpeed`, `${g_stateObj.speed} x`, 2, _ => {
+	const lnkSpeed = makeSettingLblButton(`lnkSpeed`, `${g_stateObj.speed} x`, setNoSpeed, _ => {
 		g_stateObj.speed = (Number(g_stateObj.speed) < C_MAX_SPEED ? Number(g_stateObj.speed) + 0.25 : C_MIN_SPEED);
 		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
 	});
@@ -2704,31 +2715,36 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkSpeed);
 
-	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `R`, 2, _ => {
+	// 右回し・左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `R`, setNoSpeed, _ => {
 		g_stateObj.speed = (Number(g_stateObj.speed) < C_MAX_SPEED - 1 ? Number(g_stateObj.speed) + 1 : (Number(g_stateObj.speed) === C_MAX_SPEED ? C_MIN_SPEED : C_MAX_SPEED));
 		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `L`, 2, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `L`, setNoSpeed, _ => {
 		g_stateObj.speed = (Number(g_stateObj.speed) > C_MIN_SPEED + 1 ? Number(g_stateObj.speed) - 1 : (Number(g_stateObj.speed) === C_MIN_SPEED ? C_MAX_SPEED : C_MIN_SPEED));
 		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `RR`, 2, _ => {
+
+	// 早右回し・早左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `RR`, setNoSpeed, _ => {
 		g_stateObj.speed = (Number(g_stateObj.speed) < C_MAX_SPEED ? Number(g_stateObj.speed) + 0.25 : C_MIN_SPEED);
 		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `LL`, 2, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `LL`, setNoSpeed, _ => {
 		g_stateObj.speed = (Number(g_stateObj.speed) > C_MIN_SPEED ? Number(g_stateObj.speed) - 0.25 : C_MAX_SPEED);
 		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
 	}));
 
-
+	// ---------------------------------------------------
 	// 速度モーション (Motion)
-	const lblMotion = createDivLabel(`lblMotion`, 0, C_LEN_SETLBL_HEIGHT * 3,
+	// 縦位置: 3
+	const setNoMotion = 3;
+	const lblMotion = createDivLabel(`lblMotion`, 0, C_LEN_SETLBL_HEIGHT * setNoMotion,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#eeff99>M</span>otion`);
 	optionsprite.appendChild(lblMotion);
 
-	const lnkMotion = makeSettingLblButton(`lnkMotion`, g_stateObj.motion, 3, _ => {
+	const lnkMotion = makeSettingLblButton(`lnkMotion`, g_stateObj.motion, setNoMotion, _ => {
 		switch (g_stateObj.motion) {
 			case C_FLG_OFF:
 				g_stateObj.motion = `Boost`; break;
@@ -2753,7 +2769,8 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkMotion);
 
-	optionsprite.appendChild(makeMiniButton(`lnkMotion`, `R`, 3, _ => {
+	// 右回し・左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkMotion`, `R`, setNoMotion, _ => {
 		switch (g_stateObj.motion) {
 			case C_FLG_OFF:
 				g_stateObj.motion = `Boost`; break;
@@ -2764,7 +2781,7 @@ function createOptionWindow(_sprite) {
 		}
 		lnkMotion.innerHTML = g_stateObj.motion;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkMotion`, `L`, 3, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkMotion`, `L`, setNoMotion, _ => {
 		switch (g_stateObj.motion) {
 			case C_FLG_OFF:
 				g_stateObj.motion = `Brake`; break;
@@ -2776,14 +2793,16 @@ function createOptionWindow(_sprite) {
 		lnkMotion.innerHTML = g_stateObj.motion;
 	}));
 
-
-	// リバース
-	const lblReverse = createDivLabel(`lblReverse`, 0, C_LEN_SETLBL_HEIGHT * 4,
+	// ---------------------------------------------------
+	// リバース (Reverse)
+	// 縦位置: 4
+	const setNoReverse = 4;
+	const lblReverse = createDivLabel(`lblReverse`, 0, C_LEN_SETLBL_HEIGHT * setNoReverse,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#ddff99>R</span>everse`);
 	optionsprite.appendChild(lblReverse);
 
-	const lnkReverse = makeSettingLblButton(`lnkReverse`, g_stateObj.reverse, 4, _ => {
+	const lnkReverse = makeSettingLblButton(`lnkReverse`, g_stateObj.reverse, setNoReverse, _ => {
 		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkReverse.innerHTML = g_stateObj.reverse;
 	});
@@ -2794,22 +2813,26 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkReverse);
 
-	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `R`, 4, _ => {
+	// 右回し・左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `R`, setNoReverse, _ => {
 		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkReverse.innerHTML = g_stateObj.reverse;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `L`, 4, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `L`, setNoReverse, _ => {
 		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkReverse.innerHTML = g_stateObj.reverse;
 	}));
 
-	// ミラー・ランダム
-	const lblShuffle = createDivLabel(`lblShuffle`, 0, C_LEN_SETLBL_HEIGHT * 5.5,
+	// ---------------------------------------------------
+	// ミラー・ランダム (Shuffle)
+	// 縦位置: 5.5
+	const setNoShuffle = 5.5;
+	const lblShuffle = createDivLabel(`lblShuffle`, 0, C_LEN_SETLBL_HEIGHT * setNoShuffle,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99ff99>S</span>huffle`);
 	optionsprite.appendChild(lblShuffle);
 
-	const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, 5.5, _ => {
+	const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, setNoShuffle, _ => {
 		g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
 		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
 		lnkShuffle.innerHTML = g_stateObj.shuffle;
@@ -2822,24 +2845,28 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkShuffle);
 
-	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `R`, 5.5, _ => {
+	// 右回し・左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `R`, setNoShuffle, _ => {
 		g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
 		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
 		lnkShuffle.innerHTML = g_stateObj.shuffle;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `L`, 5.5, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `L`, setNoShuffle, _ => {
 		g_shuffleNum = (g_shuffleNum === 0 ? g_shuffles.length - 1 : --g_shuffleNum);
 		g_stateObj.shuffle = g_shuffles[g_shuffleNum];
 		lnkShuffle.innerHTML = g_stateObj.shuffle;
 	}));
 
+	// ---------------------------------------------------
 	// 鑑賞モード設定 (AutoPlay)
-	const lblAutoPlay = createDivLabel(`lblAutoPlay`, 0, C_LEN_SETLBL_HEIGHT * 6.5,
+	// 縦位置: 6.5
+	const setNoAutoPlay = 6.5;
+	const lblAutoPlay = createDivLabel(`lblAutoPlay`, 0, C_LEN_SETLBL_HEIGHT * setNoAutoPlay,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99ffbb>A</span>utoPlay`);
 	optionsprite.appendChild(lblAutoPlay);
 
-	const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.auto, 6.5, _ => {
+	const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.auto, setNoAutoPlay, _ => {
 		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	});
@@ -2850,28 +2877,33 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkAutoPlay);
 
-	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `R`, 6.5, _ => {
+	// 右回し・左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `R`, setNoAutoPlay, _ => {
 		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `L`, 6.5, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `L`, setNoAutoPlay, _ => {
 		g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkAutoPlay.innerHTML = g_stateObj.auto;
 	}));
 
+	// ---------------------------------------------------
 	// ゲージ設定 (Gauge)
-	const lblGauge = createDivLabel(`lblGauge`, 0, C_LEN_SETLBL_HEIGHT * 7.5,
+	// 縦位置: 7.5
+	const setNoGauge = 7.5;
+	const lblGauge = createDivLabel(`lblGauge`, 0, C_LEN_SETLBL_HEIGHT * setNoGauge,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99ffdd>G</span>auge`);
 	optionsprite.appendChild(lblGauge);
 
-	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 8.5 - 3,
+	// ゲージ設定詳細　縦位置: ゲージ設定+1
+	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * (setNoGauge + 1) - 3,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, 11, C_CLR_TITLE,
 		gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit));
 	optionsprite.appendChild(lblGauge2);
 
 	const lnkGauge = makeSettingLblButton(`lnkGauge`,
-		g_stateObj.lifeSetName, 7.5, _ => {
+		g_stateObj.lifeSetName, setNoGauge, _ => {
 			g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
 			gaugeChange(g_stateObj.lifeId);
 
@@ -2888,14 +2920,15 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkGauge);
 
-	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `R`, 7.5, _ => {
+	// 右回し・左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `R`, setNoGauge, _ => {
 		g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
 		gaugeChange(g_stateObj.lifeId);
 
 		lnkGauge.innerHTML = g_stateObj.lifeSetName;
 		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `L`, 7.5, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `L`, setNoGauge, _ => {
 		g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
 		gaugeChange(g_stateObj.lifeId);
 
@@ -2994,14 +3027,16 @@ function createOptionWindow(_sprite) {
 		return `[Start:${initVal}, Rcv:${_rcv}, Dmg:${_dmg}]`;
 	}
 
-
+	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
-	const lblAdjustment = createDivLabel(`lblAdjustment`, 0, C_LEN_SETLBL_HEIGHT * 10,
+	// 縦位置: 10  短縮ショートカットあり
+	const setNoAdjustment = 10;
+	const lblAdjustment = createDivLabel(`lblAdjustment`, 0, C_LEN_SETLBL_HEIGHT * setNoAdjustment,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99ffff>A</span>djustment`);
 	optionsprite.appendChild(lblAdjustment);
 
-	const lnkAdjustment = makeSettingLblButton(`lnkAdjustment`, g_stateObj.adjustment, 10, _ => {
+	const lnkAdjustment = makeSettingLblButton(`lnkAdjustment`, g_stateObj.adjustment, setNoAdjustment, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	});
@@ -3012,59 +3047,64 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkAdjustment);
 
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `R`, 10, _ => {
+	// 右回し・左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `R`, setNoAdjustment, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment >= C_MAX_ADJUSTMENT - 5 ? (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : C_MAX_ADJUSTMENT) : g_stateObj.adjustment + 5);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `L`, 10, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `L`, setNoAdjustment, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment <= -(C_MAX_ADJUSTMENT - 5) ? (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : -C_MAX_ADJUSTMENT) : g_stateObj.adjustment - 5);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `RR`, 10, _ => {
+	// 早右回し・早左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `RR`, setNoAdjustment, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : ++g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `LL`, 10, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `LL`, setNoAdjustment, _ => {
 		g_stateObj.adjustment = (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : --g_stateObj.adjustment);
 		lnkAdjustment.innerHTML = g_stateObj.adjustment;
 	}));
 
-
+	// ---------------------------------------------------
 	// フェードイン (Fadein)
-	const lblFadein = createDivLabel(`lblFadein`, 0, C_LEN_SETLBL_HEIGHT * 11,
+	// 縦位置: 11 スライダーあり
+	const setNoFadein = 11;
+	const lblFadein = createDivLabel(`lblFadein`, 0, C_LEN_SETLBL_HEIGHT * setNoFadein,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99eeff>F</span>adein`);
 	optionsprite.appendChild(lblFadein);
 
-	const lnkFadein = createDivLabel(`lblFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * 11,
+	const lnkFadein = createDivLabel(`lblFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * setNoFadein,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `${g_stateObj.fadein}%`);
 	optionsprite.appendChild(lnkFadein);
 
-	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `R`, 11, _ => {
+	// 右回し・左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `R`, setNoFadein, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 99 ? 0 : g_stateObj.fadein + 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `L`, 11, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `L`, setNoFadein, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 0 ? 99 : g_stateObj.fadein - 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}));
 
+	// フェードインのスライダー処理
 	let addXPos = 0;
 	let addYPos = 0;
 	if (g_userAgent.indexOf(`firefox`) !== -1) {
 		addXPos = -8;
 		addYPos = 1;
 	}
-	const lblFadeinSlider = createDivLabel(`lblFadeinBar`, 160 + addXPos, C_LEN_SETLBL_HEIGHT * 11 + addYPos, ``, ``, ``, ``,
+	const lblFadeinSlider = createDivLabel(`lblFadeinBar`, 160 + addXPos, C_LEN_SETLBL_HEIGHT * setNoFadein + addYPos, ``, ``, ``, ``,
 		`<input id=fadeinSlider type=range value=0 min=0 max=99 step=1>`);
 	optionsprite.appendChild(lblFadeinSlider);
 
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
 	fadeinSlider.value = g_stateObj.fadein;
 
-	// フェードインのスライダー処理
 	fadeinSlider.addEventListener(`input`, _ => {
 		g_stateObj.fadein = parseInt(fadeinSlider.value);
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
@@ -3075,14 +3115,16 @@ function createOptionWindow(_sprite) {
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}, false);
 
-
-	// ボリューム
-	const lblVolume = createDivLabel(`lblVolume`, 0, C_LEN_SETLBL_HEIGHT * 12,
+	// ---------------------------------------------------
+	// ボリューム (Volume) 
+	// 縦位置: 12
+	const setNoVolume = 12;
+	const lblVolume = createDivLabel(`lblVolume`, 0, C_LEN_SETLBL_HEIGHT * setNoVolume,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
 		`<span style=color:#99ddff>V</span>olume`);
 	optionsprite.appendChild(lblVolume);
 
-	const lnkVolume = makeSettingLblButton(`lnkVolume`, `${g_stateObj.volume}%`, 12, _ => {
+	const lnkVolume = makeSettingLblButton(`lnkVolume`, `${g_stateObj.volume}%`, setNoVolume, _ => {
 		g_volumeNum = (g_volumeNum === 0 ? g_volumes.length - 1 : --g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
@@ -3095,12 +3137,13 @@ function createOptionWindow(_sprite) {
 	}
 	optionsprite.appendChild(lnkVolume);
 
-	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `R`, 12, _ => {
+	// 右回し・左回しボタン
+	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `R`, setNoVolume, _ => {
 		g_volumeNum = (g_volumeNum === 0 ? g_volumes.length - 1 : --g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `L`, 12, _ => {
+	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `L`, setNoVolume, _ => {
 		g_volumeNum = (g_volumeNum === g_volumes.length - 1 ? 0 : ++g_volumeNum);
 		g_stateObj.volume = g_volumes[g_volumeNum];
 		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
