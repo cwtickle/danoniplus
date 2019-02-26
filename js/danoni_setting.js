@@ -43,5 +43,6 @@ const g_presetGaugeCustom = {
 const g_presetSettingUse = {
 	motion: `true`,
 	shuffle: `true`,
-	autoPlay: `true`
+	autoPlay: `true`,
+	gauge: `true`
 };

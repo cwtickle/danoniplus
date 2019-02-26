@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.1.0`;
+const g_version = `Ver 3.1.1`;
 const g_revisedDate = `2019/02/26`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2237,6 +2237,9 @@ function headerConvert(_dosObj) {
 	// AutoPlay
 	obj.autoPlayUse = setVal(_dosObj.autoPlayUse, setVal(g_presetSettingUse.autoPlay, `true`, `string`), `string`);
 
+	// Gauge
+	obj.gaugeUse = setVal(_dosObj.gaugeUse, setVal(g_presetSettingUse.gauge, `true`, `string`), `string`);
+
 	return obj;
 }
 
@@ -2782,7 +2785,7 @@ function createOptionWindow(_sprite) {
 		}));
 	} else {
 		lblMotion.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lblMotionNon`, setNoMotion, g_stateObj.motion));
+		optionsprite.appendChild(makeDisabledLabel(`lnkMotion`, setNoMotion, g_stateObj.motion));
 	}
 
 	// ---------------------------------------------------
@@ -2851,7 +2854,7 @@ function createOptionWindow(_sprite) {
 		}));
 	} else {
 		lblShuffle.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lblShuffleNon`, setNoShuffle, g_stateObj.shuffle));
+		optionsprite.appendChild(makeDisabledLabel(`lnkShuffle`, setNoShuffle, g_stateObj.shuffle));
 	}
 
 	// ---------------------------------------------------
@@ -2886,7 +2889,7 @@ function createOptionWindow(_sprite) {
 		}));
 	} else {
 		lblAutoPlay.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lblAutoPlayNon`, setNoAutoPlay, g_stateObj.auto));
+		optionsprite.appendChild(makeDisabledLabel(`lnkAutoPlay`, setNoAutoPlay, g_stateObj.auto));
 	}
 
 	// ---------------------------------------------------
@@ -2904,39 +2907,44 @@ function createOptionWindow(_sprite) {
 		gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit));
 	optionsprite.appendChild(lblGauge2);
 
-	const lnkGauge = makeSettingLblButton(`lnkGauge`,
-		g_stateObj.lifeSetName, setNoGauge, _ => {
+	if (g_headerObj.gaugeUse !== `false`) {
+		const lnkGauge = makeSettingLblButton(`lnkGauge`,
+			g_stateObj.lifeSetName, setNoGauge, _ => {
+				g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
+				gaugeChange(g_stateObj.lifeId);
+
+				lnkGauge.innerHTML = g_stateObj.lifeSetName;
+				lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
+			});
+		lnkGauge.oncontextmenu = _ => {
+			g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
+			gaugeChange(g_stateObj.lifeId);
+
+			lnkGauge.innerHTML = g_stateObj.lifeSetName;
+			lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
+			return false;
+		}
+		optionsprite.appendChild(lnkGauge);
+
+		// 右回し・左回しボタン
+		optionsprite.appendChild(makeMiniButton(`lnkGauge`, `R`, setNoGauge, _ => {
 			g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
 			gaugeChange(g_stateObj.lifeId);
 
 			lnkGauge.innerHTML = g_stateObj.lifeSetName;
 			lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
-		});
-	lnkGauge.oncontextmenu = _ => {
-		g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
-		gaugeChange(g_stateObj.lifeId);
+		}));
+		optionsprite.appendChild(makeMiniButton(`lnkGauge`, `L`, setNoGauge, _ => {
+			g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
+			gaugeChange(g_stateObj.lifeId);
 
-		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
-		return false;
+			lnkGauge.innerHTML = g_stateObj.lifeSetName;
+			lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
+		}));
+	} else {
+		lblGauge.style.color = `#666666`;
+		optionsprite.appendChild(makeDisabledLabel(`lnkGauge`, setNoGauge, g_stateObj.lifeSetName));
 	}
-	optionsprite.appendChild(lnkGauge);
-
-	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `R`, setNoGauge, _ => {
-		g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
-		gaugeChange(g_stateObj.lifeId);
-
-		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
-	}));
-	optionsprite.appendChild(makeMiniButton(`lnkGauge`, `L`, setNoGauge, _ => {
-		g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
-		gaugeChange(g_stateObj.lifeId);
-
-		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
-	}));
 
 	/**
 	 * ゲージ設定の切替処理
