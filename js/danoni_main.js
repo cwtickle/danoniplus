@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/26
+ * Revised : 2019/02/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.1.2`;
-const g_revisedDate = `2019/02/26`;
+const g_version = `Ver 3.1.3`;
+const g_revisedDate = `2019/02/27`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -4170,6 +4170,9 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 		if (tmpData !== undefined && tmpData !== ``) {
 			const tmpWordData = tmpData.split(`,`);
 			for (let k = 0; k < tmpWordData.length; k += 3) {
+				if (isNaN(parseInt(tmpWordData[k]))) {
+					continue;
+				}
 				tmpWordData[k] = calcFrame(tmpWordData[k]);
 				tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
 
@@ -5725,40 +5728,42 @@ function MainInit() {
 			g_wordObj.wordDat = g_scoreObj.wordData[g_scoreObj.frameNum][1];
 			g_wordSprite = document.querySelector(`#lblword${g_wordObj.wordDir}`);
 
-			if (g_wordObj.wordDat === `[fadein]`) {
-				g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = true;
-				g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = false;
-				g_wordSprite.style.opacity = 0;
+			if (g_wordSprite !== null) {
+				if (g_wordObj.wordDat === `[fadein]`) {
+					g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = true;
+					g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = false;
+					g_wordSprite.style.opacity = 0;
 
-			} else if (g_wordObj.wordDat === `[fadeout]`) {
-				g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = false;
-				g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = true;
-				g_wordSprite.style.opacity = 1;
-
-			} else if (g_wordObj.wordDat === `[center]` ||
-				g_wordObj.wordDat === `[left]` || g_wordObj.wordDat === `[right]`) {
-
-			} else {
-				if (!g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
-					&& Number(g_wordSprite.style.opacity) === 0) {
+				} else if (g_wordObj.wordDat === `[fadeout]`) {
+					g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = false;
+					g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = true;
 					g_wordSprite.style.opacity = 1;
-				}
-				g_workObj[`word${g_wordObj.wordDir}Data`] = g_wordObj.wordDat;
-				g_wordSprite.innerHTML = g_wordObj.wordDat;
-			}
 
-			if (g_wordObj.wordDat === `[center]`) {
-				g_wordSprite.style.textAlign = C_ALIGN_CENTER;
-				g_wordSprite.style.display = `block`;
-				g_wordSprite.style.margin = `auto`;
-			} else if (g_wordObj.wordDat === `[left]`) {
-				g_wordSprite.style.textAlign = C_ALIGN_LEFT;
-				g_wordSprite.style.display = `inline`;
-				g_wordSprite.style.margin = `0`;
-			} else if (g_wordObj.wordDat === `[right]`) {
-				g_wordSprite.style.textAlign = C_ALIGN_RIGHT;
-				g_wordSprite.style.display = `block`;
-				g_wordSprite.style.margin = `auto`;
+				} else if (g_wordObj.wordDat === `[center]` ||
+					g_wordObj.wordDat === `[left]` || g_wordObj.wordDat === `[right]`) {
+
+				} else {
+					if (!g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
+						&& Number(g_wordSprite.style.opacity) === 0) {
+						g_wordSprite.style.opacity = 1;
+					}
+					g_workObj[`word${g_wordObj.wordDir}Data`] = g_wordObj.wordDat;
+					g_wordSprite.innerHTML = g_wordObj.wordDat;
+				}
+
+				if (g_wordObj.wordDat === `[center]`) {
+					g_wordSprite.style.textAlign = C_ALIGN_CENTER;
+					g_wordSprite.style.display = `block`;
+					g_wordSprite.style.margin = `auto`;
+				} else if (g_wordObj.wordDat === `[left]`) {
+					g_wordSprite.style.textAlign = C_ALIGN_LEFT;
+					g_wordSprite.style.display = `inline`;
+					g_wordSprite.style.margin = `0`;
+				} else if (g_wordObj.wordDat === `[right]`) {
+					g_wordSprite.style.textAlign = C_ALIGN_RIGHT;
+					g_wordSprite.style.display = `block`;
+					g_wordSprite.style.margin = `auto`;
+				}
 			}
 		}
 
