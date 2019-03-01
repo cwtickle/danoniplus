@@ -2495,7 +2495,7 @@ function keysConvert(_dosObj) {
 			if (_dosObj[`shuffle${newKey}`] !== undefined) {
 				const tmpshuffles = _dosObj[`shuffle${newKey}`].split(`$`);
 				for (let k = 0; k < tmpshuffles.length; k++) {
-					g_keyObj[`shuffle${newKey}_${k}`] = tmpshuffles[k].split(`,`).map(parseInt);
+					g_keyObj[`shuffle${newKey}_${k}`] = tmpshuffles[k].split(`,`).map(n => parseInt(n, 10));
 				}
 			}
 		}
