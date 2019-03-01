@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/27
+ * Revised : 2019/03/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.1.3`;
-const g_revisedDate = `2019/02/27`;
+const g_version = `Ver 3.1.4`;
+const g_revisedDate = `2019/03/01`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2495,7 +2495,7 @@ function keysConvert(_dosObj) {
 			if (_dosObj[`shuffle${newKey}`] !== undefined) {
 				const tmpshuffles = _dosObj[`shuffle${newKey}`].split(`$`);
 				for (let k = 0; k < tmpshuffles.length; k++) {
-					g_keyObj[`shuffle${newKey}_${k}`] = tmpshuffles[k].split(`,`).map(parseInt);
+					g_keyObj[`shuffle${newKey}_${k}`] = tmpshuffles[k].split(`,`).map(n => parseInt(n, 10));
 				}
 			}
 		}
