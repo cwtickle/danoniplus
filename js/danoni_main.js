@@ -1762,20 +1762,40 @@ function titleInit() {
 	}
 
 	// 曲名文字描画（曲名は譜面データから取得）
-	// 矢印色の1番目と3番目を使ってタイトルをグラデーション
-	const grd2 = l0ctx.createLinearGradient(0, 0, g_sHeight, 0);
+	let titlefontgrd = ``;
 	if (g_headerObj.customTitleUse === `false`) {
 
-		if (g_headerObj.setColor[0] != undefined) {
-			grd2.addColorStop(0, g_headerObj[`setColor`][0]);
-		} else {
-			grd2.addColorStop(0, `#ffffff`);
+		// グラデーションの指定がない場合、
+		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
+		if (g_headerObj.titlegrd != undefined) {
+			titlefontgrd = g_headerObj.titlegrd;
+		}else{
+			if (g_headerObj.setColor[0] != undefined) {
+				titlefontgrd += g_headerObj[`setColor`][0];
+			} else {
+				titlefontgrd += `#ffffff`;
+			}
+
+			titlefontgrd += `,`;
+
+			if (g_headerObj.setColor[2] != undefined) {
+				titlefontgrd += g_headerObj[`setColor`][2];
+			} else {
+				titlefontgrd += `#66ffff`;
+			}
 		}
-		if (g_headerObj.setColor[2] != undefined) {
-			grd2.addColorStop(1, g_headerObj[`setColor`][2]);
-		} else {
-			grd2.addColorStop(1, `#66ffff`);
+
+		// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
+		// 先頭1文字目が#かどうかで判断するので、redやwhiteのような色コードの指定はNG
+		if (titlefontgrd[0] == `#`) {
+			titlefontgrd = `to right,` + titlefontgrd;
 		}
+
+		// グラデーションが1色しか指定されていない場合、自動的に補完する
+		if (titlefontgrd.split(`#`).length <= 2) {
+			titlefontgrd += `,#ffffff`;
+		}
+
 		let titlefontsize = 64 * (12 / g_headerObj.musicTitle.length);
 		if (titlefontsize >= 64) {
 			titlefontsize = 64;
@@ -1790,8 +1810,28 @@ function titleInit() {
 		if (g_headerObj.titlefont !== ``) {
 			titlefontname = setVal(g_headerObj.titlefont, titlefontname, `string`);
 		}
-		createLabel(l0ctx, g_headerObj.musicTitle, g_sWidth / 2, g_sHeight / 2,
-			titlefontsize, titlefontname, grd2, `center`);
+		titlefontname = `'` + titlefontname.replace( /,/g , `','` ) + `'`;
+
+		const lblmusicTitle = createDivLabel(`lblmusicTitle`, 
+			g_sWidth * -1, 0, 
+			g_sWidth * 3, g_sHeight - 50, 
+			titlefontsize, `#ffffff`,
+			`<span style="
+				align:` + C_ALIGN_CENTER + `;
+				line-height:` + (g_sHeight - 50) + `px;
+				font-family:` + titlefontname + `;
+				font-size:` + titlefontsize + `px;
+				background: linear-gradient(` + titlefontgrd + `);
+				background-clip: text;
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: rgba(255,255,255,0.0);
+				color: #ffffff;
+			">
+			` + g_headerObj.musicTitle + `
+			</span>
+			</div>`
+		);
+		divRoot.appendChild(lblmusicTitle);
 	}
 
 	// 非推奨ブラウザに対して警告文を表示
@@ -2252,6 +2292,9 @@ function headerConvert(_dosObj) {
 
 	// デフォルト曲名表示のフォント名
 	obj.titlefont = setVal(_dosObj.titlefont, ``, `string`);
+
+	// デフォルト曲名表示のグラデーション指定css
+	obj.titlegrd = setVal(_dosObj.titlegrd, ``, `string`);
 
 	// オプション利用可否設定
 	// Motion
