@@ -1767,10 +1767,10 @@ function titleInit() {
 
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
-		if (g_headerObj.titlegrd != undefined) {
+		if (setVal(g_headerObj.titlegrd, ``, `string`) !== ``) {
 			titlefontgrd = g_headerObj.titlegrd;
 		}else{
-			if (g_headerObj.setColor[0] != undefined) {
+			if (g_headerObj.setColor[0] !== undefined) {
 				titlefontgrd += g_headerObj[`setColor`][0];
 			} else {
 				titlefontgrd += `#ffffff`;
@@ -1778,7 +1778,7 @@ function titleInit() {
 
 			titlefontgrd += `,`;
 
-			if (g_headerObj.setColor[2] != undefined) {
+			if (g_headerObj.setColor[2] !== undefined) {
 				titlefontgrd += g_headerObj[`setColor`][2];
 			} else {
 				titlefontgrd += `#66ffff`;
@@ -1787,22 +1787,22 @@ function titleInit() {
 
 		// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
 		// 先頭1文字目が#かどうかで判断するので、redやwhiteのような色コードの指定はNG
-		if (titlefontgrd[0] == `#`) {
+		if (titlefontgrd[0] === `#`) {
 			titlefontgrd = `to right,` + titlefontgrd;
 		}
-
+		
 		// グラデーションが1色しか指定されていない場合、自動的に補完する
 		if (titlefontgrd.split(`#`).length <= 2) {
 			titlefontgrd += `,#ffffff`;
 		}
-
+		
 		let titlefontsize = 64 * (12 / g_headerObj.musicTitle.length);
 		if (titlefontsize >= 64) {
 			titlefontsize = 64;
 		}
 
 		// カスタム変数 titlesize の定義 (使用例： |titlesize=40|)
-		if (g_headerObj.titlesize != ``) {
+		if (g_headerObj.titlesize !== ``) {
 			titlefontsize = setVal(g_headerObj.titlesize, titlefontsize, `number`);
 		}
 		// カスタム変数 titlefont の定義 (使用例： |titlefont=Century,Meiryo UI|)
@@ -1811,17 +1811,17 @@ function titleInit() {
 			titlefontname = setVal(g_headerObj.titlefont, titlefontname, `string`);
 		}
 		titlefontname = `'` + titlefontname.replace( /,/g , `','` ) + `'`;
-
+		
 		const lblmusicTitle = createDivLabel(`lblmusicTitle`, 
 			g_sWidth * -1, 0, 
-			g_sWidth * 3, g_sHeight - 50, 
+			g_sWidth *  3, g_sHeight, 
 			titlefontsize, `#ffffff`,
 			`<span style="
-				align:` + C_ALIGN_CENTER + `;
-				line-height:` + (g_sHeight - 50) + `px;
-				font-family:` + titlefontname + `;
-				font-size:` + titlefontsize + `px;
-				background: linear-gradient(` + titlefontgrd + `);
+				align:${C_ALIGN_CENTER};
+				line-height:${(g_sHeight - 20)}px;
+				font-family:${titlefontname};
+				font-size:${titlefontsize}px;
+				background: linear-gradient(${titlefontgrd});
 				background-clip: text;
 				-webkit-background-clip: text;
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
