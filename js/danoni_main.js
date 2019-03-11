@@ -1755,7 +1755,7 @@ function titleInit() {
 
 	// 背景の矢印オブジェクトを表示
 	if (g_headerObj.customTitleArrowUse === `false`) {
-		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj[`setColor`][0], (g_sWidth - 500) / 2, -15, 500, 180);
+		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj.setColor[0], (g_sWidth - 500) / 2, -15, 500, 180);
 		lblArrow.style.opacity = 0.25;
 		lblArrow.style.zIndex = 0;
 		divRoot.appendChild(lblArrow);
@@ -1771,7 +1771,7 @@ function titleInit() {
 			titlefontgrd = g_headerObj.titlegrd;
 		}else{
 			if (g_headerObj.setColor[0] !== undefined) {
-				titlefontgrd += g_headerObj[`setColor`][0];
+				titlefontgrd += g_headerObj.setColor[0];
 			} else {
 				titlefontgrd += `#ffffff`;
 			}
@@ -1779,7 +1779,7 @@ function titleInit() {
 			titlefontgrd += `,`;
 
 			if (g_headerObj.setColor[2] !== undefined) {
-				titlefontgrd += g_headerObj[`setColor`][2];
+				titlefontgrd += g_headerObj.setColor[2];
 			} else {
 				titlefontgrd += `#66ffff`;
 			}
@@ -1788,7 +1788,7 @@ function titleInit() {
 		// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
 		// 先頭1文字目が#かどうかで判断するので、redやwhiteのような色コードの指定はNG
 		if (titlefontgrd[0] === `#`) {
-			titlefontgrd = `to right,` + titlefontgrd;
+			titlefontgrd = `to right,${titlefontgrd}`;
 		}
 
 		// グラデーションが1色しか指定されていない場合、自動的に補完する
@@ -1810,7 +1810,7 @@ function titleInit() {
 		if (g_headerObj.titlefont !== ``) {
 			titlefontname = setVal(g_headerObj.titlefont, titlefontname, `string`);
 		}
-		titlefontname = `'` + titlefontname.replace( /,/g , `','` ) + `'`;
+		titlefontname = `'${(titlefontname.replace( /,/g , `','` ))}'`;
 
 		// カスタム変数 titlepos の定義 (使用例： |titlepos=0,10| マイナス、小数点の指定もOK)
 		let titlefontpos = (
@@ -1818,7 +1818,6 @@ function titleInit() {
 			? g_headerObj.titlepos.split(`,`)
 			: [0,0]
 		);
-		console.log(titlefontpos);
 
 		const lblmusicTitle = createDivLabel(`lblmusicTitle`, 
 			g_sWidth * -1 + Number(titlefontpos[0]), 0 + Number(titlefontpos[1]), 
@@ -1835,7 +1834,7 @@ function titleInit() {
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
 				color: #ffffff;
 			">
-			` + g_headerObj.musicTitle + `
+				${g_headerObj.musicTitle}
 			</span>
 			</div>`
 		);
