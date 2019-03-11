@@ -1790,12 +1790,12 @@ function titleInit() {
 		if (titlefontgrd[0] === `#`) {
 			titlefontgrd = `to right,` + titlefontgrd;
 		}
-		
+
 		// グラデーションが1色しか指定されていない場合、自動的に補完する
 		if (titlefontgrd.split(`#`).length <= 2) {
 			titlefontgrd += `,#ffffff`;
 		}
-		
+
 		let titlefontsize = 64 * (12 / g_headerObj.musicTitle.length);
 		if (titlefontsize >= 64) {
 			titlefontsize = 64;
@@ -1811,14 +1811,22 @@ function titleInit() {
 			titlefontname = setVal(g_headerObj.titlefont, titlefontname, `string`);
 		}
 		titlefontname = `'` + titlefontname.replace( /,/g , `','` ) + `'`;
-		
+
+		// カスタム変数 titlepos の定義 (使用例： |titlepos=0,10| マイナス、小数点の指定もOK)
+		let titlefontpos = (
+			(setVal(g_headerObj.titlepos, ``, `string`) !== ``)
+			? g_headerObj.titlepos.split(`,`)
+			: [0,0]
+		);
+		console.log(titlefontpos);
+
 		const lblmusicTitle = createDivLabel(`lblmusicTitle`, 
-			g_sWidth * -1, 0, 
+			g_sWidth * -1 + Number(titlefontpos[0]), 0 + Number(titlefontpos[1]), 
 			g_sWidth *  3, g_sHeight, 
 			titlefontsize, `#ffffff`,
 			`<span style="
 				align:${C_ALIGN_CENTER};
-				line-height:${(g_sHeight - 20)}px;
+				line-height:${(g_sHeight - 40)}px;
 				font-family:${titlefontname};
 				font-size:${titlefontsize}px;
 				background: linear-gradient(${titlefontgrd});
@@ -2295,6 +2303,9 @@ function headerConvert(_dosObj) {
 
 	// デフォルト曲名表示のグラデーション指定css
 	obj.titlegrd = setVal(_dosObj.titlegrd, ``, `string`);
+
+	// デフォルト曲名表示の表示位置調整
+	obj.titlepos = setVal(_dosObj.titlepos, ``, `string`);
 
 	// オプション利用可否設定
 	// Motion
