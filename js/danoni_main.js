@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/03/01
+ * Revised : 2019/03/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.1.4`;
-const g_revisedDate = `2019/03/01`;
+const g_version = `Ver 3.2.0`;
+const g_revisedDate = `2019/03/12`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1769,7 +1769,7 @@ function titleInit() {
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
 		if (setVal(g_headerObj.titlegrd, ``, `string`) !== ``) {
 			titlefontgrd = g_headerObj.titlegrd;
-		}else{
+		} else {
 			if (g_headerObj.setColor[0] !== undefined) {
 				titlefontgrd += g_headerObj.setColor[0];
 			} else {
@@ -1810,18 +1810,18 @@ function titleInit() {
 		if (g_headerObj.titlefont !== ``) {
 			titlefontname = setVal(g_headerObj.titlefont, titlefontname, `string`);
 		}
-		titlefontname = `'${(titlefontname.replace( /,/g , `','` ))}'`;
+		titlefontname = `'${(titlefontname.replace(/,/g, `','`))}'`;
 
 		// カスタム変数 titlepos の定義 (使用例： |titlepos=0,10| マイナス、小数点の指定もOK)
 		let titlefontpos = (
 			(setVal(g_headerObj.titlepos, ``, `string`) !== ``)
-			? g_headerObj.titlepos.split(`,`)
-			: [0,0]
+				? g_headerObj.titlepos.split(`,`)
+				: [0, 0]
 		);
 
-		const lblmusicTitle = createDivLabel(`lblmusicTitle`, 
-			g_sWidth * -1 + Number(titlefontpos[0]), 0 + Number(titlefontpos[1]), 
-			g_sWidth *  3, g_sHeight, 
+		const lblmusicTitle = createDivLabel(`lblmusicTitle`,
+			g_sWidth * -1 + Number(titlefontpos[0]), 0 + Number(titlefontpos[1]),
+			g_sWidth * 3, g_sHeight,
 			titlefontsize, `#ffffff`,
 			`<span style="
 				align:${C_ALIGN_CENTER};
