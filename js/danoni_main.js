@@ -3489,13 +3489,15 @@ function createSettingsDisplayWindow(_sprite) {
 
 		const lnk = makeSettingLblButton(`lnk${_name}`, `${_name.slice(0, 1).toUpperCase()}${_name.slice(1)}`, _heightPos, _ => {
 			g_stateObj[`d_${_name.toLowerCase()}`] = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-			lnk.style.color = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? `#999999` : `#ffffff`);
+			lnk.style.color = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? `#666666` : `#ffffff`);
+			lnk.style.borderColor = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? `#000000 #333333` : `#000000 #cccccc`);
 		});
-		lnk.style.width = `150px`;
-		lnk.style.left = `calc(50px + 150px * ${_widthPos})`;
+		lnk.style.width = `170px`;
+		lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
 		lnk.style.color = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? `#666666` : `#ffffff`);
+		lnk.style.borderStyle = `solid`;
+		lnk.style.borderColor = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? `#000000 #333333` : `#000000 #cccccc`);
 		optionsprite.appendChild(lnk);
-
 	}
 
 }
