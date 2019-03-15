@@ -3485,6 +3485,12 @@ function createSettingsDisplayWindow(_sprite) {
 	makeDisplayButton(`lyrics`, 2, 1);
 	makeDisplayButton(`background`, 3, 1);
 
+	/**
+	 * Display表示/非表示ボタン
+	 * @param {*} _name 
+	 * @param {*} _heightPos 縦位置
+	 * @param {*} _widthPos 横位置
+	 */
 	function makeDisplayButton(_name, _heightPos, _widthPos) {
 
 		const lnk = makeSettingLblButton(`lnk${_name}`, `${_name.slice(0, 1).toUpperCase()}${_name.slice(1)}`, _heightPos, _ => {
