@@ -3471,28 +3471,39 @@ function createSettingsDisplayWindow(_sprite) {
 	// 各ボタン用のスプライトを作成
 	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 100, 400, 300);
 
-	makeDisplayButton(`stepZone`, 0);
-	makeDisplayButton(`judgement`, 1);
-	makeDisplayButton(`lifeGauge`, 2);
-	makeDisplayButton(`musicInfo`, 3);
-	makeDisplayButton(`speed`, 5);
-	makeDisplayButton(`color`, 6);
-	makeDisplayButton(`lyrics`, 7);
-	makeDisplayButton(`background`, 8);
+	const divRoot = document.querySelector(`#divRoot`);
+	const sdDesc = createDivLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14, C_CLR_TITLE,
+		`[クリックでON/OFFを切替、灰色でOFF]`);
+	divRoot.appendChild(sdDesc);
 
-	function makeDisplayButton(_name, _heightPos) {
-		//const charStart = _name.slice(0, 1);
-		const lbl = createDivLabel(`lbl${_name}`, -10, C_LEN_SETLBL_HEIGHT * _heightPos,
-			120, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-			`<span style=color:#999999>${_name.slice(0, 1).toUpperCase()}</span>${_name.slice(1)}`);
-		optionsprite.appendChild(lbl);
+	makeDisplayButton(`stepZone`, 0, 0);
+	makeDisplayButton(`judgement`, 1, 0);
+	makeDisplayButton(`lifeGauge`, 2, 0);
+	makeDisplayButton(`musicInfo`, 3, 0);
+	makeDisplayButton(`speed`, 0, 1);
+	makeDisplayButton(`color`, 1, 1);
+	makeDisplayButton(`lyrics`, 2, 1);
+	makeDisplayButton(`background`, 3, 1);
 
-		const lnk = makeSettingLblButton(`lnk${_name}`, g_stateObj[`d_${_name.toLowerCase()}`], _heightPos, _ => {
+	/**
+	 * Display表示/非表示ボタン
+	 * @param {*} _name 
+	 * @param {*} _heightPos 縦位置
+	 * @param {*} _widthPos 横位置
+	 */
+	function makeDisplayButton(_name, _heightPos, _widthPos) {
+
+		const lnk = makeSettingLblButton(`lnk${_name}`, `${_name.slice(0, 1).toUpperCase()}${_name.slice(1)}`, _heightPos, _ => {
 			g_stateObj[`d_${_name.toLowerCase()}`] = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-			lnk.innerHTML = g_stateObj[`d_${_name.toLowerCase()}`];
+			lnk.style.color = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? `#666666` : `#ffffff`);
+			lnk.style.borderColor = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? `#000000 #333333` : `#000000 #cccccc`);
 		});
+		lnk.style.width = `170px`;
+		lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
+		lnk.style.color = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? `#666666` : `#ffffff`);
+		lnk.style.borderStyle = `solid`;
+		lnk.style.borderColor = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? `#000000 #333333` : `#000000 #cccccc`);
 		optionsprite.appendChild(lnk);
-
 	}
 
 }
