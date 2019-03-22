@@ -5628,6 +5628,7 @@ function MainInit() {
 				frzRoot.setAttribute(`frzBarLength`, frzLength);
 				frzRoot.setAttribute(`frzAttempt`, 0);
 				frzRoot.setAttribute(`boostSpd`, boostSpdDir);
+				frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[targetj]);
 				mainSprite.appendChild(frzRoot);
 
 				// フリーズアローは、下記の順で作成する。
@@ -5726,10 +5727,11 @@ function MainInit() {
 
 						// フリーズアローがヒット中の処理
 						if (frzBarLength > 0) {
+							const dividePos = frzRoot.getAttribute(`dividePos`);
 							frzBarLength = parseFloat(frzBar.style.height) - g_workObj.currentSpeed * Math.abs(boostSpdDir);
 							frzRoot.setAttribute(`frzBarLength`, frzBarLength);
 							frzBar.style.height = `${frzBarLength}px`;
-							frzBar.style.top = `${parseFloat(frzBar.style.top) + g_workObj.currentSpeed * Math.abs(boostSpdDir) * g_workObj.dividePos[j]}px`;
+							frzBar.style.top = `${parseFloat(frzBar.style.top) + g_workObj.currentSpeed * Math.abs(boostSpdDir) * dividePos}px`;
 							frzBtm.style.top = `${parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
 							frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
 
