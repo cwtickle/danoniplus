@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/03/16
+ * Revised : 2019/03/22
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.3.1`;
-const g_revisedDate = `2019/03/16`;
+const g_version = `Ver 3.4.0`;
+const g_revisedDate = `2019/03/22`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -5540,19 +5540,19 @@ function MainInit() {
 			for (let j = 0, len = g_workObj.mkArrow[g_scoreObj.frameNum].length; j < len; j++) {
 
 				const targetj = g_workObj.mkArrow[g_scoreObj.frameNum][j];
+				const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[targetj];
 
 				const step = createArrowEffect(`arrow${targetj}_${++arrowCnts[targetj]}`, g_workObj.arrowColors[targetj],
 					g_workObj.stepX[targetj],
-					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd * g_workObj.scrollDir[targetj], 50,
+					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir, 50,
 					g_workObj.stepRtn[targetj]);
 				step.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum]);
 				step.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 				step.setAttribute(`judgEndFlg`, `false`);
-				step.setAttribute(`boostSpd`, g_workObj.boostSpd);
+				step.setAttribute(`boostSpd`, boostSpdDir);
 
 				mainSprite.appendChild(step);
 			}
-			//delete g_workObj.mkArrow[g_scoreObj.frameNum];
 		}
 
 		// 矢印移動＆消去
@@ -5563,7 +5563,7 @@ function MainInit() {
 			for (let k = g_workObj.judgArrowCnt[j]; k <= arrowCnts[j]; k++) {
 				const arrow = document.querySelector(`#arrow${j}_${k}`);
 				let boostCnt = arrow.getAttribute(`boostCnt`);
-				const boostSpd = arrow.getAttribute(`boostSpd`);
+				const boostSpdDir = arrow.getAttribute(`boostSpd`);
 				let cnt = arrow.getAttribute(`cnt`);
 
 				// 全体色変化 (移動時)
@@ -5579,7 +5579,7 @@ function MainInit() {
 				// 移動
 				if (g_workObj.currentSpeed !== 0) {
 					arrow.style.top = `${parseFloat(arrow.style.top) -
-						(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpd * g_workObj.scrollDir[j]}px`;
+						(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
 					arrow.setAttribute(`boostCnt`, --boostCnt);
 				}
 				arrow.setAttribute(`cnt`, --cnt);
@@ -5615,11 +5615,11 @@ function MainInit() {
 			for (let j = 0, len = g_workObj.mkFrzArrow[g_scoreObj.frameNum].length; j < len; j++) {
 				const targetj = g_workObj.mkFrzArrow[g_scoreObj.frameNum][j];
 				const frzLength = g_workObj.mkFrzLength[targetj][frzCnts[targetj] * 2];
-				const rev = g_workObj.scrollDir[targetj];
+				const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[targetj];
 
 				const frzRoot = createSprite(`mainSprite`, `frz${targetj}_${++frzCnts[targetj]}`,
 					g_workObj.stepX[targetj],
-					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd * rev,
+					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 					50, 100 + frzLength);
 				frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum]);
 				frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
@@ -5627,7 +5627,8 @@ function MainInit() {
 				frzRoot.setAttribute(`isMoving`, `true`);
 				frzRoot.setAttribute(`frzBarLength`, frzLength);
 				frzRoot.setAttribute(`frzAttempt`, 0);
-				frzRoot.setAttribute(`boostSpd`, g_workObj.boostSpd);
+				frzRoot.setAttribute(`boostSpd`, boostSpdDir);
+				frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[targetj]);
 				mainSprite.appendChild(frzRoot);
 
 				// フリーズアローは、下記の順で作成する。
@@ -5650,12 +5651,12 @@ function MainInit() {
 
 				// 後発矢印の塗り部分
 				const frzBtmShadow = createColorObject(`frzBtmShadow${targetj}_${frzCnts[targetj]}`, `#000000`,
-					0, frzLength * g_workObj.boostSpd * rev, 50, 50, g_workObj.stepRtn[targetj], `arrowShadow`);
+					0, frzLength * boostSpdDir, 50, 50, g_workObj.stepRtn[targetj], `arrowShadow`);
 				frzRoot.appendChild(frzBtmShadow);
 
 				// 後発矢印
 				const frzBtm = createArrowEffect(`frzBtm${targetj}_${frzCnts[targetj]}`, g_workObj.frzNormalColors[targetj],
-					0, frzLength * g_workObj.boostSpd * rev, 50, g_workObj.stepRtn[targetj]);
+					0, frzLength * boostSpdDir, 50, g_workObj.stepRtn[targetj]);
 				frzRoot.appendChild(frzBtm);
 			}
 		}
@@ -5665,7 +5666,7 @@ function MainInit() {
 			for (let k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
 				const frzRoot = document.querySelector(`#frz${j}_${k}`);
 				let boostCnt = frzRoot.getAttribute(`boostCnt`);
-				const boostSpd = frzRoot.getAttribute(`boostSpd`);
+				const boostSpdDir = frzRoot.getAttribute(`boostSpd`);
 				let cnt = frzRoot.getAttribute(`cnt`);
 				let frzAttempt = frzRoot.getAttribute(`frzAttempt`);
 
@@ -5697,7 +5698,7 @@ function MainInit() {
 						// 移動
 						if (g_workObj.currentSpeed !== 0) {
 							frzRoot.style.top = `${parseFloat(frzRoot.style.top) -
-								(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpd * g_workObj.scrollDir[j]}px`;
+								(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
 							frzRoot.setAttribute(`boostCnt`, --boostCnt);
 						}
 						frzRoot.setAttribute(`cnt`, --cnt);
@@ -5726,12 +5727,13 @@ function MainInit() {
 
 						// フリーズアローがヒット中の処理
 						if (frzBarLength > 0) {
-							frzBarLength = parseFloat(frzBar.style.height) - g_workObj.currentSpeed * boostSpd;
+							const dividePos = frzRoot.getAttribute(`dividePos`);
+							frzBarLength = parseFloat(frzBar.style.height) - g_workObj.currentSpeed * Math.abs(boostSpdDir);
 							frzRoot.setAttribute(`frzBarLength`, frzBarLength);
 							frzBar.style.height = `${frzBarLength}px`;
-							frzBar.style.top = `${parseFloat(frzBar.style.top) + g_workObj.currentSpeed * boostSpd * g_workObj.dividePos[j]}px`;
-							frzBtm.style.top = `${parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpd * g_workObj.scrollDir[j]}px`;
-							frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpd * g_workObj.scrollDir[j]}px`;
+							frzBar.style.top = `${parseFloat(frzBar.style.top) + g_workObj.currentSpeed * Math.abs(boostSpdDir) * dividePos}px`;
+							frzBtm.style.top = `${parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
+							frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
 
 							let keyDownFlg = false;
 							for (let m = 0, len = g_workObj.keyCtrl[j].length; m < len; m++) {
@@ -5775,7 +5777,7 @@ function MainInit() {
 				} else {
 					frzBarLength -= g_workObj.currentSpeed;
 					frzRoot.setAttribute(`frzBarLength`, frzBarLength);
-					frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpd * g_workObj.scrollDir[j]}px`;
+					frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
 
 					if (frzBarLength <= 0) {
 						g_workObj.judgFrzCnt[j]++;
