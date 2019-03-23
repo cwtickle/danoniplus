@@ -1796,36 +1796,42 @@ function titleInit() {
 			titlefontgrd += `,#ffffff`;
 		}
 
-		let titlefontsize = 64 * (12 / g_headerObj.musicTitle.length);
+		let titlefontsize = 64 * (12 / g_headerObj.musicTitleForView[0].length);
 		if (titlefontsize >= 64) {
 			titlefontsize = 64;
 		}
 
-		// カスタム変数 titlesize の定義 (使用例： |titlesize=40|)
+		// 変数 titlesize の定義 (使用例： |titlesize=40|)
 		if (g_headerObj.titlesize !== ``) {
 			titlefontsize = setVal(g_headerObj.titlesize, titlefontsize, `number`);
 		}
-		// カスタム変数 titlefont の定義 (使用例： |titlefont=Century,Meiryo UI|)
+		// 変数 titlefont の定義 (使用例： |titlefont=Century,Meiryo UI|)
 		let titlefontname = `メイリオ`;
 		if (g_headerObj.titlefont !== ``) {
 			titlefontname = setVal(g_headerObj.titlefont, titlefontname, `string`);
 		}
 		titlefontname = `'${(titlefontname.replace(/,/g, `','`))}'`;
 
-		// カスタム変数 titlepos の定義 (使用例： |titlepos=0,10| マイナス、小数点の指定もOK)
+		// 変数 titlepos の定義 (使用例： |titlepos=0,10| マイナス、小数点の指定もOK)
 		let titlefontpos = (
 			(setVal(g_headerObj.titlepos, ``, `string`) !== ``)
 				? g_headerObj.titlepos.split(`,`)
 				: [0, 0]
 		);
 
+		// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
+		let titlelineheight = g_headerObj.titlelineheight;
+		if (g_headerObj.titlelineheight === ``) {
+			titlelineheight = setVal(g_headerObj.titlelineheight, titlefontsize + 10, `number`);
+		}
+
 		const lblmusicTitle = createDivLabel(`lblmusicTitle`,
 			g_sWidth * -1 + Number(titlefontpos[0]), 0 + Number(titlefontpos[1]),
-			g_sWidth * 3, g_sHeight,
+			g_sWidth * 3, g_sHeight - 40,
 			titlefontsize, `#ffffff`,
 			`<span style="
 				align:${C_ALIGN_CENTER};
-				line-height:${(g_sHeight - 40)}px;
+				line-height:${titlelineheight}px;
 				font-family:${titlefontname};
 				font-size:${titlefontsize}px;
 				background: linear-gradient(${titlefontgrd});
@@ -1834,10 +1840,14 @@ function titleInit() {
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
 				color: #ffffff;
 			">
-				${g_headerObj.musicTitle}
-			</span>
-			</div>`
+				${g_headerObj.musicTitleForView[0]}<br>
+				${setVal(g_headerObj.musicTitleForView[1], ``, `string`)}
+			</span>`
 		);
+		lblmusicTitle.style.display = `flex`;
+		lblmusicTitle.style.flexDirection = `column`;
+		lblmusicTitle.style.justifyContent = `center`;
+		lblmusicTitle.style.alignItems = `center`;
 		divRoot.appendChild(lblmusicTitle);
 	}
 
@@ -2026,7 +2036,8 @@ function headerConvert(_dosObj) {
 	// 曲名
 	if (_dosObj.musicTitle !== undefined && _dosObj.musicTitle !== ``) {
 		const musics = _dosObj.musicTitle.split(`,`);
-		obj.musicTitle = musics[0];
+		obj.musicTitle = musics[0].split(`<br>`).join(` `);
+		obj.musicTitleForView = musics[0].split("<br>");
 		if (musics.length > 1) {
 			obj.artistName = musics[1];
 		} else {
@@ -2305,6 +2316,9 @@ function headerConvert(_dosObj) {
 
 	// デフォルト曲名表示の表示位置調整
 	obj.titlepos = setVal(_dosObj.titlepos, ``, `string`);
+
+	// デフォルト曲名表示の複数行時の縦間隔
+	obj.titlelineheight = setVal(_dosObj.titlelineheight, ``, `number`);
 
 	// オプション利用可否設定
 	// Motion
@@ -6531,7 +6545,9 @@ function resultInit() {
 	playDataWindow.appendChild(makeResultPlayData(`lblMusic`, 20, `#999999`, 0,
 		`Music`, C_ALIGN_LEFT));
 	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `#cccccc`, 0,
-		g_headerObj.musicTitle, C_ALIGN_CENTER));
+		g_headerObj.musicTitleForView[0], C_ALIGN_CENTER));
+	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `#cccccc`, 1,
+		setVal(g_headerObj.musicTitleForView[1], ``, `string`), C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `#999999`, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
