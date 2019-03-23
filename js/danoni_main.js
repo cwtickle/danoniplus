@@ -1801,9 +1801,13 @@ function titleInit() {
 			titlefontsize = 64;
 		}
 
-		// 変数 titlesize の定義 (使用例： |titlesize=40|)
+		// 変数 titlesize の定義 (使用例： |titlesize=40,20|)
+		let titlefontsize1;
+		let titlefontsize2;
 		if (g_headerObj.titlesize !== ``) {
-			titlefontsize = setVal(g_headerObj.titlesize, titlefontsize, `number`);
+			let titlefontsizes = g_headerObj.titlesize.split(`,`);
+			titlefontsize1 = setVal(titlefontsizes[0], titlefontsize, `number`);
+			titlefontsize2 = setVal(titlefontsizes[1], titlefontsize1, `number`);
 		}
 		// 変数 titlefont の定義 (使用例： |titlefont=Century,Meiryo UI|)
 		let titlefontname = `メイリオ`;
@@ -1833,7 +1837,7 @@ function titleInit() {
 				align:${C_ALIGN_CENTER};
 				line-height:${titlelineheight}px;
 				font-family:${titlefontname};
-				font-size:${titlefontsize}px;
+				font-size:${titlefontsize1}px;
 				background: linear-gradient(${titlefontgrd});
 				background-clip: text;
 				-webkit-background-clip: text;
@@ -1841,7 +1845,9 @@ function titleInit() {
 				color: #ffffff;
 			">
 				${g_headerObj.musicTitleForView[0]}<br>
-				${setVal(g_headerObj.musicTitleForView[1], ``, `string`)}
+				<span style="font-size:${titlefontsize2}px;">
+					${setVal(g_headerObj.musicTitleForView[1], ``, `string`)}
+				</span>
 			</span>`
 		);
 		lblmusicTitle.style.display = `flex`;
@@ -2306,7 +2312,7 @@ function headerConvert(_dosObj) {
 	obj.customReadyUse = setVal(_dosObj.customReadyUse, ``, `string`);
 
 	// デフォルト曲名表示のフォントサイズ
-	obj.titlesize = setVal(_dosObj.titlesize, ``, `number`);
+	obj.titlesize = setVal(_dosObj.titlesize, ``, `string`);
 
 	// デフォルト曲名表示のフォント名
 	obj.titlefont = setVal(_dosObj.titlefont, ``, `string`);
