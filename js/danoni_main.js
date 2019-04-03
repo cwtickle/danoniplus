@@ -2074,10 +2074,18 @@ function headerConvert(_dosObj) {
 		obj.lifeInits = [];
 		for (let j = 0; j < difs.length; j++) {
 			const difDetails = difs[j].split(`,`);
-			const border = (difDetails[3]) ? difDetails[3] : g_presetGauge.Border;
-			const recovery = (difDetails[4]) ? difDetails[4] : g_presetGauge.Recovery;
-			const damage = (difDetails[5]) ? difDetails[5] : g_presetGauge.Damage;
-			const init = (difDetails[6]) ? difDetails[6] : g_presetGauge.Init;
+			const border = (difDetails[3]) ? difDetails[3] :
+				(g_presetGauge !== undefined && (`Border` in g_presetGauge) ?
+					g_presetGauge.Border : `x`);
+			const recovery = (difDetails[4]) ? difDetails[4] :
+				(g_presetGauge !== undefined && (`Recovery` in g_presetGauge) ?
+					g_presetGauge.Recovery : 6);
+			const damage = (difDetails[5]) ? difDetails[5] :
+				(g_presetGauge !== undefined && (`Damage` in g_presetGauge) ?
+					g_presetGauge.Damage : 40);
+			const init = (difDetails[6]) ? difDetails[6] :
+				(g_presetGauge !== undefined && (`Init` in g_presetGauge) ?
+					g_presetGauge.Init : 25);
 			obj.keyLabels.push(setVal(difDetails[0], `7`, `string`));
 			obj.difLabels.push(setVal(difDetails[1], `Normal`, `string`));
 			obj.initSpeeds.push(setVal(difDetails[2], 3.5, `float`));
@@ -2297,19 +2305,29 @@ function headerConvert(_dosObj) {
 	obj.releaseDate = setVal(_dosObj.releaseDate, ``, `string`);
 
 	// タイトル画面のデフォルト曲名表示の利用有無
-	obj.customTitleUse = setVal(_dosObj.customTitleUse, ``, `string`);
+	obj.customTitleUse = setVal(_dosObj.customTitleUse,
+		(g_presetCustomDesignUse !== undefined && (`title` in g_presetCustomDesignUse) ?
+			g_presetCustomDesignUse.title : `false`), `string`);
 
 	// タイトル画面のデフォルト背景矢印の利用有無
-	obj.customTitleArrowUse = setVal(_dosObj.customTitleArrowUse, ``, `string`);
+	obj.customTitleArrowUse = setVal(_dosObj.customTitleArrowUse,
+		(g_presetCustomDesignUse !== undefined && (`titleArrow` in g_presetCustomDesignUse) ?
+			g_presetCustomDesignUse.titleArrow : `false`), `string`);
 
 	// デフォルト背景の利用有無
-	obj.customBackUse = setVal(_dosObj.customBackUse, ``, `string`);
+	obj.customBackUse = setVal(_dosObj.customBackUse,
+		(g_presetCustomDesignUse !== undefined && (`back` in g_presetCustomDesignUse) ?
+			g_presetCustomDesignUse.back : `false`), `string`);
 
 	// デフォルト背景の利用有無（メイン画面のみ適用）
-	obj.customBackMainUse = setVal(_dosObj.customBackMainUse, ``, `string`);
+	obj.customBackMainUse = setVal(_dosObj.customBackMainUse,
+		(g_presetCustomDesignUse !== undefined && (`backMain` in g_presetCustomDesignUse) ?
+			g_presetCustomDesignUse.backMain : `false`), `string`);
 
 	// デフォルトReady表示の利用有無
-	obj.customReadyUse = setVal(_dosObj.customReadyUse, ``, `string`);
+	obj.customReadyUse = setVal(_dosObj.customReadyUse,
+		(g_presetCustomDesignUse !== undefined && (`ready` in g_presetCustomDesignUse) ?
+			g_presetCustomDesignUse.ready : `false`), `string`);
 
 	// デフォルト曲名表示のフォントサイズ
 	obj.titlesize = setVal(_dosObj.titlesize, ``, `string`);
@@ -5043,7 +5061,7 @@ function MainInit() {
 
 	// 画面背景を指定 (background-color)
 	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false` || g_headerObj.customBackMainUse === `false`) {
+	if (g_headerObj.customBackUse === `false` && g_headerObj.customBackMainUse === `false`) {
 		grd.addColorStop(0, `#000000`);
 		grd.addColorStop(1, `#222222`);
 		l0ctx.fillStyle = grd;
