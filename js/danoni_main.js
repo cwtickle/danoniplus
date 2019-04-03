@@ -6514,7 +6514,7 @@ function resultInit() {
 		g_resultObj.fmaxCombo * 2;
 
 	const allScore = (g_allArrow + g_allFrz / 2) * 10;
-	const resultScore = Math.round(scoreTmp / allScore * 1000000);
+	const resultScore = Math.round(scoreTmp / allScore * 1000000) || 0;
 	g_resultObj.score = resultScore;
 
 	// ランク計算
