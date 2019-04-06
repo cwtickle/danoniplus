@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/04/03
+ * Revised : 2019/04/06
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.6.0`;
-const g_revisedDate = `2019/04/03`;
+const g_version = `Ver 3.7.0`;
+const g_revisedDate = `2019/04/06`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -5061,7 +5061,7 @@ function MainInit() {
 
 	// 画面背景を指定 (background-color)
 	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false` && g_headerObj.customBackMainUse === `false`) {
+	if (g_headerObj.customBackMainUse === `false`) {
 		grd.addColorStop(0, `#000000`);
 		grd.addColorStop(1, `#222222`);
 		l0ctx.fillStyle = grd;
