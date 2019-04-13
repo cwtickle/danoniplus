@@ -8,8 +8,8 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.7.0`;
-const g_revisedDate = `2019/04/06`;
+const g_version = `Ver 3.8.0`;
+const g_revisedDate = `2019/04/13`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1745,14 +1745,6 @@ function titleInit() {
 		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	}
 
-	// ユーザカスタムイベント(初期)
-	if (typeof customTitleInit === `function`) {
-		customTitleInit();
-		if (typeof customTitleInit2 === `function`) {
-			customTitleInit2();
-		}
-	}
-
 	// 背景の矢印オブジェクトを表示
 	if (g_headerObj.customTitleArrowUse === `false`) {
 		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj.setColor[0], (g_sWidth - 500) / 2, -15, 500, 180);
@@ -1865,6 +1857,14 @@ function titleInit() {
 		(g_userAgent.indexOf(`firefox`) !== -1 && location.href.match(`^file`))) {
 
 		makeWarningWindow(C_MSG_W_0001);
+	}
+
+	// ユーザカスタムイベント(初期)
+	if (typeof customTitleInit === `function`) {
+		customTitleInit();
+		if (typeof customTitleInit2 === `function`) {
+			customTitleInit2();
+		}
 	}
 
 	// ボタン描画
