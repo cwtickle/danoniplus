@@ -22,45 +22,11 @@
  */
 function customTitleInit() {
 
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
-
-	// 画面背景を指定 (background-color)
-	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	grd.addColorStop(0, "#000000");
-	grd.addColorStop(1, "#000022");
-	l0ctx.fillStyle = grd;
-	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-
-
 	// 背景の矢印オブジェクトを表示
 	var lblC = createArrowEffect("lblC", "#ffffff", g_sWidth / 2 - 300, 0, 100, "onigiri");
 	lblC.style.opacity = 0.25;
 	divRoot.appendChild(lblC);
 
-	var lblArrow = createArrowEffect("lblArrow", g_headerObj["setColor"][0], (g_sWidth - 500) / 2, -15, 500, 180);
-	lblArrow.style.opacity = 0.25;
-	divRoot.appendChild(lblArrow);
-
-	// 曲名文字描画（曲名は譜面データから取得）
-	var grd = l0ctx.createLinearGradient(0, 0, g_sHeight, 0);
-	if (g_headerObj["setColor"][0] != undefined) {
-		grd.addColorStop(0, g_headerObj["setColor"][0]);
-	} else {
-		grd.addColorStop(0, "#ffffff");
-	}
-	if (g_headerObj["setColor"][2] != undefined) {
-		grd.addColorStop(1, g_headerObj["setColor"][2]);
-	} else {
-		grd.addColorStop(1, "#66ffff");
-	}
-	var titlefontsize = 64 * (12 / g_headerObj["musicTitle"].length);
-	if (titlefontsize >= 64) {
-		titlefontsize = 64;
-	}
-	createLabel(l0ctx, g_headerObj["musicTitle"], g_sWidth / 2, g_sHeight / 2,
-		titlefontsize, "Century Gothic", grd, "center");
 
 	// Tweetボタン描画
 	var btnTweet = createButton({
@@ -85,16 +51,6 @@ function customTitleInit() {
  * カスタム画面(コメントとか)
  */
 function customCommentInit() {
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
-
-	// 画面背景を指定 (background-color)
-	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	grd.addColorStop(0, "#000000");
-	grd.addColorStop(1, "#002222");
-	l0ctx.fillStyle = grd;
-	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 
 	// タイトル文字描画
 	var lblTitle = getTitleDivLabel("lblTitle",
@@ -137,16 +93,6 @@ function customCommentInit() {
  * オプション画面(初期表示)
  */
 function customOptionInit() {
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
-
-	// 画面背景を指定 (background-color)
-	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	grd.addColorStop(0, "#000000");
-	grd.addColorStop(1, "#171700");
-	l0ctx.fillStyle = grd;
-	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 
 }
 
@@ -154,16 +100,6 @@ function customOptionInit() {
  * キーコンフィグ画面(初期表示)
  */
 function customKeyConfigInit() {
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
-
-	// 画面背景を指定 (background-color)
-	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	grd.addColorStop(0, "#000000");
-	grd.addColorStop(1, "#171700");
-	l0ctx.fillStyle = grd;
-	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 
 }
 
@@ -203,15 +139,5 @@ function customMainEnterFrame() {
  * 結果画面(初期表示)
  */
 function customResultInit() {
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
-
-	// 画面背景を指定 (background-color)
-	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	grd.addColorStop(0, "#000000");
-	grd.addColorStop(1, "#001717");
-	l0ctx.fillStyle = grd;
-	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 
 }
