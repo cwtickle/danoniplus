@@ -661,6 +661,19 @@ const g_keyObj = {
 	blank9A_1: 52.5,
 	blank9B_0: 52.5,
 
+	// キー置換用(ParaFla版との互換)
+	keyTransPattern: {
+		'9': '9A',
+		'DP': '9A',
+		'9A-1': '9A',
+		'9A-2': '9A',
+		'9B-1': '9B',
+		'9B-2': '9B',
+		'TP': '13',
+		'15': '15A',
+		'15R': '15B'
+	},
+
 	dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
 
@@ -2086,7 +2099,8 @@ function headerConvert(_dosObj) {
 			const init = (difDetails[6]) ? difDetails[6] :
 				(g_presetGauge !== undefined && (`Init` in g_presetGauge) ?
 					g_presetGauge.Init : 25);
-			obj.keyLabels.push(setVal(difDetails[0], `7`, `string`));
+			const keyLabel = setVal(difDetails[0], `7`, `string`);
+			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] || keyLabel);
 			obj.difLabels.push(setVal(difDetails[1], `Normal`, `string`));
 			obj.initSpeeds.push(setVal(difDetails[2], 3.5, `float`));
 			if (border !== `x`) {
