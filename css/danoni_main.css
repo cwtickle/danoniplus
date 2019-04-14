@@ -133,16 +133,8 @@ input[type=range]::-moz-range-thumb{
 input[type=range]:focus {
 	outline: 0;
 }
-@keyframes upToDown {
-	0% {
-		opacity: 0;/* 透明 */
-		transform: translateY(-50px);
-	}
-	100% {
-		opacity: 1;/* 不透明 */
-		transform: translateY(0);
-	}
-}
+
+/* 左から右へ */
 @keyframes leftToRight {
 	0% {
 		opacity: 0;/* 透明 */
@@ -153,6 +145,20 @@ input[type=range]:focus {
 		transform: translateX(0);
 	}
 }
+
+/* 上から下へ */
+@keyframes upToDown {
+	0% {
+		opacity: 0;/* 透明 */
+		transform: translateY(-50px);
+	}
+	100% {
+		opacity: 1;/* 不透明 */
+		transform: translateY(0);
+	}
+}
+
+/* 左から右へ移動し、フェードアウト（結果画面で使用） */
 @keyframes leftToRightFade {
 	0% {
 		opacity: 0;/* 透明 */
@@ -171,6 +177,8 @@ input[type=range]:focus {
 		transform: translateX(30px);
 	}
 }
+
+/* 上から下へ移動し、フェードアウト（結果画面で使用） */
 @keyframes upToDownFade {
 	0% {
 		opacity: 0;/* 透明 */
@@ -189,6 +197,8 @@ input[type=range]:focus {
 		transform: translateY(10px);
 	}
 }
+
+/* 徐々に表示（結果画面で使用） */
 @keyframes slowlyAppearing {
 	0% {
 		opacity: 0.5;/* 透明 */
@@ -199,4 +209,79 @@ input[type=range]:focus {
 	100% {
 		opacity: 1;/* 不透明 */
 	}
+}
+
+/* 文字拡大から元のサイズへ戻る */
+@keyframes fromBig {
+	0% {
+		opacity: 0;/* 透明 */
+		transform: scale(1.5, 1.5);
+		
+	}
+	100% {
+		opacity: 1;/* 不透明 */
+		transform: scale(1, 1);
+	}
+}
+
+/* X軸回転 */
+@keyframes spinX {
+	0% {
+		transform: rotateX(0deg);
+	}
+	100% {
+		transform: rotateX(360deg);
+	}
+}
+
+/* Y軸回転 */
+@keyframes spinY {
+	0% {
+		transform: rotateY(0deg);
+	}
+	100% {
+		transform: rotateY(360deg);
+	}
+}
+
+/* Z軸回転 */
+@keyframes spinZ {
+	0% {
+		transform: rotateZ(0deg);
+	}
+	100% {
+		transform: rotateZ(360deg);
+	}
+}
+
+/* ぼかし */
+@keyframes blur {
+	0% {
+		filter: blur(8px);
+	}
+	100% {
+		filter: blur(0);
+	}
+}
+
+/* 発光から暗くなり元に戻る */
+@keyframes brightToDark {
+	0% {
+		filter: brightness(0.0);
+	}
+	30% {
+		filter: brightness(2.0);
+	}
+	70% {
+		filter: brightness(0.0);
+	}
+	100% {
+		filter: brightness(1.0);
+	}
+}
+
+/* タイトルデフォルトモーション（HTML側で上書き可能） */
+#lblmusicTitle{
+	animation-duration: 1.5s;
+	animation-name: leftToRight;
 }
