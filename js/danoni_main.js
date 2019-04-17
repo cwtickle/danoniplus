@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.11.0`;
+const g_version = `Ver 3.11.1`;
 const g_revisedDate = `2019/04/17`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2298,7 +2298,7 @@ function headerConvert(_dosObj) {
 	// 読込対象の画像を指定(rel:preload)と同じ
 	obj.preloadImages = [];
 	if (_dosObj.preloadImages !== undefined) {
-		const preloadImgs = preloadImages.split(`,`);
+		const preloadImgs = _dosObj.preloadImages.split(`,`);
 
 		for (let j = 0, len = preloadImgs.length; j < len; j++) {
 			if (setVal(preloadImgs[j], ``, `string`) !== ``) {
