@@ -4278,36 +4278,43 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	// 歌詞データの分解 (3つで1セット)
 	obj.wordData = [];
 	obj.wordData.length = 0;
-	if (_dosObj[`word${_scoreNo}_data`] !== undefined && g_stateObj.d_lyrics === C_FLG_ON) {
+	if (g_stateObj.d_lyrics === C_FLG_ON) {
 
-		tmpData = _dosObj[`word${_scoreNo}_data`].split(`\r`).join(``);
-		tmpData = tmpData.split(`\n`).join(``);
+		let inputWordData = ``;
+		if (_dosObj[`word${_scoreNo}_data`] !== undefined) {
+			inputWordData = _dosObj[`word${_scoreNo}_data`];
+		} else if (_dosObj.word_data !== undefined) {
+			inputWordData = _dosObj.word_data;
+		}
+		if (inputWordData != ``) {
+			tmpData = inputWordData.split(`\r`).join(``);
+			tmpData = tmpData.split(`\n`).join(``);
 
-		if (tmpData !== undefined && tmpData !== ``) {
-			const tmpWordData = tmpData.split(`,`);
-			for (let k = 0; k < tmpWordData.length; k += 3) {
-				if (isNaN(parseInt(tmpWordData[k]))) {
-					continue;
-				}
-				tmpWordData[k] = calcFrame(tmpWordData[k]);
-				tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
+			if (tmpData !== undefined && tmpData !== ``) {
+				const tmpWordData = tmpData.split(`,`);
+				for (let k = 0; k < tmpWordData.length; k += 3) {
+					if (isNaN(parseInt(tmpWordData[k]))) {
+						continue;
+					}
+					tmpWordData[k] = calcFrame(tmpWordData[k]);
+					tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
 
-				let addFrame = 0;
-				if (obj.wordData[tmpWordData[k]] === undefined) {
-					obj.wordData[tmpWordData[k]] = [];
-				} else {
-					for (let m = 1; ; m++) {
-						if (obj.wordData[tmpWordData[k] + m] === undefined) {
-							obj.wordData[tmpWordData[k] + m] = [];
-							addFrame = m;
-							break;
+					let addFrame = 0;
+					if (obj.wordData[tmpWordData[k]] === undefined) {
+						obj.wordData[tmpWordData[k]] = [];
+					} else {
+						for (let m = 1; ; m++) {
+							if (obj.wordData[tmpWordData[k] + m] === undefined) {
+								obj.wordData[tmpWordData[k] + m] = [];
+								addFrame = m;
+								break;
+							}
 						}
 					}
+					obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], tmpWordData[k + 2]);
 				}
-				obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], tmpWordData[k + 2]);
 			}
 		}
-
 	}
 
 	// 背景データの分解 (下記すべてで1セット、改行区切り)
