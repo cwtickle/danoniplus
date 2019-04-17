@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.10.0`;
+const g_version = `Ver 3.11.0`;
 const g_revisedDate = `2019/04/17`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2230,11 +2230,9 @@ function headerConvert(_dosObj) {
 		obj.blankFrameDef = parseInt(_dosObj.blankFrame);
 	}
 
-	// フェードインフレーム数
+	// 開始フレーム数（0以外の場合はフェードインスタート）
 	if (_dosObj.startFrame !== undefined) {
-		obj.startFrame = parseInt(_dosObj.startFrame);
-	} else {
-		obj.startFrame = 0;
+		obj.startFrame = _dosObj.startFrame.split(`$`);
 	}
 
 	// フェードアウトフレーム数(譜面別)
@@ -4540,8 +4538,8 @@ function getFirstArrowFrame(_dataObj) {
  */
 function getStartFrame(_lastFrame) {
 	let frameNum = 0;
-	frameNum = g_headerObj.startFrame;
-	if (_lastFrame >= g_headerObj.startFrame) {
+	frameNum = parseInt(g_headerObj.startFrame[g_stateObj.scoreId]) || parseInt(g_headerObj.startFrame[0]) || 0;
+	if (_lastFrame >= frameNum) {
 		frameNum = Math.round(g_stateObj.fadein / 100 * (_lastFrame - frameNum)) + frameNum;
 	}
 	return frameNum;
@@ -6607,6 +6605,11 @@ function resultInit() {
 		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	}
 
+	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
+		g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan +
+		g_resultObj.kita + g_resultObj.iknai;
+	const fullArrows = g_allArrow + g_allFrz / 2;
+
 	// スコア計算(一括)
 	const scoreTmp = g_resultObj.ii * 8 +
 		g_resultObj.shakin * 4 +
@@ -6626,7 +6629,7 @@ function resultInit() {
 	if (g_gameOverFlg) {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
-	} else if (g_headerObj.startFrame === 0 && g_stateObj.auto === C_FLG_OFF) {
+	} else if (playingArrows === fullArrows && g_stateObj.auto === C_FLG_OFF) {
 		if (g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai === 0) {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
@@ -6819,16 +6822,20 @@ function resultInit() {
 	divRoot.appendChild(lblResultPre);
 	lblResultPre.style.opacity = 0;
 
-	const fullArrows = g_allArrow + g_allFrz / 2;
 	let resultFlgTmp = ``;
-	if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
-		resultFlgTmp = `<span style=color:#ffffff>All Perfect!!</span>`;
-	} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
-		resultFlgTmp = `<span style=color:#ffffcc>Perfect!!</span>`;
-	} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
-		resultFlgTmp = `<span style=color:#66ffff>FullCombo!</span>`;
+
+	if (playingArrows === fullArrows) {
+		if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
+			resultFlgTmp = `<span style=color:#ffffff>All Perfect!!</span>`;
+		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
+			resultFlgTmp = `<span style=color:#ffffcc>Perfect!!</span>`;
+		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
+			resultFlgTmp = `<span style=color:#66ffff>FullCombo!</span>`;
+		} else {
+			resultFlgTmp = `CLEARED!`;
+		}
 	} else {
-		resultFlgTmp = `CLEARED!`;
+		resultFlgTmp = ``;
 	}
 
 	const lblResultPre2 = createDivLabel(`lblResultPre`, g_sWidth / 2 + 50, 40,
