@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/04/14
+ * Revised : 2019/04/17
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.9.0`;
-const g_revisedDate = `2019/04/14`;
+const g_version = `Ver 3.10.0`;
+const g_revisedDate = `2019/04/17`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -4176,9 +4176,6 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	obj.arrowData = [];
 	obj.frzData = [];
-	let frzName;
-	let tmpData;
-	let tmpArrayData = [];
 	const headerAdjustment = parseInt(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
 	const realAdjustment = parseInt(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
 	g_stateObj.realAdjustment = realAdjustment;
@@ -4189,7 +4186,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 
 		// 矢印データの分解
 		if (_dosObj[`${g_keyObj[`chara${keyCtrlPtn}`][j]}${_scoreNo}_data`] !== undefined) {
-			tmpData = _dosObj[`${g_keyObj[`chara${keyCtrlPtn}`][j]}${_scoreNo}_data`].split(`\r`).join(``);
+			let tmpData = _dosObj[`${g_keyObj[`chara${keyCtrlPtn}`][j]}${_scoreNo}_data`].split(`\r`).join(``);
 			tmpData = tmpData.split(`\n`).join(``);
 
 			if (tmpData !== undefined) {
@@ -4205,7 +4202,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 		}
 
 		// 矢印名からフリーズアロー名への変換
-		frzName = g_keyObj[`chara${keyCtrlPtn}`][j].replace(`leftdia`, `frzLdia`);
+		let frzName = g_keyObj[`chara${keyCtrlPtn}`][j].replace(`leftdia`, `frzLdia`);
 		frzName = frzName.replace(`rightdia`, `frzRdia`);
 		frzName = frzName.replace(`left`, `frzLeft`);
 		frzName = frzName.replace(`down`, `frzDown`);
@@ -4219,7 +4216,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 
 		// フリーズアローデータの分解 (2つで1セット)
 		if (_dosObj[`${frzName}${_scoreNo}_data`] !== undefined) {
-			tmpData = _dosObj[`${frzName}${_scoreNo}_data`].split(`\r`).join(``);
+			let tmpData = _dosObj[`${frzName}${_scoreNo}_data`].split(`\r`).join(``);
 			tmpData = tmpData.split(`\n`).join(``);
 
 			if (tmpData !== undefined) {
@@ -4235,79 +4232,153 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 		}
 	}
 
-	// 速度変化・色変化データの分解 (2つで1セット)
+	// 速度変化（全体）データの分解 (2つで1セット)
 	obj.speedData = [];
 	obj.speedData.length = 0;
 	const speedFooter = (g_keyObj.currentKey === `5` ? `_data` : `_change`);
 	if (_dosObj[`speed${_scoreNo}${speedFooter}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
-		obj.speedData = _dosObj[`speed${_scoreNo}${speedFooter}`].split(`,`);
-		for (let k = 0; k < obj.speedData.length; k += 2) {
-			obj.speedData[k] = calcFrame(obj.speedData[k]);
-			obj.speedData[k + 1] = parseFloat(obj.speedData[k + 1]);
+		let speedIdx = 0;
+		let tmpArrayData = _dosObj[`speed${_scoreNo}${speedFooter}`].split(`\r`).join(`\n`);
+		tmpArrayData = tmpArrayData.split(`\n`);
+
+		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
+			const tmpData = tmpArrayData[j];
+
+			if (tmpData !== undefined && tmpData !== ``) {
+				const tmpSpeedData = tmpData.split(`,`);
+				for (let k = 0; k < tmpSpeedData.length; k += 2) {
+					if (isNaN(parseInt(tmpSpeedData[k]))) {
+						continue;
+					}
+					obj.speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
+					obj.speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
+					speedIdx += 2;
+				}
+			}
 		}
 	}
+
+	// 速度変化（個別）データの分解 (2つで1セット, セット毎の改行区切り可)
 	obj.boostData = [];
 	obj.boostData.length = 0;
 	if (_dosObj[`boost${_scoreNo}_data`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
-		obj.boostData = _dosObj[`boost${_scoreNo}_data`].split(`,`);
-		for (let k = 0; k < obj.boostData.length; k += 2) {
-			obj.boostData[k] = calcFrame(obj.boostData[k]);
-			obj.boostData[k + 1] = parseFloat(obj.boostData[k + 1]);
+		let speedIdx = 0;
+		let tmpArrayData = _dosObj[`boost${_scoreNo}_data`].split(`\r`).join(`\n`);
+		tmpArrayData = tmpArrayData.split(`\n`);
+
+		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
+			const tmpData = tmpArrayData[j];
+
+			if (tmpData !== undefined && tmpData !== ``) {
+				const tmpSpeedData = tmpData.split(`,`);
+				for (let k = 0; k < tmpSpeedData.length; k += 2) {
+					if (isNaN(parseInt(tmpSpeedData[k]))) {
+						continue;
+					}
+					obj.boostData[speedIdx] = calcFrame(tmpSpeedData[k]);
+					obj.boostData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
+					speedIdx += 2;
+				}
+			}
 		}
 	}
 
+	// 色変化（個別）データの分解（3つで1セット, セット毎の改行区切り可）
 	obj.colorData = [];
 	obj.colorData.length = 0;
 	if (_dosObj[`color${_scoreNo}_data`] !== undefined && _dosObj[`color${_scoreNo}_data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
-		obj.colorData = _dosObj[`color${_scoreNo}_data`].split(`,`);
-		for (let k = 0; k < obj.colorData.length; k += 3) {
-			obj.colorData[k] = calcFrame(obj.colorData[k]);
-			obj.colorData[k + 1] = parseFloat(obj.colorData[k + 1]);
+		let colorIdx = 0;
+		let tmpArrayData = _dosObj[`color${_scoreNo}_data`].split(`\r`).join(`\n`);
+		tmpArrayData = tmpArrayData.split(`\n`);
+
+		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
+			const tmpData = tmpArrayData[j];
+
+			if (tmpData !== undefined && tmpData !== ``) {
+				const tmpColorData = tmpData.split(`,`);
+				for (let k = 0; k < tmpColorData.length; k += 3) {
+					if (isNaN(parseInt(tmpColorData[k]))) {
+						continue;
+					}
+					obj.colorData[colorIdx] = calcFrame(tmpColorData[k]);
+					obj.colorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
+					obj.colorData[colorIdx + 2] = tmpColorData[k + 2];
+					colorIdx += 3;
+				}
+			}
 		}
 	}
+
+	// 色変化（全体）データの分解 (3つで1セット, セット毎の改行区切り可)
 	obj.acolorData = [];
 	obj.acolorData.length = 0;
 	if (_dosObj[`acolor${_scoreNo}_data`] !== undefined && _dosObj[`acolor${_scoreNo}data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
-		obj.acolorData = _dosObj[`acolor${_scoreNo}_data`].split(`,`);
-		for (let k = 0; k < obj.acolorData.length; k += 3) {
-			obj.acolorData[k] = calcFrame(obj.acolorData[k]);
-			obj.acolorData[k + 1] = parseFloat(obj.acolorData[k + 1]);
+		let colorIdx = 0;
+		let tmpArrayData = _dosObj[`acolor${_scoreNo}_data`].split(`\r`).join(`\n`);
+		tmpArrayData = tmpArrayData.split(`\n`);
+
+		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
+			const tmpData = tmpArrayData[j];
+
+			if (tmpData !== undefined && tmpData !== ``) {
+				const tmpColorData = tmpData.split(`,`);
+				for (let k = 0; k < tmpColorData.length; k += 3) {
+					if (isNaN(parseInt(tmpColorData[k]))) {
+						continue;
+					}
+					obj.acolorData[colorIdx] = calcFrame(tmpColorData[k]);
+					obj.acolorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
+					obj.acolorData[colorIdx + 2] = tmpColorData[k + 2];
+					colorIdx += 3;
+				}
+			}
 		}
 	}
 
-	// 歌詞データの分解 (3つで1セット)
+	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
 	obj.wordData = [];
 	obj.wordData.length = 0;
-	if (_dosObj[`word${_scoreNo}_data`] !== undefined && g_stateObj.d_lyrics === C_FLG_ON) {
+	if (g_stateObj.d_lyrics === C_FLG_ON) {
 
-		tmpData = _dosObj[`word${_scoreNo}_data`].split(`\r`).join(``);
-		tmpData = tmpData.split(`\n`).join(``);
+		let inputWordData = ``;
+		if (_dosObj[`word${_scoreNo}_data`] !== undefined) {
+			inputWordData = _dosObj[`word${_scoreNo}_data`];
+		} else if (_dosObj.word_data !== undefined) {
+			inputWordData = _dosObj.word_data;
+		}
+		if (inputWordData != ``) {
+			let tmpArrayData = inputWordData.split(`\r`).join(`\n`);
+			tmpArrayData = tmpArrayData.split(`\n`);
 
-		if (tmpData !== undefined && tmpData !== ``) {
-			const tmpWordData = tmpData.split(`,`);
-			for (let k = 0; k < tmpWordData.length; k += 3) {
-				if (isNaN(parseInt(tmpWordData[k]))) {
-					continue;
-				}
-				tmpWordData[k] = calcFrame(tmpWordData[k]);
-				tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
+			for (let j = 0, len = tmpArrayData.length; j < len; j++) {
+				const tmpData = tmpArrayData[j];
 
-				let addFrame = 0;
-				if (obj.wordData[tmpWordData[k]] === undefined) {
-					obj.wordData[tmpWordData[k]] = [];
-				} else {
-					for (let m = 1; ; m++) {
-						if (obj.wordData[tmpWordData[k] + m] === undefined) {
-							obj.wordData[tmpWordData[k] + m] = [];
-							addFrame = m;
-							break;
+				if (tmpData !== undefined && tmpData !== ``) {
+					const tmpWordData = tmpData.split(`,`);
+					for (let k = 0; k < tmpWordData.length; k += 3) {
+						if (isNaN(parseInt(tmpWordData[k]))) {
+							continue;
 						}
+						tmpWordData[k] = calcFrame(tmpWordData[k]);
+						tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
+
+						let addFrame = 0;
+						if (obj.wordData[tmpWordData[k]] === undefined) {
+							obj.wordData[tmpWordData[k]] = [];
+						} else {
+							for (let m = 1; ; m++) {
+								if (obj.wordData[tmpWordData[k] + m] === undefined) {
+									obj.wordData[tmpWordData[k] + m] = [];
+									addFrame = m;
+									break;
+								}
+							}
+						}
+						obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], tmpWordData[k + 2]);
 					}
 				}
-				obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], tmpWordData[k + 2]);
 			}
 		}
-
 	}
 
 	// 背景データの分解 (下記すべてで1セット、改行区切り)
@@ -4317,11 +4388,11 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	obj.backMaxDepth = -1;
 	if (_dosObj[`back${_scoreNo}_data`] !== undefined && g_stateObj.d_background === C_FLG_ON) {
 
-		tmpArrayData = _dosObj[`back${_scoreNo}_data`].split(`\r`).join(`\n`);
+		let tmpArrayData = _dosObj[`back${_scoreNo}_data`].split(`\r`).join(`\n`);
 		tmpArrayData = tmpArrayData.split(`\n`);
 
 		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
-			tmpData = tmpArrayData[j];
+			const tmpData = tmpArrayData[j];
 
 			if (tmpData !== undefined && tmpData !== ``) {
 				const tmpBackData = tmpData.split(`,`);
