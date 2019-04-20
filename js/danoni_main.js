@@ -2162,8 +2162,8 @@ function headerConvert(_dosObj) {
 
 	// 初期色情報
 	obj.setColorInit = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
-	obj.setColorLight = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
-	obj.setColorDark = [`#000022`, `#002222`, `#000000`, `#222200`, `#221100`];
+	obj.setColorType1 = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
+	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
 	obj.setColorDefault = [];
 
 	if (_dosObj.setColor !== undefined && _dosObj.setColor !== ``) {
@@ -2182,16 +2182,16 @@ function headerConvert(_dosObj) {
 
 	// フリーズアロー初期色情報
 	obj.frzColorInit = [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`];
-	obj.frzColorLight = [[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+	obj.frzColorType1 = [[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
 	[`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
 	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
 	[`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
 	[`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]];
-	obj.frzColorDark = [[`#002222`, `#110022`, `#333300`, `#222200`],
-	[`#002211`, `#002222`, `#333300`, `#222200`],
-	[`#66ffff`, `#6600ff`, `#333300`, `#222200`],
-	[`#110022`, `#110033`, `#333300`, `#222200`],
-	[`#220011`, `#330011`, `#333300`, `#222200`]];
+	obj.frzColorType2 = [[`#cccccc`, `#999999`, `#cccc33`, `#999933`],
+	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+	[`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
+	[`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]];
 	obj.frzColor = [];
 	obj.frzColorDefault = [];
 
@@ -3697,14 +3697,14 @@ function keyConfigInit() {
 	const lnkcolorType = makeSettingLblButton(`lnkKcType`, g_colorType, 0, _ => {
 		switch (g_colorType) {
 			case `Default`:
-				g_colorType = `Light`;
+				g_colorType = `Type1`;
 				break;
 
-			case `Light`:
-				g_colorType = `Dark`;
+			case `Type1`:
+				g_colorType = `Type2`;
 				break;
 
-			case `Dark`:
+			case `Type2`:
 				g_colorType = `Default`;
 				break;
 		}
