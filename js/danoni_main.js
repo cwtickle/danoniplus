@@ -3698,14 +3698,15 @@ function keyConfigInit() {
 		switch (g_colorType) {
 			case `Default`:
 				g_colorType = `Type1`;
+				g_stateObj.d_color = `OFF`;
 				break;
-
 			case `Type1`:
 				g_colorType = `Type2`;
+				g_stateObj.d_color = `OFF`;
 				break;
-
 			case `Type2`:
 				g_colorType = `Default`;
+				g_stateObj.d_color = `ON`;
 				break;
 		}
 		g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
