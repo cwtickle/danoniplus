@@ -2182,8 +2182,16 @@ function headerConvert(_dosObj) {
 
 	// フリーズアロー初期色情報
 	obj.frzColorInit = [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`];
-	obj.frzColorLight = [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`];
-	obj.frzColorDark = [`#002222`, `#110022`, `#333300`, `#222200`];
+	obj.frzColorLight = [[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+	[`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
+	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+	[`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
+	[`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]];
+	obj.frzColorDark = [[`#002222`, `#110022`, `#333300`, `#222200`],
+	[`#002211`, `#002222`, `#333300`, `#222200`],
+	[`#66ffff`, `#6600ff`, `#333300`, `#222200`],
+	[`#110022`, `#110033`, `#333300`, `#222200`],
+	[`#220011`, `#330011`, `#333300`, `#222200`]];
 	obj.frzColor = [];
 	obj.frzColorDefault = [];
 
@@ -3690,26 +3698,20 @@ function keyConfigInit() {
 		switch (g_colorType) {
 			case `Default`:
 				g_colorType = `Light`;
-				for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-					g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`]));
-				}
 				break;
 
 			case `Light`:
 				g_colorType = `Dark`;
-				for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-					g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`]));
-				}
 				break;
 
 			case `Dark`:
 				g_colorType = `Default`;
-				for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-					g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj.frzColorDefault[j]));
-				}
 				break;
 		}
 		g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
+		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
+			g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
+		}
 		for (let j = 0; j < keyNum; j++) {
 
 			// IE/Edge(V17以前)の場合は何もしない
