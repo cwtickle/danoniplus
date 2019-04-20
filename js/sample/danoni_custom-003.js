@@ -107,25 +107,7 @@ function customKeyConfigInit() {
  * メイン画面(初期表示)
  */
 function customMainInit() {
-	// レイヤー情報取得
-	var layer0 = document.getElementById("layer0");
-	var l0ctx = layer0.getContext("2d");
 
-	// 画面背景を指定 (background-color)
-	var grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	grd.addColorStop(0, "#000000");
-	grd.addColorStop(1, "#111100");
-	l0ctx.fillStyle = grd;
-	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-
-	// ここにカスタム処理を記述する
-	var lblReady = createDivLabel("lblReady", g_sWidth / 2 - 100, g_sHeight / 2 - 100,
-		200, 50, 40, C_CLR_TITLE,
-		"<span style='color:#9999ff;font-size:60px;'>R</span>EADY?");
-	divRoot.appendChild(lblReady);
-	lblReady.style.animationDuration = "2.5s";
-	lblReady.style.animationName = "leftToRightFade";
-	lblReady.style.opacity = 0;
 }
 
 /**

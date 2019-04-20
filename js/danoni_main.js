@@ -702,6 +702,7 @@ const C_MIN_SPEED = 1;
 
 /** キーコンフィグ設定 */
 let g_kcType = `Main`;
+let g_colorType = `Default`;
 
 /** メイン画面用共通オブジェクト */
 const g_workObj = {};
@@ -1760,7 +1761,7 @@ function titleInit() {
 
 	// 背景の矢印オブジェクトを表示
 	if (g_headerObj.customTitleArrowUse === `false`) {
-		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj.setColor[0], (g_sWidth - 500) / 2, -15, 500, 180);
+		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj.setColorDefault[0], (g_sWidth - 500) / 2, -15, 500, 180);
 		lblArrow.style.opacity = 0.25;
 		lblArrow.style.zIndex = 0;
 		divRoot.appendChild(lblArrow);
@@ -1775,16 +1776,16 @@ function titleInit() {
 		if (setVal(g_headerObj.titlegrd, ``, `string`) !== ``) {
 			titlefontgrd = g_headerObj.titlegrd;
 		} else {
-			if (g_headerObj.setColor[0] !== undefined) {
-				titlefontgrd += g_headerObj.setColor[0];
+			if (g_headerObj.setColorDefault[0] !== undefined) {
+				titlefontgrd += g_headerObj.setColorDefault[0];
 			} else {
 				titlefontgrd += `#ffffff`;
 			}
 
 			titlefontgrd += `,`;
 
-			if (g_headerObj.setColor[2] !== undefined) {
-				titlefontgrd += g_headerObj.setColor[2];
+			if (g_headerObj.setColorDefault[2] !== undefined) {
+				titlefontgrd += g_headerObj.setColorDefault[2];
 			} else {
 				titlefontgrd += `#66ffff`;
 			}
@@ -2160,7 +2161,10 @@ function headerConvert(_dosObj) {
 	}
 
 	// 初期色情報
-	obj.setColorInit = [`#cccccc`, `#9999ff`, `#ffffff`, `#ffff99`, `#99ff99`];
+	obj.setColorInit = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
+	obj.setColorLight = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
+	obj.setColorDark = [`#000022`, `#002222`, `#000000`, `#222200`, `#221100`];
+	obj.setColorDefault = [];
 
 	if (_dosObj.setColor !== undefined && _dosObj.setColor !== ``) {
 		obj.setColor = _dosObj.setColor.split(`,`);
@@ -2173,12 +2177,15 @@ function headerConvert(_dosObj) {
 	} else {
 		obj.setColor = JSON.parse(JSON.stringify(obj.setColorInit));
 	}
+	obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColor));
 
 
 	// フリーズアロー初期色情報
 	obj.frzColorInit = [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`];
+	obj.frzColorLight = [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`];
+	obj.frzColorDark = [`#002222`, `#110022`, `#333300`, `#222200`];
 	obj.frzColor = [];
-	obj.frzColorDef = [];
+	obj.frzColorDefault = [];
 
 	if (_dosObj.frzColor !== undefined && _dosObj.frzColor !== ``) {
 		const tmpFrzColors = _dosObj.frzColor.split(`$`);
@@ -2192,17 +2199,17 @@ function headerConvert(_dosObj) {
 				obj.frzColor[j][k] = obj.frzColorInit[k];
 			}
 
-			obj.frzColorDef[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
+			obj.frzColorDefault[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
 		}
 		for (let j = tmpFrzColors.length, len = obj.setColorInit.length; j < len; j++) {
 			obj.frzColor[j] = JSON.parse(JSON.stringify(obj.frzColor[0]));
-			obj.frzColorDef[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
+			obj.frzColorDefault[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
 		}
 
 	} else {
 		for (let j = 0, len = obj.setColorInit.length; j < len; j++) {
 			obj.frzColor[j] = JSON.parse(JSON.stringify(obj.frzColorInit));
-			obj.frzColorDef[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
+			obj.frzColorDefault[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
 		}
 	}
 
@@ -3673,6 +3680,52 @@ function keyConfigInit() {
 	lnkKcType.style.top = `35px`;
 	divRoot.appendChild(lnkKcType);
 
+	// キーカラータイプ切替ボタン
+	const lblcolorType = createDivLabel(`lblcolorType`, g_sWidth - 120, 10,
+		70, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
+		`<span style=color:#ffdd99>C</span>olorType`);
+	divRoot.appendChild(lblcolorType);
+
+	const lnkcolorType = makeSettingLblButton(`lnkKcType`, g_colorType, 0, _ => {
+		switch (g_colorType) {
+			case `Default`:
+				g_colorType = `Light`;
+				for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
+					g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`]));
+				}
+				break;
+
+			case `Light`:
+				g_colorType = `Dark`;
+				for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
+					g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`]));
+				}
+				break;
+
+			case `Dark`:
+				g_colorType = `Default`;
+				for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
+					g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj.frzColorDefault[j]));
+				}
+				break;
+		}
+		g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
+		for (let j = 0; j < keyNum; j++) {
+
+			// IE/Edge(V17以前)の場合は何もしない
+			if (g_userAgent.indexOf(`msie`) !== -1 ||
+				g_userAgent.indexOf(`trident`) !== -1 ||
+				(g_userAgent.indexOf(`edge`) !== -1 && edgeVersion < 18)) {
+			} else {
+				document.querySelector(`#arrow${j}`).style.backgroundColor = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
+			}
+		}
+		lnkcolorType.innerHTML = g_colorType;
+	});
+	lnkcolorType.style.width = `100px`;
+	lnkcolorType.style.left = `calc(${g_sWidth}px - 130px)`;
+	lnkcolorType.style.top = `35px`;
+	divRoot.appendChild(lnkcolorType);
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customKeyConfigInit === `function`) {
