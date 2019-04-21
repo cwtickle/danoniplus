@@ -1633,16 +1633,22 @@ function initAfterDosLoaded() {
 	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
 		if (g_headerObj.customjs2 !== ``) {
 			loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
-				loadMusic();
+				titleInit();
 			});
 		} else {
-			loadMusic();
+			titleInit();
 		}
 	});
 }
 
 function loadMusic() {
 	const url = `../${g_headerObj.musicFolder}/${g_headerObj.musicUrl}`;
+
+	// Now Loadingを表示
+	const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight - 40,
+		g_sWidth, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `Now Loading...`);
+	lblLoading.style.textAlign = C_ALIGN_RIGHT;
+	divRoot.appendChild(lblLoading);
 
 	// ローカル動作時
 	if (location.href.match(`^file`)) {
@@ -1703,7 +1709,7 @@ function loadMusic() {
 // Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備
 async function initWebAudioAPI(_url) {
 	g_audio = new AudioPlayer();
-	titleInit();
+	musicAfterLoaded();
 	const promise = await fetch(_url);
 	const arrayBuffer = await promise.arrayBuffer();
 	await g_audio.init(arrayBuffer);
@@ -1717,12 +1723,12 @@ function setAudio(_url) {
 				initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
 			} else {
 				makeWarningWindow(C_MSG_E_0031);
-				titleInit();
+				musicAfterLoaded();
 			}
 		});
 	} else if (location.href.match(`^file`)) {
 		g_audio.src = _url;
-		titleInit();
+		musicAfterLoaded();
 	} else {
 		initWebAudioAPI(_url);
 	}
@@ -2714,18 +2720,7 @@ function optionInit() {
 		align: C_ALIGN_CENTER
 	}, _ => {
 		clearWindow();
-		g_audio.load();
-
-		if (g_audio.readyState === 4) {
-			// audioの読み込みが終わった後の処理
-			loadingScoreInit();
-		} else {
-			// 読込中の状態
-			g_audio.addEventListener(`canplaythrough`, (_ => function f() {
-				g_audio.removeEventListener(`canplaythrough`, f, false);
-				loadingScoreInit();
-			})(), false);
-		}
+		loadMusic();
 	});
 	divRoot.appendChild(btnPlay);
 
@@ -2759,18 +2754,7 @@ function optionInit() {
 		}
 		if (setKey === 13) {
 			clearWindow();
-			g_audio.load();
-
-			if (g_audio.readyState === 4) {
-				// audioの読み込みが終わった後の処理
-				loadingScoreInit();
-			} else {
-				// 読込中の状態
-				g_audio.addEventListener(`canplaythrough`, (_ => function f() {
-					g_audio.removeEventListener(`canplaythrough`, f, false);
-					loadingScoreInit();
-				})(), false);
-			}
+			loadMusic();
 		}
 		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
 			if (setKey === C_BLOCK_KEYS[j]) {
@@ -2779,6 +2763,21 @@ function optionInit() {
 		}
 	}
 	document.onkeyup = evt => { }
+}
+
+function musicAfterLoaded() {
+	g_audio.load();
+
+	if (g_audio.readyState === 4) {
+		// audioの読み込みが終わった後の処理
+		loadingScoreInit();
+	} else {
+		// 読込中の状態
+		g_audio.addEventListener(`canplaythrough`, (_ => function f() {
+			g_audio.removeEventListener(`canplaythrough`, f, false);
+			loadingScoreInit();
+		})(), false);
+	}
 }
 
 /**
