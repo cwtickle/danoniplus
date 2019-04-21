@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.13.0`;
+const g_version = `Ver 3.13.1`;
 const g_revisedDate = `2019/04/21`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4594,7 +4594,9 @@ function getFirstArrowFrame(_dataObj) {
  */
 function getStartFrame(_lastFrame) {
 	let frameNum = 0;
-	frameNum = parseInt(g_headerObj.startFrame[g_stateObj.scoreId]) || parseInt(g_headerObj.startFrame[0]) || 0;
+	if (g_headerObj.startFrame !== undefined) {
+		frameNum = parseInt(g_headerObj.startFrame[g_stateObj.scoreId] || g_headerObj.startFrame[0])
+	}
 	if (_lastFrame >= frameNum) {
 		frameNum = Math.round(g_stateObj.fadein / 100 * (_lastFrame - frameNum)) + frameNum;
 	}
