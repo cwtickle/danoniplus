@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/25
+ * Revised : 2019/04/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.9.3`;
-const g_revisedDate = `2019/02/25`;
+const g_version = `Ver 2.9.4`;
+const g_revisedDate = `2019/04/21`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1384,21 +1384,26 @@ function loadScript(_url, _callback, _charset = `UTF-8`) {
 
 // WebAudioAPIでAudio要素風に再生するクラス
 class AudioPlayer {
-	constructor(_arrayBuffer) {
+	constructor() {
 		this._context = new AudioContext();
-		this._arrayBuffer = _arrayBuffer;
 		this._gain = this._context.createGain();
 		this._gain.connect(this._context.destination);
 		this._startTime = 0;
 		this._fadeinPosition = 0;
+		this._eventListeners = {};
 		this.playbackRate = 1;
 	}
 
-	async init() {
+	async init(_arrayBuffer) {
+		this._arrayBuffer = _arrayBuffer;
 		await this._context.decodeAudioData(this._arrayBuffer, _buffer => {
 			this._duration = _buffer.duration;
 			this._buffer = _buffer;
-		})
+		});
+
+		if (this._eventListeners[`canplaythrough`] !== undefined) {
+			this._eventListeners[`canplaythrough`].forEach(_listener => _listener());
+		}
 	}
 
 	play() {
@@ -1432,8 +1437,29 @@ class AudioPlayer {
 		return this._duration;
 	}
 
+	get readyState() {
+		if (this._duration) {
+			return 4;
+		} else {
+			return 0;
+		}
+	}
+
+	addEventListener(_type, _listener) {
+		if (this._eventListeners[_type] === undefined) {
+			this._eventListeners[_type] = [];
+		}
+		this._eventListeners[_type].push(_listener);
+	}
+
+	removeEventListener(_type, _listener) {
+		if (this._eventListeners[_type] === undefined) {
+			return;
+		}
+		this._eventListeners[_type] = this._eventListeners[_type].filter(_element => _element !== _listener);
+	}
+
 	load() { }
-	get readyState() { return 4; }
 	dispatchEvent() { }
 }
 
@@ -1613,11 +1639,11 @@ function loadMusic() {
 
 // Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備
 async function initWebAudioAPI(_url) {
+	g_audio = new AudioPlayer();
+	titleInit();
 	const promise = await fetch(_url);
 	const arrayBuffer = await promise.arrayBuffer();
-	g_audio = new AudioPlayer(arrayBuffer);
-	await g_audio.init();
-	titleInit();
+	await g_audio.init(arrayBuffer);
 }
 
 function setAudio(_url) {
@@ -2136,7 +2162,7 @@ function headerConvert(_dosObj) {
 	// 読込対象の画像を指定(rel:preload)と同じ
 	obj.preloadImages = [];
 	if (_dosObj.preloadImages !== undefined) {
-		const preloadImgs = preloadImages.split(`,`);
+		const preloadImgs = _dosObj.preloadImages.split(`,`);
 
 		for (let j = 0, len = preloadImgs.length; j < len; j++) {
 			if (setVal(preloadImgs[j], ``, `string`) !== ``) {
