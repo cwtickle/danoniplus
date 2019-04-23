@@ -10,7 +10,7 @@
  */
 const g_version = `Ver 3.13.1`;
 const g_revisedDate = `2019/04/21`;
-const g_alphaVersion = `+ md 0.2.0`;
+const g_alphaVersion = `+ md 0.3.0`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1646,72 +1646,78 @@ function loadMusic() {
 	const musicUrl = g_headerObj.musicUrls[g_stateObj.scoreId] || g_headerObj.musicUrls[0];
 	const url = `../${g_headerObj.musicFolder}/${musicUrl}`;
 
-	if (musicUrl.slice(-3) === `.js` || musicUrl.slice(-4) === `.txt`) {
-		g_musicEncodedFlg = true;
+	if (musicUrl === g_headerObj.musicUrl) {
+		musicAfterLoaded();
 	} else {
-		g_musicEncodedFlg = false;
-	}
+		g_headerObj.musicUrl = musicUrl;
 
-	// Now Loadingを表示
-	const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight - 40,
-		g_sWidth, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `Now Loading...`);
-	lblLoading.style.textAlign = C_ALIGN_RIGHT;
-	divRoot.appendChild(lblLoading);
-
-	// ローカル動作時
-	if (location.href.match(`^file`)) {
-		setAudio(url);
-		return;
-	}
-
-	// XHRで読み込み
-	const request = new XMLHttpRequest();
-	request.open(`GET`, url, true);
-	request.responseType = `blob`;
-
-	// 読み込み完了時
-	request.addEventListener(`load`, _ => {
-		if (request.status >= 200 && request.status < 300) {
-			const blobUrl = URL.createObjectURL(request.response);
-			setAudio(blobUrl);
+		if (musicUrl.slice(-3) === `.js` || musicUrl.slice(-4) === `.txt`) {
+			g_musicEncodedFlg = true;
 		} else {
-			makeWarningWindow(`${C_MSG_E_0032}<br>(${request.status} ${request.statusText})`);
+			g_musicEncodedFlg = false;
 		}
-	});
 
-	// 進捗時
-	request.addEventListener(`progress`, _event => {
-		const lblLoading = document.querySelector(`#lblLoading`);
+		// Now Loadingを表示
+		const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight - 40,
+			g_sWidth, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `Now Loading...`);
+		lblLoading.style.textAlign = C_ALIGN_RIGHT;
+		divRoot.appendChild(lblLoading);
 
-		if (_event.lengthComputable) {
-			const rate = _event.loaded / _event.total;
-			const layer0 = document.querySelector(`#layer0`);
-			const l0ctx = layer0.getContext(`2d`);
-			l0ctx.fillStyle = C_CLR_LOADING_BAR;
-			l0ctx.fillRect(0, layer0.height - 10, layer0.width * rate, 10);
-			lblLoading.innerText = `Now Loading... ${Math.floor(rate * 100)}%`;
-		} else {
-			lblLoading.innerText = `Now Loading... ${_event.loaded}Bytes`;
+		// ローカル動作時
+		if (location.href.match(`^file`)) {
+			setAudio(url);
+			return;
 		}
-		// ユーザカスタムイベント
-		if (typeof customLoadingProgress === `function`) {
-			customLoadingProgress(_event);
-			if (typeof customLoadingProgress2 === `function`) {
-				customLoadingProgress2(_event);
+
+		// XHRで読み込み
+		const request = new XMLHttpRequest();
+		request.open(`GET`, url, true);
+		request.responseType = `blob`;
+
+		// 読み込み完了時
+		request.addEventListener(`load`, _ => {
+			if (request.status >= 200 && request.status < 300) {
+				const blobUrl = URL.createObjectURL(request.response);
+				setAudio(blobUrl);
+			} else {
+				makeWarningWindow(`${C_MSG_E_0032}<br>(${request.status} ${request.statusText})`);
 			}
-		}
-	});
+		});
 
-	// エラー処理
-	request.addEventListener(`timeout`, _ => {
-		makeWarningWindow(`${C_MSG_E_0033}`);
-	});
+		// 進捗時
+		request.addEventListener(`progress`, _event => {
+			const lblLoading = document.querySelector(`#lblLoading`);
 
-	request.addEventListener(`error`, _ => {
-		makeWarningWindow(`${C_MSG_E_0034}`);
-	});
+			if (_event.lengthComputable) {
+				const rate = _event.loaded / _event.total;
+				const layer0 = document.querySelector(`#layer0`);
+				const l0ctx = layer0.getContext(`2d`);
+				l0ctx.fillStyle = C_CLR_LOADING_BAR;
+				l0ctx.fillRect(0, layer0.height - 10, layer0.width * rate, 10);
+				lblLoading.innerText = `Now Loading... ${Math.floor(rate * 100)}%`;
+			} else {
+				lblLoading.innerText = `Now Loading... ${_event.loaded}Bytes`;
+			}
+			// ユーザカスタムイベント
+			if (typeof customLoadingProgress === `function`) {
+				customLoadingProgress(_event);
+				if (typeof customLoadingProgress2 === `function`) {
+					customLoadingProgress2(_event);
+				}
+			}
+		});
 
-	request.send();
+		// エラー処理
+		request.addEventListener(`timeout`, _ => {
+			makeWarningWindow(`${C_MSG_E_0033}`);
+		});
+
+		request.addEventListener(`error`, _ => {
+			makeWarningWindow(`${C_MSG_E_0034}`);
+		});
+
+		request.send();
+	}
 }
 
 // Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備
