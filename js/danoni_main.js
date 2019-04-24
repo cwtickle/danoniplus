@@ -10,7 +10,7 @@
  */
 const g_version = `Ver 3.13.1`;
 const g_revisedDate = `2019/04/21`;
-const g_alphaVersion = `+ md 0.3.0`;
+const g_alphaVersion = `+ mb 0.4.0`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1643,7 +1643,7 @@ function initAfterDosLoaded() {
 }
 
 function loadMusic() {
-	const musicUrl = g_headerObj.musicUrls[g_stateObj.scoreId] || g_headerObj.musicUrls[0];
+	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	const url = `../${g_headerObj.musicFolder}/${musicUrl}`;
 
 	if (musicUrl === g_headerObj.musicUrl) {
@@ -1655,6 +1655,19 @@ function loadMusic() {
 			g_musicEncodedFlg = true;
 		} else {
 			g_musicEncodedFlg = false;
+		}
+
+		// レイヤー情報取得
+		const layer0 = document.querySelector(`#layer0`);
+		const l0ctx = layer0.getContext(`2d`);
+
+		// 画面背景を指定 (background-color)
+		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+		if (g_headerObj.customBackUse === `false`) {
+			grd.addColorStop(0, `#000000`);
+			grd.addColorStop(1, `#222222`);
+			l0ctx.fillStyle = grd;
+			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 		}
 
 		// Now Loadingを表示
@@ -2077,13 +2090,23 @@ function headerConvert(_dosObj) {
 	obj.musicTitles = [];
 	obj.musicTitlesForView = [];
 	obj.artistNames = [];
+	obj.musicNos = [];
 
 	if (_dosObj.musicTitle !== undefined && _dosObj.musicTitle !== ``) {
-		const musicData = _dosObj.musicTitle.split(`$`);
+		const musicData = _dosObj.musicTitle.split(`;`);
+
+		if (_dosObj.musicNo !== undefined && _dosObj.musicNo !== ``) {
+			obj.musicNos = _dosObj.musicNo.split(`$`);
+		}
 
 		for (let j = 0; j < musicData.length; j++) {
 			const musics = musicData[j].split(`,`);
 
+			if (obj.musicNos.length >= j) {
+				obj.musicTitles[j] = musics[0].split(`<br>`).join(` `);
+				obj.musicTitlesForView[j] = musics[0].split("<br>");
+				obj.artistNames[j] = setVal(musics[1], ``, `string`);
+			}
 			if (j == 0) {
 				obj.musicTitle = musics[0].split(`<br>`).join(` `);
 				obj.musicTitleForView = musics[0].split("<br>");
@@ -2095,13 +2118,14 @@ function headerConvert(_dosObj) {
 				}
 				if (musics.length > 2) {
 					obj.artistUrl = musics[2];
+					if (musics.length > 3) {
+						obj.musicTitles[j] = musics[3].split(`<br>`).join(` `);
+						obj.musicTitlesForView[j] = musics[3].split("<br>");
+					}
 				} else {
 					obj.artistUrl = location.href;
 				}
 			}
-			obj.musicTitles[j] = musics[0].split(`<br>`).join(` `);
-			obj.musicTitlesForView[j] = musics[0].split("<br>");
-			obj.artistNames[j] = setVal(musics[1], ``, `string`);
 		}
 	} else {
 		makeWarningWindow(C_MSG_E_0012);
@@ -2331,7 +2355,7 @@ function headerConvert(_dosObj) {
 
 	// 楽曲URL
 	if (_dosObj.musicUrl !== undefined) {
-		obj.musicUrls = _dosObj.musicUrl.split(`$`);
+		obj.musicUrls = _dosObj.musicUrl.split(`;`);
 	} else {
 		makeWarningWindow(C_MSG_E_0031);
 	}
@@ -4001,21 +4025,6 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
  */
 function loadingScoreInit() {
 
-	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
-
-	const divRoot = document.querySelector(`#divRoot`);
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-	}
-
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
@@ -5440,8 +5449,8 @@ function MainInit() {
 	judgeSprite.appendChild(lblWord3);
 
 	// 曲名・アーティスト名表示
-	const musicTitle = g_headerObj.musicTitles[g_stateObj.scoreId] || g_headerObj.musicTitle;
-	const artistName = g_headerObj.artistNames[g_stateObj.scoreId] || g_headerObj.artistName;
+	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
+	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 	const lblCredit = createDivLabel(`lblCredit`, 125, g_sHeight - 30, g_sWidth - 125, 20, 14, `#cccccc`,
 		`${musicTitle} / ${artistName}`);
 	lblCredit.style.textAlign = C_ALIGN_LEFT;
@@ -6753,13 +6762,13 @@ function resultInit() {
 	}
 
 	// 曲名・オプション描画
-	const musicTitle = g_headerObj.musicTitles[g_stateObj.scoreId] || g_headerObj.musicTitle;
+	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 
 	let musicTitleForView0;
 	let musicTitleForView1;
-	if (g_headerObj.musicTitlesForView[g_stateObj.scoreId] !== undefined) {
-		musicTitleForView0 = g_headerObj.musicTitlesForView[g_stateObj.scoreId][0];
-		musicTitleForView1 = g_headerObj.musicTitlesForView[g_stateObj.scoreId][1];
+	if (g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]] !== undefined) {
+		musicTitleForView0 = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][0];
+		musicTitleForView1 = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][1];
 	} else {
 		musicTitleForView0 = g_headerObj.musicTitleForView[0];
 		musicTitleForView1 = g_headerObj.musicTitleForView[1];
