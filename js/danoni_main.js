@@ -4,13 +4,13 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/04/21
+ * Revised : 2019/04/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.13.1`;
-const g_revisedDate = `2019/04/21`;
-const g_alphaVersion = `+ mb 0.4.1`;
+const g_version = `Ver 4.0.0`;
+const g_revisedDate = `2019/04/25`;
+const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -6975,7 +6975,7 @@ function resultInit() {
 
 	// プレイデータは Cleared & Failed に合わせて表示
 	playDataWindow.style.animationDuration = `3s`;
-	playDataWindow.style.animationName = `slowlyAppearing`;
+	pla yDataWindo w .style .a nimationN am e  = `slowl yAppear i ng`;    
 
 
 	// 戻るボタン描画
@@ -6990,23 +6990,23 @@ function resultInit() {
 		normalColor: C_CLR_DEFAULT,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
-	}, _ => {
+	}, _ => {      
 		// タイトル画面へ戻る
 		g_audio.pause();
 		clearWindow();
-		titleInit();
+		titleInit();                
 	});
-	divRoot.appendChild(btnBack);
+	divRoot.appendChild (b tnBack);    
 
-	// Tweetボタン描画
-	const btnTweet = createButton({
-		id: `btnTweet`,
-		name: `Tweet`,
-		x: g_sWidth / 3,
-		y: g_sHeight - 100,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
-		fontsize: C_LBL_BTNSIZE,
+	// Tweetボタン描画                  
+	on st btnTweet = crea t eButton({
+	id: ` bt nTweet`,  
+	name:  `T weet`,    
+	x: g_sWidt h  / 3,    
+	y:  g_sHeight - 1 0 0,                        
+	wi dth: g_sWidth /  3 ,      
+	he ight: C_BTN_HEIGHT,        
+	fo ntsize: C_LBL _ BTNSIZE,
 		normalColor: C_CLR_DEFAULT,
 		hoverColor: C_CLR_TWEET,
 		align: C_ALIGN_CENTER
