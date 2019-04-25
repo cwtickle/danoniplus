@@ -10,7 +10,7 @@
  */
 const g_version = `Ver 3.13.1`;
 const g_revisedDate = `2019/04/21`;
-const g_alphaVersion = `+ mb 0.4.0`;
+const g_alphaVersion = `+ mb 0.4.1`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2093,7 +2093,7 @@ function headerConvert(_dosObj) {
 	obj.musicNos = [];
 
 	if (_dosObj.musicTitle !== undefined && _dosObj.musicTitle !== ``) {
-		const musicData = _dosObj.musicTitle.split(`;`);
+		const musicData = _dosObj.musicTitle.split(`$`);
 
 		if (_dosObj.musicNo !== undefined && _dosObj.musicNo !== ``) {
 			obj.musicNos = _dosObj.musicNo.split(`$`);
@@ -2355,7 +2355,7 @@ function headerConvert(_dosObj) {
 
 	// 楽曲URL
 	if (_dosObj.musicUrl !== undefined) {
-		obj.musicUrls = _dosObj.musicUrl.split(`;`);
+		obj.musicUrls = _dosObj.musicUrl.split(`$`);
 	} else {
 		makeWarningWindow(C_MSG_E_0031);
 	}
