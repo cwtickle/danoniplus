@@ -4,12 +4,13 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/04/21
+ * Revised : 2019/04/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.13.1`;
-const g_revisedDate = `2019/04/21`;
+const g_version = `Ver 4.0.0`;
+const g_revisedDate = `2019/04/25`;
+const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1633,77 +1634,109 @@ function initAfterDosLoaded() {
 	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
 		if (g_headerObj.customjs2 !== ``) {
 			loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
-				loadMusic();
+				titleInit();
 			});
 		} else {
-			loadMusic();
+			titleInit();
 		}
 	});
 }
 
 function loadMusic() {
-	const url = `../${g_headerObj.musicFolder}/${g_headerObj.musicUrl}`;
+	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
+	const url = `../${g_headerObj.musicFolder}/${musicUrl}`;
 
-	// ローカル動作時
-	if (location.href.match(`^file`)) {
-		setAudio(url);
-		return;
-	}
+	if (musicUrl === g_headerObj.musicUrl) {
+		musicAfterLoaded();
+	} else {
+		g_headerObj.musicUrl = musicUrl;
 
-	// XHRで読み込み
-	const request = new XMLHttpRequest();
-	request.open(`GET`, url, true);
-	request.responseType = `blob`;
-
-	// 読み込み完了時
-	request.addEventListener(`load`, _ => {
-		if (request.status >= 200 && request.status < 300) {
-			const blobUrl = URL.createObjectURL(request.response);
-			setAudio(blobUrl);
+		if (musicUrl.slice(-3) === `.js` || musicUrl.slice(-4) === `.txt`) {
+			g_musicEncodedFlg = true;
 		} else {
-			makeWarningWindow(`${C_MSG_E_0032}<br>(${request.status} ${request.statusText})`);
+			g_musicEncodedFlg = false;
 		}
-	});
 
-	// 進捗時
-	request.addEventListener(`progress`, _event => {
-		const lblLoading = document.querySelector(`#lblLoading`);
+		// レイヤー情報取得
+		const layer0 = document.querySelector(`#layer0`);
+		const l0ctx = layer0.getContext(`2d`);
 
-		if (_event.lengthComputable) {
-			const rate = _event.loaded / _event.total;
-			const layer0 = document.querySelector(`#layer0`);
-			const l0ctx = layer0.getContext(`2d`);
-			l0ctx.fillStyle = C_CLR_LOADING_BAR;
-			l0ctx.fillRect(0, layer0.height - 10, layer0.width * rate, 10);
-			lblLoading.innerText = `Now Loading... ${Math.floor(rate * 100)}%`;
-		} else {
-			lblLoading.innerText = `Now Loading... ${_event.loaded}Bytes`;
+		// 画面背景を指定 (background-color)
+		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+		if (g_headerObj.customBackUse === `false`) {
+			grd.addColorStop(0, `#000000`);
+			grd.addColorStop(1, `#222222`);
+			l0ctx.fillStyle = grd;
+			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 		}
-		// ユーザカスタムイベント
-		if (typeof customLoadingProgress === `function`) {
-			customLoadingProgress(_event);
-			if (typeof customLoadingProgress2 === `function`) {
-				customLoadingProgress2(_event);
+
+		// Now Loadingを表示
+		const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight - 40,
+			g_sWidth, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `Now Loading...`);
+		lblLoading.style.textAlign = C_ALIGN_RIGHT;
+		divRoot.appendChild(lblLoading);
+
+		// ローカル動作時
+		if (location.href.match(`^file`)) {
+			setAudio(url);
+			return;
+		}
+
+		// XHRで読み込み
+		const request = new XMLHttpRequest();
+		request.open(`GET`, url, true);
+		request.responseType = `blob`;
+
+		// 読み込み完了時
+		request.addEventListener(`load`, _ => {
+			if (request.status >= 200 && request.status < 300) {
+				const blobUrl = URL.createObjectURL(request.response);
+				setAudio(blobUrl);
+			} else {
+				makeWarningWindow(`${C_MSG_E_0032}<br>(${request.status} ${request.statusText})`);
 			}
-		}
-	});
+		});
 
-	// エラー処理
-	request.addEventListener(`timeout`, _ => {
-		makeWarningWindow(`${C_MSG_E_0033}`);
-	});
+		// 進捗時
+		request.addEventListener(`progress`, _event => {
+			const lblLoading = document.querySelector(`#lblLoading`);
 
-	request.addEventListener(`error`, _ => {
-		makeWarningWindow(`${C_MSG_E_0034}`);
-	});
+			if (_event.lengthComputable) {
+				const rate = _event.loaded / _event.total;
+				const layer0 = document.querySelector(`#layer0`);
+				const l0ctx = layer0.getContext(`2d`);
+				l0ctx.fillStyle = C_CLR_LOADING_BAR;
+				l0ctx.fillRect(0, layer0.height - 10, layer0.width * rate, 10);
+				lblLoading.innerText = `Now Loading... ${Math.floor(rate * 100)}%`;
+			} else {
+				lblLoading.innerText = `Now Loading... ${_event.loaded}Bytes`;
+			}
+			// ユーザカスタムイベント
+			if (typeof customLoadingProgress === `function`) {
+				customLoadingProgress(_event);
+				if (typeof customLoadingProgress2 === `function`) {
+					customLoadingProgress2(_event);
+				}
+			}
+		});
 
-	request.send();
+		// エラー処理
+		request.addEventListener(`timeout`, _ => {
+			makeWarningWindow(`${C_MSG_E_0033}`);
+		});
+
+		request.addEventListener(`error`, _ => {
+			makeWarningWindow(`${C_MSG_E_0034}`);
+		});
+
+		request.send();
+	}
 }
 
 // Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備
 async function initWebAudioAPI(_url) {
 	g_audio = new AudioPlayer();
-	titleInit();
+	musicAfterLoaded();
 	const promise = await fetch(_url);
 	const arrayBuffer = await promise.arrayBuffer();
 	await g_audio.init(arrayBuffer);
@@ -1717,12 +1750,12 @@ function setAudio(_url) {
 				initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
 			} else {
 				makeWarningWindow(C_MSG_E_0031);
-				titleInit();
+				musicAfterLoaded();
 			}
 		});
 	} else if (location.href.match(`^file`)) {
 		g_audio.src = _url;
-		titleInit();
+		musicAfterLoaded();
 	} else {
 		initWebAudioAPI(_url);
 	}
@@ -1958,7 +1991,7 @@ function titleInit() {
 	}
 	const lnkVersion = createButton({
 		id: `lnkVersion`,
-		name: `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${customVersion}${releaseDate}`,
+		name: `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${g_alphaVersion}${customVersion}${releaseDate}`,
 		x: g_sWidth / 4,
 		y: g_sHeight - 20,
 		width: g_sWidth * 3 / 4 - 10,
@@ -2054,20 +2087,45 @@ function headerConvert(_dosObj) {
 	const obj = {};
 
 	// 曲名
+	obj.musicTitles = [];
+	obj.musicTitlesForView = [];
+	obj.artistNames = [];
+	obj.musicNos = [];
+
 	if (_dosObj.musicTitle !== undefined && _dosObj.musicTitle !== ``) {
-		const musics = _dosObj.musicTitle.split(`,`);
-		obj.musicTitle = musics[0].split(`<br>`).join(` `);
-		obj.musicTitleForView = musics[0].split("<br>");
-		if (musics.length > 1) {
-			obj.artistName = musics[1];
-		} else {
-			makeWarningWindow(C_MSG_E_0011);
-			obj.artistName = `artistName`;
+		const musicData = _dosObj.musicTitle.split(`$`);
+
+		if (_dosObj.musicNo !== undefined && _dosObj.musicNo !== ``) {
+			obj.musicNos = _dosObj.musicNo.split(`$`);
 		}
-		if (musics.length > 2) {
-			obj.artistUrl = musics[2];
-		} else {
-			obj.artistUrl = location.href;
+
+		for (let j = 0; j < musicData.length; j++) {
+			const musics = musicData[j].split(`,`);
+
+			if (obj.musicNos.length >= j) {
+				obj.musicTitles[j] = musics[0].split(`<br>`).join(` `);
+				obj.musicTitlesForView[j] = musics[0].split("<br>");
+				obj.artistNames[j] = setVal(musics[1], ``, `string`);
+			}
+			if (j == 0) {
+				obj.musicTitle = musics[0].split(`<br>`).join(` `);
+				obj.musicTitleForView = musics[0].split("<br>");
+				if (musics.length > 1) {
+					obj.artistName = musics[1];
+				} else {
+					makeWarningWindow(C_MSG_E_0011);
+					obj.artistName = `artistName`;
+				}
+				if (musics.length > 2) {
+					obj.artistUrl = musics[2];
+					if (musics.length > 3) {
+						obj.musicTitles[j] = musics[3].split(`<br>`).join(` `);
+						obj.musicTitlesForView[j] = musics[3].split("<br>");
+					}
+				} else {
+					obj.artistUrl = location.href;
+				}
+			}
 		}
 	} else {
 		makeWarningWindow(C_MSG_E_0012);
@@ -2297,10 +2355,7 @@ function headerConvert(_dosObj) {
 
 	// 楽曲URL
 	if (_dosObj.musicUrl !== undefined) {
-		if (_dosObj.musicUrl.slice(-3) === `.js` || _dosObj.musicUrl.slice(-4) === `.txt`) {
-			g_musicEncodedFlg = true;
-		}
-		obj.musicUrl = _dosObj.musicUrl;
+		obj.musicUrls = _dosObj.musicUrl.split(`$`);
 	} else {
 		makeWarningWindow(C_MSG_E_0031);
 	}
@@ -2714,18 +2769,7 @@ function optionInit() {
 		align: C_ALIGN_CENTER
 	}, _ => {
 		clearWindow();
-		g_audio.load();
-
-		if (g_audio.readyState === 4) {
-			// audioの読み込みが終わった後の処理
-			loadingScoreInit();
-		} else {
-			// 読込中の状態
-			g_audio.addEventListener(`canplaythrough`, (_ => function f() {
-				g_audio.removeEventListener(`canplaythrough`, f, false);
-				loadingScoreInit();
-			})(), false);
-		}
+		loadMusic();
 	});
 	divRoot.appendChild(btnPlay);
 
@@ -2759,18 +2803,7 @@ function optionInit() {
 		}
 		if (setKey === 13) {
 			clearWindow();
-			g_audio.load();
-
-			if (g_audio.readyState === 4) {
-				// audioの読み込みが終わった後の処理
-				loadingScoreInit();
-			} else {
-				// 読込中の状態
-				g_audio.addEventListener(`canplaythrough`, (_ => function f() {
-					g_audio.removeEventListener(`canplaythrough`, f, false);
-					loadingScoreInit();
-				})(), false);
-			}
+			loadMusic();
 		}
 		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
 			if (setKey === C_BLOCK_KEYS[j]) {
@@ -2779,6 +2812,21 @@ function optionInit() {
 		}
 	}
 	document.onkeyup = evt => { }
+}
+
+function musicAfterLoaded() {
+	g_audio.load();
+
+	if (g_audio.readyState === 4) {
+		// audioの読み込みが終わった後の処理
+		loadingScoreInit();
+	} else {
+		// 読込中の状態
+		g_audio.addEventListener(`canplaythrough`, (_ => function f() {
+			g_audio.removeEventListener(`canplaythrough`, f, false);
+			loadingScoreInit();
+		})(), false);
+	}
 }
 
 /**
@@ -5401,8 +5449,10 @@ function MainInit() {
 	judgeSprite.appendChild(lblWord3);
 
 	// 曲名・アーティスト名表示
+	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
+	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 	const lblCredit = createDivLabel(`lblCredit`, 125, g_sHeight - 30, g_sWidth - 125, 20, 14, `#cccccc`,
-		`${g_headerObj.musicTitle} / ${g_headerObj.artistName}`);
+		`${musicTitle} / ${artistName}`);
 	lblCredit.style.textAlign = C_ALIGN_LEFT;
 	infoSprite.appendChild(lblCredit);
 
@@ -6712,12 +6762,24 @@ function resultInit() {
 	}
 
 	// 曲名・オプション描画
+	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
+
+	let musicTitleForView0;
+	let musicTitleForView1;
+	if (g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]] !== undefined) {
+		musicTitleForView0 = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][0];
+		musicTitleForView1 = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][1];
+	} else {
+		musicTitleForView0 = g_headerObj.musicTitleForView[0];
+		musicTitleForView1 = g_headerObj.musicTitleForView[1];
+	}
+
 	playDataWindow.appendChild(makeResultPlayData(`lblMusic`, 20, `#999999`, 0,
 		`Music`, C_ALIGN_LEFT));
 	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `#cccccc`, 0,
-		g_headerObj.musicTitleForView[0], C_ALIGN_CENTER));
+		musicTitleForView0, C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `#cccccc`, 1,
-		setVal(g_headerObj.musicTitleForView[1], ``, `string`), C_ALIGN_CENTER));
+		setVal(musicTitleForView1, ``, `string`), C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `#999999`, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
@@ -6861,7 +6923,7 @@ function resultInit() {
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `/${g_stateObj.shuffle}`;
 	}
-	const tweetResultTmp = `【#danoni${hashTag}】${g_headerObj.musicTitle}(${tweetDifData})/
+	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData})/
 		${g_headerObj.tuning}/
 		Rank:${rankMark}/
 		Score:${g_resultObj.score}/
