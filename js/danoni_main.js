@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/04/21
+ * Revised : 2019/04/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.13.1`;
-const g_revisedDate = `2019/04/21`;
+const g_version = `Ver 3.13.2`;
+const g_revisedDate = `2019/04/27`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -4456,11 +4456,11 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				const tmpDepth = setVal(tmpBackData[1], 0, `number`);
 				const tmpPath = escapeHtml(setVal(tmpBackData[2], ``, `string`));
 				const tmpClass = escapeHtml(setVal(tmpBackData[3], ``, `string`));
-				const tmpX = setVal(tmpBackData[4], 0, `number`);
-				const tmpY = setVal(tmpBackData[5], 0, `number`);
+				const tmpX = setVal(tmpBackData[4], 0, `float`);
+				const tmpY = setVal(tmpBackData[5], 0, `float`);
 				const tmpWidth = setVal(tmpBackData[6], 0, `number`);					// spanタグの場合は font-size
 				const tmpHeight = escapeHtml(setVal(tmpBackData[7], ``, `string`));	// spanタグの場合は color(文字列可)
-				const tmpOpacity = setVal(tmpBackData[8], 1, `number`);
+				const tmpOpacity = setVal(tmpBackData[8], 1, `float`);
 				const tmpAnimationName = escapeHtml(setVal(tmpBackData[9], C_DIS_NONE, `string`));
 				const tmpAnimationDuration = setVal(tmpBackData[10], 0, `number`) / 60;
 
