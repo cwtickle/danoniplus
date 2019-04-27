@@ -3625,8 +3625,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				const tmpDepth = setVal(tmpBackData[1], 0, "number");
 				const tmpPath = escapeHtml(setVal(tmpBackData[2], "", "string"));
 				const tmpClass = escapeHtml(setVal(tmpBackData[3], "", "string"));
-				const tmpX = setVal(tmpBackData[4], 0, "number");
-				const tmpY = setVal(tmpBackData[5], 0, "number");
+				const tmpX = setVal(tmpBackData[4], 0, "float");
+				const tmpY = setVal(tmpBackData[5], 0, "float");
 				const tmpWidth = setVal(tmpBackData[6], 0, "number");					// spanタグの場合は font-size
 				const tmpHeight = escapeHtml(setVal(tmpBackData[7], "", "string"));	// spanタグの場合は color(文字列可)
 				const tmpOpacity = setVal(tmpBackData[8], 1, "float");
