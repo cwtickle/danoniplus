@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/02/12
+ * Revised : 2019/04/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.15.2";
+const g_version = "Ver 1.15.3";
 const g_version_gauge = "Ver 0.5.1.20181223";
 const g_version_musicEncoded = "Ver 0.1.1.20181224";
 const g_version_lyrics = "Ver 0.2.0.20181230";
@@ -3629,7 +3629,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				const tmpY = setVal(tmpBackData[5], 0, "number");
 				const tmpWidth = setVal(tmpBackData[6], 0, "number");					// spanタグの場合は font-size
 				const tmpHeight = escapeHtml(setVal(tmpBackData[7], "", "string"));	// spanタグの場合は color(文字列可)
-				const tmpOpacity = setVal(tmpBackData[8], 1, "number");
+				const tmpOpacity = setVal(tmpBackData[8], 1, "float");
 				const tmpAnimationName = escapeHtml(setVal(tmpBackData[9], C_DIS_NONE, "string"));
 				const tmpAnimationDuration = setVal(tmpBackData[10], 0, "number") / 60;
 
