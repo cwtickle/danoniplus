@@ -10,7 +10,7 @@
  */
 const g_version = `Ver 4.0.1`;
 const g_revisedDate = `2019/04/27`;
-const g_alphaVersion = `+ sl 0.1.0`;
+const g_alphaVersion = `+ sl 0.2.0`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -861,9 +861,18 @@ if (g_checkStorage) {
 	} else {
 		g_localStorage.adjustment = 0;
 	}
+
+	// Volume初期値設定
+	if (g_localStorage.volume !== undefined) {
+		g_stateObj.volume = setVal(g_localStorage.volume, 100, `number`);
+	} else {
+		g_localStorage.volume = 100;
+	}
+
 } else {
 	g_localStorage = {
-		adjustment: 0
+		adjustment: 0,
+		volume: 100,
 	};
 }
 
@@ -5250,8 +5259,9 @@ function getArrowSettings() {
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
 
-	// ローカルストレージへAdjustmentを保存
+	// ローカルストレージへAdjustment, Volumeを保存
 	g_localStorage.adjustment = g_stateObj.adjustment;
+	g_localStorage.volume = g_stateObj.volume;
 	localStorage.setItem(location.href, JSON.stringify(g_localStorage));
 }
 
