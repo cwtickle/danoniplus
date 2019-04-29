@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.1.0`;
+const g_version = `Ver 4.1.1`;
 const g_revisedDate = `2019/04/29`;
 const g_alphaVersion = ``;
 
@@ -3534,18 +3534,7 @@ function settingsDisplayInit() {
 		align: C_ALIGN_CENTER
 	}, _ => {
 		clearWindow();
-		g_audio.load();
-
-		if (g_audio.readyState === 4) {
-			// audioの読み込みが終わった後の処理
-			loadingScoreInit();
-		} else {
-			// 読込中の状態
-			g_audio.addEventListener(`canplaythrough`, (_ => function f() {
-				g_audio.removeEventListener(`canplaythrough`, f, false);
-				loadingScoreInit();
-			})(), false);
-		}
+		loadMusic();
 	});
 	divRoot.appendChild(btnPlay);
 
