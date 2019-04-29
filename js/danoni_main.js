@@ -10,7 +10,7 @@
  */
 const g_version = `Ver 4.0.1`;
 const g_revisedDate = `2019/04/27`;
-const g_alphaVersion = ``;
+const g_alphaVersion = `+ sl 0.2.0`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -848,6 +848,33 @@ const C_MSG_E_0103 = `新しいキー:{0}の[stepRtn]が未定義です。(E-010
 	|stepRtn{0}=0,45,-90,135,180,onigiri|`;
 const C_MSG_E_0104 = `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
 	|keyCtrl{0}=75,79,76,80,187,32/0|`;
+
+// ローカルストレージ設定
+const g_checkStorage = localStorage.getItem(location.href);
+let g_localStorage;
+if (g_checkStorage) {
+	g_localStorage = JSON.parse(g_checkStorage);
+
+	// Adjustment初期値設定
+	if (g_localStorage.adjustment !== undefined) {
+		g_stateObj.adjustment = setVal(g_localStorage.adjustment, 0, `number`);
+	} else {
+		g_localStorage.adjustment = 0;
+	}
+
+	// Volume初期値設定
+	if (g_localStorage.volume !== undefined) {
+		g_stateObj.volume = setVal(g_localStorage.volume, 100, `number`);
+	} else {
+		g_localStorage.volume = 100;
+	}
+
+} else {
+	g_localStorage = {
+		adjustment: 0,
+		volume: 100,
+	};
+}
 
 /**
  * イベントハンドラ用オブジェクト
@@ -5231,6 +5258,11 @@ function getArrowSettings() {
 
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
+
+	// ローカルストレージへAdjustment, Volumeを保存
+	g_localStorage.adjustment = g_stateObj.adjustment;
+	g_localStorage.volume = g_stateObj.volume;
+	localStorage.setItem(location.href, JSON.stringify(g_localStorage));
 }
 
 /*-----------------------------------------------------------*/
