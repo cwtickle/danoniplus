@@ -7055,7 +7055,7 @@ function resultInit() {
 	let fmaxComboDf = 0;
 	let scoreDf = 0;
 
-	if (g_stateObj.auto === C_FLG_OFF) {
+	if (g_stateObj.auto === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF) {
 		if (scoreName in g_localStorage.highscores) {
 			iiDf = g_resultObj.ii - g_localStorage.highscores[scoreName].ii;
 			shakinDf = g_resultObj.shakin - g_localStorage.highscores[scoreName].shakin;
@@ -7113,7 +7113,7 @@ function resultInit() {
 		resultWindow.appendChild(makeResultSymbol(`lblIiL1`, 210, `#999999`, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 		resultWindow.appendChild(makeResultSymbol(`lblShakinL1`, 210, `#999999`, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 		resultWindow.appendChild(makeResultSymbol(`lblMatariL1`, 210, `#999999`, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonL1`, 210, `#999999`, 3, `(${shobonDf >= 0 ? "+" : "－-"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonL1`, 210, `#999999`, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 		resultWindow.appendChild(makeResultSymbol(`lblUwanL1`, 210, `#999999`, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 		resultWindow.appendChild(makeResultSymbol(`lblKitaL1`, 210, `#999999`, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 		resultWindow.appendChild(makeResultSymbol(`lblIknaiL1`, 210, `#999999`, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
@@ -7148,7 +7148,7 @@ function resultInit() {
 		resultWindow.appendChild(makeResultSymbol(`lblScoreL2`, 320, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `)`, C_ALIGN_LEFT));
 
 	} else {
-		resultWindow.appendChild(makeResultSymbol(`lblAutoView`, 230, `#999999`, 4, `(AutoPlay)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblAutoView`, 230, `#999999`, 4, `(No Record)`, C_ALIGN_LEFT));
 		const lblAutoView = document.querySelector(`#lblAutoView`);
 		lblAutoView.style.fontSize = `24px`;
 	}
