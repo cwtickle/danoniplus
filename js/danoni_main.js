@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.2.0`;
+const g_version = `Ver 4.2.1`;
 const g_revisedDate = `2019/04/30`;
 const g_alphaVersion = ``;
 
@@ -4531,8 +4531,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				const tmpAnimationName = escapeHtml(setVal(tmpMaskData[9], C_DIS_NONE, `string`));
 				const tmpAnimationDuration = setVal(tmpMaskData[10], 0, `number`) / 60;
 
-				if (tmpDepth > obj.MaskMaxDepth) {
-					obj.MaskMaxDepth = tmpDepth;
+				if (tmpDepth > obj.maskMaxDepth) {
+					obj.maskMaxDepth = tmpDepth;
 				}
 
 				let addFrame = 0;
@@ -5366,7 +5366,7 @@ function MainInit() {
 
 	// マスクスプライトを作成 (最上位)
 	const maskSprite = createSprite(`divRoot`, `maskSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_scoreObj.backMaxDepth; j++) {
+	for (let j = 0; j <= g_scoreObj.maskMaxDepth; j++) {
 		createSprite(`maskSprite`, `maskSprite${j}`, 0, 0, g_sWidth, g_sHeight);
 	}
 
@@ -5472,7 +5472,7 @@ function MainInit() {
 		lblInitColor = C_CLR_DEFAULTLIFE;
 	}
 	lblLife.style.backgroundColor = lblInitColor;
-	divRoot.appendChild(lblLife);
+	infoSprite.appendChild(lblLife);
 
 	// ライフ背景
 	const lifeBackObj = createColorObject(`lifeBackObj`, C_CLR_BACKLIFE,
