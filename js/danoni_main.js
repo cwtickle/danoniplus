@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/04/29
+ * Revised : 2019/04/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.1.1`;
-const g_revisedDate = `2019/04/29`;
+const g_version = `Ver 4.2.0`;
+const g_revisedDate = `2019/04/30`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4109,6 +4109,9 @@ function loadingScoreInit() {
 			if (tmpObj.wordData !== undefined && tmpObj.wordData.length >= 3) {
 				g_scoreObj.wordData = JSON.parse(JSON.stringify(tmpObj.wordData));
 			}
+			if (tmpObj.maskData !== undefined && tmpObj.maskData.length >= 1) {
+				g_scoreObj.maskData = JSON.parse(JSON.stringify(tmpObj.maskData));
+			}
 			if (tmpObj.backData !== undefined && tmpObj.backData.length >= 1) {
 				g_scoreObj.backData = JSON.parse(JSON.stringify(tmpObj.backData));
 			}
@@ -4495,6 +4498,67 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 						obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], tmpWordData[k + 2]);
 					}
 				}
+			}
+		}
+	}
+
+	// マスクデータの分解 (下記すべてで1セット、改行区切り)
+	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
+	obj.maskData = [];
+	obj.maskData.length = 0;
+	obj.maskMaxDepth = -1;
+	if (_dosObj[`mask${_scoreNo}_data`] !== undefined && g_stateObj.d_background === C_FLG_ON) {
+
+		let tmpArrayData = _dosObj[`mask${_scoreNo}_data`].split(`\r`).join(`\n`);
+		tmpArrayData = tmpArrayData.split(`\n`);
+
+		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
+			const tmpData = tmpArrayData[j];
+
+			if (tmpData !== undefined && tmpData !== ``) {
+				const tmpMaskData = tmpData.split(`,`);
+
+				// 値チェックとエスケープ処理
+				const tmpFrame = calcFrame(setVal(tmpMaskData[0], 200, `number`));
+				const tmpDepth = setVal(tmpMaskData[1], 0, `number`);
+				const tmpPath = escapeHtml(setVal(tmpMaskData[2], ``, `string`));
+				const tmpClass = escapeHtml(setVal(tmpMaskData[3], ``, `string`));
+				const tmpX = setVal(tmpMaskData[4], 0, `float`);
+				const tmpY = setVal(tmpMaskData[5], 0, `float`);
+				const tmpWidth = setVal(tmpMaskData[6], 0, `number`);				// spanタグの場合は font-size
+				const tmpHeight = escapeHtml(setVal(tmpMaskData[7], ``, `string`));	// spanタグの場合は color(文字列可)
+				const tmpOpacity = setVal(tmpMaskData[8], 1, `float`);
+				const tmpAnimationName = escapeHtml(setVal(tmpMaskData[9], C_DIS_NONE, `string`));
+				const tmpAnimationDuration = setVal(tmpMaskData[10], 0, `number`) / 60;
+
+				if (tmpDepth > obj.MaskMaxDepth) {
+					obj.MaskMaxDepth = tmpDepth;
+				}
+
+				let addFrame = 0;
+				if (obj.maskData[tmpFrame] === undefined) {
+					obj.maskData[tmpFrame] = {};
+				} else {
+					for (let m = 1; ; m++) {
+						if (obj.maskData[tmpFrame + m] === undefined) {
+							obj.maskData[tmpFrame + m] = {};
+							addFrame = m;
+							break;
+						}
+					}
+				}
+				obj.maskData[tmpFrame + addFrame] = {
+					depth: tmpDepth,
+					path: tmpPath,
+					class: tmpClass,
+					left: tmpX,
+					top: tmpY,
+					width: tmpWidth,
+					height: tmpHeight,
+					opacity: tmpOpacity,
+					animationName: tmpAnimationName,
+					animationDuration: tmpAnimationDuration
+				};
 			}
 		}
 	}
@@ -5300,6 +5364,12 @@ function MainInit() {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 
+	// マスクスプライトを作成 (最上位)
+	const maskSprite = createSprite(`divRoot`, `maskSprite`, 0, 0, g_sWidth, g_sHeight);
+	for (let j = 0; j <= g_scoreObj.backMaxDepth; j++) {
+		createSprite(`maskSprite`, `maskSprite${j}`, 0, 0, g_sWidth, g_sHeight);
+	}
+
 	// ステップゾーンを表示
 	for (let j = 0; j < keyNum; j++) {
 		const step = createArrowEffect(`step${j}`, `#999999`,
@@ -6088,6 +6158,54 @@ function MainInit() {
 		fadeWord(`1`);
 		fadeWord(`2`);
 		fadeWord(`3`);
+
+		// マスク表示・マスクモーション
+		if (g_scoreObj.maskData[g_scoreObj.frameNum] !== undefined) {
+			const tmpObj = g_scoreObj.maskData[g_scoreObj.frameNum];
+			const maskSprite = document.querySelector(`#maskSprite${tmpObj.depth}`);
+			if (tmpObj.path !== ``) {
+				if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
+					tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
+
+					// imgタグの場合
+					let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
+						style="position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
+					if (tmpObj.width !== 0 && tmpObj.width > 0) {
+						tmpInnerHTML += `;width:${tmpObj.width}px`;
+					}
+					if (tmpObj.height !== `` && setVal(tmpObj.height, 0, `number`) > 0) {
+						tmpInnerHTML += `;height:${tmpObj.height}px`;
+					}
+					tmpInnerHTML += `;animation-name:${tmpObj.animationName}
+						;animation-duration:${tmpObj.animationDuration}s
+						;opacity:${tmpObj.opacity}">`;
+					maskSprite.innerHTML = tmpInnerHTML;
+
+				} else {
+
+					// spanタグの場合
+					let tmpInnerHTML = `<span class="${tmpObj.class}"
+						style="display:inline-block;position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
+
+					// この場合のwidthは font-size と解釈する
+					if (tmpObj.width !== 0 && tmpObj.width > 0) {
+						tmpInnerHTML += `;font-size:${tmpObj.width}px`;
+					}
+
+					// この場合のheightは color と解釈する
+					if (tmpObj.height !== ``) {
+						tmpInnerHTML += `;color:${tmpObj.height}`;
+					}
+					tmpInnerHTML += `;animation-name:${tmpObj.animationName}
+						;animation-duration:${tmpObj.animationDuration}s
+						;opacity:${tmpObj.opacity}">${tmpObj.path}</span>`;
+					maskSprite.innerHTML = tmpInnerHTML;
+				}
+			} else {
+				maskSprite.innerHTML = ``;
+			}
+
+		}
 
 		// 背景表示・背景モーション
 		if (g_scoreObj.backData[g_scoreObj.frameNum] !== undefined) {
