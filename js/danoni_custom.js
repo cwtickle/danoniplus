@@ -38,6 +38,13 @@ function customTitleInit() {
 }
 
 /**
+ * メイン画面(フレーム毎表示) [Scene: Title / Melon]
+ */
+function customTitleEnterFrame() {
+
+}
+
+/**
  * オプション画面(初期表示) [Scene: Option / Lime]
  */
 function customOptionInit() {
