@@ -2042,6 +2042,31 @@ function titleInit() {
 	});
 	divRoot.appendChild(btnStart);
 
+	// ローカルストレージ設定をクリア
+	const btnReset = createButton({
+		id: `btnReset`,
+		name: `Data Reset`,
+		x: 0,
+		y: g_sHeight - 20,
+		width: g_sWidth / 5,
+		height: 16,
+		fontsize: 12,
+		normalColor: C_CLR_DEFAULT,
+		hoverColor: C_CLR_RESET,
+		align: C_ALIGN_CENTER
+	}, _ => {
+		if (window.confirm(`この作品のローカル設定をクリアします。よろしいですか？\n(ハイスコアやAdjustment等のデータがクリアされます)`)) {
+			g_localStorage = {
+				adjustment: 0,
+				volume: 100,
+				highscores: {},
+			};
+			localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+			location.reload(true);
+		}
+	});
+	divRoot.appendChild(btnReset);
+
 	// リロードボタン
 	const btnReload = createButton({
 		id: `btnReload`,
