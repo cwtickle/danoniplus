@@ -2196,7 +2196,7 @@ function headerConvert(_dosObj) {
 			obj.difLabels.push(setVal(difDetails[1], `Normal`, `string`));
 			obj.initSpeeds.push(setVal(difDetails[2], 3.5, `float`));
 			if (border !== `x`) {
-				obj.lifeBorders.push(setVal(border, 70, `number`));
+				obj.lifeBorders.push(setVal(border, 70, `float`));
 			} else {
 				obj.lifeBorders.push(`x`);
 			}
@@ -7043,6 +7043,20 @@ function resultInit() {
 
 	resultWindow.appendChild(makeResultSymbol(`lblScoreS`, 50, `#ffffff`, 10, g_resultObj.score, C_ALIGN_RIGHT));
 
+	// ランク描画
+	const lblRank = createDivCustomLabel(`lblRank`, 340, 160, 70, 20, 50, `#ffffff`,
+		`<span style=color:${rankColor}>${rankMark}</span>`, `"Bookman Old Style", "Meiryo UI", sans-serif`);
+	lblRank.style.textAlign = C_ALIGN_CENTER;
+	resultWindow.appendChild(lblRank);
+
+	// ユーザカスタムイベント(初期)
+	if (typeof customResultInit === `function`) {
+		customResultInit();
+		if (typeof customResultInit2 === `function`) {
+			customResultInit2();
+		}
+	}
+
 	// ハイスコア差分計算
 	const scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	let iiDf = 0;
@@ -7152,20 +7166,6 @@ function resultInit() {
 		resultWindow.appendChild(makeResultSymbol(`lblAutoView`, 230, `#999999`, 4, `(No Record)`, C_ALIGN_LEFT));
 		const lblAutoView = document.querySelector(`#lblAutoView`);
 		lblAutoView.style.fontSize = `24px`;
-	}
-
-	// ランク描画
-	const lblRank = createDivCustomLabel(`lblRank`, 340, 160, 70, 20, 50, `#ffffff`,
-		`<span style=color:${rankColor}>${rankMark}</span>`, `"Bookman Old Style", "Meiryo UI", sans-serif`);
-	lblRank.style.textAlign = C_ALIGN_CENTER;
-	resultWindow.appendChild(lblRank);
-
-	// ユーザカスタムイベント(初期)
-	if (typeof customResultInit === `function`) {
-		customResultInit();
-		if (typeof customResultInit2 === `function`) {
-			customResultInit2();
-		}
 	}
 
 	// Twitter用リザルト
