@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.3.2`;
+const g_version = `Ver 4.4.0`;
 const g_revisedDate = `2019/05/01`;
 const g_alphaVersion = ``;
 
@@ -803,6 +803,7 @@ const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chr
 
 let g_audio = new Audio();
 let g_timeoutEvtId = 0;
+let g_timeoutEvtTitleId = 0;
 let g_inputKeyBuffer = [];
 
 // 歌詞制御
@@ -1800,6 +1801,8 @@ function setAudio(_url) {
 function titleInit() {
 	clearWindow();
 
+	g_scoreObj.titleFrameNum = 0;
+
 	// レイヤー情報取得
 	const layer0 = document.querySelector(`#layer0`);
 	const l0ctx = layer0.getContext(`2d`);
@@ -1939,6 +1942,12 @@ function titleInit() {
 		makeWarningWindow(C_MSG_W_0001);
 	}
 
+	// 背景スプライトを作成
+	createSprite(`divRoot`, `backTitleSprite`, 0, 0, g_sWidth, g_sHeight);
+	for (let j = 0; j <= g_headerObj.backTitleMaxDepth; j++) {
+		createSprite(`backTitleSprite`, `backTitleSprite${j}`, 0, 0, g_sWidth, g_sHeight);
+	}
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customTitleInit === `function`) {
 		customTitleInit();
@@ -1946,6 +1955,73 @@ function titleInit() {
 			customTitleInit2();
 		}
 	}
+
+	/**
+	 * タイトルのモーション設定
+	 */
+	function flowTitleTimeline() {
+
+		// ユーザカスタムイベント(フレーム毎)
+		if (typeof customTitleEnterFrame === `function`) {
+			customTitleEnterFrame();
+			if (typeof customTitleEnterFrame2 === `function`) {
+				customTitleEnterFrame2();
+			}
+		}
+
+		// 背景表示・背景モーション
+		if (g_headerObj.backTitleData[g_scoreObj.titleFrameNum] !== undefined) {
+			const tmpObj = g_headerObj.backTitleData[g_scoreObj.titleFrameNum];
+			const backTitleSprite = document.querySelector(`#backTitleSprite${tmpObj.depth}`);
+			if (tmpObj.path !== ``) {
+				if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
+					tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
+
+					// imgタグの場合
+					let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
+						style="position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
+					if (tmpObj.width !== 0 && tmpObj.width > 0) {
+						tmpInnerHTML += `;width:${tmpObj.width}px`;
+					}
+					if (tmpObj.height !== `` && setVal(tmpObj.height, 0, `number`) > 0) {
+						tmpInnerHTML += `;height:${tmpObj.height}px`;
+					}
+					tmpInnerHTML += `;animation-name:${tmpObj.animationName}
+						;animation-duration:${tmpObj.animationDuration}s
+						;opacity:${tmpObj.opacity}">`;
+					backTitleSprite.innerHTML = tmpInnerHTML;
+
+				} else {
+
+					// spanタグの場合
+					let tmpInnerHTML = `<span class="${tmpObj.class}"
+						style="display:inline-block;position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
+
+					// この場合のwidthは font-size と解釈する
+					if (tmpObj.width !== 0 && tmpObj.width > 0) {
+						tmpInnerHTML += `;font-size:${tmpObj.width}px`;
+					}
+
+					// この場合のheightは color と解釈する
+					if (tmpObj.height !== ``) {
+						tmpInnerHTML += `;color:${tmpObj.height}`;
+					}
+					tmpInnerHTML += `;animation-name:${tmpObj.animationName}
+						;animation-duration:${tmpObj.animationDuration}s
+						;opacity:${tmpObj.opacity}">${tmpObj.path}</span>`;
+					backTitleSprite.innerHTML = tmpInnerHTML;
+				}
+			} else {
+				backTitleSprite.innerHTML = ``;
+			}
+
+		}
+
+		g_scoreObj.titleFrameNum++;
+		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60);
+	}
+
+	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60);
 
 	// ボタン描画
 	const btnStart = createButton({
@@ -1960,10 +2036,36 @@ function titleInit() {
 		hoverColor: C_CLR_DEFHOVER,
 		align: C_ALIGN_CENTER
 	}, _ => {
+		clearTimeout(g_timeoutEvtTitleId);
 		clearWindow();
 		optionInit();
 	});
 	divRoot.appendChild(btnStart);
+
+	// ローカルストレージ設定をクリア
+	const btnReset = createButton({
+		id: `btnReset`,
+		name: `Data Reset`,
+		x: 0,
+		y: g_sHeight - 20,
+		width: g_sWidth / 5,
+		height: 16,
+		fontsize: 12,
+		normalColor: C_CLR_DEFAULT,
+		hoverColor: C_CLR_RESET,
+		align: C_ALIGN_CENTER
+	}, _ => {
+		if (window.confirm(`この作品のローカル設定をクリアします。よろしいですか？\n(ハイスコアやAdjustment等のデータがクリアされます)`)) {
+			g_localStorage = {
+				adjustment: 0,
+				volume: 100,
+				highscores: {},
+			};
+			localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+			location.reload(true);
+		}
+	});
+	divRoot.appendChild(btnReset);
 
 	// リロードボタン
 	const btnReload = createButton({
@@ -2046,6 +2148,7 @@ function titleInit() {
 			setKey = event.keyCode;
 		}
 		if (setKey === 13) {
+			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
 			optionInit();
 		}
@@ -2471,6 +2574,67 @@ function headerConvert(_dosObj) {
 
 	// Gauge
 	obj.gaugeUse = setVal(_dosObj.gaugeUse, setVal(g_presetSettingUse.gauge, `true`, `string`), `string`);
+
+	// 背景データの分解 (下記すべてで1セット、改行区切り)
+	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
+	obj.backTitleData = [];
+	obj.backTitleData.length = 0;
+	obj.backTitleMaxDepth = -1;
+	if (_dosObj.backtitle_data !== undefined) {
+
+		let tmpArrayData = _dosObj.backtitle_data.split(`\r`).join(`\n`);
+		tmpArrayData = tmpArrayData.split(`\n`);
+
+		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
+			const tmpData = tmpArrayData[j];
+
+			if (tmpData !== undefined && tmpData !== ``) {
+				const tmpBackTitleData = tmpData.split(`,`);
+
+				// 値チェックとエスケープ処理
+				const tmpFrame = setVal(tmpBackTitleData[0], 200, `number`);
+				const tmpDepth = setVal(tmpBackTitleData[1], 0, `number`);
+				const tmpPath = escapeHtml(setVal(tmpBackTitleData[2], ``, `string`));
+				const tmpClass = escapeHtml(setVal(tmpBackTitleData[3], ``, `string`));
+				const tmpX = setVal(tmpBackTitleData[4], 0, `float`);
+				const tmpY = setVal(tmpBackTitleData[5], 0, `float`);
+				const tmpWidth = setVal(tmpBackTitleData[6], 0, `number`);					// spanタグの場合は font-size
+				const tmpHeight = escapeHtml(setVal(tmpBackTitleData[7], ``, `string`));	// spanタグの場合は color(文字列可)
+				const tmpOpacity = setVal(tmpBackTitleData[8], 1, `float`);
+				const tmpAnimationName = escapeHtml(setVal(tmpBackTitleData[9], C_DIS_NONE, `string`));
+				const tmpAnimationDuration = setVal(tmpBackTitleData[10], 0, `number`) / 60;
+
+				if (tmpDepth > obj.backTitleMaxDepth) {
+					obj.backTitleMaxDepth = tmpDepth;
+				}
+
+				let addFrame = 0;
+				if (obj.backTitleData[tmpFrame] === undefined) {
+					obj.backTitleData[tmpFrame] = {};
+				} else {
+					for (let m = 1; ; m++) {
+						if (obj.backTitleData[tmpFrame + m] === undefined) {
+							obj.backTitleData[tmpFrame + m] = {};
+							addFrame = m;
+							break;
+						}
+					}
+				}
+				obj.backTitleData[tmpFrame + addFrame] = {
+					depth: tmpDepth,
+					path: tmpPath,
+					class: tmpClass,
+					left: tmpX,
+					top: tmpY,
+					width: tmpWidth,
+					height: tmpHeight,
+					opacity: tmpOpacity,
+					animationName: tmpAnimationName,
+					animationDuration: tmpAnimationDuration
+				};
+			}
+		}
+	}
 
 	return obj;
 }
