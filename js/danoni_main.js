@@ -878,6 +878,7 @@ if (g_checkStorage) {
 	g_localStorage = {
 		adjustment: 0,
 		volume: 100,
+		highscores: {},
 	};
 }
 
