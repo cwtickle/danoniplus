@@ -1963,9 +1963,9 @@ function titleInit() {
 
 		// ユーザカスタムイベント(フレーム毎)
 		if (typeof customTitleEnterFrame === `function`) {
-			customMainEnterFrame();
+			customTitleEnterFrame();
 			if (typeof customTitleEnterFrame2 === `function`) {
-				customMainEnterFrame2();
+				customTitleEnterFrame2();
 			}
 		}
 
