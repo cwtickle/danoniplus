@@ -4897,7 +4897,7 @@ function getFirstArrowFrame(_dataObj) {
 function getStartFrame(_lastFrame) {
 	let frameNum = 0;
 	if (g_headerObj.startFrame !== undefined) {
-		frameNum = parseInt(g_headerObj.startFrame[g_stateObj.scoreId] || g_headerObj.startFrame[0])
+		frameNum = parseInt(g_headerObj.startFrame[g_stateObj.scoreId] || g_headerObj.startFrame[0] || 0);
 	}
 	if (_lastFrame >= frameNum) {
 		frameNum = Math.round(g_stateObj.fadein / 100 * (_lastFrame - frameNum)) + frameNum;
