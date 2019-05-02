@@ -866,6 +866,10 @@ if (g_checkStorage) {
 	// Volume初期値設定
 	if (g_localStorage.volume !== undefined) {
 		g_stateObj.volume = setVal(g_localStorage.volume, 100, `number`);
+		g_volumeNum = g_volumes.findIndex(volume => volume === g_stateObj.volume);
+		if (g_volumeNum < 0) {
+			g_volumeNum = 0;
+		}
 	} else {
 		g_localStorage.volume = 100;
 	}
