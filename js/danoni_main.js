@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/01
+ * Revised : 2019/05/02
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.4.0`;
-const g_revisedDate = `2019/05/01`;
+const g_version = `Ver 4.4.1`;
+const g_revisedDate = `2019/05/02`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -866,6 +866,10 @@ if (g_checkStorage) {
 	// Volume初期値設定
 	if (g_localStorage.volume !== undefined) {
 		g_stateObj.volume = setVal(g_localStorage.volume, 100, `number`);
+		g_volumeNum = g_volumes.findIndex(volume => volume === g_stateObj.volume);
+		if (g_volumeNum < 0) {
+			g_volumeNum = 0;
+		}
 	} else {
 		g_localStorage.volume = 100;
 	}
@@ -4893,7 +4897,7 @@ function getFirstArrowFrame(_dataObj) {
 function getStartFrame(_lastFrame) {
 	let frameNum = 0;
 	if (g_headerObj.startFrame !== undefined) {
-		frameNum = parseInt(g_headerObj.startFrame[g_stateObj.scoreId] || g_headerObj.startFrame[0])
+		frameNum = parseInt(g_headerObj.startFrame[g_stateObj.scoreId] || g_headerObj.startFrame[0] || 0);
 	}
 	if (_lastFrame >= frameNum) {
 		frameNum = Math.round(g_stateObj.fadein / 100 * (_lastFrame - frameNum)) + frameNum;
