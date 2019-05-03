@@ -3699,8 +3699,6 @@ function createOptionWindow(_sprite) {
 		// ---------------------------------------------------
 		// 4. 譜面初期情報ロード許可フラグの設定
 		g_canLoadDifInfoFlg = true;
-
-		console.log();
 	}
 
 	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
@@ -4380,6 +4378,9 @@ function loadingScoreInit() {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
+
+	// 譜面初期情報ロード許可フラグ
+	g_canLoadDifInfoFlg = false;
 
 	// 譜面データの読み込み
 	let scoreIdHeader = ``;
