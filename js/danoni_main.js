@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.6.0`;
+const g_version = `Ver 4.6.1`;
 const g_revisedDate = `2019/05/03`;
 const g_alphaVersion = ``;
 
@@ -3660,7 +3660,7 @@ function createOptionWindow(_sprite) {
 						g_keyObj[`div${copyPtn}`] = g_keyObj[`div${basePtn}`];
 						g_keyObj[`blank${copyPtn}`] = g_keyObj[`blank${basePtn}`];
 						if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
-							g_keyObj[`shuffle${copyPtn}`] = g_keyObj[`shuffle${basePtn}`];
+							g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
 						}
 					}
 
