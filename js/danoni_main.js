@@ -5666,6 +5666,9 @@ function getArrowSettings() {
 				g_localKeyStorage.keyCtrl[j] = [];
 				for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 					g_localKeyStorage.keyCtrl[j][k] = g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k];
+					if (g_keyObj.currentPtn !== -1) {
+						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k];
+					}
 				}
 				if (g_keyObj[`keyCtrl${localPtn}`] !== undefined) {
 					if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length < g_keyObj[`keyCtrl${localPtn}`][j].length) {
