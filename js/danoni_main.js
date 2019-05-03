@@ -156,6 +156,7 @@ const g_stateObj = {
 	lifeId: 0,
 	shuffle: `OFF`,
 	extraKeyFlg: false,
+	dataSaveFlg: true,
 
 	d_stepzone: C_FLG_ON,
 	d_judgement: C_FLG_ON,
@@ -3023,6 +3024,34 @@ function optionInit() {
 		}
 	}
 	document.onkeyup = evt => { }
+
+	// データセーブフラグの切替
+	const btnSave = createButton({
+		id: `btnSave`,
+		name: `Data Save`,
+		x: 0,
+		y: 5,
+		width: g_sWidth / 5,
+		height: 16,
+		fontsize: 12,
+		normalColor: `#111111`,
+		hoverColor: C_CLR_RESET,
+		align: C_ALIGN_CENTER
+	}, _ => {
+		if (g_stateObj.dataSaveFlg) {
+			g_stateObj.dataSaveFlg = false;
+			btnSave.style.color = `#666666`;
+			btnSave.style.borderColor = `#000000 #333333`;
+		} else {
+			g_stateObj.dataSaveFlg = true;
+			btnSave.style.color = `#cccccc`;
+			btnSave.style.borderColor = `#000000 #cccccc`;
+		}
+	});
+	divRoot.appendChild(btnSave);
+	btnSave.style.color = (g_stateObj.dataSaveFlg ? `#ffffff` : `#666666`);
+	btnSave.style.borderStyle = `solid`;
+	btnSave.style.borderColor = (g_stateObj.dataSaveFlg ? `#000000 #cccccc` : `#000000 #333333`);
 }
 
 function musicAfterLoaded() {
@@ -3589,7 +3618,7 @@ function createOptionWindow(_sprite) {
 
 			// キー別のローカルストレージの初期設定　※特殊キーは除く
 			if (!g_stateObj.extraKeyFlg) {
-				g_checkKeyStorage = localStorage.getItem(`${g_keyObj.currentKey}k`);
+				g_checkKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
 				if (g_checkKeyStorage) {
 					g_localKeyStorage = JSON.parse(g_checkKeyStorage);
 
@@ -3670,8 +3699,6 @@ function createOptionWindow(_sprite) {
 		// ---------------------------------------------------
 		// 4. 譜面初期情報ロード許可フラグの設定
 		g_canLoadDifInfoFlg = true;
-
-		console.log();
 	}
 
 	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
@@ -4351,6 +4378,9 @@ function loadingScoreInit() {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
+
+	// 譜面初期情報ロード許可フラグ
+	g_canLoadDifInfoFlg = false;
 
 	// 譜面データの読み込み
 	let scoreIdHeader = ``;
@@ -5619,32 +5649,38 @@ function getArrowSettings() {
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
 
-	// ローカルストレージへAdjustment, Volumeを保存
-	g_localStorage.adjustment = g_stateObj.adjustment;
-	g_localStorage.volume = g_stateObj.volume;
-	localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+	if (g_stateObj.dataSaveFlg) {
 
-	// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
-	if (!g_stateObj.extraKeyFlg) {
-		g_localKeyStorage.reverse = g_stateObj.reverse;
-		if (g_keyObj.currentPtn !== -1) {
-			g_localKeyStorage.keyCtrlPtn = g_keyObj.currentPtn;
-		}
-		const localPtn = `${g_keyObj.currentKey}_-1`;
-		for (let j = 0; j < keyNum; j++) {
-			g_localKeyStorage.keyCtrl[j] = [];
-			for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
-				g_localKeyStorage.keyCtrl[j][k] = g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k];
+		// ローカルストレージへAdjustment, Volumeを保存
+		g_localStorage.adjustment = g_stateObj.adjustment;
+		g_localStorage.volume = g_stateObj.volume;
+		localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+
+		// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
+		if (!g_stateObj.extraKeyFlg) {
+			g_localKeyStorage.reverse = g_stateObj.reverse;
+			if (g_keyObj.currentPtn !== -1) {
+				g_localKeyStorage.keyCtrlPtn = g_keyObj.currentPtn;
 			}
-			if (g_keyObj[`keyCtrl${localPtn}`] !== undefined) {
-				if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length < g_keyObj[`keyCtrl${localPtn}`][j].length) {
-					for (let k = g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k < g_keyObj[`keyCtrl${localPtn}`][j].length; k++) {
-						g_localKeyStorage.keyCtrl[j][k] = undefined;
+			const localPtn = `${g_keyObj.currentKey}_-1`;
+			for (let j = 0; j < keyNum; j++) {
+				g_localKeyStorage.keyCtrl[j] = [];
+				for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
+					g_localKeyStorage.keyCtrl[j][k] = g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k];
+					if (g_keyObj.currentPtn !== -1) {
+						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k];
+					}
+				}
+				if (g_keyObj[`keyCtrl${localPtn}`] !== undefined) {
+					if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length < g_keyObj[`keyCtrl${localPtn}`][j].length) {
+						for (let k = g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k < g_keyObj[`keyCtrl${localPtn}`][j].length; k++) {
+							g_localKeyStorage.keyCtrl[j][k] = undefined;
+						}
 					}
 				}
 			}
+			localStorage.setItem(`danonicw-${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
 		}
-		localStorage.setItem(`${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
 	}
 }
 
@@ -7407,7 +7443,7 @@ function resultInit() {
 			fmaxComboDf = g_resultObj.fmaxCombo - g_localStorage.highscores[scoreName].fmaxCombo;
 			scoreDf = g_resultObj.score - g_localStorage.highscores[scoreName].score;
 
-			if (scoreDf > 0) {
+			if (scoreDf > 0 && g_stateObj.dataSaveFlg) {
 				g_localStorage.highscores[scoreName].ii = g_resultObj.ii;
 				g_localStorage.highscores[scoreName].shakin = g_resultObj.shakin;
 				g_localStorage.highscores[scoreName].matari = g_resultObj.matari;
@@ -7433,19 +7469,21 @@ function resultInit() {
 			fmaxComboDf = g_resultObj.fmaxCombo;
 			scoreDf = g_resultObj.score;
 
-			g_localStorage.highscores[scoreName] = {};
-			g_localStorage.highscores[scoreName].ii = g_resultObj.ii;
-			g_localStorage.highscores[scoreName].shakin = g_resultObj.shakin;
-			g_localStorage.highscores[scoreName].matari = g_resultObj.matari;
-			g_localStorage.highscores[scoreName].shobon = g_resultObj.shobon;
-			g_localStorage.highscores[scoreName].uwan = g_resultObj.uwan;
-			g_localStorage.highscores[scoreName].kita = g_resultObj.kita;
-			g_localStorage.highscores[scoreName].iknai = g_resultObj.iknai;
-			g_localStorage.highscores[scoreName].maxCombo = g_resultObj.maxCombo;
-			g_localStorage.highscores[scoreName].fmaxCombo = g_resultObj.fmaxCombo;
-			g_localStorage.highscores[scoreName].score = g_resultObj.score;
+			if (g_stateObj.dataSaveFlg) {
+				g_localStorage.highscores[scoreName] = {};
+				g_localStorage.highscores[scoreName].ii = g_resultObj.ii;
+				g_localStorage.highscores[scoreName].shakin = g_resultObj.shakin;
+				g_localStorage.highscores[scoreName].matari = g_resultObj.matari;
+				g_localStorage.highscores[scoreName].shobon = g_resultObj.shobon;
+				g_localStorage.highscores[scoreName].uwan = g_resultObj.uwan;
+				g_localStorage.highscores[scoreName].kita = g_resultObj.kita;
+				g_localStorage.highscores[scoreName].iknai = g_resultObj.iknai;
+				g_localStorage.highscores[scoreName].maxCombo = g_resultObj.maxCombo;
+				g_localStorage.highscores[scoreName].fmaxCombo = g_resultObj.fmaxCombo;
+				g_localStorage.highscores[scoreName].score = g_resultObj.score;
 
-			localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+				localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+			}
 		}
 
 		// ハイスコア差分描画
