@@ -4380,7 +4380,9 @@ function loadingScoreInit() {
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
 	// 譜面初期情報ロード許可フラグ
-	g_canLoadDifInfoFlg = false;
+	if (!g_stateObj.dataSaveFlg) {
+		g_canLoadDifInfoFlg = false;
+	}
 
 	// 譜面データの読み込み
 	let scoreIdHeader = ``;
