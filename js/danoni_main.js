@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.5.0`;
+const g_version = `Ver 4.6.0`;
 const g_revisedDate = `2019/05/03`;
 const g_alphaVersion = ``;
 
