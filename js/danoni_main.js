@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/02
+ * Revised : 2019/05/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.4.1`;
-const g_revisedDate = `2019/05/02`;
+const g_version = `Ver 4.5.0`;
+const g_revisedDate = `2019/05/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -155,6 +155,7 @@ const g_stateObj = {
 	lifeSetName: `Normal`,
 	lifeId: 0,
 	shuffle: `OFF`,
+	extraKeyFlg: false,
 
 	d_stepzone: C_FLG_ON,
 	d_judgement: C_FLG_ON,
@@ -887,6 +888,11 @@ if (g_checkStorage) {
 	};
 }
 
+// ローカルストレージ設定 (ドメイン・キー別)
+let g_checkKeyStorage;
+let g_localKeyStorage;
+let g_canLoadDifInfoFlg = false;
+
 /**
  * イベントハンドラ用オブジェクト
  * 参考: http://webkatu.com/remove-eventlistener/
@@ -1594,6 +1600,9 @@ function initialControl() {
 	lblLoading.style.textAlign = C_ALIGN_RIGHT;
 	divRoot.appendChild(lblLoading);
 
+	// 譜面初期情報ロード許可フラグ
+	g_canLoadDifInfoFlg = true;
+
 	// 譜面データの読み込み
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
@@ -1805,6 +1814,7 @@ function setAudio(_url) {
 function titleInit() {
 	clearWindow();
 
+	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
 
 	// レイヤー情報取得
@@ -3049,18 +3059,13 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblDifficulty);
 
 	const lnkDifficulty = makeSettingLblButton(`lnkDifficulty`,
-		`${g_headerObj.keyLabels[g_stateObj.scoreId]} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`, setNoDifficulty, _ => {
+		``, setNoDifficulty, _ => {
 			g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
-			setDifficulty();
+			setDifficulty(true);
 		});
-	if (getStrLength(lnkDifficulty.innerHTML) > 25) {
-		lnkDifficulty.style.fontSize = `14px`;
-	} else if (getStrLength(lnkDifficulty.innerHTML) > 18) {
-		lnkDifficulty.style.fontSize = `16px`;
-	}
 	lnkDifficulty.oncontextmenu = _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
-		setDifficulty();
+		setDifficulty(true);
 		return false;
 	}
 	optionsprite.appendChild(lnkDifficulty);
@@ -3068,35 +3073,12 @@ function createOptionWindow(_sprite) {
 	// 右回し・左回しボタン
 	optionsprite.appendChild(makeMiniButton(`lnkDifficulty`, `R`, setNoDifficulty, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
-		setDifficulty();
+		setDifficulty(true);
 	}));
 	optionsprite.appendChild(makeMiniButton(`lnkDifficulty`, `L`, setNoDifficulty, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
-		setDifficulty();
+		setDifficulty(true);
 	}));
-
-	/**
-	 * 難易度変更ボタン押下時処理：譜面名及び初期速度を変更
-	 */
-	function setDifficulty() {
-		lnkDifficulty.innerHTML = `${g_headerObj.keyLabels[g_stateObj.scoreId]} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-		g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
-		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
-		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-		g_keyObj.currentPtn = 0;
-
-		g_stateObj.lifeId = 0;
-		gaugeChange(g_stateObj.lifeId);
-
-		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
-
-		if (getStrLength(lnkDifficulty.innerHTML) > 25) {
-			lnkDifficulty.style.fontSize = `14px`;
-		} else if (getStrLength(lnkDifficulty.innerHTML) > 18) {
-			lnkDifficulty.style.fontSize = `16px`;
-		}
-	}
 
 	// ---------------------------------------------------
 	// ハイスコア機能実装時に使用予定のスペース
@@ -3111,7 +3093,7 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#ffff99>S</span>peed`);
 	optionsprite.appendChild(lblSpeed);
 
-	const lnkSpeed = makeSettingLblButton(`lnkSpeed`, `${g_stateObj.speed} x`, setNoSpeed, _ => {
+	const lnkSpeed = makeSettingLblButton(`lnkSpeed`, ``, setNoSpeed, _ => {
 		g_stateObj.speed = (Number(g_stateObj.speed) < C_MAX_SPEED ? Number(g_stateObj.speed) + 0.25 : C_MIN_SPEED);
 		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
 	});
@@ -3190,7 +3172,7 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#ddff99>R</span>everse`);
 	optionsprite.appendChild(lblReverse);
 
-	const lnkReverse = makeSettingLblButton(`lnkReverse`, g_stateObj.reverse, setNoReverse, _ => {
+	const lnkReverse = makeSettingLblButton(`lnkReverse`, ``, setNoReverse, _ => {
 		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 		lnkReverse.innerHTML = g_stateObj.reverse;
 	});
@@ -3296,13 +3278,12 @@ function createOptionWindow(_sprite) {
 
 	// ゲージ設定詳細　縦位置: ゲージ設定+1
 	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * (setNoGauge + 1) - 3,
-		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, 11, C_CLR_TITLE,
-		gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit));
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, 11, C_CLR_TITLE, ``);
 	optionsprite.appendChild(lblGauge2);
 
 	if (g_headerObj.gaugeUse !== `false`) {
 		const lnkGauge = makeSettingLblButton(`lnkGauge`,
-			g_stateObj.lifeSetName, setNoGauge, _ => {
+			``, setNoGauge, _ => {
 				g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
 				gaugeChange(g_stateObj.lifeId);
 
@@ -3567,6 +3548,134 @@ function createOptionWindow(_sprite) {
 		return lbl;
 	}
 
+	/**
+	 * 譜面初期化処理
+	 * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
+	 * - g_canLoadDifInfoFlg は譜面初期化フラグで、初期化したくない場合は対象画面にて false にしておく
+	 *   (Display設定画面、キーコンフィグ画面では通常OFF)
+	 *   この関数を実行後、このフラグはONに戻るようになっている 
+	 * - [キーコン]->[初期化]->[名称設定]の順に配置する。
+	 *   初期化処理にてキー数関連の設定を行っているため、この順序で無いとデータが正しく格納されない
+	 */
+	function setDifficulty(_initFlg) {
+
+		// ---------------------------------------------------
+		// 1. キーコンフィグ設定 (KeyConfig)
+		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
+
+		// ---------------------------------------------------
+		// 2. 初期化設定
+		if (g_canLoadDifInfoFlg || _initFlg) {
+
+			// 特殊キーフラグ
+			g_stateObj.extraKeyFlg = false;
+
+			// キーパターン初期化
+			g_keyObj.currentPtn = 0;
+
+			// 速度、ゲージの初期設定
+			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
+			g_stateObj.lifeId = 0;
+
+			if (g_rootObj.keyExtraList !== undefined) {
+				const keyExtraList = g_rootObj.keyExtraList.split(`,`);
+				for (let j = 0; j < keyExtraList.length; j++) {
+					if (g_keyObj.currentKey === keyExtraList[j]) {
+						g_stateObj.extraKeyFlg = true;
+						break;
+					}
+				}
+			}
+
+			// キー別のローカルストレージの初期設定　※特殊キーは除く
+			if (!g_stateObj.extraKeyFlg) {
+				g_checkKeyStorage = localStorage.getItem(`${g_keyObj.currentKey}k`);
+				if (g_checkKeyStorage) {
+					g_localKeyStorage = JSON.parse(g_checkKeyStorage);
+
+					// Reverse初期値設定
+					if (g_localKeyStorage.reverse !== undefined) {
+						g_stateObj.reverse = setVal(g_localKeyStorage.reverse, C_FLG_OFF, `string`);
+					} else {
+						g_localKeyStorage.reverse = C_FLG_OFF;
+					}
+
+					// キーコンフィグ初期値設定
+					if (g_localKeyStorage.keyCtrlPtn === undefined) {
+						g_localKeyStorage.keyCtrlPtn = 0;
+					}
+					const baseKeyCtrlPtn = g_localKeyStorage.keyCtrlPtn;
+					const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+					const baseKeyNum = g_keyObj[`chara${basePtn}`].length;
+
+					if (g_localKeyStorage.keyCtrl !== undefined) {
+						g_keyObj.currentPtn = -1;
+						const copyPtn = `${g_keyObj.currentKey}_-1`;
+						g_keyObj[`keyCtrl${copyPtn}`] = [];
+						g_keyObj[`keyCtrl${copyPtn}d`] = [];
+
+						for (let j = 0; j < baseKeyNum; j++) {
+							g_keyObj[`keyCtrl${copyPtn}`][j] = [];
+							g_keyObj[`keyCtrl${copyPtn}d`][j] = [];
+
+							for (let k = 0; k < g_keyObj[`keyCtrl${basePtn}`][j].length; k++) {
+								g_keyObj[`keyCtrl${copyPtn}`][j][k] = g_localKeyStorage.keyCtrl[j][k];
+								g_keyObj[`keyCtrl${copyPtn}d`][j][k] = g_localKeyStorage.keyCtrl[j][k];
+							}
+						}
+
+						g_keyObj[`chara${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`chara${basePtn}`]));
+						g_keyObj[`color${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`color${basePtn}`]));
+						g_keyObj[`stepRtn${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${basePtn}`]));
+						g_keyObj[`pos${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`pos${basePtn}`]));
+						g_keyObj[`div${copyPtn}`] = g_keyObj[`div${basePtn}`];
+						g_keyObj[`blank${copyPtn}`] = g_keyObj[`blank${basePtn}`];
+						if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
+							g_keyObj[`shuffle${copyPtn}`] = g_keyObj[`shuffle${basePtn}`];
+						}
+					}
+
+				} else {
+					g_localKeyStorage = {
+						reverse: C_FLG_OFF,
+						keyCtrl: [[]],
+						keyCtrlPtn: 0,
+					};
+				}
+			}
+		}
+
+		// ---------------------------------------------------
+		// 3. 名称の設定
+
+		// 譜面名設定 (Difficulty)
+		lnkDifficulty.innerHTML = `${g_keyObj.currentKey} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+		if (getStrLength(lnkDifficulty.innerHTML) > 25) {
+			lnkDifficulty.style.fontSize = `14px`;
+		} else if (getStrLength(lnkDifficulty.innerHTML) > 18) {
+			lnkDifficulty.style.fontSize = `16px`;
+		}
+
+		// 速度設定 (Speed)
+		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
+
+		// リバース設定 (Reverse)
+		lnkReverse.innerHTML = g_stateObj.reverse;
+
+		// ゲージ設定 (Gauge)
+		gaugeChange(g_stateObj.lifeId);
+		lnkGauge.innerHTML = g_stateObj.lifeSetName;
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
+
+		// ---------------------------------------------------
+		// 4. 譜面初期情報ロード許可フラグの設定
+		g_canLoadDifInfoFlg = true;
+
+		console.log();
+	}
+
+	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
+	setDifficulty(false);
 	optionsprite.oncontextmenu = _ => false;
 }
 
@@ -3629,6 +3738,9 @@ function settingsDisplayInit() {
 	const l0ctx = layer0.getContext(`2d`);
 
 	const divRoot = document.querySelector(`#divRoot`);
+
+	// 譜面初期情報ロード許可フラグ
+	g_canLoadDifInfoFlg = false;
 
 	// タイトル文字描画
 	const lblTitle = getTitleDivLabel(`lblTitle`,
@@ -3826,6 +3938,9 @@ function keyConfigInit() {
 
 	const divRoot = document.querySelector(`#divRoot`);
 
+	// 譜面初期情報ロード許可フラグ
+	g_canLoadDifInfoFlg = false;
+
 	// タイトル文字描画
 	const lblTitle = getTitleDivLabel(`lblTitle`,
 		`<span style=color:#6666ff;font-size:40px>K</span>EY
@@ -3887,6 +4002,11 @@ function keyConfigInit() {
 				g_keyObj.blank * stdPos + kWidth / 2,
 				50 + 20 * k + 150 * dividePos,
 				50, 20, 16, `#cccccc`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
+			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] !== g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]) {
+				document.querySelector(`#keycon${j}_${k}`).style.color = `#ffff00`;
+			} else if (g_keyObj.currentPtn === -1) {
+				document.querySelector(`#keycon${j}_${k}`).style.color = `#99ccff`;
+			}
 		}
 	}
 	posj = g_keyObj[`pos${keyCtrlPtn}`][0];
@@ -4015,7 +4135,11 @@ function keyConfigInit() {
 		if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined) {
 			g_keyObj.currentPtn = tempPtn;
 		} else {
-			g_keyObj.currentPtn = 0;
+			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined) {
+				g_keyObj.currentPtn = -1;
+			} else {
+				g_keyObj.currentPtn = 0;
+			}
 		}
 		clearWindow();
 		keyConfigInit();
@@ -4047,6 +4171,12 @@ function keyConfigInit() {
 				for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 					g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k];
 					document.querySelector(`#keycon${j}_${k}`).innerHTML = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
+
+					if (g_keyObj.currentPtn === -1) {
+						document.querySelector(`#keycon${j}_${k}`).style.color = `#99ccff`;
+					} else {
+						document.querySelector(`#keycon${j}_${k}`).style.color = `#cccccc`;
+					}
 				}
 			}
 			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
@@ -4078,6 +4208,9 @@ function keyConfigInit() {
 			} else {
 				if (setKey === 46) {
 					setKey = 0;
+				}
+				if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][g_currentj][g_currentk] !== setKey) {
+					keyCdObj.style.color = `#ffff00`;
 				}
 				keyCdObj.innerHTML = g_kCd[setKey];
 				g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][g_currentk] = setKey;
@@ -5490,6 +5623,29 @@ function getArrowSettings() {
 	g_localStorage.adjustment = g_stateObj.adjustment;
 	g_localStorage.volume = g_stateObj.volume;
 	localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+
+	// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
+	if (!g_stateObj.extraKeyFlg) {
+		g_localKeyStorage.reverse = g_stateObj.reverse;
+		if (g_keyObj.currentPtn !== -1) {
+			g_localKeyStorage.keyCtrlPtn = g_keyObj.currentPtn;
+		}
+		const localPtn = `${g_keyObj.currentKey}_-1`;
+		for (let j = 0; j < keyNum; j++) {
+			g_localKeyStorage.keyCtrl[j] = [];
+			for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
+				g_localKeyStorage.keyCtrl[j][k] = g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k];
+			}
+			if (g_keyObj[`keyCtrl${localPtn}`] !== undefined) {
+				if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length < g_keyObj[`keyCtrl${localPtn}`][j].length) {
+					for (let k = g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k < g_keyObj[`keyCtrl${localPtn}`][j].length; k++) {
+						g_localKeyStorage.keyCtrl[j][k] = undefined;
+					}
+				}
+			}
+		}
+		localStorage.setItem(`${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
+	}
 }
 
 /*-----------------------------------------------------------*/
