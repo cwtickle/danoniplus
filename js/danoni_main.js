@@ -1996,7 +1996,9 @@ function titleInit() {
 			const tmpObj = g_headerObj.backTitleData[g_scoreObj.titleFrameNum];
 			const backTitleSprite = document.querySelector(`#backTitleSprite${tmpObj.depth}`);
 			if (tmpObj.path !== ``) {
-				if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
+				if (tmpObj.path === `[loop]`) {
+					g_scoreObj.titleFrameNum = 0;
+				} else if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
 					tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
 
 					// imgタグの場合
