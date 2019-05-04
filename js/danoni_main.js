@@ -1818,6 +1818,13 @@ function titleInit() {
 	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
 
+	// 譜面初期情報ロード許可フラグ
+	// (初回読み込み時はローカルストレージのロードが必要なため、
+	//  ローカルストレージ保存時はフラグを解除しない)
+	if (!g_stateObj.dataSaveFlg) {
+		g_canLoadDifInfoFlg = false;
+	}
+
 	// レイヤー情報取得
 	const layer0 = document.querySelector(`#layer0`);
 	const l0ctx = layer0.getContext(`2d`);
