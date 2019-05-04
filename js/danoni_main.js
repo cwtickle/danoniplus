@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/03
+ * Revised : 2019/05/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.6.1`;
-const g_revisedDate = `2019/05/03`;
+const g_version = `Ver 4.6.2`;
+const g_revisedDate = `2019/05/04`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1818,6 +1818,13 @@ function titleInit() {
 	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
 
+	// 譜面初期情報ロード許可フラグ
+	// (初回読み込み時はローカルストレージのロードが必要なため、
+	//  ローカルストレージ保存時はフラグを解除しない)
+	if (!g_stateObj.dataSaveFlg) {
+		g_canLoadDifInfoFlg = false;
+	}
+
 	// レイヤー情報取得
 	const layer0 = document.querySelector(`#layer0`);
 	const l0ctx = layer0.getContext(`2d`);
@@ -3594,6 +3601,16 @@ function createOptionWindow(_sprite) {
 
 		// ---------------------------------------------------
 		// 2. 初期化設定
+
+		if (_initFlg) {
+
+			// 速度、ゲージ、リバースの初期設定
+			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
+			g_stateObj.lifeId = 0;
+			g_localKeyStorage.reverse = C_FLG_OFF;
+
+		}
+
 		if (g_canLoadDifInfoFlg || _initFlg) {
 
 			// 特殊キーフラグ
@@ -3601,10 +3618,6 @@ function createOptionWindow(_sprite) {
 
 			// キーパターン初期化
 			g_keyObj.currentPtn = 0;
-
-			// 速度、ゲージの初期設定
-			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
-			g_stateObj.lifeId = 0;
 
 			if (g_rootObj.keyExtraList !== undefined) {
 				const keyExtraList = g_rootObj.keyExtraList.split(`,`);
@@ -3622,11 +3635,9 @@ function createOptionWindow(_sprite) {
 				if (g_checkKeyStorage) {
 					g_localKeyStorage = JSON.parse(g_checkKeyStorage);
 
-					// Reverse初期値設定
+					// リバース初期値設定
 					if (g_localKeyStorage.reverse !== undefined) {
 						g_stateObj.reverse = setVal(g_localKeyStorage.reverse, C_FLG_OFF, `string`);
-					} else {
-						g_localKeyStorage.reverse = C_FLG_OFF;
 					}
 
 					// キーコンフィグ初期値設定
@@ -4380,6 +4391,8 @@ function loadingScoreInit() {
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
 	// 譜面初期情報ロード許可フラグ
+	// (タイトルバック時保存したデータを設定画面にて再読み込みするため、
+	//  ローカルストレージ保存時はフラグを解除しない)
 	if (!g_stateObj.dataSaveFlg) {
 		g_canLoadDifInfoFlg = false;
 	}
