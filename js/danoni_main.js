@@ -1818,6 +1818,9 @@ function titleInit() {
 	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
 
+	// タイトル用ループカウンター
+	g_scoreObj.titleLoopCount = 0;
+
 	// 譜面初期情報ロード許可フラグ
 	// (初回読み込み時はローカルストレージのロードが必要なため、
 	//  ローカルストレージ保存時はフラグを解除しない)
@@ -1996,7 +1999,20 @@ function titleInit() {
 			const tmpObj = g_headerObj.backTitleData[g_scoreObj.titleFrameNum];
 			const backTitleSprite = document.querySelector(`#backTitleSprite${tmpObj.depth}`);
 			if (tmpObj.path !== ``) {
-				if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
+				if (tmpObj.path === `[loop]`) {
+					// キーワード指定：ループ
+					// 指定フレーム(class)へ移動する
+					g_scoreObj.titleFrameNum = setVal(Number(tmpObj.class) - 1, 0, `number`);
+					g_scoreObj.titleLoopCount++;
+
+				} else if (tmpObj.path === `[jump]`) {
+					// キーワード指定：フレームジャンプ
+					// 指定回数以上のループ(left)があれば指定フレーム(class)へ移動する
+					if (g_scoreObj.titleLoopCount >= Number(tmpObj.left)) {
+						g_scoreObj.titleFrameNum = setVal(Number(tmpObj.class) - 1, 0, `number`);
+						g_scoreObj.titleLoopCount = 0;
+					}
+				} else if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
 					tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
 
 					// imgタグの場合
