@@ -2009,7 +2009,7 @@ function titleInit() {
 					// キーワード指定：フレームジャンプ
 					// 指定回数以上のループ(left)があれば指定フレーム(class)へ移動する
 					if (g_scoreObj.titleLoopCount >= Number(tmpObj.left)) {
-						g_scoreObj.titleFrameNum = Number(tmpObj.class) - 1;
+						g_scoreObj.titleFrameNum = setVal(Number(tmpObj.class) - 1, 0, `number`);
 						g_scoreObj.titleLoopCount = 0;
 					}
 				} else if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
