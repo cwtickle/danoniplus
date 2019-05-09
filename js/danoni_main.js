@@ -382,10 +382,10 @@ const g_keyObj = {
 	chara5_1: [`space`, `left`, `down`, `up`, `right`],
 	chara9A_1: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
 	chara9i_1: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
-	chara11_1: [`space`, `sleft`, `sdown`, `sup`, `sright`,
-		`left`, `leftdia`, `down`, `up`, `rightdia`, `right`],
-	chara11L_1: [`sleft`, `sdown`, `sup`, `sright`, `space`,
-		`left`, `leftdia`, `down`, `up`, `rightdia`, `right`],
+	chara11_1: [`sleft`, `sdown`, `sup`, `sright`,
+		`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
+	chara11L_1: [`sleft`, `sdown`, `sup`, `sright`,
+		`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
 	chara12_1: [`sleft`, `sdown`, `sup`, `sright`,
 		`oni`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
 	chara14_1: [`sleftdia`, `sleft`, `sdown`, `sup`, `sright`, `srightdia`,
@@ -423,8 +423,8 @@ const g_keyObj = {
 	color5_1: [2, 0, 0, 0, 0],
 	color9A_1: [0, 0, 0, 0, 2, 3, 3, 3, 3],
 	color9i_1: [2, 2, 2, 2, 2, 0, 0, 0, 0],
-	color11_1: [2, 3, 3, 3, 3, 0, 1, 0, 0, 1, 0],
-	color11L_1: [3, 3, 3, 3, 2, 0, 1, 0, 0, 1, 0],
+	color11_1: [3, 3, 3, 3, 0, 1, 0, 2, 0, 1, 0],
+	color11L_1: [3, 3, 3, 3, 0, 1, 0, 2, 0, 1, 0],
 	color12_1: [3, 3, 3, 3, 2, 0, 1, 0, 1, 0, 1, 0],
 	color14_1: [4, 3, 3, 3, 3, 4, 2, 0, 1, 0, 1, 0, 1, 0],
 	color15A_1: [3, 3, 3, 3, 4, 4, 4, 4, 0, 1, 0, 2, 0, 1, 0],
@@ -459,8 +459,8 @@ const g_keyObj = {
 	shuffle5_1: [1, 0, 0, 0, 0],
 	shuffle9A_1: [0, 0, 0, 0, 1, 2, 2, 2, 2],
 	shuffle9i_1: [0, 0, 0, 0, 0, 1, 1, 1, 1],
-	shuffle11_1: [2, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
-	shuffle11L_1: [0, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1],
+	shuffle11_1: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
+	shuffle11L_1: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
 	shuffle12_1: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
 	shuffle14_1: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
 	shuffle15A_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
@@ -498,8 +498,8 @@ const g_keyObj = {
 	stepRtn5_1: [`onigiri`, 0, -90, 90, 180],
 	stepRtn9A_1: [0, -90, 90, 180, `onigiri`, 0, -90, 90, 180],
 	stepRtn9i_1: [`monar`, `giko`, `c`, `morara`, `onigiri`, 0, -90, 90, 180],
-	stepRtn11_1: [`onigiri`, 0, -90, 90, 180, 0, -45, -90, 90, 135, 180],
-	stepRtn11L_1: [0, -90, 90, 180, `onigiri`, 0, -45, -90, 90, 135, 180],
+	stepRtn11_1: [0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
+	stepRtn11L_1: [0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
 	stepRtn12_1: [0, -90, 90, 180, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
 	stepRtn14_1: [45, 0, -90, 90, 180, 135, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
 	stepRtn15A_1: [0, -90, 90, 180, 0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
@@ -567,8 +567,8 @@ const g_keyObj = {
 	pos5_1: [0, 1, 2, 3, 4],
 	pos9A_1: [0, 1, 2, 3, 4, 5, 6, 7, 8],
 	pos9i_1: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-	pos11_1: [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12],
-	pos11L_1: [0, 1, 2, 3, 4, 6, 7, 8, 10, 11, 12],
+	pos11_1: [0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12],
+	pos11L_1: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
 	pos12_1: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
 	pos14_1: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
 	pos15A_1: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
@@ -629,8 +629,8 @@ const g_keyObj = {
 	keyCtrl5_1: [[32, 0], [37], [40], [38, 0], [39]],
 	keyCtrl9A_1: [[83], [68], [69, 82], [70], [32], [37], [40], [38, 0], [39]],
 	keyCtrl9i_1: [[65], [83], [68], [70], [32], [37], [40], [38, 0], [39]],
-	keyCtrl11_1: [[32], [37], [40], [38, 0], [39], [83], [68], [70], [74], [75], [76]],
-	keyCtrl11L_1: [[87], [69], [51, 52], [82], [32], [83], [68], [70], [74], [75], [76]],
+	keyCtrl11_1: [[87], [69], [51, 52], [82], [83], [68], [70], [32], [74], [75], [76]],
+	keyCtrl11L_1: [[37], [40], [38, 0], [39], [83], [68], [70], [32], [74], [75], [76]],
 	keyCtrl12_1: [[89], [85, 73], [56, 55, 57], [79], [32], [66], [72], [78, 77], [74, 75], [188], [76], [190]],
 	keyCtrl14_1: [[82, 84], [89], [85, 73], [56, 54, 55, 57, 48], [79], [192, 80], [32], [66], [72], [78, 77], [74, 75], [188], [76], [190]],
 	keyCtrl15A_1: [[87], [69], [51, 52], [82], [85], [73], [56, 57], [79], [83], [68], [70], [32], [74], [75], [76]],
@@ -640,8 +640,8 @@ const g_keyObj = {
 	keyCtrl5_1d: [[32, 0], [37], [40], [38, 0], [39]],
 	keyCtrl9A_1d: [[83], [68], [69, 82], [70], [32], [37], [40], [38, 0], [39]],
 	keyCtrl9i_1d: [[65], [83], [68], [70], [32], [37], [40], [38, 0], [39]],
-	keyCtrl11_1d: [[32], [37], [40], [38, 0], [39], [83], [68], [70], [74], [75], [76]],
-	keyCtrl11L_1d: [[87], [69], [51, 52], [82], [32], [83], [68], [70], [74], [75], [76]],
+	keyCtrl11_1d: [[87], [69], [51, 52], [82], [83], [68], [70], [32], [74], [75], [76]],
+	keyCtrl11L_1d: [[37], [40], [38, 0], [39], [83], [68], [70], [32], [74], [75], [76]],
 	keyCtrl12_1d: [[89], [85, 73], [56, 55, 57], [79], [32], [66], [72], [78, 77], [74, 75], [188], [76], [190]],
 	keyCtrl14_1d: [[82, 84], [89], [85, 73], [56, 54, 55, 57, 48], [79], [192, 80], [32], [66], [72], [78, 77], [74, 75], [188], [76], [190]],
 	keyCtrl15A_1d: [[87], [69], [51, 52], [82], [85], [73], [56, 57], [79], [83], [68], [70], [32], [74], [75], [76]],
@@ -664,6 +664,39 @@ const g_keyObj = {
 	blank9A_1: 52.5,
 	blank9B_0: 52.5,
 
+	// 別キー
+	transKey5_0: '',
+	transKey7_0: '',
+	transKey7i_0: '',
+	transKey8_0: '',
+	transKey9A_0: '',
+	transKey9B_0: '',
+	transKey9i_0: '',
+	transKey11_0: '',
+	transKey11L_0: '',
+	transKey11W_0: '',
+	transKey12_0: '',
+	transKey13_0: '',
+	transKey14_0: '',
+	transKey14i_0: '',
+	transKey15A_0: '',
+	transKey15B_0: '',
+	transKey16i_0: '',
+	transKey17_0: '',
+
+	transKey5_1: '',
+	transKey9A_1: '',
+	transKey9i_1: '',
+	transKey11_1: '11L',
+	transKey11L_1: '11',
+	transKey12_1: '',
+	transKey14_1: '',
+	transKey15A_1: '',
+	transKey15B_1: '',
+	transKey17_1: '',
+
+	transKey5_2: '',
+
 	// キー置換用(ParaFla版との互換)
 	keyTransPattern: {
 		'9': '9A',
@@ -674,7 +707,7 @@ const g_keyObj = {
 		'9B-2': '9B',
 		'TP': '13',
 		'15': '15A',
-		'15R': '15B'
+		'15R': '15B',
 	},
 
 	dummy: 0	// ダミー(カンマ抜け落ち防止)
@@ -1821,10 +1854,12 @@ function titleInit() {
 	// タイトル用ループカウンター
 	g_scoreObj.titleLoopCount = 0;
 
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+
 	// 譜面初期情報ロード許可フラグ
 	// (初回読み込み時はローカルストレージのロードが必要なため、
 	//  ローカルストレージ保存時はフラグを解除しない)
-	if (!g_stateObj.dataSaveFlg) {
+	if (!g_stateObj.dataSaveFlg || setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, `string`) !== ``) {
 		g_canLoadDifInfoFlg = false;
 	}
 
@@ -2899,6 +2934,19 @@ function keysConvert(_dosObj) {
 				}
 			}
 
+			// 別キーフラグ (transKeyX_Y)
+			if (_dosObj[`transKey${newKey}`] !== undefined) {
+				const tmpTransKeys = _dosObj[`transKey${newKey}`].split(`$`);
+				if (tmpTransKeys.length > 0) {
+					for (let k = 0, len = tmpTransKeys.length; k < len; k++) {
+						if (isNaN(Number(tmpTransKeys[k]))) {
+						} else {
+							g_keyObj[`transKey${newKey}_${k}`] = parseFloat(tmpTransKeys[k]);
+						}
+					}
+				}
+			}
+
 			// シャッフルグループ (shuffleX_Y)
 			if (_dosObj[`shuffle${newKey}`] !== undefined) {
 				const tmpshuffles = _dosObj[`shuffle${newKey}`].split(`$`);
@@ -3686,6 +3734,7 @@ function createOptionWindow(_sprite) {
 						g_keyObj[`pos${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`pos${basePtn}`]));
 						g_keyObj[`div${copyPtn}`] = g_keyObj[`div${basePtn}`];
 						g_keyObj[`blank${copyPtn}`] = g_keyObj[`blank${basePtn}`];
+						g_keyObj[`transKey${copyPtn}`] = g_keyObj[`transKey${basePtn}`];
 						if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
 							g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
 						}
@@ -4409,7 +4458,7 @@ function loadingScoreInit() {
 	// 譜面初期情報ロード許可フラグ
 	// (タイトルバック時保存したデータを設定画面にて再読み込みするため、
 	//  ローカルストレージ保存時はフラグを解除しない)
-	if (!g_stateObj.dataSaveFlg) {
+	if (!g_stateObj.dataSaveFlg || setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, `string`) !== ``) {
 		g_canLoadDifInfoFlg = false;
 	}
 
@@ -5680,7 +5729,7 @@ function getArrowSettings() {
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
 
-	if (g_stateObj.dataSaveFlg) {
+	if (g_stateObj.dataSaveFlg && setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, `string`) === ``) {
 
 		// ローカルストレージへAdjustment, Volumeを保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
@@ -7310,6 +7359,12 @@ function resultInit() {
 		musicTitleForView1 = g_headerObj.musicTitleForView[1];
 	}
 
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	let transKeyData = ``;
+	if (setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, `string`) !== ``) {
+		transKeyData = `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)`;
+	}
+
 	playDataWindow.appendChild(makeResultPlayData(`lblMusic`, 20, `#999999`, 0,
 		`Music`, C_ALIGN_LEFT));
 	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `#cccccc`, 0,
@@ -7318,7 +7373,7 @@ function resultInit() {
 		setVal(musicTitleForView1, ``, `string`), C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `#999999`, 2,
 		`Difficulty`, C_ALIGN_LEFT));
-	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		difData += ` [${g_stateObj.shuffle}]`;
 	}
@@ -7461,7 +7516,9 @@ function resultInit() {
 	let fmaxComboDf = 0;
 	let scoreDf = 0;
 
-	if (g_stateObj.auto === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF) {
+	if (g_stateObj.auto === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
+		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, `string`) === ``) {
+
 		if (scoreName in g_localStorage.highscores) {
 			iiDf = g_resultObj.ii - g_localStorage.highscores[scoreName].ii;
 			shakinDf = g_resultObj.shakin - g_localStorage.highscores[scoreName].shakin;
@@ -7568,7 +7625,7 @@ function resultInit() {
 	} else {
 		hashTag = ``;
 	}
-	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `/${g_stateObj.shuffle}`;
 	}
