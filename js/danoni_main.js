@@ -2969,10 +2969,7 @@ function keysConvert(_dosObj) {
 				const tmpTransKeys = _dosObj[`transKey${newKey}`].split(`$`);
 				if (tmpTransKeys.length > 0) {
 					for (let k = 0, len = tmpTransKeys.length; k < len; k++) {
-						if (isNaN(Number(tmpTransKeys[k]))) {
-						} else {
-							g_keyObj[`transKey${newKey}_${k}`] = parseFloat(tmpTransKeys[k]);
-						}
+						g_keyObj[`transKey${newKey}_${k}`] = setVal(tmpTransKeys[k], ``, `string`);
 					}
 				}
 			}
@@ -3693,6 +3690,16 @@ function createOptionWindow(_sprite) {
 		// 1. キーコンフィグ設定 (KeyConfig)
 		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 
+		if (g_rootObj.keyExtraList !== undefined) {
+			const keyExtraList = g_rootObj.keyExtraList.split(`,`);
+			for (let j = 0; j < keyExtraList.length; j++) {
+				if (g_keyObj.currentKey === keyExtraList[j]) {
+					g_stateObj.extraKeyFlg = true;
+					break;
+				}
+			}
+		}
+
 		// ---------------------------------------------------
 		// 2. 初期化設定
 
@@ -3701,8 +3708,9 @@ function createOptionWindow(_sprite) {
 			// 速度、ゲージ、リバースの初期設定
 			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
 			g_stateObj.lifeId = 0;
-			g_localKeyStorage.reverse = C_FLG_OFF;
-
+			if (!g_stateObj.extraKeyFlg) {
+				g_localKeyStorage.reverse = C_FLG_OFF;
+			}
 		}
 
 		if (g_canLoadDifInfoFlg || _initFlg) {
@@ -3712,16 +3720,6 @@ function createOptionWindow(_sprite) {
 
 			// キーパターン初期化
 			g_keyObj.currentPtn = 0;
-
-			if (g_rootObj.keyExtraList !== undefined) {
-				const keyExtraList = g_rootObj.keyExtraList.split(`,`);
-				for (let j = 0; j < keyExtraList.length; j++) {
-					if (g_keyObj.currentKey === keyExtraList[j]) {
-						g_stateObj.extraKeyFlg = true;
-						break;
-					}
-				}
-			}
 
 			// キー別のローカルストレージの初期設定　※特殊キーは除く
 			if (!g_stateObj.extraKeyFlg) {
