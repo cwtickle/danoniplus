@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/10
+ * Revised : 2019/05/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.8.0`;
-const g_revisedDate = `2019/05/10`;
+const g_version = `Ver 4.8.1`;
+const g_revisedDate = `2019/05/11`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4528,7 +4528,7 @@ function loadingScoreInit() {
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0);
 
 	// ライフ回復・ダメージ量の計算
-	calcLifeVals(g_allArrow + g_allFrz);
+	calcLifeVals(g_allArrow + g_allFrz / 2);
 
 	// 最終フレーム数の取得
 	let lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
