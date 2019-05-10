@@ -2698,7 +2698,7 @@ function headerConvert(_dosObj) {
 	obj.gaugeUse = setVal(_dosObj.gaugeUse, setVal(g_presetSettingUse.gauge, `true`, `string`), `string`);
 
 	// 別キーパターンの使用有無
-	obj.transKeyUse = setVal(_dosObj.transKeyUse, `false`, `string`);
+	obj.transKeyUse = setVal(_dosObj.transKeyUse, `true`, `string`);
 
 	// 背景データの分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
@@ -4286,7 +4286,7 @@ function keyConfigInit() {
 	}, _ => {
 		let tempPtn = g_keyObj.currentPtn + 1;
 		while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, `string`) !== `` &&
-			g_headerObj.transKeyUse === `true`) {
+			g_headerObj.transKeyUse === `false`) {
 
 			tempPtn++;
 			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
