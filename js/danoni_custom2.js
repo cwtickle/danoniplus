@@ -40,7 +40,7 @@ function customTitleInit2() {
 /**
  * タイトル画面(フレーム毎表示) [Scene: Title / Melon]
  */
-function customMainEnterFrame2() {
+function customTitleEnterFrame2() {
 
 }
 
