@@ -402,6 +402,9 @@ const g_keyObj = {
 	chara9A_2: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
 	chara9B_2: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
 
+	chara9A_3: [`left`, `down`, `gor`, `up`, `right`, `space`,
+		`sleft`, `sdown`, `siyo`, `sup`, `sright`],
+
 	// カラーパターン
 	color5_0: [0, 0, 0, 0, 2],
 	color7_0: [0, 1, 0, 2, 0, 1, 0],
@@ -438,6 +441,8 @@ const g_keyObj = {
 	color5_2: [0, 0, 2, 0, 0],
 	color9A_2: [1, 0, 1, 0, 2, 0, 1, 0, 1],
 	color9B_2: [0, 0, 0, 0, 2, 3, 3, 3, 3],
+
+	color9A_3: [0, 0, 2, 0, 0, 2, 3, 3, 2, 3, 3],
 
 	// シャッフルグループ
 	//  - Mirror, Random, S-Random使用時、同じグループ同士で入れ替えます
@@ -477,6 +482,8 @@ const g_keyObj = {
 	shuffle5_2: [0, 0, 1, 0, 0],
 	shuffle9A_2: [0, 0, 0, 0, 1, 0, 0, 0, 0],
 	shuffle9B_2: [0, 0, 0, 0, 1, 2, 2, 2, 2],
+
+	shuffle9A_3: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
 
 	// 基本パターン (矢印回転、AAキャラクタ)
 	// - AAキャラクタの場合、キャラクタ名を指定
@@ -521,6 +528,8 @@ const g_keyObj = {
 	stepRtn9A_2: [45, 0, -45, -90, `onigiri`, 90, 135, 180, 225],
 	stepRtn9B_2: [0, -90, 90, 180, `onigiri`, 0, -90, 90, 180],
 
+	stepRtn9A_3: [0, -90, `giko`, 90, 180, `onigiri`, 0, -90, `iyo`, 90, 180],
+
 	// 各キーの区切り位置
 	div5_0: 5,
 	div7_0: 7,
@@ -557,6 +566,8 @@ const g_keyObj = {
 	div5_2: 5,
 	div9A_2: 9,
 	div9B_2: 9,
+
+	div9A_3: 11,
 
 	// 各キーの位置関係
 	pos5_0: [0, 1, 2, 3, 4],
@@ -595,6 +606,7 @@ const g_keyObj = {
 	pos9A_2: [0, 1, 2, 3, 4, 5, 6, 7, 8],
 	pos9B_2: [0, 1, 2, 3, 4, 5, 6, 7, 8],
 
+	pos9A_3: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 
 	// 基本パターン (キーコンフィグ)
 	// - 末尾dなし(実際の設定値)と末尾dあり(デフォルト値)は必ずセットで揃えること。配列数も合わせる。
@@ -676,6 +688,10 @@ const g_keyObj = {
 	keyCtrl9A_2d: [[65], [83], [68], [70], [32], [74], [75], [76], [187]],
 	keyCtrl9B_2d: [[83], [68], [69, 82], [70], [32], [37], [40], [38, 0], [39]],
 
+	keyCtrl9A_3: [[83], [88, 67], [68], [69, 82], [70], [32], [74], [77, 188], [75], [73, 79], [76]],
+
+	keyCtrl9A_3d: [[83], [88, 67], [68], [69, 82], [70], [32], [74], [77, 188], [75], [73, 79], [76]],
+
 	// 矢印間隔補正
 	blank: 55,
 	blank_def: 55,
@@ -687,6 +703,7 @@ const g_keyObj = {
 	blank9A_0: 52.5,
 	blank9A_1: 52.5,
 	blank9A_2: 52.5,
+	blank9A_3: 50,
 	blank9B_0: 52.5,
 	blank9B_1: 52.5,
 	blank9B_2: 52.5,
@@ -726,6 +743,8 @@ const g_keyObj = {
 	transKey5_2: '',
 	transKey9A_2: '9B',
 	transKey9B_2: '9A',
+
+	transKey9A_3: '11i',
 
 	// キー置換用(ParaFla版との互換)
 	keyTransPattern: {
@@ -2678,6 +2697,9 @@ function headerConvert(_dosObj) {
 	// Gauge
 	obj.gaugeUse = setVal(_dosObj.gaugeUse, setVal(g_presetSettingUse.gauge, `true`, `string`), `string`);
 
+	// 別キーパターンの使用有無
+	obj.transKeyUse = setVal(_dosObj.transKeyUse, `false`, `string`);
+
 	// 背景データの分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	obj.backTitleData = [];
@@ -4262,7 +4284,15 @@ function keyConfigInit() {
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER
 	}, _ => {
-		const tempPtn = g_keyObj.currentPtn + 1;
+		let tempPtn = g_keyObj.currentPtn + 1;
+		while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, `string`) !== `` &&
+			g_headerObj.transKeyUse === `true`) {
+
+			tempPtn++;
+			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
+				break;
+			}
+		}
 		if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined) {
 			g_keyObj.currentPtn = tempPtn;
 		} else {
