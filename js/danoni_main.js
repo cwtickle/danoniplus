@@ -4,14 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/04/27
+ * Revised : 2019/05/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.15.3";
-const g_version_gauge = "Ver 0.5.1.20181223";
-const g_version_musicEncoded = "Ver 0.1.1.20181224";
-const g_version_lyrics = "Ver 0.2.0.20181230";
+const g_version = "Ver 1.15.4";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -3356,7 +3353,7 @@ function loadingScoreInit() {
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0);
 
 	// ライフ回復・ダメージ量の計算
-	calcLifeVals(g_allArrow + g_allFrz);
+	calcLifeVals(g_allArrow + g_allFrz / 2);
 
 	// 最終フレーム数の取得
 	let lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
