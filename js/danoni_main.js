@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.8.1`;
+const g_version = `Ver 4.9.0`;
 const g_revisedDate = `2019/05/11`;
 const g_alphaVersion = ``;
 
@@ -2216,7 +2216,11 @@ function titleInit() {
 		normalColor: C_CLR_LNK,
 		hoverColor: C_CLR_DEFAULT,
 		align: C_ALIGN_LEFT
-	}, _ => window.open(g_headerObj.creatorUrl, `_blank`));
+	}, _ => {
+		if (setVal(g_headerObj.creatorUrl, ``, `string`) !== ``) {
+			window.open(g_headerObj.creatorUrl, `_blank`);
+		}
+	});
 	divRoot.appendChild(lnkMaker);
 
 	// 作曲者リンク表示
@@ -2231,7 +2235,11 @@ function titleInit() {
 		normalColor: C_CLR_LNK,
 		hoverColor: C_CLR_DEFAULT,
 		align: C_ALIGN_LEFT
-	}, _ => window.open(g_headerObj.artistUrl, `_blank`));
+	}, _ => {
+		if (setVal(g_headerObj.artistUrl, ``, `string`) !== ``) {
+			window.open(g_headerObj.artistUrl, `_blank`);
+		}
+	});
 	divRoot.appendChild(lnkArtist);
 
 	// バージョン描画
@@ -4127,6 +4135,17 @@ function keyConfigInit() {
 		g_keyObj.blank = g_keyObj[`blank${keyCtrlPtn}`];
 	} else {
 		g_keyObj.blank = g_keyObj.blank_def;
+	}
+
+	// 別キーモード警告メッセージ
+	const kcMsg = createDivLabel(`kcMsg`, 0, g_sHeight - 35, g_sWidth, 20, 14, `#ffff99`,
+		``);
+	kcMsg.style.align = C_ALIGN_CENTER;
+	divRoot.appendChild(kcMsg);
+	if (setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, `string`) !== ``) {
+		document.querySelector(`#kcMsg`).innerHTML = `別キーモードではハイスコア、キーコンフィグ等は保存されません`;
+	} else {
+		document.querySelector(`#kcMsg`).innerHTML = ``;
 	}
 
 	/** 同行の左から数えた場合の位置(x座標) */
