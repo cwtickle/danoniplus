@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/11
+ * Revised : 2019/05/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.9.0`;
-const g_revisedDate = `2019/05/11`;
+const g_version = `Ver 4.9.1`;
+const g_revisedDate = `2019/05/12`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4016,18 +4016,7 @@ function settingsDisplayInit() {
 		}
 		if (setKey === 13) {
 			clearWindow();
-			g_audio.load();
-
-			if (g_audio.readyState === 4) {
-				// audioの読み込みが終わった後の処理
-				loadingScoreInit();
-			} else {
-				// 読込中の状態
-				g_audio.addEventListener(`canplaythrough`, (_ => function f() {
-					g_audio.removeEventListener(`canplaythrough`, f, false);
-					loadingScoreInit();
-				})(), false);
-			}
+			loadMusic();
 		}
 		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
 			if (setKey === C_BLOCK_KEYS[j]) {
@@ -6195,18 +6184,8 @@ function MainInit() {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			clearWindow();
-			g_audio.load();
+			musicAfterLoaded();
 
-			if (g_audio.readyState === 4) {
-				// audioの読み込みが終わった後の処理
-				loadingScoreInit();
-			} else {
-				// 読込中の状態
-				g_audio.addEventListener(`canplaythrough`, (_ => function f() {
-					g_audio.removeEventListener(`canplaythrough`, f, false);
-					loadingScoreInit();
-				})(), false);
-			}
 		} else if (setKey === 46) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
@@ -7811,19 +7790,7 @@ function resultInit() {
 	}, _ => {
 		g_audio.pause();
 		clearWindow();
-		g_audio.load();
-
-		if (g_audio.readyState === 4) {
-			// audioの読み込みが終わった後の処理
-			g_gameOverFlg = false;
-			loadingScoreInit();
-		} else {
-			// 読込中の状態
-			g_audio.addEventListener(`canplaythrough`, (_ => function f() {
-				g_audio.removeEventListener(`canplaythrough`, f, false);
-				loadingScoreInit();
-			})(), false);
-		}
+		musicAfterLoaded();
 	});
 	divRoot.appendChild(btnRetry);
 
