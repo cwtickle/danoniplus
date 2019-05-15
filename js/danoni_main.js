@@ -1818,7 +1818,7 @@ function loadMusic() {
 	request.addEventListener(`load`, _ => {
 		if (request.status >= 200 && request.status < 300) {
 			const blobUrl = URL.createObjectURL(request.response);
-			const loader = document.querySelector(`#loader`);
+			const loader = createSprite(`divRoot`, `loader`, 0, g_sHeight - 10, g_sWidth, 10);
 			loader.style.backgroundColor = `#333333`;
 			lblLoading.innerText = `Please Wait...`;
 			setAudio(blobUrl);
