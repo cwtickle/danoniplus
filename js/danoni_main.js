@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/12
+ * Revised : 2019/05/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.9.1`;
-const g_revisedDate = `2019/05/12`;
+const g_version = `Ver 4.10.0`;
+const g_revisedDate = `2019/05/15`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1776,91 +1776,89 @@ function loadMusic() {
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	const url = `../${g_headerObj.musicFolder}/${musicUrl}`;
 
-	if (musicUrl === g_headerObj.musicUrl) {
-		musicAfterLoaded();
+	g_headerObj.musicUrl = musicUrl;
+
+	if (musicUrl.slice(-3) === `.js` || musicUrl.slice(-4) === `.txt`) {
+		g_musicEncodedFlg = true;
 	} else {
-		g_headerObj.musicUrl = musicUrl;
-
-		if (musicUrl.slice(-3) === `.js` || musicUrl.slice(-4) === `.txt`) {
-			g_musicEncodedFlg = true;
-		} else {
-			g_musicEncodedFlg = false;
-		}
-
-		// レイヤー情報取得
-		const layer0 = document.querySelector(`#layer0`);
-		const l0ctx = layer0.getContext(`2d`);
-
-		// 画面背景を指定 (background-color)
-		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-		if (g_headerObj.customBackUse === `false`) {
-			grd.addColorStop(0, `#000000`);
-			grd.addColorStop(1, `#222222`);
-			l0ctx.fillStyle = grd;
-			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-		}
-
-		// Now Loadingを表示
-		const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight - 40,
-			g_sWidth, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `Now Loading...`);
-		lblLoading.style.textAlign = C_ALIGN_RIGHT;
-		divRoot.appendChild(lblLoading);
-
-		// ローカル動作時
-		if (location.href.match(`^file`)) {
-			setAudio(url);
-			return;
-		}
-
-		// XHRで読み込み
-		const request = new XMLHttpRequest();
-		request.open(`GET`, url, true);
-		request.responseType = `blob`;
-
-		// 読み込み完了時
-		request.addEventListener(`load`, _ => {
-			if (request.status >= 200 && request.status < 300) {
-				const blobUrl = URL.createObjectURL(request.response);
-				setAudio(blobUrl);
-			} else {
-				makeWarningWindow(`${C_MSG_E_0032}<br>(${request.status} ${request.statusText})`);
-			}
-		});
-
-		// 進捗時
-		request.addEventListener(`progress`, _event => {
-			const lblLoading = document.querySelector(`#lblLoading`);
-
-			if (_event.lengthComputable) {
-				const rate = _event.loaded / _event.total;
-				const layer0 = document.querySelector(`#layer0`);
-				const l0ctx = layer0.getContext(`2d`);
-				l0ctx.fillStyle = C_CLR_LOADING_BAR;
-				l0ctx.fillRect(0, layer0.height - 10, layer0.width * rate, 10);
-				lblLoading.innerText = `Now Loading... ${Math.floor(rate * 100)}%`;
-			} else {
-				lblLoading.innerText = `Now Loading... ${_event.loaded}Bytes`;
-			}
-			// ユーザカスタムイベント
-			if (typeof customLoadingProgress === `function`) {
-				customLoadingProgress(_event);
-				if (typeof customLoadingProgress2 === `function`) {
-					customLoadingProgress2(_event);
-				}
-			}
-		});
-
-		// エラー処理
-		request.addEventListener(`timeout`, _ => {
-			makeWarningWindow(`${C_MSG_E_0033}`);
-		});
-
-		request.addEventListener(`error`, _ => {
-			makeWarningWindow(`${C_MSG_E_0034}`);
-		});
-
-		request.send();
+		g_musicEncodedFlg = false;
 	}
+
+	// レイヤー情報取得
+	const layer0 = document.querySelector(`#layer0`);
+	const l0ctx = layer0.getContext(`2d`);
+
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (g_headerObj.customBackUse === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	}
+
+	// Now Loadingを表示
+	const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight - 40,
+		g_sWidth, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `Now Loading...`);
+	lblLoading.style.textAlign = C_ALIGN_RIGHT;
+	divRoot.appendChild(lblLoading);
+
+	// ローカル動作時
+	if (location.href.match(`^file`)) {
+		setAudio(url);
+		return;
+	}
+
+	// XHRで読み込み
+	const request = new XMLHttpRequest();
+	request.open(`GET`, url, true);
+	request.responseType = `blob`;
+
+	// 読み込み完了時
+	request.addEventListener(`load`, _ => {
+		if (request.status >= 200 && request.status < 300) {
+			const blobUrl = URL.createObjectURL(request.response);
+			const loader = createSprite(`divRoot`, `loader`, 0, g_sHeight - 10, g_sWidth, 10);
+			loader.style.backgroundColor = `#333333`;
+			lblLoading.innerText = `Please Wait...`;
+			setAudio(blobUrl);
+		} else {
+			makeWarningWindow(`${C_MSG_E_0032}<br>(${request.status} ${request.statusText})`);
+		}
+	});
+
+	// 進捗時
+	request.addEventListener(`progress`, _event => {
+		const lblLoading = document.querySelector(`#lblLoading`);
+
+		if (_event.lengthComputable) {
+			const rate = _event.loaded / _event.total;
+			const loader = createSprite(`divRoot`, `loader`, 0, g_sHeight - 10, g_sWidth, 10);
+			loader.style.width = `${g_sWidth * rate}px`;
+			loader.style.backgroundColor = `#eeeeee`;
+			lblLoading.innerText = `Now Loading... ${Math.floor(rate * 100)}%`;
+		} else {
+			lblLoading.innerText = `Now Loading... ${_event.loaded}Bytes`;
+		}
+		// ユーザカスタムイベント
+		if (typeof customLoadingProgress === `function`) {
+			customLoadingProgress(_event);
+			if (typeof customLoadingProgress2 === `function`) {
+				customLoadingProgress2(_event);
+			}
+		}
+	});
+
+	// エラー処理
+	request.addEventListener(`timeout`, _ => {
+		makeWarningWindow(`${C_MSG_E_0033}`);
+	});
+
+	request.addEventListener(`error`, _ => {
+		makeWarningWindow(`${C_MSG_E_0034}`);
+	});
+
+	request.send();
 }
 
 // Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備
@@ -5959,7 +5957,7 @@ function MainInit() {
 	}
 
 	let fullSecond = Math.ceil(g_headerObj.blankFrame / 60 + duration / g_headerObj.playbackRate);
-	if (fadeOutFrame !== Infinity) {
+	if (fadeOutFrame !== Infinity && g_headerObj.endFrame === undefined) {
 		fullSecond += Math.ceil(C_FRM_AFTERFADE / 60);
 	}
 
@@ -7790,7 +7788,7 @@ function resultInit() {
 	}, _ => {
 		g_audio.pause();
 		clearWindow();
-		musicAfterLoaded();
+		loadMusic();
 	});
 	divRoot.appendChild(btnRetry);
 
