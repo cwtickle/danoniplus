@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/15
+ * Revised : 2019/05/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.10.1`;
+const g_version = `Ver 5.0.0`;
 const g_revisedDate = `2019/05/16`;
 const g_alphaVersion = ``;
 
