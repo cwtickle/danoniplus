@@ -134,6 +134,145 @@ const C_FLG_ON = `ON`;
 const C_FLG_OFF = `OFF`;
 const C_DIS_NONE = `none`;
 
+/** 設定・オプション画面用共通 */
+const C_LEN_SETLBL_LEFT = 140;
+const C_LEN_SETLBL_WIDTH = 250;
+const C_LEN_SETLBL_HEIGHT = 23;
+const C_SIZ_SETLBL = 17;
+const C_LEN_SETDIFLBL_HEIGHT = 25;
+const C_SIZ_SETDIFLBL = 17;
+const C_LEN_SETMINI_WIDTH = 40;
+const C_SIZ_SETMINI = 18;
+
+const C_LBL_SETMINIL = `<`;
+const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH / 2;
+const C_LBL_SETMINILL = `<`;
+const C_LEN_SETMINILL_LEFT = C_LEN_SETMINIL_LEFT + C_LEN_SETMINI_WIDTH;
+const C_LBL_SETMINIR = `>`;
+const C_LBL_SETMINIRR = `>`;
+const C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH / 2;
+const C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
+
+const C_MAX_ADJUSTMENT = 30;
+const C_MAX_SPEED = 10;
+const C_MIN_SPEED = 1;
+
+/** キーコンフィグ設定 */
+let g_kcType = `Main`;
+let g_colorType = `Default`;
+
+/** メイン画面用共通オブジェクト */
+const g_workObj = {};
+g_workObj.stepX = [];
+g_workObj.stepRtn = [];
+g_workObj.keyCtrl = [];
+g_workObj.keyHitFlg = [];
+g_workObj.scrollDir = [];
+g_workObj.dividePos = [];
+
+const C_FRM_AFTERFADE = 420;
+const C_FRM_FRZATTEMPT = 5;
+
+/** 判定系共通オブジェクト */
+const g_judgObj = {
+	arrowJ: [2, 4, 6, 8, 8],
+	frzJ: [2, 4, 8]
+};
+const C_JDG_II = 0;
+const C_JDG_SHAKIN = 1;
+const C_JDG_MATARI = 2;
+const C_JDG_SHOBON = 3;
+const C_JDG_UWAN = 4;
+
+const C_JDG_KITA = 0;
+const C_JDG_SFSF = 1;
+const C_JDG_IKNAI = 2;
+
+let C_JCR_II = "(・∀・)ｲｲ!!";
+let C_JCR_SHAKIN = "(`・ω・)ｼｬｷﾝ";
+let C_JCR_MATARI = "( ´∀`)ﾏﾀｰﾘ";
+let C_JCR_SHOBON = "(´・ω・`)ｼｮﾎﾞｰﾝ";
+let C_JCR_UWAN = "( `Д´)ｳﾜｧﾝ!!";
+
+let C_JCR_KITA = "(ﾟ∀ﾟ)ｷﾀ-!!";
+let C_JCR_SFSF = "";
+let C_JCR_IKNAI = "(・A・)ｲｸﾅｲ";
+
+const C_CLR_II = `#66ffff`;
+const C_CLR_SHAKIN = `#99ff99`;
+const C_CLR_MATARI = `#ff9966`;
+const C_CLR_UWAN = `#ff9999`;
+const C_CLR_SHOBON = `#ccccff`;
+const C_CLR_KITA = `#ffff99`;
+const C_CLR_SFSF = ``;
+const C_CLR_IKNAI = `#99ff66`;
+
+const C_LEN_JDGCHARA_WIDTH = 200;
+const C_LEN_JDGCHARA_HEIGHT = 20;
+const C_SIZ_JDGCHARA = 20;
+
+const C_LEN_JDGCNTS_WIDTH = 100;
+const C_LEN_JDGCNTS_HEIGHT = 20;
+const C_SIZ_JDGCNTS = 16;
+
+const C_FRM_HITMOTION = 4;
+const C_FRM_JDGMOTION = 60;
+
+/** 結果画面用共通オブジェクト */
+const g_resultObj = {
+	ii: 0,
+	shakin: 0,
+	matari: 0,
+	shobon: 0,
+	uwan: 0,
+	kita: 0,
+	sfsf: 0,
+	iknai: 0,
+	combo: 0,
+	maxCombo: 0,
+	fCombo: 0,
+	fmaxCombo: 0,
+	score: 0
+};
+
+let g_allArrow = 0;
+let g_allFrz = 0;
+let g_currentArrows = 0;
+const g_rankObj = {
+	rankMarks: [`SS`, `S`, `SA`, `AAA`, `AA`, `A`, `B`],
+	rankRate: [97, 90, 85, 80, 75, 70, 50],
+	rankColor: [`#00ccff`, `#6600ff`, `#ff9900`, `#ff0000`, `#00ff00`, `#ff00ff`, `#cc00ff`],
+
+	rankMarkPF: `PF`,
+	rankColorPF: `#cccc00`,
+	rankMarkC: `C`,
+	rankColorC: `#cc9933`,
+	rankMarkF: `F`,
+	rankColorF: `#999999`,
+	rankMarkX: `X`,
+	rankColorX: `#996600`
+};
+
+let g_gameOverFlg = false;
+
+const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
+
+let g_audio = new Audio();
+let g_timeoutEvtId = 0;
+let g_timeoutEvtTitleId = 0;
+let g_inputKeyBuffer = [];
+
+// 歌詞制御
+const g_wordObj = {
+	wordDir: 0,
+	wordDat: ``,
+	fadeInFlg0: false,
+	fadeInFlg1: false,
+	fadeOutFlg0: false,
+	fadeOutFlg1: false
+};
+let g_wordSprite;
+
 // 譜面データ持ち回り用
 let g_rootObj = {};
 let g_headerObj = {};
@@ -143,7 +282,9 @@ const g_stateObj = {
 	speed: 3.5,
 	motion: C_FLG_OFF,
 	reverse: C_FLG_OFF,
-	auto: C_FLG_OFF,
+	shuffle: `OFF`,
+	autoPlay: C_FLG_OFF,
+	gauge: `Normal`,
 	adjustment: 0,
 	fadein: 0,
 	volume: 100,
@@ -152,9 +293,7 @@ const g_stateObj = {
 	lifeMode: `Border`,
 	lifeBorder: 70,
 	lifeInit: 25,
-	lifeSetName: `Normal`,
-	lifeId: 0,
-	shuffle: `OFF`,
+
 	extraKeyFlg: false,
 	dataSaveFlg: true,
 
@@ -195,14 +334,29 @@ const g_gaugeOptionObj = {
 };
 let g_gaugeType;
 
-const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
-let g_volumeNum = 0;
+const g_speeds = [...Array((C_MAX_SPEED - C_MIN_SPEED) * 4 + 1).keys()].map(i => C_MIN_SPEED + i / 4);
+let g_speedNum = 0;
 
-const g_motions = [`OFF`, `Boost`, `Brake`];
+const g_motions = [C_FLG_OFF, `Boost`, `Brake`];
 let g_motionNum = 0;
 
-const g_shuffles = [`OFF`, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
+const g_reverses = [C_FLG_OFF, C_FLG_ON];
+let g_reverseNum = 0;
+
+const g_shuffles = [C_FLG_OFF, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
 let g_shuffleNum = 0;
+
+let g_gauges = [];
+let g_gaugeNum = 0;
+
+const g_autoPlays = [C_FLG_OFF, C_FLG_ON];
+let g_autoPlayNum = 0;
+
+const g_adjustments = [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT);
+let g_adjustmentNum = C_MAX_ADJUSTMENT;
+
+const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
+let g_volumeNum = 0;
 
 // サイズ(後で指定)
 let g_sWidth;
@@ -762,145 +916,6 @@ const g_keyObj = {
 	dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
 
-/** 設定・オプション画面用共通 */
-const C_LEN_SETLBL_LEFT = 140;
-const C_LEN_SETLBL_WIDTH = 250;
-const C_LEN_SETLBL_HEIGHT = 23;
-const C_SIZ_SETLBL = 17;
-const C_LEN_SETDIFLBL_HEIGHT = 25;
-const C_SIZ_SETDIFLBL = 17;
-const C_LEN_SETMINI_WIDTH = 40;
-const C_SIZ_SETMINI = 18;
-
-const C_LBL_SETMINIL = `<`;
-const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH / 2;
-const C_LBL_SETMINILL = `<`;
-const C_LEN_SETMINILL_LEFT = C_LEN_SETMINIL_LEFT + C_LEN_SETMINI_WIDTH;
-const C_LBL_SETMINIR = `>`;
-const C_LBL_SETMINIRR = `>`;
-const C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH / 2;
-const C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
-
-const C_MAX_ADJUSTMENT = 30;
-const C_MAX_SPEED = 10;
-const C_MIN_SPEED = 1;
-
-/** キーコンフィグ設定 */
-let g_kcType = `Main`;
-let g_colorType = `Default`;
-
-/** メイン画面用共通オブジェクト */
-const g_workObj = {};
-g_workObj.stepX = [];
-g_workObj.stepRtn = [];
-g_workObj.keyCtrl = [];
-g_workObj.keyHitFlg = [];
-g_workObj.scrollDir = [];
-g_workObj.dividePos = [];
-
-const C_FRM_AFTERFADE = 420;
-const C_FRM_FRZATTEMPT = 5;
-
-/** 判定系共通オブジェクト */
-const g_judgObj = {
-	arrowJ: [2, 4, 6, 8, 8],
-	frzJ: [2, 4, 8]
-};
-const C_JDG_II = 0;
-const C_JDG_SHAKIN = 1;
-const C_JDG_MATARI = 2;
-const C_JDG_SHOBON = 3;
-const C_JDG_UWAN = 4;
-
-const C_JDG_KITA = 0;
-const C_JDG_SFSF = 1;
-const C_JDG_IKNAI = 2;
-
-let C_JCR_II = "(・∀・)ｲｲ!!";
-let C_JCR_SHAKIN = "(`・ω・)ｼｬｷﾝ";
-let C_JCR_MATARI = "( ´∀`)ﾏﾀｰﾘ";
-let C_JCR_SHOBON = "(´・ω・`)ｼｮﾎﾞｰﾝ";
-let C_JCR_UWAN = "( `Д´)ｳﾜｧﾝ!!";
-
-let C_JCR_KITA = "(ﾟ∀ﾟ)ｷﾀ-!!";
-let C_JCR_SFSF = "";
-let C_JCR_IKNAI = "(・A・)ｲｸﾅｲ";
-
-const C_CLR_II = `#66ffff`;
-const C_CLR_SHAKIN = `#99ff99`;
-const C_CLR_MATARI = `#ff9966`;
-const C_CLR_UWAN = `#ff9999`;
-const C_CLR_SHOBON = `#ccccff`;
-const C_CLR_KITA = `#ffff99`;
-const C_CLR_SFSF = ``;
-const C_CLR_IKNAI = `#99ff66`;
-
-const C_LEN_JDGCHARA_WIDTH = 200;
-const C_LEN_JDGCHARA_HEIGHT = 20;
-const C_SIZ_JDGCHARA = 20;
-
-const C_LEN_JDGCNTS_WIDTH = 100;
-const C_LEN_JDGCNTS_HEIGHT = 20;
-const C_SIZ_JDGCNTS = 16;
-
-const C_FRM_HITMOTION = 4;
-const C_FRM_JDGMOTION = 60;
-
-/** 結果画面用共通オブジェクト */
-const g_resultObj = {
-	ii: 0,
-	shakin: 0,
-	matari: 0,
-	shobon: 0,
-	uwan: 0,
-	kita: 0,
-	sfsf: 0,
-	iknai: 0,
-	combo: 0,
-	maxCombo: 0,
-	fCombo: 0,
-	fmaxCombo: 0,
-	score: 0
-};
-
-let g_allArrow = 0;
-let g_allFrz = 0;
-let g_currentArrows = 0;
-const g_rankObj = {
-	rankMarks: [`SS`, `S`, `SA`, `AAA`, `AA`, `A`, `B`],
-	rankRate: [97, 90, 85, 80, 75, 70, 50],
-	rankColor: [`#00ccff`, `#6600ff`, `#ff9900`, `#ff0000`, `#00ff00`, `#ff00ff`, `#cc00ff`],
-
-	rankMarkPF: `PF`,
-	rankColorPF: `#cccc00`,
-	rankMarkC: `C`,
-	rankColorC: `#cc9933`,
-	rankMarkF: `F`,
-	rankColorF: `#999999`,
-	rankMarkX: `X`,
-	rankColorX: `#996600`
-};
-
-let g_gameOverFlg = false;
-
-const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
-
-let g_audio = new Audio();
-let g_timeoutEvtId = 0;
-let g_timeoutEvtTitleId = 0;
-let g_inputKeyBuffer = [];
-
-// 歌詞制御
-const g_wordObj = {
-	wordDir: 0,
-	wordDat: ``,
-	fadeInFlg0: false,
-	fadeInFlg1: false,
-	fadeOutFlg0: false,
-	fadeOutFlg1: false
-};
-let g_wordSprite;
-
 /** 
  * メッセージ定義 
  * - 変数名は `C_MSG_X_YYYY` の形で、末尾に (X-YYYY) をつける。
@@ -943,6 +958,10 @@ if (g_checkStorage) {
 	// Adjustment初期値設定
 	if (g_localStorage.adjustment !== undefined) {
 		g_stateObj.adjustment = setVal(g_localStorage.adjustment, 0, `number`);
+		g_adjustmentNum = g_adjustments.findIndex(adjustment => adjustment === g_stateObj.adjustment);
+		if (g_volumeNum < 0) {
+			g_volumeNum = C_MAX_ADJUSTMENT;
+		}
 	} else {
 		g_localStorage.adjustment = 0;
 	}
@@ -2447,6 +2466,7 @@ function headerConvert(_dosObj) {
 	}
 	if (obj.initSpeeds[0] !== undefined) {
 		g_stateObj.speed = obj.initSpeeds[0];
+		g_speedNum = g_speeds.findIndex(speed => speed === g_stateObj.speed);
 	}
 	if (obj.lifeBorders[0] === `x`) {
 		g_stateObj.lifeBorder = 0;
@@ -2465,17 +2485,18 @@ function headerConvert(_dosObj) {
 		}
 	}
 
-	g_stateObj.lifeSetName = g_gaugeOptionObj[g_gaugeType.toLowerCase()][g_stateObj.lifeId];
+	g_gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
+	g_stateObj.gauge = g_gauges[g_gaugeNum];
 
-	if (g_gaugeOptionObj[`gauge${g_stateObj.lifeSetName}s`] != undefined) {
-		if (g_gaugeOptionObj[`gauge${g_stateObj.lifeSetName}s`].lifeBorders[0] === `x`) {
+	if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] != undefined) {
+		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`].lifeBorders[0] === `x`) {
 			g_stateObj.lifeBorder = 0;
 		} else {
-			g_stateObj.lifeBorder = g_gaugeOptionObj[`gauge${g_stateObj.lifeSetName}s`].lifeBorders[0];
+			g_stateObj.lifeBorder = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`].lifeBorders[0];
 		}
-		g_stateObj.lifeRcv = g_gaugeOptionObj[`gauge${g_stateObj.lifeSetName}s`].lifeRecoverys[0];
-		g_stateObj.lifeDmg = g_gaugeOptionObj[`gauge${g_stateObj.lifeSetName}s`].lifeDamages[0];
-		g_stateObj.lifeInit = g_gaugeOptionObj[`gauge${g_stateObj.lifeSetName}s`].lifeInits[0];
+		g_stateObj.lifeRcv = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`].lifeRecoverys[0];
+		g_stateObj.lifeDmg = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`].lifeDamages[0];
+		g_stateObj.lifeInit = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`].lifeInits[0];
 	} else {
 		g_stateObj.lifeRcv = obj.lifeRecoverys[0];
 		g_stateObj.lifeDmg = obj.lifeDamages[0];
@@ -3249,34 +3270,28 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblSpeed);
 
 	const lnkSpeed = makeSettingLblButton(`lnkSpeed`, ``, setNoSpeed, _ => {
-		g_stateObj.speed = (Number(g_stateObj.speed) < C_MAX_SPEED ? Number(g_stateObj.speed) + 0.25 : C_MIN_SPEED);
-		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
+		setSetting(1, `speed`, ` x`);
 	});
 	lnkSpeed.oncontextmenu = _ => {
-		g_stateObj.speed = (Number(g_stateObj.speed) > C_MIN_SPEED ? Number(g_stateObj.speed) - 0.25 : C_MAX_SPEED);
-		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
+		setSetting(-1, `speed`, ` x`);
 		return false;
 	}
 	optionsprite.appendChild(lnkSpeed);
 
-	// 右回し・左回しボタン
+	// 早右回し・早左回しボタン
 	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `R`, setNoSpeed, _ => {
-		g_stateObj.speed = (Number(g_stateObj.speed) < C_MAX_SPEED - 1 ? Number(g_stateObj.speed) + 1 : (Number(g_stateObj.speed) === C_MAX_SPEED ? C_MIN_SPEED : C_MAX_SPEED));
-		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
+		setSetting(4, `speed`, ` x`);
 	}));
 	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `L`, setNoSpeed, _ => {
-		g_stateObj.speed = (Number(g_stateObj.speed) > C_MIN_SPEED + 1 ? Number(g_stateObj.speed) - 1 : (Number(g_stateObj.speed) === C_MIN_SPEED ? C_MAX_SPEED : C_MIN_SPEED));
-		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
+		setSetting(-4, `speed`, ` x`);
 	}));
 
-	// 早右回し・早左回しボタン
+	// 右回し・左回しボタン
 	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `RR`, setNoSpeed, _ => {
-		g_stateObj.speed = (Number(g_stateObj.speed) < C_MAX_SPEED ? Number(g_stateObj.speed) + 0.25 : C_MIN_SPEED);
-		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
+		setSetting(1, `speed`, ` x`);
 	}));
 	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `LL`, setNoSpeed, _ => {
-		g_stateObj.speed = (Number(g_stateObj.speed) > C_MIN_SPEED ? Number(g_stateObj.speed) - 0.25 : C_MAX_SPEED);
-		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
+		setSetting(-1, `speed`, ` x`);
 	}));
 
 	// ---------------------------------------------------
@@ -3290,28 +3305,20 @@ function createOptionWindow(_sprite) {
 
 	if (g_headerObj.motionUse !== `false`) {
 		const lnkMotion = makeSettingLblButton(`lnkMotion`, g_stateObj.motion, setNoMotion, _ => {
-			g_motionNum = (g_motionNum === g_motions.length - 1 ? 0 : ++g_motionNum);
-			g_stateObj.motion = g_motions[g_motionNum];
-			lnkMotion.innerHTML = g_stateObj.motion;
+			setSetting(1, `motion`);
 		});
 		lnkMotion.oncontextmenu = _ => {
-			g_motionNum = (g_motionNum === 0 ? g_motions.length - 1 : --g_motionNum);
-			g_stateObj.motion = g_motions[g_motionNum];
-			lnkMotion.innerHTML = g_stateObj.motion;
+			setSetting(-1, `motion`);
 			return false;
 		}
 		optionsprite.appendChild(lnkMotion);
 
 		// 右回し・左回しボタン
 		optionsprite.appendChild(makeMiniButton(`lnkMotion`, `R`, setNoMotion, _ => {
-			g_motionNum = (g_motionNum === g_motions.length - 1 ? 0 : ++g_motionNum);
-			g_stateObj.motion = g_motions[g_motionNum];
-			lnkMotion.innerHTML = g_stateObj.motion;
+			setSetting(1, `motion`);
 		}));
 		optionsprite.appendChild(makeMiniButton(`lnkMotion`, `L`, setNoMotion, _ => {
-			g_motionNum = (g_motionNum === 0 ? g_motions.length - 1 : --g_motionNum);
-			g_stateObj.motion = g_motions[g_motionNum];
-			lnkMotion.innerHTML = g_stateObj.motion;
+			setSetting(-1, `motion`);
 		}));
 	} else {
 		lblMotion.style.color = `#666666`;
@@ -3328,24 +3335,20 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblReverse);
 
 	const lnkReverse = makeSettingLblButton(`lnkReverse`, ``, setNoReverse, _ => {
-		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkReverse.innerHTML = g_stateObj.reverse;
+		setSetting(1, `reverse`);
 	});
 	lnkReverse.oncontextmenu = _ => {
-		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkReverse.innerHTML = g_stateObj.reverse;
+		setSetting(-1, `reverse`);
 		return false;
 	}
 	optionsprite.appendChild(lnkReverse);
 
 	// 右回し・左回しボタン
 	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `R`, setNoReverse, _ => {
-		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkReverse.innerHTML = g_stateObj.reverse;
+		setSetting(1, `reverse`);
 	}));
 	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `L`, setNoReverse, _ => {
-		g_stateObj.reverse = (g_stateObj.reverse === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-		lnkReverse.innerHTML = g_stateObj.reverse;
+		setSetting(-1, `reverse`);
 	}));
 
 	// ---------------------------------------------------
@@ -3359,28 +3362,20 @@ function createOptionWindow(_sprite) {
 
 	if (g_headerObj.shuffleUse !== `false`) {
 		const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, setNoShuffle, _ => {
-			g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
-			g_stateObj.shuffle = g_shuffles[g_shuffleNum];
-			lnkShuffle.innerHTML = g_stateObj.shuffle;
+			setSetting(1, `shuffle`);
 		});
 		lnkShuffle.oncontextmenu = _ => {
-			g_shuffleNum = (g_shuffleNum === 0 ? g_shuffles.length - 1 : --g_shuffleNum);
-			g_stateObj.shuffle = g_shuffles[g_shuffleNum];
-			lnkShuffle.innerHTML = g_stateObj.shuffle;
+			setSetting(-1, `shuffle`);
 			return false;
 		}
 		optionsprite.appendChild(lnkShuffle);
 
 		// 右回し・左回しボタン
 		optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `R`, setNoShuffle, _ => {
-			g_shuffleNum = (g_shuffleNum === g_shuffles.length - 1 ? 0 : ++g_shuffleNum);
-			g_stateObj.shuffle = g_shuffles[g_shuffleNum];
-			lnkShuffle.innerHTML = g_stateObj.shuffle;
+			setSetting(1, `shuffle`);
 		}));
 		optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `L`, setNoShuffle, _ => {
-			g_shuffleNum = (g_shuffleNum === 0 ? g_shuffles.length - 1 : --g_shuffleNum);
-			g_stateObj.shuffle = g_shuffles[g_shuffleNum];
-			lnkShuffle.innerHTML = g_stateObj.shuffle;
+			setSetting(-1, `shuffle`);
 		}));
 	} else {
 		lblShuffle.style.color = `#666666`;
@@ -3397,29 +3392,25 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblAutoPlay);
 
 	if (g_headerObj.autoPlayUse !== `false`) {
-		const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.auto, setNoAutoPlay, _ => {
-			g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-			lnkAutoPlay.innerHTML = g_stateObj.auto;
+		const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.autoPlay, setNoAutoPlay, _ => {
+			setSetting(1, `autoPlay`);
 		});
 		lnkAutoPlay.oncontextmenu = _ => {
-			g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-			lnkAutoPlay.innerHTML = g_stateObj.auto;
+			setSetting(-1, `autoPlay`);
 			return false;
 		}
 		optionsprite.appendChild(lnkAutoPlay);
 
 		// 右回し・左回しボタン
 		optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `R`, setNoAutoPlay, _ => {
-			g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-			lnkAutoPlay.innerHTML = g_stateObj.auto;
+			setSetting(1, `autoPlay`);
 		}));
 		optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `L`, setNoAutoPlay, _ => {
-			g_stateObj.auto = (g_stateObj.auto === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-			lnkAutoPlay.innerHTML = g_stateObj.auto;
+			setSetting(-1, `autoPlay`);
 		}));
 	} else {
 		lblAutoPlay.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lnkAutoPlay`, setNoAutoPlay, g_stateObj.auto));
+		optionsprite.appendChild(makeDisabledLabel(`lnkAutoPlay`, setNoAutoPlay, g_stateObj.autoPlay));
 	}
 
 	// ---------------------------------------------------
@@ -3439,68 +3430,62 @@ function createOptionWindow(_sprite) {
 	if (g_headerObj.gaugeUse !== `false`) {
 		const lnkGauge = makeSettingLblButton(`lnkGauge`,
 			``, setNoGauge, _ => {
-				g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
-				gaugeChange(g_stateObj.lifeId);
-
-				lnkGauge.innerHTML = g_stateObj.lifeSetName;
-				lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
+				setGauge(1);
 			});
 		lnkGauge.oncontextmenu = _ => {
-			g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
-			gaugeChange(g_stateObj.lifeId);
-
-			lnkGauge.innerHTML = g_stateObj.lifeSetName;
-			lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
+			setGauge(-1);
 			return false;
 		}
 		optionsprite.appendChild(lnkGauge);
 
 		// 右回し・左回しボタン
 		optionsprite.appendChild(makeMiniButton(`lnkGauge`, `R`, setNoGauge, _ => {
-			g_stateObj.lifeId = (g_stateObj.lifeId + 1 >= g_gaugeOptionObj[g_gaugeType.toLowerCase()].length ? 0 : ++g_stateObj.lifeId);
-			gaugeChange(g_stateObj.lifeId);
-
-			lnkGauge.innerHTML = g_stateObj.lifeSetName;
-			lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
+			setGauge(1);
 		}));
 		optionsprite.appendChild(makeMiniButton(`lnkGauge`, `L`, setNoGauge, _ => {
-			g_stateObj.lifeId = (g_stateObj.lifeId === 0 ? g_gaugeOptionObj[g_gaugeType.toLowerCase()].length - 1 : --g_stateObj.lifeId);
-			gaugeChange(g_stateObj.lifeId);
-
-			lnkGauge.innerHTML = g_stateObj.lifeSetName;
-			lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
+			setGauge(-1);
 		}));
 	} else {
 		lblGauge.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lnkGauge`, setNoGauge, g_stateObj.lifeSetName));
+		optionsprite.appendChild(makeDisabledLabel(`lnkGauge`, setNoGauge, g_stateObj.gauge));
+	}
+
+	/**
+	 * ゲージ設定メイン
+	 * @param {number} _scrollNum 
+	 */
+	function setGauge(_scrollNum) {
+		gaugeChange(g_gaugeNum);
+		setSetting(_scrollNum, `gauge`);
+		document.querySelector(`#lblGauge2`).innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 	}
 
 	/**
 	 * ゲージ設定の切替処理
-	 * @param {number} _lifeId 
+	 * @param {number} _gaugeNum 
 	 */
-	function gaugeChange(_lifeId) {
-		g_stateObj.lifeSetName = g_gaugeOptionObj[g_gaugeType.toLowerCase()][_lifeId];
-		g_stateObj.lifeMode = g_gaugeOptionObj[`type${g_gaugeType}`][_lifeId];
+	function gaugeChange(_gaugeNum) {
+		g_stateObj.gauge = g_gauges[g_gaugeNum];
+		g_stateObj.lifeMode = g_gaugeOptionObj[`type${g_gaugeType}`][_gaugeNum];
 
-		g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${g_gaugeType}`][_lifeId];
-		g_stateObj.lifeInit = g_gaugeOptionObj[`init${g_gaugeType}`][_lifeId];
-		g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${g_gaugeType}`][_lifeId];
-		g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${g_gaugeType}`][_lifeId];
+		g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${g_gaugeType}`][_gaugeNum];
+		g_stateObj.lifeInit = g_gaugeOptionObj[`init${g_gaugeType}`][_gaugeNum];
+		g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${g_gaugeType}`][_gaugeNum];
+		g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${g_gaugeType}`][_gaugeNum];
 
-		if (_lifeId === 0) {
+		if (_gaugeNum === 0) {
 			if (setVal(g_headerObj.lifeBorders[g_stateObj.scoreId], ``, `string`) !== ``) {
 				if (g_headerObj.lifeBorders[g_stateObj.scoreId] === `x`) {
 					g_gaugeType = C_LFE_SURVIVAL;
 					g_stateObj.lifeBorder = 0;
 					g_stateObj.lifeMode = C_LFE_SURVIVAL;
-					g_stateObj.lifeSetName = g_gaugeOptionObj[g_gaugeType.toLowerCase()][_lifeId];
 				} else {
 					g_gaugeType = C_LFE_BORDER;
 					g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
 					g_stateObj.lifeMode = C_LFE_BORDER;
-					g_stateObj.lifeSetName = g_gaugeOptionObj[g_gaugeType.toLowerCase()][_lifeId];
 				}
+				g_gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
+				g_stateObj.gauge = g_gauges[g_gaugeNum];
 			}
 			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], ``, `number`) !== ``) {
 				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
@@ -3512,7 +3497,7 @@ function createOptionWindow(_sprite) {
 				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
 			}
 
-		} else if (g_stateObj.lifeSetName == `Light` || g_stateObj.lifeSetName == `Easy`) {
+		} else if (g_stateObj.gauge == `Light` || g_stateObj.gauge == `Easy`) {
 			// ゲージ設定がLight/Easyのとき、Original/Normalに合わせて設定を見直す
 
 			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], ``, `number`) !== ``) {
@@ -3529,8 +3514,8 @@ function createOptionWindow(_sprite) {
 		// ゲージ設定別に個別設定した場合はここで設定を上書き
 		const tmpScoreId = g_stateObj.scoreId;
 
-		if (g_gaugeOptionObj[`gauge${g_stateObj.lifeSetName}s`] != undefined) {
-			const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.lifeSetName}s`];
+		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] != undefined) {
+			const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
 
 			if (setVal(tmpGaugeObj.lifeBorders[tmpScoreId], `string`) != ``) {
 				if (tmpGaugeObj.lifeBorders[tmpScoreId] === `x`) {
@@ -3576,33 +3561,27 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblAdjustment);
 
 	const lnkAdjustment = makeSettingLblButton(`lnkAdjustment`, g_stateObj.adjustment, setNoAdjustment, _ => {
-		g_stateObj.adjustment = (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : ++g_stateObj.adjustment);
-		lnkAdjustment.innerHTML = g_stateObj.adjustment;
+		setSetting(1, `adjustment`);
 	});
 	lnkAdjustment.oncontextmenu = _ => {
-		g_stateObj.adjustment = (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : --g_stateObj.adjustment);
-		lnkAdjustment.innerHTML = g_stateObj.adjustment;
+		setSetting(-1, `adjustment`);
 		return false;
 	}
 	optionsprite.appendChild(lnkAdjustment);
 
-	// 右回し・左回しボタン
+	// 早右回し・早左回しボタン
 	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `R`, setNoAdjustment, _ => {
-		g_stateObj.adjustment = (g_stateObj.adjustment >= C_MAX_ADJUSTMENT - 5 ? (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : C_MAX_ADJUSTMENT) : g_stateObj.adjustment + 5);
-		lnkAdjustment.innerHTML = g_stateObj.adjustment;
+		setSetting(5, `adjustment`);
 	}));
 	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `L`, setNoAdjustment, _ => {
-		g_stateObj.adjustment = (g_stateObj.adjustment <= -(C_MAX_ADJUSTMENT - 5) ? (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : -C_MAX_ADJUSTMENT) : g_stateObj.adjustment - 5);
-		lnkAdjustment.innerHTML = g_stateObj.adjustment;
+		setSetting(-5, `adjustment`);
 	}));
-	// 早右回し・早左回しボタン
+	// 右回し・左回しボタン
 	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `RR`, setNoAdjustment, _ => {
-		g_stateObj.adjustment = (g_stateObj.adjustment === C_MAX_ADJUSTMENT ? -C_MAX_ADJUSTMENT : ++g_stateObj.adjustment);
-		lnkAdjustment.innerHTML = g_stateObj.adjustment;
+		setSetting(1, `adjustment`);
 	}));
 	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `LL`, setNoAdjustment, _ => {
-		g_stateObj.adjustment = (g_stateObj.adjustment === -C_MAX_ADJUSTMENT ? C_MAX_ADJUSTMENT : --g_stateObj.adjustment);
-		lnkAdjustment.innerHTML = g_stateObj.adjustment;
+		setSetting(-1, `adjustment`);
 	}));
 
 	// ---------------------------------------------------
@@ -3664,28 +3643,20 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblVolume);
 
 	const lnkVolume = makeSettingLblButton(`lnkVolume`, `${g_stateObj.volume}%`, setNoVolume, _ => {
-		g_volumeNum = (g_volumeNum === 0 ? g_volumes.length - 1 : --g_volumeNum);
-		g_stateObj.volume = g_volumes[g_volumeNum];
-		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
+		setSetting(1, `volume`, `%`);
 	});
 	lnkVolume.oncontextmenu = _ => {
-		g_volumeNum = (g_volumeNum === g_volumes.length - 1 ? 0 : ++g_volumeNum);
-		g_stateObj.volume = g_volumes[g_volumeNum];
-		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
+		setSetting(-1, `volume`, `%`);
 		return false;
 	}
 	optionsprite.appendChild(lnkVolume);
 
 	// 右回し・左回しボタン
 	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `R`, setNoVolume, _ => {
-		g_volumeNum = (g_volumeNum === 0 ? g_volumes.length - 1 : --g_volumeNum);
-		g_stateObj.volume = g_volumes[g_volumeNum];
-		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
+		setSetting(1, `volume`, `%`);
 	}));
 	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `L`, setNoVolume, _ => {
-		g_volumeNum = (g_volumeNum === g_volumes.length - 1 ? 0 : ++g_volumeNum);
-		g_stateObj.volume = g_volumes[g_volumeNum];
-		lnkVolume.innerHTML = `${g_stateObj.volume}%`;
+		setSetting(-1, `volume`, `%`);
 	}));
 
 	// ---------------------------------------------------
@@ -3701,6 +3672,22 @@ function createOptionWindow(_sprite) {
 			_defaultStr);
 		lbl.style.textAlign = C_ALIGN_CENTER;
 		return lbl;
+	}
+
+	/**
+	 * 設定メイン・汎用
+	 * @param {number} _scrollNum 
+	 * @param {string} _settingName
+	 * @param {string} _unitName
+	 */
+	function setSetting(_scrollNum, _settingName, _unitName = ``) {
+		if (_scrollNum > 0) {
+			eval(`g_${_settingName}Num = (g_${_settingName}Num === g_${_settingName}s.length - 1 ? 0 : (g_${_settingName}Num + _scrollNum >= g_${_settingName}s.length ? g_${_settingName}s.length - 1 : g_${_settingName}Num + _scrollNum))`);
+		} else if (_scrollNum < 0) {
+			eval(`g_${_settingName}Num = (g_${_settingName}Num === 0 ? g_${_settingName}s.length - 1 : (g_${_settingName}Num + _scrollNum <= 0 ? 0 : g_${_settingName}Num + _scrollNum))`);
+		}
+		eval(`g_stateObj.${_settingName} = g_${_settingName}s[g_${_settingName}Num]`);
+		eval(`document.querySelector('#lnk${_settingName.slice(0, 1).toUpperCase()}${_settingName.slice(1)}').innerHTML = g_stateObj.${_settingName} + _unitName`);
 	}
 
 	/**
@@ -3735,7 +3722,11 @@ function createOptionWindow(_sprite) {
 
 			// 速度、ゲージ、リバースの初期設定
 			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
-			g_stateObj.lifeId = 0;
+			g_speedNum = g_speeds.findIndex(speed => speed === g_stateObj.speed);
+			if (g_speedNum < 0) {
+				g_speedNum = 0;
+			}
+			g_gaugeNum = 0;
 			if (!g_stateObj.extraKeyFlg) {
 				g_localKeyStorage.reverse = C_FLG_OFF;
 			}
@@ -3818,15 +3809,13 @@ function createOptionWindow(_sprite) {
 		}
 
 		// 速度設定 (Speed)
-		lnkSpeed.innerHTML = `${g_stateObj.speed} x`;
+		setSetting(0, `speed`, ` x`);
 
 		// リバース設定 (Reverse)
-		lnkReverse.innerHTML = g_stateObj.reverse;
+		setSetting(0, `reverse`);
 
 		// ゲージ設定 (Gauge)
-		gaugeChange(g_stateObj.lifeId);
-		lnkGauge.innerHTML = g_stateObj.lifeSetName;
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
+		setGauge(0);
 
 		// ---------------------------------------------------
 		// 4. 譜面初期情報ロード許可フラグの設定
@@ -6178,7 +6167,7 @@ function MainInit() {
 		}
 		g_inputKeyBuffer[setKey] = true;
 
-		eval(`mainKeyDownAct${g_stateObj.auto}`)(setKey);
+		eval(`mainKeyDownAct${g_stateObj.autoPlay}`)(setKey);
 
 		// 曲中リトライ、タイトルバック
 		if (setKey === 8) {
@@ -6242,7 +6231,7 @@ function MainInit() {
 		}
 		g_inputKeyBuffer[setKey] = false;
 
-		eval(`mainKeyUpAct${g_stateObj.auto}`)();
+		eval(`mainKeyUpAct${g_stateObj.autoPlay}`)();
 	}
 
 	/**
@@ -6407,7 +6396,7 @@ function MainInit() {
 				}
 				arrow.setAttribute(`cnt`, --cnt);
 
-				if (g_stateObj.auto === C_FLG_ON) {
+				if (g_stateObj.autoPlay === C_FLG_ON) {
 					if (cnt === 0) {
 						judgeIi(cnt);
 						stepDivHit.style.opacity = 1;
@@ -6526,7 +6515,7 @@ function MainInit() {
 						}
 						frzRoot.setAttribute(`cnt`, --cnt);
 
-						if (g_stateObj.auto === C_FLG_ON && cnt === 0) {
+						if (g_stateObj.autoPlay === C_FLG_ON && cnt === 0) {
 							changeHitFrz(j, k);
 						}
 					} else {
@@ -6565,7 +6554,7 @@ function MainInit() {
 									break;
 								}
 							}
-							if (!keyDownFlg && g_stateObj.auto === C_FLG_OFF) {
+							if (!keyDownFlg && g_stateObj.autoPlay === C_FLG_OFF) {
 								frzRoot.setAttribute(`frzAttempt`, ++frzAttempt);
 
 								if (frzAttempt > C_FRM_FRZATTEMPT) {
@@ -7379,7 +7368,7 @@ function resultInit() {
 	if (g_gameOverFlg) {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
-	} else if (playingArrows === fullArrows && g_stateObj.auto === C_FLG_OFF) {
+	} else if (playingArrows === fullArrows && g_stateObj.autoPlay === C_FLG_OFF) {
 		if (g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai === 0) {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
@@ -7447,8 +7436,8 @@ function resultInit() {
 	if (g_stateObj.reverse !== C_FLG_OFF) {
 		playStyleData += `, Reverse`;
 	}
-	if (g_stateObj.lifeSetName !== `Original` && g_stateObj.lifeSetName !== `Normal`) {
-		playStyleData += `, ${g_stateObj.lifeSetName}`;
+	if (g_stateObj.gauge !== `Original` && g_stateObj.gauge !== `Normal`) {
+		playStyleData += `, ${g_stateObj.gauge}`;
 	}
 	playDataWindow.appendChild(makeResultPlayData(`lblStyleData`, 60, `#cccccc`, 3,
 		playStyleData, C_ALIGN_CENTER));
@@ -7573,7 +7562,7 @@ function resultInit() {
 	let fmaxComboDf = 0;
 	let scoreDf = 0;
 
-	if (g_stateObj.auto === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
+	if (g_stateObj.autoPlay === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
 		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, `string`) === ``) {
 
 		if (scoreName in g_localStorage.highscores) {
