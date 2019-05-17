@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/16
+ * Revised : 2019/05/17
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.0.0`;
-const g_revisedDate = `2019/05/16`;
+const g_version = `Ver 5.0.1`;
+const g_revisedDate = `2019/05/17`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -355,8 +355,8 @@ let g_autoPlayNum = 0;
 const g_adjustments = [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT);
 let g_adjustmentNum = C_MAX_ADJUSTMENT;
 
-const g_volumes = [100, 75, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0];
-let g_volumeNum = 0;
+const g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
+let g_volumeNum = g_volumes.length - 1;
 
 // サイズ(後で指定)
 let g_sWidth;
@@ -3455,8 +3455,17 @@ function createOptionWindow(_sprite) {
 	 * @param {number} _scrollNum 
 	 */
 	function setGauge(_scrollNum) {
-		gaugeChange(g_gaugeNum);
+
+		// カーソルを動かさない場合は先にゲージ設定をリロード
+		if (_scrollNum === 0) {
+			gaugeChange(g_gaugeNum);
+		}
 		setSetting(_scrollNum, `gauge`);
+
+		// カーソルを動かす場合は設定変更後にゲージ設定を再設定
+		if (_scrollNum !== 0) {
+			gaugeChange(g_gaugeNum);
+		}
 		document.querySelector(`#lblGauge2`).innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
 	}
 
@@ -3465,7 +3474,6 @@ function createOptionWindow(_sprite) {
 	 * @param {number} _gaugeNum 
 	 */
 	function gaugeChange(_gaugeNum) {
-		g_stateObj.gauge = g_gauges[g_gaugeNum];
 		g_stateObj.lifeMode = g_gaugeOptionObj[`type${g_gaugeType}`][_gaugeNum];
 
 		g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${g_gaugeType}`][_gaugeNum];
