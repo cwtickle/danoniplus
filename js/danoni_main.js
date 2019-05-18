@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/17
+ * Revised : 2019/05/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.0.2`;
-const g_revisedDate = `2019/05/17`;
+const g_version = `Ver 5.0.3`;
+const g_revisedDate = `2019/05/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3758,6 +3758,10 @@ function createOptionWindow(_sprite) {
 					// リバース初期値設定
 					if (g_localKeyStorage.reverse !== undefined) {
 						g_stateObj.reverse = setVal(g_localKeyStorage.reverse, C_FLG_OFF, `string`);
+						g_reverseNum = g_reverses.findIndex(reverse => reverse === g_stateObj.reverse);
+						if (g_reverseNum < 0) {
+							g_reverseNum = 0;
+						}
 					}
 
 					// キーコンフィグ初期値設定
