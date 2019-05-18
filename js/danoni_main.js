@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.0.3`;
+const g_version = `Ver 5.1.0`;
 const g_revisedDate = `2019/05/18`;
 const g_alphaVersion = ``;
 
@@ -1964,6 +1964,7 @@ function titleInit() {
 
 	// 曲名文字描画（曲名は譜面データから取得）
 	let titlefontgrd = ``;
+	let titlefontgrd2 = ``;
 	if (g_headerObj.customTitleUse === `false`) {
 
 		// グラデーションの指定がない場合、
@@ -1995,6 +1996,22 @@ function titleInit() {
 		// グラデーションが1色しか指定されていない場合、自動的に補完する
 		if (titlefontgrd.split(`#`).length <= 2) {
 			titlefontgrd += `,#ffffff`;
+		}
+
+		if (g_headerObj.titlegrds.length > 1 && setVal(g_headerObj.titlegrds[1], ``, `string`) !== ``) {
+
+			// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
+			titlefontgrd2 = g_headerObj.titlegrds[1];
+			if (titlefontgrd2[0] === `#`) {
+				titlefontgrd2 = `to right,${titlefontgrd2}`;
+			}
+
+			// グラデーションが1色しか指定されていない場合、自動的に補完する
+			if (titlefontgrd2.split(`#`).length <= 2) {
+				titlefontgrd2 += `,#ffffff`;
+			}
+		} else {
+			titlefontgrd2 = titlefontgrd;
 		}
 
 		let titlefontsize = 64 * (12 / g_headerObj.musicTitleForView[0].length);
@@ -2046,7 +2063,13 @@ function titleInit() {
 				color: #ffffff;
 			">
 				${g_headerObj.musicTitleForView[0]}<br>
-				<span style="font-size:${titlefontsize2}px;">
+				<span style="
+					font-size:${titlefontsize2}px;
+					background: linear-gradient(${titlefontgrd2});
+					background-clip: text;
+					-webkit-background-clip: text;
+					-webkit-text-fill-color: rgba(255,255,255,0.0);
+				">
 					${setVal(g_headerObj.musicTitleForView[1], ``, `string`)}
 				</span>
 			</span>`
@@ -2703,7 +2726,12 @@ function headerConvert(_dosObj) {
 	obj.titlefont = setVal(_dosObj.titlefont, ``, `string`);
 
 	// デフォルト曲名表示のグラデーション指定css
-	obj.titlegrd = setVal(_dosObj.titlegrd, ``, `string`);
+	obj.titlegrds = [];
+	if (_dosObj.titlegrd !== undefined) {
+		const tmpTitlegrd = _dosObj.titlegrd.replace(`0x`, `#`);
+		obj.titlegrds = tmpTitlegrd.split(`$`);
+		obj.titlegrd = setVal(obj.titlegrds[0], ``, `string`);
+	}
 
 	// デフォルト曲名表示の表示位置調整
 	obj.titlepos = setVal(_dosObj.titlepos, ``, `string`);
