@@ -5487,11 +5487,8 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 			}
 		}
-	}
 
-	for (let j = 0; j < _dataObj.shadowArrowData.length; j++) {
-
-		// 矢印の出現フレーム数計算
+		// 矢印(影)の出現フレーム数計算
 		if (_dataObj.shadowArrowData[j] !== undefined) {
 
 			startPoint[j] = [];
@@ -5562,9 +5559,6 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 			}
 		}
-	}
-
-	for (let j = 0; j < _dataObj.frzData.length; j++) {
 
 		// フリーズアローの出現フレーム数計算
 		if (_dataObj.frzData[j] !== undefined) {
@@ -5652,11 +5646,8 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 			}
 		}
-	}
 
-	for (let j = 0; j < _dataObj.shadowFrzData.length; j++) {
-
-		// フリーズアローの出現フレーム数計算
+		// フリーズアロー(影)の出現フレーム数計算
 		if (_dataObj.shadowFrzData[j] !== undefined) {
 
 			frzStartPoint[j] = [];
@@ -5679,7 +5670,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			g_workObj.initY[frmPrev] = tmpObj.startY;
 			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 			g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-			g_workObj.mkFrzLength[j][lastk] = getFrzLength(_speedOnFrame,
+			g_workObj.mkShadowFrzLength[j][lastk] = getFrzLength(_speedOnFrame,
 				_dataObj.shadowFrzData[j][lastk], _dataObj.shadowFrzData[j][lastk + 1]);
 
 			if (g_workObj.mkShadowFrzArrow[frzStartPoint[j][lastk]] === undefined) {
@@ -5728,7 +5719,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 				// フリーズアローの出現タイミングを保存
 				if (frzStartPoint[j][k] >= 0) {
-					g_workObj.mkFrzLength[j][k] = getFrzLength(_speedOnFrame,
+					g_workObj.mkShadowFrzLength[j][k] = getFrzLength(_speedOnFrame,
 						_dataObj.shadowFrzData[j][k], _dataObj.shadowFrzData[j][k + 1]);
 					if (g_workObj.mkShadowFrzArrow[frzStartPoint[j][k]] === undefined) {
 						g_workObj.mkShadowFrzArrow[frzStartPoint[j][k]] = [];
@@ -5736,8 +5727,8 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 					g_workObj.mkShadowFrzArrow[frzStartPoint[j][k]].push(j);
 
 				} else {
-					if (g_workObj.mkFrzLength[j] !== undefined) {
-						g_workObj.mkFrzLength[j] = JSON.parse(JSON.stringify(g_workObj.mkFrzLength[j].slice(k + 2)));
+					if (g_workObj.mkShadowFrzLength[j] !== undefined) {
+						g_workObj.mkShadowFrzLength[j] = JSON.parse(JSON.stringify(g_workObj.mkShadowFrzLength[j].slice(k + 2)));
 					}
 				}
 			}
