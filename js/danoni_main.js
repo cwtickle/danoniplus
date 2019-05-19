@@ -6644,7 +6644,8 @@ function MainInit() {
 		// 矢印生成
 		if (g_workObj.mkArrow[g_scoreObj.frameNum] !== undefined) {
 			for (let j = 0, len = g_workObj.mkArrow[g_scoreObj.frameNum].length; j < len; j++) {
-
+				makeArrow(g_workObj.mkArrow[g_scoreObj.frameNum][j]);
+				/*
 				const targetj = g_workObj.mkArrow[g_scoreObj.frameNum][j];
 				const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[targetj];
 
@@ -6658,7 +6659,24 @@ function MainInit() {
 				step.setAttribute(`boostSpd`, boostSpdDir);
 
 				mainSprite.appendChild(step);
+				*/
 			}
+		}
+
+		function makeArrow(_arrowObj) {
+			const targetj = _arrowObj;
+			const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[targetj];
+
+			const step = createArrowEffect(`arrow${targetj}_${++arrowCnts[targetj]}`, g_workObj.arrowColors[targetj],
+				g_workObj.stepX[targetj],
+				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir, 50,
+				g_workObj.stepRtn[targetj]);
+			step.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum]);
+			step.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
+			step.setAttribute(`judgEndFlg`, `false`);
+			step.setAttribute(`boostSpd`, boostSpdDir);
+
+			mainSprite.appendChild(step);
 		}
 
 		// 矢印移動＆消去
