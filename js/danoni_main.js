@@ -1956,7 +1956,7 @@ function titleInit() {
 
 	// 背景の矢印オブジェクトを表示
 	if (g_headerObj.customTitleArrowUse === `false`) {
-		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj.setColorDefault[0], (g_sWidth - 500) / 2, -15, 500, 180);
+		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj.setColorDefault[0], (g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2, 500, 180);
 		lblArrow.style.opacity = 0.25;
 		lblArrow.style.zIndex = 0;
 		divRoot.appendChild(lblArrow);
@@ -3251,7 +3251,7 @@ function musicAfterLoaded() {
 function createOptionWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 85, 400, 300);
+	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 85 + (g_sHeight - 500) / 2, 400, 300);
 
 	// ---------------------------------------------------
 	// 難易度 (Difficulty)
@@ -4064,7 +4064,7 @@ function settingsDisplayInit() {
 function createSettingsDisplayWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 100, 400, 300);
+	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 100 + (g_sHeight - 500) / 2, 400, 300);
 
 	const divRoot = document.querySelector(`#divRoot`);
 	const sdDesc = createDivLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14, C_CLR_TITLE,
@@ -4143,7 +4143,7 @@ function keyConfigInit() {
 	divRoot.appendChild(kcDesc);
 
 	// キーの一覧を表示
-	const keyconSprite = createSprite(`divRoot`, `keyconSprite`, (g_sWidth - 400) / 2, 100, 400, 300);
+	const keyconSprite = createSprite(`divRoot`, `keyconSprite`, (g_sWidth - 400) / 2, 100 + (g_sHeight - 500) / 2, 400, 300);
 	const kWidth = parseInt(keyconSprite.style.width);
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -7374,9 +7374,9 @@ function resultInit() {
 		`<span style=color:#6666ff;font-size:40px>R</span>ESULT`, 0, 15);
 	divRoot.appendChild(lblTitle);
 
-	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70, 450, 110);
+	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70 + (g_sHeight - 500) / 2, 450, 110);
 	playDataWindow.style.border = `solid 0.5px #666666`;
-	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 180, 185, 360, 210);
+	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 180, 185 + (g_sHeight - 500) / 2, 360, 210);
 
 	// 画面背景を指定 (background-color)
 	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
