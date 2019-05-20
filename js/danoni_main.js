@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/19
+ * Revised : 2019/05/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.1.1`;
-const g_revisedDate = `2019/05/19`;
+const g_version = `Ver 5.2.0`;
+const g_revisedDate = `2019/05/20`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -334,28 +334,28 @@ const g_gaugeOptionObj = {
 };
 let g_gaugeType;
 
-const g_speeds = [...Array((C_MAX_SPEED - C_MIN_SPEED) * 4 + 1).keys()].map(i => C_MIN_SPEED + i / 4);
+let g_speeds = [...Array((C_MAX_SPEED - C_MIN_SPEED) * 4 + 1).keys()].map(i => C_MIN_SPEED + i / 4);
 let g_speedNum = 0;
 
-const g_motions = [C_FLG_OFF, `Boost`, `Brake`];
+let g_motions = [C_FLG_OFF, `Boost`, `Brake`];
 let g_motionNum = 0;
 
-const g_reverses = [C_FLG_OFF, C_FLG_ON];
+let g_reverses = [C_FLG_OFF, C_FLG_ON];
 let g_reverseNum = 0;
 
-const g_shuffles = [C_FLG_OFF, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
+let g_shuffles = [C_FLG_OFF, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
 let g_shuffleNum = 0;
 
 let g_gauges = [];
 let g_gaugeNum = 0;
 
-const g_autoPlays = [C_FLG_OFF, C_FLG_ON];
+let g_autoPlays = [C_FLG_OFF, C_FLG_ON];
 let g_autoPlayNum = 0;
 
-const g_adjustments = [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT);
+let g_adjustments = [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT);
 let g_adjustmentNum = C_MAX_ADJUSTMENT;
 
-const g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
+let g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
 let g_volumeNum = g_volumes.length - 1;
 
 // サイズ(後で指定)
@@ -1956,7 +1956,7 @@ function titleInit() {
 
 	// 背景の矢印オブジェクトを表示
 	if (g_headerObj.customTitleArrowUse === `false`) {
-		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj.setColorDefault[0], (g_sWidth - 500) / 2, -15, 500, 180);
+		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj.setColorDefault[0], (g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2, 500, 180);
 		lblArrow.style.opacity = 0.25;
 		lblArrow.style.zIndex = 0;
 		divRoot.appendChild(lblArrow);
@@ -2440,6 +2440,16 @@ function headerConvert(_dosObj) {
 		obj.artistUrl = location.href;
 	}
 
+	// 最小・最大速度の設定
+	obj.minSpeed = Math.round(setVal(_dosObj.minSpeed, C_MIN_SPEED, `float`) * 4) / 4;
+	obj.maxSpeed = Math.round(setVal(_dosObj.maxSpeed, C_MAX_SPEED, `float`) * 4) / 4;
+	if (obj.minSpeed > obj.maxSpeed || obj.minSpeed < 0.5 || obj.maxSpeed < 0.5) {
+		obj.minSpeed = C_MIN_SPEED;
+		obj.maxSpeed = C_MAX_SPEED;
+	}
+	g_speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 4 + 1).keys()].map(i => obj.minSpeed + i / 4);
+
+
 	// 譜面情報
 	if (_dosObj.difData !== undefined && _dosObj.difData !== ``) {
 		const difs = _dosObj.difData.split(`$`);
@@ -2490,6 +2500,9 @@ function headerConvert(_dosObj) {
 	if (obj.initSpeeds[0] !== undefined) {
 		g_stateObj.speed = obj.initSpeeds[0];
 		g_speedNum = g_speeds.findIndex(speed => speed === g_stateObj.speed);
+		if (g_speedNum < 0) {
+			g_speedNum = 0;
+		}
 	}
 	if (obj.lifeBorders[0] === `x`) {
 		g_stateObj.lifeBorder = 0;
@@ -3251,7 +3264,7 @@ function musicAfterLoaded() {
 function createOptionWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 85, 400, 300);
+	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 85 + (g_sHeight - 500) / 2, 400, 300);
 
 	// ---------------------------------------------------
 	// 難易度 (Difficulty)
@@ -4064,7 +4077,7 @@ function settingsDisplayInit() {
 function createSettingsDisplayWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 100, 400, 300);
+	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 100 + (g_sHeight - 500) / 2, 400, 300);
 
 	const divRoot = document.querySelector(`#divRoot`);
 	const sdDesc = createDivLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14, C_CLR_TITLE,
@@ -4143,7 +4156,7 @@ function keyConfigInit() {
 	divRoot.appendChild(kcDesc);
 
 	// キーの一覧を表示
-	const keyconSprite = createSprite(`divRoot`, `keyconSprite`, (g_sWidth - 400) / 2, 100, 400, 300);
+	const keyconSprite = createSprite(`divRoot`, `keyconSprite`, (g_sWidth - 400) / 2, 100 + (g_sHeight - 500) / 2, 400, 300);
 	const kWidth = parseInt(keyconSprite.style.width);
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -7374,9 +7387,9 @@ function resultInit() {
 		`<span style=color:#6666ff;font-size:40px>R</span>ESULT`, 0, 15);
 	divRoot.appendChild(lblTitle);
 
-	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70, 450, 110);
+	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70 + (g_sHeight - 500) / 2, 450, 110);
 	playDataWindow.style.border = `solid 0.5px #666666`;
-	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 180, 185, 360, 210);
+	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 180, 185 + (g_sHeight - 500) / 2, 360, 210);
 
 	// 画面背景を指定 (background-color)
 	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
