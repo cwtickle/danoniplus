@@ -334,28 +334,28 @@ const g_gaugeOptionObj = {
 };
 let g_gaugeType;
 
-const g_speeds = [...Array((C_MAX_SPEED - C_MIN_SPEED) * 4 + 1).keys()].map(i => C_MIN_SPEED + i / 4);
+let g_speeds = [...Array((C_MAX_SPEED - C_MIN_SPEED) * 4 + 1).keys()].map(i => C_MIN_SPEED + i / 4);
 let g_speedNum = 0;
 
-const g_motions = [C_FLG_OFF, `Boost`, `Brake`];
+let g_motions = [C_FLG_OFF, `Boost`, `Brake`];
 let g_motionNum = 0;
 
-const g_reverses = [C_FLG_OFF, C_FLG_ON];
+let g_reverses = [C_FLG_OFF, C_FLG_ON];
 let g_reverseNum = 0;
 
-const g_shuffles = [C_FLG_OFF, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
+let g_shuffles = [C_FLG_OFF, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
 let g_shuffleNum = 0;
 
 let g_gauges = [];
 let g_gaugeNum = 0;
 
-const g_autoPlays = [C_FLG_OFF, C_FLG_ON];
+let g_autoPlays = [C_FLG_OFF, C_FLG_ON];
 let g_autoPlayNum = 0;
 
-const g_adjustments = [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT);
+let g_adjustments = [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT);
 let g_adjustmentNum = C_MAX_ADJUSTMENT;
 
-const g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
+let g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
 let g_volumeNum = g_volumes.length - 1;
 
 // サイズ(後で指定)
@@ -2440,6 +2440,16 @@ function headerConvert(_dosObj) {
 		obj.artistUrl = location.href;
 	}
 
+	// 最小・最大速度の設定
+	obj.minSpeed = Math.round(setVal(_dosObj.minSpeed, C_MIN_SPEED, `float`) * 4) / 4;
+	obj.maxSpeed = Math.round(setVal(_dosObj.maxSpeed, C_MAX_SPEED, `float`) * 4) / 4;
+	if (obj.minSpeed > obj.maxSpeed || obj.minSpeed < 0.5 || obj.maxSpeed < 0.5) {
+		obj.minSpeed = C_MIN_SPEED;
+		obj.maxSpeed = C_MAX_SPEED;
+	}
+	g_speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 4 + 1).keys()].map(i => obj.minSpeed + i / 4);
+
+
 	// 譜面情報
 	if (_dosObj.difData !== undefined && _dosObj.difData !== ``) {
 		const difs = _dosObj.difData.split(`$`);
@@ -2490,6 +2500,9 @@ function headerConvert(_dosObj) {
 	if (obj.initSpeeds[0] !== undefined) {
 		g_stateObj.speed = obj.initSpeeds[0];
 		g_speedNum = g_speeds.findIndex(speed => speed === g_stateObj.speed);
+		if (g_speedNum < 0) {
+			g_speedNum = 0;
+		}
 	}
 	if (obj.lifeBorders[0] === `x`) {
 		g_stateObj.lifeBorder = 0;
