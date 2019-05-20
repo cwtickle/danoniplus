@@ -2443,7 +2443,7 @@ function headerConvert(_dosObj) {
 	// 最小・最大速度の設定
 	obj.minSpeed = Math.round(setVal(_dosObj.minSpeed, C_MIN_SPEED, `float`) * 4) / 4;
 	obj.maxSpeed = Math.round(setVal(_dosObj.maxSpeed, C_MAX_SPEED, `float`) * 4) / 4;
-	if (obj.minSpeed > obj.maxSpeed) {
+	if (obj.minSpeed > obj.maxSpeed || obj.minSpeed < 0.5 || obj.maxSpeed < 0.5) {
 		obj.minSpeed = C_MIN_SPEED;
 		obj.maxSpeed = C_MAX_SPEED;
 	}
