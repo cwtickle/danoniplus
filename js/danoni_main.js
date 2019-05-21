@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/20
+ * Revised : 2019/05/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.2.0`;
-const g_revisedDate = `2019/05/20`;
+const g_version = `Ver 5.2.1`;
+const g_revisedDate = `2019/05/21`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3782,6 +3782,9 @@ function createOptionWindow(_sprite) {
 			g_gaugeNum = 0;
 			if (!g_stateObj.extraKeyFlg) {
 				g_localKeyStorage.reverse = C_FLG_OFF;
+			} else {
+				g_stateObj.reverse = C_FLG_OFF;
+				g_reverseNum = 0;
 			}
 		}
 
@@ -4633,13 +4636,13 @@ function loadingScoreInit() {
 				g_scoreObj.acolorData = JSON.parse(JSON.stringify(tmpObj.acolorData));
 			}
 			if (tmpObj.wordData !== undefined && tmpObj.wordData.length >= 3) {
-				g_scoreObj.wordData = JSON.parse(JSON.stringify(tmpObj.wordData));
+				g_scoreObj.wordData = tmpObj.wordData.concat();
 			}
 			if (tmpObj.maskData !== undefined && tmpObj.maskData.length >= 1) {
-				g_scoreObj.maskData = JSON.parse(JSON.stringify(tmpObj.maskData));
+				g_scoreObj.maskData = tmpObj.maskData.concat();
 			}
 			if (tmpObj.backData !== undefined && tmpObj.backData.length >= 1) {
-				g_scoreObj.backData = JSON.parse(JSON.stringify(tmpObj.backData));
+				g_scoreObj.backData = tmpObj.backData.concat();
 			}
 
 			lastFrame += preblankFrame;
