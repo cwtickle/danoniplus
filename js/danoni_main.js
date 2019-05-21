@@ -4652,7 +4652,6 @@ function loadingScoreInit() {
 			g_headerObj.blankFrame += preblankFrame;
 		}
 	}
-	console.table(g_scoreObj.backData);
 
 	// シャッフルグループ未定義の場合
 	if (g_keyObj[`shuffle${keyCtrlPtn}`] === undefined) {
