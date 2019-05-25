@@ -5903,8 +5903,10 @@ function MainInit() {
 	g_workObj.word0Data = ``;
 	g_workObj.word1Data = ``;
 	g_currentArrows = 0;
-	g_workObj.fadeInNo = 0;
-	g_workObj.fadeOutNo = 0;
+	g_workObj.fadeInNo = [0, 0, 0, 0];
+	g_workObj.fadeOutNo = [0, 0, 0, 0];
+	g_workObj.fadingFrame = [0, 0, 0, 0];
+	g_workObj.lastFadeFrame = [0, 0, 0, 0];
 
 	// 背景スプライトを作成
 	const backSprite = createSprite(`divRoot`, `backSprite`, 0, 0, g_sWidth, g_sHeight);
@@ -6668,20 +6670,24 @@ function MainInit() {
 			g_wordSprite = document.querySelector(`#lblword${g_wordObj.wordDir}`);
 
 			if (g_wordSprite !== null) {
+				const wordDepth = Number(g_wordObj.wordDir);
 				if (g_wordObj.wordDat === `[fadein]`) {
-					g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = true;
-					g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = false;
-					g_wordSprite.style.opacity = 0;
+					g_wordObj[`fadeInFlg${wordDepth}`] = true;
+					g_wordObj[`fadeOutFlg${wordDepth}`] = false;
+					g_workObj.fadingFrame[wordDepth] = 0;
+					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
 
-					g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo % 2)}`;
+					g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
 					g_wordSprite.style.animationDuration = `0.5s`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[fadeout]`) {
-					g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = false;
-					g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = true;
+					g_wordObj[`fadeInFlg${wordDepth}`] = false;
+					g_wordObj[`fadeOutFlg${wordDepth}`] = true;
+					g_workObj.fadingFrame[wordDepth] = 0;
+					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
 
-					g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeInNo % 2)}`;
+					g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
 					g_wordSprite.style.animationDuration = `0.5s`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
@@ -6689,10 +6695,16 @@ function MainInit() {
 					g_wordObj.wordDat === `[left]` || g_wordObj.wordDat === `[right]`) {
 
 				} else {
+					g_workObj.fadingFrame = (g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth]) / 60;
 					if (g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
-						&& Number(g_wordSprite.style.opacity) === 0) {
-						g_wordSprite.style.opacity = 1;
+						&& g_workObj.fadingFrame >= 0.5) {
 						g_wordSprite.style.animationName = `none`;
+						g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = false;
+					}
+					if (g_wordObj[`fadeInFlg${g_wordObj.wordDir}`]
+						&& g_workObj.fadingFrame >= 0.5) {
+						g_wordSprite.style.animationName = `none`;
+						g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = false;
 					}
 					g_workObj[`word${g_wordObj.wordDir}Data`] = g_wordObj.wordDat;
 					g_wordSprite.innerHTML = g_wordObj.wordDat;
