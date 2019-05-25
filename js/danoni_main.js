@@ -5903,6 +5903,8 @@ function MainInit() {
 	g_workObj.word0Data = ``;
 	g_workObj.word1Data = ``;
 	g_currentArrows = 0;
+	g_workObj.fadeInNo = 0;
+	g_workObj.fadeOutNo = 0;
 
 	// 背景スプライトを作成
 	const backSprite = createSprite(`divRoot`, `backSprite`, 0, 0, g_sWidth, g_sHeight);
@@ -6671,18 +6673,26 @@ function MainInit() {
 					g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = false;
 					g_wordSprite.style.opacity = 0;
 
+					g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo % 2)}`;
+					g_wordSprite.style.animationDuration = `0.5s`;
+					g_wordSprite.style.animationFillMode = `forwards`;
+
 				} else if (g_wordObj.wordDat === `[fadeout]`) {
 					g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = false;
 					g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = true;
-					g_wordSprite.style.opacity = 1;
+
+					g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeInNo % 2)}`;
+					g_wordSprite.style.animationDuration = `0.5s`;
+					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[center]` ||
 					g_wordObj.wordDat === `[left]` || g_wordObj.wordDat === `[right]`) {
 
 				} else {
-					if (!g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
+					if (g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
 						&& Number(g_wordSprite.style.opacity) === 0) {
 						g_wordSprite.style.opacity = 1;
+						g_wordSprite.style.animationName = `none`;
 					}
 					g_workObj[`word${g_wordObj.wordDir}Data`] = g_wordObj.wordDat;
 					g_wordSprite.innerHTML = g_wordObj.wordDat;
@@ -6703,12 +6713,6 @@ function MainInit() {
 				}
 			}
 		}
-
-		// 歌詞フェードイン・アウト
-		fadeWord(`0`);
-		fadeWord(`1`);
-		fadeWord(`2`);
-		fadeWord(`3`);
 
 		// マスク表示・マスクモーション
 		if (g_scoreObj.maskData[g_scoreObj.frameNum] !== undefined) {
@@ -6956,33 +6960,6 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 					}
 				}
 			}
-		}
-	}
-}
-
-/**
- * 歌詞のフェードイン・アウト
- * @param {string} _wordDir 
- */
-function fadeWord(_wordDir) {
-
-	if (g_wordObj[`fadeInFlg${_wordDir}`]) {
-		let wordAlpha = parseFloat(document.querySelector(`#lblword${_wordDir}`).style.opacity);
-		if (wordAlpha + 0.04 >= 0.99) {
-			g_wordObj[`fadeInFlg${_wordDir}`] = false;
-			document.querySelector(`#lblword${_wordDir}`).style.opacity = 1;
-		} else {
-			wordAlpha += 0.04;
-			document.querySelector(`#lblword${_wordDir}`).style.opacity = wordAlpha;
-		}
-	} else if (g_wordObj[`fadeOutFlg${_wordDir}`]) {
-		let wordAlpha = parseFloat(document.querySelector(`#lblword${_wordDir}`).style.opacity);
-		if (wordAlpha - 0.04 <= 0.01) {
-			g_wordObj[`fadeOutFlg${_wordDir}`] = false;
-			document.querySelector(`#lblword${_wordDir}`).style.opacity = 0;
-		} else {
-			wordAlpha -= 0.04;
-			document.querySelector(`#lblword${_wordDir}`).style.opacity = wordAlpha;
 		}
 	}
 }

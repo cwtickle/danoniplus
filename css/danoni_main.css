@@ -280,8 +280,46 @@ input[type=range]:focus {
 	}
 }
 
+/* フェードイン */
+@keyframes fadeIn0 {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+@keyframes fadeIn1 {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+/* フェードアウト */
+@keyframes fadeOut0 {
+	0% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes fadeOut1 {
+	0% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
 /* タイトルデフォルトモーション（HTML側で上書き可能） */
-#lblmusicTitle{
+#lblmusicTitle {
 	animation-duration: 1.5s;
 	animation-name: leftToRight;
 }
