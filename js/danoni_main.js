@@ -7101,8 +7101,16 @@ function judgeArrow(_j) {
 		const judgFrz = document.querySelector(`#frz${_j}_${fcurrentNo}`);
 
 		if (judgFrz !== null) {
+			const difFrame = Number(judgFrz.getAttribute(`cnt`));
 			const difCnt = Math.abs(judgFrz.getAttribute(`cnt`));
 			const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
+
+			if (typeof customJudgeFrz === `function`) {
+				customJudgeFrz(difFrame);
+				if (typeof customJudgeFrz2 === `function`) {
+					customJudgeFrz2(difFrame);
+				}
+			}
 
 			if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
 				changeHitFrz(_j, fcurrentNo);
