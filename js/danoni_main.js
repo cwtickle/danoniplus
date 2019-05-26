@@ -2047,7 +2047,7 @@ function titleInit() {
 		// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
 		let titlelineheight = g_headerObj.titlelineheight;
 		if (g_headerObj.titlelineheight === ``) {
-			titlelineheight = setVal(g_headerObj.titlelineheight, titlefontsize1 + 10, `number`);
+			titlelineheight = setVal(g_headerObj.titlelineheight, titlefontsize2, `number`);
 		}
 
 		const lblmusicTitle = createDivLabel(`lblmusicTitle`,
@@ -2056,7 +2056,7 @@ function titleInit() {
 			titlefontsize, `#ffffff`,
 			`<span style="
 				align:${C_ALIGN_CENTER};
-				line-height:${titlelineheight}px;
+				position:relative;top:${titlefontsize1 - (titlefontsize1 + titlefontsize2) / 2}px;
 				font-family:${titlefontname};
 				font-size:${titlefontsize1}px;
 				background: linear-gradient(${titlefontgrd});
@@ -2068,6 +2068,7 @@ function titleInit() {
 				${g_headerObj.musicTitleForView[0]}<br>
 				<span style="
 					font-size:${titlefontsize2}px;
+					position:relative;top:${titlelineheight - (titlefontsize1 + titlefontsize2) / 2 - titlefontsize1 + titlefontsize2}px;
 					background: linear-gradient(${titlefontgrd2});
 					background-clip: text;
 					-webkit-background-clip: text;
@@ -2076,6 +2077,10 @@ function titleInit() {
 					${setVal(g_headerObj.musicTitleForView[1], ``, `string`)}
 				</span>
 			</span>`
+			//position:relative;top:${((titlefontsize1 + titlefontsize2) / 2 - titlefontsize1) * 3}px;
+			//position:relative;top:${titlefontsize1 - (titlefontsize1 + titlefontsize2) / 2 - (titlelineheight + titlefontsize1)}px;
+			//position:relative;top:${titlelineheight - (titlefontsize1 + titlefontsize2) / 2}px;
+			//position:relative;top:${titlefontsize1 - (titlefontsize1 + titlefontsize2) / 2 + (titlelineheight - titlefontsize1) - (titlefontsize1 - titlefontsize2)}px;
 		);
 		lblmusicTitle.style.display = `flex`;
 		lblmusicTitle.style.flexDirection = `column`;
