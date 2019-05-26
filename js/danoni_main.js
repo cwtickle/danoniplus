@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/21
+ * Revised : 2019/05/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 3.13.4`;
-const g_revisedDate = `2019/05/21`;
+const g_version = `Ver 3.13.5`;
+const g_revisedDate = `2019/05/26`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1814,6 +1814,8 @@ function titleInit() {
 			let titlefontsizes = g_headerObj.titlesize.split(`,`);
 			titlefontsize1 = setVal(titlefontsizes[0], titlefontsize, `number`);
 			titlefontsize2 = setVal(titlefontsizes[1], titlefontsize1, `number`);
+		} else {
+			titlefontsize1 = titlefontsize;
 		}
 		// 変数 titlefont の定義 (使用例： |titlefont=Century,Meiryo UI|)
 		let titlefontname = `メイリオ`;
@@ -1832,7 +1834,7 @@ function titleInit() {
 		// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
 		let titlelineheight = g_headerObj.titlelineheight;
 		if (g_headerObj.titlelineheight === ``) {
-			titlelineheight = setVal(g_headerObj.titlelineheight, titlefontsize + 10, `number`);
+			titlelineheight = setVal(g_headerObj.titlelineheight, titlefontsize1 + 10, `number`);
 		}
 
 		const lblmusicTitle = createDivLabel(`lblmusicTitle`,
