@@ -1,5 +1,7 @@
 # Dancing☆Onigiri (CW Edition)
 
+[![Join the chat at https://gitter.im/danonicw/community](https://badges.gitter.im/danonicw/community.svg)](https://gitter.im/danonicw/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 リズムゲームDancing☆Onigiri (CW Edition)のソース作成・配布場所です。  
 Flash版の同ゲームのHTML5版を制作しています。 
 (旧名:Dancing☆Onigiri for HTML5)  
