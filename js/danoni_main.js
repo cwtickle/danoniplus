@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.5.0`;
+const g_version = `Ver 5.6.0`;
 const g_revisedDate = `2019/05/26`;
 const g_alphaVersion = ``;
 
@@ -272,7 +272,7 @@ const g_wordObj = {
 	fadeOutFlg1: false
 };
 let g_wordSprite;
-let C_WOD_FRAME = 30;
+let C_WOD_FRAME = 60;
 
 // 譜面データ持ち回り用
 let g_rootObj = {};
@@ -3859,6 +3859,14 @@ function createOptionWindow(_sprite) {
 					g_reverseNum = 0;
 				}
 			}
+
+			// ユーザカスタムイベント(初期)
+			if (typeof customSetDifficulty === `function`) {
+				customSetDifficulty(_initFlg, g_canLoadDifInfoFlg);
+				if (typeof customSetDifficulty2 === `function`) {
+					customSetDifficulty2(_initFlg, g_canLoadDifInfoFlg);
+				}
+			}
 		}
 
 		// ---------------------------------------------------
@@ -5034,7 +5042,14 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 								}
 							}
 						}
-						obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], tmpWordData[k + 2]);
+
+						if (tmpWordData.length > 3 && tmpWordData.length < 6) {
+							tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, `number`);
+							obj.wordData[tmpWordData[0] + addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
+							break;
+						} else {
+							obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], tmpWordData[k + 2]);
+						}
 					}
 				}
 			}
@@ -5915,12 +5930,14 @@ function MainInit() {
 	g_workObj.fadeOutNo = [];
 	g_workObj.fadingFrame = [];
 	g_workObj.lastFadeFrame = [];
+	g_workObj.wordFadeFrame = [];
 
 	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
 		g_workObj.fadeInNo[j] = 0;
 		g_workObj.fadeOutNo[j] = 0;
 		g_workObj.fadingFrame[j] = 0;
 		g_workObj.lastFadeFrame[j] = 0;
+		g_workObj.wordFadeFrame[j] = 0;
 	}
 
 	// 背景スプライトを作成
@@ -6684,8 +6701,14 @@ function MainInit() {
 					g_workObj.fadingFrame[wordDepth] = 0;
 					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
 
+					if (g_scoreObj.wordData[g_scoreObj.frameNum].length > 2) {
+						g_workObj.wordFadeFrame[wordDepth] = setVal(g_scoreObj.wordData[g_scoreObj.frameNum][2], C_WOD_FRAME, `number`);
+					} else {
+						g_workObj.wordFadeFrame[wordDepth] = C_WOD_FRAME;
+					}
+
 					g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
-					g_wordSprite.style.animationDuration = `${C_WOD_FRAME / 60}s`;
+					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[fadeout]`) {
@@ -6694,8 +6717,14 @@ function MainInit() {
 					g_workObj.fadingFrame[wordDepth] = 0;
 					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
 
+					if (g_scoreObj.wordData[g_scoreObj.frameNum].length > 2) {
+						g_workObj.wordFadeFrame[wordDepth] = setVal(g_scoreObj.wordData[g_scoreObj.frameNum][2], C_WOD_FRAME, `number`);
+					} else {
+						g_workObj.wordFadeFrame[wordDepth] = C_WOD_FRAME;
+					}
+
 					g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
-					g_wordSprite.style.animationDuration = `${C_WOD_FRAME / 60}s`;
+					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[center]` ||
@@ -6704,12 +6733,12 @@ function MainInit() {
 				} else {
 					g_workObj.fadingFrame = g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth];
 					if (g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
-						&& g_workObj.fadingFrame >= C_WOD_FRAME) {
+						&& g_workObj.fadingFrame >= g_workObj.wordFadeFrame[wordDepth]) {
 						g_wordSprite.style.animationName = `none`;
 						g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = false;
 					}
 					if (g_wordObj[`fadeInFlg${g_wordObj.wordDir}`]
-						&& g_workObj.fadingFrame >= C_WOD_FRAME) {
+						&& g_workObj.fadingFrame >= g_workObj.wordFadeFrame[wordDepth]) {
 						g_wordSprite.style.animationName = `none`;
 						g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = false;
 					}

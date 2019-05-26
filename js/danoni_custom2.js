@@ -37,6 +37,10 @@ function customTitleInit2() {
     g_localVersion2 = ``;
 }
 
+function customSetDifficulty2(_initFlg, _canLoadDifInfoFlg) {
+
+}
+
 /**
  * タイトル画面(フレーム毎表示) [Scene: Title / Melon]
  */
