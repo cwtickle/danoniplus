@@ -272,6 +272,7 @@ const g_wordObj = {
 	fadeOutFlg1: false
 };
 let g_wordSprite;
+let C_WOD_FRAME = 30;
 
 // 譜面データ持ち回り用
 let g_rootObj = {};
@@ -4988,6 +4989,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
 	obj.wordData = [];
 	obj.wordData.length = 0;
+	obj.wordMaxDepth = -1;
 	if (g_stateObj.d_lyrics === C_FLG_ON) {
 
 		let inputWordData = ``;
@@ -5011,6 +5013,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 						}
 						tmpWordData[k] = calcFrame(tmpWordData[k]);
 						tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
+
+						if (tmpWordData[k + 1] > obj.wordMaxDepth) {
+							obj.wordMaxDepth = tmpWordData[k + 1];
+						}
 
 						let addFrame = 0;
 						if (obj.wordData[tmpWordData[k]] === undefined) {
@@ -5900,13 +5906,18 @@ function MainInit() {
 		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	}
 
-	g_workObj.word0Data = ``;
-	g_workObj.word1Data = ``;
 	g_currentArrows = 0;
-	g_workObj.fadeInNo = [0, 0, 0, 0];
-	g_workObj.fadeOutNo = [0, 0, 0, 0];
-	g_workObj.fadingFrame = [0, 0, 0, 0];
-	g_workObj.lastFadeFrame = [0, 0, 0, 0];
+	g_workObj.fadeInNo = [];
+	g_workObj.fadeOutNo = [];
+	g_workObj.fadingFrame = [];
+	g_workObj.lastFadeFrame = [];
+
+	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
+		g_workObj.fadeInNo[j] = 0;
+		g_workObj.fadeOutNo[j] = 0;
+		g_workObj.fadingFrame[j] = 0;
+		g_workObj.lastFadeFrame[j] = 0;
+	}
 
 	// 背景スプライトを作成
 	const backSprite = createSprite(`divRoot`, `backSprite`, 0, 0, g_sWidth, g_sHeight);
@@ -6080,29 +6091,21 @@ function MainInit() {
 	infoSprite.appendChild(makeCounterSymbol(`lblIknai`, g_sWidth - 110, C_CLR_IKNAI, 9, 0));
 	infoSprite.appendChild(makeCounterSymbol(`lblFCombo`, g_sWidth - 110, `#ffffff`, 10, 0));
 
-	// 歌詞表示1
-	const lblWord0 = createDivLabel(`lblword0`, 100, 10, g_sWidth - 200, 30, 14, `#ffffff`,
-		g_workObj.word0Data);
-	lblWord0.style.textAlign = C_ALIGN_LEFT;
-	judgeSprite.appendChild(lblWord0);
-
-	// 歌詞表示2
-	const lblWord1 = createDivLabel(`lblword1`, 100, g_sHeight - 60, g_sWidth - 200, 20, 14, `#ffffff`,
-		g_workObj.word1Data);
-	lblWord1.style.textAlign = C_ALIGN_LEFT;
-	judgeSprite.appendChild(lblWord1);
-
-	// 歌詞表示3
-	const lblWord2 = createDivLabel(`lblword2`, 100, 10, g_sWidth - 200, 30, 14, `#ffffff`,
-		g_workObj.word0Data);
-	lblWord2.style.textAlign = C_ALIGN_LEFT;
-	judgeSprite.appendChild(lblWord2);
-
-	// 歌詞表示4
-	const lblWord3 = createDivLabel(`lblword3`, 100, g_sHeight - 60, g_sWidth - 200, 20, 14, `#ffffff`,
-		g_workObj.word1Data);
-	lblWord3.style.textAlign = C_ALIGN_LEFT;
-	judgeSprite.appendChild(lblWord3);
+	// 歌詞表示
+	createSprite(`judgeSprite`, `wordSprite`, 0, 0, g_sWidth, g_sHeight);
+	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
+		let lblWord;
+		if (j % 2 === 0) {
+			lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, 10, g_sWidth - 200, 30);
+		} else {
+			lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, g_sHeight - 60, g_sWidth - 200, 20);
+		}
+		lblWord.style.fontSize = `14px`;
+		lblWord.style.color = `#ffffff`;
+		lblWord.style.fontFamily = getBasicFont();
+		lblWord.style.textAlign = C_ALIGN_LEFT;
+		lblWord.innerHTML = ``;
+	}
 
 	// 曲名・アーティスト名表示
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
@@ -6678,7 +6681,7 @@ function MainInit() {
 					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
 
 					g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
-					g_wordSprite.style.animationDuration = `0.5s`;
+					g_wordSprite.style.animationDuration = `${C_WOD_FRAME / 60}s`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[fadeout]`) {
@@ -6688,21 +6691,21 @@ function MainInit() {
 					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
 
 					g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
-					g_wordSprite.style.animationDuration = `0.5s`;
+					g_wordSprite.style.animationDuration = `${C_WOD_FRAME / 60}s`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[center]` ||
 					g_wordObj.wordDat === `[left]` || g_wordObj.wordDat === `[right]`) {
 
 				} else {
-					g_workObj.fadingFrame = (g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth]) / 60;
+					g_workObj.fadingFrame = g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth];
 					if (g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
-						&& g_workObj.fadingFrame >= 0.5) {
+						&& g_workObj.fadingFrame >= C_WOD_FRAME) {
 						g_wordSprite.style.animationName = `none`;
 						g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = false;
 					}
 					if (g_wordObj[`fadeInFlg${g_wordObj.wordDir}`]
-						&& g_workObj.fadingFrame >= 0.5) {
+						&& g_workObj.fadingFrame >= C_WOD_FRAME) {
 						g_wordSprite.style.animationName = `none`;
 						g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = false;
 					}
