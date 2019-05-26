@@ -125,6 +125,11 @@ function customJudgeUwan2(difFrame){
 
 }
 
+// フリーズアロー開始矢印判定
+function customJudgeFrz2(difFrame){
+
+}
+
 // キター
 function customJudgeKita2(difFrame){
 

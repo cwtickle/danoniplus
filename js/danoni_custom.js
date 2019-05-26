@@ -1,7 +1,6 @@
 ﻿`use strict`;
 /**
  * Dancing☆Onigiri カスタム用jsファイル
- * ver 2.9.0 以降向け
  * 
  * このファイルは、作品個別に設定できる項目となっています。
  * 譜面データ側で下記のように作品別の外部jsファイルを指定することで、
@@ -124,6 +123,11 @@ function customJudgeShobon(difFrame){
 
 // ウワァン
 function customJudgeUwan(difFrame){
+
+}
+
+// フリーズアロー開始矢印判定
+function customJudgeFrz(difFrame){
 
 }
 
