@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.5.0`;
+const g_version = `Ver 5.6.0`;
 const g_revisedDate = `2019/05/26`;
 const g_alphaVersion = ``;
 
@@ -3857,6 +3857,14 @@ function createOptionWindow(_sprite) {
 					};
 					g_stateObj.reverse = C_FLG_OFF;
 					g_reverseNum = 0;
+				}
+			}
+
+			// ユーザカスタムイベント(初期)
+			if (typeof customSetDifficulty === `function`) {
+				customSetDifficulty(_initFlg, g_canLoadDifInfoFlg);
+				if (typeof customSetDifficulty2 === `function`) {
+					customSetDifficulty2(_initFlg, g_canLoadDifInfoFlg);
 				}
 			}
 		}

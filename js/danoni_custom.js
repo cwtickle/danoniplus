@@ -36,6 +36,10 @@ function customTitleInit() {
 
 }
 
+function customSetDifficulty(_initFlg, _canLoadDifInfoFlg) {
+
+}
+
 /**
  * メイン画面(フレーム毎表示) [Scene: Title / Melon]
  */
