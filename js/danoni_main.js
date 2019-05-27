@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/26
+ * Revised : 2019/05/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.6.0`;
-const g_revisedDate = `2019/05/26`;
+const g_version = `Ver 5.6.1`;
+const g_revisedDate = `2019/05/27`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3859,14 +3859,6 @@ function createOptionWindow(_sprite) {
 					g_reverseNum = 0;
 				}
 			}
-
-			// ユーザカスタムイベント(初期)
-			if (typeof customSetDifficulty === `function`) {
-				customSetDifficulty(_initFlg, g_canLoadDifInfoFlg);
-				if (typeof customSetDifficulty2 === `function`) {
-					customSetDifficulty2(_initFlg, g_canLoadDifInfoFlg);
-				}
-			}
 		}
 
 		// ---------------------------------------------------
@@ -3888,6 +3880,14 @@ function createOptionWindow(_sprite) {
 
 		// ゲージ設定 (Gauge)
 		setGauge(0);
+
+		// ユーザカスタムイベント(初期)
+		if (typeof customSetDifficulty === `function`) {
+			customSetDifficulty(_initFlg, g_canLoadDifInfoFlg);
+			if (typeof customSetDifficulty2 === `function`) {
+				customSetDifficulty2(_initFlg, g_canLoadDifInfoFlg);
+			}
+		}
 
 		// ---------------------------------------------------
 		// 4. 譜面初期情報ロード許可フラグの設定
@@ -7130,16 +7130,8 @@ function judgeArrow(_j) {
 		const judgFrz = document.querySelector(`#frz${_j}_${fcurrentNo}`);
 
 		if (judgFrz !== null) {
-			const difFrame = Number(judgFrz.getAttribute(`cnt`));
 			const difCnt = Math.abs(judgFrz.getAttribute(`cnt`));
 			const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
-
-			if (typeof customJudgeFrz === `function`) {
-				customJudgeFrz(difFrame);
-				if (typeof customJudgeFrz2 === `function`) {
-					customJudgeFrz2(difFrame);
-				}
-			}
 
 			if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
 				changeHitFrz(_j, fcurrentNo);
