@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/11
+ * Revised : 2019/05/28
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.15.4";
+const g_version = "Ver 1.15.5";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -4888,7 +4888,7 @@ function MainInit() {
 					g_workObj.stepX[targetj],
 					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd * g_workObj.scrollDir[targetj], 50,
 					g_workObj.stepRtn[targetj]);
-				step.setAttribute("cnt", g_workObj.arrivalFrame[g_scoreObj.frameNum]);
+				step.setAttribute("cnt", ++g_workObj.arrivalFrame[g_scoreObj.frameNum]);
 				step.setAttribute("boostCnt", g_workObj.motionFrame[g_scoreObj.frameNum]);
 				step.setAttribute("judgEndFlg", "false");
 				step.setAttribute("boostSpd", g_workObj.boostSpd);
@@ -4964,7 +4964,7 @@ function MainInit() {
 					g_workObj.stepX[targetj],
 					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd * rev,
 					50, 100 + frzLength);
-				frzRoot.setAttribute("cnt", g_workObj.arrivalFrame[g_scoreObj.frameNum]);
+				frzRoot.setAttribute("cnt", ++g_workObj.arrivalFrame[g_scoreObj.frameNum]);
 				frzRoot.setAttribute("boostCnt", g_workObj.motionFrame[g_scoreObj.frameNum]);
 				frzRoot.setAttribute("judgEndFlg", "false");
 				frzRoot.setAttribute("isMoving", "true");
