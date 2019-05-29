@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/28
+ * Revised : 2019/05/29
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 2.9.8`;
-const g_revisedDate = `2019/05/28`;
+const g_version = `Ver 2.9.9`;
+const g_revisedDate = `2019/05/29`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2091,6 +2091,9 @@ function headerConvert(_dosObj) {
 		obj.blankFrame = parseInt(_dosObj.blankFrame);
 		obj.blankFrameDef = parseInt(_dosObj.blankFrame);
 	}
+	// ver2.9.8で判定位置を1フレームずらしたことによる補正
+	obj.blankFrame--;
+	obj.blankFrameDef--;
 
 	// フェードインフレーム数
 	if (_dosObj.startFrame !== undefined) {
