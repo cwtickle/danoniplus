@@ -1,7 +1,7 @@
 ﻿`use strict`;
 /**
  * Dancing☆Onigiri カスタム用jsファイル
- * ver 2.9.0 以降向け (custom:Type2)
+ * その２：作品個別用
  * 
  * このファイルは、作品個別に設定できる項目となっています。
  * 譜面データ側で下記のように作品別の外部jsファイルを指定することで、
@@ -35,6 +35,15 @@ function customLoadingProgress2(_event) {
 function customTitleInit2() {
     // バージョン表記
     g_localVersion2 = ``;
+}
+
+/**
+ * 譜面選択(Difficultyボタン)時カスタム処理 
+ * @param {boolean} _initFlg 譜面変更フラグ (true:譜面変更選択時 / false:画面遷移による移動時)
+ * @param {boolean} _canLoadDifInfoFlg 譜面初期化フラグ (true:譜面設定を再読込 / false:譜面設定を引き継ぐ)
+ */
+function customSetDifficulty2(_initFlg, _canLoadDifInfoFlg) {
+
 }
 
 /**

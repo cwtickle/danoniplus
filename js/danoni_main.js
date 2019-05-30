@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/26
+ * Revised : 2019/05/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.4.0`;
-const g_revisedDate = `2019/05/26`;
+const g_version = `Ver 5.6.6`;
+const g_revisedDate = `2019/05/30`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3892,6 +3892,14 @@ function createOptionWindow(_sprite) {
 		// ゲージ設定 (Gauge)
 		setGauge(0);
 
+		// ユーザカスタムイベント(初期)
+		if (typeof customSetDifficulty === `function`) {
+			customSetDifficulty(_initFlg, g_canLoadDifInfoFlg);
+			if (typeof customSetDifficulty2 === `function`) {
+				customSetDifficulty2(_initFlg, g_canLoadDifInfoFlg);
+			}
+		}
+
 		// ---------------------------------------------------
 		// 4. 譜面初期情報ロード許可フラグの設定
 		g_canLoadDifInfoFlg = true;
@@ -5073,7 +5081,14 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _shadowNo = ``) {
 								}
 							}
 						}
-						obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], tmpWordData[k + 2]);
+
+						if (tmpWordData.length > 3 && tmpWordData.length < 6) {
+							tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, `number`);
+							obj.wordData[tmpWordData[0] + addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
+							break;
+						} else {
+							obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], tmpWordData[k + 2]);
+						}
 					}
 				}
 			}
@@ -6378,12 +6393,14 @@ function MainInit() {
 	g_workObj.fadeOutNo = [];
 	g_workObj.fadingFrame = [];
 	g_workObj.lastFadeFrame = [];
+	g_workObj.wordFadeFrame = [];
 
 	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
 		g_workObj.fadeInNo[j] = 0;
 		g_workObj.fadeOutNo[j] = 0;
 		g_workObj.fadingFrame[j] = 0;
 		g_workObj.lastFadeFrame[j] = 0;
+		g_workObj.wordFadeFrame[j] = 0;
 	}
 
 	// 背景スプライトを作成
@@ -6892,7 +6909,7 @@ function MainInit() {
 					g_workObj.stepX[targetj],
 					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir, 50,
 					g_workObj.stepRtn[targetj]);
-				step.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum]);
+				step.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 				step.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 				step.setAttribute(`judgEndFlg`, `false`);
 				step.setAttribute(`boostSpd`, boostSpdDir);
@@ -6984,7 +7001,7 @@ function MainInit() {
 					g_workObj.stepX[targetj],
 					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 					50, 100 + frzLength);
-				frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum]);
+				frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 				frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 				frzRoot.setAttribute(`judgEndFlg`, `false`);
 				frzRoot.setAttribute(`isMoving`, `true`);
@@ -7165,8 +7182,15 @@ function MainInit() {
 					g_workObj.fadingFrame[wordDepth] = 0;
 					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
 
+					if (g_scoreObj.wordData[g_scoreObj.frameNum].length > 2) {
+						g_workObj.wordFadeFrame[wordDepth] = setVal(g_scoreObj.wordData[g_scoreObj.frameNum][2], C_WOD_FRAME, `number`);
+					} else {
+						g_workObj.wordFadeFrame[wordDepth] = C_WOD_FRAME;
+					}
+
 					g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
-					g_wordSprite.style.animationDuration = `${C_WOD_FRAME / 60}s`;
+					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
+					g_wordSprite.style.animationTimingFunction = `linear`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[fadeout]`) {
@@ -7175,8 +7199,15 @@ function MainInit() {
 					g_workObj.fadingFrame[wordDepth] = 0;
 					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
 
+					if (g_scoreObj.wordData[g_scoreObj.frameNum].length > 2) {
+						g_workObj.wordFadeFrame[wordDepth] = setVal(g_scoreObj.wordData[g_scoreObj.frameNum][2], C_WOD_FRAME, `number`);
+					} else {
+						g_workObj.wordFadeFrame[wordDepth] = C_WOD_FRAME;
+					}
+
 					g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
-					g_wordSprite.style.animationDuration = `${C_WOD_FRAME / 60}s`;
+					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
+					g_wordSprite.style.animationTimingFunction = `linear`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[center]` ||
@@ -7185,12 +7216,12 @@ function MainInit() {
 				} else {
 					g_workObj.fadingFrame = g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth];
 					if (g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
-						&& g_workObj.fadingFrame >= C_WOD_FRAME) {
+						&& g_workObj.fadingFrame >= g_workObj.wordFadeFrame[wordDepth]) {
 						g_wordSprite.style.animationName = `none`;
 						g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = false;
 					}
 					if (g_wordObj[`fadeInFlg${g_wordObj.wordDir}`]
-						&& g_workObj.fadingFrame >= C_WOD_FRAME) {
+						&& g_workObj.fadingFrame >= g_workObj.wordFadeFrame[wordDepth]) {
 						g_wordSprite.style.animationName = `none`;
 						g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = false;
 					}
