@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.6.5`;
+const g_version = `Ver 5.6.6`;
 const g_revisedDate = `2019/05/30`;
 const g_alphaVersion = ``;
 
@@ -6445,7 +6445,7 @@ function MainInit() {
 					g_workObj.stepX[targetj],
 					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir, 50,
 					g_workObj.stepRtn[targetj]);
-				step.setAttribute(`cnt`, ++g_workObj.arrivalFrame[g_scoreObj.frameNum]);
+				step.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 				step.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 				step.setAttribute(`judgEndFlg`, `false`);
 				step.setAttribute(`boostSpd`, boostSpdDir);
@@ -6520,7 +6520,7 @@ function MainInit() {
 					g_workObj.stepX[targetj],
 					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 					50, 100 + frzLength);
-				frzRoot.setAttribute(`cnt`, ++g_workObj.arrivalFrame[g_scoreObj.frameNum]);
+				frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 				frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 				frzRoot.setAttribute(`judgEndFlg`, `false`);
 				frzRoot.setAttribute(`isMoving`, `true`);
