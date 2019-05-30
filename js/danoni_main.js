@@ -272,7 +272,7 @@ const g_wordObj = {
 	fadeOutFlg1: false
 };
 let g_wordSprite;
-let C_WOD_FRAME = 60;
+let C_WOD_FRAME = 30;
 
 // 譜面データ持ち回り用
 let g_rootObj = {};
@@ -6709,6 +6709,7 @@ function MainInit() {
 
 					g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
 					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
+					g_wordSprite.style.animationTimingFunction = `linear`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[fadeout]`) {
@@ -6725,6 +6726,7 @@ function MainInit() {
 
 					g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
 					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
+					g_wordSprite.style.animationTimingFunction = `linear`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[center]` ||
