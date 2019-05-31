@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/27
+ * Revised : 2019/05/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.6.1`;
-const g_revisedDate = `2019/05/27`;
+const g_version = `Ver 5.6.6`;
+const g_revisedDate = `2019/05/30`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -272,7 +272,7 @@ const g_wordObj = {
 	fadeOutFlg1: false
 };
 let g_wordSprite;
-let C_WOD_FRAME = 60;
+let C_WOD_FRAME = 30;
 
 // 譜面データ持ち回り用
 let g_rootObj = {};
@@ -4595,6 +4595,9 @@ function loadingScoreInit() {
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0);
 
 	// ライフ回復・ダメージ量の計算
+	if (g_rootObj.frzStartjdgUse === `true`) {
+		g_allArrow += g_allFrz / 2;
+	}
 	calcLifeVals(g_allArrow + g_allFrz / 2);
 
 	// 最終フレーム数の取得
@@ -4605,6 +4608,7 @@ function loadingScoreInit() {
 
 	// 開始フレーム数の取得(フェードイン加味)
 	g_scoreObj.frameNum = getStartFrame(lastFrame);
+	g_scoreObj.actualFrame;
 
 	// フレームごとの速度を取得（配列形式）
 	let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
@@ -5799,6 +5803,7 @@ function getArrowSettings() {
 
 	g_workObj.judgArrowCnt = [];
 	g_workObj.judgFrzCnt = [];
+	g_workObj.FrzHitCnt = [];
 	g_judgObj.lockFlgs = [];
 
 	// 矢印色管理 (個別)
@@ -5832,6 +5837,7 @@ function getArrowSettings() {
 
 		g_workObj.judgArrowCnt[j] = 1;
 		g_workObj.judgFrzCnt[j] = 1;
+		g_workObj.FrzHitCnt[j] = 1;
 		g_judgObj.lockFlgs[j] = false;
 
 		g_workObj.arrowColors[j] = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
@@ -6225,6 +6231,8 @@ function MainInit() {
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customMainInit === `function`) {
+		let preblankFrame = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment + Number(parseInt(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]) );
+		g_scoreObj.actualFrame = g_scoreObj.frameNum - preblankFrame;
 		customMainInit();
 		if (typeof customMainInit2 === `function`) {
 			customMainInit2();
@@ -6408,6 +6416,7 @@ function MainInit() {
 			if (typeof customMainEnterFrame2 === `function`) {
 				customMainEnterFrame2();
 			}
+			g_scoreObj.actualFrame++;
 		}
 
 		// 速度変化 (途中変速, 個別加速)
@@ -6445,7 +6454,7 @@ function MainInit() {
 					g_workObj.stepX[targetj],
 					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir, 50,
 					g_workObj.stepRtn[targetj]);
-				step.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum]);
+				step.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 				step.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 				step.setAttribute(`judgEndFlg`, `false`);
 				step.setAttribute(`boostSpd`, boostSpdDir);
@@ -6520,7 +6529,7 @@ function MainInit() {
 					g_workObj.stepX[targetj],
 					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 					50, 100 + frzLength);
-				frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum]);
+				frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 				frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 				frzRoot.setAttribute(`judgEndFlg`, `false`);
 				frzRoot.setAttribute(`isMoving`, `true`);
@@ -6604,6 +6613,9 @@ function MainInit() {
 
 						if (g_stateObj.autoPlay === C_FLG_ON && cnt === 0) {
 							changeHitFrz(j, k);
+							if (g_rootObj.frzStartjdgUse === `true`) {
+								judgeIi(cnt);
+							}
 						}
 					} else {
 						const frzBtmShadow = document.querySelector(`#frzBtmShadow${j}_${k}`);
@@ -6672,6 +6684,9 @@ function MainInit() {
 						frzRoot.setAttribute(`judgEndFlg`, `true`);
 
 						changeFailedFrz(j, k);
+						if (g_rootObj.frzStartjdgUse === `true`) {
+							judgeUwan(cnt);
+						}
 					}
 				} else {
 					frzBarLength -= g_workObj.currentSpeed;
@@ -6709,6 +6724,7 @@ function MainInit() {
 
 					g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
 					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
+					g_wordSprite.style.animationTimingFunction = `linear`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[fadeout]`) {
@@ -6725,6 +6741,7 @@ function MainInit() {
 
 					g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
 					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
+					g_wordSprite.style.animationTimingFunction = `linear`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
 				} else if (g_wordObj.wordDat === `[center]` ||
@@ -7134,6 +7151,20 @@ function judgeArrow(_j) {
 			const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
 
 			if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
+				if (g_rootObj.frzStartjdgUse === `true`) {
+					if (g_workObj.FrzHitCnt[_j] === undefined || g_workObj.FrzHitCnt[_j] <= fcurrentNo) {
+						if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
+							judgeIi(difCnt);
+						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
+							judgeShakin(difCnt);
+						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
+							judgeMatari(difCnt);
+						} else {
+							judgeShobon(difCnt);
+						}
+						g_workObj.FrzHitCnt[_j] = fcurrentNo+1;
+					}
+				}
 				changeHitFrz(_j, fcurrentNo);
 				g_judgObj.lockFlgs[_j] = false;
 				return;
