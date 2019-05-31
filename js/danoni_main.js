@@ -3094,10 +3094,7 @@ function keysConvert(_dosObj) {
  */
 function optionInit() {
 
-	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
-
+	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 
 	// タイトル文字描画
@@ -3107,15 +3104,6 @@ function optionInit() {
 
 	// オプションボタン用の設置
 	createOptionWindow(`divRoot`);
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-	}
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customOptionInit === `function`) {
