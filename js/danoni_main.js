@@ -1804,18 +1804,7 @@ function loadMusic() {
 		g_musicEncodedFlg = false;
 	}
 
-	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-	}
+	drawDefaultBackImage(``);
 
 	// Now Loadingを表示
 	const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight - 40,
