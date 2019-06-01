@@ -1029,30 +1029,38 @@ const g_handler = (_ => {
 
 /**
  * 文字列を想定された型に変換
- * - _type は `float`(小数)、`number`(整数)、`string`(文字列)から選択
- * - 型に合わない場合は _defaultStr を返却するが、_defaultStr自体の型チェック・変換は行わない
+ * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、`string`(文字列)から選択
+ * - 型に合わない場合は _default を返却するが、_default自体の型チェック・変換は行わない
  * @param {string} _checkStr 
- * @param {string} _defaultStr 
+ * @param {string} _default 
  * @param {string} _type 
  */
-function setVal(_checkStr, _defaultStr, _type) {
+function setVal(_checkStr, _default, _type) {
 
 	// 値がundefined相当の場合は無条件でデフォルト値を返却
-	if (_checkStr === undefined || _checkStr === ``) {
-		return _defaultStr;
+	if (_checkStr === undefined || _checkStr === null || _checkStr === ``) {
+		return _default;
 	}
 
 	let isNaNflg;
 	if (_type === `float`) {
 		// 数値型(小数可)の場合
 		isNaNflg = isNaN(parseFloat(_checkStr));
-		return (isNaNflg ? _defaultStr : parseFloat(_checkStr));
+		return (isNaNflg ? _default : parseFloat(_checkStr));
 
 	} else if (_type === `number`) {
 		// 数値型(整数のみ)の場合
 		isNaNflg = isNaN(parseInt(_checkStr));
-		return (isNaNflg ? _defaultStr : parseInt(_checkStr));
+		return (isNaNflg ? _default : parseInt(_checkStr));
 
+	} else if (_type === `boolean`) {
+		const lowerCase = _checkStr.toString().toLowerCase();
+		if (lowerCase === `true`) {
+			return true;
+		} else if (lowerCase === `false`) {
+			return false;
+		}
+		return _default
 	}
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
