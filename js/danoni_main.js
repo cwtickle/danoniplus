@@ -122,6 +122,9 @@ let g_externalDos = ``;
 // 譜面データの&区切りを有効にするか
 let g_enableAmpersandSplit = true;
 
+// 譜面データをdecodeURIするか
+let g_enableDecodeURI = false;
+
 // Motionオプション配列の基準位置
 const C_MOTION_STD_POS = 15;
 
@@ -1723,6 +1726,11 @@ function initialControl() {
 		g_enableAmpersandSplit = setVal(ampSplitInput.value, true, `boolean`);
 	}
 
+	const decodeUriInput = document.querySelector(`#enableDecodeURI`);
+	if (decodeUriInput !== null) {
+		g_enableDecodeURI = setVal(decodeUriInput.value, false, `boolean`);
+	}
+
 	// 譜面データの読み込み
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
@@ -2395,7 +2403,7 @@ function dosConvert(_dos) {
 			const pKey = params[j].substring(0, pos);
 			const pValue = params[j].substring(pos + 1);
 			if (pKey !== undefined) {
-				obj[pKey] = pValue;
+				obj[pKey] = g_enableDecodeURI ? decodeURIComponent(pValue) : pValue;
 			}
 		}
 	}
