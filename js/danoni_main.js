@@ -2757,6 +2757,9 @@ function headerConvert(_dosObj) {
 	// デフォルト曲名表示の複数行時の縦間隔
 	obj.titlelineheight = setVal(_dosObj.titlelineheight, ``, `number`);
 
+	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
+	obj.frzStartjdgUse = setVal(_dosObj.frzStartjdgUse, setVal(g_presetFrzStartjdgUse, `false`, `string`), `string`);
+
 	// オプション利用可否設定
 	// Motion
 	obj.motionUse = setVal(_dosObj.motionUse, setVal(g_presetSettingUse.motion, `true`, `string`), `string`);
@@ -4595,7 +4598,8 @@ function loadingScoreInit() {
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0);
 
 	// ライフ回復・ダメージ量の計算
-	if (g_rootObj.frzStartjdgUse === `true`) {
+	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
+	if (g_headerObj.frzStartjdgUse === `true`) {
 		g_allArrow += g_allFrz / 2;
 	}
 	calcLifeVals(g_allArrow + g_allFrz / 2);
@@ -4608,7 +4612,7 @@ function loadingScoreInit() {
 
 	// 開始フレーム数の取得(フェードイン加味)
 	g_scoreObj.frameNum = getStartFrame(lastFrame);
-	g_scoreObj.actualFrame;
+	g_scoreObj.baseFrame;
 
 	// フレームごとの速度を取得（配列形式）
 	let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
@@ -5803,7 +5807,7 @@ function getArrowSettings() {
 
 	g_workObj.judgArrowCnt = [];
 	g_workObj.judgFrzCnt = [];
-	g_workObj.FrzHitCnt = [];
+	g_workObj.judgFrzHitCnt = [];
 	g_judgObj.lockFlgs = [];
 
 	// 矢印色管理 (個別)
@@ -5837,7 +5841,7 @@ function getArrowSettings() {
 
 		g_workObj.judgArrowCnt[j] = 1;
 		g_workObj.judgFrzCnt[j] = 1;
-		g_workObj.FrzHitCnt[j] = 1;
+		g_workObj.judgFrzHitCnt[j] = 1;
 		g_judgObj.lockFlgs[j] = false;
 
 		g_workObj.arrowColors[j] = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
@@ -6231,8 +6235,7 @@ function MainInit() {
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customMainInit === `function`) {
-		let preblankFrame = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment + Number(parseInt(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]) );
-		g_scoreObj.actualFrame = g_scoreObj.frameNum - preblankFrame;
+		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.realAdjustment;
 		customMainInit();
 		if (typeof customMainInit2 === `function`) {
 			customMainInit2();
@@ -6416,7 +6419,7 @@ function MainInit() {
 			if (typeof customMainEnterFrame2 === `function`) {
 				customMainEnterFrame2();
 			}
-			g_scoreObj.actualFrame++;
+			g_scoreObj.baseFrame++;
 		}
 
 		// 速度変化 (途中変速, 個別加速)
@@ -6613,7 +6616,7 @@ function MainInit() {
 
 						if (g_stateObj.autoPlay === C_FLG_ON && cnt === 0) {
 							changeHitFrz(j, k);
-							if (g_rootObj.frzStartjdgUse === `true`) {
+							if (g_headerObj.frzStartjdgUse === `true`) {
 								judgeIi(cnt);
 							}
 						}
@@ -6684,7 +6687,7 @@ function MainInit() {
 						frzRoot.setAttribute(`judgEndFlg`, `true`);
 
 						changeFailedFrz(j, k);
-						if (g_rootObj.frzStartjdgUse === `true`) {
+						if (g_headerObj.frzStartjdgUse === `true`) {
 							judgeUwan(cnt);
 						}
 					}
@@ -7151,8 +7154,8 @@ function judgeArrow(_j) {
 			const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
 
 			if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
-				if (g_rootObj.frzStartjdgUse === `true`) {
-					if (g_workObj.FrzHitCnt[_j] === undefined || g_workObj.FrzHitCnt[_j] <= fcurrentNo) {
+				if (g_headerObj.frzStartjdgUse === `true`) {
+					if (g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
 						if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 							judgeIi(difCnt);
 						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
@@ -7162,7 +7165,7 @@ function judgeArrow(_j) {
 						} else {
 							judgeShobon(difCnt);
 						}
-						g_workObj.FrzHitCnt[_j] = fcurrentNo+1;
+						g_workObj.judgFrzHitCnt[_j] = fcurrentNo+1;
 					}
 				}
 				changeHitFrz(_j, fcurrentNo);
