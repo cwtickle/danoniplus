@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/30
+ * Revised : 2019/06/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.6.6`;
-const g_revisedDate = `2019/05/30`;
+const g_version = `Ver 5.7.0`;
+const g_revisedDate = `2019/06/01`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1804,18 +1804,7 @@ function loadMusic() {
 		g_musicEncodedFlg = false;
 	}
 
-	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-	}
+	drawDefaultBackImage(``);
 
 	// Now Loadingを表示
 	const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight - 40,
@@ -1910,10 +1899,34 @@ function setAudio(_url) {
 }
 
 /**
+ * デフォルト背景画像の描画処理
+ * @param {string} _key メイン画面かどうか。Main:メイン画面、(空白):それ以外
+ */
+function drawDefaultBackImage(_key) {
+
+	// レイヤー情報取得
+	const layer0 = document.querySelector(`#layer0`);
+	const l0ctx = layer0.getContext(`2d`);
+
+	g_sWidth = layer0.width;
+	g_sHeight = layer0.height;
+
+	// 画面背景を指定 (background-color)
+	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+	if (setVal(g_headerObj[`customBack${_key}Use`], ``, `string`) === `` || g_headerObj[`customBack${_key}Use`] === `false`) {
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	}
+}
+
+/**
  *  タイトル画面初期化
  */
 function titleInit() {
 	clearWindow();
+	drawDefaultBackImage(``);
 
 	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
@@ -1929,13 +1942,6 @@ function titleInit() {
 	if (!g_stateObj.dataSaveFlg || setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, `string`) !== ``) {
 		g_canLoadDifInfoFlg = false;
 	}
-
-	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
-	g_sWidth = layer0.width;
-	g_sHeight = layer0.height;
-
 	const divRoot = document.querySelector(`#divRoot`);
 
 	// タイトル文字描画
@@ -1945,15 +1951,6 @@ function titleInit() {
 		<span style=color:#ff6666;font-size:40px>O</span>NIGIRI`
 			.replace(/[\t\n]/g, ``), 0, 15);
 	divRoot.appendChild(lblTitle);
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (setVal(g_headerObj.customBackUse, ``, `string`) === `` || g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-	}
 
 	// 背景の矢印オブジェクトを表示
 	if (g_headerObj.customTitleArrowUse === `false`) {
@@ -2757,6 +2754,10 @@ function headerConvert(_dosObj) {
 	// デフォルト曲名表示の複数行時の縦間隔
 	obj.titlelineheight = setVal(_dosObj.titlelineheight, ``, `number`);
 
+	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
+	obj.frzStartjdgUse = setVal(_dosObj.frzStartjdgUse,
+		(typeof g_presetFrzStartjdgUse === `string` ? setVal(g_presetFrzStartjdgUse, `false`, `string`) : `false`), `string`);
+
 	// オプション利用可否設定
 	// Motion
 	obj.motionUse = setVal(_dosObj.motionUse, setVal(g_presetSettingUse.motion, `true`, `string`), `string`);
@@ -3090,10 +3091,7 @@ function keysConvert(_dosObj) {
  */
 function optionInit() {
 
-	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
-
+	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 
 	// タイトル文字描画
@@ -3103,15 +3101,6 @@ function optionInit() {
 
 	// オプションボタン用の設置
 	createOptionWindow(`divRoot`);
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-	}
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customOptionInit === `function`) {
@@ -3953,10 +3942,7 @@ function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
 
 function settingsDisplayInit() {
 
-	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
-
+	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 
 	// 譜面初期情報ロード許可フラグ
@@ -3969,15 +3955,6 @@ function settingsDisplayInit() {
 
 	// オプションボタン用の設置
 	createSettingsDisplayWindow(`divRoot`);
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-	}
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customSettingsDisplayInit === `function`) {
@@ -4141,10 +4118,7 @@ function createSettingsDisplayWindow(_sprite) {
  */
 function keyConfigInit() {
 
-	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
-
+	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 
 	// 譜面初期情報ロード許可フラグ
@@ -4156,15 +4130,6 @@ function keyConfigInit() {
 		<span style=color:#ff6666;font-size:40px>C</span>ONFIG`
 			.replace(/[\t\n]/g, ``), 0, 15);
 	divRoot.appendChild(lblTitle);
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-	}
 
 	const kcDesc = createDivLabel(`kcDesc`, 0, 65, g_sWidth, 20, 14, C_CLR_TITLE,
 		`[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`);
@@ -4595,6 +4560,10 @@ function loadingScoreInit() {
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0);
 
 	// ライフ回復・ダメージ量の計算
+	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
+	if (g_headerObj.frzStartjdgUse === `true`) {
+		g_allArrow += g_allFrz / 2;
+	}
 	calcLifeVals(g_allArrow + g_allFrz / 2);
 
 	// 最終フレーム数の取得
@@ -4605,6 +4574,7 @@ function loadingScoreInit() {
 
 	// 開始フレーム数の取得(フェードイン加味)
 	g_scoreObj.frameNum = getStartFrame(lastFrame);
+	g_scoreObj.baseFrame;
 
 	// フレームごとの速度を取得（配列形式）
 	let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
@@ -5799,6 +5769,7 @@ function getArrowSettings() {
 
 	g_workObj.judgArrowCnt = [];
 	g_workObj.judgFrzCnt = [];
+	g_workObj.judgFrzHitCnt = [];
 	g_judgObj.lockFlgs = [];
 
 	// 矢印色管理 (個別)
@@ -5832,6 +5803,7 @@ function getArrowSettings() {
 
 		g_workObj.judgArrowCnt[j] = 1;
 		g_workObj.judgFrzCnt[j] = 1;
+		g_workObj.judgFrzHitCnt[j] = 1;
 		g_judgObj.lockFlgs[j] = false;
 
 		g_workObj.arrowColors[j] = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
@@ -5909,21 +5881,8 @@ function getArrowSettings() {
  * メイン画面初期化
  */
 function MainInit() {
-
-	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
-
+	drawDefaultBackImage(`Main`);
 	const divRoot = document.querySelector(`#divRoot`);
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackMainUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-	}
 
 	g_currentArrows = 0;
 	g_workObj.fadeInNo = [];
@@ -5941,7 +5900,7 @@ function MainInit() {
 	}
 
 	// 背景スプライトを作成
-	const backSprite = createSprite(`divRoot`, `backSprite`, 0, 0, g_sWidth, g_sHeight);
+	createSprite(`divRoot`, `backSprite`, 0, 0, g_sWidth, g_sHeight);
 	for (let j = 0; j <= g_scoreObj.backMaxDepth; j++) {
 		createSprite(`backSprite`, `backSprite${j}`, 0, 0, g_sWidth, g_sHeight);
 	}
@@ -6225,6 +6184,7 @@ function MainInit() {
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customMainInit === `function`) {
+		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.realAdjustment;
 		customMainInit();
 		if (typeof customMainInit2 === `function`) {
 			customMainInit2();
@@ -6408,6 +6368,7 @@ function MainInit() {
 			if (typeof customMainEnterFrame2 === `function`) {
 				customMainEnterFrame2();
 			}
+			g_scoreObj.baseFrame++;
 		}
 
 		// 速度変化 (途中変速, 個別加速)
@@ -6604,6 +6565,9 @@ function MainInit() {
 
 						if (g_stateObj.autoPlay === C_FLG_ON && cnt === 0) {
 							changeHitFrz(j, k);
+							if (g_headerObj.frzStartjdgUse === `true`) {
+								judgeIi(cnt);
+							}
 						}
 					} else {
 						const frzBtmShadow = document.querySelector(`#frzBtmShadow${j}_${k}`);
@@ -6672,6 +6636,9 @@ function MainInit() {
 						frzRoot.setAttribute(`judgEndFlg`, `true`);
 
 						changeFailedFrz(j, k);
+						if (g_headerObj.frzStartjdgUse === `true`) {
+							judgeUwan(cnt);
+						}
 					}
 				} else {
 					frzBarLength -= g_workObj.currentSpeed;
@@ -7136,6 +7103,20 @@ function judgeArrow(_j) {
 			const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
 
 			if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
+				if (g_headerObj.frzStartjdgUse === `true`) {
+					if (g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
+						if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
+							judgeIi(difCnt);
+						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
+							judgeShakin(difCnt);
+						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
+							judgeMatari(difCnt);
+						} else {
+							judgeShobon(difCnt);
+						}
+						g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
+					}
+				}
 				changeHitFrz(_j, fcurrentNo);
 				g_judgObj.lockFlgs[_j] = false;
 				return;
@@ -7406,10 +7387,7 @@ function finishViewing() {
  */
 function resultInit() {
 
-	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
-
+	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 
 	// タイトル文字描画
@@ -7420,15 +7398,6 @@ function resultInit() {
 	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70 + (g_sHeight - 500) / 2, 450, 110);
 	playDataWindow.style.border = `solid 0.5px #666666`;
 	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 180, 185 + (g_sHeight - 500) / 2, 360, 210);
-
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (g_headerObj.customBackUse === `false`) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-	}
 
 	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
 		g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan +
