@@ -1739,7 +1739,7 @@ function initialControl() {
 		loadScript(`${filename}?${randTime}`, _ => {
 			if (typeof externalDosInit === `function`) {
 				externalDosInit();
-				Object.assign(g_rootObj, dosConvert(g_externalDos.replace(`&`, `|`)));
+				Object.assign(g_rootObj, dosConvert(g_externalDos));
 			} else {
 				makeWarningWindow(C_MSG_E_0022);
 			}
