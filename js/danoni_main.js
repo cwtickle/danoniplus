@@ -1909,6 +1909,10 @@ function setAudio(_url) {
 	}
 }
 
+/**
+ * デフォルト背景画像の描画処理
+ * @param {string} _key メイン画面かどうか。Main:メイン画面、(空白):それ以外
+ */
 function drawDefaultBackImage(_key) {
 
 	// レイヤー情報取得
