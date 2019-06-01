@@ -119,6 +119,9 @@ let g_musicdata = ``;
 // 外部dosデータ
 let g_externalDos = ``;
 
+// 譜面データの&区切りを有効にするか
+let g_enableAmpersandSplit = true;
+
 // Motionオプション配列の基準位置
 const C_MOTION_STD_POS = 15;
 
@@ -1714,6 +1717,12 @@ function initialControl() {
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = true;
 
+	// 譜面データの読み込みオプション
+	const ampSplitInput = document.querySelector(`#enableAmpersandSplit`);
+	if (ampSplitInput !== null) {
+		g_enableAmpersandSplit = setVal(ampSplitInput.value, true, `boolean`);
+	}
+
 	// 譜面データの読み込み
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
@@ -2378,7 +2387,7 @@ function makeWarningWindow(_text) {
 function dosConvert(_dos) {
 
 	const obj = {};
-	const paramsTmp = _dos.split(`&`).join(`|`);
+	const paramsTmp = g_enableAmpersandSplit ? _dos.split(`&`).join(`|`) : _dos;
 	const params = paramsTmp.split(`|`);
 	for (let j = 0; j < params.length; j++) {
 		const pos = params[j].indexOf(`=`);
