@@ -2758,7 +2758,8 @@ function headerConvert(_dosObj) {
 	obj.titlelineheight = setVal(_dosObj.titlelineheight, ``, `number`);
 
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
-	obj.frzStartjdgUse = setVal(_dosObj.frzStartjdgUse, setVal(g_presetFrzStartjdgUse, `false`, `string`), `string`);
+	obj.frzStartjdgUse = setVal(_dosObj.frzStartjdgUse,
+		(typeof g_presetFrzStartjdgUse === `string` ? setVal(g_presetFrzStartjdgUse, `false`, `string`) : `false`), `string`);
 
 	// オプション利用可否設定
 	// Motion
