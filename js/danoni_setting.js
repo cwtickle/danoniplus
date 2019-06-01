@@ -56,3 +56,7 @@ const g_presetSettingUse = {
 	autoPlay: `true`,
 	gauge: `true`,
 };
+
+// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
+// 判定させる場合は `true` を指定
+g_presetFrzStartjdgUse = `false`;
