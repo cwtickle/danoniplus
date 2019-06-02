@@ -6562,17 +6562,18 @@ function MainInit() {
 
 		/**
 		 * 矢印生成
-		 * @param {object} _arrowObj 
+		 * @param {number} _j 
 		 * @param {number} _arrowCnt 
+		 * @param {string} _name
+		 * @param {string} _color
 		 */
-		function makeArrow(_arrowObj, _arrowCnt, _name, _color) {
-			const targetj = _arrowObj;
-			const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[targetj];
+		function makeArrow(_j, _arrowCnt, _name, _color) {
+			const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 
-			const step = createArrowEffect(`${_name}${targetj}_${_arrowCnt}`, _color,
-				g_workObj.stepX[targetj],
-				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir, 50,
-				g_workObj.stepRtn[targetj]);
+			const step = createArrowEffect(`${_name}${_j}_${_arrowCnt}`, _color,
+				g_workObj.stepX[_j],
+				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir, 50,
+				g_workObj.stepRtn[_j]);
 			step.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum]);
 			step.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 			step.setAttribute(`judgEndFlg`, `false`);
@@ -6664,51 +6665,63 @@ function MainInit() {
 		if (g_workObj.mkFrzArrow[g_scoreObj.frameNum] !== undefined) {
 			for (let j = 0, len = g_workObj.mkFrzArrow[g_scoreObj.frameNum].length; j < len; j++) {
 				const targetj = g_workObj.mkFrzArrow[g_scoreObj.frameNum][j];
-				const frzLength = g_workObj.mkFrzLength[targetj][frzCnts[targetj] * 2];
-				const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[targetj];
-
-				const frzRoot = createSprite(`mainSprite`, `frz${targetj}_${++frzCnts[targetj]}`,
-					g_workObj.stepX[targetj],
-					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
-					50, 100 + frzLength);
-				frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
-				frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
-				frzRoot.setAttribute(`judgEndFlg`, `false`);
-				frzRoot.setAttribute(`isMoving`, `true`);
-				frzRoot.setAttribute(`frzBarLength`, frzLength);
-				frzRoot.setAttribute(`frzAttempt`, 0);
-				frzRoot.setAttribute(`boostSpd`, boostSpdDir);
-				frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[targetj]);
-				mainSprite.appendChild(frzRoot);
-
-				// フリーズアローは、下記の順で作成する。
-				// 後に作成するほど前面に表示される。
-
-				// フリーズアロー帯(frzBar)
-				const frzBar = createColorObject(`frzBar${targetj}_${frzCnts[targetj]}`, g_workObj.frzNormalBarColors[targetj],
-					5, 25 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[targetj], 40, frzLength * g_workObj.boostSpd, 0, `frzBar`);
-				frzRoot.appendChild(frzBar);
-
-				// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-				const frzTopShadow = createColorObject(`frzTopShadow${targetj}_${frzCnts[targetj]}`, `#000000`,
-					0, 0, 50, 50, g_workObj.stepRtn[targetj], `arrowShadow`);
-				frzRoot.appendChild(frzTopShadow);
-
-				// 開始矢印。ヒット時は隠れる。
-				const frzTop = createArrowEffect(`frzTop${targetj}_${frzCnts[targetj]}`, g_workObj.frzNormalColors[targetj],
-					0, 0, 50, g_workObj.stepRtn[targetj]);
-				frzRoot.appendChild(frzTop);
-
-				// 後発矢印の塗り部分
-				const frzBtmShadow = createColorObject(`frzBtmShadow${targetj}_${frzCnts[targetj]}`, `#000000`,
-					0, frzLength * boostSpdDir, 50, 50, g_workObj.stepRtn[targetj], `arrowShadow`);
-				frzRoot.appendChild(frzBtmShadow);
-
-				// 後発矢印
-				const frzBtm = createArrowEffect(`frzBtm${targetj}_${frzCnts[targetj]}`, g_workObj.frzNormalColors[targetj],
-					0, frzLength * boostSpdDir, 50, g_workObj.stepRtn[targetj]);
-				frzRoot.appendChild(frzBtm);
+				makeFrzArrow(targetj, ++frzCnts[targetj], `frz`,
+					g_workObj.frzNormalColors[targetj], g_workObj.frzNormalBarColors[targetj]);
 			}
+		}
+
+		/**
+		 * フリーズアロー生成
+		 * @param {number} _j 
+		 * @param {number} _arrowCnt 
+		 * @param {string} _name 
+		 * @param {string} _color 
+		 */
+		function makeFrzArrow(_j, _arrowCnt, _name, _normalColor, _barColor) {
+			const frzLength = g_workObj.mkFrzLength[_j][(_arrowCnt - 1) * 2];
+			const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
+
+			const frzRoot = createSprite(`mainSprite`, `${_name}${_j}_${_arrowCnt}`,
+				g_workObj.stepX[_j],
+				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+				50, 100 + frzLength);
+			frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
+			frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
+			frzRoot.setAttribute(`judgEndFlg`, `false`);
+			frzRoot.setAttribute(`isMoving`, `true`);
+			frzRoot.setAttribute(`frzBarLength`, frzLength);
+			frzRoot.setAttribute(`frzAttempt`, 0);
+			frzRoot.setAttribute(`boostSpd`, boostSpdDir);
+			frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[_j]);
+			mainSprite.appendChild(frzRoot);
+
+			// フリーズアローは、下記の順で作成する。
+			// 後に作成するほど前面に表示される。
+
+			// フリーズアロー帯(frzBar)
+			const frzBar = createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
+				5, 25 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[_j], 40, frzLength * g_workObj.boostSpd, 0, `frzBar`);
+			frzRoot.appendChild(frzBar);
+
+			// 開始矢印の塗り部分。ヒット時は前面に出て光る。
+			const frzTopShadow = createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, `#000000`,
+				0, 0, 50, 50, g_workObj.stepRtn[_j], `arrowShadow`);
+			frzRoot.appendChild(frzTopShadow);
+
+			// 開始矢印。ヒット時は隠れる。
+			const frzTop = createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
+				0, 0, 50, g_workObj.stepRtn[_j]);
+			frzRoot.appendChild(frzTop);
+
+			// 後発矢印の塗り部分
+			const frzBtmShadow = createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, `#000000`,
+				0, frzLength * boostSpdDir, 50, 50, g_workObj.stepRtn[_j], `arrowShadow`);
+			frzRoot.appendChild(frzBtmShadow);
+
+			// 後発矢印
+			const frzBtm = createArrowEffect(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
+				0, frzLength * boostSpdDir, 50, g_workObj.stepRtn[_j]);
+			frzRoot.appendChild(frzBtm);
 		}
 
 		// フリーズアロー移動＆消去
