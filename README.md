@@ -13,9 +13,8 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 オリジナルのゲームデータを作ることができます。  
 
 ## Demo
-- [Demo1](http://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / 木下たまき  
-- [Demo2](http://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) シャイニングスター / 魔王魂  
-- [Demo3](http://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) プチ・マギエ / Napi  
+- [Demo1](http://cw7.sakura.ne.jp/danonidemo/v1/2009/0007R_DimEuro.html) Dimension Transfer - euro mix / Y.W  
+- [Demo2](http://cw7.sakura.ne.jp/danonidemo/v1/2016/0277_PbrideRin.html) Princess Bride！@鏡音リンでミミコピ/ 干瓢碁  
 
 ## 遊び方 (How to Play)
 リズムに合わせてやってくる矢印・フリーズアローを、ステップゾーン上で押すリズムゲームです。  
