@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/06/01
+ * Revised : 2019/06/08
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.8.0`;
-const g_revisedDate = `2019/06/01`;
+const g_version = `Ver 5.8.1`;
+const g_revisedDate = `2019/06/08`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4162,7 +4162,7 @@ function keyConfigInit() {
 	divRoot.appendChild(kcDesc);
 
 	// キーの一覧を表示
-	const keyconSprite = createSprite(`divRoot`, `keyconSprite`, (g_sWidth - 400) / 2, 100 + (g_sHeight - 500) / 2, 400, 300);
+	const keyconSprite = createSprite(`divRoot`, `keyconSprite`, 0, 100 + (g_sHeight - 500) / 2, g_sWidth, 300);
 	const kWidth = parseInt(keyconSprite.style.width);
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -4198,18 +4198,18 @@ function keyConfigInit() {
 
 		posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-		stdPos = (posj >= divideCnt ? leftCnt - (posMax - divideCnt) / 2 : leftCnt - divideCnt / 2);
+		stdPos = (posj >= divideCnt ? leftCnt + 1 - (posMax - (divideCnt - 1)) / 2 : leftCnt - (divideCnt - 1) / 2);
 		dividePos = (posj >= divideCnt ? 1 : 0);
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		keyconSprite.appendChild(createArrowEffect(`arrow${j}`, g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]],
-			g_keyObj.blank * stdPos + kWidth / 2,
+			g_keyObj.blank * stdPos + kWidth / 2 - 25,
 			150 * dividePos, 50,
 			g_keyObj[`stepRtn${keyCtrlPtn}`][j]));
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 			keyconSprite.appendChild(createDivLabel(`keycon${j}_${k}`,
-				g_keyObj.blank * stdPos + kWidth / 2,
+				g_keyObj.blank * stdPos + kWidth / 2 - 25,
 				50 + 20 * k + 150 * dividePos,
 				50, 20, 16, `#cccccc`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] !== g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]) {
@@ -4468,10 +4468,10 @@ function keyConfigInit() {
 				const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
 
 				leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-				stdPos = (posj >= divideCnt ? leftCnt - (posMax - divideCnt) / 2 : leftCnt - divideCnt / 2);
+				stdPos = (posj >= divideCnt ? leftCnt + 1 - (posMax - (divideCnt - 1)) / 2 : leftCnt - (divideCnt - 1) / 2);
 				dividePos = (posj >= divideCnt ? 1 : 0);
 
-				cursor.style.left = `${kWidth / 2 + g_keyObj.blank * stdPos - 10}px`;
+				cursor.style.left = `${kWidth / 2 + g_keyObj.blank * stdPos - 10 - 25}px`;
 				cursor.style.top = `${50 + 150 * dividePos}px`;
 				if (g_kcType === `Replaced`) {
 					cursor.style.top = `${parseFloat(cursor.style.top) + 20}px`;
@@ -5815,8 +5815,8 @@ function getArrowSettings() {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-		const stdPos = (posj >= divideCnt ? leftCnt - (posMax - divideCnt) / 2 : leftCnt - divideCnt / 2);
-		g_workObj.stepX[j] = g_keyObj.blank * stdPos + g_sWidth / 2;
+		const stdPos = (posj >= divideCnt ? leftCnt + 1 - (posMax - (divideCnt - 1)) / 2 : leftCnt - (divideCnt - 1) / 2);
+		g_workObj.stepX[j] = g_keyObj.blank * stdPos + g_sWidth / 2 - 25;
 
 		if (g_stateObj.reverse === C_FLG_ON) {
 			g_workObj.dividePos[j] = (posj >= divideCnt ? 0 : 1);
