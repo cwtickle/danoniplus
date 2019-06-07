@@ -4468,10 +4468,10 @@ function keyConfigInit() {
 				const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
 
 				leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-				stdPos = (posj >= divideCnt ? leftCnt - (posMax - divideCnt) / 2 : leftCnt - divideCnt / 2);
+				stdPos = (posj >= divideCnt ? leftCnt + 1 - (posMax - (divideCnt - 1)) / 2 : leftCnt - (divideCnt - 1) / 2);
 				dividePos = (posj >= divideCnt ? 1 : 0);
 
-				cursor.style.left = `${kWidth / 2 + g_keyObj.blank * stdPos - 10}px`;
+				cursor.style.left = `${kWidth / 2 + g_keyObj.blank * stdPos - 10 - 25}px`;
 				cursor.style.top = `${50 + 150 * dividePos}px`;
 				if (g_kcType === `Replaced`) {
 					cursor.style.top = `${parseFloat(cursor.style.top) + 20}px`;
@@ -5815,8 +5815,8 @@ function getArrowSettings() {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-		const stdPos = (posj >= divideCnt ? leftCnt - (posMax - divideCnt) / 2 : leftCnt - divideCnt / 2);
-		g_workObj.stepX[j] = g_keyObj.blank * stdPos + g_sWidth / 2;
+		const stdPos = (posj >= divideCnt ? leftCnt + 1 - (posMax - (divideCnt - 1)) / 2 : leftCnt - (divideCnt - 1) / 2);
+		g_workObj.stepX[j] = g_keyObj.blank * stdPos + g_sWidth / 2 - 25;
 
 		if (g_stateObj.reverse === C_FLG_ON) {
 			g_workObj.dividePos[j] = (posj >= divideCnt ? 0 : 1);
