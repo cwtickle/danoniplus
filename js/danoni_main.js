@@ -112,6 +112,8 @@ const C_IMG_CFRZBAR = `../img/frzbar.png`;
 const C_IMG_MORARAFRZBAR = `../img/frzbar.png`;
 const C_IMG_MONARFRZBAR = `../img/frzbar.png`;
 
+const C_ARW_WIDTH = 50;
+
 // 音楽ファイル エンコードフラグ
 let g_musicEncodedFlg = false;
 let g_musicdata = ``;
@@ -4222,13 +4224,13 @@ function keyConfigInit() {
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		keyconSprite.appendChild(createArrowEffect(`arrow${j}`, g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]],
-			g_keyObj.blank * stdPos + kWidth / 2 - 25,
+			g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
 			150 * dividePos, 50,
 			g_keyObj[`stepRtn${keyCtrlPtn}`][j]));
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 			keyconSprite.appendChild(createDivLabel(`keycon${j}_${k}`,
-				g_keyObj.blank * stdPos + kWidth / 2 - 25,
+				g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
 				50 + 20 * k + 150 * dividePos,
 				50, 20, 16, `#cccccc`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] !== g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]) {
@@ -4242,7 +4244,7 @@ function keyConfigInit() {
 
 	// カーソルの作成
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, C_IMG_CURSOR,
-		kWidth / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10 - 25, 45, 15, 30));
+		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
 	// キーコンフィグタイプ切替ボタン
@@ -4494,7 +4496,7 @@ function keyConfigInit() {
 					dividePos = 0;
 				}
 
-				cursor.style.left = `${kWidth / 2 + g_keyObj.blank * stdPos - 10 - 25}px`;
+				cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
 				cursor.style.top = `${50 + 150 * dividePos}px`;
 				if (g_kcType === `Replaced`) {
 					cursor.style.top = `${parseFloat(cursor.style.top) + 20}px`;
@@ -4527,7 +4529,7 @@ function resetCursorMain(_width, _divideCnt, _keyCtrlPtn) {
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][0];
 
 	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10 - 25}px`;
+	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
 	cursor.style.top = `45px`;
 }
 
@@ -4564,7 +4566,7 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
 	}
 
 	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${_width / 2 + g_keyObj.blank * stdPos - 10 - 25}px`;
+	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
 	if (g_currentk === 1) {
 		cursor.style.top = `${65 + 150 * dividePos}px`;
 	} else {
@@ -4587,7 +4589,7 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][0];
 
 	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10 - 25}px`;
+	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
 	cursor.style.top = `45px`;
 }
 
@@ -5854,7 +5856,7 @@ function getArrowSettings() {
 		} else {
 			stdPos = posj - divideCnt / 2;
 		}
-		g_workObj.stepX[j] = g_keyObj.blank * stdPos + g_sWidth / 2 - 25;
+		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_sWidth - C_ARW_WIDTH) / 2;
 
 		if (g_stateObj.reverse === C_FLG_ON) {
 			g_workObj.dividePos[j] = (posj > divideCnt ? 0 : 1);
