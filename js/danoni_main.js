@@ -112,6 +112,8 @@ const C_IMG_CFRZBAR = `../img/frzbar.png`;
 const C_IMG_MORARAFRZBAR = `../img/frzbar.png`;
 const C_IMG_MONARFRZBAR = `../img/frzbar.png`;
 
+const C_ARW_WIDTH = 50;
+
 // 音楽ファイル エンコードフラグ
 let g_musicEncodedFlg = false;
 let g_musicdata = ``;
@@ -166,6 +168,8 @@ const C_MIN_SPEED = 1;
 /** キーコンフィグ設定 */
 let g_kcType = `Main`;
 let g_colorType = `Default`;
+const C_KYC_HEIGHT = 150;
+const C_KYC_REPHEIGHT = 20;
 
 /** メイン画面用共通オブジェクト */
 const g_workObj = {};
@@ -2934,6 +2938,7 @@ function keysConvert(_dosObj) {
 		const keyExtraList = _dosObj.keyExtraList.split(`,`);
 		let tmpKeyCtrl = [];
 		let tmpKeyPtn = [];
+		let tmpDivPtn = [];
 		let tmpMinPatterns = 1;
 
 		for (let j = 0; j < keyExtraList.length; j++) {
@@ -2979,14 +2984,21 @@ function keysConvert(_dosObj) {
 				const tmpDivs = _dosObj[`div${newKey}`].split(`$`);
 				if (tmpDivs.length > 0) {
 					for (let k = 0, len = tmpDivs.length; k < len; k++) {
-						if (setVal(tmpDivs[k], -1, `number`) === -1) {
+						tmpDivPtn = tmpDivs[k].split(`,`);
+
+						if (setVal(tmpDivPtn[0], -1, `number`) === -1) {
 							if (setVal(g_keyObj[`div${newKey}_${k}`], -1, `number`) !== -1) {
 								continue;
 							} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
 								g_keyObj[`div${newKey}_${k}`] = g_keyObj[`chara${newKey}_0`].length;
 							}
 						} else {
-							g_keyObj[`div${newKey}_${k}`] = tmpDivs[k];
+							g_keyObj[`div${newKey}_${k}`] = setVal(tmpDivPtn[0], g_keyObj[`chara${newKey}_0`].length, `number`);
+						}
+
+						// ステップゾーン位置の最終番号
+						if (tmpDivPtn.length > 1) {
+							g_keyObj[`divMax${newKey}_${k}`] = setVal(tmpDivPtn[1], -1, `number`);
 						}
 					}
 				}
@@ -3027,6 +3039,11 @@ function keysConvert(_dosObj) {
 						g_keyObj[`pos${newKey}_${k}`] = tmpPoss[k].split(`,`);
 						for (let m = 0, len2 = g_keyObj[`pos${newKey}_${k}`].length; m < len2; m++) {
 							g_keyObj[`pos${newKey}_${k}`][m] = Number(g_keyObj[`pos${newKey}_${k}`][m]);
+						}
+
+						if (g_keyObj[`divMax${newKey}_${k}`] === undefined || g_keyObj[`divMax${newKey}_${k}`] === -1) {
+							const posLength = g_keyObj[`pos${newKey}_${k}`].length;
+							g_keyObj[`divMax${newKey}_${k}`] = g_keyObj[`pos${newKey}_${k}`][posLength - 1] + 1;
 						}
 					}
 				}
@@ -3809,11 +3826,12 @@ function createOptionWindow(_sprite) {
 
 		if (g_canLoadDifInfoFlg || _initFlg) {
 
-			// キーパターン初期化
-			g_keyObj.currentPtn = 0;
-
 			// キー別のローカルストレージの初期設定　※特殊キーは除く
 			if (!g_stateObj.extraKeyFlg) {
+
+				// キーパターン初期化
+				g_keyObj.currentPtn = 0;
+
 				g_checkKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
 				if (g_checkKeyStorage) {
 					g_localKeyStorage = JSON.parse(g_checkKeyStorage);
@@ -4167,8 +4185,9 @@ function keyConfigInit() {
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const posMax = g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1;
-	const divideCnt = g_keyObj[`div${keyCtrlPtn}`];
+	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
+		g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
+	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined) {
 		g_keyObj.blank = g_keyObj[`blank${keyCtrlPtn}`];
 	} else {
@@ -4186,8 +4205,6 @@ function keyConfigInit() {
 		document.querySelector(`#kcMsg`).innerHTML = ``;
 	}
 
-	/** 同行の左から数えた場合の位置(x座標) */
-	let leftCnt = 0;
 	/** 同行の中心から見た場合の位置(x座標) */
 	let stdPos = 0;
 	/** 行位置 */
@@ -4197,21 +4214,25 @@ function keyConfigInit() {
 	for (let j = 0; j < keyNum; j++) {
 
 		posj = g_keyObj[`pos${keyCtrlPtn}`][j];
-		leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-		stdPos = (posj >= divideCnt ? leftCnt + 1 - (posMax - (divideCnt - 1)) / 2 : leftCnt - (divideCnt - 1) / 2);
-		dividePos = (posj >= divideCnt ? 1 : 0);
+		if (posj > divideCnt) {
+			stdPos = posj - (posMax + divideCnt) / 2;
+			dividePos = 1;
+		} else {
+			stdPos = posj - divideCnt / 2;
+			dividePos = 0;
+		}
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		keyconSprite.appendChild(createArrowEffect(`arrow${j}`, g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]],
-			g_keyObj.blank * stdPos + kWidth / 2 - 25,
-			150 * dividePos, 50,
+			g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
+			C_KYC_HEIGHT * dividePos, 50,
 			g_keyObj[`stepRtn${keyCtrlPtn}`][j]));
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 			keyconSprite.appendChild(createDivLabel(`keycon${j}_${k}`,
-				g_keyObj.blank * stdPos + kWidth / 2 - 25,
-				50 + 20 * k + 150 * dividePos,
-				50, 20, 16, `#cccccc`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
+				g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
+				50 + C_KYC_REPHEIGHT * k + C_KYC_HEIGHT * dividePos,
+				C_ARW_WIDTH, C_ARW_WIDTH, 16, `#cccccc`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] !== g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]) {
 				document.querySelector(`#keycon${j}_${k}`).style.color = `#ffff00`;
 			} else if (g_keyObj.currentPtn === -1) {
@@ -4223,7 +4244,7 @@ function keyConfigInit() {
 
 	// カーソルの作成
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, C_IMG_CURSOR,
-		kWidth / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
+		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
 	// キーコンフィグタイプ切替ボタン
@@ -4362,7 +4383,8 @@ function keyConfigInit() {
 		clearWindow();
 		keyConfigInit();
 		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-		eval(`resetCursor${g_kcType}`)(kWidth, g_keyObj[`div${keyCtrlPtn}`], keyCtrlPtn);
+		const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+		eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 	});
 	divRoot.appendChild(btnPtnChange);
 
@@ -4383,7 +4405,7 @@ function keyConfigInit() {
 			g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 			const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-			const divideCnt = g_keyObj[`div${keyCtrlPtn}`];
+			const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 
 			for (let j = 0; j < keyNum; j++) {
 				for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
@@ -4439,7 +4461,7 @@ function keyConfigInit() {
 			if (g_currentk < g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj].length - 1 &&
 				g_kcType !== `Main`) {
 				g_currentk++;
-				cursor.style.top = `${parseInt(cursor.style.top) + 20}px`;
+				cursor.style.top = `${parseInt(cursor.style.top) + C_KYC_REPHEIGHT}px`;
 
 			} else if (g_currentj < g_keyObj[`keyCtrl${keyCtrlPtn}`].length - 1) {
 				// 他の代替キーが存在せず、次の矢印がある場合
@@ -4466,15 +4488,18 @@ function keyConfigInit() {
 					}
 				}
 				const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
+				if (posj > divideCnt) {
+					stdPos = posj - (posMax + divideCnt) / 2;
+					dividePos = 1;
+				} else {
+					stdPos = posj - divideCnt / 2;
+					dividePos = 0;
+				}
 
-				leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-				stdPos = (posj >= divideCnt ? leftCnt + 1 - (posMax - (divideCnt - 1)) / 2 : leftCnt - (divideCnt - 1) / 2);
-				dividePos = (posj >= divideCnt ? 1 : 0);
-
-				cursor.style.left = `${kWidth / 2 + g_keyObj.blank * stdPos - 10 - 25}px`;
-				cursor.style.top = `${50 + 150 * dividePos}px`;
+				cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
+				cursor.style.top = `${50 + C_KYC_HEIGHT * dividePos}px`;
 				if (g_kcType === `Replaced`) {
-					cursor.style.top = `${parseFloat(cursor.style.top) + 20}px`;
+					cursor.style.top = `${parseFloat(cursor.style.top) + C_KYC_REPHEIGHT}px`;
 				}
 
 			} else {
@@ -4504,7 +4529,7 @@ function resetCursorMain(_width, _divideCnt, _keyCtrlPtn) {
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][0];
 
 	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
+	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
 	cursor.style.top = `45px`;
 }
 
@@ -4528,14 +4553,26 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
 		}
 	}
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][g_currentj];
+	const posMax = (g_keyObj[`divMax${_keyCtrlPtn}`] !== undefined ?
+		g_keyObj[`divMax${_keyCtrlPtn}`] : g_keyObj[`pos${_keyCtrlPtn}`][keyNum - 1] + 1);
+	let stdPos;
+	let dividePos;
+	if (posj > _divideCnt) {
+		stdPos = posj - (posMax + _divideCnt) / 2;
+		dividePos = 1;
+	} else {
+		stdPos = posj - _divideCnt / 2;
+		dividePos = 0;
+	}
 
 	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
+	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
 	if (g_currentk === 1) {
-		cursor.style.top = `65px`;
+		cursor.style.top = `${45 + C_KYC_REPHEIGHT + C_KYC_HEIGHT * dividePos}px`;
 	} else {
 		g_kcType = `ALL`;
-		cursor.style.top = `45px`;
+		document.querySelector(`#lnkKcType`).innerHTML = g_kcType;
+		cursor.style.top = `${45 + C_KYC_HEIGHT * dividePos}px`;
 	}
 }
 
@@ -4553,7 +4590,7 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][0];
 
 	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
+	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
 	cursor.style.top = `45px`;
 }
 
@@ -5771,8 +5808,8 @@ function getArrowSettings() {
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const posMax = g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1;
-	const divideCnt = g_keyObj[`div${keyCtrlPtn}`];
+	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ? g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
+	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined) {
 		g_keyObj.blank = g_keyObj[`blank${keyCtrlPtn}`];
 	} else {
@@ -5814,16 +5851,20 @@ function getArrowSettings() {
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
-		const leftCnt = (posj >= divideCnt ? posj - divideCnt : posj);
-		const stdPos = (posj >= divideCnt ? leftCnt + 1 - (posMax - (divideCnt - 1)) / 2 : leftCnt - (divideCnt - 1) / 2);
-		g_workObj.stepX[j] = g_keyObj.blank * stdPos + g_sWidth / 2 - 25;
+		let stdPos;
+		if (posj > divideCnt) {
+			stdPos = posj - (posMax + divideCnt) / 2;
+		} else {
+			stdPos = posj - divideCnt / 2;
+		}
+		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_sWidth - C_ARW_WIDTH) / 2;
 
 		if (g_stateObj.reverse === C_FLG_ON) {
-			g_workObj.dividePos[j] = (posj >= divideCnt ? 0 : 1);
-			g_workObj.scrollDir[j] = (posj >= divideCnt ? 1 : -1);
+			g_workObj.dividePos[j] = (posj > divideCnt ? 0 : 1);
+			g_workObj.scrollDir[j] = (posj > divideCnt ? 1 : -1);
 		} else {
-			g_workObj.dividePos[j] = (posj >= divideCnt ? 1 : 0);
-			g_workObj.scrollDir[j] = (posj >= divideCnt ? -1 : 1);
+			g_workObj.dividePos[j] = (posj > divideCnt ? 1 : 0);
+			g_workObj.scrollDir[j] = (posj > divideCnt ? -1 : 1);
 		}
 
 		g_workObj.judgArrowCnt[j] = 1;
