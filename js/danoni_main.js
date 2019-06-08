@@ -4203,8 +4203,6 @@ function keyConfigInit() {
 		document.querySelector(`#kcMsg`).innerHTML = ``;
 	}
 
-	/** 同行の左から数えた場合の位置(x座標) */
-	let leftCnt = 0;
 	/** 同行の中心から見た場合の位置(x座標) */
 	let stdPos = 0;
 	/** 行位置 */
@@ -4571,6 +4569,7 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
 		cursor.style.top = `${65 + 150 * dividePos}px`;
 	} else {
 		g_kcType = `ALL`;
+		document.querySelector(`#lnkKcType`).innerHTML = g_kcType;
 		cursor.style.top = `${45 + 150 * dividePos}px`;
 	}
 }
