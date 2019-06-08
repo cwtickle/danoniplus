@@ -2934,6 +2934,7 @@ function keysConvert(_dosObj) {
 		const keyExtraList = _dosObj.keyExtraList.split(`,`);
 		let tmpKeyCtrl = [];
 		let tmpKeyPtn = [];
+		let tmpDivPtn = [];
 		let tmpMinPatterns = 1;
 
 		for (let j = 0; j < keyExtraList.length; j++) {
@@ -2979,14 +2980,21 @@ function keysConvert(_dosObj) {
 				const tmpDivs = _dosObj[`div${newKey}`].split(`$`);
 				if (tmpDivs.length > 0) {
 					for (let k = 0, len = tmpDivs.length; k < len; k++) {
-						if (setVal(tmpDivs[k], -1, `number`) === -1) {
+						tmpDivPtn = tmpDivs[k].split(`,`);
+
+						if (setVal(tmpDivPtn[0], -1, `number`) === -1) {
 							if (setVal(g_keyObj[`div${newKey}_${k}`], -1, `number`) !== -1) {
 								continue;
 							} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
 								g_keyObj[`div${newKey}_${k}`] = g_keyObj[`chara${newKey}_0`].length;
 							}
 						} else {
-							g_keyObj[`div${newKey}_${k}`] = tmpDivs[k];
+							g_keyObj[`div${newKey}_${k}`] = setVal(tmpDivPtn[0], g_keyObj[`chara${newKey}_0`].length, `number`);
+						}
+
+						// ステップゾーン位置の最終番号
+						if (tmpDivPtn.length > 1) {
+							g_keyObj[`divMax${newKey}_${k}`] = setVal(tmpDivPtn[1], -1, `number`);
 						}
 					}
 				}
@@ -3027,6 +3035,11 @@ function keysConvert(_dosObj) {
 						g_keyObj[`pos${newKey}_${k}`] = tmpPoss[k].split(`,`);
 						for (let m = 0, len2 = g_keyObj[`pos${newKey}_${k}`].length; m < len2; m++) {
 							g_keyObj[`pos${newKey}_${k}`][m] = Number(g_keyObj[`pos${newKey}_${k}`][m]);
+						}
+
+						if (g_keyObj[`divMax${newKey}_${k}`] === undefined || g_keyObj[`divMax${newKey}_${k}`] === -1) {
+							const posLength = g_keyObj[`pos${newKey}_${k}`].length;
+							g_keyObj[`divMax${newKey}_${k}`] = g_keyObj[`pos${newKey}_${k}`][posLength - 1] + 1;
 						}
 					}
 				}
@@ -4167,7 +4180,8 @@ function keyConfigInit() {
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const posMax = g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1;
+	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
+		g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`];
 	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined) {
 		g_keyObj.blank = g_keyObj[`blank${keyCtrlPtn}`];
@@ -4223,7 +4237,7 @@ function keyConfigInit() {
 
 	// カーソルの作成
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, C_IMG_CURSOR,
-		kWidth / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
+		kWidth / 2 + g_keyObj.blank * (posj - (divideCnt - 1) / 2) - 10 - 25, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
 	// キーコンフィグタイプ切替ボタン
@@ -4504,7 +4518,7 @@ function resetCursorMain(_width, _divideCnt, _keyCtrlPtn) {
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][0];
 
 	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
+	cursor.style.left = `${_width / 2 + g_keyObj.blank * (posj - (_divideCnt - 1) / 2) - 10 - 25}px`;
 	cursor.style.top = `45px`;
 }
 
@@ -4530,12 +4544,18 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][g_currentj];
 
 	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
+	const leftCnt = (posj >= _divideCnt ? posj - _divideCnt : posj);
+	const posMax = (g_keyObj[`divMax${_keyCtrlPtn}`] !== undefined ?
+		g_keyObj[`divMax${_keyCtrlPtn}`] : g_keyObj[`pos${_keyCtrlPtn}`][keyNum - 1] + 1);
+	const stdPos = (posj >= _divideCnt ? leftCnt + 1 - (posMax - (_divideCnt - 1)) / 2 : leftCnt - (_divideCnt - 1) / 2);
+	cursor.style.left = `${_width / 2 + g_keyObj.blank * stdPos - 10 - 25}px`;
+
+	const dividePos = (posj >= _divideCnt ? 1 : 0);
 	if (g_currentk === 1) {
-		cursor.style.top = `65px`;
+		cursor.style.top = `${65 + 150 * dividePos}px`;
 	} else {
 		g_kcType = `ALL`;
-		cursor.style.top = `45px`;
+		cursor.style.top = `${45 + 150 * dividePos}px`;
 	}
 }
 
@@ -4553,7 +4573,7 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][0];
 
 	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${_width / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
+	cursor.style.left = `${_width / 2 + g_keyObj.blank * (posj - (_divideCnt - 1) / 2) - 10 - 25}px`;
 	cursor.style.top = `45px`;
 }
 
@@ -5771,7 +5791,7 @@ function getArrowSettings() {
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const posMax = g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1;
+	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ? g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`];
 	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined) {
 		g_keyObj.blank = g_keyObj[`blank${keyCtrlPtn}`];
