@@ -3822,11 +3822,12 @@ function createOptionWindow(_sprite) {
 
 		if (g_canLoadDifInfoFlg || _initFlg) {
 
-			// キーパターン初期化
-			g_keyObj.currentPtn = 0;
-
 			// キー別のローカルストレージの初期設定　※特殊キーは除く
 			if (!g_stateObj.extraKeyFlg) {
+
+				// キーパターン初期化
+				g_keyObj.currentPtn = 0;
+
 				g_checkKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
 				if (g_checkKeyStorage) {
 					g_localKeyStorage = JSON.parse(g_checkKeyStorage);
@@ -4211,9 +4212,13 @@ function keyConfigInit() {
 	for (let j = 0; j < keyNum; j++) {
 
 		posj = g_keyObj[`pos${keyCtrlPtn}`][j];
-		leftCnt = (posj > divideCnt ? posj - divideCnt : posj);
-		stdPos = leftCnt - (posj > divideCnt ? (posMax - divideCnt) : divideCnt) / 2;
-		dividePos = (posj > divideCnt ? 1 : 0);
+		if (posj > divideCnt) {
+			stdPos = posj - (posMax + divideCnt) / 2;
+			dividePos = 1;
+		} else {
+			stdPos = posj - divideCnt / 2;
+			dividePos = 0;
+		}
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		keyconSprite.appendChild(createArrowEffect(`arrow${j}`, g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]],
@@ -4481,10 +4486,13 @@ function keyConfigInit() {
 					}
 				}
 				const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
-
-				leftCnt = (posj > divideCnt ? posj - divideCnt : posj);
-				stdPos = leftCnt - (posj > divideCnt ? (posMax - divideCnt) : divideCnt) / 2;
-				dividePos = (posj > divideCnt ? 1 : 0);
+				if (posj > divideCnt) {
+					stdPos = posj - (posMax + divideCnt) / 2;
+					dividePos = 1;
+				} else {
+					stdPos = posj - divideCnt / 2;
+					dividePos = 0;
+				}
 
 				cursor.style.left = `${kWidth / 2 + g_keyObj.blank * stdPos - 10 - 25}px`;
 				cursor.style.top = `${50 + 150 * dividePos}px`;
@@ -4543,16 +4551,20 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
 		}
 	}
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][g_currentj];
-
-	const cursor = document.querySelector(`#cursor`);
-
-	const leftCnt = (posj > _divideCnt ? posj - _divideCnt : posj);
 	const posMax = (g_keyObj[`divMax${_keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`divMax${_keyCtrlPtn}`] : g_keyObj[`pos${_keyCtrlPtn}`][keyNum - 1] + 1);
-	const stdPos = leftCnt - (posj > _divideCnt ? (posMax - _divideCnt) : _divideCnt) / 2;
+	let stdPos;
+	let dividePos;
+	if (posj > _divideCnt) {
+		stdPos = posj - (posMax + _divideCnt) / 2;
+		dividePos = 1;
+	} else {
+		stdPos = posj - _divideCnt / 2;
+		dividePos = 0;
+	}
 
+	const cursor = document.querySelector(`#cursor`);
 	cursor.style.left = `${_width / 2 + g_keyObj.blank * stdPos - 10 - 25}px`;
-	const dividePos = (posj > _divideCnt ? 1 : 0);
 	if (g_currentk === 1) {
 		cursor.style.top = `${65 + 150 * dividePos}px`;
 	} else {
@@ -5836,8 +5848,12 @@ function getArrowSettings() {
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
-		const leftCnt = (posj > divideCnt ? posj - divideCnt : posj);
-		const stdPos = (posj > divideCnt ? leftCnt - (posMax - divideCnt) / 2 : leftCnt - divideCnt / 2);
+		let stdPos;
+		if (posj > divideCnt) {
+			stdPos = posj - (posMax + divideCnt) / 2;
+		} else {
+			stdPos = posj - divideCnt / 2;
+		}
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + g_sWidth / 2 - 25;
 
 		if (g_stateObj.reverse === C_FLG_ON) {
