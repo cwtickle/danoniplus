@@ -168,6 +168,8 @@ const C_MIN_SPEED = 1;
 /** キーコンフィグ設定 */
 let g_kcType = `Main`;
 let g_colorType = `Default`;
+const C_KYC_HEIGHT = 150;
+const C_KYC_REPHEIGHT = 20;
 
 /** メイン画面用共通オブジェクト */
 const g_workObj = {};
@@ -4223,14 +4225,14 @@ function keyConfigInit() {
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		keyconSprite.appendChild(createArrowEffect(`arrow${j}`, g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]],
 			g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
-			150 * dividePos, 50,
+			C_KYC_HEIGHT * dividePos, 50,
 			g_keyObj[`stepRtn${keyCtrlPtn}`][j]));
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 			keyconSprite.appendChild(createDivLabel(`keycon${j}_${k}`,
 				g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
-				50 + 20 * k + 150 * dividePos,
-				50, 20, 16, `#cccccc`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
+				50 + C_KYC_REPHEIGHT * k + C_KYC_HEIGHT * dividePos,
+				C_ARW_WIDTH, C_ARW_WIDTH, 16, `#cccccc`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] !== g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]) {
 				document.querySelector(`#keycon${j}_${k}`).style.color = `#ffff00`;
 			} else if (g_keyObj.currentPtn === -1) {
@@ -4459,7 +4461,7 @@ function keyConfigInit() {
 			if (g_currentk < g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj].length - 1 &&
 				g_kcType !== `Main`) {
 				g_currentk++;
-				cursor.style.top = `${parseInt(cursor.style.top) + 20}px`;
+				cursor.style.top = `${parseInt(cursor.style.top) + C_KYC_REPHEIGHT}px`;
 
 			} else if (g_currentj < g_keyObj[`keyCtrl${keyCtrlPtn}`].length - 1) {
 				// 他の代替キーが存在せず、次の矢印がある場合
@@ -4495,9 +4497,9 @@ function keyConfigInit() {
 				}
 
 				cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
-				cursor.style.top = `${50 + 150 * dividePos}px`;
+				cursor.style.top = `${50 + C_KYC_HEIGHT * dividePos}px`;
 				if (g_kcType === `Replaced`) {
-					cursor.style.top = `${parseFloat(cursor.style.top) + 20}px`;
+					cursor.style.top = `${parseFloat(cursor.style.top) + C_KYC_REPHEIGHT}px`;
 				}
 
 			} else {
@@ -4566,11 +4568,11 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
 	const cursor = document.querySelector(`#cursor`);
 	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
 	if (g_currentk === 1) {
-		cursor.style.top = `${65 + 150 * dividePos}px`;
+		cursor.style.top = `${45 + C_KYC_REPHEIGHT + C_KYC_HEIGHT * dividePos}px`;
 	} else {
 		g_kcType = `ALL`;
 		document.querySelector(`#lnkKcType`).innerHTML = g_kcType;
-		cursor.style.top = `${45 + 150 * dividePos}px`;
+		cursor.style.top = `${45 + C_KYC_HEIGHT * dividePos}px`;
 	}
 }
 
