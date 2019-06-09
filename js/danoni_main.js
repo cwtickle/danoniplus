@@ -393,7 +393,7 @@ for (let j = 0; j < 255; j++) {
 	g_kCd[j] = ``;
 }
 g_kCd[0] = `×`;
-g_kCd[8] = `BS`;
+g_kCd[8] = `BackSpace`;
 g_kCd[9] = `Tab`;
 g_kCd[12] = `Clear`;
 g_kCd[13] = `Enter`;
@@ -2484,7 +2484,7 @@ function headerConvert(_dosObj) {
 	}
 	g_speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 4 + 1).keys()].map(i => obj.minSpeed + i / 4);
 
-	// 割当
+	// プレイ中のショートカットキー
 	obj.keyRetry = setVal(_dosObj.keyRetry, C_KEY_RETRY, `number`);
 	obj.keyTitleBack = setVal(_dosObj.keyTitleBack, C_KEY_TITLEBACK, `number`);
 
@@ -4201,8 +4201,14 @@ function keyConfigInit() {
 		g_keyObj.blank = g_keyObj.blank_def;
 	}
 
+	// ショートカットキーメッセージ
+	const scMsg = createDivLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, 14, `#cccccc`,
+		`プレイ中ショートカット：「${g_kCd[g_headerObj.keyTitleBack]}」タイトルバック / 「${g_kCd[g_headerObj.keyRetry]}」リトライ`);
+	scMsg.style.align = C_ALIGN_CENTER;
+	divRoot.appendChild(scMsg);
+
 	// 別キーモード警告メッセージ
-	const kcMsg = createDivLabel(`kcMsg`, 0, g_sHeight - 35, g_sWidth, 20, 14, `#ffff99`,
+	const kcMsg = createDivLabel(`kcMsg`, 0, g_sHeight - 25, g_sWidth, 20, 14, `#ffff99`,
 		``);
 	kcMsg.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcMsg);
