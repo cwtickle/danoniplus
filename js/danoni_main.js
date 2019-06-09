@@ -2480,6 +2480,8 @@ function headerConvert(_dosObj) {
 	}
 	g_speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 4 + 1).keys()].map(i => obj.minSpeed + i / 4);
 
+	// フリーズアローの許容フレーム数設定
+	obj.frzAttempt = setVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT, `number`);
 
 	// 譜面情報
 	if (_dosObj.difData !== undefined && _dosObj.difData !== ``) {
@@ -6674,7 +6676,7 @@ function MainInit() {
 							if (!keyDownFlg && g_stateObj.autoPlay === C_FLG_OFF) {
 								frzRoot.setAttribute(`frzAttempt`, ++frzAttempt);
 
-								if (frzAttempt > C_FRM_FRZATTEMPT) {
+								if (frzAttempt > g_headerObj.frzAttempt) {
 
 									// フリーズアローを離したとき
 									if (frzRoot.getAttribute(`judgEndFlg`) === `false`) {
