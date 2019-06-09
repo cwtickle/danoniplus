@@ -183,6 +183,10 @@ g_workObj.dividePos = [];
 const C_FRM_AFTERFADE = 420;
 const C_FRM_FRZATTEMPT = 5;
 
+/** ショートカットキー */
+const C_KEY_RETRY = 8;
+const C_KEY_TITLEBACK = 46;
+
 /** 判定系共通オブジェクト */
 const g_judgObj = {
 	arrowJ: [2, 4, 6, 8, 8],
@@ -389,7 +393,7 @@ for (let j = 0; j < 255; j++) {
 	g_kCd[j] = ``;
 }
 g_kCd[0] = `×`;
-g_kCd[8] = `BS`;
+g_kCd[8] = `BackSpace`;
 g_kCd[9] = `Tab`;
 g_kCd[12] = `Clear`;
 g_kCd[13] = `Enter`;
@@ -2480,8 +2484,14 @@ function headerConvert(_dosObj) {
 	}
 	g_speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 4 + 1).keys()].map(i => obj.minSpeed + i / 4);
 
+
+	// プレイ中のショートカットキー
+	obj.keyRetry = setVal(_dosObj.keyRetry, C_KEY_RETRY, `number`);
+	obj.keyTitleBack = setVal(_dosObj.keyTitleBack, C_KEY_TITLEBACK, `number`);
+
 	// フリーズアローの許容フレーム数設定
 	obj.frzAttempt = setVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT, `number`);
+
 
 	// 譜面情報
 	if (_dosObj.difData !== undefined && _dosObj.difData !== ``) {
@@ -4196,8 +4206,14 @@ function keyConfigInit() {
 		g_keyObj.blank = g_keyObj.blank_def;
 	}
 
+	// ショートカットキーメッセージ
+	const scMsg = createDivLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, 14, `#cccccc`,
+		`プレイ中ショートカット：「${g_kCd[g_headerObj.keyTitleBack]}」タイトルバック / 「${g_kCd[g_headerObj.keyRetry]}」リトライ`);
+	scMsg.style.align = C_ALIGN_CENTER;
+	divRoot.appendChild(scMsg);
+
 	// 別キーモード警告メッセージ
-	const kcMsg = createDivLabel(`kcMsg`, 0, g_sHeight - 35, g_sWidth, 20, 14, `#ffff99`,
+	const kcMsg = createDivLabel(`kcMsg`, 0, g_sHeight - 25, g_sWidth, 20, 14, `#ffff99`,
 		``);
 	kcMsg.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcMsg);
@@ -6285,13 +6301,13 @@ function MainInit() {
 		eval(`mainKeyDownAct${g_stateObj.autoPlay}`)(setKey);
 
 		// 曲中リトライ、タイトルバック
-		if (setKey === 8) {
+		if (setKey === g_headerObj.keyRetry) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			clearWindow();
 			musicAfterLoaded();
 
-		} else if (setKey === 46) {
+		} else if (setKey === g_headerObj.keyTitleBack) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			setTimeout(_ => {
