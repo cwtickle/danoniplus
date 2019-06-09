@@ -183,6 +183,10 @@ g_workObj.dividePos = [];
 const C_FRM_AFTERFADE = 420;
 const C_FRM_FRZATTEMPT = 5;
 
+/** ショートカットキー */
+const C_KEY_RETRY = 8;
+const C_KEY_TITLEBACK = 46;
+
 /** 判定系共通オブジェクト */
 const g_judgObj = {
 	arrowJ: [2, 4, 6, 8, 8],
@@ -2480,6 +2484,9 @@ function headerConvert(_dosObj) {
 	}
 	g_speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 4 + 1).keys()].map(i => obj.minSpeed + i / 4);
 
+	// 割当
+	obj.keyRetry = setVal(_dosObj.keyRetry, C_KEY_RETRY, `number`);
+	obj.keyTitleBack = setVal(_dosObj.keyTitleBack, C_KEY_TITLEBACK, `number`);
 
 	// 譜面情報
 	if (_dosObj.difData !== undefined && _dosObj.difData !== ``) {
@@ -6283,13 +6290,13 @@ function MainInit() {
 		eval(`mainKeyDownAct${g_stateObj.autoPlay}`)(setKey);
 
 		// 曲中リトライ、タイトルバック
-		if (setKey === 8) {
+		if (setKey === g_headerObj.keyRetry) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			clearWindow();
 			musicAfterLoaded();
 
-		} else if (setKey === 46) {
+		} else if (setKey === g_headerObj.keyTitleBack) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			setTimeout(_ => {
