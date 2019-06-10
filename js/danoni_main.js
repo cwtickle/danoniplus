@@ -877,6 +877,14 @@ const g_keyObj = {
 	blank9B_1: 52.5,
 	blank9B_2: 52.5,
 
+	// ショートカットキーコード
+	keyRetry: 8,
+	keyRetry_def: 8,
+	keyRetry8_0: 9,
+
+	keyTitleBack: 46,
+	keyTitleBack_def: 46,
+
 	// 別キー
 	transKey5_0: '',
 	transKey7_0: '',
@@ -2487,7 +2495,9 @@ function headerConvert(_dosObj) {
 
 	// プレイ中のショートカットキー
 	obj.keyRetry = setVal(_dosObj.keyRetry, C_KEY_RETRY, `number`);
+	obj.keyRetryDef = obj.keyRetry;
 	obj.keyTitleBack = setVal(_dosObj.keyTitleBack, C_KEY_TITLEBACK, `number`);
+	obj.keyTitleBackDef = obj.keyTitleBack;
 
 	// フリーズアローの許容フレーム数設定
 	obj.frzAttempt = setVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT, `number`);
@@ -3102,24 +3112,30 @@ function keysConvert(_dosObj) {
 			}
 
 			// ステップゾーン間隔 (blankX_Y)
-			if (_dosObj[`blank${newKey}`] !== undefined) {
-				const tmpBlanks = _dosObj[`blank${newKey}`].split(`$`);
-				if (tmpBlanks.length > 0) {
-					for (let k = 0, len = tmpBlanks.length; k < len; k++) {
-						if (isNaN(Number(tmpBlanks[k]))) {
-						} else {
-							g_keyObj[`blank${newKey}_${k}`] = parseFloat(tmpBlanks[k]);
-						}
-					}
-				}
-			}
+			newKeySingleParam(newKey, `blank`, `float`);
+
+			// プレイ中ショートカット：リトライ (keyRetryX_Y)
+			newKeySingleParam(newKey, `keyRetry`, `number`);
+
+			// プレイ中ショートカット：タイトルバック (keyTitleBackX_Y)
+			newKeySingleParam(newKey, `keyTitleBack`, `number`);
 
 			// 別キーフラグ (transKeyX_Y)
-			if (_dosObj[`transKey${newKey}`] !== undefined) {
-				const tmpTransKeys = _dosObj[`transKey${newKey}`].split(`$`);
-				if (tmpTransKeys.length > 0) {
-					for (let k = 0, len = tmpTransKeys.length; k < len; k++) {
-						g_keyObj[`transKey${newKey}_${k}`] = setVal(tmpTransKeys[k], ``, `string`);
+			newKeySingleParam(newKey, `transKey`, `string`);
+
+			/**
+			 * 新キー用単一パラメータ
+			 * @param {string} _key キー数
+			 * @param {string} _name 名前
+			 * @param {string} _type float, number, string, boolean
+			 */
+			function newKeySingleParam(_key, _name, _type) {
+				if (_dosObj[`${_name}${_key}`] !== undefined) {
+					const tmps = _dosObj[`${_name}${_key}`].split(`$`);
+					if (tmps.length > 0) {
+						for (let k = 0, len = tmps.length; k < len; k++) {
+							g_keyObj[`${_name}${_key}_${k}`] = setVal(tmps[k], ``, _type);
+						}
 					}
 				}
 			}
@@ -3887,6 +3903,8 @@ function createOptionWindow(_sprite) {
 						g_keyObj[`pos${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`pos${basePtn}`]));
 						g_keyObj[`div${copyPtn}`] = g_keyObj[`div${basePtn}`];
 						g_keyObj[`blank${copyPtn}`] = g_keyObj[`blank${basePtn}`];
+						g_keyObj[`keyRetry${copyPtn}`] = g_keyObj[`keyRetry${basePtn}`];
+						g_keyObj[`keyTitleBack${copyPtn}`] = g_keyObj[`keyTitleBack${basePtn}`];
 						g_keyObj[`transKey${copyPtn}`] = g_keyObj[`transKey${basePtn}`];
 						if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
 							g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
@@ -3901,6 +3919,25 @@ function createOptionWindow(_sprite) {
 					};
 					g_stateObj.reverse = C_FLG_OFF;
 					g_reverseNum = 0;
+				}
+			}
+
+			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+			if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
+				if (g_keyObj[`keyRetry${keyCtrlPtn}`] !== undefined &&
+					g_keyObj[`keyRetry${keyCtrlPtn}`] !== ``) {
+					g_headerObj.keyRetry = g_keyObj[`keyRetry${keyCtrlPtn}`];
+				} else {
+					g_headerObj.keyRetry = g_headerObj.keyRetryDef;
+				}
+			}
+
+			if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
+				if (g_keyObj[`keyTitleBack${keyCtrlPtn}`] !== undefined &&
+					g_keyObj[`keyTitleBack${keyCtrlPtn}`] !== ``) {
+					g_headerObj.keyTitleBack = g_keyObj[`keyTitleBack${keyCtrlPtn}`];
+				} else {
+					g_headerObj.keyTitleBack = g_headerObj.keyTitleBackDef;
 				}
 			}
 		}
@@ -5828,7 +5865,7 @@ function getArrowSettings() {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ? g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined) {
+	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined && g_keyObj[`blank${keyCtrlPtn}`] !== ``) {
 		g_keyObj.blank = g_keyObj[`blank${keyCtrlPtn}`];
 	} else {
 		g_keyObj.blank = g_keyObj.blank_def;
