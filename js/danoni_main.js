@@ -879,11 +879,9 @@ const g_keyObj = {
 
 	// ショートカットキーコード
 	keyRetry: 8,
-	keyRetry_def: 8,
 	keyRetry8_0: 9,
 
 	keyTitleBack: 46,
-	keyTitleBack_def: 46,
 
 	// 別キー
 	transKey5_0: '',
