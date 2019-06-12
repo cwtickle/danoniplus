@@ -2610,7 +2610,7 @@ function headerConvert(_dosObj) {
 	}
 	obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColor));
 	// 矢印の内側塗りつぶし色の設定
-	obj.setShadowColor = setVal(_dosObj.ShadowColor.replace(`0x`, `#`), ``, `string`);
+	obj.setshadowColor = setVal(_dosObj.shadowColor.replace(`0x`, `#`), ``, `string`);
 
 
 	// フリーズアロー初期色情報
@@ -6048,7 +6048,7 @@ function MainInit() {
 	// ステップゾーンを表示
 	for (let j = 0; j < keyNum; j++) {
 		// 矢印の内側を塗りつぶすか否か
-		if(g_headerObj.setShadowColor !== ``) {
+		if(g_headerObj.setshadowColor !== ``) {
 			// 矢印の塗り部分
 			const stepShadow = createColorObject(`stepShadow${j}`, `#000000`,
 			g_workObj.stepX[j],
@@ -6536,7 +6536,7 @@ function MainInit() {
 				const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[targetj];
 
 				// 矢印の内側を塗りつぶすか否か
-				if(g_headerObj.setShadowColor === ``) {
+				if(g_headerObj.setshadowColor === ``) {
 
 					const step = createArrowEffect(`arrow${targetj}_${++arrowCnts[targetj]}`, g_workObj.arrowColors[targetj],
 						g_workObj.stepX[targetj],
@@ -6564,7 +6564,7 @@ function MainInit() {
 					// 後に作成するほど前面に表示される。
 					
 					// 矢印の塗り部分
-					const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[targetj] : g_headerObj.setShadowColor);
+					const shadowColor = (g_headerObj.setshadowColor === `Default` ? g_workObj.arrowColors[targetj] : g_headerObj.setshadowColor);
 					const stepShadow = createColorObject(`stepShadow${targetj}_${arrowCnts[targetj]}`, shadowColor,
 						0, 0, 50, 50, g_workObj.stepRtn[targetj], `arrowShadow`);
 					stepRoot.appendChild(stepShadow);
