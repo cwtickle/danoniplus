@@ -6047,6 +6047,17 @@ function MainInit() {
 
 	// ステップゾーンを表示
 	for (let j = 0; j < keyNum; j++) {
+		// 矢印の内側を塗りつぶすか否か
+		if(g_headerObj.setShadowColor !== ``) {
+			// 矢印の塗り部分
+			const stepShadow = createColorObject(`stepShadow${j}`, `#000000`,
+			g_workObj.stepX[j],
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+			50, 50, g_workObj.stepRtn[j], `arrowShadow`);
+			mainSprite.appendChild(stepShadow);
+			stepShadow.style.opacity = 0.7;
+		}
+
 		const step = createArrowEffect(`step${j}`, `#999999`,
 			g_workObj.stepX[j],
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], 50,
