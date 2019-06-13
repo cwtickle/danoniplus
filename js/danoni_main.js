@@ -2610,7 +2610,7 @@ function headerConvert(_dosObj) {
 	}
 	obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColor));
 	// 矢印の内側塗りつぶし色の設定
-	obj.setShadowColor = setVal(_dosObj.shadowColor, ``, `string`).replace(`0x`, `#`);
+	obj.setShadowColor = setVal(_dosObj.setShadowColor, ``, `string`).replace(`0x`, `#`);
 
 
 	// フリーズアロー初期色情報
