@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/06/09
+ * Revised : 2019/06/10
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.9.0`;
-const g_revisedDate = `2019/06/09`;
+const g_version = `Ver 5.11.0`;
+const g_revisedDate = `2019/06/10`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -133,6 +133,7 @@ const C_MOTION_STD_POS = 15;
 // キーブロック対象(キーコードを指定)
 const C_BLOCK_KEYS = [
 	8, 9, 13, 17, 18, 32, /* BackSpace, Tab, Enter, Ctrl, Alt, Space */
+	33, 34, 35, 36,       /* PageUp, PageDown, End, Home */
 	37, 38, 39, 40, 46,   /* Left, Down, Up, Right, Delete */
 	112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126 /* F1～F15 */
 ];
@@ -182,6 +183,10 @@ g_workObj.dividePos = [];
 
 const C_FRM_AFTERFADE = 420;
 const C_FRM_FRZATTEMPT = 5;
+
+/** ショートカットキー */
+const C_KEY_RETRY = 8;
+const C_KEY_TITLEBACK = 46;
 
 /** 判定系共通オブジェクト */
 const g_judgObj = {
@@ -392,7 +397,7 @@ for (let j = 0; j < 255; j++) {
 	g_kCd[j] = ``;
 }
 g_kCd[0] = `×`;
-g_kCd[8] = `BS`;
+g_kCd[8] = `BackSpace`;
 g_kCd[9] = `Tab`;
 g_kCd[12] = `Clear`;
 g_kCd[13] = `Enter`;
@@ -875,6 +880,12 @@ const g_keyObj = {
 	blank9B_0: 52.5,
 	blank9B_1: 52.5,
 	blank9B_2: 52.5,
+
+	// ショートカットキーコード
+	keyRetry: 8,
+	keyRetry8_0: 9,
+
+	keyTitleBack: 46,
 
 	// 別キー
 	transKey5_0: '',
@@ -2484,6 +2495,16 @@ function headerConvert(_dosObj) {
 	g_speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 4 + 1).keys()].map(i => obj.minSpeed + i / 4);
 
 
+	// プレイ中のショートカットキー
+	obj.keyRetry = setVal(_dosObj.keyRetry, C_KEY_RETRY, `number`);
+	obj.keyRetryDef = obj.keyRetry;
+	obj.keyTitleBack = setVal(_dosObj.keyTitleBack, C_KEY_TITLEBACK, `number`);
+	obj.keyTitleBackDef = obj.keyTitleBack;
+
+	// フリーズアローの許容フレーム数設定
+	obj.frzAttempt = setVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT, `number`);
+
+
 	// 譜面情報
 	if (_dosObj.difData !== undefined && _dosObj.difData !== ``) {
 		const difs = _dosObj.difData.split(`$`);
@@ -2591,6 +2612,8 @@ function headerConvert(_dosObj) {
 		obj.setColor = JSON.parse(JSON.stringify(obj.setColorInit));
 	}
 	obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColor));
+	// 矢印の内側塗りつぶし色の設定
+	obj.setShadowColor = setVal(_dosObj.setShadowColor, ``, `string`).replace(`0x`, `#`);
 
 
 	// フリーズアロー初期色情報
@@ -3097,24 +3120,30 @@ function keysConvert(_dosObj) {
 			}
 
 			// ステップゾーン間隔 (blankX_Y)
-			if (_dosObj[`blank${newKey}`] !== undefined) {
-				const tmpBlanks = _dosObj[`blank${newKey}`].split(`$`);
-				if (tmpBlanks.length > 0) {
-					for (let k = 0, len = tmpBlanks.length; k < len; k++) {
-						if (isNaN(Number(tmpBlanks[k]))) {
-						} else {
-							g_keyObj[`blank${newKey}_${k}`] = parseFloat(tmpBlanks[k]);
-						}
-					}
-				}
-			}
+			newKeySingleParam(newKey, `blank`, `float`);
+
+			// プレイ中ショートカット：リトライ (keyRetryX_Y)
+			newKeySingleParam(newKey, `keyRetry`, `number`);
+
+			// プレイ中ショートカット：タイトルバック (keyTitleBackX_Y)
+			newKeySingleParam(newKey, `keyTitleBack`, `number`);
 
 			// 別キーフラグ (transKeyX_Y)
-			if (_dosObj[`transKey${newKey}`] !== undefined) {
-				const tmpTransKeys = _dosObj[`transKey${newKey}`].split(`$`);
-				if (tmpTransKeys.length > 0) {
-					for (let k = 0, len = tmpTransKeys.length; k < len; k++) {
-						g_keyObj[`transKey${newKey}_${k}`] = setVal(tmpTransKeys[k], ``, `string`);
+			newKeySingleParam(newKey, `transKey`, `string`);
+
+			/**
+			 * 新キー用単一パラメータ
+			 * @param {string} _key キー数
+			 * @param {string} _name 名前
+			 * @param {string} _type float, number, string, boolean
+			 */
+			function newKeySingleParam(_key, _name, _type) {
+				if (_dosObj[`${_name}${_key}`] !== undefined) {
+					const tmps = _dosObj[`${_name}${_key}`].split(`$`);
+					if (tmps.length > 0) {
+						for (let k = 0, len = tmps.length; k < len; k++) {
+							g_keyObj[`${_name}${_key}_${k}`] = setVal(tmps[k], ``, _type);
+						}
 					}
 				}
 			}
@@ -3886,6 +3915,8 @@ function createOptionWindow(_sprite) {
 						g_keyObj[`pos${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`pos${basePtn}`]));
 						g_keyObj[`div${copyPtn}`] = g_keyObj[`div${basePtn}`];
 						g_keyObj[`blank${copyPtn}`] = g_keyObj[`blank${basePtn}`];
+						g_keyObj[`keyRetry${copyPtn}`] = g_keyObj[`keyRetry${basePtn}`];
+						g_keyObj[`keyTitleBack${copyPtn}`] = g_keyObj[`keyTitleBack${basePtn}`];
 						g_keyObj[`transKey${copyPtn}`] = g_keyObj[`transKey${basePtn}`];
 						if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
 							g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
@@ -3900,6 +3931,25 @@ function createOptionWindow(_sprite) {
 					};
 					g_stateObj.reverse = C_FLG_OFF;
 					g_reverseNum = 0;
+				}
+			}
+
+			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+			if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
+				if (g_keyObj[`keyRetry${keyCtrlPtn}`] !== undefined &&
+					g_keyObj[`keyRetry${keyCtrlPtn}`] !== ``) {
+					g_headerObj.keyRetry = g_keyObj[`keyRetry${keyCtrlPtn}`];
+				} else {
+					g_headerObj.keyRetry = g_headerObj.keyRetryDef;
+				}
+			}
+
+			if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
+				if (g_keyObj[`keyTitleBack${keyCtrlPtn}`] !== undefined &&
+					g_keyObj[`keyTitleBack${keyCtrlPtn}`] !== ``) {
+					g_headerObj.keyTitleBack = g_keyObj[`keyTitleBack${keyCtrlPtn}`];
+				} else {
+					g_headerObj.keyTitleBack = g_headerObj.keyTitleBackDef;
 				}
 			}
 		}
@@ -4205,8 +4255,14 @@ function keyConfigInit() {
 		g_keyObj.blank = g_keyObj.blank_def;
 	}
 
+	// ショートカットキーメッセージ
+	const scMsg = createDivLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, 14, `#cccccc`,
+		`プレイ中ショートカット：「${g_kCd[g_headerObj.keyTitleBack]}」タイトルバック / 「${g_kCd[g_headerObj.keyRetry]}」リトライ`);
+	scMsg.style.align = C_ALIGN_CENTER;
+	divRoot.appendChild(scMsg);
+
 	// 別キーモード警告メッセージ
-	const kcMsg = createDivLabel(`kcMsg`, 0, g_sHeight - 35, g_sWidth, 20, 14, `#ffff99`,
+	const kcMsg = createDivLabel(`kcMsg`, 0, g_sHeight - 25, g_sWidth, 20, 14, `#ffff99`,
 		``);
 	kcMsg.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcMsg);
@@ -5919,7 +5975,7 @@ function getArrowSettings() {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ? g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined) {
+	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined && g_keyObj[`blank${keyCtrlPtn}`] !== ``) {
 		g_keyObj.blank = g_keyObj[`blank${keyCtrlPtn}`];
 	} else {
 		g_keyObj.blank = g_keyObj.blank_def;
@@ -6132,6 +6188,17 @@ function MainInit() {
 
 	// ステップゾーンを表示
 	for (let j = 0; j < keyNum; j++) {
+		// 矢印の内側を塗りつぶすか否か
+		if (g_headerObj.setShadowColor !== ``) {
+			// 矢印の塗り部分
+			const stepShadow = createColorObject(`stepShadow${j}`, `#000000`,
+				g_workObj.stepX[j],
+				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+				50, 50, g_workObj.stepRtn[j], `arrowShadow`);
+			mainSprite.appendChild(stepShadow);
+			stepShadow.style.opacity = 0.7;
+		}
+
 		const step = createArrowEffect(`step${j}`, `#999999`,
 			g_workObj.stepX[j],
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], 50,
@@ -6430,13 +6497,13 @@ function MainInit() {
 		eval(`mainKeyDownAct${g_stateObj.autoPlay}`)(setKey);
 
 		// 曲中リトライ、タイトルバック
-		if (setKey === 8) {
+		if (setKey === g_headerObj.keyRetry) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			clearWindow();
 			musicAfterLoaded();
 
-		} else if (setKey === 46) {
+		} else if (setKey === g_headerObj.keyTitleBack) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			setTimeout(_ => {
@@ -6636,16 +6703,33 @@ function MainInit() {
 		function makeArrow(_j, _arrowCnt, _name, _color) {
 			const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 
-			const step = createArrowEffect(`${_name}${_j}_${_arrowCnt}`, _color,
+			const stepRoot = createSprite(`mainSprite`, `${_name}${_j}_${++arrowCnts[_j]}`,
 				g_workObj.stepX[_j],
-				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir, 50,
-				g_workObj.stepRtn[_j]);
-			step.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum]);
-			step.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
-			step.setAttribute(`judgEndFlg`, `false`);
-			step.setAttribute(`boostSpd`, boostSpdDir);
+				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+				50, 100);
+			stepRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
+			stepRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
+			stepRoot.setAttribute(`judgEndFlg`, `false`);
+			stepRoot.setAttribute(`boostSpd`, boostSpdDir);
+			mainSprite.appendChild(stepRoot);
 
-			mainSprite.appendChild(step);
+			// 内側塗りつぶし矢印は、下記の順で作成する。
+			// 後に作成するほど前面に表示される。
+
+			// 矢印の内側を塗りつぶすか否か
+			if (g_headerObj.setShadowColor !== ``) {
+				// 矢印の塗り部分
+				const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[_j] : g_headerObj.setShadowColor);
+				const arrShadow = createColorObject(`${_name}Shadow${_j}_${arrowCnts[_j]}`, shadowColor,
+					0, 0, 50, 50, g_workObj.stepRtn[_j], `arrowShadow`);
+				arrShadow.style.opacity = 0.5;
+				stepRoot.appendChild(arrShadow);
+			}
+
+			// 矢印
+			const step = createArrowEffect(`${_name}Top${_j}_${arrowCnts[_j]}`, g_workObj.arrowColors[_j],
+				0, 0, 50, g_workObj.stepRtn[_j]);
+			stepRoot.appendChild(step);
 		}
 
 		// 矢印移動＆消去
@@ -6877,7 +6961,7 @@ function MainInit() {
 							if (!keyDownFlg && g_stateObj.autoPlay === C_FLG_OFF) {
 								frzRoot.setAttribute(`frzAttempt`, ++frzAttempt);
 
-								if (frzAttempt > C_FRM_FRZATTEMPT) {
+								if (frzAttempt > g_headerObj.frzAttempt) {
 
 									// フリーズアローを離したとき
 									if (frzRoot.getAttribute(`judgEndFlg`) === `false`) {
