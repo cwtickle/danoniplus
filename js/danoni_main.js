@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/06/10
+ * Revised : 2019/06/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.11.0`;
-const g_revisedDate = `2019/06/10`;
+const g_version = `Ver 5.12.0`;
+const g_revisedDate = `2019/06/14`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2609,6 +2609,8 @@ function headerConvert(_dosObj) {
 		obj.setColor = JSON.parse(JSON.stringify(obj.setColorInit));
 	}
 	obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColor));
+	// 矢印の内側塗りつぶし色の設定
+	obj.setShadowColor = setVal(_dosObj.setShadowColor, ``, `string`).replace(`0x`, `#`);
 
 
 	// フリーズアロー初期色情報
@@ -4277,6 +4279,16 @@ function keyConfigInit() {
 		}
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
+		if (g_headerObj.setShadowColor !== ``) {
+			// 矢印の塗り部分
+			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]] : g_headerObj.setShadowColor);
+			const stepShadow = createColorObject(`arrowShadow${j}`, shadowColor,
+				g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
+				C_KYC_HEIGHT * dividePos,
+				C_ARW_WIDTH, C_ARW_WIDTH, g_keyObj[`stepRtn${keyCtrlPtn}`][j], `arrowShadow`);
+			keyconSprite.appendChild(stepShadow);
+			stepShadow.style.opacity = 0.5;
+		}
 		keyconSprite.appendChild(createArrowEffect(`arrow${j}`, g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]],
 			g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
 			C_KYC_HEIGHT * dividePos, 50,
@@ -6045,6 +6057,17 @@ function MainInit() {
 
 	// ステップゾーンを表示
 	for (let j = 0; j < keyNum; j++) {
+		// 矢印の内側を塗りつぶすか否か
+		if (g_headerObj.setShadowColor !== ``) {
+			// 矢印の塗り部分
+			const stepShadow = createColorObject(`stepShadow${j}`, `#000000`,
+				g_workObj.stepX[j],
+				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+				50, 50, g_workObj.stepRtn[j], `arrowShadow`);
+			mainSprite.appendChild(stepShadow);
+			stepShadow.style.opacity = 0.7;
+		}
+
 		const step = createArrowEffect(`step${j}`, `#999999`,
 			g_workObj.stepX[j],
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], 50,
@@ -6522,16 +6545,33 @@ function MainInit() {
 				const targetj = g_workObj.mkArrow[g_scoreObj.frameNum][j];
 				const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[targetj];
 
-				const step = createArrowEffect(`arrow${targetj}_${++arrowCnts[targetj]}`, g_workObj.arrowColors[targetj],
+				const stepRoot = createSprite(`mainSprite`, `arrow${targetj}_${++arrowCnts[targetj]}`,
 					g_workObj.stepX[targetj],
-					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir, 50,
-					g_workObj.stepRtn[targetj]);
-				step.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
-				step.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
-				step.setAttribute(`judgEndFlg`, `false`);
-				step.setAttribute(`boostSpd`, boostSpdDir);
+					g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[targetj] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+					50, 100);
+				stepRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
+				stepRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
+				stepRoot.setAttribute(`judgEndFlg`, `false`);
+				stepRoot.setAttribute(`boostSpd`, boostSpdDir);
+				mainSprite.appendChild(stepRoot);
 
-				mainSprite.appendChild(step);
+				// 内側塗りつぶし矢印は、下記の順で作成する。
+				// 後に作成するほど前面に表示される。
+
+				// 矢印の内側を塗りつぶすか否か
+				if (g_headerObj.setShadowColor !== ``) {
+					// 矢印の塗り部分
+					const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[targetj] : g_headerObj.setShadowColor);
+					const arrShadow = createColorObject(`arrShadow${targetj}_${arrowCnts[targetj]}`, shadowColor,
+						0, 0, 50, 50, g_workObj.stepRtn[targetj], `arrowShadow`);
+					arrShadow.style.opacity = 0.5;
+					stepRoot.appendChild(arrShadow);
+				}
+
+				// 矢印
+				const step = createArrowEffect(`arrTop${targetj}_${arrowCnts[targetj]}`, g_workObj.arrowColors[targetj],
+					0, 0, 50, g_workObj.stepRtn[targetj]);
+				stepRoot.appendChild(step);
 			}
 		}
 
