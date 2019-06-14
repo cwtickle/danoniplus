@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/06/10
+ * Revised : 2019/06/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.11.0`;
-const g_revisedDate = `2019/06/10`;
+const g_version = `Ver 5.12.0`;
+const g_revisedDate = `2019/06/14`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4290,6 +4290,16 @@ function keyConfigInit() {
 		}
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
+		if (g_headerObj.setShadowColor !== ``) {
+			// 矢印の塗り部分
+			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]] : g_headerObj.setShadowColor);
+			const stepShadow = createColorObject(`arrowShadow${j}`, shadowColor,
+				g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
+				C_KYC_HEIGHT * dividePos,
+				C_ARW_WIDTH, C_ARW_WIDTH, g_keyObj[`stepRtn${keyCtrlPtn}`][j], `arrowShadow`);
+			keyconSprite.appendChild(stepShadow);
+			stepShadow.style.opacity = 0.5;
+		}
 		keyconSprite.appendChild(createArrowEffect(`arrow${j}`, g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]],
 			g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
 			C_KYC_HEIGHT * dividePos, 50,
