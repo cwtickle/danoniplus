@@ -6734,7 +6734,7 @@ function MainInit() {
 						// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
 						// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
 						// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
-						if (g_workObj.judgFrzCnt[j] !== k && Number(cnt) === g_judgObj.frzJ[C_JDG_SFSF] + 1) {
+						if (g_workObj.judgFrzCnt[j] !== k && Number(cnt) <= g_judgObj.frzJ[C_JDG_SFSF] + 1) {
 							const prevFrzRoot = document.querySelector(`#frz${j}_${g_workObj.judgFrzCnt[j]}`);
 							const prevCnt = Number(prevFrzRoot.getAttribute(`cnt`));
 							if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_KITA]) {
