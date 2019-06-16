@@ -5897,6 +5897,7 @@ function getArrowSettings() {
 
 	g_workObj.judgArrowCnt = [];
 	g_workObj.judgFrzCnt = [];
+	g_workObj.movFrzCnt = [];
 	g_workObj.judgFrzHitCnt = [];
 	g_judgObj.lockFlgs = [];
 
@@ -5935,6 +5936,7 @@ function getArrowSettings() {
 
 		g_workObj.judgArrowCnt[j] = 1;
 		g_workObj.judgFrzCnt[j] = 1;
+		g_workObj.movFrzCnt[j] = 1;
 		g_workObj.judgFrzHitCnt[j] = 1;
 		g_judgObj.lockFlgs[j] = false;
 
@@ -6683,7 +6685,7 @@ function MainInit() {
 
 		// フリーズアロー移動＆消去
 		for (let j = 0; j < keyNum; j++) {
-			for (let k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
+			for (let k = g_workObj.movFrzCnt[j]; k <= frzCnts[j]; k++) {
 				const frzRoot = document.querySelector(`#frz${j}_${k}`);
 				let boostCnt = frzRoot.getAttribute(`boostCnt`);
 				const boostSpdDir = frzRoot.getAttribute(`boostSpd`);
@@ -6774,6 +6776,7 @@ function MainInit() {
 									if (frzRoot.getAttribute(`judgEndFlg`) === `false`) {
 										if (frzRoot.getAttribute(`isMoving`) === `false`) {
 											judgeIknai(cnt);
+											g_workObj.judgFrzCnt[j]++;
 											frzRoot.setAttribute(`judgEndFlg`, `true`);
 
 											changeFailedFrz(j, k);
@@ -6785,28 +6788,46 @@ function MainInit() {
 							judgeKita(cnt);
 
 							g_workObj.judgFrzCnt[j]++;
+							g_workObj.movFrzCnt[j]++;
 							frzRoot.setAttribute(`judgEndFlg`, `true`);
 							mainSprite.removeChild(frzRoot);
 						}
 					}
 
-					// フリーズアローが枠外に出たときの処理
-					if (cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
-						judgeIknai(cnt);
+					// フリーズアローがNG(イクナイ)確定したときの処理
+					if (cnt < (-1) * g_judgObj.frzJ[C_JDG_SFSF]) {
+						g_workObj.judgFrzCnt[j]++;
 						frzRoot.setAttribute(`judgEndFlg`, `true`);
-
-						changeFailedFrz(j, k);
-						if (g_headerObj.frzStartjdgUse === `true`) {
-							judgeUwan(cnt);
-						}
 					}
 				} else {
-					frzBarLength -= g_workObj.currentSpeed;
-					frzRoot.setAttribute(`frzBarLength`, frzBarLength);
 					frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
 
+					if (cnt > (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+					} else {
+
+						// フリーズアロー枠外確定時に色をFailedに変える
+						if (Number(cnt) === (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+							if (frzRoot.getAttribute(`isMoving`) === `true`) {
+								judgeIknai(cnt);
+								changeFailedFrz(j, k);
+								if (g_headerObj.frzStartjdgUse === `true`) {
+									judgeUwan(cnt);
+								}
+							}
+						}
+
+						// 判定確定後でバーが残っているケースは判定NG(イクナイ)が確定したときのみ発生
+						// 仮想的にバーを短くしていき、終端矢印が到達した時点でフリーズアロー自体を消す
+						frzBarLength -= g_workObj.currentSpeed;
+						frzRoot.setAttribute(`frzBarLength`, frzBarLength);
+					}
+					frzRoot.setAttribute(`cnt`, --cnt);
+
 					if (frzBarLength <= 0) {
-						g_workObj.judgFrzCnt[j]++;
+						if (g_workObj.judgFrzCnt[j] === g_workObj.movFrzCnt[j]) {
+							g_workObj.judgFrzCnt[j]++;
+						}
+						g_workObj.movFrzCnt[j]++;
 						mainSprite.removeChild(frzRoot);
 					}
 				}
