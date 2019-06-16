@@ -6649,6 +6649,7 @@ function MainInit() {
 				frzRoot.setAttribute(`judgEndFlg`, `false`);
 				frzRoot.setAttribute(`isMoving`, `true`);
 				frzRoot.setAttribute(`frzBarLength`, frzLength);
+				frzRoot.setAttribute(`frzBarLengthDef`, frzLength);
 				frzRoot.setAttribute(`frzAttempt`, 0);
 				frzRoot.setAttribute(`boostSpd`, boostSpdDir);
 				frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[targetj]);
@@ -6691,6 +6692,7 @@ function MainInit() {
 				let boostCnt = frzRoot.getAttribute(`boostCnt`);
 				const boostSpdDir = frzRoot.getAttribute(`boostSpd`);
 				let cnt = frzRoot.getAttribute(`cnt`);
+				console.log(`${j}/${k}/${cnt}`);
 				let frzAttempt = frzRoot.getAttribute(`frzAttempt`);
 
 				const frzTop = document.querySelector(`#frzTop${j}_${k}`);
@@ -6815,6 +6817,7 @@ function MainInit() {
 									judgeUwan(cnt);
 								}
 							}
+							frzBarLength = frzRoot.getAttribute(`frzBarLengthDef`);
 						}
 
 						// 判定確定後でバーが残っているケースは判定NG(イクナイ)が確定したときのみ発生
@@ -6824,11 +6827,15 @@ function MainInit() {
 					}
 					frzRoot.setAttribute(`cnt`, --cnt);
 
-					if (frzBarLength <= 0) {
+					if (g_workObj.judgFrzCnt[j] === k - 1
+						&& Number(cnt) <= g_judgObj.frzJ[C_JDG_IKNAI]) {
+						g_workObj.movFrzCnt[j] = g_workObj.judgFrzCnt[j];
+						mainSprite.removeChild(document.querySelector(`#frz${j}_${k - 1}`));
+					} else if (frzBarLength <= 0) {
 						if (g_workObj.judgFrzCnt[j] === g_workObj.movFrzCnt[j]) {
 							g_workObj.judgFrzCnt[j]++;
 						}
-						g_workObj.movFrzCnt[j]++;
+						g_workObj.movFrzCnt[j] = g_workObj.judgFrzCnt[j];
 						mainSprite.removeChild(frzRoot);
 					}
 				}
