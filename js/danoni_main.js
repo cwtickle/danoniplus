@@ -6584,16 +6584,17 @@ function MainInit() {
 
 			for (let k = g_workObj.judgArrowCnt[j]; k <= arrowCnts[j]; k++) {
 				const arrow = document.querySelector(`#arrow${j}_${k}`);
+				const arrowTop = document.querySelector(`#arrTop${j}_${k}`);
 				let boostCnt = arrow.getAttribute(`boostCnt`);
 				const boostSpdDir = arrow.getAttribute(`boostSpd`);
 				let cnt = arrow.getAttribute(`cnt`);
 
 				// 全体色変化 (移動時)
 				if (g_workObj.mkAColor[g_scoreObj.frameNum] !== undefined) {
-					if (arrow.getAttribute(`color`) !== g_workObj.arrowColors[j]) {
+					if (arrowTop.getAttribute(`color`) !== g_workObj.arrowColors[j]) {
 						if (g_workObj.arrowColors[j] === g_workObj.arrowColorsAll[j]) {
-							arrow.style.backgroundColor = g_workObj.arrowColorsAll[j];
-							arrow.setAttribute(`color`, g_workObj.arrowColorsAll[j]);
+							arrowTop.style.backgroundColor = g_workObj.arrowColorsAll[j];
+							arrowTop.setAttribute(`color`, g_workObj.arrowColorsAll[j]);
 						}
 					}
 				}
