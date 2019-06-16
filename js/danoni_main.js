@@ -5897,7 +5897,6 @@ function getArrowSettings() {
 
 	g_workObj.judgArrowCnt = [];
 	g_workObj.judgFrzCnt = [];
-	g_workObj.movFrzCnt = [];
 	g_workObj.judgFrzHitCnt = [];
 	g_judgObj.lockFlgs = [];
 
@@ -5936,7 +5935,6 @@ function getArrowSettings() {
 
 		g_workObj.judgArrowCnt[j] = 1;
 		g_workObj.judgFrzCnt[j] = 1;
-		g_workObj.movFrzCnt[j] = 1;
 		g_workObj.judgFrzHitCnt[j] = 1;
 		g_judgObj.lockFlgs[j] = false;
 
@@ -6649,7 +6647,6 @@ function MainInit() {
 				frzRoot.setAttribute(`judgEndFlg`, `false`);
 				frzRoot.setAttribute(`isMoving`, `true`);
 				frzRoot.setAttribute(`frzBarLength`, frzLength);
-				frzRoot.setAttribute(`frzBarLengthDef`, frzLength);
 				frzRoot.setAttribute(`frzAttempt`, 0);
 				frzRoot.setAttribute(`boostSpd`, boostSpdDir);
 				frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[targetj]);
@@ -6687,12 +6684,11 @@ function MainInit() {
 
 		// フリーズアロー移動＆消去
 		for (let j = 0; j < keyNum; j++) {
-			for (let k = g_workObj.movFrzCnt[j]; k <= frzCnts[j]; k++) {
+			for (let k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
 				const frzRoot = document.querySelector(`#frz${j}_${k}`);
 				let boostCnt = frzRoot.getAttribute(`boostCnt`);
 				const boostSpdDir = frzRoot.getAttribute(`boostSpd`);
 				let cnt = frzRoot.getAttribute(`cnt`);
-				console.log(`${j}/${k}/${cnt}`);
 				let frzAttempt = frzRoot.getAttribute(`frzAttempt`);
 
 				const frzTop = document.querySelector(`#frzTop${j}_${k}`);
@@ -6732,6 +6728,25 @@ function MainInit() {
 							changeHitFrz(j, k);
 							if (g_headerObj.frzStartjdgUse === `true`) {
 								judgeIi(cnt);
+							}
+						}
+
+						// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
+						// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
+						// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
+						if (g_workObj.judgFrzCnt[j] !== k && Number(cnt) === g_judgObj.frzJ[C_JDG_SFSF] + 1) {
+							const prevFrzRoot = document.querySelector(`#frz${j}_${g_workObj.judgFrzCnt[j]}`);
+							const prevCnt = Number(prevFrzRoot.getAttribute(`cnt`));
+							if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_KITA]) {
+							} else {
+								if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+									judgeIknai(cnt);
+									if (g_headerObj.frzStartjdgUse === `true`) {
+										judgeUwan(cnt);
+									}
+								}
+								mainSprite.removeChild(prevFrzRoot);
+								g_workObj.judgFrzCnt[j]++;
 							}
 						}
 					} else {
@@ -6779,7 +6794,6 @@ function MainInit() {
 									if (frzRoot.getAttribute(`judgEndFlg`) === `false`) {
 										if (frzRoot.getAttribute(`isMoving`) === `false`) {
 											judgeIknai(cnt);
-											g_workObj.judgFrzCnt[j]++;
 											frzRoot.setAttribute(`judgEndFlg`, `true`);
 
 											changeFailedFrz(j, k);
@@ -6791,51 +6805,28 @@ function MainInit() {
 							judgeKita(cnt);
 
 							g_workObj.judgFrzCnt[j]++;
-							g_workObj.movFrzCnt[j]++;
 							frzRoot.setAttribute(`judgEndFlg`, `true`);
 							mainSprite.removeChild(frzRoot);
 						}
 					}
 
-					// フリーズアローがNG(イクナイ)確定したときの処理
-					if (cnt < (-1) * g_judgObj.frzJ[C_JDG_SFSF]) {
-						g_workObj.judgFrzCnt[j]++;
+					// フリーズアローが枠外に出たときの処理
+					if (cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+						judgeIknai(cnt);
 						frzRoot.setAttribute(`judgEndFlg`, `true`);
+
+						changeFailedFrz(j, k);
+						if (g_headerObj.frzStartjdgUse === `true`) {
+							judgeUwan(cnt);
+						}
 					}
 				} else {
+					frzBarLength -= g_workObj.currentSpeed;
+					frzRoot.setAttribute(`frzBarLength`, frzBarLength);
 					frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
 
-					if (cnt > (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
-					} else {
-
-						// フリーズアロー枠外確定時に色をFailedに変える
-						if (Number(cnt) === (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
-							if (frzRoot.getAttribute(`isMoving`) === `true`) {
-								judgeIknai(cnt);
-								changeFailedFrz(j, k);
-								if (g_headerObj.frzStartjdgUse === `true`) {
-									judgeUwan(cnt);
-								}
-							}
-							frzBarLength = frzRoot.getAttribute(`frzBarLengthDef`);
-						}
-
-						// 判定確定後でバーが残っているケースは判定NG(イクナイ)が確定したときのみ発生
-						// 仮想的にバーを短くしていき、終端矢印が到達した時点でフリーズアロー自体を消す
-						frzBarLength -= g_workObj.currentSpeed;
-						frzRoot.setAttribute(`frzBarLength`, frzBarLength);
-					}
-					frzRoot.setAttribute(`cnt`, --cnt);
-
-					if (g_workObj.judgFrzCnt[j] === k - 1
-						&& Number(cnt) <= g_judgObj.frzJ[C_JDG_IKNAI]) {
-						g_workObj.movFrzCnt[j] = g_workObj.judgFrzCnt[j];
-						mainSprite.removeChild(document.querySelector(`#frz${j}_${k - 1}`));
-					} else if (frzBarLength <= 0) {
-						if (g_workObj.judgFrzCnt[j] === g_workObj.movFrzCnt[j]) {
-							g_workObj.judgFrzCnt[j]++;
-						}
-						g_workObj.movFrzCnt[j] = g_workObj.judgFrzCnt[j];
+					if (frzBarLength <= 0) {
+						g_workObj.judgFrzCnt[j]++;
 						mainSprite.removeChild(frzRoot);
 					}
 				}
