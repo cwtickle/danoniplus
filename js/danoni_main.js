@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/06/14
+ * Revised : 2019/06/17
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.12.0`;
-const g_revisedDate = `2019/06/14`;
+const g_version = `Ver 5.12.1`;
+const g_revisedDate = `2019/06/17`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -6582,16 +6582,17 @@ function MainInit() {
 
 			for (let k = g_workObj.judgArrowCnt[j]; k <= arrowCnts[j]; k++) {
 				const arrow = document.querySelector(`#arrow${j}_${k}`);
+				const arrowTop = document.querySelector(`#arrTop${j}_${k}`);
 				let boostCnt = arrow.getAttribute(`boostCnt`);
 				const boostSpdDir = arrow.getAttribute(`boostSpd`);
 				let cnt = arrow.getAttribute(`cnt`);
 
 				// 全体色変化 (移動時)
 				if (g_workObj.mkAColor[g_scoreObj.frameNum] !== undefined) {
-					if (arrow.getAttribute(`color`) !== g_workObj.arrowColors[j]) {
+					if (arrowTop.getAttribute(`color`) !== g_workObj.arrowColors[j]) {
 						if (g_workObj.arrowColors[j] === g_workObj.arrowColorsAll[j]) {
-							arrow.style.backgroundColor = g_workObj.arrowColorsAll[j];
-							arrow.setAttribute(`color`, g_workObj.arrowColorsAll[j]);
+							arrowTop.style.backgroundColor = g_workObj.arrowColorsAll[j];
+							arrowTop.setAttribute(`color`, g_workObj.arrowColorsAll[j]);
 						}
 					}
 				}
@@ -6727,6 +6728,27 @@ function MainInit() {
 							changeHitFrz(j, k);
 							if (g_headerObj.frzStartjdgUse === `true`) {
 								judgeIi(cnt);
+							}
+						}
+
+						// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
+						// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
+						// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
+						if (g_workObj.judgFrzCnt[j] !== k && Number(cnt) <= g_judgObj.frzJ[C_JDG_SFSF] + 1) {
+							const prevFrzRoot = document.querySelector(`#frz${j}_${g_workObj.judgFrzCnt[j]}`);
+							const prevCnt = Number(prevFrzRoot.getAttribute(`cnt`));
+							if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_KITA]) {
+							} else {
+
+								// 枠外判定前の場合、このタイミングで枠外判定を行う
+								if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+									judgeIknai(cnt);
+									if (g_headerObj.frzStartjdgUse === `true`) {
+										judgeUwan(cnt);
+									}
+								}
+								mainSprite.removeChild(prevFrzRoot);
+								g_workObj.judgFrzCnt[j]++;
 							}
 						}
 					} else {
