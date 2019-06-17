@@ -6739,6 +6739,8 @@ function MainInit() {
 							const prevCnt = Number(prevFrzRoot.getAttribute(`cnt`));
 							if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_KITA]) {
 							} else {
+
+								// 枠外判定前の場合、このタイミングで枠外判定を行う
 								if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
 									judgeIknai(cnt);
 									if (g_headerObj.frzStartjdgUse === `true`) {
