@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/06/17
+ * Revised : 2019/06/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.12.1`;
-const g_revisedDate = `2019/06/17`;
+const g_version = `Ver 5.12.2`;
+const g_revisedDate = `2019/06/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5502,7 +5502,10 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	let arrowArrivalFrm;
 	let frmPrev;
 
-	for (let j = 0; j < _dataObj.arrowData.length; j++) {
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+
+	for (let j = 0; j < keyNum; j++) {
 
 		// 矢印の出現フレーム数計算
 		if (_dataObj.arrowData[j] !== undefined) {
