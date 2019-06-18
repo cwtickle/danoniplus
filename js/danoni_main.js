@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/05/31
+ * Revised : 2019/06/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.10.9`;
-const g_revisedDate = `2019/05/31`;
+const g_version = `Ver 4.10.10`;
+const g_revisedDate = `2019/06/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5337,7 +5337,10 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	let arrowArrivalFrm;
 	let frmPrev;
 
-	for (let j = 0; j < _dataObj.arrowData.length; j++) {
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+
+	for (let j = 0; j < keyNum; j++) {
 
 		// 矢印の出現フレーム数計算
 		if (_dataObj.arrowData[j] !== undefined) {
@@ -6534,6 +6537,27 @@ function MainInit() {
 
 						if (g_stateObj.auto === C_FLG_ON && cnt === 0) {
 							changeHitFrz(j, k);
+						}
+
+						// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
+						// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
+						// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
+						if (g_workObj.judgFrzCnt[j] !== k && Number(cnt) <= g_judgObj.frzJ[C_JDG_SFSF] + 1) {
+							const prevFrzRoot = document.querySelector(`#frz${j}_${g_workObj.judgFrzCnt[j]}`);
+							const prevCnt = Number(prevFrzRoot.getAttribute(`cnt`));
+							if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_KITA]) {
+							} else {
+
+								// 枠外判定前の場合、このタイミングで枠外判定を行う
+								if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+									judgeIknai(cnt);
+									if (g_headerObj.frzStartjdgUse === `true`) {
+										judgeUwan(cnt);
+									}
+								}
+								mainSprite.removeChild(prevFrzRoot);
+								g_workObj.judgFrzCnt[j]++;
+							}
 						}
 					} else {
 						const frzBtmShadow = document.querySelector(`#frzBtmShadow${j}_${k}`);
