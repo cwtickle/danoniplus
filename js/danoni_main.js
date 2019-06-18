@@ -6712,7 +6712,7 @@ function MainInit() {
 		function makeArrow(_j, _arrowCnt, _name, _color) {
 			const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 
-			const stepRoot = createSprite(`mainSprite`, `${_name}${_j}_${++arrowCnts[_j]}`,
+			const stepRoot = createSprite(`mainSprite`, `${_name}${_j}_${_arrowCnt}`,
 				g_workObj.stepX[_j],
 				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 				50, 100);
@@ -6729,14 +6729,14 @@ function MainInit() {
 			if (g_headerObj.setShadowColor !== ``) {
 				// 矢印の塗り部分
 				const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[_j] : g_headerObj.setShadowColor);
-				const arrShadow = createColorObject(`${_name}Shadow${_j}_${arrowCnts[_j]}`, shadowColor,
+				const arrShadow = createColorObject(`${_name}Shadow${_j}_${_arrowCnt}`, shadowColor,
 					0, 0, 50, 50, g_workObj.stepRtn[_j], `arrowShadow`);
 				arrShadow.style.opacity = 0.5;
 				stepRoot.appendChild(arrShadow);
 			}
 
 			// 矢印
-			const step = createArrowEffect(`${_name}Top${_j}_${arrowCnts[_j]}`, g_workObj.arrowColors[_j],
+			const step = createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _color,
 				0, 0, 50, g_workObj.stepRtn[_j]);
 			stepRoot.appendChild(step);
 		}
