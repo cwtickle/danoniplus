@@ -5502,7 +5502,10 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	let arrowArrivalFrm;
 	let frmPrev;
 
-	for (let j = 0; j < _dataObj.arrowData.length; j++) {
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+
+	for (let j = 0; j < keyNum; j++) {
 
 		// 矢印の出現フレーム数計算
 		if (_dataObj.arrowData[j] !== undefined) {
