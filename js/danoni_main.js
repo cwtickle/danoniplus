@@ -301,7 +301,7 @@ const g_stateObj = {
 	speed: 3.5,
 	motion: C_FLG_OFF,
 	reverse: C_FLG_OFF,
-	shuffle: `OFF`,
+	shuffle: C_FLG_OFF,
 	autoPlay: C_FLG_OFF,
 	gauge: `Normal`,
 	adjustment: 0,
@@ -4364,15 +4364,15 @@ function keyConfigInit() {
 		switch (g_colorType) {
 			case `Default`:
 				g_colorType = `Type1`;
-				g_stateObj.d_color = `OFF`;
+				g_stateObj.d_color = C_FLG_OFF;
 				break;
 			case `Type1`:
 				g_colorType = `Type2`;
-				g_stateObj.d_color = `OFF`;
+				g_stateObj.d_color = C_FLG_OFF;
 				break;
 			case `Type2`:
 				g_colorType = `Default`;
-				g_stateObj.d_color = `ON`;
+				g_stateObj.d_color = C_FLG_ON;
 				break;
 		}
 		g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
@@ -6684,7 +6684,7 @@ function MainInit() {
 		changeFrzColors(g_workObj.mkFAColor[g_scoreObj.frameNum], g_workObj.mkFAColorCd[g_scoreObj.frameNum],
 			g_keyObj[`color${keyCtrlPtn}`], keyNum, `A`);
 
-		// ダミー矢印生成
+		// ダミー矢印生成（背面に表示するため先に処理）
 		if (g_workObj.mkDummyArrow[g_scoreObj.frameNum] !== undefined) {
 			console.log('1/' + g_scoreObj.frameNum + '/' + g_workObj.mkDummyArrow[g_scoreObj.frameNum]);
 			const mkData = g_workObj.mkDummyArrow[g_scoreObj.frameNum];
@@ -6699,6 +6699,39 @@ function MainInit() {
 			const mkData = g_workObj.mkArrow[g_scoreObj.frameNum];
 			for (let j = 0, len = mkData.length; j < len; j++) {
 				makeArrow(mkData[j], ++arrowCnts[mkData[j]], `arrow`, g_workObj.arrowColors[mkData[j]]);
+			}
+		}
+
+		// 矢印移動＆消去
+		for (let j = 0; j < keyNum; j++) {
+			const stepDivHit = document.querySelector(`#stepHit${j}`);
+
+			// ダミー矢印の移動
+			for (let k = g_workObj.judgDummyArrowCnt[j]; k <= dummyArrowCnts[j]; k++) {
+				movArrow(j, k, `dummyArrow`);
+			}
+
+			// 通常矢印の移動
+			for (let k = g_workObj.judgArrowCnt[j]; k <= arrowCnts[j]; k++) {
+				movArrow(j, k, `arrow`);
+			}
+
+			// ステップゾーンのヒット領域は一定時間で非表示化
+			let hitCnt = stepDivHit.getAttribute(`cnt`);
+			if (hitCnt > 0) {
+				stepDivHit.setAttribute(`cnt`, --hitCnt);
+				if (hitCnt === 0) {
+					stepDivHit.style.opacity = 0;
+				}
+			}
+		}
+
+		// フリーズアロー生成
+		if (g_workObj.mkFrzArrow[g_scoreObj.frameNum] !== undefined) {
+			for (let j = 0, len = g_workObj.mkFrzArrow[g_scoreObj.frameNum].length; j < len; j++) {
+				const targetj = g_workObj.mkFrzArrow[g_scoreObj.frameNum][j];
+				makeFrzArrow(targetj, ++frzCnts[targetj], `frz`,
+					g_workObj.frzNormalColors[targetj], g_workObj.frzNormalBarColors[targetj]);
 			}
 		}
 
@@ -6741,92 +6774,100 @@ function MainInit() {
 			stepRoot.appendChild(step);
 		}
 
-		// 矢印移動＆消去
-		for (let j = 0; j < keyNum; j++) {
+		/**
+		 * 矢印移動メイン
+		 * @param {number} _j 
+		 * @param {number} _k 
+		 * @param {string} _name 
+		 */
+		function movArrow(_j, _k, _name) {
+			const arrow = document.querySelector(`#${_name}${_j}_${_k}`);
+			let boostCnt = arrow.getAttribute(`boostCnt`);
+			const boostSpdDir = arrow.getAttribute(`boostSpd`);
+			let cnt = arrow.getAttribute(`cnt`);
 
-			// 通常矢印の移動
-			const stepDivHit = document.querySelector(`#stepHit${j}`);
+			// 全体色変化 (移動時)
+			eval(`${_name}ChangeAllColor`)(_j, _k, _name);
 
-			for (let k = g_workObj.judgArrowCnt[j]; k <= arrowCnts[j]; k++) {
-				const arrow = document.querySelector(`#arrow${j}_${k}`);
-				const arrowTop = document.querySelector(`#arrowTop${j}_${k}`);
-				let boostCnt = arrow.getAttribute(`boostCnt`);
-				const boostSpdDir = arrow.getAttribute(`boostSpd`);
-				let cnt = arrow.getAttribute(`cnt`);
-
-				// 全体色変化 (移動時)
-				if (g_workObj.mkAColor[g_scoreObj.frameNum] !== undefined) {
-					if (arrowTop.getAttribute(`color`) !== g_workObj.arrowColors[j]) {
-						if (g_workObj.arrowColors[j] === g_workObj.arrowColorsAll[j]) {
-							arrowTop.style.backgroundColor = g_workObj.arrowColorsAll[j];
-							arrowTop.setAttribute(`color`, g_workObj.arrowColorsAll[j]);
-						}
-					}
-				}
-
-				// 移動
-				if (g_workObj.currentSpeed !== 0) {
-					arrow.style.top = `${parseFloat(arrow.style.top) -
-						(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
-					arrow.setAttribute(`boostCnt`, --boostCnt);
-				}
-				arrow.setAttribute(`cnt`, --cnt);
-
-				if (g_stateObj.autoPlay === C_FLG_ON) {
-					if (cnt === 0) {
-						judgeIi(cnt);
-						stepDivHit.style.opacity = 1;
-						stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-						g_workObj.judgArrowCnt[j]++;
-						mainSprite.removeChild(arrow);
-					}
-
-				} else if (cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
-					judgeUwan(cnt);
-					g_workObj.judgArrowCnt[j]++;
-					mainSprite.removeChild(arrow);
-				}
+			// 移動
+			if (g_workObj.currentSpeed !== 0) {
+				arrow.style.top = `${parseFloat(arrow.style.top) -
+					(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
+				arrow.setAttribute(`boostCnt`, --boostCnt);
 			}
+			arrow.setAttribute(`cnt`, --cnt);
 
-			// ダミー矢印の移動
-			for (let k = g_workObj.judgDummyArrowCnt[j]; k <= dummyArrowCnts[j]; k++) {
-				const arrow = document.querySelector(`#dummyArrow${j}_${k}`);
-				let boostCnt = arrow.getAttribute(`boostCnt`);
-				const boostSpdDir = arrow.getAttribute(`boostSpd`);
-				let cnt = arrow.getAttribute(`cnt`);
+			eval(`${_name}JudgeMotion`)(_j, arrow, cnt);
+		}
 
-				// 移動
-				if (g_workObj.currentSpeed !== 0) {
-					arrow.style.top = `${parseFloat(arrow.style.top) -
-						(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
-					arrow.setAttribute(`boostCnt`, --boostCnt);
-				}
-				arrow.setAttribute(`cnt`, --cnt);
-
-				if (cnt === 0) {
-					stepDivHit.style.opacity = 1;
-					stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-					g_workObj.judgDummyArrowCnt[j]++;
-					mainSprite.removeChild(arrow);
-				}
-			}
-
-			// ステップゾーンのヒット領域は一定時間で非表示化
-			let hitCnt = stepDivHit.getAttribute(`cnt`);
-			if (hitCnt > 0) {
-				stepDivHit.setAttribute(`cnt`, --hitCnt);
-				if (hitCnt === 0) {
-					stepDivHit.style.opacity = 0;
+		/**
+		 * 全体色変化（通常矢印用）
+		 * @param {number} _j 矢印位置
+		 * @param {number} _k 何番目の矢印かを指定
+		 * @param {string} _name 
+		 */
+		function arrowChangeAllColor(_j, _k, _name) {
+			const arrowTop = document.querySelector(`#${_name}Top${_j}_${_k}`);
+			if (g_workObj.mkAColor[g_scoreObj.frameNum] !== undefined) {
+				if (arrowTop.getAttribute(`color`) !== g_workObj.arrowColors[_j]) {
+					if (g_workObj.arrowColors[_j] === g_workObj.arrowColorsAll[_j]) {
+						arrowTop.style.backgroundColor = g_workObj.arrowColorsAll[_j];
+						arrowTop.setAttribute(`color`, g_workObj.arrowColorsAll[_j]);
+					}
 				}
 			}
 		}
 
-		// フリーズアロー生成
-		if (g_workObj.mkFrzArrow[g_scoreObj.frameNum] !== undefined) {
-			for (let j = 0, len = g_workObj.mkFrzArrow[g_scoreObj.frameNum].length; j < len; j++) {
-				const targetj = g_workObj.mkFrzArrow[g_scoreObj.frameNum][j];
-				makeFrzArrow(targetj, ++frzCnts[targetj], `frz`,
-					g_workObj.frzNormalColors[targetj], g_workObj.frzNormalBarColors[targetj]);
+		/**
+		 * 全体色変化（ダミー矢印用）
+		 * @param {number} _j 矢印位置
+		 * @param {number} _k 何番目の矢印かを指定
+		 * @param {number} _name 
+		 */
+		function dummyArrowChangeAllColor(_j, _k, _name) {
+
+		}
+
+		/**
+		 * オート・枠外消去（通常矢印用）
+		 * ※MainInit内部で指定必須（mainSprite指定）
+		 * @param {number} _j 矢印位置
+		 * @param {string} _arrow 
+		 * @param {number} _cnt 
+		 */
+		function arrowJudgeMotion(_j, _arrow, _cnt) {
+			if (g_stateObj.autoPlay === C_FLG_ON) {
+				if (_cnt === 0) {
+					judgeIi(_cnt);
+					stepDivHit.style.opacity = 1;
+					stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
+					g_workObj.judgArrowCnt[_j]++;
+					mainSprite.removeChild(arrow);
+				}
+
+			} else if (_cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
+				judgeUwan(_cnt);
+				g_workObj.judgArrowCnt[_j]++;
+				mainSprite.removeChild(_arrow);
+			}
+		}
+
+		/**
+		 * オート処理（ダミー矢印用）
+		 * ※MainInit内部で指定必須（mainSprite指定）
+		 * @param {number} _j 矢印位置
+		 * @param {string} _arrow 
+		 * @param {number} _cnt 
+		 */
+		function dummyArrowJudgeMotion(_j, _arrow, _cnt) {
+			if (_cnt === 0) {
+				const stepDivHit = document.querySelector(`#stepHit${_j}`);
+
+				stepDivHit.style.opacity = 1;
+				stepDivHit.style.backgroundColor = C_CLR_DUMMY;
+				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
+				g_workObj.judgDummyArrowCnt[_j]++;
+				mainSprite.removeChild(_arrow);
 			}
 		}
 
@@ -7859,7 +7900,7 @@ function resultInit() {
 	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `#999999`, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-	if (g_stateObj.shuffle !== `OFF`) {
+	if (g_stateObj.shuffle !== C_FLG_OFF) {
 		difData += ` [${g_stateObj.shuffle}]`;
 	}
 	playDataWindow.appendChild(makeResultPlayData(`lblDifData`, 60, `#cccccc`, 2, difData,
