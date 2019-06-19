@@ -6768,15 +6768,14 @@ function MainInit() {
 				// 矢印の塗り部分
 				const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[_j] : g_headerObj.setShadowColor);
 				const arrShadow = createColorObject(`${_name}Shadow${_j}_${_arrowCnt}`, shadowColor,
-					0, 0, 50, 50, g_workObj.stepRtn[_j], `arrowShadow`);
+					0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`);
 				arrShadow.style.opacity = 0.5;
 				stepRoot.appendChild(arrShadow);
 			}
 
 			// 矢印
-			const step = createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _color,
-				0, 0, 50, g_workObj.stepRtn[_j]);
-			stepRoot.appendChild(step);
+			stepRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _color,
+				0, 0, C_ARW_WIDTH, g_workObj.stepRtn[_j]));
 		}
 
 		/**
@@ -6934,29 +6933,29 @@ function MainInit() {
 			// 後に作成するほど前面に表示される。
 
 			// フリーズアロー帯(frzBar)
-			const frzBar = createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
-				5, 25 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[_j], 40, frzLength * g_workObj.boostSpd, 0, `frzBar`);
-			frzRoot.appendChild(frzBar);
+			frzRoot.appendChild(createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
+				5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[_j],
+				C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, 0, `frzBar`));
 
 			// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-			const frzTopShadow = createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, `#000000`,
-				0, 0, 50, 50, g_workObj.stepRtn[_j], `arrowShadow`);
-			frzRoot.appendChild(frzTopShadow);
+			frzRoot.appendChild(createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, `#000000`,
+				0, 0,
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`));
 
 			// 開始矢印。ヒット時は隠れる。
-			const frzTop = createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
-				0, 0, 50, g_workObj.stepRtn[_j]);
-			frzRoot.appendChild(frzTop);
+			frzRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
+				0, 0,
+				C_ARW_WIDTH, g_workObj.stepRtn[_j]));
 
 			// 後発矢印の塗り部分
-			const frzBtmShadow = createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, `#000000`,
-				0, frzLength * boostSpdDir, 50, 50, g_workObj.stepRtn[_j], `arrowShadow`);
-			frzRoot.appendChild(frzBtmShadow);
+			frzRoot.appendChild(createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, `#000000`,
+				0, frzLength * boostSpdDir,
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`));
 
 			// 後発矢印
-			const frzBtm = createArrowEffect(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
-				0, frzLength * boostSpdDir, 50, g_workObj.stepRtn[_j]);
-			frzRoot.appendChild(frzBtm);
+			frzRoot.appendChild(createArrowEffect(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
+				0, frzLength * boostSpdDir,
+				C_ARW_WIDTH, g_workObj.stepRtn[_j]));
 		}
 
 		/**
