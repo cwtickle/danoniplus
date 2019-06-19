@@ -6972,11 +6972,11 @@ function MainInit() {
 
 			if (frzRoot.getAttribute(`judgEndFlg`) === `false`) {
 				if (frzRoot.getAttribute(`isMoving`) === `true`) {
-					frzMoving(_j, _k, _name, frzRoot, cnt);
+					eval(`${_name}Moving`)(_j, _k, _name, frzRoot, cnt);
 				} else {
 
 					// 全体色変化 (ヒット時)
-					frzChangeAllColor(_j, _k, _name, `Hit`);
+					eval(`${_name}ChangeAllColor`)(_j, _k, _name, `Hit`);
 
 					// フリーズアローがヒット中の処理
 					if (frzBarLength > 0) {
@@ -7037,7 +7037,8 @@ function MainInit() {
 			}
 			_frzRoot.setAttribute(`cnt`, --_cnt);
 
-			eval(`frzJudgeMotion${g_stateObj.autoPlay}`)(_j, _k, _cnt);
+			// 次フリーズアローへ判定を移すかチェック
+			eval(`frzJudgeNext${g_stateObj.autoPlay}`)(_j, _k, _cnt);
 		}
 
 		/**
@@ -7064,14 +7065,8 @@ function MainInit() {
 			frzBtm.style.top = `${parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
 			frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
 
-			let keyDownFlg = false;
-			for (let m = 0, len = g_workObj.keyCtrl[_j].length; m < len; m++) {
-				if (g_workObj.keyHitFlg[_j][m]) {
-					keyDownFlg = true;
-					break;
-				}
-			}
-			if (!keyDownFlg && g_stateObj.autoPlay === C_FLG_OFF) {
+			const keyDownFlg = eval(`${_name}CheckKeyUp${g_stateObj.autoPlay}`)(_j);
+			if (!keyDownFlg) {
 				_frzRoot.setAttribute(`frzAttempt`, frzAttempt + 1);
 
 				if (frzAttempt > g_headerObj.frzAttempt) {
@@ -7102,30 +7097,32 @@ function MainInit() {
 
 			if (g_workObj.mkFAColor[g_scoreObj.frameNum] !== undefined) {
 				if (frzBtm.getAttribute(`color`) !== g_workObj[`frz${_state}Colors`][_j]) {
-					if (g_workObj[`frz${_state}Colors`][_j] === g_workObj[`frz${_state}ColorsAll`][_j]) {
+					const toColorCode = g_workObj[`frz${_state}ColorsAll`][_j];
+					if (g_workObj[`frz${_state}Colors`][_j] === toColorCode) {
 						if (_state === `Normal`) {
-							frzTop.style.backgroundColor = g_workObj[`frz${_state}ColorsAll`][_j];
+							frzTop.style.backgroundColor = toColorCode;
 						}
-						frzBtm.style.backgroundColor = g_workObj[`frz${_state}ColorsAll`][_j];
-						frzBtm.setAttribute(`color`, g_workObj[`frz${_state}ColorsAll`][_j]);
+						frzBtm.style.backgroundColor = toColorCode;
+						frzBtm.setAttribute(`color`, toColorCode);
 					}
 				}
 				if (frzBar.getAttribute(`color`) !== g_workObj[`frz${_state}BarColors`][_j]) {
-					if (g_workObj[`frz${_state}BarColors`][_j] === g_workObj[`frz${_state}BarColorsAll`][_j]) {
-						frzBar.style.backgroundColor = g_workObj[`frz${_state}BarColorsAll`][_j];
-						frzBar.setAttribute(`color`, g_workObj[`frz${_state}BarColorsAll`][_j]);
+					const toBarColorCode = g_workObj[`frz${_state}BarColorsAll`][_j];
+					if (g_workObj[`frz${_state}BarColors`][_j] === toBarColorCode) {
+						frzBar.style.backgroundColor = toBarColorCode;
+						frzBar.setAttribute(`color`, toBarColorCode);
 					}
 				}
 			}
 		}
 
 		/**
-		 * フリーズアロー移動時判定処理 (AutoPlay:OFF時)
+		 * 次フリーズアローへ判定を移すかチェック (AutoPlay:OFF時)
 		 * @param {number} _j 
 		 * @param {number} _k 
 		 * @param {number} _cnt 
 		 */
-		function frzJudgeMotionOFF(_j, _k, _cnt) {
+		function frzJudgeNextOFF(_j, _k, _cnt) {
 
 			// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
 			// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
@@ -7150,12 +7147,12 @@ function MainInit() {
 		}
 
 		/**
-		 * フリーズアロー移動時判定処理 (AutoPlay:ON時)
+		 * 次フリーズアローへの判定引継処理 (AutoPlay:ON時)
 		 * @param {number} _j 
 		 * @param {number} _k 
 		 * @param {number} _cnt 
 		 */
-		function frzJudgeMotionON(_j, _k, _cnt) {
+		function frzJudgeNextON(_j, _k, _cnt) {
 
 			if (_cnt === 0) {
 				changeHitFrz(_j, _k);
@@ -7163,6 +7160,27 @@ function MainInit() {
 					judgeIi(_cnt);
 				}
 			}
+		}
+
+		/**
+		 * フリーズアローヒット中に手を離したかどうかをチェック (AutoPlay：OFF時)
+		 * @param {number} _j 
+		 */
+		function frzCheckKeyUpOFF(_j) {
+			for (let m = 0, len = g_workObj.keyCtrl[_j].length; m < len; m++) {
+				if (g_workObj.keyHitFlg[_j][m]) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		/**
+		 * フリーズアローヒット中は何もしない (AutoPlay：ON時)
+		 * @param {number} _j 
+		 */
+		function frzCheckKeyUpON(_j) {
+			return true;
 		}
 
 
