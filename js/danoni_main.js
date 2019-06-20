@@ -6725,12 +6725,23 @@ function MainInit() {
 			frzON: (_j, _k, _cnt) => {
 
 				if (_cnt === 0) {
-					changeHitFrz(_j, _k);
+					changeHitFrz(_j, _k, `frz`);
 					if (g_headerObj.frzStartjdgUse === `true`) {
 						judgeIi(_cnt);
 					}
 				}
-			}
+			},
+
+			dummyFrzOFF: (_j, _k, _cnt) => {
+				if (_cnt === 0) {
+					changeHitFrz(_j, _k, `dummyFrz`);
+				}
+			},
+			dummyFrzON: (_j, _k, _cnt) => {
+				if (_cnt === 0) {
+					changeHitFrz(_j, _k, `dummyFrz`);
+				}
+			},
 		};
 
 		/**
@@ -6750,7 +6761,45 @@ function MainInit() {
 			frzON: (_j) => {
 				return true;
 			},
+
+			dummyFrzOFF: (_j) => {
+				return true;
+			},
+
+			dummyFrzON: (_j) => {
+				return true;
+			},
 		};
+
+		const frzDeleteFunc = {
+
+			frz: (_j, _frzRoot, _cnt) => {
+				g_workObj.judgFrzCnt[_j]++;
+				mainSprite.removeChild(_frzRoot);
+			},
+
+			dummyFrz: (_j, _frzRoot, _cnt) => {
+				g_workObj.judgDummyFrzCnt[_j]++;
+				mainSprite.removeChild(_frzRoot);
+			},
+		};
+
+		const judgeNGFunc = {
+
+			frz: (_j, _k, _frzRoot, _cnt) => {
+				if (_cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+					judgeIknai(_cnt);
+					_frzRoot.setAttribute(`judgEndFlg`, `true`);
+
+					changeFailedFrz(_j, _k);
+					if (g_headerObj.frzStartjdgUse === `true`) {
+						judgeUwan(_cnt);
+					}
+				}
+			},
+
+			dummyFrz: (_j, _k, _frzRoot, _cnt) => { },
+		}
 
 		/**
 		 * 矢印生成
@@ -6824,7 +6873,8 @@ function MainInit() {
 		 * @param {string} _color 
 		 */
 		function makeFrzArrow(_j, _arrowCnt, _name, _normalColor, _barColor) {
-			const frzLength = g_workObj.mkFrzLength[_j][(_arrowCnt - 1) * 2];
+			const camelHeader = _name.slice(0, 1).toUpperCase() + _name.slice(1);
+			const frzLength = g_workObj[`mk${camelHeader}Length`][_j][(_arrowCnt - 1) * 2];
 			const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 
 			const frzRoot = createSprite(`mainSprite`, `${_name}${_j}_${_arrowCnt}`,
@@ -6888,39 +6938,31 @@ function MainInit() {
 				} else {
 
 					// 全体色変化 (ヒット時)
-					changeColorFunc.frz(_j, _k, `Hit`);
+					changeColorFunc[_name](_j, _k, `Hit`);
 
 					// フリーズアローがヒット中の処理
 					if (frzBarLength > 0) {
 						frzHitMotion(_j, _k, _name, frzRoot, cnt);
 
 					} else {
-						judgeKita(cnt);
-
-						g_workObj.judgFrzCnt[_j]++;
+						if (_name === `frz`) {
+							judgeKita(cnt);
+						}
 						frzRoot.setAttribute(`judgEndFlg`, `true`);
-						mainSprite.removeChild(frzRoot);
+						frzDeleteFunc[_name](_j, frzRoot, cnt);
 					}
 				}
 
 				// フリーズアローが枠外に出たときの処理
-				if (cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
-					judgeIknai(cnt);
-					frzRoot.setAttribute(`judgEndFlg`, `true`);
+				judgeNGFunc[_name](_j, _k, frzRoot, cnt);
 
-					changeFailedFrz(_j, _k);
-					if (g_headerObj.frzStartjdgUse === `true`) {
-						judgeUwan(cnt);
-					}
-				}
 			} else {
 				frzBarLength -= g_workObj.currentSpeed;
 				frzRoot.setAttribute(`frzBarLength`, frzBarLength);
 				frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
 
 				if (frzBarLength <= 0) {
-					g_workObj.judgFrzCnt[_j]++;
-					mainSprite.removeChild(frzRoot);
+					frzDeleteFunc[_name](_j, frzRoot, cnt);
 				}
 			}
 		}
@@ -6939,7 +6981,7 @@ function MainInit() {
 			const boostSpdDir = _frzRoot.getAttribute(`boostSpd`);
 
 			// 全体色変化 (通常時)
-			changeColorFunc.frz(_j, _k, `Normal`);
+			changeColorFunc[_name](_j, _k, `Normal`);
 
 			// 移動
 			if (g_workObj.currentSpeed !== 0) {
@@ -6950,7 +6992,7 @@ function MainInit() {
 			_frzRoot.setAttribute(`cnt`, --_cnt);
 
 			// 次フリーズアローへ判定を移すかチェック
-			judgeNextFunc[`frz${g_stateObj.autoPlay}`](_j, _k, _cnt);
+			judgeNextFunc[`${_name}${g_stateObj.autoPlay}`](_j, _k, _cnt);
 		}
 
 		/**
@@ -6977,8 +7019,7 @@ function MainInit() {
 			frzBtm.style.top = `${parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
 			frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
 
-			const keyDownFlg = checkKeyUpFunc[`${_name}${g_stateObj.autoPlay}`](_j);
-			if (!keyDownFlg) {
+			if (!checkKeyUpFunc[`${_name}${g_stateObj.autoPlay}`](_j)) {
 				_frzRoot.setAttribute(`frzAttempt`, frzAttempt + 1);
 
 				if (frzAttempt > g_headerObj.frzAttempt) {
@@ -7114,6 +7155,15 @@ function MainInit() {
 			}
 		}
 
+		// ダミーフリーズアロー生成
+		if (g_workObj.mkDummyFrzArrow[g_scoreObj.frameNum] !== undefined) {
+			for (let j = 0, len = g_workObj.mkDummyFrzArrow[g_scoreObj.frameNum].length; j < len; j++) {
+				const targetj = g_workObj.mkDummyFrzArrow[g_scoreObj.frameNum][j];
+				makeFrzArrow(targetj, ++dummyFrzCnts[targetj], `dummyFrz`,
+					C_CLR_DUMMY, `#888888`);
+			}
+		}
+
 		// フリーズアロー生成
 		if (g_workObj.mkFrzArrow[g_scoreObj.frameNum] !== undefined) {
 			for (let j = 0, len = g_workObj.mkFrzArrow[g_scoreObj.frameNum].length; j < len; j++) {
@@ -7127,6 +7177,9 @@ function MainInit() {
 		for (let j = 0; j < keyNum; j++) {
 			for (let k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
 				movFrzArrow(j, k, `frz`);
+			}
+			for (let k = g_workObj.judgDummyFrzCnt[j]; k <= dummyFrzCnts[j]; k++) {
+				movFrzArrow(j, k, `dummyFrz`);
 			}
 		}
 
@@ -7462,9 +7515,9 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
  * @param {number} _j 
  * @param {number} _k 
  */
-function changeHitFrz(_j, _k) {
+function changeHitFrz(_j, _k, _name) {
 
-	const frzTopShadow = document.querySelector(`#frzTopShadow${_j}_${_k}`);
+	const frzTopShadow = document.querySelector(`#${_name}TopShadow${_j}_${_k}`);
 	if (frzTopShadow.getAttribute(`type`) === `arrow`) {
 		const fstyle = frzTopShadow.style;
 		fstyle.backgroundColor = `#ffffff`;
@@ -7472,18 +7525,20 @@ function changeHitFrz(_j, _k) {
 		fstyle.left = `-10px`;
 		fstyle.width = `70px`;
 		fstyle.height = `70px`;
-		document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 0;
+		document.querySelector(`#${_name}Top${_j}_${_k}`).style.opacity = 0;
 	} else {
-		document.querySelector(`#frzTop${_j}_${_k}`).style.backgroundColor = g_workObj.frzHitColors[_j];
+		document.querySelector(`#${_name}Top${_j}_${_k}`).style.backgroundColor = g_workObj.frzHitColors[_j];
 	}
 
-	const frzBar = document.querySelector(`#frzBar${_j}_${_k}`);
-	const frzRoot = document.querySelector(`#frz${_j}_${_k}`);
-	const frzBtm = document.querySelector(`#frzBtm${_j}_${_k}`);
-	const frzBtmShadow = document.querySelector(`#frzBtmShadow${_j}_${_k}`);
+	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
+	const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
+	const frzBtm = document.querySelector(`#${_name}Btm${_j}_${_k}`);
+	const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
 
-	frzBar.style.backgroundColor = g_workObj.frzHitBarColors[_j];
-	frzBtm.style.backgroundColor = g_workObj.frzHitColors[_j];
+	if (_name === `frz`) {
+		frzBar.style.backgroundColor = g_workObj.frzHitBarColors[_j];
+		frzBtm.style.backgroundColor = g_workObj.frzHitColors[_j];
+	}
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
 	const delFrzLength = parseFloat(document.querySelector(`#step${_j}`).style.top) - parseFloat(frzRoot.style.top);
@@ -7593,7 +7648,7 @@ function judgeArrow(_j) {
 						g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 					}
 				}
-				changeHitFrz(_j, fcurrentNo);
+				changeHitFrz(_j, fcurrentNo, `frz`);
 				g_judgObj.lockFlgs[_j] = false;
 				return;
 			}
