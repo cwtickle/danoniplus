@@ -6604,6 +6604,396 @@ function MainInit() {
 	 * フレーム処理(譜面台)
 	 */
 	function flowTimeline() {
+
+		/**
+		 * 全体色変化
+		 */
+		const changeColorFunc = {
+
+			arrow: (_j, _k) => {
+				const arrowTop = document.querySelector(`#arrowTop${_j}_${_k}`);
+				if (g_workObj.mkAColor[g_scoreObj.frameNum] !== undefined) {
+					if (arrowTop.getAttribute(`color`) !== g_workObj.arrowColors[_j]) {
+						if (g_workObj.arrowColors[_j] === g_workObj.arrowColorsAll[_j]) {
+							arrowTop.style.backgroundColor = g_workObj.arrowColorsAll[_j];
+							arrowTop.setAttribute(`color`, g_workObj.arrowColorsAll[_j]);
+						}
+					}
+				}
+			},
+
+			dummyArrow: (_j, _k) => { },
+
+			frz: (_j, _k, _state) => {
+				const frzTop = document.querySelector(`#frzTop${_j}_${_k}`);
+				const frzBar = document.querySelector(`#frzBar${_j}_${_k}`);
+				const frzBtm = document.querySelector(`#frzBtm${_j}_${_k}`);
+
+				if (g_workObj.mkFAColor[g_scoreObj.frameNum] !== undefined) {
+					if (frzBtm.getAttribute(`color`) !== g_workObj[`frz${_state}Colors`][_j]) {
+						const toColorCode = g_workObj[`frz${_state}ColorsAll`][_j];
+						if (g_workObj[`frz${_state}Colors`][_j] === toColorCode) {
+							if (_state === `Normal`) {
+								frzTop.style.backgroundColor = toColorCode;
+							}
+							frzBtm.style.backgroundColor = toColorCode;
+							frzBtm.setAttribute(`color`, toColorCode);
+						}
+					}
+					if (frzBar.getAttribute(`color`) !== g_workObj[`frz${_state}BarColors`][_j]) {
+						const toBarColorCode = g_workObj[`frz${_state}BarColorsAll`][_j];
+						if (g_workObj[`frz${_state}BarColors`][_j] === toBarColorCode) {
+							frzBar.style.backgroundColor = toBarColorCode;
+							frzBar.setAttribute(`color`, toBarColorCode);
+						}
+					}
+				}
+			},
+
+			dummyFrz: (_j, _k, _name, _state) => { },
+		};
+
+		/**
+		 * オート・枠外消去
+		 * ※MainInit内部で指定必須（mainSprite指定）
+		 */
+		const judgeMotionFunc = {
+
+			arrowOFF: (_j, _arrow, _cnt) => {
+				if (_cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
+					judgeUwan(_cnt);
+					g_workObj.judgArrowCnt[_j]++;
+					mainSprite.removeChild(_arrow);
+				}
+			},
+
+			arrowON: (_j, _arrow, _cnt) => {
+				if (_cnt === 0) {
+					const stepDivHit = document.querySelector(`#stepHit${_j}`);
+
+					judgeIi(_cnt);
+					stepDivHit.style.opacity = 1;
+					stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
+					g_workObj.judgArrowCnt[_j]++;
+					mainSprite.removeChild(_arrow);
+				}
+			},
+
+			dummyArrowOFF: (_j, _arrow, _cnt) => {
+				if (_cnt === 0) {
+					const stepDivHit = document.querySelector(`#stepHit${_j}`);
+
+					stepDivHit.style.opacity = 1;
+					stepDivHit.style.backgroundColor = C_CLR_DUMMY;
+					stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
+					g_workObj.judgDummyArrowCnt[_j]++;
+					mainSprite.removeChild(_arrow);
+				}
+			},
+		};
+		judgeMotionFunc.dummyArrowON = (_j, _arrow, _cnt) => judgeMotionFunc.dummyArrowOFF(_j, _arrow, _cnt);
+
+		/**
+		 * 次フリーズアローへ判定を移すかチェック
+		 */
+		const judgeNextFunc = {
+
+			frzOFF: (_j, _k, _cnt) => {
+
+				// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
+				// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
+				// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
+				if (g_workObj.judgFrzCnt[_j] !== _k && Number(_cnt) <= g_judgObj.frzJ[C_JDG_SFSF] + 1) {
+					const prevFrzRoot = document.querySelector(`#frz${_j}_${g_workObj.judgFrzCnt[_j]}`);
+					const prevCnt = Number(prevFrzRoot.getAttribute(`cnt`));
+					if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_KITA]) {
+					} else {
+
+						// 枠外判定前の場合、このタイミングで枠外判定を行う
+						if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+							judgeIknai(_cnt);
+							if (g_headerObj.frzStartjdgUse === `true`) {
+								judgeUwan(_cnt);
+							}
+						}
+						mainSprite.removeChild(prevFrzRoot);
+						g_workObj.judgFrzCnt[_j]++;
+					}
+				}
+			},
+
+			frzON: (_j, _k, _cnt) => {
+
+				if (_cnt === 0) {
+					changeHitFrz(_j, _k);
+					if (g_headerObj.frzStartjdgUse === `true`) {
+						judgeIi(_cnt);
+					}
+				}
+			}
+		};
+
+		/**
+		 * フリーズアローヒット中に手を離したかどうかをチェック
+		 */
+		const checkKeyUpFunc = {
+
+			frzOFF: (_j) => {
+				for (let m = 0, len = g_workObj.keyCtrl[_j].length; m < len; m++) {
+					if (g_workObj.keyHitFlg[_j][m]) {
+						return true;
+					}
+				}
+				return false;
+			},
+
+			frzON: (_j) => {
+				return true;
+			},
+		};
+
+		/**
+		 * 矢印生成
+		 * @param {number} _j 
+		 * @param {number} _arrowCnt 
+		 * @param {string} _name
+		 * @param {string} _color
+		 */
+		function makeArrow(_j, _arrowCnt, _name, _color) {
+			const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
+
+			const stepRoot = createSprite(`mainSprite`, `${_name}${_j}_${_arrowCnt}`,
+				g_workObj.stepX[_j],
+				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+				50, 100);
+			stepRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
+			stepRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
+			stepRoot.setAttribute(`judgEndFlg`, `false`);
+			stepRoot.setAttribute(`boostSpd`, boostSpdDir);
+			mainSprite.appendChild(stepRoot);
+
+			// 内側塗りつぶし矢印は、下記の順で作成する。
+			// 後に作成するほど前面に表示される。
+
+			// 矢印の内側を塗りつぶすか否か
+			if (g_headerObj.setShadowColor !== ``) {
+				// 矢印の塗り部分
+				const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[_j] : g_headerObj.setShadowColor);
+				const arrShadow = createColorObject(`${_name}Shadow${_j}_${_arrowCnt}`, shadowColor,
+					0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`);
+				arrShadow.style.opacity = 0.5;
+				stepRoot.appendChild(arrShadow);
+			}
+
+			// 矢印
+			stepRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _color,
+				0, 0, C_ARW_WIDTH, g_workObj.stepRtn[_j]));
+		}
+
+		/**
+		 * 矢印移動メイン
+		 * @param {number} _j 
+		 * @param {number} _k 
+		 * @param {string} _name 
+		 */
+		function movArrow(_j, _k, _name) {
+			const arrow = document.querySelector(`#${_name}${_j}_${_k}`);
+			let boostCnt = arrow.getAttribute(`boostCnt`);
+			const boostSpdDir = arrow.getAttribute(`boostSpd`);
+			let cnt = arrow.getAttribute(`cnt`);
+
+			// 全体色変化 (移動時)
+			changeColorFunc[_name](_j, _k);
+
+			// 移動
+			if (g_workObj.currentSpeed !== 0) {
+				arrow.style.top = `${parseFloat(arrow.style.top) -
+					(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
+				arrow.setAttribute(`boostCnt`, --boostCnt);
+			}
+			arrow.setAttribute(`cnt`, --cnt);
+
+			judgeMotionFunc[`${_name}${g_stateObj.autoPlay}`](_j, arrow, cnt);
+		}
+
+		/**
+		 * フリーズアロー生成
+		 * @param {number} _j 
+		 * @param {number} _arrowCnt 
+		 * @param {string} _name 
+		 * @param {string} _color 
+		 */
+		function makeFrzArrow(_j, _arrowCnt, _name, _normalColor, _barColor) {
+			const frzLength = g_workObj.mkFrzLength[_j][(_arrowCnt - 1) * 2];
+			const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
+
+			const frzRoot = createSprite(`mainSprite`, `${_name}${_j}_${_arrowCnt}`,
+				g_workObj.stepX[_j],
+				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+				50, 100 + frzLength);
+			frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
+			frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
+			frzRoot.setAttribute(`judgEndFlg`, `false`);
+			frzRoot.setAttribute(`isMoving`, `true`);
+			frzRoot.setAttribute(`frzBarLength`, frzLength);
+			frzRoot.setAttribute(`frzAttempt`, 0);
+			frzRoot.setAttribute(`boostSpd`, boostSpdDir);
+			frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[_j]);
+			mainSprite.appendChild(frzRoot);
+
+			// フリーズアローは、下記の順で作成する。
+			// 後に作成するほど前面に表示される。
+
+			// フリーズアロー帯(frzBar)
+			frzRoot.appendChild(createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
+				5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[_j],
+				C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, 0, `frzBar`));
+
+			// 開始矢印の塗り部分。ヒット時は前面に出て光る。
+			frzRoot.appendChild(createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, `#000000`,
+				0, 0,
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`));
+
+			// 開始矢印。ヒット時は隠れる。
+			frzRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
+				0, 0,
+				C_ARW_WIDTH, g_workObj.stepRtn[_j]));
+
+			// 後発矢印の塗り部分
+			frzRoot.appendChild(createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, `#000000`,
+				0, frzLength * boostSpdDir,
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`));
+
+			// 後発矢印
+			frzRoot.appendChild(createArrowEffect(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
+				0, frzLength * boostSpdDir,
+				C_ARW_WIDTH, g_workObj.stepRtn[_j]));
+		}
+
+		/**
+		 * フリーズアロー処理メイン
+		 * @param {number} _j 
+		 * @param {number} _k 
+		 * @param {string} _name 
+		 */
+		function movFrzArrow(_j, _k, _name) {
+			const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
+			const boostSpdDir = frzRoot.getAttribute(`boostSpd`);
+			let cnt = frzRoot.getAttribute(`cnt`);
+			let frzBarLength = frzRoot.getAttribute(`frzBarLength`);
+
+			if (frzRoot.getAttribute(`judgEndFlg`) === `false`) {
+				if (frzRoot.getAttribute(`isMoving`) === `true`) {
+					frzMoving(_j, _k, _name, frzRoot, cnt);
+				} else {
+
+					// 全体色変化 (ヒット時)
+					changeColorFunc.frz(_j, _k, `Hit`);
+
+					// フリーズアローがヒット中の処理
+					if (frzBarLength > 0) {
+						frzHitMotion(_j, _k, _name, frzRoot, cnt);
+
+					} else {
+						judgeKita(cnt);
+
+						g_workObj.judgFrzCnt[_j]++;
+						frzRoot.setAttribute(`judgEndFlg`, `true`);
+						mainSprite.removeChild(frzRoot);
+					}
+				}
+
+				// フリーズアローが枠外に出たときの処理
+				if (cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+					judgeIknai(cnt);
+					frzRoot.setAttribute(`judgEndFlg`, `true`);
+
+					changeFailedFrz(_j, _k);
+					if (g_headerObj.frzStartjdgUse === `true`) {
+						judgeUwan(cnt);
+					}
+				}
+			} else {
+				frzBarLength -= g_workObj.currentSpeed;
+				frzRoot.setAttribute(`frzBarLength`, frzBarLength);
+				frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
+
+				if (frzBarLength <= 0) {
+					g_workObj.judgFrzCnt[_j]++;
+					mainSprite.removeChild(frzRoot);
+				}
+			}
+		}
+
+		/**
+		 * フリーズアロー移動
+		 * @param {number} _j 
+		 * @param {number} _k 
+		 * @param {string} _name 
+		 * @param {object} _frzRoot 
+		 * @param {number} _cnt 
+		 */
+		function frzMoving(_j, _k, _name, _frzRoot, _cnt) {
+
+			let boostCnt = _frzRoot.getAttribute(`boostCnt`);
+			const boostSpdDir = _frzRoot.getAttribute(`boostSpd`);
+
+			// 全体色変化 (通常時)
+			changeColorFunc.frz(_j, _k, `Normal`);
+
+			// 移動
+			if (g_workObj.currentSpeed !== 0) {
+				_frzRoot.style.top = `${parseFloat(_frzRoot.style.top) -
+					(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
+				_frzRoot.setAttribute(`boostCnt`, --boostCnt);
+			}
+			_frzRoot.setAttribute(`cnt`, --_cnt);
+
+			// 次フリーズアローへ判定を移すかチェック
+			judgeNextFunc[`frz${g_stateObj.autoPlay}`](_j, _k, _cnt);
+		}
+
+		/**
+		 * フリーズアローヒット時処理
+		 * @param {number} _j 
+		 * @param {number} _k 
+		 * @param {string} _name 
+		 * @param {object} _frzRoot 
+		 * @param {number} _cnt 
+		 */
+		function frzHitMotion(_j, _k, _name, _frzRoot, _cnt) {
+
+			const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
+			const frzBtm = document.querySelector(`#${_name}Btm${_j}_${_k}`);
+			const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
+			const dividePos = _frzRoot.getAttribute(`dividePos`);
+			const boostSpdDir = _frzRoot.getAttribute(`boostSpd`);
+			const frzAttempt = _frzRoot.getAttribute(`frzAttempt`);
+			const frzBarLength = parseFloat(frzBar.style.height) - g_workObj.currentSpeed * Math.abs(boostSpdDir);
+
+			_frzRoot.setAttribute(`frzBarLength`, frzBarLength);
+			frzBar.style.height = `${frzBarLength}px`;
+			frzBar.style.top = `${parseFloat(frzBar.style.top) + g_workObj.currentSpeed * Math.abs(boostSpdDir) * dividePos}px`;
+			frzBtm.style.top = `${parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
+			frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
+
+			const keyDownFlg = checkKeyUpFunc[`${_name}${g_stateObj.autoPlay}`](_j);
+			if (!keyDownFlg) {
+				_frzRoot.setAttribute(`frzAttempt`, frzAttempt + 1);
+
+				if (frzAttempt > g_headerObj.frzAttempt) {
+
+					// フリーズアローを離したとき
+					if (_frzRoot.getAttribute(`judgEndFlg`) === `false`) {
+						judgeIknai(_cnt);
+						_frzRoot.setAttribute(`judgEndFlg`, `true`);
+
+						changeFailedFrz(_j, _k);
+					}
+				}
+			}
+		}
+
 		lblframe.innerHTML = g_scoreObj.frameNum;
 
 		// キーの押下状態を取得
@@ -6739,450 +7129,6 @@ function MainInit() {
 				movFrzArrow(j, k, `frz`);
 			}
 		}
-
-		/**
-		 * 矢印生成
-		 * @param {number} _j 
-		 * @param {number} _arrowCnt 
-		 * @param {string} _name
-		 * @param {string} _color
-		 */
-		function makeArrow(_j, _arrowCnt, _name, _color) {
-			const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
-
-			const stepRoot = createSprite(`mainSprite`, `${_name}${_j}_${_arrowCnt}`,
-				g_workObj.stepX[_j],
-				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
-				50, 100);
-			stepRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
-			stepRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
-			stepRoot.setAttribute(`judgEndFlg`, `false`);
-			stepRoot.setAttribute(`boostSpd`, boostSpdDir);
-			mainSprite.appendChild(stepRoot);
-
-			// 内側塗りつぶし矢印は、下記の順で作成する。
-			// 後に作成するほど前面に表示される。
-
-			// 矢印の内側を塗りつぶすか否か
-			if (g_headerObj.setShadowColor !== ``) {
-				// 矢印の塗り部分
-				const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[_j] : g_headerObj.setShadowColor);
-				const arrShadow = createColorObject(`${_name}Shadow${_j}_${_arrowCnt}`, shadowColor,
-					0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`);
-				arrShadow.style.opacity = 0.5;
-				stepRoot.appendChild(arrShadow);
-			}
-
-			// 矢印
-			stepRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _color,
-				0, 0, C_ARW_WIDTH, g_workObj.stepRtn[_j]));
-		}
-
-		/**
-		 * 矢印移動メイン
-		 * @param {number} _j 
-		 * @param {number} _k 
-		 * @param {string} _name 
-		 */
-		function movArrow(_j, _k, _name) {
-			const arrow = document.querySelector(`#${_name}${_j}_${_k}`);
-			let boostCnt = arrow.getAttribute(`boostCnt`);
-			const boostSpdDir = arrow.getAttribute(`boostSpd`);
-			let cnt = arrow.getAttribute(`cnt`);
-
-			// 全体色変化 (移動時)
-			eval(`${_name}ChangeAllColor`)(_j, _k, _name);
-
-			// 移動
-			if (g_workObj.currentSpeed !== 0) {
-				arrow.style.top = `${parseFloat(arrow.style.top) -
-					(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
-				arrow.setAttribute(`boostCnt`, --boostCnt);
-			}
-			arrow.setAttribute(`cnt`, --cnt);
-
-			eval(`${_name}JudgeMotion${g_stateObj.autoPlay}`)(_j, arrow, cnt);
-		}
-
-		/**
-		 * 全体色変化（通常矢印用）
-		 * @param {number} _j 矢印位置
-		 * @param {number} _k 何番目の矢印かを指定
-		 * @param {string} _name 
-		 */
-		function arrowChangeAllColor(_j, _k, _name) {
-			const arrowTop = document.querySelector(`#${_name}Top${_j}_${_k}`);
-			if (g_workObj.mkAColor[g_scoreObj.frameNum] !== undefined) {
-				if (arrowTop.getAttribute(`color`) !== g_workObj.arrowColors[_j]) {
-					if (g_workObj.arrowColors[_j] === g_workObj.arrowColorsAll[_j]) {
-						arrowTop.style.backgroundColor = g_workObj.arrowColorsAll[_j];
-						arrowTop.setAttribute(`color`, g_workObj.arrowColorsAll[_j]);
-					}
-				}
-			}
-		}
-
-		/**
-		 * 全体色変化（ダミー矢印用）
-		 * @param {number} _j 矢印位置
-		 * @param {number} _k 何番目の矢印かを指定
-		 * @param {number} _name 
-		 */
-		function dummyArrowChangeAllColor(_j, _k, _name) {
-
-		}
-
-		/**
-		 * オート・枠外消去（通常矢印用）(AutoPlay:OFF時)
-		 * ※MainInit内部で指定必須（mainSprite指定）
-		 * @param {number} _j 矢印位置
-		 * @param {string} _arrow 
-		 * @param {number} _cnt 
-		 */
-		function arrowJudgeMotionOFF(_j, _arrow, _cnt) {
-			if (_cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
-				judgeUwan(_cnt);
-				g_workObj.judgArrowCnt[_j]++;
-				mainSprite.removeChild(_arrow);
-			}
-		}
-
-		/**
-		 * オート・枠外消去（通常矢印用）(AutoPlay:ON時)
-		 * ※MainInit内部で指定必須（mainSprite指定）
-		 * @param {number} _j 矢印位置
-		 * @param {string} _arrow 
-		 * @param {number} _cnt 
-		 */
-		function arrowJudgeMotionON(_j, _arrow, _cnt) {
-			if (_cnt === 0) {
-				const stepDivHit = document.querySelector(`#stepHit${_j}`);
-
-				judgeIi(_cnt);
-				stepDivHit.style.opacity = 1;
-				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-				g_workObj.judgArrowCnt[_j]++;
-				mainSprite.removeChild(_arrow);
-			}
-		}
-
-		/**
-		 * オート処理（ダミー矢印用） (AutoPlay:OFF時)
-		 * ※MainInit内部で指定必須（mainSprite指定）
-		 * @param {number} _j 矢印位置
-		 * @param {string} _arrow 
-		 * @param {number} _cnt 
-		 */
-		function dummyArrowJudgeMotionOFF(_j, _arrow, _cnt) {
-			if (_cnt === 0) {
-				const stepDivHit = document.querySelector(`#stepHit${_j}`);
-
-				stepDivHit.style.opacity = 1;
-				stepDivHit.style.backgroundColor = C_CLR_DUMMY;
-				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-				g_workObj.judgDummyArrowCnt[_j]++;
-				mainSprite.removeChild(_arrow);
-			}
-		}
-
-		/**
-		 * オート処理（ダミー矢印用） (AutoPlay:ON時)
-		 * ※MainInit内部で指定必須（mainSprite指定）
-		 * @param {number} _j 矢印位置
-		 * @param {string} _arrow 
-		 * @param {number} _cnt 
-		 */
-		function dummyArrowJudgeMotionON(_j, _arrow, _cnt) {
-			if (_cnt === 0) {
-				const stepDivHit = document.querySelector(`#stepHit${_j}`);
-
-				stepDivHit.style.opacity = 1;
-				stepDivHit.style.backgroundColor = C_CLR_DUMMY;
-				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-				g_workObj.judgDummyArrowCnt[_j]++;
-				mainSprite.removeChild(_arrow);
-			}
-		}
-
-		/**
-		 * フリーズアロー生成
-		 * @param {number} _j 
-		 * @param {number} _arrowCnt 
-		 * @param {string} _name 
-		 * @param {string} _color 
-		 */
-		function makeFrzArrow(_j, _arrowCnt, _name, _normalColor, _barColor) {
-			const frzLength = g_workObj.mkFrzLength[_j][(_arrowCnt - 1) * 2];
-			const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
-
-			const frzRoot = createSprite(`mainSprite`, `${_name}${_j}_${_arrowCnt}`,
-				g_workObj.stepX[_j],
-				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
-				50, 100 + frzLength);
-			frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
-			frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
-			frzRoot.setAttribute(`judgEndFlg`, `false`);
-			frzRoot.setAttribute(`isMoving`, `true`);
-			frzRoot.setAttribute(`frzBarLength`, frzLength);
-			frzRoot.setAttribute(`frzAttempt`, 0);
-			frzRoot.setAttribute(`boostSpd`, boostSpdDir);
-			frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[_j]);
-			mainSprite.appendChild(frzRoot);
-
-			// フリーズアローは、下記の順で作成する。
-			// 後に作成するほど前面に表示される。
-
-			// フリーズアロー帯(frzBar)
-			frzRoot.appendChild(createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
-				5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[_j],
-				C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, 0, `frzBar`));
-
-			// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-			frzRoot.appendChild(createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, `#000000`,
-				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`));
-
-			// 開始矢印。ヒット時は隠れる。
-			frzRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
-				0, 0,
-				C_ARW_WIDTH, g_workObj.stepRtn[_j]));
-
-			// 後発矢印の塗り部分
-			frzRoot.appendChild(createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, `#000000`,
-				0, frzLength * boostSpdDir,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`));
-
-			// 後発矢印
-			frzRoot.appendChild(createArrowEffect(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
-				0, frzLength * boostSpdDir,
-				C_ARW_WIDTH, g_workObj.stepRtn[_j]));
-		}
-
-		/**
-		 * フリーズアロー処理メイン
-		 * @param {number} _j 
-		 * @param {number} _k 
-		 * @param {string} _name 
-		 */
-		function movFrzArrow(_j, _k, _name) {
-			const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
-			const boostSpdDir = frzRoot.getAttribute(`boostSpd`);
-			let cnt = frzRoot.getAttribute(`cnt`);
-			let frzBarLength = frzRoot.getAttribute(`frzBarLength`);
-
-			if (frzRoot.getAttribute(`judgEndFlg`) === `false`) {
-				if (frzRoot.getAttribute(`isMoving`) === `true`) {
-					eval(`${_name}Moving`)(_j, _k, _name, frzRoot, cnt);
-				} else {
-
-					// 全体色変化 (ヒット時)
-					eval(`${_name}ChangeAllColor`)(_j, _k, _name, `Hit`);
-
-					// フリーズアローがヒット中の処理
-					if (frzBarLength > 0) {
-						frzHitMotion(_j, _k, _name, frzRoot, cnt);
-
-					} else {
-						judgeKita(cnt);
-
-						g_workObj.judgFrzCnt[_j]++;
-						frzRoot.setAttribute(`judgEndFlg`, `true`);
-						mainSprite.removeChild(frzRoot);
-					}
-				}
-
-				// フリーズアローが枠外に出たときの処理
-				if (cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
-					judgeIknai(cnt);
-					frzRoot.setAttribute(`judgEndFlg`, `true`);
-
-					changeFailedFrz(_j, _k);
-					if (g_headerObj.frzStartjdgUse === `true`) {
-						judgeUwan(cnt);
-					}
-				}
-			} else {
-				frzBarLength -= g_workObj.currentSpeed;
-				frzRoot.setAttribute(`frzBarLength`, frzBarLength);
-				frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
-
-				if (frzBarLength <= 0) {
-					g_workObj.judgFrzCnt[_j]++;
-					mainSprite.removeChild(frzRoot);
-				}
-			}
-		}
-
-		/**
-		 * フリーズアロー移動
-		 * @param {number} _j 
-		 * @param {number} _k 
-		 * @param {string} _name 
-		 * @param {object} _frzRoot 
-		 * @param {number} _cnt 
-		 */
-		function frzMoving(_j, _k, _name, _frzRoot, _cnt) {
-
-			let boostCnt = _frzRoot.getAttribute(`boostCnt`);
-			const boostSpdDir = _frzRoot.getAttribute(`boostSpd`);
-
-			// 全体色変化 (通常時)
-			frzChangeAllColor(_j, _k, _name, `Normal`);
-
-			// 移動
-			if (g_workObj.currentSpeed !== 0) {
-				_frzRoot.style.top = `${parseFloat(_frzRoot.style.top) -
-					(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
-				_frzRoot.setAttribute(`boostCnt`, --boostCnt);
-			}
-			_frzRoot.setAttribute(`cnt`, --_cnt);
-
-			// 次フリーズアローへ判定を移すかチェック
-			eval(`frzJudgeNext${g_stateObj.autoPlay}`)(_j, _k, _cnt);
-		}
-
-		/**
-		 * フリーズアローヒット時処理
-		 * @param {number} _j 
-		 * @param {number} _k 
-		 * @param {string} _name 
-		 * @param {object} _frzRoot 
-		 * @param {number} _cnt 
-		 */
-		function frzHitMotion(_j, _k, _name, _frzRoot, _cnt) {
-
-			const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
-			const frzBtm = document.querySelector(`#${_name}Btm${_j}_${_k}`);
-			const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
-			const dividePos = _frzRoot.getAttribute(`dividePos`);
-			const boostSpdDir = _frzRoot.getAttribute(`boostSpd`);
-			const frzAttempt = _frzRoot.getAttribute(`frzAttempt`);
-			const frzBarLength = parseFloat(frzBar.style.height) - g_workObj.currentSpeed * Math.abs(boostSpdDir);
-
-			_frzRoot.setAttribute(`frzBarLength`, frzBarLength);
-			frzBar.style.height = `${frzBarLength}px`;
-			frzBar.style.top = `${parseFloat(frzBar.style.top) + g_workObj.currentSpeed * Math.abs(boostSpdDir) * dividePos}px`;
-			frzBtm.style.top = `${parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
-			frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
-
-			const keyDownFlg = eval(`${_name}CheckKeyUp${g_stateObj.autoPlay}`)(_j);
-			if (!keyDownFlg) {
-				_frzRoot.setAttribute(`frzAttempt`, frzAttempt + 1);
-
-				if (frzAttempt > g_headerObj.frzAttempt) {
-
-					// フリーズアローを離したとき
-					if (_frzRoot.getAttribute(`judgEndFlg`) === `false`) {
-						judgeIknai(_cnt);
-						_frzRoot.setAttribute(`judgEndFlg`, `true`);
-
-						changeFailedFrz(_j, _k);
-					}
-				}
-			}
-		}
-
-		/**
-		 * 全体色変化（フリーズアロー用）
-		 * @param {number} _j 
-		 * @param {number} _k 
-		 * @param {string} _name 
-		 * @param {string} _state 
-		 */
-		function frzChangeAllColor(_j, _k, _name, _state) {
-
-			const frzTop = document.querySelector(`#${_name}Top${_j}_${_k}`);
-			const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
-			const frzBtm = document.querySelector(`#${_name}Btm${_j}_${_k}`);
-
-			if (g_workObj.mkFAColor[g_scoreObj.frameNum] !== undefined) {
-				if (frzBtm.getAttribute(`color`) !== g_workObj[`frz${_state}Colors`][_j]) {
-					const toColorCode = g_workObj[`frz${_state}ColorsAll`][_j];
-					if (g_workObj[`frz${_state}Colors`][_j] === toColorCode) {
-						if (_state === `Normal`) {
-							frzTop.style.backgroundColor = toColorCode;
-						}
-						frzBtm.style.backgroundColor = toColorCode;
-						frzBtm.setAttribute(`color`, toColorCode);
-					}
-				}
-				if (frzBar.getAttribute(`color`) !== g_workObj[`frz${_state}BarColors`][_j]) {
-					const toBarColorCode = g_workObj[`frz${_state}BarColorsAll`][_j];
-					if (g_workObj[`frz${_state}BarColors`][_j] === toBarColorCode) {
-						frzBar.style.backgroundColor = toBarColorCode;
-						frzBar.setAttribute(`color`, toBarColorCode);
-					}
-				}
-			}
-		}
-
-		/**
-		 * 次フリーズアローへ判定を移すかチェック (AutoPlay:OFF時)
-		 * @param {number} _j 
-		 * @param {number} _k 
-		 * @param {number} _cnt 
-		 */
-		function frzJudgeNextOFF(_j, _k, _cnt) {
-
-			// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
-			// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
-			// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
-			if (g_workObj.judgFrzCnt[_j] !== _k && Number(_cnt) <= g_judgObj.frzJ[C_JDG_SFSF] + 1) {
-				const prevFrzRoot = document.querySelector(`#${_name}${_j}_${g_workObj.judgFrzCnt[_j]}`);
-				const prevCnt = Number(prevFrzRoot.getAttribute(`cnt`));
-				if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_KITA]) {
-				} else {
-
-					// 枠外判定前の場合、このタイミングで枠外判定を行う
-					if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
-						judgeIknai(_cnt);
-						if (g_headerObj.frzStartjdgUse === `true`) {
-							judgeUwan(_cnt);
-						}
-					}
-					mainSprite.removeChild(prevFrzRoot);
-					g_workObj.judgFrzCnt[_j]++;
-				}
-			}
-		}
-
-		/**
-		 * 次フリーズアローへの判定引継処理 (AutoPlay:ON時)
-		 * @param {number} _j 
-		 * @param {number} _k 
-		 * @param {number} _cnt 
-		 */
-		function frzJudgeNextON(_j, _k, _cnt) {
-
-			if (_cnt === 0) {
-				changeHitFrz(_j, _k);
-				if (g_headerObj.frzStartjdgUse === `true`) {
-					judgeIi(_cnt);
-				}
-			}
-		}
-
-		/**
-		 * フリーズアローヒット中に手を離したかどうかをチェック (AutoPlay：OFF時)
-		 * @param {number} _j 
-		 */
-		function frzCheckKeyUpOFF(_j) {
-			for (let m = 0, len = g_workObj.keyCtrl[_j].length; m < len; m++) {
-				if (g_workObj.keyHitFlg[_j][m]) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		/**
-		 * フリーズアローヒット中は何もしない (AutoPlay：ON時)
-		 * @param {number} _j 
-		 */
-		function frzCheckKeyUpON(_j) {
-			return true;
-		}
-
 
 		// 歌詞表示
 		if (g_scoreObj.wordData[g_scoreObj.frameNum] !== undefined) {
