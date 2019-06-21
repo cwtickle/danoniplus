@@ -143,4 +143,9 @@ function customJudgeKita2(difFrame){
 function customJudgeIknai2(difFrame){
 
 }
+
+// ダミー
+function customJudgeDummy2(difFrame){
+
+}
 */

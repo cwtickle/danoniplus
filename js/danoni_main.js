@@ -6650,6 +6650,12 @@ function MainInit() {
 			if (_cnt === 0) {
 				const stepDivHit = document.querySelector(`#stepHit${_j}`);
 
+				if (typeof customJudgeDummy === `function`) {
+					customJudgeDummy(difFrame);
+					if (typeof customJudgeDummy2 === `function`) {
+						customJudgeDummy2(difFrame);
+					}
+				}
 				stepDivHit.style.opacity = 1;
 				stepDivHit.style.backgroundColor = C_CLR_DUMMY;
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
