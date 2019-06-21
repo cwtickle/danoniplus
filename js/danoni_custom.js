@@ -145,4 +145,9 @@ function customJudgeKita(difFrame){
 function customJudgeIknai(difFrame){
 
 }
+
+// ダミー
+function customJudgeDummy(difFrame){
+
+}
 */
