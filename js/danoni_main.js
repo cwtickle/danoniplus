@@ -4980,7 +4980,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		// 矢印データの分解
 		const arrowName = g_keyObj[`chara${keyCtrlPtn}`][j];
 		obj.arrowData[j] = storeArrowData(_dosObj[`${arrowName}${_scoreNo}_data`]);
-		g_allArrow += obj.arrowData[j].length;
+		if (isNaN(parseFloat(obj.arrowData[j][0]))) {
+		} else {
+			g_allArrow += obj.arrowData[j].length;
+		}
 
 		if (g_stateObj.dummyId !== ``) {
 			obj.dummyArrowData[j] = storeArrowData(_dosObj[`${arrowName}${_dummyNo}_data`]);
@@ -5001,7 +5004,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 
 		// フリーズアローデータの分解 (2つで1セット)
 		obj.frzData[j] = storeArrowData(_dosObj[`${frzName}${_scoreNo}_data`]);
-		g_allFrz += obj.frzData[j].length;
+		if (isNaN(parseFloat(obj.frzData[j][0]))) {
+		} else {
+			g_allFrz += obj.frzData[j].length;
+		}
 
 		if (g_stateObj.dummyId !== ``) {
 			obj.dummyFrzData[j] = storeArrowData(_dosObj[`${frzName}${_dummyNo}_data`]);
@@ -5041,9 +5047,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		let tmpArrayData = _dosObj[`speed${_scoreNo}${speedFooter}`].split(`\r`).join(`\n`);
 		tmpArrayData = tmpArrayData.split(`\n`);
 
-		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
-			const tmpData = tmpArrayData[j];
-
+		tmpArrayData.forEach(tmpData => {
 			if (tmpData !== undefined && tmpData !== ``) {
 				const tmpSpeedData = tmpData.split(`,`);
 				for (let k = 0; k < tmpSpeedData.length; k += 2) {
@@ -5055,7 +5059,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					speedIdx += 2;
 				}
 			}
-		}
+		});
 	}
 
 	// 速度変化（個別）データの分解 (2つで1セット, セット毎の改行区切り可)
@@ -5066,9 +5070,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		let tmpArrayData = _dosObj[`boost${_scoreNo}_data`].split(`\r`).join(`\n`);
 		tmpArrayData = tmpArrayData.split(`\n`);
 
-		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
-			const tmpData = tmpArrayData[j];
-
+		tmpArrayData.forEach(tmpData => {
 			if (tmpData !== undefined && tmpData !== ``) {
 				const tmpSpeedData = tmpData.split(`,`);
 				for (let k = 0; k < tmpSpeedData.length; k += 2) {
@@ -5080,7 +5082,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					speedIdx += 2;
 				}
 			}
-		}
+		});
 	}
 
 	// 色変化（個別）データの分解（3つで1セット, セット毎の改行区切り可）
@@ -5091,9 +5093,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		let tmpArrayData = _dosObj[`color${_scoreNo}_data`].split(`\r`).join(`\n`);
 		tmpArrayData = tmpArrayData.split(`\n`);
 
-		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
-			const tmpData = tmpArrayData[j];
-
+		tmpArrayData.forEach(tmpData => {
 			if (tmpData !== undefined && tmpData !== ``) {
 				const tmpColorData = tmpData.split(`,`);
 				for (let k = 0; k < tmpColorData.length; k += 3) {
@@ -5106,7 +5106,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					colorIdx += 3;
 				}
 			}
-		}
+		});
 	}
 
 	// 色変化（全体）データの分解 (3つで1セット, セット毎の改行区切り可)
@@ -5117,9 +5117,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		let tmpArrayData = _dosObj[`acolor${_scoreNo}_data`].split(`\r`).join(`\n`);
 		tmpArrayData = tmpArrayData.split(`\n`);
 
-		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
-			const tmpData = tmpArrayData[j];
-
+		tmpArrayData.forEach(tmpData => {
 			if (tmpData !== undefined && tmpData !== ``) {
 				const tmpColorData = tmpData.split(`,`);
 				for (let k = 0; k < tmpColorData.length; k += 3) {
@@ -5132,7 +5130,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					colorIdx += 3;
 				}
 			}
-		}
+		});
 	}
 
 	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
@@ -5151,9 +5149,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 			let tmpArrayData = inputWordData.split(`\r`).join(`\n`);
 			tmpArrayData = tmpArrayData.split(`\n`);
 
-			for (let j = 0, len = tmpArrayData.length; j < len; j++) {
-				const tmpData = tmpArrayData[j];
-
+			tmpArrayData.forEach(tmpData => {
 				if (tmpData !== undefined && tmpData !== ``) {
 					const tmpWordData = tmpData.split(`,`);
 					for (let k = 0; k < tmpWordData.length; k += 3) {
@@ -5189,7 +5185,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 						}
 					}
 				}
-			}
+			});
 		}
 	}
 
@@ -5203,9 +5199,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		let tmpArrayData = _dosObj[`mask${_scoreNo}_data`].split(`\r`).join(`\n`);
 		tmpArrayData = tmpArrayData.split(`\n`);
 
-		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
-			const tmpData = tmpArrayData[j];
-
+		tmpArrayData.forEach(tmpData => {
 			if (tmpData !== undefined && tmpData !== ``) {
 				const tmpMaskData = tmpData.split(`,`);
 
@@ -5251,7 +5245,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					animationDuration: tmpAnimationDuration
 				};
 			}
-		}
+		});
 	}
 
 	// 背景データの分解 (下記すべてで1セット、改行区切り)
@@ -5264,9 +5258,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		let tmpArrayData = _dosObj[`back${_scoreNo}_data`].split(`\r`).join(`\n`);
 		tmpArrayData = tmpArrayData.split(`\n`);
 
-		for (let j = 0, len = tmpArrayData.length; j < len; j++) {
-			const tmpData = tmpArrayData[j];
-
+		tmpArrayData.forEach(tmpData => {
 			if (tmpData !== undefined && tmpData !== ``) {
 				const tmpBackData = tmpData.split(`,`);
 
@@ -5277,7 +5269,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 				const tmpClass = escapeHtml(setVal(tmpBackData[3], ``, `string`));
 				const tmpX = setVal(tmpBackData[4], 0, `float`);
 				const tmpY = setVal(tmpBackData[5], 0, `float`);
-				const tmpWidth = setVal(tmpBackData[6], 0, `number`);					// spanタグの場合は font-size
+				const tmpWidth = setVal(tmpBackData[6], 0, `number`);				// spanタグの場合は font-size
 				const tmpHeight = escapeHtml(setVal(tmpBackData[7], ``, `string`));	// spanタグの場合は color(文字列可)
 				const tmpOpacity = setVal(tmpBackData[8], 1, `float`);
 				const tmpAnimationName = escapeHtml(setVal(tmpBackData[9], C_DIS_NONE, `string`));
@@ -5312,7 +5304,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					animationDuration: tmpAnimationDuration
 				};
 			}
-		}
+		});
 	}
 
 	return obj;
