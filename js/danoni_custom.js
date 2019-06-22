@@ -146,8 +146,13 @@ function customJudgeIknai(difFrame){
 
 }
 
-// ダミー
-function customJudgeDummy(difFrame){
+// ダミー矢印
+function customJudgeDummyArrow(difFrame){
+
+}
+
+// ダミーフリーズアロー
+function customJudgeDummyFrz(difFrame){
 
 }
 */
