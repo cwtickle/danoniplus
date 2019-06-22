@@ -270,6 +270,18 @@ const g_rankObj = {
 	rankColorX: `#996600`
 };
 
+const g_pointAllocation = {
+	ii: 8,
+	shakin: 4,
+	matari: 2,
+	kita: 8,
+	sfsf: 4,
+	maxCombo: 2,
+	fmaxCombo: 2,
+}
+
+let g_maxScore = 1000000;
+
 let g_gameOverFlg = false;
 
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
@@ -7926,16 +7938,12 @@ function resultInit() {
 	const fullArrows = g_allArrow + g_allFrz / 2;
 
 	// スコア計算(一括)
-	const scoreTmp = g_resultObj.ii * 8 +
-		g_resultObj.shakin * 4 +
-		g_resultObj.matari * 2 +
-		g_resultObj.kita * 8 +
-		g_resultObj.sfsf * 4 +
-		g_resultObj.maxCombo * 2 +
-		g_resultObj.fmaxCombo * 2;
+	const scoreTmp = Object.keys(g_pointAllocation).reduce(
+		(score, name) => score + g_resultObj[name] * g_pointAllocation[name]
+	, 0)
 
 	const allScore = (g_allArrow + g_allFrz / 2) * 10;
-	const resultScore = Math.round(scoreTmp / allScore * 1000000) || 0;
+	const resultScore = Math.round(scoreTmp / allScore * g_maxScore) || 0;
 	g_resultObj.score = resultScore;
 
 	// ランク計算
@@ -7952,13 +7960,13 @@ function resultInit() {
 			let rankPos = g_rankObj.rankRate.length;
 			for (let j = 0, len = g_rankObj.rankRate.length; j < len; j++) {
 				rankPos = len;
-				if (resultScore / 10000 >= g_rankObj.rankRate[j]) {
+				if (resultScore * 100 / g_maxScore >= g_rankObj.rankRate[j]) {
 					rankMark = g_rankObj.rankMarks[j];
 					rankColor = g_rankObj.rankColor[j];
 					break;
 				}
 			}
-			if (resultScore / 10000 < g_rankObj.rankRate[rankPos - 1]) {
+			if (resultScore * 100 / g_maxScore < g_rankObj.rankRate[rankPos - 1]) {
 				rankMark = g_rankObj.rankMarkC;
 				rankColor = g_rankObj.rankColorC;
 			}
