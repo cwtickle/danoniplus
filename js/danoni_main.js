@@ -6621,11 +6621,12 @@ function MainInit() {
 	};
 
 	/**
-	 * オート・枠外消去
+	 * 自動判定、矢印・フリーズアロー消去
 	 * ※MainInit内部で指定必須（mainSprite指定）
 	 */
 	const judgeMotionFunc = {
 
+		// 矢印(枠外判定、AutoPlay: OFF)
 		arrowOFF: (_j, _arrow, _cnt) => {
 			if (_cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
 				judgeUwan(_cnt);
@@ -6634,6 +6635,7 @@ function MainInit() {
 			}
 		},
 
+		// 矢印(オート、AutoPlay: ON)
 		arrowON: (_j, _arrow, _cnt) => {
 			if (_cnt === 0) {
 				const stepDivHit = document.querySelector(`#stepHit${_j}`);
@@ -6646,14 +6648,15 @@ function MainInit() {
 			}
 		},
 
+		// ダミー矢印(オート、AutoPlay: OFF)
 		dummyArrowOFF: (_j, _arrow, _cnt) => {
 			if (_cnt === 0) {
 				const stepDivHit = document.querySelector(`#stepHit${_j}`);
 
-				if (typeof customJudgeDummy === `function`) {
-					customJudgeDummy(difFrame);
-					if (typeof customJudgeDummy2 === `function`) {
-						customJudgeDummy2(difFrame);
+				if (typeof customJudgeDummyArrow === `function`) {
+					customJudgeDummyArrow(difFrame);
+					if (typeof customJudgeDummyArrow2 === `function`) {
+						customJudgeDummyArrow2(difFrame);
 					}
 				}
 				stepDivHit.style.opacity = 1;
@@ -6663,6 +6666,71 @@ function MainInit() {
 				mainSprite.removeChild(_arrow);
 			}
 		},
+
+		// フリーズアロー(成功時)
+		frzOK: (_j, _k, _frzRoot, _cnt) => {
+			judgeKita(_cnt);
+			_frzRoot.setAttribute(`judgEndFlg`, `true`);
+			g_workObj.judgFrzCnt[_j]++;
+			mainSprite.removeChild(_frzRoot);
+		},
+
+		// ダミーフリーズアロー(成功時)
+		dummyFrzOK: (_j, _k, _frzRoot, _cnt) => {
+			if (typeof customJudgeDummyFrz === `function`) {
+				customJudgeDummyFrz(difFrame);
+				if (typeof customJudgeDummyFrz2 === `function`) {
+					customJudgeDummyFrz2(difFrame);
+				}
+			}
+			_frzRoot.setAttribute(`judgEndFlg`, `true`);
+			g_workObj.judgDummyFrzCnt[_j]++;
+			mainSprite.removeChild(_frzRoot);
+		},
+
+		// フリーズアロー(枠外判定)
+		frzNG: (_j, _k, _frzRoot, _cnt) => {
+			if (_cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+				judgeIknai(_cnt);
+				_frzRoot.setAttribute(`judgEndFlg`, `true`);
+
+				changeFailedFrz(_j, _k);
+				if (g_headerObj.frzStartjdgUse === `true`) {
+					judgeUwan(_cnt);
+				}
+			}
+		},
+
+		// ダミーフリーズアロー(枠外判定)
+		dummyFrzNG: (_j, _k, _frzRoot, _cnt) => { },
+
+		// フリーズアロー(キーを離したときの処理)
+		frzKeyUp: (_j, _k, _frzRoot, _cnt, _keyUpFrame) => {
+			if (_keyUpFrame > g_headerObj.frzAttempt) {
+				if (_frzRoot.getAttribute(`judgEndFlg`) === `false`) {
+					judgeIknai(_cnt);
+					_frzRoot.setAttribute(`judgEndFlg`, `true`);
+					changeFailedFrz(_j, _k);
+				}
+			}
+		},
+
+		// ダミーフリーズアロー(キーを離したときの処理)
+		// ※処理上通ることはないが、統一のために定義
+		dummyFrzKeyUp: (_j, _k, _frzRoot, _cnt, _keyUpFrame) => { },
+
+		// フリーズアロー(判定外での消去)
+		frzDelete: (_j, _k, _frzRoot, _cnt) => {
+			g_workObj.judgFrzCnt[_j]++;
+			mainSprite.removeChild(_frzRoot);
+		},
+
+		// ダミーフリーズアロー(判定外での消去)
+		dummyFrzDelete: (_j, _k, _frzRoot, _cnt) => {
+			g_workObj.judgDummyFrzCnt[_j]++;
+			mainSprite.removeChild(_frzRoot);
+		},
+
 	};
 	judgeMotionFunc.dummyArrowON = (_j, _arrow, _cnt) => judgeMotionFunc.dummyArrowOFF(_j, _arrow, _cnt);
 
@@ -6738,42 +6806,6 @@ function MainInit() {
 			return true;
 		},
 	};
-
-	/**
-	 * フリーズアロー消去
-	 */
-	const frzDeleteFunc = {
-
-		frz: (_j, _frzRoot, _cnt) => {
-			g_workObj.judgFrzCnt[_j]++;
-			mainSprite.removeChild(_frzRoot);
-		},
-
-		dummyFrz: (_j, _frzRoot, _cnt) => {
-			g_workObj.judgDummyFrzCnt[_j]++;
-			mainSprite.removeChild(_frzRoot);
-		},
-	};
-
-	/**
-	 * フリーズアローの枠外判定
-	 */
-	const judgeNGFunc = {
-
-		frz: (_j, _k, _frzRoot, _cnt) => {
-			if (_cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
-				judgeIknai(_cnt);
-				_frzRoot.setAttribute(`judgEndFlg`, `true`);
-
-				changeFailedFrz(_j, _k);
-				if (g_headerObj.frzStartjdgUse === `true`) {
-					judgeUwan(_cnt);
-				}
-			}
-		},
-
-		dummyFrz: (_j, _k, _frzRoot, _cnt) => { },
-	}
 
 	/**
 	 * 矢印生成
@@ -6910,25 +6942,18 @@ function MainInit() {
 			if (frzRoot.getAttribute(`isMoving`) === `true`) {
 				frzMoving(_j, _k, _name, frzRoot, cnt);
 			} else {
-
 				// 全体色変化 (ヒット時)
 				changeColorFunc[_name](_j, _k, `Hit`);
 
 				// フリーズアローがヒット中の処理
 				if (frzBarLength > 0) {
 					frzHitMotion(_j, _k, _name, frzRoot, cnt);
-
 				} else {
-					if (_name === `frz`) {
-						judgeKita(cnt);
-					}
-					frzRoot.setAttribute(`judgEndFlg`, `true`);
-					frzDeleteFunc[_name](_j, frzRoot, cnt);
+					judgeMotionFunc[`${_name}OK`](_j, _k, frzRoot, cnt);
 				}
 			}
-
 			// フリーズアローが枠外に出たときの処理
-			judgeNGFunc[_name](_j, _k, frzRoot, cnt);
+			judgeMotionFunc[`${_name}NG`](_j, _k, frzRoot, cnt);
 
 		} else {
 			frzBarLength -= g_workObj.currentSpeed;
@@ -6936,7 +6961,7 @@ function MainInit() {
 			frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
 
 			if (frzBarLength <= 0) {
-				frzDeleteFunc[_name](_j, frzRoot, cnt);
+				judgeMotionFunc[`${_name}Delete`](_j, _k, frzRoot, cnt);
 			}
 		}
 	}
@@ -6984,7 +7009,7 @@ function MainInit() {
 		const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
 		const dividePos = _frzRoot.getAttribute(`dividePos`);
 		const boostSpdDir = _frzRoot.getAttribute(`boostSpd`);
-		const frzAttempt = _frzRoot.getAttribute(`frzAttempt`);
+		const keyUpFrame = _frzRoot.getAttribute(`frzAttempt`);
 		const frzBarLength = parseFloat(frzBar.style.height) - g_workObj.currentSpeed * Math.abs(boostSpdDir);
 
 		_frzRoot.setAttribute(`frzBarLength`, frzBarLength);
@@ -6994,18 +7019,8 @@ function MainInit() {
 		frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
 
 		if (!checkKeyUpFunc[`${_name}${g_stateObj.autoPlay}`](_j)) {
-			_frzRoot.setAttribute(`frzAttempt`, frzAttempt + 1);
-
-			if (frzAttempt > g_headerObj.frzAttempt) {
-
-				// フリーズアローを離したとき
-				if (_frzRoot.getAttribute(`judgEndFlg`) === `false`) {
-					judgeIknai(_cnt);
-					_frzRoot.setAttribute(`judgEndFlg`, `true`);
-
-					changeFailedFrz(_j, _k);
-				}
-			}
+			_frzRoot.setAttribute(`frzAttempt`, keyUpFrame + 1);
+			judgeMotionFunc[`${_name}KeyUp`](_j, _k, _frzRoot, _cnt, keyUpFrame + 1);
 		}
 	}
 
@@ -7148,11 +7163,11 @@ function MainInit() {
 
 		// フリーズアロー移動＆消去
 		for (let j = 0; j < keyNum; j++) {
-			for (let k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
-				movFrzArrow(j, k, `frz`);
-			}
 			for (let k = g_workObj.judgDummyFrzCnt[j]; k <= dummyFrzCnts[j]; k++) {
 				movFrzArrow(j, k, `dummyFrz`);
+			}
+			for (let k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
+				movFrzArrow(j, k, `frz`);
 			}
 		}
 
