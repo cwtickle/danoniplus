@@ -322,6 +322,7 @@ const g_stateObj = {
 	d_musicinfo: C_FLG_ON,
 	d_color: C_FLG_ON,
 	d_speed: C_FLG_ON,
+	d_motion: C_FLG_ON,
 	d_lyrics: C_FLG_ON,
 	d_background: C_FLG_ON
 };
@@ -4771,6 +4772,9 @@ function loadingScoreInit() {
 			if (tmpObj.acolorData !== undefined && tmpObj.acolorData.length >= 3) {
 				g_scoreObj.acolorData = JSON.parse(JSON.stringify(tmpObj.acolorData));
 			}
+			if (tmpObj.motionData !== undefined && tmpObj.motionData.length >= 3) {
+				g_scoreObj.motionData = JSON.parse(JSON.stringify(tmpObj.motionData));
+			}
 			if (tmpObj.wordData !== undefined && tmpObj.wordData.length >= 3) {
 				g_scoreObj.wordData = tmpObj.wordData.concat();
 			}
@@ -5131,6 +5135,28 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					obj.acolorData[colorIdx + 2] = tmpColorData[k + 2];
 					colorIdx += 3;
 				}
+			}
+		});
+	}
+
+	// 矢印モーション（個別）データの分解（3～4つで1セット, セット毎の改行区切り）
+	obj.motionData = [];
+	obj.motionData.length = 0;
+	if (_dosObj[`motion${_scoreNo}_data`] !== undefined && _dosObj[`motion${_scoreNo}_data`] !== `` && g_stateObj.d_motion === C_FLG_ON) {
+		let motionIdx = 0;
+		let tmpArrayData = _dosObj[`motion${_scoreNo}_data`].split(`\r`).join(`\n`);
+		tmpArrayData = tmpArrayData.split(`\n`);
+
+		tmpArrayData.forEach(tmpData => {
+			if (tmpData !== undefined && tmpData !== ``) {
+				const tmpMotionData = tmpData.split(`,`);
+				if (isNaN(parseInt(tmpMotionData[0]))) {
+					continue;
+				}
+				obj.MotionData[motionIdx] = calcFrame(tmpMotionData[0]);
+				obj.MotionData[motionIdx + 1] = parseFloat(tmpMotionData[1]);
+				obj.MotionData[motionIdx + 2] = tmpMotionData[2];
+				motionIdx += 3;
 			}
 		});
 	}
@@ -5833,6 +5859,44 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		}
 	}
 
+	// 個別モーションのタイミング更新
+	if (_dataObj.motionData !== undefined && _dataObj.motionData.length >= 3) {
+		if (_dataObj.speedData !== undefined) {
+			spdk = _dataObj.speedData.length - 2;
+			spdPrev = _dataObj.speedData[spdk];
+		} else {
+			spdPrev = 0;
+		}
+		spdNext = Infinity;
+
+		lastk = _dataObj.motionData.length - 3;
+		tmpObj = getArrowStartFrame(_dataObj.motionData[lastk], _speedOnFrame, _motionOnFrame);
+		frmPrev = tmpObj.frm;
+		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+		//pushColors(``, tmpObj.frm, _dataObj.motionData[lastk + 1], _dataObj.motionData[lastk + 2].replace(`0x`, `#`));
+
+		for (let k = lastk - 3; k >= 0; k -= 3) {
+
+			if (_dataObj.motionData[k] < g_scoreObj.frameNum) {
+				break;
+			} else if ((_dataObj.motionData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
+				&& _dataObj.motionData[k] < spdNext)) {
+				_dataObj.motionData[k] -= g_workObj.arrivalFrame[frmPrev];
+			} else {
+				if (_dataObj.motionData[k] < spdPrev) {
+					spdk -= 2;
+					spdNext = spdPrev;
+					spdPrev = _dataObj.speedData[spdk];
+				}
+				tmpObj = getArrowStartFrame(_dataObj.motionData[k], _speedOnFrame, _motionOnFrame);
+				frmPrev = tmpObj.frm;
+				_dataObj.motionData[k] = tmpObj.frm;
+				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+			}
+			//pushColors(``, _dataObj.motionData[k], _dataObj.motionData[k + 1], _dataObj.motionData[k + 2]);
+		}
+	}
+
 	// 実際に処理させる途中変速配列を作成
 	g_workObj.speedData = [];
 	g_workObj.speedData.length = 0;
@@ -5915,7 +5979,7 @@ function convertreplaceNums() {
 }
 
 /**
- * 色情報の格納
+ * 色情報・モーション情報の格納
  * @param {string} _header 
  * @param {number} _frame 
  * @param {number} _val 
@@ -6829,6 +6893,9 @@ function MainInit() {
 		stepRoot.setAttribute(`boostSpd`, boostSpdDir);
 		mainSprite.appendChild(stepRoot);
 
+		stepRoot.classList.add(`toRight`);
+		stepRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / 60}s`;
+
 		// 内側塗りつぶし矢印は、下記の順で作成する。
 		// 後に作成するほど前面に表示される。
 
@@ -6898,6 +6965,9 @@ function MainInit() {
 		frzRoot.setAttribute(`boostSpd`, boostSpdDir);
 		frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[_j]);
 		mainSprite.appendChild(frzRoot);
+
+		frzRoot.classList.add(`toSpin`);
+		frzRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / 60}s`;
 
 		// フリーズアローは、下記の順で作成する。
 		// 後に作成するほど前面に表示される。

@@ -323,3 +323,10 @@ input[type=range]:focus {
 	animation-duration: 1.5s;
 	animation-name: leftToRight;
 }
+
+.toRight {
+	animation-name: leftToRight;
+}
+.toSpin {
+	animation-name: spinY;
+}
