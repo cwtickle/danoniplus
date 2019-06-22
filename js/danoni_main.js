@@ -4813,9 +4813,11 @@ function loadingScoreInit() {
 	} else if (g_stateObj.shuffle === `Random+`) {
 		applyRandom(keyNum, [[...Array(keyNum).keys()]]);
 	} else if (g_stateObj.shuffle === `S-Random`) {
-		applySRandom(keyNum, shuffleGroup);
+		applySRandom(keyNum, shuffleGroup, `arrow`, `frz`);
+		applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
 	} else if (g_stateObj.shuffle === `S-Random+`) {
-		applySRandom(keyNum, [[...Array(keyNum).keys()]]);
+		applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
+		applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
 	}
 
 	// 矢印・フリーズアロー・速度/色変化格納処理
@@ -4897,11 +4899,11 @@ function applyRandom(_keyNum, _shuffleGroup) {
 
 /**
  * S-Randomの適用
- * （ダミー矢印はシャッフル対象外）
  * @param {number} _keyNum
  * @param {array} _shuffleGroup
  */
-function applySRandom(_keyNum, _shuffleGroup) {
+function applySRandom(_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) {
+
 	const tmpArrowData = [...Array(_keyNum)].map(_ => []);
 	const tmpFrzData = [...Array(_keyNum)].map(_ => []);
 
@@ -4910,7 +4912,7 @@ function applySRandom(_keyNum, _shuffleGroup) {
 		// 全フリーズを開始フレーム順に並べる
 		const allFreezeArrows = [];
 		_group.forEach(_key => {
-			const frzData = g_scoreObj.frzData[_key] || [];
+			const frzData = g_scoreObj[`${_frzHeader}Data`][_key] || [];
 			for (let i = 0; i < frzData.length; i += 2) {
 				allFreezeArrows.push({ begin: frzData[i], end: frzData[i + 1] });
 			}
@@ -4929,7 +4931,7 @@ function applySRandom(_keyNum, _shuffleGroup) {
 		});
 
 		// 通常矢印の配置
-		const allArrows = _group.map(_key => g_scoreObj.arrowData[_key]).flat();
+		const allArrows = _group.map(_key => g_scoreObj[`${_arrowHeader}Data`][_key]).flat();
 		allArrows.sort((_a, _b) => _a - _b);
 		allArrows.forEach(_arrow => {
 			// 置ける場所を検索
@@ -4945,8 +4947,8 @@ function applySRandom(_keyNum, _shuffleGroup) {
 		})
 	});
 
-	g_scoreObj.arrowData = tmpArrowData;
-	g_scoreObj.frzData = tmpFrzData.map(_freezes =>
+	g_scoreObj[`${_arrowHeader}Data`] = tmpArrowData;
+	g_scoreObj[`${_frzHeader}Data`] = tmpFrzData.map(_freezes =>
 		_freezes.map(_freeze => [_freeze.begin, _freeze.end]).flat()
 	);
 }
