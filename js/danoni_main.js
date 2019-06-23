@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/06/22
+ * Revised : 2019/06/23
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 6.1.0`;
-const g_revisedDate = `2019/06/22`;
+const g_version = `Ver 6.2.0`;
+const g_revisedDate = `2019/06/23`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -269,6 +269,18 @@ const g_rankObj = {
 	rankMarkX: `X`,
 	rankColorX: `#996600`
 };
+
+const g_pointAllocation = {
+	ii: 8,
+	shakin: 4,
+	matari: 2,
+	kita: 8,
+	sfsf: 4,
+	maxCombo: 2,
+	fmaxCombo: 2,
+}
+
+let g_maxScore = 1000000;
 
 let g_gameOverFlg = false;
 
@@ -6576,6 +6588,10 @@ function MainInit() {
 
 	/**
 	 * 全体色変化
+	 * 
+	 * @param _j 矢印位置
+	 * @param _k 矢印の表示順
+	 * @param _state フリーズアローの色変化対象 (Normal: 通常時、Hit: ヒット時)
 	 */
 	const changeColorFunc = {
 
@@ -6619,12 +6635,20 @@ function MainInit() {
 			}
 		},
 
-		dummyFrz: (_j, _k, _name, _state) => { },
+		dummyFrz: (_j, _k, _state) => { },
 	};
 
 	/**
 	 * 自動判定、矢印・フリーズアロー消去
 	 * ※MainInit内部で指定必須（mainSprite指定）
+	 * 
+	 * @param _j 矢印位置
+	 * @param _arrow 矢印(オブジェクト)
+	 * 
+	 * @param _k 矢印の表示順
+	 * @param _frzRoot フリーズアロー(オブジェクト)
+	 * @param _cnt ステップゾーン到達までのフレーム数
+	 * @param _keyUpFrame キーを離したフレーム数
 	 */
 	const judgeMotionFunc = {
 
@@ -6738,6 +6762,10 @@ function MainInit() {
 
 	/**
 	 * 次フリーズアローへ判定を移すかチェック
+	 * 
+	 * @param _j 矢印の位置
+	 * @param _k 矢印の表示順
+	 * @param _cnt ステップゾーン到達までのフレーム数
 	 */
 	const judgeNextFunc = {
 
@@ -6789,6 +6817,8 @@ function MainInit() {
 
 	/**
 	 * フリーズアローヒット中に手を離したかどうかをチェック
+	 * 
+	 * @param _j 矢印の位置
 	 */
 	const checkKeyUpFunc = {
 
@@ -6811,10 +6841,10 @@ function MainInit() {
 
 	/**
 	 * 矢印生成
-	 * @param {number} _j 
-	 * @param {number} _arrowCnt 
-	 * @param {string} _name
-	 * @param {string} _color
+	 * @param {number} _j 矢印の位置
+	 * @param {number} _arrowCnt 現在の判定矢印順
+	 * @param {string} _name 矢印名
+	 * @param {string} _color 矢印色
 	 */
 	function makeArrow(_j, _arrowCnt, _name, _color) {
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
@@ -6878,7 +6908,8 @@ function MainInit() {
 	 * @param {number} _j 
 	 * @param {number} _arrowCnt 
 	 * @param {string} _name 
-	 * @param {string} _color 
+	 * @param {string} _normalcolor
+	 * @param {string} _barColor 
 	 */
 	function makeFrzArrow(_j, _arrowCnt, _name, _normalColor, _barColor) {
 		const camelHeader = _name.slice(0, 1).toUpperCase() + _name.slice(1);
@@ -7926,16 +7957,12 @@ function resultInit() {
 	const fullArrows = g_allArrow + g_allFrz / 2;
 
 	// スコア計算(一括)
-	const scoreTmp = g_resultObj.ii * 8 +
-		g_resultObj.shakin * 4 +
-		g_resultObj.matari * 2 +
-		g_resultObj.kita * 8 +
-		g_resultObj.sfsf * 4 +
-		g_resultObj.maxCombo * 2 +
-		g_resultObj.fmaxCombo * 2;
+	const scoreTmp = Object.keys(g_pointAllocation).reduce(
+		(score, name) => score + g_resultObj[name] * g_pointAllocation[name]
+		, 0)
 
 	const allScore = (g_allArrow + g_allFrz / 2) * 10;
-	const resultScore = Math.round(scoreTmp / allScore * 1000000) || 0;
+	const resultScore = Math.round(scoreTmp / allScore * g_maxScore) || 0;
 	g_resultObj.score = resultScore;
 
 	// ランク計算
@@ -7952,13 +7979,13 @@ function resultInit() {
 			let rankPos = g_rankObj.rankRate.length;
 			for (let j = 0, len = g_rankObj.rankRate.length; j < len; j++) {
 				rankPos = len;
-				if (resultScore / 10000 >= g_rankObj.rankRate[j]) {
+				if (resultScore * 100 / g_maxScore >= g_rankObj.rankRate[j]) {
 					rankMark = g_rankObj.rankMarks[j];
 					rankColor = g_rankObj.rankColor[j];
 					break;
 				}
 			}
-			if (resultScore / 10000 < g_rankObj.rankRate[rankPos - 1]) {
+			if (resultScore * 100 / g_maxScore < g_rankObj.rankRate[rankPos - 1]) {
 				rankMark = g_rankObj.rankMarkC;
 				rankColor = g_rankObj.rankColorC;
 			}
