@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/06/23
+ * Revised : 2019/06/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 6.2.0`;
-const g_revisedDate = `2019/06/23`;
+const g_version = `Ver 6.2.1`;
+const g_revisedDate = `2019/06/26`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2583,7 +2583,7 @@ function headerConvert(_dosObj) {
 
 	// ノルマ制設定
 	for (let j = 0; j < g_gaugeOptionObj.border.length; j++) {
-		if (g_gaugeOptionObj.border[j] != `SuddenDeath`) {
+		if (g_gaugeOptionObj.border[j] !== `SuddenDeath`) {
 			getGaugeSetting(_dosObj, g_gaugeOptionObj.border[j], obj);
 		}
 	}
@@ -2591,7 +2591,7 @@ function headerConvert(_dosObj) {
 	g_gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
 	g_stateObj.gauge = g_gauges[g_gaugeNum];
 
-	if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] != undefined) {
+	if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] !== undefined) {
 		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`].lifeBorders[0] === `x`) {
 			g_stateObj.lifeBorder = 0;
 		} else {
@@ -3647,23 +3647,23 @@ function createOptionWindow(_sprite) {
 		// ゲージ設定別に個別設定した場合はここで設定を上書き
 		const tmpScoreId = g_stateObj.scoreId;
 
-		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] != undefined) {
+		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] !== undefined) {
 			const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
 
-			if (setVal(tmpGaugeObj.lifeBorders[tmpScoreId], `string`) != ``) {
+			if (setVal(tmpGaugeObj.lifeBorders[tmpScoreId], `string`) !== ``) {
 				if (tmpGaugeObj.lifeBorders[tmpScoreId] === `x`) {
 					g_stateObj.lifeBorder = 0;
 				} else {
 					g_stateObj.lifeBorder = tmpGaugeObj.lifeBorders[tmpScoreId];
 				}
 			}
-			if (setVal(tmpGaugeObj.lifeRecoverys[tmpScoreId], `float`) != ``) {
+			if (setVal(tmpGaugeObj.lifeRecoverys[tmpScoreId], `float`) !== ``) {
 				g_stateObj.lifeRcv = tmpGaugeObj.lifeRecoverys[tmpScoreId];
 			}
-			if (setVal(tmpGaugeObj.lifeDamages[tmpScoreId], `float`) != ``) {
+			if (setVal(tmpGaugeObj.lifeDamages[tmpScoreId], `float`) !== ``) {
 				g_stateObj.lifeDmg = tmpGaugeObj.lifeDamages[tmpScoreId];
 			}
-			if (setVal(tmpGaugeObj.lifeInits[tmpScoreId], `float`) != ``) {
+			if (setVal(tmpGaugeObj.lifeInits[tmpScoreId], `float`) !== ``) {
 				g_stateObj.lifeInit = tmpGaugeObj.lifeInits[tmpScoreId];
 			}
 		}
@@ -3943,6 +3943,10 @@ function createOptionWindow(_sprite) {
 					};
 					g_stateObj.reverse = C_FLG_OFF;
 					g_reverseNum = 0;
+				}
+			} else {
+				if (g_keyObj.currentPtn === -1) {
+					g_keyObj.currentPtn = 0;
 				}
 			}
 
@@ -5159,7 +5163,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		} else if (_dosObj.word_data !== undefined) {
 			inputWordData = _dosObj.word_data;
 		}
-		if (inputWordData != ``) {
+		if (inputWordData !== ``) {
 			let tmpArrayData = inputWordData.split(`\r`).join(`\n`);
 			tmpArrayData = tmpArrayData.split(`\n`);
 
