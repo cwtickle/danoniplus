@@ -289,6 +289,7 @@ const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chr
 let g_audio = new Audio();
 let g_timeoutEvtId = 0;
 let g_timeoutEvtTitleId = 0;
+let g_timeoutEvtResultId = 0;
 let g_inputKeyBuffer = [];
 
 // 歌詞制御
@@ -2115,12 +2116,10 @@ function titleInit() {
 	drawDefaultBackImage(``);
 
 	// タイトル用フレーム初期化
-	g_scoreObj.backTitleFrameNum = 0;
-	g_scoreObj.maskTitleFrameNum = 0;
+	g_scoreObj.titleFrameNum = 0;
 
 	// タイトル用ループカウンター
-	g_scoreObj.backTitleLoopCount = 0;
-	g_scoreObj.maskTitleLoopCount = 0;
+	g_scoreObj.titleLoopCount = 0;
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 
@@ -2418,12 +2417,6 @@ function titleInit() {
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus`, `_blank`));
 	divRoot.appendChild(lnkVersion);
 
-	// マスクスプライトを作成
-	createSprite(`divRoot`, `maskTitleSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.maskTitleMaxDepth; j++) {
-		createSprite(`maskTitleSprite`, `maskTitleSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
-
 	/**
 	 * タイトルのモーション設定
 	 */
@@ -2438,17 +2431,10 @@ function titleInit() {
 		}
 
 		// 背景表示・背景モーション
-		if (g_headerObj.backTitleData[g_scoreObj.backTitleFrameNum] !== undefined) {
-			g_scoreObj.backTitleFrameNum = drawSpriteData(g_scoreObj.backTitleFrameNum, `title`, `back`);
+		if (g_headerObj.backTitleData[g_scoreObj.titleFrameNum] !== undefined) {
+			g_scoreObj.titleFrameNum = drawSpriteData(g_scoreObj.titleFrameNum, `title`, `back`);
 		}
-
-		// マスク表示・マスクモーション
-		if (g_headerObj.maskTitleData[g_scoreObj.maskTitleFrameNum] !== undefined) {
-			g_scoreObj.maskTitleFrameNum = drawSpriteData(g_scoreObj.maskTitleFrameNum, `title`, `mask`);
-		}
-
-		g_scoreObj.backTitleFrameNum++;
-		g_scoreObj.maskTitleFrameNum++;
+		g_scoreObj.titleFrameNum++;
 		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60);
 	}
 
@@ -2934,7 +2920,7 @@ function headerConvert(_dosObj) {
 	// 別キーパターンの使用有無
 	obj.transKeyUse = setVal(_dosObj.transKeyUse, `true`, `string`);
 
-	// 背景データの分解 (下記すべてで1セット、改行区切り)
+	// タイトル画面用・背景データの分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	obj.backTitleData = [];
 	obj.backTitleData.length = 0;
@@ -2943,13 +2929,21 @@ function headerConvert(_dosObj) {
 		[obj.backTitleData, obj.backTitleMaxDepth] = makeSpriteData(_dosObj.backtitle_data);
 	}
 
-	// マスクデータの分解 (下記すべてで1セット、改行区切り)
+	// 結果画面用・背景データの分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	obj.maskTitleData = [];
-	obj.maskTitleData.length = 0;
-	obj.maskTitleMaxDepth = -1;
-	if (_dosObj.masktitle_data !== undefined) {
-		[obj.maskTitleData, obj.maskTitleMaxDepth] = makeSpriteData(_dosObj.masktitle_data);
+	obj.backResultData = [];
+	obj.backResultData.length = 0;
+	obj.backResultMaxDepth = -1;
+	if (_dosObj.backresult_data !== undefined) {
+		[obj.backResultData, obj.backResultMaxDepth] = makeSpriteData(_dosObj.backresult_data);
+	}
+
+	// 結果画面用・マスクデータの分解 (下記すべてで1セット、改行区切り)
+	obj.maskResultData = [];
+	obj.maskResultData.length = 0;
+	obj.maskResultMaxDepth = -1;
+	if (_dosObj.maskresult_data !== undefined) {
+		[obj.maskResultData, obj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
 	}
 
 	return obj;
@@ -7904,7 +7898,22 @@ function finishViewing() {
 function resultInit() {
 
 	drawDefaultBackImage(``);
+
+	// 結果画面用フレーム初期化
+	g_scoreObj.backResultFrameNum = 0;
+	g_scoreObj.maskResultFrameNum = 0;
+
+	// 結果画面用ループカウンター
+	g_scoreObj.backResultLoopCount = 0;
+	g_scoreObj.maskResultLoopCount = 0;
+
 	const divRoot = document.querySelector(`#divRoot`);
+
+	// 背景スプライトを作成
+	createSprite(`divRoot`, `backResultSprite`, 0, 0, g_sWidth, g_sHeight);
+	for (let j = 0; j <= g_headerObj.backResultMaxDepth; j++) {
+		createSprite(`backResultSprite`, `backResultSprite${j}`, 0, 0, g_sWidth, g_sHeight);
+	}
 
 	// タイトル文字描画
 	const lblTitle = getTitleDivLabel(`lblTitle`,
@@ -8296,6 +8305,11 @@ function resultInit() {
 	playDataWindow.style.animationDuration = `3s`;
 	playDataWindow.style.animationName = `slowlyAppearing`;
 
+	// マスクスプライトを作成
+	createSprite(`divRoot`, `maskResultSprite`, 0, 0, g_sWidth, g_sHeight);
+	for (let j = 0; j <= g_headerObj.maskResultMaxDepth; j++) {
+		createSprite(`maskResultSprite`, `maskResultSprite${j}`, 0, 0, g_sWidth, g_sHeight);
+	}
 
 	// 戻るボタン描画
 	const btnBack = createButton({
@@ -8312,6 +8326,7 @@ function resultInit() {
 	}, _ => {
 		// タイトル画面へ戻る
 		g_audio.pause();
+		clearTimeout(g_timeoutEvtResultId);
 		clearWindow();
 		titleInit();
 	});
@@ -8346,10 +8361,41 @@ function resultInit() {
 		align: C_ALIGN_CENTER
 	}, _ => {
 		g_audio.pause();
+		clearTimeout(g_timeoutEvtResultId);
 		clearWindow();
 		loadMusic();
 	});
 	divRoot.appendChild(btnRetry);
+
+	/**
+	 * タイトルのモーション設定
+	 */
+	function flowResultTimeline() {
+
+		// ユーザカスタムイベント(フレーム毎)
+		if (typeof customResultEnterFrame === `function`) {
+			customResultEnterFrame();
+			if (typeof customResultEnterFrame2 === `function`) {
+				customResultEnterFrame2();
+			}
+		}
+
+		// 背景表示・背景モーション
+		if (g_headerObj.backResultData[g_scoreObj.backResultFrameNum] !== undefined) {
+			g_scoreObj.backResultFrameNum = drawSpriteData(g_scoreObj.backResultFrameNum, `result`, `back`);
+		}
+
+		// マスク表示・マスクモーション
+		if (g_headerObj.maskResultData[g_scoreObj.maskResultFrameNum] !== undefined) {
+			g_scoreObj.maskResultFrameNum = drawSpriteData(g_scoreObj.maskResultFrameNum, `result`, `mask`);
+		}
+
+		g_scoreObj.backResultFrameNum++;
+		g_scoreObj.maskResultFrameNum++;
+		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60);
+	}
+
+	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60);
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
