@@ -105,6 +105,13 @@ function customResultInit2() {
 }
 
 /**
+ * 結果画面(フレーム毎表示) [Scene: Result / Grape]
+ */
+function customResultEnterFrame2() {
+
+}
+
+/**
  * 判定カスタム処理 (引数は共通で1つ保持)
  * @param {number} difFrame タイミング誤差(フレーム数)
  */
