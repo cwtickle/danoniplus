@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/06/27
+ * Revised : 2019/06/28
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 6.3.0`;
-const g_revisedDate = `2019/06/27`;
+const g_version = `Ver 6.4.0`;
+const g_revisedDate = `2019/06/28`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2945,6 +2945,9 @@ function headerConvert(_dosObj) {
 	if (_dosObj.maskresult_data !== undefined) {
 		[obj.maskResultData, obj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
 	}
+
+	// 結果画面用のマスク透過設定
+	obj.maskresultButton = setVal(_dosObj.maskresultButton, `false`, `string`);
 
 	return obj;
 }
@@ -8305,12 +8308,6 @@ function resultInit() {
 	playDataWindow.style.animationDuration = `3s`;
 	playDataWindow.style.animationName = `slowlyAppearing`;
 
-	// マスクスプライトを作成
-	createSprite(`divRoot`, `maskResultSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.maskResultMaxDepth; j++) {
-		createSprite(`maskResultSprite`, `maskResultSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
-
 	// 戻るボタン描画
 	const btnBack = createButton({
 		id: `btnBack`,
@@ -8366,6 +8363,15 @@ function resultInit() {
 		loadMusic();
 	});
 	divRoot.appendChild(btnRetry);
+
+	// マスクスプライトを作成
+	const maskResultSprite = createSprite(`divRoot`, `maskResultSprite`, 0, 0, g_sWidth, g_sHeight);
+	for (let j = 0; j <= g_headerObj.maskResultMaxDepth; j++) {
+		createSprite(`maskResultSprite`, `maskResultSprite${j}`, 0, 0, g_sWidth, g_sHeight);
+	}
+	if (g_headerObj.maskresultButton === `false`) {
+		maskResultSprite.style.pointerEvents = `none`;
+	}
 
 	/**
 	 * タイトルのモーション設定
