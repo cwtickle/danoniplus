@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/06/27
+ * Revised : 2019/06/28
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 6.3.0`;
-const g_revisedDate = `2019/06/27`;
+const g_version = `Ver 6.4.0`;
+const g_revisedDate = `2019/06/28`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2109,6 +2109,58 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 }
 
 /**
+ * 背景・マスクモーションの表示
+ * @param {number} _frame 
+ * @param {string} _spriteName 
+ * @param {string} _depthName 
+ */
+function drawMainSpriteData(_frame, _spriteName) {
+
+	const tmpObj = g_scoreObj[`${_spriteName}Data`][_frame];
+	const baseSprite = document.querySelector(`#${_spriteName}Sprite${tmpObj.depth}`);
+	if (tmpObj.path !== ``) {
+		if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
+			tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
+
+			// imgタグの場合
+			let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
+					style="position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
+			if (tmpObj.width !== 0 && tmpObj.width > 0) {
+				tmpInnerHTML += `;width:${tmpObj.width}px`;
+			}
+			if (tmpObj.height !== `` && setVal(tmpObj.height, 0, `number`) > 0) {
+				tmpInnerHTML += `;height:${tmpObj.height}px`;
+			}
+			tmpInnerHTML += `;animation-name:${tmpObj.animationName}
+					;animation-duration:${tmpObj.animationDuration}s
+					;opacity:${tmpObj.opacity}">`;
+			baseSprite.innerHTML = tmpInnerHTML;
+
+		} else {
+			// spanタグの場合
+			let tmpInnerHTML = `<span class="${tmpObj.class}"
+					style="display:inline-block;position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
+
+			// この場合のwidthは font-size と解釈する
+			if (tmpObj.width !== 0 && tmpObj.width > 0) {
+				tmpInnerHTML += `;font-size:${tmpObj.width}px`;
+			}
+
+			// この場合のheightは color と解釈する
+			if (tmpObj.height !== ``) {
+				tmpInnerHTML += `;color:${tmpObj.height}`;
+			}
+			tmpInnerHTML += `;animation-name:${tmpObj.animationName}
+					;animation-duration:${tmpObj.animationDuration}s
+					;opacity:${tmpObj.opacity}">${tmpObj.path}</span>`;
+			baseSprite.innerHTML = tmpInnerHTML;
+		}
+	} else {
+		baseSprite.innerHTML = ``;
+	}
+}
+
+/**
  *  タイトル画面初期化
  */
 function titleInit() {
@@ -2116,10 +2168,12 @@ function titleInit() {
 	drawDefaultBackImage(``);
 
 	// タイトル用フレーム初期化
-	g_scoreObj.titleFrameNum = 0;
+	g_scoreObj.backTitleFrameNum = 0;
+	g_scoreObj.maskTitleFrameNum = 0;
 
 	// タイトル用ループカウンター
-	g_scoreObj.titleLoopCount = 0;
+	g_scoreObj.backTitleLoopCount = 0;
+	g_scoreObj.maskTitleLoopCount = 0;
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 
@@ -2417,6 +2471,15 @@ function titleInit() {
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus`, `_blank`));
 	divRoot.appendChild(lnkVersion);
 
+	// マスクスプライトを作成
+	createSprite(`divRoot`, `maskTitleSprite`, 0, 0, g_sWidth, g_sHeight);
+	for (let j = 0; j <= g_headerObj.maskTitleMaxDepth; j++) {
+		createSprite(`maskTitleSprite`, `maskTitleSprite${j}`, 0, 0, g_sWidth, g_sHeight);
+	}
+	if (g_headerObj.masktitleButton === `false`) {
+		maskTitleSprite.style.pointerEvents = `none`;
+	}
+
 	/**
 	 * タイトルのモーション設定
 	 */
@@ -2431,10 +2494,17 @@ function titleInit() {
 		}
 
 		// 背景表示・背景モーション
-		if (g_headerObj.backTitleData[g_scoreObj.titleFrameNum] !== undefined) {
-			g_scoreObj.titleFrameNum = drawSpriteData(g_scoreObj.titleFrameNum, `title`, `back`);
+		if (g_headerObj.backTitleData[g_scoreObj.backTitleFrameNum] !== undefined) {
+			g_scoreObj.backTitleFrameNum = drawSpriteData(g_scoreObj.backTitleFrameNum, `title`, `back`);
 		}
-		g_scoreObj.titleFrameNum++;
+
+		// マスク表示・マスクモーション
+		if (g_headerObj.maskTitleData[g_scoreObj.maskTitleFrameNum] !== undefined) {
+			g_scoreObj.maskTitleFrameNum = drawSpriteData(g_scoreObj.maskTitleFrameNum, `title`, `mask`);
+		}
+
+		g_scoreObj.backTitleFrameNum++;
+		g_scoreObj.maskTitleFrameNum++;
 		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60);
 	}
 
@@ -2929,6 +2999,17 @@ function headerConvert(_dosObj) {
 		[obj.backTitleData, obj.backTitleMaxDepth] = makeSpriteData(_dosObj.backtitle_data);
 	}
 
+	// タイトル画面用・マスクデータの分解 (下記すべてで1セット、改行区切り)
+	obj.maskTitleData = [];
+	obj.maskTitleData.length = 0;
+	obj.maskTitleMaxDepth = -1;
+	if (_dosObj.masktitle_data !== undefined) {
+		[obj.maskTitleData, obj.maskTitleMaxDepth] = makeSpriteData(_dosObj.masktitle_data);
+	}
+
+	// 結果画面用のマスク透過設定
+	obj.masktitleButton = setVal(_dosObj.masktitleButton, `false`, `string`);
+
 	// 結果画面用・背景データの分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	obj.backResultData = [];
@@ -2945,6 +3026,9 @@ function headerConvert(_dosObj) {
 	if (_dosObj.maskresult_data !== undefined) {
 		[obj.maskResultData, obj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
 	}
+
+	// 結果画面用のマスク透過設定
+	obj.maskresultButton = setVal(_dosObj.maskresultButton, `false`, `string`);
 
 	return obj;
 }
@@ -7241,98 +7325,12 @@ function MainInit() {
 
 		// マスク表示・マスクモーション
 		if (g_scoreObj.maskData[g_scoreObj.frameNum] !== undefined) {
-			const tmpObj = g_scoreObj.maskData[g_scoreObj.frameNum];
-			const maskSprite = document.querySelector(`#maskSprite${tmpObj.depth}`);
-			if (tmpObj.path !== ``) {
-				if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
-					tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
-
-					// imgタグの場合
-					let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
-						style="position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-					if (tmpObj.width !== 0 && tmpObj.width > 0) {
-						tmpInnerHTML += `;width:${tmpObj.width}px`;
-					}
-					if (tmpObj.height !== `` && setVal(tmpObj.height, 0, `number`) > 0) {
-						tmpInnerHTML += `;height:${tmpObj.height}px`;
-					}
-					tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-						;animation-duration:${tmpObj.animationDuration}s
-						;opacity:${tmpObj.opacity}">`;
-					maskSprite.innerHTML = tmpInnerHTML;
-
-				} else {
-
-					// spanタグの場合
-					let tmpInnerHTML = `<span class="${tmpObj.class}"
-						style="display:inline-block;position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-
-					// この場合のwidthは font-size と解釈する
-					if (tmpObj.width !== 0 && tmpObj.width > 0) {
-						tmpInnerHTML += `;font-size:${tmpObj.width}px`;
-					}
-
-					// この場合のheightは color と解釈する
-					if (tmpObj.height !== ``) {
-						tmpInnerHTML += `;color:${tmpObj.height}`;
-					}
-					tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-						;animation-duration:${tmpObj.animationDuration}s
-						;opacity:${tmpObj.opacity}">${tmpObj.path}</span>`;
-					maskSprite.innerHTML = tmpInnerHTML;
-				}
-			} else {
-				maskSprite.innerHTML = ``;
-			}
-
+			drawMainSpriteData(g_scoreObj.frameNum, `mask`);
 		}
 
 		// 背景表示・背景モーション
 		if (g_scoreObj.backData[g_scoreObj.frameNum] !== undefined) {
-			const tmpObj = g_scoreObj.backData[g_scoreObj.frameNum];
-			const backSprite = document.querySelector(`#backSprite${tmpObj.depth}`);
-			if (tmpObj.path !== ``) {
-				if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
-					tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
-
-					// imgタグの場合
-					let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
-						style="position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-					if (tmpObj.width !== 0 && tmpObj.width > 0) {
-						tmpInnerHTML += `;width:${tmpObj.width}px`;
-					}
-					if (tmpObj.height !== `` && setVal(tmpObj.height, 0, `number`) > 0) {
-						tmpInnerHTML += `;height:${tmpObj.height}px`;
-					}
-					tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-						;animation-duration:${tmpObj.animationDuration}s
-						;opacity:${tmpObj.opacity}">`;
-					backSprite.innerHTML = tmpInnerHTML;
-
-				} else {
-
-					// spanタグの場合
-					let tmpInnerHTML = `<span class="${tmpObj.class}"
-						style="display:inline-block;position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-
-					// この場合のwidthは font-size と解釈する
-					if (tmpObj.width !== 0 && tmpObj.width > 0) {
-						tmpInnerHTML += `;font-size:${tmpObj.width}px`;
-					}
-
-					// この場合のheightは color と解釈する
-					if (tmpObj.height !== ``) {
-						tmpInnerHTML += `;color:${tmpObj.height}`;
-					}
-					tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-						;animation-duration:${tmpObj.animationDuration}s
-						;opacity:${tmpObj.opacity}">${tmpObj.path}</span>`;
-					backSprite.innerHTML = tmpInnerHTML;
-				}
-			} else {
-				backSprite.innerHTML = ``;
-			}
-
+			drawMainSpriteData(g_scoreObj.frameNum, `back`);
 		}
 
 		// 判定キャラクタ消去
@@ -8305,12 +8303,6 @@ function resultInit() {
 	playDataWindow.style.animationDuration = `3s`;
 	playDataWindow.style.animationName = `slowlyAppearing`;
 
-	// マスクスプライトを作成
-	createSprite(`divRoot`, `maskResultSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.maskResultMaxDepth; j++) {
-		createSprite(`maskResultSprite`, `maskResultSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
-
 	// 戻るボタン描画
 	const btnBack = createButton({
 		id: `btnBack`,
@@ -8366,6 +8358,15 @@ function resultInit() {
 		loadMusic();
 	});
 	divRoot.appendChild(btnRetry);
+
+	// マスクスプライトを作成
+	const maskResultSprite = createSprite(`divRoot`, `maskResultSprite`, 0, 0, g_sWidth, g_sHeight);
+	for (let j = 0; j <= g_headerObj.maskResultMaxDepth; j++) {
+		createSprite(`maskResultSprite`, `maskResultSprite${j}`, 0, 0, g_sWidth, g_sHeight);
+	}
+	if (g_headerObj.maskresultButton === `false`) {
+		maskResultSprite.style.pointerEvents = `none`;
+	}
 
 	/**
 	 * タイトルのモーション設定
