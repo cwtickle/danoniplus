@@ -352,13 +352,13 @@ const g_gaugeOptionObj = {
 	survival: [`Original`, `Light`, `No Recovery`, `SuddenDeath`, `Practice`],
 	border: [`Normal`, `Easy`, `Hard`, `SuddenDeath`],
 
-	initSurvival: [250, 250, C_VAL_MAXLIFE, C_VAL_MAXLIFE, C_VAL_MAXLIFE / 2],
+	initSurvival: [25, 25, 100, 100, 50],
 	rcvSurvival: [6, 6, 0, 0, 0],
 	dmgSurvival: [40, 20, 50, C_VAL_MAXLIFE, 0],
 	typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
 	clearSurvival: [0, 0, 0, 0, 0],
 
-	initBorder: [250, 250, C_VAL_MAXLIFE, C_VAL_MAXLIFE],
+	initBorder: [25, 25, 100, 100],
 	rcvBorder: [2, 2, 1, 0],
 	dmgBorder: [7, 4, 50, C_VAL_MAXLIFE],
 	typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL],
@@ -2697,7 +2697,7 @@ function headerConvert(_dosObj) {
 			}
 			obj.lifeRecoverys.push(setVal(recovery, 6, `float`));
 			obj.lifeDamages.push(setVal(damage, 40, `float`));
-			obj.lifeInits.push(setVal(init, 25, `float`) * 10);
+			obj.lifeInits.push(setVal(init, 25, `float`));
 		}
 	} else {
 		makeWarningWindow(C_MSG_E_0021);
@@ -2707,7 +2707,7 @@ function headerConvert(_dosObj) {
 		obj.lifeBorders = [`x`];
 		obj.lifeRecoverys = [6];
 		obj.lifeDamages = [40];
-		obj.lifeInits = [250];
+		obj.lifeInits = [25];
 	}
 	if (obj.initSpeeds[0] !== undefined) {
 		g_stateObj.speed = obj.initSpeeds[0];
@@ -3062,7 +3062,7 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 			}
 			g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(setVal(gaugeDetails[1], 2, `float`));
 			g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(setVal(gaugeDetails[2], 7, `float`));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(C_VAL_MAXLIFE * setVal(gaugeDetails[3], 25, `float`) / 100);
+			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(setVal(gaugeDetails[3], 25, `float`));
 		}
 		if (gauges.length < difLength) {
 			for (let j = gauges.length; j < difLength; j++) {
@@ -3087,7 +3087,7 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 			}
 			g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(setVal(g_presetGaugeCustom[_name].Recovery, 2, `float`));
 			g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(setVal(g_presetGaugeCustom[_name].Damage, 7, `float`));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(C_VAL_MAXLIFE * setVal(g_presetGaugeCustom[_name].Init, 25, `float`) / 100);
+			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(setVal(g_presetGaugeCustom[_name].Init, 25, `float`));
 		}
 	}
 }
@@ -3797,7 +3797,7 @@ function createOptionWindow(_sprite) {
 	 * ゲージ設定の詳細表示を整形
 	 */
 	function gaugeFormat(_mode, _border, _rcv, _dmg, _init) {
-		const initVal = C_VAL_MAXLIFE * _init / 1000;
+		const initVal = C_VAL_MAXLIFE * _init / 100;
 		const borderVal = C_VAL_MAXLIFE * _border / 100;
 
 		if (_mode === C_LFE_BORDER) {
@@ -5393,7 +5393,7 @@ function calcLifeVals(_allArrows) {
 		g_workObj.lifeDmg = g_stateObj.lifeDmg;
 	}
 	g_workObj.lifeBorder = C_VAL_MAXLIFE * g_stateObj.lifeBorder / 100;
-	g_workObj.lifeInit = C_VAL_MAXLIFE * g_stateObj.lifeInit / 1000;
+	g_workObj.lifeInit = C_VAL_MAXLIFE * g_stateObj.lifeInit / 100;
 }
 
 /**
@@ -5402,7 +5402,7 @@ function calcLifeVals(_allArrows) {
  * @param {number} _allArrows 
  */
 function calcLifeVal(_val, _allArrows) {
-	return Math.round(_val * 100000 / _allArrows) / 100;
+	return Math.round(_val * C_VAL_MAXLIFE * 100 / _allArrows) / 100;
 }
 
 /**
