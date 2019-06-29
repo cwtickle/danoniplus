@@ -2714,7 +2714,7 @@ function headerConvert(_dosObj) {
 	// 最大ライフ
 	obj.maxLifeVal = setVal(_dosObj.maxLifeVal, C_VAL_MAXLIFE, `float`);
 	g_gaugeOptionObj = {
-		survival: [`Original`, `Light`, `No Recovery`, `SuddenDeath`, `Practice`],
+		survival: [`Original`, `Light`, `NoRecovery`, `SuddenDeath`, `Practice`],
 		border: [`Normal`, `Easy`, `Hard`, `SuddenDeath`],
 
 		initSurvival: [25, 25, 100, 100, 50],
@@ -2730,11 +2730,12 @@ function headerConvert(_dosObj) {
 		clearBorder: [70, 70, 0, 0]
 	};
 
-	// ノルマ制設定
+	// ライフ設定のカスタム部分取得（譜面ヘッダー加味）
+	for (let j = 0; j < g_gaugeOptionObj.survival.length; j++) {
+		getGaugeSetting(_dosObj, g_gaugeOptionObj.survival[j], obj);
+	}
 	for (let j = 0; j < g_gaugeOptionObj.border.length; j++) {
-		if (g_gaugeOptionObj.border[j] !== `SuddenDeath`) {
-			getGaugeSetting(_dosObj, g_gaugeOptionObj.border[j], obj);
-		}
+		getGaugeSetting(_dosObj, g_gaugeOptionObj.border[j], obj);
 	}
 
 	g_gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
@@ -3062,18 +3063,18 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 			if (gaugeDetails[0] === `x`) {
 				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(`x`);
 			} else {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(setVal(gaugeDetails[0], 70, `float`));
+				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(setVal(gaugeDetails[0], ``, `float`));
 			}
-			g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(setVal(gaugeDetails[1], 2, `float`));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(setVal(gaugeDetails[2], 7, `float`));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(setVal(gaugeDetails[3], 25, `float`));
+			g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(setVal(gaugeDetails[1], ``, `float`));
+			g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(setVal(gaugeDetails[2], ``, `float`));
+			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(setVal(gaugeDetails[3], ``, `float`));
 		}
 		if (gauges.length < difLength) {
 			for (let j = gauges.length; j < difLength; j++) {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(_headerObj.lifeBorders[j]);
-				g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(_headerObj.lifeRecoverys[j]);
-				g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(_headerObj.lifeDamages[j]);
-				g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(_headerObj.lifeInits[j]);
+				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(``);
+				g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(``);
+				g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(``);
+				g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(``);
 			}
 		}
 	} else if (g_presetGaugeCustom[_name]) {
@@ -3087,11 +3088,11 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 			if (g_presetGaugeCustom[_name].Border === `x`) {
 				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(`x`);
 			} else {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(setVal(g_presetGaugeCustom[_name].Border, 70, `float`));
+				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(setVal(g_presetGaugeCustom[_name].Border, ``, `float`));
 			}
-			g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(setVal(g_presetGaugeCustom[_name].Recovery, 2, `float`));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(setVal(g_presetGaugeCustom[_name].Damage, 7, `float`));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(setVal(g_presetGaugeCustom[_name].Init, 25, `float`));
+			g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(setVal(g_presetGaugeCustom[_name].Recovery, ``, `float`));
+			g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(setVal(g_presetGaugeCustom[_name].Damage, ``, `float`));
+			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(setVal(g_presetGaugeCustom[_name].Init, ``, `float`));
 		}
 	}
 }
@@ -3778,20 +3779,20 @@ function createOptionWindow(_sprite) {
 		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] !== undefined) {
 			const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
 
-			if (setVal(tmpGaugeObj.lifeBorders[tmpScoreId], `string`) !== ``) {
+			if (setVal(tmpGaugeObj.lifeBorders[tmpScoreId], ``, `string`) !== ``) {
 				if (tmpGaugeObj.lifeBorders[tmpScoreId] === `x`) {
 					g_stateObj.lifeBorder = 0;
 				} else {
 					g_stateObj.lifeBorder = tmpGaugeObj.lifeBorders[tmpScoreId];
 				}
 			}
-			if (setVal(tmpGaugeObj.lifeRecoverys[tmpScoreId], `float`) !== ``) {
+			if (setVal(tmpGaugeObj.lifeRecoverys[tmpScoreId], ``, `float`) !== ``) {
 				g_stateObj.lifeRcv = tmpGaugeObj.lifeRecoverys[tmpScoreId];
 			}
-			if (setVal(tmpGaugeObj.lifeDamages[tmpScoreId], `float`) !== ``) {
+			if (setVal(tmpGaugeObj.lifeDamages[tmpScoreId], ``, `float`) !== ``) {
 				g_stateObj.lifeDmg = tmpGaugeObj.lifeDamages[tmpScoreId];
 			}
-			if (setVal(tmpGaugeObj.lifeInits[tmpScoreId], `float`) !== ``) {
+			if (setVal(tmpGaugeObj.lifeInits[tmpScoreId], ``, `float`) !== ``) {
 				g_stateObj.lifeInit = tmpGaugeObj.lifeInits[tmpScoreId];
 			}
 		}
