@@ -2713,6 +2713,8 @@ function headerConvert(_dosObj) {
 
 	// 最大ライフ
 	obj.maxLifeVal = setVal(_dosObj.maxLifeVal, C_VAL_MAXLIFE, `float`);
+
+	// ゲージ設定詳細（初期値）
 	g_gaugeOptionObj = {
 		survival: [`Original`, `Light`, `NoRecovery`, `SuddenDeath`, `Practice`],
 		border: [`Normal`, `Easy`, `Hard`, `SuddenDeath`],
