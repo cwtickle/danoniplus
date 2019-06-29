@@ -348,22 +348,7 @@ let C_CLR_BACKLIFE = `#222222`;
 const C_LFE_SURVIVAL = `Survival`;
 const C_LFE_BORDER = `Border`;
 
-const g_gaugeOptionObj = {
-	survival: [`Original`, `Light`, `No Recovery`, `SuddenDeath`, `Practice`],
-	border: [`Normal`, `Easy`, `Hard`, `SuddenDeath`],
-
-	initSurvival: [25, 25, 100, 100, 50],
-	rcvSurvival: [6, 6, 0, 0, 0],
-	dmgSurvival: [40, 20, 50, C_VAL_MAXLIFE, 0],
-	typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
-	clearSurvival: [0, 0, 0, 0, 0],
-
-	initBorder: [25, 25, 100, 100],
-	rcvBorder: [2, 2, 1, 0],
-	dmgBorder: [7, 4, 50, C_VAL_MAXLIFE],
-	typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL],
-	clearBorder: [70, 70, 0, 0]
-};
+let g_gaugeOptionObj = {};
 let g_gaugeType;
 
 let g_speeds = [...Array((C_MAX_SPEED - C_MIN_SPEED) * 4 + 1).keys()].map(i => C_MIN_SPEED + i / 4);
@@ -2726,6 +2711,25 @@ function headerConvert(_dosObj) {
 		g_gaugeType = C_LFE_BORDER;
 	}
 
+	// 最大ライフ
+	obj.maxLifeVal = setVal(_dosObj.maxLifeVal, C_VAL_MAXLIFE, `float`);
+	g_gaugeOptionObj = {
+		survival: [`Original`, `Light`, `No Recovery`, `SuddenDeath`, `Practice`],
+		border: [`Normal`, `Easy`, `Hard`, `SuddenDeath`],
+
+		initSurvival: [25, 25, 100, 100, 50],
+		rcvSurvival: [6, 6, 0, 0, 0],
+		dmgSurvival: [40, 20, 50, obj.maxLifeVal, 0],
+		typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
+		clearSurvival: [0, 0, 0, 0, 0],
+
+		initBorder: [25, 25, 100, 100],
+		rcvBorder: [2, 2, 1, 0],
+		dmgBorder: [7, 4, 50, obj.maxLifeVal],
+		typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL],
+		clearBorder: [70, 70, 0, 0]
+	};
+
 	// ノルマ制設定
 	for (let j = 0; j < g_gaugeOptionObj.border.length; j++) {
 		if (g_gaugeOptionObj.border[j] !== `SuddenDeath`) {
@@ -3797,8 +3801,8 @@ function createOptionWindow(_sprite) {
 	 * ゲージ設定の詳細表示を整形
 	 */
 	function gaugeFormat(_mode, _border, _rcv, _dmg, _init) {
-		const initVal = C_VAL_MAXLIFE * _init / 100;
-		const borderVal = C_VAL_MAXLIFE * _border / 100;
+		const initVal = g_headerObj.maxLifeVal * _init / 100;
+		const borderVal = g_headerObj.maxLifeVal * _border / 100;
 
 		if (_mode === C_LFE_BORDER) {
 			if (borderVal !== 0) {
@@ -5392,8 +5396,8 @@ function calcLifeVals(_allArrows) {
 		g_workObj.lifeRcv = g_stateObj.lifeRcv;
 		g_workObj.lifeDmg = g_stateObj.lifeDmg;
 	}
-	g_workObj.lifeBorder = C_VAL_MAXLIFE * g_stateObj.lifeBorder / 100;
-	g_workObj.lifeInit = C_VAL_MAXLIFE * g_stateObj.lifeInit / 100;
+	g_workObj.lifeBorder = g_headerObj.maxLifeVal * g_stateObj.lifeBorder / 100;
+	g_workObj.lifeInit = g_headerObj.maxLifeVal * g_stateObj.lifeInit / 100;
 }
 
 /**
@@ -5402,7 +5406,7 @@ function calcLifeVals(_allArrows) {
  * @param {number} _allArrows 
  */
 function calcLifeVal(_val, _allArrows) {
-	return Math.round(_val * C_VAL_MAXLIFE * 100 / _allArrows) / 100;
+	return Math.round(_val * g_headerObj.maxLifeVal * 100 / _allArrows) / 100;
 }
 
 /**
@@ -6357,7 +6361,7 @@ function MainInit() {
 	const lblLife = createDivLabel(`lblLife`, 0, 30, 70, 20, 16, C_CLR_TITLE,
 		g_workObj.lifeVal);
 	let lblInitColor;
-	if (g_workObj.lifeVal === C_VAL_MAXLIFE) {
+	if (g_workObj.lifeVal === g_headerObj.maxLifeVal) {
 		lblInitColor = C_CLR_MAXLIFE;
 	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
 		lblInitColor = C_CLR_CLEARLIFE;
@@ -6375,14 +6379,14 @@ function MainInit() {
 
 	// ライフ本体
 	const lifeBar = createColorObject(`lifeBar`, lblInitColor,
-		5, 50 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeVal) / C_VAL_MAXLIFE,
-		15, (g_sHeight - 100) * g_workObj.lifeVal / C_VAL_MAXLIFE, 0, `lifeBar`);
+		5, 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal,
+		15, (g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal, 0, `lifeBar`);
 	infoSprite.appendChild(lifeBar);
 
 	// ライフ：ボーダーライン
 	// この背景の画像は40x16で作成しているが、`padding-right:5px`があるためサイズを35x16で作成
 	const lifeBorderObj = createColorObject(`lifeBorderObj`, C_CLR_BORDER,
-		5, 42 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeBorder) / C_VAL_MAXLIFE,
+		5, 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
 		35, 16, 0, `lifeBorder`);
 	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
 	lifeBorderObj.style.textAlign = C_ALIGN_RIGHT;
@@ -6392,7 +6396,7 @@ function MainInit() {
 	lifeBorderObj.style.color = `#cccccc`;
 	infoSprite.appendChild(lifeBorderObj);
 
-	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === C_VAL_MAXLIFE) {
+	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === g_headerObj.maxLifeVal) {
 		lifeBorderObj.style.display = C_DIS_NONE;
 	}
 
@@ -7639,8 +7643,8 @@ function judgeArrow(_j) {
 function lifeRecovery() {
 	let lifeColor;
 	g_workObj.lifeVal += g_workObj.lifeRcv;
-	if (g_workObj.lifeVal >= C_VAL_MAXLIFE) {
-		g_workObj.lifeVal = C_VAL_MAXLIFE;
+	if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
+		g_workObj.lifeVal = g_headerObj.maxLifeVal;
 		lifeColor = C_CLR_MAXLIFE;
 	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
 		lifeColor = C_CLR_CLEARLIFE;
@@ -7648,8 +7652,8 @@ function lifeRecovery() {
 	document.querySelector(`#lblLife`).style.backgroundColor = lifeColor;
 	document.querySelector(`#lblLife`).innerHTML = Math.floor(g_workObj.lifeVal);
 	document.querySelector(`#lifeBar`).style.backgroundColor = lifeColor;
-	document.querySelector(`#lifeBar`).style.top = `${50 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeVal) / C_VAL_MAXLIFE}px`;
-	document.querySelector(`#lifeBar`).style.height = `${(g_sHeight - 100) * g_workObj.lifeVal / C_VAL_MAXLIFE}px`;
+	document.querySelector(`#lifeBar`).style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal}px`;
+	document.querySelector(`#lifeBar`).style.height = `${(g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal}px`;
 }
 
 function lifeDamage() {
@@ -7674,8 +7678,8 @@ function lifeDamage() {
 	document.querySelector(`#lblLife`).style.backgroundColor = lifeColor;
 	document.querySelector(`#lblLife`).innerHTML = Math.floor(g_workObj.lifeVal);
 	document.querySelector(`#lifeBar`).style.backgroundColor = lifeColor;
-	document.querySelector(`#lifeBar`).style.top = `${50 + (g_sHeight - 100) * (C_VAL_MAXLIFE - g_workObj.lifeVal) / C_VAL_MAXLIFE}px`;
-	document.querySelector(`#lifeBar`).style.height = `${(g_sHeight - 100) * g_workObj.lifeVal / C_VAL_MAXLIFE}px`;
+	document.querySelector(`#lifeBar`).style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal}px`;
+	document.querySelector(`#lifeBar`).style.height = `${(g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal}px`;
 }
 
 /**
