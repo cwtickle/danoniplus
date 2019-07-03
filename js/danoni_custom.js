@@ -47,7 +47,7 @@ function customSetDifficulty(_initFlg, _canLoadDifInfoFlg) {
 }
 
 /**
- * メイン画面(フレーム毎表示) [Scene: Title / Melon]
+ * タイトル画面(フレーム毎表示) [Scene: Title / Melon]
  */
 function customTitleEnterFrame() {
 
@@ -103,6 +103,13 @@ function customMainEnterFrame() {
  * 結果画面(初期表示) [Scene: Result / Grape]
  */
 function customResultInit() {
+
+}
+
+/**
+ * 結果画面(フレーム毎表示) [Scene: Result / Grape]
+ */
+function customResultEnterFrame() {
 
 }
 
