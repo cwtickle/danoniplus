@@ -5298,7 +5298,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 			if (tmpData !== undefined && tmpData !== ``) {
 				const tmpMotionData = tmpData.split(`,`);
 				if (isNaN(parseInt(tmpMotionData[0]))) {
-					continue;
+					return;
 				}
 				obj.MotionData[motionIdx] = calcFrame(tmpMotionData[0]);
 				obj.MotionData[motionIdx + 1] = parseFloat(tmpMotionData[1]);
