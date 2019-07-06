@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/06/30
+ * Revised : 2019/07/06
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 6.5.0`;
-const g_revisedDate = `2019/06/30`;
+const g_version = `Ver 6.5.1`;
+const g_revisedDate = `2019/07/06`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5831,15 +5831,20 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	g_workObj.boostData = [];
 	g_workObj.boostData.length = 0;
 	if (_dataObj.boostData !== undefined && _dataObj.boostData.length >= 2) {
-
 		let delBoostIdx = 0;
 		for (let k = _dataObj.boostData.length - 2; k >= 0; k -= 2) {
 			if (_dataObj.boostData[k] < g_scoreObj.frameNum) {
-				delBoostIdx = k;
+				delBoostIdx = k + 2;
 				break;
 			} else {
 				tmpObj = getArrowStartFrame(_dataObj.boostData[k], _speedOnFrame, _motionOnFrame);
-				_dataObj.boostData[k] = tmpObj.frm;
+				if(tmpObj.frm < g_scoreObj.frameNum) {
+					_dataObj.boostData[k] = g_scoreObj.frameNum;
+					delBoostIdx = k;
+					break;
+				} else {
+					_dataObj.boostData[k] = tmpObj.frm;
+				}
 			}
 		}
 		for (let k = 0; k < delBoostIdx; k++) {
@@ -7091,7 +7096,7 @@ function MainInit() {
 		const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
 		const dividePos = _frzRoot.getAttribute(`dividePos`);
 		const boostSpdDir = _frzRoot.getAttribute(`boostSpd`);
-		const keyUpFrame = _frzRoot.getAttribute(`frzAttempt`);
+		const keyUpFrame = Number(_frzRoot.getAttribute(`frzAttempt`));
 		const frzBarLength = parseFloat(frzBar.style.height) - g_workObj.currentSpeed * Math.abs(boostSpdDir);
 
 		_frzRoot.setAttribute(`frzBarLength`, frzBarLength);
