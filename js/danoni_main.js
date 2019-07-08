@@ -4032,39 +4032,7 @@ function createOptionWindow(_sprite) {
 					if (g_localKeyStorage.keyCtrlPtn === undefined) {
 						g_localKeyStorage.keyCtrlPtn = 0;
 					}
-					const baseKeyCtrlPtn = g_localKeyStorage.keyCtrlPtn;
-					const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
-					const baseKeyNum = g_keyObj[`chara${basePtn}`].length;
-
-					if (g_localKeyStorage.keyCtrl !== undefined) {
-						g_keyObj.currentPtn = -1;
-						const copyPtn = `${g_keyObj.currentKey}_-1`;
-						g_keyObj[`keyCtrl${copyPtn}`] = [];
-						g_keyObj[`keyCtrl${copyPtn}d`] = [];
-
-						for (let j = 0; j < baseKeyNum; j++) {
-							g_keyObj[`keyCtrl${copyPtn}`][j] = [];
-							g_keyObj[`keyCtrl${copyPtn}d`][j] = [];
-
-							for (let k = 0; k < g_keyObj[`keyCtrl${basePtn}`][j].length; k++) {
-								g_keyObj[`keyCtrl${copyPtn}`][j][k] = g_localKeyStorage.keyCtrl[j][k];
-								g_keyObj[`keyCtrl${copyPtn}d`][j][k] = g_localKeyStorage.keyCtrl[j][k];
-							}
-						}
-
-						g_keyObj[`chara${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`chara${basePtn}`]));
-						g_keyObj[`color${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`color${basePtn}`]));
-						g_keyObj[`stepRtn${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${basePtn}`]));
-						g_keyObj[`pos${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`pos${basePtn}`]));
-						g_keyObj[`div${copyPtn}`] = g_keyObj[`div${basePtn}`];
-						g_keyObj[`blank${copyPtn}`] = g_keyObj[`blank${basePtn}`];
-						g_keyObj[`keyRetry${copyPtn}`] = g_keyObj[`keyRetry${basePtn}`];
-						g_keyObj[`keyTitleBack${copyPtn}`] = g_keyObj[`keyTitleBack${basePtn}`];
-						g_keyObj[`transKey${copyPtn}`] = g_keyObj[`transKey${basePtn}`];
-						if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
-							g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
-						}
-					}
+					getKeyCtrl(g_localKeyStorage);
 
 				} else {
 					g_localKeyStorage = {
@@ -4076,9 +4044,26 @@ function createOptionWindow(_sprite) {
 					g_reverseNum = 0;
 				}
 			} else {
+
+				// 特殊キーの場合は作品毎のローカルストレージから取得
 				if (g_keyObj.currentPtn === -1) {
 					g_keyObj.currentPtn = 0;
 				}
+
+				// リバース初期値設定
+				if (g_localStorage[`reverse${g_keyObj.currentKey}`] !== undefined) {
+					g_stateObj.reverse = setVal(g_localStorage[`reverse${g_keyObj.currentKey}`], C_FLG_OFF, `string`);
+					g_reverseNum = g_reverses.findIndex(reverse => reverse === g_stateObj.reverse);
+					if (g_reverseNum < 0) {
+						g_reverseNum = 0;
+					}
+				}
+
+				// キーコンフィグ初期値設定
+				if (g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] === undefined) {
+					g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] = 0;
+				}
+				getKeyCtrl(g_localStorage, g_keyObj.currentKey);
 			}
 
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -4137,6 +4122,46 @@ function createOptionWindow(_sprite) {
 	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
 	setDifficulty(false);
 	optionsprite.oncontextmenu = _ => false;
+}
+
+/**
+ * 保存済みキーコンフィグ取得処理
+ * @param {object} _localStorage 
+ */
+function getKeyCtrl(_localStorage, _extraKeyName = ``) {
+	const baseKeyCtrlPtn = _localStorage[`keyCtrlPtn${_extraKeyName}`];
+	const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+	const baseKeyNum = g_keyObj[`chara${basePtn}`].length;
+
+	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined) {
+		g_keyObj.currentPtn = -1;
+		const copyPtn = `${g_keyObj.currentKey}_-1`;
+		g_keyObj[`keyCtrl${copyPtn}`] = [];
+		g_keyObj[`keyCtrl${copyPtn}d`] = [];
+
+		for (let j = 0; j < baseKeyNum; j++) {
+			g_keyObj[`keyCtrl${copyPtn}`][j] = [];
+			g_keyObj[`keyCtrl${copyPtn}d`][j] = [];
+
+			for (let k = 0; k < g_keyObj[`keyCtrl${basePtn}`][j].length; k++) {
+				g_keyObj[`keyCtrl${copyPtn}`][j][k] = _localStorage[`keyCtrl${_extraKeyName}`][j][k];
+				g_keyObj[`keyCtrl${copyPtn}d`][j][k] = _localStorage[`keyCtrl${_extraKeyName}`][j][k];
+			}
+		}
+
+		g_keyObj[`chara${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`chara${basePtn}`]));
+		g_keyObj[`color${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`color${basePtn}`]));
+		g_keyObj[`stepRtn${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${basePtn}`]));
+		g_keyObj[`pos${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`pos${basePtn}`]));
+		g_keyObj[`div${copyPtn}`] = g_keyObj[`div${basePtn}`];
+		g_keyObj[`blank${copyPtn}`] = g_keyObj[`blank${basePtn}`];
+		g_keyObj[`keyRetry${copyPtn}`] = g_keyObj[`keyRetry${basePtn}`];
+		g_keyObj[`keyTitleBack${copyPtn}`] = g_keyObj[`keyTitleBack${basePtn}`];
+		g_keyObj[`transKey${copyPtn}`] = g_keyObj[`transKey${basePtn}`];
+		if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
+			g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
+		}
+	}
 }
 
 /**
@@ -5838,7 +5863,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				break;
 			} else {
 				tmpObj = getArrowStartFrame(_dataObj.boostData[k], _speedOnFrame, _motionOnFrame);
-				if(tmpObj.frm < g_scoreObj.frameNum) {
+				if (tmpObj.frm < g_scoreObj.frameNum) {
 					_dataObj.boostData[k] = g_scoreObj.frameNum;
 					delBoostIdx = k;
 					break;
@@ -6175,34 +6200,53 @@ function getArrowSettings() {
 		// ローカルストレージへAdjustment, Volumeを保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
 		g_localStorage.volume = g_stateObj.volume;
-		localStorage.setItem(location.href, JSON.stringify(g_localStorage));
 
 		// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
 		if (!g_stateObj.extraKeyFlg) {
 			g_localKeyStorage.reverse = g_stateObj.reverse;
 			if (g_keyObj.currentPtn !== -1) {
 				g_localKeyStorage.keyCtrlPtn = g_keyObj.currentPtn;
+				g_keyObj[`keyCtrl${keyCtrlPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}d`]));
 			}
-			const localPtn = `${g_keyObj.currentKey}_-1`;
-			for (let j = 0; j < keyNum; j++) {
-				g_localKeyStorage.keyCtrl[j] = [];
-				for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
-					g_localKeyStorage.keyCtrl[j][k] = g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k];
-					if (g_keyObj.currentPtn !== -1) {
-						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k];
-					}
-				}
-				if (g_keyObj[`keyCtrl${localPtn}`] !== undefined) {
-					if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length < g_keyObj[`keyCtrl${localPtn}`][j].length) {
-						for (let k = g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k < g_keyObj[`keyCtrl${localPtn}`][j].length; k++) {
-							g_localKeyStorage.keyCtrl[j][k] = undefined;
-						}
-					}
-				}
-			}
+			g_localKeyStorage.keyCtrl = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 			localStorage.setItem(`danonicw-${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
+
+		} else {
+			g_localStorage[`reverse${g_keyObj.currentKey}`] = g_stateObj.reverse;
+			g_localStorage[`keyCtrl${g_keyObj.currentKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
+			if (g_keyObj.currentPtn !== -1) {
+				g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] = g_keyObj.currentPtn;
+				g_keyObj[`keyCtrl${keyCtrlPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}d`]));
+			}
+		}
+		localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+	}
+}
+
+/**
+ * キーコンフィグ保存処理
+ * @param {object} _localStorage 
+ * @param {number} _keyNum 
+ * @param {string} _keyCtrlPtn 
+ */
+function setKeyCtrl(_localStorage, _keyNum, _keyCtrlPtn) {
+	const localPtn = `${g_keyObj.currentKey}_-1`;
+	const keyCtrl = [];
+	for (let j = 0; j < _keyNum; j++) {
+		keyCtrl[j] = [];
+		for (let k = 0; k < g_keyObj[`keyCtrl${_keyCtrlPtn}`][j].length; k++) {
+			keyCtrl[j][k] = g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][k];
+		}
+		if (g_keyObj[`keyCtrl${localPtn}`] !== undefined) {
+			if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][j].length < g_keyObj[`keyCtrl${localPtn}`][j].length) {
+				for (let k = g_keyObj[`keyCtrl${_keyCtrlPtn}`][j].length; k < g_keyObj[`keyCtrl${localPtn}`][j].length; k++) {
+					keyCtrl[j][k] = undefined;
+				}
+			}
 		}
 	}
+
+	return keyCtrl;
 }
 
 /*-----------------------------------------------------------*/
@@ -6557,7 +6601,7 @@ function MainInit() {
 	const mainKeyDownActFunc = {
 
 		OFF: (_keyCode) => {
-			const matchKeys = g_keyObj[`keyCtrl${keyCtrlPtn}`];
+			const matchKeys = g_workObj.keyCtrl;
 
 			for (let j = 0; j < keyNum; j++) {
 				for (let k = 0; k < matchKeys[j].length; k++) {
