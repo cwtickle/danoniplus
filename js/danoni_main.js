@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 6.6.0`;
+const g_version = `Ver 7.0.0`;
 const g_revisedDate = `2019/07/08`;
 const g_alphaVersion = ``;
 
@@ -135,7 +135,8 @@ const C_BLOCK_KEYS = [
 	8, 9, 13, 17, 18, 32, /* BackSpace, Tab, Enter, Ctrl, Alt, Space */
 	33, 34, 35, 36,       /* PageUp, PageDown, End, Home */
 	37, 38, 39, 40, 46,   /* Left, Down, Up, Right, Delete */
-	112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126 /* F1～F15 */
+	112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, /* F1～F15 */
+	27 /* Esc */
 ];
 
 // ON/OFFスイッチ
