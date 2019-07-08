@@ -5349,8 +5349,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					}
 					cssMotionData[motionIdx] = calcFrame(tmpcssMotionData[0]);
 					cssMotionData[motionIdx + 1] = parseFloat(tmpcssMotionData[1]);
-					cssMotionData[motionIdx + 2] = tmpcssMotionData[2];
-					cssMotionData[motionIdx + 3] = setVal(tmpcssMotionData[3], tmpcssMotionData[2], `string`);
+					cssMotionData[motionIdx + 2] = (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]);
+					cssMotionData[motionIdx + 3] = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], cssMotionData[motionIdx + 2], `string`));
 					motionIdx += 4;
 				}
 			});
