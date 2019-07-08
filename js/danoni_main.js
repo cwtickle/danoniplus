@@ -4951,6 +4951,12 @@ function loadingScoreInit() {
 			if (tmpObj.frzCssMotionData !== undefined && tmpObj.frzCssMotionData.length >= 3) {
 				g_scoreObj.frzCssMotionData = JSON.parse(JSON.stringify(tmpObj.frzCssMotionData));
 			}
+			if (tmpObj.dummyArrowCssMotionData !== undefined && tmpObj.dummyArrowCssMotionData.length >= 3) {
+				g_scoreObj.dummyArrowCssMotionData = JSON.parse(JSON.stringify(tmpObj.dummyArrowCssMotionData));
+			}
+			if (tmpObj.dummyFrzCssMotionData !== undefined && tmpObj.dummyFrzCssMotionData.length >= 3) {
+				g_scoreObj.dummyFrzCssMotionData = JSON.parse(JSON.stringify(tmpObj.dummyFrzCssMotionData));
+			}
 			if (tmpObj.wordData !== undefined && tmpObj.wordData.length >= 3) {
 				g_scoreObj.wordData = tmpObj.wordData.concat();
 			}
