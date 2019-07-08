@@ -5327,6 +5327,11 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.dummyArrowCssMotionData = setCssMotionData(`arrow`, _dummyNo);
 	obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
 
+	/**
+	 * 矢印モーションデータの分解・格納（フレーム数, 矢印番号, CSSクラス名[, CSSクラス名(リバーススクロール時)]）
+	 * @param {string} _header 
+	 * @param {string} _scoreNo 
+	 */
 	function setCssMotionData(_header, _scoreNo) {
 		const dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`];
 		let cssMotionData = [];
