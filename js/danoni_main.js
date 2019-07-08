@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/07/06
+ * Revised : 2019/07/08
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.10.13`;
-const g_revisedDate = `2019/07/06`;
+const g_version = `Ver 4.10.14`;
+const g_revisedDate = `2019/07/08`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -6228,7 +6228,7 @@ function MainInit() {
 	 * @param {number} _keyCode 
 	 */
 	function mainKeyDownActOFF(_keyCode) {
-		const matchKeys = g_keyObj[`keyCtrl${keyCtrlPtn}`];
+		const matchKeys = g_workObj.keyCtrl;
 
 		for (let j = 0; j < keyNum; j++) {
 			for (let k = 0; k < matchKeys[j].length; k++) {
