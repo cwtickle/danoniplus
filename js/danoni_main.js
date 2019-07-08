@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 6.6.0`;
+const g_version = `Ver 7.0.0`;
 const g_revisedDate = `2019/07/08`;
 const g_alphaVersion = ``;
 
@@ -135,7 +135,8 @@ const C_BLOCK_KEYS = [
 	8, 9, 13, 17, 18, 32, /* BackSpace, Tab, Enter, Ctrl, Alt, Space */
 	33, 34, 35, 36,       /* PageUp, PageDown, End, Home */
 	37, 38, 39, 40, 46,   /* Left, Down, Up, Right, Delete */
-	112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126 /* F1～F15 */
+	112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, /* F1～F15 */
+	27 /* Esc */
 ];
 
 // ON/OFFスイッチ
@@ -335,6 +336,7 @@ const g_stateObj = {
 	d_musicinfo: C_FLG_ON,
 	d_color: C_FLG_ON,
 	d_speed: C_FLG_ON,
+	d_motion: C_FLG_ON,
 	d_lyrics: C_FLG_ON,
 	d_background: C_FLG_ON
 };
@@ -4944,6 +4946,18 @@ function loadingScoreInit() {
 			if (tmpObj.acolorData !== undefined && tmpObj.acolorData.length >= 3) {
 				g_scoreObj.acolorData = JSON.parse(JSON.stringify(tmpObj.acolorData));
 			}
+			if (tmpObj.arrowCssMotionData !== undefined && tmpObj.arrowCssMotionData.length >= 3) {
+				g_scoreObj.arrowCssMotionData = JSON.parse(JSON.stringify(tmpObj.arrowCssMotionData));
+			}
+			if (tmpObj.frzCssMotionData !== undefined && tmpObj.frzCssMotionData.length >= 3) {
+				g_scoreObj.frzCssMotionData = JSON.parse(JSON.stringify(tmpObj.frzCssMotionData));
+			}
+			if (tmpObj.dummyArrowCssMotionData !== undefined && tmpObj.dummyArrowCssMotionData.length >= 3) {
+				g_scoreObj.dummyArrowCssMotionData = JSON.parse(JSON.stringify(tmpObj.dummyArrowCssMotionData));
+			}
+			if (tmpObj.dummyFrzCssMotionData !== undefined && tmpObj.dummyFrzCssMotionData.length >= 3) {
+				g_scoreObj.dummyFrzCssMotionData = JSON.parse(JSON.stringify(tmpObj.dummyFrzCssMotionData));
+			}
 			if (tmpObj.wordData !== undefined && tmpObj.wordData.length >= 3) {
 				g_scoreObj.wordData = tmpObj.wordData.concat();
 			}
@@ -5308,6 +5322,43 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		});
 	}
 
+	// 矢印モーション（個別）データの分解（3～4つで1セット, セット毎の改行区切り）
+	obj.arrowCssMotionData = setCssMotionData(`arrow`, _scoreNo);
+	obj.frzCssMotionData = setCssMotionData(`frz`, _scoreNo);
+	obj.dummyArrowCssMotionData = setCssMotionData(`arrow`, _dummyNo);
+	obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
+
+	/**
+	 * 矢印モーションデータの分解・格納（フレーム数, 矢印番号, CSSクラス名(上スクロール時)[, CSSクラス名(下スクロール時)]）
+	 * @param {string} _header 
+	 * @param {string} _scoreNo 
+	 */
+	function setCssMotionData(_header, _scoreNo) {
+		const dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`];
+		let cssMotionData = [];
+
+		if (dosCssMotionData !== undefined && dosCssMotionData !== `` && g_stateObj.d_motion === C_FLG_ON) {
+			let motionIdx = 0;
+			let tmpArrayData = dosCssMotionData.split(`\r`).join(`\n`);
+			tmpArrayData = tmpArrayData.split(`\n`);
+
+			tmpArrayData.forEach(tmpData => {
+				if (tmpData !== undefined && tmpData !== ``) {
+					const tmpcssMotionData = tmpData.split(`,`);
+					if (isNaN(parseInt(tmpcssMotionData[0]))) {
+						return;
+					}
+					cssMotionData[motionIdx] = calcFrame(tmpcssMotionData[0]);
+					cssMotionData[motionIdx + 1] = parseFloat(tmpcssMotionData[1]);
+					cssMotionData[motionIdx + 2] = (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]);
+					cssMotionData[motionIdx + 3] = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], cssMotionData[motionIdx + 2], `string`));
+					motionIdx += 4;
+				}
+			});
+		}
+		return cssMotionData;
+	}
+
 	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
 	obj.wordData = [];
 	obj.wordData.length = 0;
@@ -5646,6 +5697,15 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	g_workObj.mkFAColor = [];
 	g_workObj.mkFAColorCd = [];
 
+	g_workObj.mkArrowCssMotion = [];
+	g_workObj.mkArrowCssMotionName = [];
+	g_workObj.mkFrzCssMotion = [];
+	g_workObj.mkFrzCssMotionName = [];
+	g_workObj.mkDummyArrowCssMotion = [];
+	g_workObj.mkDummyArrowCssMotionName = [];
+	g_workObj.mkDummyFrzCssMotion = [];
+	g_workObj.mkDummyFrzCssMotionName = [];
+
 	/** 矢印の移動距離 */
 	g_workObj.initY = [];
 	/** 矢印がステップゾーンに到達するまでのフレーム数 */
@@ -5925,6 +5985,52 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		}
 	}
 
+	// 個別モーションのタイミング更新
+	calcCssMotion(`arrow`);
+	calcCssMotion(`frz`);
+	calcCssMotion(`dummyArrow`);
+	calcCssMotion(`dummyFrz`);
+
+	function calcCssMotion(_header) {
+		const cssMotionData = _dataObj[`${_header}CssMotionData`];
+		if (cssMotionData !== undefined && cssMotionData.length >= 4) {
+			if (_dataObj.speedData !== undefined) {
+				spdk = _dataObj.speedData.length - 2;
+				spdPrev = _dataObj.speedData[spdk];
+			} else {
+				spdPrev = 0;
+			}
+			spdNext = Infinity;
+
+			lastk = cssMotionData.length - 4;
+			tmpObj = getArrowStartFrame(cssMotionData[lastk], _speedOnFrame, _motionOnFrame);
+			frmPrev = tmpObj.frm;
+			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+			pushCssMotions(_header, tmpObj.frm, cssMotionData[lastk + 1], cssMotionData[lastk + 2], cssMotionData[lastk + 3]);
+
+			for (let k = lastk - 4; k >= 0; k -= 4) {
+
+				if (cssMotionData[k] < g_scoreObj.frameNum) {
+					break;
+				} else if ((cssMotionData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
+					&& cssMotionData[k] < spdNext)) {
+					cssMotionData[k] -= g_workObj.arrivalFrame[frmPrev];
+				} else {
+					if (cssMotionData[k] < spdPrev) {
+						spdk -= 2;
+						spdNext = spdPrev;
+						spdPrev = _dataObj.speedData[spdk];
+					}
+					tmpObj = getArrowStartFrame(cssMotionData[k], _speedOnFrame, _motionOnFrame);
+					frmPrev = tmpObj.frm;
+					cssMotionData[k] = tmpObj.frm;
+					g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+				}
+				pushCssMotions(_header, cssMotionData[k], cssMotionData[k + 1], cssMotionData[k + 2], cssMotionData[k + 3]);
+			}
+		}
+	}
+
 	// 実際に処理させる途中変速配列を作成
 	g_workObj.speedData = [];
 	g_workObj.speedData.length = 0;
@@ -6062,6 +6168,42 @@ function pushColors(_header, _frame, _val, _colorCd) {
 }
 
 /**
+ * CSSモーション情報の格納
+ * @param {string} _header 
+ * @param {number} _frame 
+ * @param {number} _val 
+ * @param {string} _colorCd 
+ */
+function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
+
+	const camelHeader = _header.slice(0, 1).toUpperCase() + _header.slice(1);
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+
+	if (_val < 30) {
+		// 矢印のモーション
+		if (g_workObj[`mk${camelHeader}CssMotion`][_frame] === undefined) {
+			g_workObj[`mk${camelHeader}CssMotion`][_frame] = [];
+			g_workObj[`mk${camelHeader}CssMotionName`][_frame] = [];
+		}
+		if (_val < 20) {
+			const realVal = g_workObj.replaceNums[_val];
+			g_workObj[`mk${camelHeader}CssMotion`][_frame].push(realVal);
+			g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
+
+		} else if (_val >= 20) {
+			const colorNum = _val - 20;
+			for (let j = 0; j < keyNum; j++) {
+				if (g_keyObj[`color${keyCtrlPtn}`][j] === colorNum) {
+					g_workObj[`mk${camelHeader}CssMotion`][_frame].push(j);
+					g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
+				}
+			}
+		}
+	}
+}
+
+/**
  * メイン画面前の初期化処理
  */
 function getArrowSettings() {
@@ -6123,6 +6265,12 @@ function getArrowSettings() {
 	g_workObj.dummyFrzHitColorsAll = [];
 	g_workObj.dummyFrzHitBarColorsAll = [];
 
+	// モーション管理
+	g_workObj.arrowCssMotions = [];
+	g_workObj.frzCssMotions = [];
+	g_workObj.dummyArrowCssMotions = [];
+	g_workObj.dummyFrzCssMotions = [];
+
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
@@ -6177,6 +6325,11 @@ function getArrowSettings() {
 		g_workObj.dummyFrzNormalBarColorsAll[j] = C_CLR_DUMMY;
 		g_workObj.dummyFrzHitColorsAll[j] = C_CLR_DUMMY;
 		g_workObj.dummyFrzHitBarColorsAll[j] = C_CLR_DUMMY;
+
+		g_workObj.arrowCssMotions[j] = ``;
+		g_workObj.frzCssMotions[j] = ``;
+		g_workObj.dummyArrowCssMotions[j] = ``;
+		g_workObj.dummyFrzCssMotions[j] = ``;
 	}
 
 	g_resultObj.ii = 0;
@@ -6957,6 +7110,11 @@ function MainInit() {
 		stepRoot.setAttribute(`boostSpd`, boostSpdDir);
 		mainSprite.appendChild(stepRoot);
 
+		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
+			stepRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
+			stepRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / 60}s`;
+		}
+
 		// 内側塗りつぶし矢印は、下記の順で作成する。
 		// 後に作成するほど前面に表示される。
 
@@ -7027,6 +7185,11 @@ function MainInit() {
 		frzRoot.setAttribute(`boostSpd`, boostSpdDir);
 		frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[_j]);
 		mainSprite.appendChild(frzRoot);
+
+		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
+			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
+			frzRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / 60}s`;
+		}
 
 		// フリーズアローは、下記の順で作成する。
 		// 後に作成するほど前面に表示される。
@@ -7239,6 +7402,18 @@ function MainInit() {
 		// 全体色変化 (フリーズアロー)
 		changeFrzColors(g_workObj.mkFAColor[g_scoreObj.frameNum], g_workObj.mkFAColorCd[g_scoreObj.frameNum],
 			g_keyObj[`color${keyCtrlPtn}`], keyNum, `A`);
+
+		// 矢印モーション
+		changeCssMotions(g_workObj.mkArrowCssMotion[g_scoreObj.frameNum], g_workObj.mkArrowCssMotionName[g_scoreObj.frameNum], `arrow`);
+
+		// フリーズアローモーション
+		changeCssMotions(g_workObj.mkFrzCssMotion[g_scoreObj.frameNum], g_workObj.mkFrzCssMotionName[g_scoreObj.frameNum], `frz`);
+
+		// ダミー矢印モーション
+		changeCssMotions(g_workObj.mkDummyArrowCssMotion[g_scoreObj.frameNum], g_workObj.mkDummyArrowCssMotionName[g_scoreObj.frameNum], `dummyArrow`);
+
+		// ダミーフリーズアローモーション
+		changeCssMotions(g_workObj.mkDummyFrzCssMotion[g_scoreObj.frameNum], g_workObj.mkDummyFrzCssMotionName[g_scoreObj.frameNum], `dummyFrz`);
 
 		// ダミー矢印生成（背面に表示するため先に処理）
 		if (g_workObj.mkDummyArrow[g_scoreObj.frameNum] !== undefined) {
@@ -7539,6 +7714,22 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 					}
 				}
 			}
+		}
+	}
+}
+
+/**
+ * 個別モーション
+ * @param {array} _mkCssMotion 
+ * @param {array} _mkCssMotionName 
+ * @param {string} _name
+ */
+function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
+
+	if (_mkCssMotion !== undefined) {
+		for (let j = 0, len = _mkCssMotion.length; j < len; j++) {
+			const targetj = _mkCssMotion[j];
+			g_workObj[`${_name}CssMotions`][targetj] = _mkCssMotionName[2 * j + g_workObj.dividePos[targetj]];
 		}
 	}
 }
