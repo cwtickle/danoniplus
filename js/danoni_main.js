@@ -5328,7 +5328,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
 
 	/**
-	 * 矢印モーションデータの分解・格納（フレーム数, 矢印番号, CSSクラス名[, CSSクラス名(リバーススクロール時)]）
+	 * 矢印モーションデータの分解・格納（フレーム数, 矢印番号, CSSクラス名(上スクロール時)[, CSSクラス名(下スクロール時)]）
 	 * @param {string} _header 
 	 * @param {string} _scoreNo 
 	 */
