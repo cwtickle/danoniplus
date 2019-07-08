@@ -4126,7 +4126,8 @@ function createOptionWindow(_sprite) {
 
 /**
  * 保存済みキーコンフィグ取得処理
- * @param {object} _localStorage 
+ * @param {object} _localStorage 保存先のローカルストレージ名
+ * @param {string} _extraKeyName 特殊キー名(通常キーは省略)
  */
 function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 	const baseKeyCtrlPtn = _localStorage[`keyCtrlPtn${_extraKeyName}`];
@@ -6225,7 +6226,7 @@ function getArrowSettings() {
 
 /**
  * キーコンフィグ保存処理
- * @param {object} _localStorage 
+ * @param {object} _localStorage 保存先のローカルストレージ名
  * @param {number} _keyNum 
  * @param {string} _keyCtrlPtn 
  */
@@ -6245,7 +6246,6 @@ function setKeyCtrl(_localStorage, _keyNum, _keyCtrlPtn) {
 			}
 		}
 	}
-
 	return keyCtrl;
 }
 
