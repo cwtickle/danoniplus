@@ -4359,6 +4359,7 @@ function createSettingsDisplayWindow(_sprite) {
 	makeDisplayButton(`judgement`, 1, 0);
 	makeDisplayButton(`lifeGauge`, 2, 0);
 	makeDisplayButton(`musicInfo`, 3, 0);
+	makeDisplayButton(`motion`, 4, 0);
 	makeDisplayButton(`speed`, 0, 1);
 	makeDisplayButton(`color`, 1, 1);
 	makeDisplayButton(`lyrics`, 2, 1);
