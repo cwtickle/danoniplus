@@ -60,12 +60,17 @@ const C_VALIGN_BOTTOM = `bottom`;
 
 // ユーザインタフェース
 const C_CLR_DEFAULT = `#333333`;
+const C_CLR_DEFAULTA = `#111122`;
+const C_CLR_DEFAULTB = `#222211`;
+const C_CLR_DEFAULTC = `#221111`;
+const C_CLR_DEFAULTD = `#112211`;
+const C_CLR_DEFAULTE = `#112222`;
 const C_CLR_DEFHOVER = `#666666`;
-const C_CLR_BACK = `#000033`;
-const C_CLR_NEXT = `#330000`;
-const C_CLR_SETTING = `#333300`;
-const C_CLR_RESET = `#003300`;
-const C_CLR_TWEET = `#003333`;
+const C_CLR_BACK = `#000055`;
+const C_CLR_NEXT = `#550000`;
+const C_CLR_SETTING = `#555500`;
+const C_CLR_RESET = `#005500`;
+const C_CLR_TWEET = `#005555`;
 const C_CLR_TEXT = `#ffffff`;
 const C_CLR_TITLE = `#cccccc`;
 const C_CLR_LOADING_BAR = `#eeeeee`;
@@ -2363,7 +2368,7 @@ function titleInit() {
 		width: g_sWidth / 5,
 		height: 16,
 		fontsize: 12,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -2452,7 +2457,7 @@ function titleInit() {
 		width: g_sWidth * 3 / 4 - 10,
 		height: 16,
 		fontsize: 12,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTE,
 		hoverColor: C_CLR_TWEET,
 		align: C_ALIGN_RIGHT
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus`, `_blank`));
@@ -3342,7 +3347,7 @@ function optionInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -3361,7 +3366,7 @@ function optionInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -3381,7 +3386,7 @@ function optionInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTC,
 		hoverColor: C_CLR_NEXT,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4252,7 +4257,7 @@ function settingsDisplayInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4271,7 +4276,7 @@ function settingsDisplayInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4291,7 +4296,7 @@ function settingsDisplayInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTC,
 		hoverColor: C_CLR_NEXT,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4588,7 +4593,7 @@ function keyConfigInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4610,7 +4615,7 @@ function keyConfigInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4649,7 +4654,7 @@ function keyConfigInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -8559,7 +8564,7 @@ function resultInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -8580,7 +8585,7 @@ function resultInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTE,
 		hoverColor: C_CLR_TWEET,
 		align: C_ALIGN_CENTER
 	}, _ => window.open(tweetResult, `_blank`));
@@ -8595,7 +8600,7 @@ function resultInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
