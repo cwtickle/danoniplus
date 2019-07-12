@@ -59,23 +59,29 @@ const C_VALIGN_MIDDLE = `middle`;
 const C_VALIGN_BOTTOM = `bottom`;
 
 // ユーザインタフェース
-const C_CLR_DEFAULT = `#333333`;
-const C_CLR_DEFHOVER = `#666666`;
-const C_CLR_BACK = `#000033`;
-const C_CLR_NEXT = `#330000`;
-const C_CLR_SETTING = `#333300`;
-const C_CLR_RESET = `#003300`;
-const C_CLR_TWEET = `#003333`;
-const C_CLR_TEXT = `#ffffff`;
-const C_CLR_TITLE = `#cccccc`;
-const C_CLR_LOADING_BAR = `#eeeeee`;
+// カスタム側で変更できるようにletで定義している（mainではこの後の変更なし）
+let C_CLR_DEFAULT = `#333333`;
+let C_CLR_DEFAULTA = `#111133`;
+let C_CLR_DEFAULTB = `#333311`;
+let C_CLR_DEFAULTC = `#331111`;
+let C_CLR_DEFAULTD = `#113311`;
+let C_CLR_DEFAULTE = `#113333`;
+let C_CLR_DEFHOVER = `#666666`;
+let C_CLR_BACK = `#000099`;
+let C_CLR_NEXT = `#990000`;
+let C_CLR_SETTING = `#999900`;
+let C_CLR_RESET = `#009900`;
+let C_CLR_TWEET = `#009999`;
+let C_CLR_TEXT = `#ffffff`;
+let C_CLR_TITLE = `#cccccc`;
+let C_CLR_LOADING_BAR = `#eeeeee`;
+let C_CLR_LNK = `#111111`;
 
 const C_LBL_TITLESIZE = 32;
 const C_LBL_BTNSIZE = 28;
 const C_LBL_LNKSIZE = 16;
 const C_LBL_BASICFONT = `"Meiryo UI", sans-serif`;
 
-const C_CLR_LNK = `#111111`;
 const C_BTN_HEIGHT = 50;
 const C_LNK_HEIGHT = 20;
 
@@ -2363,7 +2369,7 @@ function titleInit() {
 		width: g_sWidth / 5,
 		height: 16,
 		fontsize: 12,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -2452,7 +2458,7 @@ function titleInit() {
 		width: g_sWidth * 3 / 4 - 10,
 		height: 16,
 		fontsize: 12,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTE,
 		hoverColor: C_CLR_TWEET,
 		align: C_ALIGN_RIGHT
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus`, `_blank`));
@@ -3342,7 +3348,7 @@ function optionInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -3361,7 +3367,7 @@ function optionInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -3381,7 +3387,7 @@ function optionInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTC,
 		hoverColor: C_CLR_NEXT,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -3439,7 +3445,7 @@ function optionInit() {
 		width: g_sWidth / 5,
 		height: 16,
 		fontsize: 12,
-		normalColor: `#111111`,
+		normalColor: C_CLR_LNK,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4184,7 +4190,7 @@ function makeSettingLblButton(_id, _name, _heightPos, _func) {
 		height: C_LEN_SETLBL_HEIGHT,
 		fontsize: C_SIZ_SETLBL,
 		normalColor: C_CLR_LNK,
-		hoverColor: C_CLR_DEFAULT,
+		hoverColor: C_CLR_DEFHOVER,
 		align: C_ALIGN_CENTER
 	}, _func);
 
@@ -4252,7 +4258,7 @@ function settingsDisplayInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4271,7 +4277,7 @@ function settingsDisplayInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4291,7 +4297,7 @@ function settingsDisplayInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTC,
 		hoverColor: C_CLR_NEXT,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4588,7 +4594,7 @@ function keyConfigInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4610,7 +4616,7 @@ function keyConfigInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4649,7 +4655,7 @@ function keyConfigInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -8573,7 +8579,7 @@ function resultInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -8594,7 +8600,7 @@ function resultInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTE,
 		hoverColor: C_CLR_TWEET,
 		align: C_ALIGN_CENTER
 	}, _ => window.open(tweetResult, `_blank`));
@@ -8609,7 +8615,7 @@ function resultInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
