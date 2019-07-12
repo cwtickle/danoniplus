@@ -335,7 +335,7 @@ const g_stateObj = {
 	d_musicinfo: C_FLG_ON,
 	d_color: C_FLG_ON,
 	d_speed: C_FLG_ON,
-	d_motion: C_FLG_ON,
+	d_arrowEffect: C_FLG_ON,
 	d_lyrics: C_FLG_ON,
 	d_background: C_FLG_ON
 };
@@ -4359,11 +4359,11 @@ function createSettingsDisplayWindow(_sprite) {
 	makeDisplayButton(`judgement`, 1, 0);
 	makeDisplayButton(`lifeGauge`, 2, 0);
 	makeDisplayButton(`musicInfo`, 3, 0);
-	makeDisplayButton(`motion`, 4, 0);
 	makeDisplayButton(`speed`, 0, 1);
 	makeDisplayButton(`color`, 1, 1);
 	makeDisplayButton(`lyrics`, 2, 1);
 	makeDisplayButton(`background`, 3, 1);
+	makeDisplayButton(`arrowEffect`, 4, 1);
 
 	/**
 	 * Display表示/非表示ボタン
@@ -5337,7 +5337,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		const dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`];
 		let cssMotionData = [];
 
-		if (dosCssMotionData !== undefined && dosCssMotionData !== `` && g_stateObj.d_motion === C_FLG_ON) {
+		if (dosCssMotionData !== undefined && dosCssMotionData !== `` && g_stateObj.d_arroweffect === C_FLG_ON) {
 			let motionIdx = 0;
 			let tmpArrayData = dosCssMotionData.split(`\r`).join(`\n`);
 			tmpArrayData = tmpArrayData.split(`\n`);
@@ -8322,7 +8322,13 @@ function resultInit() {
 		if (display2Data !== ``) {
 			display2Data += `, `;
 		}
-		display2Data += `Background`;
+		display2Data += `Back`;
+	}
+	if (g_stateObj.d_arroweffect !== C_FLG_ON) {
+		if (display2Data !== ``) {
+			display2Data += `, `;
+		}
+		display2Data += `ArrowEffect`;
 	}
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
