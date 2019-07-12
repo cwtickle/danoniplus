@@ -60,17 +60,17 @@ const C_VALIGN_BOTTOM = `bottom`;
 
 // ユーザインタフェース
 const C_CLR_DEFAULT = `#333333`;
-const C_CLR_DEFAULTA = `#111122`;
-const C_CLR_DEFAULTB = `#222211`;
-const C_CLR_DEFAULTC = `#221111`;
-const C_CLR_DEFAULTD = `#112211`;
-const C_CLR_DEFAULTE = `#112222`;
+const C_CLR_DEFAULTA = `#111133`;
+const C_CLR_DEFAULTB = `#333311`;
+const C_CLR_DEFAULTC = `#331111`;
+const C_CLR_DEFAULTD = `#113311`;
+const C_CLR_DEFAULTE = `#113333`;
 const C_CLR_DEFHOVER = `#666666`;
-const C_CLR_BACK = `#000055`;
-const C_CLR_NEXT = `#550000`;
-const C_CLR_SETTING = `#555500`;
-const C_CLR_RESET = `#005500`;
-const C_CLR_TWEET = `#005555`;
+const C_CLR_BACK = `#000099`;
+const C_CLR_NEXT = `#990000`;
+const C_CLR_SETTING = `#999900`;
+const C_CLR_RESET = `#009900`;
+const C_CLR_TWEET = `#009999`;
 const C_CLR_TEXT = `#ffffff`;
 const C_CLR_TITLE = `#cccccc`;
 const C_CLR_LOADING_BAR = `#eeeeee`;
@@ -3444,7 +3444,7 @@ function optionInit() {
 		width: g_sWidth / 5,
 		height: 16,
 		fontsize: 12,
-		normalColor: `#111111`,
+		normalColor: C_CLR_LNK,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4189,7 +4189,7 @@ function makeSettingLblButton(_id, _name, _heightPos, _func) {
 		height: C_LEN_SETLBL_HEIGHT,
 		fontsize: C_SIZ_SETLBL,
 		normalColor: C_CLR_LNK,
-		hoverColor: C_CLR_DEFAULT,
+		hoverColor: C_CLR_DEFHOVER,
 		align: C_ALIGN_CENTER
 	}, _func);
 
