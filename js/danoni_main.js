@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/07/08
+ * Revised : 2019/07/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.0.0`;
-const g_revisedDate = `2019/07/08`;
+const g_version = `Ver 7.1.0`;
+const g_revisedDate = `2019/07/12`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -59,23 +59,29 @@ const C_VALIGN_MIDDLE = `middle`;
 const C_VALIGN_BOTTOM = `bottom`;
 
 // ユーザインタフェース
-const C_CLR_DEFAULT = `#333333`;
-const C_CLR_DEFHOVER = `#666666`;
-const C_CLR_BACK = `#000033`;
-const C_CLR_NEXT = `#330000`;
-const C_CLR_SETTING = `#333300`;
-const C_CLR_RESET = `#003300`;
-const C_CLR_TWEET = `#003333`;
-const C_CLR_TEXT = `#ffffff`;
-const C_CLR_TITLE = `#cccccc`;
-const C_CLR_LOADING_BAR = `#eeeeee`;
+// カスタム側で変更できるようにletで定義している（mainではこの後の変更なし）
+let C_CLR_DEFAULT = `#333333`;
+let C_CLR_DEFAULTA = `#111133`;
+let C_CLR_DEFAULTB = `#333311`;
+let C_CLR_DEFAULTC = `#331111`;
+let C_CLR_DEFAULTD = `#113311`;
+let C_CLR_DEFAULTE = `#113333`;
+let C_CLR_DEFHOVER = `#666666`;
+let C_CLR_BACK = `#000099`;
+let C_CLR_NEXT = `#990000`;
+let C_CLR_SETTING = `#999900`;
+let C_CLR_RESET = `#009900`;
+let C_CLR_TWEET = `#009999`;
+let C_CLR_TEXT = `#ffffff`;
+let C_CLR_TITLE = `#cccccc`;
+let C_CLR_LOADING_BAR = `#eeeeee`;
+let C_CLR_LNK = `#111111`;
 
 const C_LBL_TITLESIZE = 32;
 const C_LBL_BTNSIZE = 28;
 const C_LBL_LNKSIZE = 16;
 const C_LBL_BASICFONT = `"Meiryo UI", sans-serif`;
 
-const C_CLR_LNK = `#111111`;
 const C_BTN_HEIGHT = 50;
 const C_LNK_HEIGHT = 20;
 
@@ -336,7 +342,7 @@ const g_stateObj = {
 	d_musicinfo: C_FLG_ON,
 	d_color: C_FLG_ON,
 	d_speed: C_FLG_ON,
-	d_motion: C_FLG_ON,
+	d_arrowEffect: C_FLG_ON,
 	d_lyrics: C_FLG_ON,
 	d_background: C_FLG_ON
 };
@@ -2363,7 +2369,7 @@ function titleInit() {
 		width: g_sWidth / 5,
 		height: 16,
 		fontsize: 12,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -2452,7 +2458,7 @@ function titleInit() {
 		width: g_sWidth * 3 / 4 - 10,
 		height: 16,
 		fontsize: 12,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTE,
 		hoverColor: C_CLR_TWEET,
 		align: C_ALIGN_RIGHT
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus`, `_blank`));
@@ -3342,7 +3348,7 @@ function optionInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -3361,7 +3367,7 @@ function optionInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -3381,7 +3387,7 @@ function optionInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTC,
 		hoverColor: C_CLR_NEXT,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -3439,7 +3445,7 @@ function optionInit() {
 		width: g_sWidth / 5,
 		height: 16,
 		fontsize: 12,
-		normalColor: `#111111`,
+		normalColor: C_CLR_LNK,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4184,7 +4190,7 @@ function makeSettingLblButton(_id, _name, _heightPos, _func) {
 		height: C_LEN_SETLBL_HEIGHT,
 		fontsize: C_SIZ_SETLBL,
 		normalColor: C_CLR_LNK,
-		hoverColor: C_CLR_DEFAULT,
+		hoverColor: C_CLR_DEFHOVER,
 		align: C_ALIGN_CENTER
 	}, _func);
 
@@ -4252,7 +4258,7 @@ function settingsDisplayInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4271,7 +4277,7 @@ function settingsDisplayInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4291,7 +4297,7 @@ function settingsDisplayInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTC,
 		hoverColor: C_CLR_NEXT,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4364,6 +4370,7 @@ function createSettingsDisplayWindow(_sprite) {
 	makeDisplayButton(`color`, 1, 1);
 	makeDisplayButton(`lyrics`, 2, 1);
 	makeDisplayButton(`background`, 3, 1);
+	makeDisplayButton(`arrowEffect`, 4, 1);
 
 	/**
 	 * Display表示/非表示ボタン
@@ -4588,7 +4595,7 @@ function keyConfigInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4610,7 +4617,7 @@ function keyConfigInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -4649,7 +4656,7 @@ function keyConfigInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -5337,7 +5344,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		const dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`];
 		let cssMotionData = [];
 
-		if (dosCssMotionData !== undefined && dosCssMotionData !== `` && g_stateObj.d_motion === C_FLG_ON) {
+		if (dosCssMotionData !== undefined && dosCssMotionData !== `` && g_stateObj.d_arroweffect === C_FLG_ON) {
 			let motionIdx = 0;
 			let tmpArrayData = dosCssMotionData.split(`\r`).join(`\n`);
 			tmpArrayData = tmpArrayData.split(`\n`);
@@ -5407,7 +5414,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 							obj.wordData[tmpWordData[0] + addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
 							break;
 						} else {
-							obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], tmpWordData[k + 2]);
+							obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], setVal(tmpWordData[k + 2], ``, `string`));
 						}
 					}
 				}
@@ -5940,6 +5947,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 個別色変化のタイミング更新
+	// フリーズアロー(ヒット時)の場合のみ、逆算をしない
 	if (_dataObj.colorData !== undefined && _dataObj.colorData.length >= 3) {
 		if (_dataObj.speedData !== undefined) {
 			spdk = _dataObj.speedData.length - 2;
@@ -5953,7 +5961,8 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		tmpObj = getArrowStartFrame(_dataObj.colorData[lastk], _speedOnFrame, _motionOnFrame);
 		frmPrev = tmpObj.frm;
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-		pushColors(``, tmpObj.frm, _dataObj.colorData[lastk + 1], _dataObj.colorData[lastk + 2].replace(`0x`, `#`));
+		pushColors(``, isFrzHitColor(_dataObj.colorData[lastk + 1]) ? _dataObj.colorData[lastk] : tmpObj.frm,
+			_dataObj.colorData[lastk + 1], _dataObj.colorData[lastk + 2].replace(`0x`, `#`));
 
 		for (let k = lastk - 3; k >= 0; k -= 3) {
 
@@ -5961,7 +5970,9 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				break;
 			} else if ((_dataObj.colorData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
 				&& _dataObj.colorData[k] < spdNext)) {
-				_dataObj.colorData[k] -= g_workObj.arrivalFrame[frmPrev];
+				if (!isFrzHitColor(_dataObj.colorData[k + 1])) {
+					_dataObj.colorData[k] -= g_workObj.arrivalFrame[frmPrev];
+				}
 			} else {
 				if (_dataObj.colorData[k] < spdPrev) {
 					spdk -= 2;
@@ -5970,7 +5981,9 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 				tmpObj = getArrowStartFrame(_dataObj.colorData[k], _speedOnFrame, _motionOnFrame);
 				frmPrev = tmpObj.frm;
-				_dataObj.colorData[k] = tmpObj.frm;
+				if (!isFrzHitColor(_dataObj.colorData[k + 1])) {
+					_dataObj.colorData[k] = tmpObj.frm;
+				}
 				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 			}
 			pushColors(``, _dataObj.colorData[k], _dataObj.colorData[k + 1], _dataObj.colorData[k + 2].replace(`0x`, `#`));
@@ -6074,6 +6087,14 @@ function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame) {
 	}
 
 	return obj;
+}
+
+/**
+ * 個別色変化におけるフリーズアロー(ヒット時)判定
+ * @param {number} _val 
+ */
+function isFrzHitColor(_val) {
+	return ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61) ? true : false;
 }
 
 /**
@@ -8322,7 +8343,13 @@ function resultInit() {
 		if (display2Data !== ``) {
 			display2Data += `, `;
 		}
-		display2Data += `Background`;
+		display2Data += `Back`;
+	}
+	if (g_stateObj.d_arroweffect !== C_FLG_ON) {
+		if (display2Data !== ``) {
+			display2Data += `, `;
+		}
+		display2Data += `ArrowEffect`;
 	}
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
@@ -8559,7 +8586,7 @@ function resultInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER
 	}, _ => {
@@ -8580,7 +8607,7 @@ function resultInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTE,
 		hoverColor: C_CLR_TWEET,
 		align: C_ALIGN_CENTER
 	}, _ => window.open(tweetResult, `_blank`));
@@ -8595,7 +8622,7 @@ function resultInit() {
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
+		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
 		align: C_ALIGN_CENTER
 	}, _ => {
