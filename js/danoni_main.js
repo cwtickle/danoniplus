@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.1.0`;
+const g_version = `Ver 7.1.1`;
 const g_revisedDate = `2019/07/12`;
 const g_alphaVersion = ``;
 
@@ -342,7 +342,7 @@ const g_stateObj = {
 	d_musicinfo: C_FLG_ON,
 	d_color: C_FLG_ON,
 	d_speed: C_FLG_ON,
-	d_arrowEffect: C_FLG_ON,
+	d_arroweffect: C_FLG_ON,
 	d_lyrics: C_FLG_ON,
 	d_background: C_FLG_ON
 };
