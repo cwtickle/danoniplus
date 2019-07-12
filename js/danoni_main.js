@@ -59,28 +59,29 @@ const C_VALIGN_MIDDLE = `middle`;
 const C_VALIGN_BOTTOM = `bottom`;
 
 // ユーザインタフェース
-const C_CLR_DEFAULT = `#333333`;
-const C_CLR_DEFAULTA = `#111133`;
-const C_CLR_DEFAULTB = `#333311`;
-const C_CLR_DEFAULTC = `#331111`;
-const C_CLR_DEFAULTD = `#113311`;
-const C_CLR_DEFAULTE = `#113333`;
-const C_CLR_DEFHOVER = `#666666`;
-const C_CLR_BACK = `#000099`;
-const C_CLR_NEXT = `#990000`;
-const C_CLR_SETTING = `#999900`;
-const C_CLR_RESET = `#009900`;
-const C_CLR_TWEET = `#009999`;
-const C_CLR_TEXT = `#ffffff`;
-const C_CLR_TITLE = `#cccccc`;
-const C_CLR_LOADING_BAR = `#eeeeee`;
+// カスタム側で変更できるようにletで定義している（mainではこの後の変更なし）
+let C_CLR_DEFAULT = `#333333`;
+let C_CLR_DEFAULTA = `#111133`;
+let C_CLR_DEFAULTB = `#333311`;
+let C_CLR_DEFAULTC = `#331111`;
+let C_CLR_DEFAULTD = `#113311`;
+let C_CLR_DEFAULTE = `#113333`;
+let C_CLR_DEFHOVER = `#666666`;
+let C_CLR_BACK = `#000099`;
+let C_CLR_NEXT = `#990000`;
+let C_CLR_SETTING = `#999900`;
+let C_CLR_RESET = `#009900`;
+let C_CLR_TWEET = `#009999`;
+let C_CLR_TEXT = `#ffffff`;
+let C_CLR_TITLE = `#cccccc`;
+let C_CLR_LOADING_BAR = `#eeeeee`;
+let C_CLR_LNK = `#111111`;
 
 const C_LBL_TITLESIZE = 32;
 const C_LBL_BTNSIZE = 28;
 const C_LBL_LNKSIZE = 16;
 const C_LBL_BASICFONT = `"Meiryo UI", sans-serif`;
 
-const C_CLR_LNK = `#111111`;
 const C_BTN_HEIGHT = 50;
 const C_LNK_HEIGHT = 20;
 
