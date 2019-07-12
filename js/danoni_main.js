@@ -5940,6 +5940,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 個別色変化のタイミング更新
+	// フリーズアロー(ヒット時)の場合のみ、逆算をしない
 	if (_dataObj.colorData !== undefined && _dataObj.colorData.length >= 3) {
 		if (_dataObj.speedData !== undefined) {
 			spdk = _dataObj.speedData.length - 2;
@@ -5953,7 +5954,8 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		tmpObj = getArrowStartFrame(_dataObj.colorData[lastk], _speedOnFrame, _motionOnFrame);
 		frmPrev = tmpObj.frm;
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-		pushColors(``, tmpObj.frm, _dataObj.colorData[lastk + 1], _dataObj.colorData[lastk + 2].replace(`0x`, `#`));
+		pushColors(``, isFrzHitColor(_dataObj.colorData[lastk + 1]) ? _dataObj.colorData[lastk] : tmpObj.frm,
+			_dataObj.colorData[lastk + 1], _dataObj.colorData[lastk + 2].replace(`0x`, `#`));
 
 		for (let k = lastk - 3; k >= 0; k -= 3) {
 
@@ -5961,7 +5963,9 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				break;
 			} else if ((_dataObj.colorData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
 				&& _dataObj.colorData[k] < spdNext)) {
-				_dataObj.colorData[k] -= g_workObj.arrivalFrame[frmPrev];
+				if (!isFrzHitColor(_dataObj.colorData[k + 1])) {
+					_dataObj.colorData[k] -= g_workObj.arrivalFrame[frmPrev];
+				}
 			} else {
 				if (_dataObj.colorData[k] < spdPrev) {
 					spdk -= 2;
@@ -5970,7 +5974,9 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 				tmpObj = getArrowStartFrame(_dataObj.colorData[k], _speedOnFrame, _motionOnFrame);
 				frmPrev = tmpObj.frm;
-				_dataObj.colorData[k] = tmpObj.frm;
+				if (!isFrzHitColor(_dataObj.colorData[k + 1])) {
+					_dataObj.colorData[k] = tmpObj.frm;
+				}
 				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 			}
 			pushColors(``, _dataObj.colorData[k], _dataObj.colorData[k + 1], _dataObj.colorData[k + 2].replace(`0x`, `#`));
@@ -6074,6 +6080,14 @@ function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame) {
 	}
 
 	return obj;
+}
+
+/**
+ * 個別色変化におけるフリーズアロー(ヒット時)判定
+ * @param {number} _val 
+ */
+function isFrzHitColor(_val) {
+	return ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61) ? true : false;
 }
 
 /**
