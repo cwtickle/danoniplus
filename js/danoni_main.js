@@ -5414,7 +5414,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 							obj.wordData[tmpWordData[0] + addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
 							break;
 						} else {
-							obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], tmpWordData[k + 2]);
+							obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], setVal(tmpWordData[k + 2], ``, `string`));
 						}
 					}
 				}
