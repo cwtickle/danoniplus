@@ -5975,7 +5975,6 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				tmpObj = getArrowStartFrame(_dataObj.colorData[k], _speedOnFrame, _motionOnFrame);
 				frmPrev = tmpObj.frm;
 				if (!isFrzHitColor(_dataObj.colorData[k + 1])) {
-					console.log(_dataObj.colorData[k + 1]);
 					_dataObj.colorData[k] = tmpObj.frm;
 				}
 				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
