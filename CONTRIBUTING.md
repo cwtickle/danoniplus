@@ -11,16 +11,16 @@
 ## [English]
 If you have a request or defect report, you can do it in one of the following ways.
 
-- Fork and edit the repository, send Pull Request to "cwtickle / danoniplus" "develop" branch..
+- Fork and edit the repository, send Pull Request to "cwtickle / danoniplus" "develop" branch.
 1. Fork it
 1. Create your feature branch (git checkout -b my-new-feature)
 1. Commit your changes (git commit -am 'Added some feature')
 1. Push to the branch (git push origin my-new-feature)
 1. Create new Pull Request to develop branch
-- Report the request / problem contents to [Gitter] (https://gitter.im/danonicw/community).  
+- Report the request / problem contents to [Gitter](https://gitter.im/danonicw/community).  
 ※ Gitter can participate even if you have "Twitter account".  
-   In Gitter, you can use markdown similar to Github. Feel free to help yourself!
-- Contact the tickle directly ([@cw_tickle] (https://twitter.com/cw_tickle)) with the request / problem content.
+　 In Gitter, you can use markdown similar to Github. Feel free to help yourself!
+- Contact the tickle directly ([@cw_tickle](https://twitter.com/cw_tickle)) with the request / problem content.
 
 # ソースのコーディングルール
 細かい縛りは入れない予定ですが、コード作法の混在を防ぐため、必要なルールは決めていきます。  
