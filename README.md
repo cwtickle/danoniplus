@@ -47,7 +47,7 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 [Flash版との差異](http://cw7.sakura.ne.jp/work/danonijs/test/danoni_flash_vs_html5.html)  
 
 ## How to Contribute
-[How to Contribute](https://github.com/cwtickle/danoniplus/blob/master/CONTRIBUTING.md)   
+[How to Contribute](CONTRIBUTING.md)   
 
 ## License
 This software is released under the MIT License, see LICENSE.  
