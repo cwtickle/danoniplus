@@ -1483,6 +1483,10 @@ function createButton(_obj, _func) {
 	style.fontFamily = getBasicFont();
 	style.backgroundColor = _obj.normalColor;
 	style.transition = `background-color 0.25s linear`;
+	if (setVal(_obj.animationName, ``, `string`) !== ``) {
+		style.animationName = _obj.animationName;
+		style.animationDuration = `1s`;
+	}
 
 	// オンマウス・タップ時の挙動 (背景色変更、カーソル変化)
 	div.onmouseover = _ => {
@@ -3350,7 +3354,8 @@ function optionInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => {
 		// タイトル画面へ戻る
 		clearWindow();
@@ -3369,7 +3374,8 @@ function optionInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => {
 		// キーコンフィグ画面へ遷移
 		g_kcType = `Main`;
@@ -3389,7 +3395,8 @@ function optionInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTC,
 		hoverColor: C_CLR_NEXT,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => {
 		clearWindow();
 		loadMusic();
@@ -4260,7 +4267,8 @@ function settingsDisplayInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => {
 		// タイトル画面へ戻る
 		clearWindow();
@@ -4279,7 +4287,8 @@ function settingsDisplayInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => {
 		// キーコンフィグ画面へ遷移
 		g_kcType = `Main`;
@@ -4299,7 +4308,8 @@ function settingsDisplayInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTC,
 		hoverColor: C_CLR_NEXT,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => {
 		clearWindow();
 		loadMusic();
@@ -4597,7 +4607,8 @@ function keyConfigInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => {
 		// 設定・オプション画面へ戻る
 		g_currentj = 0;
@@ -4619,7 +4630,8 @@ function keyConfigInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => {
 		let tempPtn = g_keyObj.currentPtn + 1;
 		while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, `string`) !== `` &&
@@ -4658,7 +4670,8 @@ function keyConfigInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => {
 		if (window.confirm(`キーを初期配置に戻します。よろしいですか？`)) {
 			g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
@@ -8588,7 +8601,8 @@ function resultInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => {
 		// タイトル画面へ戻る
 		g_audio.pause();
@@ -8609,7 +8623,8 @@ function resultInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTE,
 		hoverColor: C_CLR_TWEET,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => window.open(tweetResult, `_blank`));
 	divRoot.appendChild(btnTweet);
 
@@ -8624,7 +8639,8 @@ function resultInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`
 	}, _ => {
 		g_audio.pause();
 		clearTimeout(g_timeoutEvtResultId);
