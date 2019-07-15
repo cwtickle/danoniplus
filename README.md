@@ -5,6 +5,7 @@
 リズムゲームDancing☆Onigiri (CW Edition)のソース作成・配布場所です。  
 Flash版の同ゲームのHTML5版を制作しています。 
 (旧名:Dancing☆Onigiri for HTML5)  
+(Dancing ☆ Onigiri (CW Edition) is a rhythm game.)
 
 ![AboutDanOni](http://cw7.sakura.ne.jp/danoni/wiki/danonitop.png)
 
@@ -13,6 +14,9 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 
 公開しているソース一式と、音楽ファイル・譜面データ(テキスト)を組み合わせることで  
 オリジナルのゲームデータを作ることができます。  
+
+(By combining a set of published sources with music files and sequences (text file)
+You can create original game data.)
 
 ## Demo
 - [Demo1](http://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / 木下たまき  
@@ -26,6 +30,9 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 下記は7keyの例ですが、他にも5keyや11keyなど多様なプレイスタイルがあります。  
 (There are many playstyles in the Dancing-Onigiri. For example, 5keys, 7keys, 11keys, etc.)
 
+詳細は下記をご覧ください。(The details are as follows.)  
+-> [How to Play](../../wiki/AboutGameSystem)
+
 ![HowtoPlay](http://cw7.sakura.ne.jp/danoni/wiki/howtoplay1.png)  
 (画像は開発中のものです）
 
@@ -33,6 +40,9 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 タイミング良くキーボードを押すと(・∀・)ｲｲ!!や(ﾟ∀ﾟ)ｷﾀｰ!!となり、ライフが上がります。  
 一方、タイミングを外すと(´・ω・\`)ｼｮﾎﾞｰﾝ、(\`Д´)ｳﾜｧﾝ、(・A・)ｲｸﾅｲとなり、ライフが下がります。  
 ゲーム終了までにライフゲージのライフが残っているか、ノルマ以上であればゲームクリアです。  
+(When you press the keyboard with good timing (・∀・)ｲｲ!! (ﾟ∀ﾟ)ｷﾀｰ!! and life will go up.
+On the other hand, if you remove the timing (´・ω・\`)ｼｮﾎﾞｰﾝ, (\`Д´)ｳﾜｧﾝ, (・A・)ｲｸﾅｲ will be, life falls.
+If the life of the life gauge remains by the end of the game or it is over the quota, the game is cleared.)
 
 ## How to Make / 作り方
 - [譜面の作成概要](https://github.com/cwtickle/danoniplus/wiki/HowToMake)
@@ -47,7 +57,7 @@ ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作�
 [Flash版との差異](http://cw7.sakura.ne.jp/work/danonijs/test/danoni_flash_vs_html5.html)  
 
 ## How to Contribute
-[How to Contribute](https://github.com/cwtickle/danoniplus/blob/master/CONTRIBUTING.md)   
+[How to Contribute](CONTRIBUTING.md)   
 
 ## License
 This software is released under the MIT License, see LICENSE.  
