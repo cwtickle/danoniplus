@@ -4710,10 +4710,10 @@ function keyConfigInit() {
 			setKey = event.keyCode;
 		}
 
-		// 全角切替、BackSpace、Deleteキーは割り当て禁止
+		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
 		if (setKey === 229 || setKey === 242 || setKey === 243 || setKey === 244 ||
-			setKey === 91 || setKey === 29 || setKey === 28 ||
+			setKey === 91 || setKey === 29 || setKey === 28 || setKey === 27 ||
 			(setKey === 46 && g_currentk === 0) || setKey === g_prevKey) {
 		} else {
 			if (setKey === 8) {
