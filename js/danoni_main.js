@@ -4061,9 +4061,7 @@ function createOptionWindow(_sprite) {
 			} else {
 
 				// 特殊キーの場合は作品毎のローカルストレージから取得
-				if (g_keyObj.currentPtn === -1) {
-					g_keyObj.currentPtn = 0;
-				}
+				g_keyObj.currentPtn = 0;
 
 				// リバース初期値設定
 				if (g_localStorage[`reverse${g_keyObj.currentKey}`] !== undefined) {
@@ -4617,6 +4615,12 @@ function keyConfigInit() {
 		optionInit();
 	});
 	divRoot.appendChild(btnBack);
+
+	const lblPattern = createDivLabel(`lblPattern`, g_sWidth / 4, g_sHeight - 100,
+		g_sWidth / 2, C_BTN_HEIGHT / 2, C_LBL_BTNSIZE * 2 / 3, C_CLR_TITLE,
+		`KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Save' : g_keyObj.currentPtn + 1}`);
+	lblPattern.style.textAlign = C_ALIGN_CENTER;
+	divRoot.appendChild(lblPattern);
 
 	// パターン変更ボタン描画
 	const btnPtnChangeNext = createButton({
