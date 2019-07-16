@@ -4616,9 +4616,14 @@ function keyConfigInit() {
 	});
 	divRoot.appendChild(btnBack);
 
-	const lblPattern = createDivLabel(`lblPattern`, g_sWidth / 4, g_sHeight - 100,
-		g_sWidth / 2, C_BTN_HEIGHT / 2, C_LBL_BTNSIZE * 2 / 3, C_CLR_TITLE,
-		`KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Save' : g_keyObj.currentPtn + 1}`);
+	// キーパターン表示
+	let lblTransKey = ``;
+	if (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`], ``, `string`) !== ``) {
+		lblTransKey = '(' + setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`], ``, `string`) + ')';
+	}
+	const lblPattern = createDivLabel(`lblPattern`, g_sWidth / 5, g_sHeight - 100,
+		g_sWidth * 3 / 5, C_BTN_HEIGHT / 2, 17, C_CLR_TITLE,
+		`KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Save' : g_keyObj.currentPtn + 1}${lblTransKey}`);
 	lblPattern.style.textAlign = C_ALIGN_CENTER;
 	divRoot.appendChild(lblPattern);
 
@@ -4626,9 +4631,9 @@ function keyConfigInit() {
 	const btnPtnChangeNext = createButton({
 		id: `btnPtnChange`,
 		name: `>>`,
-		x: g_sWidth * 3 / 4,
+		x: g_sWidth * 4 / 5,
 		y: g_sHeight - 100,
-		width: g_sWidth / 4,
+		width: g_sWidth / 5,
 		height: C_BTN_HEIGHT / 2,
 		fontsize: C_LBL_BTNSIZE * 2 / 3,
 		normalColor: C_CLR_DEFAULTB,
@@ -4667,7 +4672,7 @@ function keyConfigInit() {
 		name: `<<`,
 		x: 0,
 		y: g_sHeight - 100,
-		width: g_sWidth / 4,
+		width: g_sWidth / 5,
 		height: C_BTN_HEIGHT / 2,
 		fontsize: C_LBL_BTNSIZE * 2 / 3,
 		normalColor: C_CLR_DEFAULTB,
