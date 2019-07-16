@@ -4623,7 +4623,7 @@ function keyConfigInit() {
 	}
 	const lblPattern = createDivLabel(`lblPattern`, g_sWidth / 5, g_sHeight - 100,
 		g_sWidth * 3 / 5, C_BTN_HEIGHT / 2, 17, C_CLR_TITLE,
-		`KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Save' : g_keyObj.currentPtn + 1}${lblTransKey}`);
+		`KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1}${lblTransKey}`);
 	lblPattern.style.textAlign = C_ALIGN_CENTER;
 	divRoot.appendChild(lblPattern);
 
