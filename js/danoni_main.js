@@ -3388,7 +3388,7 @@ function optionInit() {
 	const btnPlay = createButton({
 		id: `btnPlay`,
 		name: `Play`,
-		x: g_sWidth / 3 * 2,
+		x: g_sWidth * 2 / 3,
 		y: g_sHeight - 100,
 		width: g_sWidth / 3,
 		height: C_BTN_HEIGHT,
@@ -4600,15 +4600,14 @@ function keyConfigInit() {
 	const btnBack = createButton({
 		id: `btnBack`,
 		name: `Back`,
-		x: 0,
-		y: g_sHeight - 100,
+		x: g_sWidth / 3,
+		y: g_sHeight - 75,
 		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
-		fontsize: C_LBL_BTNSIZE,
+		height: C_BTN_HEIGHT / 2,
+		fontsize: C_LBL_BTNSIZE * 2 / 3,
 		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
-		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`
+		align: C_ALIGN_CENTER
 	}, _ => {
 		// 設定・オプション画面へ戻る
 		g_currentj = 0;
@@ -4620,18 +4619,17 @@ function keyConfigInit() {
 	divRoot.appendChild(btnBack);
 
 	// パターン変更ボタン描画
-	const btnPtnChange = createButton({
+	const btnPtnChangeNext = createButton({
 		id: `btnPtnChange`,
-		name: `PtnChange`,
-		x: g_sWidth / 3,
+		name: `>>`,
+		x: g_sWidth * 3 / 4,
 		y: g_sHeight - 100,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
-		fontsize: C_LBL_BTNSIZE,
+		width: g_sWidth / 4,
+		height: C_BTN_HEIGHT / 2,
+		fontsize: C_LBL_BTNSIZE * 2 / 3,
 		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
-		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`
+		align: C_ALIGN_CENTER
 	}, _ => {
 		let tempPtn = g_keyObj.currentPtn + 1;
 		while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, `string`) !== `` &&
@@ -4657,21 +4655,71 @@ function keyConfigInit() {
 		const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 		eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 	});
-	divRoot.appendChild(btnPtnChange);
+	divRoot.appendChild(btnPtnChangeNext);
+
+	// パターン変更ボタン描画
+	const btnPtnChangeBack = createButton({
+		id: `btnPtnChange`,
+		name: `<<`,
+		x: 0,
+		y: g_sHeight - 100,
+		width: g_sWidth / 4,
+		height: C_BTN_HEIGHT / 2,
+		fontsize: C_LBL_BTNSIZE * 2 / 3,
+		normalColor: C_CLR_DEFAULTB,
+		hoverColor: C_CLR_SETTING,
+		align: C_ALIGN_CENTER
+	}, _ => {
+		let tempPtn = g_keyObj.currentPtn - 1;
+		while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, `string`) !== `` &&
+			g_headerObj.transKeyUse === `false`) {
+
+			tempPtn--;
+			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
+				break;
+			}
+		}
+		if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined) {
+			g_keyObj.currentPtn = tempPtn;
+		} else {
+			tempPtn = 0;
+			while (setVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`], ``, `string`) !== ``) {
+				tempPtn++;
+				if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
+					break;
+				}
+			}
+			tempPtn--;
+			while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, `string`) !== `` &&
+				g_headerObj.transKeyUse === `false`) {
+
+				tempPtn--;
+				if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
+					break;
+				}
+			}
+			g_keyObj.currentPtn = tempPtn;
+		}
+		clearWindow();
+		keyConfigInit();
+		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+		const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+		eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
+	});
+	divRoot.appendChild(btnPtnChangeBack);
 
 	// キーコンフィグリセットボタン描画
 	const btnReset = createButton({
 		id: `btnReset`,
 		name: `Reset`,
-		x: g_sWidth / 3 * 2,
-		y: g_sHeight - 100,
+		x: 0,
+		y: g_sHeight - 75,
 		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
-		fontsize: C_LBL_BTNSIZE,
+		height: C_BTN_HEIGHT / 2,
+		fontsize: C_LBL_BTNSIZE * 2 / 3,
 		normalColor: C_CLR_DEFAULTD,
 		hoverColor: C_CLR_RESET,
-		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`
+		align: C_ALIGN_CENTER
 	}, _ => {
 		if (window.confirm(`キーを初期配置に戻します。よろしいですか？`)) {
 			g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
