@@ -3051,6 +3051,9 @@ function headerConvert(_dosObj) {
 	// 結果画面用のマスク透過設定
 	obj.maskresultButton = setVal(_dosObj.maskresultButton, `false`, `string`);
 
+	// color_dataの過去バージョン互換設定
+	obj.colorDataType = setVal(_dosObj.colorDataType, ``, `string`);
+
 	return obj;
 }
 
@@ -6166,7 +6169,7 @@ function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame) {
  * @param {number} _val 
  */
 function isFrzHitColor(_val) {
-	return ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61) ? true : false;
+	return (g_headerObj.colorDataType === `` && ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61)) ? true : false;
 }
 
 /**
