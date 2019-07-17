@@ -173,6 +173,8 @@ const C_MAX_ADJUSTMENT = 30;
 const C_MAX_SPEED = 10;
 const C_MIN_SPEED = 1;
 
+let g_initialFlg = false;
+
 /** キーコンフィグ設定 */
 let g_kcType = `Main`;
 let g_colorType = `Default`;
@@ -3355,9 +3357,10 @@ function optionInit() {
 		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
 		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`
+		animationName: (g_initialFlg ? `` : `smallToNormalY`)
 	}, _ => {
 		// タイトル画面へ戻る
+		g_initialFlg = true;
 		clearWindow();
 		titleInit();
 	});
@@ -3375,9 +3378,10 @@ function optionInit() {
 		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
 		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`
+		animationName: (g_initialFlg ? `` : `smallToNormalY`)
 	}, _ => {
 		// キーコンフィグ画面へ遷移
+		g_initialFlg = true;
 		g_kcType = `Main`;
 		clearWindow();
 		keyConfigInit();
@@ -3387,7 +3391,7 @@ function optionInit() {
 	// 進むボタン描画
 	const btnPlay = createButton({
 		id: `btnPlay`,
-		name: `Play`,
+		name: `PLAY!`,
 		x: g_sWidth * 2 / 3,
 		y: g_sHeight - 100,
 		width: g_sWidth / 3,
@@ -3396,8 +3400,9 @@ function optionInit() {
 		normalColor: C_CLR_DEFAULTC,
 		hoverColor: C_CLR_NEXT,
 		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`
+		animationName: (g_initialFlg ? `` : `smallToNormalY`)
 	}, _ => {
+		g_initialFlg = true;
 		clearWindow();
 		loadMusic();
 	});
@@ -4265,8 +4270,7 @@ function settingsDisplayInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTA,
 		hoverColor: C_CLR_BACK,
-		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`
+		align: C_ALIGN_CENTER
 	}, _ => {
 		// タイトル画面へ戻る
 		clearWindow();
@@ -4285,8 +4289,7 @@ function settingsDisplayInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTB,
 		hoverColor: C_CLR_SETTING,
-		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`
+		align: C_ALIGN_CENTER
 	}, _ => {
 		// キーコンフィグ画面へ遷移
 		g_kcType = `Main`;
@@ -4298,7 +4301,7 @@ function settingsDisplayInit() {
 	// 進むボタン描画
 	const btnPlay = createButton({
 		id: `btnPlay`,
-		name: `Play`,
+		name: `PLAY!`,
 		x: g_sWidth / 3 * 2,
 		y: g_sHeight - 100,
 		width: g_sWidth / 3,
@@ -4306,8 +4309,7 @@ function settingsDisplayInit() {
 		fontsize: C_LBL_BTNSIZE,
 		normalColor: C_CLR_DEFAULTC,
 		hoverColor: C_CLR_NEXT,
-		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`
+		align: C_ALIGN_CENTER
 	}, _ => {
 		clearWindow();
 		loadMusic();
@@ -4597,7 +4599,7 @@ function keyConfigInit() {
 	// 戻るボタン描画
 	const btnBack = createButton({
 		id: `btnBack`,
-		name: `Back`,
+		name: `To Settings`,
 		x: g_sWidth / 3,
 		y: g_sHeight - 75,
 		width: g_sWidth / 3,
