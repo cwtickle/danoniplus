@@ -1776,6 +1776,23 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 	return [spriteData, maxDepth];
 }
 
+/**
+ * 現在URLのクエリパラメータから指定した値を取得
+ * @param {string} _name
+ */
+function getQueryParamVal(_name) {
+    const url = window.location.href;
+    const name = _name.replace(/[\[\]]/g, `\\$&`);
+
+    const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
+    const results = regex.exec(url);
+
+    if (!results) return null;
+    if (!results[2]) return ``;
+
+    return decodeURIComponent(results[2].replace(/\+/g, ` `));
+}
+
 /*-----------------------------------------------------------*/
 /* Scene : TITLE [melon] */
 /*-----------------------------------------------------------*/
@@ -1897,6 +1914,10 @@ function initAfterDosLoaded() {
 			preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
 		}
 	}
+
+	// クエリで譜面番号が指定されていればセット
+	const specifiedScoreId = getQueryParamVal(`score_id`);
+	g_stateObj.scoreId = g_headerObj.keyLabels[specifiedScoreId] ? specifiedScoreId : 0;
 
 	// customjs、音楽ファイルの読み込み
 	const randTime = new Date().getTime();
