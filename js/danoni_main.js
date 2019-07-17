@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/07/15
+ * Revised : 2019/07/17
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.2.0`;
-const g_revisedDate = `2019/07/15`;
+const g_version = `Ver 7.3.0`;
+const g_revisedDate = `2019/07/17`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1916,7 +1916,7 @@ function initAfterDosLoaded() {
 	}
 
 	// クエリで譜面番号が指定されていればセット
-	const specifiedScoreId = getQueryParamVal(`score_id`);
+	const specifiedScoreId = getQueryParamVal(`scoreId`);
 	g_stateObj.scoreId = g_headerObj.keyLabels[specifiedScoreId] ? specifiedScoreId : 0;
 
 	// customjs、音楽ファイルの読み込み
