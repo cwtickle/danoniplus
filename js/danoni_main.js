@@ -3384,7 +3384,6 @@ function optionInit() {
 		animationName: (g_initialFlg ? `` : `smallToNormalY`)
 	}, _ => {
 		// タイトル画面へ戻る
-		g_initialFlg = true;
 		clearWindow();
 		titleInit();
 	});
@@ -3405,7 +3404,6 @@ function optionInit() {
 		animationName: (g_initialFlg ? `` : `smallToNormalY`)
 	}, _ => {
 		// キーコンフィグ画面へ遷移
-		g_initialFlg = true;
 		g_kcType = `Main`;
 		clearWindow();
 		keyConfigInit();
@@ -3426,7 +3424,6 @@ function optionInit() {
 		align: C_ALIGN_CENTER,
 		animationName: (g_initialFlg ? `` : `smallToNormalY`)
 	}, _ => {
-		g_initialFlg = true;
 		clearWindow();
 		loadMusic();
 	});
@@ -3499,6 +3496,7 @@ function optionInit() {
 	btnSave.style.color = (g_stateObj.dataSaveFlg ? `#ffffff` : `#666666`);
 	btnSave.style.borderStyle = `solid`;
 	btnSave.style.borderColor = (g_stateObj.dataSaveFlg ? `#000000 #cccccc` : `#000000 #333333`);
+	g_initialFlg = true;
 }
 
 function musicAfterLoaded() {
