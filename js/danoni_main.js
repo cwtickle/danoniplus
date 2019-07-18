@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/07/17
+ * Revised : 2019/07/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.3.0`;
-const g_revisedDate = `2019/07/17`;
+const g_version = `Ver 7.3.1`;
+const g_revisedDate = `2019/07/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3384,7 +3384,6 @@ function optionInit() {
 		animationName: (g_initialFlg ? `` : `smallToNormalY`)
 	}, _ => {
 		// タイトル画面へ戻る
-		g_initialFlg = true;
 		clearWindow();
 		titleInit();
 	});
@@ -3405,7 +3404,6 @@ function optionInit() {
 		animationName: (g_initialFlg ? `` : `smallToNormalY`)
 	}, _ => {
 		// キーコンフィグ画面へ遷移
-		g_initialFlg = true;
 		g_kcType = `Main`;
 		clearWindow();
 		keyConfigInit();
@@ -3426,7 +3424,6 @@ function optionInit() {
 		align: C_ALIGN_CENTER,
 		animationName: (g_initialFlg ? `` : `smallToNormalY`)
 	}, _ => {
-		g_initialFlg = true;
 		clearWindow();
 		loadMusic();
 	});
@@ -3499,6 +3496,7 @@ function optionInit() {
 	btnSave.style.color = (g_stateObj.dataSaveFlg ? `#ffffff` : `#666666`);
 	btnSave.style.borderStyle = `solid`;
 	btnSave.style.borderColor = (g_stateObj.dataSaveFlg ? `#000000 #cccccc` : `#000000 #333333`);
+	g_initialFlg = true;
 }
 
 function musicAfterLoaded() {
