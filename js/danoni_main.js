@@ -8830,7 +8830,7 @@ function resultFadeOut() {
 		const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
 		if (tmpVolume < 0) {
 			g_audio.volume = 0;
-			clearInterval(g_timeoutEvtId);
+			clearTimeout(g_timeoutEvtId);
 			g_audio.pause();
 		} else {
 			g_audio.volume = tmpVolume;
