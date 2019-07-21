@@ -1198,7 +1198,7 @@ function getStrLength(str) {
  * 左パディング
  * @param {string} _str 元の文字列 
  * @param {number} _length パディング後の長さ 
- * @param {*} _chr 
+ * @param {string} _chr パディング文字列
  */
 function paddingLeft(_str, _length, _chr) {
 	let paddingStr = _str;
