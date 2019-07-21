@@ -6673,6 +6673,7 @@ function MainInit() {
 			fadeOutFrame = (fadeOutFrame - g_headerObj.blankFrame) / g_headerObj.playbackRate + g_headerObj.blankFrame;
 		}
 	}
+	g_scoreObj.fadeOutFrame = (fadeOutFrame === Infinity ? 0 : fadeOutFrame);
 
 	// 終了時間指定の場合、その値を適用する
 	let endFrameUseFlg = false;
@@ -8710,6 +8711,7 @@ function resultInit() {
 	}, _ => {
 		// タイトル画面へ戻る
 		g_audio.pause();
+		clearTimeout(g_timeoutEvtId);
 		clearTimeout(g_timeoutEvtResultId);
 		clearWindow();
 		titleInit();
@@ -8747,6 +8749,7 @@ function resultInit() {
 		animationName: `smallToNormalY`
 	}, _ => {
 		g_audio.pause();
+		clearTimeout(g_timeoutEvtId);
 		clearTimeout(g_timeoutEvtResultId);
 		clearWindow();
 		loadMusic();
@@ -8811,20 +8814,30 @@ function resultInit() {
 	if (g_headerObj.fadeFrame !== undefined && g_headerObj.fadeFrame !== ``) {
 		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
 		} else {
-			g_timeoutEvtId = setInterval(`resultFadeOut()`, 1000 / 60);
+			g_timeoutEvtId = setTimeout(_ => resultFadeOut(), 1000 / 60);
 		}
 	}
 }
 
+/**
+ * リザルト画面移行後のフェードアウト処理
+ */
 function resultFadeOut() {
-	const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
-	if (tmpVolume < 0) {
-		g_audio.volume = 0;
-		clearInterval(g_timeoutEvtId);
-		g_audio.pause();
+
+	if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
+		g_scoreObj.frameNum++;
 	} else {
-		g_audio.volume = tmpVolume;
+		const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
+		if (tmpVolume < 0) {
+			g_audio.volume = 0;
+			clearInterval(g_timeoutEvtId);
+			g_audio.pause();
+		} else {
+			g_audio.volume = tmpVolume;
+		}
 	}
+
+	g_timeoutEvtId = setTimeout(_ => resultFadeOut(), 1000 / 60);
 }
 
 /**
