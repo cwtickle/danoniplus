@@ -6086,7 +6086,7 @@ function resultInit() {
 	}, function () {
 		// タイトル画面へ戻る
 		g_audio.pause();
-		clearTimeout(g_timeoutEvtId);
+		clearInterval(g_timeoutEvtId);
 		clearWindow();
 		titleInit();
 	});
@@ -6123,7 +6123,7 @@ function resultInit() {
 		align: C_ALIGN_CENTER
 	}, function () {
 		g_audio.pause();
-		clearTimeout(g_timeoutEvtId);
+		clearInterval(g_timeoutEvtId);
 		clearWindow();
 		g_audio.load();
 
