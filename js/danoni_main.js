@@ -1195,6 +1195,20 @@ function getStrLength(str) {
 }
 
 /**
+ * 左パディング
+ * @param {string} _str 元の文字列 
+ * @param {number} _length パディング後の長さ 
+ * @param {*} _chr 
+ */
+function paddingLeft(_str, _length, _chr) {
+	let paddingStr = _str;
+	while (paddingStr.length < _length) {
+		paddingStr = _chr + paddingStr;
+	}
+	return paddingStr;
+}
+
+/**
  * 図形の描画
  * - div子要素の作成。呼び出しただけでは使用できないので、親divよりappendChildすること。
  * - 詳細は @see {@link createButton} も参照のこと。 
@@ -1781,16 +1795,16 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
  * @param {string} _name
  */
 function getQueryParamVal(_name) {
-    const url = window.location.href;
-    const name = _name.replace(/[\[\]]/g, `\\$&`);
+	const url = window.location.href;
+	const name = _name.replace(/[\[\]]/g, `\\$&`);
 
-    const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
-    const results = regex.exec(url);
+	const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
+	const results = regex.exec(url);
 
-    if (!results) return null;
-    if (!results[2]) return ``;
+	if (!results) return null;
+	if (!results[2]) return ``;
 
-    return decodeURIComponent(results[2].replace(/\+/g, ` `));
+	return decodeURIComponent(results[2].replace(/\+/g, ` `));
 }
 
 /*-----------------------------------------------------------*/
@@ -2746,6 +2760,9 @@ function headerConvert(_dosObj) {
 		g_gaugeType = C_LFE_BORDER;
 	}
 
+	// カラーコードのゼロパディング有無設定
+	obj.colorCdPaddingUse = setVal(_dosObj.colorCdPaddingUse, `false`, `string`);
+
 	// 最大ライフ
 	obj.maxLifeVal = setVal(_dosObj.maxLifeVal, C_VAL_MAXLIFE, `float`);
 
@@ -2803,6 +2820,9 @@ function headerConvert(_dosObj) {
 		obj.setColor = _dosObj.setColor.split(`,`);
 		for (let j = 0; j < obj.setColor.length; j++) {
 			obj.setColor[j] = obj.setColor[j].replace(`0x`, `#`);
+			if (obj.colorCdPaddingUse === `true`) {
+				obj.setColor[j] = `#${paddingLeft(obj.setColor[j].slice(1), 6, `0`)}`;
+			}
 		}
 		for (let j = obj.setColor.length; j < obj.setColorInit.length; j++) {
 			obj.setColor[j] = obj.setColorInit[j];
@@ -2837,6 +2857,9 @@ function headerConvert(_dosObj) {
 
 			for (let k = 0; k < obj.frzColor[j].length; k++) {
 				obj.frzColor[j][k] = obj.frzColor[j][k].replace(`0x`, `#`);
+				if (obj.colorCdPaddingUse === `true`) {
+					obj.frzColor[j][k] = `#${paddingLeft(obj.frzColor[j][k].slice(1), 6, `0`)}`;
+				}
 			}
 			for (let k = obj.frzColor[j].length; k < obj.frzColorInit.length; k++) {
 				obj.frzColor[j][k] = obj.frzColorInit[k];
