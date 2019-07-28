@@ -1925,7 +1925,15 @@ function initAfterDosLoaded() {
 	// その他の画像ファイルの読み込み
 	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
 		if (setVal(g_headerObj.preloadImages[j], ``, `string`) !== ``) {
-			preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
+			const tmpPreloadImages = g_headerObj.preloadImages[j].split(`@`);
+			if (tmpPreloadImages.length > 1) {
+				const roopCnt = setVal(tmpPreloadImages[1], 0, `number`);
+				for (let k = 1; k <= roopCnt; k++) {
+					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), String(roopCnt).length, `0`)), ``, ``);
+				}
+			} else {
+				preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
+			}
 		}
 	}
 
