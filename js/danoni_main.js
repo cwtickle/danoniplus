@@ -1929,7 +1929,7 @@ function initAfterDosLoaded() {
 			if (tmpPreloadImages.length > 1) {
 				const roopCnt = setVal(tmpPreloadImages[1], 0, `number`);
 				for (let k = 1; k <= roopCnt; k++) {
-					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), String(roopCnt).length, `0`)), ``, ``);
+					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), 4, `0`)), ``, ``);
 				}
 			} else {
 				preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
