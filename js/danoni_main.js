@@ -1925,7 +1925,37 @@ function initAfterDosLoaded() {
 	// その他の画像ファイルの読み込み
 	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
 		if (setVal(g_headerObj.preloadImages[j], ``, `string`) !== ``) {
-			preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
+
+			// Pattern A: |preloadImages=file.png|
+			// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
+			// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
+			// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
+
+			const tmpPreloadImages = g_headerObj.preloadImages[j].split(`@`);
+			if (tmpPreloadImages.length > 1) {
+				const termRoopCnts = tmpPreloadImages[1].split(`-`);
+				let startCnt;
+				let lastCnt;
+				let paddingLen;
+
+				if (termRoopCnts.length > 1) {
+					// Pattern C, Dの場合
+					startCnt = setVal(termRoopCnts[0], 1, `number`);
+					lastCnt = setVal(termRoopCnts[1], 1, `number`);
+					paddingLen = String(setVal(termRoopCnts[1], 1, `string`)).length;
+				} else {
+					// Pattern Bの場合
+					startCnt = 1;
+					lastCnt = setVal(tmpPreloadImages[1], 1, `number`);
+					paddingLen = String(setVal(tmpPreloadImages[1], 1, `string`)).length;
+				}
+				for (let k = startCnt; k <= lastCnt; k++) {
+					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)), ``, ``);
+				}
+			} else {
+				// Pattern Aの場合
+				preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
+			}
 		}
 	}
 
