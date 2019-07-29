@@ -1950,7 +1950,6 @@ function initAfterDosLoaded() {
 					paddingLen = String(setVal(tmpPreloadImages[1], 1, `string`)).length;
 				}
 				for (let k = startCnt; k <= lastCnt; k++) {
-					console.log(tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)));
 					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)), ``, ``);
 				}
 			} else {
