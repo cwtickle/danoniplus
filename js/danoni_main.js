@@ -1716,7 +1716,15 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 			const tmpSpriteData = tmpData.split(`,`);
 
 			// 値チェックとエスケープ処理
-			const tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, `number`));
+			let tmpFrame;
+			if (setVal(tmpSpriteData[0], 200, `number`) === 0) {
+				tmpFrame = 0;
+			} else {
+				tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, `number`));
+				if(tmpFrame < 0){
+					tmpFrame = 0;
+				}
+			}
 			const tmpDepth = setVal(tmpSpriteData[1], 0, `number`);
 			const tmpPath = escapeHtml(setVal(tmpSpriteData[2], ``, `string`));
 			const tmpClass = escapeHtml(setVal(tmpSpriteData[3], ``, `string`));
@@ -6297,6 +6305,20 @@ function MainInit() {
 		createSprite(`maskSprite`, `maskSprite${j}`, 0, 0, g_sWidth, g_sHeight);
 	}
 
+	if (g_scoreObj.frameNum === 0) {
+		// マスク表示・マスクモーション(0フレーム指定)
+		if (g_scoreObj.maskData[0] !== undefined) {
+			drawMainSpriteData(0, `mask`);
+			g_scoreObj.maskData[0] = undefined;
+		}
+
+		// 背景表示・背景モーション(0フレーム指定)
+		if (g_scoreObj.backData[0] !== undefined) {
+			drawMainSpriteData(0, `back`);
+			g_scoreObj.backData[0] = undefined;
+		}
+	}
+
 	// ステップゾーンを表示
 	for (let j = 0; j < keyNum; j++) {
 		// 矢印の内側を塗りつぶすか否か
@@ -7176,6 +7198,16 @@ function MainInit() {
 			g_audio.dispatchEvent(new CustomEvent(`timeupdate`));
 		}
 
+		// マスク表示・マスクモーション
+		if (g_scoreObj.maskData[g_scoreObj.frameNum] !== undefined) {
+			drawMainSpriteData(g_scoreObj.frameNum, `mask`);
+		}
+
+		// 背景表示・背景モーション
+		if (g_scoreObj.backData[g_scoreObj.frameNum] !== undefined) {
+			drawMainSpriteData(g_scoreObj.frameNum, `back`);
+		}
+
 		// フェードイン・アウト
 		if (g_audio.volume >= g_stateObj.volume / 100) {
 			musicStartFlg = false;
@@ -7375,16 +7407,6 @@ function MainInit() {
 					g_wordSprite.style.margin = `auto`;
 				}
 			}
-		}
-
-		// マスク表示・マスクモーション
-		if (g_scoreObj.maskData[g_scoreObj.frameNum] !== undefined) {
-			drawMainSpriteData(g_scoreObj.frameNum, `mask`);
-		}
-
-		// 背景表示・背景モーション
-		if (g_scoreObj.backData[g_scoreObj.frameNum] !== undefined) {
-			drawMainSpriteData(g_scoreObj.frameNum, `back`);
 		}
 
 		// 判定キャラクタ消去
