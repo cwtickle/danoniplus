@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/07/21
+ * Revised : 2019/08/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.15.11";
+const g_version = "Ver 1.15.12";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -3618,7 +3618,15 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				const tmpBackData = tmpData.split(",");
 
 				// 値チェックとエスケープ処理
-				const tmpFrame = setVal(tmpBackData[0], 200, "number") + parseFloat(g_stateObj.adjustment) + _preblankFrame;
+				let tmpFrame;
+				if (setVal(tmpBackData[0], 200, "number") === 0) {
+					tmpFrame = 0;
+				} else {
+					tmpFrame = setVal(tmpBackData[0], 200, "number") + parseFloat(g_stateObj.adjustment) + _preblankFrame;
+					if (tmpFrame < 0) {
+						tmpFrame = 0;
+					}
+				}
 				const tmpDepth = setVal(tmpBackData[1], 0, "number");
 				const tmpPath = escapeHtml(setVal(tmpBackData[2], "", "string"));
 				const tmpClass = escapeHtml(setVal(tmpBackData[3], "", "string"));
