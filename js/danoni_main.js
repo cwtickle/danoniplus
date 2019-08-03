@@ -8,8 +8,8 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.10.15`;
-const g_revisedDate = `2019/07/21`;
+const g_version = `Ver 4.10.16`;
+const g_revisedDate = `2019/08/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5006,7 +5006,15 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				const tmpMaskData = tmpData.split(`,`);
 
 				// 値チェックとエスケープ処理
-				const tmpFrame = calcFrame(setVal(tmpMaskData[0], 200, `number`));
+				let tmpFrame;
+				if (setVal(tmpMaskData[0], 200, `number`) === 0) {
+					tmpFrame = 0;
+				} else {
+					tmpFrame = calcFrame(setVal(tmpMaskData[0], 200, `number`));
+					if (tmpFrame < 0) {
+						tmpFrame = 0;
+					}
+				}
 				const tmpDepth = setVal(tmpMaskData[1], 0, `number`);
 				const tmpPath = escapeHtml(setVal(tmpMaskData[2], ``, `string`));
 				const tmpClass = escapeHtml(setVal(tmpMaskData[3], ``, `string`));
@@ -5067,7 +5075,15 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame) {
 				const tmpBackData = tmpData.split(`,`);
 
 				// 値チェックとエスケープ処理
-				const tmpFrame = calcFrame(setVal(tmpBackData[0], 200, `number`));
+				let tmpFrame;
+				if (setVal(tmpBackData[0], 200, `number`) === 0) {
+					tmpFrame = 0;
+				} else {
+					tmpFrame = calcFrame(setVal(tmpBackData[0], 200, `number`));
+					if (tmpFrame < 0) {
+						tmpFrame = 0;
+					}
+				}
 				const tmpDepth = setVal(tmpBackData[1], 0, `number`);
 				const tmpPath = escapeHtml(setVal(tmpBackData[2], ``, `string`));
 				const tmpClass = escapeHtml(setVal(tmpBackData[3], ``, `string`));
