@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/08/03
+ * Revised : 2019/08/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.5.1`;
-const g_revisedDate = `2019/08/03`;
+const g_version = `Ver 7.6.0`;
+const g_revisedDate = `2019/08/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1749,7 +1749,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				tmpFrame = 0;
 			} else {
 				tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, `number`));
-				if(tmpFrame < 0){
+				if (tmpFrame < 0) {
 					tmpFrame = 0;
 				}
 			}
@@ -2128,15 +2128,15 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 		if (tmpObj.path === `[loop]`) {
 			// キーワード指定：ループ
 			// 指定フレーム(class)へ移動する
-			g_scoreObj[`${_spriteName}LoopCount`]++;
-			return setVal(Number(tmpObj.class) - 1, 0, `number`);
+			g_scoreObj[`${_depthName}${spriteUpper}LoopCount`]++;
+			return getSpriteJumpFrame(tmpObj.class);
 
 		} else if (tmpObj.path === `[jump]`) {
 			// キーワード指定：フレームジャンプ
 			// 指定回数以上のループ(left)があれば指定フレーム(class)へ移動する
-			if (g_scoreObj[`${_spriteName}LoopCount`] >= Number(tmpObj.left)) {
-				g_scoreObj.titleLoopCount = 0;
-				return setVal(Number(tmpObj.class) - 1, 0, `number`);
+			if (g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] >= Number(tmpObj.left)) {
+				g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] = 0;
+				return getSpriteJumpFrame(tmpObj.class);
 			}
 		} else if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
 			tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
@@ -2178,6 +2178,16 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 		baseSprite.innerHTML = ``;
 	}
 	return _frame;
+}
+
+/**
+ * back/masktitle(result)において、ジャンプ先のフレーム数を取得
+ * @param {string} _frames 
+ */
+function getSpriteJumpFrame(_frames) {
+	const jumpFrames = _frames.split(`:`);
+	const jumpCnt = Math.floor(Math.random() * jumpFrames.length);
+	return setVal(Number(jumpFrames[jumpCnt]) - 1, 0, `number`);
 }
 
 /**
