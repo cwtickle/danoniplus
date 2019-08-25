@@ -1991,8 +1991,10 @@ function initAfterDosLoaded(_initFlg) {
 	}
 
 	// クエリで譜面番号が指定されていればセット
-	const specifiedScoreId = getQueryParamVal(`scoreId`);
-	g_stateObj.scoreId = g_headerObj.keyLabels[specifiedScoreId] ? specifiedScoreId : 0;
+	if (_initFlg === `true`) {
+		const specifiedScoreId = getQueryParamVal(`scoreId`);
+		g_stateObj.scoreId = g_headerObj.keyLabels[specifiedScoreId] ? specifiedScoreId : 0;
+	}
 
 	// customjs、音楽ファイルの読み込み
 	const randTime = new Date().getTime();
