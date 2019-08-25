@@ -1865,22 +1865,35 @@ function initialControl() {
 	}
 
 	// 譜面データの読み込み
+	loadDos(`true`);
+}
+
+/**
+ * 譜面読込
+ * @param {string} _initFlg 
+ */
+function loadDos(_initFlg) {
+
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
 
 	if (dosInput === null && externalDosInput === null) {
 		makeWarningWindow(C_MSG_E_0023);
-		initAfterDosLoaded();
+		initAfterDosLoaded(_initFlg);
 	}
 
 	// HTML埋め込みdos
 	if (dosInput !== null) {
 		g_rootObj = dosConvert(dosInput.value);
 		if (externalDosInput === null) {
-			const randTime = new Date().getTime();
-			loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
-				initAfterDosLoaded();
-			});
+			if (_initFlg === `true`) {
+				const randTime = new Date().getTime();
+				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
+					initAfterDosLoaded(_initFlg);
+				});
+			} else {
+				initAfterDosLoaded(_initFlg);
+			}
 		}
 	}
 
@@ -1901,18 +1914,27 @@ function initialControl() {
 			} else {
 				makeWarningWindow(C_MSG_E_0022);
 			}
-			const randTime = new Date().getTime();
-			loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
-				initAfterDosLoaded();
-			});
+
+			// danoni_setting.jsは初回時のみ読込
+			if (_initFlg === `true`) {
+				const randTime = new Date().getTime();
+				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
+					initAfterDosLoaded(_initFlg);
+				});
+			} else {
+				initAfterDosLoaded(_initFlg);
+			}
 		}, charset);
 	}
 }
 
-function initAfterDosLoaded() {
-	g_headerObj = headerConvert(g_rootObj);
-	keysConvert(g_rootObj);
+function initAfterDosLoaded(_initFlg) {
 
+	// 初回時のみ譜面ヘッダー、一時キー設定を行う
+	if (_initFlg === `true`) {
+		g_headerObj = headerConvert(g_rootObj);
+		keysConvert(g_rootObj);
+	}
 	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 	g_keyObj.currentPtn = 0;
 
@@ -1976,10 +1998,18 @@ function initAfterDosLoaded() {
 	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
 		if (g_headerObj.customjs2 !== ``) {
 			loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
-				titleInit();
+				if (_initFlg === `true`) {
+					titleInit();
+				} else {
+					loadingScoreInit2();
+				}
 			});
 		} else {
-			titleInit();
+			if (_initFlg === `true`) {
+				titleInit();
+			} else {
+				loadingScoreInit2();
+			}
 		}
 	});
 }
@@ -5026,7 +5056,11 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
  * 読込画面初期化
  */
 function loadingScoreInit() {
+	// 譜面データの読み込み
+	loadDos(`false`);
+}
 
+function loadingScoreInit2() {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
@@ -5038,7 +5072,6 @@ function loadingScoreInit() {
 		g_canLoadDifInfoFlg = false;
 	}
 
-	// 譜面データの読み込み
 	let scoreIdHeader = ``;
 	let dummyIdHeader = ``;
 	if (g_stateObj.scoreId > 0) {
