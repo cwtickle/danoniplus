@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.7.0`;
+const g_version = `Ver 7.7.1`;
 const g_revisedDate = `2019/08/25`;
 const g_alphaVersion = ``;
 
@@ -1991,8 +1991,10 @@ function initAfterDosLoaded(_initFlg) {
 	}
 
 	// クエリで譜面番号が指定されていればセット
-	const specifiedScoreId = getQueryParamVal(`scoreId`);
-	g_stateObj.scoreId = g_headerObj.keyLabels[specifiedScoreId] ? specifiedScoreId : 0;
+	if (_initFlg === `true`) {
+		const specifiedScoreId = getQueryParamVal(`scoreId`);
+		g_stateObj.scoreId = g_headerObj.keyLabels[specifiedScoreId] ? specifiedScoreId : 0;
+	}
 
 	// customjs、音楽ファイルの読み込み
 	const randTime = new Date().getTime();
