@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/08/18
+ * Revised : 2019/08/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.6.0`;
-const g_revisedDate = `2019/08/18`;
+const g_version = `Ver 7.7.0`;
+const g_revisedDate = `2019/08/25`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1753,7 +1753,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 					tmpFrame = 0;
 				}
 			}
-			const tmpDepth = setVal(tmpSpriteData[1], 0, `number`);
+			const tmpDepth = (tmpSpriteData[1] === `ALL` ? `ALL` : setVal(tmpSpriteData[1], 0, `number`));
 			const tmpPath = escapeHtml(setVal(tmpSpriteData[2], ``, `string`));
 			const tmpClass = escapeHtml(setVal(tmpSpriteData[3], ``, `string`));
 			const tmpX = setVal(tmpSpriteData[4], 0, `float`);
@@ -1764,23 +1764,24 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 			const tmpAnimationName = escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, `string`));
 			const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, `number`) / 60;
 
-			if (tmpDepth > maxDepth) {
+			if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
 				maxDepth = tmpDepth;
 			}
 
 			let addFrame = 0;
 			if (spriteData[tmpFrame] === undefined) {
-				spriteData[tmpFrame] = {};
+				spriteData[tmpFrame] = [];
+				spriteData[tmpFrame][0] = {};
 			} else {
 				for (let m = 1; ; m++) {
-					if (spriteData[tmpFrame + m] === undefined) {
-						spriteData[tmpFrame + m] = {};
+					if (spriteData[tmpFrame][m] === undefined) {
+						spriteData[tmpFrame][m] = {};
 						addFrame = m;
 						break;
 					}
 				}
 			}
-			spriteData[tmpFrame + addFrame] = {
+			spriteData[tmpFrame][addFrame] = {
 				depth: tmpDepth,
 				path: tmpPath,
 				class: tmpClass,
@@ -1865,22 +1866,35 @@ function initialControl() {
 	}
 
 	// 譜面データの読み込み
+	loadDos(`true`);
+}
+
+/**
+ * 譜面読込
+ * @param {string} _initFlg 
+ */
+function loadDos(_initFlg) {
+
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
 
 	if (dosInput === null && externalDosInput === null) {
 		makeWarningWindow(C_MSG_E_0023);
-		initAfterDosLoaded();
+		initAfterDosLoaded(_initFlg);
 	}
 
 	// HTML埋め込みdos
 	if (dosInput !== null) {
 		g_rootObj = dosConvert(dosInput.value);
 		if (externalDosInput === null) {
-			const randTime = new Date().getTime();
-			loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
-				initAfterDosLoaded();
-			});
+			if (_initFlg === `true`) {
+				const randTime = new Date().getTime();
+				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
+					initAfterDosLoaded(_initFlg);
+				});
+			} else {
+				initAfterDosLoaded(_initFlg);
+			}
 		}
 	}
 
@@ -1901,18 +1915,27 @@ function initialControl() {
 			} else {
 				makeWarningWindow(C_MSG_E_0022);
 			}
-			const randTime = new Date().getTime();
-			loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
-				initAfterDosLoaded();
-			});
+
+			// danoni_setting.jsは初回時のみ読込
+			if (_initFlg === `true`) {
+				const randTime = new Date().getTime();
+				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
+					initAfterDosLoaded(_initFlg);
+				});
+			} else {
+				initAfterDosLoaded(_initFlg);
+			}
 		}, charset);
 	}
 }
 
-function initAfterDosLoaded() {
-	g_headerObj = headerConvert(g_rootObj);
-	keysConvert(g_rootObj);
+function initAfterDosLoaded(_initFlg) {
 
+	// 初回時のみ譜面ヘッダー、一時キー設定を行う
+	if (_initFlg === `true`) {
+		g_headerObj = headerConvert(g_rootObj);
+		keysConvert(g_rootObj);
+	}
 	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 	g_keyObj.currentPtn = 0;
 
@@ -1976,10 +1999,18 @@ function initAfterDosLoaded() {
 	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
 		if (g_headerObj.customjs2 !== ``) {
 			loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
-				titleInit();
+				if (_initFlg === `true`) {
+					titleInit();
+				} else {
+					loadingScoreInit2();
+				}
 			});
 		} else {
-			titleInit();
+			if (_initFlg === `true`) {
+				titleInit();
+			} else {
+				loadingScoreInit2();
+			}
 		}
 	});
 }
@@ -2114,68 +2145,78 @@ function drawDefaultBackImage(_key) {
 }
 
 /**
- * 背景・マスクモーションの表示
+ * 背景・マスクモーションの表示（タイトル・リザルト用）
  * @param {number} _frame 
- * @param {string} _spriteName 
- * @param {string} _depthName 
+ * @param {string} _spriteName title / result
+ * @param {string} _depthName back / mask
  */
 function drawSpriteData(_frame, _spriteName, _depthName) {
 
 	const spriteUpper = `${_spriteName.slice(0, 1).toUpperCase()}${_spriteName.slice(1)}`;
-	const tmpObj = g_headerObj[`${_depthName}${spriteUpper}Data`][_frame];
-	const baseSprite = document.querySelector(`#${_depthName}${spriteUpper}Sprite${tmpObj.depth}`);
-	if (tmpObj.path !== ``) {
-		if (tmpObj.path === `[loop]`) {
-			// キーワード指定：ループ
-			// 指定フレーム(class)へ移動する
-			g_scoreObj[`${_depthName}${spriteUpper}LoopCount`]++;
-			return getSpriteJumpFrame(tmpObj.class);
+	const tmpObjs = g_headerObj[`${_depthName}${spriteUpper}Data`][_frame];
 
-		} else if (tmpObj.path === `[jump]`) {
-			// キーワード指定：フレームジャンプ
-			// 指定回数以上のループ(left)があれば指定フレーム(class)へ移動する
-			if (g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] >= Number(tmpObj.left)) {
-				g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] = 0;
+	for (let j = 0; j < tmpObjs.length; j++) {
+		const tmpObj = tmpObjs[j];
+		const baseSprite = document.querySelector(`#${_depthName}${spriteUpper}Sprite${tmpObj.depth}`);
+		if (tmpObj.path !== ``) {
+			if (tmpObj.path === `[loop]`) {
+				// キーワード指定：ループ
+				// 指定フレーム(class)へ移動する
+				g_scoreObj[`${_depthName}${spriteUpper}LoopCount`]++;
 				return getSpriteJumpFrame(tmpObj.class);
-			}
-		} else if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
-			tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
 
-			// imgタグの場合
-			let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
+			} else if (tmpObj.path === `[jump]`) {
+				// キーワード指定：フレームジャンプ
+				// 指定回数以上のループ(left)があれば指定フレーム(class)へ移動する
+				if (g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] >= Number(tmpObj.left)) {
+					g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] = 0;
+					return getSpriteJumpFrame(tmpObj.class);
+				}
+			} else if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
+				tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
+
+				// imgタグの場合
+				let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
 					style="position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-			if (tmpObj.width !== 0 && tmpObj.width > 0) {
-				tmpInnerHTML += `;width:${tmpObj.width}px`;
-			}
-			if (tmpObj.height !== `` && setVal(tmpObj.height, 0, `number`) > 0) {
-				tmpInnerHTML += `;height:${tmpObj.height}px`;
-			}
-			tmpInnerHTML += `;animation-name:${tmpObj.animationName}
+				if (tmpObj.width !== 0 && tmpObj.width > 0) {
+					tmpInnerHTML += `;width:${tmpObj.width}px`;
+				}
+				if (tmpObj.height !== `` && setVal(tmpObj.height, 0, `number`) > 0) {
+					tmpInnerHTML += `;height:${tmpObj.height}px`;
+				}
+				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
 					;animation-duration:${tmpObj.animationDuration}s
 					;opacity:${tmpObj.opacity}">`;
-			baseSprite.innerHTML = tmpInnerHTML;
+				baseSprite.innerHTML = tmpInnerHTML;
 
-		} else {
-			// spanタグの場合
-			let tmpInnerHTML = `<span class="${tmpObj.class}"
+			} else {
+				// spanタグの場合
+				let tmpInnerHTML = `<span class="${tmpObj.class}"
 					style="display:inline-block;position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
 
-			// この場合のwidthは font-size と解釈する
-			if (tmpObj.width !== 0 && tmpObj.width > 0) {
-				tmpInnerHTML += `;font-size:${tmpObj.width}px`;
-			}
+				// この場合のwidthは font-size と解釈する
+				if (tmpObj.width !== 0 && tmpObj.width > 0) {
+					tmpInnerHTML += `;font-size:${tmpObj.width}px`;
+				}
 
-			// この場合のheightは color と解釈する
-			if (tmpObj.height !== ``) {
-				tmpInnerHTML += `;color:${tmpObj.height}`;
-			}
-			tmpInnerHTML += `;animation-name:${tmpObj.animationName}
+				// この場合のheightは color と解釈する
+				if (tmpObj.height !== ``) {
+					tmpInnerHTML += `;color:${tmpObj.height}`;
+				}
+				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
 					;animation-duration:${tmpObj.animationDuration}s
 					;opacity:${tmpObj.opacity}">${tmpObj.path}</span>`;
-			baseSprite.innerHTML = tmpInnerHTML;
+				baseSprite.innerHTML = tmpInnerHTML;
+			}
+		} else {
+			if (tmpObj.depth === `ALL`) {
+				for (let j = 0; j <= g_headerObj[`${_depthName}${spriteUpper}MaxDepth`]; j++) {
+					document.querySelector(`#${_depthName}${spriteUpper}Sprite${j}`).innerHTML = ``;
+				}
+			} else {
+				baseSprite.innerHTML = ``;
+			}
 		}
-	} else {
-		baseSprite.innerHTML = ``;
 	}
 	return _frame;
 }
@@ -2193,53 +2234,61 @@ function getSpriteJumpFrame(_frames) {
 /**
  * 背景・マスクモーションの表示
  * @param {number} _frame 
- * @param {string} _spriteName 
  * @param {string} _depthName 
  */
-function drawMainSpriteData(_frame, _spriteName) {
+function drawMainSpriteData(_frame, _depthName) {
 
-	const tmpObj = g_scoreObj[`${_spriteName}Data`][_frame];
-	const baseSprite = document.querySelector(`#${_spriteName}Sprite${tmpObj.depth}`);
-	if (tmpObj.path !== ``) {
-		if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
-			tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
+	const tmpObjs = g_scoreObj[`${_depthName}Data`][_frame];
 
-			// imgタグの場合
-			let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
+	tmpObjs.forEach(tmpObj => {
+		const baseSprite = document.querySelector(`#${_depthName}Sprite${tmpObj.depth}`);
+		if (tmpObj.path !== ``) {
+			if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
+				tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
+
+				// imgタグの場合
+				let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
 					style="position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-			if (tmpObj.width !== 0 && tmpObj.width > 0) {
-				tmpInnerHTML += `;width:${tmpObj.width}px`;
-			}
-			if (tmpObj.height !== `` && setVal(tmpObj.height, 0, `number`) > 0) {
-				tmpInnerHTML += `;height:${tmpObj.height}px`;
-			}
-			tmpInnerHTML += `;animation-name:${tmpObj.animationName}
+				if (tmpObj.width !== 0 && tmpObj.width > 0) {
+					tmpInnerHTML += `;width:${tmpObj.width}px`;
+				}
+				if (tmpObj.height !== `` && setVal(tmpObj.height, 0, `number`) > 0) {
+					tmpInnerHTML += `;height:${tmpObj.height}px`;
+				}
+				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
 					;animation-duration:${tmpObj.animationDuration}s
 					;opacity:${tmpObj.opacity}">`;
-			baseSprite.innerHTML = tmpInnerHTML;
+				baseSprite.innerHTML = tmpInnerHTML;
 
-		} else {
-			// spanタグの場合
-			let tmpInnerHTML = `<span class="${tmpObj.class}"
+			} else {
+				// spanタグの場合
+				let tmpInnerHTML = `<span class="${tmpObj.class}"
 					style="display:inline-block;position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
 
-			// この場合のwidthは font-size と解釈する
-			if (tmpObj.width !== 0 && tmpObj.width > 0) {
-				tmpInnerHTML += `;font-size:${tmpObj.width}px`;
-			}
+				// この場合のwidthは font-size と解釈する
+				if (tmpObj.width !== 0 && tmpObj.width > 0) {
+					tmpInnerHTML += `;font-size:${tmpObj.width}px`;
+				}
 
-			// この場合のheightは color と解釈する
-			if (tmpObj.height !== ``) {
-				tmpInnerHTML += `;color:${tmpObj.height}`;
-			}
-			tmpInnerHTML += `;animation-name:${tmpObj.animationName}
+				// この場合のheightは color と解釈する
+				if (tmpObj.height !== ``) {
+					tmpInnerHTML += `;color:${tmpObj.height}`;
+				}
+				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
 					;animation-duration:${tmpObj.animationDuration}s
 					;opacity:${tmpObj.opacity}">${tmpObj.path}</span>`;
-			baseSprite.innerHTML = tmpInnerHTML;
+				baseSprite.innerHTML = tmpInnerHTML;
+			}
+		} else {
+			if (tmpObj.depth === `ALL`) {
+				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
+					document.querySelector(`#${_depthName}${spriteUpper}Sprite${tmpObj.depth}`).innerHTML = ``;
+				}
+			} else {
+				baseSprite.innerHTML = ``;
+			}
 		}
-	} else {
-		baseSprite.innerHTML = ``;
-	}
+	});
 }
 
 /**
@@ -2578,6 +2627,7 @@ function titleInit() {
 		// 背景表示・背景モーション
 		if (g_headerObj.backTitleData[g_scoreObj.backTitleFrameNum] !== undefined) {
 			g_scoreObj.backTitleFrameNum = drawSpriteData(g_scoreObj.backTitleFrameNum, `title`, `back`);
+			console.log(g_scoreObj.backTitleFrameNum);
 		}
 
 		// マスク表示・マスクモーション
@@ -5026,7 +5076,11 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
  * 読込画面初期化
  */
 function loadingScoreInit() {
+	// 譜面データの読み込み
+	loadDos(`false`);
+}
 
+function loadingScoreInit2() {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
@@ -5038,7 +5092,6 @@ function loadingScoreInit() {
 		g_canLoadDifInfoFlg = false;
 	}
 
-	// 譜面データの読み込み
 	let scoreIdHeader = ``;
 	let dummyIdHeader = ``;
 	if (g_stateObj.scoreId > 0) {
@@ -5564,10 +5617,11 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 						let addFrame = 0;
 						if (obj.wordData[tmpWordData[k]] === undefined) {
 							obj.wordData[tmpWordData[k]] = [];
+							obj.wordData[tmpWordData[k]][0] = [];
 						} else {
 							for (let m = 1; ; m++) {
-								if (obj.wordData[tmpWordData[k] + m] === undefined) {
-									obj.wordData[tmpWordData[k] + m] = [];
+								if (obj.wordData[tmpWordData[k]][m] === undefined) {
+									obj.wordData[tmpWordData[k]][m] = [];
 									addFrame = m;
 									break;
 								}
@@ -5576,10 +5630,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 
 						if (tmpWordData.length > 3 && tmpWordData.length < 6) {
 							tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, `number`);
-							obj.wordData[tmpWordData[0] + addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
+							obj.wordData[tmpWordData[0]][addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
 							break;
 						} else {
-							obj.wordData[tmpWordData[k] + addFrame].push(tmpWordData[k + 1], setVal(tmpWordData[k + 2], ``, `string`));
+							obj.wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1], setVal(tmpWordData[k + 2], ``, `string`));
 						}
 					}
 				}
@@ -7690,79 +7744,83 @@ function MainInit() {
 
 		// 歌詞表示
 		if (g_scoreObj.wordData[g_scoreObj.frameNum] !== undefined) {
-			g_wordObj.wordDir = g_scoreObj.wordData[g_scoreObj.frameNum][0];
-			g_wordObj.wordDat = g_scoreObj.wordData[g_scoreObj.frameNum][1];
-			g_wordSprite = document.querySelector(`#lblword${g_wordObj.wordDir}`);
+			const tmpObjs = g_scoreObj.wordData[g_scoreObj.frameNum];
 
-			if (g_wordSprite !== null) {
-				const wordDepth = Number(g_wordObj.wordDir);
-				if (g_wordObj.wordDat === `[fadein]`) {
-					g_wordObj[`fadeInFlg${wordDepth}`] = true;
-					g_wordObj[`fadeOutFlg${wordDepth}`] = false;
-					g_workObj.fadingFrame[wordDepth] = 0;
-					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
+			tmpObjs.forEach(tmpObj => {
+				g_wordObj.wordDir = tmpObj[0];
+				g_wordObj.wordDat = tmpObj[1];
+				g_wordSprite = document.querySelector(`#lblword${g_wordObj.wordDir}`);
 
-					if (g_scoreObj.wordData[g_scoreObj.frameNum].length > 2) {
-						g_workObj.wordFadeFrame[wordDepth] = setVal(g_scoreObj.wordData[g_scoreObj.frameNum][2], C_WOD_FRAME, `number`);
+				if (g_wordSprite !== null) {
+					const wordDepth = Number(g_wordObj.wordDir);
+					if (g_wordObj.wordDat === `[fadein]`) {
+						g_wordObj[`fadeInFlg${wordDepth}`] = true;
+						g_wordObj[`fadeOutFlg${wordDepth}`] = false;
+						g_workObj.fadingFrame[wordDepth] = 0;
+						g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
+
+						if (tmpObj.length > 2) {
+							g_workObj.wordFadeFrame[wordDepth] = setVal(tmpObj[2], C_WOD_FRAME, `number`);
+						} else {
+							g_workObj.wordFadeFrame[wordDepth] = C_WOD_FRAME;
+						}
+
+						g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
+						g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
+						g_wordSprite.style.animationTimingFunction = `linear`;
+						g_wordSprite.style.animationFillMode = `forwards`;
+
+					} else if (g_wordObj.wordDat === `[fadeout]`) {
+						g_wordObj[`fadeInFlg${wordDepth}`] = false;
+						g_wordObj[`fadeOutFlg${wordDepth}`] = true;
+						g_workObj.fadingFrame[wordDepth] = 0;
+						g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
+
+						if (tmpObj.length > 2) {
+							g_workObj.wordFadeFrame[wordDepth] = setVal(tmpObj[2], C_WOD_FRAME, `number`);
+						} else {
+							g_workObj.wordFadeFrame[wordDepth] = C_WOD_FRAME;
+						}
+
+						g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
+						g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
+						g_wordSprite.style.animationTimingFunction = `linear`;
+						g_wordSprite.style.animationFillMode = `forwards`;
+
+					} else if (g_wordObj.wordDat === `[center]` ||
+						g_wordObj.wordDat === `[left]` || g_wordObj.wordDat === `[right]`) {
+
 					} else {
-						g_workObj.wordFadeFrame[wordDepth] = C_WOD_FRAME;
+						g_workObj.fadingFrame = g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth];
+						if (g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
+							&& g_workObj.fadingFrame >= g_workObj.wordFadeFrame[wordDepth]) {
+							g_wordSprite.style.animationName = `none`;
+							g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = false;
+						}
+						if (g_wordObj[`fadeInFlg${g_wordObj.wordDir}`]
+							&& g_workObj.fadingFrame >= g_workObj.wordFadeFrame[wordDepth]) {
+							g_wordSprite.style.animationName = `none`;
+							g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = false;
+						}
+						g_workObj[`word${g_wordObj.wordDir}Data`] = g_wordObj.wordDat;
+						g_wordSprite.innerHTML = g_wordObj.wordDat;
 					}
 
-					g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
-					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
-					g_wordSprite.style.animationTimingFunction = `linear`;
-					g_wordSprite.style.animationFillMode = `forwards`;
-
-				} else if (g_wordObj.wordDat === `[fadeout]`) {
-					g_wordObj[`fadeInFlg${wordDepth}`] = false;
-					g_wordObj[`fadeOutFlg${wordDepth}`] = true;
-					g_workObj.fadingFrame[wordDepth] = 0;
-					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
-
-					if (g_scoreObj.wordData[g_scoreObj.frameNum].length > 2) {
-						g_workObj.wordFadeFrame[wordDepth] = setVal(g_scoreObj.wordData[g_scoreObj.frameNum][2], C_WOD_FRAME, `number`);
-					} else {
-						g_workObj.wordFadeFrame[wordDepth] = C_WOD_FRAME;
+					if (g_wordObj.wordDat === `[center]`) {
+						g_wordSprite.style.textAlign = C_ALIGN_CENTER;
+						g_wordSprite.style.display = `block`;
+						g_wordSprite.style.margin = `auto`;
+					} else if (g_wordObj.wordDat === `[left]`) {
+						g_wordSprite.style.textAlign = C_ALIGN_LEFT;
+						g_wordSprite.style.display = `inline`;
+						g_wordSprite.style.margin = `0`;
+					} else if (g_wordObj.wordDat === `[right]`) {
+						g_wordSprite.style.textAlign = C_ALIGN_RIGHT;
+						g_wordSprite.style.display = `block`;
+						g_wordSprite.style.margin = `auto`;
 					}
-
-					g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
-					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
-					g_wordSprite.style.animationTimingFunction = `linear`;
-					g_wordSprite.style.animationFillMode = `forwards`;
-
-				} else if (g_wordObj.wordDat === `[center]` ||
-					g_wordObj.wordDat === `[left]` || g_wordObj.wordDat === `[right]`) {
-
-				} else {
-					g_workObj.fadingFrame = g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth];
-					if (g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
-						&& g_workObj.fadingFrame >= g_workObj.wordFadeFrame[wordDepth]) {
-						g_wordSprite.style.animationName = `none`;
-						g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = false;
-					}
-					if (g_wordObj[`fadeInFlg${g_wordObj.wordDir}`]
-						&& g_workObj.fadingFrame >= g_workObj.wordFadeFrame[wordDepth]) {
-						g_wordSprite.style.animationName = `none`;
-						g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = false;
-					}
-					g_workObj[`word${g_wordObj.wordDir}Data`] = g_wordObj.wordDat;
-					g_wordSprite.innerHTML = g_wordObj.wordDat;
 				}
-
-				if (g_wordObj.wordDat === `[center]`) {
-					g_wordSprite.style.textAlign = C_ALIGN_CENTER;
-					g_wordSprite.style.display = `block`;
-					g_wordSprite.style.margin = `auto`;
-				} else if (g_wordObj.wordDat === `[left]`) {
-					g_wordSprite.style.textAlign = C_ALIGN_LEFT;
-					g_wordSprite.style.display = `inline`;
-					g_wordSprite.style.margin = `0`;
-				} else if (g_wordObj.wordDat === `[right]`) {
-					g_wordSprite.style.textAlign = C_ALIGN_RIGHT;
-					g_wordSprite.style.display = `block`;
-					g_wordSprite.style.margin = `auto`;
-				}
-			}
+			});
 		}
 
 		// 判定キャラクタ消去
