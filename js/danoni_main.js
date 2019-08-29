@@ -6805,13 +6805,13 @@ function MainInit() {
 		}
 	}
 
-	let fullSecond = Math.ceil(g_headerObj.blankFrame / 60 + duration / g_headerObj.playbackRate);
+	let fullFrame = Math.ceil(g_headerObj.blankFrame + g_stateObj.realAdjustment + duration * 60 / g_headerObj.playbackRate);
 	if (fadeOutFrame !== Infinity && !endFrameUseFlg) {
-		fullSecond += Math.ceil(C_FRM_AFTERFADE / 60);
+		fullFrame += C_FRM_AFTERFADE;
 	}
 
-	const fullMin = Math.floor(fullSecond / 60);
-	const fullSec = `00${Math.floor(fullSecond % 60)}`.slice(-2);
+	const fullMin = Math.floor(fullFrame / 3600);
+	const fullSec = `00${Math.floor(Math.floor(fullFrame / 60) % 60)}`.slice(-2);
 	const fullTime = `${fullMin}:${fullSec}`;
 
 	// フレーム数
@@ -7852,27 +7852,25 @@ function MainInit() {
 		g_scoreObj.frameNum++;
 		g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60 - buffTime);
 
-		// タイマー、曲終了判定
+		// タイマー
 		if (g_scoreObj.frameNum % 60 === 0) {
-			const currentSecond = Math.ceil(g_scoreObj.frameNum / 60);
 			const currentMin = Math.floor(g_scoreObj.frameNum / 3600);
 			const currentSec = `00${(g_scoreObj.frameNum / 60) % 60}`.slice(-2);
-			const currentTime = `${currentMin}:${currentSec}`;
-			lblTime1.innerHTML = currentTime;
-
-			if (currentSecond >= fullSecond) {
-				if (fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
-					g_audio.pause();
-				}
-				if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
-					g_gameOverFlg = true;
-				}
-				clearTimeout(g_timeoutEvtId);
-				setTimeout(_ => {
-					clearWindow();
-					resultInit();
-				}, 100);
+			lblTime1.innerHTML = `${currentMin}:${currentSec}`;
+		}
+		// 曲終了判定
+		if (g_scoreObj.frameNum === fullFrame) {
+			if (fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
+				g_audio.pause();
 			}
+			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
+				g_gameOverFlg = true;
+			}
+			clearTimeout(g_timeoutEvtId);
+			setTimeout(_ => {
+				clearWindow();
+				resultInit();
+			}, 100);
 		}
 	}
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60);
