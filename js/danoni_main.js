@@ -8891,6 +8891,23 @@ function resultInit() {
 		maskResultSprite.style.pointerEvents = `none`;
 	}
 
+	if (g_scoreObj.maskResultFrameNum === 0) {
+
+		// マスク表示・マスクモーション(0フレーム指定)
+		if (g_headerObj.maskResultData[0] !== undefined) {
+			g_scoreObj.maskResultFrameNum = drawSpriteData(g_scoreObj.backResultFrameNum, `result`, `mask`);
+			g_headerObj.maskResultData[0] = undefined;
+		}
+	}
+	if (g_scoreObj.backResultFrameNum === 0) {
+
+		// 背景表示・背景モーション(0フレーム指定)
+		if (g_headerObj.backResultData[0] !== undefined) {
+			g_scoreObj.backResultFrameNum = drawSpriteData(g_scoreObj.backResultFrameNum, `result`, `back`);
+			g_headerObj.backResultData[0] = undefined;
+		}
+	}
+
 	/**
 	 * タイトルのモーション設定
 	 */
