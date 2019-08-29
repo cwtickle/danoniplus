@@ -8532,30 +8532,10 @@ function resultInit() {
 		`Display`, C_ALIGN_LEFT));
 
 	let displayData = ``;
-	if (g_stateObj.d_stepzone !== C_FLG_ON) {
-		if (displayData !== ``) {
-			displayData += `, `;
-		}
-		displayData += `Step`;
-	}
-	if (g_stateObj.d_judgement !== C_FLG_ON) {
-		if (displayData !== ``) {
-			displayData += `, `;
-		}
-		displayData += `Judge`;
-	}
-	if (g_stateObj.d_lifegauge !== C_FLG_ON) {
-		if (displayData !== ``) {
-			displayData += `, `;
-		}
-		displayData += `Life`;
-	}
-	if (g_stateObj.d_musicinfo !== C_FLG_ON) {
-		if (displayData !== ``) {
-			displayData += `, `;
-		}
-		displayData += `MusicInfo`;
-	}
+	displayData = withString(displayData, g_stateObj.d_stepzone, `Step`);
+	displayData = withString(displayData, g_stateObj.d_judgement, `Judge`);
+	displayData = withString(displayData, g_stateObj.d_lifegauge, `Life`);
+	displayData = withString(displayData, g_stateObj.d_musicinfo, `MusicInfo`);
 	if (displayData === ``) {
 		displayData = `All Visible`;
 	} else {
@@ -8565,41 +8545,32 @@ function resultInit() {
 		displayData, C_ALIGN_CENTER));
 
 	let display2Data = ``;
-	if (g_stateObj.d_speed !== C_FLG_ON) {
-		if (display2Data !== ``) {
-			display2Data += `, `;
-		}
-		display2Data += `Speed`;
-	}
-	if (g_stateObj.d_color !== C_FLG_ON) {
-		if (display2Data !== ``) {
-			display2Data += `, `;
-		}
-		display2Data += `Color`;
-	}
-	if (g_stateObj.d_lyrics !== C_FLG_ON) {
-		if (display2Data !== ``) {
-			display2Data += `, `;
-		}
-		display2Data += `Lyrics`;
-	}
-	if (g_stateObj.d_background !== C_FLG_ON) {
-		if (display2Data !== ``) {
-			display2Data += `, `;
-		}
-		display2Data += `Back`;
-	}
-	if (g_stateObj.d_arroweffect !== C_FLG_ON) {
-		if (display2Data !== ``) {
-			display2Data += `, `;
-		}
-		display2Data += `ArrowEffect`;
-	}
+	display2Data = withString(display2Data, g_stateObj.d_speed, `Speed`);
+	display2Data = withString(display2Data, g_stateObj.d_color, `Color`);
+	display2Data = withString(display2Data, g_stateObj.d_lyrics, `Lyrics`);
+	display2Data = withString(display2Data, g_stateObj.d_background, `Back`);
+	display2Data = withString(display2Data, g_stateObj.d_arroweffect, `ArrowEffect`);
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
 	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, `#cccccc`, 5,
 		display2Data, C_ALIGN_CENTER));
+
+	/**
+	 * プレイスタイル（Display）のカスタム有無
+	 * @param {string} _baseString 
+	 * @param {string} _flg 
+	 * @param {string} _displayText 
+	 */
+	function withString(_baseString, _flg, _displayText) {
+		if (_flg !== C_FLG_ON) {
+			if (_baseString !== ``) {
+				_baseString += `, `;
+			}
+			_baseString += _displayText;
+		}
+		return _baseString;
+	}
 
 	// キャラクタ描画
 	resultWindow.appendChild(makeResultSymbol(`lblIi`, 0, C_CLR_II, 0, C_JCR_II, C_ALIGN_LEFT));
