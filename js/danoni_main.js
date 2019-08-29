@@ -2629,7 +2629,6 @@ function titleInit() {
 		// 背景表示・背景モーション
 		if (g_headerObj.backTitleData[g_scoreObj.backTitleFrameNum] !== undefined) {
 			g_scoreObj.backTitleFrameNum = drawSpriteData(g_scoreObj.backTitleFrameNum, `title`, `back`);
-			console.log(g_scoreObj.backTitleFrameNum);
 		}
 
 		// マスク表示・マスクモーション
@@ -3175,28 +3174,14 @@ function headerConvert(_dosObj) {
 	// 結果画面用のマスク透過設定
 	obj.masktitleButton = setVal(_dosObj.masktitleButton, `false`, `string`);
 
-	// 結果画面用・背景データの分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	obj.backResultData = [];
-	obj.backResultData.length = 0;
-	obj.backResultMaxDepth = -1;
-	if (_dosObj.backresult_data !== undefined) {
-		[obj.backResultData, obj.backResultMaxDepth] = makeSpriteData(_dosObj.backresult_data);
-	}
-
-	// 結果画面用・マスクデータの分解 (下記すべてで1セット、改行区切り)
-	obj.maskResultData = [];
-	obj.maskResultData.length = 0;
-	obj.maskResultMaxDepth = -1;
-	if (_dosObj.maskresult_data !== undefined) {
-		[obj.maskResultData, obj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
-	}
-
 	// 結果画面用のマスク透過設定
 	obj.maskresultButton = setVal(_dosObj.maskresultButton, `false`, `string`);
 
 	// color_dataの過去バージョン互換設定
 	obj.colorDataType = setVal(_dosObj.colorDataType, ``, `string`);
+
+	// リザルトモーションをDisplay:BackgroundのON/OFFと連動させるかどうかの設定
+	obj.resultMotionSet = setVal(_dosObj.resultMotionSet, `true`, `string`);
 
 	return obj;
 }
@@ -5673,6 +5658,27 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		} else if (_dosObj[`back${_scoreNo}_data`] !== undefined) {
 			[obj.backData, obj.backMaxDepth] = makeSpriteData(_dosObj[`back${_scoreNo}_data`], calcFrame);
 		}
+	}
+
+	// 結果画面用・背景データの分解 (下記すべてで1セット、改行区切り)
+	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
+	g_headerObj.backResultData = [];
+	g_headerObj.backResultData.length = 0;
+	g_headerObj.backResultMaxDepth = -1;
+
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
+	} else if (_dosObj.backresult_data !== undefined) {
+		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(_dosObj.backresult_data);
+	}
+
+	// 結果画面用・マスクデータの分解 (下記すべてで1セット、改行区切り)
+	g_headerObj.maskResultData = [];
+	g_headerObj.maskResultData.length = 0;
+	g_headerObj.maskResultMaxDepth = -1;
+
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
+	} else if (_dosObj.maskresult_data !== undefined) {
+		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
 	}
 
 	return obj;
