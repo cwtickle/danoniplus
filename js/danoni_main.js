@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/08/30
+ * Revised : 2019/08/31
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.8.0`;
-const g_revisedDate = `2019/08/30`;
+const g_version = `Ver 7.8.1`;
+const g_revisedDate = `2019/08/31`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -6827,8 +6827,12 @@ function MainInit() {
 		fullFrame += C_FRM_AFTERFADE;
 	}
 
-	const fullMin = Math.floor(fullFrame / 3600);
-	const fullSec = `00${Math.floor(Math.floor(fullFrame / 60) % 60)}`.slice(-2);
+	const nominalDiff = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
+	g_scoreObj.nominalFrameNum = g_scoreObj.frameNum - nominalDiff;
+	const nominalFullFrame = fullFrame - nominalDiff;
+
+	const fullMin = Math.floor(nominalFullFrame / 3600);
+	const fullSec = `00${Math.floor(Math.floor(nominalFullFrame / 60) % 60)}`.slice(-2);
 	const fullTime = `${fullMin}:${fullSec}`;
 
 	// フレーム数
@@ -7867,13 +7871,16 @@ function MainInit() {
 			buffTime = (thisTime - musicStartTime - (g_scoreObj.frameNum - musicStartFrame) * 1000 / 60);
 		}
 		g_scoreObj.frameNum++;
+		g_scoreObj.nominalFrameNum++;
 		g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60 - buffTime);
 
 		// タイマー
-		if (g_scoreObj.frameNum % 60 === 0) {
-			const currentMin = Math.floor(g_scoreObj.frameNum / 3600);
-			const currentSec = `00${(g_scoreObj.frameNum / 60) % 60}`.slice(-2);
-			lblTime1.innerHTML = `${currentMin}:${currentSec}`;
+		if (g_scoreObj.nominalFrameNum % 60 === 0) {
+			if (g_scoreObj.nominalFrameNum >= 0) {
+				const currentMin = Math.floor(g_scoreObj.nominalFrameNum / 3600);
+				const currentSec = `00${(g_scoreObj.nominalFrameNum / 60) % 60}`.slice(-2);
+				lblTime1.innerHTML = `${currentMin}:${currentSec}`;
+			}
 		}
 		// 曲終了判定
 		if (g_scoreObj.frameNum >= fullFrame) {
