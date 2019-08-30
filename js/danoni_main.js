@@ -261,6 +261,10 @@ const g_resultObj = {
 	score: 0
 };
 
+const C_RLT_BRACKET_L = 210;
+const C_RLT_HIDIF_X = 165;
+const C_RLT_BRACKET_R = 320;
+
 let g_allArrow = 0;
 let g_allFrz = 0;
 let g_currentArrows = 0;
@@ -8691,42 +8695,42 @@ function resultInit() {
 		}
 
 		// ハイスコア差分描画
-		resultWindow.appendChild(makeResultSymbol(`lblIiL1`, 210, `#999999`, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinL1`, 210, `#999999`, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariL1`, 210, `#999999`, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonL1`, 210, `#999999`, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanL1`, 210, `#999999`, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaL1`, 210, `#999999`, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiL1`, 210, `#999999`, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboL1`, 210, `#999999`, 7, `(${maxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboL1`, 210, `#999999`, 8, `(${fmaxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiL1`, C_RLT_BRACKET_L, `#999999`, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinL1`, C_RLT_BRACKET_L, `#999999`, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariL1`, C_RLT_BRACKET_L, `#999999`, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonL1`, C_RLT_BRACKET_L, `#999999`, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanL1`, C_RLT_BRACKET_L, `#999999`, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaL1`, C_RLT_BRACKET_L, `#999999`, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiL1`, C_RLT_BRACKET_L, `#999999`, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboL1`, C_RLT_BRACKET_L, `#999999`, 7, `(${maxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboL1`, C_RLT_BRACKET_L, `#999999`, 8, `(${fmaxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreL1`, 210, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreL1`, C_RLT_BRACKET_L, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiS`, 165, `#cccccc`, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinS`, 165, `#cccccc`, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariS`, 165, `#cccccc`, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonS`, 165, `#cccccc`, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanS`, 165, `#cccccc`, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaS`, 165, `#cccccc`, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, 165, `#cccccc`, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboS`, 165, `#cccccc`, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboS`, 165, `#cccccc`, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiS`, C_RLT_HIDIF_X, `#cccccc`, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinS`, C_RLT_HIDIF_X, `#cccccc`, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariS`, C_RLT_HIDIF_X, `#cccccc`, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonS`, C_RLT_HIDIF_X, `#cccccc`, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanS`, C_RLT_HIDIF_X, `#cccccc`, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaS`, C_RLT_HIDIF_X, `#cccccc`, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, C_RLT_HIDIF_X, `#cccccc`, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboS`, C_RLT_HIDIF_X, `#cccccc`, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboS`, C_RLT_HIDIF_X, `#cccccc`, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreS`, 165, `${scoreDf > 0 ? "#ffff99" : "#cccccc"}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreS`, C_RLT_HIDIF_X, `${scoreDf > 0 ? "#ffff99" : "#cccccc"}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
 
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiL2`, 320, `#999999`, 0, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinL2`, 320, `#999999`, 1, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariL2`, 320, `#999999`, 2, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonL2`, 320, `#999999`, 3, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanL2`, 320, `#999999`, 4, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaL2`, 320, `#999999`, 5, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiL2`, 320, `#999999`, 6, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboL2`, 320, `#999999`, 7, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboL2`, 320, `#999999`, 8, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiL2`, C_RLT_BRACKET_R, `#999999`, 0, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinL2`, C_RLT_BRACKET_R, `#999999`, 1, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariL2`, C_RLT_BRACKET_R, `#999999`, 2, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonL2`, C_RLT_BRACKET_R, `#999999`, 3, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanL2`, C_RLT_BRACKET_R, `#999999`, 4, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaL2`, C_RLT_BRACKET_R, `#999999`, 5, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiL2`, C_RLT_BRACKET_R, `#999999`, 6, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboL2`, C_RLT_BRACKET_R, `#999999`, 7, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboL2`, C_RLT_BRACKET_R, `#999999`, 8, `)`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreL2`, 320, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreL2`, C_RLT_BRACKET_R, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `)`, C_ALIGN_LEFT));
 
 	} else {
 		resultWindow.appendChild(makeResultSymbol(`lblAutoView`, 230, `#999999`, 4, `(No Record)`, C_ALIGN_LEFT));
