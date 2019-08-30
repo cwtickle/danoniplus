@@ -261,6 +261,10 @@ const g_resultObj = {
 	score: 0
 };
 
+const C_RLT_BRACKET_L = 210;
+const C_RLT_HIDIF_X = 165;
+const C_RLT_BRACKET_R = 320;
+
 let g_allArrow = 0;
 let g_allFrz = 0;
 let g_currentArrows = 0;
@@ -2629,7 +2633,6 @@ function titleInit() {
 		// 背景表示・背景モーション
 		if (g_headerObj.backTitleData[g_scoreObj.backTitleFrameNum] !== undefined) {
 			g_scoreObj.backTitleFrameNum = drawSpriteData(g_scoreObj.backTitleFrameNum, `title`, `back`);
-			console.log(g_scoreObj.backTitleFrameNum);
 		}
 
 		// マスク表示・マスクモーション
@@ -3175,28 +3178,14 @@ function headerConvert(_dosObj) {
 	// 結果画面用のマスク透過設定
 	obj.masktitleButton = setVal(_dosObj.masktitleButton, `false`, `string`);
 
-	// 結果画面用・背景データの分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	obj.backResultData = [];
-	obj.backResultData.length = 0;
-	obj.backResultMaxDepth = -1;
-	if (_dosObj.backresult_data !== undefined) {
-		[obj.backResultData, obj.backResultMaxDepth] = makeSpriteData(_dosObj.backresult_data);
-	}
-
-	// 結果画面用・マスクデータの分解 (下記すべてで1セット、改行区切り)
-	obj.maskResultData = [];
-	obj.maskResultData.length = 0;
-	obj.maskResultMaxDepth = -1;
-	if (_dosObj.maskresult_data !== undefined) {
-		[obj.maskResultData, obj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
-	}
-
 	// 結果画面用のマスク透過設定
 	obj.maskresultButton = setVal(_dosObj.maskresultButton, `false`, `string`);
 
 	// color_dataの過去バージョン互換設定
 	obj.colorDataType = setVal(_dosObj.colorDataType, ``, `string`);
+
+	// リザルトモーションをDisplay:BackgroundのON/OFFと連動させるかどうかの設定
+	obj.resultMotionSet = setVal(_dosObj.resultMotionSet, `true`, `string`);
 
 	return obj;
 }
@@ -5142,8 +5131,8 @@ function loadingScoreInit2() {
 	// フレーム・曲開始位置調整
 	let preblankFrame = 0;
 	if (g_scoreObj.frameNum === 0) {
-		if (firstArrowFrame < arrivalFrame) {
-			preblankFrame = arrivalFrame - firstArrowFrame + 10;
+		if (firstArrowFrame - C_MAX_ADJUSTMENT < arrivalFrame) {
+			preblankFrame = arrivalFrame - firstArrowFrame + C_MAX_ADJUSTMENT;
 
 			// 譜面データの再読み込み
 			const tmpObj = scoreConvert(g_rootObj, scoreIdHeader, preblankFrame, dummyIdHeader);
@@ -5194,7 +5183,6 @@ function loadingScoreInit2() {
 			if (tmpObj.backData !== undefined && tmpObj.backData.length >= 1) {
 				g_scoreObj.backData = tmpObj.backData.concat();
 			}
-
 			lastFrame += preblankFrame;
 			firstArrowFrame += preblankFrame;
 			speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
@@ -5675,6 +5663,27 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		}
 	}
 
+	// 結果画面用・背景データの分解 (下記すべてで1セット、改行区切り)
+	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
+	g_headerObj.backResultData = [];
+	g_headerObj.backResultData.length = 0;
+	g_headerObj.backResultMaxDepth = -1;
+
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
+	} else if (_dosObj.backresult_data !== undefined) {
+		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(_dosObj.backresult_data);
+	}
+
+	// 結果画面用・マスクデータの分解 (下記すべてで1セット、改行区切り)
+	g_headerObj.maskResultData = [];
+	g_headerObj.maskResultData.length = 0;
+	g_headerObj.maskResultMaxDepth = -1;
+
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
+	} else if (_dosObj.maskresult_data !== undefined) {
+		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
+	}
+
 	return obj;
 }
 
@@ -5776,13 +5785,17 @@ function getFirstArrowFrame(_dataObj) {
 		let frzData = _dataObj.frzData[j];
 
 		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[0] < tmpFirstNum && arrowData[0] > 0) {
-				tmpFirstNum = arrowData[0];
+			if (arrowData[0] !== ``) {
+				if (arrowData[0] < tmpFirstNum && arrowData[0] + C_MAX_ADJUSTMENT > 0) {
+					tmpFirstNum = arrowData[0];
+				}
 			}
 		}
 		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[0] < tmpFirstNum && frzData[0] > 0) {
-				tmpFirstNum = frzData[0];
+			if (frzData[0] !== ``) {
+				if (frzData[0] < tmpFirstNum && frzData[0] + C_MAX_ADJUSTMENT > 0) {
+					tmpFirstNum = frzData[0];
+				}
 			}
 		}
 
@@ -5790,13 +5803,17 @@ function getFirstArrowFrame(_dataObj) {
 		frzData = _dataObj.dummyFrzData[j];
 
 		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[0] < tmpFirstNum && arrowData[0] > 0) {
-				tmpFirstNum = arrowData[0];
+			if (arrowData[0] !== ``) {
+				if (arrowData[0] < tmpFirstNum && arrowData[0] + C_MAX_ADJUSTMENT > 0) {
+					tmpFirstNum = arrowData[0];
+				}
 			}
 		}
 		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[0] < tmpFirstNum && frzData[0] > 0) {
-				tmpFirstNum = frzData[0];
+			if (frzData[0] !== ``) {
+				if (frzData[0] < tmpFirstNum && frzData[0] + C_MAX_ADJUSTMENT > 0) {
+					tmpFirstNum = frzData[0];
+				}
 			}
 		}
 
@@ -6778,17 +6795,16 @@ function MainInit() {
 	g_inputKeyBuffer = [];
 
 	// 終了時間の設定
-	let duration = g_audio.duration;
+	let duration = g_audio.duration * 60;
 	let fadeOutFrame = Infinity;
-	const preblankFrameForTime = Number(g_headerObj.blankFrame - g_headerObj.blankFrameDef);
 
 	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
 	if (g_headerObj.fadeFrame !== undefined) {
 		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
 		} else {
-			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]);
-			duration = (fadeOutFrame + preblankFrameForTime - g_headerObj.blankFrame) / 60;
-			fadeOutFrame = (fadeOutFrame - g_headerObj.blankFrame) / g_headerObj.playbackRate + g_headerObj.blankFrame;
+			// フェードアウト指定の場合、曲長(フェードアウト開始まで)は FadeFrame - (本来のblankFrame)
+			duration = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) - g_headerObj.blankFrameDef;
+			fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
 		}
 	}
 	g_scoreObj.fadeOutFrame = (fadeOutFrame === Infinity ? 0 : fadeOutFrame);
@@ -6797,21 +6813,22 @@ function MainInit() {
 	let endFrameUseFlg = false;
 	if (g_headerObj.endFrame !== undefined) {
 		if (!isNaN(parseInt(g_headerObj.endFrame[g_stateObj.scoreId]))) {
-			duration = (parseInt(g_headerObj.endFrame[g_stateObj.scoreId]) - g_headerObj.blankFrame) / 60;
+			// 終了時間指定の場合、曲長は EndFrame - (本来のblankFrame)
+			duration = parseInt(g_headerObj.endFrame[g_stateObj.scoreId]) - g_headerObj.blankFrameDef;
 			endFrameUseFlg = true;
 		} else if (!isNaN(parseInt(g_headerObj.endFrame[0]))) {
-			duration = (parseInt(g_headerObj.endFrame[0]) - g_headerObj.blankFrame) / 60;
+			duration = parseInt(g_headerObj.endFrame[0]) - g_headerObj.blankFrameDef;
 			endFrameUseFlg = true;
 		}
 	}
 
-	let fullSecond = Math.ceil(g_headerObj.blankFrame / 60 + duration / g_headerObj.playbackRate);
+	let fullFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
 	if (fadeOutFrame !== Infinity && !endFrameUseFlg) {
-		fullSecond += Math.ceil(C_FRM_AFTERFADE / 60);
+		fullFrame += C_FRM_AFTERFADE;
 	}
 
-	const fullMin = Math.floor(fullSecond / 60);
-	const fullSec = `00${Math.floor(fullSecond % 60)}`.slice(-2);
+	const fullMin = Math.floor(fullFrame / 3600);
+	const fullSec = `00${Math.floor(Math.floor(fullFrame / 60) % 60)}`.slice(-2);
 	const fullTime = `${fullMin}:${fullSec}`;
 
 	// フレーム数
@@ -7852,27 +7869,25 @@ function MainInit() {
 		g_scoreObj.frameNum++;
 		g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60 - buffTime);
 
-		// タイマー、曲終了判定
+		// タイマー
 		if (g_scoreObj.frameNum % 60 === 0) {
-			const currentSecond = Math.ceil(g_scoreObj.frameNum / 60);
 			const currentMin = Math.floor(g_scoreObj.frameNum / 3600);
 			const currentSec = `00${(g_scoreObj.frameNum / 60) % 60}`.slice(-2);
-			const currentTime = `${currentMin}:${currentSec}`;
-			lblTime1.innerHTML = currentTime;
-
-			if (currentSecond >= fullSecond) {
-				if (fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
-					g_audio.pause();
-				}
-				if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
-					g_gameOverFlg = true;
-				}
-				clearTimeout(g_timeoutEvtId);
-				setTimeout(_ => {
-					clearWindow();
-					resultInit();
-				}, 100);
+			lblTime1.innerHTML = `${currentMin}:${currentSec}`;
+		}
+		// 曲終了判定
+		if (g_scoreObj.frameNum >= fullFrame) {
+			if (fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
+				g_audio.pause();
 			}
+			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
+				g_gameOverFlg = true;
+			}
+			clearTimeout(g_timeoutEvtId);
+			setTimeout(_ => {
+				clearWindow();
+				resultInit();
+			}, 100);
 		}
 	}
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60);
@@ -8528,30 +8543,10 @@ function resultInit() {
 		`Display`, C_ALIGN_LEFT));
 
 	let displayData = ``;
-	if (g_stateObj.d_stepzone !== C_FLG_ON) {
-		if (displayData !== ``) {
-			displayData += `, `;
-		}
-		displayData += `Step`;
-	}
-	if (g_stateObj.d_judgement !== C_FLG_ON) {
-		if (displayData !== ``) {
-			displayData += `, `;
-		}
-		displayData += `Judge`;
-	}
-	if (g_stateObj.d_lifegauge !== C_FLG_ON) {
-		if (displayData !== ``) {
-			displayData += `, `;
-		}
-		displayData += `Life`;
-	}
-	if (g_stateObj.d_musicinfo !== C_FLG_ON) {
-		if (displayData !== ``) {
-			displayData += `, `;
-		}
-		displayData += `MusicInfo`;
-	}
+	displayData = withString(displayData, g_stateObj.d_stepzone, `Step`);
+	displayData = withString(displayData, g_stateObj.d_judgement, `Judge`);
+	displayData = withString(displayData, g_stateObj.d_lifegauge, `Life`);
+	displayData = withString(displayData, g_stateObj.d_musicinfo, `MusicInfo`);
 	if (displayData === ``) {
 		displayData = `All Visible`;
 	} else {
@@ -8561,41 +8556,32 @@ function resultInit() {
 		displayData, C_ALIGN_CENTER));
 
 	let display2Data = ``;
-	if (g_stateObj.d_speed !== C_FLG_ON) {
-		if (display2Data !== ``) {
-			display2Data += `, `;
-		}
-		display2Data += `Speed`;
-	}
-	if (g_stateObj.d_color !== C_FLG_ON) {
-		if (display2Data !== ``) {
-			display2Data += `, `;
-		}
-		display2Data += `Color`;
-	}
-	if (g_stateObj.d_lyrics !== C_FLG_ON) {
-		if (display2Data !== ``) {
-			display2Data += `, `;
-		}
-		display2Data += `Lyrics`;
-	}
-	if (g_stateObj.d_background !== C_FLG_ON) {
-		if (display2Data !== ``) {
-			display2Data += `, `;
-		}
-		display2Data += `Back`;
-	}
-	if (g_stateObj.d_arroweffect !== C_FLG_ON) {
-		if (display2Data !== ``) {
-			display2Data += `, `;
-		}
-		display2Data += `ArrowEffect`;
-	}
+	display2Data = withString(display2Data, g_stateObj.d_speed, `Speed`);
+	display2Data = withString(display2Data, g_stateObj.d_color, `Color`);
+	display2Data = withString(display2Data, g_stateObj.d_lyrics, `Lyrics`);
+	display2Data = withString(display2Data, g_stateObj.d_background, `Back`);
+	display2Data = withString(display2Data, g_stateObj.d_arroweffect, `ArrowEffect`);
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
 	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, `#cccccc`, 5,
 		display2Data, C_ALIGN_CENTER));
+
+	/**
+	 * プレイスタイル（Display）のカスタム有無
+	 * @param {string} _baseString 
+	 * @param {string} _flg 
+	 * @param {string} _displayText 
+	 */
+	function withString(_baseString, _flg, _displayText) {
+		if (_flg !== C_FLG_ON) {
+			if (_baseString !== ``) {
+				_baseString += `, `;
+			}
+			_baseString += _displayText;
+		}
+		return _baseString;
+	}
 
 	// キャラクタ描画
 	resultWindow.appendChild(makeResultSymbol(`lblIi`, 0, C_CLR_II, 0, C_JCR_II, C_ALIGN_LEFT));
@@ -8709,42 +8695,42 @@ function resultInit() {
 		}
 
 		// ハイスコア差分描画
-		resultWindow.appendChild(makeResultSymbol(`lblIiL1`, 210, `#999999`, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinL1`, 210, `#999999`, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariL1`, 210, `#999999`, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonL1`, 210, `#999999`, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanL1`, 210, `#999999`, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaL1`, 210, `#999999`, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiL1`, 210, `#999999`, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboL1`, 210, `#999999`, 7, `(${maxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboL1`, 210, `#999999`, 8, `(${fmaxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiL1`, C_RLT_BRACKET_L, `#999999`, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinL1`, C_RLT_BRACKET_L, `#999999`, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariL1`, C_RLT_BRACKET_L, `#999999`, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonL1`, C_RLT_BRACKET_L, `#999999`, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanL1`, C_RLT_BRACKET_L, `#999999`, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaL1`, C_RLT_BRACKET_L, `#999999`, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiL1`, C_RLT_BRACKET_L, `#999999`, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboL1`, C_RLT_BRACKET_L, `#999999`, 7, `(${maxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboL1`, C_RLT_BRACKET_L, `#999999`, 8, `(${fmaxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreL1`, 210, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreL1`, C_RLT_BRACKET_L, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiS`, 165, `#cccccc`, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinS`, 165, `#cccccc`, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariS`, 165, `#cccccc`, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonS`, 165, `#cccccc`, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanS`, 165, `#cccccc`, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaS`, 165, `#cccccc`, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, 165, `#cccccc`, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboS`, 165, `#cccccc`, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboS`, 165, `#cccccc`, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiS`, C_RLT_HIDIF_X, `#cccccc`, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinS`, C_RLT_HIDIF_X, `#cccccc`, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariS`, C_RLT_HIDIF_X, `#cccccc`, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonS`, C_RLT_HIDIF_X, `#cccccc`, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanS`, C_RLT_HIDIF_X, `#cccccc`, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaS`, C_RLT_HIDIF_X, `#cccccc`, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, C_RLT_HIDIF_X, `#cccccc`, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboS`, C_RLT_HIDIF_X, `#cccccc`, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboS`, C_RLT_HIDIF_X, `#cccccc`, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreS`, 165, `${scoreDf > 0 ? "#ffff99" : "#cccccc"}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreS`, C_RLT_HIDIF_X, `${scoreDf > 0 ? "#ffff99" : "#cccccc"}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
 
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiL2`, 320, `#999999`, 0, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinL2`, 320, `#999999`, 1, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariL2`, 320, `#999999`, 2, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonL2`, 320, `#999999`, 3, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanL2`, 320, `#999999`, 4, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaL2`, 320, `#999999`, 5, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiL2`, 320, `#999999`, 6, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboL2`, 320, `#999999`, 7, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboL2`, 320, `#999999`, 8, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiL2`, C_RLT_BRACKET_R, `#999999`, 0, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinL2`, C_RLT_BRACKET_R, `#999999`, 1, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariL2`, C_RLT_BRACKET_R, `#999999`, 2, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonL2`, C_RLT_BRACKET_R, `#999999`, 3, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanL2`, C_RLT_BRACKET_R, `#999999`, 4, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaL2`, C_RLT_BRACKET_R, `#999999`, 5, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiL2`, C_RLT_BRACKET_R, `#999999`, 6, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboL2`, C_RLT_BRACKET_R, `#999999`, 7, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboL2`, C_RLT_BRACKET_R, `#999999`, 8, `)`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreL2`, 320, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreL2`, C_RLT_BRACKET_R, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `)`, C_ALIGN_LEFT));
 
 	} else {
 		resultWindow.appendChild(makeResultSymbol(`lblAutoView`, 230, `#999999`, 4, `(No Record)`, C_ALIGN_LEFT));
@@ -8885,6 +8871,23 @@ function resultInit() {
 	}
 	if (g_headerObj.maskresultButton === `false`) {
 		maskResultSprite.style.pointerEvents = `none`;
+	}
+
+	if (g_scoreObj.maskResultFrameNum === 0) {
+
+		// マスク表示・マスクモーション(0フレーム指定)
+		if (g_headerObj.maskResultData[0] !== undefined) {
+			g_scoreObj.maskResultFrameNum = drawSpriteData(0, `result`, `mask`);
+			g_headerObj.maskResultData[0] = undefined;
+		}
+	}
+	if (g_scoreObj.backResultFrameNum === 0) {
+
+		// 背景表示・背景モーション(0フレーム指定)
+		if (g_headerObj.backResultData[0] !== undefined) {
+			g_scoreObj.backResultFrameNum = drawSpriteData(0, `result`, `back`);
+			g_headerObj.backResultData[0] = undefined;
+		}
 	}
 
 	/**
