@@ -7872,7 +7872,7 @@ function MainInit() {
 			lblTime1.innerHTML = `${currentMin}:${currentSec}`;
 		}
 		// 曲終了判定
-		if (g_scoreObj.frameNum === fullFrame) {
+		if (g_scoreObj.frameNum >= fullFrame) {
 			if (fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
 				g_audio.pause();
 			}
