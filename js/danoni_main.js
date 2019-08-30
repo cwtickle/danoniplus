@@ -6793,16 +6793,14 @@ function MainInit() {
 	// 終了時間の設定
 	let duration = g_audio.duration * 60;
 	let fadeOutFrame = Infinity;
-	const preblankFrameForTime = Number(g_headerObj.blankFrame - g_headerObj.blankFrameDef);
 
 	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
 	if (g_headerObj.fadeFrame !== undefined) {
 		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
 		} else {
-			// フェードアウト開始時間に巻き戻しフレーム分を加算
-			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + preblankFrameForTime;
-			duration = fadeOutFrame - g_headerObj.blankFrame;
-			fadeOutFrame = duration / g_headerObj.playbackRate + g_headerObj.blankFrame;
+			// フェードアウト指定の場合、曲長(フェードアウト開始まで)は FadeFrame - (本来のblankFrame)
+			duration = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) - g_headerObj.blankFrameDef;
+			fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
 		}
 	}
 	g_scoreObj.fadeOutFrame = (fadeOutFrame === Infinity ? 0 : fadeOutFrame);
@@ -6820,7 +6818,7 @@ function MainInit() {
 		}
 	}
 
-	let fullFrame = Math.ceil(g_headerObj.blankFrame + g_stateObj.adjustment + duration / g_headerObj.playbackRate);
+	let fullFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
 	if (fadeOutFrame !== Infinity && !endFrameUseFlg) {
 		fullFrame += C_FRM_AFTERFADE;
 	}
