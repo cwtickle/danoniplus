@@ -5127,8 +5127,8 @@ function loadingScoreInit2() {
 	// フレーム・曲開始位置調整
 	let preblankFrame = 0;
 	if (g_scoreObj.frameNum === 0) {
-		if (firstArrowFrame < arrivalFrame) {
-			preblankFrame = arrivalFrame - firstArrowFrame + 10;
+		if (firstArrowFrame - C_MAX_ADJUSTMENT < arrivalFrame) {
+			preblankFrame = arrivalFrame - firstArrowFrame + C_MAX_ADJUSTMENT;
 
 			// 譜面データの再読み込み
 			const tmpObj = scoreConvert(g_rootObj, scoreIdHeader, preblankFrame, dummyIdHeader);
@@ -5179,7 +5179,6 @@ function loadingScoreInit2() {
 			if (tmpObj.backData !== undefined && tmpObj.backData.length >= 1) {
 				g_scoreObj.backData = tmpObj.backData.concat();
 			}
-
 			lastFrame += preblankFrame;
 			firstArrowFrame += preblankFrame;
 			speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
@@ -5782,13 +5781,17 @@ function getFirstArrowFrame(_dataObj) {
 		let frzData = _dataObj.frzData[j];
 
 		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[0] < tmpFirstNum && arrowData[0] > 0) {
-				tmpFirstNum = arrowData[0];
+			if (arrowData[0] !== ``) {
+				if (arrowData[0] < tmpFirstNum && arrowData[0] + C_MAX_ADJUSTMENT > 0) {
+					tmpFirstNum = arrowData[0];
+				}
 			}
 		}
 		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[0] < tmpFirstNum && frzData[0] > 0) {
-				tmpFirstNum = frzData[0];
+			if (frzData[0] !== ``) {
+				if (frzData[0] < tmpFirstNum && frzData[0] + C_MAX_ADJUSTMENT > 0) {
+					tmpFirstNum = frzData[0];
+				}
 			}
 		}
 
@@ -5796,13 +5799,17 @@ function getFirstArrowFrame(_dataObj) {
 		frzData = _dataObj.dummyFrzData[j];
 
 		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[0] < tmpFirstNum && arrowData[0] > 0) {
-				tmpFirstNum = arrowData[0];
+			if (arrowData[0] !== ``) {
+				if (arrowData[0] < tmpFirstNum && arrowData[0] + C_MAX_ADJUSTMENT > 0) {
+					tmpFirstNum = arrowData[0];
+				}
 			}
 		}
 		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[0] < tmpFirstNum && frzData[0] > 0) {
-				tmpFirstNum = frzData[0];
+			if (frzData[0] !== ``) {
+				if (frzData[0] < tmpFirstNum && frzData[0] + C_MAX_ADJUSTMENT > 0) {
+					tmpFirstNum = frzData[0];
+				}
 			}
 		}
 
@@ -6784,7 +6791,7 @@ function MainInit() {
 	g_inputKeyBuffer = [];
 
 	// 終了時間の設定
-	let duration = g_audio.duration;
+	let duration = g_audio.duration * 60;
 	let fadeOutFrame = Infinity;
 	const preblankFrameForTime = Number(g_headerObj.blankFrame - g_headerObj.blankFrameDef);
 
@@ -6792,9 +6799,10 @@ function MainInit() {
 	if (g_headerObj.fadeFrame !== undefined) {
 		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
 		} else {
-			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]);
-			duration = (fadeOutFrame + preblankFrameForTime - g_headerObj.blankFrame) / 60;
-			fadeOutFrame = (fadeOutFrame - g_headerObj.blankFrame) / g_headerObj.playbackRate + g_headerObj.blankFrame;
+			// フェードアウト開始時間に巻き戻しフレーム分を加算
+			fadeOutFrame = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) + preblankFrameForTime;
+			duration = fadeOutFrame - g_headerObj.blankFrame;
+			fadeOutFrame = duration / g_headerObj.playbackRate + g_headerObj.blankFrame;
 		}
 	}
 	g_scoreObj.fadeOutFrame = (fadeOutFrame === Infinity ? 0 : fadeOutFrame);
@@ -6803,15 +6811,16 @@ function MainInit() {
 	let endFrameUseFlg = false;
 	if (g_headerObj.endFrame !== undefined) {
 		if (!isNaN(parseInt(g_headerObj.endFrame[g_stateObj.scoreId]))) {
-			duration = (parseInt(g_headerObj.endFrame[g_stateObj.scoreId]) - g_headerObj.blankFrame) / 60;
+			// 終了時間指定の場合、曲長は EndFrame - (本来のblankFrame)
+			duration = parseInt(g_headerObj.endFrame[g_stateObj.scoreId]) - g_headerObj.blankFrameDef;
 			endFrameUseFlg = true;
 		} else if (!isNaN(parseInt(g_headerObj.endFrame[0]))) {
-			duration = (parseInt(g_headerObj.endFrame[0]) - g_headerObj.blankFrame) / 60;
+			duration = parseInt(g_headerObj.endFrame[0]) - g_headerObj.blankFrameDef;
 			endFrameUseFlg = true;
 		}
 	}
 
-	let fullFrame = Math.ceil(g_headerObj.blankFrame + g_stateObj.realAdjustment + duration * 60 / g_headerObj.playbackRate);
+	let fullFrame = Math.ceil(g_headerObj.blankFrame + g_stateObj.adjustment + duration / g_headerObj.playbackRate);
 	if (fadeOutFrame !== Infinity && !endFrameUseFlg) {
 		fullFrame += C_FRM_AFTERFADE;
 	}
