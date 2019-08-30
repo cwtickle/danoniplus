@@ -8875,7 +8875,7 @@ function resultInit() {
 
 		// マスク表示・マスクモーション(0フレーム指定)
 		if (g_headerObj.maskResultData[0] !== undefined) {
-			g_scoreObj.maskResultFrameNum = drawSpriteData(g_scoreObj.backResultFrameNum, `result`, `mask`);
+			g_scoreObj.maskResultFrameNum = drawSpriteData(0, `result`, `mask`);
 			g_headerObj.maskResultData[0] = undefined;
 		}
 	}
@@ -8883,7 +8883,7 @@ function resultInit() {
 
 		// 背景表示・背景モーション(0フレーム指定)
 		if (g_headerObj.backResultData[0] !== undefined) {
-			g_scoreObj.backResultFrameNum = drawSpriteData(g_scoreObj.backResultFrameNum, `result`, `back`);
+			g_scoreObj.backResultFrameNum = drawSpriteData(0, `result`, `back`);
 			g_headerObj.backResultData[0] = undefined;
 		}
 	}
