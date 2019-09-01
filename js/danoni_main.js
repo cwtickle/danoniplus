@@ -1939,9 +1939,9 @@ function initAfterDosLoaded(_initFlg) {
 	if (_initFlg === `true`) {
 		g_headerObj = headerConvert(g_rootObj);
 		keysConvert(g_rootObj);
+		g_keyObj.currentPtn = 0;
 	}
 	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-	g_keyObj.currentPtn = 0;
 
 	// 画像ファイルの読み込み
 	preloadFile(`image`, C_IMG_ARROW, ``, ``);
