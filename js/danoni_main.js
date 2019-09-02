@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/01
+ * Revised : 2019/09/02
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.8.2`;
-const g_revisedDate = `2019/09/01`;
+const g_version = `Ver 7.9.0`;
+const g_revisedDate = `2019/09/02`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -296,6 +296,7 @@ const g_pointAllocation = {
 let g_maxScore = 1000000;
 
 let g_gameOverFlg = false;
+let g_finishFlg = true;
 
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
@@ -1747,56 +1748,62 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 		if (tmpData !== undefined && tmpData !== ``) {
 			const tmpSpriteData = tmpData.split(`,`);
 
-			// 値チェックとエスケープ処理
-			let tmpFrame;
-			if (setVal(tmpSpriteData[0], 200, `number`) === 0) {
-				tmpFrame = 0;
-			} else {
-				tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, `number`));
-				if (tmpFrame < 0) {
-					tmpFrame = 0;
-				}
-			}
-			const tmpDepth = (tmpSpriteData[1] === `ALL` ? `ALL` : setVal(tmpSpriteData[1], 0, `number`));
-			const tmpPath = escapeHtml(setVal(tmpSpriteData[2], ``, `string`));
-			const tmpClass = escapeHtml(setVal(tmpSpriteData[3], ``, `string`));
-			const tmpX = setVal(tmpSpriteData[4], 0, `float`);
-			const tmpY = setVal(tmpSpriteData[5], 0, `float`);
-			const tmpWidth = setVal(tmpSpriteData[6], 0, `number`);					// spanタグの場合は font-size
-			const tmpHeight = escapeHtml(setVal(tmpSpriteData[7], ``, `string`));	// spanタグの場合は color(文字列可)
-			const tmpOpacity = setVal(tmpSpriteData[8], 1, `float`);
-			const tmpAnimationName = escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, `string`));
-			const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, `number`) / 60;
-
-			if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
-				maxDepth = tmpDepth;
-			}
-
-			let addFrame = 0;
-			if (spriteData[tmpFrame] === undefined) {
-				spriteData[tmpFrame] = [];
-				spriteData[tmpFrame][0] = {};
-			} else {
-				for (let m = 1; ; m++) {
-					if (spriteData[tmpFrame][m] === undefined) {
-						spriteData[tmpFrame][m] = {};
-						addFrame = m;
-						break;
+			if (tmpSpriteData.length > 1) {
+				// 深度が"-"の場合はスキップ
+				if (tmpSpriteData[1] === `-`) {
+				} else {
+					// 値チェックとエスケープ処理
+					let tmpFrame;
+					if (setVal(tmpSpriteData[0], 200, `number`) === 0) {
+						tmpFrame = 0;
+					} else {
+						tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, `number`));
+						if (tmpFrame < 0) {
+							tmpFrame = 0;
+						}
 					}
+					const tmpDepth = (tmpSpriteData[1] === `ALL` ? `ALL` : setVal(tmpSpriteData[1], 0, `number`));
+					const tmpPath = escapeHtml(setVal(tmpSpriteData[2], ``, `string`));
+					const tmpClass = escapeHtml(setVal(tmpSpriteData[3], ``, `string`));
+					const tmpX = setVal(tmpSpriteData[4], 0, `float`);
+					const tmpY = setVal(tmpSpriteData[5], 0, `float`);
+					const tmpWidth = setVal(tmpSpriteData[6], 0, `number`);					// spanタグの場合は font-size
+					const tmpHeight = escapeHtml(setVal(tmpSpriteData[7], ``, `string`));	// spanタグの場合は color(文字列可)
+					const tmpOpacity = setVal(tmpSpriteData[8], 1, `float`);
+					const tmpAnimationName = escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, `string`));
+					const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, `number`) / 60;
+
+					if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
+						maxDepth = tmpDepth;
+					}
+
+					let addFrame = 0;
+					if (spriteData[tmpFrame] === undefined) {
+						spriteData[tmpFrame] = [];
+						spriteData[tmpFrame][0] = {};
+					} else {
+						for (let m = 1; ; m++) {
+							if (spriteData[tmpFrame][m] === undefined) {
+								spriteData[tmpFrame][m] = {};
+								addFrame = m;
+								break;
+							}
+						}
+					}
+					spriteData[tmpFrame][addFrame] = {
+						depth: tmpDepth,
+						path: tmpPath,
+						class: tmpClass,
+						left: tmpX,
+						top: tmpY,
+						width: tmpWidth,
+						height: tmpHeight,
+						opacity: tmpOpacity,
+						animationName: tmpAnimationName,
+						animationDuration: tmpAnimationDuration
+					};
 				}
 			}
-			spriteData[tmpFrame][addFrame] = {
-				depth: tmpDepth,
-				path: tmpPath,
-				class: tmpClass,
-				left: tmpX,
-				top: tmpY,
-				width: tmpWidth,
-				height: tmpHeight,
-				opacity: tmpOpacity,
-				animationName: tmpAnimationName,
-				animationDuration: tmpAnimationDuration
-			};
 		}
 	});
 
@@ -5457,6 +5464,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 				for (let k = 0; k < tmpSpeedData.length; k += 2) {
 					if (isNaN(parseInt(tmpSpeedData[k]))) {
 						continue;
+					} else if (tmpSpeedData[k + 1] === `-`) {
+						continue;
 					}
 					obj.speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
 					obj.speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
@@ -5479,6 +5488,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 				const tmpSpeedData = tmpData.split(`,`);
 				for (let k = 0; k < tmpSpeedData.length; k += 2) {
 					if (isNaN(parseInt(tmpSpeedData[k]))) {
+						continue;
+					} else if (tmpSpeedData[k + 1] === `-`) {
 						continue;
 					}
 					obj.boostData[speedIdx] = calcFrame(tmpSpeedData[k]);
@@ -5503,6 +5514,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 				for (let k = 0; k < tmpColorData.length; k += 3) {
 					if (isNaN(parseInt(tmpColorData[k]))) {
 						continue;
+					} else if (tmpColorData[k + 1] === `-`) {
+						continue;
 					}
 					obj.colorData[colorIdx] = calcFrame(tmpColorData[k]);
 					obj.colorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
@@ -5526,6 +5539,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 				const tmpColorData = tmpData.split(`,`);
 				for (let k = 0; k < tmpColorData.length; k += 3) {
 					if (isNaN(parseInt(tmpColorData[k]))) {
+						continue;
+					} else if (tmpColorData[k + 1] === `-`) {
 						continue;
 					}
 					obj.acolorData[colorIdx] = calcFrame(tmpColorData[k]);
@@ -5596,6 +5611,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					for (let k = 0; k < tmpWordData.length; k += 3) {
 						if (isNaN(parseInt(tmpWordData[k]))) {
 							continue;
+						} else if (tmpWordData[k + 1] === `-`) {
+							continue;
 						}
 						tmpWordData[k] = calcFrame(tmpWordData[k]);
 						tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
@@ -5663,7 +5680,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		}
 	}
 
-	// 結果画面用・背景データの分解 (下記すべてで1セット、改行区切り)
+	// 結果画面用・背景データ(クリア時)の分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	g_headerObj.backResultData = [];
 	g_headerObj.backResultData.length = 0;
@@ -5674,7 +5691,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(_dosObj.backresult_data);
 	}
 
-	// 結果画面用・マスクデータの分解 (下記すべてで1セット、改行区切り)
+	// 結果画面用・マスクデータ(クリア時)の分解 (下記すべてで1セット、改行区切り)
 	g_headerObj.maskResultData = [];
 	g_headerObj.maskResultData.length = 0;
 	g_headerObj.maskResultMaxDepth = -1;
@@ -5682,6 +5699,33 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
 	} else if (_dosObj.maskresult_data !== undefined) {
 		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
+	}
+
+	// 結果画面用・背景データ(失敗時)の分解 (下記すべてで1セット、改行区切り)
+	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
+	g_headerObj.backFailedData = [];
+	g_headerObj.backFailedData.length = 0;
+	g_headerObj.backFailedMaxDepth = -1;
+
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
+	} else if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
+		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`]);
+	} else if (_dosObj.backfailed_data !== undefined) {
+		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj.backfailed_data);
+	} else if (_dosObj.backresult_data !== undefined) {
+		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj.backresult_data);
+	}
+
+	// 結果画面用・マスクデータ(失敗時)の分解 (下記すべてで1セット、改行区切り)
+	g_headerObj.maskFailedData = [];
+	g_headerObj.maskFailedData.length = 0;
+	g_headerObj.maskFailedMaxDepth = -1;
+
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
+	} else if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
+		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`]);
+	} else if (_dosObj.maskresult_data !== undefined) {
+		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
 	}
 
 	return obj;
@@ -6607,6 +6651,7 @@ function getArrowSettings() {
 
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
+	g_finishFlg = true;
 
 	if (g_stateObj.dataSaveFlg && setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, `string`) === ``) {
 
@@ -7072,6 +7117,7 @@ function MainInit() {
 				clearWindow();
 				if (keyIsDown(16)) {
 					g_gameOverFlg = true;
+					g_finishFlg = false;
 					resultInit();
 				} else {
 					titleInit();
@@ -8193,6 +8239,7 @@ function lifeDamage() {
 			setTimeout(_ => {
 				clearWindow();
 				g_gameOverFlg = true;
+				g_finishFlg = false;
 				resultInit();
 			}, 200);
 		}
@@ -8436,6 +8483,24 @@ function resultInit() {
 	g_scoreObj.maskResultLoopCount = 0;
 
 	const divRoot = document.querySelector(`#divRoot`);
+
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
+	} else {
+		// ゲームオーバー時は失敗時のリザルトモーションを適用
+		if (!g_finishFlg) {
+			if (g_rootObj.backfailedS_data !== undefined) {
+				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj.backfailedS_data);
+			}
+			if (g_rootObj.maskfailedS_data !== undefined) {
+				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj.maskfailedS_data);
+			}
+		} else if (g_gameOverFlg) {
+			g_headerObj.backResultData = g_headerObj.backFailedData.concat();
+			g_headerObj.maskResultData = g_headerObj.maskFailedData.concat();
+			g_headerObj.backResultMaxDepth = g_headerObj.backFailedMaxDepth;
+			g_headerObj.maskResultMaxDepth = g_headerObj.maskFailedMaxDepth;
+		}
+	}
 
 	// 背景スプライトを作成
 	createSprite(`divRoot`, `backResultSprite`, 0, 0, g_sWidth, g_sHeight);
@@ -8880,20 +8945,21 @@ function resultInit() {
 		maskResultSprite.style.pointerEvents = `none`;
 	}
 
-	if (g_scoreObj.maskResultFrameNum === 0) {
-
-		// マスク表示・マスクモーション(0フレーム指定)
-		if (g_headerObj.maskResultData[0] !== undefined) {
-			g_scoreObj.maskResultFrameNum = drawSpriteData(0, `result`, `mask`);
-			g_headerObj.maskResultData[0] = undefined;
-		}
-	}
+	// リザルトモーションの0フレーム対応
 	if (g_scoreObj.backResultFrameNum === 0) {
 
 		// 背景表示・背景モーション(0フレーム指定)
 		if (g_headerObj.backResultData[0] !== undefined) {
 			g_scoreObj.backResultFrameNum = drawSpriteData(0, `result`, `back`);
 			g_headerObj.backResultData[0] = undefined;
+		}
+	}
+	if (g_scoreObj.maskResultFrameNum === 0) {
+
+		// マスク表示・マスクモーション(0フレーム指定)
+		if (g_headerObj.maskResultData[0] !== undefined) {
+			g_scoreObj.maskResultFrameNum = drawSpriteData(0, `result`, `mask`);
+			g_headerObj.maskResultData[0] = undefined;
 		}
 	}
 
