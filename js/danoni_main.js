@@ -1747,56 +1747,62 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 		if (tmpData !== undefined && tmpData !== ``) {
 			const tmpSpriteData = tmpData.split(`,`);
 
-			// 値チェックとエスケープ処理
-			let tmpFrame;
-			if (setVal(tmpSpriteData[0], 200, `number`) === 0) {
-				tmpFrame = 0;
-			} else {
-				tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, `number`));
-				if (tmpFrame < 0) {
-					tmpFrame = 0;
-				}
-			}
-			const tmpDepth = (tmpSpriteData[1] === `ALL` ? `ALL` : setVal(tmpSpriteData[1], 0, `number`));
-			const tmpPath = escapeHtml(setVal(tmpSpriteData[2], ``, `string`));
-			const tmpClass = escapeHtml(setVal(tmpSpriteData[3], ``, `string`));
-			const tmpX = setVal(tmpSpriteData[4], 0, `float`);
-			const tmpY = setVal(tmpSpriteData[5], 0, `float`);
-			const tmpWidth = setVal(tmpSpriteData[6], 0, `number`);					// spanタグの場合は font-size
-			const tmpHeight = escapeHtml(setVal(tmpSpriteData[7], ``, `string`));	// spanタグの場合は color(文字列可)
-			const tmpOpacity = setVal(tmpSpriteData[8], 1, `float`);
-			const tmpAnimationName = escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, `string`));
-			const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, `number`) / 60;
-
-			if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
-				maxDepth = tmpDepth;
-			}
-
-			let addFrame = 0;
-			if (spriteData[tmpFrame] === undefined) {
-				spriteData[tmpFrame] = [];
-				spriteData[tmpFrame][0] = {};
-			} else {
-				for (let m = 1; ; m++) {
-					if (spriteData[tmpFrame][m] === undefined) {
-						spriteData[tmpFrame][m] = {};
-						addFrame = m;
-						break;
+			if (tmpSpriteData.length > 1) {
+				// 深度が"-"の場合はスキップ
+				if (tmpSpriteData[1] === `-`) {
+				} else {
+					// 値チェックとエスケープ処理
+					let tmpFrame;
+					if (setVal(tmpSpriteData[0], 200, `number`) === 0) {
+						tmpFrame = 0;
+					} else {
+						tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, `number`));
+						if (tmpFrame < 0) {
+							tmpFrame = 0;
+						}
 					}
+					const tmpDepth = (tmpSpriteData[1] === `ALL` ? `ALL` : setVal(tmpSpriteData[1], 0, `number`));
+					const tmpPath = escapeHtml(setVal(tmpSpriteData[2], ``, `string`));
+					const tmpClass = escapeHtml(setVal(tmpSpriteData[3], ``, `string`));
+					const tmpX = setVal(tmpSpriteData[4], 0, `float`);
+					const tmpY = setVal(tmpSpriteData[5], 0, `float`);
+					const tmpWidth = setVal(tmpSpriteData[6], 0, `number`);					// spanタグの場合は font-size
+					const tmpHeight = escapeHtml(setVal(tmpSpriteData[7], ``, `string`));	// spanタグの場合は color(文字列可)
+					const tmpOpacity = setVal(tmpSpriteData[8], 1, `float`);
+					const tmpAnimationName = escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, `string`));
+					const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, `number`) / 60;
+
+					if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
+						maxDepth = tmpDepth;
+					}
+
+					let addFrame = 0;
+					if (spriteData[tmpFrame] === undefined) {
+						spriteData[tmpFrame] = [];
+						spriteData[tmpFrame][0] = {};
+					} else {
+						for (let m = 1; ; m++) {
+							if (spriteData[tmpFrame][m] === undefined) {
+								spriteData[tmpFrame][m] = {};
+								addFrame = m;
+								break;
+							}
+						}
+					}
+					spriteData[tmpFrame][addFrame] = {
+						depth: tmpDepth,
+						path: tmpPath,
+						class: tmpClass,
+						left: tmpX,
+						top: tmpY,
+						width: tmpWidth,
+						height: tmpHeight,
+						opacity: tmpOpacity,
+						animationName: tmpAnimationName,
+						animationDuration: tmpAnimationDuration
+					};
 				}
 			}
-			spriteData[tmpFrame][addFrame] = {
-				depth: tmpDepth,
-				path: tmpPath,
-				class: tmpClass,
-				left: tmpX,
-				top: tmpY,
-				width: tmpWidth,
-				height: tmpHeight,
-				opacity: tmpOpacity,
-				animationName: tmpAnimationName,
-				animationDuration: tmpAnimationDuration
-			};
 		}
 	});
 
