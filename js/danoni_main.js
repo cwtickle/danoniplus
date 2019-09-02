@@ -296,6 +296,7 @@ const g_pointAllocation = {
 let g_maxScore = 1000000;
 
 let g_gameOverFlg = false;
+let g_finishFlg = true;
 
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
@@ -6634,6 +6635,7 @@ function getArrowSettings() {
 
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
+	g_finishFlg = true;
 
 	if (g_stateObj.dataSaveFlg && setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, `string`) === ``) {
 
@@ -7099,6 +7101,7 @@ function MainInit() {
 				clearWindow();
 				if (keyIsDown(16)) {
 					g_gameOverFlg = true;
+					g_finishFlg = false;
 					resultInit();
 				} else {
 					titleInit();
@@ -8220,6 +8223,7 @@ function lifeDamage() {
 			setTimeout(_ => {
 				clearWindow();
 				g_gameOverFlg = true;
+				g_finishFlg = false;
 				resultInit();
 			}, 200);
 		}
@@ -8463,6 +8467,24 @@ function resultInit() {
 	g_scoreObj.maskResultLoopCount = 0;
 
 	const divRoot = document.querySelector(`#divRoot`);
+
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
+	} else {
+		// ゲームオーバー時は失敗時のリザルトモーションを適用
+		if (!g_finishFlg) {
+			if (g_rootObj.backfailedS_data !== undefined) {
+				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj.backfailedS_data);
+			}
+			if (g_rootObj.maskfailedS_data !== undefined) {
+				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj.maskfailedS_data);
+			}
+		} else if (g_gameOverFlg) {
+			g_headerObj.backResultData = g_headerObj.backFailedData.concat();
+			g_headerObj.maskResultData = g_headerObj.maskFailedData.concat();
+			g_headerObj.backResultMaxDepth = g_headerObj.backFailedMaxDepth;
+			g_headerObj.maskResultMaxDepth = g_headerObj.maskFailedMaxDepth;
+		}
+	}
 
 	// 背景スプライトを作成
 	createSprite(`divRoot`, `backResultSprite`, 0, 0, g_sWidth, g_sHeight);
@@ -8907,27 +8929,21 @@ function resultInit() {
 		maskResultSprite.style.pointerEvents = `none`;
 	}
 
-	// ゲームオーバー時は失敗時のリザルトモーションを適用
-	if (g_gameOverFlg) {
-		g_headerObj.maskResultData = g_headerObj.maskFailedData.concat();
-		g_headerObj.backResultData = g_headerObj.backFailedData.concat();
-	}
-
 	// リザルトモーションの0フレーム対応
-	if (g_scoreObj.maskResultFrameNum === 0) {
-
-		// マスク表示・マスクモーション(0フレーム指定)
-		if (g_headerObj.maskResultData[0] !== undefined) {
-			g_scoreObj.maskResultFrameNum = drawSpriteData(0, `result`, `mask`);
-			g_headerObj.maskResultData[0] = undefined;
-		}
-	}
 	if (g_scoreObj.backResultFrameNum === 0) {
 
 		// 背景表示・背景モーション(0フレーム指定)
 		if (g_headerObj.backResultData[0] !== undefined) {
 			g_scoreObj.backResultFrameNum = drawSpriteData(0, `result`, `back`);
 			g_headerObj.backResultData[0] = undefined;
+		}
+	}
+	if (g_scoreObj.maskResultFrameNum === 0) {
+
+		// マスク表示・マスクモーション(0フレーム指定)
+		if (g_headerObj.maskResultData[0] !== undefined) {
+			g_scoreObj.maskResultFrameNum = drawSpriteData(0, `result`, `mask`);
+			g_headerObj.maskResultData[0] = undefined;
 		}
 	}
 
