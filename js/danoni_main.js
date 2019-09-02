@@ -5463,6 +5463,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 				for (let k = 0; k < tmpSpeedData.length; k += 2) {
 					if (isNaN(parseInt(tmpSpeedData[k]))) {
 						continue;
+					} else if (tmpSpeedData[k + 1] === `-`) {
+						continue;
 					}
 					obj.speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
 					obj.speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
@@ -5485,6 +5487,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 				const tmpSpeedData = tmpData.split(`,`);
 				for (let k = 0; k < tmpSpeedData.length; k += 2) {
 					if (isNaN(parseInt(tmpSpeedData[k]))) {
+						continue;
+					} else if (tmpSpeedData[k + 1] === `-`) {
 						continue;
 					}
 					obj.boostData[speedIdx] = calcFrame(tmpSpeedData[k]);
@@ -5509,6 +5513,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 				for (let k = 0; k < tmpColorData.length; k += 3) {
 					if (isNaN(parseInt(tmpColorData[k]))) {
 						continue;
+					} else if (tmpColorData[k + 1] === `-`) {
+						continue;
 					}
 					obj.colorData[colorIdx] = calcFrame(tmpColorData[k]);
 					obj.colorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
@@ -5532,6 +5538,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 				const tmpColorData = tmpData.split(`,`);
 				for (let k = 0; k < tmpColorData.length; k += 3) {
 					if (isNaN(parseInt(tmpColorData[k]))) {
+						continue;
+					} else if (tmpColorData[k + 1] === `-`) {
 						continue;
 					}
 					obj.acolorData[colorIdx] = calcFrame(tmpColorData[k]);
@@ -5601,6 +5609,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					const tmpWordData = tmpData.split(`,`);
 					for (let k = 0; k < tmpWordData.length; k += 3) {
 						if (isNaN(parseInt(tmpWordData[k]))) {
+							continue;
+						} else if (tmpWordData[k + 1] === `-`) {
 							continue;
 						}
 						tmpWordData[k] = calcFrame(tmpWordData[k]);
