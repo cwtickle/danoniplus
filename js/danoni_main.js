@@ -296,6 +296,7 @@ const g_pointAllocation = {
 let g_maxScore = 1000000;
 
 let g_gameOverFlg = false;
+let g_finishFlg = true;
 
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
@@ -5679,7 +5680,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		}
 	}
 
-	// 結果画面用・背景データの分解 (下記すべてで1セット、改行区切り)
+	// 結果画面用・背景データ(クリア時)の分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	g_headerObj.backResultData = [];
 	g_headerObj.backResultData.length = 0;
@@ -5690,7 +5691,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(_dosObj.backresult_data);
 	}
 
-	// 結果画面用・マスクデータの分解 (下記すべてで1セット、改行区切り)
+	// 結果画面用・マスクデータ(クリア時)の分解 (下記すべてで1セット、改行区切り)
 	g_headerObj.maskResultData = [];
 	g_headerObj.maskResultData.length = 0;
 	g_headerObj.maskResultMaxDepth = -1;
@@ -5698,6 +5699,33 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
 	} else if (_dosObj.maskresult_data !== undefined) {
 		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
+	}
+
+	// 結果画面用・背景データ(失敗時)の分解 (下記すべてで1セット、改行区切り)
+	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
+	g_headerObj.backFailedData = [];
+	g_headerObj.backFailedData.length = 0;
+	g_headerObj.backFailedMaxDepth = -1;
+
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
+	} else if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
+		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`]);
+	} else if (_dosObj.backfailed_data !== undefined) {
+		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj.backfailed_data);
+	} else if (_dosObj.backresult_data !== undefined) {
+		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj.backresult_data);
+	}
+
+	// 結果画面用・マスクデータ(失敗時)の分解 (下記すべてで1セット、改行区切り)
+	g_headerObj.maskFailedData = [];
+	g_headerObj.maskFailedData.length = 0;
+	g_headerObj.maskFailedMaxDepth = -1;
+
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
+	} else if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
+		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`]);
+	} else if (_dosObj.maskresult_data !== undefined) {
+		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
 	}
 
 	return obj;
@@ -6623,6 +6651,7 @@ function getArrowSettings() {
 
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
+	g_finishFlg = true;
 
 	if (g_stateObj.dataSaveFlg && setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, `string`) === ``) {
 
@@ -7088,6 +7117,7 @@ function MainInit() {
 				clearWindow();
 				if (keyIsDown(16)) {
 					g_gameOverFlg = true;
+					g_finishFlg = false;
 					resultInit();
 				} else {
 					titleInit();
@@ -8209,6 +8239,7 @@ function lifeDamage() {
 			setTimeout(_ => {
 				clearWindow();
 				g_gameOverFlg = true;
+				g_finishFlg = false;
 				resultInit();
 			}, 200);
 		}
@@ -8452,6 +8483,24 @@ function resultInit() {
 	g_scoreObj.maskResultLoopCount = 0;
 
 	const divRoot = document.querySelector(`#divRoot`);
+
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
+	} else {
+		// ゲームオーバー時は失敗時のリザルトモーションを適用
+		if (!g_finishFlg) {
+			if (g_rootObj.backfailedS_data !== undefined) {
+				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj.backfailedS_data);
+			}
+			if (g_rootObj.maskfailedS_data !== undefined) {
+				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj.maskfailedS_data);
+			}
+		} else if (g_gameOverFlg) {
+			g_headerObj.backResultData = g_headerObj.backFailedData.concat();
+			g_headerObj.maskResultData = g_headerObj.maskFailedData.concat();
+			g_headerObj.backResultMaxDepth = g_headerObj.backFailedMaxDepth;
+			g_headerObj.maskResultMaxDepth = g_headerObj.maskFailedMaxDepth;
+		}
+	}
 
 	// 背景スプライトを作成
 	createSprite(`divRoot`, `backResultSprite`, 0, 0, g_sWidth, g_sHeight);
@@ -8896,20 +8945,21 @@ function resultInit() {
 		maskResultSprite.style.pointerEvents = `none`;
 	}
 
-	if (g_scoreObj.maskResultFrameNum === 0) {
-
-		// マスク表示・マスクモーション(0フレーム指定)
-		if (g_headerObj.maskResultData[0] !== undefined) {
-			g_scoreObj.maskResultFrameNum = drawSpriteData(0, `result`, `mask`);
-			g_headerObj.maskResultData[0] = undefined;
-		}
-	}
+	// リザルトモーションの0フレーム対応
 	if (g_scoreObj.backResultFrameNum === 0) {
 
 		// 背景表示・背景モーション(0フレーム指定)
 		if (g_headerObj.backResultData[0] !== undefined) {
 			g_scoreObj.backResultFrameNum = drawSpriteData(0, `result`, `back`);
 			g_headerObj.backResultData[0] = undefined;
+		}
+	}
+	if (g_scoreObj.maskResultFrameNum === 0) {
+
+		// マスク表示・マスクモーション(0フレーム指定)
+		if (g_headerObj.maskResultData[0] !== undefined) {
+			g_scoreObj.maskResultFrameNum = drawSpriteData(0, `result`, `mask`);
+			g_headerObj.maskResultData[0] = undefined;
 		}
 	}
 
