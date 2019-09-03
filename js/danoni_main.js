@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/02
+ * Revised : 2019/09/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.9.0`;
-const g_revisedDate = `2019/09/02`;
+const g_version = `Ver 7.9.1`;
+const g_revisedDate = `2019/09/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5465,7 +5465,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					if (isNaN(parseInt(tmpSpeedData[k]))) {
 						continue;
 					} else if (tmpSpeedData[k + 1] === `-`) {
-						continue;
+						break;
 					}
 					obj.speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
 					obj.speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
@@ -5490,7 +5490,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					if (isNaN(parseInt(tmpSpeedData[k]))) {
 						continue;
 					} else if (tmpSpeedData[k + 1] === `-`) {
-						continue;
+						break;
 					}
 					obj.boostData[speedIdx] = calcFrame(tmpSpeedData[k]);
 					obj.boostData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
@@ -5515,7 +5515,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					if (isNaN(parseInt(tmpColorData[k]))) {
 						continue;
 					} else if (tmpColorData[k + 1] === `-`) {
-						continue;
+						break;
 					}
 					obj.colorData[colorIdx] = calcFrame(tmpColorData[k]);
 					obj.colorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
@@ -5541,7 +5541,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					if (isNaN(parseInt(tmpColorData[k]))) {
 						continue;
 					} else if (tmpColorData[k + 1] === `-`) {
-						continue;
+						break;
 					}
 					obj.acolorData[colorIdx] = calcFrame(tmpColorData[k]);
 					obj.acolorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
@@ -5612,7 +5612,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 						if (isNaN(parseInt(tmpWordData[k]))) {
 							continue;
 						} else if (tmpWordData[k + 1] === `-`) {
-							continue;
+							break;
 						}
 						tmpWordData[k] = calcFrame(tmpWordData[k]);
 						tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
