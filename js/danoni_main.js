@@ -6893,11 +6893,10 @@ function MainInit() {
 			fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
 		}
 	}
-	let fadeOutTerm;
+	g_scoreObj.fadeOutTerm = C_FRM_AFTERFADE;
 	if (g_headerObj.fadeFrame[g_stateObj.scoreId].length <= 1) {
-		fadeOutTerm = C_FRM_AFTERFADE;
 	} else {
-		fadeOutTerm = Number(g_headerObj.fadeFrame[g_stateObj.scoreId][1]);
+		g_scoreObj.fadeOutTerm = Number(g_headerObj.fadeFrame[g_stateObj.scoreId][1]);
 	}
 
 	g_scoreObj.fadeOutFrame = (fadeOutFrame === Infinity ? 0 : fadeOutFrame);
@@ -6917,7 +6916,7 @@ function MainInit() {
 
 	let fullFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
 	if (fadeOutFrame !== Infinity && !endFrameUseFlg) {
-		fullFrame += fadeOutTerm;
+		fullFrame += g_scoreObj.fadeOutTerm;
 	}
 
 	const nominalDiff = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
@@ -7726,8 +7725,8 @@ function MainInit() {
 		// フェードイン・アウト
 		if (g_audio.volume >= g_stateObj.volume / 100) {
 			musicStartFlg = false;
-			if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + fadeOutTerm) {
-				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / fadeOutTerm) / 1000);
+			if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + g_scoreObj.fadeOutTerm) {
+				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
 				if (tmpVolume < 0) {
 					g_audio.volume = 0;
 				} else {
@@ -7742,8 +7741,8 @@ function MainInit() {
 				} else {
 					g_audio.volume = tmpVolume;
 				}
-			} else if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + fadeOutTerm) {
-				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / fadeOutTerm) / 1000);
+			} else if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + g_scoreObj.fadeOutTerm) {
+				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
 				if (tmpVolume < 0) {
 					g_audio.volume = 0;
 				} else {
@@ -9053,7 +9052,7 @@ function resultInit() {
 		if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
 			g_scoreObj.frameNum++;
 		} else {
-			const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
+			const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
 			if (tmpVolume < 0) {
 				g_audio.volume = 0;
 				clearTimeout(g_timeoutEvtId);
