@@ -396,8 +396,10 @@ let g_sHeight;
 
 // ステップゾーン位置、到達距離(後で指定)
 const C_STEP_Y = 70;
+const C_STEP_YR = 0;
 let g_stepY;
 let g_distY;
+let g_stepYR;
 
 // キーコンフィグカーソル
 let g_currentj = 0;
@@ -3071,12 +3073,9 @@ function headerConvert(_dosObj) {
 	}
 
 	// ステップゾーン位置
-	if (isNaN(parseFloat(_dosObj.stepY))) {
-		g_stepY = C_STEP_Y;
-	} else {
-		g_stepY = parseFloat(_dosObj.stepY);
-	}
-	g_distY = g_sHeight - g_stepY;
+	g_stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));
+	g_stepYR = (isNaN(parseFloat(_dosObj.stepYR)) ? C_STEP_YR : parseFloat(_dosObj.stepYR));
+	g_distY = g_sHeight - g_stepY + g_stepYR;
 
 	// musicフォルダ設定
 	obj.musicFolder = setVal(_dosObj.musicFolder, `music`, `string`);
