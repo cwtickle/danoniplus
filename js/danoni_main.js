@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/03
+ * Revised : 2019/09/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.9.1`;
-const g_revisedDate = `2019/09/03`;
+const g_version = `Ver 8.0.0`;
+const g_revisedDate = `2019/09/07`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -396,8 +396,10 @@ let g_sHeight;
 
 // ステップゾーン位置、到達距離(後で指定)
 const C_STEP_Y = 70;
+const C_STEP_YR = 0;
 let g_stepY;
 let g_distY;
+let g_stepYR;
 
 // キーコンフィグカーソル
 let g_currentj = 0;
@@ -2312,6 +2314,7 @@ function titleInit() {
 	drawDefaultBackImage(``);
 
 	// タイトル用フレーム初期化
+	g_scoreObj.titleFrameNum = 0;
 	g_scoreObj.backTitleFrameNum = 0;
 	g_scoreObj.maskTitleFrameNum = 0;
 
@@ -2328,6 +2331,11 @@ function titleInit() {
 		g_canLoadDifInfoFlg = false;
 	}
 	const divRoot = document.querySelector(`#divRoot`);
+
+	// 曲時間制御変数
+	let thisTime;
+	let buffTime;
+	let titleStartTime = performance.now();
 
 	// タイトル文字描画
 	const lblTitle = getTitleDivLabel(`lblTitle`,
@@ -2647,9 +2655,13 @@ function titleInit() {
 			g_scoreObj.maskTitleFrameNum = drawSpriteData(g_scoreObj.maskTitleFrameNum, `title`, `mask`);
 		}
 
+		thisTime = performance.now();
+		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / 60;
+
+		g_scoreObj.titleFrameNum++;
 		g_scoreObj.backTitleFrameNum++;
 		g_scoreObj.maskTitleFrameNum++;
-		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60);
+		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60 - buffTime);
 	}
 
 	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60);
@@ -3024,7 +3036,11 @@ function headerConvert(_dosObj) {
 
 	// フェードアウトフレーム数(譜面別)
 	if (_dosObj.fadeFrame !== undefined) {
-		obj.fadeFrame = _dosObj.fadeFrame.split(`$`);
+		const fadeFrames = _dosObj.fadeFrame.split(`$`);
+		obj.fadeFrame = [];
+		fadeFrames.forEach((fadeInfo, j) => {
+			obj.fadeFrame[j] = fadeInfo.split(`,`);
+		});
 	}
 
 	// 終了フレーム数
@@ -3057,12 +3073,9 @@ function headerConvert(_dosObj) {
 	}
 
 	// ステップゾーン位置
-	if (isNaN(parseFloat(_dosObj.stepY))) {
-		g_stepY = C_STEP_Y;
-	} else {
-		g_stepY = parseFloat(_dosObj.stepY);
-	}
-	g_distY = g_sHeight - g_stepY;
+	g_stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));
+	g_stepYR = (isNaN(parseFloat(_dosObj.stepYR)) ? C_STEP_YR : parseFloat(_dosObj.stepYR));
+	g_distY = g_sHeight - g_stepY + g_stepYR;
 
 	// musicフォルダ設定
 	obj.musicFolder = setVal(_dosObj.musicFolder, `music`, `string`);
@@ -5452,7 +5465,13 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	// 速度変化（全体）データの分解 (2つで1セット)
 	obj.speedData = [];
 	obj.speedData.length = 0;
-	const speedFooter = (g_keyObj.currentKey === `5` ? `_data` : `_change`);
+	let speedFooter = ``;
+	if (_dosObj[`speed${_scoreNo}_data`] !== undefined) {
+		speedFooter = `_data`;
+	}
+	if (_dosObj[`speed${_scoreNo}_change`] !== undefined) {
+		speedFooter = `_change`;
+	}
 	if (_dosObj[`speed${_scoreNo}${speedFooter}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
 		let speedIdx = 0;
 		let tmpArrayData = _dosObj[`speed${_scoreNo}${speedFooter}`].split(`\r`).join(`\n`);
@@ -5680,25 +5699,42 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		}
 	}
 
+	let scoreIdHeader = ``;
+	if (g_stateObj.scoreId > 0) {
+		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
+	}
+
 	// 結果画面用・背景データ(クリア時)の分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	g_headerObj.backResultData = [];
 	g_headerObj.backResultData.length = 0;
 	g_headerObj.backResultMaxDepth = -1;
+	let tmpBackResultData = ``;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj.backresult_data !== undefined) {
-		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(_dosObj.backresult_data);
+	} else {
+		if (_dosObj[`backresult${scoreIdHeader}_data`] !== undefined) {
+			tmpBackResultData = _dosObj[`backresult${scoreIdHeader}_data`];
+		} else if (_dosObj.backresult_data !== undefined) {
+			tmpBackResultData = _dosObj.backresult_data;
+		}
+		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(tmpBackResultData);
 	}
 
 	// 結果画面用・マスクデータ(クリア時)の分解 (下記すべてで1セット、改行区切り)
 	g_headerObj.maskResultData = [];
 	g_headerObj.maskResultData.length = 0;
 	g_headerObj.maskResultMaxDepth = -1;
+	let tmpMaskResultData = ``;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj.maskresult_data !== undefined) {
-		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
+	} else {
+		if (_dosObj[`maskresult${scoreIdHeader}_data`] !== undefined) {
+			tmpMaskResultData = _dosObj[`maskresult${scoreIdHeader}_data`];
+		} else if (_dosObj.maskresult_data !== undefined) {
+			tmpMaskResultData = _dosObj.maskresult_data;
+		}
+		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(tmpMaskResultData);
 	}
 
 	// 結果画面用・背景データ(失敗時)の分解 (下記すべてで1セット、改行区切り)
@@ -5708,12 +5744,16 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	g_headerObj.backFailedMaxDepth = -1;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`]);
-	} else if (_dosObj.backfailed_data !== undefined) {
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj.backfailed_data);
-	} else if (_dosObj.backresult_data !== undefined) {
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj.backresult_data);
+	} else {
+		let tmpBackFailedData = ``;
+		if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
+			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
+		} else if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
+			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`];
+		} else {
+			tmpBackFailedData = tmpBackResultData;
+		}
+		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(tmpBackFailedData);
 	}
 
 	// 結果画面用・マスクデータ(失敗時)の分解 (下記すべてで1セット、改行区切り)
@@ -5722,10 +5762,16 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	g_headerObj.maskFailedMaxDepth = -1;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`]);
-	} else if (_dosObj.maskresult_data !== undefined) {
-		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
+	} else {
+		let tmpMaskFailedData = ``;
+		if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
+			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
+		} else if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
+			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`];
+		} else {
+			tmpMaskFailedData = tmpMaskResultData;
+		}
+		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(tmpMaskFailedData);
 	}
 
 	return obj;
@@ -6841,18 +6887,23 @@ function MainInit() {
 
 	// 終了時間の設定
 	let duration = g_audio.duration * 60;
-	let fadeOutFrame = Infinity;
+	g_scoreObj.fadeOutFrame = Infinity;
+	g_scoreObj.fadeOutTerm = C_FRM_AFTERFADE;
 
 	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
 	if (g_headerObj.fadeFrame !== undefined) {
-		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
+		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId][0]))) {
 		} else {
 			// フェードアウト指定の場合、曲長(フェードアウト開始まで)は FadeFrame - (本来のblankFrame)
-			duration = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]) - g_headerObj.blankFrameDef;
-			fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
+			duration = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId][0]) - g_headerObj.blankFrameDef;
+			g_scoreObj.fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
+
+			if (g_headerObj.fadeFrame[g_stateObj.scoreId].length <= 1) {
+			} else {
+				g_scoreObj.fadeOutTerm = Number(g_headerObj.fadeFrame[g_stateObj.scoreId][1]);
+			}
 		}
 	}
-	g_scoreObj.fadeOutFrame = (fadeOutFrame === Infinity ? 0 : fadeOutFrame);
 
 	// 終了時間指定の場合、その値を適用する
 	let endFrameUseFlg = false;
@@ -6868,9 +6919,10 @@ function MainInit() {
 	}
 
 	let fullFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
-	if (fadeOutFrame !== Infinity && !endFrameUseFlg) {
-		fullFrame += C_FRM_AFTERFADE;
+	if (g_scoreObj.fadeOutFrame !== Infinity && !endFrameUseFlg) {
+		fullFrame += g_scoreObj.fadeOutTerm;
 	}
+	g_scoreObj.fullFrame = fullFrame;
 
 	const nominalDiff = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
 	g_scoreObj.nominalFrameNum = g_scoreObj.frameNum - nominalDiff;
@@ -7678,8 +7730,8 @@ function MainInit() {
 		// フェードイン・アウト
 		if (g_audio.volume >= g_stateObj.volume / 100) {
 			musicStartFlg = false;
-			if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + C_FRM_AFTERFADE) {
-				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
+			if (g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm) {
+				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
 				if (tmpVolume < 0) {
 					g_audio.volume = 0;
 				} else {
@@ -7694,8 +7746,8 @@ function MainInit() {
 				} else {
 					g_audio.volume = tmpVolume;
 				}
-			} else if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + C_FRM_AFTERFADE) {
-				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
+			} else if (g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm) {
+				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
 				if (tmpVolume < 0) {
 					g_audio.volume = 0;
 				} else {
@@ -7930,7 +7982,7 @@ function MainInit() {
 		}
 		// 曲終了判定
 		if (g_scoreObj.frameNum >= fullFrame) {
-			if (fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
+			if (g_scoreObj.fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
 				g_audio.pause();
 			}
 			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
@@ -8475,6 +8527,7 @@ function resultInit() {
 	drawDefaultBackImage(``);
 
 	// 結果画面用フレーム初期化
+	g_scoreObj.resultFrameNum = 0;
 	g_scoreObj.backResultFrameNum = 0;
 	g_scoreObj.maskResultFrameNum = 0;
 
@@ -8484,14 +8537,28 @@ function resultInit() {
 
 	const divRoot = document.querySelector(`#divRoot`);
 
+	// 曲時間制御変数
+	let thisTime;
+	let buffTime;
+	let resultStartTime = performance.now();
+
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
 	} else {
 		// ゲームオーバー時は失敗時のリザルトモーションを適用
 		if (!g_finishFlg) {
-			if (g_rootObj.backfailedS_data !== undefined) {
+			let scoreIdHeader = ``;
+			if (g_stateObj.scoreId > 0) {
+				scoreIdHeader = Number(g_stateObj.scoreId) + 1;
+			}
+
+			if (g_rootObj[`backfailedS${scoreIdHeader}_data`] !== undefined) {
+				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj[`backfailedS${scoreIdHeader}_data`]);
+			} else if (g_rootObj.backfailedS_data !== undefined) {
 				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj.backfailedS_data);
 			}
-			if (g_rootObj.maskfailedS_data !== undefined) {
+			if (g_rootObj[`maskfailedS${scoreIdHeader}_data`] !== undefined) {
+				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj[`maskfailedS${scoreIdHeader}_data`]);
+			} else if (g_rootObj.maskfailedS_data !== undefined) {
 				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj.maskfailedS_data);
 			}
 		} else if (g_gameOverFlg) {
@@ -8986,9 +9053,30 @@ function resultInit() {
 			g_scoreObj.maskResultFrameNum = drawSpriteData(g_scoreObj.maskResultFrameNum, `result`, `mask`);
 		}
 
+		// リザルト画面移行後のフェードアウト処理
+		if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
+			if (g_scoreObj.frameNum >= g_scoreObj.fullFrame) {
+				clearTimeout(g_timeoutEvtId);
+			}
+			g_scoreObj.frameNum++;
+		} else {
+			const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
+			if (tmpVolume < 0) {
+				g_audio.volume = 0;
+				clearTimeout(g_timeoutEvtId);
+				g_audio.pause();
+			} else {
+				g_audio.volume = tmpVolume;
+			}
+		}
+
+		thisTime = performance.now();
+		buffTime = thisTime - resultStartTime - g_scoreObj.resultFrameNum * 1000 / 60;
+
+		g_scoreObj.resultFrameNum++;
 		g_scoreObj.backResultFrameNum++;
 		g_scoreObj.maskResultFrameNum++;
-		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60);
+		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60 - buffTime);
 	}
 
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60);
@@ -9009,33 +9097,6 @@ function resultInit() {
 		}
 	}
 	document.onkeyup = evt => { }
-	if (g_headerObj.fadeFrame !== undefined && g_headerObj.fadeFrame !== ``) {
-		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
-		} else {
-			g_timeoutEvtId = setTimeout(_ => resultFadeOut(), 1000 / 60);
-		}
-	}
-}
-
-/**
- * リザルト画面移行後のフェードアウト処理
- */
-function resultFadeOut() {
-
-	if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
-		g_scoreObj.frameNum++;
-	} else {
-		const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
-		if (tmpVolume < 0) {
-			g_audio.volume = 0;
-			clearTimeout(g_timeoutEvtId);
-			g_audio.pause();
-		} else {
-			g_audio.volume = tmpVolume;
-		}
-	}
-
-	g_timeoutEvtId = setTimeout(_ => resultFadeOut(), 1000 / 60);
 }
 
 /**
