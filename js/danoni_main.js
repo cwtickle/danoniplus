@@ -9038,6 +9038,20 @@ function resultInit() {
 			g_scoreObj.maskResultFrameNum = drawSpriteData(g_scoreObj.maskResultFrameNum, `result`, `mask`);
 		}
 
+		// リザルト画面移行後のフェードアウト処理
+		if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
+			g_scoreObj.frameNum++;
+		} else {
+			const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
+			if (tmpVolume < 0) {
+				g_audio.volume = 0;
+				clearTimeout(g_timeoutEvtId);
+				g_audio.pause();
+			} else {
+				g_audio.volume = tmpVolume;
+			}
+		}
+
 		thisTime = performance.now();
 		buffTime = thisTime - resultStartTime - g_scoreObj.resultFrameNum * 1000 / 60;
 
@@ -9065,33 +9079,6 @@ function resultInit() {
 		}
 	}
 	document.onkeyup = evt => { }
-	if (g_headerObj.fadeFrame !== undefined && g_headerObj.fadeFrame !== ``) {
-		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId]))) {
-		} else {
-			g_timeoutEvtId = setTimeout(_ => resultFadeOut(), 1000 / 60);
-		}
-	}
-}
-
-/**
- * リザルト画面移行後のフェードアウト処理
- */
-function resultFadeOut() {
-
-	if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
-		g_scoreObj.frameNum++;
-	} else {
-		const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
-		if (tmpVolume < 0) {
-			g_audio.volume = 0;
-			clearTimeout(g_timeoutEvtId);
-			g_audio.pause();
-		} else {
-			g_audio.volume = tmpVolume;
-		}
-	}
-
-	g_timeoutEvtId = setTimeout(_ => resultFadeOut(), 1000 / 60);
 }
 
 /**
