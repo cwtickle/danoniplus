@@ -5680,25 +5680,42 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		}
 	}
 
+	let scoreIdHeader = ``;
+	if (g_stateObj.scoreId > 0) {
+		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
+	}
+
 	// 結果画面用・背景データ(クリア時)の分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	g_headerObj.backResultData = [];
 	g_headerObj.backResultData.length = 0;
 	g_headerObj.backResultMaxDepth = -1;
+	let tmpBackResultData = ``;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj.backresult_data !== undefined) {
-		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(_dosObj.backresult_data);
+	} else {
+		if (_dosObj[`backresult${scoreIdHeader}_data`] !== undefined) {
+			tmpBackResultData = _dosObj[`backresult${scoreIdHeader}_data`];
+		} else if (_dosObj.backresult_data !== undefined) {
+			tmpBackResultData = _dosObj.backresult_data;
+		}
+		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(tmpBackResultData);
 	}
 
 	// 結果画面用・マスクデータ(クリア時)の分解 (下記すべてで1セット、改行区切り)
 	g_headerObj.maskResultData = [];
 	g_headerObj.maskResultData.length = 0;
 	g_headerObj.maskResultMaxDepth = -1;
+	let tmpMaskResultData = ``;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj.maskresult_data !== undefined) {
-		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
+	} else {
+		if (_dosObj[`maskresult${scoreIdHeader}_data`] !== undefined) {
+			tmpMaskResultData = _dosObj[`maskresult${scoreIdHeader}_data`];
+		} else if (_dosObj.maskresult_data !== undefined) {
+			tmpMaskResultData = _dosObj.maskresult_data;
+		}
+		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(tmpMaskResultData);
 	}
 
 	// 結果画面用・背景データ(失敗時)の分解 (下記すべてで1セット、改行区切り)
@@ -5708,12 +5725,16 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	g_headerObj.backFailedMaxDepth = -1;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`]);
-	} else if (_dosObj.backfailed_data !== undefined) {
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj.backfailed_data);
-	} else if (_dosObj.backresult_data !== undefined) {
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj.backresult_data);
+	} else {
+		let tmpBackFailedData = ``;
+		if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
+			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
+		} else if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
+			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`];
+		} else {
+			tmpBackFailedData = tmpBackResultData;
+		}
+		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(tmpBackFailedData);
 	}
 
 	// 結果画面用・マスクデータ(失敗時)の分解 (下記すべてで1セット、改行区切り)
@@ -5722,10 +5743,16 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	g_headerObj.maskFailedMaxDepth = -1;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`]);
-	} else if (_dosObj.maskresult_data !== undefined) {
-		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
+	} else {
+		let tmpMaskFailedData = ``;
+		if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
+			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
+		} else if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
+			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`];
+		} else {
+			tmpMaskFailedData = tmpMaskResultData;
+		}
+		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(tmpMaskFailedData);
 	}
 
 	return obj;
@@ -8488,10 +8515,19 @@ function resultInit() {
 	} else {
 		// ゲームオーバー時は失敗時のリザルトモーションを適用
 		if (!g_finishFlg) {
-			if (g_rootObj.backfailedS_data !== undefined) {
+			let scoreIdHeader = ``;
+			if (g_stateObj.scoreId > 0) {
+				scoreIdHeader = Number(g_stateObj.scoreId) + 1;
+			}
+
+			if (g_rootObj[`backfailedS${scoreIdHeader}_data`] !== undefined) {
+				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj[`backfailedS${scoreIdHeader}_data`]);
+			} else if (g_rootObj.backfailedS_data !== undefined) {
 				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj.backfailedS_data);
 			}
-			if (g_rootObj.maskfailedS_data !== undefined) {
+			if (g_rootObj[`maskfailedS${scoreIdHeader}_data`] !== undefined) {
+				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj[`maskfailedS${scoreIdHeader}_data`]);
+			} else if (g_rootObj.maskfailedS_data !== undefined) {
 				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj.maskfailedS_data);
 			}
 		} else if (g_gameOverFlg) {
