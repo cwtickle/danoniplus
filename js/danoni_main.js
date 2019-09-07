@@ -8502,6 +8502,7 @@ function resultInit() {
 	drawDefaultBackImage(``);
 
 	// 結果画面用フレーム初期化
+	g_scoreObj.resultFrameNum = 0;
 	g_scoreObj.backResultFrameNum = 0;
 	g_scoreObj.maskResultFrameNum = 0;
 
@@ -8510,6 +8511,11 @@ function resultInit() {
 	g_scoreObj.maskResultLoopCount = 0;
 
 	const divRoot = document.querySelector(`#divRoot`);
+
+	// 曲時間制御変数
+	let thisTime;
+	let buffTime;
+	let resultStartTime = performance.now();
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
 	} else {
@@ -9022,9 +9028,13 @@ function resultInit() {
 			g_scoreObj.maskResultFrameNum = drawSpriteData(g_scoreObj.maskResultFrameNum, `result`, `mask`);
 		}
 
+		thisTime = performance.now();
+		buffTime = thisTime - resultStartTime - g_scoreObj.resultFrameNum * 1000 / 60;
+
+		g_scoreObj.resultFrameNum++;
 		g_scoreObj.backResultFrameNum++;
 		g_scoreObj.maskResultFrameNum++;
-		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60);
+		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60 - buffTime);
 	}
 
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60);
