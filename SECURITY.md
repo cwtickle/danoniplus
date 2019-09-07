@@ -9,7 +9,8 @@ v1, v4についても致命的な不具合を除き、対応を終了します�
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 7.x     | :white_check_mark: |
+| 8.x     | :white_check_mark: |
+| 7.9.x   | :white_check_mark: |
 | 6.6.x   | :white_check_mark: |
 | 5.12.x  | :white_check_mark: |
 | 4.10.x  | :warning:          |
