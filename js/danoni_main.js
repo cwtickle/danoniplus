@@ -5466,7 +5466,13 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	// 速度変化（全体）データの分解 (2つで1セット)
 	obj.speedData = [];
 	obj.speedData.length = 0;
-	const speedFooter = (g_keyObj.currentKey === `5` ? `_data` : `_change`);
+	let speedFooter = ``;
+	if (_dosObj[`speed${_scoreNo}_data`] !== undefined) {
+		speedFooter = `_data`;
+	}
+	if (_dosObj[`speed${_scoreNo}_change`] !== undefined) {
+		speedFooter = `_change`;
+	}
 	if (_dosObj[`speed${_scoreNo}${speedFooter}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
 		let speedIdx = 0;
 		let tmpArrayData = _dosObj[`speed${_scoreNo}${speedFooter}`].split(`\r`).join(`\n`);
