@@ -2312,6 +2312,7 @@ function titleInit() {
 	drawDefaultBackImage(``);
 
 	// タイトル用フレーム初期化
+	g_scoreObj.titleFrameNum = 0;
 	g_scoreObj.backTitleFrameNum = 0;
 	g_scoreObj.maskTitleFrameNum = 0;
 
@@ -2328,6 +2329,11 @@ function titleInit() {
 		g_canLoadDifInfoFlg = false;
 	}
 	const divRoot = document.querySelector(`#divRoot`);
+
+	// 曲時間制御変数
+	let thisTime;
+	let buffTime;
+	let titleStartTime = performance.now();
 
 	// タイトル文字描画
 	const lblTitle = getTitleDivLabel(`lblTitle`,
@@ -2647,9 +2653,13 @@ function titleInit() {
 			g_scoreObj.maskTitleFrameNum = drawSpriteData(g_scoreObj.maskTitleFrameNum, `title`, `mask`);
 		}
 
+		thisTime = performance.now();
+		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / 60;
+
+		g_scoreObj.titleFrameNum++;
 		g_scoreObj.backTitleFrameNum++;
 		g_scoreObj.maskTitleFrameNum++;
-		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60);
+		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60 - buffTime);
 	}
 
 	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60);
@@ -5684,25 +5694,42 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		}
 	}
 
+	let scoreIdHeader = ``;
+	if (g_stateObj.scoreId > 0) {
+		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
+	}
+
 	// 結果画面用・背景データ(クリア時)の分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	g_headerObj.backResultData = [];
 	g_headerObj.backResultData.length = 0;
 	g_headerObj.backResultMaxDepth = -1;
+	let tmpBackResultData = ``;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj.backresult_data !== undefined) {
-		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(_dosObj.backresult_data);
+	} else {
+		if (_dosObj[`backresult${scoreIdHeader}_data`] !== undefined) {
+			tmpBackResultData = _dosObj[`backresult${scoreIdHeader}_data`];
+		} else if (_dosObj.backresult_data !== undefined) {
+			tmpBackResultData = _dosObj.backresult_data;
+		}
+		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(tmpBackResultData);
 	}
 
 	// 結果画面用・マスクデータ(クリア時)の分解 (下記すべてで1セット、改行区切り)
 	g_headerObj.maskResultData = [];
 	g_headerObj.maskResultData.length = 0;
 	g_headerObj.maskResultMaxDepth = -1;
+	let tmpMaskResultData = ``;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj.maskresult_data !== undefined) {
-		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
+	} else {
+		if (_dosObj[`maskresult${scoreIdHeader}_data`] !== undefined) {
+			tmpMaskResultData = _dosObj[`maskresult${scoreIdHeader}_data`];
+		} else if (_dosObj.maskresult_data !== undefined) {
+			tmpMaskResultData = _dosObj.maskresult_data;
+		}
+		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(tmpMaskResultData);
 	}
 
 	// 結果画面用・背景データ(失敗時)の分解 (下記すべてで1セット、改行区切り)
@@ -5712,12 +5739,16 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	g_headerObj.backFailedMaxDepth = -1;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`]);
-	} else if (_dosObj.backfailed_data !== undefined) {
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj.backfailed_data);
-	} else if (_dosObj.backresult_data !== undefined) {
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(_dosObj.backresult_data);
+	} else {
+		let tmpBackFailedData = ``;
+		if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
+			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
+		} else if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
+			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`];
+		} else {
+			tmpBackFailedData = tmpBackResultData;
+		}
+		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(tmpBackFailedData);
 	}
 
 	// 結果画面用・マスクデータ(失敗時)の分解 (下記すべてで1セット、改行区切り)
@@ -5726,10 +5757,16 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	g_headerObj.maskFailedMaxDepth = -1;
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
-	} else if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`]);
-	} else if (_dosObj.maskresult_data !== undefined) {
-		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(_dosObj.maskresult_data);
+	} else {
+		let tmpMaskFailedData = ``;
+		if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
+			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
+		} else if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
+			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`];
+		} else {
+			tmpMaskFailedData = tmpMaskResultData;
+		}
+		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(tmpMaskFailedData);
 	}
 
 	return obj;
@@ -8486,6 +8523,7 @@ function resultInit() {
 	drawDefaultBackImage(``);
 
 	// 結果画面用フレーム初期化
+	g_scoreObj.resultFrameNum = 0;
 	g_scoreObj.backResultFrameNum = 0;
 	g_scoreObj.maskResultFrameNum = 0;
 
@@ -8495,14 +8533,28 @@ function resultInit() {
 
 	const divRoot = document.querySelector(`#divRoot`);
 
+	// 曲時間制御変数
+	let thisTime;
+	let buffTime;
+	let resultStartTime = performance.now();
+
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet === `true`) {
 	} else {
 		// ゲームオーバー時は失敗時のリザルトモーションを適用
 		if (!g_finishFlg) {
-			if (g_rootObj.backfailedS_data !== undefined) {
+			let scoreIdHeader = ``;
+			if (g_stateObj.scoreId > 0) {
+				scoreIdHeader = Number(g_stateObj.scoreId) + 1;
+			}
+
+			if (g_rootObj[`backfailedS${scoreIdHeader}_data`] !== undefined) {
+				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj[`backfailedS${scoreIdHeader}_data`]);
+			} else if (g_rootObj.backfailedS_data !== undefined) {
 				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj.backfailedS_data);
 			}
-			if (g_rootObj.maskfailedS_data !== undefined) {
+			if (g_rootObj[`maskfailedS${scoreIdHeader}_data`] !== undefined) {
+				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj[`maskfailedS${scoreIdHeader}_data`]);
+			} else if (g_rootObj.maskfailedS_data !== undefined) {
 				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj.maskfailedS_data);
 			}
 		} else if (g_gameOverFlg) {
@@ -8997,9 +9049,27 @@ function resultInit() {
 			g_scoreObj.maskResultFrameNum = drawSpriteData(g_scoreObj.maskResultFrameNum, `result`, `mask`);
 		}
 
+		// リザルト画面移行後のフェードアウト処理
+		if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
+			g_scoreObj.frameNum++;
+		} else {
+			const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
+			if (tmpVolume < 0) {
+				g_audio.volume = 0;
+				clearTimeout(g_timeoutEvtId);
+				g_audio.pause();
+			} else {
+				g_audio.volume = tmpVolume;
+			}
+		}
+
+		thisTime = performance.now();
+		buffTime = thisTime - resultStartTime - g_scoreObj.resultFrameNum * 1000 / 60;
+
+		g_scoreObj.resultFrameNum++;
 		g_scoreObj.backResultFrameNum++;
 		g_scoreObj.maskResultFrameNum++;
-		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60);
+		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60 - buffTime);
 	}
 
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60);
@@ -9020,33 +9090,6 @@ function resultInit() {
 		}
 	}
 	document.onkeyup = evt => { }
-	if (g_headerObj.fadeFrame !== undefined && g_headerObj.fadeFrame !== ``) {
-		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId][0]))) {
-		} else {
-			g_timeoutEvtId = setTimeout(_ => resultFadeOut(), 1000 / 60);
-		}
-	}
-}
-
-/**
- * リザルト画面移行後のフェードアウト処理
- */
-function resultFadeOut() {
-
-	if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
-		g_scoreObj.frameNum++;
-	} else {
-		const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100) / 1000);
-		if (tmpVolume < 0) {
-			g_audio.volume = 0;
-			clearTimeout(g_timeoutEvtId);
-			g_audio.pause();
-		} else {
-			g_audio.volume = tmpVolume;
-		}
-	}
-
-	g_timeoutEvtId = setTimeout(_ => resultFadeOut(), 1000 / 60);
 }
 
 /**
