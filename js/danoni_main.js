@@ -6882,7 +6882,8 @@ function MainInit() {
 
 	// 終了時間の設定
 	let duration = g_audio.duration * 60;
-	let fadeOutFrame = Infinity;
+	g_scoreObj.fadeOutFrame = Infinity;
+	g_scoreObj.fadeOutTerm = C_FRM_AFTERFADE;
 
 	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
 	if (g_headerObj.fadeFrame !== undefined) {
@@ -6890,16 +6891,14 @@ function MainInit() {
 		} else {
 			// フェードアウト指定の場合、曲長(フェードアウト開始まで)は FadeFrame - (本来のblankFrame)
 			duration = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId][0]) - g_headerObj.blankFrameDef;
-			fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
+			g_scoreObj.fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
+
+			if (g_headerObj.fadeFrame[g_stateObj.scoreId].length <= 1) {
+			} else {
+				g_scoreObj.fadeOutTerm = Number(g_headerObj.fadeFrame[g_stateObj.scoreId][1]);
+			}
 		}
 	}
-	g_scoreObj.fadeOutTerm = C_FRM_AFTERFADE;
-	if (g_headerObj.fadeFrame[g_stateObj.scoreId].length <= 1) {
-	} else {
-		g_scoreObj.fadeOutTerm = Number(g_headerObj.fadeFrame[g_stateObj.scoreId][1]);
-	}
-
-	g_scoreObj.fadeOutFrame = (fadeOutFrame === Infinity ? 0 : fadeOutFrame);
 
 	// 終了時間指定の場合、その値を適用する
 	let endFrameUseFlg = false;
@@ -6915,9 +6914,10 @@ function MainInit() {
 	}
 
 	let fullFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
-	if (fadeOutFrame !== Infinity && !endFrameUseFlg) {
+	if (g_scoreObj.fadeOutFrame !== Infinity && !endFrameUseFlg) {
 		fullFrame += g_scoreObj.fadeOutTerm;
 	}
+	g_scoreObj.fullFrame = fullFrame;
 
 	const nominalDiff = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
 	g_scoreObj.nominalFrameNum = g_scoreObj.frameNum - nominalDiff;
@@ -7725,7 +7725,7 @@ function MainInit() {
 		// フェードイン・アウト
 		if (g_audio.volume >= g_stateObj.volume / 100) {
 			musicStartFlg = false;
-			if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + g_scoreObj.fadeOutTerm) {
+			if (g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm) {
 				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
 				if (tmpVolume < 0) {
 					g_audio.volume = 0;
@@ -7741,7 +7741,7 @@ function MainInit() {
 				} else {
 					g_audio.volume = tmpVolume;
 				}
-			} else if (g_scoreObj.frameNum >= fadeOutFrame && g_scoreObj.frameNum < fadeOutFrame + g_scoreObj.fadeOutTerm) {
+			} else if (g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm) {
 				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
 				if (tmpVolume < 0) {
 					g_audio.volume = 0;
@@ -7977,7 +7977,7 @@ function MainInit() {
 		}
 		// 曲終了判定
 		if (g_scoreObj.frameNum >= fullFrame) {
-			if (fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
+			if (g_scoreObj.fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
 				g_audio.pause();
 			}
 			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
@@ -9050,6 +9050,9 @@ function resultInit() {
 
 		// リザルト画面移行後のフェードアウト処理
 		if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
+			if (g_scoreObj.frameNum >= g_scoreObj.fullFrame) {
+				clearTimeout(g_timeoutEvtId);
+			}
 			g_scoreObj.frameNum++;
 		} else {
 			const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
