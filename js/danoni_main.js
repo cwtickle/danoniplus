@@ -2312,6 +2312,7 @@ function titleInit() {
 	drawDefaultBackImage(``);
 
 	// タイトル用フレーム初期化
+	g_scoreObj.titleFrameNum = 0;
 	g_scoreObj.backTitleFrameNum = 0;
 	g_scoreObj.maskTitleFrameNum = 0;
 
@@ -2328,6 +2329,11 @@ function titleInit() {
 		g_canLoadDifInfoFlg = false;
 	}
 	const divRoot = document.querySelector(`#divRoot`);
+
+	// 曲時間制御変数
+	let thisTime;
+	let buffTime;
+	let titleStartTime = performance.now();
 
 	// タイトル文字描画
 	const lblTitle = getTitleDivLabel(`lblTitle`,
@@ -2647,9 +2653,13 @@ function titleInit() {
 			g_scoreObj.maskTitleFrameNum = drawSpriteData(g_scoreObj.maskTitleFrameNum, `title`, `mask`);
 		}
 
+		thisTime = performance.now();
+		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / 60;
+
+		g_scoreObj.titleFrameNum++;
 		g_scoreObj.backTitleFrameNum++;
 		g_scoreObj.maskTitleFrameNum++;
-		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60);
+		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60 - buffTime);
 	}
 
 	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60);
