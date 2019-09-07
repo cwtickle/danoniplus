@@ -3061,7 +3061,7 @@ function headerConvert(_dosObj) {
 	// ステップゾーン位置
 	g_stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));
 	g_stepYR = (isNaN(parseFloat(_dosObj.stepYR)) ? C_STEP_YR : parseFloat(_dosObj.stepYR));
-	g_distY = g_sHeight - g_stepY - g_stepYR;
+	g_distY = g_sHeight - g_stepY + g_stepYR;
 
 	// musicフォルダ設定
 	obj.musicFolder = setVal(_dosObj.musicFolder, `music`, `string`);
