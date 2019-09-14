@@ -5,7 +5,7 @@
 リズムゲームDancing☆Onigiri (CW Edition)のソース作成・配布場所です。  
 Flash版の同ゲームのHTML5版を制作しています。 
 (旧名:Dancing☆Onigiri for HTML5)  
-(Dancing ☆ Onigiri (CW Edition) is a rhythm game.)
+(Dancing ☆ Onigiri (CW Edition) is a rhythm game. See the [wiki](../../wiki/Sidebar-En) for details.)
 
 ![AboutDanOni](http://cw7.sakura.ne.jp/danoni/wiki/danonitop.png)
 
