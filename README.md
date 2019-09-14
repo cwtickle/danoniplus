@@ -5,7 +5,7 @@
 リズムゲームDancing☆Onigiri (CW Edition)のソース作成・配布場所です。  
 Flash版の同ゲームのHTML5版を制作しています。 
 (旧名:Dancing☆Onigiri for HTML5)  
-(Dancing ☆ Onigiri (CW Edition) is a rhythm game.)
+(Dancing ☆ Onigiri (CW Edition) is a rhythm game. See the [wiki](../../wiki/Sidebar-En) for details.)
 
 ![AboutDanOni](http://cw7.sakura.ne.jp/danoni/wiki/danonitop.png)
 
@@ -43,6 +43,12 @@ You can create original game data.)
 (When you press the keyboard with good timing (・∀・)ｲｲ!! (ﾟ∀ﾟ)ｷﾀｰ!! and life will go up.
 On the other hand, if you remove the timing (´・ω・\`)ｼｮﾎﾞｰﾝ, (\`Д´)ｳﾜｧﾝ, (・A・)ｲｸﾅｲ will be, life falls.
 If the life of the life gauge remains by the end of the game or it is over the quota, the game is cleared.)
+
+## Works / 公開作品
+- [Dancing☆Onigiri 難易度表 for.js](http://dodl4.g3.xrea.com/) 
+- [多鍵データベース](http://apoi108.sakura.ne.jp/danoni/ta/index.php)
+- [Dancing☆Onigiri サイト一覧](https://cw7.sakura.ne.jp/danonidb/)  
+- [Dancing☆Onigiri 作品一覧](https://cw7.sakura.ne.jp/lst/)  
 
 ## How to Make / 作り方
 - [譜面の作成概要](https://github.com/cwtickle/danoniplus/wiki/HowToMake)
