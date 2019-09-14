@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/03
+ * Revised : 2019/09/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.9.1`;
-const g_revisedDate = `2019/09/03`;
+const g_version = `Ver 7.9.2`;
+const g_revisedDate = `2019/09/15`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5891,7 +5891,7 @@ function setSpeedOnFrame(_speedData, _lastFrame) {
 	let currentSpeed = g_stateObj.speed * 2;
 
 	for (let frm = 0, s = 0; frm <= _lastFrame; frm++) {
-		if (_speedData !== undefined && frm === _speedData[s]) {
+		while (_speedData !== undefined && frm >= _speedData[s]) {
 			currentSpeed = _speedData[s + 1] * g_stateObj.speed * 2;
 			s += 2;
 		}
