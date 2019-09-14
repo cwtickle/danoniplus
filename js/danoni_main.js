@@ -5937,7 +5937,7 @@ function setSpeedOnFrame(_speedData, _lastFrame) {
 	let currentSpeed = g_stateObj.speed * 2;
 
 	for (let frm = 0, s = 0; frm <= _lastFrame; frm++) {
-		if (_speedData !== undefined && frm === _speedData[s]) {
+		while (_speedData !== undefined && frm >= _speedData[s]) {
 			currentSpeed = _speedData[s + 1] * g_stateObj.speed * 2;
 			s += 2;
 		}
