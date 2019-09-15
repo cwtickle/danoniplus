@@ -8288,12 +8288,10 @@ function lifeDamage() {
 		if (g_workObj.lifeBorder === 0) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			setTimeout(_ => {
-				clearWindow();
-				g_gameOverFlg = true;
-				g_finishFlg = false;
-				resultInit();
-			}, 200);
+			clearWindow();
+			g_gameOverFlg = true;
+			g_finishFlg = false;
+			resultInit();
 		}
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
 		lifeColor = C_CLR_DEFAULTLIFE;
