@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/15 
+ * Revised : 2019/09/16 
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.15.13";
+const g_version = "Ver 1.15.14";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -4710,15 +4710,13 @@ function MainInit() {
 		} else if (setKey === 46) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			setTimeout(function () {
-				clearWindow();
-				if (keyIsDown(16)) {
-					g_gameOverFlg = true;
-					resultInit();
-				} else {
-					titleInit();
-				}
-			}, 200);
+			clearWindow();
+			if (keyIsDown(16)) {
+				g_gameOverFlg = true;
+				resultInit();
+			} else {
+				titleInit();
+			}
 		}
 
 		for (var j = 0; j < C_BLOCK_KEYS.length; j++) {
@@ -5309,6 +5307,15 @@ function MainInit() {
 				}, 100);
 			}
 		}
+		if (g_workObj.lifeVal === 0) {
+			if (g_workObj.lifeBorder === 0) {
+				g_audio.pause();
+				clearTimeout(g_timeoutEvtId);
+				clearWindow();
+				g_gameOverFlg = true;
+				resultInit();
+			}
+		}
 	}
 	const mainStartTime = performance.now();
 	g_timeoutEvtId = setTimeout(function () { flowTimeline(); }, 1000 / 60);
@@ -5596,15 +5603,6 @@ function lifeDamage() {
 	g_workObj.lifeVal -= g_workObj.lifeDmg;
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
-		if (g_workObj.lifeBorder === 0) {
-			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
-			setTimeout(function () {
-				clearWindow();
-				g_gameOverFlg = true;
-				resultInit();
-			}, 200);
-		}
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
 		lifeColor = C_CLR_DEFAULTLIFE;
 	} else {
