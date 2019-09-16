@@ -7165,16 +7165,14 @@ function MainInit() {
 		} else if (setKey === g_headerObj.keyTitleBack) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			setTimeout(_ => {
-				clearWindow();
-				if (keyIsDown(16)) {
-					g_gameOverFlg = true;
-					g_finishFlg = false;
-					resultInit();
-				} else {
-					titleInit();
-				}
-			}, 200);
+			clearWindow();
+			if (keyIsDown(16)) {
+				g_gameOverFlg = true;
+				g_finishFlg = false;
+				resultInit();
+			} else {
+				titleInit();
+			}
 		}
 
 		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
@@ -7993,6 +7991,17 @@ function MainInit() {
 				clearWindow();
 				resultInit();
 			}, 100);
+		} else if (g_workObj.lifeVal === 0) {
+
+			// ライフ制＆ライフ０の場合は途中終了
+			if (g_workObj.lifeBorder === 0) {
+				g_audio.pause();
+				clearTimeout(g_timeoutEvtId);
+				clearWindow();
+				g_gameOverFlg = true;
+				g_finishFlg = false;
+				resultInit();
+			}
 		}
 	}
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60);
@@ -8285,16 +8294,6 @@ function lifeDamage() {
 	g_workObj.lifeVal -= g_workObj.lifeDmg;
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
-		if (g_workObj.lifeBorder === 0) {
-			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
-			setTimeout(_ => {
-				clearWindow();
-				g_gameOverFlg = true;
-				g_finishFlg = false;
-				resultInit();
-			}, 200);
-		}
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
 		lifeColor = C_CLR_DEFAULTLIFE;
 	} else {
