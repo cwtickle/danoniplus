@@ -7113,16 +7113,14 @@ function MainInit() {
 		} else if (setKey === g_headerObj.keyTitleBack) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			setTimeout(_ => {
-				clearWindow();
-				if (keyIsDown(16)) {
-					g_gameOverFlg = true;
-					g_finishFlg = false;
-					resultInit();
-				} else {
-					titleInit();
-				}
-			}, 200);
+			clearWindow();
+			if (keyIsDown(16)) {
+				g_gameOverFlg = true;
+				g_finishFlg = false;
+				resultInit();
+			} else {
+				titleInit();
+			}
 		}
 
 		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
