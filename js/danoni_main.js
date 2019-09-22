@@ -7162,10 +7162,12 @@ function MainInit() {
 
 		// 曲中リトライ、タイトルバック
 		if (setKey === g_headerObj.keyRetry) {
-			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
-			clearWindow();
-			musicAfterLoaded();
+			if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
+				g_audio.pause();
+				clearTimeout(g_timeoutEvtId);
+				clearWindow();
+				musicAfterLoaded();
+			}
 
 		} else if (setKey === g_headerObj.keyTitleBack) {
 			g_audio.pause();
