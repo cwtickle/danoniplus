@@ -2031,6 +2031,8 @@ function initAfterDosLoaded(_initFlg) {
 }
 
 function loadMusic() {
+	document.onkeydown = () => {}
+
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	const url = `../${g_headerObj.musicFolder}/${musicUrl}`;
 
