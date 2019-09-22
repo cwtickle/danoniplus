@@ -6892,15 +6892,18 @@ function MainInit() {
 
 	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
 	if (g_headerObj.fadeFrame !== undefined) {
-		if (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId][0]))) {
-		} else {
+		let fadeNo = -1;
+		if (g_headerObj.fadeFrame.length >= g_stateObj.scoreId + 1) {
+			fadeNo = (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId][0])) ? -1 : g_stateObj.scoreId);
+		}
+		if (fadeNo !== -1) {
 			// フェードアウト指定の場合、曲長(フェードアウト開始まで)は FadeFrame - (本来のblankFrame)
-			duration = parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId][0]) - g_headerObj.blankFrameDef;
+			duration = parseInt(g_headerObj.fadeFrame[fadeNo][0]) - g_headerObj.blankFrameDef;
 			g_scoreObj.fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
 
-			if (g_headerObj.fadeFrame[g_stateObj.scoreId].length <= 1) {
+			if (g_headerObj.fadeFrame[fadeNo].length <= 1) {
 			} else {
-				g_scoreObj.fadeOutTerm = Number(g_headerObj.fadeFrame[g_stateObj.scoreId][1]);
+				g_scoreObj.fadeOutTerm = Number(g_headerObj.fadeFrame[fadeNo][1]);
 			}
 		}
 	}
