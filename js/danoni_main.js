@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/16
+ * Revised : 2019/09/23
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 8.0.3`;
-const g_revisedDate = `2019/09/22`;
+const g_version = `Ver 8.0.4`;
+const g_revisedDate = `2019/09/23`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2031,7 +2031,7 @@ function initAfterDosLoaded(_initFlg) {
 }
 
 function loadMusic() {
-	document.onkeydown = () => {}
+	document.onkeydown = () => { }
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	const url = `../${g_headerObj.musicFolder}/${musicUrl}`;
