@@ -4,11 +4,11 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/16 
+ * Revised : 2019/09/23 
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = "Ver 1.15.14";
+const g_version = "Ver 1.15.15";
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = "";
@@ -3435,6 +3435,7 @@ function loadingScoreInit() {
 		}
 	}
 
+	document.onkeydown = () => { }
 	clearWindow();
 	MainInit();
 }
@@ -4690,22 +4691,24 @@ function MainInit() {
 
 		// 曲中リトライ、タイトルバック
 		if (setKey === 8) {
-			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
-			clearWindow();
-			g_audio.load();
+			if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
+				g_audio.pause();
+				clearTimeout(g_timeoutEvtId);
+				clearWindow();
+				g_audio.load();
 
-			if (g_audio.readyState === 4) {
-				// audioの読み込みが終わった後の処理
-				loadingScoreInit();
-			} else {
-				// 読込中の状態
-				g_audio.addEventListener('canplaythrough', (function () {
-					return function f() {
-						g_audio.removeEventListener('canplaythrough', f, false);
-						loadingScoreInit();
-					}
-				})(), false);
+				if (g_audio.readyState === 4) {
+					// audioの読み込みが終わった後の処理
+					loadingScoreInit();
+				} else {
+					// 読込中の状態
+					g_audio.addEventListener('canplaythrough', (function () {
+						return function f() {
+							g_audio.removeEventListener('canplaythrough', f, false);
+							loadingScoreInit();
+						}
+					})(), false);
+				}
 			}
 		} else if (setKey === 46) {
 			g_audio.pause();
