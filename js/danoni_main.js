@@ -2339,6 +2339,19 @@ function titleInit() {
 	let buffTime;
 	let titleStartTime = performance.now();
 
+	// 背景の矢印オブジェクトを表示
+	if (g_headerObj.customTitleArrowUse === `false`) {
+		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj.setColorDefault[0], (g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2, 500, 180);
+		lblArrow.style.opacity = 0.25;
+		divRoot.appendChild(lblArrow);
+	}
+
+	// 背景スプライトを作成
+	createSprite(`divRoot`, `backTitleSprite`, 0, 0, g_sWidth, g_sHeight);
+	for (let j = 0; j <= g_headerObj.backTitleMaxDepth; j++) {
+		createSprite(`backTitleSprite`, `backTitleSprite${j}`, 0, 0, g_sWidth, g_sHeight);
+	}
+
 	// タイトル文字描画
 	const lblTitle = getTitleDivLabel(`lblTitle`,
 		`<span style=color:#6666ff;font-size:40px>D</span>ANCING
@@ -2346,14 +2359,6 @@ function titleInit() {
 		<span style=color:#ff6666;font-size:40px>O</span>NIGIRI`
 			.replace(/[\t\n]/g, ``), 0, 15);
 	divRoot.appendChild(lblTitle);
-
-	// 背景の矢印オブジェクトを表示
-	if (g_headerObj.customTitleArrowUse === `false`) {
-		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj.setColorDefault[0], (g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2, 500, 180);
-		lblArrow.style.opacity = 0.25;
-		lblArrow.style.zIndex = 0;
-		divRoot.appendChild(lblArrow);
-	}
 
 	// 曲名文字描画（曲名は譜面データから取得）
 	let titlefontgrd = ``;
@@ -2486,12 +2491,6 @@ function titleInit() {
 		(g_userAgent.indexOf(`firefox`) !== -1 && location.href.match(`^file`))) {
 
 		makeWarningWindow(C_MSG_W_0001);
-	}
-
-	// 背景スプライトを作成
-	createSprite(`divRoot`, `backTitleSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.backTitleMaxDepth; j++) {
-		createSprite(`backTitleSprite`, `backTitleSprite${j}`, 0, 0, g_sWidth, g_sHeight);
 	}
 
 	// ユーザカスタムイベント(初期)
