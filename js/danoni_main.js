@@ -2743,6 +2743,24 @@ function dosConvert(_dos) {
 }
 
 /**
+ * 曲名（1行）の取得
+ * @param {string} _musicName 
+ */
+function getMusicNameSimple(_musicName) {
+	const tmpName = _musicName.split(`<br>`).join(` `);
+	return tmpName.split(`<nbr>`).join(``);
+}
+
+/**
+ * 曲名（複数行）の取得
+ * @param {string} _musicName 
+ */
+function getMusicNameMultiLine(_musicName) {
+	const tmpName = _musicName.split(`<nbr>`).join(`<br>`);
+	return tmpName.split(`<br>`);
+}
+
+/**
  * 譜面ヘッダーの分解
  * @param {object} _dosObj 譜面データオブジェクト
  */
@@ -2768,13 +2786,13 @@ function headerConvert(_dosObj) {
 			const musics = musicData[j].split(`,`);
 
 			if (obj.musicNos.length >= j) {
-				obj.musicTitles[j] = musics[0].split(`<br>`).join(` `);
-				obj.musicTitlesForView[j] = musics[0].split("<br>");
+				obj.musicTitles[j] = getMusicNameSimple(musics[0]);
+				obj.musicTitlesForView[j] = getMusicNameMultiLine(musics[0]);
 				obj.artistNames[j] = setVal(musics[1], ``, `string`);
 			}
-			if (j == 0) {
-				obj.musicTitle = musics[0].split(`<br>`).join(` `);
-				obj.musicTitleForView = musics[0].split("<br>");
+			if (j === 0) {
+				obj.musicTitle = getMusicNameSimple(musics[0]);
+				obj.musicTitleForView = getMusicNameMultiLine(musics[0]);
 				if (musics.length > 1) {
 					obj.artistName = musics[1];
 				} else {
@@ -2784,8 +2802,8 @@ function headerConvert(_dosObj) {
 				if (musics.length > 2) {
 					obj.artistUrl = musics[2];
 					if (musics.length > 3) {
-						obj.musicTitles[j] = musics[3].split(`<br>`).join(` `);
-						obj.musicTitlesForView[j] = musics[3].split("<br>");
+						obj.musicTitles[j] = getMusicNameSimple(musics[3]);
+						obj.musicTitlesForView[j] = getMusicNameMultiLine(musics[3]);
 					}
 				} else {
 					obj.artistUrl = location.href;
