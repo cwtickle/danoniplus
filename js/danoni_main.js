@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/16
+ * Revised : 2019/09/23
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.10.18`;
-const g_revisedDate = `2019/09/16`;
+const g_version = `Ver 4.10.19`;
+const g_revisedDate = `2019/09/23`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1773,6 +1773,8 @@ function initAfterDosLoaded() {
 }
 
 function loadMusic() {
+	document.onkeydown = () => { }
+
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	const url = `../${g_headerObj.musicFolder}/${musicUrl}`;
 
@@ -6213,10 +6215,12 @@ function MainInit() {
 
 		// 曲中リトライ、タイトルバック
 		if (setKey === 8) {
-			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
-			clearWindow();
-			musicAfterLoaded();
+			if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
+				g_audio.pause();
+				clearTimeout(g_timeoutEvtId);
+				clearWindow();
+				musicAfterLoaded();
+			}
 
 		} else if (setKey === 46) {
 			g_audio.pause();
