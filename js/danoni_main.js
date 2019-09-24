@@ -8834,7 +8834,10 @@ function resultInit() {
 	}
 
 	// ハイスコア差分計算
-	const scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	if (g_headerObj.makerView === `true`) {
+		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
+	}
 	let iiDf = 0;
 	let shakinDf = 0;
 	let matariDf = 0;
