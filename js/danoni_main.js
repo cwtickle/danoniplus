@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/23
+ * Revised : 2019/09/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 8.1.0`;
-const g_revisedDate = `2019/09/23`;
+const g_version = `Ver 8.2.0`;
+const g_revisedDate = `2019/09/24`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1510,6 +1510,9 @@ function createButton(_obj, _func) {
 		style.animationName = _obj.animationName;
 		style.animationDuration = `1s`;
 	}
+	style.display = `flex`;
+	style.flexDirection = `column`;
+	style.justifyContent = `center`;
 
 	// オンマウス・タップ時の挙動 (背景色変更、カーソル変化)
 	div.onmouseover = _ => {
@@ -2563,7 +2566,7 @@ function titleInit() {
 	// 製作者表示
 	const lnkMaker = createButton({
 		id: `lnkMaker`,
-		name: `Maker: ${g_headerObj.tuning}`,
+		name: `Maker: ${g_headerObj.tuningInit}`,
 		x: 20,
 		y: g_sHeight - 45,
 		width: g_sWidth / 2 - 10,
@@ -2743,6 +2746,26 @@ function dosConvert(_dos) {
 }
 
 /**
+ * 曲名（1行）の取得
+ * @param {string} _musicName 
+ */
+function getMusicNameSimple(_musicName) {
+	let tmpName = _musicName.split(`<br>`).join(` `);
+	tmpName = tmpName.split(`<nbr>`).join(``);
+	return tmpName.split(`<dbr>`).join(`　`);
+}
+
+/**
+ * 曲名（複数行）の取得
+ * @param {string} _musicName 
+ */
+function getMusicNameMultiLine(_musicName) {
+	let tmpName = _musicName.split(`<nbr>`).join(`<br>`);
+	tmpName = tmpName.split(`<dbr>`).join(`<br>`);
+	return tmpName.split(`<br>`);
+}
+
+/**
  * 譜面ヘッダーの分解
  * @param {object} _dosObj 譜面データオブジェクト
  */
@@ -2768,13 +2791,13 @@ function headerConvert(_dosObj) {
 			const musics = musicData[j].split(`,`);
 
 			if (obj.musicNos.length >= j) {
-				obj.musicTitles[j] = musics[0].split(`<br>`).join(` `);
-				obj.musicTitlesForView[j] = musics[0].split("<br>");
+				obj.musicTitles[j] = getMusicNameSimple(musics[0]);
+				obj.musicTitlesForView[j] = getMusicNameMultiLine(musics[0]);
 				obj.artistNames[j] = setVal(musics[1], ``, `string`);
 			}
-			if (j == 0) {
-				obj.musicTitle = musics[0].split(`<br>`).join(` `);
-				obj.musicTitleForView = musics[0].split("<br>");
+			if (j === 0) {
+				obj.musicTitle = getMusicNameSimple(musics[0]);
+				obj.musicTitleForView = getMusicNameMultiLine(musics[0]);
 				if (musics.length > 1) {
 					obj.artistName = musics[1];
 				} else {
@@ -2784,8 +2807,8 @@ function headerConvert(_dosObj) {
 				if (musics.length > 2) {
 					obj.artistUrl = musics[2];
 					if (musics.length > 3) {
-						obj.musicTitles[j] = musics[3].split(`<br>`).join(` `);
-						obj.musicTitlesForView[j] = musics[3].split("<br>");
+						obj.musicTitles[j] = getMusicNameSimple(musics[3]);
+						obj.musicTitlesForView[j] = getMusicNameMultiLine(musics[3]);
 					}
 				} else {
 					obj.artistUrl = location.href;
@@ -2818,10 +2841,31 @@ function headerConvert(_dosObj) {
 	// フリーズアローの許容フレーム数設定
 	obj.frzAttempt = setVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT, `number`);
 
+	// 製作者表示
+	if (_dosObj.tuning !== undefined && _dosObj.tuning !== ``) {
+		const tunings = _dosObj.tuning.split(`,`);
+		obj.tuning = tunings[0];
+		if (tunings.length > 1) {
+			obj.creatorUrl = tunings[1];
+		} else {
+			obj.creatorUrl = location.href;
+		}
+	} else {
+		obj.tuning = (g_presetTuning) ? g_presetTuning : `name`;
+		obj.creatorUrl = (g_presetTuningUrl) ? g_presetTuningUrl : location.href;
+	}
+	obj.tuningInit = obj.tuning;
 
 	// 譜面情報
 	if (_dosObj.difData !== undefined && _dosObj.difData !== ``) {
 		const difs = _dosObj.difData.split(`$`);
+		const C_DIF_KEY = 0;
+		const C_DIF_NAME = 1;
+		const C_DIF_SPEED_INI = 2;
+		const C_DIF_LIFE_BORDER = 3;
+		const C_DIF_LIFE_RECOVERY = 4;
+		const C_DIF_LIFE_DAMAGE = 5;
+		const C_DIF_LIFE_INI = 6;
 		obj.keyLabels = [];
 		obj.difLabels = [];
 		obj.initSpeeds = [];
@@ -2829,24 +2873,24 @@ function headerConvert(_dosObj) {
 		obj.lifeRecoverys = [];
 		obj.lifeDamages = [];
 		obj.lifeInits = [];
+		obj.creatorNames = [];
 		for (let j = 0; j < difs.length; j++) {
 			const difDetails = difs[j].split(`,`);
-			const border = (difDetails[3]) ? difDetails[3] :
+
+			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
+			const border = (difDetails[C_DIF_LIFE_BORDER]) ? difDetails[C_DIF_LIFE_BORDER] :
 				(g_presetGauge !== undefined && (`Border` in g_presetGauge) ?
 					g_presetGauge.Border : `x`);
-			const recovery = (difDetails[4]) ? difDetails[4] :
+			const recovery = (difDetails[C_DIF_LIFE_RECOVERY]) ? difDetails[C_DIF_LIFE_RECOVERY] :
 				(g_presetGauge !== undefined && (`Recovery` in g_presetGauge) ?
 					g_presetGauge.Recovery : 6);
-			const damage = (difDetails[5]) ? difDetails[5] :
+			const damage = (difDetails[C_DIF_LIFE_DAMAGE]) ? difDetails[C_DIF_LIFE_DAMAGE] :
 				(g_presetGauge !== undefined && (`Damage` in g_presetGauge) ?
 					g_presetGauge.Damage : 40);
-			const init = (difDetails[6]) ? difDetails[6] :
+			const init = (difDetails[C_DIF_LIFE_INI]) ? difDetails[C_DIF_LIFE_INI] :
 				(g_presetGauge !== undefined && (`Init` in g_presetGauge) ?
 					g_presetGauge.Init : 25);
-			const keyLabel = setVal(difDetails[0], `7`, `string`);
-			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] || keyLabel);
-			obj.difLabels.push(setVal(difDetails[1], `Normal`, `string`));
-			obj.initSpeeds.push(setVal(difDetails[2], 3.5, `float`));
+
 			if (border !== `x`) {
 				obj.lifeBorders.push(setVal(border, 70, `float`));
 			} else {
@@ -2855,6 +2899,22 @@ function headerConvert(_dosObj) {
 			obj.lifeRecoverys.push(setVal(recovery, 6, `float`));
 			obj.lifeDamages.push(setVal(damage, 40, `float`));
 			obj.lifeInits.push(setVal(init, 25, `float`));
+
+			// キー数
+			const keyLabel = setVal(difDetails[C_DIF_KEY], `7`, `string`);
+			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] || keyLabel);
+
+			// 譜面名、制作者名
+			if (setVal(difDetails[C_DIF_NAME], ``, `string`) !== ``) {
+				const difNameInfo = difDetails[C_DIF_NAME].split(`::`);
+				obj.difLabels.push(setVal(difNameInfo[0], `Normal`, `string`));
+				obj.creatorNames.push(difNameInfo.length > 1 ? difNameInfo[1] : obj.tuning);
+			} else {
+				obj.difLabels.push(`Normal`);
+			}
+
+			// 初期速度
+			obj.initSpeeds.push(setVal(difDetails[C_DIF_SPEED_INI], 3.5, `float`));
 		}
 	} else {
 		makeWarningWindow(C_MSG_E_0021);
@@ -2865,6 +2925,7 @@ function headerConvert(_dosObj) {
 		obj.lifeRecoverys = [6];
 		obj.lifeDamages = [40];
 		obj.lifeInits = [25];
+		obj.creatorNames = [obj.tuning];
 	}
 	if (obj.initSpeeds[0] !== undefined) {
 		g_stateObj.speed = obj.initSpeeds[0];
@@ -3005,20 +3066,6 @@ function headerConvert(_dosObj) {
 	// ダミー譜面の設定
 	if (_dosObj.dummyScoreNo !== undefined) {
 		obj.dummyScoreNos = _dosObj.dummyScoreNo.split(`$`);
-	}
-
-	// 製作者表示
-	if (_dosObj.tuning !== undefined && _dosObj.tuning !== ``) {
-		const tunings = _dosObj.tuning.split(`,`);
-		obj.tuning = tunings[0];
-		if (tunings.length > 1) {
-			obj.creatorUrl = tunings[1];
-		} else {
-			obj.creatorUrl = location.href;
-		}
-	} else {
-		obj.tuning = (g_presetTuning) ? g_presetTuning : `name`;
-		obj.creatorUrl = (g_presetTuningUrl) ? g_presetTuningUrl : location.href;
 	}
 
 	// 無音のフレーム数
@@ -3162,6 +3209,9 @@ function headerConvert(_dosObj) {
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
 	obj.frzStartjdgUse = setVal(_dosObj.frzStartjdgUse,
 		(typeof g_presetFrzStartjdgUse === `string` ? setVal(g_presetFrzStartjdgUse, `false`, `string`) : `false`), `string`);
+
+	// 譜面名に制作者名を付加するかどうかのフラグ
+	obj.makerView = setVal(_dosObj.makerView, `false`, `string`);
 
 	// オプション利用可否設定
 	// Motion
@@ -3660,7 +3710,7 @@ function createOptionWindow(_sprite) {
 	// 難易度 (Difficulty)
 	// 縦位置: 0 
 	const setNoDifficulty = 0;
-	const lblDifficulty = createDivLabel(`lblDifficulty`, 0, C_LEN_SETLBL_HEIGHT * setNoDifficulty,
+	const lblDifficulty = createDivLabel(`lblDifficulty`, 0, C_LEN_SETLBL_HEIGHT * setNoDifficulty - 5,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETDIFLBL, C_CLR_TITLE,
 		`<span style=color:#ff9999>D</span>ifficulty`);
 	optionsprite.appendChild(lblDifficulty);
@@ -3686,6 +3736,14 @@ function createOptionWindow(_sprite) {
 		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
 		setDifficulty(true);
 	}));
+
+	// 譜面変更ボタンのみ 10pxプラス
+	lnkDifficulty.style.height = `${C_LEN_SETLBL_HEIGHT + 10}px`;
+	lnkDifficulty.style.top = `-10px`;
+	document.querySelector(`#lnkDifficultyR`).style.height = `${C_LEN_SETLBL_HEIGHT + 10}px`;
+	document.querySelector(`#lnkDifficultyL`).style.height = `${C_LEN_SETLBL_HEIGHT + 10}px`;
+	document.querySelector(`#lnkDifficultyR`).style.top = `-10px`;
+	document.querySelector(`#lnkDifficultyL`).style.top = `-10px`;
 
 	// ---------------------------------------------------
 	// ハイスコア機能実装時に使用予定のスペース
@@ -4268,6 +4326,10 @@ function createOptionWindow(_sprite) {
 			lnkDifficulty.style.fontSize = `14px`;
 		} else if (getStrLength(lnkDifficulty.innerHTML) > 18) {
 			lnkDifficulty.style.fontSize = `16px`;
+		}
+		if (g_headerObj.makerView === `true`) {
+			lnkDifficulty.innerHTML += `<br>(${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
+			lnkDifficulty.style.fontSize = `14px`;
 		}
 
 		// 速度設定 (Speed)
@@ -6567,6 +6629,7 @@ function getArrowSettings() {
 	} else {
 		g_keyObj.blank = g_keyObj.blank_def;
 	}
+	g_headerObj.tuning = g_headerObj.creatorNames[g_stateObj.scoreId];
 
 	g_workObj.stepX = [];
 	g_workObj.scrollDir = [];
@@ -8661,6 +8724,9 @@ function resultInit() {
 	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `#999999`, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	if (g_headerObj.makerView === `true`) {
+		difData += ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
+	}
 	if (g_stateObj.shuffle !== C_FLG_OFF) {
 		difData += ` [${g_stateObj.shuffle}]`;
 	}
@@ -8768,7 +8834,10 @@ function resultInit() {
 	}
 
 	// ハイスコア差分計算
-	const scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	if (g_headerObj.makerView === `true`) {
+		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
+	}
 	let iiDf = 0;
 	let shakinDf = 0;
 	let matariDf = 0;
