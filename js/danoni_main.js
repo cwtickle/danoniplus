@@ -2563,7 +2563,7 @@ function titleInit() {
 	// 製作者表示
 	const lnkMaker = createButton({
 		id: `lnkMaker`,
-		name: `Maker: ${g_headerObj.tuning}`,
+		name: `Maker: ${g_headerObj.tuningInit}`,
 		x: 20,
 		y: g_sHeight - 45,
 		width: g_sWidth / 2 - 10,
@@ -2838,10 +2838,31 @@ function headerConvert(_dosObj) {
 	// フリーズアローの許容フレーム数設定
 	obj.frzAttempt = setVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT, `number`);
 
+	// 製作者表示
+	if (_dosObj.tuning !== undefined && _dosObj.tuning !== ``) {
+		const tunings = _dosObj.tuning.split(`,`);
+		obj.tuning = tunings[0];
+		if (tunings.length > 1) {
+			obj.creatorUrl = tunings[1];
+		} else {
+			obj.creatorUrl = location.href;
+		}
+	} else {
+		obj.tuning = (g_presetTuning) ? g_presetTuning : `name`;
+		obj.creatorUrl = (g_presetTuningUrl) ? g_presetTuningUrl : location.href;
+	}
+	obj.tuningInit = obj.tuning;
 
 	// 譜面情報
 	if (_dosObj.difData !== undefined && _dosObj.difData !== ``) {
 		const difs = _dosObj.difData.split(`$`);
+		const C_DIF_KEY = 0;
+		const C_DIF_NAME = 1;
+		const C_DIF_SPEED_INI = 2;
+		const C_DIF_LIFE_BORDER = 3;
+		const C_DIF_LIFE_RECOVERY = 4;
+		const C_DIF_LIFE_DAMAGE = 5;
+		const C_DIF_LIFE_INI = 6;
 		obj.keyLabels = [];
 		obj.difLabels = [];
 		obj.initSpeeds = [];
@@ -2849,24 +2870,24 @@ function headerConvert(_dosObj) {
 		obj.lifeRecoverys = [];
 		obj.lifeDamages = [];
 		obj.lifeInits = [];
+		obj.creatorNames = [];
 		for (let j = 0; j < difs.length; j++) {
 			const difDetails = difs[j].split(`,`);
-			const border = (difDetails[3]) ? difDetails[3] :
+
+			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
+			const border = (difDetails[C_DIF_LIFE_BORDER]) ? difDetails[C_DIF_LIFE_BORDER] :
 				(g_presetGauge !== undefined && (`Border` in g_presetGauge) ?
 					g_presetGauge.Border : `x`);
-			const recovery = (difDetails[4]) ? difDetails[4] :
+			const recovery = (difDetails[C_DIF_LIFE_RECOVERY]) ? difDetails[C_DIF_LIFE_RECOVERY] :
 				(g_presetGauge !== undefined && (`Recovery` in g_presetGauge) ?
 					g_presetGauge.Recovery : 6);
-			const damage = (difDetails[5]) ? difDetails[5] :
+			const damage = (difDetails[C_DIF_LIFE_DAMAGE]) ? difDetails[C_DIF_LIFE_DAMAGE] :
 				(g_presetGauge !== undefined && (`Damage` in g_presetGauge) ?
 					g_presetGauge.Damage : 40);
-			const init = (difDetails[6]) ? difDetails[6] :
+			const init = (difDetails[C_DIF_LIFE_INI]) ? difDetails[C_DIF_LIFE_INI] :
 				(g_presetGauge !== undefined && (`Init` in g_presetGauge) ?
 					g_presetGauge.Init : 25);
-			const keyLabel = setVal(difDetails[0], `7`, `string`);
-			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] || keyLabel);
-			obj.difLabels.push(setVal(difDetails[1], `Normal`, `string`));
-			obj.initSpeeds.push(setVal(difDetails[2], 3.5, `float`));
+
 			if (border !== `x`) {
 				obj.lifeBorders.push(setVal(border, 70, `float`));
 			} else {
@@ -2875,6 +2896,22 @@ function headerConvert(_dosObj) {
 			obj.lifeRecoverys.push(setVal(recovery, 6, `float`));
 			obj.lifeDamages.push(setVal(damage, 40, `float`));
 			obj.lifeInits.push(setVal(init, 25, `float`));
+
+			// キー数
+			const keyLabel = setVal(difDetails[C_DIF_KEY], `7`, `string`);
+			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] || keyLabel);
+
+			// 譜面名、制作者名
+			if (setVal(difDetails[C_DIF_NAME], ``, `string`) !== ``) {
+				const difNameInfo = difDetails[C_DIF_NAME].split(`::`);
+				obj.difLabels.push(setVal(difNameInfo[0], `Normal`, `string`));
+				obj.creatorNames.push(difNameInfo.length > 1 ? difNameInfo[1] : obj.tuning);
+			} else {
+				obj.difLabels.push(`Normal`);
+			}
+
+			// 初期速度
+			obj.initSpeeds.push(setVal(difDetails[C_DIF_SPEED_INI], 3.5, `float`));
 		}
 	} else {
 		makeWarningWindow(C_MSG_E_0021);
@@ -2885,6 +2922,7 @@ function headerConvert(_dosObj) {
 		obj.lifeRecoverys = [6];
 		obj.lifeDamages = [40];
 		obj.lifeInits = [25];
+		obj.creatorNames = [obj.tuning];
 	}
 	if (obj.initSpeeds[0] !== undefined) {
 		g_stateObj.speed = obj.initSpeeds[0];
@@ -3025,20 +3063,6 @@ function headerConvert(_dosObj) {
 	// ダミー譜面の設定
 	if (_dosObj.dummyScoreNo !== undefined) {
 		obj.dummyScoreNos = _dosObj.dummyScoreNo.split(`$`);
-	}
-
-	// 製作者表示
-	if (_dosObj.tuning !== undefined && _dosObj.tuning !== ``) {
-		const tunings = _dosObj.tuning.split(`,`);
-		obj.tuning = tunings[0];
-		if (tunings.length > 1) {
-			obj.creatorUrl = tunings[1];
-		} else {
-			obj.creatorUrl = location.href;
-		}
-	} else {
-		obj.tuning = (g_presetTuning) ? g_presetTuning : `name`;
-		obj.creatorUrl = (g_presetTuningUrl) ? g_presetTuningUrl : location.href;
 	}
 
 	// 無音のフレーム数
@@ -6587,6 +6611,7 @@ function getArrowSettings() {
 	} else {
 		g_keyObj.blank = g_keyObj.blank_def;
 	}
+	g_headerObj.tuning = g_headerObj.creatorNames[g_stateObj.scoreId];
 
 	g_workObj.stepX = [];
 	g_workObj.scrollDir = [];
