@@ -2747,8 +2747,9 @@ function dosConvert(_dos) {
  * @param {string} _musicName 
  */
 function getMusicNameSimple(_musicName) {
-	const tmpName = _musicName.split(`<br>`).join(` `);
-	return tmpName.split(`<nbr>`).join(``);
+	let tmpName = _musicName.split(`<br>`).join(` `);
+	tmpName = tmpName.split(`<nbr>`).join(``);
+	return tmpName.split(`<dbr>`).join(`　`);
 }
 
 /**
@@ -2756,7 +2757,8 @@ function getMusicNameSimple(_musicName) {
  * @param {string} _musicName 
  */
 function getMusicNameMultiLine(_musicName) {
-	const tmpName = _musicName.split(`<nbr>`).join(`<br>`);
+	let tmpName = _musicName.split(`<nbr>`).join(`<br>`);
+	tmpName = tmpName.split(`<dbr>`).join(`<br>`);
 	return tmpName.split(`<br>`);
 }
 
