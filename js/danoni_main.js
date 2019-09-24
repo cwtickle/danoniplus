@@ -1510,6 +1510,9 @@ function createButton(_obj, _func) {
 		style.animationName = _obj.animationName;
 		style.animationDuration = `1s`;
 	}
+	style.display = `flex`;
+	style.flexDirection = `column`;
+	style.justifyContent = `center`;
 
 	// オンマウス・タップ時の挙動 (背景色変更、カーソル変化)
 	div.onmouseover = _ => {
@@ -3207,6 +3210,9 @@ function headerConvert(_dosObj) {
 	obj.frzStartjdgUse = setVal(_dosObj.frzStartjdgUse,
 		(typeof g_presetFrzStartjdgUse === `string` ? setVal(g_presetFrzStartjdgUse, `false`, `string`) : `false`), `string`);
 
+	// 譜面名に制作者名を付加するかどうかのフラグ
+	obj.makerView = setVal(_dosObj.makerView, `false`, `string`);
+
 	// オプション利用可否設定
 	// Motion
 	obj.motionUse = setVal(_dosObj.motionUse, setVal(g_presetSettingUse.motion, `true`, `string`), `string`);
@@ -3704,7 +3710,7 @@ function createOptionWindow(_sprite) {
 	// 難易度 (Difficulty)
 	// 縦位置: 0 
 	const setNoDifficulty = 0;
-	const lblDifficulty = createDivLabel(`lblDifficulty`, 0, C_LEN_SETLBL_HEIGHT * setNoDifficulty,
+	const lblDifficulty = createDivLabel(`lblDifficulty`, 0, C_LEN_SETLBL_HEIGHT * setNoDifficulty - 5,
 		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETDIFLBL, C_CLR_TITLE,
 		`<span style=color:#ff9999>D</span>ifficulty`);
 	optionsprite.appendChild(lblDifficulty);
@@ -3730,6 +3736,14 @@ function createOptionWindow(_sprite) {
 		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
 		setDifficulty(true);
 	}));
+
+	// 譜面変更ボタンのみ 10pxプラス
+	lnkDifficulty.style.height = `${C_LEN_SETLBL_HEIGHT + 10}px`;
+	lnkDifficulty.style.top = `-10px`;
+	document.querySelector(`#lnkDifficultyR`).style.height = `${C_LEN_SETLBL_HEIGHT + 10}px`;
+	document.querySelector(`#lnkDifficultyL`).style.height = `${C_LEN_SETLBL_HEIGHT + 10}px`;
+	document.querySelector(`#lnkDifficultyR`).style.top = `-10px`;
+	document.querySelector(`#lnkDifficultyL`).style.top = `-10px`;
 
 	// ---------------------------------------------------
 	// ハイスコア機能実装時に使用予定のスペース
@@ -4312,6 +4326,10 @@ function createOptionWindow(_sprite) {
 			lnkDifficulty.style.fontSize = `14px`;
 		} else if (getStrLength(lnkDifficulty.innerHTML) > 18) {
 			lnkDifficulty.style.fontSize = `16px`;
+		}
+		if (g_headerObj.makerView === `true`) {
+			lnkDifficulty.innerHTML += `<br>(${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
+			lnkDifficulty.style.fontSize = `14px`;
 		}
 
 		// 速度設定 (Speed)
@@ -8706,6 +8724,9 @@ function resultInit() {
 	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `#999999`, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	if (g_headerObj.makerView === `true`) {
+		difData += ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
+	}
 	if (g_stateObj.shuffle !== C_FLG_OFF) {
 		difData += ` [${g_stateObj.shuffle}]`;
 	}
