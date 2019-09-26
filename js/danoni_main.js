@@ -8281,6 +8281,7 @@ function judgeArrow(_j) {
 	if (!g_judgObj.lockFlgs[_j]) {
 		g_judgObj.lockFlgs[_j] = true;
 
+		const mainSprite = document.querySelector(`#mainSprite`);
 		const currentNo = g_workObj.judgArrowCnt[_j];
 		const stepDivHit = document.querySelector(`#stepHit${_j}`);
 		const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
