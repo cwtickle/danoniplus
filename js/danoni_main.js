@@ -159,6 +159,7 @@ const C_LEN_SETDIFLBL_HEIGHT = 25;
 const C_SIZ_SETDIFLBL = 17;
 const C_LEN_SETMINI_WIDTH = 40;
 const C_SIZ_SETMINI = 18;
+const C_SIZ_DIFSELECTOR = 14;
 
 const C_LBL_SETMINIL = `<`;
 const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH / 2;
@@ -3718,6 +3719,9 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#ff9999>D</span>ifficulty`);
 	optionsprite.appendChild(lblDifficulty);
 
+	/**
+	 * 譜面変更セレクターの削除
+	 */
 	function resetDifWindow() {
 		if (document.querySelector(`#difList`) !== null) {
 			deleteChildspriteAll(`difList`);
@@ -4468,6 +4472,13 @@ function makeSettingLblButton(_id, _name, _heightPos, _func) {
 	return settingLblButton;
 }
 
+/**
+ * 譜面変更セレクター用ボタン
+ * @param {string} _id
+ * @param {string} _name 初期設定文字
+ * @param {number} _heightPos 上からの配置順
+ * @param {function} _func
+ */
 function makeDifLblButton(_id, _name, _heightPos, _func) {
 	const difLblButton = createButton({
 		id: _id,
@@ -4476,7 +4487,7 @@ function makeDifLblButton(_id, _name, _heightPos, _func) {
 		y: C_LEN_SETLBL_HEIGHT * _heightPos,
 		width: C_LEN_SETLBL_WIDTH,
 		height: C_LEN_SETLBL_HEIGHT,
-		fontsize: 14,
+		fontsize: C_SIZ_DIFSELECTOR,
 		normalColor: C_CLR_LNK,
 		hoverColor: C_CLR_DEFHOVER,
 		align: C_ALIGN_CENTER
