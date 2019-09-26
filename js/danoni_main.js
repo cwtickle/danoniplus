@@ -2931,6 +2931,10 @@ function headerConvert(_dosObj) {
 		obj.lifeInits = [25];
 		obj.creatorNames = [obj.tuning];
 	}
+	const keyLists = obj.keyLabels.filter((x, j, self) => {
+		return self.indexOf(x) === j;
+	});
+	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 	if (obj.initSpeeds[0] !== undefined) {
 		g_stateObj.speed = obj.initSpeeds[0];
 		g_speedNum = g_speeds.findIndex(speed => speed === g_stateObj.speed);
@@ -3741,11 +3745,13 @@ function createOptionWindow(_sprite) {
 					difList.style.overflow = `auto`;
 					difList.style.backgroundColor = `#111111`;
 					const difCover = createSprite(`optionsprite`, `difCover`, 0, 45, 140, 255);
+					difCover.style.overflow = `auto`;
 					difCover.style.backgroundColor = `#111111`;
 					difCover.style.opacity = 0.95;
 
+					// 全リスト作成
 					for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
-						let text = `${g_headerObj.keyLabels[j]}key / ${g_headerObj.difLabels[j]}`;
+						let text = `${g_headerObj.keyLabels[j]} / ${g_headerObj.difLabels[j]}`;
 						if (g_headerObj.makerView === `true`) {
 							text += ` (${g_headerObj.creatorNames[j]})`;
 						}
@@ -3757,6 +3763,8 @@ function createOptionWindow(_sprite) {
 							optionsprite.removeChild(difCover);
 						}));
 					}
+
+					// ランダム選択
 					const lnkDifRandom = makeDifLblButton(`difRandom`, `RANDOM`, 0, _ => {
 						g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
 						setDifficulty(true);
@@ -3765,8 +3773,33 @@ function createOptionWindow(_sprite) {
 						optionsprite.removeChild(difCover);
 					});
 					difCover.appendChild(lnkDifRandom);
-					lnkDifRandom.style.width = `120px`;
+					lnkDifRandom.style.width = `110px`;
 
+					// キー別フィルタボタン作成
+					for (let m = 0; m < g_headerObj.keyLists.length; m++) {
+						const lnkKeyFilter = makeDifLblButton(`keyFilter`, `${g_headerObj.keyLists[m]} key`, m + 1.5, _ => {
+							deleteChildspriteAll(`difList`);
+
+							for (let j = 0, k = 0; j < g_headerObj.keyLabels.length; j++) {
+								if (g_headerObj.keyLabels[j] === g_headerObj.keyLists[m]) {
+									let text = `${g_headerObj.keyLabels[j]} / ${g_headerObj.difLabels[j]}`;
+									if (g_headerObj.makerView === `true`) {
+										text += ` (${g_headerObj.creatorNames[j]})`;
+									}
+									difList.appendChild(makeDifLblButton(`dif${k}`, text, k, _ => {
+										g_stateObj.scoreId = j;
+										setDifficulty(true);
+										deleteChildspriteAll(`difList`);
+										optionsprite.removeChild(difList);
+										optionsprite.removeChild(difCover);
+									}));
+									k++;
+								}
+							}
+						});
+						difCover.appendChild(lnkKeyFilter);
+						lnkKeyFilter.style.width = `110px`;
+					}
 				} else {
 					resetDifWindow();
 				}
