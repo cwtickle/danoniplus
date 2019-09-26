@@ -3757,6 +3757,16 @@ function createOptionWindow(_sprite) {
 							optionsprite.removeChild(difCover);
 						}));
 					}
+					const lnkDifRandom = makeDifLblButton(`difRandom`, `RANDOM`, 0, _ => {
+						g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
+						setDifficulty(true);
+						deleteChildspriteAll(`difList`);
+						optionsprite.removeChild(difList);
+						optionsprite.removeChild(difCover);
+					});
+					difCover.appendChild(lnkDifRandom);
+					lnkDifRandom.style.width = `120px`;
+
 				} else {
 					resetDifWindow();
 				}
