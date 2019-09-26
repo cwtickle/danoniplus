@@ -7771,82 +7771,6 @@ function MainInit() {
 	}
 
 	/**
-	 * 矢印・フリーズアロー判定
-	 * @param {*} _j 対象矢印・フリーズアロー
-	 */
-	function judgeArrow(_j) {
-
-		if (!g_judgObj.lockFlgs[_j]) {
-			g_judgObj.lockFlgs[_j] = true;
-
-			const currentNo = g_workObj.judgArrowCnt[_j];
-			const stepDivHit = document.querySelector(`#stepHit${_j}`);
-			const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
-
-			const fcurrentNo = g_workObj.judgFrzCnt[_j];
-
-			if (judgArrow !== null) {
-				const difFrame = Number(judgArrow.getAttribute(`cnt`));
-				const difCnt = Math.abs(judgArrow.getAttribute(`cnt`));
-				const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
-
-				if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
-					stepDivHit.style.opacity = 0.75;
-
-					if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-						judgeIi(difFrame);
-						stepDivHit.style.background = C_CLR_II;
-					} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-						judgeShakin(difFrame);
-						stepDivHit.style.background = C_CLR_SHAKIN;
-					} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-						judgeMatari(difFrame);
-						stepDivHit.style.background = C_CLR_MATARI;
-					} else {
-						judgeShobon(difFrame);
-						stepDivHit.style.background = C_CLR_SHOBON;
-					}
-					stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-
-					judgeObjDelete.arrow(_j, judgArrow);
-					g_judgObj.lockFlgs[_j] = false;
-					return;
-				}
-			}
-
-			const judgFrz = document.querySelector(`#frz${_j}_${fcurrentNo}`);
-
-			if (judgFrz !== null) {
-				const difCnt = Math.abs(judgFrz.getAttribute(`cnt`));
-				const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
-
-				if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
-					if (g_headerObj.frzStartjdgUse === `true`) {
-						if (g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
-							if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-								judgeIi(difCnt);
-							} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-								judgeShakin(difCnt);
-							} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-								judgeMatari(difCnt);
-							} else {
-								judgeShobon(difCnt);
-							}
-							g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
-						}
-					}
-					changeHitFrz(_j, fcurrentNo, `frz`);
-					g_judgObj.lockFlgs[_j] = false;
-					return;
-				}
-			}
-			const stepDiv = document.querySelector(`#step${_j}`);
-			stepDiv.style.backgroundColor = `#66ffff`;
-			g_judgObj.lockFlgs[_j] = false;
-		}
-	}
-
-	/**
 	 * フレーム処理(譜面台)
 	 */
 	function flowTimeline() {
@@ -8346,6 +8270,84 @@ function changeFailedFrz(_j, _k) {
  */
 function keyIsDown(_keyCode) {
 	return (g_inputKeyBuffer[_keyCode] ? true : false);
+}
+
+/**
+ * 矢印・フリーズアロー判定
+ * @param {number} _j 対象矢印・フリーズアロー
+ */
+function judgeArrow(_j) {
+
+	if (!g_judgObj.lockFlgs[_j]) {
+		g_judgObj.lockFlgs[_j] = true;
+
+		const currentNo = g_workObj.judgArrowCnt[_j];
+		const stepDivHit = document.querySelector(`#stepHit${_j}`);
+		const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
+
+		const fcurrentNo = g_workObj.judgFrzCnt[_j];
+
+		if (judgArrow !== null) {
+			const difFrame = Number(judgArrow.getAttribute(`cnt`));
+			const difCnt = Math.abs(judgArrow.getAttribute(`cnt`));
+			const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
+
+			if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
+				stepDivHit.style.opacity = 0.75;
+
+				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
+					judgeIi(difFrame);
+					stepDivHit.style.background = C_CLR_II;
+				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
+					judgeShakin(difFrame);
+					stepDivHit.style.background = C_CLR_SHAKIN;
+				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
+					judgeMatari(difFrame);
+					stepDivHit.style.background = C_CLR_MATARI;
+				} else {
+					judgeShobon(difFrame);
+					stepDivHit.style.background = C_CLR_SHOBON;
+				}
+				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
+
+				mainSprite.removeChild(judgArrow);
+				g_workObj.judgArrowCnt[_j]++;
+
+				g_judgObj.lockFlgs[_j] = false;
+				return;
+			}
+		}
+
+		const judgFrz = document.querySelector(`#frz${_j}_${fcurrentNo}`);
+
+		if (judgFrz !== null) {
+			const difCnt = Math.abs(judgFrz.getAttribute(`cnt`));
+			const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
+
+			if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
+				if (g_headerObj.frzStartjdgUse === `true`) {
+					if (g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
+						if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
+							judgeIi(difCnt);
+						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
+							judgeShakin(difCnt);
+						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
+							judgeMatari(difCnt);
+						} else {
+							judgeShobon(difCnt);
+						}
+						g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
+					}
+				}
+				changeHitFrz(_j, fcurrentNo, `frz`);
+				g_judgObj.lockFlgs[_j] = false;
+				return;
+			}
+		}
+		const stepDiv = document.querySelector(`#step${_j}`);
+		stepDiv.style.backgroundColor = `#66ffff`;
+		g_judgObj.lockFlgs[_j] = false;
+	}
 }
 
 function lifeRecovery() {
