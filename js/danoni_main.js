@@ -7229,6 +7229,7 @@ function MainInit() {
 				clearTimeout(g_timeoutEvtId);
 				clearWindow();
 				musicAfterLoaded();
+				document.onkeyup = _ => { };
 			}
 
 		} else if (setKey === g_headerObj.keyTitleBack) {
@@ -7242,6 +7243,7 @@ function MainInit() {
 			} else {
 				titleInit();
 			}
+			document.onkeyup = _ => { };
 		}
 
 		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
@@ -7333,7 +7335,32 @@ function MainInit() {
 	};
 
 	/**
-	 * 自動判定、矢印・フリーズアロー消去
+	 * 矢印・フリーズアロー消去
+	 * 
+	 * @param _j 矢印位置
+	 * @param _deleteObj 削除オブジェクト
+	 */
+	const judgeObjDelete = {
+		arrow: (_j, _deleteObj) => {
+			g_workObj.judgArrowCnt[_j]++;
+			mainSprite.removeChild(_deleteObj);
+		},
+		dummyArrow: (_j, _deleteObj) => {
+			g_workObj.judgDummyArrowCnt[_j]++;
+			mainSprite.removeChild(_deleteObj);
+		},
+		frz: (_j, _deleteObj) => {
+			g_workObj.judgFrzCnt[_j]++;
+			mainSprite.removeChild(_deleteObj);
+		},
+		dummyFrz: (_j, _deleteObj) => {
+			g_workObj.judgDummyFrzCnt[_j]++;
+			mainSprite.removeChild(_deleteObj);
+		},
+	};
+
+	/**
+	 * 自動判定
 	 * ※MainInit内部で指定必須（mainSprite指定）
 	 * 
 	 * @param _j 矢印位置
@@ -7350,8 +7377,7 @@ function MainInit() {
 		arrowOFF: (_j, _arrow, _cnt) => {
 			if (_cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
 				judgeUwan(_cnt);
-				g_workObj.judgArrowCnt[_j]++;
-				mainSprite.removeChild(_arrow);
+				judgeObjDelete.arrow(_j, _arrow);
 			}
 		},
 
@@ -7363,8 +7389,7 @@ function MainInit() {
 				judgeIi(_cnt);
 				stepDivHit.style.opacity = 1;
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-				g_workObj.judgArrowCnt[_j]++;
-				mainSprite.removeChild(_arrow);
+				judgeObjDelete.arrow(_j, _arrow);
 			}
 		},
 
@@ -7382,8 +7407,7 @@ function MainInit() {
 				stepDivHit.style.opacity = 1;
 				stepDivHit.style.backgroundColor = C_CLR_DUMMY;
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-				g_workObj.judgDummyArrowCnt[_j]++;
-				mainSprite.removeChild(_arrow);
+				judgeObjDelete.dummyArrow(_j, _arrow);
 			}
 		},
 
@@ -7391,8 +7415,7 @@ function MainInit() {
 		frzOK: (_j, _k, _frzRoot, _cnt) => {
 			judgeKita(_cnt);
 			_frzRoot.setAttribute(`judgEndFlg`, `true`);
-			g_workObj.judgFrzCnt[_j]++;
-			mainSprite.removeChild(_frzRoot);
+			judgeObjDelete.frz(_j, _frzRoot);
 		},
 
 		// ダミーフリーズアロー(成功時)
@@ -7404,8 +7427,7 @@ function MainInit() {
 				}
 			}
 			_frzRoot.setAttribute(`judgEndFlg`, `true`);
-			g_workObj.judgDummyFrzCnt[_j]++;
-			mainSprite.removeChild(_frzRoot);
+			judgeObjDelete.dummyFrz(_j, _frzRoot);
 		},
 
 		// フリーズアロー(枠外判定)
@@ -7439,18 +7461,6 @@ function MainInit() {
 		// ※処理上通ることはないが、統一のために定義
 		dummyFrzKeyUp: (_j, _k, _frzRoot, _cnt, _keyUpFrame) => { },
 
-		// フリーズアロー(判定外での消去)
-		frzDelete: (_j, _k, _frzRoot, _cnt) => {
-			g_workObj.judgFrzCnt[_j]++;
-			mainSprite.removeChild(_frzRoot);
-		},
-
-		// ダミーフリーズアロー(判定外での消去)
-		dummyFrzDelete: (_j, _k, _frzRoot, _cnt) => {
-			g_workObj.judgDummyFrzCnt[_j]++;
-			mainSprite.removeChild(_frzRoot);
-		},
-
 	};
 	judgeMotionFunc.dummyArrowON = (_j, _arrow, _cnt) => judgeMotionFunc.dummyArrowOFF(_j, _arrow, _cnt);
 
@@ -7481,8 +7491,7 @@ function MainInit() {
 							judgeUwan(_cnt);
 						}
 					}
-					mainSprite.removeChild(prevFrzRoot);
-					g_workObj.judgFrzCnt[_j]++;
+					judgeObjDelete.frz(_j, prevFrzRoot);
 				}
 			}
 		},
@@ -7685,6 +7694,12 @@ function MainInit() {
 				// フリーズアローがヒット中の処理
 				if (frzBarLength > 0) {
 					frzHitMotion(_j, _k, _name, frzRoot, cnt);
+
+					if (!checkKeyUpFunc[`${_name}${g_stateObj.autoPlay}`](_j)) {
+						const keyUpFrame = Number(frzRoot.getAttribute(`frzAttempt`)) + 1;
+						frzRoot.setAttribute(`frzAttempt`, keyUpFrame);
+						judgeMotionFunc[`${_name}KeyUp`](_j, _k, frzRoot, cnt, keyUpFrame);
+					}
 				} else {
 					judgeMotionFunc[`${_name}OK`](_j, _k, frzRoot, cnt);
 				}
@@ -7694,11 +7709,11 @@ function MainInit() {
 
 		} else {
 			frzBarLength -= g_workObj.currentSpeed;
-			frzRoot.setAttribute(`frzBarLength`, frzBarLength);
-			frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
-
-			if (frzBarLength <= 0) {
-				judgeMotionFunc[`${_name}Delete`](_j, _k, frzRoot, cnt);
+			if (frzBarLength > 0) {
+				frzRoot.setAttribute(`frzBarLength`, frzBarLength);
+				frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
+			} else {
+				judgeObjDelete[_name](_j, frzRoot);
 			}
 		}
 	}
@@ -7746,7 +7761,6 @@ function MainInit() {
 		const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
 		const dividePos = _frzRoot.getAttribute(`dividePos`);
 		const boostSpdDir = _frzRoot.getAttribute(`boostSpd`);
-		const keyUpFrame = Number(_frzRoot.getAttribute(`frzAttempt`));
 		const frzBarLength = parseFloat(frzBar.style.height) - g_workObj.currentSpeed * Math.abs(boostSpdDir);
 
 		_frzRoot.setAttribute(`frzBarLength`, frzBarLength);
@@ -7754,11 +7768,6 @@ function MainInit() {
 		frzBar.style.top = `${parseFloat(frzBar.style.top) + g_workObj.currentSpeed * Math.abs(boostSpdDir) * dividePos}px`;
 		frzBtm.style.top = `${parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
 		frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
-
-		if (!checkKeyUpFunc[`${_name}${g_stateObj.autoPlay}`](_j)) {
-			_frzRoot.setAttribute(`frzAttempt`, keyUpFrame + 1);
-			judgeMotionFunc[`${_name}KeyUp`](_j, _k, _frzRoot, _cnt, keyUpFrame + 1);
-		}
 	}
 
 	/**
@@ -8265,7 +8274,7 @@ function keyIsDown(_keyCode) {
 
 /**
  * 矢印・フリーズアロー判定
- * @param {*} _j 対象矢印・フリーズアロー
+ * @param {number} _j 対象矢印・フリーズアロー
  */
 function judgeArrow(_j) {
 
