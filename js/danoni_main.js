@@ -159,6 +159,7 @@ const C_LEN_SETDIFLBL_HEIGHT = 25;
 const C_SIZ_SETDIFLBL = 17;
 const C_LEN_SETMINI_WIDTH = 40;
 const C_SIZ_SETMINI = 18;
+const C_SIZ_DIFSELECTOR = 14;
 
 const C_LBL_SETMINIL = `<`;
 const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH / 2;
@@ -2822,6 +2823,9 @@ function headerConvert(_dosObj) {
 		obj.artistUrl = location.href;
 	}
 
+	// 譜面変更セレクターの利用有無
+	obj.difSelectorUse = setVal(_dosObj.difSelectorUse, `false`, `string`);
+
 	// 最小・最大速度の設定
 	obj.minSpeed = Math.round(setVal(_dosObj.minSpeed, C_MIN_SPEED, `float`) * 4) / 4;
 	obj.maxSpeed = Math.round(setVal(_dosObj.maxSpeed, C_MAX_SPEED, `float`) * 4) / 4;
@@ -3715,14 +3719,66 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#ff9999>D</span>ifficulty`);
 	optionsprite.appendChild(lblDifficulty);
 
+	/**
+	 * 譜面変更セレクターの削除
+	 */
+	function resetDifWindow() {
+		if (document.querySelector(`#difList`) !== null) {
+			deleteChildspriteAll(`difList`);
+			optionsprite.removeChild(document.querySelector(`#difList`));
+			optionsprite.removeChild(document.querySelector(`#difCover`));
+		}
+	}
+
 	const lnkDifficulty = makeSettingLblButton(`lnkDifficulty`,
 		``, setNoDifficulty, _ => {
-			g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
-			setDifficulty(true);
+			if (g_headerObj.difSelectorUse === `false`) {
+				g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
+				setDifficulty(true);
+			} else {
+				if (document.querySelector(`#difList`) === null) {
+					const difList = createSprite(`optionsprite`, `difList`, 140, 45, 280, 255);
+					difList.style.overflow = `auto`;
+					difList.style.backgroundColor = `#111111`;
+					const difCover = createSprite(`optionsprite`, `difCover`, 0, 45, 140, 255);
+					difCover.style.backgroundColor = `#111111`;
+					difCover.style.opacity = 0.95;
+
+					for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
+						let text = `${g_headerObj.keyLabels[j]}key / ${g_headerObj.difLabels[j]}`;
+						if (g_headerObj.makerView === `true`) {
+							text += ` (${g_headerObj.creatorNames[j]})`;
+						}
+						difList.appendChild(makeDifLblButton(`dif${j}`, text, j, _ => {
+							g_stateObj.scoreId = j;
+							setDifficulty(true);
+							deleteChildspriteAll(`difList`);
+							optionsprite.removeChild(difList);
+							optionsprite.removeChild(difCover);
+						}));
+					}
+					const lnkDifRandom = makeDifLblButton(`difRandom`, `RANDOM`, 0, _ => {
+						g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
+						setDifficulty(true);
+						deleteChildspriteAll(`difList`);
+						optionsprite.removeChild(difList);
+						optionsprite.removeChild(difCover);
+					});
+					difCover.appendChild(lnkDifRandom);
+					lnkDifRandom.style.width = `120px`;
+
+				} else {
+					resetDifWindow();
+				}
+			}
 		});
 	lnkDifficulty.oncontextmenu = _ => {
-		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
-		setDifficulty(true);
+		if (g_headerObj.difSelectorUse === `false`) {
+			g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
+			setDifficulty(true);
+		} else {
+			resetDifWindow();
+		}
 		return false;
 	}
 	optionsprite.appendChild(lnkDifficulty);
@@ -3731,10 +3787,12 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(makeMiniButton(`lnkDifficulty`, `R`, setNoDifficulty, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
 		setDifficulty(true);
+		resetDifWindow();
 	}));
 	optionsprite.appendChild(makeMiniButton(`lnkDifficulty`, `L`, setNoDifficulty, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
 		setDifficulty(true);
+		resetDifWindow();
 	}));
 
 	// 譜面変更ボタンのみ 10pxプラス
@@ -4422,6 +4480,32 @@ function makeSettingLblButton(_id, _name, _heightPos, _func) {
 	}, _func);
 
 	return settingLblButton;
+}
+
+/**
+ * 譜面変更セレクター用ボタン
+ * @param {string} _id
+ * @param {string} _name 初期設定文字
+ * @param {number} _heightPos 上からの配置順
+ * @param {function} _func
+ */
+function makeDifLblButton(_id, _name, _heightPos, _func) {
+	const difLblButton = createButton({
+		id: _id,
+		name: _name,
+		x: 0,
+		y: C_LEN_SETLBL_HEIGHT * _heightPos,
+		width: C_LEN_SETLBL_WIDTH,
+		height: C_LEN_SETLBL_HEIGHT,
+		fontsize: C_SIZ_DIFSELECTOR,
+		normalColor: C_CLR_LNK,
+		hoverColor: C_CLR_DEFHOVER,
+		align: C_ALIGN_CENTER
+	}, _func);
+	difLblButton.style.borderStyle = `solid`;
+	difLblButton.style.borderColor = `#000000 #cccccc`;
+
+	return difLblButton;
 }
 
 /**
