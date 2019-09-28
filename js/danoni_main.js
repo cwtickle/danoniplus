@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 8.5.0`;
+const g_version = `Ver 8.5.1`;
 const g_revisedDate = `2019/09/28`;
 const g_alphaVersion = ``;
 
@@ -1901,6 +1901,25 @@ function loadDos(_initFlg) {
 		initAfterDosLoaded(_initFlg);
 	}
 
+	// 譜面分割あり、譜面番号固定時のみ譜面データを一時クリア
+	const dosDivideInput = document.querySelector(`#externalDosDivide`);
+	const dosLockInput = document.querySelector(`#externalDosLock`);
+	let dosDivideFlg = false;
+	if (dosDivideInput !== null) {
+		dosDivideFlg = setVal(dosDivideInput.value, false, `boolean`);
+	}
+	if (dosLockInput !== null) {
+		g_stateObj.scoreLockFlg = setVal(dosLockInput.value, false, `boolean`);
+	}
+	if (externalDosInput !== null && dosDivideFlg && g_stateObj.scoreLockFlg) {
+		const scoreList = Object.keys(g_rootObj).filter(data => {
+			return data.endsWith(`_data`) || data.endsWith(`_change`);
+		});
+		scoreList.forEach(scoredata => {
+			g_rootObj[scoredata] = ``;
+		});
+	}
+
 	// HTML埋め込みdos
 	if (dosInput !== null) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
@@ -1919,18 +1938,9 @@ function loadDos(_initFlg) {
 	// 外部dos読み込み
 	if (externalDosInput !== null) {
 		let charset = document.characterSet;
-		let dosDivideFlg = false;
 		const charsetInput = document.querySelector(`#externalDosCharset`);
-		const dosDivideInput = document.querySelector(`#externalDosDivide`);
-		const dosLockInput = document.querySelector(`#externalDosLock`);
 		if (charsetInput !== null) {
 			charset = charsetInput.value;
-		}
-		if (dosDivideInput !== null) {
-			dosDivideFlg = setVal(dosDivideInput.value, false, `boolean`);
-		}
-		if (dosLockInput !== null) {
-			g_stateObj.scoreLockFlg = setVal(dosLockInput.value, false, `boolean`);
 		}
 		const filenameBase = externalDosInput.value.match(/.+\..*/)[0];
 		const filenameExtension = filenameBase.split(`.`).pop();
@@ -1942,14 +1952,6 @@ function loadDos(_initFlg) {
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
 			if (typeof externalDosInit === `function`) {
-
-				// 譜面データを一時クリア
-				const scoreList = Object.keys(g_rootObj).filter(data => {
-					return data.endsWith(`_data`) || data.endsWith(`_change`);
-				});
-				scoreList.forEach(scoredata => {
-					g_rootObj[scoredata] = ``;
-				});
 
 				// 外部データを読込
 				externalDosInit();
