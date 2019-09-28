@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/26
+ * Revised : 2019/09/28
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 8.4.0`;
-const g_revisedDate = `2019/09/26`;
+const g_version = `Ver 8.5.0`;
+const g_revisedDate = `2019/09/28`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -324,6 +324,7 @@ let g_rootObj = {};
 let g_headerObj = {};
 let g_scoreObj = {};
 const g_stateObj = {
+	scoreLockFlg: false,
 	scoreId: 0,
 	dummyId: ``,
 	speed: 3.5,
@@ -1883,12 +1884,12 @@ function initialControl() {
 	}
 
 	// 譜面データの読み込み
-	loadDos(`true`);
+	loadDos(true);
 }
 
 /**
  * 譜面読込
- * @param {string} _initFlg 
+ * @param {boolean} _initFlg 
  */
 function loadDos(_initFlg) {
 
@@ -1902,9 +1903,9 @@ function loadDos(_initFlg) {
 
 	// HTML埋め込みdos
 	if (dosInput !== null) {
-		g_rootObj = dosConvert(dosInput.value);
+		Object.assign(g_rootObj, dosConvert(dosInput.value));
 		if (externalDosInput === null) {
-			if (_initFlg === `true`) {
+			if (_initFlg === true) {
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
 					initAfterDosLoaded(_initFlg);
@@ -1918,23 +1919,48 @@ function loadDos(_initFlg) {
 	// 外部dos読み込み
 	if (externalDosInput !== null) {
 		let charset = document.characterSet;
+		let dosDivideFlg = false;
 		const charsetInput = document.querySelector(`#externalDosCharset`);
+		const dosDivideInput = document.querySelector(`#externalDosDivide`);
+		const dosLockInput = document.querySelector(`#externalDosLock`);
 		if (charsetInput !== null) {
 			charset = charsetInput.value;
 		}
+		if (dosDivideInput !== null) {
+			dosDivideFlg = setVal(dosDivideInput.value, false, `boolean`);
+		}
+		if (dosLockInput !== null) {
+			g_stateObj.scoreLockFlg = setVal(dosLockInput.value, false, `boolean`);
+		}
+		const filenameBase = externalDosInput.value.match(/.+\..*/)[0];
+		const filenameExtension = filenameBase.split(`.`).pop();
+		const filenameCommon = filenameBase.split(`.${filenameExtension}`)[0];
+		const scoreIdHeader = (g_stateObj.scoreId > 0 ? g_stateObj.scoreId + 1 : ``);
+		const filename = (_initFlg === true || dosDivideFlg === false ?
+			`${filenameCommon}.${filenameExtension}` : `${filenameCommon}${scoreIdHeader}.${filenameExtension}`);
 
-		const filename = externalDosInput.value.match(/.+\..*/)[0];
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
 			if (typeof externalDosInit === `function`) {
+
+				// 譜面データを一時クリア
+				const scoreList = Object.keys(g_rootObj).filter(data => {
+					return data.endsWith(`_data`) || data.endsWith(`_change`);
+				});
+				scoreList.forEach(scoredata => {
+					g_rootObj[scoredata] = ``;
+				});
+
+				// 外部データを読込
 				externalDosInit();
 				Object.assign(g_rootObj, dosConvert(g_externalDos));
+
 			} else {
 				makeWarningWindow(C_MSG_E_0022);
 			}
 
 			// danoni_setting.jsは初回時のみ読込
-			if (_initFlg === `true`) {
+			if (_initFlg === true) {
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
 					initAfterDosLoaded(_initFlg);
@@ -1948,84 +1974,82 @@ function loadDos(_initFlg) {
 
 function initAfterDosLoaded(_initFlg) {
 
-	// 初回時のみ譜面ヘッダー、一時キー設定を行う
-	if (_initFlg === `true`) {
+	// 初回時のみ譜面ヘッダー、一時キー設定、画像の再読込を行う
+	if (_initFlg === true) {
 		g_headerObj = headerConvert(g_rootObj);
 		keysConvert(g_rootObj);
 		g_keyObj.currentPtn = 0;
-	}
-	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 
-	// 画像ファイルの読み込み
-	preloadFile(`image`, C_IMG_ARROW, ``, ``);
-	preloadFile(`image`, C_IMG_ARROWSD, ``, ``);
-	preloadFile(`image`, C_IMG_ONIGIRI, ``, ``);
-	preloadFile(`image`, C_IMG_AASD, ``, ``);
-	preloadFile(`image`, C_IMG_GIKO, ``, ``);
-	preloadFile(`image`, C_IMG_IYO, ``, ``);
-	preloadFile(`image`, C_IMG_C, ``, ``);
-	preloadFile(`image`, C_IMG_MORARA, ``, ``);
-	preloadFile(`image`, C_IMG_MONAR, ``, ``);
-	preloadFile(`image`, C_IMG_CURSOR, ``, ``);
-	preloadFile(`image`, C_IMG_FRZBAR, ``, ``);
-	preloadFile(`image`, C_IMG_LIFEBORDER, ``, ``);
+		// 画像ファイルの読み込み
+		preloadFile(`image`, C_IMG_ARROW, ``, ``);
+		preloadFile(`image`, C_IMG_ARROWSD, ``, ``);
+		preloadFile(`image`, C_IMG_ONIGIRI, ``, ``);
+		preloadFile(`image`, C_IMG_AASD, ``, ``);
+		preloadFile(`image`, C_IMG_GIKO, ``, ``);
+		preloadFile(`image`, C_IMG_IYO, ``, ``);
+		preloadFile(`image`, C_IMG_C, ``, ``);
+		preloadFile(`image`, C_IMG_MORARA, ``, ``);
+		preloadFile(`image`, C_IMG_MONAR, ``, ``);
+		preloadFile(`image`, C_IMG_CURSOR, ``, ``);
+		preloadFile(`image`, C_IMG_FRZBAR, ``, ``);
+		preloadFile(`image`, C_IMG_LIFEBORDER, ``, ``);
 
-	// その他の画像ファイルの読み込み
-	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
-		if (setVal(g_headerObj.preloadImages[j], ``, `string`) !== ``) {
+		// その他の画像ファイルの読み込み
+		for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
+			if (setVal(g_headerObj.preloadImages[j], ``, `string`) !== ``) {
 
-			// Pattern A: |preloadImages=file.png|
-			// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
-			// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
-			// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
+				// Pattern A: |preloadImages=file.png|
+				// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
+				// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
+				// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
 
-			const tmpPreloadImages = g_headerObj.preloadImages[j].split(`@`);
-			if (tmpPreloadImages.length > 1) {
-				const termRoopCnts = tmpPreloadImages[1].split(`-`);
-				let startCnt;
-				let lastCnt;
-				let paddingLen;
+				const tmpPreloadImages = g_headerObj.preloadImages[j].split(`@`);
+				if (tmpPreloadImages.length > 1) {
+					const termRoopCnts = tmpPreloadImages[1].split(`-`);
+					let startCnt;
+					let lastCnt;
+					let paddingLen;
 
-				if (termRoopCnts.length > 1) {
-					// Pattern C, Dの場合
-					startCnt = setVal(termRoopCnts[0], 1, `number`);
-					lastCnt = setVal(termRoopCnts[1], 1, `number`);
-					paddingLen = String(setVal(termRoopCnts[1], 1, `string`)).length;
+					if (termRoopCnts.length > 1) {
+						// Pattern C, Dの場合
+						startCnt = setVal(termRoopCnts[0], 1, `number`);
+						lastCnt = setVal(termRoopCnts[1], 1, `number`);
+						paddingLen = String(setVal(termRoopCnts[1], 1, `string`)).length;
+					} else {
+						// Pattern Bの場合
+						startCnt = 1;
+						lastCnt = setVal(tmpPreloadImages[1], 1, `number`);
+						paddingLen = String(setVal(tmpPreloadImages[1], 1, `string`)).length;
+					}
+					for (let k = startCnt; k <= lastCnt; k++) {
+						preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)), ``, ``);
+					}
 				} else {
-					// Pattern Bの場合
-					startCnt = 1;
-					lastCnt = setVal(tmpPreloadImages[1], 1, `number`);
-					paddingLen = String(setVal(tmpPreloadImages[1], 1, `string`)).length;
+					// Pattern Aの場合
+					preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
 				}
-				for (let k = startCnt; k <= lastCnt; k++) {
-					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)), ``, ``);
-				}
-			} else {
-				// Pattern Aの場合
-				preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
 			}
 		}
-	}
 
-	// クエリで譜面番号が指定されていればセット
-	if (_initFlg === `true`) {
+		// クエリで譜面番号が指定されていればセット
 		const specifiedScoreId = getQueryParamVal(`scoreId`);
 		g_stateObj.scoreId = g_headerObj.keyLabels[specifiedScoreId] ? specifiedScoreId : 0;
 	}
+	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 
-	// customjs、音楽ファイルの読み込み
+	// customjsの読み込み
 	const randTime = new Date().getTime();
 	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
 		if (g_headerObj.customjs2 !== ``) {
 			loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
-				if (_initFlg === `true`) {
+				if (_initFlg === true) {
 					titleInit();
 				} else {
 					loadingScoreInit2();
 				}
 			});
 		} else {
-			if (_initFlg === `true`) {
+			if (_initFlg === true) {
 				titleInit();
 			} else {
 				loadingScoreInit2();
@@ -5268,7 +5292,7 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
  */
 function loadingScoreInit() {
 	// 譜面データの読み込み
-	loadDos(`false`);
+	loadDos(false);
 }
 
 function loadingScoreInit2() {
@@ -5285,7 +5309,7 @@ function loadingScoreInit2() {
 
 	let scoreIdHeader = ``;
 	let dummyIdHeader = ``;
-	if (g_stateObj.scoreId > 0) {
+	if (g_stateObj.scoreId > 0 && g_stateObj.scoreLockFlg === false) {
 		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
 	}
 	if (g_stateObj.dummyId !== ``) {
