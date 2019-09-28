@@ -1932,10 +1932,12 @@ function loadDos(_initFlg) {
 		if (dosLockInput !== null) {
 			g_stateObj.scoreLockFlg = setVal(dosLockInput.value, false, `boolean`);
 		}
-		const filenamePair = externalDosInput.value.match(/.+\..*/)[0].split(`.`);
+		const filenameBase = externalDosInput.value.match(/.+\..*/)[0];
+		const filenameExtension = filenameBase.split(`.`).pop();
+		const filenameCommon = filenameBase.split(`.${filenameExtension}`)[0];
 		const scoreIdHeader = (g_stateObj.scoreId > 0 ? g_stateObj.scoreId + 1 : ``);
 		const filename = (_initFlg === true || dosDivideFlg === false ?
-			`${filenamePair[0]}.${filenamePair[1]}` : `${filenamePair[0]}${scoreIdHeader}.${filenamePair[1]}`);
+			`${filenameCommon}.${filenameExtension}` : `${filenameCommon}${scoreIdHeader}.${filenameExtension}`);
 
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
