@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/23
+ * Revised : 2019/09/28
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.9.4`;
-const g_revisedDate = `2019/09/23`;
+const g_version = `Ver 7.9.5`;
+const g_revisedDate = `2019/09/28`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1942,70 +1942,68 @@ function loadDos(_initFlg) {
 
 function initAfterDosLoaded(_initFlg) {
 
-	// 初回時のみ譜面ヘッダー、一時キー設定を行う
+	// 初回時のみ譜面ヘッダー、一時キー設定、画像ファイル読込を行う
 	if (_initFlg === `true`) {
 		g_headerObj = headerConvert(g_rootObj);
 		keysConvert(g_rootObj);
 		g_keyObj.currentPtn = 0;
-	}
-	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 
-	// 画像ファイルの読み込み
-	preloadFile(`image`, C_IMG_ARROW, ``, ``);
-	preloadFile(`image`, C_IMG_ARROWSD, ``, ``);
-	preloadFile(`image`, C_IMG_ONIGIRI, ``, ``);
-	preloadFile(`image`, C_IMG_AASD, ``, ``);
-	preloadFile(`image`, C_IMG_GIKO, ``, ``);
-	preloadFile(`image`, C_IMG_IYO, ``, ``);
-	preloadFile(`image`, C_IMG_C, ``, ``);
-	preloadFile(`image`, C_IMG_MORARA, ``, ``);
-	preloadFile(`image`, C_IMG_MONAR, ``, ``);
-	preloadFile(`image`, C_IMG_CURSOR, ``, ``);
-	preloadFile(`image`, C_IMG_FRZBAR, ``, ``);
-	preloadFile(`image`, C_IMG_LIFEBORDER, ``, ``);
+		// 画像ファイルの読み込み
+		preloadFile(`image`, C_IMG_ARROW, ``, ``);
+		preloadFile(`image`, C_IMG_ARROWSD, ``, ``);
+		preloadFile(`image`, C_IMG_ONIGIRI, ``, ``);
+		preloadFile(`image`, C_IMG_AASD, ``, ``);
+		preloadFile(`image`, C_IMG_GIKO, ``, ``);
+		preloadFile(`image`, C_IMG_IYO, ``, ``);
+		preloadFile(`image`, C_IMG_C, ``, ``);
+		preloadFile(`image`, C_IMG_MORARA, ``, ``);
+		preloadFile(`image`, C_IMG_MONAR, ``, ``);
+		preloadFile(`image`, C_IMG_CURSOR, ``, ``);
+		preloadFile(`image`, C_IMG_FRZBAR, ``, ``);
+		preloadFile(`image`, C_IMG_LIFEBORDER, ``, ``);
 
-	// その他の画像ファイルの読み込み
-	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
-		if (setVal(g_headerObj.preloadImages[j], ``, `string`) !== ``) {
+		// その他の画像ファイルの読み込み
+		for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
+			if (setVal(g_headerObj.preloadImages[j], ``, `string`) !== ``) {
 
-			// Pattern A: |preloadImages=file.png|
-			// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
-			// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
-			// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
+				// Pattern A: |preloadImages=file.png|
+				// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
+				// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
+				// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
 
-			const tmpPreloadImages = g_headerObj.preloadImages[j].split(`@`);
-			if (tmpPreloadImages.length > 1) {
-				const termRoopCnts = tmpPreloadImages[1].split(`-`);
-				let startCnt;
-				let lastCnt;
-				let paddingLen;
+				const tmpPreloadImages = g_headerObj.preloadImages[j].split(`@`);
+				if (tmpPreloadImages.length > 1) {
+					const termRoopCnts = tmpPreloadImages[1].split(`-`);
+					let startCnt;
+					let lastCnt;
+					let paddingLen;
 
-				if (termRoopCnts.length > 1) {
-					// Pattern C, Dの場合
-					startCnt = setVal(termRoopCnts[0], 1, `number`);
-					lastCnt = setVal(termRoopCnts[1], 1, `number`);
-					paddingLen = String(setVal(termRoopCnts[1], 1, `string`)).length;
+					if (termRoopCnts.length > 1) {
+						// Pattern C, Dの場合
+						startCnt = setVal(termRoopCnts[0], 1, `number`);
+						lastCnt = setVal(termRoopCnts[1], 1, `number`);
+						paddingLen = String(setVal(termRoopCnts[1], 1, `string`)).length;
+					} else {
+						// Pattern Bの場合
+						startCnt = 1;
+						lastCnt = setVal(tmpPreloadImages[1], 1, `number`);
+						paddingLen = String(setVal(tmpPreloadImages[1], 1, `string`)).length;
+					}
+					for (let k = startCnt; k <= lastCnt; k++) {
+						preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)), ``, ``);
+					}
 				} else {
-					// Pattern Bの場合
-					startCnt = 1;
-					lastCnt = setVal(tmpPreloadImages[1], 1, `number`);
-					paddingLen = String(setVal(tmpPreloadImages[1], 1, `string`)).length;
+					// Pattern Aの場合
+					preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
 				}
-				for (let k = startCnt; k <= lastCnt; k++) {
-					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)), ``, ``);
-				}
-			} else {
-				// Pattern Aの場合
-				preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
 			}
 		}
-	}
 
-	// クエリで譜面番号が指定されていればセット
-	if (_initFlg === `true`) {
+		// クエリで譜面番号が指定されていればセット
 		const specifiedScoreId = getQueryParamVal(`scoreId`);
 		g_stateObj.scoreId = g_headerObj.keyLabels[specifiedScoreId] ? specifiedScoreId : 0;
 	}
+	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 
 	// customjs、音楽ファイルの読み込み
 	const randTime = new Date().getTime();
