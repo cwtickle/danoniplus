@@ -3131,6 +3131,9 @@ function headerConvert(_dosObj) {
 	// 再生速度
 	obj.playbackRate = setVal(_dosObj.playbackRate, 1, C_TYP_FLOAT);
 
+	// 譜面の伸縮率
+	obj.stratchRate = setVal(_dosObj.stratchRate, 1, C_TYP_FLOAT);
+
 	// 外部jsファイルの指定
 	if (_dosObj.customjs !== undefined && _dosObj.customjs !== ``) {
 		const customjss = _dosObj.customjs.split(`,`);
@@ -5597,7 +5600,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	const realAdjustment = parseInt(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
 	g_stateObj.realAdjustment = realAdjustment;
 	const blankFrame = g_headerObj.blankFrame;
-	const calcFrame = _frame => Math.round((parseInt(_frame) - blankFrame) / g_headerObj.playbackRate + blankFrame + realAdjustment);
+	const calcFrame = _frame => Math.round((parseInt(_frame) - blankFrame) / g_headerObj.playbackRate * g_headerObj.stratchRate + blankFrame + realAdjustment);
 
 	for (let j = 0; j < keyNum; j++) {
 
