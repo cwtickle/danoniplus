@@ -1898,7 +1898,7 @@ function loadDos(_initFlg) {
 
 	if (dosInput === null && externalDosInput === null) {
 		makeWarningWindow(C_MSG_E_0023);
-		initAfterDosLoaded(_initFlg);
+		initAfterDosLoaded();
 	}
 
 	// 譜面分割あり、譜面番号固定時のみ譜面データを一時クリア
@@ -1927,10 +1927,10 @@ function loadDos(_initFlg) {
 			if (_initFlg === true) {
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
-					initAfterDosLoaded(_initFlg);
+					initAfterDosLoaded();
 				});
 			} else {
-				initAfterDosLoaded(_initFlg);
+				loadingScoreInit2();
 			}
 		}
 	}
@@ -1965,97 +1965,89 @@ function loadDos(_initFlg) {
 			if (_initFlg === true) {
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
-					initAfterDosLoaded(_initFlg);
+					initAfterDosLoaded();
 				});
 			} else {
-				initAfterDosLoaded(_initFlg);
+				loadingScoreInit2();
 			}
 		}, charset);
 	}
 }
 
-function initAfterDosLoaded(_initFlg) {
+/**
+ * 初回読込後に画像プリロード・カスタムjsを読み込む処理
+ */
+function initAfterDosLoaded() {
 
-	// 初回時のみ譜面ヘッダー、一時キー設定、画像の再読込を行う
-	if (_initFlg === true) {
-		g_headerObj = headerConvert(g_rootObj);
-		keysConvert(g_rootObj);
-		g_keyObj.currentPtn = 0;
+	g_headerObj = headerConvert(g_rootObj);
+	keysConvert(g_rootObj);
+	g_keyObj.currentPtn = 0;
 
-		// 画像ファイルの読み込み
-		preloadFile(`image`, C_IMG_ARROW, ``, ``);
-		preloadFile(`image`, C_IMG_ARROWSD, ``, ``);
-		preloadFile(`image`, C_IMG_ONIGIRI, ``, ``);
-		preloadFile(`image`, C_IMG_AASD, ``, ``);
-		preloadFile(`image`, C_IMG_GIKO, ``, ``);
-		preloadFile(`image`, C_IMG_IYO, ``, ``);
-		preloadFile(`image`, C_IMG_C, ``, ``);
-		preloadFile(`image`, C_IMG_MORARA, ``, ``);
-		preloadFile(`image`, C_IMG_MONAR, ``, ``);
-		preloadFile(`image`, C_IMG_CURSOR, ``, ``);
-		preloadFile(`image`, C_IMG_FRZBAR, ``, ``);
-		preloadFile(`image`, C_IMG_LIFEBORDER, ``, ``);
+	// クエリで譜面番号が指定されていればセット
+	const specifiedScoreId = getQueryParamVal(`scoreId`);
+	g_stateObj.scoreId = g_headerObj.keyLabels[specifiedScoreId] ? specifiedScoreId : 0;
+	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 
-		// その他の画像ファイルの読み込み
-		for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
-			if (setVal(g_headerObj.preloadImages[j], ``, `string`) !== ``) {
+	// 画像ファイルの読み込み
+	preloadFile(`image`, C_IMG_ARROW, ``, ``);
+	preloadFile(`image`, C_IMG_ARROWSD, ``, ``);
+	preloadFile(`image`, C_IMG_ONIGIRI, ``, ``);
+	preloadFile(`image`, C_IMG_AASD, ``, ``);
+	preloadFile(`image`, C_IMG_GIKO, ``, ``);
+	preloadFile(`image`, C_IMG_IYO, ``, ``);
+	preloadFile(`image`, C_IMG_C, ``, ``);
+	preloadFile(`image`, C_IMG_MORARA, ``, ``);
+	preloadFile(`image`, C_IMG_MONAR, ``, ``);
+	preloadFile(`image`, C_IMG_CURSOR, ``, ``);
+	preloadFile(`image`, C_IMG_FRZBAR, ``, ``);
+	preloadFile(`image`, C_IMG_LIFEBORDER, ``, ``);
 
-				// Pattern A: |preloadImages=file.png|
-				// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
-				// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
-				// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
+	// その他の画像ファイルの読み込み
+	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
+		if (setVal(g_headerObj.preloadImages[j], ``, `string`) !== ``) {
 
-				const tmpPreloadImages = g_headerObj.preloadImages[j].split(`@`);
-				if (tmpPreloadImages.length > 1) {
-					const termRoopCnts = tmpPreloadImages[1].split(`-`);
-					let startCnt;
-					let lastCnt;
-					let paddingLen;
+			// Pattern A: |preloadImages=file.png|
+			// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
+			// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
+			// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
 
-					if (termRoopCnts.length > 1) {
-						// Pattern C, Dの場合
-						startCnt = setVal(termRoopCnts[0], 1, `number`);
-						lastCnt = setVal(termRoopCnts[1], 1, `number`);
-						paddingLen = String(setVal(termRoopCnts[1], 1, `string`)).length;
-					} else {
-						// Pattern Bの場合
-						startCnt = 1;
-						lastCnt = setVal(tmpPreloadImages[1], 1, `number`);
-						paddingLen = String(setVal(tmpPreloadImages[1], 1, `string`)).length;
-					}
-					for (let k = startCnt; k <= lastCnt; k++) {
-						preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)), ``, ``);
-					}
+			const tmpPreloadImages = g_headerObj.preloadImages[j].split(`@`);
+			if (tmpPreloadImages.length > 1) {
+				const termRoopCnts = tmpPreloadImages[1].split(`-`);
+				let startCnt;
+				let lastCnt;
+				let paddingLen;
+
+				if (termRoopCnts.length > 1) {
+					// Pattern C, Dの場合
+					startCnt = setVal(termRoopCnts[0], 1, `number`);
+					lastCnt = setVal(termRoopCnts[1], 1, `number`);
+					paddingLen = String(setVal(termRoopCnts[1], 1, `string`)).length;
 				} else {
-					// Pattern Aの場合
-					preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
+					// Pattern Bの場合
+					startCnt = 1;
+					lastCnt = setVal(tmpPreloadImages[1], 1, `number`);
+					paddingLen = String(setVal(tmpPreloadImages[1], 1, `string`)).length;
 				}
+				for (let k = startCnt; k <= lastCnt; k++) {
+					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)), ``, ``);
+				}
+			} else {
+				// Pattern Aの場合
+				preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
 			}
 		}
-
-		// クエリで譜面番号が指定されていればセット
-		const specifiedScoreId = getQueryParamVal(`scoreId`);
-		g_stateObj.scoreId = g_headerObj.keyLabels[specifiedScoreId] ? specifiedScoreId : 0;
 	}
-	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 
 	// customjsの読み込み
 	const randTime = new Date().getTime();
 	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
 		if (g_headerObj.customjs2 !== ``) {
 			loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
-				if (_initFlg === true) {
-					titleInit();
-				} else {
-					loadingScoreInit2();
-				}
+				titleInit();
 			});
 		} else {
-			if (_initFlg === true) {
-				titleInit();
-			} else {
-				loadingScoreInit2();
-			}
+			titleInit();
 		}
 	});
 }
@@ -2961,21 +2953,13 @@ function headerConvert(_dosObj) {
 		return self.indexOf(x) === j;
 	});
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
+
 	if (obj.initSpeeds[0] !== undefined) {
 		g_stateObj.speed = obj.initSpeeds[0];
 		g_speedNum = g_speeds.findIndex(speed => speed === g_stateObj.speed);
 		if (g_speedNum < 0) {
 			g_speedNum = 0;
 		}
-	}
-	if (obj.lifeBorders[0] === `x`) {
-		g_stateObj.lifeBorder = 0;
-		g_stateObj.lifeMode = C_LFE_SURVIVAL;
-		g_gaugeType = C_LFE_SURVIVAL;
-	} else {
-		g_stateObj.lifeBorder = obj.lifeBorders[0];
-		g_stateObj.lifeMode = C_LFE_BORDER;
-		g_gaugeType = C_LFE_BORDER;
 	}
 
 	// カラーコードのゼロパディング有無設定
@@ -3008,24 +2992,6 @@ function headerConvert(_dosObj) {
 	}
 	for (let j = 0; j < g_gaugeOptionObj.border.length; j++) {
 		getGaugeSetting(_dosObj, g_gaugeOptionObj.border[j], obj);
-	}
-
-	g_gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
-	g_stateObj.gauge = g_gauges[g_gaugeNum];
-
-	if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] !== undefined) {
-		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`].lifeBorders[0] === `x`) {
-			g_stateObj.lifeBorder = 0;
-		} else {
-			g_stateObj.lifeBorder = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`].lifeBorders[0];
-		}
-		g_stateObj.lifeRcv = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`].lifeRecoverys[0];
-		g_stateObj.lifeDmg = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`].lifeDamages[0];
-		g_stateObj.lifeInit = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`].lifeInits[0];
-	} else {
-		g_stateObj.lifeRcv = obj.lifeRecoverys[0];
-		g_stateObj.lifeDmg = obj.lifeDamages[0];
-		g_stateObj.lifeInit = obj.lifeInits[0];
 	}
 
 	// 初期色情報
@@ -4080,13 +4046,8 @@ function createOptionWindow(_sprite) {
 	 * @param {number} _gaugeNum 
 	 */
 	function gaugeChange(_gaugeNum) {
-		g_stateObj.lifeMode = g_gaugeOptionObj[`type${g_gaugeType}`][_gaugeNum];
 
-		g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${g_gaugeType}`][_gaugeNum];
-		g_stateObj.lifeInit = g_gaugeOptionObj[`init${g_gaugeType}`][_gaugeNum];
-		g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${g_gaugeType}`][_gaugeNum];
-		g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${g_gaugeType}`][_gaugeNum];
-
+		// ゲージ初期化
 		if (_gaugeNum === 0) {
 			if (setVal(g_headerObj.lifeBorders[g_stateObj.scoreId], ``, `string`) !== ``) {
 				if (g_headerObj.lifeBorders[g_stateObj.scoreId] === `x`) {
@@ -4110,10 +4071,17 @@ function createOptionWindow(_sprite) {
 			if (setVal(g_headerObj.lifeDamages[g_stateObj.scoreId], ``, `number`) !== ``) {
 				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
 			}
+		}
 
-		} else if (g_stateObj.gauge == `Light` || g_stateObj.gauge == `Easy`) {
-			// ゲージ設定がLight/Easyのとき、Original/Normalに合わせて設定を見直す
+		// 設定されたゲージ設定、カーソルに合わせて設定値を更新
+		g_stateObj.lifeMode = g_gaugeOptionObj[`type${g_gaugeType}`][_gaugeNum];
+		g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${g_gaugeType}`][_gaugeNum];
+		g_stateObj.lifeInit = g_gaugeOptionObj[`init${g_gaugeType}`][_gaugeNum];
+		g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${g_gaugeType}`][_gaugeNum];
+		g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${g_gaugeType}`][_gaugeNum];
 
+		// ゲージ設定(Light, Easy)の初期化
+		if (g_stateObj.gauge == `Light` || g_stateObj.gauge == `Easy`) {
 			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], ``, `number`) !== ``) {
 				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
 			}
@@ -4126,6 +4094,7 @@ function createOptionWindow(_sprite) {
 		}
 
 		// ゲージ設定別に個別設定した場合はここで設定を上書き
+		// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
 		const tmpScoreId = g_stateObj.scoreId;
 
 		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] !== undefined) {
