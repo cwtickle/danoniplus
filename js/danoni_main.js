@@ -1930,7 +1930,7 @@ function loadDos(_initFlg) {
 					initAfterDosLoaded();
 				});
 			} else {
-				loadingScoreInit2();
+				loadCustomjs(_initFlg);
 			}
 		}
 	}
@@ -1968,14 +1968,14 @@ function loadDos(_initFlg) {
 					initAfterDosLoaded();
 				});
 			} else {
-				loadingScoreInit2();
+				loadCustomjs(_initFlg);
 			}
 		}, charset);
 	}
 }
 
 /**
- * 初回読込後に画像プリロード・カスタムjsを読み込む処理
+ * 初回読込後に画像プリロードを設定する処理
  */
 function initAfterDosLoaded() {
 
@@ -2042,14 +2042,30 @@ function initAfterDosLoaded() {
 	}
 
 	// customjsの読み込み
+	loadCustomjs(true);
+}
+
+/**
+ * customjsの読込
+ * @param {boolean} _initFlg 
+ */
+function loadCustomjs(_initFlg) {
 	const randTime = new Date().getTime();
 	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
 		if (g_headerObj.customjs2 !== ``) {
 			loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
-				titleInit();
+				if (_initFlg) {
+					titleInit();
+				} else {
+					loadingScoreInit2();
+				}
 			});
 		} else {
-			titleInit();
+			if (_initFlg) {
+				titleInit();
+			} else {
+				loadingScoreInit2();
+			}
 		}
 	});
 }
