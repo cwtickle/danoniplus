@@ -1979,14 +1979,16 @@ function loadDos(_initFlg) {
  */
 function initAfterDosLoaded() {
 
+	// クエリで譜面番号が指定されていればセット
+	g_stateObj.scoreId = setVal(getQueryParamVal(`scoreId`), 0, `number`);
+
+	// 譜面ヘッダー、特殊キー情報の読込
 	g_headerObj = headerConvert(g_rootObj);
 	keysConvert(g_rootObj);
-	g_keyObj.currentPtn = 0;
 
-	// クエリで譜面番号が指定されていればセット
-	const specifiedScoreId = getQueryParamVal(`scoreId`);
-	g_stateObj.scoreId = g_headerObj.keyLabels[specifiedScoreId] ? specifiedScoreId : 0;
+	// キー数情報を初期化
 	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
+	g_keyObj.currentPtn = 0;
 
 	// 画像ファイルの読み込み
 	preloadFile(`image`, C_IMG_ARROW, ``, ``);
@@ -2896,6 +2898,8 @@ function headerConvert(_dosObj) {
 		obj.lifeDamages = [];
 		obj.lifeInits = [];
 		obj.creatorNames = [];
+		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
+
 		for (let j = 0; j < difs.length; j++) {
 			const difDetails = difs[j].split(`,`);
 
@@ -2954,12 +2958,11 @@ function headerConvert(_dosObj) {
 	});
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 
-	if (obj.initSpeeds[0] !== undefined) {
-		g_stateObj.speed = obj.initSpeeds[0];
-		g_speedNum = g_speeds.findIndex(speed => speed === g_stateObj.speed);
-		if (g_speedNum < 0) {
-			g_speedNum = 0;
-		}
+	// 初期速度の設定
+	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
+	g_speedNum = g_speeds.findIndex(speed => speed === g_stateObj.speed);
+	if (g_speedNum < 0) {
+		g_speedNum = 0;
 	}
 
 	// カラーコードのゼロパディング有無設定
