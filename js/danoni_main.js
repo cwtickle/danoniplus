@@ -987,6 +987,7 @@ const C_MSG_E_0031 = `楽曲ファイルが未指定か、フォーマットが�
 const C_MSG_E_0032 = `楽曲ファイルの読み込みに失敗しました。(E-0032)`;
 const C_MSG_E_0033 = `楽曲ファイルの読み込み中に接続がタイムアウトしました。(E-0033)`;
 const C_MSG_E_0034 = `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`;
+const C_MSG_E_0041 = `ファイル:{0}の読み込みに失敗しました。(E-0041)<br>`;
 
 const C_MSG_E_0101 = `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
 	|color{0}=0,1,0,1,0,2|`;
@@ -1660,6 +1661,7 @@ function loadScript(_url, _callback, _charset = `UTF-8`) {
 	script.src = _url;
 	script.charset = _charset;
 	script.onload = _ => _callback();
+	script.onerror = _ => makeWarningWindow(C_MSG_E_0041.split(`{0}`).join(_url));
 	document.querySelector(`head`).appendChild(script);
 }
 
@@ -1931,6 +1933,7 @@ function loadDos(_initFlg) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
 		if (externalDosInput === null) {
 			if (_initFlg === true) {
+				clearWindow();
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
 					initAfterDosLoaded();
@@ -1969,6 +1972,7 @@ function loadDos(_initFlg) {
 
 			// danoni_setting.jsは初回時のみ読込
 			if (_initFlg === true) {
+				clearWindow();
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
 					initAfterDosLoaded();
@@ -2358,7 +2362,6 @@ function drawMainSpriteData(_frame, _depthName) {
  *  タイトル画面初期化
  */
 function titleInit() {
-	clearWindow();
 	drawDefaultBackImage(``);
 
 	// タイトル用フレーム初期化
@@ -2817,6 +2820,10 @@ function headerConvert(_dosObj) {
 	// ヘッダー群の格納先
 	const obj = {};
 
+	// フォントの設定
+	obj.customFont = setVal(_dosObj.customFont, ``, C_TYP_STRING);
+	g_headerObj.customFont = obj.customFont;
+
 	// 曲名
 	obj.musicTitles = [];
 	obj.musicTitlesForView = [];
@@ -2861,6 +2868,7 @@ function headerConvert(_dosObj) {
 	} else {
 		makeWarningWindow(C_MSG_E_0012);
 		obj.musicTitle = `musicName`;
+		obj.musicTitleForView = [`musicName`];
 		obj.artistName = `artistName`;
 		obj.artistUrl = location.href;
 	}
@@ -3176,9 +3184,6 @@ function headerConvert(_dosObj) {
 			}
 		}
 	}
-
-	// フォントの設定
-	obj.customFont = setVal(_dosObj.customFont, ``, C_TYP_STRING);
 
 	// 最終演出表示有無（noneで無効化）
 	obj.finishView = setVal(_dosObj.finishView, ``, C_TYP_STRING);
