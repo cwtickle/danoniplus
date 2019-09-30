@@ -1661,7 +1661,7 @@ function loadScript(_url, _callback, _charset = `UTF-8`) {
 	script.src = _url;
 	script.charset = _charset;
 	script.onload = _ => _callback();
-	script.onerror = _ => makeWarningWindow(C_MSG_E_0041.split(`{0}`).join(_url));
+	script.onerror = _ => makeWarningWindow(C_MSG_E_0041.split(`{0}`).join(_url.split(`?`)[0]));
 	document.querySelector(`head`).appendChild(script);
 }
 
