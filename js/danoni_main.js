@@ -1946,6 +1946,7 @@ function loadDos(_initFlg) {
 
 	// 外部dos読み込み
 	if (externalDosInput !== null) {
+		clearWindow();
 		let charset = document.characterSet;
 		const charsetInput = document.querySelector(`#externalDosCharset`);
 		if (charsetInput !== null) {
@@ -1972,7 +1973,6 @@ function loadDos(_initFlg) {
 
 			// danoni_setting.jsは初回時のみ読込
 			if (_initFlg) {
-				clearWindow();
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
 					initAfterDosLoaded();
