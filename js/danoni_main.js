@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/29
+ * Revised : 2019/09/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.9.6`;
-const g_revisedDate = `2019/09/29`;
+const g_version = `Ver 7.9.7`;
+const g_revisedDate = `2019/09/30`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1899,6 +1899,7 @@ function loadDos(_initFlg) {
 		g_rootObj = dosConvert(dosInput.value);
 		if (externalDosInput === null) {
 			if (_initFlg === `true`) {
+				clearWindow();
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
 					initAfterDosLoaded(_initFlg);
@@ -1920,6 +1921,7 @@ function loadDos(_initFlg) {
 		const filename = externalDosInput.value.match(/.+\..*/)[0];
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
+			clearWindow();
 			if (typeof externalDosInit === `function`) {
 				externalDosInit();
 				Object.assign(g_rootObj, dosConvert(g_externalDos));
@@ -2315,7 +2317,6 @@ function drawMainSpriteData(_frame, _depthName) {
  *  タイトル画面初期化
  */
 function titleInit() {
-	clearWindow();
 	drawDefaultBackImage(``);
 
 	// タイトル用フレーム初期化
@@ -2789,6 +2790,7 @@ function headerConvert(_dosObj) {
 	} else {
 		makeWarningWindow(C_MSG_E_0012);
 		obj.musicTitle = `musicName`;
+		obj.musicTitleForView = [`musicName`];
 		obj.artistName = `artistName`;
 		obj.artistUrl = location.href;
 	}
