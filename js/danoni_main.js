@@ -8,8 +8,8 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 4.10.19`;
-const g_revisedDate = `2019/09/23`;
+const g_version = `Ver 4.10.20`;
+const g_revisedDate = `2019/09/30`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1699,6 +1699,7 @@ function initialControl() {
 	if (dosInput !== null) {
 		g_rootObj = dosConvert(dosInput.value);
 		if (externalDosInput === null) {
+			clearWindow();
 			const randTime = new Date().getTime();
 			loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
 				initAfterDosLoaded();
@@ -1717,6 +1718,7 @@ function initialControl() {
 		const filename = externalDosInput.value.match(/.+\..*/)[0];
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
+			clearWindow();
 			if (typeof externalDosInit === `function`) {
 				externalDosInit();
 				Object.assign(g_rootObj, dosConvert(g_externalDos.replace(`&`, `|`)));
@@ -1895,7 +1897,6 @@ function setAudio(_url) {
  *  タイトル画面初期化
  */
 function titleInit() {
-	clearWindow();
 
 	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
