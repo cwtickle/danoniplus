@@ -2399,6 +2399,7 @@ function headerConvert(_dosObj) {
 	} else {
 		makeWarningWindow(C_MSG_E_0012);
 		obj.musicTitle = `musicName`;
+		obj.musicTitleForView = [`musicName`];
 		obj.artistName = `artistName`;
 		obj.artistUrl = location.href;
 	}
