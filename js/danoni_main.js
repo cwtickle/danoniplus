@@ -1932,7 +1932,7 @@ function loadDos(_initFlg) {
 	if (dosInput !== null) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
 		if (externalDosInput === null) {
-			if (_initFlg === true) {
+			if (_initFlg) {
 				clearWindow();
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
@@ -1955,7 +1955,7 @@ function loadDos(_initFlg) {
 		const filenameExtension = filenameBase.split(`.`).pop();
 		const filenameCommon = filenameBase.split(`.${filenameExtension}`)[0];
 		const scoreIdHeader = (g_stateObj.scoreId > 0 ? g_stateObj.scoreId + 1 : ``);
-		const filename = (_initFlg === true || dosDivideFlg === false ?
+		const filename = (_initFlg || !dosDivideFlg ?
 			`${filenameCommon}.${filenameExtension}` : `${filenameCommon}${scoreIdHeader}.${filenameExtension}`);
 
 		const randTime = new Date().getTime();
@@ -1971,7 +1971,7 @@ function loadDos(_initFlg) {
 			}
 
 			// danoni_setting.jsは初回時のみ読込
-			if (_initFlg === true) {
+			if (_initFlg) {
 				clearWindow();
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
