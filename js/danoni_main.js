@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/09/30
+ * Revised : 2019/10/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 8.6.1`;
-const g_revisedDate = `2019/09/30`;
+const g_version = `Ver 8.6.2`;
+const g_revisedDate = `2019/10/01`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4101,14 +4101,14 @@ function createOptionWindow(_sprite) {
 			if (setVal(g_headerObj.lifeDamages[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
 				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
 			}
+		} else {
+			// 設定されたゲージ設定、カーソルに合わせて設定値を更新
+			g_stateObj.lifeMode = g_gaugeOptionObj[`type${g_gaugeType}`][_gaugeNum];
+			g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${g_gaugeType}`][_gaugeNum];
+			g_stateObj.lifeInit = g_gaugeOptionObj[`init${g_gaugeType}`][_gaugeNum];
+			g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${g_gaugeType}`][_gaugeNum];
+			g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${g_gaugeType}`][_gaugeNum];
 		}
-
-		// 設定されたゲージ設定、カーソルに合わせて設定値を更新
-		g_stateObj.lifeMode = g_gaugeOptionObj[`type${g_gaugeType}`][_gaugeNum];
-		g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${g_gaugeType}`][_gaugeNum];
-		g_stateObj.lifeInit = g_gaugeOptionObj[`init${g_gaugeType}`][_gaugeNum];
-		g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${g_gaugeType}`][_gaugeNum];
-		g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${g_gaugeType}`][_gaugeNum];
 
 		// ゲージ設定(Light, Easy)の初期化
 		if (g_stateObj.gauge == `Light` || g_stateObj.gauge == `Easy`) {
