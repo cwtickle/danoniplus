@@ -1903,6 +1903,8 @@ function loadDos(_initFlg) {
 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
+	const divRoot = document.querySelector(`#divRoot`);
+	const lblLoading = document.querySelector(`#lblLoading`);
 
 	if (dosInput === null && externalDosInput === null) {
 		makeWarningWindow(C_MSG_E_0023);
@@ -1933,9 +1935,9 @@ function loadDos(_initFlg) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
 		if (externalDosInput === null) {
 			if (_initFlg) {
-				clearWindow();
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
+					divRoot.removeChild(lblLoading);
 					initAfterDosLoaded();
 				});
 			} else {
@@ -1946,7 +1948,6 @@ function loadDos(_initFlg) {
 
 	// 外部dos読み込み
 	if (externalDosInput !== null) {
-		clearWindow();
 		let charset = document.characterSet;
 		const charsetInput = document.querySelector(`#externalDosCharset`);
 		if (charsetInput !== null) {
@@ -1962,6 +1963,7 @@ function loadDos(_initFlg) {
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
 			if (typeof externalDosInit === `function`) {
+				divRoot.removeChild(lblLoading);
 
 				// 外部データを読込
 				externalDosInit();
@@ -2753,6 +2755,7 @@ function makeWarningWindow(_text) {
 		lblWarning = getTitleDivLabel(`lblWarning`, `<p>${_text}</p>`, 0, 70);
 		lblWarning.style.backgroundColor = `#ffcccc`;
 		lblWarning.style.opacity = 0.9;
+		divRoot.appendChild(lblWarning);
 	} else {
 		lblWarning = document.querySelector(`#lblWarning`);
 		lblWarning.innerHTML += `<p>${_text}</p>`;
@@ -2765,8 +2768,6 @@ function makeWarningWindow(_text) {
 	lblWarning.style.color = `#660000`;
 	lblWarning.style.textAlign = C_ALIGN_LEFT;
 	lblWarning.style.fontFamily = getBasicFont();
-
-	divRoot.appendChild(lblWarning);
 }
 
 /**
@@ -3723,6 +3724,12 @@ function musicAfterLoaded() {
 		g_audio.addEventListener(`canplaythrough`, (_ => function f() {
 			g_audio.removeEventListener(`canplaythrough`, f, false);
 			loadingScoreInit();
+		})(), false);
+
+		// エラー時
+		g_audio.addEventListener(`error`, (_ => function f() {
+			g_audio.removeEventListener(`error`, f, false);
+			makeWarningWindow(C_MSG_E_0041.split(`{0}`).join(g_audio.src));
 		})(), false);
 	}
 }
