@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/10/01
+ * Revised : 2019/10/02
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 8.6.2`;
-const g_revisedDate = `2019/10/01`;
+const g_version = `Ver 8.6.3`;
+const g_revisedDate = `2019/10/02`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -132,6 +132,9 @@ let g_musicdata = ``;
 
 // 外部dosデータ
 let g_externalDos = ``;
+
+// fps(デフォルトは60)
+let g_fps = 60;
 
 // 譜面データの&区切りを有効にするか
 let g_enableAmpersandSplit = true;
@@ -1786,7 +1789,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 					const tmpHeight = escapeHtml(setVal(tmpSpriteData[7], ``, C_TYP_STRING));	// spanタグの場合は color(文字列可)
 					const tmpOpacity = setVal(tmpSpriteData[8], 1, C_TYP_FLOAT);
 					const tmpAnimationName = escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING));
-					const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / 60;
+					const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / g_fps;
 
 					if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
 						maxDepth = tmpDepth;
@@ -1903,6 +1906,7 @@ function loadDos(_initFlg) {
 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
+	const divRoot = document.querySelector(`#divRoot`);
 
 	if (dosInput === null && externalDosInput === null) {
 		makeWarningWindow(C_MSG_E_0023);
@@ -1933,9 +1937,11 @@ function loadDos(_initFlg) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
 		if (externalDosInput === null) {
 			if (_initFlg) {
-				clearWindow();
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
+					if (document.querySelector(`#lblLoading`) !== null) {
+						divRoot.removeChild(document.querySelector(`#lblLoading`));
+					}
 					initAfterDosLoaded();
 				});
 			} else {
@@ -1946,7 +1952,6 @@ function loadDos(_initFlg) {
 
 	// 外部dos読み込み
 	if (externalDosInput !== null) {
-		clearWindow();
 		let charset = document.characterSet;
 		const charsetInput = document.querySelector(`#externalDosCharset`);
 		if (charsetInput !== null) {
@@ -1962,6 +1967,9 @@ function loadDos(_initFlg) {
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
 			if (typeof externalDosInit === `function`) {
+				if (document.querySelector(`#lblLoading`) !== null) {
+					divRoot.removeChild(document.querySelector(`#lblLoading`));
+				}
 
 				// 外部データを読込
 				externalDosInit();
@@ -2706,15 +2714,15 @@ function titleInit() {
 		}
 
 		thisTime = performance.now();
-		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / 60;
+		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / g_fps;
 
 		g_scoreObj.titleFrameNum++;
 		g_scoreObj.backTitleFrameNum++;
 		g_scoreObj.maskTitleFrameNum++;
-		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60 - buffTime);
+		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps - buffTime);
 	}
 
-	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / 60);
+	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
@@ -2753,6 +2761,7 @@ function makeWarningWindow(_text) {
 		lblWarning = getTitleDivLabel(`lblWarning`, `<p>${_text}</p>`, 0, 70);
 		lblWarning.style.backgroundColor = `#ffcccc`;
 		lblWarning.style.opacity = 0.9;
+		divRoot.appendChild(lblWarning);
 	} else {
 		lblWarning = document.querySelector(`#lblWarning`);
 		lblWarning.innerHTML += `<p>${_text}</p>`;
@@ -2765,8 +2774,6 @@ function makeWarningWindow(_text) {
 	lblWarning.style.color = `#660000`;
 	lblWarning.style.textAlign = C_ALIGN_LEFT;
 	lblWarning.style.fontFamily = getBasicFont();
-
-	divRoot.appendChild(lblWarning);
 }
 
 /**
@@ -3723,6 +3730,12 @@ function musicAfterLoaded() {
 		g_audio.addEventListener(`canplaythrough`, (_ => function f() {
 			g_audio.removeEventListener(`canplaythrough`, f, false);
 			loadingScoreInit();
+		})(), false);
+
+		// エラー時
+		g_audio.addEventListener(`error`, (_ => function f() {
+			g_audio.removeEventListener(`error`, f, false);
+			makeWarningWindow(C_MSG_E_0041.split(`{0}`).join(g_audio.src));
 		})(), false);
 	}
 }
@@ -7092,7 +7105,7 @@ function MainInit() {
 	g_inputKeyBuffer = [];
 
 	// 終了時間の設定
-	let duration = g_audio.duration * 60;
+	let duration = g_audio.duration * g_fps;
 	g_scoreObj.fadeOutFrame = Infinity;
 	g_scoreObj.fadeOutTerm = C_FRM_AFTERFADE;
 
@@ -7137,8 +7150,8 @@ function MainInit() {
 	g_scoreObj.nominalFrameNum = g_scoreObj.frameNum - nominalDiff;
 	const nominalFullFrame = fullFrame - nominalDiff;
 
-	const fullMin = Math.floor(nominalFullFrame / 3600);
-	const fullSec = `00${Math.floor(Math.floor(nominalFullFrame / 60) % 60)}`.slice(-2);
+	const fullMin = Math.floor(nominalFullFrame / 60 / g_fps);
+	const fullSec = `00${Math.floor(Math.floor(nominalFullFrame / g_fps) % 60)}`.slice(-2);
 	const fullTime = `${fullMin}:${fullSec}`;
 
 	// フレーム数
@@ -7706,7 +7719,7 @@ function MainInit() {
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			stepRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
-			stepRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / 60}s`;
+			stepRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
 		}
 
 		// 内側塗りつぶし矢印は、下記の順で作成する。
@@ -7782,7 +7795,7 @@ function MainInit() {
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
-			frzRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / 60}s`;
+			frzRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
 		}
 
 		// フリーズアローは、下記の順で作成する。
@@ -7928,7 +7941,7 @@ function MainInit() {
 
 		if (g_scoreObj.frameNum === musicStartFrame) {
 			musicStartFlg = true;
-			g_audio.currentTime = firstFrame / 60 * g_headerObj.playbackRate;
+			g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
 			g_audio.playbackRate = g_headerObj.playbackRate;
 			g_audio.play();
 			musicStartTime = performance.now();
@@ -8105,7 +8118,7 @@ function MainInit() {
 						}
 
 						g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
-						g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
+						g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / g_fps}s`;
 						g_wordSprite.style.animationTimingFunction = `linear`;
 						g_wordSprite.style.animationFillMode = `forwards`;
 
@@ -8122,7 +8135,7 @@ function MainInit() {
 						}
 
 						g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
-						g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / 60}s`;
+						g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / g_fps}s`;
 						g_wordSprite.style.animationTimingFunction = `linear`;
 						g_wordSprite.style.animationFillMode = `forwards`;
 
@@ -8184,17 +8197,17 @@ function MainInit() {
 		thisTime = performance.now();
 		buffTime = 0;
 		if (g_scoreObj.frameNum >= musicStartFrame) {
-			buffTime = (thisTime - musicStartTime - (g_scoreObj.frameNum - musicStartFrame) * 1000 / 60);
+			buffTime = (thisTime - musicStartTime - (g_scoreObj.frameNum - musicStartFrame) * 1000 / g_fps);
 		}
 		g_scoreObj.frameNum++;
 		g_scoreObj.nominalFrameNum++;
-		g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60 - buffTime);
+		g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps - buffTime);
 
 		// タイマー
-		if (g_scoreObj.nominalFrameNum % 60 === 0) {
+		if (g_scoreObj.nominalFrameNum % g_fps === 0) {
 			if (g_scoreObj.nominalFrameNum >= 0) {
-				const currentMin = Math.floor(g_scoreObj.nominalFrameNum / 3600);
-				const currentSec = `00${(g_scoreObj.nominalFrameNum / 60) % 60}`.slice(-2);
+				const currentMin = Math.floor(g_scoreObj.nominalFrameNum / 60 / g_fps);
+				const currentSec = `00${(g_scoreObj.nominalFrameNum / g_fps) % 60}`.slice(-2);
 				lblTime1.innerHTML = `${currentMin}:${currentSec}`;
 			}
 		}
@@ -8224,7 +8237,7 @@ function MainInit() {
 			}
 		}
 	}
-	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / 60);
+	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps);
 }
 
 /**
@@ -9296,15 +9309,15 @@ function resultInit() {
 		}
 
 		thisTime = performance.now();
-		buffTime = thisTime - resultStartTime - g_scoreObj.resultFrameNum * 1000 / 60;
+		buffTime = thisTime - resultStartTime - g_scoreObj.resultFrameNum * 1000 / g_fps;
 
 		g_scoreObj.resultFrameNum++;
 		g_scoreObj.backResultFrameNum++;
 		g_scoreObj.maskResultFrameNum++;
-		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60 - buffTime);
+		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps - buffTime);
 	}
 
-	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / 60);
+	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
