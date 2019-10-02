@@ -1904,7 +1904,6 @@ function loadDos(_initFlg) {
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
 	const divRoot = document.querySelector(`#divRoot`);
-	const lblLoading = document.querySelector(`#lblLoading`);
 
 	if (dosInput === null && externalDosInput === null) {
 		makeWarningWindow(C_MSG_E_0023);
@@ -1937,7 +1936,9 @@ function loadDos(_initFlg) {
 			if (_initFlg) {
 				const randTime = new Date().getTime();
 				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
-					divRoot.removeChild(lblLoading);
+					if (document.querySelector(`#lblLoading`) !== null) {
+						divRoot.removeChild(document.querySelector(`#lblLoading`));
+					}
 					initAfterDosLoaded();
 				});
 			} else {
@@ -1963,7 +1964,9 @@ function loadDos(_initFlg) {
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
 			if (typeof externalDosInit === `function`) {
-				divRoot.removeChild(lblLoading);
+				if (document.querySelector(`#lblLoading`) !== null) {
+					divRoot.removeChild(document.querySelector(`#lblLoading`));
+				}
 
 				// 外部データを読込
 				externalDosInit();
