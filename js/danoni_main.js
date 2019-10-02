@@ -1001,46 +1001,9 @@ const C_MSG_E_0103 = `新しいキー:{0}の[stepRtn]が未定義です。(E-010
 const C_MSG_E_0104 = `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
 	|keyCtrl{0}=75,79,76,80,187,32/0|`;
 
-// ローカルストレージ設定
-const g_checkStorage = localStorage.getItem(location.href);
+// ローカルストレージ設定 (作品別)
 let g_localStorage;
-if (g_checkStorage) {
-	g_localStorage = JSON.parse(g_checkStorage);
-
-	// Adjustment初期値設定
-	if (g_localStorage.adjustment !== undefined) {
-		g_stateObj.adjustment = setVal(g_localStorage.adjustment, 0, C_TYP_NUMBER);
-		g_adjustmentNum = g_adjustments.findIndex(adjustment => adjustment === g_stateObj.adjustment);
-		if (g_volumeNum < 0) {
-			g_volumeNum = C_MAX_ADJUSTMENT;
-		}
-	} else {
-		g_localStorage.adjustment = 0;
-	}
-
-	// Volume初期値設定
-	if (g_localStorage.volume !== undefined) {
-		g_stateObj.volume = setVal(g_localStorage.volume, 100, C_TYP_NUMBER);
-		g_volumeNum = g_volumes.findIndex(volume => volume === g_stateObj.volume);
-		if (g_volumeNum < 0) {
-			g_volumeNum = 0;
-		}
-	} else {
-		g_localStorage.volume = 100;
-	}
-
-	// ハイスコア取得準備
-	if (g_localStorage.highscores === undefined) {
-		g_localStorage.highscores = {};
-	}
-
-} else {
-	g_localStorage = {
-		adjustment: 0,
-		volume: 100,
-		highscores: {},
-	};
-}
+let g_localStorageURL;
 
 // ローカルストレージ設定 (ドメイン・キー別)
 let g_checkKeyStorage;
@@ -1894,8 +1857,60 @@ function initialControl() {
 		g_enableDecodeURI = setVal(decodeUriInput.value, false, C_TYP_BOOLEAN);
 	}
 
+	// 作品別ローカルストレージの読み込み
+	loadLocalStorage();
+
 	// 譜面データの読み込み
 	loadDos(true);
+}
+
+/**
+ * 作品別ローカルストレージの読み込み・初期設定
+ */
+function loadLocalStorage() {
+	// URLからscoreIdを削除
+	const url = new URL(location.href);
+	url.searchParams.delete('scoreId');
+	g_localStorageURL = url.toString();
+
+	const checkStorage = localStorage.getItem(g_localStorageURL);
+	if (checkStorage) {
+		g_localStorage = JSON.parse(checkStorage);
+
+		// Adjustment初期値設定
+		if (g_localStorage.adjustment !== undefined) {
+			g_stateObj.adjustment = setVal(g_localStorage.adjustment, 0, C_TYP_NUMBER);
+			g_adjustmentNum = g_adjustments.findIndex(adjustment => adjustment === g_stateObj.adjustment);
+			if (g_volumeNum < 0) {
+				g_volumeNum = C_MAX_ADJUSTMENT;
+			}
+		} else {
+			g_localStorage.adjustment = 0;
+		}
+
+		// Volume初期値設定
+		if (g_localStorage.volume !== undefined) {
+			g_stateObj.volume = setVal(g_localStorage.volume, 100, C_TYP_NUMBER);
+			g_volumeNum = g_volumes.findIndex(volume => volume === g_stateObj.volume);
+			if (g_volumeNum < 0) {
+				g_volumeNum = 0;
+			}
+		} else {
+			g_localStorage.volume = 100;
+		}
+
+		// ハイスコア取得準備
+		if (g_localStorage.highscores === undefined) {
+			g_localStorage.highscores = {};
+		}
+
+	} else {
+		g_localStorage = {
+			adjustment: 0,
+			volume: 100,
+			highscores: {},
+		};
+	}
 }
 
 /**
@@ -2596,7 +2611,7 @@ function titleInit() {
 				volume: 100,
 				highscores: {},
 			};
-			localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+			localStorage.setItem(g_localStorageURL, JSON.stringify(g_localStorage));
 			location.reload(true);
 		}
 	});
@@ -6942,7 +6957,7 @@ function getArrowSettings() {
 				g_keyObj[`keyCtrl${keyCtrlPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}d`]));
 			}
 		}
-		localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+		localStorage.setItem(g_localStorageURL, JSON.stringify(g_localStorage));
 	}
 }
 
@@ -9040,7 +9055,7 @@ function resultInit() {
 				g_localStorage.highscores[scoreName].fmaxCombo = g_resultObj.fmaxCombo;
 				g_localStorage.highscores[scoreName].score = g_resultObj.score;
 
-				localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+				localStorage.setItem(g_localStorageURL, JSON.stringify(g_localStorage));
 			}
 		} else {
 			iiDf = g_resultObj.ii;
@@ -9067,7 +9082,7 @@ function resultInit() {
 				g_localStorage.highscores[scoreName].fmaxCombo = g_resultObj.fmaxCombo;
 				g_localStorage.highscores[scoreName].score = g_resultObj.score;
 
-				localStorage.setItem(location.href, JSON.stringify(g_localStorage));
+				localStorage.setItem(g_localStorageURL, JSON.stringify(g_localStorage));
 			}
 		}
 
