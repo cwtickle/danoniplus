@@ -1003,7 +1003,7 @@ const C_MSG_E_0104 = `新しいキー:{0}の[keyCtrl]が未定義です。(E-010
 
 // ローカルストレージ設定 (作品別)
 let g_localStorage;
-let g_localStorageURL;
+let g_localStorageUrl;
 
 // ローカルストレージ設定 (ドメイン・キー別)
 let g_checkKeyStorage;
@@ -1871,9 +1871,9 @@ function loadLocalStorage() {
 	// URLからscoreIdを削除
 	const url = new URL(location.href);
 	url.searchParams.delete('scoreId');
-	g_localStorageURL = url.toString();
+	g_localStorageUrl = url.toString();
 
-	const checkStorage = localStorage.getItem(g_localStorageURL);
+	const checkStorage = localStorage.getItem(g_localStorageUrl);
 	if (checkStorage) {
 		g_localStorage = JSON.parse(checkStorage);
 
@@ -2611,7 +2611,7 @@ function titleInit() {
 				volume: 100,
 				highscores: {},
 			};
-			localStorage.setItem(g_localStorageURL, JSON.stringify(g_localStorage));
+			localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 			location.reload(true);
 		}
 	});
@@ -6957,7 +6957,7 @@ function getArrowSettings() {
 				g_keyObj[`keyCtrl${keyCtrlPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}d`]));
 			}
 		}
-		localStorage.setItem(g_localStorageURL, JSON.stringify(g_localStorage));
+		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 	}
 }
 
@@ -9055,7 +9055,7 @@ function resultInit() {
 				g_localStorage.highscores[scoreName].fmaxCombo = g_resultObj.fmaxCombo;
 				g_localStorage.highscores[scoreName].score = g_resultObj.score;
 
-				localStorage.setItem(g_localStorageURL, JSON.stringify(g_localStorage));
+				localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 			}
 		} else {
 			iiDf = g_resultObj.ii;
@@ -9082,7 +9082,7 @@ function resultInit() {
 				g_localStorage.highscores[scoreName].fmaxCombo = g_resultObj.fmaxCombo;
 				g_localStorage.highscores[scoreName].score = g_resultObj.score;
 
-				localStorage.setItem(g_localStorageURL, JSON.stringify(g_localStorage));
+				localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 			}
 		}
 
@@ -9149,7 +9149,7 @@ function resultInit() {
 		${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}/
 		${g_resultObj.kita}-${g_resultObj.iknai}/
 		${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo} 
-		${location.href}`.replace(/[\t\n]/g, ``);
+		${g_localStorageUrl}`.replace(/[\t\n]/g, ``);
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetResultTmp)}`;
 
 
