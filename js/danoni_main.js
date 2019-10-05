@@ -8219,13 +8219,14 @@ function MainInit() {
 		g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps - buffTime);
 
 		// タイマー
-		if (g_scoreObj.nominalFrameNum % g_fps === 0) {
+		if (Math.floor(g_scoreObj.nominalFrameNum % g_fps) === 0) {
 			if (g_scoreObj.nominalFrameNum >= 0) {
 				const currentMin = Math.floor(g_scoreObj.nominalFrameNum / 60 / g_fps);
-				const currentSec = `00${(g_scoreObj.nominalFrameNum / g_fps) % 60}`.slice(-2);
+				const currentSec = `00${Math.floor(g_scoreObj.nominalFrameNum / g_fps) % 60}`.slice(-2);
 				lblTime1.innerHTML = `${currentMin}:${currentSec}`;
 			}
 		}
+
 		// 曲終了判定
 		if (g_scoreObj.frameNum >= fullFrame) {
 			if (g_scoreObj.fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
