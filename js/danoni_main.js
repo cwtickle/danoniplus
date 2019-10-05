@@ -362,7 +362,8 @@ const g_stateObj = {
 	d_speed: C_FLG_ON,
 	d_arroweffect: C_FLG_ON,
 	d_lyrics: C_FLG_ON,
-	d_background: C_FLG_ON
+	d_background: C_FLG_ON,
+	appearance: `Visible`,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -400,6 +401,9 @@ let g_adjustmentNum = C_MAX_ADJUSTMENT;
 
 let g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
 let g_volumeNum = g_volumes.length - 1;
+
+let g_appearances = [`Visible`, `Hidden`, `Sudden`];
+let g_appearanceNum = 0;
 
 // サイズ(後で指定)
 let g_sWidth;
@@ -3278,6 +3282,9 @@ function headerConvert(_dosObj) {
 	// Gauge
 	obj.gaugeUse = setVal(_dosObj.gaugeUse, setVal(g_presetSettingUse.gauge, true, C_TYP_BOOLEAN), C_TYP_BOOLEAN);
 
+	// Appearance
+	obj.appearanceUse = setVal(_dosObj.appearanceUse, setVal(g_presetSettingUse.appearance, true, C_TYP_BOOLEAN), C_TYP_BOOLEAN);
+
 	// 別キーパターンの使用有無
 	obj.transKeyUse = setVal(_dosObj.transKeyUse, true, C_TYP_BOOLEAN);
 
@@ -4316,22 +4323,6 @@ function createOptionWindow(_sprite) {
 	}
 
 	/**
-	 * 設定メイン・汎用
-	 * @param {number} _scrollNum 
-	 * @param {string} _settingName
-	 * @param {string} _unitName
-	 */
-	function setSetting(_scrollNum, _settingName, _unitName = ``) {
-		if (_scrollNum > 0) {
-			eval(`g_${_settingName}Num = (g_${_settingName}Num === g_${_settingName}s.length - 1 ? 0 : (g_${_settingName}Num + _scrollNum >= g_${_settingName}s.length ? g_${_settingName}s.length - 1 : g_${_settingName}Num + _scrollNum))`);
-		} else if (_scrollNum < 0) {
-			eval(`g_${_settingName}Num = (g_${_settingName}Num === 0 ? g_${_settingName}s.length - 1 : (g_${_settingName}Num + _scrollNum <= 0 ? 0 : g_${_settingName}Num + _scrollNum))`);
-		}
-		eval(`g_stateObj.${_settingName} = g_${_settingName}s[g_${_settingName}Num]`);
-		eval(`document.querySelector('#lnk${_settingName.slice(0, 1).toUpperCase()}${_settingName.slice(1)}').innerHTML = g_stateObj.${_settingName} + _unitName`);
-	}
-
-	/**
 	 * 譜面初期化処理
 	 * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
 	 * - g_canLoadDifInfoFlg は譜面初期化フラグで、初期化したくない場合は対象画面にて false にしておく
@@ -4501,6 +4492,22 @@ function createOptionWindow(_sprite) {
 	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
 	setDifficulty(false);
 	optionsprite.oncontextmenu = _ => false;
+}
+
+/**
+ * 設定メイン・汎用
+ * @param {number} _scrollNum 
+ * @param {string} _settingName
+ * @param {string} _unitName
+ */
+function setSetting(_scrollNum, _settingName, _unitName = ``) {
+	if (_scrollNum > 0) {
+		eval(`g_${_settingName}Num = (g_${_settingName}Num === g_${_settingName}s.length - 1 ? 0 : (g_${_settingName}Num + _scrollNum >= g_${_settingName}s.length ? g_${_settingName}s.length - 1 : g_${_settingName}Num + _scrollNum))`);
+	} else if (_scrollNum < 0) {
+		eval(`g_${_settingName}Num = (g_${_settingName}Num === 0 ? g_${_settingName}s.length - 1 : (g_${_settingName}Num + _scrollNum <= 0 ? 0 : g_${_settingName}Num + _scrollNum))`);
+	}
+	eval(`g_stateObj.${_settingName} = g_${_settingName}s[g_${_settingName}Num]`);
+	eval(`document.querySelector('#lnk${_settingName.slice(0, 1).toUpperCase()}${_settingName.slice(1)}').innerHTML = g_stateObj.${_settingName} + _unitName`);
 }
 
 /**
@@ -4768,6 +4775,47 @@ function createSettingsDisplayWindow(_sprite) {
 	makeDisplayButton(`lyrics`, 2, 1);
 	makeDisplayButton(`background`, 3, 1);
 	makeDisplayButton(`arrowEffect`, 4, 1);
+
+	// ---------------------------------------------------
+	// 矢印の見え方 (Appearance)
+	// 縦位置: 6
+	const setNoAppearance = 6;
+	const lblAppearance = createDivLabel(`lblAppearance`, 0, C_LEN_SETLBL_HEIGHT * setNoAppearance,
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
+		`<span style=color:#cc99ff>A</span>ppearance`);
+	optionsprite.appendChild(lblAppearance);
+
+	if (g_headerObj.appearanceUse) {
+		const lnkAppearance = makeSettingLblButton(`lnkAppearance`, g_stateObj.appearance, setNoAppearance, _ => {
+			setSetting(1, `appearance`);
+			switchArrowEffect();
+		});
+		lnkAppearance.oncontextmenu = _ => {
+			setSetting(-1, `appearance`);
+			switchArrowEffect();
+			return false;
+		}
+		optionsprite.appendChild(lnkAppearance);
+
+		// 右回し・左回しボタン
+		optionsprite.appendChild(makeMiniButton(`lnkAppearance`, `R`, setNoAppearance, _ => {
+			setSetting(1, `appearance`);
+			switchArrowEffect();
+		}));
+		optionsprite.appendChild(makeMiniButton(`lnkAppearance`, `L`, setNoAppearance, _ => {
+			setSetting(-1, `appearance`);
+			switchArrowEffect();
+		}));
+	} else {
+		lblAppearance.style.color = `#666666`;
+		optionsprite.appendChild(makeDisabledLabel(`lnkAppearance`, setNoAppearance, g_stateObj.appearance));
+	}
+
+	function switchArrowEffect() {
+		g_stateObj.d_arroweffect = (g_stateObj.appearance !== `Visible` ? C_FLG_OFF : C_FLG_ON);
+		document.querySelector(`#lnkarrowEffect`).style.color = (g_stateObj.appearance !== `Visible` ? `#666666` : `#ffffff`);
+		document.querySelector(`#lnkarrowEffect`).style.borderColor = (g_stateObj.appearance !== `Visible` ? `#000000 #333333` : `#000000 #cccccc`);
+	}
 
 	/**
 	 * Display表示/非表示ボタン
@@ -7732,7 +7780,10 @@ function MainInit() {
 		stepRoot.setAttribute(`boostSpd`, boostSpdDir);
 		mainSprite.appendChild(stepRoot);
 
-		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
+		if (g_stateObj.appearance !== `Visible`) {
+			stepRoot.classList.add(g_stateObj.appearance);
+			stepRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
+		} else if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			stepRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
 			stepRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
 		}
@@ -7808,7 +7859,10 @@ function MainInit() {
 		frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[_j]);
 		mainSprite.appendChild(frzRoot);
 
-		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
+		if (g_stateObj.appearance !== `Visible`) {
+			frzRoot.classList.add(g_stateObj.appearance);
+			frzRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
+		} else if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
 			frzRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
 		}

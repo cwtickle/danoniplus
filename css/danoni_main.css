@@ -330,6 +330,36 @@ input[type=range]:focus {
 	}
 }
 
+@keyframes hiddenArrow {
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 1;
+	}
+	75% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes suddenArrow {
+	0% {
+		opacity: 0;
+	}
+	50% {
+		opacity: 0;
+	}
+	75% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
 /* タイトルデフォルトモーション（HTML側で上書き可能） */
 #lblmusicTitle {
 	animation-duration: 1.5s;
@@ -341,4 +371,10 @@ input[type=range]:focus {
 }
 .toSpin {
 	animation-name: spinY;
+}
+.Hidden {
+	animation-name: hiddenArrow;
+}
+.Sudden {
+	animation-name: suddenArrow;
 }
