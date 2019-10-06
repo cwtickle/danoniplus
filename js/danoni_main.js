@@ -6015,10 +6015,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
  * @param {string} _str 
  */
 function escapeHtml(_str) {
-	let newstr = _str.split(`<`).join(`&lt;`);
+	let newstr = _str.split(`&`).join(`&amp;`);
 	newstr = newstr.split(`>`).join(`&gt;`);
+	newstr = newstr.split(`<`).join(`&lt;`);
 	newstr = newstr.split("`").join(`&quot;`);
-	newstr = newstr.split(`&`).join(`&amp;`);
 
 	return newstr;
 }
