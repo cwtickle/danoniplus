@@ -4788,11 +4788,11 @@ function createSettingsDisplayWindow(_sprite) {
 	if (g_headerObj.appearanceUse) {
 		const lnkAppearance = makeSettingLblButton(`lnkAppearance`, g_stateObj.appearance, setNoAppearance, _ => {
 			setSetting(1, `appearance`);
-			switchArrowEffect();
+			//switchArrowEffect();
 		});
 		lnkAppearance.oncontextmenu = _ => {
 			setSetting(-1, `appearance`);
-			switchArrowEffect();
+			//switchArrowEffect();
 			return false;
 		}
 		optionsprite.appendChild(lnkAppearance);
@@ -4800,22 +4800,24 @@ function createSettingsDisplayWindow(_sprite) {
 		// 右回し・左回しボタン
 		optionsprite.appendChild(makeMiniButton(`lnkAppearance`, `R`, setNoAppearance, _ => {
 			setSetting(1, `appearance`);
-			switchArrowEffect();
+			//switchArrowEffect();
 		}));
 		optionsprite.appendChild(makeMiniButton(`lnkAppearance`, `L`, setNoAppearance, _ => {
 			setSetting(-1, `appearance`);
-			switchArrowEffect();
+			//switchArrowEffect();
 		}));
 	} else {
 		lblAppearance.style.color = `#666666`;
 		optionsprite.appendChild(makeDisabledLabel(`lnkAppearance`, setNoAppearance, g_stateObj.appearance));
 	}
 
+	/*
 	function switchArrowEffect() {
 		g_stateObj.d_arroweffect = (g_stateObj.appearance !== `Visible` ? C_FLG_OFF : C_FLG_ON);
 		document.querySelector(`#lnkarrowEffect`).style.color = (g_stateObj.appearance !== `Visible` ? `#666666` : `#ffffff`);
 		document.querySelector(`#lnkarrowEffect`).style.borderColor = (g_stateObj.appearance !== `Visible` ? `#000000 #333333` : `#000000 #cccccc`);
 	}
+	*/
 
 	/**
 	 * Display表示/非表示ボタン
@@ -7780,10 +7782,7 @@ function MainInit() {
 		stepRoot.setAttribute(`boostSpd`, boostSpdDir);
 		mainSprite.appendChild(stepRoot);
 
-		if (g_stateObj.appearance !== `Visible`) {
-			stepRoot.classList.add(g_stateObj.appearance);
-			stepRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
-		} else if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
+		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			stepRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
 			stepRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
 		}
@@ -7859,10 +7858,7 @@ function MainInit() {
 		frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[_j]);
 		mainSprite.appendChild(frzRoot);
 
-		if (g_stateObj.appearance !== `Visible`) {
-			frzRoot.classList.add(g_stateObj.appearance);
-			frzRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
-		} else if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
+		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
 			frzRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
 		}
