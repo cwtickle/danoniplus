@@ -8987,6 +8987,9 @@ function resultInit() {
 	if (g_stateObj.reverse !== C_FLG_OFF) {
 		playStyleData += `, Reverse`;
 	}
+	if (g_stateObj.appearance !== `Visible`) {
+		playStyleData += `, ${g_stateObj.appearance}`;
+	}
 	if (g_stateObj.gauge !== `Original` && g_stateObj.gauge !== `Normal`) {
 		playStyleData += `, ${g_stateObj.gauge}`;
 	}
