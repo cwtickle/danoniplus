@@ -7070,18 +7070,6 @@ function MainInit() {
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createSprite(`divRoot`, `mainSprite`, 0, 0, g_sWidth, g_sHeight);
-	const arrowSprite = [
-		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_sWidth, g_sHeight),
-		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_sWidth, g_sHeight)
-	];
-
-	if (g_stateObj.appearance === `Sudden`) {
-		arrowSprite[0].style.clipPath = `inset(0% 0% 50% 0%)`;
-		arrowSprite[1].style.clipPath = `inset(50% 0% 0% 0%)`;
-	} else if (g_stateObj.appearance === `Hidden`) {
-		arrowSprite[0].style.clipPath = `inset(50% 0% 0% 0%)`;
-		arrowSprite[1].style.clipPath = `inset(0% 0% 50% 0%)`;
-	}
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createSprite(`divRoot`, `infoSprite`, 0, 0, g_sWidth, g_sHeight);
@@ -7143,6 +7131,21 @@ function MainInit() {
 		if (g_stateObj.d_stepzone === C_FLG_OFF) {
 			step.style.display = C_DIS_NONE;
 		}
+	}
+
+	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
+	const arrowSprite = [
+		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_sWidth, g_sHeight),
+		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_sWidth, g_sHeight)
+	];
+
+	// Hidden, Sudden時は一部描画を隠す
+	if (g_stateObj.appearance === `Sudden`) {
+		arrowSprite[0].style.clipPath = `inset(0% 0% 40% 0%)`;
+		arrowSprite[1].style.clipPath = `inset(40% 0% 0% 0%)`;
+	} else if (g_stateObj.appearance === `Hidden`) {
+		arrowSprite[0].style.clipPath = `inset(50% 0% 0% 0%)`;
+		arrowSprite[1].style.clipPath = `inset(0% 0% 50% 0%)`;
 	}
 
 	// 矢印・フリーズアロー・速度変化 移動/判定/変化対象の初期化
