@@ -7578,19 +7578,19 @@ function MainInit() {
 	const judgeObjDelete = {
 		arrow: (_j, _deleteObj) => {
 			g_workObj.judgArrowCnt[_j]++;
-			arrowSprite[g_workObj.dividePos[_j]].removeChild(_deleteObj);
+			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
 		},
 		dummyArrow: (_j, _deleteObj) => {
 			g_workObj.judgDummyArrowCnt[_j]++;
-			arrowSprite[g_workObj.dividePos[_j]].removeChild(_deleteObj);
+			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
 		},
 		frz: (_j, _deleteObj) => {
 			g_workObj.judgFrzCnt[_j]++;
-			arrowSprite[g_workObj.dividePos[_j]].removeChild(_deleteObj);
+			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
 		},
 		dummyFrz: (_j, _deleteObj) => {
 			g_workObj.judgDummyFrzCnt[_j]++;
-			arrowSprite[g_workObj.dividePos[_j]].removeChild(_deleteObj);
+			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
 		},
 	};
 
@@ -7796,6 +7796,7 @@ function MainInit() {
 		stepRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 		stepRoot.setAttribute(`judgEndFlg`, `false`);
 		stepRoot.setAttribute(`boostSpd`, boostSpdDir);
+		stepRoot.setAttribute(`dividePos`, dividePos);
 		arrowSprite[dividePos].appendChild(stepRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
@@ -7885,7 +7886,7 @@ function MainInit() {
 
 		// フリーズアロー帯(frzBar)
 		frzRoot.appendChild(createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
-			5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[_j],
+			5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
 			C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, 0, `frzBar`));
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
@@ -8464,6 +8465,7 @@ function changeHitFrz(_j, _k, _name) {
 	const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
 	const frzBtm = document.querySelector(`#${_name}Btm${_j}_${_k}`);
 	const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
+	const dividePos = Number(frzRoot.getAttribute(`dividePos`));
 
 	if (_name === `frz`) {
 		frzBar.style.backgroundColor = g_workObj.frzHitBarColors[_j];
@@ -8476,7 +8478,7 @@ function changeHitFrz(_j, _k, _name) {
 	frzRoot.style.top = document.querySelector(`#step${_j}`).style.top;
 	frzBtm.style.top = `${parseFloat(frzBtm.style.top) - delFrzLength}px`;
 	frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - delFrzLength}px`;
-	frzBar.style.top = `${parseFloat(frzBar.style.top) - delFrzLength * g_workObj.dividePos[_j]}px`;
+	frzBar.style.top = `${parseFloat(frzBar.style.top) - delFrzLength * dividePos}px`;
 	frzBar.style.height = `${parseFloat(frzBar.style.height) - delFrzLength * g_workObj.scrollDir[_j]}px`;
 
 	frzRoot.setAttribute(`isMoving`, `false`);
@@ -8519,10 +8521,11 @@ function judgeArrow(_j) {
 	if (!g_judgObj.lockFlgs[_j]) {
 		g_judgObj.lockFlgs[_j] = true;
 
-		const arrowSprite = document.querySelector(`#arrowSprite${g_workObj.dividePos[_j]}`);
 		const currentNo = g_workObj.judgArrowCnt[_j];
 		const stepDivHit = document.querySelector(`#stepHit${_j}`);
 		const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
+		const dividePos = Number(judgArrow.getAttribute(`dividePos`));
+		const arrowSprite = document.querySelector(`#arrowSprite${dividePos}`);
 
 		const fcurrentNo = g_workObj.judgFrzCnt[_j];
 
