@@ -7070,6 +7070,18 @@ function MainInit() {
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createSprite(`divRoot`, `mainSprite`, 0, 0, g_sWidth, g_sHeight);
+	const arrowSprite = [
+		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_sWidth, g_sHeight),
+		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_sWidth, g_sHeight)
+	];
+
+	if (g_stateObj.appearance === `Sudden`) {
+		arrowSprite[0].style.clipPath = `inset(0% 0% 50% 0%)`;
+		arrowSprite[1].style.clipPath = `inset(50% 0% 0% 0%)`;
+	} else if (g_stateObj.appearance === `Hidden`) {
+		arrowSprite[0].style.clipPath = `inset(50% 0% 0% 0%)`;
+		arrowSprite[1].style.clipPath = `inset(0% 0% 50% 0%)`;
+	}
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createSprite(`divRoot`, `infoSprite`, 0, 0, g_sWidth, g_sHeight);
@@ -7563,25 +7575,25 @@ function MainInit() {
 	const judgeObjDelete = {
 		arrow: (_j, _deleteObj) => {
 			g_workObj.judgArrowCnt[_j]++;
-			mainSprite.removeChild(_deleteObj);
+			arrowSprite[g_workObj.dividePos[_j]].removeChild(_deleteObj);
 		},
 		dummyArrow: (_j, _deleteObj) => {
 			g_workObj.judgDummyArrowCnt[_j]++;
-			mainSprite.removeChild(_deleteObj);
+			arrowSprite[g_workObj.dividePos[_j]].removeChild(_deleteObj);
 		},
 		frz: (_j, _deleteObj) => {
 			g_workObj.judgFrzCnt[_j]++;
-			mainSprite.removeChild(_deleteObj);
+			arrowSprite[g_workObj.dividePos[_j]].removeChild(_deleteObj);
 		},
 		dummyFrz: (_j, _deleteObj) => {
 			g_workObj.judgDummyFrzCnt[_j]++;
-			mainSprite.removeChild(_deleteObj);
+			arrowSprite[g_workObj.dividePos[_j]].removeChild(_deleteObj);
 		},
 	};
 
 	/**
 	 * 自動判定
-	 * ※MainInit内部で指定必須（mainSprite指定）
+	 * ※MainInit内部で指定必須（arrowSprite指定）
 	 * 
 	 * @param _j 矢印位置
 	 * @param _arrow 矢印(オブジェクト)
@@ -7771,16 +7783,17 @@ function MainInit() {
 	 */
 	function makeArrow(_j, _arrowCnt, _name, _color) {
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
+		const dividePos = g_workObj.dividePos[_j];
 
-		const stepRoot = createSprite(`mainSprite`, `${_name}${_j}_${_arrowCnt}`,
+		const stepRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+			g_stepY + (g_distY - g_stepY - 50) * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 			50, 100);
 		stepRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 		stepRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 		stepRoot.setAttribute(`judgEndFlg`, `false`);
 		stepRoot.setAttribute(`boostSpd`, boostSpdDir);
-		mainSprite.appendChild(stepRoot);
+		arrowSprite[dividePos].appendChild(stepRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			stepRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
@@ -7843,10 +7856,11 @@ function MainInit() {
 		const camelHeader = _name.slice(0, 1).toUpperCase() + _name.slice(1);
 		const frzLength = g_workObj[`mk${camelHeader}Length`][_j][(_arrowCnt - 1) * 2];
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
+		const dividePos = g_workObj.dividePos[_j];
 
-		const frzRoot = createSprite(`mainSprite`, `${_name}${_j}_${_arrowCnt}`,
+		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+			g_stepY + (g_distY - g_stepY - 50) * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 			50, 100 + frzLength);
 		frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 		frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
@@ -7855,8 +7869,8 @@ function MainInit() {
 		frzRoot.setAttribute(`frzBarLength`, frzLength);
 		frzRoot.setAttribute(`frzAttempt`, 0);
 		frzRoot.setAttribute(`boostSpd`, boostSpdDir);
-		frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[_j]);
-		mainSprite.appendChild(frzRoot);
+		frzRoot.setAttribute(`dividePos`, dividePos);
+		arrowSprite[dividePos].appendChild(frzRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
@@ -8502,7 +8516,7 @@ function judgeArrow(_j) {
 	if (!g_judgObj.lockFlgs[_j]) {
 		g_judgObj.lockFlgs[_j] = true;
 
-		const mainSprite = document.querySelector(`#mainSprite`);
+		const arrowSprite = document.querySelector(`#arrowSprite${g_workObj.dividePos[_j]}`);
 		const currentNo = g_workObj.judgArrowCnt[_j];
 		const stepDivHit = document.querySelector(`#stepHit${_j}`);
 		const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
@@ -8532,7 +8546,7 @@ function judgeArrow(_j) {
 				}
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
-				mainSprite.removeChild(judgArrow);
+				arrowSprite.removeChild(judgArrow);
 				g_workObj.judgArrowCnt[_j]++;
 
 				g_judgObj.lockFlgs[_j] = false;
