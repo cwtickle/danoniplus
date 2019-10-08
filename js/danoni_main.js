@@ -402,7 +402,7 @@ let g_adjustmentNum = C_MAX_ADJUSTMENT;
 let g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
 let g_volumeNum = g_volumes.length - 1;
 
-let g_appearances = [`Visible`, `Hidden`, `Sudden`];
+let g_appearances = [`Visible`, `Hidden`, `Sudden`, `Slit`];
 let g_appearanceNum = 0;
 
 // サイズ(後で指定)
