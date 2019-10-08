@@ -55,6 +55,7 @@ const g_presetSettingUse = {
 	shuffle: `true`,
 	autoPlay: `true`,
 	gauge: `true`,
+	appearance: `true`,
 };
 
 // フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
