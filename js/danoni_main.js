@@ -4304,21 +4304,6 @@ function createOptionWindow(_sprite) {
 		setSetting(-1, `volume`, `%`);
 	}));
 
-	// ---------------------------------------------------
-	/**
-	 * 無効化用ラベル作成
-	 * @param {string} _id 
-	 * @param {number} _heightPos 
-	 * @param {string} _defaultStr 
-	 */
-	function makeDisabledLabel(_id, _heightPos, _defaultStr) {
-		const lbl = createDivLabel(_id, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * _heightPos,
-			C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `#666666`,
-			_defaultStr);
-		lbl.style.textAlign = C_ALIGN_CENTER;
-		return lbl;
-	}
-
 	/**
 	 * 譜面初期化処理
 	 * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
@@ -4505,6 +4490,20 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
 	}
 	eval(`g_stateObj.${_settingName} = g_${_settingName}s[g_${_settingName}Num]`);
 	eval(`document.querySelector('#lnk${_settingName.slice(0, 1).toUpperCase()}${_settingName.slice(1)}').innerHTML = g_stateObj.${_settingName} + _unitName`);
+}
+
+/**
+ * 無効化用ラベル作成
+ * @param {string} _id 
+ * @param {number} _heightPos 
+ * @param {string} _defaultStr 
+ */
+function makeDisabledLabel(_id, _heightPos, _defaultStr) {
+	const lbl = createDivLabel(_id, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * _heightPos,
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `#666666`,
+		_defaultStr);
+	lbl.style.textAlign = C_ALIGN_CENTER;
+	return lbl;
 }
 
 /**
