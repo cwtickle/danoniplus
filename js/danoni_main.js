@@ -362,7 +362,8 @@ const g_stateObj = {
 	d_speed: C_FLG_ON,
 	d_arroweffect: C_FLG_ON,
 	d_lyrics: C_FLG_ON,
-	d_background: C_FLG_ON
+	d_background: C_FLG_ON,
+	appearance: `Visible`,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -400,6 +401,9 @@ let g_adjustmentNum = C_MAX_ADJUSTMENT;
 
 let g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
 let g_volumeNum = g_volumes.length - 1;
+
+let g_appearances = [`Visible`, `Hidden`, `Sudden`, `Slit`];
+let g_appearanceNum = 0;
 
 // サイズ(後で指定)
 let g_sWidth;
@@ -1604,9 +1608,6 @@ function clearWindow() {
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
 	const divRoot = document.querySelector(`#divRoot`);
 	while (divRoot.hasChildNodes()) {
-		/*
-		alert(divRoot.firstChild.getAttribute(`lsnrkey`));
-		*/
 		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkey`));
 		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkeyTS`));
 		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkeyTE`));
@@ -3278,6 +3279,9 @@ function headerConvert(_dosObj) {
 	// Gauge
 	obj.gaugeUse = setVal(_dosObj.gaugeUse, setVal(g_presetSettingUse.gauge, true, C_TYP_BOOLEAN), C_TYP_BOOLEAN);
 
+	// Appearance
+	obj.appearanceUse = setVal(_dosObj.appearanceUse, setVal(g_presetSettingUse.appearance, true, C_TYP_BOOLEAN), C_TYP_BOOLEAN);
+
 	// 別キーパターンの使用有無
 	obj.transKeyUse = setVal(_dosObj.transKeyUse, true, C_TYP_BOOLEAN);
 
@@ -4300,37 +4304,6 @@ function createOptionWindow(_sprite) {
 		setSetting(-1, `volume`, `%`);
 	}));
 
-	// ---------------------------------------------------
-	/**
-	 * 無効化用ラベル作成
-	 * @param {string} _id 
-	 * @param {number} _heightPos 
-	 * @param {string} _defaultStr 
-	 */
-	function makeDisabledLabel(_id, _heightPos, _defaultStr) {
-		const lbl = createDivLabel(_id, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * _heightPos,
-			C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `#666666`,
-			_defaultStr);
-		lbl.style.textAlign = C_ALIGN_CENTER;
-		return lbl;
-	}
-
-	/**
-	 * 設定メイン・汎用
-	 * @param {number} _scrollNum 
-	 * @param {string} _settingName
-	 * @param {string} _unitName
-	 */
-	function setSetting(_scrollNum, _settingName, _unitName = ``) {
-		if (_scrollNum > 0) {
-			eval(`g_${_settingName}Num = (g_${_settingName}Num === g_${_settingName}s.length - 1 ? 0 : (g_${_settingName}Num + _scrollNum >= g_${_settingName}s.length ? g_${_settingName}s.length - 1 : g_${_settingName}Num + _scrollNum))`);
-		} else if (_scrollNum < 0) {
-			eval(`g_${_settingName}Num = (g_${_settingName}Num === 0 ? g_${_settingName}s.length - 1 : (g_${_settingName}Num + _scrollNum <= 0 ? 0 : g_${_settingName}Num + _scrollNum))`);
-		}
-		eval(`g_stateObj.${_settingName} = g_${_settingName}s[g_${_settingName}Num]`);
-		eval(`document.querySelector('#lnk${_settingName.slice(0, 1).toUpperCase()}${_settingName.slice(1)}').innerHTML = g_stateObj.${_settingName} + _unitName`);
-	}
-
 	/**
 	 * 譜面初期化処理
 	 * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
@@ -4501,6 +4474,36 @@ function createOptionWindow(_sprite) {
 	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
 	setDifficulty(false);
 	optionsprite.oncontextmenu = _ => false;
+}
+
+/**
+ * 設定メイン・汎用
+ * @param {number} _scrollNum 
+ * @param {string} _settingName
+ * @param {string} _unitName
+ */
+function setSetting(_scrollNum, _settingName, _unitName = ``) {
+	if (_scrollNum > 0) {
+		eval(`g_${_settingName}Num = (g_${_settingName}Num === g_${_settingName}s.length - 1 ? 0 : (g_${_settingName}Num + _scrollNum >= g_${_settingName}s.length ? g_${_settingName}s.length - 1 : g_${_settingName}Num + _scrollNum))`);
+	} else if (_scrollNum < 0) {
+		eval(`g_${_settingName}Num = (g_${_settingName}Num === 0 ? g_${_settingName}s.length - 1 : (g_${_settingName}Num + _scrollNum <= 0 ? 0 : g_${_settingName}Num + _scrollNum))`);
+	}
+	eval(`g_stateObj.${_settingName} = g_${_settingName}s[g_${_settingName}Num]`);
+	eval(`document.querySelector('#lnk${_settingName.slice(0, 1).toUpperCase()}${_settingName.slice(1)}').innerHTML = g_stateObj.${_settingName} + _unitName`);
+}
+
+/**
+ * 無効化用ラベル作成
+ * @param {string} _id 
+ * @param {number} _heightPos 
+ * @param {string} _defaultStr 
+ */
+function makeDisabledLabel(_id, _heightPos, _defaultStr) {
+	const lbl = createDivLabel(_id, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * _heightPos,
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `#666666`,
+		_defaultStr);
+	lbl.style.textAlign = C_ALIGN_CENTER;
+	return lbl;
 }
 
 /**
@@ -4768,6 +4771,37 @@ function createSettingsDisplayWindow(_sprite) {
 	makeDisplayButton(`lyrics`, 2, 1);
 	makeDisplayButton(`background`, 3, 1);
 	makeDisplayButton(`arrowEffect`, 4, 1);
+
+	// ---------------------------------------------------
+	// 矢印の見え方 (Appearance)
+	// 縦位置: 6
+	const setNoAppearance = 6;
+	const lblAppearance = createDivLabel(`lblAppearance`, 0, C_LEN_SETLBL_HEIGHT * setNoAppearance,
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
+		`<span style=color:#cc99ff>A</span>ppearance`);
+	optionsprite.appendChild(lblAppearance);
+
+	if (g_headerObj.appearanceUse) {
+		const lnkAppearance = makeSettingLblButton(`lnkAppearance`, g_stateObj.appearance, setNoAppearance, _ => {
+			setSetting(1, `appearance`);
+		});
+		lnkAppearance.oncontextmenu = _ => {
+			setSetting(-1, `appearance`);
+			return false;
+		}
+		optionsprite.appendChild(lnkAppearance);
+
+		// 右回し・左回しボタン
+		optionsprite.appendChild(makeMiniButton(`lnkAppearance`, `R`, setNoAppearance, _ => {
+			setSetting(1, `appearance`);
+		}));
+		optionsprite.appendChild(makeMiniButton(`lnkAppearance`, `L`, setNoAppearance, _ => {
+			setSetting(-1, `appearance`);
+		}));
+	} else {
+		lblAppearance.style.color = `#666666`;
+		optionsprite.appendChild(makeDisabledLabel(`lnkAppearance`, setNoAppearance, g_stateObj.appearance));
+	}
 
 	/**
 	 * Display表示/非表示ボタン
@@ -7083,6 +7117,18 @@ function MainInit() {
 		}
 	}
 
+	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
+	const arrowSprite = [
+		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_sWidth, g_sHeight),
+		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_sWidth, g_sHeight)
+	];
+
+	// Appearanceのオプション適用時は一部描画を隠す
+	if (g_stateObj.appearance !== `Visible`) {
+		arrowSprite[0].classList.add(`${g_stateObj.appearance}0`);
+		arrowSprite[1].classList.add(`${g_stateObj.appearance}1`);
+	}
+
 	// 矢印・フリーズアロー・速度変化 移動/判定/変化対象の初期化
 	const arrowCnts = [];
 	const frzCnts = [];
@@ -7513,25 +7559,25 @@ function MainInit() {
 	const judgeObjDelete = {
 		arrow: (_j, _deleteObj) => {
 			g_workObj.judgArrowCnt[_j]++;
-			mainSprite.removeChild(_deleteObj);
+			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
 		},
 		dummyArrow: (_j, _deleteObj) => {
 			g_workObj.judgDummyArrowCnt[_j]++;
-			mainSprite.removeChild(_deleteObj);
+			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
 		},
 		frz: (_j, _deleteObj) => {
 			g_workObj.judgFrzCnt[_j]++;
-			mainSprite.removeChild(_deleteObj);
+			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
 		},
 		dummyFrz: (_j, _deleteObj) => {
 			g_workObj.judgDummyFrzCnt[_j]++;
-			mainSprite.removeChild(_deleteObj);
+			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
 		},
 	};
 
 	/**
 	 * 自動判定
-	 * ※MainInit内部で指定必須（mainSprite指定）
+	 * ※MainInit内部で指定必須（arrowSprite指定）
 	 * 
 	 * @param _j 矢印位置
 	 * @param _arrow 矢印(オブジェクト)
@@ -7721,16 +7767,18 @@ function MainInit() {
 	 */
 	function makeArrow(_j, _arrowCnt, _name, _color) {
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
+		const dividePos = g_workObj.dividePos[_j];
 
-		const stepRoot = createSprite(`mainSprite`, `${_name}${_j}_${_arrowCnt}`,
+		const stepRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+			g_stepY + (g_distY - g_stepY - 50) * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 			50, 100);
 		stepRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 		stepRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 		stepRoot.setAttribute(`judgEndFlg`, `false`);
 		stepRoot.setAttribute(`boostSpd`, boostSpdDir);
-		mainSprite.appendChild(stepRoot);
+		stepRoot.setAttribute(`dividePos`, dividePos);
+		arrowSprite[dividePos].appendChild(stepRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			stepRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
@@ -7793,10 +7841,11 @@ function MainInit() {
 		const camelHeader = _name.slice(0, 1).toUpperCase() + _name.slice(1);
 		const frzLength = g_workObj[`mk${camelHeader}Length`][_j][(_arrowCnt - 1) * 2];
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
+		const dividePos = g_workObj.dividePos[_j];
 
-		const frzRoot = createSprite(`mainSprite`, `${_name}${_j}_${_arrowCnt}`,
+		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[_j] + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+			g_stepY + (g_distY - g_stepY - 50) * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 			50, 100 + frzLength);
 		frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 		frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
@@ -7805,8 +7854,8 @@ function MainInit() {
 		frzRoot.setAttribute(`frzBarLength`, frzLength);
 		frzRoot.setAttribute(`frzAttempt`, 0);
 		frzRoot.setAttribute(`boostSpd`, boostSpdDir);
-		frzRoot.setAttribute(`dividePos`, g_workObj.dividePos[_j]);
-		mainSprite.appendChild(frzRoot);
+		frzRoot.setAttribute(`dividePos`, dividePos);
+		arrowSprite[dividePos].appendChild(frzRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
@@ -7818,7 +7867,7 @@ function MainInit() {
 
 		// フリーズアロー帯(frzBar)
 		frzRoot.appendChild(createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
-			5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * g_workObj.dividePos[_j],
+			5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
 			C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, 0, `frzBar`));
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
@@ -8397,6 +8446,7 @@ function changeHitFrz(_j, _k, _name) {
 	const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
 	const frzBtm = document.querySelector(`#${_name}Btm${_j}_${_k}`);
 	const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
+	const dividePos = Number(frzRoot.getAttribute(`dividePos`));
 
 	if (_name === `frz`) {
 		frzBar.style.backgroundColor = g_workObj.frzHitBarColors[_j];
@@ -8409,7 +8459,7 @@ function changeHitFrz(_j, _k, _name) {
 	frzRoot.style.top = document.querySelector(`#step${_j}`).style.top;
 	frzBtm.style.top = `${parseFloat(frzBtm.style.top) - delFrzLength}px`;
 	frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - delFrzLength}px`;
-	frzBar.style.top = `${parseFloat(frzBar.style.top) - delFrzLength * g_workObj.dividePos[_j]}px`;
+	frzBar.style.top = `${parseFloat(frzBar.style.top) - delFrzLength * dividePos}px`;
 	frzBar.style.height = `${parseFloat(frzBar.style.height) - delFrzLength * g_workObj.scrollDir[_j]}px`;
 
 	frzRoot.setAttribute(`isMoving`, `false`);
@@ -8452,7 +8502,6 @@ function judgeArrow(_j) {
 	if (!g_judgObj.lockFlgs[_j]) {
 		g_judgObj.lockFlgs[_j] = true;
 
-		const mainSprite = document.querySelector(`#mainSprite`);
 		const currentNo = g_workObj.judgArrowCnt[_j];
 		const stepDivHit = document.querySelector(`#stepHit${_j}`);
 		const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
@@ -8463,6 +8512,8 @@ function judgeArrow(_j) {
 			const difFrame = Number(judgArrow.getAttribute(`cnt`));
 			const difCnt = Math.abs(judgArrow.getAttribute(`cnt`));
 			const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
+			const dividePos = Number(judgArrow.getAttribute(`dividePos`));
+			const arrowSprite = document.querySelector(`#arrowSprite${dividePos}`);
 
 			if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
 				stepDivHit.style.opacity = 0.75;
@@ -8482,7 +8533,7 @@ function judgeArrow(_j) {
 				}
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
-				mainSprite.removeChild(judgArrow);
+				arrowSprite.removeChild(judgArrow);
 				g_workObj.judgArrowCnt[_j]++;
 
 				g_judgObj.lockFlgs[_j] = false;
@@ -8922,6 +8973,9 @@ function resultInit() {
 	}
 	if (g_stateObj.reverse !== C_FLG_OFF) {
 		playStyleData += `, Reverse`;
+	}
+	if (g_stateObj.appearance !== `Visible`) {
+		playStyleData += `, ${g_stateObj.appearance}`;
 	}
 	if (g_stateObj.gauge !== `Original` && g_stateObj.gauge !== `Normal`) {
 		playStyleData += `, ${g_stateObj.gauge}`;
