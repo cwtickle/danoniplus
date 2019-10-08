@@ -8524,8 +8524,6 @@ function judgeArrow(_j) {
 		const currentNo = g_workObj.judgArrowCnt[_j];
 		const stepDivHit = document.querySelector(`#stepHit${_j}`);
 		const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
-		const dividePos = Number(judgArrow.getAttribute(`dividePos`));
-		const arrowSprite = document.querySelector(`#arrowSprite${dividePos}`);
 
 		const fcurrentNo = g_workObj.judgFrzCnt[_j];
 
@@ -8533,6 +8531,8 @@ function judgeArrow(_j) {
 			const difFrame = Number(judgArrow.getAttribute(`cnt`));
 			const difCnt = Math.abs(judgArrow.getAttribute(`cnt`));
 			const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
+			const dividePos = Number(judgArrow.getAttribute(`dividePos`));
+			const arrowSprite = document.querySelector(`#arrowSprite${dividePos}`);
 
 			if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
 				stepDivHit.style.opacity = 0.75;
