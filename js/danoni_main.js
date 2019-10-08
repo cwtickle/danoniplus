@@ -1608,9 +1608,6 @@ function clearWindow() {
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
 	const divRoot = document.querySelector(`#divRoot`);
 	while (divRoot.hasChildNodes()) {
-		/*
-		alert(divRoot.firstChild.getAttribute(`lsnrkey`));
-		*/
 		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkey`));
 		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkeyTS`));
 		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkeyTE`));
@@ -4788,11 +4785,9 @@ function createSettingsDisplayWindow(_sprite) {
 	if (g_headerObj.appearanceUse) {
 		const lnkAppearance = makeSettingLblButton(`lnkAppearance`, g_stateObj.appearance, setNoAppearance, _ => {
 			setSetting(1, `appearance`);
-			//switchArrowEffect();
 		});
 		lnkAppearance.oncontextmenu = _ => {
 			setSetting(-1, `appearance`);
-			//switchArrowEffect();
 			return false;
 		}
 		optionsprite.appendChild(lnkAppearance);
@@ -4800,24 +4795,14 @@ function createSettingsDisplayWindow(_sprite) {
 		// 右回し・左回しボタン
 		optionsprite.appendChild(makeMiniButton(`lnkAppearance`, `R`, setNoAppearance, _ => {
 			setSetting(1, `appearance`);
-			//switchArrowEffect();
 		}));
 		optionsprite.appendChild(makeMiniButton(`lnkAppearance`, `L`, setNoAppearance, _ => {
 			setSetting(-1, `appearance`);
-			//switchArrowEffect();
 		}));
 	} else {
 		lblAppearance.style.color = `#666666`;
 		optionsprite.appendChild(makeDisabledLabel(`lnkAppearance`, setNoAppearance, g_stateObj.appearance));
 	}
-
-	/*
-	function switchArrowEffect() {
-		g_stateObj.d_arroweffect = (g_stateObj.appearance !== `Visible` ? C_FLG_OFF : C_FLG_ON);
-		document.querySelector(`#lnkarrowEffect`).style.color = (g_stateObj.appearance !== `Visible` ? `#666666` : `#ffffff`);
-		document.querySelector(`#lnkarrowEffect`).style.borderColor = (g_stateObj.appearance !== `Visible` ? `#000000 #333333` : `#000000 #cccccc`);
-	}
-	*/
 
 	/**
 	 * Display表示/非表示ボタン
