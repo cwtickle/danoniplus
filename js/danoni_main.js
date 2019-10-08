@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/10/06
+ * Revised : 2019/10/08
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 7.9.8`;
-const g_revisedDate = `2019/10/06`;
+const g_version = `Ver 7.9.9`;
+const g_revisedDate = `2019/10/08`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7725,11 +7725,11 @@ function MainInit() {
 		}
 
 		// 速度変化 (途中変速, 個別加速)
-		if (g_workObj.speedData !== undefined && g_scoreObj.frameNum === g_workObj.speedData[speedCnts]) {
+		while (g_workObj.speedData !== undefined && g_scoreObj.frameNum >= g_workObj.speedData[speedCnts]) {
 			g_workObj.currentSpeed = g_workObj.speedData[speedCnts + 1];
 			speedCnts += 2;
 		}
-		if (g_workObj.boostData !== undefined && g_scoreObj.frameNum === g_workObj.boostData[boostCnts]) {
+		while (g_workObj.boostData !== undefined && g_scoreObj.frameNum >= g_workObj.boostData[boostCnts]) {
 			g_workObj.boostSpd = g_workObj.boostData[boostCnts + 1];
 			boostCnts += 2;
 		}
