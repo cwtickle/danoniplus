@@ -7139,13 +7139,10 @@ function MainInit() {
 		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_sWidth, g_sHeight)
 	];
 
-	// Hidden, Sudden時は一部描画を隠す
-	if (g_stateObj.appearance === `Sudden`) {
-		arrowSprite[0].style.clipPath = `inset(0% 0% 40% 0%)`;
-		arrowSprite[1].style.clipPath = `inset(40% 0% 0% 0%)`;
-	} else if (g_stateObj.appearance === `Hidden`) {
-		arrowSprite[0].style.clipPath = `inset(50% 0% 0% 0%)`;
-		arrowSprite[1].style.clipPath = `inset(0% 0% 50% 0%)`;
+	// Appearanceのオプション適用時は一部描画を隠す
+	if (g_stateObj.appearance !== `Visible`) {
+		arrowSprite[0].classList.add(`${g_stateObj.appearance}0`);
+		arrowSprite[1].classList.add(`${g_stateObj.appearance}1`);
 	}
 
 	// 矢印・フリーズアロー・速度変化 移動/判定/変化対象の初期化

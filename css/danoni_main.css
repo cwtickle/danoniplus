@@ -342,3 +342,17 @@ input[type=range]:focus {
 .toSpin {
 	animation-name: spinY;
 }
+
+/* Appearance用 クリッピングマスク */
+.Hidden0 {
+	clip-path: inset(50% 0% 0% 0%);
+}
+.Hidden1 {
+	clip-path: inset(0% 0% 50% 0%);
+}
+.Sudden0 {
+	clip-path: inset(0% 0% 40% 0%);
+}
+.Sudden1 {
+	clip-path: inset(40% 0% 0% 0%);
+}
