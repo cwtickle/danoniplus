@@ -5384,11 +5384,6 @@ function loadingScoreInit2() {
 	}
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0, dummyIdHeader);
 
-	// ライフ回復・ダメージ量の計算
-	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
-	if (g_headerObj.frzStartjdgUse) {
-		g_allArrow += g_allFrz / 2;
-	}
 	calcLifeVals(g_allArrow + g_allFrz / 2);
 
 	// 最終フレーム数の取得
@@ -5703,6 +5698,12 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		if (g_stateObj.dummyId !== ``) {
 			obj.dummyFrzData[j] = storeArrowData(_dosObj[`${frzName}${_dummyNo}_data`]);
 		}
+	}
+
+	// ライフ回復・ダメージ量の計算
+	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
+	if (g_headerObj.frzStartjdgUse) {
+		g_allArrow += g_allFrz / 2;
 	}
 
 	/**
