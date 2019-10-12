@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/10/08
+ * Revised : 2019/10/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 6.6.10`;
-const g_revisedDate = `2019/10/08`;
+const g_version = `Ver 6.6.11`;
+const g_revisedDate = `2019/10/12`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4889,11 +4889,6 @@ function loadingScoreInit() {
 	}
 	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0, dummyIdHeader);
 
-	// ライフ回復・ダメージ量の計算
-	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
-	if (g_headerObj.frzStartjdgUse === `true`) {
-		g_allArrow += g_allFrz / 2;
-	}
 	calcLifeVals(g_allArrow + g_allFrz / 2);
 
 	// 最終フレーム数の取得
@@ -5197,6 +5192,12 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		if (g_stateObj.dummyId !== ``) {
 			obj.dummyFrzData[j] = storeArrowData(_dosObj[`${frzName}${_dummyNo}_data`]);
 		}
+	}
+
+	// ライフ回復・ダメージ量の計算
+	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
+	if (g_headerObj.frzStartjdgUse === `true`) {
+		g_allArrow += g_allFrz / 2;
 	}
 
 	/**
