@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 6.6.12`;
+const g_version = `Ver 6.6.13`;
 const g_revisedDate = `2019/10/13`;
 const g_alphaVersion = ``;
 
@@ -6803,9 +6803,9 @@ function MainInit() {
 				const stepDivHit = document.querySelector(`#stepHit${_j}`);
 
 				if (typeof customJudgeDummyArrow === `function`) {
-					customJudgeDummyArrow(difFrame);
+					customJudgeDummyArrow(_cnt);
 					if (typeof customJudgeDummyArrow2 === `function`) {
-						customJudgeDummyArrow2(difFrame);
+						customJudgeDummyArrow2(_cnt);
 					}
 				}
 				stepDivHit.style.opacity = 1;
@@ -6827,9 +6827,9 @@ function MainInit() {
 		// ダミーフリーズアロー(成功時)
 		dummyFrzOK: (_j, _k, _frzRoot, _cnt) => {
 			if (typeof customJudgeDummyFrz === `function`) {
-				customJudgeDummyFrz(difFrame);
+				customJudgeDummyFrz(_cnt);
 				if (typeof customJudgeDummyFrz2 === `function`) {
-					customJudgeDummyFrz2(difFrame);
+					customJudgeDummyFrz2(_cnt);
 				}
 			}
 			_frzRoot.setAttribute(`judgEndFlg`, `true`);
