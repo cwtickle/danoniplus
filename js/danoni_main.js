@@ -3120,8 +3120,8 @@ function headerConvert(_dosObj) {
 	}
 
 	// ダミー譜面の設定
-	if (_dosObj.dummyScoreNo !== undefined) {
-		obj.dummyScoreNos = _dosObj.dummyScoreNo.split(`$`);
+	if (_dosObj.dummyId !== undefined) {
+		obj.dummyScoreNos = _dosObj.dummyId.split(`$`);
 	}
 
 	// 無音のフレーム数
