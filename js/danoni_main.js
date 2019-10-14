@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/10/13
+ * Revised : 2019/10/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 8.7.6`;
-const g_revisedDate = `2019/10/13`;
+const g_version = `Ver 8.7.7`;
+const g_revisedDate = `2019/10/14`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2372,7 +2372,7 @@ function drawMainSpriteData(_frame, _depthName) {
 		} else {
 			if (tmpObj.depth === `ALL`) {
 				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
-					document.querySelector(`#${_depthName}${spriteUpper}Sprite${tmpObj.depth}`).innerHTML = ``;
+					document.querySelector(`#${_depthName}Sprite${j}`).innerHTML = ``;
 				}
 			} else {
 				baseSprite.innerHTML = ``;
