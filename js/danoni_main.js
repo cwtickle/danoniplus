@@ -2373,7 +2373,7 @@ function drawMainSpriteData(_frame, _depthName) {
 		} else {
 			if (tmpObj.depth === `ALL`) {
 				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
-					document.querySelector(`#${_depthName}${spriteUpper}Sprite${tmpObj.depth}`).innerHTML = ``;
+					document.querySelector(`#${_depthName}Sprite${j}`).innerHTML = ``;
 				}
 			} else {
 				baseSprite.innerHTML = ``;
