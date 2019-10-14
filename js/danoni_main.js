@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/10/13
+ * Revised : 2019/10/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.0.3`;
-const g_revisedDate = `2019/10/13`;
+const g_version = `Ver 9.1.0`;
+const g_revisedDate = `2019/10/14`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2373,7 +2373,7 @@ function drawMainSpriteData(_frame, _depthName) {
 		} else {
 			if (tmpObj.depth === `ALL`) {
 				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
-					document.querySelector(`#${_depthName}${spriteUpper}Sprite${tmpObj.depth}`).innerHTML = ``;
+					document.querySelector(`#${_depthName}Sprite${j}`).innerHTML = ``;
 				}
 			} else {
 				baseSprite.innerHTML = ``;
@@ -5851,7 +5851,13 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	 * @param {string} _scoreNo 
 	 */
 	function setCssMotionData(_header, _scoreNo) {
-		const dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`];
+		let dosCssMotionData;
+		if (_dosObj[`${_header}Motion${_scoreNo}_data`] !== undefined) {
+			dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`];
+		} else if (_dosObj[`${_header}Motion_data`] !== undefined) {
+			dosCssMotionData = _dosObj[`${_header}Motion_data`];
+		}
+
 		let cssMotionData = [];
 
 		if (dosCssMotionData !== undefined && dosCssMotionData !== `` && g_stateObj.d_arroweffect === C_FLG_ON) {
@@ -5940,14 +5946,15 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.maskData = [];
 	obj.maskData.length = 0;
 	if (g_stateObj.d_background === C_FLG_ON) {
+		let maskDataList;
 		if (g_stateObj.reverse === C_FLG_ON) {
-			if (_dosObj[`maskRev${_scoreNo}_data`] !== undefined) {
-				[obj.maskData, obj.maskMaxDepth] = makeSpriteData(_dosObj[`maskRev${_scoreNo}_data`], calcFrame);
-			} else if (_dosObj[`mask${_scoreNo}_data`] !== undefined) {
-				[obj.maskData, obj.maskMaxDepth] = makeSpriteData(_dosObj[`mask${_scoreNo}_data`], calcFrame);
-			}
-		} else if (_dosObj[`mask${_scoreNo}_data`] !== undefined) {
-			[obj.maskData, obj.maskMaxDepth] = makeSpriteData(_dosObj[`mask${_scoreNo}_data`], calcFrame);
+			maskDataList = [_dosObj[`maskRev${_scoreNo}_data`], _dosObj.maskRev_data, _dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
+		} else {
+			maskDataList = [_dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
+		}
+		const maskData = maskDataList.find((v) => v !== undefined);
+		if (maskData !== undefined) {
+			[obj.maskData, obj.maskMaxDepth] = makeSpriteData(maskData, calcFrame);
 		}
 	}
 
@@ -5956,14 +5963,15 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.backData = [];
 	obj.backData.length = 0;
 	if (g_stateObj.d_background === C_FLG_ON) {
+		let backDataList;
 		if (g_stateObj.reverse === C_FLG_ON) {
-			if (_dosObj[`backRev${_scoreNo}_data`] !== undefined) {
-				[obj.backData, obj.backMaxDepth] = makeSpriteData(_dosObj[`backRev${_scoreNo}_data`], calcFrame);
-			} else if (_dosObj[`back${_scoreNo}_data`] !== undefined) {
-				[obj.backData, obj.backMaxDepth] = makeSpriteData(_dosObj[`back${_scoreNo}_data`], calcFrame);
-			}
-		} else if (_dosObj[`back${_scoreNo}_data`] !== undefined) {
-			[obj.backData, obj.backMaxDepth] = makeSpriteData(_dosObj[`back${_scoreNo}_data`], calcFrame);
+			backDataList = [_dosObj[`backRev${_scoreNo}_data`], _dosObj.backRev_data, _dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
+		} else {
+			backDataList = [_dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
+		}
+		const backData = backDataList.find((v) => v !== undefined);
+		if (backData !== undefined) {
+			[obj.backData, obj.backMaxDepth] = makeSpriteData(backData, calcFrame);
 		}
 	}
 
