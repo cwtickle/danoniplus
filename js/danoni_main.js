@@ -7859,9 +7859,10 @@ function MainInit() {
 		// 後に作成するほど前面に表示される。
 
 		// フリーズアロー帯(frzBar)
-		frzRoot.appendChild(createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
+		const frzBar = frzRoot.appendChild(createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
 			5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
 			C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, 0, `frzBar`));
+		frzBar.style.opacity = 0.75;
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
 		frzRoot.appendChild(createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, `#000000`,
@@ -8426,7 +8427,7 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
  */
 function changeHitFrz(_j, _k, _name) {
 
-	document.querySelector(`#frzHit${_j}`).style.opacity = 1;
+	document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
 	document.querySelector(`#${_name}Top${_j}_${_k}`).style.opacity = 0;
 
 	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
@@ -8448,7 +8449,6 @@ function changeHitFrz(_j, _k, _name) {
 	frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - delFrzLength}px`;
 	frzBar.style.top = `${parseFloat(frzBar.style.top) - delFrzLength * dividePos}px`;
 	frzBar.style.height = `${parseFloat(frzBar.style.height) - delFrzLength * g_workObj.scrollDir[_j]}px`;
-	frzBar.style.opacity = 0.75;
 
 	frzRoot.setAttribute(`isMoving`, `false`);
 }
