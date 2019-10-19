@@ -3199,6 +3199,9 @@ function headerConvert(_dosObj) {
 		(g_presetCustomDesignUse !== undefined && (`ready` in g_presetCustomDesignUse) ?
 			setVal(g_presetCustomDesignUse.ready, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 
+	// デフォルトReady表示の遅延時間設定
+	obj.readyDelayFrame = setVal(_dosObj.readyDelayFrame, 0, C_TYP_NUMBER);
+
 	// デフォルト曲名表示のフォントサイズ
 	obj.titlesize = setVal(_dosObj.titlesize, ``, C_TYP_STRING);
 
@@ -7391,10 +7394,11 @@ function MainInit() {
 		const lblReady = createDivLabel(`lblReady`, g_sWidth / 2 - 100, g_sHeight / 2 - 75,
 			200, 50, 40, C_CLR_TITLE,
 			`<span style='color:` + g_headerObj.setColor[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
-		divRoot.appendChild(lblReady);
 		lblReady.style.animationDuration = `2.5s`;
 		lblReady.style.animationName = `leftToRightFade`;
+		lblReady.style.animationDelay = `${g_headerObj.readyDelayFrame / g_fps}s`;
 		lblReady.style.opacity = 0;
+		divRoot.appendChild(lblReady);
 	}
 
 	/**
