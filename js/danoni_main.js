@@ -1292,8 +1292,6 @@ function createImg(_id, _imgPath, _x, _y, _width, _height) {
 
 /**
  * 矢印オブジェクトの作成（色付きマスク版）
- * - cssスタイルに mask-image を使っているため、Chrome/Safari/FirefoxとIE/Edgeで処理を振り分ける。
- * - IE/Edgeは色指定なし。
  * @param {string} _id 
  * @param {string} _color 
  * @param {number} _x 
@@ -1303,46 +1301,25 @@ function createImg(_id, _imgPath, _x, _y, _width, _height) {
  */
 function createArrowEffect(_id, _color, _x, _y, _size, _rotate) {
 
+	const div = createDiv(_id, _x, _y, _size, _size);
+
 	// 矢印・おにぎり判定
 	let rotate;
 	let charaStyle;
-	let charaImg;
-	let sizeX;
 	if (isNaN(Number(_rotate))) {
 		rotate = 0;
 		charaStyle = _rotate;
-		charaImg = eval(`C_IMG_${_rotate.toUpperCase()}`);
-		sizeX = _size;
 	} else {
 		rotate = _rotate;
 		charaStyle = `arrow`;
-		charaImg = C_IMG_ARROW;
-		sizeX = _size;
 	}
-
-	const div = createDiv(_id, _x, _y, sizeX, _size);
 	div.align = C_ALIGN_CENTER;
 
-	let edgeVersion = 0;
-	if (g_userAgent.indexOf(`edge`) !== -1) {
-		edgeVersion = Math.floor(g_userAgent.slice(g_userAgent.indexOf(`edge`) + 5));
+	if (_color !== ``) {
+		div.style.backgroundColor = _color;
 	}
-
-	// IE/Edge(V17以前)の場合は色なし版を表示
-	if (g_userAgent.indexOf(`msie`) !== -1 ||
-		g_userAgent.indexOf(`trident`) !== -1 ||
-		(g_userAgent.indexOf(`edge`) !== -1 && edgeVersion < 18)) {
-		div.innerHTML = `<img id=${_id}img src=${charaImg}
-			style=width:${sizeX}px;height:${_size}px;transform:rotate(${rotate}deg)>`;
-
-	} else {
-		// それ以外は指定された色でマスク
-		if (_color !== ``) {
-			div.style.backgroundColor = _color;
-		}
-		div.className = charaStyle;
-		div.style.transform = `rotate(${rotate}deg)`;
-	}
+	div.className = charaStyle;
+	div.style.transform = `rotate(${rotate}deg)`;
 	div.setAttribute(`color`, _color);
 
 	return div;
@@ -1356,7 +1333,6 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	// 矢印・おにぎり判定
 	let rotate;
 	let charaStyle;
-	let charaImg;
 	if (isNaN(Number(_rotate))) {
 		rotate = 0;
 		charaStyle = _rotate + _styleName;
@@ -1366,29 +1342,13 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 		charaStyle = _styleName;
 		div.setAttribute(`type`, `arrow`);
 	}
-	charaImg = eval(`C_IMG_${charaStyle.toUpperCase()}`);
 	div.align = C_ALIGN_CENTER;
 
-	let edgeVersion = 0;
-	if (g_userAgent.indexOf(`edge`) !== -1) {
-		edgeVersion = Math.floor(g_userAgent.slice(g_userAgent.indexOf(`edge`) + 5));
+	if (_color !== ``) {
+		div.style.backgroundColor = _color;
 	}
-
-	// IE/Edge(V17以前)の場合は色なし版を表示
-	if (g_userAgent.indexOf(`msie`) !== -1 ||
-		g_userAgent.indexOf(`trident`) !== -1 ||
-		(g_userAgent.indexOf(`edge`) !== -1 && edgeVersion < 18)) {
-		div.innerHTML = `<img id=${_id}img src=${charaImg}
-			style=width:${_width}px;height:${_height}px;transform:rotate(${rotate}deg)>`;
-
-	} else {
-		// それ以外は指定された色でマスク
-		if (_color !== ``) {
-			div.style.backgroundColor = _color;
-		}
-		div.className = charaStyle;
-		div.style.transform = `rotate(${rotate}deg)`;
-	}
+	div.className = charaStyle;
+	div.style.transform = `rotate(${rotate}deg)`;
 	div.setAttribute(`color`, _color);
 
 	return div;
@@ -7138,6 +7098,29 @@ function MainInit() {
 		arrowSprite[1].classList.add(`${g_stateObj.appearance}1`);
 	}
 
+	// フリーズアローヒット部分
+	for (let j = 0; j < keyNum; j++) {
+		const frzHit = createSprite(`mainSprite`, `frzHit${j}`,
+			g_workObj.stepX[j], g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+			50, 50);
+		frzHit.style.opacity = 0;
+		if (isNaN(Number(g_workObj.stepRtn[j]))) {
+			frzHit.appendChild(createColorObject(`frzHitShadow${j}`, `#000000`,
+				0, 0,
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `arrowShadow`));
+
+			frzHit.appendChild(createArrowEffect(`frzHitTop${j}`, g_workObj.frzHitColors[j],
+				0, 0,
+				C_ARW_WIDTH, g_workObj.stepRtn[j]));
+
+		} else {
+			frzHit.appendChild(createColorObject(`frzHitTop${j}`, `#ffffff`,
+				- 10,
+				- 10,
+				70, 70, g_workObj.stepRtn[j], `arrowShadow`));
+		}
+	}
+
 	// 矢印・フリーズアロー・速度変化 移動/判定/変化対象の初期化
 	const arrowCnts = [];
 	const frzCnts = [];
@@ -7541,6 +7524,8 @@ function MainInit() {
 					if (g_workObj[`frz${_state}Colors`][_j] === toColorCode) {
 						if (_state === `Normal`) {
 							frzTop.style.backgroundColor = toColorCode;
+						} else {
+							document.querySelector(`#frzHitTop${_j}`).style.backgroundColor = toColorCode;
 						}
 						frzBtm.style.backgroundColor = toColorCode;
 						frzBtm.setAttribute(`color`, toColorCode);
@@ -7639,6 +7624,7 @@ function MainInit() {
 		// フリーズアロー(成功時)
 		frzOK: (_j, _k, _frzRoot, _cnt) => {
 			judgeKita(_cnt);
+			document.querySelector(`#frzHit${_j}`).style.opacity = 0;
 			_frzRoot.setAttribute(`judgEndFlg`, `true`);
 			judgeObjDelete.frz(_j, _frzRoot);
 		},
@@ -7651,6 +7637,7 @@ function MainInit() {
 					customJudgeDummyFrz2(_cnt);
 				}
 			}
+			document.querySelector(`#frzHit${_j}`).style.opacity = 0;
 			_frzRoot.setAttribute(`judgEndFlg`, `true`);
 			judgeObjDelete.dummyFrz(_j, _frzRoot);
 		},
@@ -8266,25 +8253,6 @@ function MainInit() {
 			}
 		}
 
-		// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
-		thisTime = performance.now();
-		buffTime = 0;
-		if (g_scoreObj.frameNum >= musicStartFrame) {
-			buffTime = (thisTime - musicStartTime - (g_scoreObj.frameNum - musicStartFrame) * 1000 / g_fps);
-		}
-		g_scoreObj.frameNum++;
-		g_scoreObj.nominalFrameNum++;
-		g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps - buffTime);
-
-		// タイマー
-		if (Math.floor(g_scoreObj.nominalFrameNum % g_fps) === 0) {
-			if (g_scoreObj.nominalFrameNum >= 0) {
-				const currentMin = Math.floor(g_scoreObj.nominalFrameNum / 60 / g_fps);
-				const currentSec = `00${Math.floor(g_scoreObj.nominalFrameNum / g_fps) % 60}`.slice(-2);
-				lblTime1.innerHTML = `${currentMin}:${currentSec}`;
-			}
-		}
-
 		// 曲終了判定
 		if (g_scoreObj.frameNum >= fullFrame) {
 			if (g_scoreObj.fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
@@ -8298,17 +8266,37 @@ function MainInit() {
 				clearWindow();
 				resultInit();
 			}, 100);
-		} else if (g_workObj.lifeVal === 0) {
+
+		} else if (g_workObj.lifeVal === 0 && g_workObj.lifeBorder === 0) {
 
 			// ライフ制＆ライフ０の場合は途中終了
-			if (g_workObj.lifeBorder === 0) {
-				g_audio.pause();
-				clearTimeout(g_timeoutEvtId);
-				clearWindow();
-				g_gameOverFlg = true;
-				g_finishFlg = false;
-				resultInit();
+			g_audio.pause();
+			clearTimeout(g_timeoutEvtId);
+			clearWindow();
+			g_gameOverFlg = true;
+			g_finishFlg = false;
+			resultInit();
+
+		} else {
+
+			// タイマー
+			if (Math.floor(g_scoreObj.nominalFrameNum % g_fps) === 0) {
+				if (g_scoreObj.nominalFrameNum >= 0) {
+					const currentMin = Math.floor(g_scoreObj.nominalFrameNum / 60 / g_fps);
+					const currentSec = `00${Math.floor(g_scoreObj.nominalFrameNum / g_fps) % 60}`.slice(-2);
+					lblTime1.innerHTML = `${currentMin}:${currentSec}`;
+				}
 			}
+
+			// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
+			thisTime = performance.now();
+			buffTime = 0;
+			if (g_scoreObj.frameNum >= musicStartFrame) {
+				buffTime = (thisTime - musicStartTime - (g_scoreObj.frameNum - musicStartFrame) * 1000 / g_fps);
+			}
+			g_scoreObj.frameNum++;
+			g_scoreObj.nominalFrameNum++;
+			g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps - buffTime);
 		}
 	}
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps);
@@ -8438,18 +8426,8 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
  */
 function changeHitFrz(_j, _k, _name) {
 
-	const frzTopShadow = document.querySelector(`#${_name}TopShadow${_j}_${_k}`);
-	if (frzTopShadow.getAttribute(`type`) === `arrow`) {
-		const fstyle = frzTopShadow.style;
-		fstyle.backgroundColor = `#ffffff`;
-		fstyle.top = `-10px`;
-		fstyle.left = `-10px`;
-		fstyle.width = `70px`;
-		fstyle.height = `70px`;
-		document.querySelector(`#${_name}Top${_j}_${_k}`).style.opacity = 0;
-	} else {
-		document.querySelector(`#${_name}Top${_j}_${_k}`).style.backgroundColor = g_workObj.frzHitColors[_j];
-	}
+	document.querySelector(`#frzHit${_j}`).style.opacity = 0.95;
+	document.querySelector(`#${_name}Top${_j}_${_k}`).style.opacity = 0;
 
 	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
 	const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
@@ -8480,14 +8458,7 @@ function changeHitFrz(_j, _k, _name) {
  * @param {number} _k 
  */
 function changeFailedFrz(_j, _k) {
-	const frzTopShadow = document.querySelector(`#frzTopShadow${_j}_${_k}`);
-	const fstyle = frzTopShadow.style;
-	fstyle.backgroundColor = `#000000`;
-	fstyle.top = `0px`;
-	fstyle.left = `0px`;
-	fstyle.width = `50px`;
-	fstyle.height = `50px`;
-	fstyle.opacity = 1;
+	document.querySelector(`#frzHit${_j}`).style.opacity = 0;
 	document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 1;
 	document.querySelector(`#frzTop${_j}_${_k}`).style.backgroundColor = `#cccccc`;
 	document.querySelector(`#frzBar${_j}_${_k}`).style.backgroundColor = `#999999`;
