@@ -8426,7 +8426,7 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
  */
 function changeHitFrz(_j, _k, _name) {
 
-	document.querySelector(`#frzHit${_j}`).style.opacity = 0.75;
+	document.querySelector(`#frzHit${_j}`).style.opacity = 1;
 	document.querySelector(`#${_name}Top${_j}_${_k}`).style.opacity = 0;
 
 	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
@@ -8448,6 +8448,7 @@ function changeHitFrz(_j, _k, _name) {
 	frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - delFrzLength}px`;
 	frzBar.style.top = `${parseFloat(frzBar.style.top) - delFrzLength * dividePos}px`;
 	frzBar.style.height = `${parseFloat(frzBar.style.height) - delFrzLength * g_workObj.scrollDir[_j]}px`;
+	frzBar.style.opacity = 0.75;
 
 	frzRoot.setAttribute(`isMoving`, `false`);
 }
@@ -8462,6 +8463,7 @@ function changeFailedFrz(_j, _k) {
 	document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 1;
 	document.querySelector(`#frzTop${_j}_${_k}`).style.backgroundColor = `#cccccc`;
 	document.querySelector(`#frzBar${_j}_${_k}`).style.backgroundColor = `#999999`;
+	document.querySelector(`#frzBar${_j}_${_k}`).style.opacity = 1;
 	document.querySelector(`#frzBtm${_j}_${_k}`).style.backgroundColor = `#cccccc`;
 }
 
