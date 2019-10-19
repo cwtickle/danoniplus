@@ -4101,6 +4101,7 @@ function createOptionWindow(_sprite) {
 				}
 				if (g_gaugeOptionObj.custom.length > 0) {
 					g_gaugeType = C_LFE_CUSTOM;
+					g_stateObj.lifeMode = g_gaugeOptionObj.typeCustom[_gaugeNum];
 				}
 				g_gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
 				g_stateObj.gauge = g_gauges[g_gaugeNum];
