@@ -8427,19 +8427,18 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
  */
 function changeHitFrz(_j, _k, _name) {
 
-	document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
-	document.querySelector(`#${_name}Top${_j}_${_k}`).style.opacity = 0;
-
+	if (_name === `frz`) {
+		document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
+		document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 0;
+	}
 	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
 	const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
 	const frzBtm = document.querySelector(`#${_name}Btm${_j}_${_k}`);
 	const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
 	const dividePos = Number(frzRoot.getAttribute(`dividePos`));
 
-	if (_name === `frz`) {
-		frzBar.style.backgroundColor = g_workObj.frzHitBarColors[_j];
-		frzBtm.style.backgroundColor = g_workObj.frzHitColors[_j];
-	}
+	frzBar.style.backgroundColor = g_workObj[`${_name}HitBarColors`][_j];
+	frzBtm.style.backgroundColor = g_workObj[`${_name}HitColors`][_j];
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
 	const delFrzLength = parseFloat(document.querySelector(`#step${_j}`).style.top) - parseFloat(frzRoot.style.top);
