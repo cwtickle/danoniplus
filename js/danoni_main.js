@@ -4875,7 +4875,7 @@ function keyConfigInit() {
 		}
 		keyconSprite.appendChild(createArrowEffect(`arrow${j}`, g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]],
 			g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
-			C_KYC_HEIGHT * dividePos, 50,
+			C_KYC_HEIGHT * dividePos, C_ARW_WIDTH,
 			g_keyObj[`stepRtn${keyCtrlPtn}`][j]));
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
@@ -7061,20 +7061,20 @@ function MainInit() {
 			const stepShadow = createColorObject(`stepShadow${j}`, `#000000`,
 				g_workObj.stepX[j],
 				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
-				50, 50, g_workObj.stepRtn[j], `arrowShadow`);
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `arrowShadow`);
 			mainSprite.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.7;
 		}
 
 		const step = createArrowEffect(`step${j}`, `#999999`,
 			g_workObj.stepX[j],
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], 50,
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], C_ARW_WIDTH,
 			g_workObj.stepRtn[j]);
 		mainSprite.appendChild(step);
 
 		const stepHit = createArrowEffect(`stepHit${j}`, `#999999`,
 			g_workObj.stepX[j] - 15,
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] - 15, 80,
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] - 15, C_ARW_WIDTH + 30,
 			g_workObj.stepRtn[j]);
 		stepHit.style.opacity = 0;
 		stepHit.setAttribute(`cnt`, 0);
@@ -7102,7 +7102,7 @@ function MainInit() {
 	for (let j = 0; j < keyNum; j++) {
 		const frzHit = createSprite(`mainSprite`, `frzHit${j}`,
 			g_workObj.stepX[j], g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
-			50, 50);
+			C_ARW_WIDTH, C_ARW_WIDTH);
 		frzHit.style.opacity = 0;
 		if (isNaN(Number(g_workObj.stepRtn[j]))) {
 			frzHit.appendChild(createColorObject(`frzHitShadow${j}`, `#000000`,
@@ -7115,9 +7115,8 @@ function MainInit() {
 
 		} else {
 			frzHit.appendChild(createColorObject(`frzHitTop${j}`, `#ffffff`,
-				- 10,
-				- 10,
-				70, 70, g_workObj.stepRtn[j], `arrowShadow`));
+				-10, -10,
+				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.stepRtn[j], `arrowShadow`));
 		}
 	}
 
@@ -7524,8 +7523,6 @@ function MainInit() {
 					if (g_workObj[`frz${_state}Colors`][_j] === toColorCode) {
 						if (_state === `Normal`) {
 							frzTop.style.backgroundColor = toColorCode;
-						} else {
-							document.querySelector(`#frzHitTop${_j}`).style.backgroundColor = toColorCode;
 						}
 						frzBtm.style.backgroundColor = toColorCode;
 						frzBtm.setAttribute(`color`, toColorCode);
@@ -8384,6 +8381,9 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 							g_workObj.frzHitColors[k] = _mkColorCd[j];
 							if (_allFlg === `A`) {
 								g_workObj.frzHitColorsAll[k] = _mkColorCd[j];
+								if (isNaN(Number(g_workObj.stepRtn[k]))) {
+									document.querySelector(`#frzHitTop${k}`).style.backgroundColor = _mkColorCd[j];
+								}
 							}
 						}
 					}
@@ -8426,7 +8426,7 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
  */
 function changeHitFrz(_j, _k, _name) {
 
-	document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
+	document.querySelector(`#frzHit${_j}`).style.opacity = 0.75;
 	document.querySelector(`#${_name}Top${_j}_${_k}`).style.opacity = 0;
 
 	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
