@@ -8426,7 +8426,7 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
  */
 function changeHitFrz(_j, _k, _name) {
 
-	document.querySelector(`#frzHit${_j}`).style.opacity = 0.95;
+	document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
 	document.querySelector(`#${_name}Top${_j}_${_k}`).style.opacity = 0;
 
 	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
