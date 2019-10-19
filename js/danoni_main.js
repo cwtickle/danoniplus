@@ -374,6 +374,7 @@ let C_CLR_BORDER = `#555555`;
 let C_CLR_BACKLIFE = `#222222`;
 const C_LFE_SURVIVAL = `Survival`;
 const C_LFE_BORDER = `Border`;
+const C_LFE_CUSTOM = `Custom`;
 
 let g_gaugeOptionObj = {};
 let g_gaugeType;
@@ -2988,6 +2989,7 @@ function headerConvert(_dosObj) {
 	g_gaugeOptionObj = {
 		survival: [`Original`, `Light`, `NoRecovery`, `SuddenDeath`, `Practice`],
 		border: [`Normal`, `Easy`, `Hard`, `SuddenDeath`],
+		custom: [],
 
 		initSurvival: [25, 25, 100, 100, 50],
 		rcvSurvival: [6, 6, 0, 0, 0],
@@ -2999,8 +3001,21 @@ function headerConvert(_dosObj) {
 		rcvBorder: [2, 2, 1, 0],
 		dmgBorder: [7, 4, 50, obj.maxLifeVal],
 		typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL],
-		clearBorder: [70, 70, 0, 0]
+		clearBorder: [70, 70, 0, 0],
+
+		typeCustom: [],
 	};
+
+	// カスタムゲージ設定
+	// |customGauge=Original::S,Normal::B,Escape::B|
+	if (_dosObj.customGauge !== undefined) {
+		const customGauges = _dosObj.customGauge.split(`,`);
+		for (let j = 0; j < customGauges.length; j++) {
+			const customGaugeSets = customGauges[j].split(`::`);
+			g_gaugeOptionObj.custom[j] = customGaugeSets[0];
+			g_gaugeOptionObj.typeCustom[j] = (customGaugeSets[1] === `F` ? C_LFE_SURVIVAL : C_LFE_BORDER);
+		}
+	}
 
 	// ライフ設定のカスタム部分取得（譜面ヘッダー加味）
 	for (let j = 0; j < g_gaugeOptionObj.survival.length; j++) {
@@ -3008,6 +3023,9 @@ function headerConvert(_dosObj) {
 	}
 	for (let j = 0; j < g_gaugeOptionObj.border.length; j++) {
 		getGaugeSetting(_dosObj, g_gaugeOptionObj.border[j], obj);
+	}
+	for (let j = 0; j < g_gaugeOptionObj.custom.length; j++) {
+		getGaugeSetting(_dosObj, g_gaugeOptionObj.custom[j], obj);
 	}
 
 	// 初期色情報
@@ -4081,6 +4099,9 @@ function createOptionWindow(_sprite) {
 					g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
 					g_stateObj.lifeMode = C_LFE_BORDER;
 				}
+				if (g_gaugeOptionObj.custom.length > 0) {
+					g_gaugeType = C_LFE_CUSTOM;
+				}
 				g_gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
 				g_stateObj.gauge = g_gauges[g_gaugeNum];
 			}
@@ -4096,10 +4117,12 @@ function createOptionWindow(_sprite) {
 		} else {
 			// 設定されたゲージ設定、カーソルに合わせて設定値を更新
 			g_stateObj.lifeMode = g_gaugeOptionObj[`type${g_gaugeType}`][_gaugeNum];
-			g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${g_gaugeType}`][_gaugeNum];
-			g_stateObj.lifeInit = g_gaugeOptionObj[`init${g_gaugeType}`][_gaugeNum];
-			g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${g_gaugeType}`][_gaugeNum];
-			g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${g_gaugeType}`][_gaugeNum];
+			if (g_gaugeOptionObj.custom.length === 0) {
+				g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${g_gaugeType}`][_gaugeNum];
+				g_stateObj.lifeInit = g_gaugeOptionObj[`init${g_gaugeType}`][_gaugeNum];
+				g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${g_gaugeType}`][_gaugeNum];
+				g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${g_gaugeType}`][_gaugeNum];
+			}
 		}
 
 		// ゲージ設定(Light, Easy)の初期化
