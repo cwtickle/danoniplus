@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/10/19
+ * Revised : 2019/10/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.2.0`;
-const g_revisedDate = `2019/10/19`;
+const g_version = `Ver 9.3.0`;
+const g_revisedDate = `2019/10/20`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -188,6 +188,7 @@ let g_initialFlg = false;
 /** キーコンフィグ設定 */
 let g_kcType = `Main`;
 let g_colorType = `Default`;
+let g_baseDisp = `Settings`;
 const C_KYC_HEIGHT = 150;
 const C_KYC_REPHEIGHT = 20;
 
@@ -3217,6 +3218,9 @@ function headerConvert(_dosObj) {
 		(g_presetCustomDesignUse !== undefined && (`ready` in g_presetCustomDesignUse) ?
 			setVal(g_presetCustomDesignUse.ready, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 
+	// デフォルトReady表示の遅延時間設定
+	obj.readyDelayFrame = setVal(_dosObj.readyDelayFrame, 0, C_TYP_NUMBER);
+
 	// デフォルト曲名表示のフォントサイズ
 	obj.titlesize = setVal(_dosObj.titlesize, ``, C_TYP_STRING);
 
@@ -3569,6 +3573,7 @@ function optionInit() {
 
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
+	g_baseDisp = `Settings`;
 
 	// タイトル文字描画
 	const lblTitle = getTitleDivLabel(`lblTitle`,
@@ -4613,6 +4618,7 @@ function settingsDisplayInit() {
 
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
+	g_baseDisp = `Display`;
 
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = false;
@@ -5019,7 +5025,12 @@ function keyConfigInit() {
 		g_currentk = 0;
 		g_prevKey = 0;
 		clearWindow();
-		optionInit();
+
+		if (g_baseDisp === `Settings`) {
+			optionInit();
+		} else {
+			settingsDisplayInit();
+		}
 	});
 	divRoot.appendChild(btnBack);
 
@@ -5873,10 +5884,15 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	if (g_stateObj.d_lyrics === C_FLG_ON) {
 
 		let inputWordData = ``;
-		if (_dosObj[`word${_scoreNo}_data`] !== undefined) {
-			inputWordData = _dosObj[`word${_scoreNo}_data`];
-		} else if (_dosObj.word_data !== undefined) {
-			inputWordData = _dosObj.word_data;
+		let wordDataList;
+		if (g_stateObj.reverse === C_FLG_ON) {
+			wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+		} else {
+			wordDataList = [_dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+		}
+		const wordData = wordDataList.find((v) => v !== undefined);
+		if (wordData !== undefined) {
+			inputWordData = wordData;
 		}
 		if (inputWordData !== ``) {
 			let tmpArrayData = inputWordData.split(`\r`).join(`\n`);
@@ -7415,10 +7431,11 @@ function MainInit() {
 		const lblReady = createDivLabel(`lblReady`, g_sWidth / 2 - 100, g_sHeight / 2 - 75,
 			200, 50, 40, C_CLR_TITLE,
 			`<span style='color:` + g_headerObj.setColor[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
-		divRoot.appendChild(lblReady);
 		lblReady.style.animationDuration = `2.5s`;
 		lblReady.style.animationName = `leftToRightFade`;
+		lblReady.style.animationDelay = `${g_headerObj.readyDelayFrame / g_fps}s`;
 		lblReady.style.opacity = 0;
+		divRoot.appendChild(lblReady);
 	}
 
 	/**
