@@ -188,6 +188,7 @@ let g_initialFlg = false;
 /** キーコンフィグ設定 */
 let g_kcType = `Main`;
 let g_colorType = `Default`;
+let g_baseDisp = `Settings`;
 const C_KYC_HEIGHT = 150;
 const C_KYC_REPHEIGHT = 20;
 
@@ -3551,6 +3552,7 @@ function optionInit() {
 
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
+	g_baseDisp = `Settings`;
 
 	// タイトル文字描画
 	const lblTitle = getTitleDivLabel(`lblTitle`,
@@ -4589,6 +4591,7 @@ function settingsDisplayInit() {
 
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
+	g_baseDisp = `Display`;
 
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = false;
@@ -4995,7 +4998,12 @@ function keyConfigInit() {
 		g_currentk = 0;
 		g_prevKey = 0;
 		clearWindow();
-		optionInit();
+
+		if (g_baseDisp === `Settings`) {
+			optionInit();
+		} else {
+			settingsDisplayInit();
+		}
 	});
 	divRoot.appendChild(btnBack);
 
