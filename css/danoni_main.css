@@ -133,6 +133,21 @@ input[type=range]::-moz-range-thumb{
 input[type=range]:focus {
 	outline: 0;
 }
+.gaugeVal {
+	font-size:12px;
+}
+.lifeVal {
+	color: #ff9966;
+}
+.gaugeTable {
+	width: 250px;
+	margin: 0 auto;
+	border: 1px #666666 solid; 
+	border-collapse: collapse;
+}
+.gaugeTable td {
+	width: 55px;
+}
 
 /* 左から右へ */
 @keyframes leftToRight {
