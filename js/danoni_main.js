@@ -5860,10 +5860,15 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	if (g_stateObj.d_lyrics === C_FLG_ON) {
 
 		let inputWordData = ``;
-		if (_dosObj[`word${_scoreNo}_data`] !== undefined) {
-			inputWordData = _dosObj[`word${_scoreNo}_data`];
-		} else if (_dosObj.word_data !== undefined) {
-			inputWordData = _dosObj.word_data;
+		let wordDataList;
+		if (g_stateObj.reverse === C_FLG_ON) {
+			wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+		} else {
+			wordDataList = [_dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+		}
+		const wordData = wordDataList.find((v) => v !== undefined);
+		if (wordData !== undefined) {
+			inputWordData = wordData;
 		}
 		if (inputWordData !== ``) {
 			let tmpArrayData = inputWordData.split(`\r`).join(`\n`);
