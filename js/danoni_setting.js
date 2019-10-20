@@ -36,6 +36,18 @@ const g_presetGaugeCustom = {
 		Damage: 50,
 		Init: 100,
 	},
+	NoRecovery: {
+		Border: `x`,
+		Recovery: 0,
+		Damage: 50,
+		Init: 100,
+	},
+	SuddenDeath: {
+		Border: `x`,
+		Recovery: 0,
+		Damage: 1000,
+		Init: 100,
+	},
 };
 
 // デフォルトのデザインを使用せず、独自のデザインを使用するかを指定
