@@ -45,9 +45,15 @@ const g_presetGaugeCustom = {
 	SuddenDeath: {
 		Border: `x`,
 		Recovery: 0,
-		Damage: 1000,
+		Damage: g_headerObj.maxLifeVal,
 		Init: 100,
 	},
+	Practice: {
+		Border: `x`,
+		Recovery: 0,
+		Damage: 0,
+		Init: 50,
+	}
 };
 
 // デフォルトのデザインを使用せず、独自のデザインを使用するかを指定

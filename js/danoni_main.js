@@ -351,6 +351,7 @@ const g_stateObj = {
 	lifeMode: `Border`,
 	lifeBorder: 70,
 	lifeInit: 25,
+	lifeVariable: C_FLG_OFF,
 
 	extraKeyFlg: false,
 	dataSaveFlg: true,
@@ -4042,8 +4043,8 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblGauge);
 
 	// ゲージ設定詳細　縦位置: ゲージ設定+1
-	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * (setNoGauge + 1) - 3,
-		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, 11, C_CLR_TITLE, ``);
+	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * (setNoGauge + 1),
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT * 2, 11, C_CLR_TITLE, ``);
 	optionsprite.appendChild(lblGauge2);
 
 	if (g_headerObj.gaugeUse) {
@@ -4085,7 +4086,8 @@ function createOptionWindow(_sprite) {
 		if (_scrollNum !== 0) {
 			gaugeChange(g_gaugeNum);
 		}
-		document.querySelector(`#lblGauge2`).innerHTML = gaugeFormat(g_stateObj.lifeMode, g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit);
+		document.querySelector(`#lblGauge2`).innerHTML = gaugeFormat(g_stateObj.lifeMode,
+			g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
 	}
 
 	/**
@@ -4135,7 +4137,6 @@ function createOptionWindow(_sprite) {
 				g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${g_gaugeType}`][_gaugeNum];
 			}
 		}
-		console.log(g_stateObj.lifeVariable);
 
 		// ゲージ設定(Light, Easy)の初期化
 		if (g_stateObj.gauge == `Light` || g_stateObj.gauge == `Easy`) {
@@ -4181,16 +4182,37 @@ function createOptionWindow(_sprite) {
 	/**
 	 * ゲージ設定の詳細表示を整形
 	 */
-	function gaugeFormat(_mode, _border, _rcv, _dmg, _init) {
+	function gaugeFormat(_mode, _border, _rcv, _dmg, _init, _lifeValFlg) {
 		const initVal = g_headerObj.maxLifeVal * _init / 100;
-		const borderVal = g_headerObj.maxLifeVal * _border / 100;
+		const borderVal = (_mode === C_LFE_BORDER && _border !== 0 ?
+			g_headerObj.maxLifeVal * _border / 100 : `-`);
 
-		if (_mode === C_LFE_BORDER) {
-			if (borderVal !== 0) {
-				return `[Start:${initVal}, Border:${borderVal}, <br>Rcv:${_rcv}, Dmg:${_dmg}]`;
-			}
+		let lifeValCss = ``;
+		if (_lifeValFlg === C_FLG_ON) {
+			lifeValCss = ` class="lifeVal"`;
 		}
-		return `[Start:${initVal}, Rcv:${_rcv}, Dmg:${_dmg}]`;
+
+		// 整形用に数値を小数第1位で丸める
+		const init = Math.round(initVal * 10) / 10;
+		const border = (borderVal !== `-` ? Math.round(borderVal * 10) / 10 : `-`);
+		const rcv = Math.round(_rcv * 10) / 10;
+		const dmg = Math.round(_dmg * 10) / 10;
+
+		return `<table class="gaugeTable">
+					<tr>
+						<td>Start</td>
+						<td>Border</td>
+						<td>Recovery</td>
+						<td>Damage</td>
+					</tr>
+					<tr class="gaugeVal">
+						<td style="width:85px;">${init}/${g_headerObj.maxLifeVal}</td>
+						<td>${border}</td>
+						<td${lifeValCss}>${rcv}</td>
+						<td${lifeValCss}>${dmg}</td>
+					</tr>
+				</table>
+				`;
 	}
 
 	// ---------------------------------------------------
