@@ -8453,9 +8453,6 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 							g_workObj.frzHitColors[k] = _mkColorCd[j];
 							if (_allFlg === `A`) {
 								g_workObj.frzHitColorsAll[k] = _mkColorCd[j];
-								if (isNaN(Number(g_workObj.stepRtn[k]))) {
-									document.querySelector(`#frzHitTop${k}`).style.backgroundColor = _mkColorCd[j];
-								}
 							}
 						}
 					}
@@ -8501,6 +8498,9 @@ function changeHitFrz(_j, _k, _name) {
 	if (_name === `frz`) {
 		document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
 		document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 0;
+		if (isNaN(Number(g_workObj.stepRtn[_j]))) {
+			document.querySelector(`#frzHitTop${_j}`).style.backgroundColor = g_workObj.frzHitColors[_j];
+		}
 	}
 	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
 	const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
