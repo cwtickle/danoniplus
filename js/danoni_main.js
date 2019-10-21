@@ -8453,6 +8453,9 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 							g_workObj.frzHitColors[k] = _mkColorCd[j];
 							if (_allFlg === `A`) {
 								g_workObj.frzHitColorsAll[k] = _mkColorCd[j];
+								if (isNaN(Number(g_workObj.stepRtn[k]))) {
+									document.querySelector(`#frzHitTop${k}`).style.backgroundColor = _mkColorCd[j];
+								}
 							}
 						}
 					}
