@@ -3011,7 +3011,7 @@ function headerConvert(_dosObj) {
 	};
 
 	// カスタムゲージ設定
-	// |customGauge=Original::S,Normal::B,Escape::B|
+	// |customGauge=Original::F,Normal::V,Escape::V|
 	if (_dosObj.customGauge !== undefined) {
 		const customGauges = _dosObj.customGauge.split(`,`);
 		for (let j = 0; j < customGauges.length; j++) {
@@ -4192,8 +4192,8 @@ function createOptionWindow(_sprite) {
 			lifeValCss = ` class="lifeVal"`;
 		}
 
-		// 整形用に数値を小数第1位で丸める
-		const init = Math.round(initVal * 10) / 10;
+		// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
+		const init = Math.round(initVal);
 		const border = (borderVal !== `-` ? Math.round(borderVal * 10) / 10 : `-`);
 		const rcv = Math.round(_rcv * 10) / 10;
 		const dmg = Math.round(_dmg * 10) / 10;
@@ -8501,6 +8501,9 @@ function changeHitFrz(_j, _k, _name) {
 	if (_name === `frz`) {
 		document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
 		document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 0;
+		if (isNaN(Number(g_workObj.stepRtn[_j]))) {
+			document.querySelector(`#frzHitTop${_j}`).style.backgroundColor = g_workObj.frzHitColors[_j];
+		}
 	}
 	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
 	const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
