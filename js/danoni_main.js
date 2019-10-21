@@ -7463,7 +7463,11 @@ function MainInit() {
 			`<span style='color:` + g_headerObj.setColor[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
 		lblReady.style.animationDuration = `2.5s`;
 		lblReady.style.animationName = `leftToRightFade`;
-		lblReady.style.animationDelay = `${g_headerObj.readyDelayFrame / g_fps}s`;
+		let readyDelayFrame = 0;
+		if (g_headerObj.readyDelayFrame > 0 && g_headerObj.readyDelayFrame + g_stateObj.adjustment > 0) {
+			readyDelayFrame = g_headerObj.readyDelayFrame + g_stateObj.adjustment;
+		}
+		lblReady.style.animationDelay = `${readyDelayFrame / g_fps}s`;
 		lblReady.style.opacity = 0;
 		divRoot.appendChild(lblReady);
 	}
