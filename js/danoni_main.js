@@ -3011,7 +3011,7 @@ function headerConvert(_dosObj) {
 	};
 
 	// カスタムゲージ設定
-	// |customGauge=Original::S,Normal::B,Escape::B|
+	// |customGauge=Original::F,Normal::V,Escape::V|
 	if (_dosObj.customGauge !== undefined) {
 		const customGauges = _dosObj.customGauge.split(`,`);
 		for (let j = 0; j < customGauges.length; j++) {
@@ -4192,8 +4192,8 @@ function createOptionWindow(_sprite) {
 			lifeValCss = ` class="lifeVal"`;
 		}
 
-		// 整形用に数値を小数第1位で丸める
-		const init = Math.round(initVal * 10) / 10;
+		// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
+		const init = Math.round(initVal);
 		const border = (borderVal !== `-` ? Math.round(borderVal * 10) / 10 : `-`);
 		const rcv = Math.round(_rcv * 10) / 10;
 		const dmg = Math.round(_dmg * 10) / 10;
