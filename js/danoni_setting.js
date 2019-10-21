@@ -45,7 +45,7 @@ const g_presetGaugeCustom = {
 	SuddenDeath: {
 		Border: `x`,
 		Recovery: 0,
-		Damage: g_headerObj.maxLifeVal,
+		Damage: setVal(g_rootObj.maxLifeVal, C_VAL_MAXLIFE, C_TYP_FLOAT),
 		Init: 100,
 	},
 	Practice: {
