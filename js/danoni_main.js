@@ -4043,8 +4043,8 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblGauge);
 
 	// ゲージ設定詳細　縦位置: ゲージ設定+1
-	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * (setNoGauge + 1),
-		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT * 2, 11, C_CLR_TITLE, ``);
+	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT - 20, C_LEN_SETLBL_HEIGHT * (setNoGauge + 1),
+		C_LEN_SETLBL_WIDTH + 40, C_LEN_SETLBL_HEIGHT * 2, 11, C_CLR_TITLE, ``);
 	optionsprite.appendChild(lblGauge2);
 
 	if (g_headerObj.gaugeUse) {
@@ -4185,7 +4185,7 @@ function createOptionWindow(_sprite) {
 	function gaugeFormat(_mode, _border, _rcv, _dmg, _init, _lifeValFlg) {
 		const initVal = g_headerObj.maxLifeVal * _init / 100;
 		const borderVal = (_mode === C_LFE_BORDER && _border !== 0 ?
-			g_headerObj.maxLifeVal * _border / 100 : `-`);
+			Math.round(g_headerObj.maxLifeVal * _border / 100) : `-`);
 
 		let lifeValCss = ``;
 		if (_lifeValFlg === C_FLG_ON) {
@@ -4194,9 +4194,9 @@ function createOptionWindow(_sprite) {
 
 		// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
 		const init = Math.round(initVal);
-		const border = (borderVal !== `-` ? Math.round(borderVal * 10) / 10 : `-`);
-		const rcv = Math.round(_rcv * 10) / 10;
-		const dmg = Math.round(_dmg * 10) / 10;
+		const border = (borderVal !== `-` ? borderVal : `-`);
+		const rcv = Math.round(_rcv * 100) / 100;
+		const dmg = Math.round(_dmg * 100) / 100;
 
 		return `<table class="gaugeTable">
 					<tr>
@@ -9036,7 +9036,7 @@ function resultInit() {
 	if (g_stateObj.appearance !== `Visible`) {
 		playStyleData += `, ${g_stateObj.appearance}`;
 	}
-	if (g_stateObj.gauge !== `Original` && g_stateObj.gauge !== `Normal`) {
+	if (g_stateObj.gauge !== g_gauges[0]) {
 		playStyleData += `, ${g_stateObj.gauge}`;
 	}
 	playDataWindow.appendChild(makeResultPlayData(`lblStyleData`, 60, `#cccccc`, 3,
