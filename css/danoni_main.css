@@ -140,13 +140,13 @@ input[type=range]:focus {
 	color: #ff9966;
 }
 .gaugeTable {
-	width: 250px;
+	width: 280px;
 	margin: 0 auto;
 	border: 1px #666666 solid; 
 	border-collapse: collapse;
 }
 .gaugeTable td {
-	width: 55px;
+	width: 65px;
 }
 
 /* 左から右へ */
