@@ -9036,7 +9036,7 @@ function resultInit() {
 	if (g_stateObj.appearance !== `Visible`) {
 		playStyleData += `, ${g_stateObj.appearance}`;
 	}
-	if (g_stateObj.gauge !== `Original` && g_stateObj.gauge !== `Normal`) {
+	if (g_stateObj.gauge !== g_gauges[0]) {
 		playStyleData += `, ${g_stateObj.gauge}`;
 	}
 	playDataWindow.appendChild(makeResultPlayData(`lblStyleData`, 60, `#cccccc`, 3,
