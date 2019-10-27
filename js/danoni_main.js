@@ -4103,17 +4103,15 @@ function createOptionWindow(_sprite) {
 					g_gaugeType = C_LFE_SURVIVAL;
 					g_stateObj.lifeBorder = 0;
 					g_stateObj.lifeMode = C_LFE_SURVIVAL;
-					g_stateObj.lifeVariable = C_FLG_OFF;
 				} else {
 					g_gaugeType = C_LFE_BORDER;
 					g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
 					g_stateObj.lifeMode = C_LFE_BORDER;
-					g_stateObj.lifeVariable = C_FLG_ON;
 				}
 				if (g_gaugeOptionObj.custom.length > 0) {
 					g_gaugeType = C_LFE_CUSTOM;
-					g_stateObj.lifeVariable = g_gaugeOptionObj.varCustom[_gaugeNum];
 				}
+				g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
 				g_gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
 				g_stateObj.gauge = g_gauges[g_gaugeNum];
 			}
