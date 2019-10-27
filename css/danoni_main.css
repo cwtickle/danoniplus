@@ -377,3 +377,38 @@ input[type=range]:focus {
 .Slit1 {
 	clip-path: polygon(5% 0%, 100% 0%, 100% 30%, 5% 30%, 5% 45%, 100% 45%, 100% 55%, 5% 55%, 5% 70%, 100% 70%, 100% 100%, 5% 100%);
 }
+
+/* 設定別カラー */
+.settings_Difficulty::first-letter {
+	color:#ff9999;
+}
+.settings_Speed::first-letter {
+	color:#ffff99;
+}
+.settings_Motion::first-letter {
+	color:#eeff99;
+}
+.settings_Reverse::first-letter {
+	color:#ddff99;
+}
+.settings_Shuffle::first-letter {
+	color:#99ff99;
+}
+.settings_AutoPlay::first-letter {
+	color:#99ffbb;
+}
+.settings_Gauge::first-letter {
+	color:#99ffdd;
+}
+.settings_Adjustment::first-letter {
+	color:#99ffff;
+}
+.settings_Fadein::first-letter {
+	color:#99eeff;
+}
+.settings_Volume::first-letter {
+	color:#99ddff;
+}
+.settings_Appearance::first-letter {
+	color:#cc99ff;
+}

@@ -3758,10 +3758,7 @@ function createOptionWindow(_sprite) {
 	// 難易度 (Difficulty)
 	// 縦位置: 0 
 	const setNoDifficulty = 0;
-	const lblDifficulty = createDivLabel(`lblDifficulty`, 0, C_LEN_SETLBL_HEIGHT * setNoDifficulty - 5,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETDIFLBL, C_CLR_TITLE,
-		`<span style=color:#ff9999>D</span>ifficulty`);
-	optionsprite.appendChild(lblDifficulty);
+	optionsprite.appendChild(createLblSetting(`Difficulty`, setNoDifficulty, -5));
 
 	/**
 	 * 譜面変更セレクターの削除
@@ -3884,10 +3881,7 @@ function createOptionWindow(_sprite) {
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
 	const setNoSpeed = 2;
-	const lblSpeed = createDivLabel(`lblSpeed`, 0, C_LEN_SETLBL_HEIGHT * setNoSpeed,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#ffff99>S</span>peed`);
-	optionsprite.appendChild(lblSpeed);
+	optionsprite.appendChild(createLblSetting(`Speed`, setNoSpeed));
 
 	const lnkSpeed = makeSettingLblButton(`lnkSpeed`, ``, setNoSpeed, _ => {
 		setSetting(1, `speed`, ` x`);
@@ -3918,10 +3912,7 @@ function createOptionWindow(_sprite) {
 	// 速度モーション (Motion)
 	// 縦位置: 3
 	const setNoMotion = 3;
-	const lblMotion = createDivLabel(`lblMotion`, 0, C_LEN_SETLBL_HEIGHT * setNoMotion,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#eeff99>M</span>otion`);
-	optionsprite.appendChild(lblMotion);
+	optionsprite.appendChild(createLblSetting(`Motion`, setNoMotion));
 
 	if (g_headerObj.motionUse) {
 		const lnkMotion = makeSettingLblButton(`lnkMotion`, g_stateObj.motion, setNoMotion, _ => {
@@ -3949,10 +3940,7 @@ function createOptionWindow(_sprite) {
 	// リバース (Reverse)
 	// 縦位置: 4
 	const setNoReverse = 4;
-	const lblReverse = createDivLabel(`lblReverse`, 0, C_LEN_SETLBL_HEIGHT * setNoReverse,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#ddff99>R</span>everse`);
-	optionsprite.appendChild(lblReverse);
+	optionsprite.appendChild(createLblSetting(`Reverse`, setNoReverse));
 
 	const lnkReverse = makeSettingLblButton(`lnkReverse`, ``, setNoReverse, _ => {
 		setSetting(1, `reverse`);
@@ -3975,10 +3963,7 @@ function createOptionWindow(_sprite) {
 	// ミラー・ランダム (Shuffle)
 	// 縦位置: 5.5
 	const setNoShuffle = 5.5;
-	const lblShuffle = createDivLabel(`lblShuffle`, 0, C_LEN_SETLBL_HEIGHT * setNoShuffle,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99ff99>S</span>huffle`);
-	optionsprite.appendChild(lblShuffle);
+	optionsprite.appendChild(createLblSetting(`Shuffle`, setNoShuffle));
 
 	if (g_headerObj.shuffleUse) {
 		const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, setNoShuffle, _ => {
@@ -4006,10 +3991,7 @@ function createOptionWindow(_sprite) {
 	// 鑑賞モード設定 (AutoPlay)
 	// 縦位置: 6.5
 	const setNoAutoPlay = 6.5;
-	const lblAutoPlay = createDivLabel(`lblAutoPlay`, 0, C_LEN_SETLBL_HEIGHT * setNoAutoPlay,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99ffbb>A</span>utoPlay`);
-	optionsprite.appendChild(lblAutoPlay);
+	optionsprite.appendChild(createLblSetting(`AutoPlay`, setNoAutoPlay));
 
 	if (g_headerObj.autoPlayUse) {
 		const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.autoPlay, setNoAutoPlay, _ => {
@@ -4037,10 +4019,7 @@ function createOptionWindow(_sprite) {
 	// ゲージ設定 (Gauge)
 	// 縦位置: 7.5
 	const setNoGauge = 7.5;
-	const lblGauge = createDivLabel(`lblGauge`, 0, C_LEN_SETLBL_HEIGHT * setNoGauge,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99ffdd>G</span>auge`);
-	optionsprite.appendChild(lblGauge);
+	optionsprite.appendChild(createLblSetting(`Gauge`, setNoGauge));
 
 	// ゲージ設定詳細　縦位置: ゲージ設定+1
 	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT - 20, C_LEN_SETLBL_HEIGHT * (setNoGauge + 1),
@@ -4219,10 +4198,7 @@ function createOptionWindow(_sprite) {
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
 	const setNoAdjustment = 10;
-	const lblAdjustment = createDivLabel(`lblAdjustment`, 0, C_LEN_SETLBL_HEIGHT * setNoAdjustment,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99ffff>A</span>djustment`);
-	optionsprite.appendChild(lblAdjustment);
+	optionsprite.appendChild(createLblSetting(`Adjustment`, setNoAdjustment));
 
 	const lnkAdjustment = makeSettingLblButton(`lnkAdjustment`, g_stateObj.adjustment, setNoAdjustment, _ => {
 		setSetting(1, `adjustment`);
@@ -4252,10 +4228,7 @@ function createOptionWindow(_sprite) {
 	// フェードイン (Fadein)
 	// 縦位置: 11 スライダーあり
 	const setNoFadein = 11;
-	const lblFadein = createDivLabel(`lblFadein`, 0, C_LEN_SETLBL_HEIGHT * setNoFadein,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99eeff>F</span>adein`);
-	optionsprite.appendChild(lblFadein);
+	optionsprite.appendChild(createLblSetting(`Fadein`, setNoFadein));
 
 	const lnkFadein = createDivLabel(`lblFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * setNoFadein,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `${g_stateObj.fadein}%`);
@@ -4301,10 +4274,7 @@ function createOptionWindow(_sprite) {
 	// ボリューム (Volume) 
 	// 縦位置: 12
 	const setNoVolume = 12;
-	const lblVolume = createDivLabel(`lblVolume`, 0, C_LEN_SETLBL_HEIGHT * setNoVolume,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99ddff>V</span>olume`);
-	optionsprite.appendChild(lblVolume);
+	optionsprite.appendChild(createLblSetting(`Volume`, setNoVolume));
 
 	const lnkVolume = makeSettingLblButton(`lnkVolume`, `${g_stateObj.volume}%`, setNoVolume, _ => {
 		setSetting(1, `volume`, `%`);
@@ -4493,6 +4463,21 @@ function createOptionWindow(_sprite) {
 	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
 	setDifficulty(false);
 	optionsprite.oncontextmenu = _ => false;
+}
+
+/**
+ * 設定画面用ラベルの作成
+ * @param {string} _settingName 
+ * @param {number} _posY 
+ * @param {number} _adjY 
+ */
+function createLblSetting(_settingName, _posY, _adjY = 0) {
+	const lbl = createDivLabel(`lbl${_settingName}`, 0, C_LEN_SETLBL_HEIGHT * _posY + _adjY,
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
+		_settingName);
+	lbl.classList.add(`settings_${_settingName}`);
+
+	return lbl;
 }
 
 /**
@@ -4796,10 +4781,7 @@ function createSettingsDisplayWindow(_sprite) {
 	// 矢印の見え方 (Appearance)
 	// 縦位置: 6
 	const setNoAppearance = 6;
-	const lblAppearance = createDivLabel(`lblAppearance`, 0, C_LEN_SETLBL_HEIGHT * setNoAppearance,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#cc99ff>A</span>ppearance`);
-	optionsprite.appendChild(lblAppearance);
+	optionsprite.appendChild(createLblSetting(`Appearance`, setNoAppearance));
 
 	if (g_headerObj.appearanceUse) {
 		const lnkAppearance = makeSettingLblButton(`lnkAppearance`, g_stateObj.appearance, setNoAppearance, _ => {
