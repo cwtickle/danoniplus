@@ -72,6 +72,7 @@ let C_CLR_NEXT = `#990000`;
 let C_CLR_SETTING = `#999900`;
 let C_CLR_RESET = `#009900`;
 let C_CLR_TWEET = `#009999`;
+
 let C_CLR_TEXT = `#ffffff`;
 let C_CLR_TITLE = `#cccccc`;
 let C_CLR_LOADING_BAR = `#eeeeee`;
@@ -2619,9 +2620,8 @@ function titleInit() {
 		width: g_sWidth,
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_TITLESIZE,
-		normalColor: C_CLR_DEFAULT,
-		hoverColor: C_CLR_DEFHOVER,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		class: `button_Default`,
 	}, _ => {
 		clearTimeout(g_timeoutEvtTitleId);
 		clearWindow();
@@ -2638,9 +2638,8 @@ function titleInit() {
 		width: g_sWidth / 5,
 		height: 16,
 		fontsize: 12,
-		normalColor: C_CLR_DEFAULTD,
-		hoverColor: C_CLR_RESET,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		class: `button_Reset`,
 	}, _ => {
 		if (window.confirm(`この作品のローカル設定をクリアします。よろしいですか？\n(ハイスコアやAdjustment等のデータがクリアされます)`)) {
 			g_localStorage = {
@@ -2663,9 +2662,8 @@ function titleInit() {
 		width: 30,
 		height: 30,
 		fontsize: 20,
-		normalColor: C_CLR_DEFAULT,
-		hoverColor: C_CLR_DEFHOVER,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		class: `button_Default`,
 	}, _ => location.reload(true));
 	divRoot.appendChild(btnReload);
 
@@ -2678,9 +2676,8 @@ function titleInit() {
 		width: g_sWidth / 2 - 10,
 		height: C_LNK_HEIGHT,
 		fontsize: C_LBL_LNKSIZE,
-		normalColor: C_CLR_LNK,
-		hoverColor: C_CLR_DEFAULT,
-		align: C_ALIGN_LEFT
+		align: C_ALIGN_LEFT,
+		class: `button_Default`,
 	}, _ => {
 		if (setVal(g_headerObj.creatorUrl, ``, C_TYP_STRING) !== ``) {
 			window.open(g_headerObj.creatorUrl, `_blank`);
@@ -2697,9 +2694,8 @@ function titleInit() {
 		width: g_sWidth / 2 - 10,
 		height: C_LNK_HEIGHT,
 		fontsize: C_LBL_LNKSIZE,
-		normalColor: C_CLR_LNK,
-		hoverColor: C_CLR_DEFAULT,
-		align: C_ALIGN_LEFT
+		align: C_ALIGN_LEFT,
+		class: `button_Default`,
 	}, _ => {
 		if (setVal(g_headerObj.artistUrl, ``, C_TYP_STRING) !== ``) {
 			window.open(g_headerObj.artistUrl, `_blank`);
@@ -2727,9 +2723,8 @@ function titleInit() {
 		width: g_sWidth * 3 / 4 - 10,
 		height: 16,
 		fontsize: 12,
-		normalColor: C_CLR_DEFAULTE,
-		hoverColor: C_CLR_TWEET,
-		align: C_ALIGN_RIGHT
+		align: C_ALIGN_RIGHT,
+		class: `button_Tweet`,
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus`, `_blank`));
 	divRoot.appendChild(lnkVersion);
 
@@ -3856,10 +3851,10 @@ function createOptionWindow(_sprite) {
 				if (document.querySelector(`#difList`) === null) {
 					const difList = createSprite(`optionsprite`, `difList`, 140, 45, 280, 255);
 					difList.style.overflow = `auto`;
-					difList.style.backgroundColor = `#111111`;
+					difList.classList.add(`settings_DifSelector`);
 					const difCover = createSprite(`optionsprite`, `difCover`, 0, 45, 140, 255);
 					difCover.style.overflow = `auto`;
-					difCover.style.backgroundColor = `#111111`;
+					difCover.classList.add(`settings_DifSelector`);
 					difCover.style.opacity = 0.95;
 
 					// 全リスト作成
@@ -4664,9 +4659,8 @@ function makeDifLblButton(_id, _name, _heightPos, _func) {
 		width: C_LEN_SETLBL_WIDTH,
 		height: C_LEN_SETLBL_HEIGHT,
 		fontsize: C_SIZ_DIFSELECTOR,
-		normalColor: C_CLR_LNK,
-		hoverColor: C_CLR_DEFHOVER,
-		align: C_ALIGN_CENTER
+		align: C_ALIGN_CENTER,
+		class: `button_Default`,
 	}, _func);
 	difLblButton.style.borderStyle = `solid`;
 	difLblButton.style.borderColor = `#000000 #cccccc`;
