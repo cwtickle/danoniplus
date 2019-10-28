@@ -284,6 +284,18 @@ input[type=range]:focus {
 }
 
 /* 設定別カラー */
+.settings_Title::first-letter {
+	color:#6666ff;
+	font-size:40px;
+}
+.settings_Title2::first-letter {
+	color:#ff6666;
+	font-size:40px;
+}
+.settings_Display::first-letter {
+	color:#ffff66;
+	font-size:40px;
+}
 .settings_Difficulty::first-letter {
 	color:#ff9999;
 }
@@ -323,5 +335,10 @@ input[type=range]:focus {
 	transition: background-color 0.25s linear;
 	display: flex;
 	flex-direction: column;
+	justify-content: center;
+}
+
+.flex_centering {
+	display: flex;
 	justify-content: center;
 }

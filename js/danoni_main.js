@@ -3606,8 +3606,8 @@ function optionInit() {
 	g_baseDisp = `Settings`;
 
 	// タイトル文字描画
-	const lblTitle = getTitleDivLabel(`lblTitle`,
-		`<span style=color:#6666ff;font-size:40px>S</span>ETTINGS`, 0, 15);
+	const lblTitle = getTitleDivLabel(`lblTitle`, `SETTINGS`, 0, 15);
+	lblTitle.classList.add(`settings_Title`);
 	divRoot.appendChild(lblTitle);
 
 	// オプションボタン用の設置
@@ -4664,8 +4664,8 @@ function settingsDisplayInit() {
 	g_canLoadDifInfoFlg = false;
 
 	// タイトル文字描画
-	const lblTitle = getTitleDivLabel(`lblTitle`,
-		`<span style=color:#ffff66;font-size:40px>D</span>ISPLAY`, 0, 15);
+	const lblTitle = getTitleDivLabel(`lblTitle`, `DISPLAY`, 0, 15);
+	lblTitle.classList.add(`settings_Display`);
 	divRoot.appendChild(lblTitle);
 
 	// オプションボタン用の設置
@@ -4870,9 +4870,11 @@ function keyConfigInit() {
 
 	// タイトル文字描画
 	const lblTitle = getTitleDivLabel(`lblTitle`,
-		`<span style=color:#6666ff;font-size:40px>K</span>EY
-		<span style=color:#ff6666;font-size:40px>C</span>ONFIG`
+		`<div class="settings_Title">KEY</div>
+		<div class="settings_Title2">CONFIG</div>`
 			.replace(/[\t\n]/g, ``), 0, 15);
+	lblTitle.classList.add(`flex_centering`);
+
 	divRoot.appendChild(lblTitle);
 
 	const kcDesc = createDivLabel(`kcDesc`, 0, 65, g_sWidth, 20, 14, C_CLR_TITLE,
@@ -8941,8 +8943,8 @@ function resultInit() {
 	}
 
 	// タイトル文字描画
-	const lblTitle = getTitleDivLabel(`lblTitle`,
-		`<span style=color:#6666ff;font-size:40px>R</span>ESULT`, 0, 15);
+	const lblTitle = getTitleDivLabel(`lblTitle`, `RESULT`, 0, 15);
+	lblTitle.classList.add(`settings_Title`);
 	divRoot.appendChild(lblTitle);
 
 	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70 + (g_sHeight - 500) / 2, 450, 110);
