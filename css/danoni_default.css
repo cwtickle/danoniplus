@@ -1,0 +1,128 @@
+﻿@charset "UTF-8";
+
+/* タイトル */
+.title_base {
+	color:#cccccc;
+}
+
+/* 設定別カラー */
+.settings_Title::first-letter {
+	color:#6666ff;
+	font-size:40px;
+}
+.settings_Title2::first-letter {
+	color:#ff6666;
+	font-size:40px;
+}
+.settings_Display::first-letter {
+	color:#ffff66;
+	font-size:40px;
+}
+.settings_Difficulty::first-letter {
+	color:#ff9999;
+}
+.settings_Speed::first-letter {
+	color:#ffff99;
+}
+.settings_Motion::first-letter {
+	color:#eeff99;
+}
+.settings_Reverse::first-letter {
+	color:#ddff99;
+}
+.settings_Shuffle::first-letter {
+	color:#99ff99;
+}
+.settings_AutoPlay::first-letter {
+	color:#99ffbb;
+}
+.settings_Gauge::first-letter {
+	color:#99ffdd;
+}
+.settings_Adjustment::first-letter {
+	color:#99ffff;
+}
+.settings_Fadein::first-letter {
+	color:#99eeff;
+}
+.settings_Volume::first-letter {
+	color:#99ddff;
+}
+.settings_Appearance::first-letter {
+	color:#cc99ff;
+}
+
+/* 結果画面：項目、設定値 */
+.result_lbl {
+	color: #999999;
+}
+.result_style {
+	color: #cccccc;
+}
+
+/* 結果画面：判定名 */
+.common_ii {
+	color: #66ffff;
+}
+.common_shakin {
+	color: #99ff99;
+}
+.common_matari {
+	color: #ff9966;
+}
+.common_shobon {
+	color: #ccccff;
+}
+.common_uwan {
+	color: #ff9999;
+}
+.common_kita {
+	color: #ffff99;
+}
+.common_iknai {
+	color: #99ff66;
+}
+.common_combo {
+	color: #ffffff;
+}
+.common_score {
+	color: #ffffff;
+}
+
+/* 結果画面：スコア */
+.result_score {
+	color: #ffffff;
+}
+/* 結果画面：ハイスコア差分、ハイスコア時のカラー */
+.result_scoreHiBlanket {
+	color: #999999;
+}
+.result_scoreHi {
+	color: #cccccc;
+}
+.result_scoreHiPlus {
+	color: #ffff99;
+}
+/* 結果画面：ハイスコア更新外の表示色 */
+.result_noRecord {
+	color: #999999;
+}
+/* 結果画面：完全PF、PF、FC、Cleared、Failed */
+.result_AllPerfect {
+	color:#ffffff;
+}
+.result_Perfect {
+	color:#ffffcc;
+}
+.result_FullCombo {
+	color:#66ffff;
+}
+.result_Cleared {
+	color:#ffff66;
+}
+.result_Failed {
+	color:#ff6666;
+}
+.result_Window::first-letter {
+	font-size:80px;
+}

@@ -1170,6 +1170,18 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = ``) {
 }
 
 /**
+ * CSSファイルの読み込み（danoni_main.css以外）
+ * デフォルトは danoni_default.css を読み込む
+ * @param {url} _href 
+ */
+function importCssFile(_href) {
+	const link = document.createElement(`link`);
+	link.rel = `stylesheet`;
+	link.href = _href;
+	document.head.appendChild(link);
+}
+
+/**
  * 基本フォントを取得
  */
 function getBasicFont() {
@@ -2014,6 +2026,9 @@ function initAfterDosLoaded() {
 	// キー数情報を初期化
 	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 	g_keyObj.currentPtn = 0;
+
+	// CSSファイルの読み込み
+	importCssFile(`../css/danoni_default.css`);
 
 	// 画像ファイルの読み込み
 	preloadFile(`image`, C_IMG_ARROW);
