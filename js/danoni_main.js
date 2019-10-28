@@ -1260,7 +1260,9 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text) 
 	const div = createDiv(_id, _x, _y, _width, _height);
 	const style = div.style;
 	style.fontSize = `${_fontsize}px`;
-	style.color = _color;
+	if (_color !== ``) {
+		style.color = _color;
+	}
 	style.fontFamily = getBasicFont();
 	style.textAlign = C_ALIGN_CENTER;
 	div.innerHTML = _text;
@@ -1285,7 +1287,9 @@ function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _
 	const div = createDiv(_id, _x, _y, _width, _height);
 	const style = div.style;
 	style.fontSize = `${_fontsize}px`;
-	style.color = _color;
+	if (_color !== ``) {
+		style.color = _color;
+	}
 	style.fontFamily = _font;
 	style.textAlign = C_ALIGN_CENTER;
 	div.innerHTML = _text;
@@ -1537,8 +1541,9 @@ function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align) 
  * @param {number} _y 
  */
 function getTitleDivLabel(_id, _titlename, _x, _y) {
-	const div = createDivLabel(_id, _x, _y, g_sWidth, 50, C_LBL_BTNSIZE, C_CLR_TITLE, _titlename);
+	const div = createDivLabel(_id, _x, _y, g_sWidth, 50, C_LBL_BTNSIZE, ``, _titlename);
 	div.style.textAlign = C_ALIGN_CENTER;
+	div.classList.add(`title_base`);
 	return div;
 }
 
@@ -7334,16 +7339,16 @@ function MainInit() {
 	}
 
 	// 判定カウンタ表示
-	infoSprite.appendChild(makeCounterSymbol(`lblIi`, g_sWidth - 110, C_CLR_II, 1, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblShakin`, g_sWidth - 110, C_CLR_SHAKIN, 2, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblMatari`, g_sWidth - 110, C_CLR_MATARI, 3, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblShobon`, g_sWidth - 110, C_CLR_SHOBON, 4, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblUwan`, g_sWidth - 110, C_CLR_UWAN, 5, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblMCombo`, g_sWidth - 110, `#ffffff`, 6, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblIi`, g_sWidth - 110, `common_ii`, 1, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblShakin`, g_sWidth - 110, `common_shakin`, 2, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblMatari`, g_sWidth - 110, `common_matari`, 3, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblShobon`, g_sWidth - 110, `common_shobon`, 4, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblUwan`, g_sWidth - 110, `common_uwan`, 5, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblMCombo`, g_sWidth - 110, `common_combo`, 6, 0));
 
-	infoSprite.appendChild(makeCounterSymbol(`lblKita`, g_sWidth - 110, C_CLR_KITA, 8, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblIknai`, g_sWidth - 110, C_CLR_IKNAI, 9, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblFCombo`, g_sWidth - 110, `#ffffff`, 10, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblKita`, g_sWidth - 110, `common_kita`, 8, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblIknai`, g_sWidth - 110, `common_iknai`, 9, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblFCombo`, g_sWidth - 110, `common_combo`, 10, 0));
 
 	// 歌詞表示
 	createSprite(`judgeSprite`, `wordSprite`, 0, 0, g_sWidth, g_sHeight);
@@ -8388,14 +8393,15 @@ function MainInit() {
  * 判定カウンタ表示作成
  * @param {string} _id 
  * @param {number} _x
- * @param {string} _color 
+ * @param {string} _class 
  * @param {number} _heightPos 
  * @param {string, number} _text
  */
-function makeCounterSymbol(_id, _x, _color, _heightPos, _text) {
+function makeCounterSymbol(_id, _x, _class, _heightPos, _text) {
 	const counter = createDivLabel(_id, _x, C_LEN_JDGCNTS_HEIGHT * _heightPos,
-		C_LEN_JDGCNTS_WIDTH, C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, _color, _text);
+		C_LEN_JDGCNTS_WIDTH, C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, ``, _text);
 	counter.style.textAlign = C_ALIGN_RIGHT;
+	counter.classList.add(_class);
 
 	return counter;
 }
@@ -9014,13 +9020,13 @@ function resultInit() {
 		transKeyData = `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)`;
 	}
 
-	playDataWindow.appendChild(makeResultPlayData(`lblMusic`, 20, `#999999`, 0,
+	playDataWindow.appendChild(makeResultPlayData(`lblMusic`, 20, `result_lbl`, 0,
 		`Music`, C_ALIGN_LEFT));
-	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `#cccccc`, 0,
+	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `result_style`, 0,
 		musicTitleForView0, C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `#cccccc`, 1,
+	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `result_style`, 1,
 		setVal(musicTitleForView1, ``, C_TYP_STRING), C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `#999999`, 2,
+	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `result_lbl`, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_headerObj.makerView) {
@@ -9029,9 +9035,9 @@ function resultInit() {
 	if (g_stateObj.shuffle !== C_FLG_OFF) {
 		difData += ` [${g_stateObj.shuffle}]`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblDifData`, 60, `#cccccc`, 2, difData,
+	playDataWindow.appendChild(makeResultPlayData(`lblDifData`, 60, `result_style`, 2, difData,
 		C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeResultPlayData(`lblStyle`, 20, `#999999`, 3,
+	playDataWindow.appendChild(makeResultPlayData(`lblStyle`, 20, `result_lbl`, 3,
 		`Playstyle`, C_ALIGN_LEFT));
 
 	let playStyleData = ``;
@@ -9048,10 +9054,10 @@ function resultInit() {
 	if (g_stateObj.gauge !== g_gauges[0]) {
 		playStyleData += `, ${g_stateObj.gauge}`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblStyleData`, 60, `#cccccc`, 3,
+	playDataWindow.appendChild(makeResultPlayData(`lblStyleData`, 60, `result_style`, 3,
 		playStyleData, C_ALIGN_CENTER));
 
-	playDataWindow.appendChild(makeResultPlayData(`lblDisplay`, 20, `#999999`, 4,
+	playDataWindow.appendChild(makeResultPlayData(`lblDisplay`, 20, `result_lbl`, 4,
 		`Display`, C_ALIGN_LEFT));
 
 	let displayData = ``;
@@ -9064,7 +9070,7 @@ function resultInit() {
 	} else {
 		displayData += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, `#cccccc`, 4,
+	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, `result_style`, 4,
 		displayData, C_ALIGN_CENTER));
 
 	let display2Data = ``;
@@ -9076,7 +9082,7 @@ function resultInit() {
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, `#cccccc`, 5,
+	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, `result_style`, 5,
 		display2Data, C_ALIGN_CENTER));
 
 	/**
@@ -9096,30 +9102,30 @@ function resultInit() {
 	}
 
 	// キャラクタ描画
-	resultWindow.appendChild(makeResultSymbol(`lblIi`, 0, C_CLR_II, 0, C_JCR_II, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblShakin`, 0, C_CLR_SHAKIN, 1, C_JCR_SHAKIN, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblMatari`, 0, C_CLR_MATARI, 2, C_JCR_MATARI, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblShobon`, 0, C_CLR_SHOBON, 3, C_JCR_SHOBON, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblUwan`, 0, C_CLR_UWAN, 4, C_JCR_UWAN, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblKita`, 0, C_CLR_KITA, 5, C_JCR_KITA, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblIknai`, 0, C_CLR_IKNAI, 6, C_JCR_IKNAI, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblMCombo`, 0, `#ffffff`, 7, `MaxCombo`, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblFCombo`, 0, `#ffffff`, 8, `FreezeCombo`, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblIi`, 0, `common_ii`, 0, C_JCR_II, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblShakin`, 0, `common_shakin`, 1, C_JCR_SHAKIN, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblMatari`, 0, `common_matari`, 2, C_JCR_MATARI, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblShobon`, 0, `common_shobon`, 3, C_JCR_SHOBON, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblUwan`, 0, `common_uwan`, 4, C_JCR_UWAN, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblKita`, 0, `common_kita`, 5, C_JCR_KITA, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblIknai`, 0, `common_iknai`, 6, C_JCR_IKNAI, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblMCombo`, 0, `common_combo`, 7, `MaxCombo`, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblFCombo`, 0, `common_combo`, 8, `FreezeCombo`, C_ALIGN_LEFT));
 
-	resultWindow.appendChild(makeResultSymbol(`lblScore`, 0, `#ffffff`, 10, `Score`, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblScore`, 0, `common_score`, 10, `Score`, C_ALIGN_LEFT));
 
 	// スコア描画
-	resultWindow.appendChild(makeResultSymbol(`lblIiS`, 50, `#ffffff`, 0, g_resultObj.ii, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblShakinS`, 50, `#ffffff`, 1, g_resultObj.shakin, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblMatariS`, 50, `#ffffff`, 2, g_resultObj.matari, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblShobonS`, 50, `#ffffff`, 3, g_resultObj.shobon, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblUwanS`, 50, `#ffffff`, 4, g_resultObj.uwan, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblKitaS`, 50, `#ffffff`, 5, g_resultObj.kita, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, 50, `#ffffff`, 6, g_resultObj.iknai, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblMComboS`, 50, `#ffffff`, 7, g_resultObj.maxCombo, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblFComboS`, 50, `#ffffff`, 8, g_resultObj.fmaxCombo, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblIiS`, 50, `result_score`, 0, g_resultObj.ii, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblShakinS`, 50, `result_score`, 1, g_resultObj.shakin, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblMatariS`, 50, `result_score`, 2, g_resultObj.matari, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblShobonS`, 50, `result_score`, 3, g_resultObj.shobon, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblUwanS`, 50, `result_score`, 4, g_resultObj.uwan, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblKitaS`, 50, `result_score`, 5, g_resultObj.kita, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, 50, `result_score`, 6, g_resultObj.iknai, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblMComboS`, 50, `result_score`, 7, g_resultObj.maxCombo, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblFComboS`, 50, `result_score`, 8, g_resultObj.fmaxCombo, C_ALIGN_RIGHT));
 
-	resultWindow.appendChild(makeResultSymbol(`lblScoreS`, 50, `#ffffff`, 10, g_resultObj.score, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblScoreS`, 50, `result_score`, 10, g_resultObj.score, C_ALIGN_RIGHT));
 
 	// ランク描画
 	const lblRank = createDivCustomLabel(`lblRank`, 340, 160, 70, 20, 50, `#ffffff`,
@@ -9210,45 +9216,45 @@ function resultInit() {
 		}
 
 		// ハイスコア差分描画
-		resultWindow.appendChild(makeResultSymbol(`lblIiL1`, C_RLT_BRACKET_L, `#999999`, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinL1`, C_RLT_BRACKET_L, `#999999`, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariL1`, C_RLT_BRACKET_L, `#999999`, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonL1`, C_RLT_BRACKET_L, `#999999`, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanL1`, C_RLT_BRACKET_L, `#999999`, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaL1`, C_RLT_BRACKET_L, `#999999`, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiL1`, C_RLT_BRACKET_L, `#999999`, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboL1`, C_RLT_BRACKET_L, `#999999`, 7, `(${maxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboL1`, C_RLT_BRACKET_L, `#999999`, 8, `(${fmaxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 7, `(${maxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 8, `(${fmaxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreL1`, C_RLT_BRACKET_L, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreL1`, C_RLT_BRACKET_L, `${scoreDf > 0 ? "result_scoreHiPlus" : "result_scoreHiBlanket"}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiS`, C_RLT_HIDIF_X, `#cccccc`, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinS`, C_RLT_HIDIF_X, `#cccccc`, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariS`, C_RLT_HIDIF_X, `#cccccc`, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonS`, C_RLT_HIDIF_X, `#cccccc`, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanS`, C_RLT_HIDIF_X, `#cccccc`, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaS`, C_RLT_HIDIF_X, `#cccccc`, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, C_RLT_HIDIF_X, `#cccccc`, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboS`, C_RLT_HIDIF_X, `#cccccc`, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboS`, C_RLT_HIDIF_X, `#cccccc`, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiS`, C_RLT_HIDIF_X, `result_scoreHi`, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinS`, C_RLT_HIDIF_X, `result_scoreHi`, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariS`, C_RLT_HIDIF_X, `result_scoreHi`, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonS`, C_RLT_HIDIF_X, `result_scoreHi`, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanS`, C_RLT_HIDIF_X, `result_scoreHi`, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaS`, C_RLT_HIDIF_X, `result_scoreHi`, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, C_RLT_HIDIF_X, `result_scoreHi`, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboS`, C_RLT_HIDIF_X, `result_scoreHi`, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboS`, C_RLT_HIDIF_X, `result_scoreHi`, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreS`, C_RLT_HIDIF_X, `${scoreDf > 0 ? "#ffff99" : "#cccccc"}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreS`, C_RLT_HIDIF_X, `${scoreDf > 0 ? "result_scoreHiPlus" : "result_scoreHi"}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
 
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiL2`, C_RLT_BRACKET_R, `#999999`, 0, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinL2`, C_RLT_BRACKET_R, `#999999`, 1, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariL2`, C_RLT_BRACKET_R, `#999999`, 2, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonL2`, C_RLT_BRACKET_R, `#999999`, 3, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanL2`, C_RLT_BRACKET_R, `#999999`, 4, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaL2`, C_RLT_BRACKET_R, `#999999`, 5, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiL2`, C_RLT_BRACKET_R, `#999999`, 6, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboL2`, C_RLT_BRACKET_R, `#999999`, 7, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboL2`, C_RLT_BRACKET_R, `#999999`, 8, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 0, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 1, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 2, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 3, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 4, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 5, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 6, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 7, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 8, `)`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreL2`, C_RLT_BRACKET_R, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreL2`, C_RLT_BRACKET_R, `${scoreDf > 0 ? "result_scoreHiPlus" : "result_scoreHiBlanket"}`, 10, `)`, C_ALIGN_LEFT));
 
 	} else {
-		resultWindow.appendChild(makeResultSymbol(`lblAutoView`, 230, `#999999`, 4, `(No Record)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblAutoView`, 230, `result_noRecord`, 4, `(No Record)`, C_ALIGN_LEFT));
 		const lblAutoView = document.querySelector(`#lblAutoView`);
 		lblAutoView.style.fontSize = `24px`;
 	}
@@ -9479,15 +9485,16 @@ function resultInit() {
  * 結果表示作成（曲名、オプション）
  * @param {string} _id 
  * @param {number} _x
- * @param {string} _color 
+ * @param {string} _class 
  * @param {number} _heightPos 
  * @param {string, number} _text
  * @param {string} _align
  */
-function makeResultPlayData(_id, _x, _color, _heightPos, _text, _align) {
+function makeResultPlayData(_id, _x, _class, _heightPos, _text, _align) {
 	const symbol = createDivLabel(_id, _x, 18 * _heightPos,
-		400, 18, 14, _color, _text);
+		400, 18, 14, ``, _text);
 	symbol.style.textAlign = _align;
+	symbol.classList.add(_class);
 
 	return symbol;
 }
@@ -9496,15 +9503,16 @@ function makeResultPlayData(_id, _x, _color, _heightPos, _text, _align) {
  * 結果表示作成（キャラクタ）
  * @param {string} _id 
  * @param {number} _x
- * @param {string} _color 
+ * @param {string} _class
  * @param {number} _heightPos 
  * @param {string, number} _text
  * @param {string} _align
  */
-function makeResultSymbol(_id, _x, _color, _heightPos, _text, _align) {
+function makeResultSymbol(_id, _x, _class, _heightPos, _text, _align) {
 	const symbol = createDivLabel(_id, _x, 18 * _heightPos,
-		150, 18, 16, _color, _text);
+		150, 18, 16, ``, _text);
 	symbol.style.textAlign = _align;
+	symbol.classList.add(_class);
 
 	return symbol;
 }
