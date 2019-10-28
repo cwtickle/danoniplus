@@ -1735,9 +1735,11 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 					const tmpAnimationName = escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING));
 					const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / g_fps;
 
-					if (tmpPath.indexOf(`.png`) !== -1 || tmpPath.indexOf(`.gif`) !== -1 ||
-						tmpPath.indexOf(`.bmp`) !== -1 || tmpPath.indexOf(`.jpg`) !== -1) {
-						preloadFile(`image`, tmpPath);
+					if (g_headerObj.autoPreload) {
+						if (tmpPath.indexOf(`.png`) !== -1 || tmpPath.indexOf(`.gif`) !== -1 ||
+							tmpPath.indexOf(`.bmp`) !== -1 || tmpPath.indexOf(`.jpg`) !== -1) {
+							preloadFile(`image`, tmpPath);
+						}
 					}
 					if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
 						maxDepth = tmpDepth;
@@ -3198,6 +3200,9 @@ function headerConvert(_dosObj) {
 	if (_dosObj.hashTag !== undefined) {
 		obj.hashTag = _dosObj.hashTag;
 	}
+
+	// 自動プリロードの設定
+	obj.autoPreload = setVal(_dosObj.autoPreload, false, C_TYP_BOOLEAN);
 
 	// 読込対象の画像を指定(rel:preload)と同じ
 	obj.preloadImages = [];
