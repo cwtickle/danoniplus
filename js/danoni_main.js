@@ -8857,21 +8857,21 @@ function finishViewing() {
 		if (g_headerObj.finishView !== C_DIS_NONE) {
 			const fullArrows = g_allArrow + g_allFrz / 2;
 			if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
-				document.querySelector(`#finishView`).innerHTML = `<span style=color:#ffffff>All Perfect!!</span>`;
+				document.querySelector(`#finishView`).innerHTML = `<span class="result_AllPerfect">All Perfect!!</span>`;
 				document.querySelector(`#finishView`).style.opacity = 1;
 				document.querySelector(`#charaJ`).innerHTML = ``;
 				document.querySelector(`#comboJ`).innerHTML = ``;
 				document.querySelector(`#charaFJ`).innerHTML = ``;
 				document.querySelector(`#comboFJ`).innerHTML = ``;
 			} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
-				document.querySelector(`#finishView`).innerHTML = `Perfect!!`;
+				document.querySelector(`#finishView`).innerHTML = `<span class="result_Perfect">Perfect!!</span>`;
 				document.querySelector(`#finishView`).style.opacity = 1;
 				document.querySelector(`#charaJ`).innerHTML = ``;
 				document.querySelector(`#comboJ`).innerHTML = ``;
 				document.querySelector(`#charaFJ`).innerHTML = ``;
 				document.querySelector(`#comboFJ`).innerHTML = ``;
 			} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
-				document.querySelector(`#finishView`).innerHTML = `<span style=color:#66ffff>FullCombo!</span>`;
+				document.querySelector(`#finishView`).innerHTML = `<span class="result_FullCombo">FullCombo!</span>`;
 				document.querySelector(`#finishView`).style.opacity = 1;
 				document.querySelector(`#charaJ`).innerHTML = ``;
 				document.querySelector(`#comboJ`).innerHTML = ``;
@@ -9278,8 +9278,8 @@ function resultInit() {
 
 	// Cleared & Failed表示
 	const lblResultPre = createDivLabel(`lblResultPre`, g_sWidth / 2 - 150, g_sHeight / 2 - 160,
-		200, 50, 60, `#ffff66`,
-		`<span style=font-size:80px>C</span>LEARED!`);
+		200, 50, 60, `#ffff66`, `<span class="result_Cleared">CLEARED!</span>`);
+	lblResultPre.classList.add(`result_Window`);
 	divRoot.appendChild(lblResultPre);
 	lblResultPre.style.opacity = 0;
 
@@ -9287,13 +9287,13 @@ function resultInit() {
 
 	if (playingArrows === fullArrows) {
 		if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
-			resultFlgTmp = `<span style=color:#ffffff>All Perfect!!</span>`;
+			resultFlgTmp = `<span class="result_AllPerfect">All Perfect!!</span>`;
 		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
-			resultFlgTmp = `<span style=color:#ffffcc>Perfect!!</span>`;
+			resultFlgTmp = `<span class="result_Perfect">Perfect!!</span>`;
 		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
-			resultFlgTmp = `<span style=color:#66ffff>FullCombo!</span>`;
+			resultFlgTmp = `<span class="result_FullCombo">FullCombo!</span>`;
 		} else {
-			resultFlgTmp = `CLEARED!`;
+			resultFlgTmp = `<span class="result_Cleared">CLEARED!</span>`;
 		}
 	} else {
 		resultFlgTmp = ``;
@@ -9308,10 +9308,10 @@ function resultInit() {
 		lblResultPre.style.animationName = `leftToRightFade`;
 	} else {
 		lblResultPre.style.animationDuration = `3s`;
-		lblResultPre.innerHTML = `<span style=color:#ff6666><span style=font-size:80px>F</span>AILED...</span>`;
+		lblResultPre.innerHTML = `<span class="result_Failed">FAILED...</span>`;
 		lblResultPre.style.animationName = `upToDownFade`;
 
-		lblResultPre2.innerHTML = `<span style=color:#ff6666>FAILED...</span>`;
+		lblResultPre2.innerHTML = `<span class="result_Failed">FAILED...</span>`;
 	}
 
 	// プレイデータは Cleared & Failed に合わせて表示

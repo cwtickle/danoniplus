@@ -330,6 +330,25 @@ input[type=range]:focus {
 	color:#cc99ff;
 }
 
+.result_AllPerfect {
+	color:#ffffff;
+}
+.result_Perfect {
+	color:#ffffcc;
+}
+.result_FullCombo {
+	color:#66ffff;
+}
+.result_Cleared {
+	color:#ffff66;
+}
+.result_Failed {
+	color:#ff6666;
+}
+.result_Window::first-letter {
+	font-size:80px;
+}
+
 /* ボタン一般 */
 .button_common {
 	transition: background-color 0.25s linear;
