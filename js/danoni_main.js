@@ -4996,9 +4996,11 @@ function keyConfigInit() {
 				50 + C_KYC_REPHEIGHT * k + C_KYC_HEIGHT * dividePos,
 				C_ARW_WIDTH, C_ARW_WIDTH, 16, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] !== g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]) {
-				document.querySelector(`#keycon${j}_${k}`).style.color = `#ffff00`;
+				removeClassList(j, k);
+				document.querySelector(`#keycon${j}_${k}`).classList.add(`keyconfig_Changekey`);
 			} else if (g_keyObj.currentPtn === -1) {
-				document.querySelector(`#keycon${j}_${k}`).style.color = `#99ccff`;
+				removeClassList(j, k);
+				document.querySelector(`#keycon${j}_${k}`).classList.add(`keyconfig_Defaultkey`);
 			}
 		}
 	}
@@ -5240,9 +5242,11 @@ function keyConfigInit() {
 					document.querySelector(`#keycon${j}_${k}`).innerHTML = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
 
 					if (g_keyObj.currentPtn === -1) {
-						document.querySelector(`#keycon${j}_${k}`).style.color = `#99ccff`;
+						removeClassList(j, k);
+						document.querySelector(`#keycon${j}_${k}`).classList.add(`keyconfig_Defaultkey`);
 					} else {
-						document.querySelector(`#keycon${j}_${k}`).style.color = `#cccccc`;
+						removeClassList(j, k);
+						document.querySelector(`#keycon${j}_${k}`).classList.add(`title_base`);
 					}
 				}
 			}
@@ -5277,7 +5281,8 @@ function keyConfigInit() {
 					setKey = 0;
 				}
 				if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][g_currentj][g_currentk] !== setKey) {
-					keyCdObj.style.color = `#ffff00`;
+					removeClassList(g_currentj, g_currentk);
+					keyCdObj.classList.add(`keyconfig_Changekey`);
 				}
 				keyCdObj.innerHTML = g_kCd[setKey];
 				g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][g_currentk] = setKey;
@@ -5419,6 +5424,24 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
 	const cursor = document.querySelector(`#cursor`);
 	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
 	cursor.style.top = `45px`;
+}
+
+/**
+ * キーコンフィグ画面の対応キー色変更
+ * @param {number} _j 
+ * @param {number} _k 
+ */
+function removeClassList(_j, _k) {
+	const obj = document.querySelector(`#keycon${_j}_${_k}`);
+	if (obj.classList.contains(`keyconfig_Changekey`)) {
+		obj.classList.remove(`keyconfig_Changekey`);
+	}
+	if (obj.classList.contains(`keyconfig_Defaultkey`)) {
+		obj.classList.remove(`keyconfig_Defaultkey`);
+	}
+	if (obj.classList.contains(`title_base`)) {
+		obj.classList.remove(`title_base`);
+	}
 }
 
 /*-----------------------------------------------------------*/

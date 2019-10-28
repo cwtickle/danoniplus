@@ -86,8 +86,14 @@
 .keyconfig_ConfigType::first-letter {
 	color:#99ddff;
 }
-.keyconfig_ColorTYpe::first-letter {
+.keyconfig_ColorType::first-letter {
 	color:#ffdd99;
+}
+.keyconfig_Changekey {
+	color:#ffff00;
+}
+.keyconfig_Defaultkey {
+	color:#99ccff;
 }
 
 /* 結果画面：項目、設定値 */

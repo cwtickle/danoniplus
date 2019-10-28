@@ -89,6 +89,12 @@
 .keyconfig_ColorType::first-letter {
 	color:#773300;
 }
+.keyconfig_Changekey {
+	color:#999900;
+}
+.keyconfig_Defaultkey {
+	color:#000099;
+}
 
 /* 結果画面：項目、設定値 */
 .result_lbl {
