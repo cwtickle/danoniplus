@@ -39,7 +39,7 @@
 	-webkit-mask-image: url("../img/onigiri_600.png");
 	-webkit-mask-size: contain;
 }
-.onigiriarrowShadow {
+.onigiriShadow {
 	mask-image: url("../img/aaShadow_500.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/aaShadow_500.png");
@@ -51,7 +51,7 @@
 	-webkit-mask-image: url("../img/giko_600.png");
 	-webkit-mask-size: contain;
 }
-.gikoarrowShadow {
+.gikoShadow {
 	mask-image: url("../img/aaShadow_500.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/aaShadow_500.png");
@@ -63,7 +63,7 @@
 	-webkit-mask-image: url("../img/iyo_600.png");
 	-webkit-mask-size: contain;
 }
-.iyoarrowShadow {
+.iyoShadow {
 	mask-image: url("../img/aaShadow_500.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/aaShadow_500.png");
@@ -75,7 +75,7 @@
 	-webkit-mask-image: url("../img/c_600.png");
 	-webkit-mask-size: contain;
 }
-.carrowShadow {
+.cShadow {
 	mask-image: url("../img/aaShadow_500.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/aaShadow_500.png");
@@ -87,7 +87,7 @@
 	-webkit-mask-image: url("../img/morara_600.png");
 	-webkit-mask-size: contain;
 }
-.moraraarrowShadow {
+.moraraShadow {
 	mask-image: url("../img/aaShadow_500.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/aaShadow_500.png");
@@ -99,7 +99,7 @@
 	-webkit-mask-image: url("../img/monar_600.png");
 	-webkit-mask-size: contain;
 }
-.monararrowShadow {
+.monarShadow {
 	mask-image: url("../img/aaShadow_500.png");
 	mask-size: contain;
 	-webkit-mask-image: url("../img/aaShadow_500.png");

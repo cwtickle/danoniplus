@@ -109,21 +109,6 @@ const C_IMG_FRZBAR = `../img/frzbar.png`;
 const C_IMG_LIFEBAR = `../img/frzbar.png`;
 const C_IMG_LIFEBORDER = `../img/borderline.png`;
 
-const C_IMG_ARROWSHADOW = `../img/arrowShadow_500.png`;
-const C_IMG_ONIGIRIARROWSHADOW = `../img/aaShadow_500.png`;
-const C_IMG_GIKOARROWSHADOW = `../img/aaShadow_500.png`;
-const C_IMG_IYOARROWSHADOW = `../img/aaShadow_500.png`;
-const C_IMG_CARROWSHADOW = `../img/aaShadow_500.png`;
-const C_IMG_MORARAARROWSHADOW = `../img/aaShadow_500.png`;
-const C_IMG_MONARARROWSHADOW = `../img/aaShadow_500.png`;
-
-const C_IMG_ONIGIRIFRZBAR = `../img/frzbar.png`;
-const C_IMG_GIKOFRZBAR = `../img/frzbar.png`;
-const C_IMG_IYOFRZBAR = `../img/frzbar.png`;
-const C_IMG_CFRZBAR = `../img/frzbar.png`;
-const C_IMG_MORARAFRZBAR = `../img/frzbar.png`;
-const C_IMG_MONARFRZBAR = `../img/frzbar.png`;
-
 const C_ARW_WIDTH = 50;
 
 // 音楽ファイル エンコードフラグ
@@ -1336,13 +1321,13 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	// 矢印・おにぎり判定
 	let rotate;
 	let charaStyle;
-	if (isNaN(Number(_rotate))) {
+	if (isNaN(Number(_rotate)) || _rotate === ``) {
 		rotate = 0;
 		charaStyle = _rotate + _styleName;
 		div.setAttribute(`type`, `AA`);
 	} else {
 		rotate = _rotate;
-		charaStyle = _styleName;
+		charaStyle = `arrow` + _styleName;
 		div.setAttribute(`type`, `arrow`);
 	}
 	div.align = C_ALIGN_CENTER;
@@ -4911,7 +4896,7 @@ function keyConfigInit() {
 			const stepShadow = createColorObject(`arrowShadow${j}`, shadowColor,
 				g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
 				C_KYC_HEIGHT * dividePos,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_keyObj[`stepRtn${keyCtrlPtn}`][j], `arrowShadow`);
+				C_ARW_WIDTH, C_ARW_WIDTH, g_keyObj[`stepRtn${keyCtrlPtn}`][j], `Shadow`);
 			keyconSprite.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.5;
 		}
@@ -7113,7 +7098,7 @@ function MainInit() {
 			const stepShadow = createColorObject(`stepShadow${j}`, `#000000`,
 				g_workObj.stepX[j],
 				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `arrowShadow`);
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`);
 			mainSprite.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.7;
 		}
@@ -7159,7 +7144,7 @@ function MainInit() {
 		if (isNaN(Number(g_workObj.stepRtn[j]))) {
 			frzHit.appendChild(createColorObject(`frzHitShadow${j}`, `#000000`,
 				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `arrowShadow`));
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`));
 
 			frzHit.appendChild(createArrowEffect(`frzHitTop${j}`, g_workObj.frzHitColors[j],
 				0, 0,
@@ -7168,7 +7153,7 @@ function MainInit() {
 		} else {
 			frzHit.appendChild(createColorObject(`frzHitTop${j}`, `#ffffff`,
 				-10, -10,
-				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.stepRtn[j], `arrowShadow`));
+				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.stepRtn[j], `Shadow`));
 		}
 	}
 
@@ -7280,25 +7265,25 @@ function MainInit() {
 	// ライフ背景
 	const lifeBackObj = createColorObject(`lifeBackObj`, C_CLR_BACKLIFE,
 		5, 50,
-		15, g_sHeight - 100, 0, `lifeBar`);
+		15, g_sHeight - 100, ``, `lifeBar`);
 	infoSprite.appendChild(lifeBackObj);
 
 	// ライフ本体
 	const lifeBar = createColorObject(`lifeBar`, lblInitColor,
 		5, 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal,
-		15, (g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal, 0, `lifeBar`);
+		15, (g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal, ``, `lifeBar`);
 	infoSprite.appendChild(lifeBar);
 
 	// ライフ：ボーダーライン
 	// この背景の画像は40x16で作成しているが、`padding-right:5px`があるためサイズを35x16で作成
 	const lifeBorderObj = createColorObject(`lifeBorderObj`, C_CLR_BORDER,
-		5, 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
-		35, 16, 0, `lifeBorder`);
+		10, 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
+		35, 16, ``, `lifeBorder`);
 	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
 	lifeBorderObj.style.textAlign = C_ALIGN_RIGHT;
 	lifeBorderObj.style.paddingRight = `5px`;
 	lifeBorderObj.style.fontFamily = getBasicFont();
-	lifeBorderObj.style.fontSize = `14px`;
+	lifeBorderObj.style.fontSize = `12px`;
 	lifeBorderObj.style.color = `#cccccc`;
 	infoSprite.appendChild(lifeBorderObj);
 
@@ -7843,7 +7828,7 @@ function MainInit() {
 			// 矢印の塗り部分
 			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[_j] : g_headerObj.setShadowColor);
 			const arrShadow = createColorObject(`${_name}Shadow${_j}_${_arrowCnt}`, shadowColor,
-				0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`);
+				0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`);
 			arrShadow.style.opacity = 0.5;
 			stepRoot.appendChild(arrShadow);
 		}
@@ -7918,13 +7903,13 @@ function MainInit() {
 		// フリーズアロー帯(frzBar)
 		const frzBar = frzRoot.appendChild(createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
 			5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
-			C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, 0, `frzBar`));
+			C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, ``, `frzBar`));
 		frzBar.style.opacity = 0.75;
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
 		frzRoot.appendChild(createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, `#000000`,
 			0, 0,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`));
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`));
 
 		// 開始矢印。ヒット時は隠れる。
 		frzRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
@@ -7934,7 +7919,7 @@ function MainInit() {
 		// 後発矢印の塗り部分
 		frzRoot.appendChild(createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, `#000000`,
 			0, frzLength * boostSpdDir,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`));
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`));
 
 		// 後発矢印
 		frzRoot.appendChild(createArrowEffect(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
