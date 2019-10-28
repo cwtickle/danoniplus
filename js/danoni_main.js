@@ -131,6 +131,8 @@ const g_imgObj = {
 	lifeBorder: C_IMG_LIFEBORDER,
 };
 
+const g_preloadImgs = [];
+
 const C_ARW_WIDTH = 50;
 
 // 音楽ファイル エンコードフラグ
@@ -1146,18 +1148,25 @@ function checkArrayVal(_checkArray, _type, _minLength) {
  * @param {string} _type 
  * @param {string} _crossOrigin 
  */
-function preloadFile(_as, _href, _type, _crossOrigin) {
-	const link = document.createElement(`link`);
-	link.rel = `preload`;
-	link.as = _as;
-	link.href = _href;
-	if (_type !== ``) {
-		link.type = _type;
+function preloadFile(_as, _href, _type = ``, _crossOrigin = ``) {
+
+	const preloadFlg = g_preloadImgs.find(v => v === _href);
+
+	if (preloadFlg === undefined) {
+		g_preloadImgs.push(_href);
+
+		const link = document.createElement(`link`);
+		link.rel = `preload`;
+		link.as = _as;
+		link.href = _href;
+		if (_type !== ``) {
+			link.type = _type;
+		}
+		if (_crossOrigin !== ``) {
+			link.crossOrigin = _crossOrigin;
+		}
+		document.head.appendChild(link);
 	}
-	if (_crossOrigin !== ``) {
-		link.crossOrigin = _crossOrigin
-	}
-	document.head.appendChild(link);
 }
 
 /**
@@ -1726,6 +1735,12 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 					const tmpAnimationName = escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING));
 					const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / g_fps;
 
+					if (g_headerObj.autoPreload) {
+						if (tmpPath.indexOf(`.png`) !== -1 || tmpPath.indexOf(`.gif`) !== -1 ||
+							tmpPath.indexOf(`.bmp`) !== -1 || tmpPath.indexOf(`.jpg`) !== -1) {
+							preloadFile(`image`, tmpPath);
+						}
+					}
 					if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
 						maxDepth = tmpDepth;
 					}
@@ -1996,18 +2011,18 @@ function initAfterDosLoaded() {
 	g_keyObj.currentPtn = 0;
 
 	// 画像ファイルの読み込み
-	preloadFile(`image`, C_IMG_ARROW, ``, ``);
-	preloadFile(`image`, C_IMG_ARROWSD, ``, ``);
-	preloadFile(`image`, C_IMG_ONIGIRI, ``, ``);
-	preloadFile(`image`, C_IMG_AASD, ``, ``);
-	preloadFile(`image`, C_IMG_GIKO, ``, ``);
-	preloadFile(`image`, C_IMG_IYO, ``, ``);
-	preloadFile(`image`, C_IMG_C, ``, ``);
-	preloadFile(`image`, C_IMG_MORARA, ``, ``);
-	preloadFile(`image`, C_IMG_MONAR, ``, ``);
-	preloadFile(`image`, C_IMG_CURSOR, ``, ``);
-	preloadFile(`image`, C_IMG_FRZBAR, ``, ``);
-	preloadFile(`image`, C_IMG_LIFEBORDER, ``, ``);
+	preloadFile(`image`, C_IMG_ARROW);
+	preloadFile(`image`, C_IMG_ARROWSD);
+	preloadFile(`image`, C_IMG_ONIGIRI);
+	preloadFile(`image`, C_IMG_AASD);
+	preloadFile(`image`, C_IMG_GIKO);
+	preloadFile(`image`, C_IMG_IYO);
+	preloadFile(`image`, C_IMG_C);
+	preloadFile(`image`, C_IMG_MORARA);
+	preloadFile(`image`, C_IMG_MONAR);
+	preloadFile(`image`, C_IMG_CURSOR);
+	preloadFile(`image`, C_IMG_FRZBAR);
+	preloadFile(`image`, C_IMG_LIFEBORDER);
 
 	// その他の画像ファイルの読み込み
 	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
@@ -2037,11 +2052,11 @@ function initAfterDosLoaded() {
 					paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
 				}
 				for (let k = startCnt; k <= lastCnt; k++) {
-					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)), ``, ``);
+					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)));
 				}
 			} else {
 				// Pattern Aの場合
-				preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
+				preloadFile(`image`, g_headerObj.preloadImages[j]);
 			}
 		}
 	}
@@ -3185,6 +3200,10 @@ function headerConvert(_dosObj) {
 	if (_dosObj.hashTag !== undefined) {
 		obj.hashTag = _dosObj.hashTag;
 	}
+
+	// 自動プリロードの設定
+	obj.autoPreload = setVal(_dosObj.autoPreload, false, C_TYP_BOOLEAN);
+	g_headerObj.autoPreload = obj.autoPreload;
 
 	// 読込対象の画像を指定(rel:preload)と同じ
 	obj.preloadImages = [];
