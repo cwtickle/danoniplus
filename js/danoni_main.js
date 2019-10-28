@@ -95,15 +95,15 @@ const C_TYP_STRING = `string`;
 const C_TYP_FLOAT = `float`;
 
 // 画像ファイル
-const C_IMG_ARROW = `../img/arrow_500.png`;
-const C_IMG_ARROWSD = `../img/arrowShadow_500.png`;
-const C_IMG_ONIGIRI = `../img/onigiri_600.png`;
-const C_IMG_AASD = `../img/aaShadow_500.png`;
-const C_IMG_GIKO = `../img/giko_600.png`;
-const C_IMG_IYO = `../img/iyo_600.png`;
-const C_IMG_C = `../img/c_600.png`;
-const C_IMG_MORARA = `../img/morara_600.png`;
-const C_IMG_MONAR = `../img/monar_600.png`;
+const C_IMG_ARROW = `../img/arrow.png`;
+const C_IMG_ARROWSD = `../img/arrowShadow.png`;
+const C_IMG_ONIGIRI = `../img/onigiri.png`;
+const C_IMG_AASD = `../img/aaShadow.png`;
+const C_IMG_GIKO = `../img/giko.png`;
+const C_IMG_IYO = `../img/iyo.png`;
+const C_IMG_C = `../img/c.png`;
+const C_IMG_MORARA = `../img/morara.png`;
+const C_IMG_MONAR = `../img/monar.png`;
 const C_IMG_CURSOR = `../img/cursor.png`;
 const C_IMG_FRZBAR = `../img/frzbar.png`;
 const C_IMG_LIFEBAR = `../img/frzbar.png`;

@@ -10,15 +10,15 @@
 	overflow: hidden;
 }
 .arrow {
-	mask-image: url("../img/arrow_500.png");
+	mask-image: url("../img/arrow.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/arrow_500.png");
+	-webkit-mask-image: url("../img/arrow.png");
 	-webkit-mask-size: contain;
 }
 .arrowShadow {
-	mask-image: url("../img/arrowShadow_500.png");
+	mask-image: url("../img/arrowShadow.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/arrowShadow_500.png");
+	-webkit-mask-image: url("../img/arrowShadow.png");
 	-webkit-mask-size: contain;
 }
 .frzBar {
@@ -34,75 +34,75 @@
 	-webkit-mask-size: contain;
 }
 .onigiri {
-	mask-image: url("../img/onigiri_600.png");
+	mask-image: url("../img/onigiri.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/onigiri_600.png");
+	-webkit-mask-image: url("../img/onigiri.png");
 	-webkit-mask-size: contain;
 }
 .onigiriShadow {
-	mask-image: url("../img/aaShadow_500.png");
+	mask-image: url("../img/aaShadow.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/aaShadow_500.png");
+	-webkit-mask-image: url("../img/aaShadow.png");
 	-webkit-mask-size: contain;
 }
 .giko {
-	mask-image: url("../img/giko_600.png");
+	mask-image: url("../img/giko.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/giko_600.png");
+	-webkit-mask-image: url("../img/giko.png");
 	-webkit-mask-size: contain;
 }
 .gikoShadow {
-	mask-image: url("../img/aaShadow_500.png");
+	mask-image: url("../img/aaShadow.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/aaShadow_500.png");
+	-webkit-mask-image: url("../img/aaShadow.png");
 	-webkit-mask-size: contain;
 }
 .iyo {
-	mask-image: url("../img/iyo_600.png");
+	mask-image: url("../img/iyo.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/iyo_600.png");
+	-webkit-mask-image: url("../img/iyo.png");
 	-webkit-mask-size: contain;
 }
 .iyoShadow {
-	mask-image: url("../img/aaShadow_500.png");
+	mask-image: url("../img/aaShadow.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/aaShadow_500.png");
+	-webkit-mask-image: url("../img/aaShadow.png");
 	-webkit-mask-size: contain;
 }
 .c {
-	mask-image: url("../img/c_600.png");
+	mask-image: url("../img/c.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/c_600.png");
+	-webkit-mask-image: url("../img/c.png");
 	-webkit-mask-size: contain;
 }
 .cShadow {
-	mask-image: url("../img/aaShadow_500.png");
+	mask-image: url("../img/aaShadow.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/aaShadow_500.png");
+	-webkit-mask-image: url("../img/aaShadow.png");
 	-webkit-mask-size: contain;
 }
 .morara {
-	mask-image: url("../img/morara_600.png");
+	mask-image: url("../img/morara.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/morara_600.png");
+	-webkit-mask-image: url("../img/morara.png");
 	-webkit-mask-size: contain;
 }
 .moraraShadow {
-	mask-image: url("../img/aaShadow_500.png");
+	mask-image: url("../img/aaShadow.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/aaShadow_500.png");
+	-webkit-mask-image: url("../img/aaShadow.png");
 	-webkit-mask-size: contain;
 }
 .monar {
-	mask-image: url("../img/monar_600.png");
+	mask-image: url("../img/monar.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/monar_600.png");
+	-webkit-mask-image: url("../img/monar.png");
 	-webkit-mask-size: contain;
 }
 .monarShadow {
-	mask-image: url("../img/aaShadow_500.png");
+	mask-image: url("../img/aaShadow.png");
 	mask-size: contain;
-	-webkit-mask-image: url("../img/aaShadow_500.png");
+	-webkit-mask-image: url("../img/aaShadow.png");
 	-webkit-mask-size: contain;
 }
 input[type=range] {
