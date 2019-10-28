@@ -1163,7 +1163,7 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = ``) {
 			link.type = _type;
 		}
 		if (_crossOrigin !== ``) {
-			link.crossOrigin = _crossOrigin
+			link.crossOrigin = _crossOrigin;
 		}
 		document.head.appendChild(link);
 	}
