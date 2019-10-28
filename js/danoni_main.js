@@ -109,6 +109,28 @@ const C_IMG_FRZBAR = `../img/frzbar.png`;
 const C_IMG_LIFEBAR = `../img/frzbar.png`;
 const C_IMG_LIFEBORDER = `../img/borderline.png`;
 
+const g_imgObj = {
+	arrow: C_IMG_ARROW,
+	arrowShadow: C_IMG_ARROWSD,
+	onigiri: C_IMG_ONIGIRI,
+	onigiriShadow: C_IMG_AASD,
+	giko: C_IMG_GIKO,
+	gikoShadow: C_IMG_AASD,
+	iyo: C_IMG_GIKO,
+	iyoShadow: C_IMG_AASD,
+	c: C_IMG_C,
+	cShadow: C_IMG_AASD,
+	morara: C_IMG_MORARA,
+	moraraShadow: C_IMG_AASD,
+	monar: C_IMG_MONAR,
+	monarShadow: C_IMG_AASD,
+
+	cursor: C_IMG_CURSOR,
+	frzBar: C_IMG_FRZBAR,
+	lifeBar: C_IMG_LIFEBAR,
+	lifeBorder: C_IMG_LIFEBORDER,
+};
+
 const C_ARW_WIDTH = 50;
 
 // 音楽ファイル エンコードフラグ
@@ -1295,19 +1317,21 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate) {
 	let rotate;
 	let charaStyle;
 	if (isNaN(Number(_rotate))) {
-		rotate = 0;
 		charaStyle = _rotate;
 	} else {
-		rotate = _rotate;
 		charaStyle = `arrow`;
+		div.style.transform = `rotate(${_rotate}deg)`;
 	}
 	div.align = C_ALIGN_CENTER;
 
 	if (_color !== ``) {
 		div.style.backgroundColor = _color;
 	}
-	div.className = charaStyle;
-	div.style.transform = `rotate(${rotate}deg)`;
+
+	div.style.maskImage = `url("${g_imgObj[charaStyle]}")`;
+	div.style.maskSize = `contain`;
+	div.style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
+	div.style.webkitMaskSize = `contain`;
 	div.setAttribute(`color`, _color);
 
 	return div;
@@ -1322,12 +1346,11 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	let rotate;
 	let charaStyle;
 	if (isNaN(Number(_rotate)) || _rotate === ``) {
-		rotate = 0;
 		charaStyle = _rotate + _styleName;
 		div.setAttribute(`type`, `AA`);
 	} else {
-		rotate = _rotate;
 		charaStyle = `arrow` + _styleName;
+		div.style.transform = `rotate(${_rotate}deg)`;
 		div.setAttribute(`type`, `arrow`);
 	}
 	div.align = C_ALIGN_CENTER;
@@ -1335,8 +1358,11 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	if (_color !== ``) {
 		div.style.backgroundColor = _color;
 	}
-	div.className = charaStyle;
-	div.style.transform = `rotate(${rotate}deg)`;
+
+	div.style.maskImage = `url("${g_imgObj[charaStyle]}")`;
+	div.style.maskSize = `contain`;
+	div.style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
+	div.style.webkitMaskSize = `contain`;
 	div.setAttribute(`color`, _color);
 
 	return div;
