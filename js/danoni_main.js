@@ -1567,39 +1567,42 @@ function getTitleDivLabel(_id, _titlename, _x, _y) {
  */
 function clearWindow() {
 
-	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
+	if (document.querySelector(`#layer0`) !== null) {
 
-	g_sWidth = layer0.width;
-	g_sHeight = layer0.height;
-	const C_MARGIN = 0;
+		// レイヤー情報取得
+		const layer0 = document.querySelector(`#layer0`);
+		const l0ctx = layer0.getContext(`2d`);
 
-	// 線画、図形をクリア
-	l0ctx.clearRect(0, 0, g_sWidth, g_sHeight);
+		g_sWidth = layer0.width;
+		g_sHeight = layer0.height;
+		const C_MARGIN = 0;
 
-	if (document.querySelector(`#layer1`) !== null) {
-		const layer1 = document.querySelector(`#layer1`);
-		const l1ctx = layer1.getContext(`2d`);
-		l1ctx.clearRect(0, 0, g_sWidth, g_sHeight);
+		// 線画、図形をクリア
+		l0ctx.clearRect(0, 0, g_sWidth, g_sHeight);
 
-		// 線画 (title-line)
-		l1ctx.beginPath();
-		l1ctx.strokeStyle = `#cccccc`;
-		l1ctx.moveTo(C_MARGIN, C_MARGIN);
-		l1ctx.lineTo(g_sWidth - C_MARGIN, C_MARGIN);
-		l1ctx.stroke();
+		if (document.querySelector(`#layer1`) !== null) {
+			const layer1 = document.querySelector(`#layer1`);
+			const l1ctx = layer1.getContext(`2d`);
+			l1ctx.clearRect(0, 0, g_sWidth, g_sHeight);
 
-		l1ctx.beginPath();
-		l1ctx.strokeStyle = `#cccccc`;
-		l1ctx.moveTo(C_MARGIN, g_sHeight - C_MARGIN);
-		l1ctx.lineTo(g_sWidth - C_MARGIN, g_sHeight - C_MARGIN);
-		l1ctx.stroke();
-	}
-	if (document.querySelector(`#layer2`) !== null) {
-		const layer2 = document.querySelector(`#layer2`);
-		const l2ctx = layer2.getContext(`2d`);
-		l2ctx.clearRect(0, 0, g_sWidth, g_sHeight);
+			// 線画 (title-line)
+			l1ctx.beginPath();
+			l1ctx.strokeStyle = `#cccccc`;
+			l1ctx.moveTo(C_MARGIN, C_MARGIN);
+			l1ctx.lineTo(g_sWidth - C_MARGIN, C_MARGIN);
+			l1ctx.stroke();
+
+			l1ctx.beginPath();
+			l1ctx.strokeStyle = `#cccccc`;
+			l1ctx.moveTo(C_MARGIN, g_sHeight - C_MARGIN);
+			l1ctx.lineTo(g_sWidth - C_MARGIN, g_sHeight - C_MARGIN);
+			l1ctx.stroke();
+		}
+		if (document.querySelector(`#layer2`) !== null) {
+			const layer2 = document.querySelector(`#layer2`);
+			const l2ctx = layer2.getContext(`2d`);
+			l2ctx.clearRect(0, 0, g_sWidth, g_sHeight);
+		}
 	}
 
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
@@ -1817,9 +1820,11 @@ function getQueryParamVal(_name) {
 /*-----------------------------------------------------------*/
 
 function initialControl() {
-	const layer0 = document.querySelector(`#layer0`);
-	g_sWidth = layer0.width;
-	g_sHeight = layer0.height;
+
+	g_sWidth = (isNaN(parseFloat(document.querySelector(`#canvas-frame`).style.width)) ?
+		600 : parseFloat(document.querySelector(`#canvas-frame`).style.width));
+	g_sHeight = (isNaN(parseFloat(document.querySelector(`#canvas-frame`).style.height)) ?
+		500 : parseFloat(document.querySelector(`#canvas-frame`).style.height));
 
 	let divRoot;
 	if (document.querySelector(`#divRoot`) === null) {
@@ -1834,12 +1839,18 @@ function initialControl() {
 	}
 
 	// 背景の表示
-	const l0ctx = layer0.getContext(`2d`);
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	grd.addColorStop(0, `#000000`);
-	grd.addColorStop(1, `#222222`);
-	l0ctx.fillStyle = grd;
-	l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	if (document.querySelector(`#layer0`) !== null) {
+		const layer0 = document.querySelector(`#layer0`);
+		const l0ctx = layer0.getContext(`2d`);
+		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		l0ctx.fillStyle = grd;
+		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+	} else {
+		const divBack = createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+		divBack.style.background = `linear-gradient(#000000, #222222)`;
+	}
 
 	// Now Loadingを表示
 	const lblLoading = createDivLabel(`lblLoading`, 0, g_sHeight - 40,
@@ -2026,6 +2037,12 @@ function initAfterDosLoaded() {
 	// キー数情報を初期化
 	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 	g_keyObj.currentPtn = 0;
+
+	// CSSファイル内のbackgroundを取得するために再描画
+	if (document.querySelector(`#layer0`) === null) {
+		document.querySelector(`#divRoot`).removeChild(document.querySelector(`#divBack`));
+		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+	}
 
 	// CSSファイルの読み込み
 	importCssFile(`../css/danoni_default.css`);
@@ -2225,19 +2242,23 @@ function setAudio(_url) {
 function drawDefaultBackImage(_key) {
 
 	// レイヤー情報取得
-	const layer0 = document.querySelector(`#layer0`);
-	const l0ctx = layer0.getContext(`2d`);
+	if (document.querySelector(`#layer0`) !== null) {
+		const layer0 = document.querySelector(`#layer0`);
+		const l0ctx = layer0.getContext(`2d`);
 
-	g_sWidth = layer0.width;
-	g_sHeight = layer0.height;
+		g_sWidth = layer0.width;
+		g_sHeight = layer0.height;
 
-	// 画面背景を指定 (background-color)
-	const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-	if (!g_headerObj[`customBack${_key}Use`] || !g_headerObj[`customBack${_key}Use`]) {
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+		// 画面背景を指定 (background-color)
+		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+		if (!g_headerObj[`customBack${_key}Use`] || !g_headerObj[`customBack${_key}Use`]) {
+			grd.addColorStop(0, `#000000`);
+			grd.addColorStop(1, `#222222`);
+			l0ctx.fillStyle = grd;
+			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+		}
+	} else {
+		const divBack = createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
 	}
 }
 
