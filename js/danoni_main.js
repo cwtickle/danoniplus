@@ -95,34 +95,19 @@ const C_TYP_STRING = `string`;
 const C_TYP_FLOAT = `float`;
 
 // 画像ファイル
-const C_IMG_ARROW = `../img/arrow_500.png`;
-const C_IMG_ARROWSD = `../img/arrowShadow_500.png`;
-const C_IMG_ONIGIRI = `../img/onigiri_600.png`;
-const C_IMG_AASD = `../img/aaShadow_500.png`;
-const C_IMG_GIKO = `../img/giko_600.png`;
-const C_IMG_IYO = `../img/iyo_600.png`;
-const C_IMG_C = `../img/c_600.png`;
-const C_IMG_MORARA = `../img/morara_600.png`;
-const C_IMG_MONAR = `../img/monar_600.png`;
+const C_IMG_ARROW = `../img/arrow.png`;
+const C_IMG_ARROWSD = `../img/arrowShadow.png`;
+const C_IMG_ONIGIRI = `../img/onigiri.png`;
+const C_IMG_AASD = `../img/aaShadow.png`;
+const C_IMG_GIKO = `../img/giko.png`;
+const C_IMG_IYO = `../img/iyo.png`;
+const C_IMG_C = `../img/c.png`;
+const C_IMG_MORARA = `../img/morara.png`;
+const C_IMG_MONAR = `../img/monar.png`;
 const C_IMG_CURSOR = `../img/cursor.png`;
 const C_IMG_FRZBAR = `../img/frzbar.png`;
 const C_IMG_LIFEBAR = `../img/frzbar.png`;
 const C_IMG_LIFEBORDER = `../img/borderline.png`;
-
-const C_IMG_ARROWSHADOW = `../img/arrowShadow_500.png`;
-const C_IMG_ONIGIRIARROWSHADOW = `../img/aaShadow_500.png`;
-const C_IMG_GIKOARROWSHADOW = `../img/aaShadow_500.png`;
-const C_IMG_IYOARROWSHADOW = `../img/aaShadow_500.png`;
-const C_IMG_CARROWSHADOW = `../img/aaShadow_500.png`;
-const C_IMG_MORARAARROWSHADOW = `../img/aaShadow_500.png`;
-const C_IMG_MONARARROWSHADOW = `../img/aaShadow_500.png`;
-
-const C_IMG_ONIGIRIFRZBAR = `../img/frzbar.png`;
-const C_IMG_GIKOFRZBAR = `../img/frzbar.png`;
-const C_IMG_IYOFRZBAR = `../img/frzbar.png`;
-const C_IMG_CFRZBAR = `../img/frzbar.png`;
-const C_IMG_MORARAFRZBAR = `../img/frzbar.png`;
-const C_IMG_MONARFRZBAR = `../img/frzbar.png`;
 
 const C_ARW_WIDTH = 50;
 
@@ -1336,13 +1321,13 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	// 矢印・おにぎり判定
 	let rotate;
 	let charaStyle;
-	if (isNaN(Number(_rotate))) {
+	if (isNaN(Number(_rotate)) || _rotate === ``) {
 		rotate = 0;
 		charaStyle = _rotate + _styleName;
 		div.setAttribute(`type`, `AA`);
 	} else {
 		rotate = _rotate;
-		charaStyle = _styleName;
+		charaStyle = `arrow` + _styleName;
 		div.setAttribute(`type`, `arrow`);
 	}
 	div.align = C_ALIGN_CENTER;
@@ -1437,6 +1422,7 @@ function createButton(_obj, _func) {
 
 	// ボタン用の子要素divを作成
 	const div = createDiv(_obj.id, _obj.x, _obj.y, _obj.width, _obj.height);
+	div.classList.add(`button_common`);
 
 	// ボタンの装飾を定義
 	const style = div.style;
@@ -1447,14 +1433,10 @@ function createButton(_obj, _func) {
 	style.fontSize = `${_obj.fontsize}px`;
 	style.fontFamily = getBasicFont();
 	style.backgroundColor = _obj.normalColor;
-	style.transition = `background-color 0.25s linear`;
 	if (setVal(_obj.animationName, ``, C_TYP_STRING) !== ``) {
 		style.animationName = _obj.animationName;
 		style.animationDuration = `1s`;
 	}
-	style.display = `flex`;
-	style.flexDirection = `column`;
-	style.justifyContent = `center`;
 
 	// オンマウス・タップ時の挙動 (背景色変更、カーソル変化)
 	div.onmouseover = _ => {
@@ -3758,10 +3740,7 @@ function createOptionWindow(_sprite) {
 	// 難易度 (Difficulty)
 	// 縦位置: 0 
 	const setNoDifficulty = 0;
-	const lblDifficulty = createDivLabel(`lblDifficulty`, 0, C_LEN_SETLBL_HEIGHT * setNoDifficulty - 5,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETDIFLBL, C_CLR_TITLE,
-		`<span style=color:#ff9999>D</span>ifficulty`);
-	optionsprite.appendChild(lblDifficulty);
+	optionsprite.appendChild(createLblSetting(`Difficulty`, setNoDifficulty, -5));
 
 	/**
 	 * 譜面変更セレクターの削除
@@ -3884,10 +3863,7 @@ function createOptionWindow(_sprite) {
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
 	const setNoSpeed = 2;
-	const lblSpeed = createDivLabel(`lblSpeed`, 0, C_LEN_SETLBL_HEIGHT * setNoSpeed,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#ffff99>S</span>peed`);
-	optionsprite.appendChild(lblSpeed);
+	optionsprite.appendChild(createLblSetting(`Speed`, setNoSpeed));
 
 	const lnkSpeed = makeSettingLblButton(`lnkSpeed`, ``, setNoSpeed, _ => {
 		setSetting(1, `speed`, ` x`);
@@ -3918,10 +3894,7 @@ function createOptionWindow(_sprite) {
 	// 速度モーション (Motion)
 	// 縦位置: 3
 	const setNoMotion = 3;
-	const lblMotion = createDivLabel(`lblMotion`, 0, C_LEN_SETLBL_HEIGHT * setNoMotion,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#eeff99>M</span>otion`);
-	optionsprite.appendChild(lblMotion);
+	optionsprite.appendChild(createLblSetting(`Motion`, setNoMotion));
 
 	if (g_headerObj.motionUse) {
 		const lnkMotion = makeSettingLblButton(`lnkMotion`, g_stateObj.motion, setNoMotion, _ => {
@@ -3949,10 +3922,7 @@ function createOptionWindow(_sprite) {
 	// リバース (Reverse)
 	// 縦位置: 4
 	const setNoReverse = 4;
-	const lblReverse = createDivLabel(`lblReverse`, 0, C_LEN_SETLBL_HEIGHT * setNoReverse,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#ddff99>R</span>everse`);
-	optionsprite.appendChild(lblReverse);
+	optionsprite.appendChild(createLblSetting(`Reverse`, setNoReverse));
 
 	const lnkReverse = makeSettingLblButton(`lnkReverse`, ``, setNoReverse, _ => {
 		setSetting(1, `reverse`);
@@ -3975,10 +3945,7 @@ function createOptionWindow(_sprite) {
 	// ミラー・ランダム (Shuffle)
 	// 縦位置: 5.5
 	const setNoShuffle = 5.5;
-	const lblShuffle = createDivLabel(`lblShuffle`, 0, C_LEN_SETLBL_HEIGHT * setNoShuffle,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99ff99>S</span>huffle`);
-	optionsprite.appendChild(lblShuffle);
+	optionsprite.appendChild(createLblSetting(`Shuffle`, setNoShuffle));
 
 	if (g_headerObj.shuffleUse) {
 		const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, setNoShuffle, _ => {
@@ -4006,10 +3973,7 @@ function createOptionWindow(_sprite) {
 	// 鑑賞モード設定 (AutoPlay)
 	// 縦位置: 6.5
 	const setNoAutoPlay = 6.5;
-	const lblAutoPlay = createDivLabel(`lblAutoPlay`, 0, C_LEN_SETLBL_HEIGHT * setNoAutoPlay,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99ffbb>A</span>utoPlay`);
-	optionsprite.appendChild(lblAutoPlay);
+	optionsprite.appendChild(createLblSetting(`AutoPlay`, setNoAutoPlay));
 
 	if (g_headerObj.autoPlayUse) {
 		const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.autoPlay, setNoAutoPlay, _ => {
@@ -4037,10 +4001,7 @@ function createOptionWindow(_sprite) {
 	// ゲージ設定 (Gauge)
 	// 縦位置: 7.5
 	const setNoGauge = 7.5;
-	const lblGauge = createDivLabel(`lblGauge`, 0, C_LEN_SETLBL_HEIGHT * setNoGauge,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99ffdd>G</span>auge`);
-	optionsprite.appendChild(lblGauge);
+	optionsprite.appendChild(createLblSetting(`Gauge`, setNoGauge));
 
 	// ゲージ設定詳細　縦位置: ゲージ設定+1
 	const lblGauge2 = createDivLabel(`lblGauge2`, C_LEN_SETLBL_LEFT - 20, C_LEN_SETLBL_HEIGHT * (setNoGauge + 1),
@@ -4217,10 +4178,7 @@ function createOptionWindow(_sprite) {
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
 	const setNoAdjustment = 10;
-	const lblAdjustment = createDivLabel(`lblAdjustment`, 0, C_LEN_SETLBL_HEIGHT * setNoAdjustment,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99ffff>A</span>djustment`);
-	optionsprite.appendChild(lblAdjustment);
+	optionsprite.appendChild(createLblSetting(`Adjustment`, setNoAdjustment));
 
 	const lnkAdjustment = makeSettingLblButton(`lnkAdjustment`, g_stateObj.adjustment, setNoAdjustment, _ => {
 		setSetting(1, `adjustment`);
@@ -4250,10 +4208,7 @@ function createOptionWindow(_sprite) {
 	// フェードイン (Fadein)
 	// 縦位置: 11 スライダーあり
 	const setNoFadein = 11;
-	const lblFadein = createDivLabel(`lblFadein`, 0, C_LEN_SETLBL_HEIGHT * setNoFadein,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99eeff>F</span>adein`);
-	optionsprite.appendChild(lblFadein);
+	optionsprite.appendChild(createLblSetting(`Fadein`, setNoFadein));
 
 	const lnkFadein = createDivLabel(`lblFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * setNoFadein,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `${g_stateObj.fadein}%`);
@@ -4299,10 +4254,7 @@ function createOptionWindow(_sprite) {
 	// ボリューム (Volume) 
 	// 縦位置: 12
 	const setNoVolume = 12;
-	const lblVolume = createDivLabel(`lblVolume`, 0, C_LEN_SETLBL_HEIGHT * setNoVolume,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#99ddff>V</span>olume`);
-	optionsprite.appendChild(lblVolume);
+	optionsprite.appendChild(createLblSetting(`Volume`, setNoVolume));
 
 	const lnkVolume = makeSettingLblButton(`lnkVolume`, `${g_stateObj.volume}%`, setNoVolume, _ => {
 		setSetting(1, `volume`, `%`);
@@ -4491,6 +4443,21 @@ function createOptionWindow(_sprite) {
 	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
 	setDifficulty(false);
 	optionsprite.oncontextmenu = _ => false;
+}
+
+/**
+ * 設定画面用ラベルの作成
+ * @param {string} _settingName 
+ * @param {number} _posY 
+ * @param {number} _adjY 
+ */
+function createLblSetting(_settingName, _posY, _adjY = 0) {
+	const lbl = createDivLabel(`lbl${_settingName}`, 0, C_LEN_SETLBL_HEIGHT * _posY + _adjY,
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
+		_settingName);
+	lbl.classList.add(`settings_${_settingName}`);
+
+	return lbl;
 }
 
 /**
@@ -4794,10 +4761,7 @@ function createSettingsDisplayWindow(_sprite) {
 	// 矢印の見え方 (Appearance)
 	// 縦位置: 6
 	const setNoAppearance = 6;
-	const lblAppearance = createDivLabel(`lblAppearance`, 0, C_LEN_SETLBL_HEIGHT * setNoAppearance,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TITLE,
-		`<span style=color:#cc99ff>A</span>ppearance`);
-	optionsprite.appendChild(lblAppearance);
+	optionsprite.appendChild(createLblSetting(`Appearance`, setNoAppearance));
 
 	if (g_headerObj.appearanceUse) {
 		const lnkAppearance = makeSettingLblButton(`lnkAppearance`, g_stateObj.appearance, setNoAppearance, _ => {
@@ -4927,7 +4891,7 @@ function keyConfigInit() {
 			const stepShadow = createColorObject(`arrowShadow${j}`, shadowColor,
 				g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
 				C_KYC_HEIGHT * dividePos,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_keyObj[`stepRtn${keyCtrlPtn}`][j], `arrowShadow`);
+				C_ARW_WIDTH, C_ARW_WIDTH, g_keyObj[`stepRtn${keyCtrlPtn}`][j], `Shadow`);
 			keyconSprite.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.5;
 		}
@@ -7129,7 +7093,7 @@ function MainInit() {
 			const stepShadow = createColorObject(`stepShadow${j}`, `#000000`,
 				g_workObj.stepX[j],
 				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `arrowShadow`);
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`);
 			mainSprite.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.7;
 		}
@@ -7175,7 +7139,7 @@ function MainInit() {
 		if (isNaN(Number(g_workObj.stepRtn[j]))) {
 			frzHit.appendChild(createColorObject(`frzHitShadow${j}`, `#000000`,
 				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `arrowShadow`));
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`));
 
 			frzHit.appendChild(createArrowEffect(`frzHitTop${j}`, g_workObj.frzHitColors[j],
 				0, 0,
@@ -7184,7 +7148,7 @@ function MainInit() {
 		} else {
 			frzHit.appendChild(createColorObject(`frzHitTop${j}`, `#ffffff`,
 				-10, -10,
-				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.stepRtn[j], `arrowShadow`));
+				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.stepRtn[j], `Shadow`));
 		}
 	}
 
@@ -7296,25 +7260,25 @@ function MainInit() {
 	// ライフ背景
 	const lifeBackObj = createColorObject(`lifeBackObj`, C_CLR_BACKLIFE,
 		5, 50,
-		15, g_sHeight - 100, 0, `lifeBar`);
+		15, g_sHeight - 100, ``, `lifeBar`);
 	infoSprite.appendChild(lifeBackObj);
 
 	// ライフ本体
 	const lifeBar = createColorObject(`lifeBar`, lblInitColor,
 		5, 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal,
-		15, (g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal, 0, `lifeBar`);
+		15, (g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal, ``, `lifeBar`);
 	infoSprite.appendChild(lifeBar);
 
 	// ライフ：ボーダーライン
 	// この背景の画像は40x16で作成しているが、`padding-right:5px`があるためサイズを35x16で作成
 	const lifeBorderObj = createColorObject(`lifeBorderObj`, C_CLR_BORDER,
-		5, 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
-		35, 16, 0, `lifeBorder`);
+		10, 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
+		35, 16, ``, `lifeBorder`);
 	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
 	lifeBorderObj.style.textAlign = C_ALIGN_RIGHT;
 	lifeBorderObj.style.paddingRight = `5px`;
 	lifeBorderObj.style.fontFamily = getBasicFont();
-	lifeBorderObj.style.fontSize = `14px`;
+	lifeBorderObj.style.fontSize = `12px`;
 	lifeBorderObj.style.color = `#cccccc`;
 	infoSprite.appendChild(lifeBorderObj);
 
@@ -7859,7 +7823,7 @@ function MainInit() {
 			// 矢印の塗り部分
 			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[_j] : g_headerObj.setShadowColor);
 			const arrShadow = createColorObject(`${_name}Shadow${_j}_${_arrowCnt}`, shadowColor,
-				0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`);
+				0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`);
 			arrShadow.style.opacity = 0.5;
 			stepRoot.appendChild(arrShadow);
 		}
@@ -7934,13 +7898,13 @@ function MainInit() {
 		// フリーズアロー帯(frzBar)
 		const frzBar = frzRoot.appendChild(createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
 			5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
-			C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, 0, `frzBar`));
+			C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, ``, `frzBar`));
 		frzBar.style.opacity = 0.75;
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
 		frzRoot.appendChild(createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, `#000000`,
 			0, 0,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`));
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`));
 
 		// 開始矢印。ヒット時は隠れる。
 		frzRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
@@ -7950,7 +7914,7 @@ function MainInit() {
 		// 後発矢印の塗り部分
 		frzRoot.appendChild(createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, `#000000`,
 			0, frzLength * boostSpdDir,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `arrowShadow`));
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`));
 
 		// 後発矢印
 		frzRoot.appendChild(createArrowEffect(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
