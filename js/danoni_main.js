@@ -2258,7 +2258,7 @@ function drawDefaultBackImage(_key) {
 			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 		}
 	} else {
-		const divBack = createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
 	}
 }
 
