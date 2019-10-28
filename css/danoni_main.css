@@ -412,3 +412,11 @@ input[type=range]:focus {
 .settings_Appearance::first-letter {
 	color:#cc99ff;
 }
+
+/* ボタン一般 */
+.button_common {
+	transition: background-color 0.25s linear;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}

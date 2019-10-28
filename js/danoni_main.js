@@ -1422,6 +1422,7 @@ function createButton(_obj, _func) {
 
 	// ボタン用の子要素divを作成
 	const div = createDiv(_obj.id, _obj.x, _obj.y, _obj.width, _obj.height);
+	div.classList.add(`button_common`);
 
 	// ボタンの装飾を定義
 	const style = div.style;
@@ -1432,14 +1433,10 @@ function createButton(_obj, _func) {
 	style.fontSize = `${_obj.fontsize}px`;
 	style.fontFamily = getBasicFont();
 	style.backgroundColor = _obj.normalColor;
-	style.transition = `background-color 0.25s linear`;
 	if (setVal(_obj.animationName, ``, C_TYP_STRING) !== ``) {
 		style.animationName = _obj.animationName;
 		style.animationDuration = `1s`;
 	}
-	style.display = `flex`;
-	style.flexDirection = `column`;
-	style.justifyContent = `center`;
 
 	// オンマウス・タップ時の挙動 (背景色変更、カーソル変化)
 	div.onmouseover = _ => {
