@@ -175,6 +175,14 @@
 }
 
 /* ボタン */
+.button_Start {
+	color: #cccccc;
+	background-color: #333333;
+}
+.button_Start:hover {
+	color: #cccccc;
+	background-color: #666666;
+}
 .button_Default {
 	color: #cccccc;
 	background-color: #111111;

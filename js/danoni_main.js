@@ -2621,7 +2621,7 @@ function titleInit() {
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_TITLESIZE,
 		align: C_ALIGN_CENTER,
-		class: `button_Default`,
+		class: `button_Start`,
 	}, _ => {
 		clearTimeout(g_timeoutEvtTitleId);
 		clearWindow();
