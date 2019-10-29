@@ -3932,10 +3932,10 @@ function createOptionWindow(_sprite) {
 				if (document.querySelector(`#difList`) === null) {
 					const difList = createSprite(`optionsprite`, `difList`, 140, 45, 280, 255);
 					difList.style.overflow = `auto`;
-					difList.classList.add(`settings_DifSelector`);
+					difList.classList.toggle(`settings_DifSelector`, true);
 					const difCover = createSprite(`optionsprite`, `difCover`, 0, 45, 140, 255);
 					difCover.style.overflow = `auto`;
-					difCover.classList.add(`settings_DifSelector`);
+					difCover.classList.toggle(`settings_DifSelector`, true);
 					difCover.style.opacity = 0.95;
 
 					// 全リスト作成
@@ -4715,8 +4715,6 @@ function makeSettingLblButton(_id, _name, _heightPos, _func) {
 		width: C_LEN_SETLBL_WIDTH,
 		height: C_LEN_SETLBL_HEIGHT,
 		fontsize: C_SIZ_SETLBL,
-		//		normalColor: C_CLR_LNK,
-		//		hoverColor: C_CLR_DEFHOVER,
 		align: C_ALIGN_CENTER,
 		class: `button_Default`,
 	}, _func);
@@ -4744,7 +4742,7 @@ function makeDifLblButton(_id, _name, _heightPos, _func) {
 		class: `button_Default`,
 	}, _func);
 	difLblButton.style.borderStyle = `solid`;
-	difLblButton.style.borderColor = `#000000 #cccccc`;
+	difLblButton.classList.add(`button_ON`);
 
 	return difLblButton;
 }
