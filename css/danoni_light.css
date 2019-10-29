@@ -109,25 +109,25 @@
 
 /* 結果画面：判定名 */
 .common_ii {
-	color: #007777;
+	color: #009999;
 }
 .common_shakin {
-	color: #007700;
+	color: #009900;
 }
 .common_matari {
-	color: #775500;
+	color: #cc8800;
 }
 .common_shobon {
-	color: #000077;
+	color: #0000cc;
 }
 .common_uwan {
-	color: #770000;
+	color: #cc0000;
 }
 .common_kita {
-	color: #777700;
+	color: #999900;
 }
 .common_iknai {
-	color: #557700;
+	color: #669900;
 }
 .common_combo {
 	color: #000000;
@@ -156,16 +156,16 @@
 }
 /* 結果画面：完全PF、PF、FC、Cleared、Failed */
 .result_AllPerfect {
-	color:#999900;
+	color:#999999;
 }
 .result_Perfect {
-	color:#666600;
+	color:#999900;
 }
 .result_FullCombo {
 	color:#007777;
 }
 .result_Cleared {
-	color:#000066;
+	color:#666600;
 }
 .result_Failed {
 	color:#990000;
@@ -175,6 +175,7 @@
 }
 
 /* ボタン */
+/* Click Here */
 .button_Start {
 	color: #000000;
 	background-color: #dddddd;
@@ -183,6 +184,7 @@
 	color: #000000;
 	background-color: #999999;
 }
+/* デフォルト */
 .button_Default {
 	color: #000000;
 	background-color: #eeeeee;
@@ -191,6 +193,7 @@
 	color: #000000;
 	background-color: #bbbbbb;
 }
+/* カーソル */
 .button_Mini {
 	color: #000000;
 	background-color: #cccccc;
@@ -199,6 +202,7 @@
 	color: #000000;
 	background-color: #999999;
 }
+/* 戻る */
 .button_Back {
     color: #000000;
 	background-color: #ccccff;
@@ -207,6 +211,7 @@
     color: #000000;
 	background-color: #9999ff;
 }
+/* 設定 */
 .button_Setting {
 	color: #000000;
 	background-color: #ffffcc;
@@ -215,6 +220,7 @@
 	color: #000000;
 	background-color: #ffff66;
 }
+/* 進む */
 .button_Next {
 	color: #000000;
 	background-color: #ffcccc;
@@ -223,6 +229,7 @@
 	color: #000000;
 	background-color: #ff9999;
 }
+/* リセット */
 .button_Reset {
 	color: #000000;
 	background-color: #ccffcc;
@@ -231,6 +238,7 @@
 	color: #000000;
 	background-color: #99ff99;
 }
+/* ツイート */
 .button_Tweet {
 	color: #000000;
 	background-color: #ccffff;
@@ -238,4 +246,28 @@
 .button_Tweet:hover {
 	color: #000000;
 	background-color: #66ffff;
+}
+
+/* ボタン：ON/OFF */
+.button_OFF {
+	color: #cccccc;
+	border-color: #eeeeee #cccccc; 
+}
+.button_ON {
+	color: #000000;
+	border-color: #eeeeee #333333; 
+}
+
+/* ライフゲージ */
+.life_Max {
+	background-color: #cccc66;
+}
+.life_Cleared {
+	background-color: #66cccc;
+}
+.life_Failed {
+	background-color: #999999;
+}
+.life_Background {
+	background-color: #cccccc;
 }

@@ -175,6 +175,7 @@
 }
 
 /* ボタン */
+/* Click Here */
 .button_Start {
 	color: #cccccc;
 	background-color: #333333;
@@ -183,6 +184,7 @@
 	color: #cccccc;
 	background-color: #666666;
 }
+/* デフォルト */
 .button_Default {
 	color: #cccccc;
 	background-color: #111111;
@@ -191,6 +193,7 @@
 	color: #cccccc;
 	background-color: #666666;
 }
+/* カーソル */
 .button_Mini {
 	color: #cccccc;
 	background-color: #333333;
@@ -199,6 +202,7 @@
 	color: #cccccc;
 	background-color: #999900;
 }
+/* 戻る */
 .button_Back {
 	color: #cccccc;
 	background-color: #111133;
@@ -207,6 +211,7 @@
 	color: #cccccc;
 	background-color: #000099;
 }
+/* 設定 */
 .button_Setting {
 	color: #cccccc;
 	background-color: #333311;
@@ -215,6 +220,7 @@
 	color: #cccccc;
 	background-color: #999900;
 }
+/* 進む */
 .button_Next {
 	color: #cccccc;
 	background-color: #331111;
@@ -223,6 +229,7 @@
 	color: #cccccc;
 	background-color: #990000;
 }
+/* リセット */
 .button_Reset {
 	color: #cccccc;
 	background-color: #113311;
@@ -231,6 +238,7 @@
 	color: #cccccc;
 	background-color: #009900;
 }
+/* ツイート */
 .button_Tweet {
 	color: #cccccc;
 	background-color: #113333;
@@ -238,4 +246,28 @@
 .button_Tweet:hover {
 	color: #cccccc;
 	background-color: #009999;
+}
+
+/* ボタン：ON/OFF */
+.button_OFF {
+	color: #666666;
+	border-color: #000000 #333333; 
+}
+.button_ON {
+	color: #ffffff;
+	border-color: #000000 #cccccc; 
+}
+
+/* ライフゲージ */
+.life_Max {
+	background-color: #444400;
+}
+.life_Cleared {
+	background-color: #004444;
+}
+.life_Failed {
+	background-color: #444444;
+}
+.life_Background {
+	background-color: #222222;
 }
