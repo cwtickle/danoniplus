@@ -550,6 +550,69 @@ g_kCd[226] = `\\ _`;
 g_kCd[229] = `Z/H`;
 g_kCd[240] = `CapsLk`;
 
+// CSS名称
+const g_cssObj = {
+	title_base: `title_base`,
+
+	settings_DifSelector: `settings_DifSelector`,
+	settings_Disabled: `settings_Disabled`,
+	settings_FadeinBar: `settings_FadeinBar`,
+
+	keyconfig_warning: `keyconfig_warning`,
+	keyconfig_ConfigType: `keyconfig_ConfigType`,
+	keyconfig_ColorType: `keyconfig_ColorType`,
+	keyconfig_Changekey: `keyconfig_Changekey`,
+	keyconfig_Defaultkey: `keyconfig_Defaultkey`,
+
+	main_stepKeyDown: `main_stepKeyDown`,
+	main_stepDefault: `main_stepDefault`,
+	main_stepDummy: `main_stepDummy`,
+	main_stepIi: `main_stepIi`,
+	main_stepShakin: `main_stepShakin`,
+	main_stepMatari: `main_stepMatari`,
+	main_stepShobon: `main_stepShobon`,
+
+	result_lbl: `result_lbl`,
+	result_style: `result_style`,
+
+	common_ii: `common_ii`,
+	common_shakin: `common_shakin`,
+	common_matari: `common_matari`,
+	common_shobon: `common_shobon`,
+	common_uwan: `common_uwan`,
+	common_kita: `common_kita`,
+	common_iknai: `common_iknai`,
+	common_combo: `common_combo`,
+	common_score: `common_score`,
+
+	result_score: `result_score`,
+	result_scoreHiBlanket: `result_scoreHiBlanket`,
+	result_scoreHi: `result_scoreHi`,
+	result_scoreHiPlus: `result_scoreHiPlus`,
+	result_noRecord: `result_noRecord`,
+
+	result_AllPerfect: `result_AllPerfect`,
+	result_Perfect: `result_Perfect`,
+	result_FullCombo: `result_FullCombo`,
+	result_Cleared: `result_Cleared`,
+	result_Failed: `result_Failed`,
+	result_Window: `result_Window`,
+
+	button_Start: `button_Start`,
+	button_Default: `button_Default`,
+	button_Mini: `button_Mini`,
+	button_Back: `button_Back`,
+	button_Setting: `button_Setting`,
+	button_Next: `button_Next`,
+	button_Reset: `button_Reset`,
+	button_Tweet: `button_Tweet`,
+
+	life_Max: `life_Max`,
+	life_Cleared: `life_Cleared`,
+	life_Failed: `life_Failed`,
+	life_Background: `life_Background`,
+};
+
 // キー別の設定（一旦ここで定義）
 // ステップゾーンの位置関係は自動化を想定
 const g_keyObj = {
@@ -1292,7 +1355,7 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text) 
  * @param {string} _text
  * @param {string} _class 
  */
-function createDivCssLabel(_id, _x, _y, _width, _height, _fontsize, _text, _class = `title_base`) {
+function createDivCssLabel(_id, _x, _y, _width, _height, _fontsize, _text, _class = g_cssObj.title_base) {
 	const div = createDiv(_id, _x, _y, _width, _height);
 	div.classList.add(_class);
 
@@ -2698,7 +2761,7 @@ function titleInit() {
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_TITLESIZE,
 		align: C_ALIGN_CENTER,
-		class: `button_Start`,
+		class: g_cssObj.button_Start,
 	}, _ => {
 		clearTimeout(g_timeoutEvtTitleId);
 		clearWindow();
@@ -2716,7 +2779,7 @@ function titleInit() {
 		height: 16,
 		fontsize: 12,
 		align: C_ALIGN_CENTER,
-		class: `button_Reset`,
+		class: g_cssObj.button_Reset,
 	}, _ => {
 		if (window.confirm(`この作品のローカル設定をクリアします。よろしいですか？\n(ハイスコアやAdjustment等のデータがクリアされます)`)) {
 			g_localStorage = {
@@ -2740,7 +2803,7 @@ function titleInit() {
 		height: 30,
 		fontsize: 20,
 		align: C_ALIGN_CENTER,
-		class: `button_Start`,
+		class: g_cssObj.button_Start,
 	}, _ => location.reload(true));
 	divRoot.appendChild(btnReload);
 
@@ -2754,7 +2817,7 @@ function titleInit() {
 		height: C_LNK_HEIGHT,
 		fontsize: C_LBL_LNKSIZE,
 		align: C_ALIGN_LEFT,
-		class: `button_Default`,
+		class: g_cssObj.button_Default,
 	}, _ => {
 		if (setVal(g_headerObj.creatorUrl, ``, C_TYP_STRING) !== ``) {
 			window.open(g_headerObj.creatorUrl, `_blank`);
@@ -2772,7 +2835,7 @@ function titleInit() {
 		height: C_LNK_HEIGHT,
 		fontsize: C_LBL_LNKSIZE,
 		align: C_ALIGN_LEFT,
-		class: `button_Default`,
+		class: g_cssObj.button_Default,
 	}, _ => {
 		if (setVal(g_headerObj.artistUrl, ``, C_TYP_STRING) !== ``) {
 			window.open(g_headerObj.artistUrl, `_blank`);
@@ -2801,7 +2864,7 @@ function titleInit() {
 		height: 16,
 		fontsize: 12,
 		align: C_ALIGN_RIGHT,
-		class: `button_Tweet`,
+		class: g_cssObj.button_Tweet,
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus`, `_blank`));
 	divRoot.appendChild(lnkVersion);
 
@@ -3757,7 +3820,7 @@ function optionInit() {
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
 		animationName: (g_initialFlg ? `` : `smallToNormalY`),
-		class: `button_Back`,
+		class: g_cssObj.button_Back,
 	}, _ => {
 		// タイトル画面へ戻る
 		clearWindow();
@@ -3776,7 +3839,7 @@ function optionInit() {
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
 		animationName: (g_initialFlg ? `` : `smallToNormalY`),
-		class: `button_Setting`,
+		class: g_cssObj.button_Setting,
 	}, _ => {
 		// キーコンフィグ画面へ遷移
 		g_kcType = `Main`;
@@ -3796,7 +3859,7 @@ function optionInit() {
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
 		animationName: (g_initialFlg ? `` : `smallToNormalY`),
-		class: `button_Next`,
+		class: g_cssObj.button_Next,
 	}, _ => {
 		clearWindow();
 		loadMusic();
@@ -3813,7 +3876,7 @@ function optionInit() {
 		height: 40,
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
-		class: `button_Mini`,
+		class: g_cssObj.button_Mini,
 	}, _ => {
 		// タイトル画面へ戻る
 		clearWindow();
@@ -3852,7 +3915,7 @@ function optionInit() {
 		height: 16,
 		fontsize: 12,
 		align: C_ALIGN_CENTER,
-		class: `button_Default`,
+		class: g_cssObj.button_Default,
 	}, _ => {
 		if (g_stateObj.dataSaveFlg) {
 			g_stateObj.dataSaveFlg = false;
@@ -3930,10 +3993,10 @@ function createOptionWindow(_sprite) {
 				if (document.querySelector(`#difList`) === null) {
 					const difList = createSprite(`optionsprite`, `difList`, 140, 45, 280, 255);
 					difList.style.overflow = `auto`;
-					difList.classList.toggle(`settings_DifSelector`, true);
+					difList.classList.toggle(g_cssObj.settings_DifSelector, true);
 					const difCover = createSprite(`optionsprite`, `difCover`, 0, 45, 140, 255);
 					difCover.style.overflow = `auto`;
-					difCover.classList.toggle(`settings_DifSelector`, true);
+					difCover.classList.toggle(g_cssObj.settings_DifSelector, true);
 					difCover.style.opacity = 0.95;
 
 					// 全リスト作成
@@ -4379,7 +4442,7 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(createLblSetting(`Fadein`, setNoFadein));
 
 	const lnkFadein = createDivCssLabel(`lblFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * setNoFadein,
-		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `${g_stateObj.fadein}%`, `settings_FadeinBar`);
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `${g_stateObj.fadein}%`, g_cssObj.settings_FadeinBar);
 	optionsprite.appendChild(lnkFadein);
 
 	// 右回し・左回しボタン
@@ -4651,7 +4714,7 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
  */
 function makeDisabledLabel(_id, _heightPos, _defaultStr) {
 	const lbl = createDivCssLabel(_id, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * _heightPos,
-		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, _defaultStr, `settings_Disabled`);
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, _defaultStr, g_cssObj.settings_Disabled);
 	lbl.style.textAlign = C_ALIGN_CENTER;
 	return lbl;
 }
@@ -4714,7 +4777,7 @@ function makeSettingLblButton(_id, _name, _heightPos, _func) {
 		height: C_LEN_SETLBL_HEIGHT,
 		fontsize: C_SIZ_SETLBL,
 		align: C_ALIGN_CENTER,
-		class: `button_Default`,
+		class: g_cssObj.button_Default,
 	}, _func);
 
 	return settingLblButton;
@@ -4737,7 +4800,7 @@ function makeDifLblButton(_id, _name, _heightPos, _func) {
 		height: C_LEN_SETLBL_HEIGHT,
 		fontsize: C_SIZ_DIFSELECTOR,
 		align: C_ALIGN_CENTER,
-		class: `button_Default`,
+		class: g_cssObj.button_Default,
 	}, _func);
 	difLblButton.style.borderStyle = `solid`;
 	difLblButton.classList.add(`button_ON`);
@@ -4762,7 +4825,7 @@ function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
 		height: C_LEN_SETLBL_HEIGHT,
 		fontsize: C_SIZ_SETLBL,
 		align: C_ALIGN_CENTER,
-		class: `button_Mini`,
+		class: g_cssObj.button_Mini,
 	}, _func);
 
 	return miniButton;
@@ -4807,7 +4870,7 @@ function settingsDisplayInit() {
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
-		class: `button_Back`,
+		class: g_cssObj.button_Back,
 	}, _ => {
 		// タイトル画面へ戻る
 		clearWindow();
@@ -4825,7 +4888,7 @@ function settingsDisplayInit() {
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
-		class: `button_Setting`,
+		class: g_cssObj.button_Setting,
 	}, _ => {
 		// キーコンフィグ画面へ遷移
 		g_kcType = `Main`;
@@ -4844,7 +4907,7 @@ function settingsDisplayInit() {
 		height: C_BTN_HEIGHT,
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
-		class: `button_Next`,
+		class: g_cssObj.button_Next,
 	}, _ => {
 		clearWindow();
 		loadMusic();
@@ -4861,7 +4924,7 @@ function settingsDisplayInit() {
 		height: 40,
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
-		class: `button_Mini`,
+		class: g_cssObj.button_Mini,
 	}, _ => {
 		// タイトル画面へ戻る
 		clearWindow();
@@ -5024,7 +5087,7 @@ function keyConfigInit() {
 
 	// 別キーモード警告メッセージ
 	const kcMsg = createDivCssLabel(`kcMsg`, 0, g_sHeight - 25, g_sWidth, 20, 14,
-		``, `keyconfig_warning`);
+		``, g_cssObj.keyconfig_warning);
 	kcMsg.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcMsg);
 	if (setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) !== ``) {
@@ -5073,10 +5136,10 @@ function keyConfigInit() {
 				C_ARW_WIDTH, C_ARW_WIDTH, 16, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] !== g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]) {
 				removeClassList(j, k);
-				document.querySelector(`#keycon${j}_${k}`).classList.add(`keyconfig_Changekey`);
+				document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.keyconfig_Changekey);
 			} else if (g_keyObj.currentPtn === -1) {
 				removeClassList(j, k);
-				document.querySelector(`#keycon${j}_${k}`).classList.add(`keyconfig_Defaultkey`);
+				document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.keyconfig_Defaultkey);
 			}
 		}
 	}
@@ -5091,7 +5154,7 @@ function keyConfigInit() {
 	const lblKcType = createDivCssLabel(`lblKcType`, 30, 10,
 		70, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL,
 		`ConfigType`);
-	lblKcType.classList.add(`keyconfig_ConfigType`);
+	lblKcType.classList.add(g_cssObj.keyconfig_ConfigType);
 	divRoot.appendChild(lblKcType);
 
 	const lnkKcType = makeSettingLblButton(`lnkKcType`, g_kcType, 0, _ => {
@@ -5122,7 +5185,7 @@ function keyConfigInit() {
 	const lblcolorType = createDivCssLabel(`lblcolorType`, g_sWidth - 120, 10,
 		70, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL,
 		`ColorType`);
-	lblcolorType.classList.add(`keyconfig_ColorType`);
+	lblcolorType.classList.add(g_cssObj.keyconfig_ColorType);
 	divRoot.appendChild(lblcolorType);
 
 	const lnkcolorType = makeSettingLblButton(`lnkKcType`, g_colorType, 0, _ => {
@@ -5179,7 +5242,7 @@ function keyConfigInit() {
 		height: C_BTN_HEIGHT / 2,
 		fontsize: C_LBL_BTNSIZE * 2 / 3,
 		align: C_ALIGN_CENTER,
-		class: `button_Back`,
+		class: g_cssObj.button_Back,
 	}, _ => {
 		// 設定・オプション画面へ戻る
 		g_currentj = 0;
@@ -5216,7 +5279,7 @@ function keyConfigInit() {
 		height: C_BTN_HEIGHT / 2,
 		fontsize: C_LBL_BTNSIZE * 2 / 3,
 		align: C_ALIGN_CENTER,
-		class: `button_Setting`,
+		class: g_cssObj.button_Setting,
 	}, _ => {
 		let tempPtn = g_keyObj.currentPtn + 1;
 		while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, C_TYP_STRING) !== `` &&
@@ -5254,7 +5317,7 @@ function keyConfigInit() {
 		height: C_BTN_HEIGHT / 2,
 		fontsize: C_LBL_BTNSIZE * 2 / 3,
 		align: C_ALIGN_CENTER,
-		class: `button_Setting`,
+		class: g_cssObj.button_Setting,
 	}, _ => {
 		let tempPtn = g_keyObj.currentPtn - 1;
 		while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, C_TYP_STRING) !== `` &&
@@ -5304,7 +5367,7 @@ function keyConfigInit() {
 		height: C_BTN_HEIGHT / 2,
 		fontsize: C_LBL_BTNSIZE * 2 / 3,
 		align: C_ALIGN_CENTER,
-		class: `button_Reset`,
+		class: g_cssObj.button_Reset,
 	}, _ => {
 		if (window.confirm(`キーを初期配置に戻します。よろしいですか？`)) {
 			g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
@@ -5319,10 +5382,10 @@ function keyConfigInit() {
 
 					if (g_keyObj.currentPtn === -1) {
 						removeClassList(j, k);
-						document.querySelector(`#keycon${j}_${k}`).classList.add(`keyconfig_Defaultkey`);
+						document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.keyconfig_Defaultkey);
 					} else {
 						removeClassList(j, k);
-						document.querySelector(`#keycon${j}_${k}`).classList.add(`title_base`);
+						document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.title_base);
 					}
 				}
 			}
@@ -5358,7 +5421,7 @@ function keyConfigInit() {
 				}
 				if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][g_currentj][g_currentk] !== setKey) {
 					removeClassList(g_currentj, g_currentk);
-					keyCdObj.classList.add(`keyconfig_Changekey`);
+					keyCdObj.classList.add(g_cssObj.keyconfig_Changekey);
 				}
 				keyCdObj.innerHTML = g_kCd[setKey];
 				g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][g_currentk] = setKey;
@@ -5509,14 +5572,14 @@ function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
  */
 function removeClassList(_j, _k) {
 	const obj = document.querySelector(`#keycon${_j}_${_k}`);
-	if (obj.classList.contains(`keyconfig_Changekey`)) {
-		obj.classList.remove(`keyconfig_Changekey`);
+	if (obj.classList.contains(g_cssObj.keyconfig_Changekey)) {
+		obj.classList.remove(g_cssObj.keyconfig_Changekey);
 	}
-	if (obj.classList.contains(`keyconfig_Defaultkey`)) {
-		obj.classList.remove(`keyconfig_Defaultkey`);
+	if (obj.classList.contains(g_cssObj.keyconfig_Defaultkey)) {
+		obj.classList.remove(g_cssObj.keyconfig_Defaultkey);
 	}
-	if (obj.classList.contains(`title_base`)) {
-		obj.classList.remove(`title_base`);
+	if (obj.classList.contains(g_cssObj.title_base)) {
+		obj.classList.remove(g_cssObj.title_base);
 	}
 }
 
@@ -7289,7 +7352,7 @@ function MainInit() {
 			g_workObj.stepX[j],
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], C_ARW_WIDTH,
 			g_workObj.stepRtn[j]);
-		step.classList.add(`main_stepDefault`);
+		step.classList.add(g_cssObj.main_stepDefault);
 		mainSprite.appendChild(step);
 
 		const stepHit = createArrowEffect(`stepHit${j}`, ``,
@@ -7298,7 +7361,7 @@ function MainInit() {
 			g_workObj.stepRtn[j]);
 		stepHit.style.opacity = 0;
 		stepHit.setAttribute(`cnt`, 0);
-		stepHit.classList.add(`main_stepDefault`);
+		stepHit.classList.add(g_cssObj.main_stepDefault);
 		mainSprite.appendChild(stepHit);
 
 		// ステップゾーンOFF設定
@@ -7437,11 +7500,11 @@ function MainInit() {
 		g_workObj.lifeVal);
 	let lblInitColor;
 	if (g_workObj.lifeVal === g_headerObj.maxLifeVal) {
-		lblInitColor = `life_Max`;
+		lblInitColor = g_cssObj.life_Max;
 	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
-		lblInitColor = `life_Cleared`;
+		lblInitColor = g_cssObj.life_Cleared;
 	} else {
-		lblInitColor = `life_Failed`;
+		lblInitColor = g_cssObj.life_Failed;
 	}
 	lblLife.classList.add(lblInitColor);
 	infoSprite.appendChild(lblLife);
@@ -7450,7 +7513,7 @@ function MainInit() {
 	const lifeBackObj = createColorObject(`lifeBackObj`, ``,
 		5, 50,
 		15, g_sHeight - 100, ``, `lifeBar`);
-	lifeBackObj.classList.add(`life_Background`);
+	lifeBackObj.classList.add(g_cssObj.life_Background);
 	infoSprite.appendChild(lifeBackObj);
 
 	// ライフ本体
@@ -7478,16 +7541,16 @@ function MainInit() {
 	}
 
 	// 判定カウンタ表示
-	infoSprite.appendChild(makeCounterSymbol(`lblIi`, g_sWidth - 110, `common_ii`, 1, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblShakin`, g_sWidth - 110, `common_shakin`, 2, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblMatari`, g_sWidth - 110, `common_matari`, 3, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblShobon`, g_sWidth - 110, `common_shobon`, 4, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblUwan`, g_sWidth - 110, `common_uwan`, 5, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblMCombo`, g_sWidth - 110, `common_combo`, 6, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblIi`, g_sWidth - 110, g_cssObj.common_ii, 1, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblShakin`, g_sWidth - 110, g_cssObj.common_shakin, 2, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblMatari`, g_sWidth - 110, g_cssObj.common_matari, 3, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblShobon`, g_sWidth - 110, g_cssObj.common_shobon, 4, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblUwan`, g_sWidth - 110, g_cssObj.common_uwan, 5, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblMCombo`, g_sWidth - 110, g_cssObj.common_combo, 6, 0));
 
-	infoSprite.appendChild(makeCounterSymbol(`lblKita`, g_sWidth - 110, `common_kita`, 8, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblIknai`, g_sWidth - 110, `common_iknai`, 9, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblFCombo`, g_sWidth - 110, `common_combo`, 10, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblKita`, g_sWidth - 110, g_cssObj.common_kita, 8, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblIknai`, g_sWidth - 110, g_cssObj.common_iknai, 9, 0));
+	infoSprite.appendChild(makeCounterSymbol(`lblFCombo`, g_sWidth - 110, g_cssObj.common_combo, 10, 0));
 
 	// 歌詞表示
 	createSprite(`judgeSprite`, `wordSprite`, 0, 0, g_sWidth, g_sHeight);
@@ -7527,35 +7590,35 @@ function MainInit() {
 
 	// 判定キャラクタ表示：矢印
 	const charaJ = createDivCssLabel(`charaJ`, g_sWidth / 2 - 200, g_sHeight / 2 - 50,
-		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, `common_ii`);
+		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_ii);
 	charaJ.style.textAlign = C_ALIGN_CENTER;
 	charaJ.setAttribute(`cnt`, 0);
 	judgeSprite.appendChild(charaJ);
 
 	// コンボ表示：矢印
 	const comboJ = createDivCssLabel(`comboJ`, g_sWidth / 2 - 50, g_sHeight / 2 - 50,
-		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, `common_kita`);
+		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_kita);
 	comboJ.style.textAlign = C_ALIGN_CENTER;
 	comboJ.setAttribute(`cnt`, 0);
 	judgeSprite.appendChild(comboJ);
 
 	// 判定キャラクタ表示：フリーズアロー
 	const charaFJ = createDivCssLabel(`charaFJ`, g_sWidth / 2 - 100, g_sHeight / 2,
-		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, `common_kita`);
+		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_kita);
 	charaFJ.style.textAlign = C_ALIGN_CENTER;
 	charaFJ.setAttribute(`cnt`, 0);
 	judgeSprite.appendChild(charaFJ);
 
 	// コンボ表示：フリーズアロー
 	const comboFJ = createDivCssLabel(`comboFJ`, g_sWidth / 2 + 50, g_sHeight / 2,
-		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, `common_ii`);
+		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_ii);
 	comboFJ.style.textAlign = C_ALIGN_CENTER;
 	comboFJ.setAttribute(`cnt`, 0);
 	judgeSprite.appendChild(comboFJ);
 
 	// パーフェクト演出
 	const finishView = createDivCssLabel(`finishView`, g_sWidth / 2 - 150, g_sHeight / 2 - 50,
-		300, 20, 50, ``, `common_kita`);
+		300, 20, 50, ``, g_cssObj.common_kita);
 	finishView.style.textAlign = C_ALIGN_CENTER;
 	judgeSprite.appendChild(finishView);
 
@@ -7696,8 +7759,8 @@ function MainInit() {
 		OFF: _ => {
 			for (let j = 0; j < keyNum; j++) {
 				if (g_workObj.keyCtrl[j].find(key => keyIsDown(key)) === undefined) {
-					document.querySelector(`#step${j}`).classList.remove(`main_stepKeyDown`);
-					document.querySelector(`#step${j}`).classList.add(`main_stepDefault`);
+					document.querySelector(`#step${j}`).classList.remove(g_cssObj.main_stepKeyDown);
+					document.querySelector(`#step${j}`).classList.add(g_cssObj.main_stepDefault);
 					//document.querySelector(`#step${j}`).style.backgroundColor = `#999999`;
 				}
 			}
@@ -7842,8 +7905,8 @@ function MainInit() {
 					}
 				}
 				stepDivHit.style.opacity = 1;
-				stepDivHit.classList.remove(`main_stepDefault`, `main_stepDummy`, `main_stepIi`, `main_stepShakin`, `main_stepMatari`, `main_stepShobon`);
-				stepDivHit.classList.add(`main_stepDummy`);
+				stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
+				stepDivHit.classList.add(g_cssObj.main_stepDummy);
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 				judgeObjDelete.dummyArrow(_j, _arrow);
 			}
@@ -8732,20 +8795,20 @@ function judgeArrow(_j) {
 
 			if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
 				stepDivHit.style.opacity = 0.75;
-				stepDivHit.classList.remove(`main_stepDefault`, `main_stepDummy`, `main_stepIi`, `main_stepShakin`, `main_stepMatari`, `main_stepShobon`);
+				stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
 
 				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 					judgeIi(difFrame);
-					stepDivHit.classList.add(`main_stepIi`);
+					stepDivHit.classList.add(g_cssObj.main_stepIi);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
 					judgeShakin(difFrame);
-					stepDivHit.classList.add(`main_stepShakin`);
+					stepDivHit.classList.add(g_cssObj.main_stepShakin);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
 					judgeMatari(difFrame);
-					stepDivHit.classList.add(`main_stepMatari`);
+					stepDivHit.classList.add(g_cssObj.main_stepMatari);
 				} else {
 					judgeShobon(difFrame);
-					stepDivHit.classList.add(`main_stepShobon`);
+					stepDivHit.classList.add(g_cssObj.main_stepShobon);
 				}
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
@@ -8784,9 +8847,8 @@ function judgeArrow(_j) {
 			}
 		}
 		const stepDiv = document.querySelector(`#step${_j}`);
-		stepDiv.classList.remove(`main_stepDefault`);
-		stepDiv.classList.add(`main_stepKeyDown`);
-		//stepDiv.style.backgroundColor = `#66ffff`;
+		stepDiv.classList.remove(g_cssObj.main_stepDefault);
+		stepDiv.classList.add(g_cssObj.main_stepKeyDown);
 		g_judgObj.lockFlgs[_j] = false;
 	}
 }
@@ -8799,17 +8861,17 @@ function lifeRecovery() {
 
 	if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
 		g_workObj.lifeVal = g_headerObj.maxLifeVal;
-		lifeCss = `life_Max`;
-		lblLife.classList.remove(`life_Cleared`, `life_Failed`);
+		lifeCss = g_cssObj.life_Max;
+		lblLife.classList.remove(g_cssObj.life_Cleared, g_cssObj.life_Failed);
 		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(`life_Cleared`, `life_Failed`);
+		lifeBar.classList.remove(g_cssObj.life_Cleared, g_cssObj.life_Failed);
 		lifeBar.classList.add(lifeCss);
 
 	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
-		lifeCss = `life_Cleared`;
-		lblLife.classList.remove(`life_Max`, `life_Failed`);
+		lifeCss = g_cssObj.life_Cleared;
+		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
 		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(`life_Max`, `life_Failed`);
+		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
 		lifeBar.classList.add(lifeCss);
 	}
 	lblLife.innerHTML = Math.floor(g_workObj.lifeVal);
@@ -8826,16 +8888,16 @@ function lifeDamage() {
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
-		lifeCss = `life_Failed`;
-		lblLife.classList.remove(`life_Max`, `life_Cleared`);
+		lifeCss = g_cssObj.life_Failed;
+		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared);
 		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(`life_Max`, `life_Cleared`);
+		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared);
 		lifeBar.classList.add(lifeCss);
 	} else {
-		lifeCss = `life_Cleared`;
-		lblLife.classList.remove(`life_Max`, `life_Failed`);
+		lifeCss = g_cssObj.life_Cleared;
+		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
 		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(`life_Max`, `life_Failed`);
+		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
 		lifeBar.classList.add(lifeCss);
 	}
 	lblLife.innerHTML = Math.floor(g_workObj.lifeVal);
@@ -9183,13 +9245,13 @@ function resultInit() {
 		transKeyData = `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)`;
 	}
 
-	playDataWindow.appendChild(makeResultPlayData(`lblMusic`, 20, `result_lbl`, 0,
+	playDataWindow.appendChild(makeResultPlayData(`lblMusic`, 20, g_cssObj.result_lbl, 0,
 		`Music`, C_ALIGN_LEFT));
-	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `result_style`, 0,
+	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 0,
 		musicTitleForView0, C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `result_style`, 1,
+	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 1,
 		setVal(musicTitleForView1, ``, C_TYP_STRING), C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `result_lbl`, 2,
+	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_headerObj.makerView) {
@@ -9198,9 +9260,9 @@ function resultInit() {
 	if (g_stateObj.shuffle !== C_FLG_OFF) {
 		difData += ` [${g_stateObj.shuffle}]`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblDifData`, 60, `result_style`, 2, difData,
+	playDataWindow.appendChild(makeResultPlayData(`lblDifData`, 60, g_cssObj.result_style, 2, difData,
 		C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeResultPlayData(`lblStyle`, 20, `result_lbl`, 3,
+	playDataWindow.appendChild(makeResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3,
 		`Playstyle`, C_ALIGN_LEFT));
 
 	let playStyleData = ``;
@@ -9217,10 +9279,10 @@ function resultInit() {
 	if (g_stateObj.gauge !== g_gauges[0]) {
 		playStyleData += `, ${g_stateObj.gauge}`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblStyleData`, 60, `result_style`, 3,
+	playDataWindow.appendChild(makeResultPlayData(`lblStyleData`, 60, g_cssObj.result_style, 3,
 		playStyleData, C_ALIGN_CENTER));
 
-	playDataWindow.appendChild(makeResultPlayData(`lblDisplay`, 20, `result_lbl`, 4,
+	playDataWindow.appendChild(makeResultPlayData(`lblDisplay`, 20, g_cssObj.result_lbl, 4,
 		`Display`, C_ALIGN_LEFT));
 
 	let displayData = ``;
@@ -9233,7 +9295,7 @@ function resultInit() {
 	} else {
 		displayData += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, `result_style`, 4,
+	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 4,
 		displayData, C_ALIGN_CENTER));
 
 	let display2Data = ``;
@@ -9245,7 +9307,7 @@ function resultInit() {
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, `result_style`, 5,
+	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 5,
 		display2Data, C_ALIGN_CENTER));
 
 	/**
@@ -9265,30 +9327,30 @@ function resultInit() {
 	}
 
 	// キャラクタ描画
-	resultWindow.appendChild(makeResultSymbol(`lblIi`, 0, `common_ii`, 0, C_JCR_II, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblShakin`, 0, `common_shakin`, 1, C_JCR_SHAKIN, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblMatari`, 0, `common_matari`, 2, C_JCR_MATARI, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblShobon`, 0, `common_shobon`, 3, C_JCR_SHOBON, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblUwan`, 0, `common_uwan`, 4, C_JCR_UWAN, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblKita`, 0, `common_kita`, 5, C_JCR_KITA, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblIknai`, 0, `common_iknai`, 6, C_JCR_IKNAI, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblMCombo`, 0, `common_combo`, 7, `MaxCombo`, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblFCombo`, 0, `common_combo`, 8, `FreezeCombo`, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblIi`, 0, g_cssObj.common_ii, 0, C_JCR_II, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblShakin`, 0, g_cssObj.common_shakin, 1, C_JCR_SHAKIN, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblMatari`, 0, g_cssObj.common_matari, 2, C_JCR_MATARI, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblShobon`, 0, g_cssObj.common_shobon, 3, C_JCR_SHOBON, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblUwan`, 0, g_cssObj.common_uwan, 4, C_JCR_UWAN, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblKita`, 0, g_cssObj.common_kita, 5, C_JCR_KITA, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblIknai`, 0, g_cssObj.common_iknai, 6, C_JCR_IKNAI, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblMCombo`, 0, g_cssObj.common_combo, 7, `MaxCombo`, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblFCombo`, 0, g_cssObj.common_combo, 8, `FreezeCombo`, C_ALIGN_LEFT));
 
-	resultWindow.appendChild(makeResultSymbol(`lblScore`, 0, `common_score`, 10, `Score`, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeResultSymbol(`lblScore`, 0, g_cssObj.common_score, 10, `Score`, C_ALIGN_LEFT));
 
 	// スコア描画
-	resultWindow.appendChild(makeResultSymbol(`lblIiS`, 50, `result_score`, 0, g_resultObj.ii, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblShakinS`, 50, `result_score`, 1, g_resultObj.shakin, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblMatariS`, 50, `result_score`, 2, g_resultObj.matari, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblShobonS`, 50, `result_score`, 3, g_resultObj.shobon, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblUwanS`, 50, `result_score`, 4, g_resultObj.uwan, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblKitaS`, 50, `result_score`, 5, g_resultObj.kita, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, 50, `result_score`, 6, g_resultObj.iknai, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblMComboS`, 50, `result_score`, 7, g_resultObj.maxCombo, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblFComboS`, 50, `result_score`, 8, g_resultObj.fmaxCombo, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblIiS`, 50, g_cssObj.result_score, 0, g_resultObj.ii, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblShakinS`, 50, g_cssObj.result_score, 1, g_resultObj.shakin, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblMatariS`, 50, g_cssObj.result_score, 2, g_resultObj.matari, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblShobonS`, 50, g_cssObj.result_score, 3, g_resultObj.shobon, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblUwanS`, 50, g_cssObj.result_score, 4, g_resultObj.uwan, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblKitaS`, 50, g_cssObj.result_score, 5, g_resultObj.kita, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, 50, g_cssObj.result_score, 6, g_resultObj.iknai, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblMComboS`, 50, g_cssObj.result_score, 7, g_resultObj.maxCombo, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblFComboS`, 50, g_cssObj.result_score, 8, g_resultObj.fmaxCombo, C_ALIGN_RIGHT));
 
-	resultWindow.appendChild(makeResultSymbol(`lblScoreS`, 50, `result_score`, 10, g_resultObj.score, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeResultSymbol(`lblScoreS`, 50, g_cssObj.result_score, 10, g_resultObj.score, C_ALIGN_RIGHT));
 
 	// ランク描画
 	const lblRank = createDivCustomLabel(`lblRank`, 340, 160, 70, 20, 50, `#ffffff`,
@@ -9379,45 +9441,45 @@ function resultInit() {
 		}
 
 		// ハイスコア差分描画
-		resultWindow.appendChild(makeResultSymbol(`lblIiL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 7, `(${maxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboL1`, C_RLT_BRACKET_L, `result_scoreHiBlanket`, 8, `(${fmaxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 7, `(${maxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 8, `(${fmaxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreL1`, C_RLT_BRACKET_L, `${scoreDf > 0 ? "result_scoreHiPlus" : "result_scoreHiBlanket"}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreL1`, C_RLT_BRACKET_L, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiS`, C_RLT_HIDIF_X, `result_scoreHi`, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinS`, C_RLT_HIDIF_X, `result_scoreHi`, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariS`, C_RLT_HIDIF_X, `result_scoreHi`, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonS`, C_RLT_HIDIF_X, `result_scoreHi`, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanS`, C_RLT_HIDIF_X, `result_scoreHi`, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaS`, C_RLT_HIDIF_X, `result_scoreHi`, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, C_RLT_HIDIF_X, `result_scoreHi`, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboS`, C_RLT_HIDIF_X, `result_scoreHi`, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboS`, C_RLT_HIDIF_X, `result_scoreHi`, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreS`, C_RLT_HIDIF_X, `${scoreDf > 0 ? "result_scoreHiPlus" : "result_scoreHi"}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreS`, C_RLT_HIDIF_X, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
 
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 0, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 1, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 2, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 3, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 4, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 5, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 6, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 7, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboL2`, C_RLT_BRACKET_R, `result_scoreHiBlanket`, 8, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 0, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 1, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 2, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 3, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 4, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 5, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 6, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 7, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 8, `)`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreL2`, C_RLT_BRACKET_R, `${scoreDf > 0 ? "result_scoreHiPlus" : "result_scoreHiBlanket"}`, 10, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreL2`, C_RLT_BRACKET_R, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`, 10, `)`, C_ALIGN_LEFT));
 
 	} else {
-		resultWindow.appendChild(makeResultSymbol(`lblAutoView`, 230, `result_noRecord`, 4, `(No Record)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`, C_ALIGN_LEFT));
 		const lblAutoView = document.querySelector(`#lblAutoView`);
 		lblAutoView.style.fontSize = `24px`;
 	}
@@ -9447,8 +9509,8 @@ function resultInit() {
 
 	// Cleared & Failed表示
 	const lblResultPre = createDivCssLabel(`lblResultPre`, g_sWidth / 2 - 150, g_sHeight / 2 - 160,
-		200, 50, 60, `<span class="result_Cleared">CLEARED!</span>`, `result_Cleared`);
-	lblResultPre.classList.add(`result_Window`);
+		200, 50, 60, `<span class="result_Cleared">CLEARED!</span>`, g_cssObj.result_Cleared);
+	lblResultPre.classList.add(g_cssObj.result_Window);
 	divRoot.appendChild(lblResultPre);
 	lblResultPre.style.opacity = 0;
 
@@ -9469,7 +9531,7 @@ function resultInit() {
 	}
 
 	const lblResultPre2 = createDivCssLabel(`lblResultPre`, g_sWidth / 2 + 50, 40,
-		200, 30, 20, resultFlgTmp, `result_Cleared`);
+		200, 30, 20, resultFlgTmp, g_cssObj.result_Cleared);
 	divRoot.appendChild(lblResultPre2);
 
 	if (!g_gameOverFlg) {
@@ -9498,7 +9560,7 @@ function resultInit() {
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
-		class: `button_Back`,
+		class: g_cssObj.button_Back,
 	}, _ => {
 		// タイトル画面へ戻る
 		g_audio.pause();
@@ -9520,7 +9582,7 @@ function resultInit() {
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
-		class: `button_Tweet`,
+		class: g_cssObj.button_Tweet,
 	}, _ => window.open(tweetResult, `_blank`));
 	divRoot.appendChild(btnTweet);
 
@@ -9535,7 +9597,7 @@ function resultInit() {
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
-		class: `button_Reset`,
+		class: g_cssObj.button_Reset,
 	}, _ => {
 		g_audio.pause();
 		clearTimeout(g_timeoutEvtId);
