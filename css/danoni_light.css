@@ -83,6 +83,7 @@
 	width: 65px;
 }
 
+/* キーコンフィグ */
 .keyconfig_warning {
 	color: #999900;
 }
@@ -97,6 +98,29 @@
 }
 .keyconfig_Defaultkey {
 	color:#000099;
+}
+
+/* ステップゾーン */
+.main_stepKeyDown {
+	background-color: #009999;
+}
+.main_stepDefault {
+	background-color: #666666;
+}
+.main_stepDummy {
+	background-color: #666666;
+}
+.main_stepIi {
+	background-color: #009999;
+}
+.main_stepShakin {
+	background-color: #009900;
+}
+.main_stepMatari {
+	background-color: #cc8800;
+}
+.main_stepShobon {
+	background-color: #0000cc;
 }
 
 /* 結果画面：項目、設定値 */

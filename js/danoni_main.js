@@ -1593,12 +1593,10 @@ function createCssButton(_obj, _func) {
 	style.verticalAlign = C_VALIGN_MIDDLE;
 	style.fontSize = `${_obj.fontsize}px`;
 	style.fontFamily = getBasicFont();
-	style.backgroundColor = _obj.normalColor;
 	if (setVal(_obj.animationName, ``, C_TYP_STRING) !== ``) {
 		style.animationName = _obj.animationName;
 		style.animationDuration = `1s`;
 	}
-
 	div.ontouchstart = ``;
 
 	// ボタンを押したときの動作
@@ -7287,18 +7285,20 @@ function MainInit() {
 			stepShadow.style.opacity = 0.7;
 		}
 
-		const step = createArrowEffect(`step${j}`, `#999999`,
+		const step = createArrowEffect(`step${j}`, ``,
 			g_workObj.stepX[j],
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], C_ARW_WIDTH,
 			g_workObj.stepRtn[j]);
+		step.classList.add(`main_stepDefault`);
 		mainSprite.appendChild(step);
 
-		const stepHit = createArrowEffect(`stepHit${j}`, `#999999`,
+		const stepHit = createArrowEffect(`stepHit${j}`, ``,
 			g_workObj.stepX[j] - 15,
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] - 15, C_ARW_WIDTH + 30,
 			g_workObj.stepRtn[j]);
 		stepHit.style.opacity = 0;
 		stepHit.setAttribute(`cnt`, 0);
+		stepHit.classList.add(`main_stepDefault`);
 		mainSprite.appendChild(stepHit);
 
 		// ステップゾーンOFF設定
@@ -7696,7 +7696,9 @@ function MainInit() {
 		OFF: _ => {
 			for (let j = 0; j < keyNum; j++) {
 				if (g_workObj.keyCtrl[j].find(key => keyIsDown(key)) === undefined) {
-					document.querySelector(`#step${j}`).style.backgroundColor = `#999999`;
+					document.querySelector(`#step${j}`).classList.remove(`main_stepKeyDown`);
+					document.querySelector(`#step${j}`).classList.add(`main_stepDefault`);
+					//document.querySelector(`#step${j}`).style.backgroundColor = `#999999`;
 				}
 			}
 		},
@@ -7840,7 +7842,8 @@ function MainInit() {
 					}
 				}
 				stepDivHit.style.opacity = 1;
-				stepDivHit.style.backgroundColor = C_CLR_DUMMY;
+				stepDivHit.classList.remove(`main_stepDefault`, `main_stepDummy`, `main_stepIi`, `main_stepShakin`, `main_stepMatari`, `main_stepShobon`);
+				stepDivHit.classList.add(`main_stepDummy`);
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 				judgeObjDelete.dummyArrow(_j, _arrow);
 			}
@@ -8729,19 +8732,20 @@ function judgeArrow(_j) {
 
 			if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
 				stepDivHit.style.opacity = 0.75;
+				stepDivHit.classList.remove(`main_stepDefault`, `main_stepDummy`, `main_stepIi`, `main_stepShakin`, `main_stepMatari`, `main_stepShobon`);
 
 				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 					judgeIi(difFrame);
-					stepDivHit.style.background = C_CLR_II;
+					stepDivHit.classList.add(`main_stepIi`);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
 					judgeShakin(difFrame);
-					stepDivHit.style.background = C_CLR_SHAKIN;
+					stepDivHit.classList.add(`main_stepShakin`);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
 					judgeMatari(difFrame);
-					stepDivHit.style.background = C_CLR_MATARI;
+					stepDivHit.classList.add(`main_stepMatari`);
 				} else {
 					judgeShobon(difFrame);
-					stepDivHit.style.background = C_CLR_SHOBON;
+					stepDivHit.classList.add(`main_stepShobon`);
 				}
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
@@ -8780,7 +8784,9 @@ function judgeArrow(_j) {
 			}
 		}
 		const stepDiv = document.querySelector(`#step${_j}`);
-		stepDiv.style.backgroundColor = `#66ffff`;
+		stepDiv.classList.remove(`main_stepDefault`);
+		stepDiv.classList.add(`main_stepKeyDown`);
+		//stepDiv.style.backgroundColor = `#66ffff`;
 		g_judgObj.lockFlgs[_j] = false;
 	}
 }
