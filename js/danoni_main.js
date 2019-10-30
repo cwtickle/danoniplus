@@ -611,6 +611,8 @@ const g_cssObj = {
 	life_Cleared: `life_Cleared`,
 	life_Failed: `life_Failed`,
 	life_Background: `life_Background`,
+
+	flex_centering: `flex_centering`,
 };
 
 // キー別の設定（一旦ここで定義）
@@ -2604,10 +2606,11 @@ function titleInit() {
 
 	// タイトル文字描画
 	const lblTitle = getTitleDivLabel(`lblTitle`,
-		`<span style=color:#6666ff;font-size:40px>D</span>ANCING
-		<span style=color:#ffff66;font-size:40px>☆</span>
-		<span style=color:#ff6666;font-size:40px>O</span>NIGIRI`
+		`<div class="settings_Title">DANCING</div>
+		<div class="settings_TitleStar">☆</div>
+		<div class="settings_Title2">ONIGIRI</div>`
 			.replace(/[\t\n]/g, ``), 0, 15);
+	lblTitle.classList.add(g_cssObj.flex_centering);
 	divRoot.appendChild(lblTitle);
 
 	// 曲名文字描画（曲名は譜面データから取得）
@@ -5055,7 +5058,7 @@ function keyConfigInit() {
 		`<div class="settings_Title">KEY</div>
 		<div class="settings_Title2">CONFIG</div>`
 			.replace(/[\t\n]/g, ``), 0, 15);
-	lblTitle.classList.add(`flex_centering`);
+	lblTitle.classList.add(g_cssObj.flex_centering);
 
 	divRoot.appendChild(lblTitle);
 

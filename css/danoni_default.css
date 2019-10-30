@@ -18,6 +18,10 @@
 	color:#ff6666;
 	font-size:40px;
 }
+.settings_TitleStar::first-letter {
+	color:#ffff66;
+	font-size:40px;
+}
 .settings_Display::first-letter {
 	color:#ffff66;
 	font-size:40px;
