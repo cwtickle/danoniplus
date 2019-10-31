@@ -38,21 +38,6 @@ input[type=range]::-moz-range-thumb{
 input[type=range]:focus {
 	outline: 0;
 }
-.gaugeVal {
-	font-size:12px;
-}
-.lifeVal {
-	color: #ff9966;
-}
-.gaugeTable {
-	width: 280px;
-	margin: 0 auto;
-	border: 1px #666666 solid; 
-	border-collapse: collapse;
-}
-.gaugeTable td {
-	width: 65px;
-}
 
 /* 左から右へ */
 @keyframes leftToRight {
@@ -283,45 +268,19 @@ input[type=range]:focus {
 	clip-path: polygon(5% 0%, 100% 0%, 100% 30%, 5% 30%, 5% 45%, 100% 45%, 100% 55%, 5% 55%, 5% 70%, 100% 70%, 100% 100%, 5% 100%);
 }
 
-/* 設定別カラー */
-.settings_Difficulty::first-letter {
-	color:#ff9999;
-}
-.settings_Speed::first-letter {
-	color:#ffff99;
-}
-.settings_Motion::first-letter {
-	color:#eeff99;
-}
-.settings_Reverse::first-letter {
-	color:#ddff99;
-}
-.settings_Shuffle::first-letter {
-	color:#99ff99;
-}
-.settings_AutoPlay::first-letter {
-	color:#99ffbb;
-}
-.settings_Gauge::first-letter {
-	color:#99ffdd;
-}
-.settings_Adjustment::first-letter {
-	color:#99ffff;
-}
-.settings_Fadein::first-letter {
-	color:#99eeff;
-}
-.settings_Volume::first-letter {
-	color:#99ddff;
-}
-.settings_Appearance::first-letter {
-	color:#cc99ff;
-}
-
 /* ボタン一般 */
 .button_common {
 	transition: background-color 0.25s linear;
 	display: flex;
 	flex-direction: column;
+	justify-content: center;
+	cursor: default;
+}
+.button_common:hover {
+	cursor: pointer;
+}
+
+.flex_centering {
+	display: flex;
 	justify-content: center;
 }
