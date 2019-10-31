@@ -1326,7 +1326,7 @@ function createDiv(_id, _x, _y, _width, _height) {
 }
 
 /**
- * 子div要素のラベル文字作成 (過去互換用)
+ * 子div要素のラベル文字作成 (v9互換用)
  * - ここで指定するテキストはhtmlタグが使える
  * @param {string} _id 
  * @param {number} _x 
@@ -1521,7 +1521,7 @@ function deleteChildspriteAll(_parentObjName) {
 }
 
 /**
- * ボタンの作成 (過去互換版)
+ * ボタンの作成 (v9互換版)
  * - ボタンの位置、色といった基本設定をここで指定
  * - 実際のボタンは以下のように設定して使用すること（表示されなくなる）
  * - ボタンの表示テキスト及びフォントは固定
@@ -3989,7 +3989,7 @@ function createOptionWindow(_sprite) {
 		}
 	}
 
-	const lnkDifficulty = makeSettingLblButton(`lnkDifficulty`,
+	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`,
 		``, setNoDifficulty, _ => {
 			if (!g_headerObj.difSelectorUse) {
 				g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
@@ -4010,7 +4010,7 @@ function createOptionWindow(_sprite) {
 						if (g_headerObj.makerView) {
 							text += ` (${g_headerObj.creatorNames[j]})`;
 						}
-						difList.appendChild(makeDifLblButton(`dif${j}`, text, j, _ => {
+						difList.appendChild(makeDifLblCssButton(`dif${j}`, text, j, _ => {
 							g_stateObj.scoreId = j;
 							setDifficulty(true);
 							deleteChildspriteAll(`difList`);
@@ -4020,7 +4020,7 @@ function createOptionWindow(_sprite) {
 					}
 
 					// ランダム選択
-					const lnkDifRandom = makeDifLblButton(`difRandom`, `RANDOM`, 0, _ => {
+					const lnkDifRandom = makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
 						g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
 						setDifficulty(true);
 						deleteChildspriteAll(`difList`);
@@ -4032,7 +4032,7 @@ function createOptionWindow(_sprite) {
 
 					// キー別フィルタボタン作成
 					for (let m = 0; m < g_headerObj.keyLists.length; m++) {
-						const lnkKeyFilter = makeDifLblButton(`keyFilter`, `${g_headerObj.keyLists[m]} key`, m + 1.5, _ => {
+						const lnkKeyFilter = makeDifLblCssButton(`keyFilter`, `${g_headerObj.keyLists[m]} key`, m + 1.5, _ => {
 							deleteChildspriteAll(`difList`);
 
 							for (let j = 0, k = 0; j < g_headerObj.keyLabels.length; j++) {
@@ -4041,7 +4041,7 @@ function createOptionWindow(_sprite) {
 									if (g_headerObj.makerView) {
 										text += ` (${g_headerObj.creatorNames[j]})`;
 									}
-									difList.appendChild(makeDifLblButton(`dif${k}`, text, k, _ => {
+									difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
 										g_stateObj.scoreId = j;
 										setDifficulty(true);
 										deleteChildspriteAll(`difList`);
@@ -4072,12 +4072,12 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lnkDifficulty);
 
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkDifficulty`, `R`, setNoDifficulty, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkDifficulty`, `R`, setNoDifficulty, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
 		setDifficulty(true);
 		resetDifWindow();
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkDifficulty`, `L`, setNoDifficulty, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkDifficulty`, `L`, setNoDifficulty, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
 		setDifficulty(true);
 		resetDifWindow();
@@ -4101,7 +4101,7 @@ function createOptionWindow(_sprite) {
 	const setNoSpeed = 2;
 	optionsprite.appendChild(createLblSetting(`Speed`, setNoSpeed));
 
-	const lnkSpeed = makeSettingLblButton(`lnkSpeed`, ``, setNoSpeed, _ => {
+	const lnkSpeed = makeSettingLblCssButton(`lnkSpeed`, ``, setNoSpeed, _ => {
 		setSetting(1, `speed`, ` x`);
 	});
 	lnkSpeed.oncontextmenu = _ => {
@@ -4111,18 +4111,18 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lnkSpeed);
 
 	// 早右回し・早左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `R`, setNoSpeed, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkSpeed`, `R`, setNoSpeed, _ => {
 		setSetting(4, `speed`, ` x`);
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `L`, setNoSpeed, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkSpeed`, `L`, setNoSpeed, _ => {
 		setSetting(-4, `speed`, ` x`);
 	}));
 
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `RR`, setNoSpeed, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkSpeed`, `RR`, setNoSpeed, _ => {
 		setSetting(1, `speed`, ` x`);
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkSpeed`, `LL`, setNoSpeed, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkSpeed`, `LL`, setNoSpeed, _ => {
 		setSetting(-1, `speed`, ` x`);
 	}));
 
@@ -4133,7 +4133,7 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(createLblSetting(`Motion`, setNoMotion));
 
 	if (g_headerObj.motionUse) {
-		const lnkMotion = makeSettingLblButton(`lnkMotion`, g_stateObj.motion, setNoMotion, _ => {
+		const lnkMotion = makeSettingLblCssButton(`lnkMotion`, g_stateObj.motion, setNoMotion, _ => {
 			setSetting(1, `motion`);
 		});
 		lnkMotion.oncontextmenu = _ => {
@@ -4143,10 +4143,10 @@ function createOptionWindow(_sprite) {
 		optionsprite.appendChild(lnkMotion);
 
 		// 右回し・左回しボタン
-		optionsprite.appendChild(makeMiniButton(`lnkMotion`, `R`, setNoMotion, _ => {
+		optionsprite.appendChild(makeMiniCssButton(`lnkMotion`, `R`, setNoMotion, _ => {
 			setSetting(1, `motion`);
 		}));
-		optionsprite.appendChild(makeMiniButton(`lnkMotion`, `L`, setNoMotion, _ => {
+		optionsprite.appendChild(makeMiniCssButton(`lnkMotion`, `L`, setNoMotion, _ => {
 			setSetting(-1, `motion`);
 		}));
 	} else {
@@ -4160,7 +4160,7 @@ function createOptionWindow(_sprite) {
 	const setNoReverse = 4;
 	optionsprite.appendChild(createLblSetting(`Reverse`, setNoReverse));
 
-	const lnkReverse = makeSettingLblButton(`lnkReverse`, ``, setNoReverse, _ => {
+	const lnkReverse = makeSettingLblCssButton(`lnkReverse`, ``, setNoReverse, _ => {
 		setSetting(1, `reverse`);
 	});
 	lnkReverse.oncontextmenu = _ => {
@@ -4170,10 +4170,10 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lnkReverse);
 
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `R`, setNoReverse, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkReverse`, `R`, setNoReverse, _ => {
 		setSetting(1, `reverse`);
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkReverse`, `L`, setNoReverse, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkReverse`, `L`, setNoReverse, _ => {
 		setSetting(-1, `reverse`);
 	}));
 
@@ -4184,7 +4184,7 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(createLblSetting(`Shuffle`, setNoShuffle));
 
 	if (g_headerObj.shuffleUse) {
-		const lnkShuffle = makeSettingLblButton(`lnkShuffle`, g_stateObj.shuffle, setNoShuffle, _ => {
+		const lnkShuffle = makeSettingLblCssButton(`lnkShuffle`, g_stateObj.shuffle, setNoShuffle, _ => {
 			setSetting(1, `shuffle`);
 		});
 		lnkShuffle.oncontextmenu = _ => {
@@ -4194,10 +4194,10 @@ function createOptionWindow(_sprite) {
 		optionsprite.appendChild(lnkShuffle);
 
 		// 右回し・左回しボタン
-		optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `R`, setNoShuffle, _ => {
+		optionsprite.appendChild(makeMiniCssButton(`lnkShuffle`, `R`, setNoShuffle, _ => {
 			setSetting(1, `shuffle`);
 		}));
-		optionsprite.appendChild(makeMiniButton(`lnkShuffle`, `L`, setNoShuffle, _ => {
+		optionsprite.appendChild(makeMiniCssButton(`lnkShuffle`, `L`, setNoShuffle, _ => {
 			setSetting(-1, `shuffle`);
 		}));
 	} else {
@@ -4212,7 +4212,7 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(createLblSetting(`AutoPlay`, setNoAutoPlay));
 
 	if (g_headerObj.autoPlayUse) {
-		const lnkAutoPlay = makeSettingLblButton(`lnkAutoPlay`, g_stateObj.autoPlay, setNoAutoPlay, _ => {
+		const lnkAutoPlay = makeSettingLblCssButton(`lnkAutoPlay`, g_stateObj.autoPlay, setNoAutoPlay, _ => {
 			setSetting(1, `autoPlay`);
 		});
 		lnkAutoPlay.oncontextmenu = _ => {
@@ -4222,10 +4222,10 @@ function createOptionWindow(_sprite) {
 		optionsprite.appendChild(lnkAutoPlay);
 
 		// 右回し・左回しボタン
-		optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `R`, setNoAutoPlay, _ => {
+		optionsprite.appendChild(makeMiniCssButton(`lnkAutoPlay`, `R`, setNoAutoPlay, _ => {
 			setSetting(1, `autoPlay`);
 		}));
-		optionsprite.appendChild(makeMiniButton(`lnkAutoPlay`, `L`, setNoAutoPlay, _ => {
+		optionsprite.appendChild(makeMiniCssButton(`lnkAutoPlay`, `L`, setNoAutoPlay, _ => {
 			setSetting(-1, `autoPlay`);
 		}));
 	} else {
@@ -4245,7 +4245,7 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lblGauge2);
 
 	if (g_headerObj.gaugeUse) {
-		const lnkGauge = makeSettingLblButton(`lnkGauge`,
+		const lnkGauge = makeSettingLblCssButton(`lnkGauge`,
 			``, setNoGauge, _ => {
 				setGauge(1);
 			});
@@ -4256,10 +4256,10 @@ function createOptionWindow(_sprite) {
 		optionsprite.appendChild(lnkGauge);
 
 		// 右回し・左回しボタン
-		optionsprite.appendChild(makeMiniButton(`lnkGauge`, `R`, setNoGauge, _ => {
+		optionsprite.appendChild(makeMiniCssButton(`lnkGauge`, `R`, setNoGauge, _ => {
 			setGauge(1);
 		}));
-		optionsprite.appendChild(makeMiniButton(`lnkGauge`, `L`, setNoGauge, _ => {
+		optionsprite.appendChild(makeMiniCssButton(`lnkGauge`, `L`, setNoGauge, _ => {
 			setGauge(-1);
 		}));
 	} else {
@@ -4416,7 +4416,7 @@ function createOptionWindow(_sprite) {
 	const setNoAdjustment = 10;
 	optionsprite.appendChild(createLblSetting(`Adjustment`, setNoAdjustment));
 
-	const lnkAdjustment = makeSettingLblButton(`lnkAdjustment`, g_stateObj.adjustment, setNoAdjustment, _ => {
+	const lnkAdjustment = makeSettingLblCssButton(`lnkAdjustment`, g_stateObj.adjustment, setNoAdjustment, _ => {
 		setSetting(1, `adjustment`);
 	});
 	lnkAdjustment.oncontextmenu = _ => {
@@ -4426,17 +4426,17 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lnkAdjustment);
 
 	// 早右回し・早左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `R`, setNoAdjustment, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `R`, setNoAdjustment, _ => {
 		setSetting(5, `adjustment`);
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `L`, setNoAdjustment, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `L`, setNoAdjustment, _ => {
 		setSetting(-5, `adjustment`);
 	}));
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `RR`, setNoAdjustment, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `RR`, setNoAdjustment, _ => {
 		setSetting(1, `adjustment`);
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkAdjustment`, `LL`, setNoAdjustment, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `LL`, setNoAdjustment, _ => {
 		setSetting(-1, `adjustment`);
 	}));
 
@@ -4451,12 +4451,12 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lnkFadein);
 
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `R`, setNoFadein, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkFadein`, `R`, setNoFadein, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 99 ? 0 : g_stateObj.fadein + 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkFadein`, `L`, setNoFadein, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkFadein`, `L`, setNoFadein, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 0 ? 99 : g_stateObj.fadein - 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
@@ -4492,7 +4492,7 @@ function createOptionWindow(_sprite) {
 	const setNoVolume = 12;
 	optionsprite.appendChild(createLblSetting(`Volume`, setNoVolume));
 
-	const lnkVolume = makeSettingLblButton(`lnkVolume`, `${g_stateObj.volume}%`, setNoVolume, _ => {
+	const lnkVolume = makeSettingLblCssButton(`lnkVolume`, `${g_stateObj.volume}%`, setNoVolume, _ => {
 		setSetting(1, `volume`, `%`);
 	});
 	lnkVolume.oncontextmenu = _ => {
@@ -4502,10 +4502,10 @@ function createOptionWindow(_sprite) {
 	optionsprite.appendChild(lnkVolume);
 
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `R`, setNoVolume, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkVolume`, `R`, setNoVolume, _ => {
 		setSetting(1, `volume`, `%`);
 	}));
-	optionsprite.appendChild(makeMiniButton(`lnkVolume`, `L`, setNoVolume, _ => {
+	optionsprite.appendChild(makeMiniCssButton(`lnkVolume`, `L`, setNoVolume, _ => {
 		setSetting(-1, `volume`, `%`);
 	}));
 
@@ -4766,13 +4766,87 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 }
 
 /**
- * 設定・オプション表示用ボタン
+ * 設定・オプション表示用ボタン - v9互換用
  * @param {string} _id 
  * @param {string} _name 初期設定文字
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func 
  */
 function makeSettingLblButton(_id, _name, _heightPos, _func) {
+	const settingLblButton = createButton({
+		id: _id,
+		name: _name,
+		x: C_LEN_SETLBL_LEFT,
+		y: C_LEN_SETLBL_HEIGHT * _heightPos,
+		width: C_LEN_SETLBL_WIDTH,
+		height: C_LEN_SETLBL_HEIGHT,
+		fontsize: C_SIZ_SETLBL,
+		normalColor: C_CLR_LNK,
+		hoverColor: C_CLR_DEFHOVER,
+		align: C_ALIGN_CENTER
+	}, _func);
+
+	return settingLblButton;
+}
+
+/**
+ * 譜面変更セレクター用ボタン - v9互換用
+ * @param {string} _id
+ * @param {string} _name 初期設定文字
+ * @param {number} _heightPos 上からの配置順
+ * @param {function} _func
+ */
+function makeDifLblButton(_id, _name, _heightPos, _func) {
+	const difLblButton = createButton({
+		id: _id,
+		name: _name,
+		x: 0,
+		y: C_LEN_SETLBL_HEIGHT * _heightPos,
+		width: C_LEN_SETLBL_WIDTH,
+		height: C_LEN_SETLBL_HEIGHT,
+		fontsize: C_SIZ_DIFSELECTOR,
+		normalColor: C_CLR_LNK,
+		hoverColor: C_CLR_DEFHOVER,
+		align: C_ALIGN_CENTER
+	}, _func);
+	difLblButton.style.borderStyle = `solid`;
+	difLblButton.style.borderColor = `#000000 #cccccc`;
+
+	return difLblButton;
+}
+
+/**
+ * 設定・オプション用の設定変更ミニボタン - v9互換用
+ * @param {string} _id 
+ * @param {string} _directionFlg 表示用ボタンのどちら側に置くかを設定。(R, RR:右、L, LL:左)
+ * @param {number} _heightPos 上からの配置順
+ * @param {function} _func 
+ */
+function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
+	const miniButton = createButton({
+		id: _id + _directionFlg,
+		name: eval(`C_LBL_SETMINI${_directionFlg}`),
+		x: eval(`C_LEN_SETMINI${_directionFlg}_LEFT`),
+		y: C_LEN_SETLBL_HEIGHT * _heightPos,
+		width: C_LEN_SETMINI_WIDTH,
+		height: C_LEN_SETLBL_HEIGHT,
+		fontsize: C_SIZ_SETLBL,
+		normalColor: C_CLR_DEFAULT,
+		hoverColor: C_CLR_SETTING,
+		align: C_ALIGN_CENTER
+	}, _func);
+
+	return miniButton;
+}
+
+/**
+ * 設定・オプション表示用ボタン
+ * @param {string} _id 
+ * @param {string} _name 初期設定文字
+ * @param {number} _heightPos 上からの配置順
+ * @param {function} _func 
+ */
+function makeSettingLblCssButton(_id, _name, _heightPos, _func) {
 	const settingLblButton = createCssButton({
 		id: _id,
 		name: _name,
@@ -4795,7 +4869,7 @@ function makeSettingLblButton(_id, _name, _heightPos, _func) {
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  */
-function makeDifLblButton(_id, _name, _heightPos, _func) {
+function makeDifLblCssButton(_id, _name, _heightPos, _func) {
 	const difLblButton = createCssButton({
 		id: _id,
 		name: _name,
@@ -4820,7 +4894,7 @@ function makeDifLblButton(_id, _name, _heightPos, _func) {
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func 
  */
-function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
+function makeMiniCssButton(_id, _directionFlg, _heightPos, _func) {
 	const miniButton = createCssButton({
 		id: _id + _directionFlg,
 		name: eval(`C_LBL_SETMINI${_directionFlg}`),
@@ -4991,7 +5065,7 @@ function createSettingsDisplayWindow(_sprite) {
 	optionsprite.appendChild(createLblSetting(`Appearance`, setNoAppearance));
 
 	if (g_headerObj.appearanceUse) {
-		const lnkAppearance = makeSettingLblButton(`lnkAppearance`, g_stateObj.appearance, setNoAppearance, _ => {
+		const lnkAppearance = makeSettingLblCssButton(`lnkAppearance`, g_stateObj.appearance, setNoAppearance, _ => {
 			setSetting(1, `appearance`);
 		});
 		lnkAppearance.oncontextmenu = _ => {
@@ -5001,10 +5075,10 @@ function createSettingsDisplayWindow(_sprite) {
 		optionsprite.appendChild(lnkAppearance);
 
 		// 右回し・左回しボタン
-		optionsprite.appendChild(makeMiniButton(`lnkAppearance`, `R`, setNoAppearance, _ => {
+		optionsprite.appendChild(makeMiniCssButton(`lnkAppearance`, `R`, setNoAppearance, _ => {
 			setSetting(1, `appearance`);
 		}));
-		optionsprite.appendChild(makeMiniButton(`lnkAppearance`, `L`, setNoAppearance, _ => {
+		optionsprite.appendChild(makeMiniCssButton(`lnkAppearance`, `L`, setNoAppearance, _ => {
 			setSetting(-1, `appearance`);
 		}));
 	} else {
@@ -5021,7 +5095,7 @@ function createSettingsDisplayWindow(_sprite) {
 	function makeDisplayButton(_name, _heightPos, _widthPos) {
 
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
-		const lnk = makeSettingLblButton(`lnk${_name}`, `${_name.slice(0, 1).toUpperCase()}${_name.slice(1)}`, _heightPos, _ => {
+		const lnk = makeSettingLblCssButton(`lnk${_name}`, `${_name.slice(0, 1).toUpperCase()}${_name.slice(1)}`, _heightPos, _ => {
 			g_stateObj[`d_${_name.toLowerCase()}`] = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 			if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
 				lnk.classList.replace(g_cssObj.button_ON, g_cssObj.button_OFF);
@@ -5160,7 +5234,7 @@ function keyConfigInit() {
 	lblKcType.classList.add(g_cssObj.keyconfig_ConfigType);
 	divRoot.appendChild(lblKcType);
 
-	const lnkKcType = makeSettingLblButton(`lnkKcType`, g_kcType, 0, _ => {
+	const lnkKcType = makeSettingLblCssButton(`lnkKcType`, g_kcType, 0, _ => {
 		switch (g_kcType) {
 			case `Main`:
 				g_kcType = `Replaced`;
@@ -5191,7 +5265,7 @@ function keyConfigInit() {
 	lblcolorType.classList.add(g_cssObj.keyconfig_ColorType);
 	divRoot.appendChild(lblcolorType);
 
-	const lnkcolorType = makeSettingLblButton(`lnkKcType`, g_colorType, 0, _ => {
+	const lnkcolorType = makeSettingLblCssButton(`lnkKcType`, g_colorType, 0, _ => {
 		switch (g_colorType) {
 			case `Default`:
 				g_colorType = `Type1`;
@@ -9247,13 +9321,13 @@ function resultInit() {
 		transKeyData = `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)`;
 	}
 
-	playDataWindow.appendChild(makeResultPlayData(`lblMusic`, 20, g_cssObj.result_lbl, 0,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblMusic`, 20, g_cssObj.result_lbl, 0,
 		`Music`, C_ALIGN_LEFT));
-	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 0,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 0,
 		musicTitleForView0, C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 1,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 1,
 		setVal(musicTitleForView1, ``, C_TYP_STRING), C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_headerObj.makerView) {
@@ -9262,9 +9336,9 @@ function resultInit() {
 	if (g_stateObj.shuffle !== C_FLG_OFF) {
 		difData += ` [${g_stateObj.shuffle}]`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblDifData`, 60, g_cssObj.result_style, 2, difData,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDifData`, 60, g_cssObj.result_style, 2, difData,
 		C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3,
 		`Playstyle`, C_ALIGN_LEFT));
 
 	let playStyleData = ``;
@@ -9281,10 +9355,10 @@ function resultInit() {
 	if (g_stateObj.gauge !== g_gauges[0]) {
 		playStyleData += `, ${g_stateObj.gauge}`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblStyleData`, 60, g_cssObj.result_style, 3,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblStyleData`, 60, g_cssObj.result_style, 3,
 		playStyleData, C_ALIGN_CENTER));
 
-	playDataWindow.appendChild(makeResultPlayData(`lblDisplay`, 20, g_cssObj.result_lbl, 4,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplay`, 20, g_cssObj.result_lbl, 4,
 		`Display`, C_ALIGN_LEFT));
 
 	let displayData = ``;
@@ -9297,7 +9371,7 @@ function resultInit() {
 	} else {
 		displayData += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 4,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 4,
 		displayData, C_ALIGN_CENTER));
 
 	let display2Data = ``;
@@ -9309,7 +9383,7 @@ function resultInit() {
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 5,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 5,
 		display2Data, C_ALIGN_CENTER));
 
 	/**
@@ -9329,30 +9403,30 @@ function resultInit() {
 	}
 
 	// キャラクタ描画
-	resultWindow.appendChild(makeResultSymbol(`lblIi`, 0, g_cssObj.common_ii, 0, C_JCR_II, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblShakin`, 0, g_cssObj.common_shakin, 1, C_JCR_SHAKIN, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblMatari`, 0, g_cssObj.common_matari, 2, C_JCR_MATARI, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblShobon`, 0, g_cssObj.common_shobon, 3, C_JCR_SHOBON, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblUwan`, 0, g_cssObj.common_uwan, 4, C_JCR_UWAN, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblKita`, 0, g_cssObj.common_kita, 5, C_JCR_KITA, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblIknai`, 0, g_cssObj.common_iknai, 6, C_JCR_IKNAI, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblMCombo`, 0, g_cssObj.common_combo, 7, `MaxCombo`, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeResultSymbol(`lblFCombo`, 0, g_cssObj.common_combo, 8, `FreezeCombo`, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblIi`, 0, g_cssObj.common_ii, 0, C_JCR_II, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblShakin`, 0, g_cssObj.common_shakin, 1, C_JCR_SHAKIN, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblMatari`, 0, g_cssObj.common_matari, 2, C_JCR_MATARI, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblShobon`, 0, g_cssObj.common_shobon, 3, C_JCR_SHOBON, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblUwan`, 0, g_cssObj.common_uwan, 4, C_JCR_UWAN, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblKita`, 0, g_cssObj.common_kita, 5, C_JCR_KITA, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblIknai`, 0, g_cssObj.common_iknai, 6, C_JCR_IKNAI, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblMCombo`, 0, g_cssObj.common_combo, 7, `MaxCombo`, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblFCombo`, 0, g_cssObj.common_combo, 8, `FreezeCombo`, C_ALIGN_LEFT));
 
-	resultWindow.appendChild(makeResultSymbol(`lblScore`, 0, g_cssObj.common_score, 10, `Score`, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblScore`, 0, g_cssObj.common_score, 10, `Score`, C_ALIGN_LEFT));
 
 	// スコア描画
-	resultWindow.appendChild(makeResultSymbol(`lblIiS`, 50, g_cssObj.result_score, 0, g_resultObj.ii, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblShakinS`, 50, g_cssObj.result_score, 1, g_resultObj.shakin, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblMatariS`, 50, g_cssObj.result_score, 2, g_resultObj.matari, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblShobonS`, 50, g_cssObj.result_score, 3, g_resultObj.shobon, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblUwanS`, 50, g_cssObj.result_score, 4, g_resultObj.uwan, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblKitaS`, 50, g_cssObj.result_score, 5, g_resultObj.kita, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, 50, g_cssObj.result_score, 6, g_resultObj.iknai, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblMComboS`, 50, g_cssObj.result_score, 7, g_resultObj.maxCombo, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeResultSymbol(`lblFComboS`, 50, g_cssObj.result_score, 8, g_resultObj.fmaxCombo, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblIiS`, 50, g_cssObj.result_score, 0, g_resultObj.ii, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblShakinS`, 50, g_cssObj.result_score, 1, g_resultObj.shakin, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblMatariS`, 50, g_cssObj.result_score, 2, g_resultObj.matari, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblShobonS`, 50, g_cssObj.result_score, 3, g_resultObj.shobon, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblUwanS`, 50, g_cssObj.result_score, 4, g_resultObj.uwan, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblKitaS`, 50, g_cssObj.result_score, 5, g_resultObj.kita, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblIknaiS`, 50, g_cssObj.result_score, 6, g_resultObj.iknai, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblMComboS`, 50, g_cssObj.result_score, 7, g_resultObj.maxCombo, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblFComboS`, 50, g_cssObj.result_score, 8, g_resultObj.fmaxCombo, C_ALIGN_RIGHT));
 
-	resultWindow.appendChild(makeResultSymbol(`lblScoreS`, 50, g_cssObj.result_score, 10, g_resultObj.score, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblScoreS`, 50, g_cssObj.result_score, 10, g_resultObj.score, C_ALIGN_RIGHT));
 
 	// ランク描画
 	const lblRank = createDivCustomLabel(`lblRank`, 340, 160, 70, 20, 50, `#ffffff`,
@@ -9443,45 +9517,45 @@ function resultInit() {
 		}
 
 		// ハイスコア差分描画
-		resultWindow.appendChild(makeResultSymbol(`lblIiL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 7, `(${maxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 8, `(${fmaxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblIiL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblShakinL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblMatariL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblShobonL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblUwanL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblKitaL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblIknaiL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblMComboL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 7, `(${maxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblFComboL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 8, `(${fmaxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreL1`, C_RLT_BRACKET_L, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblScoreL1`, C_RLT_BRACKET_L, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblIiS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblShakinS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblMatariS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblShobonS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblUwanS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblKitaS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblIknaiS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblMComboS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblFComboS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreS`, C_RLT_HIDIF_X, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblScoreS`, C_RLT_HIDIF_X, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
 
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 0, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 1, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 2, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 3, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 4, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 5, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 6, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 7, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 8, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblIiL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 0, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblShakinL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 1, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblMatariL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 2, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblShobonL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 3, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblUwanL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 4, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblKitaL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 5, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblIknaiL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 6, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblMComboL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 7, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblFComboL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 8, `)`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreL2`, C_RLT_BRACKET_R, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`, 10, `)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblScoreL2`, C_RLT_BRACKET_R, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`, 10, `)`, C_ALIGN_LEFT));
 
 	} else {
-		resultWindow.appendChild(makeResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`, C_ALIGN_LEFT));
 		const lblAutoView = document.querySelector(`#lblAutoView`);
 		lblAutoView.style.fontSize = `24px`;
 	}
@@ -9706,6 +9780,40 @@ function resultInit() {
 }
 
 /**
+ * 結果表示作成（曲名、オプション）- v9互換用
+ * @param {string} _id 
+ * @param {number} _x
+ * @param {string} _color 
+ * @param {number} _heightPos 
+ * @param {string, number} _text
+ * @param {string} _align
+ */
+function makeResultPlayData(_id, _x, _color, _heightPos, _text, _align) {
+	const symbol = createDivLabel(_id, _x, 18 * _heightPos,
+		400, 18, 14, _color, _text);
+	symbol.style.textAlign = _align;
+
+	return symbol;
+}
+
+/**
+ * 結果表示作成（キャラクタ）- v9互換用
+ * @param {string} _id 
+ * @param {number} _x
+ * @param {string} _color 
+ * @param {number} _heightPos 
+ * @param {string, number} _text
+ * @param {string} _align
+ */
+function makeResultSymbol(_id, _x, _color, _heightPos, _text, _align) {
+	const symbol = createDivLabel(_id, _x, 18 * _heightPos,
+		150, 18, 16, _color, _text);
+	symbol.style.textAlign = _align;
+
+	return symbol;
+}
+
+/**
  * 結果表示作成（曲名、オプション）
  * @param {string} _id 
  * @param {number} _x
@@ -9714,7 +9822,7 @@ function resultInit() {
  * @param {string, number} _text
  * @param {string} _align
  */
-function makeResultPlayData(_id, _x, _class, _heightPos, _text, _align) {
+function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align) {
 	const symbol = createDivCssLabel(_id, _x, 18 * _heightPos,
 		400, 18, 14, _text, _class);
 	symbol.style.textAlign = _align;
@@ -9731,7 +9839,7 @@ function makeResultPlayData(_id, _x, _class, _heightPos, _text, _align) {
  * @param {string, number} _text
  * @param {string} _align
  */
-function makeResultSymbol(_id, _x, _class, _heightPos, _text, _align) {
+function makeCssResultSymbol(_id, _x, _class, _heightPos, _text, _align) {
 	const symbol = createDivCssLabel(_id, _x, 18 * _heightPos,
 		150, 18, 16, _text, _class);
 	symbol.style.textAlign = _align;
