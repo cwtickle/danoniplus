@@ -2200,7 +2200,8 @@ function initAfterDosLoaded() {
 	}
 
 	// CSSファイルの読み込み
-	importCssFile(`../css/danoni_${g_headerObj.skinCss}.css`);
+	const randTime = new Date().getTime();
+	importCssFile(`../css/danoni_${g_headerObj.skinCss}.css?${randTime}`);
 
 	// 画像ファイルの読み込み
 	preloadFile(`image`, C_IMG_ARROW);

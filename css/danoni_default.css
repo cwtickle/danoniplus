@@ -205,29 +205,29 @@
 /* ボタン */
 /* Click Here */
 .button_Start {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #333333;
 }
 .button_Start:hover {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #666666;
 }
 /* デフォルト */
 .button_Default {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #111111;
 }
 .button_Default:hover {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #666666;
 }
 /* カーソル */
 .button_Mini {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #333333;
 }
 .button_Mini:hover {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #999900;
 }
 /* 戻る */
@@ -241,38 +241,38 @@
 }
 /* 設定 */
 .button_Setting {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #333311;
 }
 .button_Setting:hover {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #999900;
 }
 /* 進む */
 .button_Next {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #331111;
 }
 .button_Next:hover {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #990000;
 }
 /* リセット */
 .button_Reset {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #113311;
 }
 .button_Reset:hover {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #009900;
 }
 /* ツイート */
 .button_Tweet {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #113333;
 }
 .button_Tweet:hover {
-	color: #cccccc;
+	color: #ffffff;
 	background-color: #009999;
 }
 
