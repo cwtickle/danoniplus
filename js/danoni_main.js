@@ -607,6 +607,9 @@ const g_cssObj = {
 	button_Reset: `button_Reset`,
 	button_Tweet: `button_Tweet`,
 
+	button_OFF: `button_OFF`,
+	button_ON: `button_ON`,
+
 	life_Max: `life_Max`,
 	life_Cleared: `life_Cleared`,
 	life_Failed: `life_Failed`,
@@ -3922,18 +3925,16 @@ function optionInit() {
 	}, _ => {
 		if (g_stateObj.dataSaveFlg) {
 			g_stateObj.dataSaveFlg = false;
-			btnSave.classList.remove(`button_ON`);
-			btnSave.classList.add(`button_OFF`);
+			btnSave.classList.replace(g_cssObj.button_ON, g_cssObj.button_OFF);
 		} else {
 			g_stateObj.dataSaveFlg = true;
-			btnSave.classList.remove(`button_OFF`);
-			btnSave.classList.add(`button_ON`);
+			btnSave.classList.replace(g_cssObj.button_OFF, g_cssObj.button_ON);
 		}
 	});
 	if (g_stateObj.dataSaveFlg) {
-		btnSave.classList.add(`button_ON`);
+		btnSave.classList.add(g_cssObj.button_ON);
 	} else {
-		btnSave.classList.add(`button_OFF`);
+		btnSave.classList.add(g_cssObj.button_OFF);
 	}
 	btnSave.style.borderStyle = `solid`;
 	divRoot.appendChild(btnSave);
@@ -4806,7 +4807,7 @@ function makeDifLblButton(_id, _name, _heightPos, _func) {
 		class: g_cssObj.button_Default,
 	}, _func);
 	difLblButton.style.borderStyle = `solid`;
-	difLblButton.classList.add(`button_ON`);
+	difLblButton.classList.add(g_cssObj.button_ON);
 
 	return difLblButton;
 }
@@ -5022,11 +5023,9 @@ function createSettingsDisplayWindow(_sprite) {
 		const lnk = makeSettingLblButton(`lnk${_name}`, `${_name.slice(0, 1).toUpperCase()}${_name.slice(1)}`, _heightPos, _ => {
 			g_stateObj[`d_${_name.toLowerCase()}`] = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 			if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
-				lnk.classList.remove(`button_ON`);
-				lnk.classList.add(`button_OFF`);
+				lnk.classList.replace(g_cssObj.button_ON, g_cssObj.button_OFF);
 			} else {
-				lnk.classList.remove(`button_OFF`);
-				lnk.classList.add(`button_ON`);
+				lnk.classList.replace(g_cssObj.button_OFF, g_cssObj.button_ON);
 			}
 		});
 		lnk.style.width = `170px`;
@@ -7764,7 +7763,6 @@ function MainInit() {
 				if (g_workObj.keyCtrl[j].find(key => keyIsDown(key)) === undefined) {
 					document.querySelector(`#step${j}`).classList.remove(g_cssObj.main_stepKeyDown);
 					document.querySelector(`#step${j}`).classList.add(g_cssObj.main_stepDefault);
-					//document.querySelector(`#step${j}`).style.backgroundColor = `#999999`;
 				}
 			}
 		},

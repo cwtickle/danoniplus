@@ -64,7 +64,7 @@
 	background-color: #111111;
 }
 .settings_Disabled {
-	color: #666666;
+	color:#666666;
 }
 .settings_FadeinBar {
 	color:#ffffff;
@@ -92,16 +92,16 @@
 	color: #ffff99;
 }
 .keyconfig_ConfigType::first-letter {
-	color:#99ddff;
+	color: #99ddff;
 }
 .keyconfig_ColorType::first-letter {
-	color:#ffdd99;
+	color: #ffdd99;
 }
 .keyconfig_Changekey {
-	color:#ffff00;
+	color: #ffff00;
 }
 .keyconfig_Defaultkey {
-	color:#99ccff;
+	color: #99ccff;
 }
 
 /* ステップゾーン */

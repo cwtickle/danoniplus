@@ -61,10 +61,10 @@
 }
 
 .settings_DifSelector {
-	background-color: #eeeeee;
+	background-color:#eeeeee;
 }
 .settings_Disabled {
-	color: #999999;
+	color:#999999;
 }
 .settings_FadeinBar {
 	color:#000000;
@@ -92,16 +92,16 @@
 	color: #999900;
 }
 .keyconfig_ConfigType::first-letter {
-	color:#003377;
+	color: #003377;
 }
 .keyconfig_ColorType::first-letter {
-	color:#773300;
+	color: #773300;
 }
 .keyconfig_Changekey {
-	color:#999900;
+	color: #999900;
 }
 .keyconfig_Defaultkey {
-	color:#000099;
+	color: #000099;
 }
 
 /* ステップゾーン */
@@ -184,19 +184,19 @@
 }
 /* 結果画面：完全PF、PF、FC、Cleared、Failed */
 .result_AllPerfect {
-	color:#999999;
+	color: #999999;
 }
 .result_Perfect {
-	color:#999900;
+	color: #999900;
 }
 .result_FullCombo {
-	color:#007777;
+	color: #007777;
 }
 .result_Cleared {
-	color:#666600;
+	color: #666600;
 }
 .result_Failed {
-	color:#990000;
+	color: #990000;
 }
 .result_Window::first-letter {
 	font-size:80px;
