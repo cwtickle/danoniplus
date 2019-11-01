@@ -2291,7 +2291,7 @@ function loadCustomjs(_initFlg) {
 				}
 			}, false);
 		}, false);
-	});
+	}, false);
 }
 
 function loadMusic() {
