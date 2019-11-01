@@ -1240,7 +1240,7 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = ``) {
 
 /**
  * CSSファイルの読み込み（danoni_main.css以外）
- * デフォルトは danoni_default.css を読み込む
+ * デフォルトは danoni_skin_default.css を読み込む
  * @param {url} _href 
  */
 function importCssFile(_href) {
@@ -2201,7 +2201,7 @@ function initAfterDosLoaded() {
 
 	// CSSファイルの読み込み
 	const randTime = new Date().getTime();
-	importCssFile(`../css/danoni_${g_headerObj.skinCss}.css?${randTime}`);
+	importCssFile(`../css/danoni_skin_${g_headerObj.skinCss}.css?${randTime}`);
 
 	// 画像ファイルの読み込み
 	preloadFile(`image`, C_IMG_ARROW);
