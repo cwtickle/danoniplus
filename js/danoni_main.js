@@ -5317,14 +5317,7 @@ function keyConfigInit() {
 			g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
 		}
 		for (let j = 0; j < keyNum; j++) {
-
-			// IE/Edge(V17以前)の場合は何もしない
-			if (g_userAgent.indexOf(`msie`) !== -1 ||
-				g_userAgent.indexOf(`trident`) !== -1 ||
-				(g_userAgent.indexOf(`edge`) !== -1 && edgeVersion < 18)) {
-			} else {
-				document.querySelector(`#arrow${j}`).style.backgroundColor = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
-			}
+			document.querySelector(`#arrow${j}`).style.backgroundColor = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
 		}
 		lnkcolorType.innerHTML = g_colorType;
 	});
