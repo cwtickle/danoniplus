@@ -1803,6 +1803,7 @@ function clearWindow() {
  * 外部jsファイルの読込
  * @param {string} _url 
  * @param {function} _callback 
+ * @param {boolean} _requiredFlg (default : true / 読込必須)
  * @param {string} _charset (default : UTF-8)
  */
 function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
@@ -2202,16 +2203,6 @@ function loadDos(_initFlg) {
 	}
 }
 
-function loadSettingJs() {
-	const randTime = new Date().getTime();
-	loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
-		if (document.querySelector(`#lblLoading`) !== null) {
-			document.querySelector(`#divRoot`).removeChild(document.querySelector(`#lblLoading`));
-		}
-		initAfterDosLoaded();
-	}, false);
-}
-
 /**
  * 初回読込後に画像プリロードを設定する処理
  */
@@ -2309,6 +2300,36 @@ function loadCustomjs(_initFlg) {
 				}
 			}, false);
 		}, false);
+	}, false);
+}
+
+/**
+ * danoni_setting.jsの読込
+ */
+function loadSettingJs() {
+
+	// 共通設定ファイルの指定
+	let settingType;
+	let settingRoot;
+	if (g_rootObj.settingType !== undefined && g_rootObj.settingType !== ``) {
+		if (g_rootObj.settingType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+			settingType = `_${g_rootObj.settingType.split(C_MRK_CURRENT_DIRECTORY)[1]}`;
+			settingRoot = ``;
+		} else {
+			settingType = `_${g_rootObj.settingType}`;
+			settingRoot = C_DIR_JS;
+		}
+	} else {
+		settingType = ``;
+		settingRoot = C_DIR_JS;
+	}
+
+	const randTime = new Date().getTime();
+	loadScript(`${settingRoot}danoni_setting${settingType}.js?${randTime}`, _ => {
+		if (document.querySelector(`#lblLoading`) !== null) {
+			document.querySelector(`#divRoot`).removeChild(document.querySelector(`#lblLoading`));
+		}
+		initAfterDosLoaded();
 	}, false);
 }
 
