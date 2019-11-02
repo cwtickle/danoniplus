@@ -1792,14 +1792,14 @@ function clearWindow() {
  * @param {function} _callback 
  * @param {string} _charset (default : UTF-8)
  */
-function loadScript(_url, _callback, _requireFlg = true, _charset = `UTF-8`) {
+function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
 	const script = document.createElement(`script`);
 	script.type = `text/javascript`;
 	script.src = _url;
 	script.charset = _charset;
 	script.onload = _ => _callback();
 	script.onerror = _ => {
-		if (_requireFlg) {
+		if (_requiredFlg) {
 			makeWarningWindow(C_MSG_E_0041.split(`{0}`).join(_url.split(`?`)[0]));
 		} else {
 			_callback();
