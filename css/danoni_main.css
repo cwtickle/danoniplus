@@ -268,6 +268,27 @@ input[type=range]:focus {
 	clip-path: polygon(5% 0%, 100% 0%, 100% 30%, 5% 30%, 5% 45%, 100% 45%, 100% 55%, 5% 55%, 5% 70%, 100% 70%, 100% 100%, 5% 100%);
 }
 
+/* 設定画面：ゲージ設定詳細 */
+.settings_gaugeVal {
+	font-size:12px;
+}
+.settings_gaugeTable {
+	width: 280px;
+	margin: 0 auto;
+	border: 1px #666666 solid; 
+	border-collapse: collapse;
+}
+.settings_gaugeTable td {
+	width: 65px;
+}
+
+/* ライフゲージボーダー */
+.life_Border {
+	font-size: 12px;
+	padding-right: 5px;
+	text-align: right;
+}
+
 /* ボタン一般 */
 .button_common {
 	transition: background-color 0.25s linear;

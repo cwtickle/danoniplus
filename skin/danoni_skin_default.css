@@ -1,202 +1,218 @@
 ﻿@charset "UTF-8";
 /* 背景 */
 #divBack {
-    background: linear-gradient(#dddddd, #ffffff);
+    background: linear-gradient(#000000, #222222);
 }
 
 /* タイトル */
 .title_base {
-	color:#222222;
+	color:#cccccc;
 }
 
 /* 設定別カラー */
 .settings_Title::first-letter {
-	color:#000099;
+	color:#6666ff;
 	font-size:40px;
 }
 .settings_Title2::first-letter {
-	color:#990000;
+	color:#ff6666;
 	font-size:40px;
 }
 .settings_TitleStar::first-letter {
-	color:#999900;
+	color:#ffff66;
 	font-size:40px;
 }
 .settings_Display::first-letter {
-	color:#777700;
+	color:#ffff66;
 	font-size:40px;
 }
 .settings_Difficulty::first-letter {
-	color:#990000;
+	color:#ff9999;
 }
 .settings_Speed::first-letter {
-	color:#777700;
+	color:#ffff99;
 }
 .settings_Motion::first-letter {
-	color:#667700;
+	color:#eeff99;
 }
 .settings_Reverse::first-letter {
-	color:#557733;
+	color:#ddff99;
 }
 .settings_Shuffle::first-letter {
-	color:#337733;
+	color:#99ff99;
 }
 .settings_AutoPlay::first-letter {
-	color:#337744;
+	color:#99ffbb;
 }
 .settings_Gauge::first-letter {
-	color:#227755;
+	color:#99ffdd;
 }
 .settings_Adjustment::first-letter {
-	color:#007777;
+	color:#99ffff;
 }
 .settings_Fadein::first-letter {
-	color:#005577;
+	color:#99eeff;
 }
 .settings_Volume::first-letter {
-	color:#003377;
+	color:#99ddff;
 }
 .settings_Appearance::first-letter {
-	color:#9900ff;
+	color:#cc99ff;
 }
 
 .settings_DifSelector {
-	background-color:#eeeeee;
+	background-color: #111111;
 }
 .settings_Disabled {
-	color:#999999;
+	color:#666666;
 }
 .settings_FadeinBar {
-	color:#000000;
+	color:#ffffff;
 }
 
 /* 設定画面：ゲージ設定詳細 */
-.settings_gaugeVal {
-	font-size:12px;
-}
 .settings_lifeVal {
-	color: #996600;
+	color: #ff9966;
 }
-.settings_gaugeTable {
-	width: 280px;
-	margin: 0 auto;
-	border: 1px #222222 solid; 
-	border-collapse: collapse;
-}
-.settings_gaugeTable td {
-	width: 65px;
+.settings_gaugeTableBorder {
+	border-color: #666666; 
 }
 
 /* キーコンフィグ */
 .keyconfig_warning {
-	color: #999900;
+	color: #ffff99;
 }
 .keyconfig_ConfigType::first-letter {
-	color: #003377;
+	color: #99ddff;
 }
 .keyconfig_ColorType::first-letter {
-	color: #773300;
+	color: #ffdd99;
 }
 .keyconfig_Changekey {
-	color: #999900;
+	color: #ffff00;
 }
 .keyconfig_Defaultkey {
-	color: #000099;
+	color: #99ccff;
 }
 
 /* ステップゾーン */
 .main_stepKeyDown {
-	background-color: #009999;
+	background-color: #66ffff;
 }
 .main_stepDefault {
-	background-color: #666666;
+	background-color: #999999;
 }
 .main_stepDummy {
-	background-color: #666666;
+	background-color: #777777;
 }
 .main_stepIi {
-	background-color: #009999;
+	background-color: #66ffff;
 }
 .main_stepShakin {
-	background-color: #009900;
+	background-color: #99ff99;
 }
 .main_stepMatari {
-	background-color: #cc8800;
+	background-color: #ff9966;
 }
 .main_stepShobon {
-	background-color: #0000cc;
+	background-color: #ccccff;
+}
+
+.main_objShadow {
+	background-color: #000000;
+}
+.main_frzHitTop {
+	background-color: #ffffff;
+}
+
+/* ライフゲージ */
+.life_Max {
+	background-color: #444400;
+}
+.life_Cleared {
+	background-color: #004444;
+}
+.life_Failed {
+	background-color: #444444;
+}
+.life_Background {
+	background-color: #222222;
+}
+.life_BorderColor {
+	background-color: #555555;
+	color:#cccccc;
 }
 
 /* 結果画面：項目、設定値 */
 .result_lbl {
-	color: #333333;
+	color: #999999;
 }
 .result_style {
-	color: #111111;
+	color: #cccccc;
 }
 
 /* 結果画面：判定名 */
 .common_ii {
-	color: #009999;
+	color: #66ffff;
 }
 .common_shakin {
-	color: #009900;
+	color: #99ff99;
 }
 .common_matari {
-	color: #cc8800;
+	color: #ff9966;
 }
 .common_shobon {
-	color: #0000cc;
+	color: #ccccff;
 }
 .common_uwan {
-	color: #cc0000;
+	color: #ff9999;
 }
 .common_kita {
-	color: #999900;
+	color: #ffff99;
 }
 .common_iknai {
-	color: #669900;
+	color: #99ff66;
 }
 .common_combo {
-	color: #000000;
+	color: #ffffff;
 }
 .common_score {
-	color: #000000;
+	color: #ffffff;
 }
 
 /* 結果画面：スコア */
 .result_score {
-	color: #000000;
+	color: #ffffff;
 }
 /* 結果画面：ハイスコア差分、ハイスコア時のカラー */
 .result_scoreHiBlanket {
-	color: #222222;
+	color: #999999;
 }
 .result_scoreHi {
-	color: #000000;
+	color: #cccccc;
 }
 .result_scoreHiPlus {
-	color: #777700;
+	color: #ffff99;
 }
 /* 結果画面：ハイスコア更新外の表示色 */
 .result_noRecord {
-	color: #222222;
+	color: #999999;
 }
 /* 結果画面：完全PF、PF、FC、Cleared、Failed */
 .result_AllPerfect {
-	color: #999999;
+	color:#ffffff;
 }
 .result_Perfect {
-	color: #999900;
+	color:#ffffcc;
 }
 .result_FullCombo {
-	color: #007777;
+	color:#66ffff;
 }
 .result_Cleared {
-	color: #666600;
+	color:#ffff66;
 }
 .result_Failed {
-	color: #990000;
+	color:#ff6666;
 }
 .result_Window::first-letter {
 	font-size:80px;
@@ -205,97 +221,83 @@
 /* ボタン */
 /* Click Here */
 .button_Start {
-	color: #000000;
-	background-color: #dddddd;
+	color: #ffffff;
+	background-color: #333333;
 }
 .button_Start:hover {
-	color: #000000;
-	background-color: #999999;
+	color: #ffffff;
+	background-color: #666666;
 }
 /* デフォルト */
 .button_Default {
-	color: #000000;
-	background-color: #eeeeee;
+	color: #ffffff;
+	background-color: #111111;
 }
 .button_Default:hover {
-	color: #000000;
-	background-color: #bbbbbb;
+	color: #ffffff;
+	background-color: #666666;
 }
 /* カーソル */
 .button_Mini {
-	color: #000000;
-	background-color: #cccccc;
+	color: #ffffff;
+	background-color: #333333;
 }
 .button_Mini:hover {
-	color: #000000;
-	background-color: #999999;
+	color: #ffffff;
+	background-color: #999900;
 }
 /* 戻る */
 .button_Back {
-    color: #000000;
-	background-color: #ccccff;
+	color: #cccccc;
+	background-color: #111133;
 }
 .button_Back:hover {
-    color: #000000;
-	background-color: #9999ff;
+	color: #cccccc;
+	background-color: #000099;
 }
 /* 設定 */
 .button_Setting {
-	color: #000000;
-	background-color: #ffffcc;
+	color: #ffffff;
+	background-color: #333311;
 }
 .button_Setting:hover {
-	color: #000000;
-	background-color: #ffff66;
+	color: #ffffff;
+	background-color: #999900;
 }
 /* 進む */
 .button_Next {
-	color: #000000;
-	background-color: #ffcccc;
+	color: #ffffff;
+	background-color: #331111;
 }
 .button_Next:hover {
-	color: #000000;
-	background-color: #ff9999;
+	color: #ffffff;
+	background-color: #990000;
 }
 /* リセット */
 .button_Reset {
-	color: #000000;
-	background-color: #ccffcc;
+	color: #ffffff;
+	background-color: #113311;
 }
 .button_Reset:hover {
-	color: #000000;
-	background-color: #99ff99;
+	color: #ffffff;
+	background-color: #009900;
 }
 /* ツイート */
 .button_Tweet {
-	color: #000000;
-	background-color: #ccffff;
+	color: #ffffff;
+	background-color: #113333;
 }
 .button_Tweet:hover {
-	color: #000000;
-	background-color: #66ffff;
+	color: #ffffff;
+	background-color: #009999;
 }
 
 /* ボタン：ON/OFF */
 .button_OFF {
-	color: #cccccc;
-	border-color: #eeeeee #cccccc; 
+	color: #666666;
+	border-color: #000000 #333333; 
 }
 .button_ON {
-	color: #000000;
-	border-color: #eeeeee #333333; 
-}
-
-/* ライフゲージ */
-.life_Max {
-	background-color: #cccc66;
-}
-.life_Cleared {
-	background-color: #66cccc;
-}
-.life_Failed {
-	background-color: #999999;
-}
-.life_Background {
-	background-color: #cccccc;
+	color: #ffffff;
+	border-color: #000000 #cccccc; 
 }

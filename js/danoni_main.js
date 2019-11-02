@@ -94,6 +94,8 @@ const C_TYP_BOOLEAN = `boolean`;
 const C_TYP_NUMBER = `number`;
 const C_TYP_STRING = `string`;
 const C_TYP_FLOAT = `float`;
+const C_TYP_OBJECT = `object`;
+const C_TYP_FUNCTION = `function`;
 
 // 画像ファイル
 const C_IMG_ARROW = `../img/arrow.png`;
@@ -109,6 +111,19 @@ const C_IMG_CURSOR = `../img/cursor.png`;
 const C_IMG_FRZBAR = `../img/frzbar.png`;
 const C_IMG_LIFEBAR = `../img/frzbar.png`;
 const C_IMG_LIFEBORDER = `../img/borderline.png`;
+
+// jsファイル
+const C_JSF_CUSTOM = `danoni_custom.js`;
+const C_JSF_BLANK = `danoni_blank.js`;
+
+// ディレクトリパス
+const C_DIR_JS = `../js/`;
+const C_DIR_CSS = `../css/`;
+const C_DIR_MUSIC = `../music/`;
+const C_DIR_SKIN = `../skin/`;
+
+// カレントディレクトリマーク
+const C_MRK_CURRENT_DIRECTORY = `(..)`;
 
 const g_imgObj = {
 	arrow: C_IMG_ARROW,
@@ -572,6 +587,16 @@ const g_cssObj = {
 	main_stepMatari: `main_stepMatari`,
 	main_stepShobon: `main_stepShobon`,
 
+	main_objShadow: `main_objShadow`,
+	main_frzHitTop: `main_frzHitTop`,
+
+	life_Max: `life_Max`,
+	life_Cleared: `life_Cleared`,
+	life_Failed: `life_Failed`,
+	life_Background: `life_Background`,
+	life_Border: `life_Border`,
+	life_BorderColor: `life_BorderColor`,
+
 	result_lbl: `result_lbl`,
 	result_style: `result_style`,
 
@@ -609,11 +634,6 @@ const g_cssObj = {
 
 	button_OFF: `button_OFF`,
 	button_ON: `button_ON`,
-
-	life_Max: `life_Max`,
-	life_Cleared: `life_Cleared`,
-	life_Failed: `life_Failed`,
-	life_Background: `life_Background`,
 
 	flex_centering: `flex_centering`,
 };
@@ -1211,6 +1231,14 @@ function checkArrayVal(_checkArray, _type, _minLength) {
 }
 
 /**
+ * div要素のstyleを取得
+ * @param {string} _id 
+ */
+function $id(_id) {
+	return document.querySelector(`#${_id}`).style;
+}
+
+/**
  * プリロードするファイルの設定
  * @param {string} _as 
  * @param {string} _href 
@@ -1240,7 +1268,7 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = ``) {
 
 /**
  * CSSファイルの読み込み（danoni_main.css以外）
- * デフォルトは danoni_default.css を読み込む
+ * デフォルトは danoni_skin_default.css を読み込む
  * @param {url} _href 
  */
 function importCssFile(_href) {
@@ -1775,15 +1803,22 @@ function clearWindow() {
  * 外部jsファイルの読込
  * @param {string} _url 
  * @param {function} _callback 
+ * @param {boolean} _requiredFlg (default : true / 読込必須)
  * @param {string} _charset (default : UTF-8)
  */
-function loadScript(_url, _callback, _charset = `UTF-8`) {
+function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
 	const script = document.createElement(`script`);
 	script.type = `text/javascript`;
 	script.src = _url;
 	script.charset = _charset;
 	script.onload = _ => _callback();
-	script.onerror = _ => makeWarningWindow(C_MSG_E_0041.split(`{0}`).join(_url.split(`?`)[0]));
+	script.onerror = _ => {
+		if (_requiredFlg) {
+			makeWarningWindow(C_MSG_E_0041.split(`{0}`).join(_url.split(`?`)[0]));
+		} else {
+			_callback();
+		}
+	};
 	document.querySelector(`head`).appendChild(script);
 }
 
@@ -2122,15 +2157,9 @@ function loadDos(_initFlg) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
 		if (externalDosInput === null) {
 			if (_initFlg) {
-				const randTime = new Date().getTime();
-				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
-					if (document.querySelector(`#lblLoading`) !== null) {
-						divRoot.removeChild(document.querySelector(`#lblLoading`));
-					}
-					initAfterDosLoaded();
-				});
+				loadSettingJs();
 			} else {
-				loadCustomjs(_initFlg);
+				loadCustomjs(false);
 			}
 		}
 	}
@@ -2151,7 +2180,7 @@ function loadDos(_initFlg) {
 
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
-			if (typeof externalDosInit === `function`) {
+			if (typeof externalDosInit === C_TYP_FUNCTION) {
 				if (document.querySelector(`#lblLoading`) !== null) {
 					divRoot.removeChild(document.querySelector(`#lblLoading`));
 				}
@@ -2166,14 +2195,11 @@ function loadDos(_initFlg) {
 
 			// danoni_setting.jsは初回時のみ読込
 			if (_initFlg) {
-				const randTime = new Date().getTime();
-				loadScript(`../js/danoni_setting.js?${randTime}`, _ => {
-					initAfterDosLoaded();
-				});
+				loadSettingJs();
 			} else {
-				loadCustomjs(_initFlg);
+				loadCustomjs(false);
 			}
-		}, charset);
+		}, false, charset);
 	}
 }
 
@@ -2201,7 +2227,7 @@ function initAfterDosLoaded() {
 
 	// CSSファイルの読み込み
 	const randTime = new Date().getTime();
-	importCssFile(`../css/danoni_${g_headerObj.skinCss}.css?${randTime}`);
+	importCssFile(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.css?${randTime}`);
 
 	// 画像ファイルの読み込み
 	preloadFile(`image`, C_IMG_ARROW);
@@ -2264,30 +2290,59 @@ function initAfterDosLoaded() {
  */
 function loadCustomjs(_initFlg) {
 	const randTime = new Date().getTime();
-	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
-		if (g_headerObj.customjs2 !== ``) {
-			loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
+	loadScript(`${g_headerObj.customjsRoot}${g_headerObj.customjs}?${randTime}`, _ => {
+		loadScript(`${g_headerObj.customjs2Root}${g_headerObj.customjs2}?${randTime}`, _ => {
+			loadScript(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.js?${randTime}`, _ => {
 				if (_initFlg) {
 					titleInit();
 				} else {
 					loadingScoreInit2();
 				}
-			});
+			}, false);
+		}, false);
+	}, false);
+}
+
+/**
+ * danoni_setting.jsの読込
+ */
+function loadSettingJs() {
+
+	// 共通設定ファイルの指定
+	let settingType;
+	let settingRoot;
+	if (g_rootObj.settingType !== undefined && g_rootObj.settingType !== ``) {
+		if (g_rootObj.settingType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+			settingType = `_${g_rootObj.settingType.split(C_MRK_CURRENT_DIRECTORY)[1]}`;
+			settingRoot = ``;
 		} else {
-			if (_initFlg) {
-				titleInit();
-			} else {
-				loadingScoreInit2();
-			}
+			settingType = `_${g_rootObj.settingType}`;
+			settingRoot = C_DIR_JS;
 		}
-	});
+	} else {
+		settingType = ``;
+		settingRoot = C_DIR_JS;
+	}
+
+	const randTime = new Date().getTime();
+	loadScript(`${settingRoot}danoni_setting${settingType}.js?${randTime}`, _ => {
+		if (document.querySelector(`#lblLoading`) !== null) {
+			document.querySelector(`#divRoot`).removeChild(document.querySelector(`#lblLoading`));
+		}
+		initAfterDosLoaded();
+	}, false);
 }
 
 function loadMusic() {
 	document.onkeydown = () => { }
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
-	const url = `../${g_headerObj.musicFolder}/${musicUrl}`;
+	let url;
+	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
+	} else {
+		url = `../${g_headerObj.musicFolder}/${musicUrl}`;
+	}
 
 	g_headerObj.musicUrl = musicUrl;
 
@@ -2343,9 +2398,9 @@ function loadMusic() {
 			lblLoading.innerText = `Now Loading... ${_event.loaded}Bytes`;
 		}
 		// ユーザカスタムイベント
-		if (typeof customLoadingProgress === `function`) {
+		if (typeof customLoadingProgress === C_TYP_FUNCTION) {
 			customLoadingProgress(_event);
-			if (typeof customLoadingProgress2 === `function`) {
+			if (typeof customLoadingProgress2 === C_TYP_FUNCTION) {
 				customLoadingProgress2(_event);
 			}
 		}
@@ -2375,7 +2430,7 @@ async function initWebAudioAPI(_url) {
 function setAudio(_url) {
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
-			if (typeof musicInit === `function`) {
+			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
 				initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
 			} else {
@@ -2751,9 +2806,9 @@ function titleInit() {
 	}
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customTitleInit === `function`) {
+	if (typeof customTitleInit === C_TYP_FUNCTION) {
 		customTitleInit();
-		if (typeof customTitleInit2 === `function`) {
+		if (typeof customTitleInit2 === C_TYP_FUNCTION) {
 			customTitleInit2();
 		}
 	}
@@ -2890,9 +2945,9 @@ function titleInit() {
 	function flowTitleTimeline() {
 
 		// ユーザカスタムイベント(フレーム毎)
-		if (typeof customTitleEnterFrame === `function`) {
+		if (typeof customTitleEnterFrame === C_TYP_FUNCTION) {
 			customTitleEnterFrame();
-			if (typeof customTitleEnterFrame2 === `function`) {
+			if (typeof customTitleEnterFrame2 === C_TYP_FUNCTION) {
 				customTitleEnterFrame2();
 			}
 		}
@@ -2942,6 +2997,10 @@ function titleInit() {
 	document.onkeyup = evt => { }
 
 	divRoot.oncontextmenu = _ => false;
+
+	if (typeof skinTitleInit === C_TYP_FUNCTION) {
+		skinTitleInit();
+	}
 }
 
 /**
@@ -3136,16 +3195,16 @@ function headerConvert(_dosObj) {
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
 			const border = (difDetails[C_DIF_LIFE_BORDER]) ? difDetails[C_DIF_LIFE_BORDER] :
-				(g_presetGauge !== undefined && (`Border` in g_presetGauge) ?
+				(typeof g_presetGauge === C_TYP_OBJECT && (`Border` in g_presetGauge) ?
 					g_presetGauge.Border : `x`);
 			const recovery = (difDetails[C_DIF_LIFE_RECOVERY]) ? difDetails[C_DIF_LIFE_RECOVERY] :
-				(g_presetGauge !== undefined && (`Recovery` in g_presetGauge) ?
+				(typeof g_presetGauge === C_TYP_OBJECT && (`Recovery` in g_presetGauge) ?
 					g_presetGauge.Recovery : 6);
 			const damage = (difDetails[C_DIF_LIFE_DAMAGE]) ? difDetails[C_DIF_LIFE_DAMAGE] :
-				(g_presetGauge !== undefined && (`Damage` in g_presetGauge) ?
+				(typeof g_presetGauge === C_TYP_OBJECT && (`Damage` in g_presetGauge) ?
 					g_presetGauge.Damage : 40);
 			const init = (difDetails[C_DIF_LIFE_INI]) ? difDetails[C_DIF_LIFE_INI] :
-				(g_presetGauge !== undefined && (`Init` in g_presetGauge) ?
+				(typeof g_presetGauge === C_TYP_OBJECT && (`Init` in g_presetGauge) ?
 					g_presetGauge.Init : 25);
 
 			if (border !== `x`) {
@@ -3359,21 +3418,50 @@ function headerConvert(_dosObj) {
 	// 再生速度
 	obj.playbackRate = setVal(_dosObj.playbackRate, 1, C_TYP_FLOAT);
 
-	// 外部cssファイルの指定
-	obj.skinCss = setVal(_dosObj.skinCss, `default`, C_TYP_STRING);
+	// 外部スキンファイルの指定
+	if (_dosObj.skinType !== undefined && _dosObj.skinType !== ``) {
+		if (_dosObj.skinType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+			obj.skinType = _dosObj.skinType.split(C_MRK_CURRENT_DIRECTORY)[1];
+			obj.skinRoot = ``;
+		} else {
+			obj.skinType = _dosObj.skinType;
+			obj.skinRoot = C_DIR_SKIN;
+		}
+	} else {
+		obj.skinType = `default`;
+		obj.skinRoot = C_DIR_SKIN;
+	}
 
 	// 外部jsファイルの指定
 	if (_dosObj.customjs !== undefined && _dosObj.customjs !== ``) {
 		const customjss = _dosObj.customjs.split(`,`);
 		if (customjss.length > 1) {
-			obj.customjs2 = customjss[1];
+			customjss[1] = setVal(customjss[1], C_JSF_BLANK, C_TYP_STRING);
+			if (customjss[1].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+				obj.customjs2 = customjss[1].split(C_MRK_CURRENT_DIRECTORY)[1];
+				obj.customjs2Root = ``;
+			} else {
+				obj.customjs2 = customjss[1];
+				obj.customjs2Root = C_DIR_JS;
+			}
 		} else {
-			obj.customjs2 = ``;
+			obj.customjs2 = C_JSF_BLANK;
+			obj.customjs2Root = C_DIR_JS;
 		}
-		obj.customjs = setVal(customjss[0], `danoni_custom.js`, C_TYP_STRING);
+
+		customjss[0] = setVal(customjss[0], C_JSF_CUSTOM, C_TYP_STRING);
+		if (customjss[0].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+			obj.customjs = customjss[0].split(C_MRK_CURRENT_DIRECTORY)[1];
+			obj.customjsRoot = ``;
+		} else {
+			obj.customjs = customjss[0];
+			obj.customjsRoot = C_DIR_JS;
+		}
 	} else {
-		obj.customjs = `danoni_custom.js`;
-		obj.customjs2 = ``;
+		obj.customjs = C_JSF_CUSTOM;
+		obj.customjsRoot = C_DIR_JS;
+		obj.customjs2 = C_JSF_BLANK;
+		obj.customjs2Root = C_DIR_JS;
 	}
 
 	// ステップゾーン位置
@@ -3420,27 +3508,27 @@ function headerConvert(_dosObj) {
 
 	// タイトル画面のデフォルト曲名表示の利用有無
 	obj.customTitleUse = setVal(_dosObj.customTitleUse,
-		(g_presetCustomDesignUse !== undefined && (`title` in g_presetCustomDesignUse) ?
+		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`title` in g_presetCustomDesignUse) ?
 			setVal(g_presetCustomDesignUse.title, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 
 	// タイトル画面のデフォルト背景矢印の利用有無
 	obj.customTitleArrowUse = setVal(_dosObj.customTitleArrowUse,
-		(g_presetCustomDesignUse !== undefined && (`titleArrow` in g_presetCustomDesignUse) ?
+		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`titleArrow` in g_presetCustomDesignUse) ?
 			setVal(g_presetCustomDesignUse.titleArrow, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 
 	// デフォルト背景の利用有無
 	obj.customBackUse = setVal(_dosObj.customBackUse,
-		(g_presetCustomDesignUse !== undefined && (`back` in g_presetCustomDesignUse) ?
+		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`back` in g_presetCustomDesignUse) ?
 			setVal(g_presetCustomDesignUse.back, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 
 	// デフォルト背景の利用有無（メイン画面のみ適用）
 	obj.customBackMainUse = setVal(_dosObj.customBackMainUse,
-		(g_presetCustomDesignUse !== undefined && (`backMain` in g_presetCustomDesignUse) ?
+		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`backMain` in g_presetCustomDesignUse) ?
 			setVal(g_presetCustomDesignUse.backMain, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 
 	// デフォルトReady表示の利用有無
 	obj.customReadyUse = setVal(_dosObj.customReadyUse,
-		(g_presetCustomDesignUse !== undefined && (`ready` in g_presetCustomDesignUse) ?
+		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`ready` in g_presetCustomDesignUse) ?
 			setVal(g_presetCustomDesignUse.ready, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 
 	// デフォルトReady表示の遅延時間設定
@@ -3475,19 +3563,24 @@ function headerConvert(_dosObj) {
 
 	// オプション利用可否設定
 	// Motion
-	obj.motionUse = setVal(_dosObj.motionUse, setVal(g_presetSettingUse.motion, true, C_TYP_BOOLEAN), C_TYP_BOOLEAN);
+	obj.motionUse = setVal(_dosObj.motionUse,
+		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.motion, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 
 	// Shuffle
-	obj.shuffleUse = setVal(_dosObj.shuffleUse, setVal(g_presetSettingUse.shuffle, true, C_TYP_BOOLEAN), C_TYP_BOOLEAN);
+	obj.shuffleUse = setVal(_dosObj.shuffleUse,
+		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.shuffle, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 
 	// AutoPlay
-	obj.autoPlayUse = setVal(_dosObj.autoPlayUse, setVal(g_presetSettingUse.autoPlay, true, C_TYP_BOOLEAN), C_TYP_BOOLEAN);
+	obj.autoPlayUse = setVal(_dosObj.autoPlayUse,
+		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.autoPlay, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 
 	// Gauge
-	obj.gaugeUse = setVal(_dosObj.gaugeUse, setVal(g_presetSettingUse.gauge, true, C_TYP_BOOLEAN), C_TYP_BOOLEAN);
+	obj.gaugeUse = setVal(_dosObj.gaugeUse,
+		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.gauge, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 
 	// Appearance
-	obj.appearanceUse = setVal(_dosObj.appearanceUse, setVal(g_presetSettingUse.appearance, true, C_TYP_BOOLEAN), C_TYP_BOOLEAN);
+	obj.appearanceUse = setVal(_dosObj.appearanceUse,
+		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.appearance, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 
 	// 別キーパターンの使用有無
 	obj.transKeyUse = setVal(_dosObj.transKeyUse, true, C_TYP_BOOLEAN);
@@ -3563,7 +3656,7 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 				g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(``);
 			}
 		}
-	} else if (g_presetGaugeCustom[_name]) {
+	} else if (typeof g_presetGaugeCustom === C_TYP_OBJECT && g_presetGaugeCustom[_name]) {
 		g_gaugeOptionObj[`gauge${_name}s`] = {
 			lifeBorders: [],
 			lifeRecoverys: [],
@@ -3809,9 +3902,9 @@ function optionInit() {
 	createOptionWindow(`divRoot`);
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customOptionInit === `function`) {
+	if (typeof customOptionInit === C_TYP_FUNCTION) {
 		customOptionInit();
-		if (typeof customOptionInit2 === `function`) {
+		if (typeof customOptionInit2 === C_TYP_FUNCTION) {
 			customOptionInit2();
 		}
 	}
@@ -3940,6 +4033,10 @@ function optionInit() {
 	btnSave.style.borderStyle = `solid`;
 	divRoot.appendChild(btnSave);
 	g_initialFlg = true;
+
+	if (typeof skinOptionInit === C_TYP_FUNCTION) {
+		skinOptionInit();
+	}
 }
 
 function musicAfterLoaded() {
@@ -4393,7 +4490,7 @@ function createOptionWindow(_sprite) {
 		const rcv = Math.round(_rcv * 100) / 100;
 		const dmg = Math.round(_dmg * 100) / 100;
 
-		return `<table class="settings_gaugeTable">
+		return `<table class="settings_gaugeTable settings_gaugeTableBorder">
 					<tr>
 						<td>Start</td>
 						<td>Border</td>
@@ -4664,9 +4761,9 @@ function createOptionWindow(_sprite) {
 		setGauge(0);
 
 		// ユーザカスタムイベント(初期)
-		if (typeof customSetDifficulty === `function`) {
+		if (typeof customSetDifficulty === C_TYP_FUNCTION) {
 			customSetDifficulty(_initFlg, g_canLoadDifInfoFlg);
-			if (typeof customSetDifficulty2 === `function`) {
+			if (typeof customSetDifficulty2 === C_TYP_FUNCTION) {
 				customSetDifficulty2(_initFlg, g_canLoadDifInfoFlg);
 			}
 		}
@@ -4932,9 +5029,9 @@ function settingsDisplayInit() {
 	createSettingsDisplayWindow(`divRoot`);
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customSettingsDisplayInit === `function`) {
+	if (typeof customSettingsDisplayInit === C_TYP_FUNCTION) {
 		customSettingsDisplayInit();
-		if (typeof customSettingsDisplayInit2 === `function`) {
+		if (typeof customSettingsDisplayInit2 === C_TYP_FUNCTION) {
 			customSettingsDisplayInit2();
 		}
 	}
@@ -5032,6 +5129,10 @@ function settingsDisplayInit() {
 		}
 	}
 	document.onkeyup = evt => { }
+
+	if (typeof skinSettingsDisplayInit === C_TYP_FUNCTION) {
+		skinSettingsDisplayInit();
+	}
 }
 
 /**
@@ -5285,14 +5386,7 @@ function keyConfigInit() {
 			g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
 		}
 		for (let j = 0; j < keyNum; j++) {
-
-			// IE/Edge(V17以前)の場合は何もしない
-			if (g_userAgent.indexOf(`msie`) !== -1 ||
-				g_userAgent.indexOf(`trident`) !== -1 ||
-				(g_userAgent.indexOf(`edge`) !== -1 && edgeVersion < 18)) {
-			} else {
-				document.querySelector(`#arrow${j}`).style.backgroundColor = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
-			}
+			document.querySelector(`#arrow${j}`).style.backgroundColor = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
 		}
 		lnkcolorType.innerHTML = g_colorType;
 	});
@@ -5302,9 +5396,9 @@ function keyConfigInit() {
 	divRoot.appendChild(lnkcolorType);
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customKeyConfigInit === `function`) {
+	if (typeof customKeyConfigInit === C_TYP_FUNCTION) {
 		customKeyConfigInit();
-		if (typeof customKeyConfigInit2 === `function`) {
+		if (typeof customKeyConfigInit2 === C_TYP_FUNCTION) {
 			customKeyConfigInit2();
 		}
 	}
@@ -5560,6 +5654,10 @@ function keyConfigInit() {
 				return false;
 			}
 		}
+	}
+
+	if (typeof skinKeyConfigInit === C_TYP_FUNCTION) {
+		skinKeyConfigInit();
 	}
 }
 
@@ -5825,9 +5923,9 @@ function loadingScoreInit2() {
 	getArrowSettings();
 
 	// ユーザカスタムイベント
-	if (typeof customLoadingInit === `function`) {
+	if (typeof customLoadingInit === C_TYP_FUNCTION) {
 		customLoadingInit();
-		if (typeof customLoadingInit2 === `function`) {
+		if (typeof customLoadingInit2 === C_TYP_FUNCTION) {
 			customLoadingInit2();
 		}
 	}
@@ -7417,10 +7515,11 @@ function MainInit() {
 		// 矢印の内側を塗りつぶすか否か
 		if (g_headerObj.setShadowColor !== ``) {
 			// 矢印の塗り部分
-			const stepShadow = createColorObject(`stepShadow${j}`, `#000000`,
+			const stepShadow = createColorObject(`stepShadow${j}`, ``,
 				g_workObj.stepX[j],
 				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
 				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`);
+			stepShadow.classList.add(g_cssObj.main_objShadow);
 			mainSprite.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.7;
 		}
@@ -7466,18 +7565,22 @@ function MainInit() {
 			C_ARW_WIDTH, C_ARW_WIDTH);
 		frzHit.style.opacity = 0;
 		if (isNaN(Number(g_workObj.stepRtn[j]))) {
-			frzHit.appendChild(createColorObject(`frzHitShadow${j}`, `#000000`,
+			const frzHitShadow = createColorObject(`frzHitShadow${j}`, ``,
 				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`));
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`);
+			frzHitShadow.classList.add(g_cssObj.main_objShadow);
+			frzHit.appendChild(frzHitShadow);
 
 			frzHit.appendChild(createArrowEffect(`frzHitTop${j}`, g_workObj.frzHitColors[j],
 				0, 0,
 				C_ARW_WIDTH, g_workObj.stepRtn[j]));
 
 		} else {
-			frzHit.appendChild(createColorObject(`frzHitTop${j}`, `#ffffff`,
+			const frzHitTop = createColorObject(`frzHitTop${j}`, ``,
 				-10, -10,
-				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.stepRtn[j], `Shadow`));
+				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.stepRtn[j], `Shadow`);
+			frzHitTop.classList.add(g_cssObj.main_frzHitTop);
+			frzHit.appendChild(frzHitTop);
 		}
 	}
 
@@ -7606,11 +7709,8 @@ function MainInit() {
 		10, 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
 		35, 16, ``, `lifeBorder`);
 	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
-	lifeBorderObj.style.textAlign = C_ALIGN_RIGHT;
-	lifeBorderObj.style.paddingRight = `5px`;
+	lifeBorderObj.classList.add(g_cssObj.life_Border, g_cssObj.life_BorderColor);
 	lifeBorderObj.style.fontFamily = getBasicFont();
-	lifeBorderObj.style.fontSize = `12px`;
-	lifeBorderObj.style.color = `#cccccc`;
 	infoSprite.appendChild(lifeBorderObj);
 
 	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === g_headerObj.maxLifeVal) {
@@ -7741,10 +7841,10 @@ function MainInit() {
 	}
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customMainInit === `function`) {
+	if (typeof customMainInit === C_TYP_FUNCTION) {
 		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.realAdjustment;
 		customMainInit();
-		if (typeof customMainInit2 === `function`) {
+		if (typeof customMainInit2 === C_TYP_FUNCTION) {
 			customMainInit2();
 		}
 	}
@@ -7974,9 +8074,9 @@ function MainInit() {
 			if (_cnt === 0) {
 				const stepDivHit = document.querySelector(`#stepHit${_j}`);
 
-				if (typeof customJudgeDummyArrow === `function`) {
+				if (typeof customJudgeDummyArrow === C_TYP_FUNCTION) {
 					customJudgeDummyArrow(_cnt);
-					if (typeof customJudgeDummyArrow2 === `function`) {
+					if (typeof customJudgeDummyArrow2 === C_TYP_FUNCTION) {
 						customJudgeDummyArrow2(_cnt);
 					}
 				}
@@ -7998,9 +8098,9 @@ function MainInit() {
 
 		// ダミーフリーズアロー(成功時)
 		dummyFrzOK: (_j, _k, _frzRoot, _cnt) => {
-			if (typeof customJudgeDummyFrz === `function`) {
+			if (typeof customJudgeDummyFrz === C_TYP_FUNCTION) {
 				customJudgeDummyFrz(_cnt);
-				if (typeof customJudgeDummyFrz2 === `function`) {
+				if (typeof customJudgeDummyFrz2 === C_TYP_FUNCTION) {
 					customJudgeDummyFrz2(_cnt);
 				}
 			}
@@ -8235,9 +8335,11 @@ function MainInit() {
 		frzBar.style.opacity = 0.75;
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-		frzRoot.appendChild(createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, `#000000`,
+		const frzTopShadow = createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, ``,
 			0, 0,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`));
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`);
+		frzTopShadow.classList.add(g_cssObj.main_objShadow);
+		frzRoot.appendChild(frzTopShadow);
 
 		// 開始矢印。ヒット時は隠れる。
 		frzRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
@@ -8245,9 +8347,11 @@ function MainInit() {
 			C_ARW_WIDTH, g_workObj.stepRtn[_j]));
 
 		// 後発矢印の塗り部分
-		frzRoot.appendChild(createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, `#000000`,
+		const frzBtmShadow = createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, ``,
 			0, frzLength * boostSpdDir,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`));
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`);
+		frzBtmShadow.classList.add(g_cssObj.main_objShadow);
+		frzRoot.appendChild(frzBtmShadow);
 
 		// 後発矢印
 		frzRoot.appendChild(createArrowEffect(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
@@ -8416,9 +8520,9 @@ function MainInit() {
 		}
 
 		// ユーザカスタムイベント(フレーム毎)
-		if (typeof customMainEnterFrame === `function`) {
+		if (typeof customMainEnterFrame === C_TYP_FUNCTION) {
 			customMainEnterFrame();
-			if (typeof customMainEnterFrame2 === `function`) {
+			if (typeof customMainEnterFrame2 === C_TYP_FUNCTION) {
 				customMainEnterFrame2();
 			}
 			g_scoreObj.baseFrame++;
@@ -8666,6 +8770,9 @@ function MainInit() {
 			g_scoreObj.nominalFrameNum++;
 			g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps - buffTime);
 		}
+	}
+	if (typeof skinMainInit === C_TYP_FUNCTION) {
+		skinMainInit();
 	}
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps);
 }
@@ -9001,9 +9108,9 @@ function judgeIi(difFrame) {
 	lifeRecovery();
 	finishViewing();
 
-	if (typeof customJudgeIi === `function`) {
+	if (typeof customJudgeIi === C_TYP_FUNCTION) {
 		customJudgeIi(difFrame);
-		if (typeof customJudgeIi2 === `function`) {
+		if (typeof customJudgeIi2 === C_TYP_FUNCTION) {
 			customJudgeIi2(difFrame);
 		}
 	}
@@ -9029,9 +9136,9 @@ function judgeShakin(difFrame) {
 	lifeRecovery();
 	finishViewing();
 
-	if (typeof customJudgeShakin === `function`) {
+	if (typeof customJudgeShakin === C_TYP_FUNCTION) {
 		customJudgeShakin(difFrame);
-		if (typeof customJudgeShakin2 === `function`) {
+		if (typeof customJudgeShakin2 === C_TYP_FUNCTION) {
 			customJudgeShakin2(difFrame);
 		}
 	}
@@ -9052,9 +9159,9 @@ function judgeMatari(difFrame) {
 
 	finishViewing();
 
-	if (typeof customJudgeMatari === `function`) {
+	if (typeof customJudgeMatari === C_TYP_FUNCTION) {
 		customJudgeMatari(difFrame);
-		if (typeof customJudgeMatari2 === `function`) {
+		if (typeof customJudgeMatari2 === C_TYP_FUNCTION) {
 			customJudgeMatari2(difFrame);
 		}
 	}
@@ -9076,9 +9183,9 @@ function judgeShobon(difFrame) {
 
 	lifeDamage();
 
-	if (typeof customJudgeShobon === `function`) {
+	if (typeof customJudgeShobon === C_TYP_FUNCTION) {
 		customJudgeShobon(difFrame);
-		if (typeof customJudgeShobon2 === `function`) {
+		if (typeof customJudgeShobon2 === C_TYP_FUNCTION) {
 			customJudgeShobon2(difFrame);
 		}
 	}
@@ -9100,9 +9207,9 @@ function judgeUwan(difFrame) {
 
 	lifeDamage();
 
-	if (typeof customJudgeUwan === `function`) {
+	if (typeof customJudgeUwan === C_TYP_FUNCTION) {
 		customJudgeUwan(difFrame);
-		if (typeof customJudgeUwan2 === `function`) {
+		if (typeof customJudgeUwan2 === C_TYP_FUNCTION) {
 			customJudgeUwan2(difFrame);
 		}
 	}
@@ -9128,9 +9235,9 @@ function judgeKita(difFrame) {
 	lifeRecovery();
 	finishViewing();
 
-	if (typeof customJudgeKita === `function`) {
+	if (typeof customJudgeKita === C_TYP_FUNCTION) {
 		customJudgeKita(difFrame);
-		if (typeof customJudgeKita2 === `function`) {
+		if (typeof customJudgeKita2 === C_TYP_FUNCTION) {
 			customJudgeKita2(difFrame);
 		}
 	}
@@ -9151,9 +9258,9 @@ function judgeIknai(difFrame) {
 
 	lifeDamage();
 
-	if (typeof customJudgeIknai === `function`) {
+	if (typeof customJudgeIknai === C_TYP_FUNCTION) {
 		customJudgeIknai(difFrame);
-		if (typeof customJudgeIknai2 === `function`) {
+		if (typeof customJudgeIknai2 === C_TYP_FUNCTION) {
 			customJudgeIknai2(difFrame);
 		}
 	}
@@ -9435,9 +9542,9 @@ function resultInit() {
 	resultWindow.appendChild(lblRank);
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customResultInit === `function`) {
+	if (typeof customResultInit === C_TYP_FUNCTION) {
 		customResultInit();
-		if (typeof customResultInit2 === `function`) {
+		if (typeof customResultInit2 === C_TYP_FUNCTION) {
 			customResultInit2();
 		}
 	}
@@ -9716,9 +9823,9 @@ function resultInit() {
 	function flowResultTimeline() {
 
 		// ユーザカスタムイベント(フレーム毎)
-		if (typeof customResultEnterFrame === `function`) {
+		if (typeof customResultEnterFrame === C_TYP_FUNCTION) {
 			customResultEnterFrame();
-			if (typeof customResultEnterFrame2 === `function`) {
+			if (typeof customResultEnterFrame2 === C_TYP_FUNCTION) {
 				customResultEnterFrame2();
 			}
 		}
@@ -9777,6 +9884,10 @@ function resultInit() {
 		}
 	}
 	document.onkeyup = evt => { }
+
+	if (typeof skinResultInit === C_TYP_FUNCTION) {
+		skinResultInit();
+	}
 }
 
 /**
