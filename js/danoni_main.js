@@ -2223,7 +2223,7 @@ function initAfterDosLoaded() {
 
 	// CSSファイルの読み込み
 	const randTime = new Date().getTime();
-	importCssFile(`../css/danoni_skin_${g_headerObj.skinCss}.css?${randTime}`);
+	importCssFile(`../skin/danoni_skin_${g_headerObj.skinCss}.css?${randTime}`);
 
 	// 画像ファイルの読み込み
 	preloadFile(`image`, C_IMG_ARROW);
@@ -2288,7 +2288,7 @@ function loadCustomjs(_initFlg) {
 	const randTime = new Date().getTime();
 	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
 		loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
-			loadScript(`../js/danoni_skin_${g_headerObj.skinCss}.js?${randTime}`, _ => {
+			loadScript(`../skin/danoni_skin_${g_headerObj.skinCss}.js?${randTime}`, _ => {
 				if (_initFlg) {
 					titleInit();
 				} else {
