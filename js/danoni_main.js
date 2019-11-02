@@ -112,6 +112,19 @@ const C_IMG_FRZBAR = `../img/frzbar.png`;
 const C_IMG_LIFEBAR = `../img/frzbar.png`;
 const C_IMG_LIFEBORDER = `../img/borderline.png`;
 
+// jsファイル
+const C_JSF_CUSTOM = `danoni_custom.js`;
+const C_JSF_BLANK = `danoni_blank.js`;
+
+// ディレクトリパス
+const C_DIR_JS = `../js/`;
+const C_DIR_CSS = `../css/`;
+const C_DIR_MUSIC = `../music/`;
+const C_DIR_SKIN = `../skin/`;
+
+// カレントディレクトリマーク
+const C_MRK_CURRENT_DIRECTORY = `(..)`;
+
 const g_imgObj = {
 	arrow: C_IMG_ARROW,
 	arrowShadow: C_IMG_ARROWSD,
@@ -2223,7 +2236,7 @@ function initAfterDosLoaded() {
 
 	// CSSファイルの読み込み
 	const randTime = new Date().getTime();
-	importCssFile(`../skin/danoni_skin_${g_headerObj.skinCss}.css?${randTime}`);
+	importCssFile(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.css?${randTime}`);
 
 	// 画像ファイルの読み込み
 	preloadFile(`image`, C_IMG_ARROW);
@@ -2286,9 +2299,9 @@ function initAfterDosLoaded() {
  */
 function loadCustomjs(_initFlg) {
 	const randTime = new Date().getTime();
-	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
-		loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
-			loadScript(`../skin/danoni_skin_${g_headerObj.skinCss}.js?${randTime}`, _ => {
+	loadScript(`${g_headerObj.customjsRoot}${g_headerObj.customjs}?${randTime}`, _ => {
+		loadScript(`${g_headerObj.customjs2Root}${g_headerObj.customjs2}?${randTime}`, _ => {
+			loadScript(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.js?${randTime}`, _ => {
 				if (_initFlg) {
 					titleInit();
 				} else {
@@ -2303,7 +2316,12 @@ function loadMusic() {
 	document.onkeydown = () => { }
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
-	const url = `../${g_headerObj.musicFolder}/${musicUrl}`;
+	let url;
+	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
+	} else {
+		url = `../${g_headerObj.musicFolder}/${musicUrl}`;
+	}
 
 	g_headerObj.musicUrl = musicUrl;
 
@@ -3379,21 +3397,50 @@ function headerConvert(_dosObj) {
 	// 再生速度
 	obj.playbackRate = setVal(_dosObj.playbackRate, 1, C_TYP_FLOAT);
 
-	// 外部cssファイルの指定
-	obj.skinCss = setVal(_dosObj.skinCss, `default`, C_TYP_STRING);
+	// 外部スキンファイルの指定
+	if (_dosObj.skinType !== undefined && _dosObj.skinType !== ``) {
+		if (_dosObj.skinType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+			obj.skinType = _dosObj.skinType.split(C_MRK_CURRENT_DIRECTORY)[1];
+			obj.skinRoot = ``;
+		} else {
+			obj.skinType = _dosObj.skinType;
+			obj.skinRoot = C_DIR_SKIN;
+		}
+	} else {
+		obj.skinType = `default`;
+		obj.skinRoot = C_DIR_SKIN;
+	}
 
 	// 外部jsファイルの指定
 	if (_dosObj.customjs !== undefined && _dosObj.customjs !== ``) {
 		const customjss = _dosObj.customjs.split(`,`);
 		if (customjss.length > 1) {
-			obj.customjs2 = customjss[1];
+			customjss[1] = setVal(customjss[1], C_JSF_BLANK, C_TYP_STRING);
+			if (customjss[1].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+				obj.customjs2 = customjss[1].split(C_MRK_CURRENT_DIRECTORY)[1];
+				obj.customjs2Root = ``;
+			} else {
+				obj.customjs2 = customjss[1];
+				obj.customjs2Root = C_DIR_JS;
+			}
 		} else {
-			obj.customjs2 = `danoni_blank.js`;
+			obj.customjs2 = C_JSF_BLANK;
+			obj.customjs2Root = C_DIR_JS;
 		}
-		obj.customjs = setVal(customjss[0], `danoni_custom.js`, C_TYP_STRING);
+
+		customjss[0] = setVal(customjss[0], C_JSF_CUSTOM, C_TYP_STRING);
+		if (customjss[0].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+			obj.customjs = customjss[0].split(C_MRK_CURRENT_DIRECTORY)[1];
+			obj.customjsRoot = ``;
+		} else {
+			obj.customjs = customjss[0];
+			obj.customjsRoot = C_DIR_JS;
+		}
 	} else {
-		obj.customjs = `danoni_custom.js`;
-		obj.customjs2 = `danoni_blank.js`;
+		obj.customjs = C_JSF_CUSTOM;
+		obj.customjsRoot = C_DIR_JS;
+		obj.customjs2 = C_JSF_BLANK;
+		obj.customjs2Root = C_DIR_JS;
 	}
 
 	// ステップゾーン位置
