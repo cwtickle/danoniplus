@@ -295,9 +295,9 @@
 /* ボタン：ON/OFF */
 .button_OFF {
 	color: #cccccc;
-	border-color: #eeeeee #cccccc; 
+	border-color: #00000000 #cccccc; 
 }
 .button_ON {
 	color: #000000;
-	border-color: #eeeeee #333333; 
+	border-color: #00000000 #333333; 
 }
