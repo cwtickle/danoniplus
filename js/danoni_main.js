@@ -574,6 +574,15 @@ const g_cssObj = {
 	main_stepMatari: `main_stepMatari`,
 	main_stepShobon: `main_stepShobon`,
 
+	main_objShadow: `main_objShadow`,
+	main_frzHitTop: `main_frzHitTop`,
+
+	life_Max: `life_Max`,
+	life_Cleared: `life_Cleared`,
+	life_Failed: `life_Failed`,
+	life_Background: `life_Background`,
+	life_Border: `life_Border`,
+
 	result_lbl: `result_lbl`,
 	result_style: `result_style`,
 
@@ -611,11 +620,6 @@ const g_cssObj = {
 
 	button_OFF: `button_OFF`,
 	button_ON: `button_ON`,
-
-	life_Max: `life_Max`,
-	life_Cleared: `life_Cleared`,
-	life_Failed: `life_Failed`,
-	life_Background: `life_Background`,
 
 	flex_centering: `flex_centering`,
 };
@@ -4417,7 +4421,7 @@ function createOptionWindow(_sprite) {
 		const rcv = Math.round(_rcv * 100) / 100;
 		const dmg = Math.round(_dmg * 100) / 100;
 
-		return `<table class="settings_gaugeTable">
+		return `<table class="settings_gaugeTable settings_gaugeTableBorder">
 					<tr>
 						<td>Start</td>
 						<td>Border</td>
@@ -7449,10 +7453,11 @@ function MainInit() {
 		// 矢印の内側を塗りつぶすか否か
 		if (g_headerObj.setShadowColor !== ``) {
 			// 矢印の塗り部分
-			const stepShadow = createColorObject(`stepShadow${j}`, `#000000`,
+			const stepShadow = createColorObject(`stepShadow${j}`, ``,
 				g_workObj.stepX[j],
 				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
 				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`);
+			stepShadow.classList.add(g_cssObj.main_objShadow);
 			mainSprite.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.7;
 		}
@@ -7498,18 +7503,22 @@ function MainInit() {
 			C_ARW_WIDTH, C_ARW_WIDTH);
 		frzHit.style.opacity = 0;
 		if (isNaN(Number(g_workObj.stepRtn[j]))) {
-			frzHit.appendChild(createColorObject(`frzHitShadow${j}`, `#000000`,
+			const frzHitShadow = createColorObject(`frzHitShadow${j}`, ``,
 				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`));
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`);
+			frzHitShadow.classList.add(g_cssObj.main_objShadow);
+			frzHit.appendChild(frzHitShadow);
 
 			frzHit.appendChild(createArrowEffect(`frzHitTop${j}`, g_workObj.frzHitColors[j],
 				0, 0,
 				C_ARW_WIDTH, g_workObj.stepRtn[j]));
 
 		} else {
-			frzHit.appendChild(createColorObject(`frzHitTop${j}`, `#ffffff`,
+			const frzHitTop = createColorObject(`frzHitTop${j}`, ``,
 				-10, -10,
-				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.stepRtn[j], `Shadow`));
+				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.stepRtn[j], `Shadow`);
+			frzHitTop.classList.add(g_cssObj.main_frzHitTop);
+			frzHit.appendChild(frzHitTop);
 		}
 	}
 
@@ -7638,11 +7647,8 @@ function MainInit() {
 		10, 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
 		35, 16, ``, `lifeBorder`);
 	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
-	lifeBorderObj.style.textAlign = C_ALIGN_RIGHT;
-	lifeBorderObj.style.paddingRight = `5px`;
+	lifeBorderObj.classList.add(g_cssObj.life_Border);
 	lifeBorderObj.style.fontFamily = getBasicFont();
-	lifeBorderObj.style.fontSize = `12px`;
-	lifeBorderObj.style.color = `#cccccc`;
 	infoSprite.appendChild(lifeBorderObj);
 
 	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === g_headerObj.maxLifeVal) {

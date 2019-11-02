@@ -71,20 +71,11 @@
 }
 
 /* 設定画面：ゲージ設定詳細 */
-.settings_gaugeVal {
-	font-size:12px;
-}
 .settings_lifeVal {
 	color: #ff9966;
 }
-.settings_gaugeTable {
-	width: 280px;
-	margin: 0 auto;
-	border: 1px #666666 solid; 
-	border-collapse: collapse;
-}
-.settings_gaugeTable td {
-	width: 65px;
+.settings_gaugeTableBorder {
+	border-color: #666666; 
 }
 
 /* キーコンフィグ */
@@ -125,6 +116,34 @@
 }
 .main_stepShobon {
 	background-color: #ccccff;
+}
+
+.main_objShadow {
+	background-color: #000000;
+}
+.main_frzHitTop {
+	background-color: #ffffff;
+}
+
+/* ライフゲージ */
+.life_Max {
+	background-color: #444400;
+}
+.life_Cleared {
+	background-color: #004444;
+}
+.life_Failed {
+	background-color: #444444;
+}
+.life_Background {
+	background-color: #222222;
+}
+.life_Border {
+	background-color: #555555;
+	font-size: 12px;
+	padding-right: 5px;
+	color:#cccccc;
+	text-align: right;
 }
 
 /* 結果画面：項目、設定値 */
@@ -284,18 +303,4 @@
 .button_ON {
 	color: #ffffff;
 	border-color: #000000 #cccccc; 
-}
-
-/* ライフゲージ */
-.life_Max {
-	background-color: #444400;
-}
-.life_Cleared {
-	background-color: #004444;
-}
-.life_Failed {
-	background-color: #444444;
-}
-.life_Background {
-	background-color: #222222;
 }
