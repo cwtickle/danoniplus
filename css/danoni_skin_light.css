@@ -122,7 +122,7 @@
 	background-color: #666666;
 }
 .main_frzHitTop {
-	background-color: #999999;
+	background-color: #cccccc;
 }
 
 /* ライフゲージ */
@@ -138,12 +138,9 @@
 .life_Background {
 	background-color: #cccccc;
 }
-.life_Border {
+.life_BorderColor {
 	background-color: #555555;
-	font-size: 12px;
-	padding-right: 5px;
 	color:#cccccc;
-	text-align: right;
 }
 
 /* 結果画面：項目、設定値 */

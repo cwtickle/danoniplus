@@ -582,6 +582,7 @@ const g_cssObj = {
 	life_Failed: `life_Failed`,
 	life_Background: `life_Background`,
 	life_Border: `life_Border`,
+	life_BorderColor: `life_BorderColor`,
 
 	result_lbl: `result_lbl`,
 	result_style: `result_style`,
@@ -7640,7 +7641,7 @@ function MainInit() {
 		10, 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
 		35, 16, ``, `lifeBorder`);
 	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
-	lifeBorderObj.classList.add(g_cssObj.life_Border);
+	lifeBorderObj.classList.add(g_cssObj.life_Border, g_cssObj.life_BorderColor);
 	lifeBorderObj.style.fontFamily = getBasicFont();
 	infoSprite.appendChild(lifeBorderObj);
 
@@ -8266,9 +8267,11 @@ function MainInit() {
 		frzBar.style.opacity = 0.75;
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-		frzRoot.appendChild(createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, `#000000`,
+		const frzTopShadow = createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, ``,
 			0, 0,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`));
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`);
+		frzTopShadow.classList.add(g_cssObj.main_objShadow);
+		frzRoot.appendChild(frzTopShadow);
 
 		// 開始矢印。ヒット時は隠れる。
 		frzRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
@@ -8276,9 +8279,11 @@ function MainInit() {
 			C_ARW_WIDTH, g_workObj.stepRtn[_j]));
 
 		// 後発矢印の塗り部分
-		frzRoot.appendChild(createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, `#000000`,
+		const frzBtmShadow = createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, ``,
 			0, frzLength * boostSpdDir,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`));
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`);
+		frzBtmShadow.classList.add(g_cssObj.main_objShadow);
+		frzRoot.appendChild(frzBtmShadow);
 
 		// 後発矢印
 		frzRoot.appendChild(createArrowEffect(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,

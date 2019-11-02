@@ -282,6 +282,13 @@ input[type=range]:focus {
 	width: 65px;
 }
 
+/* ライフゲージボーダー */
+.life_Border {
+	font-size: 12px;
+	padding-right: 5px;
+	text-align: right;
+}
+
 /* ボタン一般 */
 .button_common {
 	transition: background-color 0.25s linear;
