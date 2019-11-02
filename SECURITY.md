@@ -7,18 +7,18 @@
 - v1～v4は**サポートを終了しました。**  
 v6, v7についても致命的な不具合を除き、対応を終了します。（v10リリース開始時に完全終了予定）
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 9.x     | :white_check_mark: |
-| 8.7.x   | :white_check_mark: |
-| 7.9.x   | :warning:          |
-| 6.6.x   | :warning:          |
-| 5.12.x  | :white_check_mark: |
-| 4.10.x  | :x:                |
-| 3.13.x  | :x:                |
-| 2.9.x   | :x:                |
-| 1.15.x  | :x:                |
-| etc.    | :x:                |
+| Version | Supported          | End of Support |
+| ------- | ------------------ |----------------|
+| 9.x     | :white_check_mark: |-               |
+| 8.7.x   | :white_check_mark: |-               |
+| 7.9.x   | :warning:          |-               |
+| 6.6.x   | :warning:          |-               |
+| 5.12.x  | :white_check_mark: |-               |
+| 4.10.x  | :x:                |2019-10-08      |
+| 3.13.x  | :x:                |2019-06-18      |
+| 2.9.x   | :x:                |2019-06-18      |
+| 1.15.x  | :x:                |2019-10-08      |
+| etc.    | :x:                |None            |
 
 ## Reporting a Vulnerability / 脆弱性・不具合情報
 
