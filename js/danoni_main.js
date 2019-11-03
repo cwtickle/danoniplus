@@ -645,6 +645,7 @@ const g_cssObj = {
 	result_Cleared: `result_Cleared`,
 	result_Failed: `result_Failed`,
 	result_Window: `result_Window`,
+	result_PlayDataWindow: `result_PlayDataWindow`,
 
 	button_Start: `button_Start`,
 	button_Default: `button_Default`,
@@ -4301,7 +4302,7 @@ function createOptionWindow(_sprite) {
 			setGauge(-1);
 		}));
 	} else {
-		lblGauge.style.color = `#666666`;
+		lblGauge.classList.add(g_cssObj.settings_Disabled);
 		gaugeSprite.appendChild(makeDisabledLabel(`lnkGauge`, 0, g_stateObj.gauge));
 	}
 
@@ -4716,7 +4717,7 @@ function createGeneralSetting(_obj, _settingName, _unitName = ``, _skipFlg = fal
 			}));
 		}
 	} else {
-		document.querySelector(`#lbl${settingUpper}`).style.color = `#666666`;
+		document.querySelector(`#lbl${settingUpper}`).classList.add(g_cssObj.settings_Disabled);
 		_obj.appendChild(makeDisabledLabel(`lnk${settingUpper}`, 0, `${g_stateObj[_settingName]}${_unitName}`));
 	}
 }
@@ -9291,7 +9292,7 @@ function resultInit() {
 	divRoot.appendChild(lblTitle);
 
 	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70 + (g_sHeight - 500) / 2, 450, 110);
-	playDataWindow.style.border = `solid 0.5px #666666`;
+	playDataWindow.classList.add(g_cssObj.result_PlayDataWindow);
 	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 180, 185 + (g_sHeight - 500) / 2, 360, 210);
 
 	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
