@@ -4100,13 +4100,36 @@ function musicAfterLoaded() {
 function createOptionWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 85 + (g_sHeight - 500) / 2, 400, 300);
+	const optionWidth = (g_sWidth - 400) / 2;
+	const optionsprite = createSprite(_sprite, `optionsprite`, optionWidth, 85 + (g_sHeight - 500) / 2, 400, 300);
+
+	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
+	const difficultySprite = createSprite(`optionsprite`, `difficultySprite`, 0, -5,
+		optionWidth, C_LEN_SETLBL_HEIGHT + 10);
+	const speedSprite = createSprite(`optionsprite`, `speedSprite`, 0, 2 * C_LEN_SETLBL_HEIGHT,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const motionSprite = createSprite(`optionsprite`, `motionSprite`, 0, 3 * C_LEN_SETLBL_HEIGHT,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const reverseSprite = createSprite(`optionsprite`, `reverseSprite`, 0, 4 * C_LEN_SETLBL_HEIGHT,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const shuffleSprite = createSprite(`optionsprite`, `shuffleSprite`, 0, 5.5 * C_LEN_SETLBL_HEIGHT,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const autoPlaySprite = createSprite(`optionsprite`, `autoPlaySprite`, 0, 6.5 * C_LEN_SETLBL_HEIGHT,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const gaugeSprite = createSprite(`optionsprite`, `gaugeSprite`, 0, 7.5 * C_LEN_SETLBL_HEIGHT,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const adjustmentSprite = createSprite(`optionsprite`, `adjustmentSprite`, 0, 10 * C_LEN_SETLBL_HEIGHT,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const fadeinSprite = createSprite(`optionsprite`, `fadeinSprite`, 0, 11 * C_LEN_SETLBL_HEIGHT,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const volumeSprite = createSprite(`optionsprite`, `volumeSprite`, 0, 12 * C_LEN_SETLBL_HEIGHT,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
 
 	// ---------------------------------------------------
 	// 難易度 (Difficulty)
 	// 縦位置: 0 
 	const setNoDifficulty = 0;
-	optionsprite.appendChild(createLblSetting(`Difficulty`, setNoDifficulty, -5));
+	difficultySprite.appendChild(createLblSetting(`Difficulty`, 0, -5));
 
 	/**
 	 * 譜面変更セレクターの削除
@@ -4120,7 +4143,7 @@ function createOptionWindow(_sprite) {
 	}
 
 	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`,
-		``, setNoDifficulty, _ => {
+		``, 0, _ => {
 			if (!g_headerObj.difSelectorUse) {
 				g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
 				setDifficulty(true);
@@ -4199,15 +4222,15 @@ function createOptionWindow(_sprite) {
 		}
 		return false;
 	}
-	optionsprite.appendChild(lnkDifficulty);
+	difficultySprite.appendChild(lnkDifficulty);
 
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniCssButton(`lnkDifficulty`, `R`, setNoDifficulty, _ => {
+	difficultySprite.appendChild(makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
 		setDifficulty(true);
 		resetDifWindow();
 	}));
-	optionsprite.appendChild(makeMiniCssButton(`lnkDifficulty`, `L`, setNoDifficulty, _ => {
+	difficultySprite.appendChild(makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
 		setDifficulty(true);
 		resetDifWindow();
@@ -4228,173 +4251,167 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
-	const setNoSpeed = 2;
-	optionsprite.appendChild(createLblSetting(`Speed`, setNoSpeed));
+	speedSprite.appendChild(createLblSetting(`Speed`, 0));
 
-	const lnkSpeed = makeSettingLblCssButton(`lnkSpeed`, ``, setNoSpeed, _ => {
+	const lnkSpeed = makeSettingLblCssButton(`lnkSpeed`, ``, 0, _ => {
 		setSetting(1, `speed`, ` x`);
 	});
 	lnkSpeed.oncontextmenu = _ => {
 		setSetting(-1, `speed`, ` x`);
 		return false;
 	}
-	optionsprite.appendChild(lnkSpeed);
+	speedSprite.appendChild(lnkSpeed);
 
 	// 早右回し・早左回しボタン
-	optionsprite.appendChild(makeMiniCssButton(`lnkSpeed`, `R`, setNoSpeed, _ => {
+	speedSprite.appendChild(makeMiniCssButton(`lnkSpeed`, `R`, 0, _ => {
 		setSetting(4, `speed`, ` x`);
 	}));
-	optionsprite.appendChild(makeMiniCssButton(`lnkSpeed`, `L`, setNoSpeed, _ => {
+	speedSprite.appendChild(makeMiniCssButton(`lnkSpeed`, `L`, 0, _ => {
 		setSetting(-4, `speed`, ` x`);
 	}));
 
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniCssButton(`lnkSpeed`, `RR`, setNoSpeed, _ => {
+	speedSprite.appendChild(makeMiniCssButton(`lnkSpeed`, `RR`, 0, _ => {
 		setSetting(1, `speed`, ` x`);
 	}));
-	optionsprite.appendChild(makeMiniCssButton(`lnkSpeed`, `LL`, setNoSpeed, _ => {
+	speedSprite.appendChild(makeMiniCssButton(`lnkSpeed`, `LL`, 0, _ => {
 		setSetting(-1, `speed`, ` x`);
 	}));
 
 	// ---------------------------------------------------
 	// 速度モーション (Motion)
 	// 縦位置: 3
-	const setNoMotion = 3;
-	optionsprite.appendChild(createLblSetting(`Motion`, setNoMotion));
+	motionSprite.appendChild(createLblSetting(`Motion`, 0));
 
 	if (g_headerObj.motionUse) {
-		const lnkMotion = makeSettingLblCssButton(`lnkMotion`, g_stateObj.motion, setNoMotion, _ => {
+		const lnkMotion = makeSettingLblCssButton(`lnkMotion`, g_stateObj.motion, 0, _ => {
 			setSetting(1, `motion`);
 		});
 		lnkMotion.oncontextmenu = _ => {
 			setSetting(-1, `motion`);
 			return false;
 		}
-		optionsprite.appendChild(lnkMotion);
+		motionSprite.appendChild(lnkMotion);
 
 		// 右回し・左回しボタン
-		optionsprite.appendChild(makeMiniCssButton(`lnkMotion`, `R`, setNoMotion, _ => {
+		motionSprite.appendChild(makeMiniCssButton(`lnkMotion`, `R`, 0, _ => {
 			setSetting(1, `motion`);
 		}));
-		optionsprite.appendChild(makeMiniCssButton(`lnkMotion`, `L`, setNoMotion, _ => {
+		motionSprite.appendChild(makeMiniCssButton(`lnkMotion`, `L`, 0, _ => {
 			setSetting(-1, `motion`);
 		}));
 	} else {
 		lblMotion.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lnkMotion`, setNoMotion, g_stateObj.motion));
+		motionSprite.appendChild(makeDisabledLabel(`lnkMotion`, 0, g_stateObj.motion));
 	}
 
 	// ---------------------------------------------------
 	// リバース (Reverse)
 	// 縦位置: 4
-	const setNoReverse = 4;
-	optionsprite.appendChild(createLblSetting(`Reverse`, setNoReverse));
+	reverseSprite.appendChild(createLblSetting(`Reverse`, 0));
 
-	const lnkReverse = makeSettingLblCssButton(`lnkReverse`, ``, setNoReverse, _ => {
+	const lnkReverse = makeSettingLblCssButton(`lnkReverse`, ``, 0, _ => {
 		setSetting(1, `reverse`);
 	});
 	lnkReverse.oncontextmenu = _ => {
 		setSetting(-1, `reverse`);
 		return false;
 	}
-	optionsprite.appendChild(lnkReverse);
+	reverseSprite.appendChild(lnkReverse);
 
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniCssButton(`lnkReverse`, `R`, setNoReverse, _ => {
+	reverseSprite.appendChild(makeMiniCssButton(`lnkReverse`, `R`, 0, _ => {
 		setSetting(1, `reverse`);
 	}));
-	optionsprite.appendChild(makeMiniCssButton(`lnkReverse`, `L`, setNoReverse, _ => {
+	reverseSprite.appendChild(makeMiniCssButton(`lnkReverse`, `L`, 0, _ => {
 		setSetting(-1, `reverse`);
 	}));
 
 	// ---------------------------------------------------
 	// ミラー・ランダム (Shuffle)
 	// 縦位置: 5.5
-	const setNoShuffle = 5.5;
-	optionsprite.appendChild(createLblSetting(`Shuffle`, setNoShuffle));
+	shuffleSprite.appendChild(createLblSetting(`Shuffle`, 0));
 
 	if (g_headerObj.shuffleUse) {
-		const lnkShuffle = makeSettingLblCssButton(`lnkShuffle`, g_stateObj.shuffle, setNoShuffle, _ => {
+		const lnkShuffle = makeSettingLblCssButton(`lnkShuffle`, g_stateObj.shuffle, 0, _ => {
 			setSetting(1, `shuffle`);
 		});
 		lnkShuffle.oncontextmenu = _ => {
 			setSetting(-1, `shuffle`);
 			return false;
 		}
-		optionsprite.appendChild(lnkShuffle);
+		shuffleSprite.appendChild(lnkShuffle);
 
 		// 右回し・左回しボタン
-		optionsprite.appendChild(makeMiniCssButton(`lnkShuffle`, `R`, setNoShuffle, _ => {
+		shuffleSprite.appendChild(makeMiniCssButton(`lnkShuffle`, `R`, 0, _ => {
 			setSetting(1, `shuffle`);
 		}));
-		optionsprite.appendChild(makeMiniCssButton(`lnkShuffle`, `L`, setNoShuffle, _ => {
+		shuffleSprite.appendChild(makeMiniCssButton(`lnkShuffle`, `L`, 0, _ => {
 			setSetting(-1, `shuffle`);
 		}));
 	} else {
 		lblShuffle.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lnkShuffle`, setNoShuffle, g_stateObj.shuffle));
+		shuffleSprite.appendChild(makeDisabledLabel(`lnkShuffle`, 0, g_stateObj.shuffle));
 	}
 
 	// ---------------------------------------------------
 	// 鑑賞モード設定 (AutoPlay)
 	// 縦位置: 6.5
-	const setNoAutoPlay = 6.5;
-	optionsprite.appendChild(createLblSetting(`AutoPlay`, setNoAutoPlay));
+	autoPlaySprite.appendChild(createLblSetting(`AutoPlay`, 0));
 
 	if (g_headerObj.autoPlayUse) {
-		const lnkAutoPlay = makeSettingLblCssButton(`lnkAutoPlay`, g_stateObj.autoPlay, setNoAutoPlay, _ => {
+		const lnkAutoPlay = makeSettingLblCssButton(`lnkAutoPlay`, g_stateObj.autoPlay, 0, _ => {
 			setSetting(1, `autoPlay`);
 		});
 		lnkAutoPlay.oncontextmenu = _ => {
 			setSetting(-1, `autoPlay`);
 			return false;
 		}
-		optionsprite.appendChild(lnkAutoPlay);
+		autoPlaySprite.appendChild(lnkAutoPlay);
 
 		// 右回し・左回しボタン
-		optionsprite.appendChild(makeMiniCssButton(`lnkAutoPlay`, `R`, setNoAutoPlay, _ => {
+		autoPlaySprite.appendChild(makeMiniCssButton(`lnkAutoPlay`, `R`, 0, _ => {
 			setSetting(1, `autoPlay`);
 		}));
-		optionsprite.appendChild(makeMiniCssButton(`lnkAutoPlay`, `L`, setNoAutoPlay, _ => {
+		autoPlaySprite.appendChild(makeMiniCssButton(`lnkAutoPlay`, `L`, 0, _ => {
 			setSetting(-1, `autoPlay`);
 		}));
 	} else {
 		lblAutoPlay.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lnkAutoPlay`, setNoAutoPlay, g_stateObj.autoPlay));
+		autoPlaySprite.appendChild(makeDisabledLabel(`lnkAutoPlay`, 0, g_stateObj.autoPlay));
 	}
 
 	// ---------------------------------------------------
 	// ゲージ設定 (Gauge)
 	// 縦位置: 7.5
-	const setNoGauge = 7.5;
-	optionsprite.appendChild(createLblSetting(`Gauge`, setNoGauge));
+	gaugeSprite.appendChild(createLblSetting(`Gauge`, 0));
 
 	// ゲージ設定詳細　縦位置: ゲージ設定+1
-	const lblGauge2 = createDivCssLabel(`lblGauge2`, C_LEN_SETLBL_LEFT - 20, C_LEN_SETLBL_HEIGHT * (setNoGauge + 1),
+	const lblGauge2 = createDivCssLabel(`lblGauge2`, C_LEN_SETLBL_LEFT - 20, C_LEN_SETLBL_HEIGHT,
 		C_LEN_SETLBL_WIDTH + 40, C_LEN_SETLBL_HEIGHT * 2, 11, ``);
-	optionsprite.appendChild(lblGauge2);
+	gaugeSprite.appendChild(lblGauge2);
 
 	if (g_headerObj.gaugeUse) {
 		const lnkGauge = makeSettingLblCssButton(`lnkGauge`,
-			``, setNoGauge, _ => {
+			``, 0, _ => {
 				setGauge(1);
 			});
 		lnkGauge.oncontextmenu = _ => {
 			setGauge(-1);
 			return false;
 		}
-		optionsprite.appendChild(lnkGauge);
+		gaugeSprite.appendChild(lnkGauge);
 
 		// 右回し・左回しボタン
-		optionsprite.appendChild(makeMiniCssButton(`lnkGauge`, `R`, setNoGauge, _ => {
+		gaugeSprite.appendChild(makeMiniCssButton(`lnkGauge`, `R`, 0, _ => {
 			setGauge(1);
 		}));
-		optionsprite.appendChild(makeMiniCssButton(`lnkGauge`, `L`, setNoGauge, _ => {
+		gaugeSprite.appendChild(makeMiniCssButton(`lnkGauge`, `L`, 0, _ => {
 			setGauge(-1);
 		}));
 	} else {
 		lblGauge.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lnkGauge`, setNoGauge, g_stateObj.gauge));
+		gaugeSprite.appendChild(makeDisabledLabel(`lnkGauge`, 0, g_stateObj.gauge));
 	}
 
 	/**
@@ -4543,50 +4560,48 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
-	const setNoAdjustment = 10;
-	optionsprite.appendChild(createLblSetting(`Adjustment`, setNoAdjustment));
+	adjustmentSprite.appendChild(createLblSetting(`Adjustment`, 0));
 
-	const lnkAdjustment = makeSettingLblCssButton(`lnkAdjustment`, g_stateObj.adjustment, setNoAdjustment, _ => {
+	const lnkAdjustment = makeSettingLblCssButton(`lnkAdjustment`, g_stateObj.adjustment, 0, _ => {
 		setSetting(1, `adjustment`);
 	});
 	lnkAdjustment.oncontextmenu = _ => {
 		setSetting(-1, `adjustment`);
 		return false;
 	}
-	optionsprite.appendChild(lnkAdjustment);
+	adjustmentSprite.appendChild(lnkAdjustment);
 
 	// 早右回し・早左回しボタン
-	optionsprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `R`, setNoAdjustment, _ => {
+	adjustmentSprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `R`, 0, _ => {
 		setSetting(5, `adjustment`);
 	}));
-	optionsprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `L`, setNoAdjustment, _ => {
+	adjustmentSprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `L`, 0, _ => {
 		setSetting(-5, `adjustment`);
 	}));
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `RR`, setNoAdjustment, _ => {
+	adjustmentSprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `RR`, 0, _ => {
 		setSetting(1, `adjustment`);
 	}));
-	optionsprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `LL`, setNoAdjustment, _ => {
+	adjustmentSprite.appendChild(makeMiniCssButton(`lnkAdjustment`, `LL`, 0, _ => {
 		setSetting(-1, `adjustment`);
 	}));
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
 	// 縦位置: 11 スライダーあり
-	const setNoFadein = 11;
-	optionsprite.appendChild(createLblSetting(`Fadein`, setNoFadein));
+	fadeinSprite.appendChild(createLblSetting(`Fadein`, 0));
 
-	const lnkFadein = createDivCssLabel(`lblFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * setNoFadein,
+	const lnkFadein = createDivCssLabel(`lblFadein`, C_LEN_SETLBL_LEFT, 0,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `${g_stateObj.fadein}%`, g_cssObj.settings_FadeinBar);
-	optionsprite.appendChild(lnkFadein);
+	fadeinSprite.appendChild(lnkFadein);
 
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniCssButton(`lnkFadein`, `R`, setNoFadein, _ => {
+	fadeinSprite.appendChild(makeMiniCssButton(`lnkFadein`, `R`, 0, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 99 ? 0 : g_stateObj.fadein + 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}));
-	optionsprite.appendChild(makeMiniCssButton(`lnkFadein`, `L`, setNoFadein, _ => {
+	fadeinSprite.appendChild(makeMiniCssButton(`lnkFadein`, `L`, 0, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 0 ? 99 : g_stateObj.fadein - 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
@@ -4599,9 +4614,9 @@ function createOptionWindow(_sprite) {
 		addXPos = -8;
 		addYPos = 1;
 	}
-	const lblFadeinSlider = createDivCssLabel(`lblFadeinBar`, 160 + addXPos, C_LEN_SETLBL_HEIGHT * setNoFadein + addYPos, ``, ``, ``,
+	const lblFadeinSlider = createDivCssLabel(`lblFadeinBar`, 160 + addXPos, addYPos, ``, ``, ``,
 		`<input id=fadeinSlider type=range value=0 min=0 max=99 step=1>`);
-	optionsprite.appendChild(lblFadeinSlider);
+	fadeinSprite.appendChild(lblFadeinSlider);
 
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
 	fadeinSlider.value = g_stateObj.fadein;
@@ -4619,23 +4634,22 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
 	// 縦位置: 12
-	const setNoVolume = 12;
-	optionsprite.appendChild(createLblSetting(`Volume`, setNoVolume));
+	volumeSprite.appendChild(createLblSetting(`Volume`, 0));
 
-	const lnkVolume = makeSettingLblCssButton(`lnkVolume`, `${g_stateObj.volume}%`, setNoVolume, _ => {
+	const lnkVolume = makeSettingLblCssButton(`lnkVolume`, `${g_stateObj.volume}%`, 0, _ => {
 		setSetting(1, `volume`, `%`);
 	});
 	lnkVolume.oncontextmenu = _ => {
 		setSetting(-1, `volume`, `%`);
 		return false;
 	}
-	optionsprite.appendChild(lnkVolume);
+	volumeSprite.appendChild(lnkVolume);
 
 	// 右回し・左回しボタン
-	optionsprite.appendChild(makeMiniCssButton(`lnkVolume`, `R`, setNoVolume, _ => {
+	volumeSprite.appendChild(makeMiniCssButton(`lnkVolume`, `R`, 0, _ => {
 		setSetting(1, `volume`, `%`);
 	}));
-	optionsprite.appendChild(makeMiniCssButton(`lnkVolume`, `L`, setNoVolume, _ => {
+	volumeSprite.appendChild(makeMiniCssButton(`lnkVolume`, `L`, 0, _ => {
 		setSetting(-1, `volume`, `%`);
 	}));
 
@@ -5175,12 +5189,16 @@ function settingsDisplayInit() {
 function createSettingsDisplayWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionsprite = createSprite(_sprite, `optionsprite`, (g_sWidth - 400) / 2, 100 + (g_sHeight - 500) / 2, 400, 300);
+	const optionWidth = (g_sWidth - 400) / 2;
+	const optionsprite = createSprite(_sprite, `optionsprite`, optionWidth, 100 + (g_sHeight - 500) / 2, 400, 300);
 
-	const divRoot = document.querySelector(`#divRoot`);
+	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
+	const appearanceSprite = createSprite(`optionsprite`, `appearanceSprite`, 0, 6 * C_LEN_SETLBL_HEIGHT,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
+
 	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14,
 		`[クリックでON/OFFを切替、灰色でOFF]`);
-	divRoot.appendChild(sdDesc);
+	document.querySelector(`#${_sprite}`).appendChild(sdDesc);
 
 	makeDisplayButton(`stepZone`, 0, 0);
 	makeDisplayButton(`judgement`, 1, 0);
@@ -5195,29 +5213,28 @@ function createSettingsDisplayWindow(_sprite) {
 	// ---------------------------------------------------
 	// 矢印の見え方 (Appearance)
 	// 縦位置: 6
-	const setNoAppearance = 6;
-	optionsprite.appendChild(createLblSetting(`Appearance`, setNoAppearance));
+	appearanceSprite.appendChild(createLblSetting(`Appearance`, 0));
 
 	if (g_headerObj.appearanceUse) {
-		const lnkAppearance = makeSettingLblCssButton(`lnkAppearance`, g_stateObj.appearance, setNoAppearance, _ => {
+		const lnkAppearance = makeSettingLblCssButton(`lnkAppearance`, g_stateObj.appearance, 0, _ => {
 			setSetting(1, `appearance`);
 		});
 		lnkAppearance.oncontextmenu = _ => {
 			setSetting(-1, `appearance`);
 			return false;
 		}
-		optionsprite.appendChild(lnkAppearance);
+		appearanceSprite.appendChild(lnkAppearance);
 
 		// 右回し・左回しボタン
-		optionsprite.appendChild(makeMiniCssButton(`lnkAppearance`, `R`, setNoAppearance, _ => {
+		appearanceSprite.appendChild(makeMiniCssButton(`lnkAppearance`, `R`, 0, _ => {
 			setSetting(1, `appearance`);
 		}));
-		optionsprite.appendChild(makeMiniCssButton(`lnkAppearance`, `L`, setNoAppearance, _ => {
+		appearanceSprite.appendChild(makeMiniCssButton(`lnkAppearance`, `L`, 0, _ => {
 			setSetting(-1, `appearance`);
 		}));
 	} else {
 		lblAppearance.style.color = `#666666`;
-		optionsprite.appendChild(makeDisabledLabel(`lnkAppearance`, setNoAppearance, g_stateObj.appearance));
+		appearanceSprite.appendChild(makeDisabledLabel(`lnkAppearance`, 0, g_stateObj.appearance));
 	}
 
 	/**
