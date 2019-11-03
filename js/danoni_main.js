@@ -1525,23 +1525,20 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	let charaStyle;
 	if (isNaN(Number(_rotate)) || _rotate === ``) {
 		charaStyle = `${_rotate}${_styleName}`;
-		div.setAttribute(`type`, _styleName);
 	} else {
 		charaStyle = `arrow${_styleName}`;
 		div.style.transform = `rotate(${_rotate}deg)`;
-		div.setAttribute(`type`, `arrow`);
 	}
-	div.align = C_ALIGN_CENTER;
 
 	if (_color !== ``) {
 		div.style.backgroundColor = _color;
 	}
-
 	div.style.maskImage = `url("${g_imgObj[charaStyle]}")`;
 	div.style.maskSize = `contain`;
 	div.style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
 	div.style.webkitMaskSize = `contain`;
 	div.setAttribute(`color`, _color);
+	div.setAttribute(`type`, charaStyle);
 
 	return div;
 }
