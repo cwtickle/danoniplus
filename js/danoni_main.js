@@ -4151,10 +4151,10 @@ function createOptionWindow(_sprite) {
 				setDifficulty(true);
 			} else {
 				if (document.querySelector(`#difList`) === null) {
-					const difList = createSprite(`optionsprite`, `difList`, 140, 45, 280, 255);
+					const difList = createSprite(`optionsprite`, `difList`, 165, 65, 280, 255);
 					difList.style.overflow = `auto`;
 					difList.classList.toggle(g_cssObj.settings_DifSelector, true);
-					const difCover = createSprite(`optionsprite`, `difCover`, 0, 45, 140, 255);
+					const difCover = createSprite(`optionsprite`, `difCover`, 25, 65, 140, 255);
 					difCover.style.overflow = `auto`;
 					difCover.classList.toggle(g_cssObj.settings_DifSelector, true);
 					difCover.style.opacity = 0.95;
