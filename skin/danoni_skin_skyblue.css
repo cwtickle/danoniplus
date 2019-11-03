@@ -1,7 +1,7 @@
 ﻿@charset "UTF-8";
 /* 背景 */
 #divBack {
-    background: linear-gradient(#dddddd, #ffffff);
+    background: linear-gradient(#ccffff, #ccccff);
 }
 
 /* タイトル */
@@ -27,41 +27,41 @@
 	font-size:40px;
 }
 .settings_Difficulty::first-letter {
-	color:#990000;
+	color:#000099;
 }
 .settings_Speed::first-letter {
-	color:#777700;
+	color:#003399;
 }
 .settings_Motion::first-letter {
-	color:#667700;
+	color:#006699;
 }
 .settings_Reverse::first-letter {
-	color:#557733;
+	color:#009999;
 }
 .settings_Shuffle::first-letter {
-	color:#337733;
+	color:#006699;
 }
 .settings_AutoPlay::first-letter {
-	color:#337744;
+	color:#003399;
 }
 .settings_Gauge::first-letter {
-	color:#227755;
+	color:#000099;
 }
 .settings_Adjustment::first-letter {
-	color:#007777;
+	color:#003399;
 }
 .settings_Fadein::first-letter {
-	color:#005577;
+	color:#006699;
 }
 .settings_Volume::first-letter {
-	color:#003377;
+	color:#009999;
 }
 .settings_Appearance::first-letter {
 	color:#9900ff;
 }
 
 .settings_DifSelector {
-	background-color:#eeeeee;
+	background-color:#ccddee;
 }
 .settings_Disabled {
 	color:#999999;
@@ -226,29 +226,29 @@
 /* Click Here */
 .button_Start {
 	color: #000000;
-	background-color: #dddddd;
+	background-color: #ddffff;
 }
 .button_Start:hover {
 	color: #000000;
-	background-color: #999999;
+	background-color: #66ccff;
 }
 /* デフォルト */
 .button_Default {
 	color: #000000;
-	background-color: #eeeeee;
+	background-color: #00000000;
 }
 .button_Default:hover {
 	color: #000000;
-	background-color: #bbbbbb;
+	background-color: #99ccff;
 }
 /* カーソル */
 .button_Mini {
 	color: #000000;
-	background-color: #cccccc;
+	background-color: #bbccdd;
 }
 .button_Mini:hover {
 	color: #000000;
-	background-color: #999999;
+	background-color: #99aabb;
 }
 /* 戻る */
 .button_Back {
@@ -299,7 +299,7 @@
 /* ボタン：ON/OFF */
 .button_OFF {
 	color: #cccccc;
-	border-color: #00000000 #cccccc; 
+	border-color: #00000000 #999999; 
 }
 .button_ON {
 	color: #000000;
