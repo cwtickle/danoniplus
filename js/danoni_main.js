@@ -139,6 +139,29 @@ const g_imgObj = {
 	monar: C_IMG_MONAR,
 	monarShadow: C_IMG_AASD,
 
+	arrowStep: C_IMG_ARROW,
+	arrowShadowStep: C_IMG_ARROWSD,
+	onigiriStep: C_IMG_ONIGIRI,
+	onigiriShadowStep: C_IMG_AASD,
+	gikoStep: C_IMG_GIKO,
+	gikoShadowStep: C_IMG_AASD,
+	iyoStep: C_IMG_GIKO,
+	iyoShadowStep: C_IMG_AASD,
+	cStep: C_IMG_C,
+	cShadowStep: C_IMG_AASD,
+	moraraStep: C_IMG_MORARA,
+	moraraShadowStep: C_IMG_AASD,
+	monarStep: C_IMG_MONAR,
+	monarShadowStep: C_IMG_AASD,
+
+	arrowStepHit: C_IMG_ARROW,
+	onigiriStepHit: C_IMG_ONIGIRI,
+	gikoStepHit: C_IMG_GIKO,
+	iyoStepHit: C_IMG_GIKO,
+	cStepHit: C_IMG_C,
+	moraraStepHit: C_IMG_MORARA,
+	monarStepHit: C_IMG_MONAR,
+
 	cursor: C_IMG_CURSOR,
 	frzBar: C_IMG_FRZBAR,
 	lifeBar: C_IMG_LIFEBAR,
@@ -219,6 +242,8 @@ const C_KYC_REPHEIGHT = 20;
 const g_workObj = {};
 g_workObj.stepX = [];
 g_workObj.stepRtn = [];
+g_workObj.stepHitRtn = [];
+g_workObj.arrowRtn = [];
 g_workObj.keyCtrl = [];
 g_workObj.keyHitFlg = [];
 g_workObj.scrollDir = [];
@@ -1443,7 +1468,7 @@ function createImg(_id, _imgPath, _x, _y, _width, _height) {
 }
 
 /**
- * 矢印オブジェクトの作成（色付きマスク版）
+ * 矢印オブジェクトの作成（色付きマスク版）- v10以降は未使用
  * @param {string} _id 
  * @param {string} _color 
  * @param {number} _x 
@@ -1458,7 +1483,7 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate) {
 	// 矢印・おにぎり判定
 	let charaStyle;
 	if (isNaN(Number(_rotate))) {
-		charaStyle = _rotate;
+		charaStyle = `${_rotate}`;
 	} else {
 		charaStyle = `arrow`;
 		div.style.transform = `rotate(${_rotate}deg)`;
@@ -1478,32 +1503,40 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate) {
 	return div;
 }
 
+/**
+ * 色付きオブジェクトの作成
+ * @param {string} _id 
+ * @param {string} _color 
+ * @param {number} _x 
+ * @param {number} _y 
+ * @param {number} _width 
+ * @param {number} _height 
+ * @param {string} _rotate オブジェクト名／回転角度 (default : ``)
+ * @param {string} _styleName オブジェクト種類 (default : ``)
+ */
 function createColorObject(_id, _color, _x, _y, _width, _height,
-	_rotate, _styleName) {
+	_rotate = ``, _styleName = ``) {
 
 	const div = createDiv(_id, _x, _y, _width, _height);
 
-	// 矢印・おにぎり判定
+	// 矢印・オブジェクト判定
 	let charaStyle;
 	if (isNaN(Number(_rotate)) || _rotate === ``) {
-		charaStyle = _rotate + _styleName;
-		div.setAttribute(`type`, `AA`);
+		charaStyle = `${_rotate}${_styleName}`;
 	} else {
-		charaStyle = `arrow` + _styleName;
+		charaStyle = `arrow${_styleName}`;
 		div.style.transform = `rotate(${_rotate}deg)`;
-		div.setAttribute(`type`, `arrow`);
 	}
-	div.align = C_ALIGN_CENTER;
 
 	if (_color !== ``) {
 		div.style.backgroundColor = _color;
 	}
-
 	div.style.maskImage = `url("${g_imgObj[charaStyle]}")`;
 	div.style.maskSize = `contain`;
 	div.style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
 	div.style.webkitMaskSize = `contain`;
 	div.setAttribute(`color`, _color);
+	div.setAttribute(`type`, charaStyle);
 
 	return div;
 }
@@ -2650,7 +2683,9 @@ function titleInit() {
 
 	// 背景の矢印オブジェクトを表示
 	if (!g_headerObj.customTitleArrowUse) {
-		const lblArrow = createArrowEffect(`lblArrow`, g_headerObj.setColorDefault[0], (g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2, 500, 180);
+		const lblArrow = createColorObject(`lblArrow`, g_headerObj.setColorDefault[0],
+			(g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2,
+			500, 500, 180);
 		lblArrow.style.opacity = 0.25;
 		divRoot.appendChild(lblArrow);
 	}
@@ -5300,9 +5335,10 @@ function keyConfigInit() {
 			keyconSprite.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.5;
 		}
-		keyconSprite.appendChild(createArrowEffect(`arrow${j}`, g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]],
+		keyconSprite.appendChild(createColorObject(`arrow${j}`, g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]],
 			g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
-			C_KYC_HEIGHT * dividePos, C_ARW_WIDTH,
+			C_KYC_HEIGHT * dividePos,
+			C_ARW_WIDTH, C_ARW_WIDTH,
 			g_keyObj[`stepRtn${keyCtrlPtn}`][j]));
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
@@ -7263,6 +7299,8 @@ function getArrowSettings() {
 	g_workObj.scrollDir = [];
 	g_workObj.dividePos = [];
 	g_workObj.stepRtn = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${keyCtrlPtn}`]));
+	g_workObj.stepHitRtn = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${keyCtrlPtn}`]));
+	g_workObj.arrowRtn = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${keyCtrlPtn}`]));
 	g_workObj.keyCtrl = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}`]));
 	g_workObj.keyHitFlg = [];
 	for (let j = 0; j < g_workObj.keyCtrl.length; j++) {
@@ -7516,23 +7554,25 @@ function MainInit() {
 			const stepShadow = createColorObject(`stepShadow${j}`, ``,
 				g_workObj.stepX[j],
 				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`);
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `ShadowStep`);
 			stepShadow.classList.add(g_cssObj.main_objShadow);
 			mainSprite.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.7;
 		}
 
-		const step = createArrowEffect(`step${j}`, ``,
+		const step = createColorObject(`step${j}`, ``,
 			g_workObj.stepX[j],
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j], C_ARW_WIDTH,
-			g_workObj.stepRtn[j]);
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+			C_ARW_WIDTH, C_ARW_WIDTH,
+			g_workObj.stepRtn[j], `Step`);
 		step.classList.add(g_cssObj.main_stepDefault);
 		mainSprite.appendChild(step);
 
-		const stepHit = createArrowEffect(`stepHit${j}`, ``,
+		const stepHit = createColorObject(`stepHit${j}`, ``,
 			g_workObj.stepX[j] - 15,
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] - 15, C_ARW_WIDTH + 30,
-			g_workObj.stepRtn[j]);
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] - 15,
+			C_ARW_WIDTH + 30, C_ARW_WIDTH + 30,
+			g_workObj.stepHitRtn[j], `StepHit`);
 		stepHit.style.opacity = 0;
 		stepHit.setAttribute(`cnt`, 0);
 		stepHit.classList.add(g_cssObj.main_stepDefault);
@@ -7562,21 +7602,21 @@ function MainInit() {
 			g_workObj.stepX[j], g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
 			C_ARW_WIDTH, C_ARW_WIDTH);
 		frzHit.style.opacity = 0;
-		if (isNaN(Number(g_workObj.stepRtn[j]))) {
+		if (isNaN(Number(g_workObj.arrowRtn[j]))) {
 			const frzHitShadow = createColorObject(`frzHitShadow${j}`, ``,
 				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Shadow`);
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j], `Shadow`);
 			frzHitShadow.classList.add(g_cssObj.main_objShadow);
 			frzHit.appendChild(frzHitShadow);
 
-			frzHit.appendChild(createArrowEffect(`frzHitTop${j}`, g_workObj.frzHitColors[j],
+			frzHit.appendChild(createColorObject(`frzHitTop${j}`, g_workObj.frzHitColors[j],
 				0, 0,
-				C_ARW_WIDTH, g_workObj.stepRtn[j]));
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j]));
 
 		} else {
 			const frzHitTop = createColorObject(`frzHitTop${j}`, ``,
 				-10, -10,
-				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.stepRtn[j], `Shadow`);
+				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.arrowRtn[j], `Shadow`);
 			frzHitTop.classList.add(g_cssObj.main_frzHitTop);
 			frzHit.appendChild(frzHitTop);
 		}
@@ -8254,14 +8294,14 @@ function MainInit() {
 			// 矢印の塗り部分
 			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[_j] : g_headerObj.setShadowColor);
 			const arrShadow = createColorObject(`${_name}Shadow${_j}_${_arrowCnt}`, shadowColor,
-				0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`);
+				0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 			arrShadow.style.opacity = 0.5;
 			stepRoot.appendChild(arrShadow);
 		}
 
 		// 矢印
-		stepRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _color,
-			0, 0, C_ARW_WIDTH, g_workObj.stepRtn[_j]));
+		stepRoot.appendChild(createColorObject(`${_name}Top${_j}_${_arrowCnt}`, _color,
+			0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
 	}
 
 	/**
@@ -8335,26 +8375,26 @@ function MainInit() {
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
 		const frzTopShadow = createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, ``,
 			0, 0,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`);
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzTopShadow.classList.add(g_cssObj.main_objShadow);
 		frzRoot.appendChild(frzTopShadow);
 
 		// 開始矢印。ヒット時は隠れる。
-		frzRoot.appendChild(createArrowEffect(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
+		frzRoot.appendChild(createColorObject(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
 			0, 0,
-			C_ARW_WIDTH, g_workObj.stepRtn[_j]));
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
 
 		// 後発矢印の塗り部分
 		const frzBtmShadow = createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, ``,
 			0, frzLength * boostSpdDir,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[_j], `Shadow`);
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzBtmShadow.classList.add(g_cssObj.main_objShadow);
 		frzRoot.appendChild(frzBtmShadow);
 
 		// 後発矢印
-		frzRoot.appendChild(createArrowEffect(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
+		frzRoot.appendChild(createColorObject(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
 			0, frzLength * boostSpdDir,
-			C_ARW_WIDTH, g_workObj.stepRtn[_j]));
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
 	}
 
 	/**
@@ -8857,7 +8897,7 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 							g_workObj.frzHitColors[k] = _mkColorCd[j];
 							if (_allFlg === `A`) {
 								g_workObj.frzHitColorsAll[k] = _mkColorCd[j];
-								if (isNaN(Number(g_workObj.stepRtn[k]))) {
+								if (isNaN(Number(g_workObj.arrowRtn[k]))) {
 									document.querySelector(`#frzHitTop${k}`).style.backgroundColor = _mkColorCd[j];
 								}
 							}
@@ -8905,7 +8945,7 @@ function changeHitFrz(_j, _k, _name) {
 	if (_name === `frz`) {
 		document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
 		document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 0;
-		if (isNaN(Number(g_workObj.stepRtn[_j]))) {
+		if (isNaN(Number(g_workObj.arrowRtn[_j]))) {
 			document.querySelector(`#frzHitTop${_j}`).style.backgroundColor = g_workObj.frzHitColors[_j];
 		}
 	}
