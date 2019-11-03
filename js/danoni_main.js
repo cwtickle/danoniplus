@@ -4101,29 +4101,31 @@ function musicAfterLoaded() {
 function createOptionWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionWidth = (g_sWidth - 400) / 2;
-	const optionsprite = createSprite(_sprite, `optionsprite`, optionWidth, 85 + (g_sHeight - 500) / 2, 400, 300);
+	const optionWidth = (g_sWidth - 450) / 2;
+	const childX = 25;
+	const childY = 20;
+	const optionsprite = createSprite(_sprite, `optionsprite`, optionWidth, 65 + (g_sHeight - 500) / 2, 450, 325);
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
-	const difficultySprite = createSprite(`optionsprite`, `difficultySprite`, 0, -5,
+	const difficultySprite = createSprite(`optionsprite`, `difficultySprite`, childX, childY - 5,
 		optionWidth, C_LEN_SETLBL_HEIGHT + 10);
-	const speedSprite = createSprite(`optionsprite`, `speedSprite`, 0, 2 * C_LEN_SETLBL_HEIGHT,
+	const speedSprite = createSprite(`optionsprite`, `speedSprite`, childX, 2 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
-	const motionSprite = createSprite(`optionsprite`, `motionSprite`, 0, 3 * C_LEN_SETLBL_HEIGHT,
+	const motionSprite = createSprite(`optionsprite`, `motionSprite`, childX, 3 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
-	const reverseSprite = createSprite(`optionsprite`, `reverseSprite`, 0, 4 * C_LEN_SETLBL_HEIGHT,
+	const reverseSprite = createSprite(`optionsprite`, `reverseSprite`, childX, 4 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
-	const shuffleSprite = createSprite(`optionsprite`, `shuffleSprite`, 0, 5.5 * C_LEN_SETLBL_HEIGHT,
+	const shuffleSprite = createSprite(`optionsprite`, `shuffleSprite`, childX, 5.5 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
-	const autoPlaySprite = createSprite(`optionsprite`, `autoPlaySprite`, 0, 6.5 * C_LEN_SETLBL_HEIGHT,
+	const autoPlaySprite = createSprite(`optionsprite`, `autoPlaySprite`, childX, 6.5 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
-	const gaugeSprite = createSprite(`optionsprite`, `gaugeSprite`, 0, 7.5 * C_LEN_SETLBL_HEIGHT,
+	const gaugeSprite = createSprite(`optionsprite`, `gaugeSprite`, childX, 7.5 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
-	const adjustmentSprite = createSprite(`optionsprite`, `adjustmentSprite`, 0, 10 * C_LEN_SETLBL_HEIGHT,
+	const adjustmentSprite = createSprite(`optionsprite`, `adjustmentSprite`, childX, 10 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
-	const fadeinSprite = createSprite(`optionsprite`, `fadeinSprite`, 0, 11 * C_LEN_SETLBL_HEIGHT,
+	const fadeinSprite = createSprite(`optionsprite`, `fadeinSprite`, childX, 11 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
-	const volumeSprite = createSprite(`optionsprite`, `volumeSprite`, 0, 12 * C_LEN_SETLBL_HEIGHT,
+	const volumeSprite = createSprite(`optionsprite`, `volumeSprite`, childX, 12 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
 
 	// ---------------------------------------------------
@@ -5086,11 +5088,15 @@ function settingsDisplayInit() {
 function createSettingsDisplayWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionWidth = (g_sWidth - 400) / 2;
-	const optionsprite = createSprite(_sprite, `optionsprite`, optionWidth, 100 + (g_sHeight - 500) / 2, 400, 300);
+	const optionWidth = (g_sWidth - 450) / 2;
+	const childX = 25;
+	const childY = 30;
+	createSprite(_sprite, `optionsprite`, optionWidth, 65 + (g_sHeight - 500) / 2, 450, 325);
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
-	const appearanceSprite = createSprite(`optionsprite`, `appearanceSprite`, 0, 6 * C_LEN_SETLBL_HEIGHT,
+	const displaySprite = createSprite(`optionsprite`, `displaySprite`, childX, childY,
+		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
+	const appearanceSprite = createSprite(`optionsprite`, `appearanceSprite`, childX, 6 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
 
 	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14,
@@ -5133,7 +5139,7 @@ function createSettingsDisplayWindow(_sprite) {
 		lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
 		lnk.style.borderStyle = `solid`;
 		lnk.classList.add(`button_${flg}`);
-		optionsprite.appendChild(lnk);
+		displaySprite.appendChild(lnk);
 	}
 
 }
