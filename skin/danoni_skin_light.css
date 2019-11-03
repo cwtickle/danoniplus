@@ -180,6 +180,10 @@
 	color: #000000;
 }
 
+/* 結果画面：枠 */
+.result_PlayDataWindow {
+	border: solid 0.5px #666666;
+}
 /* 結果画面：スコア */
 .result_score {
 	color: #000000;
