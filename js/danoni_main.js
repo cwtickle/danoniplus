@@ -21,24 +21,22 @@ let g_localVersion2 = ``;
 //  シーンジャンプ:Scene
 
 /**
- * ▽ ソースコーディングルール
- * - 定数・変数名はわかりやすく、名前で判断がつくように。
+ * ▽ ソースコーディング
+ * https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTING.md
+ * 
+ * - 定数・変数名
  * -- 定数　　　　　： `C_(カテゴリ)_(名前)`の形式。全て英大文字、数字、アンダースコアのみを使用。
  * -- グローバル変数： 変数の頭に`g_`をつける。
  * -- 関数の引数　　： アンダースコア始まりのキャメル表記。
- * 
- * - 構造はシンプルに。繰り返しが多いときは関数化を検討する。
- * - コメントは処理単位ごとに簡潔に記述。ただの英訳は極力避ける。
- * - 画面の見取りがわかるように詳細設定やロジックは別関数化し、実行内容を明確にする。
  * 
  * ▽ 画面の構成
  *  [タイトル]-[設定・オプション]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]
  *  ⇒　各画面に Init がついたものが画面の基本構成(ルート)を表す。
  * 
  * ▽ スプライトの親子関係
- *  基本的にdiv要素で管理。最下層を[divRoot]とし、createSprite()でdiv子要素を作成していく。
- *  clearWindow()で[divRoot]以外の全てのスプライトを削除できる。
- *  特定のスプライトに限り削除する場合は deleteChildspriteAll() で実現。
+ *  基本的にdiv要素で管理。最下層を[divRoot]とし、createSprite()でdiv子要素を作成。
+ *  clearWindow()で[divRoot]以外の全てのスプライトを削除。
+ *  特定のスプライトに限り削除する場合は deleteChildspriteAll() 。
  */
 
 window.onload = _ => initialControl();
@@ -59,7 +57,7 @@ const C_VALIGN_MIDDLE = `middle`;
 const C_VALIGN_BOTTOM = `bottom`;
 
 // ユーザインタフェース
-// カスタム側で変更できるようにletで定義している（mainではこの後の変更なし）
+// カスタム側で変更できるようにletで定義している（v10以降のカラーコード類は互換関数以外の利用用途なし）
 let C_CLR_DEFAULT = `#333333`;
 let C_CLR_DEFAULTA = `#111133`;
 let C_CLR_DEFAULTB = `#333311`;
