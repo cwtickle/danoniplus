@@ -1521,11 +1521,11 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 
 	const div = createDiv(_id, _x, _y, _width, _height);
 
-	// 矢印・おにぎり判定
+	// 矢印・オブジェクト判定
 	let charaStyle;
 	if (isNaN(Number(_rotate)) || _rotate === ``) {
 		charaStyle = `${_rotate}${_styleName}`;
-		div.setAttribute(`type`, `AA`);
+		div.setAttribute(`type`, _styleName);
 	} else {
 		charaStyle = `arrow${_styleName}`;
 		div.style.transform = `rotate(${_rotate}deg)`;
