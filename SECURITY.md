@@ -9,11 +9,12 @@ v6, v7についても致命的な不具合を除き、対応を終了します�
 
 | Version | Supported          | End of Support |
 | ------- | ------------------ |----------------|
-| 9.x     | :white_check_mark: |-               |
-| 8.7.x   | :white_check_mark: |-               |
-| 7.9.x   | :warning:          |(At release v10)|
-| 6.6.x   | :warning:          |(At release v10)|
-| 5.12.x  | :white_check_mark: |-               |
+| 10.x    | :white_check_mark: |-               |
+| 9.4.x   | :white_check_mark: |-               |
+| 8.7.x   | :white_check_mark: |(At release v11)|
+| 7.9.x   | :warning:          |2019-11-04      |
+| 6.6.x   | :warning:          |2019-11-04      |
+| 5.12.x  | :white_check_mark: |(At release v11)|
 | 4.10.x  | :x:                |2019-10-08      |
 | 3.13.x  | :x:                |2019-06-18      |
 | 2.9.x   | :x:                |2019-06-18      |
