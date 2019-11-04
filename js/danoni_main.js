@@ -2260,6 +2260,9 @@ function initAfterDosLoaded() {
 	// CSSファイルの読み込み
 	const randTime = new Date().getTime();
 	importCssFile(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.css?${randTime}`);
+	if (g_headerObj.skinType2 !== ``) {
+		importCssFile(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.css?${randTime}`);
+	}
 
 	// 画像ファイルの読み込み
 	preloadFile(`image`, C_IMG_ARROW);
@@ -3454,16 +3457,30 @@ function headerConvert(_dosObj) {
 
 	// 外部スキンファイルの指定
 	if (_dosObj.skinType !== undefined && _dosObj.skinType !== ``) {
-		if (_dosObj.skinType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-			obj.skinType = _dosObj.skinType.split(C_MRK_CURRENT_DIRECTORY)[1];
+		const skinTypes = _dosObj.skinType.split(`,`);
+		if (skinTypes.length > 1) {
+			if (skinTypes[1].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+				obj.skinType2 = skinTypes[1].split(C_MRK_CURRENT_DIRECTORY)[1];
+				obj.skinRoot2 = ``;
+			} else {
+				obj.skinType2 = skinTypes[1];
+				obj.skinRoot2 = C_DIR_SKIN;
+			}
+		} else {
+			obj.skinType2 = ``;
+		}
+
+		if (skinTypes[0].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+			obj.skinType = skinTypes[0].split(C_MRK_CURRENT_DIRECTORY)[1];
 			obj.skinRoot = ``;
 		} else {
-			obj.skinType = _dosObj.skinType;
+			obj.skinType = skinTypes[0];
 			obj.skinRoot = C_DIR_SKIN;
 		}
 	} else {
 		obj.skinType = `default`;
 		obj.skinRoot = C_DIR_SKIN;
+		obj.skinType2 = ``;
 	}
 
 	// 外部jsファイルの指定
