@@ -2260,6 +2260,9 @@ function initAfterDosLoaded() {
 	// CSSファイルの読み込み
 	const randTime = new Date().getTime();
 	importCssFile(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.css?${randTime}`);
+	if (g_headerObj.skinType2 !== ``) {
+		importCssFile(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.css?${randTime}`);
+	}
 
 	// 画像ファイルの読み込み
 	preloadFile(`image`, C_IMG_ARROW);
@@ -2325,11 +2328,13 @@ function loadCustomjs(_initFlg) {
 	loadScript(`${g_headerObj.customjsRoot}${g_headerObj.customjs}?${randTime}`, _ => {
 		loadScript(`${g_headerObj.customjs2Root}${g_headerObj.customjs2}?${randTime}`, _ => {
 			loadScript(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.js?${randTime}`, _ => {
-				if (_initFlg) {
-					titleInit();
-				} else {
-					loadingScoreInit2();
-				}
+				loadScript(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.js?${randTime}`, _ => {
+					if (_initFlg) {
+						titleInit();
+					} else {
+						loadingScoreInit2();
+					}
+				}, false);
 			}, false);
 		}, false);
 	}, false);
@@ -3034,6 +3039,9 @@ function titleInit() {
 
 	if (typeof skinTitleInit === C_TYP_FUNCTION) {
 		skinTitleInit();
+		if (typeof skinTitleInit2 === C_TYP_FUNCTION) {
+			skinTitleInit2();
+		}
 	}
 }
 
@@ -3454,16 +3462,32 @@ function headerConvert(_dosObj) {
 
 	// 外部スキンファイルの指定
 	if (_dosObj.skinType !== undefined && _dosObj.skinType !== ``) {
-		if (_dosObj.skinType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-			obj.skinType = _dosObj.skinType.split(C_MRK_CURRENT_DIRECTORY)[1];
+		const skinTypes = _dosObj.skinType.split(`,`);
+		if (skinTypes.length > 1) {
+			if (skinTypes[1].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+				obj.skinType2 = skinTypes[1].split(C_MRK_CURRENT_DIRECTORY)[1];
+				obj.skinRoot2 = ``;
+			} else {
+				obj.skinType2 = skinTypes[1];
+				obj.skinRoot2 = C_DIR_SKIN;
+			}
+		} else {
+			obj.skinType2 = `blank`;
+			obj.skinRoot2 = C_DIR_SKIN;
+		}
+
+		if (skinTypes[0].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+			obj.skinType = skinTypes[0].split(C_MRK_CURRENT_DIRECTORY)[1];
 			obj.skinRoot = ``;
 		} else {
-			obj.skinType = _dosObj.skinType;
+			obj.skinType = skinTypes[0];
 			obj.skinRoot = C_DIR_SKIN;
 		}
 	} else {
 		obj.skinType = `default`;
 		obj.skinRoot = C_DIR_SKIN;
+		obj.skinType2 = `blank`;
+		obj.skinRoot2 = C_DIR_SKIN;
 	}
 
 	// 外部jsファイルの指定
@@ -4070,6 +4094,9 @@ function optionInit() {
 
 	if (typeof skinOptionInit === C_TYP_FUNCTION) {
 		skinOptionInit();
+		if (typeof skinOptionInit2 === C_TYP_FUNCTION) {
+			skinOptionInit2();
+		}
 	}
 }
 
@@ -5078,6 +5105,9 @@ function settingsDisplayInit() {
 
 	if (typeof skinSettingsDisplayInit === C_TYP_FUNCTION) {
 		skinSettingsDisplayInit();
+		if (typeof skinSettingsDisplayInit2 === C_TYP_FUNCTION) {
+			skinSettingsDisplayInit2();
+		}
 	}
 }
 
@@ -5590,6 +5620,9 @@ function keyConfigInit() {
 
 	if (typeof skinKeyConfigInit === C_TYP_FUNCTION) {
 		skinKeyConfigInit();
+		if (typeof skinKeyConfigInit2 === C_TYP_FUNCTION) {
+			skinKeyConfigInit2();
+		}
 	}
 }
 
@@ -8709,6 +8742,9 @@ function MainInit() {
 	}
 	if (typeof skinMainInit === C_TYP_FUNCTION) {
 		skinMainInit();
+		if (typeof skinMainInit2 === C_TYP_FUNCTION) {
+			skinMainInit2();
+		}
 	}
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps);
 }
@@ -9823,6 +9859,9 @@ function resultInit() {
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {
 		skinResultInit();
+		if (typeof skinResultInit2 === C_TYP_FUNCTION) {
+			skinResultInit2();
+		}
 	}
 }
 
