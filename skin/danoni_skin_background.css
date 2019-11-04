@@ -1,0 +1,8 @@
+﻿@charset "UTF-8";
+/* 背景 */
+#divBack {
+	background: linear-gradient(#000000, #222222);
+	/*
+	background-image: url("../img/backgroundfile.png");
+	*/
+}

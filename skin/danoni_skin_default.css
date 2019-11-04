@@ -1,0 +1,307 @@
+﻿@charset "UTF-8";
+/* 背景 */
+#divBack {
+    background: linear-gradient(#000000, #222222);
+}
+
+/* タイトル */
+.title_base {
+	color:#cccccc;
+}
+
+/* 設定別カラー */
+.settings_Title::first-letter {
+	color:#6666ff;
+	font-size:40px;
+}
+.settings_Title2::first-letter {
+	color:#ff6666;
+	font-size:40px;
+}
+.settings_TitleStar::first-letter {
+	color:#ffff66;
+	font-size:40px;
+}
+.settings_Display::first-letter {
+	color:#ffff66;
+	font-size:40px;
+}
+.settings_Difficulty::first-letter {
+	color:#ff9999;
+}
+.settings_Speed::first-letter {
+	color:#ffff99;
+}
+.settings_Motion::first-letter {
+	color:#eeff99;
+}
+.settings_Reverse::first-letter {
+	color:#ddff99;
+}
+.settings_Shuffle::first-letter {
+	color:#99ff99;
+}
+.settings_AutoPlay::first-letter {
+	color:#99ffbb;
+}
+.settings_Gauge::first-letter {
+	color:#99ffdd;
+}
+.settings_Adjustment::first-letter {
+	color:#99ffff;
+}
+.settings_Fadein::first-letter {
+	color:#99eeff;
+}
+.settings_Volume::first-letter {
+	color:#99ddff;
+}
+.settings_Appearance::first-letter {
+	color:#cc99ff;
+}
+
+.settings_DifSelector {
+	background-color: #111111;
+}
+.settings_Disabled {
+	color:#666666;
+}
+.settings_FadeinBar {
+	color:#ffffff;
+}
+
+/* 設定画面：ゲージ設定詳細 */
+.settings_lifeVal {
+	color: #ff9966;
+}
+.settings_gaugeTableBorder {
+	border-color: #666666; 
+}
+
+/* キーコンフィグ */
+.keyconfig_warning {
+	color: #ffff99;
+}
+.keyconfig_ConfigType::first-letter {
+	color: #99ddff;
+}
+.keyconfig_ColorType::first-letter {
+	color: #ffdd99;
+}
+.keyconfig_Changekey {
+	color: #ffff00;
+}
+.keyconfig_Defaultkey {
+	color: #99ccff;
+}
+
+/* ステップゾーン */
+.main_stepKeyDown {
+	background-color: #66ffff;
+}
+.main_stepDefault {
+	background-color: #999999;
+}
+.main_stepDummy {
+	background-color: #777777;
+}
+.main_stepIi {
+	background-color: #66ffff;
+}
+.main_stepShakin {
+	background-color: #99ff99;
+}
+.main_stepMatari {
+	background-color: #ff9966;
+}
+.main_stepShobon {
+	background-color: #ccccff;
+}
+
+.main_objShadow {
+	background-color: #000000;
+}
+.main_frzHitTop {
+	background-color: #ffffff;
+}
+
+/* ライフゲージ */
+.life_Max {
+	background-color: #444400;
+}
+.life_Cleared {
+	background-color: #004444;
+}
+.life_Failed {
+	background-color: #444444;
+}
+.life_Background {
+	background-color: #222222;
+}
+.life_BorderColor {
+	background-color: #555555;
+	color:#cccccc;
+}
+
+/* 結果画面：項目、設定値 */
+.result_lbl {
+	color: #999999;
+}
+.result_style {
+	color: #cccccc;
+}
+
+/* 結果画面：判定名 */
+.common_ii {
+	color: #66ffff;
+}
+.common_shakin {
+	color: #99ff99;
+}
+.common_matari {
+	color: #ff9966;
+}
+.common_shobon {
+	color: #ccccff;
+}
+.common_uwan {
+	color: #ff9999;
+}
+.common_kita {
+	color: #ffff99;
+}
+.common_iknai {
+	color: #99ff66;
+}
+.common_combo {
+	color: #ffffff;
+}
+.common_score {
+	color: #ffffff;
+}
+
+/* 結果画面：枠 */
+.result_PlayDataWindow {
+	border: solid 0.5px #666666;
+}
+/* 結果画面：スコア */
+.result_score {
+	color: #ffffff;
+}
+/* 結果画面：ハイスコア差分、ハイスコア時のカラー */
+.result_scoreHiBlanket {
+	color: #999999;
+}
+.result_scoreHi {
+	color: #cccccc;
+}
+.result_scoreHiPlus {
+	color: #ffff99;
+}
+/* 結果画面：ハイスコア更新外の表示色 */
+.result_noRecord {
+	color: #999999;
+}
+/* 結果画面：完全PF、PF、FC、Cleared、Failed */
+.result_AllPerfect {
+	color:#ffffff;
+}
+.result_Perfect {
+	color:#ffffcc;
+}
+.result_FullCombo {
+	color:#66ffff;
+}
+.result_Cleared {
+	color:#ffff66;
+}
+.result_Failed {
+	color:#ff6666;
+}
+.result_Window::first-letter {
+	font-size:80px;
+}
+
+/* ボタン */
+/* Click Here */
+.button_Start {
+	color: #ffffff;
+	background-color: #333333;
+}
+.button_Start:hover {
+	color: #ffffff;
+	background-color: #666666;
+}
+/* デフォルト */
+.button_Default {
+	color: #ffffff;
+	background-color: #111111;
+}
+.button_Default:hover {
+	color: #ffffff;
+	background-color: #666666;
+}
+/* カーソル */
+.button_Mini {
+	color: #ffffff;
+	background-color: #333333;
+}
+.button_Mini:hover {
+	color: #ffffff;
+	background-color: #999900;
+}
+/* 戻る */
+.button_Back {
+	color: #cccccc;
+	background-color: #111133;
+}
+.button_Back:hover {
+	color: #cccccc;
+	background-color: #000099;
+}
+/* 設定 */
+.button_Setting {
+	color: #ffffff;
+	background-color: #333311;
+}
+.button_Setting:hover {
+	color: #ffffff;
+	background-color: #999900;
+}
+/* 進む */
+.button_Next {
+	color: #ffffff;
+	background-color: #331111;
+}
+.button_Next:hover {
+	color: #ffffff;
+	background-color: #990000;
+}
+/* リセット */
+.button_Reset {
+	color: #ffffff;
+	background-color: #113311;
+}
+.button_Reset:hover {
+	color: #ffffff;
+	background-color: #009900;
+}
+/* ツイート */
+.button_Tweet {
+	color: #ffffff;
+	background-color: #113333;
+}
+.button_Tweet:hover {
+	color: #ffffff;
+	background-color: #009999;
+}
+
+/* ボタン：ON/OFF */
+.button_OFF {
+	color: #666666;
+	border-color: #000000 #333333; 
+}
+.button_ON {
+	color: #ffffff;
+	border-color: #000000 #cccccc; 
+}
