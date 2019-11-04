@@ -2328,11 +2328,13 @@ function loadCustomjs(_initFlg) {
 	loadScript(`${g_headerObj.customjsRoot}${g_headerObj.customjs}?${randTime}`, _ => {
 		loadScript(`${g_headerObj.customjs2Root}${g_headerObj.customjs2}?${randTime}`, _ => {
 			loadScript(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.js?${randTime}`, _ => {
-				if (_initFlg) {
-					titleInit();
-				} else {
-					loadingScoreInit2();
-				}
+				loadScript(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.js?${randTime}`, _ => {
+					if (_initFlg) {
+						titleInit();
+					} else {
+						loadingScoreInit2();
+					}
+				}, false);
 			}, false);
 		}, false);
 	}, false);
@@ -3468,6 +3470,7 @@ function headerConvert(_dosObj) {
 			}
 		} else {
 			obj.skinType2 = ``;
+			obj.skinRoot2 = C_DIR_SKIN;
 		}
 
 		if (skinTypes[0].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
@@ -3481,6 +3484,7 @@ function headerConvert(_dosObj) {
 		obj.skinType = `default`;
 		obj.skinRoot = C_DIR_SKIN;
 		obj.skinType2 = ``;
+		obj.skinRoot2 = C_DIR_SKIN;
 	}
 
 	// 外部jsファイルの指定
