@@ -3039,6 +3039,9 @@ function titleInit() {
 
 	if (typeof skinTitleInit === C_TYP_FUNCTION) {
 		skinTitleInit();
+		if (typeof skinTitleInit2 === C_TYP_FUNCTION) {
+			skinTitleInit2();
+		}
 	}
 }
 
@@ -3469,7 +3472,7 @@ function headerConvert(_dosObj) {
 				obj.skinRoot2 = C_DIR_SKIN;
 			}
 		} else {
-			obj.skinType2 = ``;
+			obj.skinType2 = `blank`;
 			obj.skinRoot2 = C_DIR_SKIN;
 		}
 
@@ -3483,7 +3486,7 @@ function headerConvert(_dosObj) {
 	} else {
 		obj.skinType = `default`;
 		obj.skinRoot = C_DIR_SKIN;
-		obj.skinType2 = ``;
+		obj.skinType2 = `blank`;
 		obj.skinRoot2 = C_DIR_SKIN;
 	}
 
@@ -4091,6 +4094,9 @@ function optionInit() {
 
 	if (typeof skinOptionInit === C_TYP_FUNCTION) {
 		skinOptionInit();
+		if (typeof skinOptionInit2 === C_TYP_FUNCTION) {
+			skinOptionInit2();
+		}
 	}
 }
 
@@ -5099,6 +5105,9 @@ function settingsDisplayInit() {
 
 	if (typeof skinSettingsDisplayInit === C_TYP_FUNCTION) {
 		skinSettingsDisplayInit();
+		if (typeof skinSettingsDisplayInit2 === C_TYP_FUNCTION) {
+			skinSettingsDisplayInit2();
+		}
 	}
 }
 
@@ -5611,6 +5620,9 @@ function keyConfigInit() {
 
 	if (typeof skinKeyConfigInit === C_TYP_FUNCTION) {
 		skinKeyConfigInit();
+		if (typeof skinKeyConfigInit2 === C_TYP_FUNCTION) {
+			skinKeyConfigInit2();
+		}
 	}
 }
 
@@ -8730,6 +8742,9 @@ function MainInit() {
 	}
 	if (typeof skinMainInit === C_TYP_FUNCTION) {
 		skinMainInit();
+		if (typeof skinMainInit2 === C_TYP_FUNCTION) {
+			skinMainInit2();
+		}
 	}
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps);
 }
@@ -9844,6 +9859,9 @@ function resultInit() {
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {
 		skinResultInit();
+		if (typeof skinResultInit2 === C_TYP_FUNCTION) {
+			skinResultInit2();
+		}
 	}
 }
 
