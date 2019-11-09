@@ -2464,7 +2464,17 @@ async function initWebAudioAPI(_url) {
 	await g_audio.init(arrayBuffer);
 }
 
+/**
+ * 音楽データの設定
+ * iOSの場合はAudioタグによる再生
+ * @param {string} _url 
+ */
 function setAudio(_url) {
+	const ua = navigator.userAgent;
+	const isIOS = ua.indexOf(`iPhone`) >= 0
+		|| ua.indexOf(`iPad`) >= 0
+		|| ua.indexOf(`iPod`) >= 0;
+
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
@@ -2475,9 +2485,28 @@ function setAudio(_url) {
 				musicAfterLoaded();
 			}
 		});
+
+	} else if (isIOS) {
+		const btnPlay = createCssButton({
+			id: `btnPlay`,
+			name: `PLAY!`,
+			x: g_sWidth * 2 / 3,
+			y: g_sHeight - 100,
+			width: g_sWidth / 3,
+			height: C_BTN_HEIGHT,
+			fontsize: C_LBL_BTNSIZE,
+			align: C_ALIGN_CENTER,
+			class: g_cssObj.button_Next,
+		}, _ => {
+			g_audio.src = _url;
+			musicAfterLoaded();
+		});
+		divRoot.appendChild(btnPlay);
+
 	} else if (location.href.match(`^file`)) {
 		g_audio.src = _url;
 		musicAfterLoaded();
+
 	} else {
 		initWebAudioAPI(_url);
 	}
