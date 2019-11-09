@@ -2470,9 +2470,10 @@ async function initWebAudioAPI(_url) {
  * @param {string} _url 
  */
 function setAudio(_url) {
-	const isIOS = g_userAgent.indexOf(`iPhone`) >= 0
-		|| g_userAgent.indexOf(`iPad`) >= 0
-		|| g_userAgent.indexOf(`iPod`) >= 0;
+	const ua = navigator.userAgent;
+	const isIOS = ua.indexOf(`iPhone`) >= 0
+		|| ua.indexOf(`iPad`) >= 0
+		|| ua.indexOf(`iPod`) >= 0;
 
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
@@ -2484,39 +2485,31 @@ function setAudio(_url) {
 				musicAfterLoaded();
 			}
 		});
+
 	} else if (isIOS) {
-		makeUrlButton(_url => {
+		const btnPlay = createCssButton({
+			id: `btnPlay`,
+			name: `PLAY!`,
+			x: g_sWidth * 2 / 3,
+			y: g_sHeight - 100,
+			width: g_sWidth / 3,
+			height: C_BTN_HEIGHT,
+			fontsize: C_LBL_BTNSIZE,
+			align: C_ALIGN_CENTER,
+			class: g_cssObj.button_Next,
+		}, _ => {
 			g_audio.src = _url;
 			musicAfterLoaded();
 		});
+		divRoot.appendChild(btnPlay);
+
 	} else if (location.href.match(`^file`)) {
 		g_audio.src = _url;
 		musicAfterLoaded();
+
 	} else {
 		initWebAudioAPI(_url);
 	}
-}
-
-/**
- * プレイ続行ボタンの作成
- * @param {function} _func 
- */
-function makePlayButton(_func) {
-	// 進むボタン描画
-	const btnPlay = createCssButton({
-		id: `btnPlay`,
-		name: `PLAY!`,
-		x: g_sWidth * 2 / 3,
-		y: g_sHeight - 100,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
-		fontsize: C_LBL_BTNSIZE,
-		align: C_ALIGN_CENTER,
-		class: g_cssObj.button_Next,
-	}, _ => {
-		func();
-	});
-	document.querySelector(`#divRoot`).appendChild(btnPlay);
 }
 
 /**
