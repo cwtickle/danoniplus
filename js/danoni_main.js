@@ -2255,6 +2255,8 @@ function initAfterDosLoaded() {
 	if (document.querySelector(`#layer0`) === null) {
 		document.querySelector(`#divRoot`).removeChild(document.querySelector(`#divBack`));
 		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+	} else if (g_headerObj.skinType !== `default`) {
+		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
 	}
 
 	// CSSファイルの読み込み
@@ -2504,6 +2506,9 @@ function drawDefaultBackImage(_key) {
 			grd.addColorStop(1, `#222222`);
 			l0ctx.fillStyle = grd;
 			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+		}
+		if (g_headerObj.skinType !== `default`) {
+			createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
 		}
 	} else {
 		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
