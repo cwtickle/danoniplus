@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/10/12
+ * Revised : 2019/11/10
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 5.12.14`;
-const g_revisedDate = `2019/10/12`;
+const g_version = `Ver 5.12.15`;
+const g_revisedDate = `2019/11/10`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1924,6 +1924,11 @@ async function initWebAudioAPI(_url) {
 }
 
 function setAudio(_url) {
+	const ua = navigator.userAgent;
+	const isIOS = ua.indexOf(`iPhone`) >= 0
+		|| ua.indexOf(`iPad`) >= 0
+		|| ua.indexOf(`iPod`) >= 0;
+
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === `function`) {
@@ -1934,6 +1939,24 @@ function setAudio(_url) {
 				musicAfterLoaded();
 			}
 		});
+	} else if (isIOS) {
+		const btnPlay = createButton({
+			id: `btnPlay`,
+			name: `PLAY!`,
+			x: g_sWidth * 2 / 3,
+			y: g_sHeight - 100,
+			width: g_sWidth / 3,
+			height: C_BTN_HEIGHT,
+			fontsize: C_LBL_BTNSIZE,
+			normalColor: C_CLR_DEFAULT,
+			hoverColor: C_CLR_NEXT,
+			align: C_ALIGN_CENTER
+		}, _ => {
+			g_audio.src = _url;
+			musicAfterLoaded();
+		});
+		document.querySelector(`#divRoot`).appendChild(btnPlay);
+
 	} else if (location.href.match(`^file`)) {
 		g_audio.src = _url;
 		musicAfterLoaded();
