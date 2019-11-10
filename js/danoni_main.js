@@ -1858,6 +1858,7 @@ function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
 // WebAudioAPIでAudio要素風に再生するクラス
 class AudioPlayer {
 	constructor() {
+		const AudioContext = window.AudioContext || window.webkitAudioContext;
 		this._context = new AudioContext();
 		this._gain = this._context.createGain();
 		this._gain.connect(this._context.destination);
@@ -2481,11 +2482,25 @@ function setAudio(_url) {
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
-				if (isIOS) {
-					makeWarningWindow(C_MSG_E_0035);
-				}
 				musicInit();
-				initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
+				if (isIOS) {
+					const btnPlay = createCssButton({
+						id: `btnPlay`,
+						name: `PLAY!`,
+						x: g_sWidth * 2 / 3,
+						y: g_sHeight - 100,
+						width: g_sWidth / 3,
+						height: C_BTN_HEIGHT,
+						fontsize: C_LBL_BTNSIZE,
+						align: C_ALIGN_CENTER,
+						class: g_cssObj.button_Next,
+					}, _ => {
+						initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
+					});
+					divRoot.appendChild(btnPlay);
+				} else {
+					initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
+				}
 			} else {
 				makeWarningWindow(C_MSG_E_0031);
 				musicAfterLoaded();
@@ -2504,8 +2519,12 @@ function setAudio(_url) {
 			align: C_ALIGN_CENTER,
 			class: g_cssObj.button_Next,
 		}, _ => {
-			g_audio.src = _url;
-			musicAfterLoaded();
+			if (location.href.match(`^file`)) {
+				g_audio.src = _url;
+				musicAfterLoaded();
+			} else {
+				initWebAudioAPI(_url);
+			}
 		});
 		divRoot.appendChild(btnPlay);
 
