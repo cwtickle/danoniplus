@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/11/04
+ * Revised : 2019/11/10
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 10.0.0`;
-const g_revisedDate = `2019/11/04`;
+const g_version = `Ver 10.1.0`;
+const g_revisedDate = `2019/11/10`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1119,6 +1119,7 @@ const C_MSG_E_0031 = `楽曲ファイルが未指定か、フォーマットが�
 const C_MSG_E_0032 = `楽曲ファイルの読み込みに失敗しました。(E-0032)`;
 const C_MSG_E_0033 = `楽曲ファイルの読み込み中に接続がタイムアウトしました。(E-0033)`;
 const C_MSG_E_0034 = `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`;
+const C_MSG_E_0035 = `お使いのOSでは指定された楽曲フォーマットに対応していません。(E-0035)`;
 const C_MSG_E_0041 = `ファイル:{0}の読み込みに失敗しました。(E-0041)<br>`;
 
 const C_MSG_E_0101 = `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
@@ -2255,6 +2256,8 @@ function initAfterDosLoaded() {
 	if (document.querySelector(`#layer0`) === null) {
 		document.querySelector(`#divRoot`).removeChild(document.querySelector(`#divBack`));
 		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+	} else if (g_headerObj.skinType !== `default` && !g_headerObj.customBackUse) {
+		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
 	}
 
 	// CSSファイルの読み込み
@@ -2464,10 +2467,23 @@ async function initWebAudioAPI(_url) {
 	await g_audio.init(arrayBuffer);
 }
 
+/**
+ * 音楽データの設定
+ * iOSの場合はAudioタグによる再生
+ * @param {string} _url 
+ */
 function setAudio(_url) {
+	const ua = navigator.userAgent;
+	const isIOS = ua.indexOf(`iPhone`) >= 0
+		|| ua.indexOf(`iPad`) >= 0
+		|| ua.indexOf(`iPod`) >= 0;
+
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
+				if (isIOS) {
+					makeWarningWindow(C_MSG_E_0035);
+				}
 				musicInit();
 				initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
 			} else {
@@ -2475,9 +2491,28 @@ function setAudio(_url) {
 				musicAfterLoaded();
 			}
 		});
+
+	} else if (isIOS) {
+		const btnPlay = createCssButton({
+			id: `btnPlay`,
+			name: `PLAY!`,
+			x: g_sWidth * 2 / 3,
+			y: g_sHeight - 100,
+			width: g_sWidth / 3,
+			height: C_BTN_HEIGHT,
+			fontsize: C_LBL_BTNSIZE,
+			align: C_ALIGN_CENTER,
+			class: g_cssObj.button_Next,
+		}, _ => {
+			g_audio.src = _url;
+			musicAfterLoaded();
+		});
+		divRoot.appendChild(btnPlay);
+
 	} else if (location.href.match(`^file`)) {
 		g_audio.src = _url;
 		musicAfterLoaded();
+
 	} else {
 		initWebAudioAPI(_url);
 	}
@@ -2499,11 +2534,15 @@ function drawDefaultBackImage(_key) {
 
 		// 画面背景を指定 (background-color)
 		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-		if (!g_headerObj[`customBack${_key}Use`] || !g_headerObj[`customBack${_key}Use`]) {
+		if (!g_headerObj[`customBack${_key}Use`]) {
 			grd.addColorStop(0, `#000000`);
 			grd.addColorStop(1, `#222222`);
 			l0ctx.fillStyle = grd;
 			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+
+			if (g_headerObj.skinType !== `default`) {
+				createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+			}
 		}
 	} else {
 		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
