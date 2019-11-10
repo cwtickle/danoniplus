@@ -961,7 +961,7 @@ const C_MSG_E_0031 = `楽曲ファイルが未指定か、フォーマットが�
 const C_MSG_E_0032 = `楽曲ファイルの読み込みに失敗しました。(E-0032)`;
 const C_MSG_E_0033 = `楽曲ファイルの読み込み中に接続がタイムアウトしました。(E-0033)`;
 const C_MSG_E_0034 = `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`;
-
+const C_MSG_E_0035 = `お使いのOSでは指定された楽曲フォーマットに対応していません。(E-0035)`;
 const C_MSG_E_0101 = `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
 	|color{0}=0,1,0,1,0,2|`;
 const C_MSG_E_0102 = `新しいキー:{0}の[chara]が未定義です。(E-0102)<br>
@@ -1932,6 +1932,9 @@ function setAudio(_url) {
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === `function`) {
+				if (isIOS) {
+					makeWarningWindow(C_MSG_E_0035);
+				}
 				musicInit();
 				initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
 			} else {
