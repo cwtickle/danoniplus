@@ -2255,7 +2255,7 @@ function initAfterDosLoaded() {
 	if (document.querySelector(`#layer0`) === null) {
 		document.querySelector(`#divRoot`).removeChild(document.querySelector(`#divBack`));
 		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
-	} else if (g_headerObj.skinType !== `default`) {
+	} else if (g_headerObj.skinType !== `default` && !g_headerObj.customBackUse) {
 		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
 	}
 
@@ -2501,14 +2501,15 @@ function drawDefaultBackImage(_key) {
 
 		// 画面背景を指定 (background-color)
 		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-		if (!g_headerObj[`customBack${_key}Use`] || !g_headerObj[`customBack${_key}Use`]) {
+		if (!g_headerObj[`customBack${_key}Use`]) {
 			grd.addColorStop(0, `#000000`);
 			grd.addColorStop(1, `#222222`);
 			l0ctx.fillStyle = grd;
 			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-		}
-		if (g_headerObj.skinType !== `default`) {
-			createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+
+			if (g_headerObj.skinType !== `default`) {
+				createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+			}
 		}
 	} else {
 		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
