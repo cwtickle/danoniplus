@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/11/10
+ * Revised : 2019/11/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 10.1.0`;
-const g_revisedDate = `2019/11/10`;
+const g_version = `Ver 10.1.1`;
+const g_revisedDate = `2019/11/11`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1858,6 +1858,7 @@ function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
 // WebAudioAPIでAudio要素風に再生するクラス
 class AudioPlayer {
 	constructor() {
+		const AudioContext = window.AudioContext || window.webkitAudioContext;
 		this._context = new AudioContext();
 		this._gain = this._context.createGain();
 		this._gain.connect(this._context.destination);
@@ -2481,11 +2482,27 @@ function setAudio(_url) {
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
-				if (isIOS) {
-					makeWarningWindow(C_MSG_E_0035);
-				}
 				musicInit();
-				initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
+				if (isIOS) {
+					document.querySelector(`#lblLoading`).innerText = `Click to Start!`;
+					const btnPlay = createCssButton({
+						id: `btnPlay`,
+						name: `PLAY!`,
+						x: g_sWidth * 2 / 3,
+						y: g_sHeight - 100,
+						width: g_sWidth / 3,
+						height: C_BTN_HEIGHT,
+						fontsize: C_LBL_BTNSIZE,
+						align: C_ALIGN_CENTER,
+						class: g_cssObj.button_Next,
+					}, _ => {
+						divRoot.removeChild(btnPlay);
+						initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
+					});
+					divRoot.appendChild(btnPlay);
+				} else {
+					initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
+				}
 			} else {
 				makeWarningWindow(C_MSG_E_0031);
 				musicAfterLoaded();
@@ -2493,6 +2510,7 @@ function setAudio(_url) {
 		});
 
 	} else if (isIOS) {
+		document.querySelector(`#lblLoading`).innerText = `Click to Start!`;
 		const btnPlay = createCssButton({
 			id: `btnPlay`,
 			name: `PLAY!`,
@@ -2504,8 +2522,13 @@ function setAudio(_url) {
 			align: C_ALIGN_CENTER,
 			class: g_cssObj.button_Next,
 		}, _ => {
-			g_audio.src = _url;
-			musicAfterLoaded();
+			divRoot.removeChild(btnPlay);
+			if (location.href.match(`^file`)) {
+				g_audio.src = _url;
+				musicAfterLoaded();
+			} else {
+				initWebAudioAPI(_url);
+			}
 		});
 		divRoot.appendChild(btnPlay);
 
@@ -5934,8 +5957,13 @@ function loadingScoreInit2() {
 		}
 	}
 
-	clearWindow();
-	MainInit();
+	const tempId = setInterval(() => {
+		if (g_audio.duration !== undefined) {
+			clearInterval(tempId);
+			clearWindow();
+			MainInit();
+		}
+	}, 0.5);
 }
 
 /**
@@ -8735,9 +8763,6 @@ function MainInit() {
 
 		// 曲終了判定
 		if (g_scoreObj.frameNum >= fullFrame) {
-			if (g_scoreObj.fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
-				g_audio.pause();
-			}
 			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 				g_gameOverFlg = true;
 			}
@@ -9757,7 +9782,9 @@ function resultInit() {
 		class: g_cssObj.button_Back,
 	}, _ => {
 		// タイトル画面へ戻る
-		g_audio.pause();
+		if (g_finishFlg) {
+			g_audio.pause();
+		}
 		clearTimeout(g_timeoutEvtId);
 		clearTimeout(g_timeoutEvtResultId);
 		clearWindow();
@@ -9793,7 +9820,9 @@ function resultInit() {
 		animationName: `smallToNormalY`,
 		class: g_cssObj.button_Reset,
 	}, _ => {
-		g_audio.pause();
+		if (g_finishFlg) {
+			g_audio.pause();
+		}
 		clearTimeout(g_timeoutEvtId);
 		clearTimeout(g_timeoutEvtResultId);
 		clearWindow();
@@ -9862,7 +9891,6 @@ function resultInit() {
 			if (tmpVolume < 0) {
 				g_audio.volume = 0;
 				clearTimeout(g_timeoutEvtId);
-				g_audio.pause();
 			} else {
 				g_audio.volume = tmpVolume;
 			}
