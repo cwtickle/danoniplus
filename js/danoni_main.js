@@ -5953,8 +5953,13 @@ function loadingScoreInit2() {
 		}
 	}
 
-	clearWindow();
-	MainInit();
+	const tempId = setInterval(() => {
+		if (g_audio.duration !== undefined) {
+			clearInterval(tempId);
+			clearWindow();
+			MainInit();
+		}
+	}, 0.5);
 }
 
 /**
@@ -8754,9 +8759,6 @@ function MainInit() {
 
 		// 曲終了判定
 		if (g_scoreObj.frameNum >= fullFrame) {
-			if (g_scoreObj.fadeOutFrame === Infinity && isNaN(parseInt(g_headerObj.endFrame))) {
-				g_audio.pause();
-			}
 			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 				g_gameOverFlg = true;
 			}
@@ -9881,7 +9883,6 @@ function resultInit() {
 			if (tmpVolume < 0) {
 				g_audio.volume = 0;
 				clearTimeout(g_timeoutEvtId);
-				g_audio.pause();
 			} else {
 				g_audio.volume = tmpVolume;
 			}
