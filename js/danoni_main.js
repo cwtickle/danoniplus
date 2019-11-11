@@ -2484,6 +2484,7 @@ function setAudio(_url) {
 			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
 				if (isIOS) {
+					document.querySelector(`#lblLoading`).innerText = `Click to Start!`;
 					const btnPlay = createCssButton({
 						id: `btnPlay`,
 						name: `PLAY!`,
@@ -2495,6 +2496,7 @@ function setAudio(_url) {
 						align: C_ALIGN_CENTER,
 						class: g_cssObj.button_Next,
 					}, _ => {
+						divRoot.removeChild(btnPlay);
 						initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
 					});
 					divRoot.appendChild(btnPlay);
@@ -2508,6 +2510,7 @@ function setAudio(_url) {
 		});
 
 	} else if (isIOS) {
+		document.querySelector(`#lblLoading`).innerText = `Click to Start!`;
 		const btnPlay = createCssButton({
 			id: `btnPlay`,
 			name: `PLAY!`,
@@ -2519,6 +2522,7 @@ function setAudio(_url) {
 			align: C_ALIGN_CENTER,
 			class: g_cssObj.button_Next,
 		}, _ => {
+			divRoot.removeChild(btnPlay);
 			if (location.href.match(`^file`)) {
 				g_audio.src = _url;
 				musicAfterLoaded();
