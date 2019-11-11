@@ -9782,7 +9782,9 @@ function resultInit() {
 		class: g_cssObj.button_Back,
 	}, _ => {
 		// タイトル画面へ戻る
-		g_audio.pause();
+		if (g_finishFlg) {
+			g_audio.pause();
+		}
 		clearTimeout(g_timeoutEvtId);
 		clearTimeout(g_timeoutEvtResultId);
 		clearWindow();
@@ -9818,7 +9820,9 @@ function resultInit() {
 		animationName: `smallToNormalY`,
 		class: g_cssObj.button_Reset,
 	}, _ => {
-		g_audio.pause();
+		if (g_finishFlg) {
+			g_audio.pause();
+		}
 		clearTimeout(g_timeoutEvtId);
 		clearTimeout(g_timeoutEvtResultId);
 		clearWindow();
