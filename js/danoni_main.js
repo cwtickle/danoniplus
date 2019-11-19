@@ -54,12 +54,52 @@ window.onload = _ => {
 /* Scene : COMMON [water] */
 /*-----------------------------------------------------------*/
 
-let g_maxScore = 1000000;
+// 音楽ファイル エンコードフラグ
+let g_musicEncodedFlg = false;
+let g_musicdata = ``;
 
+// 外部dosデータ
+let g_externalDos = ``;
+
+// fps(デフォルトは60)
+let g_fps = 60;
+
+// 譜面データの&区切りを有効にするか
+let g_enableAmpersandSplit = true;
+
+// 譜面データをdecodeURIするか
+let g_enableDecodeURI = false;
+
+// プリロード済ファイル
+const g_preloadImgs = [];
+
+// 矢印サイズ
+const C_ARW_WIDTH = 50;
+
+// ON/OFFスイッチ
+const C_FLG_ON = `ON`;
+const C_FLG_OFF = `OFF`;
+const C_DIS_NONE = `none`;
+
+// 初期化フラグ（ボタンアニメーション制御）
+let g_initialFlg = false;
+
+// キーコンフィグ初期設定
+let g_kcType = `Main`;
+let g_colorType = `Default`;
+let g_baseDisp = `Settings`;
+
+// ライフ・ゲームオーバー・曲終了管理
+let g_maxScore = 1000000;
 let g_gameOverFlg = false;
 let g_finishFlg = true;
 
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
+
+let g_wordSprite;
+let g_rootObj = {};
+let g_headerObj = {};
+let g_scoreObj = {};
 
 let g_audio = new Audio();
 let g_timeoutEvtId = 0;

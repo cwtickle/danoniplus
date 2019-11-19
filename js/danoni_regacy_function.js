@@ -1,7 +1,7 @@
 ﻿`use strict`;
 /**
  * Dancing☆Onigiri (CW Edition)
- * 旧バージョン定義関数
+ * 旧バージョン定義変数・関数
  *
  * Source by tickle
  * Created : 2019/11/19
@@ -9,6 +9,26 @@
  *
  * https://github.com/cwtickle/danoniplus
  */
+
+// ユーザインタフェース
+// カスタム側で変更できるようにletで定義している（v10以降のカラーコード類は互換関数以外の利用用途なし）
+let C_CLR_DEFAULT = `#333333`;
+let C_CLR_DEFAULTA = `#111133`;
+let C_CLR_DEFAULTB = `#333311`;
+let C_CLR_DEFAULTC = `#331111`;
+let C_CLR_DEFAULTD = `#113311`;
+let C_CLR_DEFAULTE = `#113333`;
+let C_CLR_DEFHOVER = `#666666`;
+let C_CLR_BACK = `#000099`;
+let C_CLR_NEXT = `#990000`;
+let C_CLR_SETTING = `#999900`;
+let C_CLR_RESET = `#009900`;
+let C_CLR_TWEET = `#009999`;
+
+let C_CLR_TEXT = `#ffffff`;
+let C_CLR_TITLE = `#cccccc`;
+let C_CLR_LOADING_BAR = `#eeeeee`;
+let C_CLR_LNK = `#111111`;
 
 /**
 * 子div要素のラベル文字作成 (v9互換用)

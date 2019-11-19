@@ -21,26 +21,6 @@ const C_VALIGN_TOP = `top`;
 const C_VALIGN_MIDDLE = `middle`;
 const C_VALIGN_BOTTOM = `bottom`;
 
-// ユーザインタフェース
-// カスタム側で変更できるようにletで定義している（v10以降のカラーコード類は互換関数以外の利用用途なし）
-let C_CLR_DEFAULT = `#333333`;
-let C_CLR_DEFAULTA = `#111133`;
-let C_CLR_DEFAULTB = `#333311`;
-let C_CLR_DEFAULTC = `#331111`;
-let C_CLR_DEFAULTD = `#113311`;
-let C_CLR_DEFAULTE = `#113333`;
-let C_CLR_DEFHOVER = `#666666`;
-let C_CLR_BACK = `#000099`;
-let C_CLR_NEXT = `#990000`;
-let C_CLR_SETTING = `#999900`;
-let C_CLR_RESET = `#009900`;
-let C_CLR_TWEET = `#009999`;
-
-let C_CLR_TEXT = `#ffffff`;
-let C_CLR_TITLE = `#cccccc`;
-let C_CLR_LOADING_BAR = `#eeeeee`;
-let C_CLR_LNK = `#111111`;
-
 const C_LBL_TITLESIZE = 32;
 const C_LBL_BTNSIZE = 28;
 const C_LBL_LNKSIZE = 16;
@@ -133,26 +113,6 @@ const g_imgObj = {
     lifeBorder: C_IMG_LIFEBORDER,
 };
 
-const g_preloadImgs = [];
-
-const C_ARW_WIDTH = 50;
-
-// 音楽ファイル エンコードフラグ
-let g_musicEncodedFlg = false;
-let g_musicdata = ``;
-
-// 外部dosデータ
-let g_externalDos = ``;
-
-// fps(デフォルトは60)
-let g_fps = 60;
-
-// 譜面データの&区切りを有効にするか
-let g_enableAmpersandSplit = true;
-
-// 譜面データをdecodeURIするか
-let g_enableDecodeURI = false;
-
 // Motionオプション配列の基準位置
 const C_MOTION_STD_POS = 15;
 
@@ -164,11 +124,6 @@ const C_BLOCK_KEYS = [
     112, 113, 114, 115, 0, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, /* F1～F15 (F5は除く) */
     27 /* Esc */
 ];
-
-// ON/OFFスイッチ
-const C_FLG_ON = `ON`;
-const C_FLG_OFF = `OFF`;
-const C_DIS_NONE = `none`;
 
 /** 設定・オプション画面用共通 */
 const C_LEN_SETLBL_LEFT = 140;
@@ -194,12 +149,6 @@ const C_MAX_ADJUSTMENT = 30;
 const C_MAX_SPEED = 10;
 const C_MIN_SPEED = 1;
 
-let g_initialFlg = false;
-
-/** キーコンフィグ設定 */
-let g_kcType = `Main`;
-let g_colorType = `Default`;
-let g_baseDisp = `Settings`;
 const C_KYC_HEIGHT = 150;
 const C_KYC_REPHEIGHT = 20;
 
@@ -326,13 +275,9 @@ const g_wordObj = {
     fadeOutFlg0: false,
     fadeOutFlg1: false
 };
-let g_wordSprite;
 let C_WOD_FRAME = 30;
 
 // 譜面データ持ち回り用
-let g_rootObj = {};
-let g_headerObj = {};
-let g_scoreObj = {};
 const g_stateObj = {
     scoreLockFlg: false,
     scoreId: 0,
