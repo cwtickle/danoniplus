@@ -152,17 +152,6 @@ const C_MIN_SPEED = 1;
 const C_KYC_HEIGHT = 150;
 const C_KYC_REPHEIGHT = 20;
 
-/** メイン画面用共通オブジェクト */
-const g_workObj = {};
-g_workObj.stepX = [];
-g_workObj.stepRtn = [];
-g_workObj.stepHitRtn = [];
-g_workObj.arrowRtn = [];
-g_workObj.keyCtrl = [];
-g_workObj.keyHitFlg = [];
-g_workObj.scrollDir = [];
-g_workObj.dividePos = [];
-
 const C_FRM_AFTERFADE = 420;
 const C_FRM_FRZATTEMPT = 5;
 
@@ -257,15 +246,6 @@ const g_pointAllocation = {
     fmaxCombo: 2,
 }
 
-// 歌詞制御
-const g_wordObj = {
-    wordDir: 0,
-    wordDat: ``,
-    fadeInFlg0: false,
-    fadeInFlg1: false,
-    fadeOutFlg0: false,
-    fadeOutFlg1: false
-};
 let C_WOD_FRAME = 30;
 
 // 譜面データ持ち回り用

@@ -54,13 +54,6 @@ window.onload = _ => {
 /* Scene : COMMON [water] */
 /*-----------------------------------------------------------*/
 
-// 音楽ファイル エンコードフラグ
-let g_musicEncodedFlg = false;
-let g_musicdata = ``;
-
-// 外部dosデータ
-let g_externalDos = ``;
-
 // fps(デフォルトは60)
 let g_fps = 60;
 
@@ -96,16 +89,46 @@ let g_finishFlg = true;
 
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
-let g_wordSprite;
+/** 共通オブジェクト */
 let g_rootObj = {};
 let g_headerObj = {};
 let g_scoreObj = {};
 
+const g_workObj = {};
+g_workObj.stepX = [];
+g_workObj.stepRtn = [];
+g_workObj.stepHitRtn = [];
+g_workObj.arrowRtn = [];
+g_workObj.keyCtrl = [];
+g_workObj.keyHitFlg = [];
+g_workObj.scrollDir = [];
+g_workObj.dividePos = [];
+
+// 歌詞制御
+let g_wordSprite;
+
+const g_wordObj = {
+	wordDir: 0,
+	wordDat: ``,
+	fadeInFlg0: false,
+	fadeInFlg1: false,
+	fadeOutFlg0: false,
+	fadeOutFlg1: false
+};
+
+// オーディオ設定・タイマー管理
 let g_audio = new Audio();
 let g_timeoutEvtId = 0;
 let g_timeoutEvtTitleId = 0;
 let g_timeoutEvtResultId = 0;
 let g_inputKeyBuffer = [];
+
+// 音楽ファイル エンコードフラグ
+let g_musicEncodedFlg = false;
+
+// 外部dosデータ
+let g_externalDos = ``;
+let g_musicdata = ``;
 
 // ローカルストレージ設定 (作品別)
 let g_localStorage;
