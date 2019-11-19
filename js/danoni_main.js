@@ -94,15 +94,16 @@ let g_rootObj = {};
 let g_headerObj = {};
 let g_scoreObj = {};
 
-const g_workObj = {};
-g_workObj.stepX = [];
-g_workObj.stepRtn = [];
-g_workObj.stepHitRtn = [];
-g_workObj.arrowRtn = [];
-g_workObj.keyCtrl = [];
-g_workObj.keyHitFlg = [];
-g_workObj.scrollDir = [];
-g_workObj.dividePos = [];
+const g_workObj = {
+	stepX: [],
+	stepRtn: [],
+	stepHitRtn: [],
+	arrowRtn: [],
+	keyCtrl: [],
+	keyHitFlg: [],
+	scrollDir: [],
+	dividePos: [],
+};
 
 // 歌詞制御
 let g_wordSprite;
