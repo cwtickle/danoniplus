@@ -302,6 +302,9 @@ let g_motionNum = 0;
 let g_reverses = [C_FLG_OFF, C_FLG_ON];
 let g_reverseNum = 0;
 
+let g_scrolls = [];
+let g_scrollNum = 0;
+
 let g_shuffles = [C_FLG_OFF, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
 let g_shuffleNum = 0;
 
@@ -955,6 +958,111 @@ const g_keyObj = {
         'TP': '13',
         '15': '15A',
         '15R': '15B',
+    },
+
+    // スクロール拡張オプション
+    scrollName_def: [`Default`],
+    scrollName5: [`Straight`, `Cross`, `Split`, `Alternate`],
+    scrollName7: [`Straight`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
+    scrollName7i: [`Straight`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
+    scrollName8: [`Straight`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
+    scrollName9A: [`Straight`, `Cross`, `Split`, `Alternate`],
+    scrollName9B: [`Straight`, `Cross`, `Split`, `Alternate`],
+    scrollName9i: [`Straight`],
+    scrollName11: [`Default`],
+    scrollName11L: [`Default`],
+    scrollName11i: [`Straight`, `Cross`, `Split`, `Alternate`],
+    scrollName12: [`Default`],
+    scrollName13: [`Default`],
+    scrollName14: [`Default`],
+    scrollName14i: [`Default`],
+    scrollName15: [`Default`],
+    scrollName16i: [`Default`],
+    scrollName17: [`Default`],
+
+    scrollDir5_0: {
+        'Straight': [1, 1, 1, 1, 1],
+        'Cross': [1, -1, -1, 1, 1],
+        'Split': [1, 1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1],
+    },
+    scrollDir5_1: {
+        'Straight': [1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, 1],
+        'Split': [1, 1, 1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1],
+    },
+    scrollDir5_2: {
+        'Straight': [1, 1, 1, 1, 1],
+        'Cross': [1, -1, -1, -1, 1],
+        'Split': [1, 1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1],
+    },
+    scrollDir7_0: {
+        'Straight': [1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1],
+        'Twist': [1, 1, -1, -1, 1, 1, -1],
+        'Asymmetry': [1, -1, 1, -1, -1, 1, -1],
+    },
+    scrollDir8_0: {
+        'Straight': [1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, 1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1],
+        'Twist': [1, 1, -1, -1, 1, 1, -1, -1],
+        'Asymmetry': [1, -1, 1, -1, -1, 1, -1, 1],
+    },
+    scrollDir9A_0: {
+        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+    scrollDir9A_1: {
+        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+    scrollDir9A_2: {
+        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+    scrollDir9A_3: {
+        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, 1, -1, -1, -1, -1, -1, 1, 1, 1],
+        'Split': [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+
+    scrollDir9B_0: {
+        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+    scrollDir9B_1: {
+        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+    scrollDir9B_2: {
+        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+
+    scrollDir11i_0: {
+        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, 1, -1, -1, -1, -1, -1, 1, 1, 1],
+        'Split': [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
     },
 
     dummy: 0	// ダミー(カンマ抜け落ち防止)
