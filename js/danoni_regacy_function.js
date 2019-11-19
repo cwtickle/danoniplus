@@ -30,6 +30,22 @@ let C_CLR_TITLE = `#cccccc`;
 let C_CLR_LOADING_BAR = `#eeeeee`;
 let C_CLR_LNK = `#111111`;
 
+// 判定キャラクタの色 (v10以降はcssで定義)
+const C_CLR_II = `#66ffff`;
+const C_CLR_SHAKIN = `#99ff99`;
+const C_CLR_MATARI = `#ff9966`;
+const C_CLR_UWAN = `#ff9999`;
+const C_CLR_SHOBON = `#ccccff`;
+const C_CLR_KITA = `#ffff99`;
+const C_CLR_SFSF = ``;
+const C_CLR_IKNAI = `#99ff66`;
+
+// ライフゲージの色 (v10以降はcssで定義)
+let C_CLR_MAXLIFE = `#444400`;
+let C_CLR_CLEARLIFE = `#004444`;
+let C_CLR_DEFAULTLIFE = `#444444`;
+let C_CLR_BACKLIFE = `#222222`;
+
 /**
 * 子div要素のラベル文字作成 (v9互換用)
 * - ここで指定するテキストはhtmlタグが使える
