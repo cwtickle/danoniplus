@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 10.2.0`;
+const g_version = `Ver 10.2.1`;
 const g_revisedDate = `2019/11/20`;
 const g_alphaVersion = ``;
 
@@ -44,7 +44,7 @@ window.onload = _ => {
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
 	loadScript(`../js/lib/danoni_constants.js?${randTime}`, _ => {
-		loadScript(`../js/lib/danoni_regacy_function.js?${randTime}`, _ => {
+		loadScript(`../js/lib/danoni_legacy_function.js?${randTime}`, _ => {
 			initialControl();
 		}, false);
 	});
