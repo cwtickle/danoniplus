@@ -126,8 +126,8 @@ const C_BLOCK_KEYS = [
 ];
 
 /** 設定・オプション画面用共通 */
-const C_LEN_SETLBL_LEFT = 140;
-const C_LEN_SETLBL_WIDTH = 250;
+const C_LEN_SETLBL_LEFT = 160;
+const C_LEN_SETLBL_WIDTH = 210;
 const C_LEN_SETLBL_HEIGHT = 23;
 const C_SIZ_SETLBL = 17;
 const C_LEN_SETDIFLBL_HEIGHT = 25;
@@ -137,12 +137,12 @@ const C_SIZ_SETMINI = 18;
 const C_SIZ_DIFSELECTOR = 14;
 
 const C_LBL_SETMINIL = `<`;
-const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH / 2;
+const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH;
 const C_LBL_SETMINILL = `<`;
 const C_LEN_SETMINILL_LEFT = C_LEN_SETMINIL_LEFT + C_LEN_SETMINI_WIDTH;
 const C_LBL_SETMINIR = `>`;
 const C_LBL_SETMINIRR = `>`;
-const C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH / 2;
+const C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH;
 const C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
 
 const C_MAX_ADJUSTMENT = 30;
@@ -256,6 +256,7 @@ const g_stateObj = {
     speed: 3.5,
     motion: C_FLG_OFF,
     reverse: C_FLG_OFF,
+    scroll: `---`,
     shuffle: C_FLG_OFF,
     autoPlay: C_FLG_OFF,
     gauge: `Normal`,
@@ -525,6 +526,8 @@ const g_cssObj = {
 
     button_OFF: `button_OFF`,
     button_ON: `button_ON`,
+    button_RevOFF: `button_RevOFF`,
+    button_RevON: `button_RevON`,
 
     flex_centering: `flex_centering`,
 };
@@ -961,45 +964,53 @@ const g_keyObj = {
     },
 
     // スクロール拡張オプション
-    scrollName_def: [`Default`],
-    scrollName5: [`Straight`, `Cross`, `Split`, `Alternate`],
-    scrollName7: [`Straight`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
-    scrollName7i: [`Straight`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
-    scrollName8: [`Straight`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
-    scrollName9A: [`Straight`, `Cross`, `Split`, `Alternate`],
-    scrollName9B: [`Straight`, `Cross`, `Split`, `Alternate`],
-    scrollName9i: [`Straight`],
-    scrollName11: [`Default`],
-    scrollName11L: [`Default`],
-    scrollName11i: [`Straight`, `Cross`, `Split`, `Alternate`],
-    scrollName12: [`Default`],
-    scrollName13: [`Default`],
-    scrollName14: [`Default`],
-    scrollName14i: [`Default`],
-    scrollName15: [`Default`],
-    scrollName16i: [`Default`],
-    scrollName17: [`Default`],
+    scrollName_def: [`---`],
+    scrollName5: [`---`, `Cross`, `Split`, `Alternate`],
+    scrollName7: [`---`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
+    scrollName7i: [`---`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
+    scrollName8: [`---`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
+    scrollName9A: [`---`, `Cross`, `Split`, `Alternate`],
+    scrollName9B: [`---`, `Cross`, `Split`, `Alternate`],
+    scrollName9i: [`---`],
+    scrollName11: [`---`],
+    scrollName11L: [`---`],
+    scrollName11i: [`---`, `Cross`, `Split`, `Alternate`],
+    scrollName12: [`---`],
+    scrollName13: [`---`],
+    scrollName14: [`---`],
+    scrollName14i: [`---`],
+    scrollName15: [`---`],
+    scrollName16i: [`---`],
+    scrollName17: [`---`],
 
     scrollDir5_0: {
-        'Straight': [1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1],
         'Cross': [1, -1, -1, 1, 1],
         'Split': [1, 1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1],
     },
     scrollDir5_1: {
-        'Straight': [1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, 1],
         'Split': [1, 1, 1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1],
     },
     scrollDir5_2: {
-        'Straight': [1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1],
         'Cross': [1, -1, -1, -1, 1],
         'Split': [1, 1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1],
     },
     scrollDir7_0: {
-        'Straight': [1, 1, 1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1],
+        'Twist': [1, 1, -1, -1, 1, 1, -1],
+        'Asymmetry': [1, -1, 1, -1, -1, 1, -1],
+    },
+    scrollDir7i_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1],
@@ -1007,7 +1018,7 @@ const g_keyObj = {
         'Asymmetry': [1, -1, 1, -1, -1, 1, -1],
     },
     scrollDir8_0: {
-        'Straight': [1, 1, 1, 1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, 1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1],
@@ -1015,51 +1026,51 @@ const g_keyObj = {
         'Asymmetry': [1, -1, 1, -1, -1, 1, -1, 1],
     },
     scrollDir9A_0: {
-        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
     },
     scrollDir9A_1: {
-        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
     },
     scrollDir9A_2: {
-        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
     },
     scrollDir9A_3: {
-        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, 1, -1, -1, -1, -1, -1, 1, 1, 1],
         'Split': [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
     },
 
     scrollDir9B_0: {
-        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
     },
     scrollDir9B_1: {
-        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
     },
     scrollDir9B_2: {
-        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
     },
 
     scrollDir11i_0: {
-        'Straight': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, 1, -1, -1, -1, -1, -1, 1, 1, 1],
         'Split': [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],

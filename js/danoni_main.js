@@ -2534,6 +2534,10 @@ function headerConvert(_dosObj) {
 	obj.motionUse = setVal(_dosObj.motionUse,
 		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.motion, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 
+	// Scroll-Extension
+	obj.scrollUse = setVal(_dosObj.scrollUse,
+		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.scroll, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
+
 	// Shuffle
 	obj.shuffleUse = setVal(_dosObj.shuffleUse,
 		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.shuffle, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
@@ -3198,9 +3202,51 @@ function createOptionWindow(_sprite) {
 	createGeneralSetting(motionSprite, `motion`);
 
 	// ---------------------------------------------------
-	// リバース (Reverse)
+	// リバース (Reverse) / スクロール (Scroll)
 	// 縦位置: 4
-	createGeneralSetting(reverseSprite, `reverse`);
+	if (g_headerObj.scrollUse === undefined || g_headerObj.scrollUse === true) {
+		createGeneralSetting(reverseSprite, `scroll`);
+		$id(`lnkScroll`).left = `${parseFloat($id(`lnkScroll`).left) + 90}px`;
+		$id(`lnkScroll`).width = `${parseFloat($id(`lnkScroll`).width) - 90}px`;
+
+		const btnReverse = createCssButton({
+			id: `btnReverse`,
+			name: `Reverse:${g_stateObj.reverse}`,
+			x: 160,
+			y: 0,
+			width: 90,
+			height: 21,
+			fontsize: 14,
+			align: C_ALIGN_CENTER,
+			class: g_cssObj.button_Default,
+		}, _ => {
+			setReverse();
+		});
+		btnReverse.oncontextmenu = _ => {
+			setReverse();
+			return false;
+		}
+		if (g_stateObj.reverse === C_FLG_ON) {
+			btnReverse.classList.add(g_cssObj.button_RevON);
+		} else {
+			btnReverse.classList.add(g_cssObj.button_RevOFF);
+		}
+		btnReverse.style.borderStyle = `solid`;
+		reverseSprite.appendChild(btnReverse);
+	} else {
+		createGeneralSetting(reverseSprite, `reverse`);
+	}
+
+	function setReverse() {
+		if (g_stateObj.reverse === C_FLG_ON) {
+			g_stateObj.reverse = C_FLG_OFF;
+			btnReverse.classList.replace(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
+		} else {
+			g_stateObj.reverse = C_FLG_ON;
+			btnReverse.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
+		}
+		btnReverse.innerHTML = `Reverse:${g_stateObj.reverse}`;
+	}
 
 	// ---------------------------------------------------
 	// ミラー・ランダム (Shuffle)
@@ -3494,6 +3540,7 @@ function createOptionWindow(_sprite) {
 				g_stateObj.reverse = C_FLG_OFF;
 				g_reverseNum = 0;
 			}
+			g_scrollNum = 0;
 		}
 
 		if (g_canLoadDifInfoFlg || _initFlg) {
@@ -3591,8 +3638,27 @@ function createOptionWindow(_sprite) {
 		// 速度設定 (Speed)
 		setSetting(0, `speed`, ` x`);
 
-		// リバース設定 (Reverse)
-		setSetting(0, `reverse`);
+		// リバース設定 (Reverse, Scroll)
+		if (g_headerObj.scrollUse === undefined || g_headerObj.scrollUse === true) {
+			if (typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT) {
+				g_scrolls = JSON.parse(JSON.stringify(g_keyObj[`scrollName${g_keyObj.currentKey}`]));
+			} else {
+				g_scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
+			}
+			g_stateObj.scroll = g_scrolls[g_scrollNum];
+			setSetting(0, `scroll`);
+
+			const btnReverse = document.querySelector(`#btnReverse`);
+			if (g_stateObj.reverse === C_FLG_ON) {
+				btnReverse.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
+			} else {
+				btnReverse.classList.replace(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
+			}
+			btnReverse.innerHTML = `Reverse:${g_stateObj.reverse}`;
+		} else {
+			g_scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
+			setSetting(0, `reverse`);
+		}
 
 		// ゲージ設定 (Gauge)
 		setGauge(0);
@@ -3619,8 +3685,11 @@ function createOptionWindow(_sprite) {
  * 汎用設定
  * @param {object} _obj 
  * @param {string} _settingName 
+ * @param {string} _unitName 
  * @param {boolean} _skipFlg 
  * @param {number} _skipTerm 
+ * @param {function} _beforeFunc 
+ * @param {function} _afterFunc 
  */
 function createGeneralSetting(_obj, _settingName, _unitName = ``, _skipFlg = false, _skipTerm = 5) {
 
@@ -3739,6 +3808,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 		g_keyObj[`keyRetry${copyPtn}`] = g_keyObj[`keyRetry${basePtn}`];
 		g_keyObj[`keyTitleBack${copyPtn}`] = g_keyObj[`keyTitleBack${basePtn}`];
 		g_keyObj[`transKey${copyPtn}`] = g_keyObj[`transKey${basePtn}`];
+		g_keyObj[`scrollDir${copyPtn}`] = g_keyObj[`scrollDir${basePtn}`];
 		if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
 			g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
 		}
@@ -6122,6 +6192,13 @@ function getArrowSettings() {
 	g_workObj.dummyArrowCssMotions = [];
 	g_workObj.dummyFrzCssMotions = [];
 
+	let scrollDirOptions;
+	if (g_keyObj[`scrollDir${keyCtrlPtn}`] !== undefined) {
+		scrollDirOptions = g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll];
+	} else {
+		scrollDirOptions = [...Array(keyNum)].fill(1);
+	}
+
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
@@ -6134,11 +6211,11 @@ function getArrowSettings() {
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_sWidth - C_ARW_WIDTH) / 2;
 
 		if (g_stateObj.reverse === C_FLG_ON) {
-			g_workObj.dividePos[j] = (posj > divideCnt ? 0 : 1);
-			g_workObj.scrollDir[j] = (posj > divideCnt ? 1 : -1);
+			g_workObj.dividePos[j] = ((posj > divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1)) % 2;
+			g_workObj.scrollDir[j] = (posj > divideCnt ? 1 : -1) * scrollDirOptions[j];
 		} else {
-			g_workObj.dividePos[j] = (posj > divideCnt ? 1 : 0);
-			g_workObj.scrollDir[j] = (posj > divideCnt ? -1 : 1);
+			g_workObj.dividePos[j] = ((posj > divideCnt ? 1 : 0) + (scrollDirOptions[j] === 1 ? 0 : 1)) % 2;
+			g_workObj.scrollDir[j] = (posj > divideCnt ? -1 : 1) * scrollDirOptions[j];
 		}
 
 		g_workObj.judgArrowCnt[j] = 1;
@@ -8264,7 +8341,13 @@ function resultInit() {
 		playStyleData += `, ${g_stateObj.motion}`;
 	}
 	if (g_stateObj.reverse !== C_FLG_OFF) {
-		playStyleData += `, Reverse`;
+		if (g_stateObj.scroll !== `---`) {
+			playStyleData += `, R-${g_stateObj.scroll}`;
+		} else {
+			playStyleData += `, Reverse`;
+		}
+	} else if (g_stateObj.scroll !== `---`) {
+		playStyleData += `, ${g_stateObj.scroll}`;
 	}
 	if (g_stateObj.appearance !== `Visible`) {
 		playStyleData += `, ${g_stateObj.appearance}`;
