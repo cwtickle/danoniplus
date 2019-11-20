@@ -971,17 +971,7 @@ const g_keyObj = {
     scrollName8: [`---`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
     scrollName9A: [`---`, `Cross`, `Split`, `Alternate`],
     scrollName9B: [`---`, `Cross`, `Split`, `Alternate`],
-    scrollName9i: [`---`],
-    scrollName11: [`---`],
-    scrollName11L: [`---`],
     scrollName11i: [`---`, `Cross`, `Split`, `Alternate`],
-    scrollName12: [`---`],
-    scrollName13: [`---`],
-    scrollName14: [`---`],
-    scrollName14i: [`---`],
-    scrollName15: [`---`],
-    scrollName16i: [`---`],
-    scrollName17: [`---`],
 
     scrollDir5_0: {
         '---': [1, 1, 1, 1, 1],

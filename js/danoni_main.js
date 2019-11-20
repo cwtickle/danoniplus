@@ -3056,6 +3056,8 @@ function createOptionWindow(_sprite) {
 		optionWidth, C_LEN_SETLBL_HEIGHT);
 	const reverseSprite = createSprite(`optionsprite`, `reverseSprite`, childX, 4 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const scrollSprite = createSprite(`optionsprite`, `scrollSprite`, childX, 4 * C_LEN_SETLBL_HEIGHT + childY,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
 	const shuffleSprite = createSprite(`optionsprite`, `shuffleSprite`, childX, 5.5 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
 	const autoPlaySprite = createSprite(`optionsprite`, `autoPlaySprite`, childX, 6.5 * C_LEN_SETLBL_HEIGHT + childY,
@@ -3205,7 +3207,7 @@ function createOptionWindow(_sprite) {
 	// リバース (Reverse) / スクロール (Scroll)
 	// 縦位置: 4
 	if (g_headerObj.scrollUse) {
-		createGeneralSetting(reverseSprite, `scroll`);
+		createGeneralSetting(scrollSprite, `scroll`);
 		$id(`lnkScroll`).left = `${parseFloat($id(`lnkScroll`).left) + 90}px`;
 		$id(`lnkScroll`).width = `${parseFloat($id(`lnkScroll`).width) - 90}px`;
 
@@ -3232,7 +3234,14 @@ function createOptionWindow(_sprite) {
 			btnReverse.classList.add(g_cssObj.button_RevOFF);
 		}
 		btnReverse.style.borderStyle = `solid`;
-		reverseSprite.appendChild(btnReverse);
+		scrollSprite.appendChild(btnReverse);
+
+		createGeneralSetting(reverseSprite, `reverse`);
+		if (g_scrolls.length > 1) {
+			reverseSprite.style.visibility = `hidden`;
+		} else {
+			scrollSprite.style.visibility = `hidden`;
+		}
 	} else {
 		createGeneralSetting(reverseSprite, `reverse`);
 	}
@@ -3639,22 +3648,32 @@ function createOptionWindow(_sprite) {
 		setSetting(0, `speed`, ` x`);
 
 		// リバース設定 (Reverse, Scroll)
-		if (g_headerObj.scrollUse === undefined || g_headerObj.scrollUse === true) {
+		if (g_headerObj.scrollUse) {
 			if (typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT) {
 				g_scrolls = JSON.parse(JSON.stringify(g_keyObj[`scrollName${g_keyObj.currentKey}`]));
 			} else {
 				g_scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
 			}
 			g_stateObj.scroll = g_scrolls[g_scrollNum];
-			setSetting(0, `scroll`);
 
-			const btnReverse = document.querySelector(`#btnReverse`);
-			if (g_stateObj.reverse === C_FLG_ON) {
-				btnReverse.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
+			if (g_scrolls.length > 1) {
+				scrollSprite.style.visibility = `visible`;
+				reverseSprite.style.visibility = `hidden`;
+				setSetting(0, `scroll`);
+
+				const btnReverse = document.querySelector(`#btnReverse`);
+				if (g_stateObj.reverse === C_FLG_ON) {
+					btnReverse.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
+				} else {
+					btnReverse.classList.replace(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
+				}
+				btnReverse.innerHTML = `Reverse:${g_stateObj.reverse}`;
 			} else {
-				btnReverse.classList.replace(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
+				scrollSprite.style.visibility = `hidden`;
+				reverseSprite.style.visibility = `visible`;
+				setSetting(0, `reverse`);
 			}
-			btnReverse.innerHTML = `Reverse:${g_stateObj.reverse}`;
+
 		} else {
 			g_scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
 			setSetting(0, `reverse`);
