@@ -38,6 +38,9 @@
 .settings_Reverse::first-letter {
 	color:#ddff99;
 }
+.settings_Scroll::first-letter {
+	color:#ddff99;
+}
 .settings_Shuffle::first-letter {
 	color:#99ff99;
 }
@@ -304,4 +307,13 @@
 .button_ON {
 	color: #ffffff;
 	border-color: #000000 #cccccc; 
+}
+/* ボタン：ON/OFF リバース用 */
+.button_RevOFF {
+	color: #cccccc;
+	border-color: #000000 #999999; 
+}
+.button_RevON {
+	color: #ffffff;
+	border-color: #000000 #ddff99; 
 }

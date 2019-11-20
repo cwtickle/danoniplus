@@ -126,8 +126,8 @@ const C_BLOCK_KEYS = [
 ];
 
 /** 設定・オプション画面用共通 */
-const C_LEN_SETLBL_LEFT = 140;
-const C_LEN_SETLBL_WIDTH = 250;
+const C_LEN_SETLBL_LEFT = 160;
+const C_LEN_SETLBL_WIDTH = 210;
 const C_LEN_SETLBL_HEIGHT = 23;
 const C_SIZ_SETLBL = 17;
 const C_LEN_SETDIFLBL_HEIGHT = 25;
@@ -137,12 +137,12 @@ const C_SIZ_SETMINI = 18;
 const C_SIZ_DIFSELECTOR = 14;
 
 const C_LBL_SETMINIL = `<`;
-const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH / 2;
+const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH;
 const C_LBL_SETMINILL = `<`;
 const C_LEN_SETMINILL_LEFT = C_LEN_SETMINIL_LEFT + C_LEN_SETMINI_WIDTH;
 const C_LBL_SETMINIR = `>`;
 const C_LBL_SETMINIRR = `>`;
-const C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH / 2;
+const C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH;
 const C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
 
 const C_MAX_ADJUSTMENT = 30;
@@ -256,6 +256,7 @@ const g_stateObj = {
     speed: 3.5,
     motion: C_FLG_OFF,
     reverse: C_FLG_OFF,
+    scroll: `---`,
     shuffle: C_FLG_OFF,
     autoPlay: C_FLG_OFF,
     gauge: `Normal`,
@@ -301,6 +302,9 @@ let g_motionNum = 0;
 
 let g_reverses = [C_FLG_OFF, C_FLG_ON];
 let g_reverseNum = 0;
+
+let g_scrolls = [];
+let g_scrollNum = 0;
 
 let g_shuffles = [C_FLG_OFF, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
 let g_shuffleNum = 0;
@@ -522,6 +526,8 @@ const g_cssObj = {
 
     button_OFF: `button_OFF`,
     button_ON: `button_ON`,
+    button_RevOFF: `button_RevOFF`,
+    button_RevON: `button_RevON`,
 
     flex_centering: `flex_centering`,
 };
@@ -955,6 +961,185 @@ const g_keyObj = {
         'TP': '13',
         '15': '15A',
         '15R': '15B',
+    },
+
+    // スクロール拡張オプション
+    scrollName_def: [`---`],
+    scrollName5: [`---`, `Cross`, `Split`, `Alternate`],
+    scrollName7: [`---`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
+    scrollName7i: [`---`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
+    scrollName8: [`---`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
+    scrollName9A: [`---`, `Cross`, `Split`, `Alternate`],
+    scrollName9B: [`---`, `Cross`, `Split`, `Alternate`],
+    scrollName11: [`---`, `Flat`],
+    scrollName11L: [`---`, `Flat`],
+    scrollName11W: [`---`, `Flat`],
+    scrollName11i: [`---`, `Cross`, `Split`, `Alternate`],
+    scrollName12: [`---`, `Flat`],
+    scrollName13: [`---`, `Flat`],
+    scrollName14: [`---`, `Flat`],
+    scrollName14i: [`---`, `Flat`],
+    scrollName15A: [`---`, `Flat`],
+    scrollName15B: [`---`, `Flat`],
+    scrollName16i: [`---`, `Flat`],
+
+    scrollDir5_0: {
+        '---': [1, 1, 1, 1, 1],
+        'Cross': [1, -1, -1, 1, 1],
+        'Split': [1, 1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1],
+    },
+    scrollDir5_1: {
+        '---': [1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, 1],
+        'Split': [1, 1, 1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1],
+    },
+    scrollDir5_2: {
+        '---': [1, 1, 1, 1, 1],
+        'Cross': [1, -1, -1, -1, 1],
+        'Split': [1, 1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1],
+    },
+    scrollDir7_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1],
+        'Twist': [1, 1, -1, -1, 1, 1, -1],
+        'Asymmetry': [1, -1, 1, -1, -1, 1, -1],
+    },
+    scrollDir7i_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1],
+        'Twist': [1, 1, -1, -1, 1, 1, -1],
+        'Asymmetry': [1, -1, 1, -1, -1, 1, -1],
+    },
+    scrollDir8_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, 1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1],
+        'Twist': [1, 1, -1, -1, 1, 1, -1, -1],
+        'Asymmetry': [1, -1, 1, -1, -1, 1, -1, 1],
+    },
+    scrollDir9A_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+    scrollDir9A_1: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+    scrollDir9A_2: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+    scrollDir9A_3: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, 1, -1, -1, -1, -1, -1, 1, 1, 1],
+        'Split': [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+
+    scrollDir9B_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+    scrollDir9B_1: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+    scrollDir9B_2: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+
+    scrollDir11_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir11_1: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [-1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1],
+    },
+    scrollDir11L_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir11L_1: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [-1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1],
+    },
+    scrollDir11W_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
+    },
+
+    scrollDir11i_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, 1, -1, -1, -1, -1, -1, 1, 1, 1],
+        'Split': [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+    },
+
+    scrollDir12_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir12_1: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir13_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir14_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir14_1: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir14i_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir15A_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir15A_1: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir15B_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir15B_1: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
+    },
+    scrollDir16i_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
     },
 
     dummy: 0	// ダミー(カンマ抜け落ち防止)

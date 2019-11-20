@@ -70,6 +70,7 @@ const g_presetCustomDesignUse = {
 // 一律使用させたくない場合は `false` を指定（デフォルトは `true`）
 const g_presetSettingUse = {
 	motion: `true`,
+	scroll: `true`,
 	shuffle: `true`,
 	autoPlay: `true`,
 	gauge: `true`,

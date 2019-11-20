@@ -2534,6 +2534,10 @@ function headerConvert(_dosObj) {
 	obj.motionUse = setVal(_dosObj.motionUse,
 		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.motion, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 
+	// Scroll-Extension
+	obj.scrollUse = setVal(_dosObj.scrollUse,
+		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.scroll, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
+
 	// Shuffle
 	obj.shuffleUse = setVal(_dosObj.shuffleUse,
 		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.shuffle, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
@@ -2722,7 +2726,7 @@ function keysConvert(_dosObj) {
 				}
 			}
 
-			// 矢印の回転量指定、キャラクタパターン (StepRtnX_Y)
+			// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
 			if (_dosObj[`stepRtn${newKey}`] !== undefined) {
 				const tmpStepRtns = _dosObj[`stepRtn${newKey}`].split(`$`);
 				if (tmpStepRtns.length > 0) {
@@ -2841,6 +2845,33 @@ function keysConvert(_dosObj) {
 				const tmpshuffles = _dosObj[`shuffle${newKey}`].split(`$`);
 				for (let k = 0; k < tmpshuffles.length; k++) {
 					g_keyObj[`shuffle${newKey}_${k}`] = tmpshuffles[k].split(`,`).map(n => parseInt(n, 10));
+				}
+			}
+
+			// スクロールパターン (scrollX_Y)
+			// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
+			if (_dosObj[`scroll${newKey}`] !== undefined) {
+				g_keyObj[`scrollName${newKey}`] = [`---`];
+				const tmpScrolls = _dosObj[`scroll${newKey}`].split(`$`);
+				if (tmpScrolls.length > 0) {
+					for (let k = 0, len = tmpScrolls.length; k < len; k++) {
+						if (setVal(tmpScrolls[k], ``, C_TYP_STRING) === ``) {
+							continue;
+						}
+						g_keyObj[`scrollDir${newKey}_${k}`] = {
+							'---': [...Array(g_keyObj[`color${newKey}_${k}`].length)].fill(1),
+						};
+						const tmpScrollPtns = tmpScrolls[k].split(`/`);
+						for (let m = 0, len = tmpScrollPtns.length; m < len; m++) {
+							const tmpScrollPair = tmpScrollPtns[m].split(`::`);
+							g_keyObj[`scrollName${newKey}`][m + 1] = tmpScrollPair[0];
+							const tmpScrollDir = tmpScrollPair[1].split(`,`);
+							g_keyObj[`scrollDir${newKey}_${k}`][tmpScrollPair[0]] = [];
+							for (let n = 0, len = tmpScrollDir.length; n < len; n++) {
+								g_keyObj[`scrollDir${newKey}_${k}`][tmpScrollPair[0]][n] = Number(tmpScrollDir[n]);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -3052,6 +3083,8 @@ function createOptionWindow(_sprite) {
 		optionWidth, C_LEN_SETLBL_HEIGHT);
 	const reverseSprite = createSprite(`optionsprite`, `reverseSprite`, childX, 4 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const scrollSprite = createSprite(`optionsprite`, `scrollSprite`, childX, 4 * C_LEN_SETLBL_HEIGHT + childY,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
 	const shuffleSprite = createSprite(`optionsprite`, `shuffleSprite`, childX, 5.5 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
 	const autoPlaySprite = createSprite(`optionsprite`, `autoPlaySprite`, childX, 6.5 * C_LEN_SETLBL_HEIGHT + childY,
@@ -3198,9 +3231,58 @@ function createOptionWindow(_sprite) {
 	createGeneralSetting(motionSprite, `motion`);
 
 	// ---------------------------------------------------
-	// リバース (Reverse)
+	// リバース (Reverse) / スクロール (Scroll)
 	// 縦位置: 4
-	createGeneralSetting(reverseSprite, `reverse`);
+	if (g_headerObj.scrollUse) {
+		createGeneralSetting(scrollSprite, `scroll`);
+		$id(`lnkScroll`).left = `${parseFloat($id(`lnkScroll`).left) + 90}px`;
+		$id(`lnkScroll`).width = `${parseFloat($id(`lnkScroll`).width) - 90}px`;
+
+		const btnReverse = createCssButton({
+			id: `btnReverse`,
+			name: `Reverse:${g_stateObj.reverse}`,
+			x: 160,
+			y: 0,
+			width: 90,
+			height: 21,
+			fontsize: 14,
+			align: C_ALIGN_CENTER,
+			class: g_cssObj.button_Default,
+		}, _ => {
+			setReverse();
+		});
+		btnReverse.oncontextmenu = _ => {
+			setReverse();
+			return false;
+		}
+		if (g_stateObj.reverse === C_FLG_ON) {
+			btnReverse.classList.add(g_cssObj.button_RevON);
+		} else {
+			btnReverse.classList.add(g_cssObj.button_RevOFF);
+		}
+		btnReverse.style.borderStyle = `solid`;
+		scrollSprite.appendChild(btnReverse);
+
+		createGeneralSetting(reverseSprite, `reverse`);
+		if (g_scrolls.length > 1) {
+			reverseSprite.style.visibility = `hidden`;
+		} else {
+			scrollSprite.style.visibility = `hidden`;
+		}
+	} else {
+		createGeneralSetting(reverseSprite, `reverse`);
+	}
+
+	function setReverse() {
+		if (g_stateObj.reverse === C_FLG_ON) {
+			g_stateObj.reverse = C_FLG_OFF;
+			btnReverse.classList.replace(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
+		} else {
+			g_stateObj.reverse = C_FLG_ON;
+			btnReverse.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
+		}
+		btnReverse.innerHTML = `Reverse:${g_stateObj.reverse}`;
+	}
 
 	// ---------------------------------------------------
 	// ミラー・ランダム (Shuffle)
@@ -3218,8 +3300,8 @@ function createOptionWindow(_sprite) {
 	gaugeSprite.appendChild(createLblSetting(`Gauge`));
 
 	// ゲージ設定詳細　縦位置: ゲージ設定+1
-	const lblGauge2 = createDivCssLabel(`lblGauge2`, C_LEN_SETLBL_LEFT - 20, C_LEN_SETLBL_HEIGHT,
-		C_LEN_SETLBL_WIDTH + 40, C_LEN_SETLBL_HEIGHT * 2, 11, ``);
+	const lblGauge2 = createDivCssLabel(`lblGauge2`, C_LEN_SETLBL_LEFT - 35, C_LEN_SETLBL_HEIGHT,
+		C_LEN_SETLBL_WIDTH + 60, C_LEN_SETLBL_HEIGHT * 2, 11, ``);
 	gaugeSprite.appendChild(lblGauge2);
 
 	if (g_headerObj.gaugeUse) {
@@ -3494,6 +3576,7 @@ function createOptionWindow(_sprite) {
 				g_stateObj.reverse = C_FLG_OFF;
 				g_reverseNum = 0;
 			}
+			g_scrollNum = 0;
 		}
 
 		if (g_canLoadDifInfoFlg || _initFlg) {
@@ -3591,8 +3674,37 @@ function createOptionWindow(_sprite) {
 		// 速度設定 (Speed)
 		setSetting(0, `speed`, ` x`);
 
-		// リバース設定 (Reverse)
-		setSetting(0, `reverse`);
+		// リバース設定 (Reverse, Scroll)
+		if (g_headerObj.scrollUse) {
+			if (typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT) {
+				g_scrolls = JSON.parse(JSON.stringify(g_keyObj[`scrollName${g_keyObj.currentKey}`]));
+			} else {
+				g_scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
+			}
+			g_stateObj.scroll = g_scrolls[g_scrollNum];
+
+			if (g_scrolls.length > 1) {
+				scrollSprite.style.visibility = `visible`;
+				reverseSprite.style.visibility = `hidden`;
+				setSetting(0, `scroll`);
+
+				const btnReverse = document.querySelector(`#btnReverse`);
+				if (g_stateObj.reverse === C_FLG_ON) {
+					btnReverse.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
+				} else {
+					btnReverse.classList.replace(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
+				}
+				btnReverse.innerHTML = `Reverse:${g_stateObj.reverse}`;
+			} else {
+				scrollSprite.style.visibility = `hidden`;
+				reverseSprite.style.visibility = `visible`;
+				setSetting(0, `reverse`);
+			}
+
+		} else {
+			g_scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
+			setSetting(0, `reverse`);
+		}
 
 		// ゲージ設定 (Gauge)
 		setGauge(0);
@@ -3619,6 +3731,7 @@ function createOptionWindow(_sprite) {
  * 汎用設定
  * @param {object} _obj 
  * @param {string} _settingName 
+ * @param {string} _unitName 
  * @param {boolean} _skipFlg 
  * @param {number} _skipTerm 
  */
@@ -3739,6 +3852,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 		g_keyObj[`keyRetry${copyPtn}`] = g_keyObj[`keyRetry${basePtn}`];
 		g_keyObj[`keyTitleBack${copyPtn}`] = g_keyObj[`keyTitleBack${basePtn}`];
 		g_keyObj[`transKey${copyPtn}`] = g_keyObj[`transKey${basePtn}`];
+		g_keyObj[`scrollDir${copyPtn}`] = g_keyObj[`scrollDir${basePtn}`];
 		if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
 			g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
 		}
@@ -5108,10 +5222,14 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 
 		let inputWordData = ``;
 		let wordDataList;
-		if (g_stateObj.reverse === C_FLG_ON) {
-			wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+		if (g_stateObj.scroll !== `---`) {
+			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
 		} else {
-			wordDataList = [_dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+			if (g_stateObj.reverse === C_FLG_ON) {
+				wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+			} else {
+				wordDataList = [_dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+			}
 		}
 		const wordData = wordDataList.find((v) => v !== undefined);
 		if (wordData !== undefined) {
@@ -5170,10 +5288,14 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.maskData.length = 0;
 	if (g_stateObj.d_background === C_FLG_ON) {
 		let maskDataList;
-		if (g_stateObj.reverse === C_FLG_ON) {
-			maskDataList = [_dosObj[`maskRev${_scoreNo}_data`], _dosObj.maskRev_data, _dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
+		if (g_stateObj.scroll !== `---`) {
+			maskDataList = [_dosObj[`maskAlt${_scoreNo}_data`], _dosObj.maskAlt_data, _dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
 		} else {
-			maskDataList = [_dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
+			if (g_stateObj.reverse === C_FLG_ON) {
+				maskDataList = [_dosObj[`maskRev${_scoreNo}_data`], _dosObj.maskRev_data, _dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
+			} else {
+				maskDataList = [_dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
+			}
 		}
 		const maskData = maskDataList.find((v) => v !== undefined);
 		if (maskData !== undefined) {
@@ -5187,10 +5309,14 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.backData.length = 0;
 	if (g_stateObj.d_background === C_FLG_ON) {
 		let backDataList;
-		if (g_stateObj.reverse === C_FLG_ON) {
-			backDataList = [_dosObj[`backRev${_scoreNo}_data`], _dosObj.backRev_data, _dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
+		if (g_stateObj.scroll !== `---`) {
+			backDataList = [_dosObj[`backAlt${_scoreNo}_data`], _dosObj.backAlt_data, _dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
 		} else {
-			backDataList = [_dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
+			if (g_stateObj.reverse === C_FLG_ON) {
+				backDataList = [_dosObj[`backRev${_scoreNo}_data`], _dosObj.backRev_data, _dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
+			} else {
+				backDataList = [_dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
+			}
 		}
 		const backData = backDataList.find((v) => v !== undefined);
 		if (backData !== undefined) {
@@ -6122,6 +6248,13 @@ function getArrowSettings() {
 	g_workObj.dummyArrowCssMotions = [];
 	g_workObj.dummyFrzCssMotions = [];
 
+	let scrollDirOptions;
+	if (g_keyObj[`scrollDir${keyCtrlPtn}`] !== undefined) {
+		scrollDirOptions = g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll];
+	} else {
+		scrollDirOptions = [...Array(keyNum)].fill(1);
+	}
+
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
@@ -6134,11 +6267,11 @@ function getArrowSettings() {
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_sWidth - C_ARW_WIDTH) / 2;
 
 		if (g_stateObj.reverse === C_FLG_ON) {
-			g_workObj.dividePos[j] = (posj > divideCnt ? 0 : 1);
-			g_workObj.scrollDir[j] = (posj > divideCnt ? 1 : -1);
+			g_workObj.dividePos[j] = ((posj > divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1)) % 2;
+			g_workObj.scrollDir[j] = (posj > divideCnt ? 1 : -1) * scrollDirOptions[j];
 		} else {
-			g_workObj.dividePos[j] = (posj > divideCnt ? 1 : 0);
-			g_workObj.scrollDir[j] = (posj > divideCnt ? -1 : 1);
+			g_workObj.dividePos[j] = ((posj > divideCnt ? 1 : 0) + (scrollDirOptions[j] === 1 ? 0 : 1)) % 2;
+			g_workObj.scrollDir[j] = (posj > divideCnt ? -1 : 1) * scrollDirOptions[j];
 		}
 
 		g_workObj.judgArrowCnt[j] = 1;
@@ -6340,6 +6473,15 @@ function MainInit() {
 		step.classList.add(g_cssObj.main_stepDefault);
 		mainSprite.appendChild(step);
 
+		const stepDiv = createColorObject(`stepDiv${j}`, ``,
+			g_workObj.stepX[j],
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+			C_ARW_WIDTH, C_ARW_WIDTH,
+			g_workObj.stepRtn[j], `Step`);
+		stepDiv.style.display = C_DIS_NONE;
+		stepDiv.classList.add(g_cssObj.main_stepKeyDown);
+		mainSprite.appendChild(stepDiv);
+
 		const stepHit = createColorObject(`stepHit${j}`, ``,
 			g_workObj.stepX[j] - 15,
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] - 15,
@@ -6351,9 +6493,25 @@ function MainInit() {
 		mainSprite.appendChild(stepHit);
 
 		// ステップゾーンOFF設定
-		if (g_stateObj.d_stepzone === C_FLG_OFF) {
+		if (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) {
 			step.style.display = C_DIS_NONE;
 		}
+	}
+	if (g_stateObj.scroll === `Flat` && g_stateObj.d_stepzone === C_FLG_ON) {
+
+		// ステップゾーンの代わり
+		const stepBar0 = createColorObject(`stepBar`, ``,
+			0, g_stepY + (g_distY - g_stepY - 50) * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
+			g_sWidth - 50, 1, ``, `lifeBar`);
+		stepBar0.classList.add(g_cssObj.life_Failed);
+		mainSprite.appendChild(stepBar0);
+
+		const stepBar1 = createColorObject(`stepBar`, ``,
+			0, g_stepY + (g_distY - g_stepY - 50) * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
+			g_sWidth - 50, 1, ``, `lifeBar`);
+		stepBar1.classList.add(g_cssObj.life_Failed);
+		mainSprite.appendChild(stepBar1);
+
 	}
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
@@ -6746,8 +6904,7 @@ function MainInit() {
 		OFF: _ => {
 			for (let j = 0; j < keyNum; j++) {
 				if (g_workObj.keyCtrl[j].find(key => keyIsDown(key)) === undefined) {
-					document.querySelector(`#step${j}`).classList.remove(g_cssObj.main_stepKeyDown);
-					document.querySelector(`#step${j}`).classList.add(g_cssObj.main_stepDefault);
+					document.querySelector(`#stepDiv${j}`).style.display = C_DIS_NONE;
 				}
 			}
 		},
@@ -7839,9 +7996,8 @@ function judgeArrow(_j) {
 				return;
 			}
 		}
-		const stepDiv = document.querySelector(`#step${_j}`);
-		stepDiv.classList.remove(g_cssObj.main_stepDefault);
-		stepDiv.classList.add(g_cssObj.main_stepKeyDown);
+		const stepDiv = document.querySelector(`#stepDiv${_j}`);
+		stepDiv.style.display = `inherit`;
 		g_judgObj.lockFlgs[_j] = false;
 	}
 }
@@ -8264,7 +8420,13 @@ function resultInit() {
 		playStyleData += `, ${g_stateObj.motion}`;
 	}
 	if (g_stateObj.reverse !== C_FLG_OFF) {
-		playStyleData += `, Reverse`;
+		if (g_stateObj.scroll !== `---`) {
+			playStyleData += `, R-${g_stateObj.scroll}`;
+		} else {
+			playStyleData += `, Reverse`;
+		}
+	} else if (g_stateObj.scroll !== `---`) {
+		playStyleData += `, ${g_stateObj.scroll}`;
 	}
 	if (g_stateObj.appearance !== `Visible`) {
 		playStyleData += `, ${g_stateObj.appearance}`;
