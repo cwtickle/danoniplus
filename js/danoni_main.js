@@ -2726,7 +2726,7 @@ function keysConvert(_dosObj) {
 				}
 			}
 
-			// 矢印の回転量指定、キャラクタパターン (StepRtnX_Y)
+			// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
 			if (_dosObj[`stepRtn${newKey}`] !== undefined) {
 				const tmpStepRtns = _dosObj[`stepRtn${newKey}`].split(`$`);
 				if (tmpStepRtns.length > 0) {
@@ -2845,6 +2845,33 @@ function keysConvert(_dosObj) {
 				const tmpshuffles = _dosObj[`shuffle${newKey}`].split(`$`);
 				for (let k = 0; k < tmpshuffles.length; k++) {
 					g_keyObj[`shuffle${newKey}_${k}`] = tmpshuffles[k].split(`,`).map(n => parseInt(n, 10));
+				}
+			}
+
+			// スクロールパターン (scrollX_Y)
+			// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
+			if (_dosObj[`scroll${newKey}`] !== undefined) {
+				g_keyObj[`scrollName${newKey}`] = [`---`];
+				const tmpScrolls = _dosObj[`scroll${newKey}`].split(`$`);
+				if (tmpScrolls.length > 0) {
+					for (let k = 0, len = tmpScrolls.length; k < len; k++) {
+						if (setVal(tmpScrolls[k], ``, C_TYP_STRING) === ``) {
+							continue;
+						}
+						g_keyObj[`scrollDir${newKey}_${k}`] = {
+							'---': [...Array(g_keyObj[`color${newKey}_${k}`].length)].fill(1),
+						};
+						const tmpScrollPtns = tmpScrolls[k].split(`/`);
+						for (let m = 0, len = tmpScrollPtns.length; m < len; m++) {
+							const tmpScrollPair = tmpScrollPtns[m].split(`::`);
+							g_keyObj[`scrollName${newKey}`][m + 1] = tmpScrollPair[0];
+							const tmpScrollDir = tmpScrollPair[1].split(`,`);
+							g_keyObj[`scrollDir${newKey}_${k}`][tmpScrollPair[0]] = [];
+							for (let n = 0, len = tmpScrollDir.length; n < len; n++) {
+								g_keyObj[`scrollDir${newKey}_${k}`][tmpScrollPair[0]][n] = Number(tmpScrollDir[n]);
+							}
+						}
+					}
 				}
 			}
 		}
