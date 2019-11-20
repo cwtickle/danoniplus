@@ -5222,10 +5222,14 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 
 		let inputWordData = ``;
 		let wordDataList;
-		if (g_stateObj.reverse === C_FLG_ON) {
-			wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+		if (g_stateObj.scroll !== `---`) {
+			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
 		} else {
-			wordDataList = [_dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+			if (g_stateObj.reverse === C_FLG_ON) {
+				wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+			} else {
+				wordDataList = [_dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
+			}
 		}
 		const wordData = wordDataList.find((v) => v !== undefined);
 		if (wordData !== undefined) {
@@ -5284,10 +5288,14 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.maskData.length = 0;
 	if (g_stateObj.d_background === C_FLG_ON) {
 		let maskDataList;
-		if (g_stateObj.reverse === C_FLG_ON) {
-			maskDataList = [_dosObj[`maskRev${_scoreNo}_data`], _dosObj.maskRev_data, _dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
+		if (g_stateObj.scroll !== `---`) {
+			maskDataList = [_dosObj[`maskAlt${_scoreNo}_data`], _dosObj.maskAlt_data, _dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
 		} else {
-			maskDataList = [_dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
+			if (g_stateObj.reverse === C_FLG_ON) {
+				maskDataList = [_dosObj[`maskRev${_scoreNo}_data`], _dosObj.maskRev_data, _dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
+			} else {
+				maskDataList = [_dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
+			}
 		}
 		const maskData = maskDataList.find((v) => v !== undefined);
 		if (maskData !== undefined) {
@@ -5301,10 +5309,14 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.backData.length = 0;
 	if (g_stateObj.d_background === C_FLG_ON) {
 		let backDataList;
-		if (g_stateObj.reverse === C_FLG_ON) {
-			backDataList = [_dosObj[`backRev${_scoreNo}_data`], _dosObj.backRev_data, _dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
+		if (g_stateObj.scroll !== `---`) {
+			backDataList = [_dosObj[`backAlt${_scoreNo}_data`], _dosObj.backAlt_data, _dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
 		} else {
-			backDataList = [_dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
+			if (g_stateObj.reverse === C_FLG_ON) {
+				backDataList = [_dosObj[`backRev${_scoreNo}_data`], _dosObj.backRev_data, _dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
+			} else {
+				backDataList = [_dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
+			}
 		}
 		const backData = backDataList.find((v) => v !== undefined);
 		if (backData !== undefined) {
