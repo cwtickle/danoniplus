@@ -3204,7 +3204,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// リバース (Reverse) / スクロール (Scroll)
 	// 縦位置: 4
-	if (g_headerObj.scrollUse === undefined || g_headerObj.scrollUse === true) {
+	if (g_headerObj.scrollUse) {
 		createGeneralSetting(reverseSprite, `scroll`);
 		$id(`lnkScroll`).left = `${parseFloat($id(`lnkScroll`).left) + 90}px`;
 		$id(`lnkScroll`).width = `${parseFloat($id(`lnkScroll`).width) - 90}px`;
@@ -3688,8 +3688,6 @@ function createOptionWindow(_sprite) {
  * @param {string} _unitName 
  * @param {boolean} _skipFlg 
  * @param {number} _skipTerm 
- * @param {function} _beforeFunc 
- * @param {function} _afterFunc 
  */
 function createGeneralSetting(_obj, _settingName, _unitName = ``, _skipFlg = false, _skipTerm = 5) {
 
