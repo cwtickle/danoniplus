@@ -3264,8 +3264,8 @@ function createOptionWindow(_sprite) {
 	gaugeSprite.appendChild(createLblSetting(`Gauge`));
 
 	// ゲージ設定詳細　縦位置: ゲージ設定+1
-	const lblGauge2 = createDivCssLabel(`lblGauge2`, C_LEN_SETLBL_LEFT - 20, C_LEN_SETLBL_HEIGHT,
-		C_LEN_SETLBL_WIDTH + 40, C_LEN_SETLBL_HEIGHT * 2, 11, ``);
+	const lblGauge2 = createDivCssLabel(`lblGauge2`, C_LEN_SETLBL_LEFT - 35, C_LEN_SETLBL_HEIGHT,
+		C_LEN_SETLBL_WIDTH + 60, C_LEN_SETLBL_HEIGHT * 2, 11, ``);
 	gaugeSprite.appendChild(lblGauge2);
 
 	if (g_headerObj.gaugeUse) {
