@@ -973,6 +973,7 @@ const g_keyObj = {
     scrollName9B: [`---`, `Cross`, `Split`, `Alternate`],
     scrollName11: [`---`, `Flat`],
     scrollName11L: [`---`, `Flat`],
+    scrollName11W: [`---`, `Flat`],
     scrollName11i: [`---`, `Cross`, `Split`, `Alternate`],
     scrollName12: [`---`, `Flat`],
     scrollName13: [`---`, `Flat`],
@@ -1083,6 +1084,10 @@ const g_keyObj = {
     scrollDir11L_1: {
         '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [-1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1],
+    },
+    scrollDir11W_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
     },
 
     scrollDir11i_0: {
