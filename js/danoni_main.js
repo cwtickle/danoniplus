@@ -6434,6 +6434,15 @@ function MainInit() {
 		step.classList.add(g_cssObj.main_stepDefault);
 		mainSprite.appendChild(step);
 
+		const stepDiv = createColorObject(`stepDiv${j}`, ``,
+			g_workObj.stepX[j],
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+			C_ARW_WIDTH, C_ARW_WIDTH,
+			g_workObj.stepRtn[j], `Step`);
+		stepDiv.style.display = C_DIS_NONE;
+		stepDiv.classList.add(g_cssObj.main_stepKeyDown);
+		mainSprite.appendChild(stepDiv);
+
 		const stepHit = createColorObject(`stepHit${j}`, ``,
 			g_workObj.stepX[j] - 15,
 			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] - 15,
@@ -6445,9 +6454,25 @@ function MainInit() {
 		mainSprite.appendChild(stepHit);
 
 		// ステップゾーンOFF設定
-		if (g_stateObj.d_stepzone === C_FLG_OFF) {
+		if (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) {
 			step.style.display = C_DIS_NONE;
 		}
+	}
+	if (g_stateObj.scroll === `Flat` && g_stateObj.d_stepzone === C_FLG_ON) {
+
+		// ステップゾーンの代わり
+		const stepBar0 = createColorObject(`stepBar`, ``,
+			0, g_stepY + (g_distY - g_stepY - 50) * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
+			g_sWidth - 50, 1, ``, `lifeBar`);
+		stepBar0.classList.add(g_cssObj.life_Failed);
+		mainSprite.appendChild(stepBar0);
+
+		const stepBar1 = createColorObject(`stepBar`, ``,
+			0, g_stepY + (g_distY - g_stepY - 50) * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
+			g_sWidth - 50, 1, ``, `lifeBar`);
+		stepBar1.classList.add(g_cssObj.life_Failed);
+		mainSprite.appendChild(stepBar1);
+
 	}
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
@@ -6840,8 +6865,7 @@ function MainInit() {
 		OFF: _ => {
 			for (let j = 0; j < keyNum; j++) {
 				if (g_workObj.keyCtrl[j].find(key => keyIsDown(key)) === undefined) {
-					document.querySelector(`#step${j}`).classList.remove(g_cssObj.main_stepKeyDown);
-					document.querySelector(`#step${j}`).classList.add(g_cssObj.main_stepDefault);
+					document.querySelector(`#stepDiv${j}`).style.display = C_DIS_NONE;
 				}
 			}
 		},
@@ -7933,9 +7957,8 @@ function judgeArrow(_j) {
 				return;
 			}
 		}
-		const stepDiv = document.querySelector(`#step${_j}`);
-		stepDiv.classList.remove(g_cssObj.main_stepDefault);
-		stepDiv.classList.add(g_cssObj.main_stepKeyDown);
+		const stepDiv = document.querySelector(`#stepDiv${_j}`);
+		stepDiv.style.display = `inherit`;
 		g_judgObj.lockFlgs[_j] = false;
 	}
 }
