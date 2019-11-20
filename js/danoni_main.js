@@ -6453,44 +6453,53 @@ function MainInit() {
 
 	// ステップゾーンを表示
 	for (let j = 0; j < keyNum; j++) {
+
+		const stepRoot = createSprite(`mainSprite`, `stepRoot${j}`,
+			g_workObj.stepX[j],
+			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+			C_ARW_WIDTH, C_ARW_WIDTH);
+
 		// 矢印の内側を塗りつぶすか否か
 		if (g_headerObj.setShadowColor !== ``) {
 			// 矢印の塗り部分
 			const stepShadow = createColorObject(`stepShadow${j}`, ``,
-				g_workObj.stepX[j],
-				g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+				0,
+				0,
 				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `ShadowStep`);
 			stepShadow.classList.add(g_cssObj.main_objShadow);
-			mainSprite.appendChild(stepShadow);
+			stepRoot.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.7;
 		}
 
+		// ステップゾーン本体
 		const step = createColorObject(`step${j}`, ``,
-			g_workObj.stepX[j],
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+			0,
+			0,
 			C_ARW_WIDTH, C_ARW_WIDTH,
 			g_workObj.stepRtn[j], `Step`);
 		step.classList.add(g_cssObj.main_stepDefault);
-		mainSprite.appendChild(step);
+		stepRoot.appendChild(step);
 
+		// ステップゾーン空押し
 		const stepDiv = createColorObject(`stepDiv${j}`, ``,
-			g_workObj.stepX[j],
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+			0,
+			0,
 			C_ARW_WIDTH, C_ARW_WIDTH,
 			g_workObj.stepRtn[j], `Step`);
 		stepDiv.style.display = C_DIS_NONE;
 		stepDiv.classList.add(g_cssObj.main_stepKeyDown);
-		mainSprite.appendChild(stepDiv);
+		stepRoot.appendChild(stepDiv);
 
+		// ステップゾーンヒット時モーション
 		const stepHit = createColorObject(`stepHit${j}`, ``,
-			g_workObj.stepX[j] - 15,
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j] - 15,
+			-15,
+			-15,
 			C_ARW_WIDTH + 30, C_ARW_WIDTH + 30,
 			g_workObj.stepHitRtn[j], `StepHit`);
 		stepHit.style.opacity = 0;
 		stepHit.setAttribute(`cnt`, 0);
 		stepHit.classList.add(g_cssObj.main_stepDefault);
-		mainSprite.appendChild(stepHit);
+		stepRoot.appendChild(stepHit);
 
 		// ステップゾーンOFF設定
 		if (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) {
@@ -7202,7 +7211,7 @@ function MainInit() {
 		const stepRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
 			g_stepY + (g_distY - g_stepY - 50) * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
-			50, 100);
+			C_ARW_WIDTH, C_ARW_WIDTH);
 		stepRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 		stepRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 		stepRoot.setAttribute(`judgEndFlg`, `false`);
@@ -7888,9 +7897,9 @@ function changeHitFrz(_j, _k, _name) {
 	frzBtm.style.backgroundColor = g_workObj[`${_name}HitColors`][_j];
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
-	const delFrzLength = parseFloat(document.querySelector(`#step${_j}`).style.top) - parseFloat(frzRoot.style.top);
+	const delFrzLength = parseFloat(document.querySelector(`#stepRoot${_j}`).style.top) - parseFloat(frzRoot.style.top);
 
-	frzRoot.style.top = document.querySelector(`#step${_j}`).style.top;
+	frzRoot.style.top = document.querySelector(`#stepRoot${_j}`).style.top;
 	frzBtm.style.top = `${parseFloat(frzBtm.style.top) - delFrzLength}px`;
 	frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - delFrzLength}px`;
 	frzBar.style.top = `${parseFloat(frzBar.style.top) - delFrzLength * dividePos}px`;
