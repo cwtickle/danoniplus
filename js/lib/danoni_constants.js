@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2019/11/23
+ * Revised : 2019/11/24
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -75,7 +75,7 @@ const g_imgObj = {
     onigiriShadow: C_IMG_AASD,
     giko: C_IMG_GIKO,
     gikoShadow: C_IMG_AASD,
-    iyo: C_IMG_GIKO,
+    iyo: C_IMG_IYO,
     iyoShadow: C_IMG_AASD,
     c: C_IMG_C,
     cShadow: C_IMG_AASD,
@@ -90,7 +90,7 @@ const g_imgObj = {
     onigiriShadowStep: C_IMG_AASD,
     gikoStep: C_IMG_GIKO,
     gikoShadowStep: C_IMG_AASD,
-    iyoStep: C_IMG_GIKO,
+    iyoStep: C_IMG_IYO,
     iyoShadowStep: C_IMG_AASD,
     cStep: C_IMG_C,
     cShadowStep: C_IMG_AASD,
@@ -102,7 +102,7 @@ const g_imgObj = {
     arrowStepHit: C_IMG_ARROW,
     onigiriStepHit: C_IMG_ONIGIRI,
     gikoStepHit: C_IMG_GIKO,
-    iyoStepHit: C_IMG_GIKO,
+    iyoStepHit: C_IMG_IYO,
     cStepHit: C_IMG_C,
     moraraStepHit: C_IMG_MORARA,
     monarStepHit: C_IMG_MONAR,
