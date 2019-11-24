@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 10.2.3`;
+const g_version = `Ver 10.2.4`;
 const g_revisedDate = `2019/11/24`;
 const g_alphaVersion = ``;
 
@@ -3895,7 +3895,7 @@ function makeDifLblCssButton(_id, _name, _heightPos, _func) {
 		name: _name,
 		x: 0,
 		y: C_LEN_SETLBL_HEIGHT * _heightPos,
-		width: C_LEN_SETLBL_WIDTH,
+		width: C_LEN_DIFSELECTOR_WIDTH,
 		height: C_LEN_SETLBL_HEIGHT,
 		fontsize: C_SIZ_DIFSELECTOR,
 		align: C_ALIGN_CENTER,
