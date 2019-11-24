@@ -128,6 +128,7 @@ const C_BLOCK_KEYS = [
 /** 設定・オプション画面用共通 */
 const C_LEN_SETLBL_LEFT = 160;
 const C_LEN_SETLBL_WIDTH = 210;
+const C_LEN_DIFSELECTOR_WIDTH = 250;
 const C_LEN_SETLBL_HEIGHT = 23;
 const C_SIZ_SETLBL = 17;
 const C_LEN_SETDIFLBL_HEIGHT = 25;
