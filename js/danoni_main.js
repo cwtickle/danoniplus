@@ -5467,34 +5467,20 @@ function getLastFrame(_dataObj) {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 
 	for (let j = 0; j < keyNum; j++) {
-		let arrowData = _dataObj.arrowData[j];
-		let frzData = _dataObj.frzData[j];
+		const data = [
+			_dataObj.arrowData[j],
+			_dataObj.frzData[j],
+			_dataObj.dummyArrowData[j],
+			_dataObj.dummyFrzData[j]
+		];
 
-		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[arrowData.length - 1] > tmpLastNum) {
-				tmpLastNum = arrowData[arrowData.length - 1];
+		data.forEach(_objData => {
+			if (_objData !== undefined && _objData !== ``) {
+				if (_objData[_objData.length - 1] > tmpLastNum) {
+					tmpLastNum = _objData[_objData.length - 1];
+				}
 			}
-		}
-		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[frzData.length - 1] > tmpLastNum) {
-				tmpLastNum = frzData[frzData.length - 1];
-			}
-		}
-
-		arrowData = _dataObj.dummyArrowData[j];
-		frzData = _dataObj.dummyFrzData[j];
-
-		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[arrowData.length - 1] > tmpLastNum) {
-				tmpLastNum = arrowData[arrowData.length - 1];
-			}
-		}
-		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[frzData.length - 1] > tmpLastNum) {
-				tmpLastNum = frzData[frzData.length - 1];
-			}
-		}
-
+		});
 	}
 	return tmpLastNum;
 }
@@ -5510,43 +5496,22 @@ function getFirstArrowFrame(_dataObj) {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 
 	for (let j = 0; j < keyNum; j++) {
+		const data = [
+			_dataObj.arrowData[j],
+			_dataObj.frzData[j],
+			_dataObj.dummyArrowData[j],
+			_dataObj.dummyFrzData[j]
+		];
 
-		let arrowData = _dataObj.arrowData[j];
-		let frzData = _dataObj.frzData[j];
-
-		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[0] !== ``) {
-				if (arrowData[0] < tmpFirstNum && arrowData[0] + C_MAX_ADJUSTMENT > 0) {
-					tmpFirstNum = arrowData[0];
+		data.forEach(_objData => {
+			if (_objData !== undefined && _objData !== ``) {
+				if (_objData[0] !== ``) {
+					if (_objData[0] < tmpFirstNum && _objData[0] + C_MAX_ADJUSTMENT > 0) {
+						tmpFirstNum = _objData[0];
+					}
 				}
 			}
-		}
-		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[0] !== ``) {
-				if (frzData[0] < tmpFirstNum && frzData[0] + C_MAX_ADJUSTMENT > 0) {
-					tmpFirstNum = frzData[0];
-				}
-			}
-		}
-
-		arrowData = _dataObj.dummyArrowData[j];
-		frzData = _dataObj.dummyFrzData[j];
-
-		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[0] !== ``) {
-				if (arrowData[0] < tmpFirstNum && arrowData[0] + C_MAX_ADJUSTMENT > 0) {
-					tmpFirstNum = arrowData[0];
-				}
-			}
-		}
-		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[0] !== ``) {
-				if (frzData[0] < tmpFirstNum && frzData[0] + C_MAX_ADJUSTMENT > 0) {
-					tmpFirstNum = frzData[0];
-				}
-			}
-		}
-
+		});
 	}
 	return tmpFirstNum;
 }
