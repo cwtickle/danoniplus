@@ -828,8 +828,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 					const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / g_fps;
 
 					if (g_headerObj.autoPreload) {
-						if (tmpPath.indexOf(`.png`) !== -1 || tmpPath.indexOf(`.gif`) !== -1 ||
-							tmpPath.indexOf(`.bmp`) !== -1 || tmpPath.indexOf(`.jpg`) !== -1) {
+						if (checkImage(tmpPath)) {
 							preloadFile(`image`, tmpPath);
 						}
 					}
@@ -1421,6 +1420,21 @@ function drawDefaultBackImage(_key) {
 }
 
 /**
+ * 画像ファイルかどうかをチェック
+ * @param {string} _str 
+ */
+function checkImage(_str) {
+	return (
+		(
+			_str.indexOf(`.png`) !== -1 ||
+			_str.indexOf(`.gif`) !== -1 ||
+			_str.indexOf(`.bmp`) !== -1 ||
+			_str.indexOf(`.jpg`) !== -1
+		) ? true : false
+	);
+}
+
+/**
  * 背景・マスクモーションの表示（タイトル・リザルト用）
  * @param {number} _frame 
  * @param {string} _spriteName title / result
@@ -1448,8 +1462,7 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 					g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] = 0;
 					return getSpriteJumpFrame(tmpObj.class);
 				}
-			} else if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
-				tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
+			} else if (checkImage(tmpObj.path)) {
 
 				// imgタグの場合
 				let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
@@ -1519,8 +1532,7 @@ function drawMainSpriteData(_frame, _depthName) {
 	tmpObjs.forEach(tmpObj => {
 		const baseSprite = document.querySelector(`#${_depthName}Sprite${tmpObj.depth}`);
 		if (tmpObj.path !== ``) {
-			if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
-				tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
+			if (checkImage(tmpObj.path)) {
 
 				// imgタグの場合
 				let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
@@ -2602,7 +2614,7 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 	if (_dosObj[`gauge${_name}`] !== undefined && _dosObj[`gauge${_name}`] !== ``) {
 		const gauges = _dosObj[`gauge${_name}`].split(`$`);
 
-		g_gaugeOptionObj[`gauge${_name}s`] = {
+		const obj = {
 			lifeBorders: [],
 			lifeRecoverys: [],
 			lifeDamages: [],
@@ -2612,24 +2624,26 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 		for (let j = 0; j < gauges.length; j++) {
 			const gaugeDetails = gauges[j].split(`,`);
 			if (gaugeDetails[0] === `x`) {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(`x`);
+				obj.lifeBorders.push(`x`);
 			} else {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(setVal(gaugeDetails[0], ``, C_TYP_FLOAT));
+				obj.lifeBorders.push(setVal(gaugeDetails[0], ``, C_TYP_FLOAT));
 			}
-			g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(setVal(gaugeDetails[1], ``, C_TYP_FLOAT));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(setVal(gaugeDetails[2], ``, C_TYP_FLOAT));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(setVal(gaugeDetails[3], ``, C_TYP_FLOAT));
+			obj.lifeRecoverys.push(setVal(gaugeDetails[1], ``, C_TYP_FLOAT));
+			obj.lifeDamages.push(setVal(gaugeDetails[2], ``, C_TYP_FLOAT));
+			obj.lifeInits.push(setVal(gaugeDetails[3], ``, C_TYP_FLOAT));
 		}
 		if (gauges.length < difLength) {
 			for (let j = gauges.length; j < difLength; j++) {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(``);
-				g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(``);
-				g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(``);
-				g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(``);
+				obj.lifeBorders.push(``);
+				obj.lifeRecoverys.push(``);
+				obj.lifeDamages.push(``);
+				obj.lifeInits.push(``);
 			}
 		}
+		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
+
 	} else if (typeof g_presetGaugeCustom === C_TYP_OBJECT && g_presetGaugeCustom[_name]) {
-		g_gaugeOptionObj[`gauge${_name}s`] = {
+		const obj = {
 			lifeBorders: [],
 			lifeRecoverys: [],
 			lifeDamages: [],
@@ -2637,14 +2651,15 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 		};
 		for (let j = 0; j < difLength; j++) {
 			if (g_presetGaugeCustom[_name].Border === `x`) {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(`x`);
+				obj.lifeBorders.push(`x`);
 			} else {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(setVal(g_presetGaugeCustom[_name].Border, ``, C_TYP_FLOAT));
+				obj.lifeBorders.push(setVal(g_presetGaugeCustom[_name].Border, ``, C_TYP_FLOAT));
 			}
-			g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(setVal(g_presetGaugeCustom[_name].Recovery, ``, C_TYP_FLOAT));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(setVal(g_presetGaugeCustom[_name].Damage, ``, C_TYP_FLOAT));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(setVal(g_presetGaugeCustom[_name].Init, ``, C_TYP_FLOAT));
+			obj.lifeRecoverys.push(setVal(g_presetGaugeCustom[_name].Recovery, ``, C_TYP_FLOAT));
+			obj.lifeDamages.push(setVal(g_presetGaugeCustom[_name].Damage, ``, C_TYP_FLOAT));
+			obj.lifeInits.push(setVal(g_presetGaugeCustom[_name].Init, ``, C_TYP_FLOAT));
 		}
+		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
 	}
 }
 
