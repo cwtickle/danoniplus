@@ -204,7 +204,7 @@ function setVal(_checkStr, _default, _type) {
 		} else if (lowerCase === `false`) {
 			return false;
 		}
-		return _default
+		return _default;
 	}
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
@@ -312,12 +312,12 @@ function getBasicFont() {
 
 /**
  * 半角換算の文字数を計算
- * @param {string} str 
+ * @param {string} _str 
  */
-function getStrLength(str) {
+function getStrLength(_str) {
 	let result = 0;
-	for (let i = 0; i < str.length; i++) {
-		const chr = str.charCodeAt(i);
+	for (let i = 0; i < _str.length; i++) {
+		const chr = _str.charCodeAt(i);
 		if ((chr >= 0x00 && chr < 0x81) ||
 			(chr === 0xf8f0) ||
 			(chr >= 0xff61 && chr < 0xffa0) ||
@@ -892,10 +892,10 @@ function getQueryParamVal(_name) {
 
 function initialControl() {
 
-	g_sWidth = (isNaN(parseFloat(document.querySelector(`#canvas-frame`).style.width)) ?
-		600 : parseFloat(document.querySelector(`#canvas-frame`).style.width));
-	g_sHeight = (isNaN(parseFloat(document.querySelector(`#canvas-frame`).style.height)) ?
-		500 : parseFloat(document.querySelector(`#canvas-frame`).style.height));
+	g_sWidth = (isNaN(parseFloat($id(`canvas-frame`).width)) ?
+		600 : parseFloat($id(`canvas-frame`).width));
+	g_sHeight = (isNaN(parseFloat($id(`canvas-frame`).height)) ?
+		500 : parseFloat($id(`canvas-frame`).height));
 
 	let divRoot;
 	if (document.querySelector(`#divRoot`) === null) {
@@ -1435,6 +1435,58 @@ function checkImage(_str) {
 }
 
 /**
+ * 背景・マスク用画像の描画
+ * @param {object} _obj 
+ */
+function drawSpriteImage(_obj) {
+	let tmpInnerHTML = `<img src=${_obj.path} class="${_obj.class}"
+					style="position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
+	if (_obj.width !== 0 && _obj.width > 0) {
+		tmpInnerHTML += `;width:${_obj.width}px`;
+	}
+	if (_obj.height !== `` && setVal(_obj.height, 0, C_TYP_NUMBER) > 0) {
+		tmpInnerHTML += `;height:${_obj.height}px`;
+	}
+	tmpInnerHTML += `;animation-name:${_obj.animationName}
+					;animation-duration:${_obj.animationDuration}s
+					;opacity:${_obj.opacity}">`;
+	return tmpInnerHTML;
+}
+
+/**
+ * 背景・マスク用テキストの描画
+ * @param {object} _obj 
+ */
+function drawSpriteText(_obj) {
+	let tmpInnerHTML = `<span class="${_obj.class}"
+					style="display:inline-block;position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
+
+	// この場合のwidthは font-size と解釈する
+	if (_obj.width !== 0 && _obj.width > 0) {
+		tmpInnerHTML += `;font-size:${_obj.width}px`;
+	}
+
+	// この場合のheightは color と解釈する
+	if (_obj.height !== ``) {
+		tmpInnerHTML += `;color:${_obj.height}`;
+	}
+	tmpInnerHTML += `;animation-name:${_obj.animationName}
+					;animation-duration:${_obj.animationDuration}s
+					;opacity:${_obj.opacity}">${_obj.path}</span>`;
+	return tmpInnerHTML;
+}
+
+/**
+ * back/masktitle(result)において、ジャンプ先のフレーム数を取得
+ * @param {string} _frames 
+ */
+function getSpriteJumpFrame(_frames) {
+	const jumpFrames = _frames.split(`:`);
+	const jumpCnt = Math.floor(Math.random() * jumpFrames.length);
+	return setVal(Number(jumpFrames[jumpCnt]) - 1, 0, C_TYP_NUMBER);
+}
+
+/**
  * 背景・マスクモーションの表示（タイトル・リザルト用）
  * @param {number} _frame 
  * @param {string} _spriteName title / result
@@ -1462,40 +1514,8 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 					g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] = 0;
 					return getSpriteJumpFrame(tmpObj.class);
 				}
-			} else if (checkImage(tmpObj.path)) {
-
-				// imgタグの場合
-				let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
-					style="position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-				if (tmpObj.width !== 0 && tmpObj.width > 0) {
-					tmpInnerHTML += `;width:${tmpObj.width}px`;
-				}
-				if (tmpObj.height !== `` && setVal(tmpObj.height, 0, C_TYP_NUMBER) > 0) {
-					tmpInnerHTML += `;height:${tmpObj.height}px`;
-				}
-				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-					;animation-duration:${tmpObj.animationDuration}s
-					;opacity:${tmpObj.opacity}">`;
-				baseSprite.innerHTML = tmpInnerHTML;
-
 			} else {
-				// spanタグの場合
-				let tmpInnerHTML = `<span class="${tmpObj.class}"
-					style="display:inline-block;position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-
-				// この場合のwidthは font-size と解釈する
-				if (tmpObj.width !== 0 && tmpObj.width > 0) {
-					tmpInnerHTML += `;font-size:${tmpObj.width}px`;
-				}
-
-				// この場合のheightは color と解釈する
-				if (tmpObj.height !== ``) {
-					tmpInnerHTML += `;color:${tmpObj.height}`;
-				}
-				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-					;animation-duration:${tmpObj.animationDuration}s
-					;opacity:${tmpObj.opacity}">${tmpObj.path}</span>`;
-				baseSprite.innerHTML = tmpInnerHTML;
+				baseSprite.innerHTML = (checkImage(tmpObj.path) ? drawSpriteImage(tmpObj) : drawSpriteText(tmpObj));
 			}
 		} else {
 			if (tmpObj.depth === `ALL`) {
@@ -1511,16 +1531,6 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 }
 
 /**
- * back/masktitle(result)において、ジャンプ先のフレーム数を取得
- * @param {string} _frames 
- */
-function getSpriteJumpFrame(_frames) {
-	const jumpFrames = _frames.split(`:`);
-	const jumpCnt = Math.floor(Math.random() * jumpFrames.length);
-	return setVal(Number(jumpFrames[jumpCnt]) - 1, 0, C_TYP_NUMBER);
-}
-
-/**
  * 背景・マスクモーションの表示
  * @param {number} _frame 
  * @param {string} _depthName 
@@ -1532,41 +1542,7 @@ function drawMainSpriteData(_frame, _depthName) {
 	tmpObjs.forEach(tmpObj => {
 		const baseSprite = document.querySelector(`#${_depthName}Sprite${tmpObj.depth}`);
 		if (tmpObj.path !== ``) {
-			if (checkImage(tmpObj.path)) {
-
-				// imgタグの場合
-				let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
-					style="position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-				if (tmpObj.width !== 0 && tmpObj.width > 0) {
-					tmpInnerHTML += `;width:${tmpObj.width}px`;
-				}
-				if (tmpObj.height !== `` && setVal(tmpObj.height, 0, C_TYP_NUMBER) > 0) {
-					tmpInnerHTML += `;height:${tmpObj.height}px`;
-				}
-				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-					;animation-duration:${tmpObj.animationDuration}s
-					;opacity:${tmpObj.opacity}">`;
-				baseSprite.innerHTML = tmpInnerHTML;
-
-			} else {
-				// spanタグの場合
-				let tmpInnerHTML = `<span class="${tmpObj.class}"
-					style="display:inline-block;position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-
-				// この場合のwidthは font-size と解釈する
-				if (tmpObj.width !== 0 && tmpObj.width > 0) {
-					tmpInnerHTML += `;font-size:${tmpObj.width}px`;
-				}
-
-				// この場合のheightは color と解釈する
-				if (tmpObj.height !== ``) {
-					tmpInnerHTML += `;color:${tmpObj.height}`;
-				}
-				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-					;animation-duration:${tmpObj.animationDuration}s
-					;opacity:${tmpObj.opacity}">${tmpObj.path}</span>`;
-				baseSprite.innerHTML = tmpInnerHTML;
-			}
+			baseSprite.innerHTML = (checkImage(tmpObj.path) ? drawSpriteImage(tmpObj) : drawSpriteText(tmpObj));
 		} else {
 			if (tmpObj.depth === `ALL`) {
 				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
