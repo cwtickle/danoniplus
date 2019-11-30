@@ -637,8 +637,6 @@ function clearWindow() {
 		const layer0 = document.querySelector(`#layer0`);
 		const l0ctx = layer0.getContext(`2d`);
 
-		g_sWidth = layer0.width;
-		g_sHeight = layer0.height;
 		const C_MARGIN = 0;
 
 		// 線画、図形をクリア
@@ -786,6 +784,48 @@ class AudioPlayer {
 }
 
 /**
+ * 背景・マスク用画像の描画
+ * @param {object} _obj 
+ */
+function makeSpriteImage(_obj) {
+	let tmpInnerHTML = `<img src=${_obj.path} class="${_obj.class}"
+					style="position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
+	if (_obj.width !== 0 && _obj.width > 0) {
+		tmpInnerHTML += `;width:${_obj.width}px`;
+	}
+	if (_obj.height !== `` && setVal(_obj.height, 0, C_TYP_NUMBER) > 0) {
+		tmpInnerHTML += `;height:${_obj.height}px`;
+	}
+	tmpInnerHTML += `;animation-name:${_obj.animationName}
+					;animation-duration:${_obj.animationDuration}s
+					;opacity:${_obj.opacity}">`;
+	return tmpInnerHTML;
+}
+
+/**
+ * 背景・マスク用テキストの描画
+ * @param {object} _obj 
+ */
+function makeSpriteText(_obj) {
+	let tmpInnerHTML = `<span class="${_obj.class}"
+					style="display:inline-block;position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
+
+	// この場合のwidthは font-size と解釈する
+	if (_obj.width !== 0 && _obj.width > 0) {
+		tmpInnerHTML += `;font-size:${_obj.width}px`;
+	}
+
+	// この場合のheightは color と解釈する
+	if (_obj.height !== ``) {
+		tmpInnerHTML += `;color:${_obj.height}`;
+	}
+	tmpInnerHTML += `;animation-name:${_obj.animationName}
+					;animation-duration:${_obj.animationDuration}s
+					;opacity:${_obj.opacity}">${_obj.path}</span>`;
+	return tmpInnerHTML;
+}
+
+/**
  * 多層スプライトデータの作成処理
  * @param {array} _data 
  * @param {function} _calcFrame 
@@ -802,66 +842,64 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 		if (tmpData !== undefined && tmpData !== ``) {
 			const tmpSpriteData = tmpData.split(`,`);
 
-			if (tmpSpriteData.length > 1) {
-				// 深度が"-"の場合はスキップ
-				if (tmpSpriteData[1] === `-`) {
+			// 深度が"-"の場合はスキップ
+			if (tmpSpriteData.length > 1 && tmpSpriteData[1] !== `-`) {
+
+				// 値チェックとエスケープ処理
+				let tmpFrame;
+				if (setVal(tmpSpriteData[0], 200, C_TYP_NUMBER) === 0) {
+					tmpFrame = 0;
 				} else {
-					// 値チェックとエスケープ処理
-					let tmpFrame;
-					if (setVal(tmpSpriteData[0], 200, C_TYP_NUMBER) === 0) {
+					tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_NUMBER));
+					if (tmpFrame < 0) {
 						tmpFrame = 0;
-					} else {
-						tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_NUMBER));
-						if (tmpFrame < 0) {
-							tmpFrame = 0;
-						}
 					}
-					const tmpDepth = (tmpSpriteData[1] === `ALL` ? `ALL` : setVal(tmpSpriteData[1], 0, C_TYP_NUMBER));
-					const tmpPath = escapeHtml(setVal(tmpSpriteData[2], ``, C_TYP_STRING));
-					const tmpClass = escapeHtml(setVal(tmpSpriteData[3], ``, C_TYP_STRING));
-					const tmpX = setVal(tmpSpriteData[4], 0, C_TYP_FLOAT);
-					const tmpY = setVal(tmpSpriteData[5], 0, C_TYP_FLOAT);
-					const tmpWidth = setVal(tmpSpriteData[6], 0, C_TYP_NUMBER);					// spanタグの場合は font-size
-					const tmpHeight = escapeHtml(setVal(tmpSpriteData[7], ``, C_TYP_STRING));	// spanタグの場合は color(文字列可)
-					const tmpOpacity = setVal(tmpSpriteData[8], 1, C_TYP_FLOAT);
-					const tmpAnimationName = escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING));
-					const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / g_fps;
-
-					if (g_headerObj.autoPreload) {
-						if (checkImage(tmpPath)) {
-							preloadFile(`image`, tmpPath);
-						}
-					}
-					if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
-						maxDepth = tmpDepth;
-					}
-
-					let addFrame = 0;
-					if (spriteData[tmpFrame] === undefined) {
-						spriteData[tmpFrame] = [];
-						spriteData[tmpFrame][0] = {};
-					} else {
-						for (let m = 1; ; m++) {
-							if (spriteData[tmpFrame][m] === undefined) {
-								spriteData[tmpFrame][m] = {};
-								addFrame = m;
-								break;
-							}
-						}
-					}
-					spriteData[tmpFrame][addFrame] = {
-						depth: tmpDepth,
-						path: tmpPath,
-						class: tmpClass,
-						left: tmpX,
-						top: tmpY,
-						width: tmpWidth,
-						height: tmpHeight,
-						opacity: tmpOpacity,
-						animationName: tmpAnimationName,
-						animationDuration: tmpAnimationDuration
-					};
 				}
+				const tmpDepth = (tmpSpriteData[1] === `ALL` ? `ALL` : setVal(tmpSpriteData[1], 0, C_TYP_NUMBER));
+				if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
+					maxDepth = tmpDepth;
+				}
+
+				const tmpObj = {
+					path: escapeHtml(setVal(tmpSpriteData[2], ``, C_TYP_STRING)),		// 画像パス or テキスト
+					class: escapeHtml(setVal(tmpSpriteData[3], ``, C_TYP_STRING)),		// CSSクラス
+					left: setVal(tmpSpriteData[4], 0, C_TYP_FLOAT),						// X座標
+					top: setVal(tmpSpriteData[5], 0, C_TYP_FLOAT),						// Y座標
+					width: setVal(tmpSpriteData[6], 0, C_TYP_NUMBER),					// spanタグの場合は font-size
+					height: escapeHtml(setVal(tmpSpriteData[7], ``, C_TYP_STRING)),		// spanタグの場合は color(文字列可)
+					opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
+					animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING)),
+					animationDuration: setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / g_fps,
+				};
+				if (g_headerObj.autoPreload) {
+					if (checkImage(tmpObj.path)) {
+						preloadFile(`image`, tmpObj.path);
+					}
+				}
+
+				let addFrame = 0;
+				if (spriteData[tmpFrame] === undefined) {
+					spriteData[tmpFrame] = [];
+					spriteData[tmpFrame][0] = {};
+				} else {
+					for (let m = 1; ; m++) {
+						if (spriteData[tmpFrame][m] === undefined) {
+							spriteData[tmpFrame][m] = {};
+							addFrame = m;
+							break;
+						}
+					}
+				}
+
+				const emptyPatterns = [``, `[loop]`, `[jump]`];
+				spriteData[tmpFrame][addFrame] = {
+					depth: tmpDepth,
+					command: tmpObj.path,
+					jumpFrame: tmpObj.class,
+					maxLoop: tmpObj.left,
+					htmlText: emptyPatterns.includes(tmpObj.path) ?
+						`` : (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj)),
+				};
 			}
 		}
 	});
@@ -1399,9 +1437,6 @@ function drawDefaultBackImage(_key) {
 		const layer0 = document.querySelector(`#layer0`);
 		const l0ctx = layer0.getContext(`2d`);
 
-		g_sWidth = layer0.width;
-		g_sHeight = layer0.height;
-
 		// 画面背景を指定 (background-color)
 		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
 		if (!g_headerObj[`customBack${_key}Use`]) {
@@ -1435,48 +1470,6 @@ function checkImage(_str) {
 }
 
 /**
- * 背景・マスク用画像の描画
- * @param {object} _obj 
- */
-function drawSpriteImage(_obj) {
-	let tmpInnerHTML = `<img src=${_obj.path} class="${_obj.class}"
-					style="position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
-	if (_obj.width !== 0 && _obj.width > 0) {
-		tmpInnerHTML += `;width:${_obj.width}px`;
-	}
-	if (_obj.height !== `` && setVal(_obj.height, 0, C_TYP_NUMBER) > 0) {
-		tmpInnerHTML += `;height:${_obj.height}px`;
-	}
-	tmpInnerHTML += `;animation-name:${_obj.animationName}
-					;animation-duration:${_obj.animationDuration}s
-					;opacity:${_obj.opacity}">`;
-	return tmpInnerHTML;
-}
-
-/**
- * 背景・マスク用テキストの描画
- * @param {object} _obj 
- */
-function drawSpriteText(_obj) {
-	let tmpInnerHTML = `<span class="${_obj.class}"
-					style="display:inline-block;position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
-
-	// この場合のwidthは font-size と解釈する
-	if (_obj.width !== 0 && _obj.width > 0) {
-		tmpInnerHTML += `;font-size:${_obj.width}px`;
-	}
-
-	// この場合のheightは color と解釈する
-	if (_obj.height !== ``) {
-		tmpInnerHTML += `;color:${_obj.height}`;
-	}
-	tmpInnerHTML += `;animation-name:${_obj.animationName}
-					;animation-duration:${_obj.animationDuration}s
-					;opacity:${_obj.opacity}">${_obj.path}</span>`;
-	return tmpInnerHTML;
-}
-
-/**
  * back/masktitle(result)において、ジャンプ先のフレーム数を取得
  * @param {string} _frames 
  */
@@ -1500,22 +1493,22 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 	for (let j = 0; j < tmpObjs.length; j++) {
 		const tmpObj = tmpObjs[j];
 		const baseSprite = document.querySelector(`#${_depthName}${spriteUpper}Sprite${tmpObj.depth}`);
-		if (tmpObj.path !== ``) {
-			if (tmpObj.path === `[loop]`) {
+		if (tmpObj.command !== ``) {
+			if (tmpObj.command === `[loop]`) {
 				// キーワード指定：ループ
 				// 指定フレーム(class)へ移動する
 				g_scoreObj[`${_depthName}${spriteUpper}LoopCount`]++;
-				return getSpriteJumpFrame(tmpObj.class);
+				return getSpriteJumpFrame(tmpObj.jumpFrame);
 
-			} else if (tmpObj.path === `[jump]`) {
+			} else if (tmpObj.command === `[jump]`) {
 				// キーワード指定：フレームジャンプ
-				// 指定回数以上のループ(left)があれば指定フレーム(class)へ移動する
-				if (g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] >= Number(tmpObj.left)) {
+				// 指定回数以上のループ(maxLoop)があれば指定フレーム(jumpFrame)へ移動する
+				if (g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] >= Number(tmpObj.maxLoop)) {
 					g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] = 0;
-					return getSpriteJumpFrame(tmpObj.class);
+					return getSpriteJumpFrame(tmpObj.jumpFrame);
 				}
 			} else {
-				baseSprite.innerHTML = (checkImage(tmpObj.path) ? drawSpriteImage(tmpObj) : drawSpriteText(tmpObj));
+				baseSprite.innerHTML = tmpObj.htmlText;
 			}
 		} else {
 			if (tmpObj.depth === `ALL`) {
@@ -1523,7 +1516,7 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 					document.querySelector(`#${_depthName}${spriteUpper}Sprite${j}`).innerHTML = ``;
 				}
 			} else {
-				baseSprite.innerHTML = ``;
+				baseSprite.innerHTML = tmpObj.htmlText;
 			}
 		}
 	}
@@ -1541,8 +1534,8 @@ function drawMainSpriteData(_frame, _depthName) {
 
 	tmpObjs.forEach(tmpObj => {
 		const baseSprite = document.querySelector(`#${_depthName}Sprite${tmpObj.depth}`);
-		if (tmpObj.path !== ``) {
-			baseSprite.innerHTML = (checkImage(tmpObj.path) ? drawSpriteImage(tmpObj) : drawSpriteText(tmpObj));
+		if (tmpObj.command !== ``) {
+			baseSprite.innerHTML = tmpObj.htmlText;
 		} else {
 			if (tmpObj.depth === `ALL`) {
 				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
@@ -1553,6 +1546,33 @@ function drawMainSpriteData(_frame, _depthName) {
 			}
 		}
 	});
+}
+
+/**
+ * 曲名のグラデーションを指定
+ * @param {array} _titlegrds 
+ */
+function getMusicTitleGradation(_titlegrds) {
+	const grdData = [];
+
+	for (let j = 0; j < _titlegrds.length; j++) {
+
+		let tmpgrd = setVal(_titlegrds[j], ``, C_TYP_STRING);
+
+		// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
+		// 先頭1文字目が#かどうかで判断するので、redやwhiteのような色コードの指定はNG
+		if (tmpgrd[0] === `#`) {
+			tmpgrd = `to right,${tmpgrd}`;
+		}
+
+		// グラデーションが1色しか指定されていない場合、自動的に補完する
+		if (tmpgrd.split(`#`).length <= 2) {
+			tmpgrd += `,#ffffff`;
+		}
+		grdData.push(tmpgrd);
+	}
+
+	return [grdData[0], (grdData.length > 1 ? grdData[1] : grdData[0])];
 }
 
 /**
@@ -1610,55 +1630,19 @@ function titleInit() {
 	divRoot.appendChild(lblTitle);
 
 	// 曲名文字描画（曲名は譜面データから取得）
-	let titlefontgrd = ``;
-	let titlefontgrd2 = ``;
 	if (!g_headerObj.customTitleUse) {
+
+		let titlefontgrd = ``;
+		let titlefontgrd2 = ``;
 
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
-		if (setVal(g_headerObj.titlegrd, ``, C_TYP_STRING) !== ``) {
-			titlefontgrd = g_headerObj.titlegrd;
+		if (g_headerObj.titlegrds.length === 0) {
+			const color1 = setVal(g_headerObj.setColorDefault[0], `#ffffff`, C_TYP_STRING);
+			const color2 = setVal(g_headerObj.setColorDefault[2], `#66ffff`, C_TYP_STRING);
+			[titlefontgrd, titlefontgrd2] = getMusicTitleGradation([`${color1},${color2}`]);
 		} else {
-			if (g_headerObj.setColorDefault[0] !== undefined) {
-				titlefontgrd += g_headerObj.setColorDefault[0];
-			} else {
-				titlefontgrd += `#ffffff`;
-			}
-
-			titlefontgrd += `,`;
-
-			if (g_headerObj.setColorDefault[2] !== undefined) {
-				titlefontgrd += g_headerObj.setColorDefault[2];
-			} else {
-				titlefontgrd += `#66ffff`;
-			}
-		}
-
-		// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
-		// 先頭1文字目が#かどうかで判断するので、redやwhiteのような色コードの指定はNG
-		if (titlefontgrd[0] === `#`) {
-			titlefontgrd = `to right,${titlefontgrd}`;
-		}
-
-		// グラデーションが1色しか指定されていない場合、自動的に補完する
-		if (titlefontgrd.split(`#`).length <= 2) {
-			titlefontgrd += `,#ffffff`;
-		}
-
-		if (g_headerObj.titlegrds.length > 1 && setVal(g_headerObj.titlegrds[1], ``, C_TYP_STRING) !== ``) {
-
-			// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
-			titlefontgrd2 = g_headerObj.titlegrds[1];
-			if (titlefontgrd2[0] === `#`) {
-				titlefontgrd2 = `to right,${titlefontgrd2}`;
-			}
-
-			// グラデーションが1色しか指定されていない場合、自動的に補完する
-			if (titlefontgrd2.split(`#`).length <= 2) {
-				titlefontgrd2 += `,#ffffff`;
-			}
-		} else {
-			titlefontgrd2 = titlefontgrd;
+			[titlefontgrd, titlefontgrd2] = getMusicTitleGradation(g_headerObj.titlegrds);
 		}
 
 		let titlefontsize = 64 * (12 / g_headerObj.musicTitleForView[0].length);
