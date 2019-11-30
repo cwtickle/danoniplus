@@ -1638,9 +1638,7 @@ function titleInit() {
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
 		if (g_headerObj.titlegrds.length === 0) {
-			const color1 = setVal(g_headerObj.setColorDefault[0], `#ffffff`, C_TYP_STRING);
-			const color2 = setVal(g_headerObj.setColorDefault[2], `#66ffff`, C_TYP_STRING);
-			[titlefontgrd, titlefontgrd2] = getMusicTitleGradation([`${color1},${color2}`]);
+			[titlefontgrd, titlefontgrd2] = getMusicTitleGradation([`${g_headerObj.setColorDefault[0]},${g_headerObj.setColorDefault[2]}`]);
 		} else {
 			[titlefontgrd, titlefontgrd2] = getMusicTitleGradation(g_headerObj.titlegrds);
 		}
@@ -4468,9 +4466,8 @@ function keyConfigInit() {
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
-		if (setKey === 229 || setKey === 242 || setKey === 243 || setKey === 244 ||
-			setKey === 91 || setKey === 29 || setKey === 28 || setKey === 27 ||
-			(setKey === 46 && g_currentk === 0) || setKey === g_prevKey) {
+		const disabledKeys = [229, 242, 243, 244, 91, 29, 28, 27, g_prevKey];
+		if (disabledKeys.includes(setKey) || (setKey === 46 && g_currentk === 0)) {
 		} else {
 			if (setKey === 8) {
 			} else {
@@ -4721,6 +4718,7 @@ function loadingScoreInit2() {
 			// 譜面データの再読み込み
 			const tmpObj = scoreConvert(g_rootObj, scoreIdHeader, preblankFrame, dummyIdHeader);
 			for (let j = 0; j < keyNum; j++) {
+				copyLoadingObject(tmpObj.arrowData[j])
 				if (tmpObj.arrowData[j] !== undefined) {
 					g_scoreObj.arrowData[j] = JSON.parse(JSON.stringify(tmpObj.arrowData[j]));
 				}
@@ -5094,57 +5092,9 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		});
 	}
 
-	// 色変化（個別）データの分解（3つで1セット, セット毎の改行区切り可）
-	obj.colorData = [];
-	obj.colorData.length = 0;
-	if (_dosObj[`color${_scoreNo}_data`] !== undefined && _dosObj[`color${_scoreNo}_data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
-		let colorIdx = 0;
-		let tmpArrayData = _dosObj[`color${_scoreNo}_data`].split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
-
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				const tmpColorData = tmpData.split(`,`);
-				for (let k = 0; k < tmpColorData.length; k += 3) {
-					if (isNaN(parseInt(tmpColorData[k]))) {
-						continue;
-					} else if (tmpColorData[k + 1] === `-`) {
-						break;
-					}
-					obj.colorData[colorIdx] = calcFrame(tmpColorData[k]);
-					obj.colorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
-					obj.colorData[colorIdx + 2] = tmpColorData[k + 2];
-					colorIdx += 3;
-				}
-			}
-		});
-	}
-
-	// 色変化（全体）データの分解 (3つで1セット, セット毎の改行区切り可)
-	obj.acolorData = [];
-	obj.acolorData.length = 0;
-	if (_dosObj[`acolor${_scoreNo}_data`] !== undefined && _dosObj[`acolor${_scoreNo}data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
-		let colorIdx = 0;
-		let tmpArrayData = _dosObj[`acolor${_scoreNo}_data`].split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
-
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				const tmpColorData = tmpData.split(`,`);
-				for (let k = 0; k < tmpColorData.length; k += 3) {
-					if (isNaN(parseInt(tmpColorData[k]))) {
-						continue;
-					} else if (tmpColorData[k + 1] === `-`) {
-						break;
-					}
-					obj.acolorData[colorIdx] = calcFrame(tmpColorData[k]);
-					obj.acolorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
-					obj.acolorData[colorIdx + 2] = tmpColorData[k + 2];
-					colorIdx += 3;
-				}
-			}
-		});
-	}
+	// 色変化（個別・全体）の分解 (3つで1セット, セット毎の改行区切り可)
+	obj.colorData = setColorData(`color`, _scoreNo);
+	obj.acolorData = setColorData(`acolor`, _scoreNo);
 
 	// 矢印モーション（個別）データの分解（3～4つで1セット, セット毎の改行区切り）
 	obj.arrowCssMotionData = setCssMotionData(`arrow`, _scoreNo);
@@ -5153,7 +5103,40 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
 
 	/**
-	 * 矢印モーションデータの分解・格納（フレーム数, 矢印番号, CSSクラス名(上スクロール時)[, CSSクラス名(下スクロール時)]）
+	 * 色変化データの分解・格納（フレーム数, 矢印番号）
+	 * @param {string} _header 
+	 * @param {string} _scoreNo 
+	 */
+	function setColorData(_header, _scoreNo) {
+		let colorData = [];
+
+		if (_dosObj[`${_header}${_scoreNo}_data`] !== undefined && _dosObj[`${_header}${_scoreNo}data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
+			let colorIdx = 0;
+			let tmpArrayData = _dosObj[`${_header}${_scoreNo}_data`].split(`\r`).join(`\n`);
+			tmpArrayData = tmpArrayData.split(`\n`);
+
+			tmpArrayData.forEach(tmpData => {
+				if (tmpData !== undefined && tmpData !== ``) {
+					const tmpColorData = tmpData.split(`,`);
+					for (let k = 0; k < tmpColorData.length; k += 3) {
+						if (isNaN(parseInt(tmpColorData[k]))) {
+							continue;
+						} else if (tmpColorData[k + 1] === `-`) {
+							break;
+						}
+						colorData[colorIdx] = calcFrame(tmpColorData[k]);
+						colorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
+						colorData[colorIdx + 2] = tmpColorData[k + 2];
+						colorIdx += 3;
+					}
+				}
+			});
+		}
+		return colorData;
+	}
+
+	/**
+	 * 矢印モーションデータの分解・格納（フレーム数, 矢印番号）
 	 * @param {string} _header 
 	 * @param {string} _scoreNo 
 	 */
