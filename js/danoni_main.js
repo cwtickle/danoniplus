@@ -1516,7 +1516,7 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 					document.querySelector(`#${_depthName}${spriteUpper}Sprite${j}`).innerHTML = ``;
 				}
 			} else {
-				baseSprite.innerHTML = tmpObj.htmlText;
+				baseSprite.innerHTML = ``;
 			}
 		}
 	}
