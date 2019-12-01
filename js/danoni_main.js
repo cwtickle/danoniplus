@@ -821,6 +821,28 @@ function makeSpriteText(_obj) {
 }
 
 /**
+ * 多重配列の存在をチェックし、
+ * 存在しない場合は作成、存在する場合は重複を避けて配列を新規作成
+ * @param {object, array} _obj 
+ */
+function checkDuplicatedObjects(_obj) {
+	let addFrame = 0;
+	if (_obj === undefined) {
+		_obj = [];
+		_obj[0] = [];
+	} else {
+		for (let m = 1; ; m++) {
+			if (_obj[m] === undefined) {
+				_obj[m] = [];
+				addFrame = m;
+				break;
+			}
+		}
+	}
+	return [_obj, addFrame];
+}
+
+/**
  * 多層スプライトデータの作成処理
  * @param {array} _data 
  * @param {function} _calcFrame 
@@ -873,18 +895,8 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				}
 
 				let addFrame = 0;
-				if (spriteData[tmpFrame] === undefined) {
-					spriteData[tmpFrame] = [];
-					spriteData[tmpFrame][0] = {};
-				} else {
-					for (let m = 1; ; m++) {
-						if (spriteData[tmpFrame][m] === undefined) {
-							spriteData[tmpFrame][m] = {};
-							addFrame = m;
-							break;
-						}
-					}
-				}
+				[spriteData[tmpFrame], addFrame] =
+					checkDuplicatedObjects(spriteData[tmpFrame]);
 
 				const emptyPatterns = [``, `[loop]`, `[jump]`];
 				spriteData[tmpFrame][addFrame] = {
@@ -5176,18 +5188,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 					}
 
 					let addFrame = 0;
-					if (wordData[tmpWordData[k]] === undefined) {
-						wordData[tmpWordData[k]] = [];
-						wordData[tmpWordData[k]][0] = [];
-					} else {
-						for (let m = 1; ; m++) {
-							if (wordData[tmpWordData[k]][m] === undefined) {
-								wordData[tmpWordData[k]][m] = [];
-								addFrame = m;
-								break;
-							}
-						}
-					}
+					[wordData[tmpWordData[k]], addFrame] =
+						checkDuplicatedObjects(wordData[tmpWordData[k]]);
 
 					if (tmpWordData.length > 3 && tmpWordData.length < 6) {
 						tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, C_TYP_NUMBER);
