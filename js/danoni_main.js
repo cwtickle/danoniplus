@@ -663,13 +663,7 @@ function clearWindow() {
 	}
 
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
-	const divRoot = document.querySelector(`#divRoot`);
-	while (divRoot.hasChildNodes()) {
-		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkey`));
-		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkeyTS`));
-		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkeyTE`));
-		divRoot.removeChild(divRoot.firstChild);
-	}
+	deleteChildspriteAll(`divRoot`);
 
 }
 
@@ -821,6 +815,28 @@ function makeSpriteText(_obj) {
 }
 
 /**
+ * 多重配列の存在をチェックし、
+ * 存在しない場合は作成、存在する場合は重複を避けて配列を新規作成
+ * @param {object, array} _obj 
+ */
+function checkDuplicatedObjects(_obj) {
+	let addFrame = 0;
+	if (_obj === undefined) {
+		_obj = [];
+		_obj[0] = [];
+	} else {
+		for (let m = 1; ; m++) {
+			if (_obj[m] === undefined) {
+				_obj[m] = [];
+				addFrame = m;
+				break;
+			}
+		}
+	}
+	return [_obj, addFrame];
+}
+
+/**
  * 多層スプライトデータの作成処理
  * @param {array} _data 
  * @param {function} _calcFrame 
@@ -873,18 +889,8 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				}
 
 				let addFrame = 0;
-				if (spriteData[tmpFrame] === undefined) {
-					spriteData[tmpFrame] = [];
-					spriteData[tmpFrame][0] = {};
-				} else {
-					for (let m = 1; ; m++) {
-						if (spriteData[tmpFrame][m] === undefined) {
-							spriteData[tmpFrame][m] = {};
-							addFrame = m;
-							break;
-						}
-					}
-				}
+				[spriteData[tmpFrame], addFrame] =
+					checkDuplicatedObjects(spriteData[tmpFrame]);
 
 				const emptyPatterns = [``, `[loop]`, `[jump]`];
 				spriteData[tmpFrame][addFrame] = {
@@ -4965,9 +4971,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		return arrowData;
 	}
 
-	// 速度変化（全体）データの分解 (2つで1セット)
-	obj.speedData = [];
-	obj.speedData.length = 0;
+	// 速度変化データの分解 (2つで1セット)
 	let speedFooter = ``;
 	if (_dosObj[`speed${_scoreNo}_data`] !== undefined) {
 		speedFooter = `_data`;
@@ -4975,52 +4979,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	if (_dosObj[`speed${_scoreNo}_change`] !== undefined) {
 		speedFooter = `_change`;
 	}
-	if (_dosObj[`speed${_scoreNo}${speedFooter}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
-		let speedIdx = 0;
-		let tmpArrayData = _dosObj[`speed${_scoreNo}${speedFooter}`].split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
 
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				const tmpSpeedData = tmpData.split(`,`);
-				for (let k = 0; k < tmpSpeedData.length; k += 2) {
-					if (isNaN(parseInt(tmpSpeedData[k]))) {
-						continue;
-					} else if (tmpSpeedData[k + 1] === `-`) {
-						break;
-					}
-					obj.speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
-					obj.speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
-					speedIdx += 2;
-				}
-			}
-		});
-	}
-
-	// 速度変化（個別）データの分解 (2つで1セット, セット毎の改行区切り可)
-	obj.boostData = [];
-	obj.boostData.length = 0;
-	if (_dosObj[`boost${_scoreNo}_data`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
-		let speedIdx = 0;
-		let tmpArrayData = _dosObj[`boost${_scoreNo}_data`].split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
-
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				const tmpSpeedData = tmpData.split(`,`);
-				for (let k = 0; k < tmpSpeedData.length; k += 2) {
-					if (isNaN(parseInt(tmpSpeedData[k]))) {
-						continue;
-					} else if (tmpSpeedData[k + 1] === `-`) {
-						break;
-					}
-					obj.boostData[speedIdx] = calcFrame(tmpSpeedData[k]);
-					obj.boostData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
-					speedIdx += 2;
-				}
-			}
-		});
-	}
+	// 速度変化（個別・全体）の分解 (2つで1セット, セット毎の改行区切り可)
+	obj.boostData = setSpeedData(`boost`, _scoreNo);
+	obj.speedData = setSpeedData(`speed`, _scoreNo, speedFooter);
 
 	// 色変化（個別・全体）の分解 (3つで1セット, セット毎の改行区切り可)
 	obj.colorData = setColorData(`color`, _scoreNo);
@@ -5031,6 +4993,79 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.frzCssMotionData = setCssMotionData(`frz`, _scoreNo);
 	obj.dummyArrowCssMotionData = setCssMotionData(`arrow`, _dummyNo);
 	obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
+
+	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
+	obj.wordData = [];
+	obj.wordMaxDepth = -1;
+	if (g_stateObj.d_lyrics === C_FLG_OFF) {
+	} else {
+		[obj.wordData, obj.wordMaxDepth] = makeWordData(_scoreNo);
+	}
+
+	// 背景・マスクデータの分解 (下記すべてで1セット、改行区切り)
+	// [フレーム数, 階層, 背景パス, class(CSSで別定義), X, Y, width, height, opacity, animationName, animationDuration]
+	obj.maskData = [];
+	obj.maskMaxDepth = -1;
+	obj.backData = [];
+	obj.backMaxDepth = -1;
+	if (g_stateObj.d_background === C_FLG_OFF) {
+	} else {
+		[obj.maskData, obj.maskMaxDepth] = makeBackgroundData(`mask`, _scoreNo);
+		[obj.backData, obj.backMaxDepth] = makeBackgroundData(`back`, _scoreNo);
+	}
+
+	// 結果画面用・背景/マスクデータの分解 (下記すべてで1セット、改行区切り)
+	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
+		const backgroundResults = [`backResult`, `maskResult`, `backFailed`, `maskFailed`];
+		backgroundResults.forEach(backName => {
+			g_headerObj[`${backName}Data`] = [];
+			g_headerObj[`${backName}MaxDepth`] = -1;
+		});
+	} else {
+		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] =
+			makeBackgroundResultData(`backresult`, _scoreNo);
+		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] =
+			makeBackgroundResultData(`maskresult`, _scoreNo);
+		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] =
+			makeBackgroundResultData(`backfailed${g_gaugeType.slice(0, 1)}`, _scoreNo, `backresult`);
+		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] =
+			makeBackgroundResultData(`maskfailed${g_gaugeType.slice(0, 1)}`, _scoreNo, `maskresult`);
+	}
+
+	/**
+	 * 速度変化データの分解・格納（フレーム数, 矢印番号）
+	 * @param {string} _header 
+	 * @param {string} _scoreNo 
+	 * @param {string} _footer 
+	 */
+	function setSpeedData(_header, _scoreNo, _footer = `_data`) {
+		let speedData = [];
+
+		if (_dosObj[`${_header}${_scoreNo}${_footer}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
+			let speedIdx = 0;
+			let tmpArrayData = _dosObj[`${_header}${_scoreNo}${_footer}`].split(`\r`).join(`\n`);
+			tmpArrayData = tmpArrayData.split(`\n`);
+
+			tmpArrayData.forEach(tmpData => {
+				if (tmpData !== undefined && tmpData !== ``) {
+					const tmpSpeedData = tmpData.split(`,`);
+					for (let k = 0; k < tmpSpeedData.length; k += 2) {
+						if (isNaN(parseInt(tmpSpeedData[k]))) {
+							continue;
+						} else if (tmpSpeedData[k + 1] === `-`) {
+							break;
+						}
+						speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
+						speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
+						speedIdx += 2;
+					}
+				}
+			});
+		}
+
+		return speedData;
+	}
 
 	/**
 	 * 色変化データの分解・格納（フレーム数, 矢印番号）
@@ -5102,189 +5137,100 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		return cssMotionData;
 	}
 
-	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
-	obj.wordData = [];
-	obj.wordData.length = 0;
-	obj.wordMaxDepth = -1;
-	if (g_stateObj.d_lyrics === C_FLG_ON) {
-
-		let inputWordData = ``;
-		let wordDataList;
+	/**
+	 * 歌詞データの分解
+	 * @param {string} _scoreNo 
+	 */
+	function makeWordData(_scoreNo) {
+		let wordDataList = [];
 		if (g_stateObj.scroll !== `---`) {
-			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
-		} else {
-			if (g_stateObj.reverse === C_FLG_ON) {
-				wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
-			} else {
-				wordDataList = [_dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
-			}
+			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data];
+		} else if (g_stateObj.reverse === C_FLG_ON) {
+			wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data];
 		}
-		const wordData = wordDataList.find((v) => v !== undefined);
-		if (wordData !== undefined) {
-			inputWordData = wordData;
-		}
-		if (inputWordData !== ``) {
-			let tmpArrayData = inputWordData.split(`\r`).join(`\n`);
-			tmpArrayData = tmpArrayData.split(`\n`);
+		wordDataList.push(_dosObj[`word${_scoreNo}_data`], _dosObj.word_data);
 
-			tmpArrayData.forEach(tmpData => {
-				if (tmpData !== undefined && tmpData !== ``) {
-					const tmpWordData = tmpData.split(`,`);
-					for (let k = 0; k < tmpWordData.length; k += 3) {
-						if (isNaN(parseInt(tmpWordData[k]))) {
-							continue;
-						} else if (tmpWordData[k + 1] === `-`) {
-							break;
-						}
-						tmpWordData[k] = calcFrame(tmpWordData[k]);
-						tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
+		const inputWordData = wordDataList.find((v) => v !== undefined);
+		return (inputWordData !== undefined ? makeSpriteWordData(inputWordData) : [[], -1]);
+	}
 
-						if (tmpWordData[k + 1] > obj.wordMaxDepth) {
-							obj.wordMaxDepth = tmpWordData[k + 1];
-						}
+	/**
+	 * 多層歌詞データの格納処理
+	 * @param {object} _data 
+	 */
+	function makeSpriteWordData(_data) {
+		const wordData = [];
+		let wordMaxDepth = -1;
 
-						let addFrame = 0;
-						if (obj.wordData[tmpWordData[k]] === undefined) {
-							obj.wordData[tmpWordData[k]] = [];
-							obj.wordData[tmpWordData[k]][0] = [];
-						} else {
-							for (let m = 1; ; m++) {
-								if (obj.wordData[tmpWordData[k]][m] === undefined) {
-									obj.wordData[tmpWordData[k]][m] = [];
-									addFrame = m;
-									break;
-								}
-							}
-						}
+		let tmpArrayData = _data.split(`\r`).join(`\n`);
+		tmpArrayData = tmpArrayData.split(`\n`);
 
-						if (tmpWordData.length > 3 && tmpWordData.length < 6) {
-							tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, C_TYP_NUMBER);
-							obj.wordData[tmpWordData[0]][addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
-							break;
-						} else {
-							obj.wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1], setVal(tmpWordData[k + 2], ``, C_TYP_STRING));
-						}
+		tmpArrayData.forEach(tmpData => {
+			if (tmpData !== undefined && tmpData !== ``) {
+				const tmpWordData = tmpData.split(`,`);
+				for (let k = 0; k < tmpWordData.length; k += 3) {
+					if (isNaN(parseInt(tmpWordData[k]))) {
+						continue;
+					} else if (tmpWordData[k + 1] === `-`) {
+						break;
+					}
+					tmpWordData[k] = calcFrame(tmpWordData[k]);
+					tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
+
+					if (tmpWordData[k + 1] > wordMaxDepth) {
+						wordMaxDepth = tmpWordData[k + 1];
+					}
+
+					let addFrame = 0;
+					[wordData[tmpWordData[k]], addFrame] =
+						checkDuplicatedObjects(wordData[tmpWordData[k]]);
+
+					if (tmpWordData.length > 3 && tmpWordData.length < 6) {
+						tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, C_TYP_NUMBER);
+						wordData[tmpWordData[0]][addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
+						break;
+					} else {
+						wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1], setVal(tmpWordData[k + 2], ``, C_TYP_STRING));
 					}
 				}
-			});
-		}
-	}
-
-	// マスクデータの分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	obj.maskData = [];
-	obj.maskData.length = 0;
-	if (g_stateObj.d_background === C_FLG_ON) {
-		let maskDataList;
-		if (g_stateObj.scroll !== `---`) {
-			maskDataList = [_dosObj[`maskAlt${_scoreNo}_data`], _dosObj.maskAlt_data, _dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
-		} else {
-			if (g_stateObj.reverse === C_FLG_ON) {
-				maskDataList = [_dosObj[`maskRev${_scoreNo}_data`], _dosObj.maskRev_data, _dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
-			} else {
-				maskDataList = [_dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
 			}
-		}
-		const maskData = maskDataList.find((v) => v !== undefined);
-		if (maskData !== undefined) {
-			[obj.maskData, obj.maskMaxDepth] = makeSpriteData(maskData, calcFrame);
-		}
+		});
+
+		return [wordData, wordMaxDepth];
 	}
 
-	// 背景データの分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	obj.backData = [];
-	obj.backData.length = 0;
-	if (g_stateObj.d_background === C_FLG_ON) {
-		let backDataList;
+	/**
+	 * 背景・マスクデータの分解
+	 * @param {string} _header 
+	 * @param {string} _scoreNo
+	 */
+	function makeBackgroundData(_header, _scoreNo) {
+		let dataList = [];
 		if (g_stateObj.scroll !== `---`) {
-			backDataList = [_dosObj[`backAlt${_scoreNo}_data`], _dosObj.backAlt_data, _dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
-		} else {
-			if (g_stateObj.reverse === C_FLG_ON) {
-				backDataList = [_dosObj[`backRev${_scoreNo}_data`], _dosObj.backRev_data, _dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
-			} else {
-				backDataList = [_dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
-			}
+			dataList = [_dosObj[`${_header}Alt${_scoreNo}_data`], _dosObj[`${_header}Alt_data`]];
+		} else if (g_stateObj.reverse === C_FLG_ON) {
+			dataList = [_dosObj[`${_header}Rev${_scoreNo}_data`], _dosObj[`${_header}Rev_data`]];
 		}
-		const backData = backDataList.find((v) => v !== undefined);
-		if (backData !== undefined) {
-			[obj.backData, obj.backMaxDepth] = makeSpriteData(backData, calcFrame);
-		}
+		dataList.push(_dosObj[`${_header}${_scoreNo}_data`], _dosObj[`${_header}_data`]);
+
+		const data = dataList.find((v) => v !== undefined);
+		return (data !== undefined ? makeSpriteData(data, calcFrame) : [[], -1]);
 	}
 
-	let scoreIdHeader = ``;
-	if (g_stateObj.scoreId > 0) {
-		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
-	}
-
-	// 結果画面用・背景データ(クリア時)の分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	g_headerObj.backResultData = [];
-	g_headerObj.backResultData.length = 0;
-	g_headerObj.backResultMaxDepth = -1;
-	let tmpBackResultData = ``;
-
-	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
-	} else {
-		if (_dosObj[`backresult${scoreIdHeader}_data`] !== undefined) {
-			tmpBackResultData = _dosObj[`backresult${scoreIdHeader}_data`];
-		} else if (_dosObj.backresult_data !== undefined) {
-			tmpBackResultData = _dosObj.backresult_data;
+	/**
+	 * リザルトモーションデータ(結果画面用背景・マスクデータ)の分解
+	 * @param {string} _header 
+	 * @param {string} _scoreNo 
+	 * @param {string} _defaultHeader 
+	 */
+	function makeBackgroundResultData(_header, _scoreNo, _defaultHeader = ``) {
+		let dataList = [_dosObj[`${_header}${_scoreNo}_data`], _dosObj[`${_header}_data`]];
+		if (_defaultHeader !== ``) {
+			dataList.push(_dosObj[`${_defaultHeader}${_scoreNo}_data`], _dosObj[`${_defaultHeader}_data`]);
 		}
-		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(tmpBackResultData);
-	}
 
-	// 結果画面用・マスクデータ(クリア時)の分解 (下記すべてで1セット、改行区切り)
-	g_headerObj.maskResultData = [];
-	g_headerObj.maskResultData.length = 0;
-	g_headerObj.maskResultMaxDepth = -1;
-	let tmpMaskResultData = ``;
-
-	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
-	} else {
-		if (_dosObj[`maskresult${scoreIdHeader}_data`] !== undefined) {
-			tmpMaskResultData = _dosObj[`maskresult${scoreIdHeader}_data`];
-		} else if (_dosObj.maskresult_data !== undefined) {
-			tmpMaskResultData = _dosObj.maskresult_data;
-		}
-		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(tmpMaskResultData);
-	}
-
-	// 結果画面用・背景データ(失敗時)の分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	g_headerObj.backFailedData = [];
-	g_headerObj.backFailedData.length = 0;
-	g_headerObj.backFailedMaxDepth = -1;
-
-	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
-	} else {
-		let tmpBackFailedData = ``;
-		if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
-			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
-		} else if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`];
-		} else {
-			tmpBackFailedData = tmpBackResultData;
-		}
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(tmpBackFailedData);
-	}
-
-	// 結果画面用・マスクデータ(失敗時)の分解 (下記すべてで1セット、改行区切り)
-	g_headerObj.maskFailedData = [];
-	g_headerObj.maskFailedData.length = 0;
-	g_headerObj.maskFailedMaxDepth = -1;
-
-	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
-	} else {
-		let tmpMaskFailedData = ``;
-		if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
-			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
-		} else if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`];
-		} else {
-			tmpMaskFailedData = tmpMaskResultData;
-		}
-		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(tmpMaskFailedData);
+		const data = dataList.find((v) => v !== undefined);
+		return (data !== undefined ? makeSpriteData(data) : [[], -1]);
 	}
 
 	return obj;
