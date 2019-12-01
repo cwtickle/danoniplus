@@ -663,13 +663,7 @@ function clearWindow() {
 	}
 
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
-	const divRoot = document.querySelector(`#divRoot`);
-	while (divRoot.hasChildNodes()) {
-		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkey`));
-		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkeyTS`));
-		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkeyTE`));
-		divRoot.removeChild(divRoot.firstChild);
-	}
+	deleteChildspriteAll(`divRoot`);
 
 }
 
