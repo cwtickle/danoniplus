@@ -1,5 +1,6 @@
 # Dancing☆Onigiri (CW Edition)
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/9558f21e17a47a4dc987/maintainability)](https://codeclimate.com/github/cwtickle/danoniplus/maintainability)
 [![Join the chat at https://gitter.im/danonicw/community](https://badges.gitter.im/danonicw/community.svg)](https://gitter.im/danonicw/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 リズムゲームDancing☆Onigiri (CW Edition)のソース作成・配布場所です。  

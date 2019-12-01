@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/11/24
+ * Revised : 2019/12/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 10.2.4`;
-const g_revisedDate = `2019/11/24`;
+const g_version = `Ver 10.3.0`;
+const g_revisedDate = `2019/12/01`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -199,12 +199,7 @@ function setVal(_checkStr, _default, _type) {
 
 	} else if (_type === C_TYP_BOOLEAN) {
 		const lowerCase = _checkStr.toString().toLowerCase();
-		if (lowerCase === `true`) {
-			return true;
-		} else if (lowerCase === `false`) {
-			return false;
-		}
-		return _default
+		return (lowerCase === `true` ? true : (lowerCase === `false` ? false : _default));
 	}
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
@@ -312,12 +307,12 @@ function getBasicFont() {
 
 /**
  * 半角換算の文字数を計算
- * @param {string} str 
+ * @param {string} _str 
  */
-function getStrLength(str) {
+function getStrLength(_str) {
 	let result = 0;
-	for (let i = 0; i < str.length; i++) {
-		const chr = str.charCodeAt(i);
+	for (let i = 0; i < _str.length; i++) {
+		const chr = _str.charCodeAt(i);
 		if ((chr >= 0x00 && chr < 0x81) ||
 			(chr === 0xf8f0) ||
 			(chr >= 0xff61 && chr < 0xffa0) ||
@@ -637,8 +632,6 @@ function clearWindow() {
 		const layer0 = document.querySelector(`#layer0`);
 		const l0ctx = layer0.getContext(`2d`);
 
-		g_sWidth = layer0.width;
-		g_sHeight = layer0.height;
 		const C_MARGIN = 0;
 
 		// 線画、図形をクリア
@@ -670,13 +663,7 @@ function clearWindow() {
 	}
 
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
-	const divRoot = document.querySelector(`#divRoot`);
-	while (divRoot.hasChildNodes()) {
-		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkey`));
-		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkeyTS`));
-		g_handler.removeListener(divRoot.firstChild.getAttribute(`lsnrkeyTE`));
-		divRoot.removeChild(divRoot.firstChild);
-	}
+	deleteChildspriteAll(`divRoot`);
 
 }
 
@@ -786,6 +773,70 @@ class AudioPlayer {
 }
 
 /**
+ * 背景・マスク用画像の描画
+ * @param {object} _obj 
+ */
+function makeSpriteImage(_obj) {
+	let tmpInnerHTML = `<img src=${_obj.path} class="${_obj.class}"
+					style="position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
+	if (_obj.width !== 0 && _obj.width > 0) {
+		tmpInnerHTML += `;width:${_obj.width}px`;
+	}
+	if (_obj.height !== `` && setVal(_obj.height, 0, C_TYP_NUMBER) > 0) {
+		tmpInnerHTML += `;height:${_obj.height}px`;
+	}
+	tmpInnerHTML += `;animation-name:${_obj.animationName}
+					;animation-duration:${_obj.animationDuration}s
+					;opacity:${_obj.opacity}">`;
+	return tmpInnerHTML;
+}
+
+/**
+ * 背景・マスク用テキストの描画
+ * @param {object} _obj 
+ */
+function makeSpriteText(_obj) {
+	let tmpInnerHTML = `<span class="${_obj.class}"
+					style="display:inline-block;position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
+
+	// この場合のwidthは font-size と解釈する
+	if (_obj.width !== 0 && _obj.width > 0) {
+		tmpInnerHTML += `;font-size:${_obj.width}px`;
+	}
+
+	// この場合のheightは color と解釈する
+	if (_obj.height !== ``) {
+		tmpInnerHTML += `;color:${_obj.height}`;
+	}
+	tmpInnerHTML += `;animation-name:${_obj.animationName}
+					;animation-duration:${_obj.animationDuration}s
+					;opacity:${_obj.opacity}">${_obj.path}</span>`;
+	return tmpInnerHTML;
+}
+
+/**
+ * 多重配列の存在をチェックし、
+ * 存在しない場合は作成、存在する場合は重複を避けて配列を新規作成
+ * @param {object, array} _obj 
+ */
+function checkDuplicatedObjects(_obj) {
+	let addFrame = 0;
+	if (_obj === undefined) {
+		_obj = [];
+		_obj[0] = [];
+	} else {
+		for (let m = 1; ; m++) {
+			if (_obj[m] === undefined) {
+				_obj[m] = [];
+				addFrame = m;
+				break;
+			}
+		}
+	}
+	return [_obj, addFrame];
+}
+
+/**
  * 多層スプライトデータの作成処理
  * @param {array} _data 
  * @param {function} _calcFrame 
@@ -802,67 +853,54 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 		if (tmpData !== undefined && tmpData !== ``) {
 			const tmpSpriteData = tmpData.split(`,`);
 
-			if (tmpSpriteData.length > 1) {
-				// 深度が"-"の場合はスキップ
-				if (tmpSpriteData[1] === `-`) {
+			// 深度が"-"の場合はスキップ
+			if (tmpSpriteData.length > 1 && tmpSpriteData[1] !== `-`) {
+
+				// 値チェックとエスケープ処理
+				let tmpFrame;
+				if (setVal(tmpSpriteData[0], 200, C_TYP_NUMBER) === 0) {
+					tmpFrame = 0;
 				} else {
-					// 値チェックとエスケープ処理
-					let tmpFrame;
-					if (setVal(tmpSpriteData[0], 200, C_TYP_NUMBER) === 0) {
+					tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_NUMBER));
+					if (tmpFrame < 0) {
 						tmpFrame = 0;
-					} else {
-						tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_NUMBER));
-						if (tmpFrame < 0) {
-							tmpFrame = 0;
-						}
 					}
-					const tmpDepth = (tmpSpriteData[1] === `ALL` ? `ALL` : setVal(tmpSpriteData[1], 0, C_TYP_NUMBER));
-					const tmpPath = escapeHtml(setVal(tmpSpriteData[2], ``, C_TYP_STRING));
-					const tmpClass = escapeHtml(setVal(tmpSpriteData[3], ``, C_TYP_STRING));
-					const tmpX = setVal(tmpSpriteData[4], 0, C_TYP_FLOAT);
-					const tmpY = setVal(tmpSpriteData[5], 0, C_TYP_FLOAT);
-					const tmpWidth = setVal(tmpSpriteData[6], 0, C_TYP_NUMBER);					// spanタグの場合は font-size
-					const tmpHeight = escapeHtml(setVal(tmpSpriteData[7], ``, C_TYP_STRING));	// spanタグの場合は color(文字列可)
-					const tmpOpacity = setVal(tmpSpriteData[8], 1, C_TYP_FLOAT);
-					const tmpAnimationName = escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING));
-					const tmpAnimationDuration = setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / g_fps;
-
-					if (g_headerObj.autoPreload) {
-						if (tmpPath.indexOf(`.png`) !== -1 || tmpPath.indexOf(`.gif`) !== -1 ||
-							tmpPath.indexOf(`.bmp`) !== -1 || tmpPath.indexOf(`.jpg`) !== -1) {
-							preloadFile(`image`, tmpPath);
-						}
-					}
-					if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
-						maxDepth = tmpDepth;
-					}
-
-					let addFrame = 0;
-					if (spriteData[tmpFrame] === undefined) {
-						spriteData[tmpFrame] = [];
-						spriteData[tmpFrame][0] = {};
-					} else {
-						for (let m = 1; ; m++) {
-							if (spriteData[tmpFrame][m] === undefined) {
-								spriteData[tmpFrame][m] = {};
-								addFrame = m;
-								break;
-							}
-						}
-					}
-					spriteData[tmpFrame][addFrame] = {
-						depth: tmpDepth,
-						path: tmpPath,
-						class: tmpClass,
-						left: tmpX,
-						top: tmpY,
-						width: tmpWidth,
-						height: tmpHeight,
-						opacity: tmpOpacity,
-						animationName: tmpAnimationName,
-						animationDuration: tmpAnimationDuration
-					};
 				}
+				const tmpDepth = (tmpSpriteData[1] === `ALL` ? `ALL` : setVal(tmpSpriteData[1], 0, C_TYP_NUMBER));
+				if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
+					maxDepth = tmpDepth;
+				}
+
+				const tmpObj = {
+					path: escapeHtml(setVal(tmpSpriteData[2], ``, C_TYP_STRING)),		// 画像パス or テキスト
+					class: escapeHtml(setVal(tmpSpriteData[3], ``, C_TYP_STRING)),		// CSSクラス
+					left: setVal(tmpSpriteData[4], 0, C_TYP_FLOAT),						// X座標
+					top: setVal(tmpSpriteData[5], 0, C_TYP_FLOAT),						// Y座標
+					width: setVal(tmpSpriteData[6], 0, C_TYP_NUMBER),					// spanタグの場合は font-size
+					height: escapeHtml(setVal(tmpSpriteData[7], ``, C_TYP_STRING)),		// spanタグの場合は color(文字列可)
+					opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
+					animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING)),
+					animationDuration: setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / g_fps,
+				};
+				if (g_headerObj.autoPreload) {
+					if (checkImage(tmpObj.path)) {
+						preloadFile(`image`, tmpObj.path);
+					}
+				}
+
+				let addFrame = 0;
+				[spriteData[tmpFrame], addFrame] =
+					checkDuplicatedObjects(spriteData[tmpFrame]);
+
+				const emptyPatterns = [``, `[loop]`, `[jump]`];
+				spriteData[tmpFrame][addFrame] = {
+					depth: tmpDepth,
+					command: tmpObj.path,
+					jumpFrame: tmpObj.class,
+					maxLoop: tmpObj.left,
+					htmlText: emptyPatterns.includes(tmpObj.path) ?
+						`` : (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj)),
+				};
 			}
 		}
 	});
@@ -893,10 +931,10 @@ function getQueryParamVal(_name) {
 
 function initialControl() {
 
-	g_sWidth = (isNaN(parseFloat(document.querySelector(`#canvas-frame`).style.width)) ?
-		600 : parseFloat(document.querySelector(`#canvas-frame`).style.width));
-	g_sHeight = (isNaN(parseFloat(document.querySelector(`#canvas-frame`).style.height)) ?
-		500 : parseFloat(document.querySelector(`#canvas-frame`).style.height));
+	g_sWidth = (isNaN(parseFloat($id(`canvas-frame`).width)) ?
+		600 : parseFloat($id(`canvas-frame`).width));
+	g_sHeight = (isNaN(parseFloat($id(`canvas-frame`).height)) ?
+		500 : parseFloat($id(`canvas-frame`).height));
 
 	let divRoot;
 	if (document.querySelector(`#divRoot`) === null) {
@@ -1400,9 +1438,6 @@ function drawDefaultBackImage(_key) {
 		const layer0 = document.querySelector(`#layer0`);
 		const l0ctx = layer0.getContext(`2d`);
 
-		g_sWidth = layer0.width;
-		g_sHeight = layer0.height;
-
 		// 画面背景を指定 (background-color)
 		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
 		if (!g_headerObj[`customBack${_key}Use`]) {
@@ -1421,6 +1456,31 @@ function drawDefaultBackImage(_key) {
 }
 
 /**
+ * 画像ファイルかどうかをチェック
+ * @param {string} _str 
+ */
+function checkImage(_str) {
+	return (
+		(
+			_str.indexOf(`.png`) !== -1 ||
+			_str.indexOf(`.gif`) !== -1 ||
+			_str.indexOf(`.bmp`) !== -1 ||
+			_str.indexOf(`.jpg`) !== -1
+		) ? true : false
+	);
+}
+
+/**
+ * back/masktitle(result)において、ジャンプ先のフレーム数を取得
+ * @param {string} _frames 
+ */
+function getSpriteJumpFrame(_frames) {
+	const jumpFrames = _frames.split(`:`);
+	const jumpCnt = Math.floor(Math.random() * jumpFrames.length);
+	return setVal(Number(jumpFrames[jumpCnt]) - 1, 0, C_TYP_NUMBER);
+}
+
+/**
  * 背景・マスクモーションの表示（タイトル・リザルト用）
  * @param {number} _frame 
  * @param {string} _spriteName title / result
@@ -1434,55 +1494,22 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 	for (let j = 0; j < tmpObjs.length; j++) {
 		const tmpObj = tmpObjs[j];
 		const baseSprite = document.querySelector(`#${_depthName}${spriteUpper}Sprite${tmpObj.depth}`);
-		if (tmpObj.path !== ``) {
-			if (tmpObj.path === `[loop]`) {
+		if (tmpObj.command !== ``) {
+			if (tmpObj.command === `[loop]`) {
 				// キーワード指定：ループ
 				// 指定フレーム(class)へ移動する
 				g_scoreObj[`${_depthName}${spriteUpper}LoopCount`]++;
-				return getSpriteJumpFrame(tmpObj.class);
+				return getSpriteJumpFrame(tmpObj.jumpFrame);
 
-			} else if (tmpObj.path === `[jump]`) {
+			} else if (tmpObj.command === `[jump]`) {
 				// キーワード指定：フレームジャンプ
-				// 指定回数以上のループ(left)があれば指定フレーム(class)へ移動する
-				if (g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] >= Number(tmpObj.left)) {
+				// 指定回数以上のループ(maxLoop)があれば指定フレーム(jumpFrame)へ移動する
+				if (g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] >= Number(tmpObj.maxLoop)) {
 					g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] = 0;
-					return getSpriteJumpFrame(tmpObj.class);
+					return getSpriteJumpFrame(tmpObj.jumpFrame);
 				}
-			} else if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
-				tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
-
-				// imgタグの場合
-				let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
-					style="position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-				if (tmpObj.width !== 0 && tmpObj.width > 0) {
-					tmpInnerHTML += `;width:${tmpObj.width}px`;
-				}
-				if (tmpObj.height !== `` && setVal(tmpObj.height, 0, C_TYP_NUMBER) > 0) {
-					tmpInnerHTML += `;height:${tmpObj.height}px`;
-				}
-				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-					;animation-duration:${tmpObj.animationDuration}s
-					;opacity:${tmpObj.opacity}">`;
-				baseSprite.innerHTML = tmpInnerHTML;
-
 			} else {
-				// spanタグの場合
-				let tmpInnerHTML = `<span class="${tmpObj.class}"
-					style="display:inline-block;position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-
-				// この場合のwidthは font-size と解釈する
-				if (tmpObj.width !== 0 && tmpObj.width > 0) {
-					tmpInnerHTML += `;font-size:${tmpObj.width}px`;
-				}
-
-				// この場合のheightは color と解釈する
-				if (tmpObj.height !== ``) {
-					tmpInnerHTML += `;color:${tmpObj.height}`;
-				}
-				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-					;animation-duration:${tmpObj.animationDuration}s
-					;opacity:${tmpObj.opacity}">${tmpObj.path}</span>`;
-				baseSprite.innerHTML = tmpInnerHTML;
+				baseSprite.innerHTML = tmpObj.htmlText;
 			}
 		} else {
 			if (tmpObj.depth === `ALL`) {
@@ -1498,16 +1525,6 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 }
 
 /**
- * back/masktitle(result)において、ジャンプ先のフレーム数を取得
- * @param {string} _frames 
- */
-function getSpriteJumpFrame(_frames) {
-	const jumpFrames = _frames.split(`:`);
-	const jumpCnt = Math.floor(Math.random() * jumpFrames.length);
-	return setVal(Number(jumpFrames[jumpCnt]) - 1, 0, C_TYP_NUMBER);
-}
-
-/**
  * 背景・マスクモーションの表示
  * @param {number} _frame 
  * @param {string} _depthName 
@@ -1518,43 +1535,8 @@ function drawMainSpriteData(_frame, _depthName) {
 
 	tmpObjs.forEach(tmpObj => {
 		const baseSprite = document.querySelector(`#${_depthName}Sprite${tmpObj.depth}`);
-		if (tmpObj.path !== ``) {
-			if (tmpObj.path.indexOf(`.png`) !== -1 || tmpObj.path.indexOf(`.gif`) !== -1 ||
-				tmpObj.path.indexOf(`.bmp`) !== -1 || tmpObj.path.indexOf(`.jpg`) !== -1) {
-
-				// imgタグの場合
-				let tmpInnerHTML = `<img src=${tmpObj.path} class="${tmpObj.class}"
-					style="position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-				if (tmpObj.width !== 0 && tmpObj.width > 0) {
-					tmpInnerHTML += `;width:${tmpObj.width}px`;
-				}
-				if (tmpObj.height !== `` && setVal(tmpObj.height, 0, C_TYP_NUMBER) > 0) {
-					tmpInnerHTML += `;height:${tmpObj.height}px`;
-				}
-				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-					;animation-duration:${tmpObj.animationDuration}s
-					;opacity:${tmpObj.opacity}">`;
-				baseSprite.innerHTML = tmpInnerHTML;
-
-			} else {
-				// spanタグの場合
-				let tmpInnerHTML = `<span class="${tmpObj.class}"
-					style="display:inline-block;position:absolute;left:${tmpObj.left}px;top:${tmpObj.top}px`;
-
-				// この場合のwidthは font-size と解釈する
-				if (tmpObj.width !== 0 && tmpObj.width > 0) {
-					tmpInnerHTML += `;font-size:${tmpObj.width}px`;
-				}
-
-				// この場合のheightは color と解釈する
-				if (tmpObj.height !== ``) {
-					tmpInnerHTML += `;color:${tmpObj.height}`;
-				}
-				tmpInnerHTML += `;animation-name:${tmpObj.animationName}
-					;animation-duration:${tmpObj.animationDuration}s
-					;opacity:${tmpObj.opacity}">${tmpObj.path}</span>`;
-				baseSprite.innerHTML = tmpInnerHTML;
-			}
+		if (tmpObj.command !== ``) {
+			baseSprite.innerHTML = tmpObj.htmlText;
 		} else {
 			if (tmpObj.depth === `ALL`) {
 				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
@@ -1565,6 +1547,33 @@ function drawMainSpriteData(_frame, _depthName) {
 			}
 		}
 	});
+}
+
+/**
+ * 曲名のグラデーションを指定
+ * @param {array} _titlegrds 
+ */
+function getMusicTitleGradation(_titlegrds) {
+	const grdData = [];
+
+	for (let j = 0; j < _titlegrds.length; j++) {
+
+		let tmpgrd = setVal(_titlegrds[j], ``, C_TYP_STRING);
+
+		// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
+		// 先頭1文字目が#かどうかで判断するので、redやwhiteのような色コードの指定はNG
+		if (tmpgrd[0] === `#`) {
+			tmpgrd = `to right,${tmpgrd}`;
+		}
+
+		// グラデーションが1色しか指定されていない場合、自動的に補完する
+		if (tmpgrd.split(`#`).length <= 2) {
+			tmpgrd += `,#ffffff`;
+		}
+		grdData.push(tmpgrd);
+	}
+
+	return [grdData[0], (grdData.length > 1 ? grdData[1] : grdData[0])];
 }
 
 /**
@@ -1622,55 +1631,17 @@ function titleInit() {
 	divRoot.appendChild(lblTitle);
 
 	// 曲名文字描画（曲名は譜面データから取得）
-	let titlefontgrd = ``;
-	let titlefontgrd2 = ``;
 	if (!g_headerObj.customTitleUse) {
+
+		let titlefontgrd = ``;
+		let titlefontgrd2 = ``;
 
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
-		if (setVal(g_headerObj.titlegrd, ``, C_TYP_STRING) !== ``) {
-			titlefontgrd = g_headerObj.titlegrd;
+		if (g_headerObj.titlegrds.length === 0) {
+			[titlefontgrd, titlefontgrd2] = getMusicTitleGradation([`${g_headerObj.setColorDefault[0]},${g_headerObj.setColorDefault[2]}`]);
 		} else {
-			if (g_headerObj.setColorDefault[0] !== undefined) {
-				titlefontgrd += g_headerObj.setColorDefault[0];
-			} else {
-				titlefontgrd += `#ffffff`;
-			}
-
-			titlefontgrd += `,`;
-
-			if (g_headerObj.setColorDefault[2] !== undefined) {
-				titlefontgrd += g_headerObj.setColorDefault[2];
-			} else {
-				titlefontgrd += `#66ffff`;
-			}
-		}
-
-		// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
-		// 先頭1文字目が#かどうかで判断するので、redやwhiteのような色コードの指定はNG
-		if (titlefontgrd[0] === `#`) {
-			titlefontgrd = `to right,${titlefontgrd}`;
-		}
-
-		// グラデーションが1色しか指定されていない場合、自動的に補完する
-		if (titlefontgrd.split(`#`).length <= 2) {
-			titlefontgrd += `,#ffffff`;
-		}
-
-		if (g_headerObj.titlegrds.length > 1 && setVal(g_headerObj.titlegrds[1], ``, C_TYP_STRING) !== ``) {
-
-			// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
-			titlefontgrd2 = g_headerObj.titlegrds[1];
-			if (titlefontgrd2[0] === `#`) {
-				titlefontgrd2 = `to right,${titlefontgrd2}`;
-			}
-
-			// グラデーションが1色しか指定されていない場合、自動的に補完する
-			if (titlefontgrd2.split(`#`).length <= 2) {
-				titlefontgrd2 += `,#ffffff`;
-			}
-		} else {
-			titlefontgrd2 = titlefontgrd;
+			[titlefontgrd, titlefontgrd2] = getMusicTitleGradation(g_headerObj.titlegrds);
 		}
 
 		let titlefontsize = 64 * (12 / g_headerObj.musicTitleForView[0].length);
@@ -1924,13 +1895,7 @@ function titleInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		// ブラウザ判定
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		if (setKey === 13) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
@@ -2474,30 +2439,14 @@ function headerConvert(_dosObj) {
 	// 更新日
 	obj.releaseDate = setVal(_dosObj.releaseDate, ``, C_TYP_STRING);
 
-	// タイトル画面のデフォルト曲名表示の利用有無
-	obj.customTitleUse = setVal(_dosObj.customTitleUse,
-		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`title` in g_presetCustomDesignUse) ?
-			setVal(g_presetCustomDesignUse.title, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
-
-	// タイトル画面のデフォルト背景矢印の利用有無
-	obj.customTitleArrowUse = setVal(_dosObj.customTitleArrowUse,
-		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`titleArrow` in g_presetCustomDesignUse) ?
-			setVal(g_presetCustomDesignUse.titleArrow, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
-
-	// デフォルト背景の利用有無
-	obj.customBackUse = setVal(_dosObj.customBackUse,
-		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`back` in g_presetCustomDesignUse) ?
-			setVal(g_presetCustomDesignUse.back, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
-
-	// デフォルト背景の利用有無（メイン画面のみ適用）
-	obj.customBackMainUse = setVal(_dosObj.customBackMainUse,
-		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`backMain` in g_presetCustomDesignUse) ?
-			setVal(g_presetCustomDesignUse.backMain, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
-
-	// デフォルトReady表示の利用有無
-	obj.customReadyUse = setVal(_dosObj.customReadyUse,
-		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`ready` in g_presetCustomDesignUse) ?
-			setVal(g_presetCustomDesignUse.ready, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
+	// デフォルト曲名表示、背景、Ready表示の利用有無
+	const defaultObjs = [`title`, `titleArrow`, `back`, `backMain`, `ready`];
+	defaultObjs.forEach(objName => {
+		const objUpper = `${objName.slice(0, 1).toUpperCase()}${objName.slice(1)}`;
+		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
+			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
+				setVal(g_presetCustomDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
+	});
 
 	// デフォルトReady表示の遅延時間設定
 	obj.readyDelayFrame = setVal(_dosObj.readyDelayFrame, 0, C_TYP_NUMBER);
@@ -2530,29 +2479,13 @@ function headerConvert(_dosObj) {
 	obj.makerView = setVal(_dosObj.makerView, false, C_TYP_BOOLEAN);
 
 	// オプション利用可否設定
-	// Motion
-	obj.motionUse = setVal(_dosObj.motionUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.motion, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
+	const usingOptions = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
 
-	// Scroll-Extension
-	obj.scrollUse = setVal(_dosObj.scrollUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.scroll, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
-
-	// Shuffle
-	obj.shuffleUse = setVal(_dosObj.shuffleUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.shuffle, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
-
-	// AutoPlay
-	obj.autoPlayUse = setVal(_dosObj.autoPlayUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.autoPlay, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
-
-	// Gauge
-	obj.gaugeUse = setVal(_dosObj.gaugeUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.gauge, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
-
-	// Appearance
-	obj.appearanceUse = setVal(_dosObj.appearanceUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.appearance, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
+	usingOptions.forEach(option => {
+		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
+			(typeof g_presetSettingUse === C_TYP_OBJECT ?
+				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
+	});
 
 	// 別キーパターンの使用有無
 	obj.transKeyUse = setVal(_dosObj.transKeyUse, true, C_TYP_BOOLEAN);
@@ -2602,7 +2535,7 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 	if (_dosObj[`gauge${_name}`] !== undefined && _dosObj[`gauge${_name}`] !== ``) {
 		const gauges = _dosObj[`gauge${_name}`].split(`$`);
 
-		g_gaugeOptionObj[`gauge${_name}s`] = {
+		const obj = {
 			lifeBorders: [],
 			lifeRecoverys: [],
 			lifeDamages: [],
@@ -2612,24 +2545,26 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 		for (let j = 0; j < gauges.length; j++) {
 			const gaugeDetails = gauges[j].split(`,`);
 			if (gaugeDetails[0] === `x`) {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(`x`);
+				obj.lifeBorders.push(`x`);
 			} else {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(setVal(gaugeDetails[0], ``, C_TYP_FLOAT));
+				obj.lifeBorders.push(setVal(gaugeDetails[0], ``, C_TYP_FLOAT));
 			}
-			g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(setVal(gaugeDetails[1], ``, C_TYP_FLOAT));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(setVal(gaugeDetails[2], ``, C_TYP_FLOAT));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(setVal(gaugeDetails[3], ``, C_TYP_FLOAT));
+			obj.lifeRecoverys.push(setVal(gaugeDetails[1], ``, C_TYP_FLOAT));
+			obj.lifeDamages.push(setVal(gaugeDetails[2], ``, C_TYP_FLOAT));
+			obj.lifeInits.push(setVal(gaugeDetails[3], ``, C_TYP_FLOAT));
 		}
 		if (gauges.length < difLength) {
 			for (let j = gauges.length; j < difLength; j++) {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(``);
-				g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(``);
-				g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(``);
-				g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(``);
+				obj.lifeBorders.push(``);
+				obj.lifeRecoverys.push(``);
+				obj.lifeDamages.push(``);
+				obj.lifeInits.push(``);
 			}
 		}
+		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
+
 	} else if (typeof g_presetGaugeCustom === C_TYP_OBJECT && g_presetGaugeCustom[_name]) {
-		g_gaugeOptionObj[`gauge${_name}s`] = {
+		const obj = {
 			lifeBorders: [],
 			lifeRecoverys: [],
 			lifeDamages: [],
@@ -2637,14 +2572,15 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 		};
 		for (let j = 0; j < difLength; j++) {
 			if (g_presetGaugeCustom[_name].Border === `x`) {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(`x`);
+				obj.lifeBorders.push(`x`);
 			} else {
-				g_gaugeOptionObj[`gauge${_name}s`].lifeBorders.push(setVal(g_presetGaugeCustom[_name].Border, ``, C_TYP_FLOAT));
+				obj.lifeBorders.push(setVal(g_presetGaugeCustom[_name].Border, ``, C_TYP_FLOAT));
 			}
-			g_gaugeOptionObj[`gauge${_name}s`].lifeRecoverys.push(setVal(g_presetGaugeCustom[_name].Recovery, ``, C_TYP_FLOAT));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeDamages.push(setVal(g_presetGaugeCustom[_name].Damage, ``, C_TYP_FLOAT));
-			g_gaugeOptionObj[`gauge${_name}s`].lifeInits.push(setVal(g_presetGaugeCustom[_name].Init, ``, C_TYP_FLOAT));
+			obj.lifeRecoverys.push(setVal(g_presetGaugeCustom[_name].Recovery, ``, C_TYP_FLOAT));
+			obj.lifeDamages.push(setVal(g_presetGaugeCustom[_name].Damage, ``, C_TYP_FLOAT));
+			obj.lifeInits.push(setVal(g_presetGaugeCustom[_name].Init, ``, C_TYP_FLOAT));
 		}
+		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
 	}
 }
 
@@ -2985,13 +2921,7 @@ function optionInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		// ブラウザ判定
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
@@ -4034,13 +3964,7 @@ function settingsDisplayInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		// ブラウザ判定
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
@@ -4482,20 +4406,12 @@ function keyConfigInit() {
 	document.onkeydown = evt => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
-
-		// ブラウザ判定
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
-		if (setKey === 229 || setKey === 242 || setKey === 243 || setKey === 244 ||
-			setKey === 91 || setKey === 29 || setKey === 28 || setKey === 27 ||
-			(setKey === 46 && g_currentk === 0) || setKey === g_prevKey) {
+		const disabledKeys = [229, 242, 243, 244, 91, 29, 28, 27, g_prevKey];
+		if (disabledKeys.includes(setKey) || (setKey === 46 && g_currentk === 0)) {
 		} else {
 			if (setKey === 8) {
 			} else {
@@ -4644,15 +4560,7 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
  * @param {string} _keyCtrlPtn 
  */
 function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
-
-	g_currentj = 0;
-	g_currentk = 0;
-	g_prevKey = -1;
-	const posj = g_keyObj[`pos${_keyCtrlPtn}`][0];
-
-	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
-	cursor.style.top = `45px`;
+	resetCursorMain(_width, _divideCnt, _keyCtrlPtn);
 }
 
 /**
@@ -4746,6 +4654,7 @@ function loadingScoreInit2() {
 			// 譜面データの再読み込み
 			const tmpObj = scoreConvert(g_rootObj, scoreIdHeader, preblankFrame, dummyIdHeader);
 			for (let j = 0; j < keyNum; j++) {
+				copyLoadingObject(tmpObj.arrowData[j])
 				if (tmpObj.arrowData[j] !== undefined) {
 					g_scoreObj.arrowData[j] = JSON.parse(JSON.stringify(tmpObj.arrowData[j]));
 				}
@@ -5062,9 +4971,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		return arrowData;
 	}
 
-	// 速度変化（全体）データの分解 (2つで1セット)
-	obj.speedData = [];
-	obj.speedData.length = 0;
+	// 速度変化データの分解 (2つで1セット)
 	let speedFooter = ``;
 	if (_dosObj[`speed${_scoreNo}_data`] !== undefined) {
 		speedFooter = `_data`;
@@ -5072,104 +4979,14 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	if (_dosObj[`speed${_scoreNo}_change`] !== undefined) {
 		speedFooter = `_change`;
 	}
-	if (_dosObj[`speed${_scoreNo}${speedFooter}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
-		let speedIdx = 0;
-		let tmpArrayData = _dosObj[`speed${_scoreNo}${speedFooter}`].split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
 
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				const tmpSpeedData = tmpData.split(`,`);
-				for (let k = 0; k < tmpSpeedData.length; k += 2) {
-					if (isNaN(parseInt(tmpSpeedData[k]))) {
-						continue;
-					} else if (tmpSpeedData[k + 1] === `-`) {
-						break;
-					}
-					obj.speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
-					obj.speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
-					speedIdx += 2;
-				}
-			}
-		});
-	}
+	// 速度変化（個別・全体）の分解 (2つで1セット, セット毎の改行区切り可)
+	obj.boostData = setSpeedData(`boost`, _scoreNo);
+	obj.speedData = setSpeedData(`speed`, _scoreNo, speedFooter);
 
-	// 速度変化（個別）データの分解 (2つで1セット, セット毎の改行区切り可)
-	obj.boostData = [];
-	obj.boostData.length = 0;
-	if (_dosObj[`boost${_scoreNo}_data`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
-		let speedIdx = 0;
-		let tmpArrayData = _dosObj[`boost${_scoreNo}_data`].split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
-
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				const tmpSpeedData = tmpData.split(`,`);
-				for (let k = 0; k < tmpSpeedData.length; k += 2) {
-					if (isNaN(parseInt(tmpSpeedData[k]))) {
-						continue;
-					} else if (tmpSpeedData[k + 1] === `-`) {
-						break;
-					}
-					obj.boostData[speedIdx] = calcFrame(tmpSpeedData[k]);
-					obj.boostData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
-					speedIdx += 2;
-				}
-			}
-		});
-	}
-
-	// 色変化（個別）データの分解（3つで1セット, セット毎の改行区切り可）
-	obj.colorData = [];
-	obj.colorData.length = 0;
-	if (_dosObj[`color${_scoreNo}_data`] !== undefined && _dosObj[`color${_scoreNo}_data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
-		let colorIdx = 0;
-		let tmpArrayData = _dosObj[`color${_scoreNo}_data`].split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
-
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				const tmpColorData = tmpData.split(`,`);
-				for (let k = 0; k < tmpColorData.length; k += 3) {
-					if (isNaN(parseInt(tmpColorData[k]))) {
-						continue;
-					} else if (tmpColorData[k + 1] === `-`) {
-						break;
-					}
-					obj.colorData[colorIdx] = calcFrame(tmpColorData[k]);
-					obj.colorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
-					obj.colorData[colorIdx + 2] = tmpColorData[k + 2];
-					colorIdx += 3;
-				}
-			}
-		});
-	}
-
-	// 色変化（全体）データの分解 (3つで1セット, セット毎の改行区切り可)
-	obj.acolorData = [];
-	obj.acolorData.length = 0;
-	if (_dosObj[`acolor${_scoreNo}_data`] !== undefined && _dosObj[`acolor${_scoreNo}data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
-		let colorIdx = 0;
-		let tmpArrayData = _dosObj[`acolor${_scoreNo}_data`].split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
-
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				const tmpColorData = tmpData.split(`,`);
-				for (let k = 0; k < tmpColorData.length; k += 3) {
-					if (isNaN(parseInt(tmpColorData[k]))) {
-						continue;
-					} else if (tmpColorData[k + 1] === `-`) {
-						break;
-					}
-					obj.acolorData[colorIdx] = calcFrame(tmpColorData[k]);
-					obj.acolorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
-					obj.acolorData[colorIdx + 2] = tmpColorData[k + 2];
-					colorIdx += 3;
-				}
-			}
-		});
-	}
+	// 色変化（個別・全体）の分解 (3つで1セット, セット毎の改行区切り可)
+	obj.colorData = setColorData(`color`, _scoreNo);
+	obj.acolorData = setColorData(`acolor`, _scoreNo);
 
 	// 矢印モーション（個別）データの分解（3～4つで1セット, セット毎の改行区切り）
 	obj.arrowCssMotionData = setCssMotionData(`arrow`, _scoreNo);
@@ -5177,8 +4994,114 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.dummyArrowCssMotionData = setCssMotionData(`arrow`, _dummyNo);
 	obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
 
+	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
+	obj.wordData = [];
+	obj.wordMaxDepth = -1;
+	if (g_stateObj.d_lyrics === C_FLG_OFF) {
+	} else {
+		[obj.wordData, obj.wordMaxDepth] = makeWordData(_scoreNo);
+	}
+
+	// 背景・マスクデータの分解 (下記すべてで1セット、改行区切り)
+	// [フレーム数, 階層, 背景パス, class(CSSで別定義), X, Y, width, height, opacity, animationName, animationDuration]
+	obj.maskData = [];
+	obj.maskMaxDepth = -1;
+	obj.backData = [];
+	obj.backMaxDepth = -1;
+	if (g_stateObj.d_background === C_FLG_OFF) {
+	} else {
+		[obj.maskData, obj.maskMaxDepth] = makeBackgroundData(`mask`, _scoreNo);
+		[obj.backData, obj.backMaxDepth] = makeBackgroundData(`back`, _scoreNo);
+	}
+
+	// 結果画面用・背景/マスクデータの分解 (下記すべてで1セット、改行区切り)
+	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
+		const backgroundResults = [`backResult`, `maskResult`, `backFailed`, `maskFailed`];
+		backgroundResults.forEach(backName => {
+			g_headerObj[`${backName}Data`] = [];
+			g_headerObj[`${backName}MaxDepth`] = -1;
+		});
+	} else {
+		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] =
+			makeBackgroundResultData(`backresult`, _scoreNo);
+		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] =
+			makeBackgroundResultData(`maskresult`, _scoreNo);
+		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] =
+			makeBackgroundResultData(`backfailed${g_gaugeType.slice(0, 1)}`, _scoreNo, `backresult`);
+		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] =
+			makeBackgroundResultData(`maskfailed${g_gaugeType.slice(0, 1)}`, _scoreNo, `maskresult`);
+	}
+
 	/**
-	 * 矢印モーションデータの分解・格納（フレーム数, 矢印番号, CSSクラス名(上スクロール時)[, CSSクラス名(下スクロール時)]）
+	 * 速度変化データの分解・格納（フレーム数, 矢印番号）
+	 * @param {string} _header 
+	 * @param {string} _scoreNo 
+	 * @param {string} _footer 
+	 */
+	function setSpeedData(_header, _scoreNo, _footer = `_data`) {
+		let speedData = [];
+
+		if (_dosObj[`${_header}${_scoreNo}${_footer}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
+			let speedIdx = 0;
+			let tmpArrayData = _dosObj[`${_header}${_scoreNo}${_footer}`].split(`\r`).join(`\n`);
+			tmpArrayData = tmpArrayData.split(`\n`);
+
+			tmpArrayData.forEach(tmpData => {
+				if (tmpData !== undefined && tmpData !== ``) {
+					const tmpSpeedData = tmpData.split(`,`);
+					for (let k = 0; k < tmpSpeedData.length; k += 2) {
+						if (isNaN(parseInt(tmpSpeedData[k]))) {
+							continue;
+						} else if (tmpSpeedData[k + 1] === `-`) {
+							break;
+						}
+						speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
+						speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
+						speedIdx += 2;
+					}
+				}
+			});
+		}
+
+		return speedData;
+	}
+
+	/**
+	 * 色変化データの分解・格納（フレーム数, 矢印番号）
+	 * @param {string} _header 
+	 * @param {string} _scoreNo 
+	 */
+	function setColorData(_header, _scoreNo) {
+		let colorData = [];
+
+		if (_dosObj[`${_header}${_scoreNo}_data`] !== undefined && _dosObj[`${_header}${_scoreNo}data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
+			let colorIdx = 0;
+			let tmpArrayData = _dosObj[`${_header}${_scoreNo}_data`].split(`\r`).join(`\n`);
+			tmpArrayData = tmpArrayData.split(`\n`);
+
+			tmpArrayData.forEach(tmpData => {
+				if (tmpData !== undefined && tmpData !== ``) {
+					const tmpColorData = tmpData.split(`,`);
+					for (let k = 0; k < tmpColorData.length; k += 3) {
+						if (isNaN(parseInt(tmpColorData[k]))) {
+							continue;
+						} else if (tmpColorData[k + 1] === `-`) {
+							break;
+						}
+						colorData[colorIdx] = calcFrame(tmpColorData[k]);
+						colorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
+						colorData[colorIdx + 2] = tmpColorData[k + 2];
+						colorIdx += 3;
+					}
+				}
+			});
+		}
+		return colorData;
+	}
+
+	/**
+	 * 矢印モーションデータの分解・格納（フレーム数, 矢印番号）
 	 * @param {string} _header 
 	 * @param {string} _scoreNo 
 	 */
@@ -5214,189 +5137,100 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		return cssMotionData;
 	}
 
-	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
-	obj.wordData = [];
-	obj.wordData.length = 0;
-	obj.wordMaxDepth = -1;
-	if (g_stateObj.d_lyrics === C_FLG_ON) {
-
-		let inputWordData = ``;
-		let wordDataList;
+	/**
+	 * 歌詞データの分解
+	 * @param {string} _scoreNo 
+	 */
+	function makeWordData(_scoreNo) {
+		let wordDataList = [];
 		if (g_stateObj.scroll !== `---`) {
-			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
-		} else {
-			if (g_stateObj.reverse === C_FLG_ON) {
-				wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
-			} else {
-				wordDataList = [_dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
-			}
+			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data];
+		} else if (g_stateObj.reverse === C_FLG_ON) {
+			wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data];
 		}
-		const wordData = wordDataList.find((v) => v !== undefined);
-		if (wordData !== undefined) {
-			inputWordData = wordData;
-		}
-		if (inputWordData !== ``) {
-			let tmpArrayData = inputWordData.split(`\r`).join(`\n`);
-			tmpArrayData = tmpArrayData.split(`\n`);
+		wordDataList.push(_dosObj[`word${_scoreNo}_data`], _dosObj.word_data);
 
-			tmpArrayData.forEach(tmpData => {
-				if (tmpData !== undefined && tmpData !== ``) {
-					const tmpWordData = tmpData.split(`,`);
-					for (let k = 0; k < tmpWordData.length; k += 3) {
-						if (isNaN(parseInt(tmpWordData[k]))) {
-							continue;
-						} else if (tmpWordData[k + 1] === `-`) {
-							break;
-						}
-						tmpWordData[k] = calcFrame(tmpWordData[k]);
-						tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
+		const inputWordData = wordDataList.find((v) => v !== undefined);
+		return (inputWordData !== undefined ? makeSpriteWordData(inputWordData) : [[], -1]);
+	}
 
-						if (tmpWordData[k + 1] > obj.wordMaxDepth) {
-							obj.wordMaxDepth = tmpWordData[k + 1];
-						}
+	/**
+	 * 多層歌詞データの格納処理
+	 * @param {object} _data 
+	 */
+	function makeSpriteWordData(_data) {
+		const wordData = [];
+		let wordMaxDepth = -1;
 
-						let addFrame = 0;
-						if (obj.wordData[tmpWordData[k]] === undefined) {
-							obj.wordData[tmpWordData[k]] = [];
-							obj.wordData[tmpWordData[k]][0] = [];
-						} else {
-							for (let m = 1; ; m++) {
-								if (obj.wordData[tmpWordData[k]][m] === undefined) {
-									obj.wordData[tmpWordData[k]][m] = [];
-									addFrame = m;
-									break;
-								}
-							}
-						}
+		let tmpArrayData = _data.split(`\r`).join(`\n`);
+		tmpArrayData = tmpArrayData.split(`\n`);
 
-						if (tmpWordData.length > 3 && tmpWordData.length < 6) {
-							tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, C_TYP_NUMBER);
-							obj.wordData[tmpWordData[0]][addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
-							break;
-						} else {
-							obj.wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1], setVal(tmpWordData[k + 2], ``, C_TYP_STRING));
-						}
+		tmpArrayData.forEach(tmpData => {
+			if (tmpData !== undefined && tmpData !== ``) {
+				const tmpWordData = tmpData.split(`,`);
+				for (let k = 0; k < tmpWordData.length; k += 3) {
+					if (isNaN(parseInt(tmpWordData[k]))) {
+						continue;
+					} else if (tmpWordData[k + 1] === `-`) {
+						break;
+					}
+					tmpWordData[k] = calcFrame(tmpWordData[k]);
+					tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
+
+					if (tmpWordData[k + 1] > wordMaxDepth) {
+						wordMaxDepth = tmpWordData[k + 1];
+					}
+
+					let addFrame = 0;
+					[wordData[tmpWordData[k]], addFrame] =
+						checkDuplicatedObjects(wordData[tmpWordData[k]]);
+
+					if (tmpWordData.length > 3 && tmpWordData.length < 6) {
+						tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, C_TYP_NUMBER);
+						wordData[tmpWordData[0]][addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
+						break;
+					} else {
+						wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1], setVal(tmpWordData[k + 2], ``, C_TYP_STRING));
 					}
 				}
-			});
-		}
-	}
-
-	// マスクデータの分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	obj.maskData = [];
-	obj.maskData.length = 0;
-	if (g_stateObj.d_background === C_FLG_ON) {
-		let maskDataList;
-		if (g_stateObj.scroll !== `---`) {
-			maskDataList = [_dosObj[`maskAlt${_scoreNo}_data`], _dosObj.maskAlt_data, _dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
-		} else {
-			if (g_stateObj.reverse === C_FLG_ON) {
-				maskDataList = [_dosObj[`maskRev${_scoreNo}_data`], _dosObj.maskRev_data, _dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
-			} else {
-				maskDataList = [_dosObj[`mask${_scoreNo}_data`], _dosObj.mask_data];
 			}
-		}
-		const maskData = maskDataList.find((v) => v !== undefined);
-		if (maskData !== undefined) {
-			[obj.maskData, obj.maskMaxDepth] = makeSpriteData(maskData, calcFrame);
-		}
+		});
+
+		return [wordData, wordMaxDepth];
 	}
 
-	// 背景データの分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	obj.backData = [];
-	obj.backData.length = 0;
-	if (g_stateObj.d_background === C_FLG_ON) {
-		let backDataList;
+	/**
+	 * 背景・マスクデータの分解
+	 * @param {string} _header 
+	 * @param {string} _scoreNo
+	 */
+	function makeBackgroundData(_header, _scoreNo) {
+		let dataList = [];
 		if (g_stateObj.scroll !== `---`) {
-			backDataList = [_dosObj[`backAlt${_scoreNo}_data`], _dosObj.backAlt_data, _dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
-		} else {
-			if (g_stateObj.reverse === C_FLG_ON) {
-				backDataList = [_dosObj[`backRev${_scoreNo}_data`], _dosObj.backRev_data, _dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
-			} else {
-				backDataList = [_dosObj[`back${_scoreNo}_data`], _dosObj.back_data];
-			}
+			dataList = [_dosObj[`${_header}Alt${_scoreNo}_data`], _dosObj[`${_header}Alt_data`]];
+		} else if (g_stateObj.reverse === C_FLG_ON) {
+			dataList = [_dosObj[`${_header}Rev${_scoreNo}_data`], _dosObj[`${_header}Rev_data`]];
 		}
-		const backData = backDataList.find((v) => v !== undefined);
-		if (backData !== undefined) {
-			[obj.backData, obj.backMaxDepth] = makeSpriteData(backData, calcFrame);
-		}
+		dataList.push(_dosObj[`${_header}${_scoreNo}_data`], _dosObj[`${_header}_data`]);
+
+		const data = dataList.find((v) => v !== undefined);
+		return (data !== undefined ? makeSpriteData(data, calcFrame) : [[], -1]);
 	}
 
-	let scoreIdHeader = ``;
-	if (g_stateObj.scoreId > 0) {
-		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
-	}
-
-	// 結果画面用・背景データ(クリア時)の分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	g_headerObj.backResultData = [];
-	g_headerObj.backResultData.length = 0;
-	g_headerObj.backResultMaxDepth = -1;
-	let tmpBackResultData = ``;
-
-	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
-	} else {
-		if (_dosObj[`backresult${scoreIdHeader}_data`] !== undefined) {
-			tmpBackResultData = _dosObj[`backresult${scoreIdHeader}_data`];
-		} else if (_dosObj.backresult_data !== undefined) {
-			tmpBackResultData = _dosObj.backresult_data;
+	/**
+	 * リザルトモーションデータ(結果画面用背景・マスクデータ)の分解
+	 * @param {string} _header 
+	 * @param {string} _scoreNo 
+	 * @param {string} _defaultHeader 
+	 */
+	function makeBackgroundResultData(_header, _scoreNo, _defaultHeader = ``) {
+		let dataList = [_dosObj[`${_header}${_scoreNo}_data`], _dosObj[`${_header}_data`]];
+		if (_defaultHeader !== ``) {
+			dataList.push(_dosObj[`${_defaultHeader}${_scoreNo}_data`], _dosObj[`${_defaultHeader}_data`]);
 		}
-		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(tmpBackResultData);
-	}
 
-	// 結果画面用・マスクデータ(クリア時)の分解 (下記すべてで1セット、改行区切り)
-	g_headerObj.maskResultData = [];
-	g_headerObj.maskResultData.length = 0;
-	g_headerObj.maskResultMaxDepth = -1;
-	let tmpMaskResultData = ``;
-
-	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
-	} else {
-		if (_dosObj[`maskresult${scoreIdHeader}_data`] !== undefined) {
-			tmpMaskResultData = _dosObj[`maskresult${scoreIdHeader}_data`];
-		} else if (_dosObj.maskresult_data !== undefined) {
-			tmpMaskResultData = _dosObj.maskresult_data;
-		}
-		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(tmpMaskResultData);
-	}
-
-	// 結果画面用・背景データ(失敗時)の分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	g_headerObj.backFailedData = [];
-	g_headerObj.backFailedData.length = 0;
-	g_headerObj.backFailedMaxDepth = -1;
-
-	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
-	} else {
-		let tmpBackFailedData = ``;
-		if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
-			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
-		} else if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`];
-		} else {
-			tmpBackFailedData = tmpBackResultData;
-		}
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] = makeSpriteData(tmpBackFailedData);
-	}
-
-	// 結果画面用・マスクデータ(失敗時)の分解 (下記すべてで1セット、改行区切り)
-	g_headerObj.maskFailedData = [];
-	g_headerObj.maskFailedData.length = 0;
-	g_headerObj.maskFailedMaxDepth = -1;
-
-	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
-	} else {
-		let tmpMaskFailedData = ``;
-		if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
-			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
-		} else if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`];
-		} else {
-			tmpMaskFailedData = tmpMaskResultData;
-		}
-		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] = makeSpriteData(tmpMaskFailedData);
+		const data = dataList.find((v) => v !== undefined);
+		return (data !== undefined ? makeSpriteData(data) : [[], -1]);
 	}
 
 	return obj;
@@ -5452,34 +5286,20 @@ function getLastFrame(_dataObj) {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 
 	for (let j = 0; j < keyNum; j++) {
-		let arrowData = _dataObj.arrowData[j];
-		let frzData = _dataObj.frzData[j];
+		const data = [
+			_dataObj.arrowData[j],
+			_dataObj.frzData[j],
+			_dataObj.dummyArrowData[j],
+			_dataObj.dummyFrzData[j]
+		];
 
-		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[arrowData.length - 1] > tmpLastNum) {
-				tmpLastNum = arrowData[arrowData.length - 1];
+		data.forEach(_objData => {
+			if (_objData !== undefined && _objData !== ``) {
+				if (_objData[_objData.length - 1] > tmpLastNum) {
+					tmpLastNum = _objData[_objData.length - 1];
+				}
 			}
-		}
-		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[frzData.length - 1] > tmpLastNum) {
-				tmpLastNum = frzData[frzData.length - 1];
-			}
-		}
-
-		arrowData = _dataObj.dummyArrowData[j];
-		frzData = _dataObj.dummyFrzData[j];
-
-		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[arrowData.length - 1] > tmpLastNum) {
-				tmpLastNum = arrowData[arrowData.length - 1];
-			}
-		}
-		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[frzData.length - 1] > tmpLastNum) {
-				tmpLastNum = frzData[frzData.length - 1];
-			}
-		}
-
+		});
 	}
 	return tmpLastNum;
 }
@@ -5495,43 +5315,22 @@ function getFirstArrowFrame(_dataObj) {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 
 	for (let j = 0; j < keyNum; j++) {
+		const data = [
+			_dataObj.arrowData[j],
+			_dataObj.frzData[j],
+			_dataObj.dummyArrowData[j],
+			_dataObj.dummyFrzData[j]
+		];
 
-		let arrowData = _dataObj.arrowData[j];
-		let frzData = _dataObj.frzData[j];
-
-		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[0] !== ``) {
-				if (arrowData[0] < tmpFirstNum && arrowData[0] + C_MAX_ADJUSTMENT > 0) {
-					tmpFirstNum = arrowData[0];
+		data.forEach(_objData => {
+			if (_objData !== undefined && _objData !== ``) {
+				if (_objData[0] !== ``) {
+					if (_objData[0] < tmpFirstNum && _objData[0] + C_MAX_ADJUSTMENT > 0) {
+						tmpFirstNum = _objData[0];
+					}
 				}
 			}
-		}
-		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[0] !== ``) {
-				if (frzData[0] < tmpFirstNum && frzData[0] + C_MAX_ADJUSTMENT > 0) {
-					tmpFirstNum = frzData[0];
-				}
-			}
-		}
-
-		arrowData = _dataObj.dummyArrowData[j];
-		frzData = _dataObj.dummyFrzData[j];
-
-		if (arrowData !== undefined && arrowData !== ``) {
-			if (arrowData[0] !== ``) {
-				if (arrowData[0] < tmpFirstNum && arrowData[0] + C_MAX_ADJUSTMENT > 0) {
-					tmpFirstNum = arrowData[0];
-				}
-			}
-		}
-		if (frzData !== undefined && frzData !== ``) {
-			if (frzData[0] !== ``) {
-				if (frzData[0] < tmpFirstNum && frzData[0] + C_MAX_ADJUSTMENT > 0) {
-					tmpFirstNum = frzData[0];
-				}
-			}
-		}
-
+		});
 	}
 	return tmpFirstNum;
 }
@@ -6864,13 +6663,7 @@ function MainInit() {
 
 	// キー操作イベント
 	document.onkeydown = evt => {
-
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		g_inputKeyBuffer[setKey] = true;
 		mainKeyDownActFunc[g_stateObj.autoPlay](setKey);
 
@@ -6922,15 +6715,8 @@ function MainInit() {
 	};
 
 	document.onkeyup = evt => {
-
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		g_inputKeyBuffer[setKey] = false;
-
 		mainKeyUpActFunc[g_stateObj.autoPlay]();
 	}
 
@@ -8854,13 +8640,7 @@ function resultInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		// ブラウザ判定
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
 			if (setKey === C_BLOCK_KEYS[j]) {
 				return false;
