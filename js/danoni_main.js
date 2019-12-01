@@ -199,12 +199,7 @@ function setVal(_checkStr, _default, _type) {
 
 	} else if (_type === C_TYP_BOOLEAN) {
 		const lowerCase = _checkStr.toString().toLowerCase();
-		if (lowerCase === `true`) {
-			return true;
-		} else if (lowerCase === `false`) {
-			return false;
-		}
-		return _default;
+		return (lowerCase === `true` ? true : (lowerCase === `false` ? false : _default));
 	}
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
@@ -1894,13 +1889,7 @@ function titleInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		// ブラウザ判定
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		if (setKey === 13) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
@@ -2444,30 +2433,14 @@ function headerConvert(_dosObj) {
 	// 更新日
 	obj.releaseDate = setVal(_dosObj.releaseDate, ``, C_TYP_STRING);
 
-	// タイトル画面のデフォルト曲名表示の利用有無
-	obj.customTitleUse = setVal(_dosObj.customTitleUse,
-		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`title` in g_presetCustomDesignUse) ?
-			setVal(g_presetCustomDesignUse.title, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
-
-	// タイトル画面のデフォルト背景矢印の利用有無
-	obj.customTitleArrowUse = setVal(_dosObj.customTitleArrowUse,
-		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`titleArrow` in g_presetCustomDesignUse) ?
-			setVal(g_presetCustomDesignUse.titleArrow, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
-
-	// デフォルト背景の利用有無
-	obj.customBackUse = setVal(_dosObj.customBackUse,
-		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`back` in g_presetCustomDesignUse) ?
-			setVal(g_presetCustomDesignUse.back, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
-
-	// デフォルト背景の利用有無（メイン画面のみ適用）
-	obj.customBackMainUse = setVal(_dosObj.customBackMainUse,
-		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`backMain` in g_presetCustomDesignUse) ?
-			setVal(g_presetCustomDesignUse.backMain, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
-
-	// デフォルトReady表示の利用有無
-	obj.customReadyUse = setVal(_dosObj.customReadyUse,
-		(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (`ready` in g_presetCustomDesignUse) ?
-			setVal(g_presetCustomDesignUse.ready, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
+	// デフォルト曲名表示、背景、Ready表示の利用有無
+	const defaultObjs = [`title`, `titleArrow`, `back`, `backMain`, `ready`];
+	defaultObjs.forEach(objName => {
+		const objUpper = `${objName.slice(0, 1).toUpperCase()}${objName.slice(1)}`;
+		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
+			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
+				setVal(g_presetCustomDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
+	});
 
 	// デフォルトReady表示の遅延時間設定
 	obj.readyDelayFrame = setVal(_dosObj.readyDelayFrame, 0, C_TYP_NUMBER);
@@ -2500,29 +2473,13 @@ function headerConvert(_dosObj) {
 	obj.makerView = setVal(_dosObj.makerView, false, C_TYP_BOOLEAN);
 
 	// オプション利用可否設定
-	// Motion
-	obj.motionUse = setVal(_dosObj.motionUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.motion, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
+	const usingOptions = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
 
-	// Scroll-Extension
-	obj.scrollUse = setVal(_dosObj.scrollUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.scroll, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
-
-	// Shuffle
-	obj.shuffleUse = setVal(_dosObj.shuffleUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.shuffle, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
-
-	// AutoPlay
-	obj.autoPlayUse = setVal(_dosObj.autoPlayUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.autoPlay, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
-
-	// Gauge
-	obj.gaugeUse = setVal(_dosObj.gaugeUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.gauge, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
-
-	// Appearance
-	obj.appearanceUse = setVal(_dosObj.appearanceUse,
-		(typeof g_presetSettingUse === C_TYP_OBJECT ? setVal(g_presetSettingUse.appearance, true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
+	usingOptions.forEach(option => {
+		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
+			(typeof g_presetSettingUse === C_TYP_OBJECT ?
+				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
+	});
 
 	// 別キーパターンの使用有無
 	obj.transKeyUse = setVal(_dosObj.transKeyUse, true, C_TYP_BOOLEAN);
@@ -2958,13 +2915,7 @@ function optionInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		// ブラウザ判定
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
@@ -4007,13 +3958,7 @@ function settingsDisplayInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		// ブラウザ判定
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
@@ -4455,14 +4400,7 @@ function keyConfigInit() {
 	document.onkeydown = evt => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
-
-		// ブラウザ判定
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -4616,15 +4554,7 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
  * @param {string} _keyCtrlPtn 
  */
 function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
-
-	g_currentj = 0;
-	g_currentk = 0;
-	g_prevKey = -1;
-	const posj = g_keyObj[`pos${_keyCtrlPtn}`][0];
-
-	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
-	cursor.style.top = `45px`;
+	resetCursorMain(_width, _divideCnt, _keyCtrlPtn);
 }
 
 /**
@@ -6787,13 +6717,7 @@ function MainInit() {
 
 	// キー操作イベント
 	document.onkeydown = evt => {
-
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		g_inputKeyBuffer[setKey] = true;
 		mainKeyDownActFunc[g_stateObj.autoPlay](setKey);
 
@@ -6845,15 +6769,8 @@ function MainInit() {
 	};
 
 	document.onkeyup = evt => {
-
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		g_inputKeyBuffer[setKey] = false;
-
 		mainKeyUpActFunc[g_stateObj.autoPlay]();
 	}
 
@@ -8777,13 +8694,7 @@ function resultInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		// ブラウザ判定
-		let setKey;
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
-			setKey = evt.which;
-		} else {
-			setKey = event.keyCode;
-		}
+		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
 		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
 			if (setKey === C_BLOCK_KEYS[j]) {
 				return false;
