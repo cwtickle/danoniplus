@@ -4965,9 +4965,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		return arrowData;
 	}
 
-	// 速度変化（全体）データの分解 (2つで1セット)
-	obj.speedData = [];
-	obj.speedData.length = 0;
+	// 速度変化データの分解 (2つで1セット)
 	let speedFooter = ``;
 	if (_dosObj[`speed${_scoreNo}_data`] !== undefined) {
 		speedFooter = `_data`;
@@ -4975,52 +4973,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	if (_dosObj[`speed${_scoreNo}_change`] !== undefined) {
 		speedFooter = `_change`;
 	}
-	if (_dosObj[`speed${_scoreNo}${speedFooter}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
-		let speedIdx = 0;
-		let tmpArrayData = _dosObj[`speed${_scoreNo}${speedFooter}`].split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
-
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				const tmpSpeedData = tmpData.split(`,`);
-				for (let k = 0; k < tmpSpeedData.length; k += 2) {
-					if (isNaN(parseInt(tmpSpeedData[k]))) {
-						continue;
-					} else if (tmpSpeedData[k + 1] === `-`) {
-						break;
-					}
-					obj.speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
-					obj.speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
-					speedIdx += 2;
-				}
-			}
-		});
-	}
-
-	// 速度変化（個別）データの分解 (2つで1セット, セット毎の改行区切り可)
-	obj.boostData = [];
-	obj.boostData.length = 0;
-	if (_dosObj[`boost${_scoreNo}_data`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
-		let speedIdx = 0;
-		let tmpArrayData = _dosObj[`boost${_scoreNo}_data`].split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
-
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				const tmpSpeedData = tmpData.split(`,`);
-				for (let k = 0; k < tmpSpeedData.length; k += 2) {
-					if (isNaN(parseInt(tmpSpeedData[k]))) {
-						continue;
-					} else if (tmpSpeedData[k + 1] === `-`) {
-						break;
-					}
-					obj.boostData[speedIdx] = calcFrame(tmpSpeedData[k]);
-					obj.boostData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
-					speedIdx += 2;
-				}
-			}
-		});
-	}
+	
+	// 速度変化（個別・全体）の分解 (2つで1セット, セット毎の改行区切り可)
+	obj.boostData = setSpeedData(`boost`, _scoreNo);
+	obj.speedData = setSpeedData(`speed`, _scoreNo, speedFooter);
 
 	// 色変化（個別・全体）の分解 (3つで1セット, セット毎の改行区切り可)
 	obj.colorData = setColorData(`color`, _scoreNo);
@@ -5032,6 +4988,40 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.dummyArrowCssMotionData = setCssMotionData(`arrow`, _dummyNo);
 	obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
 
+	/**
+	 * 速度変化データの分解・格納（フレーム数, 矢印番号）
+	 * @param {string} _header 
+	 * @param {string} _scoreNo 
+	 * @param {string} _footer 
+	 */
+	function setSpeedData(_header, _scoreNo, _footer = `_data`) {
+		let speedData = [];
+
+		if (_dosObj[`${_header}${_scoreNo}${_footer}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
+			let speedIdx = 0;
+			let tmpArrayData = _dosObj[`${_header}${_scoreNo}${_footer}`].split(`\r`).join(`\n`);
+			tmpArrayData = tmpArrayData.split(`\n`);
+
+			tmpArrayData.forEach(tmpData => {
+				if (tmpData !== undefined && tmpData !== ``) {
+					const tmpSpeedData = tmpData.split(`,`);
+					for (let k = 0; k < tmpSpeedData.length; k += 2) {
+						if (isNaN(parseInt(tmpSpeedData[k]))) {
+							continue;
+						} else if (tmpSpeedData[k + 1] === `-`) {
+							break;
+						}
+						speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
+						speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
+						speedIdx += 2;
+					}
+				}
+			});
+		}
+
+		return speedData;
+	}
+	
 	/**
 	 * 色変化データの分解・格納（フレーム数, 矢印番号）
 	 * @param {string} _header 
@@ -5108,7 +5098,6 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.wordMaxDepth = -1;
 	if (g_stateObj.d_lyrics === C_FLG_ON) {
 
-		let inputWordData = ``;
 		let wordDataList;
 		if (g_stateObj.scroll !== `---`) {
 			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data, _dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
@@ -5119,11 +5108,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 				wordDataList = [_dosObj[`word${_scoreNo}_data`], _dosObj.word_data];
 			}
 		}
-		const wordData = wordDataList.find((v) => v !== undefined);
-		if (wordData !== undefined) {
-			inputWordData = wordData;
-		}
-		if (inputWordData !== ``) {
+		const inputWordData = wordDataList.find((v) => v !== undefined);
+		if (inputWordData !== undefined) {
 			let tmpArrayData = inputWordData.split(`\r`).join(`\n`);
 			tmpArrayData = tmpArrayData.split(`\n`);
 
