@@ -8257,7 +8257,7 @@ function resultInit() {
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 5,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplay2Data`, 60, g_cssObj.result_style, 5,
 		display2Data, C_ALIGN_CENTER));
 
 	/**
