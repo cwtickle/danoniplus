@@ -2595,7 +2595,6 @@ function keysConvert(_dosObj) {
 	if (_dosObj.keyExtraList !== undefined) {
 		const keyExtraList = _dosObj.keyExtraList.split(`,`);
 		let tmpKeyCtrl = [];
-		let tmpKeyPtn = [];
 		let tmpDivPtn = [];
 		let tmpMinPatterns = 1;
 
@@ -2610,10 +2609,7 @@ function keysConvert(_dosObj) {
 						if (setVal(tmpColors[k], ``, C_TYP_STRING) === `` && g_keyObj[`color${newKey}_${k}`] !== undefined) {
 							continue;
 						}
-						g_keyObj[`color${newKey}_${k}`] = tmpColors[k].split(`,`);
-						for (let m = 0, len2 = g_keyObj[`color${newKey}_${k}`].length; m < len2; m++) {
-							g_keyObj[`color${newKey}_${k}`][m] = Number(g_keyObj[`color${newKey}_${k}`][m]);
-						}
+						g_keyObj[`color${newKey}_${k}`] = tmpColors[k].split(`,`).map(n => parseInt(n, 10));
 					}
 					tmpMinPatterns = tmpColors.length;
 				}
@@ -2630,7 +2626,7 @@ function keysConvert(_dosObj) {
 							continue;
 						}
 						g_keyObj[`chara${newKey}_${k}`] = tmpCharas[k].split(`,`);
-						g_keyObj[`chara${newKey}_${k}d`] = tmpCharas[k].split(`,`);
+						g_keyObj[`chara${newKey}_${k}d`] = g_keyObj[`chara${newKey}_${k}`].concat();
 					}
 				}
 			} else if (g_keyObj[`chara${newKey}_0`] === undefined) {
@@ -2670,16 +2666,8 @@ function keysConvert(_dosObj) {
 						if (setVal(tmpStepRtns[k], ``, C_TYP_STRING) === `` && g_keyObj[`stepRtn${newKey}_${k}`] !== undefined) {
 							continue;
 						}
-						g_keyObj[`stepRtn${newKey}_${k}`] = tmpStepRtns[k].split(`,`);
-						g_keyObj[`stepRtn${newKey}_${k}d`] = tmpStepRtns[k].split(`,`);
-
-						for (let m = 0, lenc = g_keyObj[`stepRtn${newKey}_${k}`].length; m < lenc; m++) {
-							if (isNaN(Number(g_keyObj[`stepRtn${newKey}_${k}`][m]))) {
-							} else {
-								g_keyObj[`stepRtn${newKey}_${k}`][m] = parseFloat(g_keyObj[`stepRtn${newKey}_${k}`][m]);
-								g_keyObj[`stepRtn${newKey}_${k}d`][m] = g_keyObj[`stepRtn${newKey}_${k}`][m];
-							}
-						}
+						g_keyObj[`stepRtn${newKey}_${k}`] = tmpStepRtns[k].split(`,`).map(n => (isNaN(Number(n)) ? n : parseInt(n, 10)));
+						g_keyObj[`stepRtn${newKey}_${k}d`] = g_keyObj[`stepRtn${newKey}_${k}`].concat();
 					}
 				}
 			} else if (g_keyObj[`stepRtn${newKey}_0`] === undefined) {
