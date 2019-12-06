@@ -2635,14 +2635,12 @@ function keysConvert(_dosObj) {
 			for (let k = 0, len = tmpDivs.length; k < len; k++) {
 				tmpDivPtn = tmpDivs[k].split(`,`);
 
-				if (setVal(tmpDivPtn[0], -1, C_TYP_NUMBER) === -1) {
-					if (setVal(g_keyObj[`div${newKey}_${k}`], -1, C_TYP_NUMBER) !== -1) {
-						continue;
-					} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
-						g_keyObj[`div${newKey}_${k}`] = g_keyObj[`chara${newKey}_0`].length;
-					}
-				} else {
+				if (setVal(tmpDivPtn[0], -1, C_TYP_NUMBER) !== -1) {
 					g_keyObj[`div${newKey}_${k}`] = setVal(tmpDivPtn[0], g_keyObj[`chara${newKey}_0`].length, C_TYP_NUMBER);
+				} else if (setVal(g_keyObj[`div${newKey}_${k}`], -1, C_TYP_NUMBER) !== -1) {
+					continue;
+				} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
+					g_keyObj[`div${newKey}_${k}`] = g_keyObj[`chara${newKey}_0`].length;
 				}
 
 				// ステップゾーン位置の最終番号
