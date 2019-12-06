@@ -3726,16 +3726,14 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 			}
 		}
 
-		g_keyObj[`chara${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`chara${basePtn}`]));
-		g_keyObj[`color${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`color${basePtn}`]));
-		g_keyObj[`stepRtn${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${basePtn}`]));
-		g_keyObj[`pos${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`pos${basePtn}`]));
-		g_keyObj[`div${copyPtn}`] = g_keyObj[`div${basePtn}`];
-		g_keyObj[`blank${copyPtn}`] = g_keyObj[`blank${basePtn}`];
-		g_keyObj[`keyRetry${copyPtn}`] = g_keyObj[`keyRetry${basePtn}`];
-		g_keyObj[`keyTitleBack${copyPtn}`] = g_keyObj[`keyTitleBack${basePtn}`];
-		g_keyObj[`transKey${copyPtn}`] = g_keyObj[`transKey${basePtn}`];
-		g_keyObj[`scrollDir${copyPtn}`] = g_keyObj[`scrollDir${basePtn}`];
+		const deepCopyList = [`chara`, `color`, `stepRtn`, `pos`];
+		deepCopyList.forEach(header => {
+			g_keyObj[`${header}${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`${header}${basePtn}`]));
+		});
+		const copyList = [`div`, `blank`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`];
+		copyList.forEach(header => {
+			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
+		});
 		if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
 			g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
 		}
