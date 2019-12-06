@@ -7045,6 +7045,7 @@ function MainInit() {
 
 		// 移動
 		if (g_workObj.currentSpeed !== 0) {
+			arrow.setAttribute(`prevPosY`, parseFloat(arrow.style.top));
 			arrow.style.top = `${parseFloat(arrow.style.top) -
 				(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
 			arrow.setAttribute(`boostCnt`, --boostCnt);
@@ -7735,10 +7736,11 @@ function judgeArrow(_j) {
 			const difFrame = Number(judgArrow.getAttribute(`cnt`));
 			const difCnt = Math.abs(judgArrow.getAttribute(`cnt`));
 			const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
-			const dividePos = Number(judgArrow.getAttribute(`dividePos`));
-			const arrowSprite = document.querySelector(`#arrowSprite${dividePos}`);
+			const arrowSprite = document.querySelector(`#arrowSprite${judgArrow.getAttribute(`dividePos`)}`);
 
 			if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
+				stepDivHit.style.top = `${parseFloat(judgArrow.getAttribute(`prevPosY`)) -
+					parseFloat(document.querySelector(`#stepRoot${_j}`).style.top) - 15}px`;
 				stepDivHit.style.opacity = 0.75;
 				stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
 
