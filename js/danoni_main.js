@@ -7037,7 +7037,6 @@ function MainInit() {
 	function movArrow(_j, _k, _name) {
 		const arrow = document.querySelector(`#${_name}${_j}_${_k}`);
 		let boostCnt = arrow.getAttribute(`boostCnt`);
-		const boostSpdDir = arrow.getAttribute(`boostSpd`);
 		let cnt = arrow.getAttribute(`cnt`);
 
 		// 全体色変化 (移動時)
@@ -7045,9 +7044,10 @@ function MainInit() {
 
 		// 移動
 		if (g_workObj.currentSpeed !== 0) {
-			arrow.setAttribute(`prevPosY`, parseFloat(arrow.style.top));
-			arrow.style.top = `${parseFloat(arrow.style.top) -
-				(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
+			const currentY = parseFloat(arrow.style.top);
+			arrow.setAttribute(`prevPosY`, currentY);
+			arrow.style.top = `${currentY - (g_workObj.currentSpeed +
+				g_workObj.motionOnFrames[boostCnt]) * parseFloat(arrow.getAttribute(`boostSpd`))}px`;
 			arrow.setAttribute(`boostCnt`, --boostCnt);
 		}
 		arrow.setAttribute(`cnt`, --cnt);
