@@ -2694,10 +2694,7 @@ function keysConvert(_dosObj) {
 						if (setVal(tmpPoss[k], ``, C_TYP_STRING) === `` && g_keyObj[`pos${newKey}_${k}`] !== undefined) {
 							continue;
 						}
-						g_keyObj[`pos${newKey}_${k}`] = tmpPoss[k].split(`,`);
-						for (let m = 0, len2 = g_keyObj[`pos${newKey}_${k}`].length; m < len2; m++) {
-							g_keyObj[`pos${newKey}_${k}`][m] = Number(g_keyObj[`pos${newKey}_${k}`][m]);
-						}
+						g_keyObj[`pos${newKey}_${k}`] = tmpPoss[k].split(`,`).map(n => parseInt(n, 10));
 
 						if (g_keyObj[`divMax${newKey}_${k}`] === undefined || g_keyObj[`divMax${newKey}_${k}`] === -1) {
 							const posLength = g_keyObj[`pos${newKey}_${k}`].length;
@@ -2709,10 +2706,7 @@ function keysConvert(_dosObj) {
 			} else {
 				for (let k = 0; k < tmpMinPatterns; k++) {
 					if (g_keyObj[`color${newKey}_${k}`] !== undefined) {
-						g_keyObj[`pos${newKey}_${k}`] = [];
-						for (let m = 0; m < g_keyObj[`color${newKey}_${k}`].length; m++) {
-							g_keyObj[`pos${newKey}_${k}`][m] = m;
-						}
+						g_keyObj[`pos${newKey}_${k}`] = [...Array(g_keyObj[`color${newKey}_${k}`].length).keys()].map(i => i);
 					}
 				}
 			}
@@ -2733,13 +2727,8 @@ function keysConvert(_dosObj) {
 
 						for (let k = 0; k < tmpKeyCtrl.length; k++) {
 							tmpKeyPtn = tmpKeyCtrl[k].split(`/`);
-							g_keyObj[`keyCtrl${newKey}_${p}`][k] = [];
-							g_keyObj[`keyCtrl${newKey}_${p}d`][k] = [];
-
-							for (let m = 0; m < tmpKeyPtn.length; m++) {
-								g_keyObj[`keyCtrl${newKey}_${p}`][k][m] = Number(tmpKeyPtn[m]);
-								g_keyObj[`keyCtrl${newKey}_${p}d`][k][m] = Number(tmpKeyPtn[m]);
-							}
+							g_keyObj[`keyCtrl${newKey}_${p}`][k] = tmpKeyCtrl[k].split(`/`).map(n => parseInt(n, 10));
+							g_keyObj[`keyCtrl${newKey}_${p}d`][k] = g_keyObj[`keyCtrl${newKey}_${p}`][k].concat();
 						}
 					}
 				}
@@ -2801,11 +2790,7 @@ function keysConvert(_dosObj) {
 						for (let m = 0, len = tmpScrollPtns.length; m < len; m++) {
 							const tmpScrollPair = tmpScrollPtns[m].split(`::`);
 							g_keyObj[`scrollName${newKey}`][m + 1] = tmpScrollPair[0];
-							const tmpScrollDir = tmpScrollPair[1].split(`,`);
-							g_keyObj[`scrollDir${newKey}_${k}`][tmpScrollPair[0]] = [];
-							for (let n = 0, len = tmpScrollDir.length; n < len; n++) {
-								g_keyObj[`scrollDir${newKey}_${k}`][tmpScrollPair[0]][n] = Number(tmpScrollDir[n]);
-							}
+							g_keyObj[`scrollDir${newKey}_${k}`][tmpScrollPair[0]] = tmpScrollPair[1].split(`,`).map(n => parseInt(n, 10));
 						}
 					}
 				}
