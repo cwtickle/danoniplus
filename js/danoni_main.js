@@ -8282,29 +8282,21 @@ function resultInit() {
 					highscoreDfObj[judge] = g_resultObj[judge] - g_localStorage.highscores[scoreName][judge];
 				}
 			});
-			if (highscoreDfObj.score > 0 && g_stateObj.dataSaveFlg) {
-				judgeScores.forEach(judge => {
-					if (judge !== ``) {
-						g_localStorage.highscores[scoreName][judge] = g_resultObj[judge];
-					}
-				});
-				localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
-			}
 		} else {
 			judgeScores.forEach(judge => {
 				if (judge !== ``) {
 					highscoreDfObj[judge] = g_resultObj[judge];
 				}
 			});
-			if (g_stateObj.dataSaveFlg) {
-				g_localStorage.highscores[scoreName] = {};
-				judgeScores.forEach(judge => {
-					if (judge !== ``) {
-						g_localStorage.highscores[scoreName][judge] = g_resultObj[judge];
-					}
-				});
-				localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
-			}
+		}
+		if (highscoreDfObj.score > 0 && g_stateObj.dataSaveFlg) {
+			g_localStorage.highscores[scoreName] = {};
+			judgeScores.forEach(judge => {
+				if (judge !== ``) {
+					g_localStorage.highscores[scoreName][judge] = g_resultObj[judge];
+				}
+			});
+			localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 		}
 
 		// ハイスコア差分描画
