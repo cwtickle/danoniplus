@@ -8240,7 +8240,7 @@ function resultInit() {
 	}
 
 	// キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
-	const judgeIds = [`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `Kita`, `Iknai`, `Mcombo`, `Fcombo`, ``, `Score`];
+	const judgeIds = [`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `Kita`, `Iknai`, `MCombo`, `FCombo`, ``, `Score`];
 	const judgeColors = [`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `combo`, `combo`, ``, `score`];
 	const judgeLabels = [C_JCR_II, C_JCR_SHAKIN, C_JCR_MATARI, C_JCR_SHOBON, C_JCR_UWAN, C_JCR_KITA, C_JCR_IKNAI, `MaxCombo`, `FreezeCombo`, ``, `Score`];
 	const judgeScores = [`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `maxCombo`, `fmaxCombo`, ``, `score`];
