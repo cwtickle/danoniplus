@@ -259,6 +259,15 @@ function $id(_id) {
 }
 
 /**
+ * 先頭のみ大文字に変換（それ以降はそのまま）
+ * @param {string} _str 
+ */
+function toCapitalize(_str) {
+	if (!_str || typeof _str !== `string`) return _str;
+	return `${_str.charAt(0).toUpperCase()}${_str.slice(1)}`;
+}
+
+/**
  * プリロードするファイルの設定
  * @param {string} _as 
  * @param {string} _href 
@@ -1488,7 +1497,7 @@ function getSpriteJumpFrame(_frames) {
  */
 function drawSpriteData(_frame, _spriteName, _depthName) {
 
-	const spriteUpper = `${_spriteName.slice(0, 1).toUpperCase()}${_spriteName.slice(1)}`;
+	const spriteUpper = toCapitalize(_spriteName);
 	const tmpObjs = g_headerObj[`${_depthName}${spriteUpper}Data`][_frame];
 
 	for (let j = 0; j < tmpObjs.length; j++) {
@@ -2442,7 +2451,7 @@ function headerConvert(_dosObj) {
 	// デフォルト曲名表示、背景、Ready表示の利用有無
 	const defaultObjs = [`title`, `titleArrow`, `back`, `backMain`, `ready`];
 	defaultObjs.forEach(objName => {
-		const objUpper = `${objName.slice(0, 1).toUpperCase()}${objName.slice(1)}`;
+		const objUpper = toCapitalize(objName);
 		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
 			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
 				setVal(g_presetCustomDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
@@ -3620,8 +3629,7 @@ function createOptionWindow(_sprite) {
  */
 function createGeneralSetting(_obj, _settingName, _unitName = ``, _skipFlg = false, _skipTerm = 5) {
 
-	const settingUpper = `${_settingName.slice(0, 1).toUpperCase()}${_settingName.slice(1)}`;
-
+	const settingUpper = toCapitalize(_settingName);
 	_obj.appendChild(createLblSetting(settingUpper));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
@@ -3684,7 +3692,7 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
 		eval(`g_${_settingName}Num = (g_${_settingName}Num === 0 ? g_${_settingName}s.length - 1 : (g_${_settingName}Num + _scrollNum <= 0 ? 0 : g_${_settingName}Num + _scrollNum))`);
 	}
 	eval(`g_stateObj.${_settingName} = g_${_settingName}s[g_${_settingName}Num]`);
-	eval(`document.querySelector('#lnk${_settingName.slice(0, 1).toUpperCase()}${_settingName.slice(1)}').innerHTML = g_stateObj.${_settingName} + _unitName`);
+	eval(`document.querySelector('#lnk${toCapitalize(_settingName)}').innerHTML = g_stateObj.${_settingName} + _unitName`);
 }
 
 /**
@@ -3982,7 +3990,7 @@ function createSettingsDisplayWindow(_sprite) {
 	function makeDisplayButton(_name, _heightPos, _widthPos) {
 
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
-		const lnk = makeSettingLblCssButton(`lnk${_name}`, `${_name.slice(0, 1).toUpperCase()}${_name.slice(1)}`, _heightPos, _ => {
+		const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
 			g_stateObj[`d_${_name.toLowerCase()}`] = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 			if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
 				lnk.classList.replace(g_cssObj.button_ON, g_cssObj.button_OFF);
@@ -4858,10 +4866,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		// 矢印データの分解
 		const arrowName = g_keyObj[`chara${keyCtrlPtn}`][j];
 		obj.arrowData[j] = storeArrowData(_dosObj[`${arrowName}${_scoreNo}_data`]);
-		if (isNaN(parseFloat(obj.arrowData[j][0]))) {
-		} else {
-			g_allArrow += obj.arrowData[j].length;
-		}
+		g_allArrow += (isNaN(parseFloat(obj.arrowData[j][0])) ? 0 : obj.arrowData[j].length);
 
 		if (g_stateObj.dummyId !== ``) {
 			obj.dummyArrowData[j] = storeArrowData(_dosObj[`${arrowName}${_dummyNo}_data`]);
@@ -4878,14 +4883,19 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		frzName = frzName.replace(`iyo`, `frzIyo`);
 		frzName = frzName.replace(`gor`, `frzGor`);
 		frzName = frzName.replace(`oni`, `foni`);
-		frzName = frzName.replace(`arrow`, `frzArrow`);
+
+		if (frzName.indexOf(`frz`) === -1 && frzName.indexOf(`foni`) === -1) {
+			if ((frzName.startsWith(`s`)) || frzName.startsWith(`t`) ||
+				(frzName.startsWith(`a`) && !frzName.startsWith(`arrow`))) {
+				frzName = frzName.replace(frzName.slice(1), `frz${toCapitalize(frzName.slice(1))}`);
+			} else {
+				frzName = frzName.replace(frzName, `frz${toCapitalize(frzName)}`);
+			}
+		}
 
 		// フリーズアローデータの分解 (2つで1セット)
 		obj.frzData[j] = storeArrowData(_dosObj[`${frzName}${_scoreNo}_data`]);
-		if (isNaN(parseFloat(obj.frzData[j][0]))) {
-		} else {
-			g_allFrz += obj.frzData[j].length;
-		}
+		g_allFrz += (isNaN(parseFloat(obj.frzData[j][0])) ? 0 : obj.frzData[j].length);
 
 		if (g_stateObj.dummyId !== ``) {
 			obj.dummyFrzData[j] = storeArrowData(_dosObj[`${frzName}${_dummyNo}_data`]);
@@ -5432,7 +5442,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	function calcArrows(_j, _data, _header) {
 
-		const camelHeader = _header.slice(0, 1).toUpperCase() + _header.slice(1);
+		const camelHeader = toCapitalize(_header);
 		if (_data !== undefined) {
 
 			let startPoint = [];
@@ -5513,7 +5523,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	function calcFrzArrows(_j, _data, _header) {
-		const camelHeader = _header.slice(0, 1).toUpperCase() + _header.slice(1);
+		const camelHeader = toCapitalize(_header);
 
 		if (_data !== undefined) {
 
@@ -5900,7 +5910,7 @@ function pushColors(_header, _frame, _val, _colorCd) {
  */
 function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
 
-	const camelHeader = _header.slice(0, 1).toUpperCase() + _header.slice(1);
+	const camelHeader = toCapitalize(_header);
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 
@@ -7014,7 +7024,7 @@ function MainInit() {
 	 * @param {string} _barColor 
 	 */
 	function makeFrzArrow(_j, _arrowCnt, _name, _normalColor, _barColor) {
-		const camelHeader = _name.slice(0, 1).toUpperCase() + _name.slice(1);
+		const camelHeader = toCapitalize(_name);
 		const frzLength = g_workObj[`mk${camelHeader}Length`][_j][(_arrowCnt - 1) * 2];
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 		const dividePos = g_workObj.dividePos[_j];
