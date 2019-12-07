@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/12/01
+ * Revised : 2019/12/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 10.3.0`;
-const g_revisedDate = `2019/12/01`;
+const g_version = `Ver 10.4.0`;
+const g_revisedDate = `2019/12/07`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -256,6 +256,15 @@ function checkArrayVal(_checkArray, _type, _minLength) {
  */
 function $id(_id) {
 	return document.querySelector(`#${_id}`).style;
+}
+
+/**
+ * 先頭のみ大文字に変換（それ以降はそのまま）
+ * @param {string} _str 
+ */
+function toCapitalize(_str) {
+	if (!_str || typeof _str !== `string`) return _str;
+	return `${_str.charAt(0).toUpperCase()}${_str.slice(1)}`;
 }
 
 /**
@@ -1488,7 +1497,7 @@ function getSpriteJumpFrame(_frames) {
  */
 function drawSpriteData(_frame, _spriteName, _depthName) {
 
-	const spriteUpper = `${_spriteName.slice(0, 1).toUpperCase()}${_spriteName.slice(1)}`;
+	const spriteUpper = toCapitalize(_spriteName);
 	const tmpObjs = g_headerObj[`${_depthName}${spriteUpper}Data`][_frame];
 
 	for (let j = 0; j < tmpObjs.length; j++) {
@@ -2442,7 +2451,7 @@ function headerConvert(_dosObj) {
 	// デフォルト曲名表示、背景、Ready表示の利用有無
 	const defaultObjs = [`title`, `titleArrow`, `back`, `backMain`, `ready`];
 	defaultObjs.forEach(objName => {
-		const objUpper = `${objName.slice(0, 1).toUpperCase()}${objName.slice(1)}`;
+		const objUpper = toCapitalize(objName);
 		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
 			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
 				setVal(g_presetCustomDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
@@ -2590,225 +2599,178 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
  */
 function keysConvert(_dosObj) {
 
-	let newKey = ``;
+	if (_dosObj.keyExtraList === undefined) {
+		return;
+	}
+	const keyExtraList = _dosObj.keyExtraList.split(`,`);
 
-	if (_dosObj.keyExtraList !== undefined) {
-		const keyExtraList = _dosObj.keyExtraList.split(`,`);
+	for (let j = 0; j < keyExtraList.length; j++) {
+		const newKey = keyExtraList[j];
 		let tmpKeyCtrl = [];
-		let tmpKeyPtn = [];
 		let tmpDivPtn = [];
 		let tmpMinPatterns = 1;
 
-		for (let j = 0; j < keyExtraList.length; j++) {
-			newKey = keyExtraList[j];
-
-			// 矢印色パターン (colorX_Y)
-			if (_dosObj[`color${newKey}`] !== undefined) {
-				const tmpColors = _dosObj[`color${newKey}`].split(`$`);
-				if (tmpColors.length > 0) {
-					for (let k = 0, len = tmpColors.length; k < len; k++) {
-						if (setVal(tmpColors[k], ``, C_TYP_STRING) === `` && g_keyObj[`color${newKey}_${k}`] !== undefined) {
-							continue;
-						}
-						g_keyObj[`color${newKey}_${k}`] = tmpColors[k].split(`,`);
-						for (let m = 0, len2 = g_keyObj[`color${newKey}_${k}`].length; m < len2; m++) {
-							g_keyObj[`color${newKey}_${k}`][m] = Number(g_keyObj[`color${newKey}_${k}`][m]);
-						}
-					}
-					tmpMinPatterns = tmpColors.length;
+		// 矢印色パターン (colorX_Y)
+		if (_dosObj[`color${newKey}`] !== undefined) {
+			const tmpColors = _dosObj[`color${newKey}`].split(`$`);
+			for (let k = 0, len = tmpColors.length; k < len; k++) {
+				if (setVal(tmpColors[k], ``, C_TYP_STRING) === `` && g_keyObj[`color${newKey}_${k}`] !== undefined) {
+					continue;
 				}
-			} else if (g_keyObj[`color${newKey}_0`] === undefined) {
-				makeWarningWindow(C_MSG_E_0101.split(`{0}`).join(newKey));
+				g_keyObj[`color${newKey}_${k}`] = tmpColors[k].split(`,`).map(n => parseInt(n, 10));
 			}
+			tmpMinPatterns = tmpColors.length;
+		} else if (g_keyObj[`color${newKey}_0`] === undefined) {
+			makeWarningWindow(C_MSG_E_0101.split(`{0}`).join(newKey));
+		}
 
-			// 読込変数の接頭辞 (charaX_Y)
-			if (_dosObj[`chara${newKey}`] !== undefined) {
-				const tmpCharas = _dosObj[`chara${newKey}`].split(`$`);
-				if (tmpCharas.length > 0) {
-					for (let k = 0, len = tmpCharas.length; k < len; k++) {
-						if (setVal(tmpCharas[k], ``, C_TYP_STRING) === `` && g_keyObj[`chara${newKey}_${k}`] !== undefined) {
-							continue;
-						}
-						g_keyObj[`chara${newKey}_${k}`] = tmpCharas[k].split(`,`);
-						g_keyObj[`chara${newKey}_${k}d`] = tmpCharas[k].split(`,`);
-					}
+		// 読込変数の接頭辞 (charaX_Y)
+		if (_dosObj[`chara${newKey}`] !== undefined) {
+			const tmpCharas = _dosObj[`chara${newKey}`].split(`$`);
+			for (let k = 0, len = tmpCharas.length; k < len; k++) {
+				if (setVal(tmpCharas[k], ``, C_TYP_STRING) === `` && g_keyObj[`chara${newKey}_${k}`] !== undefined) {
+					continue;
 				}
-			} else if (g_keyObj[`chara${newKey}_0`] === undefined) {
-				makeWarningWindow(C_MSG_E_0102.split(`{0}`).join(newKey));
+				g_keyObj[`chara${newKey}_${k}`] = tmpCharas[k].split(`,`);
+				g_keyObj[`chara${newKey}_${k}d`] = g_keyObj[`chara${newKey}_${k}`].concat();
 			}
+		} else if (g_keyObj[`chara${newKey}_0`] === undefined) {
+			makeWarningWindow(C_MSG_E_0102.split(`{0}`).join(newKey));
+		}
 
-			// 各キーの区切り位置 (divX_Y)
-			if (_dosObj[`div${newKey}`] !== undefined) {
-				const tmpDivs = _dosObj[`div${newKey}`].split(`$`);
-				if (tmpDivs.length > 0) {
-					for (let k = 0, len = tmpDivs.length; k < len; k++) {
-						tmpDivPtn = tmpDivs[k].split(`,`);
+		// 各キーの区切り位置 (divX_Y)
+		if (_dosObj[`div${newKey}`] !== undefined) {
+			const tmpDivs = _dosObj[`div${newKey}`].split(`$`);
+			for (let k = 0, len = tmpDivs.length; k < len; k++) {
+				tmpDivPtn = tmpDivs[k].split(`,`);
 
-						if (setVal(tmpDivPtn[0], -1, C_TYP_NUMBER) === -1) {
-							if (setVal(g_keyObj[`div${newKey}_${k}`], -1, C_TYP_NUMBER) !== -1) {
-								continue;
-							} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
-								g_keyObj[`div${newKey}_${k}`] = g_keyObj[`chara${newKey}_0`].length;
-							}
-						} else {
-							g_keyObj[`div${newKey}_${k}`] = setVal(tmpDivPtn[0], g_keyObj[`chara${newKey}_0`].length, C_TYP_NUMBER);
-						}
+				if (setVal(tmpDivPtn[0], -1, C_TYP_NUMBER) !== -1) {
+					g_keyObj[`div${newKey}_${k}`] = setVal(tmpDivPtn[0], g_keyObj[`chara${newKey}_0`].length, C_TYP_NUMBER);
+				} else if (setVal(g_keyObj[`div${newKey}_${k}`], -1, C_TYP_NUMBER) !== -1) {
+					continue;
+				} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
+					g_keyObj[`div${newKey}_${k}`] = g_keyObj[`chara${newKey}_0`].length;
+				}
 
-						// ステップゾーン位置の最終番号
-						if (tmpDivPtn.length > 1) {
-							g_keyObj[`divMax${newKey}_${k}`] = setVal(tmpDivPtn[1], -1, C_TYP_NUMBER);
-						}
-					}
+				// ステップゾーン位置の最終番号
+				if (tmpDivPtn.length > 1) {
+					g_keyObj[`divMax${newKey}_${k}`] = setVal(tmpDivPtn[1], -1, C_TYP_NUMBER);
 				}
 			}
+		}
 
-			// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
-			if (_dosObj[`stepRtn${newKey}`] !== undefined) {
-				const tmpStepRtns = _dosObj[`stepRtn${newKey}`].split(`$`);
-				if (tmpStepRtns.length > 0) {
-					for (let k = 0, len = tmpStepRtns.length; k < len; k++) {
-						if (setVal(tmpStepRtns[k], ``, C_TYP_STRING) === `` && g_keyObj[`stepRtn${newKey}_${k}`] !== undefined) {
-							continue;
-						}
-						g_keyObj[`stepRtn${newKey}_${k}`] = tmpStepRtns[k].split(`,`);
-						g_keyObj[`stepRtn${newKey}_${k}d`] = tmpStepRtns[k].split(`,`);
-
-						for (let m = 0, lenc = g_keyObj[`stepRtn${newKey}_${k}`].length; m < lenc; m++) {
-							if (isNaN(Number(g_keyObj[`stepRtn${newKey}_${k}`][m]))) {
-							} else {
-								g_keyObj[`stepRtn${newKey}_${k}`][m] = parseFloat(g_keyObj[`stepRtn${newKey}_${k}`][m]);
-								g_keyObj[`stepRtn${newKey}_${k}d`][m] = g_keyObj[`stepRtn${newKey}_${k}`][m];
-							}
-						}
-					}
+		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
+		if (_dosObj[`stepRtn${newKey}`] !== undefined) {
+			const tmpStepRtns = _dosObj[`stepRtn${newKey}`].split(`$`);
+			for (let k = 0, len = tmpStepRtns.length; k < len; k++) {
+				if (setVal(tmpStepRtns[k], ``, C_TYP_STRING) === `` && g_keyObj[`stepRtn${newKey}_${k}`] !== undefined) {
+					continue;
 				}
-			} else if (g_keyObj[`stepRtn${newKey}_0`] === undefined) {
-				makeWarningWindow(C_MSG_E_0103.split(`{0}`).join(newKey));
+				g_keyObj[`stepRtn${newKey}_${k}`] = tmpStepRtns[k].split(`,`).map(n => (isNaN(Number(n)) ? n : parseInt(n, 10)));
+				g_keyObj[`stepRtn${newKey}_${k}d`] = g_keyObj[`stepRtn${newKey}_${k}`].concat();
 			}
+		} else if (g_keyObj[`stepRtn${newKey}_0`] === undefined) {
+			makeWarningWindow(C_MSG_E_0103.split(`{0}`).join(newKey));
+		}
 
-			// ステップゾーン位置 (posX_Y)
-			if (_dosObj[`pos${newKey}`] !== undefined) {
-				const tmpPoss = _dosObj[`pos${newKey}`].split(`$`);
-				if (tmpPoss.length > 0) {
-					for (let k = 0, len = tmpPoss.length; k < len; k++) {
-						if (setVal(tmpPoss[k], ``, C_TYP_STRING) === `` && g_keyObj[`pos${newKey}_${k}`] !== undefined) {
-							continue;
-						}
-						g_keyObj[`pos${newKey}_${k}`] = tmpPoss[k].split(`,`);
-						for (let m = 0, len2 = g_keyObj[`pos${newKey}_${k}`].length; m < len2; m++) {
-							g_keyObj[`pos${newKey}_${k}`][m] = Number(g_keyObj[`pos${newKey}_${k}`][m]);
-						}
-
-						if (g_keyObj[`divMax${newKey}_${k}`] === undefined || g_keyObj[`divMax${newKey}_${k}`] === -1) {
-							const posLength = g_keyObj[`pos${newKey}_${k}`].length;
-							g_keyObj[`divMax${newKey}_${k}`] = g_keyObj[`pos${newKey}_${k}`][posLength - 1] + 1;
-						}
-					}
+		// ステップゾーン位置 (posX_Y)
+		if (_dosObj[`pos${newKey}`] !== undefined) {
+			const tmpPoss = _dosObj[`pos${newKey}`].split(`$`);
+			for (let k = 0, len = tmpPoss.length; k < len; k++) {
+				if (setVal(tmpPoss[k], ``, C_TYP_STRING) === `` && g_keyObj[`pos${newKey}_${k}`] !== undefined) {
+					continue;
 				}
+				g_keyObj[`pos${newKey}_${k}`] = tmpPoss[k].split(`,`).map(n => parseInt(n, 10));
 
-			} else {
-				for (let k = 0; k < tmpMinPatterns; k++) {
-					if (g_keyObj[`color${newKey}_${k}`] !== undefined) {
-						g_keyObj[`pos${newKey}_${k}`] = [];
-						for (let m = 0; m < g_keyObj[`color${newKey}_${k}`].length; m++) {
-							g_keyObj[`pos${newKey}_${k}`][m] = m;
-						}
-					}
+				if (g_keyObj[`divMax${newKey}_${k}`] === undefined || g_keyObj[`divMax${newKey}_${k}`] === -1) {
+					const posLength = g_keyObj[`pos${newKey}_${k}`].length;
+					g_keyObj[`divMax${newKey}_${k}`] = g_keyObj[`pos${newKey}_${k}`][posLength - 1] + 1;
 				}
 			}
 
-			// キーコンフィグ (keyCtrlX_Y)
-			if (_dosObj[`keyCtrl${newKey}`] !== undefined) {
-				const tmpKeyCtrls = _dosObj[`keyCtrl${newKey}`].split(`$`);
-
-				if (tmpKeyCtrls.length > 0) {
-					for (let p = 0, len = tmpKeyCtrls.length; p < len; p++) {
-						if (setVal(tmpKeyCtrls[p], ``, C_TYP_STRING) === `` && g_keyObj[`keyCtrl${newKey}_${p}`] !== undefined) {
-							continue;
-						}
-						tmpKeyCtrl = tmpKeyCtrls[p].split(`,`);
-
-						g_keyObj[`keyCtrl${newKey}_${p}`] = [];
-						g_keyObj[`keyCtrl${newKey}_${p}d`] = [];
-
-						for (let k = 0; k < tmpKeyCtrl.length; k++) {
-							tmpKeyPtn = tmpKeyCtrl[k].split(`/`);
-							g_keyObj[`keyCtrl${newKey}_${p}`][k] = [];
-							g_keyObj[`keyCtrl${newKey}_${p}d`][k] = [];
-
-							for (let m = 0; m < tmpKeyPtn.length; m++) {
-								g_keyObj[`keyCtrl${newKey}_${p}`][k][m] = Number(tmpKeyPtn[m]);
-								g_keyObj[`keyCtrl${newKey}_${p}d`][k][m] = Number(tmpKeyPtn[m]);
-							}
-						}
-					}
-				}
-			} else if (g_keyObj[`keyCtrl${newKey}_0`] === undefined) {
-				makeWarningWindow(C_MSG_E_0104.split(`{0}`).join(newKey));
-			}
-
-			// ステップゾーン間隔 (blankX_Y)
-			newKeySingleParam(newKey, `blank`, C_TYP_FLOAT);
-
-			// プレイ中ショートカット：リトライ (keyRetryX_Y)
-			newKeySingleParam(newKey, `keyRetry`, C_TYP_NUMBER);
-
-			// プレイ中ショートカット：タイトルバック (keyTitleBackX_Y)
-			newKeySingleParam(newKey, `keyTitleBack`, C_TYP_NUMBER);
-
-			// 別キーフラグ (transKeyX_Y)
-			newKeySingleParam(newKey, `transKey`, C_TYP_STRING);
-
-			/**
-			 * 新キー用単一パラメータ
-			 * @param {string} _key キー数
-			 * @param {string} _name 名前
-			 * @param {string} _type float, number, string, boolean
-			 */
-			function newKeySingleParam(_key, _name, _type) {
-				if (_dosObj[`${_name}${_key}`] !== undefined) {
-					const tmps = _dosObj[`${_name}${_key}`].split(`$`);
-					if (tmps.length > 0) {
-						for (let k = 0, len = tmps.length; k < len; k++) {
-							g_keyObj[`${_name}${_key}_${k}`] = setVal(tmps[k], ``, _type);
-						}
-					}
+		} else {
+			for (let k = 0; k < tmpMinPatterns; k++) {
+				if (g_keyObj[`color${newKey}_${k}`] !== undefined) {
+					g_keyObj[`pos${newKey}_${k}`] = [...Array(g_keyObj[`color${newKey}_${k}`].length).keys()].map(i => i);
 				}
 			}
+		}
 
-			// シャッフルグループ (shuffleX_Y)
-			if (_dosObj[`shuffle${newKey}`] !== undefined) {
-				const tmpshuffles = _dosObj[`shuffle${newKey}`].split(`$`);
-				for (let k = 0; k < tmpshuffles.length; k++) {
-					g_keyObj[`shuffle${newKey}_${k}`] = tmpshuffles[k].split(`,`).map(n => parseInt(n, 10));
+		// キーコンフィグ (keyCtrlX_Y)
+		if (_dosObj[`keyCtrl${newKey}`] !== undefined) {
+			const tmpKeyCtrls = _dosObj[`keyCtrl${newKey}`].split(`$`);
+			for (let p = 0, len = tmpKeyCtrls.length; p < len; p++) {
+				if (setVal(tmpKeyCtrls[p], ``, C_TYP_STRING) === `` && g_keyObj[`keyCtrl${newKey}_${p}`] !== undefined) {
+					continue;
+				}
+				tmpKeyCtrl = tmpKeyCtrls[p].split(`,`);
+
+				g_keyObj[`keyCtrl${newKey}_${p}`] = [];
+				g_keyObj[`keyCtrl${newKey}_${p}d`] = [];
+
+				for (let k = 0; k < tmpKeyCtrl.length; k++) {
+					tmpKeyPtn = tmpKeyCtrl[k].split(`/`);
+					g_keyObj[`keyCtrl${newKey}_${p}`][k] = tmpKeyCtrl[k].split(`/`).map(n => parseInt(n, 10));
+					g_keyObj[`keyCtrl${newKey}_${p}d`][k] = g_keyObj[`keyCtrl${newKey}_${p}`][k].concat();
 				}
 			}
+		} else if (g_keyObj[`keyCtrl${newKey}_0`] === undefined) {
+			makeWarningWindow(C_MSG_E_0104.split(`{0}`).join(newKey));
+		}
 
-			// スクロールパターン (scrollX_Y)
-			// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
-			if (_dosObj[`scroll${newKey}`] !== undefined) {
-				g_keyObj[`scrollName${newKey}`] = [`---`];
-				const tmpScrolls = _dosObj[`scroll${newKey}`].split(`$`);
-				if (tmpScrolls.length > 0) {
-					for (let k = 0, len = tmpScrolls.length; k < len; k++) {
-						if (setVal(tmpScrolls[k], ``, C_TYP_STRING) === ``) {
-							continue;
-						}
-						g_keyObj[`scrollDir${newKey}_${k}`] = {
-							'---': [...Array(g_keyObj[`color${newKey}_${k}`].length)].fill(1),
-						};
-						const tmpScrollPtns = tmpScrolls[k].split(`/`);
-						for (let m = 0, len = tmpScrollPtns.length; m < len; m++) {
-							const tmpScrollPair = tmpScrollPtns[m].split(`::`);
-							g_keyObj[`scrollName${newKey}`][m + 1] = tmpScrollPair[0];
-							const tmpScrollDir = tmpScrollPair[1].split(`,`);
-							g_keyObj[`scrollDir${newKey}_${k}`][tmpScrollPair[0]] = [];
-							for (let n = 0, len = tmpScrollDir.length; n < len; n++) {
-								g_keyObj[`scrollDir${newKey}_${k}`][tmpScrollPair[0]][n] = Number(tmpScrollDir[n]);
-							}
-						}
-					}
+		// ステップゾーン間隔 (blankX_Y)
+		newKeySingleParam(newKey, `blank`, C_TYP_FLOAT);
+
+		// プレイ中ショートカット：リトライ (keyRetryX_Y)
+		newKeySingleParam(newKey, `keyRetry`, C_TYP_NUMBER);
+
+		// プレイ中ショートカット：タイトルバック (keyTitleBackX_Y)
+		newKeySingleParam(newKey, `keyTitleBack`, C_TYP_NUMBER);
+
+		// 別キーフラグ (transKeyX_Y)
+		newKeySingleParam(newKey, `transKey`, C_TYP_STRING);
+
+		// シャッフルグループ (shuffleX_Y)
+		if (_dosObj[`shuffle${newKey}`] !== undefined) {
+			const tmpshuffles = _dosObj[`shuffle${newKey}`].split(`$`);
+			for (let k = 0; k < tmpshuffles.length; k++) {
+				g_keyObj[`shuffle${newKey}_${k}`] = tmpshuffles[k].split(`,`).map(n => parseInt(n, 10));
+			}
+		}
+
+		// スクロールパターン (scrollX_Y)
+		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
+		if (_dosObj[`scroll${newKey}`] !== undefined) {
+			g_keyObj[`scrollName${newKey}`] = [`---`];
+			const tmpScrolls = _dosObj[`scroll${newKey}`].split(`$`);
+			for (let k = 0, len = tmpScrolls.length; k < len; k++) {
+				if (setVal(tmpScrolls[k], ``, C_TYP_STRING) === ``) {
+					continue;
 				}
+				g_keyObj[`scrollDir${newKey}_${k}`] = {
+					'---': [...Array(g_keyObj[`color${newKey}_${k}`].length)].fill(1),
+				};
+				const tmpScrollPtns = tmpScrolls[k].split(`/`);
+				for (let m = 0, len = tmpScrollPtns.length; m < len; m++) {
+					const tmpScrollPair = tmpScrollPtns[m].split(`::`);
+					g_keyObj[`scrollName${newKey}`][m + 1] = tmpScrollPair[0];
+					g_keyObj[`scrollDir${newKey}_${k}`][tmpScrollPair[0]] = tmpScrollPair[1].split(`,`).map(n => parseInt(n, 10));
+				}
+			}
+		}
+	}
+
+	/**
+	 * 新キー用単一パラメータ
+	 * @param {string} _key キー数
+	 * @param {string} _name 名前
+	 * @param {string} _type float, number, string, boolean
+	 */
+	function newKeySingleParam(_key, _name, _type) {
+		if (_dosObj[`${_name}${_key}`] !== undefined) {
+			const tmps = _dosObj[`${_name}${_key}`].split(`$`);
+			for (let k = 0, len = tmps.length; k < len; k++) {
+				g_keyObj[`${_name}${_key}_${k}`] = setVal(tmps[k], ``, _type);
 			}
 		}
 	}
@@ -3667,8 +3629,7 @@ function createOptionWindow(_sprite) {
  */
 function createGeneralSetting(_obj, _settingName, _unitName = ``, _skipFlg = false, _skipTerm = 5) {
 
-	const settingUpper = `${_settingName.slice(0, 1).toUpperCase()}${_settingName.slice(1)}`;
-
+	const settingUpper = toCapitalize(_settingName);
 	_obj.appendChild(createLblSetting(settingUpper));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
@@ -3731,7 +3692,7 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
 		eval(`g_${_settingName}Num = (g_${_settingName}Num === 0 ? g_${_settingName}s.length - 1 : (g_${_settingName}Num + _scrollNum <= 0 ? 0 : g_${_settingName}Num + _scrollNum))`);
 	}
 	eval(`g_stateObj.${_settingName} = g_${_settingName}s[g_${_settingName}Num]`);
-	eval(`document.querySelector('#lnk${_settingName.slice(0, 1).toUpperCase()}${_settingName.slice(1)}').innerHTML = g_stateObj.${_settingName} + _unitName`);
+	eval(`document.querySelector('#lnk${toCapitalize(_settingName)}').innerHTML = g_stateObj.${_settingName} + _unitName`);
 }
 
 /**
@@ -3773,16 +3734,14 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 			}
 		}
 
-		g_keyObj[`chara${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`chara${basePtn}`]));
-		g_keyObj[`color${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`color${basePtn}`]));
-		g_keyObj[`stepRtn${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${basePtn}`]));
-		g_keyObj[`pos${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`pos${basePtn}`]));
-		g_keyObj[`div${copyPtn}`] = g_keyObj[`div${basePtn}`];
-		g_keyObj[`blank${copyPtn}`] = g_keyObj[`blank${basePtn}`];
-		g_keyObj[`keyRetry${copyPtn}`] = g_keyObj[`keyRetry${basePtn}`];
-		g_keyObj[`keyTitleBack${copyPtn}`] = g_keyObj[`keyTitleBack${basePtn}`];
-		g_keyObj[`transKey${copyPtn}`] = g_keyObj[`transKey${basePtn}`];
-		g_keyObj[`scrollDir${copyPtn}`] = g_keyObj[`scrollDir${basePtn}`];
+		const deepCopyList = [`chara`, `color`, `stepRtn`, `pos`];
+		deepCopyList.forEach(header => {
+			g_keyObj[`${header}${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`${header}${basePtn}`]));
+		});
+		const copyList = [`div`, `blank`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`];
+		copyList.forEach(header => {
+			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
+		});
 		if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
 			g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
 		}
@@ -4031,7 +3990,7 @@ function createSettingsDisplayWindow(_sprite) {
 	function makeDisplayButton(_name, _heightPos, _widthPos) {
 
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
-		const lnk = makeSettingLblCssButton(`lnk${_name}`, `${_name.slice(0, 1).toUpperCase()}${_name.slice(1)}`, _heightPos, _ => {
+		const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
 			g_stateObj[`d_${_name.toLowerCase()}`] = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 			if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
 				lnk.classList.replace(g_cssObj.button_ON, g_cssObj.button_OFF);
@@ -4907,10 +4866,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		// 矢印データの分解
 		const arrowName = g_keyObj[`chara${keyCtrlPtn}`][j];
 		obj.arrowData[j] = storeArrowData(_dosObj[`${arrowName}${_scoreNo}_data`]);
-		if (isNaN(parseFloat(obj.arrowData[j][0]))) {
-		} else {
-			g_allArrow += obj.arrowData[j].length;
-		}
+		g_allArrow += (isNaN(parseFloat(obj.arrowData[j][0])) ? 0 : obj.arrowData[j].length);
 
 		if (g_stateObj.dummyId !== ``) {
 			obj.dummyArrowData[j] = storeArrowData(_dosObj[`${arrowName}${_dummyNo}_data`]);
@@ -4927,14 +4883,19 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 		frzName = frzName.replace(`iyo`, `frzIyo`);
 		frzName = frzName.replace(`gor`, `frzGor`);
 		frzName = frzName.replace(`oni`, `foni`);
-		frzName = frzName.replace(`arrow`, `frzArrow`);
+
+		if (frzName.indexOf(`frz`) === -1 && frzName.indexOf(`foni`) === -1) {
+			if ((frzName.startsWith(`s`)) || frzName.startsWith(`t`) ||
+				(frzName.startsWith(`a`) && !frzName.startsWith(`arrow`))) {
+				frzName = frzName.replace(frzName.slice(1), `frz${toCapitalize(frzName.slice(1))}`);
+			} else {
+				frzName = frzName.replace(frzName, `frz${toCapitalize(frzName)}`);
+			}
+		}
 
 		// フリーズアローデータの分解 (2つで1セット)
 		obj.frzData[j] = storeArrowData(_dosObj[`${frzName}${_scoreNo}_data`]);
-		if (isNaN(parseFloat(obj.frzData[j][0]))) {
-		} else {
-			g_allFrz += obj.frzData[j].length;
-		}
+		g_allFrz += (isNaN(parseFloat(obj.frzData[j][0])) ? 0 : obj.frzData[j].length);
 
 		if (g_stateObj.dummyId !== ``) {
 			obj.dummyFrzData[j] = storeArrowData(_dosObj[`${frzName}${_dummyNo}_data`]);
@@ -5481,7 +5442,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	function calcArrows(_j, _data, _header) {
 
-		const camelHeader = _header.slice(0, 1).toUpperCase() + _header.slice(1);
+		const camelHeader = toCapitalize(_header);
 		if (_data !== undefined) {
 
 			let startPoint = [];
@@ -5562,7 +5523,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	function calcFrzArrows(_j, _data, _header) {
-		const camelHeader = _header.slice(0, 1).toUpperCase() + _header.slice(1);
+		const camelHeader = toCapitalize(_header);
 
 		if (_data !== undefined) {
 
@@ -5949,7 +5910,7 @@ function pushColors(_header, _frame, _val, _colorCd) {
  */
 function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
 
-	const camelHeader = _header.slice(0, 1).toUpperCase() + _header.slice(1);
+	const camelHeader = toCapitalize(_header);
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 
@@ -7037,7 +6998,6 @@ function MainInit() {
 	function movArrow(_j, _k, _name) {
 		const arrow = document.querySelector(`#${_name}${_j}_${_k}`);
 		let boostCnt = arrow.getAttribute(`boostCnt`);
-		const boostSpdDir = arrow.getAttribute(`boostSpd`);
 		let cnt = arrow.getAttribute(`cnt`);
 
 		// 全体色変化 (移動時)
@@ -7045,8 +7005,10 @@ function MainInit() {
 
 		// 移動
 		if (g_workObj.currentSpeed !== 0) {
-			arrow.style.top = `${parseFloat(arrow.style.top) -
-				(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
+			const currentY = parseFloat(arrow.style.top);
+			arrow.setAttribute(`prevPosY`, currentY);
+			arrow.style.top = `${currentY - (g_workObj.currentSpeed +
+				g_workObj.motionOnFrames[boostCnt]) * parseFloat(arrow.getAttribute(`boostSpd`))}px`;
 			arrow.setAttribute(`boostCnt`, --boostCnt);
 		}
 		arrow.setAttribute(`cnt`, --cnt);
@@ -7063,7 +7025,7 @@ function MainInit() {
 	 * @param {string} _barColor 
 	 */
 	function makeFrzArrow(_j, _arrowCnt, _name, _normalColor, _barColor) {
-		const camelHeader = _name.slice(0, 1).toUpperCase() + _name.slice(1);
+		const camelHeader = toCapitalize(_name);
 		const frzLength = g_workObj[`mk${camelHeader}Length`][_j][(_arrowCnt - 1) * 2];
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 		const dividePos = g_workObj.dividePos[_j];
@@ -7735,10 +7697,11 @@ function judgeArrow(_j) {
 			const difFrame = Number(judgArrow.getAttribute(`cnt`));
 			const difCnt = Math.abs(judgArrow.getAttribute(`cnt`));
 			const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
-			const dividePos = Number(judgArrow.getAttribute(`dividePos`));
-			const arrowSprite = document.querySelector(`#arrowSprite${dividePos}`);
+			const arrowSprite = document.querySelector(`#arrowSprite${judgArrow.getAttribute(`dividePos`)}`);
 
 			if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
+				stepDivHit.style.top = `${parseFloat(judgArrow.getAttribute(`prevPosY`)) -
+					parseFloat(document.querySelector(`#stepRoot${_j}`).style.top) - 15}px`;
 				stepDivHit.style.opacity = 0.75;
 				stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
 
@@ -8257,7 +8220,7 @@ function resultInit() {
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 5,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplay2Data`, 60, g_cssObj.result_style, 5,
 		display2Data, C_ALIGN_CENTER));
 
 	/**
@@ -8276,31 +8239,19 @@ function resultInit() {
 		return _baseString;
 	}
 
-	// キャラクタ描画
-	resultWindow.appendChild(makeCssResultSymbol(`lblIi`, 0, g_cssObj.common_ii, 0, C_JCR_II, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblShakin`, 0, g_cssObj.common_shakin, 1, C_JCR_SHAKIN, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblMatari`, 0, g_cssObj.common_matari, 2, C_JCR_MATARI, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblShobon`, 0, g_cssObj.common_shobon, 3, C_JCR_SHOBON, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblUwan`, 0, g_cssObj.common_uwan, 4, C_JCR_UWAN, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblKita`, 0, g_cssObj.common_kita, 5, C_JCR_KITA, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblIknai`, 0, g_cssObj.common_iknai, 6, C_JCR_IKNAI, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblMCombo`, 0, g_cssObj.common_combo, 7, `MaxCombo`, C_ALIGN_LEFT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblFCombo`, 0, g_cssObj.common_combo, 8, `FreezeCombo`, C_ALIGN_LEFT));
+	// キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
+	const judgeIds = [`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `Kita`, `Iknai`, `Mcombo`, `Fcombo`, ``, `Score`];
+	const judgeColors = [`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `combo`, `combo`, ``, `score`];
+	const judgeLabels = [C_JCR_II, C_JCR_SHAKIN, C_JCR_MATARI, C_JCR_SHOBON, C_JCR_UWAN, C_JCR_KITA, C_JCR_IKNAI, `MaxCombo`, `FreezeCombo`, ``, `Score`];
+	const judgeScores = [`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `maxCombo`, `fmaxCombo`, ``, `score`];
 
-	resultWindow.appendChild(makeCssResultSymbol(`lblScore`, 0, g_cssObj.common_score, 10, `Score`, C_ALIGN_LEFT));
-
-	// スコア描画
-	resultWindow.appendChild(makeCssResultSymbol(`lblIiS`, 50, g_cssObj.result_score, 0, g_resultObj.ii, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblShakinS`, 50, g_cssObj.result_score, 1, g_resultObj.shakin, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblMatariS`, 50, g_cssObj.result_score, 2, g_resultObj.matari, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblShobonS`, 50, g_cssObj.result_score, 3, g_resultObj.shobon, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblUwanS`, 50, g_cssObj.result_score, 4, g_resultObj.uwan, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblKitaS`, 50, g_cssObj.result_score, 5, g_resultObj.kita, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblIknaiS`, 50, g_cssObj.result_score, 6, g_resultObj.iknai, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblMComboS`, 50, g_cssObj.result_score, 7, g_resultObj.maxCombo, C_ALIGN_RIGHT));
-	resultWindow.appendChild(makeCssResultSymbol(`lblFComboS`, 50, g_cssObj.result_score, 8, g_resultObj.fmaxCombo, C_ALIGN_RIGHT));
-
-	resultWindow.appendChild(makeCssResultSymbol(`lblScoreS`, 50, g_cssObj.result_score, 10, g_resultObj.score, C_ALIGN_RIGHT));
+	// キャラクタ、スコア描画
+	judgeIds.forEach((id, j) => {
+		if (id !== ``) {
+			resultWindow.appendChild(makeCssResultSymbol(`lbl${id}`, 0, g_cssObj[`common_${judgeColors[j]}`], j, judgeLabels[j], C_ALIGN_LEFT));
+			resultWindow.appendChild(makeCssResultSymbol(`lbl${id}S`, 50, g_cssObj.common_score, j, g_resultObj[judgeScores[j]], C_ALIGN_RIGHT));
+		}
+	});
 
 	// ランク描画
 	const lblRank = createDivCustomLabel(`lblRank`, 340, 160, 70, 20, 50, `#ffffff`,
@@ -8321,112 +8272,60 @@ function resultInit() {
 	if (g_headerObj.makerView) {
 		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
 	}
-	let iiDf = 0;
-	let shakinDf = 0;
-	let matariDf = 0;
-	let shobonDf = 0;
-	let uwanDf = 0;
-	let kitaDf = 0;
-	let iknaiDf = 0;
-	let maxComboDf = 0;
-	let fmaxComboDf = 0;
-	let scoreDf = 0;
+	const highscoreDfObj = {
+		ii: 0,
+		shakin: 0,
+		matari: 0,
+		shobon: 0,
+		uwan: 0,
+		kita: 0,
+		iknai: 0,
+		maxCombo: 0,
+		fmaxCombo: 0,
+		score: 0,
+	};
 
 	if (g_stateObj.autoPlay === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
 		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``) {
 
 		if (scoreName in g_localStorage.highscores) {
-			iiDf = g_resultObj.ii - g_localStorage.highscores[scoreName].ii;
-			shakinDf = g_resultObj.shakin - g_localStorage.highscores[scoreName].shakin;
-			matariDf = g_resultObj.matari - g_localStorage.highscores[scoreName].matari;
-			shobonDf = g_resultObj.shobon - g_localStorage.highscores[scoreName].shobon;
-			uwanDf = g_resultObj.uwan - g_localStorage.highscores[scoreName].uwan;
-			kitaDf = g_resultObj.kita - g_localStorage.highscores[scoreName].kita;
-			iknaiDf = g_resultObj.iknai - g_localStorage.highscores[scoreName].iknai;
-			maxComboDf = g_resultObj.maxCombo - g_localStorage.highscores[scoreName].maxCombo;
-			fmaxComboDf = g_resultObj.fmaxCombo - g_localStorage.highscores[scoreName].fmaxCombo;
-			scoreDf = g_resultObj.score - g_localStorage.highscores[scoreName].score;
-
-			if (scoreDf > 0 && g_stateObj.dataSaveFlg) {
-				g_localStorage.highscores[scoreName].ii = g_resultObj.ii;
-				g_localStorage.highscores[scoreName].shakin = g_resultObj.shakin;
-				g_localStorage.highscores[scoreName].matari = g_resultObj.matari;
-				g_localStorage.highscores[scoreName].shobon = g_resultObj.shobon;
-				g_localStorage.highscores[scoreName].uwan = g_resultObj.uwan;
-				g_localStorage.highscores[scoreName].kita = g_resultObj.kita;
-				g_localStorage.highscores[scoreName].iknai = g_resultObj.iknai;
-				g_localStorage.highscores[scoreName].maxCombo = g_resultObj.maxCombo;
-				g_localStorage.highscores[scoreName].fmaxCombo = g_resultObj.fmaxCombo;
-				g_localStorage.highscores[scoreName].score = g_resultObj.score;
-
-				localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
-			}
+			judgeScores.forEach(judge => {
+				if (judge !== ``) {
+					highscoreDfObj[judge] = g_resultObj[judge] - g_localStorage.highscores[scoreName][judge];
+				}
+			});
 		} else {
-			iiDf = g_resultObj.ii;
-			shakinDf = g_resultObj.shakin;
-			matariDf = g_resultObj.matari;
-			shobonDf = g_resultObj.shobon;
-			uwanDf = g_resultObj.uwan;
-			kitaDf = g_resultObj.kita;
-			iknaiDf = g_resultObj.iknai;
-			maxComboDf = g_resultObj.maxCombo;
-			fmaxComboDf = g_resultObj.fmaxCombo;
-			scoreDf = g_resultObj.score;
-
-			if (g_stateObj.dataSaveFlg) {
-				g_localStorage.highscores[scoreName] = {};
-				g_localStorage.highscores[scoreName].ii = g_resultObj.ii;
-				g_localStorage.highscores[scoreName].shakin = g_resultObj.shakin;
-				g_localStorage.highscores[scoreName].matari = g_resultObj.matari;
-				g_localStorage.highscores[scoreName].shobon = g_resultObj.shobon;
-				g_localStorage.highscores[scoreName].uwan = g_resultObj.uwan;
-				g_localStorage.highscores[scoreName].kita = g_resultObj.kita;
-				g_localStorage.highscores[scoreName].iknai = g_resultObj.iknai;
-				g_localStorage.highscores[scoreName].maxCombo = g_resultObj.maxCombo;
-				g_localStorage.highscores[scoreName].fmaxCombo = g_resultObj.fmaxCombo;
-				g_localStorage.highscores[scoreName].score = g_resultObj.score;
-
-				localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
-			}
+			judgeScores.forEach(judge => {
+				if (judge !== ``) {
+					highscoreDfObj[judge] = g_resultObj[judge];
+				}
+			});
+		}
+		if (highscoreDfObj.score > 0 && g_stateObj.dataSaveFlg) {
+			g_localStorage.highscores[scoreName] = {};
+			judgeScores.forEach(judge => {
+				if (judge !== ``) {
+					g_localStorage.highscores[scoreName][judge] = g_resultObj[judge];
+				}
+			});
+			localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 		}
 
 		// ハイスコア差分描画
-		resultWindow.appendChild(makeCssResultSymbol(`lblIiL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 0, `(${iiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblShakinL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 1, `(${shakinDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblMatariL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 2, `(${matariDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblShobonL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 3, `(${shobonDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblUwanL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 4, `(${uwanDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblKitaL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 5, `(${kitaDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblIknaiL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 6, `(${iknaiDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblMComboL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 7, `(${maxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblFComboL1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, 8, `(${fmaxComboDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-
-		resultWindow.appendChild(makeCssResultSymbol(`lblScoreL1`, C_RLT_BRACKET_L, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-
-		resultWindow.appendChild(makeCssResultSymbol(`lblIiS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblShakinS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblMatariS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblShobonS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblUwanS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblKitaS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblIknaiS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblMComboS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblFComboS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
-
-		resultWindow.appendChild(makeCssResultSymbol(`lblScoreS`, C_RLT_HIDIF_X, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
-
-
-		resultWindow.appendChild(makeCssResultSymbol(`lblIiL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 0, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblShakinL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 1, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblMatariL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 2, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblShobonL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 3, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblUwanL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 4, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblKitaL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 5, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblIknaiL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 6, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblMComboL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 7, `)`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblFComboL2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, 8, `)`, C_ALIGN_LEFT));
-
-		resultWindow.appendChild(makeCssResultSymbol(`lblScoreL2`, C_RLT_BRACKET_R, `${scoreDf > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`, 10, `)`, C_ALIGN_LEFT));
+		judgeIds.forEach((id, j) => {
+			if (id === `Score`) {
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					j, `(${highscoreDfObj[judgeScores[j]] >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}LS`, C_RLT_HIDIF_X, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
+					j, Math.abs(highscoreDfObj[judgeScores[j]]), C_ALIGN_RIGHT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					j, `)`, C_ALIGN_LEFT));
+			} else if (id !== ``) {
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, j, `(${highscoreDfObj[judgeScores[j]] >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}LS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, j, Math.abs(highscoreDfObj[judgeScores[j]]), C_ALIGN_RIGHT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, j, `)`, C_ALIGN_LEFT));
+			}
+		});
 
 	} else {
 		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`, C_ALIGN_LEFT));
