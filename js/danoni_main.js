@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 10.4.0`;
+const g_version = `Ver 10.4.1`;
 const g_revisedDate = `2019/12/07`;
 const g_alphaVersion = ``;
 
@@ -7813,16 +7813,26 @@ function lifeDamage() {
 }
 
 /**
+ * 判定キャラクタの表示、判定済矢印数・判定数のカウンタ
+ * @param {string} _name 
+ * @param {string} _character 
+ * @param {string} _freezeFlg 
+ */
+function changeJudgeCharacter(_name, _character, _freezeFlg = ``) {
+	g_resultObj[_name]++;
+	g_currentArrows++;
+	document.querySelector(`#chara${_freezeFlg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
+	document.querySelector(`#chara${_freezeFlg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
+	document.querySelector(`#lbl${toCapitalize(_name)}`).innerHTML = g_resultObj[_name];
+}
+
+/**
  * 判定処理：イイ
  * @param {number} difFrame 
  */
 function judgeIi(difFrame) {
-	g_resultObj.ii++;
-	g_currentArrows++;
-	document.querySelector(`#charaJ`).innerHTML = `<span class="common_ii">${C_JCR_II}</span>`;
-	document.querySelector(`#charaJ`).setAttribute(`cnt`, C_FRM_JDGMOTION);
+	changeJudgeCharacter(`ii`, C_JCR_II);
 
-	document.querySelector(`#lblIi`).innerHTML = g_resultObj.ii;
 	if (++g_resultObj.combo > g_resultObj.maxCombo) {
 		g_resultObj.maxCombo = g_resultObj.combo;
 		document.querySelector(`#lblMCombo`).innerHTML = g_resultObj.maxCombo;
@@ -7845,12 +7855,8 @@ function judgeIi(difFrame) {
  * @param {number} difFrame 
  */
 function judgeShakin(difFrame) {
-	g_resultObj.shakin++;
-	g_currentArrows++;
-	document.querySelector(`#charaJ`).innerHTML = `<span class="common_shakin">${C_JCR_SHAKIN}</span>`;
-	document.querySelector(`#charaJ`).setAttribute(`cnt`, C_FRM_JDGMOTION);
+	changeJudgeCharacter(`shakin`, C_JCR_SHAKIN);
 
-	document.querySelector(`#lblShakin`).innerHTML = g_resultObj.shakin;
 	if (++g_resultObj.combo > g_resultObj.maxCombo) {
 		g_resultObj.maxCombo = g_resultObj.combo;
 		document.querySelector(`#lblMCombo`).innerHTML = g_resultObj.maxCombo;
@@ -7873,12 +7879,7 @@ function judgeShakin(difFrame) {
  * @param {number} difFrame 
  */
 function judgeMatari(difFrame) {
-	g_resultObj.matari++;
-	g_currentArrows++;
-	document.querySelector(`#charaJ`).innerHTML = `<span class="common_matari">${C_JCR_MATARI}</span>`;
-	document.querySelector(`#charaJ`).setAttribute(`cnt`, C_FRM_JDGMOTION);
-
-	document.querySelector(`#lblMatari`).innerHTML = g_resultObj.matari;
+	changeJudgeCharacter(`matari`, C_JCR_MATARI);
 	document.querySelector(`#comboJ`).innerHTML = ``;
 
 	finishViewing();
@@ -7896,12 +7897,7 @@ function judgeMatari(difFrame) {
  * @param {number} difFrame 
  */
 function judgeShobon(difFrame) {
-	g_resultObj.shobon++;
-	g_currentArrows++;
-	document.querySelector(`#charaJ`).innerHTML = `<span class="common_shobon">${C_JCR_SHOBON}</span>`;
-	document.querySelector(`#charaJ`).setAttribute(`cnt`, C_FRM_JDGMOTION);
-
-	document.querySelector(`#lblShobon`).innerHTML = g_resultObj.shobon;
+	changeJudgeCharacter(`shobon`, C_JCR_SHOBON);
 	g_resultObj.combo = 0;
 	document.querySelector(`#comboJ`).innerHTML = ``;
 
@@ -7920,12 +7916,7 @@ function judgeShobon(difFrame) {
  * @param {number} difFrame 
  */
 function judgeUwan(difFrame) {
-	g_resultObj.uwan++;
-	g_currentArrows++;
-	document.querySelector(`#charaJ`).innerHTML = `<span class="common_uwan">${C_JCR_UWAN}</span>`;
-	document.querySelector(`#charaJ`).setAttribute(`cnt`, C_FRM_JDGMOTION);
-
-	document.querySelector(`#lblUwan`).innerHTML = g_resultObj.uwan;
+	changeJudgeCharacter(`uwan`, C_JCR_UWAN);
 	g_resultObj.combo = 0;
 	document.querySelector(`#comboJ`).innerHTML = ``;
 
@@ -7944,11 +7935,7 @@ function judgeUwan(difFrame) {
  * @param {number} difFrame 
  */
 function judgeKita(difFrame) {
-	g_resultObj.kita++;
-	g_currentArrows++;
-	document.querySelector(`#lblKita`).innerHTML = g_resultObj.kita;
-	document.querySelector(`#charaFJ`).innerHTML = `<span class="common_kita">${C_JCR_KITA}</span>`;
-	document.querySelector(`#charaFJ`).setAttribute(`cnt`, C_FRM_JDGMOTION);
+	changeJudgeCharacter(`kita`, C_JCR_KITA, `F`);
 
 	if (++g_resultObj.fCombo > g_resultObj.fmaxCombo) {
 		g_resultObj.fmaxCombo = g_resultObj.fCombo;
@@ -7972,11 +7959,7 @@ function judgeKita(difFrame) {
  * @param {number} difFrame 
  */
 function judgeIknai(difFrame) {
-	g_resultObj.iknai++;
-	g_currentArrows++;
-	document.querySelector(`#lblIknai`).innerHTML = g_resultObj.iknai;
-	document.querySelector(`#charaFJ`).innerHTML = `<span class="common_iknai">${C_JCR_IKNAI}</span>`;
-	document.querySelector(`#charaFJ`).setAttribute(`cnt`, C_FRM_JDGMOTION);
+	changeJudgeCharacter(`iknai`, C_JCR_IKNAI, `F`);
 	document.querySelector(`#comboFJ`).innerHTML = ``;
 	g_resultObj.fCombo = 0;
 
@@ -8240,7 +8223,7 @@ function resultInit() {
 	}
 
 	// キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
-	const judgeIds = [`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `Kita`, `Iknai`, `Mcombo`, `Fcombo`, ``, `Score`];
+	const judgeIds = [`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `Kita`, `Iknai`, `MCombo`, `FCombo`, ``, `Score`];
 	const judgeColors = [`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `combo`, `combo`, ``, `score`];
 	const judgeLabels = [C_JCR_II, C_JCR_SHAKIN, C_JCR_MATARI, C_JCR_SHOBON, C_JCR_UWAN, C_JCR_KITA, C_JCR_IKNAI, `MaxCombo`, `FreezeCombo`, ``, `Score`];
 	const judgeScores = [`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `maxCombo`, `fmaxCombo`, ``, `score`];
