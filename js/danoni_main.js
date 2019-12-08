@@ -2488,12 +2488,17 @@ function headerConvert(_dosObj) {
 	obj.makerView = setVal(_dosObj.makerView, false, C_TYP_BOOLEAN);
 
 	// オプション利用可否設定
-	const usingOptions = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
+	let usingOptions = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
+	usingOptions = usingOptions.concat(g_displays);
 
 	usingOptions.forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
 			(typeof g_presetSettingUse === C_TYP_OBJECT ?
 				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
+	});
+
+	g_displays.forEach(option => {
+		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF);
 	});
 
 	// 別キーパターンの使用有無
@@ -3966,15 +3971,9 @@ function createSettingsDisplayWindow(_sprite) {
 		`[クリックでON/OFFを切替、灰色でOFF]`);
 	document.querySelector(`#${_sprite}`).appendChild(sdDesc);
 
-	makeDisplayButton(`stepZone`, 0, 0);
-	makeDisplayButton(`judgement`, 1, 0);
-	makeDisplayButton(`lifeGauge`, 2, 0);
-	makeDisplayButton(`musicInfo`, 3, 0);
-	makeDisplayButton(`speed`, 0, 1);
-	makeDisplayButton(`color`, 1, 1);
-	makeDisplayButton(`lyrics`, 2, 1);
-	makeDisplayButton(`background`, 3, 1);
-	makeDisplayButton(`arrowEffect`, 4, 1);
+	g_displays.forEach((name, j) => {
+		makeDisplayButton(name, j % 5, Math.floor(j / 5));
+	});
 
 	// ---------------------------------------------------
 	// 矢印の見え方 (Appearance)
@@ -3990,19 +3989,37 @@ function createSettingsDisplayWindow(_sprite) {
 	function makeDisplayButton(_name, _heightPos, _widthPos) {
 
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
-		const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
-			g_stateObj[`d_${_name.toLowerCase()}`] = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-			if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
-				lnk.classList.replace(g_cssObj.button_ON, g_cssObj.button_OFF);
-			} else {
-				lnk.classList.replace(g_cssObj.button_OFF, g_cssObj.button_ON);
-			}
-		});
-		lnk.style.width = `170px`;
-		lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
-		lnk.style.borderStyle = `solid`;
-		lnk.classList.add(`button_${flg}`);
-		displaySprite.appendChild(lnk);
+
+		if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_ON) {
+			const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
+				g_stateObj[`d_${_name.toLowerCase()}`] = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
+				if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
+					lnk.classList.replace(g_cssObj.button_ON, g_cssObj.button_OFF);
+				} else {
+					lnk.classList.replace(g_cssObj.button_OFF, g_cssObj.button_ON);
+				}
+			});
+			lnk.style.width = `170px`;
+			lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
+			lnk.style.borderStyle = `solid`;
+			lnk.classList.add(`button_${flg}`);
+			displaySprite.appendChild(lnk);
+		} else {
+			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos, toCapitalize(_name)));
+		}
+	}
+
+	/**
+	 * 無効化用ラベル作成
+	 * @param {string} _id 
+	 * @param {number} _heightPos 
+	 * @param {string} _defaultStr 
+	 */
+	function makeDisabledDisplayLabel(_id, _heightPos, _widthPos, _defaultStr) {
+		const lbl = createDivCssLabel(_id, 30 + 180 * _widthPos, C_LEN_SETLBL_HEIGHT * _heightPos,
+			170, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, _defaultStr, g_cssObj.settings_Disabled);
+		lbl.style.textAlign = C_ALIGN_CENTER;
+		return lbl;
 	}
 
 }
