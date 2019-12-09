@@ -6524,33 +6524,32 @@ function MainInit() {
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	infoSprite.appendChild(lblTime2);
 
-	// 判定キャラクタ表示：矢印
-	const charaJ = createDivCssLabel(`charaJ`, g_sWidth / 2 - 200, g_sHeight / 2 - 50 + g_diffObj.arrowJdgY,
-		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_ii);
-	charaJ.style.textAlign = C_ALIGN_CENTER;
-	charaJ.setAttribute(`cnt`, 0);
-	judgeSprite.appendChild(charaJ);
+	const jdgGroups = [`J`, `FJ`];
+	const jdgX = [g_sWidth / 2 - 200, g_sWidth / 2 - 100];
+	const jdgY = [g_sHeight / 2 - 60 + g_diffObj.arrowJdgY, g_sHeight / 2 + 10 + g_diffObj.frzJdgY];
+	const jdgCombos = [`kita`, `ii`];
 
-	// コンボ表示：矢印
-	const comboJ = createDivCssLabel(`comboJ`, g_sWidth / 2 - 50, g_sHeight / 2 - 50 + g_diffObj.arrowJdgY,
-		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_kita);
-	comboJ.style.textAlign = C_ALIGN_CENTER;
-	comboJ.setAttribute(`cnt`, 0);
-	judgeSprite.appendChild(comboJ);
+	jdgGroups.forEach((jdg, j) => {
 
-	// 判定キャラクタ表示：フリーズアロー
-	const charaFJ = createDivCssLabel(`charaFJ`, g_sWidth / 2 - 100, g_sHeight / 2 + g_diffObj.frzJdgY,
-		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_kita);
-	charaFJ.style.textAlign = C_ALIGN_CENTER;
-	charaFJ.setAttribute(`cnt`, 0);
-	judgeSprite.appendChild(charaFJ);
+		// キャラクタ表示
+		const charaJ = createDivCssLabel(`chara${jdg}`, jdgX[j], jdgY[j],
+			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_ii);
+		charaJ.style.textAlign = C_ALIGN_CENTER;
+		charaJ.setAttribute(`cnt`, 0);
+		judgeSprite.appendChild(charaJ);
 
-	// コンボ表示：フリーズアロー
-	const comboFJ = createDivCssLabel(`comboFJ`, g_sWidth / 2 + 50, g_sHeight / 2 + g_diffObj.frzJdgY,
-		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_ii);
-	comboFJ.style.textAlign = C_ALIGN_CENTER;
-	comboFJ.setAttribute(`cnt`, 0);
-	judgeSprite.appendChild(comboFJ);
+		// コンボ表示
+		const comboJ = createDivCssLabel(`combo${jdg}`, jdgX[j] + 150, jdgY[j],
+			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj[`common_${jdgCombos[j]}`]);
+		comboJ.style.textAlign = C_ALIGN_CENTER;
+		judgeSprite.appendChild(comboJ);
+
+		// Fast/Slow表示
+		const diffJ = createDivCssLabel(`diff${jdg}`, jdgX[j], jdgY[j] + 25,
+			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, 14, ``, g_cssObj.common_combo);
+		diffJ.style.textAlign = C_ALIGN_CENTER;
+		judgeSprite.appendChild(diffJ);
+	});
 
 	// パーフェクト演出
 	const finishView = createDivCssLabel(`finishView`, g_sWidth / 2 - 150, g_sHeight / 2 - 50,
@@ -6573,8 +6572,10 @@ function MainInit() {
 
 		document.querySelector(`#comboJ`).style.display = C_DIS_NONE;
 		document.querySelector(`#charaJ`).style.display = C_DIS_NONE;
+		document.querySelector(`#diffJ`).style.display = C_DIS_NONE;
 		document.querySelector(`#comboFJ`).style.display = C_DIS_NONE;
 		document.querySelector(`#charaFJ`).style.display = C_DIS_NONE;
+		document.querySelector(`#diffFJ`).style.display = C_DIS_NONE;
 	}
 
 	// 曲情報OFF
@@ -7460,6 +7461,7 @@ function MainInit() {
 			if (charaJCnt === 0) {
 				document.querySelector(`#charaJ`).innerHTML = ``;
 				document.querySelector(`#comboJ`).innerHTML = ``;
+				document.querySelector(`#diffJ`).innerHTML = ``;
 			}
 		}
 		let charaFJCnt = document.querySelector(`#charaFJ`).getAttribute(`cnt`);
@@ -7468,6 +7470,7 @@ function MainInit() {
 			if (charaFJCnt === 0) {
 				document.querySelector(`#charaFJ`).innerHTML = ``;
 				document.querySelector(`#comboFJ`).innerHTML = ``;
+				document.querySelector(`#diffFJ`).innerHTML = ``;
 			}
 		}
 
@@ -7741,6 +7744,8 @@ function judgeArrow(_j) {
 					stepDivHit.classList.add(g_cssObj.main_stepShobon);
 				}
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
+				document.querySelector(`#diffJ`).innerHTML = `<span class="common_${difFrame === 0 ? 'combo' : (difFrame > 0 ? 'ii' : 'matari')}">
+					${difFrame === 0 ? 'Just!!' : ((difFrame > 0 ? `Slow ${difCnt} Frame` : `Fast ${difCnt} Frame`))}</span>`;
 
 				arrowSprite.removeChild(judgArrow);
 				g_workObj.judgArrowCnt[_j]++;
@@ -7758,6 +7763,7 @@ function judgeArrow(_j) {
 
 			if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
 				if (g_headerObj.frzStartjdgUse) {
+					const difFrame = Number(judgFrz.getAttribute(`cnt`));
 					if (g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
 						if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 							judgeIi(difCnt);
@@ -7770,6 +7776,9 @@ function judgeArrow(_j) {
 						}
 						g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 					}
+					document.querySelector(`#diffJ`).innerHTML = `<span class="common_${difFrame === 0 ? 'combo' : (difFrame > 0 ? 'ii' : 'matari')}">
+						${difFrame === 0 ? 'Just!!' : ((difFrame > 0 ? `Slow ${difCnt} Frame` : `Fast ${difCnt} Frame`))}
+					</span>`;
 				}
 				changeHitFrz(_j, fcurrentNo, `frz`);
 				g_judgObj.lockFlgs[_j] = false;
@@ -7941,6 +7950,7 @@ function judgeUwan(difFrame) {
 	changeJudgeCharacter(`uwan`, C_JCR_UWAN);
 	g_resultObj.combo = 0;
 	document.querySelector(`#comboJ`).innerHTML = ``;
+	document.querySelector(`#diffJ`).innerHTML = ``;
 
 	lifeDamage();
 
