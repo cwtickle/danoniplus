@@ -338,6 +338,7 @@ const C_STEP_Y = 70;
 const C_STEP_YR = 0;
 let g_stepY;
 let g_distY;
+let g_reverseStepY;
 let g_stepYR;
 
 // キーコンフィグカーソル

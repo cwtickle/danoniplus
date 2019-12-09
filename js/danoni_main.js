@@ -2410,6 +2410,7 @@ function headerConvert(_dosObj) {
 	g_stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));
 	g_stepYR = (isNaN(parseFloat(_dosObj.stepYR)) ? C_STEP_YR : parseFloat(_dosObj.stepYR));
 	g_distY = g_sHeight - g_stepY + g_stepYR;
+	g_reverseStepY = g_distY - g_stepY - C_ARW_WIDTH;
 
 	// musicフォルダ設定
 	obj.musicFolder = setVal(_dosObj.musicFolder, `music`, C_TYP_STRING);
@@ -6233,7 +6234,7 @@ function MainInit() {
 
 		const stepRoot = createSprite(`mainSprite`, `stepRoot${j}`,
 			g_workObj.stepX[j],
-			g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+			g_stepY + g_reverseStepY * g_workObj.dividePos[j],
 			C_ARW_WIDTH, C_ARW_WIDTH);
 
 		// 矢印の内側を塗りつぶすか否か
@@ -6287,13 +6288,13 @@ function MainInit() {
 
 		// ステップゾーンの代わり
 		const stepBar0 = createColorObject(`stepBar`, ``,
-			0, g_stepY + (g_distY - g_stepY - 50) * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
+			0, g_stepY + g_reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
 			g_sWidth - 50, 1, ``, `lifeBar`);
 		stepBar0.classList.add(g_cssObj.life_Failed);
 		mainSprite.appendChild(stepBar0);
 
 		const stepBar1 = createColorObject(`stepBar`, ``,
-			0, g_stepY + (g_distY - g_stepY - 50) * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
+			0, g_stepY + g_reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
 			g_sWidth - 50, 1, ``, `lifeBar`);
 		stepBar1.classList.add(g_cssObj.life_Failed);
 		mainSprite.appendChild(stepBar1);
@@ -6315,7 +6316,7 @@ function MainInit() {
 	// フリーズアローヒット部分
 	for (let j = 0; j < keyNum; j++) {
 		const frzHit = createSprite(`mainSprite`, `frzHit${j}`,
-			g_workObj.stepX[j], g_stepY + (g_distY - g_stepY - 50) * g_workObj.dividePos[j],
+			g_workObj.stepX[j], g_stepY + g_reverseStepY * g_workObj.dividePos[j],
 			C_ARW_WIDTH, C_ARW_WIDTH);
 		frzHit.style.opacity = 0;
 		if (isNaN(Number(g_workObj.arrowRtn[j]))) {
@@ -6974,7 +6975,7 @@ function MainInit() {
 
 		const stepRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
-			g_stepY + (g_distY - g_stepY - 50) * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+			g_stepY + g_reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH);
 		stepRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 		stepRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
@@ -7049,8 +7050,8 @@ function MainInit() {
 
 		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
-			g_stepY + (g_distY - g_stepY - 50) * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
-			50, 100 + frzLength);
+			g_stepY + g_reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+			C_ARW_WIDTH, C_ARW_WIDTH + frzLength);
 		frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 		frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 		frzRoot.setAttribute(`judgEndFlg`, `false`);
