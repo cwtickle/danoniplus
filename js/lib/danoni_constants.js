@@ -341,6 +341,11 @@ let g_distY;
 let g_reverseStepY;
 let g_stepYR;
 
+const g_diffObj = {
+    arrowJdgY: 0,
+    frzJdgY: 0,
+};
+
 // キーコンフィグカーソル
 let g_currentj = 0;
 let g_currentk = 0;

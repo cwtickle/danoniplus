@@ -2412,6 +2412,10 @@ function headerConvert(_dosObj) {
 	g_distY = g_sHeight - g_stepY + g_stepYR;
 	g_reverseStepY = g_distY - g_stepY - C_ARW_WIDTH;
 
+	// 矢印・フリーズアロー判定位置補正
+	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
+	g_diffObj.frzJdgY = (isNaN(parseFloat(_dosObj.frzJdgY)) ? 0 : parseFloat(_dosObj.frzJdgY));
+
 	// musicフォルダ設定
 	obj.musicFolder = setVal(_dosObj.musicFolder, `music`, C_TYP_STRING);
 
@@ -6521,28 +6525,28 @@ function MainInit() {
 	infoSprite.appendChild(lblTime2);
 
 	// 判定キャラクタ表示：矢印
-	const charaJ = createDivCssLabel(`charaJ`, g_sWidth / 2 - 200, g_sHeight / 2 - 50,
+	const charaJ = createDivCssLabel(`charaJ`, g_sWidth / 2 - 200, g_sHeight / 2 - 50 + g_diffObj.arrowJdgY,
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_ii);
 	charaJ.style.textAlign = C_ALIGN_CENTER;
 	charaJ.setAttribute(`cnt`, 0);
 	judgeSprite.appendChild(charaJ);
 
 	// コンボ表示：矢印
-	const comboJ = createDivCssLabel(`comboJ`, g_sWidth / 2 - 50, g_sHeight / 2 - 50,
+	const comboJ = createDivCssLabel(`comboJ`, g_sWidth / 2 - 50, g_sHeight / 2 - 50 + g_diffObj.arrowJdgY,
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_kita);
 	comboJ.style.textAlign = C_ALIGN_CENTER;
 	comboJ.setAttribute(`cnt`, 0);
 	judgeSprite.appendChild(comboJ);
 
 	// 判定キャラクタ表示：フリーズアロー
-	const charaFJ = createDivCssLabel(`charaFJ`, g_sWidth / 2 - 100, g_sHeight / 2,
+	const charaFJ = createDivCssLabel(`charaFJ`, g_sWidth / 2 - 100, g_sHeight / 2 + g_diffObj.frzJdgY,
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_kita);
 	charaFJ.style.textAlign = C_ALIGN_CENTER;
 	charaFJ.setAttribute(`cnt`, 0);
 	judgeSprite.appendChild(charaFJ);
 
 	// コンボ表示：フリーズアロー
-	const comboFJ = createDivCssLabel(`comboFJ`, g_sWidth / 2 + 50, g_sHeight / 2,
+	const comboFJ = createDivCssLabel(`comboFJ`, g_sWidth / 2 + 50, g_sHeight / 2 + g_diffObj.frzJdgY,
 		C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_ii);
 	comboFJ.style.textAlign = C_ALIGN_CENTER;
 	comboFJ.setAttribute(`cnt`, 0);
