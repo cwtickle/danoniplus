@@ -7455,24 +7455,17 @@ function MainInit() {
 		}
 
 		// 判定キャラクタ消去
-		let charaJCnt = document.querySelector(`#charaJ`).getAttribute(`cnt`);
-		if (charaJCnt > 0) {
-			document.querySelector(`#charaJ`).setAttribute(`cnt`, --charaJCnt);
-			if (charaJCnt === 0) {
-				document.querySelector(`#charaJ`).innerHTML = ``;
-				document.querySelector(`#comboJ`).innerHTML = ``;
-				document.querySelector(`#diffJ`).innerHTML = ``;
+		jdgGroups.forEach(jdg => {
+			let charaJCnt = document.querySelector(`#chara${jdg}`).getAttribute(`cnt`);
+			if (charaJCnt > 0) {
+				document.querySelector(`#chara${jdg}`).setAttribute(`cnt`, --charaJCnt);
+				if (charaJCnt === 0) {
+					document.querySelector(`#chara${jdg}`).innerHTML = ``;
+					document.querySelector(`#combo${jdg}`).innerHTML = ``;
+					document.querySelector(`#diff${jdg}`).innerHTML = ``;
+				}
 			}
-		}
-		let charaFJCnt = document.querySelector(`#charaFJ`).getAttribute(`cnt`);
-		if (charaFJCnt > 0) {
-			document.querySelector(`#charaFJ`).setAttribute(`cnt`, --charaFJCnt);
-			if (charaFJCnt === 0) {
-				document.querySelector(`#charaFJ`).innerHTML = ``;
-				document.querySelector(`#comboFJ`).innerHTML = ``;
-				document.querySelector(`#diffFJ`).innerHTML = ``;
-			}
-		}
+		});
 
 		// 曲終了判定
 		if (g_scoreObj.frameNum >= fullFrame) {
@@ -7744,8 +7737,7 @@ function judgeArrow(_j) {
 					stepDivHit.classList.add(g_cssObj.main_stepShobon);
 				}
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-				document.querySelector(`#diffJ`).innerHTML = `<span class="common_${difFrame === 0 ? 'combo' : (difFrame > 0 ? 'ii' : 'matari')}">
-					${difFrame === 0 ? 'Just!!' : ((difFrame > 0 ? `Slow ${difCnt} Frame` : `Fast ${difCnt} Frame`))}</span>`;
+				document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 
 				arrowSprite.removeChild(judgArrow);
 				g_workObj.judgArrowCnt[_j]++;
@@ -7776,9 +7768,7 @@ function judgeArrow(_j) {
 						}
 						g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 					}
-					document.querySelector(`#diffJ`).innerHTML = `<span class="common_${difFrame === 0 ? 'combo' : (difFrame > 0 ? 'ii' : 'matari')}">
-						${difFrame === 0 ? 'Just!!' : ((difFrame > 0 ? `Slow ${difCnt} Frame` : `Fast ${difCnt} Frame`))}
-					</span>`;
+					document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 				}
 				changeHitFrz(_j, fcurrentNo, `frz`);
 				g_judgObj.lockFlgs[_j] = false;
@@ -7789,6 +7779,16 @@ function judgeArrow(_j) {
 		stepDiv.style.display = `inherit`;
 		g_judgObj.lockFlgs[_j] = false;
 	}
+}
+
+/**
+ * タイミングズレを表示
+ * @param {number} _difFrame 
+ * @param {number} _difCnt 
+ */
+function displayDiff(_difFrame, _difCnt) {
+	return `<span class="common_${_difFrame === 0 ? 'combo' : (_difFrame > 0 ? 'ii' : 'matari')}">
+		${_difFrame === 0 ? 'Just!!' : ((_difFrame > 0 ? `Slow ${_difCnt} Frame` : `Fast ${_difCnt} Frame`))}</span>`;
 }
 
 function lifeRecovery() {
