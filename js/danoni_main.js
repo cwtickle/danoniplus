@@ -3990,7 +3990,7 @@ function createSettingsDisplayWindow(_sprite) {
 
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
 
-		if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_ON) {
+		if (g_headerObj[`${_name}Use`]) {
 			const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
 				g_stateObj[`d_${_name.toLowerCase()}`] = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
 				if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {

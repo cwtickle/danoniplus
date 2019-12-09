@@ -278,7 +278,7 @@ const g_stateObj = {
     d_judgement: C_FLG_ON,
     d_lifegauge: C_FLG_ON,
     d_musicinfo: C_FLG_ON,
-    d_customeffect: C_FLG_ON,
+    d_special: C_FLG_ON,
     d_color: C_FLG_ON,
     d_speed: C_FLG_ON,
     d_arroweffect: C_FLG_ON,
@@ -326,7 +326,7 @@ let g_volumeNum = g_volumes.length - 1;
 let g_appearances = [`Visible`, `Hidden`, `Sudden`, `Slit`];
 let g_appearanceNum = 0;
 
-let g_displays = [`stepZone`, `judgement`, `lifeGauge`, `musicInfo`, `customEffect`,
+let g_displays = [`stepZone`, `judgement`, `lifeGauge`, `musicInfo`, `special`,
     `speed`, `color`, `lyrics`, `background`, `arrowEffect`];
 
 // サイズ(後で指定)
