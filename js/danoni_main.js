@@ -7782,8 +7782,8 @@ function judgeArrow(_j) {
  * @param {number} _difCnt 
  */
 function displayDiff(_difFrame, _difCnt) {
-	return `<span class="common_${_difFrame === 0 ? 'combo' : (_difFrame > 0 ? 'ii' : 'matari')}">
-		${_difFrame === 0 ? 'Just!!' : ((_difFrame > 0 ? `Slow ${_difCnt} Frame` : `Fast ${_difCnt} Frame`))}</span>`;
+	return `<span class="common_${_difFrame === 0 ? 'combo' : (_difFrame > 0 ? 'matari' : 'shobon')}">
+		${_difFrame === 0 ? 'Just!!' : ((_difFrame > 0 ? `Fast ${_difCnt} Frame` : `Slow ${_difCnt} Frame`))}</span>`;
 }
 
 function lifeRecovery() {
