@@ -7755,22 +7755,21 @@ function judgeArrow(_j) {
 			const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
 
 			if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
-				if (g_headerObj.frzStartjdgUse) {
+				if (g_headerObj.frzStartjdgUse &&
+					(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
 					const difFrame = Number(judgFrz.getAttribute(`cnt`));
-					if (g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
-						if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-							judgeIi(difFrame);
-							document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
-						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-							judgeShakin(difCnt);
-							document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
-						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-							judgeMatari(difCnt);
-						} else {
-							judgeShobon(difCnt);
-						}
-						g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
+					if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
+						judgeIi(difFrame);
+						document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
+					} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
+						judgeShakin(difCnt);
+						document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
+					} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
+						judgeMatari(difCnt);
+					} else {
+						judgeShobon(difCnt);
 					}
+					g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 				}
 				changeHitFrz(_j, fcurrentNo, `frz`);
 				g_judgObj.lockFlgs[_j] = false;
@@ -7927,16 +7926,22 @@ function judgeMatari(difFrame) {
 }
 
 /**
+ * ダメージ系共通処理
+ */
+function judgeDamage() {
+	g_resultObj.combo = 0;
+	document.querySelector(`#comboJ`).innerHTML = ``;
+	document.querySelector(`#diffJ`).innerHTML = ``;
+	lifeDamage();
+}
+
+/**
  * 判定処理：ショボーン
  * @param {number} difFrame 
  */
 function judgeShobon(difFrame) {
 	changeJudgeCharacter(`shobon`, C_JCR_SHOBON);
-	g_resultObj.combo = 0;
-	document.querySelector(`#comboJ`).innerHTML = ``;
-	document.querySelector(`#diffJ`).innerHTML = ``;
-
-	lifeDamage();
+	judgeDamage();
 
 	if (typeof customJudgeShobon === C_TYP_FUNCTION) {
 		customJudgeShobon(difFrame);
@@ -7952,11 +7957,7 @@ function judgeShobon(difFrame) {
  */
 function judgeUwan(difFrame) {
 	changeJudgeCharacter(`uwan`, C_JCR_UWAN);
-	g_resultObj.combo = 0;
-	document.querySelector(`#comboJ`).innerHTML = ``;
-	document.querySelector(`#diffJ`).innerHTML = ``;
-
-	lifeDamage();
+	judgeDamage();
 
 	if (typeof customJudgeUwan === C_TYP_FUNCTION) {
 		customJudgeUwan(difFrame);
