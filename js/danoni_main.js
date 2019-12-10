@@ -6545,7 +6545,7 @@ function MainInit() {
 		judgeSprite.appendChild(comboJ);
 
 		// Fast/Slow表示
-		const diffJ = createDivCssLabel(`diff${jdg}`, jdgX[j], jdgY[j] + 25,
+		const diffJ = createDivCssLabel(`diff${jdg}`, jdgX[j] + 150, jdgY[j] + 25,
 			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, 14, ``, g_cssObj.common_combo);
 		diffJ.style.textAlign = C_ALIGN_CENTER;
 		judgeSprite.appendChild(diffJ);
@@ -7726,9 +7726,11 @@ function judgeArrow(_j) {
 				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 					judgeIi(difFrame);
 					stepDivHit.classList.add(g_cssObj.main_stepIi);
+					document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
 					judgeShakin(difFrame);
 					stepDivHit.classList.add(g_cssObj.main_stepShakin);
+					document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
 					judgeMatari(difFrame);
 					stepDivHit.classList.add(g_cssObj.main_stepMatari);
@@ -7737,7 +7739,6 @@ function judgeArrow(_j) {
 					stepDivHit.classList.add(g_cssObj.main_stepShobon);
 				}
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-				document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 
 				arrowSprite.removeChild(judgArrow);
 				g_workObj.judgArrowCnt[_j]++;
@@ -7758,9 +7759,11 @@ function judgeArrow(_j) {
 					const difFrame = Number(judgFrz.getAttribute(`cnt`));
 					if (g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
 						if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-							judgeIi(difCnt);
+							judgeIi(difFrame);
+							document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
 							judgeShakin(difCnt);
+							document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
 							judgeMatari(difCnt);
 						} else {
@@ -7768,7 +7771,6 @@ function judgeArrow(_j) {
 						}
 						g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 					}
-					document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 				}
 				changeHitFrz(_j, fcurrentNo, `frz`);
 				g_judgObj.lockFlgs[_j] = false;
@@ -7912,6 +7914,7 @@ function judgeShakin(difFrame) {
 function judgeMatari(difFrame) {
 	changeJudgeCharacter(`matari`, C_JCR_MATARI);
 	document.querySelector(`#comboJ`).innerHTML = ``;
+	document.querySelector(`#diffJ`).innerHTML = ``;
 
 	finishViewing();
 
@@ -7931,6 +7934,7 @@ function judgeShobon(difFrame) {
 	changeJudgeCharacter(`shobon`, C_JCR_SHOBON);
 	g_resultObj.combo = 0;
 	document.querySelector(`#comboJ`).innerHTML = ``;
+	document.querySelector(`#diffJ`).innerHTML = ``;
 
 	lifeDamage();
 
