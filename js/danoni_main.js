@@ -8242,14 +8242,6 @@ function resultInit() {
 	lblRank.style.textAlign = C_ALIGN_CENTER;
 	resultWindow.appendChild(lblRank);
 
-	// ユーザカスタムイベント(初期)
-	if (typeof customResultInit === C_TYP_FUNCTION) {
-		customResultInit();
-		if (typeof customResultInit2 === C_TYP_FUNCTION) {
-			customResultInit2();
-		}
-	}
-
 	// ハイスコア差分計算
 	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_headerObj.makerView) {
@@ -8362,7 +8354,7 @@ function resultInit() {
 		resultFlgTmp = ``;
 	}
 
-	const lblResultPre2 = createDivCssLabel(`lblResultPre`, g_sWidth / 2 + 50, 40,
+	const lblResultPre2 = createDivCssLabel(`lblResultPre2`, g_sWidth / 2 + 50, 40,
 		200, 30, 20, resultFlgTmp, g_cssObj.result_Cleared);
 	divRoot.appendChild(lblResultPre2);
 
@@ -8380,6 +8372,14 @@ function resultInit() {
 	// プレイデータは Cleared & Failed に合わせて表示
 	playDataWindow.style.animationDuration = `3s`;
 	playDataWindow.style.animationName = `slowlyAppearing`;
+
+	// ユーザカスタムイベント(初期)
+	if (typeof customResultInit === C_TYP_FUNCTION) {
+		customResultInit();
+		if (typeof customResultInit2 === C_TYP_FUNCTION) {
+			customResultInit2();
+		}
+	}
 
 	// 戻るボタン描画
 	const btnBack = createCssButton({
