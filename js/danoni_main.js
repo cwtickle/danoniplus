@@ -6634,11 +6634,13 @@ function MainInit() {
 			const matchKeys = g_workObj.keyCtrl;
 
 			for (let j = 0; j < keyNum; j++) {
-				for (let k = 0; k < matchKeys[j].length; k++) {
-					if (_keyCode === matchKeys[j][k] && !g_workObj.keyHitFlg[j][k]) {
+				matchKeys[j].forEach((key, k) => {
+					if (_keyCode === key && !g_workObj.keyHitFlg[j][k] && !g_judgObj.lockFlgs[j]) {
+						g_judgObj.lockFlgs[j] = true;
 						judgeArrow(j);
+						g_judgObj.lockFlgs[j] = false;
 					}
-				}
+				});
 			}
 		},
 
@@ -7702,84 +7704,76 @@ function keyIsDown(_keyCode) {
  */
 function judgeArrow(_j) {
 
-	if (!g_judgObj.lockFlgs[_j]) {
-		g_judgObj.lockFlgs[_j] = true;
+	const currentNo = g_workObj.judgArrowCnt[_j];
+	const stepDivHit = document.querySelector(`#stepHit${_j}`);
+	const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
 
-		const currentNo = g_workObj.judgArrowCnt[_j];
-		const stepDivHit = document.querySelector(`#stepHit${_j}`);
-		const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
+	const fcurrentNo = g_workObj.judgFrzCnt[_j];
 
-		const fcurrentNo = g_workObj.judgFrzCnt[_j];
+	if (judgArrow !== null) {
+		const difFrame = Number(judgArrow.getAttribute(`cnt`));
+		const difCnt = Math.abs(judgArrow.getAttribute(`cnt`));
+		const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
+		const arrowSprite = document.querySelector(`#arrowSprite${judgArrow.getAttribute(`dividePos`)}`);
 
-		if (judgArrow !== null) {
-			const difFrame = Number(judgArrow.getAttribute(`cnt`));
-			const difCnt = Math.abs(judgArrow.getAttribute(`cnt`));
-			const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
-			const arrowSprite = document.querySelector(`#arrowSprite${judgArrow.getAttribute(`dividePos`)}`);
+		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
+			stepDivHit.style.top = `${parseFloat(judgArrow.getAttribute(`prevPosY`)) -
+				parseFloat(document.querySelector(`#stepRoot${_j}`).style.top) - 15}px`;
+			stepDivHit.style.opacity = 0.75;
+			stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
 
-			if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
-				stepDivHit.style.top = `${parseFloat(judgArrow.getAttribute(`prevPosY`)) -
-					parseFloat(document.querySelector(`#stepRoot${_j}`).style.top) - 15}px`;
-				stepDivHit.style.opacity = 0.75;
-				stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
+			if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
+				judgeIi(difFrame);
+				stepDivHit.classList.add(g_cssObj.main_stepIi);
+				document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
+			} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
+				judgeShakin(difFrame);
+				stepDivHit.classList.add(g_cssObj.main_stepShakin);
+				document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
+			} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
+				judgeMatari(difFrame);
+				stepDivHit.classList.add(g_cssObj.main_stepMatari);
+			} else {
+				judgeShobon(difFrame);
+				stepDivHit.classList.add(g_cssObj.main_stepShobon);
+			}
+			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
+			arrowSprite.removeChild(judgArrow);
+			g_workObj.judgArrowCnt[_j]++;
+			return;
+		}
+	}
+
+	const judgFrz = document.querySelector(`#frz${_j}_${fcurrentNo}`);
+
+	if (judgFrz !== null) {
+		const difCnt = Math.abs(judgFrz.getAttribute(`cnt`));
+		const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
+
+		if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
+			if (g_headerObj.frzStartjdgUse &&
+				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
+				const difFrame = Number(judgFrz.getAttribute(`cnt`));
 				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 					judgeIi(difFrame);
-					stepDivHit.classList.add(g_cssObj.main_stepIi);
 					document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-					judgeShakin(difFrame);
-					stepDivHit.classList.add(g_cssObj.main_stepShakin);
+					judgeShakin(difCnt);
 					document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-					judgeMatari(difFrame);
-					stepDivHit.classList.add(g_cssObj.main_stepMatari);
+					judgeMatari(difCnt);
 				} else {
-					judgeShobon(difFrame);
-					stepDivHit.classList.add(g_cssObj.main_stepShobon);
+					judgeShobon(difCnt);
 				}
-				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-
-				arrowSprite.removeChild(judgArrow);
-				g_workObj.judgArrowCnt[_j]++;
-
-				g_judgObj.lockFlgs[_j] = false;
-				return;
+				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
+			changeHitFrz(_j, fcurrentNo, `frz`);
+			return;
 		}
-
-		const judgFrz = document.querySelector(`#frz${_j}_${fcurrentNo}`);
-
-		if (judgFrz !== null) {
-			const difCnt = Math.abs(judgFrz.getAttribute(`cnt`));
-			const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
-
-			if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
-				if (g_headerObj.frzStartjdgUse &&
-					(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
-					const difFrame = Number(judgFrz.getAttribute(`cnt`));
-					if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-						judgeIi(difFrame);
-						document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
-					} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-						judgeShakin(difCnt);
-						document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
-					} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-						judgeMatari(difCnt);
-					} else {
-						judgeShobon(difCnt);
-					}
-					g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
-				}
-				changeHitFrz(_j, fcurrentNo, `frz`);
-				g_judgObj.lockFlgs[_j] = false;
-				return;
-			}
-		}
-		const stepDiv = document.querySelector(`#stepDiv${_j}`);
-		stepDiv.style.display = `inherit`;
-		g_judgObj.lockFlgs[_j] = false;
 	}
+	const stepDiv = document.querySelector(`#stepDiv${_j}`);
+	stepDiv.style.display = `inherit`;
 }
 
 /**
