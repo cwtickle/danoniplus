@@ -4235,9 +4235,21 @@ function keyConfigInit() {
 	lblPattern.style.textAlign = C_ALIGN_CENTER;
 	divRoot.appendChild(lblPattern);
 
-	// パターン変更ボタン描画
+	// パターン検索
+	const searchPattern = (_tempPtn, _sign, _transKeyUse = false, _keyCheck = `keyCtrl`) => {
+		while (setVal(g_keyObj[`${_keyCheck}${g_keyObj.currentKey}_${_tempPtn}`], ``, C_TYP_STRING) !== `` &&
+			_transKeyUse === false) {
+			_tempPtn += _sign;
+			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${_tempPtn}`] === undefined) {
+				break;
+			}
+		}
+		return _tempPtn;
+	};
+
+	// パターン変更ボタン描画(右回り)
 	const btnPtnChangeNext = createCssButton({
-		id: `btnPtnChange`,
+		id: `btnPtnChangeR`,
 		name: `>>`,
 		x: g_sWidth * 4 / 5,
 		y: g_sHeight - 100,
@@ -4247,24 +4259,10 @@ function keyConfigInit() {
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Setting,
 	}, _ => {
-		let tempPtn = g_keyObj.currentPtn + 1;
-		while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, C_TYP_STRING) !== `` &&
-			g_headerObj.transKeyUse === false) {
+		const tempPtn = searchPattern(g_keyObj.currentPtn + 1, 1, g_headerObj.transKeyUse, `transKey`);
+		g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
+			tempPtn : (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined ? -1 : 0));
 
-			tempPtn++;
-			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
-				break;
-			}
-		}
-		if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined) {
-			g_keyObj.currentPtn = tempPtn;
-		} else {
-			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined) {
-				g_keyObj.currentPtn = -1;
-			} else {
-				g_keyObj.currentPtn = 0;
-			}
-		}
 		clearWindow();
 		keyConfigInit();
 		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -4273,9 +4271,9 @@ function keyConfigInit() {
 	});
 	divRoot.appendChild(btnPtnChangeNext);
 
-	// パターン変更ボタン描画
+	// パターン変更ボタン描画(左回り)
 	const btnPtnChangeBack = createCssButton({
-		id: `btnPtnChange`,
+		id: `btnPtnChangeL`,
 		name: `<<`,
 		x: 0,
 		y: g_sHeight - 100,
@@ -4285,36 +4283,10 @@ function keyConfigInit() {
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Setting,
 	}, _ => {
-		let tempPtn = g_keyObj.currentPtn - 1;
-		while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, C_TYP_STRING) !== `` &&
-			g_headerObj.transKeyUse === false) {
+		const tempPtn = searchPattern(g_keyObj.currentPtn - 1, -1, g_headerObj.transKeyUse, `transKey`);
+		g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
+			tempPtn : searchPattern(searchPattern(0, 1) - 1, -1, g_headerObj.transKeyUse, `transKey`));
 
-			tempPtn--;
-			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
-				break;
-			}
-		}
-		if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined) {
-			g_keyObj.currentPtn = tempPtn;
-		} else {
-			tempPtn = 0;
-			while (setVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`], ``, C_TYP_STRING) !== ``) {
-				tempPtn++;
-				if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
-					break;
-				}
-			}
-			tempPtn--;
-			while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, C_TYP_STRING) !== `` &&
-				g_headerObj.transKeyUse === false) {
-
-				tempPtn--;
-				if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
-					break;
-				}
-			}
-			g_keyObj.currentPtn = tempPtn;
-		}
 		clearWindow();
 		keyConfigInit();
 		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
