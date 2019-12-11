@@ -7973,31 +7973,29 @@ function judgeIknai(difFrame) {
 	}
 }
 
+/**
+ * フルコンボ・パーフェクト演出の作成
+ * @param {string} _text 
+ */
+function makeFinishView(_text) {
+	document.querySelector(`#finishView`).innerHTML = _text;
+	document.querySelector(`#finishView`).style.opacity = 1;
+	document.querySelector(`#charaJ`).innerHTML = ``;
+	document.querySelector(`#comboJ`).innerHTML = ``;
+	document.querySelector(`#charaFJ`).innerHTML = ``;
+	document.querySelector(`#comboFJ`).innerHTML = ``;
+}
+
 function finishViewing() {
 	if (g_currentArrows === g_allArrow + g_allFrz / 2) {
 		if (g_headerObj.finishView !== C_DIS_NONE) {
 			const fullArrows = g_allArrow + g_allFrz / 2;
 			if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
-				document.querySelector(`#finishView`).innerHTML = `<span class="result_AllPerfect">All Perfect!!</span>`;
-				document.querySelector(`#finishView`).style.opacity = 1;
-				document.querySelector(`#charaJ`).innerHTML = ``;
-				document.querySelector(`#comboJ`).innerHTML = ``;
-				document.querySelector(`#charaFJ`).innerHTML = ``;
-				document.querySelector(`#comboFJ`).innerHTML = ``;
+				makeFinishView(`<span class="result_AllPerfect">All Perfect!!</span>`);
 			} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
-				document.querySelector(`#finishView`).innerHTML = `<span class="result_Perfect">Perfect!!</span>`;
-				document.querySelector(`#finishView`).style.opacity = 1;
-				document.querySelector(`#charaJ`).innerHTML = ``;
-				document.querySelector(`#comboJ`).innerHTML = ``;
-				document.querySelector(`#charaFJ`).innerHTML = ``;
-				document.querySelector(`#comboFJ`).innerHTML = ``;
+				makeFinishView(`<span class="result_Perfect">Perfect!!</span>`);
 			} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
-				document.querySelector(`#finishView`).innerHTML = `<span class="result_FullCombo">FullCombo!</span>`;
-				document.querySelector(`#finishView`).style.opacity = 1;
-				document.querySelector(`#charaJ`).innerHTML = ``;
-				document.querySelector(`#comboJ`).innerHTML = ``;
-				document.querySelector(`#charaFJ`).innerHTML = ``;
-				document.querySelector(`#comboFJ`).innerHTML = ``;
+				makeFinishView(`<span class="result_FullCombo">FullCombo!</span>`);
 			}
 		}
 	}
