@@ -7733,6 +7733,7 @@ function judgeArrow(_j) {
 			} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
 				judgeMatari(difFrame);
 				stepDivHit.classList.add(g_cssObj.main_stepMatari);
+				document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 			} else {
 				judgeShobon(difFrame);
 				stepDivHit.classList.add(g_cssObj.main_stepShobon);
@@ -7763,6 +7764,7 @@ function judgeArrow(_j) {
 					document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
 					judgeMatari(difCnt);
+					document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 				} else {
 					judgeShobon(difCnt);
 				}
@@ -7782,8 +7784,8 @@ function judgeArrow(_j) {
  * @param {number} _difCnt 
  */
 function displayDiff(_difFrame, _difCnt) {
-	return `<span class="common_${_difFrame === 0 ? 'combo' : (_difFrame > 0 ? 'matari' : 'shobon')}">
-		${_difFrame === 0 ? 'Just!!' : ((_difFrame > 0 ? `Fast ${_difCnt} Frame` : `Slow ${_difCnt} Frame`))}</span>`;
+	return `<span class="common_${_difCnt <= 1 ? 'combo' : (_difFrame > 0 ? 'matari' : 'shobon')}">
+		${_difCnt <= 1 ? 'Just!!' : ((_difFrame > 1 ? `Fast ${_difCnt} Frame` : `Slow ${_difCnt} Frames`))}</span>`;
 }
 
 function lifeRecovery() {
