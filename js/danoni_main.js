@@ -7707,56 +7707,49 @@ function judgeArrow(_j) {
 	}
 }
 
-function lifeRecovery() {
-	let lifeCss;
-	g_workObj.lifeVal += g_workObj.lifeRcv;
+/**
+ * ライフゲージバーの色、数値を変更
+ * @param {strint} _state 
+ */
+function changeLifeColor(_state = ``) {
 	const lblLife = document.querySelector(`#lblLife`);
 	const lifeBar = document.querySelector(`#lifeBar`);
-
-	if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
-		g_workObj.lifeVal = g_headerObj.maxLifeVal;
-		lifeCss = g_cssObj.life_Max;
-		lblLife.classList.remove(g_cssObj.life_Cleared, g_cssObj.life_Failed);
+	if (_state !== ``) {
+		const lifeCss = g_cssObj[`life_${_state}`];
+		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared, g_cssObj.life_Failed);
+		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared, g_cssObj.life_Failed);
 		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(g_cssObj.life_Cleared, g_cssObj.life_Failed);
-		lifeBar.classList.add(lifeCss);
-
-	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
-		lifeCss = g_cssObj.life_Cleared;
-		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
-		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
 		lifeBar.classList.add(lifeCss);
 	}
+
 	lblLife.innerHTML = Math.floor(g_workObj.lifeVal);
 	lifeBar.style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal}px`;
 	lifeBar.style.height = `${(g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal}px`;
 }
 
+function lifeRecovery() {
+	g_workObj.lifeVal += g_workObj.lifeRcv;
+
+	if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
+		g_workObj.lifeVal = g_headerObj.maxLifeVal;
+		changeLifeColor(`Max`);
+	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
+		changeLifeColor(`Cleared`);
+	} else {
+		changeLifeColor();
+	}
+}
+
 function lifeDamage() {
-	let lifeCss;
 	g_workObj.lifeVal -= g_workObj.lifeDmg;
-	const lblLife = document.querySelector(`#lblLife`);
-	const lifeBar = document.querySelector(`#lifeBar`);
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
-		lifeCss = g_cssObj.life_Failed;
-		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared);
-		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared);
-		lifeBar.classList.add(lifeCss);
+		changeLifeColor(`Failed`);
 	} else {
-		lifeCss = g_cssObj.life_Cleared;
-		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
-		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
-		lifeBar.classList.add(lifeCss);
+		changeLifeColor(`Cleared`);
 	}
-	lblLife.innerHTML = Math.floor(g_workObj.lifeVal);
-	lifeBar.style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal}px`;
-	lifeBar.style.height = `${(g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal}px`;
 }
 
 /**
