@@ -2344,29 +2344,24 @@ function headerConvert(_dosObj) {
 	// 再生速度
 	obj.playbackRate = setVal(_dosObj.playbackRate, 1, C_TYP_FLOAT);
 
+	// ファイルパスの取得
+	const getFilePath = (_fileName, _directory = ``) => {
+		const obj = {};
+		if (_fileName.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+			obj.fileName = _fileName.split(C_MRK_CURRENT_DIRECTORY)[1];
+			obj.fileRoot = ``;
+		} else {
+			obj.fileName = _fileName;
+			obj.fileRoot = _directory;
+		}
+		return [obj.fileName, obj.fileRoot];
+	};
+
 	// 外部スキンファイルの指定
 	if (_dosObj.skinType !== undefined && _dosObj.skinType !== ``) {
 		const skinTypes = _dosObj.skinType.split(`,`);
-		if (skinTypes.length > 1) {
-			if (skinTypes[1].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-				obj.skinType2 = skinTypes[1].split(C_MRK_CURRENT_DIRECTORY)[1];
-				obj.skinRoot2 = ``;
-			} else {
-				obj.skinType2 = skinTypes[1];
-				obj.skinRoot2 = C_DIR_SKIN;
-			}
-		} else {
-			obj.skinType2 = `blank`;
-			obj.skinRoot2 = C_DIR_SKIN;
-		}
-
-		if (skinTypes[0].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-			obj.skinType = skinTypes[0].split(C_MRK_CURRENT_DIRECTORY)[1];
-			obj.skinRoot = ``;
-		} else {
-			obj.skinType = skinTypes[0];
-			obj.skinRoot = C_DIR_SKIN;
-		}
+		[obj.skinType2, obj.skinRoot2] = getFilePath(skinTypes.length > 1 ? skinTypes[1] : `blank`, C_DIR_SKIN);
+		[obj.skinType, obj.skinRoot] = getFilePath(skinTypes[0], C_DIR_SKIN);
 	} else {
 		obj.skinType = `default`;
 		obj.skinRoot = C_DIR_SKIN;
@@ -2377,28 +2372,8 @@ function headerConvert(_dosObj) {
 	// 外部jsファイルの指定
 	if (_dosObj.customjs !== undefined && _dosObj.customjs !== ``) {
 		const customjss = _dosObj.customjs.split(`,`);
-		if (customjss.length > 1) {
-			customjss[1] = setVal(customjss[1], C_JSF_BLANK, C_TYP_STRING);
-			if (customjss[1].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-				obj.customjs2 = customjss[1].split(C_MRK_CURRENT_DIRECTORY)[1];
-				obj.customjs2Root = ``;
-			} else {
-				obj.customjs2 = customjss[1];
-				obj.customjs2Root = C_DIR_JS;
-			}
-		} else {
-			obj.customjs2 = C_JSF_BLANK;
-			obj.customjs2Root = C_DIR_JS;
-		}
-
-		customjss[0] = setVal(customjss[0], C_JSF_CUSTOM, C_TYP_STRING);
-		if (customjss[0].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-			obj.customjs = customjss[0].split(C_MRK_CURRENT_DIRECTORY)[1];
-			obj.customjsRoot = ``;
-		} else {
-			obj.customjs = customjss[0];
-			obj.customjsRoot = C_DIR_JS;
-		}
+		[obj.customjs2, obj.customjs2Root] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
+		[obj.customjs, obj.customjsRoot] = getFilePath(customjss[0], C_DIR_JS);
 	} else {
 		obj.customjs = C_JSF_CUSTOM;
 		obj.customjsRoot = C_DIR_JS;
