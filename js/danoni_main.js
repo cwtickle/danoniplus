@@ -2344,29 +2344,24 @@ function headerConvert(_dosObj) {
 	// 再生速度
 	obj.playbackRate = setVal(_dosObj.playbackRate, 1, C_TYP_FLOAT);
 
+	// ファイルパスの取得
+	const getFilePath = (_fileName, _directory = ``) => {
+		const obj = {};
+		if (_fileName.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+			obj.fileName = _fileName.split(C_MRK_CURRENT_DIRECTORY)[1];
+			obj.fileRoot = ``;
+		} else {
+			obj.fileName = _fileName;
+			obj.fileRoot = _directory;
+		}
+		return [obj.fileName, obj.fileRoot];
+	};
+
 	// 外部スキンファイルの指定
 	if (_dosObj.skinType !== undefined && _dosObj.skinType !== ``) {
 		const skinTypes = _dosObj.skinType.split(`,`);
-		if (skinTypes.length > 1) {
-			if (skinTypes[1].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-				obj.skinType2 = skinTypes[1].split(C_MRK_CURRENT_DIRECTORY)[1];
-				obj.skinRoot2 = ``;
-			} else {
-				obj.skinType2 = skinTypes[1];
-				obj.skinRoot2 = C_DIR_SKIN;
-			}
-		} else {
-			obj.skinType2 = `blank`;
-			obj.skinRoot2 = C_DIR_SKIN;
-		}
-
-		if (skinTypes[0].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-			obj.skinType = skinTypes[0].split(C_MRK_CURRENT_DIRECTORY)[1];
-			obj.skinRoot = ``;
-		} else {
-			obj.skinType = skinTypes[0];
-			obj.skinRoot = C_DIR_SKIN;
-		}
+		[obj.skinType2, obj.skinRoot2] = getFilePath(skinTypes.length > 1 ? skinTypes[1] : `blank`, C_DIR_SKIN);
+		[obj.skinType, obj.skinRoot] = getFilePath(skinTypes[0], C_DIR_SKIN);
 	} else {
 		obj.skinType = `default`;
 		obj.skinRoot = C_DIR_SKIN;
@@ -2377,28 +2372,8 @@ function headerConvert(_dosObj) {
 	// 外部jsファイルの指定
 	if (_dosObj.customjs !== undefined && _dosObj.customjs !== ``) {
 		const customjss = _dosObj.customjs.split(`,`);
-		if (customjss.length > 1) {
-			customjss[1] = setVal(customjss[1], C_JSF_BLANK, C_TYP_STRING);
-			if (customjss[1].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-				obj.customjs2 = customjss[1].split(C_MRK_CURRENT_DIRECTORY)[1];
-				obj.customjs2Root = ``;
-			} else {
-				obj.customjs2 = customjss[1];
-				obj.customjs2Root = C_DIR_JS;
-			}
-		} else {
-			obj.customjs2 = C_JSF_BLANK;
-			obj.customjs2Root = C_DIR_JS;
-		}
-
-		customjss[0] = setVal(customjss[0], C_JSF_CUSTOM, C_TYP_STRING);
-		if (customjss[0].indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-			obj.customjs = customjss[0].split(C_MRK_CURRENT_DIRECTORY)[1];
-			obj.customjsRoot = ``;
-		} else {
-			obj.customjs = customjss[0];
-			obj.customjsRoot = C_DIR_JS;
-		}
+		[obj.customjs2, obj.customjs2Root] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
+		[obj.customjs, obj.customjsRoot] = getFilePath(customjss[0], C_DIR_JS);
 	} else {
 		obj.customjs = C_JSF_CUSTOM;
 		obj.customjsRoot = C_DIR_JS;
@@ -4257,9 +4232,21 @@ function keyConfigInit() {
 	lblPattern.style.textAlign = C_ALIGN_CENTER;
 	divRoot.appendChild(lblPattern);
 
-	// パターン変更ボタン描画
+	// パターン検索
+	const searchPattern = (_tempPtn, _sign, _transKeyUse = false, _keyCheck = `keyCtrl`) => {
+		while (setVal(g_keyObj[`${_keyCheck}${g_keyObj.currentKey}_${_tempPtn}`], ``, C_TYP_STRING) !== `` &&
+			_transKeyUse === false) {
+			_tempPtn += _sign;
+			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${_tempPtn}`] === undefined) {
+				break;
+			}
+		}
+		return _tempPtn;
+	};
+
+	// パターン変更ボタン描画(右回り)
 	const btnPtnChangeNext = createCssButton({
-		id: `btnPtnChange`,
+		id: `btnPtnChangeR`,
 		name: `>>`,
 		x: g_sWidth * 4 / 5,
 		y: g_sHeight - 100,
@@ -4269,24 +4256,10 @@ function keyConfigInit() {
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Setting,
 	}, _ => {
-		let tempPtn = g_keyObj.currentPtn + 1;
-		while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, C_TYP_STRING) !== `` &&
-			g_headerObj.transKeyUse === false) {
+		const tempPtn = searchPattern(g_keyObj.currentPtn + 1, 1, g_headerObj.transKeyUse, `transKey`);
+		g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
+			tempPtn : (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined ? -1 : 0));
 
-			tempPtn++;
-			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
-				break;
-			}
-		}
-		if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined) {
-			g_keyObj.currentPtn = tempPtn;
-		} else {
-			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined) {
-				g_keyObj.currentPtn = -1;
-			} else {
-				g_keyObj.currentPtn = 0;
-			}
-		}
 		clearWindow();
 		keyConfigInit();
 		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -4295,9 +4268,9 @@ function keyConfigInit() {
 	});
 	divRoot.appendChild(btnPtnChangeNext);
 
-	// パターン変更ボタン描画
+	// パターン変更ボタン描画(左回り)
 	const btnPtnChangeBack = createCssButton({
-		id: `btnPtnChange`,
+		id: `btnPtnChangeL`,
 		name: `<<`,
 		x: 0,
 		y: g_sHeight - 100,
@@ -4307,36 +4280,10 @@ function keyConfigInit() {
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Setting,
 	}, _ => {
-		let tempPtn = g_keyObj.currentPtn - 1;
-		while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, C_TYP_STRING) !== `` &&
-			g_headerObj.transKeyUse === false) {
+		const tempPtn = searchPattern(g_keyObj.currentPtn - 1, -1, g_headerObj.transKeyUse, `transKey`);
+		g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
+			tempPtn : searchPattern(searchPattern(0, 1) - 1, -1, g_headerObj.transKeyUse, `transKey`));
 
-			tempPtn--;
-			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
-				break;
-			}
-		}
-		if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined) {
-			g_keyObj.currentPtn = tempPtn;
-		} else {
-			tempPtn = 0;
-			while (setVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`], ``, C_TYP_STRING) !== ``) {
-				tempPtn++;
-				if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
-					break;
-				}
-			}
-			tempPtn--;
-			while (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${tempPtn}`], ``, C_TYP_STRING) !== `` &&
-				g_headerObj.transKeyUse === false) {
-
-				tempPtn--;
-				if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] === undefined) {
-					break;
-				}
-			}
-			g_keyObj.currentPtn = tempPtn;
-		}
 		clearWindow();
 		keyConfigInit();
 		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -7788,56 +7735,49 @@ function displayDiff(_difFrame, _difCnt) {
 		${_difCnt <= 1 ? 'Just!!' : ((_difFrame > 1 ? `Fast ${_difCnt} Frame` : `Slow ${_difCnt} Frames`))}</span>`;
 }
 
-function lifeRecovery() {
-	let lifeCss;
-	g_workObj.lifeVal += g_workObj.lifeRcv;
+/**
+ * ライフゲージバーの色、数値を変更
+ * @param {strint} _state 
+ */
+function changeLifeColor(_state = ``) {
 	const lblLife = document.querySelector(`#lblLife`);
 	const lifeBar = document.querySelector(`#lifeBar`);
-
-	if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
-		g_workObj.lifeVal = g_headerObj.maxLifeVal;
-		lifeCss = g_cssObj.life_Max;
-		lblLife.classList.remove(g_cssObj.life_Cleared, g_cssObj.life_Failed);
+	if (_state !== ``) {
+		const lifeCss = g_cssObj[`life_${_state}`];
+		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared, g_cssObj.life_Failed);
+		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared, g_cssObj.life_Failed);
 		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(g_cssObj.life_Cleared, g_cssObj.life_Failed);
-		lifeBar.classList.add(lifeCss);
-
-	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
-		lifeCss = g_cssObj.life_Cleared;
-		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
-		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
 		lifeBar.classList.add(lifeCss);
 	}
+
 	lblLife.innerHTML = Math.floor(g_workObj.lifeVal);
 	lifeBar.style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal}px`;
 	lifeBar.style.height = `${(g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal}px`;
 }
 
+function lifeRecovery() {
+	g_workObj.lifeVal += g_workObj.lifeRcv;
+
+	if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
+		g_workObj.lifeVal = g_headerObj.maxLifeVal;
+		changeLifeColor(`Max`);
+	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
+		changeLifeColor(`Cleared`);
+	} else {
+		changeLifeColor();
+	}
+}
+
 function lifeDamage() {
-	let lifeCss;
 	g_workObj.lifeVal -= g_workObj.lifeDmg;
-	const lblLife = document.querySelector(`#lblLife`);
-	const lifeBar = document.querySelector(`#lifeBar`);
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
-		lifeCss = g_cssObj.life_Failed;
-		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared);
-		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared);
-		lifeBar.classList.add(lifeCss);
+		changeLifeColor(`Failed`);
 	} else {
-		lifeCss = g_cssObj.life_Cleared;
-		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
-		lblLife.classList.add(lifeCss);
-		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Failed);
-		lifeBar.classList.add(lifeCss);
+		changeLifeColor(`Cleared`);
 	}
-	lblLife.innerHTML = Math.floor(g_workObj.lifeVal);
-	lifeBar.style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal}px`;
-	lifeBar.style.height = `${(g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal}px`;
 }
 
 /**
@@ -8006,31 +7946,29 @@ function judgeIknai(difFrame) {
 	}
 }
 
+/**
+ * フルコンボ・パーフェクト演出の作成
+ * @param {string} _text 
+ */
+function makeFinishView(_text) {
+	document.querySelector(`#finishView`).innerHTML = _text;
+	document.querySelector(`#finishView`).style.opacity = 1;
+	document.querySelector(`#charaJ`).innerHTML = ``;
+	document.querySelector(`#comboJ`).innerHTML = ``;
+	document.querySelector(`#charaFJ`).innerHTML = ``;
+	document.querySelector(`#comboFJ`).innerHTML = ``;
+}
+
 function finishViewing() {
 	if (g_currentArrows === g_allArrow + g_allFrz / 2) {
 		if (g_headerObj.finishView !== C_DIS_NONE) {
 			const fullArrows = g_allArrow + g_allFrz / 2;
 			if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
-				document.querySelector(`#finishView`).innerHTML = `<span class="result_AllPerfect">All Perfect!!</span>`;
-				document.querySelector(`#finishView`).style.opacity = 1;
-				document.querySelector(`#charaJ`).innerHTML = ``;
-				document.querySelector(`#comboJ`).innerHTML = ``;
-				document.querySelector(`#charaFJ`).innerHTML = ``;
-				document.querySelector(`#comboFJ`).innerHTML = ``;
+				makeFinishView(`<span class="result_AllPerfect">All Perfect!!</span>`);
 			} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
-				document.querySelector(`#finishView`).innerHTML = `<span class="result_Perfect">Perfect!!</span>`;
-				document.querySelector(`#finishView`).style.opacity = 1;
-				document.querySelector(`#charaJ`).innerHTML = ``;
-				document.querySelector(`#comboJ`).innerHTML = ``;
-				document.querySelector(`#charaFJ`).innerHTML = ``;
-				document.querySelector(`#comboFJ`).innerHTML = ``;
+				makeFinishView(`<span class="result_Perfect">Perfect!!</span>`);
 			} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
-				document.querySelector(`#finishView`).innerHTML = `<span class="result_FullCombo">FullCombo!</span>`;
-				document.querySelector(`#finishView`).style.opacity = 1;
-				document.querySelector(`#charaJ`).innerHTML = ``;
-				document.querySelector(`#comboJ`).innerHTML = ``;
-				document.querySelector(`#charaFJ`).innerHTML = ``;
-				document.querySelector(`#comboFJ`).innerHTML = ``;
+				makeFinishView(`<span class="result_FullCombo">FullCombo!</span>`);
 			}
 		}
 	}
@@ -8275,14 +8213,6 @@ function resultInit() {
 	lblRank.style.textAlign = C_ALIGN_CENTER;
 	resultWindow.appendChild(lblRank);
 
-	// ユーザカスタムイベント(初期)
-	if (typeof customResultInit === C_TYP_FUNCTION) {
-		customResultInit();
-		if (typeof customResultInit2 === C_TYP_FUNCTION) {
-			customResultInit2();
-		}
-	}
-
 	// ハイスコア差分計算
 	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_headerObj.makerView) {
@@ -8395,7 +8325,7 @@ function resultInit() {
 		resultFlgTmp = ``;
 	}
 
-	const lblResultPre2 = createDivCssLabel(`lblResultPre`, g_sWidth / 2 + 50, 40,
+	const lblResultPre2 = createDivCssLabel(`lblResultPre2`, g_sWidth / 2 + 50, 40,
 		200, 30, 20, resultFlgTmp, g_cssObj.result_Cleared);
 	divRoot.appendChild(lblResultPre2);
 
@@ -8413,6 +8343,14 @@ function resultInit() {
 	// プレイデータは Cleared & Failed に合わせて表示
 	playDataWindow.style.animationDuration = `3s`;
 	playDataWindow.style.animationName = `slowlyAppearing`;
+
+	// ユーザカスタムイベント(初期)
+	if (typeof customResultInit === C_TYP_FUNCTION) {
+		customResultInit();
+		if (typeof customResultInit2 === C_TYP_FUNCTION) {
+			customResultInit2();
+		}
+	}
 
 	// 戻るボタン描画
 	const btnBack = createCssButton({
