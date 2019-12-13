@@ -6519,7 +6519,7 @@ function MainInit() {
 	}
 
 	// ローカル時のみフレーム数を残す
-	if (location.href.match(`^file`)) {
+	if (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) {
 	} else {
 		document.querySelector(`#lblframe`).style.display = C_DIS_NONE;
 	}
