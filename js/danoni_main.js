@@ -4,7 +4,7 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/11/11
+ * Revised : 2019/12/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
@@ -9009,7 +9009,7 @@ function resultInit() {
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, `#cccccc`, 5,
+	playDataWindow.appendChild(makeResultPlayData(`lblDisplay2Data`, 60, `#cccccc`, 5,
 		display2Data, C_ALIGN_CENTER));
 
 	/**
@@ -9155,17 +9155,17 @@ function resultInit() {
 
 		resultWindow.appendChild(makeResultSymbol(`lblScoreL1`, C_RLT_BRACKET_L, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiS`, C_RLT_HIDIF_X, `#cccccc`, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinS`, C_RLT_HIDIF_X, `#cccccc`, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariS`, C_RLT_HIDIF_X, `#cccccc`, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonS`, C_RLT_HIDIF_X, `#cccccc`, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanS`, C_RLT_HIDIF_X, `#cccccc`, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaS`, C_RLT_HIDIF_X, `#cccccc`, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, C_RLT_HIDIF_X, `#cccccc`, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboS`, C_RLT_HIDIF_X, `#cccccc`, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboS`, C_RLT_HIDIF_X, `#cccccc`, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiLS`, C_RLT_HIDIF_X, `#cccccc`, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinLS`, C_RLT_HIDIF_X, `#cccccc`, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariLS`, C_RLT_HIDIF_X, `#cccccc`, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonLS`, C_RLT_HIDIF_X, `#cccccc`, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanLS`, C_RLT_HIDIF_X, `#cccccc`, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaLS`, C_RLT_HIDIF_X, `#cccccc`, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiLS`, C_RLT_HIDIF_X, `#cccccc`, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboLS`, C_RLT_HIDIF_X, `#cccccc`, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboLS`, C_RLT_HIDIF_X, `#cccccc`, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreS`, C_RLT_HIDIF_X, `${scoreDf > 0 ? "#ffff99" : "#cccccc"}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreLS`, C_RLT_HIDIF_X, `${scoreDf > 0 ? "#ffff99" : "#cccccc"}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
 
 
 		resultWindow.appendChild(makeResultSymbol(`lblIiL2`, C_RLT_BRACKET_R, `#999999`, 0, `)`, C_ALIGN_LEFT));
@@ -9232,7 +9232,7 @@ function resultInit() {
 		resultFlgTmp = ``;
 	}
 
-	const lblResultPre2 = createDivLabel(`lblResultPre`, g_sWidth / 2 + 50, 40,
+	const lblResultPre2 = createDivLabel(`lblResultPre2`, g_sWidth / 2 + 50, 40,
 		200, 30, 20, `#ffff66`, resultFlgTmp);
 	divRoot.appendChild(lblResultPre2);
 
