@@ -278,6 +278,7 @@ const g_stateObj = {
     d_judgement: C_FLG_ON,
     d_lifegauge: C_FLG_ON,
     d_musicinfo: C_FLG_ON,
+    d_special: C_FLG_ON,
     d_color: C_FLG_ON,
     d_speed: C_FLG_ON,
     d_arroweffect: C_FLG_ON,
@@ -325,6 +326,9 @@ let g_volumeNum = g_volumes.length - 1;
 let g_appearances = [`Visible`, `Hidden`, `Sudden`, `Slit`];
 let g_appearanceNum = 0;
 
+let g_displays = [`stepZone`, `judgement`, `lifeGauge`, `musicInfo`, `special`,
+    `speed`, `color`, `lyrics`, `background`, `arrowEffect`];
+
 // サイズ(後で指定)
 let g_sWidth;
 let g_sHeight;
@@ -334,7 +338,13 @@ const C_STEP_Y = 70;
 const C_STEP_YR = 0;
 let g_stepY;
 let g_distY;
+let g_reverseStepY;
 let g_stepYR;
+
+const g_diffObj = {
+    arrowJdgY: 0,
+    frzJdgY: 0,
+};
 
 // キーコンフィグカーソル
 let g_currentj = 0;
@@ -579,6 +589,7 @@ const g_keyObj = {
         `cleft`, `dleft`, `cdown`, `ddown`, `cup`, `dup`, `cright`, `dright`],
 
     chara5_1: [`space`, `left`, `down`, `up`, `right`],
+    chara7_1: [`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
     chara9A_1: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
     chara9B_1: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
     chara9i_1: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
@@ -626,6 +637,7 @@ const g_keyObj = {
     color17_0: [0, 1, 0, 1, 0, 1, 0, 1, 2, 3, 4, 3, 4, 3, 4, 3, 4],
 
     color5_1: [2, 0, 0, 0, 0],
+    color7_1: [0, 1, 0, 2, 0, 1, 0],
     color9A_1: [0, 0, 0, 0, 2, 3, 3, 3, 3],
     color9B_1: [0, 0, 0, 0, 2, 3, 3, 3, 3],
     color9i_1: [2, 2, 2, 2, 2, 0, 0, 0, 0],
@@ -667,6 +679,7 @@ const g_keyObj = {
     shuffle17_0: [0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2],
 
     shuffle5_1: [1, 0, 0, 0, 0],
+    shuffle7_1: [0, 0, 0, 1, 0, 0, 0],
     shuffle9A_1: [0, 0, 0, 0, 1, 2, 2, 2, 2],
     shuffle9B_1: [0, 0, 0, 0, 1, 2, 2, 2, 2],
     shuffle9i_1: [0, 0, 0, 0, 0, 1, 1, 1, 1],
@@ -711,6 +724,7 @@ const g_keyObj = {
     // - 末尾の番号をカウントアップさせることで実現できる。keyCtrlと合わせること
     // - 配列の数は、通常パターンと同数で無くてはいけない（keyCtrlも同様）
     stepRtn5_1: [`onigiri`, 0, -90, 90, 180],
+    stepRtn7_1: [0, -45, -90, `onigiri`, 90, 135, 180],
     stepRtn9A_1: [0, -90, 90, 180, `onigiri`, 0, -90, 90, 180],
     stepRtn9B_1: [0, -90, 90, 180, `onigiri`, 0, -90, 90, 180],
     stepRtn9i_1: [`monar`, `giko`, `c`, `morara`, `onigiri`, 0, -90, 90, 180],
@@ -751,6 +765,7 @@ const g_keyObj = {
     div17_0: 17,
 
     div5_1: 5,
+    div7_1: 7,
     div9A_1: 9,
     div9B_1: 9,
     div9i_1: 9,
@@ -790,6 +805,7 @@ const g_keyObj = {
     pos17_0: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
 
     pos5_1: [0, 1, 2, 3, 4],
+    pos7_1: [0, 1, 2, 3, 4, 5, 6],
     pos9A_1: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     pos9B_1: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     pos9i_1: [0, 1, 2, 3, 4, 5, 6, 7, 8],
@@ -812,7 +828,7 @@ const g_keyObj = {
     // - 順番はchara, stepRtnと対応している。
     // - 多次元配列内はステップに対応するキーコードを示す。カンマ区切りで複数指定できる。
     keyCtrl5_0: [[37], [40], [38, 0], [39], [32, 0]],
-    keyCtrl7_0: [[83], [68, 0], [70], [32, 0], [74], [75, 0], [76]],
+    keyCtrl7_0: [[83], [68], [70], [32, 0], [74], [75], [76]],
     keyCtrl7i_0: [[90], [88], [67], [37], [40], [38, 0], [39]],
     keyCtrl8_0: [[83], [68, 0], [70], [32, 0], [74], [75, 0], [76], [13, 0]],
     keyCtrl9A_0: [[83], [68], [69, 82], [70], [32], [74], [75], [73, 0], [76]],
@@ -832,7 +848,7 @@ const g_keyObj = {
     keyCtrl17_0: [[65], [90], [83], [88], [68], [67], [70], [86], [32], [78], [74], [77], [75], [188], [76], [190], [187]],
 
     keyCtrl5_0d: [[37], [40], [38, 0], [39], [32, 0]],
-    keyCtrl7_0d: [[83], [68, 0], [70], [32, 0], [74], [75, 0], [76]],
+    keyCtrl7_0d: [[83], [68], [70], [32, 0], [74], [75], [76]],
     keyCtrl7i_0d: [[90], [88], [67], [37], [40], [38, 0], [39]],
     keyCtrl8_0d: [[83], [68, 0], [70], [32, 0], [74], [75, 0], [76], [13, 0]],
     keyCtrl9A_0d: [[83], [68], [69, 82], [70], [32], [74], [75], [73, 0], [76]],
@@ -856,6 +872,7 @@ const g_keyObj = {
     // - _0, _0dの数字部分をカウントアップすることで実現できる。
     // - 配列数は合わせる必要はあるが、代替キーの数は _X, _Xdで揃っていれば合わせる必要はない。
     keyCtrl5_1: [[32, 0], [37], [40], [38, 0], [39]],
+    keyCtrl7_1: [[83], [69], [70], [32, 71, 72], [74], [73], [76]],
     keyCtrl9A_1: [[83], [68], [69, 82], [70], [32], [37], [40], [38, 0], [39]],
     keyCtrl9B_1: [[83], [68], [69, 82], [70], [32], [74], [75], [73, 0], [76]],
     keyCtrl9i_1: [[65], [83], [68], [70], [32], [37], [40], [38, 0], [39]],
@@ -868,6 +885,7 @@ const g_keyObj = {
     keyCtrl17_1: [[65], [83], [68], [70], [32], [74], [75], [76], [187], [90], [88], [67], [86], [78], [77], [188], [190]],
 
     keyCtrl5_1d: [[32, 0], [37], [40], [38, 0], [39]],
+    keyCtrl7_1d: [[83], [69], [70], [32, 71, 72], [74], [73], [76]],
     keyCtrl9A_1d: [[83], [68], [69, 82], [70], [32], [37], [40], [38, 0], [39]],
     keyCtrl9B_1d: [[83], [68], [69, 82], [70], [32], [74], [75], [73, 0], [76]],
     keyCtrl9i_1d: [[65], [83], [68], [70], [32], [37], [40], [38, 0], [39]],
@@ -879,11 +897,11 @@ const g_keyObj = {
     keyCtrl15B_1d: [[87], [69], [51, 52], [82], [37], [40], [38, 0], [39], [83], [68], [70], [32], [74], [75], [76]],
     keyCtrl17_1d: [[65], [83], [68], [70], [32], [74], [75], [76], [187], [90], [88], [67], [86], [78], [77], [188], [190]],
 
-    keyCtrl5_2: [[37], [40], [32, 0], [38, 0], [39]],
+    keyCtrl5_2: [[68], [70], [32, 0], [74, 0], [75]],
     keyCtrl9A_2: [[65], [83], [68], [70], [32], [74], [75], [76], [187]],
     keyCtrl9B_2: [[83], [68], [69, 82], [70], [32], [37], [40], [38, 0], [39]],
 
-    keyCtrl5_2d: [[37], [40], [32, 0], [38, 0], [39]],
+    keyCtrl5_2d: [[68], [70], [32, 0], [74, 0], [75]],
     keyCtrl9A_2d: [[65], [83], [68], [70], [32], [74], [75], [76], [187]],
     keyCtrl9B_2d: [[83], [68], [69, 82], [70], [32], [37], [40], [38, 0], [39]],
 
@@ -914,38 +932,10 @@ const g_keyObj = {
     keyTitleBack: 46,
 
     // 別キー
-    transKey5_0: '',
-    transKey7_0: '',
-    transKey7i_0: '',
-    transKey8_0: '',
-    transKey9A_0: '',
-    transKey9B_0: '',
-    transKey9i_0: '',
-    transKey11_0: '',
-    transKey11L_0: '',
-    transKey11W_0: '',
-    transKey12_0: '',
-    transKey13_0: '',
-    transKey14_0: '',
-    transKey14i_0: '',
-    transKey15A_0: '',
-    transKey15B_0: '',
-    transKey16i_0: '',
-    transKey17_0: '',
-
-    transKey5_1: '',
-    transKey9A_1: '',
     transKey9B_1: '9A',
-    transKey9i_1: '',
     transKey11_1: '11L',
     transKey11L_1: '11',
-    transKey12_1: '',
-    transKey14_1: '',
-    transKey15A_1: '',
-    transKey15B_1: '',
-    transKey17_1: '',
 
-    transKey5_2: '',
     transKey9A_2: '9B',
     transKey9B_2: '9A',
 
@@ -1003,6 +993,14 @@ const g_keyObj = {
         'Alternate': [1, -1, 1, -1, 1],
     },
     scrollDir7_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1],
+        'Twist': [1, 1, -1, -1, 1, 1, -1],
+        'Asymmetry': [1, -1, 1, -1, -1, 1, -1],
+    },
+    scrollDir7_1: {
         '---': [1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, -1, -1, -1, -1],
