@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/11/11
+ * Revised : 2019/12/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.5`;
-const g_revisedDate = `2019/11/11`;
+const g_version = `Ver 9.4.6`;
+const g_revisedDate = `2019/12/14`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1140,7 +1140,7 @@ function checkArrayVal(_checkArray, _type, _minLength) {
  * @param {string} _type 
  * @param {string} _crossOrigin 
  */
-function preloadFile(_as, _href, _type, _crossOrigin) {
+function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 	const link = document.createElement(`link`);
 	link.rel = `preload`;
 	link.as = _as;
@@ -1148,8 +1148,9 @@ function preloadFile(_as, _href, _type, _crossOrigin) {
 	if (_type !== ``) {
 		link.type = _type;
 	}
-	if (_crossOrigin !== ``) {
-		link.crossOrigin = _crossOrigin
+	if (location.href.match(`^file`)) {
+	} else {
+		link.crossOrigin = _crossOrigin;
 	}
 	document.head.appendChild(link);
 }
@@ -1990,18 +1991,18 @@ function initAfterDosLoaded() {
 	g_keyObj.currentPtn = 0;
 
 	// 画像ファイルの読み込み
-	preloadFile(`image`, C_IMG_ARROW, ``, ``);
-	preloadFile(`image`, C_IMG_ARROWSD, ``, ``);
-	preloadFile(`image`, C_IMG_ONIGIRI, ``, ``);
-	preloadFile(`image`, C_IMG_AASD, ``, ``);
-	preloadFile(`image`, C_IMG_GIKO, ``, ``);
-	preloadFile(`image`, C_IMG_IYO, ``, ``);
-	preloadFile(`image`, C_IMG_C, ``, ``);
-	preloadFile(`image`, C_IMG_MORARA, ``, ``);
-	preloadFile(`image`, C_IMG_MONAR, ``, ``);
-	preloadFile(`image`, C_IMG_CURSOR, ``, ``);
-	preloadFile(`image`, C_IMG_FRZBAR, ``, ``);
-	preloadFile(`image`, C_IMG_LIFEBORDER, ``, ``);
+	preloadFile(`image`, C_IMG_ARROW);
+	preloadFile(`image`, C_IMG_ARROWSD);
+	preloadFile(`image`, C_IMG_ONIGIRI);
+	preloadFile(`image`, C_IMG_AASD);
+	preloadFile(`image`, C_IMG_GIKO);
+	preloadFile(`image`, C_IMG_IYO);
+	preloadFile(`image`, C_IMG_C);
+	preloadFile(`image`, C_IMG_MORARA);
+	preloadFile(`image`, C_IMG_MONAR);
+	preloadFile(`image`, C_IMG_CURSOR);
+	preloadFile(`image`, C_IMG_FRZBAR);
+	preloadFile(`image`, C_IMG_LIFEBORDER);
 
 	// その他の画像ファイルの読み込み
 	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
@@ -2031,11 +2032,11 @@ function initAfterDosLoaded() {
 					paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
 				}
 				for (let k = startCnt; k <= lastCnt; k++) {
-					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)), ``, ``);
+					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)));
 				}
 			} else {
 				// Pattern Aの場合
-				preloadFile(`image`, g_headerObj.preloadImages[j], ``, ``);
+				preloadFile(`image`, g_headerObj.preloadImages[j]);
 			}
 		}
 	}
@@ -7496,7 +7497,7 @@ function MainInit() {
 	}
 
 	// ローカル時のみフレーム数を残す
-	if (location.href.match(`^file`)) {
+	if (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) {
 	} else {
 		document.querySelector(`#lblframe`).style.display = C_DIS_NONE;
 	}
