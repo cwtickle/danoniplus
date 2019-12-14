@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/12/13
+ * Revised : 2019/12/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 10.5.0`;
-const g_revisedDate = `2019/12/13`;
+const g_version = `Ver 10.5.1`;
+const g_revisedDate = `2019/12/14`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -274,7 +274,7 @@ function toCapitalize(_str) {
  * @param {string} _type 
  * @param {string} _crossOrigin 
  */
-function preloadFile(_as, _href, _type = ``, _crossOrigin = ``) {
+function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 
 	const preloadFlg = g_preloadImgs.find(v => v === _href);
 
@@ -288,7 +288,8 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = ``) {
 		if (_type !== ``) {
 			link.type = _type;
 		}
-		if (_crossOrigin !== ``) {
+		if (location.href.match(`^file`)) {
+		} else {
 			link.crossOrigin = _crossOrigin;
 		}
 		document.head.appendChild(link);
