@@ -7830,7 +7830,7 @@ function resultInit() {
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeResultPlayData(`lblDisplayData`, 60, `#cccccc`, 5,
+	playDataWindow.appendChild(makeResultPlayData(`lblDisplay2Data`, 60, `#cccccc`, 5,
 		display2Data, C_ALIGN_CENTER));
 
 	// キャラクタ描画
@@ -7957,17 +7957,17 @@ function resultInit() {
 
 		resultWindow.appendChild(makeResultSymbol(`lblScoreL1`, 210, `${scoreDf > 0 ? "#ffff66" : "#999999"}`, 10, `(${scoreDf >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblIiS`, 165, `#cccccc`, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShakinS`, 165, `#cccccc`, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMatariS`, 165, `#cccccc`, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblShobonS`, 165, `#cccccc`, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblUwanS`, 165, `#cccccc`, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblKitaS`, 165, `#cccccc`, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblIknaiS`, 165, `#cccccc`, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblMComboS`, 165, `#cccccc`, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
-		resultWindow.appendChild(makeResultSymbol(`lblFComboS`, 165, `#cccccc`, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIiLS`, 165, `#cccccc`, 0, Math.abs(iiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShakinLS`, 165, `#cccccc`, 1, Math.abs(shakinDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMatariLS`, 165, `#cccccc`, 2, Math.abs(matariDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblShobonLS`, 165, `#cccccc`, 3, Math.abs(shobonDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblUwanLS`, 165, `#cccccc`, 4, Math.abs(uwanDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblKitaLS`, 165, `#cccccc`, 5, Math.abs(kitaDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblIknaiLS`, 165, `#cccccc`, 6, Math.abs(iknaiDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblMComboLS`, 165, `#cccccc`, 7, Math.abs(maxComboDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblFComboLS`, 165, `#cccccc`, 8, Math.abs(fmaxComboDf), C_ALIGN_RIGHT));
 
-		resultWindow.appendChild(makeResultSymbol(`lblScoreS`, 165, `${scoreDf > 0 ? "#ffff99" : "#cccccc"}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeResultSymbol(`lblScoreLS`, 165, `${scoreDf > 0 ? "#ffff99" : "#cccccc"}`, 10, Math.abs(scoreDf), C_ALIGN_RIGHT));
 
 
 		resultWindow.appendChild(makeResultSymbol(`lblIiL2`, 320, `#999999`, 0, `)`, C_ALIGN_LEFT));
@@ -8034,7 +8034,7 @@ function resultInit() {
 		resultFlgTmp = ``;
 	}
 
-	const lblResultPre2 = createDivLabel(`lblResultPre`, g_sWidth / 2 + 50, 40,
+	const lblResultPre2 = createDivLabel(`lblResultPre2`, g_sWidth / 2 + 50, 40,
 		200, 30, 20, `#ffff66`, resultFlgTmp);
 	divRoot.appendChild(lblResultPre2);
 
