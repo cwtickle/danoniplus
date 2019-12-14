@@ -274,7 +274,7 @@ function toCapitalize(_str) {
  * @param {string} _type 
  * @param {string} _crossOrigin 
  */
-function preloadFile(_as, _href, _type = ``, _crossOrigin = ``) {
+function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 
 	const preloadFlg = g_preloadImgs.find(v => v === _href);
 
@@ -288,7 +288,8 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = ``) {
 		if (_type !== ``) {
 			link.type = _type;
 		}
-		if (_crossOrigin !== ``) {
+		if (location.href.match(`^file`)) {
+		} else {
 			link.crossOrigin = _crossOrigin;
 		}
 		document.head.appendChild(link);
