@@ -6506,23 +6506,15 @@ function MainInit() {
 
 	// 判定系OFF設定
 	if (g_stateObj.d_judgement === C_FLG_OFF) {
-		document.querySelector(`#lblIi`).style.display = C_DIS_NONE;
-		document.querySelector(`#lblShakin`).style.display = C_DIS_NONE;
-		document.querySelector(`#lblMatari`).style.display = C_DIS_NONE;
-		document.querySelector(`#lblShobon`).style.display = C_DIS_NONE;
-		document.querySelector(`#lblUwan`).style.display = C_DIS_NONE;
-		document.querySelector(`#lblMCombo`).style.display = C_DIS_NONE;
-
-		document.querySelector(`#lblKita`).style.display = C_DIS_NONE;
-		document.querySelector(`#lblIknai`).style.display = C_DIS_NONE;
-		document.querySelector(`#lblFCombo`).style.display = C_DIS_NONE;
-
-		document.querySelector(`#comboJ`).style.display = C_DIS_NONE;
-		document.querySelector(`#charaJ`).style.display = C_DIS_NONE;
-		document.querySelector(`#diffJ`).style.display = C_DIS_NONE;
-		document.querySelector(`#comboFJ`).style.display = C_DIS_NONE;
-		document.querySelector(`#charaFJ`).style.display = C_DIS_NONE;
-		document.querySelector(`#diffFJ`).style.display = C_DIS_NONE;
+		const hideObjs = [
+			`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `MCombo`, `Kita`, `Iknai`, `FCombo`
+		];
+		hideObjs.forEach(hideObj => {
+			document.querySelector(`#lbl${hideObj}`).style.display = C_DIS_NONE;
+		});
+		jdgGroups.forEach(jdg => {
+			document.querySelector(`#diff${jdg}`).style.display = C_DIS_NONE;
+		});
 	}
 
 	// 曲情報OFF
@@ -7955,8 +7947,10 @@ function makeFinishView(_text) {
 	document.querySelector(`#finishView`).style.opacity = 1;
 	document.querySelector(`#charaJ`).innerHTML = ``;
 	document.querySelector(`#comboJ`).innerHTML = ``;
+	document.querySelector(`#diffJ`).innerHTML = ``;
 	document.querySelector(`#charaFJ`).innerHTML = ``;
 	document.querySelector(`#comboFJ`).innerHTML = ``;
+	document.querySelector(`#diffFJ`).innerHTML = ``;
 }
 
 function finishViewing() {
