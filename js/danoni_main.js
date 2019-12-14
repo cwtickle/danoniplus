@@ -274,7 +274,7 @@ function toCapitalize(_str) {
  * @param {string} _type 
  * @param {string} _crossOrigin 
  */
-function preloadFile(_as, _href, _type = ``, _crossOrigin = ``) {
+function preloadFile(_as, _href, _type = ``, _crossOrigin = `crossorigin`) {
 
 	const preloadFlg = g_preloadImgs.find(v => v === _href);
 
