@@ -7725,7 +7725,7 @@ function judgeArrow(_j) {
  */
 function displayDiff(_difFrame, _difCnt) {
 	return `<span class="common_${_difCnt <= 1 ? 'combo' : (_difFrame > 0 ? 'matari' : 'shobon')}">
-		${_difCnt <= 1 ? 'Just!!' : ((_difFrame > 1 ? `Fast ${_difCnt} Frame` : `Slow ${_difCnt} Frames`))}</span>`;
+		${_difCnt <= 1 ? 'Just!!' : ((_difFrame > 1 ? `Fast` : `Slow`)) + ` ${_difCnt} Frames`}</span>`;
 }
 
 /**
