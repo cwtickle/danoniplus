@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/12/14
+ * Revised : 2019/12/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 11.0.0`;
-const g_revisedDate = `2019/12/14`;
+const g_version = `Ver 11.0.1`;
+const g_revisedDate = `2019/12/16`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7725,7 +7725,7 @@ function judgeArrow(_j) {
  */
 function displayDiff(_difFrame, _difCnt) {
 	return `<span class="common_${_difCnt <= 1 ? 'combo' : (_difFrame > 0 ? 'matari' : 'shobon')}">
-		${_difCnt <= 1 ? 'Just!!' : ((_difFrame > 1 ? `Fast ${_difCnt} Frame` : `Slow ${_difCnt} Frames`))}</span>`;
+		${_difCnt <= 1 ? 'Just!!' : ((_difFrame > 1 ? `Fast` : `Slow`)) + ` ${_difCnt} Frames`}</span>`;
 }
 
 /**
@@ -8105,7 +8105,7 @@ function resultInit() {
 		`Music`, C_ALIGN_LEFT));
 	playDataWindow.appendChild(makeCssResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 0,
 		musicTitleForView0, C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeCssResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 1,
+	playDataWindow.appendChild(makeCssResultPlayData(`lblMusicData2`, 60, g_cssObj.result_style, 1,
 		setVal(musicTitleForView1, ``, C_TYP_STRING), C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2,
 		`Difficulty`, C_ALIGN_LEFT));
