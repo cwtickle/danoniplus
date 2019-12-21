@@ -4084,27 +4084,35 @@ function keyConfigInit() {
 		}
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
+		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2;
+		const keyconY = C_KYC_HEIGHT * dividePos;
+
 		if (g_headerObj.setShadowColor !== ``) {
 			// 矢印の塗り部分
 			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]] : g_headerObj.setShadowColor);
 			const stepShadow = createColorObject(`arrowShadow${j}`, shadowColor,
-				g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
-				C_KYC_HEIGHT * dividePos,
+				keyconX, keyconY,
 				C_ARW_WIDTH, C_ARW_WIDTH, g_keyObj[`stepRtn${keyCtrlPtn}`][j], `Shadow`);
 			keyconSprite.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.5;
 		}
 		keyconSprite.appendChild(createColorObject(`arrow${j}`, g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]],
-			g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
-			C_KYC_HEIGHT * dividePos,
+			keyconX, keyconY,
 			C_ARW_WIDTH, C_ARW_WIDTH,
 			g_keyObj[`stepRtn${keyCtrlPtn}`][j]));
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
+			if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] === undefined) {
+				g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = 0;
+				g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] = 0;
+			}
+
 			keyconSprite.appendChild(createDivCssLabel(`keycon${j}_${k}`,
-				g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2,
-				50 + C_KYC_REPHEIGHT * k + C_KYC_HEIGHT * dividePos,
-				C_ARW_WIDTH, C_ARW_WIDTH, 16, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
+				keyconX, 50 + C_KYC_REPHEIGHT * k + keyconY,
+				C_ARW_WIDTH, C_ARW_WIDTH, 16,
+				g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
+
+			// キーに色付け
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] !== g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]) {
 				removeClassList(j, k);
 				document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.keyconfig_Changekey);
