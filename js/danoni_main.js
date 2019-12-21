@@ -4583,7 +4583,6 @@ function loadingScoreInit2() {
 			// 譜面データの再読み込み
 			const tmpObj = scoreConvert(g_rootObj, scoreIdHeader, preblankFrame, dummyIdHeader);
 			for (let j = 0; j < keyNum; j++) {
-				copyLoadingObject(tmpObj.arrowData[j])
 				if (tmpObj.arrowData[j] !== undefined) {
 					g_scoreObj.arrowData[j] = JSON.parse(JSON.stringify(tmpObj.arrowData[j]));
 				}
