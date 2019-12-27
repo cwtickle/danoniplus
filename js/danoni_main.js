@@ -6482,7 +6482,7 @@ function MainInit() {
 
 	const jdgGroups = [`J`, `FJ`];
 	const jdgX = [g_sWidth / 2 - 200, g_sWidth / 2 - 100];
-	const jdgY = [g_sHeight / 2 - 60 + g_diffObj.arrowJdgY, g_sHeight / 2 + 10 + g_diffObj.frzJdgY];
+	const jdgY = [(g_sHeight + g_stepYR) / 2 - 60 + g_diffObj.arrowJdgY, (g_sHeight + g_stepYR) / 2 + 10 + g_diffObj.frzJdgY];
 	const jdgCombos = [`kita`, `ii`];
 
 	jdgGroups.forEach((jdg, j) => {
@@ -6559,7 +6559,7 @@ function MainInit() {
 
 	// Ready?表示
 	if (!g_headerObj.customReadyUse) {
-		const lblReady = createDivCssLabel(`lblReady`, g_sWidth / 2 - 100, g_sHeight / 2 - 75,
+		const lblReady = createDivCssLabel(`lblReady`, g_sWidth / 2 - 100, (g_sHeight + g_stepYR) / 2 - 75,
 			200, 50, 40,
 			`<span style='color:` + g_headerObj.setColor[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
 		lblReady.style.animationDuration = `2.5s`;
