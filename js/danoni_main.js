@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 11.1.0`;
+const g_version = `Ver 11.1.1`;
 const g_revisedDate = `2019/12/27`;
 const g_alphaVersion = ``;
 
@@ -7774,7 +7774,7 @@ function lifeDamage() {
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
-		document.querySelector(`#lblLife`).innerHTML = `0`;
+		changeLifeColor();
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
 		changeLifeColor(`Failed`);
 	} else {
