@@ -7773,6 +7773,7 @@ function lifeDamage() {
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
+		lblLife.innerHTML = `0`;
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
 		changeLifeColor(`Failed`);
 	} else {
