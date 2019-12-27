@@ -2387,7 +2387,7 @@ function headerConvert(_dosObj) {
 	g_stepYR = (isNaN(parseFloat(_dosObj.stepYR)) ? C_STEP_YR : parseFloat(_dosObj.stepYR));
 	g_distY = g_sHeight - g_stepY + g_stepYR;
 	g_reverseStepY = g_distY - g_stepY - C_ARW_WIDTH;
-	obj.buttomWordSetFlg = setVal(_dosObj.buttomWordSet, false, C_TYP_BOOLEAN);
+	obj.bottomWordSetFlg = setVal(_dosObj.bottomWordSet, false, C_TYP_BOOLEAN);
 
 	// 矢印・フリーズアロー判定位置補正
 	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
@@ -6451,7 +6451,7 @@ function MainInit() {
 		if (j % 2 === 0) {
 			lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, 10, g_sWidth - 200, 50);
 		} else {
-			lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, g_headerObj.buttomWordSetFlg ? g_distY + 10 : g_sHeight - 60, g_sWidth - 200, 50);
+			lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, g_headerObj.bottomWordSetFlg ? g_distY + 10 : g_sHeight - 60, g_sWidth - 200, 50);
 		}
 		lblWord.style.fontSize = `14px`;
 		lblWord.style.color = `#ffffff`;
