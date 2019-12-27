@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/12/22
+ * Revised : 2019/12/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 11.0.2`;
-const g_revisedDate = `2019/12/22`;
+const g_version = `Ver 11.1.0`;
+const g_revisedDate = `2019/12/27`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2387,6 +2387,7 @@ function headerConvert(_dosObj) {
 	g_stepYR = (isNaN(parseFloat(_dosObj.stepYR)) ? C_STEP_YR : parseFloat(_dosObj.stepYR));
 	g_distY = g_sHeight - g_stepY + g_stepYR;
 	g_reverseStepY = g_distY - g_stepY - C_ARW_WIDTH;
+	obj.buttomWordSetFlg = setVal(_dosObj.buttomWordSet, false, C_TYP_BOOLEAN);
 
 	// 矢印・フリーズアロー判定位置補正
 	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
@@ -6448,9 +6449,9 @@ function MainInit() {
 	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
 		let lblWord;
 		if (j % 2 === 0) {
-			lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, 10, g_sWidth - 200, 30);
+			lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, 10, g_sWidth - 200, 50);
 		} else {
-			lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, g_sHeight - 60, g_sWidth - 200, 20);
+			lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, g_headerObj.buttomWordSetFlg ? g_distY + 10 : g_sHeight - 60, g_sWidth - 200, 50);
 		}
 		lblWord.style.fontSize = `14px`;
 		lblWord.style.color = `#ffffff`;
@@ -6481,7 +6482,7 @@ function MainInit() {
 
 	const jdgGroups = [`J`, `FJ`];
 	const jdgX = [g_sWidth / 2 - 200, g_sWidth / 2 - 100];
-	const jdgY = [g_sHeight / 2 - 60 + g_diffObj.arrowJdgY, g_sHeight / 2 + 10 + g_diffObj.frzJdgY];
+	const jdgY = [(g_sHeight + g_stepYR) / 2 - 60 + g_diffObj.arrowJdgY, (g_sHeight + g_stepYR) / 2 + 10 + g_diffObj.frzJdgY];
 	const jdgCombos = [`kita`, `ii`];
 
 	jdgGroups.forEach((jdg, j) => {
@@ -6558,7 +6559,7 @@ function MainInit() {
 
 	// Ready?表示
 	if (!g_headerObj.customReadyUse) {
-		const lblReady = createDivCssLabel(`lblReady`, g_sWidth / 2 - 100, g_sHeight / 2 - 75,
+		const lblReady = createDivCssLabel(`lblReady`, g_sWidth / 2 - 100, (g_sHeight + g_stepYR) / 2 - 75,
 			200, 50, 40,
 			`<span style='color:` + g_headerObj.setColor[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
 		lblReady.style.animationDuration = `2.5s`;
@@ -7773,6 +7774,7 @@ function lifeDamage() {
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
+		document.querySelector(`#lblLife`).innerHTML = `0`;
 	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
 		changeLifeColor(`Failed`);
 	} else {
