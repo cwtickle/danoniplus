@@ -1905,16 +1905,14 @@ function titleInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = evt.keyCode;
 		if (setKey === 13) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
 			optionInit();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
+		if (C_BLOCK_KEYS.includes(setKey)) {
+			return false;
 		}
 	}
 
@@ -2870,15 +2868,13 @@ function optionInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = evt.keyCode;
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
+		if (C_BLOCK_KEYS.includes(setKey)) {
+			return false;
 		}
 	}
 	document.onkeyup = evt => { }
@@ -3910,15 +3906,13 @@ function settingsDisplayInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = evt.keyCode;
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
+		if (C_BLOCK_KEYS.includes(setKey)) {
+			return false;
 		}
 	}
 	document.onkeyup = evt => { }
@@ -4344,7 +4338,7 @@ function keyConfigInit() {
 	document.onkeydown = evt => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = evt.keyCode;
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -4415,10 +4409,8 @@ function keyConfigInit() {
 				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 			}
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
+		if (C_BLOCK_KEYS.includes(setKey)) {
+			return false;
 		}
 	}
 
@@ -6597,7 +6589,7 @@ function MainInit() {
 
 	// キー操作イベント
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = evt.keyCode;
 		g_inputKeyBuffer[setKey] = true;
 		mainKeyDownActFunc[g_stateObj.autoPlay](setKey);
 
@@ -6625,10 +6617,8 @@ function MainInit() {
 			document.onkeyup = _ => { };
 		}
 
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
+		if (C_BLOCK_KEYS.includes(setKey)) {
+			return false;
 		}
 	}
 
@@ -6649,7 +6639,7 @@ function MainInit() {
 	};
 
 	document.onkeyup = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = evt.keyCode;
 		g_inputKeyBuffer[setKey] = false;
 		mainKeyUpActFunc[g_stateObj.autoPlay]();
 	}
@@ -8497,11 +8487,8 @@ function resultInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
+		if (C_BLOCK_KEYS.includes(evt.keyCode)) {
+			return false;
 		}
 	}
 	document.onkeyup = evt => { }
