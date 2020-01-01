@@ -4342,7 +4342,10 @@ function keyConfigInit() {
 	document.onkeydown = evt => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
-		const setKey = evt.keyCode;
+		let setKey = evt.keyCode;
+		if (setKey === 59) {
+			setKey = 187;
+		}
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -6593,7 +6596,10 @@ function MainInit() {
 
 	// キー操作イベント
 	document.onkeydown = evt => {
-		const setKey = evt.keyCode;
+		let setKey = evt.keyCode;
+		if (setKey === 59) {
+			setKey = 187;
+		}
 		g_inputKeyBuffer[setKey] = true;
 		mainKeyDownActFunc[g_stateObj.autoPlay](setKey);
 
@@ -6643,7 +6649,10 @@ function MainInit() {
 	};
 
 	document.onkeyup = evt => {
-		const setKey = evt.keyCode;
+		let setKey = evt.keyCode;
+		if (setKey === 59) {
+			setKey = 187;
+		}
 		g_inputKeyBuffer[setKey] = false;
 		mainKeyUpActFunc[g_stateObj.autoPlay]();
 	}
