@@ -6640,7 +6640,7 @@ function MainInit() {
 	};
 
 	document.onkeyup = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 		g_inputKeyBuffer[setKey] = false;
 		mainKeyUpActFunc[g_stateObj.autoPlay]();
 	}
