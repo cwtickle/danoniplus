@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/12/14
+ * Revised : 2020/01/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.6`;
-const g_revisedDate = `2019/12/14`;
+const g_version = `Ver 9.4.7`;
+const g_revisedDate = `2020/01/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2071,7 +2071,11 @@ function loadCustomjs(_initFlg) {
 }
 
 function loadMusic() {
-	document.onkeydown = () => { }
+	document.onkeydown = evt => {
+		if (C_BLOCK_KEYS.includes(evt.keyCode)) {
+			return false;
+		}
+	}
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	const url = `../${g_headerObj.musicFolder}/${musicUrl}`;
@@ -9061,7 +9065,7 @@ function resultInit() {
 		`Music`, C_ALIGN_LEFT));
 	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `#cccccc`, 0,
 		musicTitleForView0, C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeResultPlayData(`lblMusicData`, 60, `#cccccc`, 1,
+	playDataWindow.appendChild(makeResultPlayData(`lblMusicData2`, 60, `#cccccc`, 1,
 		setVal(musicTitleForView1, ``, C_TYP_STRING), C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeResultPlayData(`lblDifficulty`, 20, `#999999`, 2,
 		`Difficulty`, C_ALIGN_LEFT));
