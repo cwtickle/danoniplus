@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 10.5.4`;
+const g_version = `Ver 10.5.5`;
 const g_revisedDate = `2020/01/03`;
 const g_alphaVersion = ``;
 
@@ -2158,6 +2158,7 @@ function headerConvert(_dosObj) {
 				obj.creatorNames.push(difNameInfo.length > 1 ? difNameInfo[1] : obj.tuning);
 			} else {
 				obj.difLabels.push(`Normal`);
+				obj.creatorNames.push(obj.tuning);
 			}
 
 			// 初期速度
