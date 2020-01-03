@@ -2162,6 +2162,7 @@ function headerConvert(_dosObj) {
 				obj.creatorNames.push(difNameInfo.length > 1 ? difNameInfo[1] : obj.tuning);
 			} else {
 				obj.difLabels.push(`Normal`);
+				obj.creatorNames.push(obj.tuning);
 			}
 
 			// 初期速度
