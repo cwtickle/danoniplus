@@ -172,12 +172,16 @@ const g_handler = (_ => {
 })();
 
 /**
+ * 特定キーコードを置換する処理
+ * @param {string} setKey 
+ */
+const transKeys = setKey => setKey === 59 ? 187 : setKey;
+
+/**
  * 特定キーをブロックする処理
  * @param {string} setKey 
  */
-const blockKeys = setKey => {
-	return C_BLOCK_KEYS.includes(setKey) ? false : true;
-}
+const blockKeys = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
 
 /**
  * 文字列を想定された型に変換
@@ -1913,7 +1917,7 @@ function titleInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = evt.keyCode;
+		const setKey = transKeys(evt.keyCode);
 		if (setKey === 13) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
@@ -2874,7 +2878,7 @@ function optionInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = evt.keyCode;
+		const setKey = transKeys(evt.keyCode);
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
@@ -3910,7 +3914,7 @@ function settingsDisplayInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = evt.keyCode;
+		const setKey = transKeys(evt.keyCode);
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
@@ -4340,7 +4344,7 @@ function keyConfigInit() {
 	document.onkeydown = evt => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
-		const setKey = evt.keyCode;
+		const setKey = transKeys(evt.keyCode);
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -6589,7 +6593,7 @@ function MainInit() {
 
 	// キー操作イベント
 	document.onkeydown = evt => {
-		const setKey = evt.keyCode;
+		const setKey = transKeys(evt.keyCode);
 		g_inputKeyBuffer[setKey] = true;
 		mainKeyDownActFunc[g_stateObj.autoPlay](setKey);
 
