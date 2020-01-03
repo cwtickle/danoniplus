@@ -172,6 +172,18 @@ const g_handler = (_ => {
 })();
 
 /**
+ * 特定キーコードを置換する処理
+ * @param {string} setKey 
+ */
+const transCode = setKey => setKey === 59 ? 187 : setKey;
+
+/**
+ * 特定キーをブロックする処理
+ * @param {string} setKey 
+ */
+const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
+
+/**
  * 文字列を想定された型に変換
  * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、`string`(文字列)から選択
  * - 型に合わない場合は _default を返却するが、_default自体の型チェック・変換は行わない
@@ -1271,11 +1283,7 @@ function loadSettingJs() {
 }
 
 function loadMusic() {
-	document.onkeydown = evt => {
-		if (C_BLOCK_KEYS.includes(evt.keyCode)) {
-			return false;
-		}
-	}
+	document.onkeydown = evt => blockCode(evt.keyCode);
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url;
@@ -1909,17 +1917,13 @@ function titleInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 		if (setKey === 13) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
 			optionInit();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 
 	document.onkeyup = evt => { }
@@ -2874,16 +2878,12 @@ function optionInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 	document.onkeyup = evt => { }
 
@@ -3914,16 +3914,12 @@ function settingsDisplayInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 	document.onkeyup = evt => { }
 
@@ -4348,7 +4344,7 @@ function keyConfigInit() {
 	document.onkeydown = evt => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -4419,11 +4415,7 @@ function keyConfigInit() {
 				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 			}
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 
 	if (typeof skinKeyConfigInit === C_TYP_FUNCTION) {
@@ -6601,7 +6593,7 @@ function MainInit() {
 
 	// キー操作イベント
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 		g_inputKeyBuffer[setKey] = true;
 		mainKeyDownActFunc[g_stateObj.autoPlay](setKey);
 
@@ -6628,12 +6620,7 @@ function MainInit() {
 			}
 			document.onkeyup = _ => { };
 		}
-
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 
 	/**
@@ -6653,7 +6640,7 @@ function MainInit() {
 	};
 
 	document.onkeyup = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 		g_inputKeyBuffer[setKey] = false;
 		mainKeyUpActFunc[g_stateObj.autoPlay]();
 	}
@@ -8500,14 +8487,7 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
-	}
+	document.onkeydown = evt => blockCode(evt.keyCode);
 	document.onkeyup = evt => { }
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {
