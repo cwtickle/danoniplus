@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2019/12/28
+ * Revised : 2020/01/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 11.1.2`;
-const g_revisedDate = `2019/12/28`;
+const g_version = `Ver 11.2.0`;
+const g_revisedDate = `2020/01/04`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -170,6 +170,18 @@ const g_handler = (_ => {
 		}
 	}
 })();
+
+/**
+ * 特定キーコードを置換する処理
+ * @param {string} setKey 
+ */
+const transCode = setKey => setKey === 59 ? 187 : setKey;
+
+/**
+ * 特定キーをブロックする処理
+ * @param {string} setKey 
+ */
+const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
 
 /**
  * 文字列を想定された型に変換
@@ -1271,7 +1283,7 @@ function loadSettingJs() {
 }
 
 function loadMusic() {
-	document.onkeydown = () => { }
+	document.onkeydown = evt => blockCode(evt.keyCode);
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url;
@@ -1905,17 +1917,13 @@ function titleInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 		if (setKey === 13) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
 			optionInit();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 
 	document.onkeyup = evt => { }
@@ -2117,6 +2125,13 @@ function headerConvert(_dosObj) {
 		obj.creatorNames = [];
 		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
 
+		const lifeData = (_name, _preData, _default) => {
+			const data = (_preData) ? _preData :
+				(typeof g_presetGauge === C_TYP_OBJECT && (_name in g_presetGauge) ?
+					g_presetGauge[_name] : _default);
+			return setVal(data, _default, C_TYP_FLOAT);
+		};
+
 		for (let j = 0; j < difs.length; j++) {
 			const difDetails = difs[j].split(`,`);
 
@@ -2124,24 +2139,15 @@ function headerConvert(_dosObj) {
 			const border = (difDetails[C_DIF_LIFE_BORDER]) ? difDetails[C_DIF_LIFE_BORDER] :
 				(typeof g_presetGauge === C_TYP_OBJECT && (`Border` in g_presetGauge) ?
 					g_presetGauge.Border : `x`);
-			const recovery = (difDetails[C_DIF_LIFE_RECOVERY]) ? difDetails[C_DIF_LIFE_RECOVERY] :
-				(typeof g_presetGauge === C_TYP_OBJECT && (`Recovery` in g_presetGauge) ?
-					g_presetGauge.Recovery : 6);
-			const damage = (difDetails[C_DIF_LIFE_DAMAGE]) ? difDetails[C_DIF_LIFE_DAMAGE] :
-				(typeof g_presetGauge === C_TYP_OBJECT && (`Damage` in g_presetGauge) ?
-					g_presetGauge.Damage : 40);
-			const init = (difDetails[C_DIF_LIFE_INI]) ? difDetails[C_DIF_LIFE_INI] :
-				(typeof g_presetGauge === C_TYP_OBJECT && (`Init` in g_presetGauge) ?
-					g_presetGauge.Init : 25);
 
 			if (border !== `x`) {
 				obj.lifeBorders.push(setVal(border, 70, C_TYP_FLOAT));
 			} else {
 				obj.lifeBorders.push(`x`);
 			}
-			obj.lifeRecoverys.push(setVal(recovery, 6, C_TYP_FLOAT));
-			obj.lifeDamages.push(setVal(damage, 40, C_TYP_FLOAT));
-			obj.lifeInits.push(setVal(init, 25, C_TYP_FLOAT));
+			obj.lifeRecoverys.push(lifeData(`Recovery`, difDetails[C_DIF_LIFE_RECOVERY], 6));
+			obj.lifeDamages.push(lifeData(`Damage`, difDetails[C_DIF_LIFE_DAMAGE], 40));
+			obj.lifeInits.push(lifeData(`Init`, difDetails[C_DIF_LIFE_INI], 25));
 
 			// キー数
 			const keyLabel = setVal(difDetails[C_DIF_KEY], `7`, C_TYP_STRING);
@@ -2154,6 +2160,7 @@ function headerConvert(_dosObj) {
 				obj.creatorNames.push(difNameInfo.length > 1 ? difNameInfo[1] : obj.tuning);
 			} else {
 				obj.difLabels.push(`Normal`);
+				obj.creatorNames.push(obj.tuning);
 			}
 
 			// 初期速度
@@ -2870,16 +2877,12 @@ function optionInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 	document.onkeyup = evt => { }
 
@@ -3910,16 +3913,12 @@ function settingsDisplayInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 	document.onkeyup = evt => { }
 
@@ -4344,7 +4343,7 @@ function keyConfigInit() {
 	document.onkeydown = evt => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -4415,11 +4414,7 @@ function keyConfigInit() {
 				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 			}
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 
 	if (typeof skinKeyConfigInit === C_TYP_FUNCTION) {
@@ -6597,7 +6592,7 @@ function MainInit() {
 
 	// キー操作イベント
 	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 		g_inputKeyBuffer[setKey] = true;
 		mainKeyDownActFunc[g_stateObj.autoPlay](setKey);
 
@@ -6624,12 +6619,7 @@ function MainInit() {
 			}
 			document.onkeyup = _ => { };
 		}
-
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 
 	/**
@@ -6649,7 +6639,7 @@ function MainInit() {
 	};
 
 	document.onkeyup = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
+		const setKey = transCode(evt.keyCode);
 		g_inputKeyBuffer[setKey] = false;
 		mainKeyUpActFunc[g_stateObj.autoPlay]();
 	}
@@ -8496,14 +8486,7 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => {
-		const setKey = (g_userAgent.indexOf(`firefox`) !== -1 ? evt.which : event.keyCode);
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
-	}
+	document.onkeydown = evt => blockCode(evt.keyCode);
 	document.onkeyup = evt => { }
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {
