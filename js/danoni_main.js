@@ -1271,7 +1271,11 @@ function loadSettingJs() {
 }
 
 function loadMusic() {
-	document.onkeydown = () => { }
+	document.onkeydown = evt => {
+		if (C_BLOCK_KEYS.includes(evt.keyCode)) {
+			return false;
+		}
+	}
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url;
