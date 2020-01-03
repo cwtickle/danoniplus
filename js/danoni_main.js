@@ -2125,6 +2125,13 @@ function headerConvert(_dosObj) {
 		obj.creatorNames = [];
 		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
 
+		const lifeData = (_name, _preData, _default) => {
+			const data = (_preData) ? _preData :
+				(typeof g_presetGauge === C_TYP_OBJECT && (_name in g_presetGauge) ?
+					g_presetGauge[_name] : _default);
+			return setVal(data, _default, C_TYP_FLOAT);
+		};
+
 		for (let j = 0; j < difs.length; j++) {
 			const difDetails = difs[j].split(`,`);
 
@@ -2132,24 +2139,15 @@ function headerConvert(_dosObj) {
 			const border = (difDetails[C_DIF_LIFE_BORDER]) ? difDetails[C_DIF_LIFE_BORDER] :
 				(typeof g_presetGauge === C_TYP_OBJECT && (`Border` in g_presetGauge) ?
 					g_presetGauge.Border : `x`);
-			const recovery = (difDetails[C_DIF_LIFE_RECOVERY]) ? difDetails[C_DIF_LIFE_RECOVERY] :
-				(typeof g_presetGauge === C_TYP_OBJECT && (`Recovery` in g_presetGauge) ?
-					g_presetGauge.Recovery : 6);
-			const damage = (difDetails[C_DIF_LIFE_DAMAGE]) ? difDetails[C_DIF_LIFE_DAMAGE] :
-				(typeof g_presetGauge === C_TYP_OBJECT && (`Damage` in g_presetGauge) ?
-					g_presetGauge.Damage : 40);
-			const init = (difDetails[C_DIF_LIFE_INI]) ? difDetails[C_DIF_LIFE_INI] :
-				(typeof g_presetGauge === C_TYP_OBJECT && (`Init` in g_presetGauge) ?
-					g_presetGauge.Init : 25);
 
 			if (border !== `x`) {
 				obj.lifeBorders.push(setVal(border, 70, C_TYP_FLOAT));
 			} else {
 				obj.lifeBorders.push(`x`);
 			}
-			obj.lifeRecoverys.push(setVal(recovery, 6, C_TYP_FLOAT));
-			obj.lifeDamages.push(setVal(damage, 40, C_TYP_FLOAT));
-			obj.lifeInits.push(setVal(init, 25, C_TYP_FLOAT));
+			obj.lifeRecoverys.push(lifeData(`Recovery`, difDetails[C_DIF_LIFE_RECOVERY], 6));
+			obj.lifeDamages.push(lifeData(`Damage`, difDetails[C_DIF_LIFE_DAMAGE], 40));
+			obj.lifeInits.push(lifeData(`Init`, difDetails[C_DIF_LIFE_INI], 25));
 
 			// キー数
 			const keyLabel = setVal(difDetails[C_DIF_KEY], `7`, C_TYP_STRING);
@@ -2162,6 +2160,7 @@ function headerConvert(_dosObj) {
 				obj.creatorNames.push(difNameInfo.length > 1 ? difNameInfo[1] : obj.tuning);
 			} else {
 				obj.difLabels.push(`Normal`);
+				obj.creatorNames.push(obj.tuning);
 			}
 
 			// 初期速度
