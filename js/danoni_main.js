@@ -6244,30 +6244,6 @@ function MainInit() {
 		if (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) {
 			step.style.display = C_DIS_NONE;
 		}
-
-		// フリーズアローヒット部分
-		const frzHit = createSprite(`mainSprite`, `frzHit${j}`,
-			g_workObj.stepX[j], g_stepY + g_reverseStepY * g_workObj.dividePos[j],
-			C_ARW_WIDTH, C_ARW_WIDTH);
-		frzHit.style.opacity = 0;
-		if (isNaN(Number(g_workObj.arrowRtn[j]))) {
-			const frzHitShadow = createColorObject(`frzHitShadow${j}`, ``,
-				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j], `Shadow`);
-			frzHitShadow.classList.add(g_cssObj.main_objShadow);
-			frzHit.appendChild(frzHitShadow);
-
-			frzHit.appendChild(createColorObject(`frzHitTop${j}`, g_workObj.frzHitColors[j],
-				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j]));
-
-		} else {
-			const frzHitTop = createColorObject(`frzHitTop${j}`, ``,
-				-10, -10,
-				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.arrowRtn[j], `Shadow`);
-			frzHitTop.classList.add(g_cssObj.main_frzHitTop);
-			frzHit.appendChild(frzHitTop);
-		}
 	}
 	if (g_stateObj.scroll === `Flat` && g_stateObj.d_stepzone === C_FLG_ON) {
 
@@ -6296,6 +6272,33 @@ function MainInit() {
 	if (g_stateObj.appearance !== `Visible`) {
 		arrowSprite[0].classList.add(`${g_stateObj.appearance}0`);
 		arrowSprite[1].classList.add(`${g_stateObj.appearance}1`);
+	}
+
+	for (let j = 0; j < keyNum; j++) {
+
+		// フリーズアローヒット部分
+		const frzHit = createSprite(`mainSprite`, `frzHit${j}`,
+			g_workObj.stepX[j], g_stepY + g_reverseStepY * g_workObj.dividePos[j],
+			C_ARW_WIDTH, C_ARW_WIDTH);
+		frzHit.style.opacity = 0;
+		if (isNaN(Number(g_workObj.arrowRtn[j]))) {
+			const frzHitShadow = createColorObject(`frzHitShadow${j}`, ``,
+				0, 0,
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j], `Shadow`);
+			frzHitShadow.classList.add(g_cssObj.main_objShadow);
+			frzHit.appendChild(frzHitShadow);
+
+			frzHit.appendChild(createColorObject(`frzHitTop${j}`, g_workObj.frzHitColors[j],
+				0, 0,
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j]));
+
+		} else {
+			const frzHitTop = createColorObject(`frzHitTop${j}`, ``,
+				-10, -10,
+				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.arrowRtn[j], `Shadow`);
+			frzHitTop.classList.add(g_cssObj.main_frzHitTop);
+			frzHit.appendChild(frzHitTop);
+		}
 	}
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
@@ -6425,6 +6428,8 @@ function MainInit() {
 		lblWord.style.color = `#ffffff`;
 		lblWord.style.fontFamily = getBasicFont();
 		lblWord.style.textAlign = C_ALIGN_LEFT;
+		lblWord.style.display = `block`;
+		lblWord.style.margin = `auto`;
 		lblWord.innerHTML = ``;
 	}
 
@@ -7288,9 +7293,18 @@ function MainInit() {
 
 				if (g_wordSprite !== null) {
 					const wordDepth = Number(g_wordObj.wordDir);
-					if (g_wordObj.wordDat === `[fadein]`) {
-						g_wordObj[`fadeInFlg${wordDepth}`] = true;
-						g_wordObj[`fadeOutFlg${wordDepth}`] = false;
+					if (g_wordObj.wordDat.substring(0, 5) === `[fade`) {
+
+						// フェードイン・アウト開始
+						if (g_wordObj.wordDat === `[fadein]`) {
+							g_wordObj[`fadeInFlg${wordDepth}`] = true;
+							g_wordObj[`fadeOutFlg${wordDepth}`] = false;
+							g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
+						} else if (g_wordObj.wordDat === `[fadeout]`) {
+							g_wordObj[`fadeInFlg${wordDepth}`] = false;
+							g_wordObj[`fadeOutFlg${wordDepth}`] = true;
+							g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
+						}
 						g_workObj.fadingFrame[wordDepth] = 0;
 						g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
 
@@ -7300,24 +7314,6 @@ function MainInit() {
 							g_workObj.wordFadeFrame[wordDepth] = C_WOD_FRAME;
 						}
 
-						g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
-						g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / g_fps}s`;
-						g_wordSprite.style.animationTimingFunction = `linear`;
-						g_wordSprite.style.animationFillMode = `forwards`;
-
-					} else if (g_wordObj.wordDat === `[fadeout]`) {
-						g_wordObj[`fadeInFlg${wordDepth}`] = false;
-						g_wordObj[`fadeOutFlg${wordDepth}`] = true;
-						g_workObj.fadingFrame[wordDepth] = 0;
-						g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
-
-						if (tmpObj.length > 2) {
-							g_workObj.wordFadeFrame[wordDepth] = setVal(tmpObj[2], C_WOD_FRAME, C_TYP_NUMBER);
-						} else {
-							g_workObj.wordFadeFrame[wordDepth] = C_WOD_FRAME;
-						}
-
-						g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
 						g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / g_fps}s`;
 						g_wordSprite.style.animationTimingFunction = `linear`;
 						g_wordSprite.style.animationFillMode = `forwards`;
@@ -7325,7 +7321,12 @@ function MainInit() {
 					} else if (g_wordObj.wordDat === `[center]` ||
 						g_wordObj.wordDat === `[left]` || g_wordObj.wordDat === `[right]`) {
 
+						// 歌詞位置変更
+						g_wordSprite.style.textAlign = g_wordObj.wordDat.slice(1, -1);
+
 					} else {
+
+						// フェードイン・アウト処理後、表示する歌詞を表示
 						g_workObj.fadingFrame = g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth];
 						if (g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
 							&& g_workObj.fadingFrame >= g_workObj.wordFadeFrame[wordDepth]) {
@@ -7339,20 +7340,6 @@ function MainInit() {
 						}
 						g_workObj[`word${g_wordObj.wordDir}Data`] = g_wordObj.wordDat;
 						g_wordSprite.innerHTML = g_wordObj.wordDat;
-					}
-
-					if (g_wordObj.wordDat === `[center]`) {
-						g_wordSprite.style.textAlign = C_ALIGN_CENTER;
-						g_wordSprite.style.display = `block`;
-						g_wordSprite.style.margin = `auto`;
-					} else if (g_wordObj.wordDat === `[left]`) {
-						g_wordSprite.style.textAlign = C_ALIGN_LEFT;
-						g_wordSprite.style.display = `inline`;
-						g_wordSprite.style.margin = `0`;
-					} else if (g_wordObj.wordDat === `[right]`) {
-						g_wordSprite.style.textAlign = C_ALIGN_RIGHT;
-						g_wordSprite.style.display = `block`;
-						g_wordSprite.style.margin = `auto`;
 					}
 				}
 			});
