@@ -6184,9 +6184,22 @@ function MainInit() {
 		}
 	}
 
-	// ステップゾーンを表示
+	// 矢印・フリーズアロー・速度変化 移動/判定/変化対象の初期化
+	const arrowCnts = [];
+	const frzCnts = [];
+	const dummyArrowCnts = [];
+	const dummyFrzCnts = [];
+	let speedCnts = 0;
+	let boostCnts = 0;
+
 	for (let j = 0; j < keyNum; j++) {
 
+		arrowCnts[j] = 0;
+		frzCnts[j] = 0;
+		dummyArrowCnts[j] = 0;
+		dummyFrzCnts[j] = 0;
+
+		// ステップゾーンルート
 		const stepRoot = createSprite(`mainSprite`, `stepRoot${j}`,
 			g_workObj.stepX[j],
 			g_stepY + g_reverseStepY * g_workObj.dividePos[j],
@@ -6196,8 +6209,7 @@ function MainInit() {
 		if (g_headerObj.setShadowColor !== ``) {
 			// 矢印の塗り部分
 			const stepShadow = createColorObject(`stepShadow${j}`, ``,
-				0,
-				0,
+				0, 0,
 				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `ShadowStep`);
 			stepShadow.classList.add(g_cssObj.main_objShadow);
 			stepRoot.appendChild(stepShadow);
@@ -6206,29 +6218,23 @@ function MainInit() {
 
 		// ステップゾーン本体
 		const step = createColorObject(`step${j}`, ``,
-			0,
-			0,
-			C_ARW_WIDTH, C_ARW_WIDTH,
-			g_workObj.stepRtn[j], `Step`);
+			0, 0,
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Step`);
 		step.classList.add(g_cssObj.main_stepDefault);
 		stepRoot.appendChild(step);
 
 		// ステップゾーン空押し
 		const stepDiv = createColorObject(`stepDiv${j}`, ``,
-			0,
-			0,
-			C_ARW_WIDTH, C_ARW_WIDTH,
-			g_workObj.stepRtn[j], `Step`);
+			0, 0,
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Step`);
 		stepDiv.style.display = C_DIS_NONE;
 		stepDiv.classList.add(g_cssObj.main_stepKeyDown);
 		stepRoot.appendChild(stepDiv);
 
 		// ステップゾーンヒット時モーション
 		const stepHit = createColorObject(`stepHit${j}`, ``,
-			-15,
-			-15,
-			C_ARW_WIDTH + 30, C_ARW_WIDTH + 30,
-			g_workObj.stepHitRtn[j], `StepHit`);
+			-15, -15,
+			C_ARW_WIDTH + 30, C_ARW_WIDTH + 30, g_workObj.stepHitRtn[j], `StepHit`);
 		stepHit.style.opacity = 0;
 		stepHit.setAttribute(`cnt`, 0);
 		stepHit.classList.add(g_cssObj.main_stepDefault);
@@ -6237,6 +6243,30 @@ function MainInit() {
 		// ステップゾーンOFF設定
 		if (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) {
 			step.style.display = C_DIS_NONE;
+		}
+
+		// フリーズアローヒット部分
+		const frzHit = createSprite(`mainSprite`, `frzHit${j}`,
+			g_workObj.stepX[j], g_stepY + g_reverseStepY * g_workObj.dividePos[j],
+			C_ARW_WIDTH, C_ARW_WIDTH);
+		frzHit.style.opacity = 0;
+		if (isNaN(Number(g_workObj.arrowRtn[j]))) {
+			const frzHitShadow = createColorObject(`frzHitShadow${j}`, ``,
+				0, 0,
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j], `Shadow`);
+			frzHitShadow.classList.add(g_cssObj.main_objShadow);
+			frzHit.appendChild(frzHitShadow);
+
+			frzHit.appendChild(createColorObject(`frzHitTop${j}`, g_workObj.frzHitColors[j],
+				0, 0,
+				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j]));
+
+		} else {
+			const frzHitTop = createColorObject(`frzHitTop${j}`, ``,
+				-10, -10,
+				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.arrowRtn[j], `Shadow`);
+			frzHitTop.classList.add(g_cssObj.main_frzHitTop);
+			frzHit.appendChild(frzHitTop);
 		}
 	}
 	if (g_stateObj.scroll === `Flat` && g_stateObj.d_stepzone === C_FLG_ON) {
@@ -6267,48 +6297,6 @@ function MainInit() {
 		arrowSprite[0].classList.add(`${g_stateObj.appearance}0`);
 		arrowSprite[1].classList.add(`${g_stateObj.appearance}1`);
 	}
-
-	// フリーズアローヒット部分
-	for (let j = 0; j < keyNum; j++) {
-		const frzHit = createSprite(`mainSprite`, `frzHit${j}`,
-			g_workObj.stepX[j], g_stepY + g_reverseStepY * g_workObj.dividePos[j],
-			C_ARW_WIDTH, C_ARW_WIDTH);
-		frzHit.style.opacity = 0;
-		if (isNaN(Number(g_workObj.arrowRtn[j]))) {
-			const frzHitShadow = createColorObject(`frzHitShadow${j}`, ``,
-				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j], `Shadow`);
-			frzHitShadow.classList.add(g_cssObj.main_objShadow);
-			frzHit.appendChild(frzHitShadow);
-
-			frzHit.appendChild(createColorObject(`frzHitTop${j}`, g_workObj.frzHitColors[j],
-				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j]));
-
-		} else {
-			const frzHitTop = createColorObject(`frzHitTop${j}`, ``,
-				-10, -10,
-				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.arrowRtn[j], `Shadow`);
-			frzHitTop.classList.add(g_cssObj.main_frzHitTop);
-			frzHit.appendChild(frzHitTop);
-		}
-	}
-
-	// 矢印・フリーズアロー・速度変化 移動/判定/変化対象の初期化
-	const arrowCnts = [];
-	const frzCnts = [];
-	for (let j = 0; j < keyNum; j++) {
-		arrowCnts[j] = 0;
-		frzCnts[j] = 0;
-	}
-	const dummyArrowCnts = [];
-	const dummyFrzCnts = [];
-	for (let j = 0; j < keyNum; j++) {
-		dummyArrowCnts[j] = 0;
-		dummyFrzCnts[j] = 0;
-	}
-	let speedCnts = 0;
-	let boostCnts = 0;
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
@@ -6427,27 +6415,12 @@ function MainInit() {
 		lifeBorderObj.style.display = C_DIS_NONE;
 	}
 
-	// 判定カウンタ表示
-	infoSprite.appendChild(makeCounterSymbol(`lblIi`, g_sWidth - 110, g_cssObj.common_ii, 1, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblShakin`, g_sWidth - 110, g_cssObj.common_shakin, 2, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblMatari`, g_sWidth - 110, g_cssObj.common_matari, 3, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblShobon`, g_sWidth - 110, g_cssObj.common_shobon, 4, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblUwan`, g_sWidth - 110, g_cssObj.common_uwan, 5, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblMCombo`, g_sWidth - 110, g_cssObj.common_combo, 6, 0));
-
-	infoSprite.appendChild(makeCounterSymbol(`lblKita`, g_sWidth - 110, g_cssObj.common_kita, 8, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblIknai`, g_sWidth - 110, g_cssObj.common_iknai, 9, 0));
-	infoSprite.appendChild(makeCounterSymbol(`lblFCombo`, g_sWidth - 110, g_cssObj.common_combo, 10, 0));
-
 	// 歌詞表示
 	createSprite(`judgeSprite`, `wordSprite`, 0, 0, g_sWidth, g_sHeight);
 	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
-		let lblWord;
-		if (j % 2 === 0) {
-			lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, 10, g_sWidth - 200, 50);
-		} else {
-			lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, g_headerObj.bottomWordSetFlg ? g_distY + 10 : g_sHeight - 60, g_sWidth - 200, 50);
-		}
+		const wordY = (j % 2 === 0 ? 10 : (g_headerObj.bottomWordSetFlg ? g_distY + 10 : g_sHeight - 60));
+		const lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, wordY, g_sWidth - 200, 50);
+
 		lblWord.style.fontSize = `14px`;
 		lblWord.style.color = `#ffffff`;
 		lblWord.style.fontFamily = getBasicFont();
@@ -6481,7 +6454,6 @@ function MainInit() {
 	const jdgCombos = [`kita`, `ii`];
 
 	jdgGroups.forEach((jdg, j) => {
-
 		// キャラクタ表示
 		const charaJ = createDivCssLabel(`chara${jdg}`, jdgX[j], jdgY[j],
 			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_ii);
@@ -6502,24 +6474,32 @@ function MainInit() {
 		judgeSprite.appendChild(diffJ);
 	});
 
-	// パーフェクト演出
-	const finishView = createDivCssLabel(`finishView`, g_sWidth / 2 - 150, g_sHeight / 2 - 50,
-		300, 20, 50, ``, g_cssObj.common_kita);
-	finishView.style.textAlign = C_ALIGN_CENTER;
-	judgeSprite.appendChild(finishView);
-
-	// 判定系OFF設定
+	// 判定カウンタ表示
+	const jdgObjs = [
+		`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `MCombo`, ``, `Kita`, `Iknai`, `FCombo`
+	];
+	jdgObjs.forEach((jdgObj, j) => {
+		if (jdgObj !== ``) {
+			infoSprite.appendChild(makeCounterSymbol(`lbl${jdgObj}`, g_sWidth - 110,
+				g_cssObj[`common_${jdgObj.toLowerCase()}`], j + 1, 0));
+		}
+	});
 	if (g_stateObj.d_judgement === C_FLG_OFF) {
-		const hideObjs = [
-			`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `MCombo`, `Kita`, `Iknai`, `FCombo`
-		];
-		hideObjs.forEach(hideObj => {
-			document.querySelector(`#lbl${hideObj}`).style.display = C_DIS_NONE;
+		jdgObjs.forEach(jdgObj => {
+			if (jdgObj !== ``) {
+				document.querySelector(`#lbl${jdgObj}`).style.display = C_DIS_NONE;
+			}
 		});
 		jdgGroups.forEach(jdg => {
 			document.querySelector(`#diff${jdg}`).style.display = C_DIS_NONE;
 		});
 	}
+
+	// パーフェクト演出
+	const finishView = createDivCssLabel(`finishView`, g_sWidth / 2 - 150, g_sHeight / 2 - 50,
+		300, 20, 50, ``, g_cssObj.common_kita);
+	finishView.style.textAlign = C_ALIGN_CENTER;
+	judgeSprite.appendChild(finishView);
 
 	// 曲情報OFF
 	if (g_stateObj.d_musicinfo === C_FLG_OFF) {
