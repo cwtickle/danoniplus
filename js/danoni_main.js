@@ -6134,14 +6134,12 @@ function MainInit() {
 	g_currentArrows = 0;
 	g_workObj.fadeInNo = [];
 	g_workObj.fadeOutNo = [];
-	g_workObj.fadingFrame = [];
 	g_workObj.lastFadeFrame = [];
 	g_workObj.wordFadeFrame = [];
 
 	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
 		g_workObj.fadeInNo[j] = 0;
 		g_workObj.fadeOutNo[j] = 0;
-		g_workObj.fadingFrame[j] = 0;
 		g_workObj.lastFadeFrame[j] = 0;
 		g_workObj.wordFadeFrame[j] = 0;
 	}
@@ -7304,14 +7302,9 @@ function MainInit() {
 						g_wordObj[`fadeOutFlg${wordDepth}`] = true;
 						g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
 					}
-					g_workObj.fadingFrame[wordDepth] = 0;
 					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
-
-					if (tmpObj.length > 2) {
-						g_workObj.wordFadeFrame[wordDepth] = setVal(tmpObj[2], C_WOD_FRAME, C_TYP_NUMBER);
-					} else {
-						g_workObj.wordFadeFrame[wordDepth] = C_WOD_FRAME;
-					}
+					g_workObj.wordFadeFrame[wordDepth] = (tmpObj.length > 2 ?
+						setVal(tmpObj[2], C_WOD_FRAME, C_TYP_NUMBER) : C_WOD_FRAME);
 
 					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / g_fps}s`;
 					g_wordSprite.style.animationTimingFunction = `linear`;
@@ -7326,17 +7319,13 @@ function MainInit() {
 				} else {
 
 					// フェードイン・アウト処理後、表示する歌詞を表示
-					g_workObj.fadingFrame = g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth];
-					if (g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`]
-						&& g_workObj.fadingFrame >= g_workObj.wordFadeFrame[wordDepth]) {
-						g_wordSprite.style.animationName = `none`;
-						g_wordObj[`fadeOutFlg${g_wordObj.wordDir}`] = false;
-					}
-					if (g_wordObj[`fadeInFlg${g_wordObj.wordDir}`]
-						&& g_workObj.fadingFrame >= g_workObj.wordFadeFrame[wordDepth]) {
-						g_wordSprite.style.animationName = `none`;
-						g_wordObj[`fadeInFlg${g_wordObj.wordDir}`] = false;
-					}
+					const fadingFlg = g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth] >= g_workObj.wordFadeFrame[wordDepth];
+					[`Out`, `In`].forEach(pattern => {
+						if (g_wordObj[`fade${pattern}Flg${g_wordObj.wordDir}`] && fadingFlg) {
+							g_wordSprite.style.animationName = `none`;
+							g_wordObj[`fade${pattern}Flg${g_wordObj.wordDir}`] = false;
+						}
+					});
 					g_workObj[`word${g_wordObj.wordDir}Data`] = g_wordObj.wordDat;
 					g_wordSprite.innerHTML = g_wordObj.wordDat;
 				}
