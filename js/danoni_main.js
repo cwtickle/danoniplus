@@ -7158,20 +7158,16 @@ function MainInit() {
 		}
 
 		// フェードイン・アウト
+		const isFadeOutArea = g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm;
 		if (g_audio.volume >= g_stateObj.volume / 100) {
 			musicStartFlg = false;
-			if (g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm) {
-				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
-				g_audio.volume = (tmpVolume < 0 ? 0 : tmpVolume);
-			}
-		} else {
-			if (musicStartFlg) {
-				const tmpVolume = (g_audio.volume + (3 * g_stateObj.volume / 100) / 1000);
-				g_audio.volume = (tmpVolume > 1 ? 1 : tmpVolume);
-			} else if (g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm) {
-				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
-				g_audio.volume = (tmpVolume < 0 ? 0 : tmpVolume);
-			}
+		}
+		if (musicStartFlg) {
+			const tmpVolume = (g_audio.volume + (3 * g_stateObj.volume / 100) / 1000);
+			g_audio.volume = (tmpVolume > 1 ? 1 : tmpVolume);
+		} else if (isFadeOutArea) {
+			const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
+			g_audio.volume = (tmpVolume < 0 ? 0 : tmpVolume);
 		}
 
 		// ユーザカスタムイベント(フレーム毎)
