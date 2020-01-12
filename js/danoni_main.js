@@ -7162,27 +7162,15 @@ function MainInit() {
 			musicStartFlg = false;
 			if (g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm) {
 				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
-				if (tmpVolume < 0) {
-					g_audio.volume = 0;
-				} else {
-					g_audio.volume = tmpVolume;
-				}
+				g_audio.volume = (tmpVolume < 0 ? 0 : tmpVolume);
 			}
 		} else {
 			if (musicStartFlg) {
 				const tmpVolume = (g_audio.volume + (3 * g_stateObj.volume / 100) / 1000);
-				if (tmpVolume > 1) {
-					g_audio.volume = 1;
-				} else {
-					g_audio.volume = tmpVolume;
-				}
+				g_audio.volume = (tmpVolume > 1 ? 1 : tmpVolume);
 			} else if (g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm) {
 				const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
-				if (tmpVolume < 0) {
-					g_audio.volume = 0;
-				} else {
-					g_audio.volume = tmpVolume;
-				}
+				g_audio.volume = (tmpVolume < 0 ? 0 : tmpVolume);
 			}
 		}
 
