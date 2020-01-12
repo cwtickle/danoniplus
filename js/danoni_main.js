@@ -6478,13 +6478,13 @@ function MainInit() {
 	});
 
 	// 判定カウンタ表示
-	const jdgObjs = [
-		`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `MCombo`, ``, `Kita`, `Iknai`, `FCombo`
-	];
+	const jdgObjs = [`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `MCombo`, ``, `Kita`, `Iknai`, `FCombo`];
+	const judgeColors = [`ii`, `shakin`, `matari`, `shobon`, `uwan`, `combo`, ``, `kita`, `iknai`, `combo`];
+
 	jdgObjs.forEach((jdgObj, j) => {
 		if (jdgObj !== ``) {
 			infoSprite.appendChild(makeCounterSymbol(`lbl${jdgObj}`, g_sWidth - 110,
-				g_cssObj[`common_${jdgObj.toLowerCase()}`], j + 1, 0));
+				g_cssObj[`common_${judgeColors[j]}`], j + 1, 0));
 		}
 	});
 	if (g_stateObj.d_judgement === C_FLG_OFF) {
@@ -6494,6 +6494,8 @@ function MainInit() {
 			}
 		});
 		jdgGroups.forEach(jdg => {
+			document.querySelector(`#chara${jdg}`).style.display = C_DIS_NONE;
+			document.querySelector(`#combo${jdg}`).style.display = C_DIS_NONE;
 			document.querySelector(`#diff${jdg}`).style.display = C_DIS_NONE;
 		});
 	}
