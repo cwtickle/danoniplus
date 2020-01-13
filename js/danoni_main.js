@@ -4578,6 +4578,10 @@ function loadingScoreInit2() {
 	// キーパターン(デフォルト)に対応する矢印番号を格納
 	convertreplaceNums();
 
+	const setData = (_data, _minLength = 1) => {
+		return (_data !== undefined && _data.length >= _minLength ? _data.concat() : []);
+	}
+
 	// フレーム・曲開始位置調整
 	let preblankFrame = 0;
 	if (g_scoreObj.frameNum === 0) {
@@ -4600,39 +4604,27 @@ function loadingScoreInit2() {
 					g_scoreObj.dummyFrzData[j] = JSON.parse(JSON.stringify(tmpObj.dummyFrzData[j]));
 				}
 			}
-			if (tmpObj.speedData !== undefined && tmpObj.speedData.length >= 2) {
-				g_scoreObj.speedData = JSON.parse(JSON.stringify(tmpObj.speedData));
-			}
-			if (tmpObj.boostData !== undefined && tmpObj.boostData.length >= 2) {
-				g_scoreObj.boostData = JSON.parse(JSON.stringify(tmpObj.boostData));
-			}
-			if (tmpObj.colorData !== undefined && tmpObj.colorData.length >= 3) {
-				g_scoreObj.colorData = JSON.parse(JSON.stringify(tmpObj.colorData));
-			}
-			if (tmpObj.acolorData !== undefined && tmpObj.acolorData.length >= 3) {
-				g_scoreObj.acolorData = JSON.parse(JSON.stringify(tmpObj.acolorData));
-			}
-			if (tmpObj.arrowCssMotionData !== undefined && tmpObj.arrowCssMotionData.length >= 3) {
-				g_scoreObj.arrowCssMotionData = JSON.parse(JSON.stringify(tmpObj.arrowCssMotionData));
-			}
-			if (tmpObj.frzCssMotionData !== undefined && tmpObj.frzCssMotionData.length >= 3) {
-				g_scoreObj.frzCssMotionData = JSON.parse(JSON.stringify(tmpObj.frzCssMotionData));
-			}
-			if (tmpObj.dummyArrowCssMotionData !== undefined && tmpObj.dummyArrowCssMotionData.length >= 3) {
-				g_scoreObj.dummyArrowCssMotionData = JSON.parse(JSON.stringify(tmpObj.dummyArrowCssMotionData));
-			}
-			if (tmpObj.dummyFrzCssMotionData !== undefined && tmpObj.dummyFrzCssMotionData.length >= 3) {
-				g_scoreObj.dummyFrzCssMotionData = JSON.parse(JSON.stringify(tmpObj.dummyFrzCssMotionData));
-			}
-			if (tmpObj.wordData !== undefined && tmpObj.wordData.length >= 3) {
-				g_scoreObj.wordData = tmpObj.wordData.concat();
-			}
-			if (tmpObj.maskData !== undefined && tmpObj.maskData.length >= 1) {
-				g_scoreObj.maskData = tmpObj.maskData.concat();
-			}
-			if (tmpObj.backData !== undefined && tmpObj.backData.length >= 1) {
-				g_scoreObj.backData = tmpObj.backData.concat();
-			}
+
+			/**
+			 * データ種, 最小データ長のセット
+			 */
+			const dataTypes = [
+				[`speed`, 2],
+				[`boost`, 2],
+				[`color`, 3],
+				[`acolor`, 3],
+				[`arrowCssMotion`, 3],
+				[`frzCssMotion`, 3],
+				[`dummyArrowCssMotion`, 3],
+				[`dummyFrzCssMotion`, 3],
+				[`word`, 3],
+				[`mask`, 1],
+				[`back`, 1],
+			];
+			dataTypes.forEach(dataType => {
+				g_scoreObj[`${dataType[0]}Data`] = setData(tmpObj[`${dataType[0]}Data`], dataType[1]);
+			});
+
 			lastFrame += preblankFrame;
 			firstArrowFrame += preblankFrame;
 			speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
