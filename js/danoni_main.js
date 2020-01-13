@@ -7944,16 +7944,13 @@ function resultInit() {
 				scoreIdHeader = Number(g_stateObj.scoreId) + 1;
 			}
 
-			if (g_rootObj[`backfailedS${scoreIdHeader}_data`] !== undefined) {
-				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj[`backfailedS${scoreIdHeader}_data`]);
-			} else if (g_rootObj.backfailedS_data !== undefined) {
-				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj.backfailedS_data);
-			}
-			if (g_rootObj[`maskfailedS${scoreIdHeader}_data`] !== undefined) {
-				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj[`maskfailedS${scoreIdHeader}_data`]);
-			} else if (g_rootObj.maskfailedS_data !== undefined) {
-				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj.maskfailedS_data);
-			}
+			[`back`, `mask`].forEach(sprite => {
+				if (g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] !== undefined) {
+					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = makeSpriteData(g_rootObj[`${sprite}failedS${scoreIdHeader}_data`]);
+				} else if (g_rootObj[`${sprite}failedS_data`] !== undefined) {
+					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = makeSpriteData(g_rootObj[`${sprite}failedS_data`]);
+				}
+			});
 		} else if (g_gameOverFlg) {
 			g_headerObj.backResultData = g_headerObj.backFailedData.concat();
 			g_headerObj.maskResultData = g_headerObj.maskFailedData.concat();
