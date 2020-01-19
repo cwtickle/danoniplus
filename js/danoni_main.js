@@ -4617,6 +4617,7 @@ function loadingScoreInit2() {
 				[`frzCssMotion`, 3],
 				[`dummyArrowCssMotion`, 3],
 				[`dummyFrzCssMotion`, 3],
+				[`object`, 4],
 				[`word`, 3],
 				[`mask`, 1],
 				[`back`, 1],
@@ -4920,6 +4921,9 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	obj.dummyArrowCssMotionData = setCssMotionData(`arrow`, _dummyNo);
 	obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
 
+	// オブジェクト変更データの分解 (4～5つで1セット、セット毎の改行区切り)
+	obj.objectData = setObjectData(_scoreNo);
+
 	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
 	obj.wordData = [];
 	obj.wordMaxDepth = -1;
@@ -4962,7 +4966,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	/**
 	 * 速度変化データの分解・格納（フレーム数, 矢印番号）
 	 * @param {string} _header 
-	 * @param {string} _scoreNo 
+	 * @param {number} _scoreNo 
 	 * @param {string} _footer 
 	 */
 	function setSpeedData(_header, _scoreNo, _footer = `_data`) {
@@ -4996,7 +5000,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	/**
 	 * 色変化データの分解・格納（フレーム数, 矢印番号）
 	 * @param {string} _header 
-	 * @param {string} _scoreNo 
+	 * @param {number} _scoreNo 
 	 */
 	function setColorData(_header, _scoreNo) {
 		let colorData = [];
@@ -5029,7 +5033,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	/**
 	 * 矢印モーションデータの分解・格納（フレーム数, 矢印番号）
 	 * @param {string} _header 
-	 * @param {string} _scoreNo 
+	 * @param {number} _scoreNo 
 	 */
 	function setCssMotionData(_header, _scoreNo) {
 		let dosCssMotionData;
@@ -5061,6 +5065,43 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 			});
 		}
 		return cssMotionData;
+	}
+
+	/**
+	 * オブジェクト変更データの分解・格納 (矢印番号)
+	 * @param {number} _scoreNo 
+	 */
+	function setObjectData(_scoreNo) {
+		let dosObjectData;
+		if (_dosObj[`object${_scoreNo}_data`] !== undefined) {
+			dosObjectData = _dosObj[`object${_scoreNo}_data`];
+		} else if (_dosObj.object_data !== undefined) {
+			dosObjectData = _dosObj.object_data;
+		}
+
+		let objectData = [];
+
+		if (dosObjectData !== undefined && dosObjectData !== `` && g_stateObj.d_arroweffect === C_FLG_ON) {
+			let objectIdx = 0;
+			let tmpArrayData = dosObjectData.split(`\r`).join(`\n`);
+			tmpArrayData = tmpArrayData.split(`\n`);
+
+			tmpArrayData.forEach(tmpData => {
+				if (tmpData !== undefined && tmpData !== ``) {
+					const tmpobjectData = tmpData.split(`,`);
+					if (isNaN(parseInt(tmpobjectData[0]))) {
+						return;
+					}
+					objectData[objectIdx] = calcFrame(tmpobjectData[0]);
+					objectData[objectIdx + 1] = parseInt(tmpobjectData[1]);
+					objectData[objectIdx + 2] = tmpobjectData[2];
+					objectData[objectIdx + 3] = tmpobjectData[3];
+					objectData[objectIdx + 4] = (tmpobjectData.length > 4 ? tmpobjectData[4] : g_workObj[`${tmpobjectData[2]}Rtn`][objectData[objectIdx + 1]]);
+					objectIdx += 5;
+				}
+			});
+		}
+		return objectData;
 	}
 
 	/**
@@ -5365,31 +5406,18 @@ function getFirstArrivalFrame(_startFrame, _speedOnFrame, _motionOnFrame) {
 function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame) {
 
 	// 矢印・フリーズアロー・速度/色変化用 フレーム別処理配列
-	g_workObj.mkArrow = [];
-	g_workObj.mkFrzArrow = [];
-	g_workObj.mkFrzLength = [];
-
-	g_workObj.mkDummyArrow = [];
-	g_workObj.mkDummyFrzArrow = [];
-	g_workObj.mkDummyFrzLength = [];
-
-	g_workObj.mkColor = [];
-	g_workObj.mkColorCd = [];
-	g_workObj.mkFColor = [];
-	g_workObj.mkFColorCd = [];
-	g_workObj.mkAColor = [];
-	g_workObj.mkAColorCd = [];
-	g_workObj.mkFAColor = [];
-	g_workObj.mkFAColorCd = [];
-
-	g_workObj.mkArrowCssMotion = [];
-	g_workObj.mkArrowCssMotionName = [];
-	g_workObj.mkFrzCssMotion = [];
-	g_workObj.mkFrzCssMotionName = [];
-	g_workObj.mkDummyArrowCssMotion = [];
-	g_workObj.mkDummyArrowCssMotionName = [];
-	g_workObj.mkDummyFrzCssMotion = [];
-	g_workObj.mkDummyFrzCssMotionName = [];
+	const workObjs = [
+		`Arrow`, `FrzArrow`, `FrzLength`,
+		`Color`, `ColorCd`, `FColor`, `FColorCd`,
+		`AColor`, `AColorCd`, `FAColor`, `FAColorCd`,
+		`ArrowCssMotion`, `ArrowCssMotionName`,
+		`FrzCssMotion`, `FrzCssMotionName`,
+	];
+	[``, `Dummy`].forEach(header => {
+		workObjs.forEach(name => {
+			g_workObj[`mk${header}${name}`] = [];
+		});
+	});
 
 	/** 矢印の移動距離 */
 	g_workObj.initY = [];
