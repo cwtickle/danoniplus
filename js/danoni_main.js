@@ -2522,6 +2522,9 @@ function headerConvert(_dosObj) {
 	// リザルトモーションをDisplay:BackgroundのON/OFFと連動させるかどうかの設定
 	obj.resultMotionSet = setVal(_dosObj.resultMotionSet, true, C_TYP_BOOLEAN);
 
+	// 速度変化グラフの使用可否
+	obj.speedGraphUse = setVal(_dosObj.speedGraphUse, true, C_TYP_BOOLEAN);
+
 	return obj;
 }
 
@@ -2960,7 +2963,7 @@ function createOptionWindow(_sprite) {
 	const difficultySprite = createSprite(`optionsprite`, `difficultySprite`, childX, childY - 5,
 		optionWidth, C_LEN_SETLBL_HEIGHT + 10);
 	const speedSprite = createSprite(`optionsprite`, `speedSprite`, childX, 2 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth + 40, C_LEN_SETLBL_HEIGHT);
 	const motionSprite = createSprite(`optionsprite`, `motionSprite`, childX, 3 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
 	const reverseSprite = createSprite(`optionsprite`, `reverseSprite`, childX, 4 * C_LEN_SETLBL_HEIGHT + childY,
@@ -3106,6 +3109,168 @@ function createOptionWindow(_sprite) {
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
 	createGeneralSetting(speedSprite, `speed`, ` x`, true, 4);
+
+	/**
+	 * 速度変化グラフの描画
+	 */
+	function drawSpeedGraph() {
+		let scoreIdHeader = ``;
+		if (g_stateObj.scoreId > 0 && g_stateObj.scoreLockFlg === false) {
+			scoreIdHeader = Number(g_stateObj.scoreId) + 1;
+		}
+
+		const scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0, ``, true);
+		const lastFrame = getLastFrame(scoreObj) + g_headerObj.blankFrame;
+		const speedObj = {
+			speed: {frame: [0], speed: [1]},
+			boost: {frame: [0], speed: [1]}
+		};
+
+		[`speed`, `boost`].forEach(speedType => {
+			let frame = speedObj[`${speedType}`].frame;
+			let speed = speedObj[`${speedType}`].speed;
+			const speedData = scoreObj[`${speedType}Data`];
+
+			for (let i=0; i<speedData.length; i+=2) {
+				frame.push(speedData[i]);
+				speed.push(speedData[i + 1]);
+			}
+			frame.push(lastFrame);
+			speed.push(speed[speed.length - 1]);
+		});
+
+		let maxLine = Math.max(Math.max.apply(null, speedObj.speed.speed), Math.max.apply(null, speedObj.boost.speed));
+		let minLine = Math.min(Math.min.apply(null, speedObj.speed.speed), Math.min.apply(null, speedObj.boost.speed));
+
+		if (maxLine > 2.5) {
+			maxLine = 2.5;
+		} else if (maxLine < 1.5) {
+			maxLine = 1.5;
+		}
+		if (minLine < 0) {
+			minLine = 0;
+		}
+
+		const peakLine = ((maxLine - 1) > (1 - minLine)) ? maxLine : minLine;
+		const expandRate = 1 / Math.abs(peakLine - 1);
+
+		const canvas = document.getElementById(`speedGraph`);
+		const context = canvas.getContext(`2d`);
+
+		context.clearRect(0, 0, C_LEN_SPEEDGRAPH_WIDTH, C_LEN_SPEEDGRAPH_HEIGHT);
+
+		for (let speed = 1; speed <= maxLine + 0.5; speed += 0.5) {
+			drawLine(context, speed, `main`);
+			for (let subSpeed = 0.1; subSpeed < 0.5; subSpeed += 0.1) {
+				drawLine(context, speed + subSpeed, `sub`);
+			}
+		}
+		for (let speed = 1; speed >= minLine - 0.5; speed -= 0.5) {
+			drawLine(context, speed, `main`);
+			for (let subSpeed = 0.1; subSpeed < 0.5; subSpeed += 0.1) {
+				drawLine(context, speed - subSpeed, `sub`);
+			}
+		}
+
+		[`speed`, `boost`].forEach(speedType => {
+			context.beginPath();
+			let x, y, preY;
+
+			for (let i=0; i<speedObj[`${speedType}`].frame.length; i++) {
+				x = speedObj[`${speedType}`].frame[i] * (C_LEN_SPEEDGRAPH_WIDTH - 30) / lastFrame + 30;
+				y = (speedObj[`${speedType}`].speed[i] - 1) * expandRate * -90 + 100;
+
+				context.lineTo(x, preY);
+				context.lineTo(x, y);
+				preY = y;
+			}
+
+			context.lineWidth = 1;
+			context.strokeStyle = (speedType === `speed`) ? C_CLR_SPEEDGRAPH_SPEED : C_CLR_SPEEDGRAPH_BOOST;
+			context.stroke();
+		
+			const lineX = (speedType === `speed`) ? 43 : 160;
+			context.beginPath();
+			context.moveTo(lineX, 208);
+			context.lineTo(lineX + 40, 208);
+			context.stroke();
+    	context.font = `15px "Meiryo UI"`;
+			context.fillText(speedType, lineX + 48, 211);
+		});
+
+		/**
+		 * グラフ上に横軸を表示
+		 * @param {object} _context 
+		 * @param {number} _speed 
+		 * @param {string} _lineType 
+		 */
+		function drawLine(_context, _speed, _lineType) {
+			const lineY = (_speed - 1) * expandRate * -90 + 100;
+			_context.beginPath();
+			_context.moveTo(30, lineY);
+			_context.lineTo(C_LEN_SPEEDGRAPH_WIDTH, lineY);
+    	_context.font = `12px "Meiryo UI"`;
+		  _context.fillStyle = `#FFFFFF`;
+
+			if (_lineType == `main`) {
+				_context.strokeStyle = `#FFFFFF`;
+				_context.lineWidth = 2;
+				_context.fillText(_speed.toFixed(2), 0, lineY + 4);
+			} else {
+				_context.strokeStyle = `#646464`;
+				_context.lineWidth = 1;
+			}
+			_context.stroke();
+		}
+	}
+
+	if (g_headerObj.speedGraphUse) {
+		const speedGraph = document.createElement(`canvas`);
+		speedGraph.id = `speedGraph`;
+		speedGraph.width = C_LEN_SPEEDGRAPH_WIDTH;
+		speedGraph.height = C_LEN_SPEEDGRAPH_HEIGHT;
+		speedGraph.style.left = `145px`;
+		speedGraph.style.top = `89px`;
+		speedGraph.style.position = `absolute`;
+		speedGraph.style.background = `#101010`;
+		speedGraph.style.border = `dotted 2px`;
+		speedGraph.style.visibility = `hidden`;
+		optionsprite.appendChild(speedGraph);
+
+		const btnSpeedGraph = createCssButton({
+			id: `btnSpeedGraph`,
+			name: `Graph`,
+			x: 415,
+			y: 0,
+			width: 40,
+			height: 20,
+			fontsize: 12,
+			align: C_ALIGN_CENTER,
+			class: g_cssObj.button_Default,
+		}, _ => {
+			setSpeedGraph();
+		});
+
+		btnSpeedGraph.style.borderStyle = `solid`;
+		btnSpeedGraph.classList.add(g_cssObj.button_RevOFF);
+		speedSprite.appendChild(btnSpeedGraph);
+		setSpeedGraphFlg = C_FLG_OFF;
+	}
+
+	function setSpeedGraph() {
+		const btnSpeedGraph = document.getElementById(`btnSpeedGraph`);
+		const speedGraph = document.getElementById(`speedGraph`);	
+
+		if (setSpeedGraphFlg === C_FLG_ON) {
+			btnSpeedGraph.classList.replace(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
+			speedGraph.style.visibility = `hidden`;
+			setSpeedGraphFlg = C_FLG_OFF;
+		} else {
+			btnSpeedGraph.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
+			speedGraph.style.visibility = `visible`;
+			setSpeedGraphFlg = C_FLG_ON;
+		}
+	}
 
 	// ---------------------------------------------------
 	// 速度モーション (Motion)
@@ -3555,6 +3720,9 @@ function createOptionWindow(_sprite) {
 
 		// 速度設定 (Speed)
 		setSetting(0, `speed`, ` x`);
+		if (g_headerObj.speedGraphUse) {
+			drawSpeedGraph();
+		}
 
 		// リバース設定 (Reverse, Scroll)
 		if (g_headerObj.scrollUse) {
@@ -4814,8 +4982,9 @@ function applySRandom(_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) {
  * 譜面データの分解
  * @param {object} _dosObj 
  * @param {string} _scoreNo
+ * @param {boolean} _scoreAnalyzeFlg (default : false)
  */
-function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
+function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``, _scoreAnalyzeFlg = false) {
 
 	// 矢印群の格納先
 	const obj = {};
@@ -4917,6 +5086,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	// 速度変化（個別・全体）の分解 (2つで1セット, セット毎の改行区切り可)
 	obj.boostData = setSpeedData(`boost`, _scoreNo);
 	obj.speedData = setSpeedData(`speed`, _scoreNo, speedFooter);
+
+	if (_scoreAnalyzeFlg) {
+		return obj;
+	}
 
 	// 色変化（個別・全体）の分解 (3つで1セット, セット毎の改行区切り可)
 	obj.colorData = setColorData(`color`, _scoreNo);
