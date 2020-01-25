@@ -3114,11 +3114,7 @@ function createOptionWindow(_sprite) {
 	 * 速度変化グラフの描画
 	 */
 	function drawSpeedGraph() {
-		let scoreIdHeader = ``;
-		if (g_stateObj.scoreId > 0 && g_stateObj.scoreLockFlg === false) {
-			scoreIdHeader = Number(g_stateObj.scoreId) + 1;
-		}
-
+		const scoreIdHeader = setScoreIdHeader();
 		const scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0, ``, true);
 		const lastFrame = getLastFrame(scoreObj) + g_headerObj.blankFrame;
 		const speedObj = {
@@ -3147,8 +3143,12 @@ function createOptionWindow(_sprite) {
 		} else if (maxLine < 1.5) {
 			maxLine = 1.5;
 		}
-		if (minLine < 0) {
+		if (minLine <= 0) {
+			minLine = -0.5;
+		} else if (minLine <= 0.5) {
 			minLine = 0;
+		} else if (minLine <= 1) {
+			minLine = 0.5;
 		}
 
 		const peakLine = ((maxLine - 1) > (1 - minLine)) ? maxLine : minLine;
@@ -3159,16 +3159,10 @@ function createOptionWindow(_sprite) {
 
 		context.clearRect(0, 0, C_LEN_SPEEDGRAPH_WIDTH, C_LEN_SPEEDGRAPH_HEIGHT);
 
-		for (let speed = 1; speed <= maxLine + 0.5; speed += 0.5) {
+		for (let speed = minLine; speed <= maxLine + 0.5; speed += 0.5) {
 			drawLine(context, speed, `main`);
 			for (let subSpeed = 0.1; subSpeed < 0.5; subSpeed += 0.1) {
 				drawLine(context, speed + subSpeed, `sub`);
-			}
-		}
-		for (let speed = 1; speed >= minLine - 0.5; speed -= 0.5) {
-			drawLine(context, speed, `main`);
-			for (let subSpeed = 0.1; subSpeed < 0.5; subSpeed += 0.1) {
-				drawLine(context, speed - subSpeed, `sub`);
 			}
 		}
 
@@ -3194,7 +3188,7 @@ function createOptionWindow(_sprite) {
 			context.moveTo(lineX, 208);
 			context.lineTo(lineX + 40, 208);
 			context.stroke();
-    	context.font = `15px "Meiryo UI"`;
+			context.font = `15px "Meiryo UI"`;
 			context.fillText(speedType, lineX + 48, 211);
 		});
 
@@ -3209,7 +3203,7 @@ function createOptionWindow(_sprite) {
 			_context.beginPath();
 			_context.moveTo(30, lineY);
 			_context.lineTo(C_LEN_SPEEDGRAPH_WIDTH, lineY);
-    	_context.font = `12px "Meiryo UI"`;
+			_context.font = `12px "Meiryo UI"`;
 		  _context.fillStyle = `#FFFFFF`;
 
 			if (_lineType == `main`) {
@@ -4694,6 +4688,13 @@ function loadingScoreInit() {
 	loadDos(false);
 }
 
+function setScoreIdHeader() {
+	if (g_stateObj.scoreId > 0 && g_stateObj.scoreLockFlg === false) {
+		return Number(g_stateObj.scoreId) + 1;
+	}
+	return ``;
+}
+
 function loadingScoreInit2() {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -4706,11 +4707,8 @@ function loadingScoreInit2() {
 		g_canLoadDifInfoFlg = false;
 	}
 
-	let scoreIdHeader = ``;
+	let scoreIdHeader = setScoreIdHeader();
 	let dummyIdHeader = ``;
-	if (g_stateObj.scoreId > 0 && g_stateObj.scoreLockFlg === false) {
-		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
-	}
 	if (g_stateObj.dummyId !== ``) {
 		if (g_stateObj.dummyId === 0 || g_stateObj.dummyId === 1) {
 			dummyIdHeader = ``;
