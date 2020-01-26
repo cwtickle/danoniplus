@@ -1008,7 +1008,7 @@ function initialControl() {
 	loadLocalStorage();
 
 	// 譜面データの読み込み
-	loadDos(_ => loadSettingJs());
+	loadDos(_ => loadSettingJs(), true);
 }
 
 /**
@@ -4654,7 +4654,7 @@ function removeClassList(_j, _k) {
  */
 function loadingScoreInit() {
 	// 譜面データの読み込み
-	loadDos(_ => loadCustomjs(false), true);
+	loadDos(_ => loadCustomjs(false));
 }
 
 function setScoreIdHeader() {
