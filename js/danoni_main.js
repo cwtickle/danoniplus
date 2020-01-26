@@ -3140,6 +3140,11 @@ function createOptionWindow(_sprite) {
 			}
 		}
 
+		const strokeColor = {
+			speed: C_CLR_SPEEDGRAPH_SPEED,
+			boost: C_CLR_SPEEDGRAPH_BOOST,
+		};
+
 		[`speed`, `boost`].forEach(speedType => {
 			context.beginPath();
 			let x, y, preY;
@@ -3154,7 +3159,7 @@ function createOptionWindow(_sprite) {
 			}
 
 			context.lineWidth = 1;
-			context.strokeStyle = (speedType === `speed`) ? C_CLR_SPEEDGRAPH_SPEED : C_CLR_SPEEDGRAPH_BOOST;
+			context.strokeStyle = strokeColor[speedType];
 			context.stroke();
 
 			const lineX = (speedType === `speed`) ? 125 : 210;
@@ -3180,9 +3185,12 @@ function createOptionWindow(_sprite) {
 			_context.lineWidth = 1;
 
 			if (_lineType == `main`) {
-				_context.strokeStyle = `#FFFFFF`;
+				const textBaseObj = document.querySelector(`#lnkDifficulty`);
+				const textColor = window.getComputedStyle(textBaseObj, ``).color;
+				_context.strokeStyle = textColor;
 				_context.font = `12px ${getBasicFont()}`;
-				_context.fillStyle = `#FFFFFF`;
+				_context.fillStyle = textColor;
+				console.log(textColor);
 				_context.fillText(_speed.toFixed(2), 0, lineY + 4);
 			} else {
 				_context.strokeStyle = `#646464`;
@@ -3193,13 +3201,15 @@ function createOptionWindow(_sprite) {
 
 	if (g_headerObj.scoreDetailUse) {
 		const speedGraph = document.createElement(`canvas`);
+		const textBaseObj = document.querySelector(`#lnkDifficulty`);
+		const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
 		speedGraph.id = `speedGraph`;
 		speedGraph.width = C_LEN_SPEEDGRAPH_WIDTH;
 		speedGraph.height = C_LEN_SPEEDGRAPH_HEIGHT;
 		speedGraph.style.left = `145px`;
 		speedGraph.style.top = `89px`;
 		speedGraph.style.position = `absolute`;
-		speedGraph.style.background = `#101010`;
+		speedGraph.style.background = bkColor;
 		speedGraph.style.border = `dotted 2px`;
 		speedGraph.style.visibility = `hidden`;
 		optionsprite.appendChild(speedGraph);
