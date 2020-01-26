@@ -3133,10 +3133,10 @@ function createOptionWindow(_sprite) {
 
 		context.clearRect(0, 0, C_LEN_SPEEDGRAPH_WIDTH, C_LEN_SPEEDGRAPH_HEIGHT);
 
-		for (let speed = 0; speed <= 2; speed += 0.5) {
-			drawLine(context, speed, `main`);
-			for (let subSpeed = 0.1; subSpeed < 0.5; subSpeed += 0.1) {
-				drawLine(context, speed + subSpeed, `sub`);
+		for (let speed = 0; speed <= 20; speed += 5) {
+			drawLine(context, speed / 10, `main`);
+			for (let subSpeed = 1; subSpeed < 5; subSpeed++) {
+				drawLine(context, (speed + subSpeed) / 10, `sub`);
 			}
 		}
 
@@ -3162,7 +3162,7 @@ function createOptionWindow(_sprite) {
 			context.moveTo(lineX, 215);
 			context.lineTo(lineX + 30, 215);
 			context.stroke();
-			context.font = `14px "Meiryo UI", sans-serif`;
+			context.font = `14px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 		});
 
@@ -3181,7 +3181,7 @@ function createOptionWindow(_sprite) {
 
 			if (_lineType == `main`) {
 				_context.strokeStyle = `#FFFFFF`;
-				_context.font = `12px "Meiryo UI", sans-serif`;
+				_context.font = `12px ${getBasicFont()}`;
 				_context.fillStyle = `#FFFFFF`;
 				_context.fillText(_speed.toFixed(2), 0, lineY + 4);
 			} else {
