@@ -2515,8 +2515,8 @@ function headerConvert(_dosObj) {
 	// リザルトモーションをDisplay:BackgroundのON/OFFと連動させるかどうかの設定
 	obj.resultMotionSet = setVal(_dosObj.resultMotionSet, true, C_TYP_BOOLEAN);
 
-	// 速度変化グラフの使用可否
-	obj.speedGraphUse = setVal(_dosObj.speedGraphUse, true, C_TYP_BOOLEAN);
+	// 譜面明細の使用可否
+	obj.scoreDetailUse = setVal(_dosObj.scoreDetailUse, true, C_TYP_BOOLEAN);
 
 	return obj;
 }
@@ -3128,7 +3128,7 @@ function createOptionWindow(_sprite) {
 			speed.push(speed[speed.length - 1]);
 		});
 
-		const canvas = document.getElementById(`speedGraph`);
+		const canvas = document.querySelector(`#speedGraph`);
 		const context = canvas.getContext(`2d`);
 
 		context.clearRect(0, 0, C_LEN_SPEEDGRAPH_WIDTH, C_LEN_SPEEDGRAPH_HEIGHT);
@@ -3191,7 +3191,7 @@ function createOptionWindow(_sprite) {
 		}
 	}
 
-	if (g_headerObj.speedGraphUse) {
+	if (g_headerObj.scoreDetailUse) {
 		const speedGraph = document.createElement(`canvas`);
 		speedGraph.id = `speedGraph`;
 		speedGraph.width = C_LEN_SPEEDGRAPH_WIDTH;
@@ -3223,8 +3223,7 @@ function createOptionWindow(_sprite) {
 	}
 
 	function setSpeedGraph() {
-		const btnSpeedGraph = document.getElementById(`btnSpeedGraph`);
-		const speedGraph = document.getElementById(`speedGraph`);
+		const speedGraph = document.querySelector(`#speedGraph`);
 
 		if (setSpeedGraphFlg === C_FLG_ON) {
 			speedGraph.style.visibility = `hidden`;
@@ -3683,7 +3682,7 @@ function createOptionWindow(_sprite) {
 
 		// 速度設定 (Speed)
 		setSetting(0, `speed`, ` x`);
-		if (g_headerObj.speedGraphUse) {
+		if (g_headerObj.scoreDetailUse) {
 			loadDos(_ => drawSpeedGraph());
 		}
 
