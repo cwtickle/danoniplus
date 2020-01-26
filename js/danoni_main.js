@@ -3174,9 +3174,10 @@ function createOptionWindow(_sprite) {
 		});
 
 		/**
-		 * グラフ上に横軸を表示
+		 * グラフ上に目盛を表示
 		 * @param {object} _context 
 		 * @param {number} _speed 
+		 * @param {string} _lineType 
 		 */
 		function drawLine(_context, _speed, _lineType) {
 			const lineY = (_speed - 1) * -90 + 105;
