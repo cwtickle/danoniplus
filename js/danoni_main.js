@@ -3135,31 +3135,12 @@ function createOptionWindow(_sprite) {
 			speed.push(speed[speed.length - 1]);
 		});
 
-		let maxLine = Math.max(Math.max.apply(null, speedObj.speed.speed), Math.max.apply(null, speedObj.boost.speed));
-		let minLine = Math.min(Math.min.apply(null, speedObj.speed.speed), Math.min.apply(null, speedObj.boost.speed));
-
-		if (maxLine > 2.5) {
-			maxLine = 2.5;
-		} else if (maxLine < 1.5) {
-			maxLine = 1.5;
-		}
-		if (minLine <= 0) {
-			minLine = -0.5;
-		} else if (minLine <= 0.5) {
-			minLine = 0;
-		} else if (minLine <= 1) {
-			minLine = 0.5;
-		}
-
-		const peakLine = ((maxLine - 1) > (1 - minLine)) ? maxLine : minLine;
-		const expandRate = 1 / Math.abs(peakLine - 1);
-
 		const canvas = document.getElementById(`speedGraph`);
 		const context = canvas.getContext(`2d`);
 
 		context.clearRect(0, 0, C_LEN_SPEEDGRAPH_WIDTH, C_LEN_SPEEDGRAPH_HEIGHT);
 
-		for (let speed = minLine; speed <= maxLine + 0.5; speed += 0.5) {
+		for (let speed = 0; speed <= 2; speed += 0.5) {
 			drawLine(context, speed, `main`);
 			for (let subSpeed = 0.1; subSpeed < 0.5; subSpeed += 0.1) {
 				drawLine(context, speed + subSpeed, `sub`);
@@ -3172,7 +3153,7 @@ function createOptionWindow(_sprite) {
 
 			for (let i=0; i<speedObj[`${speedType}`].frame.length; i++) {
 				x = speedObj[`${speedType}`].frame[i] * (C_LEN_SPEEDGRAPH_WIDTH - 30) / lastFrame + 30;
-				y = (speedObj[`${speedType}`].speed[i] - 1) * expandRate * -90 + 100;
+				y = (speedObj[`${speedType}`].speed[i] - 1) * -90 + 105;
 
 				context.lineTo(x, preY);
 				context.lineTo(x, y);
@@ -3182,37 +3163,35 @@ function createOptionWindow(_sprite) {
 			context.lineWidth = 1;
 			context.strokeStyle = (speedType === `speed`) ? C_CLR_SPEEDGRAPH_SPEED : C_CLR_SPEEDGRAPH_BOOST;
 			context.stroke();
-		
-			const lineX = (speedType === `speed`) ? 43 : 160;
+
+			const lineX = (speedType === `speed`) ? 125 : 210;
 			context.beginPath();
-			context.moveTo(lineX, 208);
-			context.lineTo(lineX + 40, 208);
+			context.moveTo(lineX, 215);
+			context.lineTo(lineX + 30, 215);
 			context.stroke();
-			context.font = `15px "Meiryo UI"`;
-			context.fillText(speedType, lineX + 48, 211);
+			context.font = `14px "Meiryo UI", sans-serif`;
+			context.fillText(speedType, lineX + 35, 218);
 		});
 
 		/**
 		 * グラフ上に横軸を表示
 		 * @param {object} _context 
 		 * @param {number} _speed 
-		 * @param {string} _lineType 
 		 */
 		function drawLine(_context, _speed, _lineType) {
-			const lineY = (_speed - 1) * expandRate * -90 + 100;
+			const lineY = (_speed - 1) * -90 + 105;
 			_context.beginPath();
 			_context.moveTo(30, lineY);
 			_context.lineTo(C_LEN_SPEEDGRAPH_WIDTH, lineY);
-			_context.font = `12px "Meiryo UI"`;
-		  _context.fillStyle = `#FFFFFF`;
+			_context.lineWidth = 1;
 
 			if (_lineType == `main`) {
 				_context.strokeStyle = `#FFFFFF`;
-				_context.lineWidth = 2;
+				_context.font = `12px "Meiryo UI", sans-serif`;
+				_context.fillStyle = `#FFFFFF`;
 				_context.fillText(_speed.toFixed(2), 0, lineY + 4);
 			} else {
 				_context.strokeStyle = `#646464`;
-				_context.lineWidth = 1;
 			}
 			_context.stroke();
 		}
@@ -3233,20 +3212,18 @@ function createOptionWindow(_sprite) {
 
 		const btnSpeedGraph = createCssButton({
 			id: `btnSpeedGraph`,
-			name: `Graph`,
+			name: `i`,
 			x: 415,
 			y: 0,
-			width: 40,
-			height: 20,
-			fontsize: 12,
+			width: 23,
+			height: 23,
+			fontsize: 16,
 			align: C_ALIGN_CENTER,
-			class: g_cssObj.button_Default,
+			class: g_cssObj.button_Mini,
 		}, _ => {
 			setSpeedGraph();
 		});
 
-		btnSpeedGraph.style.borderStyle = `solid`;
-		btnSpeedGraph.classList.add(g_cssObj.button_RevOFF);
 		speedSprite.appendChild(btnSpeedGraph);
 		setSpeedGraphFlg = C_FLG_OFF;
 	}
@@ -3256,11 +3233,9 @@ function createOptionWindow(_sprite) {
 		const speedGraph = document.getElementById(`speedGraph`);	
 
 		if (setSpeedGraphFlg === C_FLG_ON) {
-			btnSpeedGraph.classList.replace(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
 			speedGraph.style.visibility = `hidden`;
 			setSpeedGraphFlg = C_FLG_OFF;
 		} else {
-			btnSpeedGraph.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
 			speedGraph.style.visibility = `visible`;
 			setSpeedGraphFlg = C_FLG_ON;
 		}
