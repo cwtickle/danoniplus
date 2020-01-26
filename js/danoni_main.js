@@ -1008,7 +1008,7 @@ function initialControl() {
 	loadLocalStorage();
 
 	// 譜面データの読み込み
-	loadDos(true);
+	loadDos(_ => loadSettingJs(), true);
 }
 
 /**
@@ -1062,9 +1062,10 @@ function loadLocalStorage() {
 
 /**
  * 譜面読込
- * @param {boolean} _initFlg 
+ * @param {function} _afterFunc 実行後の処理
+ * @param {boolean} _initFlg 初期化フラグ(true: 常時1譜面目を読込, false: 指定された譜面を読込)
  */
-function loadDos(_initFlg) {
+function loadDos(_afterFunc, _initFlg = false) {
 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
@@ -1098,11 +1099,7 @@ function loadDos(_initFlg) {
 	if (dosInput !== null) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
 		if (externalDosInput === null) {
-			if (_initFlg) {
-				loadSettingJs();
-			} else {
-				loadCustomjs(false);
-			}
+			_afterFunc();
 		}
 	}
 
@@ -1136,11 +1133,7 @@ function loadDos(_initFlg) {
 			}
 
 			// danoni_setting.jsは初回時のみ読込
-			if (_initFlg) {
-				loadSettingJs();
-			} else {
-				loadCustomjs(false);
-			}
+			_afterFunc();
 		}, false, charset);
 	}
 }
@@ -2522,8 +2515,8 @@ function headerConvert(_dosObj) {
 	// リザルトモーションをDisplay:BackgroundのON/OFFと連動させるかどうかの設定
 	obj.resultMotionSet = setVal(_dosObj.resultMotionSet, true, C_TYP_BOOLEAN);
 
-	// 速度変化グラフの使用可否
-	obj.speedGraphUse = setVal(_dosObj.speedGraphUse, true, C_TYP_BOOLEAN);
+	// 譜面明細の使用可否
+	obj.scoreDetailUse = setVal(_dosObj.scoreDetailUse, true, C_TYP_BOOLEAN);
 
 	return obj;
 }
@@ -3118,8 +3111,8 @@ function createOptionWindow(_sprite) {
 		const scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0, ``, true);
 		const lastFrame = getLastFrame(scoreObj) + g_headerObj.blankFrame;
 		const speedObj = {
-			speed: {frame: [0], speed: [1]},
-			boost: {frame: [0], speed: [1]}
+			speed: { frame: [0], speed: [1] },
+			boost: { frame: [0], speed: [1] }
 		};
 
 		[`speed`, `boost`].forEach(speedType => {
@@ -3127,7 +3120,7 @@ function createOptionWindow(_sprite) {
 			let speed = speedObj[`${speedType}`].speed;
 			const speedData = scoreObj[`${speedType}Data`];
 
-			for (let i=0; i<speedData.length; i+=2) {
+			for (let i = 0; i < speedData.length; i += 2) {
 				frame.push(speedData[i]);
 				speed.push(speedData[i + 1]);
 			}
@@ -3135,7 +3128,7 @@ function createOptionWindow(_sprite) {
 			speed.push(speed[speed.length - 1]);
 		});
 
-		const canvas = document.getElementById(`speedGraph`);
+		const canvas = document.querySelector(`#speedGraph`);
 		const context = canvas.getContext(`2d`);
 
 		context.clearRect(0, 0, C_LEN_SPEEDGRAPH_WIDTH, C_LEN_SPEEDGRAPH_HEIGHT);
@@ -3151,7 +3144,7 @@ function createOptionWindow(_sprite) {
 			context.beginPath();
 			let x, y, preY;
 
-			for (let i=0; i<speedObj[`${speedType}`].frame.length; i++) {
+			for (let i = 0; i < speedObj[`${speedType}`].frame.length; i++) {
 				x = speedObj[`${speedType}`].frame[i] * (C_LEN_SPEEDGRAPH_WIDTH - 30) / lastFrame + 30;
 				y = (speedObj[`${speedType}`].speed[i] - 1) * -90 + 105;
 
@@ -3198,7 +3191,7 @@ function createOptionWindow(_sprite) {
 		}
 	}
 
-	if (g_headerObj.speedGraphUse) {
+	if (g_headerObj.scoreDetailUse) {
 		const speedGraph = document.createElement(`canvas`);
 		speedGraph.id = `speedGraph`;
 		speedGraph.width = C_LEN_SPEEDGRAPH_WIDTH;
@@ -3230,8 +3223,7 @@ function createOptionWindow(_sprite) {
 	}
 
 	function setSpeedGraph() {
-		const btnSpeedGraph = document.getElementById(`btnSpeedGraph`);
-		const speedGraph = document.getElementById(`speedGraph`);	
+		const speedGraph = document.querySelector(`#speedGraph`);
 
 		if (setSpeedGraphFlg === C_FLG_ON) {
 			speedGraph.style.visibility = `hidden`;
@@ -3690,8 +3682,8 @@ function createOptionWindow(_sprite) {
 
 		// 速度設定 (Speed)
 		setSetting(0, `speed`, ` x`);
-		if (g_headerObj.speedGraphUse) {
-			drawSpeedGraph();
+		if (g_headerObj.scoreDetailUse) {
+			loadDos(_ => drawSpeedGraph());
 		}
 
 		// リバース設定 (Reverse, Scroll)
@@ -4661,7 +4653,7 @@ function removeClassList(_j, _k) {
  */
 function loadingScoreInit() {
 	// 譜面データの読み込み
-	loadDos(false);
+	loadDos(_ => loadCustomjs(false));
 }
 
 function setScoreIdHeader() {
