@@ -3200,19 +3200,23 @@ function createOptionWindow(_sprite) {
 	}
 
 	if (g_headerObj.scoreDetailUse) {
+		const scoreDetail = createSprite(`optionsprite`, `scoreDetail`, 20, 90, 420, 230);
+		scoreDetail.classList.add(g_cssObj.settings_DifSelector);
+		scoreDetail.style.visibility = `hidden`;
+
 		const speedGraph = document.createElement(`canvas`);
 		const textBaseObj = document.querySelector(`#lnkDifficulty`);
 		const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
 		speedGraph.id = `speedGraph`;
 		speedGraph.width = C_LEN_SPEEDGRAPH_WIDTH;
 		speedGraph.height = C_LEN_SPEEDGRAPH_HEIGHT;
-		speedGraph.style.left = `145px`;
-		speedGraph.style.top = `89px`;
+		speedGraph.style.left = `125px`;
+		speedGraph.style.top = `0px`;
 		speedGraph.style.position = `absolute`;
 		speedGraph.style.background = bkColor;
 		speedGraph.style.border = `dotted 2px`;
 		speedGraph.style.visibility = `hidden`;
-		optionsprite.appendChild(speedGraph);
+		scoreDetail.appendChild(speedGraph);
 
 		const btnSpeedGraph = createCssButton({
 			id: `btnSpeedGraph`,
@@ -3233,12 +3237,15 @@ function createOptionWindow(_sprite) {
 	}
 
 	function setSpeedGraph() {
+		const scoreDetail = document.querySelector(`#scoreDetail`);
 		const speedGraph = document.querySelector(`#speedGraph`);
 
 		if (setSpeedGraphFlg === C_FLG_ON) {
+			scoreDetail.style.visibility = `hidden`;
 			speedGraph.style.visibility = `hidden`;
 			setSpeedGraphFlg = C_FLG_OFF;
 		} else {
+			scoreDetail.style.visibility = `visible`;
 			speedGraph.style.visibility = `visible`;
 			setSpeedGraphFlg = C_FLG_ON;
 		}
