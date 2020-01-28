@@ -141,6 +141,7 @@ const C_LEN_GRAPH_WIDTH = 286;
 const C_LEN_GRAPH_HEIGHT = 226;
 const C_CLR_SPEEDGRAPH_SPEED = `#cc3333`;
 const C_CLR_SPEEDGRAPH_BOOST = `#999900`;
+const C_LEN_DENSITY_DIVISION = 16;
 
 const C_LBL_SETMINIL = `<`;
 const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH;
@@ -279,7 +280,7 @@ const g_stateObj = {
     extraKeyFlg: false,
     dataSaveFlg: true,
     scoreDetailViewFlg: false,
-    scoreDetail: `speedGraph`,
+    scoreDetail: `Speed`,
 
     d_stepzone: C_FLG_ON,
     d_judgement: C_FLG_ON,
@@ -333,7 +334,7 @@ let g_volumeNum = g_volumes.length - 1;
 let g_appearances = [`Visible`, `Hidden`, `Sudden`, `Slit`];
 let g_appearanceNum = 0;
 
-let g_scoreDetails = [`speedGraph`, `densityGraph`];
+let g_scoreDetails = [`Speed`, `Density`];
 let g_scoreDetailNum = 0;
 
 let g_displays = [`stepZone`, `judgement`, `lifeGauge`, `musicInfo`, `special`,

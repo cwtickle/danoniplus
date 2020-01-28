@@ -3126,7 +3126,7 @@ function createOptionWindow(_sprite) {
 			speed.push(speed[speed.length - 1]);
 		});
 
-		const canvas = document.querySelector(`#speedGraph`);
+		const canvas = document.querySelector(`#detailSpeed`);
 		const context = canvas.getContext(`2d`);
 
 		context.clearRect(0, 0, C_LEN_GRAPH_WIDTH, C_LEN_GRAPH_HEIGHT);
@@ -3170,6 +3170,55 @@ function createOptionWindow(_sprite) {
 		});
 	}
 
+	function drawDensityGraph(_scoreObj) {
+		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame;
+		const densityData = [];
+		let allData = 0;
+		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
+			densityData[j] = 0;
+		}
+
+		for (let j = 0; j < keyNum; j++) {
+			_scoreObj.arrowData[j].forEach(note => {
+				const point = Math.floor(note / lastFrame * C_LEN_DENSITY_DIVISION);
+				densityData[point]++;
+				allData++;
+			});
+			_scoreObj.frzData[j].forEach((note, k) => {
+				if (k % 2 === 0 && note !== ``) {
+					const point = Math.floor(note / lastFrame * C_LEN_DENSITY_DIVISION);
+					densityData[point]++;
+					allData++;
+				}
+			});
+		}
+
+		const canvas = document.querySelector(`#detailDensity`);
+		const context = canvas.getContext(`2d`);
+
+		context.clearRect(0, 0, C_LEN_GRAPH_WIDTH, C_LEN_GRAPH_HEIGHT);
+		context.strokeStyle = `#ffffff`;
+
+		for (let j = 0; j <= 20; j += 5) {
+			drawLine(context, j / 10, `main`);
+			for (let k = 1; k < 5; k++) {
+				drawLine(context, (j + k) / 10, `sub`);
+			}
+		}
+		let tmp = 0;
+		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
+			const percentage = Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100;
+			context.beginPath();
+			context.fillRect(16 * j + 30, 195 - 9 * percentage / 10,
+				15.5, 9 * percentage / 10
+			);
+			context.stroke();
+		}
+
+	}
+
 	/**
 	 * グラフ上に目盛を表示
 	 * @param {object} _context 
@@ -3200,8 +3249,8 @@ function createOptionWindow(_sprite) {
 		const scoreDetail = createSprite(`optionsprite`, `scoreDetail`, 20, 90, 420, 230);
 		scoreDetail.classList.add(g_cssObj.settings_DifSelector);
 		scoreDetail.style.visibility = `hidden`;
-		scoreDetail.appendChild(createGraph(`speedGraph`));
-		scoreDetail.appendChild(createGraph(`densityGraph`));
+		scoreDetail.appendChild(createGraph(`Speed`));
+		scoreDetail.appendChild(createGraph(`Density`));
 
 		const btnGraph = createCssButton({
 			id: `btnGraph`,
@@ -3219,13 +3268,24 @@ function createOptionWindow(_sprite) {
 
 		speedSprite.appendChild(btnGraph);
 		g_stateObj.scoreDetailViewFlg = false;
+
+		const lnk = makeSettingLblCssButton(`lnkScoreDetail`, `${g_stateObj.scoreDetail}`, 0, _ => {
+			let detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
+			detailObj.style.visibility = `hidden`;
+			setSetting(1, `scoreDetail`);
+			detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
+			detailObj.style.visibility = `visible`;
+		});
+		lnk.style.left = `0px`;
+		lnk.style.width = `120px`;
+		scoreDetail.appendChild(lnk);
 	}
 
 	function createGraph(_name) {
 		const graphObj = document.createElement(`canvas`);
 		const textBaseObj = document.querySelector(`#lnkDifficulty`);
 		const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
-		graphObj.id = _name;
+		graphObj.id = `detail${_name}`;
 		graphObj.width = C_LEN_GRAPH_WIDTH;
 		graphObj.height = C_LEN_GRAPH_HEIGHT;
 		graphObj.style.left = `125px`;
@@ -3240,7 +3300,7 @@ function createOptionWindow(_sprite) {
 
 	function setScoreDetail() {
 		const scoreDetail = document.querySelector(`#scoreDetail`);
-		const detailObj = document.querySelector(`#${g_stateObj.scoreDetail}`);
+		const detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
 
 		if (g_stateObj.scoreDetailViewFlg) {
 			scoreDetail.style.visibility = `hidden`;
@@ -3705,6 +3765,7 @@ function createOptionWindow(_sprite) {
 			loadDos(_ => {
 				const scoreObj = scoreConvert(g_rootObj, setScoreIdHeader(), 0, ``, true);
 				drawSpeedGraph(scoreObj);
+				drawDensityGraph(scoreObj);
 			});
 		}
 
