@@ -3106,10 +3106,8 @@ function createOptionWindow(_sprite) {
 	/**
 	 * 速度変化グラフの描画
 	 */
-	function drawSpeedGraph() {
-		const scoreIdHeader = setScoreIdHeader();
-		const scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0, ``, true);
-		const lastFrame = getLastFrame(scoreObj) + g_headerObj.blankFrame;
+	function drawSpeedGraph(_scoreObj) {
+		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame;
 		const speedObj = {
 			speed: { frame: [0], speed: [1] },
 			boost: { frame: [0], speed: [1] }
@@ -3118,7 +3116,7 @@ function createOptionWindow(_sprite) {
 		[`speed`, `boost`].forEach(speedType => {
 			let frame = speedObj[`${speedType}`].frame;
 			let speed = speedObj[`${speedType}`].speed;
-			const speedData = scoreObj[`${speedType}Data`];
+			const speedData = _scoreObj[`${speedType}Data`];
 
 			for (let i = 0; i < speedData.length; i += 2) {
 				frame.push(speedData[i]);
@@ -3131,7 +3129,7 @@ function createOptionWindow(_sprite) {
 		const canvas = document.querySelector(`#speedGraph`);
 		const context = canvas.getContext(`2d`);
 
-		context.clearRect(0, 0, C_LEN_SPEEDGRAPH_WIDTH, C_LEN_SPEEDGRAPH_HEIGHT);
+		context.clearRect(0, 0, C_LEN_GRAPH_WIDTH, C_LEN_GRAPH_HEIGHT);
 
 		for (let speed = 0; speed <= 20; speed += 5) {
 			drawLine(context, speed / 10, `main`);
@@ -3150,7 +3148,7 @@ function createOptionWindow(_sprite) {
 			let x, y, preY;
 
 			for (let i = 0; i < speedObj[`${speedType}`].frame.length; i++) {
-				x = speedObj[`${speedType}`].frame[i] * (C_LEN_SPEEDGRAPH_WIDTH - 30) / lastFrame + 30;
+				x = speedObj[`${speedType}`].frame[i] * (C_LEN_GRAPH_WIDTH - 30) / lastFrame + 30;
 				y = (speedObj[`${speedType}`].speed[i] - 1) * -90 + 105;
 
 				context.lineTo(x, preY);
@@ -3170,33 +3168,32 @@ function createOptionWindow(_sprite) {
 			context.font = `14px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 		});
+	}
 
-		/**
-		 * グラフ上に目盛を表示
-		 * @param {object} _context 
-		 * @param {number} _speed 
-		 * @param {string} _lineType 
-		 */
-		function drawLine(_context, _speed, _lineType) {
-			const lineY = (_speed - 1) * -90 + 105;
-			_context.beginPath();
-			_context.moveTo(30, lineY);
-			_context.lineTo(C_LEN_SPEEDGRAPH_WIDTH, lineY);
-			_context.lineWidth = 1;
+	/**
+	 * グラフ上に目盛を表示
+	 * @param {object} _context 
+	 * @param {number} _speed 
+	 * @param {string} _lineType 
+	 */
+	function drawLine(_context, _speed, _lineType) {
+		const lineY = (_speed - 1) * -90 + 105;
+		_context.beginPath();
+		_context.moveTo(30, lineY);
+		_context.lineTo(C_LEN_GRAPH_WIDTH, lineY);
+		_context.lineWidth = 1;
 
-			if (_lineType == `main`) {
-				const textBaseObj = document.querySelector(`#lnkDifficulty`);
-				const textColor = window.getComputedStyle(textBaseObj, ``).color;
-				_context.strokeStyle = textColor;
-				_context.font = `12px ${getBasicFont()}`;
-				_context.fillStyle = textColor;
-				console.log(textColor);
-				_context.fillText(_speed.toFixed(2), 0, lineY + 4);
-			} else {
-				_context.strokeStyle = `#646464`;
-			}
-			_context.stroke();
+		if (_lineType == `main`) {
+			const textBaseObj = document.querySelector(`#lnkDifficulty`);
+			const textColor = window.getComputedStyle(textBaseObj, ``).color;
+			_context.strokeStyle = textColor;
+			_context.font = `12px ${getBasicFont()}`;
+			_context.fillStyle = textColor;
+			_context.fillText(_speed.toFixed(2), 0, lineY + 4);
+		} else {
+			_context.strokeStyle = `#646464`;
 		}
+		_context.stroke();
 	}
 
 	if (g_headerObj.scoreDetailUse) {
@@ -3204,9 +3201,10 @@ function createOptionWindow(_sprite) {
 		scoreDetail.classList.add(g_cssObj.settings_DifSelector);
 		scoreDetail.style.visibility = `hidden`;
 		scoreDetail.appendChild(createGraph(`speedGraph`));
+		scoreDetail.appendChild(createGraph(`densityGraph`));
 
-		const btnSpeedGraph = createCssButton({
-			id: `btnSpeedGraph`,
+		const btnGraph = createCssButton({
+			id: `btnGraph`,
 			name: `i`,
 			x: 415,
 			y: 0,
@@ -3216,41 +3214,42 @@ function createOptionWindow(_sprite) {
 			align: C_ALIGN_CENTER,
 			class: g_cssObj.button_Mini,
 		}, _ => {
-			setSpeedGraph();
+			setScoreDetail();
 		});
 
-		speedSprite.appendChild(btnSpeedGraph);
-		setSpeedGraphFlg = C_FLG_OFF;
+		speedSprite.appendChild(btnGraph);
+		g_stateObj.scoreDetailViewFlg = false;
 	}
 
 	function createGraph(_name) {
-		const graph = document.createElement(`canvas`);
+		const graphObj = document.createElement(`canvas`);
 		const textBaseObj = document.querySelector(`#lnkDifficulty`);
 		const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
-		graph.id = _name;
-		graph.width = C_LEN_SPEEDGRAPH_WIDTH;
-		graph.height = C_LEN_SPEEDGRAPH_HEIGHT;
-		graph.style.left = `125px`;
-		graph.style.top = `0px`;
-		graph.style.position = `absolute`;
-		graph.style.background = bkColor;
-		graph.style.border = `dotted 2px`;
-		graph.style.visibility = `hidden`;
-		return graph;
+		graphObj.id = _name;
+		graphObj.width = C_LEN_GRAPH_WIDTH;
+		graphObj.height = C_LEN_GRAPH_HEIGHT;
+		graphObj.style.left = `125px`;
+		graphObj.style.top = `0px`;
+		graphObj.style.position = `absolute`;
+		graphObj.style.background = bkColor;
+		graphObj.style.border = `dotted 2px`;
+		graphObj.style.visibility = `hidden`;
+
+		return graphObj;
 	}
 
-	function setSpeedGraph() {
+	function setScoreDetail() {
 		const scoreDetail = document.querySelector(`#scoreDetail`);
-		const speedGraph = document.querySelector(`#speedGraph`);
+		const detailObj = document.querySelector(`#${g_stateObj.scoreDetail}`);
 
-		if (setSpeedGraphFlg === C_FLG_ON) {
+		if (g_stateObj.scoreDetailViewFlg) {
 			scoreDetail.style.visibility = `hidden`;
-			speedGraph.style.visibility = `hidden`;
-			setSpeedGraphFlg = C_FLG_OFF;
+			detailObj.style.visibility = `hidden`;
+			g_stateObj.scoreDetailViewFlg = false;
 		} else {
 			scoreDetail.style.visibility = `visible`;
-			speedGraph.style.visibility = `visible`;
-			setSpeedGraphFlg = C_FLG_ON;
+			detailObj.style.visibility = `visible`;
+			g_stateObj.scoreDetailViewFlg = true;
 		}
 	}
 
@@ -3703,7 +3702,10 @@ function createOptionWindow(_sprite) {
 		// 速度設定 (Speed)
 		setSetting(0, `speed`, ` x`);
 		if (g_headerObj.scoreDetailUse) {
-			loadDos(_ => drawSpeedGraph());
+			loadDos(_ => {
+				const scoreObj = scoreConvert(g_rootObj, setScoreIdHeader(), 0, ``, true);
+				drawSpeedGraph(scoreObj);
+			});
 		}
 
 		// リバース設定 (Reverse, Scroll)
