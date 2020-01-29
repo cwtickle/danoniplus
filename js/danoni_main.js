@@ -3105,6 +3105,7 @@ function createOptionWindow(_sprite) {
 
 	/**
 	 * 速度変化グラフの描画
+	 * @param {object} _scoreObj
 	 */
 	function drawSpeedGraph(_scoreObj) {
 		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame;
@@ -3162,6 +3163,10 @@ function createOptionWindow(_sprite) {
 		});
 	}
 
+	/**
+	 * 譜面密度グラフの描画
+	 * @param {object} _scoreObj 
+	 */
 	function drawDensityGraph(_scoreObj) {
 		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -3186,13 +3191,14 @@ function createOptionWindow(_sprite) {
 				}
 			});
 		}
-
+		const maxDensity = densityData.indexOf(Math.max.apply(null, densityData));
 		const canvas = document.querySelector(`#detailDensity`);
 		const context = canvas.getContext(`2d`);
 		drawBaseLine(context);
 		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
 			const percentage = Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100;
 			context.beginPath();
+			context.fillStyle = (j === maxDensity ? C_CLR_DENSITY_MAX : C_CLR_DENSITY_DEFAULT);
 			context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * percentage / 10,
 				15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * percentage / 10
 			);
