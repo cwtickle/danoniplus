@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/01/12
+ * Revised : 2020/01/29
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 11.2.1`;
-const g_revisedDate = `2020/01/12`;
+const g_version = `Ver 11.3.0`;
+const g_revisedDate = `2020/01/29`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1008,7 +1008,7 @@ function initialControl() {
 	loadLocalStorage();
 
 	// 譜面データの読み込み
-	loadDos(true);
+	loadDos(_ => loadSettingJs(), true);
 }
 
 /**
@@ -1062,9 +1062,10 @@ function loadLocalStorage() {
 
 /**
  * 譜面読込
- * @param {boolean} _initFlg 
+ * @param {function} _afterFunc 実行後の処理
+ * @param {boolean} _initFlg 初期化フラグ(true: 常時1譜面目を読込, false: 指定された譜面を読込)
  */
-function loadDos(_initFlg) {
+function loadDos(_afterFunc, _initFlg = false) {
 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
@@ -1098,11 +1099,7 @@ function loadDos(_initFlg) {
 	if (dosInput !== null) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
 		if (externalDosInput === null) {
-			if (_initFlg) {
-				loadSettingJs();
-			} else {
-				loadCustomjs(false);
-			}
+			_afterFunc();
 		}
 	}
 
@@ -1136,11 +1133,7 @@ function loadDos(_initFlg) {
 			}
 
 			// danoni_setting.jsは初回時のみ読込
-			if (_initFlg) {
-				loadSettingJs();
-			} else {
-				loadCustomjs(false);
-			}
+			_afterFunc();
 		}, false, charset);
 	}
 }
@@ -1228,24 +1221,20 @@ function initAfterDosLoaded() {
 	}
 
 	// customjsの読み込み
-	loadCustomjs(true);
+	loadCustomjs(_ => titleInit());
 }
 
 /**
  * customjsの読込
- * @param {boolean} _initFlg 
+ * @param {function} _afterFunc 
  */
-function loadCustomjs(_initFlg) {
+function loadCustomjs(_afterFunc) {
 	const randTime = new Date().getTime();
 	loadScript(`${g_headerObj.customjsRoot}${g_headerObj.customjs}?${randTime}`, _ => {
 		loadScript(`${g_headerObj.customjs2Root}${g_headerObj.customjs2}?${randTime}`, _ => {
 			loadScript(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.js?${randTime}`, _ => {
 				loadScript(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.js?${randTime}`, _ => {
-					if (_initFlg) {
-						titleInit();
-					} else {
-						loadingScoreInit2();
-					}
+					_afterFunc();
 				}, false);
 			}, false);
 		}, false);
@@ -2522,6 +2511,9 @@ function headerConvert(_dosObj) {
 	// リザルトモーションをDisplay:BackgroundのON/OFFと連動させるかどうかの設定
 	obj.resultMotionSet = setVal(_dosObj.resultMotionSet, true, C_TYP_BOOLEAN);
 
+	// 譜面明細の使用可否
+	obj.scoreDetailUse = setVal(_dosObj.scoreDetailUse, true, C_TYP_BOOLEAN);
+
 	return obj;
 }
 
@@ -2960,7 +2952,7 @@ function createOptionWindow(_sprite) {
 	const difficultySprite = createSprite(`optionsprite`, `difficultySprite`, childX, childY - 5,
 		optionWidth, C_LEN_SETLBL_HEIGHT + 10);
 	const speedSprite = createSprite(`optionsprite`, `speedSprite`, childX, 2 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth + 40, C_LEN_SETLBL_HEIGHT);
 	const motionSprite = createSprite(`optionsprite`, `motionSprite`, childX, 3 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
 	const reverseSprite = createSprite(`optionsprite`, `reverseSprite`, childX, 4 * C_LEN_SETLBL_HEIGHT + childY,
@@ -3106,6 +3098,223 @@ function createOptionWindow(_sprite) {
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
 	createGeneralSetting(speedSprite, `speed`, ` x`, true, 4);
+
+	/**
+	 * 速度変化グラフの描画
+	 * @param {object} _scoreObj
+	 */
+	function drawSpeedGraph(_scoreObj) {
+		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame;
+		const speedObj = {
+			speed: { frame: [0], speed: [1] },
+			boost: { frame: [0], speed: [1] }
+		};
+
+		[`speed`, `boost`].forEach(speedType => {
+			let frame = speedObj[`${speedType}`].frame;
+			let speed = speedObj[`${speedType}`].speed;
+			const speedData = _scoreObj[`${speedType}Data`];
+
+			for (let i = 0; i < speedData.length; i += 2) {
+				frame.push(speedData[i]);
+				speed.push(speedData[i + 1]);
+			}
+			frame.push(lastFrame);
+			speed.push(speed[speed.length - 1]);
+		});
+
+		const canvas = document.querySelector(`#detailSpeed`);
+		const context = canvas.getContext(`2d`);
+		drawBaseLine(context);
+
+		const strokeColor = {
+			speed: C_CLR_SPEEDGRAPH_SPEED,
+			boost: C_CLR_SPEEDGRAPH_BOOST,
+		};
+
+		[`speed`, `boost`].forEach(speedType => {
+			context.beginPath();
+			let x, y, preY;
+
+			for (let i = 0; i < speedObj[`${speedType}`].frame.length; i++) {
+				x = speedObj[`${speedType}`].frame[i] * (C_LEN_GRAPH_WIDTH - 30) / lastFrame + 30;
+				y = (speedObj[`${speedType}`].speed[i] - 1) * -90 + 105;
+
+				context.lineTo(x, preY);
+				context.lineTo(x, y);
+				preY = y;
+			}
+
+			context.lineWidth = 1;
+			context.strokeStyle = strokeColor[speedType];
+			context.stroke();
+
+			const lineX = (speedType === `speed`) ? 125 : 210;
+			context.beginPath();
+			context.moveTo(lineX, 215);
+			context.lineTo(lineX + 30, 215);
+			context.stroke();
+			context.font = `14px ${getBasicFont()}`;
+			context.fillText(speedType, lineX + 35, 218);
+		});
+	}
+
+	/**
+	 * 譜面密度グラフの描画
+	 * @param {object} _scoreObj 
+	 */
+	function drawDensityGraph(_scoreObj) {
+		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame;
+		const densityData = [];
+		let allData = 0;
+		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
+			densityData[j] = 0;
+		}
+
+		for (let j = 0; j < keyNum; j++) {
+			_scoreObj.arrowData[j].forEach(note => {
+				const point = Math.floor(note / lastFrame * C_LEN_DENSITY_DIVISION);
+				densityData[point]++;
+				allData++;
+			});
+			_scoreObj.frzData[j].forEach((note, k) => {
+				if (k % 2 === 0 && note !== ``) {
+					const point = Math.floor(note / lastFrame * C_LEN_DENSITY_DIVISION);
+					densityData[point]++;
+					allData++;
+				}
+			});
+		}
+		const maxDensity = densityData.indexOf(Math.max.apply(null, densityData));
+		const canvas = document.querySelector(`#detailDensity`);
+		const context = canvas.getContext(`2d`);
+		drawBaseLine(context);
+		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
+			const percentage = Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100;
+			context.beginPath();
+			context.fillStyle = (j === maxDensity ? C_CLR_DENSITY_MAX : C_CLR_DENSITY_DEFAULT);
+			context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * percentage / 10,
+				15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * percentage / 10
+			);
+			context.stroke();
+		}
+
+	}
+
+	/**
+	 * グラフの縦軸を描画
+	 * @param {context} _context 
+	 * @param {number} _resolution 
+	 */
+	function drawBaseLine(_context, _resolution = 10) {
+		_context.clearRect(0, 0, C_LEN_GRAPH_WIDTH, C_LEN_GRAPH_HEIGHT);
+
+		for (let j = 0; j <= 2 * _resolution; j += 5) {
+			drawLine(_context, j / _resolution, `main`, 2);
+			for (let k = 1; k < 5; k++) {
+				drawLine(_context, (j + k) / _resolution, `sub`, 2);
+			}
+		}
+	}
+
+	/**
+	 * グラフ上に目盛を表示
+	 * @param {object} _context 
+	 * @param {number} _y 
+	 * @param {string} _lineType 
+	 * @param {number} _fixed
+	 */
+	function drawLine(_context, _y, _lineType, _fixed = 0) {
+		const lineY = (_y - 1) * -90 + 105;
+		_context.beginPath();
+		_context.moveTo(30, lineY);
+		_context.lineTo(C_LEN_GRAPH_WIDTH, lineY);
+		_context.lineWidth = 1;
+
+		if (_lineType == `main`) {
+			const textBaseObj = document.querySelector(`#lnkDifficulty`);
+			const textColor = window.getComputedStyle(textBaseObj, ``).color;
+			_context.strokeStyle = textColor;
+			_context.font = `12px ${getBasicFont()}`;
+			_context.fillStyle = textColor;
+			_context.fillText(_y.toFixed(_fixed), 0, lineY + 4);
+		} else {
+			_context.strokeStyle = `#646464`;
+		}
+		_context.stroke();
+	}
+
+	if (g_headerObj.scoreDetailUse) {
+		const scoreDetail = createSprite(`optionsprite`, `scoreDetail`, 20, 90, 420, 230);
+		scoreDetail.classList.add(g_cssObj.settings_DifSelector);
+		scoreDetail.style.visibility = `hidden`;
+		scoreDetail.appendChild(createGraph(`Speed`));
+		scoreDetail.appendChild(createGraph(`Density`));
+
+		const btnGraph = createCssButton({
+			id: `btnGraph`,
+			name: `i`,
+			x: 415,
+			y: 0,
+			width: 23,
+			height: 23,
+			fontsize: 16,
+			align: C_ALIGN_CENTER,
+			class: g_cssObj.button_Mini,
+		}, _ => {
+			setScoreDetail();
+		});
+
+		speedSprite.appendChild(btnGraph);
+		g_stateObj.scoreDetailViewFlg = false;
+
+		const lnk = makeSettingLblCssButton(`lnkScoreDetail`, `${g_stateObj.scoreDetail}`, 0, _ => {
+			let detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
+			detailObj.style.visibility = `hidden`;
+			setSetting(1, `scoreDetail`);
+			detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
+			detailObj.style.visibility = `visible`;
+		});
+		lnk.style.left = `10px`;
+		lnk.style.width = `100px`;
+		lnk.style.borderStyle = `solid`;
+		lnk.classList.add(g_cssObj.button_RevON);
+		scoreDetail.appendChild(lnk);
+	}
+
+	function createGraph(_name) {
+		const graphObj = document.createElement(`canvas`);
+		const textBaseObj = document.querySelector(`#lnkDifficulty`);
+		const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
+		graphObj.id = `detail${_name}`;
+		graphObj.width = C_LEN_GRAPH_WIDTH;
+		graphObj.height = C_LEN_GRAPH_HEIGHT;
+		graphObj.style.left = `125px`;
+		graphObj.style.top = `0px`;
+		graphObj.style.position = `absolute`;
+		graphObj.style.background = bkColor;
+		graphObj.style.border = `dotted 2px`;
+		graphObj.style.visibility = `hidden`;
+
+		return graphObj;
+	}
+
+	function setScoreDetail() {
+		const scoreDetail = document.querySelector(`#scoreDetail`);
+		const detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
+
+		if (g_stateObj.scoreDetailViewFlg) {
+			scoreDetail.style.visibility = `hidden`;
+			detailObj.style.visibility = `hidden`;
+			g_stateObj.scoreDetailViewFlg = false;
+		} else {
+			scoreDetail.style.visibility = `visible`;
+			detailObj.style.visibility = `visible`;
+			g_stateObj.scoreDetailViewFlg = true;
+		}
+	}
 
 	// ---------------------------------------------------
 	// 速度モーション (Motion)
@@ -3555,6 +3764,13 @@ function createOptionWindow(_sprite) {
 
 		// 速度設定 (Speed)
 		setSetting(0, `speed`, ` x`);
+		if (g_headerObj.scoreDetailUse) {
+			loadDos(_ => {
+				const scoreObj = scoreConvert(g_rootObj, setScoreIdHeader(), 0, ``, true);
+				drawSpeedGraph(scoreObj);
+				drawDensityGraph(scoreObj);
+			});
+		}
 
 		// リバース設定 (Reverse, Scroll)
 		if (g_headerObj.scrollUse) {
@@ -4523,7 +4739,14 @@ function removeClassList(_j, _k) {
  */
 function loadingScoreInit() {
 	// 譜面データの読み込み
-	loadDos(false);
+	loadDos(_ => loadCustomjs(_ => loadingScoreInit2()));
+}
+
+function setScoreIdHeader() {
+	if (g_stateObj.scoreId > 0 && g_stateObj.scoreLockFlg === false) {
+		return Number(g_stateObj.scoreId) + 1;
+	}
+	return ``;
 }
 
 function loadingScoreInit2() {
@@ -4538,11 +4761,8 @@ function loadingScoreInit2() {
 		g_canLoadDifInfoFlg = false;
 	}
 
-	let scoreIdHeader = ``;
+	let scoreIdHeader = setScoreIdHeader();
 	let dummyIdHeader = ``;
-	if (g_stateObj.scoreId > 0 && g_stateObj.scoreLockFlg === false) {
-		scoreIdHeader = Number(g_stateObj.scoreId) + 1;
-	}
 	if (g_stateObj.dummyId !== ``) {
 		if (g_stateObj.dummyId === 0 || g_stateObj.dummyId === 1) {
 			dummyIdHeader = ``;
@@ -4814,8 +5034,9 @@ function applySRandom(_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) {
  * 譜面データの分解
  * @param {object} _dosObj 
  * @param {string} _scoreNo
+ * @param {boolean} _scoreAnalyzeFlg (default : false)
  */
-function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
+function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``, _scoreAnalyzeFlg = false) {
 
 	// 矢印群の格納先
 	const obj = {};
@@ -4917,6 +5138,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	// 速度変化（個別・全体）の分解 (2つで1セット, セット毎の改行区切り可)
 	obj.boostData = setSpeedData(`boost`, _scoreNo);
 	obj.speedData = setSpeedData(`speed`, _scoreNo, speedFooter);
+
+	if (_scoreAnalyzeFlg) {
+		return obj;
+	}
 
 	// 色変化（個別・全体）の分解 (3つで1セット, セット毎の改行区切り可)
 	obj.colorData = setColorData(`color`, _scoreNo);
@@ -7944,16 +8169,13 @@ function resultInit() {
 				scoreIdHeader = Number(g_stateObj.scoreId) + 1;
 			}
 
-			if (g_rootObj[`backfailedS${scoreIdHeader}_data`] !== undefined) {
-				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj[`backfailedS${scoreIdHeader}_data`]);
-			} else if (g_rootObj.backfailedS_data !== undefined) {
-				[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] = makeSpriteData(g_rootObj.backfailedS_data);
-			}
-			if (g_rootObj[`maskfailedS${scoreIdHeader}_data`] !== undefined) {
-				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj[`maskfailedS${scoreIdHeader}_data`]);
-			} else if (g_rootObj.maskfailedS_data !== undefined) {
-				[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] = makeSpriteData(g_rootObj.maskfailedS_data);
-			}
+			[`back`, `mask`].forEach(sprite => {
+				if (g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] !== undefined) {
+					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = makeSpriteData(g_rootObj[`${sprite}failedS${scoreIdHeader}_data`]);
+				} else if (g_rootObj[`${sprite}failedS_data`] !== undefined) {
+					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = makeSpriteData(g_rootObj[`${sprite}failedS_data`]);
+				}
+			});
 		} else if (g_gameOverFlg) {
 			g_headerObj.backResultData = g_headerObj.backFailedData.concat();
 			g_headerObj.maskResultData = g_headerObj.maskFailedData.concat();
