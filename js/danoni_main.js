@@ -1221,24 +1221,20 @@ function initAfterDosLoaded() {
 	}
 
 	// customjsの読み込み
-	loadCustomjs(true);
+	loadCustomjs(_ => titleInit());
 }
 
 /**
  * customjsの読込
- * @param {boolean} _initFlg 
+ * @param {function} _afterFunc 
  */
-function loadCustomjs(_initFlg) {
+function loadCustomjs(_afterFunc) {
 	const randTime = new Date().getTime();
 	loadScript(`${g_headerObj.customjsRoot}${g_headerObj.customjs}?${randTime}`, _ => {
 		loadScript(`${g_headerObj.customjs2Root}${g_headerObj.customjs2}?${randTime}`, _ => {
 			loadScript(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.js?${randTime}`, _ => {
 				loadScript(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.js?${randTime}`, _ => {
-					if (_initFlg) {
-						titleInit();
-					} else {
-						loadingScoreInit2();
-					}
+					_afterFunc();
 				}, false);
 			}, false);
 		}, false);
@@ -4743,7 +4739,7 @@ function removeClassList(_j, _k) {
  */
 function loadingScoreInit() {
 	// 譜面データの読み込み
-	loadDos(_ => loadCustomjs(false));
+	loadDos(_ => loadCustomjs(_ => loadingScoreInit2()));
 }
 
 function setScoreIdHeader() {
