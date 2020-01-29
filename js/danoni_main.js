@@ -3275,8 +3275,10 @@ function createOptionWindow(_sprite) {
 			detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
 			detailObj.style.visibility = `visible`;
 		});
-		lnk.style.left = `0px`;
-		lnk.style.width = `120px`;
+		lnk.style.left = `10px`;
+		lnk.style.width = `100px`;
+		lnk.style.borderStyle = `solid`;
+		lnk.classList.add(g_cssObj.button_RevON);
 		scoreDetail.appendChild(lnk);
 	}
 
