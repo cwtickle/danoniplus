@@ -3128,15 +3128,7 @@ function createOptionWindow(_sprite) {
 
 		const canvas = document.querySelector(`#detailSpeed`);
 		const context = canvas.getContext(`2d`);
-
-		context.clearRect(0, 0, C_LEN_GRAPH_WIDTH, C_LEN_GRAPH_HEIGHT);
-
-		for (let speed = 0; speed <= 20; speed += 5) {
-			drawLine(context, speed / 10, `main`);
-			for (let subSpeed = 1; subSpeed < 5; subSpeed++) {
-				drawLine(context, (speed + subSpeed) / 10, `sub`);
-			}
-		}
+		drawBaseLine(context);
 
 		const strokeColor = {
 			speed: C_CLR_SPEEDGRAPH_SPEED,
@@ -3197,22 +3189,12 @@ function createOptionWindow(_sprite) {
 
 		const canvas = document.querySelector(`#detailDensity`);
 		const context = canvas.getContext(`2d`);
-
-		context.clearRect(0, 0, C_LEN_GRAPH_WIDTH, C_LEN_GRAPH_HEIGHT);
-		context.strokeStyle = `#ffffff`;
-
-		for (let j = 0; j <= 20; j += 5) {
-			drawLine(context, j / 10, `main`);
-			for (let k = 1; k < 5; k++) {
-				drawLine(context, (j + k) / 10, `sub`);
-			}
-		}
-		let tmp = 0;
+		drawBaseLine(context);
 		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
 			const percentage = Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100;
 			context.beginPath();
-			context.fillRect(16 * j + 30, 195 - 9 * percentage / 10,
-				15.5, 9 * percentage / 10
+			context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * percentage / 10,
+				15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * percentage / 10
 			);
 			context.stroke();
 		}
@@ -3220,13 +3202,30 @@ function createOptionWindow(_sprite) {
 	}
 
 	/**
+	 * グラフの縦軸を描画
+	 * @param {context} _context 
+	 * @param {number} _resolution 
+	 */
+	function drawBaseLine(_context, _resolution = 10) {
+		_context.clearRect(0, 0, C_LEN_GRAPH_WIDTH, C_LEN_GRAPH_HEIGHT);
+
+		for (let j = 0; j <= 2 * _resolution; j += 5) {
+			drawLine(_context, j / _resolution, `main`, 2);
+			for (let k = 1; k < 5; k++) {
+				drawLine(_context, (j + k) / _resolution, `sub`, 2);
+			}
+		}
+	}
+
+	/**
 	 * グラフ上に目盛を表示
 	 * @param {object} _context 
-	 * @param {number} _speed 
+	 * @param {number} _y 
 	 * @param {string} _lineType 
+	 * @param {number} _fixed
 	 */
-	function drawLine(_context, _speed, _lineType) {
-		const lineY = (_speed - 1) * -90 + 105;
+	function drawLine(_context, _y, _lineType, _fixed = 0) {
+		const lineY = (_y - 1) * -90 + 105;
 		_context.beginPath();
 		_context.moveTo(30, lineY);
 		_context.lineTo(C_LEN_GRAPH_WIDTH, lineY);
@@ -3238,7 +3237,7 @@ function createOptionWindow(_sprite) {
 			_context.strokeStyle = textColor;
 			_context.font = `12px ${getBasicFont()}`;
 			_context.fillStyle = textColor;
-			_context.fillText(_speed.toFixed(2), 0, lineY + 4);
+			_context.fillText(_y.toFixed(_fixed), 0, lineY + 4);
 		} else {
 			_context.strokeStyle = `#646464`;
 		}
