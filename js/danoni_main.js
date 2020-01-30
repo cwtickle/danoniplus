@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/01/29
+ * Revised : 2020/01/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 11.3.0`;
-const g_revisedDate = `2020/01/29`;
+const g_version = `Ver 11.3.1`;
+const g_revisedDate = `2020/01/30`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3105,6 +3105,8 @@ function createOptionWindow(_sprite) {
 	 */
 	function drawSpeedGraph(_scoreObj) {
 		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame;
+		const startFrame = getStartFrame(lastFrame);
+		const playingFrame = lastFrame - startFrame;
 		const speedObj = {
 			speed: { frame: [0], speed: [1] },
 			boost: { frame: [0], speed: [1] }
@@ -3116,10 +3118,12 @@ function createOptionWindow(_sprite) {
 			const speedData = _scoreObj[`${speedType}Data`];
 
 			for (let i = 0; i < speedData.length; i += 2) {
-				frame.push(speedData[i]);
-				speed.push(speedData[i + 1]);
+				if (speedData[i] >= startFrame) {
+					frame.push(speedData[i] - startFrame);
+					speed.push(speedData[i + 1]);
+				}
 			}
-			frame.push(lastFrame);
+			frame.push(playingFrame);
 			speed.push(speed[speed.length - 1]);
 		});
 
@@ -3137,7 +3141,7 @@ function createOptionWindow(_sprite) {
 			let x, y, preY;
 
 			for (let i = 0; i < speedObj[`${speedType}`].frame.length; i++) {
-				x = speedObj[`${speedType}`].frame[i] * (C_LEN_GRAPH_WIDTH - 30) / lastFrame + 30;
+				x = speedObj[`${speedType}`].frame[i] * (C_LEN_GRAPH_WIDTH - 30) / playingFrame + 30;
 				y = (speedObj[`${speedType}`].speed[i] - 1) * -90 + 105;
 
 				context.lineTo(x, preY);
@@ -3166,7 +3170,9 @@ function createOptionWindow(_sprite) {
 	function drawDensityGraph(_scoreObj) {
 		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame;
+		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame + 1;
+		const startFrame = getStartFrame(lastFrame);
+		const playingFrame = lastFrame - startFrame;
 		const densityData = [];
 		let allData = 0;
 		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
@@ -3175,15 +3181,19 @@ function createOptionWindow(_sprite) {
 
 		for (let j = 0; j < keyNum; j++) {
 			_scoreObj.arrowData[j].forEach(note => {
-				const point = Math.floor(note / lastFrame * C_LEN_DENSITY_DIVISION);
-				densityData[point]++;
-				allData++;
+				const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+				if (point >= 0) {
+					densityData[point]++;
+					allData++;
+				}
 			});
 			_scoreObj.frzData[j].forEach((note, k) => {
 				if (k % 2 === 0 && note !== ``) {
-					const point = Math.floor(note / lastFrame * C_LEN_DENSITY_DIVISION);
-					densityData[point]++;
-					allData++;
+					const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+					if (point >= 0) {
+						densityData[point]++;
+						allData++;
+					}
 				}
 			});
 		}
@@ -4781,7 +4791,7 @@ function loadingScoreInit2() {
 	let firstArrowFrame = getFirstArrowFrame(g_scoreObj);
 
 	// 開始フレーム数の取得(フェードイン加味)
-	g_scoreObj.frameNum = getStartFrame(lastFrame);
+	g_scoreObj.frameNum = getStartFrame(lastFrame, g_stateObj.fadein);
 	g_scoreObj.baseFrame;
 
 	// フレームごとの速度を取得（配列形式）
@@ -5498,13 +5508,13 @@ function getFirstArrowFrame(_dataObj) {
  * 開始フレームの取得
  * @param {number} _lastFrame 
  */
-function getStartFrame(_lastFrame) {
+function getStartFrame(_lastFrame, _fadein = 0) {
 	let frameNum = 0;
 	if (g_headerObj.startFrame !== undefined) {
 		frameNum = parseInt(g_headerObj.startFrame[g_stateObj.scoreId] || g_headerObj.startFrame[0] || 0);
 	}
 	if (_lastFrame >= frameNum) {
-		frameNum = Math.round(g_stateObj.fadein / 100 * (_lastFrame - frameNum)) + frameNum;
+		frameNum = Math.round(_fadein / 100 * (_lastFrame - frameNum)) + frameNum;
 	}
 	return frameNum;
 }
