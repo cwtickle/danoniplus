@@ -47,7 +47,7 @@ function customSetDifficulty(_initFlg, _canLoadDifInfoFlg) {
 }
 
 /**
- * メイン画面(フレーム毎表示) [Scene: Title / Melon]
+ * タイトル画面(フレーム毎表示) [Scene: Title / Melon]
  */
 function customTitleEnterFrame() {
 
@@ -107,6 +107,13 @@ function customResultInit() {
 }
 
 /**
+ * 結果画面(フレーム毎表示) [Scene: Result / Grape]
+ */
+function customResultEnterFrame() {
+
+}
+
+/**
  * 判定カスタム処理 (引数は共通で1つ保持)
  * @param {number} difFrame タイミング誤差(フレーム数)
  */
@@ -143,6 +150,16 @@ function customJudgeKita(difFrame){
 
 // イクナイ
 function customJudgeIknai(difFrame){
+
+}
+
+// ダミー矢印
+function customJudgeDummyArrow(difFrame){
+
+}
+
+// ダミーフリーズアロー
+function customJudgeDummyFrz(difFrame){
 
 }
 */

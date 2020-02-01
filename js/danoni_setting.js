@@ -36,6 +36,24 @@ const g_presetGaugeCustom = {
 		Damage: 50,
 		Init: 100,
 	},
+	NoRecovery: {
+		Border: `x`,
+		Recovery: 0,
+		Damage: 50,
+		Init: 100,
+	},
+	SuddenDeath: {
+		Border: `x`,
+		Recovery: 0,
+		Damage: setVal(g_rootObj.maxLifeVal, C_VAL_MAXLIFE, C_TYP_FLOAT),
+		Init: 100,
+	},
+	Practice: {
+		Border: `x`,
+		Recovery: 0,
+		Damage: 0,
+		Init: 50,
+	}
 };
 
 // デフォルトのデザインを使用せず、独自のデザインを使用するかを指定
@@ -52,9 +70,11 @@ const g_presetCustomDesignUse = {
 // 一律使用させたくない場合は `false` を指定（デフォルトは `true`）
 const g_presetSettingUse = {
 	motion: `true`,
+	scroll: `true`,
 	shuffle: `true`,
 	autoPlay: `true`,
 	gauge: `true`,
+	appearance: `true`,
 };
 
 // フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)

@@ -1,11 +1,26 @@
-# How to Contribute
-Pull RequestについてはMasterではなく、当面Developに対してPull Requestしてください。  
+# How to Contribute / 要望・不具合報告について
+## [Japanese]
+要望・不具合報告がある場合、以下のいずれかの方法で行うことができます。
 
+- リポジトリをForkして編集した後、Pull Requestを「cwtickle/danoniplus」の「develop」ブランチへ送る。
+- [Gitter](https://gitter.im/danonicw/community)に要望・不具合内容を報告する。  
+※Gitterは「Twitterアカウント」を持っている方でも参加可能です。  
+　Gitter内では、Github同様のmarkdownが使えます。お気軽にどうぞ！
+- 要望・不具合内容をティックル宛([@cw_tickle](https://twitter.com/cw_tickle))へ直接連絡する。
+
+## [English]
+If you have a request or defect report, you can do it in one of the following ways.
+
+- Fork and edit the repository, send Pull Request to "cwtickle / danoniplus" "develop" branch.
 1. Fork it
 1. Create your feature branch (git checkout -b my-new-feature)
 1. Commit your changes (git commit -am 'Added some feature')
 1. Push to the branch (git push origin my-new-feature)
-1. Create new Pull Request
+1. Create new Pull Request to develop branch
+- Report the request / problem contents to [Gitter](https://gitter.im/danonicw/community).  
+※ Gitter can participate even if you have "Twitter account".  
+　 In Gitter, you can use markdown similar to Github. Feel free to help yourself!
+- Contact the tickle directly ([@cw_tickle](https://twitter.com/cw_tickle)) with the request / problem content.
 
 # ソースのコーディングルール
 細かい縛りは入れない予定ですが、コード作法の混在を防ぐため、必要なルールは決めていきます。  
@@ -21,10 +36,17 @@ forループを除き、danoni_main.js内は極力const/letで宣言する。
 |関数の引数|アンダースコア始まりのキャメル表記。 例)_count, _folderName|
 
 ## ソース構造
-・構造はシンプルに。画面別になるように区分けして書く。  
-・繰り返しが多いときは関数化を検討する。  
-・コメントは処理単位ごとに簡潔に記述。ただの英訳は極力避ける。  
-・画面の見取りがわかるように詳細設定やロジックは別関数化し、実行内容を明確にする。  
+### [Japanese]
+- 構造はシンプルに。画面別になるように区分けして書く。  
+- 繰り返しが多いときは関数化を検討する。  
+- コメントは処理単位ごとに簡潔に記述。ただの英訳は極力避ける。  
+- 画面の見取りがわかるように詳細設定やロジックは別関数化し、実行内容を明確にする。  
+
+### [English]
+- The structure is simple. It divides and writes so that it may become another screen.
+- Consider functionalization when there are many iterations.
+- Comments are described briefly for each processing unit. Avoid plain English translation as much as possible.
+- Make detailed settings and logic separate functions so that you can see screen sketches, and clarify the contents of execution.
 
 ## 画面の構成
 ・[タイトル]-[設定・オプション]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]  
