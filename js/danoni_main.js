@@ -3099,6 +3099,44 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 2  短縮ショートカットあり
 	createGeneralSetting(speedSprite, `speed`, ` x`, true, 4);
 
+	if (g_headerObj.scoreDetailUse) {
+		const scoreDetail = createSprite(`optionsprite`, `scoreDetail`, 20, 90, 420, 230);
+		scoreDetail.classList.add(g_cssObj.settings_DifSelector);
+		scoreDetail.style.visibility = `hidden`;
+		scoreDetail.appendChild(createGraph(`Speed`));
+		scoreDetail.appendChild(createGraph(`Density`));
+
+		const btnGraph = createCssButton({
+			id: `btnGraph`,
+			name: `i`,
+			x: 415,
+			y: 0,
+			width: 23,
+			height: 23,
+			fontsize: 16,
+			align: C_ALIGN_CENTER,
+			class: g_cssObj.button_Mini,
+		}, _ => {
+			setScoreDetail();
+		});
+
+		speedSprite.appendChild(btnGraph);
+		g_stateObj.scoreDetailViewFlg = false;
+
+		const lnk = makeSettingLblCssButton(`lnkScoreDetail`, `${g_stateObj.scoreDetail}`, 0, _ => {
+			let detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
+			detailObj.style.visibility = `hidden`;
+			setSetting(1, `scoreDetail`);
+			detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
+			detailObj.style.visibility = `visible`;
+		});
+		lnk.style.left = `10px`;
+		lnk.style.width = `100px`;
+		lnk.style.borderStyle = `solid`;
+		lnk.classList.add(g_cssObj.button_RevON);
+		scoreDetail.appendChild(lnk);
+	}
+
 	/**
 	 * 速度変化グラフの描画
 	 * @param {object} _scoreObj
@@ -3108,8 +3146,8 @@ function createOptionWindow(_sprite) {
 		const startFrame = getStartFrame(lastFrame);
 		const playingFrame = lastFrame - startFrame;
 		const speedObj = {
-			speed: { frame: [0], speed: [1] },
-			boost: { frame: [0], speed: [1] }
+			speed: { frame: [0], speed: [1], cnt: 0 },
+			boost: { frame: [0], speed: [1], cnt: 0 }
 		};
 
 		[`speed`, `boost`].forEach(speedType => {
@@ -3122,12 +3160,13 @@ function createOptionWindow(_sprite) {
 					frame.push(speedData[i] - startFrame);
 					speed.push(speedData[i + 1]);
 				}
+				speedObj[`${speedType}`].cnt++;
 			}
 			frame.push(playingFrame);
 			speed.push(speed[speed.length - 1]);
 		});
 
-		const canvas = document.querySelector(`#detailSpeed`);
+		const canvas = document.querySelector(`#graphSpeed`);
 		const context = canvas.getContext(`2d`);
 		drawBaseLine(context);
 
@@ -3136,7 +3175,7 @@ function createOptionWindow(_sprite) {
 			boost: C_CLR_SPEEDGRAPH_BOOST,
 		};
 
-		[`speed`, `boost`].forEach(speedType => {
+		[`speed`, `boost`].forEach((speedType, j) => {
 			context.beginPath();
 			let x, y, preY;
 
@@ -3160,6 +3199,8 @@ function createOptionWindow(_sprite) {
 			context.stroke();
 			context.font = `14px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
+
+			scoreDetailLabel(`Speed`, `${speedType.slice(0, 1).toUpperCase()}${speedType.slice(1)}`, speedObj[`${speedType}`].cnt, j);
 		});
 	}
 
@@ -3198,7 +3239,7 @@ function createOptionWindow(_sprite) {
 			});
 		}
 		const maxDensity = densityData.indexOf(Math.max.apply(null, densityData));
-		const canvas = document.querySelector(`#detailDensity`);
+		const canvas = document.querySelector(`#graphDensity`);
 		const context = canvas.getContext(`2d`);
 		drawBaseLine(context);
 		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
@@ -3211,6 +3252,32 @@ function createOptionWindow(_sprite) {
 			context.stroke();
 		}
 
+		const apm = Math.round(allData / (playingFrame / g_fps / 60));
+		scoreDetailLabel(`Density`, `APM`, apm, 0);
+		const minutes = Math.floor(playingFrame / g_fps / 60);
+		const seconds = `00${Math.floor((playingFrame / g_fps) % 60)}`.slice(-2);
+		const playingTime = `${minutes}:${seconds}`;
+		scoreDetailLabel(`Density`, `Time`, playingTime, 1);
+	}
+
+	/**
+	 * 譜面明細内の補足情報
+	 * @param {string} _name 
+	 * @param {string} _label 
+	 * @param {string} _value 
+	 * @param {number} _pos 
+	 */
+	function scoreDetailLabel(_name, _label, _value, _pos = 0) {
+		if (document.querySelector(`#data${_label}`) === null) {
+			const lbl = createDivCssLabel(`lbl${_label}`, 10, 65 + _pos * 20, 100, 20, 14, `${_label}`);
+			lbl.style.textAlign = C_ALIGN_LEFT;
+			document.querySelector(`#detail${_name}`).appendChild(lbl);
+			const data = createDivCssLabel(`data${_label}`, 10, 65 + _pos * 20, 100, 20, 14, `${_value}`);
+			data.style.textAlign = C_ALIGN_RIGHT;
+			document.querySelector(`#detail${_name}`).appendChild(data);
+		} else {
+			document.querySelector(`#data${_label}`).innerHTML = `${_value}`;
+		}
 	}
 
 	/**
@@ -3256,49 +3323,17 @@ function createOptionWindow(_sprite) {
 		_context.stroke();
 	}
 
-	if (g_headerObj.scoreDetailUse) {
-		const scoreDetail = createSprite(`optionsprite`, `scoreDetail`, 20, 90, 420, 230);
-		scoreDetail.classList.add(g_cssObj.settings_DifSelector);
-		scoreDetail.style.visibility = `hidden`;
-		scoreDetail.appendChild(createGraph(`Speed`));
-		scoreDetail.appendChild(createGraph(`Density`));
-
-		const btnGraph = createCssButton({
-			id: `btnGraph`,
-			name: `i`,
-			x: 415,
-			y: 0,
-			width: 23,
-			height: 23,
-			fontsize: 16,
-			align: C_ALIGN_CENTER,
-			class: g_cssObj.button_Mini,
-		}, _ => {
-			setScoreDetail();
-		});
-
-		speedSprite.appendChild(btnGraph);
-		g_stateObj.scoreDetailViewFlg = false;
-
-		const lnk = makeSettingLblCssButton(`lnkScoreDetail`, `${g_stateObj.scoreDetail}`, 0, _ => {
-			let detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
-			detailObj.style.visibility = `hidden`;
-			setSetting(1, `scoreDetail`);
-			detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
-			detailObj.style.visibility = `visible`;
-		});
-		lnk.style.left = `10px`;
-		lnk.style.width = `100px`;
-		lnk.style.borderStyle = `solid`;
-		lnk.classList.add(g_cssObj.button_RevON);
-		scoreDetail.appendChild(lnk);
-	}
-
+	/**
+	 * グラフの作成
+	 * @param {string} _name 
+	 */
 	function createGraph(_name) {
+		const detailObj = createSprite(`scoreDetail`, `detail${_name}`, 0, 0, 420, 230);
 		const graphObj = document.createElement(`canvas`);
 		const textBaseObj = document.querySelector(`#lnkDifficulty`);
 		const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
-		graphObj.id = `detail${_name}`;
+
+		graphObj.id = `graph${_name}`;
 		graphObj.width = C_LEN_GRAPH_WIDTH;
 		graphObj.height = C_LEN_GRAPH_HEIGHT;
 		graphObj.style.left = `125px`;
@@ -3306,11 +3341,16 @@ function createOptionWindow(_sprite) {
 		graphObj.style.position = `absolute`;
 		graphObj.style.background = bkColor;
 		graphObj.style.border = `dotted 2px`;
-		graphObj.style.visibility = `hidden`;
 
-		return graphObj;
+		detailObj.style.visibility = `hidden`;
+		detailObj.appendChild(graphObj);
+
+		return detailObj;
 	}
 
+	/**
+	 * 譜面明細表示／非表示ボタンの処理
+	 */
 	function setScoreDetail() {
 		const scoreDetail = document.querySelector(`#scoreDetail`);
 		const detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
