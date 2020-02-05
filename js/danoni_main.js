@@ -3103,8 +3103,8 @@ function createOptionWindow(_sprite) {
 		const scoreDetail = createSprite(`optionsprite`, `scoreDetail`, 20, 90, 420, 230);
 		scoreDetail.classList.add(g_cssObj.settings_DifSelector);
 		scoreDetail.style.visibility = `hidden`;
-		scoreDetail.appendChild(createGraph(`Speed`));
-		scoreDetail.appendChild(createGraph(`Density`));
+		scoreDetail.appendChild(createScoreDetail(`Speed`));
+		scoreDetail.appendChild(createScoreDetail(`Density`));
 
 		const btnGraph = createCssButton({
 			id: `btnGraph`,
@@ -3135,6 +3135,53 @@ function createOptionWindow(_sprite) {
 		lnk.style.borderStyle = `solid`;
 		lnk.classList.add(g_cssObj.button_RevON);
 		scoreDetail.appendChild(lnk);
+	}
+
+	/**
+	 * 譜面明細子画面・グラフの作成
+	 * @param {string} _name 
+	 * @param {boolean} _graphUseFlg
+	 */
+	function createScoreDetail(_name, _graphUseFlg = true) {
+		const detailObj = createSprite(`scoreDetail`, `detail${_name}`, 0, 0, 420, 230);
+
+		if (_graphUseFlg) {
+			const graphObj = document.createElement(`canvas`);
+			const textBaseObj = document.querySelector(`#lnkDifficulty`);
+			const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
+
+			graphObj.id = `graph${_name}`;
+			graphObj.width = C_LEN_GRAPH_WIDTH;
+			graphObj.height = C_LEN_GRAPH_HEIGHT;
+			graphObj.style.left = `125px`;
+			graphObj.style.top = `0px`;
+			graphObj.style.position = `absolute`;
+			graphObj.style.background = bkColor;
+			graphObj.style.border = `dotted 2px`;
+
+			detailObj.appendChild(graphObj);
+		}
+		detailObj.style.visibility = `hidden`;
+
+		return detailObj;
+	}
+
+	/**
+	 * 譜面明細表示／非表示ボタンの処理
+	 */
+	function setScoreDetail() {
+		const scoreDetail = document.querySelector(`#scoreDetail`);
+		const detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
+
+		if (g_stateObj.scoreDetailViewFlg) {
+			scoreDetail.style.visibility = `hidden`;
+			detailObj.style.visibility = `hidden`;
+			g_stateObj.scoreDetailViewFlg = false;
+		} else {
+			scoreDetail.style.visibility = `visible`;
+			detailObj.style.visibility = `visible`;
+			g_stateObj.scoreDetailViewFlg = true;
+		}
 	}
 
 	/**
@@ -3215,16 +3262,21 @@ function createOptionWindow(_sprite) {
 		const startFrame = getStartFrame(lastFrame);
 		const playingFrame = lastFrame - startFrame;
 		const densityData = [];
+		g_workObj.arrowCnt = [];
+		g_workObj.frzCnt = [];
 		let allData = 0;
 		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
 			densityData[j] = 0;
 		}
 
 		for (let j = 0; j < keyNum; j++) {
+			g_workObj.arrowCnt[j] = 0;
+			g_workObj.frzCnt[j] = 0;
 			_scoreObj.arrowData[j].forEach(note => {
 				const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 				if (point >= 0) {
 					densityData[point]++;
+					g_workObj.arrowCnt[j]++;
 					allData++;
 				}
 			});
@@ -3233,6 +3285,7 @@ function createOptionWindow(_sprite) {
 					const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 					if (point >= 0) {
 						densityData[point]++;
+						g_workObj.frzCnt[j]++;
 						allData++;
 					}
 				}
@@ -3258,14 +3311,16 @@ function createOptionWindow(_sprite) {
 		const seconds = `00${Math.floor((playingFrame / g_fps) % 60)}`.slice(-2);
 		const playingTime = `${minutes}:${seconds}`;
 		scoreDetailLabel(`Density`, `Time`, playingTime, 1);
+		scoreDetailLabel(`Density`, `Arrow`, g_workObj.arrowCnt.reduce((p, x) => p + x), 3);
+		scoreDetailLabel(`Density`, `Frz`, g_workObj.frzCnt.reduce((p, x) => p + x), 4);
 	}
 
 	/**
 	 * 譜面明細内の補足情報
-	 * @param {string} _name 
+	 * @param {string} _name 表示する譜面明細のラベル
 	 * @param {string} _label 
 	 * @param {string} _value 
-	 * @param {number} _pos 
+	 * @param {number} _pos 表示位置
 	 */
 	function scoreDetailLabel(_name, _label, _value, _pos = 0) {
 		if (document.querySelector(`#data${_label}`) === null) {
@@ -3321,49 +3376,6 @@ function createOptionWindow(_sprite) {
 			_context.strokeStyle = `#646464`;
 		}
 		_context.stroke();
-	}
-
-	/**
-	 * グラフの作成
-	 * @param {string} _name 
-	 */
-	function createGraph(_name) {
-		const detailObj = createSprite(`scoreDetail`, `detail${_name}`, 0, 0, 420, 230);
-		const graphObj = document.createElement(`canvas`);
-		const textBaseObj = document.querySelector(`#lnkDifficulty`);
-		const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
-
-		graphObj.id = `graph${_name}`;
-		graphObj.width = C_LEN_GRAPH_WIDTH;
-		graphObj.height = C_LEN_GRAPH_HEIGHT;
-		graphObj.style.left = `125px`;
-		graphObj.style.top = `0px`;
-		graphObj.style.position = `absolute`;
-		graphObj.style.background = bkColor;
-		graphObj.style.border = `dotted 2px`;
-
-		detailObj.style.visibility = `hidden`;
-		detailObj.appendChild(graphObj);
-
-		return detailObj;
-	}
-
-	/**
-	 * 譜面明細表示／非表示ボタンの処理
-	 */
-	function setScoreDetail() {
-		const scoreDetail = document.querySelector(`#scoreDetail`);
-		const detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
-
-		if (g_stateObj.scoreDetailViewFlg) {
-			scoreDetail.style.visibility = `hidden`;
-			detailObj.style.visibility = `hidden`;
-			g_stateObj.scoreDetailViewFlg = false;
-		} else {
-			scoreDetail.style.visibility = `visible`;
-			detailObj.style.visibility = `visible`;
-			g_stateObj.scoreDetailViewFlg = true;
-		}
 	}
 
 	// ---------------------------------------------------
