@@ -3247,7 +3247,7 @@ function createOptionWindow(_sprite) {
 			context.font = `14px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 
-			scoreDetailLabel(`Speed`, `${speedType.slice(0, 1).toUpperCase()}${speedType.slice(1)}`, speedObj[`${speedType}`].cnt, j);
+			makeScoreDetailLabel(`Speed`, `${speedType.slice(0, 1).toUpperCase()}${speedType.slice(1)}`, speedObj[`${speedType}`].cnt, j);
 		});
 	}
 
@@ -3306,13 +3306,13 @@ function createOptionWindow(_sprite) {
 		}
 
 		const apm = Math.round(allData / (playingFrame / g_fps / 60));
-		scoreDetailLabel(`Density`, `APM`, apm, 0);
+		makeScoreDetailLabel(`Density`, `APM`, apm, 0);
 		const minutes = Math.floor(playingFrame / g_fps / 60);
 		const seconds = `00${Math.floor((playingFrame / g_fps) % 60)}`.slice(-2);
 		const playingTime = `${minutes}:${seconds}`;
-		scoreDetailLabel(`Density`, `Time`, playingTime, 1);
-		scoreDetailLabel(`Density`, `Arrow`, g_workObj.arrowCnt.reduce((p, x) => p + x), 3);
-		scoreDetailLabel(`Density`, `Frz`, g_workObj.frzCnt.reduce((p, x) => p + x), 4);
+		makeScoreDetailLabel(`Density`, `Time`, playingTime, 1);
+		makeScoreDetailLabel(`Density`, `Arrow`, g_workObj.arrowCnt.reduce((p, x) => p + x), 3);
+		makeScoreDetailLabel(`Density`, `Frz`, g_workObj.frzCnt.reduce((p, x) => p + x), 4);
 	}
 
 	/**
@@ -3322,7 +3322,7 @@ function createOptionWindow(_sprite) {
 	 * @param {string} _value 
 	 * @param {number} _pos 表示位置
 	 */
-	function scoreDetailLabel(_name, _label, _value, _pos = 0) {
+	function makeScoreDetailLabel(_name, _label, _value, _pos = 0) {
 		if (document.querySelector(`#data${_label}`) === null) {
 			const lbl = createDivCssLabel(`lbl${_label}`, 10, 65 + _pos * 20, 100, 20, 14, `${_label}`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
