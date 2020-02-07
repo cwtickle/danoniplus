@@ -94,6 +94,17 @@ let g_rootObj = {};
 let g_headerObj = {};
 let g_scoreObj = {};
 
+const g_detailObj = {
+	arrowCnt: [],
+	frzCnt: [],
+	maxDensity: [],
+	densityData: [],
+	startFrame: [],
+	playingFrame: [],
+	speedData: [],
+	boostData: [],
+};
+
 const g_workObj = {
 	stepX: [],
 	stepRtn: [],
@@ -1220,14 +1231,8 @@ function initAfterDosLoaded() {
 		}
 	}
 
-	// customjsの読み込み
+	// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
 	loadCustomjs(_ => {
-		g_workObj.arrowCnt = [];
-		g_workObj.frzCnt = [];
-		g_workObj.maxDensity = [];
-		g_workObj.densityData = [];
-		g_workObj.playingFrame = [];
-
 		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
 			loadDos(_ => {
 				const keyCtrlPtn = `${g_headerObj.keyLabels[g_stateObj.scoreId]}_0`;
@@ -1284,15 +1289,19 @@ function storeBaseData(_scoreId, _scoreObj, _keyNum) {
 		});
 	}
 
-	g_workObj.maxDensity[_scoreId] = densityData.indexOf(Math.max.apply(null, densityData));
-	g_workObj.densityData[_scoreId] = [];
+	g_detailObj.speedData[_scoreId] = _scoreObj.speedData.concat();
+	g_detailObj.boostData[_scoreId] = _scoreObj.boostData.concat();
+
+	g_detailObj.maxDensity[_scoreId] = densityData.indexOf(Math.max.apply(null, densityData));
+	g_detailObj.densityData[_scoreId] = [];
 	for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
-		g_workObj.densityData[_scoreId].push(Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100);
+		g_detailObj.densityData[_scoreId].push(Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100);
 	}
 
-	g_workObj.arrowCnt[_scoreId] = arrowCnt.concat();
-	g_workObj.frzCnt[_scoreId] = frzCnt.concat();
-	g_workObj.playingFrame[_scoreId] = playingFrame;
+	g_detailObj.arrowCnt[_scoreId] = arrowCnt.concat();
+	g_detailObj.frzCnt[_scoreId] = frzCnt.concat();
+	g_detailObj.startFrame[_scoreId] = startFrame;
+	g_detailObj.playingFrame[_scoreId] = playingFrame;
 }
 
 /**
@@ -3257,12 +3266,11 @@ function createOptionWindow(_sprite) {
 
 	/**
 	 * 速度変化グラフの描画
-	 * @param {object} _scoreObj
+	 * @param {number} _scoreId
 	 */
-	function drawSpeedGraph(_scoreObj) {
-		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame;
-		const startFrame = getStartFrame(lastFrame);
-		const playingFrame = lastFrame - startFrame;
+	function drawSpeedGraph(_scoreId) {
+		const startFrame = g_detailObj.startFrame[_scoreId];
+		const playingFrame = g_detailObj.playingFrame[_scoreId];
 		const speedObj = {
 			speed: { frame: [0], speed: [1], cnt: 0 },
 			boost: { frame: [0], speed: [1], cnt: 0 }
@@ -3271,7 +3279,7 @@ function createOptionWindow(_sprite) {
 		[`speed`, `boost`].forEach(speedType => {
 			let frame = speedObj[`${speedType}`].frame;
 			let speed = speedObj[`${speedType}`].speed;
-			const speedData = _scoreObj[`${speedType}Data`];
+			const speedData = g_detailObj[`${speedType}Data`][_scoreId];
 
 			for (let i = 0; i < speedData.length; i += 2) {
 				if (speedData[i] >= startFrame) {
@@ -3328,25 +3336,25 @@ function createOptionWindow(_sprite) {
 	 */
 	function drawDensityGraph(_scoreId) {
 
-		const arrowCnts = g_workObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
-		const frzCnts = g_workObj.frzCnt[_scoreId].reduce((p, x) => p + x);
+		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
+		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
 
 		const canvas = document.querySelector(`#graphDensity`);
 		const context = canvas.getContext(`2d`);
 		drawBaseLine(context);
 		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
 			context.beginPath();
-			context.fillStyle = (j === g_workObj.maxDensity[_scoreId] ? C_CLR_DENSITY_MAX : C_CLR_DENSITY_DEFAULT);
-			context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * g_workObj.densityData[_scoreId][j] / 10,
-				15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * g_workObj.densityData[_scoreId][j] / 10
+			context.fillStyle = (j === g_detailObj.maxDensity[_scoreId] ? C_CLR_DENSITY_MAX : C_CLR_DENSITY_DEFAULT);
+			context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * g_detailObj.densityData[_scoreId][j] / 10,
+				15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * g_detailObj.densityData[_scoreId][j] / 10
 			);
 			context.stroke();
 		}
 
-		const apm = Math.round((arrowCnts + frzCnts) / (g_workObj.playingFrame[_scoreId] / g_fps / 60));
+		const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60));
 		makeScoreDetailLabel(`Density`, `APM`, apm, 0);
-		const minutes = Math.floor(g_workObj.playingFrame[_scoreId] / g_fps / 60);
-		const seconds = `00${Math.floor((g_workObj.playingFrame[_scoreId] / g_fps) % 60)}`.slice(-2);
+		const minutes = Math.floor(g_detailObj.playingFrame[_scoreId] / g_fps / 60);
+		const seconds = `00${Math.floor((g_detailObj.playingFrame[_scoreId] / g_fps) % 60)}`.slice(-2);
 		const playingTime = `${minutes}:${seconds}`;
 		makeScoreDetailLabel(`Density`, `Time`, playingTime, 1);
 		makeScoreDetailLabel(`Density`, `Arrow`, arrowCnts, 3);
@@ -3865,11 +3873,8 @@ function createOptionWindow(_sprite) {
 		// 速度設定 (Speed)
 		setSetting(0, `speed`, ` x`);
 		if (g_headerObj.scoreDetailUse) {
-			loadDos(_ => {
-				const scoreObj = scoreConvert(g_rootObj, setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg), 0, ``, true);
-				drawSpeedGraph(scoreObj);
-				drawDensityGraph(g_stateObj.scoreId);
-			});
+			drawSpeedGraph(g_stateObj.scoreId);
+			drawDensityGraph(g_stateObj.scoreId);
 		}
 
 		// リバース設定 (Reverse, Scroll)
