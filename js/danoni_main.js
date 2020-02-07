@@ -1008,7 +1008,7 @@ function initialControl() {
 	loadLocalStorage();
 
 	// 譜面データの読み込み
-	loadDos(_ => loadSettingJs(), true);
+	loadDos(_ => loadSettingJs(), 0);
 }
 
 /**
@@ -1063,9 +1063,9 @@ function loadLocalStorage() {
 /**
  * 譜面読込
  * @param {function} _afterFunc 実行後の処理
- * @param {boolean} _initFlg 初期化フラグ(true: 常時1譜面目を読込, false: 指定された譜面を読込)
+ * @param {number} _scoreId 譜面番号
  */
-function loadDos(_afterFunc, _initFlg = false) {
+function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId) {
 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
@@ -1113,9 +1113,9 @@ function loadDos(_afterFunc, _initFlg = false) {
 		const filenameBase = externalDosInput.value.match(/.+\..*/)[0];
 		const filenameExtension = filenameBase.split(`.`).pop();
 		const filenameCommon = filenameBase.split(`.${filenameExtension}`)[0];
-		const scoreIdHeader = (g_stateObj.scoreId > 0 ? g_stateObj.scoreId + 1 : ``);
-		const filename = (_initFlg || !dosDivideFlg ?
-			`${filenameCommon}.${filenameExtension}` : `${filenameCommon}${scoreIdHeader}.${filenameExtension}`);
+		const filename = (!dosDivideFlg ?
+			`${filenameCommon}.${filenameExtension}` :
+			`${filenameCommon}${setScoreIdHeader(_scoreId)}.${filenameExtension}`);
 
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
@@ -3828,7 +3828,7 @@ function createOptionWindow(_sprite) {
 		setSetting(0, `speed`, ` x`);
 		if (g_headerObj.scoreDetailUse) {
 			loadDos(_ => {
-				const scoreObj = scoreConvert(g_rootObj, setScoreIdHeader(), 0, ``, true);
+				const scoreObj = scoreConvert(g_rootObj, setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg), 0, ``, true);
 				drawSpeedGraph(scoreObj);
 				drawDensityGraph(scoreObj);
 			});
@@ -4804,9 +4804,9 @@ function loadingScoreInit() {
 	loadDos(_ => loadCustomjs(_ => loadingScoreInit2()));
 }
 
-function setScoreIdHeader() {
-	if (g_stateObj.scoreId > 0 && g_stateObj.scoreLockFlg === false) {
-		return Number(g_stateObj.scoreId) + 1;
+function setScoreIdHeader(_scoreId = 0, _scoreLockFlg = false) {
+	if (_scoreId > 0 && _scoreLockFlg === false) {
+		return Number(_scoreId) + 1;
 	}
 	return ``;
 }
@@ -4823,7 +4823,7 @@ function loadingScoreInit2() {
 		g_canLoadDifInfoFlg = false;
 	}
 
-	let scoreIdHeader = setScoreIdHeader();
+	let scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg);
 	let dummyIdHeader = ``;
 	if (g_stateObj.dummyId !== ``) {
 		if (g_stateObj.dummyId === 0 || g_stateObj.dummyId === 1) {
@@ -8226,10 +8226,7 @@ function resultInit() {
 	} else {
 		// ゲームオーバー時は失敗時のリザルトモーションを適用
 		if (!g_finishFlg) {
-			let scoreIdHeader = ``;
-			if (g_stateObj.scoreId > 0) {
-				scoreIdHeader = Number(g_stateObj.scoreId) + 1;
-			}
+			const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg);
 
 			[`back`, `mask`].forEach(sprite => {
 				if (g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] !== undefined) {
