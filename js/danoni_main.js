@@ -1221,7 +1221,78 @@ function initAfterDosLoaded() {
 	}
 
 	// customjsの読み込み
-	loadCustomjs(_ => titleInit());
+	loadCustomjs(_ => {
+		g_workObj.arrowCnt = [];
+		g_workObj.frzCnt = [];
+		g_workObj.maxDensity = [];
+		g_workObj.densityData = [];
+		g_workObj.playingFrame = [];
+
+		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
+			loadDos(_ => {
+				const keyCtrlPtn = `${g_headerObj.keyLabels[g_stateObj.scoreId]}_0`;
+				storeBaseData(
+					j, scoreConvert(g_rootObj, setScoreIdHeader(j, g_stateObj.scoreLockFlg), 0, ``, true),
+					g_keyObj[`chara${keyCtrlPtn}`].length
+				);
+			}, j);
+		}
+		titleInit();
+	});
+}
+
+/**
+ * 譜面詳細データの格納
+ * @param {number} _scoreId 
+ * @param {object} _scoreObj 
+ * @param {number} _keyNum 
+ */
+function storeBaseData(_scoreId, _scoreObj, _keyNum) {
+	const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame + 1;
+	const startFrame = getStartFrame(lastFrame);
+	const playingFrame = lastFrame - startFrame;
+
+	// 譜面密度グラフ用のデータ作成
+	const arrowCnt = [];
+	const frzCnt = [];
+	const densityData = [];
+	let allData = 0;
+	for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
+		densityData[j] = 0;
+	}
+
+	for (let j = 0; j < _keyNum; j++) {
+		arrowCnt[j] = 0;
+		frzCnt[j] = 0;
+		_scoreObj.arrowData[j].forEach(note => {
+			const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+			if (point >= 0) {
+				densityData[point]++;
+				arrowCnt[j]++;
+				allData++;
+			}
+		});
+		_scoreObj.frzData[j].forEach((note, k) => {
+			if (k % 2 === 0 && note !== ``) {
+				const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+				if (point >= 0) {
+					densityData[point]++;
+					frzCnt[j]++;
+					allData++;
+				}
+			}
+		});
+	}
+
+	g_workObj.maxDensity[_scoreId] = densityData.indexOf(Math.max.apply(null, densityData));
+	g_workObj.densityData[_scoreId] = [];
+	for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
+		g_workObj.densityData[_scoreId].push(Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100);
+	}
+
+	g_workObj.arrowCnt[_scoreId] = arrowCnt.concat();
+	g_workObj.frzCnt[_scoreId] = frzCnt.concat();
+	g_workObj.playingFrame[_scoreId] = playingFrame;
 }
 
 /**
@@ -3253,66 +3324,33 @@ function createOptionWindow(_sprite) {
 
 	/**
 	 * 譜面密度グラフの描画
-	 * @param {object} _scoreObj 
+	 * @param {number} _scoreId 
 	 */
-	function drawDensityGraph(_scoreObj) {
-		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame + 1;
-		const startFrame = getStartFrame(lastFrame);
-		const playingFrame = lastFrame - startFrame;
-		const densityData = [];
-		g_workObj.arrowCnt = [];
-		g_workObj.frzCnt = [];
-		let allData = 0;
-		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
-			densityData[j] = 0;
-		}
+	function drawDensityGraph(_scoreId) {
 
-		for (let j = 0; j < keyNum; j++) {
-			g_workObj.arrowCnt[j] = 0;
-			g_workObj.frzCnt[j] = 0;
-			_scoreObj.arrowData[j].forEach(note => {
-				const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
-				if (point >= 0) {
-					densityData[point]++;
-					g_workObj.arrowCnt[j]++;
-					allData++;
-				}
-			});
-			_scoreObj.frzData[j].forEach((note, k) => {
-				if (k % 2 === 0 && note !== ``) {
-					const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
-					if (point >= 0) {
-						densityData[point]++;
-						g_workObj.frzCnt[j]++;
-						allData++;
-					}
-				}
-			});
-		}
-		const maxDensity = densityData.indexOf(Math.max.apply(null, densityData));
+		const arrowCnts = g_workObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
+		const frzCnts = g_workObj.frzCnt[_scoreId].reduce((p, x) => p + x);
+
 		const canvas = document.querySelector(`#graphDensity`);
 		const context = canvas.getContext(`2d`);
 		drawBaseLine(context);
 		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
-			const percentage = Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100;
 			context.beginPath();
-			context.fillStyle = (j === maxDensity ? C_CLR_DENSITY_MAX : C_CLR_DENSITY_DEFAULT);
-			context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * percentage / 10,
-				15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * percentage / 10
+			context.fillStyle = (j === g_workObj.maxDensity[_scoreId] ? C_CLR_DENSITY_MAX : C_CLR_DENSITY_DEFAULT);
+			context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * g_workObj.densityData[_scoreId][j] / 10,
+				15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * g_workObj.densityData[_scoreId][j] / 10
 			);
 			context.stroke();
 		}
 
-		const apm = Math.round(allData / (playingFrame / g_fps / 60));
+		const apm = Math.round((arrowCnts + frzCnts) / (g_workObj.playingFrame[_scoreId] / g_fps / 60));
 		makeScoreDetailLabel(`Density`, `APM`, apm, 0);
-		const minutes = Math.floor(playingFrame / g_fps / 60);
-		const seconds = `00${Math.floor((playingFrame / g_fps) % 60)}`.slice(-2);
+		const minutes = Math.floor(g_workObj.playingFrame[_scoreId] / g_fps / 60);
+		const seconds = `00${Math.floor((g_workObj.playingFrame[_scoreId] / g_fps) % 60)}`.slice(-2);
 		const playingTime = `${minutes}:${seconds}`;
 		makeScoreDetailLabel(`Density`, `Time`, playingTime, 1);
-		makeScoreDetailLabel(`Density`, `Arrow`, g_workObj.arrowCnt.reduce((p, x) => p + x), 3);
-		makeScoreDetailLabel(`Density`, `Frz`, g_workObj.frzCnt.reduce((p, x) => p + x), 4);
+		makeScoreDetailLabel(`Density`, `Arrow`, arrowCnts, 3);
+		makeScoreDetailLabel(`Density`, `Frz`, frzCnts, 4);
 	}
 
 	/**
@@ -3830,7 +3868,7 @@ function createOptionWindow(_sprite) {
 			loadDos(_ => {
 				const scoreObj = scoreConvert(g_rootObj, setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg), 0, ``, true);
 				drawSpeedGraph(scoreObj);
-				drawDensityGraph(scoreObj);
+				drawDensityGraph(g_stateObj.scoreId);
 			});
 		}
 
