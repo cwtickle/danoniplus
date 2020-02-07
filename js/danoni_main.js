@@ -94,6 +94,17 @@ let g_rootObj = {};
 let g_headerObj = {};
 let g_scoreObj = {};
 
+const g_detailObj = {
+	arrowCnt: [],
+	frzCnt: [],
+	maxDensity: [],
+	densityData: [],
+	startFrame: [],
+	playingFrame: [],
+	speedData: [],
+	boostData: [],
+};
+
 const g_workObj = {
 	stepX: [],
 	stepRtn: [],
@@ -1008,7 +1019,7 @@ function initialControl() {
 	loadLocalStorage();
 
 	// 譜面データの読み込み
-	loadDos(_ => loadSettingJs(), true);
+	loadDos(_ => loadSettingJs(), 0);
 }
 
 /**
@@ -1063,9 +1074,9 @@ function loadLocalStorage() {
 /**
  * 譜面読込
  * @param {function} _afterFunc 実行後の処理
- * @param {boolean} _initFlg 初期化フラグ(true: 常時1譜面目を読込, false: 指定された譜面を読込)
+ * @param {number} _scoreId 譜面番号
  */
-function loadDos(_afterFunc, _initFlg = false) {
+function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId) {
 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
@@ -1113,9 +1124,9 @@ function loadDos(_afterFunc, _initFlg = false) {
 		const filenameBase = externalDosInput.value.match(/.+\..*/)[0];
 		const filenameExtension = filenameBase.split(`.`).pop();
 		const filenameCommon = filenameBase.split(`.${filenameExtension}`)[0];
-		const scoreIdHeader = (g_stateObj.scoreId > 0 ? g_stateObj.scoreId + 1 : ``);
-		const filename = (_initFlg || !dosDivideFlg ?
-			`${filenameCommon}.${filenameExtension}` : `${filenameCommon}${scoreIdHeader}.${filenameExtension}`);
+		const filename = (!dosDivideFlg ?
+			`${filenameCommon}.${filenameExtension}` :
+			`${filenameCommon}${setScoreIdHeader(_scoreId)}.${filenameExtension}`);
 
 		const randTime = new Date().getTime();
 		loadScript(`${filename}?${randTime}`, _ => {
@@ -1220,8 +1231,77 @@ function initAfterDosLoaded() {
 		}
 	}
 
-	// customjsの読み込み
-	loadCustomjs(_ => titleInit());
+	// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
+	loadCustomjs(_ => {
+		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
+			loadDos(_ => {
+				const keyCtrlPtn = `${g_headerObj.keyLabels[g_stateObj.scoreId]}_0`;
+				storeBaseData(
+					j, scoreConvert(g_rootObj, setScoreIdHeader(j, g_stateObj.scoreLockFlg), 0, ``, true),
+					g_keyObj[`chara${keyCtrlPtn}`].length
+				);
+			}, j);
+		}
+		titleInit();
+	});
+}
+
+/**
+ * 譜面詳細データの格納
+ * @param {number} _scoreId 
+ * @param {object} _scoreObj 
+ * @param {number} _keyNum 
+ */
+function storeBaseData(_scoreId, _scoreObj, _keyNum) {
+	const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame + 1;
+	const startFrame = getStartFrame(lastFrame);
+	const playingFrame = lastFrame - startFrame;
+
+	// 譜面密度グラフ用のデータ作成
+	const arrowCnt = [];
+	const frzCnt = [];
+	const densityData = [];
+	let allData = 0;
+	for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
+		densityData[j] = 0;
+	}
+
+	for (let j = 0; j < _keyNum; j++) {
+		arrowCnt[j] = 0;
+		frzCnt[j] = 0;
+		_scoreObj.arrowData[j].forEach(note => {
+			const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+			if (point >= 0) {
+				densityData[point]++;
+				arrowCnt[j]++;
+				allData++;
+			}
+		});
+		_scoreObj.frzData[j].forEach((note, k) => {
+			if (k % 2 === 0 && note !== ``) {
+				const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+				if (point >= 0) {
+					densityData[point]++;
+					frzCnt[j]++;
+					allData++;
+				}
+			}
+		});
+	}
+
+	g_detailObj.speedData[_scoreId] = _scoreObj.speedData.concat();
+	g_detailObj.boostData[_scoreId] = _scoreObj.boostData.concat();
+
+	g_detailObj.maxDensity[_scoreId] = densityData.indexOf(Math.max.apply(null, densityData));
+	g_detailObj.densityData[_scoreId] = [];
+	for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
+		g_detailObj.densityData[_scoreId].push(Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100);
+	}
+
+	g_detailObj.arrowCnt[_scoreId] = arrowCnt.concat();
+	g_detailObj.frzCnt[_scoreId] = frzCnt.concat();
+	g_detailObj.startFrame[_scoreId] = startFrame;
+	g_detailObj.playingFrame[_scoreId] = playingFrame;
 }
 
 /**
@@ -3186,12 +3266,11 @@ function createOptionWindow(_sprite) {
 
 	/**
 	 * 速度変化グラフの描画
-	 * @param {object} _scoreObj
+	 * @param {number} _scoreId
 	 */
-	function drawSpeedGraph(_scoreObj) {
-		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame;
-		const startFrame = getStartFrame(lastFrame);
-		const playingFrame = lastFrame - startFrame;
+	function drawSpeedGraph(_scoreId) {
+		const startFrame = g_detailObj.startFrame[_scoreId];
+		const playingFrame = g_detailObj.playingFrame[_scoreId];
 		const speedObj = {
 			speed: { frame: [0], speed: [1], cnt: 0 },
 			boost: { frame: [0], speed: [1], cnt: 0 }
@@ -3200,7 +3279,7 @@ function createOptionWindow(_sprite) {
 		[`speed`, `boost`].forEach(speedType => {
 			let frame = speedObj[`${speedType}`].frame;
 			let speed = speedObj[`${speedType}`].speed;
-			const speedData = _scoreObj[`${speedType}Data`];
+			const speedData = g_detailObj[`${speedType}Data`][_scoreId];
 
 			for (let i = 0; i < speedData.length; i += 2) {
 				if (speedData[i] >= startFrame) {
@@ -3253,66 +3332,33 @@ function createOptionWindow(_sprite) {
 
 	/**
 	 * 譜面密度グラフの描画
-	 * @param {object} _scoreObj 
+	 * @param {number} _scoreId 
 	 */
-	function drawDensityGraph(_scoreObj) {
-		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-		const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame + 1;
-		const startFrame = getStartFrame(lastFrame);
-		const playingFrame = lastFrame - startFrame;
-		const densityData = [];
-		g_workObj.arrowCnt = [];
-		g_workObj.frzCnt = [];
-		let allData = 0;
-		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
-			densityData[j] = 0;
-		}
+	function drawDensityGraph(_scoreId) {
 
-		for (let j = 0; j < keyNum; j++) {
-			g_workObj.arrowCnt[j] = 0;
-			g_workObj.frzCnt[j] = 0;
-			_scoreObj.arrowData[j].forEach(note => {
-				const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
-				if (point >= 0) {
-					densityData[point]++;
-					g_workObj.arrowCnt[j]++;
-					allData++;
-				}
-			});
-			_scoreObj.frzData[j].forEach((note, k) => {
-				if (k % 2 === 0 && note !== ``) {
-					const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
-					if (point >= 0) {
-						densityData[point]++;
-						g_workObj.frzCnt[j]++;
-						allData++;
-					}
-				}
-			});
-		}
-		const maxDensity = densityData.indexOf(Math.max.apply(null, densityData));
+		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
+		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
+
 		const canvas = document.querySelector(`#graphDensity`);
 		const context = canvas.getContext(`2d`);
 		drawBaseLine(context);
 		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
-			const percentage = Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100;
 			context.beginPath();
-			context.fillStyle = (j === maxDensity ? C_CLR_DENSITY_MAX : C_CLR_DENSITY_DEFAULT);
-			context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * percentage / 10,
-				15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * percentage / 10
+			context.fillStyle = (j === g_detailObj.maxDensity[_scoreId] ? C_CLR_DENSITY_MAX : C_CLR_DENSITY_DEFAULT);
+			context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * g_detailObj.densityData[_scoreId][j] / 10,
+				15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * g_detailObj.densityData[_scoreId][j] / 10
 			);
 			context.stroke();
 		}
 
-		const apm = Math.round(allData / (playingFrame / g_fps / 60));
+		const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60));
 		makeScoreDetailLabel(`Density`, `APM`, apm, 0);
-		const minutes = Math.floor(playingFrame / g_fps / 60);
-		const seconds = `00${Math.floor((playingFrame / g_fps) % 60)}`.slice(-2);
+		const minutes = Math.floor(g_detailObj.playingFrame[_scoreId] / g_fps / 60);
+		const seconds = `00${Math.floor((g_detailObj.playingFrame[_scoreId] / g_fps) % 60)}`.slice(-2);
 		const playingTime = `${minutes}:${seconds}`;
 		makeScoreDetailLabel(`Density`, `Time`, playingTime, 1);
-		makeScoreDetailLabel(`Density`, `Arrow`, g_workObj.arrowCnt.reduce((p, x) => p + x), 3);
-		makeScoreDetailLabel(`Density`, `Frz`, g_workObj.frzCnt.reduce((p, x) => p + x), 4);
+		makeScoreDetailLabel(`Density`, `Arrow`, arrowCnts, 3);
+		makeScoreDetailLabel(`Density`, `Frz`, frzCnts, 4);
 	}
 
 	/**
@@ -3827,11 +3873,8 @@ function createOptionWindow(_sprite) {
 		// 速度設定 (Speed)
 		setSetting(0, `speed`, ` x`);
 		if (g_headerObj.scoreDetailUse) {
-			loadDos(_ => {
-				const scoreObj = scoreConvert(g_rootObj, setScoreIdHeader(), 0, ``, true);
-				drawSpeedGraph(scoreObj);
-				drawDensityGraph(scoreObj);
-			});
+			drawSpeedGraph(g_stateObj.scoreId);
+			drawDensityGraph(g_stateObj.scoreId);
 		}
 
 		// リバース設定 (Reverse, Scroll)
@@ -4804,9 +4847,9 @@ function loadingScoreInit() {
 	loadDos(_ => loadCustomjs(_ => loadingScoreInit2()));
 }
 
-function setScoreIdHeader() {
-	if (g_stateObj.scoreId > 0 && g_stateObj.scoreLockFlg === false) {
-		return Number(g_stateObj.scoreId) + 1;
+function setScoreIdHeader(_scoreId = 0, _scoreLockFlg = false) {
+	if (_scoreId > 0 && _scoreLockFlg === false) {
+		return Number(_scoreId) + 1;
 	}
 	return ``;
 }
@@ -4823,7 +4866,7 @@ function loadingScoreInit2() {
 		g_canLoadDifInfoFlg = false;
 	}
 
-	let scoreIdHeader = setScoreIdHeader();
+	let scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg);
 	let dummyIdHeader = ``;
 	if (g_stateObj.dummyId !== ``) {
 		if (g_stateObj.dummyId === 0 || g_stateObj.dummyId === 1) {
@@ -8226,10 +8269,7 @@ function resultInit() {
 	} else {
 		// ゲームオーバー時は失敗時のリザルトモーションを適用
 		if (!g_finishFlg) {
-			let scoreIdHeader = ``;
-			if (g_stateObj.scoreId > 0) {
-				scoreIdHeader = Number(g_stateObj.scoreId) + 1;
-			}
+			const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg);
 
 			[`back`, `mask`].forEach(sprite => {
 				if (g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] !== undefined) {
