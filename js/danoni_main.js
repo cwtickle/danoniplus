@@ -1169,8 +1169,7 @@ function reloadDos(_scoreId) {
 	_scoreId++;
 	if (_scoreId < g_headerObj.keyLabels.length) {
 		loadDos(_ => {
-			const keyCtrlPtn = `${g_headerObj.keyLabels[_scoreId]}_0`;
-			storeBaseData(_scoreId, scoreConvert(g_rootObj, _scoreId, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
+			getScoreDetailData(_scoreId);
 		}, _scoreId, true);
 	}
 }
@@ -1260,11 +1259,19 @@ function initAfterDosLoaded() {
 	// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
 	loadCustomjs(_ => {
 		loadDos(_ => {
-			const keyCtrlPtn = `${g_headerObj.keyLabels[0]}_0`;
-			storeBaseData(0, scoreConvert(g_rootObj, 0, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
+			getScoreDetailData(0);
 		}, 0, true);
 		titleInit();
 	});
+}
+
+/**
+ * 譜面ファイル読込後処理（譜面詳細情報取得用）
+ * @param {number} _scoreId 
+ */
+function getScoreDetailData(_scoreId) {
+	const keyCtrlPtn = `${g_headerObj.keyLabels[_scoreId]}_0`;
+	storeBaseData(_scoreId, scoreConvert(g_rootObj, _scoreId, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
 }
 
 /**
