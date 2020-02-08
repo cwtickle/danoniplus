@@ -2358,12 +2358,11 @@ function headerConvert(_dosObj) {
 		obj.setColor = _dosObj.setColor.split(`,`);
 		for (let j = 0; j < obj.setColor.length; j++) {
 
-			obj.setColorOrg[j] = obj.setColor[j].replace(/0x/g, `#`);
+			obj.setColorOrg[j] = obj.setColor[j].replace(/0x/g, `#`).split(`:`)[0];
 			if (obj.colorCdPaddingUse) {
 				obj.setColorOrg[j] = `#${paddingLeft(obj.setColorOrg[j].slice(1), 6, `0`)}`;
 			}
 			obj.setColor[j] = makeColorGradation(obj.setColor[j], obj.colorGradation, obj.colorCdPaddingUse);
-
 			/*
 			obj.setColor[j] = obj.setColor[j].replace(/0x/g, `#`);
 			if (obj.colorCdPaddingUse) {
@@ -2653,9 +2652,14 @@ function headerConvert(_dosObj) {
 /**
  * グラデーション用のカラーフォーマットを作成
  * @param {string} _colorStr 
+ * @param {boolean} _colorGradation
+ * @param {boolean} _colorCdPaddingUse
  */
 function makeColorGradation(_colorStr, _colorGradation = g_headerObj.colorGradation, _colorCdPaddingUse = false) {
-	// |color_data=300,20,to right:#ffff99:#ffffff:#9999ff@radial-gradient|
+
+	// |color_data=300,20,45deg:#ffff99:#ffffff:#9999ff@linear-gradient|
+	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
+	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
 
 	let convertColorStr;
 	const tmpColorStr = _colorStr.split(`@`);
@@ -2667,18 +2671,19 @@ function makeColorGradation(_colorStr, _colorGradation = g_headerObj.colorGradat
 		}
 	}
 
+	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
 	if (colorArray.length === 1) {
 		if (_colorGradation) {
 			convertColorStr = `to right, ${colorArray[0]}, #ffffff, ${colorArray[0]}`;
 		} else {
 			convertColorStr = `to right, ${colorArray[0]}, ${colorArray[0]}`;
 		}
-	} else if (colorArray[0].slice(0, 1) === `#`) {
+	} else if (gradationType === `linear-gradient` && colorArray[0].slice(0, 1) === `#`) {
 		convertColorStr = `to right, ${colorArray.join(',')}`;
 	} else {
 		convertColorStr = `${colorArray.join(',')}`;
 	}
-	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
+
 
 	return `${gradationType}(${convertColorStr})`;
 }
