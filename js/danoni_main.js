@@ -1097,7 +1097,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId) {
 	if (dosLockInput !== null) {
 		g_stateObj.scoreLockFlg = setVal(dosLockInput.value, false, C_TYP_BOOLEAN);
 	}
-	if (externalDosInput !== null && dosDivideFlg && g_stateObj.scoreLockFlg) {
+	if (dosDivideFlg && g_stateObj.scoreLockFlg) {
 		const scoreList = Object.keys(g_rootObj).filter(data => {
 			return data.endsWith(`_data`) || data.endsWith(`_change`);
 		});
@@ -1136,14 +1136,16 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId) {
 				}
 
 				// 外部データを読込
+				const tmpExternalDos = g_externalDos;
 				externalDosInit();
-				Object.assign(g_rootObj, dosConvert(g_externalDos));
+				if (tmpExternalDos === g_externalDos && _scoreId !== 0) {
+				} else {
+					Object.assign(g_rootObj, dosConvert(g_externalDos));
+				}
 
 			} else {
 				makeWarningWindow(C_MSG_E_0022);
 			}
-
-			// danoni_setting.jsは初回時のみ読込
 			_afterFunc();
 		}, false, charset);
 	}
@@ -1239,6 +1241,24 @@ function initAfterDosLoaded() {
 				storeBaseData(j, scoreConvert(g_rootObj, j, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
 			}, j);
 		}
+		/*
+		loadDos(_ => {
+			const keyCtrlPtn = `${g_headerObj.keyLabels[0]}_0`;
+			storeBaseData(0, scoreConvert(g_rootObj, 0, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
+			loadDos(_ => {
+				const keyCtrlPtn = `${g_headerObj.keyLabels[1]}_0`;
+				storeBaseData(1, scoreConvert(g_rootObj, 1, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
+				loadDos(_ => {
+					const keyCtrlPtn = `${g_headerObj.keyLabels[2]}_0`;
+					storeBaseData(2, scoreConvert(g_rootObj, 2, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
+					loadDos(_ => {
+						const keyCtrlPtn = `${g_headerObj.keyLabels[3]}_0`;
+						storeBaseData(3, scoreConvert(g_rootObj, 3, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
+					}, 3);
+				}, 2);
+			}, 1);
+		}, 0);
+		*/
 		titleInit();
 	});
 }
@@ -1268,6 +1288,9 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 		arrowCnt[j] = 0;
 		frzCnt[j] = 0;
 		_scoreObj.arrowData[j].forEach(note => {
+			if (isNaN(parseFloat(note))) {
+				return;
+			}
 			const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 			if (point >= 0) {
 				densityData[point]++;
@@ -1276,6 +1299,9 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 			}
 		});
 		_scoreObj.frzData[j].forEach((note, k) => {
+			if (isNaN(parseFloat(note))) {
+				return;
+			}
 			if (k % 2 === 0 && note !== ``) {
 				const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 				if (point >= 0) {
