@@ -40,6 +40,7 @@ let g_localVersion2 = ``;
  */
 
 window.onload = _ => {
+	g_loadObj = {};
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
@@ -708,6 +709,7 @@ function clearWindow() {
  * @param {string} _charset (default : UTF-8)
  */
 function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
+	g_loadObj[_url.split(`?`)[0]] = true;
 	const script = document.createElement(`script`);
 	script.type = `text/javascript`;
 	script.src = _url;
@@ -717,6 +719,7 @@ function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
 		if (_requiredFlg) {
 			makeWarningWindow(C_MSG_E_0041.split(`{0}`).join(_url.split(`?`)[0]));
 		} else {
+			g_loadObj[_url.split(`?`)[0]] = false;
 			_callback();
 		}
 	};
@@ -1076,7 +1079,7 @@ function loadLocalStorage() {
  * @param {function} _afterFunc 実行後の処理
  * @param {number} _scoreId 譜面番号
  */
-function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId) {
+function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) {
 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
@@ -1136,9 +1139,8 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId) {
 				}
 
 				// 外部データを読込
-				const tmpExternalDos = g_externalDos;
 				externalDosInit();
-				if (tmpExternalDos === g_externalDos && _scoreId !== 0) {
+				if (!g_loadObj[filename]) {
 				} else {
 					Object.assign(g_rootObj, dosConvert(g_externalDos));
 				}
@@ -1147,6 +1149,15 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId) {
 				makeWarningWindow(C_MSG_E_0022);
 			}
 			_afterFunc();
+			if (_cyclicFlg) {
+				_scoreId++;
+				if (_scoreId < g_headerObj.keyLabels.length) {
+					loadDos(_ => {
+						const keyCtrlPtn = `${g_headerObj.keyLabels[_scoreId]}_0`;
+						storeBaseData(_scoreId, scoreConvert(g_rootObj, _scoreId, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
+					}, _scoreId, true);
+				}
+			}
 		}, false, charset);
 	}
 }
@@ -1235,30 +1246,10 @@ function initAfterDosLoaded() {
 
 	// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
 	loadCustomjs(_ => {
-		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
-			loadDos(_ => {
-				const keyCtrlPtn = `${g_headerObj.keyLabels[j]}_0`;
-				storeBaseData(j, scoreConvert(g_rootObj, j, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
-			}, j);
-		}
-		/*
 		loadDos(_ => {
 			const keyCtrlPtn = `${g_headerObj.keyLabels[0]}_0`;
 			storeBaseData(0, scoreConvert(g_rootObj, 0, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
-			loadDos(_ => {
-				const keyCtrlPtn = `${g_headerObj.keyLabels[1]}_0`;
-				storeBaseData(1, scoreConvert(g_rootObj, 1, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
-				loadDos(_ => {
-					const keyCtrlPtn = `${g_headerObj.keyLabels[2]}_0`;
-					storeBaseData(2, scoreConvert(g_rootObj, 2, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
-					loadDos(_ => {
-						const keyCtrlPtn = `${g_headerObj.keyLabels[3]}_0`;
-						storeBaseData(3, scoreConvert(g_rootObj, 3, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
-					}, 3);
-				}, 2);
-			}, 1);
-		}, 0);
-		*/
+		}, 0, true);
 		titleInit();
 	});
 }
@@ -3305,15 +3296,17 @@ function createOptionWindow(_sprite) {
 			let speed = speedObj[`${speedType}`].speed;
 			const speedData = g_detailObj[`${speedType}Data`][_scoreId];
 
-			for (let i = 0; i < speedData.length; i += 2) {
-				if (speedData[i] >= startFrame) {
-					frame.push(speedData[i] - startFrame);
-					speed.push(speedData[i + 1]);
+			if (speedData !== undefined) {
+				for (let i = 0; i < speedData.length; i += 2) {
+					if (speedData[i] >= startFrame) {
+						frame.push(speedData[i] - startFrame);
+						speed.push(speedData[i + 1]);
+					}
+					speedObj[`${speedType}`].cnt++;
 				}
-				speedObj[`${speedType}`].cnt++;
+				frame.push(playingFrame);
+				speed.push(speed[speed.length - 1]);
 			}
-			frame.push(playingFrame);
-			speed.push(speed[speed.length - 1]);
 		});
 
 		const canvas = document.querySelector(`#graphSpeed`);
