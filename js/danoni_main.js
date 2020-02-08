@@ -1100,7 +1100,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	if (dosLockInput !== null) {
 		g_stateObj.scoreLockFlg = setVal(dosLockInput.value, false, C_TYP_BOOLEAN);
 	}
-	if (dosDivideFlg && g_stateObj.scoreLockFlg) {
+	if (externalDosInput !== null && dosDivideFlg && g_stateObj.scoreLockFlg) {
 		const scoreList = Object.keys(g_rootObj).filter(data => {
 			return data.endsWith(`_data`) || data.endsWith(`_change`);
 		});
@@ -1114,6 +1114,9 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
 		if (externalDosInput === null) {
 			_afterFunc();
+			if (_cyclicFlg) {
+				reloadDos(_scoreId);
+			}
 		}
 	}
 
@@ -1150,15 +1153,23 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 			}
 			_afterFunc();
 			if (_cyclicFlg) {
-				_scoreId++;
-				if (_scoreId < g_headerObj.keyLabels.length) {
-					loadDos(_ => {
-						const keyCtrlPtn = `${g_headerObj.keyLabels[_scoreId]}_0`;
-						storeBaseData(_scoreId, scoreConvert(g_rootObj, _scoreId, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
-					}, _scoreId, true);
-				}
+				reloadDos(_scoreId);
 			}
 		}, false, charset);
+	}
+}
+
+/**
+ * 譜面情報の再取得を行う（譜面詳細情報取得用）
+ * @param {number} _scoreId 
+ */
+function reloadDos(_scoreId) {
+	_scoreId++;
+	if (_scoreId < g_headerObj.keyLabels.length) {
+		loadDos(_ => {
+			const keyCtrlPtn = `${g_headerObj.keyLabels[_scoreId]}_0`;
+			storeBaseData(_scoreId, scoreConvert(g_rootObj, _scoreId, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
+		}, _scoreId, true);
 	}
 }
 
