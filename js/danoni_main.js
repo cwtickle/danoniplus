@@ -1236,10 +1236,7 @@ function initAfterDosLoaded() {
 		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
 			loadDos(_ => {
 				const keyCtrlPtn = `${g_headerObj.keyLabels[j]}_0`;
-				storeBaseData(
-					j, scoreConvert(g_rootObj, j, 0, ``, keyCtrlPtn, true),
-					keyCtrlPtn
-				);
+				storeBaseData(j, scoreConvert(g_rootObj, j, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
 			}, j);
 		}
 		titleInit();
@@ -5153,13 +5150,12 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	g_allFrz = 0;
 
 	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg);
-	const keyCtrlPtn = _keyCtrlPtn;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
 	obj.arrowData = [];
 	obj.frzData = [];
 	obj.dummyArrowData = [];
 	obj.dummyFrzData = [];
-	const headerAdjustment = parseInt(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
+	const headerAdjustment = parseInt(g_headerObj.adjustment[_scoreId] || g_headerObj.adjustment[0]);
 	const realAdjustment = parseInt(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
 	g_stateObj.realAdjustment = realAdjustment;
 	const blankFrame = g_headerObj.blankFrame;
@@ -5168,7 +5164,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	for (let j = 0; j < keyNum; j++) {
 
 		// 矢印データの分解
-		const arrowName = g_keyObj[`chara${keyCtrlPtn}`][j];
+		const arrowName = g_keyObj[`chara${_keyCtrlPtn}`][j];
 		obj.arrowData[j] = storeArrowData(_dosObj[`${arrowName}${scoreIdHeader}_data`]);
 		g_allArrow += (isNaN(parseFloat(obj.arrowData[j][0])) ? 0 : obj.arrowData[j].length);
 
@@ -5177,7 +5173,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		}
 
 		// 矢印名からフリーズアロー名への変換
-		let frzName = g_keyObj[`chara${keyCtrlPtn}`][j].replace(`leftdia`, `frzLdia`);
+		let frzName = g_keyObj[`chara${_keyCtrlPtn}`][j].replace(`leftdia`, `frzLdia`);
 		frzName = frzName.replace(`rightdia`, `frzRdia`);
 		frzName = frzName.replace(`left`, `frzLeft`);
 		frzName = frzName.replace(`down`, `frzDown`);
