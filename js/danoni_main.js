@@ -1238,7 +1238,7 @@ function initAfterDosLoaded() {
 				const keyCtrlPtn = `${g_headerObj.keyLabels[j]}_0`;
 				storeBaseData(
 					j, scoreConvert(g_rootObj, j, 0, ``, keyCtrlPtn, true),
-					g_keyObj[`chara${keyCtrlPtn}`].length
+					keyCtrlPtn
 				);
 			}, j);
 		}
@@ -1250,12 +1250,13 @@ function initAfterDosLoaded() {
  * 譜面詳細データの格納
  * @param {number} _scoreId 
  * @param {object} _scoreObj 
- * @param {number} _keyNum 
+ * @param {number} _keyCtrlPtn 
  */
-function storeBaseData(_scoreId, _scoreObj, _keyNum) {
-	const lastFrame = getLastFrame(_scoreObj) + g_headerObj.blankFrame + 1;
-	const startFrame = getStartFrame(lastFrame);
+function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
+	const lastFrame = getLastFrame(_scoreObj, _keyCtrlPtn) + g_headerObj.blankFrame + 1;
+	const startFrame = getStartFrame(lastFrame, 0, _scoreId);
 	const playingFrame = lastFrame - startFrame;
+	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
 
 	// 譜面密度グラフ用のデータ作成
 	const arrowCnt = [];
@@ -1266,7 +1267,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyNum) {
 		densityData[j] = 0;
 	}
 
-	for (let j = 0; j < _keyNum; j++) {
+	for (let j = 0; j < keyNum; j++) {
 		arrowCnt[j] = 0;
 		frzCnt[j] = 0;
 		_scoreObj.arrowData[j].forEach(note => {
@@ -5546,12 +5547,12 @@ function calcLifeVal(_val, _allArrows) {
 /**
  * 最終フレーム数の取得
  * @param {object} _dataObj 
+ * @param {string} _keyCtrlPtn
  */
-function getLastFrame(_dataObj) {
+function getLastFrame(_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`) {
 
 	let tmpLastNum = 0;
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
 
 	for (let j = 0; j < keyNum; j++) {
 		const data = [
@@ -5575,12 +5576,12 @@ function getLastFrame(_dataObj) {
 /**
  * 最初の矢印フレームの取得
  * @param {object} _dataObj 
+ * @param {string} _keyCtrlPtn
  */
-function getFirstArrowFrame(_dataObj) {
+function getFirstArrowFrame(_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`) {
 
 	let tmpFirstNum = Infinity;
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
 
 	for (let j = 0; j < keyNum; j++) {
 		const data = [
@@ -5606,11 +5607,13 @@ function getFirstArrowFrame(_dataObj) {
 /**
  * 開始フレームの取得
  * @param {number} _lastFrame 
+ * @param {number} _fadein
+ * @param {number} _scoreId
  */
-function getStartFrame(_lastFrame, _fadein = 0) {
+function getStartFrame(_lastFrame, _fadein = 0, _scoreId = g_stateObj.scoreId) {
 	let frameNum = 0;
 	if (g_headerObj.startFrame !== undefined) {
-		frameNum = parseInt(g_headerObj.startFrame[g_stateObj.scoreId] || g_headerObj.startFrame[0] || 0);
+		frameNum = parseInt(g_headerObj.startFrame[_scoreId] || g_headerObj.startFrame[0] || 0);
 	}
 	if (_lastFrame >= frameNum) {
 		frameNum = Math.round(_fadein / 100 * (_lastFrame - frameNum)) + frameNum;
