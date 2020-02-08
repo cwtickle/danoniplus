@@ -5137,8 +5137,10 @@ function applySRandom(_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) {
 /**
  * 譜面データの分解
  * @param {object} _dosObj 
- * @param {number} _scoreId
- * @param {string} _dummyNo
+ * @param {number} _scoreId 譜面番号
+ * @param {number} _preblankFrame 補完フレーム数
+ * @param {string} _dummyNo ダミー用譜面番号添え字
+ * @param {string} _keyCtrlPtn 選択キー及びパターン
  * @param {boolean} _scoreAnalyzeFlg (default : false)
  */
 function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
