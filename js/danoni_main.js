@@ -703,6 +703,7 @@ function clearWindow() {
 
 /**
  * 外部jsファイルの読込
+ * 読込可否を g_loadObj[ファイル名] で管理 (true: 読込成功, false: 読込失敗)
  * @param {string} _url 
  * @param {function} _callback 
  * @param {boolean} _requiredFlg (default : true / 読込必須)
@@ -1078,6 +1079,7 @@ function loadLocalStorage() {
  * 譜面読込
  * @param {function} _afterFunc 実行後の処理
  * @param {number} _scoreId 譜面番号
+ * @param {boolean} _cyclicFlg 再読込フラグ（譜面詳細情報取得用、再帰的にloadDosを呼び出す）
  */
 function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) {
 
@@ -1141,7 +1143,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 					divRoot.removeChild(document.querySelector(`#lblLoading`));
 				}
 
-				// 外部データを読込
+				// 外部データを読込（ファイルが見つからなかった場合は譜面追記をスキップ）
 				externalDosInit();
 				if (!g_loadObj[filename]) {
 				} else {
