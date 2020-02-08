@@ -1235,9 +1235,9 @@ function initAfterDosLoaded() {
 	loadCustomjs(_ => {
 		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
 			loadDos(_ => {
-				const keyCtrlPtn = `${g_headerObj.keyLabels[g_stateObj.scoreId]}_0`;
+				const keyCtrlPtn = `${g_headerObj.keyLabels[j]}_0`;
 				storeBaseData(
-					j, scoreConvert(g_rootObj, setScoreIdHeader(j, g_stateObj.scoreLockFlg), 0, ``, true),
+					j, scoreConvert(g_rootObj, j, 0, ``, keyCtrlPtn, true),
 					g_keyObj[`chara${keyCtrlPtn}`].length
 				);
 			}, j);
@@ -4866,7 +4866,6 @@ function loadingScoreInit2() {
 		g_canLoadDifInfoFlg = false;
 	}
 
-	let scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg);
 	let dummyIdHeader = ``;
 	if (g_stateObj.dummyId !== ``) {
 		if (g_stateObj.dummyId === 0 || g_stateObj.dummyId === 1) {
@@ -4875,7 +4874,7 @@ function loadingScoreInit2() {
 			dummyIdHeader = g_stateObj.dummyId;
 		}
 	}
-	g_scoreObj = scoreConvert(g_rootObj, scoreIdHeader, 0, dummyIdHeader);
+	g_scoreObj = scoreConvert(g_rootObj, g_stateObj.scoreId, 0, dummyIdHeader);
 
 	calcLifeVals(g_allArrow + g_allFrz / 2);
 
@@ -4910,7 +4909,7 @@ function loadingScoreInit2() {
 			preblankFrame = arrivalFrame - firstArrowFrame + C_MAX_ADJUSTMENT;
 
 			// 譜面データの再読み込み
-			const tmpObj = scoreConvert(g_rootObj, scoreIdHeader, preblankFrame, dummyIdHeader);
+			const tmpObj = scoreConvert(g_rootObj, g_stateObj.scoreId, preblankFrame, dummyIdHeader);
 			for (let j = 0; j < keyNum; j++) {
 				if (tmpObj.arrowData[j] !== undefined) {
 					g_scoreObj.arrowData[j] = JSON.parse(JSON.stringify(tmpObj.arrowData[j]));
@@ -5138,17 +5137,20 @@ function applySRandom(_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) {
 /**
  * 譜面データの分解
  * @param {object} _dosObj 
- * @param {string} _scoreNo
+ * @param {number} _scoreId
+ * @param {string} _dummyNo
  * @param {boolean} _scoreAnalyzeFlg (default : false)
  */
-function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``, _scoreAnalyzeFlg = false) {
+function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
+	_keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`, _scoreAnalyzeFlg = false) {
 
 	// 矢印群の格納先
 	const obj = {};
 	g_allArrow = 0;
 	g_allFrz = 0;
 
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg);
+	const keyCtrlPtn = _keyCtrlPtn;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	obj.arrowData = [];
 	obj.frzData = [];
@@ -5164,7 +5166,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``, _scoreAn
 
 		// 矢印データの分解
 		const arrowName = g_keyObj[`chara${keyCtrlPtn}`][j];
-		obj.arrowData[j] = storeArrowData(_dosObj[`${arrowName}${_scoreNo}_data`]);
+		obj.arrowData[j] = storeArrowData(_dosObj[`${arrowName}${scoreIdHeader}_data`]);
 		g_allArrow += (isNaN(parseFloat(obj.arrowData[j][0])) ? 0 : obj.arrowData[j].length);
 
 		if (g_stateObj.dummyId !== ``) {
@@ -5193,7 +5195,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``, _scoreAn
 		}
 
 		// フリーズアローデータの分解 (2つで1セット)
-		obj.frzData[j] = storeArrowData(_dosObj[`${frzName}${_scoreNo}_data`]);
+		obj.frzData[j] = storeArrowData(_dosObj[`${frzName}${scoreIdHeader}_data`]);
 		g_allFrz += (isNaN(parseFloat(obj.frzData[j][0])) ? 0 : obj.frzData[j].length);
 
 		if (g_stateObj.dummyId !== ``) {
@@ -5233,28 +5235,28 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``, _scoreAn
 
 	// 速度変化データの分解 (2つで1セット)
 	let speedFooter = ``;
-	if (_dosObj[`speed${_scoreNo}_data`] !== undefined) {
+	if (_dosObj[`speed${scoreIdHeader}_data`] !== undefined) {
 		speedFooter = `_data`;
 	}
-	if (_dosObj[`speed${_scoreNo}_change`] !== undefined) {
+	if (_dosObj[`speed${scoreIdHeader}_change`] !== undefined) {
 		speedFooter = `_change`;
 	}
 
 	// 速度変化（個別・全体）の分解 (2つで1セット, セット毎の改行区切り可)
-	obj.boostData = setSpeedData(`boost`, _scoreNo);
-	obj.speedData = setSpeedData(`speed`, _scoreNo, speedFooter);
+	obj.boostData = setSpeedData(`boost`, scoreIdHeader);
+	obj.speedData = setSpeedData(`speed`, scoreIdHeader, speedFooter);
+
+	// 色変化（個別・全体）の分解 (3つで1セット, セット毎の改行区切り可)
+	obj.colorData = setColorData(`color`, scoreIdHeader);
+	obj.acolorData = setColorData(`acolor`, scoreIdHeader);
 
 	if (_scoreAnalyzeFlg) {
 		return obj;
 	}
 
-	// 色変化（個別・全体）の分解 (3つで1セット, セット毎の改行区切り可)
-	obj.colorData = setColorData(`color`, _scoreNo);
-	obj.acolorData = setColorData(`acolor`, _scoreNo);
-
 	// 矢印モーション（個別）データの分解（3～4つで1セット, セット毎の改行区切り）
-	obj.arrowCssMotionData = setCssMotionData(`arrow`, _scoreNo);
-	obj.frzCssMotionData = setCssMotionData(`frz`, _scoreNo);
+	obj.arrowCssMotionData = setCssMotionData(`arrow`, scoreIdHeader);
+	obj.frzCssMotionData = setCssMotionData(`frz`, scoreIdHeader);
 	obj.dummyArrowCssMotionData = setCssMotionData(`arrow`, _dummyNo);
 	obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
 
@@ -5263,7 +5265,7 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``, _scoreAn
 	obj.wordMaxDepth = -1;
 	if (g_stateObj.d_lyrics === C_FLG_OFF) {
 	} else {
-		[obj.wordData, obj.wordMaxDepth] = makeWordData(_scoreNo);
+		[obj.wordData, obj.wordMaxDepth] = makeWordData(scoreIdHeader);
 	}
 
 	// 背景・マスクデータの分解 (下記すべてで1セット、改行区切り)
@@ -5274,8 +5276,8 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``, _scoreAn
 	obj.backMaxDepth = -1;
 	if (g_stateObj.d_background === C_FLG_OFF) {
 	} else {
-		[obj.maskData, obj.maskMaxDepth] = makeBackgroundData(`mask`, _scoreNo);
-		[obj.backData, obj.backMaxDepth] = makeBackgroundData(`back`, _scoreNo);
+		[obj.maskData, obj.maskMaxDepth] = makeBackgroundData(`mask`, scoreIdHeader);
+		[obj.backData, obj.backMaxDepth] = makeBackgroundData(`back`, scoreIdHeader);
 	}
 
 	// 結果画面用・背景/マスクデータの分解 (下記すべてで1セット、改行区切り)
@@ -5288,13 +5290,13 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``, _scoreAn
 		});
 	} else {
 		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] =
-			makeBackgroundResultData(`backresult`, _scoreNo);
+			makeBackgroundResultData(`backresult`, scoreIdHeader);
 		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] =
-			makeBackgroundResultData(`maskresult`, _scoreNo);
+			makeBackgroundResultData(`maskresult`, scoreIdHeader);
 		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] =
-			makeBackgroundResultData(`backfailed${g_gaugeType.slice(0, 1)}`, _scoreNo, `backresult`);
+			makeBackgroundResultData(`backfailed${g_gaugeType.slice(0, 1)}`, scoreIdHeader, `backresult`);
 		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] =
-			makeBackgroundResultData(`maskfailed${g_gaugeType.slice(0, 1)}`, _scoreNo, `maskresult`);
+			makeBackgroundResultData(`maskfailed${g_gaugeType.slice(0, 1)}`, scoreIdHeader, `maskresult`);
 	}
 
 	/**
