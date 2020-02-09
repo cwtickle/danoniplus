@@ -1678,11 +1678,11 @@ function drawMainSpriteData(_frame, _depthName) {
 /**
  * グラデーション用のカラーフォーマットを作成
  * @param {string} _colorStr 
- * @param {boolean} _defaultColorGrd
+ * @param {boolean} _defaultColorgrd
  * @param {boolean} _colorCdPaddingUse
  * @param {boolean} _musicTitleFlg
  */
-function makeColorGradation(_colorStr, _defaultColorGrd = g_headerObj.defaultColorGrd,
+function makeColorGradation(_colorStr, _defaultColorgrd = g_headerObj.defaultColorgrd,
 	_colorCdPaddingUse = false, _musicTitleFlg = false) {
 
 	// |color_data=300,20,45deg:#ffff99:#ffffff:#9999ff@linear-gradient|
@@ -1703,7 +1703,7 @@ function makeColorGradation(_colorStr, _defaultColorGrd = g_headerObj.defaultCol
 	if (colorArray.length === 1) {
 		if (_musicTitleFlg) {
 			convertColorStr = `to right, ${colorArray[0]} 100%, #eeeeee 0%`;
-		} else if (_defaultColorGrd) {
+		} else if (_defaultColorgrd) {
 			convertColorStr = `to right, ${colorArray[0]}, #eeeeee, ${colorArray[0]}`;
 		} else {
 			convertColorStr = `to right, ${colorArray[0]}, ${colorArray[0]}`;
@@ -2313,7 +2313,7 @@ function headerConvert(_dosObj) {
 	}
 
 	// 矢印の色変化を常時グラデーションさせる設定
-	obj.defaultColorGrd = setVal(_dosObj.defaultColorGrd, false, C_TYP_BOOLEAN);
+	obj.defaultColorgrd = setVal(_dosObj.defaultColorgrd, false, C_TYP_BOOLEAN);
 
 	// カラーコードのゼロパディング有無設定
 	obj.colorCdPaddingUse = setVal(_dosObj.colorCdPaddingUse, false, C_TYP_BOOLEAN);
@@ -2380,11 +2380,11 @@ function headerConvert(_dosObj) {
 			if (obj.colorCdPaddingUse) {
 				obj.setColorOrg[j] = `#${paddingLeft(obj.setColorOrg[j].slice(1), 6, `0`)}`;
 			}
-			obj.setColor[j] = makeColorGradation(obj.setColor[j], obj.defaultColorGrd, obj.colorCdPaddingUse);
+			obj.setColor[j] = makeColorGradation(obj.setColor[j], obj.defaultColorgrd, obj.colorCdPaddingUse);
 		}
 		for (let j = obj.setColor.length; j < obj.setColorInit.length; j++) {
 			obj.setColorOrg[j] = obj.setColor[j];
-			obj.setColor[j] = makeColorGradation(obj.setColorInit[j], obj.defaultColorGrd);
+			obj.setColor[j] = makeColorGradation(obj.setColorInit[j], obj.defaultColorgrd);
 		}
 	} else {
 		obj.setColorOrg = JSON.parse(JSON.stringify(obj.setColorInit));
@@ -2416,10 +2416,10 @@ function headerConvert(_dosObj) {
 			obj.frzColor[j] = tmpFrzColors[j].split(`,`);
 
 			for (let k = 0; k < obj.frzColor[j].length; k++) {
-				obj.frzColor[j][k] = makeColorGradation(obj.frzColor[j][k], obj.defaultColorGrd, obj.colorCdPaddingUse);
+				obj.frzColor[j][k] = makeColorGradation(obj.frzColor[j][k], obj.defaultColorgrd, obj.colorCdPaddingUse);
 			}
 			for (let k = obj.frzColor[j].length; k < obj.frzColorInit.length; k++) {
-				obj.frzColor[j][k] = makeColorGradation(obj.frzColorInit[k], obj.defaultColorGrd, obj.colorCdPaddingUse);
+				obj.frzColor[j][k] = makeColorGradation(obj.frzColorInit[k], obj.defaultColorgrd, obj.colorCdPaddingUse);
 			}
 
 			obj.frzColorDefault[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
