@@ -3714,60 +3714,64 @@ function createOptionWindow(_sprite) {
 
 		// ツール難易度
 		if (document.querySelector(`#lblTooldif`) === null) {
-			lbl = createDivCssLabel(`lblTooldif`, 125, 5, 250, 35, 16, `Level`);
+			lbl = createDivCssLabel(`lblTooldif`, 130, 5, 250, 35, 16, `Level`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
-			data = createDivCssLabel(`dataTooldif`, 250, 5, 160, 35, 16, g_detailObj.toolDif[_scoreId].tool);
+			data = createDivCssLabel(`dataTooldif`, 250, 3, 160, 35, 18, g_detailObj.toolDif[_scoreId].tool);
 			data.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 		} else {
 			document.querySelector(`#dataTooldif`).innerHTML = g_detailObj.toolDif[_scoreId].tool;
 		}
 
-		let ArrowInfo = `${arrowCnts + frzCnts} (${arrowCnts} + ${frzCnts})`;
-		let ArrowInfo2 = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>(${g_detailObj.frzCnt[_scoreId]})`.split(`,`).join(`/`);
+		let ArrowInfo = `${arrowCnts + frzCnts} <span style="font-size:14px;">(${arrowCnts} + ${frzCnts})</span>`;
+		let ArrowInfo2 = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
+			(${g_detailObj.frzCnt[_scoreId]})<br><br>
+			(${g_detailObj.toolDif[_scoreId].push3})`.split(`,`).join(`/`);
 
-		// ノーツ数詳細
-		if (document.querySelector(`#lblArrowInfo`) === null) {
-			lbl = createDivCssLabel(`lblArrowInfo`, 125, 30, 250, 35, 16, `All Arrows`);
+		if (document.querySelector(`#lblDouji`) === null) {
+			lbl = createDivCssLabel(`lblDouji`, 130, 25, 125, 35, 14, `同時補正`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
-			data = createDivCssLabel(`dataArrowInfo`, 250, 30, 160, 35, 16, ArrowInfo);
+			lbl = createDivCssLabel(`lblTate`, 250, 25, 125, 35, 14, `縦連補正`);
+			lbl.style.textAlign = C_ALIGN_LEFT;
+			document.querySelector(`#detailToolDif`).appendChild(lbl);
+
+			data = createDivCssLabel(`dataDouji`, 200, 25, 160, 35, 14, g_detailObj.toolDif[_scoreId].douji);
 			data.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 
-			lbl = createDivCssLabel(`lblArrowInfo2`, 125, 70, 50, 90, 14, `Arrow:<br><br>Frz:`);
+			data = createDivCssLabel(`dataTate`, 325, 25, 160, 35, 14, g_detailObj.toolDif[_scoreId].tate);
+			data.style.textAlign = C_ALIGN_LEFT;
+			document.querySelector(`#detailToolDif`).appendChild(data);
+
+			lbl = createDivCssLabel(`lblArrowInfo`, 130, 45, 290, 35, 16, `All Arrows`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
-			data = createDivCssLabel(`dataArrowInfo2`, 125, 70, 285, 90, 14, ArrowInfo2);
+			data = createDivCssLabel(`dataArrowInfo`, 250, 45, 160, 35, 16, ArrowInfo);
+			data.style.textAlign = C_ALIGN_LEFT;
+			document.querySelector(`#detailToolDif`).appendChild(data);
+
+			lbl = createDivCssLabel(`lblArrowInfo2`, 130, 70, 200, 90, 14,
+				`- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`);
+			lbl.style.textAlign = C_ALIGN_LEFT;
+			document.querySelector(`#detailToolDif`).appendChild(lbl);
+
+			data = createDivCssLabel(`dataArrowInfo2`, 140, 70, 275, 150, 14, ArrowInfo2);
 			data.style.textAlign = C_ALIGN_LEFT;
 			data.style.overflow = `auto`;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 
 		} else {
+			document.querySelector(`#dataDouji`).innerHTML = g_detailObj.toolDif[_scoreId].douji;
+			document.querySelector(`#dataTate`).innerHTML = g_detailObj.toolDif[_scoreId].tate;
+			document.querySelector(`#lblArrowInfo2`).innerHTML = `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`;
 			document.querySelector(`#dataArrowInfo`).innerHTML = ArrowInfo;
 			document.querySelector(`#dataArrowInfo2`).innerHTML = ArrowInfo2;
 		}
-
-		// 詳細データ
-		makeScoreDetailLabel(`ToolDif`, `douji`, g_detailObj.toolDif[_scoreId].douji, 0, `同時`);
-		makeScoreDetailLabel(`ToolDif`, `tate`, g_detailObj.toolDif[_scoreId].tate, 1, `縦連`);
-		makeScoreDetailLabel(`ToolDif`, `push3cnt`, g_detailObj.toolDif[_scoreId].push3cnt, 4, `3つ押し数`);
-
-		// 3つ押しリスト
-		makeScoreDetailLabel(`ToolDif`, `push3`, ``, 5, `3つ押しリスト`);
-		if (document.querySelector(`#datapush3list`) === null) {
-			const push3 = createDivCssLabel(`datapush3list`, 10, 65 + 6 * 20, 400, 35, 14, g_detailObj.toolDif[_scoreId].push3);
-			push3.style.textAlign = C_ALIGN_LEFT;
-			push3.style.overflow = `auto`;
-			document.querySelector(`#detailToolDif`).appendChild(push3);
-		} else {
-			document.querySelector(`#datapush3list`).innerHTML = g_detailObj.toolDif[_scoreId].push3;
-		}
-		document.querySelector(`#lblpush3`).innerHTML = (g_detailObj.toolDif[_scoreId].push3cnt > 0 ? `3つ押しリスト` : ``);
 
 		// データ出力ボタン
 		if (document.querySelector(`#lnkDifInfo`) === null) {
