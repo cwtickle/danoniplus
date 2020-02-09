@@ -1676,30 +1676,45 @@ function drawMainSpriteData(_frame, _depthName) {
 }
 
 /**
- * 曲名のグラデーションを指定
- * @param {array} _titlegrds 
+ * グラデーション用のカラーフォーマットを作成
+ * @param {string} _colorStr 
+ * @param {boolean} _colorGradation
+ * @param {boolean} _colorCdPaddingUse
+ * @param {boolean} _musicTitleFlg
  */
-function getMusicTitleGradation(_titlegrds) {
-	const grdData = [];
+function makeColorGradation(_colorStr, _colorGradation = g_headerObj.colorGradation,
+	_colorCdPaddingUse = false, _musicTitleFlg = false) {
 
-	for (let j = 0; j < _titlegrds.length; j++) {
+	// |color_data=300,20,45deg:#ffff99:#ffffff:#9999ff@linear-gradient|
+	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
+	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
 
-		let tmpgrd = setVal(_titlegrds[j], ``, C_TYP_STRING);
-
-		// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
-		// 先頭1文字目が#かどうかで判断するので、redやwhiteのような色コードの指定はNG
-		if (tmpgrd[0] === `#`) {
-			tmpgrd = `to right,${tmpgrd}`;
+	let convertColorStr;
+	const tmpColorStr = _colorStr.split(`@`);
+	const colorArray = tmpColorStr[0].split(`:`);
+	for (let j = 0; j < colorArray.length; j++) {
+		colorArray[j] = colorArray[j].replace(/0x/g, `#`);
+		if (_colorCdPaddingUse) {
+			colorArray[j] = `#${paddingLeft(colorArray[j].slice(1), 6, `0`)}`;
 		}
-
-		// グラデーションが1色しか指定されていない場合、自動的に補完する
-		if (tmpgrd.split(`#`).length <= 2) {
-			tmpgrd += `,#ffffff`;
-		}
-		grdData.push(tmpgrd);
 	}
 
-	return [grdData[0], (grdData.length > 1 ? grdData[1] : grdData[0])];
+	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
+	if (colorArray.length === 1) {
+		if (_musicTitleFlg) {
+			convertColorStr = `to right, ${colorArray[0]} 100%, #eeeeee 0%`;
+		} else if (_colorGradation) {
+			convertColorStr = `to right, ${colorArray[0]}, #eeeeee, ${colorArray[0]}`;
+		} else {
+			convertColorStr = `to right, ${colorArray[0]}, ${colorArray[0]}`;
+		}
+	} else if (gradationType === `linear-gradient` && colorArray[0].slice(0, 1) === `#`) {
+		convertColorStr = `to right, ${colorArray.join(', ')}`;
+	} else {
+		convertColorStr = `${colorArray.join(', ')}`;
+	}
+
+	return `${gradationType}(${convertColorStr})`;
 }
 
 /**
@@ -1734,7 +1749,7 @@ function titleInit() {
 
 	// 背景の矢印オブジェクトを表示
 	if (!g_headerObj.customTitleArrowUse) {
-		const lblArrow = createColorObject(`lblArrow`, g_headerObj.setColorDefault[0],
+		const lblArrow = createColorObject(`lblArrow`, makeColorGradation(g_headerObj.setColorDefault[0], false, false),
 			(g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2,
 			500, 500, 180);
 		lblArrow.style.opacity = 0.25;
@@ -1765,9 +1780,13 @@ function titleInit() {
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
 		if (g_headerObj.titlegrds.length === 0) {
-			[titlefontgrd, titlefontgrd2] = getMusicTitleGradation([`${g_headerObj.setColorDefault[0]},${g_headerObj.setColorDefault[2]}`]);
+			titlefontgrd = makeColorGradation(`${g_headerObj.setColorDefault[0]},${g_headerObj.setColorDefault[2]}`, false, false, true);
+			titlefontgrd2 = titlefontgrd;
 		} else {
-			[titlefontgrd, titlefontgrd2] = getMusicTitleGradation(g_headerObj.titlegrds);
+			titlefontgrd = makeColorGradation(g_headerObj.titlegrds[0], false, false, true);
+			if (g_headerObj.titlegrds.length > 1) {
+				titlefontgrd2 = makeColorGradation(g_headerObj.titlegrds[1], false, false, true);
+			}
 		}
 
 		let titlefontsize = 64 * (12 / g_headerObj.musicTitleForView[0].length);
@@ -1815,7 +1834,7 @@ function titleInit() {
 				position:relative;top:${titlefontsize1 - (titlefontsize1 + titlefontsize2) / 2}px;
 				font-family:${titlefontname};
 				font-size:${titlefontsize1}px;
-				background: linear-gradient(${titlefontgrd});
+				background: ${titlefontgrd};
 				background-clip: text;
 				-webkit-background-clip: text;
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
@@ -1825,7 +1844,7 @@ function titleInit() {
 				<span style="
 					font-size:${titlefontsize2}px;
 					position:relative;top:${titlelineheight - (titlefontsize1 + titlefontsize2) / 2 - titlefontsize1 + titlefontsize2}px;
-					background: linear-gradient(${titlefontgrd2});
+					background: ${titlefontgrd2};
 					background-clip: text;
 					-webkit-background-clip: text;
 					-webkit-text-fill-color: rgba(255,255,255,0.0);
@@ -2357,18 +2376,11 @@ function headerConvert(_dosObj) {
 	if (_dosObj.setColor !== undefined && _dosObj.setColor !== ``) {
 		obj.setColor = _dosObj.setColor.split(`,`);
 		for (let j = 0; j < obj.setColor.length; j++) {
-
 			obj.setColorOrg[j] = obj.setColor[j].replace(/0x/g, `#`).split(`:`)[0];
 			if (obj.colorCdPaddingUse) {
 				obj.setColorOrg[j] = `#${paddingLeft(obj.setColorOrg[j].slice(1), 6, `0`)}`;
 			}
 			obj.setColor[j] = makeColorGradation(obj.setColor[j], obj.colorGradation, obj.colorCdPaddingUse);
-			/*
-			obj.setColor[j] = obj.setColor[j].replace(/0x/g, `#`);
-			if (obj.colorCdPaddingUse) {
-				obj.setColor[j] = `#${paddingLeft(obj.setColor[j].slice(1), 6, `0`)}`;
-			}
-			*/
 		}
 		for (let j = obj.setColor.length; j < obj.setColorInit.length; j++) {
 			obj.setColorOrg[j] = obj.setColor[j];
@@ -2405,12 +2417,6 @@ function headerConvert(_dosObj) {
 
 			for (let k = 0; k < obj.frzColor[j].length; k++) {
 				obj.frzColor[j][k] = makeColorGradation(obj.frzColor[j][k], obj.colorGradation, obj.colorCdPaddingUse);
-				/*
-				obj.frzColor[j][k] = obj.frzColor[j][k].replace(/0x/g, `#`);
-				if (obj.colorCdPaddingUse) {
-					obj.frzColor[j][k] = `#${paddingLeft(obj.frzColor[j][k].slice(1), 6, `0`)}`;
-				}
-				*/
 			}
 			for (let k = obj.frzColor[j].length; k < obj.frzColorInit.length; k++) {
 				obj.frzColor[j][k] = makeColorGradation(obj.frzColorInit[k], obj.colorGradation, obj.colorCdPaddingUse);
@@ -2579,7 +2585,7 @@ function headerConvert(_dosObj) {
 	// デフォルト曲名表示のグラデーション指定css
 	obj.titlegrds = [];
 	if (_dosObj.titlegrd !== undefined) {
-		const tmpTitlegrd = _dosObj.titlegrd.replace(/0x/g, `#`);
+		const tmpTitlegrd = _dosObj.titlegrd.replace(/,/g, `:`);
 		obj.titlegrds = tmpTitlegrd.split(`$`);
 		obj.titlegrd = setVal(obj.titlegrds[0], ``, C_TYP_STRING);
 	}
@@ -2647,45 +2653,6 @@ function headerConvert(_dosObj) {
 	obj.scoreDetailUse = setVal(_dosObj.scoreDetailUse, true, C_TYP_BOOLEAN);
 
 	return obj;
-}
-
-/**
- * グラデーション用のカラーフォーマットを作成
- * @param {string} _colorStr 
- * @param {boolean} _colorGradation
- * @param {boolean} _colorCdPaddingUse
- */
-function makeColorGradation(_colorStr, _colorGradation = g_headerObj.colorGradation, _colorCdPaddingUse = false) {
-
-	// |color_data=300,20,45deg:#ffff99:#ffffff:#9999ff@linear-gradient|
-	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
-	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
-
-	let convertColorStr;
-	const tmpColorStr = _colorStr.split(`@`);
-	const colorArray = tmpColorStr[0].split(`:`);
-	for (let j = 0; j < colorArray.length; j++) {
-		colorArray[j] = colorArray[j].replace(/0x/g, `#`);
-		if (_colorCdPaddingUse) {
-			colorArray[j] = `#${paddingLeft(colorArray[j].slice(1), 6, `0`)}`;
-		}
-	}
-
-	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
-	if (colorArray.length === 1) {
-		if (_colorGradation) {
-			convertColorStr = `to right, ${colorArray[0]}, #ffffff, ${colorArray[0]}`;
-		} else {
-			convertColorStr = `to right, ${colorArray[0]}, ${colorArray[0]}`;
-		}
-	} else if (gradationType === `linear-gradient` && colorArray[0].slice(0, 1) === `#`) {
-		convertColorStr = `to right, ${colorArray.join(',')}`;
-	} else {
-		convertColorStr = `${colorArray.join(',')}`;
-	}
-
-
-	return `${gradationType}(${convertColorStr})`;
 }
 
 /**
@@ -6076,7 +6043,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		frmPrev = tmpObj.frm;
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 		pushColors(``, isFrzHitColor(_dataObj.colorData[lastk + 1]) ? _dataObj.colorData[lastk] : tmpObj.frm,
-			_dataObj.colorData[lastk + 1], _dataObj.colorData[lastk + 2].replace(/0x/g, `#`));
+			_dataObj.colorData[lastk + 1], _dataObj.colorData[lastk + 2]);
 
 		for (let k = lastk - 3; k >= 0; k -= 3) {
 
@@ -6100,7 +6067,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 			}
-			pushColors(``, _dataObj.colorData[k], _dataObj.colorData[k + 1], _dataObj.colorData[k + 2].replace(/0x/g, `#`));
+			pushColors(``, _dataObj.colorData[k], _dataObj.colorData[k + 1], _dataObj.colorData[k + 2]);
 		}
 	}
 
@@ -6108,7 +6075,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	if (_dataObj.acolorData !== undefined && _dataObj.acolorData.length >= 3) {
 
 		for (let k = _dataObj.acolorData.length - 3; k >= 0; k -= 3) {
-			pushColors(`A`, _dataObj.acolorData[k], _dataObj.acolorData[k + 1], _dataObj.acolorData[k + 2].replace(/0x/g, `#`));
+			pushColors(`A`, _dataObj.acolorData[k], _dataObj.acolorData[k + 1], _dataObj.acolorData[k + 2]);
 		}
 	}
 
