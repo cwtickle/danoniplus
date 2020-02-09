@@ -40,6 +40,7 @@ let g_localVersion2 = ``;
  */
 
 window.onload = _ => {
+	g_loadObj = {};
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
@@ -103,7 +104,6 @@ const g_detailObj = {
 	playingFrame: [],
 	speedData: [],
 	boostData: [],
-	toolDif: [],
 };
 
 const g_workObj = {
@@ -374,32 +374,6 @@ function paddingLeft(_str, _length, _chr) {
 		paddingStr = _chr + paddingStr;
 	}
 	return paddingStr;
-}
-
-/**
- * クリップボードコピー関数
- * 入力値をクリップボードへコピーする
- * @param {string} _textVal 入力値
- */
-function copyTextToClipboard(_textVal) {
-	// テキストエリアを用意する
-	let copyFrom = document.createElement(`textarea`);
-	// テキストエリアへ値をセット
-	copyFrom.textContent = _textVal;
-
-	// bodyタグの要素を取得
-	var bodyElm = document.getElementsByTagName(`body`)[0];
-	// 子要素にテキストエリアを配置
-	bodyElm.appendChild(copyFrom);
-
-	// テキストエリアの値を選択
-	copyFrom.select();
-	// コピーコマンド発行
-	var retVal = document.execCommand(`copy`);
-	// 追加テキストエリアを削除
-	bodyElm.removeChild(copyFrom);
-	// 処理結果を返却
-	return retVal;
 }
 
 /**
@@ -729,12 +703,14 @@ function clearWindow() {
 
 /**
  * 外部jsファイルの読込
+ * 読込可否を g_loadObj[ファイル名] で管理 (true: 読込成功, false: 読込失敗)
  * @param {string} _url 
  * @param {function} _callback 
  * @param {boolean} _requiredFlg (default : true / 読込必須)
  * @param {string} _charset (default : UTF-8)
  */
 function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
+	g_loadObj[_url.split(`?`)[0]] = true;
 	const script = document.createElement(`script`);
 	script.type = `text/javascript`;
 	script.src = _url;
@@ -744,6 +720,7 @@ function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
 		if (_requiredFlg) {
 			makeWarningWindow(C_MSG_E_0041.split(`{0}`).join(_url.split(`?`)[0]));
 		} else {
+			g_loadObj[_url.split(`?`)[0]] = false;
 			_callback();
 		}
 	};
@@ -1102,8 +1079,9 @@ function loadLocalStorage() {
  * 譜面読込
  * @param {function} _afterFunc 実行後の処理
  * @param {number} _scoreId 譜面番号
+ * @param {boolean} _cyclicFlg 再読込フラグ（譜面詳細情報取得用、再帰的にloadDosを呼び出す）
  */
-function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId) {
+function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) {
 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
@@ -1125,7 +1103,6 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId) {
 		g_stateObj.scoreLockFlg = setVal(dosLockInput.value, false, C_TYP_BOOLEAN);
 	}
 	if (externalDosInput !== null && dosDivideFlg && g_stateObj.scoreLockFlg) {
-		g_rootObj["boost_data"] = ``;
 		const scoreList = Object.keys(g_rootObj).filter(data => {
 			return data.endsWith(`_data`) || data.endsWith(`_change`);
 		});
@@ -1139,6 +1116,9 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
 		if (externalDosInput === null) {
 			_afterFunc();
+			if (_cyclicFlg) {
+				reloadDos(_scoreId);
+			}
 		}
 	}
 
@@ -1163,17 +1143,34 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId) {
 					divRoot.removeChild(document.querySelector(`#lblLoading`));
 				}
 
-				// 外部データを読込
+				// 外部データを読込（ファイルが見つからなかった場合は譜面追記をスキップ）
 				externalDosInit();
-				Object.assign(g_rootObj, dosConvert(g_externalDos));
+				if (!g_loadObj[filename]) {
+				} else {
+					Object.assign(g_rootObj, dosConvert(g_externalDos));
+				}
 
 			} else {
 				makeWarningWindow(C_MSG_E_0022);
 			}
-
-			// danoni_setting.jsは初回時のみ読込
 			_afterFunc();
+			if (_cyclicFlg) {
+				reloadDos(_scoreId);
+			}
 		}, false, charset);
+	}
+}
+
+/**
+ * 譜面情報の再取得を行う（譜面詳細情報取得用）
+ * @param {number} _scoreId 
+ */
+function reloadDos(_scoreId) {
+	_scoreId++;
+	if (_scoreId < g_headerObj.keyLabels.length) {
+		loadDos(_ => {
+			getScoreDetailData(_scoreId);
+		}, _scoreId, true);
 	}
 }
 
@@ -1261,14 +1258,20 @@ function initAfterDosLoaded() {
 
 	// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
 	loadCustomjs(_ => {
-		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
-			loadDos(_ => {
-				const keyCtrlPtn = `${g_headerObj.keyLabels[j]}_0`;
-				storeBaseData(j, scoreConvert(g_rootObj, j, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
-			}, j);
-		}
+		loadDos(_ => {
+			getScoreDetailData(0);
+		}, 0, true);
 		titleInit();
 	});
+}
+
+/**
+ * 譜面ファイル読込後処理（譜面詳細情報取得用）
+ * @param {number} _scoreId 
+ */
+function getScoreDetailData(_scoreId) {
+	const keyCtrlPtn = `${g_headerObj.keyLabels[_scoreId]}_0`;
+	storeBaseData(_scoreId, scoreConvert(g_rootObj, _scoreId, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
 }
 
 /**
@@ -1296,6 +1299,9 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 		arrowCnt[j] = 0;
 		frzCnt[j] = 0;
 		_scoreObj.arrowData[j].forEach(note => {
+			if (isNaN(parseFloat(note))) {
+				return;
+			}
 			const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 			if (point >= 0) {
 				densityData[point]++;
@@ -1304,6 +1310,9 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 			}
 		});
 		_scoreObj.frzData[j].forEach((note, k) => {
+			if (isNaN(parseFloat(note))) {
+				return;
+			}
 			if (k % 2 === 0 && note !== ``) {
 				const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 				if (point >= 0) {
@@ -1315,7 +1324,6 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 		});
 	}
 
-	g_detailObj.toolDif[_scoreId] = calcLevel(_scoreObj);
 	g_detailObj.speedData[_scoreId] = _scoreObj.speedData.concat();
 	g_detailObj.boostData[_scoreId] = _scoreObj.boostData.concat();
 
@@ -1329,216 +1337,6 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	g_detailObj.frzCnt[_scoreId] = frzCnt.concat();
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
-}
-
-/**
- * ツール計算
- * @param {object} _scoreObj 
- */
-function calcLevel(_scoreObj){
-	//--------------------------------------------------------------
-	//＜フリーズデータ分解＞
-	//  フリーズデータを分解し、矢印データに組み込む
-	//
-	//  (イメージ)
-	//    &left_data=400,500,700&
-	//    &frzLeft_data=550,650&
-	//  ⇒
-	//    left_data=[400,500,550,700];  // フリーズの始点を組込
-	//    frzStartData=[550];	// フリーズ始点
-	//    frzEndData  =[650];	// フリーズ終点
-	//--------------------------------------------------------------
-	let frzStartData=[];
-	let frzEndData=[];
-
-	for (let j = 0; j < _scoreObj.frzData.length; j++) {
-		if (_scoreObj.frzData[j].length>1) {
-			for (let k = 0; k < _scoreObj.frzData[j].length; k+=2) {
-				_scoreObj.arrowData[j].push(_scoreObj.frzData[j][k]);
-				frzStartData.push(_scoreObj.frzData[j][k]);
-				frzEndData.push(_scoreObj.frzData[j][k+1]);
-			}
-		}
-		_scoreObj.arrowData[j].sort((a, b) => a - b);
-	}
-
-	frzStartData.sort((a, b) => a - b);
-	frzEndData.sort((a, b) => a - b);
-
-	//--------------------------------------------------------------
-	//＜データ結合･整理＞
-	//  矢印データを連結してソートする。
-	//
-	//  重複は後の同時押し補正で使用する。
-	//  後の同時押し補正の都合上、firstFrame-100, lastFrame+100 のデータを末尾に追加。
-	//
-	//  (イメージ)
-	//    &left_data=300,400,550&	// フリーズデータ(始点)を含む
-	//    &down_data=500&
-	//    &up_data=600&
-	//    &right_data=700,800&
-	//    &space_data=200,300,1000&
-	//    frzEndData = [650];	// フリーズデータ(終点) ※allScorebook対象外
-	//  ⇒
-	//    allScorebook = [100,200,300,300,400,500,550,600,700,800,1000,1100];
-	//
-	//--------------------------------------------------------------
-	let allScorebook = [];
-	let firstFrame = 0;
-	let lastFrame = 0;
-
-	for (let j = 0; j < _scoreObj.arrowData.length; j++) {
-		allScorebook = allScorebook.concat(_scoreObj.arrowData[j]);
-	}
-
-	allScorebook.sort((a, b) => a - b);
-	allScorebook.unshift(allScorebook[0] - 100);
-	allScorebook.push(allScorebook[allScorebook.length-1] + 100);
-
-	frzEndData.push(allScorebook[allScorebook.length-1]);
-
-	// ファーストナンバー、ラストナンバーの特定
-	if (!isNaN(parseFloat(allScorebook[1]))) {
-		firstFrame = allScorebook[1];
-	}else{
-		firstFrame = 0;
-	}
-	if(!isNaN(parseFloat(allScorebook[allScorebook.length-2]))){
-		lastFrame = allScorebook[allScorebook.length-2];
-		if(!isNaN(parseFloat(frzEndData[frzEndData.length-2]))){
-			let arrEnd = Math.round(allScorebook[allScorebook.length-2]);
-			let frzEnd = Math.round(frzEndData[frzEndData.length-2]);
-			if (frzEnd > arrEnd) {
-				lastFrame = frzEnd;
-			}
-		}
-	}else{
-		lastFrame = 0;
-	}
-
-	//--------------------------------------------------------------
-	//＜間隔フレーム数の調和平均計算+いろいろ補正＞
-	//  レベル計算メイン。
-	//
-	//  [レベル計算ツール++ ver1.18] 3つ押し以上でも同時押し補正ができるよう調整
-	//--------------------------------------------------------------
-	let levelcount = 0;   // 難易度レベル
-	let leveltmp;
-	let freezenum = 0; // フリーズアロー数
-	let pushCnt = 1;   // 同時押し数カウント
-	let twoPushCount = 0; // 同時押し補正値
-	let push3cnt = [];    // 3つ押し判定数
-	
-	for (let i = 1; i < allScorebook.length-2; ++i){
-		// フリーズ始点の検索
-		while (frzStartData[0] == allScorebook[i]) {
-			// 同時押しの場合
-			if (allScorebook[i] == allScorebook[i+1]) {
-				break;
-			}
-
-			// 現フレームに存在するフリーズ数を1増やす
-			// (フリーズアローの同時チェック開始)
-			frzStartData.shift();
-			freezenum++;
-		}
-
-		// フリーズ終点の検索
-		while (frzEndData[0] < allScorebook[i+1]) {
-			// 現フレームに存在するフリーズ数を1減らす
-			frzEndData.shift();
-			freezenum--;
-		}
-
-		// 同時押し補正処理(フリーズアローが絡まない場合)
-		if (allScorebook[i+1] == allScorebook[i] && !freezenum) {
-			
-			let chk = (allScorebook[i+2] - allScorebook[i+1]) * (allScorebook[i] - allScorebook[i-pushCnt]);
-			if (chk != 0) {
-				twoPushCount += 40/chk;
-			}else{
-				// 3つ押しが絡んだ場合は加算しない
-				push3cnt.push(allScorebook[i]);
-			}
-			pushCnt++;
-
-		// 単押し＋フリーズアローの補正処理(フリーズアロー中の矢印)
-		}else{
-			pushCnt = 1;
-			let chk2 = (2 - freezenum) * (allScorebook[i+1] - allScorebook[i]);
-			if (chk2 > 0) {
-				levelcount += 2/chk2;
-			}else{
-				// 3つ押しが絡んだ場合は加算しない
-				push3cnt.push(allScorebook[i]);
-			}
-		}
-	}
-	levelcount += twoPushCount;
-	leveltmp = levelcount;
-
-	//--------------------------------------------------------------
-	//＜同方向連打補正＞
-	//  同方向矢印(フリーズアロー)の隣接間隔が10フレーム未満の場合に加算する。
-	//--------------------------------------------------------------
-	for (let j = 0; j < _scoreObj.arrowData.length; j++) {
-		for (let k = 0; k < _scoreObj.arrowData[j].length; ++k) {
-		_scoreObj.arrowData[j][k]
-			if(_scoreObj.arrowData[j][k+1] - _scoreObj.arrowData[j][k] < 10){
-				levelcount += 10 / (_scoreObj.arrowData[j][k+1] - _scoreObj.arrowData[j][k])
-				 / (_scoreObj.arrowData[j][k+1] - _scoreObj.arrowData[j][k]) - 1 / 10;
-			}
-		}
-	}
-
-	//--------------------------------------------------------------
-	//＜表示＞
-	//  曲長補正を行い、最終的な難易度レベル値を表示する。
-	//--------------------------------------------------------------
-	// 難易度レベル(最終)
-	let print = Math.round(levelcount / Math.sqrt(allScorebook.length - push3cnt.length - 3) * 400) / 100;
-
-	// 難易度レベル(縦連打以外)
-	let tmp = Math.round(leveltmp / Math.sqrt(allScorebook.length - push3cnt.length - 3) * 400) / 100;
-
-	// 縦連打補正値計算
-	let tate = Math.round((print - tmp) * 100) / 100;
-	if(isNaN(tate) || tate == Infinity){
-		tate = 0;
-	}
-	// 同時押し補正値計算
-	let douji = Math.round(twoPushCount / Math.sqrt(allScorebook.length - push3cnt.length - 3) * 400) / 100;
-	if(isNaN(douji) || douji == Infinity){
-		douji = 0;
-	}
-
-	//--------------------------------------------------------------
-	//＜難易度レベル(最終)を小数第2位までに丸める＞
-	//  [レベル計算ツール++ ver1.18] 3つ押し補正適用
-	//  [レベル計算ツール++ ver1.28] 矢印数1の場合の処理追加
-	//--------------------------------------------------------------
-	let subPrint;
-	if(allScorebook.length == 3){
-		print = `0.01`;
-		tmp = `0.01`;
-	}else{
-		print = Math.round(print * 100 * (allScorebook.length - 3) / (allScorebook.length - push3cnt.length - 3)) / 100;
-		subPrint = Math.round((print * 100) % 100);
-		subPrint = (subPrint < 10 ? "0"+subPrint : ""+subPrint);
-		print = `${Math.floor(print)}.${subPrint}${(push3cnt.length > 0 ? "*" : "")}`;
-	}
-
-	//--------------------------------------------------------------
-	//＜計算結果を格納＞
-	//--------------------------------------------------------------
-	let toolDif = {
-		tool: print,
-		tate: tate,
-		douji: douji,
-		push3cnt: push3cnt.length,
-		push3: push3cnt,
-	};
-	return toolDif;
 }
 
 /**
@@ -3422,7 +3220,6 @@ function createOptionWindow(_sprite) {
 		scoreDetail.style.visibility = `hidden`;
 		scoreDetail.appendChild(createScoreDetail(`Speed`));
 		scoreDetail.appendChild(createScoreDetail(`Density`));
-		scoreDetail.appendChild(createScoreDetail(`ToolDif`, false));
 
 		const btnGraph = createCssButton({
 			id: `btnGraph`,
@@ -3519,15 +3316,17 @@ function createOptionWindow(_sprite) {
 			let speed = speedObj[`${speedType}`].speed;
 			const speedData = g_detailObj[`${speedType}Data`][_scoreId];
 
-			for (let i = 0; i < speedData.length; i += 2) {
-				if (speedData[i] >= startFrame) {
-					frame.push(speedData[i] - startFrame);
-					speed.push(speedData[i + 1]);
+			if (speedData !== undefined) {
+				for (let i = 0; i < speedData.length; i += 2) {
+					if (speedData[i] >= startFrame) {
+						frame.push(speedData[i] - startFrame);
+						speed.push(speedData[i + 1]);
+					}
+					speedObj[`${speedType}`].cnt++;
 				}
-				speedObj[`${speedType}`].cnt++;
+				frame.push(playingFrame);
+				speed.push(speed[speed.length - 1]);
 			}
-			frame.push(playingFrame);
-			speed.push(speed[speed.length - 1]);
 		});
 
 		const canvas = document.querySelector(`#graphSpeed`);
@@ -3606,16 +3405,16 @@ function createOptionWindow(_sprite) {
 	 * @param {string} _value 
 	 * @param {number} _pos 表示位置
 	 */
-	function makeScoreDetailLabel(_name, _label, _value, _pos = 0, _labelname = _label) {
-		if (document.querySelector(`#data${_labelname}`) === null) {
-			const lbl = createDivCssLabel(`lbl${_labelname}`, 10, 65 + _pos * 20, 100, 20, 14, `${_label}`);
+	function makeScoreDetailLabel(_name, _label, _value, _pos = 0) {
+		if (document.querySelector(`#data${_label}`) === null) {
+			const lbl = createDivCssLabel(`lbl${_label}`, 10, 65 + _pos * 20, 100, 20, 14, `${_label}`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detail${_name}`).appendChild(lbl);
-			const data = createDivCssLabel(`data${_labelname}`, 10, 65 + _pos * 20, 100, 20, 14, `${_value}`);
+			const data = createDivCssLabel(`data${_label}`, 10, 65 + _pos * 20, 100, 20, 14, `${_value}`);
 			data.style.textAlign = C_ALIGN_RIGHT;
 			document.querySelector(`#detail${_name}`).appendChild(data);
 		} else {
-			document.querySelector(`#data${_labelname}`).innerHTML = `${_value}`;
+			document.querySelector(`#data${_label}`).innerHTML = `${_value}`;
 		}
 	}
 
@@ -3660,118 +3459,6 @@ function createOptionWindow(_sprite) {
 			_context.strokeStyle = `#646464`;
 		}
 		_context.stroke();
-	}
-
-	/**
-	 * 譜面の難易度情報
-	 * @param {number} _scoreId 
-	 */
-	function makeDifInfo(_scoreId) {
-
-		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
-		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
-		let lbl;
-		let data;
-
-		// ツール難易度
-		if (document.querySelector(`#lblTooldif`) === null) {
-			lbl = createDivCssLabel(`lblTooldif`, 125, 10, 250, 35, 20, `ツール難易度:`);
-			lbl.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(lbl);
-
-			data = createDivCssLabel(`dataTooldif`, 290, 10, 120, 35, 20, g_detailObj.toolDif[_scoreId].tool);
-			data.style.textAlign = C_ALIGN_CENTER;
-			document.querySelector(`#detailToolDif`).appendChild(data);
-		} else {
-			document.querySelector(`#dataTooldif`).innerHTML = g_detailObj.toolDif[_scoreId].tool;
-		}
-
-		let ArrowInfo = `${arrowCnts+frzCnts} (${arrowCnts} + ${frzCnts})`;
-		let ArrowInfo2 = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>(${g_detailObj.frzCnt[_scoreId]})`.split(`,`).join(`/`);
-		// ノーツ数詳細
-		if (document.querySelector(`#lblArrowInfo`) === null) {
-			lbl = createDivCssLabel(`lblArrowInfo`, 125, 40, 250, 35, 18, `矢印数:`);
-			lbl.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(lbl);
-
-			data = createDivCssLabel(`dataArrowInfo`, 150, 40, 300, 35, 18, ArrowInfo);
-			data.style.textAlign = C_ALIGN_CENTER;
-			document.querySelector(`#detailToolDif`).appendChild(data);
-
-			lbl = createDivCssLabel(`lblArrowInfo2`, 125, 70, 50, 90, 14, `通常:<br><br>氷矢:`);
-			lbl.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(lbl);
-
-			data = createDivCssLabel(`dataArrowInfo2`, 125, 70, 285, 90, 14, ArrowInfo2);
-			data.style.textAlign = C_ALIGN_LEFT;
-			data.style.overflow = `auto`;
-			document.querySelector(`#detailToolDif`).appendChild(data);
-		} else {
-			document.querySelector(`#dataArrowInfo`).innerHTML = ArrowInfo;
-			document.querySelector(`#dataArrowInfo2`).innerHTML = ArrowInfo2;
-		}
-
-		// 詳細データ
-		makeScoreDetailLabel(`ToolDif`, `同時`, g_detailObj.toolDif[_scoreId].douji, 1, `douji`);
-		makeScoreDetailLabel(`ToolDif`, `縦連`, g_detailObj.toolDif[_scoreId].tate, 2, `tate`);
-		makeScoreDetailLabel(`ToolDif`, `3つ押し数`, g_detailObj.toolDif[_scoreId].push3cnt, 4, `push3cnt`);
-		
-		// 3つ押しリスト
-		makeScoreDetailLabel(`ToolDif`, `3つ押しリスト`, ``, 5, `push3`);
-		if (document.querySelector(`#datapush3list`) === null) {
-			const push3 = createDivCssLabel(`datapush3list`, 10, 65 + 6 * 20, 400, 35, 14, g_detailObj.toolDif[_scoreId].push3);
-			push3.style.textAlign = C_ALIGN_LEFT;
-			push3.style.overflow = `auto`;
-			document.querySelector(`#detailToolDif`).appendChild(push3);
-		} else {
-			document.querySelector(`#datapush3list`).innerHTML = g_detailObj.toolDif[_scoreId].push3;
-		}
-		document.querySelector(`#lblpush3`).innerHTML = (g_detailObj.toolDif[_scoreId].push3cnt > 0 ? `3つ押しリスト` : ``);
-
-		// データ出力ボタン
-		if (document.querySelector(`#lnkDifInfo`) === null) {
-			let printData = ``;
-			for (let j = 0; j < g_detailObj.arrowCnt.length; j++) {
-				const arrowCnts = g_detailObj.arrowCnt[j].reduce((p, x) => p + x);
-				const frzCnts = g_detailObj.frzCnt[j].reduce((p, x) => p + x);
-				const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[j] / g_fps / 60));
-				const minutes = Math.floor(g_detailObj.playingFrame[j] / g_fps / 60);
-				const seconds = `00${Math.floor((g_detailObj.playingFrame[j] / g_fps) % 60)}`.slice(-2);
-				const playingTime = `${minutes}:${seconds}`;
-
-				printData += 
-					// 譜面番号
-					`[${j+1}]\t`+ 
-					// ツール値
-					`${g_detailObj.toolDif[j].tool}\t`+
-					// 同時
-					`${g_detailObj.toolDif[j].douji}\t`+
-					// 縦連
-					`${g_detailObj.toolDif[j].tate}\t`+
-					// 総矢印数
-					`${(arrowCnts+frzCnts)}\t`+
-					// 矢印
-					`${arrowCnts}\t`+
-					// フリーズアロー
-					`${frzCnts}\t`+
-					// APM
-					`${apm}\t`+
-					// 時間(分秒)
-					`${playingTime}\r\n`;
-			}
-			const lnk = makeSettingLblCssButton(`lnkDifInfo`, `データ出力`, 0, _ => {
-				copyTextToClipboard(
-					`****** Dancing☆Onigiri レベル計算ツール+++ [${g_version}] ******\r\n\r\n`
-					+`\t難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間\r\n\r\n${printData}`
-				);
-			});
-			lnk.style.left = `10px`;
-			lnk.style.top = `30px`;
-			lnk.style.width = `100px`;
-			lnk.style.borderStyle = `solid`;
-			lnk.classList.add(g_cssObj.button_RevON);
-			document.querySelector(`#detailToolDif`).appendChild(lnk);
-		}
 	}
 
 	// ---------------------------------------------------
@@ -4225,7 +3912,6 @@ function createOptionWindow(_sprite) {
 		if (g_headerObj.scoreDetailUse) {
 			drawSpeedGraph(g_stateObj.scoreId);
 			drawDensityGraph(g_stateObj.scoreId);
-			makeDifInfo(g_stateObj.scoreId);
 		}
 
 		// リバース設定 (Reverse, Scroll)
@@ -5508,10 +5194,6 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	obj.frzData = [];
 	obj.dummyArrowData = [];
 	obj.dummyFrzData = [];
-	obj.boostData = [];
-	obj.speedData = [];
-	obj.colorData = [];
-	obj.acolorData = [];
 	const headerAdjustment = parseInt(g_headerObj.adjustment[_scoreId] || g_headerObj.adjustment[0]);
 	const realAdjustment = parseInt(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
 	g_stateObj.realAdjustment = realAdjustment;
