@@ -336,7 +336,7 @@ let g_volumeNum = g_volumes.length - 1;
 let g_appearances = [`Visible`, `Hidden`, `Sudden`, `Slit`];
 let g_appearanceNum = 0;
 
-let g_scoreDetails = [`Speed`, `Density`];
+let g_scoreDetails = [`Speed`, `Density`, `ToolDif`];
 let g_scoreDetailNum = 0;
 
 let g_displays = [`stepZone`, `judgement`, `lifeGauge`, `musicInfo`, `special`,
