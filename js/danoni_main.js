@@ -527,7 +527,7 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	}
 
 	if (_color !== ``) {
-		div.style.backgroundColor = _color;
+		div.style.background = _color;
 	}
 	div.style.maskImage = `url("${g_imgObj[charaStyle]}")`;
 	div.style.maskSize = `contain`;
@@ -1920,30 +1920,46 @@ function drawMainSpriteData(_frame, _depthName) {
 }
 
 /**
- * 曲名のグラデーションを指定
- * @param {array} _titlegrds 
+ * グラデーション用のカラーフォーマットを作成
+ * @param {string} _colorStr 
+ * @param {boolean} _defaultColorgrd
+ * @param {boolean} _colorCdPaddingUse
+ * @param {boolean} _objType (normal: 汎用, titleMusic: タイトル曲名, titleArrow: タイトル矢印)
  */
-function getMusicTitleGradation(_titlegrds) {
-	const grdData = [];
+function makeColorGradation(_colorStr, _defaultColorgrd = g_headerObj.defaultColorgrd,
+	_colorCdPaddingUse = false, _objType = `normal`) {
 
-	for (let j = 0; j < _titlegrds.length; j++) {
+	// |color_data=300,20,45deg:#ffff99:#ffffff:#9999ff@linear-gradient|
+	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
+	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
 
-		let tmpgrd = setVal(_titlegrds[j], ``, C_TYP_STRING);
-
-		// グラデーションの方向の指定がない場合、左から右へグラデーションさせる
-		// 先頭1文字目が#かどうかで判断するので、redやwhiteのような色コードの指定はNG
-		if (tmpgrd[0] === `#`) {
-			tmpgrd = `to right,${tmpgrd}`;
+	let convertColorStr;
+	const tmpColorStr = _colorStr.split(`@`);
+	const colorArray = tmpColorStr[0].split(`:`);
+	for (let j = 0; j < colorArray.length; j++) {
+		colorArray[j] = colorArray[j].replace(/0x/g, `#`);
+		if (_colorCdPaddingUse) {
+			colorArray[j] = `#${paddingLeft(colorArray[j].slice(1), 6, `0`)}`;
 		}
-
-		// グラデーションが1色しか指定されていない場合、自動的に補完する
-		if (tmpgrd.split(`#`).length <= 2) {
-			tmpgrd += `,#ffffff`;
-		}
-		grdData.push(tmpgrd);
 	}
 
-	return [grdData[0], (grdData.length > 1 ? grdData[1] : grdData[0])];
+	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
+	const defaultDir = (_objType === `titleArrow` ? `to left` : `to right`);
+	if (colorArray.length === 1) {
+		if (_objType === `titleMusic`) {
+			convertColorStr = `${defaultDir}, ${colorArray[0]} 100%, #eeeeee 0%`;
+		} else if (_defaultColorgrd) {
+			convertColorStr = `${defaultDir}, ${colorArray[0]}, #eeeeee, ${colorArray[0]}`;
+		} else {
+			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
+		}
+	} else if (gradationType === `linear-gradient` && colorArray[0].slice(0, 1) === `#`) {
+		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
+	} else {
+		convertColorStr = `${colorArray.join(', ')}`;
+	}
+
+	return `${gradationType}(${convertColorStr})`;
 }
 
 /**
@@ -1978,7 +1994,9 @@ function titleInit() {
 
 	// 背景の矢印オブジェクトを表示
 	if (!g_headerObj.customTitleArrowUse) {
-		const lblArrow = createColorObject(`lblArrow`, g_headerObj.setColorDefault[0],
+		const titlecolor = (g_headerObj.titlearrowgrds.length === 0 ?
+			`${g_headerObj.setColorDefault[0]}` : g_headerObj.titlearrowgrds[0]);
+		const lblArrow = createColorObject(`lblArrow`, makeColorGradation(titlecolor, false, false, `titleArrow`),
 			(g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2,
 			500, 500, 180);
 		lblArrow.style.opacity = 0.25;
@@ -2009,9 +2027,13 @@ function titleInit() {
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
 		if (g_headerObj.titlegrds.length === 0) {
-			[titlefontgrd, titlefontgrd2] = getMusicTitleGradation([`${g_headerObj.setColorDefault[0]},${g_headerObj.setColorDefault[2]}`]);
+			titlefontgrd = makeColorGradation(`${g_headerObj.setColorDefault[0]},${g_headerObj.setColorDefault[2]}`, false, false, `titleMusic`);
+			titlefontgrd2 = titlefontgrd;
 		} else {
-			[titlefontgrd, titlefontgrd2] = getMusicTitleGradation(g_headerObj.titlegrds);
+			titlefontgrd = makeColorGradation(g_headerObj.titlegrds[0], false, false, `titleMusic`);
+			if (g_headerObj.titlegrds.length > 1) {
+				titlefontgrd2 = makeColorGradation(g_headerObj.titlegrds[1], false, false, `titleMusic`);
+			}
 		}
 
 		let titlefontsize = 64 * (12 / g_headerObj.musicTitleForView[0].length);
@@ -2059,7 +2081,7 @@ function titleInit() {
 				position:relative;top:${titlefontsize1 - (titlefontsize1 + titlefontsize2) / 2}px;
 				font-family:${titlefontname};
 				font-size:${titlefontsize1}px;
-				background: linear-gradient(${titlefontgrd});
+				background: ${titlefontgrd};
 				background-clip: text;
 				-webkit-background-clip: text;
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
@@ -2069,7 +2091,7 @@ function titleInit() {
 				<span style="
 					font-size:${titlefontsize2}px;
 					position:relative;top:${titlelineheight - (titlefontsize1 + titlefontsize2) / 2 - titlefontsize1 + titlefontsize2}px;
-					background: linear-gradient(${titlefontgrd2});
+					background: ${titlefontgrd2};
 					background-clip: text;
 					-webkit-background-clip: text;
 					-webkit-text-fill-color: rgba(255,255,255,0.0);
@@ -2537,6 +2559,9 @@ function headerConvert(_dosObj) {
 		g_speedNum = 0;
 	}
 
+	// 矢印の色変化を常時グラデーションさせる設定
+	obj.defaultColorgrd = setVal(_dosObj.defaultColorgrd, false, C_TYP_BOOLEAN);
+
 	// カラーコードのゼロパディング有無設定
 	obj.colorCdPaddingUse = setVal(_dosObj.colorCdPaddingUse, false, C_TYP_BOOLEAN);
 
@@ -2593,24 +2618,28 @@ function headerConvert(_dosObj) {
 	obj.setColorType1 = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
 	obj.setColorDefault = [];
+	obj.setColorOrg = [];
 
 	if (_dosObj.setColor !== undefined && _dosObj.setColor !== ``) {
 		obj.setColor = _dosObj.setColor.split(`,`);
 		for (let j = 0; j < obj.setColor.length; j++) {
-			obj.setColor[j] = obj.setColor[j].replace(`0x`, `#`);
+			obj.setColorOrg[j] = obj.setColor[j].replace(/0x/g, `#`).split(`:`)[0];
 			if (obj.colorCdPaddingUse) {
-				obj.setColor[j] = `#${paddingLeft(obj.setColor[j].slice(1), 6, `0`)}`;
+				obj.setColorOrg[j] = `#${paddingLeft(obj.setColorOrg[j].slice(1), 6, `0`)}`;
 			}
+			obj.setColor[j] = makeColorGradation(obj.setColor[j], obj.defaultColorgrd, obj.colorCdPaddingUse);
 		}
 		for (let j = obj.setColor.length; j < obj.setColorInit.length; j++) {
-			obj.setColor[j] = obj.setColorInit[j];
+			obj.setColorOrg[j] = obj.setColor[j];
+			obj.setColor[j] = makeColorGradation(obj.setColorInit[j], obj.defaultColorgrd);
 		}
 	} else {
+		obj.setColorOrg = JSON.parse(JSON.stringify(obj.setColorInit));
 		obj.setColor = JSON.parse(JSON.stringify(obj.setColorInit));
 	}
-	obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColor));
+	obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColorOrg));
 	// 矢印の内側塗りつぶし色の設定
-	obj.setShadowColor = setVal(_dosObj.setShadowColor, ``, C_TYP_STRING).replace(`0x`, `#`);
+	obj.setShadowColor = setVal(_dosObj.setShadowColor, ``, C_TYP_STRING);
 
 
 	// フリーズアロー初期色情報
@@ -2634,13 +2663,10 @@ function headerConvert(_dosObj) {
 			obj.frzColor[j] = tmpFrzColors[j].split(`,`);
 
 			for (let k = 0; k < obj.frzColor[j].length; k++) {
-				obj.frzColor[j][k] = obj.frzColor[j][k].replace(`0x`, `#`);
-				if (obj.colorCdPaddingUse) {
-					obj.frzColor[j][k] = `#${paddingLeft(obj.frzColor[j][k].slice(1), 6, `0`)}`;
-				}
+				obj.frzColor[j][k] = makeColorGradation(obj.frzColor[j][k], obj.defaultColorgrd, obj.colorCdPaddingUse);
 			}
 			for (let k = obj.frzColor[j].length; k < obj.frzColorInit.length; k++) {
-				obj.frzColor[j][k] = obj.frzColorInit[k];
+				obj.frzColor[j][k] = makeColorGradation(obj.frzColorInit[k], obj.defaultColorgrd, obj.colorCdPaddingUse);
 			}
 
 			obj.frzColorDefault[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
@@ -2803,13 +2829,17 @@ function headerConvert(_dosObj) {
 	// デフォルト曲名表示のフォント名
 	obj.titlefont = setVal(_dosObj.titlefont, ``, C_TYP_STRING);
 
-	// デフォルト曲名表示のグラデーション指定css
+	// デフォルト曲名表示, 背景矢印のグラデーション指定css
 	obj.titlegrds = [];
-	if (_dosObj.titlegrd !== undefined) {
-		const tmpTitlegrd = _dosObj.titlegrd.replace(`0x`, `#`);
-		obj.titlegrds = tmpTitlegrd.split(`$`);
-		obj.titlegrd = setVal(obj.titlegrds[0], ``, C_TYP_STRING);
-	}
+	obj.titlearrowgrds = [];
+
+	[`titlegrd`, `titlearrowgrd`].forEach(_name => {
+		if (_dosObj[_name] !== undefined) {
+			const tmpTitlegrd = _dosObj[_name].replace(/,/g, `:`);
+			obj[`${_name}s`] = tmpTitlegrd.split(`$`);
+			obj[`${_name}`] = setVal(obj[`${_name}s`][0], ``, C_TYP_STRING);
+		}
+	});
 
 	// デフォルト曲名表示の表示位置調整
 	obj.titlepos = setVal(_dosObj.titlepos, ``, C_TYP_STRING);
@@ -4812,7 +4842,7 @@ function keyConfigInit() {
 
 		if (g_headerObj.setShadowColor !== ``) {
 			// 矢印の塗り部分
-			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]] : g_headerObj.setShadowColor);
+			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]] : makeColorGradation(g_headerObj.setShadowColor));
 			const stepShadow = createColorObject(`arrowShadow${j}`, shadowColor,
 				keyconX, keyconY,
 				C_ARW_WIDTH, C_ARW_WIDTH, g_keyObj[`stepRtn${keyCtrlPtn}`][j], `Shadow`);
@@ -4910,7 +4940,7 @@ function keyConfigInit() {
 			g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
 		}
 		for (let j = 0; j < keyNum; j++) {
-			document.querySelector(`#arrow${j}`).style.backgroundColor = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
+			document.querySelector(`#arrow${j}`).style.background = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
 		}
 		lnkcolorType.innerHTML = g_colorType;
 	});
@@ -6385,7 +6415,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		frmPrev = tmpObj.frm;
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 		pushColors(``, isFrzHitColor(_dataObj.colorData[lastk + 1]) ? _dataObj.colorData[lastk] : tmpObj.frm,
-			_dataObj.colorData[lastk + 1], _dataObj.colorData[lastk + 2].replace(`0x`, `#`));
+			_dataObj.colorData[lastk + 1], _dataObj.colorData[lastk + 2]);
 
 		for (let k = lastk - 3; k >= 0; k -= 3) {
 
@@ -6409,7 +6439,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 			}
-			pushColors(``, _dataObj.colorData[k], _dataObj.colorData[k + 1], _dataObj.colorData[k + 2].replace(`0x`, `#`));
+			pushColors(``, _dataObj.colorData[k], _dataObj.colorData[k + 1], _dataObj.colorData[k + 2]);
 		}
 	}
 
@@ -6417,7 +6447,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	if (_dataObj.acolorData !== undefined && _dataObj.acolorData.length >= 3) {
 
 		for (let k = _dataObj.acolorData.length - 3; k >= 0; k -= 3) {
-			pushColors(`A`, _dataObj.acolorData[k], _dataObj.acolorData[k + 1], _dataObj.acolorData[k + 2].replace(`0x`, `#`));
+			pushColors(`A`, _dataObj.acolorData[k], _dataObj.acolorData[k + 1], _dataObj.acolorData[k + 2]);
 		}
 	}
 
@@ -6567,6 +6597,7 @@ function pushColors(_header, _frame, _val, _colorCd) {
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const colorCd = makeColorGradation(_colorCd);
 
 	if (_val < 30) {
 		// 矢印の色変化
@@ -6577,13 +6608,13 @@ function pushColors(_header, _frame, _val, _colorCd) {
 		if (_val < 20) {
 			const realVal = g_workObj.replaceNums[_val];
 			g_workObj[`mk${_header}Color`][_frame].push(realVal);
-			g_workObj[`mk${_header}ColorCd`][_frame].push(_colorCd);
+			g_workObj[`mk${_header}ColorCd`][_frame].push(colorCd);
 		} else if (_val >= 20) {
 			const colorNum = _val - 20;
 			for (let j = 0; j < keyNum; j++) {
 				if (g_keyObj[`color${keyCtrlPtn}`][j] === colorNum) {
 					g_workObj[`mk${_header}Color`][_frame].push(j);
-					g_workObj[`mk${_header}ColorCd`][_frame].push(_colorCd);
+					g_workObj[`mk${_header}ColorCd`][_frame].push(colorCd);
 				}
 			}
 		}
@@ -6595,18 +6626,18 @@ function pushColors(_header, _frame, _val, _colorCd) {
 		}
 		if (_val < 50) {
 			g_workObj[`mkF${_header}Color`][_frame].push(_val % 30);
-			g_workObj[`mkF${_header}ColorCd`][_frame].push(_colorCd);
+			g_workObj[`mkF${_header}ColorCd`][_frame].push(colorCd);
 		} else if (_val < 60) {
 			const tmpVal = (_val % 50) * 2;
 			g_workObj[`mkF${_header}Color`][_frame].push(tmpVal, tmpVal + 1);
-			g_workObj[`mkF${_header}ColorCd`][_frame].push(_colorCd, _colorCd);
+			g_workObj[`mkF${_header}ColorCd`][_frame].push(colorCd, colorCd);
 		} else {
 			if (_val === 60) {
 				g_workObj[`mkF${_header}Color`][_frame].push(0, 1, 2, 3, 4, 5, 6, 7);
 			} else {
 				g_workObj[`mkF${_header}Color`][_frame].push(10, 11, 12, 13, 14, 15, 16, 17);
 			}
-			g_workObj[`mkF${_header}ColorCd`][_frame].push(_colorCd, _colorCd, _colorCd, _colorCd, _colorCd, _colorCd, _colorCd, _colorCd);
+			g_workObj[`mkF${_header}ColorCd`][_frame].push(colorCd, colorCd, colorCd, colorCd, colorCd, colorCd, colorCd, colorCd);
 		}
 	}
 }
@@ -6766,19 +6797,20 @@ function getArrowSettings() {
 		g_workObj.frzHitColorsAll[j] = g_headerObj.frzColor[g_keyObj[`color${keyCtrlPtn}`][j]][2];
 		g_workObj.frzHitBarColorsAll[j] = g_headerObj.frzColor[g_keyObj[`color${keyCtrlPtn}`][j]][3];
 
-		g_workObj.dummyArrowColors[j] = C_CLR_DUMMY;
+		const dummyColor = makeColorGradation(C_CLR_DUMMY);
+		g_workObj.dummyArrowColors[j] = dummyColor;
 
-		g_workObj.dummyFrzNormalColors[j] = C_CLR_DUMMY;
-		g_workObj.dummyFrzNormalBarColors[j] = C_CLR_DUMMY;
-		g_workObj.dummyFrzHitColors[j] = C_CLR_DUMMY;
-		g_workObj.dummyFrzHitBarColors[j] = C_CLR_DUMMY;
+		g_workObj.dummyFrzNormalColors[j] = dummyColor;
+		g_workObj.dummyFrzNormalBarColors[j] = dummyColor;
+		g_workObj.dummyFrzHitColors[j] = dummyColor;
+		g_workObj.dummyFrzHitBarColors[j] = dummyColor;
 
-		g_workObj.dummyArrowColorsAll[j] = C_CLR_DUMMY;
+		g_workObj.dummyArrowColorsAll[j] = dummyColor;
 
-		g_workObj.dummyFrzNormalColorsAll[j] = C_CLR_DUMMY;
-		g_workObj.dummyFrzNormalBarColorsAll[j] = C_CLR_DUMMY;
-		g_workObj.dummyFrzHitColorsAll[j] = C_CLR_DUMMY;
-		g_workObj.dummyFrzHitBarColorsAll[j] = C_CLR_DUMMY;
+		g_workObj.dummyFrzNormalColorsAll[j] = dummyColor;
+		g_workObj.dummyFrzNormalBarColorsAll[j] = dummyColor;
+		g_workObj.dummyFrzHitColorsAll[j] = dummyColor;
+		g_workObj.dummyFrzHitBarColorsAll[j] = dummyColor;
 
 		g_workObj.arrowCssMotions[j] = ``;
 		g_workObj.frzCssMotions[j] = ``;
@@ -7278,7 +7310,7 @@ function MainInit() {
 	if (!g_headerObj.customReadyUse) {
 		const lblReady = createDivCssLabel(`lblReady`, g_sWidth / 2 - 100, (g_sHeight + g_stepYR) / 2 - 75,
 			200, 50, 40,
-			`<span style='color:` + g_headerObj.setColor[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
+			`<span style='color:` + g_headerObj.setColorDefault[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
 		lblReady.style.animationDuration = `2.5s`;
 		lblReady.style.animationName = `leftToRightFade`;
 		let readyDelayFrame = 0;
@@ -7380,7 +7412,7 @@ function MainInit() {
 			if (g_workObj.mkAColor[g_scoreObj.frameNum] !== undefined) {
 				if (arrowTop.getAttribute(`color`) !== g_workObj.arrowColors[_j]) {
 					if (g_workObj.arrowColors[_j] === g_workObj.arrowColorsAll[_j]) {
-						arrowTop.style.backgroundColor = g_workObj.arrowColorsAll[_j];
+						arrowTop.style.background = g_workObj.arrowColorsAll[_j];
 						arrowTop.setAttribute(`color`, g_workObj.arrowColorsAll[_j]);
 					}
 				}
@@ -7399,16 +7431,16 @@ function MainInit() {
 					const toColorCode = g_workObj[`frz${_state}ColorsAll`][_j];
 					if (g_workObj[`frz${_state}Colors`][_j] === toColorCode) {
 						if (_state === `Normal`) {
-							frzTop.style.backgroundColor = toColorCode;
+							frzTop.style.background = toColorCode;
 						}
-						frzBtm.style.backgroundColor = toColorCode;
+						frzBtm.style.background = toColorCode;
 						frzBtm.setAttribute(`color`, toColorCode);
 					}
 				}
 				if (frzBar.getAttribute(`color`) !== g_workObj[`frz${_state}BarColors`][_j]) {
 					const toBarColorCode = g_workObj[`frz${_state}BarColorsAll`][_j];
 					if (g_workObj[`frz${_state}BarColors`][_j] === toBarColorCode) {
-						frzBar.style.backgroundColor = toBarColorCode;
+						frzBar.style.background = toBarColorCode;
 						frzBar.setAttribute(`color`, toBarColorCode);
 					}
 				}
@@ -8219,7 +8251,7 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg)
 							if (_allFlg === `A`) {
 								g_workObj.frzHitColorsAll[k] = _mkColorCd[j];
 								if (isNaN(Number(g_workObj.arrowRtn[k]))) {
-									document.querySelector(`#frzHitTop${k}`).style.backgroundColor = _mkColorCd[j];
+									document.querySelector(`#frzHitTop${k}`).style.background = _mkColorCd[j];
 								}
 							}
 						}
@@ -8267,7 +8299,7 @@ function changeHitFrz(_j, _k, _name) {
 		document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
 		document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 0;
 		if (isNaN(Number(g_workObj.arrowRtn[_j]))) {
-			document.querySelector(`#frzHitTop${_j}`).style.backgroundColor = g_workObj.frzHitColors[_j];
+			document.querySelector(`#frzHitTop${_j}`).style.background = g_workObj.frzHitColors[_j];
 		}
 	}
 	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
@@ -8276,8 +8308,8 @@ function changeHitFrz(_j, _k, _name) {
 	const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
 	const dividePos = Number(frzRoot.getAttribute(`dividePos`));
 
-	frzBar.style.backgroundColor = g_workObj[`${_name}HitBarColors`][_j];
-	frzBtm.style.backgroundColor = g_workObj[`${_name}HitColors`][_j];
+	frzBar.style.background = g_workObj[`${_name}HitBarColors`][_j];
+	frzBtm.style.background = g_workObj[`${_name}HitColors`][_j];
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
 	const delFrzLength = parseFloat(document.querySelector(`#stepRoot${_j}`).style.top) - parseFloat(frzRoot.style.top);
@@ -8299,10 +8331,10 @@ function changeHitFrz(_j, _k, _name) {
 function changeFailedFrz(_j, _k) {
 	document.querySelector(`#frzHit${_j}`).style.opacity = 0;
 	document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 1;
-	document.querySelector(`#frzTop${_j}_${_k}`).style.backgroundColor = `#cccccc`;
-	document.querySelector(`#frzBar${_j}_${_k}`).style.backgroundColor = `#999999`;
+	document.querySelector(`#frzTop${_j}_${_k}`).style.background = makeColorGradation(`#cccccc`);
+	document.querySelector(`#frzBar${_j}_${_k}`).style.background = makeColorGradation(`#999999`);
 	document.querySelector(`#frzBar${_j}_${_k}`).style.opacity = 1;
-	document.querySelector(`#frzBtm${_j}_${_k}`).style.backgroundColor = `#cccccc`;
+	document.querySelector(`#frzBtm${_j}_${_k}`).style.background = makeColorGradation(`#cccccc`);
 }
 
 /**
