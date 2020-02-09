@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/01/29
+ * Revised : 2020/02/09
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -336,7 +336,7 @@ let g_volumeNum = g_volumes.length - 1;
 let g_appearances = [`Visible`, `Hidden`, `Sudden`, `Slit`];
 let g_appearanceNum = 0;
 
-let g_scoreDetails = [`Speed`, `Density`];
+let g_scoreDetails = [`Speed`, `Density`, `ToolDif`];
 let g_scoreDetailNum = 0;
 
 let g_displays = [`stepZone`, `judgement`, `lifeGauge`, `musicInfo`, `special`,
