@@ -1680,10 +1680,10 @@ function drawMainSpriteData(_frame, _depthName) {
  * @param {string} _colorStr 
  * @param {boolean} _defaultColorgrd
  * @param {boolean} _colorCdPaddingUse
- * @param {boolean} _musicTitleFlg
+ * @param {boolean} _objType (normal: 汎用, titleMusic: タイトル曲名, titleArrow: タイトル矢印)
  */
 function makeColorGradation(_colorStr, _defaultColorgrd = g_headerObj.defaultColorgrd,
-	_colorCdPaddingUse = false, _musicTitleFlg = false) {
+	_colorCdPaddingUse = false, _objType = `normal`) {
 
 	// |color_data=300,20,45deg:#ffff99:#ffffff:#9999ff@linear-gradient|
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
@@ -1700,16 +1700,17 @@ function makeColorGradation(_colorStr, _defaultColorgrd = g_headerObj.defaultCol
 	}
 
 	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
+	const defaultDir = (_objType === `titleArrow` ? `to left` : `to right`);
 	if (colorArray.length === 1) {
-		if (_musicTitleFlg) {
-			convertColorStr = `to right, ${colorArray[0]} 100%, #eeeeee 0%`;
+		if (_objType === `titleMusic`) {
+			convertColorStr = `${defaultDir}, ${colorArray[0]} 100%, #eeeeee 0%`;
 		} else if (_defaultColorgrd) {
-			convertColorStr = `to right, ${colorArray[0]}, #eeeeee, ${colorArray[0]}`;
+			convertColorStr = `${defaultDir}, ${colorArray[0]}, #eeeeee, ${colorArray[0]}`;
 		} else {
-			convertColorStr = `to right, ${colorArray[0]}, ${colorArray[0]}`;
+			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
 		}
 	} else if (gradationType === `linear-gradient` && colorArray[0].slice(0, 1) === `#`) {
-		convertColorStr = `to right, ${colorArray.join(', ')}`;
+		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
 	} else {
 		convertColorStr = `${colorArray.join(', ')}`;
 	}
@@ -1749,7 +1750,9 @@ function titleInit() {
 
 	// 背景の矢印オブジェクトを表示
 	if (!g_headerObj.customTitleArrowUse) {
-		const lblArrow = createColorObject(`lblArrow`, makeColorGradation(g_headerObj.setColorDefault[0], false, false),
+		const titlecolor = (g_headerObj.titlearrowgrds.length === 0 ?
+			`${g_headerObj.setColorDefault[0]}` : g_headerObj.titlearrowgrds[0]);
+		const lblArrow = createColorObject(`lblArrow`, makeColorGradation(titlecolor, false, false, `titleArrow`),
 			(g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2,
 			500, 500, 180);
 		lblArrow.style.opacity = 0.25;
@@ -1780,12 +1783,12 @@ function titleInit() {
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
 		if (g_headerObj.titlegrds.length === 0) {
-			titlefontgrd = makeColorGradation(`${g_headerObj.setColorDefault[0]},${g_headerObj.setColorDefault[2]}`, false, false, true);
+			titlefontgrd = makeColorGradation(`${g_headerObj.setColorDefault[0]},${g_headerObj.setColorDefault[2]}`, false, false, `titleMusic`);
 			titlefontgrd2 = titlefontgrd;
 		} else {
-			titlefontgrd = makeColorGradation(g_headerObj.titlegrds[0], false, false, true);
+			titlefontgrd = makeColorGradation(g_headerObj.titlegrds[0], false, false, `titleMusic`);
 			if (g_headerObj.titlegrds.length > 1) {
-				titlefontgrd2 = makeColorGradation(g_headerObj.titlegrds[1], false, false, true);
+				titlefontgrd2 = makeColorGradation(g_headerObj.titlegrds[1], false, false, `titleMusic`);
 			}
 		}
 
@@ -2582,13 +2585,17 @@ function headerConvert(_dosObj) {
 	// デフォルト曲名表示のフォント名
 	obj.titlefont = setVal(_dosObj.titlefont, ``, C_TYP_STRING);
 
-	// デフォルト曲名表示のグラデーション指定css
+	// デフォルト曲名表示, 背景矢印のグラデーション指定css
 	obj.titlegrds = [];
-	if (_dosObj.titlegrd !== undefined) {
-		const tmpTitlegrd = _dosObj.titlegrd.replace(/,/g, `:`);
-		obj.titlegrds = tmpTitlegrd.split(`$`);
-		obj.titlegrd = setVal(obj.titlegrds[0], ``, C_TYP_STRING);
-	}
+	obj.titlearrowgrds = [];
+
+	[`titlegrd`, `titlearrowgrd`].forEach(_name => {
+		if (_dosObj[_name] !== undefined) {
+			const tmpTitlegrd = _dosObj[_name].replace(/,/g, `:`);
+			obj[`${_name}s`] = tmpTitlegrd.split(`$`);
+			obj[`${_name}`] = setVal(obj[`${_name}s`][0], ``, C_TYP_STRING);
+		}
+	});
 
 	// デフォルト曲名表示の表示位置調整
 	obj.titlepos = setVal(_dosObj.titlepos, ``, C_TYP_STRING);
