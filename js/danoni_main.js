@@ -3714,12 +3714,12 @@ function createOptionWindow(_sprite) {
 
 		// ツール難易度
 		if (document.querySelector(`#lblTooldif`) === null) {
-			lbl = createDivCssLabel(`lblTooldif`, 125, 10, 250, 35, 20, `ツール難易度:`);
+			lbl = createDivCssLabel(`lblTooldif`, 125, 5, 250, 35, 16, `Level`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
-			data = createDivCssLabel(`dataTooldif`, 290, 10, 120, 35, 20, g_detailObj.toolDif[_scoreId].tool);
-			data.style.textAlign = C_ALIGN_CENTER;
+			data = createDivCssLabel(`dataTooldif`, 250, 5, 160, 35, 16, g_detailObj.toolDif[_scoreId].tool);
+			data.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 		} else {
 			document.querySelector(`#dataTooldif`).innerHTML = g_detailObj.toolDif[_scoreId].tool;
@@ -3727,17 +3727,18 @@ function createOptionWindow(_sprite) {
 
 		let ArrowInfo = `${arrowCnts + frzCnts} (${arrowCnts} + ${frzCnts})`;
 		let ArrowInfo2 = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>(${g_detailObj.frzCnt[_scoreId]})`.split(`,`).join(`/`);
+
 		// ノーツ数詳細
 		if (document.querySelector(`#lblArrowInfo`) === null) {
-			lbl = createDivCssLabel(`lblArrowInfo`, 125, 40, 250, 35, 18, `矢印数:`);
+			lbl = createDivCssLabel(`lblArrowInfo`, 125, 30, 250, 35, 16, `All Arrows`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
-			data = createDivCssLabel(`dataArrowInfo`, 150, 40, 300, 35, 18, ArrowInfo);
-			data.style.textAlign = C_ALIGN_CENTER;
+			data = createDivCssLabel(`dataArrowInfo`, 250, 30, 160, 35, 16, ArrowInfo);
+			data.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 
-			lbl = createDivCssLabel(`lblArrowInfo2`, 125, 70, 50, 90, 14, `通常:<br><br>氷矢:`);
+			lbl = createDivCssLabel(`lblArrowInfo2`, 125, 70, 50, 90, 14, `Arrow:<br><br>Frz:`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
@@ -3745,14 +3746,15 @@ function createOptionWindow(_sprite) {
 			data.style.textAlign = C_ALIGN_LEFT;
 			data.style.overflow = `auto`;
 			document.querySelector(`#detailToolDif`).appendChild(data);
+
 		} else {
 			document.querySelector(`#dataArrowInfo`).innerHTML = ArrowInfo;
 			document.querySelector(`#dataArrowInfo2`).innerHTML = ArrowInfo2;
 		}
 
 		// 詳細データ
-		makeScoreDetailLabel(`ToolDif`, `douji`, g_detailObj.toolDif[_scoreId].douji, 1, `同時`);
-		makeScoreDetailLabel(`ToolDif`, `tate`, g_detailObj.toolDif[_scoreId].tate, 2, `縦連`);
+		makeScoreDetailLabel(`ToolDif`, `douji`, g_detailObj.toolDif[_scoreId].douji, 0, `同時`);
+		makeScoreDetailLabel(`ToolDif`, `tate`, g_detailObj.toolDif[_scoreId].tate, 1, `縦連`);
 		makeScoreDetailLabel(`ToolDif`, `push3cnt`, g_detailObj.toolDif[_scoreId].push3cnt, 4, `3つ押し数`);
 
 		// 3つ押しリスト
