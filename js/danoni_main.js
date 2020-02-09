@@ -1561,6 +1561,12 @@ function calcLevel(_scoreObj) {
 		print = Math.round(print * 100 * (allScorebook.length - 3) / (allScorebook.length - push3cnt.length - 3)) / 100;
 		subPrint = Math.round((print * 100) % 100);
 		subPrint = (subPrint < 10 ? "0" + subPrint : "" + subPrint);
+		if (isNaN(parseFloat(print))) {
+			print = 0;
+		}
+		if (isNaN(parseFloat(subPrint))) {
+			subPrint = `00`;
+		}
 		print = `${Math.floor(print)}.${subPrint}${(push3cnt.length > 0 ? "*" : "")}`;
 	}
 
@@ -3718,7 +3724,7 @@ function createOptionWindow(_sprite) {
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
-			data = createDivCssLabel(`dataTooldif`, 250, 3, 160, 35, 18, g_detailObj.toolDif[_scoreId].tool);
+			data = createDivCssLabel(`dataTooldif`, 270, 3, 160, 35, 18, g_detailObj.toolDif[_scoreId].tool);
 			data.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 		} else {
@@ -3735,7 +3741,7 @@ function createOptionWindow(_sprite) {
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
-			lbl = createDivCssLabel(`lblTate`, 250, 25, 125, 35, 14, `縦連補正`);
+			lbl = createDivCssLabel(`lblTate`, 270, 25, 125, 35, 14, `縦連補正`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
@@ -3743,7 +3749,7 @@ function createOptionWindow(_sprite) {
 			data.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 
-			data = createDivCssLabel(`dataTate`, 325, 25, 160, 35, 14, g_detailObj.toolDif[_scoreId].tate);
+			data = createDivCssLabel(`dataTate`, 345, 25, 160, 35, 14, g_detailObj.toolDif[_scoreId].tate);
 			data.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 
@@ -3751,7 +3757,7 @@ function createOptionWindow(_sprite) {
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
-			data = createDivCssLabel(`dataArrowInfo`, 250, 45, 160, 35, 16, ArrowInfo);
+			data = createDivCssLabel(`dataArrowInfo`, 270, 45, 160, 35, 16, ArrowInfo);
 			data.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 
