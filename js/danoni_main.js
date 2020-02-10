@@ -1396,7 +1396,8 @@ function calcLevel(_scoreObj) {
 				frzEndData.push(_scoreObj.frzData[j][k + 1]);
 			}
 		}
-		_scoreObj.arrowData[j].sort((a, b) => a - b);
+		_scoreObj.arrowData[j] = _scoreObj.arrowData[j].sort((a, b) => a - b)
+			.filter((x, i, self) => self.indexOf(x) === i && !isNaN(parseFloat(x)));
 	}
 
 	frzStartData.sort((a, b) => a - b);
@@ -1421,8 +1422,6 @@ function calcLevel(_scoreObj) {
 	//
 	//--------------------------------------------------------------
 	let allScorebook = [];
-	let firstFrame = 0;
-	let lastFrame = 0;
 
 	for (let j = 0; j < _scoreObj.arrowData.length; j++) {
 		allScorebook = allScorebook.concat(_scoreObj.arrowData[j]);
@@ -1433,25 +1432,6 @@ function calcLevel(_scoreObj) {
 	allScorebook.push(allScorebook[allScorebook.length - 1] + 100);
 
 	frzEndData.push(allScorebook[allScorebook.length - 1]);
-
-	// ファーストナンバー、ラストナンバーの特定
-	if (!isNaN(parseFloat(allScorebook[1]))) {
-		firstFrame = allScorebook[1];
-	} else {
-		firstFrame = 0;
-	}
-	if (!isNaN(parseFloat(allScorebook[allScorebook.length - 2]))) {
-		lastFrame = allScorebook[allScorebook.length - 2];
-		if (!isNaN(parseFloat(frzEndData[frzEndData.length - 2]))) {
-			let arrEnd = Math.round(allScorebook[allScorebook.length - 2]);
-			let frzEnd = Math.round(frzEndData[frzEndData.length - 2]);
-			if (frzEnd > arrEnd) {
-				lastFrame = frzEnd;
-			}
-		}
-	} else {
-		lastFrame = 0;
-	}
 
 	//--------------------------------------------------------------
 	//＜間隔フレーム数の調和平均計算+いろいろ補正＞
@@ -3767,10 +3747,11 @@ function createOptionWindow(_sprite) {
 			document.querySelector(`#dataTooldif`).innerHTML = g_detailObj.toolDif[_scoreId].tool;
 		}
 
+		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
 		let ArrowInfo = `${arrowCnts + frzCnts} <span style="font-size:14px;">(${arrowCnts} + ${frzCnts})</span>`;
 		let ArrowInfo2 = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
 			(${g_detailObj.frzCnt[_scoreId]})<br><br>
-			(${g_detailObj.toolDif[_scoreId].push3})`.split(`,`).join(`/`);
+			${push3CntStr}`.split(`,`).join(`/`);
 
 		if (document.querySelector(`#lblDouji`) === null) {
 			lbl = createDivCssLabel(`lblDouji`, 130, 25, 125, 35, 14, `同時補正`);
