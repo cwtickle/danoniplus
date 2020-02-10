@@ -2618,26 +2618,31 @@ function headerConvert(_dosObj) {
 	obj.setColorType1 = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
 	obj.setColorDefault = [];
-	obj.setColorOrg = [];
 
 	if (_dosObj.setColor !== undefined && _dosObj.setColor !== ``) {
 		obj.setColor = _dosObj.setColor.split(`,`);
 		for (let j = 0; j < obj.setColor.length; j++) {
-			obj.setColorOrg[j] = obj.setColor[j].replace(/0x/g, `#`).split(`:`)[0];
+			const tmpSetColorOrg = obj.setColor[j].replace(/0x/g, `#`).split(`:`);
+			tmpSetColorOrg.some(colorOrg => {
+				if (colorOrg.indexOf(`#`) !== -1) {
+					obj.setColorDefault[j] = colorOrg;
+					return true;
+				}
+			});
 			if (obj.colorCdPaddingUse) {
-				obj.setColorOrg[j] = `#${paddingLeft(obj.setColorOrg[j].slice(1), 6, `0`)}`;
+				obj.setColorDefault[j] = `#${paddingLeft(obj.setColorDefault[j].slice(1), 6, `0`)}`;
 			}
 			obj.setColor[j] = makeColorGradation(obj.setColor[j], obj.defaultColorgrd, obj.colorCdPaddingUse);
 		}
 		for (let j = obj.setColor.length; j < obj.setColorInit.length; j++) {
-			obj.setColorOrg[j] = obj.setColor[j];
+			obj.setColorDefault[j] = obj.setColor[j];
 			obj.setColor[j] = makeColorGradation(obj.setColorInit[j], obj.defaultColorgrd);
 		}
 	} else {
-		obj.setColorOrg = JSON.parse(JSON.stringify(obj.setColorInit));
+		obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColorInit));
 		obj.setColor = JSON.parse(JSON.stringify(obj.setColorInit));
 	}
-	obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColorOrg));
+
 	// 矢印の内側塗りつぶし色の設定
 	obj.setShadowColor = setVal(_dosObj.setShadowColor, ``, C_TYP_STRING);
 
