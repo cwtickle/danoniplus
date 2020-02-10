@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/02/09
+ * Revised : 2020/02/10
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 12.0.0`;
-const g_revisedDate = `2020/02/09`;
+const g_version = `Ver 12.0.1`;
+const g_revisedDate = `2020/02/10`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1198,6 +1198,8 @@ function reloadDos(_scoreId) {
 		loadDos(_ => {
 			getScoreDetailData(_scoreId);
 		}, _scoreId, true);
+	} else {
+		titleInit();
 	}
 }
 
@@ -1288,7 +1290,6 @@ function initAfterDosLoaded() {
 		loadDos(_ => {
 			getScoreDetailData(0);
 		}, 0, true);
-		titleInit();
 	});
 }
 
@@ -1395,7 +1396,8 @@ function calcLevel(_scoreObj) {
 				frzEndData.push(_scoreObj.frzData[j][k + 1]);
 			}
 		}
-		_scoreObj.arrowData[j].sort((a, b) => a - b);
+		_scoreObj.arrowData[j] = _scoreObj.arrowData[j].sort((a, b) => a - b)
+			.filter((x, i, self) => self.indexOf(x) === i && !isNaN(parseFloat(x)));
 	}
 
 	frzStartData.sort((a, b) => a - b);
@@ -1420,8 +1422,6 @@ function calcLevel(_scoreObj) {
 	//
 	//--------------------------------------------------------------
 	let allScorebook = [];
-	let firstFrame = 0;
-	let lastFrame = 0;
 
 	for (let j = 0; j < _scoreObj.arrowData.length; j++) {
 		allScorebook = allScorebook.concat(_scoreObj.arrowData[j]);
@@ -1432,25 +1432,6 @@ function calcLevel(_scoreObj) {
 	allScorebook.push(allScorebook[allScorebook.length - 1] + 100);
 
 	frzEndData.push(allScorebook[allScorebook.length - 1]);
-
-	// ファーストナンバー、ラストナンバーの特定
-	if (!isNaN(parseFloat(allScorebook[1]))) {
-		firstFrame = allScorebook[1];
-	} else {
-		firstFrame = 0;
-	}
-	if (!isNaN(parseFloat(allScorebook[allScorebook.length - 2]))) {
-		lastFrame = allScorebook[allScorebook.length - 2];
-		if (!isNaN(parseFloat(frzEndData[frzEndData.length - 2]))) {
-			let arrEnd = Math.round(allScorebook[allScorebook.length - 2]);
-			let frzEnd = Math.round(frzEndData[frzEndData.length - 2]);
-			if (frzEnd > arrEnd) {
-				lastFrame = frzEnd;
-			}
-		}
-	} else {
-		lastFrame = 0;
-	}
 
 	//--------------------------------------------------------------
 	//＜間隔フレーム数の調和平均計算+いろいろ補正＞
@@ -2618,26 +2599,31 @@ function headerConvert(_dosObj) {
 	obj.setColorType1 = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
 	obj.setColorDefault = [];
-	obj.setColorOrg = [];
 
 	if (_dosObj.setColor !== undefined && _dosObj.setColor !== ``) {
 		obj.setColor = _dosObj.setColor.split(`,`);
 		for (let j = 0; j < obj.setColor.length; j++) {
-			obj.setColorOrg[j] = obj.setColor[j].replace(/0x/g, `#`).split(`:`)[0];
+			const tmpSetColorOrg = obj.setColor[j].replace(/0x/g, `#`).split(`:`);
+			tmpSetColorOrg.some(colorOrg => {
+				if (colorOrg.indexOf(`#`) !== -1) {
+					obj.setColorDefault[j] = colorOrg;
+					return true;
+				}
+			});
 			if (obj.colorCdPaddingUse) {
-				obj.setColorOrg[j] = `#${paddingLeft(obj.setColorOrg[j].slice(1), 6, `0`)}`;
+				obj.setColorDefault[j] = `#${paddingLeft(obj.setColorDefault[j].slice(1), 6, `0`)}`;
 			}
 			obj.setColor[j] = makeColorGradation(obj.setColor[j], obj.defaultColorgrd, obj.colorCdPaddingUse);
 		}
 		for (let j = obj.setColor.length; j < obj.setColorInit.length; j++) {
-			obj.setColorOrg[j] = obj.setColor[j];
+			obj.setColorDefault[j] = obj.setColor[j];
 			obj.setColor[j] = makeColorGradation(obj.setColorInit[j], obj.defaultColorgrd);
 		}
 	} else {
-		obj.setColorOrg = JSON.parse(JSON.stringify(obj.setColorInit));
+		obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColorInit));
 		obj.setColor = JSON.parse(JSON.stringify(obj.setColorInit));
 	}
-	obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColorOrg));
+
 	// 矢印の内側塗りつぶし色の設定
 	obj.setShadowColor = setVal(_dosObj.setShadowColor, ``, C_TYP_STRING);
 
@@ -3761,10 +3747,11 @@ function createOptionWindow(_sprite) {
 			document.querySelector(`#dataTooldif`).innerHTML = g_detailObj.toolDif[_scoreId].tool;
 		}
 
+		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
 		let ArrowInfo = `${arrowCnts + frzCnts} <span style="font-size:14px;">(${arrowCnts} + ${frzCnts})</span>`;
 		let ArrowInfo2 = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
 			(${g_detailObj.frzCnt[_scoreId]})<br><br>
-			(${g_detailObj.toolDif[_scoreId].push3})`.split(`,`).join(`/`);
+			${push3CntStr}`.split(`,`).join(`/`);
 
 		if (document.querySelector(`#lblDouji`) === null) {
 			lbl = createDivCssLabel(`lblDouji`, 130, 25, 125, 35, 14, `同時補正`);
