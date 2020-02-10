@@ -1198,6 +1198,8 @@ function reloadDos(_scoreId) {
 		loadDos(_ => {
 			getScoreDetailData(_scoreId);
 		}, _scoreId, true);
+	} else {
+		titleInit();
 	}
 }
 
@@ -1288,7 +1290,6 @@ function initAfterDosLoaded() {
 		loadDos(_ => {
 			getScoreDetailData(0);
 		}, 0, true);
-		titleInit();
 	});
 }
 
