@@ -1976,7 +1976,7 @@ function titleInit() {
 	// 背景の矢印オブジェクトを表示
 	if (!g_headerObj.customTitleArrowUse) {
 		const titlecolor = (g_headerObj.titlearrowgrds.length === 0 ?
-			`${g_headerObj.setColorDefault[0]}` : g_headerObj.titlearrowgrds[0]);
+			`${g_headerObj.setColorOrg[0]}` : g_headerObj.titlearrowgrds[0]);
 		const lblArrow = createColorObject(`lblArrow`, makeColorGradation(titlecolor, false, false, `titleArrow`),
 			(g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2,
 			500, 500, 180);
@@ -2008,7 +2008,7 @@ function titleInit() {
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
 		if (g_headerObj.titlegrds.length === 0) {
-			titlefontgrd = makeColorGradation(`${g_headerObj.setColorDefault[0]},${g_headerObj.setColorDefault[2]}`, false, false, `titleMusic`);
+			titlefontgrd = makeColorGradation(`${g_headerObj.setColorOrg[0]},${g_headerObj.setColorOrg[2]}`, false, false, `titleMusic`);
 			titlefontgrd2 = titlefontgrd;
 		} else {
 			titlefontgrd = makeColorGradation(g_headerObj.titlegrds[0], false, false, `titleMusic`);
@@ -2598,6 +2598,7 @@ function headerConvert(_dosObj) {
 	obj.setColorInit = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setColorType1 = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
+	obj.setColorOrg = [];
 	obj.setColorDefault = [];
 
 	if (_dosObj.setColor !== undefined && _dosObj.setColor !== ``) {
@@ -2606,23 +2607,24 @@ function headerConvert(_dosObj) {
 			const tmpSetColorOrg = obj.setColor[j].replace(/0x/g, `#`).split(`:`);
 			tmpSetColorOrg.some(colorOrg => {
 				if (colorOrg.indexOf(`#`) !== -1) {
-					obj.setColorDefault[j] = colorOrg;
+					obj.setColorOrg[j] = colorOrg;
 					return true;
 				}
 			});
 			if (obj.colorCdPaddingUse) {
-				obj.setColorDefault[j] = `#${paddingLeft(obj.setColorDefault[j].slice(1), 6, `0`)}`;
+				obj.setColorOrg[j] = `#${paddingLeft(obj.setColorOrg[j].slice(1), 6, `0`)}`;
 			}
 			obj.setColor[j] = makeColorGradation(obj.setColor[j], obj.defaultColorgrd, obj.colorCdPaddingUse);
 		}
 		for (let j = obj.setColor.length; j < obj.setColorInit.length; j++) {
-			obj.setColorDefault[j] = obj.setColor[j];
+			obj.setColorOrg[j] = obj.setColor[j];
 			obj.setColor[j] = makeColorGradation(obj.setColorInit[j], obj.defaultColorgrd);
 		}
 	} else {
-		obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColorInit));
+		obj.setColorOrg = JSON.parse(JSON.stringify(obj.setColorInit));
 		obj.setColor = JSON.parse(JSON.stringify(obj.setColorInit));
 	}
+	obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColor));
 
 	// 矢印の内側塗りつぶし色の設定
 	obj.setShadowColor = setVal(_dosObj.setShadowColor, ``, C_TYP_STRING);
@@ -7297,7 +7299,7 @@ function MainInit() {
 	if (!g_headerObj.customReadyUse) {
 		const lblReady = createDivCssLabel(`lblReady`, g_sWidth / 2 - 100, (g_sHeight + g_stepYR) / 2 - 75,
 			200, 50, 40,
-			`<span style='color:` + g_headerObj.setColorDefault[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
+			`<span style='color:` + g_headerObj.setColorOrg[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
 		lblReady.style.animationDuration = `2.5s`;
 		lblReady.style.animationName = `leftToRightFade`;
 		let readyDelayFrame = 0;
