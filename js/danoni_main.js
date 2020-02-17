@@ -2245,15 +2245,12 @@ function titleInit() {
 			}
 		}
 
-		// 背景表示・背景モーション
-		if (g_headerObj.backTitleData[g_scoreObj.backTitleFrameNum] !== undefined) {
-			g_scoreObj.backTitleFrameNum = drawSpriteData(g_scoreObj.backTitleFrameNum, `title`, `back`);
-		}
-
-		// マスク表示・マスクモーション
-		if (g_headerObj.maskTitleData[g_scoreObj.maskTitleFrameNum] !== undefined) {
-			g_scoreObj.maskTitleFrameNum = drawSpriteData(g_scoreObj.maskTitleFrameNum, `title`, `mask`);
-		}
+		// 背景・マスクモーション
+		[`back`, `mask`].forEach(sprite => {
+			if (g_headerObj[`${sprite}TitleData`][g_scoreObj[`${sprite}TitleFrameNum`]] !== undefined) {
+				g_scoreObj[`${sprite}TitleFrameNum`] = drawSpriteData(g_scoreObj[`${sprite}TitleFrameNum`], `title`, sprite);
+			}
+		});
 
 		thisTime = performance.now();
 		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / g_fps;
@@ -6926,18 +6923,14 @@ function MainInit() {
 		createSprite(`maskSprite`, `maskSprite${j}`, 0, 0, g_sWidth, g_sHeight);
 	}
 
+	// 背景・マスクモーション(0フレーム指定)
 	if (g_scoreObj.frameNum === 0) {
-		// マスク表示・マスクモーション(0フレーム指定)
-		if (g_scoreObj.maskData[0] !== undefined) {
-			drawMainSpriteData(0, `mask`);
-			g_scoreObj.maskData[0] = undefined;
-		}
-
-		// 背景表示・背景モーション(0フレーム指定)
-		if (g_scoreObj.backData[0] !== undefined) {
-			drawMainSpriteData(0, `back`);
-			g_scoreObj.backData[0] = undefined;
-		}
+		[`back`, `mask`].forEach(sprite => {
+			if (g_scoreObj[`${sprite}Data`][0] !== undefined) {
+				drawMainSpriteData(0, sprite);
+				g_scoreObj[`${sprite}Data`][0] = undefined;
+			}
+		});
 	}
 
 	// 矢印・フリーズアロー・速度変化 移動/判定/変化対象の初期化
@@ -7910,15 +7903,12 @@ function MainInit() {
 			g_audio.dispatchEvent(new CustomEvent(`timeupdate`));
 		}
 
-		// マスク表示・マスクモーション
-		if (g_scoreObj.maskData[g_scoreObj.frameNum] !== undefined) {
-			drawMainSpriteData(g_scoreObj.frameNum, `mask`);
-		}
-
-		// 背景表示・背景モーション
-		if (g_scoreObj.backData[g_scoreObj.frameNum] !== undefined) {
-			drawMainSpriteData(g_scoreObj.frameNum, `back`);
-		}
+		// 背景・マスクモーション
+		[`back`, `mask`].forEach(sprite => {
+			if (g_scoreObj[`${sprite}Data`][g_scoreObj.frameNum] !== undefined) {
+				drawMainSpriteData(g_scoreObj.frameNum, sprite);
+			}
+		});
 
 		// フェードイン・アウト
 		const isFadeOutArea = g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm;
@@ -9110,22 +9100,14 @@ function resultInit() {
 	}
 
 	// リザルトモーションの0フレーム対応
-	if (g_scoreObj.backResultFrameNum === 0) {
-
-		// 背景表示・背景モーション(0フレーム指定)
-		if (g_headerObj.backResultData[0] !== undefined) {
-			g_scoreObj.backResultFrameNum = drawSpriteData(0, `result`, `back`);
-			g_headerObj.backResultData[0] = undefined;
+	[`back`, `mask`].forEach(sprite => {
+		if (g_scoreObj[`${sprite}ResultFrameNum`] === 0) {
+			if (g_headerObj[`${sprite}ResultData`][0] !== undefined) {
+				g_scoreObj[`${sprite}ResultFrameNum`] = drawSpriteData(0, `result`, sprite);
+				g_headerObj[`${sprite}ResultData`][0] = undefined;
+			}
 		}
-	}
-	if (g_scoreObj.maskResultFrameNum === 0) {
-
-		// マスク表示・マスクモーション(0フレーム指定)
-		if (g_headerObj.maskResultData[0] !== undefined) {
-			g_scoreObj.maskResultFrameNum = drawSpriteData(0, `result`, `mask`);
-			g_headerObj.maskResultData[0] = undefined;
-		}
-	}
+	});
 
 	/**
 	 * タイトルのモーション設定
@@ -9140,15 +9122,12 @@ function resultInit() {
 			}
 		}
 
-		// 背景表示・背景モーション
-		if (g_headerObj.backResultData[g_scoreObj.backResultFrameNum] !== undefined) {
-			g_scoreObj.backResultFrameNum = drawSpriteData(g_scoreObj.backResultFrameNum, `result`, `back`);
-		}
-
-		// マスク表示・マスクモーション
-		if (g_headerObj.maskResultData[g_scoreObj.maskResultFrameNum] !== undefined) {
-			g_scoreObj.maskResultFrameNum = drawSpriteData(g_scoreObj.maskResultFrameNum, `result`, `mask`);
-		}
+		// 背景・マスクモーション
+		[`back`, `mask`].forEach(sprite => {
+			if (g_headerObj[`${sprite}ResultData`][g_scoreObj[`${sprite}ResultFrameNum`]] !== undefined) {
+				g_scoreObj[`${sprite}ResultFrameNum`] = drawSpriteData(g_scoreObj[`${sprite}ResultFrameNum`], `result`, sprite);
+			}
+		});
 
 		// リザルト画面移行後のフェードアウト処理
 		if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
