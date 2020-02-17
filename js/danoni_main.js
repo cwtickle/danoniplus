@@ -130,6 +130,8 @@ const g_wordObj = {
 	fadeOutFlg1: false
 };
 
+const g_animationData = [`back`, `mask`];
+
 // オーディオ設定・タイマー管理
 let g_audio = new Audio();
 let g_timeoutEvtId = 0;
@@ -2246,7 +2248,7 @@ function titleInit() {
 		}
 
 		// 背景・マスクモーション
-		[`back`, `mask`].forEach(sprite => {
+		g_animationData.forEach(sprite => {
 			if (g_headerObj[`${sprite}TitleData`][g_scoreObj[`${sprite}TitleFrameNum`]] !== undefined) {
 				g_scoreObj[`${sprite}TitleFrameNum`] = drawSpriteData(g_scoreObj[`${sprite}TitleFrameNum`], `title`, sprite);
 			}
@@ -6925,7 +6927,7 @@ function MainInit() {
 
 	// 背景・マスクモーション(0フレーム指定)
 	if (g_scoreObj.frameNum === 0) {
-		[`back`, `mask`].forEach(sprite => {
+		g_animationData.forEach(sprite => {
 			if (g_scoreObj[`${sprite}Data`][0] !== undefined) {
 				drawMainSpriteData(0, sprite);
 				g_scoreObj[`${sprite}Data`][0] = undefined;
@@ -7904,7 +7906,7 @@ function MainInit() {
 		}
 
 		// 背景・マスクモーション
-		[`back`, `mask`].forEach(sprite => {
+		g_animationData.forEach(sprite => {
 			if (g_scoreObj[`${sprite}Data`][g_scoreObj.frameNum] !== undefined) {
 				drawMainSpriteData(g_scoreObj.frameNum, sprite);
 			}
@@ -8689,7 +8691,7 @@ function resultInit() {
 		if (!g_finishFlg) {
 			const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg);
 
-			[`back`, `mask`].forEach(sprite => {
+			g_animationData.forEach(sprite => {
 				if (g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] !== undefined) {
 					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = makeSpriteData(g_rootObj[`${sprite}failedS${scoreIdHeader}_data`]);
 				} else if (g_rootObj[`${sprite}failedS_data`] !== undefined) {
@@ -9100,7 +9102,7 @@ function resultInit() {
 	}
 
 	// リザルトモーションの0フレーム対応
-	[`back`, `mask`].forEach(sprite => {
+	g_animationData.forEach(sprite => {
 		if (g_scoreObj[`${sprite}ResultFrameNum`] === 0) {
 			if (g_headerObj[`${sprite}ResultData`][0] !== undefined) {
 				g_scoreObj[`${sprite}ResultFrameNum`] = drawSpriteData(0, `result`, sprite);
@@ -9123,7 +9125,7 @@ function resultInit() {
 		}
 
 		// 背景・マスクモーション
-		[`back`, `mask`].forEach(sprite => {
+		g_animationData.forEach(sprite => {
 			if (g_headerObj[`${sprite}ResultData`][g_scoreObj[`${sprite}ResultFrameNum`]] !== undefined) {
 				g_scoreObj[`${sprite}ResultFrameNum`] = drawSpriteData(g_scoreObj[`${sprite}ResultFrameNum`], `result`, sprite);
 			}
