@@ -1946,6 +1946,18 @@ function makeColorGradation(_colorStr, _defaultColorgrd = g_headerObj.defaultCol
 }
 
 /**
+ * タイトル・リザルトモーションの描画
+ * @param {string} _spriteName 
+ */
+function drawTitleResultMotion(_spriteName) {
+	g_animationData.forEach(sprite => {
+		if (g_headerObj[`${sprite}${_spriteName}Data`][g_scoreObj[`${sprite}${_spriteName}FrameNum`]] !== undefined) {
+			g_scoreObj[`${sprite}${_spriteName}FrameNum`] = drawSpriteData(g_scoreObj[`${sprite}${_spriteName}FrameNum`], `${_spriteName.toLowerCase()}`, sprite);
+		}
+	});
+}
+
+/**
  *  タイトル画面初期化
  */
 function titleInit() {
@@ -2248,11 +2260,7 @@ function titleInit() {
 		}
 
 		// 背景・マスクモーション
-		g_animationData.forEach(sprite => {
-			if (g_headerObj[`${sprite}TitleData`][g_scoreObj[`${sprite}TitleFrameNum`]] !== undefined) {
-				g_scoreObj[`${sprite}TitleFrameNum`] = drawSpriteData(g_scoreObj[`${sprite}TitleFrameNum`], `title`, sprite);
-			}
-		});
+		drawTitleResultMotion(`Title`);
 
 		thisTime = performance.now();
 		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / g_fps;
@@ -9125,11 +9133,7 @@ function resultInit() {
 		}
 
 		// 背景・マスクモーション
-		g_animationData.forEach(sprite => {
-			if (g_headerObj[`${sprite}ResultData`][g_scoreObj[`${sprite}ResultFrameNum`]] !== undefined) {
-				g_scoreObj[`${sprite}ResultFrameNum`] = drawSpriteData(g_scoreObj[`${sprite}ResultFrameNum`], `result`, sprite);
-			}
-		});
+		drawTitleResultMotion(`Result`);
 
 		// リザルト画面移行後のフェードアウト処理
 		if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
