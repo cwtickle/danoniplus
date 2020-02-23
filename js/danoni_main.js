@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 12.0.1`;
+const g_version = `Ver 12.0.2`;
 const g_revisedDate = `2020/02/10`;
 const g_alphaVersion = ``;
 
@@ -1976,7 +1976,7 @@ function titleInit() {
 	// 背景の矢印オブジェクトを表示
 	if (!g_headerObj.customTitleArrowUse) {
 		const titlecolor = (g_headerObj.titlearrowgrds.length === 0 ?
-			`${g_headerObj.setColorDefault[0]}` : g_headerObj.titlearrowgrds[0]);
+			`${g_headerObj.setColorOrg[0]}` : g_headerObj.titlearrowgrds[0]);
 		const lblArrow = createColorObject(`lblArrow`, makeColorGradation(titlecolor, false, false, `titleArrow`),
 			(g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2,
 			500, 500, 180);
@@ -2008,7 +2008,7 @@ function titleInit() {
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
 		if (g_headerObj.titlegrds.length === 0) {
-			titlefontgrd = makeColorGradation(`${g_headerObj.setColorDefault[0]},${g_headerObj.setColorDefault[2]}`, false, false, `titleMusic`);
+			titlefontgrd = makeColorGradation(`${g_headerObj.setColorOrg[0]},${g_headerObj.setColorOrg[2]}`, false, false, `titleMusic`);
 			titlefontgrd2 = titlefontgrd;
 		} else {
 			titlefontgrd = makeColorGradation(g_headerObj.titlegrds[0], false, false, `titleMusic`);
@@ -2598,6 +2598,7 @@ function headerConvert(_dosObj) {
 	obj.setColorInit = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setColorType1 = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
+	obj.setColorOrg = [];
 	obj.setColorDefault = [];
 
 	if (_dosObj.setColor !== undefined && _dosObj.setColor !== ``) {
@@ -2606,23 +2607,24 @@ function headerConvert(_dosObj) {
 			const tmpSetColorOrg = obj.setColor[j].replace(/0x/g, `#`).split(`:`);
 			tmpSetColorOrg.some(colorOrg => {
 				if (colorOrg.indexOf(`#`) !== -1) {
-					obj.setColorDefault[j] = colorOrg;
+					obj.setColorOrg[j] = colorOrg;
 					return true;
 				}
 			});
 			if (obj.colorCdPaddingUse) {
-				obj.setColorDefault[j] = `#${paddingLeft(obj.setColorDefault[j].slice(1), 6, `0`)}`;
+				obj.setColorOrg[j] = `#${paddingLeft(obj.setColorOrg[j].slice(1), 6, `0`)}`;
 			}
 			obj.setColor[j] = makeColorGradation(obj.setColor[j], obj.defaultColorgrd, obj.colorCdPaddingUse);
 		}
 		for (let j = obj.setColor.length; j < obj.setColorInit.length; j++) {
-			obj.setColorDefault[j] = obj.setColor[j];
+			obj.setColorOrg[j] = obj.setColor[j];
 			obj.setColor[j] = makeColorGradation(obj.setColorInit[j], obj.defaultColorgrd);
 		}
 	} else {
-		obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColorInit));
+		obj.setColorOrg = JSON.parse(JSON.stringify(obj.setColorInit));
 		obj.setColor = JSON.parse(JSON.stringify(obj.setColorInit));
 	}
+	obj.setColorDefault = JSON.parse(JSON.stringify(obj.setColor));
 
 	// 矢印の内側塗りつぶし色の設定
 	obj.setShadowColor = setVal(_dosObj.setShadowColor, ``, C_TYP_STRING);
@@ -3081,6 +3083,9 @@ function keysConvert(_dosObj) {
 
 		// ステップゾーン間隔 (blankX_Y)
 		newKeySingleParam(newKey, `blank`, C_TYP_FLOAT);
+
+		// 矢印群の倍率 (scaleX_Y)
+		newKeySingleParam(newKey, `scale`, C_TYP_FLOAT);
 
 		// プレイ中ショートカット：リトライ (keyRetryX_Y)
 		newKeySingleParam(newKey, `keyRetry`, C_TYP_NUMBER);
@@ -4468,7 +4473,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 		deepCopyList.forEach(header => {
 			g_keyObj[`${header}${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`${header}${basePtn}`]));
 		});
-		const copyList = [`div`, `blank`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`];
+		const copyList = [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`];
 		copyList.forEach(header => {
 			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
 		});
@@ -4776,18 +4781,21 @@ function keyConfigInit() {
 
 	// キーの一覧を表示
 	const keyconSprite = createSprite(`divRoot`, `keyconSprite`, 0, 100 + (g_sHeight - 500) / 2, g_sWidth, 300);
-	const kWidth = parseInt(keyconSprite.style.width);
-
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined) {
-		g_keyObj.blank = g_keyObj[`blank${keyCtrlPtn}`];
-	} else {
-		g_keyObj.blank = g_keyObj.blank_def;
-	}
+
+	[`blank`, `scale`].forEach(header => {
+		if (g_keyObj[`${header}${keyCtrlPtn}`] !== undefined) {
+			g_keyObj[header] = g_keyObj[`${header}${keyCtrlPtn}`];
+		} else {
+			g_keyObj[header] = g_keyObj[`${header}_def`];
+		}
+	});
+	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
+	const kWidth = parseInt(keyconSprite.style.width);
 
 	// ショートカットキーメッセージ
 	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, 14,
@@ -6694,11 +6702,13 @@ function getArrowSettings() {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ? g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined && g_keyObj[`blank${keyCtrlPtn}`] !== ``) {
-		g_keyObj.blank = g_keyObj[`blank${keyCtrlPtn}`];
-	} else {
-		g_keyObj.blank = g_keyObj.blank_def;
-	}
+	[`blank`, `scale`].forEach(header => {
+		if (g_keyObj[`${header}${keyCtrlPtn}`] !== undefined && g_keyObj[`${header}${keyCtrlPtn}`] !== ``) {
+			g_keyObj[header] = g_keyObj[`${header}${keyCtrlPtn}`];
+		} else {
+			g_keyObj[header] = g_keyObj[`${header}_def`];
+		}
+	});
 	g_headerObj.tuning = g_headerObj.creatorNames[g_stateObj.scoreId];
 
 	g_workObj.stepX = [];
@@ -6928,6 +6938,7 @@ function MainInit() {
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createSprite(`divRoot`, `mainSprite`, 0, 0, g_sWidth, g_sHeight);
+	mainSprite.style.transform = `scale(${g_keyObj.scale})`;
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createSprite(`divRoot`, `infoSprite`, 0, 0, g_sWidth, g_sHeight);
@@ -7317,7 +7328,7 @@ function MainInit() {
 	if (!g_headerObj.customReadyUse) {
 		const lblReady = createDivCssLabel(`lblReady`, g_sWidth / 2 - 100, (g_sHeight + g_stepYR) / 2 - 75,
 			200, 50, 40,
-			`<span style='color:` + g_headerObj.setColorDefault[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
+			`<span style='color:` + g_headerObj.setColorOrg[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
 		lblReady.style.animationDuration = `2.5s`;
 		lblReady.style.animationName = `leftToRightFade`;
 		let readyDelayFrame = 0;
