@@ -938,6 +938,11 @@ const g_keyObj = {
     blank9B_1: 52.5,
     blank9B_2: 52.5,
 
+    // 矢印群の倍率指定
+    scale: 1,
+    scale_def: 1,
+    scale17_0: 0.85,
+
     // ショートカットキーコード
     keyRetry: 8,
     keyRetry8_0: 9,
