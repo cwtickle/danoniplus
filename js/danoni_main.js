@@ -3084,6 +3084,9 @@ function keysConvert(_dosObj) {
 		// ステップゾーン間隔 (blankX_Y)
 		newKeySingleParam(newKey, `blank`, C_TYP_FLOAT);
 
+		// 矢印群の倍率 (scaleX_Y)
+		newKeySingleParam(newKey, `scale`, C_TYP_FLOAT);
+
 		// プレイ中ショートカット：リトライ (keyRetryX_Y)
 		newKeySingleParam(newKey, `keyRetry`, C_TYP_NUMBER);
 
@@ -4470,7 +4473,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 		deepCopyList.forEach(header => {
 			g_keyObj[`${header}${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`${header}${basePtn}`]));
 		});
-		const copyList = [`div`, `blank`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`];
+		const copyList = [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`];
 		copyList.forEach(header => {
 			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
 		});
@@ -4778,18 +4781,22 @@ function keyConfigInit() {
 
 	// キーの一覧を表示
 	const keyconSprite = createSprite(`divRoot`, `keyconSprite`, 0, 100 + (g_sHeight - 500) / 2, g_sWidth, 300);
-	const kWidth = parseInt(keyconSprite.style.width);
-
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined) {
-		g_keyObj.blank = g_keyObj[`blank${keyCtrlPtn}`];
-	} else {
-		g_keyObj.blank = g_keyObj.blank_def;
-	}
+
+	[`blank`, `scale`].forEach(header => {
+		if (g_keyObj[`${header}${keyCtrlPtn}`] !== undefined) {
+			g_keyObj[header] = g_keyObj[`${header}${keyCtrlPtn}`];
+		} else {
+			g_keyObj[header] = g_keyObj[`${header}_def`];
+		}
+	});
+	console.log(g_keyObj.scale);
+	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
+	const kWidth = parseInt(keyconSprite.style.width);
 
 	// ショートカットキーメッセージ
 	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, 14,
@@ -6676,11 +6683,13 @@ function getArrowSettings() {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ? g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-	if (g_keyObj[`blank${keyCtrlPtn}`] !== undefined && g_keyObj[`blank${keyCtrlPtn}`] !== ``) {
-		g_keyObj.blank = g_keyObj[`blank${keyCtrlPtn}`];
-	} else {
-		g_keyObj.blank = g_keyObj.blank_def;
-	}
+	[`blank`, `scale`].forEach(header => {
+		if (g_keyObj[`${header}${keyCtrlPtn}`] !== undefined && g_keyObj[`${header}${keyCtrlPtn}`] !== ``) {
+			g_keyObj[header] = g_keyObj[`${header}${keyCtrlPtn}`];
+		} else {
+			g_keyObj[header] = g_keyObj[`${header}_def`];
+		}
+	});
 	g_headerObj.tuning = g_headerObj.creatorNames[g_stateObj.scoreId];
 
 	g_workObj.stepX = [];
@@ -6910,7 +6919,7 @@ function MainInit() {
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createSprite(`divRoot`, `mainSprite`, 0, 0, g_sWidth, g_sHeight);
-	mainSprite.style.transform = `scale(0.9)`;
+	mainSprite.style.transform = `scale(${g_keyObj.scale})`;
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createSprite(`divRoot`, `infoSprite`, 0, 0, g_sWidth, g_sHeight);
