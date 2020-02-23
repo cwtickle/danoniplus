@@ -4794,7 +4794,6 @@ function keyConfigInit() {
 			g_keyObj[header] = g_keyObj[`${header}_def`];
 		}
 	});
-	console.log(g_keyObj.scale);
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
 	const kWidth = parseInt(keyconSprite.style.width);
 
