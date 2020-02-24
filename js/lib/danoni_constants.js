@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/02/09
+ * Revised : 2020/02/24
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -937,6 +937,11 @@ const g_keyObj = {
     blank9B_0: 52.5,
     blank9B_1: 52.5,
     blank9B_2: 52.5,
+
+    // 矢印群の倍率指定
+    scale: 1,
+    scale_def: 1,
+    scale17_0: 0.85,
 
     // ショートカットキーコード
     keyRetry: 8,
