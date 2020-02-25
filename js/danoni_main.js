@@ -8908,6 +8908,48 @@ function resultInit() {
 	lblRank.style.textAlign = C_ALIGN_CENTER;
 	resultWindow.appendChild(lblRank);
 
+	// Cleared & Failed表示
+	const lblResultPre = createDivCssLabel(`lblResultPre`, g_sWidth / 2 - 150, g_sHeight / 2 - 160,
+		200, 50, 60, `<span class="result_Cleared">CLEARED!</span>`, g_cssObj.result_Cleared);
+	lblResultPre.classList.add(g_cssObj.result_Window);
+	divRoot.appendChild(lblResultPre);
+	lblResultPre.style.opacity = 0;
+
+	let resultFlgTmp = ``;
+
+	if (playingArrows === fullArrows) {
+		if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
+			resultFlgTmp = `<span class="result_AllPerfect">All Perfect!!</span>`;
+		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
+			resultFlgTmp = `<span class="result_Perfect">Perfect!!</span>`;
+		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
+			resultFlgTmp = `<span class="result_FullCombo">FullCombo!</span>`;
+		} else {
+			resultFlgTmp = `<span class="result_Cleared">CLEARED!</span>`;
+		}
+	} else {
+		resultFlgTmp = ``;
+	}
+
+	const lblResultPre2 = createDivCssLabel(`lblResultPre2`, g_sWidth / 2 + 50, 40,
+		200, 30, 20, resultFlgTmp, g_cssObj.result_Cleared);
+	divRoot.appendChild(lblResultPre2);
+
+	if (!g_gameOverFlg) {
+		lblResultPre.style.animationDuration = `2.5s`;
+		lblResultPre.style.animationName = `leftToRightFade`;
+	} else {
+		lblResultPre.style.animationDuration = `3s`;
+		lblResultPre.innerHTML = `<span class="result_Failed">FAILED...</span>`;
+		lblResultPre.style.animationName = `upToDownFade`;
+
+		lblResultPre2.innerHTML = `<span class="result_Failed">FAILED...</span>`;
+	}
+
+	// プレイデータは Cleared & Failed に合わせて表示
+	playDataWindow.style.animationDuration = `3s`;
+	playDataWindow.style.animationName = `slowlyAppearing`;
+
 	// ハイスコア差分計算
 	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_headerObj.makerView) {
@@ -8925,6 +8967,14 @@ function resultInit() {
 		fmaxCombo: 0,
 		score: 0,
 	};
+
+	// ユーザカスタムイベント(初期)
+	if (typeof customResultInit === C_TYP_FUNCTION) {
+		customResultInit();
+		if (typeof customResultInit2 === C_TYP_FUNCTION) {
+			customResultInit2();
+		}
+	}
 
 	if (g_stateObj.autoPlay === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
 		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``) {
@@ -8995,57 +9045,6 @@ function resultInit() {
 		${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo} 
 		${g_localStorageUrl}`.replace(/[\t\n]/g, ``);
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetResultTmp)}`;
-
-
-	// Cleared & Failed表示
-	const lblResultPre = createDivCssLabel(`lblResultPre`, g_sWidth / 2 - 150, g_sHeight / 2 - 160,
-		200, 50, 60, `<span class="result_Cleared">CLEARED!</span>`, g_cssObj.result_Cleared);
-	lblResultPre.classList.add(g_cssObj.result_Window);
-	divRoot.appendChild(lblResultPre);
-	lblResultPre.style.opacity = 0;
-
-	let resultFlgTmp = ``;
-
-	if (playingArrows === fullArrows) {
-		if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
-			resultFlgTmp = `<span class="result_AllPerfect">All Perfect!!</span>`;
-		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
-			resultFlgTmp = `<span class="result_Perfect">Perfect!!</span>`;
-		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
-			resultFlgTmp = `<span class="result_FullCombo">FullCombo!</span>`;
-		} else {
-			resultFlgTmp = `<span class="result_Cleared">CLEARED!</span>`;
-		}
-	} else {
-		resultFlgTmp = ``;
-	}
-
-	const lblResultPre2 = createDivCssLabel(`lblResultPre2`, g_sWidth / 2 + 50, 40,
-		200, 30, 20, resultFlgTmp, g_cssObj.result_Cleared);
-	divRoot.appendChild(lblResultPre2);
-
-	if (!g_gameOverFlg) {
-		lblResultPre.style.animationDuration = `2.5s`;
-		lblResultPre.style.animationName = `leftToRightFade`;
-	} else {
-		lblResultPre.style.animationDuration = `3s`;
-		lblResultPre.innerHTML = `<span class="result_Failed">FAILED...</span>`;
-		lblResultPre.style.animationName = `upToDownFade`;
-
-		lblResultPre2.innerHTML = `<span class="result_Failed">FAILED...</span>`;
-	}
-
-	// プレイデータは Cleared & Failed に合わせて表示
-	playDataWindow.style.animationDuration = `3s`;
-	playDataWindow.style.animationName = `slowlyAppearing`;
-
-	// ユーザカスタムイベント(初期)
-	if (typeof customResultInit === C_TYP_FUNCTION) {
-		customResultInit();
-		if (typeof customResultInit2 === C_TYP_FUNCTION) {
-			customResultInit2();
-		}
-	}
 
 	// 戻るボタン描画
 	const btnBack = createCssButton({
