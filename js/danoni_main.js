@@ -8968,6 +8968,24 @@ function resultInit() {
 		score: 0,
 	};
 
+	if (g_stateObj.autoPlay === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
+		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``) {
+
+		judgeIds.forEach((id, j) => {
+			if (id === `Score`) {
+			} else if (id !== ``) {
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, j, `(+`, C_ALIGN_LEFT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}LS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, j, 0, C_ALIGN_RIGHT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, j, `)`, C_ALIGN_LEFT));
+			}
+		});
+
+	} else {
+		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`, C_ALIGN_LEFT));
+		const lblAutoView = document.querySelector(`#lblAutoView`);
+		lblAutoView.style.fontSize = `24px`;
+	}
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customResultInit === C_TYP_FUNCTION) {
 		customResultInit();
@@ -9012,16 +9030,11 @@ function resultInit() {
 				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
 					j, `)`, C_ALIGN_LEFT));
 			} else if (id !== ``) {
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, j, `(${highscoreDfObj[judgeScores[j]] >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}LS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, j, Math.abs(highscoreDfObj[judgeScores[j]]), C_ALIGN_RIGHT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, j, `)`, C_ALIGN_LEFT));
+				document.querySelector(`#lbl${id}L1`).innerHTML = `(${highscoreDfObj[judgeScores[j]] >= 0 ? "+" : "－"}`;
+				document.querySelector(`#lbl${id}LS`).innerHTML = Math.abs(highscoreDfObj[judgeScores[j]]);
 			}
 		});
 
-	} else {
-		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`, C_ALIGN_LEFT));
-		const lblAutoView = document.querySelector(`#lblAutoView`);
-		lblAutoView.style.fontSize = `24px`;
 	}
 
 	// Twitter用リザルト
