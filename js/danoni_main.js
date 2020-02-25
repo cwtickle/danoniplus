@@ -8908,95 +8908,6 @@ function resultInit() {
 	lblRank.style.textAlign = C_ALIGN_CENTER;
 	resultWindow.appendChild(lblRank);
 
-	// ハイスコア差分計算
-	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-	if (g_headerObj.makerView) {
-		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
-	}
-	const highscoreDfObj = {
-		ii: 0,
-		shakin: 0,
-		matari: 0,
-		shobon: 0,
-		uwan: 0,
-		kita: 0,
-		iknai: 0,
-		maxCombo: 0,
-		fmaxCombo: 0,
-		score: 0,
-	};
-
-	if (g_stateObj.autoPlay === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
-		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``) {
-
-		if (scoreName in g_localStorage.highscores) {
-			judgeScores.forEach(judge => {
-				if (judge !== ``) {
-					highscoreDfObj[judge] = g_resultObj[judge] - g_localStorage.highscores[scoreName][judge];
-				}
-			});
-		} else {
-			judgeScores.forEach(judge => {
-				if (judge !== ``) {
-					highscoreDfObj[judge] = g_resultObj[judge];
-				}
-			});
-		}
-		if (highscoreDfObj.score > 0 && g_stateObj.dataSaveFlg) {
-			g_localStorage.highscores[scoreName] = {};
-			judgeScores.forEach(judge => {
-				if (judge !== ``) {
-					g_localStorage.highscores[scoreName][judge] = g_resultObj[judge];
-				}
-			});
-			localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
-		}
-
-		// ハイスコア差分描画
-		judgeIds.forEach((id, j) => {
-			if (id === `Score`) {
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-					j, `(${highscoreDfObj[judgeScores[j]] >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}LS`, C_RLT_HIDIF_X, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
-					j, Math.abs(highscoreDfObj[judgeScores[j]]), C_ALIGN_RIGHT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-					j, `)`, C_ALIGN_LEFT));
-			} else if (id !== ``) {
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, j, `(${highscoreDfObj[judgeScores[j]] >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}LS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, j, Math.abs(highscoreDfObj[judgeScores[j]]), C_ALIGN_RIGHT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, j, `)`, C_ALIGN_LEFT));
-			}
-		});
-
-	} else {
-		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`, C_ALIGN_LEFT));
-		const lblAutoView = document.querySelector(`#lblAutoView`);
-		lblAutoView.style.fontSize = `24px`;
-	}
-
-	// Twitter用リザルト
-	let hashTag;
-	if (g_headerObj.hashTag !== undefined) {
-		hashTag = ` ${g_headerObj.hashTag}`;
-	} else {
-		hashTag = ``;
-	}
-	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `/${g_stateObj.shuffle}`;
-	}
-	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData})/
-		${g_headerObj.tuning}/
-		Rank:${rankMark}/
-		Score:${g_resultObj.score}/
-		Playstyle:${playStyleData}/
-		${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}/
-		${g_resultObj.kita}-${g_resultObj.iknai}/
-		${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo} 
-		${g_localStorageUrl}`.replace(/[\t\n]/g, ``);
-	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetResultTmp)}`;
-
-
 	// Cleared & Failed表示
 	const lblResultPre = createDivCssLabel(`lblResultPre`, g_sWidth / 2 - 150, g_sHeight / 2 - 160,
 		200, 50, 60, `<span class="result_Cleared">CLEARED!</span>`, g_cssObj.result_Cleared);
@@ -9039,6 +8950,45 @@ function resultInit() {
 	playDataWindow.style.animationDuration = `3s`;
 	playDataWindow.style.animationName = `slowlyAppearing`;
 
+	// ハイスコア差分計算
+	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	if (g_headerObj.makerView) {
+		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
+	}
+	const highscoreDfObj = {
+		ii: 0,
+		shakin: 0,
+		matari: 0,
+		shobon: 0,
+		uwan: 0,
+		kita: 0,
+		iknai: 0,
+		maxCombo: 0,
+		fmaxCombo: 0,
+		score: 0,
+	};
+
+	const highscoreCondition = (g_stateObj.autoPlay === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
+		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``);
+
+	if (highscoreCondition) {
+
+		// ハイスコア差分描画
+		judgeIds.forEach((id, j) => {
+			if (id === `Score`) {
+			} else if (id !== ``) {
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, j, `(+`, C_ALIGN_LEFT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}LS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, j, 0, C_ALIGN_RIGHT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, j, `)`, C_ALIGN_LEFT));
+			}
+		});
+
+	} else {
+		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`, C_ALIGN_LEFT));
+		const lblAutoView = document.querySelector(`#lblAutoView`);
+		lblAutoView.style.fontSize = `24px`;
+	}
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customResultInit === C_TYP_FUNCTION) {
 		customResultInit();
@@ -9046,6 +8996,70 @@ function resultInit() {
 			customResultInit2();
 		}
 	}
+
+	if (highscoreCondition) {
+
+		if (scoreName in g_localStorage.highscores) {
+			judgeScores.forEach(judge => {
+				if (judge !== ``) {
+					highscoreDfObj[judge] = g_resultObj[judge] - g_localStorage.highscores[scoreName][judge];
+				}
+			});
+		} else {
+			judgeScores.forEach(judge => {
+				if (judge !== ``) {
+					highscoreDfObj[judge] = g_resultObj[judge];
+				}
+			});
+		}
+		if (highscoreDfObj.score > 0 && g_stateObj.dataSaveFlg) {
+			g_localStorage.highscores[scoreName] = {};
+			judgeScores.forEach(judge => {
+				if (judge !== ``) {
+					g_localStorage.highscores[scoreName][judge] = g_resultObj[judge];
+				}
+			});
+			localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+		}
+
+		// ハイスコア差分値適用、ハイスコア部分作成
+		judgeIds.forEach((id, j) => {
+			if (id === `Score`) {
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					j, `(${highscoreDfObj[judgeScores[j]] >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}LS`, C_RLT_HIDIF_X, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
+					j, Math.abs(highscoreDfObj[judgeScores[j]]), C_ALIGN_RIGHT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					j, `)`, C_ALIGN_LEFT));
+			} else if (id !== ``) {
+				document.querySelector(`#lbl${id}L1`).innerHTML = `(${highscoreDfObj[judgeScores[j]] >= 0 ? "+" : "－"}`;
+				document.querySelector(`#lbl${id}LS`).innerHTML = Math.abs(highscoreDfObj[judgeScores[j]]);
+			}
+		});
+
+	}
+
+	// Twitter用リザルト
+	let hashTag;
+	if (g_headerObj.hashTag !== undefined) {
+		hashTag = ` ${g_headerObj.hashTag}`;
+	} else {
+		hashTag = ``;
+	}
+	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	if (g_stateObj.shuffle !== `OFF`) {
+		tweetDifData += `/${g_stateObj.shuffle}`;
+	}
+	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData})/
+		${g_headerObj.tuning}/
+		Rank:${rankMark}/
+		Score:${g_resultObj.score}/
+		Playstyle:${playStyleData}/
+		${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}/
+		${g_resultObj.kita}-${g_resultObj.iknai}/
+		${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo} 
+		${g_localStorageUrl}`.replace(/[\t\n]/g, ``);
+	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetResultTmp)}`;
 
 	// 戻るボタン描画
 	const btnBack = createCssButton({
