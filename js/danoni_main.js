@@ -8968,9 +8968,12 @@ function resultInit() {
 		score: 0,
 	};
 
-	if (g_stateObj.autoPlay === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
-		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``) {
+	const highscoreCondition = (g_stateObj.autoPlay === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
+		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``);
 
+	if (highscoreCondition) {
+
+		// ハイスコア差分描画
 		judgeIds.forEach((id, j) => {
 			if (id === `Score`) {
 			} else if (id !== ``) {
@@ -8994,8 +8997,7 @@ function resultInit() {
 		}
 	}
 
-	if (g_stateObj.autoPlay === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
-		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``) {
+	if (highscoreCondition) {
 
 		if (scoreName in g_localStorage.highscores) {
 			judgeScores.forEach(judge => {
@@ -9020,7 +9022,7 @@ function resultInit() {
 			localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 		}
 
-		// ハイスコア差分描画
+		// ハイスコア差分値適用、ハイスコア部分作成
 		judgeIds.forEach((id, j) => {
 			if (id === `Score`) {
 				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
