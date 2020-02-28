@@ -2014,6 +2014,8 @@ function titleInit() {
 			titlefontgrd = makeColorGradation(g_headerObj.titlegrds[0], false, false, `titleMusic`);
 			if (g_headerObj.titlegrds.length > 1) {
 				titlefontgrd2 = makeColorGradation(g_headerObj.titlegrds[1], false, false, `titleMusic`);
+			} else {
+				titlefontgrd2 = titlefontgrd;
 			}
 		}
 
