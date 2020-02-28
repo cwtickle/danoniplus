@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/02/25
+ * Revised : 2020/02/28
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 12.1.1`;
-const g_revisedDate = `2020/02/25`;
+const g_version = `Ver 12.1.2`;
+const g_revisedDate = `2020/02/28`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2014,6 +2014,8 @@ function titleInit() {
 			titlefontgrd = makeColorGradation(g_headerObj.titlegrds[0], false, false, `titleMusic`);
 			if (g_headerObj.titlegrds.length > 1) {
 				titlefontgrd2 = makeColorGradation(g_headerObj.titlegrds[1], false, false, `titleMusic`);
+			} else {
+				titlefontgrd2 = titlefontgrd;
 			}
 		}
 
