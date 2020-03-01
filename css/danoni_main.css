@@ -291,15 +291,21 @@ input[type=range]:focus {
 /* 設定画面：ゲージ設定詳細:Div版 */
 .settings_gaugeDivCover {
 	border: 1px #666666 solid;
+	width: 280px;
 }
 .settings_gaugeDivTable {
 	display: table;
-	width: 280px;
+	width: 278px;
 }
 .settings_gaugeDivTableCol {
 	display: table-cell;
-	width: 65px;
 	border-collapse: collapse;
+}
+.settings_gaugeStart {
+	width: 85px;
+}
+.settings_gaugeEtc {
+	width: 65px;
 }
 
 /* ライフゲージボーダー */

@@ -4079,52 +4079,35 @@ function createOptionWindow(_sprite) {
 
 		return `<div class="settings_gaugeDivCover">
 					<div class="settings_gaugeDivTable">
-						<div class="settings_gaugeDivTableCol" style="width=85px;">
+						<div class="settings_gaugeDivTableCol settings_gaugeStart">
 							Start
 						</div>
-						<div class="settings_gaugeDivTableCol">
+						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
 							Border
 						</div>
-						<div class="settings_gaugeDivTableCol">
+						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
 							Recovery
 						</div>
-						<div class="settings_gaugeDivTableCol">
+						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
 							Damage
 						</div>
 					</div>
 					<div class="settings_gaugeDivTable">
-						<div class="settings_gaugeDivTableCol" style="width=85px;">
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
 							${init}/${g_headerObj.maxLifeVal}
 						</div>
-						<div class="settings_gaugeDivTableCol">
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
 							${border}
 						</div>
-						<div class="settings_gaugeDivTableCol${lifeValCss}">
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
 							${rcv}
 						</div>
-						<div class="settings_gaugeDivTableCol${lifeValCss}">
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
 							${dmg}
 						</div>
 					</div>
 				</div>
 				`;
-
-		/*
-				<table class="settings_gaugeTable settings_gaugeTableBorder">
-					<tr>
-						<td>Start</td>
-						<td>Border</td>
-						<td>Recovery</td>
-						<td>Damage</td>
-					</tr>
-					<tr class="settings_gaugeVal">
-						<td style="width:85px;">${init}/${g_headerObj.maxLifeVal}</td>
-						<td>${border}</td>
-						<td${lifeValCss}>${rcv}</td>
-						<td${lifeValCss}>${dmg}</td>
-					</tr>
-				</table>
-		*/
 	}
 
 	// ---------------------------------------------------
