@@ -278,13 +278,22 @@ input[type=range]:focus {
 .settings_gaugeVal {
 	font-size:12px;
 }
-.settings_gaugeTable {
+.settings_gaugeDivCover {
+	border: 1px #666666 solid;
 	width: 280px;
-	margin: 0 auto;
-	border: 1px #666666 solid; 
+}
+.settings_gaugeDivTable {
+	display: table;
+	width: 279px;
+}
+.settings_gaugeDivTableCol {
+	display: table-cell;
 	border-collapse: collapse;
 }
-.settings_gaugeTable td {
+.settings_gaugeStart {
+	width: 85px;
+}
+.settings_gaugeEtc {
 	width: 65px;
 }
 

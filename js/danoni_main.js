@@ -4068,7 +4068,7 @@ function createOptionWindow(_sprite) {
 
 		let lifeValCss = ``;
 		if (_lifeValFlg === C_FLG_ON) {
-			lifeValCss = ` class="settings_lifeVal"`;
+			lifeValCss = ` settings_lifeVal`;
 		}
 
 		// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
@@ -4077,20 +4077,36 @@ function createOptionWindow(_sprite) {
 		const rcv = Math.round(_rcv * 100) / 100;
 		const dmg = Math.round(_dmg * 100) / 100;
 
-		return `<table class="settings_gaugeTable settings_gaugeTableBorder">
-					<tr>
-						<td>Start</td>
-						<td>Border</td>
-						<td>Recovery</td>
-						<td>Damage</td>
-					</tr>
-					<tr class="settings_gaugeVal">
-						<td style="width:85px;">${init}/${g_headerObj.maxLifeVal}</td>
-						<td>${border}</td>
-						<td${lifeValCss}>${rcv}</td>
-						<td${lifeValCss}>${dmg}</td>
-					</tr>
-				</table>
+		return `<div class="settings_gaugeDivCover">
+					<div class="settings_gaugeDivTable">
+						<div class="settings_gaugeDivTableCol settings_gaugeStart">
+							Start
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+							Border
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+							Recovery
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+							Damage
+						</div>
+					</div>
+					<div class="settings_gaugeDivTable">
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
+							${init}/${g_headerObj.maxLifeVal}
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+							${border}
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+							${rcv}
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+							${dmg}
+						</div>
+					</div>
+				</div>
 				`;
 	}
 
