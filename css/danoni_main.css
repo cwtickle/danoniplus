@@ -1,4 +1,14 @@
 ﻿@charset "UTF-8";
+/* ----------------------------------------
+  Dancing☆Onigiri (CW Edition)
+  本体cssファイル
+
+  Created : 2018/10/08
+  Revised : 2020/03/06
+
+  https://github.com/cwtickle/danoniplus
+------------------------------------------ */
+
 #canvas-frame {
 	height:500px;
 	position: relative;
