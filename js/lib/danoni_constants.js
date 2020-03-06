@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/02/24
+ * Revised : 2020/03/06
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1032,7 +1032,7 @@ const g_keyObj = {
         'Split': [1, 1, 1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1],
         'Twist': [1, 1, -1, -1, 1, 1, -1],
-        'Asymmetry': [1, -1, 1, -1, -1, 1, -1],
+        'Asymmetry': [1, -1, 1, 1, -1, 1, -1],
     },
     scrollDir8_0: {
         '---': [1, 1, 1, 1, 1, 1, 1, 1],

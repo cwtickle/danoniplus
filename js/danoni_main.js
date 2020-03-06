@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/02/28
+ * Revised : 2020/03/06
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 12.1.2`;
-const g_revisedDate = `2020/02/28`;
+const g_version = `Ver 12.2.0`;
+const g_revisedDate = `2020/03/06`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -129,6 +129,8 @@ const g_wordObj = {
 	fadeOutFlg0: false,
 	fadeOutFlg1: false
 };
+
+const g_animationData = [`back`, `mask`];
 
 // オーディオ設定・タイマー管理
 let g_audio = new Audio();
@@ -1944,6 +1946,18 @@ function makeColorGradation(_colorStr, _defaultColorgrd = g_headerObj.defaultCol
 }
 
 /**
+ * タイトル・リザルトモーションの描画
+ * @param {string} _spriteName 
+ */
+function drawTitleResultMotion(_spriteName) {
+	g_animationData.forEach(sprite => {
+		if (g_headerObj[`${sprite}${_spriteName}Data`][g_scoreObj[`${sprite}${_spriteName}FrameNum`]] !== undefined) {
+			g_scoreObj[`${sprite}${_spriteName}FrameNum`] = drawSpriteData(g_scoreObj[`${sprite}${_spriteName}FrameNum`], `${_spriteName.toLowerCase()}`, sprite);
+		}
+	});
+}
+
+/**
  *  タイトル画面初期化
  */
 function titleInit() {
@@ -2247,15 +2261,8 @@ function titleInit() {
 			}
 		}
 
-		// 背景表示・背景モーション
-		if (g_headerObj.backTitleData[g_scoreObj.backTitleFrameNum] !== undefined) {
-			g_scoreObj.backTitleFrameNum = drawSpriteData(g_scoreObj.backTitleFrameNum, `title`, `back`);
-		}
-
-		// マスク表示・マスクモーション
-		if (g_headerObj.maskTitleData[g_scoreObj.maskTitleFrameNum] !== undefined) {
-			g_scoreObj.maskTitleFrameNum = drawSpriteData(g_scoreObj.maskTitleFrameNum, `title`, `mask`);
-		}
+		// 背景・マスクモーション
+		drawTitleResultMotion(`Title`);
 
 		thisTime = performance.now();
 		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / g_fps;
@@ -4068,7 +4075,7 @@ function createOptionWindow(_sprite) {
 
 		let lifeValCss = ``;
 		if (_lifeValFlg === C_FLG_ON) {
-			lifeValCss = ` class="settings_lifeVal"`;
+			lifeValCss = ` settings_lifeVal`;
 		}
 
 		// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
@@ -4077,20 +4084,36 @@ function createOptionWindow(_sprite) {
 		const rcv = Math.round(_rcv * 100) / 100;
 		const dmg = Math.round(_dmg * 100) / 100;
 
-		return `<table class="settings_gaugeTable settings_gaugeTableBorder">
-					<tr>
-						<td>Start</td>
-						<td>Border</td>
-						<td>Recovery</td>
-						<td>Damage</td>
-					</tr>
-					<tr class="settings_gaugeVal">
-						<td style="width:85px;">${init}/${g_headerObj.maxLifeVal}</td>
-						<td>${border}</td>
-						<td${lifeValCss}>${rcv}</td>
-						<td${lifeValCss}>${dmg}</td>
-					</tr>
-				</table>
+		return `<div class="settings_gaugeDivCover">
+					<div class="settings_gaugeDivTable">
+						<div class="settings_gaugeDivTableCol settings_gaugeStart">
+							Start
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+							Border
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+							Recovery
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+							Damage
+						</div>
+					</div>
+					<div class="settings_gaugeDivTable">
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
+							${init}/${g_headerObj.maxLifeVal}
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+							${border}
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+							${rcv}
+						</div>
+						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+							${dmg}
+						</div>
+					</div>
+				</div>
 				`;
 	}
 
@@ -6937,18 +6960,14 @@ function MainInit() {
 		createSprite(`maskSprite`, `maskSprite${j}`, 0, 0, g_sWidth, g_sHeight);
 	}
 
+	// 背景・マスクモーション(0フレーム指定)
 	if (g_scoreObj.frameNum === 0) {
-		// マスク表示・マスクモーション(0フレーム指定)
-		if (g_scoreObj.maskData[0] !== undefined) {
-			drawMainSpriteData(0, `mask`);
-			g_scoreObj.maskData[0] = undefined;
-		}
-
-		// 背景表示・背景モーション(0フレーム指定)
-		if (g_scoreObj.backData[0] !== undefined) {
-			drawMainSpriteData(0, `back`);
-			g_scoreObj.backData[0] = undefined;
-		}
+		g_animationData.forEach(sprite => {
+			if (g_scoreObj[`${sprite}Data`][0] !== undefined) {
+				drawMainSpriteData(0, sprite);
+				g_scoreObj[`${sprite}Data`][0] = undefined;
+			}
+		});
 	}
 
 	// 矢印・フリーズアロー・速度変化 移動/判定/変化対象の初期化
@@ -7921,15 +7940,12 @@ function MainInit() {
 			g_audio.dispatchEvent(new CustomEvent(`timeupdate`));
 		}
 
-		// マスク表示・マスクモーション
-		if (g_scoreObj.maskData[g_scoreObj.frameNum] !== undefined) {
-			drawMainSpriteData(g_scoreObj.frameNum, `mask`);
-		}
-
-		// 背景表示・背景モーション
-		if (g_scoreObj.backData[g_scoreObj.frameNum] !== undefined) {
-			drawMainSpriteData(g_scoreObj.frameNum, `back`);
-		}
+		// 背景・マスクモーション
+		g_animationData.forEach(sprite => {
+			if (g_scoreObj[`${sprite}Data`][g_scoreObj.frameNum] !== undefined) {
+				drawMainSpriteData(g_scoreObj.frameNum, sprite);
+			}
+		});
 
 		// フェードイン・アウト
 		const isFadeOutArea = g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm;
@@ -8710,7 +8726,7 @@ function resultInit() {
 		if (!g_finishFlg) {
 			const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg);
 
-			[`back`, `mask`].forEach(sprite => {
+			g_animationData.forEach(sprite => {
 				if (g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] !== undefined) {
 					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = makeSpriteData(g_rootObj[`${sprite}failedS${scoreIdHeader}_data`]);
 				} else if (g_rootObj[`${sprite}failedS_data`] !== undefined) {
@@ -9135,22 +9151,14 @@ function resultInit() {
 	}
 
 	// リザルトモーションの0フレーム対応
-	if (g_scoreObj.backResultFrameNum === 0) {
-
-		// 背景表示・背景モーション(0フレーム指定)
-		if (g_headerObj.backResultData[0] !== undefined) {
-			g_scoreObj.backResultFrameNum = drawSpriteData(0, `result`, `back`);
-			g_headerObj.backResultData[0] = undefined;
+	g_animationData.forEach(sprite => {
+		if (g_scoreObj[`${sprite}ResultFrameNum`] === 0) {
+			if (g_headerObj[`${sprite}ResultData`][0] !== undefined) {
+				g_scoreObj[`${sprite}ResultFrameNum`] = drawSpriteData(0, `result`, sprite);
+				g_headerObj[`${sprite}ResultData`][0] = undefined;
+			}
 		}
-	}
-	if (g_scoreObj.maskResultFrameNum === 0) {
-
-		// マスク表示・マスクモーション(0フレーム指定)
-		if (g_headerObj.maskResultData[0] !== undefined) {
-			g_scoreObj.maskResultFrameNum = drawSpriteData(0, `result`, `mask`);
-			g_headerObj.maskResultData[0] = undefined;
-		}
-	}
+	});
 
 	/**
 	 * タイトルのモーション設定
@@ -9165,15 +9173,8 @@ function resultInit() {
 			}
 		}
 
-		// 背景表示・背景モーション
-		if (g_headerObj.backResultData[g_scoreObj.backResultFrameNum] !== undefined) {
-			g_scoreObj.backResultFrameNum = drawSpriteData(g_scoreObj.backResultFrameNum, `result`, `back`);
-		}
-
-		// マスク表示・マスクモーション
-		if (g_headerObj.maskResultData[g_scoreObj.maskResultFrameNum] !== undefined) {
-			g_scoreObj.maskResultFrameNum = drawSpriteData(g_scoreObj.maskResultFrameNum, `result`, `mask`);
-		}
+		// 背景・マスクモーション
+		drawTitleResultMotion(`Result`);
 
 		// リザルト画面移行後のフェードアウト処理
 		if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
