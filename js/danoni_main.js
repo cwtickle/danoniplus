@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/03/06
+ * Revised : 2020/03/08
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 12.2.0`;
-const g_revisedDate = `2020/03/06`;
+const g_version = `Ver 12.2.1`;
+const g_revisedDate = `2020/03/08`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7539,6 +7539,7 @@ function MainInit() {
 						customJudgeDummyArrow2(_cnt);
 					}
 				}
+				stepDivHit.style.top = `-15px`;
 				stepDivHit.style.opacity = 1;
 				stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
 				stepDivHit.classList.add(g_cssObj.main_stepDummy);
