@@ -7038,6 +7038,7 @@ function MainInit() {
 						customJudgeDummyArrow2(_cnt);
 					}
 				}
+				stepDivHit.style.top = `-15px`;
 				stepDivHit.style.opacity = 1;
 				stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
 				stepDivHit.classList.add(g_cssObj.main_stepDummy);
