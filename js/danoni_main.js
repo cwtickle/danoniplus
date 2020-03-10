@@ -8507,17 +8507,24 @@ function changeJudgeCharacter(_name, _character, _freezeFlg = ``) {
 }
 
 /**
+ * コンボの更新
+ */
+function updateCombo() {
+	if (++g_resultObj.combo > g_resultObj.maxCombo) {
+		g_resultObj.maxCombo = g_resultObj.combo;
+		document.querySelector(`#lblMCombo`).innerHTML = g_resultObj.maxCombo;
+	}
+	document.querySelector(`#comboJ`).innerHTML = `${g_resultObj.combo} Combo!!`;
+}
+
+/**
  * 判定処理：イイ
  * @param {number} difFrame 
  */
 function judgeIi(difFrame) {
 	changeJudgeCharacter(`ii`, C_JCR_II);
 
-	if (++g_resultObj.combo > g_resultObj.maxCombo) {
-		g_resultObj.maxCombo = g_resultObj.combo;
-		document.querySelector(`#lblMCombo`).innerHTML = g_resultObj.maxCombo;
-	}
-	document.querySelector(`#comboJ`).innerHTML = `${g_resultObj.combo} Combo!!`;
+	updateCombo();
 	document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, Math.abs(difFrame));
 
 	lifeRecovery();
@@ -8538,11 +8545,7 @@ function judgeIi(difFrame) {
 function judgeShakin(difFrame) {
 	changeJudgeCharacter(`shakin`, C_JCR_SHAKIN);
 
-	if (++g_resultObj.combo > g_resultObj.maxCombo) {
-		g_resultObj.maxCombo = g_resultObj.combo;
-		document.querySelector(`#lblMCombo`).innerHTML = g_resultObj.maxCombo;
-	}
-	document.querySelector(`#comboJ`).innerHTML = `${g_resultObj.combo} Combo!!`;
+	updateCombo();
 	document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, Math.abs(difFrame));
 
 	lifeRecovery();
