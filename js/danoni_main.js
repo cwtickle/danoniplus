@@ -8389,15 +8389,12 @@ function judgeArrow(_j) {
 			if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 				judgeIi(difFrame);
 				stepDivHit.classList.add(g_cssObj.main_stepIi);
-				document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 			} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
 				judgeShakin(difFrame);
 				stepDivHit.classList.add(g_cssObj.main_stepShakin);
-				document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 			} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
 				judgeMatari(difFrame);
 				stepDivHit.classList.add(g_cssObj.main_stepMatari);
-				document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 			} else {
 				judgeShobon(difFrame);
 				stepDivHit.classList.add(g_cssObj.main_stepShobon);
@@ -8422,13 +8419,10 @@ function judgeArrow(_j) {
 				const difFrame = Number(judgFrz.getAttribute(`cnt`));
 				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 					judgeIi(difFrame);
-					document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
 					judgeShakin(difCnt);
-					document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
 					judgeMatari(difCnt);
-					document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, difCnt);
 				} else {
 					judgeShobon(difCnt);
 				}
@@ -8524,6 +8518,7 @@ function judgeIi(difFrame) {
 		document.querySelector(`#lblMCombo`).innerHTML = g_resultObj.maxCombo;
 	}
 	document.querySelector(`#comboJ`).innerHTML = `${g_resultObj.combo} Combo!!`;
+	document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, Math.abs(difFrame));
 
 	lifeRecovery();
 	finishViewing();
@@ -8548,6 +8543,7 @@ function judgeShakin(difFrame) {
 		document.querySelector(`#lblMCombo`).innerHTML = g_resultObj.maxCombo;
 	}
 	document.querySelector(`#comboJ`).innerHTML = `${g_resultObj.combo} Combo!!`;
+	document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, Math.abs(difFrame));
 
 	lifeRecovery();
 	finishViewing();
@@ -8567,7 +8563,7 @@ function judgeShakin(difFrame) {
 function judgeMatari(difFrame) {
 	changeJudgeCharacter(`matari`, C_JCR_MATARI);
 	document.querySelector(`#comboJ`).innerHTML = ``;
-	document.querySelector(`#diffJ`).innerHTML = ``;
+	document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, Math.abs(difFrame));
 
 	finishViewing();
 
