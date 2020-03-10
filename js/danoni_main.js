@@ -8442,7 +8442,7 @@ function judgeArrow(_j) {
  * @param {number} _difCnt 
  */
 function displayDiff(_difFrame, _difCnt) {
-	return `<span class="common_${_difCnt <= 1 ? 'combo' : (_difFrame > 0 ? 'matari' : 'shobon')}">
+	document.querySelector(`#diffJ`).innerHTML = `<span class="common_${_difCnt <= 1 ? 'combo' : (_difFrame > 0 ? 'matari' : 'shobon')}">
 		${_difCnt <= 1 ? 'Just!!' : ((_difFrame > 1 ? `Fast` : `Slow`)) + ` ${_difCnt} Frames`}</span>`;
 }
 
@@ -8525,7 +8525,7 @@ function judgeIi(difFrame) {
 	changeJudgeCharacter(`ii`, C_JCR_II);
 
 	updateCombo();
-	document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, Math.abs(difFrame));
+	displayDiff(difFrame, Math.abs(difFrame));
 
 	lifeRecovery();
 	finishViewing();
@@ -8546,7 +8546,7 @@ function judgeShakin(difFrame) {
 	changeJudgeCharacter(`shakin`, C_JCR_SHAKIN);
 
 	updateCombo();
-	document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, Math.abs(difFrame));
+	displayDiff(difFrame, Math.abs(difFrame));
 
 	lifeRecovery();
 	finishViewing();
@@ -8566,8 +8566,8 @@ function judgeShakin(difFrame) {
 function judgeMatari(difFrame) {
 	changeJudgeCharacter(`matari`, C_JCR_MATARI);
 	document.querySelector(`#comboJ`).innerHTML = ``;
-	document.querySelector(`#diffJ`).innerHTML = displayDiff(difFrame, Math.abs(difFrame));
 
+	displayDiff(difFrame, Math.abs(difFrame));
 	finishViewing();
 
 	if (typeof customJudgeMatari === C_TYP_FUNCTION) {
