@@ -1905,17 +1905,24 @@ function drawMainSpriteData(_frame, _depthName) {
 /**
  * グラデーション用のカラーフォーマットを作成
  * @param {string} _colorStr 
- * @param {boolean} _defaultColorgrd
- * @param {boolean} _colorCdPaddingUse
- * @param {boolean} _objType (normal: 汎用, titleMusic: タイトル曲名, titleArrow: タイトル矢印)
+ * @param {object} _options
+ *   defaultColorgrd
+ *   colorCdPaddingUse
+ *   objType (normal: 汎用, titleMusic: タイトル曲名, titleArrow: タイトル矢印)
+ *   shadowFlg
  */
-function makeColorGradation(_colorStr, _defaultColorgrd = g_headerObj.defaultColorgrd,
-	_colorCdPaddingUse = false, _objType = `normal`) {
+function makeColorGradation(_colorStr, _options = {}) {
 
 	// |color_data=300,20,45deg:#ffff99:#ffffff:#9999ff@linear-gradient|
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
 
+	const _defaultColorgrd = _options.defaultColorgrd || g_headerObj.defaultColorgrd;
+	const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
+	const _objType = _options.objType || `normal`;
+	const _shadowFlg = _options.shadowFlg || false;
+
+	const alphaVal = (_shadowFlg ? `80` : ``);
 	let convertColorStr;
 	const tmpColorStr = _colorStr.split(`@`);
 	const colorArray = tmpColorStr[0].split(`:`);
@@ -1924,15 +1931,18 @@ function makeColorGradation(_colorStr, _defaultColorgrd = g_headerObj.defaultCol
 		if (_colorCdPaddingUse) {
 			colorArray[j] = `#${paddingLeft(colorArray[j].slice(1), 6, `0`)}`;
 		}
+		if (colorArray[j].length === 7) {
+			colorArray[j] += alphaVal;
+		}
 	}
 
 	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
 	const defaultDir = (_objType === `titleArrow` ? `to left` : `to right`);
 	if (colorArray.length === 1) {
 		if (_objType === `titleMusic`) {
-			convertColorStr = `${defaultDir}, ${colorArray[0]} 100%, #eeeeee 0%`;
+			convertColorStr = `${defaultDir}, ${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
 		} else if (_defaultColorgrd) {
-			convertColorStr = `${defaultDir}, ${colorArray[0]}, #eeeeee, ${colorArray[0]}`;
+			convertColorStr = `${defaultDir}, ${colorArray[0]}, #eeeeee${alphaVal}, ${colorArray[0]}`;
 		} else {
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
 		}
@@ -1991,9 +2001,10 @@ function titleInit() {
 	if (!g_headerObj.customTitleArrowUse) {
 		const titlecolor = (g_headerObj.titlearrowgrds.length === 0 ?
 			`${g_headerObj.setColorOrg[0]}` : g_headerObj.titlearrowgrds[0]);
-		const lblArrow = createColorObject(`lblArrow`, makeColorGradation(titlecolor, false, false, `titleArrow`),
-			(g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2,
-			500, 500, 180);
+		const lblArrow = createColorObject(`lblArrow`, makeColorGradation(titlecolor, {
+			defaultColorgrd: false,
+			objType: `titleArrow`,
+		}), (g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2, 500, 500, 180);
 		lblArrow.style.opacity = 0.25;
 		divRoot.appendChild(lblArrow);
 	}
@@ -2022,12 +2033,21 @@ function titleInit() {
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
 		if (g_headerObj.titlegrds.length === 0) {
-			titlefontgrd = makeColorGradation(`${g_headerObj.setColorOrg[0]},${g_headerObj.setColorOrg[2]}`, false, false, `titleMusic`);
+			titlefontgrd = makeColorGradation(`${g_headerObj.setColorOrg[0]},${g_headerObj.setColorOrg[2]}`, {
+				defaultColorgrd: false,
+				objType: `titleMusic`,
+			});
 			titlefontgrd2 = titlefontgrd;
 		} else {
-			titlefontgrd = makeColorGradation(g_headerObj.titlegrds[0], false, false, `titleMusic`);
+			titlefontgrd = makeColorGradation(g_headerObj.titlegrds[0], {
+				defaultColorgrd: false,
+				objType: `titleMusic`,
+			});
 			if (g_headerObj.titlegrds.length > 1) {
-				titlefontgrd2 = makeColorGradation(g_headerObj.titlegrds[1], false, false, `titleMusic`);
+				titlefontgrd2 = makeColorGradation(g_headerObj.titlegrds[1], {
+					defaultColorgrd: false,
+					objType: `titleMusic`,
+				});
 			} else {
 				titlefontgrd2 = titlefontgrd;
 			}
@@ -2623,11 +2643,16 @@ function headerConvert(_dosObj) {
 			if (obj.colorCdPaddingUse) {
 				obj.setColorOrg[j] = `#${paddingLeft(obj.setColorOrg[j].slice(1), 6, `0`)}`;
 			}
-			obj.setColor[j] = makeColorGradation(obj.setColor[j], obj.defaultColorgrd, obj.colorCdPaddingUse);
+			obj.setColor[j] = makeColorGradation(obj.setColor[j], {
+				defaultColorgrd: obj.defaultColorgrd,
+				colorCdPaddingUse: obj.colorCdPaddingUse,
+			});
 		}
 		for (let j = obj.setColor.length; j < obj.setColorInit.length; j++) {
 			obj.setColorOrg[j] = obj.setColor[j];
-			obj.setColor[j] = makeColorGradation(obj.setColorInit[j], obj.defaultColorgrd);
+			obj.setColor[j] = makeColorGradation(obj.setColorInit[j], {
+				defaultColorgrd: obj.defaultColorgrd,
+			});
 		}
 	} else {
 		obj.setColorOrg = JSON.parse(JSON.stringify(obj.setColorInit));
@@ -2660,10 +2685,16 @@ function headerConvert(_dosObj) {
 			obj.frzColor[j] = tmpFrzColors[j].split(`,`);
 
 			for (let k = 0; k < obj.frzColor[j].length; k++) {
-				obj.frzColor[j][k] = makeColorGradation(obj.frzColor[j][k], obj.defaultColorgrd, obj.colorCdPaddingUse);
+				obj.frzColor[j][k] = makeColorGradation(obj.frzColor[j][k], {
+					defaultColorgrd: obj.defaultColorgrd,
+					colorCdPaddingUse: obj.colorCdPaddingUse,
+				});
 			}
 			for (let k = obj.frzColor[j].length; k < obj.frzColorInit.length; k++) {
-				obj.frzColor[j][k] = makeColorGradation(obj.frzColorInit[k], obj.defaultColorgrd, obj.colorCdPaddingUse);
+				obj.frzColor[j][k] = makeColorGradation(obj.frzColorInit[k], {
+					defaultColorgrd: obj.defaultColorgrd,
+					colorCdPaddingUse: obj.colorCdPaddingUse,
+				});
 			}
 
 			obj.frzColorDefault[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
@@ -4862,7 +4893,8 @@ function keyConfigInit() {
 
 		if (g_headerObj.setShadowColor !== ``) {
 			// 矢印の塗り部分
-			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]] : makeColorGradation(g_headerObj.setShadowColor));
+			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]] :
+				makeColorGradation(g_headerObj.setShadowColor));
 			const stepShadow = createColorObject(`arrowShadow${j}`, shadowColor,
 				keyconX, keyconY,
 				C_ARW_WIDTH, C_ARW_WIDTH, g_keyObj[`stepRtn${keyCtrlPtn}`][j], `Shadow`);
@@ -7714,10 +7746,15 @@ function MainInit() {
 		// 矢印の内側を塗りつぶすか否か
 		if (g_headerObj.setShadowColor !== ``) {
 			// 矢印の塗り部分
-			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[_j] : g_headerObj.setShadowColor);
+			const shadowColor = (g_headerObj.setShadowColor === `Default` ? g_workObj.arrowColors[_j] :
+				makeColorGradation(g_headerObj.setShadowColor, {
+					shadowFlg: true,
+				}));
 			const arrShadow = createColorObject(`${_name}Shadow${_j}_${_arrowCnt}`, shadowColor,
 				0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
-			arrShadow.style.opacity = 0.5;
+			if (g_headerObj.setShadowColor === `Default`) {
+				arrShadow.style.opacity = 0.5;
+			}
 			stepRoot.appendChild(arrShadow);
 		}
 
