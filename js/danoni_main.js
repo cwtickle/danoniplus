@@ -5354,6 +5354,10 @@ function loadingScoreInit2() {
 	// キーパターン(デフォルト)に対応する矢印番号を格納
 	convertreplaceNums();
 
+	const setData = (_data, _minLength = 1) => {
+		return (_data !== undefined && _data.length >= _minLength ? _data.concat() : []);
+	}
+
 	// フレーム・曲開始位置調整
 	let preblankFrame = 0;
 	if (g_scoreObj.frameNum === 0) {
@@ -5376,39 +5380,28 @@ function loadingScoreInit2() {
 					g_scoreObj.dummyFrzData[j] = JSON.parse(JSON.stringify(tmpObj.dummyFrzData[j]));
 				}
 			}
-			if (tmpObj.speedData !== undefined && tmpObj.speedData.length >= 2) {
-				g_scoreObj.speedData = JSON.parse(JSON.stringify(tmpObj.speedData));
-			}
-			if (tmpObj.boostData !== undefined && tmpObj.boostData.length >= 2) {
-				g_scoreObj.boostData = JSON.parse(JSON.stringify(tmpObj.boostData));
-			}
-			if (tmpObj.colorData !== undefined && tmpObj.colorData.length >= 3) {
-				g_scoreObj.colorData = JSON.parse(JSON.stringify(tmpObj.colorData));
-			}
-			if (tmpObj.acolorData !== undefined && tmpObj.acolorData.length >= 3) {
-				g_scoreObj.acolorData = JSON.parse(JSON.stringify(tmpObj.acolorData));
-			}
-			if (tmpObj.arrowCssMotionData !== undefined && tmpObj.arrowCssMotionData.length >= 3) {
-				g_scoreObj.arrowCssMotionData = JSON.parse(JSON.stringify(tmpObj.arrowCssMotionData));
-			}
-			if (tmpObj.frzCssMotionData !== undefined && tmpObj.frzCssMotionData.length >= 3) {
-				g_scoreObj.frzCssMotionData = JSON.parse(JSON.stringify(tmpObj.frzCssMotionData));
-			}
-			if (tmpObj.dummyArrowCssMotionData !== undefined && tmpObj.dummyArrowCssMotionData.length >= 3) {
-				g_scoreObj.dummyArrowCssMotionData = JSON.parse(JSON.stringify(tmpObj.dummyArrowCssMotionData));
-			}
-			if (tmpObj.dummyFrzCssMotionData !== undefined && tmpObj.dummyFrzCssMotionData.length >= 3) {
-				g_scoreObj.dummyFrzCssMotionData = JSON.parse(JSON.stringify(tmpObj.dummyFrzCssMotionData));
-			}
-			if (tmpObj.wordData !== undefined && tmpObj.wordData.length >= 3) {
-				g_scoreObj.wordData = tmpObj.wordData.concat();
-			}
-			if (tmpObj.maskData !== undefined && tmpObj.maskData.length >= 1) {
-				g_scoreObj.maskData = tmpObj.maskData.concat();
-			}
-			if (tmpObj.backData !== undefined && tmpObj.backData.length >= 1) {
-				g_scoreObj.backData = tmpObj.backData.concat();
-			}
+
+			/**
+			 * データ種, 最小データ長のセット
+			 */
+			const dataTypes = [
+				[`speed`, 2],
+				[`boost`, 2],
+				[`color`, 3],
+				[`acolor`, 3],
+				[`arrowCssMotion`, 3],
+				[`frzCssMotion`, 3],
+				[`dummyArrowCssMotion`, 3],
+				[`dummyFrzCssMotion`, 3],
+				[`object`, 4],
+				[`word`, 3],
+				[`mask`, 1],
+				[`back`, 1],
+			];
+			dataTypes.forEach(dataType => {
+				g_scoreObj[`${dataType[0]}Data`] = setData(tmpObj[`${dataType[0]}Data`], dataType[1]);
+			});
+
 			lastFrame += preblankFrame;
 			firstArrowFrame += preblankFrame;
 			speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
@@ -5755,7 +5748,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	/**
 	 * 速度変化データの分解・格納（フレーム数, 矢印番号）
 	 * @param {string} _header 
-	 * @param {string} _scoreNo 
+	 * @param {number} _scoreNo 
 	 * @param {string} _footer 
 	 */
 	function setSpeedData(_header, _scoreNo, _footer = `_data`) {
@@ -5789,7 +5782,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	/**
 	 * 色変化データの分解・格納（フレーム数, 矢印番号）
 	 * @param {string} _header 
-	 * @param {string} _scoreNo 
+	 * @param {number} _scoreNo 
 	 */
 	function setColorData(_header, _scoreNo) {
 		let colorData = [];
@@ -5822,7 +5815,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	/**
 	 * 矢印モーションデータの分解・格納（フレーム数, 矢印番号）
 	 * @param {string} _header 
-	 * @param {string} _scoreNo 
+	 * @param {number} _scoreNo 
 	 */
 	function setCssMotionData(_header, _scoreNo) {
 		let dosCssMotionData;
@@ -6160,31 +6153,18 @@ function getFirstArrivalFrame(_startFrame, _speedOnFrame, _motionOnFrame) {
 function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame) {
 
 	// 矢印・フリーズアロー・速度/色変化用 フレーム別処理配列
-	g_workObj.mkArrow = [];
-	g_workObj.mkFrzArrow = [];
-	g_workObj.mkFrzLength = [];
-
-	g_workObj.mkDummyArrow = [];
-	g_workObj.mkDummyFrzArrow = [];
-	g_workObj.mkDummyFrzLength = [];
-
-	g_workObj.mkColor = [];
-	g_workObj.mkColorCd = [];
-	g_workObj.mkFColor = [];
-	g_workObj.mkFColorCd = [];
-	g_workObj.mkAColor = [];
-	g_workObj.mkAColorCd = [];
-	g_workObj.mkFAColor = [];
-	g_workObj.mkFAColorCd = [];
-
-	g_workObj.mkArrowCssMotion = [];
-	g_workObj.mkArrowCssMotionName = [];
-	g_workObj.mkFrzCssMotion = [];
-	g_workObj.mkFrzCssMotionName = [];
-	g_workObj.mkDummyArrowCssMotion = [];
-	g_workObj.mkDummyArrowCssMotionName = [];
-	g_workObj.mkDummyFrzCssMotion = [];
-	g_workObj.mkDummyFrzCssMotionName = [];
+	const workObjs = [
+		`Arrow`, `FrzArrow`, `FrzLength`,
+		`Color`, `ColorCd`, `FColor`, `FColorCd`,
+		`AColor`, `AColorCd`, `FAColor`, `FAColorCd`,
+		`ArrowCssMotion`, `ArrowCssMotionName`,
+		`FrzCssMotion`, `FrzCssMotionName`,
+	];
+	[``, `Dummy`].forEach(header => {
+		workObjs.forEach(name => {
+			g_workObj[`mk${header}${name}`] = [];
+		});
+	});
 
 	/** 矢印の移動距離 */
 	g_workObj.initY = [];
