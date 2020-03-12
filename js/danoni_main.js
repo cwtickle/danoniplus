@@ -5421,6 +5421,8 @@ function loadingScoreInit2() {
 				[`boost`, 2],
 				[`color`, 3],
 				[`acolor`, 3],
+				[`shadowcolor`, 3],
+				[`ashadowcolor`, 3],
 				[`arrowCssMotion`, 3],
 				[`frzCssMotion`, 3],
 				[`dummyArrowCssMotion`, 3],
@@ -5727,6 +5729,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	// 色変化（個別・全体）の分解 (3つで1セット, セット毎の改行区切り可)
 	obj.colorData = setColorData(`color`, scoreIdHeader);
 	obj.acolorData = setColorData(`acolor`, scoreIdHeader);
+
+	obj.shadowColorData = setColorData(`shadowcolor`, scoreIdHeader);
+	obj.ashadowColorData = setColorData(`ashadowcolor`, scoreIdHeader);
 
 	if (_scoreAnalyzeFlg) {
 		return obj;
