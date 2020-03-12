@@ -5681,9 +5681,6 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	obj.dummyArrowCssMotionData = setCssMotionData(`arrow`, _dummyNo);
 	obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
 
-	// オブジェクト変更データの分解 (4～5つで1セット、セット毎の改行区切り)
-	obj.objectData = setObjectData(_scoreNo);
-
 	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
 	obj.wordData = [];
 	obj.wordMaxDepth = -1;
@@ -5825,43 +5822,6 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			});
 		}
 		return cssMotionData;
-	}
-
-	/**
-	 * オブジェクト変更データの分解・格納 (矢印番号)
-	 * @param {number} _scoreNo 
-	 */
-	function setObjectData(_scoreNo) {
-		let dosObjectData;
-		if (_dosObj[`object${_scoreNo}_data`] !== undefined) {
-			dosObjectData = _dosObj[`object${_scoreNo}_data`];
-		} else if (_dosObj.object_data !== undefined) {
-			dosObjectData = _dosObj.object_data;
-		}
-
-		let objectData = [];
-
-		if (dosObjectData !== undefined && dosObjectData !== `` && g_stateObj.d_arroweffect === C_FLG_ON) {
-			let objectIdx = 0;
-			let tmpArrayData = dosObjectData.split(`\r`).join(`\n`);
-			tmpArrayData = tmpArrayData.split(`\n`);
-
-			tmpArrayData.forEach(tmpData => {
-				if (tmpData !== undefined && tmpData !== ``) {
-					const tmpobjectData = tmpData.split(`,`);
-					if (isNaN(parseInt(tmpobjectData[0]))) {
-						return;
-					}
-					objectData[objectIdx] = calcFrame(tmpobjectData[0]);
-					objectData[objectIdx + 1] = parseInt(tmpobjectData[1]);
-					objectData[objectIdx + 2] = tmpobjectData[2];
-					objectData[objectIdx + 3] = tmpobjectData[3];
-					objectData[objectIdx + 4] = (tmpobjectData.length > 4 ? tmpobjectData[4] : g_workObj[`${tmpobjectData[2]}Rtn`][objectData[objectIdx + 1]]);
-					objectIdx += 5;
-				}
-			});
-		}
-		return objectData;
 	}
 
 	/**
