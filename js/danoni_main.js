@@ -6194,6 +6194,8 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		`Arrow`, `FrzArrow`, `FrzLength`,
 		`Color`, `ColorCd`, `FColor`, `FColorCd`,
 		`AColor`, `AColorCd`, `FAColor`, `FAColorCd`,
+		`shadowColor`, `shadowColorCd`, `FshadowColor`, `FshadowColorCd`,
+		`AshadowColor`, `AshadowColorCd`, `FAshadowColor`, `FAshadowColorCd`,
 		`ArrowCssMotion`, `ArrowCssMotionName`,
 		`FrzCssMotion`, `FrzCssMotionName`,
 	];
@@ -6436,55 +6438,65 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		g_workObj.boostData = JSON.parse(JSON.stringify(_dataObj.boostData));
 	}
 
-	// 個別色変化のタイミング更新
-	// フリーズアロー(ヒット時)の場合のみ、逆算をしない
-	if (_dataObj.colorData !== undefined && _dataObj.colorData.length >= 3) {
-		if (_dataObj.speedData !== undefined) {
-			spdk = _dataObj.speedData.length - 2;
-			spdPrev = _dataObj.speedData[spdk];
-		} else {
-			spdPrev = 0;
-		}
-		spdNext = Infinity;
+	// 個別・全体色変化のタイミング更新
+	calcColorData(``);
+	calcColorData(`shadow`);
 
-		lastk = _dataObj.colorData.length - 3;
-		tmpObj = getArrowStartFrame(_dataObj.colorData[lastk], _speedOnFrame, _motionOnFrame);
-		frmPrev = tmpObj.frm;
-		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-		pushColors(``, isFrzHitColor(_dataObj.colorData[lastk + 1]) ? _dataObj.colorData[lastk] : tmpObj.frm,
-			_dataObj.colorData[lastk + 1], _dataObj.colorData[lastk + 2]);
+	function calcColorData(_header) {
 
-		for (let k = lastk - 3; k >= 0; k -= 3) {
+		const colorData = _dataObj[`${_header}colorData`];
+		const acolorData = _dataObj[`a${_header}colorData`];
 
-			if (_dataObj.colorData[k] < g_scoreObj.frameNum) {
-				break;
-			} else if ((_dataObj.colorData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
-				&& _dataObj.colorData[k] < spdNext)) {
-				if (!isFrzHitColor(_dataObj.colorData[k + 1])) {
-					_dataObj.colorData[k] -= g_workObj.arrivalFrame[frmPrev];
-				}
+		// 個別色変化のタイミング更新
+		// フリーズアロー(ヒット時)の場合のみ、逆算をしない
+		if (colorData !== undefined && colorData.length >= 3) {
+			if (_dataObj.speedData !== undefined) {
+				spdk = _dataObj.speedData.length - 2;
+				spdPrev = _dataObj.speedData[spdk];
 			} else {
-				if (_dataObj.colorData[k] < spdPrev) {
-					spdk -= 2;
-					spdNext = spdPrev;
-					spdPrev = _dataObj.speedData[spdk];
-				}
-				tmpObj = getArrowStartFrame(_dataObj.colorData[k], _speedOnFrame, _motionOnFrame);
-				frmPrev = tmpObj.frm;
-				if (!isFrzHitColor(_dataObj.colorData[k + 1])) {
-					_dataObj.colorData[k] = tmpObj.frm;
-				}
-				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+				spdPrev = 0;
 			}
-			pushColors(``, _dataObj.colorData[k], _dataObj.colorData[k + 1], _dataObj.colorData[k + 2]);
+			spdNext = Infinity;
+
+			lastk = colorData.length - 3;
+			tmpObj = getArrowStartFrame(colorData[lastk], _speedOnFrame, _motionOnFrame);
+			frmPrev = tmpObj.frm;
+			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+			pushColors(``, isFrzHitColor(colorData[lastk + 1]) ? colorData[lastk] : tmpObj.frm,
+				colorData[lastk + 1], colorData[lastk + 2]);
+
+			for (let k = lastk - 3; k >= 0; k -= 3) {
+
+				if (colorData[k] < g_scoreObj.frameNum) {
+					break;
+				} else if ((colorData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
+					&& colorData[k] < spdNext)) {
+					if (!isFrzHitColor(colorData[k + 1])) {
+						colorData[k] -= g_workObj.arrivalFrame[frmPrev];
+					}
+				} else {
+					if (colorData[k] < spdPrev) {
+						spdk -= 2;
+						spdNext = spdPrev;
+						spdPrev = _dataObj.speedData[spdk];
+					}
+					tmpObj = getArrowStartFrame(colorData[k], _speedOnFrame, _motionOnFrame);
+					frmPrev = tmpObj.frm;
+					if (!isFrzHitColor(colorData[k + 1])) {
+						colorData[k] = tmpObj.frm;
+					}
+					g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+				}
+				pushColors(`${_header}`, colorData[k], colorData[k + 1], colorData[k + 2]);
+			}
 		}
-	}
 
-	// 全体色変化のタイミング更新
-	if (_dataObj.acolorData !== undefined && _dataObj.acolorData.length >= 3) {
+		// 全体色変化のタイミング更新
+		if (acolorData !== undefined && acolorData.length >= 3) {
 
-		for (let k = _dataObj.acolorData.length - 3; k >= 0; k -= 3) {
-			pushColors(`A`, _dataObj.acolorData[k], _dataObj.acolorData[k + 1], _dataObj.acolorData[k + 2]);
+			for (let k = acolorData.length - 3; k >= 0; k -= 3) {
+				pushColors(`A${_header}`, acolorData[k], acolorData[k + 1], acolorData[k + 2]);
+			}
 		}
 	}
 
