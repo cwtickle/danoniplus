@@ -2623,6 +2623,7 @@ function headerConvert(_dosObj) {
 		getGaugeSetting(_dosObj, g_gaugeOptionObj.custom[j], obj);
 	}
 
+	// TODO: この部分を矢印塗りつぶし部分についても適用できるように対応
 	// 初期色情報
 	obj.setColorInit = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setColorType1 = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
@@ -6768,6 +6769,7 @@ function getArrowSettings() {
 	g_workObj.judgDummyArrowCnt = [];
 	g_workObj.judgDummyFrzCnt = [];
 
+	// TODO: この部分を矢印塗りつぶし部分についても適用できるように変数を作成
 	// 矢印色管理 (個別)
 	g_workObj.arrowColors = [];
 	g_workObj.frzNormalColors = [];
@@ -6834,6 +6836,7 @@ function getArrowSettings() {
 		g_workObj.judgDummyArrowCnt[j] = 1;
 		g_workObj.judgDummyFrzCnt[j] = 1;
 
+		// TODO: この部分を矢印塗りつぶし部分についても適用できるように変数を作成
 		g_workObj.arrowColors[j] = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
 
 		g_workObj.frzNormalColors[j] = g_headerObj.frzColor[g_keyObj[`color${keyCtrlPtn}`][j]][0];
@@ -7455,6 +7458,7 @@ function MainInit() {
 	 */
 	const changeColorFunc = {
 
+		// TODO: この部分を矢印塗りつぶし部分についても適用できるように対応
 		arrow: (_j, _k) => {
 			const arrowTop = document.querySelector(`#arrowTop${_j}_${_k}`);
 			if (g_workObj.mkAColor[g_scoreObj.frameNum] !== undefined) {
@@ -7469,6 +7473,7 @@ function MainInit() {
 
 		dummyArrow: (_j, _k) => { },
 
+		// TODO: この部分を矢印塗りつぶし部分についても適用できるように対応
 		frz: (_j, _k, _state) => {
 			const frzTop = document.querySelector(`#frzTop${_j}_${_k}`);
 			const frzBar = document.querySelector(`#frzBar${_j}_${_k}`);
@@ -8234,6 +8239,8 @@ function makeCounterSymbol(_id, _x, _class, _heightPos, _text) {
 
 	return counter;
 }
+
+// TODO: この部分を矢印塗りつぶし部分についても適用できるように関数を見直し
 
 /**
  * 個別色変化 (矢印)
