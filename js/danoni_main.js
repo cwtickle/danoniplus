@@ -2628,16 +2628,16 @@ function headerConvert(_dosObj) {
 		getGaugeSetting(_dosObj, g_gaugeOptionObj.custom[j], obj);
 	}
 
+	// 初期色情報
 	obj.setColorInit = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setShadowColorInit = [``, ``, ``, ``, ``];
+
+	obj.setColorType1 = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
+	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
 
 	[``, `Shadow`].forEach(pattern => {
 
 		const _name = `set${pattern}Color`;
-
-		// 初期色情報
-		obj[`${_name}Type1`] = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
-		obj[`${_name}Type2`] = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
 
 		// グラデーション変換前文字列
 		obj[`${_name}Str`] = [];
