@@ -1935,7 +1935,7 @@ function makeColorGradation(_colorStr, _options = {}) {
 		if (_colorCdPaddingUse) {
 			colorArray[j] = `#${paddingLeft(colorArray[j].slice(1), 6, `0`)}`;
 		}
-		if (j === 0 && colorArray[0].charAt !== `#`) {
+		if (j === 0 && colorArray[0].substring(0, 1) !== `#`) {
 		} else if (colorArray[j].length === 7) {
 			colorArray[j] += alphaVal;
 		}
