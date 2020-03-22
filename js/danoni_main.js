@@ -44,11 +44,13 @@ window.onload = _ => {
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
-	loadScript(`../js/lib/danoni_constants.js?${randTime}`, _ => {
-		loadScript(`../js/lib/danoni_legacy_function.js?${randTime}`, _ => {
-			initialControl();
-		}, false);
-	});
+	loadScript(`../js/lib/danoni_localbinary.js?${randTime}`, _ => {
+		loadScript(`../js/lib/danoni_constants.js?${randTime}`, _ => {
+			loadScript(`../js/lib/danoni_legacy_function.js?${randTime}`, _ => {
+				initialControl();
+			}, false);
+		});
+	}, false);
 };
 
 /*-----------------------------------------------------------*/
