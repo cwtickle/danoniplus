@@ -2637,12 +2637,19 @@ function headerConvert(_dosObj) {
 		// 初期色情報
 		obj[`${_name}Type1`] = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 		obj[`${_name}Type2`] = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
+
+		// グラデーション変換前文字列
+		obj[`${_name}Str`] = [];
+
 		obj[`${_name}Org`] = [];
 		obj[`${_name}Default`] = [];
 
 		if (_dosObj[_name] !== undefined && _dosObj[_name] !== ``) {
+
+			// 譜面側で指定されているデータを配列に変換
 			obj[_name] = _dosObj[_name].split(`,`);
 			for (let j = 0; j < obj[_name].length; j++) {
+				obj[`${_name}Str`][j] = obj[_name][j];
 				const tmpSetColorOrg = obj[_name][j].replace(/0x/g, `#`).split(`:`);
 				tmpSetColorOrg.some(colorOrg => {
 					if (colorOrg.indexOf(`#`) !== -1 || colorOrg === `Default`) {
@@ -2659,9 +2666,10 @@ function headerConvert(_dosObj) {
 					shadowFlg: (pattern === `Shadow` ? true : false),
 				});
 			}
-			console.log(obj[`${_name}Org`][0]);
+
+			// 指定数より少ない配列の場合、不足分をデフォルト値で補完
 			for (let j = obj[_name].length; j < obj[`${_name}Init`].length; j++) {
-				obj[`${_name}Org`][j] = (obj[`${_name}Init`][j] === `` ? obj[`${_name}Org`][0] : obj[`${_name}Init`][j]);
+				obj[`${_name}Org`][j] = (obj[`${_name}Init`][j] === `` ? obj[`${_name}Str`][0] : obj[`${_name}Init`][j]);
 				obj[_name][j] = makeColorGradation(obj[`${_name}Org`][j], {
 					defaultColorgrd: obj.defaultColorgrd,
 					shadowFlg: (pattern === `Shadow` ? true : false),
