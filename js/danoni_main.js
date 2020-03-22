@@ -2114,6 +2114,10 @@ function titleInit() {
 		makeWarningWindow(C_MSG_W_0001);
 	}
 
+	if (location.href.match(/^file/)) {
+		makeWarningWindow(C_MSG_W_0011);
+	}
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customTitleInit === C_TYP_FUNCTION) {
 		customTitleInit();
