@@ -8420,8 +8420,8 @@ function changeHitFrz(_j, _k, _name) {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 	let shadowColor = ``;
-	if (g_headerObj.frzShadowColor[colorPos][1] !== ``) {
-		shadowColor = (g_headerObj.frzShadowColor[colorPos][1] === `Default` ? _normalColor :
+	if (g_headerObj.frzShadowColor[colorPos][1] !== `` && _name === `frz`) {
+		shadowColor = (g_headerObj.frzShadowColor[colorPos][1] === `Default` ? g_workObj.frzHitColors[_j] :
 			g_headerObj.frzShadowColor[colorPos][1]);
 		frzBtmShadow.style.background = shadowColor;
 	}
