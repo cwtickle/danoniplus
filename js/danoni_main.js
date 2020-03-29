@@ -2684,7 +2684,6 @@ function headerConvert(_dosObj) {
 			obj[`${_frzName}Default`] = obj[`${_frzName}`].concat();
 		}
 	});
-	console.log(obj.setShadowColor);
 
 	/**
 	 * 矢印・フリーズアロー色のデータ展開
