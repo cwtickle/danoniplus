@@ -2641,58 +2641,7 @@ function headerConvert(_dosObj) {
 	obj.setColorType1 = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
 
-	[``, `Shadow`].forEach(pattern => {
-
-		const _name = `set${pattern}Color`;
-
-		// グラデーション変換前文字列
-		obj[`${_name}Str`] = [];
-
-		obj[`${_name}Org`] = [];
-		obj[`${_name}Default`] = [];
-
-		if (_dosObj[_name] !== undefined && _dosObj[_name] !== ``) {
-
-			// 譜面側で指定されているデータを配列に変換
-			obj[_name] = _dosObj[_name].split(`,`);
-			for (let j = 0; j < obj[_name].length; j++) {
-				obj[`${_name}Str`][j] = obj[_name][j];
-				const tmpSetColorOrg = obj[_name][j].replace(/0x/g, `#`).split(`:`);
-				tmpSetColorOrg.some(colorOrg => {
-					if (colorOrg.indexOf(`#`) !== -1 || colorOrg === `Default`) {
-						obj[`${_name}Org`][j] = colorOrg;
-						return true;
-					}
-				});
-				if (obj.colorCdPaddingUse) {
-					obj[`${_name}Org`][j] = `#${paddingLeft(obj[`${_name}Org`][j].slice(1), 6, `0`)}`;
-				}
-				obj[_name][j] = makeColorGradation(obj[_name][j], {
-					defaultColorgrd: obj.defaultColorgrd,
-					colorCdPaddingUse: obj.colorCdPaddingUse,
-					shadowFlg: (pattern === `Shadow` ? true : false),
-				});
-			}
-
-			// 指定数より少ない配列の場合、不足分をデフォルト値で補完
-			for (let j = obj[_name].length; j < obj[`${_name}Init`].length; j++) {
-				obj[`${_name}Org`][j] = (obj[`${_name}Init`][j] === `` ? obj[`${_name}Str`][0] : obj[`${_name}Init`][j]);
-				obj[_name][j] = makeColorGradation(obj[`${_name}Org`][j], {
-					defaultColorgrd: obj.defaultColorgrd,
-					shadowFlg: (pattern === `Shadow` ? true : false),
-				});
-			}
-		} else {
-			obj[`${_name}Org`] = JSON.parse(JSON.stringify(obj[`${_name}Init`]));
-			obj[_name] = JSON.parse(JSON.stringify(obj[`${_name}Init`]));
-		}
-		obj[`${_name}Default`] = JSON.parse(JSON.stringify(obj[_name]));
-
-	});
-
-
 	// フリーズアロー初期色情報
-	obj.frzColorInit = [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`];
 	obj.frzColorType1 = [[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
 	[`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
 	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
@@ -2704,38 +2653,104 @@ function headerConvert(_dosObj) {
 	[`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
 	[`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]];
 	obj.frzColor = [];
+	obj.frzColorStr = [];
+	obj.frzColorOrg = [];
 	obj.frzColorDefault = [];
 
-	if (_dosObj.frzColor !== undefined && _dosObj.frzColor !== ``) {
-		const tmpFrzColors = _dosObj.frzColor.split(`$`);
-		for (let j = 0, len = tmpFrzColors.length; j < len; j++) {
-			obj.frzColor[j] = tmpFrzColors[j].split(`,`);
+	[obj.setColor, obj.setColorStr, obj.setColorOrg] =
+		setColorList(_dosObj.setColor, obj.setColorInit, {
+			defaultColorgrd: obj.defaultColorgrd,
+			colorCdPaddingUse: obj.colorCdPaddingUse,
+			shadowFlg: false,
+		});
+	obj.setColorDefault = obj.setColor.concat();
 
-			for (let k = 0; k < obj.frzColor[j].length; k++) {
-				obj.frzColor[j][k] = makeColorGradation(obj.frzColor[j][k], {
-					defaultColorgrd: obj.defaultColorgrd,
-					colorCdPaddingUse: obj.colorCdPaddingUse,
+	[obj.setShadowColor, obj.setShadowColorStr, obj.setShadowColorOrg] =
+		setColorList(_dosObj.setShadowColor, obj.setShadowColorInit, {
+			defaultColorgrd: obj.defaultColorgrd,
+			colorCdPaddingUse: obj.colorCdPaddingUse,
+			shadowFlg: true,
+		});
+
+	const tmpFrzColors = (_dosObj.frzColor !== undefined ? _dosObj.frzColor.split(`$`) : []);
+	for (let j = 0; j < obj.setColor.length; j++) {
+		[obj.frzColor[j], obj.frzColorStr[j], obj.frzColorOrg[j]] =
+			setColorList(tmpFrzColors[j], new Array(5).fill(obj.setColorStr[j]), {
+				defaultColorgrd: obj.defaultColorgrd,
+				colorCdPaddingUse: obj.colorCdPaddingUse,
+				shadowFlg: false,
+			});
+	}
+	obj.frzColorDefault = obj.frzColor.concat();
+
+	/**
+	 * 矢印・フリーズアロー色のデータ展開
+	 * @param {array} _data 
+	 * @param {array} _colorInit 
+	 * @param {object} _options 
+	 */
+	function setColorList(_data, _colorInit, _options = {}) {
+
+		const _defaultColorgrd = _options.defaultColorgrd || g_headerObj.defaultColorgrd;
+		const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
+		const _shadowFlg = _options.shadowFlg || false;
+
+		// 色文字列(グラデーション適用前)
+		let colorStr = [];
+		let colorOrg = [];
+
+		// 色文字列(グラデーション適用後)
+		let colorList = [];
+
+		// 譜面側で指定されているデータを配列に変換
+		if (_data !== undefined && _data !== ``) {
+			colorList = _data.split(`,`);
+			colorStr = colorList.concat();
+
+			// フリーズアローで配列長が既定(4)の半分(2)の場合、前2つの内容で追記する
+			if (colorStr.length === 2) {
+				colorStr = [colorStr[0], colorStr[1], colorStr[0], colorStr[1]];
+				colorList = colorStr.concat();
+			}
+
+			for (let j = 0; j < colorList.length; j++) {
+				const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
+				tmpSetColorOrg.some(tmpColorOrg => {
+					if (tmpColorOrg.indexOf(`#`) !== -1 || tmpColorOrg === `Default`) {
+						colorOrg[j] = tmpColorOrg;
+						return true;
+					}
+				});
+				if (_colorCdPaddingUse) {
+					colorOrg[j] = `#${paddingLeft(colorOrg[j].slice(1), 6, `0`)}`;
+				}
+				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
+					defaultColorgrd: _defaultColorgrd,
+					colorCdPaddingUse: _colorCdPaddingUse,
+					shadowFlg: _shadowFlg,
 				});
 			}
-			for (let k = obj.frzColor[j].length; k < obj.frzColorInit.length; k++) {
-				obj.frzColor[j][k] = makeColorGradation(obj.frzColorInit[k], {
-					defaultColorgrd: obj.defaultColorgrd,
-					colorCdPaddingUse: obj.colorCdPaddingUse,
+
+			// 指定数より少ない配列の場合、不足分をデフォルト値で補完
+			for (let j = colorList.length; j < _colorInit.length; j++) {
+				colorOrg[j] = (_colorInit[j] === `` ? colorStr[0] : _colorInit[j]);
+				colorList[j] = makeColorGradation(colorOrg[j], {
+					defaultColorgrd: _defaultColorgrd,
+					shadowFlg: _shadowFlg,
 				});
 			}
+		} else {
+			colorOrg = _colorInit.concat();
+			for (let j = 0; j < _colorInit.length; j++) {
+				colorList[j] = makeColorGradation(_colorInit[j], {
+					defaultColorgrd: _defaultColorgrd,
+					colorCdPaddingUse: _colorCdPaddingUse,
+					shadowFlg: _shadowFlg,
+				});
+			}
+		}
 
-			obj.frzColorDefault[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
-		}
-		for (let j = tmpFrzColors.length, len = obj.setColorInit.length; j < len; j++) {
-			obj.frzColor[j] = JSON.parse(JSON.stringify(obj.frzColor[0]));
-			obj.frzColorDefault[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
-		}
-
-	} else {
-		for (let j = 0, len = obj.setColorInit.length; j < len; j++) {
-			obj.frzColor[j] = JSON.parse(JSON.stringify(obj.frzColorInit));
-			obj.frzColorDefault[j] = JSON.parse(JSON.stringify(obj.frzColor[j]));
-		}
+		return [colorList, colorStr, colorOrg];
 	}
 
 	// ダミー譜面の設定
