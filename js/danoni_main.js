@@ -2657,6 +2657,7 @@ function headerConvert(_dosObj) {
 	obj.frzColorOrg = [];
 	obj.frzColorDefault = [];
 
+	// 矢印色
 	[obj.setColor, obj.setColorStr, obj.setColorOrg] =
 		setColorList(_dosObj.setColor, obj.setColorInit, {
 			defaultColorgrd: obj.defaultColorgrd,
@@ -2665,6 +2666,7 @@ function headerConvert(_dosObj) {
 		});
 	obj.setColorDefault = obj.setColor.concat();
 
+	// 矢印色(塗りつぶし部分)
 	[obj.setShadowColor, obj.setShadowColorStr, obj.setShadowColorOrg] =
 		setColorList(_dosObj.setShadowColor, obj.setShadowColorInit, {
 			defaultColorgrd: obj.defaultColorgrd,
@@ -2672,8 +2674,9 @@ function headerConvert(_dosObj) {
 			shadowFlg: true,
 		});
 
+	// フリーズアロー色
 	const tmpFrzColors = (_dosObj.frzColor !== undefined ? _dosObj.frzColor.split(`$`) : []);
-	for (let j = 0; j < obj.setColor.length; j++) {
+	for (let j = 0; j < obj.setColorInit.length; j++) {
 		[obj.frzColor[j], obj.frzColorStr[j], obj.frzColorOrg[j]] =
 			setColorList(tmpFrzColors[j], new Array(5).fill(obj.setColorStr[j]), {
 				defaultColorgrd: obj.defaultColorgrd,
@@ -2695,11 +2698,13 @@ function headerConvert(_dosObj) {
 		const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
 		const _shadowFlg = _options.shadowFlg || false;
 
-		// 色文字列(グラデーション適用前)
+		// グラデーション文字列 #ffff99:#9999ff@linear-gradient
 		let colorStr = [];
+
+		// カラーコード抽出用 #ffff99 - Ready文字、背景矢印のデフォルト色で使用
 		let colorOrg = [];
 
-		// 色文字列(グラデーション適用後)
+		// グラデーション適用後文字列 linear-gradient(to right, #ffff99, #9999ff)
 		let colorList = [];
 
 		// 譜面側で指定されているデータを配列に変換
@@ -2707,9 +2712,12 @@ function headerConvert(_dosObj) {
 			colorList = _data.split(`,`);
 			colorStr = colorList.concat();
 
-			// フリーズアローで配列長が既定(4)の半分(2)の場合、前2つの内容で追記する
-			if (colorStr.length === 2) {
-				colorStr = [colorStr[0], colorStr[1], colorStr[0], colorStr[1]];
+			// 色変化配列が既定長より小さい場合、データ補完する
+			if (colorStr.length < _colorInit.length) {
+				const defaultLength = colorStr.length;
+				for (let j = 0; j < _colorInit.length; j++) {
+					colorStr[j] = colorStr[j % defaultLength];
+				}
 				colorList = colorStr.concat();
 			}
 
@@ -2731,15 +2739,9 @@ function headerConvert(_dosObj) {
 				});
 			}
 
-			// 指定数より少ない配列の場合、不足分をデフォルト値で補完
-			for (let j = colorList.length; j < _colorInit.length; j++) {
-				colorOrg[j] = (_colorInit[j] === `` ? colorStr[0] : _colorInit[j]);
-				colorList[j] = makeColorGradation(colorOrg[j], {
-					defaultColorgrd: _defaultColorgrd,
-					shadowFlg: _shadowFlg,
-				});
-			}
 		} else {
+
+			// 未定義の場合は指定されたデフォルト配列(_colorInit)で再定義
 			colorOrg = _colorInit.concat();
 			for (let j = 0; j < _colorInit.length; j++) {
 				colorList[j] = makeColorGradation(_colorInit[j], {
