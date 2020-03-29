@@ -2684,6 +2684,7 @@ function headerConvert(_dosObj) {
 			obj[`${_frzName}Default`] = obj[`${_frzName}`].concat();
 		}
 	});
+	console.log(obj.setShadowColor);
 
 	/**
 	 * 矢印・フリーズアロー色のデータ展開
@@ -2744,7 +2745,7 @@ function headerConvert(_dosObj) {
 			colorStr = _colorInit.concat();
 			colorOrg = _colorInit.concat();
 			for (let j = 0; j < _colorInit.length; j++) {
-				colorList[j] = makeColorGradation(_colorInit[j], {
+				colorList[j] = _colorInit[j] === `` ? `` : makeColorGradation(_colorInit[j], {
 					defaultColorgrd: _defaultColorgrd,
 					colorCdPaddingUse: _colorCdPaddingUse,
 					shadowFlg: _shadowFlg,
@@ -7850,6 +7851,13 @@ function MainInit() {
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 		const dividePos = g_workObj.dividePos[_j];
 
+		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
+		let shadowColor = ``;
+		if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
+			shadowColor = (g_headerObj.frzShadowColor[colorPos][0] === `Default` ? _normalColor :
+				g_headerObj.frzShadowColor[colorPos][0]);
+		}
+
 		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
 			g_stepY + g_reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
@@ -7879,7 +7887,7 @@ function MainInit() {
 		frzBar.style.opacity = 0.75;
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-		const frzTopShadow = createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, ``,
+		const frzTopShadow = createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, shadowColor,
 			0, 0,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzTopShadow.classList.add(g_cssObj.main_objShadow);
@@ -7891,7 +7899,7 @@ function MainInit() {
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
 
 		// 後発矢印の塗り部分
-		const frzBtmShadow = createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, ``,
+		const frzBtmShadow = createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, shadowColor,
 			0, frzLength * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzBtmShadow.classList.add(g_cssObj.main_objShadow);
