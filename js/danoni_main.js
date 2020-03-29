@@ -2652,39 +2652,38 @@ function headerConvert(_dosObj) {
 	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
 	[`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
 	[`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]];
-	obj.frzColor = [];
-	obj.frzColorStr = [];
-	obj.frzColorOrg = [];
 	obj.frzColorDefault = [];
 
-	// 矢印色
-	[obj.setColor, obj.setColorStr, obj.setColorOrg] =
-		setColorList(_dosObj.setColor, obj.setColorInit, {
-			defaultColorgrd: obj.defaultColorgrd,
-			colorCdPaddingUse: obj.colorCdPaddingUse,
-			shadowFlg: false,
-		});
-	obj.setColorDefault = obj.setColor.concat();
+	[``, `Shadow`].forEach((pattern, k) => {
+		const _name = `set${pattern}Color`;
+		const _frzName = `frz${pattern}Color`;
 
-	// 矢印色(塗りつぶし部分)
-	[obj.setShadowColor, obj.setShadowColorStr, obj.setShadowColorOrg] =
-		setColorList(_dosObj.setShadowColor, obj.setShadowColorInit, {
-			defaultColorgrd: obj.defaultColorgrd,
-			colorCdPaddingUse: obj.colorCdPaddingUse,
-			shadowFlg: true,
-		});
-
-	// フリーズアロー色
-	const tmpFrzColors = (_dosObj.frzColor !== undefined ? _dosObj.frzColor.split(`$`) : []);
-	for (let j = 0; j < obj.setColorInit.length; j++) {
-		[obj.frzColor[j], obj.frzColorStr[j], obj.frzColorOrg[j]] =
-			setColorList(tmpFrzColors[j], new Array(obj.setColorInit.length).fill(obj.setColorStr[j]), {
+		// 矢印色
+		[obj[`${_name}`], obj[`${_name}Str`], obj[`${_name}Org`]] =
+			setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], {
 				defaultColorgrd: obj.defaultColorgrd,
 				colorCdPaddingUse: obj.colorCdPaddingUse,
-				shadowFlg: false,
+				shadowFlg: Boolean(k),
 			});
-	}
-	obj.frzColorDefault = obj.frzColor.concat();
+
+		// フリーズアロー色
+		obj[`${_frzName}`] = [];
+		obj[`${_frzName}Str`] = [];
+		obj[`${_frzName}Org`] = [];
+		const tmpFrzColors = (_dosObj[_frzName] !== undefined ? _dosObj[_frzName].split(`$`) : []);
+		for (let j = 0; j < obj.setColorInit.length; j++) {
+			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
+				setColorList(tmpFrzColors[j], new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]), {
+					defaultColorgrd: obj.defaultColorgrd,
+					colorCdPaddingUse: obj.colorCdPaddingUse,
+					shadowFlg: Boolean(k),
+				});
+		}
+		if (k === 0) {
+			obj[`${_name}Default`] = obj[`${_name}`].concat();
+			obj[`${_frzName}Default`] = obj[`${_frzName}`].concat();
+		}
+	});
 
 	/**
 	 * 矢印・フリーズアロー色のデータ展開
@@ -2742,6 +2741,7 @@ function headerConvert(_dosObj) {
 		} else {
 
 			// 未定義の場合は指定されたデフォルト配列(_colorInit)で再定義
+			colorStr = _colorInit.concat();
 			colorOrg = _colorInit.concat();
 			for (let j = 0; j < _colorInit.length; j++) {
 				colorList[j] = makeColorGradation(_colorInit[j], {
