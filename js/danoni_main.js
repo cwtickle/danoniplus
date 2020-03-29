@@ -2678,7 +2678,7 @@ function headerConvert(_dosObj) {
 	const tmpFrzColors = (_dosObj.frzColor !== undefined ? _dosObj.frzColor.split(`$`) : []);
 	for (let j = 0; j < obj.setColorInit.length; j++) {
 		[obj.frzColor[j], obj.frzColorStr[j], obj.frzColorOrg[j]] =
-			setColorList(tmpFrzColors[j], new Array(5).fill(obj.setColorStr[j]), {
+			setColorList(tmpFrzColors[j], new Array(obj.setColorInit.length).fill(obj.setColorStr[j]), {
 				defaultColorgrd: obj.defaultColorgrd,
 				colorCdPaddingUse: obj.colorCdPaddingUse,
 				shadowFlg: false,
