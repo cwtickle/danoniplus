@@ -8418,6 +8418,15 @@ function changeHitFrz(_j, _k, _name) {
 	const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
 	const dividePos = Number(frzRoot.getAttribute(`dividePos`));
 
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
+	let shadowColor = ``;
+	if (g_headerObj.frzShadowColor[colorPos][1] !== ``) {
+		shadowColor = (g_headerObj.frzShadowColor[colorPos][1] === `Default` ? _normalColor :
+			g_headerObj.frzShadowColor[colorPos][1]);
+		frzBtmShadow.style.background = shadowColor;
+	}
+
 	frzBar.style.background = g_workObj[`${_name}HitBarColors`][_j];
 	frzBtm.style.background = g_workObj[`${_name}HitColors`][_j];
 
@@ -8441,10 +8450,17 @@ function changeHitFrz(_j, _k, _name) {
 function changeFailedFrz(_j, _k) {
 	document.querySelector(`#frzHit${_j}`).style.opacity = 0;
 	document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 1;
-	document.querySelector(`#frzTop${_j}_${_k}`).style.background = makeColorGradation(`#cccccc`);
-	document.querySelector(`#frzBar${_j}_${_k}`).style.background = makeColorGradation(`#999999`);
+	document.querySelector(`#frzTop${_j}_${_k}`).style.background = `#cccccc`;
+	document.querySelector(`#frzBar${_j}_${_k}`).style.background = `#999999`;
 	document.querySelector(`#frzBar${_j}_${_k}`).style.opacity = 1;
-	document.querySelector(`#frzBtm${_j}_${_k}`).style.background = makeColorGradation(`#cccccc`);
+	document.querySelector(`#frzBtm${_j}_${_k}`).style.background = `#cccccc`;
+
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
+	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
+		document.querySelector(`#frzTopShadow${_j}_${_k}`).style.background = `#333333`;
+		document.querySelector(`#frzBtmShadow${_j}_${_k}`).style.background = `#333333`;
+	}
 }
 
 /**
