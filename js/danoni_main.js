@@ -2652,39 +2652,38 @@ function headerConvert(_dosObj) {
 	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
 	[`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
 	[`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]];
-	obj.frzColor = [];
-	obj.frzColorStr = [];
-	obj.frzColorOrg = [];
 	obj.frzColorDefault = [];
 
-	// 矢印色
-	[obj.setColor, obj.setColorStr, obj.setColorOrg] =
-		setColorList(_dosObj.setColor, obj.setColorInit, {
-			defaultColorgrd: obj.defaultColorgrd,
-			colorCdPaddingUse: obj.colorCdPaddingUse,
-			shadowFlg: false,
-		});
-	obj.setColorDefault = obj.setColor.concat();
+	[``, `Shadow`].forEach((pattern, k) => {
+		const _name = `set${pattern}Color`;
+		const _frzName = `frz${pattern}Color`;
 
-	// 矢印色(塗りつぶし部分)
-	[obj.setShadowColor, obj.setShadowColorStr, obj.setShadowColorOrg] =
-		setColorList(_dosObj.setShadowColor, obj.setShadowColorInit, {
-			defaultColorgrd: obj.defaultColorgrd,
-			colorCdPaddingUse: obj.colorCdPaddingUse,
-			shadowFlg: true,
-		});
-
-	// フリーズアロー色
-	const tmpFrzColors = (_dosObj.frzColor !== undefined ? _dosObj.frzColor.split(`$`) : []);
-	for (let j = 0; j < obj.setColorInit.length; j++) {
-		[obj.frzColor[j], obj.frzColorStr[j], obj.frzColorOrg[j]] =
-			setColorList(tmpFrzColors[j], new Array(obj.setColorInit.length).fill(obj.setColorStr[j]), {
+		// 矢印色
+		[obj[`${_name}`], obj[`${_name}Str`], obj[`${_name}Org`]] =
+			setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], {
 				defaultColorgrd: obj.defaultColorgrd,
 				colorCdPaddingUse: obj.colorCdPaddingUse,
-				shadowFlg: false,
+				shadowFlg: Boolean(k),
 			});
-	}
-	obj.frzColorDefault = obj.frzColor.concat();
+
+		// フリーズアロー色
+		obj[`${_frzName}`] = [];
+		obj[`${_frzName}Str`] = [];
+		obj[`${_frzName}Org`] = [];
+		const tmpFrzColors = (_dosObj[_frzName] !== undefined ? _dosObj[_frzName].split(`$`) : []);
+		for (let j = 0; j < obj.setColorInit.length; j++) {
+			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
+				setColorList(tmpFrzColors[j], new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]), {
+					defaultColorgrd: obj.defaultColorgrd,
+					colorCdPaddingUse: obj.colorCdPaddingUse,
+					shadowFlg: Boolean(k),
+				});
+		}
+		if (k === 0) {
+			obj[`${_name}Default`] = obj[`${_name}`].concat();
+			obj[`${_frzName}Default`] = obj[`${_frzName}`].concat();
+		}
+	});
 
 	/**
 	 * 矢印・フリーズアロー色のデータ展開
@@ -2742,9 +2741,10 @@ function headerConvert(_dosObj) {
 		} else {
 
 			// 未定義の場合は指定されたデフォルト配列(_colorInit)で再定義
+			colorStr = _colorInit.concat();
 			colorOrg = _colorInit.concat();
 			for (let j = 0; j < _colorInit.length; j++) {
-				colorList[j] = makeColorGradation(_colorInit[j], {
+				colorList[j] = _colorInit[j] === `` ? `` : makeColorGradation(_colorInit[j], {
 					defaultColorgrd: _defaultColorgrd,
 					colorCdPaddingUse: _colorCdPaddingUse,
 					shadowFlg: _shadowFlg,
@@ -7850,6 +7850,13 @@ function MainInit() {
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 		const dividePos = g_workObj.dividePos[_j];
 
+		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
+		let shadowColor = ``;
+		if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
+			shadowColor = (g_headerObj.frzShadowColor[colorPos][0] === `Default` ? _normalColor :
+				g_headerObj.frzShadowColor[colorPos][0]);
+		}
+
 		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
 			g_stepY + g_reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
@@ -7879,7 +7886,7 @@ function MainInit() {
 		frzBar.style.opacity = 0.75;
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-		const frzTopShadow = createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, ``,
+		const frzTopShadow = createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, shadowColor,
 			0, 0,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzTopShadow.classList.add(g_cssObj.main_objShadow);
@@ -7891,7 +7898,7 @@ function MainInit() {
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
 
 		// 後発矢印の塗り部分
-		const frzBtmShadow = createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, ``,
+		const frzBtmShadow = createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, shadowColor,
 			0, frzLength * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzBtmShadow.classList.add(g_cssObj.main_objShadow);
@@ -8410,6 +8417,15 @@ function changeHitFrz(_j, _k, _name) {
 	const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
 	const dividePos = Number(frzRoot.getAttribute(`dividePos`));
 
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
+	let shadowColor = ``;
+	if (g_headerObj.frzShadowColor[colorPos][1] !== `` && _name === `frz`) {
+		shadowColor = (g_headerObj.frzShadowColor[colorPos][1] === `Default` ? g_workObj.frzHitColors[_j] :
+			g_headerObj.frzShadowColor[colorPos][1]);
+		frzBtmShadow.style.background = shadowColor;
+	}
+
 	frzBar.style.background = g_workObj[`${_name}HitBarColors`][_j];
 	frzBtm.style.background = g_workObj[`${_name}HitColors`][_j];
 
@@ -8433,10 +8449,17 @@ function changeHitFrz(_j, _k, _name) {
 function changeFailedFrz(_j, _k) {
 	document.querySelector(`#frzHit${_j}`).style.opacity = 0;
 	document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 1;
-	document.querySelector(`#frzTop${_j}_${_k}`).style.background = makeColorGradation(`#cccccc`);
-	document.querySelector(`#frzBar${_j}_${_k}`).style.background = makeColorGradation(`#999999`);
+	document.querySelector(`#frzTop${_j}_${_k}`).style.background = `#cccccc`;
+	document.querySelector(`#frzBar${_j}_${_k}`).style.background = `#999999`;
 	document.querySelector(`#frzBar${_j}_${_k}`).style.opacity = 1;
-	document.querySelector(`#frzBtm${_j}_${_k}`).style.background = makeColorGradation(`#cccccc`);
+	document.querySelector(`#frzBtm${_j}_${_k}`).style.background = `#cccccc`;
+
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
+	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
+		document.querySelector(`#frzTopShadow${_j}_${_k}`).style.background = `#333333`;
+		document.querySelector(`#frzBtmShadow${_j}_${_k}`).style.background = `#333333`;
+	}
 }
 
 /**
