@@ -2637,12 +2637,12 @@ function headerConvert(_dosObj) {
 	}
 
 	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
-	if (_dosObj.defaultFrzUse !== undefined) {
-		obj.defaultFrzUse = setVal(_dosObj.defaultFrzUse, true, C_TYP_BOOLEAN);
+	if (_dosObj.defaultFrzColorUse !== undefined) {
+		obj.defaultFrzColorUse = setVal(_dosObj.defaultFrzColorUse, true, C_TYP_BOOLEAN);
 	} else if (typeof g_presetFrzColors === C_TYP_BOOLEAN) {
-		obj.defaultFrzUse = (g_presetFrzColor ? true : false);
+		obj.defaultFrzColorUse = (g_presetFrzColors ? true : false);
 	} else {
-		obj.defaultFrzUse = true;
+		obj.defaultFrzColorUse = true;
 	}
 
 	// 初期色情報
@@ -2685,15 +2685,15 @@ function headerConvert(_dosObj) {
 		obj[`${_frzName}Org`] = [];
 		const tmpFrzColors = (_dosObj[_frzName] !== undefined ? _dosObj[_frzName].split(`$`) : []);
 		for (let j = 0; j < obj.setColorInit.length; j++) {
-			let defaultFrz;
-			if (obj.defaultFrzUse) {
-				defaultFrz = (j === 0 ? obj[`${_frzName}Init`] : obj[`${_frzName}Org`][0]);
+			let defaultFrzColor;
+			if (obj.defaultFrzColorUse) {
+				defaultFrzColor = (j === 0 ? obj[`${_frzName}Init`] : obj[`${_frzName}Org`][0]);
 			} else {
-				defaultFrz = new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]);
+				defaultFrzColor = new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]);
 			}
 
 			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
-				setColorList(tmpFrzColors[j], defaultFrz, {
+				setColorList(tmpFrzColors[j], defaultFrzColor, {
 					defaultColorgrd: obj.defaultColorgrd,
 					colorCdPaddingUse: obj.colorCdPaddingUse,
 					objType: `frz`,
