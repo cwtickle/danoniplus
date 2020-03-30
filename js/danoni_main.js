@@ -1928,7 +1928,9 @@ function makeColorGradation(_colorStr, _options = {}) {
 		return `Default`;
 	}
 
-	const alphaVal = (_shadowFlg ? `80` : ``);
+	// 矢印の塗りつぶしのみ、透明度を50%にする
+	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : ``;
+
 	let convertColorStr;
 	const tmpColorStr = _colorStr.split(`@`);
 	const colorArray = tmpColorStr[0].split(`:`);
@@ -2676,6 +2678,7 @@ function headerConvert(_dosObj) {
 				setColorList(tmpFrzColors[j], new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]), {
 					defaultColorgrd: obj.defaultColorgrd,
 					colorCdPaddingUse: obj.colorCdPaddingUse,
+					objType: `frz`,
 					shadowFlg: Boolean(k),
 				});
 		}
@@ -2695,6 +2698,7 @@ function headerConvert(_dosObj) {
 
 		const _defaultColorgrd = _options.defaultColorgrd || g_headerObj.defaultColorgrd;
 		const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
+		const _objType = _options.objType || `normal`;
 		const _shadowFlg = _options.shadowFlg || false;
 
 		// グラデーション文字列 #ffff99:#9999ff@linear-gradient
@@ -2734,6 +2738,7 @@ function headerConvert(_dosObj) {
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
 					defaultColorgrd: _defaultColorgrd,
 					colorCdPaddingUse: _colorCdPaddingUse,
+					objType: _objType,
 					shadowFlg: _shadowFlg,
 				});
 			}
