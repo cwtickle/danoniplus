@@ -207,8 +207,8 @@ const C_LEN_JDGCNTS_WIDTH = 100;
 const C_LEN_JDGCNTS_HEIGHT = 20;
 const C_SIZ_JDGCNTS = 16;
 
-const C_FRM_HITMOTION = 4;
-const C_FRM_JDGMOTION = 60;
+let C_FRM_HITMOTION = 4;
+let C_FRM_JDGMOTION = 60;
 
 /** 結果画面用共通オブジェクト */
 const g_resultObj = {
