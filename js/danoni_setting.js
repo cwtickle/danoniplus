@@ -22,6 +22,9 @@ const g_presetGauge = {
 	//	Init: 25,    // 初期値
 };
 
+// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
+const g_presetFrzColors = true;
+
 // ゲージ設定（デフォルト以外）
 const g_presetGaugeCustom = {
 	Easy: {
