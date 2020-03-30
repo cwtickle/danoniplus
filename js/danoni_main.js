@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 13.1.0`;
+const g_version = `Ver 13.1.1`;
 const g_revisedDate = `2020/03/30`;
 const g_alphaVersion = ``;
 
@@ -2696,6 +2696,7 @@ function headerConvert(_dosObj) {
 				setColorList(tmpFrzColors[j], defaultFrzColor, {
 					defaultColorgrd: obj.defaultColorgrd,
 					colorCdPaddingUse: obj.colorCdPaddingUse,
+					defaultFrzColorUse: obj.defaultFrzColorUse,
 					objType: `frz`,
 					shadowFlg: Boolean(k),
 				});
@@ -2716,6 +2717,7 @@ function headerConvert(_dosObj) {
 
 		const _defaultColorgrd = _options.defaultColorgrd || g_headerObj.defaultColorgrd;
 		const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
+		const _defaultFrzColorUse = _options.defaultFrzColorUse || true;
 		const _objType = _options.objType || `normal`;
 		const _shadowFlg = _options.shadowFlg || false;
 
@@ -2736,8 +2738,14 @@ function headerConvert(_dosObj) {
 			// 色変化配列が既定長より小さい場合、データ補完する
 			if (colorStr.length < _colorInit.length) {
 				const defaultLength = colorStr.length;
-				for (let j = 0; j < _colorInit.length; j++) {
-					colorStr[j] = colorStr[j % defaultLength];
+				if (_objType === `frz` && _defaultFrzColorUse) {
+					for (let j = defaultLength; j < _colorInit.length; j++) {
+						colorStr[j] = _colorInit[j];
+					}
+				} else {
+					for (let j = 0; j < _colorInit.length; j++) {
+						colorStr[j] = colorStr[j % defaultLength];
+					}
 				}
 				colorList = colorStr.concat();
 			}
