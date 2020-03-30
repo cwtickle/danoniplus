@@ -2738,7 +2738,7 @@ function headerConvert(_dosObj) {
 			// 色変化配列が既定長より小さい場合、データ補完する
 			if (colorStr.length < _colorInit.length) {
 				const defaultLength = colorStr.length;
-				if (_defaultFrzColorUse) {
+				if (_objType === `frz` && _defaultFrzColorUse) {
 					for (let j = defaultLength; j < _colorInit.length; j++) {
 						colorStr[j] = _colorInit[j];
 					}
