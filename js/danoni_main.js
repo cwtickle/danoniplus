@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/03/29
+ * Revised : 2020/03/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 13.0.0`;
-const g_revisedDate = `2020/03/29`;
+const g_version = `Ver 13.1.0`;
+const g_revisedDate = `2020/03/30`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1928,7 +1928,9 @@ function makeColorGradation(_colorStr, _options = {}) {
 		return `Default`;
 	}
 
-	const alphaVal = (_shadowFlg ? `80` : ``);
+	// 矢印の塗りつぶしのみ、透明度を50%にする
+	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : ``;
+
 	let convertColorStr;
 	const tmpColorStr = _colorStr.split(`@`);
 	const colorArray = tmpColorStr[0].split(`:`);
@@ -2634,6 +2636,15 @@ function headerConvert(_dosObj) {
 		getGaugeSetting(_dosObj, g_gaugeOptionObj.custom[j], obj);
 	}
 
+	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
+	if (_dosObj.defaultFrzColorUse !== undefined) {
+		obj.defaultFrzColorUse = setVal(_dosObj.defaultFrzColorUse, true, C_TYP_BOOLEAN);
+	} else if (typeof g_presetFrzColors === C_TYP_BOOLEAN) {
+		obj.defaultFrzColorUse = (g_presetFrzColors ? true : false);
+	} else {
+		obj.defaultFrzColorUse = true;
+	}
+
 	// 初期色情報
 	obj.setColorInit = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setShadowColorInit = [``, ``, ``, ``, ``];
@@ -2642,6 +2653,8 @@ function headerConvert(_dosObj) {
 	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
 
 	// フリーズアロー初期色情報
+	obj.frzColorInit = [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`];
+	obj.frzShadowColorInit = [``, ``, ``, ``];
 	obj.frzColorType1 = [[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
 	[`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
 	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
@@ -2672,10 +2685,18 @@ function headerConvert(_dosObj) {
 		obj[`${_frzName}Org`] = [];
 		const tmpFrzColors = (_dosObj[_frzName] !== undefined ? _dosObj[_frzName].split(`$`) : []);
 		for (let j = 0; j < obj.setColorInit.length; j++) {
+			let defaultFrzColor;
+			if (obj.defaultFrzColorUse) {
+				defaultFrzColor = (j === 0 ? obj[`${_frzName}Init`] : obj[`${_frzName}Org`][0]);
+			} else {
+				defaultFrzColor = new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]);
+			}
+
 			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
-				setColorList(tmpFrzColors[j], new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]), {
+				setColorList(tmpFrzColors[j], defaultFrzColor, {
 					defaultColorgrd: obj.defaultColorgrd,
 					colorCdPaddingUse: obj.colorCdPaddingUse,
+					objType: `frz`,
 					shadowFlg: Boolean(k),
 				});
 		}
@@ -2695,6 +2716,7 @@ function headerConvert(_dosObj) {
 
 		const _defaultColorgrd = _options.defaultColorgrd || g_headerObj.defaultColorgrd;
 		const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
+		const _objType = _options.objType || `normal`;
 		const _shadowFlg = _options.shadowFlg || false;
 
 		// グラデーション文字列 #ffff99:#9999ff@linear-gradient
@@ -2734,6 +2756,7 @@ function headerConvert(_dosObj) {
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
 					defaultColorgrd: _defaultColorgrd,
 					colorCdPaddingUse: _colorCdPaddingUse,
+					objType: _objType,
 					shadowFlg: _shadowFlg,
 				});
 			}

@@ -1,6 +1,7 @@
 ﻿`use strict`;
 /**
  * Dancing☆Onigiri 設定用jsファイル
+ * Template Update: 2020/03/30
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -21,6 +22,9 @@ const g_presetGauge = {
 	//	Damage: 7,   // ダメージ量
 	//	Init: 25,    // 初期値
 };
+
+// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
+const g_presetFrzColors = true;
 
 // ゲージ設定（デフォルト以外）
 const g_presetGaugeCustom = {
