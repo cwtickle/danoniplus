@@ -2636,6 +2636,15 @@ function headerConvert(_dosObj) {
 		getGaugeSetting(_dosObj, g_gaugeOptionObj.custom[j], obj);
 	}
 
+	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
+	if (_dosObj.defaultFrzUse !== undefined) {
+		obj.defaultFrzUse = setVal(_dosObj.defaultFrzUse, true, C_TYP_BOOLEAN);
+	} else if (typeof g_presetFrzColors === C_TYP_BOOLEAN) {
+		obj.defaultFrzUse = (g_presetFrzColor ? true : false);
+	} else {
+		obj.defaultFrzUse = true;
+	}
+
 	// 初期色情報
 	obj.setColorInit = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
 	obj.setShadowColorInit = [``, ``, ``, ``, ``];
@@ -2644,6 +2653,8 @@ function headerConvert(_dosObj) {
 	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
 
 	// フリーズアロー初期色情報
+	obj.frzColorInit = [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`];
+	obj.frzShadowColorInit = [``, ``, ``, ``];
 	obj.frzColorType1 = [[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
 	[`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
 	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
@@ -2674,8 +2685,15 @@ function headerConvert(_dosObj) {
 		obj[`${_frzName}Org`] = [];
 		const tmpFrzColors = (_dosObj[_frzName] !== undefined ? _dosObj[_frzName].split(`$`) : []);
 		for (let j = 0; j < obj.setColorInit.length; j++) {
+			let defaultFrz;
+			if (obj.defaultFrzUse) {
+				defaultFrz = (j === 0 ? obj[`${_frzName}Init`] : obj[`${_frzName}Org`][0]);
+			} else {
+				defaultFrz = new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]);
+			}
+
 			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
-				setColorList(tmpFrzColors[j], new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]), {
+				setColorList(tmpFrzColors[j], defaultFrz, {
 					defaultColorgrd: obj.defaultColorgrd,
 					colorCdPaddingUse: obj.colorCdPaddingUse,
 					objType: `frz`,
