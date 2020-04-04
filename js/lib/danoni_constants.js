@@ -354,6 +354,7 @@ const g_hidSudObj = {
     filterPos: 10,
     pgDown: {},
     pgUp: {},
+    std: {},
 };
 g_hidSudObj[`Hidden+`] = 0;
 g_hidSudObj[`Sudden+`] = 1;
@@ -372,6 +373,14 @@ g_hidSudObj.pgUp[`Hidden+`] = {
 g_hidSudObj.pgUp[`Sudden+`] = {
     OFF: 34,
     ON: 33,
+}
+g_hidSudObj.std[`Hidden+`] = {
+    OFF: 0,
+    ON: 1,
+};
+g_hidSudObj.std[`Sudden+`] = {
+    OFF: 1,
+    ON: 0,
 }
 
 // ステップゾーン位置、到達距離(後で指定)

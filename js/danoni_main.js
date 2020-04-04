@@ -8348,7 +8348,8 @@ function changeAppearanceFilter(_num = 10) {
 
 	document.querySelector(`#filterBar0`).style.top = `${g_sHeight * _num / 100}px`;
 	document.querySelector(`#filterBar1`).style.top = `${g_sHeight * (100 - _num) / 100}px`;
-	document.querySelector(`#filterView`).style.top = `${g_sHeight * (100 - _num) / 100 - 10}px`;
+	document.querySelector(`#filterView`).style.top =
+		document.querySelector(`#filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).style.top;
 	document.querySelector(`#filterView`).innerHTML = `${_num}%`;
 	g_hidSudObj.filterPos = _num;
 }
