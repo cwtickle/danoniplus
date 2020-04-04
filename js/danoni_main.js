@@ -7168,6 +7168,10 @@ function MainInit() {
 			g_sWidth - 50, 1, ``, `lifeBar`);
 		filterBar1.classList.add(g_cssObj.life_Failed);
 		mainSprite.appendChild(filterBar1);
+
+		const filterView = createDivCssLabel(`filterView`, g_sWidth - 70, 0, 10, 10, 10, ``);
+		filterView.style.textAlign = C_ALIGN_RIGHT;
+		mainSprite.appendChild(filterView);
 	}
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
@@ -7518,9 +7522,9 @@ function MainInit() {
 			document.onkeyup = _ => { };
 
 		} else if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
-			if (setKey === g_hidSudObj.pgDown[g_stateObj.appearance]) {
+			if (setKey === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
 				changeAppearanceFilter(g_hidSudObj.filterPos < 100 ? g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
-			} else if (setKey === g_hidSudObj.pgUp[g_stateObj.appearance]) {
+			} else if (setKey === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
 				changeAppearanceFilter(g_hidSudObj.filterPos > 0 ? g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
 			}
 		}
@@ -8344,6 +8348,8 @@ function changeAppearanceFilter(_num = 10) {
 
 	document.querySelector(`#filterBar0`).style.top = `${g_sHeight * _num / 100}px`;
 	document.querySelector(`#filterBar1`).style.top = `${g_sHeight * (100 - _num) / 100}px`;
+	document.querySelector(`#filterView`).style.top = `${g_sHeight * (100 - _num) / 100 - 10}px`;
+	document.querySelector(`#filterView`).innerHTML = `${_num}%`;
 	g_hidSudObj.filterPos = _num;
 }
 

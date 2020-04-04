@@ -357,10 +357,22 @@ const g_hidSudObj = {
 };
 g_hidSudObj[`Hidden+`] = 0;
 g_hidSudObj[`Sudden+`] = 1;
-g_hidSudObj.pgDown[`Hidden+`] = 34;
-g_hidSudObj.pgDown[`Sudden+`] = 33;
-g_hidSudObj.pgUp[`Hidden+`] = 33;
-g_hidSudObj.pgUp[`Sudden+`] = 34;
+g_hidSudObj.pgDown[`Hidden+`] = {
+    OFF: 34,
+    ON: 33,
+};
+g_hidSudObj.pgDown[`Sudden+`] = {
+    OFF: 33,
+    ON: 34,
+}
+g_hidSudObj.pgUp[`Hidden+`] = {
+    OFF: 33,
+    ON: 34,
+}
+g_hidSudObj.pgUp[`Sudden+`] = {
+    OFF: 34,
+    ON: 33,
+}
 
 // ステップゾーン位置、到達距離(後で指定)
 const C_STEP_Y = 70;
