@@ -7519,9 +7519,9 @@ function MainInit() {
 
 		} else if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
 			if (setKey === g_hidSudObj.pgDown[g_stateObj.appearance]) {
-				changeAppearanceFilter(g_hidSudObj.filterPos < 90 ? g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
+				changeAppearanceFilter(g_hidSudObj.filterPos < 100 ? g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
 			} else if (setKey === g_hidSudObj.pgUp[g_stateObj.appearance]) {
-				changeAppearanceFilter(g_hidSudObj.filterPos > 10 ? g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
+				changeAppearanceFilter(g_hidSudObj.filterPos > 0 ? g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
 			}
 		}
 		return blockCode(setKey);
@@ -9035,6 +9035,9 @@ function resultInit() {
 	}
 	if (g_stateObj.appearance !== `Visible`) {
 		playStyleData += `, ${g_stateObj.appearance}`;
+		if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
+			playStyleData += `(${g_hidSudObj.filterPos}%)`;
+		}
 	}
 	if (g_stateObj.gauge !== g_gauges[0]) {
 		playStyleData += `, ${g_stateObj.gauge}`;
