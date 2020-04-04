@@ -7156,6 +7156,20 @@ function MainInit() {
 
 	}
 
+	if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
+		const filterBar0 = createColorObject(`filterBar0`, ``,
+			0, 0,
+			g_sWidth - 50, 1, ``, `lifeBar`);
+		filterBar0.classList.add(g_cssObj.life_Failed);
+		mainSprite.appendChild(filterBar0);
+
+		const filterBar1 = createColorObject(`filterBar1`, ``,
+			0, 0,
+			g_sWidth - 50, 1, ``, `lifeBar`);
+		filterBar1.classList.add(g_cssObj.life_Failed);
+		mainSprite.appendChild(filterBar1);
+	}
+
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
 	const arrowSprite = [
 		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_sWidth, g_sHeight),
@@ -7163,7 +7177,10 @@ function MainInit() {
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
-	if (g_stateObj.appearance !== `Visible`) {
+	if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
+		changeAppearanceFilter();
+
+	} else if (g_stateObj.appearance !== `Visible`) {
 		arrowSprite[0].classList.add(`${g_stateObj.appearance}0`);
 		arrowSprite[1].classList.add(`${g_stateObj.appearance}1`);
 	}
@@ -7499,6 +7516,13 @@ function MainInit() {
 				titleInit();
 			}
 			document.onkeyup = _ => { };
+
+		} else if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
+			if (setKey === g_hidSudObj.pgDown[g_stateObj.appearance]) {
+				changeAppearanceFilter(g_hidSudObj.filterPos < 90 ? g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
+			} else if (setKey === g_hidSudObj.pgUp[g_stateObj.appearance]) {
+				changeAppearanceFilter(g_hidSudObj.filterPos > 10 ? g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
+			}
 		}
 		return blockCode(setKey);
 	}
@@ -8304,6 +8328,23 @@ function MainInit() {
 		}
 	}
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps);
+}
+
+/**
+ * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
+ * @param {number} _num 
+ */
+function changeAppearanceFilter(_num = 10) {
+	const topNum = g_hidSudObj[g_stateObj.appearance];
+	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
+	document.querySelector(`#arrowSprite${topNum}`).style.clipPath = `inset(${_num}% 0% 0% 0%)`;
+	document.querySelector(`#arrowSprite${topNum}`).style.webkitClipPath = `inset(${_num}% 0% 0% 0%)`;
+	document.querySelector(`#arrowSprite${bottomNum}`).style.clipPath = `inset(0% 0% ${_num}% 0%)`;
+	document.querySelector(`#arrowSprite${bottomNum}`).style.webkitClipPath = `inset(0% 0% ${_num}% 0%)`;
+
+	document.querySelector(`#filterBar0`).style.top = `${g_sHeight * _num / 100}px`;
+	document.querySelector(`#filterBar1`).style.top = `${g_sHeight * (100 - _num) / 100}px`;
+	g_hidSudObj.filterPos = _num;
 }
 
 /**

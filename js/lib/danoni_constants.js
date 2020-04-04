@@ -337,7 +337,7 @@ let g_adjustmentNum = C_MAX_ADJUSTMENT;
 let g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
 let g_volumeNum = g_volumes.length - 1;
 
-let g_appearances = [`Visible`, `Hidden`, `Sudden`, `Slit`];
+let g_appearances = [`Visible`, `Hidden`, `Sudden`, `Hidden+`, `Sudden+`, `Slit`];
 let g_appearanceNum = 0;
 
 let g_scoreDetails = [`Speed`, `Density`, `ToolDif`];
@@ -349,6 +349,18 @@ let g_displays = [`stepZone`, `judgement`, `lifeGauge`, `musicInfo`, `special`,
 // サイズ(後で指定)
 let g_sWidth;
 let g_sHeight;
+
+const g_hidSudObj = {
+    filterPos: 10,
+    pgDown: {},
+    pgUp: {},
+};
+g_hidSudObj[`Hidden+`] = 0;
+g_hidSudObj[`Sudden+`] = 1;
+g_hidSudObj.pgDown[`Hidden+`] = 34;
+g_hidSudObj.pgDown[`Sudden+`] = 33;
+g_hidSudObj.pgUp[`Hidden+`] = 33;
+g_hidSudObj.pgUp[`Sudden+`] = 34;
 
 // ステップゾーン位置、到達距離(後で指定)
 const C_STEP_Y = 70;
