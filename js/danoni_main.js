@@ -7178,7 +7178,7 @@ function MainInit() {
 
 	// Appearanceのオプション適用時は一部描画を隠す
 	if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
-		changeAppearanceFilter();
+		changeAppearanceFilter(g_hidSudObj.filterPos);
 
 	} else if (g_stateObj.appearance !== `Visible`) {
 		arrowSprite[0].classList.add(`${g_stateObj.appearance}0`);
