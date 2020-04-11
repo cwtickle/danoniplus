@@ -15,19 +15,19 @@ v11の対応終了時期はv14リリース開始時を予定しています。�
 
 | Version | Supported          | Latest Version | End of Support |
 | ------- | ------------------ |----------------|----------------|
-| 13.x    | :white_check_mark: |[v13.2.1](../../releases/tag/v13.2.1)          |-|
-| 12.x    | :white_check_mark: |[v12.3.2](../../releases/tag/v12.3.2)          |(At Release v15)|
-| 11.x    | :warning:          |[v11.4.3](../../releases/tag/v11.4.3)          |(At Release v14)|
-| 10.x    | :x:                |[v10.5.5 (final)](../../releases/tag/v10.5.5)  |2020-02-10|
-| 9.x     | :white_check_mark: |[v9.4.9](../../releases/tag/v9.4.9)            |-|
-| 8.x     | :x:                |[v8.7.10 (final)](../../releases/tag/v8.7.10)  |2019-12-14|
-| 7.x     | :x:                |[v7.9.13 (final)](../../releases/tag/v7.9.13)  |2019-11-04|
-| 6.x     | :x:                |[v6.6.13 (final)](../../releases/tag/v6.6.13)  |2019-11-04|
-| 5.x     | :x::anchor:        |[v5.12.17 (final)](../../releases/tag/v5.12.17)|2019-12-14|
-| 4.x     | :x:                |[v4.10.22 (final)](../../releases/tag/v4.10.22)|2019-10-08|
-| 3.x     | :x:                |[v3.13.9 (final)](../../releases/tag/v3.13.9)  |2019-06-18|
-| 2.x     | :x:                |[v2.9.11 (final)](../../releases/tag/v2.9.11)  |2019-06-18|
-| 1.x     | :x::anchor:        |[v1.15.17 (final)](../../releases/tag/v1.15.17)|2019-10-08|
+| v13     | :white_check_mark: |[v13.2.1](../../releases/tag/v13.2.1)          |-|
+| v12     | :white_check_mark: |[v12.3.2](../../releases/tag/v12.3.2)          |(At Release v15)|
+| v11     | :warning:          |[v11.4.3](../../releases/tag/v11.4.3)          |(At Release v14)|
+| v10     | :x:                |[v10.5.5 (final)](../../releases/tag/v10.5.5)  |2020-02-10|
+| v9      | :white_check_mark: |[v9.4.9](../../releases/tag/v9.4.9)            |-|
+| v8      | :x:                |[v8.7.10 (final)](../../releases/tag/v8.7.10)  |2019-12-14|
+| v7      | :x:                |[v7.9.13 (final)](../../releases/tag/v7.9.13)  |2019-11-04|
+| v6      | :x:                |[v6.6.13 (final)](../../releases/tag/v6.6.13)  |2019-11-04|
+| v5      | :x::anchor:        |[v5.12.17 (final)](../../releases/tag/v5.12.17)|2019-12-14|
+| v4      | :x:                |[v4.10.22 (final)](../../releases/tag/v4.10.22)|2019-10-08|
+| v3      | :x:                |[v3.13.9 (final)](../../releases/tag/v3.13.9)  |2019-06-18|
+| v2      | :x:                |[v2.9.11 (final)](../../releases/tag/v2.9.11)  |2019-06-18|
+| v1      | :x::anchor:        |[v1.15.17 (final)](../../releases/tag/v1.15.17)|2019-10-08|
 
 ## Reporting a Vulnerability / 脆弱性・不具合情報
 
