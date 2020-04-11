@@ -41,19 +41,23 @@ const C_TYP_OBJECT = `object`;
 const C_TYP_FUNCTION = `function`;
 
 // 画像ファイル
-const C_IMG_ARROW = `../img/arrow.png`;
-const C_IMG_ARROWSD = `../img/arrowShadow.png`;
-const C_IMG_ONIGIRI = `../img/onigiri.png`;
-const C_IMG_AASD = `../img/aaShadow.png`;
-const C_IMG_GIKO = `../img/giko.png`;
-const C_IMG_IYO = `../img/iyo.png`;
-const C_IMG_C = `../img/c.png`;
-const C_IMG_MORARA = `../img/morara.png`;
-const C_IMG_MONAR = `../img/monar.png`;
-const C_IMG_CURSOR = `../img/cursor.png`;
-const C_IMG_FRZBAR = `../img/frzbar.png`;
-const C_IMG_LIFEBAR = `../img/frzbar.png`;
-const C_IMG_LIFEBORDER = `../img/borderline.png`;
+let C_IMG_ARROW = `../img/arrow.png`;
+let C_IMG_ARROWSD = `../img/arrowShadow.png`;
+let C_IMG_ONIGIRI = `../img/onigiri.png`;
+let C_IMG_AASD = `../img/aaShadow.png`;
+let C_IMG_GIKO = `../img/giko.png`;
+let C_IMG_IYO = `../img/iyo.png`;
+let C_IMG_C = `../img/c.png`;
+let C_IMG_MORARA = `../img/morara.png`;
+let C_IMG_MONAR = `../img/monar.png`;
+let C_IMG_CURSOR = `../img/cursor.png`;
+let C_IMG_FRZBAR = `../img/frzbar.png`;
+let C_IMG_LIFEBAR = `../img/frzbar.png`;
+let C_IMG_LIFEBORDER = `../img/borderline.png`;
+
+if (typeof loadBinary === C_TYP_FUNCTION) {
+    loadBinary();
+}
 
 // jsファイル
 const C_JSF_CUSTOM = `danoni_custom.js`;

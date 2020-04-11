@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/03/08
+ * Revised : 2020/04/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 11.4.2`;
-const g_revisedDate = `2020/03/08`;
+const g_version = `Ver 11.4.3`;
+const g_revisedDate = `2020/04/11`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -43,11 +43,13 @@ window.onload = _ => {
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
-	loadScript(`../js/lib/danoni_constants.js?${randTime}`, _ => {
-		loadScript(`../js/lib/danoni_legacy_function.js?${randTime}`, _ => {
-			initialControl();
-		}, false);
-	});
+	loadScript(`../js/lib/danoni_localbinary.js?${randTime}`, _ => {
+		loadScript(`../js/lib/danoni_constants.js?${randTime}`, _ => {
+			loadScript(`../js/lib/danoni_legacy_function.js?${randTime}`, _ => {
+				initialControl();
+			}, false);
+		});
+	}, false);
 };
 
 /*-----------------------------------------------------------*/
@@ -3633,7 +3635,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 11 スライダーあり
 	fadeinSprite.appendChild(createLblSetting(`Fadein`));
 
-	const lnkFadein = createDivCssLabel(`lblFadein`, C_LEN_SETLBL_LEFT, 0,
+	const lnkFadein = createDivCssLabel(`lnkFadein`, C_LEN_SETLBL_LEFT, 0,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `${g_stateObj.fadein}%`, g_cssObj.settings_FadeinBar);
 	fadeinSprite.appendChild(lnkFadein);
 
@@ -4445,7 +4447,7 @@ function keyConfigInit() {
 	lblcolorType.classList.add(g_cssObj.keyconfig_ColorType);
 	divRoot.appendChild(lblcolorType);
 
-	const lnkcolorType = makeSettingLblCssButton(`lnkKcType`, g_colorType, 0, _ => {
+	const lnkcolorType = makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, _ => {
 		switch (g_colorType) {
 			case `Default`:
 				g_colorType = `Type1`;
