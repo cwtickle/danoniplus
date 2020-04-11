@@ -2684,18 +2684,22 @@ function headerConvert(_dosObj) {
 		obj[`${_frzName}Str`] = [];
 		obj[`${_frzName}Org`] = [];
 		const tmpFrzColors = (_dosObj[_frzName] !== undefined ? _dosObj[_frzName].split(`$`) : []);
+		const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
+
 		for (let j = 0; j < obj.setColorInit.length; j++) {
-			let defaultFrzColor;
-			if (obj.defaultFrzColorUse) {
-				defaultFrzColor = (j > 0 ?
-					obj[`${_frzName}Org`][0] : obj[`${_frzName}Init`]);
-			} else {
-				defaultFrzColor = (j > 0 && tmpFrzColors.length > 0 ?
-					obj[`${_frzName}Org`][0] : new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]));
+
+			// デフォルト配列の作成（1番目の要素をベースに、フリーズアロー初期セット or 矢印色からデータを補完）
+			let currentFrzColors = [];
+			for (let k = 0; k < obj[`${_frzName}Init`].length; k++) {
+				if (firstFrzColors[k] === undefined || firstFrzColors[k] === ``) {
+					currentFrzColors[k] = obj.defaultFrzColorUse ? obj[`${_frzName}Init`][k] : obj[`${_name}Str`][j];
+				} else {
+					currentFrzColors[k] = firstFrzColors[k];
+				}
 			}
 
 			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
-				setColorList(tmpFrzColors[j], defaultFrzColor, {
+				setColorList(tmpFrzColors[j], currentFrzColors, {
 					defaultColorgrd: obj.defaultColorgrd,
 					colorCdPaddingUse: obj.colorCdPaddingUse,
 					defaultFrzColorUse: obj.defaultFrzColorUse,
@@ -2737,20 +2741,20 @@ function headerConvert(_dosObj) {
 			colorList = _data.split(`,`);
 			colorStr = colorList.concat();
 
-			// 色変化配列が既定長より小さい場合、データ補完する
-			if (colorStr.length < _colorInit.length) {
-				const defaultLength = colorStr.length;
-				if (_objType === `frz` && _defaultFrzColorUse) {
-					for (let j = defaultLength; j < _colorInit.length; j++) {
+			// データ補完処理
+			const defaultLength = colorStr.length;
+			if (_objType === `frz` && _defaultFrzColorUse) {
+				for (let j = 0; j < _colorInit.length; j++) {
+					if (colorStr[j] === undefined || colorStr[j] === ``) {
 						colorStr[j] = _colorInit[j];
 					}
-				} else {
-					for (let j = 0; j < _colorInit.length; j++) {
-						colorStr[j] = colorStr[j % defaultLength];
-					}
 				}
-				colorList = colorStr.concat();
+			} else {
+				for (let j = 0; j < _colorInit.length; j++) {
+					colorStr[j] = colorStr[j % defaultLength];
+				}
 			}
+			colorList = colorStr.concat();
 
 			for (let j = 0; j < colorList.length; j++) {
 				const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
