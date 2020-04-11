@@ -2687,9 +2687,11 @@ function headerConvert(_dosObj) {
 		for (let j = 0; j < obj.setColorInit.length; j++) {
 			let defaultFrzColor;
 			if (obj.defaultFrzColorUse) {
-				defaultFrzColor = (j === 0 ? obj[`${_frzName}Init`] : obj[`${_frzName}Org`][0]);
+				defaultFrzColor = (j > 0 ?
+					obj[`${_frzName}Org`][0] : obj[`${_frzName}Init`]);
 			} else {
-				defaultFrzColor = new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]);
+				defaultFrzColor = (j > 0 && tmpFrzColors.length > 0 ?
+					obj[`${_frzName}Org`][0] : new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]));
 			}
 
 			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
