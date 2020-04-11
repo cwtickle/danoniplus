@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/01/03
+ * Revised : 2020/04/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.8`;
-const g_revisedDate = `2020/01/03`;
+const g_version = `Ver 9.4.9`;
+const g_revisedDate = `2020/04/11`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4312,7 +4312,7 @@ function createOptionWindow(_sprite) {
 		`<span style=color:#99eeff>F</span>adein`);
 	optionsprite.appendChild(lblFadein);
 
-	const lnkFadein = createDivLabel(`lblFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * setNoFadein,
+	const lnkFadein = createDivLabel(`lnkFadein`, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * setNoFadein,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, C_CLR_TEXT, `${g_stateObj.fadein}%`);
 	optionsprite.appendChild(lnkFadein);
 
@@ -5048,7 +5048,7 @@ function keyConfigInit() {
 		`<span style=color:#ffdd99>C</span>olorType`);
 	divRoot.appendChild(lblcolorType);
 
-	const lnkcolorType = makeSettingLblButton(`lnkKcType`, g_colorType, 0, _ => {
+	const lnkcolorType = makeSettingLblButton(`lnkColorType`, g_colorType, 0, _ => {
 		switch (g_colorType) {
 			case `Default`:
 				g_colorType = `Type1`;
