@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/04/04
+ * Revised : 2020/04/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 13.2.0`;
-const g_revisedDate = `2020/04/04`;
+const g_version = `Ver 13.2.1`;
+const g_revisedDate = `2020/04/11`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4233,7 +4233,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 11 スライダーあり
 	fadeinSprite.appendChild(createLblSetting(`Fadein`));
 
-	const lnkFadein = createDivCssLabel(`lblFadein`, C_LEN_SETLBL_LEFT, 0,
+	const lnkFadein = createDivCssLabel(`lnkFadein`, C_LEN_SETLBL_LEFT, 0,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `${g_stateObj.fadein}%`, g_cssObj.settings_FadeinBar);
 	fadeinSprite.appendChild(lnkFadein);
 
@@ -5048,7 +5048,7 @@ function keyConfigInit() {
 	lblcolorType.classList.add(g_cssObj.keyconfig_ColorType);
 	divRoot.appendChild(lblcolorType);
 
-	const lnkcolorType = makeSettingLblCssButton(`lnkKcType`, g_colorType, 0, _ => {
+	const lnkcolorType = makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, _ => {
 		switch (g_colorType) {
 			case `Default`:
 				g_colorType = `Type1`;
