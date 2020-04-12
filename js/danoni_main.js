@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/04/11
+ * Revised : 2020/04/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 13.2.1`;
-const g_revisedDate = `2020/04/11`;
+const g_version = `Ver 13.3.0`;
+const g_revisedDate = `2020/04/12`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2673,7 +2673,7 @@ function headerConvert(_dosObj) {
 
 		// 矢印色
 		[obj[`${_name}`], obj[`${_name}Str`], obj[`${_name}Org`]] =
-			setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], {
+			setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], obj[`${_name}Init`].length, {
 				defaultColorgrd: obj.defaultColorgrd,
 				colorCdPaddingUse: obj.colorCdPaddingUse,
 				shadowFlg: Boolean(k),
@@ -2684,16 +2684,24 @@ function headerConvert(_dosObj) {
 		obj[`${_frzName}Str`] = [];
 		obj[`${_frzName}Org`] = [];
 		const tmpFrzColors = (_dosObj[_frzName] !== undefined ? _dosObj[_frzName].split(`$`) : []);
+		const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
+
 		for (let j = 0; j < obj.setColorInit.length; j++) {
-			let defaultFrzColor;
-			if (obj.defaultFrzColorUse) {
-				defaultFrzColor = (j === 0 ? obj[`${_frzName}Init`] : obj[`${_frzName}Org`][0]);
-			} else {
-				defaultFrzColor = new Array(obj.setColorInit.length).fill(obj[`${_name}Str`][j]);
+
+			// デフォルト配列の作成（1番目の要素をベースに、フリーズアロー初期セット or 矢印色からデータを補完）
+			let currentFrzColors = [];
+			const baseLength = firstFrzColors.length === 0 || obj.defaultFrzColorUse ?
+				obj[`${_frzName}Init`].length : firstFrzColors.length;
+			for (let k = 0; k < baseLength; k++) {
+				if (firstFrzColors[k] === undefined || firstFrzColors[k] === ``) {
+					currentFrzColors[k] = obj.defaultFrzColorUse ? obj[`${_frzName}Init`][k] : obj[`${_name}Str`][j];
+				} else {
+					currentFrzColors[k] = firstFrzColors[k];
+				}
 			}
 
 			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
-				setColorList(tmpFrzColors[j], defaultFrzColor, {
+				setColorList(tmpFrzColors[j], currentFrzColors, obj[`${_frzName}Init`].length, {
 					defaultColorgrd: obj.defaultColorgrd,
 					colorCdPaddingUse: obj.colorCdPaddingUse,
 					defaultFrzColorUse: obj.defaultFrzColorUse,
@@ -2713,11 +2721,11 @@ function headerConvert(_dosObj) {
 	 * @param {array} _colorInit 
 	 * @param {object} _options 
 	 */
-	function setColorList(_data, _colorInit, _options = {}) {
+	function setColorList(_data, _colorInit, _colorInitLength, _options = {}) {
 
 		const _defaultColorgrd = _options.defaultColorgrd || g_headerObj.defaultColorgrd;
 		const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
-		const _defaultFrzColorUse = _options.defaultFrzColorUse || true;
+		const _defaultFrzColorUse = (_options.defaultFrzColorUse === undefined ? true : _options.defaultFrzColorUse);
 		const _objType = _options.objType || `normal`;
 		const _shadowFlg = _options.shadowFlg || false;
 
@@ -2735,20 +2743,22 @@ function headerConvert(_dosObj) {
 			colorList = _data.split(`,`);
 			colorStr = colorList.concat();
 
-			// 色変化配列が既定長より小さい場合、データ補完する
-			if (colorStr.length < _colorInit.length) {
-				const defaultLength = colorStr.length;
-				if (_objType === `frz` && _defaultFrzColorUse) {
-					for (let j = defaultLength; j < _colorInit.length; j++) {
+			// データ補完処理
+			const defaultLength = colorStr.length;
+			if (_objType === `frz` && _defaultFrzColorUse) {
+				// デフォルト配列に満たない・足りない部分はデフォルト配列で穴埋め
+				for (let j = 0; j < _colorInitLength; j++) {
+					if (colorStr[j] === undefined || colorStr[j] === ``) {
 						colorStr[j] = _colorInit[j];
 					}
-				} else {
-					for (let j = 0; j < _colorInit.length; j++) {
-						colorStr[j] = colorStr[j % defaultLength];
-					}
 				}
-				colorList = colorStr.concat();
+			} else {
+				// デフォルト配列長をループさせて格納
+				for (let j = 0; j < _colorInitLength; j++) {
+					colorStr[j] = colorStr[j % defaultLength];
+				}
 			}
+			colorList = colorStr.concat();
 
 			for (let j = 0; j < colorList.length; j++) {
 				const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
