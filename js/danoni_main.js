@@ -2673,7 +2673,7 @@ function headerConvert(_dosObj) {
 
 		// 矢印色
 		[obj[`${_name}`], obj[`${_name}Str`], obj[`${_name}Org`]] =
-			setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], {
+			setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], obj[`${_name}Init`].length, {
 				defaultColorgrd: obj.defaultColorgrd,
 				colorCdPaddingUse: obj.colorCdPaddingUse,
 				shadowFlg: Boolean(k),
@@ -2690,7 +2690,9 @@ function headerConvert(_dosObj) {
 
 			// デフォルト配列の作成（1番目の要素をベースに、フリーズアロー初期セット or 矢印色からデータを補完）
 			let currentFrzColors = [];
-			for (let k = 0; k < obj[`${_frzName}Init`].length; k++) {
+			const baseLength = firstFrzColors.length === 0 || obj.defaultFrzColorUse ?
+				obj[`${_frzName}Init`].length : firstFrzColors.length;
+			for (let k = 0; k < baseLength; k++) {
 				if (firstFrzColors[k] === undefined || firstFrzColors[k] === ``) {
 					currentFrzColors[k] = obj.defaultFrzColorUse ? obj[`${_frzName}Init`][k] : obj[`${_name}Str`][j];
 				} else {
@@ -2699,7 +2701,7 @@ function headerConvert(_dosObj) {
 			}
 
 			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
-				setColorList(tmpFrzColors[j], currentFrzColors, {
+				setColorList(tmpFrzColors[j], currentFrzColors, obj[`${_frzName}Init`].length, {
 					defaultColorgrd: obj.defaultColorgrd,
 					colorCdPaddingUse: obj.colorCdPaddingUse,
 					defaultFrzColorUse: obj.defaultFrzColorUse,
@@ -2719,11 +2721,11 @@ function headerConvert(_dosObj) {
 	 * @param {array} _colorInit 
 	 * @param {object} _options 
 	 */
-	function setColorList(_data, _colorInit, _options = {}) {
+	function setColorList(_data, _colorInit, _colorInitLength, _options = {}) {
 
 		const _defaultColorgrd = _options.defaultColorgrd || g_headerObj.defaultColorgrd;
 		const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
-		const _defaultFrzColorUse = _options.defaultFrzColorUse || true;
+		const _defaultFrzColorUse = (_options.defaultFrzColorUse === undefined ? true : _options.defaultFrzColorUse);
 		const _objType = _options.objType || `normal`;
 		const _shadowFlg = _options.shadowFlg || false;
 
@@ -2744,13 +2746,15 @@ function headerConvert(_dosObj) {
 			// データ補完処理
 			const defaultLength = colorStr.length;
 			if (_objType === `frz` && _defaultFrzColorUse) {
-				for (let j = 0; j < _colorInit.length; j++) {
+				// デフォルト配列に満たない・足りない部分はデフォルト配列で穴埋め
+				for (let j = 0; j < _colorInitLength; j++) {
 					if (colorStr[j] === undefined || colorStr[j] === ``) {
 						colorStr[j] = _colorInit[j];
 					}
 				}
 			} else {
-				for (let j = 0; j < _colorInit.length; j++) {
+				// デフォルト配列長をループさせて格納
+				for (let j = 0; j < _colorInitLength; j++) {
 					colorStr[j] = colorStr[j % defaultLength];
 				}
 			}
