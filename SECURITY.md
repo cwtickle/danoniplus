@@ -15,7 +15,7 @@ v11の対応終了時期はv14リリース開始時を予定しています。�
 
 | Version | Supported          | Latest Version | End of Support |
 | ------- | ------------------ |----------------|----------------|
-| v13     | :white_check_mark: |[v13.2.1](../../releases/tag/v13.2.1)          |-|
+| v13     | :white_check_mark: |[v13.3.0](../../releases/tag/v13.3.0)          |-|
 | v12     | :white_check_mark: |[v12.3.2](../../releases/tag/v12.3.2)          |(At Release v15)|
 | v11     | :warning:          |[v11.4.3](../../releases/tag/v11.4.3)          |(At Release v14)|
 | v10     | :x:                |[v10.5.5 (final)](../../releases/tag/v10.5.5)  |2020-02-10|
