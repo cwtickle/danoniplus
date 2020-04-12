@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/04/11
+ * Revised : 2020/04/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 12.3.2`;
-const g_revisedDate = `2020/04/11`;
+const g_version = `Ver 12.3.3`;
+const g_revisedDate = `2020/04/12`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5122,7 +5122,7 @@ function keyConfigInit() {
 	document.onkeydown = evt => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
-		const setKey = transCode(evt.keyCode);
+		let setKey = transCode(evt.keyCode);
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
