@@ -7166,7 +7166,7 @@ function MainInit() {
 
 	}
 
-	if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
+	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		const filterBar0 = createColorObject(`filterBar0`, ``,
 			0, 0,
 			g_sWidth - 50, 1, ``, `lifeBar`);
@@ -7191,8 +7191,8 @@ function MainInit() {
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
-	if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
-		changeAppearanceFilter(g_hidSudObj.filterPos);
+	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+		changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos);
 
 	} else if (g_stateObj.appearance !== `Visible`) {
 		arrowSprite[0].classList.add(`${g_stateObj.appearance}0`);
@@ -7531,11 +7531,13 @@ function MainInit() {
 			}
 			document.onkeyup = _ => { };
 
-		} else if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
+		} else if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 			if (setKey === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(g_hidSudObj.filterPos < 100 ? g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
+				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos < 100 ?
+					g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
 			} else if (setKey === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(g_hidSudObj.filterPos > 0 ? g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
+				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos > 0 ?
+					g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
 			}
 		}
 		return blockCode(setKey);
@@ -8346,22 +8348,29 @@ function MainInit() {
 
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
+ * @param {string} _appearance
  * @param {number} _num 
  */
-function changeAppearanceFilter(_num = 10) {
+function changeAppearanceFilter(_appearance, _num = 10) {
 	const topNum = g_hidSudObj[g_stateObj.appearance];
 	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
-	document.querySelector(`#arrowSprite${topNum}`).style.clipPath = `inset(${_num}% 0% 0% 0%)`;
-	document.querySelector(`#arrowSprite${topNum}`).style.webkitClipPath = `inset(${_num}% 0% 0% 0%)`;
-	document.querySelector(`#arrowSprite${bottomNum}`).style.clipPath = `inset(0% 0% ${_num}% 0%)`;
-	document.querySelector(`#arrowSprite${bottomNum}`).style.webkitClipPath = `inset(0% 0% ${_num}% 0%)`;
+
+	const numPlus = (_appearance === `Hid/Sud+` ? _num : `0`);
+	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
+	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
+
+	document.querySelector(`#arrowSprite${topNum}`).style.clipPath = topShape;
+	document.querySelector(`#arrowSprite${topNum}`).style.webkitClipPath = topShape;
+	document.querySelector(`#arrowSprite${bottomNum}`).style.clipPath = bottomShape;
+	document.querySelector(`#arrowSprite${bottomNum}`).style.webkitClipPath = bottomShape;
 
 	document.querySelector(`#filterBar0`).style.top = `${g_sHeight * _num / 100}px`;
 	document.querySelector(`#filterBar1`).style.top = `${g_sHeight * (100 - _num) / 100}px`;
 	document.querySelector(`#filterView`).style.top =
 		document.querySelector(`#filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).style.top;
 	document.querySelector(`#filterView`).innerHTML = `${_num}%`;
-	if (g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
+
+	if (_appearance !== `Hid/Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
 		document.querySelector(`#filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).style.display = C_DIS_NONE;
 	}
 	g_hidSudObj.filterPos = _num;

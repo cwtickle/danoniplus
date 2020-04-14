@@ -337,8 +337,10 @@ let g_adjustmentNum = C_MAX_ADJUSTMENT;
 let g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
 let g_volumeNum = g_volumes.length - 1;
 
-let g_appearances = [`Visible`, `Hidden`, `Sudden`, `Hidden+`, `Sudden+`, `Slit`];
+let g_appearances = [`Visible`, `Hidden`, `Sudden`, `Hidden+`, `Sudden+`, `Hid/Sud+`, `Slit`];
 let g_appearanceNum = 0;
+
+let g_appearanceRanges = [`Hidden+`, `Sudden+`, `Hid/Sud+`];
 
 let g_scoreDetails = [`Speed`, `Density`, `ToolDif`];
 let g_scoreDetailNum = 0;
@@ -358,11 +360,16 @@ const g_hidSudObj = {
 };
 g_hidSudObj[`Hidden+`] = 0;
 g_hidSudObj[`Sudden+`] = 1;
+g_hidSudObj[`Hid/Sud+`] = 1;
 g_hidSudObj.pgDown[`Hidden+`] = {
     OFF: 34,
     ON: 33,
 };
 g_hidSudObj.pgDown[`Sudden+`] = {
+    OFF: 33,
+    ON: 34,
+}
+g_hidSudObj.pgDown[`Hid/Sud+`] = {
     OFF: 33,
     ON: 34,
 }
@@ -374,11 +381,19 @@ g_hidSudObj.pgUp[`Sudden+`] = {
     OFF: 34,
     ON: 33,
 }
+g_hidSudObj.pgUp[`Hid/Sud+`] = {
+    OFF: 34,
+    ON: 33,
+}
 g_hidSudObj.std[`Hidden+`] = {
     OFF: 0,
     ON: 1,
 };
 g_hidSudObj.std[`Sudden+`] = {
+    OFF: 1,
+    ON: 0,
+}
+g_hidSudObj.std[`Hid/Sud+`] = {
     OFF: 1,
     ON: 0,
 }
