@@ -8355,7 +8355,7 @@ function changeAppearanceFilter(_appearance, _num = 10) {
 	const topNum = g_hidSudObj[g_stateObj.appearance];
 	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
 
-	const numPlus = (_appearance === `Hid/Sud+` ? _num : `0`);
+	const numPlus = (_appearance === `Hid&Sud+` ? _num : `0`);
 	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
 
@@ -8370,7 +8370,7 @@ function changeAppearanceFilter(_appearance, _num = 10) {
 		document.querySelector(`#filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).style.top;
 	document.querySelector(`#filterView`).innerHTML = `${_num}%`;
 
-	if (_appearance !== `Hid/Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
+	if (_appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
 		document.querySelector(`#filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).style.display = C_DIS_NONE;
 	}
 	g_hidSudObj.filterPos = _num;
@@ -9064,7 +9064,7 @@ function resultInit() {
 	}
 	if (g_stateObj.appearance !== `Visible`) {
 		playStyleData += `, ${g_stateObj.appearance}`;
-		if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
+		if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 			playStyleData += `(${g_hidSudObj.filterPos}%)`;
 		}
 	}
@@ -9278,7 +9278,7 @@ function resultInit() {
 	}
 	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `/${g_stateObj.shuffle}`;
+		tweetDifData += `:${g_stateObj.shuffle}`;
 	}
 	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData})/
 		${g_headerObj.tuning}/
