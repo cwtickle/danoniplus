@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/04/12
+ * Revised : 2020/04/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 13.3.1`;
-const g_revisedDate = `2020/04/12`;
+const g_version = `Ver 13.4.0`;
+const g_revisedDate = `2020/04/15`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2970,6 +2970,7 @@ function headerConvert(_dosObj) {
 	// オプション利用可否設定
 	let usingOptions = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
 	usingOptions = usingOptions.concat(g_displays);
+	usingOptions = usingOptions.concat(`judgement`);
 
 	usingOptions.forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
@@ -2977,6 +2978,12 @@ function headerConvert(_dosObj) {
 				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 	});
 
+	// 旧バージョン互換（judgementUse=falseを指定した場合は例外的にjudgment, fastSlow, scoreを一律設定）
+	if (!obj.judgementUse) {
+		obj.judgmentUse = false;
+		obj.fastSlowUse = false;
+		obj.scoreUse = false;
+	}
 	g_displays.forEach(option => {
 		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF);
 	});
@@ -4716,6 +4723,12 @@ function settingsDisplayInit() {
 	// オプションボタン用の設置
 	createSettingsDisplayWindow(`divRoot`);
 
+	// ショートカットキーメッセージ
+	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, 14,
+		`Hidden+/Sudden+ 時ショートカット：「pageUp」カバーを上へ / 「pageDown」カバーを下へ`);
+	scMsg.style.align = C_ALIGN_CENTER;
+	divRoot.appendChild(scMsg);
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customSettingsDisplayInit === C_TYP_FUNCTION) {
 		customSettingsDisplayInit();
@@ -4831,7 +4844,7 @@ function createSettingsDisplayWindow(_sprite) {
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
 	const displaySprite = createSprite(`optionsprite`, `displaySprite`, childX, childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
-	const appearanceSprite = createSprite(`optionsprite`, `appearanceSprite`, childX, 6 * C_LEN_SETLBL_HEIGHT + childY,
+	const appearanceSprite = createSprite(`optionsprite`, `appearanceSprite`, childX, 8 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
 
 	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14,
@@ -4839,7 +4852,7 @@ function createSettingsDisplayWindow(_sprite) {
 	document.querySelector(`#${_sprite}`).appendChild(sdDesc);
 
 	g_displays.forEach((name, j) => {
-		makeDisplayButton(name, j % 5, Math.floor(j / 5));
+		makeDisplayButton(name, j % 7, Math.floor(j / 7));
 	});
 
 	// ---------------------------------------------------
@@ -7166,7 +7179,7 @@ function MainInit() {
 
 	}
 
-	if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
+	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		const filterBar0 = createColorObject(`filterBar0`, ``,
 			0, 0,
 			g_sWidth - 50, 1, ``, `lifeBar`);
@@ -7191,8 +7204,8 @@ function MainInit() {
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
-	if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
-		changeAppearanceFilter(g_hidSudObj.filterPos);
+	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+		changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos);
 
 	} else if (g_stateObj.appearance !== `Visible`) {
 		arrowSprite[0].classList.add(`${g_stateObj.appearance}0`);
@@ -7414,15 +7427,21 @@ function MainInit() {
 				g_cssObj[`common_${judgeColors[j]}`], j + 1, 0));
 		}
 	});
-	if (g_stateObj.d_judgement === C_FLG_OFF) {
+	if (g_stateObj.d_score === C_FLG_OFF) {
 		jdgObjs.forEach(jdgObj => {
 			if (jdgObj !== ``) {
 				document.querySelector(`#lbl${jdgObj}`).style.display = C_DIS_NONE;
 			}
 		});
+	}
+	if (g_stateObj.d_judgment === C_FLG_OFF) {
 		jdgGroups.forEach(jdg => {
 			document.querySelector(`#chara${jdg}`).style.display = C_DIS_NONE;
 			document.querySelector(`#combo${jdg}`).style.display = C_DIS_NONE;
+		});
+	}
+	if (g_stateObj.d_fastslow === C_FLG_OFF) {
+		jdgGroups.forEach(jdg => {
 			document.querySelector(`#diff${jdg}`).style.display = C_DIS_NONE;
 		});
 	}
@@ -7531,11 +7550,13 @@ function MainInit() {
 			}
 			document.onkeyup = _ => { };
 
-		} else if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
+		} else if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 			if (setKey === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(g_hidSudObj.filterPos < 100 ? g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
+				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos < 100 ?
+					g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
 			} else if (setKey === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(g_hidSudObj.filterPos > 0 ? g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
+				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos > 0 ?
+					g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
 			}
 		}
 		return blockCode(setKey);
@@ -8346,21 +8367,34 @@ function MainInit() {
 
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
+ * @param {string} _appearance
  * @param {number} _num 
  */
-function changeAppearanceFilter(_num = 10) {
+function changeAppearanceFilter(_appearance, _num = 10) {
 	const topNum = g_hidSudObj[g_stateObj.appearance];
 	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
-	document.querySelector(`#arrowSprite${topNum}`).style.clipPath = `inset(${_num}% 0% 0% 0%)`;
-	document.querySelector(`#arrowSprite${topNum}`).style.webkitClipPath = `inset(${_num}% 0% 0% 0%)`;
-	document.querySelector(`#arrowSprite${bottomNum}`).style.clipPath = `inset(0% 0% ${_num}% 0%)`;
-	document.querySelector(`#arrowSprite${bottomNum}`).style.webkitClipPath = `inset(0% 0% ${_num}% 0%)`;
+	if (_appearance === `Hid&Sud+` && _num > 50) {
+		_num = 50;
+	}
+
+	const numPlus = (_appearance === `Hid&Sud+` ? _num : `0`);
+	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
+	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
+
+	document.querySelector(`#arrowSprite${topNum}`).style.clipPath = topShape;
+	document.querySelector(`#arrowSprite${topNum}`).style.webkitClipPath = topShape;
+	document.querySelector(`#arrowSprite${bottomNum}`).style.clipPath = bottomShape;
+	document.querySelector(`#arrowSprite${bottomNum}`).style.webkitClipPath = bottomShape;
 
 	document.querySelector(`#filterBar0`).style.top = `${g_sHeight * _num / 100}px`;
 	document.querySelector(`#filterBar1`).style.top = `${g_sHeight * (100 - _num) / 100}px`;
 	document.querySelector(`#filterView`).style.top =
 		document.querySelector(`#filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).style.top;
 	document.querySelector(`#filterView`).innerHTML = `${_num}%`;
+
+	if (_appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
+		document.querySelector(`#filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).style.display = C_DIS_NONE;
+	}
 	g_hidSudObj.filterPos = _num;
 }
 
@@ -9052,7 +9086,7 @@ function resultInit() {
 	}
 	if (g_stateObj.appearance !== `Visible`) {
 		playStyleData += `, ${g_stateObj.appearance}`;
-		if (g_stateObj.appearance === `Hidden+` || g_stateObj.appearance === `Sudden+`) {
+		if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 			playStyleData += `(${g_hidSudObj.filterPos}%)`;
 		}
 	}
@@ -9067,9 +9101,12 @@ function resultInit() {
 
 	let displayData = ``;
 	displayData = withString(displayData, g_stateObj.d_stepzone, `Step`);
-	displayData = withString(displayData, g_stateObj.d_judgement, `Judge`);
+	displayData = withString(displayData, g_stateObj.d_judgment, `Judge`);
+	displayData = withString(displayData, g_stateObj.d_fastslow, `FS`);
 	displayData = withString(displayData, g_stateObj.d_lifegauge, `Life`);
+	displayData = withString(displayData, g_stateObj.d_score, `Score`);
 	displayData = withString(displayData, g_stateObj.d_musicinfo, `MusicInfo`);
+	displayData = withString(displayData, g_stateObj.d_special, `SP`);
 	if (displayData === ``) {
 		displayData = `All Visible`;
 	} else {
@@ -9266,7 +9303,7 @@ function resultInit() {
 	}
 	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `/${g_stateObj.shuffle}`;
+		tweetDifData += `:${g_stateObj.shuffle}`;
 	}
 	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData})/
 		${g_headerObj.tuning}/
