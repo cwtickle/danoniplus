@@ -8354,6 +8354,9 @@ function MainInit() {
 function changeAppearanceFilter(_appearance, _num = 10) {
 	const topNum = g_hidSudObj[g_stateObj.appearance];
 	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
+	if (_appearance === `Hid&Sud+` && _num > 50) {
+		_num = 50;
+	}
 
 	const numPlus = (_appearance === `Hid&Sud+` ? _num : `0`);
 	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
