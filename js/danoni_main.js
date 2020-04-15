@@ -4716,6 +4716,12 @@ function settingsDisplayInit() {
 	// オプションボタン用の設置
 	createSettingsDisplayWindow(`divRoot`);
 
+	// ショートカットキーメッセージ
+	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, 14,
+		`Hidden+/Sudden+ 時ショートカット：「pageUp」カバーを上へ / 「pageDown」カバーを下へ`);
+	scMsg.style.align = C_ALIGN_CENTER;
+	divRoot.appendChild(scMsg);
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customSettingsDisplayInit === C_TYP_FUNCTION) {
 		customSettingsDisplayInit();
