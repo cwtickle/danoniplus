@@ -289,9 +289,11 @@ const g_stateObj = {
     scoreDetail: `Speed`,
 
     d_stepzone: C_FLG_ON,
-    d_judgement: C_FLG_ON,
+    d_judgment: C_FLG_ON,
+    d_fastslow: C_FLG_ON,
     d_lifegauge: C_FLG_ON,
     d_musicinfo: C_FLG_ON,
+    d_score: C_FLG_ON,
     d_special: C_FLG_ON,
     d_color: C_FLG_ON,
     d_speed: C_FLG_ON,
@@ -343,7 +345,7 @@ let g_appearanceNum = 0;
 let g_scoreDetails = [`Speed`, `Density`, `ToolDif`];
 let g_scoreDetailNum = 0;
 
-let g_displays = [`stepZone`, `judgement`, `lifeGauge`, `musicInfo`, `special`,
+let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `special`,
     `speed`, `color`, `lyrics`, `background`, `arrowEffect`];
 
 // サイズ(後で指定)
