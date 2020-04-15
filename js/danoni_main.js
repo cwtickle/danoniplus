@@ -2970,6 +2970,7 @@ function headerConvert(_dosObj) {
 	// オプション利用可否設定
 	let usingOptions = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
 	usingOptions = usingOptions.concat(g_displays);
+	usingOptions = usingOptions.concat(`judgement`);
 
 	usingOptions.forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
@@ -2977,6 +2978,12 @@ function headerConvert(_dosObj) {
 				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 	});
 
+	// 旧バージョン互換（judgementUse=falseを指定した場合は例外的にjudgment, fastSlow, scoreを一律設定）
+	if (!obj.judgementUse) {
+		obj.judgmentUse = false;
+		obj.fastSlowUse = false;
+		obj.scoreUse = false;
+	}
 	g_displays.forEach(option => {
 		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF);
 	});
