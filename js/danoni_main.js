@@ -2970,6 +2970,7 @@ function headerConvert(_dosObj) {
 	// オプション利用可否設定
 	let usingOptions = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
 	usingOptions = usingOptions.concat(g_displays);
+	usingOptions = usingOptions.concat(`judgement`);
 
 	usingOptions.forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
@@ -2977,6 +2978,12 @@ function headerConvert(_dosObj) {
 				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 	});
 
+	// 旧バージョン互換（judgementUse=falseを指定した場合は例外的にjudgment, fastSlow, scoreを一律設定）
+	if (!obj.judgementUse) {
+		obj.judgmentUse = false;
+		obj.fastSlowUse = false;
+		obj.scoreUse = false;
+	}
 	g_displays.forEach(option => {
 		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF);
 	});
@@ -4837,7 +4844,7 @@ function createSettingsDisplayWindow(_sprite) {
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
 	const displaySprite = createSprite(`optionsprite`, `displaySprite`, childX, childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
-	const appearanceSprite = createSprite(`optionsprite`, `appearanceSprite`, childX, 6 * C_LEN_SETLBL_HEIGHT + childY,
+	const appearanceSprite = createSprite(`optionsprite`, `appearanceSprite`, childX, 8 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
 
 	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14,
@@ -4845,7 +4852,7 @@ function createSettingsDisplayWindow(_sprite) {
 	document.querySelector(`#${_sprite}`).appendChild(sdDesc);
 
 	g_displays.forEach((name, j) => {
-		makeDisplayButton(name, j % 5, Math.floor(j / 5));
+		makeDisplayButton(name, j % 7, Math.floor(j / 7));
 	});
 
 	// ---------------------------------------------------
@@ -7420,15 +7427,21 @@ function MainInit() {
 				g_cssObj[`common_${judgeColors[j]}`], j + 1, 0));
 		}
 	});
-	if (g_stateObj.d_judgement === C_FLG_OFF) {
+	if (g_stateObj.d_score === C_FLG_OFF) {
 		jdgObjs.forEach(jdgObj => {
 			if (jdgObj !== ``) {
 				document.querySelector(`#lbl${jdgObj}`).style.display = C_DIS_NONE;
 			}
 		});
+	}
+	if (g_stateObj.d_judgment === C_FLG_OFF) {
 		jdgGroups.forEach(jdg => {
 			document.querySelector(`#chara${jdg}`).style.display = C_DIS_NONE;
 			document.querySelector(`#combo${jdg}`).style.display = C_DIS_NONE;
+		});
+	}
+	if (g_stateObj.d_fastslow === C_FLG_OFF) {
+		jdgGroups.forEach(jdg => {
 			document.querySelector(`#diff${jdg}`).style.display = C_DIS_NONE;
 		});
 	}
@@ -9088,9 +9101,12 @@ function resultInit() {
 
 	let displayData = ``;
 	displayData = withString(displayData, g_stateObj.d_stepzone, `Step`);
-	displayData = withString(displayData, g_stateObj.d_judgement, `Judge`);
+	displayData = withString(displayData, g_stateObj.d_judgment, `Judge`);
+	displayData = withString(displayData, g_stateObj.d_fastslow, `FS`);
 	displayData = withString(displayData, g_stateObj.d_lifegauge, `Life`);
+	displayData = withString(displayData, g_stateObj.d_score, `Score`);
 	displayData = withString(displayData, g_stateObj.d_musicinfo, `MusicInfo`);
+	displayData = withString(displayData, g_stateObj.d_special, `SP`);
 	if (displayData === ``) {
 		displayData = `All Visible`;
 	} else {
