@@ -303,6 +303,7 @@ const g_stateObj = {
     d_background: C_FLG_ON,
     d_special: C_FLG_ON,
     appearance: `Visible`,
+    opacity: 100,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -345,6 +346,9 @@ let g_appearances = [`Visible`, `Hidden`, `Hidden+`, `Sudden`, `Sudden+`, `Hid&S
 let g_appearanceNum = 0;
 
 let g_appearanceRanges = [`Hidden+`, `Sudden+`, `Hid&Sud+`];
+
+let g_opacitys = [10, 25, 50, 75, 100];
+let g_opacityNum = g_opacitys.length - 1;
 
 let g_scoreDetails = [`Speed`, `Density`, `ToolDif`];
 let g_scoreDetailNum = 0;
