@@ -1,7 +1,7 @@
 ﻿`use strict`;
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2020/04/15
+ * Template Update: 2020/04/16
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -86,12 +86,13 @@ const g_presetSettingUse = {
 	//	lifeGauge: `true`,
 	//	score: `true`,
 	//	musicInfo: `true`,
-	//	special: `true`,
+	//	filterLine: `true`,
 	//	speed: `true`,
 	//	color: `true`,
 	//	lyrics: `true`,
 	//	background: `true`,
 	//	arrowEffect: `true`,
+	//	special: `true`,
 };
 
 // フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
