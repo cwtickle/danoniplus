@@ -4846,6 +4846,8 @@ function createSettingsDisplayWindow(_sprite) {
 		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
 	const appearanceSprite = createSprite(`optionsprite`, `appearanceSprite`, childX, 8 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const opacitySprite = createSprite(`optionsprite`, `opacitySprite`, childX, 9 * C_LEN_SETLBL_HEIGHT + childY,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
 
 	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14,
 		`[クリックでON/OFFを切替、灰色でOFF]`);
@@ -4857,8 +4859,13 @@ function createSettingsDisplayWindow(_sprite) {
 
 	// ---------------------------------------------------
 	// 矢印の見え方 (Appearance)
-	// 縦位置: 6
+	// 縦位置: 8
 	createGeneralSetting(appearanceSprite, `appearance`);
+
+	// ---------------------------------------------------
+	// 判定表示系の不透明度 (Opacity)
+	// 縦位置: 9
+	createGeneralSetting(opacitySprite, `opacity`, `%`);
 
 	/**
 	 * Display表示/非表示ボタン
@@ -4869,15 +4876,15 @@ function createSettingsDisplayWindow(_sprite) {
 	function makeDisplayButton(_name, _heightPos, _widthPos) {
 
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
+		const list = [C_FLG_OFF, C_FLG_ON];
 
 		if (g_headerObj[`${_name}Use`]) {
 			const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
-				g_stateObj[`d_${_name.toLowerCase()}`] = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-				if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
-					lnk.classList.replace(g_cssObj.button_ON, g_cssObj.button_OFF);
-				} else {
-					lnk.classList.replace(g_cssObj.button_OFF, g_cssObj.button_ON);
-				}
+				const displayFlg = g_stateObj[`d_${_name.toLowerCase()}`];
+				const displayNum = list.findIndex(flg => flg === displayFlg);
+				const nextDisplayFlg = list[(displayNum + 1) % list.length];
+				g_stateObj[`d_${_name.toLowerCase()}`] = nextDisplayFlg;
+				lnk.classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
 			});
 			lnk.style.width = `170px`;
 			lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
@@ -7080,6 +7087,7 @@ function MainInit() {
 
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createSprite(`divRoot`, `judgeSprite`, 0, 0, g_sWidth, g_sHeight);
+	judgeSprite.style.opacity = g_stateObj.opacity / 100;
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -7200,6 +7208,9 @@ function MainInit() {
 		if (g_stateObj.d_filterline === C_FLG_OFF) {
 			[`filterBar0`, `filterBar1`].forEach(obj =>
 				document.querySelector(`#${obj}`).style.display = C_DIS_NONE);
+		} else {
+			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj =>
+				document.querySelector(`#${obj}`).style.opacity = g_stateObj.opacity / 100);
 		}
 	}
 
