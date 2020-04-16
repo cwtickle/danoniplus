@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/04/11
+ * Revised : 2020/04/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.9`;
-const g_revisedDate = `2020/04/11`;
+const g_version = `Ver 9.4.10`;
+const g_revisedDate = `2020/04/16`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4194,7 +4194,7 @@ function createOptionWindow(_sprite) {
 		}
 
 		// ゲージ設定(Light, Easy)の初期化
-		if (g_stateObj.gauge == `Light` || g_stateObj.gauge == `Easy`) {
+		if (g_stateObj.gauge === `Light` || g_stateObj.gauge === `Easy`) {
 			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
 				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
 			}
