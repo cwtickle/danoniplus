@@ -62,6 +62,9 @@
 .settings_Appearance::first-letter {
 	color:#9900ff;
 }
+.settings_Opacity::first-letter {
+	color:#666666;
+}
 
 .settings_DifSelector {
 	background-color:#ccddee;

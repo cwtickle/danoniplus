@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/04/15
+ * Revised : 2020/04/16
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -294,13 +294,16 @@ const g_stateObj = {
     d_lifegauge: C_FLG_ON,
     d_musicinfo: C_FLG_ON,
     d_score: C_FLG_ON,
-    d_special: C_FLG_ON,
+    d_filterline: C_FLG_ON,
+
     d_color: C_FLG_ON,
     d_speed: C_FLG_ON,
     d_arroweffect: C_FLG_ON,
     d_lyrics: C_FLG_ON,
     d_background: C_FLG_ON,
+    d_special: C_FLG_ON,
     appearance: `Visible`,
+    opacity: 100,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -344,11 +347,14 @@ let g_appearanceNum = 0;
 
 let g_appearanceRanges = [`Hidden+`, `Sudden+`, `Hid&Sud+`];
 
+let g_opacitys = [10, 25, 50, 75, 100];
+let g_opacityNum = g_opacitys.length - 1;
+
 let g_scoreDetails = [`Speed`, `Density`, `ToolDif`];
 let g_scoreDetailNum = 0;
 
-let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `special`,
-    `speed`, `color`, `lyrics`, `background`, `arrowEffect`];
+let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
+    `speed`, `color`, `lyrics`, `background`, `arrowEffect`, `special`];
 
 // サイズ(後で指定)
 let g_sWidth;

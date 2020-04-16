@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/04/15
+ * Revised : 2020/04/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 13.4.0`;
-const g_revisedDate = `2020/04/15`;
+const g_version = `Ver 13.5.0`;
+const g_revisedDate = `2020/04/16`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1452,9 +1452,9 @@ function calcLevel(_scoreObj) {
 
 	for (let i = 1; i < allScorebook.length - 2; ++i) {
 		// フリーズ始点の検索
-		while (frzStartData[0] == allScorebook[i]) {
+		while (frzStartData[0] === allScorebook[i]) {
 			// 同時押しの場合
-			if (allScorebook[i] == allScorebook[i + 1]) {
+			if (allScorebook[i] === allScorebook[i + 1]) {
 				break;
 			}
 
@@ -1472,7 +1472,7 @@ function calcLevel(_scoreObj) {
 		}
 
 		// 同時押し補正処理(フリーズアローが絡まない場合)
-		if (allScorebook[i + 1] == allScorebook[i] && !freezenum) {
+		if (allScorebook[i + 1] === allScorebook[i] && !freezenum) {
 
 			let chk = (allScorebook[i + 2] - allScorebook[i + 1]) * (allScorebook[i] - allScorebook[i - pushCnt]);
 			if (chk != 0) {
@@ -1524,12 +1524,12 @@ function calcLevel(_scoreObj) {
 
 	// 縦連打補正値計算
 	let tate = Math.round((print - tmp) * 100) / 100;
-	if (isNaN(tate) || tate == Infinity) {
+	if (isNaN(tate) || tate === Infinity) {
 		tate = 0;
 	}
 	// 同時押し補正値計算
 	let douji = Math.round(twoPushCount / Math.sqrt(allScorebook.length - push3cnt.length - 3) * 400) / 100;
-	if (isNaN(douji) || douji == Infinity) {
+	if (isNaN(douji) || douji === Infinity) {
 		douji = 0;
 	}
 
@@ -1539,7 +1539,7 @@ function calcLevel(_scoreObj) {
 	//  [レベル計算ツール++ ver1.28] 矢印数1の場合の処理追加
 	//--------------------------------------------------------------
 	let subPrint;
-	if (allScorebook.length == 3) {
+	if (allScorebook.length === 3) {
 		print = `0.01`;
 		tmp = `0.01`;
 	} else {
@@ -3847,7 +3847,7 @@ function createOptionWindow(_sprite) {
 		_context.lineTo(C_LEN_GRAPH_WIDTH, lineY);
 		_context.lineWidth = 1;
 
-		if (_lineType == `main`) {
+		if (_lineType === `main`) {
 			const textBaseObj = document.querySelector(`#lnkDifficulty`);
 			const textColor = window.getComputedStyle(textBaseObj, ``).color;
 			_context.strokeStyle = textColor;
@@ -4148,7 +4148,7 @@ function createOptionWindow(_sprite) {
 		}
 
 		// ゲージ設定(Light, Easy)の初期化
-		if (g_stateObj.gauge == `Light` || g_stateObj.gauge == `Easy`) {
+		if (g_stateObj.gauge === `Light` || g_stateObj.gauge === `Easy`) {
 			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
 				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
 			}
@@ -4725,7 +4725,7 @@ function settingsDisplayInit() {
 
 	// ショートカットキーメッセージ
 	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, 14,
-		`Hidden+/Sudden+ 時ショートカット：「pageUp」カバーを上へ / 「pageDown」カバーを下へ`);
+		`Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`);
 	scMsg.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(scMsg);
 
@@ -4846,6 +4846,8 @@ function createSettingsDisplayWindow(_sprite) {
 		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
 	const appearanceSprite = createSprite(`optionsprite`, `appearanceSprite`, childX, 8 * C_LEN_SETLBL_HEIGHT + childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT);
+	const opacitySprite = createSprite(`optionsprite`, `opacitySprite`, childX, 9 * C_LEN_SETLBL_HEIGHT + childY,
+		optionWidth, C_LEN_SETLBL_HEIGHT);
 
 	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14,
 		`[クリックでON/OFFを切替、灰色でOFF]`);
@@ -4857,8 +4859,13 @@ function createSettingsDisplayWindow(_sprite) {
 
 	// ---------------------------------------------------
 	// 矢印の見え方 (Appearance)
-	// 縦位置: 6
+	// 縦位置: 8
 	createGeneralSetting(appearanceSprite, `appearance`);
+
+	// ---------------------------------------------------
+	// 判定表示系の不透明度 (Opacity)
+	// 縦位置: 9
+	createGeneralSetting(opacitySprite, `opacity`, `%`);
 
 	/**
 	 * Display表示/非表示ボタン
@@ -4869,15 +4876,15 @@ function createSettingsDisplayWindow(_sprite) {
 	function makeDisplayButton(_name, _heightPos, _widthPos) {
 
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
+		const list = [C_FLG_OFF, C_FLG_ON];
 
 		if (g_headerObj[`${_name}Use`]) {
 			const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
-				g_stateObj[`d_${_name.toLowerCase()}`] = (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF ? C_FLG_ON : C_FLG_OFF);
-				if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
-					lnk.classList.replace(g_cssObj.button_ON, g_cssObj.button_OFF);
-				} else {
-					lnk.classList.replace(g_cssObj.button_OFF, g_cssObj.button_ON);
-				}
+				const displayFlg = g_stateObj[`d_${_name.toLowerCase()}`];
+				const displayNum = list.findIndex(flg => flg === displayFlg);
+				const nextDisplayFlg = list[(displayNum + 1) % list.length];
+				g_stateObj[`d_${_name.toLowerCase()}`] = nextDisplayFlg;
+				lnk.classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
 			});
 			lnk.style.width = `170px`;
 			lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
@@ -7080,6 +7087,7 @@ function MainInit() {
 
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createSprite(`divRoot`, `judgeSprite`, 0, 0, g_sWidth, g_sHeight);
+	judgeSprite.style.opacity = g_stateObj.opacity / 100;
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -7179,6 +7187,7 @@ function MainInit() {
 
 	}
 
+	// Hidden+, Sudden+用のライン、パーセント表示
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		const filterBar0 = createColorObject(`filterBar0`, ``,
 			0, 0,
@@ -7195,6 +7204,14 @@ function MainInit() {
 		const filterView = createDivCssLabel(`filterView`, g_sWidth - 70, 0, 10, 10, 10, ``);
 		filterView.style.textAlign = C_ALIGN_RIGHT;
 		mainSprite.appendChild(filterView);
+
+		if (g_stateObj.d_filterline === C_FLG_OFF) {
+			[`filterBar0`, `filterBar1`].forEach(obj =>
+				document.querySelector(`#${obj}`).style.display = C_DIS_NONE);
+		} else {
+			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj =>
+				document.querySelector(`#${obj}`).style.opacity = g_stateObj.opacity / 100);
+		}
 	}
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
@@ -9106,7 +9123,7 @@ function resultInit() {
 	displayData = withString(displayData, g_stateObj.d_lifegauge, `Life`);
 	displayData = withString(displayData, g_stateObj.d_score, `Score`);
 	displayData = withString(displayData, g_stateObj.d_musicinfo, `MusicInfo`);
-	displayData = withString(displayData, g_stateObj.d_special, `SP`);
+	displayData = withString(displayData, g_stateObj.d_filterline, `Filter`);
 	if (displayData === ``) {
 		displayData = `All Visible`;
 	} else {
@@ -9120,7 +9137,8 @@ function resultInit() {
 	display2Data = withString(display2Data, g_stateObj.d_color, `Color`);
 	display2Data = withString(display2Data, g_stateObj.d_lyrics, `Lyrics`);
 	display2Data = withString(display2Data, g_stateObj.d_background, `Back`);
-	display2Data = withString(display2Data, g_stateObj.d_arroweffect, `ArrowEffect`);
+	display2Data = withString(display2Data, g_stateObj.d_arroweffect, `Effect`);
+	display2Data = withString(display2Data, g_stateObj.d_special, `SP`);
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
