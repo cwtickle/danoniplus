@@ -4725,7 +4725,7 @@ function settingsDisplayInit() {
 
 	// ショートカットキーメッセージ
 	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, 14,
-		`Hidden+/Sudden+ 時ショートカット：「pageUp」カバーを上へ / 「pageDown」カバーを下へ`);
+		`Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`);
 	scMsg.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(scMsg);
 
@@ -7179,6 +7179,7 @@ function MainInit() {
 
 	}
 
+	// Hidden+, Sudden+用のライン、パーセント表示
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		const filterBar0 = createColorObject(`filterBar0`, ``,
 			0, 0,
@@ -7195,6 +7196,11 @@ function MainInit() {
 		const filterView = createDivCssLabel(`filterView`, g_sWidth - 70, 0, 10, 10, 10, ``);
 		filterView.style.textAlign = C_ALIGN_RIGHT;
 		mainSprite.appendChild(filterView);
+
+		if (g_stateObj.d_filterline === C_FLG_OFF) {
+			[`filterBar0`, `filterBar1`].forEach(obj =>
+				document.querySelector(`#${obj}`).style.display = C_DIS_NONE);
+		}
 	}
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
@@ -9106,7 +9112,7 @@ function resultInit() {
 	displayData = withString(displayData, g_stateObj.d_lifegauge, `Life`);
 	displayData = withString(displayData, g_stateObj.d_score, `Score`);
 	displayData = withString(displayData, g_stateObj.d_musicinfo, `MusicInfo`);
-	displayData = withString(displayData, g_stateObj.d_special, `SP`);
+	displayData = withString(displayData, g_stateObj.d_filterline, `Filter`);
 	if (displayData === ``) {
 		displayData = `All Visible`;
 	} else {
@@ -9120,7 +9126,8 @@ function resultInit() {
 	display2Data = withString(display2Data, g_stateObj.d_color, `Color`);
 	display2Data = withString(display2Data, g_stateObj.d_lyrics, `Lyrics`);
 	display2Data = withString(display2Data, g_stateObj.d_background, `Back`);
-	display2Data = withString(display2Data, g_stateObj.d_arroweffect, `ArrowEffect`);
+	display2Data = withString(display2Data, g_stateObj.d_arroweffect, `Effect`);
+	display2Data = withString(display2Data, g_stateObj.d_special, `SP`);
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
