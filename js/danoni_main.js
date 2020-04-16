@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/04/12
+ * Revised : 2020/04/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 11.4.4`;
-const g_revisedDate = `2020/04/12`;
+const g_version = `Ver 11.4.5`;
+const g_revisedDate = `2020/04/16`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3367,7 +3367,7 @@ function createOptionWindow(_sprite) {
 		_context.lineTo(C_LEN_GRAPH_WIDTH, lineY);
 		_context.lineWidth = 1;
 
-		if (_lineType == `main`) {
+		if (_lineType === `main`) {
 			const textBaseObj = document.querySelector(`#lnkDifficulty`);
 			const textColor = window.getComputedStyle(textBaseObj, ``).color;
 			_context.strokeStyle = textColor;
@@ -3549,7 +3549,7 @@ function createOptionWindow(_sprite) {
 		}
 
 		// ゲージ設定(Light, Easy)の初期化
-		if (g_stateObj.gauge == `Light` || g_stateObj.gauge == `Easy`) {
+		if (g_stateObj.gauge === `Light` || g_stateObj.gauge === `Easy`) {
 			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
 				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
 			}
