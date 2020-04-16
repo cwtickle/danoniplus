@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 13.5.0`;
+const g_version = `Ver 13.5.1`;
 const g_revisedDate = `2020/04/16`;
 const g_alphaVersion = ``;
 
@@ -7087,7 +7087,6 @@ function MainInit() {
 
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createSprite(`divRoot`, `judgeSprite`, 0, 0, g_sWidth, g_sHeight);
-	judgeSprite.style.opacity = g_stateObj.opacity / 100;
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -7420,18 +7419,21 @@ function MainInit() {
 		charaJ.style.textAlign = C_ALIGN_CENTER;
 		charaJ.setAttribute(`cnt`, 0);
 		judgeSprite.appendChild(charaJ);
+		charaJ.style.opacity = g_stateObj.opacity / 100;
 
 		// コンボ表示
 		const comboJ = createDivCssLabel(`combo${jdg}`, jdgX[j] + 150, jdgY[j],
 			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj[`common_${jdgCombos[j]}`]);
 		comboJ.style.textAlign = C_ALIGN_CENTER;
 		judgeSprite.appendChild(comboJ);
+		comboJ.style.opacity = g_stateObj.opacity / 100;
 
 		// Fast/Slow表示
 		const diffJ = createDivCssLabel(`diff${jdg}`, jdgX[j] + 150, jdgY[j] + 25,
 			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, 14, ``, g_cssObj.common_combo);
 		diffJ.style.textAlign = C_ALIGN_CENTER;
 		judgeSprite.appendChild(diffJ);
+		diffJ.style.opacity = g_stateObj.opacity / 100;
 	});
 
 	// 判定カウンタ表示
