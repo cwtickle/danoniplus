@@ -1452,9 +1452,9 @@ function calcLevel(_scoreObj) {
 
 	for (let i = 1; i < allScorebook.length - 2; ++i) {
 		// フリーズ始点の検索
-		while (frzStartData[0] == allScorebook[i]) {
+		while (frzStartData[0] === allScorebook[i]) {
 			// 同時押しの場合
-			if (allScorebook[i] == allScorebook[i + 1]) {
+			if (allScorebook[i] === allScorebook[i + 1]) {
 				break;
 			}
 
@@ -1472,7 +1472,7 @@ function calcLevel(_scoreObj) {
 		}
 
 		// 同時押し補正処理(フリーズアローが絡まない場合)
-		if (allScorebook[i + 1] == allScorebook[i] && !freezenum) {
+		if (allScorebook[i + 1] === allScorebook[i] && !freezenum) {
 
 			let chk = (allScorebook[i + 2] - allScorebook[i + 1]) * (allScorebook[i] - allScorebook[i - pushCnt]);
 			if (chk != 0) {
@@ -1524,12 +1524,12 @@ function calcLevel(_scoreObj) {
 
 	// 縦連打補正値計算
 	let tate = Math.round((print - tmp) * 100) / 100;
-	if (isNaN(tate) || tate == Infinity) {
+	if (isNaN(tate) || tate === Infinity) {
 		tate = 0;
 	}
 	// 同時押し補正値計算
 	let douji = Math.round(twoPushCount / Math.sqrt(allScorebook.length - push3cnt.length - 3) * 400) / 100;
-	if (isNaN(douji) || douji == Infinity) {
+	if (isNaN(douji) || douji === Infinity) {
 		douji = 0;
 	}
 
@@ -1539,7 +1539,7 @@ function calcLevel(_scoreObj) {
 	//  [レベル計算ツール++ ver1.28] 矢印数1の場合の処理追加
 	//--------------------------------------------------------------
 	let subPrint;
-	if (allScorebook.length == 3) {
+	if (allScorebook.length === 3) {
 		print = `0.01`;
 		tmp = `0.01`;
 	} else {
@@ -3847,7 +3847,7 @@ function createOptionWindow(_sprite) {
 		_context.lineTo(C_LEN_GRAPH_WIDTH, lineY);
 		_context.lineWidth = 1;
 
-		if (_lineType == `main`) {
+		if (_lineType === `main`) {
 			const textBaseObj = document.querySelector(`#lnkDifficulty`);
 			const textColor = window.getComputedStyle(textBaseObj, ``).color;
 			_context.strokeStyle = textColor;
@@ -4148,7 +4148,7 @@ function createOptionWindow(_sprite) {
 		}
 
 		// ゲージ設定(Light, Easy)の初期化
-		if (g_stateObj.gauge == `Light` || g_stateObj.gauge == `Easy`) {
+		if (g_stateObj.gauge === `Light` || g_stateObj.gauge === `Easy`) {
 			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
 				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
 			}
