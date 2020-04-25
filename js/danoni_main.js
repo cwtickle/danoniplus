@@ -2827,6 +2827,12 @@ function headerConvert(_dosObj) {
 	// 終了フレーム数
 	if (_dosObj.endFrame !== undefined) {
 		obj.endFrame = _dosObj.endFrame.split(`$`);
+		for (let j = 0; j < obj.endFrame.length; j++) {
+			if (obj.endFrame[j].indexOf(`:`) !== -1) {
+				const tmpTimes = obj.endFrame[j].split(`:`);
+				obj.endFrame[j] = g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpTimes[1]));
+			}
+		}
 	}
 
 	// タイミング調整
