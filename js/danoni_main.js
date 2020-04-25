@@ -2827,10 +2827,17 @@ function headerConvert(_dosObj) {
 	// 終了フレーム数
 	if (_dosObj.endFrame !== undefined) {
 		obj.endFrame = _dosObj.endFrame.split(`$`);
+
+		// タイマー表示 |endFrame=1:35.20|
 		for (let j = 0; j < obj.endFrame.length; j++) {
 			if (obj.endFrame[j].indexOf(`:`) !== -1) {
 				const tmpTimes = obj.endFrame[j].split(`:`);
-				obj.endFrame[j] = g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpTimes[1]));
+				if (tmpTimes[1].indexOf(`.`) !== -1) {
+					const tmpSeconds = tmpTimes[1].split(`.`);
+					obj.endFrame[j] = g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpSeconds[0])) + Number(tmpSeconds[1]);
+				} else {
+					obj.endFrame[j] = g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpTimes[1]));
+				}
 			}
 		}
 	}
