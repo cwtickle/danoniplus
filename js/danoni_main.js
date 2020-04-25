@@ -2813,6 +2813,10 @@ function headerConvert(_dosObj) {
 	// 開始フレーム数（0以外の場合はフェードインスタート）
 	if (_dosObj.startFrame !== undefined) {
 		obj.startFrame = _dosObj.startFrame.split(`$`);
+
+		for (let j = 0; j < obj.startFrame.length; j++) {
+			obj.startFrame[j] = transTimerToFrame(obj.startFrame[j]);
+		}
 	}
 
 	// フェードアウトフレーム数(譜面別)
@@ -2821,6 +2825,7 @@ function headerConvert(_dosObj) {
 		obj.fadeFrame = [];
 		fadeFrames.forEach((fadeInfo, j) => {
 			obj.fadeFrame[j] = fadeInfo.split(`,`);
+			obj.fadeFrame[j][0] = transTimerToFrame(obj.fadeFrame[j][0]);
 		});
 	}
 
@@ -2828,17 +2833,8 @@ function headerConvert(_dosObj) {
 	if (_dosObj.endFrame !== undefined) {
 		obj.endFrame = _dosObj.endFrame.split(`$`);
 
-		// タイマー表示 |endFrame=1:35.20|
 		for (let j = 0; j < obj.endFrame.length; j++) {
-			if (obj.endFrame[j].indexOf(`:`) !== -1) {
-				const tmpTimes = obj.endFrame[j].split(`:`);
-				if (tmpTimes[1].indexOf(`.`) !== -1) {
-					const tmpSeconds = tmpTimes[1].split(`.`);
-					obj.endFrame[j] = g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpSeconds[0])) + Number(tmpSeconds[1]);
-				} else {
-					obj.endFrame[j] = g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpTimes[1]));
-				}
-			}
+			obj.endFrame[j] = transTimerToFrame(obj.endFrame[j]);
 		}
 	}
 
@@ -3037,6 +3033,24 @@ function headerConvert(_dosObj) {
 	obj.scoreDetailUse = setVal(_dosObj.scoreDetailUse, true, C_TYP_BOOLEAN);
 
 	return obj;
+}
+
+/**
+ * 疑似タイマー表記をフレーム数へ変換
+ * |endFrame=1:35.20|
+ * @param {string} _str 
+ */
+function transTimerToFrame(_str) {
+	if (_str.indexOf(`:`) !== -1) {
+		const tmpTimes = _str.split(`:`);
+		if (tmpTimes[1].indexOf(`.`) !== -1) {
+			const tmpSeconds = tmpTimes[1].split(`.`);
+			return g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpSeconds[0])) + Number(tmpSeconds[1]);
+		} else {
+			return g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpTimes[1]));
+		}
+	}
+	return _str;
 }
 
 /**
