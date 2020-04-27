@@ -2993,12 +2993,12 @@ function headerConvert(_dosObj) {
 
 	let interlockingErrorFlg = false;
 	g_displays.forEach((option, j) => {
-		obj[`${option}Set`] = setVal(_dosObj[`${option}Use`], ``, C_TYP_STRING);
+		obj[`${option}Set`] = setVal(_dosObj[`${option}Set`], ``, C_TYP_STRING);
 
 		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Set`] !== `` ? obj[`${option}Set`] : C_FLG_ON);
 		obj[`${option}Default`] = (_dosObj[`${option}Default`] !== undefined ? _dosObj[`${option}Default`].split(`,`) : []);
 
-		// Displayのデフォルト設定で、双方向に
+		// Displayのデフォルト設定で、双方向に設定されている場合は設定をブロック
 		g_displays.forEach((option2, k) => {
 			if (j > k) {
 				if (obj[`${option}Default`].includes(option2) &&
@@ -4943,7 +4943,7 @@ function createSettingsDisplayWindow(_sprite) {
 			lnk.classList.add(`button_${flg}`);
 			displaySprite.appendChild(lnk);
 		} else {
-			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos, `ーーー`));
+			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos, `- - -`));
 		}
 
 		/**
