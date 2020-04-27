@@ -2346,6 +2346,12 @@ function makeWarningWindow(_text) {
 	} else {
 		lblWarning = document.querySelector(`#lblWarning`);
 		lblWarning.innerHTML += `<p>${_text}</p>`;
+		const text = lblWarning.innerHTML;
+
+		lblWarning = getTitleDivLabel(`lblWarning`, text, 0, 70);
+		lblWarning.style.backgroundColor = `#ffcccc`;
+		lblWarning.style.opacity = 0.9;
+		divRoot.appendChild(lblWarning);
 	}
 	const len = lblWarning.innerHTML.split(`<br>`).length + lblWarning.innerHTML.split(`<p>`).length - 1;
 	const warnHeight = 21 * len;
@@ -2978,8 +2984,6 @@ function headerConvert(_dosObj) {
 
 	// オプション利用可否設定
 	let usingOptions = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
-	usingOptions = usingOptions.concat(g_displays);
-	usingOptions = usingOptions.concat(`judgement`);
 
 	usingOptions.forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
@@ -2987,15 +2991,31 @@ function headerConvert(_dosObj) {
 				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 	});
 
-	// 旧バージョン互換（judgementUse=falseを指定した場合は例外的にjudgment, fastSlow, scoreを一律設定）
-	if (!obj.judgementUse) {
-		obj.judgmentUse = false;
-		obj.fastSlowUse = false;
-		obj.scoreUse = false;
-	}
-	g_displays.forEach(option => {
-		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF);
+	let interlockingErrorFlg = false;
+	g_displays.forEach((option, j) => {
+		g_stateObj[`d_${option.toLowerCase()}`] = C_FLG_ON;
+		obj[`${option}Default`] = (_dosObj[`${option}Default`] !== undefined ? _dosObj[`${option}Default`].split(`,`) : []);
+
+		// Displayのデフォルト設定で、双方向に
+		g_displays.forEach((option2, k) => {
+			if (j > k) {
+				if (obj[`${option}Default`].includes(option2) &&
+					obj[`${option2}Default`].includes(option)) {
+					interlockingErrorFlg = true;
+					makeWarningWindow(C_MSG_E_0051);
+				}
+			}
+		});
 	});
+
+	if (!interlockingErrorFlg) {
+		g_displays.forEach(option => {
+			obj[`${option}Default`].forEach(defaultOption => {
+				g_stateObj[`d_${defaultOption.toLowerCase()}`] = C_FLG_OFF;
+				interlockingButton(obj, defaultOption, C_FLG_OFF, C_FLG_ON);
+			});
+		});
+	}
 
 	// 別キーパターンの使用有無
 	obj.transKeyUse = setVal(_dosObj.transKeyUse, true, C_TYP_BOOLEAN);
@@ -4905,37 +4925,55 @@ function createSettingsDisplayWindow(_sprite) {
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
 		const list = [C_FLG_OFF, C_FLG_ON];
 
-		if (g_headerObj[`${_name}Use`]) {
-			const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
-				const displayFlg = g_stateObj[`d_${_name.toLowerCase()}`];
-				const displayNum = list.findIndex(flg => flg === displayFlg);
-				const nextDisplayFlg = list[(displayNum + 1) % list.length];
-				g_stateObj[`d_${_name.toLowerCase()}`] = nextDisplayFlg;
-				lnk.classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
-			});
-			lnk.style.width = `170px`;
-			lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
-			lnk.style.borderStyle = `solid`;
-			lnk.classList.add(`button_${flg}`);
-			displaySprite.appendChild(lnk);
-		} else {
-			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos, toCapitalize(_name)));
-		}
+		const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
+			const displayFlg = g_stateObj[`d_${_name.toLowerCase()}`];
+			const displayNum = list.findIndex(flg => flg === displayFlg);
+			const nextDisplayFlg = list[(displayNum + 1) % list.length];
+			g_stateObj[`d_${_name.toLowerCase()}`] = nextDisplayFlg;
+			lnk.classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
+
+			interlockingButton(g_headerObj, _name, nextDisplayFlg, displayFlg, true);
+		});
+		lnk.style.width = `170px`;
+		lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
+		lnk.style.borderStyle = `solid`;
+		lnk.classList.add(`button_${flg}`);
+		displaySprite.appendChild(lnk);
+	}
+}
+
+/**
+ * Displayボタンを切り替えたときに連動して切り替えるボタンの設定
+ * @param {object} _headerObj 
+ * @param {string} _name 
+ * @param {string} _current 変更元
+ * @param {string} _next 変更先
+ * @param {boolean} _bottonFlg ボタンフラグ (false: 初期, true: ボタン)
+ */
+function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = false) {
+	let includeDefaults = [];
+	if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
+		g_displays.forEach(option => {
+			if (option === _name) {
+				return;
+			}
+			if (g_stateObj[`d_${option.toLowerCase()}`] === C_FLG_ON && _headerObj[`${option}Default`] !== undefined) {
+				includeDefaults = includeDefaults.concat(_headerObj[`${option}Default`]);
+			}
+		});
 	}
 
-	/**
-	 * 無効化用ラベル作成
-	 * @param {string} _id 
-	 * @param {number} _heightPos 
-	 * @param {string} _defaultStr 
-	 */
-	function makeDisabledDisplayLabel(_id, _heightPos, _widthPos, _defaultStr) {
-		const lbl = createDivCssLabel(_id, 30 + 180 * _widthPos, C_LEN_SETLBL_HEIGHT * _heightPos,
-			170, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, _defaultStr, g_cssObj.settings_Disabled);
-		lbl.style.textAlign = C_ALIGN_CENTER;
-		return lbl;
+	if (_headerObj[`${_name}Default`].length !== 0) {
+		_headerObj[`${_name}Default`].forEach(defaultOption => {
+			if (!includeDefaults.includes(defaultOption)) {
+				g_stateObj[`d_${defaultOption.toLowerCase()}`] = _next;
+				if (_bottonFlg) {
+					document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${_current}`], g_cssObj[`button_${_next}`]);
+				}
+				interlockingButton(_headerObj, defaultOption, _next, _current, _bottonFlg);
+			}
+		});
 	}
-
 }
 
 /*-----------------------------------------------------------*/
