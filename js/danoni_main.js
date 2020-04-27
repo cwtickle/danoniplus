@@ -2993,7 +2993,9 @@ function headerConvert(_dosObj) {
 
 	let interlockingErrorFlg = false;
 	g_displays.forEach((option, j) => {
-		g_stateObj[`d_${option.toLowerCase()}`] = C_FLG_ON;
+		obj[`${option}Set`] = setVal(_dosObj[`${option}Use`], ``, C_TYP_STRING);
+
+		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Set`] !== `` ? obj[`${option}Set`] : C_FLG_ON);
 		obj[`${option}Default`] = (_dosObj[`${option}Default`] !== undefined ? _dosObj[`${option}Default`].split(`,`) : []);
 
 		// Displayのデフォルト設定で、双方向に
@@ -4925,20 +4927,37 @@ function createSettingsDisplayWindow(_sprite) {
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
 		const list = [C_FLG_OFF, C_FLG_ON];
 
-		const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
-			const displayFlg = g_stateObj[`d_${_name.toLowerCase()}`];
-			const displayNum = list.findIndex(flg => flg === displayFlg);
-			const nextDisplayFlg = list[(displayNum + 1) % list.length];
-			g_stateObj[`d_${_name.toLowerCase()}`] = nextDisplayFlg;
-			lnk.classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
+		if (g_headerObj[`${_name}Set`] === ``) {
+			const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
+				const displayFlg = g_stateObj[`d_${_name.toLowerCase()}`];
+				const displayNum = list.findIndex(flg => flg === displayFlg);
+				const nextDisplayFlg = list[(displayNum + 1) % list.length];
+				g_stateObj[`d_${_name.toLowerCase()}`] = nextDisplayFlg;
+				lnk.classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
 
-			interlockingButton(g_headerObj, _name, nextDisplayFlg, displayFlg, true);
-		});
-		lnk.style.width = `170px`;
-		lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
-		lnk.style.borderStyle = `solid`;
-		lnk.classList.add(`button_${flg}`);
-		displaySprite.appendChild(lnk);
+				interlockingButton(g_headerObj, _name, nextDisplayFlg, displayFlg, true);
+			});
+			lnk.style.width = `170px`;
+			lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
+			lnk.style.borderStyle = `solid`;
+			lnk.classList.add(`button_${flg}`);
+			displaySprite.appendChild(lnk);
+		} else {
+			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos, `ーーー`));
+		}
+
+		/**
+		 * 無効化用ラベル作成
+		 * @param {string} _id 
+		 * @param {number} _heightPos 
+		 * @param {string} _defaultStr 
+		 */
+		function makeDisabledDisplayLabel(_id, _heightPos, _widthPos, _defaultStr) {
+			const lbl = createDivCssLabel(_id, 30 + 180 * _widthPos, C_LEN_SETLBL_HEIGHT * _heightPos,
+				170, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, _defaultStr, g_cssObj.settings_Disabled);
+			lbl.style.textAlign = C_ALIGN_CENTER;
+			return lbl;
+		}
 	}
 }
 
