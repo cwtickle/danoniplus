@@ -560,7 +560,7 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
  * @param {number} _width 幅
  * @param {number} _height 高さ
  */
-function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height) {
+function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height, _options = {}) {
 	let newsprite;
 	if (document.querySelector(`#${_newObjName}`) === null) {
 		const parentsprite = document.querySelector(`#${_parentObjName}`);
@@ -568,6 +568,9 @@ function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height) {
 		parentsprite.appendChild(newsprite);
 	} else {
 		newsprite = document.querySelector(`#${_newObjName}`);
+	}
+	if (_options.description !== undefined) {
+		newsprite.title = _options.description;
 	}
 	return newsprite;
 }
@@ -3524,27 +3527,27 @@ function createOptionWindow(_sprite) {
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
 	const difficultySprite = createSprite(`optionsprite`, `difficultySprite`, childX, childY - 5,
-		optionWidth, C_LEN_SETLBL_HEIGHT + 10);
+		optionWidth, C_LEN_SETLBL_HEIGHT + 10, { description: g_msgObj.difficulty });
 	const speedSprite = createSprite(`optionsprite`, `speedSprite`, childX, 2 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth + 40, C_LEN_SETLBL_HEIGHT);
+		optionWidth + 40, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.speed });
 	const motionSprite = createSprite(`optionsprite`, `motionSprite`, childX, 3 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.motion });
 	const reverseSprite = createSprite(`optionsprite`, `reverseSprite`, childX, 4 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.reverse });
 	const scrollSprite = createSprite(`optionsprite`, `scrollSprite`, childX, 4 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.scroll });
 	const shuffleSprite = createSprite(`optionsprite`, `shuffleSprite`, childX, 5.5 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.shuffle });
 	const autoPlaySprite = createSprite(`optionsprite`, `autoPlaySprite`, childX, 6.5 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.autoplay });
 	const gaugeSprite = createSprite(`optionsprite`, `gaugeSprite`, childX, 7.5 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.gauge });
 	const adjustmentSprite = createSprite(`optionsprite`, `adjustmentSprite`, childX, 10 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.adjustment });
 	const fadeinSprite = createSprite(`optionsprite`, `fadeinSprite`, childX, 11 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.fadein });
 	const volumeSprite = createSprite(`optionsprite`, `volumeSprite`, childX, 12 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.volume });
 
 	// ---------------------------------------------------
 	// 難易度 (Difficulty)
@@ -4907,9 +4910,9 @@ function createSettingsDisplayWindow(_sprite) {
 	const displaySprite = createSprite(`optionsprite`, `displaySprite`, childX, childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
 	const appearanceSprite = createSprite(`optionsprite`, `appearanceSprite`, childX, 8 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.appearance });
 	const opacitySprite = createSprite(`optionsprite`, `opacitySprite`, childX, 9 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT);
+		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.opacity });
 
 	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14,
 		`[クリックでON/OFFを切替、灰色でOFF]`);
@@ -4953,6 +4956,7 @@ function createSettingsDisplayWindow(_sprite) {
 			lnk.style.width = `170px`;
 			lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
 			lnk.style.borderStyle = `solid`;
+			lnk.title = g_msgObj[`d_${_name.toLowerCase()}`];
 			lnk.classList.add(`button_${flg}`);
 			displaySprite.appendChild(lnk);
 		} else {
