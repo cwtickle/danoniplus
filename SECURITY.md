@@ -18,7 +18,7 @@ v11の対応終了時期はv14リリース開始時を予定しています。�
 | v14     | :white_check_mark: |[v14.0.0](../../releases/tag/v14.0.0)          |-|
 | v13     | :white_check_mark: |[v13.6.0](../../releases/tag/v13.6.0)          |(At Release v16)|
 | v12     | :white_check_mark: |[v12.3.4](../../releases/tag/v12.3.4)          |(At Release v15)|
-| v11     | :warning:          |[v11.4.5](../../releases/tag/v11.4.5)          |2020-04-18|
+| v11     | :x:                |[v11.4.5 (final)](../../releases/tag/v11.4.5)  |2020-04-18|
 | v10     | :x:                |[v10.5.5 (final)](../../releases/tag/v10.5.5)  |2020-02-10|
 | v9      | :white_check_mark: |[v9.4.10](../../releases/tag/v9.4.10)          |-|
 | v8      | :x:                |[v8.7.10 (final)](../../releases/tag/v8.7.10)  |2019-12-14|
