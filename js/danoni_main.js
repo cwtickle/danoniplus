@@ -202,7 +202,7 @@ const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
 
 /**
  * 文字列を想定された型に変換
- * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、`string`(文字列)から選択
+ * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、`switch`(ON/OFF), `string`(文字列)から選択
  * - 型に合わない場合は _default を返却するが、_default自体の型チェック・変換は行わない
  * @param {string} _checkStr 
  * @param {string} _default 
@@ -227,8 +227,14 @@ function setVal(_checkStr, _default, _type) {
 		return (isNaNflg ? _default : parseInt(_checkStr));
 
 	} else if (_type === C_TYP_BOOLEAN) {
+		// 真偽値の場合
 		const lowerCase = _checkStr.toString().toLowerCase();
 		return (lowerCase === `true` ? true : (lowerCase === `false` ? false : _default));
+
+	} else if (_type === C_TYP_SWITCH) {
+		// ON/OFFスイッチの場合
+		return [C_FLG_OFF, C_FLG_ON].includes(_checkStr.toString().toUpperCase()) ?
+			_checkStr.toString().toUpperCase() : _default;
 	}
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
@@ -2346,6 +2352,12 @@ function makeWarningWindow(_text) {
 	} else {
 		lblWarning = document.querySelector(`#lblWarning`);
 		lblWarning.innerHTML += `<p>${_text}</p>`;
+		const text = lblWarning.innerHTML;
+
+		lblWarning = getTitleDivLabel(`lblWarning`, text, 0, 70);
+		lblWarning.style.backgroundColor = `#ffcccc`;
+		lblWarning.style.opacity = 0.9;
+		divRoot.appendChild(lblWarning);
 	}
 	const len = lblWarning.innerHTML.split(`<br>`).length + lblWarning.innerHTML.split(`<p>`).length - 1;
 	const warnHeight = 21 * len;
@@ -2978,8 +2990,6 @@ function headerConvert(_dosObj) {
 
 	// オプション利用可否設定
 	let usingOptions = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
-	usingOptions = usingOptions.concat(g_displays);
-	usingOptions = usingOptions.concat(`judgement`);
 
 	usingOptions.forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
@@ -2987,15 +2997,40 @@ function headerConvert(_dosObj) {
 				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 	});
 
-	// 旧バージョン互換（judgementUse=falseを指定した場合は例外的にjudgment, fastSlow, scoreを一律設定）
-	if (!obj.judgementUse) {
-		obj.judgmentUse = false;
-		obj.fastSlowUse = false;
-		obj.scoreUse = false;
-	}
-	g_displays.forEach(option => {
-		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF);
+	let interlockingErrorFlg = false;
+	g_displays.forEach((option, j) => {
+
+		// Display使用可否設定を分解 |displayUse=false,ON|
+		const displayTempUse = _dosObj[`${option}Use`] || g_presetSettingUse[option];
+		const displayUse = (displayTempUse !== undefined ? displayTempUse.split(`,`) : [true, C_FLG_ON]);
+
+		// displayUse -> ボタンの有効/無効, displaySet -> ボタンの初期値(ON/OFF)
+		obj[`${option}Use`] = setVal(displayUse[0], true, C_TYP_BOOLEAN);
+		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] : C_FLG_OFF, ``, C_TYP_SWITCH);
+
+		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Set`] !== `` ? obj[`${option}Set`] : C_FLG_ON);
+		obj[`${option}ChainOFF`] = (_dosObj[`${option}ChainOFF`] !== undefined ? _dosObj[`${option}ChainOFF`].split(`,`) : []);
+
+		// Displayのデフォルト設定で、双方向に設定されている場合は設定をブロック
+		g_displays.forEach((option2, k) => {
+			if (j > k) {
+				if (obj[`${option}ChainOFF`].includes(option2) &&
+					obj[`${option2}ChainOFF`].includes(option)) {
+					interlockingErrorFlg = true;
+					makeWarningWindow(C_MSG_E_0051);
+				}
+			}
+		});
 	});
+
+	if (!interlockingErrorFlg) {
+		g_displays.forEach(option => {
+			obj[`${option}ChainOFF`].forEach(defaultOption => {
+				g_stateObj[`d_${defaultOption.toLowerCase()}`] = C_FLG_OFF;
+				interlockingButton(obj, defaultOption, C_FLG_OFF, C_FLG_ON);
+			});
+		});
+	}
 
 	// 別キーパターンの使用有無
 	obj.transKeyUse = setVal(_dosObj.transKeyUse, true, C_TYP_BOOLEAN);
@@ -4912,6 +4947,8 @@ function createSettingsDisplayWindow(_sprite) {
 				const nextDisplayFlg = list[(displayNum + 1) % list.length];
 				g_stateObj[`d_${_name.toLowerCase()}`] = nextDisplayFlg;
 				lnk.classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
+
+				interlockingButton(g_headerObj, _name, nextDisplayFlg, displayFlg, true);
 			});
 			lnk.style.width = `170px`;
 			lnk.style.left = `calc(30px + 180px * ${_widthPos})`;
@@ -4919,23 +4956,67 @@ function createSettingsDisplayWindow(_sprite) {
 			lnk.classList.add(`button_${flg}`);
 			displaySprite.appendChild(lnk);
 		} else {
-			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos, toCapitalize(_name)));
+			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos,
+				`${toCapitalize(_name)}:${g_headerObj[`${_name}Set`]}`, g_headerObj[`${_name}Set`]));
+		}
+
+		/**
+		 * 無効化用ラベル作成
+		 * @param {string} _id 
+		 * @param {number} _heightPos 
+		 * @param {number} _widthPos
+		 * @param {string} _defaultStr 
+		 * @param {string} _flg
+		 */
+		function makeDisabledDisplayLabel(_id, _heightPos, _widthPos, _defaultStr, _flg) {
+			const lbl = createDivCssLabel(_id, 30 + 180 * _widthPos, 3 + C_LEN_SETLBL_HEIGHT * _heightPos,
+				170, C_LEN_SETLBL_HEIGHT, 14, _defaultStr, g_cssObj[`button_Disabled${flg}`]);
+			lbl.style.textAlign = C_ALIGN_CENTER;
+			return lbl;
 		}
 	}
+}
 
-	/**
-	 * 無効化用ラベル作成
-	 * @param {string} _id 
-	 * @param {number} _heightPos 
-	 * @param {string} _defaultStr 
-	 */
-	function makeDisabledDisplayLabel(_id, _heightPos, _widthPos, _defaultStr) {
-		const lbl = createDivCssLabel(_id, 30 + 180 * _widthPos, C_LEN_SETLBL_HEIGHT * _heightPos,
-			170, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, _defaultStr, g_cssObj.settings_Disabled);
-		lbl.style.textAlign = C_ALIGN_CENTER;
-		return lbl;
+/**
+ * Displayボタンを切り替えたときに連動して切り替えるボタンの設定
+ * @param {object} _headerObj 
+ * @param {string} _name 
+ * @param {string} _current 変更元
+ * @param {string} _next 変更先
+ * @param {boolean} _bottonFlg ボタンフラグ (false: 初期, true: ボタン)
+ */
+function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = false) {
+	let includeDefaults = [];
+	if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
+		g_displays.forEach(option => {
+			if (option === _name) {
+				return;
+			}
+			if (g_stateObj[`d_${option.toLowerCase()}`] === C_FLG_ON && _headerObj[`${option}Default`] !== undefined) {
+				includeDefaults = includeDefaults.concat(_headerObj[`${option}ChainOFF`]);
+			}
+		});
 	}
 
+	if (_headerObj[`${_name}ChainOFF`].length !== 0) {
+		_headerObj[`${_name}ChainOFF`].forEach(defaultOption => {
+
+			// 連動してOFFにするボタンの設定
+			if (!includeDefaults.includes(defaultOption)) {
+				g_stateObj[`d_${defaultOption.toLowerCase()}`] = _next;
+				if (_bottonFlg) {
+					if (g_headerObj[`${defaultOption}Use`]) {
+						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${_current}`], g_cssObj[`button_${_next}`]);
+					} else {
+						document.querySelector(`#lnk${defaultOption}`).innerHTML = `${toCapitalize(defaultOption)}:${_next}`;
+						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_Disabled${_current}`], g_cssObj[`button_Disabled${_next}`]);
+					}
+				}
+				// さらに連動する場合は設定を反転
+				interlockingButton(_headerObj, defaultOption, _next, _current, _bottonFlg);
+			}
+		});
+	}
 }
 
 /*-----------------------------------------------------------*/
