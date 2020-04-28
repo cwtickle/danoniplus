@@ -202,7 +202,7 @@ const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
 
 /**
  * 文字列を想定された型に変換
- * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、`string`(文字列)から選択
+ * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、`switch`(ON/OFF), `string`(文字列)から選択
  * - 型に合わない場合は _default を返却するが、_default自体の型チェック・変換は行わない
  * @param {string} _checkStr 
  * @param {string} _default 
@@ -227,8 +227,14 @@ function setVal(_checkStr, _default, _type) {
 		return (isNaNflg ? _default : parseInt(_checkStr));
 
 	} else if (_type === C_TYP_BOOLEAN) {
+		// 真偽値の場合
 		const lowerCase = _checkStr.toString().toLowerCase();
 		return (lowerCase === `true` ? true : (lowerCase === `false` ? false : _default));
+
+	} else if (_type === C_TYP_SWITCH) {
+		// ON/OFFスイッチの場合
+		return [C_FLG_OFF, C_FLG_ON].includes(_checkStr.toString().toUpperCase()) ?
+			_checkStr.toString().toUpperCase() : _default;
 	}
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
@@ -2993,16 +2999,21 @@ function headerConvert(_dosObj) {
 
 	let interlockingErrorFlg = false;
 	g_displays.forEach((option, j) => {
-		obj[`${option}Set`] = setVal(_dosObj[`${option}Set`], ``, C_TYP_STRING);
+
+		// Display使用可否設定を分解 |displayUse=false,ON|
+		const displayUse = (_dosObj[`${option}Use`] !== undefined ?
+			_dosObj[`${option}Use`].split(`,`) : [true, C_FLG_ON]);
+		obj[`${option}Use`] = setVal(displayUse[0], true, C_TYP_BOOLEAN);
+		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] : C_FLG_OFF, ``, C_TYP_SWITCH);
 
 		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Set`] !== `` ? obj[`${option}Set`] : C_FLG_ON);
-		obj[`${option}Default`] = (_dosObj[`${option}Default`] !== undefined ? _dosObj[`${option}Default`].split(`,`) : []);
+		obj[`${option}ChainOFF`] = (_dosObj[`${option}ChainOFF`] !== undefined ? _dosObj[`${option}ChainOFF`].split(`,`) : []);
 
 		// Displayのデフォルト設定で、双方向に設定されている場合は設定をブロック
 		g_displays.forEach((option2, k) => {
 			if (j > k) {
-				if (obj[`${option}Default`].includes(option2) &&
-					obj[`${option2}Default`].includes(option)) {
+				if (obj[`${option}ChainOFF`].includes(option2) &&
+					obj[`${option2}ChainOFF`].includes(option)) {
 					interlockingErrorFlg = true;
 					makeWarningWindow(C_MSG_E_0051);
 				}
@@ -3012,7 +3023,7 @@ function headerConvert(_dosObj) {
 
 	if (!interlockingErrorFlg) {
 		g_displays.forEach(option => {
-			obj[`${option}Default`].forEach(defaultOption => {
+			obj[`${option}ChainOFF`].forEach(defaultOption => {
 				g_stateObj[`d_${defaultOption.toLowerCase()}`] = C_FLG_OFF;
 				interlockingButton(obj, defaultOption, C_FLG_OFF, C_FLG_ON);
 			});
@@ -4927,7 +4938,7 @@ function createSettingsDisplayWindow(_sprite) {
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
 		const list = [C_FLG_OFF, C_FLG_ON];
 
-		if (g_headerObj[`${_name}Set`] === ``) {
+		if (g_headerObj[`${_name}Use`]) {
 			const lnk = makeSettingLblCssButton(`lnk${_name}`, `${toCapitalize(_name)}`, _heightPos, _ => {
 				const displayFlg = g_stateObj[`d_${_name.toLowerCase()}`];
 				const displayNum = list.findIndex(flg => flg === displayFlg);
@@ -4979,17 +4990,17 @@ function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = fal
 				return;
 			}
 			if (g_stateObj[`d_${option.toLowerCase()}`] === C_FLG_ON && _headerObj[`${option}Default`] !== undefined) {
-				includeDefaults = includeDefaults.concat(_headerObj[`${option}Default`]);
+				includeDefaults = includeDefaults.concat(_headerObj[`${option}ChainOFF`]);
 			}
 		});
 	}
 
-	if (_headerObj[`${_name}Default`].length !== 0) {
-		_headerObj[`${_name}Default`].forEach(defaultOption => {
+	if (_headerObj[`${_name}ChainOFF`].length !== 0) {
+		_headerObj[`${_name}ChainOFF`].forEach(defaultOption => {
 			if (!includeDefaults.includes(defaultOption)) {
 				g_stateObj[`d_${defaultOption.toLowerCase()}`] = _next;
 				if (_bottonFlg) {
-					if (g_headerObj[`${defaultOption}Set`] === ``) {
+					if (g_headerObj[`${defaultOption}Use`]) {
 						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${_current}`], g_cssObj[`button_${_next}`]);
 					} else {
 						document.querySelector(`#lnk${defaultOption}`).innerHTML = `${toCapitalize(defaultOption)}:${_next}`;

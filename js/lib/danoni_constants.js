@@ -39,6 +39,7 @@ const C_TYP_STRING = `string`;
 const C_TYP_FLOAT = `float`;
 const C_TYP_OBJECT = `object`;
 const C_TYP_FUNCTION = `function`;
+const C_TYP_SWITCH = `switch`;
 
 // 画像ファイル
 let C_IMG_ARROW = `../img/arrow.png`;
