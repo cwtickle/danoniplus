@@ -3001,8 +3001,10 @@ function headerConvert(_dosObj) {
 	g_displays.forEach((option, j) => {
 
 		// Display使用可否設定を分解 |displayUse=false,ON|
-		const displayUse = (_dosObj[`${option}Use`] !== undefined ?
-			_dosObj[`${option}Use`].split(`,`) : [true, C_FLG_ON]);
+		const displayTempUse = _dosObj[`${option}Use`] || g_presetSettingUse[option];
+		const displayUse = (displayTempUse !== undefined ? displayTempUse.split(`,`) : [true, C_FLG_ON]);
+
+		// displayUse -> ボタンの有効/無効, displaySet -> ボタンの初期値(ON/OFF)
 		obj[`${option}Use`] = setVal(displayUse[0], true, C_TYP_BOOLEAN);
 		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] : C_FLG_OFF, ``, C_TYP_SWITCH);
 
@@ -4954,7 +4956,8 @@ function createSettingsDisplayWindow(_sprite) {
 			lnk.classList.add(`button_${flg}`);
 			displaySprite.appendChild(lnk);
 		} else {
-			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos, `${toCapitalize(_name)}:${g_headerObj[`${_name}Set`]}`, g_headerObj[`${_name}Set`]));
+			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos,
+				`${toCapitalize(_name)}:${g_headerObj[`${_name}Set`]}`, g_headerObj[`${_name}Set`]));
 		}
 
 		/**
@@ -4963,7 +4966,7 @@ function createSettingsDisplayWindow(_sprite) {
 		 * @param {number} _heightPos 
 		 * @param {number} _widthPos
 		 * @param {string} _defaultStr 
-		 * @param {string} _name
+		 * @param {string} _flg
 		 */
 		function makeDisabledDisplayLabel(_id, _heightPos, _widthPos, _defaultStr, _flg) {
 			const lbl = createDivCssLabel(_id, 30 + 180 * _widthPos, 3 + C_LEN_SETLBL_HEIGHT * _heightPos,
@@ -4997,6 +5000,8 @@ function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = fal
 
 	if (_headerObj[`${_name}ChainOFF`].length !== 0) {
 		_headerObj[`${_name}ChainOFF`].forEach(defaultOption => {
+
+			// 連動してOFFにするボタンの設定
 			if (!includeDefaults.includes(defaultOption)) {
 				g_stateObj[`d_${defaultOption.toLowerCase()}`] = _next;
 				if (_bottonFlg) {
@@ -5007,6 +5012,7 @@ function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = fal
 						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_Disabled${_current}`], g_cssObj[`button_Disabled${_next}`]);
 					}
 				}
+				// さらに連動する場合は設定を反転
 				interlockingButton(_headerObj, defaultOption, _next, _current, _bottonFlg);
 			}
 		});
