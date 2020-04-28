@@ -320,3 +320,12 @@
 	color: #ffffff;
 	border-color: #000000 #ddff99; 
 }
+/* ボタン：ON/OFF 無効化ボタン用 */
+.button_DisabledOFF {
+	color: #999999;
+	background-color: #333333;
+}
+.button_DisabledON {
+	color: #ffffff;
+	background-color: #009999;
+}

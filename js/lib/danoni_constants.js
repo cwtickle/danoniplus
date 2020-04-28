@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/04/16
+ * Revised : 2020/04/28
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -39,6 +39,7 @@ const C_TYP_STRING = `string`;
 const C_TYP_FLOAT = `float`;
 const C_TYP_OBJECT = `object`;
 const C_TYP_FUNCTION = `function`;
+const C_TYP_SWITCH = `switch`;
 
 // 画像ファイル
 let C_IMG_ARROW = `../img/arrow.png`;
@@ -612,6 +613,9 @@ const g_cssObj = {
     button_ON: `button_ON`,
     button_RevOFF: `button_RevOFF`,
     button_RevON: `button_RevON`,
+
+    button_DisabledOFF: `button_DisabledOFF`,
+    button_DisabledON: `button_DisabledON`,
 
     flex_centering: `flex_centering`,
 };
@@ -1249,6 +1253,7 @@ const C_MSG_E_0033 = `楽曲ファイルの読み込み中に接続がタイム�
 const C_MSG_E_0034 = `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`;
 const C_MSG_E_0035 = `お使いのOSでは指定された楽曲フォーマットに対応していません。(E-0035)`;
 const C_MSG_E_0041 = `ファイル:{0}の読み込みに失敗しました。(E-0041)<br>`;
+const C_MSG_E_0051 = `Displayオプションのデフォルト設定(XXXXDefault)で、<br>指定できない組み合わせが設定されています。(E-0051)`;
 
 const C_MSG_E_0101 = `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
 	|color{0}=0,1,0,1,0,2|`;
@@ -1259,3 +1264,35 @@ const C_MSG_E_0103 = `新しいキー:{0}の[stepRtn]が未定義です。(E-010
 const C_MSG_E_0104 = `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
     |keyCtrl{0}=75,79,76,80,187,32/0|`;
 
+const g_msgObj = {
+
+    difficulty: `譜面を選択します。`,
+    speed: `矢印の流れる速度を設定します。`,
+    motion: `矢印の速度を一定ではなく、\n変動させるモーションをつけるか設定します。`,
+    reverse: `矢印の流れる向きを設定します。`,
+    scroll: `各レーンのスクロール方向をパターンに沿って設定します。`,
+    shuffle: `譜面を左右反転したり、ランダムにします。\nランダムにした場合は別譜面扱いとなり、ハイスコアは保存されません。`,
+    autoplay: `オートプレイにするかどうかを設定します。\nオートプレイ時はハイスコアを保存しません。`,
+    gauge: `クリア条件を設定します。`,
+    adjustment: `タイミングにズレを感じる場合、\n数値を変えることでズレを直すことができます。`,
+    fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
+    volume: `ゲーム内の音量を設定します。`,
+
+    d_stepzone: `ステップゾーンの表示`,
+    d_judgment: `判定キャラクタ・コンボの表示`,
+    d_fastslow: `Fast/Slow表示`,
+    d_lifegauge: `ライフゲージの表示`,
+    d_score: `現時点の判定数を表示`,
+    d_musicinfo: `音楽情報（現状は時間表示のみ）`,
+    d_filterline: `Hidden+, Sudden+使用時のフィルターの境界線表示`,
+    d_speed: `途中変速、個別加速の有効化設定`,
+    d_color: `色変化の有効化設定`,
+    d_lyrics: `歌詞表示の有効化設定`,
+    d_background: `背景・マスクモーションの有効化設定`,
+    d_arroweffect: `矢印・フリーズアローモーションの有効化設定`,
+    d_special: `作品固有の特殊演出の有効化設定`,
+
+    appearance: `流れる矢印の見え方を制御します。`,
+    opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
+
+};
