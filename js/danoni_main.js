@@ -4943,18 +4943,20 @@ function createSettingsDisplayWindow(_sprite) {
 			lnk.classList.add(`button_${flg}`);
 			displaySprite.appendChild(lnk);
 		} else {
-			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos, `- - -`));
+			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos, `${toCapitalize(_name)}:${g_headerObj[`${_name}Set`]}`, g_headerObj[`${_name}Set`]));
 		}
 
 		/**
 		 * 無効化用ラベル作成
 		 * @param {string} _id 
 		 * @param {number} _heightPos 
+		 * @param {number} _widthPos
 		 * @param {string} _defaultStr 
+		 * @param {string} _name
 		 */
-		function makeDisabledDisplayLabel(_id, _heightPos, _widthPos, _defaultStr) {
-			const lbl = createDivCssLabel(_id, 30 + 180 * _widthPos, C_LEN_SETLBL_HEIGHT * _heightPos,
-				170, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, _defaultStr, g_cssObj.settings_Disabled);
+		function makeDisabledDisplayLabel(_id, _heightPos, _widthPos, _defaultStr, _flg) {
+			const lbl = createDivCssLabel(_id, 30 + 180 * _widthPos, 3 + C_LEN_SETLBL_HEIGHT * _heightPos,
+				170, C_LEN_SETLBL_HEIGHT, 14, _defaultStr, g_cssObj[`button_Disabled${flg}`]);
 			lbl.style.textAlign = C_ALIGN_CENTER;
 			return lbl;
 		}
@@ -4987,7 +4989,12 @@ function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = fal
 			if (!includeDefaults.includes(defaultOption)) {
 				g_stateObj[`d_${defaultOption.toLowerCase()}`] = _next;
 				if (_bottonFlg) {
-					document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${_current}`], g_cssObj[`button_${_next}`]);
+					if (g_headerObj[`${defaultOption}Set`] === ``) {
+						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${_current}`], g_cssObj[`button_${_next}`]);
+					} else {
+						document.querySelector(`#lnk${defaultOption}`).innerHTML = `${toCapitalize(defaultOption)}:${_next}`;
+						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_Disabled${_current}`], g_cssObj[`button_Disabled${_next}`]);
+					}
 				}
 				interlockingButton(_headerObj, defaultOption, _next, _current, _bottonFlg);
 			}

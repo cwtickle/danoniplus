@@ -613,6 +613,9 @@ const g_cssObj = {
     button_RevOFF: `button_RevOFF`,
     button_RevON: `button_RevON`,
 
+    button_DisabledOFF: `button_DisabledOFF`,
+    button_DisabledON: `button_DisabledON`,
+
     flex_centering: `flex_centering`,
 };
 
