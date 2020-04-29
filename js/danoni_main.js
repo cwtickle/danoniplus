@@ -4987,9 +4987,9 @@ function createSettingsDisplayWindow(_sprite) {
  * @param {string} _name 
  * @param {string} _current 変更元
  * @param {string} _next 変更先
- * @param {boolean} _bottonFlg ボタンフラグ (false: 初期, true: ボタン)
+ * @param {boolean} _buttonFlg ボタンフラグ (false: 初期, true: ボタン)
  */
-function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = false) {
+function interlockingButton(_headerObj, _name, _current, _next, _buttonFlg = false) {
 	let includeDefaults = [];
 	if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
 		g_displays.forEach(option => {
@@ -5008,7 +5008,7 @@ function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = fal
 			// 連動してOFFにするボタンの設定
 			if (!includeDefaults.includes(defaultOption)) {
 				g_stateObj[`d_${defaultOption.toLowerCase()}`] = _next;
-				if (_bottonFlg) {
+				if (_buttonFlg) {
 					if (g_headerObj[`${defaultOption}Use`]) {
 						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${_current}`], g_cssObj[`button_${_next}`]);
 					} else {
@@ -5017,7 +5017,7 @@ function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = fal
 					}
 				}
 				// さらに連動する場合は設定を反転
-				interlockingButton(_headerObj, defaultOption, _next, _current, _bottonFlg);
+				interlockingButton(_headerObj, defaultOption, _next, _current, _buttonFlg);
 			}
 		});
 	}
