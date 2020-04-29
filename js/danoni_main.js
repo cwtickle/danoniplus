@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/04/28
+ * Revised : 2020/04/29
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.0.0`;
-const g_revisedDate = `2020/04/28`;
+const g_version = `Ver 14.0.1`;
+const g_revisedDate = `2020/04/29`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4987,9 +4987,9 @@ function createSettingsDisplayWindow(_sprite) {
  * @param {string} _name 
  * @param {string} _current 変更元
  * @param {string} _next 変更先
- * @param {boolean} _bottonFlg ボタンフラグ (false: 初期, true: ボタン)
+ * @param {boolean} _buttonFlg ボタンフラグ (false: 初期, true: ボタン)
  */
-function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = false) {
+function interlockingButton(_headerObj, _name, _current, _next, _buttonFlg = false) {
 	let includeDefaults = [];
 	if (g_stateObj[`d_${_name.toLowerCase()}`] === C_FLG_OFF) {
 		g_displays.forEach(option => {
@@ -5008,7 +5008,7 @@ function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = fal
 			// 連動してOFFにするボタンの設定
 			if (!includeDefaults.includes(defaultOption)) {
 				g_stateObj[`d_${defaultOption.toLowerCase()}`] = _next;
-				if (_bottonFlg) {
+				if (_buttonFlg) {
 					if (g_headerObj[`${defaultOption}Use`]) {
 						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${_current}`], g_cssObj[`button_${_next}`]);
 					} else {
@@ -5017,7 +5017,7 @@ function interlockingButton(_headerObj, _name, _current, _next, _bottonFlg = fal
 					}
 				}
 				// さらに連動する場合は設定を反転
-				interlockingButton(_headerObj, defaultOption, _next, _current, _bottonFlg);
+				interlockingButton(_headerObj, defaultOption, _next, _current, _buttonFlg);
 			}
 		});
 	}
@@ -5125,10 +5125,8 @@ function keyConfigInit() {
 			g_keyObj[`stepRtn${keyCtrlPtn}`][j]));
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
-			if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] === undefined) {
-				g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = 0;
-				g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] = 0;
-			}
+			g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k], 0, C_TYP_NUMBER);
+			g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
 
 			keyconSprite.appendChild(createDivCssLabel(`keycon${j}_${k}`,
 				keyconX, 50 + C_KYC_REPHEIGHT * k + keyconY,
@@ -5344,7 +5342,7 @@ function keyConfigInit() {
 
 			for (let j = 0; j < keyNum; j++) {
 				for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
-					g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k];
+					g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
 					document.querySelector(`#keycon${j}_${k}`).innerHTML = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
 
 					if (g_keyObj.currentPtn === -1) {
