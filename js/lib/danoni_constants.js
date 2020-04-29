@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/04/28
+ * Revised : 2020/04/29
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1253,7 +1253,7 @@ const C_MSG_E_0033 = `楽曲ファイルの読み込み中に接続がタイム�
 const C_MSG_E_0034 = `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`;
 const C_MSG_E_0035 = `お使いのOSでは指定された楽曲フォーマットに対応していません。(E-0035)`;
 const C_MSG_E_0041 = `ファイル:{0}の読み込みに失敗しました。(E-0041)<br>`;
-const C_MSG_E_0051 = `Displayオプションのデフォルト設定(XXXXDefault)で、<br>指定できない組み合わせが設定されています。(E-0051)`;
+const C_MSG_E_0051 = `Displayオプションのデフォルト設定(XXXXChainOFF)で、<br>指定できない組み合わせが設定されています。(E-0051)`;
 
 const C_MSG_E_0101 = `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
 	|color{0}=0,1,0,1,0,2|`;
