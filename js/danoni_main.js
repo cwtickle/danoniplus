@@ -5125,10 +5125,8 @@ function keyConfigInit() {
 			g_keyObj[`stepRtn${keyCtrlPtn}`][j]));
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
-			if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] === undefined) {
-				g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = 0;
-				g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] = 0;
-			}
+			g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k], 0, C_TYP_NUMBER);
+			g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
 
 			keyconSprite.appendChild(createDivCssLabel(`keycon${j}_${k}`,
 				keyconX, 50 + C_KYC_REPHEIGHT * k + keyconY,
@@ -5344,7 +5342,7 @@ function keyConfigInit() {
 
 			for (let j = 0; j < keyNum; j++) {
 				for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
-					g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k];
+					g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
 					document.querySelector(`#keycon${j}_${k}`).innerHTML = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
 
 					if (g_keyObj.currentPtn === -1) {
