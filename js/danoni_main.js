@@ -7252,7 +7252,7 @@ function MainInit() {
 			const stepShadow = createColorObject(`stepShadow${j}`, ``,
 				0, 0,
 				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `ShadowStep`);
-			stepShadow.classList.add(g_cssObj.main_objShadow);
+			stepShadow.classList.add(g_cssObj.main_objStepShadow);
 			stepRoot.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.7;
 		}

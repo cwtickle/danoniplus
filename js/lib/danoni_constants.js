@@ -563,6 +563,7 @@ const g_cssObj = {
     main_stepMatari: `main_stepMatari`,
     main_stepShobon: `main_stepShobon`,
 
+    main_objStepShadow: `main_objStepShadow`,
     main_objShadow: `main_objShadow`,
     main_frzHitTop: `main_frzHitTop`,
 
