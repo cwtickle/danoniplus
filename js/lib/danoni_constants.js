@@ -367,6 +367,7 @@ const g_hidSudObj = {
     pgUp: {},
     std: {},
 };
+g_hidSudObj[`Visible`] = 1;
 g_hidSudObj[`Hidden+`] = 0;
 g_hidSudObj[`Sudden+`] = 1;
 g_hidSudObj[`Hid&Sud+`] = 1;
@@ -414,6 +415,8 @@ let g_stepY;
 let g_distY;
 let g_reverseStepY;
 let g_stepYR;
+let g_stepDiffY;
+let g_arrowHeight;
 
 const g_diffObj = {
     arrowJdgY: 0,

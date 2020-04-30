@@ -2906,8 +2906,10 @@ function headerConvert(_dosObj) {
 	// ステップゾーン位置
 	g_stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));
 	g_stepYR = (isNaN(parseFloat(_dosObj.stepYR)) ? C_STEP_YR : parseFloat(_dosObj.stepYR));
-	g_distY = g_sHeight - g_stepY + g_stepYR;
-	g_reverseStepY = g_distY - g_stepY - C_ARW_WIDTH;
+	g_stepDiffY = g_stepY - C_STEP_Y;
+	g_distY = g_sHeight - C_STEP_Y + g_stepYR;
+	g_reverseStepY = g_distY - g_stepY - g_stepDiffY - C_ARW_WIDTH;
+	g_arrowHeight = g_sHeight + g_stepYR - g_stepDiffY * 2;
 	obj.bottomWordSetFlg = setVal(_dosObj.bottomWordSet, false, C_TYP_BOOLEAN);
 
 	// 矢印・フリーズアロー判定位置補正
@@ -7196,7 +7198,7 @@ function MainInit() {
 	}
 
 	// ステップゾーン、矢印のメインスプライトを作成
-	const mainSprite = createSprite(`divRoot`, `mainSprite`, 0, 0, g_sWidth, g_sHeight);
+	const mainSprite = createSprite(`divRoot`, `mainSprite`, 0, g_stepY - C_STEP_Y, g_sWidth, g_sHeight);
 	mainSprite.style.transform = `scale(${g_keyObj.scale})`;
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
@@ -7243,7 +7245,7 @@ function MainInit() {
 		// ステップゾーンルート
 		const stepRoot = createSprite(`mainSprite`, `stepRoot${j}`,
 			g_workObj.stepX[j],
-			g_stepY + g_reverseStepY * g_workObj.dividePos[j],
+			C_STEP_Y + g_reverseStepY * g_workObj.dividePos[j],
 			C_ARW_WIDTH, C_ARW_WIDTH);
 
 		// 矢印の内側を塗りつぶすか否か
@@ -7290,13 +7292,13 @@ function MainInit() {
 
 		// ステップゾーンの代わり
 		const stepBar0 = createColorObject(`stepBar`, ``,
-			0, g_stepY + g_reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
+			0, C_STEP_Y + g_reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
 			g_sWidth - 50, 1, ``, `lifeBar`);
 		stepBar0.classList.add(g_cssObj.life_Failed);
 		mainSprite.appendChild(stepBar0);
 
 		const stepBar1 = createColorObject(`stepBar`, ``,
-			0, g_stepY + g_reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
+			0, C_STEP_Y + g_reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
 			g_sWidth - 50, 1, ``, `lifeBar`);
 		stepBar1.classList.add(g_cssObj.life_Failed);
 		mainSprite.appendChild(stepBar1);
@@ -7332,15 +7334,16 @@ function MainInit() {
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
 	const arrowSprite = [
-		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_sWidth, g_sHeight),
-		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_sWidth, g_sHeight)
+		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_sWidth, g_arrowHeight),
+		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_sWidth, g_arrowHeight)
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos);
-
-	} else if (g_stateObj.appearance !== `Visible`) {
+	} else if (g_stateObj.appearance === `Visible`) {
+		changeAppearanceFilter(g_stateObj.appearance, 0);
+	} else {
 		arrowSprite[0].classList.add(`${g_stateObj.appearance}0`);
 		arrowSprite[1].classList.add(`${g_stateObj.appearance}1`);
 	}
@@ -7349,7 +7352,7 @@ function MainInit() {
 
 		// フリーズアローヒット部分
 		const frzHit = createSprite(`mainSprite`, `frzHit${j}`,
-			g_workObj.stepX[j], g_stepY + g_reverseStepY * g_workObj.dividePos[j],
+			g_workObj.stepX[j], C_STEP_Y + g_reverseStepY * g_workObj.dividePos[j],
 			C_ARW_WIDTH, C_ARW_WIDTH);
 		frzHit.style.opacity = 0;
 		if (isNaN(Number(g_workObj.arrowRtn[j]))) {
@@ -8000,7 +8003,7 @@ function MainInit() {
 
 		const stepRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
-			g_stepY + g_reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+			C_STEP_Y + g_reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH);
 		stepRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 		stepRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
@@ -8085,7 +8088,7 @@ function MainInit() {
 
 		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
-			g_stepY + g_reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+			C_STEP_Y + g_reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH + frzLength);
 		frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 		frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
@@ -8522,16 +8525,18 @@ function changeAppearanceFilter(_appearance, _num = 10) {
 	document.querySelector(`#arrowSprite${bottomNum}`).style.clipPath = bottomShape;
 	document.querySelector(`#arrowSprite${bottomNum}`).style.webkitClipPath = bottomShape;
 
-	document.querySelector(`#filterBar0`).style.top = `${g_sHeight * _num / 100}px`;
-	document.querySelector(`#filterBar1`).style.top = `${g_sHeight * (100 - _num) / 100}px`;
-	document.querySelector(`#filterView`).style.top =
-		document.querySelector(`#filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).style.top;
-	document.querySelector(`#filterView`).innerHTML = `${_num}%`;
+	if (document.querySelector(`#filterBar0`) !== null) {
+		document.querySelector(`#filterBar0`).style.top = `${g_arrowHeight * _num / 100}px`;
+		document.querySelector(`#filterBar1`).style.top = `${g_arrowHeight * (100 - _num) / 100}px`;
+		document.querySelector(`#filterView`).style.top =
+			document.querySelector(`#filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).style.top;
+		document.querySelector(`#filterView`).innerHTML = `${_num}%`;
 
-	if (_appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
-		document.querySelector(`#filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).style.display = C_DIS_NONE;
+		if (_appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
+			document.querySelector(`#filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).style.display = C_DIS_NONE;
+		}
+		g_hidSudObj.filterPos = _num;
 	}
-	g_hidSudObj.filterPos = _num;
 }
 
 /**
@@ -9222,9 +9227,6 @@ function resultInit() {
 	}
 	if (g_stateObj.appearance !== `Visible`) {
 		playStyleData += `, ${g_stateObj.appearance}`;
-		if (g_appearanceRanges.includes(g_stateObj.appearance)) {
-			playStyleData += `(${g_hidSudObj.filterPos}%)`;
-		}
 	}
 	if (g_stateObj.gauge !== g_gauges[0]) {
 		playStyleData += `, ${g_stateObj.gauge}`;
