@@ -210,6 +210,8 @@ const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
  */
 function setVal(_checkStr, _default, _type) {
 
+	let convertStr = _checkStr;
+
 	// 値がundefined相当の場合は無条件でデフォルト値を返却
 	if (_checkStr === undefined || _checkStr === null || _checkStr === ``) {
 		return _default;
@@ -219,26 +221,26 @@ function setVal(_checkStr, _default, _type) {
 	if (_type === C_TYP_FLOAT) {
 		// 数値型(小数可)の場合
 		isNaNflg = isNaN(parseFloat(_checkStr));
-		return (isNaNflg ? _default : parseFloat(_checkStr));
+		convertStr = (isNaNflg ? _default : parseFloat(_checkStr));
 
 	} else if (_type === C_TYP_NUMBER) {
 		// 数値型(整数のみ)の場合
 		isNaNflg = isNaN(parseInt(_checkStr));
-		return (isNaNflg ? _default : parseInt(_checkStr));
+		convertStr = (isNaNflg ? _default : parseInt(_checkStr));
 
 	} else if (_type === C_TYP_BOOLEAN) {
 		// 真偽値の場合
 		const lowerCase = _checkStr.toString().toLowerCase();
-		return (lowerCase === `true` ? true : (lowerCase === `false` ? false : _default));
+		convertStr = (lowerCase === `true` ? true : (lowerCase === `false` ? false : _default));
 
 	} else if (_type === C_TYP_SWITCH) {
 		// ON/OFFスイッチの場合
-		return [C_FLG_OFF, C_FLG_ON].includes(_checkStr.toString().toUpperCase()) ?
+		convertStr = [C_FLG_OFF, C_FLG_ON].includes(_checkStr.toString().toUpperCase()) ?
 			_checkStr.toString().toUpperCase() : _default;
 	}
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
-	return _checkStr;
+	return convertStr;
 }
 
 /**
@@ -1964,7 +1966,9 @@ function makeColorGradation(_colorStr, _options = {}) {
 		} else {
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
 		}
-	} else if (gradationType === `linear-gradient` && colorArray[0].slice(0, 1) === `#`) {
+	} else if (gradationType === `linear-gradient` && (colorArray[0].slice(0, 1) === `#` ||
+		(!colorArray[0].startsWith(`to `) && !colorArray[0].endsWith(`deg`)))) {
+		// "to XXXX" もしくは "XXXdeg"のパターン以外は方向を補完する
 		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
 	} else {
 		convertColorStr = `${colorArray.join(', ')}`;
@@ -2608,6 +2612,10 @@ function headerConvert(_dosObj) {
 
 	// 最大ライフ
 	obj.maxLifeVal = setVal(_dosObj.maxLifeVal, C_VAL_MAXLIFE, C_TYP_FLOAT);
+	if (obj.maxLifeVal <= 0) {
+		obj.maxLifeVal = C_VAL_MAXLIFE;
+		makeWarningWindow(C_MSG_E_0042.split(`{0}`).join(`maxLifeVal`));
+	}
 
 	// ゲージ設定詳細（初期値）
 	g_gaugeOptionObj = {
@@ -2781,7 +2789,8 @@ function headerConvert(_dosObj) {
 			for (let j = 0; j < colorList.length; j++) {
 				const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
 				tmpSetColorOrg.some(tmpColorOrg => {
-					if (tmpColorOrg.indexOf(`#`) !== -1 || tmpColorOrg === `Default`) {
+					if (tmpColorOrg.indexOf(`#`) !== -1 ||
+						(!tmpColorOrg.startsWith(`to `) && !tmpColorOrg.endsWith(`deg`)) || tmpColorOrg === `Default`) {
 						colorOrg[j] = tmpColorOrg;
 						return true;
 					}
@@ -2865,6 +2874,10 @@ function headerConvert(_dosObj) {
 
 	// 再生速度
 	obj.playbackRate = setVal(_dosObj.playbackRate, 1, C_TYP_FLOAT);
+	if (obj.playbackRate <= 0) {
+		obj.playbackRate = 1;
+		makeWarningWindow(C_MSG_E_0042.split(`{0}`).join(`playbackRate`));
+	}
 
 	// ファイルパスの取得
 	const getFilePath = (_fileName, _directory = ``) => {
