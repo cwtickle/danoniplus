@@ -1296,7 +1296,7 @@ const g_msgObj = {
     d_fastslow: `Fast/Slow表示`,
     d_lifegauge: `ライフゲージの表示`,
     d_score: `現時点の判定数を表示`,
-    d_musicinfo: `音楽情報（現状は時間表示のみ）`,
+    d_musicinfo: `音楽情報（時間表示含む）`,
     d_filterline: `Hidden+, Sudden+使用時のフィルターの境界線表示`,
     d_speed: `途中変速、個別加速の有効化設定`,
     d_color: `色変化の有効化設定`,
