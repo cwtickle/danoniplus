@@ -2789,7 +2789,8 @@ function headerConvert(_dosObj) {
 			for (let j = 0; j < colorList.length; j++) {
 				const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
 				tmpSetColorOrg.some(tmpColorOrg => {
-					if (tmpColorOrg.indexOf(`#`) !== -1 || tmpColorOrg === `Default`) {
+					if (tmpColorOrg.indexOf(`#`) !== -1 ||
+						(!tmpColorOrg.startsWith(`to `) && !tmpColorOrg.endsWith(`deg`)) || tmpColorOrg === `Default`) {
 						colorOrg[j] = tmpColorOrg;
 						return true;
 					}
