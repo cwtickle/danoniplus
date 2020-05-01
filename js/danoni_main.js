@@ -7590,7 +7590,10 @@ function MainInit() {
 
 	// 曲情報OFF
 	if (g_stateObj.d_musicinfo === C_FLG_OFF) {
-		document.querySelector(`#lblCredit`).style.left = `20px`;
+		lblCredit.style.left = `20px`;
+		lblCredit.style.animationDuration = `4.0s`;
+		lblCredit.style.animationName = `leftToRightFade`;
+		lblCredit.style.animationFillMode = `both`;
 		document.querySelector(`#lblTime1`).style.display = C_DIS_NONE;
 		document.querySelector(`#lblTime2`).style.display = C_DIS_NONE;
 	}
