@@ -418,6 +418,15 @@ let g_stepYR;
 let g_stepDiffY;
 let g_arrowHeight;
 
+const g_posObj = {
+    stepY: 70,
+    distY: 0,
+    reverseStepY: 0,
+    stepYR: 0,
+    stepDiffY: 0,
+    arrowHeight: 0,
+}
+
 const g_diffObj = {
     arrowJdgY: 0,
     frzJdgY: 0,
