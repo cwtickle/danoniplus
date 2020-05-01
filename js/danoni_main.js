@@ -1966,7 +1966,9 @@ function makeColorGradation(_colorStr, _options = {}) {
 		} else {
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
 		}
-	} else if (gradationType === `linear-gradient` && colorArray[0].slice(0, 1) === `#`) {
+	} else if (gradationType === `linear-gradient` && (colorArray[0].slice(0, 1) === `#` ||
+		(!colorArray[0].startsWith(`to `) && !colorArray[0].endsWith(`deg`)))) {
+		// "to XXXX" もしくは "XXXdeg"のパターン以外は方向を補完する
 		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
 	} else {
 		convertColorStr = `${colorArray.join(', ')}`;
