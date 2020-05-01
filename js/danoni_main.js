@@ -7252,7 +7252,7 @@ function MainInit() {
 			const stepShadow = createColorObject(`stepShadow${j}`, ``,
 				0, 0,
 				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `ShadowStep`);
-			stepShadow.classList.add(g_cssObj.main_objShadow);
+			stepShadow.classList.add(g_cssObj.main_objStepShadow);
 			stepRoot.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.7;
 		}
@@ -7365,8 +7365,8 @@ function MainInit() {
 
 		} else {
 			const frzHitTop = createColorObject(`frzHitTop${j}`, ``,
-				-10, -10,
-				C_ARW_WIDTH + 20, C_ARW_WIDTH + 20, g_workObj.arrowRtn[j], `Shadow`);
+				-8, -8,
+				C_ARW_WIDTH + 16, C_ARW_WIDTH + 16, g_workObj.arrowRtn[j], `Shadow`);
 			frzHitTop.classList.add(g_cssObj.main_frzHitTop);
 			frzHit.appendChild(frzHitTop);
 		}
