@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/04/29
+ * Revised : 2020/05/01
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -367,6 +367,7 @@ const g_hidSudObj = {
     pgUp: {},
     std: {},
 };
+g_hidSudObj[`Visible`] = 1;
 g_hidSudObj[`Hidden+`] = 0;
 g_hidSudObj[`Sudden+`] = 1;
 g_hidSudObj[`Hid&Sud+`] = 1;
@@ -414,6 +415,17 @@ let g_stepY;
 let g_distY;
 let g_reverseStepY;
 let g_stepYR;
+let g_stepDiffY;
+let g_arrowHeight;
+
+const g_posObj = {
+    stepY: 70,
+    distY: 0,
+    reverseStepY: 0,
+    stepYR: 0,
+    stepDiffY: 0,
+    arrowHeight: 0,
+}
 
 const g_diffObj = {
     arrowJdgY: 0,
@@ -563,6 +575,7 @@ const g_cssObj = {
     main_stepMatari: `main_stepMatari`,
     main_stepShobon: `main_stepShobon`,
 
+    main_objStepShadow: `main_objStepShadow`,
     main_objShadow: `main_objShadow`,
     main_frzHitTop: `main_frzHitTop`,
 
@@ -1253,6 +1266,7 @@ const C_MSG_E_0033 = `楽曲ファイルの読み込み中に接続がタイム�
 const C_MSG_E_0034 = `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`;
 const C_MSG_E_0035 = `お使いのOSでは指定された楽曲フォーマットに対応していません。(E-0035)`;
 const C_MSG_E_0041 = `ファイル:{0}の読み込みに失敗しました。(E-0041)<br>`;
+const C_MSG_E_0042 = `{0}は0より大きい値を指定する必要があります。(E-0042)`;
 const C_MSG_E_0051 = `Displayオプションのデフォルト設定(XXXXChainOFF)で、<br>指定できない組み合わせが設定されています。(E-0051)`;
 
 const C_MSG_E_0101 = `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
@@ -1283,7 +1297,7 @@ const g_msgObj = {
     d_fastslow: `Fast/Slow表示`,
     d_lifegauge: `ライフゲージの表示`,
     d_score: `現時点の判定数を表示`,
-    d_musicinfo: `音楽情報（現状は時間表示のみ）`,
+    d_musicinfo: `音楽情報（時間表示含む）`,
     d_filterline: `Hidden+, Sudden+使用時のフィルターの境界線表示`,
     d_speed: `途中変速、個別加速の有効化設定`,
     d_color: `色変化の有効化設定`,

@@ -1,4 +1,13 @@
 ﻿@charset "UTF-8";
+/* ----------------------------------------
+  Dancing☆Onigiri (CW Edition)
+  スキンcssファイル (light)
+
+  Created : 2019/11/04
+  Revised : 2020/05/01 (v14.1.0)
+
+  https://github.com/cwtickle/danoniplus
+------------------------------------------ */
 /* 背景 */
 #divBack {
     background: linear-gradient(#dddddd, #ffffff);
@@ -124,6 +133,9 @@
 	background-color: #0000cc;
 }
 
+.main_objStepShadow {
+	background-color: #eeeeee;
+}
 .main_objShadow {
 	background-color: #666666;
 }
