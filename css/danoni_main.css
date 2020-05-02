@@ -4,7 +4,7 @@
   本体cssファイル
 
   Created : 2018/10/08
-  Revised : 2020/03/06
+  Revised : 2020/05/02 (v14.1.1)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -256,32 +256,6 @@ input[type=range]:focus {
 }
 .toSpin {
 	animation-name: spinY;
-}
-
-/* Appearance用 クリッピングマスク */
-.Hidden0 {
-	clip-path: inset(50% 0% 0% 0%);
-	-webkit-clip-path: inset(50% 0% 0% 0%);
-}
-.Hidden1 {
-	clip-path: inset(0% 0% 50% 0%);
-	-webkit-clip-path: inset(0% 0% 50% 0%);
-}
-.Sudden0 {
-	clip-path: inset(0% 0% 40% 0%);
-	-webkit-clip-path: inset(0% 0% 40% 0%);
-}
-.Sudden1 {
-	clip-path: inset(40% 0% 0% 0%);
-	-webkit-clip-path: inset(40% 0% 0% 0%);
-}
-.Slit0 {
-	clip-path: polygon(5% 0%, 100% 0%, 100% 30%, 5% 30%, 5% 45%, 100% 45%, 100% 55%, 5% 55%, 5% 70%, 100% 70%, 100% 100%, 5% 100%);
-	-webkit-clip-path: polygon(5% 0%, 100% 0%, 100% 30%, 5% 30%, 5% 45%, 100% 45%, 100% 55%, 5% 55%, 5% 70%, 100% 70%, 100% 100%, 5% 100%);
-}
-.Slit1 {
-	clip-path: polygon(5% 0%, 100% 0%, 100% 30%, 5% 30%, 5% 45%, 100% 45%, 100% 55%, 5% 55%, 5% 70%, 100% 70%, 100% 100%, 5% 100%);
-	-webkit-clip-path: polygon(5% 0%, 100% 0%, 100% 30%, 5% 30%, 5% 45%, 100% 45%, 100% 55%, 5% 55%, 5% 70%, 100% 70%, 100% 100%, 5% 100%);
 }
 
 /* 設定画面：ゲージ設定詳細 */
