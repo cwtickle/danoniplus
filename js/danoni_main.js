@@ -76,6 +76,7 @@ const C_ARW_WIDTH = 50;
 const C_FLG_ON = `ON`;
 const C_FLG_OFF = `OFF`;
 const C_DIS_NONE = `none`;
+const C_DIS_INHERIT = `inherit`;
 
 // 初期化フラグ（ボタンアニメーション制御）
 let g_initialFlg = false;
@@ -7325,29 +7326,27 @@ function MainInit() {
 	}
 
 	// Hidden+, Sudden+用のライン、パーセント表示
-	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
-		const filterBar0 = createColorObject(`filterBar0`, ``,
+	[`filterBar0`, `filterBar1`].forEach(obj => {
+		const filterBar = createColorObject(`${obj}`, ``,
 			0, 0,
 			g_sWidth - 50, 1, ``, `lifeBar`);
-		filterBar0.classList.add(g_cssObj.life_Failed);
-		mainSprite.appendChild(filterBar0);
+		filterBar.classList.add(g_cssObj.life_Failed);
+		filterBar.style.display = C_DIS_NONE;
+		mainSprite.appendChild(filterBar);
+	});
 
-		const filterBar1 = createColorObject(`filterBar1`, ``,
-			0, 0,
-			g_sWidth - 50, 1, ``, `lifeBar`);
-		filterBar1.classList.add(g_cssObj.life_Failed);
-		mainSprite.appendChild(filterBar1);
+	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 
 		const filterView = createDivCssLabel(`filterView`, g_sWidth - 70, 0, 10, 10, 10, ``);
 		filterView.style.textAlign = C_ALIGN_RIGHT;
 		mainSprite.appendChild(filterView);
 
 		if (g_stateObj.d_filterline === C_FLG_OFF) {
-			[`filterBar0`, `filterBar1`].forEach(obj =>
-				document.querySelector(`#${obj}`).style.display = C_DIS_NONE);
 		} else {
-			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj =>
-				document.querySelector(`#${obj}`).style.opacity = g_stateObj.opacity / 100);
+			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj => {
+				document.querySelector(`#${obj}`).style.display = C_DIS_INHERIT;
+				document.querySelector(`#${obj}`).style.opacity = g_stateObj.opacity / 100;
+			});
 		}
 	}
 
@@ -7360,11 +7359,8 @@ function MainInit() {
 	// Appearanceのオプション適用時は一部描画を隠す
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos);
-	} else if (g_stateObj.appearance === `Visible`) {
-		changeAppearanceFilter(g_stateObj.appearance, 0);
 	} else {
-		arrowSprite[0].classList.add(`${g_stateObj.appearance}0`);
-		arrowSprite[1].classList.add(`${g_stateObj.appearance}1`);
+		changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPosDefault[g_stateObj.appearance]);
 	}
 
 	for (let j = 0; j < keyNum; j++) {
@@ -8547,9 +8543,10 @@ function changeAppearanceFilter(_appearance, _num = 10) {
 	document.querySelector(`#arrowSprite${bottomNum}`).style.clipPath = bottomShape;
 	document.querySelector(`#arrowSprite${bottomNum}`).style.webkitClipPath = bottomShape;
 
-	if (document.querySelector(`#filterBar0`) !== null) {
-		document.querySelector(`#filterBar0`).style.top = `${g_posObj.arrowHeight * _num / 100}px`;
-		document.querySelector(`#filterBar1`).style.top = `${g_posObj.arrowHeight * (100 - _num) / 100}px`;
+	document.querySelector(`#filterBar0`).style.top = `${g_posObj.arrowHeight * _num / 100}px`;
+	document.querySelector(`#filterBar1`).style.top = `${g_posObj.arrowHeight * (100 - _num) / 100}px`;
+
+	if (g_appearanceRanges.includes(_appearance)) {
 		document.querySelector(`#filterView`).style.top =
 			document.querySelector(`#filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).style.top;
 		document.querySelector(`#filterView`).innerHTML = `${_num}%`;
