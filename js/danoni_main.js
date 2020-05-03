@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/05/01
+ * Revised : 2020/05/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.1.0`;
-const g_revisedDate = `2020/05/01`;
+const g_version = `Ver 14.2.0`;
+const g_revisedDate = `2020/05/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -76,6 +76,7 @@ const C_ARW_WIDTH = 50;
 const C_FLG_ON = `ON`;
 const C_FLG_OFF = `OFF`;
 const C_DIS_NONE = `none`;
+const C_DIS_INHERIT = `inherit`;
 
 // 初期化フラグ（ボタンアニメーション制御）
 let g_initialFlg = false;
@@ -104,6 +105,7 @@ const g_detailObj = {
 	densityData: [],
 	startFrame: [],
 	playingFrame: [],
+	playingFrameWithBlank: [],
 	speedData: [],
 	boostData: [],
 	toolDif: [],
@@ -1324,9 +1326,11 @@ function getScoreDetailData(_scoreId) {
  * @param {number} _keyCtrlPtn 
  */
 function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
-	const lastFrame = getLastFrame(_scoreObj, _keyCtrlPtn) + g_headerObj.blankFrame + 1;
+	const lastFrame = getLastFrame(_scoreObj, _keyCtrlPtn) + 1;
 	const startFrame = getStartFrame(lastFrame, 0, _scoreId);
-	const playingFrame = lastFrame - startFrame;
+	const firstArrowFrame = getFirstArrowFrame(_scoreObj, _keyCtrlPtn);
+	const playingFrame = lastFrame - firstArrowFrame;
+	const playingFrameWithBlank = lastFrame - startFrame;
 	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
 
 	// 譜面密度グラフ用のデータ作成
@@ -1345,7 +1349,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 			if (isNaN(parseFloat(note))) {
 				return;
 			}
-			const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+			const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 			if (point >= 0) {
 				densityData[point]++;
 				arrowCnt[j]++;
@@ -1357,7 +1361,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 				return;
 			}
 			if (k % 2 === 0 && note !== ``) {
-				const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+				const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 				if (point >= 0) {
 					densityData[point]++;
 					frzCnt[j]++;
@@ -1381,6 +1385,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	g_detailObj.frzCnt[_scoreId] = frzCnt.concat();
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
+	g_detailObj.playingFrameWithBlank[_scoreId] = playingFrameWithBlank;
 }
 
 /**
@@ -3796,7 +3801,7 @@ function createOptionWindow(_sprite) {
 	 */
 	function drawSpeedGraph(_scoreId) {
 		const startFrame = g_detailObj.startFrame[_scoreId];
-		const playingFrame = g_detailObj.playingFrame[_scoreId];
+		const playingFrame = g_detailObj.playingFrameWithBlank[_scoreId];
 		const speedObj = {
 			speed: { frame: [0], speed: [1], cnt: 0 },
 			boost: { frame: [0], speed: [1], cnt: 0 }
@@ -3881,8 +3886,8 @@ function createOptionWindow(_sprite) {
 
 		const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60));
 		makeScoreDetailLabel(`Density`, `APM`, apm, 0);
-		const minutes = Math.floor(g_detailObj.playingFrame[_scoreId] / g_fps / 60);
-		const seconds = `00${Math.floor((g_detailObj.playingFrame[_scoreId] / g_fps) % 60)}`.slice(-2);
+		const minutes = Math.floor(g_detailObj.playingFrameWithBlank[_scoreId] / g_fps / 60);
+		const seconds = `00${Math.floor((g_detailObj.playingFrameWithBlank[_scoreId] / g_fps) % 60)}`.slice(-2);
 		const playingTime = `${minutes}:${seconds}`;
 		makeScoreDetailLabel(`Density`, `Time`, playingTime, 1);
 		makeScoreDetailLabel(`Density`, `Arrow`, arrowCnts, 3);
@@ -7325,29 +7330,28 @@ function MainInit() {
 	}
 
 	// Hidden+, Sudden+用のライン、パーセント表示
-	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
-		const filterBar0 = createColorObject(`filterBar0`, ``,
+	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj => {
+		const filterBar = createColorObject(`${obj}`, ``,
 			0, 0,
 			g_sWidth - 50, 1, ``, `lifeBar`);
-		filterBar0.classList.add(g_cssObj.life_Failed);
-		mainSprite.appendChild(filterBar0);
+		filterBar.classList.add(g_cssObj.life_Failed);
+		filterBar.style.opacity = 0.0625;
+		mainSprite.appendChild(filterBar);
+	});
+	document.querySelector(`#borderBar0`).style.top = `${g_posObj.stepDiffY}px`;
+	document.querySelector(`#borderBar1`).style.top = `${g_posObj.stepDiffY + g_posObj.arrowHeight}px`;
 
-		const filterBar1 = createColorObject(`filterBar1`, ``,
-			0, 0,
-			g_sWidth - 50, 1, ``, `lifeBar`);
-		filterBar1.classList.add(g_cssObj.life_Failed);
-		mainSprite.appendChild(filterBar1);
+	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 
 		const filterView = createDivCssLabel(`filterView`, g_sWidth - 70, 0, 10, 10, 10, ``);
 		filterView.style.textAlign = C_ALIGN_RIGHT;
 		mainSprite.appendChild(filterView);
 
 		if (g_stateObj.d_filterline === C_FLG_OFF) {
-			[`filterBar0`, `filterBar1`].forEach(obj =>
-				document.querySelector(`#${obj}`).style.display = C_DIS_NONE);
 		} else {
-			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj =>
-				document.querySelector(`#${obj}`).style.opacity = g_stateObj.opacity / 100);
+			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj => {
+				document.querySelector(`#${obj}`).style.opacity = g_stateObj.opacity / 100;
+			});
 		}
 	}
 
@@ -7360,11 +7364,8 @@ function MainInit() {
 	// Appearanceのオプション適用時は一部描画を隠す
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos);
-	} else if (g_stateObj.appearance === `Visible`) {
-		changeAppearanceFilter(g_stateObj.appearance, 0);
 	} else {
-		arrowSprite[0].classList.add(`${g_stateObj.appearance}0`);
-		arrowSprite[1].classList.add(`${g_stateObj.appearance}1`);
+		changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPosDefault[g_stateObj.appearance]);
 	}
 
 	for (let j = 0; j < keyNum; j++) {
@@ -8547,9 +8548,10 @@ function changeAppearanceFilter(_appearance, _num = 10) {
 	document.querySelector(`#arrowSprite${bottomNum}`).style.clipPath = bottomShape;
 	document.querySelector(`#arrowSprite${bottomNum}`).style.webkitClipPath = bottomShape;
 
-	if (document.querySelector(`#filterBar0`) !== null) {
-		document.querySelector(`#filterBar0`).style.top = `${g_posObj.arrowHeight * _num / 100}px`;
-		document.querySelector(`#filterBar1`).style.top = `${g_posObj.arrowHeight * (100 - _num) / 100}px`;
+	document.querySelector(`#filterBar0`).style.top = `${g_posObj.arrowHeight * _num / 100}px`;
+	document.querySelector(`#filterBar1`).style.top = `${g_posObj.arrowHeight * (100 - _num) / 100}px`;
+
+	if (g_appearanceRanges.includes(_appearance)) {
 		document.querySelector(`#filterView`).style.top =
 			document.querySelector(`#filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).style.top;
 		document.querySelector(`#filterView`).innerHTML = `${_num}%`;
