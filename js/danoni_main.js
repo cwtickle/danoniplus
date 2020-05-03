@@ -7335,7 +7335,7 @@ function MainInit() {
 			0, 0,
 			g_sWidth - 50, 1, ``, `lifeBar`);
 		filterBar.classList.add(g_cssObj.life_Failed);
-		filterBar.style.opacity = 0.0625;
+		filterBar.style.visibility = `hidden`;
 		mainSprite.appendChild(filterBar);
 	});
 	document.querySelector(`#borderBar0`).style.top = `${g_posObj.stepDiffY}px`;
@@ -7350,6 +7350,7 @@ function MainInit() {
 		if (g_stateObj.d_filterline === C_FLG_OFF) {
 		} else {
 			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj => {
+				document.querySelector(`#${obj}`).style.visibility = `visible`;
 				document.querySelector(`#${obj}`).style.opacity = g_stateObj.opacity / 100;
 			});
 		}
@@ -8696,7 +8697,7 @@ function changeHitFrz(_j, _k, _name) {
 
 	if (_name === `frz`) {
 		document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
-		document.querySelector(`#frzTop${frzNo}`).style.opacity = 0;
+		document.querySelector(`#frzTop${frzNo}`).style.display = C_DIS_NONE;
 		if (isNaN(Number(g_workObj.arrowRtn[_j]))) {
 			document.querySelector(`#frzHitTop${_j}`).style.background = g_workObj.frzHitColors[_j];
 		}
@@ -8739,7 +8740,7 @@ function changeHitFrz(_j, _k, _name) {
 function changeFailedFrz(_j, _k) {
 	const frzNo = `${_j}_${_k}`;
 	document.querySelector(`#frzHit${_j}`).style.opacity = 0;
-	document.querySelector(`#frzTop${frzNo}`).style.opacity = 1;
+	document.querySelector(`#frzTop${frzNo}`).style.display = C_DIS_INHERIT;
 	document.querySelector(`#frzTop${frzNo}`).style.background = `#cccccc`;
 	document.querySelector(`#frzBar${frzNo}`).style.background = `#999999`;
 	document.querySelector(`#frzBar${frzNo}`).style.opacity = 1;
