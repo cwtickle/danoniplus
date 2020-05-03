@@ -8691,18 +8691,19 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
  * @param {number} _k 
  */
 function changeHitFrz(_j, _k, _name) {
+	const frzNo = `${_j}_${_k}`;
 
 	if (_name === `frz`) {
 		document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
-		document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 0;
+		document.querySelector(`#frzTop${frzNo}`).style.opacity = 0;
 		if (isNaN(Number(g_workObj.arrowRtn[_j]))) {
 			document.querySelector(`#frzHitTop${_j}`).style.background = g_workObj.frzHitColors[_j];
 		}
 	}
-	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
-	const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
-	const frzBtm = document.querySelector(`#${_name}Btm${_j}_${_k}`);
-	const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
+	const frzBar = document.querySelector(`#${_name}Bar${frzNo}`);
+	const frzRoot = document.querySelector(`#${_name}${frzNo}`);
+	const frzBtm = document.querySelector(`#${_name}Btm${frzNo}`);
+	const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${frzNo}`);
 	const dividePos = Number(frzRoot.getAttribute(`dividePos`));
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -8735,18 +8736,19 @@ function changeHitFrz(_j, _k, _name) {
  * @param {number} _k 
  */
 function changeFailedFrz(_j, _k) {
+	const frzNo = `${_j}_${_k}`;
 	document.querySelector(`#frzHit${_j}`).style.opacity = 0;
-	document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 1;
-	document.querySelector(`#frzTop${_j}_${_k}`).style.background = `#cccccc`;
-	document.querySelector(`#frzBar${_j}_${_k}`).style.background = `#999999`;
-	document.querySelector(`#frzBar${_j}_${_k}`).style.opacity = 1;
-	document.querySelector(`#frzBtm${_j}_${_k}`).style.background = `#cccccc`;
+	document.querySelector(`#frzTop${frzNo}`).style.opacity = 1;
+	document.querySelector(`#frzTop${frzNo}`).style.background = `#cccccc`;
+	document.querySelector(`#frzBar${frzNo}`).style.background = `#999999`;
+	document.querySelector(`#frzBar${frzNo}`).style.opacity = 1;
+	document.querySelector(`#frzBtm${frzNo}`).style.background = `#cccccc`;
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
-		document.querySelector(`#frzTopShadow${_j}_${_k}`).style.background = `#333333`;
-		document.querySelector(`#frzBtmShadow${_j}_${_k}`).style.background = `#333333`;
+		document.querySelector(`#frzTopShadow${frzNo}`).style.background = `#333333`;
+		document.querySelector(`#frzBtmShadow${frzNo}`).style.background = `#333333`;
 	}
 }
 
@@ -8772,7 +8774,7 @@ function judgeArrow(_j) {
 
 	if (judgArrow !== null) {
 		const difFrame = Number(judgArrow.getAttribute(`cnt`));
-		const difCnt = Math.abs(judgArrow.getAttribute(`cnt`));
+		const difCnt = Math.abs(difFrame);
 		const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
 		const arrowSprite = document.querySelector(`#arrowSprite${judgArrow.getAttribute(`dividePos`)}`);
 
@@ -8816,11 +8818,11 @@ function judgeArrow(_j) {
 				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 					judgeIi(difFrame);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-					judgeShakin(difCnt);
+					judgeShakin(difFrame);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-					judgeMatari(difCnt);
+					judgeMatari(difFrame);
 				} else {
-					judgeShobon(difCnt);
+					judgeShobon(difFrame);
 				}
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
