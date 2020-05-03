@@ -8101,6 +8101,7 @@ function MainInit() {
 		const frzLength = g_workObj[`mk${camelHeader}Length`][_j][(_arrowCnt - 1) * 2];
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 		const dividePos = g_workObj.dividePos[_j];
+		const frzNo = `${_j}_${_arrowCnt}`;
 
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 		let shadowColor = ``;
@@ -8109,7 +8110,7 @@ function MainInit() {
 				g_headerObj.frzShadowColor[colorPos][0]);
 		}
 
-		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
+		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${frzNo}`,
 			g_workObj.stepX[_j],
 			C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH + frzLength);
@@ -8132,32 +8133,32 @@ function MainInit() {
 		// 後に作成するほど前面に表示される。
 
 		// フリーズアロー帯(frzBar)
-		const frzBar = frzRoot.appendChild(createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
+		const frzBar = frzRoot.appendChild(createColorObject(`${_name}Bar${frzNo}`, _barColor,
 			5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
 			C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, ``, `frzBar`));
 		frzBar.style.opacity = 0.75;
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-		const frzTopShadow = createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, shadowColor,
+		const frzTopShadow = createColorObject(`${_name}TopShadow${frzNo}`, shadowColor,
 			0, 0,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzTopShadow.classList.add(g_cssObj.main_objShadow);
 		frzRoot.appendChild(frzTopShadow);
 
 		// 開始矢印。ヒット時は隠れる。
-		frzRoot.appendChild(createColorObject(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
+		frzRoot.appendChild(createColorObject(`${_name}Top${frzNo}`, _normalColor,
 			0, 0,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
 
 		// 後発矢印の塗り部分
-		const frzBtmShadow = createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, shadowColor,
+		const frzBtmShadow = createColorObject(`${_name}BtmShadow${frzNo}`, shadowColor,
 			0, frzLength * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzBtmShadow.classList.add(g_cssObj.main_objShadow);
 		frzRoot.appendChild(frzBtmShadow);
 
 		// 後発矢印
-		frzRoot.appendChild(createColorObject(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
+		frzRoot.appendChild(createColorObject(`${_name}Btm${frzNo}`, _normalColor,
 			0, frzLength * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
 	}
@@ -8831,7 +8832,7 @@ function judgeArrow(_j) {
 		}
 	}
 	const stepDiv = document.querySelector(`#stepDiv${_j}`);
-	stepDiv.style.display = `inherit`;
+	stepDiv.style.display = C_DIS_INHERIT;
 }
 
 /**
