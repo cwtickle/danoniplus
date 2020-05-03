@@ -105,6 +105,7 @@ const g_detailObj = {
 	densityData: [],
 	startFrame: [],
 	playingFrame: [],
+	playingFrameWithBlank: [],
 	speedData: [],
 	boostData: [],
 	toolDif: [],
@@ -1325,9 +1326,11 @@ function getScoreDetailData(_scoreId) {
  * @param {number} _keyCtrlPtn 
  */
 function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
-	const lastFrame = getLastFrame(_scoreObj, _keyCtrlPtn) + g_headerObj.blankFrame + 1;
+	const lastFrame = getLastFrame(_scoreObj, _keyCtrlPtn) + 1;
 	const startFrame = getStartFrame(lastFrame, 0, _scoreId);
-	const playingFrame = lastFrame - startFrame;
+	const firstArrowFrame = getFirstArrowFrame(_scoreObj, _keyCtrlPtn);
+	const playingFrame = lastFrame - firstArrowFrame;
+	const playingFrameWithBlank = lastFrame - startFrame;
 	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
 
 	// 譜面密度グラフ用のデータ作成
@@ -1346,7 +1349,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 			if (isNaN(parseFloat(note))) {
 				return;
 			}
-			const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+			const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 			if (point >= 0) {
 				densityData[point]++;
 				arrowCnt[j]++;
@@ -1358,7 +1361,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 				return;
 			}
 			if (k % 2 === 0 && note !== ``) {
-				const point = Math.floor((note - startFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+				const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 				if (point >= 0) {
 					densityData[point]++;
 					frzCnt[j]++;
@@ -1382,6 +1385,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	g_detailObj.frzCnt[_scoreId] = frzCnt.concat();
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
+	g_detailObj.playingFrameWithBlank[_scoreId] = playingFrameWithBlank;
 }
 
 /**
@@ -3797,7 +3801,7 @@ function createOptionWindow(_sprite) {
 	 */
 	function drawSpeedGraph(_scoreId) {
 		const startFrame = g_detailObj.startFrame[_scoreId];
-		const playingFrame = g_detailObj.playingFrame[_scoreId];
+		const playingFrame = g_detailObj.playingFrameWithBlank[_scoreId];
 		const speedObj = {
 			speed: { frame: [0], speed: [1], cnt: 0 },
 			boost: { frame: [0], speed: [1], cnt: 0 }
@@ -3882,8 +3886,8 @@ function createOptionWindow(_sprite) {
 
 		const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60));
 		makeScoreDetailLabel(`Density`, `APM`, apm, 0);
-		const minutes = Math.floor(g_detailObj.playingFrame[_scoreId] / g_fps / 60);
-		const seconds = `00${Math.floor((g_detailObj.playingFrame[_scoreId] / g_fps) % 60)}`.slice(-2);
+		const minutes = Math.floor(g_detailObj.playingFrameWithBlank[_scoreId] / g_fps / 60);
+		const seconds = `00${Math.floor((g_detailObj.playingFrameWithBlank[_scoreId] / g_fps) % 60)}`.slice(-2);
 		const playingTime = `${minutes}:${seconds}`;
 		makeScoreDetailLabel(`Density`, `Time`, playingTime, 1);
 		makeScoreDetailLabel(`Density`, `Arrow`, arrowCnts, 3);
