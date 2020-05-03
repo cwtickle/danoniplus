@@ -343,7 +343,7 @@ let g_adjustmentNum = C_MAX_ADJUSTMENT;
 let g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
 let g_volumeNum = g_volumes.length - 1;
 
-let g_appearances = [`Visible`, `Hidden`, `Hidden+`, `Sudden`, `Sudden+`, `Hid&Sud+`, `Slit`];
+let g_appearances = [`Visible`, `Hidden`, `Hidden+`, `Sudden`, `Sudden+`, `Hid&Sud+`];
 let g_appearanceNum = 0;
 
 let g_appearanceRanges = [`Hidden+`, `Sudden+`, `Hid&Sud+`];
@@ -366,11 +366,18 @@ const g_hidSudObj = {
     pgDown: {},
     pgUp: {},
     std: {},
+    filterPosDefault: {},
 };
 g_hidSudObj[`Visible`] = 1;
+g_hidSudObj[`Hidden`] = 0;
 g_hidSudObj[`Hidden+`] = 0;
+g_hidSudObj[`Sudden`] = 1;
 g_hidSudObj[`Sudden+`] = 1;
 g_hidSudObj[`Hid&Sud+`] = 1;
+
+g_hidSudObj.filterPosDefault[`Visible`] = 0;
+g_hidSudObj.filterPosDefault[`Hidden`] = 50;
+g_hidSudObj.filterPosDefault[`Sudden`] = 40;
 g_hidSudObj.pgDown[`Hidden+`] = {
     OFF: 34,
     ON: 33,
