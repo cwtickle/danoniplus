@@ -3103,6 +3103,9 @@ function headerConvert(_dosObj) {
 	// 譜面明細の使用可否
 	obj.scoreDetailUse = setVal(_dosObj.scoreDetailUse, true, C_TYP_BOOLEAN);
 
+	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
+	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
+
 	return obj;
 }
 
@@ -8842,22 +8845,28 @@ function judgeArrow(_j) {
 /**
  * タイミングズレを表示
  * @param {number} _difFrame 
- * @param {number} _difCnt 
+ * @param {number} _justFrames
  */
-function displayDiff(_difFrame, _difCnt) {
+function displayDiff(_difFrame, _justFrames = 0) {
 	let diffJDisp = ``;
-	if (_difFrame > 0) {
-		diffJDisp = `<span class="common_matari">Fast ${_difCnt} Frames</span>`;
-	} else if (_difFrame < 0) {
-		diffJDisp = `<span class="common_shobon">Slow ${_difCnt} Frames</span>`;
+	let difCnt = Math.abs(_difFrame);
+	if (_difFrame > _justFrames) {
+		diffJDisp = `<span class="common_matari">Fast ${difCnt} Frames</span>`;
+	} else if (_difFrame < _justFrames * (-1)) {
+		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
 	}
 	document.querySelector(`#diffJ`).innerHTML = diffJDisp;
 }
 
-function countFastSlow(_difFrame) {
-	if (_difFrame > 0) {
+/**
+ * Fast/Slowカウンタ
+ * @param {number} _difFrame 
+ * @param {number} _justFrames 
+ */
+function countFastSlow(_difFrame, _justFrames = 0) {
+	if (_difFrame > _justFrames) {
 		g_resultObj.fast++;
-	} else if (_difFrame < 0) {
+	} else if (_difFrame < _justFrames) {
 		g_resultObj.slow++;
 	}
 }
@@ -8941,7 +8950,7 @@ function judgeIi(difFrame) {
 	changeJudgeCharacter(`ii`, C_JCR_II);
 
 	updateCombo();
-	displayDiff(difFrame, Math.abs(difFrame));
+	displayDiff(difFrame, g_headerObj.justFrames);
 
 	lifeRecovery();
 	finishViewing();
@@ -8962,7 +8971,7 @@ function judgeShakin(difFrame) {
 	changeJudgeCharacter(`shakin`, C_JCR_SHAKIN);
 
 	updateCombo();
-	displayDiff(difFrame, Math.abs(difFrame));
+	displayDiff(difFrame, g_headerObj.justFrames);
 
 	lifeRecovery();
 	finishViewing();
@@ -8983,7 +8992,7 @@ function judgeMatari(difFrame) {
 	changeJudgeCharacter(`matari`, C_JCR_MATARI);
 	document.querySelector(`#comboJ`).innerHTML = ``;
 
-	displayDiff(difFrame, Math.abs(difFrame));
+	displayDiff(difFrame, g_headerObj.justFrames);
 	finishViewing();
 
 	if (typeof customJudgeMatari === C_TYP_FUNCTION) {
