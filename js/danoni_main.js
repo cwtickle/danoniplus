@@ -3103,6 +3103,9 @@ function headerConvert(_dosObj) {
 	// 譜面明細の使用可否
 	obj.scoreDetailUse = setVal(_dosObj.scoreDetailUse, true, C_TYP_BOOLEAN);
 
+	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
+	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
+
 	return obj;
 }
 
@@ -7134,6 +7137,9 @@ function getArrowSettings() {
 	g_resultObj.fCombo = 0;
 	g_resultObj.fmaxCombo = 0;
 
+	g_resultObj.fast = 0;
+	g_resultObj.slow = 0;
+
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
 	g_finishFlg = true;
@@ -8799,6 +8805,7 @@ function judgeArrow(_j) {
 				judgeShobon(difFrame);
 				stepDivHit.classList.add(g_cssObj.main_stepShobon);
 			}
+			countFastSlow(difFrame);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
 			arrowSprite.removeChild(judgArrow);
@@ -8826,6 +8833,7 @@ function judgeArrow(_j) {
 				} else {
 					judgeShobon(difFrame);
 				}
+				countFastSlow(difFrame);
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
 			changeHitFrz(_j, fcurrentNo, `frz`);
@@ -8839,11 +8847,30 @@ function judgeArrow(_j) {
 /**
  * タイミングズレを表示
  * @param {number} _difFrame 
- * @param {number} _difCnt 
+ * @param {number} _justFrames
  */
-function displayDiff(_difFrame, _difCnt) {
-	document.querySelector(`#diffJ`).innerHTML = `<span class="common_${_difCnt <= 1 ? 'combo' : (_difFrame > 0 ? 'matari' : 'shobon')}">
-		${_difCnt <= 1 ? 'Just!!' : ((_difFrame > 1 ? `Fast` : `Slow`)) + ` ${_difCnt} Frames`}</span>`;
+function displayDiff(_difFrame, _justFrames = 0) {
+	let diffJDisp = ``;
+	let difCnt = Math.abs(_difFrame);
+	if (_difFrame > _justFrames) {
+		diffJDisp = `<span class="common_matari">Fast ${difCnt} Frames</span>`;
+	} else if (_difFrame < _justFrames * (-1)) {
+		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
+	}
+	document.querySelector(`#diffJ`).innerHTML = diffJDisp;
+}
+
+/**
+ * Fast/Slowカウンタ
+ * @param {number} _difFrame 
+ * @param {number} _justFrames 
+ */
+function countFastSlow(_difFrame, _justFrames = 0) {
+	if (_difFrame > _justFrames) {
+		g_resultObj.fast++;
+	} else if (_difFrame < _justFrames) {
+		g_resultObj.slow++;
+	}
 }
 
 /**
@@ -8925,7 +8952,7 @@ function judgeIi(difFrame) {
 	changeJudgeCharacter(`ii`, C_JCR_II);
 
 	updateCombo();
-	displayDiff(difFrame, Math.abs(difFrame));
+	displayDiff(difFrame, g_headerObj.justFrames);
 
 	lifeRecovery();
 	finishViewing();
@@ -8946,7 +8973,7 @@ function judgeShakin(difFrame) {
 	changeJudgeCharacter(`shakin`, C_JCR_SHAKIN);
 
 	updateCombo();
-	displayDiff(difFrame, Math.abs(difFrame));
+	displayDiff(difFrame, g_headerObj.justFrames);
 
 	lifeRecovery();
 	finishViewing();
@@ -8967,7 +8994,7 @@ function judgeMatari(difFrame) {
 	changeJudgeCharacter(`matari`, C_JCR_MATARI);
 	document.querySelector(`#comboJ`).innerHTML = ``;
 
-	displayDiff(difFrame, Math.abs(difFrame));
+	displayDiff(difFrame, g_headerObj.justFrames);
 	finishViewing();
 
 	if (typeof customJudgeMatari === C_TYP_FUNCTION) {
@@ -9154,7 +9181,7 @@ function resultInit() {
 
 	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70 + (g_sHeight - 500) / 2, 450, 110);
 	playDataWindow.classList.add(g_cssObj.result_PlayDataWindow);
-	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 180, 185 + (g_sHeight - 500) / 2, 360, 210);
+	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 200, 185 + (g_sHeight - 500) / 2, 400, 210);
 
 	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
 		g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan +
@@ -9323,6 +9350,12 @@ function resultInit() {
 			resultWindow.appendChild(makeCssResultSymbol(`lbl${id}S`, 50, g_cssObj.common_score, j, g_resultObj[judgeScores[j]], C_ALIGN_RIGHT));
 		}
 	});
+	if (g_stateObj.autoPlay === C_FLG_OFF) {
+		resultWindow.appendChild(makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_matari, 0, `Fast`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblSlow`, 350, g_cssObj.common_shobon, 2, `Slow`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblFastS`, 260, g_cssObj.score, 1, g_resultObj.fast, C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblSlowS`, 260, g_cssObj.score, 3, g_resultObj.slow, C_ALIGN_RIGHT));
+	}
 
 	// ランク描画
 	const lblRank = createDivCustomLabel(`lblRank`, 340, 160, 70, 20, 50, `#ffffff`,
