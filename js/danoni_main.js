@@ -2397,7 +2397,14 @@ function dosConvert(_dos) {
 		const pos = params[j].indexOf(`=`);
 		if (pos > 0) {
 			const pKey = params[j].substring(0, pos);
-			const pValue = params[j].substring(pos + 1);
+			let pValue = params[j].substring(pos + 1);
+
+			// アンパサンド、パイプ文字のエスケープ指定
+			pValue = pValue.split(`*amp*`).join(`&`);
+			pValue = pValue.split(`*pipe*`).join(`|`);
+			pValue = pValue.split(`*rsquo*`).join(`'`);
+			pValue = pValue.split(`*quot*`).join(`"`);
+
 			if (pKey !== undefined) {
 				obj[pKey] = g_enableDecodeURI ? decodeURIComponent(pValue) : pValue;
 			}
