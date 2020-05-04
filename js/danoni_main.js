@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.3.1`;
+const g_version = `Ver 14.3.2`;
 const g_revisedDate = `2020/05/04`;
 const g_alphaVersion = ``;
 
@@ -2404,6 +2404,7 @@ function dosConvert(_dos) {
 			pValue = pValue.split(`*pipe*`).join(`|`);
 			pValue = pValue.split(`*rsquo*`).join(`'`);
 			pValue = pValue.split(`*quot*`).join(`"`);
+			pValue = pValue.split(`*comma*`).join(`,`);
 
 			if (pKey !== undefined) {
 				obj[pKey] = g_enableDecodeURI ? decodeURIComponent(pValue) : pValue;
