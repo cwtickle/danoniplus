@@ -225,7 +225,10 @@ const g_resultObj = {
     maxCombo: 0,
     fCombo: 0,
     fmaxCombo: 0,
-    score: 0
+    score: 0,
+
+    fast: 0,
+    slow: 0,
 };
 
 const C_RLT_BRACKET_L = 210;

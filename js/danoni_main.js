@@ -7134,6 +7134,9 @@ function getArrowSettings() {
 	g_resultObj.fCombo = 0;
 	g_resultObj.fmaxCombo = 0;
 
+	g_resultObj.fast = 0;
+	g_resultObj.slow = 0;
+
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
 	g_finishFlg = true;
@@ -7843,6 +7846,7 @@ function MainInit() {
 		arrowOFF: (_j, _arrow, _cnt) => {
 			if (_cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
 				judgeUwan(_cnt);
+				countFastSlow(_cnt);
 				judgeObjDelete.arrow(_j, _arrow);
 			}
 		},
@@ -7909,6 +7913,7 @@ function MainInit() {
 				changeFailedFrz(_j, _k);
 				if (g_headerObj.frzStartjdgUse) {
 					judgeUwan(_cnt);
+					countFastSlow(_cnt);
 				}
 			}
 		},
@@ -8795,6 +8800,7 @@ function judgeArrow(_j) {
 				judgeShobon(difFrame);
 				stepDivHit.classList.add(g_cssObj.main_stepShobon);
 			}
+			countFastSlow(difFrame);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
 			arrowSprite.removeChild(judgArrow);
@@ -8822,6 +8828,7 @@ function judgeArrow(_j) {
 				} else {
 					judgeShobon(difCnt);
 				}
+				countFastSlow(difFrame);
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
 			changeHitFrz(_j, fcurrentNo, `frz`);
@@ -8838,8 +8845,19 @@ function judgeArrow(_j) {
  * @param {number} _difCnt 
  */
 function displayDiff(_difFrame, _difCnt) {
-	document.querySelector(`#diffJ`).innerHTML = `<span class="common_${_difCnt <= 1 ? 'combo' : (_difFrame > 0 ? 'matari' : 'shobon')}">
-		${_difCnt <= 1 ? 'Just!!' : ((_difFrame > 1 ? `Fast` : `Slow`)) + ` ${_difCnt} Frames`}</span>`;
+	if (_difFrame > 0) {
+		document.querySelector(`#diffJ`).innerHTML = `<span class="common_matari">Fast ${_difCnt} Frames</span>`;
+	} else if (_difFrame < 0) {
+		document.querySelector(`#diffJ`).innerHTML = `<span class="common_shobon">Slow ${_difCnt} Frames</span>`;
+	}
+}
+
+function countFastSlow(_difFrame) {
+	if (_difFrame > 0) {
+		g_resultObj.fast++;
+	} else if (_difFrame < 0) {
+		g_resultObj.slow++;
+	}
 }
 
 /**
@@ -9150,7 +9168,7 @@ function resultInit() {
 
 	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70 + (g_sHeight - 500) / 2, 450, 110);
 	playDataWindow.classList.add(g_cssObj.result_PlayDataWindow);
-	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 180, 185 + (g_sHeight - 500) / 2, 360, 210);
+	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 200, 185 + (g_sHeight - 500) / 2, 400, 210);
 
 	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
 		g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan +
@@ -9319,6 +9337,10 @@ function resultInit() {
 			resultWindow.appendChild(makeCssResultSymbol(`lbl${id}S`, 50, g_cssObj.common_score, j, g_resultObj[judgeScores[j]], C_ALIGN_RIGHT));
 		}
 	});
+	resultWindow.appendChild(makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_matari, 0, `Fast`, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblSlow`, 350, g_cssObj.common_shobon, 2, `Slow`, C_ALIGN_LEFT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblFastS`, 260, g_cssObj.score, 1, g_resultObj.fast, C_ALIGN_RIGHT));
+	resultWindow.appendChild(makeCssResultSymbol(`lblSlowS`, 260, g_cssObj.score, 3, g_resultObj.slow, C_ALIGN_RIGHT));
 
 	// ランク描画
 	const lblRank = createDivCustomLabel(`lblRank`, 340, 160, 70, 20, 50, `#ffffff`,
