@@ -8812,7 +8812,7 @@ function judgeArrow(_j) {
 				judgeShobon(difFrame);
 				stepDivHit.classList.add(g_cssObj.main_stepShobon);
 			}
-			countFastSlow(difFrame);
+			countFastSlow(difFrame, g_headerObj.justFrames);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
 			arrowSprite.removeChild(judgArrow);
@@ -8840,7 +8840,7 @@ function judgeArrow(_j) {
 				} else {
 					judgeShobon(difFrame);
 				}
-				countFastSlow(difFrame);
+				countFastSlow(difFrame, g_headerObj.justFrames);
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
 			changeHitFrz(_j, fcurrentNo, `frz`);
