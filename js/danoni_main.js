@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/04/16
+ * Revised : 2020/05/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 12.3.4`;
-const g_revisedDate = `2020/04/16`;
+const g_version = `Ver 12.3.5`;
+const g_revisedDate = `2020/05/04`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2313,15 +2313,24 @@ function makeWarningWindow(_text) {
 	let lblWarning;
 	if (document.querySelector(`#lblWarning`) === null) {
 		lblWarning = getTitleDivLabel(`lblWarning`, `<p>${_text}</p>`, 0, 70);
-		lblWarning.style.backgroundColor = `#ffcccc`;
-		lblWarning.style.opacity = 0.9;
-		divRoot.appendChild(lblWarning);
 	} else {
 		lblWarning = document.querySelector(`#lblWarning`);
-		lblWarning.innerHTML += `<p>${_text}</p>`;
+		const text = lblWarning.innerHTML + `<p>${_text}</p>`;
+		divRoot.removeChild(document.querySelector(`#lblWarning`));
+		lblWarning = getTitleDivLabel(`lblWarning`, text, 0, 70);
 	}
+	lblWarning.style.backgroundColor = `#ffcccc`;
+	lblWarning.style.opacity = 0.9;
+	divRoot.appendChild(lblWarning);
+
 	const len = lblWarning.innerHTML.split(`<br>`).length + lblWarning.innerHTML.split(`<p>`).length - 1;
-	const warnHeight = 21 * len;
+	let warnHeight;
+	if (len * 21 <= 150) {
+		warnHeight = len * 21;
+	} else {
+		warnHeight = 150;
+		lblWarning.style.overflow = `auto`;
+	}
 	lblWarning.style.height = `${warnHeight}px`;
 	lblWarning.style.lineHeight = `15px`;
 	lblWarning.style.fontSize = `14px`;
@@ -8406,11 +8415,11 @@ function judgeArrow(_j) {
 				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 					judgeIi(difFrame);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-					judgeShakin(difCnt);
+					judgeShakin(difFrame);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-					judgeMatari(difCnt);
+					judgeMatari(difFrame);
 				} else {
-					judgeShobon(difCnt);
+					judgeShobon(difFrame);
 				}
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
