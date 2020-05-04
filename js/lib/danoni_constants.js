@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/05/03 (v14.2.0)
+ * Revised : 2020/05/04 (v14.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -225,7 +225,10 @@ const g_resultObj = {
     maxCombo: 0,
     fCombo: 0,
     fmaxCombo: 0,
-    score: 0
+    score: 0,
+
+    fast: 0,
+    slow: 0,
 };
 
 const C_RLT_BRACKET_L = 210;

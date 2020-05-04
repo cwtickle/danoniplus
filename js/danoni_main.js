@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/05/03
+ * Revised : 2020/05/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.2.0`;
-const g_revisedDate = `2020/05/03`;
+const g_version = `Ver 14.3.0`;
+const g_revisedDate = `2020/05/04`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3102,6 +3102,9 @@ function headerConvert(_dosObj) {
 
 	// 譜面明細の使用可否
 	obj.scoreDetailUse = setVal(_dosObj.scoreDetailUse, true, C_TYP_BOOLEAN);
+
+	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
+	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
 
 	return obj;
 }
@@ -7134,6 +7137,9 @@ function getArrowSettings() {
 	g_resultObj.fCombo = 0;
 	g_resultObj.fmaxCombo = 0;
 
+	g_resultObj.fast = 0;
+	g_resultObj.slow = 0;
+
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
 	g_finishFlg = true;
@@ -7335,7 +7341,7 @@ function MainInit() {
 			0, 0,
 			g_sWidth - 50, 1, ``, `lifeBar`);
 		filterBar.classList.add(g_cssObj.life_Failed);
-		filterBar.style.opacity = 0.0625;
+		filterBar.style.visibility = `hidden`;
 		mainSprite.appendChild(filterBar);
 	});
 	document.querySelector(`#borderBar0`).style.top = `${g_posObj.stepDiffY}px`;
@@ -7350,6 +7356,7 @@ function MainInit() {
 		if (g_stateObj.d_filterline === C_FLG_OFF) {
 		} else {
 			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj => {
+				document.querySelector(`#${obj}`).style.visibility = `visible`;
 				document.querySelector(`#${obj}`).style.opacity = g_stateObj.opacity / 100;
 			});
 		}
@@ -8101,6 +8108,7 @@ function MainInit() {
 		const frzLength = g_workObj[`mk${camelHeader}Length`][_j][(_arrowCnt - 1) * 2];
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 		const dividePos = g_workObj.dividePos[_j];
+		const frzNo = `${_j}_${_arrowCnt}`;
 
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 		let shadowColor = ``;
@@ -8109,7 +8117,7 @@ function MainInit() {
 				g_headerObj.frzShadowColor[colorPos][0]);
 		}
 
-		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
+		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${frzNo}`,
 			g_workObj.stepX[_j],
 			C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH + frzLength);
@@ -8132,32 +8140,32 @@ function MainInit() {
 		// 後に作成するほど前面に表示される。
 
 		// フリーズアロー帯(frzBar)
-		const frzBar = frzRoot.appendChild(createColorObject(`${_name}Bar${_j}_${_arrowCnt}`, _barColor,
+		const frzBar = frzRoot.appendChild(createColorObject(`${_name}Bar${frzNo}`, _barColor,
 			5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
 			C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, ``, `frzBar`));
 		frzBar.style.opacity = 0.75;
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-		const frzTopShadow = createColorObject(`${_name}TopShadow${_j}_${_arrowCnt}`, shadowColor,
+		const frzTopShadow = createColorObject(`${_name}TopShadow${frzNo}`, shadowColor,
 			0, 0,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzTopShadow.classList.add(g_cssObj.main_objShadow);
 		frzRoot.appendChild(frzTopShadow);
 
 		// 開始矢印。ヒット時は隠れる。
-		frzRoot.appendChild(createColorObject(`${_name}Top${_j}_${_arrowCnt}`, _normalColor,
+		frzRoot.appendChild(createColorObject(`${_name}Top${frzNo}`, _normalColor,
 			0, 0,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
 
 		// 後発矢印の塗り部分
-		const frzBtmShadow = createColorObject(`${_name}BtmShadow${_j}_${_arrowCnt}`, shadowColor,
+		const frzBtmShadow = createColorObject(`${_name}BtmShadow${frzNo}`, shadowColor,
 			0, frzLength * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzBtmShadow.classList.add(g_cssObj.main_objShadow);
 		frzRoot.appendChild(frzBtmShadow);
 
 		// 後発矢印
-		frzRoot.appendChild(createColorObject(`${_name}Btm${_j}_${_arrowCnt}`, _normalColor,
+		frzRoot.appendChild(createColorObject(`${_name}Btm${frzNo}`, _normalColor,
 			0, frzLength * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
 	}
@@ -8691,18 +8699,19 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
  * @param {number} _k 
  */
 function changeHitFrz(_j, _k, _name) {
+	const frzNo = `${_j}_${_k}`;
 
 	if (_name === `frz`) {
 		document.querySelector(`#frzHit${_j}`).style.opacity = 0.9;
-		document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 0;
+		document.querySelector(`#frzTop${frzNo}`).style.display = C_DIS_NONE;
 		if (isNaN(Number(g_workObj.arrowRtn[_j]))) {
 			document.querySelector(`#frzHitTop${_j}`).style.background = g_workObj.frzHitColors[_j];
 		}
 	}
-	const frzBar = document.querySelector(`#${_name}Bar${_j}_${_k}`);
-	const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
-	const frzBtm = document.querySelector(`#${_name}Btm${_j}_${_k}`);
-	const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${_j}_${_k}`);
+	const frzBar = document.querySelector(`#${_name}Bar${frzNo}`);
+	const frzRoot = document.querySelector(`#${_name}${frzNo}`);
+	const frzBtm = document.querySelector(`#${_name}Btm${frzNo}`);
+	const frzBtmShadow = document.querySelector(`#${_name}BtmShadow${frzNo}`);
 	const dividePos = Number(frzRoot.getAttribute(`dividePos`));
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -8735,18 +8744,19 @@ function changeHitFrz(_j, _k, _name) {
  * @param {number} _k 
  */
 function changeFailedFrz(_j, _k) {
+	const frzNo = `${_j}_${_k}`;
 	document.querySelector(`#frzHit${_j}`).style.opacity = 0;
-	document.querySelector(`#frzTop${_j}_${_k}`).style.opacity = 1;
-	document.querySelector(`#frzTop${_j}_${_k}`).style.background = `#cccccc`;
-	document.querySelector(`#frzBar${_j}_${_k}`).style.background = `#999999`;
-	document.querySelector(`#frzBar${_j}_${_k}`).style.opacity = 1;
-	document.querySelector(`#frzBtm${_j}_${_k}`).style.background = `#cccccc`;
+	document.querySelector(`#frzTop${frzNo}`).style.display = C_DIS_INHERIT;
+	document.querySelector(`#frzTop${frzNo}`).style.background = `#cccccc`;
+	document.querySelector(`#frzBar${frzNo}`).style.background = `#999999`;
+	document.querySelector(`#frzBar${frzNo}`).style.opacity = 1;
+	document.querySelector(`#frzBtm${frzNo}`).style.background = `#cccccc`;
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
-		document.querySelector(`#frzTopShadow${_j}_${_k}`).style.background = `#333333`;
-		document.querySelector(`#frzBtmShadow${_j}_${_k}`).style.background = `#333333`;
+		document.querySelector(`#frzTopShadow${frzNo}`).style.background = `#333333`;
+		document.querySelector(`#frzBtmShadow${frzNo}`).style.background = `#333333`;
 	}
 }
 
@@ -8772,7 +8782,7 @@ function judgeArrow(_j) {
 
 	if (judgArrow !== null) {
 		const difFrame = Number(judgArrow.getAttribute(`cnt`));
-		const difCnt = Math.abs(judgArrow.getAttribute(`cnt`));
+		const difCnt = Math.abs(difFrame);
 		const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
 		const arrowSprite = document.querySelector(`#arrowSprite${judgArrow.getAttribute(`dividePos`)}`);
 
@@ -8795,6 +8805,7 @@ function judgeArrow(_j) {
 				judgeShobon(difFrame);
 				stepDivHit.classList.add(g_cssObj.main_stepShobon);
 			}
+			countFastSlow(difFrame);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
 			arrowSprite.removeChild(judgArrow);
@@ -8816,12 +8827,13 @@ function judgeArrow(_j) {
 				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 					judgeIi(difFrame);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-					judgeShakin(difCnt);
+					judgeShakin(difFrame);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-					judgeMatari(difCnt);
+					judgeMatari(difFrame);
 				} else {
-					judgeShobon(difCnt);
+					judgeShobon(difFrame);
 				}
+				countFastSlow(difFrame);
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
 			changeHitFrz(_j, fcurrentNo, `frz`);
@@ -8829,17 +8841,36 @@ function judgeArrow(_j) {
 		}
 	}
 	const stepDiv = document.querySelector(`#stepDiv${_j}`);
-	stepDiv.style.display = `inherit`;
+	stepDiv.style.display = C_DIS_INHERIT;
 }
 
 /**
  * タイミングズレを表示
  * @param {number} _difFrame 
- * @param {number} _difCnt 
+ * @param {number} _justFrames
  */
-function displayDiff(_difFrame, _difCnt) {
-	document.querySelector(`#diffJ`).innerHTML = `<span class="common_${_difCnt <= 1 ? 'combo' : (_difFrame > 0 ? 'matari' : 'shobon')}">
-		${_difCnt <= 1 ? 'Just!!' : ((_difFrame > 1 ? `Fast` : `Slow`)) + ` ${_difCnt} Frames`}</span>`;
+function displayDiff(_difFrame, _justFrames = 0) {
+	let diffJDisp = ``;
+	let difCnt = Math.abs(_difFrame);
+	if (_difFrame > _justFrames) {
+		diffJDisp = `<span class="common_matari">Fast ${difCnt} Frames</span>`;
+	} else if (_difFrame < _justFrames * (-1)) {
+		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
+	}
+	document.querySelector(`#diffJ`).innerHTML = diffJDisp;
+}
+
+/**
+ * Fast/Slowカウンタ
+ * @param {number} _difFrame 
+ * @param {number} _justFrames 
+ */
+function countFastSlow(_difFrame, _justFrames = 0) {
+	if (_difFrame > _justFrames) {
+		g_resultObj.fast++;
+	} else if (_difFrame < _justFrames) {
+		g_resultObj.slow++;
+	}
 }
 
 /**
@@ -8921,7 +8952,7 @@ function judgeIi(difFrame) {
 	changeJudgeCharacter(`ii`, C_JCR_II);
 
 	updateCombo();
-	displayDiff(difFrame, Math.abs(difFrame));
+	displayDiff(difFrame, g_headerObj.justFrames);
 
 	lifeRecovery();
 	finishViewing();
@@ -8942,7 +8973,7 @@ function judgeShakin(difFrame) {
 	changeJudgeCharacter(`shakin`, C_JCR_SHAKIN);
 
 	updateCombo();
-	displayDiff(difFrame, Math.abs(difFrame));
+	displayDiff(difFrame, g_headerObj.justFrames);
 
 	lifeRecovery();
 	finishViewing();
@@ -8963,7 +8994,7 @@ function judgeMatari(difFrame) {
 	changeJudgeCharacter(`matari`, C_JCR_MATARI);
 	document.querySelector(`#comboJ`).innerHTML = ``;
 
-	displayDiff(difFrame, Math.abs(difFrame));
+	displayDiff(difFrame, g_headerObj.justFrames);
 	finishViewing();
 
 	if (typeof customJudgeMatari === C_TYP_FUNCTION) {
@@ -9150,7 +9181,7 @@ function resultInit() {
 
 	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70 + (g_sHeight - 500) / 2, 450, 110);
 	playDataWindow.classList.add(g_cssObj.result_PlayDataWindow);
-	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 180, 185 + (g_sHeight - 500) / 2, 360, 210);
+	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 200, 185 + (g_sHeight - 500) / 2, 400, 210);
 
 	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
 		g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan +
@@ -9319,6 +9350,12 @@ function resultInit() {
 			resultWindow.appendChild(makeCssResultSymbol(`lbl${id}S`, 50, g_cssObj.common_score, j, g_resultObj[judgeScores[j]], C_ALIGN_RIGHT));
 		}
 	});
+	if (g_stateObj.autoPlay === C_FLG_OFF) {
+		resultWindow.appendChild(makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_matari, 0, `Fast`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblSlow`, 350, g_cssObj.common_shobon, 2, `Slow`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblFastS`, 260, g_cssObj.score, 1, g_resultObj.fast, C_ALIGN_RIGHT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblSlowS`, 260, g_cssObj.score, 3, g_resultObj.slow, C_ALIGN_RIGHT));
+	}
 
 	// ランク描画
 	const lblRank = createDivCustomLabel(`lblRank`, 340, 160, 70, 20, 50, `#ffffff`,
@@ -9458,16 +9495,13 @@ function resultInit() {
 	}
 
 	// Twitter用リザルト
-	let hashTag;
-	if (g_headerObj.hashTag !== undefined) {
-		hashTag = ` ${g_headerObj.hashTag}`;
-	} else {
-		hashTag = ``;
-	}
+	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${g_stateObj.shuffle}`;
 	}
+	const twiturl = new URL(g_localStorageUrl);
+	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData})/
 		${g_headerObj.tuning}/
 		Rank:${rankMark}/
@@ -9476,7 +9510,7 @@ function resultInit() {
 		${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}/
 		${g_resultObj.kita}-${g_resultObj.iknai}/
 		${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo} 
-		${g_localStorageUrl}`.replace(/[\t\n]/g, ``);
+		${twiturl.toString()}`.replace(/[\t\n]/g, ``);
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetResultTmp)}`;
 
 	// 戻るボタン描画
