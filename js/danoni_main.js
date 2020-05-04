@@ -6259,6 +6259,7 @@ function escapeHtml(_str) {
 function escapeHtmlForEnabledTag(_str) {
 	let newstr = _str.split(`*amp*`).join(`&amp;`);
 	newstr = newstr.split(`*pipe*`).join(`|`);
+	newstr = newstr.split(`*dollar*`).join(`$`);
 	newstr = newstr.split(`*rsquo*`).join(`&rsquo;`);
 	newstr = newstr.split(`*quot*`).join(`&quot;`);
 	newstr = newstr.split(`*comma*`).join(`&sbquo;`);
