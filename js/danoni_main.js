@@ -8845,11 +8845,13 @@ function judgeArrow(_j) {
  * @param {number} _difCnt 
  */
 function displayDiff(_difFrame, _difCnt) {
+	let diffJDisp = ``;
 	if (_difFrame > 0) {
-		document.querySelector(`#diffJ`).innerHTML = `<span class="common_matari">Fast ${_difCnt} Frames</span>`;
+		diffJDisp = `<span class="common_matari">Fast ${_difCnt} Frames</span>`;
 	} else if (_difFrame < 0) {
-		document.querySelector(`#diffJ`).innerHTML = `<span class="common_shobon">Slow ${_difCnt} Frames</span>`;
+		diffJDisp = `<span class="common_shobon">Slow ${_difCnt} Frames</span>`;
 	}
+	document.querySelector(`#diffJ`).innerHTML = diffJDisp;
 }
 
 function countFastSlow(_difFrame) {
