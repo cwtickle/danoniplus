@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.3.2`;
+const g_version = `Ver 14.3.3`;
 const g_revisedDate = `2020/05/04`;
 const g_alphaVersion = ``;
 
@@ -7349,7 +7349,7 @@ function MainInit() {
 			0, 0,
 			g_sWidth - 50, 1, ``, `lifeBar`);
 		filterBar.classList.add(g_cssObj.life_Failed);
-		filterBar.style.visibility = `hidden`;
+		filterBar.style.opacity = 0.0625;
 		mainSprite.appendChild(filterBar);
 	});
 	document.querySelector(`#borderBar0`).style.top = `${g_posObj.stepDiffY}px`;
@@ -7364,7 +7364,6 @@ function MainInit() {
 		if (g_stateObj.d_filterline === C_FLG_OFF) {
 		} else {
 			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj => {
-				document.querySelector(`#${obj}`).style.visibility = `visible`;
 				document.querySelector(`#${obj}`).style.opacity = g_stateObj.opacity / 100;
 			});
 		}
@@ -8876,7 +8875,7 @@ function displayDiff(_difFrame, _justFrames = 0) {
 function countFastSlow(_difFrame, _justFrames = 0) {
 	if (_difFrame > _justFrames) {
 		g_resultObj.fast++;
-	} else if (_difFrame < _justFrames) {
+	} else if (_difFrame < _justFrames * (-1)) {
 		g_resultObj.slow++;
 	}
 }
