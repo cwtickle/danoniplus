@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.3.3`;
+const g_version = `Ver 14.3.4`;
 const g_revisedDate = `2020/05/04`;
 const g_alphaVersion = ``;
 
@@ -8812,7 +8812,7 @@ function judgeArrow(_j) {
 				judgeShobon(difFrame);
 				stepDivHit.classList.add(g_cssObj.main_stepShobon);
 			}
-			countFastSlow(difFrame);
+			countFastSlow(difFrame, g_headerObj.justFrames);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
 			arrowSprite.removeChild(judgArrow);
@@ -8840,7 +8840,7 @@ function judgeArrow(_j) {
 				} else {
 					judgeShobon(difFrame);
 				}
-				countFastSlow(difFrame);
+				countFastSlow(difFrame, g_headerObj.justFrames);
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
 			changeHitFrz(_j, fcurrentNo, `frz`);
