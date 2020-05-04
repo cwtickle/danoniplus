@@ -2404,6 +2404,7 @@ function dosConvert(_dos) {
 			pValue = pValue.split(`*pipe*`).join(`|`);
 			pValue = pValue.split(`*rsquo*`).join(`'`);
 			pValue = pValue.split(`*quot*`).join(`"`);
+			pValue = pValue.split(`*comma*`).join(`,`);
 
 			if (pKey !== undefined) {
 				obj[pKey] = g_enableDecodeURI ? decodeURIComponent(pValue) : pValue;
