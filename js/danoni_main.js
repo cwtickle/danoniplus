@@ -8875,7 +8875,7 @@ function displayDiff(_difFrame, _justFrames = 0) {
 function countFastSlow(_difFrame, _justFrames = 0) {
 	if (_difFrame > _justFrames) {
 		g_resultObj.fast++;
-	} else if (_difFrame < _justFrames) {
+	} else if (_difFrame < _justFrames * (-1)) {
 		g_resultObj.slow++;
 	}
 }
