@@ -9495,16 +9495,13 @@ function resultInit() {
 	}
 
 	// Twitter用リザルト
-	let hashTag;
-	if (g_headerObj.hashTag !== undefined) {
-		hashTag = ` ${g_headerObj.hashTag}`;
-	} else {
-		hashTag = ``;
-	}
+	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${g_stateObj.shuffle}`;
 	}
+	const twiturl = new URL(g_localStorageUrl);
+	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData})/
 		${g_headerObj.tuning}/
 		Rank:${rankMark}/
@@ -9513,7 +9510,7 @@ function resultInit() {
 		${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}/
 		${g_resultObj.kita}-${g_resultObj.iknai}/
 		${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo} 
-		${g_localStorageUrl}`.replace(/[\t\n]/g, ``);
+		${twiturl.toString()}`.replace(/[\t\n]/g, ``);
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetResultTmp)}`;
 
 	// 戻るボタン描画
