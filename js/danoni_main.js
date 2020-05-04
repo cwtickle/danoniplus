@@ -7849,7 +7849,6 @@ function MainInit() {
 		arrowOFF: (_j, _arrow, _cnt) => {
 			if (_cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
 				judgeUwan(_cnt);
-				countFastSlow(_cnt);
 				judgeObjDelete.arrow(_j, _arrow);
 			}
 		},
@@ -7916,7 +7915,6 @@ function MainInit() {
 				changeFailedFrz(_j, _k);
 				if (g_headerObj.frzStartjdgUse) {
 					judgeUwan(_cnt);
-					countFastSlow(_cnt);
 				}
 			}
 		},
