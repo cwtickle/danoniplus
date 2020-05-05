@@ -2397,14 +2397,7 @@ function dosConvert(_dos) {
 		const pos = params[j].indexOf(`=`);
 		if (pos > 0) {
 			const pKey = params[j].substring(0, pos);
-			let pValue = params[j].substring(pos + 1);
-
-			// アンパサンド、パイプ文字のエスケープ指定
-			pValue = pValue.split(`*amp*`).join(`&`);
-			pValue = pValue.split(`*pipe*`).join(`|`);
-			pValue = pValue.split(`*rsquo*`).join(`'`);
-			pValue = pValue.split(`*quot*`).join(`"`);
-			pValue = pValue.split(`*comma*`).join(`,`);
+			const pValue = params[j].substring(pos + 1);
 
 			if (pKey !== undefined) {
 				obj[pKey] = g_enableDecodeURI ? decodeURIComponent(pValue) : pValue;
@@ -2464,15 +2457,15 @@ function headerConvert(_dosObj) {
 			const musics = musicData[j].split(`,`);
 
 			if (obj.musicNos.length >= j) {
-				obj.musicTitles[j] = getMusicNameSimple(musics[0]);
-				obj.musicTitlesForView[j] = getMusicNameMultiLine(musics[0]);
-				obj.artistNames[j] = setVal(musics[1], ``, C_TYP_STRING);
+				obj.musicTitles[j] = escapeHtml(getMusicNameSimple(musics[0]));
+				obj.musicTitlesForView[j] = escapeHtmlForArray(getMusicNameMultiLine(musics[0]));
+				obj.artistNames[j] = escapeHtml(setVal(musics[1], ``, C_TYP_STRING));
 			}
 			if (j === 0) {
-				obj.musicTitle = getMusicNameSimple(musics[0]);
-				obj.musicTitleForView = getMusicNameMultiLine(musics[0]);
+				obj.musicTitle = escapeHtml(getMusicNameSimple(musics[0]));
+				obj.musicTitleForView = escapeHtmlForArray(getMusicNameMultiLine(musics[0]));
 				if (musics.length > 1) {
-					obj.artistName = musics[1];
+					obj.artistName = escapeHtml(musics[1]);
 				} else {
 					makeWarningWindow(C_MSG_E_0011);
 					obj.artistName = `artistName`;
@@ -2480,8 +2473,8 @@ function headerConvert(_dosObj) {
 				if (musics.length > 2) {
 					obj.artistUrl = musics[2];
 					if (musics.length > 3) {
-						obj.musicTitles[j] = getMusicNameSimple(musics[3]);
-						obj.musicTitlesForView[j] = getMusicNameMultiLine(musics[3]);
+						obj.musicTitles[j] = escapeHtml(getMusicNameSimple(musics[3]));
+						obj.musicTitlesForView[j] = escapeHtmlForArray(getMusicNameMultiLine(musics[3]));
 					}
 				} else {
 					obj.artistUrl = location.href;
@@ -2584,8 +2577,8 @@ function headerConvert(_dosObj) {
 			// 譜面名、制作者名
 			if (setVal(difDetails[C_DIF_NAME], ``, C_TYP_STRING) !== ``) {
 				const difNameInfo = difDetails[C_DIF_NAME].split(`::`);
-				obj.difLabels.push(setVal(difNameInfo[0], `Normal`, C_TYP_STRING));
-				obj.creatorNames.push(difNameInfo.length > 1 ? difNameInfo[1] : obj.tuning);
+				obj.difLabels.push(escapeHtml(setVal(difNameInfo[0], `Normal`, C_TYP_STRING)));
+				obj.creatorNames.push(difNameInfo.length > 1 ? escapeHtml(difNameInfo[1]) : obj.tuning);
 			} else {
 				obj.difLabels.push(`Normal`);
 				obj.creatorNames.push(obj.tuning);
@@ -6199,7 +6192,8 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 						wordData[tmpWordData[0]][addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
 						break;
 					} else {
-						wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1], setVal(tmpWordData[k + 2], ``, C_TYP_STRING));
+						wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1],
+							escapeHtmlForEnabledTag(setVal(tmpWordData[k + 2], ``, C_TYP_STRING)));
 					}
 				}
 			}
@@ -6255,7 +6249,49 @@ function escapeHtml(_str) {
 	newstr = newstr.split(`>`).join(`&gt;`);
 	newstr = newstr.split(`"`).join(`&quot;`);
 
+	return escapeHtmlForEnabledTag(newstr);
+}
+
+/**
+ * 文字列のエスケープ処理(htmlタグ許容版)
+ * @param {string} _str 
+ */
+function escapeHtmlForEnabledTag(_str) {
+	let newstr = _str.split(`*amp*`).join(`&amp;`);
+	newstr = newstr.split(`*pipe*`).join(`|`);
+	newstr = newstr.split(`*dollar*`).join(`$`);
+	newstr = newstr.split(`*rsquo*`).join(`&rsquo;`);
+	newstr = newstr.split(`*quot*`).join(`&quot;`);
+	newstr = newstr.split(`*comma*`).join(`&sbquo;`);
+
 	return newstr;
+}
+
+/**
+ * エスケープ文字を元の文字に戻す
+ * @param {string} _str 
+ */
+function unEscapeHtml(_str) {
+	let newstr = _str.split(`&amp;`).join(`&`);
+	newstr = newstr.split(`&rsquo;`).join(`'`);
+	newstr = newstr.split(`&quot;`).join(`"`);
+	newstr = newstr.split(`&sbquo;`).join(`,`);
+	newstr = newstr.split(`&lt;`).join(`<`);
+	newstr = newstr.split(`&gt;`).join(`>`);
+
+	return newstr;
+}
+
+/**
+ * 配列の中身を全てエスケープ処理
+ * @param {array} _array 
+ */
+function escapeHtmlForArray(_array) {
+	let newArray = [];
+	_array.forEach((str, j) => {
+		newArray[j] = escapeHtml(str);
+	});
+	return newArray;
 }
 
 /**
@@ -9518,7 +9554,7 @@ function resultInit() {
 		${g_resultObj.kita}-${g_resultObj.iknai}/
 		${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo} 
 		${twiturl.toString()}`.replace(/[\t\n]/g, ``);
-	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetResultTmp)}`;
+	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(unEscapeHtml(tweetResultTmp))}`;
 
 	// 戻るボタン描画
 	const btnBack = createCssButton({
