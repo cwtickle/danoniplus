@@ -3734,7 +3734,7 @@ function createOptionWindow(_sprite) {
 		}, _ => {
 			setScoreDetail();
 		});
-
+		btnGraph.title = g_msgObj.graph;
 		speedSprite.appendChild(btnGraph);
 		g_stateObj.scoreDetailViewFlg = false;
 
