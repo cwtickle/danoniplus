@@ -9545,8 +9545,8 @@ function resultInit() {
 	}
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
-	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData})/
-		${g_headerObj.tuning}/
+	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData})/ 
+		${g_headerObj.tuning}/ 
 		Rank:${rankMark}/
 		Score:${g_resultObj.score}/
 		Playstyle:${playStyleData}/
