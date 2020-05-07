@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/05/04 (v14.3.4)
+ * Revised : 2020/05/07 (v14.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1301,6 +1301,11 @@ const g_msgObj = {
     adjustment: `タイミングにズレを感じる場合、\n数値を変えることでズレを直すことができます。`,
     fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
     volume: `ゲーム内の音量を設定します。`,
+
+    graph: `速度変化や譜面密度状況、\n譜面の難易度など譜面の詳細情報を表示します。`,
+    dataSave: `ハイスコア、リバース設定、\nキーコンフィグの保存の有無を設定します。`,
+    toDisplay: `プレイ画面上のオブジェクトの\n表示・非表示（一部透明度）を設定します。`,
+    toSettings: `SETTINGS画面へ戻ります。`,
 
     d_stepzone: `ステップゾーンの表示`,
     d_judgment: `判定キャラクタ・コンボの表示`,

@@ -8,8 +8,8 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.4.0`;
-const g_revisedDate = `2020/05/05`;
+const g_version = `Ver 14.5.0`;
+const g_revisedDate = `2020/05/07`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2489,9 +2489,6 @@ function headerConvert(_dosObj) {
 		obj.artistUrl = location.href;
 	}
 
-	// 譜面変更セレクターの利用有無
-	obj.difSelectorUse = setVal(_dosObj.difSelectorUse, false, C_TYP_BOOLEAN);
-
 	// 最小・最大速度の設定
 	obj.minSpeed = Math.round(setVal(_dosObj.minSpeed, C_MIN_SPEED, C_TYP_FLOAT) * 4) / 4;
 	obj.maxSpeed = Math.round(setVal(_dosObj.maxSpeed, C_MAX_SPEED, C_TYP_FLOAT) * 4) / 4;
@@ -2602,6 +2599,9 @@ function headerConvert(_dosObj) {
 		return self.indexOf(x) === j;
 	});
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
+
+	// 譜面変更セレクターの利用有無
+	obj.difSelectorUse = (setVal(_dosObj.difSelectorUse, (obj.keyLabels.length > 5 ? true : false), C_TYP_BOOLEAN));
 
 	// 初期速度の設定
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
@@ -3039,7 +3039,8 @@ function headerConvert(_dosObj) {
 
 		// displayUse -> ボタンの有効/無効, displaySet -> ボタンの初期値(ON/OFF)
 		obj[`${option}Use`] = setVal(displayUse[0], true, C_TYP_BOOLEAN);
-		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] : C_FLG_OFF, ``, C_TYP_SWITCH);
+		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] :
+			(obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF), ``, C_TYP_SWITCH);
 
 		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Set`] !== `` ? obj[`${option}Set`] : C_FLG_ON);
 		obj[`${option}ChainOFF`] = (_dosObj[`${option}ChainOFF`] !== undefined ? _dosObj[`${option}ChainOFF`].split(`,`) : []);
@@ -3479,6 +3480,7 @@ function optionInit() {
 		clearWindow();
 		settingsDisplayInit();
 	});
+	btnDisplay.title = g_msgObj.toDisplay;
 	divRoot.appendChild(btnDisplay);
 
 	// キー操作イベント（デフォルト）
@@ -3517,6 +3519,7 @@ function optionInit() {
 	} else {
 		btnSave.classList.add(g_cssObj.button_OFF);
 	}
+	btnSave.title = g_msgObj.dataSave;
 	btnSave.style.borderStyle = `solid`;
 	divRoot.appendChild(btnSave);
 	g_initialFlg = true;
@@ -3734,7 +3737,7 @@ function createOptionWindow(_sprite) {
 		}, _ => {
 			setScoreDetail();
 		});
-
+		btnGraph.title = g_msgObj.graph;
 		speedSprite.appendChild(btnGraph);
 		g_stateObj.scoreDetailViewFlg = false;
 
@@ -4909,6 +4912,7 @@ function settingsDisplayInit() {
 		clearWindow();
 		optionInit();
 	});
+	btnSettings.title = g_msgObj.toSettings;
 	divRoot.appendChild(btnSettings);
 
 
@@ -9545,8 +9549,8 @@ function resultInit() {
 	}
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
-	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData})/
-		${g_headerObj.tuning}/
+	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData}) /
+		${g_headerObj.tuning} /
 		Rank:${rankMark}/
 		Score:${g_resultObj.score}/
 		Playstyle:${playStyleData}/
