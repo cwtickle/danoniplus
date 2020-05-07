@@ -2489,9 +2489,6 @@ function headerConvert(_dosObj) {
 		obj.artistUrl = location.href;
 	}
 
-	// 譜面変更セレクターの利用有無
-	obj.difSelectorUse = setVal(_dosObj.difSelectorUse, false, C_TYP_BOOLEAN);
-
 	// 最小・最大速度の設定
 	obj.minSpeed = Math.round(setVal(_dosObj.minSpeed, C_MIN_SPEED, C_TYP_FLOAT) * 4) / 4;
 	obj.maxSpeed = Math.round(setVal(_dosObj.maxSpeed, C_MAX_SPEED, C_TYP_FLOAT) * 4) / 4;
@@ -2602,6 +2599,9 @@ function headerConvert(_dosObj) {
 		return self.indexOf(x) === j;
 	});
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
+
+	// 譜面変更セレクターの利用有無
+	obj.difSelectorUse = (setVal(_dosObj.difSelectorUse, (obj.keyLabels.length > 5 ? true : false), C_TYP_BOOLEAN));
 
 	// 初期速度の設定
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
