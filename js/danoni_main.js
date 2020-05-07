@@ -3480,6 +3480,7 @@ function optionInit() {
 		clearWindow();
 		settingsDisplayInit();
 	});
+	btnDisplay.title = g_msgObj.toDisplay;
 	divRoot.appendChild(btnDisplay);
 
 	// キー操作イベント（デフォルト）
@@ -3518,6 +3519,7 @@ function optionInit() {
 	} else {
 		btnSave.classList.add(g_cssObj.button_OFF);
 	}
+	btnSave.title = g_msgObj.dataSave;
 	btnSave.style.borderStyle = `solid`;
 	divRoot.appendChild(btnSave);
 	g_initialFlg = true;
@@ -3735,7 +3737,7 @@ function createOptionWindow(_sprite) {
 		}, _ => {
 			setScoreDetail();
 		});
-
+		btnGraph.title = g_msgObj.graph;
 		speedSprite.appendChild(btnGraph);
 		g_stateObj.scoreDetailViewFlg = false;
 
@@ -4910,6 +4912,7 @@ function settingsDisplayInit() {
 		clearWindow();
 		optionInit();
 	});
+	btnSettings.title = g_msgObj.toSettings;
 	divRoot.appendChild(btnSettings);
 
 
