@@ -3039,7 +3039,8 @@ function headerConvert(_dosObj) {
 
 		// displayUse -> ボタンの有効/無効, displaySet -> ボタンの初期値(ON/OFF)
 		obj[`${option}Use`] = setVal(displayUse[0], true, C_TYP_BOOLEAN);
-		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] : C_FLG_OFF, ``, C_TYP_SWITCH);
+		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] :
+			(obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF), ``, C_TYP_SWITCH);
 
 		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Set`] !== `` ? obj[`${option}Set`] : C_FLG_ON);
 		obj[`${option}ChainOFF`] = (_dosObj[`${option}ChainOFF`] !== undefined ? _dosObj[`${option}ChainOFF`].split(`,`) : []);
