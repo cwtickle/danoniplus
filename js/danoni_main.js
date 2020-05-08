@@ -4452,6 +4452,7 @@ function createOptionWindow(_sprite) {
 				g_reverseNum = 0;
 			}
 			g_scrollNum = 0;
+			g_autoPlayNum = 0;
 		}
 
 		if (g_canLoadDifInfoFlg || _initFlg) {
@@ -4585,6 +4586,13 @@ function createOptionWindow(_sprite) {
 			g_scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
 			setSetting(0, `reverse`);
 		}
+
+		// オート・アシスト設定 (AutoPlay)
+		g_autoPlays = (typeof g_keyObj[`assistName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
+			g_autoPlaysBase.concat(g_keyObj[`assistName${g_keyObj.currentKey}`]) :
+			g_autoPlaysBase.concat());
+		g_stateObj.autoPlay = g_autoPlays[g_autoPlayNum];
+		document.querySelector(`#lnkAutoPlay`).innerHTML = g_stateObj.autoPlay;
 
 		// ゲージ設定 (Gauge)
 		setGauge(0);
@@ -4726,7 +4734,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 		deepCopyList.forEach(header => {
 			g_keyObj[`${header}${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`${header}${basePtn}`]));
 		});
-		const copyList = [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`];
+		const copyList = [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`];
 		copyList.forEach(header => {
 			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
 		});
@@ -5732,6 +5740,37 @@ function loadingScoreInit2() {
 		applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
 	}
 
+	// アシスト用の配列があれば、ダミーデータで上書き
+	if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
+		![C_FLG_OFF, C_FLG_ON].includes(g_stateObj.autoPlay)) {
+		const assistArray = g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay];
+		for (let j = 0; j < keyNum; j++) {
+			if (assistArray[j] === 1) {
+				g_scoreObj.dummyArrowData[j] = g_scoreObj.arrowData[j].concat();
+				g_scoreObj.arrowData[j] = [];
+				g_scoreObj.dummyFrzData[j] = g_scoreObj.frzData[j].concat();
+				g_scoreObj.frzData[j] = [];
+			} else {
+				g_scoreObj.dummyArrowData[j] = [];
+				g_scoreObj.dummyFrzData[j] = [];
+			}
+		}
+	}
+
+	// 矢印・フリーズアロー数をカウント
+	g_allArrow = 0;
+	g_allFrz = 0;
+	for (let j = 0; j < keyNum; j++) {
+		g_allArrow += (isNaN(parseFloat(g_scoreObj.arrowData[j][0])) ? 0 : g_scoreObj.arrowData[j].length);
+		g_allFrz += (isNaN(parseFloat(g_scoreObj.frzData[j][0])) ? 0 : g_scoreObj.frzData[j].length);
+	}
+
+	// ライフ回復・ダメージ量の計算
+	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
+	if (g_headerObj.frzStartjdgUse) {
+		g_allArrow += g_allFrz / 2;
+	}
+
 	// 矢印・フリーズアロー・速度/色変化格納処理
 	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
 
@@ -5884,8 +5923,6 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	// 矢印群の格納先
 	const obj = {};
-	g_allArrow = 0;
-	g_allFrz = 0;
 
 	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg);
 	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
@@ -5904,7 +5941,6 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		// 矢印データの分解
 		const arrowName = g_keyObj[`chara${_keyCtrlPtn}`][j];
 		obj.arrowData[j] = storeArrowData(_dosObj[`${arrowName}${scoreIdHeader}_data`]);
-		g_allArrow += (isNaN(parseFloat(obj.arrowData[j][0])) ? 0 : obj.arrowData[j].length);
 
 		if (g_stateObj.dummyId !== ``) {
 			obj.dummyArrowData[j] = storeArrowData(_dosObj[`${arrowName}${_dummyNo}_data`]);
@@ -5933,17 +5969,10 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		// フリーズアローデータの分解 (2つで1セット)
 		obj.frzData[j] = storeArrowData(_dosObj[`${frzName}${scoreIdHeader}_data`]);
-		g_allFrz += (isNaN(parseFloat(obj.frzData[j][0])) ? 0 : obj.frzData[j].length);
 
 		if (g_stateObj.dummyId !== ``) {
 			obj.dummyFrzData[j] = storeArrowData(_dosObj[`${frzName}${_dummyNo}_data`]);
 		}
-	}
-
-	// ライフ回復・ダメージ量の計算
-	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
-	if (g_headerObj.frzStartjdgUse) {
-		g_allArrow += g_allFrz / 2;
 	}
 
 	/**
@@ -7108,6 +7137,8 @@ function getArrowSettings() {
 		scrollDirOptions = [...Array(keyNum)].fill(1);
 	}
 
+	g_stateObj.autoAll = (g_stateObj.autoPlay === C_FLG_ON ? C_FLG_ON : C_FLG_OFF);
+
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
@@ -7741,7 +7772,7 @@ function MainInit() {
 	document.onkeydown = evt => {
 		const setKey = transCode(evt.keyCode);
 		g_inputKeyBuffer[setKey] = true;
-		mainKeyDownActFunc[g_stateObj.autoPlay](setKey);
+		mainKeyDownActFunc[g_stateObj.autoAll](setKey);
 
 		// 曲中リトライ、タイトルバック
 		if (setKey === g_headerObj.keyRetry) {
@@ -7797,7 +7828,7 @@ function MainInit() {
 	document.onkeyup = evt => {
 		const setKey = transCode(evt.keyCode);
 		g_inputKeyBuffer[setKey] = false;
-		mainKeyUpActFunc[g_stateObj.autoPlay]();
+		mainKeyUpActFunc[g_stateObj.autoAll]();
 	}
 
 	/**
@@ -8139,7 +8170,7 @@ function MainInit() {
 		}
 		arrow.setAttribute(`cnt`, --cnt);
 
-		judgeMotionFunc[`${_name}${g_stateObj.autoPlay}`](_j, arrow, cnt);
+		judgeMotionFunc[`${_name}${g_stateObj.autoAll}`](_j, arrow, cnt);
 	}
 
 	/**
@@ -8240,7 +8271,7 @@ function MainInit() {
 				if (frzBarLength > 0) {
 					frzHitMotion(_j, _k, _name, frzRoot, cnt);
 
-					if (!checkKeyUpFunc[`${_name}${g_stateObj.autoPlay}`](_j)) {
+					if (!checkKeyUpFunc[`${_name}${g_stateObj.autoAll}`](_j)) {
 						const keyUpFrame = Number(frzRoot.getAttribute(`frzAttempt`)) + 1;
 						frzRoot.setAttribute(`frzAttempt`, keyUpFrame);
 						judgeMotionFunc[`${_name}KeyUp`](_j, _k, frzRoot, cnt, keyUpFrame);
@@ -8288,7 +8319,7 @@ function MainInit() {
 		_frzRoot.setAttribute(`cnt`, --_cnt);
 
 		// 次フリーズアローへ判定を移すかチェック
-		judgeNextFunc[`${_name}${g_stateObj.autoPlay}`](_j, _k, _cnt);
+		judgeNextFunc[`${_name}${g_stateObj.autoAll}`](_j, _k, _cnt);
 	}
 
 	/**
@@ -9250,7 +9281,7 @@ function resultInit() {
 	if (g_gameOverFlg) {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
-	} else if (playingArrows === fullArrows && g_stateObj.autoPlay === C_FLG_OFF) {
+	} else if (playingArrows === fullArrows && g_stateObj.autoAll === C_FLG_OFF) {
 		if (g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai === 0) {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
@@ -9302,6 +9333,9 @@ function resultInit() {
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	if (![C_FLG_OFF, C_FLG_ON].includes(g_stateObj.autoPlay)) {
+		difData += ` -${g_stateObj.autoPlay}less`;
+	}
 	if (g_headerObj.makerView) {
 		difData += ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
 	}
@@ -9397,7 +9431,7 @@ function resultInit() {
 			resultWindow.appendChild(makeCssResultSymbol(`lbl${id}S`, 50, g_cssObj.common_score, j, g_resultObj[judgeScores[j]], C_ALIGN_RIGHT));
 		}
 	});
-	if (g_stateObj.autoPlay === C_FLG_OFF) {
+	if (g_stateObj.autoAll === C_FLG_OFF) {
 		resultWindow.appendChild(makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_matari, 0, `Fast`, C_ALIGN_LEFT));
 		resultWindow.appendChild(makeCssResultSymbol(`lblSlow`, 350, g_cssObj.common_shobon, 2, `Slow`, C_ALIGN_LEFT));
 		resultWindow.appendChild(makeCssResultSymbol(`lblFastS`, 260, g_cssObj.score, 1, g_resultObj.fast, C_ALIGN_RIGHT));
@@ -9453,7 +9487,8 @@ function resultInit() {
 	playDataWindow.style.animationName = `slowlyAppearing`;
 
 	// ハイスコア差分計算
-	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	const assistFlg = ([C_FLG_OFF, C_FLG_ON].includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
+	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_headerObj.makerView) {
 		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
 	}
@@ -9470,7 +9505,7 @@ function resultInit() {
 		score: 0,
 	};
 
-	const highscoreCondition = (g_stateObj.autoPlay === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
+	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
 		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``);
 
 	if (highscoreCondition) {
@@ -9543,7 +9578,7 @@ function resultInit() {
 
 	// Twitter用リザルト
 	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
-	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${g_stateObj.shuffle}`;
 	}

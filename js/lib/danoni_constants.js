@@ -276,6 +276,7 @@ const g_stateObj = {
     scroll: `---`,
     shuffle: C_FLG_OFF,
     autoPlay: C_FLG_OFF,
+    autoAll: C_FLG_OFF,
     gauge: `Normal`,
     adjustment: 0,
     fadein: 0,
@@ -338,6 +339,7 @@ let g_gauges = [];
 let g_gaugeNum = 0;
 
 let g_autoPlays = [C_FLG_OFF, C_FLG_ON];
+const g_autoPlaysBase = [C_FLG_OFF, C_FLG_ON];
 let g_autoPlayNum = 0;
 
 let g_adjustments = [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT);
@@ -1244,6 +1246,33 @@ const g_keyObj = {
     scrollDir16i_0: {
         '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    },
+
+    // プレイアシスト設定
+    assistName5: [`Onigiri`],
+    assistName12: [`Onigiri`],
+    assistName14: [`Onigiri`],
+
+    assistPos5_0: {
+        'Onigiri': [0, 0, 0, 0, 1],
+    },
+    assistPos5_1: {
+        'Onigiri': [1, 0, 0, 0, 0],
+    },
+    assistPos5_2: {
+        'Onigiri': [0, 0, 1, 0, 0],
+    },
+    assistPos12_0: {
+        'Onigiri': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
+    assistPos12_1: {
+        'Onigiri': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
+    assistPos14_0: {
+        'Onigiri': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
+    assistPos14_1: {
+        'Onigiri': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     },
 
     dummy: 0	// ダミー(カンマ抜け落ち防止)
