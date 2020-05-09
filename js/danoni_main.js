@@ -6193,7 +6193,8 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 					if (tmpWordData.length > 3 && tmpWordData.length < 6) {
 						tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, C_TYP_NUMBER);
-						wordData[tmpWordData[0]][addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
+						wordData[tmpWordData[0]][addFrame].push(tmpWordData[1],
+							escapeHtmlForEnabledTag(tmpWordData[2]), tmpWordData[3]);
 						break;
 					} else {
 						wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1],
