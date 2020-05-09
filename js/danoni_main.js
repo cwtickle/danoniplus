@@ -2511,14 +2511,14 @@ function headerConvert(_dosObj) {
 	// 製作者表示
 	if (_dosObj.tuning !== undefined && _dosObj.tuning !== ``) {
 		const tunings = _dosObj.tuning.split(`,`);
-		obj.tuning = tunings[0];
+		obj.tuning = escapeHtmlForEnabledTag(tunings[0]);
 		if (tunings.length > 1) {
 			obj.creatorUrl = tunings[1];
 		} else {
 			obj.creatorUrl = location.href;
 		}
 	} else {
-		obj.tuning = (g_presetTuning) ? g_presetTuning : `name`;
+		obj.tuning = (g_presetTuning) ? escapeHtmlForEnabledTag(g_presetTuning) : `name`;
 		obj.creatorUrl = (g_presetTuningUrl) ? g_presetTuningUrl : location.href;
 	}
 	obj.tuningInit = obj.tuning;
@@ -6193,7 +6193,8 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 					if (tmpWordData.length > 3 && tmpWordData.length < 6) {
 						tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, C_TYP_NUMBER);
-						wordData[tmpWordData[0]][addFrame].push(tmpWordData[1], tmpWordData[2], tmpWordData[3]);
+						wordData[tmpWordData[0]][addFrame].push(tmpWordData[1],
+							escapeHtmlForEnabledTag(tmpWordData[2]), tmpWordData[3]);
 						break;
 					} else {
 						wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1],
@@ -6267,6 +6268,8 @@ function escapeHtmlForEnabledTag(_str) {
 	newstr = newstr.split(`*rsquo*`).join(`&rsquo;`);
 	newstr = newstr.split(`*quot*`).join(`&quot;`);
 	newstr = newstr.split(`*comma*`).join(`&sbquo;`);
+	newstr = newstr.split(`*squo*`).join(`&#39;`);
+	newstr = newstr.split(`*bkquo*`).join(`&#96;`);
 
 	return newstr;
 }
@@ -6277,11 +6280,13 @@ function escapeHtmlForEnabledTag(_str) {
  */
 function unEscapeHtml(_str) {
 	let newstr = _str.split(`&amp;`).join(`&`);
-	newstr = newstr.split(`&rsquo;`).join(`'`);
+	newstr = newstr.split(`&rsquo;`).join(`’`);
 	newstr = newstr.split(`&quot;`).join(`"`);
 	newstr = newstr.split(`&sbquo;`).join(`,`);
 	newstr = newstr.split(`&lt;`).join(`<`);
 	newstr = newstr.split(`&gt;`).join(`>`);
+	newstr = newstr.split(`&#39;`).join(`'`);
+	newstr = newstr.split(`&#96;`).join(`\``);
 
 	return newstr;
 }
