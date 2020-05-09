@@ -6280,11 +6280,13 @@ function escapeHtmlForEnabledTag(_str) {
  */
 function unEscapeHtml(_str) {
 	let newstr = _str.split(`&amp;`).join(`&`);
-	newstr = newstr.split(`&rsquo;`).join(`'`);
+	newstr = newstr.split(`&rsquo;`).join(`’`);
 	newstr = newstr.split(`&quot;`).join(`"`);
 	newstr = newstr.split(`&sbquo;`).join(`,`);
 	newstr = newstr.split(`&lt;`).join(`<`);
 	newstr = newstr.split(`&gt;`).join(`>`);
+	newstr = newstr.split(`&#39;`).join(`'`);
+	newstr = newstr.split(`&#96;`).join(`\``);
 
 	return newstr;
 }
