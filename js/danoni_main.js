@@ -4433,6 +4433,11 @@ function createOptionWindow(_sprite) {
 			}
 		}
 
+		// アシスト設定の配列を入れ替え
+		g_autoPlays = (typeof g_keyObj[`assistName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
+			g_autoPlaysBase.concat(g_keyObj[`assistName${g_keyObj.currentKey}`]) :
+			g_autoPlaysBase.concat());
+
 		// ---------------------------------------------------
 		// 2. 初期化設定
 
@@ -4452,7 +4457,9 @@ function createOptionWindow(_sprite) {
 				g_reverseNum = 0;
 			}
 			g_scrollNum = 0;
-			g_autoPlayNum = (g_stateObj.autoPlay === C_FLG_ON ? 1 : 0);
+			if (!g_autoPlays.includes(g_stateObj.autoPlay)) {
+				g_autoPlayNum = 0;
+			}
 		}
 
 		if (g_canLoadDifInfoFlg || _initFlg) {
@@ -4588,9 +4595,6 @@ function createOptionWindow(_sprite) {
 		}
 
 		// オート・アシスト設定 (AutoPlay)
-		g_autoPlays = (typeof g_keyObj[`assistName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
-			g_autoPlaysBase.concat(g_keyObj[`assistName${g_keyObj.currentKey}`]) :
-			g_autoPlaysBase.concat());
 		g_stateObj.autoPlay = g_autoPlays[g_autoPlayNum];
 		document.querySelector(`#lnkAutoPlay`).innerHTML = g_stateObj.autoPlay;
 
