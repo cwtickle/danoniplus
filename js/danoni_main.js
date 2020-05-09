@@ -4452,7 +4452,7 @@ function createOptionWindow(_sprite) {
 				g_reverseNum = 0;
 			}
 			g_scrollNum = 0;
-			g_autoPlayNum = 0;
+			g_autoPlayNum = (g_stateObj.autoPlay === C_FLG_ON ? 1 : 0);
 		}
 
 		if (g_canLoadDifInfoFlg || _initFlg) {
