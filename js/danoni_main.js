@@ -2245,6 +2245,9 @@ function titleInit() {
 			window.open(g_headerObj.creatorUrl, `_blank`);
 		}
 	});
+	if (setVal(g_headerObj.creatorUrl, ``, C_TYP_STRING) !== ``) {
+		lnkMaker.title = g_headerObj.creatorUrl;
+	}
 	divRoot.appendChild(lnkMaker);
 
 	// 作曲者リンク表示
@@ -2263,6 +2266,9 @@ function titleInit() {
 			window.open(g_headerObj.artistUrl, `_blank`);
 		}
 	});
+	if (setVal(g_headerObj.artistUrl, ``, C_TYP_STRING) !== ``) {
+		lnkArtist.title = g_headerObj.artistUrl;
+	}
 	divRoot.appendChild(lnkArtist);
 
 	// バージョン描画
