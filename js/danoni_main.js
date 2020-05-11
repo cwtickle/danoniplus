@@ -3554,6 +3554,23 @@ function musicAfterLoaded() {
 }
 
 /**
+ * 設定画面用スプライトリストの作成
+ * @param {array} _settingList (設定名、縦位置、縦位置差分、幅差分、高さ差分)を設定別にリスト化
+ */
+function setSpriteList(_settingList) {
+	const optionWidth = (g_sWidth - 450) / 2;
+	const childX = 25;
+	const childY = 20;
+	const spriteList = [];
+	_settingList.forEach(setting => {
+		spriteList[setting[0]] = createSprite(`optionsprite`, `${setting[0]}Sprite`,
+			childX, setting[1] * C_LEN_SETLBL_HEIGHT + childY + setting[2],
+			optionWidth + setting[3], C_LEN_SETLBL_HEIGHT + setting[4], { description: g_msgObj[setting[0]] });
+	});
+	return spriteList;
+}
+
+/**
  * 設定・オプション画面のラベル・ボタン処理の描画
  * @param {Object} _sprite 基準とするスプライト(ここで指定する座標は、そのスプライトからの相対位置)
  */
@@ -3561,8 +3578,6 @@ function createOptionWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
 	const optionWidth = (g_sWidth - 450) / 2;
-	const childX = 25;
-	const childY = 20;
 	const optionsprite = createSprite(_sprite, `optionsprite`, optionWidth, 65 + (g_sHeight - 500) / 2, 450, 325);
 
 	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
@@ -3581,12 +3596,7 @@ function createOptionWindow(_sprite) {
 	];
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
-	const spriteList = [];
-	settingList.forEach(setting => {
-		spriteList[setting[0]] = createSprite(`optionsprite`, `${setting[0]}Sprite`,
-			childX, setting[1] * C_LEN_SETLBL_HEIGHT + childY + setting[2],
-			optionWidth + setting[3], C_LEN_SETLBL_HEIGHT + setting[4], { description: g_msgObj[setting[0]] });
-	});
+	const spriteList = setSpriteList(settingList);
 
 	// ---------------------------------------------------
 	// 難易度 (Difficulty)
@@ -4940,23 +4950,18 @@ function createSettingsDisplayWindow(_sprite) {
 	// 各ボタン用のスプライトを作成
 	const optionWidth = (g_sWidth - 450) / 2;
 	const childX = 25;
-	const childY = 30;
+	const childY = 20;
 	createSprite(_sprite, `optionsprite`, optionWidth, 65 + (g_sHeight - 500) / 2, 450, 325);
 
-	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
+	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
 	const settingList = [
-		[`appearance`, 8, 0, 0, 0],
-		[`opacity`, 9, 0, 0, 0],
+		[`appearance`, 8, 10, 0, 0],
+		[`opacity`, 9, 10, 0, 0],
 	];
 
-	const spriteList = [];
-	settingList.forEach(setting => {
-		spriteList[setting[0]] = createSprite(`optionsprite`, `${setting[0]}Sprite`,
-			childX, setting[1] * C_LEN_SETLBL_HEIGHT + childY + setting[2],
-			optionWidth + setting[3], C_LEN_SETLBL_HEIGHT + setting[4], { description: g_msgObj[setting[0]] });
-	});
-
-	const displaySprite = createSprite(`optionsprite`, `displaySprite`, childX, childY,
+	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
+	const spriteList = setSpriteList(settingList);
+	const displaySprite = createSprite(`optionsprite`, `displaySprite`, childX, childY + 10,
 		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
 
 	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14,
