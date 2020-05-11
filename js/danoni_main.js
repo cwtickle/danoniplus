@@ -3565,34 +3565,33 @@ function createOptionWindow(_sprite) {
 	const childY = 20;
 	const optionsprite = createSprite(_sprite, `optionsprite`, optionWidth, 65 + (g_sHeight - 500) / 2, 450, 325);
 
+	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
+	const settingList = [
+		[`difficulty`, 0, -5, 0, 10],
+		[`speed`, 2, 0, 0, 0],
+		[`motion`, 3, 0, 0, 0],
+		[`reverse`, 4, 0, 0, 0],
+		[`scroll`, 4, 0, 0, 0],
+		[`shuffle`, 5.5, 0, 0, 0],
+		[`autoplay`, 6.5, 0, 0, 0],
+		[`gauge`, 7.5, 0, 0, 0],
+		[`adjustment`, 10, 0, 0, 0],
+		[`fadein`, 11, 0, 0, 0],
+		[`volume`, 12, 0, 0, 0],
+	];
+
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
-	const difficultySprite = createSprite(`optionsprite`, `difficultySprite`, childX, childY - 5,
-		optionWidth, C_LEN_SETLBL_HEIGHT + 10, { description: g_msgObj.difficulty });
-	const speedSprite = createSprite(`optionsprite`, `speedSprite`, childX, 2 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth + 40, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.speed });
-	const motionSprite = createSprite(`optionsprite`, `motionSprite`, childX, 3 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.motion });
-	const reverseSprite = createSprite(`optionsprite`, `reverseSprite`, childX, 4 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.reverse });
-	const scrollSprite = createSprite(`optionsprite`, `scrollSprite`, childX, 4 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.scroll });
-	const shuffleSprite = createSprite(`optionsprite`, `shuffleSprite`, childX, 5.5 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.shuffle });
-	const autoPlaySprite = createSprite(`optionsprite`, `autoPlaySprite`, childX, 6.5 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.autoplay });
-	const gaugeSprite = createSprite(`optionsprite`, `gaugeSprite`, childX, 7.5 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.gauge });
-	const adjustmentSprite = createSprite(`optionsprite`, `adjustmentSprite`, childX, 10 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.adjustment });
-	const fadeinSprite = createSprite(`optionsprite`, `fadeinSprite`, childX, 11 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.fadein });
-	const volumeSprite = createSprite(`optionsprite`, `volumeSprite`, childX, 12 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.volume });
+	const spriteList = [];
+	settingList.forEach(setting => {
+		spriteList[setting[0]] = createSprite(`optionsprite`, `${setting[0]}Sprite`,
+			childX, setting[1] * C_LEN_SETLBL_HEIGHT + childY + setting[2],
+			optionWidth + setting[3], C_LEN_SETLBL_HEIGHT + setting[4], { description: g_msgObj[setting[0]] });
+	});
 
 	// ---------------------------------------------------
 	// 難易度 (Difficulty)
 	// 縦位置: 0 
-	difficultySprite.appendChild(createLblSetting(`Difficulty`, -5));
+	spriteList.difficulty.appendChild(createLblSetting(`Difficulty`, -5));
 
 	/**
 	 * 譜面変更セレクターの削除
@@ -3686,12 +3685,12 @@ function createOptionWindow(_sprite) {
 	difficultySprite.appendChild(lnkDifficulty);
 
 	// 右回し・左回しボタン
-	difficultySprite.appendChild(makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => {
+	spriteList.difficulty.appendChild(makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
 		setDifficulty(true);
 		resetDifWindow();
 	}));
-	difficultySprite.appendChild(makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => {
+	spriteList.difficulty.appendChild(makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => {
 		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
 		setDifficulty(true);
 		resetDifWindow();
@@ -3712,7 +3711,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
-	createGeneralSetting(speedSprite, `speed`, ` x`, true, 4);
+	createGeneralSetting(spriteList.speed, `speed`, ` x`, true, 4);
 
 	if (g_headerObj.scoreDetailUse) {
 		const scoreDetail = createSprite(`optionsprite`, `scoreDetail`, 20, 90, 420, 230);
@@ -3736,7 +3735,7 @@ function createOptionWindow(_sprite) {
 			setScoreDetail();
 		});
 		btnGraph.title = g_msgObj.graph;
-		speedSprite.appendChild(btnGraph);
+		spriteList.speed.appendChild(btnGraph);
 		g_stateObj.scoreDetailViewFlg = false;
 
 		const lnk = makeSettingLblCssButton(`lnkScoreDetail`, `${g_stateObj.scoreDetail}`, 0, _ => {
@@ -4085,13 +4084,13 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// 速度モーション (Motion)
 	// 縦位置: 3
-	createGeneralSetting(motionSprite, `motion`);
+	createGeneralSetting(spriteList.motion, `motion`);
 
 	// ---------------------------------------------------
 	// リバース (Reverse) / スクロール (Scroll)
 	// 縦位置: 4
 	if (g_headerObj.scrollUse) {
-		createGeneralSetting(scrollSprite, `scroll`);
+		createGeneralSetting(spriteList.scroll, `scroll`);
 		$id(`lnkScroll`).left = `${parseFloat($id(`lnkScroll`).left) + 90}px`;
 		$id(`lnkScroll`).width = `${parseFloat($id(`lnkScroll`).width) - 90}px`;
 
@@ -4118,16 +4117,16 @@ function createOptionWindow(_sprite) {
 			btnReverse.classList.add(g_cssObj.button_RevOFF);
 		}
 		btnReverse.style.borderStyle = `solid`;
-		scrollSprite.appendChild(btnReverse);
+		spriteList.scroll.appendChild(btnReverse);
 
-		createGeneralSetting(reverseSprite, `reverse`);
+		createGeneralSetting(spriteList.reverse, `reverse`);
 		if (g_scrolls.length > 1) {
-			reverseSprite.style.visibility = `hidden`;
+			spriteList.reverse.style.visibility = `hidden`;
 		} else {
-			scrollSprite.style.visibility = `hidden`;
+			spriteList.scroll.style.visibility = `hidden`;
 		}
 	} else {
-		createGeneralSetting(reverseSprite, `reverse`);
+		createGeneralSetting(spriteList.reverse, `reverse`);
 	}
 
 	function setReverse() {
@@ -4144,22 +4143,22 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// ミラー・ランダム (Shuffle)
 	// 縦位置: 5.5
-	createGeneralSetting(shuffleSprite, `shuffle`);
+	createGeneralSetting(spriteList.shuffle, `shuffle`);
 
 	// ---------------------------------------------------
 	// 鑑賞モード設定 (AutoPlay)
 	// 縦位置: 6.5
-	createGeneralSetting(autoPlaySprite, `autoPlay`);
+	createGeneralSetting(spriteList.autoplay, `autoPlay`);
 
 	// ---------------------------------------------------
 	// ゲージ設定 (Gauge)
 	// 縦位置: 7.5
-	gaugeSprite.appendChild(createLblSetting(`Gauge`));
+	spriteList.gauge.appendChild(createLblSetting(`Gauge`));
 
 	// ゲージ設定詳細　縦位置: ゲージ設定+1
 	const lblGauge2 = createDivCssLabel(`lblGauge2`, C_LEN_SETLBL_LEFT - 35, C_LEN_SETLBL_HEIGHT,
 		C_LEN_SETLBL_WIDTH + 60, C_LEN_SETLBL_HEIGHT * 2, 11, ``);
-	gaugeSprite.appendChild(lblGauge2);
+	spriteList.gauge.appendChild(lblGauge2);
 
 	if (g_headerObj.gaugeUse) {
 		const lnkGauge = makeSettingLblCssButton(`lnkGauge`,
@@ -4170,18 +4169,18 @@ function createOptionWindow(_sprite) {
 			setGauge(-1);
 			return false;
 		}
-		gaugeSprite.appendChild(lnkGauge);
+		spriteList.gauge.appendChild(lnkGauge);
 
 		// 右回し・左回しボタン
-		gaugeSprite.appendChild(makeMiniCssButton(`lnkGauge`, `R`, 0, _ => {
+		spriteList.gauge.appendChild(makeMiniCssButton(`lnkGauge`, `R`, 0, _ => {
 			setGauge(1);
 		}));
-		gaugeSprite.appendChild(makeMiniCssButton(`lnkGauge`, `L`, 0, _ => {
+		spriteList.gauge.appendChild(makeMiniCssButton(`lnkGauge`, `L`, 0, _ => {
 			setGauge(-1);
 		}));
 	} else {
 		lblGauge.classList.add(g_cssObj.settings_Disabled);
-		gaugeSprite.appendChild(makeDisabledLabel(`lnkGauge`, 0, g_stateObj.gauge));
+		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, g_stateObj.gauge));
 	}
 
 	/**
@@ -4346,24 +4345,24 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
-	createGeneralSetting(adjustmentSprite, `adjustment`, ``, true, 5);
+	createGeneralSetting(spriteList.adjustment, `adjustment`, ``, true, 5);
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
 	// 縦位置: 11 スライダーあり
-	fadeinSprite.appendChild(createLblSetting(`Fadein`));
+	spriteList.fadein.appendChild(createLblSetting(`Fadein`));
 
 	const lnkFadein = createDivCssLabel(`lnkFadein`, C_LEN_SETLBL_LEFT, 0,
 		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `${g_stateObj.fadein}%`, g_cssObj.settings_FadeinBar);
-	fadeinSprite.appendChild(lnkFadein);
+	spriteList.fadein.appendChild(lnkFadein);
 
 	// 右回し・左回しボタン
-	fadeinSprite.appendChild(makeMiniCssButton(`lnkFadein`, `R`, 0, _ => {
+	spriteList.fadein.appendChild(makeMiniCssButton(`lnkFadein`, `R`, 0, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 99 ? 0 : g_stateObj.fadein + 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}));
-	fadeinSprite.appendChild(makeMiniCssButton(`lnkFadein`, `L`, 0, _ => {
+	spriteList.fadein.appendChild(makeMiniCssButton(`lnkFadein`, `L`, 0, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 0 ? 99 : g_stateObj.fadein - 1);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
@@ -4378,7 +4377,7 @@ function createOptionWindow(_sprite) {
 	}
 	const lblFadeinSlider = createDivCssLabel(`lblFadeinBar`, 160 + addXPos, addYPos, ``, ``, ``,
 		`<input id=fadeinSlider type=range value=0 min=0 max=99 step=1>`);
-	fadeinSprite.appendChild(lblFadeinSlider);
+	spriteList.fadein.appendChild(lblFadeinSlider);
 
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
 	fadeinSlider.value = g_stateObj.fadein;
@@ -4396,7 +4395,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
 	// 縦位置: 12
-	createGeneralSetting(volumeSprite, `volume`, `%`);
+	createGeneralSetting(spriteList.volume, `volume`, `%`);
 
 	/**
 	 * 譜面初期化処理
@@ -4561,8 +4560,8 @@ function createOptionWindow(_sprite) {
 			g_stateObj.scroll = g_scrolls[g_scrollNum];
 
 			if (g_scrolls.length > 1) {
-				scrollSprite.style.visibility = `visible`;
-				reverseSprite.style.visibility = `hidden`;
+				spriteList.scroll.style.visibility = `visible`;
+				spriteList.reverse.style.visibility = `hidden`;
 				setSetting(0, `scroll`);
 
 				const btnReverse = document.querySelector(`#btnReverse`);
@@ -4573,8 +4572,8 @@ function createOptionWindow(_sprite) {
 				}
 				btnReverse.innerHTML = `Reverse:${g_stateObj.reverse}`;
 			} else {
-				scrollSprite.style.visibility = `hidden`;
-				reverseSprite.style.visibility = `visible`;
+				spriteList.scroll.style.visibility = `hidden`;
+				spriteList.reverse.style.visibility = `visible`;
 				setSetting(0, `reverse`);
 			}
 
@@ -4945,12 +4944,20 @@ function createSettingsDisplayWindow(_sprite) {
 	createSprite(_sprite, `optionsprite`, optionWidth, 65 + (g_sHeight - 500) / 2, 450, 325);
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
+	const settingList = [
+		[`appearance`, 8, 0, 0, 0],
+		[`opacity`, 9, 0, 0, 0],
+	];
+
+	const spriteList = [];
+	settingList.forEach(setting => {
+		spriteList[setting[0]] = createSprite(`optionsprite`, `${setting[0]}Sprite`,
+			childX, setting[1] * C_LEN_SETLBL_HEIGHT + childY + setting[2],
+			optionWidth + setting[3], C_LEN_SETLBL_HEIGHT + setting[4], { description: g_msgObj[setting[0]] });
+	});
+
 	const displaySprite = createSprite(`optionsprite`, `displaySprite`, childX, childY,
 		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
-	const appearanceSprite = createSprite(`optionsprite`, `appearanceSprite`, childX, 8 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.appearance });
-	const opacitySprite = createSprite(`optionsprite`, `opacitySprite`, childX, 9 * C_LEN_SETLBL_HEIGHT + childY,
-		optionWidth, C_LEN_SETLBL_HEIGHT, { description: g_msgObj.opacity });
 
 	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14,
 		`[クリックでON/OFFを切替、灰色でOFF]`);
@@ -4963,12 +4970,12 @@ function createSettingsDisplayWindow(_sprite) {
 	// ---------------------------------------------------
 	// 矢印の見え方 (Appearance)
 	// 縦位置: 8
-	createGeneralSetting(appearanceSprite, `appearance`);
+	createGeneralSetting(spriteList.appearance, `appearance`);
 
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	createGeneralSetting(opacitySprite, `opacity`, `%`);
+	createGeneralSetting(spriteList.opacity, `opacity`, `%`);
 
 	/**
 	 * Display表示/非表示ボタン
