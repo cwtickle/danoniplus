@@ -3359,6 +3359,25 @@ function keysConvert(_dosObj) {
 				}
 			}
 		}
+
+		// アシストパターン (assistX_Y)
+		// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
+		if (_dosObj[`assist${newKey}`] !== undefined) {
+			const tmpAssists = _dosObj[`assist${newKey}`].split(`$`);
+			for (let k = 0, len = tmpAssists.length; k < len; k++) {
+				if (setVal(tmpAssists[k], ``, C_TYP_STRING) === ``) {
+					continue;
+				}
+				const tmpAssistPtns = tmpAssists[k].split(`/`);
+				g_keyObj[`assistName${newKey}`] = [];
+				g_keyObj[`assistPos${newKey}_${k}`] = {};
+				for (let m = 0, len = tmpAssistPtns.length; m < len; m++) {
+					const tmpAssistPair = tmpAssistPtns[m].split(`::`);
+					g_keyObj[`assistName${newKey}`][m] = tmpAssistPair[0];
+					g_keyObj[`assistPos${newKey}_${k}`][tmpAssistPair[0]] = tmpAssistPair[1].split(`,`).map(n => parseInt(n, 10));
+				}
+			}
+		}
 	}
 
 	/**
