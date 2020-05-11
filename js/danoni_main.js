@@ -3605,6 +3605,32 @@ function createOptionWindow(_sprite) {
 		}
 	}
 
+	/**
+	 * 譜面リストの作成
+	 * @param {object} _difList 
+	 * @param {object} _difCover 
+	 * @param {string} _targetKey 
+	 */
+	function makeDifList(_difList, _difCover, _targetKey = ``) {
+		let k = 0;
+		g_headerObj.keyLabels.forEach((keyLabel, j) => {
+			if (_targetKey === `` || keyLabel === _targetKey) {
+				let text = `${keyLabel} / ${g_headerObj.difLabels[j]}`;
+				if (g_headerObj.makerView) {
+					text += ` (${g_headerObj.creatorNames[j]})`;
+				}
+				_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
+					g_stateObj.scoreId = j;
+					setDifficulty(true);
+					deleteChildspriteAll(`difList`);
+					optionsprite.removeChild(_difList);
+					optionsprite.removeChild(_difCover);
+				}));
+				k++;
+			}
+		});
+	}
+
 	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`,
 		``, 0, _ => {
 			if (!g_headerObj.difSelectorUse) {
@@ -3621,19 +3647,7 @@ function createOptionWindow(_sprite) {
 					difCover.style.opacity = 0.95;
 
 					// 全リスト作成
-					for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
-						let text = `${g_headerObj.keyLabels[j]} / ${g_headerObj.difLabels[j]}`;
-						if (g_headerObj.makerView) {
-							text += ` (${g_headerObj.creatorNames[j]})`;
-						}
-						difList.appendChild(makeDifLblCssButton(`dif${j}`, text, j, _ => {
-							g_stateObj.scoreId = j;
-							setDifficulty(true);
-							deleteChildspriteAll(`difList`);
-							optionsprite.removeChild(difList);
-							optionsprite.removeChild(difCover);
-						}));
-					}
+					makeDifList(difList, difCover);
 
 					// ランダム選択
 					const lnkDifRandom = makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
@@ -3647,30 +3661,14 @@ function createOptionWindow(_sprite) {
 					lnkDifRandom.style.width = `110px`;
 
 					// キー別フィルタボタン作成
-					for (let m = 0; m < g_headerObj.keyLists.length; m++) {
-						const lnkKeyFilter = makeDifLblCssButton(`keyFilter`, `${g_headerObj.keyLists[m]} key`, m + 1.5, _ => {
+					g_headerObj.keyLists.forEach((targetKey, m) => {
+						const lnkKeyFilter = makeDifLblCssButton(`keyFilter`, `${targetKey} key`, m + 1.5, _ => {
 							deleteChildspriteAll(`difList`);
-
-							for (let j = 0, k = 0; j < g_headerObj.keyLabels.length; j++) {
-								if (g_headerObj.keyLabels[j] === g_headerObj.keyLists[m]) {
-									let text = `${g_headerObj.keyLabels[j]} / ${g_headerObj.difLabels[j]}`;
-									if (g_headerObj.makerView) {
-										text += ` (${g_headerObj.creatorNames[j]})`;
-									}
-									difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
-										g_stateObj.scoreId = j;
-										setDifficulty(true);
-										deleteChildspriteAll(`difList`);
-										optionsprite.removeChild(difList);
-										optionsprite.removeChild(difCover);
-									}));
-									k++;
-								}
-							}
+							makeDifList(difList, difCover, targetKey);
 						});
 						difCover.appendChild(lnkKeyFilter);
 						lnkKeyFilter.style.width = `110px`;
-					}
+					});
 				} else {
 					resetDifWindow();
 				}
@@ -4424,13 +4422,12 @@ function createOptionWindow(_sprite) {
 		}
 
 		if (g_rootObj.keyExtraList !== undefined) {
-			const keyExtraList = g_rootObj.keyExtraList.split(`,`);
-			for (let j = 0; j < keyExtraList.length; j++) {
-				if (g_keyObj.currentKey === keyExtraList[j]) {
+			g_rootObj.keyExtraList.split(`,`).some(extraKey => {
+				if (g_keyObj.currentKey === extraKey) {
 					g_stateObj.extraKeyFlg = true;
-					break;
+					return true;
 				}
-			}
+			});
 		}
 
 		// ---------------------------------------------------
