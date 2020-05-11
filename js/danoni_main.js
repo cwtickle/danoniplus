@@ -3588,7 +3588,7 @@ function createOptionWindow(_sprite) {
 		[`reverse`, 4, 0, 0, 0],
 		[`scroll`, 4, 0, 0, 0],
 		[`shuffle`, 5.5, 0, 0, 0],
-		[`autoplay`, 6.5, 0, 0, 0],
+		[`autoPlay`, 6.5, 0, 0, 0],
 		[`gauge`, 7.5, 0, 0, 0],
 		[`adjustment`, 10, 0, 0, 0],
 		[`fadein`, 11, 0, 0, 0],
@@ -4158,7 +4158,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// 鑑賞モード設定 (AutoPlay)
 	// 縦位置: 6.5
-	createGeneralSetting(spriteList.autoplay, `autoPlay`);
+	createGeneralSetting(spriteList.autoPlay, `autoPlay`);
 
 	// ---------------------------------------------------
 	// ゲージ設定 (Gauge)
@@ -4960,9 +4960,9 @@ function createSettingsDisplayWindow(_sprite) {
 	];
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
-	const spriteList = setSpriteList(settingList);
 	const displaySprite = createSprite(`optionsprite`, `displaySprite`, childX, childY + 10,
 		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
+	const spriteList = setSpriteList(settingList);
 
 	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14,
 		`[クリックでON/OFFを切替、灰色でOFF]`);
