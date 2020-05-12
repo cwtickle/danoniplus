@@ -1251,10 +1251,7 @@ const g_keyObj = {
     // プレイアシスト設定
     assistName5: [`Onigiri`],
     assistName9A: [`Left`, `Right`],
-    assistName9B: [`Left`, `Right`],
     assistName11i: [`Left`, `Right`],
-    assistName12: [`Onigiri`, `Up`],
-    assistName14: [`Onigiri`, `Up`],
     assistName17: [`Left`, `Right`],
 
     assistPos5_0: {
@@ -1284,39 +1281,9 @@ const g_keyObj = {
         'Right': [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
     },
 
-    assistPos9B_0: {
-        'Left': [1, 1, 1, 1, 0, 0, 0, 0, 0],
-        'Right': [0, 0, 0, 0, 0, 1, 1, 1, 1],
-    },
-    assistPos9B_1: {
-        'Left': [1, 1, 1, 1, 0, 0, 0, 0, 0],
-        'Right': [0, 0, 0, 0, 0, 1, 1, 1, 1],
-    },
-    assistPos9B_2: {
-        'Left': [1, 1, 1, 1, 0, 0, 0, 0, 0],
-        'Right': [0, 0, 0, 0, 0, 1, 1, 1, 1],
-    },
-
     assistPos11i_0: {
         'Left': [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
         'Right': [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
-    },
-
-    assistPos12_0: {
-        'Onigiri': [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        'Up': [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-    },
-    assistPos12_1: {
-        'Onigiri': [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        'Up': [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-    },
-    assistPos14_0: {
-        'Onigiri': [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        'Up': [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-    },
-    assistPos14_1: {
-        'Onigiri': [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        'Up': [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
     },
 
     assistPos17_0: {
