@@ -5776,7 +5776,7 @@ function loadingScoreInit2() {
 
 	// アシスト用の配列があれば、ダミーデータで上書き
 	if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
-		![C_FLG_OFF, C_FLG_ALL].includes(g_stateObj.autoPlay)) {
+		!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
 		const assistArray = g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay];
 		for (let j = 0; j < keyNum; j++) {
 			if (assistArray[j] === 1) {
@@ -9372,7 +9372,7 @@ function resultInit() {
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-	if (![C_FLG_OFF, C_FLG_ALL].includes(g_stateObj.autoPlay)) {
+	if (!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
 		difData += ` -${g_stateObj.autoPlay}less`;
 	}
 	if (g_headerObj.makerView) {
@@ -9526,7 +9526,7 @@ function resultInit() {
 	playDataWindow.style.animationName = `slowlyAppearing`;
 
 	// ハイスコア差分計算
-	const assistFlg = ([C_FLG_OFF, C_FLG_ALL].includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
+	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
 	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_headerObj.makerView) {
 		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
