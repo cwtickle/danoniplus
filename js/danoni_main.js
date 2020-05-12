@@ -3741,7 +3741,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
-	createGeneralSetting(spriteList.speed, `speed`, ` x`, true, 4);
+	createGeneralSetting(spriteList.speed, `speed`, { unitName: ` x`, skipTerm: 4 });
 
 	if (g_headerObj.scoreDetailUse) {
 		const scoreDetail = createSprite(`optionsprite`, `scoreDetail`, 20, 90, 420, 230);
@@ -4375,7 +4375,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
-	createGeneralSetting(spriteList.adjustment, `adjustment`, ``, true, 5);
+	createGeneralSetting(spriteList.adjustment, `adjustment`, { skipTerm: 5 });
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
@@ -4425,7 +4425,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
 	// 縦位置: 12
-	createGeneralSetting(spriteList.volume, `volume`, `%`);
+	createGeneralSetting(spriteList.volume, `volume`, { unitName: `%` });
 
 	/**
 	 * 譜面初期化処理
@@ -4649,14 +4649,15 @@ function createOptionWindow(_sprite) {
  * 汎用設定
  * @param {object} _obj 
  * @param {string} _settingName 
- * @param {string} _unitName 
- * @param {boolean} _skipFlg 
- * @param {number} _skipTerm 
+ * @param {object} _options
  */
-function createGeneralSetting(_obj, _settingName, _unitName = ``, _skipFlg = false, _skipTerm = 5) {
-
+function createGeneralSetting(_obj, _settingName, _options = {}) {
+	const _unitName = setVal(_options.unitName, ``, C_TYP_STRING);
+	const _skipTerm = setVal(_options.skipTerm, 0, C_TYP_NUMBER);
 	const settingUpper = toCapitalize(_settingName);
-	_obj.appendChild(createLblSetting(settingUpper));
+
+	_obj.appendChild(createLblSetting(settingUpper, 0,
+		toCapitalize(setVal(_options.settingLabel, _settingName, C_TYP_STRING))));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
 		const lnk = makeSettingLblCssButton(`lnk${settingUpper}`, `${g_stateObj[_settingName]}${_unitName}`, 0, _ => {
@@ -4670,13 +4671,13 @@ function createGeneralSetting(_obj, _settingName, _unitName = ``, _skipFlg = fal
 
 		// 早右回し・早左回しボタン
 		_obj.appendChild(makeMiniCssButton(`lnk${settingUpper}`, `R`, 0, _ => {
-			setSetting(_skipFlg ? _skipTerm : 1, _settingName, _unitName);
+			setSetting(_skipTerm > 0 ? _skipTerm : 1, _settingName, _unitName);
 		}));
 		_obj.appendChild(makeMiniCssButton(`lnk${settingUpper}`, `L`, 0, _ => {
-			setSetting(_skipFlg ? _skipTerm * (-1) : -1, _settingName, _unitName);
+			setSetting(_skipTerm > 0 ? _skipTerm * (-1) : -1, _settingName, _unitName);
 		}));
 
-		if (_skipFlg) {
+		if (_skipTerm > 0) {
 			// 右回し・左回しボタン
 			_obj.appendChild(makeMiniCssButton(`lnk${settingUpper}`, `RR`, 0, _ => {
 				setSetting(1, _settingName, _unitName);
@@ -4694,12 +4695,12 @@ function createGeneralSetting(_obj, _settingName, _unitName = ``, _skipFlg = fal
 /**
  * 設定画面用ラベルの作成
  * @param {string} _settingName 
- * @param {number} _posY 
  * @param {number} _adjY 
+ * @param {string} _settingLabel 
  */
-function createLblSetting(_settingName, _adjY = 0) {
+function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName) {
 	const lbl = createDivCssLabel(`lbl${_settingName}`, 0, _adjY,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, _settingName);
+		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, _settingLabel);
 	lbl.classList.add(`settings_${_settingName}`);
 
 	return lbl;
@@ -5012,7 +5013,7 @@ function createSettingsDisplayWindow(_sprite) {
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	createGeneralSetting(spriteList.opacity, `opacity`, `%`);
+	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: `%` });
 
 	/**
 	 * Display表示/非表示ボタン
