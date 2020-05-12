@@ -1253,9 +1253,8 @@ const g_keyObj = {
     assistName9A: [`Left`, `Right`],
     assistName9B: [`Left`, `Right`],
     assistName11i: [`Left`, `Right`],
-    assistName11W: [`Left`, `Right`],
-    assistName12: [`Left`, `Right`],
-    assistName14: [`Left`, `Right`],
+    assistName12: [`Onigiri`, `Up`],
+    assistName14: [`Onigiri`, `Up`],
     assistName17: [`Left`, `Right`],
 
     assistPos5_0: {
@@ -1303,26 +1302,21 @@ const g_keyObj = {
         'Right': [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
     },
 
-    assistPos11W_0: {
-        'Left': [1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-        'Right': [0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1],
-    },
-
     assistPos12_0: {
-        'Left': [1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-        'Right': [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1],
+        'Onigiri': [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        'Up': [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
     },
     assistPos12_1: {
-        'Left': [1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-        'Right': [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1],
+        'Onigiri': [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        'Up': [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
     },
     assistPos14_0: {
-        'Left': [1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-        'Right': [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1],
+        'Onigiri': [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        'Up': [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
     },
     assistPos14_1: {
-        'Left': [1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-        'Right': [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1],
+        'Onigiri': [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        'Up': [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
     },
 
     assistPos17_0: {

@@ -5670,8 +5670,6 @@ function loadingScoreInit2() {
 	}
 	g_scoreObj = scoreConvert(g_rootObj, g_stateObj.scoreId, 0, dummyIdHeader);
 
-	calcLifeVals(g_allArrow + g_allFrz / 2);
-
 	// 最終フレーム数の取得
 	let lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
 
@@ -5809,6 +5807,8 @@ function loadingScoreInit2() {
 		g_allArrow += (isNaN(parseFloat(g_scoreObj.arrowData[j][0])) ? 0 : g_scoreObj.arrowData[j].length);
 		g_allFrz += (isNaN(parseFloat(g_scoreObj.frzData[j][0])) ? 0 : g_scoreObj.frzData[j].length);
 	}
+
+	calcLifeVals(g_allArrow + g_allFrz / 2);
 
 	// ライフ回復・ダメージ量の計算
 	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
