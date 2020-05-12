@@ -2700,6 +2700,9 @@ function headerConvert(_dosObj) {
 	[`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]];
 	obj.frzColorDefault = [];
 
+	// ダミー用初期矢印色
+	obj.setDummyColor = [`#777777`, `#444444`, `#777777`, `#444444`, `#777777`];
+
 	[``, `Shadow`].forEach((pattern, k) => {
 		const _name = `set${pattern}Color`;
 		const _frzName = `frz${pattern}Color`;
@@ -5192,9 +5195,17 @@ function keyConfigInit() {
 		const keyconY = C_KYC_HEIGHT * dividePos;
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 
+		let arrowColor = g_headerObj.setColor[colorPos];
+		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
+			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
+			if (g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay][j] === 1) {
+				arrowColor = g_headerObj.setDummyColor[colorPos];
+			};
+		}
+
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
 			// 矢印の塗り部分
-			const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? g_headerObj.setColor[colorPos] :
+			const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? arrowColor :
 				g_headerObj.setShadowColor[colorPos]);
 			const stepShadow = createColorObject(`arrowShadow${j}`, shadowColor,
 				keyconX, keyconY,
@@ -5202,7 +5213,7 @@ function keyConfigInit() {
 			keyconSprite.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.5;
 		}
-		keyconSprite.appendChild(createColorObject(`arrow${j}`, g_headerObj.setColor[colorPos],
+		keyconSprite.appendChild(createColorObject(`arrow${j}`, arrowColor,
 			keyconX, keyconY,
 			C_ARW_WIDTH, C_ARW_WIDTH,
 			g_keyObj[`stepRtn${keyCtrlPtn}`][j]));
@@ -7181,6 +7192,7 @@ function getArrowSettings() {
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
+		const colorj = g_keyObj[`color${keyCtrlPtn}`][j];
 		let stdPos;
 		if (posj > divideCnt) {
 			stdPos = posj - (posMax + divideCnt) / 2;
@@ -7206,34 +7218,22 @@ function getArrowSettings() {
 		g_workObj.judgDummyFrzCnt[j] = 1;
 
 		// TODO: この部分を矢印塗りつぶし部分についても適用できるように変数を作成
-		g_workObj.arrowColors[j] = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
 
-		g_workObj.frzNormalColors[j] = g_headerObj.frzColor[g_keyObj[`color${keyCtrlPtn}`][j]][0];
-		g_workObj.frzNormalBarColors[j] = g_headerObj.frzColor[g_keyObj[`color${keyCtrlPtn}`][j]][1];
-		g_workObj.frzHitColors[j] = g_headerObj.frzColor[g_keyObj[`color${keyCtrlPtn}`][j]][2];
-		g_workObj.frzHitBarColors[j] = g_headerObj.frzColor[g_keyObj[`color${keyCtrlPtn}`][j]][3];
+		[``, `All`].forEach(type => {
+			g_workObj[`arrowColors${type}`][j] = g_headerObj.setColor[colorj];
 
-		g_workObj.arrowColorsAll[j] = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
+			g_workObj[`frzNormalColors${type}`][j] = g_headerObj.frzColor[colorj][0];
+			g_workObj[`frzNormalBarColors${type}`][j] = g_headerObj.frzColor[colorj][1];
+			g_workObj[`frzHitColors${type}`][j] = g_headerObj.frzColor[colorj][2];
+			g_workObj[`frzHitBarColors${type}`][j] = g_headerObj.frzColor[colorj][3];
 
-		g_workObj.frzNormalColorsAll[j] = g_headerObj.frzColor[g_keyObj[`color${keyCtrlPtn}`][j]][0];
-		g_workObj.frzNormalBarColorsAll[j] = g_headerObj.frzColor[g_keyObj[`color${keyCtrlPtn}`][j]][1];
-		g_workObj.frzHitColorsAll[j] = g_headerObj.frzColor[g_keyObj[`color${keyCtrlPtn}`][j]][2];
-		g_workObj.frzHitBarColorsAll[j] = g_headerObj.frzColor[g_keyObj[`color${keyCtrlPtn}`][j]][3];
+			g_workObj[`dummyArrowColors${type}`][j] = g_headerObj.setDummyColor[colorj];
 
-		const dummyColor = makeColorGradation(C_CLR_DUMMY);
-		g_workObj.dummyArrowColors[j] = dummyColor;
-
-		g_workObj.dummyFrzNormalColors[j] = dummyColor;
-		g_workObj.dummyFrzNormalBarColors[j] = dummyColor;
-		g_workObj.dummyFrzHitColors[j] = dummyColor;
-		g_workObj.dummyFrzHitBarColors[j] = dummyColor;
-
-		g_workObj.dummyArrowColorsAll[j] = dummyColor;
-
-		g_workObj.dummyFrzNormalColorsAll[j] = dummyColor;
-		g_workObj.dummyFrzNormalBarColorsAll[j] = dummyColor;
-		g_workObj.dummyFrzHitColorsAll[j] = dummyColor;
-		g_workObj.dummyFrzHitBarColorsAll[j] = dummyColor;
+			g_workObj[`dummyFrzNormalColors${type}`][j] = g_headerObj.setDummyColor[colorj];
+			g_workObj[`dummyFrzNormalBarColors${type}`][j] = g_headerObj.setDummyColor[colorj];
+			g_workObj[`dummyFrzHitColors${type}`][j] = g_headerObj.setDummyColor[colorj];
+			g_workObj[`dummyFrzHitBarColors${type}`][j] = g_headerObj.setDummyColor[colorj];
+		});
 
 		g_workObj.arrowCssMotions[j] = ``;
 		g_workObj.frzCssMotions[j] = ``;
