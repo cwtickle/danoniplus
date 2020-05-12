@@ -5194,14 +5194,7 @@ function keyConfigInit() {
 		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2;
 		const keyconY = C_KYC_HEIGHT * dividePos;
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
-
-		let arrowColor = g_headerObj.setColor[colorPos];
-		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
-			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
-			if (g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay][j] === 1) {
-				arrowColor = g_headerObj.setDummyColor[colorPos];
-			};
-		}
+		const arrowColor = getKeyConfigColor(j, colorPos);
 
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
 			// 矢印の塗り部分
@@ -5302,7 +5295,7 @@ function keyConfigInit() {
 			g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
 		}
 		for (let j = 0; j < keyNum; j++) {
-			document.querySelector(`#arrow${j}`).style.background = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
+			document.querySelector(`#arrow${j}`).style.background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
 		}
 		lnkcolorType.innerHTML = g_colorType;
 	});
@@ -5310,6 +5303,21 @@ function keyConfigInit() {
 	lnkcolorType.style.left = `calc(${g_sWidth}px - 130px)`;
 	lnkcolorType.style.top = `35px`;
 	divRoot.appendChild(lnkcolorType);
+
+	/**
+	 * キーコンフィグ用の矢印色を取得
+	 * @param {number} _colorPos 
+	 */
+	function getKeyConfigColor(_j, _colorPos) {
+		let arrowColor = g_headerObj.setColor[_colorPos];
+		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
+			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
+			if (g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay][_j] === 1) {
+				arrowColor = g_headerObj.setDummyColor[_colorPos];
+			};
+		}
+		return arrowColor;
+	}
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customKeyConfigInit === C_TYP_FUNCTION) {
