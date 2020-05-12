@@ -75,6 +75,7 @@ const C_ARW_WIDTH = 50;
 // ON/OFFスイッチ
 const C_FLG_ON = `ON`;
 const C_FLG_OFF = `OFF`;
+const C_FLG_ALL = `ALL`;
 const C_DIS_NONE = `none`;
 const C_DIS_INHERIT = `inherit`;
 
@@ -947,8 +948,8 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 						tmpFrame = 0;
 					}
 				}
-				const tmpDepth = (tmpSpriteData[1] === `ALL` ? `ALL` : setVal(tmpSpriteData[1], 0, C_TYP_NUMBER));
-				if (tmpDepth !== `ALL` && tmpDepth > maxDepth) {
+				const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_NUMBER));
+				if (tmpDepth !== C_FLG_ALL && tmpDepth > maxDepth) {
 					maxDepth = tmpDepth;
 				}
 
@@ -1883,7 +1884,7 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 				baseSprite.innerHTML = tmpObj.htmlText;
 			}
 		} else {
-			if (tmpObj.depth === `ALL`) {
+			if (tmpObj.depth === C_FLG_ALL) {
 				for (let j = 0; j <= g_headerObj[`${_depthName}${spriteUpper}MaxDepth`]; j++) {
 					document.querySelector(`#${_depthName}${spriteUpper}Sprite${j}`).innerHTML = ``;
 				}
@@ -1909,7 +1910,7 @@ function drawMainSpriteData(_frame, _depthName) {
 		if (tmpObj.command !== ``) {
 			baseSprite.innerHTML = tmpObj.htmlText;
 		} else {
-			if (tmpObj.depth === `ALL`) {
+			if (tmpObj.depth === C_FLG_ALL) {
 				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
 					document.querySelector(`#${_depthName}Sprite${j}`).innerHTML = ``;
 				}
@@ -5237,11 +5238,11 @@ function keyConfigInit() {
 				break;
 
 			case `Replaced`:
-				g_kcType = `ALL`;
+				g_kcType = C_FLG_ALL;
 				resetCursorALL(kWidth, divideCnt, keyCtrlPtn);
 				break;
 
-			case `ALL`:
+			case C_FLG_ALL:
 				g_kcType = `Main`;
 				resetCursorMain(kWidth, divideCnt, keyCtrlPtn);
 				break;
@@ -5573,7 +5574,7 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
 	if (g_currentk === 1) {
 		cursor.style.top = `${45 + C_KYC_REPHEIGHT + C_KYC_HEIGHT * dividePos}px`;
 	} else {
-		g_kcType = `ALL`;
+		g_kcType = C_FLG_ALL;
 		document.querySelector(`#lnkKcType`).innerHTML = g_kcType;
 		cursor.style.top = `${45 + C_KYC_HEIGHT * dividePos}px`;
 	}
@@ -5765,7 +5766,7 @@ function loadingScoreInit2() {
 
 	// アシスト用の配列があれば、ダミーデータで上書き
 	if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
-		![C_FLG_OFF, C_FLG_ON].includes(g_stateObj.autoPlay)) {
+		![C_FLG_OFF, C_FLG_ALL].includes(g_stateObj.autoPlay)) {
 		const assistArray = g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay];
 		for (let j = 0; j < keyNum; j++) {
 			if (assistArray[j] === 1) {
@@ -7160,7 +7161,7 @@ function getArrowSettings() {
 		scrollDirOptions = [...Array(keyNum)].fill(1);
 	}
 
-	g_stateObj.autoAll = (g_stateObj.autoPlay === C_FLG_ON ? C_FLG_ON : C_FLG_OFF);
+	g_stateObj.autoAll = (g_stateObj.autoPlay === C_FLG_ALL ? C_FLG_ON : C_FLG_OFF);
 
 	for (let j = 0; j < keyNum; j++) {
 
@@ -9356,7 +9357,7 @@ function resultInit() {
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2,
 		`Difficulty`, C_ALIGN_LEFT));
 	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-	if (![C_FLG_OFF, C_FLG_ON].includes(g_stateObj.autoPlay)) {
+	if (![C_FLG_OFF, C_FLG_ALL].includes(g_stateObj.autoPlay)) {
 		difData += ` -${g_stateObj.autoPlay}less`;
 	}
 	if (g_headerObj.makerView) {
@@ -9510,7 +9511,7 @@ function resultInit() {
 	playDataWindow.style.animationName = `slowlyAppearing`;
 
 	// ハイスコア差分計算
-	const assistFlg = ([C_FLG_OFF, C_FLG_ON].includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
+	const assistFlg = ([C_FLG_OFF, C_FLG_ALL].includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
 	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_headerObj.makerView) {
 		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;

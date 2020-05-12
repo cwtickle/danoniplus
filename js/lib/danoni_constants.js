@@ -338,8 +338,8 @@ let g_shuffleNum = 0;
 let g_gauges = [];
 let g_gaugeNum = 0;
 
-let g_autoPlays = [C_FLG_OFF, C_FLG_ON];
-const g_autoPlaysBase = [C_FLG_OFF, C_FLG_ON];
+let g_autoPlays = [C_FLG_OFF, C_FLG_ALL];
+const g_autoPlaysBase = [C_FLG_OFF, C_FLG_ALL];
 let g_autoPlayNum = 0;
 
 let g_adjustments = [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT);
