@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/05/04
+ * Revised : 2020/05/13
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 13.6.2`;
-const g_revisedDate = `2020/05/04`;
+const g_version = `Ver 13.6.3`;
+const g_revisedDate = `2020/05/13`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2264,13 +2264,27 @@ function titleInit() {
 		name: `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${g_alphaVersion}${customVersion}${releaseDate}`,
 		x: g_sWidth / 4,
 		y: g_sHeight - 20,
-		width: g_sWidth * 3 / 4 - 10,
+		width: g_sWidth * 3 / 4 - 30,
 		height: 16,
 		fontsize: 12,
 		align: C_ALIGN_RIGHT,
 		class: g_cssObj.button_Tweet,
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus`, `_blank`));
 	divRoot.appendChild(lnkVersion);
+
+	// バージョン比較用リンク
+	const lnkComparison = createCssButton({
+		id: `lnkComparison`,
+		name: `&#x2194;`,
+		x: g_sWidth - 30,
+		y: g_sHeight - 20,
+		width: 20,
+		height: 16,
+		fontsize: 12,
+		align: C_ALIGN_CENTER,
+		class: g_cssObj.button_Tweet,
+	}, _ => window.open(`https://github.com/cwtickle/danoniplus/compare/v${g_version.slice(4)}...master`, `_blank`));
+	divRoot.appendChild(lnkComparison);
 
 	// マスクスプライトを作成
 	createSprite(`divRoot`, `maskTitleSprite`, 0, 0, g_sWidth, g_sHeight);
