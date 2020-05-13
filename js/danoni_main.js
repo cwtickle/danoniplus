@@ -5620,6 +5620,20 @@ function loadingScoreInit2() {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
+	// ユーザカスタムイベント
+	if (typeof customPreloadingInit === C_TYP_FUNCTION) {
+		customPreloadingInit();
+		if (typeof customPreloadingInit2 === C_TYP_FUNCTION) {
+			customPreloadingInit2();
+		}
+	}
+	if (typeof skinPreloadingInit === C_TYP_FUNCTION) {
+		skinPreloadingInit();
+		if (typeof skinPreloadingInit2 === C_TYP_FUNCTION) {
+			skinPreloadingInit2();
+		}
+	}
+
 	// 譜面初期情報ロード許可フラグ
 	// (タイトルバック時保存したデータを設定画面にて再読み込みするため、
 	//  ローカルストレージ保存時はフラグを解除しない)
