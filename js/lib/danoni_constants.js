@@ -276,6 +276,7 @@ const g_stateObj = {
     scroll: `---`,
     shuffle: C_FLG_OFF,
     autoPlay: C_FLG_OFF,
+    autoAll: C_FLG_OFF,
     gauge: `Normal`,
     adjustment: 0,
     fadein: 0,
@@ -337,7 +338,8 @@ let g_shuffleNum = 0;
 let g_gauges = [];
 let g_gaugeNum = 0;
 
-let g_autoPlays = [C_FLG_OFF, C_FLG_ON];
+let g_autoPlays = [C_FLG_OFF, C_FLG_ALL];
+const g_autoPlaysBase = [C_FLG_OFF, C_FLG_ALL];
 let g_autoPlayNum = 0;
 
 let g_adjustments = [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT);
@@ -1246,6 +1248,53 @@ const g_keyObj = {
         'Flat': [1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
     },
 
+    // プレイアシスト設定
+    assistName5: [`Onigiri`],
+    assistName9A: [`Left`, `Right`],
+    assistName11i: [`Left`, `Right`],
+    assistName17: [`Left`, `Right`],
+
+    assistPos5_0: {
+        'Onigiri': [0, 0, 0, 0, 1],
+    },
+    assistPos5_1: {
+        'Onigiri': [1, 0, 0, 0, 0],
+    },
+    assistPos5_2: {
+        'Onigiri': [0, 0, 1, 0, 0],
+    },
+
+    assistPos9A_0: {
+        'Left': [1, 1, 1, 1, 0, 0, 0, 0, 0],
+        'Right': [0, 0, 0, 0, 0, 1, 1, 1, 1],
+    },
+    assistPos9A_1: {
+        'Left': [1, 1, 1, 1, 0, 0, 0, 0, 0],
+        'Right': [0, 0, 0, 0, 0, 1, 1, 1, 1],
+    },
+    assistPos9A_2: {
+        'Left': [1, 1, 1, 1, 0, 0, 0, 0, 0],
+        'Right': [0, 0, 0, 0, 0, 1, 1, 1, 1],
+    },
+    assistPos9A_3: {
+        'Left': [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        'Right': [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+    },
+
+    assistPos11i_0: {
+        'Left': [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        'Right': [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+    },
+
+    assistPos17_0: {
+        'Left': [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'Right': [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+    },
+    assistPos17_1: {
+        'Left': [1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+        'Right': [0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1],
+    },
+
     dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
 
@@ -1296,7 +1345,7 @@ const g_msgObj = {
     reverse: `矢印の流れる向きを設定します。`,
     scroll: `各レーンのスクロール方向をパターンに沿って設定します。`,
     shuffle: `譜面を左右反転したり、ランダムにします。\nランダムにした場合は別譜面扱いとなり、ハイスコアは保存されません。`,
-    autoplay: `オートプレイにするかどうかを設定します。\nオートプレイ時はハイスコアを保存しません。`,
+    autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
     gauge: `クリア条件を設定します。`,
     adjustment: `タイミングにズレを感じる場合、\n数値を変えることでズレを直すことができます。`,
     fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
