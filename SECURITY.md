@@ -15,12 +15,12 @@ v12の対応終了時期はv15リリース開始時を予定しています。�
 
 | Version | Supported          | Latest Version | End of Support |
 | ------- | ------------------ |----------------|----------------|
-| v14     | :white_check_mark: |[v14.5.1](../../releases/tag/v14.5.1)          |-|
-| v13     | :white_check_mark: |[v13.6.2](../../releases/tag/v13.6.2)          |(At Release v16)|
-| v12     | :warning:          |[v12.3.5](../../releases/tag/v12.3.5)          |(At Release v15)|
+| v14     | :white_check_mark: |[v14.5.2](../../releases/tag/v14.5.2)          |-|
+| v13     | :warning:          |[v13.6.3](../../releases/tag/v13.6.3)          |(At Release v16)|
+| v12     | :x:                |[v12.3.6 (final)](../../releases/tag/v12.3.6)  |2020-05-13|
 | v11     | :x:                |[v11.4.5 (final)](../../releases/tag/v11.4.5)  |2020-04-18|
 | v10     | :x:                |[v10.5.5 (final)](../../releases/tag/v10.5.5)  |2020-02-10|
-| v9      | :white_check_mark: |[v9.4.11](../../releases/tag/v9.4.11)          |-|
+| v9      | :white_check_mark: |[v9.4.12](../../releases/tag/v9.4.12)          |-|
 | v8      | :x:                |[v8.7.10 (final)](../../releases/tag/v8.7.10)  |2019-12-14|
 | v7      | :x:                |[v7.9.13 (final)](../../releases/tag/v7.9.13)  |2019-11-04|
 | v6      | :x:                |[v6.6.13 (final)](../../releases/tag/v6.6.13)  |2019-11-04|
