@@ -8490,18 +8490,18 @@ function MainInit() {
 		}
 
 		// 個別色変化 (矢印)
-		changeArrowColors(g_workObj.mkColor[g_scoreObj.frameNum], g_workObj.mkColorCd[g_scoreObj.frameNum], ``);
+		changeArrowColors(g_workObj.mkColor[g_scoreObj.frameNum], g_workObj.mkColorCd[g_scoreObj.frameNum]);
 
 		// 個別色変化（フリーズアロー）
 		changeFrzColors(g_workObj.mkFColor[g_scoreObj.frameNum], g_workObj.mkFColorCd[g_scoreObj.frameNum],
-			g_keyObj[`color${keyCtrlPtn}`], keyNum, ``);
+			g_keyObj[`color${keyCtrlPtn}`]);
 
 		// 全体色変化 (矢印)
 		changeArrowColors(g_workObj.mkAColor[g_scoreObj.frameNum], g_workObj.mkAColorCd[g_scoreObj.frameNum], `A`);
 
 		// 全体色変化 (フリーズアロー)
 		changeFrzColors(g_workObj.mkFAColor[g_scoreObj.frameNum], g_workObj.mkFAColorCd[g_scoreObj.frameNum],
-			g_keyObj[`color${keyCtrlPtn}`], keyNum, `A`);
+			g_keyObj[`color${keyCtrlPtn}`], `A`);
 
 		// 矢印モーション
 		changeCssMotions(g_workObj.mkArrowCssMotion[g_scoreObj.frameNum], g_workObj.mkArrowCssMotionName[g_scoreObj.frameNum], `arrow`);
@@ -8754,17 +8754,17 @@ function makeCounterSymbol(_id, _x, _class, _heightPos, _text) {
  * @param {array} _mkColorCd 
  * @param {string} _allFlg
  */
-function changeArrowColors(_mkColor, _mkColorCd, _allFlg) {
+function changeArrowColors(_mkColor, _mkColorCd, _allFlg = ``) {
 
-	if (_mkColor !== undefined) {
-		for (let j = 0, len = _mkColor.length; j < len; j++) {
-			const targetj = _mkColor[j];
-			g_workObj.arrowColors[targetj] = _mkColorCd[j];
-			if (_allFlg === `A`) {
-				g_workObj.arrowColorsAll[targetj] = _mkColorCd[j];
-			}
-		}
+	if (_mkColor === undefined) {
+		return;
 	}
+	_mkColor.forEach((targetj, j) => {
+		g_workObj.arrowColors[targetj] = _mkColorCd[j];
+		if (_allFlg === `A`) {
+			g_workObj.arrowColorsAll[targetj] = _mkColorCd[j];
+		}
+	});
 }
 
 /**
@@ -8772,68 +8772,31 @@ function changeArrowColors(_mkColor, _mkColorCd, _allFlg) {
  * @param {array} _mkColor 
  * @param {array} _mkColorCd 
  * @param {array} _colorPatterns 
- * @param {number} _keyNum 
  * @param {string} _allFlg
  */
-function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg) {
+function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _allFlg = ``) {
 
-	if (_mkColor !== undefined) {
-		for (let j = 0, len = _mkColor.length; j < len; j++) {
+	if (_mkColor === undefined) {
+		return;
+	}
+	_mkColor.forEach((targetj, j) => {
 
-			const targetj = _mkColor[j];
+		// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
+		const ctype = (targetj > 10 ? `Hit` : `Normal`) + (targetj % 2 === 0 ? `` : `Bar`);
+		const colorPos = Math.ceil((targetj % 10 - 1) / 2);
 
-			// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
-			if (targetj < 10) {
-				if (targetj % 2 === 0) {
-					// 矢印 (通常)
-					for (let k = 0; k < _keyNum; k++) {
-						if (targetj / 2 === _colorPatterns[k]) {
-							g_workObj.frzNormalColors[k] = _mkColorCd[j];
-							if (_allFlg === `A`) {
-								g_workObj.frzNormalColorsAll[k] = _mkColorCd[j];
-							}
-						}
-					}
-				} else {
-					// 帯 (通常)
-					for (let k = 0; k < _keyNum; k++) {
-						if ((targetj - 1) / 2 === _colorPatterns[k]) {
-							g_workObj.frzNormalBarColors[k] = _mkColorCd[j];
-							if (_allFlg === `A`) {
-								g_workObj.frzNormalBarColorsAll[k] = _mkColorCd[j];
-							}
-						}
-					}
-				}
-			} else {
-				const targetj2 = targetj - 10;
-				if (targetj2 % 2 === 0) {
-					// 矢印 (ヒット時)
-					for (let k = 0; k < _keyNum; k++) {
-						if (targetj2 / 2 === _colorPatterns[k]) {
-							g_workObj.frzHitColors[k] = _mkColorCd[j];
-							if (_allFlg === `A`) {
-								g_workObj.frzHitColorsAll[k] = _mkColorCd[j];
-								if (isNaN(Number(g_workObj.arrowRtn[k]))) {
-									document.querySelector(`#frzHitTop${k}`).style.background = _mkColorCd[j];
-								}
-							}
-						}
-					}
-				} else {
-					// 帯 (ヒット時)
-					for (let k = 0; k < _keyNum; k++) {
-						if ((targetj2 - 1) / 2 === _colorPatterns[k]) {
-							g_workObj.frzHitBarColors[k] = _mkColorCd[j];
-							if (_allFlg === `A`) {
-								g_workObj.frzHitBarColorsAll[k] = _mkColorCd[j];
-							}
-						}
+		_colorPatterns.forEach((cpattern, k) => {
+			if (colorPos === cpattern) {
+				g_workObj[`frz${ctype}Colors`][k] = _mkColorCd[j];
+				if (_allFlg === `A`) {
+					g_workObj[`frz${ctype}ColorsAll`][k] = _mkColorCd[j];
+					if (ctype === `HitBar` && isNaN(Number(g_workObj.arrowRtn[k]))) {
+						document.querySelector(`#frzHitTop${k}`).style.background = _mkColorCd[j];
 					}
 				}
 			}
-		}
-	}
+		});
+	});
 }
 
 /**
