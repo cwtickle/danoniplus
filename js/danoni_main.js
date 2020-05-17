@@ -1936,10 +1936,10 @@ function makeColorGradation(_colorStr, _options = {}) {
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
 
-	const _defaultColorgrd = _options.defaultColorgrd || g_headerObj.defaultColorgrd;
-	const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
-	const _objType = _options.objType || `normal`;
-	const _shadowFlg = _options.shadowFlg || false;
+	const _defaultColorgrd = setVal(_options.defaultColorgrd, g_headerObj.defaultColorgrd, C_TYP_BOOLEAN);
+	const _colorCdPaddingUse = setVal(_options.colorCdPaddingUse, false, C_TYP_BOOLEAN);
+	const _objType = setVal(_options.objType, `normal`, C_TYP_STRING);
+	const _shadowFlg = setVal(_options.shadowFlg, false, C_TYP_BOOLEAN);
 
 	if (_colorStr === `Default`) {
 		return `Default`;
@@ -2679,15 +2679,9 @@ function headerConvert(_dosObj) {
 	}
 
 	// ライフ設定のカスタム部分取得（譜面ヘッダー加味）
-	for (let j = 0; j < g_gaugeOptionObj.survival.length; j++) {
-		getGaugeSetting(_dosObj, g_gaugeOptionObj.survival[j], obj);
-	}
-	for (let j = 0; j < g_gaugeOptionObj.border.length; j++) {
-		getGaugeSetting(_dosObj, g_gaugeOptionObj.border[j], obj);
-	}
-	for (let j = 0; j < g_gaugeOptionObj.custom.length; j++) {
-		getGaugeSetting(_dosObj, g_gaugeOptionObj.custom[j], obj);
-	}
+	[`survival`, `border`, `custom`].forEach(gaugeType => {
+		g_gaugeOptionObj[gaugeType].forEach(gaugePtn => getGaugeSetting(_dosObj, gaugePtn, obj));
+	});
 
 	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
 	if (_dosObj.defaultFrzColorUse !== undefined) {
@@ -2779,11 +2773,11 @@ function headerConvert(_dosObj) {
 	 */
 	function setColorList(_data, _colorInit, _colorInitLength, _options = {}) {
 
-		const _defaultColorgrd = _options.defaultColorgrd || g_headerObj.defaultColorgrd;
-		const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
-		const _defaultFrzColorUse = (_options.defaultFrzColorUse === undefined ? true : _options.defaultFrzColorUse);
-		const _objType = _options.objType || `normal`;
-		const _shadowFlg = _options.shadowFlg || false;
+		const _defaultColorgrd = setVal(_options.defaultColorgrd, g_headerObj.defaultColorgrd, C_TYP_BOOLEAN);
+		const _colorCdPaddingUse = setVal(_options.colorCdPaddingUse, false, C_TYP_BOOLEAN);
+		const _defaultFrzColorUse = setVal(_options.defaultFrzColorUse, true, C_TYP_BOOLEAN);
+		const _objType = setVal(_options.objType, `normal`, C_TYP_STRING);
+		const _shadowFlg = setVal(_options.shadowFlg, false, C_TYP_BOOLEAN);
 
 		// グラデーション文字列 #ffff99:#9999ff@linear-gradient
 		let colorStr = [];
