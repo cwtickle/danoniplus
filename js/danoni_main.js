@@ -980,9 +980,9 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				setSpriteData(tmpObj, tmpFrame, tmpDepth);
 
 				// opacityが"preload"を指定された場合は一定フレーム手前に同じ画像をopacity:0で描画して準備
-				if (tmpSpriteData[8] === `preload` && tmpFrame - 1 >= 0) {
+				if (tmpSpriteData[8] === `preload` && tmpFrame - 10 >= 0) {
 					tmpObj.opacity = 0;
-					setSpriteData(tmpObj, tmpFrame - 1, tmpDepth);
+					setSpriteData(tmpObj, tmpFrame - 10, tmpDepth);
 				}
 			}
 		}
