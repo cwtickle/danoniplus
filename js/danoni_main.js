@@ -5850,13 +5850,13 @@ function loadingScoreInit2() {
 		g_allFrz += (isNaN(parseFloat(g_scoreObj.frzData[j][0])) ? 0 : g_scoreObj.frzData[j].length);
 	}
 
-	calcLifeVals(g_allArrow + g_allFrz / 2);
-
 	// ライフ回復・ダメージ量の計算
 	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
 	if (g_headerObj.frzStartjdgUse) {
 		g_allArrow += g_allFrz / 2;
 	}
+
+	calcLifeVals(g_allArrow + g_allFrz / 2);
 
 	// 矢印・フリーズアロー・速度/色変化格納処理
 	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
