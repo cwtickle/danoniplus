@@ -244,8 +244,6 @@ function setVal(_checkStr, _default, _type) {
 
 	} else if (_type === C_TYP_CALC) {
 		convertStr = new Function(`return ${_checkStr}`)();
-		isNaNflg = isNaN(parseInt(convertStr));
-		convertStr = (isNaNflg ? _default : convertStr);
 	}
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
@@ -6179,13 +6177,12 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				if (tmpData !== undefined && tmpData !== ``) {
 					const tmpSpeedData = tmpData.split(`,`);
 					for (let k = 0; k < tmpSpeedData.length; k += 2) {
-						const tmpFrame = setVal(tmpSpeedData[k], ``, C_TYP_CALC);
-						if (tmpFrame === ``) {
+						if (setVal(tmpSpeedData[k], ``, C_TYP_STRING) === ``) {
 							continue;
 						} else if (tmpSpeedData[k + 1] === `-`) {
 							break;
 						}
-						speedData[speedIdx] = calcFrame(tmpFrame);
+						speedData[speedIdx] = calcFrame(setVal(tmpSpeedData[k], ``, C_TYP_CALC));
 						speedData[speedIdx + 1] = setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC);
 						speedIdx += 2;
 					}
@@ -6213,13 +6210,12 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				if (tmpData !== undefined && tmpData !== ``) {
 					const tmpColorData = tmpData.split(`,`);
 					for (let k = 0; k < tmpColorData.length; k += 3) {
-						const tmpFrame = setVal(tmpColorData[k], ``, C_TYP_CALC);
-						if (tmpFrame === ``) {
+						if (setVal(tmpColorData[k], ``, C_TYP_STRING) === ``) {
 							continue;
 						} else if (tmpColorData[k + 1] === `-`) {
 							break;
 						}
-						colorData[colorIdx] = calcFrame(tmpFrame);
+						colorData[colorIdx] = calcFrame(setVal(tmpColorData[k], ``, C_TYP_CALC));
 						colorData[colorIdx + 1] = setVal(tmpColorData[k + 1], 0, C_TYP_CALC);
 						colorData[colorIdx + 2] = tmpColorData[k + 2];
 						colorIdx += 3;
@@ -6299,13 +6295,12 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			if (tmpData !== undefined && tmpData !== ``) {
 				const tmpWordData = tmpData.split(`,`);
 				for (let k = 0; k < tmpWordData.length; k += 3) {
-					const tmpFrame = setVal(tmpWordData[k], ``, C_TYP_CALC);
-					if (tmpFrame === ``) {
+					if (setVal(tmpWordData[k], ``, C_TYP_STRING) === ``) {
 						continue;
 					} else if (tmpWordData[k + 1] === `-`) {
 						break;
 					}
-					tmpWordData[k] = calcFrame(tmpFrame);
+					tmpWordData[k] = calcFrame(setVal(tmpWordData[k], ``, C_TYP_CALC));
 					tmpWordData[k + 1] = setVal(tmpWordData[k + 1], 0, C_TYP_CALC);
 
 					if (tmpWordData[k + 1] > wordMaxDepth) {
