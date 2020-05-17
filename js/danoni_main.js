@@ -7190,31 +7190,18 @@ function getArrowSettings() {
 	g_workObj.judgDummyFrzCnt = [];
 
 	// TODO: この部分を矢印塗りつぶし部分についても適用できるように変数を作成
-	// 矢印色管理 (個別)
-	g_workObj.arrowColors = [];
-	g_workObj.frzNormalColors = [];
-	g_workObj.frzNormalBarColors = [];
-	g_workObj.frzHitColors = [];
-	g_workObj.frzHitBarColors = [];
 
-	g_workObj.dummyArrowColors = [];
-	g_workObj.dummyFrzNormalColors = [];
-	g_workObj.dummyFrzNormalBarColors = [];
-	g_workObj.dummyFrzHitColors = [];
-	g_workObj.dummyFrzHitBarColors = [];
+	// 矢印色管理 (個別・全体)
+	[``, `All`].forEach(type => {
+		g_workObj[`arrowColors${type}`] = [];
+		g_workObj[`dummyArrowColors${type}`] = [];
 
-	// 矢印色管理 (全体)
-	g_workObj.arrowColorsAll = [];
-	g_workObj.frzNormalColorsAll = [];
-	g_workObj.frzNormalBarColorsAll = [];
-	g_workObj.frzHitColorsAll = [];
-	g_workObj.frzHitBarColorsAll = [];
-
-	g_workObj.dummyArrowColorsAll = [];
-	g_workObj.dummyFrzNormalColorsAll = [];
-	g_workObj.dummyFrzNormalBarColorsAll = [];
-	g_workObj.dummyFrzHitColorsAll = [];
-	g_workObj.dummyFrzHitBarColorsAll = [];
+		[`frz`, `dummyFrz`].forEach(arrowType => {
+			[`Normal`, `NormalBar`, `Hit`, `HitBar`].forEach(frzType => {
+				g_workObj[`${arrowType}${frzType}Colors${type}`] = [];
+			});
+		});
+	});
 
 	// モーション管理
 	g_workObj.arrowCssMotions = [];
@@ -7283,22 +7270,10 @@ function getArrowSettings() {
 		g_workObj.dummyFrzCssMotions[j] = ``;
 	}
 
-	g_resultObj.ii = 0;
-	g_resultObj.shakin = 0;
-	g_resultObj.matari = 0;
-	g_resultObj.shobon = 0;
-	g_resultObj.uwan = 0;
-	g_resultObj.combo = 0;
-	g_resultObj.maxCombo = 0;
-
-	g_resultObj.kita = 0;
-	g_resultObj.sfsf = 0;
-	g_resultObj.iknai = 0;
-	g_resultObj.fCombo = 0;
-	g_resultObj.fmaxCombo = 0;
-
-	g_resultObj.fast = 0;
-	g_resultObj.slow = 0;
+	[
+		`ii`, `shakin`, `matari`, `shobon`, `uwan`, `combo`, `maxcombo`,
+		`kita`, `sfsf`, `iknai`, `fCombo`, `fmaxCombo`, `fast`, `slow`
+	].forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
