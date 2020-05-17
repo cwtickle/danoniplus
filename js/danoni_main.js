@@ -968,7 +968,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 					top: setVal(tmpSpriteData[5], 0, C_TYP_FLOAT),						// Y座標
 					width: setVal(tmpSpriteData[6], 0, C_TYP_NUMBER),					// spanタグの場合は font-size
 					height: escapeHtml(setVal(tmpSpriteData[7], ``, C_TYP_STRING)),		// spanタグの場合は color(文字列可)
-					opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
+					opacity: setVal(tmpSpriteData[8] === `preload` ? 1 : tmpSpriteData[8], 1, C_TYP_FLOAT),
 					animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING)),
 					animationDuration: setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / g_fps,
 				};
@@ -977,23 +977,38 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 						preloadFile(`image`, tmpObj.path);
 					}
 				}
+				setSpriteData(tmpObj, tmpFrame, tmpDepth);
 
-				let addFrame = 0;
-				[spriteData[tmpFrame], addFrame] =
-					checkDuplicatedObjects(spriteData[tmpFrame]);
-
-				const emptyPatterns = [``, `[loop]`, `[jump]`];
-				spriteData[tmpFrame][addFrame] = {
-					depth: tmpDepth,
-					command: tmpObj.path,
-					jumpFrame: tmpObj.class,
-					maxLoop: tmpObj.left,
-					htmlText: emptyPatterns.includes(tmpObj.path) ?
-						`` : (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj)),
-				};
+				// opacityが"preload"を指定された場合は一定フレーム手前に同じ画像をopacity:0で描画して準備
+				if (tmpSpriteData[8] === `preload` && tmpFrame - 1 >= 0) {
+					tmpObj.opacity = 0;
+					setSpriteData(tmpObj, tmpFrame - 1, tmpDepth);
+				}
 			}
 		}
 	});
+
+	/**
+	 * 多層スプライトデータの格納処理
+	 * @param {object} _tmpObj 
+	 * @param {number} _tmpFrame 
+	 * @param {number} _tmpDepth 
+	 */
+	function setSpriteData(_tmpObj, _tmpFrame, _tmpDepth) {
+		let addFrame = 0;
+		[spriteData[_tmpFrame], addFrame] =
+			checkDuplicatedObjects(spriteData[_tmpFrame]);
+
+		const emptyPatterns = [``, `[loop]`, `[jump]`];
+		spriteData[_tmpFrame][addFrame] = {
+			depth: _tmpDepth,
+			command: _tmpObj.path,
+			jumpFrame: _tmpObj.class,
+			maxLoop: _tmpObj.left,
+			htmlText: emptyPatterns.includes(_tmpObj.path) ?
+				`` : (checkImage(_tmpObj.path) ? makeSpriteImage(_tmpObj) : makeSpriteText(_tmpObj)),
+		};
+	}
 
 	return [spriteData, maxDepth];
 }
