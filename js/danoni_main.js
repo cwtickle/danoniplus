@@ -243,7 +243,11 @@ function setVal(_checkStr, _default, _type) {
 			_checkStr.toString().toUpperCase() : _default;
 
 	} else if (_type === C_TYP_CALC) {
-		convertStr = new Function(`return ${_checkStr}`)();
+		try {
+			convertStr = new Function(`return ${_checkStr}`)();
+		} catch (err) {
+			convertStr = _default;
+		}
 	}
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
