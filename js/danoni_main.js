@@ -956,7 +956,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 						tmpFrame = 0;
 					}
 				}
-				const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_CALC));
+				const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_CALC) + 1);
 				if (tmpDepth !== C_FLG_ALL && tmpDepth > maxDepth) {
 					maxDepth = tmpDepth;
 				}
@@ -982,7 +982,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				// opacityが"preload"を指定された場合は一定フレーム手前に同じ画像をopacity:0で描画して準備
 				if (tmpSpriteData[8] === `preload` && tmpFrame - 10 >= 0) {
 					tmpObj.opacity = 0;
-					setSpriteData(tmpObj, tmpFrame - 10, tmpDepth);
+					setSpriteData(tmpObj, tmpFrame - 10, 0);
 				}
 			}
 		}
