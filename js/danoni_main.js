@@ -205,7 +205,8 @@ const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
 
 /**
  * 文字列を想定された型に変換
- * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、`switch`(ON/OFF), `string`(文字列)から選択
+ * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、
+ *   `switch`(ON/OFF), `calc`(数式), `string`(文字列)から選択
  * - 型に合わない場合は _default を返却するが、_default自体の型チェック・変換は行わない
  * @param {string} _checkStr 
  * @param {string} _default 
@@ -231,9 +232,6 @@ function setVal(_checkStr, _default, _type) {
 		isNaNflg = isNaN(parseInt(_checkStr));
 		convertStr = (isNaNflg ? _default : parseInt(_checkStr));
 
-	} else if (_type === C_TYP_CALC) {
-		convertStr = new Function(`return ${_checkStr}`)();
-
 	} else if (_type === C_TYP_BOOLEAN) {
 		// 真偽値の場合
 		const lowerCase = _checkStr.toString().toLowerCase();
@@ -243,6 +241,11 @@ function setVal(_checkStr, _default, _type) {
 		// ON/OFFスイッチの場合
 		convertStr = [C_FLG_OFF, C_FLG_ON].includes(_checkStr.toString().toUpperCase()) ?
 			_checkStr.toString().toUpperCase() : _default;
+
+	} else if (_type === C_TYP_CALC) {
+		convertStr = new Function(`return ${_checkStr}`)();
+		isNaNflg = isNaN(parseInt(convertStr));
+		convertStr = (isNaNflg ? _default : convertStr);
 	}
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
@@ -6176,13 +6179,14 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				if (tmpData !== undefined && tmpData !== ``) {
 					const tmpSpeedData = tmpData.split(`,`);
 					for (let k = 0; k < tmpSpeedData.length; k += 2) {
-						if (isNaN(parseInt(tmpSpeedData[k]))) {
+						const tmpFrame = setVal(tmpSpeedData[k], ``, C_TYP_CALC);
+						if (tmpFrame === ``) {
 							continue;
 						} else if (tmpSpeedData[k + 1] === `-`) {
 							break;
 						}
-						speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
-						speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
+						speedData[speedIdx] = calcFrame(tmpFrame);
+						speedData[speedIdx + 1] = setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC);
 						speedIdx += 2;
 					}
 				}
@@ -6209,13 +6213,14 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				if (tmpData !== undefined && tmpData !== ``) {
 					const tmpColorData = tmpData.split(`,`);
 					for (let k = 0; k < tmpColorData.length; k += 3) {
-						if (isNaN(parseInt(tmpColorData[k]))) {
+						const tmpFrame = setVal(tmpColorData[k], ``, C_TYP_CALC);
+						if (tmpFrame === ``) {
 							continue;
 						} else if (tmpColorData[k + 1] === `-`) {
 							break;
 						}
-						colorData[colorIdx] = calcFrame(tmpColorData[k]);
-						colorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
+						colorData[colorIdx] = calcFrame(tmpFrame);
+						colorData[colorIdx + 1] = setVal(tmpColorData[k + 1], 0, C_TYP_CALC);
 						colorData[colorIdx + 2] = tmpColorData[k + 2];
 						colorIdx += 3;
 					}
@@ -6294,13 +6299,14 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			if (tmpData !== undefined && tmpData !== ``) {
 				const tmpWordData = tmpData.split(`,`);
 				for (let k = 0; k < tmpWordData.length; k += 3) {
-					if (isNaN(parseInt(tmpWordData[k]))) {
+					const tmpFrame = setVal(tmpWordData[k], ``, C_TYP_CALC);
+					if (tmpFrame === ``) {
 						continue;
 					} else if (tmpWordData[k + 1] === `-`) {
 						break;
 					}
-					tmpWordData[k] = calcFrame(tmpWordData[k]);
-					tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
+					tmpWordData[k] = calcFrame(tmpFrame);
+					tmpWordData[k + 1] = setVal(tmpWordData[k + 1], 0, C_TYP_CALC);
 
 					if (tmpWordData[k + 1] > wordMaxDepth) {
 						wordMaxDepth = tmpWordData[k + 1];
