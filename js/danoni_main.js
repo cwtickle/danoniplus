@@ -231,6 +231,9 @@ function setVal(_checkStr, _default, _type) {
 		isNaNflg = isNaN(parseInt(_checkStr));
 		convertStr = (isNaNflg ? _default : parseInt(_checkStr));
 
+	} else if (_type === C_TYP_CALC) {
+		convertStr = new Function(`return ${_checkStr}`)();
+
 	} else if (_type === C_TYP_BOOLEAN) {
 		// 真偽値の場合
 		const lowerCase = _checkStr.toString().toLowerCase();
@@ -943,12 +946,12 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				if (setVal(tmpSpriteData[0], 200, C_TYP_NUMBER) === 0) {
 					tmpFrame = 0;
 				} else {
-					tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_NUMBER));
+					tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC));
 					if (tmpFrame < 0) {
 						tmpFrame = 0;
 					}
 				}
-				const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_NUMBER));
+				const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_CALC));
 				if (tmpDepth !== C_FLG_ALL && tmpDepth > maxDepth) {
 					maxDepth = tmpDepth;
 				}
