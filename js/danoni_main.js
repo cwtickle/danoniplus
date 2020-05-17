@@ -8407,7 +8407,8 @@ function MainInit() {
 	 */
 	function flowTimeline() {
 
-		lblframe.innerHTML = g_scoreObj.frameNum;
+		const currentFrame = g_scoreObj.frameNum;
+		lblframe.innerHTML = currentFrame;
 
 		// キーの押下状態を取得
 		for (let j = 0; j < keyNum; j++) {
@@ -8416,7 +8417,7 @@ function MainInit() {
 			}
 		}
 
-		if (g_scoreObj.frameNum === musicStartFrame) {
+		if (currentFrame === musicStartFrame) {
 			musicStartFlg = true;
 			g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
 			g_audio.playbackRate = g_headerObj.playbackRate;
@@ -8427,13 +8428,13 @@ function MainInit() {
 
 		// 背景・マスクモーション
 		g_animationData.forEach(sprite => {
-			if (g_scoreObj[`${sprite}Data`][g_scoreObj.frameNum] !== undefined) {
-				drawMainSpriteData(g_scoreObj.frameNum, sprite);
+			if (g_scoreObj[`${sprite}Data`][currentFrame] !== undefined) {
+				drawMainSpriteData(currentFrame, sprite);
 			}
 		});
 
 		// フェードイン・アウト
-		const isFadeOutArea = g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm;
+		const isFadeOutArea = currentFrame >= g_scoreObj.fadeOutFrame && currentFrame < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm;
 		if (g_audio.volume >= g_stateObj.volume / 100) {
 			musicStartFlg = false;
 		}
@@ -8455,65 +8456,91 @@ function MainInit() {
 		}
 
 		// 速度変化 (途中変速, 個別加速)
-		while (g_workObj.speedData !== undefined && g_scoreObj.frameNum >= g_workObj.speedData[speedCnts]) {
+		while (g_workObj.speedData !== undefined && currentFrame >= g_workObj.speedData[speedCnts]) {
 			g_workObj.currentSpeed = g_workObj.speedData[speedCnts + 1];
 			speedCnts += 2;
 		}
-		while (g_workObj.boostData !== undefined && g_scoreObj.frameNum >= g_workObj.boostData[boostCnts]) {
+		while (g_workObj.boostData !== undefined && currentFrame >= g_workObj.boostData[boostCnts]) {
 			g_workObj.boostSpd = g_workObj.boostData[boostCnts + 1];
 			boostCnts += 2;
 		}
 
 		// 個別色変化 (矢印)
-		changeArrowColors(g_workObj.mkColor[g_scoreObj.frameNum], g_workObj.mkColorCd[g_scoreObj.frameNum]);
+		changeArrowColors(g_workObj.mkColor[currentFrame], g_workObj.mkColorCd[currentFrame]);
 
 		// 個別色変化（フリーズアロー）
-		changeFrzColors(g_workObj.mkFColor[g_scoreObj.frameNum], g_workObj.mkFColorCd[g_scoreObj.frameNum],
+		changeFrzColors(g_workObj.mkFColor[currentFrame], g_workObj.mkFColorCd[currentFrame],
 			g_keyObj[`color${keyCtrlPtn}`]);
 
 		// 全体色変化 (矢印)
-		changeArrowColors(g_workObj.mkAColor[g_scoreObj.frameNum], g_workObj.mkAColorCd[g_scoreObj.frameNum], `A`);
+		changeArrowColors(g_workObj.mkAColor[currentFrame], g_workObj.mkAColorCd[currentFrame], `A`);
 
 		// 全体色変化 (フリーズアロー)
-		changeFrzColors(g_workObj.mkFAColor[g_scoreObj.frameNum], g_workObj.mkFAColorCd[g_scoreObj.frameNum],
+		changeFrzColors(g_workObj.mkFAColor[currentFrame], g_workObj.mkFAColorCd[currentFrame],
 			g_keyObj[`color${keyCtrlPtn}`], `A`);
 
 		// 矢印モーション
-		changeCssMotions(g_workObj.mkArrowCssMotion[g_scoreObj.frameNum], g_workObj.mkArrowCssMotionName[g_scoreObj.frameNum], `arrow`);
+		changeCssMotions(g_workObj.mkArrowCssMotion[currentFrame], g_workObj.mkArrowCssMotionName[currentFrame], `arrow`);
 
 		// フリーズアローモーション
-		changeCssMotions(g_workObj.mkFrzCssMotion[g_scoreObj.frameNum], g_workObj.mkFrzCssMotionName[g_scoreObj.frameNum], `frz`);
+		changeCssMotions(g_workObj.mkFrzCssMotion[currentFrame], g_workObj.mkFrzCssMotionName[currentFrame], `frz`);
 
 		// ダミー矢印モーション
-		changeCssMotions(g_workObj.mkDummyArrowCssMotion[g_scoreObj.frameNum], g_workObj.mkDummyArrowCssMotionName[g_scoreObj.frameNum], `dummyArrow`);
+		changeCssMotions(g_workObj.mkDummyArrowCssMotion[currentFrame], g_workObj.mkDummyArrowCssMotionName[currentFrame], `dummyArrow`);
 
 		// ダミーフリーズアローモーション
-		changeCssMotions(g_workObj.mkDummyFrzCssMotion[g_scoreObj.frameNum], g_workObj.mkDummyFrzCssMotionName[g_scoreObj.frameNum], `dummyFrz`);
+		changeCssMotions(g_workObj.mkDummyFrzCssMotion[currentFrame], g_workObj.mkDummyFrzCssMotionName[currentFrame], `dummyFrz`);
 
 		// ダミー矢印生成（背面に表示するため先に処理）
-		if (g_workObj.mkDummyArrow[g_scoreObj.frameNum] !== undefined) {
-			g_workObj.mkDummyArrow[g_scoreObj.frameNum].forEach(data =>
+		if (g_workObj.mkDummyArrow[currentFrame] !== undefined) {
+			g_workObj.mkDummyArrow[currentFrame].forEach(data =>
 				makeArrow(data, ++dummyArrowCnts[data], `dummyArrow`, C_CLR_DUMMY));
 		}
 
 		// 矢印生成
-		if (g_workObj.mkArrow[g_scoreObj.frameNum] !== undefined) {
-			g_workObj.mkArrow[g_scoreObj.frameNum].forEach(data =>
+		if (g_workObj.mkArrow[currentFrame] !== undefined) {
+			g_workObj.mkArrow[currentFrame].forEach(data =>
 				makeArrow(data, ++arrowCnts[data], `arrow`, g_workObj.arrowColors[data]));
 		}
 
-		// 矢印移動＆消去
+		// ダミーフリーズアロー生成
+		if (g_workObj.mkDummyFrzArrow[currentFrame] !== undefined) {
+			g_workObj.mkDummyFrzArrow[currentFrame].forEach(data => {
+				makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`,
+					C_CLR_DUMMY, `#888888`);
+			});
+		}
+
+		// フリーズアロー生成
+		if (g_workObj.mkFrzArrow[currentFrame] !== undefined) {
+			g_workObj.mkFrzArrow[currentFrame].forEach(data => {
+				makeFrzArrow(data, ++frzCnts[data], `frz`,
+					g_workObj.frzNormalColors[data], g_workObj.frzNormalBarColors[data]);
+			});
+		}
+
+		// 矢印・フリーズアロー移動＆消去
 		for (let j = 0; j < keyNum; j++) {
 			const stepDivHit = document.querySelector(`#stepHit${j}`);
 
-			// ダミー矢印の移動
+			// ダミー矢印
 			for (let k = g_workObj.judgDummyArrowCnt[j]; k <= dummyArrowCnts[j]; k++) {
 				movArrow(j, k, `dummyArrow`);
 			}
 
-			// 通常矢印の移動
+			// 通常矢印
 			for (let k = g_workObj.judgArrowCnt[j]; k <= arrowCnts[j]; k++) {
 				movArrow(j, k, `arrow`);
+			}
+
+			// ダミーフリーズアロー移動
+			for (let k = g_workObj.judgDummyFrzCnt[j]; k <= dummyFrzCnts[j]; k++) {
+				movFrzArrow(j, k, `dummyFrz`);
+			}
+
+			// フリーズアロー移動
+			for (let k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
+				movFrzArrow(j, k, `frz`);
 			}
 
 			// ステップゾーンのヒット領域は一定時間で非表示化
@@ -8526,35 +8553,9 @@ function MainInit() {
 			}
 		}
 
-		// ダミーフリーズアロー生成
-		if (g_workObj.mkDummyFrzArrow[g_scoreObj.frameNum] !== undefined) {
-			g_workObj.mkDummyFrzArrow[g_scoreObj.frameNum].forEach(data => {
-				makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`,
-					C_CLR_DUMMY, `#888888`);
-			});
-		}
-
-		// フリーズアロー生成
-		if (g_workObj.mkFrzArrow[g_scoreObj.frameNum] !== undefined) {
-			g_workObj.mkFrzArrow[g_scoreObj.frameNum].forEach(data => {
-				makeFrzArrow(data, ++frzCnts[data], `frz`,
-					g_workObj.frzNormalColors[data], g_workObj.frzNormalBarColors[data]);
-			});
-		}
-
-		// フリーズアロー移動＆消去
-		for (let j = 0; j < keyNum; j++) {
-			for (let k = g_workObj.judgDummyFrzCnt[j]; k <= dummyFrzCnts[j]; k++) {
-				movFrzArrow(j, k, `dummyFrz`);
-			}
-			for (let k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
-				movFrzArrow(j, k, `frz`);
-			}
-		}
-
 		// 歌詞表示
-		if (g_scoreObj.wordData[g_scoreObj.frameNum] !== undefined) {
-			const tmpObjs = g_scoreObj.wordData[g_scoreObj.frameNum];
+		if (g_scoreObj.wordData[currentFrame] !== undefined) {
+			const tmpObjs = g_scoreObj.wordData[currentFrame];
 
 			tmpObjs.forEach(tmpObj => {
 				g_wordObj.wordDir = tmpObj[0];
@@ -8574,7 +8575,7 @@ function MainInit() {
 						g_wordObj[`fadeOutFlg${wordDepth}`] = true;
 						g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
 					}
-					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
+					g_workObj.lastFadeFrame[wordDepth] = currentFrame;
 					g_workObj.wordFadeFrame[wordDepth] = (tmpObj.length > 2 ?
 						setVal(tmpObj[2], C_WOD_FRAME, C_TYP_NUMBER) : C_WOD_FRAME);
 
@@ -8591,7 +8592,7 @@ function MainInit() {
 				} else {
 
 					// フェードイン・アウト処理後、表示する歌詞を表示
-					const fadingFlg = g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth] >= g_workObj.wordFadeFrame[wordDepth];
+					const fadingFlg = currentFrame - g_workObj.lastFadeFrame[wordDepth] >= g_workObj.wordFadeFrame[wordDepth];
 					[`Out`, `In`].forEach(pattern => {
 						if (g_wordObj[`fade${pattern}Flg${g_wordObj.wordDir}`] && fadingFlg) {
 							g_wordSprite.style.animationName = `none`;
@@ -8618,7 +8619,7 @@ function MainInit() {
 		});
 
 		// 曲終了判定
-		if (g_scoreObj.frameNum >= fullFrame) {
+		if (currentFrame >= fullFrame) {
 			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 				g_gameOverFlg = true;
 			}
@@ -8652,8 +8653,8 @@ function MainInit() {
 			// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
 			thisTime = performance.now();
 			buffTime = 0;
-			if (g_scoreObj.frameNum >= musicStartFrame) {
-				buffTime = (thisTime - musicStartTime - (g_scoreObj.frameNum - musicStartFrame) * 1000 / g_fps);
+			if (currentFrame >= musicStartFrame) {
+				buffTime = (thisTime - musicStartTime - (currentFrame - musicStartFrame) * 1000 / g_fps);
 			}
 			g_scoreObj.frameNum++;
 			g_scoreObj.nominalFrameNum++;
