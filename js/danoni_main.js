@@ -926,6 +926,19 @@ function checkDuplicatedObjects(_obj) {
 	return [_obj, addFrame];
 }
 
+function checkDepthZeroPos(_obj) {
+	let pos = -1;
+	if (_obj !== undefined) {
+		_obj.forEach((tmpObj, j) => {
+			console.log(tmpObj.depth);
+			if (tmpObj.depth === 0) {
+				pos = j;
+			}
+		});
+	}
+	return pos;
+}
+
 /**
  * 多層スプライトデータの作成処理
  * @param {array} _data 
@@ -980,9 +993,18 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				setSpriteData(tmpObj, tmpFrame, tmpDepth);
 
 				// opacityが"preload"を指定された場合は一定フレーム手前に同じ画像をopacity:0で描画して準備
-				if (tmpSpriteData[8] === `preload` && tmpFrame - 10 >= 0) {
+				const preFrame = tmpFrame - 10;
+				if (tmpSpriteData[8] === `preload` && preFrame >= 0) {
 					tmpObj.opacity = 0;
-					setSpriteData(tmpObj, tmpFrame - 10, 0);
+					const zeroPos = checkDepthZeroPos(spriteData[preFrame]);
+
+					if (zeroPos === -1) {
+						setSpriteData(tmpObj, preFrame, 0);
+						console.log(spriteData[preFrame]);
+					} else {
+						spriteData[preFrame][zeroPos].htmlText += (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj));
+						console.log(spriteData[preFrame][zeroPos].htmlText);
+					}
 				}
 			}
 		}
