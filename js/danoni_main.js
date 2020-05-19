@@ -340,6 +340,13 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 		} else {
 			link.crossOrigin = _crossOrigin;
 		}
+		link.onload = _ => {
+			const tmpImg = document.createElement(`img`);
+			tmpImg.src = _href;
+			tmpImg.style.opacity = 0;
+			document.querySelector(`#divRoot`).appendChild(tmpImg);
+			document.head.removeChild(link);
+		}
 		document.head.appendChild(link);
 	}
 }
