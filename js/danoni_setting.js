@@ -100,5 +100,7 @@ const g_presetSettingUse = {
 const g_presetFrzStartjdgUse = `false`;
 
 // デフォルト画像セット (C_IMG_XXXX, 厳密にはg_imgObj) に対して拡張子の上書きを行うか設定
-// 文字列の後ろ3文字をカットして、下記の値を適用する
-const g_presetOverrideExtension = `svg`;
+// 文字列の後ろ3文字をカットして、下記の値を適用する。コメントアウトした場合は、上書きを行わない。
+// `svg`: デフォルト(svg形式)、`png`: 従来画像(png形式)
+
+// const g_presetOverrideExtension = `svg`;
