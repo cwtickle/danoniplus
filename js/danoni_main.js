@@ -8169,13 +8169,16 @@ function MainInit() {
 
 		const stepRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
 			g_workObj.stepX[_j],
-			C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+			C_STEP_Y + g_posObj.reverseStepY * dividePos,
 			C_ARW_WIDTH, C_ARW_WIDTH);
+		const translateY = g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir;
+		stepRoot.style.transform = `translateY(${translateY}px)`;
 		stepRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 		stepRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 		stepRoot.setAttribute(`judgEndFlg`, `false`);
 		stepRoot.setAttribute(`boostSpd`, boostSpdDir);
 		stepRoot.setAttribute(`dividePos`, dividePos);
+		stepRoot.setAttribute(`translateY`, translateY);
 		arrowSprite[dividePos].appendChild(stepRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
@@ -8220,10 +8223,10 @@ function MainInit() {
 
 		// 移動
 		if (g_workObj.currentSpeed !== 0) {
-			const currentY = parseFloat(arrow.style.top);
-			arrow.setAttribute(`prevPosY`, currentY);
-			arrow.style.top = `${currentY - (g_workObj.currentSpeed +
-				g_workObj.motionOnFrames[boostCnt]) * parseFloat(arrow.getAttribute(`boostSpd`))}px`;
+			const translateY = parseFloat(arrow.getAttribute(`translateY`)) -
+				(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * parseFloat(arrow.getAttribute(`boostSpd`));
+			arrow.style.transform = `translateY(${translateY}px)`;
+			arrow.setAttribute(`translateY`, translateY);
 			arrow.setAttribute(`boostCnt`, --boostCnt);
 		}
 		arrow.setAttribute(`cnt`, --cnt);
@@ -8887,8 +8890,7 @@ function judgeArrow(_j) {
 		const arrowSprite = document.querySelector(`#arrowSprite${judgArrow.getAttribute(`dividePos`)}`);
 
 		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
-			stepDivHit.style.top = `${parseFloat(judgArrow.getAttribute(`prevPosY`)) -
-				parseFloat(document.querySelector(`#stepRoot${_j}`).style.top) - 15}px`;
+			stepDivHit.style.transform = `translateY(${parseFloat(judgArrow.getAttribute(`translateY`))}px) rotate(${g_workObj.arrowRtn[_j]}deg)`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
 
