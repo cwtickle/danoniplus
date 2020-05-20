@@ -2469,6 +2469,13 @@ function headerConvert(_dosObj) {
 	obj.customFont = setVal(_dosObj.customFont, ``, C_TYP_STRING);
 	g_headerObj.customFont = obj.customFont;
 
+	// 画像拡張子の設定 (サーバ上のみ)
+	if (typeof g_presetOverrideExtension === C_TYP_STRING && !location.href.match(`^file`)) {
+		for (key in g_imgObj) {
+			g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`;
+		}
+	}
+
 	// 曲名
 	obj.musicTitles = [];
 	obj.musicTitlesForView = [];

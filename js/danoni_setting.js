@@ -97,4 +97,8 @@ const g_presetSettingUse = {
 
 // フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
 // 判定させる場合は `true` を指定
-g_presetFrzStartjdgUse = `false`;
+const g_presetFrzStartjdgUse = `false`;
+
+// デフォルト画像セット (C_IMG_XXXX, 厳密にはg_imgObj) に対して拡張子の上書きを行うか設定
+// 文字列の後ろ3文字をカットして、下記の値を適用する
+const g_presetOverrideExtension = `svg`;
