@@ -542,10 +542,12 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 
 	// 矢印・オブジェクト判定
 	let charaStyle;
+	let baseRtn = 0;
 	if (isNaN(Number(_rotate)) || _rotate === ``) {
 		charaStyle = `${_rotate}${_styleName}`;
 	} else {
 		charaStyle = `arrow${_styleName}`;
+		baseRtn = _rotate;
 		div.style.transform = `rotate(${_rotate}deg)`;
 	}
 
@@ -558,6 +560,38 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	div.style.webkitMaskSize = `contain`;
 	div.setAttribute(`color`, _color);
 	div.setAttribute(`type`, charaStyle);
+	div.setAttribute(`baseRtn`, baseRtn);
+
+	return div;
+}
+
+function createColorSubObject(_id, _color, _x, _y, _width, _height,
+	_rotate = ``, _styleName = ``) {
+
+	const div = createDiv(_id, _x, 0, _width, _height);
+
+	// 矢印・オブジェクト判定
+	let charaStyle;
+	let baseRtn = 0;
+	if (isNaN(Number(_rotate)) || _rotate === ``) {
+		charaStyle = `${_rotate}${_styleName}`;
+		div.style.transform = `translateY(${_y}px)`;
+	} else {
+		charaStyle = `arrow${_styleName}`;
+		baseRtn = _rotate;
+		div.style.transform = `translateY(${_y}px) rotate(${_rotate}deg)`;
+	}
+
+	if (_color !== ``) {
+		div.style.background = _color;
+	}
+	div.style.maskImage = `url("${g_imgObj[charaStyle]}")`;
+	div.style.maskSize = `contain`;
+	div.style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
+	div.style.webkitMaskSize = `contain`;
+	div.setAttribute(`color`, _color);
+	div.setAttribute(`type`, charaStyle);
+	div.setAttribute(`baseRtn`, baseRtn);
 
 	return div;
 }
@@ -8258,8 +8292,10 @@ function MainInit() {
 
 		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${frzNo}`,
 			g_workObj.stepX[_j],
-			C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
+			C_STEP_Y + g_posObj.reverseStepY * dividePos,
 			C_ARW_WIDTH, C_ARW_WIDTH + frzLength);
+		const translateY = g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir;
+		frzRoot.style.transform = `translateY(${translateY}px)`;
 		frzRoot.setAttribute(`cnt`, g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1);
 		frzRoot.setAttribute(`boostCnt`, g_workObj.motionFrame[g_scoreObj.frameNum]);
 		frzRoot.setAttribute(`judgEndFlg`, `false`);
@@ -8268,6 +8304,7 @@ function MainInit() {
 		frzRoot.setAttribute(`frzAttempt`, 0);
 		frzRoot.setAttribute(`boostSpd`, boostSpdDir);
 		frzRoot.setAttribute(`dividePos`, dividePos);
+		frzRoot.setAttribute(`translateY`, translateY);
 		arrowSprite[dividePos].appendChild(frzRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
@@ -8279,34 +8316,36 @@ function MainInit() {
 		// 後に作成するほど前面に表示される。
 
 		// フリーズアロー帯(frzBar)
-		const frzBar = frzRoot.appendChild(createColorObject(`${_name}Bar${frzNo}`, _barColor,
+		const frzBar = frzRoot.appendChild(createColorSubObject(`${_name}Bar${frzNo}`, _barColor,
 			5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
 			C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, ``, `frzBar`));
 		frzBar.style.opacity = 0.75;
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-		const frzTopShadow = createColorObject(`${_name}TopShadow${frzNo}`, shadowColor,
+		const frzTopShadow = createColorSubObject(`${_name}TopShadow${frzNo}`, shadowColor,
 			0, 0,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzTopShadow.classList.add(g_cssObj.main_objShadow);
 		frzRoot.appendChild(frzTopShadow);
 
 		// 開始矢印。ヒット時は隠れる。
-		frzRoot.appendChild(createColorObject(`${_name}Top${frzNo}`, _normalColor,
+		frzRoot.appendChild(createColorSubObject(`${_name}Top${frzNo}`, _normalColor,
 			0, 0,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
 
 		// 後発矢印の塗り部分
-		const frzBtmShadow = createColorObject(`${_name}BtmShadow${frzNo}`, shadowColor,
+		let frzBtmShadow = createColorSubObject(`${_name}BtmShadow${frzNo}`, shadowColor,
 			0, frzLength * boostSpdDir,
 			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
 		frzBtmShadow.classList.add(g_cssObj.main_objShadow);
 		frzRoot.appendChild(frzBtmShadow);
 
 		// 後発矢印
-		frzRoot.appendChild(createColorObject(`${_name}Btm${frzNo}`, _normalColor,
+		let frzBtm = createColorSubObject(`${_name}Btm${frzNo}`, _normalColor,
 			0, frzLength * boostSpdDir,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
+			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]);
+		frzRoot.appendChild(frzBtm);
+		//frzBtm.style.transform(`translateY(${frzLength * boostSpdDir}px) rotate(${g_workObj.stepRtn[_j]}deg)`);
 	}
 
 	/**
@@ -8348,7 +8387,11 @@ function MainInit() {
 			frzBarLength -= g_workObj.currentSpeed;
 			if (frzBarLength > 0) {
 				frzRoot.setAttribute(`frzBarLength`, frzBarLength);
-				frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
+				const translateY = parseFloat(frzRoot.getAttribute(`translateY`)) -
+					g_workObj.currentSpeed * boostSpdDir;
+				frzRoot.style.transform = `translateY(${translateY}px)`;
+				frzRoot.setAttribute(`translateY`, translateY);
+				//frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
 			} else {
 				judgeObjDelete[_name](_j, frzRoot);
 			}
@@ -8373,8 +8416,12 @@ function MainInit() {
 
 		// 移動
 		if (g_workObj.currentSpeed !== 0) {
-			_frzRoot.style.top = `${parseFloat(_frzRoot.style.top) -
-				(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
+			const translateY = parseFloat(_frzRoot.getAttribute(`translateY`)) -
+				(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir;
+			_frzRoot.style.transform = `translateY(${translateY}px)`;
+			_frzRoot.setAttribute(`translateY`, translateY);
+			//_frzRoot.style.top = `${parseFloat(_frzRoot.style.top) -
+			//	(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
 			_frzRoot.setAttribute(`boostCnt`, --boostCnt);
 		}
 		_frzRoot.setAttribute(`cnt`, --_cnt);
@@ -8402,9 +8449,16 @@ function MainInit() {
 
 		_frzRoot.setAttribute(`frzBarLength`, frzBarLength);
 		frzBar.style.height = `${frzBarLength}px`;
-		frzBar.style.top = `${parseFloat(frzBar.style.top) + g_workObj.currentSpeed * Math.abs(boostSpdDir) * dividePos}px`;
-		frzBtm.style.top = `${parseFloat(frzBtm.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
-		frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - g_workObj.currentSpeed * boostSpdDir}px`;
+		const translateY = parseFloat(_frzRoot.getAttribute(`translateY`)) -
+			g_workObj.currentSpeed * boostSpdDir;
+		const translateBarY = parseFloat(_frzRoot.getAttribute(`translateBarY`)) -
+			g_workObj.currentSpeed * boostSpdDir;
+		const baseRtn = parseFloat(frzBtm.getAttribute(`baseRtn`));
+		frzBar.style.transform = `translateY(${translateBarY * dividePos + C_ARW_WIDTH / 2}px)`;
+		frzBtm.style.transform = `translateY(${translateBarY}px) rotate(${baseRtn}deg)`;
+		frzBtmShadow.style.transform = `translateY(${translateBarY}px) rotate(${baseRtn}deg)`;
+		_frzRoot.setAttribute(`translateY`, translateY);
+		_frzRoot.setAttribute(`translateBarY`, translateBarY);
 	}
 
 	/**
@@ -8830,12 +8884,17 @@ function changeHitFrz(_j, _k, _name) {
 	frzBtm.style.background = g_workObj[`${_name}HitColors`][_j];
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
-	const delFrzLength = parseFloat(document.querySelector(`#stepRoot${_j}`).style.top) - parseFloat(frzRoot.style.top);
+	const delFrzLength = parseFloat(frzRoot.getAttribute(`translateY`));
+	const frzLength = parseFloat(frzRoot.getAttribute('frzBarLength')) - delFrzLength;
+	const translateBarY = frzLength * g_workObj.scrollDir[_j];
+	const baseRtn = parseFloat(frzBtm.getAttribute(`baseRtn`));
 
-	frzRoot.style.top = document.querySelector(`#stepRoot${_j}`).style.top;
-	frzBtm.style.top = `${parseFloat(frzBtm.style.top) - delFrzLength}px`;
-	frzBtmShadow.style.top = `${parseFloat(frzBtmShadow.style.top) - delFrzLength}px`;
-	frzBar.style.top = `${parseFloat(frzBar.style.top) - delFrzLength * dividePos}px`;
+	frzRoot.setAttribute(`translateBarY`, translateBarY);
+	frzRoot.setAttribute(`frzBarLength`, frzLength);
+	frzRoot.style.transform = `translateY(0px)`;
+	frzBtm.style.transform = `translateY(${translateBarY}px) rotate(${baseRtn}deg)`;
+	frzBtmShadow.style.transform = `translateY(${translateBarY}px) rotate(${baseRtn}deg)`;
+	frzBar.style.transform = `translateY(${translateBarY * dividePos + C_ARW_WIDTH / 2}px)`;
 	frzBar.style.height = `${parseFloat(frzBar.style.height) - delFrzLength * g_workObj.scrollDir[_j]}px`;
 
 	frzRoot.setAttribute(`isMoving`, `false`);
@@ -8890,7 +8949,7 @@ function judgeArrow(_j) {
 		const arrowSprite = document.querySelector(`#arrowSprite${judgArrow.getAttribute(`dividePos`)}`);
 
 		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
-			stepDivHit.style.transform = `translateY(${parseFloat(judgArrow.getAttribute(`translateY`))}px) rotate(${g_workObj.arrowRtn[_j]}deg)`;
+			stepDivHit.style.transform = `translateY(${judgArrow.getAttribute(`translateY`)}px) rotate(${g_workObj.arrowRtn[_j]}deg)`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
 
