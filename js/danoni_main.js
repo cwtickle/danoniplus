@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/05/17
+ * Revised : 2020/05/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 15.0.1`;
-const g_revisedDate = `2020/05/17`;
+const g_version = `Ver 15.1.0`;
+const g_revisedDate = `2020/05/21`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -205,7 +205,8 @@ const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
 
 /**
  * 文字列を想定された型に変換
- * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、`switch`(ON/OFF), `string`(文字列)から選択
+ * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、
+ *   `switch`(ON/OFF), `calc`(数式), `string`(文字列)から選択
  * - 型に合わない場合は _default を返却するが、_default自体の型チェック・変換は行わない
  * @param {string} _checkStr 
  * @param {string} _default 
@@ -240,6 +241,13 @@ function setVal(_checkStr, _default, _type) {
 		// ON/OFFスイッチの場合
 		convertStr = [C_FLG_OFF, C_FLG_ON].includes(_checkStr.toString().toUpperCase()) ?
 			_checkStr.toString().toUpperCase() : _default;
+
+	} else if (_type === C_TYP_CALC) {
+		try {
+			convertStr = new Function(`return ${_checkStr}`)();
+		} catch (err) {
+			convertStr = _default;
+		}
 	}
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
@@ -943,12 +951,12 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				if (setVal(tmpSpriteData[0], 200, C_TYP_NUMBER) === 0) {
 					tmpFrame = 0;
 				} else {
-					tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_NUMBER));
+					tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC));
 					if (tmpFrame < 0) {
 						tmpFrame = 0;
 					}
 				}
-				const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_NUMBER));
+				const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_CALC));
 				if (tmpDepth !== C_FLG_ALL && tmpDepth > maxDepth) {
 					maxDepth = tmpDepth;
 				}
@@ -956,8 +964,8 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				const tmpObj = {
 					path: escapeHtml(setVal(tmpSpriteData[2], ``, C_TYP_STRING)),		// 画像パス or テキスト
 					class: escapeHtml(setVal(tmpSpriteData[3], ``, C_TYP_STRING)),		// CSSクラス
-					left: setVal(tmpSpriteData[4], 0, C_TYP_FLOAT),						// X座標
-					top: setVal(tmpSpriteData[5], 0, C_TYP_FLOAT),						// Y座標
+					left: setVal(tmpSpriteData[4], 0, C_TYP_CALC),						// X座標
+					top: setVal(tmpSpriteData[5], 0, C_TYP_CALC),						// Y座標
 					width: setVal(tmpSpriteData[6], 0, C_TYP_NUMBER),					// spanタグの場合は font-size
 					height: escapeHtml(setVal(tmpSpriteData[7], ``, C_TYP_STRING)),		// spanタグの場合は color(文字列可)
 					opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
@@ -1936,10 +1944,10 @@ function makeColorGradation(_colorStr, _options = {}) {
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
 
-	const _defaultColorgrd = _options.defaultColorgrd || g_headerObj.defaultColorgrd;
-	const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
-	const _objType = _options.objType || `normal`;
-	const _shadowFlg = _options.shadowFlg || false;
+	const _defaultColorgrd = setVal(_options.defaultColorgrd, g_headerObj.defaultColorgrd, C_TYP_BOOLEAN);
+	const _colorCdPaddingUse = setVal(_options.colorCdPaddingUse, false, C_TYP_BOOLEAN);
+	const _objType = setVal(_options.objType, `normal`, C_TYP_STRING);
+	const _shadowFlg = setVal(_options.shadowFlg, false, C_TYP_BOOLEAN);
 
 	if (_colorStr === `Default`) {
 		return `Default`;
@@ -2118,8 +2126,8 @@ function titleInit() {
 		}
 
 		const lblmusicTitle = createDivCssLabel(`lblmusicTitle`,
-			g_sWidth * -1 + Number(titlefontpos[0]), 0 + Number(titlefontpos[1]),
-			g_sWidth * 3, g_sHeight - 40,
+			Number(titlefontpos[0]), Number(titlefontpos[1]),
+			g_sWidth, g_sHeight - 40,
 			titlefontsize,
 			`<span style="
 				align:${C_ALIGN_CENTER};
@@ -2461,6 +2469,13 @@ function headerConvert(_dosObj) {
 	obj.customFont = setVal(_dosObj.customFont, ``, C_TYP_STRING);
 	g_headerObj.customFont = obj.customFont;
 
+	// 画像拡張子の設定 (サーバ上のみ)
+	if (typeof g_presetOverrideExtension === C_TYP_STRING && !location.href.match(`^file`)) {
+		for (key in g_imgObj) {
+			g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`;
+		}
+	}
+
 	// 曲名
 	obj.musicTitles = [];
 	obj.musicTitlesForView = [];
@@ -2679,15 +2694,9 @@ function headerConvert(_dosObj) {
 	}
 
 	// ライフ設定のカスタム部分取得（譜面ヘッダー加味）
-	for (let j = 0; j < g_gaugeOptionObj.survival.length; j++) {
-		getGaugeSetting(_dosObj, g_gaugeOptionObj.survival[j], obj);
-	}
-	for (let j = 0; j < g_gaugeOptionObj.border.length; j++) {
-		getGaugeSetting(_dosObj, g_gaugeOptionObj.border[j], obj);
-	}
-	for (let j = 0; j < g_gaugeOptionObj.custom.length; j++) {
-		getGaugeSetting(_dosObj, g_gaugeOptionObj.custom[j], obj);
-	}
+	[`survival`, `border`, `custom`].forEach(gaugeType => {
+		g_gaugeOptionObj[gaugeType].forEach(gaugePtn => getGaugeSetting(_dosObj, gaugePtn, obj));
+	});
 
 	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
 	if (_dosObj.defaultFrzColorUse !== undefined) {
@@ -2779,11 +2788,11 @@ function headerConvert(_dosObj) {
 	 */
 	function setColorList(_data, _colorInit, _colorInitLength, _options = {}) {
 
-		const _defaultColorgrd = _options.defaultColorgrd || g_headerObj.defaultColorgrd;
-		const _colorCdPaddingUse = _options.colorCdPaddingUse || false;
-		const _defaultFrzColorUse = (_options.defaultFrzColorUse === undefined ? true : _options.defaultFrzColorUse);
-		const _objType = _options.objType || `normal`;
-		const _shadowFlg = _options.shadowFlg || false;
+		const _defaultColorgrd = setVal(_options.defaultColorgrd, g_headerObj.defaultColorgrd, C_TYP_BOOLEAN);
+		const _colorCdPaddingUse = setVal(_options.colorCdPaddingUse, false, C_TYP_BOOLEAN);
+		const _defaultFrzColorUse = setVal(_options.defaultFrzColorUse, true, C_TYP_BOOLEAN);
+		const _objType = setVal(_options.objType, `normal`, C_TYP_STRING);
+		const _shadowFlg = setVal(_options.shadowFlg, false, C_TYP_BOOLEAN);
 
 		// グラデーション文字列 #ffff99:#9999ff@linear-gradient
 		let colorStr = [];
@@ -6173,13 +6182,13 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				if (tmpData !== undefined && tmpData !== ``) {
 					const tmpSpeedData = tmpData.split(`,`);
 					for (let k = 0; k < tmpSpeedData.length; k += 2) {
-						if (isNaN(parseInt(tmpSpeedData[k]))) {
+						if (setVal(tmpSpeedData[k], ``, C_TYP_STRING) === ``) {
 							continue;
 						} else if (tmpSpeedData[k + 1] === `-`) {
 							break;
 						}
-						speedData[speedIdx] = calcFrame(tmpSpeedData[k]);
-						speedData[speedIdx + 1] = parseFloat(tmpSpeedData[k + 1]);
+						speedData[speedIdx] = calcFrame(setVal(tmpSpeedData[k], ``, C_TYP_CALC));
+						speedData[speedIdx + 1] = setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC);
 						speedIdx += 2;
 					}
 				}
@@ -6206,13 +6215,13 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				if (tmpData !== undefined && tmpData !== ``) {
 					const tmpColorData = tmpData.split(`,`);
 					for (let k = 0; k < tmpColorData.length; k += 3) {
-						if (isNaN(parseInt(tmpColorData[k]))) {
+						if (setVal(tmpColorData[k], ``, C_TYP_STRING) === ``) {
 							continue;
 						} else if (tmpColorData[k + 1] === `-`) {
 							break;
 						}
-						colorData[colorIdx] = calcFrame(tmpColorData[k]);
-						colorData[colorIdx + 1] = parseFloat(tmpColorData[k + 1]);
+						colorData[colorIdx] = calcFrame(setVal(tmpColorData[k], ``, C_TYP_CALC));
+						colorData[colorIdx + 1] = setVal(tmpColorData[k + 1], 0, C_TYP_CALC);
 						colorData[colorIdx + 2] = tmpColorData[k + 2];
 						colorIdx += 3;
 					}
@@ -6291,13 +6300,13 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			if (tmpData !== undefined && tmpData !== ``) {
 				const tmpWordData = tmpData.split(`,`);
 				for (let k = 0; k < tmpWordData.length; k += 3) {
-					if (isNaN(parseInt(tmpWordData[k]))) {
+					if (setVal(tmpWordData[k], ``, C_TYP_STRING) === ``) {
 						continue;
 					} else if (tmpWordData[k + 1] === `-`) {
 						break;
 					}
-					tmpWordData[k] = calcFrame(tmpWordData[k]);
-					tmpWordData[k + 1] = parseFloat(tmpWordData[k + 1]);
+					tmpWordData[k] = calcFrame(setVal(tmpWordData[k], ``, C_TYP_CALC));
+					tmpWordData[k + 1] = setVal(tmpWordData[k + 1], 0, C_TYP_CALC);
 
 					if (tmpWordData[k + 1] > wordMaxDepth) {
 						wordMaxDepth = tmpWordData[k + 1];
@@ -7190,31 +7199,18 @@ function getArrowSettings() {
 	g_workObj.judgDummyFrzCnt = [];
 
 	// TODO: この部分を矢印塗りつぶし部分についても適用できるように変数を作成
-	// 矢印色管理 (個別)
-	g_workObj.arrowColors = [];
-	g_workObj.frzNormalColors = [];
-	g_workObj.frzNormalBarColors = [];
-	g_workObj.frzHitColors = [];
-	g_workObj.frzHitBarColors = [];
 
-	g_workObj.dummyArrowColors = [];
-	g_workObj.dummyFrzNormalColors = [];
-	g_workObj.dummyFrzNormalBarColors = [];
-	g_workObj.dummyFrzHitColors = [];
-	g_workObj.dummyFrzHitBarColors = [];
+	// 矢印色管理 (個別・全体)
+	[``, `All`].forEach(type => {
+		g_workObj[`arrowColors${type}`] = [];
+		g_workObj[`dummyArrowColors${type}`] = [];
 
-	// 矢印色管理 (全体)
-	g_workObj.arrowColorsAll = [];
-	g_workObj.frzNormalColorsAll = [];
-	g_workObj.frzNormalBarColorsAll = [];
-	g_workObj.frzHitColorsAll = [];
-	g_workObj.frzHitBarColorsAll = [];
-
-	g_workObj.dummyArrowColorsAll = [];
-	g_workObj.dummyFrzNormalColorsAll = [];
-	g_workObj.dummyFrzNormalBarColorsAll = [];
-	g_workObj.dummyFrzHitColorsAll = [];
-	g_workObj.dummyFrzHitBarColorsAll = [];
+		[`frz`, `dummyFrz`].forEach(arrowType => {
+			[`Normal`, `NormalBar`, `Hit`, `HitBar`].forEach(frzType => {
+				g_workObj[`${arrowType}${frzType}Colors${type}`] = [];
+			});
+		});
+	});
 
 	// モーション管理
 	g_workObj.arrowCssMotions = [];
@@ -7283,22 +7279,10 @@ function getArrowSettings() {
 		g_workObj.dummyFrzCssMotions[j] = ``;
 	}
 
-	g_resultObj.ii = 0;
-	g_resultObj.shakin = 0;
-	g_resultObj.matari = 0;
-	g_resultObj.shobon = 0;
-	g_resultObj.uwan = 0;
-	g_resultObj.combo = 0;
-	g_resultObj.maxCombo = 0;
-
-	g_resultObj.kita = 0;
-	g_resultObj.sfsf = 0;
-	g_resultObj.iknai = 0;
-	g_resultObj.fCombo = 0;
-	g_resultObj.fmaxCombo = 0;
-
-	g_resultObj.fast = 0;
-	g_resultObj.slow = 0;
+	[
+		`ii`, `shakin`, `matari`, `shobon`, `uwan`, `combo`, `maxcombo`,
+		`kita`, `sfsf`, `iknai`, `fCombo`, `fmaxCombo`, `fast`, `slow`
+	].forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 
 	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
 	g_gameOverFlg = false;
@@ -8432,7 +8416,8 @@ function MainInit() {
 	 */
 	function flowTimeline() {
 
-		lblframe.innerHTML = g_scoreObj.frameNum;
+		const currentFrame = g_scoreObj.frameNum;
+		lblframe.innerHTML = currentFrame;
 
 		// キーの押下状態を取得
 		for (let j = 0; j < keyNum; j++) {
@@ -8441,7 +8426,7 @@ function MainInit() {
 			}
 		}
 
-		if (g_scoreObj.frameNum === musicStartFrame) {
+		if (currentFrame === musicStartFrame) {
 			musicStartFlg = true;
 			g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
 			g_audio.playbackRate = g_headerObj.playbackRate;
@@ -8452,13 +8437,13 @@ function MainInit() {
 
 		// 背景・マスクモーション
 		g_animationData.forEach(sprite => {
-			if (g_scoreObj[`${sprite}Data`][g_scoreObj.frameNum] !== undefined) {
-				drawMainSpriteData(g_scoreObj.frameNum, sprite);
+			if (g_scoreObj[`${sprite}Data`][currentFrame] !== undefined) {
+				drawMainSpriteData(currentFrame, sprite);
 			}
 		});
 
 		// フェードイン・アウト
-		const isFadeOutArea = g_scoreObj.frameNum >= g_scoreObj.fadeOutFrame && g_scoreObj.frameNum < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm;
+		const isFadeOutArea = currentFrame >= g_scoreObj.fadeOutFrame && currentFrame < g_scoreObj.fadeOutFrame + g_scoreObj.fadeOutTerm;
 		if (g_audio.volume >= g_stateObj.volume / 100) {
 			musicStartFlg = false;
 		}
@@ -8480,65 +8465,91 @@ function MainInit() {
 		}
 
 		// 速度変化 (途中変速, 個別加速)
-		while (g_workObj.speedData !== undefined && g_scoreObj.frameNum >= g_workObj.speedData[speedCnts]) {
+		while (g_workObj.speedData !== undefined && currentFrame >= g_workObj.speedData[speedCnts]) {
 			g_workObj.currentSpeed = g_workObj.speedData[speedCnts + 1];
 			speedCnts += 2;
 		}
-		while (g_workObj.boostData !== undefined && g_scoreObj.frameNum >= g_workObj.boostData[boostCnts]) {
+		while (g_workObj.boostData !== undefined && currentFrame >= g_workObj.boostData[boostCnts]) {
 			g_workObj.boostSpd = g_workObj.boostData[boostCnts + 1];
 			boostCnts += 2;
 		}
 
 		// 個別色変化 (矢印)
-		changeArrowColors(g_workObj.mkColor[g_scoreObj.frameNum], g_workObj.mkColorCd[g_scoreObj.frameNum], ``);
+		changeArrowColors(g_workObj.mkColor[currentFrame], g_workObj.mkColorCd[currentFrame]);
 
 		// 個別色変化（フリーズアロー）
-		changeFrzColors(g_workObj.mkFColor[g_scoreObj.frameNum], g_workObj.mkFColorCd[g_scoreObj.frameNum],
-			g_keyObj[`color${keyCtrlPtn}`], keyNum, ``);
+		changeFrzColors(g_workObj.mkFColor[currentFrame], g_workObj.mkFColorCd[currentFrame],
+			g_keyObj[`color${keyCtrlPtn}`]);
 
 		// 全体色変化 (矢印)
-		changeArrowColors(g_workObj.mkAColor[g_scoreObj.frameNum], g_workObj.mkAColorCd[g_scoreObj.frameNum], `A`);
+		changeArrowColors(g_workObj.mkAColor[currentFrame], g_workObj.mkAColorCd[currentFrame], `A`);
 
 		// 全体色変化 (フリーズアロー)
-		changeFrzColors(g_workObj.mkFAColor[g_scoreObj.frameNum], g_workObj.mkFAColorCd[g_scoreObj.frameNum],
-			g_keyObj[`color${keyCtrlPtn}`], keyNum, `A`);
+		changeFrzColors(g_workObj.mkFAColor[currentFrame], g_workObj.mkFAColorCd[currentFrame],
+			g_keyObj[`color${keyCtrlPtn}`], `A`);
 
 		// 矢印モーション
-		changeCssMotions(g_workObj.mkArrowCssMotion[g_scoreObj.frameNum], g_workObj.mkArrowCssMotionName[g_scoreObj.frameNum], `arrow`);
+		changeCssMotions(g_workObj.mkArrowCssMotion[currentFrame], g_workObj.mkArrowCssMotionName[currentFrame], `arrow`);
 
 		// フリーズアローモーション
-		changeCssMotions(g_workObj.mkFrzCssMotion[g_scoreObj.frameNum], g_workObj.mkFrzCssMotionName[g_scoreObj.frameNum], `frz`);
+		changeCssMotions(g_workObj.mkFrzCssMotion[currentFrame], g_workObj.mkFrzCssMotionName[currentFrame], `frz`);
 
 		// ダミー矢印モーション
-		changeCssMotions(g_workObj.mkDummyArrowCssMotion[g_scoreObj.frameNum], g_workObj.mkDummyArrowCssMotionName[g_scoreObj.frameNum], `dummyArrow`);
+		changeCssMotions(g_workObj.mkDummyArrowCssMotion[currentFrame], g_workObj.mkDummyArrowCssMotionName[currentFrame], `dummyArrow`);
 
 		// ダミーフリーズアローモーション
-		changeCssMotions(g_workObj.mkDummyFrzCssMotion[g_scoreObj.frameNum], g_workObj.mkDummyFrzCssMotionName[g_scoreObj.frameNum], `dummyFrz`);
+		changeCssMotions(g_workObj.mkDummyFrzCssMotion[currentFrame], g_workObj.mkDummyFrzCssMotionName[currentFrame], `dummyFrz`);
 
 		// ダミー矢印生成（背面に表示するため先に処理）
-		if (g_workObj.mkDummyArrow[g_scoreObj.frameNum] !== undefined) {
-			g_workObj.mkDummyArrow[g_scoreObj.frameNum].forEach(data =>
+		if (g_workObj.mkDummyArrow[currentFrame] !== undefined) {
+			g_workObj.mkDummyArrow[currentFrame].forEach(data =>
 				makeArrow(data, ++dummyArrowCnts[data], `dummyArrow`, C_CLR_DUMMY));
 		}
 
 		// 矢印生成
-		if (g_workObj.mkArrow[g_scoreObj.frameNum] !== undefined) {
-			g_workObj.mkArrow[g_scoreObj.frameNum].forEach(data =>
+		if (g_workObj.mkArrow[currentFrame] !== undefined) {
+			g_workObj.mkArrow[currentFrame].forEach(data =>
 				makeArrow(data, ++arrowCnts[data], `arrow`, g_workObj.arrowColors[data]));
 		}
 
-		// 矢印移動＆消去
+		// ダミーフリーズアロー生成
+		if (g_workObj.mkDummyFrzArrow[currentFrame] !== undefined) {
+			g_workObj.mkDummyFrzArrow[currentFrame].forEach(data => {
+				makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`,
+					C_CLR_DUMMY, `#888888`);
+			});
+		}
+
+		// フリーズアロー生成
+		if (g_workObj.mkFrzArrow[currentFrame] !== undefined) {
+			g_workObj.mkFrzArrow[currentFrame].forEach(data => {
+				makeFrzArrow(data, ++frzCnts[data], `frz`,
+					g_workObj.frzNormalColors[data], g_workObj.frzNormalBarColors[data]);
+			});
+		}
+
+		// 矢印・フリーズアロー移動＆消去
 		for (let j = 0; j < keyNum; j++) {
 			const stepDivHit = document.querySelector(`#stepHit${j}`);
 
-			// ダミー矢印の移動
+			// ダミー矢印
 			for (let k = g_workObj.judgDummyArrowCnt[j]; k <= dummyArrowCnts[j]; k++) {
 				movArrow(j, k, `dummyArrow`);
 			}
 
-			// 通常矢印の移動
+			// 通常矢印
 			for (let k = g_workObj.judgArrowCnt[j]; k <= arrowCnts[j]; k++) {
 				movArrow(j, k, `arrow`);
+			}
+
+			// ダミーフリーズアロー移動
+			for (let k = g_workObj.judgDummyFrzCnt[j]; k <= dummyFrzCnts[j]; k++) {
+				movFrzArrow(j, k, `dummyFrz`);
+			}
+
+			// フリーズアロー移動
+			for (let k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
+				movFrzArrow(j, k, `frz`);
 			}
 
 			// ステップゾーンのヒット領域は一定時間で非表示化
@@ -8551,35 +8562,9 @@ function MainInit() {
 			}
 		}
 
-		// ダミーフリーズアロー生成
-		if (g_workObj.mkDummyFrzArrow[g_scoreObj.frameNum] !== undefined) {
-			g_workObj.mkDummyFrzArrow[g_scoreObj.frameNum].forEach(data => {
-				makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`,
-					C_CLR_DUMMY, `#888888`);
-			});
-		}
-
-		// フリーズアロー生成
-		if (g_workObj.mkFrzArrow[g_scoreObj.frameNum] !== undefined) {
-			g_workObj.mkFrzArrow[g_scoreObj.frameNum].forEach(data => {
-				makeFrzArrow(data, ++frzCnts[data], `frz`,
-					g_workObj.frzNormalColors[data], g_workObj.frzNormalBarColors[data]);
-			});
-		}
-
-		// フリーズアロー移動＆消去
-		for (let j = 0; j < keyNum; j++) {
-			for (let k = g_workObj.judgDummyFrzCnt[j]; k <= dummyFrzCnts[j]; k++) {
-				movFrzArrow(j, k, `dummyFrz`);
-			}
-			for (let k = g_workObj.judgFrzCnt[j]; k <= frzCnts[j]; k++) {
-				movFrzArrow(j, k, `frz`);
-			}
-		}
-
 		// 歌詞表示
-		if (g_scoreObj.wordData[g_scoreObj.frameNum] !== undefined) {
-			const tmpObjs = g_scoreObj.wordData[g_scoreObj.frameNum];
+		if (g_scoreObj.wordData[currentFrame] !== undefined) {
+			const tmpObjs = g_scoreObj.wordData[currentFrame];
 
 			tmpObjs.forEach(tmpObj => {
 				g_wordObj.wordDir = tmpObj[0];
@@ -8599,7 +8584,7 @@ function MainInit() {
 						g_wordObj[`fadeOutFlg${wordDepth}`] = true;
 						g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
 					}
-					g_workObj.lastFadeFrame[wordDepth] = g_scoreObj.frameNum;
+					g_workObj.lastFadeFrame[wordDepth] = currentFrame;
 					g_workObj.wordFadeFrame[wordDepth] = (tmpObj.length > 2 ?
 						setVal(tmpObj[2], C_WOD_FRAME, C_TYP_NUMBER) : C_WOD_FRAME);
 
@@ -8616,7 +8601,7 @@ function MainInit() {
 				} else {
 
 					// フェードイン・アウト処理後、表示する歌詞を表示
-					const fadingFlg = g_scoreObj.frameNum - g_workObj.lastFadeFrame[wordDepth] >= g_workObj.wordFadeFrame[wordDepth];
+					const fadingFlg = currentFrame - g_workObj.lastFadeFrame[wordDepth] >= g_workObj.wordFadeFrame[wordDepth];
 					[`Out`, `In`].forEach(pattern => {
 						if (g_wordObj[`fade${pattern}Flg${g_wordObj.wordDir}`] && fadingFlg) {
 							g_wordSprite.style.animationName = `none`;
@@ -8643,7 +8628,7 @@ function MainInit() {
 		});
 
 		// 曲終了判定
-		if (g_scoreObj.frameNum >= fullFrame) {
+		if (currentFrame >= fullFrame) {
 			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 				g_gameOverFlg = true;
 			}
@@ -8677,8 +8662,8 @@ function MainInit() {
 			// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
 			thisTime = performance.now();
 			buffTime = 0;
-			if (g_scoreObj.frameNum >= musicStartFrame) {
-				buffTime = (thisTime - musicStartTime - (g_scoreObj.frameNum - musicStartFrame) * 1000 / g_fps);
+			if (currentFrame >= musicStartFrame) {
+				buffTime = (thisTime - musicStartTime - (currentFrame - musicStartFrame) * 1000 / g_fps);
 			}
 			g_scoreObj.frameNum++;
 			g_scoreObj.nominalFrameNum++;
@@ -8754,17 +8739,17 @@ function makeCounterSymbol(_id, _x, _class, _heightPos, _text) {
  * @param {array} _mkColorCd 
  * @param {string} _allFlg
  */
-function changeArrowColors(_mkColor, _mkColorCd, _allFlg) {
+function changeArrowColors(_mkColor, _mkColorCd, _allFlg = ``) {
 
-	if (_mkColor !== undefined) {
-		for (let j = 0, len = _mkColor.length; j < len; j++) {
-			const targetj = _mkColor[j];
-			g_workObj.arrowColors[targetj] = _mkColorCd[j];
-			if (_allFlg === `A`) {
-				g_workObj.arrowColorsAll[targetj] = _mkColorCd[j];
-			}
-		}
+	if (_mkColor === undefined) {
+		return;
 	}
+	_mkColor.forEach((targetj, j) => {
+		g_workObj.arrowColors[targetj] = _mkColorCd[j];
+		if (_allFlg === `A`) {
+			g_workObj.arrowColorsAll[targetj] = _mkColorCd[j];
+		}
+	});
 }
 
 /**
@@ -8772,68 +8757,31 @@ function changeArrowColors(_mkColor, _mkColorCd, _allFlg) {
  * @param {array} _mkColor 
  * @param {array} _mkColorCd 
  * @param {array} _colorPatterns 
- * @param {number} _keyNum 
  * @param {string} _allFlg
  */
-function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _keyNum, _allFlg) {
+function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _allFlg = ``) {
 
-	if (_mkColor !== undefined) {
-		for (let j = 0, len = _mkColor.length; j < len; j++) {
+	if (_mkColor === undefined) {
+		return;
+	}
+	_mkColor.forEach((targetj, j) => {
 
-			const targetj = _mkColor[j];
+		// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
+		const ctype = (targetj > 10 ? `Hit` : `Normal`) + (targetj % 2 === 0 ? `` : `Bar`);
+		const colorPos = Math.ceil((targetj % 10 - 1) / 2);
 
-			// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
-			if (targetj < 10) {
-				if (targetj % 2 === 0) {
-					// 矢印 (通常)
-					for (let k = 0; k < _keyNum; k++) {
-						if (targetj / 2 === _colorPatterns[k]) {
-							g_workObj.frzNormalColors[k] = _mkColorCd[j];
-							if (_allFlg === `A`) {
-								g_workObj.frzNormalColorsAll[k] = _mkColorCd[j];
-							}
-						}
-					}
-				} else {
-					// 帯 (通常)
-					for (let k = 0; k < _keyNum; k++) {
-						if ((targetj - 1) / 2 === _colorPatterns[k]) {
-							g_workObj.frzNormalBarColors[k] = _mkColorCd[j];
-							if (_allFlg === `A`) {
-								g_workObj.frzNormalBarColorsAll[k] = _mkColorCd[j];
-							}
-						}
-					}
-				}
-			} else {
-				const targetj2 = targetj - 10;
-				if (targetj2 % 2 === 0) {
-					// 矢印 (ヒット時)
-					for (let k = 0; k < _keyNum; k++) {
-						if (targetj2 / 2 === _colorPatterns[k]) {
-							g_workObj.frzHitColors[k] = _mkColorCd[j];
-							if (_allFlg === `A`) {
-								g_workObj.frzHitColorsAll[k] = _mkColorCd[j];
-								if (isNaN(Number(g_workObj.arrowRtn[k]))) {
-									document.querySelector(`#frzHitTop${k}`).style.background = _mkColorCd[j];
-								}
-							}
-						}
-					}
-				} else {
-					// 帯 (ヒット時)
-					for (let k = 0; k < _keyNum; k++) {
-						if ((targetj2 - 1) / 2 === _colorPatterns[k]) {
-							g_workObj.frzHitBarColors[k] = _mkColorCd[j];
-							if (_allFlg === `A`) {
-								g_workObj.frzHitBarColorsAll[k] = _mkColorCd[j];
-							}
-						}
+		_colorPatterns.forEach((cpattern, k) => {
+			if (colorPos === cpattern) {
+				g_workObj[`frz${ctype}Colors`][k] = _mkColorCd[j];
+				if (_allFlg === `A`) {
+					g_workObj[`frz${ctype}ColorsAll`][k] = _mkColorCd[j];
+					if (ctype === `HitBar` && isNaN(Number(g_workObj.arrowRtn[k]))) {
+						document.querySelector(`#frzHitTop${k}`).style.background = _mkColorCd[j];
 					}
 				}
 			}
-		}
-	}
+		});
+	});
 }
 
 /**
