@@ -43,19 +43,19 @@ const C_TYP_SWITCH = `switch`;
 const C_TYP_CALC = `calc`;
 
 // 画像ファイル
-let C_IMG_ARROW = `../img/arrow.png`;
-let C_IMG_ARROWSD = `../img/arrowShadow.png`;
-let C_IMG_ONIGIRI = `../img/onigiri.png`;
-let C_IMG_AASD = `../img/aaShadow.png`;
-let C_IMG_GIKO = `../img/giko.png`;
-let C_IMG_IYO = `../img/iyo.png`;
-let C_IMG_C = `../img/c.png`;
-let C_IMG_MORARA = `../img/morara.png`;
-let C_IMG_MONAR = `../img/monar.png`;
-let C_IMG_CURSOR = `../img/cursor.png`;
-let C_IMG_FRZBAR = `../img/frzbar.png`;
-let C_IMG_LIFEBAR = `../img/frzbar.png`;
-let C_IMG_LIFEBORDER = `../img/borderline.png`;
+let C_IMG_ARROW = `../img/arrow.svg`;
+let C_IMG_ARROWSD = `../img/arrowShadow.svg`;
+let C_IMG_ONIGIRI = `../img/onigiri.svg`;
+let C_IMG_AASD = `../img/aaShadow.svg`;
+let C_IMG_GIKO = `../img/giko.svg`;
+let C_IMG_IYO = `../img/iyo.svg`;
+let C_IMG_C = `../img/c.svg`;
+let C_IMG_MORARA = `../img/morara.svg`;
+let C_IMG_MONAR = `../img/monar.svg`;
+let C_IMG_CURSOR = `../img/cursor.svg`;
+let C_IMG_FRZBAR = `../img/frzbar.svg`;
+let C_IMG_LIFEBAR = `../img/frzbar.svg`;
+let C_IMG_LIFEBORDER = `../img/borderline.svg`;
 
 if (typeof loadBinary === C_TYP_FUNCTION) {
     loadBinary();
