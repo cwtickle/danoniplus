@@ -2126,8 +2126,8 @@ function titleInit() {
 		}
 
 		const lblmusicTitle = createDivCssLabel(`lblmusicTitle`,
-			g_sWidth * -1 + Number(titlefontpos[0]), 0 + Number(titlefontpos[1]),
-			g_sWidth * 3, g_sHeight - 40,
+			Number(titlefontpos[0]), Number(titlefontpos[1]),
+			g_sWidth, g_sHeight - 40,
 			titlefontsize,
 			`<span style="
 				align:${C_ALIGN_CENTER};
