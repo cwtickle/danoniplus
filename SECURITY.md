@@ -15,7 +15,7 @@ v13の対応終了時期はv16リリース開始時を予定しています。�
 
 | Version | Supported          | Latest Version | First Release | End of Support |
 | ------- | ------------------ |----------------|---------------|----------------|
-| v15     | :white_check_mark: |[v15.0.1](../../releases/tag/v15.0.1)          |2020-05-13|-|
+| v15     | :white_check_mark: |[v15.1.0](../../releases/tag/v15.1.0)          |2020-05-13|-|
 | v14     | :white_check_mark: |[v14.5.2](../../releases/tag/v14.5.2)          |2020-04-29|-|
 | v13     | :warning:          |[v13.6.3](../../releases/tag/v13.6.3)          |2020-03-29|(At Release v16)|
 | v12     | :x:                |[v12.3.6 (final)](../../releases/tag/v12.3.6)  |2020-02-09|2020-05-13|
