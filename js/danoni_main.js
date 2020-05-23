@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/05/21
+ * Revised : 2020/05/23
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 15.1.0`;
-const g_revisedDate = `2020/05/21`;
+const g_version = `Ver 15.1.1`;
+const g_revisedDate = `2020/05/23`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7280,7 +7280,7 @@ function getArrowSettings() {
 	}
 
 	[
-		`ii`, `shakin`, `matari`, `shobon`, `uwan`, `combo`, `maxcombo`,
+		`ii`, `shakin`, `matari`, `shobon`, `uwan`, `combo`, `maxCombo`,
 		`kita`, `sfsf`, `iknai`, `fCombo`, `fmaxCombo`, `fast`, `slow`
 	].forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 
