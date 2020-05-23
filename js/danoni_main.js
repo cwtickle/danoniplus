@@ -7280,7 +7280,7 @@ function getArrowSettings() {
 	}
 
 	[
-		`ii`, `shakin`, `matari`, `shobon`, `uwan`, `combo`, `maxcombo`,
+		`ii`, `shakin`, `matari`, `shobon`, `uwan`, `combo`, `maxCombo`,
 		`kita`, `sfsf`, `iknai`, `fCombo`, `fmaxCombo`, `fast`, `slow`
 	].forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 
