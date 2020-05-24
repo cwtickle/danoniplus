@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/05/23
+ * Revised : 2020/05/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 15.1.1`;
-const g_revisedDate = `2020/05/23`;
+const g_version = `Ver 15.1.2`;
+const g_revisedDate = `2020/05/24`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4508,12 +4508,6 @@ function createOptionWindow(_sprite) {
 				g_speedNum = 0;
 			}
 			g_gaugeNum = 0;
-			if (!g_stateObj.extraKeyFlg) {
-				g_localKeyStorage.reverse = C_FLG_OFF;
-			} else {
-				g_stateObj.reverse = C_FLG_OFF;
-				g_reverseNum = 0;
-			}
 			g_scrollNum = 0;
 			if (!g_autoPlays.includes(g_stateObj.autoPlay)) {
 				g_autoPlayNum = 0;
@@ -4568,6 +4562,9 @@ function createOptionWindow(_sprite) {
 					if (g_reverseNum < 0) {
 						g_reverseNum = 0;
 					}
+				} else {
+					g_stateObj.reverse = C_FLG_OFF;
+					g_reverseNum = 0;
 				}
 
 				// キーコンフィグ初期値設定
