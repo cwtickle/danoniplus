@@ -4508,12 +4508,6 @@ function createOptionWindow(_sprite) {
 				g_speedNum = 0;
 			}
 			g_gaugeNum = 0;
-			if (!g_stateObj.extraKeyFlg) {
-				g_localKeyStorage.reverse = C_FLG_OFF;
-			} else {
-				g_stateObj.reverse = C_FLG_OFF;
-				g_reverseNum = 0;
-			}
 			g_scrollNum = 0;
 			if (!g_autoPlays.includes(g_stateObj.autoPlay)) {
 				g_autoPlayNum = 0;
@@ -4568,6 +4562,9 @@ function createOptionWindow(_sprite) {
 					if (g_reverseNum < 0) {
 						g_reverseNum = 0;
 					}
+				} else {
+					g_stateObj.reverse = C_FLG_OFF;
+					g_reverseNum = 0;
 				}
 
 				// キーコンフィグ初期値設定
