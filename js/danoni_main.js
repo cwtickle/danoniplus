@@ -8764,7 +8764,7 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _allFlg = ``) {
 	_mkColor.forEach((targetj, j) => {
 
 		// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
-		const ctype = (targetj > 10 ? `Hit` : `Normal`) + (targetj % 2 === 0 ? `` : `Bar`);
+		const ctype = (targetj >= 10 ? `Hit` : `Normal`) + (targetj % 2 === 0 ? `` : `Bar`);
 		const colorPos = Math.ceil((targetj % 10 - 1) / 2);
 
 		_colorPatterns.forEach((cpattern, k) => {
