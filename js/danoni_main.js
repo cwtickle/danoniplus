@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/05/24
+ * Revised : 2020/05/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 15.1.2`;
-const g_revisedDate = `2020/05/24`;
+const g_version = `Ver 15.1.3`;
+const g_revisedDate = `2020/05/26`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -8764,7 +8764,7 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _allFlg = ``) {
 	_mkColor.forEach((targetj, j) => {
 
 		// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
-		const ctype = (targetj > 10 ? `Hit` : `Normal`) + (targetj % 2 === 0 ? `` : `Bar`);
+		const ctype = (targetj >= 10 ? `Hit` : `Normal`) + (targetj % 2 === 0 ? `` : `Bar`);
 		const colorPos = Math.ceil((targetj % 10 - 1) / 2);
 
 		_colorPatterns.forEach((cpattern, k) => {
