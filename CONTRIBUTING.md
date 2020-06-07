@@ -3,8 +3,8 @@
 要望・不具合報告がある場合、以下のいずれかの方法で行うことができます。
 
 - リポジトリをForkして編集した後、Pull Requestを「cwtickle/danoniplus」の「develop」ブランチへ送る。
-- [Gitter](https://gitter.im/danonicw/community)に要望・不具合内容を報告する。  
-※Gitterは「Twitterアカウント」を持っている方でも参加可能です。  
+- 当リポジトリのIssueもしくは[GitLabのIssue](https://gitlab.com/cwtickle/danonicw-issue/-/issues), もしくは[Gitter](https://gitter.im/danonicw/community)に要望・不具合内容を報告する。  
+※GitLab及びGitterは「Twitterアカウント」を持っている方でも参加可能です。  
 　Gitter内では、Github同様のmarkdownが使えます。お気軽にどうぞ！
 - 要望・不具合内容をティックル宛([@cw_tickle](https://twitter.com/cw_tickle))へ直接連絡する。
 
