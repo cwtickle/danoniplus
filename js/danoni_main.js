@@ -7696,7 +7696,11 @@ function MainInit() {
 
 	const jdgGroups = [`J`, `FJ`];
 	const jdgX = [g_sWidth / 2 - 200, g_sWidth / 2 - 100];
-	const jdgY = [(g_sHeight + g_posObj.stepYR) / 2 - 60 + g_diffObj.arrowJdgY, (g_sHeight + g_posObj.stepYR) / 2 + 10 + g_diffObj.frzJdgY];
+	const jdgY = [(g_sHeight + g_posObj.stepYR) / 2 - 60, (g_sHeight + g_posObj.stepYR) / 2 + 10];
+	if (g_stateObj.d_background === C_FLG_ON) {
+		jdgY[0] += g_diffObj.arrowJdgY;
+		jdgY[1] += g_diffObj.frzJdgY;
+	}
 	const jdgCombos = [`kita`, `ii`];
 
 	jdgGroups.forEach((jdg, j) => {
