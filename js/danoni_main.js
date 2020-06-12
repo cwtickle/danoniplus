@@ -3138,6 +3138,9 @@ function headerConvert(_dosObj) {
 	// 譜面明細の使用可否
 	obj.scoreDetailUse = setVal(_dosObj.scoreDetailUse, true, C_TYP_BOOLEAN);
 
+	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
+	obj.jdgPosReset = setVal(_dosObj.jdgPosReset, true, C_TYP_BOOLEAN);
+
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
 
@@ -7696,7 +7699,12 @@ function MainInit() {
 
 	const jdgGroups = [`J`, `FJ`];
 	const jdgX = [g_sWidth / 2 - 200, g_sWidth / 2 - 100];
-	const jdgY = [(g_sHeight + g_posObj.stepYR) / 2 - 60 + g_diffObj.arrowJdgY, (g_sHeight + g_posObj.stepYR) / 2 + 10 + g_diffObj.frzJdgY];
+	const jdgY = [(g_sHeight + g_posObj.stepYR) / 2 - 60, (g_sHeight + g_posObj.stepYR) / 2 + 10];
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.jdgPosReset) {
+	} else {
+		jdgY[0] += g_diffObj.arrowJdgY;
+		jdgY[1] += g_diffObj.frzJdgY;
+	}
 	const jdgCombos = [`kita`, `ii`];
 
 	jdgGroups.forEach((jdg, j) => {
