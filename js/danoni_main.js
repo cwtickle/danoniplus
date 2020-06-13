@@ -2321,37 +2321,42 @@ function titleInit() {
 
 	// コメントエリア作成
 	if (g_headerObj.commentVal !== ``) {
-		let tmpComment = g_headerObj.commentVal.split(`\r\n`).join(`\n`);
-		tmpComment = escapeHtmlForEnabledTag(tmpComment.split(`\n`).join(`<br>`));
-
-		const lblComment = createDivCssLabel(`lblComment`, 0, 70, g_sWidth, g_sHeight - 180, 14, tmpComment);
-		lblComment.style.textAlign = C_ALIGN_LEFT;
-		lblComment.style.overflow = `auto`;
-		lblComment.style.background = `#222222`;
-		lblComment.style.color = `#cccccc`;
-		lblComment.style.display = C_DIS_NONE;
-		divRoot.appendChild(lblComment);
-
-		const btnComment = createCssButton({
-			id: `btnComment`,
-			name: `Comment`,
-			x: g_sWidth - 180,
-			y: (g_sHeight / 2) + 150,
-			width: 150,
-			height: 50,
-			fontsize: 20,
-			align: C_ALIGN_CENTER,
-			class: `button_Default`,
-		}, _ => {
-			const lblCommentDef = document.querySelector(`#lblComment`);
-			if (lblCommentDef.style.display !== C_DIS_NONE) {
-				lblCommentDef.style.display = C_DIS_NONE;
-			} else {
-				lblCommentDef.style.display = C_DIS_INHERIT;
+		if (g_headerObj.commentExternal) {
+			if (document.querySelector(`#commentArea`) !== null) {
+				document.querySelector(`#commentArea`).innerHTML = g_headerObj.commentVal;
 			}
-		});
-		btnComment.style.border = `solid 1px #999999`;
-		divRoot.appendChild(btnComment);
+		} else {
+			let tmpComment = g_headerObj.commentVal;
+
+			const lblComment = createDivCssLabel(`lblComment`, 0, 70, g_sWidth, g_sHeight - 180, 14, tmpComment);
+			lblComment.style.textAlign = C_ALIGN_LEFT;
+			lblComment.style.overflow = `auto`;
+			lblComment.style.background = `#222222`;
+			lblComment.style.color = `#cccccc`;
+			lblComment.style.display = C_DIS_NONE;
+			divRoot.appendChild(lblComment);
+
+			const btnComment = createCssButton({
+				id: `btnComment`,
+				name: `Comment`,
+				x: g_sWidth - 180,
+				y: (g_sHeight / 2) + 150,
+				width: 150,
+				height: 50,
+				fontsize: 20,
+				align: C_ALIGN_CENTER,
+				class: `button_Default`,
+			}, _ => {
+				const lblCommentDef = document.querySelector(`#lblComment`);
+				if (lblCommentDef.style.display !== C_DIS_NONE) {
+					lblCommentDef.style.display = C_DIS_NONE;
+				} else {
+					lblCommentDef.style.display = C_DIS_INHERIT;
+				}
+			});
+			btnComment.style.border = `solid 1px #999999`;
+			divRoot.appendChild(btnComment);
+		}
 	}
 
 	// マスクスプライトを作成
@@ -3177,7 +3182,13 @@ function headerConvert(_dosObj) {
 	obj.jdgPosReset = setVal(_dosObj.jdgPosReset, true, C_TYP_BOOLEAN);
 
 	// タイトル表示用コメント
-	obj.commentVal = setVal(_dosObj.commentVal, ``, C_TYP_STRING);
+	const newlineTag = setVal(_dosObj.commentAutoBr, true, C_TYP_BOOLEAN) ? `<br>` : ``;
+	let tmpComment = setVal(_dosObj.commentVal, ``, C_TYP_STRING);
+	tmpComment = tmpComment.split(`\r\n`).join(`\n`);
+	obj.commentVal = escapeHtmlForEnabledTag(tmpComment.split(`\n`).join(newlineTag));
+
+	// コメントの外部化設定
+	obj.commentExternal = setVal(_dosObj.commentExternal, false, C_TYP_BOOLEAN);
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
