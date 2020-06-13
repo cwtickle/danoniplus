@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/05/26
+ * Revised : 2020/06/13
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 15.1.3`;
-const g_revisedDate = `2020/05/26`;
+const g_version = `Ver 15.2.0`;
+const g_revisedDate = `2020/06/13`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1139,8 +1139,10 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
 	const divRoot = document.querySelector(`#divRoot`);
+	const queryDos = getQueryParamVal(`dos`) !== null ? `dos/${getQueryParamVal('dos')}.txt` :
+		(externalDosInput !== null ? externalDosInput.value : ``);
 
-	if (dosInput === null && externalDosInput === null) {
+	if (dosInput === null && queryDos === ``) {
 		makeWarningWindow(C_MSG_E_0023);
 		initAfterDosLoaded();
 	}
@@ -1148,14 +1150,15 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	// 譜面分割あり、譜面番号固定時のみ譜面データを一時クリア
 	const dosDivideInput = document.querySelector(`#externalDosDivide`);
 	const dosLockInput = document.querySelector(`#externalDosLock`);
-	let dosDivideFlg = false;
+	let dosDivideFlg = setVal(getQueryParamVal(`dosDivide`), false, C_TYP_BOOLEAN);
 	if (dosDivideInput !== null) {
-		dosDivideFlg = setVal(dosDivideInput.value, false, C_TYP_BOOLEAN);
+		dosDivideFlg = setVal(dosDivideInput.value, dosDivideFlg, C_TYP_BOOLEAN);
 	}
+	g_stateObj.scoreLockFlg = setVal(getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
 	if (dosLockInput !== null) {
-		g_stateObj.scoreLockFlg = setVal(dosLockInput.value, false, C_TYP_BOOLEAN);
+		g_stateObj.scoreLockFlg = setVal(dosLockInput.value, g_stateObj.scoreLockFlg, C_TYP_BOOLEAN);
 	}
-	if (externalDosInput !== null && dosDivideFlg && g_stateObj.scoreLockFlg) {
+	if (queryDos !== `` && dosDivideFlg && g_stateObj.scoreLockFlg) {
 		const scoreList = Object.keys(g_rootObj).filter(data => {
 			return data.endsWith(`_data`) || data.endsWith(`_change`);
 		});
@@ -1167,7 +1170,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	// HTML埋め込みdos
 	if (dosInput !== null) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
-		if (externalDosInput === null) {
+		if (queryDos === ``) {
 			_afterFunc();
 			if (_cyclicFlg) {
 				reloadDos(_scoreId);
@@ -1176,13 +1179,13 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	}
 
 	// 外部dos読み込み
-	if (externalDosInput !== null) {
+	if (queryDos !== ``) {
 		let charset = document.characterSet;
 		const charsetInput = document.querySelector(`#externalDosCharset`);
 		if (charsetInput !== null) {
 			charset = charsetInput.value;
 		}
-		const filenameBase = externalDosInput.value.match(/.+\..*/)[0];
+		const filenameBase = queryDos.match(/.+\..*/)[0];
 		const filenameExtension = filenameBase.split(`.`).pop();
 		const filenameCommon = filenameBase.split(`.${filenameExtension}`)[0];
 		const filename = (!dosDivideFlg ?
@@ -2319,6 +2322,46 @@ function titleInit() {
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus/compare/v${g_version.slice(4)}...master`, `_blank`));
 	divRoot.appendChild(lnkComparison);
 
+	// コメントエリア作成
+	if (g_headerObj.commentVal !== ``) {
+		if (g_headerObj.commentExternal) {
+			if (document.querySelector(`#commentArea`) !== null) {
+				document.querySelector(`#commentArea`).innerHTML = g_headerObj.commentVal;
+			}
+		} else {
+			let tmpComment = g_headerObj.commentVal;
+
+			const lblComment = createDivCssLabel(`lblComment`, 0, 70, g_sWidth, g_sHeight - 180, 14, tmpComment);
+			lblComment.style.textAlign = C_ALIGN_LEFT;
+			lblComment.style.overflow = `auto`;
+			lblComment.style.background = `#222222`;
+			lblComment.style.color = `#cccccc`;
+			lblComment.style.display = C_DIS_NONE;
+			divRoot.appendChild(lblComment);
+
+			const btnComment = createCssButton({
+				id: `btnComment`,
+				name: `Comment`,
+				x: g_sWidth - 180,
+				y: (g_sHeight / 2) + 150,
+				width: 150,
+				height: 50,
+				fontsize: 20,
+				align: C_ALIGN_CENTER,
+				class: `button_Default`,
+			}, _ => {
+				const lblCommentDef = document.querySelector(`#lblComment`);
+				if (lblCommentDef.style.display !== C_DIS_NONE) {
+					lblCommentDef.style.display = C_DIS_NONE;
+				} else {
+					lblCommentDef.style.display = C_DIS_INHERIT;
+				}
+			});
+			btnComment.style.border = `solid 1px #999999`;
+			divRoot.appendChild(btnComment);
+		}
+	}
+
 	// マスクスプライトを作成
 	createSprite(`divRoot`, `maskTitleSprite`, 0, 0, g_sWidth, g_sHeight);
 	for (let j = 0; j <= g_headerObj.maskTitleMaxDepth; j++) {
@@ -3137,6 +3180,25 @@ function headerConvert(_dosObj) {
 
 	// 譜面明細の使用可否
 	obj.scoreDetailUse = setVal(_dosObj.scoreDetailUse, true, C_TYP_BOOLEAN);
+
+	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
+	obj.jdgPosReset = setVal(_dosObj.jdgPosReset, true, C_TYP_BOOLEAN);
+
+	// タイトル表示用コメント
+	const newlineTag = setVal(_dosObj.commentAutoBr, true, C_TYP_BOOLEAN) ? `<br>` : ``;
+	let tmpComment = setVal(_dosObj.commentVal, ``, C_TYP_STRING);
+	tmpComment = tmpComment.split(`\r\n`).join(`\n`);
+	obj.commentVal = escapeHtmlForEnabledTag(tmpComment.split(`\n`).join(newlineTag));
+
+	// クレジット表示
+	if (document.querySelector(`#webMusicTitle`) !== null) {
+		document.querySelector(`#webMusicTitle`).innerHTML =
+			`<span style="font-size:32px">${obj.musicTitleForView.join(`<br>`)}</span><br>
+			<span style="font-size:16px">(Artist: <a href="${obj.artistUrl}" target="_blank">${obj.artistName}</a>)</span>`;
+	}
+
+	// コメントの外部化設定
+	obj.commentExternal = setVal(_dosObj.commentExternal, false, C_TYP_BOOLEAN);
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
@@ -7696,7 +7758,12 @@ function MainInit() {
 
 	const jdgGroups = [`J`, `FJ`];
 	const jdgX = [g_sWidth / 2 - 200, g_sWidth / 2 - 100];
-	const jdgY = [(g_sHeight + g_posObj.stepYR) / 2 - 60 + g_diffObj.arrowJdgY, (g_sHeight + g_posObj.stepYR) / 2 + 10 + g_diffObj.frzJdgY];
+	const jdgY = [(g_sHeight + g_posObj.stepYR) / 2 - 60, (g_sHeight + g_posObj.stepYR) / 2 + 10];
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.jdgPosReset) {
+	} else {
+		jdgY[0] += g_diffObj.arrowJdgY;
+		jdgY[1] += g_diffObj.frzJdgY;
+	}
 	const jdgCombos = [`kita`, `ii`];
 
 	jdgGroups.forEach((jdg, j) => {

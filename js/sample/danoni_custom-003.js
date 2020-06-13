@@ -31,7 +31,7 @@ function customTitleInit() {
 	// Tweetボタン描画
 	var btnTweet = createButton({
 		id: "btnTweet",
-		name: "Comment",
+		name: "Info",
 		x: g_sWidth / 4 * 3,
 		y: 340,
 		width: g_sWidth / 4,
@@ -54,7 +54,7 @@ function customCommentInit() {
 
 	// タイトル文字描画
 	var lblTitle = getTitleDivLabel("lblTitle",
-		"<span style='color:#6666ff;font-size:40px;'>C</span>OMMENT", 0, 15);
+		"<span style='color:#6666ff;font-size:40px;'>I</span>NFO", 0, 15);
 	divRoot.appendChild(lblTitle);
 
 	var comment = "これはカスタムページのテストです。<br>" +
