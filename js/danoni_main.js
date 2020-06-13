@@ -1139,8 +1139,10 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
 	const divRoot = document.querySelector(`#divRoot`);
+	const queryDos = getQueryParamVal(`dos`) !== null ? `dos/${getQueryParamVal('dos')}.txt` :
+		(externalDosInput !== null ? externalDosInput.value : ``);
 
-	if (dosInput === null && externalDosInput === null) {
+	if (dosInput === null && queryDos === ``) {
 		makeWarningWindow(C_MSG_E_0023);
 		initAfterDosLoaded();
 	}
@@ -1148,14 +1150,15 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	// 譜面分割あり、譜面番号固定時のみ譜面データを一時クリア
 	const dosDivideInput = document.querySelector(`#externalDosDivide`);
 	const dosLockInput = document.querySelector(`#externalDosLock`);
-	let dosDivideFlg = false;
+	let dosDivideFlg = setVal(getQueryParamVal(`dosDivide`), false, C_TYP_BOOLEAN);
 	if (dosDivideInput !== null) {
-		dosDivideFlg = setVal(dosDivideInput.value, false, C_TYP_BOOLEAN);
+		dosDivideFlg = setVal(dosDivideInput.value, dosDivideFlg, C_TYP_BOOLEAN);
 	}
+	g_stateObj.scoreLockFlg = setVal(getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
 	if (dosLockInput !== null) {
-		g_stateObj.scoreLockFlg = setVal(dosLockInput.value, false, C_TYP_BOOLEAN);
+		g_stateObj.scoreLockFlg = setVal(dosLockInput.value, g_stateObj.scoreLockFlg, C_TYP_BOOLEAN);
 	}
-	if (externalDosInput !== null && dosDivideFlg && g_stateObj.scoreLockFlg) {
+	if (queryDos !== `` && dosDivideFlg && g_stateObj.scoreLockFlg) {
 		const scoreList = Object.keys(g_rootObj).filter(data => {
 			return data.endsWith(`_data`) || data.endsWith(`_change`);
 		});
@@ -1167,7 +1170,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	// HTML埋め込みdos
 	if (dosInput !== null) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
-		if (externalDosInput === null) {
+		if (queryDos === ``) {
 			_afterFunc();
 			if (_cyclicFlg) {
 				reloadDos(_scoreId);
@@ -1176,13 +1179,13 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	}
 
 	// 外部dos読み込み
-	if (externalDosInput !== null) {
+	if (queryDos !== ``) {
 		let charset = document.characterSet;
 		const charsetInput = document.querySelector(`#externalDosCharset`);
 		if (charsetInput !== null) {
 			charset = charsetInput.value;
 		}
-		const filenameBase = externalDosInput.value.match(/.+\..*/)[0];
+		const filenameBase = queryDos.match(/.+\..*/)[0];
 		const filenameExtension = filenameBase.split(`.`).pop();
 		const filenameCommon = filenameBase.split(`.${filenameExtension}`)[0];
 		const filename = (!dosDivideFlg ?
@@ -3186,6 +3189,13 @@ function headerConvert(_dosObj) {
 	let tmpComment = setVal(_dosObj.commentVal, ``, C_TYP_STRING);
 	tmpComment = tmpComment.split(`\r\n`).join(`\n`);
 	obj.commentVal = escapeHtmlForEnabledTag(tmpComment.split(`\n`).join(newlineTag));
+
+	// クレジット表示
+	if (document.querySelector(`#webMusicTitle`) !== null) {
+		document.querySelector(`#webMusicTitle`).innerHTML =
+			`<span style="font-size:32px">${obj.musicTitleForView.join(`<br>`)}</span><br>
+			<span style="font-size:16px">(Artist: <a href="${obj.artistUrl}" target="_blank">${obj.artistName}</a>)</span>`;
+	}
 
 	// コメントの外部化設定
 	obj.commentExternal = setVal(_dosObj.commentExternal, false, C_TYP_BOOLEAN);

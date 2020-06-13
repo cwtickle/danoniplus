@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<script src="../js/danoni_main.js" charset="UTF-8"></script>
+<link rel="stylesheet" type="text/css" href="../css/danoni_main.css">
+
+
+<title>Dancing★Onigiri</title>
+
+<style type="text/css">
+<!--//
+a:link   { color:#BAB7E0;}
+a:visited{ color:#BAB7E0;}
+a:active { color:#CCCCCC;}
+body{
+	font-family:"Arial","メイリオ","MS P ゴシック",sans-serif;
+	scrollbar-base-color:"black";
+	scrollbar-arrow-color:"white";
+	color:#cccccc;
+	background-color:#000011;
+	font-size:14px;
+}
+table{
+	border:0;
+	border-collapse:collapse;
+	width:800px;
+	margin-left:auto;
+	margin-right:auto;
+}
+th,td{padding:0;}
+
+a{ text-decoration: none; }
+a:hover  { color:#FF9900; text-decoration: underline; }
+
+#lblmusicTitle{
+	animation-duration: 2.0s;
+	animation-name: upToDown;
+}
+//-->
+</style>
+</head>
+
+<body>
+<table><tr><td>
+<p style="text-align:center;">
+	<span id="webMusicTitle">Preview</span>
+</p>
+<hr>
+
+<!--//
+
+・タイトルの文字サイズを変える場合
+|titlesize=60|
+・タイトルの文字フォントを変える場合
+|titlefont=Century Gothic|
+
+//-->
+<div id="canvas-frame" style="width:600px;margin:auto;">
+	<p>ゲームを準備しています...</p>
+	<p>このメッセージがいつまでも消えない場合、<br>
+		Google ChromeやFirefox等、HTML5に対応したブラウザをご利用ください。</p>
+</div>
+<hr>
+<p id="commentArea">
+</p>
+</td></tr></table>
+</body>
+</html>
