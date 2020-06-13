@@ -2319,6 +2319,41 @@ function titleInit() {
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus/compare/v${g_version.slice(4)}...master`, `_blank`));
 	divRoot.appendChild(lnkComparison);
 
+	// コメントエリア作成
+	if (g_headerObj.commentVal !== ``) {
+		let tmpComment = g_headerObj.commentVal.split(`\r\n`).join(`\n`);
+		tmpComment = escapeHtmlForEnabledTag(tmpComment.split(`\n`).join(`<br>`));
+
+		const lblComment = createDivCssLabel(`lblComment`, 0, 70, g_sWidth, g_sHeight - 180, 14, tmpComment);
+		lblComment.style.textAlign = C_ALIGN_LEFT;
+		lblComment.style.overflow = `auto`;
+		lblComment.style.background = `#222222`;
+		lblComment.style.color = `#cccccc`;
+		lblComment.style.display = C_DIS_NONE;
+		divRoot.appendChild(lblComment);
+
+		const btnComment = createCssButton({
+			id: `btnComment`,
+			name: `Comment`,
+			x: g_sWidth - 180,
+			y: (g_sHeight / 2) + 150,
+			width: 150,
+			height: 50,
+			fontsize: 20,
+			align: C_ALIGN_CENTER,
+			class: `button_Default`,
+		}, _ => {
+			const lblCommentDef = document.querySelector(`#lblComment`);
+			if (lblCommentDef.style.display !== C_DIS_NONE) {
+				lblCommentDef.style.display = C_DIS_NONE;
+			} else {
+				lblCommentDef.style.display = C_DIS_INHERIT;
+			}
+		});
+		btnComment.style.border = `solid 1px #999999`;
+		divRoot.appendChild(btnComment);
+	}
+
 	// マスクスプライトを作成
 	createSprite(`divRoot`, `maskTitleSprite`, 0, 0, g_sWidth, g_sHeight);
 	for (let j = 0; j <= g_headerObj.maskTitleMaxDepth; j++) {
@@ -3140,6 +3175,9 @@ function headerConvert(_dosObj) {
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
 	obj.jdgPosReset = setVal(_dosObj.jdgPosReset, true, C_TYP_BOOLEAN);
+
+	// タイトル表示用コメント
+	obj.commentVal = setVal(_dosObj.commentVal, ``, C_TYP_STRING);
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
