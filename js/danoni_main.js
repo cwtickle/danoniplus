@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/05/24
+ * Revised : 2020/06/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 13.6.4`;
-const g_revisedDate = `2020/05/24`;
+const g_version = `Ver 13.6.5`;
+const g_revisedDate = `2020/06/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7049,11 +7049,11 @@ function getArrowSettings() {
 		// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
 		if (!g_stateObj.extraKeyFlg) {
 			g_localKeyStorage.reverse = g_stateObj.reverse;
+			g_localKeyStorage.keyCtrl = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 			if (g_keyObj.currentPtn !== -1) {
 				g_localKeyStorage.keyCtrlPtn = g_keyObj.currentPtn;
 				g_keyObj[`keyCtrl${keyCtrlPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}d`]));
 			}
-			g_localKeyStorage.keyCtrl = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 			localStorage.setItem(`danonicw-${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
 
 		} else {
