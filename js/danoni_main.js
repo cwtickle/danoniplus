@@ -7356,11 +7356,11 @@ function getArrowSettings() {
 		// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
 		if (!g_stateObj.extraKeyFlg) {
 			g_localKeyStorage.reverse = g_stateObj.reverse;
+			g_localKeyStorage.keyCtrl = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 			if (g_keyObj.currentPtn !== -1) {
 				g_localKeyStorage.keyCtrlPtn = g_keyObj.currentPtn;
 				g_keyObj[`keyCtrl${keyCtrlPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}d`]));
 			}
-			g_localKeyStorage.keyCtrl = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 			localStorage.setItem(`danonicw-${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
 
 		} else {
