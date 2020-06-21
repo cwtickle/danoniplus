@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/06/18
+ * Revised : 2020/06/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.14`;
-const g_revisedDate = `2020/06/18`;
+const g_version = `Ver 9.4.15`;
+const g_revisedDate = `2020/06/21`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2175,7 +2175,7 @@ function setAudio(_url) {
 				musicInit();
 				if (isIOS) {
 					document.querySelector(`#lblLoading`).innerText = `Click to Start!`;
-					const btnPlay = createCssButton({
+					const btnPlay = createButton({
 						id: `btnPlay`,
 						name: `PLAY!`,
 						x: g_sWidth * 2 / 3,
@@ -2717,7 +2717,7 @@ function titleInit() {
 	divRoot.appendChild(lnkVersion);
 
 	// バージョン比較用リンク
-	const lnkComparison = createCssButton({
+	const lnkComparison = createButton({
 		id: `lnkComparison`,
 		name: `&#x2194;`,
 		x: g_sWidth - 30,
@@ -2725,8 +2725,9 @@ function titleInit() {
 		width: 20,
 		height: 16,
 		fontsize: 12,
+		normalColor: C_CLR_DEFAULTE,
+		hoverColor: C_CLR_TWEET,
 		align: C_ALIGN_CENTER,
-		class: g_cssObj.button_Tweet,
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus/compare/v${g_version.slice(4)}...master`, `_blank`));
 	divRoot.appendChild(lnkComparison);
 
@@ -7575,6 +7576,7 @@ function MainInit() {
 	// キー操作イベント
 	document.onkeydown = evt => {
 
+		evt.preventDefault();
 		let setKey;
 		if (g_userAgent.indexOf(`firefox`) !== -1) {
 			setKey = evt.which;
