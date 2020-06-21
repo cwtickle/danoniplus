@@ -7899,6 +7899,7 @@ function MainInit() {
 
 	// キー操作イベント
 	document.onkeydown = evt => {
+		evt.preventDefault();
 		const setKey = transCode(evt.keyCode);
 		g_inputKeyBuffer[setKey] = true;
 		mainKeyDownActFunc[g_stateObj.autoAll](setKey);
