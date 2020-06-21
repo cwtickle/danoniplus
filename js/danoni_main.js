@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/06/18
+ * Revised : 2020/06/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 15.2.1`;
-const g_revisedDate = `2020/06/18`;
+const g_version = `Ver 15.2.2`;
+const g_revisedDate = `2020/06/21`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7899,6 +7899,7 @@ function MainInit() {
 
 	// キー操作イベント
 	document.onkeydown = evt => {
+		evt.preventDefault();
 		const setKey = transCode(evt.keyCode);
 		g_inputKeyBuffer[setKey] = true;
 		mainKeyDownActFunc[g_stateObj.autoAll](setKey);
