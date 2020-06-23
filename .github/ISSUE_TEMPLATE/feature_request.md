@@ -12,7 +12,7 @@ assignees: ''
 
 ## スクリーンショット / Screenshot
 
-## 期待する見せ方・挙動 / Expected behavior
+## 期待する見せ方・挙動 / Expected Behavior
 - xxxx (できるだけ簡潔に / A clear and concise description of what you want to happen.)
 
 ## その他検討事項 / Other Considerations
