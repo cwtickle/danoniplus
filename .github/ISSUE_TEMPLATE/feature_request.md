@@ -1,5 +1,5 @@
 ---
-name: Feature request
+name: 改善提案 / Feature request
 about: Suggest an idea for this project
 title: "[要望] "
 labels: ''
@@ -7,18 +7,13 @@ assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.
-（要望や問題点について記述して下さい）**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## 改善詳細 / Details of Improvement
+- xxxx (できるだけ簡潔に / A clear and concise description of what the problem is.)
 
-**Describe the solution you'd like
-（要望や問題点の解決方法を記述してください）**
-A clear and concise description of what you want to happen.
+## スクリーンショット / Screenshot
 
-**Describe alternatives you've considered
-（上記の方法ができない場合、他の解決方法案があれば記述してください）**
-A clear and concise description of any alternative solutions or features you've considered.
+## 期待する見せ方・挙動 / Expected behavior
+- xxxx (できるだけ簡潔に / A clear and concise description of what you want to happen.)
 
-**Additional context
-（その他、お気づきの点がありましたらご記入をお願いします）**
-Add any other context or screenshots about the feature request here.
+## その他検討事項 / Other Considerations
+- xxxx (実装に当たり懸念事項などがあれば記述 / Add any other context or screenshots about the feature request here.)
