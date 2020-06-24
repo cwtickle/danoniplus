@@ -22,7 +22,7 @@ let g_localVersion2 = ``;
 
 /**
  * ▽ ソースコーディング
- * https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTING.md
+ * https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md
  * 
  * - 定数・変数名
  * -- 定数　　　　　： `C_(カテゴリ)_(名前)`の形式。全て英大文字、数字、アンダースコアのみを使用。
