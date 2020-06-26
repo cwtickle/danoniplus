@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/06/21
+ * Revised : 2020/06/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 13.6.6`;
-const g_revisedDate = `2020/06/21`;
+const g_version = `Ver 13.6.7`;
+const g_revisedDate = `2020/06/26`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5928,9 +5928,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] =
 			makeBackgroundResultData(`maskresult`, scoreIdHeader);
 		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] =
-			makeBackgroundResultData(`backfailed${g_gaugeType.slice(0, 1)}`, scoreIdHeader, `backresult`);
+			makeBackgroundResultData(`backfailed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `backresult`);
 		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] =
-			makeBackgroundResultData(`maskfailed${g_gaugeType.slice(0, 1)}`, scoreIdHeader, `maskresult`);
+			makeBackgroundResultData(`maskfailed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `maskresult`);
 	}
 
 	/**
