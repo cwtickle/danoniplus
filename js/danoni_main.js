@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/06/21
+ * Revised : 2020/06/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.15`;
-const g_revisedDate = `2020/06/21`;
+const g_version = `Ver 9.4.16`;
+const g_revisedDate = `2020/06/26`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -6133,10 +6133,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
 	} else {
 		let tmpBackFailedData = ``;
-		if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
-			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
-		} else if (_dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-			tmpBackFailedData = _dosObj[`backfailed${g_gaugeType.slice(0, 1)}_data`];
+		if (_dosObj[`backfailed${g_stateObj.lifeMode.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
+			tmpBackFailedData = _dosObj[`backfailed${g_stateObj.lifeMode.slice(0, 1)}${scoreIdHeader}_data`];
+		} else if (_dosObj[`backfailed${g_stateObj.lifeMode.slice(0, 1)}_data`] !== undefined) {
+			tmpBackFailedData = _dosObj[`backfailed${g_stateObj.lifeMode.slice(0, 1)}_data`];
 		} else {
 			tmpBackFailedData = tmpBackResultData;
 		}
@@ -6151,10 +6151,10 @@ function scoreConvert(_dosObj, _scoreNo, _preblankFrame, _dummyNo = ``) {
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
 	} else {
 		let tmpMaskFailedData = ``;
-		if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
-			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}${scoreIdHeader}_data`];
-		} else if (_dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`] !== undefined) {
-			tmpMaskFailedData = _dosObj[`maskfailed${g_gaugeType.slice(0, 1)}_data`];
+		if (_dosObj[`maskfailed${g_stateObj.lifeMode.slice(0, 1)}${scoreIdHeader}_data`] !== undefined) {
+			tmpMaskFailedData = _dosObj[`maskfailed${g_stateObj.lifeMode.slice(0, 1)}${scoreIdHeader}_data`];
+		} else if (_dosObj[`maskfailed${g_stateObj.lifeMode.slice(0, 1)}_data`] !== undefined) {
+			tmpMaskFailedData = _dosObj[`maskfailed${g_stateObj.lifeMode.slice(0, 1)}_data`];
 		} else {
 			tmpMaskFailedData = tmpMaskResultData;
 		}
