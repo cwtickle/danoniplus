@@ -6218,9 +6218,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] =
 			makeBackgroundResultData(`maskresult`, scoreIdHeader);
 		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] =
-			makeBackgroundResultData(`backfailed${g_gaugeType.slice(0, 1)}`, scoreIdHeader, `backresult`);
+			makeBackgroundResultData(`backfailed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `backresult`);
 		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] =
-			makeBackgroundResultData(`maskfailed${g_gaugeType.slice(0, 1)}`, scoreIdHeader, `maskresult`);
+			makeBackgroundResultData(`maskfailed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `maskresult`);
 	}
 
 	/**
