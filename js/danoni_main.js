@@ -1264,18 +1264,18 @@ function initAfterDosLoaded() {
 	}
 
 	// 画像ファイルの読み込み
-	preloadFile(`image`, C_IMG_ARROW);
-	preloadFile(`image`, C_IMG_ARROWSD);
-	preloadFile(`image`, C_IMG_ONIGIRI);
-	preloadFile(`image`, C_IMG_AASD);
-	preloadFile(`image`, C_IMG_GIKO);
-	preloadFile(`image`, C_IMG_IYO);
-	preloadFile(`image`, C_IMG_C);
-	preloadFile(`image`, C_IMG_MORARA);
-	preloadFile(`image`, C_IMG_MONAR);
-	preloadFile(`image`, C_IMG_CURSOR);
-	preloadFile(`image`, C_IMG_FRZBAR);
-	preloadFile(`image`, C_IMG_LIFEBORDER);
+	preloadFile(`image`, g_imgObj.arrow);
+	preloadFile(`image`, g_imgObj.arrowShadow);
+	preloadFile(`image`, g_imgObj.onigiri);
+	preloadFile(`image`, g_imgObj.onigiriShadow);
+	preloadFile(`image`, g_imgObj.giko);
+	preloadFile(`image`, g_imgObj.iyo);
+	preloadFile(`image`, g_imgObj.c);
+	preloadFile(`image`, g_imgObj.morara);
+	preloadFile(`image`, g_imgObj.monar);
+	preloadFile(`image`, g_imgObj.cursor);
+	preloadFile(`image`, g_imgObj.frzBar);
+	preloadFile(`image`, g_imgObj.lifeBorder);
 
 	// その他の画像ファイルの読み込み
 	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
@@ -5321,7 +5321,7 @@ function keyConfigInit() {
 	posj = g_keyObj[`pos${keyCtrlPtn}`][0];
 
 	// カーソルの作成
-	const cursor = keyconSprite.appendChild(createImg(`cursor`, C_IMG_CURSOR,
+	const cursor = keyconSprite.appendChild(createImg(`cursor`, g_imgObj.cursor,
 		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
