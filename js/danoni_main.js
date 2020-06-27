@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/06/21
+ * Revised : 2020/06/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 15.2.2`;
-const g_revisedDate = `2020/06/21`;
+const g_version = `Ver 15.3.0`;
+const g_revisedDate = `2020/06/27`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -22,7 +22,7 @@ let g_localVersion2 = ``;
 
 /**
  * ▽ ソースコーディング
- * https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTING.md
+ * https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md
  * 
  * - 定数・変数名
  * -- 定数　　　　　： `C_(カテゴリ)_(名前)`の形式。全て英大文字、数字、アンダースコアのみを使用。
@@ -1264,18 +1264,18 @@ function initAfterDosLoaded() {
 	}
 
 	// 画像ファイルの読み込み
-	preloadFile(`image`, C_IMG_ARROW);
-	preloadFile(`image`, C_IMG_ARROWSD);
-	preloadFile(`image`, C_IMG_ONIGIRI);
-	preloadFile(`image`, C_IMG_AASD);
-	preloadFile(`image`, C_IMG_GIKO);
-	preloadFile(`image`, C_IMG_IYO);
-	preloadFile(`image`, C_IMG_C);
-	preloadFile(`image`, C_IMG_MORARA);
-	preloadFile(`image`, C_IMG_MONAR);
-	preloadFile(`image`, C_IMG_CURSOR);
-	preloadFile(`image`, C_IMG_FRZBAR);
-	preloadFile(`image`, C_IMG_LIFEBORDER);
+	preloadFile(`image`, g_imgObj.arrow);
+	preloadFile(`image`, g_imgObj.arrowShadow);
+	preloadFile(`image`, g_imgObj.onigiri);
+	preloadFile(`image`, g_imgObj.onigiriShadow);
+	preloadFile(`image`, g_imgObj.giko);
+	preloadFile(`image`, g_imgObj.iyo);
+	preloadFile(`image`, g_imgObj.c);
+	preloadFile(`image`, g_imgObj.morara);
+	preloadFile(`image`, g_imgObj.monar);
+	preloadFile(`image`, g_imgObj.cursor);
+	preloadFile(`image`, g_imgObj.frzBar);
+	preloadFile(`image`, g_imgObj.lifeBorder);
 
 	// その他の画像ファイルの読み込み
 	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
@@ -5321,7 +5321,7 @@ function keyConfigInit() {
 	posj = g_keyObj[`pos${keyCtrlPtn}`][0];
 
 	// カーソルの作成
-	const cursor = keyconSprite.appendChild(createImg(`cursor`, C_IMG_CURSOR,
+	const cursor = keyconSprite.appendChild(createImg(`cursor`, g_imgObj.cursor,
 		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
@@ -6218,9 +6218,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] =
 			makeBackgroundResultData(`maskresult`, scoreIdHeader);
 		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] =
-			makeBackgroundResultData(`backfailed${g_gaugeType.slice(0, 1)}`, scoreIdHeader, `backresult`);
+			makeBackgroundResultData(`backfailed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `backresult`);
 		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] =
-			makeBackgroundResultData(`maskfailed${g_gaugeType.slice(0, 1)}`, scoreIdHeader, `maskresult`);
+			makeBackgroundResultData(`maskfailed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `maskresult`);
 	}
 
 	/**
@@ -6333,27 +6333,44 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	function makeWordData(_scoreNo) {
 		let wordDataList = [];
+		let wordReverseFlg = false;
+		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+		const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+
 		if (g_stateObj.scroll !== `---`) {
 			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data];
 		} else if (g_stateObj.reverse === C_FLG_ON) {
 			wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data];
+			if (keyNum === divideCnt + 1 && wordDataList.find((v) => v !== undefined) === undefined) {
+				wordReverseFlg = true;
+			}
 		}
 		wordDataList.push(_dosObj[`word${_scoreNo}_data`], _dosObj.word_data);
 
 		const inputWordData = wordDataList.find((v) => v !== undefined);
-		return (inputWordData !== undefined ? makeSpriteWordData(inputWordData) : [[], -1]);
+		return (inputWordData !== undefined ? makeSpriteWordData(inputWordData, wordReverseFlg) : [[], -1]);
 	}
 
 	/**
 	 * 多層歌詞データの格納処理
 	 * @param {object} _data 
+	 * @param {boolean} _reverseFlg
 	 */
-	function makeSpriteWordData(_data) {
+	function makeSpriteWordData(_data, _reverseFlg = false) {
 		const wordData = [];
 		let wordMaxDepth = -1;
+		let wordReverseFlg = _reverseFlg;
 
 		let tmpArrayData = _data.split(`\r`).join(`\n`);
 		tmpArrayData = tmpArrayData.split(`\n`);
+
+		tmpArrayData.forEach(tmpData => {
+			if (tmpData !== undefined && tmpData !== ``) {
+				if (tmpData.indexOf(`<br>`) !== -1) {
+					wordReverseFlg = false;
+				}
+			}
+		});
 
 		tmpArrayData.forEach(tmpData => {
 			if (tmpData !== undefined && tmpData !== ``) {
@@ -6366,6 +6383,8 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					}
 					tmpWordData[k] = calcFrame(setVal(tmpWordData[k], ``, C_TYP_CALC));
 					tmpWordData[k + 1] = setVal(tmpWordData[k + 1], 0, C_TYP_CALC);
+					tmpWordData[k + 1] = Math.floor(tmpWordData[k + 1] / 2) * 2 +
+						(tmpWordData[k + 1] + Number(wordReverseFlg)) % 2;
 
 					if (tmpWordData[k + 1] > wordMaxDepth) {
 						wordMaxDepth = tmpWordData[k + 1];
