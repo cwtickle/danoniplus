@@ -6333,27 +6333,44 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	function makeWordData(_scoreNo) {
 		let wordDataList = [];
+		let wordReverseFlg = false;
+		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+		const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+
 		if (g_stateObj.scroll !== `---`) {
 			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data];
 		} else if (g_stateObj.reverse === C_FLG_ON) {
 			wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data];
+			if (keyNum === divideCnt + 1 && wordDataList.find((v) => v !== undefined) === undefined) {
+				wordReverseFlg = true;
+			}
 		}
 		wordDataList.push(_dosObj[`word${_scoreNo}_data`], _dosObj.word_data);
 
 		const inputWordData = wordDataList.find((v) => v !== undefined);
-		return (inputWordData !== undefined ? makeSpriteWordData(inputWordData) : [[], -1]);
+		return (inputWordData !== undefined ? makeSpriteWordData(inputWordData, wordReverseFlg) : [[], -1]);
 	}
 
 	/**
 	 * 多層歌詞データの格納処理
 	 * @param {object} _data 
+	 * @param {boolean} _reverseFlg
 	 */
-	function makeSpriteWordData(_data) {
+	function makeSpriteWordData(_data, _reverseFlg = false) {
 		const wordData = [];
 		let wordMaxDepth = -1;
+		let wordReverseFlg = _reverseFlg;
 
 		let tmpArrayData = _data.split(`\r`).join(`\n`);
 		tmpArrayData = tmpArrayData.split(`\n`);
+
+		tmpArrayData.forEach(tmpData => {
+			if (tmpData !== undefined && tmpData !== ``) {
+				if (tmpData.indexOf(`<br>`) !== -1) {
+					wordReverseFlg = false;
+				}
+			}
+		});
 
 		tmpArrayData.forEach(tmpData => {
 			if (tmpData !== undefined && tmpData !== ``) {
@@ -6366,6 +6383,8 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					}
 					tmpWordData[k] = calcFrame(setVal(tmpWordData[k], ``, C_TYP_CALC));
 					tmpWordData[k + 1] = setVal(tmpWordData[k + 1], 0, C_TYP_CALC);
+					tmpWordData[k + 1] = Math.floor(tmpWordData[k + 1] / 2) * 2 +
+						(tmpWordData[k + 1] + Number(wordReverseFlg)) % 2;
 
 					if (tmpWordData[k + 1] > wordMaxDepth) {
 						wordMaxDepth = tmpWordData[k + 1];
