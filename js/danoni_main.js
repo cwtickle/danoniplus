@@ -3202,7 +3202,7 @@ function headerConvert(_dosObj) {
 
 	// Reverse時の歌詞の自動反転制御
 	obj.wordAutoReverse = setVal(_dosObj.wordAutoReverse,
-		(typeof g_presetWordAutoReverse === C_TYP_STRING ? setVal(g_presetWordAutoReverse, `auto`, C_TYP_SWITCH) : false), C_TYP_SWITCH);
+		(typeof g_presetWordAutoReverse === C_TYP_STRING ? setVal(g_presetWordAutoReverse, `auto`, C_TYP_STRING) : `auto`), C_TYP_STRING);
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
