@@ -104,3 +104,18 @@ const g_presetFrzStartjdgUse = `false`;
 // `svg`: デフォルト(svg形式)、`png`: 従来画像(png形式)
 
 // const g_presetOverrideExtension = `svg`;
+
+
+// Reverse時の歌詞の自動反転制御設定
+// 
+// 通常は以下の条件でReverseが指定された場合、歌詞表示を反転します。
+// この設定をどのように制御するか設定します。
+// ・上下スクロールを挟まないキーに限定（5key, 7key, 7ikey, 9A/9Bkeyなど）
+// ・リバース・スクロール拡張用の歌詞表示（wordRev_data / wordAlt_data）が設定されていない作品
+// ・SETTINGS 画面で Reverse：ON、Scroll：--- (指定なし) を指定してプレイ開始した場合
+// ・歌詞表示がすべて1段表示の場合
+//
+// ＜設定可能の値＞
+// `auto`(既定)：上記ルールに従い設定 / `OFF`: 上記ルールに関わらず反転しない / `ON`: 上記ルールに関わらず反転する
+
+// const g_presetWordAutoReverse = `auto`;

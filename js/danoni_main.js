@@ -3200,6 +3200,10 @@ function headerConvert(_dosObj) {
 	// コメントの外部化設定
 	obj.commentExternal = setVal(_dosObj.commentExternal, false, C_TYP_BOOLEAN);
 
+	// Reverse時の歌詞の自動反転制御
+	obj.wordAutoReverse = setVal(_dosObj.wordAutoReverse,
+		(typeof g_presetWordAutoReverse === C_TYP_STRING ? setVal(g_presetWordAutoReverse, `auto`, C_TYP_STRING) : `auto`), C_TYP_STRING);
+
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
 
@@ -6341,8 +6345,16 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data];
 		} else if (g_stateObj.reverse === C_FLG_ON) {
 			wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data];
-			if (keyNum === divideCnt + 1 && wordDataList.find((v) => v !== undefined) === undefined) {
-				wordReverseFlg = true;
+
+			// wordRev_dataが指定されている場合はそのままの位置を採用
+			// word_dataのみ指定されている場合、下記ルールに従って設定
+			if (wordDataList.find((v) => v !== undefined) === undefined) {
+				// Reverse時の歌詞の自動反転制御設定
+				if (g_headerObj.wordAutoReverse !== `auto`) {
+					wordReverseFlg = (g_headerObj.wordAutoReverse === C_FLG_ON ? true : false);
+				} else if (keyNum === divideCnt + 1) {
+					wordReverseFlg = true;
+				}
 			}
 		}
 		wordDataList.push(_dosObj[`word${_scoreNo}_data`], _dosObj.word_data);
@@ -6364,13 +6376,15 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		let tmpArrayData = _data.split(`\r`).join(`\n`);
 		tmpArrayData = tmpArrayData.split(`\n`);
 
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				if (tmpData.indexOf(`<br>`) !== -1) {
-					wordReverseFlg = false;
+		if (g_headerObj.wordAutoReverse === `auto`) {
+			tmpArrayData.forEach(tmpData => {
+				if (tmpData !== undefined && tmpData !== ``) {
+					if (tmpData.indexOf(`<br>`) !== -1) {
+						wordReverseFlg = false;
+					}
 				}
-			}
-		});
+			});
+		}
 
 		tmpArrayData.forEach(tmpData => {
 			if (tmpData !== undefined && tmpData !== ``) {
