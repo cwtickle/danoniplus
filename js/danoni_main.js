@@ -8696,6 +8696,12 @@ function MainInit() {
 					// 歌詞位置変更
 					g_wordSprite.style.textAlign = g_wordObj.wordDat.slice(1, -1);
 
+				} else if (/\[fontSize=\d+\]/.test(g_wordObj.wordDat)) {
+
+					// フォントサイズ変更
+					const fontSize = setVal(g_wordObj.wordDat.match(/\d+/)[0], 14, C_TYP_NUMBER);
+					g_wordSprite.style.fontSize = `${fontSize}px`;
+
 				} else {
 
 					// フェードイン・アウト処理後、表示する歌詞を表示
