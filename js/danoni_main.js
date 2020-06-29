@@ -2308,10 +2308,10 @@ function titleInit() {
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus`, `_blank`));
 	divRoot.appendChild(lnkVersion);
 
-	// バージョン比較用リンク
+	// セキュリティリンク
 	const lnkComparison = createCssButton({
 		id: `lnkComparison`,
-		name: `&#x2194;`,
+		name: `&#x1f6e1;`,
 		x: g_sWidth - 30,
 		y: g_sHeight - 20,
 		width: 20,
@@ -2319,7 +2319,7 @@ function titleInit() {
 		fontsize: 12,
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Tweet,
-	}, _ => window.open(`https://github.com/cwtickle/danoniplus/compare/v${g_version.slice(4)}...master`, `_blank`));
+	}, _ => window.open(`https://github.com/cwtickle/danoniplus/security/policy`, `_blank`));
 	divRoot.appendChild(lnkComparison);
 
 	// コメントエリア作成
