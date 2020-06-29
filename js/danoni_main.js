@@ -2309,8 +2309,8 @@ function titleInit() {
 	divRoot.appendChild(lnkVersion);
 
 	// セキュリティリンク
-	const lnkSecurity = createCssButton({
-		id: `lnkSecurity`,
+	const lnkComparison = createCssButton({
+		id: `lnkComparison`,
 		name: `&#x1f6e1;`,
 		x: g_sWidth - 30,
 		y: g_sHeight - 20,
@@ -2320,7 +2320,7 @@ function titleInit() {
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Tweet,
 	}, _ => window.open(`https://github.com/cwtickle/danoniplus/security/policy`, `_blank`));
-	divRoot.appendChild(lnkSecurity);
+	divRoot.appendChild(lnkComparison);
 
 	// コメントエリア作成
 	if (g_headerObj.commentVal !== ``) {
