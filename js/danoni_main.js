@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/06/26
+ * Revised : 2020/06/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 13.6.7`;
-const g_revisedDate = `2020/06/26`;
+const g_version = `Ver 13.6.8`;
+const g_revisedDate = `2020/06/30`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2275,7 +2275,7 @@ function titleInit() {
 	// バージョン比較用リンク
 	const lnkComparison = createCssButton({
 		id: `lnkComparison`,
-		name: `&#x2194;`,
+		name: `&#x1f6e1;`,
 		x: g_sWidth - 30,
 		y: g_sHeight - 20,
 		width: 20,
@@ -2283,7 +2283,7 @@ function titleInit() {
 		fontsize: 12,
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Tweet,
-	}, _ => window.open(`https://github.com/cwtickle/danoniplus/compare/v${g_version.slice(4)}...master`, `_blank`));
+	}, _ => window.open(`https://github.com/cwtickle/danoniplus/security/policy`, `_blank`));
 	divRoot.appendChild(lnkComparison);
 
 	// マスクスプライトを作成
