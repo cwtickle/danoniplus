@@ -2331,7 +2331,7 @@ function titleInit() {
 		} else {
 			let tmpComment = g_headerObj.commentVal;
 
-			const lblComment = createDivCssLabel(`lblComment`, 0, 70, g_sWidth, g_sHeight - 180, 14, tmpComment);
+			const lblComment = createDivCssLabel(`lblComment`, 0, 70, g_sWidth, g_sHeight - 180, C_SIZ_DIFSELECTOR, tmpComment);
 			lblComment.style.textAlign = C_ALIGN_LEFT;
 			lblComment.style.overflow = `auto`;
 			lblComment.style.background = `#222222`;
@@ -2450,7 +2450,7 @@ function makeWarningWindow(_text) {
 	}
 	lblWarning.style.height = `${warnHeight}px`;
 	lblWarning.style.lineHeight = `15px`;
-	lblWarning.style.fontSize = `14px`;
+	lblWarning.style.fontSize = `${C_SIZ_MAIN}px`;
 	lblWarning.style.color = `#660000`;
 	lblWarning.style.textAlign = C_ALIGN_LEFT;
 	lblWarning.style.fontFamily = getBasicFont();
@@ -3988,7 +3988,7 @@ function createOptionWindow(_sprite) {
 			context.moveTo(lineX, 215);
 			context.lineTo(lineX + 30, 215);
 			context.stroke();
-			context.font = `14px ${getBasicFont()}`;
+			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 
 			makeScoreDetailLabel(`Speed`, `${speedType.slice(0, 1).toUpperCase()}${speedType.slice(1)}`, speedObj[`${speedType}`].cnt, j);
@@ -4036,10 +4036,10 @@ function createOptionWindow(_sprite) {
 	 */
 	function makeScoreDetailLabel(_name, _label, _value, _pos = 0, _labelname = _label) {
 		if (document.querySelector(`#data${_label}`) === null) {
-			const lbl = createDivCssLabel(`lbl${_label}`, 10, 65 + _pos * 20, 100, 20, 14, `${_labelname}`);
+			const lbl = createDivCssLabel(`lbl${_label}`, 10, 65 + _pos * 20, 100, 20, C_SIZ_DIFSELECTOR, `${_labelname}`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detail${_name}`).appendChild(lbl);
-			const data = createDivCssLabel(`data${_label}`, 10, 65 + _pos * 20, 100, 20, 14, `${_value}`);
+			const data = createDivCssLabel(`data${_label}`, 10, 65 + _pos * 20, 100, 20, C_SIZ_DIFSELECTOR, `${_value}`);
 			data.style.textAlign = C_ALIGN_RIGHT;
 			document.querySelector(`#detail${_name}`).appendChild(data);
 		} else {
@@ -4115,25 +4115,25 @@ function createOptionWindow(_sprite) {
 		}
 
 		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
-		let ArrowInfo = `${arrowCnts + frzCnts} <span style="font-size:14px;">(${arrowCnts} + ${frzCnts})</span>`;
+		let ArrowInfo = `${arrowCnts + frzCnts} <span style="font-size:${C_SIZ_DIFSELECTOR}px;">(${arrowCnts} + ${frzCnts})</span>`;
 		let ArrowInfo2 = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
 			(${g_detailObj.frzCnt[_scoreId]})<br><br>
 			${push3CntStr}`.split(`,`).join(`/`);
 
 		if (document.querySelector(`#lblDouji`) === null) {
-			lbl = createDivCssLabel(`lblDouji`, 130, 25, 125, 35, 14, `同時補正`);
+			lbl = createDivCssLabel(`lblDouji`, 130, 25, 125, 35, C_SIZ_DIFSELECTOR, `同時補正`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
-			lbl = createDivCssLabel(`lblTate`, 270, 25, 125, 35, 14, `縦連補正`);
+			lbl = createDivCssLabel(`lblTate`, 270, 25, 125, 35, C_SIZ_DIFSELECTOR, `縦連補正`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
-			data = createDivCssLabel(`dataDouji`, 200, 25, 160, 35, 14, g_detailObj.toolDif[_scoreId].douji);
+			data = createDivCssLabel(`dataDouji`, 200, 25, 160, 35, C_SIZ_DIFSELECTOR, g_detailObj.toolDif[_scoreId].douji);
 			data.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 
-			data = createDivCssLabel(`dataTate`, 345, 25, 160, 35, 14, g_detailObj.toolDif[_scoreId].tate);
+			data = createDivCssLabel(`dataTate`, 345, 25, 160, 35, C_SIZ_DIFSELECTOR, g_detailObj.toolDif[_scoreId].tate);
 			data.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 
@@ -4145,12 +4145,12 @@ function createOptionWindow(_sprite) {
 			data.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(data);
 
-			lbl = createDivCssLabel(`lblArrowInfo2`, 130, 70, 200, 90, 14,
+			lbl = createDivCssLabel(`lblArrowInfo2`, 130, 70, 200, 90, C_SIZ_DIFSELECTOR,
 				`- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`);
 			lbl.style.textAlign = C_ALIGN_LEFT;
 			document.querySelector(`#detailToolDif`).appendChild(lbl);
 
-			data = createDivCssLabel(`dataArrowInfo2`, 140, 70, 275, 150, 14, ArrowInfo2);
+			data = createDivCssLabel(`dataArrowInfo2`, 140, 70, 275, 150, C_SIZ_DIFSELECTOR, ArrowInfo2);
 			data.style.textAlign = C_ALIGN_LEFT;
 			data.style.overflow = `auto`;
 			document.querySelector(`#detailToolDif`).appendChild(data);
@@ -4229,7 +4229,7 @@ function createOptionWindow(_sprite) {
 			y: 0,
 			width: 90,
 			height: 21,
-			fontsize: 14,
+			fontsize: C_SIZ_DIFSELECTOR,
 			align: C_ALIGN_CENTER,
 			class: g_cssObj.button_Default,
 		}, _ => {
@@ -4963,7 +4963,7 @@ function settingsDisplayInit() {
 	createSettingsDisplayWindow(`divRoot`);
 
 	// ショートカットキーメッセージ
-	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, 14,
+	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, C_SIZ_MAIN,
 		`Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`);
 	scMsg.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(scMsg);
@@ -5092,7 +5092,7 @@ function createSettingsDisplayWindow(_sprite) {
 		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
 	const spriteList = setSpriteList(settingList);
 
-	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, 14,
+	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, C_SIZ_MAIN,
 		`[クリックでON/OFFを切替、灰色でOFF]`);
 	document.querySelector(`#${_sprite}`).appendChild(sdDesc);
 
@@ -5152,7 +5152,7 @@ function createSettingsDisplayWindow(_sprite) {
 		 */
 		function makeDisabledDisplayLabel(_id, _heightPos, _widthPos, _defaultStr, _flg) {
 			const lbl = createDivCssLabel(_id, 30 + 180 * _widthPos, 3 + C_LEN_SETLBL_HEIGHT * _heightPos,
-				170, C_LEN_SETLBL_HEIGHT, 14, _defaultStr, g_cssObj[`button_Disabled${flg}`]);
+				170, C_LEN_SETLBL_HEIGHT, C_SIZ_DIFSELECTOR, _defaultStr, g_cssObj[`button_Disabled${flg}`]);
 			lbl.style.textAlign = C_ALIGN_CENTER;
 			return lbl;
 		}
@@ -5225,7 +5225,7 @@ function keyConfigInit() {
 
 	divRoot.appendChild(lblTitle);
 
-	const kcDesc = createDivCssLabel(`kcDesc`, 0, 65, g_sWidth, 20, 14,
+	const kcDesc = createDivCssLabel(`kcDesc`, 0, 65, g_sWidth, 20, C_SIZ_MAIN,
 		`[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`);
 	kcDesc.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcDesc);
@@ -5249,13 +5249,13 @@ function keyConfigInit() {
 	const kWidth = parseInt(keyconSprite.style.width);
 
 	// ショートカットキーメッセージ
-	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, 14,
+	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, C_SIZ_MAIN,
 		`プレイ中ショートカット：「${g_kCd[g_headerObj.keyTitleBack]}」タイトルバック / 「${g_kCd[g_headerObj.keyRetry]}」リトライ`);
 	scMsg.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(scMsg);
 
 	// 別キーモード警告メッセージ
-	const kcMsg = createDivCssLabel(`kcMsg`, 0, g_sHeight - 25, g_sWidth, 20, 14,
+	const kcMsg = createDivCssLabel(`kcMsg`, 0, g_sHeight - 25, g_sWidth, 20, C_SIZ_MAIN,
 		``, g_cssObj.keyconfig_warning);
 	kcMsg.style.align = C_ALIGN_CENTER;
 	divRoot.appendChild(kcMsg);
@@ -7760,7 +7760,7 @@ function MainInit() {
 		const wordY = (j % 2 === 0 ? 10 : (g_headerObj.bottomWordSetFlg ? g_posObj.distY + 10 : g_sHeight - 60));
 		const lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, wordY, g_sWidth - 200, 50);
 
-		lblWord.style.fontSize = `14px`;
+		lblWord.style.fontSize = `${C_SIZ_MAIN}px`;
 		lblWord.style.color = `#ffffff`;
 		lblWord.style.fontFamily = getBasicFont();
 		lblWord.style.textAlign = C_ALIGN_LEFT;
@@ -7772,19 +7772,19 @@ function MainInit() {
 	// 曲名・アーティスト名表示
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
-	const lblCredit = createDivCssLabel(`lblCredit`, 125, g_sHeight - 30, g_sWidth - 125, 20, 14,
+	const lblCredit = createDivCssLabel(`lblCredit`, 125, g_sHeight - 30, g_sWidth - 125, 20, C_SIZ_MAIN,
 		`${musicTitle} / ${artistName}`);
 	lblCredit.style.textAlign = C_ALIGN_LEFT;
 	infoSprite.appendChild(lblCredit);
 
 	// 曲時間表示：現在時間
-	const lblTime1 = createDivCssLabel(`lblTime1`, 18, g_sHeight - 30, 40, 20, 14,
+	const lblTime1 = createDivCssLabel(`lblTime1`, 18, g_sHeight - 30, 40, 20, C_SIZ_MAIN,
 		`-:--`);
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	infoSprite.appendChild(lblTime1);
 
 	// 曲時間表示：総時間
-	const lblTime2 = createDivCssLabel(`lblTime2`, 60, g_sHeight - 30, 60, 20, 14,
+	const lblTime2 = createDivCssLabel(`lblTime2`, 60, g_sHeight - 30, 60, 20, C_SIZ_MAIN,
 		`/ ${fullTime}`);
 	lblTime1.style.textAlign = C_ALIGN_RIGHT;
 	infoSprite.appendChild(lblTime2);
@@ -7817,7 +7817,7 @@ function MainInit() {
 
 		// Fast/Slow表示
 		const diffJ = createDivCssLabel(`diff${jdg}`, jdgX[j] + 150, jdgY[j] + 25,
-			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, 14, ``, g_cssObj.common_combo);
+			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_MAIN, ``, g_cssObj.common_combo);
 		diffJ.style.textAlign = C_ALIGN_CENTER;
 		judgeSprite.appendChild(diffJ);
 		diffJ.style.opacity = g_stateObj.opacity / 100;
@@ -8699,7 +8699,7 @@ function MainInit() {
 				} else if (/\[fontSize=\d+\]/.test(g_wordObj.wordDat)) {
 
 					// フォントサイズ変更
-					const fontSize = setVal(g_wordObj.wordDat.match(/\d+/)[0], 14, C_TYP_NUMBER);
+					const fontSize = setVal(g_wordObj.wordDat.match(/\d+/)[0], C_SIZ_MAIN, C_TYP_NUMBER);
 					g_wordSprite.style.fontSize = `${fontSize}px`;
 
 				} else {
@@ -9875,7 +9875,7 @@ function resultInit() {
  */
 function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align) {
 	const symbol = createDivCssLabel(_id, _x, 18 * _heightPos,
-		400, 18, 14, _text, _class);
+		400, 18, C_SIZ_MAIN, _text, _class);
 	symbol.style.textAlign = _align;
 
 	return symbol;
