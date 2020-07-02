@@ -2450,7 +2450,7 @@ function makeWarningWindow(_text) {
 	}
 	lblWarning.style.height = `${warnHeight}px`;
 	lblWarning.style.lineHeight = `15px`;
-	lblWarning.style.fontSize = `14px`;
+	lblWarning.style.fontSize = `${C_SIZ_MAIN}px`;
 	lblWarning.style.color = `#660000`;
 	lblWarning.style.textAlign = C_ALIGN_LEFT;
 	lblWarning.style.fontFamily = getBasicFont();
@@ -3988,7 +3988,7 @@ function createOptionWindow(_sprite) {
 			context.moveTo(lineX, 215);
 			context.lineTo(lineX + 30, 215);
 			context.stroke();
-			context.font = `14px ${getBasicFont()}`;
+			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 
 			makeScoreDetailLabel(`Speed`, `${speedType.slice(0, 1).toUpperCase()}${speedType.slice(1)}`, speedObj[`${speedType}`].cnt, j);
@@ -4115,7 +4115,7 @@ function createOptionWindow(_sprite) {
 		}
 
 		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
-		let ArrowInfo = `${arrowCnts + frzCnts} <span style="font-size:14px;">(${arrowCnts} + ${frzCnts})</span>`;
+		let ArrowInfo = `${arrowCnts + frzCnts} <span style="font-size:${C_SIZ_DIFSELECTOR}px;">(${arrowCnts} + ${frzCnts})</span>`;
 		let ArrowInfo2 = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
 			(${g_detailObj.frzCnt[_scoreId]})<br><br>
 			${push3CntStr}`.split(`,`).join(`/`);
