@@ -5324,7 +5324,58 @@ function keyConfigInit() {
 	}
 	posj = g_keyObj[`pos${keyCtrlPtn}`][0];
 
-	// カーソルの作成
+	// TODO arrowBrightness slider implementation
+	// ! these are almost copied from SETTINGS window "Fadein slider".
+	// 矢印の明るさ ( arrowBrightness )
+	//arrowBrightnessSprite.appendChild(createLblSetting(`Fadein`));
+
+	//位置指定は11Lkey設定画面の上下キーの間にしてみた
+	//const arrowBrightnessSprite = createSprite(`divRoot`, `arrowBrightnessSprite`, 0, 100 + (g_sHeight - 500) / 2, g_sWidth, 50);
+	const arrowBrightnessSprite = createSprite(`divRoot`, `arrowBrightnessSprite`, 0, 200, g_sWidth, 50);
+
+	const lnkArrowBrightness = createDivCssLabel(`lnkArrowBrightness`, C_LEN_SETLBL_LEFT, 0,
+		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `${g_stateObj.fadein}%`, g_cssObj.settings_FadeinBar); // TODO fix arguments
+	arrowBrightnessSprite.appendChild(lnkArrowBrightness);
+
+	// 右回し・左回しボタン
+	arrowBrightnessSprite.appendChild(makeMiniCssButton(`lnkArrowBrightness`, `R`, 0, _ => {
+	/* //TODO fix
+		g_stateObj.fadein = (g_stateObj.fadein === 99 ? 0 : g_stateObj.fadein + 1);
+		fadeinSlider.value = g_stateObj.fadein;
+		lnkFadein.innerHTML = `${g_stateObj.fadein}%`; */
+	}));
+	arrowBrightnessSprite.appendChild(makeMiniCssButton(`lnkArrowBrightness`, `L`, 0, _ => {
+	/* //TODO fix
+		g_stateObj.fadein = (g_stateObj.fadein === 0 ? 99 : g_stateObj.fadein - 1);
+		fadeinSlider.value = g_stateObj.fadein;
+		lnkFadein.innerHTML = `${g_stateObj.fadein}%`; */
+	}));
+
+	// フェードインのスライダー処理
+	let addXPos = 0;
+	let addYPos = 0;
+	if (g_userAgent.indexOf(`firefox`) !== -1) {
+		addXPos = -8;
+		addYPos = 1;
+	}
+	const lblArrowBrightnessSlider = createDivCssLabel(`lblArrowBrightnessBar`, 160 + addXPos, addYPos, ``, ``, ``,
+		`<input id=arrowBrightnessSlider type=range value=0 min=0 max=99 step=1>`);
+	arrowBrightnessSprite.appendChild(lblArrowBrightnessSlider);
+
+	const arrowBrightnessSlider = document.querySelector(`#arrowBrightnessSlider`);
+	arrowBrightnessSlider.value = 0;//g_stateObj.fadein; //TODO not to use g_ consts.
+
+	arrowBrightnessSlider.addEventListener(`input`, _ => {
+		/* g_stateObj.fadein = parseInt(arrowBrightnessSlider.value);
+		lnkArrowBrightness.innerHTML = `${g_stateObj.fadein}%`; */
+	}, false);
+
+	arrowBrightnessSlider.addEventListener(`change`, _ => {
+		/* g_stateObj.fadein = parseInt(arrowBrightnessSlider.value);
+		lnkArrowBrightness.innerHTML = `${g_stateObj.fadein}%`; */
+	}, false);
+
+// カーソルの作成
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, g_imgObj.cursor,
 		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
@@ -5727,6 +5778,16 @@ function removeClassList(_j, _k) {
 	if (obj.classList.contains(g_cssObj.title_base)) {
 		obj.classList.remove(g_cssObj.title_base);
 	}
+}
+
+/**
+ * 矢印色の明暗の変更
+ * 
+ */
+function changeArrowBrightness() {
+	// TODO implementation with window.getComputedStyle().getPropertyValue()
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+
 }
 
 /*-----------------------------------------------------------*/
