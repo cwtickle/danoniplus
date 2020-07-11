@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/07/02 (v15.5.0)
+ * Revised : 2020/07/11 (v15.6.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
