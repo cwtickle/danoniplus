@@ -5593,20 +5593,11 @@ function keyConfigInit() {
 
 				// 代替キーのみの場合は次の代替キーがあるキーを探す
 				if (g_kcType === `Replaced`) {
-					for (let j = g_currentj; j < keyNum; j++) {
-						if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j][1] !== undefined) {
-							g_currentj = j;
+					for (let j = g_currentj; j < keyNum + g_currentj; j++) {
+						if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j % keyNum][1] !== undefined) {
+							g_currentj = j % keyNum;
 							g_currentk = 1;
 							break;
-						}
-					}
-					if (g_currentk === 0) {
-						for (let j = 0; j < g_currentj; j++) {
-							if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j][1] !== undefined) {
-								g_currentj = j;
-								g_currentk = 1;
-								break;
-							}
 						}
 					}
 				}
@@ -5653,9 +5644,9 @@ function resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true, _r
 		}
 	} else {
 		if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][g_currentj][_resetPos] === undefined) {
-			for (let j = 0; j < keyNum; j++) {
-				if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][_resetPos] !== undefined) {
-					g_currentj = j;
+			for (let j = g_currentj; j < keyNum + g_currentj; j++) {
+				if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][j % keyNum][_resetPos] !== undefined) {
+					g_currentj = j % keyNum;
 					g_currentk = _resetPos;
 					break;
 				}
