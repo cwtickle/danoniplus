@@ -5565,48 +5565,48 @@ function keyConfigInit() {
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
 		const disabledKeys = [229, 242, 243, 244, 91, 29, 28, 27, g_prevKey];
 		if (disabledKeys.includes(setKey) || (setKey === 46 && g_currentk === 0)) {
+			return;
+		}
+		if (setKey === 8) {
 		} else {
-			if (setKey === 8) {
-			} else {
-				if (setKey === 46) {
-					setKey = 0;
-				}
-				if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][g_currentj][g_currentk] !== setKey) {
-					removeClassList(g_currentj, g_currentk);
-					keyCdObj.classList.add(g_cssObj.keyconfig_Changekey);
-				}
-				keyCdObj.innerHTML = g_kCd[setKey];
-				g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][g_currentk] = setKey;
-				g_prevKey = setKey;
+			if (setKey === 46) {
+				setKey = 0;
 			}
+			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][g_currentj][g_currentk] !== setKey) {
+				removeClassList(g_currentj, g_currentk);
+				keyCdObj.classList.add(g_cssObj.keyconfig_Changekey);
+			}
+			keyCdObj.innerHTML = g_kCd[setKey];
+			g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][g_currentk] = setKey;
+			g_prevKey = setKey;
+		}
 
-			// 後続に代替キーが存在する場合
-			if (g_currentk < g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj].length - 1 &&
-				g_kcType !== `Main`) {
-				g_currentk++;
-				cursor.style.top = `${parseInt(cursor.style.top) + C_KYC_REPHEIGHT}px`;
+		// 後続に代替キーが存在する場合
+		if (g_currentk < g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj].length - 1 &&
+			g_kcType !== `Main`) {
+			g_currentk++;
+			cursor.style.top = `${parseInt(cursor.style.top) + C_KYC_REPHEIGHT}px`;
 
-			} else if (g_currentj < keyNum - 1) {
-				// 他の代替キーが存在せず、次の矢印がある場合
-				g_currentj++;
-				g_currentk = 0;
+		} else if (g_currentj < keyNum - 1) {
+			// 他の代替キーが存在せず、次の矢印がある場合
+			g_currentj++;
+			g_currentk = 0;
 
-				// 代替キーのみの場合は次の代替キーがあるキーを探す
-				if (g_kcType === `Replaced`) {
-					for (let j = g_currentj; j < keyNum + g_currentj; j++) {
-						if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j % keyNum][1] !== undefined) {
-							g_currentj = j % keyNum;
-							g_currentk = 1;
-							break;
-						}
+			// 代替キーのみの場合は次の代替キーがあるキーを探す
+			if (g_kcType === `Replaced`) {
+				for (let j = g_currentj; j < keyNum + g_currentj; j++) {
+					if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j % keyNum][1] !== undefined) {
+						g_currentj = j % keyNum;
+						g_currentk = 1;
+						break;
 					}
 				}
-				setKeyConfigCursor(kWidth, divideCnt, keyCtrlPtn, keyNum);
-
-			} else {
-				// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
-				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 			}
+			setKeyConfigCursor(kWidth, divideCnt, keyCtrlPtn, keyNum);
+
+		} else {
+			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
+			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 		}
 		return blockCode(setKey);
 	}
