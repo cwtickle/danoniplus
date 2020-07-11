@@ -5340,17 +5340,17 @@ function keyConfigInit() {
 		switch (g_kcType) {
 			case `Main`:
 				g_kcType = `Replaced`;
-				resetCursorReplaced(kWidth, divideCnt, keyCtrlPtn);
+				resetCursorReplaced(kWidth, divideCnt, keyCtrlPtn, false);
 				break;
 
 			case `Replaced`:
 				g_kcType = C_FLG_ALL;
-				resetCursorALL(kWidth, divideCnt, keyCtrlPtn);
+				resetCursorALL(kWidth, divideCnt, keyCtrlPtn, false);
 				break;
 
 			case C_FLG_ALL:
 				g_kcType = `Main`;
-				resetCursorMain(kWidth, divideCnt, keyCtrlPtn);
+				resetCursorMain(kWidth, divideCnt, keyCtrlPtn, false);
 				break;
 		}
 		lnkKcType.innerHTML = g_kcType;
@@ -5558,6 +5558,7 @@ function keyConfigInit() {
 	document.onkeydown = evt => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
+		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 		let setKey = transCode(evt.keyCode);
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
@@ -5585,14 +5586,14 @@ function keyConfigInit() {
 				g_currentk++;
 				cursor.style.top = `${parseInt(cursor.style.top) + C_KYC_REPHEIGHT}px`;
 
-			} else if (g_currentj < g_keyObj[`keyCtrl${keyCtrlPtn}`].length - 1) {
+			} else if (g_currentj < keyNum - 1) {
 				// 他の代替キーが存在せず、次の矢印がある場合
 				g_currentj++;
 				g_currentk = 0;
 
 				// 代替キーのみの場合は次の代替キーがあるキーを探す
 				if (g_kcType === `Replaced`) {
-					for (let j = g_currentj, len = g_keyObj[`keyCtrl${keyCtrlPtn}`].length; j < len; j++) {
+					for (let j = g_currentj; j < keyNum; j++) {
 						if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j][1] !== undefined) {
 							g_currentj = j;
 							g_currentk = 1;
@@ -5600,7 +5601,7 @@ function keyConfigInit() {
 						}
 					}
 					if (g_currentk === 0) {
-						for (let j = 0, len = g_currentj; j < len; j++) {
+						for (let j = 0; j < g_currentj; j++) {
 							if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j][1] !== undefined) {
 								g_currentj = j;
 								g_currentk = 1;
@@ -5609,20 +5610,7 @@ function keyConfigInit() {
 						}
 					}
 				}
-				const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
-				if (posj > divideCnt) {
-					stdPos = posj - (posMax + divideCnt) / 2;
-					dividePos = 1;
-				} else {
-					stdPos = posj - divideCnt / 2;
-					dividePos = 0;
-				}
-
-				cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
-				cursor.style.top = `${50 + C_KYC_HEIGHT * dividePos}px`;
-				if (g_kcType === `Replaced`) {
-					cursor.style.top = `${parseFloat(cursor.style.top) + C_KYC_REPHEIGHT}px`;
-				}
+				setKeyConfigCursor(kWidth, divideCnt, keyCtrlPtn, keyNum);
 
 			} else {
 				// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
@@ -5641,45 +5629,56 @@ function keyConfigInit() {
 }
 
 /**
- * キーコンフィグ用カーソルのリセット(ConfigType:Main)
+ * キーコンフィグ用カーソルのリセット
  * @param {number} _width 
  * @param {number} _divideCnt 
  * @param {string} _keyCtrlPtn 
+ * @param {boolean} _resetCursorFlg
+ * @param {number} _resetPos
  */
-function resetCursorMain(_width, _divideCnt, _keyCtrlPtn) {
+function resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true, _resetPos = 0) {
 
-	g_currentj = 0;
-	g_currentk = 0;
-	g_prevKey = -1;
-	const posj = g_keyObj[`pos${_keyCtrlPtn}`][0];
+	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
+	if (_resetCursorFlg) {
+		g_currentj = 0;
+		g_currentk = 0;
+		g_prevKey = -1;
 
-	const cursor = document.querySelector(`#cursor`);
-	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - _divideCnt / 2) - 10}px`;
-	cursor.style.top = `45px`;
+		for (let j = 0; j < keyNum; j++) {
+			if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][_resetPos] !== undefined) {
+				g_currentj = j;
+				g_currentk = _resetPos;
+				break;
+			}
+		}
+	} else {
+		if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][g_currentj][_resetPos] === undefined) {
+			for (let j = 0; j < keyNum; j++) {
+				if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][_resetPos] !== undefined) {
+					g_currentj = j;
+					g_currentk = _resetPos;
+					break;
+				}
+			}
+		} else {
+			g_currentk = _resetPos;
+		}
+		g_prevKey = -1;
+	}
+	setKeyConfigCursor(_width, _divideCnt, _keyCtrlPtn, keyNum);
 }
 
 /**
- * キーコンフィグ用カーソルのリセット(ConfigType:Replaced)
+ * カーソル位置の設定
  * @param {number} _width 
  * @param {number} _divideCnt 
  * @param {string} _keyCtrlPtn 
+ * @param {number} _keyNum 
  */
-function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
-	g_currentj = 0;
-	g_currentk = 0;
-	g_prevKey = -1;
-	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
-
-	for (let j = 0; j < keyNum; j++) {
-		if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][1] !== undefined) {
-			g_currentj = j;
-			g_currentk = 1;
-			break;
-		}
-	}
+function setKeyConfigCursor(_width, _divideCnt, _keyCtrlPtn, _keyNum) {
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][g_currentj];
 	const posMax = (g_keyObj[`divMax${_keyCtrlPtn}`] !== undefined ?
-		g_keyObj[`divMax${_keyCtrlPtn}`] : g_keyObj[`pos${_keyCtrlPtn}`][keyNum - 1] + 1);
+		g_keyObj[`divMax${_keyCtrlPtn}`] : g_keyObj[`pos${_keyCtrlPtn}`][_keyNum - 1] + 1);
 	let stdPos;
 	let dividePos;
 	if (posj > _divideCnt) {
@@ -5692,13 +5691,37 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
 
 	const cursor = document.querySelector(`#cursor`);
 	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
-	if (g_currentk === 1) {
+	if (g_currentk >= 1) {
 		cursor.style.top = `${45 + C_KYC_REPHEIGHT + C_KYC_HEIGHT * dividePos}px`;
 	} else {
-		g_kcType = C_FLG_ALL;
+		if (g_kcType === `Replaced`) {
+			g_kcType = C_FLG_ALL;
+		}
 		document.querySelector(`#lnkKcType`).innerHTML = g_kcType;
 		cursor.style.top = `${45 + C_KYC_HEIGHT * dividePos}px`;
 	}
+}
+
+/**
+ * キーコンフィグ用カーソルのリセット(ConfigType:Main)
+ * @param {number} _width
+ * @param {number} _divideCnt
+ * @param {string} _keyCtrlPtn
+ * @param {boolean} _resetCursorFlg
+ */
+function resetCursorMain(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true) {
+	resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg);
+}
+
+/**
+ * キーコンフィグ用カーソルのリセット(ConfigType:Replaced)
+ * @param {number} _width 
+ * @param {number} _divideCnt 
+ * @param {string} _keyCtrlPtn 
+ * @param {boolean} _resetCursorFlg
+ */
+function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true) {
+	resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg, 1);
 }
 
 /**
@@ -5706,9 +5729,10 @@ function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn) {
  * @param {number} _width 
  * @param {number} _divideCnt 
  * @param {string} _keyCtrlPtn 
+ * @param {boolean} _resetCursorFlg
  */
-function resetCursorALL(_width, _divideCnt, _keyCtrlPtn) {
-	resetCursorMain(_width, _divideCnt, _keyCtrlPtn);
+function resetCursorALL(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true) {
+	resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg);
 }
 
 /**
