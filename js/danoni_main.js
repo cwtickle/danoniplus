@@ -5560,11 +5560,13 @@ function keyConfigInit() {
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 		let setKey = transCode(evt.keyCode);
+		g_inputKeyBuffer[setKey] = true;
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
 		const disabledKeys = [229, 242, 243, 244, 91, 29, 28, 27, g_prevKey];
-		if (disabledKeys.includes(setKey) || (setKey === 46 && g_currentk === 0)) {
+		if (disabledKeys.includes(setKey) || (setKey === 46 && g_currentk === 0) ||
+			(keyIsDown(91) && keyIsDown(16))) {
 			return;
 		}
 		if (setKey === 8) {
@@ -5616,6 +5618,11 @@ function keyConfigInit() {
 		if (typeof skinKeyConfigInit2 === C_TYP_FUNCTION) {
 			skinKeyConfigInit2();
 		}
+	}
+
+	document.onkeyup = evt => {
+		const setKey = transCode(evt.keyCode);
+		g_inputKeyBuffer[setKey] = false;
 	}
 }
 
