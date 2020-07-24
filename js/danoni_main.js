@@ -4437,32 +4437,32 @@ function createOptionWindow(_sprite) {
 		const rcv = Math.round(_rcv * 100) / 100;
 		const dmg = Math.round(_dmg * 100) / 100;
 
-		return `<div class="settings_gaugeDivCover">
-					<div class="settings_gaugeDivTable">
-						<div class="settings_gaugeDivTableCol settings_gaugeStart">
+		return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
+					<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
+						<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
 							Start
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+						<div id="lblGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeEtc">
 							Border
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+						<div id="lblGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeEtc">
 							Recovery
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+						<div id="lblGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeEtc">
 							Damage
 						</div>
 					</div>
-					<div class="settings_gaugeDivTable">
-						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
+					<div id="dataGaugeDivTable" class="settings_gaugeDivTable">
+						<div id="dataGaugeStart" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
 							${init}/${g_headerObj.maxLifeVal}
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+						<div id="dataGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
 							${border}
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+						<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
 							${rcv}
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+						<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
 							${dmg}
 						</div>
 					</div>
