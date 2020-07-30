@@ -204,6 +204,12 @@ const transCode = setKey => setKey === 59 ? 187 : setKey;
 const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
 
 /**
+ * 外部リンクを新規タグで開く
+ * @param {string} _url 
+ */
+const openLink = _url => window.open(_url, `_blank`, `noopener`);
+
+/**
  * 文字列を想定された型に変換
  * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、
  *   `switch`(ON/OFF), `calc`(数式), `string`(文字列)から選択
@@ -2254,7 +2260,7 @@ function titleInit() {
 		class: g_cssObj.button_Default,
 	}, _ => {
 		if (setVal(g_headerObj.creatorUrl, ``, C_TYP_STRING) !== ``) {
-			window.open(g_headerObj.creatorUrl, `_blank`);
+			openLink(g_headerObj.creatorUrl);
 		}
 	});
 	if (setVal(g_headerObj.creatorUrl, ``, C_TYP_STRING) !== ``) {
@@ -2275,7 +2281,7 @@ function titleInit() {
 		class: g_cssObj.button_Default,
 	}, _ => {
 		if (setVal(g_headerObj.artistUrl, ``, C_TYP_STRING) !== ``) {
-			window.open(g_headerObj.artistUrl, `_blank`);
+			openLink(g_headerObj.artistUrl);
 		}
 	});
 	if (setVal(g_headerObj.artistUrl, ``, C_TYP_STRING) !== ``) {
@@ -2305,7 +2311,7 @@ function titleInit() {
 		fontsize: 12,
 		align: C_ALIGN_RIGHT,
 		class: g_cssObj.button_Tweet,
-	}, _ => window.open(`https://github.com/cwtickle/danoniplus`, `_blank`));
+	}, _ => openLink(`https://github.com/cwtickle/danoniplus`));
 	divRoot.appendChild(lnkVersion);
 
 	// セキュリティリンク
@@ -2319,7 +2325,7 @@ function titleInit() {
 		fontsize: 12,
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Tweet,
-	}, _ => window.open(`https://github.com/cwtickle/danoniplus/security/policy`, `_blank`));
+	}, _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`));
 	divRoot.appendChild(lnkComparison);
 
 	// コメントエリア作成
@@ -9779,7 +9785,7 @@ function resultInit() {
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
 		class: g_cssObj.button_Tweet,
-	}, _ => window.open(tweetResult, `_blank`));
+	}, _ => openLink(tweetResult));
 	divRoot.appendChild(btnTweet);
 
 	// リトライボタン描画
