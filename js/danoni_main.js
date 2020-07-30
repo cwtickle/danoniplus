@@ -5622,6 +5622,7 @@ function keyConfigInit() {
 
 	document.onkeyup = evt => {
 		const setKey = transCode(evt.keyCode);
+		g_inputKeyBuffer[91] = false;
 		g_inputKeyBuffer[setKey] = false;
 	}
 }
