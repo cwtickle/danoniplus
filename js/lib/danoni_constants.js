@@ -1462,6 +1462,11 @@ const C_MSG_E_0104 = `新しいキー:{0}の[keyCtrl]が未定義です。(E-010
 
 const g_msgObj = {
 
+    reload: `ページを再読込します。`,
+    dataReset: `この作品で保存されているハイスコアや\nAdjustment情報等をリセットします。`,
+    github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
+    security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
+
     difficulty: `譜面を選択します。`,
     speed: `矢印の流れる速度を設定します。`,
     motion: `矢印の速度を一定ではなく、\n変動させるモーションをつけるか設定します。`,
