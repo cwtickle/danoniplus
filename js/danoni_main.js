@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/07/11
+ * Revised : 2020/08/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 15.6.0`;
-const g_revisedDate = `2020/07/11`;
+const g_version = `Ver 15.7.0`;
+const g_revisedDate = `2020/08/01`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -202,6 +202,12 @@ const transCode = setKey => setKey === 59 ? 187 : setKey;
  * @param {string} setKey 
  */
 const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
+
+/**
+ * 外部リンクを新規タグで開く
+ * @param {string} _url 
+ */
+const openLink = _url => window.open(_url, `_blank`, `noopener`);
 
 /**
  * 文字列を想定された型に変換
@@ -2225,6 +2231,7 @@ function titleInit() {
 			location.reload(true);
 		}
 	});
+	btnReset.title = g_msgObj.dataReset;
 	divRoot.appendChild(btnReset);
 
 	// リロードボタン
@@ -2239,6 +2246,7 @@ function titleInit() {
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Start,
 	}, _ => location.reload(true));
+	btnReload.title = g_msgObj.reload;
 	divRoot.appendChild(btnReload);
 
 	// 製作者表示
@@ -2254,7 +2262,7 @@ function titleInit() {
 		class: g_cssObj.button_Default,
 	}, _ => {
 		if (setVal(g_headerObj.creatorUrl, ``, C_TYP_STRING) !== ``) {
-			window.open(g_headerObj.creatorUrl, `_blank`);
+			openLink(g_headerObj.creatorUrl);
 		}
 	});
 	if (setVal(g_headerObj.creatorUrl, ``, C_TYP_STRING) !== ``) {
@@ -2275,7 +2283,7 @@ function titleInit() {
 		class: g_cssObj.button_Default,
 	}, _ => {
 		if (setVal(g_headerObj.artistUrl, ``, C_TYP_STRING) !== ``) {
-			window.open(g_headerObj.artistUrl, `_blank`);
+			openLink(g_headerObj.artistUrl);
 		}
 	});
 	if (setVal(g_headerObj.artistUrl, ``, C_TYP_STRING) !== ``) {
@@ -2305,7 +2313,8 @@ function titleInit() {
 		fontsize: 12,
 		align: C_ALIGN_RIGHT,
 		class: g_cssObj.button_Tweet,
-	}, _ => window.open(`https://github.com/cwtickle/danoniplus`, `_blank`));
+	}, _ => openLink(`https://github.com/cwtickle/danoniplus`));
+	lnkVersion.title = g_msgObj.github;
 	divRoot.appendChild(lnkVersion);
 
 	// セキュリティリンク
@@ -2319,7 +2328,8 @@ function titleInit() {
 		fontsize: 12,
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Tweet,
-	}, _ => window.open(`https://github.com/cwtickle/danoniplus/security/policy`, `_blank`));
+	}, _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`));
+	lnkComparison.title = g_msgObj.security;
 	divRoot.appendChild(lnkComparison);
 
 	// コメントエリア作成
@@ -4437,32 +4447,32 @@ function createOptionWindow(_sprite) {
 		const rcv = Math.round(_rcv * 100) / 100;
 		const dmg = Math.round(_dmg * 100) / 100;
 
-		return `<div class="settings_gaugeDivCover">
-					<div class="settings_gaugeDivTable">
-						<div class="settings_gaugeDivTableCol settings_gaugeStart">
+		return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
+					<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
+						<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
 							Start
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+						<div id="lblGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeEtc">
 							Border
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+						<div id="lblGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeEtc">
 							Recovery
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeEtc">
+						<div id="lblGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeEtc">
 							Damage
 						</div>
 					</div>
-					<div class="settings_gaugeDivTable">
-						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
+					<div id="dataGaugeDivTable" class="settings_gaugeDivTable">
+						<div id="dataGaugeStart" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
 							${init}/${g_headerObj.maxLifeVal}
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+						<div id="dataGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
 							${border}
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+						<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
 							${rcv}
 						</div>
-						<div class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+						<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
 							${dmg}
 						</div>
 					</div>
@@ -5560,11 +5570,13 @@ function keyConfigInit() {
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 		let setKey = transCode(evt.keyCode);
+		g_inputKeyBuffer[setKey] = true;
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
 		const disabledKeys = [229, 242, 243, 244, 91, 29, 28, 27, g_prevKey];
-		if (disabledKeys.includes(setKey) || (setKey === 46 && g_currentk === 0)) {
+		if (disabledKeys.includes(setKey) || (setKey === 46 && g_currentk === 0) ||
+			(keyIsDown(91) && keyIsDown(16))) {
 			return;
 		}
 		if (setKey === 8) {
@@ -5616,6 +5628,12 @@ function keyConfigInit() {
 		if (typeof skinKeyConfigInit2 === C_TYP_FUNCTION) {
 			skinKeyConfigInit2();
 		}
+	}
+
+	document.onkeyup = evt => {
+		const setKey = transCode(evt.keyCode);
+		g_inputKeyBuffer[91] = false;
+		g_inputKeyBuffer[setKey] = false;
 	}
 }
 
@@ -9779,7 +9797,7 @@ function resultInit() {
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
 		class: g_cssObj.button_Tweet,
-	}, _ => window.open(tweetResult, `_blank`));
+	}, _ => openLink(tweetResult));
 	divRoot.appendChild(btnTweet);
 
 	// リトライボタン描画

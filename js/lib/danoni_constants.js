@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/07/11 (v15.6.0)
+ * Revised : 2020/08/01 (v15.7.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1461,6 +1461,11 @@ const C_MSG_E_0104 = `新しいキー:{0}の[keyCtrl]が未定義です。(E-010
     |keyCtrl{0}=75,79,76,80,187,32/0|`;
 
 const g_msgObj = {
+
+    reload: `ページを再読込します。`,
+    dataReset: `この作品で保存されているハイスコアや\nAdjustment情報等をリセットします。`,
+    github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
+    security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
 
     difficulty: `譜面を選択します。`,
     speed: `矢印の流れる速度を設定します。`,

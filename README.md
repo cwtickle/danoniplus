@@ -3,21 +3,19 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/9558f21e17a47a4dc987/maintainability)](https://codeclimate.com/github/cwtickle/danoniplus/maintainability)
 [![Join the chat at https://gitter.im/danonicw/community](https://badges.gitter.im/danonicw/community.svg)](https://gitter.im/danonicw/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-リズムゲームDancing☆Onigiri (CW Edition)のソース作成・配布場所です。  
-Flash版の同ゲームのHTML5版を制作しています。 
-(旧名:Dancing☆Onigiri for HTML5)  
-(Dancing ☆ Onigiri (CW Edition) is a rhythm game. See the [wiki](../../wiki/Sidebar-En) for details.)
+Dancing☆Onigiri (CW Edition)は、ブラウザで動作するキーボードを使ったリズムゲームです。  
+公開しているソース一式と、音楽ファイル・譜面データ(テキスト)を組み合わせることで  
+オリジナルのゲームデータを作ることができます。  
+(Dancing Onigiri "CW Edition" is a rhythm game. 
+By combining a set of published sources with music files and sequences (text file)
+You can create original game data. See the [wiki](../../wiki/Sidebar-En) for details.
 
 ![AboutDanOni](http://cw7.sakura.ne.jp/danoni/wiki/danonitop.png)
 
+ここで公開しているソースは、Flashとして公開されているリズムゲーム  
+「Dancing☆Onigiri」の**HTML5**版です。  
 ParaFla版の譜面データに準拠し、ParaFla!ソースで作成した作品の後継、  
 置き換え先の受け皿として作成しています。  
-
-公開しているソース一式と、音楽ファイル・譜面データ(テキスト)を組み合わせることで  
-オリジナルのゲームデータを作ることができます。  
-
-(By combining a set of published sources with music files and sequences (text file)
-You can create original game data.)
 
 ## Demo
 - [Demo1](http://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / 木下たまき  
@@ -61,7 +59,7 @@ If the life of the life gauge remains by the end of the game or it is over the q
 ※Firefoxの場合、環境により動作が安定しない場合があります。  
 
 ## Difference from Flash Version / Flash版との差異について
-[Flash版との差異](http://cw7.sakura.ne.jp/work/danonijs/test/danoni_flash_vs_html5.html)  
+[Flash版との差異](https://github.com/cwtickle/danoniplus/wiki/DifferenceFromFlashVer)  
 
 ## How to Contribute
 [How to Contribute](.github/CONTRIBUTING.md)   
