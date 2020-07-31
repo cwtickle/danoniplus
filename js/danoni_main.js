@@ -2231,6 +2231,7 @@ function titleInit() {
 			location.reload(true);
 		}
 	});
+	btnReset.title = g_msgObj.dataReset;
 	divRoot.appendChild(btnReset);
 
 	// リロードボタン
@@ -2245,6 +2246,7 @@ function titleInit() {
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Start,
 	}, _ => location.reload(true));
+	btnReload.title = g_msgObj.reload;
 	divRoot.appendChild(btnReload);
 
 	// 製作者表示
@@ -2312,6 +2314,7 @@ function titleInit() {
 		align: C_ALIGN_RIGHT,
 		class: g_cssObj.button_Tweet,
 	}, _ => openLink(`https://github.com/cwtickle/danoniplus`));
+	lnkVersion.title = g_msgObj.github;
 	divRoot.appendChild(lnkVersion);
 
 	// セキュリティリンク
@@ -2326,6 +2329,7 @@ function titleInit() {
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Tweet,
 	}, _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`));
+	lnkComparison.title = g_msgObj.security;
 	divRoot.appendChild(lnkComparison);
 
 	// コメントエリア作成
