@@ -5576,14 +5576,15 @@ function keyConfigInit() {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-		let setKey = evt.keyCode;
-		g_inputKeyBuffer[setKey] = true;
+		let setCode = transCode(evt.code);
+		let setKey = g_kCdN.findIndex(kCd => kCd === setCode);
+		g_inputKeyBuffer[setCode] = true;
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
 		const disabledKeys = [229, 242, 243, 244, 91, 29, 28, 27, g_prevKey];
 		if (disabledKeys.includes(setKey) || (setKey === 46 && g_currentk === 0) ||
-			(keyIsDown(91) && keyIsDown(16))) {
+			(keyIsDown(`MetaLeft`) && keyIsDown(`ShiftRight`))) {
 			return;
 		}
 		if (setKey === 8) {
@@ -5627,7 +5628,7 @@ function keyConfigInit() {
 			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
 			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 		}
-		return blockCode(g_kCdN[setKey]);
+		return blockCode(setCode);
 	}
 
 	if (typeof skinKeyConfigInit === C_TYP_FUNCTION) {
@@ -5638,9 +5639,9 @@ function keyConfigInit() {
 	}
 
 	document.onkeyup = evt => {
-		const setKey = transCode(evt.keyCode);
-		g_inputKeyBuffer[91] = false;
-		g_inputKeyBuffer[setKey] = false;
+		const setCode = transCode(evt.code);
+		g_inputKeyBuffer[`MetaLeft`] = false;
+		g_inputKeyBuffer[setCode] = false;
 	}
 }
 
