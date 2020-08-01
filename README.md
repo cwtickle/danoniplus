@@ -3,13 +3,13 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/9558f21e17a47a4dc987/maintainability)](https://codeclimate.com/github/cwtickle/danoniplus/maintainability)
 [![Join the chat at https://gitter.im/danonicw/community](https://badges.gitter.im/danonicw/community.svg)](https://gitter.im/danonicw/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cwtickle/danoniplus?sort=semver)](https://github.com/cwtickle/danoniplus/releases/latest)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cwtickle/danoniplus?sort=semver)](https://github.com/cwtickle/danoniplus/security/policy)
 [![GitHub All Releases](https://img.shields.io/github/downloads/cwtickle/danoniplus/total?color=%23ff3399)](https://github.com/cwtickle/danoniplus/releases)
 [![GitHub](https://img.shields.io/github/license/cwtickle/danoniplus)](https://github.com/cwtickle/danoniplus/blob/develop/LICENSE)
 
 Dancing☆Onigiri (CW Edition)は、ブラウザで動作するキーボードを使ったリズムゲームです。  
 公開しているソース一式と、音楽ファイル・譜面データ(テキスト)を組み合わせることで  
-オリジナルのゲームデータを作ることができます。  
+オリジナルのゲームデータを作ることができます。詳細は[Wiki](https://github.com/cwtickle/danoniplus/wiki)をご覧ください。  
 (Dancing Onigiri "CW Edition" is a rhythm game. 
 By combining a set of published sources with music files and sequences (text file)
 You can create original game data. See the [wiki](../../wiki/Sidebar-En) for details.
@@ -63,10 +63,13 @@ If the life of the life gauge remains by the end of the game or it is over the q
 ※Firefoxの場合、環境により動作が安定しない場合があります。  
 
 ## Difference from Flash Version / Flash版との差異について
-[Flash版との差異](https://github.com/cwtickle/danoniplus/wiki/DifferenceFromFlashVer)  
+Dancing☆Onigiri (CW Edition)では基本的にParaFla!版の仕様に準拠していますが、  
+細かい点が従来と異なります。詳細は下記をご覧ください。  
+- [Flash版との差異](https://github.com/cwtickle/danoniplus/wiki/DifferenceFromFlashVer)  
 
 ## How to Contribute
-[How to Contribute](.github/CONTRIBUTING.md)   
+開発にご協力いただける方は、下記をご覧ください。GitHubアカウントの無い方でも協力できます！
+- [How to Contribute](.github/CONTRIBUTING.md)   
 
 ## License
 This software is released under the MIT License, see LICENSE.  
