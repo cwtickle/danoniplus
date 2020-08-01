@@ -386,28 +386,28 @@ g_hidSudObj.filterPosDefault[`Visible`] = 0;
 g_hidSudObj.filterPosDefault[`Hidden`] = 50;
 g_hidSudObj.filterPosDefault[`Sudden`] = 40;
 g_hidSudObj.pgDown[`Hidden+`] = {
-    OFF: 34,
-    ON: 33,
+    OFF: `PageDown`,
+    ON: `PageUp`,
 };
 g_hidSudObj.pgDown[`Sudden+`] = {
-    OFF: 33,
-    ON: 34,
+    OFF: `PageUp`,
+    ON: `PageDown`,
 }
 g_hidSudObj.pgDown[`Hid&Sud+`] = {
-    OFF: 33,
-    ON: 34,
+    OFF: `PageUp`,
+    ON: `PageDown`,
 }
 g_hidSudObj.pgUp[`Hidden+`] = {
-    OFF: 33,
-    ON: 34,
+    OFF: `PageUp`,
+    ON: `PageDown`,
 }
 g_hidSudObj.pgUp[`Sudden+`] = {
-    OFF: 34,
-    ON: 33,
+    OFF: `PageDown`,
+    ON: `PageUp`,
 }
 g_hidSudObj.pgUp[`Hid&Sud+`] = {
-    OFF: 34,
-    ON: 33,
+    OFF: `PageDown`,
+    ON: `PageUp`,
 }
 g_hidSudObj.std[`Hidden+`] = {
     OFF: 0,
@@ -570,6 +570,7 @@ g_kCd[226] = `\\ _`;
 g_kCd[229] = `IME`;
 g_kCd[240] = `CapsLk`;
 
+g_kCdN[0] = ``;
 g_kCdN[8] = `Backspace`;
 g_kCdN[9] = `Tab`;
 g_kCdN[12] = `Clear`;

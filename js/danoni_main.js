@@ -118,6 +118,7 @@ const g_workObj = {
 	stepHitRtn: [],
 	arrowRtn: [],
 	keyCtrl: [],
+	keyCtrlN: [],
 	keyHitFlg: [],
 	scrollDir: [],
 	dividePos: [],
@@ -142,7 +143,7 @@ let g_audio = new Audio();
 let g_timeoutEvtId = 0;
 let g_timeoutEvtTitleId = 0;
 let g_timeoutEvtResultId = 0;
-let g_inputKeyBuffer = [];
+let g_inputKeyBuffer = {};
 
 // 音楽ファイル エンコードフラグ
 let g_musicEncodedFlg = false;
@@ -193,15 +194,25 @@ const g_handler = (_ => {
 
 /**
  * 特定キーコードを置換する処理
- * @param {string} setKey 
+ * @param {string} _setCode 
  */
-const transCode = setKey => setKey === 59 ? 187 : setKey;
+const transCode = _setCode => {
+	let returnCode = _setCode;
+	if (_setCode === `ControlRight`) {
+		returnCode = `ControlLeft`;
+	} else if (_setCode === `ShiftLeft`) {
+		returnCode = `ShiftRight`;
+	} else if (_setCode === `AltRight`) {
+		returnCode = `AltLeft`;
+	}
+	return returnCode;
+}
 
 /**
  * 特定キーをブロックする処理
- * @param {string} setKey 
+ * @param {string} _setCode 
  */
-const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
+const blockCode = _setCode => C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode) ? false : true;
 
 /**
  * 外部リンクを新規タグで開く
@@ -1650,7 +1661,7 @@ function loadSettingJs() {
 }
 
 function loadMusic() {
-	document.onkeydown = evt => blockCode(evt.keyCode);
+	document.onkeydown = evt => blockCode(evt.code);
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url;
@@ -2406,13 +2417,13 @@ function titleInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = transCode(evt.keyCode);
-		if (setKey === 13) {
+		const setCode = transCode(evt.code);
+		if (setCode === `Enter`) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
 			optionInit();
 		}
-		return blockCode(setKey);
+		return blockCode(setCode);
 	}
 
 	document.onkeyup = evt => { }
@@ -3609,12 +3620,12 @@ function optionInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = transCode(evt.keyCode);
-		if (setKey === 13) {
+		const setCode = transCode(evt.code);
+		if (setCode === `Enter`) {
 			clearWindow();
 			loadMusic();
 		}
-		return blockCode(setKey);
+		return blockCode(setCode);
 	}
 	document.onkeyup = evt => { }
 
@@ -5058,12 +5069,12 @@ function settingsDisplayInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = transCode(evt.keyCode);
-		if (setKey === 13) {
+		const setCode = transCode(evt.code);
+		if (setCode === `Enter`) {
 			clearWindow();
 			loadMusic();
 		}
-		return blockCode(setKey);
+		return blockCode(setCode);
 	}
 	document.onkeyup = evt => { }
 
@@ -5565,7 +5576,7 @@ function keyConfigInit() {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-		let setKey = transCode(evt.keyCode);
+		let setKey = evt.keyCode;
 		g_inputKeyBuffer[setKey] = true;
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
@@ -5616,7 +5627,7 @@ function keyConfigInit() {
 			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
 			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 		}
-		return blockCode(setKey);
+		return blockCode(g_kCdN[setKey]);
 	}
 
 	if (typeof skinKeyConfigInit === C_TYP_FUNCTION) {
@@ -7303,10 +7314,13 @@ function getArrowSettings() {
 	g_workObj.stepHitRtn = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${keyCtrlPtn}`]));
 	g_workObj.arrowRtn = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${keyCtrlPtn}`]));
 	g_workObj.keyCtrl = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}`]));
+	g_workObj.keyCtrlN = [];
 	g_workObj.keyHitFlg = [];
 	for (let j = 0; j < g_workObj.keyCtrl.length; j++) {
+		g_workObj.keyCtrlN[j] = [];
 		g_workObj.keyHitFlg[j] = [];
 		for (let k = 0; k < g_workObj.keyCtrl[j].length; k++) {
+			g_workObj.keyCtrlN[j][k] = g_kCdN[g_workObj.keyCtrl[j][k]];
 			g_workObj.keyHitFlg[j][k] = false;
 		}
 	}
@@ -7943,7 +7957,7 @@ function MainInit() {
 	const mainKeyDownActFunc = {
 
 		OFF: (_keyCode) => {
-			const matchKeys = g_workObj.keyCtrl;
+			const matchKeys = g_workObj.keyCtrlN;
 
 			for (let j = 0; j < keyNum; j++) {
 				matchKeys[j].forEach((key, k) => {
@@ -7962,12 +7976,12 @@ function MainInit() {
 	// キー操作イベント
 	document.onkeydown = evt => {
 		evt.preventDefault();
-		const setKey = transCode(evt.keyCode);
-		g_inputKeyBuffer[setKey] = true;
-		mainKeyDownActFunc[g_stateObj.autoAll](setKey);
+		const setCode = transCode(evt.code);
+		g_inputKeyBuffer[setCode] = true;
+		mainKeyDownActFunc[g_stateObj.autoAll](setCode);
 
 		// 曲中リトライ、タイトルバック
-		if (setKey === g_headerObj.keyRetry) {
+		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
 			if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
@@ -7976,7 +7990,7 @@ function MainInit() {
 				document.onkeyup = _ => { };
 			}
 
-		} else if (setKey === g_headerObj.keyTitleBack) {
+		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			clearWindow();
@@ -7990,15 +8004,15 @@ function MainInit() {
 			document.onkeyup = _ => { };
 
 		} else if (g_appearanceRanges.includes(g_stateObj.appearance)) {
-			if (setKey === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
+			if (setCode === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
 				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos < 100 ?
 					g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
-			} else if (setKey === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
+			} else if (setCode === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
 				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos > 0 ?
 					g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
 			}
 		}
-		return blockCode(setKey);
+		return blockCode(setCode);
 	}
 
 	/**
@@ -8008,7 +8022,7 @@ function MainInit() {
 
 		OFF: _ => {
 			for (let j = 0; j < keyNum; j++) {
-				if (g_workObj.keyCtrl[j].find(key => keyIsDown(key)) === undefined) {
+				if (g_workObj.keyCtrlN[j].find(key => keyIsDown(key)) === undefined) {
 					document.querySelector(`#stepDiv${j}`).style.display = C_DIS_NONE;
 				}
 			}
@@ -8018,8 +8032,8 @@ function MainInit() {
 	};
 
 	document.onkeyup = evt => {
-		const setKey = transCode(evt.keyCode);
-		g_inputKeyBuffer[setKey] = false;
+		const setCode = transCode(evt.code);
+		g_inputKeyBuffer[setCode] = false;
 		mainKeyUpActFunc[g_stateObj.autoAll]();
 	}
 
@@ -8548,8 +8562,8 @@ function MainInit() {
 
 		// キーの押下状態を取得
 		for (let j = 0; j < keyNum; j++) {
-			for (let m = 0, len = g_workObj.keyCtrl[j].length; m < len; m++) {
-				g_workObj.keyHitFlg[j][m] = keyIsDown(g_workObj.keyCtrl[j][m]);
+			for (let m = 0, len = g_workObj.keyCtrlN[j].length; m < len; m++) {
+				g_workObj.keyHitFlg[j][m] = keyIsDown(g_workObj.keyCtrlN[j][m]);
 			}
 		}
 
@@ -9882,7 +9896,7 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => blockCode(evt.keyCode);
+	document.onkeydown = evt => blockCode(evt.code);
 	document.onkeyup = evt => { }
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {
