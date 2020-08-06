@@ -7420,7 +7420,7 @@ function getArrowSettings() {
 		`kita`, `sfsf`, `iknai`, `fCombo`, `fmaxCombo`, `fast`, `slow`
 	].forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 
-	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
+	g_workObj.lifeVal = Math.floor(g_workObj.lifeInit * 100) / 100;
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 
@@ -7757,8 +7757,8 @@ function MainInit() {
 	divRoot.appendChild(lblframe);
 
 	// ライフ(数字)
-	const lblLife = createDivCssLabel(`lblLife`, 0, 30, 70, 20, 16,
-		g_workObj.lifeVal);
+	const intLifeVal = Math.floor(g_workObj.lifeVal);
+	const lblLife = createDivCssLabel(`lblLife`, 0, 30, 70, 20, 16, intLifeVal);
 	let lblInitColor;
 	if (g_workObj.lifeVal === g_headerObj.maxLifeVal) {
 		lblInitColor = g_cssObj.life_Max;
@@ -7779,8 +7779,8 @@ function MainInit() {
 
 	// ライフ本体
 	const lifeBar = createColorObject(`lifeBar`, ``,
-		5, 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal,
-		15, (g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal, ``, `lifeBar`);
+		5, 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal,
+		15, (g_sHeight - 100) * intLifeVal / g_headerObj.maxLifeVal, ``, `lifeBar`);
 	lifeBar.classList.add(lblInitColor);
 	infoSprite.appendChild(lifeBar);
 
@@ -9143,9 +9143,10 @@ function changeLifeColor(_state = ``) {
 		lifeBar.classList.add(lifeCss);
 	}
 
-	lblLife.innerHTML = Math.floor(g_workObj.lifeVal);
-	lifeBar.style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal}px`;
-	lifeBar.style.height = `${(g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal}px`;
+	const intLifeVal = Math.floor(g_workObj.lifeVal);
+	lblLife.innerHTML = intLifeVal;
+	lifeBar.style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal}px`;
+	lifeBar.style.height = `${(g_sHeight - 100) * intLifeVal / g_headerObj.maxLifeVal}px`;
 }
 
 function lifeRecovery() {
