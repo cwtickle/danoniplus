@@ -3221,6 +3221,12 @@ function headerConvert(_dosObj) {
 	obj.wordAutoReverse = setVal(_dosObj.wordAutoReverse,
 		(typeof g_presetWordAutoReverse === C_TYP_STRING ? setVal(g_presetWordAutoReverse, `auto`, C_TYP_STRING) : `auto`), C_TYP_STRING);
 
+	// プレイサイズ(X方向)
+	obj.playingWidth = setVal(_dosObj.playingWidth, g_sWidth, C_TYP_NUMBER);
+
+	// プレイ左上位置(X座標)
+	obj.playingX = setVal(_dosObj.playingX, 0, C_TYP_NUMBER);
+
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
 
@@ -7373,7 +7379,7 @@ function getArrowSettings() {
 		} else {
 			stdPos = posj - divideCnt / 2;
 		}
-		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_sWidth - C_ARW_WIDTH) / 2;
+		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
 
 		if (g_stateObj.reverse === C_FLG_ON) {
 			g_workObj.dividePos[j] = ((posj > divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1)) % 2;
@@ -7508,14 +7514,14 @@ function MainInit() {
 	}
 
 	// ステップゾーン、矢印のメインスプライトを作成
-	const mainSprite = createSprite(`divRoot`, `mainSprite`, 0, g_posObj.stepY - C_STEP_Y, g_sWidth, g_sHeight);
+	const mainSprite = createSprite(`divRoot`, `mainSprite`, g_headerObj.playingX, g_posObj.stepY - C_STEP_Y, g_headerObj.playingWidth, g_sHeight);
 	mainSprite.style.transform = `scale(${g_keyObj.scale})`;
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
-	const infoSprite = createSprite(`divRoot`, `infoSprite`, 0, 0, g_sWidth, g_sHeight);
+	const infoSprite = createSprite(`divRoot`, `infoSprite`, g_headerObj.playingX, 0, g_headerObj.playingWidth, g_sHeight);
 
 	// 判定系スプライトを作成（メインスプライトより上位）
-	const judgeSprite = createSprite(`divRoot`, `judgeSprite`, 0, 0, g_sWidth, g_sHeight);
+	const judgeSprite = createSprite(`divRoot`, `judgeSprite`, g_headerObj.playingX, 0, g_headerObj.playingWidth, g_sHeight);
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -7603,13 +7609,13 @@ function MainInit() {
 		// ステップゾーンの代わり
 		const stepBar0 = createColorObject(`stepBar`, ``,
 			0, C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
-			g_sWidth - 50, 1, ``, `lifeBar`);
+			g_headerObj.playingWidth - 50, 1, ``, `lifeBar`);
 		stepBar0.classList.add(g_cssObj.life_Failed);
 		mainSprite.appendChild(stepBar0);
 
 		const stepBar1 = createColorObject(`stepBar`, ``,
 			0, C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
-			g_sWidth - 50, 1, ``, `lifeBar`);
+			g_headerObj.playingWidth - 50, 1, ``, `lifeBar`);
 		stepBar1.classList.add(g_cssObj.life_Failed);
 		mainSprite.appendChild(stepBar1);
 
@@ -7619,7 +7625,7 @@ function MainInit() {
 	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj => {
 		const filterBar = createColorObject(`${obj}`, ``,
 			0, 0,
-			g_sWidth - 50, 1, ``, `lifeBar`);
+			g_headerObj.playingWidth - 50, 1, ``, `lifeBar`);
 		filterBar.classList.add(g_cssObj.life_Failed);
 		filterBar.style.opacity = 0.0625;
 		mainSprite.appendChild(filterBar);
@@ -7629,7 +7635,7 @@ function MainInit() {
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 
-		const filterView = createDivCssLabel(`filterView`, g_sWidth - 70, 0, 10, 10, 10, ``);
+		const filterView = createDivCssLabel(`filterView`, g_headerObj.playingWidth - 70, 0, 10, 10, 10, ``);
 		filterView.style.textAlign = C_ALIGN_RIGHT;
 		mainSprite.appendChild(filterView);
 
@@ -7643,8 +7649,8 @@ function MainInit() {
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
 	const arrowSprite = [
-		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_sWidth, g_posObj.arrowHeight),
-		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_sWidth, g_posObj.arrowHeight)
+		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_headerObj.playingWidth, g_posObj.arrowHeight),
+		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_headerObj.playingWidth, g_posObj.arrowHeight)
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
@@ -7799,10 +7805,10 @@ function MainInit() {
 	}
 
 	// 歌詞表示
-	createSprite(`judgeSprite`, `wordSprite`, 0, 0, g_sWidth, g_sHeight);
+	createSprite(`judgeSprite`, `wordSprite`, 0, 0, g_headerObj.playingWidth, g_sHeight);
 	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
 		const wordY = (j % 2 === 0 ? 10 : (g_headerObj.bottomWordSetFlg ? g_posObj.distY + 10 : g_sHeight - 60));
-		const lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, wordY, g_sWidth - 200, 50);
+		const lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, wordY, g_headerObj.playingWidth - 200, 50);
 
 		lblWord.style.fontSize = `${C_SIZ_MAIN}px`;
 		lblWord.style.color = `#ffffff`;
@@ -7816,7 +7822,7 @@ function MainInit() {
 	// 曲名・アーティスト名表示
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
-	const lblCredit = createDivCssLabel(`lblCredit`, 125, g_sHeight - 30, g_sWidth - 125, 20, C_SIZ_MAIN,
+	const lblCredit = createDivCssLabel(`lblCredit`, 125, g_sHeight - 30, g_headerObj.playingWidth - 125, 20, C_SIZ_MAIN,
 		`${musicTitle} / ${artistName}`);
 	lblCredit.style.textAlign = C_ALIGN_LEFT;
 	infoSprite.appendChild(lblCredit);
@@ -7834,7 +7840,7 @@ function MainInit() {
 	infoSprite.appendChild(lblTime2);
 
 	const jdgGroups = [`J`, `FJ`];
-	const jdgX = [g_sWidth / 2 - 200, g_sWidth / 2 - 100];
+	const jdgX = [g_headerObj.playingWidth / 2 - 200, g_headerObj.playingWidth / 2 - 100];
 	const jdgY = [(g_sHeight + g_posObj.stepYR) / 2 - 60, (g_sHeight + g_posObj.stepYR) / 2 + 10];
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.jdgPosReset) {
 	} else {
@@ -7873,7 +7879,7 @@ function MainInit() {
 
 	jdgObjs.forEach((jdgObj, j) => {
 		if (jdgObj !== ``) {
-			infoSprite.appendChild(makeCounterSymbol(`lbl${jdgObj}`, g_sWidth - 110,
+			infoSprite.appendChild(makeCounterSymbol(`lbl${jdgObj}`, g_headerObj.playingWidth - 110,
 				g_cssObj[`common_${judgeColors[j]}`], j + 1, 0));
 		}
 	});
@@ -7897,7 +7903,7 @@ function MainInit() {
 	}
 
 	// パーフェクト演出
-	const finishView = createDivCssLabel(`finishView`, g_sWidth / 2 - 150, g_sHeight / 2 - 50,
+	const finishView = createDivCssLabel(`finishView`, g_headerObj.playingWidth / 2 - 150, g_sHeight / 2 - 50,
 		300, 20, 50, ``, g_cssObj.common_kita);
 	finishView.style.textAlign = C_ALIGN_CENTER;
 	judgeSprite.appendChild(finishView);
@@ -7938,8 +7944,8 @@ function MainInit() {
 
 	// Ready?表示
 	if (!g_headerObj.customReadyUse) {
-		const lblReady = createDivCssLabel(`lblReady`, g_sWidth / 2 - 100, (g_sHeight + g_posObj.stepYR) / 2 - 75,
-			200, 50, 40,
+		const lblReady = createDivCssLabel(`lblReady`, g_headerObj.playingX + g_headerObj.playingWidth / 2 - 100,
+			(g_sHeight + g_posObj.stepYR) / 2 - 75, 200, 50, 40,
 			`<span style='color:` + g_headerObj.setColorOrg[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
 		lblReady.style.animationDuration = `2.5s`;
 		lblReady.style.animationName = `leftToRightFade`;
