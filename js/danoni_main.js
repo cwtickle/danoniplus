@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/08/01
+ * Revised : 2020/08/06
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 15.7.0`;
-const g_revisedDate = `2020/08/01`;
+const g_version = `Ver 16.0.0`;
+const g_revisedDate = `2020/08/06`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -118,6 +118,7 @@ const g_workObj = {
 	stepHitRtn: [],
 	arrowRtn: [],
 	keyCtrl: [],
+	keyCtrlN: [],
 	keyHitFlg: [],
 	scrollDir: [],
 	dividePos: [],
@@ -142,7 +143,7 @@ let g_audio = new Audio();
 let g_timeoutEvtId = 0;
 let g_timeoutEvtTitleId = 0;
 let g_timeoutEvtResultId = 0;
-let g_inputKeyBuffer = [];
+let g_inputKeyBuffer = {};
 
 // 音楽ファイル エンコードフラグ
 let g_musicEncodedFlg = false;
@@ -193,15 +194,21 @@ const g_handler = (_ => {
 
 /**
  * 特定キーコードを置換する処理
- * @param {string} setKey 
+ * @param {string} _setCode 
  */
-const transCode = setKey => setKey === 59 ? 187 : setKey;
+const transCode = _setCode => {
+	let returnCode = _setCode;
+	if ([`Control`, `Shift`, `Alt`].includes(_setCode.slice(0, -5))) {
+		returnCode = _setCode.replace(`Right`, `Left`);
+	}
+	return returnCode;
+}
 
 /**
  * 特定キーをブロックする処理
- * @param {string} setKey 
+ * @param {string} _setCode 
  */
-const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
+const blockCode = _setCode => C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode) ? false : true;
 
 /**
  * 外部リンクを新規タグで開く
@@ -1650,7 +1657,7 @@ function loadSettingJs() {
 }
 
 function loadMusic() {
-	document.onkeydown = evt => blockCode(evt.keyCode);
+	document.onkeydown = evt => blockCode(evt.code);
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url;
@@ -2410,13 +2417,13 @@ function titleInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = transCode(evt.keyCode);
-		if (setKey === 13) {
+		const setCode = transCode(evt.code);
+		if (setCode === `Enter`) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
 			optionInit();
 		}
-		return blockCode(setKey);
+		return blockCode(setCode);
 	}
 
 	document.onkeyup = evt => { }
@@ -3214,6 +3221,12 @@ function headerConvert(_dosObj) {
 	obj.wordAutoReverse = setVal(_dosObj.wordAutoReverse,
 		(typeof g_presetWordAutoReverse === C_TYP_STRING ? setVal(g_presetWordAutoReverse, `auto`, C_TYP_STRING) : `auto`), C_TYP_STRING);
 
+	// プレイサイズ(X方向)
+	obj.playingWidth = setVal(_dosObj.playingWidth, g_sWidth, C_TYP_NUMBER);
+
+	// プレイ左上位置(X座標)
+	obj.playingX = setVal(_dosObj.playingX, 0, C_TYP_NUMBER);
+
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
 
@@ -3613,12 +3626,12 @@ function optionInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = transCode(evt.keyCode);
-		if (setKey === 13) {
+		const setCode = transCode(evt.code);
+		if (setCode === `Enter`) {
 			clearWindow();
 			loadMusic();
 		}
-		return blockCode(setKey);
+		return blockCode(setCode);
 	}
 	document.onkeyup = evt => { }
 
@@ -5062,12 +5075,12 @@ function settingsDisplayInit() {
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
-		const setKey = transCode(evt.keyCode);
-		if (setKey === 13) {
+		const setCode = transCode(evt.code);
+		if (setCode === `Enter`) {
 			clearWindow();
 			loadMusic();
 		}
-		return blockCode(setKey);
+		return blockCode(setCode);
 	}
 	document.onkeyup = evt => { }
 
@@ -5569,14 +5582,15 @@ function keyConfigInit() {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-		let setKey = transCode(evt.keyCode);
-		g_inputKeyBuffer[setKey] = true;
+		let setCode = transCode(evt.code);
+		let setKey = g_kCdN.findIndex(kCd => kCd === setCode);
+		g_inputKeyBuffer[setCode] = true;
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
 		const disabledKeys = [229, 242, 243, 244, 91, 29, 28, 27, g_prevKey];
 		if (disabledKeys.includes(setKey) || (setKey === 46 && g_currentk === 0) ||
-			(keyIsDown(91) && keyIsDown(16))) {
+			(keyIsDown(`MetaLeft`) && keyIsDown(`ShiftLeft`))) {
 			return;
 		}
 		if (setKey === 8) {
@@ -5620,7 +5634,7 @@ function keyConfigInit() {
 			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
 			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 		}
-		return blockCode(setKey);
+		return blockCode(setCode);
 	}
 
 	if (typeof skinKeyConfigInit === C_TYP_FUNCTION) {
@@ -5631,9 +5645,9 @@ function keyConfigInit() {
 	}
 
 	document.onkeyup = evt => {
-		const setKey = transCode(evt.keyCode);
-		g_inputKeyBuffer[91] = false;
-		g_inputKeyBuffer[setKey] = false;
+		const setCode = transCode(evt.code);
+		g_inputKeyBuffer[`MetaLeft`] = false;
+		g_inputKeyBuffer[setCode] = false;
 	}
 }
 
@@ -7307,10 +7321,13 @@ function getArrowSettings() {
 	g_workObj.stepHitRtn = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${keyCtrlPtn}`]));
 	g_workObj.arrowRtn = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${keyCtrlPtn}`]));
 	g_workObj.keyCtrl = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}`]));
+	g_workObj.keyCtrlN = [];
 	g_workObj.keyHitFlg = [];
 	for (let j = 0; j < g_workObj.keyCtrl.length; j++) {
+		g_workObj.keyCtrlN[j] = [];
 		g_workObj.keyHitFlg[j] = [];
 		for (let k = 0; k < g_workObj.keyCtrl[j].length; k++) {
+			g_workObj.keyCtrlN[j][k] = g_kCdN[g_workObj.keyCtrl[j][k]];
 			g_workObj.keyHitFlg[j][k] = false;
 		}
 	}
@@ -7362,7 +7379,7 @@ function getArrowSettings() {
 		} else {
 			stdPos = posj - divideCnt / 2;
 		}
-		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_sWidth - C_ARW_WIDTH) / 2;
+		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
 
 		if (g_stateObj.reverse === C_FLG_ON) {
 			g_workObj.dividePos[j] = ((posj > divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1)) % 2;
@@ -7409,7 +7426,7 @@ function getArrowSettings() {
 		`kita`, `sfsf`, `iknai`, `fCombo`, `fmaxCombo`, `fast`, `slow`
 	].forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 
-	g_workObj.lifeVal = Math.round(g_workObj.lifeInit);
+	g_workObj.lifeVal = Math.floor(g_workObj.lifeInit * 100) / 100;
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 
@@ -7497,14 +7514,14 @@ function MainInit() {
 	}
 
 	// ステップゾーン、矢印のメインスプライトを作成
-	const mainSprite = createSprite(`divRoot`, `mainSprite`, 0, g_posObj.stepY - C_STEP_Y, g_sWidth, g_sHeight);
+	const mainSprite = createSprite(`divRoot`, `mainSprite`, g_headerObj.playingX, g_posObj.stepY - C_STEP_Y, g_headerObj.playingWidth, g_sHeight);
 	mainSprite.style.transform = `scale(${g_keyObj.scale})`;
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
-	const infoSprite = createSprite(`divRoot`, `infoSprite`, 0, 0, g_sWidth, g_sHeight);
+	const infoSprite = createSprite(`divRoot`, `infoSprite`, g_headerObj.playingX, 0, g_headerObj.playingWidth, g_sHeight);
 
 	// 判定系スプライトを作成（メインスプライトより上位）
-	const judgeSprite = createSprite(`divRoot`, `judgeSprite`, 0, 0, g_sWidth, g_sHeight);
+	const judgeSprite = createSprite(`divRoot`, `judgeSprite`, g_headerObj.playingX, 0, g_headerObj.playingWidth, g_sHeight);
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -7592,13 +7609,13 @@ function MainInit() {
 		// ステップゾーンの代わり
 		const stepBar0 = createColorObject(`stepBar`, ``,
 			0, C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
-			g_sWidth - 50, 1, ``, `lifeBar`);
+			g_headerObj.playingWidth - 50, 1, ``, `lifeBar`);
 		stepBar0.classList.add(g_cssObj.life_Failed);
 		mainSprite.appendChild(stepBar0);
 
 		const stepBar1 = createColorObject(`stepBar`, ``,
 			0, C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
-			g_sWidth - 50, 1, ``, `lifeBar`);
+			g_headerObj.playingWidth - 50, 1, ``, `lifeBar`);
 		stepBar1.classList.add(g_cssObj.life_Failed);
 		mainSprite.appendChild(stepBar1);
 
@@ -7608,7 +7625,7 @@ function MainInit() {
 	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj => {
 		const filterBar = createColorObject(`${obj}`, ``,
 			0, 0,
-			g_sWidth - 50, 1, ``, `lifeBar`);
+			g_headerObj.playingWidth - 50, 1, ``, `lifeBar`);
 		filterBar.classList.add(g_cssObj.life_Failed);
 		filterBar.style.opacity = 0.0625;
 		mainSprite.appendChild(filterBar);
@@ -7618,7 +7635,7 @@ function MainInit() {
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 
-		const filterView = createDivCssLabel(`filterView`, g_sWidth - 70, 0, 10, 10, 10, ``);
+		const filterView = createDivCssLabel(`filterView`, g_headerObj.playingWidth - 70, 0, 10, 10, 10, ``);
 		filterView.style.textAlign = C_ALIGN_RIGHT;
 		mainSprite.appendChild(filterView);
 
@@ -7632,8 +7649,8 @@ function MainInit() {
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
 	const arrowSprite = [
-		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_sWidth, g_posObj.arrowHeight),
-		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_sWidth, g_posObj.arrowHeight)
+		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_headerObj.playingWidth, g_posObj.arrowHeight),
+		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_headerObj.playingWidth, g_posObj.arrowHeight)
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
@@ -7746,8 +7763,8 @@ function MainInit() {
 	divRoot.appendChild(lblframe);
 
 	// ライフ(数字)
-	const lblLife = createDivCssLabel(`lblLife`, 0, 30, 70, 20, 16,
-		g_workObj.lifeVal);
+	const intLifeVal = Math.floor(g_workObj.lifeVal);
+	const lblLife = createDivCssLabel(`lblLife`, 0, 30, 70, 20, 16, intLifeVal);
 	let lblInitColor;
 	if (g_workObj.lifeVal === g_headerObj.maxLifeVal) {
 		lblInitColor = g_cssObj.life_Max;
@@ -7768,8 +7785,8 @@ function MainInit() {
 
 	// ライフ本体
 	const lifeBar = createColorObject(`lifeBar`, ``,
-		5, 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal,
-		15, (g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal, ``, `lifeBar`);
+		5, 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal,
+		15, (g_sHeight - 100) * intLifeVal / g_headerObj.maxLifeVal, ``, `lifeBar`);
 	lifeBar.classList.add(lblInitColor);
 	infoSprite.appendChild(lifeBar);
 
@@ -7788,10 +7805,10 @@ function MainInit() {
 	}
 
 	// 歌詞表示
-	createSprite(`judgeSprite`, `wordSprite`, 0, 0, g_sWidth, g_sHeight);
+	createSprite(`judgeSprite`, `wordSprite`, 0, 0, g_headerObj.playingWidth, g_sHeight);
 	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
 		const wordY = (j % 2 === 0 ? 10 : (g_headerObj.bottomWordSetFlg ? g_posObj.distY + 10 : g_sHeight - 60));
-		const lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, wordY, g_sWidth - 200, 50);
+		const lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, wordY, g_headerObj.playingWidth - 200, 50);
 
 		lblWord.style.fontSize = `${C_SIZ_MAIN}px`;
 		lblWord.style.color = `#ffffff`;
@@ -7805,7 +7822,7 @@ function MainInit() {
 	// 曲名・アーティスト名表示
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
-	const lblCredit = createDivCssLabel(`lblCredit`, 125, g_sHeight - 30, g_sWidth - 125, 20, C_SIZ_MAIN,
+	const lblCredit = createDivCssLabel(`lblCredit`, 125, g_sHeight - 30, g_headerObj.playingWidth - 125, 20, C_SIZ_MAIN,
 		`${musicTitle} / ${artistName}`);
 	lblCredit.style.textAlign = C_ALIGN_LEFT;
 	infoSprite.appendChild(lblCredit);
@@ -7823,7 +7840,7 @@ function MainInit() {
 	infoSprite.appendChild(lblTime2);
 
 	const jdgGroups = [`J`, `FJ`];
-	const jdgX = [g_sWidth / 2 - 200, g_sWidth / 2 - 100];
+	const jdgX = [g_headerObj.playingWidth / 2 - 200, g_headerObj.playingWidth / 2 - 100];
 	const jdgY = [(g_sHeight + g_posObj.stepYR) / 2 - 60, (g_sHeight + g_posObj.stepYR) / 2 + 10];
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.jdgPosReset) {
 	} else {
@@ -7862,7 +7879,7 @@ function MainInit() {
 
 	jdgObjs.forEach((jdgObj, j) => {
 		if (jdgObj !== ``) {
-			infoSprite.appendChild(makeCounterSymbol(`lbl${jdgObj}`, g_sWidth - 110,
+			infoSprite.appendChild(makeCounterSymbol(`lbl${jdgObj}`, g_headerObj.playingWidth - 110,
 				g_cssObj[`common_${judgeColors[j]}`], j + 1, 0));
 		}
 	});
@@ -7886,7 +7903,7 @@ function MainInit() {
 	}
 
 	// パーフェクト演出
-	const finishView = createDivCssLabel(`finishView`, g_sWidth / 2 - 150, g_sHeight / 2 - 50,
+	const finishView = createDivCssLabel(`finishView`, g_headerObj.playingWidth / 2 - 150, g_sHeight / 2 - 50,
 		300, 20, 50, ``, g_cssObj.common_kita);
 	finishView.style.textAlign = C_ALIGN_CENTER;
 	judgeSprite.appendChild(finishView);
@@ -7927,8 +7944,8 @@ function MainInit() {
 
 	// Ready?表示
 	if (!g_headerObj.customReadyUse) {
-		const lblReady = createDivCssLabel(`lblReady`, g_sWidth / 2 - 100, (g_sHeight + g_posObj.stepYR) / 2 - 75,
-			200, 50, 40,
+		const lblReady = createDivCssLabel(`lblReady`, g_headerObj.playingX + g_headerObj.playingWidth / 2 - 100,
+			(g_sHeight + g_posObj.stepYR) / 2 - 75, 200, 50, 40,
 			`<span style='color:` + g_headerObj.setColorOrg[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
 		lblReady.style.animationDuration = `2.5s`;
 		lblReady.style.animationName = `leftToRightFade`;
@@ -7947,7 +7964,7 @@ function MainInit() {
 	const mainKeyDownActFunc = {
 
 		OFF: (_keyCode) => {
-			const matchKeys = g_workObj.keyCtrl;
+			const matchKeys = g_workObj.keyCtrlN;
 
 			for (let j = 0; j < keyNum; j++) {
 				matchKeys[j].forEach((key, k) => {
@@ -7966,12 +7983,12 @@ function MainInit() {
 	// キー操作イベント
 	document.onkeydown = evt => {
 		evt.preventDefault();
-		const setKey = transCode(evt.keyCode);
-		g_inputKeyBuffer[setKey] = true;
-		mainKeyDownActFunc[g_stateObj.autoAll](setKey);
+		const setCode = transCode(evt.code);
+		g_inputKeyBuffer[setCode] = true;
+		mainKeyDownActFunc[g_stateObj.autoAll](setCode);
 
 		// 曲中リトライ、タイトルバック
-		if (setKey === g_headerObj.keyRetry) {
+		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
 			if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
@@ -7980,7 +7997,7 @@ function MainInit() {
 				document.onkeyup = _ => { };
 			}
 
-		} else if (setKey === g_headerObj.keyTitleBack) {
+		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			clearWindow();
@@ -7994,15 +8011,15 @@ function MainInit() {
 			document.onkeyup = _ => { };
 
 		} else if (g_appearanceRanges.includes(g_stateObj.appearance)) {
-			if (setKey === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
+			if (setCode === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
 				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos < 100 ?
 					g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
-			} else if (setKey === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
+			} else if (setCode === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
 				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos > 0 ?
 					g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
 			}
 		}
-		return blockCode(setKey);
+		return blockCode(setCode);
 	}
 
 	/**
@@ -8012,7 +8029,7 @@ function MainInit() {
 
 		OFF: _ => {
 			for (let j = 0; j < keyNum; j++) {
-				if (g_workObj.keyCtrl[j].find(key => keyIsDown(key)) === undefined) {
+				if (g_workObj.keyCtrlN[j].find(key => keyIsDown(key)) === undefined) {
 					document.querySelector(`#stepDiv${j}`).style.display = C_DIS_NONE;
 				}
 			}
@@ -8022,8 +8039,8 @@ function MainInit() {
 	};
 
 	document.onkeyup = evt => {
-		const setKey = transCode(evt.keyCode);
-		g_inputKeyBuffer[setKey] = false;
+		const setCode = transCode(evt.code);
+		g_inputKeyBuffer[setCode] = false;
 		mainKeyUpActFunc[g_stateObj.autoAll]();
 	}
 
@@ -8552,8 +8569,8 @@ function MainInit() {
 
 		// キーの押下状態を取得
 		for (let j = 0; j < keyNum; j++) {
-			for (let m = 0, len = g_workObj.keyCtrl[j].length; m < len; m++) {
-				g_workObj.keyHitFlg[j][m] = keyIsDown(g_workObj.keyCtrl[j][m]);
+			for (let m = 0, len = g_workObj.keyCtrlN[j].length; m < len; m++) {
+				g_workObj.keyHitFlg[j][m] = keyIsDown(g_workObj.keyCtrlN[j][m]);
 			}
 		}
 
@@ -9132,9 +9149,10 @@ function changeLifeColor(_state = ``) {
 		lifeBar.classList.add(lifeCss);
 	}
 
-	lblLife.innerHTML = Math.floor(g_workObj.lifeVal);
-	lifeBar.style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeVal) / g_headerObj.maxLifeVal}px`;
-	lifeBar.style.height = `${(g_sHeight - 100) * g_workObj.lifeVal / g_headerObj.maxLifeVal}px`;
+	const intLifeVal = Math.floor(g_workObj.lifeVal);
+	lblLife.innerHTML = intLifeVal;
+	lifeBar.style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal}px`;
+	lifeBar.style.height = `${(g_sHeight - 100) * intLifeVal / g_headerObj.maxLifeVal}px`;
 }
 
 function lifeRecovery() {
@@ -9886,7 +9904,7 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => blockCode(evt.keyCode);
+	document.onkeydown = evt => blockCode(evt.code);
 	document.onkeyup = evt => { }
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {
