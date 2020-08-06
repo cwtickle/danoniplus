@@ -198,12 +198,8 @@ const g_handler = (_ => {
  */
 const transCode = _setCode => {
 	let returnCode = _setCode;
-	if (_setCode === `ControlRight`) {
-		returnCode = `ControlLeft`;
-	} else if (_setCode === `ShiftLeft`) {
-		returnCode = `ShiftRight`;
-	} else if (_setCode === `AltRight`) {
-		returnCode = `AltLeft`;
+	if ([`Control`, `Shift`, `Alt`].includes(_setCode.slice(0, -5))) {
+		returnCode = _setCode.replace(`Right`, `Left`);
 	}
 	return returnCode;
 }
