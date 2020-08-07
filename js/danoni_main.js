@@ -8001,7 +8001,7 @@ function MainInit() {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			clearWindow();
-			if (keyIsDown(16)) {
+			if (keyIsDown(`ShiftLeft`)) {
 				g_gameOverFlg = true;
 				g_finishFlg = false;
 				resultInit();
