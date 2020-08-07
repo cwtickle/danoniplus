@@ -4,7 +4,6 @@
 [![Join the chat at https://gitter.im/danonicw/community](https://badges.gitter.im/danonicw/community.svg)](https://gitter.im/danonicw/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cwtickle/danoniplus?sort=semver)](https://github.com/cwtickle/danoniplus/security/policy)
-[![GitHub All Releases](https://img.shields.io/github/downloads/cwtickle/danoniplus/total?color=%23ff3399)](https://github.com/cwtickle/danoniplus/releases)
 [![GitHub](https://img.shields.io/github/license/cwtickle/danoniplus)](https://github.com/cwtickle/danoniplus/blob/develop/LICENSE)
 
 Dancing☆Onigiri (CW Edition)は、ブラウザで動作するキーボードを使ったリズムゲームです。  
