@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/08/06 (v16.0.0)
+ * Revised : 2020/08/09 (v16.0.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -668,7 +668,7 @@ g_kCdN[134] = `FN`;
 g_kCdN[144] = `NumLock`;
 g_kCdN[145] = `ScrollLock`;
 g_kCdN[186] = `Quote`;
-g_kCdN[187] = `SemiColon`;
+g_kCdN[187] = `Semicolon`;
 g_kCdN[188] = `Comma`;
 g_kCdN[189] = `Minus`;
 g_kCdN[190] = `Period`;
