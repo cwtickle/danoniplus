@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/08/14 (v16.0.3)
+ * Revised : 2020/08/14 (v16.0.4)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -673,8 +673,8 @@ g_kCdN[188] = `Comma`;
 g_kCdN[189] = `Minus`;
 g_kCdN[190] = `Period`;
 g_kCdN[191] = `Slash`;
-g_kCdN[192] = `BranketLeft`;
-g_kCdN[219] = `BranketRight`;
+g_kCdN[192] = `BracketLeft`;
+g_kCdN[219] = `BracketRight`;
 g_kCdN[220] = `IntlYen`;
 g_kCdN[221] = `Backslash`;
 g_kCdN[222] = `Equal`;
