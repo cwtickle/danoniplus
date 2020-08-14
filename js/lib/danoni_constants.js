@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/08/09 (v16.0.2)
+ * Revised : 2020/08/14 (v16.0.3)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -633,22 +633,22 @@ g_kCdN[89] = `KeyY`;
 g_kCdN[90] = `KeyZ`;
 g_kCdN[91] = `MetaLeft`;
 g_kCdN[93] = `ContextMenu`;
-g_kCdN[96] = `NumPad0`;
-g_kCdN[97] = `NumPad1`;
-g_kCdN[98] = `NumPad2`;
-g_kCdN[99] = `NumPad3`;
-g_kCdN[100] = `NumPad4`;
-g_kCdN[101] = `NumPad5`;
-g_kCdN[102] = `NumPad6`;
-g_kCdN[103] = `NumPad7`;
-g_kCdN[104] = `NumPad8`;
-g_kCdN[105] = `NumPad9`;
-g_kCdN[106] = `NumPadMultiply`;
-g_kCdN[107] = `NumPadAdd`;
-g_kCdN[108] = `NumPadEnter`;
-g_kCdN[109] = `NumPadSubtract`;
+g_kCdN[96] = `Numpad0`;
+g_kCdN[97] = `Numpad1`;
+g_kCdN[98] = `Numpad2`;
+g_kCdN[99] = `Numpad3`;
+g_kCdN[100] = `Numpad4`;
+g_kCdN[101] = `Numpad5`;
+g_kCdN[102] = `Numpad6`;
+g_kCdN[103] = `Numpad7`;
+g_kCdN[104] = `Numpad8`;
+g_kCdN[105] = `Numpad9`;
+g_kCdN[106] = `NumpadMultiply`;
+g_kCdN[107] = `NumpadAdd`;
+g_kCdN[108] = `NumpadEnter`;
+g_kCdN[109] = `NumpadSubtract`;
 g_kCdN[110] = `NumpadDecimal`;
-g_kCdN[111] = `NumPadDivide`;
+g_kCdN[111] = `NumpadDivide`;
 g_kCdN[112] = `F1`;
 g_kCdN[113] = `F2`;
 g_kCdN[114] = `F3`;

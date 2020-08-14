@@ -15,7 +15,7 @@ v15の対応終了時期はv18リリース開始時を予定しています。�
 
 | Version | Supported          | Latest Version | First Release | End of Support |
 | ------- | ------------------ |----------------|---------------|----------------|
-| v16     | :white_check_mark: |[v16.0.2](../../releases/tag/v16.0.2)          |2020-08-06|-|
+| v16     | :white_check_mark: |[v16.0.3](../../releases/tag/v16.0.3)          |2020-08-06|-|
 | v15     | :white_check_mark: |[v15.7.0](../../releases/tag/v15.7.0)          |2020-05-13|(At Release v18)|
 | v14     | :white_check_mark: |[v14.5.7](../../releases/tag/v14.5.7)          |2020-04-29|-|
 | v13     | :x:                |[v13.6.8 (final)](../../releases/tag/v13.6.8)  |2020-03-29|2020-08-06|
