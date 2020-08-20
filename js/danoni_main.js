@@ -9777,7 +9777,8 @@ function resultInit() {
 		${g_resultObj.kita}-${g_resultObj.iknai}/
 		${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo} 
 		${twiturl.toString()}`.replace(/[\t\n]/g, ``);
-	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(unEscapeHtml(tweetResultTmp))}`;
+	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
+	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
 
 	// 戻るボタン描画
 	const btnBack = createCssButton({
@@ -9786,7 +9787,7 @@ function resultInit() {
 		x: 0,
 		y: g_sHeight - 100,
 		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
+		height: C_BTN_HEIGHT * 4 / 3,
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
@@ -9803,15 +9804,33 @@ function resultInit() {
 	});
 	divRoot.appendChild(btnBack);
 
+	// Copyボタン描画
+	const btnCopy = createCssButton({
+		id: `btnCopy`,
+		name: `CopyResult`,
+		x: g_sWidth / 3,
+		y: g_sHeight - 100,
+		width: g_sWidth / 3,
+		height: C_BTN_HEIGHT * 2 / 3,
+		fontsize: 24,
+		align: C_ALIGN_CENTER,
+		animationName: `smallToNormalY`,
+		class: g_cssObj.button_Setting,
+	}, _ => {
+		copyTextToClipboard(resultText);
+		alert(`リザルトデータをクリップボードにコピーしました！`);
+	});
+	divRoot.appendChild(btnCopy);
+
 	// Tweetボタン描画
 	const btnTweet = createCssButton({
 		id: `btnTweet`,
 		name: `Tweet`,
 		x: g_sWidth / 3,
-		y: g_sHeight - 100,
+		y: g_sHeight - 100 + C_BTN_HEIGHT * 2 / 3,
 		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
-		fontsize: C_LBL_BTNSIZE,
+		height: C_BTN_HEIGHT * 2 / 3,
+		fontsize: 24,
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
 		class: g_cssObj.button_Tweet,
@@ -9825,7 +9844,7 @@ function resultInit() {
 		x: g_sWidth / 3 * 2,
 		y: g_sHeight - 100,
 		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
+		height: C_BTN_HEIGHT * 4 / 3,
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
