@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/06/30
+ * Revised : 2020/08/22
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.17`;
-const g_revisedDate = `2020/06/30`;
+const g_version = `Ver 9.4.18`;
+const g_revisedDate = `2020/08/22`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2797,6 +2797,7 @@ function titleInit() {
 
 	document.onkeyup = evt => { }
 
+	document.oncontextmenu = _ => true;
 	divRoot.oncontextmenu = _ => false;
 }
 
@@ -3774,6 +3775,7 @@ function optionInit() {
 		}
 	}
 	document.onkeyup = evt => { }
+	document.oncontextmenu = _ => true;
 
 	// データセーブフラグの切替
 	const btnSave = createButton({
@@ -4842,6 +4844,7 @@ function settingsDisplayInit() {
 		}
 	}
 	document.onkeyup = evt => { }
+	document.oncontextmenu = _ => true;
 }
 
 /**
@@ -5366,6 +5369,8 @@ function keyConfigInit() {
 			}
 		}
 	}
+
+	document.oncontextmenu = _ => false;
 }
 
 /**
@@ -7150,6 +7155,7 @@ function setKeyCtrl(_localStorage, _keyNum, _keyCtrlPtn) {
 function MainInit() {
 	drawDefaultBackImage(`Main`);
 	const divRoot = document.querySelector(`#divRoot`);
+	document.oncontextmenu = _ => false;
 
 	g_currentArrows = 0;
 	g_workObj.fadeInNo = [];
@@ -9547,6 +9553,7 @@ function resultInit() {
 		}
 	}
 	document.onkeyup = evt => { }
+	document.oncontextmenu = _ => true;
 }
 
 /**
