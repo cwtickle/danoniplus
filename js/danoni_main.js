@@ -2440,7 +2440,6 @@ function titleInit() {
 
 /**
  * 警告用ウィンドウ（汎用）を表示
- * @param {string} _id 
  * @param {string} _text 
  */
 function makeWarningWindow(_text) {
@@ -2453,11 +2452,44 @@ function makeWarningWindow(_text) {
 		divRoot.removeChild(document.querySelector(`#lblWarning`));
 		lblWarning = getTitleDivLabel(`lblWarning`, text, 0, 70);
 	}
-	lblWarning.style.backgroundColor = `#ffcccc`;
-	lblWarning.style.opacity = 0.9;
 	divRoot.appendChild(lblWarning);
 
-	const len = lblWarning.innerHTML.split(`<br>`).length + lblWarning.innerHTML.split(`<p>`).length - 1;
+	setWindowStyle(lblWarning, `#ffcccc`, `#660000`);
+	divRoot.appendChild(lblWarning);
+}
+
+/**
+ * お知らせウィンドウ（汎用）を表示
+ * @param {string} _text 
+ */
+function makeInfoWindow(_text, _animationName = ``) {
+	let lblWarning;
+	if (document.querySelector(`#lblWarning`) === null) {
+	} else {
+		lblWarning = document.querySelector(`#lblWarning`);
+		divRoot.removeChild(document.querySelector(`#lblWarning`));
+	}
+	lblWarning = getTitleDivLabel(`lblWarning`, `<p>${_text}</p>`, 0, 70);
+	setWindowStyle(lblWarning, `#ccccff`, `#000066`, C_ALIGN_CENTER);
+
+	if (_animationName !== ``) {
+		lblWarning.style.animationName = _animationName;
+		lblWarning.style.animationDuration = `2.5s`;
+		lblWarning.style.animationFillMode = `forwards`;
+		lblWarning.style.animationTimingFunction = `cubic-bezier(1.000, 0.000, 0.000, 1.000)`;
+	}
+	divRoot.appendChild(lblWarning);
+}
+
+/**
+ * 警告ウィンドウのスタイル設定
+ * @param {string} _lbl 
+ * @param {string} _bkColor 
+ * @param {string} _textColor 
+ */
+function setWindowStyle(_lbl, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
+
+	const len = _lbl.innerHTML.split(`<br>`).length + _lbl.innerHTML.split(`<p>`).length - 1;
 	let warnHeight;
 	if (len * 21 <= 150) {
 		warnHeight = len * 21;
@@ -2465,12 +2497,14 @@ function makeWarningWindow(_text) {
 		warnHeight = 150;
 		lblWarning.style.overflow = `auto`;
 	}
-	lblWarning.style.height = `${warnHeight}px`;
-	lblWarning.style.lineHeight = `15px`;
-	lblWarning.style.fontSize = `${C_SIZ_MAIN}px`;
-	lblWarning.style.color = `#660000`;
-	lblWarning.style.textAlign = C_ALIGN_LEFT;
-	lblWarning.style.fontFamily = getBasicFont();
+	_lbl.style.backgroundColor = _bkColor;
+	_lbl.style.opacity = 0.9;
+	_lbl.style.height = `${warnHeight}px`;
+	_lbl.style.lineHeight = `15px`;
+	_lbl.style.fontSize = `${C_SIZ_MAIN}px`;
+	_lbl.style.color = _textColor;
+	_lbl.style.textAlign = _align;
+	_lbl.style.fontFamily = getBasicFont();
 }
 
 /**
@@ -9787,7 +9821,7 @@ function resultInit() {
 		x: 0,
 		y: g_sHeight - 100,
 		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT * 4 / 3,
+		height: C_BTN_HEIGHT * 5 / 4,
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
@@ -9811,14 +9845,14 @@ function resultInit() {
 		x: g_sWidth / 3,
 		y: g_sHeight - 100,
 		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT * 2 / 3,
+		height: C_BTN_HEIGHT * 5 / 8,
 		fontsize: 24,
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
 		class: g_cssObj.button_Setting,
 	}, _ => {
 		copyTextToClipboard(resultText);
-		alert(`リザルトデータをクリップボードにコピーしました！`);
+		makeInfoWindow(`リザルトデータをクリップボードにコピーしました！`, `leftToRightFade`);
 	});
 	divRoot.appendChild(btnCopy);
 
@@ -9827,9 +9861,9 @@ function resultInit() {
 		id: `btnTweet`,
 		name: `Tweet`,
 		x: g_sWidth / 3,
-		y: g_sHeight - 100 + C_BTN_HEIGHT * 2 / 3,
+		y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
 		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT * 2 / 3,
+		height: C_BTN_HEIGHT * 5 / 8,
 		fontsize: 24,
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
@@ -9844,7 +9878,7 @@ function resultInit() {
 		x: g_sWidth / 3 * 2,
 		y: g_sHeight - 100,
 		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT * 4 / 3,
+		height: C_BTN_HEIGHT * 5 / 4,
 		fontsize: C_LBL_BTNSIZE,
 		align: C_ALIGN_CENTER,
 		animationName: `smallToNormalY`,
