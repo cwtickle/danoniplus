@@ -5622,8 +5622,11 @@ function keyConfigInit() {
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
-		const disabledKeys = [229, 242, 243, 244, 91, 29, 28, 27, g_prevKey];
-		if (disabledKeys.includes(setKey) || (setKey === 46 && g_currentk === 0) ||
+		const disabledKeys = [229, 240, 242, 243, 244, 91, 29, 28, 27, g_prevKey];
+		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
+			makeInfoWindow(C_MSG_I_0002, `fadeOut0`);
+			return;
+		} else if ((setKey === 46 && g_currentk === 0) ||
 			(keyIsDown(`MetaLeft`) && keyIsDown(`ShiftLeft`))) {
 			return;
 		}
