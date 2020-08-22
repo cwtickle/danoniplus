@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/08/01
+ * Revised : 2020/08/22
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 15.7.0`;
-const g_revisedDate = `2020/08/01`;
+const g_version = `Ver 15.7.1`;
+const g_revisedDate = `2020/08/22`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2421,6 +2421,7 @@ function titleInit() {
 
 	document.onkeyup = evt => { }
 
+	document.oncontextmenu = _ => true;
 	divRoot.oncontextmenu = _ => false;
 
 	if (typeof skinTitleInit === C_TYP_FUNCTION) {
@@ -3621,6 +3622,7 @@ function optionInit() {
 		return blockCode(setKey);
 	}
 	document.onkeyup = evt => { }
+	document.oncontextmenu = _ => true;
 
 	// データセーブフラグの切替
 	const btnSave = createCssButton({
@@ -5070,6 +5072,7 @@ function settingsDisplayInit() {
 		return blockCode(setKey);
 	}
 	document.onkeyup = evt => { }
+	document.oncontextmenu = _ => true;
 
 	if (typeof skinSettingsDisplayInit === C_TYP_FUNCTION) {
 		skinSettingsDisplayInit();
@@ -5635,6 +5638,8 @@ function keyConfigInit() {
 		g_inputKeyBuffer[91] = false;
 		g_inputKeyBuffer[setKey] = false;
 	}
+
+	document.oncontextmenu = _ => false;
 }
 
 /**
@@ -7476,6 +7481,7 @@ function setKeyCtrl(_localStorage, _keyNum, _keyCtrlPtn) {
 function MainInit() {
 	drawDefaultBackImage(`Main`);
 	const divRoot = document.querySelector(`#divRoot`);
+	document.oncontextmenu = _ => false;
 
 	g_currentArrows = 0;
 	g_workObj.fadeInNo = [];
@@ -9888,6 +9894,7 @@ function resultInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => blockCode(evt.keyCode);
 	document.onkeyup = evt => { }
+	document.oncontextmenu = _ => true;
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {
 		skinResultInit();
