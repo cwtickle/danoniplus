@@ -2428,6 +2428,7 @@ function titleInit() {
 
 	document.onkeyup = evt => { }
 
+	document.oncontextmenu = _ => true;
 	divRoot.oncontextmenu = _ => false;
 
 	if (typeof skinTitleInit === C_TYP_FUNCTION) {
@@ -3668,6 +3669,7 @@ function optionInit() {
 		return blockCode(setCode);
 	}
 	document.onkeyup = evt => { }
+	document.oncontextmenu = _ => true;
 
 	// データセーブフラグの切替
 	const btnSave = createCssButton({
@@ -5117,6 +5119,7 @@ function settingsDisplayInit() {
 		return blockCode(setCode);
 	}
 	document.onkeyup = evt => { }
+	document.oncontextmenu = _ => true;
 
 	if (typeof skinSettingsDisplayInit === C_TYP_FUNCTION) {
 		skinSettingsDisplayInit();
@@ -5686,6 +5689,8 @@ function keyConfigInit() {
 		g_inputKeyBuffer[`MetaLeft`] = false;
 		g_inputKeyBuffer[setCode] = false;
 	}
+
+	document.oncontextmenu = _ => false;
 }
 
 /**
@@ -7530,6 +7535,7 @@ function setKeyCtrl(_localStorage, _keyNum, _keyCtrlPtn) {
 function MainInit() {
 	drawDefaultBackImage(`Main`);
 	const divRoot = document.querySelector(`#divRoot`);
+	document.oncontextmenu = _ => false;
 
 	g_currentArrows = 0;
 	g_workObj.fadeInNo = [];
@@ -9962,6 +9968,7 @@ function resultInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => blockCode(evt.code);
 	document.onkeyup = evt => { }
+	document.oncontextmenu = _ => true;
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {
 		skinResultInit();
