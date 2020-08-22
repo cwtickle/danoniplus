@@ -1574,6 +1574,7 @@ const C_MSG_E_0103 = `新しいキー:{0}の[stepRtn]が未定義です。(E-010
 	|stepRtn{0}=0,45,-90,135,180,onigiri|`;
 const C_MSG_E_0104 = `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
     |keyCtrl{0}=75,79,76,80,187,32/0|`;
+const C_MSG_I_0001 = `リザルトデータをクリップボードにコピーしました！`;
 
 const g_msgObj = {
 

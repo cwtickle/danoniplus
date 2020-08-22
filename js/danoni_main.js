@@ -9852,7 +9852,7 @@ function resultInit() {
 		class: g_cssObj.button_Setting,
 	}, _ => {
 		copyTextToClipboard(resultText);
-		makeInfoWindow(`リザルトデータをクリップボードにコピーしました！`, `leftToRightFade`);
+		makeInfoWindow(C_MSG_I_0001, `leftToRightFade`);
 	});
 	divRoot.appendChild(btnCopy);
 
