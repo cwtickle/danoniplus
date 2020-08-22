@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/08/14 (v16.0.4)
+ * Revised : 2020/08/22 (v16.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1574,6 +1574,8 @@ const C_MSG_E_0103 = `新しいキー:{0}の[stepRtn]が未定義です。(E-010
 	|stepRtn{0}=0,45,-90,135,180,onigiri|`;
 const C_MSG_E_0104 = `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
     |keyCtrl{0}=75,79,76,80,187,32/0|`;
+const C_MSG_I_0001 = `リザルトデータをクリップボードにコピーしました！`;
+const C_MSG_I_0002 = `入力したキーは割り当てできません。他のキーを指定してください。`;
 
 const g_msgObj = {
 
