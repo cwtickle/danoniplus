@@ -1,4 +1,4 @@
-﻿`use strict`;
+`use strict`;
 /**
  * Dancing☆Onigiri (CW Edition)
  * 
@@ -2420,6 +2420,11 @@ function titleInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setCode = transCode(evt.code);
+		
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		if (setCode === `Enter`) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
@@ -3629,6 +3634,11 @@ function optionInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		if (setCode === `Enter`) {
 			clearWindow();
 			loadMusic();
@@ -5078,6 +5088,11 @@ function settingsDisplayInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		if (setCode === `Enter`) {
 			clearWindow();
 			loadMusic();
@@ -5581,10 +5596,15 @@ function keyConfigInit() {
 
 	// キーボード押下時処理
 	document.onkeydown = evt => {
+		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-		let setCode = transCode(evt.code);
 		let setKey = g_kCdN.findIndex(kCd => kCd === setCode);
 		g_inputKeyBuffer[setCode] = true;
 
@@ -7986,6 +8006,11 @@ function MainInit() {
 	document.onkeydown = evt => {
 		evt.preventDefault();
 		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		g_inputKeyBuffer[setCode] = true;
 		mainKeyDownActFunc[g_stateObj.autoAll](setCode);
 
