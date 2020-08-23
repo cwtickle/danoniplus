@@ -1,4 +1,4 @@
-﻿`use strict`;
+`use strict`;
 /**
  * Dancing☆Onigiri (CW Edition)
  * 
@@ -725,6 +725,8 @@ function getTitleDivLabel(_id, _titlename, _x, _y) {
  * - 再描画時に共通で表示する箇所はここで指定している。
  */
 function clearWindow() {
+	document.onkeyup = _ => {};
+	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	if (document.querySelector(`#layer0`) !== null) {
 
