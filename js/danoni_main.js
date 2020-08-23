@@ -1,4 +1,4 @@
-`use strict`;
+﻿`use strict`;
 /**
  * Dancing☆Onigiri (CW Edition)
  * 
@@ -1659,7 +1659,7 @@ function loadSettingJs() {
 }
 
 function loadMusic() {
-	document.onkeydown = evt => blockCode(evt.code);
+	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url;
