@@ -1,15 +1,15 @@
-﻿`use strict`;
+`use strict`;
 /**
  * Dancing☆Onigiri (CW Edition)
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/08/22
+ * Revised : 2020/08/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 16.1.0`;
-const g_revisedDate = `2020/08/22`;
+const g_version = `Ver 16.2.0`;
+const g_revisedDate = `2020/08/24`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -725,6 +725,8 @@ function getTitleDivLabel(_id, _titlename, _x, _y) {
  * - 再描画時に共通で表示する箇所はここで指定している。
  */
 function clearWindow() {
+	document.onkeyup = _ => { };
+	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	if (document.querySelector(`#layer0`) !== null) {
 
@@ -1657,7 +1659,7 @@ function loadSettingJs() {
 }
 
 function loadMusic() {
-	document.onkeydown = evt => blockCode(evt.code);
+	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url;
@@ -2418,6 +2420,11 @@ function titleInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		if (setCode === `Enter`) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
@@ -3265,6 +3272,11 @@ function headerConvert(_dosObj) {
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
 
+	// リザルトデータのカスタマイズ
+	const resultFormatDefault = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
+	obj.resultFormat = escapeHtmlForEnabledTag(setVal(_dosObj.resultFormat, (typeof g_presetResultFormat === C_TYP_STRING ?
+		setVal(g_presetResultFormat, resultFormatDefault, C_TYP_STRING) : resultFormatDefault), C_TYP_STRING));
+
 	return obj;
 }
 
@@ -3662,6 +3674,11 @@ function optionInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		if (setCode === `Enter`) {
 			clearWindow();
 			loadMusic();
@@ -5112,6 +5129,11 @@ function settingsDisplayInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		if (setCode === `Enter`) {
 			clearWindow();
 			loadMusic();
@@ -5616,10 +5638,15 @@ function keyConfigInit() {
 
 	// キーボード押下時処理
 	document.onkeydown = evt => {
+		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-		let setCode = transCode(evt.code);
 		let setKey = g_kCdN.findIndex(kCd => kCd === setCode);
 		g_inputKeyBuffer[setCode] = true;
 
@@ -7259,14 +7286,14 @@ function pushColors(_header, _frame, _val, _colorCd) {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const colorCd = makeColorGradation(_colorCd);
 
-	if (_val < 30) {
+	if (_val < 30 || _val >= 1000) {
 		// 矢印の色変化
 		if (g_workObj[`mk${_header}Color`][_frame] === undefined) {
 			g_workObj[`mk${_header}Color`][_frame] = [];
 			g_workObj[`mk${_header}ColorCd`][_frame] = [];
 		}
-		if (_val < 20) {
-			const realVal = g_workObj.replaceNums[_val];
+		if (_val < 20 || _val >= 1000) {
+			const realVal = g_workObj.replaceNums[_val % 1000];
 			g_workObj[`mk${_header}Color`][_frame].push(realVal);
 			g_workObj[`mk${_header}ColorCd`][_frame].push(colorCd);
 		} else if (_val >= 20) {
@@ -8027,6 +8054,11 @@ function MainInit() {
 	document.onkeydown = evt => {
 		evt.preventDefault();
 		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		g_inputKeyBuffer[setCode] = true;
 		mainKeyDownActFunc[g_stateObj.autoAll](setCode);
 
@@ -9753,6 +9785,27 @@ function resultInit() {
 		lblAutoView.style.fontSize = `24px`;
 	}
 
+	// Twitter用リザルト
+	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
+	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
+	if (g_stateObj.shuffle !== `OFF`) {
+		tweetDifData += `:${g_stateObj.shuffle}`;
+	}
+	const twiturl = new URL(g_localStorageUrl);
+	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
+
+	let tweetResultTmp = g_headerObj.resultFormat.split(`[hashTag]`).join(`${hashTag}`)
+		.split(`[musicTitle]`).join(`${musicTitle}`)
+		.split(`[keyLabel]`).join(`${tweetDifData}`)
+		.split(`[maker]`).join(`${g_headerObj.tuning}`)
+		.split(`[rank]`).join(`${rankMark}`)
+		.split(`[score]`).join(`${g_resultObj.score}`)
+		.split(`[playStyle]`).join(`${playStyleData}`)
+		.split(`[arrowJdg]`).join(`${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`)
+		.split(`[frzJdg]`).join(`${g_resultObj.kita}-${g_resultObj.iknai}`)
+		.split(`[maxCombo]`).join(`${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo}`)
+		.split(`[url]`).join(`${twiturl.toString()}`.replace(/[\t\n]/g, ``));
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customResultInit === C_TYP_FUNCTION) {
 		customResultInit();
@@ -9803,23 +9856,11 @@ function resultInit() {
 
 	}
 
-	// Twitter用リザルト
-	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
-	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
-	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `:${g_stateObj.shuffle}`;
+	if (typeof g_presetResultVals === C_TYP_OBJECT) {
+		Object.keys(g_presetResultVals).forEach(key => {
+			tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_resultObj[g_presetResultVals[key]]);
+		});
 	}
-	const twiturl = new URL(g_localStorageUrl);
-	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
-	const tweetResultTmp = `【#danoni${hashTag}】${musicTitle}(${tweetDifData}) /
-		${g_headerObj.tuning} /
-		Rank:${rankMark}/
-		Score:${g_resultObj.score}/
-		Playstyle:${playStyleData}/
-		${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}/
-		${g_resultObj.kita}-${g_resultObj.iknai}/
-		${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo} 
-		${twiturl.toString()}`.replace(/[\t\n]/g, ``);
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
 
@@ -9966,7 +10007,7 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => blockCode(evt.code);
+	document.onkeydown = evt => blockCode(transCode(evt.code));
 	document.onkeyup = evt => { }
 	document.oncontextmenu = _ => true;
 
