@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/08/22
+ * Revised : 2020/08/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.18`;
-const g_revisedDate = `2020/08/22`;
+const g_version = `Ver 9.4.19`;
+const g_revisedDate = `2020/08/24`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1050,6 +1050,18 @@ const g_handler = (_ => {
 })();
 
 /**
+ * 特定キーコードを置換する処理
+ * @param {string} setKey 
+ */
+const transCode = setKey => setKey === 59 ? 187 : setKey;
+
+/**
+ * 特定キーをブロックする処理
+ * @param {string} setKey 
+ */
+const blockCode = setKey => C_BLOCK_KEYS.includes(setKey) ? false : true;
+
+/**
  * 文字列を想定された型に変換
  * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、`string`(文字列)から選択
  * - 型に合わない場合は _default を返却するが、_default自体の型チェック・変換は行わない
@@ -1534,6 +1546,8 @@ function getTitleDivLabel(_id, _titlename, _x, _y) {
  * - 再描画時に共通で表示する箇所はここで指定している。
  */
 function clearWindow() {
+	document.onkeyup = _ => { };
+	document.onkeydown = evt => blockCode(transCode(evt.keyCode));
 
 	// レイヤー情報取得
 	const layer0 = document.querySelector(`#layer0`);
@@ -2071,11 +2085,7 @@ function loadCustomjs(_initFlg) {
 }
 
 function loadMusic() {
-	document.onkeydown = evt => {
-		if (C_BLOCK_KEYS.includes(evt.keyCode)) {
-			return false;
-		}
-	}
+	document.onkeydown = evt => blockCode(transCode(evt.keyCode));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	const url = `../${g_headerObj.musicFolder}/${musicUrl}`;
@@ -2783,16 +2793,16 @@ function titleInit() {
 		} else {
 			setKey = event.keyCode;
 		}
+		setKey = transCode(setKey);
+		if (evt.repeat) {
+			return blockCode(setKey);
+		}
 		if (setKey === 13) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
 			optionInit();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 
 	document.onkeyup = evt => { }
@@ -3764,15 +3774,15 @@ function optionInit() {
 		} else {
 			setKey = event.keyCode;
 		}
+		setKey = transCode(setKey);
+		if (evt.repeat) {
+			return blockCode(setKey);
+		}
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 	document.onkeyup = evt => { }
 	document.oncontextmenu = _ => true;
@@ -4833,15 +4843,15 @@ function settingsDisplayInit() {
 		} else {
 			setKey = event.keyCode;
 		}
+		setKey = transCode(setKey);
+		if (evt.repeat) {
+			return blockCode(setKey);
+		}
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 	document.onkeyup = evt => { }
 	document.oncontextmenu = _ => true;
@@ -5293,6 +5303,10 @@ function keyConfigInit() {
 		} else {
 			setKey = event.keyCode;
 		}
+		setKey = transCode(setKey);
+		if (evt.repeat) {
+			return blockCode(setKey);
+		}
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -5363,11 +5377,7 @@ function keyConfigInit() {
 				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 			}
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 
 	document.oncontextmenu = _ => false;
@@ -7589,6 +7599,10 @@ function MainInit() {
 		} else {
 			setKey = event.keyCode;
 		}
+		setKey = transCode(setKey);
+		if (evt.repeat) {
+			return blockCode(setKey);
+		}
 		g_inputKeyBuffer[setKey] = true;
 		mainKeyDownActFunc[g_stateObj.autoPlay](setKey);
 
@@ -7616,11 +7630,7 @@ function MainInit() {
 			document.onkeyup = _ => { };
 		}
 
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(setKey);
 	}
 
 	/**
@@ -9546,11 +9556,7 @@ function resultInit() {
 		} else {
 			setKey = event.keyCode;
 		}
-		for (let j = 0; j < C_BLOCK_KEYS.length; j++) {
-			if (setKey === C_BLOCK_KEYS[j]) {
-				return false;
-			}
-		}
+		return blockCode(transCode(setKey));
 	}
 	document.onkeyup = evt => { }
 	document.oncontextmenu = _ => true;
