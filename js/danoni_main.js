@@ -9785,27 +9785,6 @@ function resultInit() {
 		lblAutoView.style.fontSize = `24px`;
 	}
 
-	// Twitter用リザルト
-	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
-	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
-	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `:${g_stateObj.shuffle}`;
-	}
-	const twiturl = new URL(g_localStorageUrl);
-	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
-
-	let tweetResultTmp = g_headerObj.resultFormat.split(`[hashTag]`).join(`${hashTag}`)
-		.split(`[musicTitle]`).join(`${musicTitle}`)
-		.split(`[keyLabel]`).join(`${tweetDifData}`)
-		.split(`[maker]`).join(`${g_headerObj.tuning}`)
-		.split(`[rank]`).join(`${rankMark}`)
-		.split(`[score]`).join(`${g_resultObj.score}`)
-		.split(`[playStyle]`).join(`${playStyleData}`)
-		.split(`[arrowJdg]`).join(`${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`)
-		.split(`[frzJdg]`).join(`${g_resultObj.kita}-${g_resultObj.iknai}`)
-		.split(`[maxCombo]`).join(`${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo}`)
-		.split(`[url]`).join(`${twiturl.toString()}`.replace(/[\t\n]/g, ``));
-
 	// ユーザカスタムイベント(初期)
 	if (typeof customResultInit === C_TYP_FUNCTION) {
 		customResultInit();
@@ -9855,6 +9834,27 @@ function resultInit() {
 		});
 
 	}
+
+	// Twitter用リザルト
+	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
+	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
+	if (g_stateObj.shuffle !== `OFF`) {
+		tweetDifData += `:${g_stateObj.shuffle}`;
+	}
+	const twiturl = new URL(g_localStorageUrl);
+	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
+
+	let tweetResultTmp = g_headerObj.resultFormat.split(`[hashTag]`).join(`${hashTag}`)
+		.split(`[musicTitle]`).join(`${musicTitle}`)
+		.split(`[keyLabel]`).join(`${tweetDifData}`)
+		.split(`[maker]`).join(`${g_headerObj.tuning}`)
+		.split(`[rank]`).join(`${rankMark}`)
+		.split(`[score]`).join(`${g_resultObj.score}`)
+		.split(`[playStyle]`).join(`${playStyleData}`)
+		.split(`[arrowJdg]`).join(`${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`)
+		.split(`[frzJdg]`).join(`${g_resultObj.kita}-${g_resultObj.iknai}`)
+		.split(`[maxCombo]`).join(`${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo}`)
+		.split(`[url]`).join(`${twiturl.toString()}`.replace(/[\t\n]/g, ``));
 
 	if (typeof g_presetResultVals === C_TYP_OBJECT) {
 		Object.keys(g_presetResultVals).forEach(key => {
