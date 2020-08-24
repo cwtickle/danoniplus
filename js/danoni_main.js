@@ -725,7 +725,7 @@ function getTitleDivLabel(_id, _titlename, _x, _y) {
  * - 再描画時に共通で表示する箇所はここで指定している。
  */
 function clearWindow() {
-	document.onkeyup = _ => {};
+	document.onkeyup = _ => { };
 	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	if (document.querySelector(`#layer0`) !== null) {
@@ -2420,7 +2420,7 @@ function titleInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setCode = transCode(evt.code);
-		
+
 		if (evt.repeat) {
 			return blockCode(setCode);
 		}
@@ -9993,7 +9993,7 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => blockCode(evt.code);
+	document.onkeydown = evt => blockCode(transCode(evt.code));
 	document.onkeyup = evt => { }
 	document.oncontextmenu = _ => true;
 
