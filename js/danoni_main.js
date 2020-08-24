@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/08/22
+ * Revised : 2020/08/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.5.8`;
-const g_revisedDate = `2020/08/22`;
+const g_version = `Ver 14.5.9`;
+const g_revisedDate = `2020/08/24`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -703,6 +703,8 @@ function getTitleDivLabel(_id, _titlename, _x, _y) {
  * - 再描画時に共通で表示する箇所はここで指定している。
  */
 function clearWindow() {
+	document.onkeyup = _ => { };
+	document.onkeydown = evt => blockCode(transCode(evt.keyCode));
 
 	if (document.querySelector(`#layer0`) !== null) {
 
@@ -1632,7 +1634,7 @@ function loadSettingJs() {
 }
 
 function loadMusic() {
-	document.onkeydown = evt => blockCode(evt.keyCode);
+	document.onkeydown = evt => blockCode(transCode(evt.keyCode));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url;
@@ -2343,6 +2345,9 @@ function titleInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setKey = transCode(evt.keyCode);
+		if (evt.repeat) {
+			return blockCode(setKey);
+		}
 		if (setKey === 13) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
@@ -3501,6 +3506,9 @@ function optionInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setKey = transCode(evt.keyCode);
+		if (evt.repeat) {
+			return blockCode(setKey);
+		}
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
@@ -4932,6 +4940,9 @@ function settingsDisplayInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setKey = transCode(evt.keyCode);
+		if (evt.repeat) {
+			return blockCode(setKey);
+		}
 		if (setKey === 13) {
 			clearWindow();
 			loadMusic();
@@ -5420,6 +5431,9 @@ function keyConfigInit() {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		let setKey = transCode(evt.keyCode);
+		if (evt.repeat) {
+			return blockCode(setKey);
+		}
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -7763,6 +7777,9 @@ function MainInit() {
 	document.onkeydown = evt => {
 		evt.preventDefault();
 		const setKey = transCode(evt.keyCode);
+		if (evt.repeat) {
+			return blockCode(setKey);
+		}
 		g_inputKeyBuffer[setKey] = true;
 		mainKeyDownActFunc[g_stateObj.autoPlay](setKey);
 
@@ -9708,7 +9725,7 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => blockCode(evt.keyCode);
+	document.onkeydown = evt => blockCode(transCode(evt.keyCode));
 	document.onkeyup = evt => { }
 	document.oncontextmenu = _ => true;
 
