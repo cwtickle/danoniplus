@@ -3274,8 +3274,8 @@ function headerConvert(_dosObj) {
 
 	// リザルトデータのカスタマイズ
 	const resultFormatDefault = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
-	obj.resultFormat = setVal(_dosObj.resultFormat, (typeof g_presetResultFormat === C_TYP_STRING ?
-		setVal(g_presetResultFormat, resultFormatDefault, C_TYP_STRING) : resultFormatDefault), C_TYP_STRING);
+	obj.resultFormat = escapeHtmlForEnabledTag(setVal(_dosObj.resultFormat, (typeof g_presetResultFormat === C_TYP_STRING ?
+		setVal(g_presetResultFormat, resultFormatDefault, C_TYP_STRING) : resultFormatDefault), C_TYP_STRING));
 
 	return obj;
 }
