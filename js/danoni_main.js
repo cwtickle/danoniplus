@@ -1,4 +1,4 @@
-﻿`use strict`;
+`use strict`;
 /**
  * Dancing☆Onigiri (CW Edition)
  * 
@@ -725,6 +725,8 @@ function getTitleDivLabel(_id, _titlename, _x, _y) {
  * - 再描画時に共通で表示する箇所はここで指定している。
  */
 function clearWindow() {
+	document.onkeyup = _ => {};
+	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	if (document.querySelector(`#layer0`) !== null) {
 
@@ -1657,7 +1659,7 @@ function loadSettingJs() {
 }
 
 function loadMusic() {
-	document.onkeydown = evt => blockCode(evt.code);
+	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url;
@@ -2418,6 +2420,11 @@ function titleInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setCode = transCode(evt.code);
+		
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		if (setCode === `Enter`) {
 			clearTimeout(g_timeoutEvtTitleId);
 			clearWindow();
@@ -3662,6 +3669,11 @@ function optionInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		if (setCode === `Enter`) {
 			clearWindow();
 			loadMusic();
@@ -5112,6 +5124,11 @@ function settingsDisplayInit() {
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => {
 		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		if (setCode === `Enter`) {
 			clearWindow();
 			loadMusic();
@@ -5616,10 +5633,15 @@ function keyConfigInit() {
 
 	// キーボード押下時処理
 	document.onkeydown = evt => {
+		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-		let setCode = transCode(evt.code);
 		let setKey = g_kCdN.findIndex(kCd => kCd === setCode);
 		g_inputKeyBuffer[setCode] = true;
 
@@ -8027,6 +8049,11 @@ function MainInit() {
 	document.onkeydown = evt => {
 		evt.preventDefault();
 		const setCode = transCode(evt.code);
+
+		if (evt.repeat) {
+			return blockCode(setCode);
+		}
+
 		g_inputKeyBuffer[setCode] = true;
 		mainKeyDownActFunc[g_stateObj.autoAll](setCode);
 
