@@ -7281,14 +7281,14 @@ function pushColors(_header, _frame, _val, _colorCd) {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const colorCd = makeColorGradation(_colorCd);
 
-	if (_val < 30) {
+	if (_val < 30 || _val >= 1000) {
 		// 矢印の色変化
 		if (g_workObj[`mk${_header}Color`][_frame] === undefined) {
 			g_workObj[`mk${_header}Color`][_frame] = [];
 			g_workObj[`mk${_header}ColorCd`][_frame] = [];
 		}
-		if (_val < 20) {
-			const realVal = g_workObj.replaceNums[_val];
+		if (_val < 20 || _val >= 1000) {
+			const realVal = g_workObj.replaceNums[_val % 1000];
 			g_workObj[`mk${_header}Color`][_frame].push(realVal);
 			g_workObj[`mk${_header}ColorCd`][_frame].push(colorCd);
 		} else if (_val >= 20) {
