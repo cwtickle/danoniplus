@@ -9845,11 +9845,11 @@ function resultInit() {
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 
-	let tweetMaxCombo = `${g_resultObj.maxCombo}`;
 	let tweetFrzJdg = ``;
+	let tweetMaxCombo = `${g_resultObj.maxCombo}`;
 	if (g_allFrz > 0) {
-		tweetMaxCombo += `-${g_resultObj.fmaxCombo}`;
 		tweetFrzJdg = `${g_resultObj.kita}-${g_resultObj.iknai}`;
+		tweetMaxCombo += `-${g_resultObj.fmaxCombo}`;
 	}
 
 	let tweetResultTmp = g_headerObj.resultFormat.split(`[hashTag]`).join(`${hashTag}`)
