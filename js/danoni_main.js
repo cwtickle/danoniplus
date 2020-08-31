@@ -9845,6 +9845,13 @@ function resultInit() {
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 
+	let tweetMaxCombo = `${g_resultObj.maxCombo}`;
+	let tweetFrzJdg = ``;
+	if (g_allFrz > 0) {
+		tweetMaxCombo += `-${g_resultObj.fmaxCombo}`;
+		tweetFrzJdg = `${g_resultObj.kita}-${g_resultObj.iknai}`;
+	}
+
 	let tweetResultTmp = g_headerObj.resultFormat.split(`[hashTag]`).join(`${hashTag}`)
 		.split(`[musicTitle]`).join(`${musicTitle}`)
 		.split(`[keyLabel]`).join(`${tweetDifData}`)
@@ -9853,8 +9860,8 @@ function resultInit() {
 		.split(`[score]`).join(`${g_resultObj.score}`)
 		.split(`[playStyle]`).join(`${playStyleData}`)
 		.split(`[arrowJdg]`).join(`${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`)
-		.split(`[frzJdg]`).join(`${g_resultObj.kita}-${g_resultObj.iknai}`)
-		.split(`[maxCombo]`).join(`${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo}`)
+		.split(`[frzJdg]`).join(tweetFrzJdg)
+		.split(`[maxCombo]`).join(tweetMaxCombo)
 		.split(`[url]`).join(`${twiturl.toString()}`.replace(/[\t\n]/g, ``));
 
 	if (typeof g_presetResultVals === C_TYP_OBJECT) {
