@@ -8003,15 +8003,6 @@ function MainInit() {
 		document.querySelector(`#lblframe`).style.display = C_DIS_NONE;
 	}
 
-	// ユーザカスタムイベント(初期)
-	if (typeof customMainInit === C_TYP_FUNCTION) {
-		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.realAdjustment;
-		customMainInit();
-		if (typeof customMainInit2 === C_TYP_FUNCTION) {
-			customMainInit2();
-		}
-	}
-
 	// Ready?表示
 	if (!g_headerObj.customReadyUse) {
 		const lblReady = createDivCssLabel(`lblReady`, g_headerObj.playingX + g_headerObj.playingWidth / 2 - 100,
@@ -8026,6 +8017,15 @@ function MainInit() {
 		lblReady.style.animationDelay = `${readyDelayFrame / g_fps}s`;
 		lblReady.style.opacity = 0;
 		divRoot.appendChild(lblReady);
+	}
+
+	// ユーザカスタムイベント(初期)
+	if (typeof customMainInit === C_TYP_FUNCTION) {
+		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.realAdjustment;
+		customMainInit();
+		if (typeof customMainInit2 === C_TYP_FUNCTION) {
+			customMainInit2();
+		}
 	}
 
 	/**
