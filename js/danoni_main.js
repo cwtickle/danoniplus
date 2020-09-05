@@ -3125,6 +3125,12 @@ function headerConvert(_dosObj) {
 	// デフォルトReady表示の遅延時間設定
 	obj.readyDelayFrame = setVal(_dosObj.readyDelayFrame, 0, C_TYP_NUMBER);
 
+	// デフォルトReady表示のアニメーション時間設定
+	obj.readyAnimationFrame = setVal(_dosObj.readyAnimationFrame, 150, C_TYP_NUMBER);
+
+	// デフォルトReady表示のアニメーション名
+	obj.readyAnimationName = setVal(_dosObj.readyAnimationName, `leftToRightFade`, C_TYP_STRING);
+
 	// デフォルト曲名表示のフォントサイズ
 	obj.titlesize = setVal(_dosObj.titlesize, ``, C_TYP_STRING);
 
@@ -8008,8 +8014,8 @@ function MainInit() {
 		const lblReady = createDivCssLabel(`lblReady`, g_headerObj.playingX + g_headerObj.playingWidth / 2 - 100,
 			(g_sHeight + g_posObj.stepYR) / 2 - 75, 200, 50, 40,
 			`<span style='color:` + g_headerObj.setColorOrg[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
-		lblReady.style.animationDuration = `2.5s`;
-		lblReady.style.animationName = `leftToRightFade`;
+		lblReady.style.animationDuration = `${g_headerObj.readyAnimationFrame / g_fps}s`;
+		lblReady.style.animationName = g_headerObj.readyAnimationName;
 		let readyDelayFrame = 0;
 		if (g_headerObj.readyDelayFrame > 0 && g_headerObj.readyDelayFrame + g_stateObj.adjustment > 0) {
 			readyDelayFrame = g_headerObj.readyDelayFrame + g_stateObj.adjustment;
