@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/08/25
+ * Revised : 2020/09/05
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 16.2.1`;
-const g_revisedDate = `2020/08/25`;
+const g_version = `Ver 16.3.0`;
+const g_revisedDate = `2020/09/05`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3124,6 +3124,15 @@ function headerConvert(_dosObj) {
 
 	// デフォルトReady表示の遅延時間設定
 	obj.readyDelayFrame = setVal(_dosObj.readyDelayFrame, 0, C_TYP_NUMBER);
+
+	// デフォルトReady表示のアニメーション時間設定
+	obj.readyAnimationFrame = setVal(_dosObj.readyAnimationFrame, 150, C_TYP_NUMBER);
+
+	// デフォルトReady表示のアニメーション名
+	obj.readyAnimationName = setVal(_dosObj.readyAnimationName, `leftToRightFade`, C_TYP_STRING);
+
+	// デフォルトReady表示の先頭文字色
+	obj.readyColor = setVal(_dosObj.readyColor, ``, C_TYP_STRING);
 
 	// デフォルト曲名表示のフォントサイズ
 	obj.titlesize = setVal(_dosObj.titlesize, ``, C_TYP_STRING);
@@ -8003,6 +8012,24 @@ function MainInit() {
 		document.querySelector(`#lblframe`).style.display = C_DIS_NONE;
 	}
 
+	// Ready?表示
+	if (!g_headerObj.customReadyUse) {
+		const readyColor = (g_headerObj.readyColor !== `` ? g_headerObj.readyColor : g_headerObj.setColorOrg[0]);
+		const lblReady = createDivCssLabel(`lblReady`, g_headerObj.playingX + g_headerObj.playingWidth / 2 - 100,
+			(g_sHeight + g_posObj.stepYR) / 2 - 75, 200, 50, 40,
+			`<span style='color:${readyColor};font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
+		lblReady.style.animationDuration = `${g_headerObj.readyAnimationFrame / g_fps}s`;
+		lblReady.style.animationName = g_headerObj.readyAnimationName;
+		let readyDelayFrame = 0;
+		if (g_stateObj.fadein === 0 && g_headerObj.readyDelayFrame > 0 &&
+			g_headerObj.readyDelayFrame + g_stateObj.adjustment > 0) {
+			readyDelayFrame = g_headerObj.readyDelayFrame + g_stateObj.adjustment;
+		}
+		lblReady.style.animationDelay = `${readyDelayFrame / g_fps}s`;
+		lblReady.style.opacity = 0;
+		divRoot.appendChild(lblReady);
+	}
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customMainInit === C_TYP_FUNCTION) {
 		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.realAdjustment;
@@ -8010,22 +8037,6 @@ function MainInit() {
 		if (typeof customMainInit2 === C_TYP_FUNCTION) {
 			customMainInit2();
 		}
-	}
-
-	// Ready?表示
-	if (!g_headerObj.customReadyUse) {
-		const lblReady = createDivCssLabel(`lblReady`, g_headerObj.playingX + g_headerObj.playingWidth / 2 - 100,
-			(g_sHeight + g_posObj.stepYR) / 2 - 75, 200, 50, 40,
-			`<span style='color:` + g_headerObj.setColorOrg[0] + `;font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
-		lblReady.style.animationDuration = `2.5s`;
-		lblReady.style.animationName = `leftToRightFade`;
-		let readyDelayFrame = 0;
-		if (g_headerObj.readyDelayFrame > 0 && g_headerObj.readyDelayFrame + g_stateObj.adjustment > 0) {
-			readyDelayFrame = g_headerObj.readyDelayFrame + g_stateObj.adjustment;
-		}
-		lblReady.style.animationDelay = `${readyDelayFrame / g_fps}s`;
-		lblReady.style.opacity = 0;
-		divRoot.appendChild(lblReady);
 	}
 
 	/**
@@ -9845,6 +9856,13 @@ function resultInit() {
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 
+	let tweetFrzJdg = ``;
+	let tweetMaxCombo = `${g_resultObj.maxCombo}`;
+	if (g_allFrz > 0) {
+		tweetFrzJdg = `${g_resultObj.kita}-${g_resultObj.iknai}`;
+		tweetMaxCombo += `-${g_resultObj.fmaxCombo}`;
+	}
+
 	let tweetResultTmp = g_headerObj.resultFormat.split(`[hashTag]`).join(`${hashTag}`)
 		.split(`[musicTitle]`).join(`${musicTitle}`)
 		.split(`[keyLabel]`).join(`${tweetDifData}`)
@@ -9853,8 +9871,8 @@ function resultInit() {
 		.split(`[score]`).join(`${g_resultObj.score}`)
 		.split(`[playStyle]`).join(`${playStyleData}`)
 		.split(`[arrowJdg]`).join(`${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`)
-		.split(`[frzJdg]`).join(`${g_resultObj.kita}-${g_resultObj.iknai}`)
-		.split(`[maxCombo]`).join(`${g_resultObj.maxCombo}-${g_resultObj.fmaxCombo}`)
+		.split(`[frzJdg]`).join(tweetFrzJdg)
+		.split(`[maxCombo]`).join(tweetMaxCombo)
 		.split(`[url]`).join(`${twiturl.toString()}`.replace(/[\t\n]/g, ``));
 
 	if (typeof g_presetResultVals === C_TYP_OBJECT) {
