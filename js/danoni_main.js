@@ -8017,7 +8017,8 @@ function MainInit() {
 		lblReady.style.animationDuration = `${g_headerObj.readyAnimationFrame / g_fps}s`;
 		lblReady.style.animationName = g_headerObj.readyAnimationName;
 		let readyDelayFrame = 0;
-		if (g_headerObj.readyDelayFrame > 0 && g_headerObj.readyDelayFrame + g_stateObj.adjustment > 0) {
+		if (g_stateObj.fadein === 0 && g_headerObj.readyDelayFrame > 0 &&
+			g_headerObj.readyDelayFrame + g_stateObj.adjustment > 0) {
 			readyDelayFrame = g_headerObj.readyDelayFrame + g_stateObj.adjustment;
 		}
 		lblReady.style.animationDelay = `${readyDelayFrame / g_fps}s`;
