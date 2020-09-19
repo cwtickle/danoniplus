@@ -9556,18 +9556,12 @@ function resultInit() {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
 		} else {
-			let rankPos = g_rankObj.rankRate.length;
-			for (let j = 0, len = g_rankObj.rankRate.length; j < len; j++) {
-				rankPos = len;
+			for (let j = 0; j < g_rankObj.rankRate.length; j++) {
 				if (resultScore * 100 / g_maxScore >= g_rankObj.rankRate[j]) {
 					rankMark = g_rankObj.rankMarks[j];
 					rankColor = g_rankObj.rankColor[j];
 					break;
 				}
-			}
-			if (resultScore * 100 / g_maxScore < g_rankObj.rankRate[rankPos - 1]) {
-				rankMark = g_rankObj.rankMarkC;
-				rankColor = g_rankObj.rankColorC;
 			}
 		}
 	} else {

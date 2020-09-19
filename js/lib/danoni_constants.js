@@ -241,9 +241,9 @@ let g_allArrow = 0;
 let g_allFrz = 0;
 let g_currentArrows = 0;
 const g_rankObj = {
-    rankMarks: [`SS`, `S`, `SA`, `AAA`, `AA`, `A`, `B`],
-    rankRate: [97, 90, 85, 80, 75, 70, 50],
-    rankColor: [`#00ccff`, `#6600ff`, `#ff9900`, `#ff0000`, `#00ff00`, `#ff00ff`, `#cc00ff`],
+    rankMarks: [`SS`, `S`, `SA`, `AAA`, `AA`, `A`, `B`, `C`],
+    rankRate: [97, 90, 85, 80, 75, 70, 50, 0],
+    rankColor: [`#00ccff`, `#6600ff`, `#ff9900`, `#ff0000`, `#00ff00`, `#ff00ff`, `#cc00ff`, `#cc9933`],
 
     rankMarkPF: `PF`,
     rankColorPF: `#cccc00`,
