@@ -9596,16 +9596,14 @@ function resultInit() {
 		setVal(musicTitleForView1, ``, C_TYP_STRING), C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2,
 		`Difficulty`, C_ALIGN_LEFT));
-	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-	if (!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
-		difData += ` -${g_stateObj.autoPlay}less`;
-	}
-	if (g_headerObj.makerView) {
-		difData += ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
-	}
-	if (g_stateObj.shuffle !== C_FLG_OFF) {
-		difData += ` [${g_stateObj.shuffle}]`;
-	}
+
+	let difData = [
+		`${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
+		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${g_stateObj.autoPlay}less`)}`,
+		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${g_stateObj.shuffle}]`)}`
+	].filter(value => value !== ``).join(` `);
+
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDifData`, 60, g_cssObj.result_style, 2, difData,
 		C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeCssResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3,
@@ -9659,6 +9657,7 @@ function resultInit() {
 	/**
 	 * プレイスタイルのカスタム有無
 	 * @param {string} _flg 
+	 * @param {string, boolean} _defaultSet デフォルト値
 	 * @param {string} _displayText 
 	 */
 	function withOptions(_flg, _defaultSet, _displayText = _flg) {
