@@ -9556,18 +9556,12 @@ function resultInit() {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
 		} else {
-			let rankPos = g_rankObj.rankRate.length;
-			for (let j = 0, len = g_rankObj.rankRate.length; j < len; j++) {
-				rankPos = len;
+			for (let j = 0; j < g_rankObj.rankRate.length; j++) {
 				if (resultScore * 100 / g_maxScore >= g_rankObj.rankRate[j]) {
 					rankMark = g_rankObj.rankMarks[j];
 					rankColor = g_rankObj.rankColor[j];
 					break;
 				}
-			}
-			if (resultScore * 100 / g_maxScore < g_rankObj.rankRate[rankPos - 1]) {
-				rankMark = g_rankObj.rankMarkC;
-				rankColor = g_rankObj.rankColorC;
 			}
 		}
 	} else {
@@ -9602,55 +9596,42 @@ function resultInit() {
 		setVal(musicTitleForView1, ``, C_TYP_STRING), C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2,
 		`Difficulty`, C_ALIGN_LEFT));
-	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-	if (!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
-		difData += ` -${g_stateObj.autoPlay}less`;
-	}
-	if (g_headerObj.makerView) {
-		difData += ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
-	}
-	if (g_stateObj.shuffle !== C_FLG_OFF) {
-		difData += ` [${g_stateObj.shuffle}]`;
-	}
+
+	let difData = [
+		`${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
+		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${g_stateObj.autoPlay}less`)}`,
+		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${g_stateObj.shuffle}]`)}`
+	].filter(value => value !== ``).join(` `);
+
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDifData`, 60, g_cssObj.result_style, 2, difData,
 		C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeCssResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3,
 		`Playstyle`, C_ALIGN_LEFT));
 
-	let playStyleData = ``;
-	playStyleData = `${g_stateObj.speed}x`;
-	if (g_stateObj.motion !== C_FLG_OFF) {
-		playStyleData += `, ${g_stateObj.motion}`;
-	}
-	if (g_stateObj.reverse !== C_FLG_OFF) {
-		if (g_stateObj.scroll !== `---`) {
-			playStyleData += `, R-${g_stateObj.scroll}`;
-		} else {
-			playStyleData += `, Reverse`;
-		}
-	} else if (g_stateObj.scroll !== `---`) {
-		playStyleData += `, ${g_stateObj.scroll}`;
-	}
-	if (g_stateObj.appearance !== `Visible`) {
-		playStyleData += `, ${g_stateObj.appearance}`;
-	}
-	if (g_stateObj.gauge !== g_gauges[0]) {
-		playStyleData += `, ${g_stateObj.gauge}`;
-	}
+	let playStyleData = [
+		`${g_stateObj.speed}x`,
+		`${withOptions(g_stateObj.motion, C_FLG_OFF)}`,
+		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
+			(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
+		`${withOptions(g_stateObj.appearance, `Visible`)}`,
+		`${withOptions(g_stateObj.gauge, g_gauges[0])}`
+	].filter(value => value !== ``).join(`, `);
 	playDataWindow.appendChild(makeCssResultPlayData(`lblStyleData`, 60, g_cssObj.result_style, 3,
 		playStyleData, C_ALIGN_CENTER));
 
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplay`, 20, g_cssObj.result_lbl, 4,
 		`Display`, C_ALIGN_LEFT));
 
-	let displayData = ``;
-	displayData = withString(displayData, g_stateObj.d_stepzone, `Step`);
-	displayData = withString(displayData, g_stateObj.d_judgment, `Judge`);
-	displayData = withString(displayData, g_stateObj.d_fastslow, `FS`);
-	displayData = withString(displayData, g_stateObj.d_lifegauge, `Life`);
-	displayData = withString(displayData, g_stateObj.d_score, `Score`);
-	displayData = withString(displayData, g_stateObj.d_musicinfo, `MusicInfo`);
-	displayData = withString(displayData, g_stateObj.d_filterline, `Filter`);
+	let displayData = [
+		withOptions(g_stateObj.d_stepzone, C_FLG_ON, `Step`),
+		withOptions(g_stateObj.d_judgment, C_FLG_ON, `Judge`),
+		withOptions(g_stateObj.d_fastslow, C_FLG_ON, `FS`),
+		withOptions(g_stateObj.d_lifegauge, C_FLG_ON, `Life`),
+		withOptions(g_stateObj.d_score, C_FLG_ON, `Score`),
+		withOptions(g_stateObj.d_musicinfo, C_FLG_ON, `MusicInfo`),
+		withOptions(g_stateObj.d_filterline, C_FLG_ON, `Filter`)
+	].filter(value => value !== ``).join(`, `);
 	if (displayData === ``) {
 		displayData = `All Visible`;
 	} else {
@@ -9659,13 +9640,14 @@ function resultInit() {
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 4,
 		displayData, C_ALIGN_CENTER));
 
-	let display2Data = ``;
-	display2Data = withString(display2Data, g_stateObj.d_speed, `Speed`);
-	display2Data = withString(display2Data, g_stateObj.d_color, `Color`);
-	display2Data = withString(display2Data, g_stateObj.d_lyrics, `Lyrics`);
-	display2Data = withString(display2Data, g_stateObj.d_background, `Back`);
-	display2Data = withString(display2Data, g_stateObj.d_arroweffect, `Effect`);
-	display2Data = withString(display2Data, g_stateObj.d_special, `SP`);
+	let display2Data = [
+		withOptions(g_stateObj.d_speed, C_FLG_ON, `Speed`),
+		withOptions(g_stateObj.d_color, C_FLG_ON, `Color`),
+		withOptions(g_stateObj.d_lyrics, C_FLG_ON, `Lyrics`),
+		withOptions(g_stateObj.d_background, C_FLG_ON, `Back`),
+		withOptions(g_stateObj.d_arroweffect, C_FLG_ON, `Effect`),
+		withOptions(g_stateObj.d_special, C_FLG_ON, `SP`)
+	].filter(value => value !== ``).join(`, `);
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
@@ -9673,19 +9655,13 @@ function resultInit() {
 		display2Data, C_ALIGN_CENTER));
 
 	/**
-	 * プレイスタイル（Display）のカスタム有無
-	 * @param {string} _baseString 
+	 * プレイスタイルのカスタム有無
 	 * @param {string} _flg 
+	 * @param {string, boolean} _defaultSet デフォルト値
 	 * @param {string} _displayText 
 	 */
-	function withString(_baseString, _flg, _displayText) {
-		if (_flg !== C_FLG_ON) {
-			if (_baseString !== ``) {
-				_baseString += `, `;
-			}
-			_baseString += _displayText;
-		}
-		return _baseString;
+	function withOptions(_flg, _defaultSet, _displayText = _flg) {
+		return (_flg !== _defaultSet ? _displayText : ``);
 	}
 
 	// キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
