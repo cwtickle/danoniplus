@@ -4582,25 +4582,12 @@ function createOptionWindow(_sprite) {
 	}));
 
 	// フェードインのスライダー処理
-	let addXPos = 0;
-	let addYPos = 0;
-	if (g_userAgent.indexOf(`firefox`) !== -1) {
-		addXPos = -8;
-		addYPos = 1;
-	}
-	const lblFadeinSlider = createDivCssLabel(`lblFadeinBar`, 160 + addXPos, addYPos, ``, ``, ``,
-		`<input id=fadeinSlider type=range value=0 min=0 max=99 step=1>`);
+	const lblFadeinSlider = createDivCssLabel(`lblFadeinBar`, C_LEN_SETLBL_LEFT, 0, C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL,
+		`<input id="fadeinSlider" type="range" value="${g_stateObj.fadein}" min="0" max="99" step="1">`);
 	spriteList.fadein.appendChild(lblFadeinSlider);
 
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
-	fadeinSlider.value = g_stateObj.fadein;
-
 	fadeinSlider.addEventListener(`input`, _ => {
-		g_stateObj.fadein = parseInt(fadeinSlider.value);
-		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
-	}, false);
-
-	fadeinSlider.addEventListener(`change`, _ => {
 		g_stateObj.fadein = parseInt(fadeinSlider.value);
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}, false);
