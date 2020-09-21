@@ -2237,7 +2237,7 @@ function titleInit() {
 				highscores: {},
 			};
 			localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
-			location.reload(true);
+			location.reload();
 		}
 	});
 	btnReset.title = g_msgObj.dataReset;
@@ -2254,7 +2254,7 @@ function titleInit() {
 		fontsize: 20,
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Start,
-	}, _ => location.reload(true));
+	}, _ => location.reload());
 	btnReload.title = g_msgObj.reload;
 	divRoot.appendChild(btnReload);
 
