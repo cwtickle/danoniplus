@@ -3122,8 +3122,10 @@ function headerConvert(_dosObj) {
 				setVal(g_presetCustomDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 	});
 
-	// デフォルトReady表示の遅延時間設定
-	obj.readyDelayFrame = setVal(_dosObj.readyDelayFrame, 0, C_TYP_NUMBER);
+	// デフォルトReady/リザルト表示の遅延時間設定
+	[`ready`, `result`].forEach(objName => {
+		obj[`${objName}DelayFrame`] = setVal(_dosObj[`${objName}DelayFrame`], 0, C_TYP_NUMBER);
+	});
 
 	// デフォルトReady表示のアニメーション時間設定
 	obj.readyAnimationFrame = setVal(_dosObj.readyAnimationFrame, 150, C_TYP_NUMBER);
@@ -9718,6 +9720,11 @@ function resultInit() {
 	// プレイデータは Cleared & Failed に合わせて表示
 	playDataWindow.style.animationDuration = `3s`;
 	playDataWindow.style.animationName = `slowlyAppearing`;
+
+	if (g_finishFlg && g_headerObj.resultDelayFrame > 0) {
+		lblResultPre.style.animationDelay = `${g_headerObj.resultDelayFrame / g_fps}s`;
+		playDataWindow.style.animationDelay = `${g_headerObj.resultDelayFrame / g_fps}s`;
+	}
 
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
