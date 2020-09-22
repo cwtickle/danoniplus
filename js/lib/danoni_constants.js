@@ -231,6 +231,8 @@ const g_resultObj = {
 
     fast: 0,
     slow: 0,
+
+    spState: ``,
 };
 
 const C_RLT_BRACKET_L = 210;
@@ -253,6 +255,14 @@ const g_rankObj = {
     rankColorF: `#999999`,
     rankMarkX: `X`,
     rankColorX: `#996600`
+};
+
+const g_resultMsgObj = {
+    allPerfect: `<span class="result_AllPerfect">All Perfect!!</span>`,
+    perfect: `<span class="result_Perfect">Perfect!!</span>`,
+    fullCombo: `<span class="result_FullCombo">FullCombo!</span>`,
+    cleared: `<span class="result_Cleared">CLEARED!</span>`,
+    failed: `<span class="result_Failed">FAILED...</span>`,
 };
 
 const g_pointAllocation = {
