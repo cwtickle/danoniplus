@@ -461,7 +461,6 @@ function createDiv(_id, _x, _y, _width, _height) {
 	style.position = `absolute`;
 
 	style.userSelect = C_DIS_NONE;
-	style.webkitUserSelect = C_DIS_NONE;
 	style.msUserSelect = C_DIS_NONE;
 	style.mozUserSelect = C_DIS_NONE;
 	style.khtmlUserSelect = C_DIS_NONE;
@@ -7496,6 +7495,7 @@ function getArrowSettings() {
 	g_workObj.lifeVal = Math.floor(g_workObj.lifeInit * 100) / 100;
 	g_gameOverFlg = false;
 	g_finishFlg = true;
+	g_resultObj.spState = ``;
 
 	if (g_stateObj.dataSaveFlg && setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``) {
 
@@ -9443,16 +9443,21 @@ function makeFinishView(_text) {
 }
 
 function finishViewing() {
-	if (g_currentArrows === g_allArrow + g_allFrz / 2) {
-		if (g_headerObj.finishView !== C_DIS_NONE) {
-			const fullArrows = g_allArrow + g_allFrz / 2;
-			if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
-				makeFinishView(`<span class="result_AllPerfect">All Perfect!!</span>`);
-			} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
-				makeFinishView(`<span class="result_Perfect">Perfect!!</span>`);
-			} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
-				makeFinishView(`<span class="result_FullCombo">FullCombo!</span>`);
-			}
+	const fullArrows = g_allArrow + g_allFrz / 2;
+	if (g_currentArrows === fullArrows) {
+		if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
+			g_resultObj.spState = `allPerfect`;
+		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
+			g_resultObj.spState = `perfect`;
+		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
+			g_resultObj.spState = `fullCombo`;
+		} else if (!g_gameOverFlg) {
+			g_resultObj.spState = `cleared`;
+		} else {
+			g_resultObj.spState = `failed`;
+		}
+		if (g_headerObj.finishView !== C_DIS_NONE && [`allPerfect`, `perfect`, `fullCombo`].includes(g_resultObj.spState)) {
+			makeFinishView(g_resultMsgObj[g_resultObj.spState]);
 		}
 	}
 }
@@ -9540,6 +9545,7 @@ function resultInit() {
 	if (g_gameOverFlg) {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
+		g_resultObj.spState = `failed`;
 	} else if (playingArrows === fullArrows && g_stateObj.autoAll === C_FLG_OFF) {
 		if (g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai === 0) {
 			rankMark = g_rankObj.rankMarkPF;
@@ -9681,29 +9687,13 @@ function resultInit() {
 
 	// Cleared & Failed表示
 	const lblResultPre = createDivCssLabel(`lblResultPre`, g_sWidth / 2 - 150, g_sHeight / 2 - 160,
-		200, 50, 60, `<span class="result_Cleared">CLEARED!</span>`, g_cssObj.result_Cleared);
+		200, 50, 60, g_resultMsgObj.cleared, g_cssObj.result_Cleared);
 	lblResultPre.classList.add(g_cssObj.result_Window);
 	divRoot.appendChild(lblResultPre);
 	lblResultPre.style.opacity = 0;
 
-	let resultFlgTmp = ``;
-
-	if (playingArrows === fullArrows) {
-		if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
-			resultFlgTmp = `<span class="result_AllPerfect">All Perfect!!</span>`;
-		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
-			resultFlgTmp = `<span class="result_Perfect">Perfect!!</span>`;
-		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
-			resultFlgTmp = `<span class="result_FullCombo">FullCombo!</span>`;
-		} else {
-			resultFlgTmp = `<span class="result_Cleared">CLEARED!</span>`;
-		}
-	} else {
-		resultFlgTmp = ``;
-	}
-
 	const lblResultPre2 = createDivCssLabel(`lblResultPre2`, g_sWidth / 2 + 50, 40,
-		200, 30, 20, resultFlgTmp, g_cssObj.result_Cleared);
+		200, 30, 20, (playingArrows === fullArrows ? g_resultMsgObj[g_resultObj.spState] : ``), g_cssObj.result_Cleared);
 	divRoot.appendChild(lblResultPre2);
 
 	if (!g_gameOverFlg) {
@@ -9711,10 +9701,10 @@ function resultInit() {
 		lblResultPre.style.animationName = `leftToRightFade`;
 	} else {
 		lblResultPre.style.animationDuration = `3s`;
-		lblResultPre.innerHTML = `<span class="result_Failed">FAILED...</span>`;
+		lblResultPre.innerHTML = g_resultMsgObj.failed;
 		lblResultPre.style.animationName = `upToDownFade`;
 
-		lblResultPre2.innerHTML = `<span class="result_Failed">FAILED...</span>`;
+		lblResultPre2.innerHTML = g_resultMsgObj.failed;
 	}
 
 	// プレイデータは Cleared & Failed に合わせて表示
