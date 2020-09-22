@@ -241,6 +241,7 @@ const C_RLT_BRACKET_R = 320;
 
 let g_allArrow = 0;
 let g_allFrz = 0;
+let g_fullArrows = 0;
 let g_currentArrows = 0;
 const g_rankObj = {
     rankMarks: [`SS`, `S`, `SA`, `AAA`, `AA`, `A`, `B`, `C`],

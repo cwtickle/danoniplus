@@ -6040,8 +6040,9 @@ function loadingScoreInit2() {
 	if (g_headerObj.frzStartjdgUse) {
 		g_allArrow += g_allFrz / 2;
 	}
+	g_fullArrows = g_allArrow + g_allFrz / 2;
 
-	calcLifeVals(g_allArrow + g_allFrz / 2);
+	calcLifeVals(g_fullArrows);
 
 	// 矢印・フリーズアロー・速度/色変化格納処理
 	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
@@ -9443,11 +9444,10 @@ function makeFinishView(_text) {
 }
 
 function finishViewing() {
-	const fullArrows = g_allArrow + g_allFrz / 2;
-	if (g_currentArrows === fullArrows) {
-		if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
+	if (g_currentArrows === g_fullArrows) {
+		if (g_resultObj.ii + g_resultObj.kita === g_fullArrows) {
 			g_resultObj.spState = `allPerfect`;
-		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
+		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === g_fullArrows) {
 			g_resultObj.spState = `perfect`;
 		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
 			g_resultObj.spState = `fullCombo`;
@@ -9528,14 +9528,13 @@ function resultInit() {
 	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
 		g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan +
 		g_resultObj.kita + g_resultObj.iknai;
-	const fullArrows = g_allArrow + g_allFrz / 2;
 
 	// スコア計算(一括)
 	const scoreTmp = Object.keys(g_pointAllocation).reduce(
 		(score, name) => score + g_resultObj[name] * g_pointAllocation[name]
 		, 0)
 
-	const allScore = (g_allArrow + g_allFrz / 2) * 10;
+	const allScore = g_fullArrows * 10;
 	const resultScore = Math.round(scoreTmp / allScore * g_maxScore) || 0;
 	g_resultObj.score = resultScore;
 
@@ -9546,7 +9545,7 @@ function resultInit() {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
 		g_resultObj.spState = `failed`;
-	} else if (playingArrows === fullArrows && g_stateObj.autoAll === C_FLG_OFF) {
+	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF) {
 		if (g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai === 0) {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
@@ -9693,7 +9692,7 @@ function resultInit() {
 	lblResultPre.style.opacity = 0;
 
 	const lblResultPre2 = createDivCssLabel(`lblResultPre2`, g_sWidth / 2 + 50, 40,
-		200, 30, 20, (playingArrows === fullArrows ? g_resultMsgObj[g_resultObj.spState] : ``), g_cssObj.result_Cleared);
+		200, 30, 20, (playingArrows === g_fullArrows ? g_resultMsgObj[g_resultObj.spState] : ``), g_cssObj.result_Cleared);
 	divRoot.appendChild(lblResultPre2);
 
 	if (!g_gameOverFlg) {
