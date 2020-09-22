@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/09/05
+ * Revised : 2020/09/22
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 16.3.0`;
-const g_revisedDate = `2020/09/05`;
+const g_version = `Ver 16.4.0`;
+const g_revisedDate = `2020/09/22`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -461,7 +461,6 @@ function createDiv(_id, _x, _y, _width, _height) {
 	style.position = `absolute`;
 
 	style.userSelect = C_DIS_NONE;
-	style.webkitUserSelect = C_DIS_NONE;
 	style.msUserSelect = C_DIS_NONE;
 	style.mozUserSelect = C_DIS_NONE;
 	style.khtmlUserSelect = C_DIS_NONE;
@@ -2237,7 +2236,7 @@ function titleInit() {
 				highscores: {},
 			};
 			localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
-			location.reload(true);
+			location.reload();
 		}
 	});
 	btnReset.title = g_msgObj.dataReset;
@@ -2254,7 +2253,7 @@ function titleInit() {
 		fontsize: 20,
 		align: C_ALIGN_CENTER,
 		class: g_cssObj.button_Start,
-	}, _ => location.reload(true));
+	}, _ => location.reload());
 	btnReload.title = g_msgObj.reload;
 	divRoot.appendChild(btnReload);
 
@@ -3122,8 +3121,10 @@ function headerConvert(_dosObj) {
 				setVal(g_presetCustomDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 	});
 
-	// デフォルトReady表示の遅延時間設定
-	obj.readyDelayFrame = setVal(_dosObj.readyDelayFrame, 0, C_TYP_NUMBER);
+	// デフォルトReady/リザルト表示の遅延時間設定
+	[`ready`, `result`].forEach(objName => {
+		obj[`${objName}DelayFrame`] = setVal(_dosObj[`${objName}DelayFrame`], 0, C_TYP_NUMBER);
+	});
 
 	// デフォルトReady表示のアニメーション時間設定
 	obj.readyAnimationFrame = setVal(_dosObj.readyAnimationFrame, 150, C_TYP_NUMBER);
@@ -4582,25 +4583,12 @@ function createOptionWindow(_sprite) {
 	}));
 
 	// フェードインのスライダー処理
-	let addXPos = 0;
-	let addYPos = 0;
-	if (g_userAgent.indexOf(`firefox`) !== -1) {
-		addXPos = -8;
-		addYPos = 1;
-	}
-	const lblFadeinSlider = createDivCssLabel(`lblFadeinBar`, 160 + addXPos, addYPos, ``, ``, ``,
-		`<input id=fadeinSlider type=range value=0 min=0 max=99 step=1>`);
+	const lblFadeinSlider = createDivCssLabel(`lblFadeinBar`, C_LEN_SETLBL_LEFT, 0, C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL,
+		`<input id="fadeinSlider" type="range" value="${g_stateObj.fadein}" min="0" max="99" step="1">`);
 	spriteList.fadein.appendChild(lblFadeinSlider);
 
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
-	fadeinSlider.value = g_stateObj.fadein;
-
 	fadeinSlider.addEventListener(`input`, _ => {
-		g_stateObj.fadein = parseInt(fadeinSlider.value);
-		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
-	}, false);
-
-	fadeinSlider.addEventListener(`change`, _ => {
 		g_stateObj.fadein = parseInt(fadeinSlider.value);
 		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
 	}, false);
@@ -6052,8 +6040,9 @@ function loadingScoreInit2() {
 	if (g_headerObj.frzStartjdgUse) {
 		g_allArrow += g_allFrz / 2;
 	}
+	g_fullArrows = g_allArrow + g_allFrz / 2;
 
-	calcLifeVals(g_allArrow + g_allFrz / 2);
+	calcLifeVals(g_fullArrows);
 
 	// 矢印・フリーズアロー・速度/色変化格納処理
 	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
@@ -7507,6 +7496,7 @@ function getArrowSettings() {
 	g_workObj.lifeVal = Math.floor(g_workObj.lifeInit * 100) / 100;
 	g_gameOverFlg = false;
 	g_finishFlg = true;
+	g_resultObj.spState = ``;
 
 	if (g_stateObj.dataSaveFlg && setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``) {
 
@@ -9454,16 +9444,20 @@ function makeFinishView(_text) {
 }
 
 function finishViewing() {
-	if (g_currentArrows === g_allArrow + g_allFrz / 2) {
-		if (g_headerObj.finishView !== C_DIS_NONE) {
-			const fullArrows = g_allArrow + g_allFrz / 2;
-			if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
-				makeFinishView(`<span class="result_AllPerfect">All Perfect!!</span>`);
-			} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
-				makeFinishView(`<span class="result_Perfect">Perfect!!</span>`);
-			} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
-				makeFinishView(`<span class="result_FullCombo">FullCombo!</span>`);
-			}
+	if (g_currentArrows === g_fullArrows) {
+		if (g_resultObj.ii + g_resultObj.kita === g_fullArrows) {
+			g_resultObj.spState = `allPerfect`;
+		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === g_fullArrows) {
+			g_resultObj.spState = `perfect`;
+		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
+			g_resultObj.spState = `fullCombo`;
+		} else if (!g_gameOverFlg) {
+			g_resultObj.spState = `cleared`;
+		} else {
+			g_resultObj.spState = `failed`;
+		}
+		if (g_headerObj.finishView !== C_DIS_NONE && [`allPerfect`, `perfect`, `fullCombo`].includes(g_resultObj.spState)) {
+			makeFinishView(g_resultMsgObj[g_resultObj.spState]);
 		}
 	}
 }
@@ -9534,14 +9528,13 @@ function resultInit() {
 	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
 		g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan +
 		g_resultObj.kita + g_resultObj.iknai;
-	const fullArrows = g_allArrow + g_allFrz / 2;
 
 	// スコア計算(一括)
 	const scoreTmp = Object.keys(g_pointAllocation).reduce(
 		(score, name) => score + g_resultObj[name] * g_pointAllocation[name]
 		, 0)
 
-	const allScore = (g_allArrow + g_allFrz / 2) * 10;
+	const allScore = g_fullArrows * 10;
 	const resultScore = Math.round(scoreTmp / allScore * g_maxScore) || 0;
 	g_resultObj.score = resultScore;
 
@@ -9551,23 +9544,18 @@ function resultInit() {
 	if (g_gameOverFlg) {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
-	} else if (playingArrows === fullArrows && g_stateObj.autoAll === C_FLG_OFF) {
+		g_resultObj.spState = `failed`;
+	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF) {
 		if (g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai === 0) {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
 		} else {
-			let rankPos = g_rankObj.rankRate.length;
-			for (let j = 0, len = g_rankObj.rankRate.length; j < len; j++) {
-				rankPos = len;
+			for (let j = 0; j < g_rankObj.rankRate.length; j++) {
 				if (resultScore * 100 / g_maxScore >= g_rankObj.rankRate[j]) {
 					rankMark = g_rankObj.rankMarks[j];
 					rankColor = g_rankObj.rankColor[j];
 					break;
 				}
-			}
-			if (resultScore * 100 / g_maxScore < g_rankObj.rankRate[rankPos - 1]) {
-				rankMark = g_rankObj.rankMarkC;
-				rankColor = g_rankObj.rankColorC;
 			}
 		}
 	} else {
@@ -9602,55 +9590,42 @@ function resultInit() {
 		setVal(musicTitleForView1, ``, C_TYP_STRING), C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2,
 		`Difficulty`, C_ALIGN_LEFT));
-	let difData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-	if (!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
-		difData += ` -${g_stateObj.autoPlay}less`;
-	}
-	if (g_headerObj.makerView) {
-		difData += ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
-	}
-	if (g_stateObj.shuffle !== C_FLG_OFF) {
-		difData += ` [${g_stateObj.shuffle}]`;
-	}
+
+	let difData = [
+		`${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
+		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${g_stateObj.autoPlay}less`)}`,
+		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${g_stateObj.shuffle}]`)}`
+	].filter(value => value !== ``).join(` `);
+
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDifData`, 60, g_cssObj.result_style, 2, difData,
 		C_ALIGN_CENTER));
 	playDataWindow.appendChild(makeCssResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3,
 		`Playstyle`, C_ALIGN_LEFT));
 
-	let playStyleData = ``;
-	playStyleData = `${g_stateObj.speed}x`;
-	if (g_stateObj.motion !== C_FLG_OFF) {
-		playStyleData += `, ${g_stateObj.motion}`;
-	}
-	if (g_stateObj.reverse !== C_FLG_OFF) {
-		if (g_stateObj.scroll !== `---`) {
-			playStyleData += `, R-${g_stateObj.scroll}`;
-		} else {
-			playStyleData += `, Reverse`;
-		}
-	} else if (g_stateObj.scroll !== `---`) {
-		playStyleData += `, ${g_stateObj.scroll}`;
-	}
-	if (g_stateObj.appearance !== `Visible`) {
-		playStyleData += `, ${g_stateObj.appearance}`;
-	}
-	if (g_stateObj.gauge !== g_gauges[0]) {
-		playStyleData += `, ${g_stateObj.gauge}`;
-	}
+	let playStyleData = [
+		`${g_stateObj.speed}x`,
+		`${withOptions(g_stateObj.motion, C_FLG_OFF)}`,
+		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
+			(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
+		`${withOptions(g_stateObj.appearance, `Visible`)}`,
+		`${withOptions(g_stateObj.gauge, g_gauges[0])}`
+	].filter(value => value !== ``).join(`, `);
 	playDataWindow.appendChild(makeCssResultPlayData(`lblStyleData`, 60, g_cssObj.result_style, 3,
 		playStyleData, C_ALIGN_CENTER));
 
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplay`, 20, g_cssObj.result_lbl, 4,
 		`Display`, C_ALIGN_LEFT));
 
-	let displayData = ``;
-	displayData = withString(displayData, g_stateObj.d_stepzone, `Step`);
-	displayData = withString(displayData, g_stateObj.d_judgment, `Judge`);
-	displayData = withString(displayData, g_stateObj.d_fastslow, `FS`);
-	displayData = withString(displayData, g_stateObj.d_lifegauge, `Life`);
-	displayData = withString(displayData, g_stateObj.d_score, `Score`);
-	displayData = withString(displayData, g_stateObj.d_musicinfo, `MusicInfo`);
-	displayData = withString(displayData, g_stateObj.d_filterline, `Filter`);
+	let displayData = [
+		withOptions(g_stateObj.d_stepzone, C_FLG_ON, `Step`),
+		withOptions(g_stateObj.d_judgment, C_FLG_ON, `Judge`),
+		withOptions(g_stateObj.d_fastslow, C_FLG_ON, `FS`),
+		withOptions(g_stateObj.d_lifegauge, C_FLG_ON, `Life`),
+		withOptions(g_stateObj.d_score, C_FLG_ON, `Score`),
+		withOptions(g_stateObj.d_musicinfo, C_FLG_ON, `MusicInfo`),
+		withOptions(g_stateObj.d_filterline, C_FLG_ON, `Filter`)
+	].filter(value => value !== ``).join(`, `);
 	if (displayData === ``) {
 		displayData = `All Visible`;
 	} else {
@@ -9659,13 +9634,14 @@ function resultInit() {
 	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 4,
 		displayData, C_ALIGN_CENTER));
 
-	let display2Data = ``;
-	display2Data = withString(display2Data, g_stateObj.d_speed, `Speed`);
-	display2Data = withString(display2Data, g_stateObj.d_color, `Color`);
-	display2Data = withString(display2Data, g_stateObj.d_lyrics, `Lyrics`);
-	display2Data = withString(display2Data, g_stateObj.d_background, `Back`);
-	display2Data = withString(display2Data, g_stateObj.d_arroweffect, `Effect`);
-	display2Data = withString(display2Data, g_stateObj.d_special, `SP`);
+	let display2Data = [
+		withOptions(g_stateObj.d_speed, C_FLG_ON, `Speed`),
+		withOptions(g_stateObj.d_color, C_FLG_ON, `Color`),
+		withOptions(g_stateObj.d_lyrics, C_FLG_ON, `Lyrics`),
+		withOptions(g_stateObj.d_background, C_FLG_ON, `Back`),
+		withOptions(g_stateObj.d_arroweffect, C_FLG_ON, `Effect`),
+		withOptions(g_stateObj.d_special, C_FLG_ON, `SP`)
+	].filter(value => value !== ``).join(`, `);
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
@@ -9673,19 +9649,13 @@ function resultInit() {
 		display2Data, C_ALIGN_CENTER));
 
 	/**
-	 * プレイスタイル（Display）のカスタム有無
-	 * @param {string} _baseString 
+	 * プレイスタイルのカスタム有無
 	 * @param {string} _flg 
+	 * @param {string, boolean} _defaultSet デフォルト値
 	 * @param {string} _displayText 
 	 */
-	function withString(_baseString, _flg, _displayText) {
-		if (_flg !== C_FLG_ON) {
-			if (_baseString !== ``) {
-				_baseString += `, `;
-			}
-			_baseString += _displayText;
-		}
-		return _baseString;
+	function withOptions(_flg, _defaultSet, _displayText = _flg) {
+		return (_flg !== _defaultSet ? _displayText : ``);
 	}
 
 	// キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
@@ -9716,29 +9686,13 @@ function resultInit() {
 
 	// Cleared & Failed表示
 	const lblResultPre = createDivCssLabel(`lblResultPre`, g_sWidth / 2 - 150, g_sHeight / 2 - 160,
-		200, 50, 60, `<span class="result_Cleared">CLEARED!</span>`, g_cssObj.result_Cleared);
+		200, 50, 60, g_resultMsgObj.cleared, g_cssObj.result_Cleared);
 	lblResultPre.classList.add(g_cssObj.result_Window);
 	divRoot.appendChild(lblResultPre);
 	lblResultPre.style.opacity = 0;
 
-	let resultFlgTmp = ``;
-
-	if (playingArrows === fullArrows) {
-		if (g_resultObj.ii + g_resultObj.kita === fullArrows) {
-			resultFlgTmp = `<span class="result_AllPerfect">All Perfect!!</span>`;
-		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === fullArrows) {
-			resultFlgTmp = `<span class="result_Perfect">Perfect!!</span>`;
-		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
-			resultFlgTmp = `<span class="result_FullCombo">FullCombo!</span>`;
-		} else {
-			resultFlgTmp = `<span class="result_Cleared">CLEARED!</span>`;
-		}
-	} else {
-		resultFlgTmp = ``;
-	}
-
 	const lblResultPre2 = createDivCssLabel(`lblResultPre2`, g_sWidth / 2 + 50, 40,
-		200, 30, 20, resultFlgTmp, g_cssObj.result_Cleared);
+		200, 30, 20, (playingArrows === g_fullArrows ? g_resultMsgObj[g_resultObj.spState] : ``), g_cssObj.result_Cleared);
 	divRoot.appendChild(lblResultPre2);
 
 	if (!g_gameOverFlg) {
@@ -9746,15 +9700,20 @@ function resultInit() {
 		lblResultPre.style.animationName = `leftToRightFade`;
 	} else {
 		lblResultPre.style.animationDuration = `3s`;
-		lblResultPre.innerHTML = `<span class="result_Failed">FAILED...</span>`;
+		lblResultPre.innerHTML = g_resultMsgObj.failed;
 		lblResultPre.style.animationName = `upToDownFade`;
 
-		lblResultPre2.innerHTML = `<span class="result_Failed">FAILED...</span>`;
+		lblResultPre2.innerHTML = g_resultMsgObj.failed;
 	}
 
 	// プレイデータは Cleared & Failed に合わせて表示
 	playDataWindow.style.animationDuration = `3s`;
 	playDataWindow.style.animationName = `slowlyAppearing`;
+
+	if (g_finishFlg && g_headerObj.resultDelayFrame > 0) {
+		lblResultPre.style.animationDelay = `${g_headerObj.resultDelayFrame / g_fps}s`;
+		playDataWindow.style.animationDelay = `${g_headerObj.resultDelayFrame / g_fps}s`;
+	}
 
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);

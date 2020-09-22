@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/08/22 (v16.1.0)
+ * Revised : 2020/09/22 (v16.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -231,6 +231,8 @@ const g_resultObj = {
 
     fast: 0,
     slow: 0,
+
+    spState: ``,
 };
 
 const C_RLT_BRACKET_L = 210;
@@ -239,11 +241,12 @@ const C_RLT_BRACKET_R = 320;
 
 let g_allArrow = 0;
 let g_allFrz = 0;
+let g_fullArrows = 0;
 let g_currentArrows = 0;
 const g_rankObj = {
-    rankMarks: [`SS`, `S`, `SA`, `AAA`, `AA`, `A`, `B`],
-    rankRate: [97, 90, 85, 80, 75, 70, 50],
-    rankColor: [`#00ccff`, `#6600ff`, `#ff9900`, `#ff0000`, `#00ff00`, `#ff00ff`, `#cc00ff`],
+    rankMarks: [`SS`, `S`, `SA`, `AAA`, `AA`, `A`, `B`, `C`],
+    rankRate: [97, 90, 85, 80, 75, 70, 50, 0],
+    rankColor: [`#00ccff`, `#6600ff`, `#ff9900`, `#ff0000`, `#00ff00`, `#ff00ff`, `#cc00ff`, `#cc9933`],
 
     rankMarkPF: `PF`,
     rankColorPF: `#cccc00`,
@@ -253,6 +256,14 @@ const g_rankObj = {
     rankColorF: `#999999`,
     rankMarkX: `X`,
     rankColorX: `#996600`
+};
+
+const g_resultMsgObj = {
+    allPerfect: `<span class="result_AllPerfect">All Perfect!!</span>`,
+    perfect: `<span class="result_Perfect">Perfect!!</span>`,
+    fullCombo: `<span class="result_FullCombo">FullCombo!</span>`,
+    cleared: `<span class="result_Cleared">CLEARED!</span>`,
+    failed: `<span class="result_Failed">FAILED...</span>`,
 };
 
 const g_pointAllocation = {
