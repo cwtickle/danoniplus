@@ -461,9 +461,9 @@ function createDiv(_id, _x, _y, _width, _height) {
 	style.position = `absolute`;
 
 	style.userSelect = C_DIS_NONE;
+	style.webkitUserSelect = C_DIS_NONE;
 	style.msUserSelect = C_DIS_NONE;
 	style.mozUserSelect = C_DIS_NONE;
-	style.khtmlUserSelect = C_DIS_NONE;
 	style.webkitTouchCallout = C_DIS_NONE;
 
 	return div;
