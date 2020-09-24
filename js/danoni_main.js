@@ -4998,77 +4998,51 @@ function settingsDisplayInit() {
 	}
 
 	// 戻るボタン描画
-	const btnBack = createCssButton({
-		id: `btnBack`,
-		name: `Back`,
-		x: 0,
-		y: g_sHeight - 100,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
-		fontsize: C_LBL_BTNSIZE,
-		align: C_ALIGN_CENTER,
-		class: g_cssObj.button_Back,
-	}, _ => {
-		// タイトル画面へ戻る
-		clearWindow();
-		titleInit();
-	});
-	divRoot.appendChild(btnBack);
+	divRoot.appendChild(
+		createCss2Button(`btnBack`, `Back`, {
+			x: 0, y: g_sHeight - 100,
+			w: g_sWidth / 3, h: C_BTN_HEIGHT,
+			siz: C_LBL_BTNSIZE,
+		}, _ => {
+			// タイトル画面へ戻る
+			clearWindow();
+			titleInit();
+		}, g_cssObj.button_Back)
+	);
 
 	// キーコンフィグボタン描画
-	const btnKeyConfig = createCssButton({
-		id: `btnKeyConfig`,
-		name: `KeyConfig`,
-		x: g_sWidth / 3,
-		y: g_sHeight - 100,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
-		fontsize: C_LBL_BTNSIZE,
-		align: C_ALIGN_CENTER,
-		class: g_cssObj.button_Setting,
-	}, _ => {
-		// キーコンフィグ画面へ遷移
-		g_kcType = `Main`;
-		clearWindow();
-		keyConfigInit();
-	});
-	divRoot.appendChild(btnKeyConfig);
+	divRoot.appendChild(
+		createCss2Button(`btnKeyConfig`, `KeyConfig`, {
+			x: g_sWidth / 3, y: g_sHeight - 100,
+			w: g_sWidth / 3, h: C_BTN_HEIGHT, siz: C_LBL_BTNSIZE,
+		}, _ => {
+			// キーコンフィグ画面へ遷移
+			g_kcType = `Main`;
+			clearWindow();
+			keyConfigInit();
+		}, g_cssObj.button_Setting)
+	);
 
 	// 進むボタン描画
-	const btnPlay = createCssButton({
-		id: `btnPlay`,
-		name: `PLAY!`,
-		x: g_sWidth / 3 * 2,
-		y: g_sHeight - 100,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
-		fontsize: C_LBL_BTNSIZE,
-		align: C_ALIGN_CENTER,
-		class: g_cssObj.button_Next,
-	}, _ => {
-		clearWindow();
-		loadMusic();
-	});
-	divRoot.appendChild(btnPlay);
+	divRoot.appendChild(
+		makePlayButton(_ => {
+			clearWindow();
+			loadMusic();
+		})
+	);
 
 	// SETTINGボタン描画
-	const btnSettings = createCssButton({
-		id: `btnSettings`,
-		name: `<`,
-		x: g_sWidth / 2 - 175 - C_LEN_SETMINI_WIDTH / 2,
-		y: 25,
-		width: C_LEN_SETMINI_WIDTH,
-		height: 40,
-		fontsize: C_LBL_BTNSIZE,
-		align: C_ALIGN_CENTER,
-		class: g_cssObj.button_Mini,
-	}, _ => {
-		// タイトル画面へ戻る
-		clearWindow();
-		optionInit();
-	});
-	btnSettings.title = g_msgObj.toSettings;
-	divRoot.appendChild(btnSettings);
+	divRoot.appendChild(
+		createCss2Button(`btnSettings`, `<`, {
+			x: g_sWidth / 2 - 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
+			w: C_LEN_SETMINI_WIDTH, h: 40, siz: C_LBL_BTNSIZE,
+			title: g_msgObj.toSettings,
+		}, _ => {
+			// タイトル画面へ戻る
+			clearWindow();
+			optionInit();
+		}, g_cssObj.button_Mini)
+	);
 
 
 	// キー操作イベント（デフォルト）
