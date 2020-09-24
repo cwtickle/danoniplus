@@ -4946,19 +4946,11 @@ function makeDifLblCssButton(_id, _name, _heightPos, _func) {
  * @param {function} _func 
  */
 function makeMiniCssButton(_id, _directionFlg, _heightPos, _func) {
-	const miniButton = createCssButton({
-		id: _id + _directionFlg,
-		name: eval(`C_LBL_SETMINI${_directionFlg}`),
+	return createCss2Button(`${_id}${_directionFlg}`, eval(`C_LBL_SETMINI${_directionFlg}`), {
 		x: eval(`C_LEN_SETMINI${_directionFlg}_LEFT`),
 		y: C_LEN_SETLBL_HEIGHT * _heightPos,
-		width: C_LEN_SETMINI_WIDTH,
-		height: C_LEN_SETLBL_HEIGHT,
-		fontsize: C_SIZ_SETLBL,
-		align: C_ALIGN_CENTER,
-		class: g_cssObj.button_Mini,
-	}, _func);
-
-	return miniButton;
+		w: C_LEN_SETMINI_WIDTH, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+	}, _func, g_cssObj.button_Mini);
 }
 
 /*-----------------------------------------------------------*/
@@ -5427,30 +5419,24 @@ function keyConfigInit() {
 	}
 
 	// 戻るボタン描画
-	const btnBack = createCssButton({
-		id: `btnBack`,
-		name: `To Settings`,
-		x: g_sWidth / 3,
-		y: g_sHeight - 75,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT / 2,
-		fontsize: C_LBL_BTNSIZE * 2 / 3,
-		align: C_ALIGN_CENTER,
-		class: g_cssObj.button_Back,
-	}, _ => {
-		// 設定・オプション画面へ戻る
-		g_currentj = 0;
-		g_currentk = 0;
-		g_prevKey = 0;
-		clearWindow();
+	divRoot.appendChild(
+		createCss2Button(`btnBack`, `To Settings`, {
+			x: g_sWidth / 3, y: g_sHeight - 75,
+			w: g_sWidth / 3, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+		}, _ => {
+			// 設定・オプション画面へ戻る
+			g_currentj = 0;
+			g_currentk = 0;
+			g_prevKey = 0;
+			clearWindow();
 
-		if (g_baseDisp === `Settings`) {
-			optionInit();
-		} else {
-			settingsDisplayInit();
-		}
-	});
-	divRoot.appendChild(btnBack);
+			if (g_baseDisp === `Settings`) {
+				optionInit();
+			} else {
+				settingsDisplayInit();
+			}
+		}, g_cssObj.button_Back)
+	);
 
 	// キーパターン表示
 	let lblTransKey = ``;
@@ -5477,89 +5463,71 @@ function keyConfigInit() {
 	};
 
 	// パターン変更ボタン描画(右回り)
-	const btnPtnChangeNext = createCssButton({
-		id: `btnPtnChangeR`,
-		name: `>>`,
-		x: g_sWidth * 4 / 5,
-		y: g_sHeight - 100,
-		width: g_sWidth / 5,
-		height: C_BTN_HEIGHT / 2,
-		fontsize: C_LBL_BTNSIZE * 2 / 3,
-		align: C_ALIGN_CENTER,
-		class: g_cssObj.button_Setting,
-	}, _ => {
-		const tempPtn = searchPattern(g_keyObj.currentPtn + 1, 1, g_headerObj.transKeyUse, `transKey`);
-		g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
-			tempPtn : (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined ? -1 : 0));
+	divRoot.appendChild(
+		createCss2Button(`btnPtnChangeR`, `>>`, {
+			x: g_sWidth * 4 / 5, y: g_sHeight - 100,
+			w: g_sWidth / 5, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+		}, _ => {
+			const tempPtn = searchPattern(g_keyObj.currentPtn + 1, 1, g_headerObj.transKeyUse, `transKey`);
+			g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
+				tempPtn : (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined ? -1 : 0));
 
-		clearWindow();
-		keyConfigInit();
-		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-		const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-		eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
-	});
-	divRoot.appendChild(btnPtnChangeNext);
+			clearWindow();
+			keyConfigInit();
+			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+			const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
+		}, g_cssObj.button_Setting)
+	);
 
 	// パターン変更ボタン描画(左回り)
-	const btnPtnChangeBack = createCssButton({
-		id: `btnPtnChangeL`,
-		name: `<<`,
-		x: 0,
-		y: g_sHeight - 100,
-		width: g_sWidth / 5,
-		height: C_BTN_HEIGHT / 2,
-		fontsize: C_LBL_BTNSIZE * 2 / 3,
-		align: C_ALIGN_CENTER,
-		class: g_cssObj.button_Setting,
-	}, _ => {
-		const tempPtn = searchPattern(g_keyObj.currentPtn - 1, -1, g_headerObj.transKeyUse, `transKey`);
-		g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
-			tempPtn : searchPattern(searchPattern(0, 1) - 1, -1, g_headerObj.transKeyUse, `transKey`));
+	divRoot.appendChild(
+		createCss2Button(`btnPtnChangeL`, `<<`, {
+			x: 0, y: g_sHeight - 100,
+			w: g_sWidth / 5, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+		}, _ => {
+			const tempPtn = searchPattern(g_keyObj.currentPtn - 1, -1, g_headerObj.transKeyUse, `transKey`);
+			g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
+				tempPtn : searchPattern(searchPattern(0, 1) - 1, -1, g_headerObj.transKeyUse, `transKey`));
 
-		clearWindow();
-		keyConfigInit();
-		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-		const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-		eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
-	});
-	divRoot.appendChild(btnPtnChangeBack);
+			clearWindow();
+			keyConfigInit();
+			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+			const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
+		}, g_cssObj.button_Setting)
+	);
 
 	// キーコンフィグリセットボタン描画
-	const btnReset = createCssButton({
-		id: `btnReset`,
-		name: `Reset`,
-		x: 0,
-		y: g_sHeight - 75,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT / 2,
-		fontsize: C_LBL_BTNSIZE * 2 / 3,
-		align: C_ALIGN_CENTER,
-		class: g_cssObj.button_Reset,
-	}, _ => {
-		if (window.confirm(`キーを初期配置に戻します。よろしいですか？`)) {
-			g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-			const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-			const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+	divRoot.appendChild(
+		createCss2Button(`btnReset`, `Reset`, {
+			x: 0, y: g_sHeight - 75,
+			w: g_sWidth / 3, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+		}, _ => {
+			if (window.confirm(`キーを初期配置に戻します。よろしいですか？`)) {
+				g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
+				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+				const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 
-			for (let j = 0; j < keyNum; j++) {
-				for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
-					g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
-					document.querySelector(`#keycon${j}_${k}`).innerHTML = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
+				for (let j = 0; j < keyNum; j++) {
+					for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
+						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
+						document.querySelector(`#keycon${j}_${k}`).innerHTML = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
 
-					if (g_keyObj.currentPtn === -1) {
-						removeClassList(j, k);
-						document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.keyconfig_Defaultkey);
-					} else {
-						removeClassList(j, k);
-						document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.title_base);
+						if (g_keyObj.currentPtn === -1) {
+							removeClassList(j, k);
+							document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.keyconfig_Defaultkey);
+						} else {
+							removeClassList(j, k);
+							document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.title_base);
+						}
 					}
 				}
+				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 			}
-			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
-		}
-	});
-	divRoot.appendChild(btnReset);
+		}, g_cssObj.button_Reset)
+	);
 
 
 	// キーボード押下時処理
@@ -9788,84 +9756,60 @@ function resultInit() {
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
 
 	// 戻るボタン描画
-	const btnBack = createCssButton({
-		id: `btnBack`,
-		name: `Back`,
-		x: 0,
-		y: g_sHeight - 100,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT * 5 / 4,
-		fontsize: C_LBL_BTNSIZE,
-		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`,
-		class: g_cssObj.button_Back,
-	}, _ => {
-		// タイトル画面へ戻る
-		if (g_finishFlg) {
-			g_audio.pause();
-		}
-		clearTimeout(g_timeoutEvtId);
-		clearTimeout(g_timeoutEvtResultId);
-		clearWindow();
-		titleInit();
-	});
-	divRoot.appendChild(btnBack);
+	divRoot.appendChild(
+		createCss2Button(`btnBack`, `Back`, {
+			x: 0, y: g_sHeight - 100,
+			w: g_sWidth / 3, h: C_BTN_HEIGHT * 5 / 4, siz: C_LBL_BTNSIZE,
+			animationName: `smallToNormalY`,
+		}, _ => {
+			// タイトル画面へ戻る
+			if (g_finishFlg) {
+				g_audio.pause();
+			}
+			clearTimeout(g_timeoutEvtId);
+			clearTimeout(g_timeoutEvtResultId);
+			clearWindow();
+			titleInit();
+		}, g_cssObj.button_Back)
+	);
 
 	// Copyボタン描画
-	const btnCopy = createCssButton({
-		id: `btnCopy`,
-		name: `CopyResult`,
-		x: g_sWidth / 3,
-		y: g_sHeight - 100,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT * 5 / 8,
-		fontsize: 24,
-		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`,
-		class: g_cssObj.button_Setting,
-	}, _ => {
-		copyTextToClipboard(resultText);
-		makeInfoWindow(C_MSG_I_0001, `leftToRightFade`);
-	});
-	divRoot.appendChild(btnCopy);
+	divRoot.appendChild(
+		createCss2Button(`btnCopy`, `CopyResult`, {
+			x: g_sWidth / 3, y: g_sHeight - 100,
+			w: g_sWidth / 3, h: C_BTN_HEIGHT * 5 / 8, siz: 24,
+			animationName: `smallToNormalY`,
+		}, _ => {
+			copyTextToClipboard(resultText);
+			makeInfoWindow(C_MSG_I_0001, `leftToRightFade`);
+		}, g_cssObj.button_Setting)
+	);
 
 	// Tweetボタン描画
-	const btnTweet = createCssButton({
-		id: `btnTweet`,
-		name: `Tweet`,
-		x: g_sWidth / 3,
-		y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT * 5 / 8,
-		fontsize: 24,
-		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`,
-		class: g_cssObj.button_Tweet,
-	}, _ => openLink(tweetResult));
-	divRoot.appendChild(btnTweet);
+	divRoot.appendChild(
+		createCss2Button(`btnTweet`, `Tweet`, {
+			x: g_sWidth / 3, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
+			w: g_sWidth / 3, h: C_BTN_HEIGHT * 5 / 8, siz: 24,
+			animationName: `smallToNormalY`,
+		}, _ => openLink(tweetResult), g_cssObj.button_Tweet)
+	);
 
 	// リトライボタン描画
-	const btnRetry = createCssButton({
-		id: `btnRetry`,
-		name: `Retry`,
-		x: g_sWidth / 3 * 2,
-		y: g_sHeight - 100,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT * 5 / 4,
-		fontsize: C_LBL_BTNSIZE,
-		align: C_ALIGN_CENTER,
-		animationName: `smallToNormalY`,
-		class: g_cssObj.button_Reset,
-	}, _ => {
-		if (g_finishFlg) {
-			g_audio.pause();
-		}
-		clearTimeout(g_timeoutEvtId);
-		clearTimeout(g_timeoutEvtResultId);
-		clearWindow();
-		loadMusic();
-	});
-	divRoot.appendChild(btnRetry);
+	divRoot.appendChild(
+		createCss2Button(`btnRetry`, `Retry`, {
+			x: g_sWidth / 3 * 2, y: g_sHeight - 100,
+			w: g_sWidth / 3, h: C_BTN_HEIGHT * 5 / 4, siz: C_LBL_BTNSIZE,
+			animationName: `smallToNormalY`,
+		}, _ => {
+			if (g_finishFlg) {
+				g_audio.pause();
+			}
+			clearTimeout(g_timeoutEvtId);
+			clearTimeout(g_timeoutEvtResultId);
+			clearWindow();
+			loadMusic();
+		}, g_cssObj.button_Reset)
+	);
 
 	// マスクスプライトを作成
 	const maskResultSprite = createSprite(`divRoot`, `maskResultSprite`, 0, 0, g_sWidth, g_sHeight);
