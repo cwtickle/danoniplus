@@ -521,6 +521,27 @@ function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _
 }
 
 /**
+ * 子div要素のラベル文字作成 (CSS版)
+ * @param {*} _id 
+ * @param {*} _posObj (x, y, w, h, siz, align) 
+ * @param {*} _text 
+ * @param {*} _class 
+ */
+function createDivCss2Label(_id, { x, y, w, h, siz, align = C_ALIGN_CENTER, ...rest } = {}, _text, _class = g_cssObj.title_base) {
+	const div = createDiv(_id, x, y, w, h);
+	div.classList.add(_class);
+
+	const style = div.style;
+	style.fontSize = `${siz}px`;
+	style.fontFamily = getBasicFont();
+	style.textAlign = `${align}`;
+	div.innerHTML = _text;
+	Object.keys(rest).forEach(property => style[property] = rest[property]);
+
+	return div;
+}
+
+/**
  * 画像表示
  * @param {string} _id 
  * @param {string} _imgPath 
@@ -712,9 +733,7 @@ function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align) 
  * @param {number} _y 
  */
 function getTitleDivLabel(_id, _titlename, _x, _y) {
-	const div = createDivCssLabel(_id, _x, _y, g_sWidth, 50, C_LBL_BTNSIZE, _titlename);
-	div.style.textAlign = C_ALIGN_CENTER;
-	return div;
+	return createDivCss2Label(_id, { x: _x, y: _y, w: g_sWidth, h: 50, siz: C_LBL_BTNSIZE }, _titlename);
 }
 
 /**
@@ -1029,6 +1048,16 @@ function getQueryParamVal(_name) {
 	return decodeURIComponent(results[2].replace(/\+/g, ` `));
 }
 
+/**
+ * ローディング文字用ラベルの作成
+ */
+function getLoadingLabel() {
+	return createDivCss2Label(`lblLoading`, {
+		x: 0, y: g_sHeight - 40, w: g_sWidth, h: C_LEN_SETLBL_HEIGHT,
+		siz: C_SIZ_SETLBL, align: C_ALIGN_RIGHT,
+	}, `Now Loading...`);
+}
+
 /*-----------------------------------------------------------*/
 /* Scene : TITLE [melon] */
 /*-----------------------------------------------------------*/
@@ -1067,10 +1096,7 @@ function initialControl() {
 	}
 
 	// Now Loadingを表示
-	const lblLoading = createDivCssLabel(`lblLoading`, 0, g_sHeight - 40,
-		g_sWidth, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `Now Loading...`);
-	lblLoading.style.textAlign = C_ALIGN_RIGHT;
-	divRoot.appendChild(lblLoading);
+	divRoot.appendChild(getLoadingLabel());
 
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = true;
@@ -1679,9 +1705,7 @@ function loadMusic() {
 	drawDefaultBackImage(``);
 
 	// Now Loadingを表示
-	const lblLoading = createDivCssLabel(`lblLoading`, 0, g_sHeight - 40,
-		g_sWidth, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `Now Loading...`);
-	lblLoading.style.textAlign = C_ALIGN_RIGHT;
+	const lblLoading = getLoadingLabel();
 	divRoot.appendChild(lblLoading);
 
 	// ローカル動作時
@@ -2142,10 +2166,12 @@ function titleInit() {
 			titlelineheight = setVal(g_headerObj.titlelineheight, titlefontsize2 + 5, C_TYP_NUMBER);
 		}
 
-		const lblmusicTitle = createDivCssLabel(`lblmusicTitle`,
-			Number(titlefontpos[0]), Number(titlefontpos[1]),
-			g_sWidth, g_sHeight - 40,
-			titlefontsize,
+		const lblmusicTitle = createDivCss2Label(`lblmusicTitle`,
+			{
+				x: Number(titlefontpos[0]), y: Number(titlefontpos[1]),
+				w: g_sWidth, h: g_sHeight - 40, siz: titlefontsize,
+				display: `flex`, flexDirection: `column`, justifyContent: `center`, alignItems: `center`,
+			},
 			`<span style="
 				align:${C_ALIGN_CENTER};
 				position:relative;top:${titlefontsize1 - (titlefontsize1 + titlefontsize2) / 2}px;
@@ -2170,10 +2196,6 @@ function titleInit() {
 				</span>
 			</span>`
 		);
-		lblmusicTitle.style.display = `flex`;
-		lblmusicTitle.style.flexDirection = `column`;
-		lblmusicTitle.style.justifyContent = `center`;
-		lblmusicTitle.style.alignItems = `center`;
 		divRoot.appendChild(lblmusicTitle);
 	}
 
@@ -2349,13 +2371,12 @@ function titleInit() {
 		} else {
 			let tmpComment = g_headerObj.commentVal;
 
-			const lblComment = createDivCssLabel(`lblComment`, 0, 70, g_sWidth, g_sHeight - 180, C_SIZ_DIFSELECTOR, tmpComment);
-			lblComment.style.textAlign = C_ALIGN_LEFT;
-			lblComment.style.overflow = `auto`;
-			lblComment.style.background = `#222222`;
-			lblComment.style.color = `#cccccc`;
-			lblComment.style.display = C_DIS_NONE;
-			divRoot.appendChild(lblComment);
+			divRoot.appendChild(
+				createDivCss2Label(`lblComment`, {
+					x: 0, y: 70, w: g_sWidth, h: g_sHeight - 180, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
+					overflow: `auto`, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
+				}, tmpComment)
+			);
 
 			const btnComment = createCssButton({
 				id: `btnComment`,
@@ -4122,12 +4143,16 @@ function createOptionWindow(_sprite) {
 	 */
 	function makeScoreDetailLabel(_name, _label, _value, _pos = 0, _labelname = _label) {
 		if (document.querySelector(`#data${_label}`) === null) {
-			const lbl = createDivCssLabel(`lbl${_label}`, 10, 65 + _pos * 20, 100, 20, C_SIZ_DIFSELECTOR, `${_labelname}`);
-			lbl.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detail${_name}`).appendChild(lbl);
-			const data = createDivCssLabel(`data${_label}`, 10, 65 + _pos * 20, 100, 20, C_SIZ_DIFSELECTOR, `${_value}`);
-			data.style.textAlign = C_ALIGN_RIGHT;
-			document.querySelector(`#detail${_name}`).appendChild(data);
+			document.querySelector(`#detail${_name}`).appendChild(
+				createDivCss2Label(`lbl${_label}`, {
+					x: 10, y: 65 + _pos * 20, w: 100, h: 20, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
+				}, `${_labelname}`)
+			);
+			document.querySelector(`#detail${_name}`).appendChild(
+				createDivCss2Label(`data${_label}`, {
+					x: 10, y: 65 + _pos * 20, w: 100, h: 20, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_RIGHT,
+				}, `${_value}`)
+			);
 		} else {
 			document.querySelector(`#data${_label}`).innerHTML = `${_value}`;
 		}
@@ -4188,14 +4213,18 @@ function createOptionWindow(_sprite) {
 		let data;
 
 		// ツール難易度
+		const detailToolDif = document.querySelector(`#detailToolDif`);
 		if (document.querySelector(`#lblTooldif`) === null) {
-			lbl = createDivCssLabel(`lblTooldif`, 130, 5, 250, 35, 16, `Level`);
-			lbl.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(lbl);
-
-			data = createDivCssLabel(`dataTooldif`, 270, 3, 160, 35, 18, g_detailObj.toolDif[_scoreId].tool);
-			data.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(data);
+			detailToolDif.appendChild(
+				createDivCss2Label(`lblTooldif`, {
+					x: 130, y: 5, w: 250, h: 35, siz: 16, align: C_ALIGN_LEFT,
+				}, `Level`)
+			);
+			detailToolDif.appendChild(
+				createDivCss2Label(`dataTooldif`, {
+					x: 270, y: 3, w: 160, h: 35, siz: 18, align: C_ALIGN_LEFT,
+				}, g_detailObj.toolDif[_scoreId].tool)
+			);
 		} else {
 			document.querySelector(`#dataTooldif`).innerHTML = g_detailObj.toolDif[_scoreId].tool;
 		}
@@ -4207,39 +4236,47 @@ function createOptionWindow(_sprite) {
 			${push3CntStr}`.split(`,`).join(`/`);
 
 		if (document.querySelector(`#lblDouji`) === null) {
-			lbl = createDivCssLabel(`lblDouji`, 130, 25, 125, 35, C_SIZ_DIFSELECTOR, `同時補正`);
-			lbl.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(lbl);
-
-			lbl = createDivCssLabel(`lblTate`, 270, 25, 125, 35, C_SIZ_DIFSELECTOR, `縦連補正`);
-			lbl.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(lbl);
-
-			data = createDivCssLabel(`dataDouji`, 200, 25, 160, 35, C_SIZ_DIFSELECTOR, g_detailObj.toolDif[_scoreId].douji);
-			data.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(data);
-
-			data = createDivCssLabel(`dataTate`, 345, 25, 160, 35, C_SIZ_DIFSELECTOR, g_detailObj.toolDif[_scoreId].tate);
-			data.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(data);
-
-			lbl = createDivCssLabel(`lblArrowInfo`, 130, 45, 290, 35, 16, `All Arrows`);
-			lbl.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(lbl);
-
-			data = createDivCssLabel(`dataArrowInfo`, 270, 45, 160, 35, 16, ArrowInfo);
-			data.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(data);
-
-			lbl = createDivCssLabel(`lblArrowInfo2`, 130, 70, 200, 90, C_SIZ_DIFSELECTOR,
-				`- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`);
-			lbl.style.textAlign = C_ALIGN_LEFT;
-			document.querySelector(`#detailToolDif`).appendChild(lbl);
-
-			data = createDivCssLabel(`dataArrowInfo2`, 140, 70, 275, 150, C_SIZ_DIFSELECTOR, ArrowInfo2);
-			data.style.textAlign = C_ALIGN_LEFT;
-			data.style.overflow = `auto`;
-			document.querySelector(`#detailToolDif`).appendChild(data);
+			detailToolDif.appendChild(
+				createDivCss2Label(`lblDouji`, {
+					x: 130, y: 25, w: 125, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
+				}, `同時補正`)
+			);
+			detailToolDif.appendChild(
+				createDivCss2Label(`lblTate`, {
+					x: 270, y: 25, w: 125, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
+				}, `縦連補正`)
+			);
+			detailToolDif.appendChild(
+				createDivCss2Label(`dataDouji`, {
+					x: 200, y: 25, w: 160, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
+				}, g_detailObj.toolDif[_scoreId].douji)
+			);
+			detailToolDif.appendChild(
+				createDivCss2Label(`dataTate`, {
+					x: 345, y: 25, w: 160, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
+				}, g_detailObj.toolDif[_scoreId].tate)
+			);
+			detailToolDif.appendChild(
+				createDivCss2Label(`lblArrowInfo`, {
+					x: 130, y: 45, w: 290, h: 35, siz: 16, align: C_ALIGN_LEFT,
+				}, `All Arrows`)
+			);
+			detailToolDif.appendChild(
+				createDivCss2Label(`dataArrowInfo`, {
+					x: 270, y: 45, w: 160, h: 35, siz: 16, align: C_ALIGN_LEFT,
+				}, ArrowInfo)
+			);
+			detailToolDif.appendChild(
+				createDivCss2Label(`lblArrowInfo2`, {
+					x: 130, y: 70, w: 200, h: 90, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
+				}, `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`)
+			);
+			detailToolDif.appendChild(
+				createDivCss2Label(`dataArrowInfo2`, {
+					x: 140, y: 70, w: 275, h: 150, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
+					overflow: `auto`,
+				}, ArrowInfo2)
+			);
 
 		} else {
 			document.querySelector(`#dataDouji`).innerHTML = g_detailObj.toolDif[_scoreId].douji;
@@ -4370,9 +4407,12 @@ function createOptionWindow(_sprite) {
 	spriteList.gauge.appendChild(createLblSetting(`Gauge`));
 
 	// ゲージ設定詳細　縦位置: ゲージ設定+1
-	const lblGauge2 = createDivCssLabel(`lblGauge2`, C_LEN_SETLBL_LEFT - 35, C_LEN_SETLBL_HEIGHT,
-		C_LEN_SETLBL_WIDTH + 60, C_LEN_SETLBL_HEIGHT * 2, 11, ``);
-	spriteList.gauge.appendChild(lblGauge2);
+	spriteList.gauge.appendChild(
+		createDivCss2Label(`lblGauge2`, {
+			x: C_LEN_SETLBL_LEFT - 35, y: C_LEN_SETLBL_HEIGHT,
+			w: C_LEN_SETLBL_WIDTH + 60, h: C_LEN_SETLBL_HEIGHT * 2, siz: 11,
+		}, ``)
+	);
 
 	if (g_headerObj.gaugeUse) {
 		const lnkGauge = makeSettingLblCssButton(`lnkGauge`,
@@ -4566,8 +4606,10 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 11 スライダーあり
 	spriteList.fadein.appendChild(createLblSetting(`Fadein`));
 
-	const lnkFadein = createDivCssLabel(`lnkFadein`, C_LEN_SETLBL_LEFT, 0,
-		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, `${g_stateObj.fadein}%`, g_cssObj.settings_FadeinBar);
+	const lnkFadein = createDivCss2Label(`lnkFadein`, {
+		x: C_LEN_SETLBL_LEFT, y: 0,
+		w: C_LEN_SETLBL_WIDTH, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+	}, `${g_stateObj.fadein}%`, g_cssObj.settings_FadeinBar);
 	spriteList.fadein.appendChild(lnkFadein);
 
 	// 右回し・左回しボタン
@@ -4583,9 +4625,11 @@ function createOptionWindow(_sprite) {
 	}));
 
 	// フェードインのスライダー処理
-	const lblFadeinSlider = createDivCssLabel(`lblFadeinBar`, C_LEN_SETLBL_LEFT, 0, C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL,
-		`<input id="fadeinSlider" type="range" value="${g_stateObj.fadein}" min="0" max="99" step="1">`);
-	spriteList.fadein.appendChild(lblFadeinSlider);
+	spriteList.fadein.appendChild(
+		createDivCss2Label(`lblFadeinBar`, {
+			x: C_LEN_SETLBL_LEFT, y: 0, w: C_LEN_SETLBL_WIDTH, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+		}, `<input id="fadeinSlider" type="range" value="${g_stateObj.fadein}" min="0" max="99" step="1">`)
+	);
 
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
 	fadeinSlider.addEventListener(`input`, _ => {
@@ -4867,11 +4911,10 @@ function createGeneralSetting(_obj, _settingName, _options = {}) {
  * @param {string} _settingLabel 
  */
 function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName) {
-	const lbl = createDivCssLabel(`lbl${_settingName}`, 0, _adjY,
-		100, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, _settingLabel);
-	lbl.classList.add(`settings_${_settingName}`);
-
-	return lbl;
+	return createDivCss2Label(`lbl${_settingName}`, {
+		x: 0, y: _adjY,
+		w: 100, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+	}, _settingLabel, `settings_${_settingName}`);
 }
 
 /**
@@ -4897,10 +4940,10 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
  * @param {string} _defaultStr 
  */
 function makeDisabledLabel(_id, _heightPos, _defaultStr) {
-	const lbl = createDivCssLabel(_id, C_LEN_SETLBL_LEFT, C_LEN_SETLBL_HEIGHT * _heightPos,
-		C_LEN_SETLBL_WIDTH, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL, _defaultStr, g_cssObj.settings_Disabled);
-	lbl.style.textAlign = C_ALIGN_CENTER;
-	return lbl;
+	return createDivCss2Label(_id, {
+		x: C_LEN_SETLBL_LEFT, y: C_LEN_SETLBL_HEIGHT * _heightPos,
+		w: C_LEN_SETLBL_WIDTH, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+	}, _defaultStr, g_cssObj.settings_Disabled);
 }
 
 /**
@@ -5036,10 +5079,11 @@ function settingsDisplayInit() {
 	createSettingsDisplayWindow(`divRoot`);
 
 	// ショートカットキーメッセージ
-	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, C_SIZ_MAIN,
-		`Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`);
-	scMsg.style.align = C_ALIGN_CENTER;
-	divRoot.appendChild(scMsg);
+	divRoot.appendChild(
+		createDivCss2Label(`scMsg`, {
+			x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+		}, `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`)
+	);
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customSettingsDisplayInit === C_TYP_FUNCTION) {
@@ -5171,9 +5215,11 @@ function createSettingsDisplayWindow(_sprite) {
 		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
 	const spriteList = setSpriteList(settingList);
 
-	const sdDesc = createDivCssLabel(`sdDesc`, 0, 65, g_sWidth, 20, C_SIZ_MAIN,
-		`[クリックでON/OFFを切替、灰色でOFF]`);
-	document.querySelector(`#${_sprite}`).appendChild(sdDesc);
+	document.querySelector(`#${_sprite}`).appendChild(
+		createDivCss2Label(`sdDesc`, {
+			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+		}, `[クリックでON/OFFを切替、灰色でOFF]`)
+	);
 
 	g_displays.forEach((name, j) => {
 		makeDisplayButton(name, j % 7, Math.floor(j / 7));
@@ -5230,10 +5276,10 @@ function createSettingsDisplayWindow(_sprite) {
 		 * @param {string} _flg
 		 */
 		function makeDisabledDisplayLabel(_id, _heightPos, _widthPos, _defaultStr, _flg) {
-			const lbl = createDivCssLabel(_id, 30 + 180 * _widthPos, 3 + C_LEN_SETLBL_HEIGHT * _heightPos,
-				170, C_LEN_SETLBL_HEIGHT, C_SIZ_DIFSELECTOR, _defaultStr, g_cssObj[`button_Disabled${flg}`]);
-			lbl.style.textAlign = C_ALIGN_CENTER;
-			return lbl;
+			return createDivCss2Label(_id, {
+				x: 30 + 180 * _widthPos, y: 3 + C_LEN_SETLBL_HEIGHT * _heightPos,
+				w: 170, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_DIFSELECTOR,
+			}, _defaultStr, g_cssObj[`button_Disabled${flg}`]);
 		}
 	}
 }
@@ -5304,10 +5350,11 @@ function keyConfigInit() {
 
 	divRoot.appendChild(lblTitle);
 
-	const kcDesc = createDivCssLabel(`kcDesc`, 0, 65, g_sWidth, 20, C_SIZ_MAIN,
-		`[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`);
-	kcDesc.style.align = C_ALIGN_CENTER;
-	divRoot.appendChild(kcDesc);
+	divRoot.appendChild(
+		createDivCss2Label(`kcDesc`, {
+			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+		}, `[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`)
+	);
 
 	// キーの一覧を表示
 	const keyconSprite = createSprite(`divRoot`, `keyconSprite`, 0, 100 + (g_sHeight - 500) / 2, g_sWidth, 300);
@@ -5328,20 +5375,21 @@ function keyConfigInit() {
 	const kWidth = parseInt(keyconSprite.style.width);
 
 	// ショートカットキーメッセージ
-	const scMsg = createDivCssLabel(`scMsg`, 0, g_sHeight - 45, g_sWidth, 20, C_SIZ_MAIN,
-		`プレイ中ショートカット：「${g_kCd[g_headerObj.keyTitleBack]}」タイトルバック / 「${g_kCd[g_headerObj.keyRetry]}」リトライ`);
-	scMsg.style.align = C_ALIGN_CENTER;
-	divRoot.appendChild(scMsg);
+	divRoot.appendChild(
+		createDivCss2Label(`scMsg`, {
+			x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+		}, `プレイ中ショートカット：「${g_kCd[g_headerObj.keyTitleBack]}」タイトルバック / 「${g_kCd[g_headerObj.keyRetry]}」リトライ`)
+	);
 
 	// 別キーモード警告メッセージ
-	const kcMsg = createDivCssLabel(`kcMsg`, 0, g_sHeight - 25, g_sWidth, 20, C_SIZ_MAIN,
-		``, g_cssObj.keyconfig_warning);
-	kcMsg.style.align = C_ALIGN_CENTER;
+	const kcMsg = createDivCss2Label(`kcMsg`, {
+		x: 0, y: g_sHeight - 25, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+	}, ``, g_cssObj.keyconfig_warning);
 	divRoot.appendChild(kcMsg);
 	if (setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) !== ``) {
-		document.querySelector(`#kcMsg`).innerHTML = `別キーモードではハイスコア、キーコンフィグ等は保存されません`;
+		kcMsg.innerHTML = `別キーモードではハイスコア、キーコンフィグ等は保存されません`;
 	} else {
-		document.querySelector(`#kcMsg`).innerHTML = ``;
+		kcMsg.innerHTML = ``;
 	}
 
 	/** 同行の中心から見た場合の位置(x座標) */
@@ -5386,10 +5434,12 @@ function keyConfigInit() {
 			g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k], 0, C_TYP_NUMBER);
 			g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
 
-			keyconSprite.appendChild(createDivCssLabel(`keycon${j}_${k}`,
-				keyconX, 50 + C_KYC_REPHEIGHT * k + keyconY,
-				C_ARW_WIDTH, C_ARW_WIDTH, 16,
-				g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]]));
+			keyconSprite.appendChild(
+				createDivCss2Label(`keycon${j}_${k}`, {
+					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
+					w: C_ARW_WIDTH, h: C_ARW_WIDTH, siz: 16,
+				}, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]])
+			);
 
 			// キーに色付け
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] !== g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]) {
@@ -5409,11 +5459,12 @@ function keyConfigInit() {
 	cursor.style.transitionDuration = `0.125s`;
 
 	// キーコンフィグタイプ切替ボタン
-	const lblKcType = createDivCssLabel(`lblKcType`, 30, 10,
-		70, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL,
-		`ConfigType`);
-	lblKcType.classList.add(g_cssObj.keyconfig_ConfigType);
-	divRoot.appendChild(lblKcType);
+	divRoot.appendChild(
+		createDivCss2Label(`lblKcType`, {
+			x: 30, y: 10,
+			w: 70, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+		}, `ConfigType`, g_cssObj.keyconfig_ConfigType)
+	);
 
 	const lnkKcType = makeSettingLblCssButton(`lnkKcType`, g_kcType, 0, _ => {
 		switch (g_kcType) {
@@ -5440,11 +5491,12 @@ function keyConfigInit() {
 	divRoot.appendChild(lnkKcType);
 
 	// キーカラータイプ切替ボタン
-	const lblcolorType = createDivCssLabel(`lblcolorType`, g_sWidth - 120, 10,
-		70, C_LEN_SETLBL_HEIGHT, C_SIZ_SETLBL,
-		`ColorType`);
-	lblcolorType.classList.add(g_cssObj.keyconfig_ColorType);
-	divRoot.appendChild(lblcolorType);
+	divRoot.appendChild(
+		createDivCss2Label(`lblcolorType`, {
+			x: g_sWidth - 120, y: 10,
+			w: 70, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+		}, `ColorType`, g_cssObj.keyconfig_ColorType)
+	);
 
 	const lnkcolorType = makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, _ => {
 		switch (g_colorType) {
@@ -5529,11 +5581,12 @@ function keyConfigInit() {
 	if (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`], ``, C_TYP_STRING) !== ``) {
 		lblTransKey = '(' + setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`], ``, C_TYP_STRING) + ')';
 	}
-	const lblPattern = createDivCssLabel(`lblPattern`, g_sWidth / 5, g_sHeight - 100,
-		g_sWidth * 3 / 5, C_BTN_HEIGHT / 2, 17,
-		`KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1}${lblTransKey}`);
-	lblPattern.style.textAlign = C_ALIGN_CENTER;
-	divRoot.appendChild(lblPattern);
+	divRoot.appendChild(
+		createDivCss2Label(`lblPattern`, {
+			x: g_sWidth / 5, y: g_sHeight - 100,
+			w: g_sWidth * 3 / 5, h: C_BTN_HEIGHT / 2, siz: 17
+		}, `KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1}${lblTransKey}`)
+	);
 
 	// パターン検索
 	const searchPattern = (_tempPtn, _sign, _transKeyUse = false, _keyCheck = `keyCtrl`) => {
@@ -7704,9 +7757,11 @@ function MainInit() {
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 
-		const filterView = createDivCssLabel(`filterView`, g_headerObj.playingWidth - 70, 0, 10, 10, 10, ``);
-		filterView.style.textAlign = C_ALIGN_RIGHT;
-		mainSprite.appendChild(filterView);
+		mainSprite.appendChild(
+			createDivCss2Label(`filterView`, {
+				x: g_headerObj.playingWidth - 70, y: 0, w: 10, h: 10, siz: 10, align: C_ALIGN_RIGHT,
+			}, ``)
+		);
 
 		if (g_stateObj.d_filterline === C_FLG_OFF) {
 		} else {
@@ -7827,13 +7882,11 @@ function MainInit() {
 	const fullTime = `${fullMin}:${fullSec}`;
 
 	// フレーム数
-	const lblframe = createDivCssLabel(`lblframe`, 0, 0, 100, 30, 20,
-		g_scoreObj.frameNum);
+	const lblframe = createDivCss2Label(`lblframe`, { x: 0, y: 0, w: 100, h: 30, siz: 20 }, g_scoreObj.frameNum);
 	divRoot.appendChild(lblframe);
 
 	// ライフ(数字)
 	const intLifeVal = Math.floor(g_workObj.lifeVal);
-	const lblLife = createDivCssLabel(`lblLife`, 0, 30, 70, 20, 16, intLifeVal);
 	let lblInitColor;
 	if (g_workObj.lifeVal === g_headerObj.maxLifeVal) {
 		lblInitColor = g_cssObj.life_Max;
@@ -7842,7 +7895,7 @@ function MainInit() {
 	} else {
 		lblInitColor = g_cssObj.life_Failed;
 	}
-	lblLife.classList.add(lblInitColor);
+	const lblLife = createDivCss2Label(`lblLife`, { x: 0, y: 30, w: 70, h: 20, siz: 16 }, intLifeVal, lblInitColor);
 	infoSprite.appendChild(lblLife);
 
 	// ライフ背景
@@ -7891,22 +7944,24 @@ function MainInit() {
 	// 曲名・アーティスト名表示
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
-	const lblCredit = createDivCssLabel(`lblCredit`, 125, g_sHeight - 30, g_headerObj.playingWidth - 125, 20, C_SIZ_MAIN,
-		`${musicTitle} / ${artistName}`);
-	lblCredit.style.textAlign = C_ALIGN_LEFT;
+	const lblCredit = createDivCss2Label(`lblCredit`, {
+		x: 125, y: g_sHeight - 30, w: g_headerObj.playingWidth - 125, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_LEFT
+	}, `${musicTitle} / ${artistName}`);
 	infoSprite.appendChild(lblCredit);
 
 	// 曲時間表示：現在時間
-	const lblTime1 = createDivCssLabel(`lblTime1`, 18, g_sHeight - 30, 40, 20, C_SIZ_MAIN,
-		`-:--`);
-	lblTime1.style.textAlign = C_ALIGN_RIGHT;
-	infoSprite.appendChild(lblTime1);
+	infoSprite.appendChild(
+		createDivCss2Label(`lblTime1`, {
+			x: 18, y: g_sHeight - 30, w: 40, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_RIGHT,
+		}, `-:--`)
+	);
 
 	// 曲時間表示：総時間
-	const lblTime2 = createDivCssLabel(`lblTime2`, 60, g_sHeight - 30, 60, 20, C_SIZ_MAIN,
-		`/ ${fullTime}`);
-	lblTime1.style.textAlign = C_ALIGN_RIGHT;
-	infoSprite.appendChild(lblTime2);
+	infoSprite.appendChild(
+		createDivCss2Label(`lblTime2`, {
+			x: 60, y: g_sHeight - 30, w: 60, h: 20, siz: C_SIZ_MAIN,
+		}, `/ ${fullTime}`)
+	);
 
 	const jdgGroups = [`J`, `FJ`];
 	const jdgX = [g_headerObj.playingWidth / 2 - 200, g_headerObj.playingWidth / 2 - 100];
@@ -7920,26 +7975,31 @@ function MainInit() {
 
 	jdgGroups.forEach((jdg, j) => {
 		// キャラクタ表示
-		const charaJ = createDivCssLabel(`chara${jdg}`, jdgX[j], jdgY[j],
-			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj.common_ii);
-		charaJ.style.textAlign = C_ALIGN_CENTER;
+		const charaJ = createDivCss2Label(`chara${jdg}`, {
+			x: jdgX[j], y: jdgY[j],
+			w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_JDGCHARA,
+			opacity: g_stateObj.opacity / 100,
+		}, ``, g_cssObj.common_ii);
 		charaJ.setAttribute(`cnt`, 0);
 		judgeSprite.appendChild(charaJ);
-		charaJ.style.opacity = g_stateObj.opacity / 100;
 
 		// コンボ表示
-		const comboJ = createDivCssLabel(`combo${jdg}`, jdgX[j] + 150, jdgY[j],
-			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_JDGCHARA, ``, g_cssObj[`common_${jdgCombos[j]}`]);
-		comboJ.style.textAlign = C_ALIGN_CENTER;
-		judgeSprite.appendChild(comboJ);
-		comboJ.style.opacity = g_stateObj.opacity / 100;
+		judgeSprite.appendChild(
+			createDivCss2Label(`combo${jdg}`, {
+				x: jdgX[j] + 150, y: jdgY[j],
+				w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_JDGCHARA,
+				opacity: g_stateObj.opacity / 100,
+			}, ``, g_cssObj[`common_${jdgCombos[j]}`])
+		);
 
 		// Fast/Slow表示
-		const diffJ = createDivCssLabel(`diff${jdg}`, jdgX[j] + 150, jdgY[j] + 25,
-			C_LEN_JDGCHARA_WIDTH, C_LEN_JDGCHARA_HEIGHT, C_SIZ_MAIN, ``, g_cssObj.common_combo);
-		diffJ.style.textAlign = C_ALIGN_CENTER;
-		judgeSprite.appendChild(diffJ);
-		diffJ.style.opacity = g_stateObj.opacity / 100;
+		judgeSprite.appendChild(
+			createDivCss2Label(`diff${jdg}`, {
+				x: jdgX[j] + 150, y: jdgY[j] + 25,
+				w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_MAIN,
+				opacity: g_stateObj.opacity / 100,
+			}, ``, g_cssObj.common_combo)
+		);
 	});
 
 	// 判定カウンタ表示
@@ -7972,10 +8032,12 @@ function MainInit() {
 	}
 
 	// パーフェクト演出
-	const finishView = createDivCssLabel(`finishView`, g_headerObj.playingWidth / 2 - 150, g_sHeight / 2 - 50,
-		300, 20, 50, ``, g_cssObj.common_kita);
-	finishView.style.textAlign = C_ALIGN_CENTER;
-	judgeSprite.appendChild(finishView);
+	judgeSprite.appendChild(
+		createDivCss2Label(`finishView`, {
+			x: g_headerObj.playingWidth / 2 - 150, y: g_sHeight / 2 - 50,
+			w: 300, h: 20, siz: 50,
+		}, ``, g_cssObj.common_kita)
+	);
 
 	// 曲情報OFF
 	if (g_stateObj.d_musicinfo === C_FLG_OFF) {
@@ -8005,19 +8067,23 @@ function MainInit() {
 	// Ready?表示
 	if (!g_headerObj.customReadyUse) {
 		const readyColor = (g_headerObj.readyColor !== `` ? g_headerObj.readyColor : g_headerObj.setColorOrg[0]);
-		const lblReady = createDivCssLabel(`lblReady`, g_headerObj.playingX + g_headerObj.playingWidth / 2 - 100,
-			(g_sHeight + g_posObj.stepYR) / 2 - 75, 200, 50, 40,
-			`<span style='color:${readyColor};font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
-		lblReady.style.animationDuration = `${g_headerObj.readyAnimationFrame / g_fps}s`;
-		lblReady.style.animationName = g_headerObj.readyAnimationName;
 		let readyDelayFrame = 0;
 		if (g_stateObj.fadein === 0 && g_headerObj.readyDelayFrame > 0 &&
 			g_headerObj.readyDelayFrame + g_stateObj.adjustment > 0) {
 			readyDelayFrame = g_headerObj.readyDelayFrame + g_stateObj.adjustment;
 		}
-		lblReady.style.animationDelay = `${readyDelayFrame / g_fps}s`;
-		lblReady.style.opacity = 0;
-		divRoot.appendChild(lblReady);
+
+		divRoot.appendChild(
+			createDivCss2Label(`lblReady`, {
+				x: g_headerObj.playingX + g_headerObj.playingWidth / 2 - 100,
+				y: (g_sHeight + g_posObj.stepYR) / 2 - 75,
+				w: 200, h: 50, siz: 40,
+				animationDuration: `${g_headerObj.readyAnimationFrame / g_fps}s`,
+				animationName: g_headerObj.readyAnimationName,
+				animationDelay: `${readyDelayFrame / g_fps}s`,
+				opacity: 0,
+			}, `<span style='color:${readyColor};font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`)
+		);
 	}
 
 	// ユーザカスタムイベント(初期)
@@ -8954,11 +9020,10 @@ function changeAppearanceFilter(_appearance, _num = 10) {
  * @param {string, number} _text
  */
 function makeCounterSymbol(_id, _x, _class, _heightPos, _text) {
-	const counter = createDivCssLabel(_id, _x, C_LEN_JDGCNTS_HEIGHT * _heightPos,
-		C_LEN_JDGCNTS_WIDTH, C_LEN_JDGCNTS_HEIGHT, C_SIZ_JDGCNTS, _text, _class);
-	counter.style.textAlign = C_ALIGN_RIGHT;
-
-	return counter;
+	return createDivCss2Label(_id, {
+		x: _x, y: C_LEN_JDGCNTS_HEIGHT * _heightPos,
+		w: C_LEN_JDGCNTS_WIDTH, h: C_LEN_JDGCNTS_HEIGHT, siz: C_SIZ_JDGCNTS, align: C_ALIGN_RIGHT,
+	}, _text, _class);
 }
 
 // TODO: この部分を矢印塗りつぶし部分についても適用できるように関数を見直し
@@ -9685,14 +9750,18 @@ function resultInit() {
 	resultWindow.appendChild(lblRank);
 
 	// Cleared & Failed表示
-	const lblResultPre = createDivCssLabel(`lblResultPre`, g_sWidth / 2 - 150, g_sHeight / 2 - 160,
-		200, 50, 60, g_resultMsgObj.cleared, g_cssObj.result_Cleared);
+	const lblResultPre = createDivCss2Label(`lblResultPre`, {
+		x: g_sWidth / 2 - 150, y: g_sHeight / 2 - 160,
+		w: 200, h: 50, siz: 60,
+		opacity: 0,
+	}, g_resultMsgObj.cleared, g_cssObj.result_Cleared);
 	lblResultPre.classList.add(g_cssObj.result_Window);
 	divRoot.appendChild(lblResultPre);
-	lblResultPre.style.opacity = 0;
 
-	const lblResultPre2 = createDivCssLabel(`lblResultPre2`, g_sWidth / 2 + 50, 40,
-		200, 30, 20, (playingArrows === g_fullArrows ? g_resultMsgObj[g_resultObj.spState] : ``), g_cssObj.result_Cleared);
+	const lblResultPre2 = createDivCss2Label(`lblResultPre2`, {
+		x: g_sWidth / 2 + 50, y: 40,
+		w: 200, h: 30, siz: 20,
+	}, (playingArrows === g_fullArrows ? g_resultMsgObj[g_resultObj.spState] : ``), g_cssObj.result_Cleared);
 	divRoot.appendChild(lblResultPre2);
 
 	if (!g_gameOverFlg) {
@@ -10007,11 +10076,10 @@ function resultInit() {
  * @param {string} _align
  */
 function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align) {
-	const symbol = createDivCssLabel(_id, _x, 18 * _heightPos,
-		400, 18, C_SIZ_MAIN, _text, _class);
-	symbol.style.textAlign = _align;
-
-	return symbol;
+	return createDivCss2Label(_id, {
+		x: _x, y: 18 * _heightPos,
+		w: 400, h: 18, siz: C_SIZ_MAIN, align: _align,
+	}, _text, _class);
 }
 
 /**
@@ -10024,11 +10092,10 @@ function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align) {
  * @param {string} _align
  */
 function makeCssResultSymbol(_id, _x, _class, _heightPos, _text, _align) {
-	const symbol = createDivCssLabel(_id, _x, 18 * _heightPos,
-		150, 18, 16, _text, _class);
-	symbol.style.textAlign = _align;
-
-	return symbol;
+	return createDivCss2Label(_id, {
+		x: _x, y: 18 * _heightPos,
+		w: 150, h: 18, siz: 16, align: _align,
+	}, _text, _class);
 }
 
 // ライセンス原文、以下は削除しないでください
