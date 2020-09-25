@@ -606,7 +606,7 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
  * @param {...any} _classes 
  */
 function createColorObject2(_id,
-	{ x = 0, y = 0, w = C_ARW_WIDTH, h = C_ARW_WIDTH, color = ``, rotate = ``, styleName = ``, ...rest } = {}, ..._classes) {
+	{ x = 0, y = 0, w = C_ARW_WIDTH, h = C_ARW_WIDTH, rotate = ``, styleName = ``, ...rest } = {}, ..._classes) {
 
 	const div = createDiv(_id, x, y, w, h);
 	_classes.forEach(_class => div.classList.add(_class));
@@ -621,16 +621,13 @@ function createColorObject2(_id,
 		style.transform = `rotate(${rotate}deg)`;
 	}
 
-	if (color !== ``) {
-		style.background = color;
-	}
 	style.maskImage = `url("${g_imgObj[charaStyle]}")`;
 	style.maskSize = `contain`;
 	style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
 	style.webkitMaskSize = `contain`;
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 
-	div.setAttribute(`color`, color);
+	div.setAttribute(`color`, rest.background);
 	div.setAttribute(`type`, charaStyle);
 
 	return div;
@@ -2152,7 +2149,7 @@ function titleInit() {
 			createColorObject2(`lblArrow`, {
 				x: (g_sWidth - 500) / 2, y: -15 + (g_sHeight - 500) / 2,
 				w: 500, h: 500,
-				color: makeColorGradation(titlecolor, {
+				background: makeColorGradation(titlecolor, {
 					defaultColorgrd: false,
 					objType: `titleArrow`,
 				}), rotate: 180, opacity: 0.25,
@@ -5335,14 +5332,14 @@ function keyConfigInit() {
 			keyconSprite.appendChild(
 				createColorObject2(`arrowShadow${j}`, {
 					x: keyconX, y: keyconY,
-					color: shadowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`,
+					background: shadowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`,
 					opacity: 0.5,
 				})
 			);
 		}
 		keyconSprite.appendChild(createColorObject2(`arrow${j}`, {
 			x: keyconX, y: keyconY,
-			color: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
+			background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
 		}));
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
@@ -7687,7 +7684,7 @@ function MainInit() {
 			);
 
 			frzHit.appendChild(createColorObject2(`frzHitTop${j}`, {
-				color: g_workObj.frzHitColors[j], rotate: g_workObj.arrowRtn[j],
+				background: g_workObj.frzHitColors[j], rotate: g_workObj.arrowRtn[j],
 			}));
 
 		} else {
@@ -7806,9 +7803,8 @@ function MainInit() {
 	// ライフ：ボーダーライン
 	// この背景の画像は40x16で作成しているが、`padding-right:5px`があるためサイズを35x16で作成
 	const lifeBorderObj = createColorObject2(`lifeBorderObj`, {
-		color: C_CLR_BORDER,
 		x: 10, y: 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
-		w: 35, h: 16, styleName: `lifeBorder`,
+		w: 35, h: 16, background: C_CLR_BORDER, styleName: `lifeBorder`,
 		fontFamily: getBasicFont(),
 	}, g_cssObj.life_Border, g_cssObj.life_BorderColor);
 	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
@@ -8381,7 +8377,7 @@ function MainInit() {
 			const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? g_workObj.arrowColors[_j] :
 				g_headerObj.setShadowColor[colorPos]);
 			const arrShadow = createColorObject2(`${_name}Shadow${_j}_${_arrowCnt}`, {
-				color: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
 			});
 			if (g_headerObj.setShadowColor[colorPos] === `Default`) {
 				arrShadow.style.opacity = 0.5;
@@ -8391,7 +8387,7 @@ function MainInit() {
 
 		// 矢印
 		stepRoot.appendChild(createColorObject2(`${_name}Top${_j}_${_arrowCnt}`, {
-			color: _color, rotate: g_workObj.arrowRtn[_j],
+			background: _color, rotate: g_workObj.arrowRtn[_j],
 		}));
 	}
 
@@ -8470,7 +8466,7 @@ function MainInit() {
 		frzRoot.appendChild(
 			createColorObject2(`${_name}Bar${frzNo}`, {
 				x: 5, y: C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
-				w: C_ARW_WIDTH - 10, h: frzLength * g_workObj.boostSpd, color: _barColor, styleName: `frzBar`,
+				w: C_ARW_WIDTH - 10, h: frzLength * g_workObj.boostSpd, background: _barColor, styleName: `frzBar`,
 				opacity: 0.75,
 			})
 		);
@@ -8478,14 +8474,14 @@ function MainInit() {
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
 		frzRoot.appendChild(
 			createColorObject2(`${_name}TopShadow${frzNo}`, {
-				color: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
 			}, g_cssObj.main_objShadow)
 		);
 
 		// 開始矢印。ヒット時は隠れる。
 		frzRoot.appendChild(
 			createColorObject2(`${_name}Top${frzNo}`, {
-				color: _normalColor, rotate: g_workObj.arrowRtn[_j],
+				background: _normalColor, rotate: g_workObj.arrowRtn[_j],
 			})
 		);
 
@@ -8493,7 +8489,7 @@ function MainInit() {
 		frzRoot.appendChild(
 			createColorObject2(`${_name}BtmShadow${frzNo}`, {
 				x: 0, y: frzLength * boostSpdDir,
-				color: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
 			}, g_cssObj.main_objShadow)
 		);
 
@@ -8501,7 +8497,7 @@ function MainInit() {
 		frzRoot.appendChild(
 			createColorObject2(`${_name}Btm${frzNo}`, {
 				x: 0, y: frzLength * boostSpdDir,
-				color: _normalColor, rotate: g_workObj.arrowRtn[_j],
+				background: _normalColor, rotate: g_workObj.arrowRtn[_j],
 			})
 		);
 	}
