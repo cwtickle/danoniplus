@@ -527,7 +527,8 @@ function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _
  * @param {object} _obj (x, y, w, h, siz, align, ...rest)
  * @param {...any} _classes 
  */
-function createDivCss2Label(_id, _text, { x, y, w, h, siz, align = C_ALIGN_CENTER, ...rest } = {}, ..._classes) {
+function createDivCss2Label(_id, _text, { x = 0, y = 0, w = C_LEN_SETLBL_WIDTH, h = C_LEN_SETLBL_HEIGHT,
+	siz = C_SIZ_SETLBL, align = C_ALIGN_CENTER, ...rest } = {}, ..._classes) {
 	const div = createDiv(_id, x, y, w, h);
 	if (_classes === undefined) {
 		div.classList.add(g_cssObj.title_base);
@@ -3941,7 +3942,7 @@ function createOptionWindow(_sprite) {
 				setScoreDetail();
 			}, {
 				x: 415, y: 0,
-				w: 23, h: 23, siz: 16,
+				w: 23, h: 23, siz: C_SIZ_JDGCNTS,
 				title: g_msgObj.graph,
 			}, g_cssObj.button_Mini)
 		);
@@ -4189,7 +4190,7 @@ function createOptionWindow(_sprite) {
 		if (document.querySelector(`#lblTooldif`) === null) {
 			detailToolDif.appendChild(
 				createDivCss2Label(`lblTooldif`, `Level`, {
-					x: 130, y: 5, w: 250, h: 35, siz: 16, align: C_ALIGN_LEFT,
+					x: 130, y: 5, w: 250, h: 35, siz: C_SIZ_JDGCNTS, align: C_ALIGN_LEFT,
 				})
 			);
 			detailToolDif.appendChild(
@@ -4230,12 +4231,12 @@ function createOptionWindow(_sprite) {
 			);
 			detailToolDif.appendChild(
 				createDivCss2Label(`lblArrowInfo`, `All Arrows`, {
-					x: 130, y: 45, w: 290, h: 35, siz: 16, align: C_ALIGN_LEFT,
+					x: 130, y: 45, w: 290, h: 35, siz: C_SIZ_JDGCNTS, align: C_ALIGN_LEFT,
 				})
 			);
 			detailToolDif.appendChild(
 				createDivCss2Label(`dataArrowInfo`, ArrowInfo, {
-					x: 270, y: 45, w: 160, h: 35, siz: 16, align: C_ALIGN_LEFT,
+					x: 270, y: 45, w: 160, h: 35, siz: C_SIZ_JDGCNTS, align: C_ALIGN_LEFT,
 				})
 			);
 			detailToolDif.appendChild(
@@ -4559,7 +4560,6 @@ function createOptionWindow(_sprite) {
 
 	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}%`, {
 		x: C_LEN_SETLBL_LEFT, y: 0,
-		w: C_LEN_SETLBL_WIDTH, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
 	}, g_cssObj.settings_FadeinBar);
 	spriteList.fadein.appendChild(lnkFadein);
 
@@ -4578,7 +4578,7 @@ function createOptionWindow(_sprite) {
 	// フェードインのスライダー処理
 	spriteList.fadein.appendChild(
 		createDivCss2Label(`lblFadeinBar`, `<input id="fadeinSlider" type="range" value="${g_stateObj.fadein}" min="0" max="99" step="1">`, {
-			x: C_LEN_SETLBL_LEFT, y: 0, w: C_LEN_SETLBL_WIDTH, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+			x: C_LEN_SETLBL_LEFT, y: 0,
 		})
 	);
 
@@ -4863,8 +4863,7 @@ function createGeneralSetting(_obj, _settingName, _options = {}) {
  */
 function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName) {
 	return createDivCss2Label(`lbl${_settingName}`, _settingLabel, {
-		x: 0, y: _adjY,
-		w: 100, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+		x: 0, y: _adjY, w: 100,
 	}, `settings_${_settingName}`);
 }
 
@@ -4893,7 +4892,6 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
 function makeDisabledLabel(_id, _heightPos, _defaultStr) {
 	return createDivCss2Label(_id, _defaultStr, {
 		x: C_LEN_SETLBL_LEFT, y: C_LEN_SETLBL_HEIGHT * _heightPos,
-		w: C_LEN_SETLBL_WIDTH, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
 	}, g_cssObj.settings_Disabled);
 }
 
@@ -5178,7 +5176,7 @@ function createSettingsDisplayWindow(_sprite) {
 		function makeDisabledDisplayLabel(_id, _heightPos, _widthPos, _defaultStr, _flg) {
 			return createDivCss2Label(_id, _defaultStr, {
 				x: 30 + 180 * _widthPos, y: 3 + C_LEN_SETLBL_HEIGHT * _heightPos,
-				w: 170, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_DIFSELECTOR,
+				w: 170, siz: C_SIZ_DIFSELECTOR,
 			}, g_cssObj[`button_Disabled${flg}`]);
 		}
 	}
@@ -5339,7 +5337,7 @@ function keyConfigInit() {
 			keyconSprite.appendChild(
 				createDivCss2Label(`keycon${j}_${k}`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]], {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: C_ARW_WIDTH, siz: 16,
+					w: C_ARW_WIDTH, h: C_ARW_WIDTH, siz: C_SIZ_JDGCNTS,
 				})
 			);
 
@@ -5363,8 +5361,7 @@ function keyConfigInit() {
 	// キーコンフィグタイプ切替ボタン
 	divRoot.appendChild(
 		createDivCss2Label(`lblKcType`, `ConfigType`, {
-			x: 30, y: 10,
-			w: 70, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+			x: 30, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ConfigType)
 	);
 
@@ -5394,8 +5391,7 @@ function keyConfigInit() {
 	// キーカラータイプ切替ボタン
 	divRoot.appendChild(
 		createDivCss2Label(`lblcolorType`, `ColorType`, {
-			x: g_sWidth - 120, y: 10,
-			w: 70, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+			x: g_sWidth - 120, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ColorType)
 	);
 
@@ -5478,7 +5474,7 @@ function keyConfigInit() {
 	divRoot.appendChild(
 		createDivCss2Label(`lblPattern`, `KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1}${lblTransKey}`, {
 			x: g_sWidth / 5, y: g_sHeight - 100,
-			w: g_sWidth * 3 / 5, h: C_BTN_HEIGHT / 2, siz: 17
+			w: g_sWidth * 3 / 5, h: C_BTN_HEIGHT / 2,
 		})
 	);
 
@@ -7771,7 +7767,7 @@ function MainInit() {
 	} else {
 		lblInitColor = g_cssObj.life_Failed;
 	}
-	const lblLife = createDivCss2Label(`lblLife`, intLifeVal, { x: 0, y: 30, w: 70, h: 20, siz: 16 }, lblInitColor);
+	const lblLife = createDivCss2Label(`lblLife`, intLifeVal, { x: 0, y: 30, w: 70, h: 20, siz: C_SIZ_JDGCNTS }, lblInitColor);
 	infoSprite.appendChild(lblLife);
 
 	// ライフ背景
@@ -9957,7 +9953,7 @@ function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align) {
 function makeCssResultSymbol(_id, _x, _class, _heightPos, _text, _align) {
 	return createDivCss2Label(_id, _text, {
 		x: _x, y: 18 * _heightPos,
-		w: 150, h: 18, siz: 16, align: _align,
+		w: 150, h: 18, siz: C_SIZ_JDGCNTS, align: _align,
 	}, _class);
 }
 
