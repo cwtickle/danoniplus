@@ -802,8 +802,8 @@ function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align) 
  * @param {number} _x 
  * @param {number} _y 
  */
-function getTitleDivLabel(_id, _titlename, _x, _y) {
-	return createDivCss2Label(_id, _titlename, { x: _x, y: _y, w: g_sWidth, h: 50, siz: C_LBL_BTNSIZE });
+function getTitleDivLabel(_id, _titlename, _x, _y, ..._classes) {
+	return createDivCss2Label(_id, _titlename, { x: _x, y: _y, w: g_sWidth, h: 50, siz: C_LBL_BTNSIZE }, ..._classes);
 }
 
 /**
@@ -2159,42 +2159,30 @@ function titleInit() {
 	}
 
 	// タイトル文字描画
-	const lblTitle = getTitleDivLabel(`lblTitle`,
-		`<div class="settings_Title">DANCING</div>
+	divRoot.appendChild(
+		getTitleDivLabel(`lblTitle`,
+			`<div class="settings_Title">DANCING</div>
 		<div class="settings_TitleStar">☆</div>
 		<div class="settings_Title2">ONIGIRI</div>`
-			.replace(/[\t\n]/g, ``), 0, 15);
-	lblTitle.classList.add(g_cssObj.flex_centering);
-	divRoot.appendChild(lblTitle);
+				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering)
+	);
 
 	// 曲名文字描画（曲名は譜面データから取得）
 	if (!g_headerObj.customTitleUse) {
 
-		let titlefontgrd = ``;
-		let titlefontgrd2 = ``;
-
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
-		if (g_headerObj.titlegrds.length === 0) {
-			titlefontgrd = makeColorGradation(`${g_headerObj.setColorOrg[0]},${g_headerObj.setColorOrg[2]}`, {
+		const titlefontgrd = makeColorGradation(
+			(g_headerObj.titlegrds.length > 0 ?
+				g_headerObj.titlegrds[0] : `${g_headerObj.setColorOrg[0]},${g_headerObj.setColorOrg[2]}`), {
+			defaultColorgrd: false,
+			objType: `titleMusic`,
+		});
+		const titlefontgrd2 = (g_headerObj.titlegrds.length > 1 ?
+			makeColorGradation(g_headerObj.titlegrds[1], {
 				defaultColorgrd: false,
 				objType: `titleMusic`,
-			});
-			titlefontgrd2 = titlefontgrd;
-		} else {
-			titlefontgrd = makeColorGradation(g_headerObj.titlegrds[0], {
-				defaultColorgrd: false,
-				objType: `titleMusic`,
-			});
-			if (g_headerObj.titlegrds.length > 1) {
-				titlefontgrd2 = makeColorGradation(g_headerObj.titlegrds[1], {
-					defaultColorgrd: false,
-					objType: `titleMusic`,
-				});
-			} else {
-				titlefontgrd2 = titlefontgrd;
-			}
-		}
+			}) : titlefontgrd);
 
 		let titlefontsize = 64 * (12 / g_headerObj.musicTitleForView[0].length);
 		if (titlefontsize >= 64) {
@@ -2499,8 +2487,6 @@ function makeWarningWindow(_text) {
 		divRoot.removeChild(document.querySelector(`#lblWarning`));
 		lblWarning = getTitleDivLabel(`lblWarning`, text, 0, 70);
 	}
-	divRoot.appendChild(lblWarning);
-
 	setWindowStyle(lblWarning, `#ffcccc`, `#660000`);
 	divRoot.appendChild(lblWarning);
 }
@@ -2542,7 +2528,7 @@ function setWindowStyle(_lbl, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 		warnHeight = len * 21;
 	} else {
 		warnHeight = 150;
-		lblWarning.style.overflow = `auto`;
+		_lbl.style.overflow = `auto`;
 	}
 	_lbl.style.backgroundColor = _bkColor;
 	_lbl.style.opacity = 0.9;
@@ -3630,9 +3616,7 @@ function optionInit() {
 	g_baseDisp = `Settings`;
 
 	// タイトル文字描画
-	const lblTitle = getTitleDivLabel(`lblTitle`, `SETTINGS`, 0, 15);
-	lblTitle.classList.add(`settings_Title`);
-	divRoot.appendChild(lblTitle);
+	divRoot.appendChild(getTitleDivLabel(`lblTitle`, `SETTINGS`, 0, 15, `settings_Title`));
 
 	// オプションボタン用の設置
 	createOptionWindow(`divRoot`);
@@ -4995,9 +4979,7 @@ function settingsDisplayInit() {
 	g_canLoadDifInfoFlg = false;
 
 	// タイトル文字描画
-	const lblTitle = getTitleDivLabel(`lblTitle`, `DISPLAY`, 0, 15);
-	lblTitle.classList.add(`settings_Display`);
-	divRoot.appendChild(lblTitle);
+	divRoot.appendChild(getTitleDivLabel(`lblTitle`, `DISPLAY`, 0, 15, `settings_Display`));
 
 	// オプションボタン用の設置
 	createSettingsDisplayWindow(`divRoot`);
@@ -5235,13 +5217,11 @@ function keyConfigInit() {
 	g_canLoadDifInfoFlg = false;
 
 	// タイトル文字描画
-	const lblTitle = getTitleDivLabel(`lblTitle`,
-		`<div class="settings_Title">KEY</div>
-		<div class="settings_Title2">CONFIG</div>`
-			.replace(/[\t\n]/g, ``), 0, 15);
-	lblTitle.classList.add(g_cssObj.flex_centering);
-
-	divRoot.appendChild(lblTitle);
+	divRoot.appendChild(
+		getTitleDivLabel(`lblTitle`,
+			`<div class="settings_Title">KEY</div><div class="settings_Title2">CONFIG</div>`
+				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering)
+	);
 
 	divRoot.appendChild(
 		createDivCss2Label(`kcDesc`, `[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`, {
@@ -9462,9 +9442,7 @@ function resultInit() {
 	}
 
 	// タイトル文字描画
-	const lblTitle = getTitleDivLabel(`lblTitle`, `RESULT`, 0, 15);
-	lblTitle.classList.add(`settings_Title`);
-	divRoot.appendChild(lblTitle);
+	divRoot.appendChild(getTitleDivLabel(`lblTitle`, `RESULT`, 0, 15, `settings_Title`));
 
 	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70 + (g_sHeight - 500) / 2, 450, 110);
 	playDataWindow.classList.add(g_cssObj.result_PlayDataWindow);
