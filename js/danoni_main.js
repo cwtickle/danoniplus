@@ -627,7 +627,7 @@ function createColorObject2(_id,
 	style.webkitMaskSize = `contain`;
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 
-	div.setAttribute(`color`, rest.background);
+	div.setAttribute(`color`, rest.background || ``);
 	div.setAttribute(`type`, charaStyle);
 
 	return div;
