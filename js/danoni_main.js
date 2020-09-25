@@ -521,11 +521,11 @@ function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _
 }
 
 /**
- * 子div要素のラベル文字作成 (CSS版)
- * @param {*} _id 
- * @param {*} _obj (x, y, w, h, siz, align, ...rest) 
- * @param {*} _text 
- * @param {*} _class 
+ * 子div要素のラベル文字作成 (CSS版・拡張属性対応)
+ * @param {string} _id 
+ * @param {string} _text 
+ * @param {object} _obj (x, y, w, h, siz, align, ...rest)
+ * @param {...any} _classes 
  */
 function createDivCss2Label(_id, _text, { x, y, w, h, siz, align = C_ALIGN_CENTER, ...rest } = {}, ..._classes) {
 	const div = createDiv(_id, x, y, w, h);
@@ -594,6 +594,43 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
 	div.style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
 	div.style.webkitMaskSize = `contain`;
 	div.setAttribute(`color`, _color);
+	div.setAttribute(`type`, charaStyle);
+
+	return div;
+}
+
+/**
+ * 色付きオブジェクトの作成 (拡張属性対応)
+ * @param {string} _id 
+ * @param {object} _obj (x, y, w, h, color, rotate, styleName, ...rest) 
+ * @param {...any} _classes 
+ */
+function createColorObject2(_id,
+	{ x = 0, y = 0, w = C_ARW_WIDTH, h = C_ARW_WIDTH, color = ``, rotate = ``, styleName = ``, ...rest } = {}, ..._classes) {
+
+	const div = createDiv(_id, x, y, w, h);
+	_classes.forEach(_class => div.classList.add(_class));
+	const style = div.style;
+
+	// 矢印・オブジェクト判定
+	let charaStyle;
+	if (isNaN(Number(rotate)) || rotate === ``) {
+		charaStyle = `${rotate}${styleName}`;
+	} else {
+		charaStyle = `arrow${styleName}`;
+		style.transform = `rotate(${rotate}deg)`;
+	}
+
+	if (color !== ``) {
+		style.background = color;
+	}
+	style.maskImage = `url("${g_imgObj[charaStyle]}")`;
+	style.maskSize = `contain`;
+	style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
+	style.webkitMaskSize = `contain`;
+	Object.keys(rest).forEach(property => style[property] = rest[property]);
+
+	div.setAttribute(`color`, color);
 	div.setAttribute(`type`, charaStyle);
 
 	return div;
@@ -705,13 +742,12 @@ function createCssButton(_obj, _func) {
 }
 
 /**
- * ボタンの作成 (CSS版)
- * - 拡張属性の指定に対応したバージョンです。
+ * ボタンの作成 (CSS版・拡張属性対応)
  * @param {string} _id 
- * @param {*} _text
- * @param {*} _func
- * @param {*} _obj (x, y, w, h, siz, align, ...rest)
- * @param {*} _classes 
+ * @param {string} _text
+ * @param {function} _func
+ * @param {object} _obj (x, y, w, h, siz, align, ...rest)
+ * @param {...any} _classes 
  */
 function createCss2Button(_id, _text, _func,
 	{ x, y, w, h, siz, align = C_ALIGN_CENTER, title = ``, ...rest } = {}, ..._classes) {
@@ -2112,12 +2148,16 @@ function titleInit() {
 	if (!g_headerObj.customTitleArrowUse) {
 		const titlecolor = (g_headerObj.titlearrowgrds.length === 0 ?
 			`${g_headerObj.setColorOrg[0]}` : g_headerObj.titlearrowgrds[0]);
-		const lblArrow = createColorObject(`lblArrow`, makeColorGradation(titlecolor, {
-			defaultColorgrd: false,
-			objType: `titleArrow`,
-		}), (g_sWidth - 500) / 2, -15 + (g_sHeight - 500) / 2, 500, 500, 180);
-		lblArrow.style.opacity = 0.25;
-		divRoot.appendChild(lblArrow);
+		divRoot.appendChild(
+			createColorObject2(`lblArrow`, {
+				x: (g_sWidth - 500) / 2, y: -15 + (g_sHeight - 500) / 2,
+				w: 500, h: 500,
+				color: makeColorGradation(titlecolor, {
+					defaultColorgrd: false,
+					objType: `titleArrow`,
+				}), rotate: 180, opacity: 0.25,
+			})
+		);
 	}
 
 	// 背景スプライトを作成
@@ -4912,7 +4952,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func 
  * @param {object} _overridePos 座標設定(既定を上書き)
- * @param {array} _classes 追加するクラス
+ * @param {...any} _classes 追加するクラス
  */
 function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, siz, ...rest } = {}, ..._classes) {
 	const tmpObj = {
@@ -5292,16 +5332,18 @@ function keyConfigInit() {
 			// 矢印の塗り部分
 			const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? arrowColor :
 				g_headerObj.setShadowColor[colorPos]);
-			const stepShadow = createColorObject(`arrowShadow${j}`, shadowColor,
-				keyconX, keyconY,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_keyObj[`stepRtn${keyCtrlPtn}`][j], `Shadow`);
-			keyconSprite.appendChild(stepShadow);
-			stepShadow.style.opacity = 0.5;
+			keyconSprite.appendChild(
+				createColorObject2(`arrowShadow${j}`, {
+					x: keyconX, y: keyconY,
+					color: shadowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`,
+					opacity: 0.5,
+				})
+			);
 		}
-		keyconSprite.appendChild(createColorObject(`arrow${j}`, arrowColor,
-			keyconX, keyconY,
-			C_ARW_WIDTH, C_ARW_WIDTH,
-			g_keyObj[`stepRtn${keyCtrlPtn}`][j]));
+		keyconSprite.appendChild(createColorObject2(`arrow${j}`, {
+			x: keyconX, y: keyconY,
+			color: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
+		}));
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 			g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k], 0, C_TYP_NUMBER);
@@ -7535,37 +7577,34 @@ function MainInit() {
 
 		// 矢印の内側を塗りつぶすか否か
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
-			// 矢印の塗り部分
-			const stepShadow = createColorObject(`stepShadow${j}`, ``,
-				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `ShadowStep`);
-			stepShadow.classList.add(g_cssObj.main_objStepShadow);
-			stepRoot.appendChild(stepShadow);
-			stepShadow.style.opacity = 0.7;
+			stepRoot.appendChild(
+				createColorObject2(`stepShadow${j}`, {
+					rotate: g_workObj.stepRtn[j], styleName: `ShadowStep`,
+					opacity: 0.7,
+				}, g_cssObj.main_objStepShadow)
+			);
 		}
 
 		// ステップゾーン本体
-		const step = createColorObject(`step${j}`, ``,
-			0, 0,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Step`);
-		step.classList.add(g_cssObj.main_stepDefault);
+		const step = createColorObject2(`step${j}`, {
+			rotate: g_workObj.stepRtn[j], styleName: `Step`,
+		}, g_cssObj.main_stepDefault);
 		stepRoot.appendChild(step);
 
 		// ステップゾーン空押し
-		const stepDiv = createColorObject(`stepDiv${j}`, ``,
-			0, 0,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.stepRtn[j], `Step`);
-		stepDiv.style.display = C_DIS_NONE;
-		stepDiv.classList.add(g_cssObj.main_stepKeyDown);
+		const stepDiv = createColorObject2(`stepDiv${j}`, {
+			rotate: g_workObj.stepRtn[j], styleName: `Step`,
+			display: C_DIS_NONE,
+		}, g_cssObj.main_stepKeyDown);
 		stepRoot.appendChild(stepDiv);
 
 		// ステップゾーンヒット時モーション
-		const stepHit = createColorObject(`stepHit${j}`, ``,
-			-15, -15,
-			C_ARW_WIDTH + 30, C_ARW_WIDTH + 30, g_workObj.stepHitRtn[j], `StepHit`);
-		stepHit.style.opacity = 0;
+		const stepHit = createColorObject2(`stepHit${j}`, {
+			x: -15, y: -15, w: C_ARW_WIDTH + 30, h: C_ARW_WIDTH + 30,
+			rotate: g_workObj.stepHitRtn[j], styleName: `StepHit`,
+			opacity: 0,
+		}, g_cssObj.main_stepDefault);
 		stepHit.setAttribute(`cnt`, 0);
-		stepHit.classList.add(g_cssObj.main_stepDefault);
 		stepRoot.appendChild(stepHit);
 
 		// ステップゾーンOFF設定
@@ -7576,28 +7615,30 @@ function MainInit() {
 	if (g_stateObj.scroll === `Flat` && g_stateObj.d_stepzone === C_FLG_ON) {
 
 		// ステップゾーンの代わり
-		const stepBar0 = createColorObject(`stepBar`, ``,
-			0, C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
-			g_headerObj.playingWidth - 50, 1, ``, `lifeBar`);
-		stepBar0.classList.add(g_cssObj.life_Failed);
-		mainSprite.appendChild(stepBar0);
+		mainSprite.appendChild(
+			createColorObject2(`stepBar0`, {
+				x: 0, y: C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
+				w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
+			}, g_cssObj.life_Failed)
+		);
 
-		const stepBar1 = createColorObject(`stepBar`, ``,
-			0, C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
-			g_headerObj.playingWidth - 50, 1, ``, `lifeBar`);
-		stepBar1.classList.add(g_cssObj.life_Failed);
-		mainSprite.appendChild(stepBar1);
+		mainSprite.appendChild(
+			createColorObject2(`stepBar1`, {
+				x: 0, y: C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
+				w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
+			}, g_cssObj.life_Failed)
+		);
 
 	}
 
 	// Hidden+, Sudden+用のライン、パーセント表示
 	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj => {
-		const filterBar = createColorObject(`${obj}`, ``,
-			0, 0,
-			g_headerObj.playingWidth - 50, 1, ``, `lifeBar`);
-		filterBar.classList.add(g_cssObj.life_Failed);
-		filterBar.style.opacity = 0.0625;
-		mainSprite.appendChild(filterBar);
+		mainSprite.appendChild(
+			createColorObject2(`${obj}`, {
+				w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
+				opacity: 0.0625,
+			}, g_cssObj.life_Failed)
+		);
 	});
 	document.querySelector(`#borderBar0`).style.top = `${g_posObj.stepDiffY}px`;
 	document.querySelector(`#borderBar1`).style.top = `${g_posObj.stepDiffY + g_posObj.arrowHeight}px`;
@@ -7639,22 +7680,23 @@ function MainInit() {
 			C_ARW_WIDTH, C_ARW_WIDTH);
 		frzHit.style.opacity = 0;
 		if (isNaN(Number(g_workObj.arrowRtn[j]))) {
-			const frzHitShadow = createColorObject(`frzHitShadow${j}`, ``,
-				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j], `Shadow`);
-			frzHitShadow.classList.add(g_cssObj.main_objShadow);
-			frzHit.appendChild(frzHitShadow);
+			frzHit.appendChild(
+				createColorObject2(`frzHitShadow${j}`, {
+					rotate: g_workObj.arrowRtn[j], styleName: `Shadow`
+				}, g_cssObj.main_objShadow)
+			);
 
-			frzHit.appendChild(createColorObject(`frzHitTop${j}`, g_workObj.frzHitColors[j],
-				0, 0,
-				C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[j]));
+			frzHit.appendChild(createColorObject2(`frzHitTop${j}`, {
+				color: g_workObj.frzHitColors[j], rotate: g_workObj.arrowRtn[j],
+			}));
 
 		} else {
-			const frzHitTop = createColorObject(`frzHitTop${j}`, ``,
-				-8, -8,
-				C_ARW_WIDTH + 16, C_ARW_WIDTH + 16, g_workObj.arrowRtn[j], `Shadow`);
-			frzHitTop.classList.add(g_cssObj.main_frzHitTop);
-			frzHit.appendChild(frzHitTop);
+			frzHit.appendChild(
+				createColorObject2(`frzHitTop${j}`, {
+					x: -8, y: -8, w: C_ARW_WIDTH + 16, h: C_ARW_WIDTH + 16,
+					rotate: g_workObj.arrowRtn[j], styleName: `Shadow`,
+				}, g_cssObj.main_frzHitTop)
+			);
 		}
 	}
 
@@ -7746,27 +7788,30 @@ function MainInit() {
 	infoSprite.appendChild(lblLife);
 
 	// ライフ背景
-	const lifeBackObj = createColorObject(`lifeBackObj`, ``,
-		5, 50,
-		15, g_sHeight - 100, ``, `lifeBar`);
-	lifeBackObj.classList.add(g_cssObj.life_Background);
-	infoSprite.appendChild(lifeBackObj);
+	infoSprite.appendChild(
+		createColorObject2(`lifeBackObj`, {
+			x: 5, y: 50,
+			w: 15, h: g_sHeight - 100, styleName: `lifeBar`,
+		}, g_cssObj.life_Background)
+	);
 
 	// ライフ本体
-	const lifeBar = createColorObject(`lifeBar`, ``,
-		5, 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal,
-		15, (g_sHeight - 100) * intLifeVal / g_headerObj.maxLifeVal, ``, `lifeBar`);
-	lifeBar.classList.add(lblInitColor);
-	infoSprite.appendChild(lifeBar);
+	infoSprite.appendChild(
+		createColorObject2(`lifeBar`, {
+			x: 5, y: 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal,
+			w: 15, h: (g_sHeight - 100) * intLifeVal / g_headerObj.maxLifeVal, styleName: `lifeBar`,
+		}, lblInitColor)
+	);
 
 	// ライフ：ボーダーライン
 	// この背景の画像は40x16で作成しているが、`padding-right:5px`があるためサイズを35x16で作成
-	const lifeBorderObj = createColorObject(`lifeBorderObj`, C_CLR_BORDER,
-		10, 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
-		35, 16, ``, `lifeBorder`);
+	const lifeBorderObj = createColorObject2(`lifeBorderObj`, {
+		color: C_CLR_BORDER,
+		x: 10, y: 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
+		w: 35, h: 16, styleName: `lifeBorder`,
+		fontFamily: getBasicFont(),
+	}, g_cssObj.life_Border, g_cssObj.life_BorderColor);
 	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
-	lifeBorderObj.classList.add(g_cssObj.life_Border, g_cssObj.life_BorderColor);
-	lifeBorderObj.style.fontFamily = getBasicFont();
 	infoSprite.appendChild(lifeBorderObj);
 
 	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === g_headerObj.maxLifeVal) {
@@ -8335,8 +8380,9 @@ function MainInit() {
 			// 矢印の塗り部分
 			const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? g_workObj.arrowColors[_j] :
 				g_headerObj.setShadowColor[colorPos]);
-			const arrShadow = createColorObject(`${_name}Shadow${_j}_${_arrowCnt}`, shadowColor,
-				0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
+			const arrShadow = createColorObject2(`${_name}Shadow${_j}_${_arrowCnt}`, {
+				color: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+			});
 			if (g_headerObj.setShadowColor[colorPos] === `Default`) {
 				arrShadow.style.opacity = 0.5;
 			}
@@ -8344,8 +8390,9 @@ function MainInit() {
 		}
 
 		// 矢印
-		stepRoot.appendChild(createColorObject(`${_name}Top${_j}_${_arrowCnt}`, _color,
-			0, 0, C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
+		stepRoot.appendChild(createColorObject2(`${_name}Top${_j}_${_arrowCnt}`, {
+			color: _color, rotate: g_workObj.arrowRtn[_j],
+		}));
 	}
 
 	/**
@@ -8420,34 +8467,43 @@ function MainInit() {
 		// 後に作成するほど前面に表示される。
 
 		// フリーズアロー帯(frzBar)
-		const frzBar = frzRoot.appendChild(createColorObject(`${_name}Bar${frzNo}`, _barColor,
-			5, C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
-			C_ARW_WIDTH - 10, frzLength * g_workObj.boostSpd, ``, `frzBar`));
-		frzBar.style.opacity = 0.75;
+		frzRoot.appendChild(
+			createColorObject2(`${_name}Bar${frzNo}`, {
+				x: 5, y: C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
+				w: C_ARW_WIDTH - 10, h: frzLength * g_workObj.boostSpd, color: _barColor, styleName: `frzBar`,
+				opacity: 0.75,
+			})
+		);
 
 		// 開始矢印の塗り部分。ヒット時は前面に出て光る。
-		const frzTopShadow = createColorObject(`${_name}TopShadow${frzNo}`, shadowColor,
-			0, 0,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
-		frzTopShadow.classList.add(g_cssObj.main_objShadow);
-		frzRoot.appendChild(frzTopShadow);
+		frzRoot.appendChild(
+			createColorObject2(`${_name}TopShadow${frzNo}`, {
+				color: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+			}, g_cssObj.main_objShadow)
+		);
 
 		// 開始矢印。ヒット時は隠れる。
-		frzRoot.appendChild(createColorObject(`${_name}Top${frzNo}`, _normalColor,
-			0, 0,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
+		frzRoot.appendChild(
+			createColorObject2(`${_name}Top${frzNo}`, {
+				color: _normalColor, rotate: g_workObj.arrowRtn[_j],
+			})
+		);
 
 		// 後発矢印の塗り部分
-		const frzBtmShadow = createColorObject(`${_name}BtmShadow${frzNo}`, shadowColor,
-			0, frzLength * boostSpdDir,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j], `Shadow`);
-		frzBtmShadow.classList.add(g_cssObj.main_objShadow);
-		frzRoot.appendChild(frzBtmShadow);
+		frzRoot.appendChild(
+			createColorObject2(`${_name}BtmShadow${frzNo}`, {
+				x: 0, y: frzLength * boostSpdDir,
+				color: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+			}, g_cssObj.main_objShadow)
+		);
 
 		// 後発矢印
-		frzRoot.appendChild(createColorObject(`${_name}Btm${frzNo}`, _normalColor,
-			0, frzLength * boostSpdDir,
-			C_ARW_WIDTH, C_ARW_WIDTH, g_workObj.arrowRtn[_j]));
+		frzRoot.appendChild(
+			createColorObject2(`${_name}Btm${frzNo}`, {
+				x: 0, y: frzLength * boostSpdDir,
+				color: _normalColor, rotate: g_workObj.arrowRtn[_j],
+			})
+		);
 	}
 
 	/**
