@@ -527,9 +527,13 @@ function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _
  * @param {*} _text 
  * @param {*} _class 
  */
-function createDivCss2Label(_id, _text, { x, y, w, h, siz, align = C_ALIGN_CENTER, ...rest } = {}, _class = g_cssObj.title_base) {
+function createDivCss2Label(_id, _text, { x, y, w, h, siz, align = C_ALIGN_CENTER, ...rest } = {}, ..._classes) {
 	const div = createDiv(_id, x, y, w, h);
-	div.classList.add(_class);
+	if (_classes === undefined) {
+		div.classList.add(g_cssObj.title_base);
+	} else {
+		_classes.forEach(_class => div.classList.add(_class));
+	}
 
 	const style = div.style;
 	style.fontSize = `${siz}px`;
@@ -714,9 +718,7 @@ function createCss2Button(_id, _text, _func,
 
 	const div = createDiv(_id, x, y, w, h);
 	div.classList.add(`button_common`);
-	_classes.forEach(_class => {
-		div.classList.add(_class);
-	});
+	_classes.forEach(_class => div.classList.add(_class));
 	div.innerHTML = _text;
 	div.title = title;
 	div.ontouchstart = ``;
@@ -5253,15 +5255,15 @@ function keyConfigInit() {
 	);
 
 	// 別キーモード警告メッセージ
-	const kcMsg = createDivCss2Label(`kcMsg`, ``, {
-		x: 0, y: g_sHeight - 25, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
-	}, g_cssObj.keyconfig_warning);
-	divRoot.appendChild(kcMsg);
-	if (setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) !== ``) {
-		kcMsg.innerHTML = `別キーモードではハイスコア、キーコンフィグ等は保存されません`;
-	} else {
-		kcMsg.innerHTML = ``;
-	}
+	divRoot.appendChild(
+		createDivCss2Label(
+			`kcMsg`,
+			setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) !== `` ? `別キーモードではハイスコア、キーコンフィグ等は保存されません` : ``,
+			{
+				x: 0, y: g_sHeight - 25, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+			}, g_cssObj.keyconfig_warning
+		)
+	);
 
 	/** 同行の中心から見た場合の位置(x座標) */
 	let stdPos = 0;
@@ -9595,30 +9597,29 @@ function resultInit() {
 	resultWindow.appendChild(lblRank);
 
 	// Cleared & Failed表示
-	const lblResultPre = createDivCss2Label(`lblResultPre`, g_resultMsgObj.cleared, {
-		x: g_sWidth / 2 - 150, y: g_sHeight / 2 - 160,
-		w: 200, h: 50, siz: 60,
-		opacity: 0,
-	}, g_cssObj.result_Cleared);
-	lblResultPre.classList.add(g_cssObj.result_Window);
+	const lblResultPre = createDivCss2Label(
+		`lblResultPre`,
+		(!g_gameOverFlg ? g_resultMsgObj.cleared : g_resultMsgObj.failed),
+		{
+			x: g_sWidth / 2 - 150, y: g_sHeight / 2 - 160,
+			w: 200, h: 50, siz: 60,
+			opacity: 0, animationDuration: (!g_gameOverFlg ? `2.5s` : `3s`),
+			animationName: (!g_gameOverFlg ? `leftToRightFade` : `upToDownFade`)
+		}, g_cssObj.result_Cleared, g_cssObj.result_Window
+	);
 	divRoot.appendChild(lblResultPre);
 
-	const lblResultPre2 = createDivCss2Label(`lblResultPre2`, (playingArrows === g_fullArrows ? g_resultMsgObj[g_resultObj.spState] : ``), {
-		x: g_sWidth / 2 + 50, y: 40,
-		w: 200, h: 30, siz: 20,
-	}, g_cssObj.result_Cleared);
-	divRoot.appendChild(lblResultPre2);
-
-	if (!g_gameOverFlg) {
-		lblResultPre.style.animationDuration = `2.5s`;
-		lblResultPre.style.animationName = `leftToRightFade`;
-	} else {
-		lblResultPre.style.animationDuration = `3s`;
-		lblResultPre.innerHTML = g_resultMsgObj.failed;
-		lblResultPre.style.animationName = `upToDownFade`;
-
-		lblResultPre2.innerHTML = g_resultMsgObj.failed;
-	}
+	divRoot.appendChild(
+		createDivCss2Label(
+			`lblResultPre2`,
+			(!g_gameOverFlg ?
+				(playingArrows === g_fullArrows ? g_resultMsgObj[g_resultObj.spState] : ``) : g_resultMsgObj.failed),
+			{
+				x: g_sWidth / 2 + 50, y: 40,
+				w: 200, h: 30, siz: 20,
+			}, g_cssObj.result_Cleared
+		)
+	);
 
 	// プレイデータは Cleared & Failed に合わせて表示
 	playDataWindow.style.animationDuration = `3s`;
