@@ -746,8 +746,8 @@ function createCssButton(_obj, _func) {
  * @param {object} _obj (x, y, w, h, siz, align, ...rest)
  * @param {...any} _classes 
  */
-function createCss2Button(_id, _text, _func,
-	{ x, y, w, h, siz, align = C_ALIGN_CENTER, title = ``, ...rest } = {}, ..._classes) {
+function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g_sWidth / 3, h = C_BTN_HEIGHT,
+	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, ...rest } = {}, ..._classes) {
 
 	const div = createDiv(_id, x, y, w, h);
 	div.classList.add(`button_common`);
@@ -1855,8 +1855,7 @@ async function initWebAudioAPI(_url) {
  */
 function makePlayButton(_func) {
 	return createCss2Button(`btnPlay`, `PLAY!`, _func, {
-		x: g_sWidth * 2 / 3, y: g_sHeight - 100,
-		w: g_sWidth / 3, h: C_BTN_HEIGHT, siz: C_LBL_BTNSIZE,
+		x: g_sWidth * 2 / 3,
 		animationName: (g_initialFlg ? `` : `smallToNormalY`),
 	}, g_cssObj.button_Next);
 }
@@ -2299,8 +2298,7 @@ function titleInit() {
 			clearWindow();
 			optionInit();
 		}, {
-			x: 0, y: g_sHeight - 100,
-			w: g_sWidth, h: C_BTN_HEIGHT, siz: C_LBL_TITLESIZE,
+			w: g_sWidth, siz: C_LBL_TITLESIZE,
 		}, g_cssObj.button_Start)
 	);
 
@@ -3658,8 +3656,6 @@ function optionInit() {
 			clearWindow();
 			titleInit();
 		}, {
-			x: 0, y: g_sHeight - 100,
-			w: g_sWidth / 3, h: C_BTN_HEIGHT, siz: C_LBL_BTNSIZE,
 			animationName: (g_initialFlg ? `` : `smallToNormalY`),
 		}, g_cssObj.button_Back)
 	);
@@ -3672,8 +3668,7 @@ function optionInit() {
 			clearWindow();
 			keyConfigInit();
 		}, {
-			x: g_sWidth / 3, y: g_sHeight - 100,
-			w: g_sWidth / 3, h: C_BTN_HEIGHT, siz: C_LBL_BTNSIZE,
+			x: g_sWidth / 3,
 			animationName: (g_initialFlg ? `` : `smallToNormalY`),
 		}, g_cssObj.button_Setting)
 	);
@@ -3694,7 +3689,7 @@ function optionInit() {
 			settingsDisplayInit();
 		}, {
 			x: g_sWidth / 2 + 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
-			w: C_LEN_SETMINI_WIDTH, h: 40, siz: C_LBL_BTNSIZE,
+			w: C_LEN_SETMINI_WIDTH, h: 40,
 			title: g_msgObj.toDisplay,
 		}, g_cssObj.button_Mini)
 	);
@@ -5035,11 +5030,7 @@ function settingsDisplayInit() {
 			// タイトル画面へ戻る
 			clearWindow();
 			titleInit();
-		}, {
-			x: 0, y: g_sHeight - 100,
-			w: g_sWidth / 3, h: C_BTN_HEIGHT,
-			siz: C_LBL_BTNSIZE,
-		}, g_cssObj.button_Back)
+		}, {}, g_cssObj.button_Back)
 	);
 
 	// キーコンフィグボタン描画
@@ -5050,8 +5041,7 @@ function settingsDisplayInit() {
 			clearWindow();
 			keyConfigInit();
 		}, {
-			x: g_sWidth / 3, y: g_sHeight - 100,
-			w: g_sWidth / 3, h: C_BTN_HEIGHT, siz: C_LBL_BTNSIZE,
+			x: g_sWidth / 3,
 		}, g_cssObj.button_Setting)
 	);
 
@@ -5071,7 +5061,7 @@ function settingsDisplayInit() {
 			optionInit();
 		}, {
 			x: g_sWidth / 2 - 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
-			w: C_LEN_SETMINI_WIDTH, h: 40, siz: C_LBL_BTNSIZE,
+			w: C_LEN_SETMINI_WIDTH, h: 40,
 			title: g_msgObj.toSettings,
 		}, g_cssObj.button_Mini)
 	);
@@ -9821,8 +9811,7 @@ function resultInit() {
 			clearWindow();
 			titleInit();
 		}, {
-			x: 0, y: g_sHeight - 100,
-			w: g_sWidth / 3, h: C_BTN_HEIGHT * 5 / 4, siz: C_LBL_BTNSIZE,
+			h: C_BTN_HEIGHT * 5 / 4,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Back)
 	);
@@ -9833,8 +9822,8 @@ function resultInit() {
 			copyTextToClipboard(resultText);
 			makeInfoWindow(C_MSG_I_0001, `leftToRightFade`);
 		}, {
-			x: g_sWidth / 3, y: g_sHeight - 100,
-			w: g_sWidth / 3, h: C_BTN_HEIGHT * 5 / 8, siz: 24,
+			x: g_sWidth / 3,
+			h: C_BTN_HEIGHT * 5 / 8, siz: 24,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Setting)
 	);
@@ -9843,7 +9832,7 @@ function resultInit() {
 	divRoot.appendChild(
 		createCss2Button(`btnTweet`, `Tweet`, _ => openLink(tweetResult), {
 			x: g_sWidth / 3, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
-			w: g_sWidth / 3, h: C_BTN_HEIGHT * 5 / 8, siz: 24,
+			h: C_BTN_HEIGHT * 5 / 8, siz: 24,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Tweet)
 	);
@@ -9859,8 +9848,8 @@ function resultInit() {
 			clearWindow();
 			loadMusic();
 		}, {
-			x: g_sWidth / 3 * 2, y: g_sHeight - 100,
-			w: g_sWidth / 3, h: C_BTN_HEIGHT * 5 / 4, siz: C_LBL_BTNSIZE,
+			x: g_sWidth / 3 * 2,
+			h: C_BTN_HEIGHT * 5 / 4,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Reset)
 	);
