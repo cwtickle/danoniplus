@@ -530,11 +530,7 @@ function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _
 function createDivCss2Label(_id, _text, { x = 0, y = 0, w = C_LEN_SETLBL_WIDTH, h = C_LEN_SETLBL_HEIGHT,
 	siz = C_SIZ_SETLBL, align = C_ALIGN_CENTER, ...rest } = {}, ..._classes) {
 	const div = createDiv(_id, x, y, w, h);
-	if (_classes === undefined) {
-		div.classList.add(g_cssObj.title_base);
-	} else {
-		_classes.forEach(_class => div.classList.add(_class));
-	}
+	div.classList.add(g_cssObj.title_base, ..._classes);
 
 	const style = div.style;
 	style.fontSize = `${siz}px`;
@@ -610,7 +606,7 @@ function createColorObject2(_id,
 	{ x = 0, y = 0, w = C_ARW_WIDTH, h = C_ARW_WIDTH, rotate = ``, styleName = ``, ...rest } = {}, ..._classes) {
 
 	const div = createDiv(_id, x, y, w, h);
-	_classes.forEach(_class => div.classList.add(_class));
+	div.classList.add(..._classes);
 	const style = div.style;
 
 	// 矢印・オブジェクト判定
@@ -751,8 +747,7 @@ function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g
 	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, ...rest } = {}, ..._classes) {
 
 	const div = createDiv(_id, x, y, w, h);
-	div.classList.add(`button_common`);
-	_classes.forEach(_class => div.classList.add(_class));
+	div.classList.add(`button_common`, ..._classes);
 	div.innerHTML = _text;
 	div.title = title;
 	div.ontouchstart = ``;
