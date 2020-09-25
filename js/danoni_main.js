@@ -1374,18 +1374,9 @@ function initAfterDosLoaded() {
 	}
 
 	// 画像ファイルの読み込み
-	preloadFile(`image`, g_imgObj.arrow);
-	preloadFile(`image`, g_imgObj.arrowShadow);
-	preloadFile(`image`, g_imgObj.onigiri);
-	preloadFile(`image`, g_imgObj.onigiriShadow);
-	preloadFile(`image`, g_imgObj.giko);
-	preloadFile(`image`, g_imgObj.iyo);
-	preloadFile(`image`, g_imgObj.c);
-	preloadFile(`image`, g_imgObj.morara);
-	preloadFile(`image`, g_imgObj.monar);
-	preloadFile(`image`, g_imgObj.cursor);
-	preloadFile(`image`, g_imgObj.frzBar);
-	preloadFile(`image`, g_imgObj.lifeBorder);
+	[`arrow`, `arrowShadow`, `onigiri`, `onigiriShadow`,
+		`giko`, `iyo`, `c`, `morara`, `monar`, `cursor`,
+		`frzBar`, `lifeBorder`].forEach(img => preloadFile(`image`, g_imgObj[img]));
 
 	// その他の画像ファイルの読み込み
 	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
