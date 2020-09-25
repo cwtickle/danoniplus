@@ -1729,19 +1729,15 @@ function loadCustomjs(_afterFunc) {
 function loadSettingJs() {
 
 	// 共通設定ファイルの指定
-	let settingType;
-	let settingRoot;
+	let settingType = ``;
+	let settingRoot = C_DIR_JS;
 	if (g_rootObj.settingType !== undefined && g_rootObj.settingType !== ``) {
 		if (g_rootObj.settingType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 			settingType = `_${g_rootObj.settingType.split(C_MRK_CURRENT_DIRECTORY)[1]}`;
 			settingRoot = ``;
 		} else {
 			settingType = `_${g_rootObj.settingType}`;
-			settingRoot = C_DIR_JS;
 		}
-	} else {
-		settingType = ``;
-		settingRoot = C_DIR_JS;
 	}
 
 	const randTime = new Date().getTime();
@@ -2041,16 +2037,12 @@ function drawMainSpriteData(_frame, _depthName) {
  *   objType (normal: 汎用, titleMusic: タイトル曲名, titleArrow: タイトル矢印)
  *   shadowFlg
  */
-function makeColorGradation(_colorStr, _options = {}) {
+function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultColorgrd,
+	_colorCdPaddingUse = false, _objType = `normal`, _shadowFlg = false } = {}) {
 
 	// |color_data=300,20,45deg:#ffff99:#ffffff:#9999ff@linear-gradient|
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
-
-	const _defaultColorgrd = setVal(_options.defaultColorgrd, g_headerObj.defaultColorgrd, C_TYP_BOOLEAN);
-	const _colorCdPaddingUse = setVal(_options.colorCdPaddingUse, false, C_TYP_BOOLEAN);
-	const _objType = setVal(_options.objType, `normal`, C_TYP_STRING);
-	const _shadowFlg = setVal(_options.shadowFlg, false, C_TYP_BOOLEAN);
 
 	if (_colorStr === `Default`) {
 		return `Default`;
@@ -2145,8 +2137,8 @@ function titleInit() {
 				x: (g_sWidth - 500) / 2, y: -15 + (g_sHeight - 500) / 2,
 				w: 500, h: 500,
 				background: makeColorGradation(titlecolor, {
-					defaultColorgrd: false,
-					objType: `titleArrow`,
+					_defaultColorgrd: false,
+					_objType: `titleArrow`,
 				}), rotate: 180, opacity: 0.25,
 			})
 		);
@@ -2175,13 +2167,13 @@ function titleInit() {
 		const titlefontgrd = makeColorGradation(
 			(g_headerObj.titlegrds.length > 0 ?
 				g_headerObj.titlegrds[0] : `${g_headerObj.setColorOrg[0]},${g_headerObj.setColorOrg[2]}`), {
-			defaultColorgrd: false,
-			objType: `titleMusic`,
+			_defaultColorgrd: false,
+			_objType: `titleMusic`,
 		});
 		const titlefontgrd2 = (g_headerObj.titlegrds.length > 1 ?
 			makeColorGradation(g_headerObj.titlegrds[1], {
-				defaultColorgrd: false,
-				objType: `titleMusic`,
+				_defaultColorgrd: false,
+				_objType: `titleMusic`,
 			}) : titlefontgrd);
 
 		let titlefontsize = 64 * (12 / g_headerObj.musicTitleForView[0].length);
@@ -2866,9 +2858,9 @@ function headerConvert(_dosObj) {
 		// 矢印色
 		[obj[`${_name}`], obj[`${_name}Str`], obj[`${_name}Org`]] =
 			setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], obj[`${_name}Init`].length, {
-				defaultColorgrd: obj.defaultColorgrd,
-				colorCdPaddingUse: obj.colorCdPaddingUse,
-				shadowFlg: Boolean(k),
+				_defaultColorgrd: obj.defaultColorgrd,
+				_colorCdPaddingUse: obj.colorCdPaddingUse,
+				_shadowFlg: Boolean(k),
 			});
 
 		// フリーズアロー色
@@ -2894,11 +2886,11 @@ function headerConvert(_dosObj) {
 
 			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
 				setColorList(tmpFrzColors[j], currentFrzColors, obj[`${_frzName}Init`].length, {
-					defaultColorgrd: obj.defaultColorgrd,
-					colorCdPaddingUse: obj.colorCdPaddingUse,
-					defaultFrzColorUse: obj.defaultFrzColorUse,
-					objType: `frz`,
-					shadowFlg: Boolean(k),
+					_defaultColorgrd: obj.defaultColorgrd,
+					_colorCdPaddingUse: obj.colorCdPaddingUse,
+					_defaultFrzColorUse: obj.defaultFrzColorUse,
+					_objType: `frz`,
+					_shadowFlg: Boolean(k),
 				});
 		}
 		if (k === 0) {
@@ -2913,13 +2905,9 @@ function headerConvert(_dosObj) {
 	 * @param {array} _colorInit 
 	 * @param {object} _options 
 	 */
-	function setColorList(_data, _colorInit, _colorInitLength, _options = {}) {
-
-		const _defaultColorgrd = setVal(_options.defaultColorgrd, g_headerObj.defaultColorgrd, C_TYP_BOOLEAN);
-		const _colorCdPaddingUse = setVal(_options.colorCdPaddingUse, false, C_TYP_BOOLEAN);
-		const _defaultFrzColorUse = setVal(_options.defaultFrzColorUse, true, C_TYP_BOOLEAN);
-		const _objType = setVal(_options.objType, `normal`, C_TYP_STRING);
-		const _shadowFlg = setVal(_options.shadowFlg, false, C_TYP_BOOLEAN);
+	function setColorList(_data, _colorInit, _colorInitLength,
+		{ _defaultColorgrd = g_headerObj.defaultColorgrd, _colorCdPaddingUse = false,
+			_defaultFrzColorUse = true, _objType = `normal`, _shadowFlg = false } = {}) {
 
 		// グラデーション文字列 #ffff99:#9999ff@linear-gradient
 		let colorStr = [];
@@ -2965,10 +2953,10 @@ function headerConvert(_dosObj) {
 					colorOrg[j] = `#${paddingLeft(colorOrg[j].slice(1), 6, `0`)}`;
 				}
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
-					defaultColorgrd: _defaultColorgrd,
-					colorCdPaddingUse: _colorCdPaddingUse,
-					objType: _objType,
-					shadowFlg: _shadowFlg,
+					_defaultColorgrd: _defaultColorgrd,
+					_colorCdPaddingUse: _colorCdPaddingUse,
+					_objType: _objType,
+					_shadowFlg: _shadowFlg,
 				});
 			}
 
@@ -2979,9 +2967,9 @@ function headerConvert(_dosObj) {
 			colorOrg = _colorInit.concat();
 			for (let j = 0; j < _colorInit.length; j++) {
 				colorList[j] = _colorInit[j] === `` ? `` : makeColorGradation(_colorInit[j], {
-					defaultColorgrd: _defaultColorgrd,
-					colorCdPaddingUse: _colorCdPaddingUse,
-					shadowFlg: _shadowFlg,
+					_defaultColorgrd: _defaultColorgrd,
+					_colorCdPaddingUse: _colorCdPaddingUse,
+					_shadowFlg: _shadowFlg,
 				});
 			}
 		}
