@@ -6739,6 +6739,21 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	let tmpObj;
 	let frmPrev;
 
+	function setNotes(_j, _k, _data, _startPoint, _header, _frzFlg = false) {
+		if (_startPoint >= 0) {
+			if (g_workObj[`mk${_header}Arrow`][_startPoint] === undefined) {
+				g_workObj[`mk${_header}Arrow`][_startPoint] = [];
+			}
+			g_workObj[`mk${_header}Arrow`][_startPoint].push(_j);
+
+			if (_frzFlg) {
+				g_workObj[`mk${_header}Length`][_j][_k] = getFrzLength(_speedOnFrame, _data[_k], _data[_k + 1]);
+			}
+		} else if (g_workObj[`mk${_header}Length`][_j] !== undefined) {
+			g_workObj[`mk${_header}Length`][_j] = JSON.parse(JSON.stringify(g_workObj[`mk${_header}Length`][_j].slice(_k + 2)));
+		}
+	}
+
 	function calcNotes(_j, _data, _header = ``, _frzFlg = false) {
 		if (_data === undefined) {
 			return;
@@ -6773,16 +6788,10 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 		g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
 
-		if (g_workObj[`mk${camelHeader}Arrow`][startPoint[lastk]] === undefined) {
-			g_workObj[`mk${camelHeader}Arrow`][startPoint[lastk]] = [];
-		}
-		g_workObj[`mk${camelHeader}Arrow`][startPoint[lastk]].push(_j);
-
 		if (_frzFlg) {
 			g_workObj[`mk${camelHeader}Length`][_j] = [];
-			g_workObj[`mk${camelHeader}Length`][_j][lastk] = getFrzLength(_speedOnFrame,
-				_data[lastk], _data[lastk + 1]);
 		}
+		setNotes(_j, lastk, _data, startPoint[lastk], camelHeader, _frzFlg);
 
 		// 矢印は1つずつ、フリーズアローは2つで1セット
 		for (let k = lastk - setcnt; k >= 0; k -= setcnt) {
@@ -6791,7 +6800,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			if (arrowArrivalFrm < _firstArrivalFrame) {
 
 				// 出現位置が開始前の場合は除外
-				if (_frzFlg && g_workObj[`mk${camelHeader}Length`][_j] !== undefined) {
+				if (g_workObj[`mk${camelHeader}Length`][_j] !== undefined) {
 					g_workObj[`mk${camelHeader}Length`][_j] = JSON.parse(JSON.stringify(g_workObj[`mk${camelHeader}Length`][_j].slice(k + 2)));
 				}
 				break;
@@ -6824,24 +6833,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			}
 
 			// 出現タイミングを保存
-			if (startPoint[k] >= 0) {
-				if (g_workObj[`mk${camelHeader}Arrow`][startPoint[k]] === undefined) {
-					g_workObj[`mk${camelHeader}Arrow`][startPoint[k]] = [];
-				}
-				g_workObj[`mk${camelHeader}Arrow`][startPoint[k]].push(_j);
-			}
-
-			if (_frzFlg) {
-				if (startPoint[k] >= 0) {
-					g_workObj[`mk${camelHeader}Length`][_j][k] = getFrzLength(_speedOnFrame,
-						_data[k], _data[k + 1]);
-
-				} else {
-					if (g_workObj[`mk${camelHeader}Length`][_j] !== undefined) {
-						g_workObj[`mk${camelHeader}Length`][_j] = JSON.parse(JSON.stringify(g_workObj[`mk${camelHeader}Length`][_j].slice(k + 2)));
-					}
-				}
-			}
+			setNotes(_j, k, _data, startPoint[k], camelHeader, _frzFlg);
 		}
 	}
 
