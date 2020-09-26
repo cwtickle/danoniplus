@@ -40,7 +40,9 @@ let g_localVersion2 = ``;
  */
 
 window.onload = _ => {
-	g_loadObj = {};
+	g_loadObj = {
+		main: true,
+	};
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
@@ -1254,7 +1256,9 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 
 	if (dosInput === null && queryDos === ``) {
 		makeWarningWindow(C_MSG_E_0023);
-		initAfterDosLoaded();
+		g_loadObj.main = false;
+		_afterFunc();
+		return;
 	}
 
 	// 譜面分割あり、譜面番号固定時のみ譜面データを一時クリア
@@ -1333,7 +1337,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
  */
 function reloadDos(_scoreId) {
 	_scoreId++;
-	if (_scoreId < g_headerObj.keyLabels.length) {
+	if (g_headerObj.keyLabels !== undefined && _scoreId < g_headerObj.keyLabels.length) {
 		loadDos(_ => {
 			getScoreDetailData(_scoreId);
 		}, _scoreId, true);
@@ -1415,12 +1419,17 @@ function initAfterDosLoaded() {
 		}
 	}
 
-	// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
-	loadCustomjs(_ => {
-		loadDos(_ => {
-			getScoreDetailData(0);
-		}, 0, true);
-	});
+	if (g_loadObj.main) {
+		// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
+		loadCustomjs(_ => {
+			loadDos(_ => {
+				getScoreDetailData(0);
+			}, 0, true);
+		});
+	} else {
+		getScoreDetailData(0);
+		reloadDos(0);
+	}
 }
 
 /**
@@ -2121,7 +2130,7 @@ function titleInit() {
 
 	// 背景の矢印オブジェクトを表示
 	if (!g_headerObj.customTitleArrowUse) {
-		const titlecolor = (g_headerObj.titlearrowgrds.length === 0 ?
+		const titlecolor = (g_headerObj.titlearrowgrds === undefined || g_headerObj.titlearrowgrds.length === 0 ?
 			`${g_headerObj.setColorOrg[0]}` : g_headerObj.titlearrowgrds[0]);
 		divRoot.appendChild(
 			createColorObject2(`lblArrow`, {
@@ -2664,8 +2673,8 @@ function headerConvert(_dosObj) {
 			obj.creatorUrl = location.href;
 		}
 	} else {
-		obj.tuning = (g_presetTuning) ? escapeHtmlForEnabledTag(g_presetTuning) : `name`;
-		obj.creatorUrl = (g_presetTuningUrl) ? g_presetTuningUrl : location.href;
+		obj.tuning = (typeof g_presetTuning === C_TYP_STRING ? escapeHtmlForEnabledTag(g_presetTuning) : `name`);
+		obj.creatorUrl = (typeof g_presetTuningUrl === C_TYP_STRING ? g_presetTuningUrl : location.href);
 	}
 	obj.tuningInit = obj.tuning;
 
@@ -3184,7 +3193,9 @@ function headerConvert(_dosObj) {
 	g_displays.forEach((option, j) => {
 
 		// Display使用可否設定を分解 |displayUse=false,ON|
-		const displayTempUse = _dosObj[`${option}Use`] || g_presetSettingUse[option];
+		const displayTempUse = setVal(_dosObj[`${option}Use`],
+			(typeof g_presetSettingUse === C_TYP_OBJECT ?
+				g_presetSettingUse[option] : `true`), C_TYP_STRING);
 		const displayUse = (displayTempUse !== undefined ? displayTempUse.split(`,`) : [true, C_FLG_ON]);
 
 		// displayUse -> ボタンの有効/無効, displaySet -> ボタンの初期値(ON/OFF)
@@ -3223,22 +3234,16 @@ function headerConvert(_dosObj) {
 	// 別キーパターンの使用有無
 	obj.transKeyUse = setVal(_dosObj.transKeyUse, true, C_TYP_BOOLEAN);
 
-	// タイトル画面用・背景データの分解 (下記すべてで1セット、改行区切り)
+	// タイトル画面用・背景/マスクデータの分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	obj.backTitleData = [];
-	obj.backTitleData.length = 0;
-	obj.backTitleMaxDepth = -1;
-	if (_dosObj.backtitle_data !== undefined) {
-		[obj.backTitleData, obj.backTitleMaxDepth] = makeSpriteData(_dosObj.backtitle_data);
-	}
-
-	// タイトル画面用・マスクデータの分解 (下記すべてで1セット、改行区切り)
-	obj.maskTitleData = [];
-	obj.maskTitleData.length = 0;
-	obj.maskTitleMaxDepth = -1;
-	if (_dosObj.masktitle_data !== undefined) {
-		[obj.maskTitleData, obj.maskTitleMaxDepth] = makeSpriteData(_dosObj.masktitle_data);
-	}
+	g_animationData.forEach(sprite => {
+		obj[`${sprite}TitleData`] = [];
+		obj[`${sprite}TitleData`].length = 0;
+		obj[`${sprite}TitleMaxDepth`] = -1;
+		if (_dosObj[`${sprite}title_data`] !== undefined) {
+			[obj[`${sprite}TitleData`], obj[`${sprite}TitleMaxDepth`]] = makeSpriteData(_dosObj[`${sprite}title_data`]);
+		}
+	});
 
 	// 結果画面用のマスク透過設定
 	obj.masktitleButton = setVal(_dosObj.masktitleButton, false, C_TYP_BOOLEAN);
