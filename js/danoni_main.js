@@ -6739,182 +6739,101 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	let tmpObj;
 	let frmPrev;
 
-	function calcArrows(_j, _data, _header) {
-
-		const camelHeader = toCapitalize(_header);
-		if (_data !== undefined) {
-
-			let startPoint = [];
-			let spdNext = Infinity;
-			let spdPrev = 0;
-			let spdk;
-			let lastk;
-			let tmpObj;
-			let arrowArrivalFrm;
-			let frmPrev;
-
-			if (_dataObj.speedData !== undefined) {
-				spdk = _dataObj.speedData.length - 2;
-				spdPrev = _dataObj.speedData[spdk];
-			} else {
-				spdPrev = 0;
+	function setNotes(_j, _k, _data, _startPoint, _header, _frzFlg = false) {
+		if (_startPoint >= 0) {
+			if (g_workObj[`mk${_header}Arrow`][_startPoint] === undefined) {
+				g_workObj[`mk${_header}Arrow`][_startPoint] = [];
 			}
+			g_workObj[`mk${_header}Arrow`][_startPoint].push(_j);
 
-			// 最後尾のデータから計算して格納
-			lastk = _data.length - 1;
-			arrowArrivalFrm = _data[lastk];
-			tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
-
-			startPoint[lastk] = tmpObj.frm;
-			frmPrev = tmpObj.frm;
-			g_workObj.initY[frmPrev] = tmpObj.startY;
-			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-			g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-
-			if (g_workObj[`mk${camelHeader}Arrow`][startPoint[lastk]] === undefined) {
-				g_workObj[`mk${camelHeader}Arrow`][startPoint[lastk]] = [];
+			if (_frzFlg) {
+				g_workObj[`mk${_header}Length`][_j][_k] = getFrzLength(_speedOnFrame, _data[_k], _data[_k + 1]);
 			}
-			g_workObj[`mk${camelHeader}Arrow`][startPoint[lastk]].push(_j);
-
-			for (let k = lastk - 1; k >= 0; k--) {
-				arrowArrivalFrm = _data[k];
-
-				if (arrowArrivalFrm < _firstArrivalFrame) {
-					// 矢印の出現位置が開始前の場合は除外
-					break;
-
-				} else if ((arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev] > spdPrev)
-					&& arrowArrivalFrm < spdNext) {
-
-					// 最初から最後まで同じスピードのときは前回のデータを流用
-					const tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
-					startPoint[k] = tmpFrame;
-					g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
-					g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
-					g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
-
-				} else {
-
-					// 速度変化が間に入るときは再計算
-					if (arrowArrivalFrm < spdPrev) {
-						spdk -= 2;
-						spdNext = spdPrev;
-						spdPrev = _dataObj.speedData[spdk];
-					}
-					tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
-
-					startPoint[k] = tmpObj.frm;
-					frmPrev = tmpObj.frm;
-					g_workObj.initY[frmPrev] = tmpObj.startY;
-					g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-					g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-				}
-
-				// 矢印の出現タイミングを保存
-				if (startPoint[k] >= 0) {
-					if (g_workObj[`mk${camelHeader}Arrow`][startPoint[k]] === undefined) {
-						g_workObj[`mk${camelHeader}Arrow`][startPoint[k]] = [];
-					}
-					g_workObj[`mk${camelHeader}Arrow`][startPoint[k]].push(_j);
-				}
-			}
+		} else if (g_workObj[`mk${_header}Length`][_j] !== undefined) {
+			g_workObj[`mk${_header}Length`][_j] = JSON.parse(JSON.stringify(g_workObj[`mk${_header}Length`][_j].slice(_k + 2)));
 		}
 	}
 
-	function calcFrzArrows(_j, _data, _header) {
+	function calcNotes(_j, _data, _header = ``, _frzFlg = false) {
+		if (_data === undefined) {
+			return;
+		}
+
 		const camelHeader = toCapitalize(_header);
+		const setcnt = (_frzFlg ? 2 : 1);
 
-		if (_data !== undefined) {
+		let startPoint = [];
+		let spdNext = Infinity;
+		let spdPrev = 0;
+		let spdk;
+		let tmpObj;
+		let arrowArrivalFrm;
+		let frmPrev;
 
-			let frzStartPoint = [];
-			let spdNext = Infinity;
-			let spdPrev = 0;
-			let spdk;
-			let lastk;
-			let tmpObj;
-			let arrowArrivalFrm;
-			let frmPrev;
+		if (_dataObj.speedData !== undefined) {
+			spdk = _dataObj.speedData.length - 2;
+			spdPrev = _dataObj.speedData[spdk];
+		} else {
+			spdPrev = 0;
+		}
 
-			g_workObj[`mk${camelHeader}FrzLength`][_j] = [];
-			if (_dataObj.speedData !== undefined) {
-				spdk = _dataObj.speedData.length - 2;
-				spdPrev = _dataObj.speedData[spdk];
+		// 最後尾のデータから計算して格納
+		const lastk = _data.length - setcnt;
+		arrowArrivalFrm = _data[lastk];
+		tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+
+		startPoint[lastk] = tmpObj.frm;
+		frmPrev = tmpObj.frm;
+		g_workObj.initY[frmPrev] = tmpObj.startY;
+		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+		g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+
+		if (_frzFlg) {
+			g_workObj[`mk${camelHeader}Length`][_j] = [];
+		}
+		setNotes(_j, lastk, _data, startPoint[lastk], camelHeader, _frzFlg);
+
+		// 矢印は1つずつ、フリーズアローは2つで1セット
+		for (let k = lastk - setcnt; k >= 0; k -= setcnt) {
+			arrowArrivalFrm = _data[k];
+
+			if (arrowArrivalFrm < _firstArrivalFrame) {
+
+				// 出現位置が開始前の場合は除外
+				if (g_workObj[`mk${camelHeader}Length`][_j] !== undefined) {
+					g_workObj[`mk${camelHeader}Length`][_j] = JSON.parse(JSON.stringify(g_workObj[`mk${camelHeader}Length`][_j].slice(k + 2)));
+				}
+				break;
+
+			} else if ((arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev] > spdPrev)
+				&& arrowArrivalFrm < spdNext) {
+
+				// 最初から最後まで同じスピードのときは前回のデータを流用
+				const tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
+				startPoint[k] = tmpFrame;
+				g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
+				g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
+				g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
+
 			} else {
-				spdPrev = 0;
-			}
 
-			// 最後尾のデータから計算して格納
-			lastk = _data.length - 2;
-			arrowArrivalFrm = _data[lastk];
-			tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
-
-			frzStartPoint[lastk] = tmpObj.frm;
-			frmPrev = tmpObj.frm;
-			g_workObj.initY[frmPrev] = tmpObj.startY;
-			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-			g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-			g_workObj[`mk${camelHeader}FrzLength`][_j][lastk] = getFrzLength(_speedOnFrame,
-				_data[lastk], _data[lastk + 1]);
-
-			if (g_workObj[`mk${camelHeader}FrzArrow`][frzStartPoint[lastk]] === undefined) {
-				g_workObj[`mk${camelHeader}FrzArrow`][frzStartPoint[lastk]] = [];
-			}
-			g_workObj[`mk${camelHeader}FrzArrow`][frzStartPoint[lastk]].push(_j);
-
-			// フリーズアローは2つで1セット
-			for (let k = lastk - 2; k >= 0; k -= 2) {
-				arrowArrivalFrm = _data[k];
-
-				if (arrowArrivalFrm < _firstArrivalFrame) {
-
-					// フリーズアローの出現位置が開始前の場合は除外
-					if (g_workObj[`mk${camelHeader}FrzLength`][_j] !== undefined) {
-						g_workObj[`mk${camelHeader}FrzLength`][_j] = JSON.parse(JSON.stringify(g_workObj[`mk${camelHeader}FrzLength`][_j].slice(k + 2)));
-					}
-					break;
-
-				} else if ((arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev] > spdPrev)
-					&& arrowArrivalFrm < spdNext) {
-
-					// 最初から最後まで同じスピードのときは前回のデータを流用
-					const tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
-					frzStartPoint[k] = tmpFrame;
-					g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
-					g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
-					g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
-
-				} else {
-
-					// 速度変化が間に入るときは再計算
-					if (arrowArrivalFrm < spdPrev) {
-						spdk -= 2;
-						spdNext = spdPrev;
-						spdPrev = _dataObj.speedData[spdk];
-					}
-					tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
-
-					frzStartPoint[k] = tmpObj.frm;
-					frmPrev = tmpObj.frm;
-					g_workObj.initY[frmPrev] = tmpObj.startY;
-					g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-					g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+				// 速度変化が間に入るときは再計算
+				if (arrowArrivalFrm < spdPrev) {
+					spdk -= 2;
+					spdNext = spdPrev;
+					spdPrev = _dataObj.speedData[spdk];
 				}
+				tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
 
-				// フリーズアローの出現タイミングを保存
-				if (frzStartPoint[k] >= 0) {
-					g_workObj[`mk${camelHeader}FrzLength`][_j][k] = getFrzLength(_speedOnFrame,
-						_data[k], _data[k + 1]);
-					if (g_workObj[`mk${camelHeader}FrzArrow`][frzStartPoint[k]] === undefined) {
-						g_workObj[`mk${camelHeader}FrzArrow`][frzStartPoint[k]] = [];
-					}
-					g_workObj[`mk${camelHeader}FrzArrow`][frzStartPoint[k]].push(_j);
-
-				} else {
-					if (g_workObj[`mk${camelHeader}FrzLength`][_j] !== undefined) {
-						g_workObj[`mk${camelHeader}FrzLength`][_j] = JSON.parse(JSON.stringify(g_workObj[`mk${camelHeader}FrzLength`][_j].slice(k + 2)));
-					}
-				}
+				startPoint[k] = tmpObj.frm;
+				frmPrev = tmpObj.frm;
+				g_workObj.initY[frmPrev] = tmpObj.startY;
+				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+				g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
 			}
+
+			// 出現タイミングを保存
+			setNotes(_j, k, _data, startPoint[k], camelHeader, _frzFlg);
 		}
 	}
 
@@ -6924,12 +6843,12 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	for (let j = 0; j < keyNum; j++) {
 
 		// 矢印の出現フレーム数計算
-		calcArrows(j, _dataObj.arrowData[j], ``);
-		calcArrows(j, _dataObj.dummyArrowData[j], `dummy`);
+		calcNotes(j, _dataObj.arrowData[j]);
+		calcNotes(j, _dataObj.dummyArrowData[j], `dummy`);
 
 		// フリーズアローの出現フレーム数計算
-		calcFrzArrows(j, _dataObj.frzData[j], ``);
-		calcFrzArrows(j, _dataObj.dummyFrzData[j], `dummy`);
+		calcNotes(j, _dataObj.frzData[j], `frz`, true);
+		calcNotes(j, _dataObj.dummyFrzData[j], `dummyFrz`, true);
 	}
 
 	// 個別加速のタイミング更新
