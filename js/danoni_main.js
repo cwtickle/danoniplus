@@ -782,6 +782,36 @@ function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g
 }
 
 /**
+ * オブジェクトのスタイル一括変更
+ * @param {string} _id 
+ * @param {object} _obj (x, y, w, h, siz, align, title, ...rest) 
+ */
+function changeStyle(_id, { x, y, w, h, siz, align, title, ...rest } = {}) {
+	const div = document.querySelector(`#${_id}`);
+	const style = div.style;
+
+	const obj = {
+		left: x,
+		top: y,
+		width: w,
+		height: h,
+		fontSize: siz,
+	};
+	Object.keys(obj).forEach((property) => {
+		if (setVal(obj[property], ``, C_TYP_FLOAT !== ``)) {
+			style[property] = `${obj[property]}px`;
+		}
+	})
+	if (align !== undefined) {
+		style.textAlign = `${align}`;
+	}
+	if (title !== undefined) {
+		div.title = title;
+	}
+	Object.keys(rest).forEach(property => style[property] = rest[property]);
+}
+
+/**
  * ラベル文字作成（レイヤー直書き。htmlタグは使用できない）
  * @param {string} _ctx ラベルを作成する場所のコンテキスト名
  * @param {string} _text 表示するテキスト
