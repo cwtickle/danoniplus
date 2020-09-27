@@ -6800,7 +6800,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			if (arrowArrivalFrm < _firstArrivalFrame) {
 
 				// 出現位置が開始前の場合は除外
-				if (g_workObj[`mk${camelHeader}Length`][_j] !== undefined) {
+				if (_frzFlg && g_workObj[`mk${camelHeader}Length`][_j] !== undefined) {
 					g_workObj[`mk${camelHeader}Length`][_j] = JSON.parse(JSON.stringify(g_workObj[`mk${camelHeader}Length`][_j].slice(k + 2)));
 				}
 				break;
