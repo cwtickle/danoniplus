@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 17.0.0`;
+const g_version = `Ver 17.0.1`;
 const g_revisedDate = `2020/09/27`;
 const g_alphaVersion = ``;
 
@@ -6749,7 +6749,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			if (_frzFlg) {
 				g_workObj[`mk${_header}Length`][_j][_k] = getFrzLength(_speedOnFrame, _data[_k], _data[_k + 1]);
 			}
-		} else if (g_workObj[`mk${_header}Length`][_j] !== undefined) {
+		} else if (_frzFlg && g_workObj[`mk${_header}Length`][_j] !== undefined) {
 			g_workObj[`mk${_header}Length`][_j] = JSON.parse(JSON.stringify(g_workObj[`mk${_header}Length`][_j].slice(_k + 2)));
 		}
 	}
