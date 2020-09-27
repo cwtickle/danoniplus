@@ -100,6 +100,8 @@ const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chr
 let g_rootObj = {};
 let g_headerObj = {};
 let g_scoreObj = {};
+let g_btnAddFunc = {};
+let g_btnDeleteFlg = {};
 
 const g_detailObj = {
 	arrowCnt: [],
@@ -764,7 +766,14 @@ function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 
 	// ボタンを押したときの動作
-	const lsnrkey = g_handler.addListener(div, `click`, _ => _func());
+	const lsnrkey = g_handler.addListener(div, `click`, _ => {
+		if (!setVal(g_btnDeleteFlg[_id], false, C_TYP_BOOLEAN)) {
+			_func();
+		}
+		if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
+			g_btnAddFunc[_id]();
+		}
+	});
 
 	// イベントリスナー用のキーをセット
 	div.setAttribute(`lsnrkey`, lsnrkey);
@@ -1911,6 +1920,9 @@ function setAudio(_url) {
  * @param {string} _key メイン画面かどうか。Main:メイン画面、(空白):それ以外
  */
 function drawDefaultBackImage(_key) {
+
+	g_btnAddFunc = {};
+	g_btnDeleteFlg = {};
 
 	// レイヤー情報取得
 	if (document.querySelector(`#layer0`) !== null) {
