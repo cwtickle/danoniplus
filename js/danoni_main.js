@@ -4715,21 +4715,10 @@ function createOptionWindow(_sprite) {
 
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 			if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
-				if (g_keyObj[`keyRetry${keyCtrlPtn}`] !== undefined &&
-					g_keyObj[`keyRetry${keyCtrlPtn}`] !== ``) {
-					g_headerObj.keyRetry = g_keyObj[`keyRetry${keyCtrlPtn}`];
-				} else {
-					g_headerObj.keyRetry = g_headerObj.keyRetryDef;
-				}
+				g_headerObj.keyRetry = setVal(g_keyObj[`keyRetry${keyCtrlPtn}`], g_headerObj.keyRetryDef, C_TYP_NUMBER);
 			}
-
 			if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
-				if (g_keyObj[`keyTitleBack${keyCtrlPtn}`] !== undefined &&
-					g_keyObj[`keyTitleBack${keyCtrlPtn}`] !== ``) {
-					g_headerObj.keyTitleBack = g_keyObj[`keyTitleBack${keyCtrlPtn}`];
-				} else {
-					g_headerObj.keyTitleBack = g_headerObj.keyTitleBackDef;
-				}
+				g_headerObj.keyTitleBack = setVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`], g_headerObj.keyTitleBackDef, C_TYP_NUMBER);
 			}
 		}
 
@@ -4758,11 +4747,10 @@ function createOptionWindow(_sprite) {
 
 		// リバース設定 (Reverse, Scroll)
 		if (g_headerObj.scrollUse) {
-			if (typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT) {
-				g_scrolls = JSON.parse(JSON.stringify(g_keyObj[`scrollName${g_keyObj.currentKey}`]));
-			} else {
-				g_scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
-			}
+			g_scrolls = JSON.parse(JSON.stringify(
+				typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
+					g_keyObj[`scrollName${g_keyObj.currentKey}`] : g_keyObj.scrollName_def
+			));
 			g_stateObj.scroll = g_scrolls[g_scrollNum];
 
 			if (g_scrolls.length > 1) {
@@ -4771,11 +4759,8 @@ function createOptionWindow(_sprite) {
 				setSetting(0, `scroll`);
 
 				const btnReverse = document.querySelector(`#btnReverse`);
-				if (g_stateObj.reverse === C_FLG_ON) {
-					btnReverse.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
-				} else {
-					btnReverse.classList.replace(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
-				}
+				btnReverse.classList.replace(g_cssObj[`button_Rev${g_reverses[(g_reverseNum + 1) % 2]}`],
+					g_cssObj[`button_Rev${g_reverses[g_reverseNum]}`]);
 				btnReverse.innerHTML = `Reverse:${g_stateObj.reverse}`;
 			} else {
 				spriteList.scroll.style.visibility = `hidden`;
