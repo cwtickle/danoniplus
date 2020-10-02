@@ -2224,35 +2224,18 @@ function titleInit() {
 		}
 
 		// 変数 titlesize の定義 (使用例： |titlesize=40,20|)
-		let titlefontsize1;
-		let titlefontsize2;
-		if (g_headerObj.titlesize !== ``) {
-			let titlefontsizes = g_headerObj.titlesize.split(`,`);
-			titlefontsize1 = setVal(titlefontsizes[0], titlefontsize, C_TYP_NUMBER);
-			titlefontsize2 = setVal(titlefontsizes[1], titlefontsize1, C_TYP_NUMBER);
-		} else {
-			titlefontsize1 = titlefontsize;
-		}
+		const titlefontsizes = (g_headerObj.titlesize !== `` ? g_headerObj.titlesize.split(`,`) : [titlefontsize, titlefontsize]);
+		const titlefontsize1 = setVal(titlefontsizes[0], titlefontsize, C_TYP_NUMBER);
+		const titlefontsize2 = setVal(titlefontsizes[1], titlefontsize1, C_TYP_NUMBER);
 
 		// 変数 titlefont の定義 (使用例： |titlefont=Century,Meiryo UI|)
-		let titlefontname = `メイリオ`;
-		if (g_headerObj.titlefont !== ``) {
-			titlefontname = setVal(g_headerObj.titlefont, titlefontname, C_TYP_STRING);
-		}
-		titlefontname = `'${(titlefontname.replace(/,/g, `','`))}'`;
+		const titlefontname = (g_headerObj.titlefont !== `` ? `'${(g_headerObj.titlefont.replace(/,/g, `','`))}'` : `メイリオ`);
 
 		// 変数 titlepos の定義 (使用例： |titlepos=0,10| マイナス、小数点の指定もOK)
-		let titlefontpos = (
-			(setVal(g_headerObj.titlepos, ``, C_TYP_STRING) !== ``)
-				? g_headerObj.titlepos.split(`,`)
-				: [0, 0]
-		);
+		const titlefontpos = (g_headerObj.titlepos !== `` ? g_headerObj.titlepos.split(`,`) : [0, 0]);
 
 		// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
-		let titlelineheight = g_headerObj.titlelineheight;
-		if (g_headerObj.titlelineheight === ``) {
-			titlelineheight = setVal(g_headerObj.titlelineheight, titlefontsize2 + 5, C_TYP_NUMBER);
-		}
+		const titlelineheight = (g_headerObj.titlelineheight !== `` ? g_headerObj.titlelineheight : titlefontsize2 + 5);
 
 		const lblmusicTitle = createDivCss2Label(`lblmusicTitle`,
 			`<span style="
