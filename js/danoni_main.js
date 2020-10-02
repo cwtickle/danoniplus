@@ -7614,12 +7614,10 @@ function MainInit() {
 	// 終了時間指定の場合、その値を適用する
 	let endFrameUseFlg = false;
 	if (g_headerObj.endFrame !== undefined) {
-		if (!isNaN(parseInt(g_headerObj.endFrame[g_stateObj.scoreId]))) {
+		const tmpEndFrame = g_headerObj.endFrame[g_stateObj.scoreId] || g_headerObj.endFrame[0];
+		if (!isNaN(parseInt(tmpEndFrame))) {
 			// 終了時間指定の場合、曲長は EndFrame - (本来のblankFrame)
-			duration = parseInt(g_headerObj.endFrame[g_stateObj.scoreId]) - g_headerObj.blankFrameDef;
-			endFrameUseFlg = true;
-		} else if (!isNaN(parseInt(g_headerObj.endFrame[0]))) {
-			duration = parseInt(g_headerObj.endFrame[0]) - g_headerObj.blankFrameDef;
+			duration = parseInt(tmpEndFrame) - g_headerObj.blankFrameDef;
 			endFrameUseFlg = true;
 		}
 	}
@@ -9343,8 +9341,8 @@ function resultInit() {
 	g_resultObj.score = resultScore;
 
 	// ランク計算
-	let rankMark = ``;
-	let rankColor = ``;
+	let rankMark = g_rankObj.rankMarkX;
+	let rankColor = g_rankObj.rankColorX;
 	if (g_gameOverFlg) {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
@@ -9362,22 +9360,16 @@ function resultInit() {
 				}
 			}
 		}
-	} else {
-		rankMark = g_rankObj.rankMarkX;
-		rankColor = g_rankObj.rankColorX;
 	}
 
 	// 曲名・オプション描画
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 
-	let musicTitleForView0;
-	let musicTitleForView1;
+	const mTitleForView = [g_headerObj.musicTitleForView[0], g_headerObj.musicTitleForView[1] || ``];
 	if (g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]] !== undefined) {
-		musicTitleForView0 = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][0];
-		musicTitleForView1 = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][1];
-	} else {
-		musicTitleForView0 = g_headerObj.musicTitleForView[0];
-		musicTitleForView1 = g_headerObj.musicTitleForView[1];
+		mTitleForView.forEach((mTitle, j) => {
+			mTitleForView[j] = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][j];
+		});
 	}
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -9386,14 +9378,10 @@ function resultInit() {
 		transKeyData = `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)`;
 	}
 
-	playDataWindow.appendChild(makeCssResultPlayData(`lblMusic`, 20, g_cssObj.result_lbl, 0,
-		`Music`, C_ALIGN_LEFT));
-	playDataWindow.appendChild(makeCssResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 0,
-		musicTitleForView0, C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeCssResultPlayData(`lblMusicData2`, 60, g_cssObj.result_style, 1,
-		setVal(musicTitleForView1, ``, C_TYP_STRING), C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2,
-		`Difficulty`, C_ALIGN_LEFT));
+	playDataWindow.appendChild(makeCssResultPlayData(`lblMusic`, 20, g_cssObj.result_lbl, 0, `Music`, C_ALIGN_LEFT));
+	playDataWindow.appendChild(makeCssResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 0, mTitleForView[0]));
+	playDataWindow.appendChild(makeCssResultPlayData(`lblMusicData2`, 60, g_cssObj.result_style, 1, mTitleForView[1]));
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2, `Difficulty`, C_ALIGN_LEFT));
 
 	let difData = [
 		`${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
@@ -9402,10 +9390,8 @@ function resultInit() {
 		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${g_stateObj.shuffle}]`)}`
 	].filter(value => value !== ``).join(` `);
 
-	playDataWindow.appendChild(makeCssResultPlayData(`lblDifData`, 60, g_cssObj.result_style, 2, difData,
-		C_ALIGN_CENTER));
-	playDataWindow.appendChild(makeCssResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3,
-		`Playstyle`, C_ALIGN_LEFT));
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDifData`, 60, g_cssObj.result_style, 2, difData));
+	playDataWindow.appendChild(makeCssResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3, `Playstyle`, C_ALIGN_LEFT));
 
 	let playStyleData = [
 		`${g_stateObj.speed}x`,
@@ -9415,11 +9401,9 @@ function resultInit() {
 		`${withOptions(g_stateObj.appearance, `Visible`)}`,
 		`${withOptions(g_stateObj.gauge, g_gauges[0])}`
 	].filter(value => value !== ``).join(`, `);
-	playDataWindow.appendChild(makeCssResultPlayData(`lblStyleData`, 60, g_cssObj.result_style, 3,
-		playStyleData, C_ALIGN_CENTER));
 
-	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplay`, 20, g_cssObj.result_lbl, 4,
-		`Display`, C_ALIGN_LEFT));
+	playDataWindow.appendChild(makeCssResultPlayData(`lblStyleData`, 60, g_cssObj.result_style, 3, playStyleData));
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplay`, 20, g_cssObj.result_lbl, 4, `Display`, C_ALIGN_LEFT));
 
 	let displayData = [
 		withOptions(g_stateObj.d_stepzone, C_FLG_ON, `Step`),
@@ -9435,8 +9419,7 @@ function resultInit() {
 	} else {
 		displayData += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 4,
-		displayData, C_ALIGN_CENTER));
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 4, displayData));
 
 	let display2Data = [
 		withOptions(g_stateObj.d_speed, C_FLG_ON, `Speed`),
@@ -9449,8 +9432,7 @@ function resultInit() {
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
-	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplay2Data`, 60, g_cssObj.result_style, 5,
-		display2Data, C_ALIGN_CENTER));
+	playDataWindow.appendChild(makeCssResultPlayData(`lblDisplay2Data`, 60, g_cssObj.result_style, 5, display2Data));
 
 	/**
 	 * プレイスタイルのカスタム有無
@@ -9794,7 +9776,7 @@ function resultInit() {
  * @param {string, number} _text
  * @param {string} _align
  */
-function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align) {
+function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align = C_ALIGN_CENTER) {
 	return createDivCss2Label(_id, _text, {
 		x: _x, y: 18 * _heightPos,
 		w: 400, h: 18, siz: C_SIZ_MAIN, align: _align,
