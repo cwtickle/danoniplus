@@ -9460,12 +9460,12 @@ function resultInit() {
 
 	// キャラクタ、スコア描画
 	Object.keys(jdgScoreObj).forEach(score => {
-		resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}`, 0, g_cssObj[`common_${jdgScoreObj[score].color}`], jdgScoreObj[score].pos, jdgScoreObj[score].label, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}`, 0, g_cssObj[`common_${jdgScoreObj[score].color}`], jdgScoreObj[score].pos, jdgScoreObj[score].label));
 		resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}S`, 50, g_cssObj.common_score, jdgScoreObj[score].pos, g_resultObj[score], C_ALIGN_RIGHT));
 	});
 	if (g_stateObj.autoAll === C_FLG_OFF) {
-		resultWindow.appendChild(makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_matari, 0, `Fast`, C_ALIGN_LEFT));
-		resultWindow.appendChild(makeCssResultSymbol(`lblSlow`, 350, g_cssObj.common_shobon, 2, `Slow`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_matari, 0, `Fast`));
+		resultWindow.appendChild(makeCssResultSymbol(`lblSlow`, 350, g_cssObj.common_shobon, 2, `Slow`));
 		resultWindow.appendChild(makeCssResultSymbol(`lblFastS`, 260, g_cssObj.score, 1, g_resultObj.fast, C_ALIGN_RIGHT));
 		resultWindow.appendChild(makeCssResultSymbol(`lblSlowS`, 260, g_cssObj.score, 3, g_resultObj.slow, C_ALIGN_RIGHT));
 	}
@@ -9538,14 +9538,14 @@ function resultInit() {
 		Object.keys(jdgScoreObj).forEach(score => {
 			if (score === `score`) {
 			} else {
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `(+`, C_ALIGN_LEFT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `(+`));
 				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}LS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, jdgScoreObj[score].pos, 0, C_ALIGN_RIGHT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `)`, C_ALIGN_LEFT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `)`));
 			}
 		});
 
 	} else {
-		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`));
 		const lblAutoView = document.querySelector(`#lblAutoView`);
 		lblAutoView.style.fontSize = `24px`;
 	}
@@ -9587,11 +9587,11 @@ function resultInit() {
 		Object.keys(jdgScoreObj).forEach(score => {
 			if (score === `score`) {
 				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-					jdgScoreObj[score].pos, `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+					jdgScoreObj[score].pos, `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`));
 				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}LS`, C_RLT_HIDIF_X, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
 					jdgScoreObj[score].pos, Math.abs(highscoreDfObj[score]), C_ALIGN_RIGHT));
 				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-					jdgScoreObj[score].pos, `)`, C_ALIGN_LEFT));
+					jdgScoreObj[score].pos, `)`));
 			} else {
 				document.querySelector(`#lbl${jdgScoreObj[score].id}L1`).innerHTML = `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`;
 				document.querySelector(`#lbl${jdgScoreObj[score].id}LS`).innerHTML = Math.abs(highscoreDfObj[score]);
@@ -9792,7 +9792,7 @@ function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align = C_AL
  * @param {string, number} _text
  * @param {string} _align
  */
-function makeCssResultSymbol(_id, _x, _class, _heightPos, _text, _align) {
+function makeCssResultSymbol(_id, _x, _class, _heightPos, _text, _align = C_ALIGN_LEFT) {
 	return createDivCss2Label(_id, _text, {
 		x: _x, y: 18 * _heightPos,
 		w: 150, h: 18, siz: C_SIZ_JDGCNTS, align: _align,
