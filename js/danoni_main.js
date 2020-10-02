@@ -7762,14 +7762,13 @@ function MainInit() {
 	});
 
 	// 判定カウンタ表示
-	const jdgObjs = [`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `MCombo`, ``, `Kita`, `Iknai`, `FCombo`];
-	const judgeColors = [`ii`, `shakin`, `matari`, `shobon`, `uwan`, `combo`, ``, `kita`, `iknai`, `combo`];
-
-	jdgObjs.forEach((jdgObj, j) => {
-		if (jdgObj !== ``) {
-			infoSprite.appendChild(makeCounterSymbol(`lbl${jdgObj}`, g_headerObj.playingWidth - 110,
-				g_cssObj[`common_${judgeColors[j]}`], j + 1, 0, g_workObj.scoreDisp));
-		}
+	const jdgMainScoreObj = {
+		Ii: [`ii`, 0], Shakin: [`shakin`, 1], Matari: [`matari`, 2], Shobon: [`shobon`, 3], Uwan: [`uwan`, 4],
+		MCombo: [`combo`, 5], Kita: [`kita`, 7], Iknai: [`iknai`, 8], FCombo: [`combo`, 9],
+	};
+	Object.keys(jdgMainScoreObj).forEach(jdgScore => {
+		infoSprite.appendChild(makeCounterSymbol(`lbl${jdgScore}`, g_headerObj.playingWidth - 110,
+			g_cssObj[`common_${jdgMainScoreObj[jdgScore][0]}`], jdgMainScoreObj[jdgScore][1] + 1, 0, g_workObj.scoreDisp));
 	});
 
 	// パーフェクト演出
@@ -9464,17 +9463,23 @@ function resultInit() {
 	}
 
 	// キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
-	const judgeIds = [`Ii`, `Shakin`, `Matari`, `Shobon`, `Uwan`, `Kita`, `Iknai`, `MCombo`, `FCombo`, ``, `Score`];
-	const judgeColors = [`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `combo`, `combo`, ``, `score`];
-	const judgeLabels = [C_JCR_II, C_JCR_SHAKIN, C_JCR_MATARI, C_JCR_SHOBON, C_JCR_UWAN, C_JCR_KITA, C_JCR_IKNAI, `MaxCombo`, `FreezeCombo`, ``, `Score`];
-	const judgeScores = [`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `maxCombo`, `fmaxCombo`, ``, `score`];
+	const jdgScoreObj = {
+		ii: { pos: 0, id: `Ii`, color: `ii`, label: C_JCR_II, },
+		shakin: { pos: 1, id: `Shakin`, color: `shakin`, label: C_JCR_SHAKIN, },
+		matari: { pos: 2, id: `Matari`, color: `matari`, label: C_JCR_MATARI, },
+		shobon: { pos: 3, id: `ShobonIi`, color: `shobon`, label: C_JCR_SHOBON, },
+		uwan: { pos: 4, id: `Uwan`, color: `uwan`, label: C_JCR_UWAN, },
+		kita: { pos: 5, id: `Kita`, color: `kita`, label: C_JCR_KITA, },
+		iknai: { pos: 6, id: `Iknai`, color: `iknai`, label: C_JCR_IKNAI, },
+		maxCombo: { pos: 7, id: `MCombo`, color: `combo`, label: `MaxCombo`, },
+		fmaxCombo: { pos: 8, id: `FCombo`, color: `combo`, label: `FreezeCombo`, },
+		score: { pos: 10, id: `Score`, color: `score`, label: `Score`, },
+	};
 
 	// キャラクタ、スコア描画
-	judgeIds.forEach((id, j) => {
-		if (id !== ``) {
-			resultWindow.appendChild(makeCssResultSymbol(`lbl${id}`, 0, g_cssObj[`common_${judgeColors[j]}`], j, judgeLabels[j], C_ALIGN_LEFT));
-			resultWindow.appendChild(makeCssResultSymbol(`lbl${id}S`, 50, g_cssObj.common_score, j, g_resultObj[judgeScores[j]], C_ALIGN_RIGHT));
-		}
+	Object.keys(jdgScoreObj).forEach(score => {
+		resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}`, 0, g_cssObj[`common_${jdgScoreObj[score].color}`], jdgScoreObj[score].pos, jdgScoreObj[score].label, C_ALIGN_LEFT));
+		resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}S`, 50, g_cssObj.common_score, jdgScoreObj[score].pos, g_resultObj[score], C_ALIGN_RIGHT));
 	});
 	if (g_stateObj.autoAll === C_FLG_OFF) {
 		resultWindow.appendChild(makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_matari, 0, `Fast`, C_ALIGN_LEFT));
@@ -9548,12 +9553,12 @@ function resultInit() {
 	if (highscoreCondition) {
 
 		// ハイスコア差分描画
-		judgeIds.forEach((id, j) => {
-			if (id === `Score`) {
-			} else if (id !== ``) {
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, j, `(+`, C_ALIGN_LEFT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}LS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, j, 0, C_ALIGN_RIGHT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, j, `)`, C_ALIGN_LEFT));
+		Object.keys(jdgScoreObj).forEach(score => {
+			if (score === `score`) {
+			} else {
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `(+`, C_ALIGN_LEFT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}LS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, jdgScoreObj[score].pos, 0, C_ALIGN_RIGHT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `)`, C_ALIGN_LEFT));
 			}
 		});
 
@@ -9574,13 +9579,13 @@ function resultInit() {
 	if (highscoreCondition) {
 
 		if (scoreName in g_localStorage.highscores) {
-			judgeScores.forEach(judge => {
+			Object.keys(jdgScoreObj).forEach(judge => {
 				if (judge !== ``) {
 					highscoreDfObj[judge] = g_resultObj[judge] - g_localStorage.highscores[scoreName][judge];
 				}
 			});
 		} else {
-			judgeScores.forEach(judge => {
+			Object.keys(jdgScoreObj).forEach(judge => {
 				if (judge !== ``) {
 					highscoreDfObj[judge] = g_resultObj[judge];
 				}
@@ -9588,7 +9593,7 @@ function resultInit() {
 		}
 		if (highscoreDfObj.score > 0 && g_stateObj.dataSaveFlg) {
 			g_localStorage.highscores[scoreName] = {};
-			judgeScores.forEach(judge => {
+			Object.keys(jdgScoreObj).forEach(judge => {
 				if (judge !== ``) {
 					g_localStorage.highscores[scoreName][judge] = g_resultObj[judge];
 				}
@@ -9597,17 +9602,17 @@ function resultInit() {
 		}
 
 		// ハイスコア差分値適用、ハイスコア部分作成
-		judgeIds.forEach((id, j) => {
-			if (id === `Score`) {
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-					j, `(${highscoreDfObj[judgeScores[j]] >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}LS`, C_RLT_HIDIF_X, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
-					j, Math.abs(highscoreDfObj[judgeScores[j]]), C_ALIGN_RIGHT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-					j, `)`, C_ALIGN_LEFT));
-			} else if (id !== ``) {
-				document.querySelector(`#lbl${id}L1`).innerHTML = `(${highscoreDfObj[judgeScores[j]] >= 0 ? "+" : "－"}`;
-				document.querySelector(`#lbl${id}LS`).innerHTML = Math.abs(highscoreDfObj[judgeScores[j]]);
+		Object.keys(jdgScoreObj).forEach(score => {
+			if (score === `score`) {
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					jdgScoreObj[score].pos, `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`, C_ALIGN_LEFT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}LS`, C_RLT_HIDIF_X, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
+					jdgScoreObj[score].pos, Math.abs(highscoreDfObj[score]), C_ALIGN_RIGHT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					jdgScoreObj[score].pos, `)`, C_ALIGN_LEFT));
+			} else {
+				document.querySelector(`#lbl${jdgScoreObj[score].id}L1`).innerHTML = `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`;
+				document.querySelector(`#lbl${jdgScoreObj[score].id}LS`).innerHTML = Math.abs(highscoreDfObj[score]);
 			}
 		});
 
