@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/08/24
+ * Revised : 2020/10/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.5.9`;
-const g_revisedDate = `2020/08/24`;
+const g_version = `Ver 14.5.10`;
+const g_revisedDate = `2020/10/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1089,8 +1089,8 @@ function loadLocalStorage() {
 		if (g_localStorage.adjustment !== undefined) {
 			g_stateObj.adjustment = setVal(g_localStorage.adjustment, 0, C_TYP_NUMBER);
 			g_adjustmentNum = g_adjustments.findIndex(adjustment => adjustment === g_stateObj.adjustment);
-			if (g_volumeNum < 0) {
-				g_volumeNum = C_MAX_ADJUSTMENT;
+			if (g_adjustmentNum < 0) {
+				g_adjustmentNum = C_MAX_ADJUSTMENT;
 			}
 		} else {
 			g_localStorage.adjustment = 0;
@@ -2497,7 +2497,7 @@ function headerConvert(_dosObj) {
 						obj.musicTitlesForView[j] = escapeHtmlForArray(getMusicNameMultiLine(musics[3]));
 					}
 				} else {
-					obj.artistUrl = location.href;
+					obj.artistUrl = ``;
 				}
 			}
 		}
@@ -2506,7 +2506,7 @@ function headerConvert(_dosObj) {
 		obj.musicTitle = `musicName`;
 		obj.musicTitleForView = [`musicName`];
 		obj.artistName = `artistName`;
-		obj.artistUrl = location.href;
+		obj.artistUrl = ``;
 	}
 
 	// 最小・最大速度の設定
@@ -2535,11 +2535,11 @@ function headerConvert(_dosObj) {
 		if (tunings.length > 1) {
 			obj.creatorUrl = tunings[1];
 		} else {
-			obj.creatorUrl = location.href;
+			obj.creatorUrl = (typeof g_presetTuningUrl === C_TYP_STRING ? g_presetTuningUrl : ``);
 		}
 	} else {
-		obj.tuning = (g_presetTuning) ? escapeHtmlForEnabledTag(g_presetTuning) : `name`;
-		obj.creatorUrl = (g_presetTuningUrl) ? g_presetTuningUrl : location.href;
+		obj.tuning = (typeof g_presetTuning === C_TYP_STRING) ? escapeHtmlForEnabledTag(g_presetTuning) : `name`;
+		obj.creatorUrl = (typeof g_presetTuningUrl === C_TYP_STRING) ? g_presetTuningUrl : ``;
 	}
 	obj.tuningInit = obj.tuning;
 
