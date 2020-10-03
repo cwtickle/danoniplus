@@ -1862,8 +1862,8 @@ function loadLocalStorage() {
 		if (g_localStorage.adjustment !== undefined) {
 			g_stateObj.adjustment = setVal(g_localStorage.adjustment, 0, C_TYP_NUMBER);
 			g_adjustmentNum = g_adjustments.findIndex(adjustment => adjustment === g_stateObj.adjustment);
-			if (g_volumeNum < 0) {
-				g_volumeNum = C_MAX_ADJUSTMENT;
+			if (g_adjustmentNum < 0) {
+				g_adjustmentNum = C_MAX_ADJUSTMENT;
 			}
 		} else {
 			g_localStorage.adjustment = 0;
