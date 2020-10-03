@@ -1826,7 +1826,7 @@ function loadMusic() {
 			const blobUrl = URL.createObjectURL(request.response);
 			const loader = createSprite(`divRoot`, `loader`, 0, g_sHeight - 10, g_sWidth, 10);
 			loader.style.backgroundColor = `#333333`;
-			lblLoading.innerText = `Please Wait...`;
+			lblLoading.textContent = `Please Wait...`;
 			setAudio(blobUrl);
 		} else {
 			makeWarningWindow(`${C_MSG_E_0032}<br>(${request.status} ${request.statusText})`);
@@ -1842,9 +1842,9 @@ function loadMusic() {
 			const loader = createSprite(`divRoot`, `loader`, 0, g_sHeight - 10, g_sWidth, 10);
 			loader.style.width = `${g_sWidth * rate}px`;
 			loader.style.backgroundColor = `#eeeeee`;
-			lblLoading.innerText = `Now Loading... ${Math.floor(rate * 100)}%`;
+			lblLoading.textContent = `Now Loading... ${Math.floor(rate * 100)}%`;
 		} else {
-			lblLoading.innerText = `Now Loading... ${_event.loaded}Bytes`;
+			lblLoading.textContent = `Now Loading... ${_event.loaded}Bytes`;
 		}
 		// ユーザカスタムイベント
 		if (typeof customLoadingProgress === C_TYP_FUNCTION) {
@@ -1903,7 +1903,7 @@ function setAudio(_url) {
 			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
 				if (isIOS) {
-					document.querySelector(`#lblLoading`).innerText = `Click to Start!`;
+					document.querySelector(`#lblLoading`).textContent = `Click to Start!`;
 					const btnPlay = makePlayButton(_ => {
 						divRoot.removeChild(btnPlay);
 						initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
@@ -1919,7 +1919,7 @@ function setAudio(_url) {
 		});
 
 	} else if (isIOS) {
-		document.querySelector(`#lblLoading`).innerText = `Click to Start!`;
+		document.querySelector(`#lblLoading`).textContent = `Click to Start!`;
 
 		const btnPlay = makePlayButton(_ => {
 			divRoot.removeChild(btnPlay);
@@ -2031,10 +2031,10 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 		} else {
 			if (tmpObj.depth === C_FLG_ALL) {
 				for (let j = 0; j <= g_headerObj[`${_depthName}${spriteUpper}MaxDepth`]; j++) {
-					document.querySelector(`#${_depthName}${spriteUpper}Sprite${j}`).innerHTML = ``;
+					document.querySelector(`#${_depthName}${spriteUpper}Sprite${j}`).textContent = ``;
 				}
 			} else {
-				baseSprite.innerHTML = ``;
+				baseSprite.textContent = ``;
 			}
 		}
 	}
@@ -2057,10 +2057,10 @@ function drawMainSpriteData(_frame, _depthName) {
 		} else {
 			if (tmpObj.depth === C_FLG_ALL) {
 				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
-					document.querySelector(`#${_depthName}Sprite${j}`).innerHTML = ``;
+					document.querySelector(`#${_depthName}Sprite${j}`).textContent = ``;
 				}
 			} else {
-				baseSprite.innerHTML = ``;
+				baseSprite.textContent = ``;
 			}
 		}
 	});
@@ -4099,7 +4099,7 @@ function createOptionWindow(_sprite) {
 				})
 			);
 		} else {
-			document.querySelector(`#data${_label}`).innerHTML = `${_value}`;
+			document.querySelector(`#data${_label}`).textContent = `${_value}`;
 		}
 	}
 
@@ -4171,7 +4171,7 @@ function createOptionWindow(_sprite) {
 				})
 			);
 		} else {
-			document.querySelector(`#dataTooldif`).innerHTML = g_detailObj.toolDif[_scoreId].tool;
+			document.querySelector(`#dataTooldif`).textContent = g_detailObj.toolDif[_scoreId].tool;
 		}
 
 		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
@@ -4224,8 +4224,8 @@ function createOptionWindow(_sprite) {
 			);
 
 		} else {
-			document.querySelector(`#dataDouji`).innerHTML = g_detailObj.toolDif[_scoreId].douji;
-			document.querySelector(`#dataTate`).innerHTML = g_detailObj.toolDif[_scoreId].tate;
+			document.querySelector(`#dataDouji`).textContent = g_detailObj.toolDif[_scoreId].douji;
+			document.querySelector(`#dataTate`).textContent = g_detailObj.toolDif[_scoreId].tate;
 			document.querySelector(`#lblArrowInfo2`).innerHTML = `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`;
 			document.querySelector(`#dataArrowInfo`).innerHTML = ArrowInfo;
 			document.querySelector(`#dataArrowInfo2`).innerHTML = ArrowInfo2;
@@ -4319,7 +4319,7 @@ function createOptionWindow(_sprite) {
 			g_stateObj.reverse = C_FLG_ON;
 			btnReverse.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
 		}
-		btnReverse.innerHTML = `Reverse:${g_stateObj.reverse}`;
+		btnReverse.textContent = `Reverse:${g_stateObj.reverse}`;
 	}
 
 	// ---------------------------------------------------
@@ -4539,12 +4539,12 @@ function createOptionWindow(_sprite) {
 	spriteList.fadein.appendChild(makeMiniCssButton(`lnkFadein`, `R`, 0, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 99 ? 0 : g_stateObj.fadein + 1);
 		fadeinSlider.value = g_stateObj.fadein;
-		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
+		lnkFadein.textContent = `${g_stateObj.fadein}%`;
 	}));
 	spriteList.fadein.appendChild(makeMiniCssButton(`lnkFadein`, `L`, 0, _ => {
 		g_stateObj.fadein = (g_stateObj.fadein === 0 ? 99 : g_stateObj.fadein - 1);
 		fadeinSlider.value = g_stateObj.fadein;
-		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
+		lnkFadein.textContent = `${g_stateObj.fadein}%`;
 	}));
 
 	// フェードインのスライダー処理
@@ -4557,7 +4557,7 @@ function createOptionWindow(_sprite) {
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
 	fadeinSlider.addEventListener(`input`, _ => {
 		g_stateObj.fadein = parseInt(fadeinSlider.value);
-		lnkFadein.innerHTML = `${g_stateObj.fadein}%`;
+		lnkFadein.textContent = `${g_stateObj.fadein}%`;
 	}, false);
 
 	// ---------------------------------------------------
@@ -4694,9 +4694,9 @@ function createOptionWindow(_sprite) {
 
 		// 譜面名設定 (Difficulty)
 		lnkDifficulty.innerHTML = `${g_keyObj.currentKey} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-		if (getStrLength(lnkDifficulty.innerHTML) > 25) {
+		if (getStrLength(lnkDifficulty.textContent) > 25) {
 			lnkDifficulty.style.fontSize = `14px`;
-		} else if (getStrLength(lnkDifficulty.innerHTML) > 18) {
+		} else if (getStrLength(lnkDifficulty.textContent) > 18) {
 			lnkDifficulty.style.fontSize = `16px`;
 		}
 		if (g_headerObj.makerView) {
@@ -4728,7 +4728,7 @@ function createOptionWindow(_sprite) {
 				const btnReverse = document.querySelector(`#btnReverse`);
 				btnReverse.classList.replace(g_cssObj[`button_Rev${g_reverses[(g_reverseNum + 1) % 2]}`],
 					g_cssObj[`button_Rev${g_reverses[g_reverseNum]}`]);
-				btnReverse.innerHTML = `Reverse:${g_stateObj.reverse}`;
+				btnReverse.textContent = `Reverse:${g_stateObj.reverse}`;
 			} else {
 				spriteList.scroll.style.visibility = `hidden`;
 				spriteList.reverse.style.visibility = `visible`;
@@ -4742,7 +4742,7 @@ function createOptionWindow(_sprite) {
 
 		// オート・アシスト設定 (AutoPlay)
 		g_stateObj.autoPlay = g_autoPlays[g_autoPlayNum];
-		document.querySelector(`#lnkAutoPlay`).innerHTML = g_stateObj.autoPlay;
+		document.querySelector(`#lnkAutoPlay`).textContent = g_stateObj.autoPlay;
 
 		// ゲージ設定 (Gauge)
 		setGauge(0);
@@ -4837,7 +4837,7 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
 		eval(`g_${_settingName}Num = (g_${_settingName}Num === 0 ? g_${_settingName}s.length - 1 : (g_${_settingName}Num + _scrollNum <= 0 ? 0 : g_${_settingName}Num + _scrollNum))`);
 	}
 	eval(`g_stateObj.${_settingName} = g_${_settingName}s[g_${_settingName}Num]`);
-	eval(`document.querySelector('#lnk${toCapitalize(_settingName)}').innerHTML = g_stateObj.${_settingName} + _unitName`);
+	eval(`document.querySelector('#lnk${toCapitalize(_settingName)}').textContent = g_stateObj.${_settingName} + _unitName`);
 }
 
 /**
@@ -5168,7 +5168,7 @@ function interlockingButton(_headerObj, _name, _current, _next, _buttonFlg = fal
 					if (g_headerObj[`${defaultOption}Use`]) {
 						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${_current}`], g_cssObj[`button_${_next}`]);
 					} else {
-						document.querySelector(`#lnk${defaultOption}`).innerHTML = `${toCapitalize(defaultOption)}:${_next}`;
+						document.querySelector(`#lnk${defaultOption}`).textContent = `${toCapitalize(defaultOption)}:${_next}`;
 						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_Disabled${_current}`], g_cssObj[`button_Disabled${_next}`]);
 					}
 				}
@@ -5335,7 +5335,7 @@ function keyConfigInit() {
 				resetCursorMain(kWidth, divideCnt, keyCtrlPtn, false);
 				break;
 		}
-		lnkKcType.innerHTML = g_kcType;
+		lnkKcType.textContent = g_kcType;
 	}, {
 		x: 30, y: 35, w: 100,
 	});
@@ -5370,7 +5370,7 @@ function keyConfigInit() {
 		for (let j = 0; j < keyNum; j++) {
 			document.querySelector(`#arrow${j}`).style.background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
 		}
-		lnkcolorType.innerHTML = g_colorType;
+		lnkcolorType.textContent = g_colorType;
 	}, {
 		x: g_sWidth - 130, y: 35, w: 100,
 	});
@@ -5491,7 +5491,7 @@ function keyConfigInit() {
 				for (let j = 0; j < keyNum; j++) {
 					for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
-						document.querySelector(`#keycon${j}_${k}`).innerHTML = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
+						document.querySelector(`#keycon${j}_${k}`).textContent = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
 
 						if (g_keyObj.currentPtn === -1) {
 							removeClassList(j, k);
@@ -5544,7 +5544,7 @@ function keyConfigInit() {
 				removeClassList(g_currentj, g_currentk);
 				keyCdObj.classList.add(g_cssObj.keyconfig_Changekey);
 			}
-			keyCdObj.innerHTML = g_kCd[setKey];
+			keyCdObj.textContent = g_kCd[setKey];
 			g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][g_currentk] = setKey;
 			g_prevKey = setKey;
 		}
@@ -5664,7 +5664,7 @@ function setKeyConfigCursor(_width, _divideCnt, _keyCtrlPtn, _keyNum) {
 		if (g_kcType === `Replaced`) {
 			g_kcType = C_FLG_ALL;
 		}
-		document.querySelector(`#lnkKcType`).innerHTML = g_kcType;
+		document.querySelector(`#lnkKcType`).textContent = g_kcType;
 		cursor.style.top = `${45 + C_KYC_HEIGHT * dividePos}px`;
 	}
 }
@@ -7671,7 +7671,7 @@ function MainInit() {
 		w: 35, h: 16, background: C_CLR_BORDER, styleName: `lifeBorder`,
 		fontFamily: getBasicFont(), display: g_workObj.lifegaugeDisp,
 	}, g_cssObj.life_Border, g_cssObj.life_BorderColor);
-	lifeBorderObj.innerHTML = g_workObj.lifeBorder;
+	lifeBorderObj.textContent = g_workObj.lifeBorder;
 	infoSprite.appendChild(lifeBorderObj);
 
 	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === g_headerObj.maxLifeVal) {
@@ -7687,7 +7687,7 @@ function MainInit() {
 			siz: C_SIZ_MAIN, align: C_ALIGN_LEFT, color: `#ffffff`, fontFamily: getBasicFont(),
 			display: `block`, margin: `auto`,
 		})
-		lblWord.innerHTML = ``;
+		lblWord.textContent = ``;
 	}
 
 	// 曲名・アーティスト名表示
@@ -8437,7 +8437,7 @@ function MainInit() {
 	function flowTimeline() {
 
 		const currentFrame = g_scoreObj.frameNum;
-		lblframe.innerHTML = currentFrame;
+		lblframe.textContent = currentFrame;
 
 		// キーの押下状態を取得
 		for (let j = 0; j < keyNum; j++) {
@@ -8646,9 +8646,9 @@ function MainInit() {
 			if (charaJCnt > 0) {
 				document.querySelector(`#chara${jdg}`).setAttribute(`cnt`, --charaJCnt);
 				if (charaJCnt === 0) {
-					document.querySelector(`#chara${jdg}`).innerHTML = ``;
-					document.querySelector(`#combo${jdg}`).innerHTML = ``;
-					document.querySelector(`#diff${jdg}`).innerHTML = ``;
+					document.querySelector(`#chara${jdg}`).textContent = ``;
+					document.querySelector(`#combo${jdg}`).textContent = ``;
+					document.querySelector(`#diff${jdg}`).textContent = ``;
 				}
 			}
 		});
@@ -8681,7 +8681,7 @@ function MainInit() {
 				if (g_scoreObj.nominalFrameNum >= 0) {
 					const currentMin = Math.floor(g_scoreObj.nominalFrameNum / 60 / g_fps);
 					const currentSec = `00${Math.floor(g_scoreObj.nominalFrameNum / g_fps) % 60}`.slice(-2);
-					lblTime1.innerHTML = `${currentMin}:${currentSec}`;
+					lblTime1.textContent = `${currentMin}:${currentSec}`;
 				}
 			}
 
@@ -8732,7 +8732,7 @@ function changeAppearanceFilter(_appearance, _num = 10) {
 	if (g_appearanceRanges.includes(_appearance)) {
 		document.querySelector(`#filterView`).style.top =
 			document.querySelector(`#filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).style.top;
-		document.querySelector(`#filterView`).innerHTML = `${_num}%`;
+		document.querySelector(`#filterView`).textContent = `${_num}%`;
 
 		if (_appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
 			document.querySelector(`#filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).style.display = C_DIS_NONE;
@@ -9022,7 +9022,7 @@ function changeLifeColor(_state = ``) {
 	}
 
 	const intLifeVal = Math.floor(g_workObj.lifeVal);
-	lblLife.innerHTML = intLifeVal;
+	lblLife.textContent = intLifeVal;
 	lifeBar.style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal}px`;
 	lifeBar.style.height = `${(g_sHeight - 100) * intLifeVal / g_headerObj.maxLifeVal}px`;
 }
@@ -9064,7 +9064,7 @@ function changeJudgeCharacter(_name, _character, _freezeFlg = ``) {
 	g_currentArrows++;
 	document.querySelector(`#chara${_freezeFlg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
 	document.querySelector(`#chara${_freezeFlg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
-	document.querySelector(`#lbl${toCapitalize(_name)}`).innerHTML = g_resultObj[_name];
+	document.querySelector(`#lbl${toCapitalize(_name)}`).textContent = g_resultObj[_name];
 }
 
 /**
@@ -9073,9 +9073,9 @@ function changeJudgeCharacter(_name, _character, _freezeFlg = ``) {
 function updateCombo() {
 	if (++g_resultObj.combo > g_resultObj.maxCombo) {
 		g_resultObj.maxCombo = g_resultObj.combo;
-		document.querySelector(`#lblMCombo`).innerHTML = g_resultObj.maxCombo;
+		document.querySelector(`#lblMCombo`).textContent = g_resultObj.maxCombo;
 	}
-	document.querySelector(`#comboJ`).innerHTML = `${g_resultObj.combo} Combo!!`;
+	document.querySelector(`#comboJ`).textContent = `${g_resultObj.combo} Combo!!`;
 }
 
 /**
@@ -9126,7 +9126,7 @@ function judgeShakin(difFrame) {
  */
 function judgeMatari(difFrame) {
 	changeJudgeCharacter(`matari`, C_JCR_MATARI);
-	document.querySelector(`#comboJ`).innerHTML = ``;
+	document.querySelector(`#comboJ`).textContent = ``;
 
 	displayDiff(difFrame, g_headerObj.justFrames);
 	finishViewing();
@@ -9144,8 +9144,8 @@ function judgeMatari(difFrame) {
  */
 function judgeDamage() {
 	g_resultObj.combo = 0;
-	document.querySelector(`#comboJ`).innerHTML = ``;
-	document.querySelector(`#diffJ`).innerHTML = ``;
+	document.querySelector(`#comboJ`).textContent = ``;
+	document.querySelector(`#diffJ`).textContent = ``;
 	lifeDamage();
 }
 
@@ -9190,9 +9190,9 @@ function judgeKita(difFrame) {
 
 	if (++g_resultObj.fCombo > g_resultObj.fmaxCombo) {
 		g_resultObj.fmaxCombo = g_resultObj.fCombo;
-		document.querySelector(`#lblFCombo`).innerHTML = g_resultObj.fmaxCombo;
+		document.querySelector(`#lblFCombo`).textContent = g_resultObj.fmaxCombo;
 	}
-	document.querySelector(`#comboFJ`).innerHTML = `${g_resultObj.fCombo} Combo!!`;
+	document.querySelector(`#comboFJ`).textContent = `${g_resultObj.fCombo} Combo!!`;
 
 	lifeRecovery();
 	finishViewing();
@@ -9211,7 +9211,7 @@ function judgeKita(difFrame) {
  */
 function judgeIknai(difFrame) {
 	changeJudgeCharacter(`iknai`, C_JCR_IKNAI, `F`);
-	document.querySelector(`#comboFJ`).innerHTML = ``;
+	document.querySelector(`#comboFJ`).textContent = ``;
 	g_resultObj.fCombo = 0;
 
 	lifeDamage();
@@ -9231,12 +9231,8 @@ function judgeIknai(difFrame) {
 function makeFinishView(_text) {
 	document.querySelector(`#finishView`).innerHTML = _text;
 	document.querySelector(`#finishView`).style.opacity = 1;
-	document.querySelector(`#charaJ`).innerHTML = ``;
-	document.querySelector(`#comboJ`).innerHTML = ``;
-	document.querySelector(`#diffJ`).innerHTML = ``;
-	document.querySelector(`#charaFJ`).innerHTML = ``;
-	document.querySelector(`#comboFJ`).innerHTML = ``;
-	document.querySelector(`#diffFJ`).innerHTML = ``;
+	[`charaJ`, `comboJ`, `diffJ`, `charaFJ`, `comboFJ`, `diffFJ`].forEach(label =>
+		document.querySelector(`#${label}`).textContent = ``);
 }
 
 function finishViewing() {
@@ -9585,8 +9581,8 @@ function resultInit() {
 				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
 					jdgScoreObj[score].pos, `)`));
 			} else {
-				document.querySelector(`#lbl${jdgScoreObj[score].id}L1`).innerHTML = `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`;
-				document.querySelector(`#lbl${jdgScoreObj[score].id}LS`).innerHTML = Math.abs(highscoreDfObj[score]);
+				document.querySelector(`#lbl${jdgScoreObj[score].id}L1`).textContent = `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`;
+				document.querySelector(`#lbl${jdgScoreObj[score].id}LS`).textContent = Math.abs(highscoreDfObj[score]);
 			}
 		});
 
