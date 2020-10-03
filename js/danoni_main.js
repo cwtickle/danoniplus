@@ -337,6 +337,15 @@ function toCapitalize(_str) {
 }
 
 /**
+ * 0以上の数字に変換
+ * @param {number} _num 
+ * @param {number} _init 0未満の場合に設定する値
+ */
+function roundZero(_num, _init = 0) {
+	return _num < 0 ? _init : _num;
+}
+
+/**
  * プリロードするファイルの設定
  * @param {string} _as 
  * @param {string} _href 
@@ -1099,10 +1108,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				if (setVal(tmpSpriteData[0], 200, C_TYP_NUMBER) === 0) {
 					tmpFrame = 0;
 				} else {
-					tmpFrame = _calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC));
-					if (tmpFrame < 0) {
-						tmpFrame = 0;
-					}
+					tmpFrame = roundZero(_calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC)));
 				}
 				const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_CALC));
 				if (tmpDepth !== C_FLG_ALL && tmpDepth > maxDepth) {
@@ -1242,10 +1248,7 @@ function loadLocalStorage() {
 		// Adjustment初期値設定
 		if (g_localStorage.adjustment !== undefined) {
 			g_stateObj.adjustment = setVal(g_localStorage.adjustment, 0, C_TYP_NUMBER);
-			g_adjustmentNum = g_adjustments.findIndex(adjustment => adjustment === g_stateObj.adjustment);
-			if (g_volumeNum < 0) {
-				g_volumeNum = C_MAX_ADJUSTMENT;
-			}
+			g_adjustmentNum = roundZero(g_adjustments.findIndex(adjustment => adjustment === g_stateObj.adjustment), C_MAX_ADJUSTMENT);
 		} else {
 			g_localStorage.adjustment = 0;
 		}
@@ -1253,10 +1256,7 @@ function loadLocalStorage() {
 		// Volume初期値設定
 		if (g_localStorage.volume !== undefined) {
 			g_stateObj.volume = setVal(g_localStorage.volume, 100, C_TYP_NUMBER);
-			g_volumeNum = g_volumes.findIndex(volume => volume === g_stateObj.volume);
-			if (g_volumeNum < 0) {
-				g_volumeNum = 0;
-			}
+			g_volumeNum = roundZero(g_volumes.findIndex(volume => volume === g_stateObj.volume));
 		} else {
 			g_localStorage.volume = 100;
 		}
@@ -2769,10 +2769,7 @@ function headerConvert(_dosObj) {
 
 	// 初期速度の設定
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
-	g_speedNum = g_speeds.findIndex(speed => speed === g_stateObj.speed);
-	if (g_speedNum < 0) {
-		g_speedNum = 0;
-	}
+	g_speedNum = roundZero(g_speeds.findIndex(speed => speed === g_stateObj.speed));
 
 	// 矢印の色変化を常時グラデーションさせる設定
 	obj.defaultColorgrd = setVal(_dosObj.defaultColorgrd, false, C_TYP_BOOLEAN);
@@ -4609,10 +4606,7 @@ function createOptionWindow(_sprite) {
 
 			// 速度、ゲージ、リバースの初期設定
 			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
-			g_speedNum = g_speeds.findIndex(speed => speed === g_stateObj.speed);
-			if (g_speedNum < 0) {
-				g_speedNum = 0;
-			}
+			g_speedNum = roundZero(g_speeds.findIndex(speed => speed === g_stateObj.speed));
 			g_gaugeNum = 0;
 			g_scrollNum = 0;
 			if (!g_autoPlays.includes(g_stateObj.autoPlay)) {
@@ -4635,10 +4629,7 @@ function createOptionWindow(_sprite) {
 					// リバース初期値設定
 					if (g_localKeyStorage.reverse !== undefined) {
 						g_stateObj.reverse = setVal(g_localKeyStorage.reverse, C_FLG_OFF, C_TYP_STRING);
-						g_reverseNum = g_reverses.findIndex(reverse => reverse === g_stateObj.reverse);
-						if (g_reverseNum < 0) {
-							g_reverseNum = 0;
-						}
+						g_reverseNum = roundZero(g_reverses.findIndex(reverse => reverse === g_stateObj.reverse));
 					}
 
 					// キーコンフィグ初期値設定
@@ -4664,10 +4655,7 @@ function createOptionWindow(_sprite) {
 				// リバース初期値設定
 				if (g_localStorage[`reverse${g_keyObj.currentKey}`] !== undefined) {
 					g_stateObj.reverse = setVal(g_localStorage[`reverse${g_keyObj.currentKey}`], C_FLG_OFF, C_TYP_STRING);
-					g_reverseNum = g_reverses.findIndex(reverse => reverse === g_stateObj.reverse);
-					if (g_reverseNum < 0) {
-						g_reverseNum = 0;
-					}
+					g_reverseNum = roundZero(g_reverses.findIndex(reverse => reverse === g_stateObj.reverse));
 				} else {
 					g_stateObj.reverse = C_FLG_OFF;
 					g_reverseNum = 0;
