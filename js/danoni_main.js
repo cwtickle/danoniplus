@@ -1151,16 +1151,8 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
  * @param {string} _name
  */
 function getQueryParamVal(_name) {
-	const url = window.location.href;
-	const name = _name.replace(/[\[\]]/g, `\\$&`);
-
-	const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
-	const results = regex.exec(url);
-
-	if (!results) return null;
-	if (!results[2]) return ``;
-
-	return decodeURIComponent(results[2].replace(/\+/g, ` `));
+	const param = new URL(location.href).searchParams.get(_name);
+	return param !== null ? decodeURIComponent(param.replace(/\+/g, ` `)) : null;
 }
 
 /**
