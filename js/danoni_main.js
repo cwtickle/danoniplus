@@ -2676,11 +2676,7 @@ function headerConvert(_dosObj) {
 	if (_dosObj.tuning !== undefined && _dosObj.tuning !== ``) {
 		const tunings = _dosObj.tuning.split(`,`);
 		obj.tuning = escapeHtmlForEnabledTag(tunings[0]);
-		if (tunings.length > 1) {
-			obj.creatorUrl = tunings[1];
-		} else {
-			obj.creatorUrl = ``;
-		}
+		obj.creatorUrl = (tunings.length > 1 ? tunings[1] : (typeof g_presetTuningUrl === C_TYP_STRING ? g_presetTuningUrl : ``));
 	} else {
 		obj.tuning = (typeof g_presetTuning === C_TYP_STRING ? escapeHtmlForEnabledTag(g_presetTuning) : `name`);
 		obj.creatorUrl = (typeof g_presetTuningUrl === C_TYP_STRING ? g_presetTuningUrl : ``);
