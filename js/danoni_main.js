@@ -2983,7 +2983,7 @@ function headerConvert(_dosObj) {
 		}
 	} else {
 		obj.tuning = (typeof g_presetTuning === C_TYP_STRING) ? g_presetTuning : `name`;
-		obj.creatorUrl = (typeof g_presetTuningUrl === C_TYP_STRING) ? g_presetTuningUrl : location.href;
+		obj.creatorUrl = (typeof g_presetTuningUrl === C_TYP_STRING) ? g_presetTuningUrl : ``;
 	}
 	obj.tuningInit = obj.tuning;
 
