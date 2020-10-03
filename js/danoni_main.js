@@ -1,4 +1,4 @@
-`use strict`;
+﻿`use strict`;
 /**
  * Dancing☆Onigiri (CW Edition)
  * 
@@ -2220,12 +2220,9 @@ function titleInit() {
 		}
 
 		// 変数 titlesize の定義 (使用例： |titlesize=40,20|)
-		const titlefontsizes = (g_headerObj.titlesize !== `` ? g_headerObj.titlesize.split(`,`) : [titlefontsize, titlefontsize]);
+		const titlefontsizes = (g_headerObj.titlesize !== `` ? g_headerObj.titlesize.split(`$`).join(`,`).split(`,`) : [titlefontsize, titlefontsize]);
 		const titlefontsize1 = setVal(titlefontsizes[0], titlefontsize, C_TYP_NUMBER);
 		const titlefontsize2 = setVal(titlefontsizes[1], titlefontsize1, C_TYP_NUMBER);
-
-		// 変数 titlefont の定義 (使用例： |titlefont=Century,Meiryo UI|)
-		const titlefontname = (g_headerObj.titlefont !== `` ? `'${(g_headerObj.titlefont.replace(/,/g, `','`))}'` : `メイリオ`);
 
 		// 変数 titlepos の定義 (使用例： |titlepos=0,10| マイナス、小数点の指定もOK)
 		const titlefontpos = (g_headerObj.titlepos !== `` ? g_headerObj.titlepos.split(`,`) : [0, 0]);
@@ -2237,7 +2234,7 @@ function titleInit() {
 			`<span style="
 				align:${C_ALIGN_CENTER};
 				position:relative;top:${titlefontsize1 - (titlefontsize1 + titlefontsize2) / 2}px;
-				font-family:${titlefontname};
+				font-family:${g_headerObj.titlefonts[0]};
 				background: ${titlefontgrd};
 				background-clip: text;
 				-webkit-background-clip: text;
@@ -2248,6 +2245,7 @@ function titleInit() {
 				<span style="
 					font-size:${titlefontsize2}px;
 					position:relative;top:${titlelineheight - (titlefontsize1 + titlefontsize2) / 2 - titlefontsize1 + titlefontsize2}px;
+					font-family:${g_headerObj.titlefonts[1]};
 					background: ${titlefontgrd2};
 					background-clip: text;
 					-webkit-background-clip: text;
@@ -3155,7 +3153,16 @@ function headerConvert(_dosObj) {
 	obj.titlesize = setVal(_dosObj.titlesize, ``, C_TYP_STRING);
 
 	// デフォルト曲名表示のフォント名
-	obj.titlefont = setVal(_dosObj.titlefont, ``, C_TYP_STRING);
+	// (使用例： |titlefont=Century,Meiryo UI|)
+	obj.titlefonts = [`'メイリオ'`];
+	if (_dosObj.titlefont !== undefined) {
+		_dosObj.titlefont.split(`$`).forEach((font, j) => {
+			obj.titlefonts[j] = `'${(font.replace(/,/g, `', '`))}'`;
+		});
+		if (obj.titlefonts[1] === undefined) {
+			obj.titlefonts[1] = obj.titlefonts[0];
+		}
+	}
 
 	// デフォルト曲名表示, 背景矢印のグラデーション指定css
 	obj.titlegrds = [];
