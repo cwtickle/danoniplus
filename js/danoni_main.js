@@ -218,7 +218,11 @@ const blockCode = _setCode => C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_set
  * 外部リンクを新規タグで開く
  * @param {string} _url 
  */
-const openLink = _url => window.open(_url, `_blank`, `noopener`);
+const openLink = _url => {
+	if (_url.match(`^(http|https):/`)) {
+		window.open(_url, `_blank`, `noopener`);
+	}
+}
 
 /**
  * 文字列を想定された型に変換
@@ -2333,9 +2337,7 @@ function titleInit() {
 	// 製作者表示
 	divRoot.appendChild(
 		createCss2Button(`lnkMaker`, `Maker: ${g_headerObj.tuningInit}`, _ => {
-			if (setVal(g_headerObj.creatorUrl, ``, C_TYP_STRING) !== ``) {
-				openLink(g_headerObj.creatorUrl);
-			}
+			openLink(g_headerObj.creatorUrl);
 		}, {
 			x: 20, y: g_sHeight - 45,
 			w: g_sWidth / 2 - 20, h: C_LNK_HEIGHT, siz: C_LBL_LNKSIZE, align: C_ALIGN_LEFT,
@@ -2346,9 +2348,7 @@ function titleInit() {
 	// 作曲者リンク表示
 	divRoot.appendChild(
 		createCss2Button(`lnkArtist`, `Artist: ${g_headerObj.artistName}`, _ => {
-			if (setVal(g_headerObj.artistUrl, ``, C_TYP_STRING) !== ``) {
-				openLink(g_headerObj.artistUrl);
-			}
+			openLink(g_headerObj.artistUrl);
 		}, {
 			x: g_sWidth / 2, y: g_sHeight - 45,
 			w: g_sWidth / 2 - 20, h: C_LNK_HEIGHT, siz: C_LBL_LNKSIZE, align: C_ALIGN_LEFT,
@@ -2649,7 +2649,7 @@ function headerConvert(_dosObj) {
 						obj.musicTitlesForView[j] = escapeHtmlForArray(getMusicNameMultiLine(musics[3]));
 					}
 				} else {
-					obj.artistUrl = location.href;
+					obj.artistUrl = ``;
 				}
 			}
 		}
@@ -2658,7 +2658,7 @@ function headerConvert(_dosObj) {
 		obj.musicTitle = `musicName`;
 		obj.musicTitleForView = [`musicName`];
 		obj.artistName = `artistName`;
-		obj.artistUrl = location.href;
+		obj.artistUrl = ``;
 	}
 
 	// 最小・最大速度の設定
@@ -2687,11 +2687,11 @@ function headerConvert(_dosObj) {
 		if (tunings.length > 1) {
 			obj.creatorUrl = tunings[1];
 		} else {
-			obj.creatorUrl = location.href;
+			obj.creatorUrl = ``;
 		}
 	} else {
 		obj.tuning = (typeof g_presetTuning === C_TYP_STRING ? escapeHtmlForEnabledTag(g_presetTuning) : `name`);
-		obj.creatorUrl = (typeof g_presetTuningUrl === C_TYP_STRING ? g_presetTuningUrl : location.href);
+		obj.creatorUrl = (typeof g_presetTuningUrl === C_TYP_STRING ? g_presetTuningUrl : ``);
 	}
 	obj.tuningInit = obj.tuning;
 
