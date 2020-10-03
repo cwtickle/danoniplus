@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/08/24
+ * Revised : 2020/10/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.19`;
-const g_revisedDate = `2020/08/24`;
+const g_version = `Ver 9.4.20`;
+const g_revisedDate = `2020/10/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2938,7 +2938,7 @@ function headerConvert(_dosObj) {
 						obj.musicTitlesForView[j] = getMusicNameMultiLine(musics[3]);
 					}
 				} else {
-					obj.artistUrl = location.href;
+					obj.artistUrl = ``;
 				}
 			}
 		}
@@ -2947,7 +2947,7 @@ function headerConvert(_dosObj) {
 		obj.musicTitle = `musicName`;
 		obj.musicTitleForView = [`musicName`];
 		obj.artistName = `artistName`;
-		obj.artistUrl = location.href;
+		obj.artistUrl = ``;
 	}
 
 	// 譜面変更セレクターの利用有無
@@ -2979,11 +2979,11 @@ function headerConvert(_dosObj) {
 		if (tunings.length > 1) {
 			obj.creatorUrl = tunings[1];
 		} else {
-			obj.creatorUrl = location.href;
+			obj.creatorUrl = (typeof g_presetTuningUrl === C_TYP_STRING ? g_presetTuningUrl : ``);
 		}
 	} else {
-		obj.tuning = (g_presetTuning) ? g_presetTuning : `name`;
-		obj.creatorUrl = (g_presetTuningUrl) ? g_presetTuningUrl : location.href;
+		obj.tuning = (typeof g_presetTuning === C_TYP_STRING) ? g_presetTuning : `name`;
+		obj.creatorUrl = (typeof g_presetTuningUrl === C_TYP_STRING) ? g_presetTuningUrl : location.href;
 	}
 	obj.tuningInit = obj.tuning;
 
