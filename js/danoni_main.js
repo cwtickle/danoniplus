@@ -2224,9 +2224,6 @@ function titleInit() {
 		const titlefontsize1 = setVal(titlefontsizes[0], titlefontsize, C_TYP_NUMBER);
 		const titlefontsize2 = setVal(titlefontsizes[1], titlefontsize1, C_TYP_NUMBER);
 
-		// 変数 titlepos の定義 (使用例： |titlepos=0,10| マイナス、小数点の指定もOK)
-		const titlefontpos = (g_headerObj.titlepos !== `` ? g_headerObj.titlepos.split(`,`) : [0, 0]);
-
 		// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
 		const titlelineheight = (g_headerObj.titlelineheight !== `` ? g_headerObj.titlelineheight : titlefontsize2 + 5);
 
@@ -2244,7 +2241,8 @@ function titleInit() {
 				${g_headerObj.musicTitleForView[0]}<br>
 				<span style="
 					font-size:${titlefontsize2}px;
-					position:relative;top:${titlelineheight - (titlefontsize1 + titlefontsize2) / 2 - titlefontsize1 + titlefontsize2}px;
+					position:relative;left:${g_headerObj.titlepos[1][0]}px;
+					top:${g_headerObj.titlepos[1][1] + titlelineheight - (titlefontsize1 + titlefontsize2) / 2 - titlefontsize1 + titlefontsize2}px;
 					font-family:${g_headerObj.titlefonts[1]};
 					background: ${titlefontgrd2};
 					background-clip: text;
@@ -2255,7 +2253,7 @@ function titleInit() {
 				</span>
 			</span>`,
 			{
-				x: Number(titlefontpos[0]), y: Number(titlefontpos[1]),
+				x: Number(g_headerObj.titlepos[0][0]), y: Number(g_headerObj.titlepos[0][1]),
 				w: g_sWidth, h: g_sHeight - 40, siz: titlefontsize1,
 				display: `flex`, flexDirection: `column`, justifyContent: `center`, alignItems: `center`,
 			}
@@ -3177,7 +3175,12 @@ function headerConvert(_dosObj) {
 	});
 
 	// デフォルト曲名表示の表示位置調整
-	obj.titlepos = setVal(_dosObj.titlepos, ``, C_TYP_STRING);
+	obj.titlepos = [[0, 0], [0, 0]];
+	if (_dosObj.titlepos !== undefined) {
+		_dosObj.titlepos.split(`$`).forEach((pos, j) => {
+			obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x));
+		});
+	}
 
 	// デフォルト曲名表示の複数行時の縦間隔
 	obj.titlelineheight = setVal(_dosObj.titlelineheight, ``, C_TYP_NUMBER);
