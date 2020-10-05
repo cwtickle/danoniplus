@@ -2168,13 +2168,11 @@ function titleInit() {
 
 	// 背景の矢印オブジェクトを表示
 	if (!g_headerObj.customTitleArrowUse) {
-		const titlecolor = (g_headerObj.titlearrowgrds === undefined || g_headerObj.titlearrowgrds.length === 0 ?
-			`${g_headerObj.setColorOrg[0]}` : g_headerObj.titlearrowgrds[0]);
 		divRoot.appendChild(
 			createColorObject2(`lblArrow`, {
 				x: (g_sWidth - 500) / 2, y: -15 + (g_sHeight - 500) / 2,
 				w: 500, h: 500,
-				background: makeColorGradation(titlecolor, {
+				background: makeColorGradation(g_headerObj.titlearrowgrds[0] || g_headerObj.setColorOrg[0], {
 					_defaultColorgrd: false,
 					_objType: `titleArrow`,
 				}), rotate: 180, opacity: 0.25,
@@ -2202,24 +2200,22 @@ function titleInit() {
 
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
-		const titlefontgrd = makeColorGradation(
-			(g_headerObj.titlegrds.length > 0 ?
-				g_headerObj.titlegrds[0] : `${g_headerObj.setColorOrg[0]},${g_headerObj.setColorOrg[2]}`), {
-			_defaultColorgrd: false,
-			_objType: `titleMusic`,
+		const titlegrd1 = g_headerObj.titlegrds[0] || `${g_headerObj.setColorOrg[0]},${g_headerObj.setColorOrg[2]}`;
+		const titlegrd2 = g_headerObj.titlegrds[1] || titlegrd1;
+
+		const titlegrds = [];
+		[titlegrd1, titlegrd2].forEach((titlegrd, j) => {
+			titlegrds[j] = makeColorGradation(titlegrd, {
+				_defaultColorgrd: false, _objType: `titleMusic`,
+			});
 		});
-		const titlefontgrd2 = (g_headerObj.titlegrds.length > 1 ?
-			makeColorGradation(g_headerObj.titlegrds[1], {
-				_defaultColorgrd: false,
-				_objType: `titleMusic`,
-			}) : titlefontgrd);
 
 		let titlefontsize = 64 * (12 / g_headerObj.musicTitleForView[0].length);
 		if (titlefontsize >= 64) {
 			titlefontsize = 64;
 		}
 
-		// 変数 titlesize の定義 (使用例： |titlesize=40,20|)
+		// 変数 titlesize の定義 (使用例： |titlesize=40$20|)
 		const titlefontsizes = (g_headerObj.titlesize !== `` ? g_headerObj.titlesize.split(`$`).join(`,`).split(`,`) : [titlefontsize, titlefontsize]);
 		const titlefontsize1 = setVal(titlefontsizes[0], titlefontsize, C_TYP_NUMBER);
 		const titlefontsize2 = setVal(titlefontsizes[1], titlefontsize1, C_TYP_NUMBER);
@@ -2232,7 +2228,7 @@ function titleInit() {
 				align:${C_ALIGN_CENTER};
 				position:relative;top:${titlefontsize1 - (titlefontsize1 + titlefontsize2) / 2}px;
 				font-family:${g_headerObj.titlefonts[0]};
-				background: ${titlefontgrd};
+				background: ${titlegrds[0]};
 				background-clip: text;
 				-webkit-background-clip: text;
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
@@ -2244,7 +2240,7 @@ function titleInit() {
 					position:relative;left:${g_headerObj.titlepos[1][0]}px;
 					top:${g_headerObj.titlepos[1][1] + titlelineheight - (titlefontsize1 + titlefontsize2) / 2 - titlefontsize1 + titlefontsize2}px;
 					font-family:${g_headerObj.titlefonts[1]};
-					background: ${titlefontgrd2};
+					background: ${titlegrds[1]};
 					background-clip: text;
 					-webkit-background-clip: text;
 					-webkit-text-fill-color: rgba(255,255,255,0.0);
