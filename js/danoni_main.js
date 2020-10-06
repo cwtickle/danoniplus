@@ -2617,26 +2617,21 @@ function headerConvert(_dosObj) {
 				obj.musicTitlesForView[j] = escapeHtmlForArray(getMusicNameMultiLine(musics[0]));
 				obj.artistNames[j] = escapeHtml(setVal(musics[1], ``, C_TYP_STRING));
 			}
-			if (j === 0) {
-				obj.musicTitle = escapeHtml(getMusicNameSimple(musics[0]));
-				obj.musicTitleForView = escapeHtmlForArray(getMusicNameMultiLine(musics[0]));
-				if (musics.length > 1) {
-					obj.artistName = escapeHtml(musics[1]);
-				} else {
-					makeWarningWindow(C_MSG_E_0011);
-					obj.artistName = `artistName`;
-				}
-				if (musics.length > 2) {
-					obj.artistUrl = musics[2];
-					if (musics.length > 3) {
-						obj.musicTitles[j] = escapeHtml(getMusicNameSimple(musics[3]));
-						obj.musicTitlesForView[j] = escapeHtmlForArray(getMusicNameMultiLine(musics[3]));
-					}
-				} else {
-					obj.artistUrl = ``;
-				}
-			}
 		}
+		const musics = musicData[0].split(`,`);
+		obj.musicTitle = obj.musicTitles[0];
+		obj.musicTitleForView = obj.musicTitlesForView[0];
+		obj.artistName = obj.artistNames[0] || ``;
+		if (obj.artistName === ``) {
+			makeWarningWindow(C_MSG_E_0011);
+			obj.artistName = `artistName`;
+		}
+		obj.artistUrl = musics[2] || ``;
+		if (musics[3] !== undefined) {
+			obj.musicTitles[0] = escapeHtml(getMusicNameSimple(musics[3]));
+			obj.musicTitlesForView[0] = escapeHtmlForArray(getMusicNameMultiLine(musics[3]));
+		}
+
 	} else {
 		makeWarningWindow(C_MSG_E_0012);
 		obj.musicTitle = `musicName`;
@@ -2678,13 +2673,9 @@ function headerConvert(_dosObj) {
 	// 譜面情報
 	if (_dosObj.difData !== undefined && _dosObj.difData !== ``) {
 		const difs = _dosObj.difData.split(`$`);
-		const C_DIF_KEY = 0;
-		const C_DIF_NAME = 1;
-		const C_DIF_SPEED_INI = 2;
-		const C_DIF_LIFE_BORDER = 3;
-		const C_DIF_LIFE_RECOVERY = 4;
-		const C_DIF_LIFE_DAMAGE = 5;
-		const C_DIF_LIFE_INI = 6;
+		const difpos = {
+			key: 0, name: 1, speed: 2, border: 3, recovery: 4, damage: 5, init: 6,
+		};
 		obj.keyLabels = [];
 		obj.difLabels = [];
 		obj.initSpeeds = [];
@@ -2706,26 +2697,22 @@ function headerConvert(_dosObj) {
 			const difDetails = difs[j].split(`,`);
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
-			const border = (difDetails[C_DIF_LIFE_BORDER]) ? difDetails[C_DIF_LIFE_BORDER] :
+			const border = (difDetails[difpos.border]) ? difDetails[difpos.border] :
 				(typeof g_presetGauge === C_TYP_OBJECT && (`Border` in g_presetGauge) ?
 					g_presetGauge.Border : `x`);
 
-			if (border !== `x`) {
-				obj.lifeBorders.push(setVal(border, 70, C_TYP_FLOAT));
-			} else {
-				obj.lifeBorders.push(`x`);
-			}
-			obj.lifeRecoverys.push(lifeData(`Recovery`, difDetails[C_DIF_LIFE_RECOVERY], 6));
-			obj.lifeDamages.push(lifeData(`Damage`, difDetails[C_DIF_LIFE_DAMAGE], 40));
-			obj.lifeInits.push(lifeData(`Init`, difDetails[C_DIF_LIFE_INI], 25));
+			obj.lifeBorders.push(border === `x` ? `x` : setVal(border, 70, C_TYP_FLOAT));
+			obj.lifeRecoverys.push(lifeData(`Recovery`, difDetails[difpos.recovery], 6));
+			obj.lifeDamages.push(lifeData(`Damage`, difDetails[difpos.damage], 40));
+			obj.lifeInits.push(lifeData(`Init`, difDetails[difpos.init], 25));
 
 			// キー数
-			const keyLabel = setVal(difDetails[C_DIF_KEY], `7`, C_TYP_STRING);
+			const keyLabel = setVal(difDetails[difpos.key], `7`, C_TYP_STRING);
 			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] || keyLabel);
 
 			// 譜面名、制作者名
-			if (setVal(difDetails[C_DIF_NAME], ``, C_TYP_STRING) !== ``) {
-				const difNameInfo = difDetails[C_DIF_NAME].split(`::`);
+			if (setVal(difDetails[difpos.name], ``, C_TYP_STRING) !== ``) {
+				const difNameInfo = difDetails[difpos.name].split(`::`);
 				obj.difLabels.push(escapeHtml(setVal(difNameInfo[0], `Normal`, C_TYP_STRING)));
 				obj.creatorNames.push(difNameInfo.length > 1 ? escapeHtml(difNameInfo[1]) : obj.tuning);
 			} else {
@@ -2734,7 +2721,7 @@ function headerConvert(_dosObj) {
 			}
 
 			// 初期速度
-			obj.initSpeeds.push(setVal(difDetails[C_DIF_SPEED_INI], 3.5, C_TYP_FLOAT));
+			obj.initSpeeds.push(setVal(difDetails[difpos.speed], 3.5, C_TYP_FLOAT));
 		}
 	} else {
 		makeWarningWindow(C_MSG_E_0021);
