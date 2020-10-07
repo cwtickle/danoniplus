@@ -1588,27 +1588,25 @@ function calcLevel(_scoreObj) {
 	//  後の同時押し補正の都合上、firstFrame-100, lastFrame+100 のデータを末尾に追加。
 	//
 	//  (イメージ)
-	//    &left_data=300,400,550&	// フリーズデータ(始点)を含む
-	//    &down_data=500&
-	//    &up_data=600&
-	//    &right_data=700,800&
-	//    &space_data=200,300,1000&
+	//    |left_data=300,400,550|	// フリーズデータ(始点)を含む
+	//    |down_data=500|
+	//    |up_data=600|
+	//    |right_data=700,800|
+	//    |space_data=200,300,1000|
 	//    frzEndData = [650];	// フリーズデータ(終点) ※allScorebook対象外
 	//  ⇒
 	//    allScorebook = [100,200,300,300,400,500,550,600,700,800,1000,1100];
 	//
 	//--------------------------------------------------------------
 	let allScorebook = [];
-
-	for (let j = 0; j < _scoreObj.arrowData.length; j++) {
-		allScorebook = allScorebook.concat(_scoreObj.arrowData[j]);
-	}
+	_scoreObj.arrowData.forEach(data => allScorebook = allScorebook.concat(data));
 
 	allScorebook.sort((a, b) => a - b);
 	allScorebook.unshift(allScorebook[0] - 100);
 	allScorebook.push(allScorebook[allScorebook.length - 1] + 100);
+	const allCnt = allScorebook.length;
 
-	frzEndData.push(allScorebook[allScorebook.length - 1]);
+	frzEndData.push(allScorebook[allCnt - 1]);
 
 	//--------------------------------------------------------------
 	//＜間隔フレーム数の調和平均計算+いろいろ補正＞
@@ -1622,7 +1620,7 @@ function calcLevel(_scoreObj) {
 	let twoPushCount = 0; // 同時押し補正値
 	let push3List = [];    // 3つ押し判定数
 
-	for (let i = 1; i < allScorebook.length - 2; ++i) {
+	for (let i = 1; i < allCnt - 2; i++) {
 		// フリーズ始点の検索
 		while (frzStartData[0] === allScorebook[i]) {
 			// 同時押しの場合
@@ -1687,7 +1685,6 @@ function calcLevel(_scoreObj) {
 	//＜表示＞
 	//  曲長、3つ押し補正を行い、最終的な難易度レベル値を表示する。
 	//--------------------------------------------------------------
-	const allCnt = allScorebook.length;
 	const push3Cnt = push3List.length;
 	const calcArrowCnt = allCnt - push3Cnt - 3;
 	const toDecimal2 = num => Math.round(num * 100) / 100;
