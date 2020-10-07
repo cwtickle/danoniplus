@@ -1588,27 +1588,25 @@ function calcLevel(_scoreObj) {
 	//  後の同時押し補正の都合上、firstFrame-100, lastFrame+100 のデータを末尾に追加。
 	//
 	//  (イメージ)
-	//    &left_data=300,400,550&	// フリーズデータ(始点)を含む
-	//    &down_data=500&
-	//    &up_data=600&
-	//    &right_data=700,800&
-	//    &space_data=200,300,1000&
+	//    |left_data=300,400,550|	// フリーズデータ(始点)を含む
+	//    |down_data=500|
+	//    |up_data=600|
+	//    |right_data=700,800|
+	//    |space_data=200,300,1000|
 	//    frzEndData = [650];	// フリーズデータ(終点) ※allScorebook対象外
 	//  ⇒
 	//    allScorebook = [100,200,300,300,400,500,550,600,700,800,1000,1100];
 	//
 	//--------------------------------------------------------------
 	let allScorebook = [];
-
-	for (let j = 0; j < _scoreObj.arrowData.length; j++) {
-		allScorebook = allScorebook.concat(_scoreObj.arrowData[j]);
-	}
+	_scoreObj.arrowData.forEach(data => allScorebook = allScorebook.concat(data));
 
 	allScorebook.sort((a, b) => a - b);
 	allScorebook.unshift(allScorebook[0] - 100);
 	allScorebook.push(allScorebook[allScorebook.length - 1] + 100);
+	const allCnt = allScorebook.length;
 
-	frzEndData.push(allScorebook[allScorebook.length - 1]);
+	frzEndData.push(allScorebook[allCnt - 1]);
 
 	//--------------------------------------------------------------
 	//＜間隔フレーム数の調和平均計算+いろいろ補正＞
@@ -1617,13 +1615,12 @@ function calcLevel(_scoreObj) {
 	//  [レベル計算ツール++ ver1.18] 3つ押し以上でも同時押し補正ができるよう調整
 	//--------------------------------------------------------------
 	let levelcount = 0;   // 難易度レベル
-	let leveltmp;
 	let freezenum = 0; // フリーズアロー数
 	let pushCnt = 1;   // 同時押し数カウント
 	let twoPushCount = 0; // 同時押し補正値
-	let push3cnt = [];    // 3つ押し判定数
+	let push3List = [];    // 3つ押し判定数
 
-	for (let i = 1; i < allScorebook.length - 2; ++i) {
+	for (let i = 1; i < allCnt - 2; i++) {
 		// フリーズ始点の検索
 		while (frzStartData[0] === allScorebook[i]) {
 			// 同時押しの場合
@@ -1648,97 +1645,70 @@ function calcLevel(_scoreObj) {
 		if (allScorebook[i + 1] === allScorebook[i] && !freezenum) {
 
 			let chk = (allScorebook[i + 2] - allScorebook[i + 1]) * (allScorebook[i] - allScorebook[i - pushCnt]);
-			if (chk != 0) {
+			if (chk !== 0) {
 				twoPushCount += 40 / chk;
 			} else {
 				// 3つ押しが絡んだ場合は加算しない
-				push3cnt.push(allScorebook[i]);
+				push3List.push(allScorebook[i]);
 			}
 			pushCnt++;
 
-			// 単押し＋フリーズアローの補正処理(フリーズアロー中の矢印)
 		} else {
+			// 単押し＋フリーズアローの補正処理(フリーズアロー中の矢印)
 			pushCnt = 1;
 			let chk2 = (2 - freezenum) * (allScorebook[i + 1] - allScorebook[i]);
 			if (chk2 > 0) {
 				levelcount += 2 / chk2;
 			} else {
 				// 3つ押しが絡んだ場合は加算しない
-				push3cnt.push(allScorebook[i]);
+				push3List.push(allScorebook[i]);
 			}
 		}
 	}
 	levelcount += twoPushCount;
-	leveltmp = levelcount;
+	const leveltmp = levelcount;
 
 	//--------------------------------------------------------------
 	//＜同方向連打補正＞
 	//  同方向矢印(フリーズアロー)の隣接間隔が10フレーム未満の場合に加算する。
 	//--------------------------------------------------------------
 	for (let j = 0; j < _scoreObj.arrowData.length; j++) {
-		for (let k = 0; k < _scoreObj.arrowData[j].length; ++k) {
-			_scoreObj.arrowData[j][k]
-			if (_scoreObj.arrowData[j][k + 1] - _scoreObj.arrowData[j][k] < 10) {
-				levelcount += 10 / (_scoreObj.arrowData[j][k + 1] - _scoreObj.arrowData[j][k])
-					/ (_scoreObj.arrowData[j][k + 1] - _scoreObj.arrowData[j][k]) - 1 / 10;
+		for (let k = 0; k < _scoreObj.arrowData[j].length; k++) {
+			const adjacantFrame = _scoreObj.arrowData[j][k + 1] - _scoreObj.arrowData[j][k];
+			if (adjacantFrame < 10) {
+				levelcount += 10 / Math.pow(adjacantFrame, 2) - 1 / 10;
 			}
 		}
 	}
 
 	//--------------------------------------------------------------
 	//＜表示＞
-	//  曲長補正を行い、最終的な難易度レベル値を表示する。
+	//  曲長、3つ押し補正を行い、最終的な難易度レベル値を表示する。
 	//--------------------------------------------------------------
-	// 難易度レベル(最終)
-	let print = Math.round(levelcount / Math.sqrt(allScorebook.length - push3cnt.length - 3) * 400) / 100;
+	const push3Cnt = push3List.length;
+	const calcArrowCnt = allCnt - push3Cnt - 3;
+	const toDecimal2 = num => Math.round(num * 100) / 100;
+	const calcDifLevel = num => calcArrowCnt <= 0 ? 0 : toDecimal2(num / Math.sqrt(calcArrowCnt) * 4);
 
-	// 難易度レベル(縦連打以外)
-	let tmp = Math.round(leveltmp / Math.sqrt(allScorebook.length - push3cnt.length - 3) * 400) / 100;
-
-	// 縦連打補正値計算
-	let tate = Math.round((print - tmp) * 100) / 100;
-	if (isNaN(tate) || tate === Infinity) {
-		tate = 0;
-	}
-	// 同時押し補正値計算
-	let douji = Math.round(twoPushCount / Math.sqrt(allScorebook.length - push3cnt.length - 3) * 400) / 100;
-	if (isNaN(douji) || douji === Infinity) {
-		douji = 0;
-	}
-
-	//--------------------------------------------------------------
-	//＜難易度レベル(最終)を小数第2位までに丸める＞
-	//  [レベル計算ツール++ ver1.18] 3つ押し補正適用
-	//  [レベル計算ツール++ ver1.28] 矢印数1の場合の処理追加
-	//--------------------------------------------------------------
-	let subPrint;
-	if (allScorebook.length === 3) {
-		print = `0.01`;
-		tmp = `0.01`;
-	} else {
-		print = Math.round(print * 100 * (allScorebook.length - 3) / (allScorebook.length - push3cnt.length - 3)) / 100;
-		subPrint = Math.round((print * 100) % 100);
-		subPrint = (subPrint < 10 ? "0" + subPrint : "" + subPrint);
-		if (isNaN(parseFloat(print))) {
-			print = 0;
-		}
-		if (isNaN(parseFloat(subPrint))) {
-			subPrint = `00`;
-		}
-		print = `${Math.floor(print)}.${subPrint}${(push3cnt.length > 0 ? "*" : "")}`;
-	}
+	const baseDifLevel = calcDifLevel(levelcount);
+	const difLevel = toDecimal2(baseDifLevel * (allCnt - 3) / calcArrowCnt);
 
 	//--------------------------------------------------------------
 	//＜計算結果を格納＞
 	//--------------------------------------------------------------
-	let toolDif = {
-		tool: print,
-		tate: tate,
-		douji: douji,
-		push3cnt: push3cnt.length,
-		push3: push3cnt,
+	return {
+		// 難易度レベル
+		tool: (allCnt === 3 ? `0.01` :
+			`${Math.floor(difLevel)}.${`00${Math.round((difLevel * 100) % 100)}`.slice(-2)}${(push3Cnt > 0 ? "*" : "")}`),
+		// 縦連打補正
+		tate: toDecimal2(baseDifLevel - calcDifLevel(leveltmp)),
+		// 同時押し補正
+		douji: calcDifLevel(twoPushCount),
+		// 3つ押し数
+		push3cnt: push3Cnt,
+		// 3つ押しリスト
+		push3: push3List,
 	};
-	return toolDif;
 }
 
 /**
@@ -4140,22 +4110,27 @@ function createOptionWindow(_sprite) {
 
 		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
 		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
-		let lbl;
-		let data;
 
 		// ツール難易度
 		const detailToolDif = document.querySelector(`#detailToolDif`);
+
+		/**
+		 * 譜面の難易度情報ラベルの作成
+		 * @param {string} _lbl 
+		 * @param {string} _data 
+		 * @param {object} _obj 
+		 */
+		const makeDifInfoLabel = (_lbl, _data, { _x = 130, _y = 25, _w = 125, _h = 35, _siz = C_SIZ_DIFSELECTOR, ...rest } = {}) => {
+			detailToolDif.appendChild(
+				createDivCss2Label(_lbl, _data, {
+					x: _x, y: _y, w: _w, h: _h, siz: _siz, align: C_ALIGN_LEFT, ...rest
+				})
+			);
+		}
+
 		if (document.querySelector(`#lblTooldif`) === null) {
-			detailToolDif.appendChild(
-				createDivCss2Label(`lblTooldif`, `Level`, {
-					x: 130, y: 5, w: 250, h: 35, siz: C_SIZ_JDGCNTS, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`dataTooldif`, g_detailObj.toolDif[_scoreId].tool, {
-					x: 270, y: 3, w: 160, h: 35, siz: 18, align: C_ALIGN_LEFT,
-				})
-			);
+			makeDifInfoLabel(`lblTooldif`, `Level`, { y: 5, w: 250, siz: C_SIZ_JDGCNTS });
+			makeDifInfoLabel(`dataTooldif`, g_detailObj.toolDif[_scoreId].tool, { x: 270, y: 3, w: 160, siz: 18 });
 		} else {
 			document.querySelector(`#dataTooldif`).textContent = g_detailObj.toolDif[_scoreId].tool;
 		}
@@ -4167,47 +4142,15 @@ function createOptionWindow(_sprite) {
 			${push3CntStr}`.split(`,`).join(`/`);
 
 		if (document.querySelector(`#lblDouji`) === null) {
-			detailToolDif.appendChild(
-				createDivCss2Label(`lblDouji`, `同時補正`, {
-					x: 130, y: 25, w: 125, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`lblTate`, `縦連補正`, {
-					x: 270, y: 25, w: 125, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`dataDouji`, g_detailObj.toolDif[_scoreId].douji, {
-					x: 200, y: 25, w: 160, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`dataTate`, g_detailObj.toolDif[_scoreId].tate, {
-					x: 345, y: 25, w: 160, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`lblArrowInfo`, `All Arrows`, {
-					x: 130, y: 45, w: 290, h: 35, siz: C_SIZ_JDGCNTS, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`dataArrowInfo`, ArrowInfo, {
-					x: 270, y: 45, w: 160, h: 35, siz: C_SIZ_JDGCNTS, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`lblArrowInfo2`, `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`, {
-					x: 130, y: 70, w: 200, h: 90, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`dataArrowInfo2`, ArrowInfo2, {
-					x: 140, y: 70, w: 275, h: 150, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-					overflow: `auto`,
-				})
-			);
+			makeDifInfoLabel(`lblDouji`, `同時補正`);
+			makeDifInfoLabel(`lblTate`, `縦連補正`, { x: 270 });
+			makeDifInfoLabel(`dataDouji`, g_detailObj.toolDif[_scoreId].douji, { x: 200, w: 160 });
+			makeDifInfoLabel(`dataTate`, g_detailObj.toolDif[_scoreId].tate, { x: 345, w: 160 });
+			makeDifInfoLabel(`lblArrowInfo`, `All Arrows`, { x: 130, y: 45, w: 290, siz: C_SIZ_JDGCNTS });
+			makeDifInfoLabel(`dataArrowInfo`, ArrowInfo, { x: 270, y: 45, w: 160, siz: C_SIZ_JDGCNTS });
+			makeDifInfoLabel(`lblArrowInfo2`, `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`,
+				{ x: 130, y: 70, w: 200, h: 90 });
+			makeDifInfoLabel(`dataArrowInfo2`, ArrowInfo2, { x: 140, y: 70, w: 275, h: 150, overflow: `auto` });
 
 		} else {
 			document.querySelector(`#dataDouji`).textContent = g_detailObj.toolDif[_scoreId].douji;
