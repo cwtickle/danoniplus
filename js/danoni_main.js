@@ -1617,11 +1617,10 @@ function calcLevel(_scoreObj) {
 	//  [レベル計算ツール++ ver1.18] 3つ押し以上でも同時押し補正ができるよう調整
 	//--------------------------------------------------------------
 	let levelcount = 0;   // 難易度レベル
-	let leveltmp;
 	let freezenum = 0; // フリーズアロー数
 	let pushCnt = 1;   // 同時押し数カウント
 	let twoPushCount = 0; // 同時押し補正値
-	let push3cnt = [];    // 3つ押し判定数
+	let push3List = [];    // 3つ押し判定数
 
 	for (let i = 1; i < allScorebook.length - 2; ++i) {
 		// フリーズ始点の検索
@@ -1648,97 +1647,71 @@ function calcLevel(_scoreObj) {
 		if (allScorebook[i + 1] === allScorebook[i] && !freezenum) {
 
 			let chk = (allScorebook[i + 2] - allScorebook[i + 1]) * (allScorebook[i] - allScorebook[i - pushCnt]);
-			if (chk != 0) {
+			if (chk !== 0) {
 				twoPushCount += 40 / chk;
 			} else {
 				// 3つ押しが絡んだ場合は加算しない
-				push3cnt.push(allScorebook[i]);
+				push3List.push(allScorebook[i]);
 			}
 			pushCnt++;
 
-			// 単押し＋フリーズアローの補正処理(フリーズアロー中の矢印)
 		} else {
+			// 単押し＋フリーズアローの補正処理(フリーズアロー中の矢印)
 			pushCnt = 1;
 			let chk2 = (2 - freezenum) * (allScorebook[i + 1] - allScorebook[i]);
 			if (chk2 > 0) {
 				levelcount += 2 / chk2;
 			} else {
 				// 3つ押しが絡んだ場合は加算しない
-				push3cnt.push(allScorebook[i]);
+				push3List.push(allScorebook[i]);
 			}
 		}
 	}
 	levelcount += twoPushCount;
-	leveltmp = levelcount;
+	const leveltmp = levelcount;
 
 	//--------------------------------------------------------------
 	//＜同方向連打補正＞
 	//  同方向矢印(フリーズアロー)の隣接間隔が10フレーム未満の場合に加算する。
 	//--------------------------------------------------------------
 	for (let j = 0; j < _scoreObj.arrowData.length; j++) {
-		for (let k = 0; k < _scoreObj.arrowData[j].length; ++k) {
-			_scoreObj.arrowData[j][k]
-			if (_scoreObj.arrowData[j][k + 1] - _scoreObj.arrowData[j][k] < 10) {
-				levelcount += 10 / (_scoreObj.arrowData[j][k + 1] - _scoreObj.arrowData[j][k])
-					/ (_scoreObj.arrowData[j][k + 1] - _scoreObj.arrowData[j][k]) - 1 / 10;
+		for (let k = 0; k < _scoreObj.arrowData[j].length; k++) {
+			const adjacantFrame = _scoreObj.arrowData[j][k + 1] - _scoreObj.arrowData[j][k];
+			if (adjacantFrame < 10) {
+				levelcount += 10 / Math.pow(adjacantFrame, 2) - 1 / 10;
 			}
 		}
 	}
 
 	//--------------------------------------------------------------
 	//＜表示＞
-	//  曲長補正を行い、最終的な難易度レベル値を表示する。
+	//  曲長、3つ押し補正を行い、最終的な難易度レベル値を表示する。
 	//--------------------------------------------------------------
-	// 難易度レベル(最終)
-	let print = Math.round(levelcount / Math.sqrt(allScorebook.length - push3cnt.length - 3) * 400) / 100;
+	const allCnt = allScorebook.length;
+	const push3Cnt = push3List.length;
+	const calcArrowCnt = allCnt - push3Cnt - 3;
+	const toDecimal2 = num => Math.round(num * 100) / 100;
+	const calcDifLevel = num => calcArrowCnt <= 0 ? 0 : toDecimal2(num / Math.sqrt(calcArrowCnt) * 4);
 
-	// 難易度レベル(縦連打以外)
-	let tmp = Math.round(leveltmp / Math.sqrt(allScorebook.length - push3cnt.length - 3) * 400) / 100;
-
-	// 縦連打補正値計算
-	let tate = Math.round((print - tmp) * 100) / 100;
-	if (isNaN(tate) || tate === Infinity) {
-		tate = 0;
-	}
-	// 同時押し補正値計算
-	let douji = Math.round(twoPushCount / Math.sqrt(allScorebook.length - push3cnt.length - 3) * 400) / 100;
-	if (isNaN(douji) || douji === Infinity) {
-		douji = 0;
-	}
-
-	//--------------------------------------------------------------
-	//＜難易度レベル(最終)を小数第2位までに丸める＞
-	//  [レベル計算ツール++ ver1.18] 3つ押し補正適用
-	//  [レベル計算ツール++ ver1.28] 矢印数1の場合の処理追加
-	//--------------------------------------------------------------
-	let subPrint;
-	if (allScorebook.length === 3) {
-		print = `0.01`;
-		tmp = `0.01`;
-	} else {
-		print = Math.round(print * 100 * (allScorebook.length - 3) / (allScorebook.length - push3cnt.length - 3)) / 100;
-		subPrint = Math.round((print * 100) % 100);
-		subPrint = (subPrint < 10 ? "0" + subPrint : "" + subPrint);
-		if (isNaN(parseFloat(print))) {
-			print = 0;
-		}
-		if (isNaN(parseFloat(subPrint))) {
-			subPrint = `00`;
-		}
-		print = `${Math.floor(print)}.${subPrint}${(push3cnt.length > 0 ? "*" : "")}`;
-	}
+	const baseDifLevel = calcDifLevel(levelcount);
+	const difLevel = toDecimal2(baseDifLevel * (allCnt - 3) / calcArrowCnt);
 
 	//--------------------------------------------------------------
 	//＜計算結果を格納＞
 	//--------------------------------------------------------------
-	let toolDif = {
-		tool: print,
-		tate: tate,
-		douji: douji,
-		push3cnt: push3cnt.length,
-		push3: push3cnt,
+	return {
+		// 難易度レベル
+		tool: (allCnt === 3 ? `0.01` :
+			`${Math.floor(difLevel)}.${`00${Math.round((difLevel * 100) % 100)}`.slice(-2)}${(push3Cnt > 0 ? "*" : "")}`),
+		// 縦連打補正
+		tate: toDecimal2(baseDifLevel - calcDifLevel(leveltmp)),
+		// 同時押し補正
+		douji: calcDifLevel(twoPushCount),
+		// 3つ押し数
+		push3cnt: push3Cnt,
+		// 3つ押しリスト
+		push3: push3List,
 	};
-	return toolDif;
 }
 
 /**
