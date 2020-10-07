@@ -4110,22 +4110,27 @@ function createOptionWindow(_sprite) {
 
 		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
 		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
-		let lbl;
-		let data;
 
 		// ツール難易度
 		const detailToolDif = document.querySelector(`#detailToolDif`);
+
+		/**
+		 * 譜面の難易度情報ラベルの作成
+		 * @param {string} _lbl 
+		 * @param {string} _data 
+		 * @param {object} _obj 
+		 */
+		const makeDifInfoLabel = (_lbl, _data, { _x = 130, _y = 25, _w = 125, _h = 35, _siz = C_SIZ_DIFSELECTOR, ...rest } = {}) => {
+			detailToolDif.appendChild(
+				createDivCss2Label(_lbl, _data, {
+					x: _x, y: _y, w: _w, h: _h, siz: _siz, align: C_ALIGN_LEFT, ...rest
+				})
+			);
+		}
+
 		if (document.querySelector(`#lblTooldif`) === null) {
-			detailToolDif.appendChild(
-				createDivCss2Label(`lblTooldif`, `Level`, {
-					x: 130, y: 5, w: 250, h: 35, siz: C_SIZ_JDGCNTS, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`dataTooldif`, g_detailObj.toolDif[_scoreId].tool, {
-					x: 270, y: 3, w: 160, h: 35, siz: 18, align: C_ALIGN_LEFT,
-				})
-			);
+			makeDifInfoLabel(`lblTooldif`, `Level`, { y: 5, w: 250, siz: C_SIZ_JDGCNTS });
+			makeDifInfoLabel(`dataTooldif`, g_detailObj.toolDif[_scoreId].tool, { x: 270, y: 3, w: 160, siz: 18 });
 		} else {
 			document.querySelector(`#dataTooldif`).textContent = g_detailObj.toolDif[_scoreId].tool;
 		}
@@ -4137,47 +4142,15 @@ function createOptionWindow(_sprite) {
 			${push3CntStr}`.split(`,`).join(`/`);
 
 		if (document.querySelector(`#lblDouji`) === null) {
-			detailToolDif.appendChild(
-				createDivCss2Label(`lblDouji`, `同時補正`, {
-					x: 130, y: 25, w: 125, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`lblTate`, `縦連補正`, {
-					x: 270, y: 25, w: 125, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`dataDouji`, g_detailObj.toolDif[_scoreId].douji, {
-					x: 200, y: 25, w: 160, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`dataTate`, g_detailObj.toolDif[_scoreId].tate, {
-					x: 345, y: 25, w: 160, h: 35, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`lblArrowInfo`, `All Arrows`, {
-					x: 130, y: 45, w: 290, h: 35, siz: C_SIZ_JDGCNTS, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`dataArrowInfo`, ArrowInfo, {
-					x: 270, y: 45, w: 160, h: 35, siz: C_SIZ_JDGCNTS, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`lblArrowInfo2`, `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`, {
-					x: 130, y: 70, w: 200, h: 90, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			detailToolDif.appendChild(
-				createDivCss2Label(`dataArrowInfo2`, ArrowInfo2, {
-					x: 140, y: 70, w: 275, h: 150, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-					overflow: `auto`,
-				})
-			);
+			makeDifInfoLabel(`lblDouji`, `同時補正`);
+			makeDifInfoLabel(`lblTate`, `縦連補正`, { x: 270 });
+			makeDifInfoLabel(`dataDouji`, g_detailObj.toolDif[_scoreId].douji, { x: 200, w: 160 });
+			makeDifInfoLabel(`dataTate`, g_detailObj.toolDif[_scoreId].tate, { x: 345, w: 160 });
+			makeDifInfoLabel(`lblArrowInfo`, `All Arrows`, { x: 130, y: 45, w: 290, siz: C_SIZ_JDGCNTS });
+			makeDifInfoLabel(`dataArrowInfo`, ArrowInfo, { x: 270, y: 45, w: 160, siz: C_SIZ_JDGCNTS });
+			makeDifInfoLabel(`lblArrowInfo2`, `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`,
+				{ x: 130, y: 70, w: 200, h: 90 });
+			makeDifInfoLabel(`dataArrowInfo2`, ArrowInfo2, { x: 140, y: 70, w: 275, h: 150, overflow: `auto` });
 
 		} else {
 			document.querySelector(`#dataDouji`).textContent = g_detailObj.toolDif[_scoreId].douji;
