@@ -674,6 +674,19 @@ function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height, _opt
 }
 
 /**
+ * 階層スプライト（全体）の作成
+ * @param {string} _baseName 
+ * @param {number} _num 
+ */
+function createMultipleSprite(_baseName, _num) {
+	const sprite = createSprite(`divRoot`, `${_baseName}`, 0, 0, g_sWidth, g_sHeight);
+	for (let j = 0; j <= _num; j++) {
+		createSprite(_baseName, `${_baseName}${j}`, 0, 0, g_sWidth, g_sHeight);
+	}
+	return sprite;
+}
+
+/**
  * 親スプライト配下の子スプライトを全削除
  * @param {object} _parentObjName 親スプライト名
  */
@@ -2151,10 +2164,7 @@ function titleInit() {
 	}
 
 	// 背景スプライトを作成
-	createSprite(`divRoot`, `backTitleSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.backTitleMaxDepth; j++) {
-		createSprite(`backTitleSprite`, `backTitleSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	createMultipleSprite(`backTitleSprite`, g_headerObj.backTitleMaxDepth);
 
 	// タイトル文字描画
 	divRoot.appendChild(
@@ -2372,10 +2382,7 @@ function titleInit() {
 	}
 
 	// マスクスプライトを作成
-	createSprite(`divRoot`, `maskTitleSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.maskTitleMaxDepth; j++) {
-		createSprite(`maskTitleSprite`, `maskTitleSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	const maskTitleSprite = createMultipleSprite(`maskTitleSprite`, g_headerObj.maskTitleMaxDepth);
 	if (!g_headerObj.masktitleButton) {
 		maskTitleSprite.style.pointerEvents = C_DIS_NONE;
 	}
@@ -7299,10 +7306,7 @@ function MainInit() {
 	}
 
 	// 背景スプライトを作成
-	createSprite(`divRoot`, `backSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_scoreObj.backMaxDepth; j++) {
-		createSprite(`backSprite`, `backSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth);
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createSprite(`divRoot`, `mainSprite`, g_headerObj.playingX, g_posObj.stepY - C_STEP_Y, g_headerObj.playingWidth, g_sHeight);
@@ -7318,10 +7322,7 @@ function MainInit() {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 
 	// マスクスプライトを作成 (最上位)
-	const maskSprite = createSprite(`divRoot`, `maskSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_scoreObj.maskMaxDepth; j++) {
-		createSprite(`maskSprite`, `maskSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth);
 
 	// 背景・マスクモーション(0フレーム指定)
 	if (g_scoreObj.frameNum === 0) {
@@ -9223,10 +9224,7 @@ function resultInit() {
 	}
 
 	// 背景スプライトを作成
-	createSprite(`divRoot`, `backResultSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.backResultMaxDepth; j++) {
-		createSprite(`backResultSprite`, `backResultSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	createMultipleSprite(`backResultSprite`, g_headerObj.backResultMaxDepth);
 
 	// タイトル文字描画
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, `RESULT`, 0, 15, `settings_Title`));
@@ -9601,10 +9599,7 @@ function resultInit() {
 	);
 
 	// マスクスプライトを作成
-	const maskResultSprite = createSprite(`divRoot`, `maskResultSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.maskResultMaxDepth; j++) {
-		createSprite(`maskResultSprite`, `maskResultSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	const maskResultSprite = createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);
 	if (!g_headerObj.maskresultButton) {
 		maskResultSprite.style.pointerEvents = C_DIS_NONE;
 	}
