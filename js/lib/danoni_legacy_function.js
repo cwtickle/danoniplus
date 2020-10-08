@@ -1,4 +1,4 @@
-﻿`use strict`;
+﻿'use strict';
 /**
  * Dancing☆Onigiri (CW Edition)
  * 旧バージョン定義変数・関数

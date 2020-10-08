@@ -1,4 +1,4 @@
-﻿`use strict`;
+'use strict';
 /**
  * Dancing☆Onigiri (CW Edition)
  * 
@@ -97,6 +97,7 @@ let g_finishFlg = true;
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 /** 共通オブジェクト */
+let g_loadObj = {};
 let g_rootObj = {};
 let g_headerObj = {};
 let g_scoreObj = {};

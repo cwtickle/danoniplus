@@ -1,4 +1,4 @@
-﻿`use strict`;
+﻿'use strict';
 /**
  * Dancing☆Onigiri (CW Edition)
  * 定数・初期設定用ファイル

@@ -1,4 +1,4 @@
-﻿`use strict`;
+﻿'use strict';
 /**
  * Dancing☆Onigiri (CW Edition)
  * ローカル起動用バイナリファイル定義

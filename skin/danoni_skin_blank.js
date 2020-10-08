@@ -1,4 +1,4 @@
-﻿`use strict`;
+﻿'use strict';
 /**
  * Dancing☆Onigiri スキンjsファイル (2ファイル目用)
  */
