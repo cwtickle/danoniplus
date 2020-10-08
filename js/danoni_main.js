@@ -674,6 +674,19 @@ function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height, _opt
 }
 
 /**
+ * 階層スプライト（全体）の作成
+ * @param {string} _baseName 
+ * @param {number} _num 
+ */
+function createMultipleSprite(_baseName, _num) {
+	const sprite = createSprite(`divRoot`, `${_baseName}`, 0, 0, g_sWidth, g_sHeight);
+	for (let j = 0; j <= _num; j++) {
+		createSprite(_baseName, `${_baseName}${j}`, 0, 0, g_sWidth, g_sHeight);
+	}
+	return sprite;
+}
+
+/**
  * 親スプライト配下の子スプライトを全削除
  * @param {object} _parentObjName 親スプライト名
  */
@@ -2151,10 +2164,7 @@ function titleInit() {
 	}
 
 	// 背景スプライトを作成
-	createSprite(`divRoot`, `backTitleSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.backTitleMaxDepth; j++) {
-		createSprite(`backTitleSprite`, `backTitleSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	createMultipleSprite(`backTitleSprite`, g_headerObj.backTitleMaxDepth);
 
 	// タイトル文字描画
 	divRoot.appendChild(
@@ -2372,10 +2382,7 @@ function titleInit() {
 	}
 
 	// マスクスプライトを作成
-	createSprite(`divRoot`, `maskTitleSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.maskTitleMaxDepth; j++) {
-		createSprite(`maskTitleSprite`, `maskTitleSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	const maskTitleSprite = createMultipleSprite(`maskTitleSprite`, g_headerObj.maskTitleMaxDepth);
 	if (!g_headerObj.masktitleButton) {
 		maskTitleSprite.style.pointerEvents = C_DIS_NONE;
 	}
@@ -4043,17 +4050,16 @@ function createOptionWindow(_sprite) {
 	 * @param {string} _labelname
 	 */
 	function makeScoreDetailLabel(_name, _label, _value, _pos = 0, _labelname = _label) {
+		const baseLabel = (_bLabel, _bLabelname, _bAlign) => {
+			document.querySelector(`#detail${_name}`).appendChild(
+				createDivCss2Label(`${_bLabel}`, `${_bLabelname}`, {
+					x: 10, y: 65 + _pos * 20, w: 100, h: 20, siz: C_SIZ_DIFSELECTOR, align: _bAlign,
+				})
+			);
+		};
 		if (document.querySelector(`#data${_label}`) === null) {
-			document.querySelector(`#detail${_name}`).appendChild(
-				createDivCss2Label(`lbl${_label}`, `${_labelname}`, {
-					x: 10, y: 65 + _pos * 20, w: 100, h: 20, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			document.querySelector(`#detail${_name}`).appendChild(
-				createDivCss2Label(`data${_label}`, `${_value}`, {
-					x: 10, y: 65 + _pos * 20, w: 100, h: 20, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_RIGHT,
-				})
-			);
+			baseLabel(`lbl${_label}`, `${_labelname}`, C_ALIGN_LEFT);
+			baseLabel(`data${_label}`, `${_value}`, C_ALIGN_RIGHT);
 		} else {
 			document.querySelector(`#data${_label}`).textContent = `${_value}`;
 		}
@@ -4315,35 +4321,57 @@ function createOptionWindow(_sprite) {
 	 * @param {number} _gaugeNum 
 	 */
 	function gaugeChange(_gaugeNum) {
+		const tmpScoreId = g_stateObj.scoreId;
+
+		/**
+		 * ゲージ詳細変更
+		 * @param {object} _baseProperty 
+		 * @param {string} _setProperty 
+		 * @param {number} _magnification 
+		 */
+		const setLife = (_baseProperty, _setProperty, _magnification = 1) => {
+			if (setVal(_baseProperty[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
+				g_stateObj[_setProperty] = _baseProperty[tmpScoreId] * _magnification;
+			}
+		};
+
+		/**
+		 * ゲージ詳細一括変更
+		 * @param {object} _baseObj 
+		 * @param {object} _obj 
+		 */
+		const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
+			setLife(_baseObj.lifeInits, `lifeInit`, _magInit);
+			setLife(_baseObj.lifeRecoverys, `lifeRcv`, _magRcv);
+			setLife(_baseObj.lifeDamages, `lifeDmg`, _magDmg);
+		};
+
+		/**
+		 * ライフモード切替
+		 * @param {object} _baseObj 
+		 */
+		const changeLifeMode = (_baseObj) => {
+			if (_baseObj.lifeBorders[tmpScoreId] === `x`) {
+				g_stateObj.lifeBorder = 0;
+				g_stateObj.lifeMode = C_LFE_SURVIVAL;
+			} else {
+				g_stateObj.lifeBorder = _baseObj.lifeBorders[tmpScoreId];
+				g_stateObj.lifeMode = C_LFE_BORDER;
+			}
+		};
 
 		// ゲージ初期化
 		if (_gaugeNum === 0) {
-			if (setVal(g_headerObj.lifeBorders[g_stateObj.scoreId], ``, C_TYP_STRING) !== ``) {
-				if (g_headerObj.lifeBorders[g_stateObj.scoreId] === `x`) {
-					g_gaugeType = C_LFE_SURVIVAL;
-					g_stateObj.lifeBorder = 0;
-					g_stateObj.lifeMode = C_LFE_SURVIVAL;
-				} else {
-					g_gaugeType = C_LFE_BORDER;
-					g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
-					g_stateObj.lifeMode = C_LFE_BORDER;
-				}
-				if (g_gaugeOptionObj.custom.length > 0) {
-					g_gaugeType = C_LFE_CUSTOM;
-				}
+			if (setVal(g_headerObj.lifeBorders[tmpScoreId], ``, C_TYP_STRING) !== ``) {
+				changeLifeMode(g_headerObj);
+				g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
+
 				g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
 				g_gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
 				g_stateObj.gauge = g_gauges[g_gaugeNum];
 			}
-			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
-			}
-			if (setVal(g_headerObj.lifeRecoverys[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
-			}
-			if (setVal(g_headerObj.lifeDamages[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
-			}
+			setLifeCategory(g_headerObj);
+
 		} else {
 			// 設定されたゲージ設定、カーソルに合わせて設定値を更新
 			g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
@@ -4358,42 +4386,15 @@ function createOptionWindow(_sprite) {
 
 		// ゲージ設定(Light, Easy)の初期化
 		if (g_stateObj.gauge === `Light` || g_stateObj.gauge === `Easy`) {
-			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
-			}
-			if (setVal(g_headerObj.lifeRecoverys[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId] * 2;
-			}
-			if (setVal(g_headerObj.lifeDamages[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
-			}
+			setLifeCategory(g_headerObj, { _magRcv: 2 });
 		}
 
 		// ゲージ設定別に個別設定した場合はここで設定を上書き
 		// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
-		const tmpScoreId = g_stateObj.scoreId;
-
 		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] !== undefined) {
 			const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
-
-			if (setVal(tmpGaugeObj.lifeBorders[tmpScoreId], ``, C_TYP_STRING) !== ``) {
-				if (tmpGaugeObj.lifeBorders[tmpScoreId] === `x`) {
-					g_stateObj.lifeBorder = 0;
-					g_stateObj.lifeMode = C_LFE_SURVIVAL;
-				} else {
-					g_stateObj.lifeBorder = tmpGaugeObj.lifeBorders[tmpScoreId];
-					g_stateObj.lifeMode = C_LFE_BORDER;
-				}
-			}
-			if (setVal(tmpGaugeObj.lifeRecoverys[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
-				g_stateObj.lifeRcv = tmpGaugeObj.lifeRecoverys[tmpScoreId];
-			}
-			if (setVal(tmpGaugeObj.lifeDamages[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
-				g_stateObj.lifeDmg = tmpGaugeObj.lifeDamages[tmpScoreId];
-			}
-			if (setVal(tmpGaugeObj.lifeInits[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
-				g_stateObj.lifeInit = tmpGaugeObj.lifeInits[tmpScoreId];
-			}
+			changeLifeMode(tmpGaugeObj);
+			setLifeCategory(tmpGaugeObj);
 		}
 	}
 
@@ -7299,10 +7300,7 @@ function MainInit() {
 	}
 
 	// 背景スプライトを作成
-	createSprite(`divRoot`, `backSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_scoreObj.backMaxDepth; j++) {
-		createSprite(`backSprite`, `backSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth);
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createSprite(`divRoot`, `mainSprite`, g_headerObj.playingX, g_posObj.stepY - C_STEP_Y, g_headerObj.playingWidth, g_sHeight);
@@ -7318,10 +7316,7 @@ function MainInit() {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 
 	// マスクスプライトを作成 (最上位)
-	const maskSprite = createSprite(`divRoot`, `maskSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_scoreObj.maskMaxDepth; j++) {
-		createSprite(`maskSprite`, `maskSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth);
 
 	// 背景・マスクモーション(0フレーム指定)
 	if (g_scoreObj.frameNum === 0) {
@@ -9223,10 +9218,7 @@ function resultInit() {
 	}
 
 	// 背景スプライトを作成
-	createSprite(`divRoot`, `backResultSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.backResultMaxDepth; j++) {
-		createSprite(`backResultSprite`, `backResultSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	createMultipleSprite(`backResultSprite`, g_headerObj.backResultMaxDepth);
 
 	// タイトル文字描画
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, `RESULT`, 0, 15, `settings_Title`));
@@ -9601,10 +9593,7 @@ function resultInit() {
 	);
 
 	// マスクスプライトを作成
-	const maskResultSprite = createSprite(`divRoot`, `maskResultSprite`, 0, 0, g_sWidth, g_sHeight);
-	for (let j = 0; j <= g_headerObj.maskResultMaxDepth; j++) {
-		createSprite(`maskResultSprite`, `maskResultSprite${j}`, 0, 0, g_sWidth, g_sHeight);
-	}
+	const maskResultSprite = createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);
 	if (!g_headerObj.maskresultButton) {
 		maskResultSprite.style.pointerEvents = C_DIS_NONE;
 	}
