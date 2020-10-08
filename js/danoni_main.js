@@ -4050,17 +4050,16 @@ function createOptionWindow(_sprite) {
 	 * @param {string} _labelname
 	 */
 	function makeScoreDetailLabel(_name, _label, _value, _pos = 0, _labelname = _label) {
+		const baseLabel = (_bLabel, _bLabelname, _bAlign) => {
+			document.querySelector(`#detail${_name}`).appendChild(
+				createDivCss2Label(`${_bLabel}`, `${_bLabelname}`, {
+					x: 10, y: 65 + _pos * 20, w: 100, h: 20, siz: C_SIZ_DIFSELECTOR, align: _bAlign,
+				})
+			);
+		};
 		if (document.querySelector(`#data${_label}`) === null) {
-			document.querySelector(`#detail${_name}`).appendChild(
-				createDivCss2Label(`lbl${_label}`, `${_labelname}`, {
-					x: 10, y: 65 + _pos * 20, w: 100, h: 20, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-				})
-			);
-			document.querySelector(`#detail${_name}`).appendChild(
-				createDivCss2Label(`data${_label}`, `${_value}`, {
-					x: 10, y: 65 + _pos * 20, w: 100, h: 20, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_RIGHT,
-				})
-			);
+			baseLabel(`lbl${_label}`, `${_labelname}`, C_ALIGN_LEFT);
+			baseLabel(`data${_label}`, `${_value}`, C_ALIGN_RIGHT);
 		} else {
 			document.querySelector(`#data${_label}`).textContent = `${_value}`;
 		}
@@ -4322,35 +4321,57 @@ function createOptionWindow(_sprite) {
 	 * @param {number} _gaugeNum 
 	 */
 	function gaugeChange(_gaugeNum) {
+		const tmpScoreId = g_stateObj.scoreId;
+
+		/**
+		 * ゲージ詳細変更
+		 * @param {object} _baseProperty 
+		 * @param {string} _setProperty 
+		 * @param {number} _magnification 
+		 */
+		const setLife = (_baseProperty, _setProperty, _magnification = 1) => {
+			if (setVal(_baseProperty[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
+				g_stateObj[_setProperty] = _baseProperty[tmpScoreId] * _magnification;
+			}
+		};
+
+		/**
+		 * ゲージ詳細一括変更
+		 * @param {object} _baseObj 
+		 * @param {object} _obj 
+		 */
+		const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
+			setLife(_baseObj.lifeInits, `lifeInit`, _magInit);
+			setLife(_baseObj.lifeRecoverys, `lifeRcv`, _magRcv);
+			setLife(_baseObj.lifeDamages, `lifeDmg`, _magDmg);
+		};
+
+		/**
+		 * ライフモード切替
+		 * @param {object} _baseObj 
+		 */
+		const changeLifeMode = (_baseObj) => {
+			if (_baseObj.lifeBorders[tmpScoreId] === `x`) {
+				g_stateObj.lifeBorder = 0;
+				g_stateObj.lifeMode = C_LFE_SURVIVAL;
+			} else {
+				g_stateObj.lifeBorder = _baseObj.lifeBorders[tmpScoreId];
+				g_stateObj.lifeMode = C_LFE_BORDER;
+			}
+		};
 
 		// ゲージ初期化
 		if (_gaugeNum === 0) {
-			if (setVal(g_headerObj.lifeBorders[g_stateObj.scoreId], ``, C_TYP_STRING) !== ``) {
-				if (g_headerObj.lifeBorders[g_stateObj.scoreId] === `x`) {
-					g_gaugeType = C_LFE_SURVIVAL;
-					g_stateObj.lifeBorder = 0;
-					g_stateObj.lifeMode = C_LFE_SURVIVAL;
-				} else {
-					g_gaugeType = C_LFE_BORDER;
-					g_stateObj.lifeBorder = g_headerObj.lifeBorders[g_stateObj.scoreId];
-					g_stateObj.lifeMode = C_LFE_BORDER;
-				}
-				if (g_gaugeOptionObj.custom.length > 0) {
-					g_gaugeType = C_LFE_CUSTOM;
-				}
+			if (setVal(g_headerObj.lifeBorders[tmpScoreId], ``, C_TYP_STRING) !== ``) {
+				changeLifeMode(g_headerObj);
+				g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
+
 				g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
 				g_gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
 				g_stateObj.gauge = g_gauges[g_gaugeNum];
 			}
-			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
-			}
-			if (setVal(g_headerObj.lifeRecoverys[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId];
-			}
-			if (setVal(g_headerObj.lifeDamages[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
-			}
+			setLifeCategory(g_headerObj);
+
 		} else {
 			// 設定されたゲージ設定、カーソルに合わせて設定値を更新
 			g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
@@ -4365,42 +4386,15 @@ function createOptionWindow(_sprite) {
 
 		// ゲージ設定(Light, Easy)の初期化
 		if (g_stateObj.gauge === `Light` || g_stateObj.gauge === `Easy`) {
-			if (setVal(g_headerObj.lifeInits[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeInit = g_headerObj.lifeInits[g_stateObj.scoreId];
-			}
-			if (setVal(g_headerObj.lifeRecoverys[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeRcv = g_headerObj.lifeRecoverys[g_stateObj.scoreId] * 2;
-			}
-			if (setVal(g_headerObj.lifeDamages[g_stateObj.scoreId], ``, C_TYP_NUMBER) !== ``) {
-				g_stateObj.lifeDmg = g_headerObj.lifeDamages[g_stateObj.scoreId];
-			}
+			setLifeCategory(g_headerObj, { _magRcv: 2 });
 		}
 
 		// ゲージ設定別に個別設定した場合はここで設定を上書き
 		// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
-		const tmpScoreId = g_stateObj.scoreId;
-
 		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] !== undefined) {
 			const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
-
-			if (setVal(tmpGaugeObj.lifeBorders[tmpScoreId], ``, C_TYP_STRING) !== ``) {
-				if (tmpGaugeObj.lifeBorders[tmpScoreId] === `x`) {
-					g_stateObj.lifeBorder = 0;
-					g_stateObj.lifeMode = C_LFE_SURVIVAL;
-				} else {
-					g_stateObj.lifeBorder = tmpGaugeObj.lifeBorders[tmpScoreId];
-					g_stateObj.lifeMode = C_LFE_BORDER;
-				}
-			}
-			if (setVal(tmpGaugeObj.lifeRecoverys[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
-				g_stateObj.lifeRcv = tmpGaugeObj.lifeRecoverys[tmpScoreId];
-			}
-			if (setVal(tmpGaugeObj.lifeDamages[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
-				g_stateObj.lifeDmg = tmpGaugeObj.lifeDamages[tmpScoreId];
-			}
-			if (setVal(tmpGaugeObj.lifeInits[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
-				g_stateObj.lifeInit = tmpGaugeObj.lifeInits[tmpScoreId];
-			}
+			changeLifeMode(tmpGaugeObj);
+			setLifeCategory(tmpGaugeObj);
 		}
 	}
 
