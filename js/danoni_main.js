@@ -3469,7 +3469,6 @@ function keysConvert(_dosObj) {
 				g_keyObj[`keyCtrl${newKey}_${p}d`] = [];
 
 				for (let k = 0; k < tmpKeyCtrl.length; k++) {
-					tmpKeyPtn = tmpKeyCtrl[k].split(`/`);
 					g_keyObj[`keyCtrl${newKey}_${p}`][k] = tmpKeyCtrl[k].split(`/`).map(n => parseInt(n, 10));
 					g_keyObj[`keyCtrl${newKey}_${p}d`][k] = g_keyObj[`keyCtrl${newKey}_${p}`][k].concat();
 				}
