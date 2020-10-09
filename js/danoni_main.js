@@ -1,15 +1,15 @@
-﻿`use strict`;
+﻿//'use strict';
 /**
  * Dancing☆Onigiri (CW Edition)
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/10/03
+ * Revised : 2020/10/09
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.5.10`;
-const g_revisedDate = `2020/10/03`;
+const g_version = `Ver 14.5.11`;
+const g_revisedDate = `2020/10/09`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -40,8 +40,6 @@ let g_localVersion2 = ``;
  */
 
 window.onload = _ => {
-	g_loadObj = {};
-
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
 	loadScript(`../js/lib/danoni_localbinary.js?${randTime}`, _ => {
@@ -94,7 +92,8 @@ let g_finishFlg = true;
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 /** 共通オブジェクト */
-let g_rootObj = {};
+const g_loadObj = {};
+const g_rootObj = {};
 let g_headerObj = {};
 let g_scoreObj = {};
 
@@ -398,19 +397,19 @@ function paddingLeft(_str, _length, _chr) {
  */
 function copyTextToClipboard(_textVal) {
 	// テキストエリアを用意する
-	let copyFrom = document.createElement(`textarea`);
+	const copyFrom = document.createElement(`textarea`);
 	// テキストエリアへ値をセット
 	copyFrom.textContent = _textVal;
 
 	// bodyタグの要素を取得
-	var bodyElm = document.getElementsByTagName(`body`)[0];
+	const bodyElm = document.getElementsByTagName(`body`)[0];
 	// 子要素にテキストエリアを配置
 	bodyElm.appendChild(copyFrom);
 
 	// テキストエリアの値を選択
 	copyFrom.select();
 	// コピーコマンド発行
-	var retVal = document.execCommand(`copy`);
+	const retVal = document.execCommand(`copy`);
 	// 追加テキストエリアを削除
 	bodyElm.removeChild(copyFrom);
 	// 処理結果を返却
@@ -3327,7 +3326,6 @@ function keysConvert(_dosObj) {
 				g_keyObj[`keyCtrl${newKey}_${p}d`] = [];
 
 				for (let k = 0; k < tmpKeyCtrl.length; k++) {
-					tmpKeyPtn = tmpKeyCtrl[k].split(`/`);
 					g_keyObj[`keyCtrl${newKey}_${p}`][k] = tmpKeyCtrl[k].split(`/`).map(n => parseInt(n, 10));
 					g_keyObj[`keyCtrl${newKey}_${p}d`][k] = g_keyObj[`keyCtrl${newKey}_${p}`][k].concat();
 				}
@@ -6416,7 +6414,7 @@ function getFirstArrowFrame(_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
 			}
 		});
 	}
-	return tmpFirstNum;
+	return (tmpFirstNum === Infinity ? 0 : tmpFirstNum);
 }
 
 /**
