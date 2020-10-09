@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 /**
  * Dancing☆Onigiri (CW Edition)
  * 
@@ -4394,7 +4394,9 @@ function createOptionWindow(_sprite) {
 		// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
 		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] !== undefined) {
 			const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
-			changeLifeMode(tmpGaugeObj);
+			if (setVal(tmpGaugeObj.lifeBorders[tmpScoreId], ``, C_TYP_STRING) !== ``) {
+				changeLifeMode(tmpGaugeObj);
+			}
 			setLifeCategory(tmpGaugeObj);
 		}
 	}
