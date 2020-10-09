@@ -6519,7 +6519,7 @@ function getFirstArrowFrame(_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
 			}
 		});
 	}
-	return tmpFirstNum;
+	return (tmpFirstNum === Infinity ? 0 : tmpFirstNum);
 }
 
 /**
