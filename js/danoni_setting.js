@@ -1,4 +1,4 @@
-﻿`use strict`;
+﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
  * Template Update: 2020/08/25 (v16.2.1)
