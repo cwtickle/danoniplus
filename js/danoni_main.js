@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 /**
  * Dancing☆Onigiri (CW Edition)
  * 
@@ -40,9 +40,7 @@ let g_localVersion2 = ``;
  */
 
 window.onload = _ => {
-	g_loadObj = {
-		main: true,
-	};
+	g_loadObj.main = true;
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
@@ -97,8 +95,8 @@ let g_finishFlg = true;
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 /** 共通オブジェクト */
-let g_loadObj = {};
-let g_rootObj = {};
+const g_loadObj = {};
+const g_rootObj = {};
 let g_headerObj = {};
 let g_scoreObj = {};
 let g_btnAddFunc = {};
