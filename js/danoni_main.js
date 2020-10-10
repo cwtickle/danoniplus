@@ -6375,9 +6375,7 @@ function replaceStr(_str, _pairs) {
  * @param {string} _str 
  */
 function escapeHtml(_str) {
-	return escapeHtmlForEnabledTag(
-		replaceStr(_str, [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]])
-	);
+	return escapeHtmlForEnabledTag(replaceStr(_str, g_escapeStr.escape));
 }
 
 /**
@@ -6385,12 +6383,7 @@ function escapeHtml(_str) {
  * @param {string} _str 
  */
 function escapeHtmlForEnabledTag(_str) {
-	return (
-		replaceStr(_str, [
-			[`*amp*`, `&amp;`], [`*pipe*`, `|`], [`*dollar*`, `$`], [`*rsquo*`, `&rsquo;`],
-			[`*quot*`, `&quot;`], [`*comma*`, `&quot;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
-		])
-	);
+	return replaceStr(_str, g_escapeStr.escapeTag);
 }
 
 /**
@@ -6398,12 +6391,7 @@ function escapeHtmlForEnabledTag(_str) {
  * @param {string} _str 
  */
 function unEscapeHtml(_str) {
-	return (
-		replaceStr(_str, [
-			[`&amp;`, `&`], [`&rsquo;`, `’`], [`&quot;`, `"`], [`&sbquo;`, `,`],
-			[`&lt;`, `<`], [`&gt;`, `>`], [`&#39;`, `'`], [`&#96;`, `\``],
-		])
-	);
+	return replaceStr(_str, g_escapeStr.unEscapeTag);
 }
 
 /**
