@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/10/10
+ * Revised : 2020/10/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 17.4.1`;
-const g_revisedDate = `2020/10/10`;
+const g_version = `Ver 17.4.2`;
+const g_revisedDate = `2020/10/11`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2554,6 +2554,7 @@ function headerConvert(_dosObj) {
 
 	// 画像拡張子の設定 (サーバ上のみ)
 	if (typeof g_presetOverrideExtension === C_TYP_STRING && !location.href.match(`^file`)) {
+		let key;
 		for (key in g_imgObj) {
 			g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`;
 		}
