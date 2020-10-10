@@ -1323,9 +1323,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 		const scoreList = Object.keys(g_rootObj).filter(data => {
 			return data.endsWith(`_data`) || data.endsWith(`_change`);
 		});
-		scoreList.forEach(scoredata => {
-			g_rootObj[scoredata] = ``;
-		});
+		scoreList.forEach(scoredata => g_rootObj[scoredata] = ``);
 	}
 
 	// HTML埋め込みdos
@@ -1362,8 +1360,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 
 				// 外部データを読込（ファイルが見つからなかった場合は譜面追記をスキップ）
 				externalDosInit();
-				if (!g_loadObj[filename]) {
-				} else {
+				if (g_loadObj[filename]) {
 					Object.assign(g_rootObj, dosConvert(g_externalDos));
 				}
 
@@ -1430,15 +1427,15 @@ function initAfterDosLoaded() {
 		`frzBar`, `lifeBorder`].forEach(img => preloadFile(`image`, g_imgObj[img]));
 
 	// その他の画像ファイルの読み込み
-	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
-		if (setVal(g_headerObj.preloadImages[j], ``, C_TYP_STRING) !== ``) {
+	g_headerObj.preloadImages.forEach(preloadImage => {
+		if (setVal(preloadImage, ``, C_TYP_STRING) !== ``) {
 
 			// Pattern A: |preloadImages=file.png|
 			// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
 			// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
 			// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
 
-			const tmpPreloadImages = g_headerObj.preloadImages[j].split(`@`);
+			const tmpPreloadImages = preloadImage.split(`@`);
 			if (tmpPreloadImages.length > 1) {
 				const termRoopCnts = tmpPreloadImages[1].split(`-`);
 				let startCnt;
@@ -1461,10 +1458,10 @@ function initAfterDosLoaded() {
 				}
 			} else {
 				// Pattern Aの場合
-				preloadFile(`image`, g_headerObj.preloadImages[j]);
+				preloadFile(`image`, preloadImage);
 			}
 		}
-	}
+	});
 
 	if (g_loadObj.main) {
 		// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
@@ -1499,7 +1496,6 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	const startFrame = getStartFrame(lastFrame, 0, _scoreId);
 	const firstArrowFrame = getFirstArrowFrame(_scoreObj, _keyCtrlPtn);
 	const playingFrame = lastFrame - firstArrowFrame;
-	const playingFrameWithBlank = lastFrame - startFrame;
 	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
 
 	// 譜面密度グラフ用のデータ作成
@@ -1554,7 +1550,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	g_detailObj.frzCnt[_scoreId] = frzCnt.concat();
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
-	g_detailObj.playingFrameWithBlank[_scoreId] = playingFrameWithBlank;
+	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;
 }
 
 /**
@@ -1749,11 +1745,10 @@ function loadSettingJs() {
 	let settingType = ``;
 	let settingRoot = C_DIR_JS;
 	if (g_rootObj.settingType !== undefined && g_rootObj.settingType !== ``) {
+		settingType = `_${g_rootObj.settingType}`;
 		if (g_rootObj.settingType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 			settingType = `_${g_rootObj.settingType.split(C_MRK_CURRENT_DIRECTORY)[1]}`;
 			settingRoot = ``;
-		} else {
-			settingType = `_${g_rootObj.settingType}`;
 		}
 	}
 
@@ -1770,21 +1765,13 @@ function loadMusic() {
 	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
-	let url;
+	let url = `../${g_headerObj.musicFolder}/${musicUrl}`;
 	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
-	} else {
-		url = `../${g_headerObj.musicFolder}/${musicUrl}`;
 	}
 
 	g_headerObj.musicUrl = musicUrl;
-
-	if (musicUrl.slice(-3) === `.js` || musicUrl.slice(-4) === `.txt`) {
-		g_musicEncodedFlg = true;
-	} else {
-		g_musicEncodedFlg = false;
-	}
-
+	g_musicEncodedFlg = (musicUrl.slice(-3) === `.js` || musicUrl.slice(-4) === `.txt`) ? true : false;
 	drawDefaultBackImage(``);
 
 	// Now Loadingを表示
@@ -8173,8 +8160,7 @@ function MainInit() {
 	 * @param {string} _barColor 
 	 */
 	function makeFrzArrow(_j, _arrowCnt, _name, _normalColor, _barColor) {
-		const camelHeader = toCapitalize(_name);
-		const frzLength = g_workObj[`mk${camelHeader}Length`][_j][(_arrowCnt - 1) * 2];
+		const frzLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2];
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 		const dividePos = g_workObj.dividePos[_j];
 		const frzNo = `${_j}_${_arrowCnt}`;
@@ -9485,16 +9471,17 @@ function resultInit() {
 
 		// ハイスコア差分値適用、ハイスコア部分作成
 		Object.keys(jdgScoreObj).forEach(score => {
+			const jdgScore = jdgScoreObj[score];
 			if (score === `score`) {
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-					jdgScoreObj[score].pos, `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}LS`, C_RLT_HIDIF_X, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
-					jdgScoreObj[score].pos, Math.abs(highscoreDfObj[score]), C_ALIGN_RIGHT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-					jdgScoreObj[score].pos, `)`));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScore.id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					jdgScore.pos, `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScore.id}LS`, C_RLT_HIDIF_X, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
+					jdgScore.pos, Math.abs(highscoreDfObj[score]), C_ALIGN_RIGHT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScore.id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					jdgScore.pos, `)`));
 			} else {
-				document.querySelector(`#lbl${jdgScoreObj[score].id}L1`).textContent = `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`;
-				document.querySelector(`#lbl${jdgScoreObj[score].id}LS`).textContent = Math.abs(highscoreDfObj[score]);
+				document.querySelector(`#lbl${jdgScore.id}L1`).textContent = `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`;
+				document.querySelector(`#lbl${jdgScore.id}LS`).textContent = Math.abs(highscoreDfObj[score]);
 			}
 		});
 
