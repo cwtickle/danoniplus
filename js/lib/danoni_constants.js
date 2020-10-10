@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/09/22 (v16.4.0)
+ * Revised : 2020/10/10 (v17.4.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1545,6 +1545,18 @@ const g_keyObj = {
     },
 
     dummy: 0	// ダミー(カンマ抜け落ち防止)
+};
+
+const g_escapeStr = {
+    escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
+    escapeTag: [
+        [`*amp*`, `&amp;`], [`*pipe*`, `|`], [`*dollar*`, `$`], [`*rsquo*`, `&rsquo;`],
+        [`*quot*`, `&quot;`], [`*comma*`, `&quot;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
+    ],
+    unEscapeTag: [
+        [`&amp;`, `&`], [`&rsquo;`, `’`], [`&quot;`, `"`], [`&sbquo;`, `,`],
+        [`&lt;`, `<`], [`&gt;`, `>`], [`&#39;`, `'`], [`&#96;`, `\``],
+    ],
 };
 
 /** 

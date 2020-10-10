@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/10/09
+ * Revised : 2020/10/10
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 17.4.0`;
-const g_revisedDate = `2020/10/09`;
+const g_version = `Ver 17.4.1`;
+const g_revisedDate = `2020/10/10`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1323,9 +1323,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 		const scoreList = Object.keys(g_rootObj).filter(data => {
 			return data.endsWith(`_data`) || data.endsWith(`_change`);
 		});
-		scoreList.forEach(scoredata => {
-			g_rootObj[scoredata] = ``;
-		});
+		scoreList.forEach(scoredata => g_rootObj[scoredata] = ``);
 	}
 
 	// HTML埋め込みdos
@@ -1362,8 +1360,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 
 				// 外部データを読込（ファイルが見つからなかった場合は譜面追記をスキップ）
 				externalDosInit();
-				if (!g_loadObj[filename]) {
-				} else {
+				if (g_loadObj[filename]) {
 					Object.assign(g_rootObj, dosConvert(g_externalDos));
 				}
 
@@ -1430,15 +1427,15 @@ function initAfterDosLoaded() {
 		`frzBar`, `lifeBorder`].forEach(img => preloadFile(`image`, g_imgObj[img]));
 
 	// その他の画像ファイルの読み込み
-	for (let j = 0, len = g_headerObj.preloadImages.length; j < len; j++) {
-		if (setVal(g_headerObj.preloadImages[j], ``, C_TYP_STRING) !== ``) {
+	g_headerObj.preloadImages.forEach(preloadImage => {
+		if (setVal(preloadImage, ``, C_TYP_STRING) !== ``) {
 
 			// Pattern A: |preloadImages=file.png|
 			// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
 			// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
 			// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
 
-			const tmpPreloadImages = g_headerObj.preloadImages[j].split(`@`);
+			const tmpPreloadImages = preloadImage.split(`@`);
 			if (tmpPreloadImages.length > 1) {
 				const termRoopCnts = tmpPreloadImages[1].split(`-`);
 				let startCnt;
@@ -1461,10 +1458,10 @@ function initAfterDosLoaded() {
 				}
 			} else {
 				// Pattern Aの場合
-				preloadFile(`image`, g_headerObj.preloadImages[j]);
+				preloadFile(`image`, preloadImage);
 			}
 		}
-	}
+	});
 
 	if (g_loadObj.main) {
 		// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
@@ -1499,7 +1496,6 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	const startFrame = getStartFrame(lastFrame, 0, _scoreId);
 	const firstArrowFrame = getFirstArrowFrame(_scoreObj, _keyCtrlPtn);
 	const playingFrame = lastFrame - firstArrowFrame;
-	const playingFrameWithBlank = lastFrame - startFrame;
 	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
 
 	// 譜面密度グラフ用のデータ作成
@@ -1554,7 +1550,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	g_detailObj.frzCnt[_scoreId] = frzCnt.concat();
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
-	g_detailObj.playingFrameWithBlank[_scoreId] = playingFrameWithBlank;
+	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;
 }
 
 /**
@@ -1749,11 +1745,10 @@ function loadSettingJs() {
 	let settingType = ``;
 	let settingRoot = C_DIR_JS;
 	if (g_rootObj.settingType !== undefined && g_rootObj.settingType !== ``) {
+		settingType = `_${g_rootObj.settingType}`;
 		if (g_rootObj.settingType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 			settingType = `_${g_rootObj.settingType.split(C_MRK_CURRENT_DIRECTORY)[1]}`;
 			settingRoot = ``;
-		} else {
-			settingType = `_${g_rootObj.settingType}`;
 		}
 	}
 
@@ -1770,21 +1765,13 @@ function loadMusic() {
 	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
-	let url;
+	let url = `../${g_headerObj.musicFolder}/${musicUrl}`;
 	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
-	} else {
-		url = `../${g_headerObj.musicFolder}/${musicUrl}`;
 	}
 
 	g_headerObj.musicUrl = musicUrl;
-
-	if (musicUrl.slice(-3) === `.js` || musicUrl.slice(-4) === `.txt`) {
-		g_musicEncodedFlg = true;
-	} else {
-		g_musicEncodedFlg = false;
-	}
-
+	g_musicEncodedFlg = (musicUrl.slice(-3) === `.js` || musicUrl.slice(-4) === `.txt`) ? true : false;
 	drawDefaultBackImage(``);
 
 	// Now Loadingを表示
@@ -3798,24 +3785,24 @@ function createOptionWindow(_sprite) {
 					makeDifList(difList, difCover);
 
 					// ランダム選択
-					const lnkDifRandom = makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
-						g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
-						setDifficulty(true);
-						deleteChildspriteAll(`difList`);
-						optionsprite.removeChild(difList);
-						optionsprite.removeChild(difCover);
-					});
-					difCover.appendChild(lnkDifRandom);
-					lnkDifRandom.style.width = `110px`;
+					difCover.appendChild(
+						makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
+							g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
+							setDifficulty(true);
+							deleteChildspriteAll(`difList`);
+							optionsprite.removeChild(difList);
+							optionsprite.removeChild(difCover);
+						}, { w: 110 })
+					);
 
 					// キー別フィルタボタン作成
 					g_headerObj.keyLists.forEach((targetKey, m) => {
-						const lnkKeyFilter = makeDifLblCssButton(`keyFilter`, `${targetKey} key`, m + 1.5, _ => {
-							deleteChildspriteAll(`difList`);
-							makeDifList(difList, difCover, targetKey);
-						});
-						difCover.appendChild(lnkKeyFilter);
-						lnkKeyFilter.style.width = `110px`;
+						difCover.appendChild(
+							makeDifLblCssButton(`keyFilter`, `${targetKey} key`, m + 1.5, _ => {
+								deleteChildspriteAll(`difList`);
+								makeDifList(difList, difCover, targetKey);
+							}, { w: 110 })
+						);
 					});
 				} else {
 					resetDifWindow();
@@ -4840,10 +4827,10 @@ function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, si
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  */
-function makeDifLblCssButton(_id, _name, _heightPos, _func) {
+function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_DIFSELECTOR_WIDTH, } = {}) {
 	return createCss2Button(_id, _name, _func, {
-		x: 0, y: C_LEN_SETLBL_HEIGHT * _heightPos,
-		w: C_LEN_DIFSELECTOR_WIDTH, h: C_LEN_SETLBL_HEIGHT,
+		x: x, y: C_LEN_SETLBL_HEIGHT * _heightPos,
+		w: w, h: C_LEN_SETLBL_HEIGHT,
 		siz: C_SIZ_DIFSELECTOR,
 		borderStyle: `solid`,
 	}, g_cssObj.button_Default, g_cssObj.button_ON);
@@ -5413,14 +5400,10 @@ function keyConfigInit() {
 					for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
 						document.querySelector(`#keycon${j}_${k}`).textContent = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
-
-						if (g_keyObj.currentPtn === -1) {
-							removeClassList(j, k);
-							document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.keyconfig_Defaultkey);
-						} else {
-							removeClassList(j, k);
-							document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.title_base);
-						}
+						removeClassList(j, k);
+						document.querySelector(`#keycon${j}_${k}`).classList.add(
+							g_keyObj.currentPtn === -1 ? g_cssObj.keyconfig_Defaultkey : g_cssObj.title_base
+						);
 					}
 				}
 				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
@@ -6375,16 +6358,24 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 }
 
 /**
+ * 文字列の置換
+ * @param {string} _str 
+ * @param {array} _pairs 
+ */
+function replaceStr(_str, _pairs) {
+	let tmpStr = _str;
+	_pairs.forEach(pair => {
+		tmpStr = tmpStr.split(pair[0]).join(pair[1]);
+	});
+	return tmpStr;
+}
+
+/**
  * 文字列のエスケープ処理
  * @param {string} _str 
  */
 function escapeHtml(_str) {
-	let newstr = _str.split(`&`).join(`&amp;`);
-	newstr = newstr.split(`<`).join(`&lt;`);
-	newstr = newstr.split(`>`).join(`&gt;`);
-	newstr = newstr.split(`"`).join(`&quot;`);
-
-	return escapeHtmlForEnabledTag(newstr);
+	return escapeHtmlForEnabledTag(replaceStr(_str, g_escapeStr.escape));
 }
 
 /**
@@ -6392,16 +6383,7 @@ function escapeHtml(_str) {
  * @param {string} _str 
  */
 function escapeHtmlForEnabledTag(_str) {
-	let newstr = _str.split(`*amp*`).join(`&amp;`);
-	newstr = newstr.split(`*pipe*`).join(`|`);
-	newstr = newstr.split(`*dollar*`).join(`$`);
-	newstr = newstr.split(`*rsquo*`).join(`&rsquo;`);
-	newstr = newstr.split(`*quot*`).join(`&quot;`);
-	newstr = newstr.split(`*comma*`).join(`&sbquo;`);
-	newstr = newstr.split(`*squo*`).join(`&#39;`);
-	newstr = newstr.split(`*bkquo*`).join(`&#96;`);
-
-	return newstr;
+	return replaceStr(_str, g_escapeStr.escapeTag);
 }
 
 /**
@@ -6409,16 +6391,7 @@ function escapeHtmlForEnabledTag(_str) {
  * @param {string} _str 
  */
 function unEscapeHtml(_str) {
-	let newstr = _str.split(`&amp;`).join(`&`);
-	newstr = newstr.split(`&rsquo;`).join(`’`);
-	newstr = newstr.split(`&quot;`).join(`"`);
-	newstr = newstr.split(`&sbquo;`).join(`,`);
-	newstr = newstr.split(`&lt;`).join(`<`);
-	newstr = newstr.split(`&gt;`).join(`>`);
-	newstr = newstr.split(`&#39;`).join(`'`);
-	newstr = newstr.split(`&#96;`).join(`\``);
-
-	return newstr;
+	return replaceStr(_str, g_escapeStr.unEscapeTag);
 }
 
 /**
@@ -8173,8 +8146,7 @@ function MainInit() {
 	 * @param {string} _barColor 
 	 */
 	function makeFrzArrow(_j, _arrowCnt, _name, _normalColor, _barColor) {
-		const camelHeader = toCapitalize(_name);
-		const frzLength = g_workObj[`mk${camelHeader}Length`][_j][(_arrowCnt - 1) * 2];
+		const frzLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2];
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 		const dividePos = g_workObj.dividePos[_j];
 		const frzNo = `${_j}_${_arrowCnt}`;
@@ -9158,10 +9130,6 @@ function finishViewing() {
 			g_resultObj.spState = `perfect`;
 		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
 			g_resultObj.spState = `fullCombo`;
-		} else if (!g_gameOverFlg) {
-			g_resultObj.spState = `cleared`;
-		} else {
-			g_resultObj.spState = `failed`;
 		}
 		if (g_headerObj.finishView !== C_DIS_NONE && [`allPerfect`, `perfect`, `fullCombo`].includes(g_resultObj.spState)) {
 			makeFinishView(g_resultMsgObj[g_resultObj.spState]);
@@ -9248,6 +9216,9 @@ function resultInit() {
 		rankColor = g_rankObj.rankColorF;
 		g_resultObj.spState = `failed`;
 	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF) {
+		if (g_resultObj.spState === ``) {
+			g_resultObj.spState = `cleared`;
+		}
 		if (g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai === 0) {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
@@ -9349,7 +9320,7 @@ function resultInit() {
 		ii: { pos: 0, id: `Ii`, color: `ii`, label: C_JCR_II, },
 		shakin: { pos: 1, id: `Shakin`, color: `shakin`, label: C_JCR_SHAKIN, },
 		matari: { pos: 2, id: `Matari`, color: `matari`, label: C_JCR_MATARI, },
-		shobon: { pos: 3, id: `ShobonIi`, color: `shobon`, label: C_JCR_SHOBON, },
+		shobon: { pos: 3, id: `Shobon`, color: `shobon`, label: C_JCR_SHOBON, },
 		uwan: { pos: 4, id: `Uwan`, color: `uwan`, label: C_JCR_UWAN, },
 		kita: { pos: 5, id: `Kita`, color: `kita`, label: C_JCR_KITA, },
 		iknai: { pos: 6, id: `Iknai`, color: `iknai`, label: C_JCR_IKNAI, },
@@ -9485,16 +9456,17 @@ function resultInit() {
 
 		// ハイスコア差分値適用、ハイスコア部分作成
 		Object.keys(jdgScoreObj).forEach(score => {
+			const jdgScore = jdgScoreObj[score];
 			if (score === `score`) {
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-					jdgScoreObj[score].pos, `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}LS`, C_RLT_HIDIF_X, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
-					jdgScoreObj[score].pos, Math.abs(highscoreDfObj[score]), C_ALIGN_RIGHT));
-				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-					jdgScoreObj[score].pos, `)`));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScore.id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					jdgScore.pos, `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScore.id}LS`, C_RLT_HIDIF_X, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
+					jdgScore.pos, Math.abs(highscoreDfObj[score]), C_ALIGN_RIGHT));
+				resultWindow.appendChild(makeCssResultSymbol(`lbl${jdgScore.id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					jdgScore.pos, `)`));
 			} else {
-				document.querySelector(`#lbl${jdgScoreObj[score].id}L1`).textContent = `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`;
-				document.querySelector(`#lbl${jdgScoreObj[score].id}LS`).textContent = Math.abs(highscoreDfObj[score]);
+				document.querySelector(`#lbl${jdgScore.id}L1`).textContent = `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`;
+				document.querySelector(`#lbl${jdgScore.id}LS`).textContent = Math.abs(highscoreDfObj[score]);
 			}
 		});
 
