@@ -6358,15 +6358,25 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 }
 
 /**
+ * 文字列の置換
+ * @param {string} _str 
+ * @param {array} _pairs 
+ */
+function replaceStr(_str, _pairs) {
+	let tmpStr = _str;
+	_pairs.forEach(pair => {
+		tmpStr = tmpStr.split(pair[0]).join(pair[1]);
+	});
+	return tmpStr;
+}
+
+/**
  * 文字列のエスケープ処理
  * @param {string} _str 
  */
 function escapeHtml(_str) {
 	return escapeHtmlForEnabledTag(
-		_str.split(`&`).join(`&amp;`)
-			.split(`<`).join(`&lt;`)
-			.split(`>`).join(`&gt;`)
-			.split(`"`).join(`&quot;`)
+		replaceStr(_str, [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]])
 	);
 }
 
@@ -6376,14 +6386,10 @@ function escapeHtml(_str) {
  */
 function escapeHtmlForEnabledTag(_str) {
 	return (
-		_str.split(`*amp*`).join(`&amp;`)
-			.split(`*pipe*`).join(`|`)
-			.split(`*dollar*`).join(`$`)
-			.split(`*rsquo*`).join(`&rsquo;`)
-			.split(`*quot*`).join(`&quot;`)
-			.split(`*comma*`).join(`&sbquo;`)
-			.split(`*squo*`).join(`&#39;`)
-			.split(`*bkquo*`).join(`&#96;`)
+		replaceStr(_str, [
+			[`*amp*`, `&amp;`], [`*pipe*`, `|`], [`*dollar*`, `$`], [`*rsquo*`, `&rsquo;`],
+			[`*quot*`, `&quot;`], [`*comma*`, `&quot;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
+		])
 	);
 }
 
@@ -6393,14 +6399,10 @@ function escapeHtmlForEnabledTag(_str) {
  */
 function unEscapeHtml(_str) {
 	return (
-		_str.split(`&amp;`).join(`&`)
-			.split(`&rsquo;`).join(`’`)
-			.split(`&quot;`).join(`"`)
-			.split(`&sbquo;`).join(`,`)
-			.split(`&lt;`).join(`<`)
-			.split(`&gt;`).join(`>`)
-			.split(`&#39;`).join(`'`)
-			.split(`&#96;`).join(`\``)
+		replaceStr(_str, [
+			[`&amp;`, `&`], [`&rsquo;`, `’`], [`&quot;`, `"`], [`&sbquo;`, `,`],
+			[`&lt;`, `<`], [`&gt;`, `>`], [`&#39;`, `'`], [`&#96;`, `\``],
+		])
 	);
 }
 
