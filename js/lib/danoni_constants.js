@@ -1547,6 +1547,18 @@ const g_keyObj = {
     dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
 
+const g_escapeStr = {
+    escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
+    escapeTag: [
+        [`*amp*`, `&amp;`], [`*pipe*`, `|`], [`*dollar*`, `$`], [`*rsquo*`, `&rsquo;`],
+        [`*quot*`, `&quot;`], [`*comma*`, `&quot;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
+    ],
+    unEscapeTag: [
+        [`&amp;`, `&`], [`&rsquo;`, `’`], [`&quot;`, `"`], [`&sbquo;`, `,`],
+        [`&lt;`, `<`], [`&gt;`, `>`], [`&#39;`, `'`], [`&#96;`, `\``],
+    ],
+};
+
 /** 
  * メッセージ定義 
  * - 変数名は `C_MSG_X_YYYY` の形で、末尾に (X-YYYY) をつける。
