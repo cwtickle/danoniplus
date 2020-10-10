@@ -3785,24 +3785,24 @@ function createOptionWindow(_sprite) {
 					makeDifList(difList, difCover);
 
 					// ランダム選択
-					const lnkDifRandom = makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
-						g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
-						setDifficulty(true);
-						deleteChildspriteAll(`difList`);
-						optionsprite.removeChild(difList);
-						optionsprite.removeChild(difCover);
-					});
-					difCover.appendChild(lnkDifRandom);
-					lnkDifRandom.style.width = `110px`;
+					difCover.appendChild(
+						makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
+							g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
+							setDifficulty(true);
+							deleteChildspriteAll(`difList`);
+							optionsprite.removeChild(difList);
+							optionsprite.removeChild(difCover);
+						}, { w: 110 })
+					);
 
 					// キー別フィルタボタン作成
 					g_headerObj.keyLists.forEach((targetKey, m) => {
-						const lnkKeyFilter = makeDifLblCssButton(`keyFilter`, `${targetKey} key`, m + 1.5, _ => {
-							deleteChildspriteAll(`difList`);
-							makeDifList(difList, difCover, targetKey);
-						});
-						difCover.appendChild(lnkKeyFilter);
-						lnkKeyFilter.style.width = `110px`;
+						difCover.appendChild(
+							makeDifLblCssButton(`keyFilter`, `${targetKey} key`, m + 1.5, _ => {
+								deleteChildspriteAll(`difList`);
+								makeDifList(difList, difCover, targetKey);
+							}, { w: 110 })
+						);
 					});
 				} else {
 					resetDifWindow();
@@ -4827,10 +4827,10 @@ function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, si
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  */
-function makeDifLblCssButton(_id, _name, _heightPos, _func) {
+function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_DIFSELECTOR_WIDTH, } = {}) {
 	return createCss2Button(_id, _name, _func, {
-		x: 0, y: C_LEN_SETLBL_HEIGHT * _heightPos,
-		w: C_LEN_DIFSELECTOR_WIDTH, h: C_LEN_SETLBL_HEIGHT,
+		x: x, y: C_LEN_SETLBL_HEIGHT * _heightPos,
+		w: w, h: C_LEN_SETLBL_HEIGHT,
 		siz: C_SIZ_DIFSELECTOR,
 		borderStyle: `solid`,
 	}, g_cssObj.button_Default, g_cssObj.button_ON);
