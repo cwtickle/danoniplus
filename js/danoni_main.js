@@ -9158,10 +9158,6 @@ function finishViewing() {
 			g_resultObj.spState = `perfect`;
 		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
 			g_resultObj.spState = `fullCombo`;
-		} else if (!g_gameOverFlg) {
-			g_resultObj.spState = `cleared`;
-		} else {
-			g_resultObj.spState = `failed`;
 		}
 		if (g_headerObj.finishView !== C_DIS_NONE && [`allPerfect`, `perfect`, `fullCombo`].includes(g_resultObj.spState)) {
 			makeFinishView(g_resultMsgObj[g_resultObj.spState]);
@@ -9248,6 +9244,9 @@ function resultInit() {
 		rankColor = g_rankObj.rankColorF;
 		g_resultObj.spState = `failed`;
 	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF) {
+		if (g_resultObj.spState === ``) {
+			g_resultObj.spState = `cleared`;
+		}
 		if (g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai === 0) {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
