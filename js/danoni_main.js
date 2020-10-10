@@ -9349,7 +9349,7 @@ function resultInit() {
 		ii: { pos: 0, id: `Ii`, color: `ii`, label: C_JCR_II, },
 		shakin: { pos: 1, id: `Shakin`, color: `shakin`, label: C_JCR_SHAKIN, },
 		matari: { pos: 2, id: `Matari`, color: `matari`, label: C_JCR_MATARI, },
-		shobon: { pos: 3, id: `ShobonIi`, color: `shobon`, label: C_JCR_SHOBON, },
+		shobon: { pos: 3, id: `Shobon`, color: `shobon`, label: C_JCR_SHOBON, },
 		uwan: { pos: 4, id: `Uwan`, color: `uwan`, label: C_JCR_UWAN, },
 		kita: { pos: 5, id: `Kita`, color: `kita`, label: C_JCR_KITA, },
 		iknai: { pos: 6, id: `Iknai`, color: `iknai`, label: C_JCR_IKNAI, },
