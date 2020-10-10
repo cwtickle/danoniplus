@@ -5400,14 +5400,10 @@ function keyConfigInit() {
 					for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
 						document.querySelector(`#keycon${j}_${k}`).textContent = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
-
-						if (g_keyObj.currentPtn === -1) {
-							removeClassList(j, k);
-							document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.keyconfig_Defaultkey);
-						} else {
-							removeClassList(j, k);
-							document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.title_base);
-						}
+						removeClassList(j, k);
+						document.querySelector(`#keycon${j}_${k}`).classList.add(
+							g_keyObj.currentPtn === -1 ? g_cssObj.keyconfig_Defaultkey : g_cssObj.title_base
+						);
 					}
 				}
 				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
@@ -6366,12 +6362,12 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
  * @param {string} _str 
  */
 function escapeHtml(_str) {
-	let newstr = _str.split(`&`).join(`&amp;`);
-	newstr = newstr.split(`<`).join(`&lt;`);
-	newstr = newstr.split(`>`).join(`&gt;`);
-	newstr = newstr.split(`"`).join(`&quot;`);
-
-	return escapeHtmlForEnabledTag(newstr);
+	return escapeHtmlForEnabledTag(
+		_str.split(`&`).join(`&amp;`)
+			.split(`<`).join(`&lt;`)
+			.split(`>`).join(`&gt;`)
+			.split(`"`).join(`&quot;`)
+	);
 }
 
 /**
@@ -6379,16 +6375,16 @@ function escapeHtml(_str) {
  * @param {string} _str 
  */
 function escapeHtmlForEnabledTag(_str) {
-	let newstr = _str.split(`*amp*`).join(`&amp;`);
-	newstr = newstr.split(`*pipe*`).join(`|`);
-	newstr = newstr.split(`*dollar*`).join(`$`);
-	newstr = newstr.split(`*rsquo*`).join(`&rsquo;`);
-	newstr = newstr.split(`*quot*`).join(`&quot;`);
-	newstr = newstr.split(`*comma*`).join(`&sbquo;`);
-	newstr = newstr.split(`*squo*`).join(`&#39;`);
-	newstr = newstr.split(`*bkquo*`).join(`&#96;`);
-
-	return newstr;
+	return (
+		_str.split(`*amp*`).join(`&amp;`)
+			.split(`*pipe*`).join(`|`)
+			.split(`*dollar*`).join(`$`)
+			.split(`*rsquo*`).join(`&rsquo;`)
+			.split(`*quot*`).join(`&quot;`)
+			.split(`*comma*`).join(`&sbquo;`)
+			.split(`*squo*`).join(`&#39;`)
+			.split(`*bkquo*`).join(`&#96;`)
+	);
 }
 
 /**
@@ -6396,16 +6392,16 @@ function escapeHtmlForEnabledTag(_str) {
  * @param {string} _str 
  */
 function unEscapeHtml(_str) {
-	let newstr = _str.split(`&amp;`).join(`&`);
-	newstr = newstr.split(`&rsquo;`).join(`’`);
-	newstr = newstr.split(`&quot;`).join(`"`);
-	newstr = newstr.split(`&sbquo;`).join(`,`);
-	newstr = newstr.split(`&lt;`).join(`<`);
-	newstr = newstr.split(`&gt;`).join(`>`);
-	newstr = newstr.split(`&#39;`).join(`'`);
-	newstr = newstr.split(`&#96;`).join(`\``);
-
-	return newstr;
+	return (
+		_str.split(`&amp;`).join(`&`)
+			.split(`&rsquo;`).join(`’`)
+			.split(`&quot;`).join(`"`)
+			.split(`&sbquo;`).join(`,`)
+			.split(`&lt;`).join(`<`)
+			.split(`&gt;`).join(`>`)
+			.split(`&#39;`).join(`'`)
+			.split(`&#96;`).join(`\``)
+	);
 }
 
 /**
