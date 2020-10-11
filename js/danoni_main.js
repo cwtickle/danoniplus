@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/10/09
+ * Revised : 2020/10/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 15.7.4`;
-const g_revisedDate = `2020/10/09`;
+const g_version = `Ver 15.7.5`;
+const g_revisedDate = `2020/10/11`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7574,6 +7574,9 @@ function MainInit() {
 			stepShadow.classList.add(g_cssObj.main_objStepShadow);
 			stepRoot.appendChild(stepShadow);
 			stepShadow.style.opacity = 0.7;
+			if (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) {
+				stepShadow.style.display = C_DIS_NONE;
+			}
 		}
 
 		// ステップゾーン本体
