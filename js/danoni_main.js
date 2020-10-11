@@ -7309,6 +7309,7 @@ function MainInit() {
 	const dummyFrzCnts = [];
 	let speedCnts = 0;
 	let boostCnts = 0;
+	const stepZoneHideFlg = g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`;
 
 	for (let j = 0; j < keyNum; j++) {
 
@@ -7329,7 +7330,7 @@ function MainInit() {
 			stepRoot.appendChild(
 				createColorObject2(`stepShadow${j}`, {
 					rotate: g_workObj.stepRtn[j], styleName: `ShadowStep`,
-					opacity: 0.7,
+					opacity: 0.7, display: stepZoneHideFlg ? C_DIS_NONE : C_DIS_INHERIT,
 				}, g_cssObj.main_objStepShadow)
 			);
 		}
@@ -7337,6 +7338,7 @@ function MainInit() {
 		// ステップゾーン本体
 		const step = createColorObject2(`step${j}`, {
 			rotate: g_workObj.stepRtn[j], styleName: `Step`,
+			display: stepZoneHideFlg ? C_DIS_NONE : C_DIS_INHERIT,
 		}, g_cssObj.main_stepDefault);
 		stepRoot.appendChild(step);
 
@@ -7356,27 +7358,18 @@ function MainInit() {
 		stepHit.setAttribute(`cnt`, 0);
 		stepRoot.appendChild(stepHit);
 
-		// ステップゾーンOFF設定
-		if (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) {
-			step.style.display = C_DIS_NONE;
-		}
 	}
 	if (g_stateObj.scroll === `Flat` && g_stateObj.d_stepzone === C_FLG_ON) {
 
 		// ステップゾーンの代わり
-		mainSprite.appendChild(
-			createColorObject2(`stepBar0`, {
-				x: 0, y: C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
-				w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
-			}, g_cssObj.life_Failed)
-		);
-
-		mainSprite.appendChild(
-			createColorObject2(`stepBar1`, {
-				x: 0, y: C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
-				w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
-			}, g_cssObj.life_Failed)
-		);
+		[0, C_ARW_WIDTH].forEach((y, j) => {
+			mainSprite.appendChild(
+				createColorObject2(`stepBar${j}`, {
+					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + y,
+					w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
+				}, g_cssObj.life_Failed)
+			);
+		});
 
 	}
 
