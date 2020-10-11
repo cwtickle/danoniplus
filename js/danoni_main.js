@@ -4215,7 +4215,7 @@ function createOptionWindow(_sprite) {
 			x: 160, y: 0,
 			w: 90, h: 21, siz: C_SIZ_DIFSELECTOR,
 			borderStyle: `solid`,
-		}, g_cssObj.button_Default, g_stateObj.reverse === C_FLG_ON ? g_cssObj.button_RevON : g_cssObj.button_RevOFF);
+		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`]);
 		btnReverse.oncontextmenu = _ => {
 			setReverse();
 			return false;
@@ -4223,23 +4223,16 @@ function createOptionWindow(_sprite) {
 		spriteList.scroll.appendChild(btnReverse);
 
 		createGeneralSetting(spriteList.reverse, `reverse`);
-		if (g_scrolls.length > 1) {
-			spriteList.reverse.style.visibility = `hidden`;
-		} else {
-			spriteList.scroll.style.visibility = `hidden`;
-		}
+		spriteList[g_scrolls.length > 1 ? `reverse` : `scroll`].style.visibility = `hidden`;
 	} else {
 		createGeneralSetting(spriteList.reverse, `reverse`);
 	}
 
 	function setReverse() {
-		if (g_stateObj.reverse === C_FLG_ON) {
-			g_stateObj.reverse = C_FLG_OFF;
-			btnReverse.classList.replace(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
-		} else {
-			g_stateObj.reverse = C_FLG_ON;
-			btnReverse.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
-		}
+		g_reverseNum = (g_reverseNum + 1) % 2;
+		g_stateObj.reverse = g_reverses[g_reverseNum];
+		btnReverse.classList.replace(g_cssObj[`button_Rev${g_reverses[(g_reverseNum + 1) % 2]}`],
+			g_cssObj[`button_Rev${g_reverses[g_reverseNum]}`]);
 		btnReverse.textContent = `Reverse:${g_stateObj.reverse}`;
 	}
 
