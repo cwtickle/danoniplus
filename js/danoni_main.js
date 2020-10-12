@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/10/11
+ * Revised : 2020/10/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 17.4.2`;
-const g_revisedDate = `2020/10/11`;
+const g_version = `Ver 17.4.3`;
+const g_revisedDate = `2020/10/12`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4210,37 +4210,34 @@ function createOptionWindow(_sprite) {
 		$id(`lnkScroll`).width = `${parseFloat($id(`lnkScroll`).width) - 90}px`;
 
 		const btnReverse = createCss2Button(`btnReverse`, `Reverse:${g_stateObj.reverse}`, _ => {
-			setReverse();
+			setReverse(btnReverse);
 		}, {
 			x: 160, y: 0,
 			w: 90, h: 21, siz: C_SIZ_DIFSELECTOR,
 			borderStyle: `solid`,
-		}, g_cssObj.button_Default, g_stateObj.reverse === C_FLG_ON ? g_cssObj.button_RevON : g_cssObj.button_RevOFF);
+		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`]);
 		btnReverse.oncontextmenu = _ => {
-			setReverse();
+			setReverse(btnReverse);
 			return false;
 		}
 		spriteList.scroll.appendChild(btnReverse);
 
 		createGeneralSetting(spriteList.reverse, `reverse`);
-		if (g_scrolls.length > 1) {
-			spriteList.reverse.style.visibility = `hidden`;
-		} else {
-			spriteList.scroll.style.visibility = `hidden`;
-		}
+		spriteList[g_scrolls.length > 1 ? `reverse` : `scroll`].style.visibility = `hidden`;
 	} else {
 		createGeneralSetting(spriteList.reverse, `reverse`);
 	}
 
-	function setReverse() {
-		if (g_stateObj.reverse === C_FLG_ON) {
-			g_stateObj.reverse = C_FLG_OFF;
-			btnReverse.classList.replace(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
-		} else {
-			g_stateObj.reverse = C_FLG_ON;
-			btnReverse.classList.replace(g_cssObj.button_RevOFF, g_cssObj.button_RevON);
-		}
-		btnReverse.textContent = `Reverse:${g_stateObj.reverse}`;
+	function setReverse(_btn) {
+		g_reverseNum = (g_reverseNum + 1) % 2;
+		g_stateObj.reverse = g_reverses[g_reverseNum];
+		setReverseView(_btn);
+	}
+
+	function setReverseView(_btn) {
+		_btn.classList.replace(g_cssObj[`button_Rev${g_reverses[(g_reverseNum + 1) % 2]}`],
+			g_cssObj[`button_Rev${g_reverses[g_reverseNum]}`]);
+		_btn.textContent = `Reverse:${g_stateObj.reverse}`;
 	}
 
 	// ---------------------------------------------------
@@ -4633,11 +4630,7 @@ function createOptionWindow(_sprite) {
 				spriteList.scroll.style.visibility = `visible`;
 				spriteList.reverse.style.visibility = `hidden`;
 				setSetting(0, `scroll`);
-
-				const btnReverse = document.querySelector(`#btnReverse`);
-				btnReverse.classList.replace(g_cssObj[`button_Rev${g_reverses[(g_reverseNum + 1) % 2]}`],
-					g_cssObj[`button_Rev${g_reverses[g_reverseNum]}`]);
-				btnReverse.textContent = `Reverse:${g_stateObj.reverse}`;
+				setReverseView(document.querySelector(`#btnReverse`));
 			} else {
 				spriteList.scroll.style.visibility = `hidden`;
 				spriteList.reverse.style.visibility = `visible`;
@@ -7309,6 +7302,7 @@ function MainInit() {
 	const dummyFrzCnts = [];
 	let speedCnts = 0;
 	let boostCnts = 0;
+	const stepZoneHideFlg = g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`;
 
 	for (let j = 0; j < keyNum; j++) {
 
@@ -7329,7 +7323,7 @@ function MainInit() {
 			stepRoot.appendChild(
 				createColorObject2(`stepShadow${j}`, {
 					rotate: g_workObj.stepRtn[j], styleName: `ShadowStep`,
-					opacity: 0.7,
+					opacity: 0.7, display: stepZoneHideFlg ? C_DIS_NONE : C_DIS_INHERIT,
 				}, g_cssObj.main_objStepShadow)
 			);
 		}
@@ -7337,6 +7331,7 @@ function MainInit() {
 		// ステップゾーン本体
 		const step = createColorObject2(`step${j}`, {
 			rotate: g_workObj.stepRtn[j], styleName: `Step`,
+			display: stepZoneHideFlg ? C_DIS_NONE : C_DIS_INHERIT,
 		}, g_cssObj.main_stepDefault);
 		stepRoot.appendChild(step);
 
@@ -7356,27 +7351,18 @@ function MainInit() {
 		stepHit.setAttribute(`cnt`, 0);
 		stepRoot.appendChild(stepHit);
 
-		// ステップゾーンOFF設定
-		if (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) {
-			step.style.display = C_DIS_NONE;
-		}
 	}
 	if (g_stateObj.scroll === `Flat` && g_stateObj.d_stepzone === C_FLG_ON) {
 
 		// ステップゾーンの代わり
-		mainSprite.appendChild(
-			createColorObject2(`stepBar0`, {
-				x: 0, y: C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1),
-				w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
-			}, g_cssObj.life_Failed)
-		);
-
-		mainSprite.appendChild(
-			createColorObject2(`stepBar1`, {
-				x: 0, y: C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + C_ARW_WIDTH,
-				w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
-			}, g_cssObj.life_Failed)
-		);
+		[0, C_ARW_WIDTH].forEach((y, j) => {
+			mainSprite.appendChild(
+				createColorObject2(`stepBar${j}`, {
+					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + y,
+					w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
+				}, g_cssObj.life_Failed)
+			);
+		});
 
 	}
 
