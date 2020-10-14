@@ -3802,37 +3802,32 @@ function createOptionWindow(_sprite) {
 					resetDifWindow();
 				}
 			}
-		});
-	lnkDifficulty.oncontextmenu = _ => {
-		if (!g_headerObj.difSelectorUse) {
+		}, {
+		y: -10, h: C_LEN_SETLBL_HEIGHT + 10,
+		subFunc: _ => {
+			if (!g_headerObj.difSelectorUse) {
+				g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
+				setDifficulty(true);
+			} else {
+				resetDifWindow();
+			}
+		},
+	});
+
+	// 譜面選択ボタン（メイン、右回し、左回し）
+	multiAppend(spriteList.difficulty,
+		lnkDifficulty,
+		makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => {
+			g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
+			setDifficulty(true);
+			resetDifWindow();
+		}, { dy: -10, dh: 10 }),
+		makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => {
 			g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
 			setDifficulty(true);
-		} else {
 			resetDifWindow();
-		}
-		return false;
-	}
-	difficultySprite.appendChild(lnkDifficulty);
-
-	// 右回し・左回しボタン
-	spriteList.difficulty.appendChild(makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => {
-		g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
-		setDifficulty(true);
-		resetDifWindow();
-	}));
-	spriteList.difficulty.appendChild(makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => {
-		g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
-		setDifficulty(true);
-		resetDifWindow();
-	}));
-
-	// 譜面変更ボタンのみ 10pxプラス
-	lnkDifficulty.style.height = `${C_LEN_SETLBL_HEIGHT + 10}px`;
-	lnkDifficulty.style.top = `-10px`;
-	document.querySelector(`#lnkDifficultyR`).style.height = `${C_LEN_SETLBL_HEIGHT + 10}px`;
-	document.querySelector(`#lnkDifficultyL`).style.height = `${C_LEN_SETLBL_HEIGHT + 10}px`;
-	document.querySelector(`#lnkDifficultyR`).style.top = `-10px`;
-	document.querySelector(`#lnkDifficultyL`).style.top = `-10px`;
+		}, { dy: -10, dh: 10 }),
+	)
 
 	// ---------------------------------------------------
 	// ハイスコア機能実装時に使用予定のスペース
@@ -4257,16 +4252,11 @@ function createOptionWindow(_sprite) {
 	);
 
 	if (g_headerObj.gaugeUse) {
-		const lnkGauge = makeSettingLblCssButton(`lnkGauge`, ``, 0, _ => setGauge(1));
-		lnkGauge.oncontextmenu = _ => {
-			setGauge(-1);
-			return false;
-		}
-		spriteList.gauge.appendChild(lnkGauge);
-
-		// 右回し・左回しボタン
-		spriteList.gauge.appendChild(makeMiniCssButton(`lnkGauge`, `R`, 0, _ => setGauge(1)));
-		spriteList.gauge.appendChild(makeMiniCssButton(`lnkGauge`, `L`, 0, _ => setGauge(-1)));
+		multiAppend(spriteList.gauge,
+			makeSettingLblCssButton(`lnkGauge`, ``, 0, _ => setGauge(1), { subFunc: _ => setGauge(-1) }),
+			makeMiniCssButton(`lnkGauge`, `R`, 0, _ => setGauge(1)),
+			makeMiniCssButton(`lnkGauge`, `L`, 0, _ => setGauge(-1)),
+		);
 	} else {
 		lblGauge.classList.add(g_cssObj.settings_Disabled);
 		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, g_stateObj.gauge));
@@ -4443,24 +4433,26 @@ function createOptionWindow(_sprite) {
 	}, g_cssObj.settings_FadeinBar);
 	spriteList.fadein.appendChild(lnkFadein);
 
-	// 右回し・左回しボタン
-	spriteList.fadein.appendChild(makeMiniCssButton(`lnkFadein`, `R`, 0, _ => {
-		g_stateObj.fadein = (g_stateObj.fadein === 99 ? 0 : g_stateObj.fadein + 1);
-		fadeinSlider.value = g_stateObj.fadein;
-		lnkFadein.textContent = `${g_stateObj.fadein}%`;
-	}));
-	spriteList.fadein.appendChild(makeMiniCssButton(`lnkFadein`, `L`, 0, _ => {
-		g_stateObj.fadein = (g_stateObj.fadein === 0 ? 99 : g_stateObj.fadein - 1);
-		fadeinSlider.value = g_stateObj.fadein;
-		lnkFadein.textContent = `${g_stateObj.fadein}%`;
-	}));
+	multiAppend(spriteList.fadein,
 
-	// フェードインのスライダー処理
-	spriteList.fadein.appendChild(
+		// 右回し・左回しボタン
+		makeMiniCssButton(`lnkFadein`, `R`, 0, _ => {
+			g_stateObj.fadein = (g_stateObj.fadein === 99 ? 0 : g_stateObj.fadein + 1);
+			fadeinSlider.value = g_stateObj.fadein;
+			lnkFadein.textContent = `${g_stateObj.fadein}%`;
+		}),
+		makeMiniCssButton(`lnkFadein`, `L`, 0, _ => {
+			g_stateObj.fadein = (g_stateObj.fadein === 0 ? 99 : g_stateObj.fadein - 1);
+			fadeinSlider.value = g_stateObj.fadein;
+			lnkFadein.textContent = `${g_stateObj.fadein}%`;
+		}),
+
+		// フェードインのスライダー処理
 		createDivCss2Label(`lblFadeinBar`, `<input id="fadeinSlider" type="range" value="${g_stateObj.fadein}" min="0" max="99" step="1">`, {
 			x: C_LEN_SETLBL_LEFT, y: 0,
-		})
-	);
+		}),
+
+	)
 
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
 	fadeinSlider.addEventListener(`input`, _ => {
@@ -4675,31 +4667,23 @@ function createGeneralSetting(_obj, _settingName, _options = {}) {
 		toCapitalize(setVal(_options.settingLabel, _settingName, C_TYP_STRING))));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
-		const lnk = makeSettingLblCssButton(`lnk${settingUpper}`, `${g_stateObj[_settingName]}${_unitName}`, 0, _ => {
-			setSetting(1, _settingName, _unitName);
-		});
-		lnk.oncontextmenu = _ => {
-			setSetting(-1, _settingName, _unitName);
-			return false;
-		}
-		_obj.appendChild(lnk);
 
-		// 早右回し・早左回しボタン
-		_obj.appendChild(makeMiniCssButton(`lnk${settingUpper}`, `R`, 0, _ => {
-			setSetting(_skipTerm > 0 ? _skipTerm : 1, _settingName, _unitName);
-		}));
-		_obj.appendChild(makeMiniCssButton(`lnk${settingUpper}`, `L`, 0, _ => {
-			setSetting(_skipTerm > 0 ? _skipTerm * (-1) : -1, _settingName, _unitName);
-		}));
+		multiAppend(_obj,
+			makeSettingLblCssButton(`lnk${settingUpper}`, `${g_stateObj[_settingName]}${_unitName}`, 0,
+				_ => setSetting(1, _settingName, _unitName),
+				{ subFunc: _ => setSetting(-1, _settingName, _unitName) }),
 
+			// 右回し・左回しボタン（外側）
+			makeMiniCssButton(`lnk${settingUpper}`, `R`, 0, _ => setSetting(_skipTerm > 0 ? _skipTerm : 1, _settingName, _unitName)),
+			makeMiniCssButton(`lnk${settingUpper}`, `L`, 0, _ => setSetting(_skipTerm > 0 ? _skipTerm * (-1) : -1, _settingName, _unitName)),
+		)
+
+		// 右回し・左回しボタン（内側）
 		if (_skipTerm > 0) {
-			// 右回し・左回しボタン
-			_obj.appendChild(makeMiniCssButton(`lnk${settingUpper}`, `RR`, 0, _ => {
-				setSetting(1, _settingName, _unitName);
-			}));
-			_obj.appendChild(makeMiniCssButton(`lnk${settingUpper}`, `LL`, 0, _ => {
-				setSetting(-1, _settingName, _unitName);
-			}));
+			multiAppend(_obj,
+				makeMiniCssButton(`lnk${settingUpper}`, `RR`, 0, _ => setSetting(1, _settingName, _unitName)),
+				makeMiniCssButton(`lnk${settingUpper}`, `LL`, 0, _ => setSetting(-1, _settingName, _unitName)),
+			);
 		}
 	} else {
 		document.querySelector(`#lbl${settingUpper}`).classList.add(g_cssObj.settings_Disabled);
@@ -4792,11 +4776,12 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
  * @param {string} _id 
  * @param {string} _name 初期設定文字
  * @param {number} _heightPos 上からの配置順
- * @param {function} _func 
+ * @param {function} _func 通常ボタン処理
+ * @param {function} _subFunc 右クリック時の処理
  * @param {object} _overridePos 座標設定(既定を上書き)
  * @param {...any} _classes 追加するクラス
  */
-function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, siz, ...rest } = {}, ..._classes) {
+function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, siz, subFunc = _ => true, ...rest } = {}, ..._classes) {
 	const tmpObj = {
 		x: x !== undefined ? x : C_LEN_SETLBL_LEFT,
 		y: y !== undefined ? y : C_LEN_SETLBL_HEIGHT * _heightPos,
@@ -4804,7 +4789,12 @@ function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, si
 		h: h !== undefined ? h : C_LEN_SETLBL_HEIGHT,
 		siz: siz !== undefined ? siz : C_SIZ_SETLBL,
 	};
-	return createCss2Button(_id, _name, _func, { ...tmpObj, ...rest }, g_cssObj.button_Default, ..._classes);
+	const btn = createCss2Button(_id, _name, _func, { ...tmpObj, ...rest }, g_cssObj.button_Default, ..._classes);
+	btn.oncontextmenu = _ => {
+		subFunc();
+		return false;
+	}
+	return btn;
 }
 
 /**
@@ -4830,11 +4820,11 @@ function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_D
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func 
  */
-function makeMiniCssButton(_id, _directionFlg, _heightPos, _func) {
+function makeMiniCssButton(_id, _directionFlg, _heightPos, _func, { dx = 0, dy = 0, dw = 0, dh = 0, dsiz = 0 } = {}) {
 	return createCss2Button(`${_id}${_directionFlg}`, eval(`C_LBL_SETMINI${_directionFlg}`), _func, {
-		x: eval(`C_LEN_SETMINI${_directionFlg}_LEFT`),
-		y: C_LEN_SETLBL_HEIGHT * _heightPos,
-		w: C_LEN_SETMINI_WIDTH, h: C_LEN_SETLBL_HEIGHT, siz: C_SIZ_SETLBL,
+		x: eval(`C_LEN_SETMINI${_directionFlg}_LEFT`) + dx,
+		y: C_LEN_SETLBL_HEIGHT * _heightPos + dy,
+		w: C_LEN_SETMINI_WIDTH + dw, h: C_LEN_SETLBL_HEIGHT + dh, siz: C_SIZ_SETLBL + dsiz,
 	}, g_cssObj.button_Mini);
 }
 
@@ -7482,7 +7472,7 @@ function MainInit() {
 	const lblframe = createDivCss2Label(`lblframe`, g_scoreObj.frameNum, { x: 0, y: 0, w: 100, h: 30, siz: 20, display: g_workObj.lifegaugeDisp, });
 	divRoot.appendChild(lblframe);
 
-	// ライフ(数字)
+	// ライフ(数字)部作成
 	const intLifeVal = Math.floor(g_workObj.lifeVal);
 	let lblInitColor;
 	if (g_workObj.lifeVal === g_headerObj.maxLifeVal) {
@@ -7492,27 +7482,6 @@ function MainInit() {
 	} else {
 		lblInitColor = g_cssObj.life_Failed;
 	}
-	infoSprite.appendChild(
-		createDivCss2Label(`lblLife`, intLifeVal, {
-			x: 0, y: 30, w: 70, h: 20, siz: C_SIZ_JDGCNTS, display: g_workObj.lifegaugeDisp,
-		}, lblInitColor)
-	);
-
-	// ライフ背景
-	infoSprite.appendChild(
-		createColorObject2(`lifeBackObj`, {
-			x: 5, y: 50, w: 15, h: g_sHeight - 100, styleName: `lifeBar`, display: g_workObj.lifegaugeDisp,
-		}, g_cssObj.life_Background)
-	);
-
-	// ライフ本体
-	infoSprite.appendChild(
-		createColorObject2(`lifeBar`, {
-			x: 5, y: 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal,
-			w: 15, h: (g_sHeight - 100) * intLifeVal / g_headerObj.maxLifeVal, styleName: `lifeBar`,
-			display: g_workObj.lifegaugeDisp,
-		}, lblInitColor)
-	);
 
 	// ライフ：ボーダーライン
 	// この背景の画像は40x16で作成しているが、`padding-right:5px`があるためサイズを35x16で作成
@@ -7522,11 +7491,52 @@ function MainInit() {
 		fontFamily: getBasicFont(), display: g_workObj.lifegaugeDisp,
 	}, g_cssObj.life_Border, g_cssObj.life_BorderColor);
 	lifeBorderObj.textContent = g_workObj.lifeBorder;
-	infoSprite.appendChild(lifeBorderObj);
-
 	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === g_headerObj.maxLifeVal) {
 		lifeBorderObj.style.display = C_DIS_NONE;
 	}
+
+	// 曲名・アーティスト名表示
+	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
+	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
+	const lblCredit = createDivCss2Label(`lblCredit`, `${musicTitle} / ${artistName}`, {
+		x: 125, y: g_sHeight - 30, w: g_headerObj.playingWidth - 125, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_LEFT
+	});
+
+	multiAppend(infoSprite,
+
+		// ライフ（数字）
+		createDivCss2Label(`lblLife`, intLifeVal, {
+			x: 0, y: 30, w: 70, h: 20, siz: C_SIZ_JDGCNTS, display: g_workObj.lifegaugeDisp,
+		}, lblInitColor),
+
+		// ライフ背景
+		createColorObject2(`lifeBackObj`, {
+			x: 5, y: 50, w: 15, h: g_sHeight - 100, styleName: `lifeBar`, display: g_workObj.lifegaugeDisp,
+		}, g_cssObj.life_Background),
+
+		// ライフ本体
+		createColorObject2(`lifeBar`, {
+			x: 5, y: 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal,
+			w: 15, h: (g_sHeight - 100) * intLifeVal / g_headerObj.maxLifeVal, styleName: `lifeBar`,
+			display: g_workObj.lifegaugeDisp,
+		}, lblInitColor),
+
+		// ライフ：ボーダーライン
+		lifeBorderObj,
+
+		// 曲名・アーティスト名表示
+		lblCredit,
+
+		// 曲時間表示：現在時間
+		createDivCss2Label(`lblTime1`, `-:--`, {
+			x: 18, y: g_sHeight - 30, w: 40, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_RIGHT, display: g_workObj.musicinfoDisp,
+		}),
+
+		// 曲時間表示：総時間
+		createDivCss2Label(`lblTime2`, `/ ${fullTime}`, {
+			x: 60, y: g_sHeight - 30, w: 60, h: 20, siz: C_SIZ_MAIN, display: g_workObj.musicinfoDisp,
+		}),
+	);
 
 	// 歌詞表示
 	createSprite(`judgeSprite`, `wordSprite`, 0, 0, g_headerObj.playingWidth, g_sHeight);
@@ -7539,28 +7549,6 @@ function MainInit() {
 		})
 		lblWord.textContent = ``;
 	}
-
-	// 曲名・アーティスト名表示
-	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
-	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
-	const lblCredit = createDivCss2Label(`lblCredit`, `${musicTitle} / ${artistName}`, {
-		x: 125, y: g_sHeight - 30, w: g_headerObj.playingWidth - 125, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_LEFT
-	});
-	infoSprite.appendChild(lblCredit);
-
-	// 曲時間表示：現在時間
-	infoSprite.appendChild(
-		createDivCss2Label(`lblTime1`, `-:--`, {
-			x: 18, y: g_sHeight - 30, w: 40, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_RIGHT, display: g_workObj.musicinfoDisp,
-		})
-	);
-
-	// 曲時間表示：総時間
-	infoSprite.appendChild(
-		createDivCss2Label(`lblTime2`, `/ ${fullTime}`, {
-			x: 60, y: g_sHeight - 30, w: 60, h: 20, siz: C_SIZ_MAIN, display: g_workObj.musicinfoDisp,
-		})
-	);
 
 	const jdgGroups = [`J`, `FJ`];
 	const jdgX = [g_headerObj.playingWidth / 2 - 200, g_headerObj.playingWidth / 2 - 100];
@@ -7580,24 +7568,26 @@ function MainInit() {
 			opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
 		}, g_cssObj.common_ii);
 		charaJ.setAttribute(`cnt`, 0);
-		judgeSprite.appendChild(charaJ);
 
-		// コンボ表示
-		judgeSprite.appendChild(
+		multiAppend(judgeSprite,
+
+			// キャラクタ表示
+			charaJ,
+
+			// コンボ表示
 			createDivCss2Label(`combo${jdg}`, ``, {
 				x: jdgX[j] + 150, y: jdgY[j],
 				w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_JDGCHARA,
 				opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
-			}, g_cssObj[`common_${jdgCombos[j]}`])
-		);
+			}, g_cssObj[`common_${jdgCombos[j]}`]),
 
-		// Fast/Slow表示
-		judgeSprite.appendChild(
+			// Fast/Slow表示
 			createDivCss2Label(`diff${jdg}`, ``, {
 				x: jdgX[j] + 150, y: jdgY[j] + 25,
 				w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_MAIN,
 				opacity: g_stateObj.opacity / 100, display: g_workObj.fastslowDisp,
-			}, g_cssObj.common_combo)
+			}, g_cssObj.common_combo),
+
 		);
 	});
 
