@@ -4433,19 +4433,17 @@ function createOptionWindow(_sprite) {
 	}, g_cssObj.settings_FadeinBar);
 	spriteList.fadein.appendChild(lnkFadein);
 
+	const setFadein = _sign => {
+		g_stateObj.fadein = (g_stateObj.fadein + 100 + _sign) % 100;
+		fadeinSlider.value = g_stateObj.fadein;
+		lnkFadein.textContent = `${g_stateObj.fadein}%`;
+	};
+
 	multiAppend(spriteList.fadein,
 
 		// 右回し・左回しボタン
-		makeMiniCssButton(`lnkFadein`, `R`, 0, _ => {
-			g_stateObj.fadein = (g_stateObj.fadein === 99 ? 0 : g_stateObj.fadein + 1);
-			fadeinSlider.value = g_stateObj.fadein;
-			lnkFadein.textContent = `${g_stateObj.fadein}%`;
-		}),
-		makeMiniCssButton(`lnkFadein`, `L`, 0, _ => {
-			g_stateObj.fadein = (g_stateObj.fadein === 0 ? 99 : g_stateObj.fadein - 1);
-			fadeinSlider.value = g_stateObj.fadein;
-			lnkFadein.textContent = `${g_stateObj.fadein}%`;
-		}),
+		makeMiniCssButton(`lnkFadein`, `R`, 0, _ => setFadein(1)),
+		makeMiniCssButton(`lnkFadein`, `L`, 0, _ => setFadein(-1)),
 
 		// フェードインのスライダー処理
 		createDivCss2Label(`lblFadeinBar`, `<input id="fadeinSlider" type="range" value="${g_stateObj.fadein}" min="0" max="99" step="1">`, {
