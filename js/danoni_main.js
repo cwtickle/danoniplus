@@ -1878,17 +1878,27 @@ function setAudio(_url) {
 		|| ua.indexOf(`iPad`) >= 0
 		|| ua.indexOf(`iPod`) >= 0;
 
+	const loadMp3 = _ => {
+		if (location.href.match(`^file`)) {
+			g_audio.src = _url;
+			musicAfterLoaded();
+		} else {
+			initWebAudioAPI(_url);
+		}
+	};
+
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
 				if (isIOS) {
 					document.querySelector(`#lblLoading`).textContent = `Click to Start!`;
-					const btnPlay = makePlayButton(_ => {
-						divRoot.removeChild(btnPlay);
-						initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
-					});
-					divRoot.appendChild(btnPlay);
+					divRoot.appendChild(
+						makePlayButton(evt => {
+							divRoot.removeChild(evt.target);
+							initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
+						})
+					);
 				} else {
 					initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
 				}
@@ -1900,24 +1910,15 @@ function setAudio(_url) {
 
 	} else if (isIOS) {
 		document.querySelector(`#lblLoading`).textContent = `Click to Start!`;
-
-		const btnPlay = makePlayButton(_ => {
-			divRoot.removeChild(btnPlay);
-			if (location.href.match(`^file`)) {
-				g_audio.src = _url;
-				musicAfterLoaded();
-			} else {
-				initWebAudioAPI(_url);
-			}
-		});
-		divRoot.appendChild(btnPlay);
-
-	} else if (location.href.match(`^file`)) {
-		g_audio.src = _url;
-		musicAfterLoaded();
+		divRoot.appendChild(
+			makePlayButton(evt => {
+				divRoot.removeChild(evt.target);
+				loadMp3();
+			})
+		);
 
 	} else {
-		initWebAudioAPI(_url);
+		loadMp3();
 	}
 }
 
