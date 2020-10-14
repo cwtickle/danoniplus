@@ -101,6 +101,8 @@ let g_headerObj = {};
 let g_scoreObj = {};
 let g_btnAddFunc = {};
 let g_btnDeleteFlg = {};
+let g_cxtAddFunc = {};
+let g_cxtDeleteFlg = {};
 
 const g_detailObj = {
 	arrowCnt: [],
@@ -784,7 +786,7 @@ function createCssButton(_obj, _func) {
  * @param {...any} _classes 
  */
 function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g_sWidth / 3, h = C_BTN_HEIGHT,
-	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, ...rest } = {}, ..._classes) {
+	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, cxtFunc = _ => true, ...rest } = {}, ..._classes) {
 
 	const div = createDiv(_id, x, y, w, h);
 	div.classList.add(`button_common`, ..._classes);
@@ -810,6 +812,19 @@ function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g
 			g_btnAddFunc[_id](evt);
 		}
 	});
+
+	// 右クリック時の処理
+	if (typeof cxtFunc === C_TYP_FUNCTION) {
+		div.oncontextmenu = evt => {
+			if (!setVal(g_cxtDeleteFlg[_id], false, C_TYP_BOOLEAN)) {
+				cxtFunc(evt);
+			}
+			if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
+				g_cxtAddFunc[_id](evt);
+			}
+			return false;
+		}
+	}
 
 	// イベントリスナー用のキーをセット
 	div.setAttribute(`lsnrkey`, lsnrkey);
@@ -1930,6 +1945,8 @@ function drawDefaultBackImage(_key) {
 
 	g_btnAddFunc = {};
 	g_btnDeleteFlg = {};
+	g_cxtAddFunc = {};
+	g_cxtDeleteFlg = {};
 
 	// レイヤー情報取得
 	if (document.querySelector(`#layer0`) !== null) {
@@ -3804,7 +3821,7 @@ function createOptionWindow(_sprite) {
 			}
 		}, {
 		y: -10, h: C_LEN_SETLBL_HEIGHT + 10,
-		subFunc: _ => {
+		cxtFunc: _ => {
 			if (!g_headerObj.difSelectorUse) {
 				g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
 				setDifficulty(true);
@@ -3904,16 +3921,11 @@ function createOptionWindow(_sprite) {
 	function setScoreDetail() {
 		const scoreDetail = document.querySelector(`#scoreDetail`);
 		const detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
+		const visibles = [`hidden`, `visible`];
 
-		if (g_stateObj.scoreDetailViewFlg) {
-			scoreDetail.style.visibility = `hidden`;
-			detailObj.style.visibility = `hidden`;
-			g_stateObj.scoreDetailViewFlg = false;
-		} else {
-			scoreDetail.style.visibility = `visible`;
-			detailObj.style.visibility = `visible`;
-			g_stateObj.scoreDetailViewFlg = true;
-		}
+		g_stateObj.scoreDetailViewFlg = !g_stateObj.scoreDetailViewFlg;
+		scoreDetail.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
+		detailObj.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
 	}
 
 	/**
@@ -4197,18 +4209,16 @@ function createOptionWindow(_sprite) {
 		$id(`lnkScroll`).left = `${parseFloat($id(`lnkScroll`).left) + 90}px`;
 		$id(`lnkScroll`).width = `${parseFloat($id(`lnkScroll`).width) - 90}px`;
 
-		const btnReverse = createCss2Button(`btnReverse`, `Reverse:${g_stateObj.reverse}`, _ => {
-			setReverse(btnReverse);
-		}, {
-			x: 160, y: 0,
-			w: 90, h: 21, siz: C_SIZ_DIFSELECTOR,
-			borderStyle: `solid`,
-		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`]);
-		btnReverse.oncontextmenu = _ => {
-			setReverse(btnReverse);
-			return false;
-		}
-		spriteList.scroll.appendChild(btnReverse);
+		spriteList.scroll.appendChild(
+			createCss2Button(`btnReverse`, `Reverse:${g_stateObj.reverse}`, evt => {
+				setReverse(evt.target);
+			}, {
+				x: 160, y: 0,
+				w: 90, h: 21, siz: C_SIZ_DIFSELECTOR,
+				borderStyle: `solid`,
+				cxtFunc: evt => setReverse(evt.target),
+			}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`])
+		);
 
 		createGeneralSetting(spriteList.reverse, `reverse`);
 		spriteList[g_scrolls.length > 1 ? `reverse` : `scroll`].style.visibility = `hidden`;
@@ -4253,7 +4263,7 @@ function createOptionWindow(_sprite) {
 
 	if (g_headerObj.gaugeUse) {
 		multiAppend(spriteList.gauge,
-			makeSettingLblCssButton(`lnkGauge`, ``, 0, _ => setGauge(1), { subFunc: _ => setGauge(-1) }),
+			makeSettingLblCssButton(`lnkGauge`, ``, 0, _ => setGauge(1), { cxtFunc: _ => setGauge(-1) }),
 			makeMiniCssButton(`lnkGauge`, `R`, 0, _ => setGauge(1)),
 			makeMiniCssButton(`lnkGauge`, `L`, 0, _ => setGauge(-1)),
 		);
@@ -4669,7 +4679,7 @@ function createGeneralSetting(_obj, _settingName, _options = {}) {
 		multiAppend(_obj,
 			makeSettingLblCssButton(`lnk${settingUpper}`, `${g_stateObj[_settingName]}${_unitName}`, 0,
 				_ => setSetting(1, _settingName, _unitName),
-				{ subFunc: _ => setSetting(-1, _settingName, _unitName) }),
+				{ cxtFunc: _ => setSetting(-1, _settingName, _unitName) }),
 
 			// 右回し・左回しボタン（外側）
 			makeMiniCssButton(`lnk${settingUpper}`, `R`, 0, _ => setSetting(_skipTerm > 0 ? _skipTerm : 1, _settingName, _unitName)),
@@ -4775,24 +4785,20 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
  * @param {string} _name 初期設定文字
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func 通常ボタン処理
- * @param {function} _subFunc 右クリック時の処理
+ * @param {function} _cxtFunc 右クリック時の処理
  * @param {object} _overridePos 座標設定(既定を上書き)
  * @param {...any} _classes 追加するクラス
  */
-function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, siz, subFunc = _ => true, ...rest } = {}, ..._classes) {
+function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, siz, cxtFunc = _ => true, ...rest } = {}, ..._classes) {
 	const tmpObj = {
 		x: x !== undefined ? x : C_LEN_SETLBL_LEFT,
 		y: y !== undefined ? y : C_LEN_SETLBL_HEIGHT * _heightPos,
 		w: w !== undefined ? w : C_LEN_SETLBL_WIDTH,
 		h: h !== undefined ? h : C_LEN_SETLBL_HEIGHT,
 		siz: siz !== undefined ? siz : C_SIZ_SETLBL,
+		cxtFunc: cxtFunc !== undefined ? cxtFunc : _ => true,
 	};
-	const btn = createCss2Button(_id, _name, _func, { ...tmpObj, ...rest }, g_cssObj.button_Default, ..._classes);
-	btn.oncontextmenu = _ => {
-		subFunc();
-		return false;
-	}
-	return btn;
+	return createCss2Button(_id, _name, _func, { ...tmpObj, ...rest }, g_cssObj.button_Default, ..._classes);
 }
 
 /**
