@@ -268,16 +268,15 @@ function setVal(_checkStr, _default, _type) {
 		return _default;
 	}
 
-	let isNaNflg;
 	if (_type === C_TYP_FLOAT) {
 		// 数値型(小数可)の場合
-		isNaNflg = isNaN(parseFloat(_checkStr));
-		convertStr = (isNaNflg ? _default : parseFloat(_checkStr));
+		const toFloat = parseFloat(_checkStr);
+		convertStr = (isNaN(toFloat) ? _default : toFloat);
 
 	} else if (_type === C_TYP_NUMBER) {
 		// 数値型(整数のみ)の場合
-		isNaNflg = isNaN(parseInt(_checkStr));
-		convertStr = (isNaNflg ? _default : parseInt(_checkStr));
+		const toInt = parseInt(_checkStr);
+		convertStr = (isNaN(toInt) ? _default : toInt);
 
 	} else if (_type === C_TYP_BOOLEAN) {
 		// 真偽値の場合
@@ -286,8 +285,8 @@ function setVal(_checkStr, _default, _type) {
 
 	} else if (_type === C_TYP_SWITCH) {
 		// ON/OFFスイッチの場合
-		convertStr = [C_FLG_OFF, C_FLG_ON].includes(_checkStr.toString().toUpperCase()) ?
-			_checkStr.toString().toUpperCase() : _default;
+		const toSwtich = _checkStr.toString().toUpperCase();
+		convertStr = [C_FLG_OFF, C_FLG_ON].includes(toSwtich) ? toSwtich : _default;
 
 	} else if (_type === C_TYP_CALC) {
 		try {
@@ -350,7 +349,7 @@ function checkArrayVal(_checkArray, _type, _minLength) {
  * @param {string} _id 
  */
 function $id(_id) {
-	return document.querySelector(`#${_id}`).style;
+	return document.getElementById(`${_id}`).style;
 }
 
 /**
