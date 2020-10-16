@@ -1918,7 +1918,7 @@ function setAudio(_url) {
 			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
 				if (isIOS) {
-					document.querySelector(`#lblLoading`).textContent = `Click to Start!`;
+					lblLoading.textContent = `Click to Start!`;
 					divRoot.appendChild(
 						makePlayButton(evt => {
 							divRoot.removeChild(evt.target);
@@ -1935,7 +1935,7 @@ function setAudio(_url) {
 		});
 
 	} else if (isIOS) {
-		document.querySelector(`#lblLoading`).textContent = `Click to Start!`;
+		lblLoading.textContent = `Click to Start!`;
 		divRoot.appendChild(
 			makePlayButton(evt => {
 				divRoot.removeChild(evt.target);
@@ -2374,7 +2374,7 @@ function titleInit() {
 	if (g_headerObj.commentVal !== ``) {
 		if (g_headerObj.commentExternal) {
 			if (document.querySelector(`#commentArea`) !== null) {
-				document.querySelector(`#commentArea`).innerHTML = g_headerObj.commentVal;
+				commentArea.innerHTML = g_headerObj.commentVal;
 			}
 		} else {
 			let tmpComment = g_headerObj.commentVal;
@@ -2386,8 +2386,8 @@ function titleInit() {
 				}),
 
 				createCss2Button(`btnComment`, `Comment`, _ => {
-					const lblCommentDef = document.querySelector(`#lblComment`).style.display;
-					document.querySelector(`#lblComment`).style.display = (lblCommentDef === C_DIS_NONE ? C_DIS_INHERIT : C_DIS_NONE);
+					const lblCommentDef = lblComment.style.display;
+					lblComment.style.display = (lblCommentDef === C_DIS_NONE ? C_DIS_INHERIT : C_DIS_NONE);
 				}, {
 					x: g_sWidth - 180, y: (g_sHeight / 2) + 150,
 					w: 150, h: 50, siz: 20,
@@ -3261,7 +3261,7 @@ function headerConvert(_dosObj) {
 
 	// クレジット表示
 	if (document.querySelector(`#webMusicTitle`) !== null) {
-		document.querySelector(`#webMusicTitle`).innerHTML =
+		webMusicTitle.innerHTML =
 			`<span style="font-size:32px">${obj.musicTitleForView.join(`<br>`)}</span><br>
 			<span style="font-size:16px">(Artist: <a href="${obj.artistUrl}" target="_blank">${obj.artistName}</a>)</span>`;
 	}
@@ -3790,10 +3790,7 @@ function createOptionWindow(_sprite) {
 
 	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`,
 		``, 0, _ => {
-			if (!g_headerObj.difSelectorUse) {
-				g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
-				setDifficulty(true);
-			} else {
+			if (g_headerObj.difSelectorUse) {
 				if (document.querySelector(`#difList`) === null) {
 					const difList = createSprite(`optionsprite`, `difList`, 165, 65, 280, 255);
 					difList.style.overflow = `auto`;
@@ -3829,15 +3826,18 @@ function createOptionWindow(_sprite) {
 				} else {
 					resetDifWindow();
 				}
+			} else {
+				g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
+				setDifficulty(true);
 			}
 		}, {
 		y: -10, h: C_LEN_SETLBL_HEIGHT + 10,
 		cxtFunc: _ => {
-			if (!g_headerObj.difSelectorUse) {
+			if (g_headerObj.difSelectorUse) {
+				resetDifWindow();
+			} else {
 				g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
 				setDifficulty(true);
-			} else {
-				resetDifWindow();
 			}
 		},
 	});
@@ -4133,7 +4133,7 @@ function createOptionWindow(_sprite) {
 			makeDifInfoLabel(`lblTooldif`, `Level`, { y: 5, w: 250, siz: C_SIZ_JDGCNTS });
 			makeDifInfoLabel(`dataTooldif`, g_detailObj.toolDif[_scoreId].tool, { x: 270, y: 3, w: 160, siz: 18 });
 		} else {
-			document.querySelector(`#dataTooldif`).textContent = g_detailObj.toolDif[_scoreId].tool;
+			dataTooldif.textContent = g_detailObj.toolDif[_scoreId].tool;
 		}
 
 		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
@@ -4154,11 +4154,11 @@ function createOptionWindow(_sprite) {
 			makeDifInfoLabel(`dataArrowInfo2`, ArrowInfo2, { x: 140, y: 70, w: 275, h: 150, overflow: `auto` });
 
 		} else {
-			document.querySelector(`#dataDouji`).textContent = g_detailObj.toolDif[_scoreId].douji;
-			document.querySelector(`#dataTate`).textContent = g_detailObj.toolDif[_scoreId].tate;
-			document.querySelector(`#lblArrowInfo2`).innerHTML = `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`;
-			document.querySelector(`#dataArrowInfo`).innerHTML = ArrowInfo;
-			document.querySelector(`#dataArrowInfo2`).innerHTML = ArrowInfo2;
+			dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
+			dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
+			lblArrowInfo2.innerHTML = `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`;
+			dataArrowInfo.innerHTML = ArrowInfo;
+			dataArrowInfo2.innerHTML = ArrowInfo2;
 		}
 
 		// データ出力ボタン
@@ -5540,7 +5540,7 @@ function setKeyConfigCursor(_width, _divideCnt, _keyCtrlPtn, _keyNum) {
 		if (g_kcType === `Replaced`) {
 			g_kcType = C_FLG_ALL;
 		}
-		document.querySelector(`#lnkKcType`).textContent = g_kcType;
+		lnkKcType.textContent = g_kcType;
 		cursor.style.top = `${45 + C_KYC_HEIGHT * dividePos}px`;
 	}
 }
@@ -5838,16 +5838,12 @@ function applyShuffle(_keyNum, _shuffleGroup, _style) {
 	}
 
 	// indexに従って並べ替え
-	const tmpArrowData = JSON.parse(JSON.stringify(g_scoreObj.arrowData));
-	const tmpFrzData = JSON.parse(JSON.stringify(g_scoreObj.frzData));
-	const tmpDummyArrowData = JSON.parse(JSON.stringify(g_scoreObj.dummyArrowData));
-	const tmpDummyFrzData = JSON.parse(JSON.stringify(g_scoreObj.dummyFrzData));
-	for (let i = 0; i < _keyNum; i++) {
-		g_scoreObj.arrowData[i] = tmpArrowData[index[i]] || [];
-		g_scoreObj.frzData[i] = tmpFrzData[index[i]] || [];
-		g_scoreObj.dummyArrowData[i] = tmpDummyArrowData[index[i]] || [];
-		g_scoreObj.dummyFrzData[i] = tmpDummyFrzData[index[i]] || [];
-	}
+	[`arrow`, `dummyArrow`, `frz`, `dummyFrz`].forEach(type => {
+		const tmpData = JSON.parse(JSON.stringify(g_scoreObj[`${type}Data`]));
+		for (let i = 0; i < _keyNum; i++) {
+			g_scoreObj[`${type}Data`][i] = tmpData[index[i]] || [];
+		}
+	});
 }
 
 /**
@@ -7472,8 +7468,9 @@ function MainInit() {
 	const fullTime = `${fullMin}:${fullSec}`;
 
 	// フレーム数
-	const lblframe = createDivCss2Label(`lblframe`, g_scoreObj.frameNum, { x: 0, y: 0, w: 100, h: 30, siz: 20, display: g_workObj.lifegaugeDisp, });
-	divRoot.appendChild(lblframe);
+	divRoot.appendChild(
+		createDivCss2Label(`lblframe`, g_scoreObj.frameNum, { x: 0, y: 0, w: 100, h: 30, siz: 20, display: g_workObj.lifegaugeDisp, })
+	);
 
 	// ライフ(数字)部作成
 	const intLifeVal = Math.floor(g_workObj.lifeVal);
@@ -7484,18 +7481,6 @@ function MainInit() {
 		lblInitColor = g_cssObj.life_Cleared;
 	} else {
 		lblInitColor = g_cssObj.life_Failed;
-	}
-
-	// ライフ：ボーダーライン
-	// この背景の画像は40x16で作成しているが、`padding-right:5px`があるためサイズを35x16で作成
-	const lifeBorderObj = createColorObject2(`lifeBorderObj`, {
-		x: 10, y: 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
-		w: 35, h: 16, background: C_CLR_BORDER, styleName: `lifeBorder`,
-		fontFamily: getBasicFont(), display: g_workObj.lifegaugeDisp,
-	}, g_cssObj.life_Border, g_cssObj.life_BorderColor);
-	lifeBorderObj.textContent = g_workObj.lifeBorder;
-	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === g_headerObj.maxLifeVal) {
-		lifeBorderObj.style.display = C_DIS_NONE;
 	}
 
 	// 曲名・アーティスト名表示
@@ -7522,7 +7507,12 @@ function MainInit() {
 		}, lblInitColor),
 
 		// ライフ：ボーダーライン
-		lifeBorderObj,
+		// この背景の画像は40x16で作成しているが、`padding-right:5px`があるためサイズを35x16で作成
+		createColorObject2(`lifeBorderObj`, {
+			x: 10, y: 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
+			w: 35, h: 16, background: C_CLR_BORDER, styleName: `lifeBorder`,
+			fontFamily: getBasicFont(), display: g_workObj.lifegaugeDisp,
+		}, g_cssObj.life_Border, g_cssObj.life_BorderColor),
 
 		// 曲名・アーティスト名表示
 		createDivCss2Label(`lblCredit`, `${musicTitle} / ${artistName}`, {
@@ -7539,6 +7529,12 @@ function MainInit() {
 			x: 60, y: g_sHeight - 30, w: 60, h: 20, siz: C_SIZ_MAIN, display: g_workObj.musicinfoDisp,
 		}),
 	);
+
+	// ボーダーライン表示
+	lifeBorderObj.textContent = g_workObj.lifeBorder;
+	if (g_stateObj.lifeBorder === 0 || g_workObj.lifeVal === g_headerObj.maxLifeVal) {
+		lifeBorderObj.style.display = C_DIS_NONE;
+	}
 
 	// 歌詞表示
 	createSprite(`judgeSprite`, `wordSprite`, 0, 0, g_headerObj.playingWidth, g_sHeight);
@@ -7803,24 +7799,13 @@ function MainInit() {
 	 * @param _j 矢印位置
 	 * @param _deleteObj 削除オブジェクト
 	 */
-	const judgeObjDelete = {
-		arrow: (_j, _deleteObj) => {
-			g_workObj.judgArrowCnt[_j]++;
-			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
-		},
-		dummyArrow: (_j, _deleteObj) => {
-			g_workObj.judgDummyArrowCnt[_j]++;
-			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
-		},
-		frz: (_j, _deleteObj) => {
-			g_workObj.judgFrzCnt[_j]++;
-			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
-		},
-		dummyFrz: (_j, _deleteObj) => {
-			g_workObj.judgDummyFrzCnt[_j]++;
-			arrowSprite[Number(_deleteObj.getAttribute(`dividePos`))].removeChild(_deleteObj);
-		},
-	};
+	const judgeObjDelete = {};
+	[`arrow`, `dummyArrow`, `frz`, `dummyFrz`].forEach(type => {
+		judgeObjDelete[type] = (_j, _deleteObj) => {
+			g_workObj[`judg${toCapitalize(type)}Cnt`][_j]++;
+			arrowSprite[getNumAttr(_deleteObj, `dividePos`)].removeChild(_deleteObj);
+		}
+	});
 
 	/**
 	 * 自動判定
@@ -8745,8 +8730,7 @@ function judgeArrow(_j) {
 		const arrowSprite = document.querySelector(`#arrowSprite${judgArrow.getAttribute(`dividePos`)}`);
 
 		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
-			stepDivHit.style.top = `${parseFloat(judgArrow.getAttribute(`prevPosY`)) -
-				parseFloat(document.querySelector(`#stepRoot${_j}`).style.top) - 15}px`;
+			stepDivHit.style.top = `${getNumAttr(judgArrow, `prevPosY`) - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
 
@@ -8809,13 +8793,13 @@ function judgeArrow(_j) {
  */
 function displayDiff(_difFrame, _justFrames = 0) {
 	let diffJDisp = ``;
-	let difCnt = Math.abs(_difFrame);
+	const difCnt = Math.abs(_difFrame);
 	if (_difFrame > _justFrames) {
 		diffJDisp = `<span class="common_matari">Fast ${difCnt} Frames</span>`;
 	} else if (_difFrame < _justFrames * (-1)) {
 		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
 	}
-	document.querySelector(`#diffJ`).innerHTML = diffJDisp;
+	diffJ.innerHTML = diffJDisp;
 }
 
 /**
@@ -8898,9 +8882,9 @@ function changeJudgeCharacter(_name, _character, _freezeFlg = ``) {
 function updateCombo() {
 	if (++g_resultObj.combo > g_resultObj.maxCombo) {
 		g_resultObj.maxCombo = g_resultObj.combo;
-		document.querySelector(`#lblMCombo`).textContent = g_resultObj.maxCombo;
+		lblMCombo.textContent = g_resultObj.maxCombo;
 	}
-	document.querySelector(`#comboJ`).textContent = `${g_resultObj.combo} Combo!!`;
+	comboJ.textContent = `${g_resultObj.combo} Combo!!`;
 }
 
 /**
@@ -8951,7 +8935,7 @@ function judgeShakin(difFrame) {
  */
 function judgeMatari(difFrame) {
 	changeJudgeCharacter(`matari`, C_JCR_MATARI);
-	document.querySelector(`#comboJ`).textContent = ``;
+	comboJ.textContent = ``;
 
 	displayDiff(difFrame, g_headerObj.justFrames);
 	finishViewing();
@@ -9015,9 +8999,9 @@ function judgeKita(difFrame) {
 
 	if (++g_resultObj.fCombo > g_resultObj.fmaxCombo) {
 		g_resultObj.fmaxCombo = g_resultObj.fCombo;
-		document.querySelector(`#lblFCombo`).textContent = g_resultObj.fmaxCombo;
+		lblFCombo.textContent = g_resultObj.fmaxCombo;
 	}
-	document.querySelector(`#comboFJ`).textContent = `${g_resultObj.fCombo} Combo!!`;
+	comboFJ.textContent = `${g_resultObj.fCombo} Combo!!`;
 
 	lifeRecovery();
 	finishViewing();
@@ -9036,7 +9020,7 @@ function judgeKita(difFrame) {
  */
 function judgeIknai(difFrame) {
 	changeJudgeCharacter(`iknai`, C_JCR_IKNAI, `F`);
-	document.querySelector(`#comboFJ`).textContent = ``;
+	comboFJ.textContent = ``;
 	g_resultObj.fCombo = 0;
 
 	lifeDamage();
@@ -9054,8 +9038,8 @@ function judgeIknai(difFrame) {
  * @param {string} _text 
  */
 function makeFinishView(_text) {
-	document.querySelector(`#finishView`).innerHTML = _text;
-	document.querySelector(`#finishView`).style.opacity = 1;
+	finishView.innerHTML = _text;
+	finishView.style.opacity = 1;
 	[`charaJ`, `comboJ`, `diffJ`, `charaFJ`, `comboFJ`, `diffFJ`].forEach(label =>
 		document.querySelector(`#${label}`).textContent = ``);
 }
