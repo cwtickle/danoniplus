@@ -653,7 +653,7 @@ function createColorObject2(_id,
 
 	// 矢印・オブジェクト判定
 	let charaStyle;
-	if (setVal(rotate, ``, C_TYP_NUMBER) === ``) {
+	if (isNaN(parseFloat(rotate))) {
 		charaStyle = `${rotate}${styleName}`;
 	} else {
 		charaStyle = `arrow${styleName}`;
@@ -7383,7 +7383,7 @@ function MainInit() {
 			C_ARW_WIDTH, C_ARW_WIDTH);
 		frzHit.style.opacity = 0;
 
-		if (setVal(g_workObj.arrowRtn[j], ``, C_TYP_NUMBER) === ``) {
+		if (isNaN(parseFloat(g_workObj.arrowRtn[j]))) {
 			multiAppend(frzHit,
 				createColorObject2(`frzHitShadow${j}`, {
 					rotate: g_workObj.arrowRtn[j], styleName: `Shadow`
@@ -8649,7 +8649,7 @@ function changeHitFrz(_j, _k, _name) {
 	if (_name === `frz`) {
 		$id(`frzHit${_j}`).opacity = 0.9;
 		$id(`frzTop${frzNo}`).display = C_DIS_NONE;
-		if (setVal(g_workObj.arrowRtn[_j], ``, C_TYP_NUMBER) === ``) {
+		if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
 			$id(`frzHitTop${_j}`).background = g_workObj.frzHitColors[_j];
 		}
 	}
