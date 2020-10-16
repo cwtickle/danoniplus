@@ -1445,7 +1445,7 @@ function initAfterDosLoaded() {
 
 	// CSSファイル内のbackgroundを取得するために再描画
 	if (document.querySelector(`#layer0`) === null) {
-		document.querySelector(`#divRoot`).removeChild(document.querySelector(`#divBack`));
+		divRoot.removeChild(document.querySelector(`#divBack`));
 		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
 	} else if (g_headerObj.skinType !== `default` && !g_headerObj.customBackUse) {
 		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
@@ -1792,7 +1792,7 @@ function loadSettingJs() {
 	const randTime = new Date().getTime();
 	loadScript(`${settingRoot}danoni_setting${settingType}.js?${randTime}`, _ => {
 		if (document.querySelector(`#lblLoading`) !== null) {
-			document.querySelector(`#divRoot`).removeChild(document.querySelector(`#lblLoading`));
+			divRoot.removeChild(document.querySelector(`#lblLoading`));
 		}
 		initAfterDosLoaded();
 	}, false);
@@ -4192,7 +4192,7 @@ function createOptionWindow(_sprite) {
 					// 時間(分秒)
 					`${playingTime}\r\n`;
 			}
-			document.querySelector(`#detailToolDif`).appendChild(
+			detailToolDif.appendChild(
 				makeSettingLblCssButton(`lnkDifInfo`, `データ出力`, 0, _ => {
 					copyTextToClipboard(
 						`****** Dancing☆Onigiri レベル計算ツール+++ [${g_version}] ******\r\n\r\n`
@@ -4297,7 +4297,7 @@ function createOptionWindow(_sprite) {
 		if (_scrollNum !== 0) {
 			gaugeChange(g_gaugeNum);
 		}
-		document.querySelector(`#lblGauge2`).innerHTML = gaugeFormat(g_stateObj.lifeMode,
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
 			g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
 	}
 
@@ -4646,7 +4646,7 @@ function createOptionWindow(_sprite) {
 
 		// オート・アシスト設定 (AutoPlay)
 		g_stateObj.autoPlay = g_autoPlays[g_autoPlayNum];
-		document.querySelector(`#lnkAutoPlay`).textContent = g_stateObj.autoPlay;
+		lnkAutoPlay.textContent = g_stateObj.autoPlay;
 
 		// ゲージ設定 (Gauge)
 		setGauge(0);
@@ -7349,8 +7349,8 @@ function MainInit() {
 			}, g_cssObj.life_Failed)
 		);
 	});
-	document.querySelector(`#borderBar0`).style.top = `${g_posObj.stepDiffY}px`;
-	document.querySelector(`#borderBar1`).style.top = `${g_posObj.stepDiffY + g_posObj.arrowHeight}px`;
+	borderBar0.style.top = `${g_posObj.stepDiffY}px`;
+	borderBar1.style.top = `${g_posObj.stepDiffY + g_posObj.arrowHeight}px`;
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		mainSprite.appendChild(
@@ -7615,7 +7615,7 @@ function MainInit() {
 	// ローカル時のみフレーム数を残す
 	if (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) {
 	} else {
-		document.querySelector(`#lblframe`).style.display = C_DIS_NONE;
+		lblframe.style.display = C_DIS_NONE;
 	}
 
 	// Ready?表示
@@ -8544,7 +8544,7 @@ function changeAppearanceFilter(_appearance, _num = 10) {
 	if (g_appearanceRanges.includes(_appearance)) {
 		$id(`filterView`).top =
 			$id(`filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).top;
-		document.querySelector(`#filterView`).textContent = `${_num}%`;
+		filterView.textContent = `${_num}%`;
 
 		if (_appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
 			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).display = C_DIS_NONE;
@@ -8953,8 +8953,8 @@ function judgeMatari(difFrame) {
  */
 function judgeDamage() {
 	g_resultObj.combo = 0;
-	document.querySelector(`#comboJ`).textContent = ``;
-	document.querySelector(`#diffJ`).textContent = ``;
+	comboJ.textContent = ``;
+	diffJ.textContent = ``;
 	lifeDamage();
 }
 
