@@ -6036,11 +6036,8 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	obj.speedData = setSpeedData(`speed`, scoreIdHeader, speedFooter);
 
 	// 色変化（個別・全体）の分解 (3つで1セット, セット毎の改行区切り可)
-	obj.colorData = setColorData(`color`, scoreIdHeader);
-	obj.acolorData = setColorData(`acolor`, scoreIdHeader);
-
-	obj.shadowColorData = setColorData(`shadowcolor`, scoreIdHeader);
-	obj.ashadowColorData = setColorData(`ashadowcolor`, scoreIdHeader);
+	[`color`, `acolor`, `shadowColor`, `ashadowColor`].forEach(sprite =>
+		obj[`${sprite}Data`] = setColorData(sprite, scoreIdHeader));
 
 	if (_scoreAnalyzeFlg) {
 		return obj;
@@ -6068,8 +6065,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	obj.backMaxDepth = -1;
 	if (g_stateObj.d_background === C_FLG_OFF) {
 	} else {
-		[obj.maskData, obj.maskMaxDepth] = makeBackgroundData(`mask`, scoreIdHeader);
-		[obj.backData, obj.backMaxDepth] = makeBackgroundData(`back`, scoreIdHeader);
+		g_animationData.forEach(sprite => {
+			[obj[`${sprite}Data`], obj[`${sprite}MaxDepth`]] = makeBackgroundData(sprite, scoreIdHeader);
+		});
 	}
 
 	// 結果画面用・背景/マスクデータの分解 (下記すべてで1セット、改行区切り)
@@ -6081,14 +6079,12 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			g_headerObj[`${backName}MaxDepth`] = -1;
 		});
 	} else {
-		[g_headerObj.backResultData, g_headerObj.backResultMaxDepth] =
-			makeBackgroundResultData(`backresult`, scoreIdHeader);
-		[g_headerObj.maskResultData, g_headerObj.maskResultMaxDepth] =
-			makeBackgroundResultData(`maskresult`, scoreIdHeader);
-		[g_headerObj.backFailedData, g_headerObj.backFailedMaxDepth] =
-			makeBackgroundResultData(`backfailed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `backresult`);
-		[g_headerObj.maskFailedData, g_headerObj.maskFailedMaxDepth] =
-			makeBackgroundResultData(`maskfailed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `maskresult`);
+		g_animationData.forEach(sprite => {
+			[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] =
+				makeBackgroundResultData(`${sprite}result`, scoreIdHeader);
+			[g_headerObj[`${sprite}FailedData`], g_headerObj[`${sprite}FailedMaxDepth`]] =
+				makeBackgroundResultData(`${sprite}failed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `${sprite}result`);
+		});
 	}
 
 	/**
@@ -6102,10 +6098,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		if (_dosObj[`${_header}${_scoreNo}${_footer}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
 			let speedIdx = 0;
-			let tmpArrayData = _dosObj[`${_header}${_scoreNo}${_footer}`].split(`\r`).join(`\n`);
-			tmpArrayData = tmpArrayData.split(`\n`);
+			const tmpArrayData = _dosObj[`${_header}${_scoreNo}${_footer}`].split(`\r`).join(`\n`);
 
-			tmpArrayData.forEach(tmpData => {
+			tmpArrayData.split(`\n`).forEach(tmpData => {
 				if (tmpData !== undefined && tmpData !== ``) {
 					const tmpSpeedData = tmpData.split(`,`);
 					for (let k = 0; k < tmpSpeedData.length; k += 2) {
@@ -6135,10 +6130,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		if (_dosObj[`${_header}${_scoreNo}_data`] !== undefined && _dosObj[`${_header}${_scoreNo}data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
 			let colorIdx = 0;
-			let tmpArrayData = _dosObj[`${_header}${_scoreNo}_data`].split(`\r`).join(`\n`);
-			tmpArrayData = tmpArrayData.split(`\n`);
+			const tmpArrayData = _dosObj[`${_header}${_scoreNo}_data`].split(`\r`).join(`\n`);
 
-			tmpArrayData.forEach(tmpData => {
+			tmpArrayData.split(`\n`).forEach(tmpData => {
 				if (tmpData !== undefined && tmpData !== ``) {
 					const tmpColorData = tmpData.split(`,`);
 					for (let k = 0; k < tmpColorData.length; k += 3) {
@@ -6175,10 +6169,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		if (dosCssMotionData !== undefined && dosCssMotionData !== `` && g_stateObj.d_arroweffect === C_FLG_ON) {
 			let motionIdx = 0;
-			let tmpArrayData = dosCssMotionData.split(`\r`).join(`\n`);
-			tmpArrayData = tmpArrayData.split(`\n`);
+			const tmpArrayData = dosCssMotionData.split(`\r`).join(`\n`);
 
-			tmpArrayData.forEach(tmpData => {
+			tmpArrayData.split(`\n`).forEach(tmpData => {
 				if (tmpData !== undefined && tmpData !== ``) {
 					const tmpcssMotionData = tmpData.split(`,`);
 					if (isNaN(parseInt(tmpcssMotionData[0]))) {
