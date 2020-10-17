@@ -8704,6 +8704,11 @@ function keyIsDown(_keyCode) {
 	return (g_inputKeyBuffer[_keyCode] ? true : false);
 }
 
+const jdgList = [`ii`, `shakin`, `matari`, `shobon`].map(jdg => toCapitalize(jdg));
+const checkJudgment = (_difCnt) => {
+	return jdgList[g_judgObj.arrowJ.findIndex(jdgCnt => _difCnt <= jdgCnt)];
+};
+
 /**
  * 矢印・フリーズアロー判定
  * @param {number} _j 対象矢印・フリーズアロー
@@ -8726,20 +8731,10 @@ function judgeArrow(_j) {
 			stepDivHit.style.top = `${getNumAttr(judgArrow, `prevPosY`) - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
+			const resultJdg = checkJudgment(difCnt);
+			eval(`judge${resultJdg}`)(difFrame);
+			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
 
-			if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-				judgeIi(difFrame);
-				stepDivHit.classList.add(g_cssObj.main_stepIi);
-			} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-				judgeShakin(difFrame);
-				stepDivHit.classList.add(g_cssObj.main_stepShakin);
-			} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-				judgeMatari(difFrame);
-				stepDivHit.classList.add(g_cssObj.main_stepMatari);
-			} else {
-				judgeShobon(difFrame);
-				stepDivHit.classList.add(g_cssObj.main_stepShobon);
-			}
 			countFastSlow(difFrame, g_headerObj.justFrames);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
@@ -8759,15 +8754,8 @@ function judgeArrow(_j) {
 			if (g_headerObj.frzStartjdgUse &&
 				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
 				const difFrame = Number(judgFrz.getAttribute(`cnt`));
-				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-					judgeIi(difFrame);
-				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-					judgeShakin(difFrame);
-				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-					judgeMatari(difFrame);
-				} else {
-					judgeShobon(difFrame);
-				}
+				const resultJdg = checkJudgment(difCnt);
+				eval(`judge${resultJdg}`)(difFrame);
 				countFastSlow(difFrame, g_headerObj.justFrames);
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
