@@ -9126,13 +9126,9 @@ function resultInit() {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
 		} else {
-			for (let j = 0; j < g_rankObj.rankRate.length; j++) {
-				if (resultScore * 100 / g_maxScore >= g_rankObj.rankRate[j]) {
-					rankMark = g_rankObj.rankMarks[j];
-					rankColor = g_rankObj.rankColor[j];
-					break;
-				}
-			}
+			const rPos = g_rankObj.rankRate.findIndex(rate => resultScore * 100 / g_maxScore >= rate);
+			rankMark = g_rankObj.rankMarks[rPos];
+			rankColor = g_rankObj.rankColor[rPos];
 		}
 	}
 
