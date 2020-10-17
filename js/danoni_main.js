@@ -7847,7 +7847,7 @@ function MainInit() {
 				}
 				stepDivHit.style.top = `-15px`;
 				stepDivHit.style.opacity = 1;
-				stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
+				stepDivHit.classList.value = ``;
 				stepDivHit.classList.add(g_cssObj.main_stepDummy);
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 				judgeObjDelete.dummyArrow(_j, _arrow);
@@ -8730,7 +8730,7 @@ function judgeArrow(_j) {
 		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
 			stepDivHit.style.top = `${getNumAttr(judgArrow, `prevPosY`) - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
 			stepDivHit.style.opacity = 0.75;
-			stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
+			stepDivHit.classList.value = ``;
 			const resultJdg = checkJudgment(difCnt);
 			eval(`judge${resultJdg}`)(difFrame);
 			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
