@@ -3023,27 +3023,25 @@ function headerConvert(_dosObj) {
 	};
 
 	// 外部スキンファイルの指定
+	obj.skinType = `default`;
+	obj.skinRoot = C_DIR_SKIN;
+	obj.skinType2 = `blank`;
+	obj.skinRoot2 = C_DIR_SKIN;
 	if (_dosObj.skinType !== undefined && _dosObj.skinType !== ``) {
 		const skinTypes = _dosObj.skinType.split(`,`);
 		[obj.skinType2, obj.skinRoot2] = getFilePath(skinTypes.length > 1 ? skinTypes[1] : `blank`, C_DIR_SKIN);
 		[obj.skinType, obj.skinRoot] = getFilePath(skinTypes[0], C_DIR_SKIN);
-	} else {
-		obj.skinType = `default`;
-		obj.skinRoot = C_DIR_SKIN;
-		obj.skinType2 = `blank`;
-		obj.skinRoot2 = C_DIR_SKIN;
 	}
 
 	// 外部jsファイルの指定
+	obj.customjs = C_JSF_CUSTOM;
+	obj.customjsRoot = C_DIR_JS;
+	obj.customjs2 = C_JSF_BLANK;
+	obj.customjs2Root = C_DIR_JS;
 	if (_dosObj.customjs !== undefined && _dosObj.customjs !== ``) {
 		const customjss = _dosObj.customjs.split(`,`);
 		[obj.customjs2, obj.customjs2Root] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
 		[obj.customjs, obj.customjsRoot] = getFilePath(customjss[0], C_DIR_JS);
-	} else {
-		obj.customjs = C_JSF_CUSTOM;
-		obj.customjsRoot = C_DIR_JS;
-		obj.customjs2 = C_JSF_BLANK;
-		obj.customjs2Root = C_DIR_JS;
 	}
 
 	// ステップゾーン位置
@@ -4219,9 +4217,7 @@ function createOptionWindow(_sprite) {
 		$id(`lnkScroll`).width = `${parseFloat($id(`lnkScroll`).width) - 90}px`;
 
 		spriteList.scroll.appendChild(
-			createCss2Button(`btnReverse`, `Reverse:${g_stateObj.reverse}`, evt => {
-				setReverse(evt.target);
-			}, {
+			createCss2Button(`btnReverse`, `Reverse:${g_stateObj.reverse}`, evt => setReverse(evt.target), {
 				x: 160, y: 0,
 				w: 90, h: 21, siz: C_SIZ_DIFSELECTOR,
 				borderStyle: `solid`,
