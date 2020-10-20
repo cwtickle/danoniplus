@@ -3763,10 +3763,9 @@ function createOptionWindow(_sprite) {
 	/**
 	 * 譜面リストの作成
 	 * @param {object} _difList 
-	 * @param {object} _difCover 
 	 * @param {string} _targetKey 
 	 */
-	function makeDifList(_difList, _difCover, _targetKey = ``) {
+	function makeDifList(_difList, _targetKey = ``) {
 		let k = 0;
 		g_headerObj.keyLabels.forEach((keyLabel, j) => {
 			if (_targetKey === `` || keyLabel === _targetKey) {
@@ -3777,9 +3776,7 @@ function createOptionWindow(_sprite) {
 				_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
 					g_stateObj.scoreId = j;
 					setDifficulty(true);
-					deleteChildspriteAll(`difList`);
-					optionsprite.removeChild(_difList);
-					optionsprite.removeChild(_difCover);
+					resetDifWindow();
 				}));
 				k++;
 			}
@@ -3799,16 +3796,14 @@ function createOptionWindow(_sprite) {
 					difCover.style.opacity = 0.95;
 
 					// 全リスト作成
-					makeDifList(difList, difCover);
+					makeDifList(difList);
 
 					// ランダム選択
 					difCover.appendChild(
 						makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
 							g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
 							setDifficulty(true);
-							deleteChildspriteAll(`difList`);
-							optionsprite.removeChild(difList);
-							optionsprite.removeChild(difCover);
+							resetDifWindow();
 						}, { w: 110 })
 					);
 
@@ -3817,7 +3812,7 @@ function createOptionWindow(_sprite) {
 						difCover.appendChild(
 							makeDifLblCssButton(`keyFilter`, `${targetKey} key`, m + 1.5, _ => {
 								deleteChildspriteAll(`difList`);
-								makeDifList(difList, difCover, targetKey);
+								makeDifList(difList, targetKey);
 							}, { w: 110 })
 						);
 					});
@@ -5104,11 +5099,8 @@ function keyConfigInit() {
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 
 	[`blank`, `scale`].forEach(header => {
-		if (g_keyObj[`${header}${keyCtrlPtn}`] !== undefined) {
-			g_keyObj[header] = g_keyObj[`${header}${keyCtrlPtn}`];
-		} else {
-			g_keyObj[header] = g_keyObj[`${header}_def`];
-		}
+		g_keyObj[header] = (g_keyObj[`${header}${keyCtrlPtn}`] !== undefined ?
+			g_keyObj[`${header}${keyCtrlPtn}`] : g_keyObj[`${header}_def`]);
 	});
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
 	const kWidth = parseInt(keyconSprite.style.width);
