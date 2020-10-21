@@ -4618,18 +4618,13 @@ function createOptionWindow(_sprite) {
 					g_keyObj[`scrollName${g_keyObj.currentKey}`] : g_keyObj.scrollName_def
 			));
 			g_stateObj.scroll = g_scrolls[g_scrollNum];
-
+			const [visibleScr, hiddenScr] = (g_scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
+			spriteList[visibleScr].style.visibility = `visible`;
+			spriteList[hiddenScr].style.visibility = `hidden`;
+			setSetting(0, visibleScr);
 			if (g_scrolls.length > 1) {
-				spriteList.scroll.style.visibility = `visible`;
-				spriteList.reverse.style.visibility = `hidden`;
-				setSetting(0, `scroll`);
 				setReverseView(document.querySelector(`#btnReverse`));
-			} else {
-				spriteList.scroll.style.visibility = `hidden`;
-				spriteList.reverse.style.visibility = `visible`;
-				setSetting(0, `reverse`);
 			}
-
 		} else {
 			g_scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
 			setSetting(0, `reverse`);
@@ -6599,7 +6594,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		const camelHeader = toCapitalize(_header);
 		const setcnt = (_frzFlg ? 2 : 1);
 
-		let startPoint = [];
+		const startPoint = [];
 		let spdNext = Infinity;
 		let spdPrev = 0;
 		let spdk;
