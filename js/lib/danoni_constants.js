@@ -1551,7 +1551,7 @@ const g_escapeStr = {
     escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
     escapeTag: [
         [`*amp*`, `&amp;`], [`*pipe*`, `|`], [`*dollar*`, `$`], [`*rsquo*`, `&rsquo;`],
-        [`*quot*`, `&quot;`], [`*comma*`, `&quot;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
+        [`*quot*`, `&quot;`], [`*comma*`, `&sbquo;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
     ],
     unEscapeTag: [
         [`&amp;`, `&`], [`&rsquo;`, `’`], [`&quot;`, `"`], [`&sbquo;`, `,`],
