@@ -2803,25 +2803,7 @@ function headerConvert(_dosObj) {
 	}
 
 	// 初期色情報
-	obj.setColorInit = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
-	obj.setShadowColorInit = [``, ``, ``, ``, ``];
-
-	obj.setColorType1 = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
-	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
-
-	// フリーズアロー初期色情報
-	obj.frzColorInit = [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`];
-	obj.frzShadowColorInit = [``, ``, ``, ``];
-	obj.frzColorType1 = [[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-	[`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
-	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-	[`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
-	[`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]];
-	obj.frzColorType2 = [[`#cccccc`, `#999999`, `#cccc33`, `#999933`],
-	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-	[`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
-	[`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]];
+	Object.keys(g_dfColorObj).forEach(key => obj[key] = g_dfColorObj[key].concat());
 	obj.frzColorDefault = [];
 
 	// ダミー用初期矢印色
@@ -3023,27 +3005,25 @@ function headerConvert(_dosObj) {
 	};
 
 	// 外部スキンファイルの指定
+	obj.skinType = `default`;
+	obj.skinRoot = C_DIR_SKIN;
+	obj.skinType2 = `blank`;
+	obj.skinRoot2 = C_DIR_SKIN;
 	if (_dosObj.skinType !== undefined && _dosObj.skinType !== ``) {
 		const skinTypes = _dosObj.skinType.split(`,`);
 		[obj.skinType2, obj.skinRoot2] = getFilePath(skinTypes.length > 1 ? skinTypes[1] : `blank`, C_DIR_SKIN);
 		[obj.skinType, obj.skinRoot] = getFilePath(skinTypes[0], C_DIR_SKIN);
-	} else {
-		obj.skinType = `default`;
-		obj.skinRoot = C_DIR_SKIN;
-		obj.skinType2 = `blank`;
-		obj.skinRoot2 = C_DIR_SKIN;
 	}
 
 	// 外部jsファイルの指定
+	obj.customjs = C_JSF_CUSTOM;
+	obj.customjsRoot = C_DIR_JS;
+	obj.customjs2 = C_JSF_BLANK;
+	obj.customjs2Root = C_DIR_JS;
 	if (_dosObj.customjs !== undefined && _dosObj.customjs !== ``) {
 		const customjss = _dosObj.customjs.split(`,`);
 		[obj.customjs2, obj.customjs2Root] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
 		[obj.customjs, obj.customjsRoot] = getFilePath(customjss[0], C_DIR_JS);
-	} else {
-		obj.customjs = C_JSF_CUSTOM;
-		obj.customjsRoot = C_DIR_JS;
-		obj.customjs2 = C_JSF_BLANK;
-		obj.customjs2Root = C_DIR_JS;
 	}
 
 	// ステップゾーン位置
@@ -3765,10 +3745,9 @@ function createOptionWindow(_sprite) {
 	/**
 	 * 譜面リストの作成
 	 * @param {object} _difList 
-	 * @param {object} _difCover 
 	 * @param {string} _targetKey 
 	 */
-	function makeDifList(_difList, _difCover, _targetKey = ``) {
+	function makeDifList(_difList, _targetKey = ``) {
 		let k = 0;
 		g_headerObj.keyLabels.forEach((keyLabel, j) => {
 			if (_targetKey === `` || keyLabel === _targetKey) {
@@ -3779,9 +3758,7 @@ function createOptionWindow(_sprite) {
 				_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
 					g_stateObj.scoreId = j;
 					setDifficulty(true);
-					deleteChildspriteAll(`difList`);
-					optionsprite.removeChild(_difList);
-					optionsprite.removeChild(_difCover);
+					resetDifWindow();
 				}));
 				k++;
 			}
@@ -3801,16 +3778,14 @@ function createOptionWindow(_sprite) {
 					difCover.style.opacity = 0.95;
 
 					// 全リスト作成
-					makeDifList(difList, difCover);
+					makeDifList(difList);
 
 					// ランダム選択
 					difCover.appendChild(
 						makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
 							g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
 							setDifficulty(true);
-							deleteChildspriteAll(`difList`);
-							optionsprite.removeChild(difList);
-							optionsprite.removeChild(difCover);
+							resetDifWindow();
 						}, { w: 110 })
 					);
 
@@ -3819,7 +3794,7 @@ function createOptionWindow(_sprite) {
 						difCover.appendChild(
 							makeDifLblCssButton(`keyFilter`, `${targetKey} key`, m + 1.5, _ => {
 								deleteChildspriteAll(`difList`);
-								makeDifList(difList, difCover, targetKey);
+								makeDifList(difList, targetKey);
 							}, { w: 110 })
 						);
 					});
@@ -4219,9 +4194,7 @@ function createOptionWindow(_sprite) {
 		$id(`lnkScroll`).width = `${parseFloat($id(`lnkScroll`).width) - 90}px`;
 
 		spriteList.scroll.appendChild(
-			createCss2Button(`btnReverse`, `Reverse:${g_stateObj.reverse}`, evt => {
-				setReverse(evt.target);
-			}, {
+			createCss2Button(`btnReverse`, `Reverse:${g_stateObj.reverse}`, evt => setReverse(evt.target), {
 				x: 160, y: 0,
 				w: 90, h: 21, siz: C_SIZ_DIFSELECTOR,
 				borderStyle: `solid`,
@@ -4627,18 +4600,13 @@ function createOptionWindow(_sprite) {
 					g_keyObj[`scrollName${g_keyObj.currentKey}`] : g_keyObj.scrollName_def
 			));
 			g_stateObj.scroll = g_scrolls[g_scrollNum];
-
+			const [visibleScr, hiddenScr] = (g_scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
+			spriteList[visibleScr].style.visibility = `visible`;
+			spriteList[hiddenScr].style.visibility = `hidden`;
+			setSetting(0, visibleScr);
 			if (g_scrolls.length > 1) {
-				spriteList.scroll.style.visibility = `visible`;
-				spriteList.reverse.style.visibility = `hidden`;
-				setSetting(0, `scroll`);
 				setReverseView(document.querySelector(`#btnReverse`));
-			} else {
-				spriteList.scroll.style.visibility = `hidden`;
-				spriteList.reverse.style.visibility = `visible`;
-				setSetting(0, `reverse`);
 			}
-
 		} else {
 			g_scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
 			setSetting(0, `reverse`);
@@ -5108,11 +5076,8 @@ function keyConfigInit() {
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 
 	[`blank`, `scale`].forEach(header => {
-		if (g_keyObj[`${header}${keyCtrlPtn}`] !== undefined) {
-			g_keyObj[header] = g_keyObj[`${header}${keyCtrlPtn}`];
-		} else {
-			g_keyObj[header] = g_keyObj[`${header}_def`];
-		}
+		g_keyObj[header] = (g_keyObj[`${header}${keyCtrlPtn}`] !== undefined ?
+			g_keyObj[`${header}${keyCtrlPtn}`] : g_keyObj[`${header}_def`]);
 	});
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
 	const kWidth = parseInt(keyconSprite.style.width);
@@ -6611,7 +6576,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		const camelHeader = toCapitalize(_header);
 		const setcnt = (_frzFlg ? 2 : 1);
 
-		let startPoint = [];
+		const startPoint = [];
 		let spdNext = Infinity;
 		let spdPrev = 0;
 		let spdk;
@@ -7847,7 +7812,7 @@ function MainInit() {
 				}
 				stepDivHit.style.top = `-15px`;
 				stepDivHit.style.opacity = 1;
-				stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
+				stepDivHit.classList.value = ``;
 				stepDivHit.classList.add(g_cssObj.main_stepDummy);
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 				judgeObjDelete.dummyArrow(_j, _arrow);
@@ -8704,6 +8669,11 @@ function keyIsDown(_keyCode) {
 	return (g_inputKeyBuffer[_keyCode] ? true : false);
 }
 
+const jdgList = [`ii`, `shakin`, `matari`, `shobon`].map(jdg => toCapitalize(jdg));
+const checkJudgment = (_difCnt) => {
+	return jdgList[g_judgObj.arrowJ.findIndex(jdgCnt => _difCnt <= jdgCnt)];
+};
+
 /**
  * 矢印・フリーズアロー判定
  * @param {number} _j 対象矢印・フリーズアロー
@@ -8725,21 +8695,11 @@ function judgeArrow(_j) {
 		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
 			stepDivHit.style.top = `${getNumAttr(judgArrow, `prevPosY`) - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
 			stepDivHit.style.opacity = 0.75;
-			stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
+			stepDivHit.classList.value = ``;
+			const resultJdg = checkJudgment(difCnt);
+			eval(`judge${resultJdg}`)(difFrame);
+			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
 
-			if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-				judgeIi(difFrame);
-				stepDivHit.classList.add(g_cssObj.main_stepIi);
-			} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-				judgeShakin(difFrame);
-				stepDivHit.classList.add(g_cssObj.main_stepShakin);
-			} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-				judgeMatari(difFrame);
-				stepDivHit.classList.add(g_cssObj.main_stepMatari);
-			} else {
-				judgeShobon(difFrame);
-				stepDivHit.classList.add(g_cssObj.main_stepShobon);
-			}
 			countFastSlow(difFrame, g_headerObj.justFrames);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
@@ -8759,15 +8719,8 @@ function judgeArrow(_j) {
 			if (g_headerObj.frzStartjdgUse &&
 				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
 				const difFrame = Number(judgFrz.getAttribute(`cnt`));
-				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-					judgeIi(difFrame);
-				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-					judgeShakin(difFrame);
-				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-					judgeMatari(difFrame);
-				} else {
-					judgeShobon(difFrame);
-				}
+				const resultJdg = checkJudgment(difCnt);
+				eval(`judge${resultJdg}`)(difFrame);
 				countFastSlow(difFrame, g_headerObj.justFrames);
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
@@ -9138,13 +9091,9 @@ function resultInit() {
 			rankMark = g_rankObj.rankMarkPF;
 			rankColor = g_rankObj.rankColorPF;
 		} else {
-			for (let j = 0; j < g_rankObj.rankRate.length; j++) {
-				if (resultScore * 100 / g_maxScore >= g_rankObj.rankRate[j]) {
-					rankMark = g_rankObj.rankMarks[j];
-					rankColor = g_rankObj.rankColor[j];
-					break;
-				}
-			}
+			const rPos = g_rankObj.rankRate.findIndex(rate => resultScore * 100 / g_maxScore >= rate);
+			rankMark = g_rankObj.rankMarks[rPos];
+			rankColor = g_rankObj.rankColor[rPos];
 		}
 	}
 
