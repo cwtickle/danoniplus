@@ -99,6 +99,7 @@ const g_loadObj = {};
 const g_rootObj = {};
 let g_headerObj = {};
 let g_scoreObj = {};
+let g_attrObj = {};
 let g_btnAddFunc = {};
 let g_btnDeleteFlg = {};
 let g_cxtAddFunc = {};
@@ -6985,6 +6986,7 @@ function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
  */
 function getArrowSettings() {
 
+	g_attrObj = {};
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ? g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
@@ -7759,9 +7761,9 @@ function MainInit() {
 	 */
 	const judgeObjDelete = {};
 	[`arrow`, `dummyArrow`, `frz`, `dummyFrz`].forEach(type => {
-		judgeObjDelete[type] = (_j, _deleteObj) => {
+		judgeObjDelete[type] = (_j, _deleteName) => {
 			g_workObj[`judg${toCapitalize(type)}Cnt`][_j]++;
-			arrowSprite[getNumAttr(_deleteObj, `dividePos`)].removeChild(_deleteObj);
+			arrowSprite[g_attrObj[_deleteName].dividePos].removeChild(document.getElementById(_deleteName));
 		}
 	});
 
@@ -7780,27 +7782,27 @@ function MainInit() {
 	const judgeMotionFunc = {
 
 		// 矢印(枠外判定、AutoPlay: OFF)
-		arrowOFF: (_j, _arrow, _cnt) => {
+		arrowOFF: (_j, _arrowName, _cnt) => {
 			if (_cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
 				judgeUwan(_cnt);
-				judgeObjDelete.arrow(_j, _arrow);
+				judgeObjDelete.arrow(_j, _arrowName);
 			}
 		},
 
 		// 矢印(オート、AutoPlay: ON)
-		arrowON: (_j, _arrow, _cnt) => {
+		arrowON: (_j, _arrowName, _cnt) => {
 			if (_cnt === 0) {
 				const stepDivHit = document.querySelector(`#stepHit${_j}`);
 
 				judgeIi(_cnt);
 				stepDivHit.style.opacity = 1;
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-				judgeObjDelete.arrow(_j, _arrow);
+				judgeObjDelete.arrow(_j, _arrowName);
 			}
 		},
 
 		// ダミー矢印(オート、AutoPlay: OFF)
-		dummyArrowOFF: (_j, _arrow, _cnt) => {
+		dummyArrowOFF: (_j, _arrowName, _cnt) => {
 			if (_cnt === 0) {
 				const stepDivHit = document.querySelector(`#stepHit${_j}`);
 
@@ -7815,20 +7817,20 @@ function MainInit() {
 				stepDivHit.classList.value = ``;
 				stepDivHit.classList.add(g_cssObj.main_stepDummy);
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-				judgeObjDelete.dummyArrow(_j, _arrow);
+				judgeObjDelete.dummyArrow(_j, _arrowName);
 			}
 		},
 
 		// フリーズアロー(成功時)
-		frzOK: (_j, _k, _frzRoot, _cnt) => {
+		frzOK: (_j, _k, _frzName, _cnt) => {
 			judgeKita(_cnt);
 			document.querySelector(`#frzHit${_j}`).style.opacity = 0;
-			_frzRoot.setAttribute(`judgEndFlg`, `true`);
-			judgeObjDelete.frz(_j, _frzRoot);
+			g_attrObj[_frzName].judgEndFlg = true;
+			judgeObjDelete.frz(_j, _frzName);
 		},
 
 		// ダミーフリーズアロー(成功時)
-		dummyFrzOK: (_j, _k, _frzRoot, _cnt) => {
+		dummyFrzOK: (_j, _k, _frzName, _cnt) => {
 			if (typeof customJudgeDummyFrz === C_TYP_FUNCTION) {
 				customJudgeDummyFrz(_cnt);
 				if (typeof customJudgeDummyFrz2 === C_TYP_FUNCTION) {
@@ -7836,15 +7838,15 @@ function MainInit() {
 				}
 			}
 			document.querySelector(`#frzHit${_j}`).style.opacity = 0;
-			_frzRoot.setAttribute(`judgEndFlg`, `true`);
-			judgeObjDelete.dummyFrz(_j, _frzRoot);
+			g_attrObj[_frzName].judgEndFlg = true;
+			judgeObjDelete.dummyFrz(_j, _frzName);
 		},
 
 		// フリーズアロー(枠外判定)
-		frzNG: (_j, _k, _frzRoot, _cnt) => {
+		frzNG: (_j, _k, _frzName, _cnt) => {
 			if (_cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
 				judgeIknai(_cnt);
-				_frzRoot.setAttribute(`judgEndFlg`, `true`);
+				g_attrObj[_frzName].judgEndFlg = true;
 
 				changeFailedFrz(_j, _k);
 				if (g_headerObj.frzStartjdgUse) {
@@ -7854,14 +7856,14 @@ function MainInit() {
 		},
 
 		// ダミーフリーズアロー(枠外判定)
-		dummyFrzNG: (_j, _k, _frzRoot, _cnt) => { },
+		dummyFrzNG: (_j, _k, _frzName, _cnt) => { },
 
 		// フリーズアロー(キーを離したときの処理)
-		frzKeyUp: (_j, _k, _frzRoot, _cnt, _keyUpFrame) => {
-			if (_keyUpFrame > g_headerObj.frzAttempt) {
-				if (_frzRoot.getAttribute(`judgEndFlg`) === `false`) {
+		frzKeyUp: (_j, _k, _frzName, _cnt) => {
+			if (g_attrObj[_frzName].keyUpFrame > g_headerObj.frzAttempt) {
+				if (!g_attrObj[_frzName].judgEndFlg) {
 					judgeIknai(_cnt);
-					_frzRoot.setAttribute(`judgEndFlg`, `true`);
+					g_attrObj[_frzName].judgEndFlg = true;
 					changeFailedFrz(_j, _k);
 				}
 			}
@@ -7869,10 +7871,10 @@ function MainInit() {
 
 		// ダミーフリーズアロー(キーを離したときの処理)
 		// ※処理上通ることはないが、統一のために定義
-		dummyFrzKeyUp: (_j, _k, _frzRoot, _cnt, _keyUpFrame) => { },
+		dummyFrzKeyUp: (_j, _k, _frzName, _cnt) => { },
 
 	};
-	judgeMotionFunc.dummyArrowON = (_j, _arrow, _cnt) => judgeMotionFunc.dummyArrowOFF(_j, _arrow, _cnt);
+	judgeMotionFunc.dummyArrowON = (_j, _arrowName, _cnt) => judgeMotionFunc.dummyArrowOFF(_j, _arrowName, _cnt);
 
 	/**
 	 * 次フリーズアローへ判定を移すかチェック
@@ -7888,20 +7890,20 @@ function MainInit() {
 			// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
 			// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
 			// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
-			if (g_workObj.judgFrzCnt[_j] !== _k && Number(_cnt) <= g_judgObj.frzJ[C_JDG_SFSF] + 1) {
-				const prevFrzRoot = document.querySelector(`#frz${_j}_${g_workObj.judgFrzCnt[_j]}`);
-				const prevCnt = Number(prevFrzRoot.getAttribute(`cnt`));
-				if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_KITA]) {
+			if (g_workObj.judgFrzCnt[_j] !== _k && _cnt <= g_judgObj.frzJ[C_JDG_SFSF] + 1) {
+				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
+
+				if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[C_JDG_KITA]) {
 				} else {
 
 					// 枠外判定前の場合、このタイミングで枠外判定を行う
-					if (prevCnt >= (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
 						judgeIknai(_cnt);
 						if (g_headerObj.frzStartjdgUse) {
 							judgeUwan(_cnt);
 						}
 					}
-					judgeObjDelete.frz(_j, prevFrzRoot);
+					judgeObjDelete.frz(_j, prevFrzName);
 				}
 			}
 		},
@@ -7964,15 +7966,17 @@ function MainInit() {
 		const dividePos = g_workObj.dividePos[_j];
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 
-		const stepRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${_j}_${_arrowCnt}`,
-			g_workObj.stepX[_j],
-			C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
-			C_ARW_WIDTH, C_ARW_WIDTH);
-		setAttrs(stepRoot, {
+		const arrowName = `${_name}${_j}_${_arrowCnt}`;
+		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir;
+
+		const stepRoot = createSprite(`arrowSprite${dividePos}`, arrowName,
+			g_workObj.stepX[_j], firstPosY, C_ARW_WIDTH, C_ARW_WIDTH);
+		g_attrObj[arrowName] = {
 			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
 			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
 			judgEndFlg: false, boostSpd: boostSpdDir, dividePos: dividePos,
-		});
+			prevY: firstPosY, y: firstPosY,
+		};
 		arrowSprite[dividePos].appendChild(stepRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
@@ -8010,24 +8014,20 @@ function MainInit() {
 	 * @param {string} _name 
 	 */
 	function movArrow(_j, _k, _name) {
-		const arrow = document.querySelector(`#${_name}${_j}_${_k}`);
-		let boostCnt = arrow.getAttribute(`boostCnt`);
-		let cnt = arrow.getAttribute(`cnt`);
+		const arrowName = `${_name}${_j}_${_k}`;
 
 		// 全体色変化 (移動時)
 		changeColorFunc[_name](_j, _k);
 
 		// 移動
 		if (g_workObj.currentSpeed !== 0) {
-			const currentY = parseFloat(arrow.style.top);
-			arrow.setAttribute(`prevPosY`, currentY);
-			arrow.style.top = `${currentY - (g_workObj.currentSpeed +
-				g_workObj.motionOnFrames[boostCnt]) * getNumAttr(arrow, `boostSpd`)}px`;
-			arrow.setAttribute(`boostCnt`, --boostCnt);
+			const boostCnt = g_attrObj[arrowName].boostCnt;
+			g_attrObj[arrowName].prevY = g_attrObj[arrowName].y;
+			g_attrObj[arrowName].y -= (g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * g_attrObj[arrowName].boostSpd;
+			document.getElementById(arrowName).style.top = `${g_attrObj[arrowName].y}px`;
+			g_attrObj[arrowName].boostCnt--;
 		}
-		arrow.setAttribute(`cnt`, --cnt);
-
-		judgeMotionFunc[`${_name}${g_stateObj.autoAll}`](_j, arrow, cnt);
+		judgeMotionFunc[`${_name}${g_stateObj.autoAll}`](_j, arrowName, --g_attrObj[arrowName].cnt);
 	}
 
 	/**
@@ -8051,15 +8051,18 @@ function MainInit() {
 				g_headerObj.frzShadowColor[colorPos][0]);
 		}
 
-		const frzRoot = createSprite(`arrowSprite${dividePos}`, `${_name}${frzNo}`,
-			g_workObj.stepX[_j],
-			C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir,
-			C_ARW_WIDTH, C_ARW_WIDTH + frzLength);
-		setAttrs(frzRoot, {
+		const frzName = `${_name}${frzNo}`;
+		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir;
+
+		const frzRoot = createSprite(`arrowSprite${dividePos}`, frzName,
+			g_workObj.stepX[_j], firstPosY, C_ARW_WIDTH, C_ARW_WIDTH + frzLength);
+		g_attrObj[frzName] = {
 			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
 			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
-			judgEndFlg: false, isMoving: true, frzBarLength: frzLength, frzAttempt: 0, boostSpd: boostSpdDir, dividePos: dividePos,
-		});
+			judgEndFlg: false, isMoving: true, frzBarLength: frzLength, keyUpFrame: 0,
+			boostSpd: boostSpdDir, dividePos: dividePos, dir: g_workObj.scrollDir[_j],
+			y: firstPosY,
+		};
 		arrowSprite[dividePos].appendChild(frzRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
@@ -8110,41 +8113,37 @@ function MainInit() {
 	 * @param {string} _name 
 	 */
 	function movFrzArrow(_j, _k, _name) {
-		const frzRoot = document.querySelector(`#${_name}${_j}_${_k}`);
-		const boostSpdDir = frzRoot.getAttribute(`boostSpd`);
-		let cnt = frzRoot.getAttribute(`cnt`);
-		let frzBarLength = frzRoot.getAttribute(`frzBarLength`);
+		const frzName = `${_name}${_j}_${_k}`;
 
-		if (frzRoot.getAttribute(`judgEndFlg`) === `false`) {
-			if (frzRoot.getAttribute(`isMoving`) === `true`) {
-				frzMoving(_j, _k, _name, frzRoot, cnt);
+		if (!g_attrObj[frzName].judgEndFlg) {
+			if (g_attrObj[frzName].isMoving) {
+				frzMoving(_j, _k, _name);
 			} else {
 				// 全体色変化 (ヒット時)
 				changeColorFunc[_name](_j, _k, `Hit`);
 
 				// フリーズアローがヒット中の処理
-				if (frzBarLength > 0) {
-					frzHitMotion(_j, _k, _name, frzRoot, cnt);
+				if (g_attrObj[frzName].frzBarLength > 0) {
+					frzHitMotion(_j, _k, _name);
 
 					if (!checkKeyUpFunc[`${_name}${g_stateObj.autoAll}`](_j)) {
-						const keyUpFrame = getNumAttr(frzRoot, `frzAttempt`) + 1;
-						frzRoot.setAttribute(`frzAttempt`, keyUpFrame);
-						judgeMotionFunc[`${_name}KeyUp`](_j, _k, frzRoot, cnt, keyUpFrame);
+						g_attrObj[frzName].keyUpFrame++;
+						judgeMotionFunc[`${_name}KeyUp`](_j, _k, frzName, g_attrObj[frzName].cnt);
 					}
 				} else {
-					judgeMotionFunc[`${_name}OK`](_j, _k, frzRoot, cnt);
+					judgeMotionFunc[`${_name}OK`](_j, _k, frzName, g_attrObj[frzName].cnt);
 				}
 			}
 			// フリーズアローが枠外に出たときの処理
-			judgeMotionFunc[`${_name}NG`](_j, _k, frzRoot, cnt);
+			judgeMotionFunc[`${_name}NG`](_j, _k, frzName, g_attrObj[frzName].cnt);
 
 		} else {
-			frzBarLength -= g_workObj.currentSpeed;
-			if (frzBarLength > 0) {
-				frzRoot.setAttribute(`frzBarLength`, frzBarLength);
-				frzRoot.style.top = `${parseFloat(frzRoot.style.top) - (g_workObj.currentSpeed) * boostSpdDir}px`;
+			g_attrObj[frzName].frzBarLength -= g_workObj.currentSpeed;
+			if (g_attrObj[frzName].frzBarLength > 0) {
+				g_attrObj[frzName].y -= g_workObj.currentSpeed * g_attrObj[frzName].boostSpd;
+				document.getElementById(frzName).style.top = `${g_attrObj[frzName].y}px`;
 			} else {
-				judgeObjDelete[_name](_j, frzRoot);
+				judgeObjDelete[_name](_j, frzName);
 			}
 		}
 	}
@@ -8154,27 +8153,23 @@ function MainInit() {
 	 * @param {number} _j 
 	 * @param {number} _k 
 	 * @param {string} _name 
-	 * @param {object} _frzRoot 
-	 * @param {number} _cnt 
 	 */
-	function frzMoving(_j, _k, _name, _frzRoot, _cnt) {
-
-		let boostCnt = _frzRoot.getAttribute(`boostCnt`);
-		const boostSpdDir = _frzRoot.getAttribute(`boostSpd`);
+	function frzMoving(_j, _k, _name) {
+		const frzName = `${_name}${_j}_${_k}`;
 
 		// 全体色変化 (通常時)
 		changeColorFunc[_name](_j, _k, `Normal`);
 
 		// 移動
 		if (g_workObj.currentSpeed !== 0) {
-			_frzRoot.style.top = `${parseFloat(_frzRoot.style.top) -
-				(g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * boostSpdDir}px`;
-			_frzRoot.setAttribute(`boostCnt`, --boostCnt);
+			g_attrObj[frzName].y -= (g_workObj.currentSpeed + g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt]) * g_attrObj[frzName].boostSpd;
+			document.getElementById(frzName).style.top = `${g_attrObj[frzName].y}px`;
+			g_attrObj[frzName].boostCnt--;
 		}
-		_frzRoot.setAttribute(`cnt`, --_cnt);
+		g_attrObj[frzName].cnt--;
 
 		// 次フリーズアローへ判定を移すかチェック
-		judgeNextFunc[`${_name}${g_stateObj.autoAll}`](_j, _k, _cnt);
+		judgeNextFunc[`${_name}${g_stateObj.autoAll}`](_j, _k, g_attrObj[frzName].cnt);
 	}
 
 	/**
@@ -8185,20 +8180,20 @@ function MainInit() {
 	 * @param {object} _frzRoot 
 	 * @param {number} _cnt 
 	 */
-	function frzHitMotion(_j, _k, _name, _frzRoot, _cnt) {
+	function frzHitMotion(_j, _k, _name) {
 
-		const styfrzBar = $id(`${_name}Bar${_j}_${_k}`);
-		const styfrzBtm = $id(`${_name}Btm${_j}_${_k}`);
-		const styfrzBtmShadow = $id(`${_name}BtmShadow${_j}_${_k}`);
-		const dividePos = _frzRoot.getAttribute(`dividePos`);
-		const boostSpdDir = _frzRoot.getAttribute(`boostSpd`);
-		const frzBarLength = parseFloat(styfrzBar.height) - g_workObj.currentSpeed * Math.abs(boostSpdDir);
+		const frzNo = `${_j}_${_k}`;
+		const frzName = `${_name}${frzNo}`;
+		const styfrzBar = $id(`${_name}Bar${frzNo}`);
+		const styfrzBtm = $id(`${_name}Btm${frzNo}`);
+		const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
+		const movY = g_workObj.currentSpeed * g_attrObj[frzName].boostSpd;
+		g_attrObj[frzName].frzBarLength -= movY * g_attrObj[frzName].dir;
 
-		_frzRoot.setAttribute(`frzBarLength`, frzBarLength);
-		styfrzBar.height = `${frzBarLength}px`;
-		styfrzBar.top = `${parseFloat(styfrzBar.top) + g_workObj.currentSpeed * Math.abs(boostSpdDir) * dividePos}px`;
-		styfrzBtm.top = `${parseFloat(styfrzBtm.top) - g_workObj.currentSpeed * boostSpdDir}px`;
-		styfrzBtmShadow.top = `${parseFloat(styfrzBtmShadow.top) - g_workObj.currentSpeed * boostSpdDir}px`;
+		styfrzBar.height = `${g_attrObj[frzName].frzBarLength}px`;
+		styfrzBar.top = `${parseFloat(styfrzBar.top) - movY * g_attrObj[frzName].dividePos}px`;
+		styfrzBtm.top = `${parseFloat(styfrzBtm.top) - movY}px`;
+		styfrzBtmShadow.top = styfrzBtm.top;
 	}
 
 	/**
@@ -8603,6 +8598,7 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
  */
 function changeHitFrz(_j, _k, _name) {
 	const frzNo = `${_j}_${_k}`;
+	const frzName = `${_name}${frzNo}`;
 
 	if (_name === `frz`) {
 		$id(`frzHit${_j}`).opacity = 0.9;
@@ -8611,11 +8607,9 @@ function changeHitFrz(_j, _k, _name) {
 			$id(`frzHitTop${_j}`).background = g_workObj.frzHitColors[_j];
 		}
 	}
-	const frzRoot = document.querySelector(`#${_name}${frzNo}`);
 	const styfrzBar = $id(`${_name}Bar${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
-	const dividePos = getNumAttr(frzRoot, `dividePos`);
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
@@ -8628,15 +8622,15 @@ function changeHitFrz(_j, _k, _name) {
 	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
-	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - parseFloat(frzRoot.style.top);
+	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - g_attrObj[frzName].y;
 
-	frzRoot.style.top = $id(`stepRoot${_j}`).top;
+	document.getElementById(frzName).style.top = $id(`stepRoot${_j}`).top;
 	styfrzBtm.top = `${parseFloat(styfrzBtm.top) - delFrzLength}px`;
-	styfrzBtmShadow.top = `${parseFloat(styfrzBtmShadow.top) - delFrzLength}px`;
-	styfrzBar.top = `${parseFloat(styfrzBar.top) - delFrzLength * dividePos}px`;
-	styfrzBar.height = `${parseFloat(styfrzBar.height) - delFrzLength * g_workObj.scrollDir[_j]}px`;
+	styfrzBtmShadow.top = styfrzBtm.top;
+	styfrzBar.top = `${parseFloat(styfrzBar.top) - delFrzLength * g_attrObj[frzName].dividePos}px`;
+	styfrzBar.height = `${parseFloat(styfrzBar.top) - delFrzLength * g_attrObj[frzName].dir}px`;
 
-	frzRoot.setAttribute(`isMoving`, `false`);
+	g_attrObj[frzName].isMoving = false;
 }
 
 /**
@@ -8680,20 +8674,18 @@ const checkJudgment = (_difCnt) => {
  */
 function judgeArrow(_j) {
 
-	const currentNo = g_workObj.judgArrowCnt[_j];
 	const stepDivHit = document.querySelector(`#stepHit${_j}`);
-	const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
-
-	const fcurrentNo = g_workObj.judgFrzCnt[_j];
+	const currentNo = g_workObj.judgArrowCnt[_j];
+	const arrowName = `arrow${_j}_${currentNo}`;
+	const judgArrow = document.getElementById(arrowName);
 
 	if (judgArrow !== null) {
-		const difFrame = Number(judgArrow.getAttribute(`cnt`));
+		const difFrame = g_attrObj[arrowName].cnt;
 		const difCnt = Math.abs(difFrame);
-		const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
-		const arrowSprite = document.querySelector(`#arrowSprite${judgArrow.getAttribute(`dividePos`)}`);
+		const arrowSprite = document.querySelector(`#arrowSprite${g_attrObj[arrowName].dividePos}`);
 
-		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
-			stepDivHit.style.top = `${getNumAttr(judgArrow, `prevPosY`) - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
+		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && !g_attrObj[arrowName].judgEndFlg) {
+			stepDivHit.style.top = `${g_attrObj[arrowName].prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
 			const resultJdg = checkJudgment(difCnt);
@@ -8709,16 +8701,17 @@ function judgeArrow(_j) {
 		}
 	}
 
-	const judgFrz = document.querySelector(`#frz${_j}_${fcurrentNo}`);
+	const fcurrentNo = g_workObj.judgFrzCnt[_j];
+	const frzName = `frz${_j}_${fcurrentNo}`;
+	const judgFrz = document.getElementById(frzName);
 
 	if (judgFrz !== null) {
-		const difCnt = Math.abs(judgFrz.getAttribute(`cnt`));
-		const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
+		const difFrame = g_attrObj[frzName].cnt;
+		const difCnt = Math.abs(difFrame);
 
-		if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
+		if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
 			if (g_headerObj.frzStartjdgUse &&
 				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
-				const difFrame = Number(judgFrz.getAttribute(`cnt`));
 				const resultJdg = checkJudgment(difCnt);
 				eval(`judge${resultJdg}`)(difFrame);
 				countFastSlow(difFrame, g_headerObj.justFrames);
