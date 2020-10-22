@@ -2803,25 +2803,7 @@ function headerConvert(_dosObj) {
 	}
 
 	// 初期色情報
-	obj.setColorInit = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
-	obj.setShadowColorInit = [``, ``, ``, ``, ``];
-
-	obj.setColorType1 = [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`];
-	obj.setColorType2 = [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`];
-
-	// フリーズアロー初期色情報
-	obj.frzColorInit = [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`];
-	obj.frzShadowColorInit = [``, ``, ``, ``];
-	obj.frzColorType1 = [[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-	[`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
-	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-	[`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
-	[`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]];
-	obj.frzColorType2 = [[`#cccccc`, `#999999`, `#cccc33`, `#999933`],
-	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-	[`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-	[`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
-	[`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]];
+	Object.keys(g_dfColorObj).forEach(key => obj[key] = g_dfColorObj[key].concat());
 	obj.frzColorDefault = [];
 
 	// ダミー用初期矢印色
