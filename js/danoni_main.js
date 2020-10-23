@@ -7369,6 +7369,7 @@ function MainInit() {
 	// 開始位置、楽曲再生位置の設定
 	const firstFrame = g_scoreObj.frameNum;
 	const musicStartFrame = firstFrame + g_headerObj.blankFrame;
+	const fadeFlgs = { fadein: [`In`, `Out`], fadeout: [`Out`, `In`] };
 	g_audio.volume = (firstFrame === 0 ? g_stateObj.volume / 100 : 0);
 
 	// 曲時間制御変数
@@ -8337,15 +8338,12 @@ function MainInit() {
 				if (g_wordObj.wordDat.substring(0, 5) === `[fade`) {
 
 					// フェードイン・アウト開始
-					if (g_wordObj.wordDat === `[fadein]`) {
-						g_wordObj[`fadeInFlg${wordDepth}`] = true;
-						g_wordObj[`fadeOutFlg${wordDepth}`] = false;
-						g_wordSprite.style.animationName = `fadeIn${(++g_workObj.fadeInNo[wordDepth] % 2)}`;
-					} else if (g_wordObj.wordDat === `[fadeout]`) {
-						g_wordObj[`fadeInFlg${wordDepth}`] = false;
-						g_wordObj[`fadeOutFlg${wordDepth}`] = true;
-						g_wordSprite.style.animationName = `fadeOut${(++g_workObj.fadeOutNo[wordDepth] % 2)}`;
-					}
+					const fkey = fadeFlgs[Object.keys(fadeFlgs).find(flg => g_wordObj.wordDat === `[${flg}]`)];
+					g_wordObj[`fade${fkey[0]}Flg${wordDepth}`] = true;
+					g_wordObj[`fade${fkey[1]}Flg${wordDepth}`] = false;
+					g_wordSprite.style.animationName =
+						`fade${fkey[0]}${(++g_workObj[`fade${fkey[0]}No`][wordDepth] % 2)}`;
+
 					g_workObj.lastFadeFrame[wordDepth] = currentFrame;
 					g_workObj.wordFadeFrame[wordDepth] = (tmpObj.length > 2 ?
 						setVal(tmpObj[2], C_WOD_FRAME, C_TYP_NUMBER) : C_WOD_FRAME);
