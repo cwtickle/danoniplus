@@ -4702,7 +4702,7 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
 		eval(`g_${_settingName}Num = (g_${_settingName}Num === 0 ? g_${_settingName}s.length - 1 : (g_${_settingName}Num + _scrollNum <= 0 ? 0 : g_${_settingName}Num + _scrollNum))`);
 	}
 	eval(`g_stateObj.${_settingName} = g_${_settingName}s[g_${_settingName}Num]`);
-	eval(`document.querySelector('#lnk${toCapitalize(_settingName)}').textContent = g_stateObj.${_settingName} + _unitName`);
+	document.querySelector(`#lnk${toCapitalize(_settingName)}`).textContent = g_stateObj[_settingName] + _unitName;
 }
 
 /**
@@ -8576,27 +8576,10 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
 function changeHitFrz(_j, _k, _name) {
 	const frzNo = `${_j}_${_k}`;
 	const frzName = `${_name}${frzNo}`;
-
-	if (_name === `frz`) {
-		$id(`frzHit${_j}`).opacity = 0.9;
-		$id(`frzTop${frzNo}`).display = C_DIS_NONE;
-		if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
-			$id(`frzHitTop${_j}`).background = g_workObj.frzHitColors[_j];
-		}
-	}
 	const styfrzBar = $id(`${_name}Bar${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
-
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
-	if (g_headerObj.frzShadowColor[colorPos][1] !== `` && _name === `frz`) {
-		styfrzBtmShadow.background = (g_headerObj.frzShadowColor[colorPos][1] === `Default` ?
-			g_workObj.frzHitColors[_j] : g_headerObj.frzShadowColor[colorPos][1]);
-	}
-
-	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
-	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
+	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
 	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - g_attrObj[frzName].y;
@@ -8608,8 +8591,21 @@ function changeHitFrz(_j, _k, _name) {
 
 	styfrzBar.top = `${g_attrObj[frzName].barY}px`;
 	styfrzBar.height = `${g_attrObj[frzName].frzBarLength}px`;
+	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
 	styfrzBtm.top = `${g_attrObj[frzName].btmY}px`;
+	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
 	styfrzBtmShadow.top = styfrzBtm.top;
+	if (_name === `frz`) {
+		if (g_headerObj.frzShadowColor[colorPos][1] !== ``) {
+			styfrzBtmShadow.background = (g_headerObj.frzShadowColor[colorPos][1] === `Default` ?
+				g_workObj.frzHitColors[_j] : g_headerObj.frzShadowColor[colorPos][1]);
+		}
+		$id(`frzHit${_j}`).opacity = 0.9;
+		$id(`frzTop${frzNo}`).display = C_DIS_NONE;
+		if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
+			$id(`frzHitTop${_j}`).background = g_workObj.frzHitColors[_j];
+		}
+	}
 
 	g_attrObj[frzName].isMoving = false;
 }
@@ -8628,8 +8624,7 @@ function changeFailedFrz(_j, _k) {
 	$id(`frzBar${frzNo}`).opacity = 1;
 	$id(`frzBtm${frzNo}`).background = `#cccccc`;
 
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
+	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
 		$id(`frzTopShadow${frzNo}`).background = `#333333`;
 		$id(`frzBtmShadow${frzNo}`).background = `#333333`;
@@ -8645,8 +8640,10 @@ function keyIsDown(_keyCode) {
 }
 
 const jdgList = [`ii`, `shakin`, `matari`, `shobon`].map(jdg => toCapitalize(jdg));
+const jdgFuncList = [judgeIi, judgeShakin, judgeMatari, judgeShobon];
 const checkJudgment = (_difCnt) => {
-	return jdgList[g_judgObj.arrowJ.findIndex(jdgCnt => _difCnt <= jdgCnt)];
+	const idx = g_judgObj.arrowJ.findIndex(jdgCnt => _difCnt <= jdgCnt);
+	return [jdgFuncList[idx], jdgList[idx]];
 };
 
 /**
@@ -8655,7 +8652,6 @@ const checkJudgment = (_difCnt) => {
  */
 function judgeArrow(_j) {
 
-	const stepDivHit = document.querySelector(`#stepHit${_j}`);
 	const currentNo = g_workObj.judgArrowCnt[_j];
 	const arrowName = `arrow${_j}_${currentNo}`;
 	const judgArrow = document.getElementById(arrowName);
@@ -8663,20 +8659,20 @@ function judgeArrow(_j) {
 	if (judgArrow !== null) {
 		const difFrame = g_attrObj[arrowName].cnt;
 		const difCnt = Math.abs(difFrame);
-		const arrowSprite = document.querySelector(`#arrowSprite${g_attrObj[arrowName].dividePos}`);
 
 		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && !g_attrObj[arrowName].judgEndFlg) {
+			const [resultFunc, resultJdg] = checkJudgment(difCnt);
+			resultFunc(difFrame);
+			countFastSlow(difFrame, g_headerObj.justFrames);
+
+			const stepDivHit = document.querySelector(`#stepHit${_j}`);
 			stepDivHit.style.top = `${g_attrObj[arrowName].prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
-			const resultJdg = checkJudgment(difCnt);
-			eval(`judge${resultJdg}`)(difFrame);
 			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
-
-			countFastSlow(difFrame, g_headerObj.justFrames);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
-			arrowSprite.removeChild(judgArrow);
+			document.querySelector(`#arrowSprite${g_attrObj[arrowName].dividePos}`).removeChild(judgArrow);
 			g_workObj.judgArrowCnt[_j]++;
 			return;
 		}
@@ -8693,8 +8689,8 @@ function judgeArrow(_j) {
 		if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
 			if (g_headerObj.frzStartjdgUse &&
 				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
-				const resultJdg = checkJudgment(difCnt);
-				eval(`judge${resultJdg}`)(difFrame);
+				const [resultFunc] = checkJudgment(difCnt);
+				resultFunc(difFrame);
 				countFastSlow(difFrame, g_headerObj.justFrames);
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
@@ -8702,8 +8698,7 @@ function judgeArrow(_j) {
 			return;
 		}
 	}
-	const stepDiv = document.querySelector(`#stepDiv${_j}`);
-	stepDiv.style.display = C_DIS_INHERIT;
+	document.querySelector(`#stepDiv${_j}`).style.display = C_DIS_INHERIT;
 }
 
 /**
@@ -8762,10 +8757,8 @@ function lifeRecovery() {
 	if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
 		g_workObj.lifeVal = g_headerObj.maxLifeVal;
 		changeLifeColor(`Max`);
-	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
-		changeLifeColor(`Cleared`);
 	} else {
-		changeLifeColor();
+		changeLifeColor(g_workObj.lifeVal >= g_workObj.lifeBorder ? `Cleared` : ``);
 	}
 }
 
@@ -8775,10 +8768,8 @@ function lifeDamage() {
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
 		changeLifeColor();
-	} else if (g_workObj.lifeVal < g_workObj.lifeBorder) {
-		changeLifeColor(`Failed`);
 	} else {
-		changeLifeColor(`Cleared`);
+		changeLifeColor(g_workObj.lifeVal < g_workObj.lifeBorder ? `Failed` : `Cleared`);
 	}
 }
 
