@@ -7861,11 +7861,9 @@ function MainInit() {
 		// フリーズアロー(キーを離したときの処理)
 		frzKeyUp: (_j, _k, _frzName, _cnt) => {
 			if (g_attrObj[_frzName].keyUpFrame > g_headerObj.frzAttempt) {
-				if (!g_attrObj[_frzName].judgEndFlg) {
-					judgeIknai(_cnt);
-					g_attrObj[_frzName].judgEndFlg = true;
-					changeFailedFrz(_j, _k);
-				}
+				judgeIknai(_cnt);
+				g_attrObj[_frzName].judgEndFlg = true;
+				changeFailedFrz(_j, _k);
 			}
 		},
 
@@ -8053,15 +8051,18 @@ function MainInit() {
 
 		const frzName = `${_name}${frzNo}`;
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir;
+		const firstBarLength = frzLength * g_workObj.boostSpd;
 
 		const frzRoot = createSprite(`arrowSprite${dividePos}`, frzName,
 			g_workObj.stepX[_j], firstPosY, C_ARW_WIDTH, C_ARW_WIDTH + frzLength);
 		g_attrObj[frzName] = {
 			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
 			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
-			judgEndFlg: false, isMoving: true, frzBarLength: frzLength, keyUpFrame: 0,
+			judgEndFlg: false, isMoving: true, frzBarLength: firstBarLength, keyUpFrame: 0,
 			boostSpd: boostSpdDir, dividePos: dividePos, dir: g_workObj.scrollDir[_j],
 			y: firstPosY,
+			barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos,
+			btmY: firstBarLength * g_workObj.scrollDir[_j],
 		};
 		arrowSprite[dividePos].appendChild(frzRoot);
 
@@ -8076,8 +8077,7 @@ function MainInit() {
 
 			// フリーズアロー帯(frzBar)
 			createColorObject2(`${_name}Bar${frzNo}`, {
-				x: 5, y: C_ARW_WIDTH / 2 - frzLength * g_workObj.boostSpd * dividePos,
-				w: C_ARW_WIDTH - 10, h: frzLength * g_workObj.boostSpd, background: _barColor, styleName: `frzBar`,
+				x: 5, y: g_attrObj[frzName].barY, w: C_ARW_WIDTH - 10, h: firstBarLength, background: _barColor, styleName: `frzBar`,
 				opacity: 0.75,
 			}),
 
@@ -8093,13 +8093,13 @@ function MainInit() {
 
 			// 後発矢印の塗り部分
 			createColorObject2(`${_name}BtmShadow${frzNo}`, {
-				x: 0, y: frzLength * boostSpdDir,
+				x: 0, y: g_attrObj[frzName].btmY,
 				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
 			}, g_cssObj.main_objShadow),
 
 			// 後発矢印
 			createColorObject2(`${_name}Btm${frzNo}`, {
-				x: 0, y: frzLength * boostSpdDir,
+				x: 0, y: g_attrObj[frzName].btmY,
 				background: _normalColor, rotate: g_workObj.arrowRtn[_j],
 			}),
 
@@ -8113,18 +8113,43 @@ function MainInit() {
 	 * @param {string} _name 
 	 */
 	function movFrzArrow(_j, _k, _name) {
-		const frzName = `${_name}${_j}_${_k}`;
+		const frzNo = `${_j}_${_k}`;
+		const frzName = `${_name}${frzNo}`;
+		const movY = g_workObj.currentSpeed * g_attrObj[frzName].boostSpd;
 
 		if (!g_attrObj[frzName].judgEndFlg) {
 			if (g_attrObj[frzName].isMoving) {
-				frzMoving(_j, _k, _name);
+
+				// 全体色変化 (通常時)
+				changeColorFunc[_name](_j, _k, `Normal`);
+
+				// 移動
+				if (g_workObj.currentSpeed !== 0) {
+					g_attrObj[frzName].y -= movY + g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt] * g_attrObj[frzName].boostSpd;
+					document.getElementById(frzName).style.top = `${g_attrObj[frzName].y}px`;
+					g_attrObj[frzName].boostCnt--;
+				}
+				g_attrObj[frzName].cnt--;
+
+				// 次フリーズアローへ判定を移すかチェック
+				judgeNextFunc[`${_name}${g_stateObj.autoAll}`](_j, _k, g_attrObj[frzName].cnt);
+
 			} else {
+
 				// 全体色変化 (ヒット時)
 				changeColorFunc[_name](_j, _k, `Hit`);
 
 				// フリーズアローがヒット中の処理
 				if (g_attrObj[frzName].frzBarLength > 0) {
-					frzHitMotion(_j, _k, _name);
+
+					g_attrObj[frzName].frzBarLength -= movY * g_attrObj[frzName].dir;
+					g_attrObj[frzName].barY -= movY * g_attrObj[frzName].dividePos;
+					g_attrObj[frzName].btmY -= movY;
+
+					$id(`${_name}Bar${frzNo}`).height = `${g_attrObj[frzName].frzBarLength}px`;
+					$id(`${_name}Bar${frzNo}`).top = `${g_attrObj[frzName].barY}px`;
+					$id(`${_name}Btm${frzNo}`).top = `${g_attrObj[frzName].btmY}px`;
+					$id(`${_name}BtmShadow${frzNo}`).top = `${g_attrObj[frzName].btmY}px`;
 
 					if (!checkKeyUpFunc[`${_name}${g_stateObj.autoAll}`](_j)) {
 						g_attrObj[frzName].keyUpFrame++;
@@ -8140,60 +8165,12 @@ function MainInit() {
 		} else {
 			g_attrObj[frzName].frzBarLength -= g_workObj.currentSpeed;
 			if (g_attrObj[frzName].frzBarLength > 0) {
-				g_attrObj[frzName].y -= g_workObj.currentSpeed * g_attrObj[frzName].boostSpd;
+				g_attrObj[frzName].y -= movY;
 				document.getElementById(frzName).style.top = `${g_attrObj[frzName].y}px`;
 			} else {
 				judgeObjDelete[_name](_j, frzName);
 			}
 		}
-	}
-
-	/**
-	 * フリーズアロー移動
-	 * @param {number} _j 
-	 * @param {number} _k 
-	 * @param {string} _name 
-	 */
-	function frzMoving(_j, _k, _name) {
-		const frzName = `${_name}${_j}_${_k}`;
-
-		// 全体色変化 (通常時)
-		changeColorFunc[_name](_j, _k, `Normal`);
-
-		// 移動
-		if (g_workObj.currentSpeed !== 0) {
-			g_attrObj[frzName].y -= (g_workObj.currentSpeed + g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt]) * g_attrObj[frzName].boostSpd;
-			document.getElementById(frzName).style.top = `${g_attrObj[frzName].y}px`;
-			g_attrObj[frzName].boostCnt--;
-		}
-		g_attrObj[frzName].cnt--;
-
-		// 次フリーズアローへ判定を移すかチェック
-		judgeNextFunc[`${_name}${g_stateObj.autoAll}`](_j, _k, g_attrObj[frzName].cnt);
-	}
-
-	/**
-	 * フリーズアローヒット時処理
-	 * @param {number} _j 
-	 * @param {number} _k 
-	 * @param {string} _name 
-	 * @param {object} _frzRoot 
-	 * @param {number} _cnt 
-	 */
-	function frzHitMotion(_j, _k, _name) {
-
-		const frzNo = `${_j}_${_k}`;
-		const frzName = `${_name}${frzNo}`;
-		const styfrzBar = $id(`${_name}Bar${frzNo}`);
-		const styfrzBtm = $id(`${_name}Btm${frzNo}`);
-		const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
-		const movY = g_workObj.currentSpeed * g_attrObj[frzName].boostSpd;
-		g_attrObj[frzName].frzBarLength -= movY * g_attrObj[frzName].dir;
-
-		styfrzBar.height = `${g_attrObj[frzName].frzBarLength}px`;
-		styfrzBar.top = `${parseFloat(styfrzBar.top) - movY * g_attrObj[frzName].dividePos}px`;
-		styfrzBtm.top = `${parseFloat(styfrzBtm.top) - movY}px`;
-		styfrzBtmShadow.top = styfrzBtm.top;
 	}
 
 	/**
@@ -8614,8 +8591,8 @@ function changeHitFrz(_j, _k, _name) {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 	if (g_headerObj.frzShadowColor[colorPos][1] !== `` && _name === `frz`) {
-		styfrzBtmShadow.background = (g_headerObj.frzShadowColor[colorPos][1] === `Default` ? g_workObj.frzHitColors[_j] :
-			g_headerObj.frzShadowColor[colorPos][1]);
+		styfrzBtmShadow.background = (g_headerObj.frzShadowColor[colorPos][1] === `Default` ?
+			g_workObj.frzHitColors[_j] : g_headerObj.frzShadowColor[colorPos][1]);
 	}
 
 	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
@@ -8623,13 +8600,16 @@ function changeHitFrz(_j, _k, _name) {
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
 	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - g_attrObj[frzName].y;
-
 	document.getElementById(frzName).style.top = $id(`stepRoot${_j}`).top;
-	styfrzBtm.top = `${parseFloat(styfrzBtm.top) - delFrzLength}px`;
-	styfrzBtmShadow.top = styfrzBtm.top;
-	styfrzBar.top = `${parseFloat(styfrzBar.top) - delFrzLength * g_attrObj[frzName].dividePos}px`;
+
 	g_attrObj[frzName].frzBarLength -= delFrzLength * g_attrObj[frzName].dir;
+	g_attrObj[frzName].barY -= delFrzLength * g_attrObj[frzName].dividePos;
+	g_attrObj[frzName].btmY -= delFrzLength;
+
+	styfrzBar.top = `${g_attrObj[frzName].barY}px`;
 	styfrzBar.height = `${g_attrObj[frzName].frzBarLength}px`;
+	styfrzBtm.top = `${g_attrObj[frzName].btmY}px`;
+	styfrzBtmShadow.top = styfrzBtm.top;
 
 	g_attrObj[frzName].isMoving = false;
 }
