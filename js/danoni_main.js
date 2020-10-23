@@ -8628,7 +8628,8 @@ function changeHitFrz(_j, _k, _name) {
 	styfrzBtm.top = `${parseFloat(styfrzBtm.top) - delFrzLength}px`;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	styfrzBar.top = `${parseFloat(styfrzBar.top) - delFrzLength * g_attrObj[frzName].dividePos}px`;
-	styfrzBar.height = `${parseFloat(styfrzBar.top) - delFrzLength * g_attrObj[frzName].dir}px`;
+	g_attrObj[frzName].frzBarLength -= delFrzLength * g_attrObj[frzName].dir;
+	styfrzBar.height = `${g_attrObj[frzName].frzBarLength}px`;
 
 	g_attrObj[frzName].isMoving = false;
 }
