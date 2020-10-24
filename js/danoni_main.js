@@ -8284,9 +8284,7 @@ function MainInit() {
 
 		// 歌詞表示
 		if (g_scoreObj.wordData[currentFrame] !== undefined) {
-			const tmpObjs = g_scoreObj.wordData[currentFrame];
-
-			tmpObjs.forEach(tmpObj => {
+			g_scoreObj.wordData[currentFrame].forEach(tmpObj => {
 				g_wordObj.wordDir = tmpObj[0];
 				g_wordObj.wordDat = tmpObj[1];
 				g_wordSprite = document.querySelector(`#lblword${g_wordObj.wordDir}`);
@@ -8309,8 +8307,7 @@ function MainInit() {
 					g_wordSprite.style.animationTimingFunction = `linear`;
 					g_wordSprite.style.animationFillMode = `forwards`;
 
-				} else if (g_wordObj.wordDat === `[center]` ||
-					g_wordObj.wordDat === `[left]` || g_wordObj.wordDat === `[right]`) {
+				} else if ([`[center]`, `[left]`, `[right]`].includes(g_wordObj.wordDat)) {
 
 					// 歌詞位置変更
 					g_wordSprite.style.textAlign = g_wordObj.wordDat.slice(1, -1);
@@ -8543,6 +8540,7 @@ function changeHitFrz(_j, _k, _name) {
 	g_attrObj[frzName].frzBarLength -= delFrzLength * g_attrObj[frzName].dir;
 	g_attrObj[frzName].barY -= delFrzLength * g_attrObj[frzName].dividePos;
 	g_attrObj[frzName].btmY -= delFrzLength;
+	g_attrObj[frzName].isMoving = false;
 
 	styfrzBar.top = `${g_attrObj[frzName].barY}px`;
 	styfrzBar.height = `${g_attrObj[frzName].frzBarLength}px`;
@@ -8561,8 +8559,6 @@ function changeHitFrz(_j, _k, _name) {
 			$id(`frzHitTop${_j}`).background = g_workObj.frzHitColors[_j];
 		}
 	}
-
-	g_attrObj[frzName].isMoving = false;
 }
 
 /**
