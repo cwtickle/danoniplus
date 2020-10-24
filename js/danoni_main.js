@@ -778,7 +778,7 @@ function createCssButton(_obj, _func) {
 	style.verticalAlign = C_VALIGN_MIDDLE;
 	style.fontSize = `${_obj.fontsize}px`;
 	style.fontFamily = getBasicFont();
-	if (setVal(_obj.animationName, ``, C_TYP_STRING) !== ``) {
+	if (hasVal(_obj.animationName)) {
 		style.animationName = _obj.animationName;
 		style.animationDuration = `1s`;
 	}
@@ -1464,7 +1464,7 @@ function initAfterDosLoaded() {
 		`frzBar`, `lifeBorder`].forEach(img => preloadFile(`image`, g_imgObj[img]));
 
 	// その他の画像ファイルの読み込み
-	g_headerObj.preloadImages.filter(image => setVal(image, ``, C_TYP_STRING) !== ``).forEach(preloadImage => {
+	g_headerObj.preloadImages.filter(image => hasVal(image)).forEach(preloadImage => {
 
 		// Pattern A: |preloadImages=file.png|
 		// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
@@ -2163,7 +2163,7 @@ function titleInit() {
 	// 譜面初期情報ロード許可フラグ
 	// (初回読み込み時はローカルストレージのロードが必要なため、
 	//  ローカルストレージ保存時はフラグを解除しない)
-	if (!g_stateObj.dataSaveFlg || setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) !== ``) {
+	if (!g_stateObj.dataSaveFlg || hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
 		g_canLoadDifInfoFlg = false;
 	}
 	const divRoot = document.querySelector(`#divRoot`);
@@ -2704,7 +2704,7 @@ function headerConvert(_dosObj) {
 			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] || keyLabel);
 
 			// 譜面名、制作者名
-			if (setVal(difDetails[difpos.name], ``, C_TYP_STRING) !== ``) {
+			if (hasVal(difDetails[difpos.name])) {
 				const difNameInfo = difDetails[difpos.name].split(`::`);
 				obj.difLabels.push(escapeHtml(setVal(difNameInfo[0], `Normal`, C_TYP_STRING)));
 				obj.creatorNames.push(difNameInfo.length > 1 ? escapeHtml(difNameInfo[1]) : obj.tuning);
@@ -3065,13 +3065,7 @@ function headerConvert(_dosObj) {
 	// 読込対象の画像を指定(rel:preload)と同じ
 	obj.preloadImages = [];
 	if (_dosObj.preloadImages !== undefined) {
-		const preloadImgs = _dosObj.preloadImages.split(`,`);
-
-		for (let j = 0, len = preloadImgs.length; j < len; j++) {
-			if (setVal(preloadImgs[j], ``, C_TYP_STRING) !== ``) {
-				obj.preloadImages[j] = preloadImgs[j];
-			}
-		}
+		obj.preloadImages = _dosObj.preloadImages.split(`,`).filter(image => hasVal(image)).map(preloadImage => preloadImage);
 	}
 
 	// 最終演出表示有無（noneで無効化）
@@ -3369,7 +3363,7 @@ function keysConvert(_dosObj) {
 		if (_dosObj[`color${newKey}`] !== undefined) {
 			const tmpColors = _dosObj[`color${newKey}`].split(`$`);
 			for (let k = 0, len = tmpColors.length; k < len; k++) {
-				if (setVal(tmpColors[k], ``, C_TYP_STRING) === `` && g_keyObj[`color${newKey}_${k}`] !== undefined) {
+				if (!hasVal(tmpColors[k]) && g_keyObj[`color${newKey}_${k}`] !== undefined) {
 					continue;
 				}
 				g_keyObj[`color${newKey}_${k}`] = tmpColors[k].split(`,`).map(n => parseInt(n, 10));
@@ -3383,7 +3377,7 @@ function keysConvert(_dosObj) {
 		if (_dosObj[`chara${newKey}`] !== undefined) {
 			const tmpCharas = _dosObj[`chara${newKey}`].split(`$`);
 			for (let k = 0, len = tmpCharas.length; k < len; k++) {
-				if (setVal(tmpCharas[k], ``, C_TYP_STRING) === `` && g_keyObj[`chara${newKey}_${k}`] !== undefined) {
+				if (!hasVal(tmpCharas[k]) && g_keyObj[`chara${newKey}_${k}`] !== undefined) {
 					continue;
 				}
 				g_keyObj[`chara${newKey}_${k}`] = tmpCharas[k].split(`,`);
@@ -3418,7 +3412,7 @@ function keysConvert(_dosObj) {
 		if (_dosObj[`stepRtn${newKey}`] !== undefined) {
 			const tmpStepRtns = _dosObj[`stepRtn${newKey}`].split(`$`);
 			for (let k = 0, len = tmpStepRtns.length; k < len; k++) {
-				if (setVal(tmpStepRtns[k], ``, C_TYP_STRING) === `` && g_keyObj[`stepRtn${newKey}_${k}`] !== undefined) {
+				if (!hasVal(tmpStepRtns[k]) && g_keyObj[`stepRtn${newKey}_${k}`] !== undefined) {
 					continue;
 				}
 				g_keyObj[`stepRtn${newKey}_${k}`] = tmpStepRtns[k].split(`,`).map(n => (isNaN(Number(n)) ? n : parseInt(n, 10)));
@@ -3432,7 +3426,7 @@ function keysConvert(_dosObj) {
 		if (_dosObj[`pos${newKey}`] !== undefined) {
 			const tmpPoss = _dosObj[`pos${newKey}`].split(`$`);
 			for (let k = 0, len = tmpPoss.length; k < len; k++) {
-				if (setVal(tmpPoss[k], ``, C_TYP_STRING) === `` && g_keyObj[`pos${newKey}_${k}`] !== undefined) {
+				if (!hasVal(tmpPoss[k]) && g_keyObj[`pos${newKey}_${k}`] !== undefined) {
 					continue;
 				}
 				g_keyObj[`pos${newKey}_${k}`] = tmpPoss[k].split(`,`).map(n => parseInt(n, 10));
@@ -3455,7 +3449,7 @@ function keysConvert(_dosObj) {
 		if (_dosObj[`keyCtrl${newKey}`] !== undefined) {
 			const tmpKeyCtrls = _dosObj[`keyCtrl${newKey}`].split(`$`);
 			for (let p = 0, len = tmpKeyCtrls.length; p < len; p++) {
-				if (setVal(tmpKeyCtrls[p], ``, C_TYP_STRING) === `` && g_keyObj[`keyCtrl${newKey}_${p}`] !== undefined) {
+				if (!hasVal(tmpKeyCtrls[p]) && g_keyObj[`keyCtrl${newKey}_${p}`] !== undefined) {
 					continue;
 				}
 				tmpKeyCtrl = tmpKeyCtrls[p].split(`,`);
@@ -3501,7 +3495,7 @@ function keysConvert(_dosObj) {
 			g_keyObj[`scrollName${newKey}`] = [`---`];
 			const tmpScrolls = _dosObj[`scroll${newKey}`].split(`$`);
 			for (let k = 0, len = tmpScrolls.length; k < len; k++) {
-				if (setVal(tmpScrolls[k], ``, C_TYP_STRING) === ``) {
+				if (!hasVal(tmpScrolls[k])) {
 					continue;
 				}
 				g_keyObj[`scrollDir${newKey}_${k}`] = {
@@ -3521,7 +3515,7 @@ function keysConvert(_dosObj) {
 		if (_dosObj[`assist${newKey}`] !== undefined) {
 			const tmpAssists = _dosObj[`assist${newKey}`].split(`$`);
 			for (let k = 0, len = tmpAssists.length; k < len; k++) {
-				if (setVal(tmpAssists[k], ``, C_TYP_STRING) === ``) {
+				if (!hasVal(tmpAssists[k])) {
 					continue;
 				}
 				const tmpAssistPtns = tmpAssists[k].split(`/`);
@@ -4315,7 +4309,7 @@ function createOptionWindow(_sprite) {
 
 		// ゲージ初期化
 		if (_gaugeNum === 0) {
-			if (setVal(g_headerObj.lifeBorders[tmpScoreId], ``, C_TYP_STRING) !== ``) {
+			if (hasVal(g_headerObj.lifeBorders[tmpScoreId])) {
 				changeLifeMode(g_headerObj);
 				g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
@@ -4346,7 +4340,7 @@ function createOptionWindow(_sprite) {
 		// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
 		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] !== undefined) {
 			const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
-			if (setVal(tmpGaugeObj.lifeBorders[tmpScoreId], ``, C_TYP_STRING) !== ``) {
+			if (hasVal(tmpGaugeObj.lifeBorders[tmpScoreId])) {
 				changeLifeMode(tmpGaugeObj);
 			}
 			setLifeCategory(tmpGaugeObj);
@@ -5162,7 +5156,7 @@ function keyConfigInit() {
 		// 別キーモード警告メッセージ
 		createDivCss2Label(
 			`kcMsg`,
-			setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) !== `` ? `別キーモードではハイスコア、キーコンフィグ等は保存されません` : ``,
+			hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `別キーモードではハイスコア、キーコンフィグ等は保存されません` : ``,
 			{
 				x: 0, y: g_sHeight - 25, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 			}, g_cssObj.keyconfig_warning
@@ -5254,13 +5248,13 @@ function keyConfigInit() {
 
 	// キーパターン表示
 	let lblTransKey = ``;
-	if (setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`], ``, C_TYP_STRING) !== ``) {
+	if (hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])) {
 		lblTransKey = '(' + setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`], ``, C_TYP_STRING) + ')';
 	}
 
 	// パターン検索
 	const searchPattern = (_tempPtn, _sign, _transKeyUse = false, _keyCheck = `keyCtrl`) => {
-		while (setVal(g_keyObj[`${_keyCheck}${g_keyObj.currentKey}_${_tempPtn}`], ``, C_TYP_STRING) !== `` &&
+		while (hasVal(g_keyObj[`${_keyCheck}${g_keyObj.currentKey}_${_tempPtn}`]) &&
 			_transKeyUse === false) {
 			_tempPtn += _sign;
 			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${_tempPtn}`] === undefined) {
@@ -5604,7 +5598,7 @@ function loadingScoreInit2() {
 	// 譜面初期情報ロード許可フラグ
 	// (タイトルバック時保存したデータを設定画面にて再読み込みするため、
 	//  ローカルストレージ保存時はフラグを解除しない)
-	if (!g_stateObj.dataSaveFlg || setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) !== ``) {
+	if (!g_stateObj.dataSaveFlg || hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
 		g_canLoadDifInfoFlg = false;
 	}
 
@@ -6066,7 +6060,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpSpeedData = tmpData.split(`,`);
 				for (let k = 0; k < tmpSpeedData.length; k += 2) {
-					if (setVal(tmpSpeedData[k], ``, C_TYP_STRING) === ``) {
+					if (!hasVal(tmpSpeedData[k])) {
 						continue;
 					} else if (tmpSpeedData[k + 1] === `-`) {
 						break;
@@ -6096,7 +6090,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpColorData = tmpData.split(`,`);
 				for (let k = 0; k < tmpColorData.length; k += 3) {
-					if (setVal(tmpColorData[k], ``, C_TYP_STRING) === ``) {
+					if (!hasVal(tmpColorData[k])) {
 						continue;
 					} else if (tmpColorData[k + 1] === `-`) {
 						break;
@@ -6201,7 +6195,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
 			const tmpWordData = tmpData.split(`,`);
 			for (let k = 0; k < tmpWordData.length; k += 3) {
-				if (setVal(tmpWordData[k], ``, C_TYP_STRING) === ``) {
+				if (!hasVal(tmpWordData[k])) {
 					continue;
 				} else if (tmpWordData[k + 1] === `-`) {
 					break;
@@ -7087,7 +7081,7 @@ function getArrowSettings() {
 	g_finishFlg = true;
 	g_resultObj.spState = ``;
 
-	if (g_stateObj.dataSaveFlg && setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``) {
+	if (g_stateObj.dataSaveFlg && !hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
 
 		// ローカルストレージへAdjustment, Volumeを保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
@@ -9035,7 +9029,7 @@ function resultInit() {
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	let transKeyData = ``;
-	if (setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) !== ``) {
+	if (hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
 		transKeyData = `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)`;
 	}
 
@@ -9195,7 +9189,7 @@ function resultInit() {
 	};
 
 	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
-		setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) === ``);
+		!hasVal(g_keyObj[`transKey${keyCtrlPtn}`]));
 
 	if (highscoreCondition) {
 
