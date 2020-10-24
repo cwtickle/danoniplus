@@ -228,11 +228,10 @@ const g_handler = (_ => {
  * @param {string} _setCode 
  */
 const transCode = _setCode => {
-	let returnCode = _setCode;
 	if ([`Control`, `Shift`, `Alt`].includes(_setCode.slice(0, -5))) {
-		returnCode = _setCode.replace(`Right`, `Left`);
+		return _setCode.replace(`Right`, `Left`);
 	}
-	return returnCode;
+	return _setCode;
 }
 
 /**
@@ -684,12 +683,11 @@ function createColorObject2(_id,
  */
 function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height, _options = {}) {
 	let newsprite;
-	if (document.querySelector(`#${_newObjName}`) === null) {
-		const parentsprite = document.querySelector(`#${_parentObjName}`);
+	if (document.getElementById(_newObjName) === null) {
 		newsprite = createDiv(_newObjName, _x, _y, _width, _height);
-		parentsprite.appendChild(newsprite);
+		document.getElementById(_parentObjName).appendChild(newsprite);
 	} else {
-		newsprite = document.querySelector(`#${_newObjName}`);
+		newsprite = document.getElementById(_newObjName);
 	}
 	if (_options.description !== undefined) {
 		newsprite.title = _options.description;
@@ -860,11 +858,9 @@ function changeStyle(_id, { x, y, w, h, siz, align, title, ...rest } = {}) {
 		height: h,
 		fontSize: siz,
 	};
-	Object.keys(obj).forEach((property) => {
-		if (setVal(obj[property], ``, C_TYP_FLOAT !== ``)) {
-			style[property] = `${obj[property]}px`;
-		}
-	})
+	Object.keys(obj).filter(property => setVal(obj[property], ``, C_TYP_FLOAT !== ``))
+		.forEach(property => style[property] = `${obj[property]}px`);
+
 	if (align !== undefined) {
 		style.textAlign = `${align}`;
 	}
@@ -1608,8 +1604,8 @@ function calcLevel(_scoreObj) {
 	//    frzStartData=[550];	// フリーズ始点
 	//    frzEndData  =[650];	// フリーズ終点
 	//--------------------------------------------------------------
-	let frzStartData = [];
-	let frzEndData = [];
+	const frzStartData = [];
+	const frzEndData = [];
 
 	for (let j = 0; j < _scoreObj.frzData.length; j++) {
 		if (_scoreObj.frzData[j].length > 1) {
@@ -1664,7 +1660,7 @@ function calcLevel(_scoreObj) {
 	let freezenum = 0; // フリーズアロー数
 	let pushCnt = 1;   // 同時押し数カウント
 	let twoPushCount = 0; // 同時押し補正値
-	let push3List = [];    // 3つ押し判定数
+	const push3List = [];    // 3つ押し判定数
 
 	for (let i = 1; i < allCnt - 2; i++) {
 		// フリーズ始点の検索
@@ -1690,7 +1686,7 @@ function calcLevel(_scoreObj) {
 		// 同時押し補正処理(フリーズアローが絡まない場合)
 		if (allScorebook[i + 1] === allScorebook[i] && !freezenum) {
 
-			let chk = (allScorebook[i + 2] - allScorebook[i + 1]) * (allScorebook[i] - allScorebook[i - pushCnt]);
+			const chk = (allScorebook[i + 2] - allScorebook[i + 1]) * (allScorebook[i] - allScorebook[i - pushCnt]);
 			if (chk !== 0) {
 				twoPushCount += 40 / chk;
 			} else {
@@ -1702,7 +1698,7 @@ function calcLevel(_scoreObj) {
 		} else {
 			// 単押し＋フリーズアローの補正処理(フリーズアロー中の矢印)
 			pushCnt = 1;
-			let chk2 = (2 - freezenum) * (allScorebook[i + 1] - allScorebook[i]);
+			const chk2 = (2 - freezenum) * (allScorebook[i + 1] - allScorebook[i]);
 			if (chk2 > 0) {
 				levelcount += 2 / chk2;
 			} else {
@@ -5972,16 +5968,12 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		let arrowData = [];
 
 		if (_data !== undefined) {
-			let tmpData = _data.split(`\r`).join(``);
-			tmpData = tmpData.split(`\n`).join(``);
-
+			const tmpData = _data.split(`\r`).join(``).split(`\n`).join(``);
 			if (tmpData !== undefined) {
 				arrowData = tmpData.split(`,`);
 				if (isNaN(parseFloat(arrowData[0]))) {
 				} else {
-					for (let k = 0; k < arrowData.length; k++) {
-						arrowData[k] = calcFrame(arrowData[k]);
-					}
+					arrowData = arrowData.map(data => calcFrame(data));
 				}
 			}
 		}
@@ -6272,7 +6264,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _defaultHeader 
 	 */
 	function makeBackgroundResultData(_header, _scoreNo, _defaultHeader = ``) {
-		let dataList = [_dosObj[`${_header}${_scoreNo}_data`], _dosObj[`${_header}_data`]];
+		const dataList = [_dosObj[`${_header}${_scoreNo}_data`], _dosObj[`${_header}_data`]];
 		if (_defaultHeader !== ``) {
 			dataList.push(_dosObj[`${_defaultHeader}${_scoreNo}_data`], _dosObj[`${_defaultHeader}_data`]);
 		}
@@ -6326,11 +6318,7 @@ function unEscapeHtml(_str) {
  * @param {array} _array 
  */
 function escapeHtmlForArray(_array) {
-	let newArray = [];
-	_array.forEach((str, j) => {
-		newArray[j] = escapeHtml(str);
-	});
-	return newArray;
+	return _array.map(str => escapeHtml(str));
 }
 
 /**
@@ -7046,12 +7034,8 @@ function getArrowSettings() {
 	g_workObj.dummyArrowCssMotions = [];
 	g_workObj.dummyFrzCssMotions = [];
 
-	let scrollDirOptions;
-	if (g_keyObj[`scrollDir${keyCtrlPtn}`] !== undefined) {
-		scrollDirOptions = g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll];
-	} else {
-		scrollDirOptions = [...Array(keyNum)].fill(1);
-	}
+	const scrollDirOptions = (g_keyObj[`scrollDir${keyCtrlPtn}`] !== undefined ?
+		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
 
 	g_stateObj.autoAll = (g_stateObj.autoPlay === C_FLG_ALL ? C_FLG_ON : C_FLG_OFF);
 
@@ -7059,21 +7043,11 @@ function getArrowSettings() {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const colorj = g_keyObj[`color${keyCtrlPtn}`][j];
-		let stdPos;
-		if (posj > divideCnt) {
-			stdPos = posj - (posMax + divideCnt) / 2;
-		} else {
-			stdPos = posj - divideCnt / 2;
-		}
-		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
+		const stdPos = posj - ((posj <= divideCnt ? 0 : posMax) + divideCnt) / 2;
 
-		if (g_stateObj.reverse === C_FLG_ON) {
-			g_workObj.dividePos[j] = ((posj > divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1)) % 2;
-			g_workObj.scrollDir[j] = (posj > divideCnt ? 1 : -1) * scrollDirOptions[j];
-		} else {
-			g_workObj.dividePos[j] = ((posj > divideCnt ? 1 : 0) + (scrollDirOptions[j] === 1 ? 0 : 1)) % 2;
-			g_workObj.scrollDir[j] = (posj > divideCnt ? -1 : 1) * scrollDirOptions[j];
-		}
+		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
+		g_workObj.dividePos[j] = ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
+		g_workObj.scrollDir[j] = (posj <= divideCnt ? 1 : -1) * scrollDirOptions[j] * (g_stateObj.reverse === C_FLG_OFF ? 1 : -1);
 
 		g_workObj.judgArrowCnt[j] = 1;
 		g_workObj.judgFrzCnt[j] = 1;
