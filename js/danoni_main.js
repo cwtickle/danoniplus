@@ -4186,6 +4186,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// リバース (Reverse) / スクロール (Scroll)
 	// 縦位置: 4
+	createGeneralSetting(spriteList.reverse, `reverse`);
 	if (g_headerObj.scrollUse) {
 		createGeneralSetting(spriteList.scroll, `scroll`);
 		$id(`lnkScroll`).left = `${parseFloat($id(`lnkScroll`).left) + 90}px`;
@@ -4199,11 +4200,7 @@ function createOptionWindow(_sprite) {
 				cxtFunc: evt => setReverse(evt.target),
 			}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`])
 		);
-
-		createGeneralSetting(spriteList.reverse, `reverse`);
 		spriteList[g_scrolls.length > 1 ? `reverse` : `scroll`].style.visibility = `hidden`;
-	} else {
-		createGeneralSetting(spriteList.reverse, `reverse`);
 	}
 
 	function setReverse(_btn) {
@@ -4693,13 +4690,20 @@ function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName)
  * @param {string} _unitName
  */
 function setSetting(_scrollNum, _settingName, _unitName = ``) {
+	let settingNum = eval(`g_${_settingName}Num`);
+	const settingList = eval(`g_${_settingName}s`);
+	const settingMax = settingList.length - 1;
+
 	if (_scrollNum > 0) {
-		eval(`g_${_settingName}Num = (g_${_settingName}Num === g_${_settingName}s.length - 1 ? 0 : (g_${_settingName}Num + _scrollNum >= g_${_settingName}s.length ? g_${_settingName}s.length - 1 : g_${_settingName}Num + _scrollNum))`);
+		settingNum = (settingNum === settingMax ?
+			0 : (settingNum + _scrollNum > settingMax ? settingMax : settingNum + _scrollNum));
 	} else if (_scrollNum < 0) {
-		eval(`g_${_settingName}Num = (g_${_settingName}Num === 0 ? g_${_settingName}s.length - 1 : (g_${_settingName}Num + _scrollNum <= 0 ? 0 : g_${_settingName}Num + _scrollNum))`);
+		settingNum = (settingNum === 0 ?
+			settingMax : (settingNum + _scrollNum <= 0 ? 0 : settingNum + _scrollNum));
 	}
-	eval(`g_stateObj.${_settingName} = g_${_settingName}s[g_${_settingName}Num]`);
-	document.querySelector(`#lnk${toCapitalize(_settingName)}`).textContent = g_stateObj[_settingName] + _unitName;
+	g_stateObj[_settingName] = settingList[settingNum];
+	eval(`g_${_settingName}Num = settingNum`);
+	document.querySelector(`#lnk${toCapitalize(_settingName)}`).textContent = `${g_stateObj[_settingName]}${_unitName}`;
 }
 
 /**
@@ -7999,24 +8003,15 @@ function MainInit() {
 	 * @param {string} _barColor 
 	 */
 	function makeFrzArrow(_j, _arrowCnt, _name, _normalColor, _barColor) {
-		const frzLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2];
 		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 		const dividePos = g_workObj.dividePos[_j];
 		const frzNo = `${_j}_${_arrowCnt}`;
-
-		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
-		let shadowColor = ``;
-		if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
-			shadowColor = (g_headerObj.frzShadowColor[colorPos][0] === `Default` ? _normalColor :
-				g_headerObj.frzShadowColor[colorPos][0]);
-		}
-
 		const frzName = `${_name}${frzNo}`;
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir;
-		const firstBarLength = frzLength * g_workObj.boostSpd;
+		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
 
 		const frzRoot = createSprite(`arrowSprite${dividePos}`, frzName,
-			g_workObj.stepX[_j], firstPosY, C_ARW_WIDTH, C_ARW_WIDTH + frzLength);
+			g_workObj.stepX[_j], firstPosY, C_ARW_WIDTH, C_ARW_WIDTH + firstBarLength);
 		g_attrObj[frzName] = {
 			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
 			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
@@ -8031,6 +8026,13 @@ function MainInit() {
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
 			frzRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
+		}
+
+		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
+		let shadowColor = ``;
+		if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
+			shadowColor = (g_headerObj.frzShadowColor[colorPos][0] === `Default` ?
+				_normalColor : g_headerObj.frzShadowColor[colorPos][0]);
 		}
 
 		// フリーズアローは、下記の順で作成する。
