@@ -193,6 +193,12 @@ const setAttrs = (_baseObj, { ...rest } = {}) => {
 const getNumAttr = (_baseObj, _attrkey) => parseFloat(_baseObj.getAttribute(_attrkey));
 
 /**
+ * 変数が存在するかどうかをチェック
+ * @param {string} _data 
+ */
+const hasVal = _data => _data !== undefined && _data !== ``;
+
+/**
  * イベントハンドラ用オブジェクト
  * 参考: http://webkatu.com/remove-eventlistener/
  * 
@@ -1139,59 +1145,56 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 	const spriteData = [];
 	let maxDepth = -1;
 
-	let tmpArrayData = _data.split(`\r`).join(`\n`);
-	tmpArrayData = tmpArrayData.split(`\n`);
+	const tmpArrayData = _data.split(`\r`).join(`\n`).split(`\n`);
 
-	tmpArrayData.forEach(tmpData => {
-		if (tmpData !== undefined && tmpData !== ``) {
-			const tmpSpriteData = tmpData.split(`,`);
+	tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
+		const tmpSpriteData = tmpData.split(`,`);
 
-			// 深度が"-"の場合はスキップ
-			if (tmpSpriteData.length > 1 && tmpSpriteData[1] !== `-`) {
+		// 深度が"-"の場合はスキップ
+		if (tmpSpriteData.length > 1 && tmpSpriteData[1] !== `-`) {
 
-				// 値チェックとエスケープ処理
-				let tmpFrame;
-				if (setVal(tmpSpriteData[0], 200, C_TYP_NUMBER) === 0) {
-					tmpFrame = 0;
-				} else {
-					tmpFrame = roundZero(_calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC)));
-				}
-				const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_CALC));
-				if (tmpDepth !== C_FLG_ALL && tmpDepth > maxDepth) {
-					maxDepth = tmpDepth;
-				}
-
-				const tmpObj = {
-					path: escapeHtml(setVal(tmpSpriteData[2], ``, C_TYP_STRING)),		// 画像パス or テキスト
-					class: escapeHtml(setVal(tmpSpriteData[3], ``, C_TYP_STRING)),		// CSSクラス
-					left: setVal(tmpSpriteData[4], 0, C_TYP_CALC),						// X座標
-					top: setVal(tmpSpriteData[5], 0, C_TYP_CALC),						// Y座標
-					width: setVal(tmpSpriteData[6], 0, C_TYP_NUMBER),					// spanタグの場合は font-size
-					height: escapeHtml(setVal(tmpSpriteData[7], ``, C_TYP_STRING)),		// spanタグの場合は color(文字列可)
-					opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
-					animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING)),
-					animationDuration: setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / g_fps,
-				};
-				if (g_headerObj.autoPreload) {
-					if (checkImage(tmpObj.path)) {
-						preloadFile(`image`, tmpObj.path);
-					}
-				}
-
-				let addFrame = 0;
-				[spriteData[tmpFrame], addFrame] =
-					checkDuplicatedObjects(spriteData[tmpFrame]);
-
-				const emptyPatterns = [``, `[loop]`, `[jump]`];
-				spriteData[tmpFrame][addFrame] = {
-					depth: tmpDepth,
-					command: tmpObj.path,
-					jumpFrame: tmpObj.class,
-					maxLoop: tmpObj.left,
-					htmlText: emptyPatterns.includes(tmpObj.path) ?
-						`` : (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj)),
-				};
+			// 値チェックとエスケープ処理
+			let tmpFrame;
+			if (setVal(tmpSpriteData[0], 200, C_TYP_NUMBER) === 0) {
+				tmpFrame = 0;
+			} else {
+				tmpFrame = roundZero(_calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC)));
 			}
+			const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_CALC));
+			if (tmpDepth !== C_FLG_ALL && tmpDepth > maxDepth) {
+				maxDepth = tmpDepth;
+			}
+
+			const tmpObj = {
+				path: escapeHtml(setVal(tmpSpriteData[2], ``, C_TYP_STRING)),		// 画像パス or テキスト
+				class: escapeHtml(setVal(tmpSpriteData[3], ``, C_TYP_STRING)),		// CSSクラス
+				left: setVal(tmpSpriteData[4], 0, C_TYP_CALC),						// X座標
+				top: setVal(tmpSpriteData[5], 0, C_TYP_CALC),						// Y座標
+				width: setVal(tmpSpriteData[6], 0, C_TYP_NUMBER),					// spanタグの場合は font-size
+				height: escapeHtml(setVal(tmpSpriteData[7], ``, C_TYP_STRING)),		// spanタグの場合は color(文字列可)
+				opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
+				animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING)),
+				animationDuration: setVal(tmpSpriteData[10], 0, C_TYP_NUMBER) / g_fps,
+			};
+			if (g_headerObj.autoPreload) {
+				if (checkImage(tmpObj.path)) {
+					preloadFile(`image`, tmpObj.path);
+				}
+			}
+
+			let addFrame = 0;
+			[spriteData[tmpFrame], addFrame] =
+				checkDuplicatedObjects(spriteData[tmpFrame]);
+
+			const emptyPatterns = [``, `[loop]`, `[jump]`];
+			spriteData[tmpFrame][addFrame] = {
+				depth: tmpDepth,
+				command: tmpObj.path,
+				jumpFrame: tmpObj.class,
+				maxLoop: tmpObj.left,
+				htmlText: emptyPatterns.includes(tmpObj.path) ?
+					`` : (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj)),
+			};
 		}
 	});
 
@@ -1461,39 +1464,37 @@ function initAfterDosLoaded() {
 		`frzBar`, `lifeBorder`].forEach(img => preloadFile(`image`, g_imgObj[img]));
 
 	// その他の画像ファイルの読み込み
-	g_headerObj.preloadImages.forEach(preloadImage => {
-		if (setVal(preloadImage, ``, C_TYP_STRING) !== ``) {
+	g_headerObj.preloadImages.filter(image => setVal(image, ``, C_TYP_STRING) !== ``).forEach(preloadImage => {
 
-			// Pattern A: |preloadImages=file.png|
-			// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
-			// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
-			// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
+		// Pattern A: |preloadImages=file.png|
+		// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
+		// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
+		// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
 
-			const tmpPreloadImages = preloadImage.split(`@`);
-			if (tmpPreloadImages.length > 1) {
-				const termRoopCnts = tmpPreloadImages[1].split(`-`);
-				let startCnt;
-				let lastCnt;
-				let paddingLen;
+		const tmpPreloadImages = preloadImage.split(`@`);
+		if (tmpPreloadImages.length > 1) {
+			const termRoopCnts = tmpPreloadImages[1].split(`-`);
+			let startCnt;
+			let lastCnt;
+			let paddingLen;
 
-				if (termRoopCnts.length > 1) {
-					// Pattern C, Dの場合
-					startCnt = setVal(termRoopCnts[0], 1, C_TYP_NUMBER);
-					lastCnt = setVal(termRoopCnts[1], 1, C_TYP_NUMBER);
-					paddingLen = String(setVal(termRoopCnts[1], 1, C_TYP_STRING)).length;
-				} else {
-					// Pattern Bの場合
-					startCnt = 1;
-					lastCnt = setVal(tmpPreloadImages[1], 1, C_TYP_NUMBER);
-					paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
-				}
-				for (let k = startCnt; k <= lastCnt; k++) {
-					preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)));
-				}
+			if (termRoopCnts.length > 1) {
+				// Pattern C, Dの場合
+				startCnt = setVal(termRoopCnts[0], 1, C_TYP_NUMBER);
+				lastCnt = setVal(termRoopCnts[1], 1, C_TYP_NUMBER);
+				paddingLen = String(setVal(termRoopCnts[1], 1, C_TYP_STRING)).length;
 			} else {
-				// Pattern Aの場合
-				preloadFile(`image`, preloadImage);
+				// Pattern Bの場合
+				startCnt = 1;
+				lastCnt = setVal(tmpPreloadImages[1], 1, C_TYP_NUMBER);
+				paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
 			}
+			for (let k = startCnt; k <= lastCnt; k++) {
+				preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)));
+			}
+		} else {
+			// Pattern Aの場合
+			preloadFile(`image`, preloadImage);
 		}
 	});
 
@@ -1778,7 +1779,7 @@ function loadSettingJs() {
 	// 共通設定ファイルの指定
 	let settingType = ``;
 	let settingRoot = C_DIR_JS;
-	if (g_rootObj.settingType !== undefined && g_rootObj.settingType !== ``) {
+	if (hasVal(g_rootObj.settingType)) {
 		settingType = `_${g_rootObj.settingType}`;
 		if (g_rootObj.settingType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 			settingType = `_${g_rootObj.settingType.split(C_MRK_CURRENT_DIRECTORY)[1]}`;
@@ -2594,10 +2595,10 @@ function headerConvert(_dosObj) {
 	obj.artistNames = [];
 	obj.musicNos = [];
 
-	if (_dosObj.musicTitle !== undefined && _dosObj.musicTitle !== ``) {
+	if (hasVal(_dosObj.musicTitle)) {
 		const musicData = _dosObj.musicTitle.split(`$`);
 
-		if (_dosObj.musicNo !== undefined && _dosObj.musicNo !== ``) {
+		if (hasVal(_dosObj.musicNo)) {
 			obj.musicNos = _dosObj.musicNo.split(`$`);
 		}
 
@@ -2652,7 +2653,7 @@ function headerConvert(_dosObj) {
 	obj.frzAttempt = setVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT, C_TYP_NUMBER);
 
 	// 製作者表示
-	if (_dosObj.tuning !== undefined && _dosObj.tuning !== ``) {
+	if (hasVal(_dosObj.tuning)) {
 		const tunings = _dosObj.tuning.split(`,`);
 		obj.tuning = escapeHtmlForEnabledTag(tunings[0]);
 		obj.creatorUrl = (tunings.length > 1 ? tunings[1] : (typeof g_presetTuningUrl === C_TYP_STRING ? g_presetTuningUrl : ``));
@@ -2663,7 +2664,7 @@ function headerConvert(_dosObj) {
 	obj.tuningInit = obj.tuning;
 
 	// 譜面情報
-	if (_dosObj.difData !== undefined && _dosObj.difData !== ``) {
+	if (hasVal(_dosObj.difData)) {
 		const difs = _dosObj.difData.split(`$`);
 		const difpos = {
 			key: 0, name: 1, speed: 2, border: 3, recovery: 4, damage: 5, init: 6,
@@ -2874,7 +2875,7 @@ function headerConvert(_dosObj) {
 		let colorList = [];
 
 		// 譜面側で指定されているデータを配列に変換
-		if (_data !== undefined && _data !== ``) {
+		if (hasVal(_data)) {
 			colorList = _data.split(`,`);
 			colorStr = colorList.concat();
 
@@ -3006,7 +3007,7 @@ function headerConvert(_dosObj) {
 	obj.skinRoot = C_DIR_SKIN;
 	obj.skinType2 = `blank`;
 	obj.skinRoot2 = C_DIR_SKIN;
-	if (_dosObj.skinType !== undefined && _dosObj.skinType !== ``) {
+	if (hasVal(_dosObj.skinType)) {
 		const skinTypes = _dosObj.skinType.split(`,`);
 		[obj.skinType2, obj.skinRoot2] = getFilePath(skinTypes.length > 1 ? skinTypes[1] : `blank`, C_DIR_SKIN);
 		[obj.skinType, obj.skinRoot] = getFilePath(skinTypes[0], C_DIR_SKIN);
@@ -3017,7 +3018,7 @@ function headerConvert(_dosObj) {
 	obj.customjsRoot = C_DIR_JS;
 	obj.customjs2 = C_JSF_BLANK;
 	obj.customjs2Root = C_DIR_JS;
-	if (_dosObj.customjs !== undefined && _dosObj.customjs !== ``) {
+	if (hasVal(_dosObj.customjs)) {
 		const customjss = _dosObj.customjs.split(`,`);
 		[obj.customjs2, obj.customjs2Root] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
 		[obj.customjs, obj.customjsRoot] = getFilePath(customjss[0], C_DIR_JS);
@@ -3295,7 +3296,7 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 
 	const difLength = _headerObj.keyLabels.length;
 
-	if (_dosObj[`gauge${_name}`] !== undefined && _dosObj[`gauge${_name}`] !== ``) {
+	if (hasVal(_dosObj[`gauge${_name}`])) {
 		const gauges = _dosObj[`gauge${_name}`].split(`$`);
 
 		const obj = {
@@ -6056,21 +6057,19 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		if (_dosObj[`${_header}${_scoreNo}${_footer}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
 			let speedIdx = 0;
-			const tmpArrayData = _dosObj[`${_header}${_scoreNo}${_footer}`].split(`\r`).join(`\n`);
+			const tmpArrayData = _dosObj[`${_header}${_scoreNo}${_footer}`].split(`\r`).join(`\n`).split(`\n`);
 
-			tmpArrayData.split(`\n`).forEach(tmpData => {
-				if (tmpData !== undefined && tmpData !== ``) {
-					const tmpSpeedData = tmpData.split(`,`);
-					for (let k = 0; k < tmpSpeedData.length; k += 2) {
-						if (setVal(tmpSpeedData[k], ``, C_TYP_STRING) === ``) {
-							continue;
-						} else if (tmpSpeedData[k + 1] === `-`) {
-							break;
-						}
-						speedData[speedIdx] = calcFrame(setVal(tmpSpeedData[k], ``, C_TYP_CALC));
-						speedData[speedIdx + 1] = setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC);
-						speedIdx += 2;
+			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
+				const tmpSpeedData = tmpData.split(`,`);
+				for (let k = 0; k < tmpSpeedData.length; k += 2) {
+					if (setVal(tmpSpeedData[k], ``, C_TYP_STRING) === ``) {
+						continue;
+					} else if (tmpSpeedData[k + 1] === `-`) {
+						break;
 					}
+					speedData[speedIdx] = calcFrame(setVal(tmpSpeedData[k], ``, C_TYP_CALC));
+					speedData[speedIdx + 1] = setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC);
+					speedIdx += 2;
 				}
 			});
 		}
@@ -6086,24 +6085,22 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	function setColorData(_header, _scoreNo) {
 		let colorData = [];
 
-		if (_dosObj[`${_header}${_scoreNo}_data`] !== undefined && _dosObj[`${_header}${_scoreNo}data`] !== `` && g_stateObj.d_color === C_FLG_ON) {
+		if (hasVal(_dosObj[`${_header}${_scoreNo}_data`]) && g_stateObj.d_color === C_FLG_ON) {
 			let colorIdx = 0;
-			const tmpArrayData = _dosObj[`${_header}${_scoreNo}_data`].split(`\r`).join(`\n`);
+			const tmpArrayData = _dosObj[`${_header}${_scoreNo}_data`].split(`\r`).join(`\n`).split(`\n`);
 
-			tmpArrayData.split(`\n`).forEach(tmpData => {
-				if (tmpData !== undefined && tmpData !== ``) {
-					const tmpColorData = tmpData.split(`,`);
-					for (let k = 0; k < tmpColorData.length; k += 3) {
-						if (setVal(tmpColorData[k], ``, C_TYP_STRING) === ``) {
-							continue;
-						} else if (tmpColorData[k + 1] === `-`) {
-							break;
-						}
-						colorData[colorIdx] = calcFrame(setVal(tmpColorData[k], ``, C_TYP_CALC));
-						colorData[colorIdx + 1] = setVal(tmpColorData[k + 1], 0, C_TYP_CALC);
-						colorData[colorIdx + 2] = tmpColorData[k + 2];
-						colorIdx += 3;
+			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
+				const tmpColorData = tmpData.split(`,`);
+				for (let k = 0; k < tmpColorData.length; k += 3) {
+					if (setVal(tmpColorData[k], ``, C_TYP_STRING) === ``) {
+						continue;
+					} else if (tmpColorData[k + 1] === `-`) {
+						break;
 					}
+					colorData[colorIdx] = calcFrame(setVal(tmpColorData[k], ``, C_TYP_CALC));
+					colorData[colorIdx + 1] = setVal(tmpColorData[k + 1], 0, C_TYP_CALC);
+					colorData[colorIdx + 2] = tmpColorData[k + 2];
+					colorIdx += 3;
 				}
 			});
 		}
@@ -6125,22 +6122,20 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		let cssMotionData = [];
 
-		if (dosCssMotionData !== undefined && dosCssMotionData !== `` && g_stateObj.d_arroweffect === C_FLG_ON) {
+		if (hasVal(dosCssMotionData) && g_stateObj.d_arroweffect === C_FLG_ON) {
 			let motionIdx = 0;
-			const tmpArrayData = dosCssMotionData.split(`\r`).join(`\n`);
+			const tmpArrayData = dosCssMotionData.split(`\r`).join(`\n`).split(`\n`);
 
-			tmpArrayData.split(`\n`).forEach(tmpData => {
-				if (tmpData !== undefined && tmpData !== ``) {
-					const tmpcssMotionData = tmpData.split(`,`);
-					if (isNaN(parseInt(tmpcssMotionData[0]))) {
-						return;
-					}
-					cssMotionData[motionIdx] = calcFrame(tmpcssMotionData[0]);
-					cssMotionData[motionIdx + 1] = parseFloat(tmpcssMotionData[1]);
-					cssMotionData[motionIdx + 2] = (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]);
-					cssMotionData[motionIdx + 3] = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], cssMotionData[motionIdx + 2], C_TYP_STRING));
-					motionIdx += 4;
+			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
+				const tmpcssMotionData = tmpData.split(`,`);
+				if (isNaN(parseInt(tmpcssMotionData[0]))) {
+					return;
 				}
+				cssMotionData[motionIdx] = calcFrame(tmpcssMotionData[0]);
+				cssMotionData[motionIdx + 1] = parseFloat(tmpcssMotionData[1]);
+				cssMotionData[motionIdx + 2] = (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]);
+				cssMotionData[motionIdx + 3] = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], cssMotionData[motionIdx + 2], C_TYP_STRING));
+				motionIdx += 4;
 			});
 		}
 		return cssMotionData;
@@ -6192,46 +6187,42 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		tmpArrayData = tmpArrayData.split(`\n`);
 
 		if (g_headerObj.wordAutoReverse === `auto`) {
-			tmpArrayData.forEach(tmpData => {
-				if (tmpData !== undefined && tmpData !== ``) {
-					if (tmpData.indexOf(`<br>`) !== -1) {
-						wordReverseFlg = false;
-					}
+			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
+				if (tmpData.indexOf(`<br>`) !== -1) {
+					wordReverseFlg = false;
 				}
 			});
 		}
 
-		tmpArrayData.forEach(tmpData => {
-			if (tmpData !== undefined && tmpData !== ``) {
-				const tmpWordData = tmpData.split(`,`);
-				for (let k = 0; k < tmpWordData.length; k += 3) {
-					if (setVal(tmpWordData[k], ``, C_TYP_STRING) === ``) {
-						continue;
-					} else if (tmpWordData[k + 1] === `-`) {
-						break;
-					}
-					tmpWordData[k] = calcFrame(setVal(tmpWordData[k], ``, C_TYP_CALC));
-					tmpWordData[k + 1] = setVal(tmpWordData[k + 1], 0, C_TYP_CALC);
-					tmpWordData[k + 1] = Math.floor(tmpWordData[k + 1] / 2) * 2 +
-						(tmpWordData[k + 1] + Number(wordReverseFlg)) % 2;
+		tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
+			const tmpWordData = tmpData.split(`,`);
+			for (let k = 0; k < tmpWordData.length; k += 3) {
+				if (setVal(tmpWordData[k], ``, C_TYP_STRING) === ``) {
+					continue;
+				} else if (tmpWordData[k + 1] === `-`) {
+					break;
+				}
+				tmpWordData[k] = calcFrame(setVal(tmpWordData[k], ``, C_TYP_CALC));
+				tmpWordData[k + 1] = setVal(tmpWordData[k + 1], 0, C_TYP_CALC);
+				tmpWordData[k + 1] = Math.floor(tmpWordData[k + 1] / 2) * 2 +
+					(tmpWordData[k + 1] + Number(wordReverseFlg)) % 2;
 
-					if (tmpWordData[k + 1] > wordMaxDepth) {
-						wordMaxDepth = tmpWordData[k + 1];
-					}
+				if (tmpWordData[k + 1] > wordMaxDepth) {
+					wordMaxDepth = tmpWordData[k + 1];
+				}
 
-					let addFrame = 0;
-					[wordData[tmpWordData[k]], addFrame] =
-						checkDuplicatedObjects(wordData[tmpWordData[k]]);
+				let addFrame = 0;
+				[wordData[tmpWordData[k]], addFrame] =
+					checkDuplicatedObjects(wordData[tmpWordData[k]]);
 
-					if (tmpWordData.length > 3 && tmpWordData.length < 6) {
-						tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, C_TYP_NUMBER);
-						wordData[tmpWordData[0]][addFrame].push(tmpWordData[1],
-							escapeHtmlForEnabledTag(tmpWordData[2]), tmpWordData[3]);
-						break;
-					} else {
-						wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1],
-							escapeHtmlForEnabledTag(setVal(tmpWordData[k + 2], ``, C_TYP_STRING)));
-					}
+				if (tmpWordData.length > 3 && tmpWordData.length < 6) {
+					tmpWordData[3] = setVal(tmpWordData[3], C_WOD_FRAME, C_TYP_NUMBER);
+					wordData[tmpWordData[0]][addFrame].push(tmpWordData[1],
+						escapeHtmlForEnabledTag(tmpWordData[2]), tmpWordData[3]);
+					break;
+				} else {
+					wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1],
+						escapeHtmlForEnabledTag(setVal(tmpWordData[k + 2], ``, C_TYP_STRING)));
 				}
 			}
 		});
@@ -6365,11 +6356,9 @@ function getLastFrame(_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj
 			_dataObj.dummyFrzData[j]
 		];
 
-		data.forEach(_objData => {
-			if (_objData !== undefined && _objData !== ``) {
-				if (_objData[_objData.length - 1] > tmpLastNum) {
-					tmpLastNum = _objData[_objData.length - 1];
-				}
+		data.filter(data => hasVal(data)).forEach(_objData => {
+			if (_objData[_objData.length - 1] > tmpLastNum) {
+				tmpLastNum = _objData[_objData.length - 1];
 			}
 		});
 	}
@@ -6394,12 +6383,10 @@ function getFirstArrowFrame(_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
 			_dataObj.dummyFrzData[j]
 		];
 
-		data.forEach(_objData => {
-			if (_objData !== undefined && _objData !== ``) {
-				if (_objData[0] !== ``) {
-					if (_objData[0] < tmpFirstNum && _objData[0] + C_MAX_ADJUSTMENT > 0) {
-						tmpFirstNum = _objData[0];
-					}
+		data.filter(data => hasVal(data)).forEach(_objData => {
+			if (_objData[0] !== ``) {
+				if (_objData[0] < tmpFirstNum && _objData[0] + C_MAX_ADJUSTMENT > 0) {
+					tmpFirstNum = _objData[0];
 				}
 			}
 		});
@@ -6980,7 +6967,7 @@ function getArrowSettings() {
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ? g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 	[`blank`, `scale`].forEach(header => {
-		if (g_keyObj[`${header}${keyCtrlPtn}`] !== undefined && g_keyObj[`${header}${keyCtrlPtn}`] !== ``) {
+		if (hasVal(g_keyObj[`${header}${keyCtrlPtn}`])) {
 			g_keyObj[header] = g_keyObj[`${header}${keyCtrlPtn}`];
 		} else {
 			g_keyObj[header] = g_keyObj[`${header}_def`];
