@@ -2777,7 +2777,7 @@ function headerConvert(_dosObj) {
 
 	// カスタムゲージ設定
 	// |customGauge=Original::F,Normal::V,Escape::V|
-	if (_dosObj.customGauge !== undefined) {
+	if (hasVal(_dosObj.customGauge)) {
 		const customGauges = _dosObj.customGauge.split(`,`);
 		for (let j = 0; j < customGauges.length; j++) {
 			const customGaugeSets = customGauges[j].split(`::`);
@@ -2792,7 +2792,7 @@ function headerConvert(_dosObj) {
 	});
 
 	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
-	if (_dosObj.defaultFrzColorUse !== undefined) {
+	if (hasVal(_dosObj.defaultFrzColorUse)) {
 		obj.defaultFrzColorUse = setVal(_dosObj.defaultFrzColorUse, true, C_TYP_BOOLEAN);
 	} else if (typeof g_presetFrzColors === C_TYP_BOOLEAN) {
 		obj.defaultFrzColorUse = (g_presetFrzColors ? true : false);
@@ -2934,7 +2934,7 @@ function headerConvert(_dosObj) {
 	}
 
 	// ダミー譜面の設定
-	if (_dosObj.dummyId !== undefined) {
+	if (hasVal(_dosObj.dummyId)) {
 		obj.dummyScoreNos = _dosObj.dummyId.split(`$`);
 	}
 
@@ -2948,7 +2948,7 @@ function headerConvert(_dosObj) {
 	}
 
 	// 開始フレーム数（0以外の場合はフェードインスタート）
-	if (_dosObj.startFrame !== undefined) {
+	if (hasVal(_dosObj.startFrame)) {
 		obj.startFrame = _dosObj.startFrame.split(`$`);
 
 		for (let j = 0; j < obj.startFrame.length; j++) {
@@ -2957,7 +2957,7 @@ function headerConvert(_dosObj) {
 	}
 
 	// フェードアウトフレーム数(譜面別)
-	if (_dosObj.fadeFrame !== undefined) {
+	if (hasVal(_dosObj.fadeFrame)) {
 		const fadeFrames = _dosObj.fadeFrame.split(`$`);
 		obj.fadeFrame = [];
 		fadeFrames.forEach((fadeInfo, j) => {
@@ -2967,7 +2967,7 @@ function headerConvert(_dosObj) {
 	}
 
 	// 終了フレーム数
-	if (_dosObj.endFrame !== undefined) {
+	if (hasVal(_dosObj.endFrame)) {
 		obj.endFrame = _dosObj.endFrame.split(`$`);
 
 		for (let j = 0; j < obj.endFrame.length; j++) {
@@ -2976,7 +2976,7 @@ function headerConvert(_dosObj) {
 	}
 
 	// タイミング調整
-	if (_dosObj.adjustment !== undefined) {
+	if (hasVal(_dosObj.adjustment)) {
 		obj.adjustment = _dosObj.adjustment.split(`$`);
 	} else {
 		obj.adjustment = [0];
@@ -3047,14 +3047,14 @@ function headerConvert(_dosObj) {
 	obj.musicFolder = setVal(_dosObj.musicFolder, `music`, C_TYP_STRING);
 
 	// 楽曲URL
-	if (_dosObj.musicUrl !== undefined) {
+	if (hasVal(_dosObj.musicUrl)) {
 		obj.musicUrls = _dosObj.musicUrl.split(`$`);
 	} else {
 		makeWarningWindow(C_MSG_E_0031);
 	}
 
 	// ハッシュタグ
-	if (_dosObj.hashTag !== undefined) {
+	if (hasVal(_dosObj.hashTag)) {
 		obj.hashTag = _dosObj.hashTag;
 	}
 
@@ -3064,7 +3064,7 @@ function headerConvert(_dosObj) {
 
 	// 読込対象の画像を指定(rel:preload)と同じ
 	obj.preloadImages = [];
-	if (_dosObj.preloadImages !== undefined) {
+	if (hasVal(_dosObj.preloadImages)) {
 		obj.preloadImages = _dosObj.preloadImages.split(`,`).filter(image => hasVal(image)).map(preloadImage => preloadImage);
 	}
 
@@ -3103,7 +3103,7 @@ function headerConvert(_dosObj) {
 	// デフォルト曲名表示のフォント名
 	// (使用例： |titlefont=Century,Meiryo UI|)
 	obj.titlefonts = [`'メイリオ'`];
-	if (_dosObj.titlefont !== undefined) {
+	if (hasVal(_dosObj.titlefont)) {
 		_dosObj.titlefont.split(`$`).forEach((font, j) => {
 			obj.titlefonts[j] = `'${(font.replace(/,/g, `', '`))}'`;
 		});
@@ -3117,7 +3117,7 @@ function headerConvert(_dosObj) {
 	obj.titlearrowgrds = [];
 
 	[`titlegrd`, `titlearrowgrd`].forEach(_name => {
-		if (_dosObj[_name] !== undefined) {
+		if (hasVal(_dosObj[_name])) {
 			const tmpTitlegrd = _dosObj[_name].replace(/,/g, `:`);
 			obj[`${_name}s`] = tmpTitlegrd.split(`$`);
 			obj[`${_name}`] = setVal(obj[`${_name}s`][0], ``, C_TYP_STRING);
@@ -3126,7 +3126,7 @@ function headerConvert(_dosObj) {
 
 	// デフォルト曲名表示の表示位置調整
 	obj.titlepos = [[0, 0], [0, 0]];
-	if (_dosObj.titlepos !== undefined) {
+	if (hasVal(_dosObj.titlepos)) {
 		_dosObj.titlepos.split(`$`).forEach((pos, j) => {
 			obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x));
 		});
@@ -3202,7 +3202,7 @@ function headerConvert(_dosObj) {
 		obj[`${sprite}TitleData`] = [];
 		obj[`${sprite}TitleData`].length = 0;
 		obj[`${sprite}TitleMaxDepth`] = -1;
-		if (_dosObj[`${sprite}title_data`] !== undefined) {
+		if (hasVal(_dosObj[`${sprite}title_data`])) {
 			[obj[`${sprite}TitleData`], obj[`${sprite}TitleMaxDepth`]] = makeSpriteData(_dosObj[`${sprite}title_data`]);
 		}
 	});
@@ -6053,7 +6053,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	function setSpeedData(_header, _scoreNo, _footer = `_data`) {
 		let speedData = [];
 
-		if (_dosObj[`${_header}${_scoreNo}${_footer}`] !== undefined && g_stateObj.d_speed === C_FLG_ON) {
+		if (hasVal(_dosObj[`${_header}${_scoreNo}${_footer}`]) && g_stateObj.d_speed === C_FLG_ON) {
 			let speedIdx = 0;
 			const tmpArrayData = _dosObj[`${_header}${_scoreNo}${_footer}`].split(`\r`).join(`\n`).split(`\n`);
 
