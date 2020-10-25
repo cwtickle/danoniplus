@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/10/10 (v17.4.1)
+ * Revised : 2020/10/25 (v18.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1547,11 +1547,39 @@ const g_keyObj = {
     dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
 
+const g_dfColorObj = {
+
+    // 矢印初期色情報
+    setColorInit: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
+    setShadowColorInit: [``, ``, ``, ``, ``],
+
+    setColorType1: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
+    setColorType2: [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`],
+
+    // フリーズアロー初期色情報
+    frzColorInit: [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+    frzShadowColorInit: [``, ``, ``, ``],
+    frzColorType1: [
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
+        [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
+    ],
+    frzColorType2: [
+        [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
+        [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
+    ],
+};
+
 const g_escapeStr = {
     escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
     escapeTag: [
         [`*amp*`, `&amp;`], [`*pipe*`, `|`], [`*dollar*`, `$`], [`*rsquo*`, `&rsquo;`],
-        [`*quot*`, `&quot;`], [`*comma*`, `&quot;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
+        [`*quot*`, `&quot;`], [`*comma*`, `&sbquo;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
     ],
     unEscapeTag: [
         [`&amp;`, `&`], [`&rsquo;`, `’`], [`&quot;`, `"`], [`&sbquo;`, `,`],
