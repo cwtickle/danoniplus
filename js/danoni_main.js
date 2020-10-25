@@ -1348,14 +1348,8 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	// 譜面分割あり、譜面番号固定時のみ譜面データを一時クリア
 	const dosDivideInput = document.querySelector(`#externalDosDivide`);
 	const dosLockInput = document.querySelector(`#externalDosLock`);
-	let dosDivideFlg = setVal(getQueryParamVal(`dosDivide`), false, C_TYP_BOOLEAN);
-	if (dosDivideInput !== null) {
-		dosDivideFlg = setVal(dosDivideInput.value, dosDivideFlg, C_TYP_BOOLEAN);
-	}
-	g_stateObj.scoreLockFlg = setVal(getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
-	if (dosLockInput !== null) {
-		g_stateObj.scoreLockFlg = setVal(dosLockInput.value, g_stateObj.scoreLockFlg, C_TYP_BOOLEAN);
-	}
+	const dosDivideFlg = setVal(dosDivideInput !== null ? dosDivideInput.value : getQueryParamVal(`dosDivide`), false, C_TYP_BOOLEAN);
+	g_stateObj.scoreLockFlg = setVal(dosLockInput !== null ? dosLockInput.value : getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
 	if (queryDos !== `` && dosDivideFlg && g_stateObj.scoreLockFlg) {
 		const scoreList = Object.keys(g_rootObj).filter(data => {
 			return data.endsWith(`_data`) || data.endsWith(`_change`);
@@ -1472,29 +1466,28 @@ function initAfterDosLoaded() {
 		// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
 
 		const tmpPreloadImages = preloadImage.split(`@`);
-		if (tmpPreloadImages.length > 1) {
+		if (tmpPreloadImages.length === 1) {
+			// Pattern Aの場合
+			preloadFile(`image`, preloadImage);
+		} else {
 			const termRoopCnts = tmpPreloadImages[1].split(`-`);
-			let startCnt;
+			let startCnt = 1;
 			let lastCnt;
 			let paddingLen;
 
-			if (termRoopCnts.length > 1) {
+			if (termRoopCnts.length === 1) {
+				// Pattern Bの場合
+				lastCnt = setVal(tmpPreloadImages[1], 1, C_TYP_NUMBER);
+				paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
+			} else {
 				// Pattern C, Dの場合
 				startCnt = setVal(termRoopCnts[0], 1, C_TYP_NUMBER);
 				lastCnt = setVal(termRoopCnts[1], 1, C_TYP_NUMBER);
 				paddingLen = String(setVal(termRoopCnts[1], 1, C_TYP_STRING)).length;
-			} else {
-				// Pattern Bの場合
-				startCnt = 1;
-				lastCnt = setVal(tmpPreloadImages[1], 1, C_TYP_NUMBER);
-				paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
 			}
 			for (let k = startCnt; k <= lastCnt; k++) {
-				preloadFile(`image`, tmpPreloadImages[0].replace(`*`, paddingLeft(String(k), paddingLen, `0`)));
+				preloadFile(`image`, tmpPreloadImages[0].replace(/\*/g, paddingLeft(String(k), paddingLen, `0`)));
 			}
-		} else {
-			// Pattern Aの場合
-			preloadFile(`image`, preloadImage);
 		}
 	});
 
@@ -1534,40 +1527,31 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
 
 	// 譜面密度グラフ用のデータ作成
-	const arrowCnt = [];
-	const frzCnt = [];
+	const noteCnt = { arrow: [], frz: [] };
 	const densityData = [];
 	let allData = 0;
 	for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
 		densityData[j] = 0;
 	}
 
+	const types = [`arrow`, `frz`];
 	for (let j = 0; j < keyNum; j++) {
-		arrowCnt[j] = 0;
-		frzCnt[j] = 0;
-		_scoreObj.arrowData[j].forEach(note => {
-			if (isNaN(parseFloat(note))) {
-				return;
-			}
-			const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
-			if (point >= 0) {
-				densityData[point]++;
-				arrowCnt[j]++;
-				allData++;
-			}
-		});
-		_scoreObj.frzData[j].forEach((note, k) => {
-			if (isNaN(parseFloat(note))) {
-				return;
-			}
-			if (k % 2 === 0 && note !== ``) {
+		noteCnt.arrow[j] = 0;
+		noteCnt.frz[j] = 0;
+
+		const tmpFrzData = _scoreObj.frzData[j].filter((data, k) => k % 2 === 0);
+		[_scoreObj.arrowData[j], tmpFrzData].forEach((typeData, m) => {
+			typeData.forEach(note => {
+				if (isNaN(parseFloat(note))) {
+					return;
+				}
 				const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 				if (point >= 0) {
 					densityData[point]++;
-					frzCnt[j]++;
+					noteCnt[types[m]][j]++;
 					allData++;
 				}
-			}
+			})
 		});
 	}
 
@@ -1581,8 +1565,8 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 		g_detailObj.densityData[_scoreId].push(Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100);
 	}
 
-	g_detailObj.arrowCnt[_scoreId] = arrowCnt.concat();
-	g_detailObj.frzCnt[_scoreId] = frzCnt.concat();
+	g_detailObj.arrowCnt[_scoreId] = noteCnt.arrow.concat();
+	g_detailObj.frzCnt[_scoreId] = noteCnt.frz.concat();
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
 	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;
@@ -5214,7 +5198,7 @@ function keyConfigInit() {
 				g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
 			}
 			for (let j = 0; j < keyNum; j++) {
-				document.querySelector(`#arrow${j}`).style.background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
+				$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
 			}
 			evt.target.textContent = g_colorType;
 		}, {
@@ -7279,7 +7263,7 @@ function MainInit() {
 		);
 		if (g_stateObj.d_filterline === C_FLG_ON) {
 			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj => {
-				document.querySelector(`#${obj}`).style.opacity = g_stateObj.opacity / 100;
+				$id(obj).opacity = g_stateObj.opacity / 100;
 			});
 		}
 	}
@@ -7645,7 +7629,7 @@ function MainInit() {
 		OFF: _ => {
 			for (let j = 0; j < keyNum; j++) {
 				if (g_workObj.keyCtrlN[j].find(key => keyIsDown(key)) === undefined) {
-					document.querySelector(`#stepDiv${j}`).style.display = C_DIS_NONE;
+					$id(`stepDiv${j}`).display = C_DIS_NONE;
 				}
 			}
 		},
@@ -7784,7 +7768,7 @@ function MainInit() {
 		// フリーズアロー(成功時)
 		frzOK: (_j, _k, _frzName, _cnt) => {
 			judgeKita(_cnt);
-			document.querySelector(`#frzHit${_j}`).style.opacity = 0;
+			$id(`frzHit${_j}`).opacity = 0;
 			g_attrObj[_frzName].judgEndFlg = true;
 			judgeObjDelete.frz(_j, _frzName);
 		},
@@ -7797,7 +7781,7 @@ function MainInit() {
 					customJudgeDummyFrz2(_cnt);
 				}
 			}
-			document.querySelector(`#frzHit${_j}`).style.opacity = 0;
+			$id(`frzHit${_j}`).opacity = 0;
 			g_attrObj[_frzName].judgEndFlg = true;
 			judgeObjDelete.dummyFrz(_j, _frzName);
 		},
@@ -7932,7 +7916,7 @@ function MainInit() {
 		g_attrObj[arrowName] = {
 			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
 			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
-			judgEndFlg: false, boostSpd: boostSpdDir, dividePos: dividePos,
+			boostSpd: boostSpdDir, dividePos: dividePos,
 			prevY: firstPosY, y: firstPosY,
 		};
 		arrowSprite[dividePos].appendChild(stepRoot);
@@ -8496,7 +8480,7 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _allFlg = ``) {
 				if (_allFlg === `A`) {
 					g_workObj[`frz${ctype}ColorsAll`][k] = _mkColorCd[j];
 					if (ctype === `HitBar` && isNaN(Number(g_workObj.arrowRtn[k]))) {
-						document.querySelector(`#frzHitTop${k}`).style.background = _mkColorCd[j];
+						$id(`frzHitTop${k}`).background = _mkColorCd[j];
 					}
 				}
 			}
@@ -8611,7 +8595,7 @@ function judgeArrow(_j) {
 		const difFrame = g_attrObj[arrowName].cnt;
 		const difCnt = Math.abs(difFrame);
 
-		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && !g_attrObj[arrowName].judgEndFlg) {
+		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN]) {
 			const [resultFunc, resultJdg] = checkJudgment(difCnt);
 			resultFunc(difFrame);
 			countFastSlow(difFrame, g_headerObj.justFrames);
@@ -8649,7 +8633,7 @@ function judgeArrow(_j) {
 			return;
 		}
 	}
-	document.querySelector(`#stepDiv${_j}`).style.display = C_DIS_INHERIT;
+	$id(`stepDiv${_j}`).display = C_DIS_INHERIT;
 }
 
 /**
