@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/10/16
+ * Revised : 2020/10/31
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 18.0.0`;
-const g_revisedDate = `2020/10/25`;
+const g_version = `Ver 18.0.1`;
+const g_revisedDate = `2020/10/31`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2547,9 +2547,8 @@ function getMusicNameSimple(_musicName) {
  * @param {string} _musicName 
  */
 function getMusicNameMultiLine(_musicName) {
-	let tmpName = _musicName.split(`<nbr>`).join(`<br>`);
-	tmpName = tmpName.split(`<dbr>`).join(`<br>`);
-	return tmpName.split(`<br>`);
+	const tmpName = _musicName.split(`<nbr>`).join(`<br>`).split(`<dbr>`).join(`<br>`).split(`<br>`);
+	return tmpName.length === 1 ? [tmpName[0], ``] : tmpName;
 }
 
 /**
