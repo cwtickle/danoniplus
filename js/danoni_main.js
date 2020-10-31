@@ -2547,9 +2547,8 @@ function getMusicNameSimple(_musicName) {
  * @param {string} _musicName 
  */
 function getMusicNameMultiLine(_musicName) {
-	let tmpName = _musicName.split(`<nbr>`).join(`<br>`);
-	tmpName = tmpName.split(`<dbr>`).join(`<br>`);
-	return tmpName.split(`<br>`);
+	const tmpName = _musicName.split(`<nbr>`).join(`<br>`).split(`<dbr>`).join(`<br>`).split(`<br>`);
+	return tmpName.length === 1 ? [tmpName[0], ``] : tmpName;
 }
 
 /**
