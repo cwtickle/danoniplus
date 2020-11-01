@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/10/11
+ * Revised : 2020/11/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.5.12`;
-const g_revisedDate = `2020/10/11`;
+const g_version = `Ver 14.5.13`;
+const g_revisedDate = `2020/11/01`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -6000,10 +6000,10 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	// 速度変化データの分解 (2つで1セット)
 	let speedFooter = ``;
-	if (_dosObj[`speed${scoreIdHeader}_data`] !== undefined) {
+	if (_dosObj[`speed${scoreIdHeader}_data`] !== undefined && _dosObj[`speed${scoreIdHeader}_data`] !== ``) {
 		speedFooter = `_data`;
 	}
-	if (_dosObj[`speed${scoreIdHeader}_change`] !== undefined) {
+	if (_dosObj[`speed${scoreIdHeader}_change`] !== undefined && _dosObj[`speed${scoreIdHeader}_change`] !== ``) {
 		speedFooter = `_change`;
 	}
 
