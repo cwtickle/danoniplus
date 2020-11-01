@@ -1310,6 +1310,7 @@ function loadLocalStorage() {
 			g_localStorage.volume = 100;
 		}
 
+		// Display関連の初期値設定
 		g_storeSettings.filter(tmpSetting => hasVal(g_localStorage[tmpSetting])).forEach(setting =>
 			g_stateObj[setting] = g_localStorage[setting]);
 		g_appearanceNum = roundZero(g_appearances.findIndex(setting => setting === g_stateObj.appearance));
@@ -7063,10 +7064,9 @@ function getArrowSettings() {
 
 	if (g_stateObj.dataSaveFlg && !hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
 
-		// ローカルストレージへAdjustment, Volumeを保存
+		// ローカルストレージへAdjustment, Volume, Display関連設定を保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
 		g_localStorage.volume = g_stateObj.volume;
-
 		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
 
 		// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
