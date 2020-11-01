@@ -5952,10 +5952,10 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	// 速度変化データの分解 (2つで1セット)
 	let speedFooter = ``;
-	if (_dosObj[`speed${scoreIdHeader}_data`] !== undefined) {
+	if (hasVal(_dosObj[`speed${scoreIdHeader}_data`])) {
 		speedFooter = `_data`;
 	}
-	if (_dosObj[`speed${scoreIdHeader}_change`] !== undefined) {
+	if (hasVal(_dosObj[`speed${scoreIdHeader}_change`])) {
 		speedFooter = `_change`;
 	}
 
