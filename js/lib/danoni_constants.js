@@ -375,6 +375,9 @@ let g_scoreDetailNum = 0;
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
     `speed`, `color`, `lyrics`, `background`, `arrowEffect`, `special`];
 
+let g_storeSettings = [`appearance`, `opacity`, `d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
+    `d_score`, `d_musicinfo`, `d_filterline`];
+
 // サイズ(後で指定)
 let g_sWidth;
 let g_sHeight;
