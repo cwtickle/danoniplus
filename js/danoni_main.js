@@ -4624,7 +4624,7 @@ function createGeneralSetting(_obj, _settingName, _options = {}) {
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
 
 		multiAppend(_obj,
-			makeSettingLblCssButton(`lnk${settingUpper}`, `${g_stateObj[_settingName]}${_unitName}`, 0,
+			makeSettingLblCssButton(`lnk${settingUpper}`, `${g_stateObj[_settingName]}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
 				_ => setSetting(1, _settingName, _unitName),
 				{ cxtFunc: _ => setSetting(-1, _settingName, _unitName) }),
 
@@ -4678,7 +4678,8 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
 	}
 	g_stateObj[_settingName] = settingList[settingNum];
 	eval(`g_${_settingName}Num = settingNum`);
-	document.querySelector(`#lnk${toCapitalize(_settingName)}`).textContent = `${g_stateObj[_settingName]}${_unitName}`;
+	document.querySelector(`#lnk${toCapitalize(_settingName)}`).textContent =
+		`${g_stateObj[_settingName]}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
 }
 
 /**
