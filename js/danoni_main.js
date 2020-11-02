@@ -1310,6 +1310,12 @@ function loadLocalStorage() {
 			g_localStorage.volume = 100;
 		}
 
+		// Display関連の初期値設定
+		g_storeSettings.filter(tmpSetting => hasVal(g_localStorage[tmpSetting])).forEach(setting =>
+			g_stateObj[setting] = g_localStorage[setting]);
+		g_appearanceNum = roundZero(g_appearances.findIndex(setting => setting === g_stateObj.appearance));
+		g_opacityNum = roundZero(g_opacitys.findIndex(setting => setting === g_stateObj.opacity));
+
 		// ハイスコア取得準備
 		if (g_localStorage.highscores === undefined) {
 			g_localStorage.highscores = {};
@@ -3135,7 +3141,11 @@ function headerConvert(_dosObj) {
 		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] :
 			(obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF), ``, C_TYP_SWITCH);
 
-		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Set`] !== `` ? obj[`${option}Set`] : C_FLG_ON);
+		if (g_localStorage[`d_${option.toLowerCase()}`] !== undefined) {
+			g_stateObj[`d_${option.toLowerCase()}`] = g_localStorage[`d_${option.toLowerCase()}`];
+		} else {
+			g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Set`] !== `` ? obj[`${option}Set`] : C_FLG_ON);
+		}
 		obj[`${option}ChainOFF`] = (_dosObj[`${option}ChainOFF`] !== undefined ? _dosObj[`${option}ChainOFF`].split(`,`) : []);
 
 		// Displayのデフォルト設定で、双方向に設定されている場合は設定をブロック
@@ -4614,7 +4624,7 @@ function createGeneralSetting(_obj, _settingName, _options = {}) {
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
 
 		multiAppend(_obj,
-			makeSettingLblCssButton(`lnk${settingUpper}`, `${g_stateObj[_settingName]}${_unitName}`, 0,
+			makeSettingLblCssButton(`lnk${settingUpper}`, `${g_stateObj[_settingName]}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
 				_ => setSetting(1, _settingName, _unitName),
 				{ cxtFunc: _ => setSetting(-1, _settingName, _unitName) }),
 
@@ -4668,7 +4678,8 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
 	}
 	g_stateObj[_settingName] = settingList[settingNum];
 	eval(`g_${_settingName}Num = settingNum`);
-	document.querySelector(`#lnk${toCapitalize(_settingName)}`).textContent = `${g_stateObj[_settingName]}${_unitName}`;
+	document.querySelector(`#lnk${toCapitalize(_settingName)}`).textContent =
+		`${g_stateObj[_settingName]}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
 }
 
 /**
@@ -7054,9 +7065,10 @@ function getArrowSettings() {
 
 	if (g_stateObj.dataSaveFlg && !hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
 
-		// ローカルストレージへAdjustment, Volumeを保存
+		// ローカルストレージへAdjustment, Volume, Display関連設定を保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
 		g_localStorage.volume = g_stateObj.volume;
+		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
 
 		// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
 		if (!g_stateObj.extraKeyFlg) {
