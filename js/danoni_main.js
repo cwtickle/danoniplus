@@ -2105,8 +2105,8 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	if (colorArray.length === 1) {
 		if (_objType === `titleMusic`) {
 			convertColorStr = `${defaultDir}, ${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
-		} else if (_defaultColorgrd) {
-			convertColorStr = `${defaultDir}, ${colorArray[0]}, #eeeeee${alphaVal}, ${colorArray[0]}`;
+		} else if (_defaultColorgrd[0]) {
+			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${_defaultColorgrd[1]}${alphaVal}, ${colorArray[0]}`;
 		} else {
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
 		}
@@ -2170,7 +2170,7 @@ function titleInit() {
 				x: (g_sWidth - 500) / 2, y: -15 + (g_sHeight - 500) / 2,
 				w: 500, h: 500,
 				background: makeColorGradation(g_headerObj.titlearrowgrds[0] || g_headerObj.setColorOrg[0], {
-					_defaultColorgrd: false,
+					_defaultColorgrd: [false, `#eeeeee`],
 					_objType: `titleArrow`,
 				}), rotate: 180, opacity: 0.25,
 			})
@@ -2729,7 +2729,12 @@ function headerConvert(_dosObj) {
 	g_speedNum = roundZero(g_speeds.findIndex(speed => speed === g_stateObj.speed));
 
 	// 矢印の色変化を常時グラデーションさせる設定
-	obj.defaultColorgrd = setVal(_dosObj.defaultColorgrd, false, C_TYP_BOOLEAN);
+	obj.defaultColorgrd = [false, `#eeeeee`];
+	if (hasVal(_dosObj.defaultColorgrd)) {
+		obj.defaultColorgrd = _dosObj.defaultColorgrd.split(`,`);
+		obj.defaultColorgrd[0] = setVal(obj.defaultColorgrd[0], false, C_TYP_BOOLEAN);
+		obj.defaultColorgrd[1] = setVal(obj.defaultColorgrd[1], `#eeeeee`, C_TYP_STRING);
+	}
 
 	// カラーコードのゼロパディング有無設定
 	obj.colorCdPaddingUse = setVal(_dosObj.colorCdPaddingUse, false, C_TYP_BOOLEAN);
@@ -2795,23 +2800,30 @@ function headerConvert(_dosObj) {
 
 	// ダミー用初期矢印色
 	obj.setDummyColor = [`#777777`, `#444444`, `#777777`, `#444444`, `#777777`];
+	const dfColorgrdSet = {
+		'': obj.defaultColorgrd,
+		'Type0': [!obj.defaultColorgrd[0], obj.defaultColorgrd[1]],
+	};
 
 	[``, `Shadow`].forEach((pattern, k) => {
 		const _name = `set${pattern}Color`;
 		const _frzName = `frz${pattern}Color`;
 
 		// 矢印色
-		[obj[`${_name}`], obj[`${_name}Str`], obj[`${_name}Org`]] =
-			setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], obj[`${_name}Init`].length, {
-				_defaultColorgrd: obj.defaultColorgrd,
-				_colorCdPaddingUse: obj.colorCdPaddingUse,
-				_shadowFlg: Boolean(k),
-			});
+		[``, `Type0`].forEach(type => {
+			[obj[`${_name}${type}`], obj[`${_name}Str${type}`], obj[`${_name}Org${type}`]] =
+				setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], obj[`${_name}Init`].length, {
+					_defaultColorgrd: dfColorgrdSet[type],
+					_colorCdPaddingUse: obj.colorCdPaddingUse,
+					_shadowFlg: Boolean(k),
+				});
+
+			obj[`${_frzName}${type}`] = [];
+			obj[`${_frzName}Str${type}`] = [];
+			obj[`${_frzName}Org${type}`] = [];
+		});
 
 		// フリーズアロー色
-		obj[`${_frzName}`] = [];
-		obj[`${_frzName}Str`] = [];
-		obj[`${_frzName}Org`] = [];
 		const tmpFrzColors = (_dosObj[_frzName] !== undefined ? _dosObj[_frzName].split(`$`) : []);
 		const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
 
@@ -2822,21 +2834,20 @@ function headerConvert(_dosObj) {
 			const baseLength = firstFrzColors.length === 0 || obj.defaultFrzColorUse ?
 				obj[`${_frzName}Init`].length : firstFrzColors.length;
 			for (let k = 0; k < baseLength; k++) {
-				if (firstFrzColors[k] === undefined || firstFrzColors[k] === ``) {
-					currentFrzColors[k] = obj.defaultFrzColorUse ? obj[`${_frzName}Init`][k] : obj[`${_name}Str`][j];
-				} else {
-					currentFrzColors[k] = firstFrzColors[k];
-				}
+				currentFrzColors[k] = setVal(firstFrzColors[k],
+					obj.defaultFrzColorUse ? obj[`${_frzName}Init`][k] : obj[`${_name}Str`][j], C_TYP_STRING);
 			}
 
-			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
-				setColorList(tmpFrzColors[j], currentFrzColors, obj[`${_frzName}Init`].length, {
-					_defaultColorgrd: obj.defaultColorgrd,
-					_colorCdPaddingUse: obj.colorCdPaddingUse,
-					_defaultFrzColorUse: obj.defaultFrzColorUse,
-					_objType: `frz`,
-					_shadowFlg: Boolean(k),
-				});
+			[``, `Type0`].forEach(type => {
+				[obj[`${_frzName}${type}`][j], obj[`${_frzName}Str${type}`][j], obj[`${_frzName}Org${type}`][j]] =
+					setColorList(tmpFrzColors[j], currentFrzColors, obj[`${_frzName}Init`].length, {
+						_defaultColorgrd: dfColorgrdSet[type],
+						_colorCdPaddingUse: obj.colorCdPaddingUse,
+						_defaultFrzColorUse: obj.defaultFrzColorUse,
+						_objType: `frz`,
+						_shadowFlg: Boolean(k),
+					});
+			});
 		}
 		if (k === 0) {
 			obj[`${_name}Default`] = obj[`${_name}`].concat();
@@ -5128,6 +5139,40 @@ function keyConfigInit() {
 		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
+	/**
+	 * ConfigTypeの制御
+	 * @param {event} _evt 
+	 * @param {number} _scrollNum 
+	 */
+	function setConfigType(_evt, _scrollNum = 1) {
+		const typeNum = g_keycons.configTypes.findIndex(value => value === g_kcType);
+		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
+		g_kcType = g_keycons.configTypes[nextNum];
+		g_keycons.configFunc[nextNum](kWidth, divideCnt, keyCtrlPtn, false);
+		_evt.target.textContent = g_kcType;
+	}
+
+	/**
+	 * ColorTypeの制御
+	 * @param {event} _evt 
+	 * @param {number} _scrollNum 
+	 */
+	function setColorType(_evt, _scrollNum = 1) {
+		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
+		const nextNum = (typeNum + g_keycons.colorTypes.length + _scrollNum) % g_keycons.colorTypes.length;
+		g_colorType = g_keycons.colorTypes[nextNum];
+		g_stateObj.d_color = g_keycons.colorDefs[nextNum];
+
+		g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
+		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
+			g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
+		}
+		for (let j = 0; j < keyNum; j++) {
+			$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
+		}
+		_evt.target.textContent = g_colorType;
+	}
+
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
@@ -5149,26 +5194,9 @@ function keyConfigInit() {
 			x: 30, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ConfigType),
 
-		makeSettingLblCssButton(`lnkKcType`, g_kcType, 0, evt => {
-			switch (g_kcType) {
-				case `Main`:
-					g_kcType = `Replaced`;
-					resetCursorReplaced(kWidth, divideCnt, keyCtrlPtn, false);
-					break;
-
-				case `Replaced`:
-					g_kcType = C_FLG_ALL;
-					resetCursorALL(kWidth, divideCnt, keyCtrlPtn, false);
-					break;
-
-				case C_FLG_ALL:
-					g_kcType = `Main`;
-					resetCursorMain(kWidth, divideCnt, keyCtrlPtn, false);
-					break;
-			}
-			evt.target.textContent = g_kcType;
-		}, {
+		makeSettingLblCssButton(`lnkKcType`, g_kcType, 0, evt => setConfigType(evt), {
 			x: 30, y: 35, w: 100,
+			cxtFunc: evt => setConfigType(evt, -1),
 		}),
 
 		// キーカラータイプ切替ボタン
@@ -5176,31 +5204,9 @@ function keyConfigInit() {
 			x: g_sWidth - 120, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ColorType),
 
-		makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, evt => {
-			switch (g_colorType) {
-				case `Default`:
-					g_colorType = `Type1`;
-					g_stateObj.d_color = C_FLG_OFF;
-					break;
-				case `Type1`:
-					g_colorType = `Type2`;
-					g_stateObj.d_color = C_FLG_OFF;
-					break;
-				case `Type2`:
-					g_colorType = `Default`;
-					g_stateObj.d_color = C_FLG_ON;
-					break;
-			}
-			g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
-			for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-				g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
-			}
-			for (let j = 0; j < keyNum; j++) {
-				$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
-			}
-			evt.target.textContent = g_colorType;
-		}, {
+		makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, evt => setColorType(evt), {
 			x: g_sWidth - 130, y: 35, w: 100,
+			cxtFunc: evt => setColorType(evt, -1),
 		}),
 
 	);
@@ -6855,7 +6861,8 @@ function pushColors(_header, _frame, _val, _colorCd) {
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const colorCd = makeColorGradation(_colorCd);
+	const grdFlg = (g_colorType === `Type0` ? !g_headerObj.defaultColorgrd[0] : g_headerObj.defaultColorgrd[0])
+	const colorCd = makeColorGradation(_colorCd, { _defaultColorgrd: [grdFlg, g_headerObj.defaultColorgrd[1]] });
 
 	if (_val < 30 || _val >= 1000) {
 		// 矢印の色変化
