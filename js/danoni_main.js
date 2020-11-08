@@ -2105,8 +2105,8 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	if (colorArray.length === 1) {
 		if (_objType === `titleMusic`) {
 			convertColorStr = `${defaultDir}, ${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
-		} else if (_defaultColorgrd || g_colorType === `Type0`) {
-			convertColorStr = `${defaultDir}, ${colorArray[0]}, #eeeeee${alphaVal}, ${colorArray[0]}`;
+		} else if (_defaultColorgrd[0]) {
+			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${_defaultColorgrd[1]}${alphaVal}, ${colorArray[0]}`;
 		} else {
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
 		}
@@ -2170,7 +2170,7 @@ function titleInit() {
 				x: (g_sWidth - 500) / 2, y: -15 + (g_sHeight - 500) / 2,
 				w: 500, h: 500,
 				background: makeColorGradation(g_headerObj.titlearrowgrds[0] || g_headerObj.setColorOrg[0], {
-					_defaultColorgrd: false,
+					_defaultColorgrd: [false, `#eeeeee`],
 					_objType: `titleArrow`,
 				}), rotate: 180, opacity: 0.25,
 			})
@@ -2729,7 +2729,12 @@ function headerConvert(_dosObj) {
 	g_speedNum = roundZero(g_speeds.findIndex(speed => speed === g_stateObj.speed));
 
 	// 矢印の色変化を常時グラデーションさせる設定
-	obj.defaultColorgrd = setVal(_dosObj.defaultColorgrd, false, C_TYP_BOOLEAN);
+	obj.defaultColorgrd = [false, `#eeeeee`];
+	if (hasVal(_dosObj.defaultColorgrd)) {
+		obj.defaultColorgrd = _dosObj.defaultColorgrd.split(`,`);
+		obj.defaultColorgrd[0] = setVal(obj.defaultColorgrd[0], false, C_TYP_BOOLEAN);
+		obj.defaultColorgrd[1] = setVal(obj.defaultColorgrd[1], `#eeeeee`, C_TYP_STRING);
+	}
 
 	// カラーコードのゼロパディング有無設定
 	obj.colorCdPaddingUse = setVal(_dosObj.colorCdPaddingUse, false, C_TYP_BOOLEAN);
@@ -2808,10 +2813,10 @@ function headerConvert(_dosObj) {
 				_shadowFlg: Boolean(k),
 			});
 
-		if (!obj.defaultColorgrd) {
+		if (!obj.defaultColorgrd[0]) {
 			[obj[`${_name}Type0`], obj[`${_name}StrType0`], obj[`${_name}OrgType0`]] =
 				setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], obj[`${_name}Init`].length, {
-					_defaultColorgrd: true,
+					_defaultColorgrd: [true, obj.defaultColorgrd[1]],
 					_colorCdPaddingUse: obj.colorCdPaddingUse,
 					_shadowFlg: Boolean(k),
 				});
@@ -2847,10 +2852,10 @@ function headerConvert(_dosObj) {
 					_shadowFlg: Boolean(k),
 				});
 
-			if (!obj.defaultColorgrd) {
+			if (!obj.defaultColorgrd[0]) {
 				[obj[`${_frzName}Type0`][j], obj[`${_frzName}StrType0`][j], obj[`${_frzName}OrgType0`][j]] =
 					setColorList(tmpFrzColors[j], currentFrzColors, obj[`${_frzName}Init`].length, {
-						_defaultColorgrd: true,
+						_defaultColorgrd: [true, obj.defaultColorgrd[1]],
 						_colorCdPaddingUse: obj.colorCdPaddingUse,
 						_defaultFrzColorUse: obj.defaultFrzColorUse,
 						_objType: `frz`,
@@ -6883,7 +6888,8 @@ function pushColors(_header, _frame, _val, _colorCd) {
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const colorCd = makeColorGradation(_colorCd);
+	const grdFlg = (g_colorType === `Type0` ? true : g_headerObj.defaultColorgrd[0])
+	const colorCd = makeColorGradation(_colorCd, { defaultColorgrd: [grdFlg, g_headerObj.defaultColorgrd[1]] });
 
 	if (_val < 30 || _val >= 1000) {
 		// 矢印の色変化
