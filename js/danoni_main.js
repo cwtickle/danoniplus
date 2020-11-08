@@ -2105,7 +2105,7 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	if (colorArray.length === 1) {
 		if (_objType === `titleMusic`) {
 			convertColorStr = `${defaultDir}, ${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
-		} else if (_defaultColorgrd) {
+		} else if (_defaultColorgrd || g_colorType === `Type0`) {
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, #eeeeee${alphaVal}, ${colorArray[0]}`;
 		} else {
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
@@ -2808,6 +2808,18 @@ function headerConvert(_dosObj) {
 				_shadowFlg: Boolean(k),
 			});
 
+		if (!obj.defaultColorgrd) {
+			[obj[`${_name}Type0`], obj[`${_name}StrType0`], obj[`${_name}OrgType0`]] =
+				setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], obj[`${_name}Init`].length, {
+					_defaultColorgrd: true,
+					_colorCdPaddingUse: obj.colorCdPaddingUse,
+					_shadowFlg: Boolean(k),
+				});
+			obj[`${_frzName}Type0`] = [];
+			obj[`${_frzName}StrType0`] = [];
+			obj[`${_frzName}OrgType0`] = [];
+		}
+
 		// フリーズアロー色
 		obj[`${_frzName}`] = [];
 		obj[`${_frzName}Str`] = [];
@@ -2822,11 +2834,8 @@ function headerConvert(_dosObj) {
 			const baseLength = firstFrzColors.length === 0 || obj.defaultFrzColorUse ?
 				obj[`${_frzName}Init`].length : firstFrzColors.length;
 			for (let k = 0; k < baseLength; k++) {
-				if (firstFrzColors[k] === undefined || firstFrzColors[k] === ``) {
-					currentFrzColors[k] = obj.defaultFrzColorUse ? obj[`${_frzName}Init`][k] : obj[`${_name}Str`][j];
-				} else {
-					currentFrzColors[k] = firstFrzColors[k];
-				}
+				currentFrzColors[k] = setVal(firstFrzColors[k],
+					obj.defaultFrzColorUse ? obj[`${_frzName}Init`][k] : obj[`${_name}Str`][j], C_TYP_STRING);
 			}
 
 			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
@@ -2837,6 +2846,17 @@ function headerConvert(_dosObj) {
 					_objType: `frz`,
 					_shadowFlg: Boolean(k),
 				});
+
+			if (!obj.defaultColorgrd) {
+				[obj[`${_frzName}Type0`][j], obj[`${_frzName}StrType0`][j], obj[`${_frzName}OrgType0`][j]] =
+					setColorList(tmpFrzColors[j], currentFrzColors, obj[`${_frzName}Init`].length, {
+						_defaultColorgrd: true,
+						_colorCdPaddingUse: obj.colorCdPaddingUse,
+						_defaultFrzColorUse: obj.defaultFrzColorUse,
+						_objType: `frz`,
+						_shadowFlg: Boolean(k),
+					});
+			}
 		}
 		if (k === 0) {
 			obj[`${_name}Default`] = obj[`${_name}`].concat();
@@ -5179,6 +5199,14 @@ function keyConfigInit() {
 		makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, evt => {
 			switch (g_colorType) {
 				case `Default`:
+					if (g_headerObj.setColorType0 !== undefined) {
+						g_colorType = `Type0`;
+					} else {
+						g_colorType = `Type1`;
+						g_stateObj.d_color = C_FLG_OFF;
+					}
+					break;
+				case `Type0`:
 					g_colorType = `Type1`;
 					g_stateObj.d_color = C_FLG_OFF;
 					break;
