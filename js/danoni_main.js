@@ -5139,6 +5139,40 @@ function keyConfigInit() {
 		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
+	/**
+	 * ConfigTypeの制御
+	 * @param {event} _evt 
+	 * @param {number} _scrollNum 
+	 */
+	function setConfigType(_evt, _scrollNum = 1) {
+		const typeNum = g_keycons.configTypes.findIndex(value => value === g_kcType);
+		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
+		g_kcType = g_keycons.configTypes[nextNum];
+		g_keycons.configFunc[nextNum](kWidth, divideCnt, keyCtrlPtn, false);
+		_evt.target.textContent = g_kcType;
+	}
+
+	/**
+	 * ColorTypeの制御
+	 * @param {event} _evt 
+	 * @param {number} _scrollNum 
+	 */
+	function setColorType(_evt, _scrollNum = 1) {
+		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
+		const nextNum = (typeNum + g_keycons.colorTypes.length + _scrollNum) % g_keycons.colorTypes.length;
+		g_colorType = g_keycons.colorTypes[nextNum];
+		g_stateObj.d_color = g_keycons.colorDefs[nextNum];
+
+		g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
+		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
+			g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
+		}
+		for (let j = 0; j < keyNum; j++) {
+			$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
+		}
+		_evt.target.textContent = g_colorType;
+	}
+
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
@@ -5160,26 +5194,9 @@ function keyConfigInit() {
 			x: 30, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ConfigType),
 
-		makeSettingLblCssButton(`lnkKcType`, g_kcType, 0, evt => {
-			switch (g_kcType) {
-				case `Main`:
-					g_kcType = `Replaced`;
-					resetCursorReplaced(kWidth, divideCnt, keyCtrlPtn, false);
-					break;
-
-				case `Replaced`:
-					g_kcType = C_FLG_ALL;
-					resetCursorALL(kWidth, divideCnt, keyCtrlPtn, false);
-					break;
-
-				case C_FLG_ALL:
-					g_kcType = `Main`;
-					resetCursorMain(kWidth, divideCnt, keyCtrlPtn, false);
-					break;
-			}
-			evt.target.textContent = g_kcType;
-		}, {
+		makeSettingLblCssButton(`lnkKcType`, g_kcType, 0, evt => setConfigType(evt), {
 			x: 30, y: 35, w: 100,
+			cxtFunc: evt => setConfigType(evt, -1),
 		}),
 
 		// キーカラータイプ切替ボタン
@@ -5187,34 +5204,9 @@ function keyConfigInit() {
 			x: g_sWidth - 120, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ColorType),
 
-		makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, evt => {
-			switch (g_colorType) {
-				case `Default`:
-					g_colorType = `Type0`;
-					break;
-				case `Type0`:
-					g_colorType = `Type1`;
-					g_stateObj.d_color = C_FLG_OFF;
-					break;
-				case `Type1`:
-					g_colorType = `Type2`;
-					g_stateObj.d_color = C_FLG_OFF;
-					break;
-				case `Type2`:
-					g_colorType = `Default`;
-					g_stateObj.d_color = C_FLG_ON;
-					break;
-			}
-			g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
-			for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-				g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
-			}
-			for (let j = 0; j < keyNum; j++) {
-				$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
-			}
-			evt.target.textContent = g_colorType;
-		}, {
+		makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, evt => setColorType(evt), {
 			x: g_sWidth - 130, y: 35, w: 100,
+			cxtFunc: evt => setColorType(evt, -1),
 		}),
 
 	);
@@ -6870,7 +6862,7 @@ function pushColors(_header, _frame, _val, _colorCd) {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const grdFlg = (g_colorType === `Type0` ? !g_headerObj.defaultColorgrd[0] : g_headerObj.defaultColorgrd[0])
-	const colorCd = makeColorGradation(_colorCd, { defaultColorgrd: [grdFlg, g_headerObj.defaultColorgrd[1]] });
+	const colorCd = makeColorGradation(_colorCd, { _defaultColorgrd: [grdFlg, g_headerObj.defaultColorgrd[1]] });
 
 	if (_val < 30 || _val >= 1000) {
 		// 矢印の色変化

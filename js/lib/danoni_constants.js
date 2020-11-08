@@ -372,6 +372,16 @@ let g_opacityNum = g_opacitys.length - 1;
 let g_scoreDetails = [`Speed`, `Density`, `ToolDif`];
 let g_scoreDetailNum = 0;
 
+let g_keycons = {
+    configTypes: [`Main`, `Replaced`, `ALL`],
+    configFunc: [resetCursorMain, resetCursorReplaced, resetCursorALL],
+    configTypeNum: 0,
+
+    colorTypes: [`Default`, `Type0`, `Type1`, `Type2`],
+    colorDefs: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_OFF],
+    colorTypeNum: 0,
+};
+
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
     `speed`, `color`, `lyrics`, `background`, `arrowEffect`, `special`];
 
