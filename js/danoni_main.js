@@ -2800,35 +2800,30 @@ function headerConvert(_dosObj) {
 
 	// ダミー用初期矢印色
 	obj.setDummyColor = [`#777777`, `#444444`, `#777777`, `#444444`, `#777777`];
+	const dfColorgrdSet = {
+		'': obj.defaultColorgrd,
+		'Type0': [!obj.defaultColorgrd[0], obj.defaultColorgrd[1]],
+	};
 
 	[``, `Shadow`].forEach((pattern, k) => {
 		const _name = `set${pattern}Color`;
 		const _frzName = `frz${pattern}Color`;
 
 		// 矢印色
-		[obj[`${_name}`], obj[`${_name}Str`], obj[`${_name}Org`]] =
-			setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], obj[`${_name}Init`].length, {
-				_defaultColorgrd: obj.defaultColorgrd,
-				_colorCdPaddingUse: obj.colorCdPaddingUse,
-				_shadowFlg: Boolean(k),
-			});
-
-		if (!obj.defaultColorgrd[0]) {
-			[obj[`${_name}Type0`], obj[`${_name}StrType0`], obj[`${_name}OrgType0`]] =
+		[``, `Type0`].forEach(type => {
+			[obj[`${_name}${type}`], obj[`${_name}Str${type}`], obj[`${_name}Org${type}`]] =
 				setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], obj[`${_name}Init`].length, {
-					_defaultColorgrd: [true, obj.defaultColorgrd[1]],
+					_defaultColorgrd: dfColorgrdSet[type],
 					_colorCdPaddingUse: obj.colorCdPaddingUse,
 					_shadowFlg: Boolean(k),
 				});
-			obj[`${_frzName}Type0`] = [];
-			obj[`${_frzName}StrType0`] = [];
-			obj[`${_frzName}OrgType0`] = [];
-		}
+
+			obj[`${_frzName}${type}`] = [];
+			obj[`${_frzName}Str${type}`] = [];
+			obj[`${_frzName}Org${type}`] = [];
+		});
 
 		// フリーズアロー色
-		obj[`${_frzName}`] = [];
-		obj[`${_frzName}Str`] = [];
-		obj[`${_frzName}Org`] = [];
 		const tmpFrzColors = (_dosObj[_frzName] !== undefined ? _dosObj[_frzName].split(`$`) : []);
 		const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
 
@@ -2843,25 +2838,16 @@ function headerConvert(_dosObj) {
 					obj.defaultFrzColorUse ? obj[`${_frzName}Init`][k] : obj[`${_name}Str`][j], C_TYP_STRING);
 			}
 
-			[obj[`${_frzName}`][j], obj[`${_frzName}Str`][j], obj[`${_frzName}Org`][j]] =
-				setColorList(tmpFrzColors[j], currentFrzColors, obj[`${_frzName}Init`].length, {
-					_defaultColorgrd: obj.defaultColorgrd,
-					_colorCdPaddingUse: obj.colorCdPaddingUse,
-					_defaultFrzColorUse: obj.defaultFrzColorUse,
-					_objType: `frz`,
-					_shadowFlg: Boolean(k),
-				});
-
-			if (!obj.defaultColorgrd[0]) {
-				[obj[`${_frzName}Type0`][j], obj[`${_frzName}StrType0`][j], obj[`${_frzName}OrgType0`][j]] =
+			[``, `Type0`].forEach(type => {
+				[obj[`${_frzName}${type}`][j], obj[`${_frzName}Str${type}`][j], obj[`${_frzName}Org${type}`][j]] =
 					setColorList(tmpFrzColors[j], currentFrzColors, obj[`${_frzName}Init`].length, {
-						_defaultColorgrd: [true, obj.defaultColorgrd[1]],
+						_defaultColorgrd: dfColorgrdSet[type],
 						_colorCdPaddingUse: obj.colorCdPaddingUse,
 						_defaultFrzColorUse: obj.defaultFrzColorUse,
 						_objType: `frz`,
 						_shadowFlg: Boolean(k),
 					});
-			}
+			});
 		}
 		if (k === 0) {
 			obj[`${_name}Default`] = obj[`${_name}`].concat();
@@ -5204,12 +5190,7 @@ function keyConfigInit() {
 		makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, evt => {
 			switch (g_colorType) {
 				case `Default`:
-					if (g_headerObj.setColorType0 !== undefined) {
-						g_colorType = `Type0`;
-					} else {
-						g_colorType = `Type1`;
-						g_stateObj.d_color = C_FLG_OFF;
-					}
+					g_colorType = `Type0`;
 					break;
 				case `Type0`:
 					g_colorType = `Type1`;
@@ -6888,7 +6869,7 @@ function pushColors(_header, _frame, _val, _colorCd) {
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const grdFlg = (g_colorType === `Type0` ? true : g_headerObj.defaultColorgrd[0])
+	const grdFlg = (g_colorType === `Type0` ? !g_headerObj.defaultColorgrd[0] : g_headerObj.defaultColorgrd[0])
 	const colorCd = makeColorGradation(_colorCd, { defaultColorgrd: [grdFlg, g_headerObj.defaultColorgrd[1]] });
 
 	if (_val < 30 || _val >= 1000) {
