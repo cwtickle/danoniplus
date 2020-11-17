@@ -1975,12 +1975,7 @@ function drawDefaultBackImage(_key) {
  */
 function checkImage(_str) {
 	return (
-		(
-			_str.indexOf(`.png`) !== -1 ||
-			_str.indexOf(`.gif`) !== -1 ||
-			_str.indexOf(`.bmp`) !== -1 ||
-			_str.indexOf(`.jpg`) !== -1
-		) ? true : false
+		g_imgObj.imgExtensions.findIndex(value => _str.toLowerCase().match(new RegExp(String.raw`.${value}$`, 'i'))) !== -1 ? true : false
 	);
 }
 
