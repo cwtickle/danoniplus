@@ -1316,6 +1316,10 @@ function loadLocalStorage() {
 		g_appearanceNum = roundZero(g_appearances.findIndex(setting => setting === g_stateObj.appearance));
 		g_opacityNum = roundZero(g_opacitys.findIndex(setting => setting === g_stateObj.opacity));
 
+		if (g_localStorage.colorType !== undefined) {
+			g_colorType = g_localStorage.colorType;
+		}
+
 		// ハイスコア取得準備
 		if (g_localStorage.highscores === undefined) {
 			g_localStorage.highscores = {};
@@ -5127,6 +5131,7 @@ function keyConfigInit() {
 			}
 		}
 	}
+	setColorType(``, 0);
 	posj = g_keyObj[`pos${keyCtrlPtn}`][0];
 
 	// カーソルの作成
@@ -5152,7 +5157,7 @@ function keyConfigInit() {
 	 * @param {event} _evt 
 	 * @param {number} _scrollNum 
 	 */
-	function setColorType(_evt, _scrollNum = 1) {
+	function setColorType(_evt = ``, _scrollNum = 1) {
 		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
 		const nextNum = (typeNum + g_keycons.colorTypes.length + _scrollNum) % g_keycons.colorTypes.length;
 		g_colorType = g_keycons.colorTypes[nextNum];
@@ -5165,7 +5170,9 @@ function keyConfigInit() {
 		for (let j = 0; j < keyNum; j++) {
 			$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
 		}
-		_evt.target.textContent = g_colorType;
+		if (_evt !== ``) {
+			_evt.target.textContent = g_colorType;
+		}
 	}
 
 	multiAppend(divRoot,
@@ -7070,6 +7077,7 @@ function getArrowSettings() {
 		// ローカルストレージへAdjustment, Volume, Display関連設定を保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
 		g_localStorage.volume = g_stateObj.volume;
+		g_localStorage.colorType = g_colorType;
 		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
 
 		// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
