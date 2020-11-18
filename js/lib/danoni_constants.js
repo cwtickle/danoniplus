@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/11/08 (v18.2.0)
+ * Revised : 2020/11/18 (v18.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -117,6 +117,8 @@ const g_imgObj = {
     frzBar: C_IMG_FRZBAR,
     lifeBar: C_IMG_LIFEBAR,
     lifeBorder: C_IMG_LIFEBORDER,
+
+    imgExtensions: [`png`, `gif`, `bmp`, `jpg`, `jpeg`, `svg`],
 };
 
 // Motionオプション配列の基準位置
