@@ -1311,14 +1311,8 @@ function loadLocalStorage() {
 		}
 
 		// Display関連の初期値設定
-		g_storeSettings.filter(tmpSetting => hasVal(g_localStorage[tmpSetting])).forEach(setting =>
-			g_stateObj[setting] = g_localStorage[setting]);
 		g_appearanceNum = roundZero(g_appearances.findIndex(setting => setting === g_stateObj.appearance));
 		g_opacityNum = roundZero(g_opacitys.findIndex(setting => setting === g_stateObj.opacity));
-
-		if (g_localStorage.colorType !== undefined) {
-			g_colorType = g_localStorage.colorType;
-		}
 
 		// ハイスコア取得準備
 		if (g_localStorage.highscores === undefined) {
@@ -3150,12 +3144,7 @@ function headerConvert(_dosObj) {
 		obj[`${option}Use`] = setVal(displayUse[0], true, C_TYP_BOOLEAN);
 		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] :
 			(obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF), ``, C_TYP_SWITCH);
-
-		if (g_localStorage[`d_${option.toLowerCase()}`] !== undefined) {
-			g_stateObj[`d_${option.toLowerCase()}`] = g_localStorage[`d_${option.toLowerCase()}`];
-		} else {
-			g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Set`] !== `` ? obj[`${option}Set`] : C_FLG_ON);
-		}
+		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Set`] !== `` ? obj[`${option}Set`] : C_FLG_ON);
 		obj[`${option}ChainOFF`] = (_dosObj[`${option}ChainOFF`] !== undefined ? _dosObj[`${option}ChainOFF`].split(`,`) : []);
 
 		// Displayのデフォルト設定で、双方向に設定されている場合は設定をブロック
@@ -3181,6 +3170,17 @@ function headerConvert(_dosObj) {
 				interlockingButton(obj, defaultOption, C_FLG_OFF, C_FLG_ON);
 			});
 		});
+	}
+
+	// ローカルストレージに保存済みのDisplay設定・ColorType設定を戻す
+	g_storeSettings.filter(tmpSetting => hasVal(g_localStorage[tmpSetting])).forEach(setting =>
+		g_stateObj[setting] = g_localStorage[setting]);
+	if (g_localStorage.colorType !== undefined) {
+		g_colorType = g_localStorage.colorType;
+		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
+		if (obj.colorUse) {
+			g_stateObj.d_color = g_keycons.colorDefs[typeNum];
+		}
 	}
 
 	// 別キーパターンの使用有無
@@ -5131,7 +5131,6 @@ function keyConfigInit() {
 			}
 		}
 	}
-	setColorType(``, 0);
 	posj = g_keyObj[`pos${keyCtrlPtn}`][0];
 
 	// カーソルの作成
@@ -5154,14 +5153,15 @@ function keyConfigInit() {
 
 	/**
 	 * ColorTypeの制御
-	 * @param {event} _evt 
 	 * @param {number} _scrollNum 
 	 */
-	function setColorType(_evt = ``, _scrollNum = 1) {
+	function setColorType(_scrollNum = 1) {
 		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
 		const nextNum = (typeNum + g_keycons.colorTypes.length + _scrollNum) % g_keycons.colorTypes.length;
 		g_colorType = g_keycons.colorTypes[nextNum];
-		g_stateObj.d_color = g_keycons.colorDefs[nextNum];
+		if (g_headerObj.colorUse) {
+			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
+		}
 
 		g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
 		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
@@ -5170,9 +5170,7 @@ function keyConfigInit() {
 		for (let j = 0; j < keyNum; j++) {
 			$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
 		}
-		if (_evt !== ``) {
-			_evt.target.textContent = g_colorType;
-		}
+		lnkColorType.textContent = `${g_colorType}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	}
 
 	multiAppend(divRoot,
@@ -5206,12 +5204,13 @@ function keyConfigInit() {
 			x: g_sWidth - 120, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ColorType),
 
-		makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, evt => setColorType(evt), {
+		makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, _ => setColorType(), {
 			x: g_sWidth - 130, y: 35, w: 100,
-			cxtFunc: evt => setColorType(evt, -1),
+			cxtFunc: _ => setColorType(-1),
 		}),
 
 	);
+	setColorType(0);
 
 	/**
 	 * キーコンフィグ用の矢印色を取得
