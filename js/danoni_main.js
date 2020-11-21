@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/11/01
+ * Revised : 2020/11/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 17.5.3`;
-const g_revisedDate = `2020/11/01`;
+const g_version = `Ver 17.5.4`;
+const g_revisedDate = `2020/11/21`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5236,15 +5236,21 @@ function keyConfigInit() {
 			switch (g_colorType) {
 				case `Default`:
 					g_colorType = `Type1`;
-					g_stateObj.d_color = C_FLG_OFF;
+					if (g_headerObj.colorUse) {
+						g_stateObj.d_color = C_FLG_OFF;
+					}
 					break;
 				case `Type1`:
 					g_colorType = `Type2`;
-					g_stateObj.d_color = C_FLG_OFF;
+					if (g_headerObj.colorUse) {
+						g_stateObj.d_color = C_FLG_OFF;
+					}
 					break;
 				case `Type2`:
 					g_colorType = `Default`;
-					g_stateObj.d_color = C_FLG_ON;
+					if (g_headerObj.colorUse) {
+						g_stateObj.d_color = C_FLG_ON;
+					}
 					break;
 			}
 			g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
