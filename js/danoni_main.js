@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/11/18
+ * Revised : 2020/11/23
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 18.3.0`;
-const g_revisedDate = `2020/11/18`;
+const g_version = `Ver 18.4.0`;
+const g_revisedDate = `2020/11/23`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1166,7 +1166,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 			}
 
 			const tmpObj = {
-				path: escapeHtml(setVal(tmpSpriteData[2], ``, C_TYP_STRING)),		// 画像パス or テキスト
+				path: escapeHtml(setVal(tmpSpriteData[2], ``, C_TYP_STRING), g_escapeStr.escapeCode),	// 画像パス or テキスト
 				class: escapeHtml(setVal(tmpSpriteData[3], ``, C_TYP_STRING)),		// CSSクラス
 				left: setVal(tmpSpriteData[4], 0, C_TYP_CALC),						// X座標
 				top: setVal(tmpSpriteData[5], 0, C_TYP_CALC),						// Y座標
@@ -6270,9 +6270,10 @@ function replaceStr(_str, _pairs) {
 /**
  * 文字列のエスケープ処理
  * @param {string} _str 
+ * @param {array} _escapeList
  */
-function escapeHtml(_str) {
-	return escapeHtmlForEnabledTag(replaceStr(_str, g_escapeStr.escape));
+function escapeHtml(_str, _escapeList = g_escapeStr.escape) {
+	return escapeHtmlForEnabledTag(replaceStr(_str, _escapeList));
 }
 
 /**

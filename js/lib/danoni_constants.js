@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/11/18 (v18.3.0)
+ * Revised : 2020/11/23 (v18.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1618,10 +1618,14 @@ const g_escapeStr = {
     escapeTag: [
         [`*amp*`, `&amp;`], [`*pipe*`, `|`], [`*dollar*`, `$`], [`*rsquo*`, `&rsquo;`],
         [`*quot*`, `&quot;`], [`*comma*`, `&sbquo;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
+        [`*lt*`, `&lt;`], [`*gt*`, `&gt;`],
     ],
     unEscapeTag: [
         [`&amp;`, `&`], [`&rsquo;`, `’`], [`&quot;`, `"`], [`&sbquo;`, `,`],
         [`&lt;`, `<`], [`&gt;`, `>`], [`&#39;`, `'`], [`&#96;`, `\``],
+    ],
+    escapeCode: [
+        [`<script>`, ``], [`</script>`, ``],
     ],
 };
 
