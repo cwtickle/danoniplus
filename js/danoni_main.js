@@ -2208,12 +2208,10 @@ function titleInit() {
 		const titlefontsize2 = setVal(titlefontsizes[1], titlefontsize1, C_TYP_NUMBER);
 
 		// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
-		const titlelineheight = (g_headerObj.titlelineheight !== `` ? g_headerObj.titlelineheight : titlefontsize2 + 5);
+		const titlelineheight = (g_headerObj.titlelineheight !== `` ? g_headerObj.titlelineheight - (titlefontsize2 + 10) : 0);
 
 		const lblmusicTitle = createDivCss2Label(`lblmusicTitle`,
-			`<span style="
-				align:${C_ALIGN_CENTER};
-				position:relative;top:${titlefontsize1 - (titlefontsize1 + titlefontsize2) / 2}px;
+			`<div id="lblmusicTitle1" style="
 				font-family:${g_headerObj.titlefonts[0]};
 				background: ${titlegrds[0]};
 				background-clip: text;
@@ -2221,20 +2219,21 @@ function titleInit() {
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
 				color: #ffffff;
 			">
-				${g_headerObj.musicTitleForView[0]}<br>
-				<span style="
-					font-size:${titlefontsize2}px;
-					position:relative;left:${g_headerObj.titlepos[1][0]}px;
-					top:${g_headerObj.titlepos[1][1] + titlelineheight - (titlefontsize1 + titlefontsize2) / 2 - titlefontsize1 + titlefontsize2}px;
-					font-family:${g_headerObj.titlefonts[1]};
-					background: ${titlegrds[1]};
-					background-clip: text;
-					-webkit-background-clip: text;
-					-webkit-text-fill-color: rgba(255,255,255,0.0);
-				">
-					${setVal(g_headerObj.musicTitleForView[1], ``, C_TYP_STRING)}
-				</span>
-			</span>`,
+				${g_headerObj.musicTitleForView[0]}
+			</div>
+			<div id="lblmusicTitle2" style="
+				font-size:${titlefontsize2}px;
+				position:relative;left:${g_headerObj.titlepos[1][0]}px;
+				top:${g_headerObj.titlepos[1][1] + titlelineheight}px;
+				font-family:${g_headerObj.titlefonts[1]};
+				background: ${titlegrds[1]};
+				background-clip: text;
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: rgba(255,255,255,0.0);
+			">
+				${setVal(g_headerObj.musicTitleForView[1], ``, C_TYP_STRING)}
+			</div>
+			`,
 			{
 				x: Number(g_headerObj.titlepos[0][0]), y: Number(g_headerObj.titlepos[0][1]),
 				w: g_sWidth, h: g_sHeight - 40, siz: titlefontsize1,
@@ -2614,6 +2613,8 @@ function headerConvert(_dosObj) {
 		obj.artistName = `artistName`;
 		obj.artistUrl = ``;
 	}
+
+	// todo:タイトル文字のアニメーション設定
 
 	// 最小・最大速度の設定
 	obj.minSpeed = Math.round(setVal(_dosObj.minSpeed, C_MIN_SPEED, C_TYP_FLOAT) * 4) / 4;
