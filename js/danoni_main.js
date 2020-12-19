@@ -2210,6 +2210,14 @@ function titleInit() {
 		// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
 		const titlelineheight = (g_headerObj.titlelineheight !== `` ? g_headerObj.titlelineheight - (titlefontsize2 + 10) : 0);
 
+		let txtAnimations = [``, ``];
+		if (!g_headerObj.customTitleAnimationUse) {
+			for (let j = 0; j < txtAnimations.length; j++) {
+				txtAnimations[j] = `animation-name:${g_headerObj.titleAnimationName[j]};
+				animation-duration:${g_headerObj.titleAnimationDuration[j]}s;
+				animation-delay:${g_headerObj.titleAnimationDelay[j]}s;`;
+			}
+		}
 		const lblmusicTitle = createDivCss2Label(`lblmusicTitle`,
 			`<div id="lblmusicTitle1" style="
 				font-family:${g_headerObj.titlefonts[0]};
@@ -2217,7 +2225,7 @@ function titleInit() {
 				background-clip: text;
 				-webkit-background-clip: text;
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
-				color: #ffffff;
+				${txtAnimations[0]}
 			">
 				${g_headerObj.musicTitleForView[0]}
 			</div>
@@ -2230,6 +2238,7 @@ function titleInit() {
 				background-clip: text;
 				-webkit-background-clip: text;
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
+				${txtAnimations[1]}
 			">
 				${setVal(g_headerObj.musicTitleForView[1], ``, C_TYP_STRING)}
 			</div>
@@ -2613,8 +2622,6 @@ function headerConvert(_dosObj) {
 		obj.artistName = `artistName`;
 		obj.artistUrl = ``;
 	}
-
-	// todo:タイトル文字のアニメーション設定
 
 	// 最小・最大速度の設定
 	obj.minSpeed = Math.round(setVal(_dosObj.minSpeed, C_MIN_SPEED, C_TYP_FLOAT) * 4) / 4;
@@ -3056,7 +3063,7 @@ function headerConvert(_dosObj) {
 	obj.releaseDate = setVal(_dosObj.releaseDate, ``, C_TYP_STRING);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
-	const defaultObjs = [`title`, `titleArrow`, `back`, `backMain`, `ready`];
+	const defaultObjs = [`title`, `titleArrow`, `titleAnimation`, `back`, `backMain`, `ready`];
 	defaultObjs.forEach(objName => {
 		const objUpper = toCapitalize(objName);
 		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
@@ -3110,6 +3117,24 @@ function headerConvert(_dosObj) {
 	if (hasVal(_dosObj.titlepos)) {
 		_dosObj.titlepos.split(`$`).forEach((pos, j) => {
 			obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x));
+		});
+	}
+
+	// タイトル文字のアニメーション設定
+	obj.titleAnimationName = [`leftToRight`];
+	obj.titleAnimationDuration = [1.5];
+	obj.titleAnimationDelay = [0];
+	if (hasVal(_dosObj.titleanimation)) {
+		_dosObj.titleanimation.split(`$`).forEach((pos, j) => {
+			const titleAnimation = pos.split(`,`);
+			obj.titleAnimationName[j] = setVal(titleAnimation[0], obj.titleAnimationName[0], C_TYP_STRING);
+			obj.titleAnimationDuration[j] = setVal(titleAnimation[1] / g_fps, obj.titleAnimationDuration[0], C_TYP_FLOAT);
+			obj.titleAnimationDelay[j] = setVal(titleAnimation[2] / g_fps, obj.titleAnimationDelay[0], C_TYP_FLOAT);
+		});
+	}
+	if (obj.titleAnimationName.length === 1) {
+		[`Name`, `Duration`, `Delay`].forEach(pattern => {
+			obj[`titleAnimation${pattern}`][1] = obj[`titleAnimation${pattern}`][0];
 		});
 	}
 
