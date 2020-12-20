@@ -65,6 +65,7 @@ const g_presetGaugeCustom = {
 const g_presetCustomDesignUse = {
 	title: `false`,
 	titleArrow: `false`,
+	titleAnimation: `false`,
 	back: `false`,
 	backMain: `false`,
 	ready: `false`,
@@ -145,7 +146,7 @@ const g_presetFrzStartjdgUse = `false`;
 	   右側に定義する値は、g_resultObj配下に定義する必要があります。
 
 	   例) exScore: `exScores`,
-	       [exScore] -> g_resultObj.exScores
+		   [exScore] -> g_resultObj.exScores
  */
 const g_presetResultVals = {
 	// exScore: `exScore`,

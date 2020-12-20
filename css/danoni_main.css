@@ -245,12 +245,6 @@ input[type=range]:focus {
 	}
 }
 
-/* タイトルデフォルトモーション（HTML側で上書き可能） */
-#lblmusicTitle {
-	animation-duration: 1.5s;
-	animation-name: leftToRight;
-}
-
 .toRight {
 	animation-name: leftToRight;
 }
