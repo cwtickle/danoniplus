@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/11/01
+ * Revised : 2020/12/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.24`;
-const g_revisedDate = `2020/11/01`;
+const g_version = `Ver 9.4.25`;
+const g_revisedDate = `2020/12/21`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -8499,6 +8499,10 @@ function MainInit() {
 			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 				g_gameOverFlg = true;
 			}
+
+			document.onkeydown = evt => blockCode(transCode(evt.code));
+			document.onkeyup = evt => { }
+
 			clearTimeout(g_timeoutEvtId);
 			setTimeout(_ => {
 				clearWindow();
