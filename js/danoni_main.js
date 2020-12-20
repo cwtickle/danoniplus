@@ -390,18 +390,28 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 	if (preloadFlg === undefined) {
 		g_preloadImgs.push(_href);
 
-		const link = document.createElement(`link`);
-		link.rel = `preload`;
-		link.as = _as;
-		link.href = _href;
-		if (_type !== ``) {
-			link.type = _type;
-		}
-		if (location.href.match(`^file`)) {
+		if (g_userAgent.indexOf(`firefox`) !== -1) {
+			// Firefoxの場合のみpreloadが効かないため、画像読込形式にする
+			g_loadObj[_href] = false;
+			const img = new Image();
+			img.src = _href;
+			img.onload = _ => g_loadObj[_href] = true;
+
 		} else {
-			link.crossOrigin = _crossOrigin;
+			// それ以外のブラウザの場合はrel=preloadを利用
+			const link = document.createElement(`link`);
+			link.rel = `preload`;
+			link.as = _as;
+			link.href = _href;
+			if (_type !== ``) {
+				link.type = _type;
+			}
+			if (location.href.match(`^file`)) {
+			} else {
+				link.crossOrigin = _crossOrigin;
+			}
+			document.head.appendChild(link);
 		}
-		document.head.appendChild(link);
 	}
 }
 
@@ -5792,7 +5802,13 @@ function loadingScoreInit2() {
 		if (g_audio.duration !== undefined) {
 			clearInterval(tempId);
 			clearWindow();
-			MainInit();
+			if (g_userAgent.indexOf(`firefox`) !== -1) {
+				if (g_preloadImgs.every(v => g_loadObj[v] === true)) {
+					MainInit();
+				}
+			} else {
+				MainInit();
+			}
 		}
 	}, 0.5);
 }
