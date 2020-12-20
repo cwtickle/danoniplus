@@ -8387,6 +8387,10 @@ function MainInit() {
 			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 				g_gameOverFlg = true;
 			}
+
+			document.onkeydown = evt => blockCode(transCode(evt.code));
+			document.onkeyup = evt => { }
+
 			clearTimeout(g_timeoutEvtId);
 			setTimeout(_ => {
 				clearWindow();
