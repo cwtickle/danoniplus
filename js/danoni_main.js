@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/11/23
+ * Revised : 2020/12/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 18.4.0`;
-const g_revisedDate = `2020/11/23`;
+const g_version = `Ver 18.5.0`;
+const g_revisedDate = `2020/12/20`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -390,18 +390,28 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 	if (preloadFlg === undefined) {
 		g_preloadImgs.push(_href);
 
-		const link = document.createElement(`link`);
-		link.rel = `preload`;
-		link.as = _as;
-		link.href = _href;
-		if (_type !== ``) {
-			link.type = _type;
-		}
-		if (location.href.match(`^file`)) {
+		if (g_userAgent.indexOf(`firefox`) !== -1) {
+			// Firefoxの場合のみpreloadが効かないため、画像読込形式にする
+			g_loadObj[_href] = false;
+			const img = new Image();
+			img.src = _href;
+			img.onload = _ => g_loadObj[_href] = true;
+
 		} else {
-			link.crossOrigin = _crossOrigin;
+			// それ以外のブラウザの場合はrel=preloadを利用
+			const link = document.createElement(`link`);
+			link.rel = `preload`;
+			link.as = _as;
+			link.href = _href;
+			if (_type !== ``) {
+				link.type = _type;
+			}
+			if (location.href.match(`^file`)) {
+			} else {
+				link.crossOrigin = _crossOrigin;
+			}
+			document.head.appendChild(link);
 		}
-		document.head.appendChild(link);
 	}
 }
 
@@ -2208,33 +2218,41 @@ function titleInit() {
 		const titlefontsize2 = setVal(titlefontsizes[1], titlefontsize1, C_TYP_NUMBER);
 
 		// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
-		const titlelineheight = (g_headerObj.titlelineheight !== `` ? g_headerObj.titlelineheight : titlefontsize2 + 5);
+		const titlelineheight = (g_headerObj.titlelineheight !== `` ? g_headerObj.titlelineheight - (titlefontsize2 + 10) : 0);
 
+		let txtAnimations = [``, ``];
+		if (!g_headerObj.customTitleAnimationUse) {
+			for (let j = 0; j < txtAnimations.length; j++) {
+				txtAnimations[j] = `animation-name:${g_headerObj.titleAnimationName[j]};
+				animation-duration:${g_headerObj.titleAnimationDuration[j]}s;
+				animation-delay:${g_headerObj.titleAnimationDelay[j]}s;`;
+			}
+		}
 		const lblmusicTitle = createDivCss2Label(`lblmusicTitle`,
-			`<span style="
-				align:${C_ALIGN_CENTER};
-				position:relative;top:${titlefontsize1 - (titlefontsize1 + titlefontsize2) / 2}px;
+			`<div id="lblmusicTitle1" style="
 				font-family:${g_headerObj.titlefonts[0]};
 				background: ${titlegrds[0]};
 				background-clip: text;
 				-webkit-background-clip: text;
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
-				color: #ffffff;
+				${txtAnimations[0]}
 			">
-				${g_headerObj.musicTitleForView[0]}<br>
-				<span style="
-					font-size:${titlefontsize2}px;
-					position:relative;left:${g_headerObj.titlepos[1][0]}px;
-					top:${g_headerObj.titlepos[1][1] + titlelineheight - (titlefontsize1 + titlefontsize2) / 2 - titlefontsize1 + titlefontsize2}px;
-					font-family:${g_headerObj.titlefonts[1]};
-					background: ${titlegrds[1]};
-					background-clip: text;
-					-webkit-background-clip: text;
-					-webkit-text-fill-color: rgba(255,255,255,0.0);
-				">
-					${setVal(g_headerObj.musicTitleForView[1], ``, C_TYP_STRING)}
-				</span>
-			</span>`,
+				${g_headerObj.musicTitleForView[0]}
+			</div>
+			<div id="lblmusicTitle2" style="
+				font-size:${titlefontsize2}px;
+				position:relative;left:${g_headerObj.titlepos[1][0]}px;
+				top:${g_headerObj.titlepos[1][1] + titlelineheight}px;
+				font-family:${g_headerObj.titlefonts[1]};
+				background: ${titlegrds[1]};
+				background-clip: text;
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: rgba(255,255,255,0.0);
+				${txtAnimations[1]}
+			">
+				${setVal(g_headerObj.musicTitleForView[1], ``, C_TYP_STRING)}
+			</div>
+			`,
 			{
 				x: Number(g_headerObj.titlepos[0][0]), y: Number(g_headerObj.titlepos[0][1]),
 				w: g_sWidth, h: g_sHeight - 40, siz: titlefontsize1,
@@ -3055,7 +3073,7 @@ function headerConvert(_dosObj) {
 	obj.releaseDate = setVal(_dosObj.releaseDate, ``, C_TYP_STRING);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
-	const defaultObjs = [`title`, `titleArrow`, `back`, `backMain`, `ready`];
+	const defaultObjs = [`title`, `titleArrow`, `titleAnimation`, `back`, `backMain`, `ready`];
 	defaultObjs.forEach(objName => {
 		const objUpper = toCapitalize(objName);
 		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
@@ -3109,6 +3127,24 @@ function headerConvert(_dosObj) {
 	if (hasVal(_dosObj.titlepos)) {
 		_dosObj.titlepos.split(`$`).forEach((pos, j) => {
 			obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x));
+		});
+	}
+
+	// タイトル文字のアニメーション設定
+	obj.titleAnimationName = [`leftToRight`];
+	obj.titleAnimationDuration = [1.5];
+	obj.titleAnimationDelay = [0];
+	if (hasVal(_dosObj.titleanimation)) {
+		_dosObj.titleanimation.split(`$`).forEach((pos, j) => {
+			const titleAnimation = pos.split(`,`);
+			obj.titleAnimationName[j] = setVal(titleAnimation[0], obj.titleAnimationName[0], C_TYP_STRING);
+			obj.titleAnimationDuration[j] = setVal(titleAnimation[1] / g_fps, obj.titleAnimationDuration[0], C_TYP_FLOAT);
+			obj.titleAnimationDelay[j] = setVal(titleAnimation[2] / g_fps, obj.titleAnimationDelay[0], C_TYP_FLOAT);
+		});
+	}
+	if (obj.titleAnimationName.length === 1) {
+		[`Name`, `Duration`, `Delay`].forEach(pattern => {
+			obj[`titleAnimation${pattern}`][1] = obj[`titleAnimation${pattern}`][0];
 		});
 	}
 
@@ -5766,7 +5802,13 @@ function loadingScoreInit2() {
 		if (g_audio.duration !== undefined) {
 			clearInterval(tempId);
 			clearWindow();
-			MainInit();
+			if (g_userAgent.indexOf(`firefox`) !== -1) {
+				if (g_preloadImgs.every(v => g_loadObj[v] === true)) {
+					MainInit();
+				}
+			} else {
+				MainInit();
+			}
 		}
 	}, 0.5);
 }

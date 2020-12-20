@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2020/08/25 (v16.2.1)
+ * Template Update: 2020/12/20 (v18.5.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -65,6 +65,7 @@ const g_presetGaugeCustom = {
 const g_presetCustomDesignUse = {
 	title: `false`,
 	titleArrow: `false`,
+	titleAnimation: `false`,
 	back: `false`,
 	backMain: `false`,
 	ready: `false`,
@@ -145,7 +146,7 @@ const g_presetFrzStartjdgUse = `false`;
 	   右側に定義する値は、g_resultObj配下に定義する必要があります。
 
 	   例) exScore: `exScores`,
-	       [exScore] -> g_resultObj.exScores
+		   [exScore] -> g_resultObj.exScores
  */
 const g_presetResultVals = {
 	// exScore: `exScore`,
