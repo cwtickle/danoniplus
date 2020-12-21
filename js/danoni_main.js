@@ -2759,23 +2759,23 @@ function headerConvert(_dosObj) {
 
 	// ゲージ設定詳細（初期値）
 	g_gaugeOptionObj = {
-		survival: [`Original`, `Light`, `NoRecovery`, `SuddenDeath`, `Practice`],
-		border: [`Normal`, `Easy`, `Hard`, `SuddenDeath`],
+		survival: [`Original`, `Heavy`, `NoRecovery`, `SuddenDeath`, `Practice`, `Light`],
+		border: [`Normal`, `Hard`, `SuddenDeath`, `Easy`],
 		custom: [],
 
-		initSurvival: [25, 25, 100, 100, 50],
-		rcvSurvival: [6, 6, 0, 0, 0],
-		dmgSurvival: [40, 20, 50, obj.maxLifeVal, 0],
-		typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
-		varSurvival: [C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
-		clearSurvival: [0, 0, 0, 0, 0],
+		initSurvival: [25, 50, 100, 100, 50, 25],
+		rcvSurvival: [6, 2, 0, 0, 0, 12],
+		dmgSurvival: [40, 50, 50, obj.maxLifeVal, 0, 40],
+		typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
+		varSurvival: [C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
+		clearSurvival: [0, 0, 0, 0, 0, 0],
 
-		initBorder: [25, 25, 100, 100],
-		rcvBorder: [2, 2, 1, 0],
-		dmgBorder: [7, 4, 50, obj.maxLifeVal],
-		typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL],
-		varBorder: [C_FLG_ON, C_FLG_ON, C_FLG_ON, C_FLG_OFF],
-		clearBorder: [70, 70, 0, 0],
+		initBorder: [25, 100, 100, 25],
+		rcvBorder: [2, 1, 0, 4],
+		dmgBorder: [7, 50, obj.maxLifeVal, 7],
+		typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL, C_LFE_BORDER],
+		varBorder: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_ON],
+		clearBorder: [70, 0, 0, 70],
 
 		varCustom: [],
 	};
