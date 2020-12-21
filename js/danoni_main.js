@@ -2764,7 +2764,7 @@ function headerConvert(_dosObj) {
 		custom: [],
 
 		initSurvival: [25, 50, 100, 100, 50, 25],
-		rcvSurvival: [6, 1, 0, 0, 0, 12],
+		rcvSurvival: [6, 2, 0, 0, 0, 12],
 		dmgSurvival: [40, 50, 50, obj.maxLifeVal, 0, 40],
 		typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
 		varSurvival: [C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
