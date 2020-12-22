@@ -5799,15 +5799,18 @@ function loadingScoreInit2() {
 	}
 
 	const tempId = setInterval(() => {
-		if (g_audio.duration !== undefined) {
+		const executeMain = _ => {
 			clearInterval(tempId);
 			clearWindow();
+			MainInit();
+		}
+		if (g_audio.duration !== undefined) {
 			if (g_userAgent.indexOf(`firefox`) !== -1) {
 				if (g_preloadImgs.every(v => g_loadObj[v] === true)) {
-					MainInit();
+					executeMain();
 				}
 			} else {
-				MainInit();
+				executeMain();
 			}
 		}
 	}, 0.5);
