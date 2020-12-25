@@ -5591,7 +5591,7 @@ function removeClassList(_j, _k) {
  */
 function loadingScoreInit() {
 	// 譜面データの読み込み
-	loadDos(_ => loadCustomjs(_ => loadingScoreInit2()));
+	loadDos(_ => loadingScoreInit2());
 }
 
 function setScoreIdHeader(_scoreId = 0, _scoreLockFlg = false) {
