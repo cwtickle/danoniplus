@@ -5813,7 +5813,7 @@ function loadingScoreInit2() {
 				executeMain();
 			}
 		}
-	}, 0.5);
+	}, 100);
 }
 
 /**
