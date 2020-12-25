@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/12/20 (v18.5.0)
+ * Revised : 2020/12/25 (v18.7.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1592,7 +1592,7 @@ const g_dfColorObj = {
     setShadowColorInit: [``, ``, ``, ``, ``],
 
     setColorType1: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
-    setColorType2: [`#ffffff`, `#9999ff`, `#ffffff`, `#ffccff`, `#ff9999`],
+    setColorType2: [`#ffffff`, `#9999ff`, `#99ccff`, `#ffccff`, `#ff9999`],
 
     // フリーズアロー初期色情報
     frzColorInit: [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
