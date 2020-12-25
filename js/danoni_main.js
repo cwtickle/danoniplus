@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/12/21
+ * Revised : 2020/12/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.5.15`;
-const g_revisedDate = `2020/12/21`;
+const g_version = `Ver 14.5.16`;
+const g_revisedDate = `2020/12/25`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5619,7 +5619,165 @@ function removeClassList(_j, _k) {
  */
 function loadingScoreInit() {
 	// 譜面データの読み込み
-	loadDos(_ => loadCustomjs(_ => loadingScoreInit2()));
+	loadDos(_ => {
+		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+		g_headerObj.blankFrame = g_headerObj.blankFrameDef;
+
+		// 譜面初期情報ロード許可フラグ
+		// (タイトルバック時保存したデータを設定画面にて再読み込みするため、
+		//  ローカルストレージ保存時はフラグを解除しない)
+		if (!g_stateObj.dataSaveFlg || setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) !== ``) {
+			g_canLoadDifInfoFlg = false;
+		}
+
+		let dummyIdHeader = ``;
+		if (g_stateObj.dummyId !== ``) {
+			if (g_stateObj.dummyId === 0 || g_stateObj.dummyId === 1) {
+				dummyIdHeader = ``;
+			} else {
+				dummyIdHeader = g_stateObj.dummyId;
+			}
+		}
+		g_scoreObj = scoreConvert(g_rootObj, g_stateObj.scoreId, 0, dummyIdHeader);
+
+		calcLifeVals(g_allArrow + g_allFrz / 2);
+
+		// 最終フレーム数の取得
+		let lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
+
+		// 最初の矢印データがあるフレーム数を取得
+		let firstArrowFrame = getFirstArrowFrame(g_scoreObj);
+
+		// 開始フレーム数の取得(フェードイン加味)
+		g_scoreObj.frameNum = getStartFrame(lastFrame, g_stateObj.fadein);
+		g_scoreObj.baseFrame;
+
+		// フレームごとの速度を取得（配列形式）
+		let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
+
+		// Motionオプション適用時の矢印別の速度を取得（配列形式）
+		const motionOnFrame = setMotionOnFrame();
+		g_workObj.motionOnFrames = JSON.parse(JSON.stringify(motionOnFrame));
+
+		// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
+		const firstFrame = (g_scoreObj.frameNum === 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
+		let arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
+
+		// キーパターン(デフォルト)に対応する矢印番号を格納
+		convertreplaceNums();
+
+		const setData = (_data, _minLength = 1) => {
+			return (_data !== undefined && _data.length >= _minLength ? _data.concat() : []);
+		}
+
+		// フレーム・曲開始位置調整
+		let preblankFrame = 0;
+		if (g_scoreObj.frameNum === 0) {
+			if (firstArrowFrame - C_MAX_ADJUSTMENT < arrivalFrame) {
+				preblankFrame = arrivalFrame - firstArrowFrame + C_MAX_ADJUSTMENT;
+
+				// 譜面データの再読み込み
+				const tmpObj = scoreConvert(g_rootObj, g_stateObj.scoreId, preblankFrame, dummyIdHeader);
+				for (let j = 0; j < keyNum; j++) {
+					if (tmpObj.arrowData[j] !== undefined) {
+						g_scoreObj.arrowData[j] = JSON.parse(JSON.stringify(tmpObj.arrowData[j]));
+					}
+					if (tmpObj.frzData[j] !== undefined) {
+						g_scoreObj.frzData[j] = JSON.parse(JSON.stringify(tmpObj.frzData[j]));
+					}
+					if (tmpObj.dummyArrowData[j] !== undefined && g_stateObj.shuffle === C_FLG_OFF) {
+						g_scoreObj.dummyArrowData[j] = JSON.parse(JSON.stringify(tmpObj.dummyArrowData[j]));
+					}
+					if (tmpObj.dummyFrzData[j] !== undefined && g_stateObj.shuffle === C_FLG_OFF) {
+						g_scoreObj.dummyFrzData[j] = JSON.parse(JSON.stringify(tmpObj.dummyFrzData[j]));
+					}
+				}
+
+				/**
+				 * データ種, 最小データ長のセット
+				 */
+				const dataTypes = [
+					[`speed`, 2],
+					[`boost`, 2],
+					[`color`, 3],
+					[`acolor`, 3],
+					[`shadowcolor`, 3],
+					[`ashadowcolor`, 3],
+					[`arrowCssMotion`, 3],
+					[`frzCssMotion`, 3],
+					[`dummyArrowCssMotion`, 3],
+					[`dummyFrzCssMotion`, 3],
+					[`object`, 4],
+					[`word`, 3],
+					[`mask`, 1],
+					[`back`, 1],
+				];
+				dataTypes.forEach(dataType => {
+					g_scoreObj[`${dataType[0]}Data`] = setData(tmpObj[`${dataType[0]}Data`], dataType[1]);
+				});
+
+				lastFrame += preblankFrame;
+				firstArrowFrame += preblankFrame;
+				speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
+				arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
+				g_headerObj.blankFrame += preblankFrame;
+			}
+		}
+
+		// シャッフルグループ未定義の場合
+		if (g_keyObj[`shuffle${keyCtrlPtn}`] === undefined) {
+			g_keyObj[`shuffle${keyCtrlPtn}`] = [...Array(keyNum)].fill(0);
+		}
+
+		// シャッフルグループを扱いやすくする
+		// [0, 0, 0, 1, 0, 0, 0] -> [[0, 1, 2, 4, 5, 6], [3]]
+		const shuffleGroupMap = {};
+		g_keyObj[`shuffle${keyCtrlPtn}`].forEach((_val, _i) => {
+			if (shuffleGroupMap[_val] === undefined) {
+				shuffleGroupMap[_val] = [];
+			};
+			shuffleGroupMap[_val].push(_i);
+		});
+		const shuffleGroup = Object.values(shuffleGroupMap);
+
+		// Mirror,Random,S-Randomの適用
+		if (g_stateObj.shuffle === `Mirror`) {
+			applyMirror(keyNum, shuffleGroup);
+		} else if (g_stateObj.shuffle === `Random`) {
+			applyRandom(keyNum, shuffleGroup);
+		} else if (g_stateObj.shuffle === `Random+`) {
+			applyRandom(keyNum, [[...Array(keyNum).keys()]]);
+		} else if (g_stateObj.shuffle === `S-Random`) {
+			applySRandom(keyNum, shuffleGroup, `arrow`, `frz`);
+			applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
+		} else if (g_stateObj.shuffle === `S-Random+`) {
+			applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
+			applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
+		}
+
+		// 矢印・フリーズアロー・速度/色変化格納処理
+		pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
+
+		// メインに入る前の最終初期化処理
+		getArrowSettings();
+
+		// ユーザカスタムイベント
+		if (typeof customLoadingInit === C_TYP_FUNCTION) {
+			customLoadingInit();
+			if (typeof customLoadingInit2 === C_TYP_FUNCTION) {
+				customLoadingInit2();
+			}
+		}
+
+		const tempId = setInterval(() => {
+			if (g_audio.duration !== undefined) {
+				clearInterval(tempId);
+				clearWindow();
+				MainInit();
+			}
+		}, 100);
+	});
 }
 
 function setScoreIdHeader(_scoreId = 0, _scoreLockFlg = false) {
@@ -5627,166 +5785,6 @@ function setScoreIdHeader(_scoreId = 0, _scoreLockFlg = false) {
 		return Number(_scoreId) + 1;
 	}
 	return ``;
-}
-
-function loadingScoreInit2() {
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
-
-	// 譜面初期情報ロード許可フラグ
-	// (タイトルバック時保存したデータを設定画面にて再読み込みするため、
-	//  ローカルストレージ保存時はフラグを解除しない)
-	if (!g_stateObj.dataSaveFlg || setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) !== ``) {
-		g_canLoadDifInfoFlg = false;
-	}
-
-	let dummyIdHeader = ``;
-	if (g_stateObj.dummyId !== ``) {
-		if (g_stateObj.dummyId === 0 || g_stateObj.dummyId === 1) {
-			dummyIdHeader = ``;
-		} else {
-			dummyIdHeader = g_stateObj.dummyId;
-		}
-	}
-	g_scoreObj = scoreConvert(g_rootObj, g_stateObj.scoreId, 0, dummyIdHeader);
-
-	calcLifeVals(g_allArrow + g_allFrz / 2);
-
-	// 最終フレーム数の取得
-	let lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
-
-	// 最初の矢印データがあるフレーム数を取得
-	let firstArrowFrame = getFirstArrowFrame(g_scoreObj);
-
-	// 開始フレーム数の取得(フェードイン加味)
-	g_scoreObj.frameNum = getStartFrame(lastFrame, g_stateObj.fadein);
-	g_scoreObj.baseFrame;
-
-	// フレームごとの速度を取得（配列形式）
-	let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
-
-	// Motionオプション適用時の矢印別の速度を取得（配列形式）
-	const motionOnFrame = setMotionOnFrame();
-	g_workObj.motionOnFrames = JSON.parse(JSON.stringify(motionOnFrame));
-
-	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
-	const firstFrame = (g_scoreObj.frameNum === 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
-	let arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
-
-	// キーパターン(デフォルト)に対応する矢印番号を格納
-	convertreplaceNums();
-
-	const setData = (_data, _minLength = 1) => {
-		return (_data !== undefined && _data.length >= _minLength ? _data.concat() : []);
-	}
-
-	// フレーム・曲開始位置調整
-	let preblankFrame = 0;
-	if (g_scoreObj.frameNum === 0) {
-		if (firstArrowFrame - C_MAX_ADJUSTMENT < arrivalFrame) {
-			preblankFrame = arrivalFrame - firstArrowFrame + C_MAX_ADJUSTMENT;
-
-			// 譜面データの再読み込み
-			const tmpObj = scoreConvert(g_rootObj, g_stateObj.scoreId, preblankFrame, dummyIdHeader);
-			for (let j = 0; j < keyNum; j++) {
-				if (tmpObj.arrowData[j] !== undefined) {
-					g_scoreObj.arrowData[j] = JSON.parse(JSON.stringify(tmpObj.arrowData[j]));
-				}
-				if (tmpObj.frzData[j] !== undefined) {
-					g_scoreObj.frzData[j] = JSON.parse(JSON.stringify(tmpObj.frzData[j]));
-				}
-				if (tmpObj.dummyArrowData[j] !== undefined && g_stateObj.shuffle === C_FLG_OFF) {
-					g_scoreObj.dummyArrowData[j] = JSON.parse(JSON.stringify(tmpObj.dummyArrowData[j]));
-				}
-				if (tmpObj.dummyFrzData[j] !== undefined && g_stateObj.shuffle === C_FLG_OFF) {
-					g_scoreObj.dummyFrzData[j] = JSON.parse(JSON.stringify(tmpObj.dummyFrzData[j]));
-				}
-			}
-
-			/**
-			 * データ種, 最小データ長のセット
-			 */
-			const dataTypes = [
-				[`speed`, 2],
-				[`boost`, 2],
-				[`color`, 3],
-				[`acolor`, 3],
-				[`shadowcolor`, 3],
-				[`ashadowcolor`, 3],
-				[`arrowCssMotion`, 3],
-				[`frzCssMotion`, 3],
-				[`dummyArrowCssMotion`, 3],
-				[`dummyFrzCssMotion`, 3],
-				[`object`, 4],
-				[`word`, 3],
-				[`mask`, 1],
-				[`back`, 1],
-			];
-			dataTypes.forEach(dataType => {
-				g_scoreObj[`${dataType[0]}Data`] = setData(tmpObj[`${dataType[0]}Data`], dataType[1]);
-			});
-
-			lastFrame += preblankFrame;
-			firstArrowFrame += preblankFrame;
-			speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
-			arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
-			g_headerObj.blankFrame += preblankFrame;
-		}
-	}
-
-	// シャッフルグループ未定義の場合
-	if (g_keyObj[`shuffle${keyCtrlPtn}`] === undefined) {
-		g_keyObj[`shuffle${keyCtrlPtn}`] = [...Array(keyNum)].fill(0);
-	}
-
-	// シャッフルグループを扱いやすくする
-	// [0, 0, 0, 1, 0, 0, 0] -> [[0, 1, 2, 4, 5, 6], [3]]
-	const shuffleGroupMap = {};
-	g_keyObj[`shuffle${keyCtrlPtn}`].forEach((_val, _i) => {
-		if (shuffleGroupMap[_val] === undefined) {
-			shuffleGroupMap[_val] = [];
-		};
-		shuffleGroupMap[_val].push(_i);
-	});
-	const shuffleGroup = Object.values(shuffleGroupMap);
-
-	// Mirror,Random,S-Randomの適用
-	if (g_stateObj.shuffle === `Mirror`) {
-		applyMirror(keyNum, shuffleGroup);
-	} else if (g_stateObj.shuffle === `Random`) {
-		applyRandom(keyNum, shuffleGroup);
-	} else if (g_stateObj.shuffle === `Random+`) {
-		applyRandom(keyNum, [[...Array(keyNum).keys()]]);
-	} else if (g_stateObj.shuffle === `S-Random`) {
-		applySRandom(keyNum, shuffleGroup, `arrow`, `frz`);
-		applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
-	} else if (g_stateObj.shuffle === `S-Random+`) {
-		applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
-		applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
-	}
-
-	// 矢印・フリーズアロー・速度/色変化格納処理
-	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
-
-	// メインに入る前の最終初期化処理
-	getArrowSettings();
-
-	// ユーザカスタムイベント
-	if (typeof customLoadingInit === C_TYP_FUNCTION) {
-		customLoadingInit();
-		if (typeof customLoadingInit2 === C_TYP_FUNCTION) {
-			customLoadingInit2();
-		}
-	}
-
-	const tempId = setInterval(() => {
-		if (g_audio.duration !== undefined) {
-			clearInterval(tempId);
-			clearWindow();
-			MainInit();
-		}
-	}, 0.5);
 }
 
 /**
