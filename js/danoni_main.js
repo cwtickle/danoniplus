@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/12/21
+ * Revised : 2020/12/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.25`;
-const g_revisedDate = `2020/12/21`;
+const g_version = `Ver 9.4.26`;
+const g_revisedDate = `2020/12/25`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2008,7 +2008,7 @@ function loadDos(_initFlg) {
 					initAfterDosLoaded();
 				});
 			} else {
-				loadCustomjs(_initFlg);
+				loadingScoreInit2();
 			}
 		}
 	}
@@ -2049,7 +2049,7 @@ function loadDos(_initFlg) {
 					initAfterDosLoaded();
 				});
 			} else {
-				loadCustomjs(_initFlg);
+				loadingScoreInit2();
 			}
 		}, charset);
 	}
@@ -2123,30 +2123,21 @@ function initAfterDosLoaded() {
 	}
 
 	// customjsの読み込み
-	loadCustomjs(true);
+	loadCustomjs();
 }
 
 /**
  * customjsの読込
- * @param {boolean} _initFlg 
  */
-function loadCustomjs(_initFlg) {
+function loadCustomjs() {
 	const randTime = new Date().getTime();
 	loadScript(`../js/${g_headerObj.customjs}?${randTime}`, _ => {
 		if (g_headerObj.customjs2 !== ``) {
 			loadScript(`../js/${g_headerObj.customjs2}?${randTime}`, _ => {
-				if (_initFlg) {
-					titleInit();
-				} else {
-					loadingScoreInit2();
-				}
+				titleInit();
 			});
 		} else {
-			if (_initFlg) {
-				titleInit();
-			} else {
-				loadingScoreInit2();
-			}
+			titleInit();
 		}
 	});
 }
@@ -5707,7 +5698,7 @@ function loadingScoreInit2() {
 			clearWindow();
 			MainInit();
 		}
-	}, 0.5);
+	}, 100);
 }
 
 /**
