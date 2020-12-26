@@ -1,6 +1,7 @@
 # Dancing☆Onigiri (CW Edition)
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/9558f21e17a47a4dc987/maintainability)](https://codeclimate.com/github/cwtickle/danoniplus/maintainability)
+[![CodeQL](https://github.com/cwtickle/danoniplus/workflows/CodeQL/badge.svg)](https://github.com/cwtickle/danoniplus/actions?query=workflow%3ACodeQL)
 [![Join the chat at https://gitter.im/danonicw/community](https://badges.gitter.im/danonicw/community.svg)](https://gitter.im/danonicw/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)  
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cwtickle/danoniplus?sort=semver)](https://github.com/cwtickle/danoniplus/security/policy)
 [![GitHub All Releases](https://img.shields.io/github/downloads/cwtickle/danoniplus/total?color=%23ff3399&label=downloads%20%28recently%29)](https://github.com/cwtickle/danoniplus/releases)
