@@ -9350,7 +9350,7 @@ function resultInit() {
 			clearWindow();
 			titleInit();
 		}, {
-			h: C_BTN_HEIGHT * 5 / 4,
+			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 4,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Back),
 
@@ -9359,17 +9359,25 @@ function resultInit() {
 			copyTextToClipboard(resultText);
 			makeInfoWindow(C_MSG_I_0001, `leftToRightFade`);
 		}, {
-			x: g_sWidth / 3,
+			x: g_sWidth / 4,
+			w: g_sWidth / 2,
 			h: C_BTN_HEIGHT * 5 / 8, siz: 24,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Setting),
 
 		// リザルトデータをTwitterへ転送
 		createCss2Button(`btnTweet`, `Tweet`, _ => openLink(tweetResult), {
-			x: g_sWidth / 3, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
-			h: C_BTN_HEIGHT * 5 / 8, siz: 24,
+			x: g_sWidth / 4, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
+			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 8, siz: 24,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Tweet),
+
+		// Gitterへのリンク
+		createCss2Button(`btnGitter`, `To Gitter`, _ => openLink(`https://gitter.im/danonicw/freeboard`), {
+			x: g_sWidth / 2, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
+			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 8, siz: 24,
+			animationName: `smallToNormalY`,
+		}, g_cssObj.button_Default),
 
 		// リトライ
 		createCss2Button(`btnRetry`, `Retry`, _ => {
@@ -9381,8 +9389,8 @@ function resultInit() {
 			clearWindow();
 			loadMusic();
 		}, {
-			x: g_sWidth / 3 * 2,
-			h: C_BTN_HEIGHT * 5 / 4,
+			x: g_sWidth / 4 * 3,
+			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 4,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Reset),
 	)
