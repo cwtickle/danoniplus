@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/12/25
+ * Revised : 2020/12/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 18.7.0`;
-const g_revisedDate = `2020/12/25`;
+const g_version = `Ver 18.8.0`;
+const g_revisedDate = `2020/12/27`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2329,6 +2329,13 @@ function titleInit() {
 			w: 30, h: 30, siz: 20,
 			title: g_msgObj.reload,
 		}, g_cssObj.button_Start),
+
+		// ヘルプ
+		createCss2Button(`btnHelp`, `?`, _ => openLink(`https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`), {
+			x: 0, y: g_sHeight - 150,
+			w: 40, h: 40, siz: 30,
+			title: g_msgObj.howto,
+		}, g_cssObj.button_Setting),
 
 		// 製作者表示
 		createCss2Button(`lnkMaker`, `Maker: ${g_headerObj.tuningInit}`, _ => {
@@ -9350,7 +9357,7 @@ function resultInit() {
 			clearWindow();
 			titleInit();
 		}, {
-			h: C_BTN_HEIGHT * 5 / 4,
+			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 4,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Back),
 
@@ -9359,17 +9366,25 @@ function resultInit() {
 			copyTextToClipboard(resultText);
 			makeInfoWindow(C_MSG_I_0001, `leftToRightFade`);
 		}, {
-			x: g_sWidth / 3,
+			x: g_sWidth / 4,
+			w: g_sWidth / 2,
 			h: C_BTN_HEIGHT * 5 / 8, siz: 24,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Setting),
 
 		// リザルトデータをTwitterへ転送
 		createCss2Button(`btnTweet`, `Tweet`, _ => openLink(tweetResult), {
-			x: g_sWidth / 3, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
-			h: C_BTN_HEIGHT * 5 / 8, siz: 24,
+			x: g_sWidth / 4, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
+			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 8, siz: 24,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Tweet),
+
+		// Gitterへのリンク
+		createCss2Button(`btnGitter`, `Gitter`, _ => openLink(`https://gitter.im/danonicw/freeboard`), {
+			x: g_sWidth / 2, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
+			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 8, siz: 24,
+			animationName: `smallToNormalY`,
+		}, g_cssObj.button_Default),
 
 		// リトライ
 		createCss2Button(`btnRetry`, `Retry`, _ => {
@@ -9381,8 +9396,8 @@ function resultInit() {
 			clearWindow();
 			loadMusic();
 		}, {
-			x: g_sWidth / 3 * 2,
-			h: C_BTN_HEIGHT * 5 / 4,
+			x: g_sWidth / 4 * 3,
+			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 4,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Reset),
 	)
