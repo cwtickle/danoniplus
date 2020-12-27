@@ -2330,6 +2330,13 @@ function titleInit() {
 			title: g_msgObj.reload,
 		}, g_cssObj.button_Start),
 
+		// ヘルプ
+		createCss2Button(`btnHelp`, `?`, _ => openLink(`https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`), {
+			x: 0, y: g_sHeight - 150,
+			w: 40, h: 40, siz: 30,
+			title: g_msgObj.howto,
+		}, g_cssObj.button_Setting),
+
 		// 製作者表示
 		createCss2Button(`lnkMaker`, `Maker: ${g_headerObj.tuningInit}`, _ => {
 			openLink(g_headerObj.creatorUrl);
@@ -9373,7 +9380,7 @@ function resultInit() {
 		}, g_cssObj.button_Tweet),
 
 		// Gitterへのリンク
-		createCss2Button(`btnGitter`, `To Gitter`, _ => openLink(`https://gitter.im/danonicw/freeboard`), {
+		createCss2Button(`btnGitter`, `Gitter`, _ => openLink(`https://gitter.im/danonicw/freeboard`), {
 			x: g_sWidth / 2, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
 			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 8, siz: 24,
 			animationName: `smallToNormalY`,

@@ -1673,6 +1673,7 @@ const C_MSG_I_0002 = `入力したキーは割り当てできません。他の�
 const g_msgObj = {
 
     reload: `ページを再読込します。`,
+    howto: `ゲーム画面の見方や設定の詳細についてのページへ移動します（GitHub Wiki）。`,
     dataReset: `この作品で保存されているハイスコアや\nAdjustment情報等をリセットします。`,
     github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
     security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
