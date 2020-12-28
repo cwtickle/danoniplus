@@ -1983,7 +1983,7 @@ function drawDefaultBackImage(_key) {
  */
 function checkImage(_str) {
 	return (
-		g_imgObj.imgExtensions.findIndex(value => _str.toLowerCase().match(new RegExp(String.raw`.${value}$`, 'i'))) !== -1 ? true : false
+		g_imgExtensions.findIndex(value => _str.toLowerCase().match(new RegExp(String.raw`.${value}$`, 'i'))) !== -1 ? true : false
 	);
 }
 
