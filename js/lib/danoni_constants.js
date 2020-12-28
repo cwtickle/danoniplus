@@ -117,9 +117,10 @@ const g_imgObj = {
     frzBar: C_IMG_FRZBAR,
     lifeBar: C_IMG_LIFEBAR,
     lifeBorder: C_IMG_LIFEBORDER,
-
-    imgExtensions: [`png`, `gif`, `bmp`, `jpg`, `jpeg`, `svg`],
 };
+
+// 読込対象の画像拡張子
+let g_imgExtensions = [`png`, `gif`, `bmp`, `jpg`, `jpeg`, `svg`];
 
 // Motionオプション配列の基準位置
 const C_MOTION_STD_POS = 15;
