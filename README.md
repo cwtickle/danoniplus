@@ -69,6 +69,11 @@ Dancing☆Onigiri (CW Edition)では基本的にParaFla!版の仕様に準拠し
 ## How to Contribute / 開発者の方へ 
 開発にご協力いただける方は、下記をご覧ください。GitHubアカウントの無い方でも協力できます！
 - [How to Contribute](.github/CONTRIBUTING.md)   
+- [要望・不具合報告用Gitter](https://gitter.im/danonicw/community)
+
+## Community / コミュニティ
+- [得点報告用Gitter](https://gitter.im/danonicw/freeboard)
+- [Twitter #danoni](https://twitter.com/search?q=%23danoni%20OR%20%22%E3%83%80%E3%83%B3%E3%81%8A%E3%81%AB%E3%81%A3%E3%81%9F%E3%83%BC%22&src=typed_query&f=live)
 
 ## Related Tools Repository / 関連ツール
 - [Dancing☆Onigiri エディター(CW Edition 対応)](https://github.com/superkuppabros/danoni-editor) @superkuppabros
