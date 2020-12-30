@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/12/28 (v18.8.1)
+ * Revised : 2020/12/30 (v18.8.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -485,7 +485,10 @@ for (let j = 0; j < 255; j++) {
     g_kCd[j] = ``;
     g_kCdN[j] = ``;
 }
+
+// キー表示用
 g_kCd[0] = `- - -`;
+g_kCd[1] = `Unknown`;
 g_kCd[8] = `BackSpace`;
 g_kCd[9] = `Tab`;
 g_kCd[12] = `Clear`;
@@ -597,7 +600,9 @@ g_kCd[226] = `\\ _`;
 g_kCd[229] = `IME`;
 g_kCd[240] = `CapsLk`;
 
-g_kCdN[0] = ``;
+// 従来のキーコードとの変換用
+g_kCdN[0] = `- - -`; // 無効値
+g_kCdN[1] = ``; // 特殊キー(PR #924 参照)
 g_kCdN[8] = `Backspace`;
 g_kCdN[9] = `Tab`;
 g_kCdN[12] = `Clear`;
