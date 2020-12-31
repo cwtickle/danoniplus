@@ -3080,8 +3080,7 @@ function headerConvert(_dosObj) {
 	obj.releaseDate = setVal(_dosObj.releaseDate, ``, C_TYP_STRING);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
-	const defaultObjs = [`title`, `titleArrow`, `titleAnimation`, `back`, `backMain`, `ready`];
-	defaultObjs.forEach(objName => {
+	[`title`, `titleArrow`, `titleAnimation`, `back`, `backMain`, `ready`].forEach(objName => {
 		const objUpper = toCapitalize(objName);
 		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
 			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
@@ -3166,9 +3165,7 @@ function headerConvert(_dosObj) {
 	obj.makerView = setVal(_dosObj.makerView, false, C_TYP_BOOLEAN);
 
 	// オプション利用可否設定
-	let usingOptions = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
-
-	usingOptions.forEach(option => {
+	[`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`].forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
 			(typeof g_presetSettingUse === C_TYP_OBJECT ?
 				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
