@@ -5056,12 +5056,12 @@ function interlockingButton(_headerObj, _name, _current, _next, _buttonFlg = fal
 			if (!includeDefaults.includes(defaultOption)) {
 				g_stateObj[`d_${defaultOption.toLowerCase()}`] = _next;
 				if (_buttonFlg) {
-					if (g_headerObj[`${defaultOption}Use`]) {
-						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${_current}`], g_cssObj[`button_${_next}`]);
-					} else {
+					let txtDisabled = ``;
+					if (!g_headerObj[`${defaultOption}Use`]) {
+						txtDisabled = `Disabled`;
 						document.querySelector(`#lnk${defaultOption}`).textContent = `${toCapitalize(defaultOption)}:${_next}`;
-						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_Disabled${_current}`], g_cssObj[`button_Disabled${_next}`]);
 					}
+					document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${txtDisabled}${_current}`], g_cssObj[`button_Disabled${_next}`]);
 				}
 				// さらに連動する場合は設定を反転
 				interlockingButton(_headerObj, defaultOption, _next, _current, _buttonFlg);
