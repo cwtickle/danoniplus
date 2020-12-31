@@ -5666,43 +5666,41 @@ function loadingScoreInit() {
 				preblankFrame = arrivalFrame - firstArrowFrame + C_MAX_ADJUSTMENT;
 
 				// 譜面データの再読み込み
+				const noteExistObj = {
+					arrow: true,
+					frz: true,
+					dummyArrow: g_stateObj.shuffle === C_FLG_OFF,
+					dummyFrz: g_stateObj.shuffle === C_FLG_OFF,
+				};
 				const tmpObj = scoreConvert(g_rootObj, g_stateObj.scoreId, preblankFrame, dummyIdHeader);
 				for (let j = 0; j < keyNum; j++) {
-					if (tmpObj.arrowData[j] !== undefined) {
-						g_scoreObj.arrowData[j] = JSON.parse(JSON.stringify(tmpObj.arrowData[j]));
-					}
-					if (tmpObj.frzData[j] !== undefined) {
-						g_scoreObj.frzData[j] = JSON.parse(JSON.stringify(tmpObj.frzData[j]));
-					}
-					if (tmpObj.dummyArrowData[j] !== undefined && g_stateObj.shuffle === C_FLG_OFF) {
-						g_scoreObj.dummyArrowData[j] = JSON.parse(JSON.stringify(tmpObj.dummyArrowData[j]));
-					}
-					if (tmpObj.dummyFrzData[j] !== undefined && g_stateObj.shuffle === C_FLG_OFF) {
-						g_scoreObj.dummyFrzData[j] = JSON.parse(JSON.stringify(tmpObj.dummyFrzData[j]));
-					}
+					Object.keys(noteExistObj).forEach(name => {
+						if (tmpObj[`${name}Data`][j] !== undefined && noteExistObj[name]) {
+							g_scoreObj[`${name}Data`][j] = JSON.parse(JSON.stringify(tmpObj[`${name}Data`][j]));
+						}
+					});
 				}
 
 				/**
 				 * データ種, 最小データ長のセット
 				 */
-				const dataTypes = [
-					[`speed`, 2],
-					[`boost`, 2],
-					[`color`, 3],
-					[`acolor`, 3],
-					[`shadowcolor`, 3],
-					[`ashadowcolor`, 3],
-					[`arrowCssMotion`, 3],
-					[`frzCssMotion`, 3],
-					[`dummyArrowCssMotion`, 3],
-					[`dummyFrzCssMotion`, 3],
-					[`object`, 4],
-					[`word`, 3],
-					[`mask`, 1],
-					[`back`, 1],
-				];
-				dataTypes.forEach(dataType => {
-					g_scoreObj[`${dataType[0]}Data`] = setData(tmpObj[`${dataType[0]}Data`], dataType[1]);
+				const dataMinObj = {
+					speed: 2, 
+					boost: 2,
+					color: 3,
+					acolor: 3,
+					shadowcolor: 3,
+					ashadowcolor: 3,
+					arrowCssMotion: 3,
+					frzCssMotion: 3,
+					dummyArrowCssMotion: 3,
+					dummyFrzCssMotion: 3,
+					word: 3,
+					mask: 1,
+					back: 1,
+				};
+				Object.keys(dataMinObj).forEach(dataType => {
+					g_scoreObj[`${dataType}Data`] = setData(tmpObj[`${dataType}Data`], dataMinObj[dataType]);
 				});
 
 				lastFrame += preblankFrame;
