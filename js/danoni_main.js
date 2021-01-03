@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/01/01
+ * Revised : 2021/01/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 18.9.0`;
-const g_revisedDate = `2021/01/01`;
+const g_version = `Ver 18.9.1`;
+const g_revisedDate = `2021/01/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -8666,14 +8666,15 @@ function judgeArrow(_j) {
 	const arrowName = `arrow${_j}_${currentNo}`;
 	const judgArrow = document.getElementById(arrowName);
 
-	if (judgArrow !== null) {
-		const difFrame = g_attrObj[arrowName].cnt;
-		const difCnt = Math.abs(difFrame);
+	const fcurrentNo = g_workObj.judgFrzCnt[_j];
+	const frzName = `frz${_j}_${fcurrentNo}`;
+	const judgFrz = document.getElementById(frzName);
 
-		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN]) {
-			const [resultFunc, resultJdg] = checkJudgment(difCnt);
-			resultFunc(difFrame);
-			countFastSlow(difFrame, g_headerObj.justFrames);
+	function judgeTargetArrow(_difCnt, _difFrame) {
+		if (_difCnt <= g_judgObj.arrowJ[C_JDG_UWAN]) {
+			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
+			resultFunc(_difFrame);
+			countFastSlow(_difFrame, g_headerObj.justFrames);
 
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
 			stepDivHit.style.top = `${g_attrObj[arrowName].prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
@@ -8684,30 +8685,52 @@ function judgeArrow(_j) {
 
 			document.querySelector(`#arrowSprite${g_attrObj[arrowName].dividePos}`).removeChild(judgArrow);
 			g_workObj.judgArrowCnt[_j]++;
-			return;
 		}
 	}
 
-	const fcurrentNo = g_workObj.judgFrzCnt[_j];
-	const frzName = `frz${_j}_${fcurrentNo}`;
-	const judgFrz = document.getElementById(frzName);
+	function judgeTargetFrzArrow(_difCnt, _difFrame) {
+		if (_difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
+			if (g_headerObj.frzStartjdgUse &&
+				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
+				const [resultFunc] = checkJudgment(_difCnt);
+				resultFunc(_difFrame);
+				countFastSlow(_difFrame, g_headerObj.justFrames);
+				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
+			}
+			changeHitFrz(_j, fcurrentNo, `frz`);
+		}
+	}
+
+	if (judgArrow !== null && judgFrz !== null) {
+		const difFrame = g_attrObj[arrowName].cnt;
+		const difCnt = Math.abs(difFrame);
+		const frzDifFrame = g_attrObj[frzName].cnt;
+		const frzDifCnt = Math.abs(frzDifFrame);
+
+		if (difFrame < frzDifFrame) {
+			judgeTargetArrow(difCnt, difFrame);
+		} else {
+			judgeTargetFrzArrow(frzDifCnt, frzDifFrame);
+		}
+		return;
+	}
+
+	if (judgArrow !== null) {
+		const difFrame = g_attrObj[arrowName].cnt;
+		const difCnt = Math.abs(difFrame);
+
+		judgeTargetArrow(difCnt, difFrame);
+		return;
+	}
 
 	if (judgFrz !== null) {
 		const difFrame = g_attrObj[frzName].cnt;
 		const difCnt = Math.abs(difFrame);
 
-		if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
-			if (g_headerObj.frzStartjdgUse &&
-				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
-				const [resultFunc] = checkJudgment(difCnt);
-				resultFunc(difFrame);
-				countFastSlow(difFrame, g_headerObj.justFrames);
-				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
-			}
-			changeHitFrz(_j, fcurrentNo, `frz`);
-			return;
-		}
+		judgeTargetFrzArrow(difCnt, difFrame);
+		return;
 	}
+
 	$id(`stepDiv${_j}`).display = C_DIS_INHERIT;
 }
 
