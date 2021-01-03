@@ -8707,7 +8707,7 @@ function judgeArrow(_j) {
 		const frzDifFrame = g_attrObj[frzName].cnt;
 		const frzDifCnt = Math.abs(frzDifFrame);
 
-		if (difCnt < frzDifCnt) {
+		if (difFrame < frzDifFrame) {
 			judgeTargetArrow(difCnt, difFrame);
 		} else {
 			judgeTargetFrzArrow(frzDifCnt, frzDifFrame);
