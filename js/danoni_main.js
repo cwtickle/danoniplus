@@ -1236,10 +1236,9 @@ function getLoadingLabel() {
 
 function initialControl() {
 
-	g_sWidth = (isNaN(parseFloat($id(`canvas-frame`).width)) ?
-		600 : parseFloat($id(`canvas-frame`).width));
-	g_sHeight = (isNaN(parseFloat($id(`canvas-frame`).height)) ?
-		500 : parseFloat($id(`canvas-frame`).height));
+	[g_sWidth, g_sHeight] = [
+		setVal($id(`canvas-frame`).width, 600, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
+	];
 
 	let divRoot;
 	if (document.querySelector(`#divRoot`) === null) {
@@ -3081,8 +3080,7 @@ function headerConvert(_dosObj) {
 	obj.releaseDate = setVal(_dosObj.releaseDate, ``, C_TYP_STRING);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
-	const defaultObjs = [`title`, `titleArrow`, `titleAnimation`, `back`, `backMain`, `ready`];
-	defaultObjs.forEach(objName => {
+	[`title`, `titleArrow`, `titleAnimation`, `back`, `backMain`, `ready`].forEach(objName => {
 		const objUpper = toCapitalize(objName);
 		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
 			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
@@ -3178,9 +3176,7 @@ function headerConvert(_dosObj) {
 	obj.makerView = setVal(_dosObj.makerView, false, C_TYP_BOOLEAN);
 
 	// オプション利用可否設定
-	let usingOptions = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
-
-	usingOptions.forEach(option => {
+	[`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`].forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
 			(typeof g_presetSettingUse === C_TYP_OBJECT ?
 				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
@@ -4229,8 +4225,9 @@ function createOptionWindow(_sprite) {
 	createGeneralSetting(spriteList.reverse, `reverse`);
 	if (g_headerObj.scrollUse) {
 		createGeneralSetting(spriteList.scroll, `scroll`);
-		$id(`lnkScroll`).left = `${parseFloat($id(`lnkScroll`).left) + 90}px`;
-		$id(`lnkScroll`).width = `${parseFloat($id(`lnkScroll`).width) - 90}px`;
+		[$id(`lnkScroll`).left, $id(`lnkScroll`).width] = [
+			`${parseFloat($id(`lnkScroll`).left) + 90}px`, `${parseFloat($id(`lnkScroll`).width) - 90}px`
+		];
 
 		spriteList.scroll.appendChild(
 			createCss2Button(`btnReverse`, `Reverse:${g_stateObj.reverse}`, evt => setReverse(evt.target), {
@@ -4780,22 +4777,20 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 			g_keyObj[`keyCtrl${copyPtn}d`][j] = [];
 
 			for (let k = 0; k < g_keyObj[`keyCtrl${basePtn}`][j].length; k++) {
-				g_keyObj[`keyCtrl${copyPtn}`][j][k] = _localStorage[`keyCtrl${_extraKeyName}`][j][k];
-				g_keyObj[`keyCtrl${copyPtn}d`][j][k] = _localStorage[`keyCtrl${_extraKeyName}`][j][k];
+				g_keyObj[`keyCtrl${copyPtn}d`][j][k] = g_keyObj[`keyCtrl${copyPtn}`][j][k] = _localStorage[`keyCtrl${_extraKeyName}`][j][k];
 			}
 		}
 
-		const deepCopyList = [`chara`, `color`, `stepRtn`, `pos`];
+		const deepCopyList = [`chara`, `color`, `stepRtn`, `pos`, `shuffle`];
 		deepCopyList.forEach(header => {
-			g_keyObj[`${header}${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`${header}${basePtn}`]));
+			if (g_keyObj[`${header}${basePtn}`] !== undefined) {
+				g_keyObj[`${header}${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`${header}${basePtn}`]));
+			}
 		});
 		const copyList = [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`];
 		copyList.forEach(header => {
 			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
 		});
-		if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
-			g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
-		}
 	}
 }
 
@@ -5068,12 +5063,12 @@ function interlockingButton(_headerObj, _name, _current, _next, _buttonFlg = fal
 			if (!includeDefaults.includes(defaultOption)) {
 				g_stateObj[`d_${defaultOption.toLowerCase()}`] = _next;
 				if (_buttonFlg) {
-					if (g_headerObj[`${defaultOption}Use`]) {
-						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${_current}`], g_cssObj[`button_${_next}`]);
-					} else {
+					let txtDisabled = ``;
+					if (!g_headerObj[`${defaultOption}Use`]) {
+						txtDisabled = `Disabled`;
 						document.querySelector(`#lnk${defaultOption}`).textContent = `${toCapitalize(defaultOption)}:${_next}`;
-						document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_Disabled${_current}`], g_cssObj[`button_Disabled${_next}`]);
 					}
+					document.querySelector(`#lnk${defaultOption}`).classList.replace(g_cssObj[`button_${txtDisabled}${_current}`], g_cssObj[`button_Disabled${_next}`]);
 				}
 				// さらに連動する場合は設定を反転
 				interlockingButton(_headerObj, defaultOption, _next, _current, _buttonFlg);
@@ -5681,43 +5676,41 @@ function loadingScoreInit() {
 				preblankFrame = arrivalFrame - firstArrowFrame + C_MAX_ADJUSTMENT;
 
 				// 譜面データの再読み込み
+				const noteExistObj = {
+					arrow: true,
+					frz: true,
+					dummyArrow: g_stateObj.shuffle === C_FLG_OFF,
+					dummyFrz: g_stateObj.shuffle === C_FLG_OFF,
+				};
 				const tmpObj = scoreConvert(g_rootObj, g_stateObj.scoreId, preblankFrame, dummyIdHeader);
 				for (let j = 0; j < keyNum; j++) {
-					if (tmpObj.arrowData[j] !== undefined) {
-						g_scoreObj.arrowData[j] = JSON.parse(JSON.stringify(tmpObj.arrowData[j]));
-					}
-					if (tmpObj.frzData[j] !== undefined) {
-						g_scoreObj.frzData[j] = JSON.parse(JSON.stringify(tmpObj.frzData[j]));
-					}
-					if (tmpObj.dummyArrowData[j] !== undefined && g_stateObj.shuffle === C_FLG_OFF) {
-						g_scoreObj.dummyArrowData[j] = JSON.parse(JSON.stringify(tmpObj.dummyArrowData[j]));
-					}
-					if (tmpObj.dummyFrzData[j] !== undefined && g_stateObj.shuffle === C_FLG_OFF) {
-						g_scoreObj.dummyFrzData[j] = JSON.parse(JSON.stringify(tmpObj.dummyFrzData[j]));
-					}
+					Object.keys(noteExistObj).forEach(name => {
+						if (tmpObj[`${name}Data`][j] !== undefined && noteExistObj[name]) {
+							g_scoreObj[`${name}Data`][j] = JSON.parse(JSON.stringify(tmpObj[`${name}Data`][j]));
+						}
+					});
 				}
 
 				/**
 				 * データ種, 最小データ長のセット
 				 */
-				const dataTypes = [
-					[`speed`, 2],
-					[`boost`, 2],
-					[`color`, 3],
-					[`acolor`, 3],
-					[`shadowcolor`, 3],
-					[`ashadowcolor`, 3],
-					[`arrowCssMotion`, 3],
-					[`frzCssMotion`, 3],
-					[`dummyArrowCssMotion`, 3],
-					[`dummyFrzCssMotion`, 3],
-					[`object`, 4],
-					[`word`, 3],
-					[`mask`, 1],
-					[`back`, 1],
-				];
-				dataTypes.forEach(dataType => {
-					g_scoreObj[`${dataType[0]}Data`] = setData(tmpObj[`${dataType[0]}Data`], dataType[1]);
+				const dataMinObj = {
+					speed: 2,
+					boost: 2,
+					color: 3,
+					acolor: 3,
+					shadowcolor: 3,
+					ashadowcolor: 3,
+					arrowCssMotion: 3,
+					frzCssMotion: 3,
+					dummyArrowCssMotion: 3,
+					dummyFrzCssMotion: 3,
+					word: 3,
+					mask: 1,
+					back: 1,
+				};
+				Object.keys(dataMinObj).forEach(dataType => {
+					g_scoreObj[`${dataType}Data`] = setData(tmpObj[`${dataType}Data`], dataMinObj[dataType]);
 				});
 
 				lastFrame += preblankFrame;
@@ -8670,7 +8663,8 @@ function judgeArrow(_j) {
 	const frzName = `frz${_j}_${fcurrentNo}`;
 	const judgFrz = document.getElementById(frzName);
 
-	function judgeTargetArrow(_difCnt, _difFrame) {
+	function judgeTargetArrow(_difFrame) {
+		const _difCnt = Math.abs(_difFrame);
 		if (_difCnt <= g_judgObj.arrowJ[C_JDG_UWAN]) {
 			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
 			resultFunc(_difFrame);
@@ -8688,7 +8682,8 @@ function judgeArrow(_j) {
 		}
 	}
 
-	function judgeTargetFrzArrow(_difCnt, _difFrame) {
+	function judgeTargetFrzArrow(_difFrame) {
+		const _difCnt = Math.abs(_difFrame);
 		if (_difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
 			if (g_headerObj.frzStartjdgUse &&
 				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
@@ -8703,31 +8698,21 @@ function judgeArrow(_j) {
 
 	if (judgArrow !== null && judgFrz !== null) {
 		const difFrame = g_attrObj[arrowName].cnt;
-		const difCnt = Math.abs(difFrame);
 		const frzDifFrame = g_attrObj[frzName].cnt;
-		const frzDifCnt = Math.abs(frzDifFrame);
 
 		if (difFrame < frzDifFrame) {
-			judgeTargetArrow(difCnt, difFrame);
+			judgeTargetArrow(difFrame);
 		} else {
-			judgeTargetFrzArrow(frzDifCnt, frzDifFrame);
+			judgeTargetFrzArrow(frzDifFrame);
 		}
 		return;
 	}
 
 	if (judgArrow !== null) {
-		const difFrame = g_attrObj[arrowName].cnt;
-		const difCnt = Math.abs(difFrame);
-
-		judgeTargetArrow(difCnt, difFrame);
+		judgeTargetArrow(g_attrObj[arrowName].cnt);
 		return;
-	}
-
-	if (judgFrz !== null) {
-		const difFrame = g_attrObj[frzName].cnt;
-		const difCnt = Math.abs(difFrame);
-
-		judgeTargetFrzArrow(difCnt, difFrame);
+	} else if (judgFrz !== null) {
+		judgeTargetFrzArrow(g_attrObj[frzName].cnt);
 		return;
 	}
 
