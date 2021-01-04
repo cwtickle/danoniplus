@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/12/30
+ * Revised : 2021/01/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 18.8.2`;
-const g_revisedDate = `2020/12/30`;
+const g_version = `Ver 18.9.1`;
+const g_revisedDate = `2021/01/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2225,7 +2225,8 @@ function titleInit() {
 			for (let j = 0; j < txtAnimations.length; j++) {
 				txtAnimations[j] = `animation-name:${g_headerObj.titleAnimationName[j]};
 				animation-duration:${g_headerObj.titleAnimationDuration[j]}s;
-				animation-delay:${g_headerObj.titleAnimationDelay[j]}s;`;
+				animation-delay:${g_headerObj.titleAnimationDelay[j]}s;
+				animation-timing-function:${g_headerObj.titleAnimationTimingFunction[j]};`;
 			}
 		}
 		const lblmusicTitle = createDivCss2Label(`lblmusicTitle`,
@@ -2236,7 +2237,7 @@ function titleInit() {
 				-webkit-background-clip: text;
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
 				${txtAnimations[0]}
-			">
+			" class="${g_headerObj.titleAnimationClass[0]}">
 				${g_headerObj.musicTitleForView[0]}
 			</div>
 			<div id="lblmusicTitle2" style="
@@ -2249,7 +2250,7 @@ function titleInit() {
 				-webkit-background-clip: text;
 				-webkit-text-fill-color: rgba(255,255,255,0.0);
 				${txtAnimations[1]}
-			">
+			" class="${g_headerObj.titleAnimationClass[1]}">
 				${setVal(g_headerObj.musicTitleForView[1], ``, C_TYP_STRING)}
 			</div>
 			`,
@@ -3140,18 +3141,29 @@ function headerConvert(_dosObj) {
 	obj.titleAnimationName = [`leftToRight`];
 	obj.titleAnimationDuration = [1.5];
 	obj.titleAnimationDelay = [0];
+	obj.titleAnimationTimingFunction = [`ease`];
+	obj.titleAnimationClass = [``];
 	if (hasVal(_dosObj.titleanimation)) {
 		_dosObj.titleanimation.split(`$`).forEach((pos, j) => {
 			const titleAnimation = pos.split(`,`);
 			obj.titleAnimationName[j] = setVal(titleAnimation[0], obj.titleAnimationName[0], C_TYP_STRING);
 			obj.titleAnimationDuration[j] = setVal(titleAnimation[1] / g_fps, obj.titleAnimationDuration[0], C_TYP_FLOAT);
 			obj.titleAnimationDelay[j] = setVal(titleAnimation[2] / g_fps, obj.titleAnimationDelay[0], C_TYP_FLOAT);
+			obj.titleAnimationTimingFunction[j] = setVal(titleAnimation[3], obj.titleAnimationName[3], C_TYP_STRING);
+		});
+	}
+	if (hasVal(_dosObj.titleanimationclass)) {
+		_dosObj.titleanimationclass.split(`$`).forEach((animationClass, j) => {
+			obj.titleAnimationClass[j] = setVal(animationClass, ``, C_TYP_STRING);
 		});
 	}
 	if (obj.titleAnimationName.length === 1) {
-		[`Name`, `Duration`, `Delay`].forEach(pattern => {
+		[`Name`, `Duration`, `Delay`, `TimingFunction`].forEach(pattern => {
 			obj[`titleAnimation${pattern}`][1] = obj[`titleAnimation${pattern}`][0];
 		});
+	}
+	if (obj.titleAnimationClass.length === 1) {
+		obj.titleAnimationClass[1] = obj.titleAnimationClass[0];
 	}
 
 	// デフォルト曲名表示の複数行時の縦間隔
@@ -8649,14 +8661,15 @@ function judgeArrow(_j) {
 	const arrowName = `arrow${_j}_${currentNo}`;
 	const judgArrow = document.getElementById(arrowName);
 
-	if (judgArrow !== null) {
-		const difFrame = g_attrObj[arrowName].cnt;
-		const difCnt = Math.abs(difFrame);
+	const fcurrentNo = g_workObj.judgFrzCnt[_j];
+	const frzName = `frz${_j}_${fcurrentNo}`;
+	const judgFrz = document.getElementById(frzName);
 
-		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN]) {
-			const [resultFunc, resultJdg] = checkJudgment(difCnt);
-			resultFunc(difFrame);
-			countFastSlow(difFrame, g_headerObj.justFrames);
+	function judgeTargetArrow(_difCnt, _difFrame) {
+		if (_difCnt <= g_judgObj.arrowJ[C_JDG_UWAN]) {
+			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
+			resultFunc(_difFrame);
+			countFastSlow(_difFrame, g_headerObj.justFrames);
 
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
 			stepDivHit.style.top = `${g_attrObj[arrowName].prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
@@ -8667,30 +8680,52 @@ function judgeArrow(_j) {
 
 			document.querySelector(`#arrowSprite${g_attrObj[arrowName].dividePos}`).removeChild(judgArrow);
 			g_workObj.judgArrowCnt[_j]++;
-			return;
 		}
 	}
 
-	const fcurrentNo = g_workObj.judgFrzCnt[_j];
-	const frzName = `frz${_j}_${fcurrentNo}`;
-	const judgFrz = document.getElementById(frzName);
+	function judgeTargetFrzArrow(_difCnt, _difFrame) {
+		if (_difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
+			if (g_headerObj.frzStartjdgUse &&
+				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
+				const [resultFunc] = checkJudgment(_difCnt);
+				resultFunc(_difFrame);
+				countFastSlow(_difFrame, g_headerObj.justFrames);
+				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
+			}
+			changeHitFrz(_j, fcurrentNo, `frz`);
+		}
+	}
+
+	if (judgArrow !== null && judgFrz !== null) {
+		const difFrame = g_attrObj[arrowName].cnt;
+		const difCnt = Math.abs(difFrame);
+		const frzDifFrame = g_attrObj[frzName].cnt;
+		const frzDifCnt = Math.abs(frzDifFrame);
+
+		if (difFrame < frzDifFrame) {
+			judgeTargetArrow(difCnt, difFrame);
+		} else {
+			judgeTargetFrzArrow(frzDifCnt, frzDifFrame);
+		}
+		return;
+	}
+
+	if (judgArrow !== null) {
+		const difFrame = g_attrObj[arrowName].cnt;
+		const difCnt = Math.abs(difFrame);
+
+		judgeTargetArrow(difCnt, difFrame);
+		return;
+	}
 
 	if (judgFrz !== null) {
 		const difFrame = g_attrObj[frzName].cnt;
 		const difCnt = Math.abs(difFrame);
 
-		if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
-			if (g_headerObj.frzStartjdgUse &&
-				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
-				const [resultFunc] = checkJudgment(difCnt);
-				resultFunc(difFrame);
-				countFastSlow(difFrame, g_headerObj.justFrames);
-				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
-			}
-			changeHitFrz(_j, fcurrentNo, `frz`);
-			return;
-		}
+		judgeTargetFrzArrow(difCnt, difFrame);
+		return;
 	}
+
 	$id(`stepDiv${_j}`).display = C_DIS_INHERIT;
 }
 
