@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/01/03
+ * Revised : 2021/01/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 18.9.1`;
-const g_revisedDate = `2021/01/03`;
+const g_version = `Ver 18.9.2`;
+const g_revisedDate = `2021/01/04`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -8685,7 +8685,9 @@ function judgeArrow(_j) {
 
 			document.querySelector(`#arrowSprite${g_attrObj[arrowName].dividePos}`).removeChild(judgArrow);
 			g_workObj.judgArrowCnt[_j]++;
+			return true;
 		}
+		return false;
 	}
 
 	function judgeTargetFrzArrow(_difCnt, _difFrame) {
@@ -8698,7 +8700,9 @@ function judgeArrow(_j) {
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
 			changeHitFrz(_j, fcurrentNo, `frz`);
+			return true;
 		}
+		return false;
 	}
 
 	if (judgArrow !== null && judgFrz !== null) {
@@ -8707,28 +8711,29 @@ function judgeArrow(_j) {
 		const frzDifFrame = g_attrObj[frzName].cnt;
 		const frzDifCnt = Math.abs(frzDifFrame);
 
-		if (difFrame < frzDifFrame) {
-			judgeTargetArrow(difCnt, difFrame);
-		} else {
-			judgeTargetFrzArrow(frzDifCnt, frzDifFrame);
+		if (difFrame < frzDifFrame && judgeTargetArrow(difCnt, difFrame)) {
+			return;
+		} else if (judgeTargetFrzArrow(frzDifCnt, frzDifFrame)) {
+			return;
 		}
-		return;
 	}
 
 	if (judgArrow !== null) {
 		const difFrame = g_attrObj[arrowName].cnt;
 		const difCnt = Math.abs(difFrame);
 
-		judgeTargetArrow(difCnt, difFrame);
-		return;
+		if (judgeTargetArrow(difCnt, difFrame)) {
+			return;
+		}
 	}
 
 	if (judgFrz !== null) {
 		const difFrame = g_attrObj[frzName].cnt;
 		const difCnt = Math.abs(difFrame);
 
-		judgeTargetFrzArrow(difCnt, difFrame);
-		return;
+		if (judgeTargetFrzArrow(difCnt, difFrame)) {
+			return;
+		}
 	}
 
 	$id(`stepDiv${_j}`).display = C_DIS_INHERIT;
