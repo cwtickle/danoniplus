@@ -5697,7 +5697,7 @@ function loadingScoreInit() {
 				 * データ種, 最小データ長のセット
 				 */
 				const dataMinObj = {
-					speed: 2, 
+					speed: 2,
 					boost: 2,
 					color: 3,
 					acolor: 3,
@@ -8665,7 +8665,8 @@ function judgeArrow(_j) {
 	const frzName = `frz${_j}_${fcurrentNo}`;
 	const judgFrz = document.getElementById(frzName);
 
-	function judgeTargetArrow(_difCnt, _difFrame) {
+	function judgeTargetArrow(_difFrame) {
+		const _difCnt = Math.abs(_difFrame);
 		if (_difCnt <= g_judgObj.arrowJ[C_JDG_UWAN]) {
 			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
 			resultFunc(_difFrame);
@@ -8683,7 +8684,8 @@ function judgeArrow(_j) {
 		}
 	}
 
-	function judgeTargetFrzArrow(_difCnt, _difFrame) {
+	function judgeTargetFrzArrow(_difFrame) {
+		const _difCnt = Math.abs(_difFrame);
 		if (_difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
 			if (g_headerObj.frzStartjdgUse &&
 				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
@@ -8698,31 +8700,23 @@ function judgeArrow(_j) {
 
 	if (judgArrow !== null && judgFrz !== null) {
 		const difFrame = g_attrObj[arrowName].cnt;
-		const difCnt = Math.abs(difFrame);
 		const frzDifFrame = g_attrObj[frzName].cnt;
-		const frzDifCnt = Math.abs(frzDifFrame);
 
 		if (difFrame < frzDifFrame) {
-			judgeTargetArrow(difCnt, difFrame);
+			judgeTargetArrow(difFrame);
 		} else {
-			judgeTargetFrzArrow(frzDifCnt, frzDifFrame);
+			judgeTargetFrzArrow(frzDifFrame);
 		}
 		return;
 	}
 
 	if (judgArrow !== null) {
-		const difFrame = g_attrObj[arrowName].cnt;
-		const difCnt = Math.abs(difFrame);
-
-		judgeTargetArrow(difCnt, difFrame);
+		judgeTargetArrow(g_attrObj[arrowName].cnt);
 		return;
 	}
 
 	if (judgFrz !== null) {
-		const difFrame = g_attrObj[frzName].cnt;
-		const difCnt = Math.abs(difFrame);
-
-		judgeTargetFrzArrow(difCnt, difFrame);
+		judgeTargetFrzArrow(g_attrObj[frzName].cnt);
 		return;
 	}
 
