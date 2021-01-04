@@ -8679,7 +8679,9 @@ function judgeArrow(_j) {
 
 			document.querySelector(`#arrowSprite${g_attrObj[arrowName].dividePos}`).removeChild(judgArrow);
 			g_workObj.judgArrowCnt[_j]++;
+			return true;
 		}
+		return false;
 	}
 
 	function judgeTargetFrzArrow(_difFrame) {
@@ -8693,30 +8695,30 @@ function judgeArrow(_j) {
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
 			changeHitFrz(_j, fcurrentNo, `frz`);
+			return true;
 		}
+		return false;
 	}
 
+	let judgeFlg = false;
 	if (judgArrow !== null && judgFrz !== null) {
 		const difFrame = g_attrObj[arrowName].cnt;
 		const frzDifFrame = g_attrObj[frzName].cnt;
 
 		if (difFrame < frzDifFrame) {
-			judgeTargetArrow(difFrame);
+			judgeFlg = judgeTargetArrow(difFrame);
 		} else {
-			judgeTargetFrzArrow(frzDifFrame);
+			judgeFlg = judgeTargetFrzArrow(frzDifFrame);
 		}
-		return;
-	}
-
-	if (judgArrow !== null) {
-		judgeTargetArrow(g_attrObj[arrowName].cnt);
-		return;
+	} else if (judgArrow !== null) {
+		judgeFlg = judgeTargetArrow(g_attrObj[arrowName].cnt);
 	} else if (judgFrz !== null) {
-		judgeTargetFrzArrow(g_attrObj[frzName].cnt);
-		return;
+		judgeFlg = judgeTargetFrzArrow(g_attrObj[frzName].cnt);
 	}
 
-	$id(`stepDiv${_j}`).display = C_DIS_INHERIT;
+	if (!judgeFlg) {
+		$id(`stepDiv${_j}`).display = C_DIS_INHERIT;
+	}
 }
 
 /**
