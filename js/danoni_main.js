@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/12/25
+ * Revised : 2021/01/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 9.4.26`;
-const g_revisedDate = `2020/12/25`;
+const g_version = `Ver 9.4.27`;
+const g_revisedDate = `2021/01/04`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -8722,74 +8722,101 @@ function judgeArrow(_j) {
 		g_judgObj.lockFlgs[_j] = true;
 
 		const currentNo = g_workObj.judgArrowCnt[_j];
-		const stepDivHit = document.querySelector(`#stepHit${_j}`);
 		const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
 
 		const fcurrentNo = g_workObj.judgFrzCnt[_j];
-
-		if (judgArrow !== null) {
-			const difFrame = Number(judgArrow.getAttribute(`cnt`));
-			const difCnt = Math.abs(judgArrow.getAttribute(`cnt`));
-			const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
-			const dividePos = Number(judgArrow.getAttribute(`dividePos`));
-			const arrowSprite = document.querySelector(`#arrowSprite${dividePos}`);
-
-			if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
-				stepDivHit.style.opacity = 0.75;
-
-				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-					judgeIi(difFrame);
-					stepDivHit.style.background = C_CLR_II;
-				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-					judgeShakin(difFrame);
-					stepDivHit.style.background = C_CLR_SHAKIN;
-				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-					judgeMatari(difFrame);
-					stepDivHit.style.background = C_CLR_MATARI;
-				} else {
-					judgeShobon(difFrame);
-					stepDivHit.style.background = C_CLR_SHOBON;
-				}
-				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-
-				arrowSprite.removeChild(judgArrow);
-				g_workObj.judgArrowCnt[_j]++;
-
-				g_judgObj.lockFlgs[_j] = false;
-				return;
-			}
-		}
-
 		const judgFrz = document.querySelector(`#frz${_j}_${fcurrentNo}`);
 
-		if (judgFrz !== null) {
-			const difCnt = Math.abs(judgFrz.getAttribute(`cnt`));
-			const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
+		if (judgArrow !== null && judgFrz !== null) {
+			const difFrame = Number(judgArrow.getAttribute(`cnt`));
+			const frzDifFrame = Number(judgFrz.getAttribute(`cnt`));
 
-			if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
-				if (g_headerObj.frzStartjdgUse) {
-					const difFrame = Number(judgFrz.getAttribute(`cnt`));
-					if (g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
-						if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
-							judgeIi(difFrame);
-						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
-							judgeShakin(difFrame);
-						} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
-							judgeMatari(difFrame);
-						} else {
-							judgeShobon(difFrame);
-						}
-						g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
-					}
-				}
-				changeHitFrz(_j, fcurrentNo, `frz`);
-				g_judgObj.lockFlgs[_j] = false;
+			if (difFrame < frzDifFrame) {
+				judgeTargetArrow(judgArrow);
+			} else {
+				judgeTargetFrzArrow(judgFrz);
+			}
+			if (g_judgObj.lockFlgs[_j] === false) {
 				return;
 			}
 		}
+
+		if (judgArrow !== null) {
+			judgeTargetArrow(judgArrow);
+			if (g_judgObj.lockFlgs[_j] === false) {
+				return;
+			}
+		}
+
+		if (judgFrz !== null) {
+			judgeTargetFrzArrow(judgFrz);
+			if (g_judgObj.lockFlgs[_j] === false) {
+				return;
+			}
+		}
+
 		const stepDiv = document.querySelector(`#step${_j}`);
 		stepDiv.style.backgroundColor = `#66ffff`;
 		g_judgObj.lockFlgs[_j] = false;
+	}
+
+	function judgeTargetArrow(_judgArrow) {
+		const difFrame = Number(_judgArrow.getAttribute(`cnt`));
+		const difCnt = Math.abs(_judgArrow.getAttribute(`cnt`));
+		const judgEndFlg = _judgArrow.getAttribute(`judgEndFlg`);
+		const dividePos = Number(_judgArrow.getAttribute(`dividePos`));
+		const arrowSprite = document.querySelector(`#arrowSprite${dividePos}`);
+
+		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
+			const stepDivHit = document.querySelector(`#stepHit${_j}`);
+			stepDivHit.style.opacity = 0.75;
+
+			if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
+				judgeIi(difFrame);
+				stepDivHit.style.background = C_CLR_II;
+			} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
+				judgeShakin(difFrame);
+				stepDivHit.style.background = C_CLR_SHAKIN;
+			} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
+				judgeMatari(difFrame);
+				stepDivHit.style.background = C_CLR_MATARI;
+			} else {
+				judgeShobon(difFrame);
+				stepDivHit.style.background = C_CLR_SHOBON;
+			}
+			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
+
+			arrowSprite.removeChild(_judgArrow);
+			g_workObj.judgArrowCnt[_j]++;
+
+			g_judgObj.lockFlgs[_j] = false;
+		}
+	}
+
+	function judgeTargetFrzArrow(_judgFrz) {
+		const difCnt = Math.abs(_judgFrz.getAttribute(`cnt`));
+		const judgEndFlg = _judgFrz.getAttribute(`judgEndFlg`);
+		const fcurrentNo = g_workObj.judgFrzCnt[_j];
+
+		if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
+			if (g_headerObj.frzStartjdgUse) {
+				const difFrame = Number(_judgFrz.getAttribute(`cnt`));
+				if (g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
+					if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
+						judgeIi(difFrame);
+					} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
+						judgeShakin(difFrame);
+					} else if (difCnt <= g_judgObj.arrowJ[C_JDG_MATARI]) {
+						judgeMatari(difFrame);
+					} else {
+						judgeShobon(difFrame);
+					}
+					g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
+				}
+			}
+			changeHitFrz(_j, fcurrentNo, `frz`);
+			g_judgObj.lockFlgs[_j] = false;
+		}
 	}
 }
 
