@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2020/12/30
+ * Revised : 2021/01/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 16.4.9`;
-const g_revisedDate = `2020/12/30`;
+const g_version = `Ver 16.4.10`;
+const g_revisedDate = `2021/01/04`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -9125,15 +9125,37 @@ function judgeArrow(_j) {
 	const judgArrow = document.querySelector(`#arrow${_j}_${currentNo}`);
 
 	const fcurrentNo = g_workObj.judgFrzCnt[_j];
+	const judgFrz = document.querySelector(`#frz${_j}_${fcurrentNo}`);
 
-	if (judgArrow !== null) {
+	if (judgArrow !== null && judgFrz !== null) {
 		const difFrame = Number(judgArrow.getAttribute(`cnt`));
+		const frzDifFrame = Number(judgFrz.getAttribute(`cnt`));
+		if (difFrame < frzDifFrame) {
+			if (judgeTargetArrow(judgArrow)) {
+				return;
+			}
+		} else if (judgeTargetFrzArrow(judgFrz)) {
+			return;
+		}
+	}
+
+	if (judgArrow !== null && judgeTargetArrow(judgArrow)) {
+		return;
+	} else if (judgFrz !== null && judgeTargetFrzArrow(judgFrz)) {
+		return;
+	}
+
+	const stepDiv = document.querySelector(`#stepDiv${_j}`);
+	stepDiv.style.display = C_DIS_INHERIT;
+
+	function judgeTargetArrow(_judgArrow) {
+		const difFrame = Number(_judgArrow.getAttribute(`cnt`));
 		const difCnt = Math.abs(difFrame);
-		const judgEndFlg = judgArrow.getAttribute(`judgEndFlg`);
-		const arrowSprite = document.querySelector(`#arrowSprite${judgArrow.getAttribute(`dividePos`)}`);
+		const judgEndFlg = _judgArrow.getAttribute(`judgEndFlg`);
+		const arrowSprite = document.querySelector(`#arrowSprite${_judgArrow.getAttribute(`dividePos`)}`);
 
 		if (difCnt <= g_judgObj.arrowJ[C_JDG_UWAN] && judgEndFlg === `false`) {
-			stepDivHit.style.top = `${parseFloat(judgArrow.getAttribute(`prevPosY`)) -
+			stepDivHit.style.top = `${parseFloat(_judgArrow.getAttribute(`prevPosY`)) -
 				parseFloat(document.querySelector(`#stepRoot${_j}`).style.top) - 15}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.remove(g_cssObj.main_stepDefault, g_cssObj.main_stepDummy, g_cssObj.main_stepIi, g_cssObj.main_stepShakin, g_cssObj.main_stepMatari, g_cssObj.main_stepShobon);
@@ -9154,22 +9176,22 @@ function judgeArrow(_j) {
 			countFastSlow(difFrame, g_headerObj.justFrames);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
-			arrowSprite.removeChild(judgArrow);
+			arrowSprite.removeChild(_judgArrow);
 			g_workObj.judgArrowCnt[_j]++;
-			return;
+			return true;
 		}
+		return false;
 	}
 
-	const judgFrz = document.querySelector(`#frz${_j}_${fcurrentNo}`);
-
-	if (judgFrz !== null) {
-		const difCnt = Math.abs(judgFrz.getAttribute(`cnt`));
-		const judgEndFlg = judgFrz.getAttribute(`judgEndFlg`);
+	function judgeTargetFrzArrow(_judgFrz) {
+		const difCnt = Math.abs(_judgFrz.getAttribute(`cnt`));
+		const judgEndFlg = _judgFrz.getAttribute(`judgEndFlg`);
+		const fcurrentNo = g_workObj.judgFrzCnt[_j];
 
 		if (difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && judgEndFlg === `false`) {
 			if (g_headerObj.frzStartjdgUse &&
 				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
-				const difFrame = Number(judgFrz.getAttribute(`cnt`));
+				const difFrame = Number(_judgFrz.getAttribute(`cnt`));
 				if (difCnt <= g_judgObj.arrowJ[C_JDG_II]) {
 					judgeIi(difFrame);
 				} else if (difCnt <= g_judgObj.arrowJ[C_JDG_SHAKIN]) {
@@ -9183,11 +9205,10 @@ function judgeArrow(_j) {
 				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			}
 			changeHitFrz(_j, fcurrentNo, `frz`);
-			return;
+			return true;
 		}
+		return false;
 	}
-	const stepDiv = document.querySelector(`#stepDiv${_j}`);
-	stepDiv.style.display = C_DIS_INHERIT;
 }
 
 /**
