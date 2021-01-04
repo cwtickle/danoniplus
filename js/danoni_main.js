@@ -1236,10 +1236,9 @@ function getLoadingLabel() {
 
 function initialControl() {
 
-	g_sWidth = (isNaN(parseFloat($id(`canvas-frame`).width)) ?
-		600 : parseFloat($id(`canvas-frame`).width));
-	g_sHeight = (isNaN(parseFloat($id(`canvas-frame`).height)) ?
-		500 : parseFloat($id(`canvas-frame`).height));
+	[g_sWidth, g_sHeight] = [
+		setVal($id(`canvas-frame`).width, 600, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
+	];
 
 	let divRoot;
 	if (document.querySelector(`#divRoot`) === null) {
@@ -4226,8 +4225,9 @@ function createOptionWindow(_sprite) {
 	createGeneralSetting(spriteList.reverse, `reverse`);
 	if (g_headerObj.scrollUse) {
 		createGeneralSetting(spriteList.scroll, `scroll`);
-		$id(`lnkScroll`).left = `${parseFloat($id(`lnkScroll`).left) + 90}px`;
-		$id(`lnkScroll`).width = `${parseFloat($id(`lnkScroll`).width) - 90}px`;
+		[$id(`lnkScroll`).left, $id(`lnkScroll`).width] = [
+			`${parseFloat($id(`lnkScroll`).left) + 90}px`, `${parseFloat($id(`lnkScroll`).width) - 90}px`
+		];
 
 		spriteList.scroll.appendChild(
 			createCss2Button(`btnReverse`, `Reverse:${g_stateObj.reverse}`, evt => setReverse(evt.target), {
@@ -4777,22 +4777,20 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 			g_keyObj[`keyCtrl${copyPtn}d`][j] = [];
 
 			for (let k = 0; k < g_keyObj[`keyCtrl${basePtn}`][j].length; k++) {
-				g_keyObj[`keyCtrl${copyPtn}`][j][k] = _localStorage[`keyCtrl${_extraKeyName}`][j][k];
-				g_keyObj[`keyCtrl${copyPtn}d`][j][k] = _localStorage[`keyCtrl${_extraKeyName}`][j][k];
+				g_keyObj[`keyCtrl${copyPtn}d`][j][k] = g_keyObj[`keyCtrl${copyPtn}`][j][k] = _localStorage[`keyCtrl${_extraKeyName}`][j][k];
 			}
 		}
 
-		const deepCopyList = [`chara`, `color`, `stepRtn`, `pos`];
+		const deepCopyList = [`chara`, `color`, `stepRtn`, `pos`, `shuffle`];
 		deepCopyList.forEach(header => {
-			g_keyObj[`${header}${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`${header}${basePtn}`]));
+			if (g_keyObj[`${header}${basePtn}`] !== undefined) {
+				g_keyObj[`${header}${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`${header}${basePtn}`]));
+			}
 		});
 		const copyList = [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`];
 		copyList.forEach(header => {
 			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
 		});
-		if (g_keyObj[`shuffle${basePtn}`] !== undefined) {
-			g_keyObj[`shuffle${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`shuffle${basePtn}`]));
-		}
 	}
 }
 
