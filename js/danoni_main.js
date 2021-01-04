@@ -8713,9 +8713,7 @@ function judgeArrow(_j) {
 	if (judgArrow !== null) {
 		judgeTargetArrow(g_attrObj[arrowName].cnt);
 		return;
-	}
-
-	if (judgFrz !== null) {
+	} else if (judgFrz !== null) {
 		judgeTargetFrzArrow(g_attrObj[frzName].cnt);
 		return;
 	}
