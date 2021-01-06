@@ -528,30 +528,6 @@ function createDiv(_id, _x, _y, _width, _height) {
 }
 
 /**
- * 子div要素のラベル文字作成 (CSS版)
- * @param {string} _id 
- * @param {number} _x 
- * @param {number} _y 
- * @param {number} _width 
- * @param {number} _height 
- * @param {number} _fontsize 
- * @param {string} _text
- * @param {string} _class 
- */
-function createDivCssLabel(_id, _x, _y, _width, _height, _fontsize, _text, _class = g_cssObj.title_base) {
-	const div = createDiv(_id, _x, _y, _width, _height);
-	div.classList.add(_class);
-
-	const style = div.style;
-	style.fontSize = `${_fontsize}px`;
-	style.fontFamily = getBasicFont();
-	style.textAlign = C_ALIGN_CENTER;
-	div.innerHTML = _text;
-
-	return div;
-}
-
-/**
  * 子div要素のラベル文字作成
  * - createDivLabelに加えて、独自フォントが指定できる形式。
  * @param {string} _id 
@@ -612,44 +588,6 @@ function createDivCss2Label(_id, _text, { x = 0, y = 0, w = C_LEN_SETLBL_WIDTH, 
 function createImg(_id, _imgPath, _x, _y, _width, _height) {
 	const div = createDiv(_id, _x, _y, _width, _height);
 	div.innerHTML = `<img id=${_id}img src=${_imgPath} style=width:${_width}px;height:${_height}px>`;
-
-	return div;
-}
-
-/**
- * 色付きオブジェクトの作成
- * @param {string} _id 
- * @param {string} _color 
- * @param {number} _x 
- * @param {number} _y 
- * @param {number} _width 
- * @param {number} _height 
- * @param {string} _rotate オブジェクト名／回転角度 (default : ``)
- * @param {string} _styleName オブジェクト種類 (default : ``)
- */
-function createColorObject(_id, _color, _x, _y, _width, _height,
-	_rotate = ``, _styleName = ``) {
-
-	const div = createDiv(_id, _x, _y, _width, _height);
-
-	// 矢印・オブジェクト判定
-	let charaStyle;
-	if (isNaN(Number(_rotate)) || _rotate === ``) {
-		charaStyle = `${_rotate}${_styleName}`;
-	} else {
-		charaStyle = `arrow${_styleName}`;
-		div.style.transform = `rotate(${_rotate}deg)`;
-	}
-
-	if (_color !== ``) {
-		div.style.background = _color;
-	}
-	div.style.maskImage = `url("${g_imgObj[charaStyle]}")`;
-	div.style.maskSize = `contain`;
-	div.style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
-	div.style.webkitMaskSize = `contain`;
-	div.setAttribute(`color`, _color);
-	div.setAttribute(`type`, charaStyle);
 
 	return div;
 }
@@ -737,70 +675,6 @@ function deleteChildspriteAll(_parentObjName) {
 		g_handler.removeListener(parentsprite.firstChild.getAttribute(`lsnrkeyTE`));
 		parentsprite.removeChild(parentsprite.firstChild);
 	}
-}
-
-/**
- * ボタンの作成 (CSS版)
- * - ボタンの位置、色といった基本設定をここで指定
- * - 実際のボタンは以下のように設定して使用すること（表示されなくなる）
- * - ボタンの表示テキスト及びフォントは固定
- * 
- * -  使い方：
- *		const btnBack = createButton({
- *			// ボタンオブジェクト名
- *			id: `btnBack`,
- *			// ボタンに表示する名前
- *			name: `Back`,
- *			// 作成先のx座標 (appendChildする親に対する位置)
- *			x: 0,
- *			// 作成先のy座標 (appendChildする親に対する位置)
- *			y: g_sHeight-100,
- *			// 幅
- *			width: g_sWidth/3, 
- *			// 高さ
- *			height: C_BTN_HEIGHT, 
- *			// フォントサイズ
- *			fontsize: C_LBL_BTNSIZE,
- *			// 表示位置
- *			align: C_ALIGN_CENTER,
- *			// CSSクラス名
- *			class: `class_name`,
- *		}, _ => {
- *			// ボタン押下後の処理
- *			clearWindow();
- *			titleInit();
- *		});
- *		divRoot.appendChild(btnBack);
- *   
- * @param {object} _obj ボタンオブジェクト
- * @param {function} _func ボタン押下後の処理（マウスハンドラ）
- */
-function createCssButton(_obj, _func) {
-
-	// ボタン用の子要素divを作成
-	const div = createDiv(_obj.id, _obj.x, _obj.y, _obj.width, _obj.height);
-	div.classList.add(`button_common`, _obj.class);
-
-	// ボタンの装飾を定義
-	const style = div.style;
-	div.innerHTML = _obj.name;
-	style.textAlign = _obj.align;
-	style.verticalAlign = C_VALIGN_MIDDLE;
-	style.fontSize = `${_obj.fontsize}px`;
-	style.fontFamily = getBasicFont();
-	if (hasVal(_obj.animationName)) {
-		style.animationName = _obj.animationName;
-		style.animationDuration = `1s`;
-	}
-	div.ontouchstart = ``;
-
-	// ボタンを押したときの動作
-	const lsnrkey = g_handler.addListener(div, `click`, _ => _func());
-
-	// イベントリスナー用のキーをセット
-	div.setAttribute(`lsnrkey`, lsnrkey);
-
-	return div;
 }
 
 /**
