@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/01/04
+ * Revised : 2021/01/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 18.9.2`;
-const g_revisedDate = `2021/01/04`;
+const g_version = `Ver 18.9.3`;
+const g_revisedDate = `2021/01/07`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1320,9 +1320,17 @@ function loadLocalStorage() {
 			g_localStorage.volume = 100;
 		}
 
-		// Display関連の初期値設定
-		g_appearanceNum = roundZero(g_appearances.findIndex(setting => setting === g_stateObj.appearance));
-		g_opacityNum = roundZero(g_opacitys.findIndex(setting => setting === g_stateObj.opacity));
+		// Appearance初期値設定
+		if (g_localStorage.appearance !== undefined) {
+			g_stateObj.appearance = g_localStorage.appearance;
+			g_appearanceNum = roundZero(g_appearances.findIndex(setting => setting === g_stateObj.appearance));
+		}
+
+		// Opacity初期値設定
+		if (g_localStorage.opacity !== undefined) {
+			g_stateObj.opacity = g_localStorage.opacity;
+			g_opacityNum = roundZero(g_opacitys.findIndex(setting => setting === g_stateObj.opacity));
+		}
 
 		// ハイスコア取得準備
 		if (g_localStorage.highscores === undefined) {
