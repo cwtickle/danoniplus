@@ -1319,9 +1319,17 @@ function loadLocalStorage() {
 			g_localStorage.volume = 100;
 		}
 
-		// Display関連の初期値設定
-		g_appearanceNum = roundZero(g_appearances.findIndex(setting => setting === g_stateObj.appearance));
-		g_opacityNum = roundZero(g_opacitys.findIndex(setting => setting === g_stateObj.opacity));
+		// Appearance初期値設定
+		if (g_localStorage.appearance !== undefined) {
+			g_stateObj.appearance = g_localStorage.appearance;
+			g_appearanceNum = roundZero(g_appearances.findIndex(setting => setting === g_stateObj.appearance));
+		}
+
+		// Opacity初期値設定
+		if (g_localStorage.opacity !== undefined) {
+			g_stateObj.opacity = g_localStorage.opacity;
+			g_opacityNum = roundZero(g_opacitys.findIndex(setting => setting === g_stateObj.opacity));
+		}
 
 		// ハイスコア取得準備
 		if (g_localStorage.highscores === undefined) {
