@@ -593,44 +593,6 @@ function createImg(_id, _imgPath, _x, _y, _width, _height) {
 }
 
 /**
- * 色付きオブジェクトの作成
- * @param {string} _id 
- * @param {string} _color 
- * @param {number} _x 
- * @param {number} _y 
- * @param {number} _width 
- * @param {number} _height 
- * @param {string} _rotate オブジェクト名／回転角度 (default : ``)
- * @param {string} _styleName オブジェクト種類 (default : ``)
- */
-function createColorObject(_id, _color, _x, _y, _width, _height,
-	_rotate = ``, _styleName = ``) {
-
-	const div = createDiv(_id, _x, _y, _width, _height);
-
-	// 矢印・オブジェクト判定
-	let charaStyle;
-	if (isNaN(Number(_rotate)) || _rotate === ``) {
-		charaStyle = `${_rotate}${_styleName}`;
-	} else {
-		charaStyle = `arrow${_styleName}`;
-		div.style.transform = `rotate(${_rotate}deg)`;
-	}
-
-	if (_color !== ``) {
-		div.style.background = _color;
-	}
-	div.style.maskImage = `url("${g_imgObj[charaStyle]}")`;
-	div.style.maskSize = `contain`;
-	div.style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
-	div.style.webkitMaskSize = `contain`;
-	div.setAttribute(`color`, _color);
-	div.setAttribute(`type`, charaStyle);
-
-	return div;
-}
-
-/**
  * 色付きオブジェクトの作成 (拡張属性対応)
  * @param {string} _id 
  * @param {object} _obj (x, y, w, h, color, rotate, styleName, ...rest) 
