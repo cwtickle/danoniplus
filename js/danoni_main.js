@@ -3516,8 +3516,7 @@ function optionInit() {
 		// Display設定へ移動
 		createCss2Button(`btnDisplay`, `>`, _ => settingsDisplayInit(), {
 			x: g_sWidth / 2 + 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
-			w: C_LEN_SETMINI_WIDTH, h: 40,
-			title: g_msgObj.toDisplay,
+			w: C_LEN_SETMINI_WIDTH, h: 40, title: g_msgObj.toDisplay,
 		}, g_cssObj.button_Mini),
 
 		// データセーブフラグの切替
@@ -4764,8 +4763,7 @@ function settingsDisplayInit() {
 		// メイン設定へ戻る
 		createCss2Button(`btnSettings`, `<`, _ => optionInit(), {
 			x: g_sWidth / 2 - 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
-			w: C_LEN_SETMINI_WIDTH, h: 40,
-			title: g_msgObj.toSettings,
+			w: C_LEN_SETMINI_WIDTH, h: 40, title: g_msgObj.toSettings,
 		}, g_cssObj.button_Mini)
 
 	);
