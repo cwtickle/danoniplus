@@ -3213,44 +3213,39 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 
 	const difLength = _headerObj.keyLabels.length;
 
+	const obj = {
+		lifeBorders: [],
+		lifeRecoverys: [],
+		lifeDamages: [],
+		lifeInits: []
+	};
+
+	const setGaugeDetails = gaugeData => {
+		const gaugeDetails = gaugeData.split(`,`);
+		if (gaugeDetails[0] === `x`) {
+			obj.lifeBorders.push(`x`);
+		} else {
+			obj.lifeBorders.push(setVal(gaugeDetails[0], ``, C_TYP_FLOAT));
+		}
+		obj.lifeRecoverys.push(setVal(gaugeDetails[1], ``, C_TYP_FLOAT));
+		obj.lifeDamages.push(setVal(gaugeDetails[2], ``, C_TYP_FLOAT));
+		obj.lifeInits.push(setVal(gaugeDetails[3], ``, C_TYP_FLOAT));
+	};
+
 	if (hasVal(_dosObj[`gauge${_name}`])) {
 		const gauges = _dosObj[`gauge${_name}`].split(`$`);
 
-		const obj = {
-			lifeBorders: [],
-			lifeRecoverys: [],
-			lifeDamages: [],
-			lifeInits: []
-		};
-
 		for (let j = 0; j < gauges.length; j++) {
-			const gaugeDetails = gauges[j].split(`,`);
-			if (gaugeDetails[0] === `x`) {
-				obj.lifeBorders.push(`x`);
-			} else {
-				obj.lifeBorders.push(setVal(gaugeDetails[0], ``, C_TYP_FLOAT));
-			}
-			obj.lifeRecoverys.push(setVal(gaugeDetails[1], ``, C_TYP_FLOAT));
-			obj.lifeDamages.push(setVal(gaugeDetails[2], ``, C_TYP_FLOAT));
-			obj.lifeInits.push(setVal(gaugeDetails[3], ``, C_TYP_FLOAT));
+			setGaugeDetails(gauges[j]);
 		}
 		if (gauges.length < difLength) {
 			for (let j = gauges.length; j < difLength; j++) {
-				obj.lifeBorders.push(``);
-				obj.lifeRecoverys.push(``);
-				obj.lifeDamages.push(``);
-				obj.lifeInits.push(``);
+				setGaugeDetails(gauges[0]);
 			}
 		}
 		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
 
 	} else if (typeof g_presetGaugeCustom === C_TYP_OBJECT && g_presetGaugeCustom[_name]) {
-		const obj = {
-			lifeBorders: [],
-			lifeRecoverys: [],
-			lifeDamages: [],
-			lifeInits: []
-		};
 		for (let j = 0; j < difLength; j++) {
 			if (g_presetGaugeCustom[_name].Border === `x`) {
 				obj.lifeBorders.push(`x`);
