@@ -1676,6 +1676,8 @@ function loadSettingJs() {
 }
 
 function loadMusic() {
+
+	clearWindow();
 	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
@@ -2021,6 +2023,8 @@ function drawTitleResultMotion(_spriteName) {
  *  タイトル画面初期化
  */
 function titleInit() {
+
+	clearWindow();
 	drawDefaultBackImage(``);
 
 	// タイトル用フレーム初期化
@@ -2182,7 +2186,6 @@ function titleInit() {
 		// Click Here
 		createCss2Button(`btnStart`, `Click Here!!`, _ => {
 			clearTimeout(g_timeoutEvtTitleId);
-			clearWindow();
 			optionInit();
 		}, {
 			w: g_sWidth, siz: C_LBL_TITLESIZE,
@@ -2329,7 +2332,6 @@ function titleInit() {
 
 		if (setCode === `Enter`) {
 			clearTimeout(g_timeoutEvtTitleId);
-			clearWindow();
 			optionInit();
 		}
 		return blockCode(setCode);
@@ -3475,6 +3477,7 @@ function keysConvert(_dosObj) {
  */
 function optionInit() {
 
+	clearWindow();
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Settings`;
@@ -3498,7 +3501,6 @@ function optionInit() {
 
 		// タイトル画面へ戻る
 		createCss2Button(`btnBack`, `Back`, _ => {
-			clearWindow();
 			titleInit();
 		}, {
 			animationName: (g_initialFlg ? `` : `smallToNormalY`),
@@ -3508,7 +3510,6 @@ function optionInit() {
 		createCss2Button(`btnKeyConfig`, `KeyConfig`, _ => {
 			// キーコンフィグ画面へ遷移
 			g_kcType = `Main`;
-			clearWindow();
 			keyConfigInit();
 		}, {
 			x: g_sWidth / 3,
@@ -3517,13 +3518,11 @@ function optionInit() {
 
 		// プレイ開始
 		makePlayButton(_ => {
-			clearWindow();
 			loadMusic();
 		}),
 
 		// Display設定へ移動
 		createCss2Button(`btnDisplay`, `>`, _ => {
-			clearWindow();
 			settingsDisplayInit();
 		}, {
 			x: g_sWidth / 2 + 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
@@ -3554,7 +3553,6 @@ function optionInit() {
 		}
 
 		if (setCode === `Enter`) {
-			clearWindow();
 			loadMusic();
 		}
 		return blockCode(setCode);
@@ -4730,6 +4728,7 @@ function makeMiniCssButton(_id, _directionFlg, _heightPos, _func, { dx = 0, dy =
 
 function settingsDisplayInit() {
 
+	clearWindow();
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Display`;
@@ -4763,14 +4762,12 @@ function settingsDisplayInit() {
 
 		// タイトル画面へ戻る
 		createCss2Button(`btnBack`, `Back`, _ => {
-			clearWindow();
 			titleInit();
 		}, {}, g_cssObj.button_Back),
 
 		// キーコンフィグ画面へ移動
 		createCss2Button(`btnKeyConfig`, `KeyConfig`, _ => {
 			g_kcType = `Main`;
-			clearWindow();
 			keyConfigInit();
 		}, {
 			x: g_sWidth / 3,
@@ -4778,13 +4775,11 @@ function settingsDisplayInit() {
 
 		// プレイ開始
 		makePlayButton(_ => {
-			clearWindow();
 			loadMusic();
 		}),
 
 		// メイン設定へ戻る
 		createCss2Button(`btnSettings`, `<`, _ => {
-			clearWindow();
 			optionInit();
 		}, {
 			x: g_sWidth / 2 - 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
@@ -4803,7 +4798,6 @@ function settingsDisplayInit() {
 		}
 
 		if (setCode === `Enter`) {
-			clearWindow();
 			loadMusic();
 		}
 		return blockCode(setCode);
@@ -4963,6 +4957,7 @@ function interlockingButton(_headerObj, _name, _current, _next, _buttonFlg = fal
  */
 function keyConfigInit() {
 
+	clearWindow();
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 
@@ -5188,7 +5183,6 @@ function keyConfigInit() {
 			g_currentj = 0;
 			g_currentk = 0;
 			g_prevKey = 0;
-			clearWindow();
 
 			if (g_baseDisp === `Settings`) {
 				optionInit();
@@ -5211,7 +5205,6 @@ function keyConfigInit() {
 			g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
 				tempPtn : (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined ? -1 : 0));
 
-			clearWindow();
 			keyConfigInit();
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 			const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
@@ -5227,7 +5220,6 @@ function keyConfigInit() {
 			g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
 				tempPtn : searchPattern(searchPattern(0, 1) - 1, -1, g_headerObj.transKeyUse, `transKey`));
 
-			clearWindow();
 			keyConfigInit();
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 			const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
@@ -5680,7 +5672,6 @@ function loadingScoreInit() {
 		const tempId = setInterval(() => {
 			const executeMain = _ => {
 				clearInterval(tempId);
-				clearWindow();
 				MainInit();
 			}
 			if (g_audio.duration !== undefined) {
@@ -7067,6 +7058,7 @@ function setKeyCtrl(_localStorage, _keyNum, _keyCtrlPtn) {
  * メイン画面初期化
  */
 function MainInit() {
+	clearWindow();
 	drawDefaultBackImage(`Main`);
 	const divRoot = document.querySelector(`#divRoot`);
 	document.oncontextmenu = _ => false;
@@ -7540,7 +7532,6 @@ function MainInit() {
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			clearWindow();
 			if (keyIsDown(`ShiftLeft`)) {
 				g_gameOverFlg = true;
 				g_finishFlg = false;
@@ -8283,7 +8274,6 @@ function MainInit() {
 
 			clearTimeout(g_timeoutEvtId);
 			setTimeout(_ => {
-				clearWindow();
 				resultInit();
 			}, 100);
 
@@ -8292,7 +8282,6 @@ function MainInit() {
 			// ライフ制＆ライフ０の場合は途中終了
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			clearWindow();
 			g_gameOverFlg = true;
 			g_finishFlg = false;
 			resultInit();
@@ -8876,6 +8865,7 @@ function finishViewing() {
  */
 function resultInit() {
 
+	clearWindow();
 	drawDefaultBackImage(``);
 
 	// 結果画面用フレーム初期化
@@ -9253,7 +9243,6 @@ function resultInit() {
 			}
 			clearTimeout(g_timeoutEvtId);
 			clearTimeout(g_timeoutEvtResultId);
-			clearWindow();
 			titleInit();
 		}, {
 			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 4,
@@ -9292,7 +9281,6 @@ function resultInit() {
 			}
 			clearTimeout(g_timeoutEvtId);
 			clearTimeout(g_timeoutEvtResultId);
-			clearWindow();
 			loadMusic();
 		}, {
 			x: g_sWidth / 4 * 3,
