@@ -3500,31 +3500,21 @@ function optionInit() {
 	multiAppend(divRoot,
 
 		// タイトル画面へ戻る
-		createCss2Button(`btnBack`, `Back`, _ => {
-			titleInit();
-		}, {
+		createCss2Button(`btnBack`, `Back`, _ => titleInit(), {
 			animationName: (g_initialFlg ? `` : `smallToNormalY`),
 		}, g_cssObj.button_Back),
 
 		// キーコンフィグ画面へ移動
-		createCss2Button(`btnKeyConfig`, `KeyConfig`, _ => {
-			// キーコンフィグ画面へ遷移
-			g_kcType = `Main`;
-			keyConfigInit();
-		}, {
+		createCss2Button(`btnKeyConfig`, `KeyConfig`, _ => keyConfigInit(`Main`), {
 			x: g_sWidth / 3,
 			animationName: (g_initialFlg ? `` : `smallToNormalY`),
 		}, g_cssObj.button_Setting),
 
 		// プレイ開始
-		makePlayButton(_ => {
-			loadMusic();
-		}),
+		makePlayButton(_ => loadMusic()),
 
 		// Display設定へ移動
-		createCss2Button(`btnDisplay`, `>`, _ => {
-			settingsDisplayInit();
-		}, {
+		createCss2Button(`btnDisplay`, `>`, _ => settingsDisplayInit(), {
 			x: g_sWidth / 2 + 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
 			w: C_LEN_SETMINI_WIDTH, h: 40,
 			title: g_msgObj.toDisplay,
@@ -4761,27 +4751,18 @@ function settingsDisplayInit() {
 	multiAppend(divRoot,
 
 		// タイトル画面へ戻る
-		createCss2Button(`btnBack`, `Back`, _ => {
-			titleInit();
-		}, {}, g_cssObj.button_Back),
+		createCss2Button(`btnBack`, `Back`, _ => titleInit(), {}, g_cssObj.button_Back),
 
 		// キーコンフィグ画面へ移動
-		createCss2Button(`btnKeyConfig`, `KeyConfig`, _ => {
-			g_kcType = `Main`;
-			keyConfigInit();
-		}, {
+		createCss2Button(`btnKeyConfig`, `KeyConfig`, _ => keyConfigInit(`Main`), {
 			x: g_sWidth / 3,
 		}, g_cssObj.button_Setting),
 
 		// プレイ開始
-		makePlayButton(_ => {
-			loadMusic();
-		}),
+		makePlayButton(_ => loadMusic()),
 
 		// メイン設定へ戻る
-		createCss2Button(`btnSettings`, `<`, _ => {
-			optionInit();
-		}, {
+		createCss2Button(`btnSettings`, `<`, _ => optionInit(), {
 			x: g_sWidth / 2 - 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
 			w: C_LEN_SETMINI_WIDTH, h: 40,
 			title: g_msgObj.toSettings,
@@ -4955,11 +4936,12 @@ function interlockingButton(_headerObj, _name, _current, _next, _buttonFlg = fal
 /**
  * キーコンフィグ画面初期化
  */
-function keyConfigInit() {
+function keyConfigInit(_kcType = g_kcType) {
 
 	clearWindow();
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
+	g_kcType = _kcType;
 
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = false;
@@ -8273,9 +8255,7 @@ function MainInit() {
 			document.onkeyup = evt => { }
 
 			clearTimeout(g_timeoutEvtId);
-			setTimeout(_ => {
-				resultInit();
-			}, 100);
+			setTimeout(_ => resultInit(), 100);
 
 		} else if (g_workObj.lifeVal === 0 && g_workObj.lifeBorder === 0) {
 
