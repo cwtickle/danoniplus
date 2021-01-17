@@ -60,6 +60,17 @@ const g_presetGaugeCustom = {
 	}
 };
 
+// カスタムゲージ設定(デフォルト)
+// 'ゲージ名': `回復・ダメージ量設定`　の形式で指定します。
+// (F : 矢印数によらず固定, V: 矢印数により変動)
+/*
+const g_presetGaugeList = {
+	'Original': `F`,
+	'Normal': `V`,
+	'Hard': `V`,
+};
+*/
+
 // デフォルトのデザインを使用せず、独自のデザインを使用するかを指定
 // カスタムデザインにする場合は `true` を指定
 const g_presetCustomDesignUse = {
