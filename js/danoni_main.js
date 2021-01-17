@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/01/17
+ * Revised : 2021/01/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 19.0.0`;
-const g_revisedDate = `2021/01/17`;
+const g_version = `Ver 19.1.0`;
+const g_revisedDate = `2021/01/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2680,6 +2680,11 @@ function headerConvert(_dosObj) {
 			g_gaugeOptionObj.custom[j] = customGaugeSets[0];
 			g_gaugeOptionObj.varCustom[j] = (customGaugeSets[1] !== `V` ? C_FLG_OFF : C_FLG_ON);
 		}
+	} else if (typeof g_presetGaugeList === C_TYP_OBJECT) {
+		Object.keys(g_presetGaugeList).forEach(key => {
+			g_gaugeOptionObj.custom.push(key);
+			g_gaugeOptionObj.varCustom.push((g_presetGaugeList[key] !== `V` ? C_FLG_OFF : C_FLG_ON));
+		});
 	}
 
 	// ライフ設定のカスタム部分取得（譜面ヘッダー加味）
