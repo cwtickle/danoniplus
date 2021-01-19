@@ -1978,8 +1978,16 @@ const colorToHex = (_color, _length = 3) => {
 	if (_color.substring(0, 1) === `#`) {
 		return _color;
 	}
-	const rgba = colorToRGBA(_color);
-	return `#${[...Array(_length).keys()].map(idx => byteToHex(rgba[idx])).join('')}`;
+	const tmpColor = _color.split(`;`);
+	const rgba = colorToRGBA(tmpColor[0]);
+	let rgbaLength = _length;
+
+	// red;255 の形式が指定された場合は透明度情報を上書きして変換
+	if (tmpColor.length > 1) {
+		rgba[3] = setVal(tmpColor[1], rgba[3], C_TYP_NUMBER);
+		rgbaLength = rgba.length;
+	}
+	return `#${[...Array(rgbaLength).keys()].map(idx => byteToHex(rgba[idx])).join('')}`;
 }
 
 /**
