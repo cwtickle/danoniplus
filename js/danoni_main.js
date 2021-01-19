@@ -1969,8 +1969,9 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 		return `Default`;
 	}
 
-	// 矢印の塗りつぶしのみ、透明度を50%にする
-	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : ``;
+	// 矢印の塗りつぶしの場合：透明度を50%にする
+	// 背景矢印の場合　　　　：透明度を25%にする
+	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : (_objType === `titleArrow` ? `40` : ``);
 
 	let convertColorStr;
 	const tmpColorStr = _colorStr.split(`@`);
@@ -2060,7 +2061,7 @@ function titleInit() {
 				background: makeColorGradation(g_headerObj.titlearrowgrds[0] || g_headerObj.setColorOrg[0], {
 					_defaultColorgrd: [false, `#eeeeee`],
 					_objType: `titleArrow`,
-				}), rotate: 180, opacity: 0.25,
+				}), rotate: 180,
 			})
 		);
 	}
