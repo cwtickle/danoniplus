@@ -1950,6 +1950,39 @@ function drawMainSpriteData(_frame, _depthName) {
 }
 
 /**
+ * 色名をカラーコード配列(RGBA)に変換
+ * @param {string} _color 
+ */
+const colorToRGBA = _color => {
+	const cvs = document.createElement(`canvas`);
+	cvs.height = 1;
+	cvs.width = 1;
+	const cxt = cvs.getContext(`2d`);
+	cxt.fillStyle = _color;
+	cxt.fillRect(0, 0, 1, 1);
+	return cxt.getImageData(0, 0, 1, 1).data;
+}
+
+/**
+ * 10進 -> 16進数変換 (カラーコード形式になるよう0埋め)
+ * @param {number} _num 
+ */
+const byteToHex = _num => (`${('0' + _num.toString(16)).slice(-2)}`);
+
+/**
+ * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
+ * @param {string} _color 色名
+ * @param {number} _length カラーコード種類を指定 (3 -> RGB, 4 -> RGBA)
+ */
+const colorToHex = (_color, _length = 3) => {
+	if (_color.substring(0, 1) === `#`) {
+		return _color;
+	}
+	const rgba = colorToRGBA(_color);
+	return `#${[...Array(_length).keys()].map(idx => byteToHex(rgba[idx])).join('')}`;
+}
+
+/**
  * グラデーション用のカラーフォーマットを作成
  * @param {string} _colorStr 
  * @param {object} _options
@@ -1977,7 +2010,7 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const tmpColorStr = _colorStr.split(`@`);
 	const colorArray = tmpColorStr[0].split(`:`);
 	for (let j = 0; j < colorArray.length; j++) {
-		colorArray[j] = colorArray[j].replace(/0x/g, `#`);
+		colorArray[j] = colorToHex(colorArray[j].replace(/0x/g, `#`));
 		if (_colorCdPaddingUse) {
 			colorArray[j] = `#${paddingLeft(colorArray[j].slice(1), 6, `0`)}`;
 		}
@@ -2083,7 +2116,7 @@ function titleInit() {
 
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
-		const titlegrd1 = g_headerObj.titlegrds[0] || `${g_headerObj.setColorOrg[0]},${g_headerObj.setColorOrg[2]}`;
+		const titlegrd1 = g_headerObj.titlegrds[0] || `${g_headerObj.setColorOrg[0]}:${g_headerObj.setColorOrg[2]}`;
 		const titlegrd2 = g_headerObj.titlegrds[1] || titlegrd1;
 
 		const titlegrds = [];
