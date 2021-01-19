@@ -1950,17 +1950,13 @@ function drawMainSpriteData(_frame, _depthName) {
 }
 
 /**
- * 色名をカラーコード配列(RGBA)に変換
+ * 色名をカラーコードに変換
  * @param {string} _color 
  */
-const colorToRGBA = _color => {
-	const cvs = document.createElement(`canvas`);
-	cvs.height = 1;
-	cvs.width = 1;
-	const cxt = cvs.getContext(`2d`);
+const colorNameToCode = _color => {
+	const cxt = document.createElement(`canvas`).getContext(`2d`);
 	cxt.fillStyle = _color;
-	cxt.fillRect(0, 0, 1, 1);
-	return cxt.getImageData(0, 0, 1, 1).data;
+	return cxt.fillStyle;
 }
 
 /**
@@ -1972,22 +1968,19 @@ const byteToHex = _num => (`${('0' + _num.toString(16)).slice(-2)}`);
 /**
  * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
  * @param {string} _color 色名
- * @param {number} _length カラーコード種類を指定 (3 -> RGB, 4 -> RGBA)
  */
-const colorToHex = (_color, _length = 3) => {
+const colorToHex = (_color) => {
 	if (_color.substring(0, 1) === `#`) {
 		return _color;
 	}
-	const tmpColor = _color.split(`;`);
-	const rgba = colorToRGBA(tmpColor[0]);
-	let rgbaLength = _length;
 
 	// red;255 の形式が指定された場合は透明度情報を上書きして変換
+	const tmpColor = _color.split(`;`);
+	let alphaVal = ``;
 	if (tmpColor.length > 1) {
-		rgba[3] = setVal(tmpColor[1], rgba[3], C_TYP_NUMBER);
-		rgbaLength = rgba.length;
+		alphaVal = byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER));
 	}
-	return `#${[...Array(rgbaLength).keys()].map(idx => byteToHex(rgba[idx])).join('')}`;
+	return `${colorNameToCode(tmpColor[0])}${alphaVal}`;
 }
 
 /**
