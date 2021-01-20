@@ -1970,18 +1970,26 @@ const byteToHex = _num => (`${('0' + _num.toString(16)).slice(-2)}`);
  * @param {string} _color 色名
  */
 const colorToHex = (_color) => {
-	if (_color.substring(0, 1) === `#` || !isNaN(parseFloat(_color))) {
+
+	// すでにカラーコードのものやパーセント表記、位置表記系を除外
+	// 'to'のみ、'to left'や'to right'のように方向が入るため、半角スペースまで込みで判断
+	const exceptHeader = [`at`, `to `, `from`, `circle`, `ellipse`, `closest-side`, `farthest-corner`, `transparent`];
+	const exceptFooter = [`deg`];
+	if (_color.substring(0, 1) === `#` || !isNaN(parseFloat(_color)) ||
+		exceptHeader.findIndex(value => _color.toLowerCase().match(new RegExp(String.raw`^${value}`, 'i'))) !== -1 ||
+		exceptFooter.findIndex(value => _color.toLowerCase().match(new RegExp(String.raw`${value}$`, 'i'))) !== -1) {
 		return _color;
 	}
 
-	// red;255 の形式が指定された場合は透明度情報を上書きして変換
+	// 色_位置;透明度 (Ex: red 20%;255) の形式で取り込み
+	// 透明度はカラーコード形式に変換してRGBの後ろに設定
 	const tmpColor = _color.split(`;`);
 	const colorSet = tmpColor[0].split(` `);
 	let alphaVal = ``;
 	if (tmpColor.length > 1) {
 		alphaVal = byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER));
 	}
-	return `${colorNameToCode(colorSet[0])}${alphaVal}${colorSet[1] !== undefined ? ` ${colorSet[1]}` : ''}`;
+	return `${colorNameToCode(colorSet[0])}${alphaVal}${colorSet[1] !== undefined ? ` ${colorSet.slice(1).join(' ')}` : ''}`;
 }
 
 /**
