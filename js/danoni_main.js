@@ -1972,9 +1972,9 @@ const byteToHex = _num => (`${('0' + _num.toString(16)).slice(-2)}`);
 const colorToHex = (_color) => {
 
 	// すでにカラーコードのものやパーセント表記、位置表記系を除外
-	// 'to'のみ、'to left'や'to right'のように方向が入るため、半角スペースまで込みで判断
-	const exceptHeader = [`at`, `to `, `from`, `circle`, `ellipse`, `closest-side`, `farthest-corner`, `transparent`];
-	const exceptFooter = [`deg`];
+	// 'at', 'to'のみ、'to left'や'to right'のように方向が入るため、半角スペースまで込みで判断
+	const exceptHeader = [`at `, `to `, `from`, `circle`, `ellipse`, `closest-`, `farthest-`, `transparent`];
+	const exceptFooter = [`deg`, `rad`, `grad`, `turn`, `repeat`];
 	if (_color.substring(0, 1) === `#` || !isNaN(parseFloat(_color)) ||
 		exceptHeader.findIndex(value => _color.toLowerCase().match(new RegExp(String.raw`^${value}`, 'i'))) !== -1 ||
 		exceptFooter.findIndex(value => _color.toLowerCase().match(new RegExp(String.raw`${value}$`, 'i'))) !== -1) {
@@ -2041,8 +2041,9 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
 		}
 	} else if (gradationType === `linear-gradient` && (colorArray[0].slice(0, 1) === `#` ||
-		(!colorArray[0].startsWith(`to `) && !colorArray[0].endsWith(`deg`)))) {
-		// "to XXXX" もしくは "XXXdeg"のパターン以外は方向を補完する
+		(!colorArray[0].startsWith(`to `) && !colorArray[0].endsWith(`deg`)
+			&& !colorArray[0].endsWith(`rad`) && !colorArray[0].endsWith(`turn`)))) {
+		// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
 		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
 	} else {
 		convertColorStr = `${colorArray.join(', ')}`;
