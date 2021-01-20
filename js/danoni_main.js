@@ -1875,7 +1875,7 @@ function drawDefaultBackImage(_key) {
  * @param {string} _str 
  */
 function checkImage(_str) {
-	return listMatching(_str, g_imgExtensions, { suffix: `$` });
+	return listMatching(_str, g_imgExtensions, { prefix: `[.]`, suffix: `$` });
 }
 
 /**
