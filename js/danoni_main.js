@@ -199,6 +199,16 @@ const getNumAttr = (_baseObj, _attrkey) => parseFloat(_baseObj.getAttribute(_att
 const hasVal = _data => _data !== undefined && _data !== ``;
 
 /**
+ * 部分一致検索（リストのいずれかに合致、大小文字問わず）
+ * @param {string} _str 検索文字
+ * @param {array} _list 検索リスト (英字は小文字にする必要あり)
+ * @param {string} prefix 前方一致条件 (前方一致時は ^)
+ * @param {string} suffix 後方一致条件 (後方一致時は $)
+ */
+const listMatching = (_str, _list, { prefix = ``, suffix = `` } = {}) =>
+	_list.findIndex(value => _str.toLowerCase().match(new RegExp(String.raw`${prefix}${value}${suffix}`, 'i'))) !== -1;
+
+/**
  * イベントハンドラ用オブジェクト
  * 参考: http://webkatu.com/remove-eventlistener/
  * 
@@ -1865,9 +1875,7 @@ function drawDefaultBackImage(_key) {
  * @param {string} _str 
  */
 function checkImage(_str) {
-	return (
-		g_imgExtensions.findIndex(value => _str.toLowerCase().match(new RegExp(String.raw`.${value}$`, 'i'))) !== -1 ? true : false
-	);
+	return listMatching(_str, g_imgExtensions, { suffix: `$` });
 }
 
 /**
@@ -1976,8 +1984,8 @@ const colorToHex = (_color) => {
 	const exceptHeader = [`at `, `to `, `from`, `circle`, `ellipse`, `closest-`, `farthest-`, `transparent`];
 	const exceptFooter = [`deg`, `rad`, `grad`, `turn`, `repeat`];
 	if (_color.substring(0, 1) === `#` || !isNaN(parseFloat(_color)) ||
-		exceptHeader.findIndex(value => _color.toLowerCase().match(new RegExp(String.raw`^${value}`, 'i'))) !== -1 ||
-		exceptFooter.findIndex(value => _color.toLowerCase().match(new RegExp(String.raw`${value}$`, 'i'))) !== -1) {
+		listMatching(_color, exceptHeader, { prefix: `^` }) ||
+		listMatching(_color, exceptFooter, { suffix: `$` })) {
 		return _color;
 	}
 
@@ -2040,9 +2048,11 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 		} else {
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
 		}
-	} else if (gradationType === `linear-gradient` && (colorArray[0].slice(0, 1) === `#` ||
-		(!colorArray[0].startsWith(`to `) &&
-			[`deg`, `rad`, `turn`].findIndex(value => colorArray[0].toLowerCase().match(new RegExp(String.raw`${value}$`, 'i'))) === -1))) {
+	} else if (gradationType === `linear-gradient` &&
+		(colorArray[0].slice(0, 1) === `#` ||
+			(!colorArray[0].startsWith(`to `) && !listMatching(colorArray[0], [`deg`, `rad`, `turn`], { suffix: `$` }))
+		)
+	) {
 		// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
 		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
 	} else {
