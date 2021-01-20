@@ -1970,17 +1970,18 @@ const byteToHex = _num => (`${('0' + _num.toString(16)).slice(-2)}`);
  * @param {string} _color 色名
  */
 const colorToHex = (_color) => {
-	if (_color.substring(0, 1) === `#`) {
+	if (_color.substring(0, 1) === `#` || !isNaN(parseFloat(_color))) {
 		return _color;
 	}
 
 	// red;255 の形式が指定された場合は透明度情報を上書きして変換
 	const tmpColor = _color.split(`;`);
+	const colorSet = tmpColor[0].split(` `);
 	let alphaVal = ``;
 	if (tmpColor.length > 1) {
 		alphaVal = byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER));
 	}
-	return `${colorNameToCode(tmpColor[0])}${alphaVal}`;
+	return `${colorNameToCode(colorSet[0])}${alphaVal}${colorSet[1] !== undefined ? ` ${colorSet[1]}` : ''}`;
 }
 
 /**
@@ -2020,6 +2021,7 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 			colorArray[j] += alphaVal;
 		}
 	}
+	console.log(colorArray);
 
 	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
 	const defaultDir = (_objType === `titleArrow` ? `to left` : `to right`);
