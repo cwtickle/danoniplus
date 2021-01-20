@@ -2041,8 +2041,8 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
 		}
 	} else if (gradationType === `linear-gradient` && (colorArray[0].slice(0, 1) === `#` ||
-		(!colorArray[0].startsWith(`to `) && !colorArray[0].endsWith(`deg`)
-			&& !colorArray[0].endsWith(`rad`) && !colorArray[0].endsWith(`turn`)))) {
+		(!colorArray[0].startsWith(`to `) &&
+			[`deg`, `rad`, `turn`].findIndex(value => colorArray[0].toLowerCase().match(new RegExp(String.raw`${value}$`, 'i'))) === -1))) {
 		// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
 		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
 	} else {
