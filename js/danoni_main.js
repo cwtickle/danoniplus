@@ -199,6 +199,16 @@ const getNumAttr = (_baseObj, _attrkey) => parseFloat(_baseObj.getAttribute(_att
 const hasVal = _data => _data !== undefined && _data !== ``;
 
 /**
+ * 部分一致検索（リストのいずれかに合致、大小文字問わず）
+ * @param {string} _str 検索文字
+ * @param {array} _list 検索リスト (英字は小文字にする必要あり)
+ * @param {string} prefix 前方一致条件 (前方一致時は ^)
+ * @param {string} suffix 後方一致条件 (後方一致時は $)
+ */
+const listMatching = (_str, _list, { prefix = ``, suffix = `` } = {}) =>
+	_list.findIndex(value => _str.toLowerCase().match(new RegExp(String.raw`${prefix}${value}${suffix}`, 'i'))) !== -1;
+
+/**
  * イベントハンドラ用オブジェクト
  * 参考: http://webkatu.com/remove-eventlistener/
  * 
@@ -1865,9 +1875,7 @@ function drawDefaultBackImage(_key) {
  * @param {string} _str 
  */
 function checkImage(_str) {
-	return (
-		g_imgExtensions.findIndex(value => _str.toLowerCase().match(new RegExp(String.raw`.${value}$`, 'i'))) !== -1 ? true : false
-	);
+	return listMatching(_str, g_imgExtensions, { prefix: `[.]`, suffix: `$` });
 }
 
 /**
@@ -1950,6 +1958,49 @@ function drawMainSpriteData(_frame, _depthName) {
 }
 
 /**
+ * 色名をカラーコードに変換
+ * @param {string} _color 
+ */
+const colorNameToCode = _color => {
+	const cxt = document.createElement(`canvas`).getContext(`2d`);
+	cxt.fillStyle = _color;
+	return cxt.fillStyle;
+}
+
+/**
+ * 10進 -> 16進数変換 (カラーコード形式になるよう0埋め)
+ * @param {number} _num 
+ */
+const byteToHex = _num => (`${('0' + _num.toString(16)).slice(-2)}`);
+
+/**
+ * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
+ * @param {string} _color 色名
+ */
+const colorToHex = (_color) => {
+
+	// すでにカラーコードのものやパーセント表記、位置表記系を除外
+	// 'at', 'to'のみ、'to left'や'to right'のように方向が入るため、半角スペースまで込みで判断
+	const exceptHeader = [`at `, `to `, `from`, `circle`, `ellipse`, `closest-`, `farthest-`, `transparent`];
+	const exceptFooter = [`deg`, `rad`, `grad`, `turn`, `repeat`];
+	if (_color.substring(0, 1) === `#` || !isNaN(parseFloat(_color)) ||
+		listMatching(_color, exceptHeader, { prefix: `^` }) ||
+		listMatching(_color, exceptFooter, { suffix: `$` })) {
+		return _color;
+	}
+
+	// 色_位置;透明度 (Ex: red 20%;255) の形式で取り込み
+	// 透明度はカラーコード形式に変換してRGBの後ろに設定
+	const tmpColor = _color.split(`;`);
+	const colorSet = tmpColor[0].split(` `);
+	let alphaVal = ``;
+	if (tmpColor.length > 1) {
+		alphaVal = byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER));
+	}
+	return `${colorNameToCode(colorSet[0])}${alphaVal}${colorSet[1] !== undefined ? ` ${colorSet.slice(1).join(' ')}` : ''}`;
+}
+
+/**
  * グラデーション用のカラーフォーマットを作成
  * @param {string} _colorStr 
  * @param {object} _options
@@ -1977,7 +2028,7 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const tmpColorStr = _colorStr.split(`@`);
 	const colorArray = tmpColorStr[0].split(`:`);
 	for (let j = 0; j < colorArray.length; j++) {
-		colorArray[j] = colorArray[j].replace(/0x/g, `#`);
+		colorArray[j] = colorToHex(colorArray[j].replace(/0x/g, `#`));
 		if (_colorCdPaddingUse) {
 			colorArray[j] = `#${paddingLeft(colorArray[j].slice(1), 6, `0`)}`;
 		}
@@ -1997,9 +2048,12 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 		} else {
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
 		}
-	} else if (gradationType === `linear-gradient` && (colorArray[0].slice(0, 1) === `#` ||
-		(!colorArray[0].startsWith(`to `) && !colorArray[0].endsWith(`deg`)))) {
-		// "to XXXX" もしくは "XXXdeg"のパターン以外は方向を補完する
+	} else if (gradationType === `linear-gradient` &&
+		(colorArray[0].slice(0, 1) === `#` ||
+			(!colorArray[0].startsWith(`to `) && !listMatching(colorArray[0], [`deg`, `rad`, `turn`], { suffix: `$` }))
+		)
+	) {
+		// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
 		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
 	} else {
 		convertColorStr = `${colorArray.join(', ')}`;
@@ -2083,7 +2137,7 @@ function titleInit() {
 
 		// グラデーションの指定がない場合、
 		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
-		const titlegrd1 = g_headerObj.titlegrds[0] || `${g_headerObj.setColorOrg[0]},${g_headerObj.setColorOrg[2]}`;
+		const titlegrd1 = g_headerObj.titlegrds[0] || `${g_headerObj.setColorOrg[0]}:${g_headerObj.setColorOrg[2]}`;
 		const titlegrd2 = g_headerObj.titlegrds[1] || titlegrd1;
 
 		const titlegrds = [];
