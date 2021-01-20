@@ -2021,7 +2021,6 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 			colorArray[j] += alphaVal;
 		}
 	}
-	console.log(colorArray);
 
 	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
 	const defaultDir = (_objType === `titleArrow` ? `to left` : `to right`);
