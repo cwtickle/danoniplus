@@ -142,8 +142,6 @@ const g_wordObj = {
 	fadeOutFlg1: false
 };
 
-const g_animationData = [`back`, `mask`];
-
 // オーディオ設定・タイマー管理
 let g_audio = new Audio();
 let g_timeoutEvtId = 0;
@@ -1358,9 +1356,7 @@ function initAfterDosLoaded() {
 	}
 
 	// 画像ファイルの読み込み
-	[`arrow`, `arrowShadow`, `onigiri`, `onigiriShadow`,
-		`giko`, `iyo`, `c`, `morara`, `monar`, `cursor`,
-		`frzBar`, `lifeBorder`].forEach(img => preloadFile(`image`, g_imgObj[img]));
+	g_imgInitList.forEach(img => preloadFile(`image`, g_imgObj[img]));
 
 	// その他の画像ファイルの読み込み
 	g_headerObj.preloadImages.filter(image => hasVal(image)).forEach(preloadImage => {
@@ -1980,12 +1976,9 @@ const byteToHex = _num => (`${('0' + _num.toString(16)).slice(-2)}`);
 const colorToHex = (_color) => {
 
 	// すでにカラーコードのものやパーセント表記、位置表記系を除外
-	// 'at', 'to'のみ、'to left'や'to right'のように方向が入るため、半角スペースまで込みで判断
-	const exceptHeader = [`at `, `to `, `from`, `circle`, `ellipse`, `closest-`, `farthest-`, `transparent`];
-	const exceptFooter = [`deg`, `rad`, `grad`, `turn`, `repeat`];
 	if (_color.substring(0, 1) === `#` || !isNaN(parseFloat(_color)) ||
-		listMatching(_color, exceptHeader, { prefix: `^` }) ||
-		listMatching(_color, exceptFooter, { suffix: `$` })) {
+		listMatching(_color, g_cssCheckStr.header, { prefix: `^` }) ||
+		listMatching(_color, g_cssCheckStr.footer, { suffix: `$` })) {
 		return _color;
 	}
 
@@ -2772,7 +2765,7 @@ function headerConvert(_dosObj) {
 		const _frzName = `frz${pattern}Color`;
 
 		// 矢印色
-		[``, `Type0`].forEach(type => {
+		Object.keys(dfColorgrdSet).forEach(type => {
 			[obj[`${_name}${type}`], obj[`${_name}Str${type}`], obj[`${_name}Org${type}`]] =
 				setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], obj[`${_name}Init`].length, {
 					_defaultColorgrd: dfColorgrdSet[type],
@@ -2800,7 +2793,7 @@ function headerConvert(_dosObj) {
 					obj.defaultFrzColorUse ? obj[`${_frzName}Init`][k] : obj[`${_name}Str`][j], C_TYP_STRING);
 			}
 
-			[``, `Type0`].forEach(type => {
+			Object.keys(dfColorgrdSet).forEach(type => {
 				[obj[`${_frzName}${type}`][j], obj[`${_frzName}Str${type}`][j], obj[`${_frzName}Org${type}`][j]] =
 					setColorList(tmpFrzColors[j], currentFrzColors, obj[`${_frzName}Init`].length, {
 						_defaultColorgrd: dfColorgrdSet[type],
@@ -3024,7 +3017,7 @@ function headerConvert(_dosObj) {
 	obj.releaseDate = setVal(_dosObj.releaseDate, ``, C_TYP_STRING);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
-	[`title`, `titleArrow`, `titleAnimation`, `back`, `backMain`, `ready`].forEach(objName => {
+	g_titleLists.init.forEach(objName => {
 		const objUpper = toCapitalize(objName);
 		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
 			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
@@ -3050,7 +3043,7 @@ function headerConvert(_dosObj) {
 
 	// デフォルト曲名表示のフォント名
 	// (使用例： |titlefont=Century,Meiryo UI|)
-	obj.titlefonts = [`'メイリオ'`];
+	obj.titlefonts = g_titleLists.defaultFonts.concat();
 	if (hasVal(_dosObj.titlefont)) {
 		_dosObj.titlefont.split(`$`).forEach((font, j) => {
 			obj.titlefonts[j] = `'${(font.replace(/,/g, `', '`))}'`;
@@ -3061,10 +3054,8 @@ function headerConvert(_dosObj) {
 	}
 
 	// デフォルト曲名表示, 背景矢印のグラデーション指定css
-	obj.titlegrds = [];
-	obj.titlearrowgrds = [];
-
-	[`titlegrd`, `titlearrowgrd`].forEach(_name => {
+	g_titleLists.grdList.forEach(_name => {
+		obj[`${_name}s`] = [];
 		if (hasVal(_dosObj[_name])) {
 			const tmpTitlegrd = _dosObj[_name].replace(/,/g, `:`);
 			obj[`${_name}s`] = tmpTitlegrd.split(`$`);
@@ -3101,7 +3092,7 @@ function headerConvert(_dosObj) {
 		});
 	}
 	if (obj.titleAnimationName.length === 1) {
-		[`Name`, `Duration`, `Delay`, `TimingFunction`].forEach(pattern => {
+		g_titleLists.animation.forEach(pattern => {
 			obj[`titleAnimation${pattern}`][1] = obj[`titleAnimation${pattern}`][0];
 		});
 	}
@@ -3120,7 +3111,7 @@ function headerConvert(_dosObj) {
 	obj.makerView = setVal(_dosObj.makerView, false, C_TYP_BOOLEAN);
 
 	// オプション利用可否設定
-	[`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`].forEach(option => {
+	g_canDisabledSettings.forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
 			(typeof g_presetSettingUse === C_TYP_OBJECT ?
 				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
@@ -3882,7 +3873,7 @@ function createOptionWindow(_sprite) {
 			boost: { frame: [0], speed: [1], cnt: 0 }
 		};
 
-		[`speed`, `boost`].forEach(speedType => {
+		Object.keys(speedObj).forEach(speedType => {
 			let frame = speedObj[`${speedType}`].frame;
 			let speed = speedObj[`${speedType}`].speed;
 			const speedData = g_detailObj[`${speedType}Data`][_scoreId];
@@ -3909,7 +3900,7 @@ function createOptionWindow(_sprite) {
 			boost: C_CLR_SPEEDGRAPH_BOOST,
 		};
 
-		[`speed`, `boost`].forEach((speedType, j) => {
+		Object.keys(speedObj).forEach((speedType, j) => {
 			context.beginPath();
 			let x, y, preY;
 
@@ -4705,14 +4696,12 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 			}
 		}
 
-		const deepCopyList = [`chara`, `color`, `stepRtn`, `pos`, `shuffle`];
-		deepCopyList.forEach(header => {
+		g_keyCopyLists.multiple.forEach(header => {
 			if (g_keyObj[`${header}${basePtn}`] !== undefined) {
 				g_keyObj[`${header}${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`${header}${basePtn}`]));
 			}
 		});
-		const copyList = [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`];
-		copyList.forEach(header => {
+		g_keyCopyLists.simple.forEach(header => {
 			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
 		});
 	}
@@ -5600,26 +5589,8 @@ function loadingScoreInit() {
 					});
 				}
 
-				/**
-				 * データ種, 最小データ長のセット
-				 */
-				const dataMinObj = {
-					speed: 2,
-					boost: 2,
-					color: 3,
-					acolor: 3,
-					shadowcolor: 3,
-					ashadowcolor: 3,
-					arrowCssMotion: 3,
-					frzCssMotion: 3,
-					dummyArrowCssMotion: 3,
-					dummyFrzCssMotion: 3,
-					word: 3,
-					mask: 1,
-					back: 1,
-				};
-				Object.keys(dataMinObj).forEach(dataType => {
-					g_scoreObj[`${dataType}Data`] = setData(tmpObj[`${dataType}Data`], dataMinObj[dataType]);
+				Object.keys(g_dataMinObj).forEach(dataType => {
+					g_scoreObj[`${dataType}Data`] = setData(tmpObj[`${dataType}Data`], g_dataMinObj[dataType]);
 				});
 
 				lastFrame += preblankFrame;
@@ -5751,7 +5722,7 @@ function applyShuffle(_keyNum, _shuffleGroup, _style) {
 	}
 
 	// indexに従って並べ替え
-	[`arrow`, `dummyArrow`, `frz`, `dummyFrz`].forEach(type => {
+	g_typeLists.arrow.forEach(type => {
 		const tmpData = JSON.parse(JSON.stringify(g_scoreObj[`${type}Data`]));
 		for (let i = 0; i < _keyNum; i++) {
 			g_scoreObj[`${type}Data`][i] = tmpData[index[i]] || [];
@@ -5945,7 +5916,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	obj.speedData = setSpeedData(`speed`, scoreIdHeader, speedFooter);
 
 	// 色変化（個別・全体）の分解 (3つで1セット, セット毎の改行区切り可)
-	[`color`, `acolor`, `shadowColor`, `ashadowColor`].forEach(sprite =>
+	g_typeLists.color.forEach(sprite =>
 		obj[`${sprite}Data`] = setColorData(sprite, scoreIdHeader));
 
 	if (_scoreAnalyzeFlg) {
@@ -6451,17 +6422,8 @@ function getFirstArrivalFrame(_startFrame, _speedOnFrame, _motionOnFrame) {
 function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame) {
 
 	// 矢印・フリーズアロー・速度/色変化用 フレーム別処理配列
-	const workObjs = [
-		`Arrow`, `FrzArrow`, `FrzLength`,
-		`Color`, `ColorCd`, `FColor`, `FColorCd`,
-		`AColor`, `AColorCd`, `FAColor`, `FAColorCd`,
-		`shadowColor`, `shadowColorCd`, `FshadowColor`, `FshadowColorCd`,
-		`AshadowColor`, `AshadowColorCd`, `FAshadowColor`, `FAshadowColorCd`,
-		`ArrowCssMotion`, `ArrowCssMotionName`,
-		`FrzCssMotion`, `FrzCssMotionName`,
-	];
 	[``, `Dummy`].forEach(header => {
-		workObjs.forEach(name => {
+		g_typeLists.dataList.forEach(name => {
 			g_workObj[`mk${header}${name}`] = [];
 		});
 	});
@@ -7676,7 +7638,7 @@ function MainInit() {
 	 * @param _deleteObj 削除オブジェクト
 	 */
 	const judgeObjDelete = {};
-	[`arrow`, `dummyArrow`, `frz`, `dummyFrz`].forEach(type => {
+	g_typeLists.arrow.forEach(type => {
 		judgeObjDelete[type] = (_j, _deleteName) => {
 			g_workObj[`judg${toCapitalize(type)}Cnt`][_j]++;
 			arrowSprite[g_attrObj[_deleteName].dividePos].removeChild(document.getElementById(_deleteName));

@@ -119,8 +119,29 @@ const g_imgObj = {
     lifeBorder: C_IMG_LIFEBORDER,
 };
 
+// g_imgObjのうち、初期読込するリスト
+const g_imgInitList = [
+    `arrow`, `arrowShadow`, `onigiri`, `onigiriShadow`,
+    `giko`, `iyo`, `c`, `morara`, `monar`, `cursor`, `frzBar`, `lifeBorder`,
+];
+
 // 読込対象の画像拡張子
 let g_imgExtensions = [`png`, `gif`, `bmp`, `jpg`, `jpeg`, `svg`];
+
+// オブジェクト種別
+const g_typeLists = {
+    arrow: [`arrow`, `dummyArrow`, `frz`, `dummyFrz`],
+    color: [`color`, `acolor`, `shadowColor`, `ashadowColor`],
+    dataList: [
+        `Arrow`, `FrzArrow`, `FrzLength`,
+        `Color`, `ColorCd`, `FColor`, `FColorCd`,
+        `AColor`, `AColorCd`, `FAColor`, `FAColorCd`,
+        `shadowColor`, `shadowColorCd`, `FshadowColor`, `FshadowColorCd`,
+        `AshadowColor`, `AshadowColorCd`, `FAshadowColor`, `FAshadowColorCd`,
+        `ArrowCssMotion`, `ArrowCssMotionName`,
+        `FrzCssMotion`, `FrzCssMotionName`,
+    ],
+};
 
 // Motionオプション配列の基準位置
 const C_MOTION_STD_POS = 15;
@@ -390,6 +411,8 @@ let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `mus
 
 let g_storeSettings = [`appearance`, `opacity`, `d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
     `d_score`, `d_musicinfo`, `d_filterline`];
+
+let g_canDisabledSettings = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
 
 // サイズ(後で指定)
 let g_sWidth;
@@ -1591,6 +1614,49 @@ const g_keyObj = {
     dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
 
+// 特殊キーのコピー種 (simple: 代入、multiple: 配列ごと代入)
+const g_keyCopyLists = {
+    simple: [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
+    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`],
+};
+
+// タイトル画面関連のリスト群
+const g_titleLists = {
+    /** タイトル画面で利用する初期オブジェクトのリスト */
+    init: [`title`, `titleArrow`, `titleAnimation`, `back`, `backMain`, `ready`],
+
+    /** タイトルのデフォルトフォント */
+    defaultFonts: [`'メイリオ'`],
+
+    /** グラデーション関連初期リスト */
+    grdList: [`titlegrd`, `titlearrowgrd`],
+
+    /** タイトル用アニメーションの設定種 */
+    animation: [`Name`, `Duration`, `Delay`, `TimingFunction`],
+
+};
+
+const g_animationData = [`back`, `mask`];
+
+/**
+ * データ種, 最小データ長のセット
+ */
+const g_dataMinObj = {
+    speed: 2,
+    boost: 2,
+    color: 3,
+    acolor: 3,
+    shadowcolor: 3,
+    ashadowcolor: 3,
+    arrowCssMotion: 3,
+    frzCssMotion: 3,
+    dummyArrowCssMotion: 3,
+    dummyFrzCssMotion: 3,
+    word: 3,
+    mask: 1,
+    back: 1,
+};
+
 const g_dfColorObj = {
 
     // 矢印初期色情報
@@ -1633,6 +1699,13 @@ const g_escapeStr = {
     escapeCode: [
         [`<script>`, ``], [`</script>`, ``],
     ],
+};
+
+// グラデーションで、カラーコードではないパーセント表記、位置表記系を除外するためのリスト
+// 'at', 'to'のみ、'to left'や'to right'のように方向が入るため、半角スペースまで込みで判断
+const g_cssCheckStr = {
+    header: [`at `, `to `, `from`, `circle`, `ellipse`, `closest-`, `farthest-`, `transparent`],
+    footer: [`deg`, `rad`, `grad`, `turn`, `repeat`],
 };
 
 /** 
