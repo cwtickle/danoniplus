@@ -3683,20 +3683,20 @@ function createOptionWindow(_sprite) {
 	/**
 	 * 譜面変更セレクターの削除
 	 */
-	function resetDifWindow() {
+	const resetDifWindow = _ => {
 		if (document.querySelector(`#difList`) !== null) {
 			deleteChildspriteAll(`difList`);
 			optionsprite.removeChild(document.querySelector(`#difList`));
 			optionsprite.removeChild(document.querySelector(`#difCover`));
 		}
-	}
+	};
 
 	/**
 	 * 譜面リストの作成
 	 * @param {object} _difList 
 	 * @param {string} _targetKey 
 	 */
-	function makeDifList(_difList, _targetKey = ``) {
+	const makeDifList = (_difList, _targetKey = ``) => {
 		let k = 0;
 		g_headerObj.keyLabels.forEach((keyLabel, j) => {
 			if (_targetKey === `` || keyLabel === _targetKey) {
@@ -3712,7 +3712,16 @@ function createOptionWindow(_sprite) {
 				k++;
 			}
 		});
-	}
+	};
+
+	// 譜面選択処理
+	const nextDifficulty = (_scrollNum = 1, _resetFlg = false) => {
+		g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
+		setDifficulty(true);
+		if (_resetFlg) {
+			resetDifWindow();
+		}
+	};
 
 	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`,
 		``, 0, _ => {
@@ -3751,8 +3760,7 @@ function createOptionWindow(_sprite) {
 					resetDifWindow();
 				}
 			} else {
-				g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
-				setDifficulty(true);
+				nextDifficulty();
 			}
 		}, {
 		y: -10, h: C_LEN_SETLBL_HEIGHT + 10,
@@ -3760,8 +3768,7 @@ function createOptionWindow(_sprite) {
 			if (g_headerObj.difSelectorUse) {
 				resetDifWindow();
 			} else {
-				g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
-				setDifficulty(true);
+				nextDifficulty(-1);
 			}
 		},
 	});
@@ -3769,16 +3776,8 @@ function createOptionWindow(_sprite) {
 	// 譜面選択ボタン（メイン、右回し、左回し）
 	multiAppend(spriteList.difficulty,
 		lnkDifficulty,
-		makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => {
-			g_stateObj.scoreId = (g_stateObj.scoreId < g_headerObj.keyLabels.length - 1 ? ++g_stateObj.scoreId : 0);
-			setDifficulty(true);
-			resetDifWindow();
-		}, { dy: -10, dh: 10 }),
-		makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => {
-			g_stateObj.scoreId = (g_stateObj.scoreId > 0 ? --g_stateObj.scoreId : g_headerObj.keyLabels.length - 1);
-			setDifficulty(true);
-			resetDifWindow();
-		}, { dy: -10, dh: 10 }),
+		makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => nextDifficulty(1, true), { dy: -10, dh: 10 }),
+		makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => nextDifficulty(-1, true), { dy: -10, dh: 10 }),
 	)
 
 	// ---------------------------------------------------
@@ -3869,13 +3868,13 @@ function createOptionWindow(_sprite) {
 		const startFrame = g_detailObj.startFrame[_scoreId];
 		const playingFrame = g_detailObj.playingFrameWithBlank[_scoreId];
 		const speedObj = {
-			speed: { frame: [0], speed: [1], cnt: 0 },
-			boost: { frame: [0], speed: [1], cnt: 0 }
+			speed: { frame: [0], speed: [1], cnt: 0, strokeColor: C_CLR_SPEEDGRAPH_SPEED },
+			boost: { frame: [0], speed: [1], cnt: 0, strokeColor: C_CLR_SPEEDGRAPH_BOOST }
 		};
 
 		Object.keys(speedObj).forEach(speedType => {
-			let frame = speedObj[`${speedType}`].frame;
-			let speed = speedObj[`${speedType}`].speed;
+			let frame = speedObj[speedType].frame;
+			let speed = speedObj[speedType].speed;
 			const speedData = g_detailObj[`${speedType}Data`][_scoreId];
 
 			if (speedData !== undefined) {
@@ -3884,7 +3883,7 @@ function createOptionWindow(_sprite) {
 						frame.push(speedData[i] - startFrame);
 						speed.push(speedData[i + 1]);
 					}
-					speedObj[`${speedType}`].cnt++;
+					speedObj[speedType].cnt++;
 				}
 				frame.push(playingFrame);
 				speed.push(speed[speed.length - 1]);
@@ -3895,18 +3894,13 @@ function createOptionWindow(_sprite) {
 		const context = canvas.getContext(`2d`);
 		drawBaseLine(context);
 
-		const strokeColor = {
-			speed: C_CLR_SPEEDGRAPH_SPEED,
-			boost: C_CLR_SPEEDGRAPH_BOOST,
-		};
-
 		Object.keys(speedObj).forEach((speedType, j) => {
 			context.beginPath();
-			let x, y, preY;
+			let preY;
 
-			for (let i = 0; i < speedObj[`${speedType}`].frame.length; i++) {
-				x = speedObj[`${speedType}`].frame[i] * (C_LEN_GRAPH_WIDTH - 30) / playingFrame + 30;
-				y = (speedObj[`${speedType}`].speed[i] - 1) * -90 + 105;
+			for (let i = 0; i < speedObj[speedType].frame.length; i++) {
+				const x = speedObj[speedType].frame[i] * (C_LEN_GRAPH_WIDTH - 30) / playingFrame + 30;
+				const y = (speedObj[speedType].speed[i] - 1) * -90 + 105;
 
 				context.lineTo(x, preY);
 				context.lineTo(x, y);
@@ -3914,7 +3908,7 @@ function createOptionWindow(_sprite) {
 			}
 
 			context.lineWidth = 1;
-			context.strokeStyle = strokeColor[speedType];
+			context.strokeStyle = speedObj[speedType].strokeColor;
 			context.stroke();
 
 			const lineX = (speedType === `speed`) ? 125 : 210;
@@ -3925,7 +3919,7 @@ function createOptionWindow(_sprite) {
 			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 
-			makeScoreDetailLabel(`Speed`, `${speedType.slice(0, 1).toUpperCase()}${speedType.slice(1)}`, speedObj[`${speedType}`].cnt, j);
+			makeScoreDetailLabel(`Speed`, `${speedType.slice(0, 1).toUpperCase()}${speedType.slice(1)}`, speedObj[speedType].cnt, j);
 		});
 	}
 
