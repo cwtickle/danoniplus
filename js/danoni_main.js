@@ -4061,20 +4061,20 @@ function createOptionWindow(_sprite) {
 			${push3CntStr}`.split(`,`).join(`/`);
 
 		if (document.querySelector(`#lblDouji`) === null) {
-			makeDifInfoLabel(`lblDouji`, `同時補正`);
-			makeDifInfoLabel(`lblTate`, `縦連補正`, { x: 270 });
+			makeDifInfoLabel(`lblDouji`, g_msgObj.difInfoDouji);
+			makeDifInfoLabel(`lblTate`, g_msgObj.difInfoTate, { x: 270 });
 			makeDifInfoLabel(`dataDouji`, g_detailObj.toolDif[_scoreId].douji, { x: 200, w: 160 });
 			makeDifInfoLabel(`dataTate`, g_detailObj.toolDif[_scoreId].tate, { x: 345, w: 160 });
 			makeDifInfoLabel(`lblArrowInfo`, `All Arrows`, { x: 130, y: 45, w: 290, siz: C_SIZ_JDGCNTS });
 			makeDifInfoLabel(`dataArrowInfo`, ArrowInfo, { x: 270, y: 45, w: 160, siz: C_SIZ_JDGCNTS });
-			makeDifInfoLabel(`lblArrowInfo2`, `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`,
+			makeDifInfoLabel(`lblArrowInfo2`, g_msgObj.difInfoCnt.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt),
 				{ x: 130, y: 70, w: 200, h: 90 });
 			makeDifInfoLabel(`dataArrowInfo2`, ArrowInfo2, { x: 140, y: 70, w: 275, h: 150, overflow: `auto` });
 
 		} else {
 			dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
 			dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
-			lblArrowInfo2.innerHTML = `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 (${g_detailObj.toolDif[_scoreId].push3cnt}):`;
+			lblArrowInfo2.innerHTML = g_msgObj.difInfoCnt.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
 			dataArrowInfo.innerHTML = ArrowInfo;
 			dataArrowInfo2.innerHTML = ArrowInfo2;
 		}
@@ -4111,10 +4111,10 @@ function createOptionWindow(_sprite) {
 					`${playingTime}\r\n`;
 			}
 			detailToolDif.appendChild(
-				makeSettingLblCssButton(`lnkDifInfo`, `データ出力`, 0, _ => {
+				makeSettingLblCssButton(`lnkDifInfo`, g_msgObj.difInfoPrint, 0, _ => {
 					copyTextToClipboard(
-						`****** Dancing☆Onigiri レベル計算ツール+++ [${g_version}] ******\r\n\r\n`
-						+ `\t難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間\r\n\r\n${printData}`
+						`****** ${g_msgObj.difInfoPrintTitle} [${g_version}] ******\r\n\r\n`
+						+ `\t${g_msgObj.difInfoPrintHeader}\r\n\r\n${printData}`
 					);
 				}, {
 					x: 10, y: 30, w: 100, borderStyle: `solid`

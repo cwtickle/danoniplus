@@ -1797,4 +1797,11 @@ const g_msgObj = {
     transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
     sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
 
+    difInfoDouji: `同時補正`,
+    difInfoTate: `縦連補正`,
+    difInfoCnt: `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 ({0}):`,
+    difInfoPrint: `データ出力`,
+    difInfoPrintTitle: `Dancing☆Onigiri レベル計算ツール+++`,
+    difInfoPrintHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
+
 };
