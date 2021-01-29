@@ -4143,7 +4143,7 @@ function createOptionWindow(_sprite) {
 		];
 
 		spriteList.scroll.appendChild(
-			createCss2Button(`btnReverse`, `Reverse:${g_stateObj.reverse}`, evt => setReverse(evt.target), {
+			createCss2Button(`btnReverse`, `${g_lblNameObj.Reverse}:${g_stateObj.reverse}`, evt => setReverse(evt.target), {
 				x: 160, y: 0,
 				w: 90, h: 21, siz: C_SIZ_DIFSELECTOR,
 				borderStyle: `solid`,
@@ -4162,7 +4162,7 @@ function createOptionWindow(_sprite) {
 	function setReverseView(_btn) {
 		_btn.classList.replace(g_cssObj[`button_Rev${g_reverses[(g_reverseNum + 1) % 2]}`],
 			g_cssObj[`button_Rev${g_reverses[g_reverseNum]}`]);
-		_btn.textContent = `Reverse:${g_stateObj.reverse}`;
+		_btn.textContent = `${g_lblNameObj.Reverse}:${g_stateObj.reverse}`;
 	}
 
 	// ---------------------------------------------------
@@ -4325,16 +4325,16 @@ function createOptionWindow(_sprite) {
 		return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 					<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
 						<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
-							Start
+							${g_lblNameObj.g_start}
 						</div>
 						<div id="lblGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeEtc">
-							Border
+							${g_lblNameObj.g_border}
 						</div>
 						<div id="lblGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeEtc">
-							Recovery
+							${g_lblNameObj.g_recovery}
 						</div>
 						<div id="lblGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeEtc">
-							Damage
+							${g_lblNameObj.g_damage}
 						</div>
 					</div>
 					<div id="dataGaugeDivTable" class="settings_gaugeDivTable">

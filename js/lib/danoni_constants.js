@@ -1778,6 +1778,11 @@ const g_lblNameObj = {
     Fadein: `Fadein`,
     Volume: `Volume`,
 
+    g_start: `Start`,
+    g_border: `Border`,
+    g_recovery: `Recovery`,
+    g_damage: `Damage`,
+
     d_StepZone: `StepZone`,
     d_Judgment: `Judgment`,
     d_FastSlow: `FastSlow`,
