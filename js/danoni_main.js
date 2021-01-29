@@ -4776,7 +4776,7 @@ function settingsDisplayInit() {
 
 	// ショートカットキーメッセージ
 	divRoot.appendChild(
-		createDivCss2Label(`scMsg`, `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`, {
+		createDivCss2Label(`scMsg`, g_msgObj.sdShortcutDesc, {
 			x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		})
 	);
@@ -4859,7 +4859,7 @@ function createSettingsDisplayWindow(_sprite) {
 	const spriteList = setSpriteList(settingList);
 
 	document.querySelector(`#${_sprite}`).appendChild(
-		createDivCss2Label(`sdDesc`, `[クリックでON/OFFを切替、灰色でOFF]`, {
+		createDivCss2Label(`sdDesc`, g_msgObj.sdDesc, {
 			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		})
 	);
@@ -4994,7 +4994,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			`<div class="settings_Title">KEY</div><div class="settings_Title2">CONFIG</div>`
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
-		createDivCss2Label(`kcDesc`, `[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`, {
+		createDivCss2Label(`kcDesc`, g_msgObj.kcDesc, {
 			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		}),
 
@@ -5121,14 +5121,18 @@ function keyConfigInit(_kcType = g_kcType) {
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
-		createDivCss2Label(`scMsg`, `プレイ中ショートカット：「${g_kCd[g_headerObj.keyTitleBack]}」タイトルバック / 「${g_kCd[g_headerObj.keyRetry]}」リトライ`, {
-			x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
-		}),
+		createDivCss2Label(
+			`scMsg`,
+			g_msgObj.kcShortcutDesc.split(`{0}`).join(g_kCd[g_headerObj.keyTitleBack])
+				.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]),
+			{
+				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+			}),
 
 		// 別キーモード警告メッセージ
 		createDivCss2Label(
 			`kcMsg`,
-			hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `別キーモードではハイスコア、キーコンフィグ等は保存されません` : ``,
+			hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? g_msgObj.transKeyDesc : ``,
 			{
 				x: 0, y: g_sHeight - 25, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 			}, g_cssObj.keyconfig_warning
