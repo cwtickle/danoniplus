@@ -1783,6 +1783,22 @@ const g_lblNameObj = {
     g_recovery: `Recovery`,
     g_damage: `Damage`,
 
+    s_speed: `Speed`,
+    s_boost: `Boost`,
+    s_apm: `APM`,
+    s_time: `Time`,
+    s_arrow: `Arrow`,
+    s_frz: `Frz`,
+
+    s_level: `Level`,
+    s_douji: `同時補正`,
+    s_tate: `縦連補正`,
+    s_cnts: `All Arrows`,
+    s_linecnts: `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 ({0}):`,
+    s_print: `データ出力`,
+    s_printTitle: `Dancing☆Onigiri レベル計算ツール+++`,
+    s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
+
     d_StepZone: `StepZone`,
     d_Judgment: `Judgment`,
     d_FastSlow: `FastSlow`,
@@ -1900,12 +1916,5 @@ const g_msgObj = {
     kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
     transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
     sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
-
-    difInfoDouji: `同時補正`,
-    difInfoTate: `縦連補正`,
-    difInfoCnt: `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 ({0}):`,
-    difInfoPrint: `データ出力`,
-    difInfoPrintTitle: `Dancing☆Onigiri レベル計算ツール+++`,
-    difInfoPrintHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
 
 };

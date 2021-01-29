@@ -3922,7 +3922,7 @@ function createOptionWindow(_sprite) {
 			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 
-			makeScoreDetailLabel(`Speed`, `${speedType.slice(0, 1).toUpperCase()}${speedType.slice(1)}`, speedObj[speedType].cnt, j);
+			makeScoreDetailLabel(`Speed`, g_lblNameObj[`s_${speedType}`], speedObj[speedType].cnt, j);
 		});
 	}
 
@@ -3948,13 +3948,13 @@ function createOptionWindow(_sprite) {
 		}
 
 		const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60));
-		makeScoreDetailLabel(`Density`, `APM`, apm, 0);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_apm, apm, 0);
 		const minutes = Math.floor(g_detailObj.playingFrameWithBlank[_scoreId] / g_fps / 60);
 		const seconds = `00${Math.floor((g_detailObj.playingFrameWithBlank[_scoreId] / g_fps) % 60)}`.slice(-2);
 		const playingTime = `${minutes}:${seconds}`;
-		makeScoreDetailLabel(`Density`, `Time`, playingTime, 1);
-		makeScoreDetailLabel(`Density`, `Arrow`, arrowCnts, 3);
-		makeScoreDetailLabel(`Density`, `Frz`, frzCnts, 4);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_time, playingTime, 1);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, arrowCnts, 3);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_frz, frzCnts, 4);
 	}
 
 	/**
@@ -4051,7 +4051,7 @@ function createOptionWindow(_sprite) {
 		}
 
 		if (document.querySelector(`#lblTooldif`) === null) {
-			makeDifInfoLabel(`lblTooldif`, `Level`, { y: 5, w: 250, siz: C_SIZ_JDGCNTS });
+			makeDifInfoLabel(`lblTooldif`, g_lblNameObj.s_level, { y: 5, w: 250, siz: C_SIZ_JDGCNTS });
 			makeDifInfoLabel(`dataTooldif`, g_detailObj.toolDif[_scoreId].tool, { x: 270, y: 3, w: 160, siz: 18 });
 		} else {
 			dataTooldif.textContent = g_detailObj.toolDif[_scoreId].tool;
@@ -4064,13 +4064,13 @@ function createOptionWindow(_sprite) {
 			${push3CntStr}`.split(`,`).join(`/`);
 
 		if (document.querySelector(`#lblDouji`) === null) {
-			makeDifInfoLabel(`lblDouji`, g_msgObj.difInfoDouji);
-			makeDifInfoLabel(`lblTate`, g_msgObj.difInfoTate, { x: 270 });
+			makeDifInfoLabel(`lblDouji`, g_lblNameObj.s_douji);
+			makeDifInfoLabel(`lblTate`, g_lblNameObj.s_tate, { x: 270 });
 			makeDifInfoLabel(`dataDouji`, g_detailObj.toolDif[_scoreId].douji, { x: 200, w: 160 });
 			makeDifInfoLabel(`dataTate`, g_detailObj.toolDif[_scoreId].tate, { x: 345, w: 160 });
-			makeDifInfoLabel(`lblArrowInfo`, `All Arrows`, { x: 130, y: 45, w: 290, siz: C_SIZ_JDGCNTS });
+			makeDifInfoLabel(`lblArrowInfo`, g_lblNameObj.s_cnts, { x: 130, y: 45, w: 290, siz: C_SIZ_JDGCNTS });
 			makeDifInfoLabel(`dataArrowInfo`, ArrowInfo, { x: 270, y: 45, w: 160, siz: C_SIZ_JDGCNTS });
-			makeDifInfoLabel(`lblArrowInfo2`, g_msgObj.difInfoCnt.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt),
+			makeDifInfoLabel(`lblArrowInfo2`, g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt),
 				{ x: 130, y: 70, w: 200, h: 90 });
 			makeDifInfoLabel(`dataArrowInfo2`, ArrowInfo2, { x: 140, y: 70, w: 275, h: 150, overflow: `auto` });
 
@@ -4114,10 +4114,10 @@ function createOptionWindow(_sprite) {
 					`${playingTime}\r\n`;
 			}
 			detailToolDif.appendChild(
-				makeSettingLblCssButton(`lnkDifInfo`, g_msgObj.difInfoPrint, 0, _ => {
+				makeSettingLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 0, _ => {
 					copyTextToClipboard(
-						`****** ${g_msgObj.difInfoPrintTitle} [${g_version}] ******\r\n\r\n`
-						+ `\t${g_msgObj.difInfoPrintHeader}\r\n\r\n${printData}`
+						`****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n`
+						+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`
 					);
 					makeInfoWindow(g_msgInfoObj.I_0003, `leftToRightFade`);
 				}, {
