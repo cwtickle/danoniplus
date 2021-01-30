@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2021/01/18 (v19.1.0)
+ * Template Update: 2021/01/30 (v19.3.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -14,6 +14,12 @@ const g_presetTuning = `name`;
 
 // 譜面製作者URL
 const g_presetTuningUrl = `https://www.google.co.jp/`;
+
+// 既定スキン (デフォルトは default)
+const g_presetSkinType = `default`;
+
+// 既定カスタムJs (デフォルトは danoni_custom.js)
+//const g_presetCustomJs = `danoni_custom.js`;
 
 // ゲージ設定（デフォルト）
 const g_presetGauge = {
@@ -161,4 +167,22 @@ const g_presetFrzStartjdgUse = `false`;
  */
 const g_presetResultVals = {
 	// exScore: `exScore`,
+};
+
+/**
+ * ラベルテキスト (g_lblNameObj) に対応するプロパティを上書きする設定
+ * ※danoni_setting.js の他、customjsにも利用可
+ * ※設定可能項目についてはdanoni_constants.jsをご覧ください。
+ */
+const g_local_lblNameObj = {
+
+};
+
+/**
+ * オンマウステキスト、確認メッセージ定義 (g_msgObj) に対応するプロパティを上書きする設定
+ * ※danoni_setting.js の他、customjsにも利用可
+ * ※設定可能項目についてはdanoni_constants.jsをご覧ください。
+ */
+const g_local_msgObj = {
+
 };

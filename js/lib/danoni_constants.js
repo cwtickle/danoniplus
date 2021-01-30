@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2020/12/30 (v18.8.2)
+ * Revised : 2021/01/30 (v19.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -119,8 +119,30 @@ const g_imgObj = {
     lifeBorder: C_IMG_LIFEBORDER,
 };
 
+// g_imgObjのうち、初期読込するリスト
+const g_imgInitList = [
+    `arrow`, `arrowShadow`, `onigiri`, `onigiriShadow`,
+    `giko`, `iyo`, `c`, `morara`, `monar`, `cursor`, `frzBar`, `lifeBorder`,
+];
+
 // 読込対象の画像拡張子
 let g_imgExtensions = [`png`, `gif`, `bmp`, `jpg`, `jpeg`, `svg`];
+
+// オブジェクト種別
+const g_typeLists = {
+    arrow: [`arrow`, `dummyArrow`, `frz`, `dummyFrz`],
+    color: [`color`, `acolor`, `shadowColor`, `ashadowColor`],
+    frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`],
+    dataList: [
+        `Arrow`, `FrzArrow`, `FrzLength`,
+        `Color`, `ColorCd`, `FColor`, `FColorCd`,
+        `AColor`, `AColorCd`, `FAColor`, `FAColorCd`,
+        `shadowColor`, `shadowColorCd`, `FshadowColor`, `FshadowColorCd`,
+        `AshadowColor`, `AshadowColorCd`, `FAshadowColor`, `FAshadowColorCd`,
+        `ArrowCssMotion`, `ArrowCssMotionName`,
+        `FrzCssMotion`, `FrzCssMotionName`,
+    ],
+};
 
 // Motionオプション配列の基準位置
 const C_MOTION_STD_POS = 15;
@@ -193,16 +215,6 @@ const C_JDG_KITA = 0;
 const C_JDG_SFSF = 1;
 const C_JDG_IKNAI = 2;
 
-let C_JCR_II = "(・∀・)ｲｲ!!";
-let C_JCR_SHAKIN = "(`・ω・)ｼｬｷﾝ";
-let C_JCR_MATARI = "( ´∀`)ﾏﾀｰﾘ";
-let C_JCR_SHOBON = "(´・ω・`)ｼｮﾎﾞｰﾝ";
-let C_JCR_UWAN = "( `Д´)ｳﾜｧﾝ!!";
-
-let C_JCR_KITA = "(ﾟ∀ﾟ)ｷﾀ-!!";
-let C_JCR_SFSF = "";
-let C_JCR_IKNAI = "(・A・)ｲｸﾅｲ";
-
 const C_CLR_DUMMY = `#777777`;
 
 const C_LEN_JDGCHARA_WIDTH = 200;
@@ -259,14 +271,6 @@ const g_rankObj = {
     rankColorF: `#999999`,
     rankMarkX: `X`,
     rankColorX: `#996600`
-};
-
-const g_resultMsgObj = {
-    allPerfect: `<span class="result_AllPerfect">All Perfect!!</span>`,
-    perfect: `<span class="result_Perfect">Perfect!!</span>`,
-    fullCombo: `<span class="result_FullCombo">FullCombo!</span>`,
-    cleared: `<span class="result_Cleared">CLEARED!</span>`,
-    failed: `<span class="result_Failed">FAILED...</span>`,
 };
 
 const g_pointAllocation = {
@@ -390,6 +394,8 @@ let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `mus
 
 let g_storeSettings = [`appearance`, `opacity`, `d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
     `d_score`, `d_musicinfo`, `d_filterline`];
+
+let g_canDisabledSettings = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
 
 // サイズ(後で指定)
 let g_sWidth;
@@ -1591,6 +1597,49 @@ const g_keyObj = {
     dummy: 0	// ダミー(カンマ抜け落ち防止)
 };
 
+// 特殊キーのコピー種 (simple: 代入、multiple: 配列ごと代入)
+const g_keyCopyLists = {
+    simple: [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
+    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`],
+};
+
+// タイトル画面関連のリスト群
+const g_titleLists = {
+    /** タイトル画面で利用する初期オブジェクトのリスト */
+    init: [`title`, `titleArrow`, `titleAnimation`, `back`, `backMain`, `ready`],
+
+    /** タイトルのデフォルトフォント */
+    defaultFonts: [`'メイリオ'`],
+
+    /** グラデーション関連初期リスト */
+    grdList: [`titlegrd`, `titlearrowgrd`],
+
+    /** タイトル用アニメーションの設定種 */
+    animation: [`Name`, `Duration`, `Delay`, `TimingFunction`],
+
+};
+
+const g_animationData = [`back`, `mask`];
+
+/**
+ * データ種, 最小データ長のセット
+ */
+const g_dataMinObj = {
+    speed: 2,
+    boost: 2,
+    color: 3,
+    acolor: 3,
+    shadowcolor: 3,
+    ashadowcolor: 3,
+    arrowCssMotion: 3,
+    frzCssMotion: 3,
+    dummyArrowCssMotion: 3,
+    dummyFrzCssMotion: 3,
+    word: 3,
+    mask: 1,
+    back: 1,
+};
+
 const g_dfColorObj = {
 
     // 矢印初期色情報
@@ -1635,47 +1684,199 @@ const g_escapeStr = {
     ],
 };
 
+// グラデーションで、カラーコードではないパーセント表記、位置表記系を除外するためのリスト
+// 'at', 'to'のみ、'to left'や'to right'のように方向が入るため、半角スペースまで込みで判断
+const g_cssCheckStr = {
+    header: [`at `, `to `, `from`, `circle`, `ellipse`, `closest-`, `farthest-`, `transparent`],
+    footer: [`deg`, `rad`, `grad`, `turn`, `repeat`],
+};
+
 /** 
  * メッセージ定義 
- * - 変数名は `C_MSG_X_YYYY` の形で、末尾に (X-YYYY) をつける。
+ * - 変数名は `X_YYYY` の形で、末尾に (X-YYYY) をつける。
  * - 記述不正の場合、書き方を2行目に指定すると親切。
 */
-const C_MSG_W_0001 = `お使いのブラウザは動作保証外です。<br>
-	Chrome/Opera/Vivaldiなど、WebKit系ブラウザの利用を推奨します。(W-0001)`;
-const C_MSG_W_0011 = `fileスキームでの動作のため、内蔵の画像データを使用します。(W-0011)<br>
-	imgフォルダ以下の画像の変更は適用されません。`;
-const C_MSG_E_0011 = `アーティスト名が未入力です。(E-0011)`;
-const C_MSG_E_0012 = `曲名情報が未設定です。(E-0012)<br>
-	|musicTitle=曲名,アーティスト名,アーティストURL|`;
-const C_MSG_E_0021 = `譜面情報が未指定か、フォーマットが間違っています。(E-0021)<br>
-	|difData=キー数,譜面名,初期速度|`;
-const C_MSG_E_0022 = `外部譜面ファイルのフォーマットが間違っています。(E-0022)<br>
-	function externalDosInit() { g_externalDos = \`(譜面データ)\`; }`;
-const C_MSG_E_0023 = `譜面情報が未指定です。(E-0023)<br>
+const g_msgInfoObj = {
+    W_0001: `お使いのブラウザは動作保証外です。<br>
+    Chrome/Opera/Vivaldiなど、WebKit系ブラウザの利用を推奨します。(W-0001)`,
+    W_0011: `fileスキームでの動作のため、内蔵の画像データを使用します。(W-0011)<br>
+    imgフォルダ以下の画像の変更は適用されません。`,
+
+    E_0011: `アーティスト名が未入力です。(E-0011)`,
+    E_0012: `曲名情報が未設定です。(E-0012)<br>
+    |musicTitle=曲名,アーティスト名,アーティストURL|`,
+    E_0021: `譜面情報が未指定か、フォーマットが間違っています。(E-0021)<br>
+    |difData=キー数,譜面名,初期速度|`,
+    E_0022: `外部譜面ファイルのフォーマットが間違っています。(E-0022)<br>
+    function externalDosInit() { g_externalDos = \`(譜面データ)\`; }`,
+    E_0023: `譜面情報が未指定です。(E-0023)<br>
 	以下のいずれか、または両方を指定してください。<br>
 	&lt;input type="hidden" name="externalDos" id="externalDos" value="dos.txt"&gt;<br>
-	&lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>`;
-const C_MSG_E_0031 = `楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>
-	|musicUrl=****.mp3|`;
-const C_MSG_E_0032 = `楽曲ファイルの読み込みに失敗しました。(E-0032)`;
-const C_MSG_E_0033 = `楽曲ファイルの読み込み中に接続がタイムアウトしました。(E-0033)`;
-const C_MSG_E_0034 = `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`;
-const C_MSG_E_0035 = `お使いのOSでは指定された楽曲フォーマットに対応していません。(E-0035)`;
-const C_MSG_E_0041 = `ファイル:{0}の読み込みに失敗しました。(E-0041)<br>`;
-const C_MSG_E_0042 = `{0}は0より大きい値を指定する必要があります。(E-0042)`;
-const C_MSG_E_0051 = `Displayオプションのデフォルト設定(XXXXChainOFF)で、<br>指定できない組み合わせが設定されています。(E-0051)`;
+    &lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>`,
+    E_0031: `楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>
+    |musicUrl=****.mp3|`,
+    E_0032: `楽曲ファイルの読み込みに失敗しました。(E-0032)`,
+    E_0033: `楽曲ファイルの読み込み中に接続がタイムアウトしました。(E-0033)`,
+    E_0034: `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`,
+    E_0035: `お使いのOSでは指定された楽曲フォーマットに対応していません。(E-0035)`,
+    E_0041: `ファイル:{0}の読み込みに失敗しました。(E-0041)<br>`,
+    E_0042: `{0}は0より大きい値を指定する必要があります。(E-0042)`,
+    E_0051: `Displayオプションのデフォルト設定(XXXXChainOFF)で、<br>指定できない組み合わせが設定されています。(E-0051)`,
 
-const C_MSG_E_0101 = `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
-	|color{0}=0,1,0,1,0,2|`;
-const C_MSG_E_0102 = `新しいキー:{0}の[chara]が未定義です。(E-0102)<br>
-	|chara{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|`;
-const C_MSG_E_0103 = `新しいキー:{0}の[stepRtn]が未定義です。(E-0103)<br>
-	|stepRtn{0}=0,45,-90,135,180,onigiri|`;
-const C_MSG_E_0104 = `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
-    |keyCtrl{0}=75,79,76,80,187,32/0|`;
-const C_MSG_I_0001 = `リザルトデータをクリップボードにコピーしました！`;
-const C_MSG_I_0002 = `入力したキーは割り当てできません。他のキーを指定してください。`;
+    E_0101: `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
+    |color{0}=0,1,0,1,0,2|`,
+    E_0102: `新しいキー:{0}の[chara]が未定義です。(E-0102)<br>
+    |chara{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|`,
+    E_0103: `新しいキー:{0}の[stepRtn]が未定義です。(E-0103)<br>
+    |stepRtn{0}=0,45,-90,135,180,onigiri|`,
+    E_0104: `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
+    |keyCtrl{0}=75,79,76,80,187,32/0|`,
 
+    I_0001: `リザルトデータをクリップボードにコピーしました！`,
+    I_0002: `入力したキーは割り当てできません。他のキーを指定してください。`,
+    I_0003: `各譜面の明細情報をクリップボードにコピーしました！`,
+};
+
+/**
+ * ラベル表示定義
+ */
+const g_lblNameObj = {
+    dancing: `DANCING`,
+    star: `☆`,
+    onigiri: `ONIGIRI`,
+    settings: `SETTINGS`,
+    display: `DISPLAY`,
+    key: `KEY`,
+    config: `CONFIG`,
+    result: `RESULT`,
+
+    kcDesc: `[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`,
+    sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
+    kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
+    transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
+    sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
+
+    maker: `Maker`,
+    artist: `Artist`,
+
+    dataReset: `Data Reset`,
+    dataSave: `Data Save`,
+    clickHere: `Click Here!!`,
+    comment: `Comment`,
+
+    nowLoading: `Now Loading...`,
+    pleaseWait: `Please Wait...`,
+
+    b_back: `Back`,
+    b_keyConfig: `KeyConfig`,
+    b_play: `PLAY!`,
+    b_reset: `Reset`,
+    b_settings: `To Settings`,
+    b_copy: `CopyResult`,
+    b_tweet: `Tweet`,
+    b_gitter: `Gitter`,
+    b_retry: `Retry`,
+
+    Difficulty: `Difficulty`,
+    Speed: `Speed`,
+    Motion: `Motion`,
+    Scroll: `Scroll`,
+    Reverse: `Reverse`,
+    Shuffle: `Shuffle`,
+    AutoPlay: `AutoPlay`,
+    Gauge: `Gauge`,
+    Adjustment: `Adjustment`,
+    Fadein: `Fadein`,
+    Volume: `Volume`,
+
+    g_start: `Start`,
+    g_border: `Border`,
+    g_recovery: `Recovery`,
+    g_damage: `Damage`,
+
+    s_speed: `Speed`,
+    s_boost: `Boost`,
+    s_apm: `APM`,
+    s_time: `Time`,
+    s_arrow: `Arrow`,
+    s_frz: `Frz`,
+
+    s_level: `Level`,
+    s_douji: `同時補正`,
+    s_tate: `縦連補正`,
+    s_cnts: `All Arrows`,
+    s_linecnts: `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 ({0}):`,
+    s_print: `データ出力`,
+    s_printTitle: `Dancing☆Onigiri レベル計算ツール+++`,
+    s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
+
+    d_StepZone: `StepZone`,
+    d_Judgment: `Judgment`,
+    d_FastSlow: `FastSlow`,
+    d_LifeGauge: `LifeGauge`,
+    d_Score: `Score`,
+    d_MusicInfo: `MusicInfo`,
+    d_FilterLine: `FilterLine`,
+    d_Speed: `Speed`,
+    d_Color: `Color`,
+    d_Lyrics: `Lyrics`,
+    d_Background: `Background`,
+    d_ArrowEffect: `ArrowEffect`,
+    d_Special: `Special`,
+
+    Appearance: `Appearance`,
+    Opacity: `Opacity`,
+
+    ConfigType: `ConfigType`,
+    ColorType: `ColorType`,
+    KeyPattern: `KeyPattern`,
+
+    j_ii: "(・∀・)ｲｲ!!",
+    j_shakin: "(`・ω・)ｼｬｷﾝ",
+    j_matari: "( ´∀`)ﾏﾀｰﾘ",
+    j_shobon: "(´・ω・`)ｼｮﾎﾞｰﾝ",
+    j_uwan: "( `Д´)ｳﾜｧﾝ!!",
+
+    j_kita: "(ﾟ∀ﾟ)ｷﾀ-!!",
+    j_iknai: "(・A・)ｲｸﾅｲ",
+
+    j_maxCombo: `MaxCombo`,
+    j_fmaxCombo: `FreezeCombo`,
+    j_score: `Score`,
+
+    j_fast: `Fast`,
+    j_slow: `Slow`,
+
+    allPerfect: `All Perfect!!`,
+    perfect: `Perfect!!`,
+    fullCombo: `FullCombo!`,
+    cleared: `CLEARED!`,
+    failed: `FAILED...`,
+};
+
+// クリア表示
+const g_resultMsgObj = {
+    allPerfect: `<span class="result_AllPerfect">${g_lblNameObj.allPerfect}</span>`,
+    perfect: `<span class="result_Perfect">${g_lblNameObj.perfect}</span>`,
+    fullCombo: `<span class="result_FullCombo">${g_lblNameObj.fullCombo}</span>`,
+    cleared: `<span class="result_Cleared">${g_lblNameObj.cleared}</span>`,
+    failed: `<span class="result_Failed">${g_lblNameObj.failed}</span>`,
+};
+
+// 判定名
+let C_JCR_II = g_lblNameObj.j_ii;
+let C_JCR_SHAKIN = g_lblNameObj.j_shakin;
+let C_JCR_MATARI = g_lblNameObj.j_matari;
+let C_JCR_SHOBON = g_lblNameObj.j_shobon;
+let C_JCR_UWAN = g_lblNameObj.j_uwan;
+
+let C_JCR_KITA = g_lblNameObj.j_kita;
+let C_JCR_SFSF = "";
+let C_JCR_IKNAI = g_lblNameObj.j_iknai;
+
+/**
+ * オンマウステキスト、確認メッセージ定義
+ */
 const g_msgObj = {
 
     reload: `ページを再読込します。`,
@@ -1683,6 +1884,9 @@ const g_msgObj = {
     dataReset: `この作品で保存されているハイスコアや\nAdjustment情報等をリセットします。`,
     github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
     security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
+
+    dataResetConfirm: `この作品のローカル設定をクリアします。よろしいですか？\n(ハイスコアやAdjustment等のデータがクリアされます)`,
+    keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
 
     difficulty: `譜面を選択します。`,
     speed: `矢印の流れる速度を設定します。`,
