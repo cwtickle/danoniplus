@@ -1690,6 +1690,8 @@ function loadMusic() {
 	let url = `../${g_headerObj.musicFolder}/${musicUrl}`;
 	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
+	} else if (g_headerObj.musicFolder.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+		url = `${g_headerObj.musicFolder.split(C_MRK_CURRENT_DIRECTORY)[1]}/${musicUrl}`;
 	}
 
 	g_headerObj.musicUrl = musicUrl;
