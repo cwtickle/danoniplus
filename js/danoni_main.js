@@ -2324,7 +2324,7 @@ function titleInit() {
 					overflow: `auto`, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
 				}),
 
-				createCss2Button(`btnComment`, `Comment`, _ => {
+				createCss2Button(`btnComment`, g_lblNameObj.comment, _ => {
 					const lblCommentDef = lblComment.style.display;
 					lblComment.style.display = (lblCommentDef === C_DIS_NONE ? C_DIS_INHERIT : C_DIS_NONE);
 				}, {

@@ -1696,7 +1696,7 @@ const g_cssCheckStr = {
  * - 変数名は `X_YYYY` の形で、末尾に (X-YYYY) をつける。
  * - 記述不正の場合、書き方を2行目に指定すると親切。
 */
-const g_msgInfoObj = {
+let g_msgInfoObj = {
     W_0001: `お使いのブラウザは動作保証外です。<br>
     Chrome/Opera/Vivaldiなど、WebKit系ブラウザの利用を推奨します。(W-0001)`,
     W_0011: `fileスキームでの動作のため、内蔵の画像データを使用します。(W-0011)<br>
@@ -1740,7 +1740,7 @@ const g_msgInfoObj = {
 /**
  * ラベル表示定義
  */
-const g_lblNameObj = {
+let g_lblNameObj = {
     dancing: `DANCING`,
     star: `☆`,
     onigiri: `ONIGIRI`,
@@ -1756,6 +1756,7 @@ const g_lblNameObj = {
     dataReset: `Data Reset`,
     dataSave: `Data Save`,
     clickHere: `Click Here!!`,
+    comment: `Comment`,
 
     b_back: `Back`,
     b_keyConfig: `KeyConfig`,
@@ -1867,7 +1868,7 @@ let C_JCR_IKNAI = g_lblNameObj.j_iknai;
 /**
  * メッセージ、補足表示定義
  */
-const g_msgObj = {
+let g_msgObj = {
 
     reload: `ページを再読込します。`,
     howto: `ゲーム画面の見方や設定の詳細についてのページへ移動します（GitHub Wiki）。`,
