@@ -1657,6 +1657,33 @@ function loadCustomjs(_afterFunc) {
 }
 
 /**
+ * 入力されたパスを、ディレクトリとそれ以外に分割
+ * 返却値：[ファイルキーワード, ルートディレクトリ]
+ * @param {string} _path 
+ * @param {number} _pos 
+ * @param {string} _directory 
+ */
+const getFolderAndType = (_path, _pos, _directory = ``) => {
+	return (_pos > 0 ? [_path.substring(_pos + 1), `${_path.substring(0, _pos)}/`] : [_path, _directory]);
+};
+
+/**
+ * 与えられたパスより、キーワードとディレクトリに分割
+ * カレントディレクトリ指定がある場合を考慮して、処理を分けている
+ * 返却値：[ファイルキーワード, ルートディレクトリ]
+ * @param {string} _fileName 
+ * @param {string} _directory 
+ */
+const getFilePath = (_fileName, _directory = ``) => {
+	if (_fileName.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+		const tmpType = _fileName.split(C_MRK_CURRENT_DIRECTORY)[1];
+		return getFolderAndType(tmpType, tmpType.indexOf(`/`));
+	} else {
+		return getFolderAndType(_fileName, _fileName.lastIndexOf(`/`), _directory);
+	}
+};
+
+/**
  * danoni_setting.jsの読込
  */
 function loadSettingJs() {
@@ -1665,17 +1692,9 @@ function loadSettingJs() {
 	let settingType = ``;
 	let settingRoot = C_DIR_JS;
 	if (hasVal(g_rootObj.settingType)) {
-		settingType = `_${g_rootObj.settingType}`;
-		if (g_rootObj.settingType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-			const tmpType = g_rootObj.settingType.split(C_MRK_CURRENT_DIRECTORY)[1];
-			const pos = tmpType.indexOf(`/`);
-			if (pos > 0) {
-				settingType = (tmpType.substring(pos + 1) === `` ? `` : `_${tmpType.substring(pos + 1)}`);
-				settingRoot = `${tmpType.substring(0, pos)}/`;
-			} else {
-				settingType = `_${tmpType}`;
-				settingRoot = ``;
-			}
+		[settingType, settingRoot] = getFilePath(g_rootObj.settingType, C_DIR_JS);
+		if (settingType !== ``) {
+			settingType = `_${settingType}`;
 		}
 	}
 
@@ -2947,19 +2966,6 @@ function headerConvert(_dosObj) {
 		obj.playbackRate = 1;
 		makeWarningWindow(g_msgInfoObj.E_0042.split(`{0}`).join(`playbackRate`));
 	}
-
-	// ファイルパスの取得
-	const getFilePath = (_fileName, _directory = ``) => {
-		const obj = {};
-		if (_fileName.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-			obj.fileName = _fileName.split(C_MRK_CURRENT_DIRECTORY)[1];
-			obj.fileRoot = ``;
-		} else {
-			obj.fileName = _fileName;
-			obj.fileRoot = _directory;
-		}
-		return [obj.fileName, obj.fileRoot];
-	};
 
 	// 外部スキンファイルの指定
 	obj.skinType = `default`;
