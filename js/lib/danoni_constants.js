@@ -132,6 +132,7 @@ let g_imgExtensions = [`png`, `gif`, `bmp`, `jpg`, `jpeg`, `svg`];
 const g_typeLists = {
     arrow: [`arrow`, `dummyArrow`, `frz`, `dummyFrz`],
     color: [`color`, `acolor`, `shadowColor`, `ashadowColor`],
+    frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`],
     dataList: [
         `Arrow`, `FrzArrow`, `FrzLength`,
         `Color`, `ColorCd`, `FColor`, `FColorCd`,

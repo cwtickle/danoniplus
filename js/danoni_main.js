@@ -4077,7 +4077,7 @@ function createOptionWindow(_sprite) {
 		} else {
 			dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
 			dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
-			lblArrowInfo2.innerHTML = g_msgObj.difInfoCnt.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
+			lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
 			dataArrowInfo.innerHTML = ArrowInfo;
 			dataArrowInfo2.innerHTML = ArrowInfo2;
 		}
@@ -6909,33 +6909,27 @@ function getArrowSettings() {
 		}
 	}
 
-	g_workObj.judgArrowCnt = [];
-	g_workObj.judgFrzCnt = [];
-	g_workObj.judgFrzHitCnt = [];
-	g_judgObj.lockFlgs = [];
-
-	g_workObj.judgDummyArrowCnt = [];
-	g_workObj.judgDummyFrzCnt = [];
+	g_typeLists.arrow.forEach(type => g_workObj[`judg${toCapitalize(type)}Cnt`] = [...Array(keyNum)].fill(1));
+	g_workObj.judgFrzHitCnt = [...Array(keyNum)].fill(1);
+	g_judgObj.lockFlgs = [...Array(keyNum)].fill(false);
 
 	// TODO: この部分を矢印塗りつぶし部分についても適用できるように変数を作成
 
 	// 矢印色管理 (個別・全体)
-	[``, `All`].forEach(type => {
+	const eachOrAll = [``, `All`];
+	eachOrAll.forEach(type => {
 		g_workObj[`arrowColors${type}`] = [];
 		g_workObj[`dummyArrowColors${type}`] = [];
 
 		[`frz`, `dummyFrz`].forEach(arrowType => {
-			[`Normal`, `NormalBar`, `Hit`, `HitBar`].forEach(frzType => {
+			g_typeLists.frzColor.forEach(frzType => {
 				g_workObj[`${arrowType}${frzType}Colors${type}`] = [];
 			});
 		});
 	});
 
 	// モーション管理
-	g_workObj.arrowCssMotions = [];
-	g_workObj.frzCssMotions = [];
-	g_workObj.dummyArrowCssMotions = [];
-	g_workObj.dummyFrzCssMotions = [];
+	g_typeLists.arrow.forEach(type => g_workObj[`${type}CssMotions`] = [...Array(keyNum)].fill(``));
 
 	const scrollDirOptions = (g_keyObj[`scrollDir${keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
@@ -6952,42 +6946,21 @@ function getArrowSettings() {
 		g_workObj.dividePos[j] = ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
 		g_workObj.scrollDir[j] = (posj <= divideCnt ? 1 : -1) * scrollDirOptions[j] * (g_stateObj.reverse === C_FLG_OFF ? 1 : -1);
 
-		g_workObj.judgArrowCnt[j] = 1;
-		g_workObj.judgFrzCnt[j] = 1;
-		g_workObj.judgFrzHitCnt[j] = 1;
-		g_judgObj.lockFlgs[j] = false;
-
-		g_workObj.judgDummyArrowCnt[j] = 1;
-		g_workObj.judgDummyFrzCnt[j] = 1;
-
 		// TODO: この部分を矢印塗りつぶし部分についても適用できるように変数を作成
 
-		[``, `All`].forEach(type => {
+		eachOrAll.forEach(type => {
 			g_workObj[`arrowColors${type}`][j] = g_headerObj.setColor[colorj];
-
-			g_workObj[`frzNormalColors${type}`][j] = g_headerObj.frzColor[colorj][0];
-			g_workObj[`frzNormalBarColors${type}`][j] = g_headerObj.frzColor[colorj][1];
-			g_workObj[`frzHitColors${type}`][j] = g_headerObj.frzColor[colorj][2];
-			g_workObj[`frzHitBarColors${type}`][j] = g_headerObj.frzColor[colorj][3];
-
 			g_workObj[`dummyArrowColors${type}`][j] = g_headerObj.setDummyColor[colorj];
 
-			g_workObj[`dummyFrzNormalColors${type}`][j] = g_headerObj.setDummyColor[colorj];
-			g_workObj[`dummyFrzNormalBarColors${type}`][j] = g_headerObj.setDummyColor[colorj];
-			g_workObj[`dummyFrzHitColors${type}`][j] = g_headerObj.setDummyColor[colorj];
-			g_workObj[`dummyFrzHitBarColors${type}`][j] = g_headerObj.setDummyColor[colorj];
+			g_typeLists.frzColor.forEach((frzType, k) => {
+				g_workObj[`frz${frzType}Colors${type}`][j] = g_headerObj.frzColor[colorj][k];
+				g_workObj[`dummyFrz${frzType}Colors${type}`][j] = g_headerObj.setDummyColor[colorj];
+			});
 		});
-
-		g_workObj.arrowCssMotions[j] = ``;
-		g_workObj.frzCssMotions[j] = ``;
-		g_workObj.dummyArrowCssMotions[j] = ``;
-		g_workObj.dummyFrzCssMotions[j] = ``;
 	}
 
-	[
-		`ii`, `shakin`, `matari`, `shobon`, `uwan`, `combo`, `maxCombo`,
-		`kita`, `sfsf`, `iknai`, `fCombo`, `fmaxCombo`, `fast`, `slow`
-	].forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
+	Object.keys(g_resultObj).forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
+	g_resultObj.spState = ``;
 
 	g_displays.forEach(_disp => {
 		const lowerDisp = _disp.toLowerCase();
@@ -6997,7 +6970,6 @@ function getArrowSettings() {
 	g_workObj.lifeVal = Math.floor(g_workObj.lifeInit * 100) / 100;
 	g_gameOverFlg = false;
 	g_finishFlg = true;
-	g_resultObj.spState = ``;
 
 	if (g_stateObj.dataSaveFlg && !hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
 
