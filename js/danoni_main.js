@@ -1106,7 +1106,7 @@ function getQueryParamVal(_name) {
  * ローディング文字用ラベルの作成
  */
 function getLoadingLabel() {
-	return createDivCss2Label(`lblLoading`, `Now Loading...`, {
+	return createDivCss2Label(`lblLoading`, g_lblNameObj.nowLoading, {
 		x: 0, y: g_sHeight - 40, w: g_sWidth, h: C_LEN_SETLBL_HEIGHT,
 		siz: C_SIZ_SETLBL, align: C_ALIGN_RIGHT,
 	});
@@ -1717,7 +1717,7 @@ function loadMusic() {
 			const blobUrl = URL.createObjectURL(request.response);
 			const loader = createSprite(`divRoot`, `loader`, 0, g_sHeight - 10, g_sWidth, 10);
 			loader.style.backgroundColor = `#333333`;
-			lblLoading.textContent = `Please Wait...`;
+			lblLoading.textContent = g_lblNameObj.pleaseWait;
 			setAudio(blobUrl);
 		} else {
 			makeWarningWindow(`${g_msgInfoObj.E_0032}<br>(${request.status} ${request.statusText})`);
@@ -1733,9 +1733,9 @@ function loadMusic() {
 			const loader = createSprite(`divRoot`, `loader`, 0, g_sHeight - 10, g_sWidth, 10);
 			loader.style.width = `${g_sWidth * rate}px`;
 			loader.style.backgroundColor = `#eeeeee`;
-			lblLoading.textContent = `Now Loading... ${Math.floor(rate * 100)}%`;
+			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${Math.floor(rate * 100)}%`;
 		} else {
-			lblLoading.textContent = `Now Loading... ${_event.loaded}Bytes`;
+			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${_event.loaded}Bytes`;
 		}
 		// ユーザカスタムイベント
 		if (typeof customLoadingProgress === C_TYP_FUNCTION) {
@@ -4780,7 +4780,7 @@ function settingsDisplayInit() {
 
 	// ショートカットキーメッセージ
 	divRoot.appendChild(
-		createDivCss2Label(`scMsg`, g_msgObj.sdShortcutDesc, {
+		createDivCss2Label(`scMsg`, g_lblNameObj.sdShortcutDesc, {
 			x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		})
 	);
@@ -4863,7 +4863,7 @@ function createSettingsDisplayWindow(_sprite) {
 	const spriteList = setSpriteList(settingList);
 
 	document.querySelector(`#${_sprite}`).appendChild(
-		createDivCss2Label(`sdDesc`, g_msgObj.sdDesc, {
+		createDivCss2Label(`sdDesc`, g_lblNameObj.sdDesc, {
 			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		})
 	);
@@ -4998,7 +4998,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			`<div class="settings_Title">${g_lblNameObj.key}</div><div class="settings_Title2">${g_lblNameObj.config}</div>`
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
-		createDivCss2Label(`kcDesc`, g_msgObj.kcDesc, {
+		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc, {
 			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		}),
 
@@ -5127,7 +5127,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		// ショートカットキーメッセージ
 		createDivCss2Label(
 			`scMsg`,
-			g_msgObj.kcShortcutDesc.split(`{0}`).join(g_kCd[g_headerObj.keyTitleBack])
+			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_kCd[g_headerObj.keyTitleBack])
 				.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]),
 			{
 				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
@@ -5136,7 +5136,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		// 別キーモード警告メッセージ
 		createDivCss2Label(
 			`kcMsg`,
-			hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? g_msgObj.transKeyDesc : ``,
+			hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? g_lblNameObj.transKeyDesc : ``,
 			{
 				x: 0, y: g_sHeight - 25, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 			}, g_cssObj.keyconfig_warning

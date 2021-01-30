@@ -1750,6 +1750,12 @@ let g_lblNameObj = {
     config: `CONFIG`,
     result: `RESULT`,
 
+    kcDesc: `[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`,
+    sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
+    kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
+    transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
+    sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
+
     maker: `Maker`,
     artist: `Artist`,
 
@@ -1757,6 +1763,9 @@ let g_lblNameObj = {
     dataSave: `Data Save`,
     clickHere: `Click Here!!`,
     comment: `Comment`,
+
+    nowLoading: `Now Loading...`,
+    pleaseWait: `Please Wait...`,
 
     b_back: `Back`,
     b_keyConfig: `KeyConfig`,
@@ -1912,11 +1921,5 @@ let g_msgObj = {
 
     appearance: `流れる矢印の見え方を制御します。`,
     opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
-
-    kcDesc: `[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`,
-    sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
-    kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
-    transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
-    sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
 
 };
