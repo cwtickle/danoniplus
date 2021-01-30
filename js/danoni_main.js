@@ -1646,7 +1646,7 @@ function calcLevel(_scoreObj) {
 function loadCustomjs(_afterFunc) {
 	const randTime = new Date().getTime();
 	loadScript(`${g_headerObj.customjsRoot}${g_headerObj.customjs}?${randTime}`, _ => {
-		loadScript(`${g_headerObj.customjsRoot2}${g_headerObj.customjs2}?${randTime}`, _ => {
+		loadScript(`${g_headerObj.customjs2Root}${g_headerObj.customjs2}?${randTime}`, _ => {
 			loadScript(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.js?${randTime}`, _ => {
 				loadScript(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.js?${randTime}`, _ => {
 					_afterFunc();
@@ -2976,7 +2976,7 @@ function headerConvert(_dosObj) {
 	// 外部jsファイルの指定
 	const tmpCustomjs = _dosObj.customjs || (typeof g_presetCustomJs === C_TYP_STRING ? g_presetCustomJs : C_JSF_CUSTOM);
 	const customjss = tmpCustomjs.split(`,`);
-	[obj.customjs2, obj.customjsRoot2] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
+	[obj.customjs2, obj.customjs2Root] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
 	[obj.customjs, obj.customjsRoot] = getFilePath(customjss[0], C_DIR_JS);
 
 	// ステップゾーン位置
