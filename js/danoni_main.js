@@ -1646,7 +1646,7 @@ function calcLevel(_scoreObj) {
 function loadCustomjs(_afterFunc) {
 	const randTime = new Date().getTime();
 	loadScript(`${g_headerObj.customjsRoot}${g_headerObj.customjs}?${randTime}`, _ => {
-		loadScript(`${g_headerObj.customjs2Root}${g_headerObj.customjs2}?${randTime}`, _ => {
+		loadScript(`${g_headerObj.customjsRoot2}${g_headerObj.customjs2}?${randTime}`, _ => {
 			loadScript(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.js?${randTime}`, _ => {
 				loadScript(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.js?${randTime}`, _ => {
 					_afterFunc();
@@ -2968,26 +2968,16 @@ function headerConvert(_dosObj) {
 	}
 
 	// 外部スキンファイルの指定
-	obj.skinType = `default`;
-	obj.skinRoot = C_DIR_SKIN;
-	obj.skinType2 = `blank`;
-	obj.skinRoot2 = C_DIR_SKIN;
-	if (hasVal(_dosObj.skinType)) {
-		const skinTypes = _dosObj.skinType.split(`,`);
-		[obj.skinType2, obj.skinRoot2] = getFilePath(skinTypes.length > 1 ? skinTypes[1] : `blank`, C_DIR_SKIN);
-		[obj.skinType, obj.skinRoot] = getFilePath(skinTypes[0], C_DIR_SKIN);
-	}
+	const tmpSkinType = _dosObj.skinType || (typeof g_presetSkinType === C_TYP_STRING ? g_presetSkinType : `default`);
+	const skinTypes = tmpSkinType.split(`,`);
+	[obj.skinType2, obj.skinRoot2] = getFilePath(skinTypes.length > 1 ? skinTypes[1] : `blank`, C_DIR_SKIN);
+	[obj.skinType, obj.skinRoot] = getFilePath(skinTypes[0], C_DIR_SKIN);
 
 	// 外部jsファイルの指定
-	obj.customjs = C_JSF_CUSTOM;
-	obj.customjsRoot = C_DIR_JS;
-	obj.customjs2 = C_JSF_BLANK;
-	obj.customjs2Root = C_DIR_JS;
-	if (hasVal(_dosObj.customjs)) {
-		const customjss = _dosObj.customjs.split(`,`);
-		[obj.customjs2, obj.customjs2Root] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
-		[obj.customjs, obj.customjsRoot] = getFilePath(customjss[0], C_DIR_JS);
-	}
+	const tmpCustomjs = _dosObj.customjs || (typeof g_presetCustomJs === C_TYP_STRING ? g_presetCustomJs : C_JSF_CUSTOM);
+	const customjss = tmpCustomjs.split(`,`);
+	[obj.customjs2, obj.customjsRoot2] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
+	[obj.customjs, obj.customjsRoot] = getFilePath(customjss[0], C_DIR_JS);
 
 	// ステップゾーン位置
 	g_posObj.stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));

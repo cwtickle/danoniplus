@@ -15,6 +15,12 @@ const g_presetTuning = `name`;
 // 譜面製作者URL
 const g_presetTuningUrl = `https://www.google.co.jp/`;
 
+// 既定スキン (デフォルトは default)
+const g_presetSkinType = `default`;
+
+// 既定カスタムJs (デフォルトは danoni_custom.js)
+//const g_presetCustomJs = `danoni_custom.js`;
+
 // ゲージ設定（デフォルト）
 const g_presetGauge = {
 	//	Border: 70,  // ノルマ制でのボーダーライン、ライフ制にしたい場合は `x` を指定
