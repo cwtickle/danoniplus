@@ -162,3 +162,21 @@ const g_presetFrzStartjdgUse = `false`;
 const g_presetResultVals = {
 	// exScore: `exScore`,
 };
+
+/**
+ * ラベルテキスト (g_lblNameObj) に対応するプロパティを上書きする設定
+ * ※danoni_setting.js の他、customjsにも利用可
+ * ※設定可能項目についてはdanoni_constants.jsをご覧ください。
+ */
+const g_local_lblNameObj = {
+
+};
+
+/**
+ * オンマウステキスト、確認メッセージ定義 (g_msgObj) に対応するプロパティを上書きする設定
+ * ※danoni_setting.js の他、customjsにも利用可
+ * ※設定可能項目についてはdanoni_constants.jsをご覧ください。
+ */
+const g_local_msgObj = {
+
+};

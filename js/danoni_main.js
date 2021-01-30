@@ -2528,6 +2528,14 @@ function headerConvert(_dosObj) {
 		}
 	}
 
+	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
+	if (typeof g_local_lblNameObj === C_TYP_OBJECT) {
+		Object.keys(g_local_lblNameObj).forEach(property => g_lblNameObj[property] = g_local_lblNameObj[property]);
+	}
+	if (typeof g_local_msgObj === C_TYP_OBJECT) {
+		Object.keys(g_local_msgObj).forEach(property => g_msgObj[property] = g_local_msgObj[property]);
+	}
+
 	// 曲名
 	obj.musicTitles = [];
 	obj.musicTitlesForView = [];
