@@ -1667,8 +1667,15 @@ function loadSettingJs() {
 	if (hasVal(g_rootObj.settingType)) {
 		settingType = `_${g_rootObj.settingType}`;
 		if (g_rootObj.settingType.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-			settingType = `_${g_rootObj.settingType.split(C_MRK_CURRENT_DIRECTORY)[1]}`;
-			settingRoot = ``;
+			const tmpType = g_rootObj.settingType.split(C_MRK_CURRENT_DIRECTORY)[1];
+			const pos = tmpType.indexOf(`/`);
+			if (pos > 0) {
+				settingType = (tmpType.substring(pos + 1) === `` ? `` : `_${tmpType.substring(pos + 1)}`);
+				settingRoot = `${tmpType.substring(0, pos)}/`;
+			} else {
+				settingType = `_${tmpType}`;
+				settingRoot = ``;
+			}
 		}
 	}
 
