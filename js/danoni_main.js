@@ -41,12 +41,22 @@ let g_localVersion2 = ``;
 
 window.onload = _ => {
 	g_loadObj.main = true;
+	const current = _ => {
+		if (document.currentScript) {
+			return document.currentScript.src;
+		} else {
+			const scripts = document.getElementsByTagName(`script`);
+			const targetScript = scripts[scripts.length - 1];
+			return targetScript.src;
+		}
+	}
+	g_loadObj.rootPath = current().match(/(^.*\/)/)[0];
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
-	loadScript(`../js/lib/danoni_localbinary.js?${randTime}`, _ => {
-		loadScript(`../js/lib/danoni_constants.js?${randTime}`, _ => {
-			loadScript(`../js/lib/danoni_legacy_function.js?${randTime}`, _ => {
+	loadScript(`${g_loadObj.rootPath}../js/lib/danoni_localbinary.js?${randTime}`, _ => {
+		loadScript(`${g_loadObj.rootPath}../js/lib/danoni_constants.js?${randTime}`, _ => {
+			loadScript(`${g_loadObj.rootPath}../js/lib/danoni_legacy_function.js?${randTime}`, _ => {
 				initialControl();
 			}, false);
 		});
