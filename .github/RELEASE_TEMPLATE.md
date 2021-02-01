@@ -16,7 +16,7 @@ Revised: ----/--/--
 ▼ [本体更新方法](../../wiki/HowToUpdate) / [サポートバージョン](../../security/policy) / [ソース構成](../../wiki/AboutSource) / [譜面の作成概要](../../wiki/HowtoMake)  
 ▼ [要望・不具合報告](../../blob/develop/.github/CONTRIBUTING.md) ( [Gitter](https://gitter.im/danonicw/community) )  
 
-### [@pre_version@](../../releases/tag/@pre_version@) [-> @version@](../../compare/@pre_version@...@version@) ( [vs. latest @major_version@](../../compare/@version@...master) ) [📁](../../tree/@version@)
+### [@pre_version@](../../releases/tag/@pre_version@) [-> @version@](../../compare/@pre_version@...@version@#files_bucket) ( [vs. latest @major_version@](../../compare/@version@...master#files_bucket) ) [📁](../../tree/@version@)
 
 <details open>
 <summary>Details (詳細)</summary>
@@ -39,7 +39,7 @@ Revised: ----/--/--
 |フォルダ|ファイル名||最終更新|
 |----|----|----|----|
 |/js|danoni_main.js|[:inbox_tray:](../../download/v19.3.0/danoni_main.js)|**@version@**|
-|/js|danoni_setting(-template).js|[:inbox_tray:](../../download/v19.3.0/danoni_setting-template.js)|[v19.3.0](../../releases/tag/v19.3.0)|
+|/js|[danoni_setting(-template).js](../../compare/v19.2.0...v19.3.0#files_bucket)|[:inbox_tray:](../../download/v19.3.0/danoni_setting-template.js)|[v19.3.0](../../releases/tag/v19.3.0)|
 |/js/lib|danoni_constants.js|[:inbox_tray:](../../download/v19.3.0/danoni_constants.js)|[v19.3.0](../../releases/tag/v19.3.0)|
 |/js/lib|danoni_legacy_function.js|[:inbox_tray:](../../download/v19.0.0/danoni_legacy_function.js)|[v19.0.0](../../releases/tag/v19.0.0)|
 
