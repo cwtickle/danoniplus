@@ -12,7 +12,7 @@ Revised: ----/--/--
 -->
 
 [![GitHub Releases (by Release)](https://img.shields.io/github/downloads/cwtickle/danoniplus/@version@/total)](../../archive/@version@.zip)  
-▼ 更新用ファイルは下記Assetsより  
+▼ 更新用ファイルは下記 Files changed より  
 ▼ [本体更新方法](../../wiki/HowToUpdate) / [サポートバージョン](../../security/policy) / [ソース構成](../../wiki/AboutSource) / [譜面の作成概要](../../wiki/HowtoMake)  
 ▼ [要望・不具合報告](../../blob/develop/.github/CONTRIBUTING.md) ( [Gitter](https://gitter.im/danonicw/community) )  
 
