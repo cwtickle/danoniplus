@@ -36,22 +36,22 @@ Revised: ----/--/--
 <!-- 変更ファイル一覧 -->
 ## 🔃 Files changed (@major_version@)
 
-|フォルダ|ファイル名|最終更新|
-|----|----|----|
-|/js|danoni_main.js|**@version@**|
-|/js|danoni_setting(-template).js|[v19.3.0](../../releases/tag/v19.3.0)|
-|/js/lib|danoni_constants.js|[v19.3.0](../../releases/tag/v19.3.0)|
-|/js/lib|danoni_legacy_function.js|[v19.0.0](../../releases/tag/v19.0.0)|
+|フォルダ|ファイル名||最終更新|
+|----|----|----|----|
+|/js|danoni_main.js|[:inbox_tray:](../../download/v19.3.0/danoni_main.js)|**@version@**|
+|/js|danoni_setting(-template).js|[:inbox_tray:](../../download/v19.3.0/danoni_setting-template.js)|[v19.3.0](../../releases/tag/v19.3.0)|
+|/js/lib|danoni_constants.js|[:inbox_tray:](../../download/v19.3.0/danoni_constants.js)|[v19.3.0](../../releases/tag/v19.3.0)|
+|/js/lib|danoni_legacy_function.js|[:inbox_tray:](../../download/v19.0.0/danoni_legacy_function.js)|[v19.0.0](../../releases/tag/v19.0.0)|
 
 <details>
 <summary>（参考）v18以前の差分ファイル一覧</summary>
 
-|フォルダ|ファイル名|最終更新|
-|----|----|----|
-|/js/lib|danoni_localbinary.js|[v15.1.0](../../releases/tag/v15.1.0)|
-|/css|danoni_main.css|[v18.5.0](../../releases/tag/v18.5.0)|
-|/img|aaShadow.svg<br>arrow.svg<br>arrowShadow.svg<br>borderline.svg<br>c.svg<br>cursor.svg<br>giko.svg<br>iyo.svg<br>monar.svg<br>morara.svg<br>onigiri.svg|[v15.1.0](../../releases/tag/v15.1.0)|
-|/skin|danoni_skin_default.css<br>danoni_skin_light.css<br>danoni_skin_skyblue.css|[v14.1.0](../../releases/tag/v14.1.0)|
+|フォルダ|ファイル名||最終更新|
+|----|----|----|----|
+|/js/lib|danoni_localbinary.js|[:inbox_tray:](../../download/v15.1.0/danoni_localbinary.js)|[v15.1.0](../../releases/tag/v15.1.0)|
+|/css|danoni_main.css|[:inbox_tray:](../../download/v18.5.0/danoni_main.css)|[v18.5.0](../../releases/tag/v18.5.0)|
+|/img|aaShadow.svg<br>arrow.svg<br>arrowShadow.svg<br>borderline.svg<br>c.svg<br>cursor.svg<br>giko.svg<br>iyo.svg<br>monar.svg<br>morara.svg<br>onigiri.svg|[:inbox_tray:](../../download/v15.1.0/img.zip)|[v15.1.0](../../releases/tag/v15.1.0)|
+|/skin|danoni_skin_default.css<br>danoni_skin_light.css<br>danoni_skin_skyblue.css|[:inbox_tray:](../../download/v14.1.0/danoni_skin_default.css)<br>[:inbox_tray:](../../download/v14.1.0/danoni_skin_light.css)<br>[:inbox_tray:](../../download/v14.1.0/danoni_skin_skyblue.css)|[v14.1.0](../../releases/tag/v14.1.0)|
 
 </details>
 
