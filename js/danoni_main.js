@@ -1679,7 +1679,8 @@ function loadCustomjs(_afterFunc) {
  * @param {string} _directory 
  */
 const getFolderAndType = (_path, _pos, _directory = ``) => {
-	return (_pos > 0 ? [_path.substring(_pos + 1), `${_path.substring(0, _pos)}/`] : [_path, `${g_localRootPath}${_directory}`]);
+	const rootPath = (_directory === `` ? `` : g_localRootPath);
+	return (_pos > 0 ? [_path.substring(_pos + 1), `${rootPath}${_path.substring(0, _pos)}/`] : [_path, `${rootPath}${_directory}`]);
 };
 
 /**
