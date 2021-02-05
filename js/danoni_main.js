@@ -756,7 +756,7 @@ function changeStyle(_id, { x, y, w, h, siz, align, title, ...rest } = {}) {
 		height: h,
 		fontSize: siz,
 	};
-	Object.keys(obj).filter(property => setVal(obj[property], ``, C_TYP_FLOAT !== ``))
+	Object.keys(obj).filter(property => setVal(obj[property], ``, C_TYP_FLOAT) !== ``)
 		.forEach(property => style[property] = `${obj[property]}px`);
 
 	if (align !== undefined) {
