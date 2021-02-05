@@ -43,19 +43,19 @@ const C_TYP_SWITCH = `switch`;
 const C_TYP_CALC = `calc`;
 
 // 画像ファイル
-let C_IMG_ARROW = `../img/arrow.svg`;
-let C_IMG_ARROWSD = `../img/arrowShadow.svg`;
-let C_IMG_ONIGIRI = `../img/onigiri.svg`;
-let C_IMG_AASD = `../img/aaShadow.svg`;
-let C_IMG_GIKO = `../img/giko.svg`;
-let C_IMG_IYO = `../img/iyo.svg`;
-let C_IMG_C = `../img/c.svg`;
-let C_IMG_MORARA = `../img/morara.svg`;
-let C_IMG_MONAR = `../img/monar.svg`;
-let C_IMG_CURSOR = `../img/cursor.svg`;
-let C_IMG_FRZBAR = `../img/frzbar.svg`;
-let C_IMG_LIFEBAR = `../img/frzbar.svg`;
-let C_IMG_LIFEBORDER = `../img/borderline.svg`;
+let C_IMG_ARROW = `${g_localRootPath}../img/arrow.svg`;
+let C_IMG_ARROWSD = `${g_localRootPath}../img/arrowShadow.svg`;
+let C_IMG_ONIGIRI = `${g_localRootPath}../img/onigiri.svg`;
+let C_IMG_AASD = `${g_localRootPath}../img/aaShadow.svg`;
+let C_IMG_GIKO = `${g_localRootPath}../img/giko.svg`;
+let C_IMG_IYO = `${g_localRootPath}../img/iyo.svg`;
+let C_IMG_C = `${g_localRootPath}../img/c.svg`;
+let C_IMG_MORARA = `${g_localRootPath}../img/morara.svg`;
+let C_IMG_MONAR = `${g_localRootPath}../img/monar.svg`;
+let C_IMG_CURSOR = `${g_localRootPath}../img/cursor.svg`;
+let C_IMG_FRZBAR = `${g_localRootPath}../img/frzbar.svg`;
+let C_IMG_LIFEBAR = `${g_localRootPath}../img/frzbar.svg`;
+let C_IMG_LIFEBORDER = `${g_localRootPath}../img/borderline.svg`;
 
 if (typeof loadBinary === C_TYP_FUNCTION) {
     loadBinary();

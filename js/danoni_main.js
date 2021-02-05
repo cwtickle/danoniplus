@@ -38,8 +38,12 @@ let g_localVersion2 = ``;
  *  clearWindow()で[divRoot]以外の全てのスプライトを削除。
  *  特定のスプライトに限り削除する場合は deleteChildspriteAll() 。
  */
+let g_remoteFlg = false;
 
 const current = _ => {
+	if (document.querySelector('script[data-jsmode="remote"]') !== null) {
+		g_remoteFlg = true;
+	}
 	if (document.currentScript) {
 		return document.currentScript.src;
 	}
@@ -48,13 +52,14 @@ const current = _ => {
 	return targetScript.src;
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
+const g_localRootPath = g_remoteFlg ? `` : g_rootPath;
 
 window.onload = _ => {
 	g_loadObj.main = true;
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
-	loadScript(`../js/lib/danoni_localbinary.js?${randTime}`, _ => {
+	loadScript(`${g_localRootPath}../js/lib/danoni_localbinary.js?${randTime}`, _ => {
 		loadScript(`${g_rootPath}../js/lib/danoni_constants.js?${randTime}`, _ => {
 			loadScript(`${g_rootPath}../js/lib/danoni_legacy_function.js?${randTime}`, _ => {
 				initialControl();
@@ -1674,7 +1679,7 @@ function loadCustomjs(_afterFunc) {
  * @param {string} _directory 
  */
 const getFolderAndType = (_path, _pos, _directory = ``) => {
-	return (_pos > 0 ? [_path.substring(_pos + 1), `${_path.substring(0, _pos)}/`] : [_path, _directory]);
+	return (_pos > 0 ? [_path.substring(_pos + 1), `${_path.substring(0, _pos)}/`] : [_path, `${g_localRootPath}${_directory}`]);
 };
 
 /**
@@ -1699,13 +1704,9 @@ const getFilePath = (_fileName, _directory = ``) => {
 function loadSettingJs() {
 
 	// 共通設定ファイルの指定
-	let settingType = ``;
-	let settingRoot = C_DIR_JS;
-	if (hasVal(g_rootObj.settingType)) {
-		[settingType, settingRoot] = getFilePath(g_rootObj.settingType, C_DIR_JS);
-		if (settingType !== ``) {
-			settingType = `_${settingType}`;
-		}
+	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType || ``, C_DIR_JS);
+	if (settingType !== ``) {
+		settingType = `_${settingType}`;
 	}
 
 	const randTime = new Date().getTime();
@@ -1723,7 +1724,7 @@ function loadMusic() {
 	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
-	let url = `../${g_headerObj.musicFolder}/${musicUrl}`;
+	let url = `${g_localRootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
 	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
 	} else if (g_headerObj.musicFolder.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
