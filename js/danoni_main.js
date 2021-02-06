@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 19.4.0`;
+const g_version = `Ver 19.4.1`;
 const g_revisedDate = `2021/02/06`;
 const g_alphaVersion = ``;
 
@@ -38,12 +38,7 @@ let g_localVersion2 = ``;
  *  clearWindow()で[divRoot]以外の全てのスプライトを削除。
  *  特定のスプライトに限り削除する場合は deleteChildspriteAll() 。
  */
-let g_remoteFlg = false;
-
 const current = _ => {
-	if (document.querySelector('script[data-jsmode="remote"]') !== null) {
-		g_remoteFlg = true;
-	}
 	if (document.currentScript) {
 		return document.currentScript.src;
 	}
@@ -52,14 +47,14 @@ const current = _ => {
 	return targetScript.src;
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
-const g_localRootPath = g_remoteFlg ? `` : g_rootPath;
+const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
 
 window.onload = _ => {
 	g_loadObj.main = true;
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
-	loadScript(`${g_localRootPath}../js/lib/danoni_localbinary.js?${randTime}`, _ => {
+	loadScript(`${g_rootPath}../js/lib/danoni_localbinary.js?${randTime}`, _ => {
 		loadScript(`${g_rootPath}../js/lib/danoni_constants.js?${randTime}`, _ => {
 			loadScript(`${g_rootPath}../js/lib/danoni_legacy_function.js?${randTime}`, _ => {
 				initialControl();
@@ -1679,7 +1674,7 @@ function loadCustomjs(_afterFunc) {
  * @param {string} _directory 
  */
 const getFolderAndType = (_path, _pos, _directory = ``) => {
-	const rootPath = (_directory === `` ? `` : g_localRootPath);
+	const rootPath = (_directory === `` ? `` : g_rootPath);
 	return (_pos > 0 ? [_path.substring(_pos + 1), `${rootPath}${_path.substring(0, _pos)}/`] : [_path, `${rootPath}${_directory}`]);
 };
 
@@ -1725,7 +1720,7 @@ function loadMusic() {
 	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
-	let url = `${g_localRootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
+	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
 	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
 	} else if (g_headerObj.musicFolder.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
@@ -2562,7 +2557,7 @@ function headerConvert(_dosObj) {
 
 	// 画像ルートパス、拡張子の設定 (サーバ上のみ)
 	if (!location.href.match(`^file`)) {
-		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_localRootPath}${g_imgObj[key]}`);
+		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
 		if (typeof g_presetOverrideExtension === C_TYP_STRING) {
 			Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
 		}
@@ -3011,7 +3006,7 @@ function headerConvert(_dosObj) {
 	g_diffObj.frzJdgY = (isNaN(parseFloat(_dosObj.frzJdgY)) ? 0 : parseFloat(_dosObj.frzJdgY));
 
 	// musicフォルダ設定
-	obj.musicFolder = setVal(_dosObj.musicFolder, `music`, C_TYP_STRING);
+	obj.musicFolder = setVal(_dosObj.musicFolder, (g_remoteFlg ? `(..)../music` : `music`), C_TYP_STRING);
 
 	// 楽曲URL
 	if (hasVal(_dosObj.musicUrl)) {
