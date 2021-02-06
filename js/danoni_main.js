@@ -2560,11 +2560,11 @@ function headerConvert(_dosObj) {
 	obj.customFont = setVal(_dosObj.customFont, ``, C_TYP_STRING);
 	g_headerObj.customFont = obj.customFont;
 
-	// 画像拡張子の設定 (サーバ上のみ)
-	if (typeof g_presetOverrideExtension === C_TYP_STRING && !location.href.match(`^file`)) {
-		let key;
-		for (key in g_imgObj) {
-			g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`;
+	// 画像ルートパス、拡張子の設定 (サーバ上のみ)
+	if (!location.href.match(`^file`)) {
+		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_localRootPath}${g_imgObj[key]}`);
+		if (typeof g_presetOverrideExtension === C_TYP_STRING) {
+			Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
 		}
 	}
 
