@@ -265,6 +265,37 @@ const transCode = _setCode => {
 const blockCode = _setCode => C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode) ? false : true;
 
 /**
+ * キーを押したときの動作（汎用）
+ * @param {object} _evt 
+ * @param {string} _displayName 
+ */
+const commonKeyDown = (_evt, _displayName) => {
+	const setCode = transCode(_evt.code);
+	if (_evt.repeat) {
+		return blockCode(setCode);
+	}
+	g_inputKeyBuffer[setCode] = true;
+	const scLists = Object.keys(g_shortcutObj[_displayName]).filter(keys => {
+		const keyset = keys.split(`_`);
+		return (keyset.length > 1 ? g_inputKeyBuffer[keyset[0]] && g_inputKeyBuffer[keyset[1]] : g_inputKeyBuffer[keyset[0]]);
+	});
+	if (scLists.length > 0) {
+		document.getElementById(g_shortcutObj[_displayName][scLists[0]]).click();
+	}
+	return blockCode(setCode);
+};
+
+/**
+ * キーを離したときの動作（汎用）
+ * @param {object} _evt 
+ */
+const commonKeyUp = _evt => {
+	const setCode = transCode(_evt.code);
+	g_inputKeyBuffer[`MetaLeft`] = false;
+	g_inputKeyBuffer[setCode] = false;
+};
+
+/**
  * 外部リンクを新規タグで開く
  * @param {string} _url 
  */
@@ -2406,21 +2437,8 @@ function titleInit() {
 	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => {
-		const setCode = transCode(evt.code);
-
-		if (evt.repeat) {
-			return blockCode(setCode);
-		}
-
-		if (setCode === `Enter`) {
-			clearTimeout(g_timeoutEvtTitleId);
-			optionInit();
-		}
-		return blockCode(setCode);
-	}
-
-	document.onkeyup = evt => { }
+	document.onkeydown = evt => commonKeyDown(evt, `title`);
+	document.onkeyup = evt => commonKeyUp(evt);
 
 	document.oncontextmenu = _ => true;
 	divRoot.oncontextmenu = _ => false;
@@ -3608,19 +3626,8 @@ function optionInit() {
 	);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => {
-		const setCode = transCode(evt.code);
-
-		if (evt.repeat) {
-			return blockCode(setCode);
-		}
-
-		if (setCode === `Enter`) {
-			loadMusic();
-		}
-		return blockCode(setCode);
-	}
-	document.onkeyup = evt => { }
+	document.onkeydown = evt => commonKeyDown(evt, `option`);
+	document.onkeyup = evt => commonKeyUp(evt);
 	document.oncontextmenu = _ => true;
 	g_initialFlg = true;
 
@@ -4836,19 +4843,8 @@ function settingsDisplayInit() {
 	);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => {
-		const setCode = transCode(evt.code);
-
-		if (evt.repeat) {
-			return blockCode(setCode);
-		}
-
-		if (setCode === `Enter`) {
-			loadMusic();
-		}
-		return blockCode(setCode);
-	}
-	document.onkeyup = evt => { }
+	document.onkeydown = evt => commonKeyDown(evt, `settingsDisplay`);
+	document.onkeyup = evt => commonKeyUp(evt);
 	document.oncontextmenu = _ => true;
 
 	if (typeof skinSettingsDisplayInit === C_TYP_FUNCTION) {
@@ -5382,11 +5378,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		}
 	}
 
-	document.onkeyup = evt => {
-		const setCode = transCode(evt.code);
-		g_inputKeyBuffer[`MetaLeft`] = false;
-		g_inputKeyBuffer[setCode] = false;
-	}
+	document.onkeyup = evt => commonKeyUp(evt);
 
 	document.oncontextmenu = _ => false;
 }
@@ -9345,8 +9337,8 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => blockCode(transCode(evt.code));
-	document.onkeyup = evt => { }
+	document.onkeydown = evt => commonKeyDown(evt, `result`);
+	document.onkeyup = evt => commonKeyUp(evt);
 	document.oncontextmenu = _ => true;
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {

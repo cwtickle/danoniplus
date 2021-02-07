@@ -720,6 +720,52 @@ g_kCdN[226] = `IntlRo`;
 g_kCdN[229] = `Backquote`;
 g_kCdN[240] = `CapsLock`;
 
+// 画面別ショートカット
+const g_shortcutObj = {
+    title: {
+        Enter: `btnStart`,
+    },
+    option: {
+        KeyB: `btnBack`,
+        KeyD: `lnkDifficultyR`,
+        ShiftLeft_ArrowRight: `lnkSpeedR`,
+        ArrowRight: `lnkSpeedRR`,
+        ShiftLeft_ArrowLeft: `lnkSpeedL`,
+        ArrowLeft: `lnkSpeedLL`,
+        ArrowUp: `lnkMotionR`,
+        ArrowDown: `lnkScrollR`,
+        KeyS: `lnkShuffleR`,
+        KeyA: `lnkAutoPlayR`,
+        KeyG: `lnkGaugeR`,
+
+        ShiftLeft_Semicolon: `lnkAdjustmentR`,
+        Semicolon: `lnkAdjustmentRR`,
+        ShiftLeft_Minus: `lnkAdjustmentL`,
+        Minus: `lnkAdjustmentLL`,
+        KeyV: `lnkVolumeR`,
+
+        KeyI: `btnGraph`,
+
+        KeyB: `btnBack`,
+        KeyK: `btnKeyConfig`,
+        Enter: `btnPlay`,
+    },
+    settingsDisplay: {
+        KeyA: `lnkAppearanceR`,
+        KeyO: `lnkOpacityR`,
+        KeyB: `btnBack`,
+        KeyK: `btnKeyConfig`,
+        Enter: `btnPlay`,
+    },
+    result: {
+        KeyB: `btnBack`,
+        KeyC: `btnCopy`,
+        KeyT: `btnTweet`,
+        KeyG: `btnGitter`,
+        KeyR: `btnRetry`,
+    },
+};
+
 // CSS名称
 const g_cssObj = {
     title_base: `title_base`,
