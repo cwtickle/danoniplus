@@ -2498,6 +2498,7 @@ function setWindowStyle(_lbl, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 	_lbl.style.color = _textColor;
 	_lbl.style.textAlign = _align;
 	_lbl.style.fontFamily = getBasicFont();
+	_lbl.style.pointerEvents = C_DIS_NONE;
 }
 
 /**
