@@ -726,33 +726,46 @@ const g_shortcutObj = {
         Enter: `btnStart`,
     },
     option: {
-        KeyB: `btnBack`,
+        ShiftLeft_KeyD: `lnkDifficultyL`,
         KeyD: `lnkDifficultyR`,
         ShiftLeft_ArrowRight: `lnkSpeedR`,
         ArrowRight: `lnkSpeedRR`,
         ShiftLeft_ArrowLeft: `lnkSpeedL`,
         ArrowLeft: `lnkSpeedLL`,
+
+        ShiftLeft_ArrowUp: `lnkMotionL`,
         ArrowUp: `lnkMotionR`,
+        ShiftLeft_ArrowDown: `lnkScrollL`,
         ArrowDown: `lnkScrollR`,
+        KeyR: `btnReverse`,
+
+        ShiftLeft_KeyS: `lnkShuffleL`,
         KeyS: `lnkShuffleR`,
+        ShiftLeft_KeyA: `lnkAutoPlayL`,
         KeyA: `lnkAutoPlayR`,
+        ShiftLeft_KeyG: `lnkGaugeL`,
         KeyG: `lnkGaugeR`,
 
         ShiftLeft_Semicolon: `lnkAdjustmentR`,
         Semicolon: `lnkAdjustmentRR`,
         ShiftLeft_Minus: `lnkAdjustmentL`,
         Minus: `lnkAdjustmentLL`,
+        ShiftLeft_KeyV: `lnkVolumeL`,
         KeyV: `lnkVolumeR`,
 
         KeyI: `btnGraph`,
+        KeyQ: `lnkScoreDetail`,
 
         KeyB: `btnBack`,
         KeyK: `btnKeyConfig`,
         Enter: `btnPlay`,
     },
     settingsDisplay: {
+        ShiftLeft_KeyA: `lnkAppearanceL`,
         KeyA: `lnkAppearanceR`,
+        ShiftLeft_KeyO: `lnkOpacityL`,
         KeyO: `lnkOpacityR`,
+
         KeyB: `btnBack`,
         KeyK: `btnKeyConfig`,
         Enter: `btnPlay`,

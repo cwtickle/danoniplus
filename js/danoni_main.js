@@ -279,8 +279,9 @@ const commonKeyDown = (_evt, _displayName) => {
 		const keyset = keys.split(`_`);
 		return (keyset.length > 1 ? g_inputKeyBuffer[keyset[0]] && g_inputKeyBuffer[keyset[1]] : g_inputKeyBuffer[keyset[0]]);
 	});
-	if (scLists.length > 0) {
-		document.getElementById(g_shortcutObj[_displayName][scLists[0]]).click();
+	const targetId = document.getElementById(g_shortcutObj[_displayName][scLists[0]]);
+	if (scLists.length > 0 && targetId !== null) {
+		targetId.click();
 	}
 	return blockCode(setCode);
 };
@@ -3839,6 +3840,8 @@ function createOptionWindow(_sprite) {
 			createScoreDetail(`Density`),
 			createScoreDetail(`ToolDif`, false),
 			makeSettingLblCssButton(`lnkScoreDetail`, `${g_stateObj.scoreDetail}`, 0, _ => {
+				g_stateObj.scoreDetailViewFlg = true;
+				scoreDetail.style.visibility = `visible`;
 				$id(`detail${g_stateObj.scoreDetail}`).visibility = `hidden`;
 				setSetting(1, `scoreDetail`);
 				$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
