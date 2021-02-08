@@ -2154,7 +2154,7 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
 	if (scKey.length > 0) {
 		multiAppend(_obj,
 			createDivCss2Label(`sc${_settingLabel}`, `[${setVal(g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])], dfLabel, C_TYP_STRING)}]`, {
-				x: x, y: 0, w: 40, siz: 10, fontWeight: `bold`, opacity: 0.75, pointerEvents: `none`,
+				x: x, y: 0, w: 40, siz: 10, fontWeight: `bold`, opacity: 0.75, pointerEvents: C_DIS_NONE,
 			})
 		);
 	}
@@ -3867,6 +3867,7 @@ function createOptionWindow(_sprite) {
 		const scoreDetail = createSprite(`optionsprite`, `scoreDetail`, 20, 90, 420, 230);
 		scoreDetail.classList.add(g_cssObj.settings_DifSelector);
 		scoreDetail.style.visibility = `hidden`;
+		const viewScText = _ => createScText(lnkScoreDetail, `ScoreDetail`, { targetLabel: `lnkScoreDetail`, x: -10 });
 		multiAppend(scoreDetail,
 			createScoreDetail(`Speed`),
 			createScoreDetail(`Density`),
@@ -3876,11 +3877,13 @@ function createOptionWindow(_sprite) {
 				scoreDetail.style.visibility = `visible`;
 				$id(`detail${g_stateObj.scoreDetail}`).visibility = `hidden`;
 				setSetting(1, `scoreDetail`);
+				viewScText();
 				$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
 			}, {
 				x: 10, w: 100, borderStyle: `solid`,
 			}, g_cssObj.button_RevON),
 		);
+		viewScText();
 	}
 
 	/**
