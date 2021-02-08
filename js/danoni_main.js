@@ -270,22 +270,28 @@ const blockCode = _setCode => C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_set
  * @param {string} _displayName 
  * @param {function} _func
  */
-const commonKeyDown = (_evt, _displayName, _func = _evt => { }) => {
+const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
 	const setCode = transCode(_evt.code);
 	if (_evt.repeat) {
 		return blockCode(setCode);
 	}
 	g_inputKeyBuffer[setCode] = true;
+
+	// 対象ボタンを検索
 	const scLists = Object.keys(g_shortcutObj[_displayName]).filter(keys => {
 		const keyset = keys.split(`_`);
 		return (keyset.length > 1 ? g_inputKeyBuffer[keyset[0]] && g_inputKeyBuffer[keyset[1]] : g_inputKeyBuffer[keyset[0]]);
 	});
-	const targetId = document.getElementById(g_shortcutObj[_displayName][scLists[0]]);
-	if (scLists.length > 0 && targetId !== null) {
-		targetId.click();
+	if (scLists.length > 0) {
+		// リンク先にジャンプする場合はonkeyUpイベントが動かないため、事前にキー状態をリセット
+		if (g_shortcutObj[_displayName][scLists[0]].reset) {
+			g_inputKeyBuffer[setCode] = false;
+		}
+		// 対象ボタン処理を実行
+		document.getElementById(g_shortcutObj[_displayName][scLists[0]].id).click();
 		return blockCode(setCode);
 	}
-	_func(_evt);
+	_func(setCode);
 	return blockCode(setCode);
 };
 
@@ -2137,12 +2143,31 @@ function drawTitleResultMotion(_spriteName) {
 }
 
 /**
+ * ショートカットキー表示
+ * @param {object} _obj
+ * @param {string} _settingLabel 
+ * @param {string} displayName 
+ * @param {string} dfLabel 
+ */
+const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = ``, targetLabel = `lnk${_settingLabel}R`, x = 100 } = {}) => {
+	const scKey = Object.keys(g_shortcutObj[displayName]).filter(key => g_shortcutObj[displayName][key].id === targetLabel);
+	if (scKey.length > 0) {
+		multiAppend(_obj,
+			createDivCss2Label(`sc${_settingLabel}`, `[${setVal(g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])], dfLabel, C_TYP_STRING)}]`, {
+				x: x, y: 0, w: 40, siz: 10, fontWeight: `bold`, opacity: 0.75, pointerEvents: `none`,
+			})
+		);
+	}
+}
+
+/**
  *  タイトル画面初期化
  */
 function titleInit() {
 
 	clearWindow();
 	drawDefaultBackImage(``);
+	g_inputKeyBuffer = {};
 
 	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
@@ -3577,6 +3602,7 @@ function optionInit() {
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Settings`;
+	g_inputKeyBuffer = {};
 
 	// タイトル文字描画
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, g_lblNameObj.settings, 0, 15, `settings_Title`));
@@ -3681,24 +3707,6 @@ function setSpriteList(_settingList) {
 			optionWidth + setting[3], C_LEN_SETLBL_HEIGHT + setting[4], { description: g_msgObj[setting[0]] });
 	});
 	return spriteList;
-}
-
-/**
- * ショートカットキー表示
- * @param {object} _obj
- * @param {string} _settingLabel 
- * @param {string} displayName 
- * @param {string} dfLabel 
- */
-const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = ``, targetLabel = `lnk${_settingLabel}R`, x = 100 } = {}) => {
-	const scKey = Object.keys(g_shortcutObj[displayName]).filter(key => g_shortcutObj[displayName][key] === targetLabel);
-	if (scKey.length > 0) {
-		multiAppend(_obj,
-			createDivCss2Label(`sc${_settingLabel}`, `[${setVal(g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])], dfLabel, C_TYP_STRING)}]`, {
-				x: x, y: 0, w: 40, siz: 10, fontWeight: `bold`, opacity: 0.75, pointerEvents: `none`,
-			})
-		);
-	}
 }
 
 /**
@@ -4825,6 +4833,7 @@ function settingsDisplayInit() {
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Display`;
+	g_inputKeyBuffer = {};
 
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = false;
@@ -5035,6 +5044,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_kcType = _kcType;
+	g_inputKeyBuffer = {};
 
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = false;
@@ -5337,8 +5347,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	createScText(btnBack, `Back`, { displayName: `keyConfig`, targetLabel: `btnBack`, x: -5 });
 
 	// キーボード押下時処理
-	document.onkeydown = evt => commonKeyDown(evt, `keyConfig`, evt => {
-		const setCode = transCode(evt.code);
+	document.onkeydown = evt => commonKeyDown(evt, `keyConfig`, setCode => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -7542,7 +7551,6 @@ function MainInit() {
 				clearTimeout(g_timeoutEvtId);
 				clearWindow();
 				musicAfterLoaded();
-				document.onkeyup = _ => { };
 			}
 
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
@@ -7555,7 +7563,6 @@ function MainInit() {
 			} else {
 				titleInit();
 			}
-			document.onkeyup = _ => { };
 
 		} else if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 			if (setCode === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
@@ -8892,6 +8899,7 @@ function resultInit() {
 	g_scoreObj.maskResultLoopCount = 0;
 
 	const divRoot = document.querySelector(`#divRoot`);
+	g_inputKeyBuffer = {};
 
 	// 曲時間制御変数
 	let thisTime;
