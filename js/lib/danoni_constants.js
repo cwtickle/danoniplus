@@ -756,9 +756,10 @@ const g_shortcutObj = {
         KeyI: `btnGraph`,
         KeyQ: `lnkScoreDetail`,
 
-        KeyB: `btnBack`,
-        KeyK: `btnKeyConfig`,
+        Escape: `btnBack`,
+        Space: `btnKeyConfig`,
         Enter: `btnPlay`,
+        Tab: `btnDisplay`,
     },
     settingsDisplay: {
         ShiftLeft_KeyA: `lnkAppearanceL`,
@@ -766,17 +767,30 @@ const g_shortcutObj = {
         ShiftLeft_KeyO: `lnkOpacityL`,
         KeyO: `lnkOpacityR`,
 
-        KeyB: `btnBack`,
-        KeyK: `btnKeyConfig`,
+        Escape: `btnBack`,
+        Space: `btnKeyConfig`,
         Enter: `btnPlay`,
+        Tab: `btnSettings`,
+    },
+    keyConfig: {
+        Escape: `btnBack`,
     },
     result: {
-        KeyB: `btnBack`,
+        Escape: `btnBack`,
         KeyC: `btnCopy`,
         KeyT: `btnTweet`,
         KeyG: `btnGitter`,
         KeyR: `btnRetry`,
     },
+};
+
+// 主要ボタンのリスト
+const g_btnPatterns = {
+    title: [`Start`],
+    option: [`Back`, `KeyConfig`, `Play`, `Display`],
+    settingsDisplay: [`Back`, `KeyConfig`, `Play`, `Settings`],
+    keyConfig: [`Back`],
+    result: [`Back`, `Copy`, `Tweet`, `Gitter`, `Retry`],
 };
 
 // CSS名称

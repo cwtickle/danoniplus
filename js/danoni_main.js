@@ -268,8 +268,9 @@ const blockCode = _setCode => C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_set
  * キーを押したときの動作（汎用）
  * @param {object} _evt 
  * @param {string} _displayName 
+ * @param {function} _func
  */
-const commonKeyDown = (_evt, _displayName) => {
+const commonKeyDown = (_evt, _displayName, _func = _evt => { }) => {
 	const setCode = transCode(_evt.code);
 	if (_evt.repeat) {
 		return blockCode(setCode);
@@ -282,7 +283,9 @@ const commonKeyDown = (_evt, _displayName) => {
 	const targetId = document.getElementById(g_shortcutObj[_displayName][scLists[0]]);
 	if (scLists.length > 0 && targetId !== null) {
 		targetId.click();
+		return blockCode(setCode);
 	}
+	_func(_evt);
 	return blockCode(setCode);
 };
 
@@ -291,9 +294,8 @@ const commonKeyDown = (_evt, _displayName) => {
  * @param {object} _evt 
  */
 const commonKeyUp = _evt => {
-	const setCode = transCode(_evt.code);
 	g_inputKeyBuffer[`MetaLeft`] = false;
-	g_inputKeyBuffer[setCode] = false;
+	g_inputKeyBuffer[transCode(_evt.code)] = false;
 };
 
 /**
@@ -2375,6 +2377,7 @@ function titleInit() {
 			title: g_msgObj.security,
 		}, g_cssObj.button_Tweet),
 	);
+	createScText(btnStart, `Start`, { displayName: `title`, targetLabel: `btnStart`, x: 0 });
 
 	// コメントエリア作成
 	if (g_headerObj.commentVal !== ``) {
@@ -3625,6 +3628,8 @@ function optionInit() {
 		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF)),
 
 	);
+	g_btnPatterns.option.forEach(target =>
+		createScText(document.getElementById(`btn${target}`), target, { targetLabel: `btn${target}`, x: 0 }));
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => commonKeyDown(evt, `option`);
@@ -3676,6 +3681,24 @@ function setSpriteList(_settingList) {
 			optionWidth + setting[3], C_LEN_SETLBL_HEIGHT + setting[4], { description: g_msgObj[setting[0]] });
 	});
 	return spriteList;
+}
+
+/**
+ * ショートカットキー表示
+ * @param {object} _obj
+ * @param {string} _settingLabel 
+ * @param {string} displayName 
+ * @param {string} dfLabel 
+ */
+const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = ``, targetLabel = `lnk${_settingLabel}R`, x = 100 } = {}) => {
+	const scKey = Object.keys(g_shortcutObj[displayName]).filter(key => g_shortcutObj[displayName][key] === targetLabel);
+	if (scKey.length > 0) {
+		multiAppend(_obj,
+			createDivCss2Label(`sc${_settingLabel}`, `[${setVal(g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])], dfLabel, C_TYP_STRING)}]`, {
+				x: x, y: 0, w: 40, siz: 10, fontWeight: `bold`, opacity: 0.75, pointerEvents: `none`,
+			})
+		);
+	}
 }
 
 /**
@@ -3810,6 +3833,7 @@ function createOptionWindow(_sprite) {
 		makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => nextDifficulty(1, true), { dy: -10, dh: 10 }),
 		makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => nextDifficulty(-1, true), { dy: -10, dh: 10 }),
 	)
+	createScText(spriteList.difficulty, `Difficulty`);
 
 	// ---------------------------------------------------
 	// ハイスコア機能実装時に使用予定のスペース
@@ -3818,7 +3842,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
-	createGeneralSetting(spriteList.speed, `speed`, { unitName: ` x`, skipTerm: 4 });
+	createGeneralSetting(spriteList.speed, `speed`, { unitName: ` x`, skipTerm: 4, scLabel: `← →` });
 
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
@@ -4224,6 +4248,7 @@ function createOptionWindow(_sprite) {
 			makeMiniCssButton(`lnkGauge`, `R`, 0, _ => setGauge(1)),
 			makeMiniCssButton(`lnkGauge`, `L`, 0, _ => setGauge(-1)),
 		);
+		createScText(spriteList.gauge, `Gauge`);
 	} else {
 		lblGauge.classList.add(g_cssObj.settings_Disabled);
 		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, g_stateObj.gauge));
@@ -4388,7 +4413,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
-	createGeneralSetting(spriteList.adjustment, `adjustment`, { skipTerm: 5 });
+	createGeneralSetting(spriteList.adjustment, `adjustment`, { skipTerm: 5, scLabel: `+ -` });
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
@@ -4618,36 +4643,38 @@ function createOptionWindow(_sprite) {
  * @param {string} _settingName 
  * @param {object} _options
  */
-function createGeneralSetting(_obj, _settingName, _options = {}) {
-	const _unitName = setVal(_options.unitName, ``, C_TYP_STRING);
-	const _skipTerm = setVal(_options.skipTerm, 0, C_TYP_NUMBER);
-	const settingUpper = toCapitalize(_settingName);
+function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
+	settingLabel = _settingName, displayName = `option`, scLabel = `` } = {}) {
 
-	_obj.appendChild(createLblSetting(settingUpper, 0,
-		toCapitalize(setVal(_options.settingLabel, _settingName, C_TYP_STRING))));
+	const settingUpper = toCapitalize(_settingName);
+	_obj.appendChild(createLblSetting(settingUpper, 0, toCapitalize(settingLabel)));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
 
 		multiAppend(_obj,
-			makeSettingLblCssButton(`lnk${settingUpper}`, `${g_stateObj[_settingName]}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
-				_ => setSetting(1, _settingName, _unitName),
-				{ cxtFunc: _ => setSetting(-1, _settingName, _unitName) }),
+			makeSettingLblCssButton(`lnk${settingUpper}`, `${g_stateObj[_settingName]}${unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
+				_ => setSetting(1, _settingName, unitName),
+				{ cxtFunc: _ => setSetting(-1, _settingName, unitName) }),
 
 			// 右回し・左回しボタン（外側）
-			makeMiniCssButton(`lnk${settingUpper}`, `R`, 0, _ => setSetting(_skipTerm > 0 ? _skipTerm : 1, _settingName, _unitName)),
-			makeMiniCssButton(`lnk${settingUpper}`, `L`, 0, _ => setSetting(_skipTerm > 0 ? _skipTerm * (-1) : -1, _settingName, _unitName)),
+			makeMiniCssButton(`lnk${settingUpper}`, `R`, 0, _ => setSetting(skipTerm > 0 ? skipTerm : 1, _settingName, unitName)),
+			makeMiniCssButton(`lnk${settingUpper}`, `L`, 0, _ => setSetting(skipTerm > 0 ? skipTerm * (-1) : -1, _settingName, unitName)),
 		)
 
 		// 右回し・左回しボタン（内側）
-		if (_skipTerm > 0) {
+		if (skipTerm > 0) {
 			multiAppend(_obj,
-				makeMiniCssButton(`lnk${settingUpper}`, `RR`, 0, _ => setSetting(1, _settingName, _unitName)),
-				makeMiniCssButton(`lnk${settingUpper}`, `LL`, 0, _ => setSetting(-1, _settingName, _unitName)),
+				makeMiniCssButton(`lnk${settingUpper}`, `RR`, 0, _ => setSetting(1, _settingName, unitName)),
+				makeMiniCssButton(`lnk${settingUpper}`, `LL`, 0, _ => setSetting(-1, _settingName, unitName)),
 			);
 		}
+
+		// ショートカットキー表示
+		createScText(_obj, settingUpper, { displayName: displayName, dfLabel: scLabel });
+
 	} else {
 		document.querySelector(`#lbl${settingUpper}`).classList.add(g_cssObj.settings_Disabled);
-		_obj.appendChild(makeDisabledLabel(`lnk${settingUpper}`, 0, `${g_stateObj[_settingName]}${_unitName}`));
+		_obj.appendChild(makeDisabledLabel(`lnk${settingUpper}`, 0, `${g_stateObj[_settingName]}${unitName}`));
 	}
 }
 
@@ -4844,6 +4871,8 @@ function settingsDisplayInit() {
 		}, g_cssObj.button_Mini)
 
 	);
+	g_btnPatterns.settingsDisplay.forEach(target =>
+		createScText(document.getElementById(`btn${target}`), target, { displayName: `settingsDisplay`, targetLabel: `btn${target}`, x: 0 }));
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => commonKeyDown(evt, `settingsDisplay`);
@@ -4894,12 +4923,12 @@ function createSettingsDisplayWindow(_sprite) {
 	// ---------------------------------------------------
 	// 矢印の見え方 (Appearance)
 	// 縦位置: 8
-	createGeneralSetting(spriteList.appearance, `appearance`);
+	createGeneralSetting(spriteList.appearance, `appearance`, { displayName: `settingsDisplay` });
 
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: `%` });
+	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: `%`, displayName: `settingsDisplay` });
 
 	/**
 	 * Display表示/非表示ボタン
@@ -5305,20 +5334,15 @@ function keyConfigInit(_kcType = g_kcType) {
 		}, g_cssObj.button_Reset)
 
 	);
+	createScText(btnBack, `Back`, { displayName: `keyConfig`, targetLabel: `btnBack`, x: -5 });
 
 	// キーボード押下時処理
-	document.onkeydown = evt => {
+	document.onkeydown = evt => commonKeyDown(evt, `keyConfig`, evt => {
 		const setCode = transCode(evt.code);
-
-		if (evt.repeat) {
-			return blockCode(setCode);
-		}
-
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 		let setKey = g_kCdN.findIndex(kCd => kCd === setCode);
-		g_inputKeyBuffer[setCode] = true;
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -5371,8 +5395,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
 			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 		}
-		return blockCode(setCode);
-	}
+	});
 
 	if (typeof skinKeyConfigInit === C_TYP_FUNCTION) {
 		skinKeyConfigInit();
@@ -9278,7 +9301,9 @@ function resultInit() {
 			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 4,
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Reset),
-	)
+	);
+	g_btnPatterns.result.forEach(target =>
+		createScText(document.getElementById(`btn${target}`), target, { displayName: `result`, targetLabel: `btn${target}`, x: -5 }));
 
 	// マスクスプライトを作成
 	const maskResultSprite = createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);
