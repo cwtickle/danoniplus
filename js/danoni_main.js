@@ -7514,9 +7514,9 @@ function MainInit() {
 
 		divRoot.appendChild(
 			createDivCss2Label(`lblReady`, readyHtml, {
-				x: g_headerObj.playingX + g_headerObj.playingWidth / 2 - 100,
+				x: g_headerObj.playingX + (g_headerObj.playingWidth - g_sWidth) / 2,
 				y: (g_sHeight + g_posObj.stepYR) / 2 - 75,
-				w: 200, h: 50, siz: 40,
+				w: g_sWidth, h: 50, siz: 40,
 				animationDuration: `${g_headerObj.readyAnimationFrame / g_fps}s`,
 				animationName: g_headerObj.readyAnimationName,
 				animationDelay: `${readyDelayFrame / g_fps}s`, opacity: 0,
