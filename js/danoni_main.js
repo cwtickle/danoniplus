@@ -92,6 +92,8 @@ const C_DIS_INHERIT = `inherit`;
 // 初期化フラグ（ボタンアニメーション制御）
 let g_initialFlg = false;
 
+let g_currentPage = ``;
+
 // キーコンフィグ初期設定
 let g_kcType = `Main`;
 let g_colorType = `Default`;
@@ -1757,6 +1759,7 @@ function loadSettingJs() {
 function loadMusic() {
 
 	clearWindow();
+	g_currentPage = `loading`;
 	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
@@ -2179,6 +2182,7 @@ function titleInit() {
 	clearWindow();
 	drawDefaultBackImage(``);
 	g_inputKeyBuffer = {};
+	g_currentPage = `title`;
 
 	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
@@ -3614,6 +3618,7 @@ function optionInit() {
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Settings`;
 	g_inputKeyBuffer = {};
+	g_currentPage = `option`;
 
 	// タイトル文字描画
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, g_lblNameObj.settings, 0, 15, `settings_Title`));
@@ -4847,6 +4852,7 @@ function settingsDisplayInit() {
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Display`;
 	g_inputKeyBuffer = {};
+	g_currentPage = `settingsDisplay`;
 
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = false;
@@ -5059,6 +5065,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	const divRoot = document.querySelector(`#divRoot`);
 	g_kcType = _kcType;
 	g_inputKeyBuffer = {};
+	g_currentPage = `keyConfig`;
 
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = false;
@@ -7099,6 +7106,7 @@ function MainInit() {
 	drawDefaultBackImage(`Main`);
 	const divRoot = document.querySelector(`#divRoot`);
 	document.oncontextmenu = _ => false;
+	g_currentPage = `main`;
 
 	g_currentArrows = 0;
 	g_workObj.fadeInNo = [];
@@ -8902,6 +8910,7 @@ function resultInit() {
 
 	clearWindow();
 	drawDefaultBackImage(``);
+	g_currentPage = `result`;
 
 	// 結果画面用フレーム初期化
 	g_scoreObj.resultFrameNum = 0;
@@ -9386,8 +9395,13 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, `result`);
-	document.onkeyup = evt => commonKeyUp(evt);
+	setTimeout(_ => {
+		if (g_currentPage === `result`) {
+			document.onkeydown = evt => commonKeyDown(evt, `result`);
+			document.onkeyup = evt => commonKeyUp(evt);
+		}
+	}, g_shortcutWaitTime.result);
+
 	document.oncontextmenu = _ => true;
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {

@@ -811,8 +811,13 @@ const g_shortcutObj = {
         KeyC: { id: `btnCopy` },
         KeyT: { id: `btnTweet`, reset: true },
         KeyG: { id: `btnGitter`, reset: true },
-        KeyR: { id: `btnRetry` },
+        Backspace: { id: `btnRetry` },
     },
+};
+
+// ショートカットキーの有効化時間（ミリ秒）※結果画面のみ利用
+const g_shortcutWaitTime = {
+    result: 2000,
 };
 
 // 主要ボタンのリスト
@@ -821,7 +826,7 @@ const g_btnPatterns = {
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Settings: -5 },
     keyConfig: { Back: -3 },
-    result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: -5 },
+    result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0 },
 };
 
 // CSS名称
