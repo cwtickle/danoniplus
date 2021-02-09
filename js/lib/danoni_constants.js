@@ -735,9 +735,9 @@ const g_shortcutObj = {
 
         ShiftLeft_KeyM: { id: `lnkMotionL` },
         KeyM: { id: `lnkMotionR` },
-        ArrowUp: { id: `lnkScrollL` },
+        ArrowUp: { id: `btnReverse` },
+        ShiftLeft_ArrowDown: { id: `lnkScrollL` },
         ArrowDown: { id: `lnkScrollR` },
-        ShiftLeft_KeyR: { id: `btnReverse` },
         KeyR: { id: `lnkReverseR` },
 
         ShiftLeft_KeyS: { id: `lnkShuffleL` },
@@ -818,7 +818,7 @@ const g_shortcutObj = {
 // 主要ボタンのリスト
 const g_btnPatterns = {
     title: { Start: 0 },
-    option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -12, Graph: -25 },
+    option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Settings: -5 },
     keyConfig: { Back: -3 },
     result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: -5 },

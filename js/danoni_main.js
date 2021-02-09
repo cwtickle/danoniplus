@@ -2149,13 +2149,13 @@ function drawTitleResultMotion(_spriteName) {
  * @param {string} displayName 
  * @param {string} dfLabel 
  */
-const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = ``, targetLabel = `lnk${_settingLabel}R`, x = 100 } = {}) => {
+const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = ``, targetLabel = `lnk${_settingLabel}R`, x = 95 } = {}) => {
 	const scKey = Object.keys(g_shortcutObj[displayName]).filter(key => g_shortcutObj[displayName][key].id === targetLabel);
 	if (scKey.length > 0) {
 		multiAppend(_obj,
 			createDivCss2Label(`sc${_settingLabel}`,
-				dfLabel !== `` ? `[${dfLabel}]` : `[${setVal(g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])], ``, C_TYP_STRING)}]`, {
-				x: x, y: 0, w: 40, siz: 10, fontWeight: `bold`, opacity: 0.75, pointerEvents: C_DIS_NONE,
+				dfLabel !== `` ? `${dfLabel})` : `${setVal(g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])], ``, C_TYP_STRING)})`, {
+				x: x, y: 0, w: 40, siz: 12, fontWeight: `bold`, opacity: 0.75, pointerEvents: C_DIS_NONE,
 			})
 		);
 	}
@@ -3859,7 +3859,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
-	createGeneralSetting(spriteList.speed, `speed`, { unitName: ` x`, skipTerm: 4, scLabel: `← →` });
+	createGeneralSetting(spriteList.speed, `speed`, { unitName: ` x`, skipTerm: 4, scLabel: `←→` });
 
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
@@ -4212,7 +4212,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 4
 	createGeneralSetting(spriteList.reverse, `reverse`);
 	if (g_headerObj.scrollUse) {
-		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: `↓ ↑` });
+		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: `↑/↓` });
 		[$id(`lnkScroll`).left, $id(`lnkScroll`).width] = [
 			`${parseFloat($id(`lnkScroll`).left) + 90}px`, `${parseFloat($id(`lnkScroll`).width) - 90}px`
 		];
@@ -4434,7 +4434,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
-	createGeneralSetting(spriteList.adjustment, `adjustment`, { skipTerm: 5, scLabel: `+ -` });
+	createGeneralSetting(spriteList.adjustment, `adjustment`, { skipTerm: 5, scLabel: `- +` });
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
@@ -4980,7 +4980,7 @@ function createSettingsDisplayWindow(_sprite) {
 				}, `button_${flg}`)
 			);
 			createScText(document.getElementById(`lnk${_name}`), `${toCapitalize(_name)}`,
-				{ displayName: `settingsDisplay`, targetLabel: `lnk${_name}`, x: -7 });
+				{ displayName: `settingsDisplay`, targetLabel: `lnk${_name}`, x: -5 });
 		} else {
 			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos,
 				g_lblNameObj[`d_${toCapitalize(_name)}`] + `:${g_headerObj[`${_name}Set`]}`, g_headerObj[`${_name}Set`]));
