@@ -2153,7 +2153,8 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
 	const scKey = Object.keys(g_shortcutObj[displayName]).filter(key => g_shortcutObj[displayName][key].id === targetLabel);
 	if (scKey.length > 0) {
 		multiAppend(_obj,
-			createDivCss2Label(`sc${_settingLabel}`, `[${setVal(g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])], dfLabel, C_TYP_STRING)}]`, {
+			createDivCss2Label(`sc${_settingLabel}`,
+				dfLabel !== `` ? `[${dfLabel}]` : `[${setVal(g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])], ``, C_TYP_STRING)}]`, {
 				x: x, y: 0, w: 40, siz: 10, fontWeight: `bold`, opacity: 0.75, pointerEvents: C_DIS_NONE,
 			})
 		);
@@ -4211,7 +4212,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 4
 	createGeneralSetting(spriteList.reverse, `reverse`);
 	if (g_headerObj.scrollUse) {
-		createGeneralSetting(spriteList.scroll, `scroll`);
+		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: `↓ ↑` });
 		[$id(`lnkScroll`).left, $id(`lnkScroll`).width] = [
 			`${parseFloat($id(`lnkScroll`).left) + 90}px`, `${parseFloat($id(`lnkScroll`).width) - 90}px`
 		];
