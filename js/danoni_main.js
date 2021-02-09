@@ -2161,6 +2161,16 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
 }
 
 /**
+ * 各画面の汎用ショートカットキー表示
+ * @param {string} _displayName 
+ */
+const createScTextCommon = _displayName => {
+	Object.keys(g_btnPatterns[_displayName]).forEach(target =>
+		createScText(document.getElementById(`btn${target}`), target,
+			{ displayName: _displayName, targetLabel: `btn${target}`, x: g_btnPatterns[_displayName][target] }));
+}
+
+/**
  *  タイトル画面初期化
  */
 function titleInit() {
@@ -2402,8 +2412,7 @@ function titleInit() {
 			title: g_msgObj.security,
 		}, g_cssObj.button_Tweet),
 	);
-	Object.keys(g_btnPatterns.title).forEach(target =>
-		createScText(document.getElementById(`btn${target}`), target, { displayName: `title`, targetLabel: `btn${target}`, x: g_btnPatterns.title[target] }));
+	createScTextCommon(`title`);
 
 	// コメントエリア作成
 	if (g_headerObj.commentVal !== ``) {
@@ -3654,8 +3663,7 @@ function optionInit() {
 			borderStyle: `solid`,
 		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF))
 	);
-	Object.keys(g_btnPatterns.option).forEach(target =>
-		createScText(document.getElementById(`btn${target}`), target, { targetLabel: `btn${target}`, x: g_btnPatterns.option[target] }));
+	createScTextCommon(`option`);
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => commonKeyDown(evt, `option`);
@@ -4884,8 +4892,7 @@ function settingsDisplayInit() {
 		}, g_cssObj.button_Mini)
 
 	);
-	Object.keys(g_btnPatterns.settingsDisplay).forEach(target =>
-		createScText(document.getElementById(`btn${target}`), target, { displayName: `settingsDisplay`, targetLabel: `btn${target}`, x: g_btnPatterns.settingsDisplay[target] }));
+	createScTextCommon(`settingsDisplay`);
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => commonKeyDown(evt, `settingsDisplay`);
@@ -5350,8 +5357,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		}, g_cssObj.button_Reset)
 
 	);
-	Object.keys(g_btnPatterns.keyConfig).forEach(target =>
-		createScText(document.getElementById(`btn${target}`), target, { displayName: `keyConfig`, targetLabel: `btn${target}`, x: g_btnPatterns.keyConfig[target] }));
+	createScTextCommon(`keyConfig`);
 
 	// キーボード押下時処理
 	document.onkeydown = evt => commonKeyDown(evt, `keyConfig`, setCode => {
@@ -9317,8 +9323,7 @@ function resultInit() {
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Reset),
 	);
-	Object.keys(g_btnPatterns.result).forEach(target =>
-		createScText(document.getElementById(`btn${target}`), target, { displayName: `keyconfig`, targetLabel: `btn${target}`, x: g_btnPatterns.result[target] }));
+	createScTextCommon(`result`);
 
 	// マスクスプライトを作成
 	const maskResultSprite = createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);
