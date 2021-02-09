@@ -720,6 +720,115 @@ g_kCdN[226] = `IntlRo`;
 g_kCdN[229] = `Backquote`;
 g_kCdN[240] = `CapsLock`;
 
+// 画面別ショートカット
+const g_shortcutObj = {
+    title: {
+        Enter: { id: `btnStart` },
+    },
+    option: {
+        ShiftLeft_KeyD: { id: `lnkDifficultyL` },
+        KeyD: { id: `lnkDifficultyR` },
+        ShiftLeft_ArrowRight: { id: `lnkSpeedR` },
+        ArrowRight: { id: `lnkSpeedRR` },
+        ShiftLeft_ArrowLeft: { id: `lnkSpeedL` },
+        ArrowLeft: { id: `lnkSpeedLL` },
+
+        ShiftLeft_KeyM: { id: `lnkMotionL` },
+        KeyM: { id: `lnkMotionR` },
+        ArrowUp: { id: `btnReverse` },
+        ShiftLeft_ArrowDown: { id: `lnkScrollL` },
+        ArrowDown: { id: `lnkScrollR` },
+        KeyR: { id: `lnkReverseR` },
+
+        ShiftLeft_KeyS: { id: `lnkShuffleL` },
+        KeyS: { id: `lnkShuffleR` },
+        ShiftLeft_KeyA: { id: `lnkAutoPlayL` },
+        KeyA: { id: `lnkAutoPlayR` },
+        ShiftLeft_KeyG: { id: `lnkGaugeL` },
+        KeyG: { id: `lnkGaugeR` },
+
+        ShiftLeft_Semicolon: { id: `lnkAdjustmentR` },
+        Semicolon: { id: `lnkAdjustmentRR` },
+        ShiftLeft_Minus: { id: `lnkAdjustmentL` },
+        Minus: { id: `lnkAdjustmentLL` },
+        ShiftLeft_KeyV: { id: `lnkVolumeL` },
+        KeyV: { id: `lnkVolumeR` },
+
+        KeyI: { id: `btnGraph` },
+        KeyQ: { id: `lnkScoreDetail` },
+        KeyP: { id: `lnkDifInfo` },
+        KeyZ: { id: `btnSave` },
+
+        Escape: { id: `btnBack` },
+        Space: { id: `btnKeyConfig` },
+        Enter: { id: `btnPlay` },
+        Tab: { id: `btnDisplay` },
+    },
+    settingsDisplay: {
+        ShiftLeft_KeyA: { id: `lnkAppearanceL` },
+        KeyA: { id: `lnkAppearanceR` },
+        ShiftLeft_KeyO: { id: `lnkOpacityL` },
+        KeyO: { id: `lnkOpacityR` },
+
+        Digit1: { id: `lnkstepZone` },
+        Digit2: { id: `lnkjudgment` },
+        Digit3: { id: `lnkfastSlow` },
+        Digit4: { id: `lnklifeGauge` },
+        Digit5: { id: `lnkscore` },
+        Digit6: { id: `lnkmusicInfo` },
+        Digit7: { id: `lnkfilterLine` },
+        Digit8: { id: `lnkspeed` },
+        Digit9: { id: `lnkcolor` },
+        Digit0: { id: `lnklyrics` },
+        Semicolon: { id: `lnkbackground` },
+        Minus: { id: `lnkarrowEffect` },
+        Slash: { id: `lnkspecial` },
+
+        Numpad1: { id: `lnkstepZone` },
+        Numpad2: { id: `lnkjudgment` },
+        Numpad3: { id: `lnkfastSlow` },
+        Numpad4: { id: `lnklifeGauge` },
+        Numpad5: { id: `lnkscore` },
+        Numpad6: { id: `lnkmusicInfo` },
+        Numpad7: { id: `lnkfilterLine` },
+        Numpad8: { id: `lnkspeed` },
+        Numpad9: { id: `lnkcolor` },
+        Numpad0: { id: `lnklyrics` },
+        NumpadAdd: { id: `lnkbackground` },
+        NumpadSubtract: { id: `lnkarrowEffect` },
+        NumpadDivide: { id: `lnkspecial` },
+
+        Escape: { id: `btnBack` },
+        Space: { id: `btnKeyConfig` },
+        Enter: { id: `btnPlay` },
+        Tab: { id: `btnSettings` },
+    },
+    keyConfig: {
+        Escape: { id: `btnBack` },
+    },
+    result: {
+        Escape: { id: `btnBack` },
+        KeyC: { id: `btnCopy` },
+        KeyT: { id: `btnTweet`, reset: true },
+        KeyG: { id: `btnGitter`, reset: true },
+        Backspace: { id: `btnRetry` },
+    },
+};
+
+// ショートカットキーの有効化時間（ミリ秒）※結果画面のみ利用
+const g_shortcutWaitTime = {
+    result: 2000,
+};
+
+// 主要ボタンのリスト
+const g_btnPatterns = {
+    title: { Start: 0 },
+    option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
+    settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Settings: -5 },
+    keyConfig: { Back: -3 },
+    result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0 },
+};
+
 // CSS名称
 const g_cssObj = {
     title_base: `title_base`,
