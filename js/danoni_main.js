@@ -2402,7 +2402,8 @@ function titleInit() {
 			title: g_msgObj.security,
 		}, g_cssObj.button_Tweet),
 	);
-	createScText(btnStart, `Start`, { displayName: `title`, targetLabel: `btnStart`, x: 0 });
+	Object.keys(g_btnPatterns.title).forEach(target =>
+		createScText(document.getElementById(`btn${target}`), target, { displayName: `title`, targetLabel: `btn${target}`, x: g_btnPatterns.title[target] }));
 
 	// コメントエリア作成
 	if (g_headerObj.commentVal !== ``) {
@@ -3651,11 +3652,10 @@ function optionInit() {
 			w: g_sWidth / 5, h: 16, siz: 12,
 			title: g_msgObj.dataSave,
 			borderStyle: `solid`,
-		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF)),
-
+		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF))
 	);
-	g_btnPatterns.option.forEach(target =>
-		createScText(document.getElementById(`btn${target}`), target, { targetLabel: `btn${target}`, x: 0 }));
+	Object.keys(g_btnPatterns.option).forEach(target =>
+		createScText(document.getElementById(`btn${target}`), target, { targetLabel: `btn${target}`, x: g_btnPatterns.option[target] }));
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => commonKeyDown(evt, `option`);
@@ -4189,6 +4189,7 @@ function createOptionWindow(_sprite) {
 					x: 10, y: 30, w: 100, borderStyle: `solid`
 				}, g_cssObj.button_RevON)
 			);
+			createScText(lnkDifInfo, `DifInfo`, { targetLabel: `lnkDifInfo`, x: -10 });
 		}
 	}
 
@@ -4883,8 +4884,8 @@ function settingsDisplayInit() {
 		}, g_cssObj.button_Mini)
 
 	);
-	g_btnPatterns.settingsDisplay.forEach(target =>
-		createScText(document.getElementById(`btn${target}`), target, { displayName: `settingsDisplay`, targetLabel: `btn${target}`, x: 0 }));
+	Object.keys(g_btnPatterns.settingsDisplay).forEach(target =>
+		createScText(document.getElementById(`btn${target}`), target, { displayName: `settingsDisplay`, targetLabel: `btn${target}`, x: g_btnPatterns.settingsDisplay[target] }));
 
 	// キー操作イベント（デフォルト）
 	document.onkeydown = evt => commonKeyDown(evt, `settingsDisplay`);
@@ -4970,6 +4971,8 @@ function createSettingsDisplayWindow(_sprite) {
 					borderStyle: `solid`,
 				}, `button_${flg}`)
 			);
+			createScText(document.getElementById(`lnk${_name}`), `${toCapitalize(_name)}`,
+				{ displayName: `settingsDisplay`, targetLabel: `lnk${_name}`, x: -7 });
 		} else {
 			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos,
 				g_lblNameObj[`d_${toCapitalize(_name)}`] + `:${g_headerObj[`${_name}Set`]}`, g_headerObj[`${_name}Set`]));
@@ -5347,7 +5350,8 @@ function keyConfigInit(_kcType = g_kcType) {
 		}, g_cssObj.button_Reset)
 
 	);
-	createScText(btnBack, `Back`, { displayName: `keyConfig`, targetLabel: `btnBack`, x: -5 });
+	Object.keys(g_btnPatterns.keyConfig).forEach(target =>
+		createScText(document.getElementById(`btn${target}`), target, { displayName: `keyConfig`, targetLabel: `btn${target}`, x: g_btnPatterns.keyConfig[target] }));
 
 	// キーボード押下時処理
 	document.onkeydown = evt => commonKeyDown(evt, `keyConfig`, setCode => {
@@ -9313,8 +9317,8 @@ function resultInit() {
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Reset),
 	);
-	g_btnPatterns.result.forEach(target =>
-		createScText(document.getElementById(`btn${target}`), target, { displayName: `result`, targetLabel: `btn${target}`, x: -5 }));
+	Object.keys(g_btnPatterns.result).forEach(target =>
+		createScText(document.getElementById(`btn${target}`), target, { displayName: `keyconfig`, targetLabel: `btn${target}`, x: g_btnPatterns.result[target] }));
 
 	// マスクスプライトを作成
 	const maskResultSprite = createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);

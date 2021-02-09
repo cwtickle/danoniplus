@@ -755,6 +755,8 @@ const g_shortcutObj = {
 
         KeyI: { id: `btnGraph` },
         KeyQ: { id: `lnkScoreDetail` },
+        KeyP: { id: `lnkDifInfo` },
+        KeyZ: { id: `btnSave` },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
@@ -766,6 +768,34 @@ const g_shortcutObj = {
         KeyA: { id: `lnkAppearanceR` },
         ShiftLeft_KeyO: { id: `lnkOpacityL` },
         KeyO: { id: `lnkOpacityR` },
+
+        Digit1: { id: `lnkstepZone` },
+        Digit2: { id: `lnkjudgment` },
+        Digit3: { id: `lnkfastSlow` },
+        Digit4: { id: `lnklifeGauge` },
+        Digit5: { id: `lnkscore` },
+        Digit6: { id: `lnkmusicInfo` },
+        Digit7: { id: `lnkfilterLine` },
+        Digit8: { id: `lnkspeed` },
+        Digit9: { id: `lnkcolor` },
+        Digit0: { id: `lnklyrics` },
+        Semicolon: { id: `lnkbackground` },
+        Minus: { id: `lnkarrowEffect` },
+        Slash: { id: `lnkspecial` },
+
+        Numpad1: { id: `lnkstepZone` },
+        Numpad2: { id: `lnkjudgment` },
+        Numpad3: { id: `lnkfastSlow` },
+        Numpad4: { id: `lnklifeGauge` },
+        Numpad5: { id: `lnkscore` },
+        Numpad6: { id: `lnkmusicInfo` },
+        Numpad7: { id: `lnkfilterLine` },
+        Numpad8: { id: `lnkspeed` },
+        Numpad9: { id: `lnkcolor` },
+        Numpad0: { id: `lnklyrics` },
+        NumpadAdd: { id: `lnkbackground` },
+        NumpadSubtract: { id: `lnkarrowEffect` },
+        NumpadDivide: { id: `lnkspecial` },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
@@ -786,11 +816,11 @@ const g_shortcutObj = {
 
 // 主要ボタンのリスト
 const g_btnPatterns = {
-    title: [`Start`],
-    option: [`Back`, `KeyConfig`, `Play`, `Display`],
-    settingsDisplay: [`Back`, `KeyConfig`, `Play`, `Settings`],
-    keyConfig: [`Back`],
-    result: [`Back`, `Copy`, `Tweet`, `Gitter`, `Retry`],
+    title: { Start: 0 },
+    option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -12 },
+    settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Settings: -5 },
+    keyConfig: { Back: -3 },
+    result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: -5 },
 };
 
 // CSS名称
