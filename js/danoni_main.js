@@ -769,7 +769,7 @@ function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g
 			_func(evt);
 		}
 		if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
-			g_btnAddFunc[_id](evt);
+			g_btnAddFunc[_id](evt, _func(evt));
 		}
 	});
 
@@ -780,7 +780,7 @@ function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g
 				cxtFunc(evt);
 			}
 			if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
-				g_cxtAddFunc[_id](evt);
+				g_cxtAddFunc[_id](evt, _func(evt));
 			}
 			return false;
 		}
