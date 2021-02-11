@@ -8573,7 +8573,7 @@ function judgeArrow(_j) {
 	const frzName = `frz${_j}_${fcurrentNo}`;
 	const existJudgFrz = document.getElementById(frzName) !== null;
 
-	function judgeTargetArrow(_difFrame) {
+	const judgeTargetArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
 		if (_difCnt <= g_judgObj.arrowJ[C_JDG_UWAN]) {
 			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
@@ -8592,9 +8592,9 @@ function judgeArrow(_j) {
 			return true;
 		}
 		return false;
-	}
+	};
 
-	function judgeTargetFrzArrow(_difFrame) {
+	const judgeTargetFrzArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
 		if (_difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
 			if (g_headerObj.frzStartjdgUse &&
@@ -8610,13 +8610,15 @@ function judgeArrow(_j) {
 		return false;
 	}
 
+	let judgeFlg = false;
 	const difFrame = (existJudgArrow ? g_attrObj[arrowName].cnt : Infinity);
 	const frzDifFrame = (existJudgFrz ? g_attrObj[frzName].cnt : Infinity);
 	if (difFrame < frzDifFrame) {
-		judgeTargetArrow(difFrame);
+		judgeFlg = judgeTargetArrow(difFrame);
 	} else if (difFrame > frzDifFrame) {
-		judgeTargetFrzArrow(frzDifFrame);
-	} else {
+		judgeFlg = judgeTargetFrzArrow(frzDifFrame);
+	}
+	if (!judgeFlg) {
 		$id(`stepDiv${_j}`).display = C_DIS_INHERIT;
 	}
 }
