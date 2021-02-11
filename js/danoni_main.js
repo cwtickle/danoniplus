@@ -8877,6 +8877,10 @@ function judgeIknai(difFrame) {
 	}
 }
 
+// クリア表示
+const resultViewText = _state => _state === `` ? `` :
+	`<span class="result_${toCapitalize(_state)}">${g_lblNameObj[_state]}</span>`;
+
 /**
  * フルコンボ・パーフェクト演出の作成
  * @param {string} _text 
@@ -8898,7 +8902,7 @@ function finishViewing() {
 			g_resultObj.spState = `fullCombo`;
 		}
 		if (g_headerObj.finishView !== C_DIS_NONE && [`allPerfect`, `perfect`, `fullCombo`].includes(g_resultObj.spState)) {
-			makeFinishView(g_resultMsgObj[g_resultObj.spState]);
+			makeFinishView(resultViewText(g_resultObj.spState));
 		}
 	}
 }
@@ -9119,12 +9123,12 @@ function resultInit() {
 	// Cleared & Failed表示
 	const lblResultPre = createDivCss2Label(
 		`lblResultPre`,
-		(!g_gameOverFlg ? g_resultMsgObj.cleared : g_resultMsgObj.failed),
+		resultViewText(g_gameOverFlg ? `failed` : `cleared`),
 		{
 			x: g_sWidth / 2 - 150, y: g_sHeight / 2 - 160,
 			w: 200, h: 50, siz: 60,
-			opacity: 0, animationDuration: (!g_gameOverFlg ? `2.5s` : `3s`),
-			animationName: (!g_gameOverFlg ? `leftToRightFade` : `upToDownFade`)
+			opacity: 0, animationDuration: (g_gameOverFlg ? `3s` : `2.5s`),
+			animationName: (g_gameOverFlg ? `upToDownFade` : `leftToRightFade`)
 		}, g_cssObj.result_Cleared, g_cssObj.result_Window
 	);
 	divRoot.appendChild(lblResultPre);
@@ -9132,8 +9136,8 @@ function resultInit() {
 	divRoot.appendChild(
 		createDivCss2Label(
 			`lblResultPre2`,
-			(!g_gameOverFlg ?
-				(playingArrows === g_fullArrows ? g_resultMsgObj[g_resultObj.spState] : ``) : g_resultMsgObj.failed),
+			resultViewText(g_gameOverFlg ? `failed` :
+				(playingArrows === g_fullArrows ? g_resultObj.spState : ``)),
 			{
 				x: g_sWidth / 2 + 50, y: 40,
 				w: 200, h: 30, siz: 20,
