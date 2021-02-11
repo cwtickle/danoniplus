@@ -4675,25 +4675,26 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 	settingLabel = _settingName, displayName = `option`, scLabel = `` } = {}) {
 
 	const settingUpper = toCapitalize(_settingName);
+	const linkId = `lnk${settingUpper}`;
 	_obj.appendChild(createLblSetting(settingUpper, 0, toCapitalize(settingLabel)));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
 
 		multiAppend(_obj,
-			makeSettingLblCssButton(`lnk${settingUpper}`, `${g_stateObj[_settingName]}${unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
+			makeSettingLblCssButton(linkId, `${g_stateObj[_settingName]}${unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
 				_ => setSetting(1, _settingName, unitName),
 				{ cxtFunc: _ => setSetting(-1, _settingName, unitName) }),
 
 			// 右回し・左回しボタン（外側）
-			makeMiniCssButton(`lnk${settingUpper}`, `R`, 0, _ => setSetting(skipTerm > 0 ? skipTerm : 1, _settingName, unitName)),
-			makeMiniCssButton(`lnk${settingUpper}`, `L`, 0, _ => setSetting(skipTerm > 0 ? skipTerm * (-1) : -1, _settingName, unitName)),
+			makeMiniCssButton(linkId, `R`, 0, _ => setSetting(skipTerm > 0 ? skipTerm : 1, _settingName, unitName)),
+			makeMiniCssButton(linkId, `L`, 0, _ => setSetting(skipTerm > 0 ? skipTerm * (-1) : -1, _settingName, unitName)),
 		)
 
 		// 右回し・左回しボタン（内側）
 		if (skipTerm > 0) {
 			multiAppend(_obj,
-				makeMiniCssButton(`lnk${settingUpper}`, `RR`, 0, _ => setSetting(1, _settingName, unitName)),
-				makeMiniCssButton(`lnk${settingUpper}`, `LL`, 0, _ => setSetting(-1, _settingName, unitName)),
+				makeMiniCssButton(linkId, `RR`, 0, _ => setSetting(1, _settingName, unitName)),
+				makeMiniCssButton(linkId, `LL`, 0, _ => setSetting(-1, _settingName, unitName)),
 			);
 		}
 
@@ -4702,7 +4703,7 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 
 	} else {
 		document.querySelector(`#lbl${settingUpper}`).classList.add(g_cssObj.settings_Disabled);
-		_obj.appendChild(makeDisabledLabel(`lnk${settingUpper}`, 0, `${g_stateObj[_settingName]}${unitName}`));
+		_obj.appendChild(makeDisabledLabel(linkId, 0, `${g_stateObj[_settingName]}${unitName}`));
 	}
 }
 
@@ -4969,10 +4970,11 @@ function createSettingsDisplayWindow(_sprite) {
 
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
 		const list = [C_FLG_OFF, C_FLG_ON];
+		const linkId = `lnk${_name}`;
 
 		if (g_headerObj[`${_name}Use`]) {
 			displaySprite.appendChild(
-				makeSettingLblCssButton(`lnk${_name}`, g_lblNameObj[`d_${toCapitalize(_name)}`], _heightPos, evt => {
+				makeSettingLblCssButton(linkId, g_lblNameObj[`d_${toCapitalize(_name)}`], _heightPos, evt => {
 					const displayFlg = g_stateObj[`d_${_name.toLowerCase()}`];
 					const displayNum = list.findIndex(flg => flg === displayFlg);
 					const nextDisplayFlg = list[(displayNum + 1) % list.length];
@@ -4987,10 +4989,10 @@ function createSettingsDisplayWindow(_sprite) {
 					borderStyle: `solid`,
 				}, `button_${flg}`)
 			);
-			createScText(document.getElementById(`lnk${_name}`), `${toCapitalize(_name)}`,
-				{ displayName: g_currentPage, targetLabel: `lnk${_name}`, x: -5 });
+			createScText(document.getElementById(linkId), `${toCapitalize(_name)}`,
+				{ displayName: g_currentPage, targetLabel: linkId, x: -5 });
 		} else {
-			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos,
+			displaySprite.appendChild(makeDisabledDisplayLabel(linkId, _heightPos, _widthPos,
 				g_lblNameObj[`d_${toCapitalize(_name)}`] + `:${g_headerObj[`${_name}Set`]}`, g_headerObj[`${_name}Set`]));
 		}
 
