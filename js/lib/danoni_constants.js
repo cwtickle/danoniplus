@@ -1949,6 +1949,10 @@ const g_lblNameObj = {
     Fadein: `Fadein`,
     Volume: `Volume`,
 
+    sc_speed: `←→`,
+    sc_scroll: `↑/↓`,
+    sc_adjustment: `- +`,
+
     g_start: `Start`,
     g_border: `Border`,
     g_recovery: `Recovery`,

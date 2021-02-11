@@ -2417,7 +2417,7 @@ function titleInit() {
 			title: g_msgObj.security,
 		}, g_cssObj.button_Tweet),
 	);
-	createScTextCommon(`title`);
+	createScTextCommon(g_currentPage);
 
 	// コメントエリア作成
 	if (g_headerObj.commentVal !== ``) {
@@ -2481,7 +2481,7 @@ function titleInit() {
 	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, `title`);
+	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
 	document.onkeyup = evt => commonKeyUp(evt);
 
 	document.oncontextmenu = _ => true;
@@ -3670,10 +3670,10 @@ function optionInit() {
 			borderStyle: `solid`,
 		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF))
 	);
-	createScTextCommon(`option`);
+	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, `option`);
+	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
 	document.onkeyup = evt => commonKeyUp(evt);
 	document.oncontextmenu = _ => true;
 	g_initialFlg = true;
@@ -3865,7 +3865,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
-	createGeneralSetting(spriteList.speed, `speed`, { unitName: ` x`, skipTerm: 4, scLabel: `←→` });
+	createGeneralSetting(spriteList.speed, `speed`, { unitName: ` x`, skipTerm: 4, scLabel: g_lblNameObj.sc_speed });
 
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
@@ -4218,7 +4218,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 4
 	createGeneralSetting(spriteList.reverse, `reverse`);
 	if (g_headerObj.scrollUse) {
-		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: `↑/↓` });
+		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: g_lblNameObj.sc_scroll });
 		[$id(`lnkScroll`).left, $id(`lnkScroll`).width] = [
 			`${parseFloat($id(`lnkScroll`).left) + 90}px`, `${parseFloat($id(`lnkScroll`).width) - 90}px`
 		];
@@ -4440,7 +4440,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
-	createGeneralSetting(spriteList.adjustment, `adjustment`, { skipTerm: 5, scLabel: `- +` });
+	createGeneralSetting(spriteList.adjustment, `adjustment`, { skipTerm: 5, scLabel: g_lblNameObj.sc_adjustment });
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
@@ -4900,10 +4900,10 @@ function settingsDisplayInit() {
 		}, g_cssObj.button_Mini)
 
 	);
-	createScTextCommon(`settingsDisplay`);
+	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, `settingsDisplay`);
+	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
 	document.onkeyup = evt => commonKeyUp(evt);
 	document.oncontextmenu = _ => true;
 
@@ -4951,12 +4951,12 @@ function createSettingsDisplayWindow(_sprite) {
 	// ---------------------------------------------------
 	// 矢印の見え方 (Appearance)
 	// 縦位置: 8
-	createGeneralSetting(spriteList.appearance, `appearance`, { displayName: `settingsDisplay` });
+	createGeneralSetting(spriteList.appearance, `appearance`, { displayName: g_currentPage });
 
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: `%`, displayName: `settingsDisplay` });
+	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: `%`, displayName: g_currentPage });
 
 	/**
 	 * Display表示/非表示ボタン
@@ -4987,7 +4987,7 @@ function createSettingsDisplayWindow(_sprite) {
 				}, `button_${flg}`)
 			);
 			createScText(document.getElementById(`lnk${_name}`), `${toCapitalize(_name)}`,
-				{ displayName: `settingsDisplay`, targetLabel: `lnk${_name}`, x: -5 });
+				{ displayName: g_currentPage, targetLabel: `lnk${_name}`, x: -5 });
 		} else {
 			displaySprite.appendChild(makeDisabledDisplayLabel(`lnk${_name}`, _heightPos, _widthPos,
 				g_lblNameObj[`d_${toCapitalize(_name)}`] + `:${g_headerObj[`${_name}Set`]}`, g_headerObj[`${_name}Set`]));
@@ -9334,7 +9334,7 @@ function resultInit() {
 			animationName: `smallToNormalY`,
 		}, g_cssObj.button_Reset),
 	);
-	createScTextCommon(`result`);
+	createScTextCommon(g_currentPage);
 
 	// マスクスプライトを作成
 	const maskResultSprite = createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);
@@ -9398,7 +9398,7 @@ function resultInit() {
 	// キー操作イベント（デフォルト）
 	setTimeout(_ => {
 		if (g_currentPage === `result`) {
-			document.onkeydown = evt => commonKeyDown(evt, `result`);
+			document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
 			document.onkeyup = evt => commonKeyUp(evt);
 		}
 	}, g_shortcutWaitTime.result);
