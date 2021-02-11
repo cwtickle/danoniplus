@@ -1965,29 +1965,29 @@ function getSpriteJumpFrame(_frames) {
 /**
  * 背景・マスクモーションの表示（タイトル・リザルト用）
  * @param {number} _frame 
- * @param {string} _spriteName title / result
+ * @param {string} _displayName title / result
  * @param {string} _depthName back / mask
  */
-function drawSpriteData(_frame, _spriteName, _depthName) {
+function drawSpriteData(_frame, _displayName, _depthName) {
 
-	const spriteUpper = toCapitalize(_spriteName);
-	const tmpObjs = g_headerObj[`${_depthName}${spriteUpper}Data`][_frame];
+	const spriteName = `${_depthName}${toCapitalize(_displayName)}`;
+	const tmpObjs = g_headerObj[`${spriteName}Data`][_frame];
 
 	for (let j = 0; j < tmpObjs.length; j++) {
 		const tmpObj = tmpObjs[j];
-		const baseSprite = document.querySelector(`#${_depthName}${spriteUpper}Sprite${tmpObj.depth}`);
+		const baseSprite = document.querySelector(`#${spriteName}Sprite${tmpObj.depth}`);
 		if (tmpObj.command !== ``) {
 			if (tmpObj.command === `[loop]`) {
 				// キーワード指定：ループ
 				// 指定フレーム(class)へ移動する
-				g_scoreObj[`${_depthName}${spriteUpper}LoopCount`]++;
+				g_scoreObj[`${spriteName}LoopCount`]++;
 				return getSpriteJumpFrame(tmpObj.jumpFrame);
 
 			} else if (tmpObj.command === `[jump]`) {
 				// キーワード指定：フレームジャンプ
 				// 指定回数以上のループ(maxLoop)があれば指定フレーム(jumpFrame)へ移動する
-				if (g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] >= Number(tmpObj.maxLoop)) {
-					g_scoreObj[`${_depthName}${spriteUpper}LoopCount`] = 0;
+				if (g_scoreObj[`${spriteName}LoopCount`] >= Number(tmpObj.maxLoop)) {
+					g_scoreObj[`${spriteName}LoopCount`] = 0;
 					return getSpriteJumpFrame(tmpObj.jumpFrame);
 				}
 			} else {
@@ -1995,8 +1995,8 @@ function drawSpriteData(_frame, _spriteName, _depthName) {
 			}
 		} else {
 			if (tmpObj.depth === C_FLG_ALL) {
-				for (let j = 0; j <= g_headerObj[`${_depthName}${spriteUpper}MaxDepth`]; j++) {
-					document.querySelector(`#${_depthName}${spriteUpper}Sprite${j}`).textContent = ``;
+				for (let j = 0; j <= g_headerObj[`${spriteName}MaxDepth`]; j++) {
+					document.querySelector(`#${spriteName}Sprite${j}`).textContent = ``;
 				}
 			} else {
 				baseSprite.textContent = ``;
@@ -2135,12 +2135,13 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 
 /**
  * タイトル・リザルトモーションの描画
- * @param {string} _spriteName 
+ * @param {string} _displayName
  */
-function drawTitleResultMotion(_spriteName) {
+function drawTitleResultMotion(_displayName) {
 	g_animationData.forEach(sprite => {
-		if (g_headerObj[`${sprite}${_spriteName}Data`][g_scoreObj[`${sprite}${_spriteName}FrameNum`]] !== undefined) {
-			g_scoreObj[`${sprite}${_spriteName}FrameNum`] = drawSpriteData(g_scoreObj[`${sprite}${_spriteName}FrameNum`], `${_spriteName.toLowerCase()}`, sprite);
+		const spriteName = `${sprite}${toCapitalize(_displayName)}`;
+		if (g_headerObj[`${spriteName}Data`][g_scoreObj[`${spriteName}FrameNum`]] !== undefined) {
+			g_scoreObj[`${spriteName}FrameNum`] = drawSpriteData(g_scoreObj[`${spriteName}FrameNum`], _displayName, sprite);
 		}
 	});
 }
@@ -2467,7 +2468,7 @@ function titleInit() {
 		}
 
 		// 背景・マスクモーション
-		drawTitleResultMotion(`Title`);
+		drawTitleResultMotion(g_currentPage);
 
 		thisTime = performance.now();
 		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / g_fps;
@@ -5366,10 +5367,10 @@ function keyConfigInit(_kcType = g_kcType) {
 		}, g_cssObj.button_Reset)
 
 	);
-	createScTextCommon(`keyConfig`);
+	createScTextCommon(g_currentPage);
 
 	// キーボード押下時処理
-	document.onkeydown = evt => commonKeyDown(evt, `keyConfig`, setCode => {
+	document.onkeydown = evt => commonKeyDown(evt, g_currentPage, setCode => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -9366,7 +9367,7 @@ function resultInit() {
 		}
 
 		// 背景・マスクモーション
-		drawTitleResultMotion(`Result`);
+		drawTitleResultMotion(g_currentPage);
 
 		// リザルト画面移行後のフェードアウト処理
 		if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
