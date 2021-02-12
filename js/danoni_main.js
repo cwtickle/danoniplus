@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 19.5.1`;
+const g_version = `Ver 19.5.2`;
 const g_revisedDate = `2021/02/12`;
 const g_alphaVersion = ``;
 
@@ -779,7 +779,7 @@ function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g
 			if (!setVal(g_cxtDeleteFlg[_id], false, C_TYP_BOOLEAN)) {
 				cxtFunc(evt);
 			}
-			if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
+			if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
 				g_cxtAddFunc[_id](evt);
 			}
 			return false;
