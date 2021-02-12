@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/02/08 (v19.5.0)
+ * Revised : 2021/02/12 (v19.5.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1949,6 +1949,10 @@ const g_lblNameObj = {
     Fadein: `Fadein`,
     Volume: `Volume`,
 
+    sc_speed: `←→`,
+    sc_scroll: `↑/↓`,
+    sc_adjustment: `- +`,
+
     g_start: `Start`,
     g_border: `Border`,
     g_recovery: `Recovery`,
@@ -2012,15 +2016,6 @@ const g_lblNameObj = {
     fullCombo: `FullCombo!`,
     cleared: `CLEARED!`,
     failed: `FAILED...`,
-};
-
-// クリア表示
-const g_resultMsgObj = {
-    allPerfect: `<span class="result_AllPerfect">${g_lblNameObj.allPerfect}</span>`,
-    perfect: `<span class="result_Perfect">${g_lblNameObj.perfect}</span>`,
-    fullCombo: `<span class="result_FullCombo">${g_lblNameObj.fullCombo}</span>`,
-    cleared: `<span class="result_Cleared">${g_lblNameObj.cleared}</span>`,
-    failed: `<span class="result_Failed">${g_lblNameObj.failed}</span>`,
 };
 
 // 判定名
