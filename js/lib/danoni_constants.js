@@ -177,14 +177,20 @@ const C_CLR_DENSITY_MAX = `#990000cc`;
 const C_CLR_DENSITY_DEFAULT = `#999999cc`;
 const C_LEN_DENSITY_DIVISION = 16;
 
-const C_LBL_SETMINIL = `<`;
-const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH;
-const C_LBL_SETMINILL = `<`;
-const C_LEN_SETMINILL_LEFT = C_LEN_SETMINIL_LEFT + C_LEN_SETMINI_WIDTH;
-const C_LBL_SETMINIR = `>`;
-const C_LBL_SETMINIRR = `>`;
-const C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH;
-const C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
+const g_settingBtnObj = {
+    chara: {
+        L: `<`,
+        LL: `<`,
+        R: `>`,
+        RR: `>`,
+    },
+    pos: {
+        L: C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH,
+        LL: C_LEN_SETLBL_LEFT,
+        R: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH,
+        RR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH,
+    }
+};
 
 const C_MAX_ADJUSTMENT = 30;
 const C_MAX_SPEED = 10;

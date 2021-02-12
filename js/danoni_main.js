@@ -4834,8 +4834,8 @@ function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_D
  * @param {function} _func 
  */
 function makeMiniCssButton(_id, _directionFlg, _heightPos, _func, { dx = 0, dy = 0, dw = 0, dh = 0, dsiz = 0 } = {}) {
-	return createCss2Button(`${_id}${_directionFlg}`, eval(`C_LBL_SETMINI${_directionFlg}`), _func, {
-		x: eval(`C_LEN_SETMINI${_directionFlg}_LEFT`) + dx,
+	return createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func, {
+		x: g_settingBtnObj.pos[_directionFlg] + dx,
 		y: C_LEN_SETLBL_HEIGHT * _heightPos + dy,
 		w: C_LEN_SETMINI_WIDTH + dw, h: C_LEN_SETLBL_HEIGHT + dh, siz: C_SIZ_SETLBL + dsiz,
 	}, g_cssObj.button_Mini);
