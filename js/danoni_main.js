@@ -770,7 +770,7 @@ function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 			_func(evt);
 		}
 		if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
-			g_btnAddFunc[_id](evt, _func(evt));
+			g_btnAddFunc[_id](evt, _func(evt), resetFunc(evt));
 		}
 		if (!setVal(g_btnDeleteFlg[_id], false, C_TYP_BOOLEAN)) {
 			resetFunc(evt);
@@ -3623,6 +3623,33 @@ function keysConvert(_dosObj) {
 /* Scene : SETTINGS [lime] */
 /*-----------------------------------------------------------*/
 
+const commonSettingBtn = _labelName => {
+
+	multiAppend(divRoot,
+
+		// タイトル画面へ戻る
+		createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, {
+			animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: _ => titleInit(),
+		}, g_cssObj.button_Back),
+
+		// キーコンフィグ画面へ移動
+		createCss2Button(`btnKeyConfig`, g_lblNameObj.b_keyConfig, _ => true, {
+			x: g_sWidth / 3,
+			animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: _ => keyConfigInit(`Main`),
+		}, g_cssObj.button_Setting),
+
+		// プレイ開始
+		makePlayButton(_ => loadMusic()),
+
+		// Display設定へ移動
+		createCss2Button(`btn${_labelName}`, `>`, _ => true, {
+			x: g_sWidth / 2 + 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
+			w: C_LEN_SETMINI_WIDTH, h: 40, title: g_msgObj[`to${_labelName}`],
+			resetFunc: _ => (_labelName === `Display` ? settingsDisplayInit() : optionInit()),
+		}, g_cssObj.button_Mini),
+	);
+};
+
 /**
  * 設定・オプション画面初期化
  */
@@ -3650,27 +3677,9 @@ function optionInit() {
 	}
 
 	// ボタン描画
+	commonSettingBtn(`Display`);
+
 	multiAppend(divRoot,
-
-		// タイトル画面へ戻る
-		createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, {
-			animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: _ => titleInit(),
-		}, g_cssObj.button_Back),
-
-		// キーコンフィグ画面へ移動
-		createCss2Button(`btnKeyConfig`, g_lblNameObj.b_keyConfig, _ => true, {
-			x: g_sWidth / 3,
-			animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: _ => keyConfigInit(`Main`),
-		}, g_cssObj.button_Setting),
-
-		// プレイ開始
-		makePlayButton(_ => loadMusic()),
-
-		// Display設定へ移動
-		createCss2Button(`btnDisplay`, `>`, _ => true, {
-			x: g_sWidth / 2 + 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
-			w: C_LEN_SETMINI_WIDTH, h: 40, title: g_msgObj.toDisplay, resetFunc: _ => settingsDisplayInit(),
-		}, g_cssObj.button_Mini),
 
 		// データセーブフラグの切替
 		createCss2Button(`btnSave`, g_lblNameObj.dataSave, evt => {
@@ -4893,26 +4902,8 @@ function settingsDisplayInit() {
 	}
 
 	// ボタン描画
-	multiAppend(divRoot,
+	commonSettingBtn(`Settings`);
 
-		// タイトル画面へ戻る
-		createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, { resetFunc: _ => titleInit() }, g_cssObj.button_Back),
-
-		// キーコンフィグ画面へ移動
-		createCss2Button(`btnKeyConfig`, g_lblNameObj.b_keyConfig, _ => true, {
-			x: g_sWidth / 3, resetFunc: _ => keyConfigInit(`Main`),
-		}, g_cssObj.button_Setting),
-
-		// プレイ開始
-		makePlayButton(_ => loadMusic()),
-
-		// メイン設定へ戻る
-		createCss2Button(`btnSettings`, `<`, _ => true, {
-			x: g_sWidth / 2 - 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
-			w: C_LEN_SETMINI_WIDTH, h: 40, title: g_msgObj.toSettings, resetFunc: _ => optionInit(),
-		}, g_cssObj.button_Mini)
-
-	);
 	createScTextCommon(`settingsDisplay`);
 
 	// キー操作イベント（デフォルト）
