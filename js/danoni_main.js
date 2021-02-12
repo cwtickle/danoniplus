@@ -774,16 +774,18 @@ function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g
 	});
 
 	// 右クリック時の処理
-	if (typeof cxtFunc === C_TYP_FUNCTION) {
-		div.oncontextmenu = evt => {
+	div.oncontextmenu = evt => {
+		if (typeof cxtFunc === C_TYP_FUNCTION) {
 			if (!setVal(g_cxtDeleteFlg[_id], false, C_TYP_BOOLEAN)) {
 				cxtFunc(evt);
 			}
-			if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
-				g_cxtAddFunc[_id](evt, _func(evt));
+			if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
+				g_cxtAddFunc[_id](evt, cxtFunc(evt));
 			}
-			return false;
+		} else if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
+			g_cxtAddFunc[_id](evt);
 		}
+		return false;
 	}
 
 	// イベントリスナー用のキーをセット
