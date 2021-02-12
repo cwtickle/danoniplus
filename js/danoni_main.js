@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/01/07
+ * Revised : 2021/02/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 18.9.3`;
-const g_revisedDate = `2021/01/07`;
+const g_version = `Ver 18.9.4`;
+const g_revisedDate = `2021/02/12`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -845,7 +845,7 @@ function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g
 			if (!setVal(g_cxtDeleteFlg[_id], false, C_TYP_BOOLEAN)) {
 				cxtFunc(evt);
 			}
-			if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
+			if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
 				g_cxtAddFunc[_id](evt);
 			}
 			return false;
@@ -874,7 +874,7 @@ function changeStyle(_id, { x, y, w, h, siz, align, title, ...rest } = {}) {
 		height: h,
 		fontSize: siz,
 	};
-	Object.keys(obj).filter(property => setVal(obj[property], ``, C_TYP_FLOAT !== ``))
+	Object.keys(obj).filter(property => setVal(obj[property], ``, C_TYP_FLOAT) !== ``)
 		.forEach(property => style[property] = `${obj[property]}px`);
 
 	if (align !== undefined) {
