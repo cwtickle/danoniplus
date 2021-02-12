@@ -827,31 +827,6 @@ function changeStyle(_id, { x, y, w, h, siz, align, title, ...rest } = {}) {
 }
 
 /**
- * ラベル文字作成（レイヤー直書き。htmlタグは使用できない）
- * @param {string} _ctx ラベルを作成する場所のコンテキスト名
- * @param {string} _text 表示するテキスト
- * @param {number} _x 作成先のx座標
- * @param {number} _y 作成先のy座標
- * @param {number} _fontsize フォントサイズ
- * @param {number} _fontname フォント名
- * @param {string} _color 色 (カラーコード:#ffffff 形式 or グラデーション)
- * @param {string} _align テキストの表示位置 (left, center, right)
- */
-function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align) {
-	const fontFamilys = _fontname.split(`,`);
-	let fontView = ``;
-	for (let j = 0; j < fontFamilys.length; j++) {
-		fontView += `"${fontFamilys[j]}",`;
-	}
-	fontView += `sans-serif`;
-
-	_ctx.font = `${_fontsize}px ${fontView}`;
-	_ctx.textAlign = _align;
-	_ctx.fillStyle = _color;
-	_ctx.fillText(_text, _x, _y);
-}
-
-/**
  * タイトル文字描画
  * @param {string} _id 
  * @param {string} _titlename 
@@ -1246,7 +1221,7 @@ function loadLocalStorage() {
 		// Adjustment初期値設定
 		if (g_localStorage.adjustment !== undefined) {
 			g_stateObj.adjustment = setVal(g_localStorage.adjustment, 0, C_TYP_NUMBER);
-			g_adjustmentNum = roundZero(g_adjustments.findIndex(adjustment => adjustment === g_stateObj.adjustment), C_MAX_ADJUSTMENT);
+			g_settings.adjustmentNum = roundZero(g_settings.adjustments.findIndex(adjustment => adjustment === g_stateObj.adjustment), C_MAX_ADJUSTMENT);
 		} else {
 			g_localStorage.adjustment = 0;
 		}
@@ -1254,7 +1229,7 @@ function loadLocalStorage() {
 		// Volume初期値設定
 		if (g_localStorage.volume !== undefined) {
 			g_stateObj.volume = setVal(g_localStorage.volume, 100, C_TYP_NUMBER);
-			g_volumeNum = roundZero(g_volumes.findIndex(volume => volume === g_stateObj.volume));
+			g_settings.volumeNum = roundZero(g_settings.volumes.findIndex(volume => volume === g_stateObj.volume));
 		} else {
 			g_localStorage.volume = 100;
 		}
@@ -1262,13 +1237,13 @@ function loadLocalStorage() {
 		// Appearance初期値設定
 		if (g_localStorage.appearance !== undefined) {
 			g_stateObj.appearance = g_localStorage.appearance;
-			g_appearanceNum = roundZero(g_appearances.findIndex(setting => setting === g_stateObj.appearance));
+			g_settings.appearanceNum = roundZero(g_settings.appearances.findIndex(setting => setting === g_stateObj.appearance));
 		}
 
 		// Opacity初期値設定
 		if (g_localStorage.opacity !== undefined) {
 			g_stateObj.opacity = g_localStorage.opacity;
-			g_opacityNum = roundZero(g_opacitys.findIndex(setting => setting === g_stateObj.opacity));
+			g_settings.opacityNum = roundZero(g_settings.opacitys.findIndex(setting => setting === g_stateObj.opacity));
 		}
 
 		// ハイスコア取得準備
@@ -2700,7 +2675,7 @@ function headerConvert(_dosObj) {
 		obj.minSpeed = C_MIN_SPEED;
 		obj.maxSpeed = C_MAX_SPEED;
 	}
-	g_speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 4 + 1).keys()].map(i => obj.minSpeed + i / 4);
+	g_settings.speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 4 + 1).keys()].map(i => obj.minSpeed + i / 4);
 
 
 	// プレイ中のショートカットキー
@@ -2797,7 +2772,7 @@ function headerConvert(_dosObj) {
 
 	// 初期速度の設定
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
-	g_speedNum = roundZero(g_speeds.findIndex(speed => speed === g_stateObj.speed));
+	g_settings.speedNum = roundZero(g_settings.speeds.findIndex(speed => speed === g_stateObj.speed));
 
 	// 矢印の色変化を常時グラデーションさせる設定
 	obj.defaultColorgrd = [false, `#eeeeee`];
@@ -3072,12 +3047,6 @@ function headerConvert(_dosObj) {
 	g_posObj.reverseStepY = g_posObj.distY - g_posObj.stepY - g_posObj.stepDiffY - C_ARW_WIDTH;
 	g_posObj.arrowHeight = g_sHeight + g_posObj.stepYR - g_posObj.stepDiffY * 2;
 	obj.bottomWordSetFlg = setVal(_dosObj.bottomWordSet, false, C_TYP_BOOLEAN);
-
-	// ステップゾーン位置 (旧変数)
-	g_stepY = g_posObj.stepY;
-	g_stepYR = g_posObj.stepYR;
-	g_distY = g_posObj.distY;
-	g_reverseStepY = g_posObj.reverseStepY;
 
 	// 矢印・フリーズアロー判定位置補正
 	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
@@ -4254,18 +4223,18 @@ function createOptionWindow(_sprite) {
 				cxtFunc: evt => setReverse(evt.target),
 			}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`])
 		);
-		spriteList[g_scrolls.length > 1 ? `reverse` : `scroll`].style.visibility = `hidden`;
+		spriteList[g_settings.scrolls.length > 1 ? `reverse` : `scroll`].style.visibility = `hidden`;
 	}
 
 	function setReverse(_btn) {
-		g_reverseNum = (g_reverseNum + 1) % 2;
-		g_stateObj.reverse = g_reverses[g_reverseNum];
+		g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
+		g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
 		setReverseView(_btn);
 	}
 
 	function setReverseView(_btn) {
-		_btn.classList.replace(g_cssObj[`button_Rev${g_reverses[(g_reverseNum + 1) % 2]}`],
-			g_cssObj[`button_Rev${g_reverses[g_reverseNum]}`]);
+		_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
+			g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
 		_btn.textContent = `${g_lblNameObj.Reverse}:${g_stateObj.reverse}`;
 	}
 
@@ -4312,13 +4281,13 @@ function createOptionWindow(_sprite) {
 
 		// カーソルを動かさない場合は先にゲージ設定をリロード
 		if (_scrollNum === 0) {
-			gaugeChange(g_gaugeNum);
+			gaugeChange(g_settings.gaugeNum);
 		}
 		setSetting(_scrollNum, `gauge`);
 
 		// カーソルを動かす場合は設定変更後にゲージ設定を再設定
 		if (_scrollNum !== 0) {
-			gaugeChange(g_gaugeNum);
+			gaugeChange(g_settings.gaugeNum);
 		}
 		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
 			g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
@@ -4375,8 +4344,8 @@ function createOptionWindow(_sprite) {
 				g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
 				g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
-				g_gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
-				g_stateObj.gauge = g_gauges[g_gaugeNum];
+				g_settings.gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
+				g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
 			}
 			setLifeCategory(g_headerObj);
 
@@ -4538,7 +4507,7 @@ function createOptionWindow(_sprite) {
 		}
 
 		// アシスト設定の配列を入れ替え
-		g_autoPlays = (typeof g_keyObj[`assistName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
+		g_settings.autoPlays = (typeof g_keyObj[`assistName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
 			g_autoPlaysBase.concat(g_keyObj[`assistName${g_keyObj.currentKey}`]) :
 			g_autoPlaysBase.concat());
 
@@ -4549,11 +4518,11 @@ function createOptionWindow(_sprite) {
 
 			// 速度、ゲージ、リバースの初期設定
 			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
-			g_speedNum = roundZero(g_speeds.findIndex(speed => speed === g_stateObj.speed));
-			g_gaugeNum = 0;
-			g_scrollNum = 0;
-			if (!g_autoPlays.includes(g_stateObj.autoPlay)) {
-				g_autoPlayNum = 0;
+			g_settings.speedNum = roundZero(g_settings.speeds.findIndex(speed => speed === g_stateObj.speed));
+			g_settings.gaugeNum = 0;
+			g_settings.scrollNum = 0;
+			if (!g_settings.autoPlays.includes(g_stateObj.autoPlay)) {
+				g_settings.autoPlayNum = 0;
 			}
 		}
 
@@ -4572,7 +4541,7 @@ function createOptionWindow(_sprite) {
 					// リバース初期値設定
 					if (g_localKeyStorage.reverse !== undefined) {
 						g_stateObj.reverse = setVal(g_localKeyStorage.reverse, C_FLG_OFF, C_TYP_STRING);
-						g_reverseNum = roundZero(g_reverses.findIndex(reverse => reverse === g_stateObj.reverse));
+						g_settings.reverseNum = roundZero(g_settings.reverses.findIndex(reverse => reverse === g_stateObj.reverse));
 					}
 
 					// キーコンフィグ初期値設定
@@ -4588,7 +4557,7 @@ function createOptionWindow(_sprite) {
 						keyCtrlPtn: 0,
 					};
 					g_stateObj.reverse = C_FLG_OFF;
-					g_reverseNum = 0;
+					g_settings.reverseNum = 0;
 				}
 			} else {
 
@@ -4598,10 +4567,10 @@ function createOptionWindow(_sprite) {
 				// リバース初期値設定
 				if (g_localStorage[`reverse${g_keyObj.currentKey}`] !== undefined) {
 					g_stateObj.reverse = setVal(g_localStorage[`reverse${g_keyObj.currentKey}`], C_FLG_OFF, C_TYP_STRING);
-					g_reverseNum = roundZero(g_reverses.findIndex(reverse => reverse === g_stateObj.reverse));
+					g_settings.reverseNum = roundZero(g_settings.reverses.findIndex(reverse => reverse === g_stateObj.reverse));
 				} else {
 					g_stateObj.reverse = C_FLG_OFF;
-					g_reverseNum = 0;
+					g_settings.reverseNum = 0;
 				}
 
 				// キーコンフィグ初期値設定
@@ -4645,25 +4614,25 @@ function createOptionWindow(_sprite) {
 
 		// リバース設定 (Reverse, Scroll)
 		if (g_headerObj.scrollUse) {
-			g_scrolls = JSON.parse(JSON.stringify(
+			g_settings.scrolls = JSON.parse(JSON.stringify(
 				typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
 					g_keyObj[`scrollName${g_keyObj.currentKey}`] : g_keyObj.scrollName_def
 			));
-			g_stateObj.scroll = g_scrolls[g_scrollNum];
-			const [visibleScr, hiddenScr] = (g_scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
+			g_stateObj.scroll = g_settings.scrolls[g_settings.scrollNum];
+			const [visibleScr, hiddenScr] = (g_settings.scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
 			spriteList[visibleScr].style.visibility = `visible`;
 			spriteList[hiddenScr].style.visibility = `hidden`;
 			setSetting(0, visibleScr);
-			if (g_scrolls.length > 1) {
+			if (g_settings.scrolls.length > 1) {
 				setReverseView(document.querySelector(`#btnReverse`));
 			}
 		} else {
-			g_scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
+			g_settings.scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
 			setSetting(0, `reverse`);
 		}
 
 		// オート・アシスト設定 (AutoPlay)
-		g_stateObj.autoPlay = g_autoPlays[g_autoPlayNum];
+		g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
 		lnkAutoPlay.textContent = g_stateObj.autoPlay;
 
 		// ゲージ設定 (Gauge)
@@ -4748,8 +4717,8 @@ function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName)
  * @param {string} _unitName
  */
 function setSetting(_scrollNum, _settingName, _unitName = ``) {
-	let settingNum = eval(`g_${_settingName}Num`);
-	const settingList = eval(`g_${_settingName}s`);
+	let settingNum = g_settings[`${_settingName}Num`];
+	const settingList = g_settings[`${_settingName}s`];
 	const settingMax = settingList.length - 1;
 
 	if (_scrollNum > 0) {
@@ -4760,7 +4729,7 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
 			settingMax : (settingNum + _scrollNum <= 0 ? 0 : settingNum + _scrollNum));
 	}
 	g_stateObj[_settingName] = settingList[settingNum];
-	eval(`g_${_settingName}Num = settingNum`);
+	g_settings[`${_settingName}Num`] = settingNum;
 	document.querySelector(`#lnk${toCapitalize(_settingName)}`).textContent =
 		`${g_stateObj[_settingName]}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
 }
@@ -4859,8 +4828,8 @@ function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_D
  * @param {function} _func 
  */
 function makeMiniCssButton(_id, _directionFlg, _heightPos, _func, { dx = 0, dy = 0, dw = 0, dh = 0, dsiz = 0 } = {}) {
-	return createCss2Button(`${_id}${_directionFlg}`, eval(`C_LBL_SETMINI${_directionFlg}`), _func, {
-		x: eval(`C_LEN_SETMINI${_directionFlg}_LEFT`) + dx,
+	return createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func, {
+		x: g_settingBtnObj.pos[_directionFlg] + dx,
 		y: C_LEN_SETLBL_HEIGHT * _heightPos + dy,
 		w: C_LEN_SETMINI_WIDTH + dw, h: C_LEN_SETLBL_HEIGHT + dh, siz: C_SIZ_SETLBL + dsiz,
 	}, g_cssObj.button_Mini);
@@ -7709,7 +7678,7 @@ function MainInit() {
 
 		// 矢印(枠外判定、AutoPlay: OFF)
 		arrowOFF: (_j, _arrowName, _cnt) => {
-			if (_cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
+			if (_cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.uwan]) {
 				judgeUwan(_cnt);
 				judgeObjDelete.arrow(_j, _arrowName);
 			}
@@ -7770,7 +7739,7 @@ function MainInit() {
 
 		// フリーズアロー(枠外判定)
 		frzNG: (_j, _k, _frzName, _cnt) => {
-			if (_cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+			if (_cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
 				judgeIknai(_cnt);
 				g_attrObj[_frzName].judgEndFlg = true;
 
@@ -7814,14 +7783,14 @@ function MainInit() {
 			// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
 			// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
 			// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
-			if (g_workObj.judgFrzCnt[_j] !== _k && _cnt <= g_judgObj.frzJ[C_JDG_SFSF] + 1) {
+			if (g_workObj.judgFrzCnt[_j] !== _k && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] + 1) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 
-				if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[C_JDG_KITA]) {
+				if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 				} else {
 
 					// 枠外判定前の場合、このタイミングで枠外判定を行う
-					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
 						judgeIknai(_cnt);
 						if (g_headerObj.frzStartjdgUse) {
 							judgeUwan(_cnt);
@@ -8579,7 +8548,7 @@ function judgeArrow(_j) {
 
 	const judgeTargetArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
-		if (_difCnt <= g_judgObj.arrowJ[C_JDG_UWAN]) {
+		if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan]) {
 			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
 			resultFunc(_difFrame);
 			countFastSlow(_difFrame, g_headerObj.justFrames);
@@ -8600,7 +8569,7 @@ function judgeArrow(_j) {
 
 	const judgeTargetFrzArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
-		if (_difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
+		if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] && !g_attrObj[frzName].judgEndFlg) {
 			if (g_headerObj.frzStartjdgUse &&
 				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
 				const [resultFunc] = checkJudgment(_difCnt);
@@ -8729,7 +8698,7 @@ function updateCombo() {
  * @param {number} difFrame 
  */
 function judgeIi(difFrame) {
-	changeJudgeCharacter(`ii`, C_JCR_II);
+	changeJudgeCharacter(`ii`, g_lblNameObj.j_ii);
 
 	updateCombo();
 	displayDiff(difFrame, g_headerObj.justFrames);
@@ -8750,7 +8719,7 @@ function judgeIi(difFrame) {
  * @param {number} difFrame 
  */
 function judgeShakin(difFrame) {
-	changeJudgeCharacter(`shakin`, C_JCR_SHAKIN);
+	changeJudgeCharacter(`shakin`, g_lblNameObj.j_shakin);
 
 	updateCombo();
 	displayDiff(difFrame, g_headerObj.justFrames);
@@ -8771,7 +8740,7 @@ function judgeShakin(difFrame) {
  * @param {number} difFrame 
  */
 function judgeMatari(difFrame) {
-	changeJudgeCharacter(`matari`, C_JCR_MATARI);
+	changeJudgeCharacter(`matari`, g_lblNameObj.j_matari);
 	comboJ.textContent = ``;
 
 	displayDiff(difFrame, g_headerObj.justFrames);
@@ -8800,7 +8769,7 @@ function judgeDamage() {
  * @param {number} difFrame 
  */
 function judgeShobon(difFrame) {
-	changeJudgeCharacter(`shobon`, C_JCR_SHOBON);
+	changeJudgeCharacter(`shobon`, g_lblNameObj.j_shobon);
 	judgeDamage();
 
 	if (typeof customJudgeShobon === C_TYP_FUNCTION) {
@@ -8816,7 +8785,7 @@ function judgeShobon(difFrame) {
  * @param {number} difFrame 
  */
 function judgeUwan(difFrame) {
-	changeJudgeCharacter(`uwan`, C_JCR_UWAN);
+	changeJudgeCharacter(`uwan`, g_lblNameObj.j_uwan);
 	judgeDamage();
 
 	if (typeof customJudgeUwan === C_TYP_FUNCTION) {
@@ -8832,7 +8801,7 @@ function judgeUwan(difFrame) {
  * @param {number} difFrame 
  */
 function judgeKita(difFrame) {
-	changeJudgeCharacter(`kita`, C_JCR_KITA, `F`);
+	changeJudgeCharacter(`kita`, g_lblNameObj.j_kita, `F`);
 
 	if (++g_resultObj.fCombo > g_resultObj.fmaxCombo) {
 		g_resultObj.fmaxCombo = g_resultObj.fCombo;
@@ -8856,7 +8825,7 @@ function judgeKita(difFrame) {
  * @param {number} difFrame 
  */
 function judgeIknai(difFrame) {
-	changeJudgeCharacter(`iknai`, C_JCR_IKNAI, `F`);
+	changeJudgeCharacter(`iknai`, g_lblNameObj.j_iknai, `F`);
 	comboFJ.textContent = ``;
 	g_resultObj.fCombo = 0;
 
@@ -9024,7 +8993,7 @@ function resultInit() {
 		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
 			(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
 		`${withOptions(g_stateObj.appearance, `Visible`)}`,
-		`${withOptions(g_stateObj.gauge, g_gauges[0])}`
+		`${withOptions(g_stateObj.gauge, g_settings.gauges[0])}`
 	].filter(value => value !== ``).join(`, `);
 
 	let displayData = [
@@ -9079,13 +9048,13 @@ function resultInit() {
 
 	// キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
 	const jdgScoreObj = {
-		ii: { pos: 0, id: `Ii`, color: `ii`, label: C_JCR_II, },
-		shakin: { pos: 1, id: `Shakin`, color: `shakin`, label: C_JCR_SHAKIN, },
-		matari: { pos: 2, id: `Matari`, color: `matari`, label: C_JCR_MATARI, },
-		shobon: { pos: 3, id: `Shobon`, color: `shobon`, label: C_JCR_SHOBON, },
-		uwan: { pos: 4, id: `Uwan`, color: `uwan`, label: C_JCR_UWAN, },
-		kita: { pos: 5, id: `Kita`, color: `kita`, label: C_JCR_KITA, },
-		iknai: { pos: 6, id: `Iknai`, color: `iknai`, label: C_JCR_IKNAI, },
+		ii: { pos: 0, id: `Ii`, color: `ii`, label: g_lblNameObj.j_ii, },
+		shakin: { pos: 1, id: `Shakin`, color: `shakin`, label: g_lblNameObj.j_shakin, },
+		matari: { pos: 2, id: `Matari`, color: `matari`, label: g_lblNameObj.j_matari, },
+		shobon: { pos: 3, id: `Shobon`, color: `shobon`, label: g_lblNameObj.j_shobon, },
+		uwan: { pos: 4, id: `Uwan`, color: `uwan`, label: g_lblNameObj.j_uwan, },
+		kita: { pos: 5, id: `Kita`, color: `kita`, label: g_lblNameObj.j_kita, },
+		iknai: { pos: 6, id: `Iknai`, color: `iknai`, label: g_lblNameObj.j_iknai, },
 		maxCombo: { pos: 7, id: `MCombo`, color: `combo`, label: g_lblNameObj.j_maxCombo, },
 		fmaxCombo: { pos: 8, id: `FCombo`, color: `combo`, label: g_lblNameObj.j_fmaxCombo, },
 		score: { pos: 10, id: `Score`, color: `score`, label: g_lblNameObj.j_score, },

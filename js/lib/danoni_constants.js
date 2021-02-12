@@ -177,14 +177,20 @@ const C_CLR_DENSITY_MAX = `#990000cc`;
 const C_CLR_DENSITY_DEFAULT = `#999999cc`;
 const C_LEN_DENSITY_DIVISION = 16;
 
-const C_LBL_SETMINIL = `<`;
-const C_LEN_SETMINIL_LEFT = C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH;
-const C_LBL_SETMINILL = `<`;
-const C_LEN_SETMINILL_LEFT = C_LEN_SETMINIL_LEFT + C_LEN_SETMINI_WIDTH;
-const C_LBL_SETMINIR = `>`;
-const C_LBL_SETMINIRR = `>`;
-const C_LEN_SETMINIR_LEFT = C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH;
-const C_LEN_SETMINIRR_LEFT = C_LEN_SETMINIR_LEFT - C_LEN_SETMINI_WIDTH;
+const g_settingBtnObj = {
+    chara: {
+        L: `<`,
+        LL: `<`,
+        R: `>`,
+        RR: `>`,
+    },
+    pos: {
+        L: C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH,
+        LL: C_LEN_SETLBL_LEFT,
+        R: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH,
+        RR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH,
+    }
+};
 
 const C_MAX_ADJUSTMENT = 30;
 const C_MAX_SPEED = 10;
@@ -205,15 +211,10 @@ const g_judgObj = {
     arrowJ: [2, 4, 6, 8, 8],
     frzJ: [2, 4, 8]
 };
-const C_JDG_II = 0;
-const C_JDG_SHAKIN = 1;
-const C_JDG_MATARI = 2;
-const C_JDG_SHOBON = 3;
-const C_JDG_UWAN = 4;
-
-const C_JDG_KITA = 0;
-const C_JDG_SFSF = 1;
-const C_JDG_IKNAI = 2;
+const g_judgPosObj = {
+    ii: 0, shakin: 1, matari: 2, shobon: 3, uwan: 4,
+    kita: 0, sfsf: 1, iknai: 2,
+};
 
 const C_CLR_DUMMY = `#777777`;
 
@@ -340,46 +341,51 @@ const C_LFE_CUSTOM = `Custom`;
 let g_gaugeOptionObj = {};
 let g_gaugeType;
 
-let g_speeds = [...Array((C_MAX_SPEED - C_MIN_SPEED) * 4 + 1).keys()].map(i => C_MIN_SPEED + i / 4);
-let g_speedNum = 0;
-
-let g_motions = [C_FLG_OFF, `Boost`, `Brake`];
-let g_motionNum = 0;
-
-let g_reverses = [C_FLG_OFF, C_FLG_ON];
-let g_reverseNum = 0;
-
-let g_scrolls = [];
-let g_scrollNum = 0;
-
-let g_shuffles = [C_FLG_OFF, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`];
-let g_shuffleNum = 0;
-
-let g_gauges = [];
-let g_gaugeNum = 0;
-
-let g_autoPlays = [C_FLG_OFF, C_FLG_ALL];
 const g_autoPlaysBase = [C_FLG_OFF, C_FLG_ALL];
-let g_autoPlayNum = 0;
-
-let g_adjustments = [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT);
-let g_adjustmentNum = C_MAX_ADJUSTMENT;
-
-let g_volumes = [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100];
-let g_volumeNum = g_volumes.length - 1;
-
-let g_appearances = [`Visible`, `Hidden`, `Hidden+`, `Sudden`, `Sudden+`, `Hid&Sud+`];
-let g_appearanceNum = 0;
 
 let g_appearanceRanges = [`Hidden+`, `Sudden+`, `Hid&Sud+`];
 
-let g_opacitys = [10, 25, 50, 75, 100];
-let g_opacityNum = g_opacitys.length - 1;
+// 設定系全般管理
+const g_settings = {
+    speeds: [...Array((C_MAX_SPEED - C_MIN_SPEED) * 4 + 1).keys()].map(i => C_MIN_SPEED + i / 4),
+    speedNum: 0,
 
-let g_scoreDetails = [`Speed`, `Density`, `ToolDif`];
-let g_scoreDetailNum = 0;
+    motions: [C_FLG_OFF, `Boost`, `Brake`],
+    motionNum: 0,
 
-let g_keycons = {
+    reverses: [C_FLG_OFF, C_FLG_ON],
+    reverseNum: 0,
+
+    scrolls: [],
+    scrollNum: 0,
+
+    shuffles: [C_FLG_OFF, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`],
+    shuffleNum: 0,
+
+    gauges: [],
+    gaugeNum: 0,
+
+    autoPlays: [C_FLG_OFF, C_FLG_ALL],
+    autoPlayNum: 0,
+
+    adjustments: [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT),
+    adjustmentNum: C_MAX_ADJUSTMENT,
+
+    volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
+
+    appearances: [`Visible`, `Hidden`, `Hidden+`, `Sudden`, `Sudden+`, `Hid&Sud+`],
+    appearanceNum: 0,
+
+    opacitys: [10, 25, 50, 75, 100],
+
+    scoreDetails: [`Speed`, `Density`, `ToolDif`],
+    scoreDetailNum: 0,
+};
+
+g_settings.volumeNum = g_settings.volumes.length - 1;
+g_settings.opacityNum = g_settings.opacitys.length - 1;
+
+const g_keycons = {
     configTypes: [`Main`, `Replaced`, `ALL`],
     configFunc: [resetCursorMain, resetCursorReplaced, resetCursorALL],
     configTypeNum: 0,
@@ -458,12 +464,6 @@ g_hidSudObj.std[`Hid&Sud+`] = {
 // ステップゾーン位置、到達距離(後で指定)
 const C_STEP_Y = 70;
 const C_STEP_YR = 0;
-let g_stepY;
-let g_distY;
-let g_reverseStepY;
-let g_stepYR;
-let g_stepDiffY;
-let g_arrowHeight;
 
 const g_posObj = {
     stepY: 70,
@@ -2017,17 +2017,6 @@ const g_lblNameObj = {
     cleared: `CLEARED!`,
     failed: `FAILED...`,
 };
-
-// 判定名
-let C_JCR_II = g_lblNameObj.j_ii;
-let C_JCR_SHAKIN = g_lblNameObj.j_shakin;
-let C_JCR_MATARI = g_lblNameObj.j_matari;
-let C_JCR_SHOBON = g_lblNameObj.j_shobon;
-let C_JCR_UWAN = g_lblNameObj.j_uwan;
-
-let C_JCR_KITA = g_lblNameObj.j_kita;
-let C_JCR_SFSF = "";
-let C_JCR_IKNAI = g_lblNameObj.j_iknai;
 
 /**
  * オンマウステキスト、確認メッセージ定義
