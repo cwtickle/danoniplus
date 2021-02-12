@@ -745,8 +745,9 @@ function deleteChildspriteAll(_parentObjName) {
  * @param {object} _obj (x, y, w, h, siz, align, ...rest)
  * @param {...any} _classes 
  */
-function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g_sWidth / 3, h = C_BTN_HEIGHT,
-	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, cxtFunc = _ => true, ...rest } = {}, ..._classes) {
+function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight - 100, w = g_sWidth / 3, h = C_BTN_HEIGHT,
+	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``,
+	resetFunc = _ => true, cxtFunc = _ => true, ...rest } = {}, ..._classes) {
 
 	const div = createDiv(_id, x, y, w, h);
 	div.classList.add(`button_common`, ..._classes);
@@ -769,21 +770,26 @@ function createCss2Button(_id, _text, _func, { x = 0, y = g_sHeight - 100, w = g
 			_func(evt);
 		}
 		if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
-			g_btnAddFunc[_id](evt);
+			g_btnAddFunc[_id](evt, _func, resetFunc);
+		}
+		if (!setVal(g_btnDeleteFlg[_id], false, C_TYP_BOOLEAN)) {
+			resetFunc(evt);
 		}
 	});
 
 	// 右クリック時の処理
-	if (typeof cxtFunc === C_TYP_FUNCTION) {
-		div.oncontextmenu = evt => {
+	div.oncontextmenu = evt => {
+		if (typeof cxtFunc === C_TYP_FUNCTION) {
 			if (!setVal(g_cxtDeleteFlg[_id], false, C_TYP_BOOLEAN)) {
 				cxtFunc(evt);
 			}
-			if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
-				g_cxtAddFunc[_id](evt);
+			if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
+				g_cxtAddFunc[_id](evt, cxtFunc);
 			}
-			return false;
+		} else if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
+			g_cxtAddFunc[_id](evt);
 		}
+		return false;
 	}
 
 	// イベントリスナー用のキーをセット
@@ -1850,9 +1856,10 @@ async function initWebAudioAPI(_url) {
  * @param {function} _func 
  */
 function makePlayButton(_func) {
-	return createCss2Button(`btnPlay`, g_lblNameObj.b_play, _func, {
+	return createCss2Button(`btnPlay`, g_lblNameObj.b_play, _ => true, {
 		x: g_sWidth * 2 / 3,
 		animationName: (g_initialFlg ? `` : `smallToNormalY`),
+		resetFunc: _func,
 	}, g_cssObj.button_Next);
 }
 
@@ -2338,19 +2345,19 @@ function titleInit() {
 	}
 	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
 
+	let reloadFlg = false;
+
 	// ボタン描画
 	multiAppend(divRoot,
 
 		// Click Here
-		createCss2Button(`btnStart`, g_lblNameObj.clickHere, _ => {
-			clearTimeout(g_timeoutEvtTitleId);
-			optionInit();
-		}, {
-			w: g_sWidth, siz: C_LBL_TITLESIZE,
+		createCss2Button(`btnStart`, g_lblNameObj.clickHere, _ => clearTimeout(g_timeoutEvtTitleId), {
+			w: g_sWidth, siz: C_LBL_TITLESIZE, resetFunc: _ => optionInit(),
 		}, g_cssObj.button_Start),
 
 		// Reset
 		createCss2Button(`btnReset`, g_lblNameObj.dataReset, _ => {
+			reloadFlg = false;
 			if (window.confirm(g_msgObj.dataResetConfirm)) {
 				g_localStorage = {
 					adjustment: 0,
@@ -2358,64 +2365,71 @@ function titleInit() {
 					highscores: {},
 				};
 				localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
-				location.reload();
+				reloadFlg = true;
 			}
 		}, {
 			x: 0, y: g_sHeight - 20,
 			w: g_sWidth / 5, h: 16, siz: 12,
 			title: g_msgObj.dataReset,
+			resetFunc: _ => {
+				if (reloadFlg) {
+					location.reload();
+				}
+			},
 		}, g_cssObj.button_Reset),
 
 		// リロードボタン
-		createCss2Button(`btnReload`, `R`, _ => location.reload(), {
+		createCss2Button(`btnReload`, `R`, _ => true, {
 			x: 10, y: 10,
 			w: 30, h: 30, siz: 20,
 			title: g_msgObj.reload,
+			resetFunc: _ => location.reload(),
 		}, g_cssObj.button_Start),
 
 		// ヘルプ
-		createCss2Button(`btnHelp`, `?`, _ => openLink(`https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`), {
+		createCss2Button(`btnHelp`, `?`, _ => true, {
 			x: 0, y: g_sHeight - 150,
 			w: 40, h: 40, siz: 30,
 			title: g_msgObj.howto,
+			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`),
 		}, g_cssObj.button_Setting),
 
 		// 製作者表示
-		createCss2Button(`lnkMaker`, `${g_lblNameObj.maker}: ${g_headerObj.tuningInit}`, _ => {
-			openLink(g_headerObj.creatorUrl);
-		}, {
+		createCss2Button(`lnkMaker`, `${g_lblNameObj.maker}: ${g_headerObj.tuningInit}`, _ => true, {
 			x: 20, y: g_sHeight - 45,
 			w: g_sWidth / 2 - 20, h: C_LNK_HEIGHT, siz: C_LBL_LNKSIZE, align: C_ALIGN_LEFT,
 			title: g_headerObj.creatorUrl,
+			resetFunc: _ => openLink(g_headerObj.creatorUrl),
 		}, g_cssObj.button_Default),
 
 		// アーティスト表示
-		createCss2Button(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistName}`, _ => {
-			openLink(g_headerObj.artistUrl);
-		}, {
+		createCss2Button(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistName}`, _ => true, {
 			x: g_sWidth / 2, y: g_sHeight - 45,
 			w: g_sWidth / 2 - 20, h: C_LNK_HEIGHT, siz: C_LBL_LNKSIZE, align: C_ALIGN_LEFT,
 			title: g_headerObj.artistUrl,
+			resetFunc: _ => openLink(g_headerObj.artistUrl),
 		}, g_cssObj.button_Default),
 
 		// バージョン描画
 		createCss2Button(
 			`lnkVersion`,
 			`&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${g_alphaVersion}${customVersion}${releaseDate}`,
-			_ => openLink(`https://github.com/cwtickle/danoniplus`),
+			_ => true,
 			{
 				x: g_sWidth / 4, y: g_sHeight - 20,
 				w: g_sWidth * 3 / 4 - 30, h: 16, siz: 12, align: C_ALIGN_RIGHT,
 				title: g_msgObj.github,
+				resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus`),
 			},
 			g_cssObj.button_Tweet
 		),
 
 		// セキュリティリンク
-		createCss2Button(`lnkComparison`, `&#x1f6e1;`, _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`), {
+		createCss2Button(`lnkComparison`, `&#x1f6e1;`, _ => true, {
 			x: g_sWidth - 30, y: g_sHeight - 20,
 			w: 20, h: 16, siz: 12,
 			title: g_msgObj.security,
+			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`),
 		}, g_cssObj.button_Tweet),
 	);
 	createScTextCommon(g_currentPage);
@@ -3610,6 +3624,33 @@ function keysConvert(_dosObj) {
 /* Scene : SETTINGS [lime] */
 /*-----------------------------------------------------------*/
 
+const commonSettingBtn = _labelName => {
+
+	multiAppend(divRoot,
+
+		// タイトル画面へ戻る
+		createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, {
+			animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: _ => titleInit(),
+		}, g_cssObj.button_Back),
+
+		// キーコンフィグ画面へ移動
+		createCss2Button(`btnKeyConfig`, g_lblNameObj.b_keyConfig, _ => true, {
+			x: g_sWidth / 3,
+			animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: _ => keyConfigInit(`Main`),
+		}, g_cssObj.button_Setting),
+
+		// プレイ開始
+		makePlayButton(_ => loadMusic()),
+
+		// Display設定へ移動
+		createCss2Button(`btn${_labelName}`, `>`, _ => true, {
+			x: g_sWidth / 2 + 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
+			w: C_LEN_SETMINI_WIDTH, h: 40, title: g_msgObj[`to${_labelName}`],
+			resetFunc: _ => (_labelName === `Display` ? settingsDisplayInit() : optionInit()),
+		}, g_cssObj.button_Mini),
+	);
+};
+
 /**
  * 設定・オプション画面初期化
  */
@@ -3637,27 +3678,9 @@ function optionInit() {
 	}
 
 	// ボタン描画
+	commonSettingBtn(`Display`);
+
 	multiAppend(divRoot,
-
-		// タイトル画面へ戻る
-		createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => titleInit(), {
-			animationName: (g_initialFlg ? `` : `smallToNormalY`),
-		}, g_cssObj.button_Back),
-
-		// キーコンフィグ画面へ移動
-		createCss2Button(`btnKeyConfig`, g_lblNameObj.b_keyConfig, _ => keyConfigInit(`Main`), {
-			x: g_sWidth / 3,
-			animationName: (g_initialFlg ? `` : `smallToNormalY`),
-		}, g_cssObj.button_Setting),
-
-		// プレイ開始
-		makePlayButton(_ => loadMusic()),
-
-		// Display設定へ移動
-		createCss2Button(`btnDisplay`, `>`, _ => settingsDisplayInit(), {
-			x: g_sWidth / 2 + 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
-			w: C_LEN_SETMINI_WIDTH, h: 40, title: g_msgObj.toDisplay,
-		}, g_cssObj.button_Mini),
 
 		// データセーブフラグの切替
 		createCss2Button(`btnSave`, g_lblNameObj.dataSave, evt => {
@@ -3870,12 +3893,11 @@ function createOptionWindow(_sprite) {
 
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
-			createCss2Button(`btnGraph`, `i`, _ => {
-				setScoreDetail();
-			}, {
+			createCss2Button(`btnGraph`, `i`, _ => true, {
 				x: 415, y: 0,
 				w: 23, h: 23, siz: C_SIZ_JDGCNTS,
 				title: g_msgObj.graph,
+				resetFunc: _ => setScoreDetail(),
 			}, g_cssObj.button_Mini)
 		);
 		g_stateObj.scoreDetailViewFlg = false;
@@ -4882,26 +4904,8 @@ function settingsDisplayInit() {
 	}
 
 	// ボタン描画
-	multiAppend(divRoot,
+	commonSettingBtn(`Settings`);
 
-		// タイトル画面へ戻る
-		createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => titleInit(), {}, g_cssObj.button_Back),
-
-		// キーコンフィグ画面へ移動
-		createCss2Button(`btnKeyConfig`, g_lblNameObj.b_keyConfig, _ => keyConfigInit(`Main`), {
-			x: g_sWidth / 3,
-		}, g_cssObj.button_Setting),
-
-		// プレイ開始
-		makePlayButton(_ => loadMusic()),
-
-		// メイン設定へ戻る
-		createCss2Button(`btnSettings`, `<`, _ => optionInit(), {
-			x: g_sWidth / 2 - 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
-			w: C_LEN_SETMINI_WIDTH, h: 40, title: g_msgObj.toSettings,
-		}, g_cssObj.button_Mini)
-
-	);
 	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
@@ -5297,15 +5301,10 @@ function keyConfigInit(_kcType = g_kcType) {
 			g_currentj = 0;
 			g_currentk = 0;
 			g_prevKey = 0;
-
-			if (g_baseDisp === `Settings`) {
-				optionInit();
-			} else {
-				settingsDisplayInit();
-			}
 		}, {
 			x: g_sWidth / 3, y: g_sHeight - 75,
 			w: g_sWidth / 3, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+			resetFunc: _ => (g_baseDisp === `Settings` ? optionInit() : settingsDisplayInit()),
 		}, g_cssObj.button_Back),
 
 		createDivCss2Label(`lblPattern`, `${g_lblNameObj.KeyPattern}: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1}${lblTransKey}`, {
@@ -5314,33 +5313,35 @@ function keyConfigInit(_kcType = g_kcType) {
 		}),
 
 		// パターン変更ボタン描画(右回り)
-		createCss2Button(`btnPtnChangeR`, `>>`, _ => {
-			const tempPtn = searchPattern(g_keyObj.currentPtn + 1, 1, g_headerObj.transKeyUse, `transKey`);
-			g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
-				tempPtn : (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined ? -1 : 0));
-
-			keyConfigInit();
-			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-			const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
-		}, {
+		createCss2Button(`btnPtnChangeR`, `>>`, _ => true, {
 			x: g_sWidth * 4 / 5, y: g_sHeight - 100,
 			w: g_sWidth / 5, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+			resetFunc: _ => {
+				const tempPtn = searchPattern(g_keyObj.currentPtn + 1, 1, g_headerObj.transKeyUse, `transKey`);
+				g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
+					tempPtn : (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined ? -1 : 0));
+
+				keyConfigInit();
+				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
+			},
 		}, g_cssObj.button_Setting),
 
 		// パターン変更ボタン描画(左回り)
-		createCss2Button(`btnPtnChangeL`, `<<`, _ => {
-			const tempPtn = searchPattern(g_keyObj.currentPtn - 1, -1, g_headerObj.transKeyUse, `transKey`);
-			g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
-				tempPtn : searchPattern(searchPattern(0, 1) - 1, -1, g_headerObj.transKeyUse, `transKey`));
-
-			keyConfigInit();
-			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-			const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
-		}, {
+		createCss2Button(`btnPtnChangeL`, `<<`, _ => true, {
 			x: 0, y: g_sHeight - 100,
 			w: g_sWidth / 5, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+			resetFunc: _ => {
+				const tempPtn = searchPattern(g_keyObj.currentPtn - 1, -1, g_headerObj.transKeyUse, `transKey`);
+				g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
+					tempPtn : searchPattern(searchPattern(0, 1) - 1, -1, g_headerObj.transKeyUse, `transKey`));
+
+				keyConfigInit();
+				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
+			},
 		}, g_cssObj.button_Setting),
 
 		// キーコンフィグリセットボタン描画
@@ -9288,10 +9289,9 @@ function resultInit() {
 			}
 			clearTimeout(g_timeoutEvtId);
 			clearTimeout(g_timeoutEvtResultId);
-			titleInit();
 		}, {
 			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 4,
-			animationName: `smallToNormalY`,
+			animationName: `smallToNormalY`, resetFunc: _ => titleInit(),
 		}, g_cssObj.button_Back),
 
 		// リザルトデータをクリップボードへコピー
@@ -9306,17 +9306,17 @@ function resultInit() {
 		}, g_cssObj.button_Setting),
 
 		// リザルトデータをTwitterへ転送
-		createCss2Button(`btnTweet`, g_lblNameObj.b_tweet, _ => openLink(tweetResult), {
+		createCss2Button(`btnTweet`, g_lblNameObj.b_tweet, _ => true, {
 			x: g_sWidth / 4, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
 			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 8, siz: 24,
-			animationName: `smallToNormalY`,
+			animationName: `smallToNormalY`, resetFunc: _ => openLink(tweetResult),
 		}, g_cssObj.button_Tweet),
 
 		// Gitterへのリンク
-		createCss2Button(`btnGitter`, g_lblNameObj.b_gitter, _ => openLink(`https://gitter.im/danonicw/freeboard`), {
+		createCss2Button(`btnGitter`, g_lblNameObj.b_gitter, _ => true, {
 			x: g_sWidth / 2, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
 			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 8, siz: 24,
-			animationName: `smallToNormalY`,
+			animationName: `smallToNormalY`, resetFunc: _ => openLink(`https://gitter.im/danonicw/freeboard`),
 		}, g_cssObj.button_Default),
 
 		// リトライ
@@ -9326,11 +9326,10 @@ function resultInit() {
 			}
 			clearTimeout(g_timeoutEvtId);
 			clearTimeout(g_timeoutEvtResultId);
-			loadMusic();
 		}, {
 			x: g_sWidth / 4 * 3,
 			w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 4,
-			animationName: `smallToNormalY`,
+			animationName: `smallToNormalY`, resetFunc: _ => loadMusic(),
 		}, g_cssObj.button_Reset),
 	);
 	createScTextCommon(g_currentPage);
