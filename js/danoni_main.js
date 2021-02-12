@@ -8570,13 +8570,13 @@ function judgeArrow(_j) {
 
 	const currentNo = g_workObj.judgArrowCnt[_j];
 	const arrowName = `arrow${_j}_${currentNo}`;
-	const judgArrow = document.getElementById(arrowName);
+	const existJudgArrow = document.getElementById(arrowName) !== null;
 
 	const fcurrentNo = g_workObj.judgFrzCnt[_j];
 	const frzName = `frz${_j}_${fcurrentNo}`;
-	const judgFrz = document.getElementById(frzName);
+	const existJudgFrz = document.getElementById(frzName) !== null;
 
-	function judgeTargetArrow(_difFrame) {
+	const judgeTargetArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
 		if (_difCnt <= g_judgObj.arrowJ[C_JDG_UWAN]) {
 			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
@@ -8590,14 +8590,14 @@ function judgeArrow(_j) {
 			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 
-			document.querySelector(`#arrowSprite${g_attrObj[arrowName].dividePos}`).removeChild(judgArrow);
+			document.getElementById(arrowName).remove();
 			g_workObj.judgArrowCnt[_j]++;
 			return true;
 		}
 		return false;
-	}
+	};
 
-	function judgeTargetFrzArrow(_difFrame) {
+	const judgeTargetFrzArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
 		if (_difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
 			if (g_headerObj.frzStartjdgUse &&
@@ -8614,21 +8614,13 @@ function judgeArrow(_j) {
 	}
 
 	let judgeFlg = false;
-	if (judgArrow !== null && judgFrz !== null) {
-		const difFrame = g_attrObj[arrowName].cnt;
-		const frzDifFrame = g_attrObj[frzName].cnt;
-
-		if (difFrame < frzDifFrame) {
-			judgeFlg = judgeTargetArrow(difFrame);
-		} else {
-			judgeFlg = judgeTargetFrzArrow(frzDifFrame);
-		}
-	} else if (judgArrow !== null) {
-		judgeFlg = judgeTargetArrow(g_attrObj[arrowName].cnt);
-	} else if (judgFrz !== null) {
-		judgeFlg = judgeTargetFrzArrow(g_attrObj[frzName].cnt);
+	const difFrame = (existJudgArrow ? g_attrObj[arrowName].cnt : Infinity);
+	const frzDifFrame = (existJudgFrz ? g_attrObj[frzName].cnt : Infinity);
+	if (difFrame < frzDifFrame) {
+		judgeFlg = judgeTargetArrow(difFrame);
+	} else if (difFrame > frzDifFrame) {
+		judgeFlg = judgeTargetFrzArrow(frzDifFrame);
 	}
-
 	if (!judgeFlg) {
 		$id(`stepDiv${_j}`).display = C_DIS_INHERIT;
 	}
