@@ -464,12 +464,6 @@ g_hidSudObj.std[`Hid&Sud+`] = {
 // ステップゾーン位置、到達距離(後で指定)
 const C_STEP_Y = 70;
 const C_STEP_YR = 0;
-let g_stepY;
-let g_distY;
-let g_reverseStepY;
-let g_stepYR;
-let g_stepDiffY;
-let g_arrowHeight;
 
 const g_posObj = {
     stepY: 70,

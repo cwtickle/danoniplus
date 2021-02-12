@@ -3048,12 +3048,6 @@ function headerConvert(_dosObj) {
 	g_posObj.arrowHeight = g_sHeight + g_posObj.stepYR - g_posObj.stepDiffY * 2;
 	obj.bottomWordSetFlg = setVal(_dosObj.bottomWordSet, false, C_TYP_BOOLEAN);
 
-	// ステップゾーン位置 (旧変数)
-	g_stepY = g_posObj.stepY;
-	g_stepYR = g_posObj.stepYR;
-	g_distY = g_posObj.distY;
-	g_reverseStepY = g_posObj.reverseStepY;
-
 	// 矢印・フリーズアロー判定位置補正
 	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
 	g_diffObj.frzJdgY = (isNaN(parseFloat(_dosObj.frzJdgY)) ? 0 : parseFloat(_dosObj.frzJdgY));
