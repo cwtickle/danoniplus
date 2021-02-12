@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/01/17 (v19.0.0)
+ * Revised : 2021/02/12 (v20.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -45,6 +45,31 @@ let C_CLR_MAXLIFE = `#444400`;
 let C_CLR_CLEARLIFE = `#004444`;
 let C_CLR_DEFAULTLIFE = `#444444`;
 let C_CLR_BACKLIFE = `#222222`;
+
+/**
+ * ラベル文字作成（レイヤー直書き。htmlタグは使用できない）
+ * @param {string} _ctx ラベルを作成する場所のコンテキスト名
+ * @param {string} _text 表示するテキスト
+ * @param {number} _x 作成先のx座標
+ * @param {number} _y 作成先のy座標
+ * @param {number} _fontsize フォントサイズ
+ * @param {number} _fontname フォント名
+ * @param {string} _color 色 (カラーコード:#ffffff 形式 or グラデーション)
+ * @param {string} _align テキストの表示位置 (left, center, right)
+ */
+function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align) {
+    const fontFamilys = _fontname.split(`,`);
+    let fontView = ``;
+    for (let j = 0; j < fontFamilys.length; j++) {
+        fontView += `"${fontFamilys[j]}",`;
+    }
+    fontView += `sans-serif`;
+
+    _ctx.font = `${_fontsize}px ${fontView}`;
+    _ctx.textAlign = _align;
+    _ctx.fillStyle = _color;
+    _ctx.fillText(_text, _x, _y);
+}
 
 /**
 * 子div要素のラベル文字作成 (v9互換用)
