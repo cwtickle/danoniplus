@@ -770,7 +770,7 @@ function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 			_func(evt);
 		}
 		if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
-			g_btnAddFunc[_id](evt, _func(evt), resetFunc(evt));
+			g_btnAddFunc[_id](evt, _func, resetFunc);
 		}
 		if (!setVal(g_btnDeleteFlg[_id], false, C_TYP_BOOLEAN)) {
 			resetFunc(evt);
@@ -784,7 +784,7 @@ function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 				cxtFunc(evt);
 			}
 			if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
-				g_cxtAddFunc[_id](evt, cxtFunc(evt));
+				g_cxtAddFunc[_id](evt, cxtFunc);
 			}
 		} else if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
 			g_cxtAddFunc[_id](evt);
