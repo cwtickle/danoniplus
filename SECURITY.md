@@ -15,9 +15,9 @@ v17の対応終了時期はv20リリース開始時を予定しています。�
 
 | Version | Supported          | Latest Version | First Release | End of Support |
 | ------- | ------------------ |----------------|---------------|----------------|
-| v19     | :heavy_check_mark: |[v19.5.0](../../releases/tag/v19.5.0)          |2021-01-17|-|
-| v18     | :heavy_check_mark: |[v18.9.3](../../releases/tag/v18.9.3)          |2020-10-25|(At Release v21)|
-| v17     | :warning:          |[v17.5.8](../../releases/tag/v17.5.8)          |2020-09-27|(At Release v20)|
+| v19     | :heavy_check_mark: |[v19.5.1](../../releases/tag/v19.5.1)          |2021-01-17|-|
+| v18     | :heavy_check_mark: |[v18.9.4](../../releases/tag/v18.9.4)          |2020-10-25|(At Release v21)|
+| v17     | :warning:          |[v17.5.9](../../releases/tag/v17.5.9)          |2020-09-27|(At Release v20)|
 | v16     | :x:                |[v16.4.10 (final)](../../releases/tag/v16.4.10)|2020-08-06|2021-01-17|
 | v15     | :x:                |[v15.7.5 (final)](../../releases/tag/v15.7.5)  |2020-05-13|2020-10-25|
 | v14     | :heavy_check_mark: |[v14.5.17](../../releases/tag/v14.5.17)        |2020-04-29|-|
