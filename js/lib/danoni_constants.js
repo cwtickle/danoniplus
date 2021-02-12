@@ -211,15 +211,10 @@ const g_judgObj = {
     arrowJ: [2, 4, 6, 8, 8],
     frzJ: [2, 4, 8]
 };
-const C_JDG_II = 0;
-const C_JDG_SHAKIN = 1;
-const C_JDG_MATARI = 2;
-const C_JDG_SHOBON = 3;
-const C_JDG_UWAN = 4;
-
-const C_JDG_KITA = 0;
-const C_JDG_SFSF = 1;
-const C_JDG_IKNAI = 2;
+const g_judgPosObj = {
+    ii: 0, shakin: 1, matari: 2, shobon: 3, uwan: 4,
+    kita: 0, sfsf: 1, iknai: 2,
+};
 
 const C_CLR_DUMMY = `#777777`;
 

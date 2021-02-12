@@ -7684,7 +7684,7 @@ function MainInit() {
 
 		// 矢印(枠外判定、AutoPlay: OFF)
 		arrowOFF: (_j, _arrowName, _cnt) => {
-			if (_cnt < (-1) * g_judgObj.arrowJ[C_JDG_UWAN]) {
+			if (_cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.uwan]) {
 				judgeUwan(_cnt);
 				judgeObjDelete.arrow(_j, _arrowName);
 			}
@@ -7745,7 +7745,7 @@ function MainInit() {
 
 		// フリーズアロー(枠外判定)
 		frzNG: (_j, _k, _frzName, _cnt) => {
-			if (_cnt < (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+			if (_cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
 				judgeIknai(_cnt);
 				g_attrObj[_frzName].judgEndFlg = true;
 
@@ -7789,14 +7789,14 @@ function MainInit() {
 			// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
 			// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
 			// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
-			if (g_workObj.judgFrzCnt[_j] !== _k && _cnt <= g_judgObj.frzJ[C_JDG_SFSF] + 1) {
+			if (g_workObj.judgFrzCnt[_j] !== _k && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] + 1) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 
-				if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[C_JDG_KITA]) {
+				if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 				} else {
 
 					// 枠外判定前の場合、このタイミングで枠外判定を行う
-					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[C_JDG_IKNAI]) {
+					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
 						judgeIknai(_cnt);
 						if (g_headerObj.frzStartjdgUse) {
 							judgeUwan(_cnt);
@@ -8554,7 +8554,7 @@ function judgeArrow(_j) {
 
 	const judgeTargetArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
-		if (_difCnt <= g_judgObj.arrowJ[C_JDG_UWAN]) {
+		if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan]) {
 			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
 			resultFunc(_difFrame);
 			countFastSlow(_difFrame, g_headerObj.justFrames);
@@ -8575,7 +8575,7 @@ function judgeArrow(_j) {
 
 	const judgeTargetFrzArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
-		if (_difCnt <= g_judgObj.frzJ[C_JDG_SFSF] && !g_attrObj[frzName].judgEndFlg) {
+		if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] && !g_attrObj[frzName].judgEndFlg) {
 			if (g_headerObj.frzStartjdgUse &&
 				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
 				const [resultFunc] = checkJudgment(_difCnt);
