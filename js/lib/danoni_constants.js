@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/02/12 (v19.5.2)
+ * Revised : 2021/02/13 (v19.5.3)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -751,6 +751,12 @@ const g_shortcutObj = {
         Semicolon: { id: `lnkAdjustmentRR` },
         ShiftLeft_Minus: { id: `lnkAdjustmentL` },
         Minus: { id: `lnkAdjustmentLL` },
+
+        ShiftLeft_NumpadAdd: { id: `lnkAdjustmentR` },
+        NumpadAdd: { id: `lnkAdjustmentRR` },
+        ShiftLeft_NumpadSubtract: { id: `lnkAdjustmentL` },
+        NumpadSubtract: { id: `lnkAdjustmentLL` },
+
         ShiftLeft_KeyV: { id: `lnkVolumeL` },
         KeyV: { id: `lnkVolumeR` },
 
