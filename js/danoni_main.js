@@ -282,7 +282,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
 	// 対象ボタンを検索
 	const scLists = Object.keys(g_shortcutObj[_displayName]).filter(keys => {
 		const keyset = keys.split(`_`);
-		return (keyset.length > 1 ? g_inputKeyBuffer[keyset[0]] && g_inputKeyBuffer[keyset[1]] : g_inputKeyBuffer[keyset[0]]);
+		return (keyset.length > 1 ? keyIsDown(keyset[0]) && keyIsDown(keyset[1]) : keyIsDown(keyset[0]));
 	});
 	if (scLists.length > 0) {
 		// リンク先にジャンプする場合はonkeyUpイベントが動かないため、事前にキー状態をリセット
@@ -4114,11 +4114,9 @@ function createOptionWindow(_sprite) {
 		 * @param {string} _data 
 		 * @param {object} _obj 
 		 */
-		const makeDifInfoLabel = (_lbl, _data, { _x = 130, _y = 25, _w = 125, _h = 35, _siz = C_SIZ_DIFSELECTOR, ...rest } = {}) => {
+		const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = C_SIZ_DIFSELECTOR, ...rest } = {}) => {
 			detailToolDif.appendChild(
-				createDivCss2Label(_lbl, _data, {
-					x: _x, y: _y, w: _w, h: _h, siz: _siz, align: C_ALIGN_LEFT, ...rest
-				})
+				createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest })
 			);
 		}
 
