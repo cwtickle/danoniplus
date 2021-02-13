@@ -751,6 +751,12 @@ const g_shortcutObj = {
         Semicolon: { id: `lnkAdjustmentRR` },
         ShiftLeft_Minus: { id: `lnkAdjustmentL` },
         Minus: { id: `lnkAdjustmentLL` },
+
+        ShiftLeft_NumpadAdd: { id: `lnkAdjustmentR` },
+        NumpadAdd: { id: `lnkAdjustmentRR` },
+        ShiftLeft_NumpadSubtract: { id: `lnkAdjustmentL` },
+        NumpadSubtract: { id: `lnkAdjustmentLL` },
+
         ShiftLeft_KeyV: { id: `lnkVolumeL` },
         KeyV: { id: `lnkVolumeR` },
 
