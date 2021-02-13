@@ -518,6 +518,35 @@ function getStrLength(_str) {
 }
 
 /**
+ * フォントサイズに応じた横幅を取得
+ * @param {string} _str 
+ * @param {number} _fontsize 
+ * @param {string} _font 
+ */
+function getStrWidth(_str, _fontsize, _font) {
+	const ctx = document.createElement(`canvas`).getContext(`2d`);
+	ctx.font = `${_fontsize}px ${_font}`;
+	return ctx.measureText(_str).width;
+}
+
+/**
+ * 指定した横幅に合ったフォントサイズを取得
+ * @param {string} _str 
+ * @param {number} _maxWidth 
+ * @param {string} _font 
+ * @param {number} _maxFontsize
+ */
+function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64) {
+	const minSiz = 5;
+	for (let siz = _maxFontsize; siz >= minSiz; siz--) {
+		if (_maxWidth >= getStrWidth(_str, siz, _font)) {
+			return siz;
+		}
+	}
+	return minSiz;
+}
+
+/**
  * 左パディング
  * @param {string} _str 元の文字列 
  * @param {number} _length パディング後の長さ 
@@ -2232,9 +2261,14 @@ function titleInit() {
 			});
 		});
 
-		let titlefontsize = 64 * (12 / g_headerObj.musicTitleForView[0].length);
-		if (titlefontsize >= 64) {
-			titlefontsize = 64;
+		let titlefontsize = 64;
+		for (let j = 0; j < g_headerObj.musicTitleForView.length; j++) {
+			if (g_headerObj.musicTitleForView[j] !== ``) {
+				const tmpSize = getFontSize(g_headerObj.musicTitleForView[j], g_sWidth - 100, g_headerObj.titlefonts[j]);
+				if (titlefontsize > tmpSize) {
+					titlefontsize = tmpSize;
+				}
+			}
 		}
 
 		// 変数 titlesize の定義 (使用例： |titlesize=40$20|)
@@ -4594,11 +4628,8 @@ function createOptionWindow(_sprite) {
 
 		// 譜面名設定 (Difficulty)
 		lnkDifficulty.innerHTML = `${g_keyObj.currentKey} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-		if (getStrLength(lnkDifficulty.textContent) > 25) {
-			lnkDifficulty.style.fontSize = `14px`;
-		} else if (getStrLength(lnkDifficulty.textContent) > 18) {
-			lnkDifficulty.style.fontSize = `16px`;
-		}
+		lnkDifficulty.style.fontSize = `${getFontSize(lnkDifficulty.textContent,
+			parseFloat(lnkDifficulty.style.width), getBasicFont(), C_SIZ_SETMINI)}px`;
 		if (g_headerObj.makerView) {
 			lnkDifficulty.innerHTML += `<br>(${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
 			lnkDifficulty.style.fontSize = `14px`;
