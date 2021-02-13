@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/02/12
+ * Revised : 2021/02/13
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 20.0.0`;
-const g_revisedDate = `2021/02/12`;
+const g_version = `Ver 20.1.0`;
+const g_revisedDate = `2021/02/13`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -282,7 +282,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
 	// 対象ボタンを検索
 	const scLists = Object.keys(g_shortcutObj[_displayName]).filter(keys => {
 		const keyset = keys.split(`_`);
-		return (keyset.length > 1 ? g_inputKeyBuffer[keyset[0]] && g_inputKeyBuffer[keyset[1]] : g_inputKeyBuffer[keyset[0]]);
+		return (keyset.length > 1 ? keyIsDown(keyset[0]) && keyIsDown(keyset[1]) : keyIsDown(keyset[0]));
 	});
 	if (scLists.length > 0) {
 		// リンク先にジャンプする場合はonkeyUpイベントが動かないため、事前にキー状態をリセット
@@ -515,6 +515,35 @@ function getStrLength(_str) {
 	}
 	//結果を返す
 	return result;
+}
+
+/**
+ * フォントサイズに応じた横幅を取得
+ * @param {string} _str 
+ * @param {number} _fontsize 
+ * @param {string} _font 
+ */
+function getStrWidth(_str, _fontsize, _font) {
+	const ctx = document.createElement(`canvas`).getContext(`2d`);
+	ctx.font = `${_fontsize}px ${_font}`;
+	return ctx.measureText(_str).width;
+}
+
+/**
+ * 指定した横幅に合ったフォントサイズを取得
+ * @param {string} _str 
+ * @param {number} _maxWidth 
+ * @param {string} _font 
+ * @param {number} _maxFontsize
+ */
+function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64) {
+	const minSiz = 5;
+	for (let siz = _maxFontsize; siz >= minSiz; siz--) {
+		if (_maxWidth >= getStrWidth(_str, siz, _font)) {
+			return siz;
+		}
+	}
+	return minSiz;
 }
 
 /**
@@ -2232,9 +2261,14 @@ function titleInit() {
 			});
 		});
 
-		let titlefontsize = 64 * (12 / g_headerObj.musicTitleForView[0].length);
-		if (titlefontsize >= 64) {
-			titlefontsize = 64;
+		let titlefontsize = 64;
+		for (let j = 0; j < g_headerObj.musicTitleForView.length; j++) {
+			if (g_headerObj.musicTitleForView[j] !== ``) {
+				const tmpSize = getFontSize(g_headerObj.musicTitleForView[j], g_sWidth - 100, g_headerObj.titlefonts[j]);
+				if (titlefontsize > tmpSize) {
+					titlefontsize = tmpSize;
+				}
+			}
 		}
 
 		// 変数 titlesize の定義 (使用例： |titlesize=40$20|)
@@ -4114,11 +4148,9 @@ function createOptionWindow(_sprite) {
 		 * @param {string} _data 
 		 * @param {object} _obj 
 		 */
-		const makeDifInfoLabel = (_lbl, _data, { _x = 130, _y = 25, _w = 125, _h = 35, _siz = C_SIZ_DIFSELECTOR, ...rest } = {}) => {
+		const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = C_SIZ_DIFSELECTOR, ...rest } = {}) => {
 			detailToolDif.appendChild(
-				createDivCss2Label(_lbl, _data, {
-					x: _x, y: _y, w: _w, h: _h, siz: _siz, align: C_ALIGN_LEFT, ...rest
-				})
+				createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest })
 			);
 		}
 
@@ -4594,11 +4626,8 @@ function createOptionWindow(_sprite) {
 
 		// 譜面名設定 (Difficulty)
 		lnkDifficulty.innerHTML = `${g_keyObj.currentKey} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
-		if (getStrLength(lnkDifficulty.textContent) > 25) {
-			lnkDifficulty.style.fontSize = `14px`;
-		} else if (getStrLength(lnkDifficulty.textContent) > 18) {
-			lnkDifficulty.style.fontSize = `16px`;
-		}
+		lnkDifficulty.style.fontSize = `${getFontSize(lnkDifficulty.textContent,
+			parseFloat(lnkDifficulty.style.width), getBasicFont(), C_SIZ_SETMINI)}px`;
 		if (g_headerObj.makerView) {
 			lnkDifficulty.innerHTML += `<br>(${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
 			lnkDifficulty.style.fontSize = `14px`;
