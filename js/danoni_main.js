@@ -4627,7 +4627,7 @@ function createOptionWindow(_sprite) {
 		// 譜面名設定 (Difficulty)
 		lnkDifficulty.innerHTML = `${g_keyObj.currentKey} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 		lnkDifficulty.style.fontSize = `${getFontSize(lnkDifficulty.textContent,
-			parseFloat(lnkDifficulty.style.width), getBasicFont(), C_SIZ_SETMINI)}px`;
+			parseFloat(lnkDifficulty.style.width), getBasicFont(), C_SIZ_SETLBL)}px`;
 		if (g_headerObj.makerView) {
 			lnkDifficulty.innerHTML += `<br>(${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
 			lnkDifficulty.style.fontSize = `14px`;
