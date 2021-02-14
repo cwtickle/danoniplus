@@ -4625,12 +4625,17 @@ function createOptionWindow(_sprite) {
 		// 3. 名称の設定
 
 		// 譜面名設定 (Difficulty)
+		const difWidth = parseFloat(lnkDifficulty.style.width);
 		lnkDifficulty.innerHTML = `${g_keyObj.currentKey} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 		lnkDifficulty.style.fontSize = `${getFontSize(lnkDifficulty.textContent,
-			parseFloat(lnkDifficulty.style.width), getBasicFont(), C_SIZ_SETLBL)}px`;
+			difWidth, getBasicFont(), C_SIZ_SETLBL)}px`;
 		if (g_headerObj.makerView) {
-			lnkDifficulty.innerHTML += `<br>(${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
-			lnkDifficulty.style.fontSize = `14px`;
+			const difNames = [lnkDifficulty.textContent, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`];
+			difNames.forEach((difName, j) => {
+				const tmpSize = getFontSize(difName, difWidth, getBasicFont(), 14);
+				difNames[j] = `<span style="font-size:${tmpSize}px">${difName}</span>`;
+			});
+			lnkDifficulty.innerHTML = difNames.join(``);
 		}
 
 		// 速度設定 (Speed)
