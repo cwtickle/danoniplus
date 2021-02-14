@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/02/13
+ * Revised : 2021/02/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 20.1.0`;
-const g_revisedDate = `2021/02/13`;
+const g_version = `Ver 20.1.1`;
+const g_revisedDate = `2021/02/14`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4625,12 +4625,17 @@ function createOptionWindow(_sprite) {
 		// 3. 名称の設定
 
 		// 譜面名設定 (Difficulty)
+		const difWidth = parseFloat(lnkDifficulty.style.width);
 		lnkDifficulty.innerHTML = `${g_keyObj.currentKey} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`;
 		lnkDifficulty.style.fontSize = `${getFontSize(lnkDifficulty.textContent,
-			parseFloat(lnkDifficulty.style.width), getBasicFont(), C_SIZ_SETMINI)}px`;
+			difWidth, getBasicFont(), C_SIZ_SETLBL)}px`;
 		if (g_headerObj.makerView) {
-			lnkDifficulty.innerHTML += `<br>(${g_headerObj.creatorNames[g_stateObj.scoreId]})`;
-			lnkDifficulty.style.fontSize = `14px`;
+			const difNames = [lnkDifficulty.textContent, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`];
+			difNames.forEach((difName, j) => {
+				const tmpSize = getFontSize(difName, difWidth, getBasicFont(), 14);
+				difNames[j] = `<span style="font-size:${tmpSize}px">${difName}</span>`;
+			});
+			lnkDifficulty.innerHTML = difNames.join(``);
 		}
 
 		// 速度設定 (Speed)
