@@ -51,6 +51,7 @@ const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) 
 
 window.onload = _ => {
 	g_loadObj.main = true;
+	g_currentPage = `initial`;
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
@@ -775,7 +776,7 @@ function deleteChildspriteAll(_parentObjName) {
  * @param {...any} _classes 
  */
 function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight - 100, w = g_sWidth / 3, h = C_BTN_HEIGHT,
-	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``,
+	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, displayName = g_currentPage, pointerEvents = C_DIS_NONE,
 	resetFunc = _ => true, cxtFunc = _ => true, ...rest } = {}, ..._classes) {
 
 	const div = createDiv(_id, x, y, w, h);
@@ -792,6 +793,13 @@ function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 		style.animationDuration = `1s`;
 	}
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
+
+	// ボタン有効化操作
+	if (pointerEvents === C_DIS_NONE) {
+		style.pointerEvents = C_DIS_NONE;
+		setTimeout(_ => style.pointerEvents = `auto`,
+			g_initialFlg && g_btnWaitTime[displayName].initial ? 0 : g_btnWaitTime[displayName].b_time);
+	}
 
 	// ボタンを押したときの動作
 	const lsnrkey = g_handler.addListener(div, `click`, evt => {
@@ -2196,7 +2204,7 @@ const setShortcutEvent = (_displayName, _func = _ => true) => {
 			document.onkeydown = evt => commonKeyDown(evt, g_currentPage, _func);
 			document.onkeyup = evt => commonKeyUp(evt);
 		}
-	}, g_shortcutWaitTime[_displayName]);
+	}, (g_initialFlg && g_btnWaitTime[_displayName].initial ? 0 : g_btnWaitTime[_displayName].s_time));
 }
 
 /**
