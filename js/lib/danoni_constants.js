@@ -826,7 +826,7 @@ const g_shortcutObj = {
 // initial: 初回のみ有効化時間を設定する場合、trueを設定
 const g_btnWaitFrame = {
     initial: { b_frame: 0, s_frame: 0 },
-    title: { b_frame: 0, s_frame: 0, initial: true },
+    title: { b_frame: 0, s_frame: 0 },
     option: { b_frame: 0, s_frame: 0, initial: true },
     settingsDisplay: { b_frame: 0, s_frame: 0 },
     loading: { b_frame: 0, s_frame: 0 },

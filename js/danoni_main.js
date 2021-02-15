@@ -796,9 +796,12 @@ function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 
 	// ボタン有効化操作
 	if (initDisabledFlg) {
-		style.pointerEvents = C_DIS_NONE;
-		setTimeout(_ => style.pointerEvents = setVal(rest.pointerEvents, `auto`, C_TYP_STRING),
-			g_initialFlg && g_btnWaitFrame[groupName].initial ? 0 : g_btnWaitFrame[groupName].b_frame) * 1000 / g_fps;
+		if (g_initialFlg && g_btnWaitFrame[groupName].initial) {
+		} else {
+			style.pointerEvents = C_DIS_NONE;
+			setTimeout(_ => style.pointerEvents = setVal(rest.pointerEvents, `auto`, C_TYP_STRING),
+				g_btnWaitFrame[groupName].b_frame * 1000 / g_fps);
+		}
 	}
 
 	// ボタンを押したときの動作
@@ -2196,15 +2199,23 @@ const createScTextCommon = _displayName => {
 
 /**
  * ショートカットキー有効化
- * @param {string} _displayName 
+ * @param {string} _displayName
+ * @param {function} _func 
  */
 const setShortcutEvent = (_displayName, _func = _ => true) => {
-	setTimeout(_ => {
-		if (g_currentPage === _displayName) {
-			document.onkeydown = evt => commonKeyDown(evt, g_currentPage, _func);
-			document.onkeyup = evt => commonKeyUp(evt);
-		}
-	}, (g_initialFlg && g_btnWaitFrame[_displayName].initial ? 0 : g_btnWaitFrame[_displayName].s_frame) * 1000 / g_fps);
+	const evList = _ => {
+		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func);
+		document.onkeyup = evt => commonKeyUp(evt);
+	}
+	if (g_initialFlg && g_btnWaitFrame[_displayName].initial) {
+		evList();
+	} else {
+		setTimeout(_ => {
+			if (g_currentPage === _displayName) {
+				evList();
+			}
+		}, g_btnWaitFrame[_displayName].s_frame * 1000 / g_fps);
+	}
 }
 
 /**
