@@ -290,7 +290,10 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
 			g_inputKeyBuffer[setCode] = false;
 		}
 		// 対象ボタン処理を実行
-		document.getElementById(g_shortcutObj[_displayName][scLists[0]].id).click();
+		const targetId = document.getElementById(g_shortcutObj[_displayName][scLists[0]].id);
+		if (targetId !== null && targetId.style.display !== C_DIS_NONE) {
+			targetId.click();
+		}
 		return blockCode(setCode);
 	}
 	_func(setCode);
@@ -2181,9 +2184,10 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
  * @param {string} _displayName 
  */
 const createScTextCommon = _displayName => {
-	Object.keys(g_btnPatterns[_displayName]).forEach(target =>
-		createScText(document.getElementById(`btn${target}`), target,
-			{ displayName: _displayName, targetLabel: `btn${target}`, x: g_btnPatterns[_displayName][target] }));
+	Object.keys(g_btnPatterns[_displayName]).filter(target => document.getElementById(`btn${target}`) !== null)
+		.forEach(target =>
+			createScText(document.getElementById(`btn${target}`), target,
+				{ displayName: _displayName, targetLabel: `btn${target}`, x: g_btnPatterns[_displayName][target] }));
 }
 
 /**
