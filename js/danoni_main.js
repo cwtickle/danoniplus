@@ -2187,6 +2187,19 @@ const createScTextCommon = _displayName => {
 }
 
 /**
+ * ショートカットキー有効化
+ * @param {string} _displayName 
+ */
+const setShortcutEvent = (_displayName, _func = _ => true) => {
+	setTimeout(_ => {
+		if (g_currentPage === _displayName) {
+			document.onkeydown = evt => commonKeyDown(evt, g_currentPage, _func);
+			document.onkeyup = evt => commonKeyUp(evt);
+		}
+	}, g_shortcutWaitTime[_displayName]);
+}
+
+/**
  *  タイトル画面初期化
  */
 function titleInit() {
@@ -2505,8 +2518,7 @@ function titleInit() {
 	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-	document.onkeyup = evt => commonKeyUp(evt);
+	setShortcutEvent(g_currentPage);
 
 	document.oncontextmenu = _ => true;
 	divRoot.oncontextmenu = _ => false;
@@ -3700,8 +3712,7 @@ function optionInit() {
 	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-	document.onkeyup = evt => commonKeyUp(evt);
+	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = _ => true;
 	g_initialFlg = true;
 
@@ -4909,12 +4920,10 @@ function settingsDisplayInit() {
 
 	// ボタン描画
 	commonSettingBtn(`Settings`);
-
 	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-	document.onkeyup = evt => commonKeyUp(evt);
+	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = _ => true;
 
 	if (typeof skinSettingsDisplayInit === C_TYP_FUNCTION) {
@@ -5377,7 +5386,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	createScTextCommon(g_currentPage);
 
 	// キーボード押下時処理
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage, setCode => {
+	setShortcutEvent(g_currentPage, setCode => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -9398,13 +9407,7 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	setTimeout(_ => {
-		if (g_currentPage === `result`) {
-			document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-			document.onkeyup = evt => commonKeyUp(evt);
-		}
-	}, g_shortcutWaitTime.result);
-
+	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = _ => true;
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {

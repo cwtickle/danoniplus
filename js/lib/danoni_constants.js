@@ -821,8 +821,12 @@ const g_shortcutObj = {
     },
 };
 
-// ショートカットキーの有効化時間（ミリ秒）※結果画面のみ利用
+// ショートカットキーの有効化時間（ミリ秒）
 const g_shortcutWaitTime = {
+    title: 0,
+    option: 0,
+    settingsDisplay: 0,
+    keyConfig: 0,
     result: 2000,
 };
 
