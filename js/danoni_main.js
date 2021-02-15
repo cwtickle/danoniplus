@@ -772,11 +772,11 @@ function deleteChildspriteAll(_parentObjName) {
  * @param {string} _id 
  * @param {string} _text
  * @param {function} _func
- * @param {object} _obj (x, y, w, h, siz, align, ...rest)
+ * @param {object} _obj (x, y, w, h, siz, align, title, groupName, initDisabledFlg, ...rest)
  * @param {...any} _classes 
  */
 function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight - 100, w = g_sWidth / 3, h = C_BTN_HEIGHT,
-	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, displayName = g_currentPage, pointerEvents = C_DIS_NONE,
+	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, groupName = g_currentPage, initDisabledFlg = true,
 	resetFunc = _ => true, cxtFunc = _ => true, ...rest } = {}, ..._classes) {
 
 	const div = createDiv(_id, x, y, w, h);
@@ -795,10 +795,10 @@ function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 
 	// ボタン有効化操作
-	if (pointerEvents === C_DIS_NONE) {
+	if (initDisabledFlg) {
 		style.pointerEvents = C_DIS_NONE;
-		setTimeout(_ => style.pointerEvents = `auto`,
-			g_initialFlg && g_btnWaitTime[displayName].initial ? 0 : g_btnWaitTime[displayName].b_time);
+		setTimeout(_ => style.pointerEvents = setVal(rest.pointerEvents, `auto`, C_TYP_STRING),
+			g_initialFlg && g_btnWaitTime[groupName].initial ? 0 : g_btnWaitTime[groupName].b_time);
 	}
 
 	// ボタンを押したときの動作

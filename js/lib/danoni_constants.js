@@ -828,9 +828,9 @@ const g_btnWaitTime = {
     initial: { b_time: 0, s_time: 0 },
     title: { b_time: 0, s_time: 0, initial: true },
     option: { b_time: 0, s_time: 0, initial: true },
+    settingsDisplay: { b_time: 0, s_time: 0 },
     loading: { b_time: 0, s_time: 0 },
     main: { b_time: 0, s_time: 0 },
-    settingsDisplay: { b_time: 0, s_time: 0 },
     keyConfig: { b_time: 0, s_time: 0 },
     result: { b_time: 0, s_time: 2000 },
 };
