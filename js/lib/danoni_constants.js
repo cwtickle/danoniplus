@@ -821,18 +821,18 @@ const g_shortcutObj = {
     },
 };
 
-// ボタン・ショートカットキーの有効化時間（ミリ秒）
-// b_time: ボタンの有効化時間、s_time: ショートカットキーの有効化時間
+// ボタン・ショートカットキーの有効化時間（フレーム数）
+// b_frame: ボタンの有効化フレーム数、s_frame: ショートカットキーの有効化フレーム数
 // initial: 初回のみ有効化時間を設定する場合、trueを設定
-const g_btnWaitTime = {
-    initial: { b_time: 0, s_time: 0 },
-    title: { b_time: 0, s_time: 0, initial: true },
-    option: { b_time: 0, s_time: 0, initial: true },
-    settingsDisplay: { b_time: 0, s_time: 0 },
-    loading: { b_time: 0, s_time: 0 },
-    main: { b_time: 0, s_time: 0 },
-    keyConfig: { b_time: 0, s_time: 0 },
-    result: { b_time: 0, s_time: 2000 },
+const g_btnWaitFrame = {
+    initial: { b_frame: 0, s_frame: 0 },
+    title: { b_frame: 0, s_frame: 0, initial: true },
+    option: { b_frame: 0, s_frame: 0, initial: true },
+    settingsDisplay: { b_frame: 0, s_frame: 0 },
+    loading: { b_frame: 0, s_frame: 0 },
+    main: { b_frame: 0, s_frame: 0 },
+    keyConfig: { b_frame: 0, s_frame: 0 },
+    result: { b_frame: 0, s_frame: 120 },
 };
 
 // 主要ボタンのリスト

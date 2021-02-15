@@ -798,7 +798,7 @@ function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 	if (initDisabledFlg) {
 		style.pointerEvents = C_DIS_NONE;
 		setTimeout(_ => style.pointerEvents = setVal(rest.pointerEvents, `auto`, C_TYP_STRING),
-			g_initialFlg && g_btnWaitTime[groupName].initial ? 0 : g_btnWaitTime[groupName].b_time);
+			g_initialFlg && g_btnWaitFrame[groupName].initial ? 0 : g_btnWaitFrame[groupName].b_frame) * 1000 / g_fps;
 	}
 
 	// ボタンを押したときの動作
@@ -2204,7 +2204,7 @@ const setShortcutEvent = (_displayName, _func = _ => true) => {
 			document.onkeydown = evt => commonKeyDown(evt, g_currentPage, _func);
 			document.onkeyup = evt => commonKeyUp(evt);
 		}
-	}, (g_initialFlg && g_btnWaitTime[_displayName].initial ? 0 : g_btnWaitTime[_displayName].s_time));
+	}, (g_initialFlg && g_btnWaitFrame[_displayName].initial ? 0 : g_btnWaitFrame[_displayName].s_frame) * 1000 / g_fps);
 }
 
 /**
