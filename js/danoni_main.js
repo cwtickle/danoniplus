@@ -104,8 +104,6 @@ let g_maxScore = 1000000;
 let g_gameOverFlg = false;
 let g_finishFlg = true;
 
-const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
-
 /** 共通オブジェクト */
 const g_loadObj = {};
 const g_rootObj = {};
@@ -1873,10 +1871,6 @@ function makePlayButton(_func) {
  * @param {string} _url 
  */
 function setAudio(_url) {
-	const ua = navigator.userAgent;
-	const isIOS = ua.indexOf(`iPhone`) >= 0
-		|| ua.indexOf(`iPad`) >= 0
-		|| ua.indexOf(`iPod`) >= 0;
 
 	const loadMp3 = _ => {
 		if (location.href.match(`^file`)) {
@@ -1891,7 +1885,7 @@ function setAudio(_url) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
-				if (isIOS) {
+				if (g_isIos) {
 					lblLoading.textContent = `Click to Start!`;
 					divRoot.appendChild(
 						makePlayButton(evt => {
@@ -1908,7 +1902,7 @@ function setAudio(_url) {
 			}
 		});
 
-	} else if (isIOS) {
+	} else if (g_isIos) {
 		lblLoading.textContent = `Click to Start!`;
 		divRoot.appendChild(
 			makePlayButton(evt => {

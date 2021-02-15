@@ -32,6 +32,9 @@ const C_LNK_HEIGHT = 20;
 // スプライト（ムービークリップ相当）のルート
 const C_SPRITE_ROOT = `divRoot`;
 
+const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
+const g_isIos = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`]);
+
 // 変数型
 const C_TYP_BOOLEAN = `boolean`;
 const C_TYP_NUMBER = `number`;
@@ -768,6 +771,7 @@ const g_shortcutObj = {
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
+        ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
     },
     settingsDisplay: {
@@ -807,6 +811,7 @@ const g_shortcutObj = {
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
+        ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnSettings` },
     },
     keyConfig: {
@@ -814,7 +819,8 @@ const g_shortcutObj = {
     },
     result: {
         Escape: { id: `btnBack` },
-        KeyC: { id: `btnCopy` },
+        ShiftLeft_Tab: { id: `btnBack` },
+        KeyC: { id: `btnCopy`, reset: true },
         KeyT: { id: `btnTweet`, reset: true },
         KeyG: { id: `btnGitter`, reset: true },
         Backspace: { id: `btnRetry` },
