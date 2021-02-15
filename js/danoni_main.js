@@ -291,7 +291,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
 		}
 		// 対象ボタン処理を実行
 		const targetId = document.getElementById(g_shortcutObj[_displayName][scLists[0]].id);
-		if (targetId !== null && targetId.style.display !== C_DIS_NONE) {
+		if (targetId !== null && targetId.style.display !== C_DIS_NONE && targetId.style.pointerEvents !== C_DIS_NONE) {
 			targetId.click();
 		}
 		return blockCode(setCode);
