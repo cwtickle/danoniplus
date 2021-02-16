@@ -51,6 +51,7 @@ const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) 
 
 window.onload = _ => {
 	g_loadObj.main = true;
+	g_currentPage = `initial`;
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
@@ -772,11 +773,11 @@ function deleteChildspriteAll(_parentObjName) {
  * @param {string} _id 
  * @param {string} _text
  * @param {function} _func
- * @param {object} _obj (x, y, w, h, siz, align, ...rest)
+ * @param {object} _obj (x, y, w, h, siz, align, title, groupName, initDisabledFlg, ...rest)
  * @param {...any} _classes 
  */
 function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight - 100, w = g_sWidth / 3, h = C_BTN_HEIGHT,
-	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``,
+	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, groupName = g_currentPage, initDisabledFlg = true,
 	resetFunc = _ => true, cxtFunc = _ => true, ...rest } = {}, ..._classes) {
 
 	const div = createDiv(_id, x, y, w, h);
@@ -793,6 +794,16 @@ function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 		style.animationDuration = `1s`;
 	}
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
+
+	// ボタン有効化操作
+	if (initDisabledFlg) {
+		if (g_initialFlg && g_btnWaitFrame[groupName].initial) {
+		} else {
+			style.pointerEvents = C_DIS_NONE;
+			setTimeout(_ => style.pointerEvents = setVal(rest.pointerEvents, `auto`, C_TYP_STRING),
+				g_btnWaitFrame[groupName].b_frame * 1000 / g_fps);
+		}
+	}
 
 	// ボタンを押したときの動作
 	const lsnrkey = g_handler.addListener(div, `click`, evt => {
@@ -2185,6 +2196,27 @@ const createScTextCommon = _displayName => {
 }
 
 /**
+ * ショートカットキー有効化
+ * @param {string} _displayName
+ * @param {function} _func 
+ */
+const setShortcutEvent = (_displayName, _func = _ => true) => {
+	const evList = _ => {
+		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func);
+		document.onkeyup = evt => commonKeyUp(evt);
+	}
+	if (g_initialFlg && g_btnWaitFrame[_displayName].initial) {
+		evList();
+	} else {
+		setTimeout(_ => {
+			if (g_currentPage === _displayName) {
+				evList();
+			}
+		}, g_btnWaitFrame[_displayName].s_frame * 1000 / g_fps);
+	}
+}
+
+/**
  *  タイトル画面初期化
  */
 function titleInit() {
@@ -2503,8 +2535,7 @@ function titleInit() {
 	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-	document.onkeyup = evt => commonKeyUp(evt);
+	setShortcutEvent(g_currentPage);
 
 	document.oncontextmenu = _ => true;
 	divRoot.oncontextmenu = _ => false;
@@ -3698,8 +3729,7 @@ function optionInit() {
 	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-	document.onkeyup = evt => commonKeyUp(evt);
+	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = _ => true;
 	g_initialFlg = true;
 
@@ -4907,12 +4937,10 @@ function settingsDisplayInit() {
 
 	// ボタン描画
 	commonSettingBtn(`Settings`);
-
 	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-	document.onkeyup = evt => commonKeyUp(evt);
+	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = _ => true;
 
 	if (typeof skinSettingsDisplayInit === C_TYP_FUNCTION) {
@@ -5377,7 +5405,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	createScTextCommon(g_currentPage);
 
 	// キーボード押下時処理
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage, setCode => {
+	setShortcutEvent(g_currentPage, setCode => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -9406,13 +9434,7 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	setTimeout(_ => {
-		if (g_currentPage === `result`) {
-			document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-			document.onkeyup = evt => commonKeyUp(evt);
-		}
-	}, g_shortcutWaitTime.result);
-
+	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = _ => true;
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {
