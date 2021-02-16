@@ -34,6 +34,7 @@ const C_SPRITE_ROOT = `divRoot`;
 
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 const g_isIos = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`]);
+const g_isMac = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`, `mac os`]);
 
 // 変数型
 const C_TYP_BOOLEAN = `boolean`;
@@ -1922,7 +1923,7 @@ const g_lblNameObj = {
     config: `CONFIG`,
     result: `RESULT`,
 
-    kcDesc: `[BackSpaceキー:スキップ / Deleteキー:(代替キーのみ)キー無効化]`,
+    kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
     sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
     kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
     transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
