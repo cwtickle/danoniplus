@@ -104,8 +104,6 @@ let g_maxScore = 1000000;
 let g_gameOverFlg = false;
 let g_finishFlg = true;
 
-const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
-
 /** 共通オブジェクト */
 const g_loadObj = {};
 const g_rootObj = {};
@@ -1865,10 +1863,6 @@ function makePlayButton(_func) {
  * @param {string} _url 
  */
 function setAudio(_url) {
-	const ua = navigator.userAgent;
-	const isIOS = ua.indexOf(`iPhone`) >= 0
-		|| ua.indexOf(`iPad`) >= 0
-		|| ua.indexOf(`iPod`) >= 0;
 
 	const loadMp3 = _ => {
 		if (location.href.match(`^file`)) {
@@ -1883,7 +1877,7 @@ function setAudio(_url) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
-				if (isIOS) {
+				if (g_isIos) {
 					lblLoading.textContent = `Click to Start!`;
 					divRoot.appendChild(
 						makePlayButton(evt => {
@@ -1900,7 +1894,7 @@ function setAudio(_url) {
 			}
 		});
 
-	} else if (isIOS) {
+	} else if (g_isIos) {
 		lblLoading.textContent = `Click to Start!`;
 		divRoot.appendChild(
 			makePlayButton(evt => {
@@ -5085,7 +5079,8 @@ function keyConfigInit(_kcType = g_kcType) {
 			`<div class="settings_Title">${g_lblNameObj.key}</div><div class="settings_Title2">${g_lblNameObj.config}</div>`
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
-		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc, {
+		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_isMac ? `Delete` : `BackSpace`)
+			.split(`{1}:`).join(g_isMac ? `` : `Delete:`), {
 			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		}),
 
@@ -5209,13 +5204,14 @@ function keyConfigInit(_kcType = g_kcType) {
 		lnkColorType.textContent = `${g_colorType}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	}
 
+	const macRetryCode = g_kCd[g_headerObj.keyRetry === C_KEY_RETRY ? C_KEY_TITLEBACK : g_headerObj.keyRetry];
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
 		createDivCss2Label(
 			`scMsg`,
-			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_kCd[g_headerObj.keyTitleBack])
-				.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]),
+			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${macRetryCode}` : g_kCd[g_headerObj.keyTitleBack])
+				.split(`{1}`).join(g_isMac ? macRetryCode : g_kCd[g_headerObj.keyRetry]),
 			{
 				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 			}),
@@ -5388,13 +5384,13 @@ function keyConfigInit(_kcType = g_kcType) {
 		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
 			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
 			return;
-		} else if ((setKey === 46 && g_currentk === 0) ||
+		} else if ((setKey === C_KEY_TITLEBACK && g_currentk === 0) ||
 			(keyIsDown(`MetaLeft`) && keyIsDown(`ShiftLeft`))) {
 			return;
 		}
-		if (setKey === 8) {
+		if (setKey === C_KEY_RETRY && (!g_isMac || (g_isMac && g_currentk === 0))) {
 		} else {
-			if (setKey === 46) {
+			if (setKey === C_KEY_TITLEBACK || setKey === C_KEY_RETRY) {
 				setKey = 0;
 			}
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][g_currentj][g_currentk] !== setKey) {
@@ -7576,7 +7572,15 @@ function MainInit() {
 
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
-			if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
+
+			if (g_isMac && keyIsDown(`ShiftLeft`)) {
+				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
+				g_audio.pause();
+				clearTimeout(g_timeoutEvtId);
+				titleInit();
+
+			} else if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
+				// 連打対策として指定ボリュームになるまでリトライを禁止
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
 				clearWindow();
