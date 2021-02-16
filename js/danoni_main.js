@@ -5208,13 +5208,14 @@ function keyConfigInit(_kcType = g_kcType) {
 		lnkColorType.textContent = `${g_colorType}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	}
 
+	const macRetryCode = g_kCd[g_headerObj.keyRetry === C_KEY_RETRY ? C_KEY_TITLEBACK : g_headerObj.keyRetry];
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
 		createDivCss2Label(
 			`scMsg`,
-			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+Delete` : g_kCd[g_headerObj.keyTitleBack])
-				.split(`{1}`).join(g_isMac ? `Delete` : g_kCd[g_headerObj.keyRetry]),
+			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${macRetryCode}` : g_kCd[g_headerObj.keyTitleBack])
+				.split(`{1}`).join(g_isMac ? macRetryCode : g_kCd[g_headerObj.keyRetry]),
 			{
 				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 			}),
