@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/02/14
+ * Revised : 2021/02/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 20.1.2`;
-const g_revisedDate = `2021/02/14`;
+const g_version = `Ver 20.2.0`;
+const g_revisedDate = `2021/02/16`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -51,6 +51,7 @@ const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) 
 
 window.onload = _ => {
 	g_loadObj.main = true;
+	g_currentPage = `initial`;
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
@@ -103,8 +104,6 @@ let g_baseDisp = `Settings`;
 let g_maxScore = 1000000;
 let g_gameOverFlg = false;
 let g_finishFlg = true;
-
-const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 
 /** 共通オブジェクト */
 const g_loadObj = {};
@@ -290,7 +289,10 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
 			g_inputKeyBuffer[setCode] = false;
 		}
 		// 対象ボタン処理を実行
-		document.getElementById(g_shortcutObj[_displayName][scLists[0]].id).click();
+		const targetId = document.getElementById(g_shortcutObj[_displayName][scLists[0]].id);
+		if (targetId !== null && targetId.style.display !== C_DIS_NONE && targetId.style.pointerEvents !== C_DIS_NONE) {
+			targetId.click();
+		}
 		return blockCode(setCode);
 	}
 	_func(setCode);
@@ -771,11 +773,11 @@ function deleteChildspriteAll(_parentObjName) {
  * @param {string} _id 
  * @param {string} _text
  * @param {function} _func
- * @param {object} _obj (x, y, w, h, siz, align, ...rest)
+ * @param {object} _obj (x, y, w, h, siz, align, title, groupName, initDisabledFlg, ...rest)
  * @param {...any} _classes 
  */
 function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight - 100, w = g_sWidth / 3, h = C_BTN_HEIGHT,
-	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``,
+	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, groupName = g_currentPage, initDisabledFlg = true,
 	resetFunc = _ => true, cxtFunc = _ => true, ...rest } = {}, ..._classes) {
 
 	const div = createDiv(_id, x, y, w, h);
@@ -792,6 +794,16 @@ function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 		style.animationDuration = `1s`;
 	}
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
+
+	// ボタン有効化操作
+	if (initDisabledFlg) {
+		if (g_initialFlg && g_btnWaitFrame[groupName].initial) {
+		} else {
+			style.pointerEvents = C_DIS_NONE;
+			setTimeout(_ => style.pointerEvents = setVal(rest.pointerEvents, `auto`, C_TYP_STRING),
+				g_btnWaitFrame[groupName].b_frame * 1000 / g_fps);
+		}
+	}
 
 	// ボタンを押したときの動作
 	const lsnrkey = g_handler.addListener(div, `click`, evt => {
@@ -1873,10 +1885,6 @@ function makePlayButton(_func) {
  * @param {string} _url 
  */
 function setAudio(_url) {
-	const ua = navigator.userAgent;
-	const isIOS = ua.indexOf(`iPhone`) >= 0
-		|| ua.indexOf(`iPad`) >= 0
-		|| ua.indexOf(`iPod`) >= 0;
 
 	const loadMp3 = _ => {
 		if (location.href.match(`^file`)) {
@@ -1891,7 +1899,7 @@ function setAudio(_url) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
-				if (isIOS) {
+				if (g_isIos) {
 					lblLoading.textContent = `Click to Start!`;
 					divRoot.appendChild(
 						makePlayButton(evt => {
@@ -1908,7 +1916,7 @@ function setAudio(_url) {
 			}
 		});
 
-	} else if (isIOS) {
+	} else if (g_isIos) {
 		lblLoading.textContent = `Click to Start!`;
 		divRoot.appendChild(
 			makePlayButton(evt => {
@@ -2181,9 +2189,31 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
  * @param {string} _displayName 
  */
 const createScTextCommon = _displayName => {
-	Object.keys(g_btnPatterns[_displayName]).forEach(target =>
-		createScText(document.getElementById(`btn${target}`), target,
-			{ displayName: _displayName, targetLabel: `btn${target}`, x: g_btnPatterns[_displayName][target] }));
+	Object.keys(g_btnPatterns[_displayName]).filter(target => document.getElementById(`btn${target}`) !== null)
+		.forEach(target =>
+			createScText(document.getElementById(`btn${target}`), target,
+				{ displayName: _displayName, targetLabel: `btn${target}`, x: g_btnPatterns[_displayName][target] }));
+}
+
+/**
+ * ショートカットキー有効化
+ * @param {string} _displayName
+ * @param {function} _func 
+ */
+const setShortcutEvent = (_displayName, _func = _ => true) => {
+	const evList = _ => {
+		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func);
+		document.onkeyup = evt => commonKeyUp(evt);
+	}
+	if (g_initialFlg && g_btnWaitFrame[_displayName].initial) {
+		evList();
+	} else {
+		setTimeout(_ => {
+			if (g_currentPage === _displayName) {
+				evList();
+			}
+		}, g_btnWaitFrame[_displayName].s_frame * 1000 / g_fps);
+	}
 }
 
 /**
@@ -2505,8 +2535,7 @@ function titleInit() {
 	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-	document.onkeyup = evt => commonKeyUp(evt);
+	setShortcutEvent(g_currentPage);
 
 	document.oncontextmenu = _ => true;
 	divRoot.oncontextmenu = _ => false;
@@ -3700,8 +3729,7 @@ function optionInit() {
 	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-	document.onkeyup = evt => commonKeyUp(evt);
+	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = _ => true;
 	g_initialFlg = true;
 
@@ -4909,12 +4937,10 @@ function settingsDisplayInit() {
 
 	// ボタン描画
 	commonSettingBtn(`Settings`);
-
 	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-	document.onkeyup = evt => commonKeyUp(evt);
+	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = _ => true;
 
 	if (typeof skinSettingsDisplayInit === C_TYP_FUNCTION) {
@@ -5089,7 +5115,8 @@ function keyConfigInit(_kcType = g_kcType) {
 			`<div class="settings_Title">${g_lblNameObj.key}</div><div class="settings_Title2">${g_lblNameObj.config}</div>`
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
-		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc, {
+		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_isMac ? `Delete` : `BackSpace`)
+			.split(`{1}:`).join(g_isMac ? `` : `Delete:`), {
 			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		}),
 
@@ -5213,13 +5240,14 @@ function keyConfigInit(_kcType = g_kcType) {
 		lnkColorType.textContent = `${g_colorType}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	}
 
+	const macRetryCode = g_kCd[g_headerObj.keyRetry === C_KEY_RETRY ? C_KEY_TITLEBACK : g_headerObj.keyRetry];
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
 		createDivCss2Label(
 			`scMsg`,
-			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_kCd[g_headerObj.keyTitleBack])
-				.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]),
+			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${macRetryCode}` : g_kCd[g_headerObj.keyTitleBack])
+				.split(`{1}`).join(g_isMac ? macRetryCode : g_kCd[g_headerObj.keyRetry]),
 			{
 				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 			}),
@@ -5377,7 +5405,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	createScTextCommon(g_currentPage);
 
 	// キーボード押下時処理
-	document.onkeydown = evt => commonKeyDown(evt, g_currentPage, setCode => {
+	setShortcutEvent(g_currentPage, setCode => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
 		const cursor = document.querySelector(`#cursor`);
 		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -5389,13 +5417,13 @@ function keyConfigInit(_kcType = g_kcType) {
 		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
 			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
 			return;
-		} else if ((setKey === 46 && g_currentk === 0) ||
+		} else if ((setKey === C_KEY_TITLEBACK && g_currentk === 0) ||
 			(keyIsDown(`MetaLeft`) && keyIsDown(`ShiftLeft`))) {
 			return;
 		}
-		if (setKey === 8) {
+		if (setKey === C_KEY_RETRY && (!g_isMac || (g_isMac && g_currentk === 0))) {
 		} else {
-			if (setKey === 46) {
+			if (setKey === C_KEY_TITLEBACK || setKey === C_KEY_RETRY) {
 				setKey = 0;
 			}
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][g_currentj][g_currentk] !== setKey) {
@@ -7577,7 +7605,15 @@ function MainInit() {
 
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
-			if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
+
+			if (g_isMac && keyIsDown(`ShiftLeft`)) {
+				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
+				g_audio.pause();
+				clearTimeout(g_timeoutEvtId);
+				titleInit();
+
+			} else if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
+				// 連打対策として指定ボリュームになるまでリトライを禁止
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
 				clearWindow();
@@ -9398,13 +9434,7 @@ function resultInit() {
 	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	setTimeout(_ => {
-		if (g_currentPage === `result`) {
-			document.onkeydown = evt => commonKeyDown(evt, g_currentPage);
-			document.onkeyup = evt => commonKeyUp(evt);
-		}
-	}, g_shortcutWaitTime.result);
-
+	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = _ => true;
 
 	if (typeof skinResultInit === C_TYP_FUNCTION) {
