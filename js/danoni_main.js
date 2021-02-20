@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/01/04
+ * Revised : 2021/02/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 14.5.17`;
-const g_revisedDate = `2021/01/04`;
+const g_version = `Ver 14.5.18`;
+const g_revisedDate = `2021/02/20`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -509,7 +509,7 @@ function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _
  */
 function createImg(_id, _imgPath, _x, _y, _width, _height) {
 	const div = createDiv(_id, _x, _y, _width, _height);
-	div.innerHTML = `<img id=${_id}img src=${_imgPath} style=width:${_width}px;height:${_height}px>`;
+	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${_width}px;height:${_height}px"${location.href.match(`^file`) ? `` : ` crossOrigin="anonimous"`}>`;
 
 	return div;
 }
