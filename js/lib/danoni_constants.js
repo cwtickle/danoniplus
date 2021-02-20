@@ -1962,6 +1962,17 @@ const g_msgInfoObj = {
 };
 
 /**
+ * ショートカット表示のデフォルト値設定
+ */
+const g_scViewObj = {
+    x: 95,
+    y: 0,
+    w: 40,
+    siz: 12,
+    format: `{0})`,
+};
+
+/**
  * ラベル表示定義
  */
 const g_lblNameObj = {

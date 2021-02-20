@@ -2181,13 +2181,14 @@ function drawTitleResultMotion(_displayName) {
  * @param {string} displayName 
  * @param {string} dfLabel 
  */
-const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = ``, targetLabel = `lnk${_settingLabel}R`, x = 95 } = {}) => {
+const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = ``, targetLabel = `lnk${_settingLabel}R`,
+	x = g_scViewObj.x, y = g_scViewObj.y, w = g_scViewObj.w, siz = g_scViewObj.siz } = {}) => {
 	const scKey = Object.keys(g_shortcutObj[displayName]).filter(key => g_shortcutObj[displayName][key].id === targetLabel);
 	if (scKey.length > 0) {
 		multiAppend(_obj,
 			createDivCss2Label(`sc${_settingLabel}`,
-				dfLabel !== `` ? `${dfLabel})` : `${setVal(g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])], ``, C_TYP_STRING)})`, {
-				x: x, y: 0, w: 40, siz: 12, fontWeight: `bold`, opacity: 0.75, pointerEvents: C_DIS_NONE,
+				g_scViewObj.format.split(`{0}`).join(dfLabel !== `` ? `${dfLabel}` : `${setVal(g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])], ``, C_TYP_STRING)}`), {
+				x, y, w, siz, fontWeight: `bold`, opacity: 0.75, pointerEvents: C_DIS_NONE,
 			})
 		);
 	}
