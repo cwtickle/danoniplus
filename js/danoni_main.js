@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/02/16
+ * Revised : 2021/02/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 19.5.4`;
-const g_revisedDate = `2021/02/16`;
+const g_version = `Ver 19.5.5`;
+const g_revisedDate = `2021/02/20`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -77,7 +77,11 @@ let g_enableAmpersandSplit = true;
 let g_enableDecodeURI = false;
 
 // プリロード済ファイル
-const g_preloadImgs = [];
+const g_preloadFiles = {
+	all: [],
+	image: [],
+	font: [],
+};
 
 // 矢印サイズ
 const C_ARW_WIDTH = 50;
@@ -446,12 +450,17 @@ function roundZero(_num, _init = 0) {
  */
 function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 
-	const preloadFlg = g_preloadImgs.find(v => v === _href);
+	const preloadFlg = g_preloadFiles.all.find(v => v === _href);
 
 	if (preloadFlg === undefined) {
-		g_preloadImgs.push(_href);
+		g_preloadFiles.all.push(_href);
 
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
+		if (g_preloadFiles[_as] === undefined) {
+			g_preloadFiles[_as] = [];
+		}
+		g_preloadFiles[_as].push(_href);
+
+		if (g_userAgent.indexOf(`firefox`) !== -1 && _as === `image`) {
 			// Firefoxの場合のみpreloadが効かないため、画像読込形式にする
 			g_loadObj[_href] = false;
 			const img = new Image();
@@ -648,7 +657,7 @@ function createDivCss2Label(_id, _text, { x = 0, y = 0, w = C_LEN_SETLBL_WIDTH, 
  */
 function createImg(_id, _imgPath, _x, _y, _width, _height) {
 	const div = createDiv(_id, _x, _y, _width, _height);
-	div.innerHTML = `<img id=${_id}img src=${_imgPath} style=width:${_width}px;height:${_height}px>`;
+	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${_width}px;height:${_height}px"${location.href.match(`^file`) ? `` : ` crossOrigin="anonimous"`}>`;
 
 	return div;
 }
@@ -5293,7 +5302,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	multiAppend(divRoot,
 
 		// 設定画面へ戻る
-		createCss2Button(`btnBack`, `To Settings`, _ => {
+		createCss2Button(`btnBack`, g_lblNameObj.b_settings, _ => {
 			g_currentj = 0;
 			g_currentk = 0;
 			g_prevKey = 0;
@@ -5761,7 +5770,7 @@ function loadingScoreInit() {
 			}
 			if (g_audio.duration !== undefined) {
 				if (g_userAgent.indexOf(`firefox`) !== -1) {
-					if (g_preloadImgs.every(v => g_loadObj[v] === true)) {
+					if (g_preloadFiles.image.every(v => g_loadObj[v] === true)) {
 						executeMain();
 					}
 				} else {
