@@ -452,7 +452,7 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 	if (preloadFlg === undefined) {
 		g_preloadImgs.push(_href);
 
-		if (g_userAgent.indexOf(`firefox`) !== -1) {
+		if (g_userAgent.indexOf(`firefox`) !== -1 && _as === `image`) {
 			// Firefoxの場合のみpreloadが効かないため、画像読込形式にする
 			g_loadObj[_href] = false;
 			const img = new Image();
