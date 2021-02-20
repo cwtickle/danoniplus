@@ -78,7 +78,11 @@ let g_enableAmpersandSplit = true;
 let g_enableDecodeURI = false;
 
 // プリロード済ファイル
-const g_preloadImgs = [];
+const g_preloadFiles = {
+	all: [],
+	image: [],
+	font: [],
+};
 
 // 矢印サイズ
 const C_ARW_WIDTH = 50;
@@ -447,10 +451,15 @@ function roundZero(_num, _init = 0) {
  */
 function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 
-	const preloadFlg = g_preloadImgs.find(v => v === _href);
+	const preloadFlg = g_preloadFiles.all.find(v => v === _href);
 
 	if (preloadFlg === undefined) {
-		g_preloadImgs.push(_href);
+		g_preloadFiles.all.push(_href);
+
+		if (g_preloadFiles[_as] === undefined) {
+			g_preloadFiles[_as] = [];
+		}
+		g_preloadFiles[_as].push(_href);
 
 		if (g_userAgent.indexOf(`firefox`) !== -1 && _as === `image`) {
 			// Firefoxの場合のみpreloadが効かないため、画像読込形式にする
@@ -5794,7 +5803,7 @@ function loadingScoreInit() {
 			}
 			if (g_audio.duration !== undefined) {
 				if (g_userAgent.indexOf(`firefox`) !== -1) {
-					if (g_preloadImgs.every(v => g_loadObj[v] === true)) {
+					if (g_preloadFiles.image.every(v => g_loadObj[v] === true)) {
 						executeMain();
 					}
 				} else {
