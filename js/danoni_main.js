@@ -648,7 +648,7 @@ function createDivCss2Label(_id, _text, { x = 0, y = 0, w = C_LEN_SETLBL_WIDTH, 
  */
 function createImg(_id, _imgPath, _x, _y, _width, _height) {
 	const div = createDiv(_id, _x, _y, _width, _height);
-	div.innerHTML = `<img id=${_id}img src=${_imgPath} style=width:${_width}px;height:${_height}px>`;
+	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${_width}px;height:${_height}px"${location.href.match(`^file`) ? `` : ` crossOrigin="anonimous"`}>`;
 
 	return div;
 }
