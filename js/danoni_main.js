@@ -5293,7 +5293,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	multiAppend(divRoot,
 
 		// 設定画面へ戻る
-		createCss2Button(`btnBack`, `To Settings`, _ => {
+		createCss2Button(`btnBack`, g_lblNameObj.b_settings, _ => {
 			g_currentj = 0;
 			g_currentk = 0;
 			g_prevKey = 0;
