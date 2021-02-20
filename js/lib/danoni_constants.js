@@ -1979,6 +1979,7 @@ const g_lblNameObj = {
     kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
     transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
     sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
+    scFormat: `{0})`,
 
     maker: `Maker`,
     artist: `Artist`,
