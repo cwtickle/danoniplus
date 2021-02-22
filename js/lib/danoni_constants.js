@@ -2066,6 +2066,61 @@ const g_lblNameObj = {
     Appearance: `Appearance`,
     Opacity: `Opacity`,
 
+    'u_OFF': `OFF`,
+    'u_ON': `ON`,
+    'u_Boost': `Boost`,
+    'u_Brake': `Brake`,
+
+    'u_Cross': `Cross`,
+    'u_Split': `Split`,
+    'u_Alternate': `Alternate`,
+    'u_Twist': `Twist`,
+    'u_Asymmetry': `Asymmetry`,
+    'u_Flat': `Flat`,
+    'u_R-': `R-`,
+    'u_Reverse': `Reverse`,
+
+    'u_Mirror': `Mirror`,
+    'u_Random': `Random`,
+    'u_Random+': `Random+`,
+    'u_S-Random': `S-Random`,
+    'u_S-Random+': `S-Random+`,
+
+    'u_ALL': `ALL`,
+    'u_Onigiri': `Onigiri`,
+    'u_Left': `Left`,
+    'u_Right': `Right`,
+
+    'u_Original': `Original`,
+    'u_Heavy': `Heavy`,
+    'u_NoRecovery': `NoRecovery`,
+    'u_SuddenDeath': `SuddenDeath`,
+    'u_Practice': `Practice`,
+    'u_Light': `Light`,
+
+    'u_Normal': `Normal`,
+    'u_Hard': `Hard`,
+    'u_Easy': `Easy`,
+
+    'u_Visible': `Visible`,
+    'u_Hidden': `Hidden`,
+    'u_Hidden+': `Hidden+`,
+    'u_Sudden': `Sudden`,
+    'u_Sudden+': `Sudden+`,
+    'u_Hid&Sud+': `Hid&Sud+`,
+
+    'u_Speed': `Speed`,
+    'u_Density': `Density`,
+    'u_ToolDif': `ToolDif`,
+
+    'u_Main': `Main`,
+    'u_Replaced': `Replaced`,
+
+    'u_Default': `Default`,
+    'u_Type0': `Type0`,
+    'u_Type1': `Type1`,
+    'u_Type2': `Type2`,
+
     ConfigType: `ConfigType`,
     ColorType: `ColorType`,
     KeyPattern: `KeyPattern`,

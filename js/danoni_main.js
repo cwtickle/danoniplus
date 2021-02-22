@@ -3951,7 +3951,7 @@ function createOptionWindow(_sprite) {
 			createScoreDetail(`Speed`),
 			createScoreDetail(`Density`),
 			createScoreDetail(`ToolDif`, false),
-			makeSettingLblCssButton(`lnkScoreDetail`, `${g_stateObj.scoreDetail}`, 0, _ => {
+			makeSettingLblCssButton(`lnkScoreDetail`, `${getStgDetailName(g_stateObj.scoreDetail)}`, 0, _ => {
 				g_stateObj.scoreDetailViewFlg = true;
 				scoreDetail.style.visibility = `visible`;
 				$id(`detail${g_stateObj.scoreDetail}`).visibility = `hidden`;
@@ -4286,7 +4286,7 @@ function createOptionWindow(_sprite) {
 		];
 
 		spriteList.scroll.appendChild(
-			createCss2Button(`btnReverse`, `${g_lblNameObj.Reverse}:${g_stateObj.reverse}`, evt => setReverse(evt.target), {
+			createCss2Button(`btnReverse`, `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`, evt => setReverse(evt.target), {
 				x: 160, y: 0,
 				w: 90, h: 21, siz: C_SIZ_DIFSELECTOR,
 				borderStyle: `solid`,
@@ -4305,7 +4305,7 @@ function createOptionWindow(_sprite) {
 	function setReverseView(_btn) {
 		_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
 			g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
-		_btn.textContent = `${g_lblNameObj.Reverse}:${g_stateObj.reverse}`;
+		_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
 	}
 
 	// ---------------------------------------------------
@@ -4340,7 +4340,7 @@ function createOptionWindow(_sprite) {
 		createScText(spriteList.gauge, `Gauge`);
 	} else {
 		lblGauge.classList.add(g_cssObj.settings_Disabled);
-		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, g_stateObj.gauge));
+		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, getStgDetailName(g_stateObj.gauge)));
 	}
 
 	/**
@@ -4706,7 +4706,7 @@ function createOptionWindow(_sprite) {
 
 		// オート・アシスト設定 (AutoPlay)
 		g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
-		lnkAutoPlay.textContent = g_stateObj.autoPlay;
+		lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
 
 		// ゲージ設定 (Gauge)
 		setGauge(0);
@@ -4740,12 +4740,13 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 
 	const settingUpper = toCapitalize(_settingName);
 	const linkId = `lnk${settingUpper}`;
+	const initName = `${getStgDetailName(g_stateObj[_settingName])}${unitName}`;
 	_obj.appendChild(createLblSetting(settingUpper, 0, toCapitalize(settingLabel)));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
 
 		multiAppend(_obj,
-			makeSettingLblCssButton(linkId, `${g_stateObj[_settingName]}${unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
+			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
 				_ => setSetting(1, _settingName, unitName),
 				{ cxtFunc: _ => setSetting(-1, _settingName, unitName) }),
 
@@ -4767,7 +4768,7 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 
 	} else {
 		document.querySelector(`#lbl${settingUpper}`).classList.add(g_cssObj.settings_Disabled);
-		_obj.appendChild(makeDisabledLabel(linkId, 0, `${g_stateObj[_settingName]}${unitName}`));
+		_obj.appendChild(makeDisabledLabel(linkId, 0, initName));
 	}
 }
 
@@ -4788,7 +4789,8 @@ function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName)
  * @param {string} _name 
  */
 function getStgDetailName(_name) {
-	return g_lblNameObj[`u_${_name}`] === undefined ? _name : g_lblNameObj[`u_${_name}`];
+	return g_lblNameObj[`u_${_name}`] === undefined || typeof g_lblRenames !== C_TYP_OBJECT || !g_lblRenames[g_currentPage] ?
+		_name : g_lblNameObj[`u_${_name}`];
 }
 
 /**
@@ -5233,7 +5235,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
 		g_kcType = g_keycons.configTypes[nextNum];
 		g_keycons.configFunc[nextNum](kWidth, divideCnt, keyCtrlPtn, false);
-		_evt.target.textContent = g_kcType;
+		_evt.target.textContent = getStgDetailName(g_kcType);
 	}
 
 	/**
@@ -5255,7 +5257,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		for (let j = 0; j < keyNum; j++) {
 			$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
 		}
-		lnkColorType.textContent = `${g_colorType}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
+		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	}
 
 	const macRetryCode = g_kCd[g_headerObj.keyRetry === C_KEY_RETRY ? C_KEY_TITLEBACK : g_headerObj.keyRetry];
@@ -5284,7 +5286,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			x: 30, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ConfigType),
 
-		makeSettingLblCssButton(`lnkKcType`, g_kcType, 0, evt => setConfigType(evt), {
+		makeSettingLblCssButton(`lnkKcType`, getStgDetailName(g_kcType), 0, evt => setConfigType(evt), {
 			x: 30, y: 35, w: 100,
 			cxtFunc: evt => setConfigType(evt, -1),
 		}),
@@ -5294,7 +5296,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			x: g_sWidth - 120, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ColorType),
 
-		makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, _ => setColorType(), {
+		makeSettingLblCssButton(`lnkColorType`, getStgDetailName(g_colorType), 0, _ => setColorType(), {
 			x: g_sWidth - 130, y: 35, w: 100,
 			cxtFunc: _ => setColorType(-1),
 		}),
@@ -9305,7 +9307,7 @@ function resultInit() {
 	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `:${g_stateObj.shuffle}`;
+		tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
 	}
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
