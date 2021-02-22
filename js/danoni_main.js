@@ -1470,7 +1470,7 @@ function initAfterDosLoaded() {
 				paddingLen = String(setVal(termRoopCnts[1], 1, C_TYP_STRING)).length;
 			}
 			for (let k = startCnt; k <= lastCnt; k++) {
-				preloadFile(`image`, tmpPreloadImages[0].replace(/\*/g, paddingLeft(String(k), paddingLen, `0`)));
+				preloadFile(`image`, tmpPreloadImages[0].replace(/\*/g, String(k).padStart(paddingLen, `0`)));
 			}
 		}
 	});
@@ -1710,7 +1710,7 @@ function calcLevel(_scoreObj) {
 	return {
 		// 難易度レベル
 		tool: (allCnt === 3 ? `0.01` :
-			`${Math.floor(difLevel)}.${`00${Math.round((difLevel * 100) % 100)}`.slice(-2)}${(push3Cnt > 0 ? "*" : "")}`),
+			`${Math.floor(difLevel)}.${`${Math.round((difLevel * 100) % 100)}`.padStart(2, `0`)}${(push3Cnt > 0 ? "*" : "")}`),
 		// 縦連打補正
 		tate: toDecimal2(baseDifLevel - calcDifLevel(leveltmp)),
 		// 同時押し補正
@@ -2129,7 +2129,7 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	for (let j = 0; j < colorArray.length; j++) {
 		colorArray[j] = colorToHex(colorArray[j].replace(/0x/g, `#`));
 		if (_colorCdPaddingUse) {
-			colorArray[j] = `#${paddingLeft(colorArray[j].slice(1), 6, `0`)}`;
+			colorArray[j] = `#${colorArray[j].slice(1).padStart(6, `0`)}`;
 		}
 		if (j === 0 && colorArray[0].substring(0, 1) !== `#`) {
 		} else if (colorArray[j].length === 7) {
@@ -3030,7 +3030,7 @@ function headerConvert(_dosObj) {
 					}
 				});
 				if (_colorCdPaddingUse) {
-					colorOrg[j] = `#${paddingLeft(colorOrg[j].slice(1), 6, `0`)}`;
+					colorOrg[j] = `#${colorOrg[j].slice(1).padStart(6, `0`)}`;
 				}
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
 					_defaultColorgrd: _defaultColorgrd,
@@ -4094,7 +4094,7 @@ function createOptionWindow(_sprite) {
 		const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60));
 		makeScoreDetailLabel(`Density`, g_lblNameObj.s_apm, apm, 0);
 		const minutes = Math.floor(g_detailObj.playingFrameWithBlank[_scoreId] / g_fps / 60);
-		const seconds = `00${Math.floor((g_detailObj.playingFrameWithBlank[_scoreId] / g_fps) % 60)}`.slice(-2);
+		const seconds = `${Math.floor((g_detailObj.playingFrameWithBlank[_scoreId] / g_fps) % 60)}`.padStart(2, `0`);
 		const playingTime = `${minutes}:${seconds}`;
 		makeScoreDetailLabel(`Density`, g_lblNameObj.s_time, playingTime, 1);
 		makeScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, arrowCnts, 3);
@@ -4232,7 +4232,7 @@ function createOptionWindow(_sprite) {
 				const frzCnts = g_detailObj.frzCnt[j].reduce((p, x) => p + x);
 				const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[j] / g_fps / 60));
 				const minutes = Math.floor(g_detailObj.playingFrame[j] / g_fps / 60);
-				const seconds = `00${Math.floor((g_detailObj.playingFrame[j] / g_fps) % 60)}`.slice(-2);
+				const seconds = `${Math.floor((g_detailObj.playingFrame[j] / g_fps) % 60)}`.padStart(2, `0`);
 				const playingTime = `${minutes}:${seconds}`;
 
 				printData +=
@@ -7393,7 +7393,7 @@ function MainInit() {
 	const nominalFullFrame = fullFrame - nominalDiff;
 
 	const fullMin = Math.floor(nominalFullFrame / 60 / g_fps);
-	const fullSec = `00${Math.floor(Math.floor(nominalFullFrame / g_fps) % 60)}`.slice(-2);
+	const fullSec = `${Math.floor(Math.floor(nominalFullFrame / g_fps) % 60)}`.padStart(2, `0`);
 	const fullTime = `${fullMin}:${fullSec}`;
 
 	// フレーム数
@@ -8390,7 +8390,7 @@ function MainInit() {
 			if (Math.floor(g_scoreObj.nominalFrameNum % g_fps) === 0) {
 				if (g_scoreObj.nominalFrameNum >= 0) {
 					const currentMin = Math.floor(g_scoreObj.nominalFrameNum / 60 / g_fps);
-					const currentSec = `00${Math.floor(g_scoreObj.nominalFrameNum / g_fps) % 60}`.slice(-2);
+					const currentSec = `${Math.floor(g_scoreObj.nominalFrameNum / g_fps) % 60}`.padStart(2, `0`);
 					lblTime1.textContent = `${currentMin}:${currentSec}`;
 				}
 			}
