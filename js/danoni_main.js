@@ -5126,7 +5126,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			`<div class="settings_Title">${g_lblNameObj.key}</div><div class="settings_Title2">${g_lblNameObj.config}</div>`
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
-		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_isMac ? `Delete` : `BackSpace`)
+		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
 			.split(`{1}:`).join(g_isMac ? `` : `Delete:`), {
 			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		}),
@@ -5251,14 +5251,13 @@ function keyConfigInit(_kcType = g_kcType) {
 		lnkColorType.textContent = `${g_colorType}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	}
 
-	const macRetryCode = g_kCd[g_headerObj.keyRetry === C_KEY_RETRY ? C_KEY_TITLEBACK : g_headerObj.keyRetry];
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
 		createDivCss2Label(
 			`scMsg`,
-			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${macRetryCode}` : g_kCd[g_headerObj.keyTitleBack])
-				.split(`{1}`).join(g_isMac ? macRetryCode : g_kCd[g_headerObj.keyRetry]),
+			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
+				.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]),
 			{
 				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 			}),

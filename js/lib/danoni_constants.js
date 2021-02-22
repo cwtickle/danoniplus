@@ -499,7 +499,7 @@ for (let j = 0; j < 255; j++) {
 // キー表示用
 g_kCd[0] = `- - -`;
 g_kCd[1] = `Unknown`;
-g_kCd[8] = `BackSpace`;
+g_kCd[8] = (g_isMac ? `Delete` : `BackSpace`);
 g_kCd[9] = `Tab`;
 g_kCd[12] = `Clear`;
 g_kCd[13] = `Enter`;
