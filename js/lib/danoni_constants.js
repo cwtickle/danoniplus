@@ -2091,6 +2091,25 @@ const g_lblNameObj = {
     fullCombo: `FullCombo!`,
     cleared: `CLEARED!`,
     failed: `FAILED...`,
+
+    rt_Music: `Music`,
+    rt_Difficulty: `Difficulty`,
+    rt_Style: `Playstyle`,
+    rt_Display: `Display`,
+
+    rd_StepZone: `Step`,
+    rd_Judgment: `Judge`,
+    rd_FastSlow: `FS`,
+    rd_LifeGauge: `Life`,
+    rd_Score: `Score`,
+    rd_MusicInfo: `MusicInfo`,
+    rd_FilterLine: `Filter`,
+    rd_Speed: `Speed`,
+    rd_Color: `Color`,
+    rd_Lyrics: `Lyrics`,
+    rd_Background: `Back`,
+    rd_ArrowEffect: `Effect`,
+    rd_Special: `SP`,
 };
 
 /**

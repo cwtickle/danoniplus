@@ -9086,13 +9086,13 @@ function resultInit() {
 	].filter(value => value !== ``).join(`, `);
 
 	let displayData = [
-		withOptions(g_stateObj.d_stepzone, C_FLG_ON, `Step`),
-		withOptions(g_stateObj.d_judgment, C_FLG_ON, `Judge`),
-		withOptions(g_stateObj.d_fastslow, C_FLG_ON, `FS`),
-		withOptions(g_stateObj.d_lifegauge, C_FLG_ON, `Life`),
-		withOptions(g_stateObj.d_score, C_FLG_ON, `Score`),
-		withOptions(g_stateObj.d_musicinfo, C_FLG_ON, `MusicInfo`),
-		withOptions(g_stateObj.d_filterline, C_FLG_ON, `Filter`)
+		withOptions(g_stateObj.d_stepzone, C_FLG_ON, g_lblNameObj.rd_StepZone),
+		withOptions(g_stateObj.d_judgment, C_FLG_ON, g_lblNameObj.rd_Judgment),
+		withOptions(g_stateObj.d_fastslow, C_FLG_ON, g_lblNameObj.rd_FastSlow),
+		withOptions(g_stateObj.d_lifegauge, C_FLG_ON, g_lblNameObj.rd_LifeGauge),
+		withOptions(g_stateObj.d_score, C_FLG_ON, g_lblNameObj.rd_Score),
+		withOptions(g_stateObj.d_musicinfo, C_FLG_ON, g_lblNameObj.rd_MusicInfo),
+		withOptions(g_stateObj.d_filterline, C_FLG_ON, g_lblNameObj.rd_FilterLine),
 	].filter(value => value !== ``).join(`, `);
 	if (displayData === ``) {
 		displayData = `All Visible`;
@@ -9101,26 +9101,26 @@ function resultInit() {
 	}
 
 	let display2Data = [
-		withOptions(g_stateObj.d_speed, C_FLG_ON, `Speed`),
-		withOptions(g_stateObj.d_color, C_FLG_ON, `Color`),
-		withOptions(g_stateObj.d_lyrics, C_FLG_ON, `Lyrics`),
-		withOptions(g_stateObj.d_background, C_FLG_ON, `Back`),
-		withOptions(g_stateObj.d_arroweffect, C_FLG_ON, `Effect`),
-		withOptions(g_stateObj.d_special, C_FLG_ON, `SP`)
+		withOptions(g_stateObj.d_speed, C_FLG_ON, g_lblNameObj.rd_Speed),
+		withOptions(g_stateObj.d_color, C_FLG_ON, g_lblNameObj.rd_Color),
+		withOptions(g_stateObj.d_lyrics, C_FLG_ON, g_lblNameObj.rd_Lyrics),
+		withOptions(g_stateObj.d_background, C_FLG_ON, g_lblNameObj.rd_Background),
+		withOptions(g_stateObj.d_arroweffect, C_FLG_ON, g_lblNameObj.rd_ArrowEffect),
+		withOptions(g_stateObj.d_special, C_FLG_ON, g_lblNameObj.rd_Special),
 	].filter(value => value !== ``).join(`, `);
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
 
 	multiAppend(playDataWindow,
-		makeCssResultPlayData(`lblMusic`, 20, g_cssObj.result_lbl, 0, `Music`, C_ALIGN_LEFT),
+		makeCssResultPlayData(`lblMusic`, 20, g_cssObj.result_lbl, 0, g_lblNameObj.rt_Music, C_ALIGN_LEFT),
 		makeCssResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 0, mTitleForView[0]),
 		makeCssResultPlayData(`lblMusicData2`, 60, g_cssObj.result_style, 1, mTitleForView[1]),
-		makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2, `Difficulty`, C_ALIGN_LEFT),
+		makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2, g_lblNameObj.rt_Difficulty, C_ALIGN_LEFT),
 		makeCssResultPlayData(`lblDifData`, 60, g_cssObj.result_style, 2, difData),
-		makeCssResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3, `Playstyle`, C_ALIGN_LEFT),
+		makeCssResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3, g_lblNameObj.rt_Style, C_ALIGN_LEFT),
 		makeCssResultPlayData(`lblStyleData`, 60, g_cssObj.result_style, 3, playStyleData),
-		makeCssResultPlayData(`lblDisplay`, 20, g_cssObj.result_lbl, 4, `Display`, C_ALIGN_LEFT),
+		makeCssResultPlayData(`lblDisplay`, 20, g_cssObj.result_lbl, 4, g_lblNameObj.rt_Display, C_ALIGN_LEFT),
 		makeCssResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 4, displayData),
 		makeCssResultPlayData(`lblDisplay2Data`, 60, g_cssObj.result_style, 5, display2Data),
 	);
