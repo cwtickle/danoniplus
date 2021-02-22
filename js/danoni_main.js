@@ -499,10 +499,11 @@ function importCssFile(_href) {
 }
 
 /**
- * 基本フォントを取得
+ * 画面共通のフォント設定
+ * @param {string} _priorityFont 
  */
-function getBasicFont() {
-	return (g_headerObj.customFont === `` ? C_LBL_BASICFONT : `${g_headerObj.customFont},${C_LBL_BASICFONT}`);
+function getBasicFont(_priorityFont = ``) {
+	return [_priorityFont, g_headerObj.customFont, C_LBL_BASICFONT].filter(value => value !== ``).join(`,`);
 }
 
 /**
@@ -9158,10 +9159,11 @@ function resultInit() {
 	}
 
 	// ランク描画
-	const lblRank = createDivCustomLabel(`lblRank`, 340, 160, 70, 20, 50, `#ffffff`,
-		`<span style=color:${rankColor}>${rankMark}</span>`, `"Bookman Old Style", "Meiryo UI", sans-serif`);
-	lblRank.style.textAlign = C_ALIGN_CENTER;
-	resultWindow.appendChild(lblRank);
+	resultWindow.appendChild(
+		createDivCss2Label(`lblRank`, rankMark, {
+			x: 340, y: 160, w: 70, h: 20, siz: 50, align: C_ALIGN_CENTER, fontFamily: getBasicFont(`"Bookman Old Style"`),
+		})
+	);
 
 	// Cleared & Failed表示
 	const lblResultPre = createDivCss2Label(
