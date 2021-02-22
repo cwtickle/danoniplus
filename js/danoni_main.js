@@ -4784,6 +4784,14 @@ function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName)
 }
 
 /**
+ * 設定名の置き換え処理
+ * @param {string} _name 
+ */
+function getStgDetailName(_name) {
+	return g_lblNameObj[`u_${_name}`] === undefined ? _name : g_lblNameObj[`u_${_name}`];
+}
+
+/**
  * 設定メイン・汎用
  * @param {number} _scrollNum 
  * @param {string} _settingName
@@ -4804,7 +4812,7 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
 	g_stateObj[_settingName] = settingList[settingNum];
 	g_settings[`${_settingName}Num`] = settingNum;
 	document.querySelector(`#lnk${toCapitalize(_settingName)}`).textContent =
-		`${g_stateObj[_settingName]}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
+		`${getStgDetailName(g_stateObj[_settingName])}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
 }
 
 /**
@@ -9065,14 +9073,14 @@ function resultInit() {
 		`${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${g_stateObj.autoPlay}less`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
-		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${g_stateObj.shuffle}]`)}`
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getStgDetailName(g_stateObj.shuffle)}]`)}`
 	].filter(value => value !== ``).join(` `);
 
 	let playStyleData = [
 		`${g_stateObj.speed}x`,
 		`${withOptions(g_stateObj.motion, C_FLG_OFF)}`,
 		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
-			(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
+			getStgDetailName(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
 		`${withOptions(g_stateObj.appearance, `Visible`)}`,
 		`${withOptions(g_stateObj.gauge, g_settings.gauges[0])}`
 	].filter(value => value !== ``).join(`, `);
@@ -9124,7 +9132,7 @@ function resultInit() {
 	 * @param {string} _displayText 
 	 */
 	function withOptions(_flg, _defaultSet, _displayText = _flg) {
-		return (_flg !== _defaultSet ? _displayText : ``);
+		return (_flg !== _defaultSet ? getStgDetailName(_displayText) : ``);
 	}
 
 	// キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
