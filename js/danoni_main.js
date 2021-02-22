@@ -3892,7 +3892,7 @@ function createOptionWindow(_sprite) {
 					// キー別フィルタボタン作成
 					g_headerObj.keyLists.forEach((targetKey, m) => {
 						difCover.appendChild(
-							makeDifLblCssButton(`keyFilter`, `${targetKey} key`, m + 1.5, _ => {
+							makeDifLblCssButton(`keyFilter${m}`, `${targetKey} key`, m + 1.5, _ => {
 								deleteChildspriteAll(`difList`);
 								makeDifList(difList, targetKey);
 							}, { w: 110 })
