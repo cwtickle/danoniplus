@@ -9161,7 +9161,8 @@ function resultInit() {
 	// ランク描画
 	resultWindow.appendChild(
 		createDivCss2Label(`lblRank`, rankMark, {
-			x: 340, y: 160, w: 70, h: 20, siz: 50, align: C_ALIGN_CENTER, fontFamily: getBasicFont(`"Bookman Old Style"`),
+			x: 340, y: 160, w: 70, h: 20, siz: 50, align: C_ALIGN_CENTER,
+			color: rankColor, fontFamily: getBasicFont(`"Bookman Old Style"`),
 		})
 	);
 
