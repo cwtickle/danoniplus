@@ -1803,7 +1803,7 @@ function loadMusic() {
 	}
 
 	g_headerObj.musicUrl = musicUrl;
-	g_musicEncodedFlg = (musicUrl.slice(-3) === `.js` || musicUrl.slice(-4) === `.txt`) ? true : false;
+	g_musicEncodedFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
 	drawDefaultBackImage(``);
 
 	// Now Loadingを表示
@@ -2074,7 +2074,7 @@ const colorNameToCode = _color => {
  * 10進 -> 16進数変換 (カラーコード形式になるよう0埋め)
  * @param {number} _num 
  */
-const byteToHex = _num => (`${('0' + _num.toString(16)).slice(-2)}`);
+const byteToHex = _num => (`${_num.toString(16).padStart(2, '0')}`);
 
 /**
  * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
