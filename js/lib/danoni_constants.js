@@ -2024,6 +2024,9 @@ const g_lblNameObj = {
     Fadein: `Fadein`,
     Volume: `Volume`,
 
+    multi: `x`,
+    percent: `%`,
+
     sc_speed: `←→`,
     sc_scroll: `↑/↓`,
     sc_adjustment: `- +`,
@@ -2065,6 +2068,9 @@ const g_lblNameObj = {
 
     Appearance: `Appearance`,
     Opacity: `Opacity`,
+
+    'u_x': `x`,
+    'u_%': `%`,
 
     'u_OFF': `OFF`,
     'u_ON': `ON`,
