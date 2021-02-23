@@ -477,8 +477,7 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 			if (_type !== ``) {
 				link.type = _type;
 			}
-			if (location.href.match(`^file`)) {
-			} else {
+			if (!isFile) {
 				link.crossOrigin = _crossOrigin;
 			}
 			document.head.appendChild(link);
@@ -688,7 +687,7 @@ function createDivCss2Label(_id, _text, { x = 0, y = 0, w = C_LEN_SETLBL_WIDTH, 
  */
 function createImg(_id, _imgPath, _x, _y, _width, _height) {
 	const div = createDiv(_id, _x, _y, _width, _height);
-	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${_width}px;height:${_height}px"${location.href.match(`^file`) ? `` : ` crossOrigin="anonimous"`}>`;
+	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${_width}px;height:${_height}px"${isFile ? `` : ` crossOrigin="anonimous"`}>`;
 
 	return div;
 }
@@ -1194,6 +1193,16 @@ function getLoadingLabel() {
 		x: 0, y: g_sHeight - 40, w: g_sWidth, h: C_LEN_SETLBL_HEIGHT,
 		siz: C_SIZ_SETLBL, align: C_ALIGN_RIGHT,
 	});
+}
+
+/**
+ * フレーム数に対応する時間表示を作成
+ * @param {number} _frame 
+ */
+const getPlayingTime = _frame => {
+	const minutes = Math.floor(_frame / g_fps / 60);
+	const seconds = `${Math.floor((_frame / g_fps) % 60)}`.padStart(2, `0`);
+	return `${minutes}:${seconds}`;
 }
 
 /*-----------------------------------------------------------*/
@@ -1811,7 +1820,7 @@ function loadMusic() {
 	divRoot.appendChild(lblLoading);
 
 	// ローカル動作時
-	if (location.href.match(`^file`)) {
+	if (isFile) {
 		setAudio(url);
 		return;
 	}
@@ -1897,7 +1906,7 @@ function makePlayButton(_func) {
 function setAudio(_url) {
 
 	const loadMp3 = _ => {
-		if (location.href.match(`^file`)) {
+		if (isFile) {
 			g_audio.src = _url;
 			musicAfterLoaded();
 		} else {
@@ -2368,12 +2377,12 @@ function titleInit() {
 	if (g_userAgent.indexOf(`msie`) !== -1 ||
 		g_userAgent.indexOf(`trident`) !== -1 ||
 		g_userAgent.indexOf(`edge`) !== -1 ||
-		(g_userAgent.indexOf(`firefox`) !== -1 && location.href.match(`^file`))) {
+		(g_userAgent.indexOf(`firefox`) !== -1 && isFile)) {
 
 		makeWarningWindow(g_msgInfoObj.W_0001);
 	}
 
-	if (location.href.match(/^file/)) {
+	if (isFile) {
 		makeWarningWindow(g_msgInfoObj.W_0011);
 	}
 
@@ -2683,7 +2692,7 @@ function headerConvert(_dosObj) {
 	g_headerObj.customFont = obj.customFont;
 
 	// 画像ルートパス、拡張子の設定 (サーバ上のみ)
-	if (!location.href.match(`^file`)) {
+	if (!isFile) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
 		if (typeof g_presetOverrideExtension === C_TYP_STRING) {
 			Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
@@ -3372,7 +3381,7 @@ function headerConvert(_dosObj) {
 	obj.playingX = setVal(_dosObj.playingX, 0, C_TYP_NUMBER);
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
-	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
+	obj.justFrames = (isLocal) ? 0 : 1;
 
 	// リザルトデータのカスタマイズ
 	const resultFormatDefault = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
@@ -4094,9 +4103,7 @@ function createOptionWindow(_sprite) {
 
 		const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60));
 		makeScoreDetailLabel(`Density`, g_lblNameObj.s_apm, apm, 0);
-		const minutes = Math.floor(g_detailObj.playingFrameWithBlank[_scoreId] / g_fps / 60);
-		const seconds = `${Math.floor((g_detailObj.playingFrameWithBlank[_scoreId] / g_fps) % 60)}`.padStart(2, `0`);
-		const playingTime = `${minutes}:${seconds}`;
+		const playingTime = getPlayingTime(g_detailObj.playingFrameWithBlank[_scoreId]);
 		makeScoreDetailLabel(`Density`, g_lblNameObj.s_time, playingTime, 1);
 		makeScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, arrowCnts, 3);
 		makeScoreDetailLabel(`Density`, g_lblNameObj.s_frz, frzCnts, 4);
@@ -4232,9 +4239,7 @@ function createOptionWindow(_sprite) {
 				const arrowCnts = g_detailObj.arrowCnt[j].reduce((p, x) => p + x);
 				const frzCnts = g_detailObj.frzCnt[j].reduce((p, x) => p + x);
 				const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[j] / g_fps / 60));
-				const minutes = Math.floor(g_detailObj.playingFrame[j] / g_fps / 60);
-				const seconds = `${Math.floor((g_detailObj.playingFrame[j] / g_fps) % 60)}`.padStart(2, `0`);
-				const playingTime = `${minutes}:${seconds}`;
+				const playingTime = getPlayingTime(g_detailObj.playingFrame[j]);
 
 				printData +=
 					// 譜面番号
@@ -7400,11 +7405,7 @@ function MainInit() {
 
 	const nominalDiff = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
 	g_scoreObj.nominalFrameNum = g_scoreObj.frameNum - nominalDiff;
-	const nominalFullFrame = fullFrame - nominalDiff;
-
-	const fullMin = Math.floor(nominalFullFrame / 60 / g_fps);
-	const fullSec = `${Math.floor(Math.floor(nominalFullFrame / g_fps) % 60)}`.padStart(2, `0`);
-	const fullTime = `${fullMin}:${fullSec}`;
+	const fullTime = getPlayingTime(fullFrame - nominalDiff);
 
 	// フレーム数
 	divRoot.appendChild(
@@ -7552,8 +7553,7 @@ function MainInit() {
 	}
 
 	// ローカル時のみフレーム数を残す
-	if (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) {
-	} else {
+	if (!isLocal) {
 		lblframe.style.display = C_DIS_NONE;
 	}
 
@@ -8399,9 +8399,7 @@ function MainInit() {
 			// タイマー
 			if (Math.floor(g_scoreObj.nominalFrameNum % g_fps) === 0) {
 				if (g_scoreObj.nominalFrameNum >= 0) {
-					const currentMin = Math.floor(g_scoreObj.nominalFrameNum / 60 / g_fps);
-					const currentSec = `${Math.floor(g_scoreObj.nominalFrameNum / g_fps) % 60}`.padStart(2, `0`);
-					lblTime1.textContent = `${currentMin}:${currentSec}`;
+					lblTime1.textContent = getPlayingTime(g_scoreObj.nominalFrameNum);
 				}
 			}
 
