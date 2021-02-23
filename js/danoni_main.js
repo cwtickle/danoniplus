@@ -267,7 +267,7 @@ const transCode = _setCode => {
  * 特定キーをブロックする処理
  * @param {string} _setCode 
  */
-const blockCode = _setCode => C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode) ? false : true;
+const blockCode = _setCode => !C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode);
 
 /**
  * キーを押したときの動作（汎用）
@@ -2851,7 +2851,7 @@ function headerConvert(_dosObj) {
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 
 	// 譜面変更セレクターの利用有無
-	obj.difSelectorUse = (setVal(_dosObj.difSelectorUse, (obj.keyLabels.length > 5 ? true : false), C_TYP_BOOLEAN));
+	obj.difSelectorUse = (setVal(_dosObj.difSelectorUse, obj.keyLabels.length > 5, C_TYP_BOOLEAN));
 
 	// 初期速度の設定
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
@@ -2923,7 +2923,7 @@ function headerConvert(_dosObj) {
 	if (hasVal(_dosObj.defaultFrzColorUse)) {
 		obj.defaultFrzColorUse = setVal(_dosObj.defaultFrzColorUse, true, C_TYP_BOOLEAN);
 	} else if (typeof g_presetFrzColors === C_TYP_BOOLEAN) {
-		obj.defaultFrzColorUse = (g_presetFrzColors ? true : false);
+		obj.defaultFrzColorUse = g_presetFrzColors;
 	} else {
 		obj.defaultFrzColorUse = true;
 	}
@@ -3043,10 +3043,7 @@ function headerConvert(_dosObj) {
 					colorOrg[j] = `#${colorOrg[j].slice(1).padStart(6, `0`)}`;
 				}
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
-					_defaultColorgrd: _defaultColorgrd,
-					_colorCdPaddingUse: _colorCdPaddingUse,
-					_objType: _objType,
-					_shadowFlg: _shadowFlg,
+					_defaultColorgrd, _colorCdPaddingUse, _objType, _shadowFlg,
 				});
 			}
 
@@ -3057,9 +3054,7 @@ function headerConvert(_dosObj) {
 			colorOrg = _colorInit.concat();
 			for (let j = 0; j < _colorInit.length; j++) {
 				colorList[j] = _colorInit[j] === `` ? `` : makeColorGradation(_colorInit[j], {
-					_defaultColorgrd: _defaultColorgrd,
-					_colorCdPaddingUse: _colorCdPaddingUse,
-					_shadowFlg: _shadowFlg,
+					_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
 				});
 			}
 		}
@@ -6214,7 +6209,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			if (wordDataList.find((v) => v !== undefined) === undefined) {
 				// Reverse時の歌詞の自動反転制御設定
 				if (g_headerObj.wordAutoReverse !== `auto`) {
-					wordReverseFlg = (g_headerObj.wordAutoReverse === C_FLG_ON ? true : false);
+					wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
 				} else if (keyNum === divideCnt + 1) {
 					wordReverseFlg = true;
 				}
@@ -6870,7 +6865,7 @@ function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame) {
  * @param {number} _val 
  */
 function isFrzHitColor(_val) {
-	return (g_headerObj.colorDataType === `` && ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61)) ? true : false;
+	return (g_headerObj.colorDataType === `` && ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61));
 }
 
 /**
@@ -7922,7 +7917,7 @@ function MainInit() {
 	const checkKeyUpFunc = {
 
 		frzOFF: (_j) => {
-			return g_workObj.keyHitFlg[_j].find(flg => flg) ? true : false;
+			return g_workObj.keyHitFlg[_j].find(flg => flg);
 		},
 
 		frzON: (_j) => {
@@ -8611,7 +8606,7 @@ function changeFailedFrz(_j, _k) {
  * @param {number} _keyCode 
  */
 function keyIsDown(_keyCode) {
-	return (g_inputKeyBuffer[_keyCode] ? true : false);
+	return g_inputKeyBuffer[_keyCode];
 }
 
 const jdgList = [`ii`, `shakin`, `matari`, `shobon`].map(jdg => toCapitalize(jdg));
