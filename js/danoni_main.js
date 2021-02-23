@@ -267,7 +267,7 @@ const transCode = _setCode => {
  * 特定キーをブロックする処理
  * @param {string} _setCode 
  */
-const blockCode = _setCode => C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode) ? false : true;
+const blockCode = _setCode => !C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode);
 
 /**
  * キーを押したときの動作（汎用）
@@ -1196,14 +1196,32 @@ function getLoadingLabel() {
 }
 
 /**
- * フレーム数に対応する時間表示を作成
+ * フレーム数を時間表示へ変換
  * @param {number} _frame 
  */
-const getPlayingTime = _frame => {
+const transFrameToTimer = _frame => {
 	const minutes = Math.floor(_frame / g_fps / 60);
 	const seconds = `${Math.floor((_frame / g_fps) % 60)}`.padStart(2, `0`);
 	return `${minutes}:${seconds}`;
 }
+
+/**
+ * 疑似タイマー表記をフレーム数へ変換
+ * |endFrame=1:35.20|
+ * @param {string} _str 
+ */
+const transTimerToFrame = _str => {
+	if (_str.indexOf(`:`) !== -1) {
+		const tmpTimes = _str.split(`:`);
+		if (tmpTimes[1].indexOf(`.`) !== -1) {
+			const tmpSeconds = tmpTimes[1].split(`.`);
+			return g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpSeconds[0])) + Number(tmpSeconds[1]);
+		} else {
+			return g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpTimes[1]));
+		}
+	}
+	return _str;
+};
 
 /*-----------------------------------------------------------*/
 /* Scene : TITLE [melon] */
@@ -2851,7 +2869,7 @@ function headerConvert(_dosObj) {
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 
 	// 譜面変更セレクターの利用有無
-	obj.difSelectorUse = (setVal(_dosObj.difSelectorUse, (obj.keyLabels.length > 5 ? true : false), C_TYP_BOOLEAN));
+	obj.difSelectorUse = (setVal(_dosObj.difSelectorUse, obj.keyLabels.length > 5, C_TYP_BOOLEAN));
 
 	// 初期速度の設定
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
@@ -2923,7 +2941,7 @@ function headerConvert(_dosObj) {
 	if (hasVal(_dosObj.defaultFrzColorUse)) {
 		obj.defaultFrzColorUse = setVal(_dosObj.defaultFrzColorUse, true, C_TYP_BOOLEAN);
 	} else if (typeof g_presetFrzColors === C_TYP_BOOLEAN) {
-		obj.defaultFrzColorUse = (g_presetFrzColors ? true : false);
+		obj.defaultFrzColorUse = g_presetFrzColors;
 	} else {
 		obj.defaultFrzColorUse = true;
 	}
@@ -3043,10 +3061,7 @@ function headerConvert(_dosObj) {
 					colorOrg[j] = `#${colorOrg[j].slice(1).padStart(6, `0`)}`;
 				}
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
-					_defaultColorgrd: _defaultColorgrd,
-					_colorCdPaddingUse: _colorCdPaddingUse,
-					_objType: _objType,
-					_shadowFlg: _shadowFlg,
+					_defaultColorgrd, _colorCdPaddingUse, _objType, _shadowFlg,
 				});
 			}
 
@@ -3057,9 +3072,7 @@ function headerConvert(_dosObj) {
 			colorOrg = _colorInit.concat();
 			for (let j = 0; j < _colorInit.length; j++) {
 				colorList[j] = _colorInit[j] === `` ? `` : makeColorGradation(_colorInit[j], {
-					_defaultColorgrd: _defaultColorgrd,
-					_colorCdPaddingUse: _colorCdPaddingUse,
-					_shadowFlg: _shadowFlg,
+					_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
 				});
 			}
 		}
@@ -3389,24 +3402,6 @@ function headerConvert(_dosObj) {
 		setVal(g_presetResultFormat, resultFormatDefault, C_TYP_STRING) : resultFormatDefault), C_TYP_STRING));
 
 	return obj;
-}
-
-/**
- * 疑似タイマー表記をフレーム数へ変換
- * |endFrame=1:35.20|
- * @param {string} _str 
- */
-function transTimerToFrame(_str) {
-	if (_str.indexOf(`:`) !== -1) {
-		const tmpTimes = _str.split(`:`);
-		if (tmpTimes[1].indexOf(`.`) !== -1) {
-			const tmpSeconds = tmpTimes[1].split(`.`);
-			return g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpSeconds[0])) + Number(tmpSeconds[1]);
-		} else {
-			return g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpTimes[1]));
-		}
-	}
-	return _str;
 }
 
 /**
@@ -4103,7 +4098,7 @@ function createOptionWindow(_sprite) {
 
 		const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60));
 		makeScoreDetailLabel(`Density`, g_lblNameObj.s_apm, apm, 0);
-		const playingTime = getPlayingTime(g_detailObj.playingFrameWithBlank[_scoreId]);
+		const playingTime = transFrameToTimer(g_detailObj.playingFrameWithBlank[_scoreId]);
 		makeScoreDetailLabel(`Density`, g_lblNameObj.s_time, playingTime, 1);
 		makeScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, arrowCnts, 3);
 		makeScoreDetailLabel(`Density`, g_lblNameObj.s_frz, frzCnts, 4);
@@ -4239,7 +4234,7 @@ function createOptionWindow(_sprite) {
 				const arrowCnts = g_detailObj.arrowCnt[j].reduce((p, x) => p + x);
 				const frzCnts = g_detailObj.frzCnt[j].reduce((p, x) => p + x);
 				const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[j] / g_fps / 60));
-				const playingTime = getPlayingTime(g_detailObj.playingFrame[j]);
+				const playingTime = transFrameToTimer(g_detailObj.playingFrame[j]);
 
 				printData +=
 					// 譜面番号
@@ -6214,7 +6209,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			if (wordDataList.find((v) => v !== undefined) === undefined) {
 				// Reverse時の歌詞の自動反転制御設定
 				if (g_headerObj.wordAutoReverse !== `auto`) {
-					wordReverseFlg = (g_headerObj.wordAutoReverse === C_FLG_ON ? true : false);
+					wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
 				} else if (keyNum === divideCnt + 1) {
 					wordReverseFlg = true;
 				}
@@ -6870,7 +6865,7 @@ function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame) {
  * @param {number} _val 
  */
 function isFrzHitColor(_val) {
-	return (g_headerObj.colorDataType === `` && ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61)) ? true : false;
+	return (g_headerObj.colorDataType === `` && ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61));
 }
 
 /**
@@ -7405,7 +7400,7 @@ function MainInit() {
 
 	const nominalDiff = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
 	g_scoreObj.nominalFrameNum = g_scoreObj.frameNum - nominalDiff;
-	const fullTime = getPlayingTime(fullFrame - nominalDiff);
+	const fullTime = transFrameToTimer(fullFrame - nominalDiff);
 
 	// フレーム数
 	divRoot.appendChild(
@@ -7922,7 +7917,7 @@ function MainInit() {
 	const checkKeyUpFunc = {
 
 		frzOFF: (_j) => {
-			return g_workObj.keyHitFlg[_j].find(flg => flg) ? true : false;
+			return g_workObj.keyHitFlg[_j].find(flg => flg);
 		},
 
 		frzON: (_j) => {
@@ -8399,7 +8394,7 @@ function MainInit() {
 			// タイマー
 			if (Math.floor(g_scoreObj.nominalFrameNum % g_fps) === 0) {
 				if (g_scoreObj.nominalFrameNum >= 0) {
-					lblTime1.textContent = getPlayingTime(g_scoreObj.nominalFrameNum);
+					lblTime1.textContent = transFrameToTimer(g_scoreObj.nominalFrameNum);
 				}
 			}
 
@@ -8611,7 +8606,7 @@ function changeFailedFrz(_j, _k) {
  * @param {number} _keyCode 
  */
 function keyIsDown(_keyCode) {
-	return (g_inputKeyBuffer[_keyCode] ? true : false);
+	return g_inputKeyBuffer[_keyCode];
 }
 
 const jdgList = [`ii`, `shakin`, `matari`, `shobon`].map(jdg => toCapitalize(jdg));
