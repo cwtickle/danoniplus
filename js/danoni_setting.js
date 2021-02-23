@@ -186,3 +186,13 @@ const g_local_lblNameObj = {
 const g_local_msgObj = {
 
 };
+
+/**
+ * 設定名の上書き可否設定
+ */
+const g_lblRenames = {
+	option: true,
+	settingsDisplay: true,
+	keyConfig: true,
+	result: true,
+};

@@ -3931,7 +3931,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
-	createGeneralSetting(spriteList.speed, `speed`, { unitName: ` x`, skipTerm: 4, scLabel: g_lblNameObj.sc_speed });
+	createGeneralSetting(spriteList.speed, `speed`, { unitName: ` ${getStgDetailName(g_lblNameObj.multi)}`, skipTerm: 4, scLabel: g_lblNameObj.sc_speed });
 
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
@@ -3952,7 +3952,7 @@ function createOptionWindow(_sprite) {
 			createScoreDetail(`Speed`),
 			createScoreDetail(`Density`),
 			createScoreDetail(`ToolDif`, false),
-			makeSettingLblCssButton(`lnkScoreDetail`, `${g_stateObj.scoreDetail}`, 0, _ => {
+			makeSettingLblCssButton(`lnkScoreDetail`, `${getStgDetailName(g_stateObj.scoreDetail)}`, 0, _ => {
 				g_stateObj.scoreDetailViewFlg = true;
 				scoreDetail.style.visibility = `visible`;
 				$id(`detail${g_stateObj.scoreDetail}`).visibility = `hidden`;
@@ -4287,7 +4287,7 @@ function createOptionWindow(_sprite) {
 		];
 
 		spriteList.scroll.appendChild(
-			createCss2Button(`btnReverse`, `${g_lblNameObj.Reverse}:${g_stateObj.reverse}`, evt => setReverse(evt.target), {
+			createCss2Button(`btnReverse`, `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`, evt => setReverse(evt.target), {
 				x: 160, y: 0,
 				w: 90, h: 21, siz: C_SIZ_DIFSELECTOR,
 				borderStyle: `solid`,
@@ -4306,7 +4306,7 @@ function createOptionWindow(_sprite) {
 	function setReverseView(_btn) {
 		_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
 			g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
-		_btn.textContent = `${g_lblNameObj.Reverse}:${g_stateObj.reverse}`;
+		_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
 	}
 
 	// ---------------------------------------------------
@@ -4341,7 +4341,7 @@ function createOptionWindow(_sprite) {
 		createScText(spriteList.gauge, `Gauge`);
 	} else {
 		lblGauge.classList.add(g_cssObj.settings_Disabled);
-		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, g_stateObj.gauge));
+		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, getStgDetailName(g_stateObj.gauge)));
 	}
 
 	/**
@@ -4510,7 +4510,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 11 スライダーあり
 	spriteList.fadein.appendChild(createLblSetting(`Fadein`));
 
-	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}%`, {
+	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}${getStgDetailName(g_lblNameObj.percent)}`, {
 		x: C_LEN_SETLBL_LEFT, y: 0,
 	}, g_cssObj.settings_FadeinBar);
 	spriteList.fadein.appendChild(lnkFadein);
@@ -4518,7 +4518,7 @@ function createOptionWindow(_sprite) {
 	const setFadein = _sign => {
 		g_stateObj.fadein = (g_stateObj.fadein + 100 + _sign) % 100;
 		fadeinSlider.value = g_stateObj.fadein;
-		lnkFadein.textContent = `${g_stateObj.fadein}%`;
+		lnkFadein.textContent = `${g_stateObj.fadein}${getStgDetailName(g_lblNameObj.percent)}`;
 	};
 
 	multiAppend(spriteList.fadein,
@@ -4537,13 +4537,13 @@ function createOptionWindow(_sprite) {
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
 	fadeinSlider.addEventListener(`input`, _ => {
 		g_stateObj.fadein = parseInt(fadeinSlider.value);
-		lnkFadein.textContent = `${g_stateObj.fadein}%`;
+		lnkFadein.textContent = `${g_stateObj.fadein}${getStgDetailName(g_lblNameObj.percent)}`;
 	}, false);
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
 	// 縦位置: 12
-	createGeneralSetting(spriteList.volume, `volume`, { unitName: `%` });
+	createGeneralSetting(spriteList.volume, `volume`, { unitName: getStgDetailName(g_lblNameObj.percent) });
 
 	/**
 	 * 譜面初期化処理
@@ -4679,7 +4679,7 @@ function createOptionWindow(_sprite) {
 		lnkDifficulty.innerHTML = difNames.join(``);
 
 		// 速度設定 (Speed)
-		setSetting(0, `speed`, ` x`);
+		setSetting(0, `speed`, ` ${getStgDetailName(g_lblNameObj.multi)}`);
 		if (g_headerObj.scoreDetailUse) {
 			drawSpeedGraph(g_stateObj.scoreId);
 			drawDensityGraph(g_stateObj.scoreId);
@@ -4707,7 +4707,7 @@ function createOptionWindow(_sprite) {
 
 		// オート・アシスト設定 (AutoPlay)
 		g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
-		lnkAutoPlay.textContent = g_stateObj.autoPlay;
+		lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
 
 		// ゲージ設定 (Gauge)
 		setGauge(0);
@@ -4741,12 +4741,13 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 
 	const settingUpper = toCapitalize(_settingName);
 	const linkId = `lnk${settingUpper}`;
+	const initName = `${getStgDetailName(g_stateObj[_settingName])}${unitName}`;
 	_obj.appendChild(createLblSetting(settingUpper, 0, toCapitalize(settingLabel)));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
 
 		multiAppend(_obj,
-			makeSettingLblCssButton(linkId, `${g_stateObj[_settingName]}${unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
+			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
 				_ => setSetting(1, _settingName, unitName),
 				{ cxtFunc: _ => setSetting(-1, _settingName, unitName) }),
 
@@ -4768,7 +4769,7 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 
 	} else {
 		document.querySelector(`#lbl${settingUpper}`).classList.add(g_cssObj.settings_Disabled);
-		_obj.appendChild(makeDisabledLabel(linkId, 0, `${g_stateObj[_settingName]}${unitName}`));
+		_obj.appendChild(makeDisabledLabel(linkId, 0, initName));
 	}
 }
 
@@ -4782,6 +4783,15 @@ function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName)
 	return createDivCss2Label(`lbl${_settingName}`, g_lblNameObj[_settingLabel], {
 		x: 0, y: _adjY, w: 100,
 	}, `settings_${_settingName}`);
+}
+
+/**
+ * 設定名の置き換え処理
+ * @param {string} _name 
+ */
+function getStgDetailName(_name) {
+	return g_lblNameObj[`u_${_name}`] === undefined || typeof g_lblRenames !== C_TYP_OBJECT || !g_lblRenames[g_currentPage] ?
+		_name : g_lblNameObj[`u_${_name}`];
 }
 
 /**
@@ -4805,7 +4815,7 @@ function setSetting(_scrollNum, _settingName, _unitName = ``) {
 	g_stateObj[_settingName] = settingList[settingNum];
 	g_settings[`${_settingName}Num`] = settingNum;
 	document.querySelector(`#lnk${toCapitalize(_settingName)}`).textContent =
-		`${g_stateObj[_settingName]}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
+		`${getStgDetailName(g_stateObj[_settingName])}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
 }
 
 /**
@@ -5003,7 +5013,7 @@ function createSettingsDisplayWindow(_sprite) {
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: `%`, displayName: g_currentPage });
+	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: getStgDetailName(g_lblNameObj.percent), displayName: g_currentPage });
 
 	/**
 	 * Display表示/非表示ボタン
@@ -5226,7 +5236,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
 		g_kcType = g_keycons.configTypes[nextNum];
 		g_keycons.configFunc[nextNum](kWidth, divideCnt, keyCtrlPtn, false);
-		_evt.target.textContent = g_kcType;
+		_evt.target.textContent = getStgDetailName(g_kcType);
 	}
 
 	/**
@@ -5248,7 +5258,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		for (let j = 0; j < keyNum; j++) {
 			$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
 		}
-		lnkColorType.textContent = `${g_colorType}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
+		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	}
 
 	multiAppend(divRoot,
@@ -5276,7 +5286,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			x: 30, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ConfigType),
 
-		makeSettingLblCssButton(`lnkKcType`, g_kcType, 0, evt => setConfigType(evt), {
+		makeSettingLblCssButton(`lnkKcType`, getStgDetailName(g_kcType), 0, evt => setConfigType(evt), {
 			x: 30, y: 35, w: 100,
 			cxtFunc: evt => setConfigType(evt, -1),
 		}),
@@ -5286,7 +5296,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			x: g_sWidth - 120, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ColorType),
 
-		makeSettingLblCssButton(`lnkColorType`, g_colorType, 0, _ => setColorType(), {
+		makeSettingLblCssButton(`lnkColorType`, getStgDetailName(g_colorType), 0, _ => setColorType(), {
 			x: g_sWidth - 130, y: 35, w: 100,
 			cxtFunc: _ => setColorType(-1),
 		}),
@@ -9065,26 +9075,26 @@ function resultInit() {
 		`${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${g_stateObj.autoPlay}less`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
-		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${g_stateObj.shuffle}]`)}`
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getStgDetailName(g_stateObj.shuffle)}]`)}`
 	].filter(value => value !== ``).join(` `);
 
 	let playStyleData = [
-		`${g_stateObj.speed}x`,
+		`${g_stateObj.speed}${getStgDetailName(g_lblNameObj.multi)}`,
 		`${withOptions(g_stateObj.motion, C_FLG_OFF)}`,
 		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
-			(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
+			getStgDetailName(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
 		`${withOptions(g_stateObj.appearance, `Visible`)}`,
 		`${withOptions(g_stateObj.gauge, g_settings.gauges[0])}`
 	].filter(value => value !== ``).join(`, `);
 
 	let displayData = [
-		withOptions(g_stateObj.d_stepzone, C_FLG_ON, `Step`),
-		withOptions(g_stateObj.d_judgment, C_FLG_ON, `Judge`),
-		withOptions(g_stateObj.d_fastslow, C_FLG_ON, `FS`),
-		withOptions(g_stateObj.d_lifegauge, C_FLG_ON, `Life`),
-		withOptions(g_stateObj.d_score, C_FLG_ON, `Score`),
-		withOptions(g_stateObj.d_musicinfo, C_FLG_ON, `MusicInfo`),
-		withOptions(g_stateObj.d_filterline, C_FLG_ON, `Filter`)
+		withOptions(g_stateObj.d_stepzone, C_FLG_ON, g_lblNameObj.rd_StepZone),
+		withOptions(g_stateObj.d_judgment, C_FLG_ON, g_lblNameObj.rd_Judgment),
+		withOptions(g_stateObj.d_fastslow, C_FLG_ON, g_lblNameObj.rd_FastSlow),
+		withOptions(g_stateObj.d_lifegauge, C_FLG_ON, g_lblNameObj.rd_LifeGauge),
+		withOptions(g_stateObj.d_score, C_FLG_ON, g_lblNameObj.rd_Score),
+		withOptions(g_stateObj.d_musicinfo, C_FLG_ON, g_lblNameObj.rd_MusicInfo),
+		withOptions(g_stateObj.d_filterline, C_FLG_ON, g_lblNameObj.rd_FilterLine),
 	].filter(value => value !== ``).join(`, `);
 	if (displayData === ``) {
 		displayData = `All Visible`;
@@ -9093,26 +9103,26 @@ function resultInit() {
 	}
 
 	let display2Data = [
-		withOptions(g_stateObj.d_speed, C_FLG_ON, `Speed`),
-		withOptions(g_stateObj.d_color, C_FLG_ON, `Color`),
-		withOptions(g_stateObj.d_lyrics, C_FLG_ON, `Lyrics`),
-		withOptions(g_stateObj.d_background, C_FLG_ON, `Back`),
-		withOptions(g_stateObj.d_arroweffect, C_FLG_ON, `Effect`),
-		withOptions(g_stateObj.d_special, C_FLG_ON, `SP`)
+		withOptions(g_stateObj.d_speed, C_FLG_ON, g_lblNameObj.rd_Speed),
+		withOptions(g_stateObj.d_color, C_FLG_ON, g_lblNameObj.rd_Color),
+		withOptions(g_stateObj.d_lyrics, C_FLG_ON, g_lblNameObj.rd_Lyrics),
+		withOptions(g_stateObj.d_background, C_FLG_ON, g_lblNameObj.rd_Background),
+		withOptions(g_stateObj.d_arroweffect, C_FLG_ON, g_lblNameObj.rd_ArrowEffect),
+		withOptions(g_stateObj.d_special, C_FLG_ON, g_lblNameObj.rd_Special),
 	].filter(value => value !== ``).join(`, `);
 	if (display2Data !== ``) {
 		display2Data += ` : OFF`;
 	}
 
 	multiAppend(playDataWindow,
-		makeCssResultPlayData(`lblMusic`, 20, g_cssObj.result_lbl, 0, `Music`, C_ALIGN_LEFT),
+		makeCssResultPlayData(`lblMusic`, 20, g_cssObj.result_lbl, 0, g_lblNameObj.rt_Music, C_ALIGN_LEFT),
 		makeCssResultPlayData(`lblMusicData`, 60, g_cssObj.result_style, 0, mTitleForView[0]),
 		makeCssResultPlayData(`lblMusicData2`, 60, g_cssObj.result_style, 1, mTitleForView[1]),
-		makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2, `Difficulty`, C_ALIGN_LEFT),
+		makeCssResultPlayData(`lblDifficulty`, 20, g_cssObj.result_lbl, 2, g_lblNameObj.rt_Difficulty, C_ALIGN_LEFT),
 		makeCssResultPlayData(`lblDifData`, 60, g_cssObj.result_style, 2, difData),
-		makeCssResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3, `Playstyle`, C_ALIGN_LEFT),
+		makeCssResultPlayData(`lblStyle`, 20, g_cssObj.result_lbl, 3, g_lblNameObj.rt_Style, C_ALIGN_LEFT),
 		makeCssResultPlayData(`lblStyleData`, 60, g_cssObj.result_style, 3, playStyleData),
-		makeCssResultPlayData(`lblDisplay`, 20, g_cssObj.result_lbl, 4, `Display`, C_ALIGN_LEFT),
+		makeCssResultPlayData(`lblDisplay`, 20, g_cssObj.result_lbl, 4, g_lblNameObj.rt_Display, C_ALIGN_LEFT),
 		makeCssResultPlayData(`lblDisplayData`, 60, g_cssObj.result_style, 4, displayData),
 		makeCssResultPlayData(`lblDisplay2Data`, 60, g_cssObj.result_style, 5, display2Data),
 	);
@@ -9124,7 +9134,7 @@ function resultInit() {
 	 * @param {string} _displayText 
 	 */
 	function withOptions(_flg, _defaultSet, _displayText = _flg) {
-		return (_flg !== _defaultSet ? _displayText : ``);
+		return (_flg !== _defaultSet ? getStgDetailName(_displayText) : ``);
 	}
 
 	// キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
@@ -9299,7 +9309,7 @@ function resultInit() {
 	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `:${g_stateObj.shuffle}`;
+		tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
 	}
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
