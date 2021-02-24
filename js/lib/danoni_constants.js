@@ -36,15 +36,8 @@ const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chr
 const g_isIos = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`]);
 const g_isMac = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`, `mac os`]);
 
-/**
- * ローカル実行かどうかのチェック (localhostを含まない)
- */
-const isFile = _ => location.href.match(/^file/);
-
-/**
- * ローカル実行かどうかのチェック (localhostを含む)
- */
-const isLocal = _ => location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
+const g_isFile = location.href.match(/^file/);
+const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
 
 // 変数型
 const C_TYP_BOOLEAN = `boolean`;
