@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 20.3.0`;
+const g_version = `Ver 20.3.1`;
 const g_revisedDate = `2021/02/24`;
 const g_alphaVersion = ``;
 
@@ -479,7 +479,7 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 			if (_type !== ``) {
 				link.type = _type;
 			}
-			if (!isFile) {
+			if (!g_isFile) {
 				link.crossOrigin = _crossOrigin;
 			}
 			document.head.appendChild(link);
@@ -693,7 +693,7 @@ function createDivCss2Label(_id, _text, { x = 0, y = 0, w = C_LEN_SETLBL_WIDTH, 
  */
 function createImg(_id, _imgPath, _x, _y, _width, _height) {
 	const div = createDiv(_id, _x, _y, _width, _height);
-	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${_width}px;height:${_height}px"${isFile ? `` : ` crossOrigin="anonimous"`}>`;
+	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${_width}px;height:${_height}px"${g_isFile ? `` : ` crossOrigin="anonimous"`}>`;
 
 	return div;
 }
@@ -1843,7 +1843,7 @@ function loadMusic() {
 	divRoot.appendChild(lblLoading);
 
 	// ローカル動作時
-	if (isFile) {
+	if (g_isFile) {
 		setAudio(url);
 		return;
 	}
@@ -1929,7 +1929,7 @@ function makePlayButton(_func) {
 function setAudio(_url) {
 
 	const loadMp3 = _ => {
-		if (isFile) {
+		if (g_isFile) {
 			g_audio.src = _url;
 			musicAfterLoaded();
 		} else {
@@ -2404,12 +2404,12 @@ function titleInit() {
 	if (g_userAgent.indexOf(`msie`) !== -1 ||
 		g_userAgent.indexOf(`trident`) !== -1 ||
 		g_userAgent.indexOf(`edge`) !== -1 ||
-		(g_userAgent.indexOf(`firefox`) !== -1 && isFile)) {
+		(g_userAgent.indexOf(`firefox`) !== -1 && g_isFile)) {
 
 		makeWarningWindow(g_msgInfoObj.W_0001);
 	}
 
-	if (isFile) {
+	if (g_isFile) {
 		makeWarningWindow(g_msgInfoObj.W_0011);
 	}
 
@@ -2719,7 +2719,7 @@ function headerConvert(_dosObj) {
 	g_headerObj.customFont = obj.customFont;
 
 	// 画像ルートパス、拡張子の設定 (サーバ上のみ)
-	if (!isFile) {
+	if (!g_isFile) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
 		if (typeof g_presetOverrideExtension === C_TYP_STRING) {
 			Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
@@ -3400,7 +3400,7 @@ function headerConvert(_dosObj) {
 	obj.playingX = setVal(_dosObj.playingX, 0, C_TYP_NUMBER);
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
-	obj.justFrames = (isLocal) ? 0 : 1;
+	obj.justFrames = (g_isLocal) ? 0 : 1;
 
 	// リザルトデータのカスタマイズ
 	const resultFormatDefault = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
@@ -7560,7 +7560,7 @@ function MainInit() {
 	}
 
 	// ローカル時のみフレーム数を残す
-	if (!isLocal) {
+	if (!g_isLocal) {
 		lblframe.style.display = C_DIS_NONE;
 	}
 
