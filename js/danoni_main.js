@@ -1737,8 +1737,7 @@ function calcLevel(_scoreObj) {
 	//--------------------------------------------------------------
 	return {
 		// 難易度レベル
-		tool: (allCnt === 3 ? `0.01` :
-			`${Math.floor(difLevel)}.${`${Math.round((difLevel * 100) % 100)}`.padStart(2, `0`)}${(push3Cnt > 0 ? "*" : "")}`),
+		tool: (allCnt === 3 ? `0.01` : `${difLevel.toFixed(2)}${(push3Cnt > 0 ? "*" : "")}`),
 		// 縦連打補正
 		tate: toDecimal2(baseDifLevel - calcDifLevel(leveltmp)),
 		// 同時押し補正
