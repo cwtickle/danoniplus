@@ -2133,6 +2133,13 @@ const colorToHex = (_color) => {
 }
 
 /**
+ * カラーコードの前パディング (旧Option Editor対応)
+ * @param {boolean} _useFlg
+ * @param {string} _colorStr 
+ */
+const colorCdPadding = (_useFlg, _colorStr) => _useFlg ? `#${_colorStr.slice(1).padStart(6, `0`)}` : _colorStr;
+
+/**
  * グラデーション用のカラーフォーマットを作成
  * @param {string} _colorStr 
  * @param {object} _options
@@ -2160,10 +2167,7 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const tmpColorStr = _colorStr.split(`@`);
 	const colorArray = tmpColorStr[0].split(`:`);
 	for (let j = 0; j < colorArray.length; j++) {
-		colorArray[j] = colorToHex(colorArray[j].replace(/0x/g, `#`));
-		if (_colorCdPaddingUse) {
-			colorArray[j] = `#${colorArray[j].slice(1).padStart(6, `0`)}`;
-		}
+		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replace(/0x/g, `#`)));
 		if (j === 0 && colorArray[0].substring(0, 1) !== `#`) {
 		} else if (colorArray[j].length === 7) {
 			colorArray[j] += alphaVal;
@@ -3058,13 +3062,10 @@ function headerConvert(_dosObj) {
 				tmpSetColorOrg.some(tmpColorOrg => {
 					if (tmpColorOrg.indexOf(`#`) !== -1 ||
 						(!tmpColorOrg.startsWith(`to `) && !tmpColorOrg.endsWith(`deg`)) || tmpColorOrg === `Default`) {
-						colorOrg[j] = tmpColorOrg;
+						colorOrg[j] = colorCdPadding(_colorCdPaddingUse, tmpColorOrg);
 						return true;
 					}
 				});
-				if (_colorCdPaddingUse) {
-					colorOrg[j] = `#${colorOrg[j].slice(1).padStart(6, `0`)}`;
-				}
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
 					_defaultColorgrd, _colorCdPaddingUse, _objType, _shadowFlg,
 				});
