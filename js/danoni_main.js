@@ -9481,10 +9481,9 @@ function resultInit() {
  * @param {string, number} _text
  * @param {string} _align
  */
-function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align = C_ALIGN_CENTER) {
+function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align = C_ALIGN_CENTER, { w = 400, siz = C_SIZ_MAIN } = {}) {
 	return createDivCss2Label(_id, _text, {
-		x: _x, y: 18 * _heightPos,
-		w: 400, h: 18, siz: C_SIZ_MAIN, align: _align,
+		x: _x, y: C_SIZ_SETMINI * _heightPos, w, h: C_SIZ_SETMINI, siz, align: _align,
 	}, _class);
 }
 
@@ -9498,10 +9497,7 @@ function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align = C_AL
  * @param {string} _align
  */
 function makeCssResultSymbol(_id, _x, _class, _heightPos, _text, _align = C_ALIGN_LEFT) {
-	return createDivCss2Label(_id, _text, {
-		x: _x, y: 18 * _heightPos,
-		w: 150, h: 18, siz: C_SIZ_JDGCNTS, align: _align,
-	}, _class);
+	return makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align, { w: 150, siz: C_SIZ_JDGCNTS });
 }
 
 // ライセンス原文、以下は削除しないでください
