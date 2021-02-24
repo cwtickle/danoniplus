@@ -4013,6 +4013,21 @@ function createOptionWindow(_sprite) {
 	}
 
 	/**
+	 * 譜面基礎データの取得
+	 * @param {number} _scoreId 
+	 */
+	function getScoreBaseData(_scoreId) {
+		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
+		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
+		return {
+			arrowCnts: arrowCnts,
+			frzCnts: frzCnts,
+			apm: Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60)),
+			playingTime: transFrameToTimer(g_detailObj.playingFrame[_scoreId]),
+		};
+	}
+
+	/**
 	 * 速度変化グラフの描画
 	 * @param {number} _scoreId
 	 */
@@ -4081,9 +4096,6 @@ function createOptionWindow(_sprite) {
 	 */
 	function drawDensityGraph(_scoreId) {
 
-		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
-		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
-
 		const canvas = document.querySelector(`#graphDensity`);
 		const context = canvas.getContext(`2d`);
 		drawBaseLine(context);
@@ -4096,12 +4108,11 @@ function createOptionWindow(_sprite) {
 			context.stroke();
 		}
 
-		const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60));
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_apm, apm, 0);
-		const playingTime = transFrameToTimer(g_detailObj.playingFrameWithBlank[_scoreId]);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_time, playingTime, 1);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, arrowCnts, 3);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_frz, frzCnts, 4);
+		const obj = getScoreBaseData(_scoreId);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_apm, obj.apm, 0);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_time, obj.playingTime, 1);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, obj.arrowCnts, 3);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_frz, obj.frzCnts, 4);
 	}
 
 	/**
@@ -4231,11 +4242,7 @@ function createOptionWindow(_sprite) {
 		if (document.querySelector(`#lnkDifInfo`) === null) {
 			let printData = ``;
 			for (let j = 0; j < g_detailObj.arrowCnt.length; j++) {
-				const arrowCnts = g_detailObj.arrowCnt[j].reduce((p, x) => p + x);
-				const frzCnts = g_detailObj.frzCnt[j].reduce((p, x) => p + x);
-				const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[j] / g_fps / 60));
-				const playingTime = transFrameToTimer(g_detailObj.playingFrame[j]);
-
+				const obj = getScoreBaseData(j);
 				printData +=
 					// 譜面番号
 					`[${j + 1}]\t` +
@@ -4246,15 +4253,15 @@ function createOptionWindow(_sprite) {
 					// 縦連
 					`${g_detailObj.toolDif[j].tate}\t` +
 					// 総矢印数
-					`${(arrowCnts + frzCnts)}\t` +
+					`${(obj.arrowCnts + obj.frzCnts)}\t` +
 					// 矢印
-					`${arrowCnts}\t` +
+					`${obj.arrowCnts}\t` +
 					// フリーズアロー
-					`${frzCnts}\t` +
+					`${obj.frzCnts}\t` +
 					// APM
-					`${apm}\t` +
+					`${obj.apm}\t` +
 					// 時間(分秒)
-					`${playingTime}\r\n`;
+					`${obj.playingTime}\r\n`;
 			}
 			detailToolDif.appendChild(
 				makeSettingLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 0, _ => {
