@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/02/20 (v20.2.1)
+ * Revised : 2021/02/24 (v20.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -35,6 +35,16 @@ const C_SPRITE_ROOT = `divRoot`;
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 const g_isIos = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`]);
 const g_isMac = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`, `mac os`]);
+
+/**
+ * ローカル実行かどうかのチェック (localhostを含まない)
+ */
+const isFile = _ => location.href.match(/^file/);
+
+/**
+ * ローカル実行かどうかのチェック (localhostを含む)
+ */
+const isLocal = _ => location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
 
 // 変数型
 const C_TYP_BOOLEAN = `boolean`;
@@ -499,7 +509,7 @@ for (let j = 0; j < 255; j++) {
 // キー表示用
 g_kCd[0] = `- - -`;
 g_kCd[1] = `Unknown`;
-g_kCd[8] = `BackSpace`;
+g_kCd[8] = (g_isMac ? `Delete` : `BackSpace`);
 g_kCd[9] = `Tab`;
 g_kCd[12] = `Clear`;
 g_kCd[13] = `Enter`;
@@ -2024,6 +2034,9 @@ const g_lblNameObj = {
     Fadein: `Fadein`,
     Volume: `Volume`,
 
+    multi: `x`,
+    percent: `%`,
+
     sc_speed: `←→`,
     sc_scroll: `↑/↓`,
     sc_adjustment: `- +`,
@@ -2066,6 +2079,64 @@ const g_lblNameObj = {
     Appearance: `Appearance`,
     Opacity: `Opacity`,
 
+    'u_x': `x`,
+    'u_%': `%`,
+
+    'u_OFF': `OFF`,
+    'u_ON': `ON`,
+    'u_Boost': `Boost`,
+    'u_Brake': `Brake`,
+
+    'u_Cross': `Cross`,
+    'u_Split': `Split`,
+    'u_Alternate': `Alternate`,
+    'u_Twist': `Twist`,
+    'u_Asymmetry': `Asymmetry`,
+    'u_Flat': `Flat`,
+    'u_R-': `R-`,
+    'u_Reverse': `Reverse`,
+
+    'u_Mirror': `Mirror`,
+    'u_Random': `Random`,
+    'u_Random+': `Random+`,
+    'u_S-Random': `S-Random`,
+    'u_S-Random+': `S-Random+`,
+
+    'u_ALL': `ALL`,
+    'u_Onigiri': `Onigiri`,
+    'u_Left': `Left`,
+    'u_Right': `Right`,
+
+    'u_Original': `Original`,
+    'u_Heavy': `Heavy`,
+    'u_NoRecovery': `NoRecovery`,
+    'u_SuddenDeath': `SuddenDeath`,
+    'u_Practice': `Practice`,
+    'u_Light': `Light`,
+
+    'u_Normal': `Normal`,
+    'u_Hard': `Hard`,
+    'u_Easy': `Easy`,
+
+    'u_Visible': `Visible`,
+    'u_Hidden': `Hidden`,
+    'u_Hidden+': `Hidden+`,
+    'u_Sudden': `Sudden`,
+    'u_Sudden+': `Sudden+`,
+    'u_Hid&Sud+': `Hid&Sud+`,
+
+    'u_Speed': `Speed`,
+    'u_Density': `Density`,
+    'u_ToolDif': `ToolDif`,
+
+    'u_Main': `Main`,
+    'u_Replaced': `Replaced`,
+
+    'u_Default': `Default`,
+    'u_Type0': `Type0`,
+    'u_Type1': `Type1`,
+    'u_Type2': `Type2`,
+
     ConfigType: `ConfigType`,
     ColorType: `ColorType`,
     KeyPattern: `KeyPattern`,
@@ -2091,6 +2162,25 @@ const g_lblNameObj = {
     fullCombo: `FullCombo!`,
     cleared: `CLEARED!`,
     failed: `FAILED...`,
+
+    rt_Music: `Music`,
+    rt_Difficulty: `Difficulty`,
+    rt_Style: `Playstyle`,
+    rt_Display: `Display`,
+
+    rd_StepZone: `Step`,
+    rd_Judgment: `Judge`,
+    rd_FastSlow: `FS`,
+    rd_LifeGauge: `Life`,
+    rd_Score: `Score`,
+    rd_MusicInfo: `MusicInfo`,
+    rd_FilterLine: `Filter`,
+    rd_Speed: `Speed`,
+    rd_Color: `Color`,
+    rd_Lyrics: `Lyrics`,
+    rd_Background: `Back`,
+    rd_ArrowEffect: `Effect`,
+    rd_Special: `SP`,
 };
 
 /**

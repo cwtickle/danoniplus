@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2021/01/30 (v19.3.0)
+ * Template Update: 2021/02/24 (v20.3.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -185,4 +185,14 @@ const g_local_lblNameObj = {
  */
 const g_local_msgObj = {
 
+};
+
+/**
+ * 設定名の上書き可否設定
+ */
+const g_lblRenames = {
+	option: true,
+	settingsDisplay: true,
+	keyConfig: true,
+	result: true,
 };
