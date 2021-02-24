@@ -538,7 +538,7 @@ function getStrLength(_str) {
 function getStrWidth(_str, _fontsize, _font) {
 	const ctx = document.createElement(`canvas`).getContext(`2d`);
 	ctx.font = `${_fontsize}px ${_font}`;
-	return ctx.measureText(_str).width;
+	return ctx.measureText(unEscapeHtml(_str)).width;
 }
 
 /**
