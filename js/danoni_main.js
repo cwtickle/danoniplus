@@ -3062,11 +3062,10 @@ function headerConvert(_dosObj) {
 				tmpSetColorOrg.some(tmpColorOrg => {
 					if (tmpColorOrg.indexOf(`#`) !== -1 ||
 						(!tmpColorOrg.startsWith(`to `) && !tmpColorOrg.endsWith(`deg`)) || tmpColorOrg === `Default`) {
-						colorOrg[j] = tmpColorOrg;
+						colorOrg[j] = colorCdPadding(_colorCdPaddingUse, tmpColorOrg);
 						return true;
 					}
 				});
-				colorOrg[j] = colorCdPadding(_colorCdPaddingUse, colorOrg[j]);
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
 					_defaultColorgrd, _colorCdPaddingUse, _objType, _shadowFlg,
 				});
