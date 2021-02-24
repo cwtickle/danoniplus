@@ -538,7 +538,7 @@ function getStrLength(_str) {
 function getStrWidth(_str, _fontsize, _font) {
 	const ctx = document.createElement(`canvas`).getContext(`2d`);
 	ctx.font = `${_fontsize}px ${_font}`;
-	return ctx.measureText(_str).width;
+	return ctx.measureText(unEscapeHtml(_str)).width;
 }
 
 /**
@@ -4666,8 +4666,7 @@ function createOptionWindow(_sprite) {
 		// 譜面名設定 (Difficulty)
 		const difWidth = parseFloat(lnkDifficulty.style.width);
 		const difNames = [`${g_keyObj.currentKey} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
-		lnkDifficulty.style.fontSize = `${getFontSize(lnkDifficulty.textContent,
-			difWidth, getBasicFont(), C_SIZ_SETLBL)}px`;
+		lnkDifficulty.style.fontSize = `${getFontSize(difNames[0], difWidth, getBasicFont(), C_SIZ_SETLBL)}px`;
 
 		if (g_headerObj.makerView) {
 			difNames.push(`(${g_headerObj.creatorNames[g_stateObj.scoreId]})`);
