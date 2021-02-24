@@ -267,7 +267,7 @@ const transCode = _setCode => {
  * 特定キーをブロックする処理
  * @param {string} _setCode 
  */
-const blockCode = _setCode => C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode) ? false : true;
+const blockCode = _setCode => !C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode);
 
 /**
  * キーを押したときの動作（汎用）
@@ -313,7 +313,7 @@ const commonKeyUp = _evt => {
 };
 
 /**
- * 外部リンクを新規タグで開く
+ * 外部リンクを新規タブで開く
  * @param {string} _url 
  */
 const openLink = _url => {
@@ -376,6 +376,8 @@ function setVal(_checkStr, _default, _type) {
  * 配列の型及び最小配列長のチェック
  * - チェックのみで変換は行わないため、変換が必要な場合は別途処理を組むこと。
  * - 型は最初の要素のみチェックを行う。
+ * 
+ * @deprecated v20以降非推奨
  * @param {array} _checkArray 
  * @param {string} _type 
  * @param {number} _minLength 最小配列長
@@ -477,8 +479,7 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 			if (_type !== ``) {
 				link.type = _type;
 			}
-			if (location.href.match(`^file`)) {
-			} else {
+			if (!isFile) {
 				link.crossOrigin = _crossOrigin;
 			}
 			document.head.appendChild(link);
@@ -508,6 +509,7 @@ function getBasicFont(_priorityFont = ``) {
 
 /**
  * 半角換算の文字数を計算
+ * @deprecated v20以降非推奨
  * @param {string} _str 
  */
 function getStrLength(_str) {
@@ -560,6 +562,7 @@ function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64)
 
 /**
  * 左パディング
+ * @deprecated v20以降非推奨
  * @param {string} _str 元の文字列 
  * @param {number} _length パディング後の長さ 
  * @param {string} _chr パディング文字列
@@ -631,6 +634,8 @@ function createDiv(_id, _x, _y, _width, _height) {
 /**
  * 子div要素のラベル文字作成
  * - createDivLabelに加えて、独自フォントが指定できる形式。
+ * 
+ * @deprecated v20以降非推奨
  * @param {string} _id 
  * @param {number} _x 
  * @param {number} _y 
@@ -688,7 +693,7 @@ function createDivCss2Label(_id, _text, { x = 0, y = 0, w = C_LEN_SETLBL_WIDTH, 
  */
 function createImg(_id, _imgPath, _x, _y, _width, _height) {
 	const div = createDiv(_id, _x, _y, _width, _height);
-	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${_width}px;height:${_height}px"${location.href.match(`^file`) ? `` : ` crossOrigin="anonimous"`}>`;
+	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${_width}px;height:${_height}px"${isFile ? `` : ` crossOrigin="anonimous"`}>`;
 
 	return div;
 }
@@ -1195,6 +1200,34 @@ function getLoadingLabel() {
 		siz: C_SIZ_SETLBL, align: C_ALIGN_RIGHT,
 	});
 }
+
+/**
+ * フレーム数を時間表示へ変換
+ * @param {number} _frame 
+ */
+const transFrameToTimer = _frame => {
+	const minutes = Math.floor(_frame / g_fps / 60);
+	const seconds = `${Math.floor((_frame / g_fps) % 60)}`.padStart(2, `0`);
+	return `${minutes}:${seconds}`;
+}
+
+/**
+ * 疑似タイマー表記をフレーム数へ変換
+ * |endFrame=1:35.20|
+ * @param {string} _str 
+ */
+const transTimerToFrame = _str => {
+	if (_str.indexOf(`:`) !== -1) {
+		const tmpTimes = _str.split(`:`);
+		if (tmpTimes[1].indexOf(`.`) !== -1) {
+			const tmpSeconds = tmpTimes[1].split(`.`);
+			return g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpSeconds[0])) + Number(tmpSeconds[1]);
+		} else {
+			return g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpTimes[1]));
+		}
+	}
+	return _str;
+};
 
 /*-----------------------------------------------------------*/
 /* Scene : TITLE [melon] */
@@ -1710,8 +1743,7 @@ function calcLevel(_scoreObj) {
 	//--------------------------------------------------------------
 	return {
 		// 難易度レベル
-		tool: (allCnt === 3 ? `0.01` :
-			`${Math.floor(difLevel)}.${`${Math.round((difLevel * 100) % 100)}`.padStart(2, `0`)}${(push3Cnt > 0 ? "*" : "")}`),
+		tool: (allCnt === 3 ? `0.01` : `${difLevel.toFixed(2)}${(push3Cnt > 0 ? "*" : "")}`),
 		// 縦連打補正
 		tate: toDecimal2(baseDifLevel - calcDifLevel(leveltmp)),
 		// 同時押し補正
@@ -1811,7 +1843,7 @@ function loadMusic() {
 	divRoot.appendChild(lblLoading);
 
 	// ローカル動作時
-	if (location.href.match(`^file`)) {
+	if (isFile) {
 		setAudio(url);
 		return;
 	}
@@ -1897,7 +1929,7 @@ function makePlayButton(_func) {
 function setAudio(_url) {
 
 	const loadMp3 = _ => {
-		if (location.href.match(`^file`)) {
+		if (isFile) {
 			g_audio.src = _url;
 			musicAfterLoaded();
 		} else {
@@ -2368,12 +2400,12 @@ function titleInit() {
 	if (g_userAgent.indexOf(`msie`) !== -1 ||
 		g_userAgent.indexOf(`trident`) !== -1 ||
 		g_userAgent.indexOf(`edge`) !== -1 ||
-		(g_userAgent.indexOf(`firefox`) !== -1 && location.href.match(`^file`))) {
+		(g_userAgent.indexOf(`firefox`) !== -1 && isFile)) {
 
 		makeWarningWindow(g_msgInfoObj.W_0001);
 	}
 
-	if (location.href.match(/^file/)) {
+	if (isFile) {
 		makeWarningWindow(g_msgInfoObj.W_0011);
 	}
 
@@ -2683,7 +2715,7 @@ function headerConvert(_dosObj) {
 	g_headerObj.customFont = obj.customFont;
 
 	// 画像ルートパス、拡張子の設定 (サーバ上のみ)
-	if (!location.href.match(`^file`)) {
+	if (!isFile) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
 		if (typeof g_presetOverrideExtension === C_TYP_STRING) {
 			Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
@@ -2842,7 +2874,7 @@ function headerConvert(_dosObj) {
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 
 	// 譜面変更セレクターの利用有無
-	obj.difSelectorUse = (setVal(_dosObj.difSelectorUse, (obj.keyLabels.length > 5 ? true : false), C_TYP_BOOLEAN));
+	obj.difSelectorUse = (setVal(_dosObj.difSelectorUse, obj.keyLabels.length > 5, C_TYP_BOOLEAN));
 
 	// 初期速度の設定
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
@@ -2914,7 +2946,7 @@ function headerConvert(_dosObj) {
 	if (hasVal(_dosObj.defaultFrzColorUse)) {
 		obj.defaultFrzColorUse = setVal(_dosObj.defaultFrzColorUse, true, C_TYP_BOOLEAN);
 	} else if (typeof g_presetFrzColors === C_TYP_BOOLEAN) {
-		obj.defaultFrzColorUse = (g_presetFrzColors ? true : false);
+		obj.defaultFrzColorUse = g_presetFrzColors;
 	} else {
 		obj.defaultFrzColorUse = true;
 	}
@@ -3034,10 +3066,7 @@ function headerConvert(_dosObj) {
 					colorOrg[j] = `#${colorOrg[j].slice(1).padStart(6, `0`)}`;
 				}
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
-					_defaultColorgrd: _defaultColorgrd,
-					_colorCdPaddingUse: _colorCdPaddingUse,
-					_objType: _objType,
-					_shadowFlg: _shadowFlg,
+					_defaultColorgrd, _colorCdPaddingUse, _objType, _shadowFlg,
 				});
 			}
 
@@ -3048,9 +3077,7 @@ function headerConvert(_dosObj) {
 			colorOrg = _colorInit.concat();
 			for (let j = 0; j < _colorInit.length; j++) {
 				colorList[j] = _colorInit[j] === `` ? `` : makeColorGradation(_colorInit[j], {
-					_defaultColorgrd: _defaultColorgrd,
-					_colorCdPaddingUse: _colorCdPaddingUse,
-					_shadowFlg: _shadowFlg,
+					_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
 				});
 			}
 		}
@@ -3372,7 +3399,7 @@ function headerConvert(_dosObj) {
 	obj.playingX = setVal(_dosObj.playingX, 0, C_TYP_NUMBER);
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
-	obj.justFrames = (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) ? 0 : 1;
+	obj.justFrames = (isLocal) ? 0 : 1;
 
 	// リザルトデータのカスタマイズ
 	const resultFormatDefault = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
@@ -3380,24 +3407,6 @@ function headerConvert(_dosObj) {
 		setVal(g_presetResultFormat, resultFormatDefault, C_TYP_STRING) : resultFormatDefault), C_TYP_STRING));
 
 	return obj;
-}
-
-/**
- * 疑似タイマー表記をフレーム数へ変換
- * |endFrame=1:35.20|
- * @param {string} _str 
- */
-function transTimerToFrame(_str) {
-	if (_str.indexOf(`:`) !== -1) {
-		const tmpTimes = _str.split(`:`);
-		if (tmpTimes[1].indexOf(`.`) !== -1) {
-			const tmpSeconds = tmpTimes[1].split(`.`);
-			return g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpSeconds[0])) + Number(tmpSeconds[1]);
-		} else {
-			return g_fps * (Number(tmpTimes[0]) * 60 + Number(tmpTimes[1]));
-		}
-	}
-	return _str;
 }
 
 /**
@@ -4009,6 +4018,21 @@ function createOptionWindow(_sprite) {
 	}
 
 	/**
+	 * 譜面基礎データの取得
+	 * @param {number} _scoreId 
+	 */
+	function getScoreBaseData(_scoreId) {
+		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
+		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
+		return {
+			arrowCnts: arrowCnts,
+			frzCnts: frzCnts,
+			apm: Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60)),
+			playingTime: transFrameToTimer(g_detailObj.playingFrame[_scoreId]),
+		};
+	}
+
+	/**
 	 * 速度変化グラフの描画
 	 * @param {number} _scoreId
 	 */
@@ -4077,9 +4101,6 @@ function createOptionWindow(_sprite) {
 	 */
 	function drawDensityGraph(_scoreId) {
 
-		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
-		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
-
 		const canvas = document.querySelector(`#graphDensity`);
 		const context = canvas.getContext(`2d`);
 		drawBaseLine(context);
@@ -4092,14 +4113,11 @@ function createOptionWindow(_sprite) {
 			context.stroke();
 		}
 
-		const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60));
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_apm, apm, 0);
-		const minutes = Math.floor(g_detailObj.playingFrameWithBlank[_scoreId] / g_fps / 60);
-		const seconds = `${Math.floor((g_detailObj.playingFrameWithBlank[_scoreId] / g_fps) % 60)}`.padStart(2, `0`);
-		const playingTime = `${minutes}:${seconds}`;
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_time, playingTime, 1);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, arrowCnts, 3);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_frz, frzCnts, 4);
+		const obj = getScoreBaseData(_scoreId);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_apm, obj.apm, 0);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_time, obj.playingTime, 1);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, obj.arrowCnts, 3);
+		makeScoreDetailLabel(`Density`, g_lblNameObj.s_frz, obj.frzCnts, 4);
 	}
 
 	/**
@@ -4229,13 +4247,7 @@ function createOptionWindow(_sprite) {
 		if (document.querySelector(`#lnkDifInfo`) === null) {
 			let printData = ``;
 			for (let j = 0; j < g_detailObj.arrowCnt.length; j++) {
-				const arrowCnts = g_detailObj.arrowCnt[j].reduce((p, x) => p + x);
-				const frzCnts = g_detailObj.frzCnt[j].reduce((p, x) => p + x);
-				const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[j] / g_fps / 60));
-				const minutes = Math.floor(g_detailObj.playingFrame[j] / g_fps / 60);
-				const seconds = `${Math.floor((g_detailObj.playingFrame[j] / g_fps) % 60)}`.padStart(2, `0`);
-				const playingTime = `${minutes}:${seconds}`;
-
+				const obj = getScoreBaseData(j);
 				printData +=
 					// 譜面番号
 					`[${j + 1}]\t` +
@@ -4246,15 +4258,15 @@ function createOptionWindow(_sprite) {
 					// 縦連
 					`${g_detailObj.toolDif[j].tate}\t` +
 					// 総矢印数
-					`${(arrowCnts + frzCnts)}\t` +
+					`${(obj.arrowCnts + obj.frzCnts)}\t` +
 					// 矢印
-					`${arrowCnts}\t` +
+					`${obj.arrowCnts}\t` +
 					// フリーズアロー
-					`${frzCnts}\t` +
+					`${obj.frzCnts}\t` +
 					// APM
-					`${apm}\t` +
+					`${obj.apm}\t` +
 					// 時間(分秒)
-					`${playingTime}\r\n`;
+					`${obj.playingTime}\r\n`;
 			}
 			detailToolDif.appendChild(
 				makeSettingLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 0, _ => {
@@ -6208,7 +6220,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			if (wordDataList.find((v) => v !== undefined) === undefined) {
 				// Reverse時の歌詞の自動反転制御設定
 				if (g_headerObj.wordAutoReverse !== `auto`) {
-					wordReverseFlg = (g_headerObj.wordAutoReverse === C_FLG_ON ? true : false);
+					wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
 				} else if (keyNum === divideCnt + 1) {
 					wordReverseFlg = true;
 				}
@@ -6864,7 +6876,7 @@ function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame) {
  * @param {number} _val 
  */
 function isFrzHitColor(_val) {
-	return (g_headerObj.colorDataType === `` && ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61)) ? true : false;
+	return (g_headerObj.colorDataType === `` && ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61));
 }
 
 /**
@@ -7399,11 +7411,7 @@ function MainInit() {
 
 	const nominalDiff = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
 	g_scoreObj.nominalFrameNum = g_scoreObj.frameNum - nominalDiff;
-	const nominalFullFrame = fullFrame - nominalDiff;
-
-	const fullMin = Math.floor(nominalFullFrame / 60 / g_fps);
-	const fullSec = `${Math.floor(Math.floor(nominalFullFrame / g_fps) % 60)}`.padStart(2, `0`);
-	const fullTime = `${fullMin}:${fullSec}`;
+	const fullTime = transFrameToTimer(fullFrame - nominalDiff);
 
 	// フレーム数
 	divRoot.appendChild(
@@ -7551,8 +7559,7 @@ function MainInit() {
 	}
 
 	// ローカル時のみフレーム数を残す
-	if (location.href.match(`^file`) || location.href.indexOf(`localhost`) !== -1) {
-	} else {
+	if (!isLocal) {
 		lblframe.style.display = C_DIS_NONE;
 	}
 
@@ -7921,7 +7928,7 @@ function MainInit() {
 	const checkKeyUpFunc = {
 
 		frzOFF: (_j) => {
-			return g_workObj.keyHitFlg[_j].find(flg => flg) ? true : false;
+			return g_workObj.keyHitFlg[_j].find(flg => flg);
 		},
 
 		frzON: (_j) => {
@@ -8398,9 +8405,7 @@ function MainInit() {
 			// タイマー
 			if (Math.floor(g_scoreObj.nominalFrameNum % g_fps) === 0) {
 				if (g_scoreObj.nominalFrameNum >= 0) {
-					const currentMin = Math.floor(g_scoreObj.nominalFrameNum / 60 / g_fps);
-					const currentSec = `${Math.floor(g_scoreObj.nominalFrameNum / g_fps) % 60}`.padStart(2, `0`);
-					lblTime1.textContent = `${currentMin}:${currentSec}`;
+					lblTime1.textContent = transFrameToTimer(g_scoreObj.nominalFrameNum);
 				}
 			}
 
@@ -8612,7 +8617,7 @@ function changeFailedFrz(_j, _k) {
  * @param {number} _keyCode 
  */
 function keyIsDown(_keyCode) {
-	return (g_inputKeyBuffer[_keyCode] ? true : false);
+	return g_inputKeyBuffer[_keyCode];
 }
 
 const jdgList = [`ii`, `shakin`, `matari`, `shobon`].map(jdg => toCapitalize(jdg));
@@ -9475,10 +9480,9 @@ function resultInit() {
  * @param {string, number} _text
  * @param {string} _align
  */
-function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align = C_ALIGN_CENTER) {
+function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align = C_ALIGN_CENTER, { w = 400, siz = C_SIZ_MAIN } = {}) {
 	return createDivCss2Label(_id, _text, {
-		x: _x, y: 18 * _heightPos,
-		w: 400, h: 18, siz: C_SIZ_MAIN, align: _align,
+		x: _x, y: C_SIZ_SETMINI * _heightPos, w, h: C_SIZ_SETMINI, siz, align: _align,
 	}, _class);
 }
 
@@ -9492,10 +9496,7 @@ function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align = C_AL
  * @param {string} _align
  */
 function makeCssResultSymbol(_id, _x, _class, _heightPos, _text, _align = C_ALIGN_LEFT) {
-	return createDivCss2Label(_id, _text, {
-		x: _x, y: 18 * _heightPos,
-		w: 150, h: 18, siz: C_SIZ_JDGCNTS, align: _align,
-	}, _class);
+	return makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align, { w: 150, siz: C_SIZ_JDGCNTS });
 }
 
 // ライセンス原文、以下は削除しないでください
