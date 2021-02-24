@@ -2167,8 +2167,7 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const tmpColorStr = _colorStr.split(`@`);
 	const colorArray = tmpColorStr[0].split(`:`);
 	for (let j = 0; j < colorArray.length; j++) {
-		colorArray[j] = colorToHex(colorArray[j].replace(/0x/g, `#`));
-		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorArray[j]);
+		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replace(/0x/g, `#`)));
 		if (j === 0 && colorArray[0].substring(0, 1) !== `#`) {
 		} else if (colorArray[j].length === 7) {
 			colorArray[j] += alphaVal;
