@@ -2133,6 +2133,12 @@ const colorToHex = (_color) => {
 }
 
 /**
+ * カラーコードの前パディング (旧Option Editor対応)
+ * @param {string} _colorStr 
+ */
+const colorCdPadding = _colorStr => `#${_colorStr.slice(1).padStart(6, `0`)}`;
+
+/**
  * グラデーション用のカラーフォーマットを作成
  * @param {string} _colorStr 
  * @param {object} _options
@@ -2162,7 +2168,7 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	for (let j = 0; j < colorArray.length; j++) {
 		colorArray[j] = colorToHex(colorArray[j].replace(/0x/g, `#`));
 		if (_colorCdPaddingUse) {
-			colorArray[j] = `#${colorArray[j].slice(1).padStart(6, `0`)}`;
+			colorArray[j] = colorCdPadding(colorArray[j]);
 		}
 		if (j === 0 && colorArray[0].substring(0, 1) !== `#`) {
 		} else if (colorArray[j].length === 7) {
@@ -3063,7 +3069,7 @@ function headerConvert(_dosObj) {
 					}
 				});
 				if (_colorCdPaddingUse) {
-					colorOrg[j] = `#${colorOrg[j].slice(1).padStart(6, `0`)}`;
+					colorOrg[j] = colorCdPadding(colorOrg[j]);
 				}
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
 					_defaultColorgrd, _colorCdPaddingUse, _objType, _shadowFlg,
