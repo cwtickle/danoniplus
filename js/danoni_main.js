@@ -313,7 +313,7 @@ const commonKeyUp = _evt => {
 };
 
 /**
- * 外部リンクを新規タグで開く
+ * 外部リンクを新規タブで開く
  * @param {string} _url 
  */
 const openLink = _url => {
@@ -376,6 +376,8 @@ function setVal(_checkStr, _default, _type) {
  * 配列の型及び最小配列長のチェック
  * - チェックのみで変換は行わないため、変換が必要な場合は別途処理を組むこと。
  * - 型は最初の要素のみチェックを行う。
+ * 
+ * @deprecated v20以降非推奨
  * @param {array} _checkArray 
  * @param {string} _type 
  * @param {number} _minLength 最小配列長
@@ -507,6 +509,7 @@ function getBasicFont(_priorityFont = ``) {
 
 /**
  * 半角換算の文字数を計算
+ * @deprecated v20以降非推奨
  * @param {string} _str 
  */
 function getStrLength(_str) {
@@ -559,6 +562,7 @@ function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64)
 
 /**
  * 左パディング
+ * @deprecated v20以降非推奨
  * @param {string} _str 元の文字列 
  * @param {number} _length パディング後の長さ 
  * @param {string} _chr パディング文字列
@@ -630,6 +634,8 @@ function createDiv(_id, _x, _y, _width, _height) {
 /**
  * 子div要素のラベル文字作成
  * - createDivLabelに加えて、独自フォントが指定できる形式。
+ * 
+ * @deprecated v20以降非推奨
  * @param {string} _id 
  * @param {number} _x 
  * @param {number} _y 
