@@ -822,11 +822,11 @@ const g_shortcutObj = {
         ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnSettings` },
     },
-    loadingIos: {
-        Enter: { id: `btnPlay` },
-    },
     keyConfig: {
         Escape: { id: `btnBack` },
+    },
+    loadingIos: {
+        Enter: { id: `btnPlay` },
     },
     result: {
         Escape: { id: `btnBack` },
@@ -846,10 +846,10 @@ const g_btnWaitFrame = {
     title: { b_frame: 0, s_frame: 0 },
     option: { b_frame: 0, s_frame: 0, initial: true },
     settingsDisplay: { b_frame: 0, s_frame: 0 },
+    keyConfig: { b_frame: 0, s_frame: 30 },
     loading: { b_frame: 0, s_frame: 0 },
     loadingIos: { b_frame: 0, s_frame: 0 },
     main: { b_frame: 0, s_frame: 0 },
-    keyConfig: { b_frame: 0, s_frame: 0 },
     result: { b_frame: 0, s_frame: 120 },
 };
 
