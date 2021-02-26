@@ -902,6 +902,7 @@ function getTitleDivLabel(_id, _titlename, _x, _y, ..._classes) {
 function clearWindow() {
 	document.onkeyup = _ => { };
 	document.onkeydown = evt => blockCode(transCode(evt.code));
+	g_inputKeyBuffer = {};
 
 	if (document.querySelector(`#layer0`) !== null) {
 
@@ -1824,7 +1825,7 @@ function loadMusic() {
 
 	clearWindow();
 	g_currentPage = `loading`;
-	document.onkeydown = evt => blockCode(transCode(evt.code));
+	setShortcutEvent(g_currentPage);
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
@@ -1942,6 +1943,8 @@ function setAudio(_url) {
 			g_currentPage = `loadingIos`;
 			lblLoading.textContent = `Click to Start!`;
 			divRoot.appendChild(makePlayButton(evt => {
+				g_currentPage = `loading`;
+				setShortcutEvent(g_currentPage);
 				divRoot.removeChild(evt.target);
 				_func();
 			}));
@@ -2266,7 +2269,6 @@ function titleInit() {
 
 	clearWindow();
 	drawDefaultBackImage(``);
-	g_inputKeyBuffer = {};
 	g_currentPage = `title`;
 
 	// タイトル用フレーム初期化
@@ -3709,7 +3711,6 @@ function optionInit() {
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Settings`;
-	g_inputKeyBuffer = {};
 	g_currentPage = `option`;
 
 	// タイトル文字描画
@@ -4937,7 +4938,6 @@ function settingsDisplayInit() {
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Display`;
-	g_inputKeyBuffer = {};
 	g_currentPage = `settingsDisplay`;
 
 	// 譜面初期情報ロード許可フラグ
@@ -5131,7 +5131,6 @@ function keyConfigInit(_kcType = g_kcType) {
 	drawDefaultBackImage(``);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_kcType = _kcType;
-	g_inputKeyBuffer = {};
 	g_currentPage = `keyConfig`;
 
 	// 譜面初期情報ロード許可フラグ
@@ -8984,7 +8983,6 @@ function resultInit() {
 	g_scoreObj.maskResultLoopCount = 0;
 
 	const divRoot = document.querySelector(`#divRoot`);
-	g_inputKeyBuffer = {};
 
 	// 曲時間制御変数
 	let thisTime;
