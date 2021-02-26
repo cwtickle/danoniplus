@@ -1847,7 +1847,6 @@ function loadMusic() {
 
 	g_headerObj.musicUrl = musicUrl;
 	g_musicEncodedFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
-	drawDefaultBackImage(``);
 
 	// Now Loadingを表示
 	const lblLoading = getLoadingLabel();
