@@ -731,6 +731,10 @@ g_kCdN[240] = `CapsLock`;
 const g_shortcutObj = {
     title: {
         Enter: { id: `btnStart` },
+        KeyR: { id: `btnReload` },
+        Slash: { id: `btnHelp`, reset: true },
+        F1: { id: `btnHelp`, reset: true },
+        KeyC: { id: `btnComment` },
     },
     option: {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
@@ -818,6 +822,9 @@ const g_shortcutObj = {
         ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnSettings` },
     },
+    loadingIos: {
+        Enter: { id: `btnPlay` },
+    },
     keyConfig: {
         Escape: { id: `btnBack` },
     },
@@ -840,6 +847,7 @@ const g_btnWaitFrame = {
     option: { b_frame: 0, s_frame: 0, initial: true },
     settingsDisplay: { b_frame: 0, s_frame: 0 },
     loading: { b_frame: 0, s_frame: 0 },
+    loadingIos: { b_frame: 0, s_frame: 0 },
     main: { b_frame: 0, s_frame: 0 },
     keyConfig: { b_frame: 0, s_frame: 0 },
     result: { b_frame: 0, s_frame: 120 },
@@ -847,9 +855,10 @@ const g_btnWaitFrame = {
 
 // 主要ボタンのリスト
 const g_btnPatterns = {
-    title: { Start: 0 },
+    title: { Start: 0, Comment: -10 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Settings: -5 },
+    loadingIos: { Play: 0 },
     keyConfig: { Back: -3 },
     result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0 },
 };

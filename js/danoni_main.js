@@ -1937,38 +1937,34 @@ function setAudio(_url) {
 		}
 	};
 
+	const readyToStart = _func => {
+		if (g_isIos) {
+			g_currentPage = `loadingIos`;
+			lblLoading.textContent = `Click to Start!`;
+			divRoot.appendChild(makePlayButton(evt => {
+				divRoot.removeChild(evt.target);
+				_func();
+			}));
+			createScTextCommon(g_currentPage);
+			setShortcutEvent(g_currentPage);
+		} else {
+			_func();
+		}
+	};
+
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
-				if (g_isIos) {
-					lblLoading.textContent = `Click to Start!`;
-					divRoot.appendChild(
-						makePlayButton(evt => {
-							divRoot.removeChild(evt.target);
-							initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
-						})
-					);
-				} else {
-					initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
-				}
+				readyToStart(_ => initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`));
 			} else {
 				makeWarningWindow(g_msgInfoObj.E_0031);
 				musicAfterLoaded();
 			}
 		});
 
-	} else if (g_isIos) {
-		lblLoading.textContent = `Click to Start!`;
-		divRoot.appendChild(
-			makePlayButton(evt => {
-				divRoot.removeChild(evt.target);
-				loadMp3();
-			})
-		);
-
 	} else {
-		loadMp3();
+		readyToStart(_ => loadMp3());
 	}
 }
 
@@ -2518,7 +2514,6 @@ function titleInit() {
 			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`),
 		}, g_cssObj.button_Tweet),
 	);
-	createScTextCommon(g_currentPage);
 
 	// コメントエリア作成
 	if (g_headerObj.commentVal !== ``) {
@@ -2547,6 +2542,7 @@ function titleInit() {
 			);
 		}
 	}
+	createScTextCommon(g_currentPage);
 
 	// マスクスプライトを作成
 	const maskTitleSprite = createMultipleSprite(`maskTitleSprite`, g_headerObj.maskTitleMaxDepth);
