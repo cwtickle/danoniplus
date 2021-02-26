@@ -731,7 +731,6 @@ g_kCdN[240] = `CapsLock`;
 const g_shortcutObj = {
     title: {
         Enter: { id: `btnStart` },
-        KeyR: { id: `btnReload` },
         Slash: { id: `btnHelp`, reset: true },
         F1: { id: `btnHelp`, reset: true },
         KeyC: { id: `btnComment` },
