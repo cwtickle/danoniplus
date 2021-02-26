@@ -903,12 +903,12 @@ function resetKeyControl() {
 }
 
 /**
- * 画面上の描画、オブジェクトを全てクリア
+ * 画面上の描画・オブジェクトを全てクリアし、背景を再描画
  * - divオブジェクト(ボタンなど)はdivRoot配下で管理しているため、子要素のみを全削除している。
  * - dicRoot自体を削除しないよう注意すること。
  * - 再描画時に共通で表示する箇所はここで指定している。
  */
-function clearWindow() {
+function clearWindow(_redrawFlg = false, _customDisplayName = ``) {
 	resetKeyControl();
 
 	if (document.querySelector(`#layer0`) !== null) {
@@ -950,6 +950,10 @@ function clearWindow() {
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
 	deleteChildspriteAll(`divRoot`);
 
+	// 背景を再描画
+	if (_redrawFlg) {
+		drawDefaultBackImage(_customDisplayName);
+	}
 }
 
 /**
@@ -1830,7 +1834,7 @@ function loadSettingJs() {
 
 function loadMusic() {
 
-	clearWindow();
+	clearWindow(true);
 	g_currentPage = `loading`;
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
@@ -1843,7 +1847,6 @@ function loadMusic() {
 
 	g_headerObj.musicUrl = musicUrl;
 	g_musicEncodedFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
-	drawDefaultBackImage(``);
 
 	// Now Loadingを表示
 	const lblLoading = getLoadingLabel();
@@ -2273,8 +2276,7 @@ const setShortcutEvent = (_displayName, _func = _ => true) => {
  */
 function titleInit() {
 
-	clearWindow();
-	drawDefaultBackImage(``);
+	clearWindow(true);
 	g_currentPage = `title`;
 
 	// タイトル用フレーム初期化
@@ -3712,8 +3714,7 @@ const commonSettingBtn = _labelName => {
  */
 function optionInit() {
 
-	clearWindow();
-	drawDefaultBackImage(``);
+	clearWindow(true);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Settings`;
 	g_currentPage = `option`;
@@ -4938,8 +4939,7 @@ function makeMiniCssButton(_id, _directionFlg, _heightPos, _func, { dx = 0, dy =
 
 function settingsDisplayInit() {
 
-	clearWindow();
-	drawDefaultBackImage(``);
+	clearWindow(true);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Display`;
 	g_currentPage = `settingsDisplay`;
@@ -5130,8 +5130,7 @@ function interlockingButton(_headerObj, _name, _current, _next, _buttonFlg = fal
  */
 function keyConfigInit(_kcType = g_kcType) {
 
-	clearWindow();
-	drawDefaultBackImage(``);
+	clearWindow(true);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_kcType = _kcType;
 	g_currentPage = `keyConfig`;
@@ -7168,8 +7167,7 @@ function setKeyCtrl(_localStorage, _keyNum, _keyCtrlPtn) {
  * メイン画面初期化
  */
 function MainInit() {
-	clearWindow();
-	drawDefaultBackImage(`Main`);
+	clearWindow(true, `Main`);
 	const divRoot = document.querySelector(`#divRoot`);
 	document.oncontextmenu = _ => false;
 	g_currentPage = `main`;
@@ -8968,8 +8966,7 @@ function finishViewing() {
  */
 function resultInit() {
 
-	clearWindow();
-	drawDefaultBackImage(``);
+	clearWindow(true);
 	g_currentPage = `result`;
 
 	// 結果画面用フレーム初期化
