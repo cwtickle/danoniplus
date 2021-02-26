@@ -894,15 +894,22 @@ function getTitleDivLabel(_id, _titlename, _x, _y, ..._classes) {
 }
 
 /**
+ * キーコントロールの初期化
+ */
+function resetKeyControl() {
+	document.onkeyup = _ => { };
+	document.onkeydown = evt => blockCode(transCode(evt.code));
+	g_inputKeyBuffer = {};
+}
+
+/**
  * 画面上の描画、オブジェクトを全てクリア
  * - divオブジェクト(ボタンなど)はdivRoot配下で管理しているため、子要素のみを全削除している。
  * - dicRoot自体を削除しないよう注意すること。
  * - 再描画時に共通で表示する箇所はここで指定している。
  */
 function clearWindow() {
-	document.onkeyup = _ => { };
-	document.onkeydown = evt => blockCode(transCode(evt.code));
-	g_inputKeyBuffer = {};
+	resetKeyControl();
 
 	if (document.querySelector(`#layer0`) !== null) {
 
@@ -1825,7 +1832,6 @@ function loadMusic() {
 
 	clearWindow();
 	g_currentPage = `loading`;
-	setShortcutEvent(g_currentPage);
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
@@ -1944,7 +1950,7 @@ function setAudio(_url) {
 			lblLoading.textContent = `Click to Start!`;
 			divRoot.appendChild(makePlayButton(evt => {
 				g_currentPage = `loading`;
-				setShortcutEvent(g_currentPage);
+				resetKeyControl();
 				divRoot.removeChild(evt.target);
 				_func();
 			}));
@@ -8380,10 +8386,7 @@ function MainInit() {
 			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 				g_gameOverFlg = true;
 			}
-
-			document.onkeydown = evt => blockCode(transCode(evt.code));
-			document.onkeyup = evt => { }
-
+			resetKeyControl();
 			clearTimeout(g_timeoutEvtId);
 			setTimeout(_ => resultInit(), 100);
 
