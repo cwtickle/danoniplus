@@ -1954,7 +1954,6 @@ function setAudio(_url) {
 				divRoot.removeChild(evt.target);
 				_func();
 			}));
-			createScTextCommon(g_currentPage);
 			setShortcutEvent(g_currentPage);
 		} else {
 			_func();
@@ -2253,6 +2252,7 @@ const createScTextCommon = _displayName => {
  * @param {function} _func 
  */
 const setShortcutEvent = (_displayName, _func = _ => true) => {
+	createScTextCommon(_displayName);
 	const evList = _ => {
 		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func);
 		document.onkeyup = evt => commonKeyUp(evt);
@@ -2550,7 +2550,6 @@ function titleInit() {
 			);
 		}
 	}
-	createScTextCommon(g_currentPage);
 
 	// マスクスプライトを作成
 	const maskTitleSprite = createMultipleSprite(`maskTitleSprite`, g_headerObj.maskTitleMaxDepth);
@@ -3750,7 +3749,6 @@ function optionInit() {
 			borderStyle: `solid`,
 		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF))
 	);
-	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage);
@@ -4972,7 +4970,6 @@ function settingsDisplayInit() {
 
 	// ボタン描画
 	commonSettingBtn(`Settings`);
-	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage);
@@ -5435,7 +5432,6 @@ function keyConfigInit(_kcType = g_kcType) {
 		}, g_cssObj.button_Reset)
 
 	);
-	createScTextCommon(g_currentPage);
 
 	// キーボード押下時処理
 	setShortcutEvent(g_currentPage, setCode => {
@@ -9396,7 +9392,6 @@ function resultInit() {
 			animationName: `smallToNormalY`, resetFunc: _ => loadMusic(),
 		}, g_cssObj.button_Reset),
 	);
-	createScTextCommon(g_currentPage);
 
 	// マスクスプライトを作成
 	const maskResultSprite = createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);
