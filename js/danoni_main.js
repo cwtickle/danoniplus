@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/02/24
+ * Revised : 2021/02/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 20.3.1`;
-const g_revisedDate = `2021/02/24`;
+const g_version = `Ver 20.4.0`;
+const g_revisedDate = `2021/02/27`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -894,14 +894,22 @@ function getTitleDivLabel(_id, _titlename, _x, _y, ..._classes) {
 }
 
 /**
- * 画面上の描画、オブジェクトを全てクリア
+ * キーコントロールの初期化
+ */
+function resetKeyControl() {
+	document.onkeyup = _ => { };
+	document.onkeydown = evt => blockCode(transCode(evt.code));
+	g_inputKeyBuffer = {};
+}
+
+/**
+ * 画面上の描画・オブジェクトを全てクリアし、背景を再描画
  * - divオブジェクト(ボタンなど)はdivRoot配下で管理しているため、子要素のみを全削除している。
  * - dicRoot自体を削除しないよう注意すること。
  * - 再描画時に共通で表示する箇所はここで指定している。
  */
-function clearWindow() {
-	document.onkeyup = _ => { };
-	document.onkeydown = evt => blockCode(transCode(evt.code));
+function clearWindow(_redrawFlg = false, _customDisplayName = ``) {
+	resetKeyControl();
 
 	if (document.querySelector(`#layer0`) !== null) {
 
@@ -942,6 +950,10 @@ function clearWindow() {
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
 	deleteChildspriteAll(`divRoot`);
 
+	// 背景を再描画
+	if (_redrawFlg) {
+		drawDefaultBackImage(_customDisplayName);
+	}
 }
 
 /**
@@ -1822,9 +1834,8 @@ function loadSettingJs() {
 
 function loadMusic() {
 
-	clearWindow();
+	clearWindow(true);
 	g_currentPage = `loading`;
-	document.onkeydown = evt => blockCode(transCode(evt.code));
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
@@ -1836,7 +1847,6 @@ function loadMusic() {
 
 	g_headerObj.musicUrl = musicUrl;
 	g_musicEncodedFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
-	drawDefaultBackImage(``);
 
 	// Now Loadingを表示
 	const lblLoading = getLoadingLabel();
@@ -1937,38 +1947,35 @@ function setAudio(_url) {
 		}
 	};
 
+	const readyToStart = _func => {
+		if (g_isIos) {
+			g_currentPage = `loadingIos`;
+			lblLoading.textContent = `Click to Start!`;
+			divRoot.appendChild(makePlayButton(evt => {
+				g_currentPage = `loading`;
+				resetKeyControl();
+				divRoot.removeChild(evt.target);
+				_func();
+			}));
+			setShortcutEvent(g_currentPage);
+		} else {
+			_func();
+		}
+	};
+
 	if (g_musicEncodedFlg) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
-				if (g_isIos) {
-					lblLoading.textContent = `Click to Start!`;
-					divRoot.appendChild(
-						makePlayButton(evt => {
-							divRoot.removeChild(evt.target);
-							initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
-						})
-					);
-				} else {
-					initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
-				}
+				readyToStart(_ => initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`));
 			} else {
 				makeWarningWindow(g_msgInfoObj.E_0031);
 				musicAfterLoaded();
 			}
 		});
 
-	} else if (g_isIos) {
-		lblLoading.textContent = `Click to Start!`;
-		divRoot.appendChild(
-			makePlayButton(evt => {
-				divRoot.removeChild(evt.target);
-				loadMp3();
-			})
-		);
-
 	} else {
-		loadMp3();
+		readyToStart(_ => loadMp3());
 	}
 }
 
@@ -2248,6 +2255,7 @@ const createScTextCommon = _displayName => {
  * @param {function} _func 
  */
 const setShortcutEvent = (_displayName, _func = _ => true) => {
+	createScTextCommon(_displayName);
 	const evList = _ => {
 		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func);
 		document.onkeyup = evt => commonKeyUp(evt);
@@ -2268,9 +2276,7 @@ const setShortcutEvent = (_displayName, _func = _ => true) => {
  */
 function titleInit() {
 
-	clearWindow();
-	drawDefaultBackImage(``);
-	g_inputKeyBuffer = {};
+	clearWindow(true);
 	g_currentPage = `title`;
 
 	// タイトル用フレーム初期化
@@ -2518,7 +2524,6 @@ function titleInit() {
 			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`),
 		}, g_cssObj.button_Tweet),
 	);
-	createScTextCommon(g_currentPage);
 
 	// コメントエリア作成
 	if (g_headerObj.commentVal !== ``) {
@@ -3709,11 +3714,9 @@ const commonSettingBtn = _labelName => {
  */
 function optionInit() {
 
-	clearWindow();
-	drawDefaultBackImage(``);
+	clearWindow(true);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Settings`;
-	g_inputKeyBuffer = {};
 	g_currentPage = `option`;
 
 	// タイトル文字描画
@@ -3747,7 +3750,6 @@ function optionInit() {
 			borderStyle: `solid`,
 		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF))
 	);
-	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage);
@@ -4937,11 +4939,9 @@ function makeMiniCssButton(_id, _directionFlg, _heightPos, _func, { dx = 0, dy =
 
 function settingsDisplayInit() {
 
-	clearWindow();
-	drawDefaultBackImage(``);
+	clearWindow(true);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Display`;
-	g_inputKeyBuffer = {};
 	g_currentPage = `settingsDisplay`;
 
 	// 譜面初期情報ロード許可フラグ
@@ -4970,7 +4970,6 @@ function settingsDisplayInit() {
 
 	// ボタン描画
 	commonSettingBtn(`Settings`);
-	createScTextCommon(g_currentPage);
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage);
@@ -5131,11 +5130,9 @@ function interlockingButton(_headerObj, _name, _current, _next, _buttonFlg = fal
  */
 function keyConfigInit(_kcType = g_kcType) {
 
-	clearWindow();
-	drawDefaultBackImage(``);
+	clearWindow(true);
 	const divRoot = document.querySelector(`#divRoot`);
 	g_kcType = _kcType;
-	g_inputKeyBuffer = {};
 	g_currentPage = `keyConfig`;
 
 	// 譜面初期情報ロード許可フラグ
@@ -5434,7 +5431,6 @@ function keyConfigInit(_kcType = g_kcType) {
 		}, g_cssObj.button_Reset)
 
 	);
-	createScTextCommon(g_currentPage);
 
 	// キーボード押下時処理
 	setShortcutEvent(g_currentPage, setCode => {
@@ -7171,8 +7167,7 @@ function setKeyCtrl(_localStorage, _keyNum, _keyCtrlPtn) {
  * メイン画面初期化
  */
 function MainInit() {
-	clearWindow();
-	drawDefaultBackImage(`Main`);
+	clearWindow(true, `Main`);
 	const divRoot = document.querySelector(`#divRoot`);
 	document.oncontextmenu = _ => false;
 	g_currentPage = `main`;
@@ -8385,10 +8380,7 @@ function MainInit() {
 			if (g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 				g_gameOverFlg = true;
 			}
-
-			document.onkeydown = evt => blockCode(transCode(evt.code));
-			document.onkeyup = evt => { }
-
+			resetKeyControl();
 			clearTimeout(g_timeoutEvtId);
 			setTimeout(_ => resultInit(), 100);
 
@@ -8974,8 +8966,7 @@ function finishViewing() {
  */
 function resultInit() {
 
-	clearWindow();
-	drawDefaultBackImage(``);
+	clearWindow(true);
 	g_currentPage = `result`;
 
 	// 結果画面用フレーム初期化
@@ -8988,7 +8979,6 @@ function resultInit() {
 	g_scoreObj.maskResultLoopCount = 0;
 
 	const divRoot = document.querySelector(`#divRoot`);
-	g_inputKeyBuffer = {};
 
 	// 曲時間制御変数
 	let thisTime;
@@ -9399,7 +9389,6 @@ function resultInit() {
 			animationName: `smallToNormalY`, resetFunc: _ => loadMusic(),
 		}, g_cssObj.button_Reset),
 	);
-	createScTextCommon(g_currentPage);
 
 	// マスクスプライトを作成
 	const maskResultSprite = createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);
