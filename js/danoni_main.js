@@ -5313,6 +5313,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 	);
 	setColorType(0);
+	g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
 
 	/**
 	 * キーコンフィグ用の矢印色を取得
@@ -5384,9 +5385,6 @@ function keyConfigInit(_kcType = g_kcType) {
 					tempPtn : (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined ? -1 : 0));
 
 				keyConfigInit();
-				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-				g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
 			},
 		}, g_cssObj.button_Setting),
 
@@ -5400,9 +5398,6 @@ function keyConfigInit(_kcType = g_kcType) {
 					tempPtn : searchPattern(searchPattern(0, 1) - 1, -1, g_headerObj.transKeyUse, `transKey`));
 
 				keyConfigInit();
-				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-				g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
 			},
 		}, g_cssObj.button_Setting),
 
