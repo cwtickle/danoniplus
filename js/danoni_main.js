@@ -5240,13 +5240,13 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {event} _evt 
 	 * @param {number} _scrollNum 
 	 */
-	function setConfigType(_evt, _scrollNum = 1) {
+	function setConfigType(_scrollNum = 1) {
 		const typeNum = g_keycons.configTypes.findIndex(value => value === g_kcType);
 		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
 		g_kcType = g_keycons.configTypes[nextNum];
-		g_keycons.configFunc[nextNum](kWidth, divideCnt, keyCtrlPtn, false);
+		g_keycons.configFunc[nextNum](kWidth, divideCnt, keyCtrlPtn, _scrollNum === 0);
 		g_keycons.configTypeNum = nextNum;
-		_evt.target.textContent = getStgDetailName(g_kcType);
+		lnkKcType.textContent = getStgDetailName(g_kcType);
 	}
 
 	/**
@@ -5296,9 +5296,9 @@ function keyConfigInit(_kcType = g_kcType) {
 			x: 30, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ConfigType),
 
-		makeSettingLblCssButton(`lnkKcType`, getStgDetailName(g_kcType), 0, evt => setConfigType(evt), {
+		makeSettingLblCssButton(`lnkKcType`, getStgDetailName(g_kcType), 0, _ => setConfigType(), {
 			x: 30, y: 35, w: 100,
-			cxtFunc: evt => setConfigType(evt, -1),
+			cxtFunc: _ => setConfigType(-1),
 		}),
 
 		// キーカラータイプ切替ボタン
@@ -5312,6 +5312,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		}),
 
 	);
+	setConfigType(0);
 	setColorType(0);
 
 	/**
@@ -5384,9 +5385,6 @@ function keyConfigInit(_kcType = g_kcType) {
 					tempPtn : (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined ? -1 : 0));
 
 				keyConfigInit();
-				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-				g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
 			},
 		}, g_cssObj.button_Setting),
 
@@ -5400,9 +5398,6 @@ function keyConfigInit(_kcType = g_kcType) {
 					tempPtn : searchPattern(searchPattern(0, 1) - 1, -1, g_headerObj.transKeyUse, `transKey`));
 
 				keyConfigInit();
-				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-				g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
 			},
 		}, g_cssObj.button_Setting),
 
