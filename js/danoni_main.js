@@ -5245,6 +5245,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
 		g_kcType = g_keycons.configTypes[nextNum];
 		g_keycons.configFunc[nextNum](kWidth, divideCnt, keyCtrlPtn, false);
+		g_keycons.configTypeNum = nextNum;
 		_evt.target.textContent = getStgDetailName(g_kcType);
 	}
 
@@ -5385,7 +5386,7 @@ function keyConfigInit(_kcType = g_kcType) {
 				keyConfigInit();
 				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
+				g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
 			},
 		}, g_cssObj.button_Setting),
 
@@ -5401,7 +5402,7 @@ function keyConfigInit(_kcType = g_kcType) {
 				keyConfigInit();
 				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
+				g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
 			},
 		}, g_cssObj.button_Setting),
 
@@ -5423,7 +5424,7 @@ function keyConfigInit(_kcType = g_kcType) {
 						);
 					}
 				}
-				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
+				g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
 			}
 		}, {
 			x: 0, y: g_sHeight - 75,
@@ -5488,7 +5489,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		} else {
 			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
-			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
+			g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
 		}
 	});
 
