@@ -5327,10 +5327,8 @@ function keyConfigInit(_kcType = g_kcType) {
 	}
 
 	// キーパターン表示
-	let lblTransKey = ``;
-	if (hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])) {
-		lblTransKey = '(' + setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`], ``, C_TYP_STRING) + ')';
-	}
+	const lblTransKey = hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ?
+		'(' + setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) + ')' : ``;
 
 	// パターン検索
 	const searchPattern = (_tempPtn, _sign, _transKeyUse = false, _keyCheck = `keyCtrl`) => {
