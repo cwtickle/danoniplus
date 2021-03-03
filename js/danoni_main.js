@@ -5404,11 +5404,6 @@ function keyConfigInit(_kcType = g_kcType) {
 		// キーコンフィグリセットボタン描画
 		createCss2Button(`btnReset`, g_lblNameObj.b_reset, _ => {
 			if (window.confirm(g_msgObj.keyResetConfirm)) {
-				g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-				const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-
 				for (let j = 0; j < keyNum; j++) {
 					for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
@@ -5431,8 +5426,6 @@ function keyConfigInit(_kcType = g_kcType) {
 	// キーボード押下時処理
 	setShortcutEvent(g_currentPage, setCode => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
-		const cursor = document.querySelector(`#cursor`);
-		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 		let setKey = g_kCdN.findIndex(kCd => kCd === setCode);
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
@@ -5561,16 +5554,16 @@ function setKeyConfigCursor(_width, _divideCnt, _keyCtrlPtn, _keyNum) {
 		dividePos = 0;
 	}
 
-	const cursor = document.querySelector(`#cursor`);
 	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
+	const baseY = C_KYC_HEIGHT * dividePos + 45;
 	if (g_currentk >= 1) {
-		cursor.style.top = `${45 + C_KYC_REPHEIGHT + C_KYC_HEIGHT * dividePos}px`;
+		cursor.style.top = `${baseY + C_KYC_REPHEIGHT}px`;
 	} else {
 		if (g_kcType === `Replaced`) {
 			g_kcType = C_FLG_ALL;
 		}
 		lnkKcType.textContent = g_kcType;
-		cursor.style.top = `${45 + C_KYC_HEIGHT * dividePos}px`;
+		cursor.style.top = `${baseY}px`;
 	}
 }
 
