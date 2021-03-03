@@ -5167,26 +5167,14 @@ function keyConfigInit(_kcType = g_kcType) {
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
 	const kWidth = parseInt(keyconSprite.style.width);
 
-	/** 同行の中心から見た場合の位置(x座標) */
-	let stdPos = 0;
-	/** 行位置 */
-	let dividePos = 0;
-	let posj = 0;
-
 	for (let j = 0; j < keyNum; j++) {
 
-		posj = g_keyObj[`pos${keyCtrlPtn}`][j];
-		if (posj > divideCnt) {
-			stdPos = posj - (posMax + divideCnt) / 2;
-			dividePos = 1;
-		} else {
-			stdPos = posj - divideCnt / 2;
-			dividePos = 0;
-		}
+		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
+		const stdPos = posj - ((posj <= divideCnt ? 0 : posMax) + divideCnt) / 2;
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2;
-		const keyconY = C_KYC_HEIGHT * dividePos;
+		const keyconY = C_KYC_HEIGHT * (posj <= divideCnt ? 0 : 1);
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
 
@@ -5228,7 +5216,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			}
 		}
 	}
-	posj = g_keyObj[`pos${keyCtrlPtn}`][0];
+	const posj = g_keyObj[`pos${keyCtrlPtn}`][0];
 
 	// カーソルの作成
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, g_imgObj.cursor,
@@ -5544,18 +5532,10 @@ function setKeyConfigCursor(_width, _divideCnt, _keyCtrlPtn, _keyNum) {
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][g_currentj];
 	const posMax = (g_keyObj[`divMax${_keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`divMax${_keyCtrlPtn}`] : g_keyObj[`pos${_keyCtrlPtn}`][_keyNum - 1] + 1);
-	let stdPos;
-	let dividePos;
-	if (posj > _divideCnt) {
-		stdPos = posj - (posMax + _divideCnt) / 2;
-		dividePos = 1;
-	} else {
-		stdPos = posj - _divideCnt / 2;
-		dividePos = 0;
-	}
+	const stdPos = posj - ((posj <= _divideCnt ? 0 : posMax) + _divideCnt) / 2;
 
 	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
-	const baseY = C_KYC_HEIGHT * dividePos + 45;
+	const baseY = C_KYC_HEIGHT * (posj <= _divideCnt ? 0 : 1) + 45;
 	if (g_currentk >= 1) {
 		cursor.style.top = `${baseY + C_KYC_REPHEIGHT}px`;
 	} else {
