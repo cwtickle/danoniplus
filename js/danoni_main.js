@@ -2116,15 +2116,28 @@ const colorNameToCode = _color => {
 const byteToHex = _num => (`${_num.toString(16).padStart(2, '0')}`);
 
 /**
+ * カラーコードかどうかを判定 (簡易版)
+ * @param {string} _str 
+ * @returns 
+ */
+const isColorCd = _str => _str.substring(0, 1) === `#`;
+
+/**
+ * CSSの位置表記系かどうかをチェック
+ * @param {string} _str 
+ * @returns 
+ */
+const cssCheck = _str => listMatching(_str, g_cssCheckStr.header, { prefix: `^` }) ||
+	listMatching(_str, g_cssCheckStr.header, { prefix: `^` });
+
+/**
  * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
  * @param {string} _color 色名
  */
 const colorToHex = (_color) => {
 
 	// すでにカラーコードのものやパーセント表記、位置表記系を除外
-	if (_color.substring(0, 1) === `#` || !isNaN(parseFloat(_color)) ||
-		listMatching(_color, g_cssCheckStr.header, { prefix: `^` }) ||
-		listMatching(_color, g_cssCheckStr.footer, { suffix: `$` })) {
+	if (!isNaN(parseFloat(_color)) || isColorCd(_color) || cssCheck(_color)) {
 		return _color;
 	}
 
@@ -2175,7 +2188,7 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const colorArray = tmpColorStr[0].split(`:`);
 	for (let j = 0; j < colorArray.length; j++) {
 		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replace(/0x/g, `#`)));
-		if (j === 0 && colorArray[0].substring(0, 1) !== `#`) {
+		if (j === 0 && !isColorCd(colorArray[0])) {
 		} else if (colorArray[j].length === 7) {
 			colorArray[j] += alphaVal;
 		}
@@ -2191,11 +2204,7 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 		} else {
 			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
 		}
-	} else if (gradationType === `linear-gradient` &&
-		(colorArray[0].slice(0, 1) === `#` ||
-			(!colorArray[0].startsWith(`to `) && !listMatching(colorArray[0], [`deg`, `rad`, `turn`], { suffix: `$` }))
-		)
-	) {
+	} else if (gradationType === `linear-gradient` && (isColorCd(colorArray[0]) || !cssCheck(colorArray[0]))) {
 		// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
 		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
 	} else {
@@ -3050,7 +3059,7 @@ function headerConvert(_dosObj) {
 			if (_objType === `frz` && _defaultFrzColorUse) {
 				// デフォルト配列に満たない・足りない部分はデフォルト配列で穴埋め
 				for (let j = 0; j < _colorInitLength; j++) {
-					if (colorStr[j] === undefined || colorStr[j] === ``) {
+					if (!hasVal(colorStr[j])) {
 						colorStr[j] = _colorInit[j];
 					}
 				}
@@ -3065,8 +3074,7 @@ function headerConvert(_dosObj) {
 			for (let j = 0; j < colorList.length; j++) {
 				const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
 				tmpSetColorOrg.some(tmpColorOrg => {
-					if (tmpColorOrg.indexOf(`#`) !== -1 ||
-						(!tmpColorOrg.startsWith(`to `) && !tmpColorOrg.endsWith(`deg`)) || tmpColorOrg === `Default`) {
+					if (isColorCd(tmpColorOrg) || !cssCheck(tmpColorOrg) || tmpColorOrg === `Default`) {
 						colorOrg[j] = colorCdPadding(_colorCdPaddingUse, tmpColorOrg);
 						return true;
 					}
