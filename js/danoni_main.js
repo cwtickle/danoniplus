@@ -2173,8 +2173,8 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
 
-	if (_colorStr === `Default`) {
-		return `Default`;
+	if (_colorStr === `Default` || _colorStr === ``) {
+		return _colorStr;
 	}
 
 	// 矢印の塗りつぶしの場合：透明度を50%にする
@@ -3088,7 +3088,7 @@ function headerConvert(_dosObj) {
 			colorStr = _colorInit.concat();
 			colorOrg = _colorInit.concat();
 			for (let j = 0; j < _colorInit.length; j++) {
-				colorList[j] = _colorInit[j] === `` ? `` : makeColorGradation(_colorInit[j], {
+				colorList[j] = makeColorGradation(_colorInit[j], {
 					_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
 				});
 			}
