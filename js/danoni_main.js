@@ -2145,11 +2145,9 @@ const colorToHex = (_color) => {
 	// 透明度はカラーコード形式に変換してRGBの後ろに設定
 	const tmpColor = _color.split(`;`);
 	const colorSet = tmpColor[0].split(` `);
-	let alphaVal = ``;
-	if (tmpColor.length > 1) {
-		alphaVal = byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER));
-	}
-	return `${colorNameToCode(colorSet[0])}${alphaVal}${colorSet[1] !== undefined ? ` ${colorSet.slice(1).join(' ')}` : ''}`;
+	return colorNameToCode(colorSet[0]) +
+		(tmpColor.length > 1 ? byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER)) : '') +
+		(colorSet[1] !== undefined ? ` ${colorSet.slice(1).join(' ')}` : '');
 }
 
 /**
@@ -2188,27 +2186,27 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const colorArray = tmpColorStr[0].split(`:`);
 	for (let j = 0; j < colorArray.length; j++) {
 		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replace(/0x/g, `#`)));
-		if (j === 0 && !isColorCd(colorArray[0])) {
-		} else if (colorArray[j].length === 7) {
+		if (isColorCd(colorArray[j]) && colorArray[j].length === 7) {
 			colorArray[j] += alphaVal;
 		}
 	}
 
 	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
-	const defaultDir = (_objType === `titleArrow` ? `to left` : `to right`);
+	const defaultDir = `to ${(_objType === 'titleArrow' ? 'left' : 'right')}, `;
 	if (colorArray.length === 1) {
 		if (_objType === `titleMusic`) {
-			convertColorStr = `${defaultDir}, ${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
+			convertColorStr = `${defaultDir}${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
 		} else if (_defaultColorgrd[0]) {
-			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${_defaultColorgrd[1]}${alphaVal}, ${colorArray[0]}`;
+			convertColorStr = `${defaultDir}${colorArray[0]}, ${_defaultColorgrd[1]}${alphaVal}, ${colorArray[0]}`;
 		} else {
-			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
+			return colorArray[0];
 		}
-	} else if (gradationType === `linear-gradient` && (isColorCd(colorArray[0]) || !cssCheck(colorArray[0]))) {
-		// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
-		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
 	} else {
-		convertColorStr = `${colorArray.join(', ')}`;
+		if (gradationType === `linear-gradient` && (isColorCd(colorArray[0]) || !cssCheck(colorArray[0]))) {
+			// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
+			convertColorStr = `${defaultDir}`;
+		}
+		convertColorStr += `${colorArray.join(', ')}`;
 	}
 
 	return `${gradationType}(${convertColorStr})`;
