@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/02/27 (v20.4.0)
+ * Revised : 2021/03/06 (v20.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -420,53 +420,35 @@ const g_hidSudObj = {
     pgUp: {},
     std: {},
     filterPosDefault: {},
-};
-g_hidSudObj[`Visible`] = 1;
-g_hidSudObj[`Hidden`] = 0;
-g_hidSudObj[`Hidden+`] = 0;
-g_hidSudObj[`Sudden`] = 1;
-g_hidSudObj[`Sudden+`] = 1;
-g_hidSudObj[`Hid&Sud+`] = 1;
 
-g_hidSudObj.filterPosDefault[`Visible`] = 0;
-g_hidSudObj.filterPosDefault[`Hidden`] = 50;
-g_hidSudObj.filterPosDefault[`Sudden`] = 40;
-g_hidSudObj.pgDown[`Hidden+`] = {
-    OFF: `PageDown`,
-    ON: `PageUp`,
+    'Visible': 1,
+    'Hidden': 0,
+    'Hidden+': 0,
+    'Sudden': 1,
+    'Sudden+': 1,
+    'Hid&Sud+': 1,
+
+    filterPosDefault: {
+        'Visible': 0,
+        'Hidden': 50,
+        'Sudden': 40,
+    },
+    pgDown: {
+        'Hidden+': { OFF: `PageDown`, ON: `PageUp`, },
+        'Sudden+': { OFF: `PageUp`, ON: `PageDown`, },
+        'Hid&Sud+': { OFF: `PageUp`, ON: `PageDown`, },
+    },
+    pgUp: {
+        'Hidden+': { OFF: `PageUp`, ON: `PageDown`, },
+        'Sudden+': { OFF: `PageDown`, ON: `PageUp`, },
+        'Hid&Sud+': { OFF: `PageDown`, ON: `PageUp`, },
+    },
+    std: {
+        'Hidden+': { OFF: 0, ON: 1, },
+        'Sudden+': { OFF: 1, ON: 0, },
+        'Hid&Sud+': { OFF: 1, ON: 0, },
+    },
 };
-g_hidSudObj.pgDown[`Sudden+`] = {
-    OFF: `PageUp`,
-    ON: `PageDown`,
-}
-g_hidSudObj.pgDown[`Hid&Sud+`] = {
-    OFF: `PageUp`,
-    ON: `PageDown`,
-}
-g_hidSudObj.pgUp[`Hidden+`] = {
-    OFF: `PageUp`,
-    ON: `PageDown`,
-}
-g_hidSudObj.pgUp[`Sudden+`] = {
-    OFF: `PageDown`,
-    ON: `PageUp`,
-}
-g_hidSudObj.pgUp[`Hid&Sud+`] = {
-    OFF: `PageDown`,
-    ON: `PageUp`,
-}
-g_hidSudObj.std[`Hidden+`] = {
-    OFF: 0,
-    ON: 1,
-};
-g_hidSudObj.std[`Sudden+`] = {
-    OFF: 1,
-    ON: 0,
-}
-g_hidSudObj.std[`Hid&Sud+`] = {
-    OFF: 1,
-    ON: 0,
-}
 
 // ステップゾーン位置、到達距離(後で指定)
 const C_STEP_Y = 70;

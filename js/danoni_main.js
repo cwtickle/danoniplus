@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/02/27
+ * Revised : 2021/03/06
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 20.4.0`;
-const g_revisedDate = `2021/02/27`;
+const g_version = `Ver 20.5.0`;
+const g_revisedDate = `2021/03/06`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1910,8 +1910,16 @@ function loadMusic() {
 	request.send();
 }
 
-// Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備
-async function initWebAudioAPI(_url) {
+// Base64から音声データに変換してWebAudioAPIで再生する準備
+async function initWebAudioAPIfromBase64(_base64) {
+	g_audio = new AudioPlayer();
+	musicAfterLoaded();
+	const array = Uint8Array.from(atob(_base64), v => v.charCodeAt(0))
+	await g_audio.init(array.buffer);
+}
+
+// 音声ファイルを読み込んでWebAudioAPIで再生する準備
+async function initWebAudioAPIfromURL(_url) {
 	g_audio = new AudioPlayer();
 	musicAfterLoaded();
 	const promise = await fetch(_url);
@@ -1943,7 +1951,7 @@ function setAudio(_url) {
 			g_audio.src = _url;
 			musicAfterLoaded();
 		} else {
-			initWebAudioAPI(_url);
+			initWebAudioAPIfromURL(_url);
 		}
 	};
 
@@ -1967,7 +1975,7 @@ function setAudio(_url) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
-				readyToStart(_ => initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`));
+				readyToStart(_ => initWebAudioAPIfromBase64(g_musicdata));
 			} else {
 				makeWarningWindow(g_msgInfoObj.E_0031);
 				musicAfterLoaded();
@@ -2116,15 +2124,28 @@ const colorNameToCode = _color => {
 const byteToHex = _num => (`${_num.toString(16).padStart(2, '0')}`);
 
 /**
+ * カラーコードかどうかを判定 (簡易版)
+ * @param {string} _str 
+ * @returns 
+ */
+const isColorCd = _str => _str.substring(0, 1) === `#`;
+
+/**
+ * CSSの位置表記系かどうかをチェック
+ * @param {string} _str 
+ * @returns 
+ */
+const hasAnglePointInfo = _str => listMatching(_str, g_cssCheckStr.header, { prefix: `^` }) ||
+	listMatching(_str, g_cssCheckStr.header, { prefix: `^` });
+
+/**
  * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
  * @param {string} _color 色名
  */
 const colorToHex = (_color) => {
 
 	// すでにカラーコードのものやパーセント表記、位置表記系を除外
-	if (_color.substring(0, 1) === `#` || !isNaN(parseFloat(_color)) ||
-		listMatching(_color, g_cssCheckStr.header, { prefix: `^` }) ||
-		listMatching(_color, g_cssCheckStr.footer, { suffix: `$` })) {
+	if (!isNaN(parseFloat(_color)) || isColorCd(_color) || hasAnglePointInfo(_color)) {
 		return _color;
 	}
 
@@ -2132,11 +2153,9 @@ const colorToHex = (_color) => {
 	// 透明度はカラーコード形式に変換してRGBの後ろに設定
 	const tmpColor = _color.split(`;`);
 	const colorSet = tmpColor[0].split(` `);
-	let alphaVal = ``;
-	if (tmpColor.length > 1) {
-		alphaVal = byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER));
-	}
-	return `${colorNameToCode(colorSet[0])}${alphaVal}${colorSet[1] !== undefined ? ` ${colorSet.slice(1).join(' ')}` : ''}`;
+	return colorNameToCode(colorSet[0]) +
+		(tmpColor.length > 1 ? byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER)) : '') +
+		(colorSet[1] !== undefined ? ` ${colorSet.slice(1).join(' ')}` : '');
 }
 
 /**
@@ -2162,8 +2181,8 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
 
-	if (_colorStr === `Default`) {
-		return `Default`;
+	if (_colorStr === `Default` || _colorStr === ``) {
+		return _colorStr;
 	}
 
 	// 矢印の塗りつぶしの場合：透明度を50%にする
@@ -2175,31 +2194,27 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const colorArray = tmpColorStr[0].split(`:`);
 	for (let j = 0; j < colorArray.length; j++) {
 		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replace(/0x/g, `#`)));
-		if (j === 0 && colorArray[0].substring(0, 1) !== `#`) {
-		} else if (colorArray[j].length === 7) {
+		if (isColorCd(colorArray[j]) && colorArray[j].length === 7) {
 			colorArray[j] += alphaVal;
 		}
 	}
 
 	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
-	const defaultDir = (_objType === `titleArrow` ? `to left` : `to right`);
+	const defaultDir = `to ${(_objType === 'titleArrow' ? 'left' : 'right')}, `;
 	if (colorArray.length === 1) {
 		if (_objType === `titleMusic`) {
-			convertColorStr = `${defaultDir}, ${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
+			convertColorStr = `${defaultDir}${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
 		} else if (_defaultColorgrd[0]) {
-			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${_defaultColorgrd[1]}${alphaVal}, ${colorArray[0]}`;
+			convertColorStr = `${defaultDir}${colorArray[0]}, ${_defaultColorgrd[1]}${alphaVal}, ${colorArray[0]}`;
 		} else {
-			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
+			return colorArray[0];
 		}
-	} else if (gradationType === `linear-gradient` &&
-		(colorArray[0].slice(0, 1) === `#` ||
-			(!colorArray[0].startsWith(`to `) && !listMatching(colorArray[0], [`deg`, `rad`, `turn`], { suffix: `$` }))
-		)
-	) {
-		// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
-		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
 	} else {
-		convertColorStr = `${colorArray.join(', ')}`;
+		if (gradationType === `linear-gradient` && (isColorCd(colorArray[0]) || !hasAnglePointInfo(colorArray[0]))) {
+			// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
+			convertColorStr = `${defaultDir}`;
+		}
+		convertColorStr += `${colorArray.join(', ')}`;
 	}
 
 	return `${gradationType}(${convertColorStr})`;
@@ -3050,7 +3065,7 @@ function headerConvert(_dosObj) {
 			if (_objType === `frz` && _defaultFrzColorUse) {
 				// デフォルト配列に満たない・足りない部分はデフォルト配列で穴埋め
 				for (let j = 0; j < _colorInitLength; j++) {
-					if (colorStr[j] === undefined || colorStr[j] === ``) {
+					if (!hasVal(colorStr[j])) {
 						colorStr[j] = _colorInit[j];
 					}
 				}
@@ -3064,13 +3079,15 @@ function headerConvert(_dosObj) {
 
 			for (let j = 0; j < colorList.length; j++) {
 				const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
-				tmpSetColorOrg.some(tmpColorOrg => {
-					if (tmpColorOrg.indexOf(`#`) !== -1 ||
-						(!tmpColorOrg.startsWith(`to `) && !tmpColorOrg.endsWith(`deg`)) || tmpColorOrg === `Default`) {
-						colorOrg[j] = colorCdPadding(_colorCdPaddingUse, tmpColorOrg);
+				const hasColor = tmpSetColorOrg.some(tmpColorOrg => {
+					if (hasVal(tmpColorOrg) && (isColorCd(tmpColorOrg) || !hasAnglePointInfo(tmpColorOrg) || tmpColorOrg === `Default`)) {
+						colorOrg[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(tmpColorOrg));
 						return true;
 					}
 				});
+				if (!hasColor) {
+					colorOrg[j] = _colorInit[j];
+				}
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
 					_defaultColorgrd, _colorCdPaddingUse, _objType, _shadowFlg,
 				});
@@ -3081,11 +3098,9 @@ function headerConvert(_dosObj) {
 			// 未定義の場合は指定されたデフォルト配列(_colorInit)で再定義
 			colorStr = _colorInit.concat();
 			colorOrg = _colorInit.concat();
-			for (let j = 0; j < _colorInit.length; j++) {
-				colorList[j] = _colorInit[j] === `` ? `` : makeColorGradation(_colorInit[j], {
-					_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
-				});
-			}
+			colorList = _colorInit.map(colorStr => makeColorGradation(colorStr, {
+				_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
+			}));
 		}
 
 		return [colorList, colorStr, colorOrg];
@@ -5167,26 +5182,14 @@ function keyConfigInit(_kcType = g_kcType) {
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
 	const kWidth = parseInt(keyconSprite.style.width);
 
-	/** 同行の中心から見た場合の位置(x座標) */
-	let stdPos = 0;
-	/** 行位置 */
-	let dividePos = 0;
-	let posj = 0;
-
 	for (let j = 0; j < keyNum; j++) {
 
-		posj = g_keyObj[`pos${keyCtrlPtn}`][j];
-		if (posj > divideCnt) {
-			stdPos = posj - (posMax + divideCnt) / 2;
-			dividePos = 1;
-		} else {
-			stdPos = posj - divideCnt / 2;
-			dividePos = 0;
-		}
+		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
+		const stdPos = posj - ((posj <= divideCnt ? 0 : posMax) + divideCnt) / 2;
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2;
-		const keyconY = C_KYC_HEIGHT * dividePos;
+		const keyconY = C_KYC_HEIGHT * (posj <= divideCnt ? 0 : 1);
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
 
@@ -5228,7 +5231,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			}
 		}
 	}
-	posj = g_keyObj[`pos${keyCtrlPtn}`][0];
+	const posj = g_keyObj[`pos${keyCtrlPtn}`][0];
 
 	// カーソルの作成
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, g_imgObj.cursor,
@@ -5240,12 +5243,13 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {event} _evt 
 	 * @param {number} _scrollNum 
 	 */
-	function setConfigType(_evt, _scrollNum = 1) {
+	function setConfigType(_scrollNum = 1) {
 		const typeNum = g_keycons.configTypes.findIndex(value => value === g_kcType);
 		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
 		g_kcType = g_keycons.configTypes[nextNum];
-		g_keycons.configFunc[nextNum](kWidth, divideCnt, keyCtrlPtn, false);
-		_evt.target.textContent = getStgDetailName(g_kcType);
+		g_keycons.configFunc[nextNum](kWidth, divideCnt, keyCtrlPtn, _scrollNum === 0);
+		g_keycons.configTypeNum = nextNum;
+		lnkKcType.textContent = getStgDetailName(g_kcType);
 	}
 
 	/**
@@ -5295,9 +5299,9 @@ function keyConfigInit(_kcType = g_kcType) {
 			x: 30, y: 10, w: 70,
 		}, g_cssObj.keyconfig_ConfigType),
 
-		makeSettingLblCssButton(`lnkKcType`, getStgDetailName(g_kcType), 0, evt => setConfigType(evt), {
+		makeSettingLblCssButton(`lnkKcType`, getStgDetailName(g_kcType), 0, _ => setConfigType(), {
 			x: 30, y: 35, w: 100,
-			cxtFunc: evt => setConfigType(evt, -1),
+			cxtFunc: _ => setConfigType(-1),
 		}),
 
 		// キーカラータイプ切替ボタン
@@ -5311,6 +5315,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		}),
 
 	);
+	setConfigType(0);
 	setColorType(0);
 
 	/**
@@ -5337,10 +5342,8 @@ function keyConfigInit(_kcType = g_kcType) {
 	}
 
 	// キーパターン表示
-	let lblTransKey = ``;
-	if (hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])) {
-		lblTransKey = '(' + setVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`], ``, C_TYP_STRING) + ')';
-	}
+	const lblTransKey = hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ?
+		'(' + setVal(g_keyObj[`transKey${keyCtrlPtn}`], ``, C_TYP_STRING) + ')' : ``;
 
 	// パターン検索
 	const searchPattern = (_tempPtn, _sign, _transKeyUse = false, _keyCheck = `keyCtrl`) => {
@@ -5383,9 +5386,6 @@ function keyConfigInit(_kcType = g_kcType) {
 					tempPtn : (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined ? -1 : 0));
 
 				keyConfigInit();
-				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 			},
 		}, g_cssObj.button_Setting),
 
@@ -5399,20 +5399,12 @@ function keyConfigInit(_kcType = g_kcType) {
 					tempPtn : searchPattern(searchPattern(0, 1) - 1, -1, g_headerObj.transKeyUse, `transKey`));
 
 				keyConfigInit();
-				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
 			},
 		}, g_cssObj.button_Setting),
 
 		// キーコンフィグリセットボタン描画
 		createCss2Button(`btnReset`, g_lblNameObj.b_reset, _ => {
 			if (window.confirm(g_msgObj.keyResetConfirm)) {
-				g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-				const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-				const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-
 				for (let j = 0; j < keyNum; j++) {
 					for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
@@ -5423,7 +5415,7 @@ function keyConfigInit(_kcType = g_kcType) {
 						);
 					}
 				}
-				eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
+				g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
 			}
 		}, {
 			x: 0, y: g_sHeight - 75,
@@ -5435,8 +5427,6 @@ function keyConfigInit(_kcType = g_kcType) {
 	// キーボード押下時処理
 	setShortcutEvent(g_currentPage, setCode => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
-		const cursor = document.querySelector(`#cursor`);
-		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 		let setKey = g_kCdN.findIndex(kCd => kCd === setCode);
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
@@ -5488,7 +5478,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		} else {
 			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
-			eval(`resetCursor${g_kcType}`)(kWidth, divideCnt, keyCtrlPtn);
+			g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
 		}
 	});
 
@@ -5555,26 +5545,18 @@ function setKeyConfigCursor(_width, _divideCnt, _keyCtrlPtn, _keyNum) {
 	const posj = g_keyObj[`pos${_keyCtrlPtn}`][g_currentj];
 	const posMax = (g_keyObj[`divMax${_keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`divMax${_keyCtrlPtn}`] : g_keyObj[`pos${_keyCtrlPtn}`][_keyNum - 1] + 1);
-	let stdPos;
-	let dividePos;
-	if (posj > _divideCnt) {
-		stdPos = posj - (posMax + _divideCnt) / 2;
-		dividePos = 1;
-	} else {
-		stdPos = posj - _divideCnt / 2;
-		dividePos = 0;
-	}
+	const stdPos = posj - ((posj <= _divideCnt ? 0 : posMax) + _divideCnt) / 2;
 
-	const cursor = document.querySelector(`#cursor`);
 	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
+	const baseY = C_KYC_HEIGHT * (posj <= _divideCnt ? 0 : 1) + 45;
 	if (g_currentk >= 1) {
-		cursor.style.top = `${45 + C_KYC_REPHEIGHT + C_KYC_HEIGHT * dividePos}px`;
+		cursor.style.top = `${baseY + C_KYC_REPHEIGHT}px`;
 	} else {
 		if (g_kcType === `Replaced`) {
 			g_kcType = C_FLG_ALL;
 		}
 		lnkKcType.textContent = g_kcType;
-		cursor.style.top = `${45 + C_KYC_HEIGHT * dividePos}px`;
+		cursor.style.top = `${baseY}px`;
 	}
 }
 
