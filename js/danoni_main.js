@@ -2127,7 +2127,7 @@ const isColorCd = _str => _str.substring(0, 1) === `#`;
  * @param {string} _str 
  * @returns 
  */
-const cssCheck = _str => listMatching(_str, g_cssCheckStr.header, { prefix: `^` }) ||
+const hasAnglePointInfo = _str => listMatching(_str, g_cssCheckStr.header, { prefix: `^` }) ||
 	listMatching(_str, g_cssCheckStr.header, { prefix: `^` });
 
 /**
@@ -2137,7 +2137,7 @@ const cssCheck = _str => listMatching(_str, g_cssCheckStr.header, { prefix: `^` 
 const colorToHex = (_color) => {
 
 	// すでにカラーコードのものやパーセント表記、位置表記系を除外
-	if (!isNaN(parseFloat(_color)) || isColorCd(_color) || cssCheck(_color)) {
+	if (!isNaN(parseFloat(_color)) || isColorCd(_color) || hasAnglePointInfo(_color)) {
 		return _color;
 	}
 
@@ -2202,7 +2202,7 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 			return colorArray[0];
 		}
 	} else {
-		if (gradationType === `linear-gradient` && (isColorCd(colorArray[0]) || !cssCheck(colorArray[0]))) {
+		if (gradationType === `linear-gradient` && (isColorCd(colorArray[0]) || !hasAnglePointInfo(colorArray[0]))) {
 			// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
 			convertColorStr = `${defaultDir}`;
 		}
@@ -3072,7 +3072,7 @@ function headerConvert(_dosObj) {
 			for (let j = 0; j < colorList.length; j++) {
 				const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
 				const hasColor = tmpSetColorOrg.some(tmpColorOrg => {
-					if (hasVal(tmpColorOrg) && (isColorCd(tmpColorOrg) || !cssCheck(tmpColorOrg) || tmpColorOrg === `Default`)) {
+					if (hasVal(tmpColorOrg) && (isColorCd(tmpColorOrg) || !hasAnglePointInfo(tmpColorOrg) || tmpColorOrg === `Default`)) {
 						colorOrg[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(tmpColorOrg));
 						return true;
 					}
