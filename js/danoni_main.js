@@ -1903,6 +1903,11 @@ async function initWebAudioAPIfromURL(_url) {
 	await g_audio.init(arrayBuffer);
 }
 
+// Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備 (互換)
+function initWebAudioAPI(_url) {
+	initWebAudioAPIfromURL(_url);
+}
+
 /**
  * PLAYボタンの作成
  * @param {function} _func 
