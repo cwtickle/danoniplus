@@ -3071,12 +3071,15 @@ function headerConvert(_dosObj) {
 
 			for (let j = 0; j < colorList.length; j++) {
 				const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
-				tmpSetColorOrg.some(tmpColorOrg => {
-					if (isColorCd(tmpColorOrg) || !cssCheck(tmpColorOrg) || tmpColorOrg === `Default`) {
-						colorOrg[j] = colorCdPadding(_colorCdPaddingUse, tmpColorOrg);
+				const hasColor = tmpSetColorOrg.some(tmpColorOrg => {
+					if (hasVal(tmpColorOrg) && (isColorCd(tmpColorOrg) || !cssCheck(tmpColorOrg) || tmpColorOrg === `Default`)) {
+						colorOrg[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(tmpColorOrg));
 						return true;
 					}
 				});
+				if (!hasColor) {
+					colorOrg[j] = _colorInit[j];
+				}
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
 					_defaultColorgrd, _colorCdPaddingUse, _objType, _shadowFlg,
 				});
