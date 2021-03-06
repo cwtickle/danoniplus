@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/02/20
+ * Revised : 2021/03/06
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 19.5.5`;
-const g_revisedDate = `2021/02/20`;
+const g_version = `Ver 19.5.6`;
+const g_revisedDate = `2021/03/06`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1846,13 +1846,26 @@ function loadMusic() {
 	request.send();
 }
 
-// Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備
-async function initWebAudioAPI(_url) {
+// Base64から音声データに変換してWebAudioAPIで再生する準備
+async function initWebAudioAPIfromBase64(_base64) {
+	g_audio = new AudioPlayer();
+	musicAfterLoaded();
+	const array = Uint8Array.from(atob(_base64), v => v.charCodeAt(0))
+	await g_audio.init(array.buffer);
+}
+
+// 音声ファイルを読み込んでWebAudioAPIで再生する準備
+async function initWebAudioAPIfromURL(_url) {
 	g_audio = new AudioPlayer();
 	musicAfterLoaded();
 	const promise = await fetch(_url);
 	const arrayBuffer = await promise.arrayBuffer();
 	await g_audio.init(arrayBuffer);
+}
+
+// Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備 (互換)
+function initWebAudioAPI(_url) {
+	initWebAudioAPIfromURL(_url);
 }
 
 /**
@@ -1878,7 +1891,7 @@ function setAudio(_url) {
 			g_audio.src = _url;
 			musicAfterLoaded();
 		} else {
-			initWebAudioAPI(_url);
+			initWebAudioAPIfromURL(_url);
 		}
 	};
 
@@ -1891,11 +1904,11 @@ function setAudio(_url) {
 					divRoot.appendChild(
 						makePlayButton(evt => {
 							divRoot.removeChild(evt.target);
-							initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
+							initWebAudioAPIfromBase64(g_musicdata);
 						})
 					);
 				} else {
-					initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`);
+					initWebAudioAPIfromBase64(g_musicdata);
 				}
 			} else {
 				makeWarningWindow(g_msgInfoObj.E_0031);
