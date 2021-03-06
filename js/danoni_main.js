@@ -2124,15 +2124,28 @@ const colorNameToCode = _color => {
 const byteToHex = _num => (`${_num.toString(16).padStart(2, '0')}`);
 
 /**
+ * カラーコードかどうかを判定 (簡易版)
+ * @param {string} _str 
+ * @returns 
+ */
+const isColorCd = _str => _str.substring(0, 1) === `#`;
+
+/**
+ * CSSの位置表記系かどうかをチェック
+ * @param {string} _str 
+ * @returns 
+ */
+const hasAnglePointInfo = _str => listMatching(_str, g_cssCheckStr.header, { prefix: `^` }) ||
+	listMatching(_str, g_cssCheckStr.header, { prefix: `^` });
+
+/**
  * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
  * @param {string} _color 色名
  */
 const colorToHex = (_color) => {
 
 	// すでにカラーコードのものやパーセント表記、位置表記系を除外
-	if (_color.substring(0, 1) === `#` || !isNaN(parseFloat(_color)) ||
-		listMatching(_color, g_cssCheckStr.header, { prefix: `^` }) ||
-		listMatching(_color, g_cssCheckStr.footer, { suffix: `$` })) {
+	if (!isNaN(parseFloat(_color)) || isColorCd(_color) || hasAnglePointInfo(_color)) {
 		return _color;
 	}
 
@@ -2140,11 +2153,9 @@ const colorToHex = (_color) => {
 	// 透明度はカラーコード形式に変換してRGBの後ろに設定
 	const tmpColor = _color.split(`;`);
 	const colorSet = tmpColor[0].split(` `);
-	let alphaVal = ``;
-	if (tmpColor.length > 1) {
-		alphaVal = byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER));
-	}
-	return `${colorNameToCode(colorSet[0])}${alphaVal}${colorSet[1] !== undefined ? ` ${colorSet.slice(1).join(' ')}` : ''}`;
+	return colorNameToCode(colorSet[0]) +
+		(tmpColor.length > 1 ? byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER)) : '') +
+		(colorSet[1] !== undefined ? ` ${colorSet.slice(1).join(' ')}` : '');
 }
 
 /**
@@ -2170,8 +2181,8 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
 	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
 
-	if (_colorStr === `Default`) {
-		return `Default`;
+	if (_colorStr === `Default` || _colorStr === ``) {
+		return _colorStr;
 	}
 
 	// 矢印の塗りつぶしの場合：透明度を50%にする
@@ -2183,31 +2194,27 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const colorArray = tmpColorStr[0].split(`:`);
 	for (let j = 0; j < colorArray.length; j++) {
 		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replace(/0x/g, `#`)));
-		if (j === 0 && colorArray[0].substring(0, 1) !== `#`) {
-		} else if (colorArray[j].length === 7) {
+		if (isColorCd(colorArray[j]) && colorArray[j].length === 7) {
 			colorArray[j] += alphaVal;
 		}
 	}
 
 	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
-	const defaultDir = (_objType === `titleArrow` ? `to left` : `to right`);
+	const defaultDir = `to ${(_objType === 'titleArrow' ? 'left' : 'right')}, `;
 	if (colorArray.length === 1) {
 		if (_objType === `titleMusic`) {
-			convertColorStr = `${defaultDir}, ${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
+			convertColorStr = `${defaultDir}${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
 		} else if (_defaultColorgrd[0]) {
-			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${_defaultColorgrd[1]}${alphaVal}, ${colorArray[0]}`;
+			convertColorStr = `${defaultDir}${colorArray[0]}, ${_defaultColorgrd[1]}${alphaVal}, ${colorArray[0]}`;
 		} else {
-			convertColorStr = `${defaultDir}, ${colorArray[0]}, ${colorArray[0]}`;
+			return colorArray[0];
 		}
-	} else if (gradationType === `linear-gradient` &&
-		(colorArray[0].slice(0, 1) === `#` ||
-			(!colorArray[0].startsWith(`to `) && !listMatching(colorArray[0], [`deg`, `rad`, `turn`], { suffix: `$` }))
-		)
-	) {
-		// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
-		convertColorStr = `${defaultDir}, ${colorArray.join(', ')}`;
 	} else {
-		convertColorStr = `${colorArray.join(', ')}`;
+		if (gradationType === `linear-gradient` && (isColorCd(colorArray[0]) || !hasAnglePointInfo(colorArray[0]))) {
+			// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
+			convertColorStr = `${defaultDir}`;
+		}
+		convertColorStr += `${colorArray.join(', ')}`;
 	}
 
 	return `${gradationType}(${convertColorStr})`;
@@ -3058,7 +3065,7 @@ function headerConvert(_dosObj) {
 			if (_objType === `frz` && _defaultFrzColorUse) {
 				// デフォルト配列に満たない・足りない部分はデフォルト配列で穴埋め
 				for (let j = 0; j < _colorInitLength; j++) {
-					if (colorStr[j] === undefined || colorStr[j] === ``) {
+					if (!hasVal(colorStr[j])) {
 						colorStr[j] = _colorInit[j];
 					}
 				}
@@ -3072,13 +3079,15 @@ function headerConvert(_dosObj) {
 
 			for (let j = 0; j < colorList.length; j++) {
 				const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
-				tmpSetColorOrg.some(tmpColorOrg => {
-					if (tmpColorOrg.indexOf(`#`) !== -1 ||
-						(!tmpColorOrg.startsWith(`to `) && !tmpColorOrg.endsWith(`deg`)) || tmpColorOrg === `Default`) {
-						colorOrg[j] = colorCdPadding(_colorCdPaddingUse, tmpColorOrg);
+				const hasColor = tmpSetColorOrg.some(tmpColorOrg => {
+					if (hasVal(tmpColorOrg) && (isColorCd(tmpColorOrg) || !hasAnglePointInfo(tmpColorOrg) || tmpColorOrg === `Default`)) {
+						colorOrg[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(tmpColorOrg));
 						return true;
 					}
 				});
+				if (!hasColor) {
+					colorOrg[j] = _colorInit[j];
+				}
 				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
 					_defaultColorgrd, _colorCdPaddingUse, _objType, _shadowFlg,
 				});
@@ -3089,11 +3098,9 @@ function headerConvert(_dosObj) {
 			// 未定義の場合は指定されたデフォルト配列(_colorInit)で再定義
 			colorStr = _colorInit.concat();
 			colorOrg = _colorInit.concat();
-			for (let j = 0; j < _colorInit.length; j++) {
-				colorList[j] = _colorInit[j] === `` ? `` : makeColorGradation(_colorInit[j], {
-					_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
-				});
-			}
+			colorList = _colorInit.map(colorStr => makeColorGradation(colorStr, {
+				_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
+			}));
 		}
 
 		return [colorList, colorStr, colorOrg];
