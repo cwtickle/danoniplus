@@ -3090,11 +3090,9 @@ function headerConvert(_dosObj) {
 			// 未定義の場合は指定されたデフォルト配列(_colorInit)で再定義
 			colorStr = _colorInit.concat();
 			colorOrg = _colorInit.concat();
-			for (let j = 0; j < _colorInit.length; j++) {
-				colorList[j] = makeColorGradation(_colorInit[j], {
-					_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
-				});
-			}
+			colorList = _colorInit.map(colorStr => makeColorGradation(colorStr, {
+				_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
+			}));
 		}
 
 		return [colorList, colorStr, colorOrg];
