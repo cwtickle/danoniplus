@@ -1910,8 +1910,16 @@ function loadMusic() {
 	request.send();
 }
 
-// Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備
-async function initWebAudioAPI(_url) {
+// Base64から音声データに変換してWebAudioAPIで再生する準備
+async function initWebAudioAPIfromBase64(_base64) {
+	g_audio = new AudioPlayer();
+	musicAfterLoaded();
+	const array = Uint8Array.from(atob(_base64), v => v.charCodeAt(0))
+	await g_audio.init(array.buffer);
+}
+
+// 音声ファイルを読み込んでWebAudioAPIで再生する準備
+async function initWebAudioAPIfromURL(_url) {
 	g_audio = new AudioPlayer();
 	musicAfterLoaded();
 	const promise = await fetch(_url);
@@ -1943,7 +1951,7 @@ function setAudio(_url) {
 			g_audio.src = _url;
 			musicAfterLoaded();
 		} else {
-			initWebAudioAPI(_url);
+			initWebAudioAPIfromURL(_url);
 		}
 	};
 
@@ -1967,7 +1975,7 @@ function setAudio(_url) {
 		loadScript(_url, _ => {
 			if (typeof musicInit === C_TYP_FUNCTION) {
 				musicInit();
-				readyToStart(_ => initWebAudioAPI(`data:audio/mp3;base64,${g_musicdata}`));
+				readyToStart(_ => initWebAudioAPIfromBase64(g_musicdata));
 			} else {
 				makeWarningWindow(g_msgInfoObj.E_0031);
 				musicAfterLoaded();
