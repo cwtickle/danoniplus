@@ -1734,6 +1734,11 @@ async function initWebAudioAPIfromURL(_url) {
 	await g_audio.init(arrayBuffer);
 }
 
+// Data URIやBlob URIからArrayBufferに変換してWebAudioAPIで再生する準備 (互換)
+function initWebAudioAPI(_url) {
+	initWebAudioAPIfromURL(_url);
+}
+
 /**
  * 音楽データの設定
  * iOSの場合はAudioタグによる再生
