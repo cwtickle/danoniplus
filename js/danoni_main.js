@@ -2136,7 +2136,7 @@ const isColorCd = _str => _str.substring(0, 1) === `#`;
  * @returns 
  */
 const hasAnglePointInfo = _str => listMatching(_str, g_cssCheckStr.header, { prefix: `^` }) ||
-	listMatching(_str, g_cssCheckStr.header, { prefix: `^` });
+	listMatching(_str, g_cssCheckStr.footer, { suffix: `$` });
 
 /**
  * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
