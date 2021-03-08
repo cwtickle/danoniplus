@@ -167,6 +167,7 @@ const C_BLOCK_KEYS = [
 const C_LEN_SETLBL_LEFT = 160;
 const C_LEN_SETLBL_WIDTH = 210;
 const C_LEN_DIFSELECTOR_WIDTH = 250;
+const C_LEN_DIFCOVER_WIDTH = 110;
 const C_LEN_SETLBL_HEIGHT = 23;
 const C_SIZ_SETLBL = 17;
 const C_LEN_SETDIFLBL_HEIGHT = 25;
@@ -190,6 +191,8 @@ const g_settingBtnObj = {
         LL: `<`,
         R: `>`,
         RR: `>`,
+        D: `↓`,
+        U: `↑`,
     },
     pos: {
         L: C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH,
@@ -315,6 +318,7 @@ const g_stateObj = {
     lifeBorder: 70,
     lifeInit: 25,
     lifeVariable: C_FLG_OFF,
+    filterKeys: ``,
 
     extraKeyFlg: false,
     dataSaveFlg: true,
@@ -724,6 +728,7 @@ const g_shortcutObj = {
         ArrowRight: { id: `lnkSpeedRR` },
         ShiftLeft_ArrowLeft: { id: `lnkSpeedL` },
         ArrowLeft: { id: `lnkSpeedLL` },
+        KeyL: { id: `lnkDifficulty` },
 
         ShiftLeft_KeyM: { id: `lnkMotionL` },
         KeyM: { id: `lnkMotionR` },
@@ -767,10 +772,13 @@ const g_shortcutObj = {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
         KeyD: { id: `lnkDifficultyR` },
         KeyR: { id: `difRandom` },
+        KeyL: { id: `lnkDifficulty` },
+        ArrowDown: { id: `btnDifD` },
+        ArrowUp: { id: `btnDifU` },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
-        Enter: { id: `btnPlay` },
+        Enter: { id: `lnkDifficulty` },
         ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
     },
