@@ -763,6 +763,17 @@ const g_shortcutObj = {
         ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
     },
+    difSelector: {
+        ShiftLeft_KeyD: { id: `lnkDifficultyL` },
+        KeyD: { id: `lnkDifficultyR` },
+        KeyR: { id: `difRandom` },
+
+        Escape: { id: `btnBack` },
+        Space: { id: `btnKeyConfig` },
+        Enter: { id: `btnPlay` },
+        ShiftLeft_Tab: { id: `btnBack` },
+        Tab: { id: `btnDisplay` },
+    },
     settingsDisplay: {
         ShiftLeft_KeyA: { id: `lnkAppearanceL` },
         KeyA: { id: `lnkAppearanceR` },
@@ -826,6 +837,7 @@ const g_btnWaitFrame = {
     initial: { b_frame: 0, s_frame: 0 },
     title: { b_frame: 0, s_frame: 0 },
     option: { b_frame: 0, s_frame: 0, initial: true },
+    difSelector: { b_frame: 0, s_frame: 0 },
     settingsDisplay: { b_frame: 0, s_frame: 0 },
     keyConfig: { b_frame: 0, s_frame: 30 },
     loading: { b_frame: 0, s_frame: 0 },
@@ -838,6 +850,7 @@ const g_btnWaitFrame = {
 const g_btnPatterns = {
     title: { Start: 0, Comment: -10 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
+    difSelector: {},
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Settings: -5 },
     loadingIos: { Play: 0 },
     keyConfig: { Back: -3 },

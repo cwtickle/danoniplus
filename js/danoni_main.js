@@ -3858,7 +3858,19 @@ function createOptionWindow(_sprite) {
 			deleteChildspriteAll(`difList`);
 			optionsprite.removeChild(document.querySelector(`#difList`));
 			optionsprite.removeChild(document.querySelector(`#difCover`));
+			g_currentPage = `option`;
+			setShortcutEvent(g_currentPage);
 		}
+	};
+
+	/**
+	 * 譜面選択処理
+	 * @param {number} _scrollNum 
+	 */
+	const nextDifficulty = (_scrollNum = 1) => {
+		g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
+		setDifficulty(true);
+		resetDifWindow();
 	};
 
 	/**
@@ -3875,28 +3887,19 @@ function createOptionWindow(_sprite) {
 					text += ` (${g_headerObj.creatorNames[j]})`;
 				}
 				_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
-					g_stateObj.scoreId = j;
-					setDifficulty(true);
-					resetDifWindow();
+					nextDifficulty(j - g_stateObj.scoreId);
 				}));
 				k++;
 			}
 		});
 	};
 
-	// 譜面選択処理
-	const nextDifficulty = (_scrollNum = 1, _resetFlg = false) => {
-		g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
-		setDifficulty(true);
-		if (_resetFlg) {
-			resetDifWindow();
-		}
-	};
-
 	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`,
 		``, 0, _ => {
 			if (g_headerObj.difSelectorUse) {
 				if (document.querySelector(`#difList`) === null) {
+					g_currentPage = `difSelector`;
+					setShortcutEvent(g_currentPage);
 					const difList = createSprite(`optionsprite`, `difList`, 165, 65, 280, 255);
 					difList.style.overflow = `auto`;
 					difList.classList.toggle(g_cssObj.settings_DifSelector, true);
@@ -3911,9 +3914,7 @@ function createOptionWindow(_sprite) {
 					// ランダム選択
 					difCover.appendChild(
 						makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
-							g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
-							setDifficulty(true);
-							resetDifWindow();
+							nextDifficulty(Math.floor(Math.random() * g_headerObj.keyLabels.length));
 						}, { w: 110 })
 					);
 
@@ -3946,8 +3947,8 @@ function createOptionWindow(_sprite) {
 	// 譜面選択ボタン（メイン、右回し、左回し）
 	multiAppend(spriteList.difficulty,
 		lnkDifficulty,
-		makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => nextDifficulty(1, true), { dy: -10, dh: 10 }),
-		makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => nextDifficulty(-1, true), { dy: -10, dh: 10 }),
+		makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => nextDifficulty(), { dy: -10, dh: 10 }),
+		makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => nextDifficulty(-1), { dy: -10, dh: 10 }),
 	)
 	createScText(spriteList.difficulty, `Difficulty`);
 
