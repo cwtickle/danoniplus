@@ -3911,9 +3911,11 @@ function createOptionWindow(_sprite) {
 		const dir = _scrollNum === 1 ? `D` : `U`;
 		return createCss2Button(`btnDif${dir}`, g_settingBtnObj.chara[dir], _ => {
 			do {
-				nextDifficulty(_scrollNum);
+				g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
 			} while (g_stateObj.filterKeys !== `` && g_stateObj.filterKeys !== g_headerObj.keyLabels[g_stateObj.scoreId]);
-			createDifWindow(g_stateObj.filterKeys);
+			setDifficulty(true);
+			deleteChildspriteAll(`difList`);
+			makeDifList(difList, g_stateObj.filterKeys);
 		}, {
 			x: 430 + _scrollNum * 10, y: 40, w: 20, h: 20, siz: C_SIZ_JDGCNTS,
 		}, g_cssObj.button_Mini);
@@ -3947,22 +3949,28 @@ function createOptionWindow(_sprite) {
 		// 全リスト
 		difCover.appendChild(
 			makeDifLblCssButton(`keyFilter`, `ALL`, 1.5, _ => {
-				deleteChildspriteAll(`difList`);
+				resetDifWindow();
 				g_stateObj.filterKeys = ``;
-				makeDifList(difList);
-			}, { w: C_LEN_DIFCOVER_WIDTH })
+				createDifWindow();
+			}, { w: C_LEN_DIFCOVER_WIDTH, btnStyle: (g_stateObj.filterKeys === `` ? `Setting` : `Default`) })
 		);
 
 		// キー別フィルタボタン作成
+		let pos = 0;
 		g_headerObj.keyLists.forEach((targetKey, m) => {
 			difCover.appendChild(
 				makeDifLblCssButton(`keyFilter${m}`, `${targetKey} key`, m + 2.5, _ => {
-					deleteChildspriteAll(`difList`);
+					resetDifWindow();
 					g_stateObj.filterKeys = targetKey;
-					makeDifList(difList, targetKey);
-				}, { w: C_LEN_DIFCOVER_WIDTH })
+					createDifWindow(targetKey);
+				}, { w: C_LEN_DIFCOVER_WIDTH, btnStyle: (g_stateObj.filterKeys === targetKey ? `Setting` : `Default`) })
 			);
+			if (g_stateObj.filterKeys === targetKey) {
+				pos = m + 9;
+			}
 		});
+		const overlength = pos * C_LEN_SETLBL_HEIGHT - parseInt(difCover.style.height);
+		difCover.scrollTop = (overlength > 0 ? overlength : 0);
 
 		multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
 	};
