@@ -3888,7 +3888,7 @@ function createOptionWindow(_sprite) {
 				}
 				_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
 					nextDifficulty(j - g_stateObj.scoreId);
-				}));
+				}, { btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
 				k++;
 			}
 		});
@@ -4925,13 +4925,13 @@ function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, si
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  */
-function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_DIFSELECTOR_WIDTH, } = {}) {
+function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_DIFSELECTOR_WIDTH, btnStyle = `Default` } = {}) {
 	return createCss2Button(_id, _name, _func, {
 		x: x, y: C_LEN_SETLBL_HEIGHT * _heightPos,
 		w: w, h: C_LEN_SETLBL_HEIGHT,
 		siz: C_SIZ_DIFSELECTOR,
 		borderStyle: `solid`,
-	}, g_cssObj.button_Default, g_cssObj.button_ON);
+	}, g_cssObj[`button_${btnStyle}`], g_cssObj.button_ON);
 }
 
 /**
