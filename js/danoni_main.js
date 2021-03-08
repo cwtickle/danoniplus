@@ -3880,6 +3880,7 @@ function createOptionWindow(_sprite) {
 	 */
 	const makeDifList = (_difList, _targetKey = ``) => {
 		let k = 0;
+		let pos = 0;
 		g_headerObj.keyLabels.forEach((keyLabel, j) => {
 			if (_targetKey === `` || keyLabel === _targetKey) {
 				let text = `${keyLabel} / ${g_headerObj.difLabels[j]}`;
@@ -3889,9 +3890,14 @@ function createOptionWindow(_sprite) {
 				_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
 					nextDifficulty(j - g_stateObj.scoreId);
 				}, { btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
+				if (j === g_stateObj.scoreId) {
+					pos = k + 2;
+				}
 				k++;
 			}
 		});
+		const overlength = pos * C_LEN_SETLBL_HEIGHT - parseInt(difList.style.height);
+		difList.scrollTop = (overlength > 0 ? overlength : 0);
 	};
 
 	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`,
