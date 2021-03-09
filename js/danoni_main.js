@@ -373,52 +373,6 @@ function setVal(_checkStr, _default, _type) {
 }
 
 /**
- * 配列の型及び最小配列長のチェック
- * - チェックのみで変換は行わないため、変換が必要な場合は別途処理を組むこと。
- * - 型は最初の要素のみチェックを行う。
- * 
- * @deprecated v20以降非推奨
- * @param {array} _checkArray 
- * @param {string} _type 
- * @param {number} _minLength 最小配列長
- */
-function checkArrayVal(_checkArray, _type, _minLength) {
-
-	// 値がundefined相当の場合は無条件でデフォルト値を返却
-	if (_checkArray === undefined || _checkArray === ``) {
-		return false;
-	}
-
-	// 配列かどうかをチェック
-	if (Object.prototype.toString.call(_checkArray) !== `[object Array]`) {
-		return false;
-	}
-
-	// 最小配列長が不正の場合は強制的に1を設定
-	if (isNaN(parseFloat(_minLength))) {
-		_minLength = 1;
-	}
-
-	let isNaNflg;
-	if (_type === C_TYP_FLOAT) {
-		// 数値型(小数可)の場合
-		isNaNflg = isNaN(parseFloat(_checkArray[0]));
-		if (isNaNflg) {
-			return false;
-		}
-	} else if (_type === C_TYP_NUMBER) {
-		// 数値型(整数のみ)の場合
-		isNaNflg = isNaN(parseInt(_checkArray[0]));
-		if (isNaNflg) {
-			return false;
-		}
-	}
-
-	// 配列長のチェック
-	return (_checkArray.length >= _minLength ? true : false);
-}
-
-/**
  * div要素のstyleを取得
  * @param {string} _id 
  */
@@ -508,30 +462,6 @@ function getBasicFont(_priorityFont = ``) {
 }
 
 /**
- * 半角換算の文字数を計算
- * @deprecated v20以降非推奨
- * @param {string} _str 
- */
-function getStrLength(_str) {
-	let result = 0;
-	for (let i = 0; i < _str.length; i++) {
-		const chr = _str.charCodeAt(i);
-		if ((chr >= 0x00 && chr < 0x81) ||
-			(chr === 0xf8f0) ||
-			(chr >= 0xff61 && chr < 0xffa0) ||
-			(chr >= 0xf8f1 && chr < 0xf8f4)) {
-			//半角文字の場合は1を加算
-			result += 1;
-		} else {
-			//それ以外の文字の場合は2を加算
-			result += 2;
-		}
-	}
-	//結果を返す
-	return result;
-}
-
-/**
  * フォントサイズに応じた横幅を取得
  * @param {string} _str 
  * @param {number} _fontsize 
@@ -558,21 +488,6 @@ function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64)
 		}
 	}
 	return minSiz;
-}
-
-/**
- * 左パディング
- * @deprecated v20以降非推奨
- * @param {string} _str 元の文字列 
- * @param {number} _length パディング後の長さ 
- * @param {string} _chr パディング文字列
- */
-function paddingLeft(_str, _length, _chr) {
-	let paddingStr = _str;
-	while (paddingStr.length < _length) {
-		paddingStr = _chr + paddingStr;
-	}
-	return paddingStr;
 }
 
 /**
@@ -627,35 +542,6 @@ function createDiv(_id, _x, _y, _width, _height) {
 	style.msUserSelect = C_DIS_NONE;
 	style.mozUserSelect = C_DIS_NONE;
 	style.webkitTouchCallout = C_DIS_NONE;
-
-	return div;
-}
-
-/**
- * 子div要素のラベル文字作成
- * - createDivLabelに加えて、独自フォントが指定できる形式。
- * 
- * @deprecated v20以降非推奨
- * @param {string} _id 
- * @param {number} _x 
- * @param {number} _y 
- * @param {number} _width 
- * @param {number} _height 
- * @param {number} _fontsize 
- * @param {string} _color 
- * @param {string} _text 
- * @param {string} _font 
- */
-function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text, _font) {
-	const div = createDiv(_id, _x, _y, _width, _height);
-	const style = div.style;
-	style.fontSize = `${_fontsize}px`;
-	if (_color !== ``) {
-		style.color = _color;
-	}
-	style.fontFamily = _font;
-	style.textAlign = C_ALIGN_CENTER;
-	div.innerHTML = _text;
 
 	return div;
 }
