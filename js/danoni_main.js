@@ -4109,7 +4109,7 @@ function createOptionWindow(_sprite) {
 			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 
-			makeScoreDetailLabel(`Speed`, g_lblNameObj[`s_${speedType}`], speedObj[speedType].cnt, j);
+			updateScoreDetailLabel(`Speed`, g_lblNameObj[`s_${speedType}`], speedObj[speedType].cnt, j);
 		});
 	}
 
@@ -4132,21 +4132,21 @@ function createOptionWindow(_sprite) {
 		}
 
 		const obj = getScoreBaseData(_scoreId);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_apm, obj.apm, 0);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_time, obj.playingTime, 1);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, obj.arrowCnts, 3);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_frz, obj.frzCnts, 4);
+		updateScoreDetailLabel(`Density`, g_lblNameObj.s_apm, obj.apm, 0);
+		updateScoreDetailLabel(`Density`, g_lblNameObj.s_time, obj.playingTime, 1);
+		updateScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, obj.arrowCnts, 3);
+		updateScoreDetailLabel(`Density`, g_lblNameObj.s_frz, obj.frzCnts, 4);
 	}
 
 	/**
-	 * 譜面明細内の補足情報
+	 * 譜面明細内の補足情報の登録・更新
 	 * @param {string} _name 表示する譜面明細のラベル
 	 * @param {string} _label 
 	 * @param {string} _value 
 	 * @param {number} _pos 表示位置
 	 * @param {string} _labelname
 	 */
-	function makeScoreDetailLabel(_name, _label, _value, _pos = 0, _labelname = _label) {
+	function updateScoreDetailLabel(_name, _label, _value, _pos = 0, _labelname = _label) {
 		const baseLabel = (_bLabel, _bLabelname, _bAlign) => {
 			document.querySelector(`#detail${_name}`).appendChild(
 				createDivCss2Label(`${_bLabel}`, `${_bLabelname}`, {
