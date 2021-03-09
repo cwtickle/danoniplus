@@ -4255,8 +4255,7 @@ function createOptionWindow(_sprite) {
 			makeDifInfoLabel(`dataTate`, ``, { x: 345, w: 160 }),
 			makeDifInfoLabel(`lblArrowInfo`, g_lblNameObj.s_cnts, { x: 130, y: 45, w: 290, siz: C_SIZ_JDGCNTS }),
 			makeDifInfoLabel(`dataArrowInfo`, ``, { x: 270, y: 45, w: 160, siz: C_SIZ_JDGCNTS }),
-			makeDifInfoLabel(`lblArrowInfo2`, ``,
-				{ x: 130, y: 70, w: 200, h: 90 }),
+			makeDifInfoLabel(`lblArrowInfo2`, ``, { x: 130, y: 70, w: 200, h: 90 }),
 			makeDifInfoLabel(`dataArrowInfo2`, ``, { x: 140, y: 70, w: 275, h: 150, overflow: `auto` }),
 			makeSettingLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 0, _ => {
 				copyTextToClipboard(
@@ -4280,10 +4279,6 @@ function createOptionWindow(_sprite) {
 		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
 		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
 		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
-		let ArrowInfo = `${arrowCnts + frzCnts} <span style="font-size:${C_SIZ_DIFSELECTOR}px;">(${arrowCnts} + ${frzCnts})</span>`;
-		let ArrowInfo2 = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
-			(${g_detailObj.frzCnt[_scoreId]})<br><br>
-			${push3CntStr}`.split(`,`).join(`/`);
 
 		if (document.querySelector(`#lblTooldif`) === null) {
 			makeDifInfoLabels(_scoreId);
@@ -4292,8 +4287,10 @@ function createOptionWindow(_sprite) {
 		dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
 		dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
 		lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
-		dataArrowInfo.innerHTML = ArrowInfo;
-		dataArrowInfo2.innerHTML = ArrowInfo2;
+		dataArrowInfo.innerHTML = `${arrowCnts + frzCnts} <span style="font-size:${C_SIZ_DIFSELECTOR}px;">(${arrowCnts} + ${frzCnts})</span>`;
+		dataArrowInfo2.innerHTML = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
+			(${g_detailObj.frzCnt[_scoreId]})<br><br>
+			${push3CntStr}`.split(`,`).join(`/`);
 	}
 
 	// ---------------------------------------------------
