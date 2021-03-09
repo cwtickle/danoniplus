@@ -4206,17 +4206,13 @@ function createOptionWindow(_sprite) {
 	}
 
 	/**
-	 * 譜面の難易度情報
+	 * 譜面の難易度情報用ラベル作成
 	 * @param {number} _scoreId 
 	 */
-	function makeDifInfo(_scoreId) {
-
-		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
-		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
+	function makeDifInfoLabels(_scoreId) {
 
 		// ツール難易度
 		const detailToolDif = document.querySelector(`#detailToolDif`);
-
 		/**
 		 * 譜面の難易度情報ラベルの作成
 		 * @param {string} _lbl 
@@ -4224,81 +4220,80 @@ function createOptionWindow(_sprite) {
 		 * @param {object} _obj 
 		 */
 		const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = C_SIZ_DIFSELECTOR, ...rest } = {}) => {
-			detailToolDif.appendChild(
-				createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest })
-			);
+			return createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest });
 		}
 
-		if (document.querySelector(`#lblTooldif`) === null) {
-			makeDifInfoLabel(`lblTooldif`, g_lblNameObj.s_level, { y: 5, w: 250, siz: C_SIZ_JDGCNTS });
-			makeDifInfoLabel(`dataTooldif`, g_detailObj.toolDif[_scoreId].tool, { x: 270, y: 3, w: 160, siz: 18 });
-		} else {
-			dataTooldif.textContent = g_detailObj.toolDif[_scoreId].tool;
+		let printData = ``;
+		for (let j = 0; j < g_detailObj.arrowCnt.length; j++) {
+			const obj = getScoreBaseData(j);
+			printData +=
+				// 譜面番号
+				`[${j + 1}]\t` +
+				// ツール値
+				`${g_detailObj.toolDif[j].tool}\t` +
+				// 同時
+				`${g_detailObj.toolDif[j].douji}\t` +
+				// 縦連
+				`${g_detailObj.toolDif[j].tate}\t` +
+				// 総矢印数
+				`${(obj.arrowCnts + obj.frzCnts)}\t` +
+				// 矢印
+				`${obj.arrowCnts}\t` +
+				// フリーズアロー
+				`${obj.frzCnts}\t` +
+				// APM
+				`${obj.apm}\t` +
+				// 時間(分秒)
+				`${obj.playingTime}\r\n`;
 		}
+		multiAppend(detailToolDif,
+			makeDifInfoLabel(`lblTooldif`, g_lblNameObj.s_level, { y: 5, w: 250, siz: C_SIZ_JDGCNTS }),
+			makeDifInfoLabel(`dataTooldif`, ``, { x: 270, y: 3, w: 160, siz: 18 }),
+			makeDifInfoLabel(`lblDouji`, g_lblNameObj.s_douji),
+			makeDifInfoLabel(`lblTate`, g_lblNameObj.s_tate, { x: 270 }),
+			makeDifInfoLabel(`dataDouji`, ``, { x: 200, w: 160 }),
+			makeDifInfoLabel(`dataTate`, ``, { x: 345, w: 160 }),
+			makeDifInfoLabel(`lblArrowInfo`, g_lblNameObj.s_cnts, { x: 130, y: 45, w: 290, siz: C_SIZ_JDGCNTS }),
+			makeDifInfoLabel(`dataArrowInfo`, ``, { x: 270, y: 45, w: 160, siz: C_SIZ_JDGCNTS }),
+			makeDifInfoLabel(`lblArrowInfo2`, ``,
+				{ x: 130, y: 70, w: 200, h: 90 }),
+			makeDifInfoLabel(`dataArrowInfo2`, ``, { x: 140, y: 70, w: 275, h: 150, overflow: `auto` }),
+			makeSettingLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 0, _ => {
+				copyTextToClipboard(
+					`****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n`
+					+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`
+				);
+				makeInfoWindow(g_msgInfoObj.I_0003, `leftToRightFade`);
+			}, {
+				x: 10, y: 30, w: 100, borderStyle: `solid`
+			}, g_cssObj.button_RevON),
+		);
+		createScText(lnkDifInfo, `DifInfo`, { targetLabel: `lnkDifInfo`, x: -10 });
+	}
 
+	/**
+	 * 譜面の難易度情報更新
+	 * @param {number} _scoreId 
+	 */
+	function makeDifInfo(_scoreId) {
+
+		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
+		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
 		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
 		let ArrowInfo = `${arrowCnts + frzCnts} <span style="font-size:${C_SIZ_DIFSELECTOR}px;">(${arrowCnts} + ${frzCnts})</span>`;
 		let ArrowInfo2 = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
 			(${g_detailObj.frzCnt[_scoreId]})<br><br>
 			${push3CntStr}`.split(`,`).join(`/`);
 
-		if (document.querySelector(`#lblDouji`) === null) {
-			makeDifInfoLabel(`lblDouji`, g_lblNameObj.s_douji);
-			makeDifInfoLabel(`lblTate`, g_lblNameObj.s_tate, { x: 270 });
-			makeDifInfoLabel(`dataDouji`, g_detailObj.toolDif[_scoreId].douji, { x: 200, w: 160 });
-			makeDifInfoLabel(`dataTate`, g_detailObj.toolDif[_scoreId].tate, { x: 345, w: 160 });
-			makeDifInfoLabel(`lblArrowInfo`, g_lblNameObj.s_cnts, { x: 130, y: 45, w: 290, siz: C_SIZ_JDGCNTS });
-			makeDifInfoLabel(`dataArrowInfo`, ArrowInfo, { x: 270, y: 45, w: 160, siz: C_SIZ_JDGCNTS });
-			makeDifInfoLabel(`lblArrowInfo2`, g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt),
-				{ x: 130, y: 70, w: 200, h: 90 });
-			makeDifInfoLabel(`dataArrowInfo2`, ArrowInfo2, { x: 140, y: 70, w: 275, h: 150, overflow: `auto` });
-
-		} else {
-			dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
-			dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
-			lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
-			dataArrowInfo.innerHTML = ArrowInfo;
-			dataArrowInfo2.innerHTML = ArrowInfo2;
+		if (document.querySelector(`#lblTooldif`) === null) {
+			makeDifInfoLabels(_scoreId);
 		}
-
-		// データ出力ボタン
-		if (document.querySelector(`#lnkDifInfo`) === null) {
-			let printData = ``;
-			for (let j = 0; j < g_detailObj.arrowCnt.length; j++) {
-				const obj = getScoreBaseData(j);
-				printData +=
-					// 譜面番号
-					`[${j + 1}]\t` +
-					// ツール値
-					`${g_detailObj.toolDif[j].tool}\t` +
-					// 同時
-					`${g_detailObj.toolDif[j].douji}\t` +
-					// 縦連
-					`${g_detailObj.toolDif[j].tate}\t` +
-					// 総矢印数
-					`${(obj.arrowCnts + obj.frzCnts)}\t` +
-					// 矢印
-					`${obj.arrowCnts}\t` +
-					// フリーズアロー
-					`${obj.frzCnts}\t` +
-					// APM
-					`${obj.apm}\t` +
-					// 時間(分秒)
-					`${obj.playingTime}\r\n`;
-			}
-			detailToolDif.appendChild(
-				makeSettingLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 0, _ => {
-					copyTextToClipboard(
-						`****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n`
-						+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`
-					);
-					makeInfoWindow(g_msgInfoObj.I_0003, `leftToRightFade`);
-				}, {
-					x: 10, y: 30, w: 100, borderStyle: `solid`
-				}, g_cssObj.button_RevON)
-			);
-			createScText(lnkDifInfo, `DifInfo`, { targetLabel: `lnkDifInfo`, x: -10 });
-		}
+		dataTooldif.textContent = g_detailObj.toolDif[_scoreId].tool;
+		dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
+		dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
+		lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
+		dataArrowInfo.innerHTML = ArrowInfo;
+		dataArrowInfo2.innerHTML = ArrowInfo2;
 	}
 
 	// ---------------------------------------------------
