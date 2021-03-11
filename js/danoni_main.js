@@ -2874,10 +2874,9 @@ function headerConvert(_dosObj) {
 		'Type0': [!obj.defaultColorgrd[0], obj.defaultColorgrd[1]],
 	};
 
-	Object.assign(obj, resetBaseColorList(obj, _dosObj.setColor, _dosObj.frzColor));
-	Object.assign(obj, resetBaseColorList(obj, _dosObj.setShadowColor, _dosObj.frzShadowColor, { pattern: `Shadow` }));
-	obj.setColorDefault = obj.setColor.concat();
-	obj.frzColorDefault = obj.frzColor.concat();
+	for (let j = 0; j < obj.difLabels.length; j++) {
+		Object.assign(obj, resetBaseColorList(obj, _dosObj, { scoreId: j }));
+	}
 
 	// ダミー譜面の設定
 	if (hasVal(_dosObj.dummyId)) {
@@ -3206,57 +3205,70 @@ function headerConvert(_dosObj) {
 /**
  * 矢印・フリーズアロー色のデータ変換
  * @param {object} _baseObj 
- * @param {string} _arrowColorTxt 
- * @param {string} _frzColorTxt 
+ * @param {string} _dosObj
  * @param {object} objectList 
- * @returns 
+ * @returns オブジェクト ※Object.assign(obj, resetBaseColorList(...))の形で呼び出しが必要
  */
-function resetBaseColorList(_baseObj, _arrowColorTxt, _frzColorTxt, { pattern = ``, scoreIdHeader = `` } = {}) {
+function resetBaseColorList(_baseObj, _dosObj, { scoreId = `` } = {}) {
 
 	const obj = {};
-	const _name = `set${pattern}Color${scoreIdHeader}`;
-	const _frzName = `frz${pattern}Color${scoreIdHeader}`;
+	const scoreIdHeader = setScoreIdHeader(scoreId);
 
-	// 矢印色
-	Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
-		[obj[`${_name}${type}`], obj[`${_name}Str${type}`], obj[`${_name}Org${type}`]] =
-			setColorList(_arrowColorTxt, _baseObj[`${_name}Init`], _baseObj[`${_name}Init`].length, {
-				_defaultColorgrd: _baseObj.dfColorgrdSet[type],
-				_colorCdPaddingUse: _baseObj.colorCdPaddingUse,
-				_shadowFlg: pattern === `Shadow`,
-			});
+	[``, `Shadow`].forEach(pattern => {
+		const _name = `set${pattern}Color${scoreIdHeader}`;
+		const _frzName = `frz${pattern}Color${scoreIdHeader}`;
+		const _arrowInit = `set${pattern}ColorInit`;
+		const _frzInit = `frz${pattern}ColorInit`;
 
-		obj[`${_frzName}${type}`] = [];
-		obj[`${_frzName}Str${type}`] = [];
-		obj[`${_frzName}Org${type}`] = [];
-	});
+		const arrowColorTxt = _dosObj[_name] || _dosObj[`set${pattern}Color`];
+		const frzColorTxt = _dosObj[_frzName] || _dosObj[`frz${pattern}Color`];
 
-	// フリーズアロー色
-	const tmpFrzColors = (_frzColorTxt !== undefined ? _frzColorTxt.split(`$`) : []);
-	const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
-
-	for (let j = 0; j < _baseObj.setColorInit.length; j++) {
-
-		// デフォルト配列の作成（1番目の要素をベースに、フリーズアロー初期セット or 矢印色からデータを補完）
-		let currentFrzColors = [];
-		const baseLength = firstFrzColors.length === 0 || _baseObj.defaultFrzColorUse ?
-			_baseObj[`${_frzName}Init`].length : firstFrzColors.length;
-		for (let k = 0; k < baseLength; k++) {
-			currentFrzColors[k] = setVal(firstFrzColors[k],
-				_baseObj.defaultFrzColorUse ? _baseObj[`${_frzName}Init`][k] : _baseObj[`${_name}Str`][j], C_TYP_STRING);
-		}
-
+		// 矢印色
 		Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
-			[obj[`${_frzName}${type}`][j], obj[`${_frzName}Str${type}`][j], obj[`${_frzName}Org${type}`][j]] =
-				setColorList(tmpFrzColors[j], currentFrzColors, _baseObj[`${_frzName}Init`].length, {
+			[obj[`${_name}${type}`], obj[`${_name}Str${type}`], obj[`${_name}Org${type}`]] =
+				setColorList(arrowColorTxt, _baseObj[_arrowInit], _baseObj[_arrowInit].length, {
 					_defaultColorgrd: _baseObj.dfColorgrdSet[type],
 					_colorCdPaddingUse: _baseObj.colorCdPaddingUse,
-					_defaultFrzColorUse: _baseObj.defaultFrzColorUse,
-					_objType: `frz`,
 					_shadowFlg: pattern === `Shadow`,
 				});
+
+			obj[`${_frzName}${type}`] = [];
+			obj[`${_frzName}Str${type}`] = [];
+			obj[`${_frzName}Org${type}`] = [];
 		});
-	}
+
+		// フリーズアロー色
+		const tmpFrzColors = (frzColorTxt !== undefined ? frzColorTxt.split(`$`) : []);
+		const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
+
+		for (let j = 0; j < _baseObj.setColorInit.length; j++) {
+
+			// デフォルト配列の作成（1番目の要素をベースに、フリーズアロー初期セット or 矢印色からデータを補完）
+			let currentFrzColors = [];
+			const baseLength = firstFrzColors.length === 0 || _baseObj.defaultFrzColorUse ?
+				_baseObj[_frzInit].length : firstFrzColors.length;
+			for (let k = 0; k < baseLength; k++) {
+				currentFrzColors[k] = setVal(firstFrzColors[k],
+					_baseObj.defaultFrzColorUse ? _baseObj[_frzInit][k] : obj[`${_name}Str`][j], C_TYP_STRING);
+			}
+
+			Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
+				[obj[`${_frzName}${type}`][j], obj[`${_frzName}Str${type}`][j], obj[`${_frzName}Org${type}`][j]] =
+					setColorList(tmpFrzColors[j], currentFrzColors, _baseObj[_frzInit].length, {
+						_defaultColorgrd: _baseObj.dfColorgrdSet[type],
+						_colorCdPaddingUse: _baseObj.colorCdPaddingUse,
+						_defaultFrzColorUse: _baseObj.defaultFrzColorUse,
+						_objType: `frz`,
+						_shadowFlg: pattern === `Shadow`,
+					});
+			});
+		}
+
+		if (pattern === ``) {
+			obj[`${_name}Default`] = obj[_name].concat();
+			obj[`${_frzName}Default`] = obj[_frzName].concat();
+		}
+	});
 
 	return obj;
 }
@@ -5326,11 +5338,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		if (g_headerObj.colorUse) {
 			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
 		}
-
-		g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
-		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-			g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
-		}
+		changeSetColor();
 		for (let j = 0; j < keyNum; j++) {
 			$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
 		}
@@ -5499,6 +5507,17 @@ function keyConfigInit(_kcType = g_kcType) {
 	document.onkeyup = evt => commonKeyUp(evt);
 
 	document.oncontextmenu = _ => false;
+}
+
+/**
+ * 初期矢印色・フリーズアロー色の変更
+ */
+function changeSetColor() {
+	const currentType = ([`Default`, `Type0`].includes(g_colorType) ? setScoreIdHeader(g_stateObj.scoreId) + g_colorType : g_colorType);
+	g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${currentType}`]));
+	for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
+		g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${currentType}`][j]));
+	}
 }
 
 /**
@@ -6958,6 +6977,7 @@ function getArrowSettings() {
 		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
 
 	g_stateObj.autoAll = (g_stateObj.autoPlay === C_FLG_ALL ? C_FLG_ON : C_FLG_OFF);
+	changeSetColor();
 
 	for (let j = 0; j < keyNum; j++) {
 
