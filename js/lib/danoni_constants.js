@@ -167,6 +167,7 @@ const C_BLOCK_KEYS = [
 const C_LEN_SETLBL_LEFT = 160;
 const C_LEN_SETLBL_WIDTH = 210;
 const C_LEN_DIFSELECTOR_WIDTH = 250;
+const C_LEN_DIFCOVER_WIDTH = 110;
 const C_LEN_SETLBL_HEIGHT = 23;
 const C_SIZ_SETLBL = 17;
 const C_LEN_SETDIFLBL_HEIGHT = 25;
@@ -190,6 +191,8 @@ const g_settingBtnObj = {
         LL: `<`,
         R: `>`,
         RR: `>`,
+        D: `↓`,
+        U: `↑`,
     },
     pos: {
         L: C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH,
@@ -315,6 +318,7 @@ const g_stateObj = {
     lifeBorder: 70,
     lifeInit: 25,
     lifeVariable: C_FLG_OFF,
+    filterKeys: ``,
 
     extraKeyFlg: false,
     dataSaveFlg: true,
@@ -723,6 +727,7 @@ const g_shortcutObj = {
         ArrowRight: { id: `lnkSpeedRR` },
         ShiftLeft_ArrowLeft: { id: `lnkSpeedL` },
         ArrowLeft: { id: `lnkSpeedLL` },
+        KeyL: { id: `lnkDifficulty` },
 
         ShiftLeft_KeyM: { id: `lnkMotionL` },
         KeyM: { id: `lnkMotionR` },
@@ -759,6 +764,20 @@ const g_shortcutObj = {
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
+        ShiftLeft_Tab: { id: `btnBack` },
+        Tab: { id: `btnDisplay` },
+    },
+    difSelector: {
+        ShiftLeft_KeyD: { id: `lnkDifficultyL` },
+        KeyD: { id: `lnkDifficultyR` },
+        KeyR: { id: `difRandom` },
+        KeyL: { id: `lnkDifficulty` },
+        ArrowDown: { id: `btnDifD` },
+        ArrowUp: { id: `btnDifU` },
+
+        Escape: { id: `btnBack` },
+        Space: { id: `btnKeyConfig` },
+        Enter: { id: `lnkDifficulty` },
         ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
     },
@@ -825,6 +844,7 @@ const g_btnWaitFrame = {
     initial: { b_frame: 0, s_frame: 0 },
     title: { b_frame: 0, s_frame: 0 },
     option: { b_frame: 0, s_frame: 0, initial: true },
+    difSelector: { b_frame: 0, s_frame: 0 },
     settingsDisplay: { b_frame: 0, s_frame: 0 },
     keyConfig: { b_frame: 0, s_frame: 30 },
     loading: { b_frame: 0, s_frame: 0 },
@@ -837,6 +857,7 @@ const g_btnWaitFrame = {
 const g_btnPatterns = {
     title: { Start: 0, Comment: -10 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
+    difSelector: {},
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Settings: -5 },
     loadingIos: { Play: 0 },
     keyConfig: { Back: -3 },

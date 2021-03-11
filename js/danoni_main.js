@@ -2155,8 +2155,10 @@ const createScTextCommon = _displayName => {
  * @param {string} _displayName
  * @param {function} _func 
  */
-const setShortcutEvent = (_displayName, _func = _ => true) => {
-	createScTextCommon(_displayName);
+const setShortcutEvent = (_displayName, _func = _ => true, _displayFlg = true) => {
+	if (_displayFlg) {
+		createScTextCommon(_displayName);
+	}
 	const evList = _ => {
 		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func);
 		document.onkeyup = evt => commonKeyUp(evt);
@@ -3619,6 +3621,7 @@ function optionInit() {
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Settings`;
 	g_currentPage = `option`;
+	g_stateObj.filterKeys = ``;
 
 	// タイトル文字描画
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, g_lblNameObj.settings, 0, 15, `settings_Title`));
@@ -3742,9 +3745,20 @@ function createOptionWindow(_sprite) {
 	const resetDifWindow = _ => {
 		if (document.querySelector(`#difList`) !== null) {
 			deleteChildspriteAll(`difList`);
-			optionsprite.removeChild(document.querySelector(`#difList`));
-			optionsprite.removeChild(document.querySelector(`#difCover`));
+			[`difList`, `difCover`, `btnDifU`, `btnDifD`].forEach(obj => optionsprite.removeChild(document.getElementById(obj)));
+			g_currentPage = `option`;
+			setShortcutEvent(g_currentPage, _ => true, false);
 		}
+	};
+
+	/**
+	 * 譜面選択処理
+	 * @param {number} _scrollNum 
+	 */
+	const nextDifficulty = (_scrollNum = 1) => {
+		g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
+		setDifficulty(true);
+		resetDifWindow();
 	};
 
 	/**
@@ -3754,6 +3768,7 @@ function createOptionWindow(_sprite) {
 	 */
 	const makeDifList = (_difList, _targetKey = ``) => {
 		let k = 0;
+		let pos = 0;
 		g_headerObj.keyLabels.forEach((keyLabel, j) => {
 			if (_targetKey === `` || keyLabel === _targetKey) {
 				let text = `${keyLabel} / ${g_headerObj.difLabels[j]}`;
@@ -3761,57 +3776,97 @@ function createOptionWindow(_sprite) {
 					text += ` (${g_headerObj.creatorNames[j]})`;
 				}
 				_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
-					g_stateObj.scoreId = j;
-					setDifficulty(true);
-					resetDifWindow();
-				}));
+					nextDifficulty(j - g_stateObj.scoreId);
+				}, { btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
+				if (j === g_stateObj.scoreId) {
+					pos = k + 6;
+				}
 				k++;
 			}
 		});
+		const overlength = pos * C_LEN_SETLBL_HEIGHT - parseInt(difList.style.height);
+		difList.scrollTop = (overlength > 0 ? overlength : 0);
 	};
 
-	// 譜面選択処理
-	const nextDifficulty = (_scrollNum = 1, _resetFlg = false) => {
-		g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
-		setDifficulty(true);
-		if (_resetFlg) {
-			resetDifWindow();
-		}
+	/**
+	 * 譜面セレクター位置の変更ボタン
+	 * @param {number} _scrollNum 
+	 * @returns 
+	 */
+	const makeDifBtn = (_scrollNum = 1) => {
+		const dir = _scrollNum === 1 ? `D` : `U`;
+		return createCss2Button(`btnDif${dir}`, g_settingBtnObj.chara[dir], _ => {
+			do {
+				g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
+			} while (g_stateObj.filterKeys !== `` && g_stateObj.filterKeys !== g_headerObj.keyLabels[g_stateObj.scoreId]);
+			setDifficulty(true);
+			deleteChildspriteAll(`difList`);
+			makeDifList(difList, g_stateObj.filterKeys);
+		}, {
+			x: 430 + _scrollNum * 10, y: 40, w: 20, h: 20, siz: C_SIZ_JDGCNTS,
+		}, g_cssObj.button_Mini);
+	};
+
+	/**
+	 * 譜面変更セレクターの作成・再作成
+	 * @param {string} _key
+	 */
+	const createDifWindow = (_key = ``) => {
+		g_currentPage = `difSelector`;
+		setShortcutEvent(g_currentPage);
+		const difList = createSprite(`optionsprite`, `difList`, 165, 65, 280, 255);
+		difList.style.overflow = `auto`;
+		difList.classList.toggle(g_cssObj.settings_DifSelector, true);
+		const difCover = createSprite(`optionsprite`, `difCover`, 25, 65, 140, 255);
+		difCover.style.overflow = `auto`;
+		difCover.classList.toggle(g_cssObj.settings_DifSelector, true);
+		difCover.style.opacity = 0.95;
+
+		// リスト再作成
+		makeDifList(difList, _key);
+
+		// ランダム選択
+		difCover.appendChild(
+			makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
+				nextDifficulty(Math.floor(Math.random() * g_headerObj.keyLabels.length));
+			}, { w: C_LEN_DIFCOVER_WIDTH })
+		);
+
+		// 全リスト
+		difCover.appendChild(
+			makeDifLblCssButton(`keyFilter`, `ALL`, 1.5, _ => {
+				resetDifWindow();
+				g_stateObj.filterKeys = ``;
+				createDifWindow();
+			}, { w: C_LEN_DIFCOVER_WIDTH, btnStyle: (g_stateObj.filterKeys === `` ? `Setting` : `Default`) })
+		);
+
+		// キー別フィルタボタン作成
+		let pos = 0;
+		g_headerObj.keyLists.forEach((targetKey, m) => {
+			difCover.appendChild(
+				makeDifLblCssButton(`keyFilter${m}`, `${targetKey} key`, m + 2.5, _ => {
+					resetDifWindow();
+					g_stateObj.filterKeys = targetKey;
+					createDifWindow(targetKey);
+				}, { w: C_LEN_DIFCOVER_WIDTH, btnStyle: (g_stateObj.filterKeys === targetKey ? `Setting` : `Default`) })
+			);
+			if (g_stateObj.filterKeys === targetKey) {
+				pos = m + 9;
+			}
+		});
+		const overlength = pos * C_LEN_SETLBL_HEIGHT - parseInt(difCover.style.height);
+		difCover.scrollTop = (overlength > 0 ? overlength : 0);
+
+		multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
 	};
 
 	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`,
 		``, 0, _ => {
 			if (g_headerObj.difSelectorUse) {
+				g_stateObj.filterKeys = ``;
 				if (document.querySelector(`#difList`) === null) {
-					const difList = createSprite(`optionsprite`, `difList`, 165, 65, 280, 255);
-					difList.style.overflow = `auto`;
-					difList.classList.toggle(g_cssObj.settings_DifSelector, true);
-					const difCover = createSprite(`optionsprite`, `difCover`, 25, 65, 140, 255);
-					difCover.style.overflow = `auto`;
-					difCover.classList.toggle(g_cssObj.settings_DifSelector, true);
-					difCover.style.opacity = 0.95;
-
-					// 全リスト作成
-					makeDifList(difList);
-
-					// ランダム選択
-					difCover.appendChild(
-						makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
-							g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
-							setDifficulty(true);
-							resetDifWindow();
-						}, { w: 110 })
-					);
-
-					// キー別フィルタボタン作成
-					g_headerObj.keyLists.forEach((targetKey, m) => {
-						difCover.appendChild(
-							makeDifLblCssButton(`keyFilter${m}`, `${targetKey} key`, m + 1.5, _ => {
-								deleteChildspriteAll(`difList`);
-								makeDifList(difList, targetKey);
-							}, { w: 110 })
-						);
-					});
+					createDifWindow();
 				} else {
 					resetDifWindow();
 				}
@@ -3822,6 +3877,7 @@ function createOptionWindow(_sprite) {
 		y: -10, h: C_LEN_SETLBL_HEIGHT + 10,
 		cxtFunc: _ => {
 			if (g_headerObj.difSelectorUse) {
+				g_stateObj.filterKeys = ``;
 				resetDifWindow();
 			} else {
 				nextDifficulty(-1);
@@ -3832,10 +3888,13 @@ function createOptionWindow(_sprite) {
 	// 譜面選択ボタン（メイン、右回し、左回し）
 	multiAppend(spriteList.difficulty,
 		lnkDifficulty,
-		makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => nextDifficulty(1, true), { dy: -10, dh: 10 }),
-		makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => nextDifficulty(-1, true), { dy: -10, dh: 10 }),
+		makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => nextDifficulty(), { dy: -10, dh: 10 }),
+		makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => nextDifficulty(-1), { dy: -10, dh: 10 }),
 	)
 	createScText(spriteList.difficulty, `Difficulty`);
+	if (g_headerObj.difSelectorUse) {
+		createScText(spriteList.difficulty, `DifficultyList`, { x: 147, y: -10, targetLabel: `lnkDifficulty` });
+	}
 
 	// ---------------------------------------------------
 	// ハイスコア機能実装時に使用予定のスペース
@@ -4802,13 +4861,13 @@ function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, si
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  */
-function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_DIFSELECTOR_WIDTH, } = {}) {
+function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_DIFSELECTOR_WIDTH, btnStyle = `Default` } = {}) {
 	return createCss2Button(_id, _name, _func, {
 		x: x, y: C_LEN_SETLBL_HEIGHT * _heightPos,
 		w: w, h: C_LEN_SETLBL_HEIGHT,
 		siz: C_SIZ_DIFSELECTOR,
 		borderStyle: `solid`,
-	}, g_cssObj.button_Default, g_cssObj.button_ON);
+	}, g_cssObj[`button_${btnStyle}`], g_cssObj.button_ON);
 }
 
 /**
