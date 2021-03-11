@@ -48,6 +48,7 @@ let C_CLR_BACKLIFE = `#222222`;
 
 /**
  * ラベル文字作成（レイヤー直書き。htmlタグは使用できない）
+ * @deprecated v10以降非推奨
  * @param {string} _ctx ラベルを作成する場所のコンテキスト名
  * @param {string} _text 表示するテキスト
  * @param {number} _x 作成先のx座標
@@ -74,6 +75,7 @@ function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align) 
 /**
 * 子div要素のラベル文字作成 (v9互換用)
 * - ここで指定するテキストはhtmlタグが使える
+* @deprecated v10以降非推奨
 * @param {string} _id 
 * @param {number} _x 
 * @param {number} _y 
@@ -98,6 +100,7 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text) 
 
 /**
  * 子div要素のラベル文字作成 (CSS版, v16互換)
+ * @deprecated v17以降非推奨
  * @param {string} _id 
  * @param {number} _x 
  * @param {number} _y 
@@ -122,6 +125,7 @@ function createDivCssLabel(_id, _x, _y, _width, _height, _fontsize, _text, _clas
 
 /**
  * 矢印オブジェクトの作成（色付きマスク版）- v10以降は未使用
+ * @deprecated v10以降非推奨
  * @param {string} _id 
  * @param {string} _color 
  * @param {number} _x 
@@ -158,6 +162,7 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate) {
 
 /**
  * 色付きオブジェクトの作成 (v16互換)
+ * @deprecated v17以降非推奨
  * @param {string} _id 
  * @param {string} _color 
  * @param {number} _x 
@@ -229,6 +234,7 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
  *		});
  *		divRoot.appendChild(btnBack);
  *   
+ * @deprecated v10以降非推奨
  * @param {object} _obj ボタンオブジェクト
  * @param {function} _func ボタン押下後の処理（マウスハンドラ）
  */
@@ -319,6 +325,7 @@ function createButton(_obj, _func) {
  *		});
  *		divRoot.appendChild(btnBack);
  *   
+ * @deprecated v17以降非推奨
  * @param {object} _obj ボタンオブジェクト
  * @param {function} _func ボタン押下後の処理（マウスハンドラ）
  */
@@ -352,6 +359,7 @@ function createCssButton(_obj, _func) {
 
 /**
  * 設定・オプション表示用ボタン - v9互換用
+ * @deprecated v10以降非推奨
  * @param {string} _id 
  * @param {string} _name 初期設定文字
  * @param {number} _heightPos 上からの配置順
@@ -376,6 +384,7 @@ function makeSettingLblButton(_id, _name, _heightPos, _func) {
 
 /**
  * 譜面変更セレクター用ボタン - v9互換用
+ * @deprecated v10以降非推奨
  * @param {string} _id
  * @param {string} _name 初期設定文字
  * @param {number} _heightPos 上からの配置順
@@ -402,6 +411,7 @@ function makeDifLblButton(_id, _name, _heightPos, _func) {
 
 /**
  * 設定・オプション用の設定変更ミニボタン - v9互換用
+ * @deprecated v10以降非推奨
  * @param {string} _id 
  * @param {string} _directionFlg 表示用ボタンのどちら側に置くかを設定。(R, RR:右、L, LL:左)
  * @param {number} _heightPos 上からの配置順
@@ -426,6 +436,7 @@ function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
 
 /**
  * 結果表示作成（曲名、オプション）- v9互換用
+ * @deprecated v10以降非推奨
  * @param {string} _id 
  * @param {number} _x
  * @param {string} _color 
@@ -443,6 +454,7 @@ function makeResultPlayData(_id, _x, _color, _heightPos, _text, _align) {
 
 /**
  * 結果表示作成（キャラクタ）- v9互換用
+ * @deprecated v10以降非推奨
  * @param {string} _id 
  * @param {number} _x
  * @param {string} _color 
@@ -458,3 +470,116 @@ function makeResultSymbol(_id, _x, _color, _heightPos, _text, _align) {
     return symbol;
 }
 
+/**
+ * 配列の型及び最小配列長のチェック
+ * - チェックのみで変換は行わないため、変換が必要な場合は別途処理を組むこと。
+ * - 型は最初の要素のみチェックを行う。
+ * 
+ * @deprecated v20以降非推奨
+ * @param {array} _checkArray 
+ * @param {string} _type 
+ * @param {number} _minLength 最小配列長
+ */
+function checkArrayVal(_checkArray, _type, _minLength) {
+
+    // 値がundefined相当の場合は無条件でデフォルト値を返却
+    if (_checkArray === undefined || _checkArray === ``) {
+        return false;
+    }
+
+    // 配列かどうかをチェック
+    if (Object.prototype.toString.call(_checkArray) !== `[object Array]`) {
+        return false;
+    }
+
+    // 最小配列長が不正の場合は強制的に1を設定
+    if (isNaN(parseFloat(_minLength))) {
+        _minLength = 1;
+    }
+
+    let isNaNflg;
+    if (_type === C_TYP_FLOAT) {
+        // 数値型(小数可)の場合
+        isNaNflg = isNaN(parseFloat(_checkArray[0]));
+        if (isNaNflg) {
+            return false;
+        }
+    } else if (_type === C_TYP_NUMBER) {
+        // 数値型(整数のみ)の場合
+        isNaNflg = isNaN(parseInt(_checkArray[0]));
+        if (isNaNflg) {
+            return false;
+        }
+    }
+
+    // 配列長のチェック
+    return (_checkArray.length >= _minLength ? true : false);
+}
+
+/**
+ * 半角換算の文字数を計算
+ * @deprecated v20以降非推奨
+ * @param {string} _str 
+ */
+function getStrLength(_str) {
+    let result = 0;
+    for (let i = 0; i < _str.length; i++) {
+        const chr = _str.charCodeAt(i);
+        if ((chr >= 0x00 && chr < 0x81) ||
+            (chr === 0xf8f0) ||
+            (chr >= 0xff61 && chr < 0xffa0) ||
+            (chr >= 0xf8f1 && chr < 0xf8f4)) {
+            //半角文字の場合は1を加算
+            result += 1;
+        } else {
+            //それ以外の文字の場合は2を加算
+            result += 2;
+        }
+    }
+    //結果を返す
+    return result;
+}
+
+/**
+ * 左パディング
+ * @deprecated v20以降非推奨
+ * @param {string} _str 元の文字列 
+ * @param {number} _length パディング後の長さ 
+ * @param {string} _chr パディング文字列
+ */
+function paddingLeft(_str, _length, _chr) {
+    let paddingStr = _str;
+    while (paddingStr.length < _length) {
+        paddingStr = _chr + paddingStr;
+    }
+    return paddingStr;
+}
+
+/**
+ * 子div要素のラベル文字作成
+ * - createDivLabelに加えて、独自フォントが指定できる形式。
+ * 
+ * @deprecated v20以降非推奨
+ * @param {string} _id 
+ * @param {number} _x 
+ * @param {number} _y 
+ * @param {number} _width 
+ * @param {number} _height 
+ * @param {number} _fontsize 
+ * @param {string} _color 
+ * @param {string} _text 
+ * @param {string} _font 
+ */
+function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text, _font) {
+    const div = createDiv(_id, _x, _y, _width, _height);
+    const style = div.style;
+    style.fontSize = `${_fontsize}px`;
+    if (_color !== ``) {
+        style.color = _color;
+    }
+    style.fontFamily = _font;
+    style.textAlign = C_ALIGN_CENTER;
+    div.innerHTML = _text;
+
+    return div;
+}
