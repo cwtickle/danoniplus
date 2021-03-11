@@ -48,6 +48,7 @@ let C_CLR_BACKLIFE = `#222222`;
 
 /**
  * ラベル文字作成（レイヤー直書き。htmlタグは使用できない）
+ * @deprecated v10以降非推奨
  * @param {string} _ctx ラベルを作成する場所のコンテキスト名
  * @param {string} _text 表示するテキスト
  * @param {number} _x 作成先のx座標
@@ -74,6 +75,7 @@ function createLabel(_ctx, _text, _x, _y, _fontsize, _fontname, _color, _align) 
 /**
 * 子div要素のラベル文字作成 (v9互換用)
 * - ここで指定するテキストはhtmlタグが使える
+* @deprecated v10以降非推奨
 * @param {string} _id 
 * @param {number} _x 
 * @param {number} _y 
@@ -98,6 +100,7 @@ function createDivLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text) 
 
 /**
  * 子div要素のラベル文字作成 (CSS版, v16互換)
+ * @deprecated v17以降非推奨
  * @param {string} _id 
  * @param {number} _x 
  * @param {number} _y 
@@ -122,6 +125,7 @@ function createDivCssLabel(_id, _x, _y, _width, _height, _fontsize, _text, _clas
 
 /**
  * 矢印オブジェクトの作成（色付きマスク版）- v10以降は未使用
+ * @deprecated v10以降非推奨
  * @param {string} _id 
  * @param {string} _color 
  * @param {number} _x 
@@ -158,6 +162,7 @@ function createArrowEffect(_id, _color, _x, _y, _size, _rotate) {
 
 /**
  * 色付きオブジェクトの作成 (v16互換)
+ * @deprecated v17以降非推奨
  * @param {string} _id 
  * @param {string} _color 
  * @param {number} _x 
@@ -229,6 +234,7 @@ function createColorObject(_id, _color, _x, _y, _width, _height,
  *		});
  *		divRoot.appendChild(btnBack);
  *   
+ * @deprecated v10以降非推奨
  * @param {object} _obj ボタンオブジェクト
  * @param {function} _func ボタン押下後の処理（マウスハンドラ）
  */
@@ -319,6 +325,7 @@ function createButton(_obj, _func) {
  *		});
  *		divRoot.appendChild(btnBack);
  *   
+ * @deprecated v17以降非推奨
  * @param {object} _obj ボタンオブジェクト
  * @param {function} _func ボタン押下後の処理（マウスハンドラ）
  */
@@ -352,6 +359,7 @@ function createCssButton(_obj, _func) {
 
 /**
  * 設定・オプション表示用ボタン - v9互換用
+ * @deprecated v10以降非推奨
  * @param {string} _id 
  * @param {string} _name 初期設定文字
  * @param {number} _heightPos 上からの配置順
@@ -376,6 +384,7 @@ function makeSettingLblButton(_id, _name, _heightPos, _func) {
 
 /**
  * 譜面変更セレクター用ボタン - v9互換用
+ * @deprecated v10以降非推奨
  * @param {string} _id
  * @param {string} _name 初期設定文字
  * @param {number} _heightPos 上からの配置順
@@ -402,6 +411,7 @@ function makeDifLblButton(_id, _name, _heightPos, _func) {
 
 /**
  * 設定・オプション用の設定変更ミニボタン - v9互換用
+ * @deprecated v10以降非推奨
  * @param {string} _id 
  * @param {string} _directionFlg 表示用ボタンのどちら側に置くかを設定。(R, RR:右、L, LL:左)
  * @param {number} _heightPos 上からの配置順
@@ -426,6 +436,7 @@ function makeMiniButton(_id, _directionFlg, _heightPos, _func) {
 
 /**
  * 結果表示作成（曲名、オプション）- v9互換用
+ * @deprecated v10以降非推奨
  * @param {string} _id 
  * @param {number} _x
  * @param {string} _color 
@@ -443,6 +454,7 @@ function makeResultPlayData(_id, _x, _color, _heightPos, _text, _align) {
 
 /**
  * 結果表示作成（キャラクタ）- v9互換用
+ * @deprecated v10以降非推奨
  * @param {string} _id 
  * @param {number} _x
  * @param {string} _color 
