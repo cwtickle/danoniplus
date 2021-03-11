@@ -5192,7 +5192,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
-		const stdPos = posj - ((posj <= divideCnt ? 0 : posMax) + divideCnt) / 2;
+		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2;
@@ -5307,7 +5307,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	 */
 	const setKeyConfigCursor = _ => {
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
-		const stdPos = posj - ((posj <= divideCnt ? 0 : posMax) + divideCnt) / 2;
+		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
 		cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
 		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 45;
@@ -5489,12 +5489,17 @@ function keyConfigInit(_kcType = g_kcType) {
 			(keyIsDown(`MetaLeft`) && keyIsDown(`ShiftLeft`))) {
 			return;
 		}
+
 		if (setKey === C_KEY_RETRY && (!g_isMac || (g_isMac && g_currentk === 0))) {
+			// スキップ
 		} else {
+			// キー割り当て処理
 			if (setKey === C_KEY_TITLEBACK || setKey === C_KEY_RETRY) {
+				// キー無効化（代替キーのみ）
 				setKey = 0;
 			}
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][g_currentj][g_currentk] !== setKey) {
+				// 既定キーと異なる場合は色付け
 				removeClassList(g_currentj, g_currentk);
 				keyCdObj.classList.add(g_cssObj.keyconfig_Changekey);
 			}
@@ -5503,9 +5508,9 @@ function keyConfigInit(_kcType = g_kcType) {
 			g_prevKey = setKey;
 		}
 
-		// 後続に代替キーが存在する場合
-		if (g_currentk < g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj].length - 1 &&
-			g_kcType !== `Main`) {
+		// カーソル移動
+		if (g_currentk < g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj].length - 1 && g_kcType !== `Main`) {
+			// 後続に代替キーが存在する場合
 			g_currentk++;
 			cursor.style.top = `${parseInt(cursor.style.top) + C_KYC_REPHEIGHT}px`;
 
@@ -7000,7 +7005,7 @@ function getArrowSettings() {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const colorj = g_keyObj[`color${keyCtrlPtn}`][j];
-		const stdPos = posj - ((posj <= divideCnt ? 0 : posMax) + divideCnt) / 2;
+		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
 		g_workObj.dividePos[j] = ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
