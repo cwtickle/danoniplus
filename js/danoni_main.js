@@ -5196,7 +5196,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2;
-		const keyconY = C_KYC_HEIGHT * (posj <= divideCnt ? 0 : 1);
+		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt));
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
 
@@ -5307,12 +5307,10 @@ function keyConfigInit(_kcType = g_kcType) {
 	 */
 	const setKeyConfigCursor = _ => {
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
-		const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
-			g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 		const stdPos = posj - ((posj <= divideCnt ? 0 : posMax) + divideCnt) / 2;
 
 		cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
-		const baseY = C_KYC_HEIGHT * (posj <= divideCnt ? 0 : 1) + 45;
+		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 45;
 		if (g_currentk >= 1) {
 			cursor.style.top = `${baseY + C_KYC_REPHEIGHT}px`;
 		} else {
