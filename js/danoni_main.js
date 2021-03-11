@@ -5174,6 +5174,21 @@ function keyConfigInit(_kcType = g_kcType) {
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
 	const kWidth = parseInt(keyconSprite.style.width);
 
+	/**
+	 * キーコンフィグ用の矢印色を取得
+	 * @param {number} _colorPos 
+	 */
+	const getKeyConfigColor = (_j, _colorPos) => {
+		let arrowColor = g_headerObj.setColor[_colorPos];
+		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
+			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
+			if (g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay][_j] === 1) {
+				arrowColor = g_headerObj.setDummyColor[_colorPos];
+			};
+		}
+		return arrowColor;
+	}
+
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
@@ -5230,42 +5245,6 @@ function keyConfigInit(_kcType = g_kcType) {
 		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
-	/**
-	 * ConfigTypeの制御
-	 * @param {event} _evt 
-	 * @param {number} _scrollNum 
-	 */
-	function setConfigType(_scrollNum = 1) {
-		const typeNum = g_keycons.configTypes.findIndex(value => value === g_kcType);
-		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
-		g_kcType = g_keycons.configTypes[nextNum];
-		g_keycons.configFunc[nextNum](kWidth, divideCnt, keyCtrlPtn, _scrollNum === 0);
-		g_keycons.configTypeNum = nextNum;
-		lnkKcType.textContent = getStgDetailName(g_kcType);
-	}
-
-	/**
-	 * ColorTypeの制御
-	 * @param {number} _scrollNum 
-	 */
-	function setColorType(_scrollNum = 1) {
-		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
-		const nextNum = (typeNum + g_keycons.colorTypes.length + _scrollNum) % g_keycons.colorTypes.length;
-		g_colorType = g_keycons.colorTypes[nextNum];
-		if (g_headerObj.colorUse) {
-			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
-		}
-
-		g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
-		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-			g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
-		}
-		for (let j = 0; j < keyNum; j++) {
-			$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
-		}
-		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
-	}
-
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
@@ -5307,31 +5286,104 @@ function keyConfigInit(_kcType = g_kcType) {
 		}),
 
 	);
-	setConfigType(0);
-	setColorType(0);
 
 	/**
-	 * キーコンフィグ用の矢印色を取得
-	 * @param {number} _colorPos 
+	 * 次のカーソルへ移動
+	 * @param {number} _pos 
 	 */
-	function getKeyConfigColor(_j, _colorPos) {
-		let arrowColor = g_headerObj.setColor[_colorPos];
-		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
-			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
-			if (g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay][_j] === 1) {
-				arrowColor = g_headerObj.setDummyColor[_colorPos];
-			};
+	const searchNextCursor = _pos => {
+		for (let j = g_currentj; j < keyNum + g_currentj; j++) {
+			if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j % keyNum][_pos] !== undefined) {
+				g_currentj = j % keyNum;
+				g_currentk = _pos;
+				return true;
+			}
 		}
-		return arrowColor;
-	}
+		return false;
+	};
 
-	// ユーザカスタムイベント(初期)
-	if (typeof customKeyConfigInit === C_TYP_FUNCTION) {
-		customKeyConfigInit();
-		if (typeof customKeyConfigInit2 === C_TYP_FUNCTION) {
-			customKeyConfigInit2();
+	/**
+	 * カーソル位置の設定
+	 */
+	const setKeyConfigCursor = _ => {
+		const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
+		const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
+			g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
+		const stdPos = posj - ((posj <= divideCnt ? 0 : posMax) + divideCnt) / 2;
+
+		cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
+		const baseY = C_KYC_HEIGHT * (posj <= divideCnt ? 0 : 1) + 45;
+		if (g_currentk >= 1) {
+			cursor.style.top = `${baseY + C_KYC_REPHEIGHT}px`;
+		} else {
+			if (g_kcType === `Replaced`) {
+				g_kcType = C_FLG_ALL;
+			}
+			lnkKcType.textContent = g_kcType;
+			cursor.style.top = `${baseY}px`;
 		}
-	}
+	};
+
+	/**
+	 * キーコンフィグ用カーソルのリセット
+	 * @param {number} _resetPos
+	 * @param {boolean} _resetCursorFlg
+	 */
+	const resetCursor = (_resetPos = 0, _resetCursorFlg = true) => {
+		g_prevKey = -1;
+		if (_resetCursorFlg) {
+			g_currentj = 0;
+			if (!searchNextCursor(_resetPos)) {
+				g_currentk = 0;
+			}
+		} else {
+			if (g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][_resetPos] === undefined) {
+				searchNextCursor(_resetPos);
+			} else {
+				g_currentk = _resetPos;
+			}
+		}
+		setKeyConfigCursor();
+	};
+
+	/**
+	 * ConfigTypeの制御
+	 * @param {event} _evt 
+	 * @param {number} _scrollNum 
+	 */
+	const setConfigType = (_scrollNum = 1) => {
+		const typeNum = g_keycons.configTypes.findIndex(value => value === g_kcType);
+		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
+		g_kcType = g_keycons.configTypes[nextNum];
+		resetCursor(Number(g_kcType === `Replaced`), _scrollNum === 0);
+		lnkKcType.textContent = getStgDetailName(g_kcType);
+	};
+
+	/**
+	 * ColorTypeの制御
+	 * @param {number} _scrollNum 
+	 */
+	const setColorType = (_scrollNum = 1) => {
+		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
+		const nextNum = (typeNum + g_keycons.colorTypes.length + _scrollNum) % g_keycons.colorTypes.length;
+		g_colorType = g_keycons.colorTypes[nextNum];
+		if (g_headerObj.colorUse) {
+			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
+		}
+
+		g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
+		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
+			g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
+		}
+		for (let j = 0; j < keyNum; j++) {
+			$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
+		}
+		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
+	};
+
+	// ConfigType, ColorTypeの初期設定
+	setConfigType(0);
+	setColorType(0);
 
 	// キーパターン表示
 	const lblTransKey = hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ?
@@ -5348,6 +5400,14 @@ function keyConfigInit(_kcType = g_kcType) {
 		}
 		return _tempPtn;
 	};
+
+	// ユーザカスタムイベント(初期)
+	if (typeof customKeyConfigInit === C_TYP_FUNCTION) {
+		customKeyConfigInit();
+		if (typeof customKeyConfigInit2 === C_TYP_FUNCTION) {
+			customKeyConfigInit2();
+		}
+	}
 
 	// ラベル・ボタン描画
 	multiAppend(divRoot,
@@ -5407,7 +5467,7 @@ function keyConfigInit(_kcType = g_kcType) {
 						);
 					}
 				}
-				g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
+				resetCursor(Number(g_kcType === `Replaced`));
 			}
 		}, {
 			x: 0, y: g_sHeight - 75,
@@ -5458,19 +5518,13 @@ function keyConfigInit(_kcType = g_kcType) {
 
 			// 代替キーのみの場合は次の代替キーがあるキーを探す
 			if (g_kcType === `Replaced`) {
-				for (let j = g_currentj; j < keyNum + g_currentj; j++) {
-					if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j % keyNum][1] !== undefined) {
-						g_currentj = j % keyNum;
-						g_currentk = 1;
-						break;
-					}
-				}
+				searchNextCursor(1);
 			}
-			setKeyConfigCursor(kWidth, divideCnt, keyCtrlPtn, keyNum);
+			setKeyConfigCursor();
 
 		} else {
 			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
-			g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
+			resetCursor(Number(g_kcType === `Replaced`));
 		}
 	});
 
@@ -5484,105 +5538,6 @@ function keyConfigInit(_kcType = g_kcType) {
 	document.onkeyup = evt => commonKeyUp(evt);
 
 	document.oncontextmenu = _ => false;
-}
-
-/**
- * キーコンフィグ用カーソルのリセット
- * @param {number} _width 
- * @param {number} _divideCnt 
- * @param {string} _keyCtrlPtn 
- * @param {boolean} _resetCursorFlg
- * @param {number} _resetPos
- */
-function resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true, _resetPos = 0) {
-
-	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
-	if (_resetCursorFlg) {
-		g_currentj = 0;
-		g_currentk = 0;
-		g_prevKey = -1;
-
-		for (let j = 0; j < keyNum; j++) {
-			if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][_resetPos] !== undefined) {
-				g_currentj = j;
-				g_currentk = _resetPos;
-				break;
-			}
-		}
-	} else {
-		if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][g_currentj][_resetPos] === undefined) {
-			for (let j = g_currentj; j < keyNum + g_currentj; j++) {
-				if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][j % keyNum][_resetPos] !== undefined) {
-					g_currentj = j % keyNum;
-					g_currentk = _resetPos;
-					break;
-				}
-			}
-		} else {
-			g_currentk = _resetPos;
-		}
-		g_prevKey = -1;
-	}
-	setKeyConfigCursor(_width, _divideCnt, _keyCtrlPtn, keyNum);
-}
-
-/**
- * カーソル位置の設定
- * @param {number} _width 
- * @param {number} _divideCnt 
- * @param {string} _keyCtrlPtn 
- * @param {number} _keyNum 
- */
-function setKeyConfigCursor(_width, _divideCnt, _keyCtrlPtn, _keyNum) {
-	const posj = g_keyObj[`pos${_keyCtrlPtn}`][g_currentj];
-	const posMax = (g_keyObj[`divMax${_keyCtrlPtn}`] !== undefined ?
-		g_keyObj[`divMax${_keyCtrlPtn}`] : g_keyObj[`pos${_keyCtrlPtn}`][_keyNum - 1] + 1);
-	const stdPos = posj - ((posj <= _divideCnt ? 0 : posMax) + _divideCnt) / 2;
-
-	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
-	const baseY = C_KYC_HEIGHT * (posj <= _divideCnt ? 0 : 1) + 45;
-	if (g_currentk >= 1) {
-		cursor.style.top = `${baseY + C_KYC_REPHEIGHT}px`;
-	} else {
-		if (g_kcType === `Replaced`) {
-			g_kcType = C_FLG_ALL;
-		}
-		lnkKcType.textContent = g_kcType;
-		cursor.style.top = `${baseY}px`;
-	}
-}
-
-/**
- * キーコンフィグ用カーソルのリセット(ConfigType:Main)
- * @param {number} _width
- * @param {number} _divideCnt
- * @param {string} _keyCtrlPtn
- * @param {boolean} _resetCursorFlg
- */
-function resetCursorMain(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true) {
-	resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg);
-}
-
-/**
- * キーコンフィグ用カーソルのリセット(ConfigType:Replaced)
- * @param {number} _width 
- * @param {number} _divideCnt 
- * @param {string} _keyCtrlPtn 
- * @param {boolean} _resetCursorFlg
- */
-function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true) {
-	resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg, 1);
-}
-
-/**
- * キーコンフィグ用カーソルのリセット(ConfigType:ALL)
- * @param {number} _width 
- * @param {number} _divideCnt 
- * @param {string} _keyCtrlPtn 
- * @param {boolean} _resetCursorFlg
- */
-function resetCursorALL(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true) {
-	resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg);
 }
 
 /**

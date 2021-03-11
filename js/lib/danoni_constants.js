@@ -394,7 +394,6 @@ g_settings.opacityNum = g_settings.opacitys.length - 1;
 
 const g_keycons = {
     configTypes: [`Main`, `Replaced`, `ALL`],
-    configFunc: [resetCursorMain, resetCursorReplaced, resetCursorALL],
     configTypeNum: 0,
 
     colorTypes: [`Default`, `Type0`, `Type1`, `Type2`],
