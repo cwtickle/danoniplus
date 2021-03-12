@@ -5545,10 +5545,11 @@ function keyConfigInit(_kcType = g_kcType) {
  */
 function changeSetColor() {
 	const isDefault = [`Default`, `Type0`].includes(g_colorType);
-	const defaultType = setScoreIdHeader(g_stateObj.scoreId) + g_colorType;
+	const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId);
+	const defaultType = scoreIdHeader + g_colorType;
 	const currentTypes = {
 		'': (isDefault ? defaultType : g_colorType),
-		'Shadow': (isDefault ? defaultType : `Default`),
+		'Shadow': (isDefault ? defaultType : `${scoreIdHeader}Default`),
 	};
 	Object.keys(currentTypes).forEach(pattern => {
 		g_headerObj[`set${pattern}Color`] = JSON.parse(JSON.stringify(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]));
