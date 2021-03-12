@@ -323,6 +323,13 @@ const openLink = _url => {
 }
 
 /**
+ * 改行コード区切りの配列展開
+ * @param {string} _str 
+ * @returns 
+ */
+const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
+
+/**
  * 文字列を想定された型に変換
  * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、
  *   `switch`(ON/OFF), `calc`(数式), `string`(文字列)から選択
@@ -1024,9 +1031,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 	const spriteData = [];
 	let maxDepth = -1;
 
-	const tmpArrayData = _data.split(`\r`).join(`\n`).split(`\n`);
-
-	tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
+	splitLF(_data).filter(data => hasVal(data)).forEach(tmpData => {
 		const tmpSpriteData = tmpData.split(`,`);
 
 		// 深度が"-"の場合はスキップ
@@ -5990,7 +5995,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		if (hasVal(_dosObj[`${_header}${_scoreNo}${_footer}`]) && g_stateObj.d_speed === C_FLG_ON) {
 			let speedIdx = 0;
-			const tmpArrayData = _dosObj[`${_header}${_scoreNo}${_footer}`].split(`\r`).join(`\n`).split(`\n`);
+			const tmpArrayData = splitLF(_dosObj[`${_header}${_scoreNo}${_footer}`]);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpSpeedData = tmpData.split(`,`);
@@ -6020,7 +6025,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		if (hasVal(_dosObj[`${_header}${_scoreNo}_data`]) && g_stateObj.d_color === C_FLG_ON) {
 			let colorIdx = 0;
-			const tmpArrayData = _dosObj[`${_header}${_scoreNo}_data`].split(`\r`).join(`\n`).split(`\n`);
+			const tmpArrayData = splitLF(_dosObj[`${_header}${_scoreNo}_data`]);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpColorData = tmpData.split(`,`);
@@ -6057,9 +6062,8 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		if (hasVal(dosCssMotionData) && g_stateObj.d_arroweffect === C_FLG_ON) {
 			let motionIdx = 0;
-			const tmpArrayData = dosCssMotionData.split(`\r`).join(`\n`).split(`\n`);
 
-			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
+			splitLF(dosCssMotionData).filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpcssMotionData = tmpData.split(`,`);
 				if (isNaN(parseInt(tmpcssMotionData[0]))) {
 					return;
@@ -6115,9 +6119,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		const wordData = [];
 		let wordMaxDepth = -1;
 		let wordReverseFlg = _reverseFlg;
-
-		let tmpArrayData = _data.split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
+		const tmpArrayData = splitLF(_data);
 
 		if (g_headerObj.wordAutoReverse === `auto`) {
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
