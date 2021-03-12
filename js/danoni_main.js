@@ -6859,24 +6859,22 @@ function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 
-	if (_val < 30) {
-		// 矢印のモーション
-		if (g_workObj[`mk${camelHeader}CssMotion`][_frame] === undefined) {
-			g_workObj[`mk${camelHeader}CssMotion`][_frame] = [];
-			g_workObj[`mk${camelHeader}CssMotionName`][_frame] = [];
-		}
-		if (_val < 20) {
-			const realVal = g_workObj.replaceNums[_val];
-			g_workObj[`mk${camelHeader}CssMotion`][_frame].push(realVal);
-			g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
+	// 矢印のモーション
+	if (g_workObj[`mk${camelHeader}CssMotion`][_frame] === undefined) {
+		g_workObj[`mk${camelHeader}CssMotion`][_frame] = [];
+		g_workObj[`mk${camelHeader}CssMotionName`][_frame] = [];
+	}
+	if (_val < 20 || _val >= 1000) {
+		const realVal = g_workObj.replaceNums[_val % 1000];
+		g_workObj[`mk${camelHeader}CssMotion`][_frame].push(realVal);
+		g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
 
-		} else if (_val >= 20) {
-			const colorNum = _val - 20;
-			for (let j = 0; j < keyNum; j++) {
-				if (g_keyObj[`color${keyCtrlPtn}`][j] === colorNum) {
-					g_workObj[`mk${camelHeader}CssMotion`][_frame].push(j);
-					g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
-				}
+	} else {
+		const colorNum = _val - 20;
+		for (let j = 0; j < keyNum; j++) {
+			if (g_keyObj[`color${keyCtrlPtn}`][j] === colorNum) {
+				g_workObj[`mk${camelHeader}CssMotion`][_frame].push(j);
+				g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
 			}
 		}
 	}
