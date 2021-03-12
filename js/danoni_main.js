@@ -1270,7 +1270,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	g_stateObj.scoreLockFlg = setVal(dosLockInput !== null ? dosLockInput.value : getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
 	if (queryDos !== `` && dosDivideFlg && g_stateObj.scoreLockFlg) {
 		const scoreList = Object.keys(g_rootObj).filter(data => {
-			return data.endsWith(`_data`) || data.endsWith(`_change`);
+			return data.endsWith(`_data`) || data.endsWith(`_change`) || data.endsWith(`Color`);
 		});
 		scoreList.forEach(scoredata => g_rootObj[scoredata] = ``);
 	}
@@ -1318,6 +1318,10 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 			}
 			_afterFunc();
 			if (_cyclicFlg) {
+				if (dosDivideFlg && g_stateObj.scoreLockFlg && _scoreId > 0) {
+					Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
+					Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
+				}
 				reloadDos(_scoreId);
 			}
 		}, false, charset);
@@ -1337,6 +1341,25 @@ function reloadDos(_scoreId) {
 	} else {
 		titleInit();
 	}
+}
+
+/**
+ * 譜面番号固定かつ譜面ファイル分割時に初期色情報を他譜面へコピー
+ * @param {object} _baseObj 
+ * @param {number} _scoreId 
+ * @returns 
+ */
+function copySetColor(_baseObj, _scoreId) {
+	const obj = {};
+	const scoreIdHeader = setScoreIdHeader(_scoreId);
+	[``, `Shadow`].forEach(pattern => {
+		[`set`, `frz`].forEach(arrow => {
+			if (hasVal(_baseObj[`${arrow}${pattern}Color`])) {
+				obj[`${arrow}${pattern}Color${scoreIdHeader}`] = _baseObj[`${arrow}${pattern}Color`].concat();
+			}
+		});
+	});
+	return obj;
 }
 
 /**
@@ -3205,7 +3228,7 @@ function headerConvert(_dosObj) {
 /**
  * 矢印・フリーズアロー色のデータ変換
  * @param {object} _baseObj 
- * @param {string} _dosObj
+ * @param {object} _dosObj
  * @param {object} objectList 
  * @returns オブジェクト ※Object.assign(obj, resetBaseColorList(...))の形で呼び出しが必要
  */
