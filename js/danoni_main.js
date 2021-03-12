@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/03/09
+ * Revised : 2021/03/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 20.5.2`;
-const g_revisedDate = `2021/03/09`;
+const g_version = `Ver 21.0.0`;
+const g_revisedDate = `2021/03/12`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -323,6 +323,13 @@ const openLink = _url => {
 }
 
 /**
+ * 改行コード区切りの配列展開
+ * @param {string} _str 
+ * @returns 
+ */
+const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
+
+/**
  * 文字列を想定された型に変換
  * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、
  *   `switch`(ON/OFF), `calc`(数式), `string`(文字列)から選択
@@ -370,52 +377,6 @@ function setVal(_checkStr, _default, _type) {
 
 	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
 	return convertStr;
-}
-
-/**
- * 配列の型及び最小配列長のチェック
- * - チェックのみで変換は行わないため、変換が必要な場合は別途処理を組むこと。
- * - 型は最初の要素のみチェックを行う。
- * 
- * @deprecated v20以降非推奨
- * @param {array} _checkArray 
- * @param {string} _type 
- * @param {number} _minLength 最小配列長
- */
-function checkArrayVal(_checkArray, _type, _minLength) {
-
-	// 値がundefined相当の場合は無条件でデフォルト値を返却
-	if (_checkArray === undefined || _checkArray === ``) {
-		return false;
-	}
-
-	// 配列かどうかをチェック
-	if (Object.prototype.toString.call(_checkArray) !== `[object Array]`) {
-		return false;
-	}
-
-	// 最小配列長が不正の場合は強制的に1を設定
-	if (isNaN(parseFloat(_minLength))) {
-		_minLength = 1;
-	}
-
-	let isNaNflg;
-	if (_type === C_TYP_FLOAT) {
-		// 数値型(小数可)の場合
-		isNaNflg = isNaN(parseFloat(_checkArray[0]));
-		if (isNaNflg) {
-			return false;
-		}
-	} else if (_type === C_TYP_NUMBER) {
-		// 数値型(整数のみ)の場合
-		isNaNflg = isNaN(parseInt(_checkArray[0]));
-		if (isNaNflg) {
-			return false;
-		}
-	}
-
-	// 配列長のチェック
-	return (_checkArray.length >= _minLength ? true : false);
 }
 
 /**
@@ -508,30 +469,6 @@ function getBasicFont(_priorityFont = ``) {
 }
 
 /**
- * 半角換算の文字数を計算
- * @deprecated v20以降非推奨
- * @param {string} _str 
- */
-function getStrLength(_str) {
-	let result = 0;
-	for (let i = 0; i < _str.length; i++) {
-		const chr = _str.charCodeAt(i);
-		if ((chr >= 0x00 && chr < 0x81) ||
-			(chr === 0xf8f0) ||
-			(chr >= 0xff61 && chr < 0xffa0) ||
-			(chr >= 0xf8f1 && chr < 0xf8f4)) {
-			//半角文字の場合は1を加算
-			result += 1;
-		} else {
-			//それ以外の文字の場合は2を加算
-			result += 2;
-		}
-	}
-	//結果を返す
-	return result;
-}
-
-/**
  * フォントサイズに応じた横幅を取得
  * @param {string} _str 
  * @param {number} _fontsize 
@@ -558,21 +495,6 @@ function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64)
 		}
 	}
 	return minSiz;
-}
-
-/**
- * 左パディング
- * @deprecated v20以降非推奨
- * @param {string} _str 元の文字列 
- * @param {number} _length パディング後の長さ 
- * @param {string} _chr パディング文字列
- */
-function paddingLeft(_str, _length, _chr) {
-	let paddingStr = _str;
-	while (paddingStr.length < _length) {
-		paddingStr = _chr + paddingStr;
-	}
-	return paddingStr;
 }
 
 /**
@@ -627,35 +549,6 @@ function createDiv(_id, _x, _y, _width, _height) {
 	style.msUserSelect = C_DIS_NONE;
 	style.mozUserSelect = C_DIS_NONE;
 	style.webkitTouchCallout = C_DIS_NONE;
-
-	return div;
-}
-
-/**
- * 子div要素のラベル文字作成
- * - createDivLabelに加えて、独自フォントが指定できる形式。
- * 
- * @deprecated v20以降非推奨
- * @param {string} _id 
- * @param {number} _x 
- * @param {number} _y 
- * @param {number} _width 
- * @param {number} _height 
- * @param {number} _fontsize 
- * @param {string} _color 
- * @param {string} _text 
- * @param {string} _font 
- */
-function createDivCustomLabel(_id, _x, _y, _width, _height, _fontsize, _color, _text, _font) {
-	const div = createDiv(_id, _x, _y, _width, _height);
-	const style = div.style;
-	style.fontSize = `${_fontsize}px`;
-	if (_color !== ``) {
-		style.color = _color;
-	}
-	style.fontFamily = _font;
-	style.textAlign = C_ALIGN_CENTER;
-	div.innerHTML = _text;
 
 	return div;
 }
@@ -1138,9 +1031,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 	const spriteData = [];
 	let maxDepth = -1;
 
-	const tmpArrayData = _data.split(`\r`).join(`\n`).split(`\n`);
-
-	tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
+	splitLF(_data).filter(data => hasVal(data)).forEach(tmpData => {
 		const tmpSpriteData = tmpData.split(`,`);
 
 		// 深度が"-"の場合はスキップ
@@ -1384,7 +1275,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	g_stateObj.scoreLockFlg = setVal(dosLockInput !== null ? dosLockInput.value : getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
 	if (queryDos !== `` && dosDivideFlg && g_stateObj.scoreLockFlg) {
 		const scoreList = Object.keys(g_rootObj).filter(data => {
-			return data.endsWith(`_data`) || data.endsWith(`_change`);
+			return data.endsWith(`_data`) || data.endsWith(`_change`) || data.endsWith(`Color`);
 		});
 		scoreList.forEach(scoredata => g_rootObj[scoredata] = ``);
 	}
@@ -1432,6 +1323,10 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 			}
 			_afterFunc();
 			if (_cyclicFlg) {
+				if (dosDivideFlg && g_stateObj.scoreLockFlg && _scoreId > 0) {
+					Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
+					Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
+				}
 				reloadDos(_scoreId);
 			}
 		}, false, charset);
@@ -1451,6 +1346,25 @@ function reloadDos(_scoreId) {
 	} else {
 		titleInit();
 	}
+}
+
+/**
+ * 譜面番号固定かつ譜面ファイル分割時に初期色情報を他譜面へコピー
+ * @param {object} _baseObj 
+ * @param {number} _scoreId 
+ * @returns 
+ */
+function copySetColor(_baseObj, _scoreId) {
+	const obj = {};
+	const scoreIdHeader = setScoreIdHeader(_scoreId);
+	[``, `Shadow`].forEach(pattern => {
+		[`set`, `frz`].forEach(arrow => {
+			if (hasVal(_baseObj[`${arrow}${pattern}Color`])) {
+				obj[`${arrow}${pattern}Color${scoreIdHeader}`] = _baseObj[`${arrow}${pattern}Color`].concat();
+			}
+		});
+	});
+	return obj;
 }
 
 /**
@@ -2269,8 +2183,10 @@ const createScTextCommon = _displayName => {
  * @param {string} _displayName
  * @param {function} _func 
  */
-const setShortcutEvent = (_displayName, _func = _ => true) => {
-	createScTextCommon(_displayName);
+const setShortcutEvent = (_displayName, _func = _ => true, _displayFlg = true) => {
+	if (_displayFlg) {
+		createScTextCommon(_displayName);
+	}
 	const evList = _ => {
 		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func);
 		document.onkeyup = evt => commonKeyUp(evt);
@@ -2981,129 +2897,13 @@ function headerConvert(_dosObj) {
 
 	// ダミー用初期矢印色
 	obj.setDummyColor = [`#777777`, `#444444`, `#777777`, `#444444`, `#777777`];
-	const dfColorgrdSet = {
+	obj.dfColorgrdSet = {
 		'': obj.defaultColorgrd,
 		'Type0': [!obj.defaultColorgrd[0], obj.defaultColorgrd[1]],
 	};
 
-	[``, `Shadow`].forEach((pattern, k) => {
-		const _name = `set${pattern}Color`;
-		const _frzName = `frz${pattern}Color`;
-
-		// 矢印色
-		Object.keys(dfColorgrdSet).forEach(type => {
-			[obj[`${_name}${type}`], obj[`${_name}Str${type}`], obj[`${_name}Org${type}`]] =
-				setColorList(_dosObj[`${_name}`], obj[`${_name}Init`], obj[`${_name}Init`].length, {
-					_defaultColorgrd: dfColorgrdSet[type],
-					_colorCdPaddingUse: obj.colorCdPaddingUse,
-					_shadowFlg: Boolean(k),
-				});
-
-			obj[`${_frzName}${type}`] = [];
-			obj[`${_frzName}Str${type}`] = [];
-			obj[`${_frzName}Org${type}`] = [];
-		});
-
-		// フリーズアロー色
-		const tmpFrzColors = (_dosObj[_frzName] !== undefined ? _dosObj[_frzName].split(`$`) : []);
-		const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
-
-		for (let j = 0; j < obj.setColorInit.length; j++) {
-
-			// デフォルト配列の作成（1番目の要素をベースに、フリーズアロー初期セット or 矢印色からデータを補完）
-			let currentFrzColors = [];
-			const baseLength = firstFrzColors.length === 0 || obj.defaultFrzColorUse ?
-				obj[`${_frzName}Init`].length : firstFrzColors.length;
-			for (let k = 0; k < baseLength; k++) {
-				currentFrzColors[k] = setVal(firstFrzColors[k],
-					obj.defaultFrzColorUse ? obj[`${_frzName}Init`][k] : obj[`${_name}Str`][j], C_TYP_STRING);
-			}
-
-			Object.keys(dfColorgrdSet).forEach(type => {
-				[obj[`${_frzName}${type}`][j], obj[`${_frzName}Str${type}`][j], obj[`${_frzName}Org${type}`][j]] =
-					setColorList(tmpFrzColors[j], currentFrzColors, obj[`${_frzName}Init`].length, {
-						_defaultColorgrd: dfColorgrdSet[type],
-						_colorCdPaddingUse: obj.colorCdPaddingUse,
-						_defaultFrzColorUse: obj.defaultFrzColorUse,
-						_objType: `frz`,
-						_shadowFlg: Boolean(k),
-					});
-			});
-		}
-		if (k === 0) {
-			obj[`${_name}Default`] = obj[`${_name}`].concat();
-			obj[`${_frzName}Default`] = obj[`${_frzName}`].concat();
-		}
-	});
-
-	/**
-	 * 矢印・フリーズアロー色のデータ展開
-	 * @param {array} _data 
-	 * @param {array} _colorInit 
-	 * @param {object} _options 
-	 */
-	function setColorList(_data, _colorInit, _colorInitLength,
-		{ _defaultColorgrd = g_headerObj.defaultColorgrd, _colorCdPaddingUse = false,
-			_defaultFrzColorUse = true, _objType = `normal`, _shadowFlg = false } = {}) {
-
-		// グラデーション文字列 #ffff99:#9999ff@linear-gradient
-		let colorStr = [];
-
-		// カラーコード抽出用 #ffff99 - Ready文字、背景矢印のデフォルト色で使用
-		let colorOrg = [];
-
-		// グラデーション適用後文字列 linear-gradient(to right, #ffff99, #9999ff)
-		let colorList = [];
-
-		// 譜面側で指定されているデータを配列に変換
-		if (hasVal(_data)) {
-			colorList = _data.split(`,`);
-			colorStr = colorList.concat();
-
-			// データ補完処理
-			const defaultLength = colorStr.length;
-			if (_objType === `frz` && _defaultFrzColorUse) {
-				// デフォルト配列に満たない・足りない部分はデフォルト配列で穴埋め
-				for (let j = 0; j < _colorInitLength; j++) {
-					if (!hasVal(colorStr[j])) {
-						colorStr[j] = _colorInit[j];
-					}
-				}
-			} else {
-				// デフォルト配列長をループさせて格納
-				for (let j = 0; j < _colorInitLength; j++) {
-					colorStr[j] = colorStr[j % defaultLength];
-				}
-			}
-			colorList = colorStr.concat();
-
-			for (let j = 0; j < colorList.length; j++) {
-				const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
-				const hasColor = tmpSetColorOrg.some(tmpColorOrg => {
-					if (hasVal(tmpColorOrg) && (isColorCd(tmpColorOrg) || !hasAnglePointInfo(tmpColorOrg) || tmpColorOrg === `Default`)) {
-						colorOrg[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(tmpColorOrg));
-						return true;
-					}
-				});
-				if (!hasColor) {
-					colorOrg[j] = _colorInit[j];
-				}
-				colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
-					_defaultColorgrd, _colorCdPaddingUse, _objType, _shadowFlg,
-				});
-			}
-
-		} else {
-
-			// 未定義の場合は指定されたデフォルト配列(_colorInit)で再定義
-			colorStr = _colorInit.concat();
-			colorOrg = _colorInit.concat();
-			colorList = _colorInit.map(colorStr => makeColorGradation(colorStr, {
-				_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
-			}));
-		}
-
-		return [colorList, colorStr, colorOrg];
+	for (let j = 0; j < obj.difLabels.length; j++) {
+		Object.assign(obj, resetBaseColorList(obj, _dosObj, { scoreId: j }));
 	}
 
 	// ダミー譜面の設定
@@ -3431,6 +3231,145 @@ function headerConvert(_dosObj) {
 }
 
 /**
+ * 矢印・フリーズアロー色のデータ変換
+ * @param {object} _baseObj 
+ * @param {object} _dosObj
+ * @param {object} objectList 
+ * @returns オブジェクト ※Object.assign(obj, resetBaseColorList(...))の形で呼び出しが必要
+ */
+function resetBaseColorList(_baseObj, _dosObj, { scoreId = `` } = {}) {
+
+	const obj = {};
+	const scoreIdHeader = setScoreIdHeader(scoreId);
+
+	[``, `Shadow`].forEach(pattern => {
+		const _name = `set${pattern}Color${scoreIdHeader}`;
+		const _frzName = `frz${pattern}Color${scoreIdHeader}`;
+		const _arrowInit = `set${pattern}ColorInit`;
+		const _frzInit = `frz${pattern}ColorInit`;
+
+		const arrowColorTxt = _dosObj[_name] || _dosObj[`set${pattern}Color`];
+		const frzColorTxt = _dosObj[_frzName] || _dosObj[`frz${pattern}Color`];
+
+		// 矢印色
+		Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
+			[obj[`${_name}${type}`], obj[`${_name}Str${type}`], obj[`${_name}Org${type}`]] =
+				setColorList(arrowColorTxt, _baseObj[_arrowInit], _baseObj[_arrowInit].length, {
+					_defaultColorgrd: _baseObj.dfColorgrdSet[type],
+					_colorCdPaddingUse: _baseObj.colorCdPaddingUse,
+					_shadowFlg: pattern === `Shadow`,
+				});
+
+			obj[`${_frzName}${type}`] = [];
+			obj[`${_frzName}Str${type}`] = [];
+			obj[`${_frzName}Org${type}`] = [];
+		});
+
+		// フリーズアロー色
+		const tmpFrzColors = (frzColorTxt !== undefined ? frzColorTxt.split(`$`) : []);
+		const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
+
+		for (let j = 0; j < _baseObj.setColorInit.length; j++) {
+
+			// デフォルト配列の作成（1番目の要素をベースに、フリーズアロー初期セット or 矢印色からデータを補完）
+			let currentFrzColors = [];
+			const baseLength = firstFrzColors.length === 0 || _baseObj.defaultFrzColorUse ?
+				_baseObj[_frzInit].length : firstFrzColors.length;
+			for (let k = 0; k < baseLength; k++) {
+				currentFrzColors[k] = setVal(firstFrzColors[k],
+					_baseObj.defaultFrzColorUse ? _baseObj[_frzInit][k] : obj[`${_name}Str`][j], C_TYP_STRING);
+			}
+
+			Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
+				[obj[`${_frzName}${type}`][j], obj[`${_frzName}Str${type}`][j], obj[`${_frzName}Org${type}`][j]] =
+					setColorList(tmpFrzColors[j], currentFrzColors, _baseObj[_frzInit].length, {
+						_defaultColorgrd: _baseObj.dfColorgrdSet[type],
+						_colorCdPaddingUse: _baseObj.colorCdPaddingUse,
+						_defaultFrzColorUse: _baseObj.defaultFrzColorUse,
+						_objType: `frz`,
+						_shadowFlg: pattern === `Shadow`,
+					});
+			});
+		}
+
+		obj[`${_name}Default`] = obj[_name].concat();
+		obj[`${_frzName}Default`] = obj[_frzName].concat();
+	});
+
+	return obj;
+}
+
+/**
+ * 矢印・フリーズアロー色のデータ展開
+ * @param {array} _data 
+ * @param {array} _colorInit 
+ * @param {object} _options 
+ */
+function setColorList(_data, _colorInit, _colorInitLength,
+	{ _defaultColorgrd = g_headerObj.defaultColorgrd, _colorCdPaddingUse = false,
+		_defaultFrzColorUse = true, _objType = `normal`, _shadowFlg = false } = {}) {
+
+	// グラデーション文字列 #ffff99:#9999ff@linear-gradient
+	let colorStr = [];
+
+	// カラーコード抽出用 #ffff99 - Ready文字、背景矢印のデフォルト色で使用
+	let colorOrg = [];
+
+	// グラデーション適用後文字列 linear-gradient(to right, #ffff99, #9999ff)
+	let colorList = [];
+
+	// 譜面側で指定されているデータを配列に変換
+	if (hasVal(_data)) {
+		colorList = _data.split(`,`);
+		colorStr = colorList.concat();
+
+		// データ補完処理
+		const defaultLength = colorStr.length;
+		if (_objType === `frz` && _defaultFrzColorUse) {
+			// デフォルト配列に満たない・足りない部分はデフォルト配列で穴埋め
+			for (let j = 0; j < _colorInitLength; j++) {
+				if (!hasVal(colorStr[j])) {
+					colorStr[j] = _colorInit[j];
+				}
+			}
+		} else {
+			// デフォルト配列長をループさせて格納
+			for (let j = 0; j < _colorInitLength; j++) {
+				colorStr[j] = colorStr[j % defaultLength];
+			}
+		}
+		colorList = colorStr.concat();
+
+		for (let j = 0; j < colorList.length; j++) {
+			const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
+			const hasColor = tmpSetColorOrg.some(tmpColorOrg => {
+				if (hasVal(tmpColorOrg) && (isColorCd(tmpColorOrg) || !hasAnglePointInfo(tmpColorOrg) || tmpColorOrg === `Default`)) {
+					colorOrg[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(tmpColorOrg));
+					return true;
+				}
+			});
+			if (!hasColor) {
+				colorOrg[j] = _colorInit[j];
+			}
+			colorList[j] = makeColorGradation(colorStr[j] === `` ? _colorInit[j] : colorStr[j], {
+				_defaultColorgrd, _colorCdPaddingUse, _objType, _shadowFlg,
+			});
+		}
+
+	} else {
+
+		// 未定義の場合は指定されたデフォルト配列(_colorInit)で再定義
+		colorStr = _colorInit.concat();
+		colorOrg = _colorInit.concat();
+		colorList = _colorInit.map(colorStr => makeColorGradation(colorStr, {
+			_defaultColorgrd, _colorCdPaddingUse, _shadowFlg,
+		}));
+	}
+
+	return [colorList, colorStr, colorOrg];
+}
+
+/**
  * ゲージ別個別設定の取得
  * @param {object} _dosObj 
  * @param {string} _name 
@@ -3733,6 +3672,7 @@ function optionInit() {
 	const divRoot = document.querySelector(`#divRoot`);
 	g_baseDisp = `Settings`;
 	g_currentPage = `option`;
+	g_stateObj.filterKeys = ``;
 
 	// タイトル文字描画
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, g_lblNameObj.settings, 0, 15, `settings_Title`));
@@ -3856,9 +3796,20 @@ function createOptionWindow(_sprite) {
 	const resetDifWindow = _ => {
 		if (document.querySelector(`#difList`) !== null) {
 			deleteChildspriteAll(`difList`);
-			optionsprite.removeChild(document.querySelector(`#difList`));
-			optionsprite.removeChild(document.querySelector(`#difCover`));
+			[`difList`, `difCover`, `btnDifU`, `btnDifD`].forEach(obj => optionsprite.removeChild(document.getElementById(obj)));
+			g_currentPage = `option`;
+			setShortcutEvent(g_currentPage, _ => true, false);
 		}
+	};
+
+	/**
+	 * 譜面選択処理
+	 * @param {number} _scrollNum 
+	 */
+	const nextDifficulty = (_scrollNum = 1) => {
+		g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
+		setDifficulty(true);
+		resetDifWindow();
 	};
 
 	/**
@@ -3868,6 +3819,7 @@ function createOptionWindow(_sprite) {
 	 */
 	const makeDifList = (_difList, _targetKey = ``) => {
 		let k = 0;
+		let pos = 0;
 		g_headerObj.keyLabels.forEach((keyLabel, j) => {
 			if (_targetKey === `` || keyLabel === _targetKey) {
 				let text = `${keyLabel} / ${g_headerObj.difLabels[j]}`;
@@ -3875,57 +3827,97 @@ function createOptionWindow(_sprite) {
 					text += ` (${g_headerObj.creatorNames[j]})`;
 				}
 				_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
-					g_stateObj.scoreId = j;
-					setDifficulty(true);
-					resetDifWindow();
-				}));
+					nextDifficulty(j - g_stateObj.scoreId);
+				}, { btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
+				if (j === g_stateObj.scoreId) {
+					pos = k + 6;
+				}
 				k++;
 			}
 		});
+		const overlength = pos * C_LEN_SETLBL_HEIGHT - parseInt(difList.style.height);
+		difList.scrollTop = (overlength > 0 ? overlength : 0);
 	};
 
-	// 譜面選択処理
-	const nextDifficulty = (_scrollNum = 1, _resetFlg = false) => {
-		g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
-		setDifficulty(true);
-		if (_resetFlg) {
-			resetDifWindow();
-		}
+	/**
+	 * 譜面セレクター位置の変更ボタン
+	 * @param {number} _scrollNum 
+	 * @returns 
+	 */
+	const makeDifBtn = (_scrollNum = 1) => {
+		const dir = _scrollNum === 1 ? `D` : `U`;
+		return createCss2Button(`btnDif${dir}`, g_settingBtnObj.chara[dir], _ => {
+			do {
+				g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
+			} while (g_stateObj.filterKeys !== `` && g_stateObj.filterKeys !== g_headerObj.keyLabels[g_stateObj.scoreId]);
+			setDifficulty(true);
+			deleteChildspriteAll(`difList`);
+			makeDifList(difList, g_stateObj.filterKeys);
+		}, {
+			x: 430 + _scrollNum * 10, y: 40, w: 20, h: 20, siz: C_SIZ_JDGCNTS,
+		}, g_cssObj.button_Mini);
+	};
+
+	/**
+	 * 譜面変更セレクターの作成・再作成
+	 * @param {string} _key
+	 */
+	const createDifWindow = (_key = ``) => {
+		g_currentPage = `difSelector`;
+		setShortcutEvent(g_currentPage);
+		const difList = createSprite(`optionsprite`, `difList`, 165, 65, 280, 255);
+		difList.style.overflow = `auto`;
+		difList.classList.toggle(g_cssObj.settings_DifSelector, true);
+		const difCover = createSprite(`optionsprite`, `difCover`, 25, 65, 140, 255);
+		difCover.style.overflow = `auto`;
+		difCover.classList.toggle(g_cssObj.settings_DifSelector, true);
+		difCover.style.opacity = 0.95;
+
+		// リスト再作成
+		makeDifList(difList, _key);
+
+		// ランダム選択
+		difCover.appendChild(
+			makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
+				nextDifficulty(Math.floor(Math.random() * g_headerObj.keyLabels.length));
+			}, { w: C_LEN_DIFCOVER_WIDTH })
+		);
+
+		// 全リスト
+		difCover.appendChild(
+			makeDifLblCssButton(`keyFilter`, `ALL`, 1.5, _ => {
+				resetDifWindow();
+				g_stateObj.filterKeys = ``;
+				createDifWindow();
+			}, { w: C_LEN_DIFCOVER_WIDTH, btnStyle: (g_stateObj.filterKeys === `` ? `Setting` : `Default`) })
+		);
+
+		// キー別フィルタボタン作成
+		let pos = 0;
+		g_headerObj.keyLists.forEach((targetKey, m) => {
+			difCover.appendChild(
+				makeDifLblCssButton(`keyFilter${m}`, `${targetKey} key`, m + 2.5, _ => {
+					resetDifWindow();
+					g_stateObj.filterKeys = targetKey;
+					createDifWindow(targetKey);
+				}, { w: C_LEN_DIFCOVER_WIDTH, btnStyle: (g_stateObj.filterKeys === targetKey ? `Setting` : `Default`) })
+			);
+			if (g_stateObj.filterKeys === targetKey) {
+				pos = m + 9;
+			}
+		});
+		const overlength = pos * C_LEN_SETLBL_HEIGHT - parseInt(difCover.style.height);
+		difCover.scrollTop = (overlength > 0 ? overlength : 0);
+
+		multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
 	};
 
 	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`,
 		``, 0, _ => {
 			if (g_headerObj.difSelectorUse) {
+				g_stateObj.filterKeys = ``;
 				if (document.querySelector(`#difList`) === null) {
-					const difList = createSprite(`optionsprite`, `difList`, 165, 65, 280, 255);
-					difList.style.overflow = `auto`;
-					difList.classList.toggle(g_cssObj.settings_DifSelector, true);
-					const difCover = createSprite(`optionsprite`, `difCover`, 25, 65, 140, 255);
-					difCover.style.overflow = `auto`;
-					difCover.classList.toggle(g_cssObj.settings_DifSelector, true);
-					difCover.style.opacity = 0.95;
-
-					// 全リスト作成
-					makeDifList(difList);
-
-					// ランダム選択
-					difCover.appendChild(
-						makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
-							g_stateObj.scoreId = Math.floor(Math.random() * g_headerObj.keyLabels.length);
-							setDifficulty(true);
-							resetDifWindow();
-						}, { w: 110 })
-					);
-
-					// キー別フィルタボタン作成
-					g_headerObj.keyLists.forEach((targetKey, m) => {
-						difCover.appendChild(
-							makeDifLblCssButton(`keyFilter${m}`, `${targetKey} key`, m + 1.5, _ => {
-								deleteChildspriteAll(`difList`);
-								makeDifList(difList, targetKey);
-							}, { w: 110 })
-						);
-					});
+					createDifWindow();
 				} else {
 					resetDifWindow();
 				}
@@ -3936,6 +3928,7 @@ function createOptionWindow(_sprite) {
 		y: -10, h: C_LEN_SETLBL_HEIGHT + 10,
 		cxtFunc: _ => {
 			if (g_headerObj.difSelectorUse) {
+				g_stateObj.filterKeys = ``;
 				resetDifWindow();
 			} else {
 				nextDifficulty(-1);
@@ -3946,10 +3939,13 @@ function createOptionWindow(_sprite) {
 	// 譜面選択ボタン（メイン、右回し、左回し）
 	multiAppend(spriteList.difficulty,
 		lnkDifficulty,
-		makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => nextDifficulty(1, true), { dy: -10, dh: 10 }),
-		makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => nextDifficulty(-1, true), { dy: -10, dh: 10 }),
+		makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => nextDifficulty(), { dy: -10, dh: 10 }),
+		makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => nextDifficulty(-1), { dy: -10, dh: 10 }),
 	)
 	createScText(spriteList.difficulty, `Difficulty`);
+	if (g_headerObj.difSelectorUse) {
+		createScText(spriteList.difficulty, `DifficultyList`, { x: 147, y: -10, targetLabel: `lnkDifficulty` });
+	}
 
 	// ---------------------------------------------------
 	// ハイスコア機能実装時に使用予定のスペース
@@ -4109,7 +4105,7 @@ function createOptionWindow(_sprite) {
 			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 
-			makeScoreDetailLabel(`Speed`, g_lblNameObj[`s_${speedType}`], speedObj[speedType].cnt, j);
+			updateScoreDetailLabel(`Speed`, g_lblNameObj[`s_${speedType}`], speedObj[speedType].cnt, j);
 		});
 	}
 
@@ -4132,21 +4128,21 @@ function createOptionWindow(_sprite) {
 		}
 
 		const obj = getScoreBaseData(_scoreId);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_apm, obj.apm, 0);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_time, obj.playingTime, 1);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, obj.arrowCnts, 3);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_frz, obj.frzCnts, 4);
+		updateScoreDetailLabel(`Density`, g_lblNameObj.s_apm, obj.apm, 0);
+		updateScoreDetailLabel(`Density`, g_lblNameObj.s_time, obj.playingTime, 1);
+		updateScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, obj.arrowCnts, 3);
+		updateScoreDetailLabel(`Density`, g_lblNameObj.s_frz, obj.frzCnts, 4);
 	}
 
 	/**
-	 * 譜面明細内の補足情報
+	 * 譜面明細内の補足情報の登録・更新
 	 * @param {string} _name 表示する譜面明細のラベル
 	 * @param {string} _label 
 	 * @param {string} _value 
 	 * @param {number} _pos 表示位置
 	 * @param {string} _labelname
 	 */
-	function makeScoreDetailLabel(_name, _label, _value, _pos = 0, _labelname = _label) {
+	function updateScoreDetailLabel(_name, _label, _value, _pos = 0, _labelname = _label) {
 		const baseLabel = (_bLabel, _bLabelname, _bAlign) => {
 			document.querySelector(`#detail${_name}`).appendChild(
 				createDivCss2Label(`${_bLabel}`, `${_bLabelname}`, {
@@ -4206,17 +4202,13 @@ function createOptionWindow(_sprite) {
 	}
 
 	/**
-	 * 譜面の難易度情報
+	 * 譜面の難易度情報用ラベル作成
 	 * @param {number} _scoreId 
 	 */
-	function makeDifInfo(_scoreId) {
-
-		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
-		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
+	function makeDifInfoLabels(_scoreId) {
 
 		// ツール難易度
 		const detailToolDif = document.querySelector(`#detailToolDif`);
-
 		/**
 		 * 譜面の難易度情報ラベルの作成
 		 * @param {string} _lbl 
@@ -4224,81 +4216,77 @@ function createOptionWindow(_sprite) {
 		 * @param {object} _obj 
 		 */
 		const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = C_SIZ_DIFSELECTOR, ...rest } = {}) => {
-			detailToolDif.appendChild(
-				createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest })
-			);
+			return createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest });
 		}
+
+		let printData = ``;
+		for (let j = 0; j < g_detailObj.arrowCnt.length; j++) {
+			const obj = getScoreBaseData(j);
+			printData +=
+				// 譜面番号
+				`[${j + 1}]\t` +
+				// ツール値
+				`${g_detailObj.toolDif[j].tool}\t` +
+				// 同時
+				`${g_detailObj.toolDif[j].douji}\t` +
+				// 縦連
+				`${g_detailObj.toolDif[j].tate}\t` +
+				// 総矢印数
+				`${(obj.arrowCnts + obj.frzCnts)}\t` +
+				// 矢印
+				`${obj.arrowCnts}\t` +
+				// フリーズアロー
+				`${obj.frzCnts}\t` +
+				// APM
+				`${obj.apm}\t` +
+				// 時間(分秒)
+				`${obj.playingTime}\r\n`;
+		}
+		multiAppend(detailToolDif,
+			makeDifInfoLabel(`lblTooldif`, g_lblNameObj.s_level, { y: 5, w: 250, siz: C_SIZ_JDGCNTS }),
+			makeDifInfoLabel(`dataTooldif`, ``, { x: 270, y: 3, w: 160, siz: 18 }),
+			makeDifInfoLabel(`lblDouji`, g_lblNameObj.s_douji),
+			makeDifInfoLabel(`lblTate`, g_lblNameObj.s_tate, { x: 270 }),
+			makeDifInfoLabel(`dataDouji`, ``, { x: 200, w: 160 }),
+			makeDifInfoLabel(`dataTate`, ``, { x: 345, w: 160 }),
+			makeDifInfoLabel(`lblArrowInfo`, g_lblNameObj.s_cnts, { x: 130, y: 45, w: 290, siz: C_SIZ_JDGCNTS }),
+			makeDifInfoLabel(`dataArrowInfo`, ``, { x: 270, y: 45, w: 160, siz: C_SIZ_JDGCNTS }),
+			makeDifInfoLabel(`lblArrowInfo2`, ``, { x: 130, y: 70, w: 200, h: 90 }),
+			makeDifInfoLabel(`dataArrowInfo2`, ``, { x: 140, y: 70, w: 275, h: 150, overflow: `auto` }),
+			makeSettingLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 0, _ => {
+				copyTextToClipboard(
+					`****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n`
+					+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`
+				);
+				makeInfoWindow(g_msgInfoObj.I_0003, `leftToRightFade`);
+			}, {
+				x: 10, y: 30, w: 100, borderStyle: `solid`
+			}, g_cssObj.button_RevON),
+		);
+		createScText(lnkDifInfo, `DifInfo`, { targetLabel: `lnkDifInfo`, x: -10 });
+	}
+
+	/**
+	 * 譜面の難易度情報更新
+	 * @param {number} _scoreId 
+	 */
+	function makeDifInfo(_scoreId) {
+
+		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
+		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
+		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
 
 		if (document.querySelector(`#lblTooldif`) === null) {
-			makeDifInfoLabel(`lblTooldif`, g_lblNameObj.s_level, { y: 5, w: 250, siz: C_SIZ_JDGCNTS });
-			makeDifInfoLabel(`dataTooldif`, g_detailObj.toolDif[_scoreId].tool, { x: 270, y: 3, w: 160, siz: 18 });
-		} else {
-			dataTooldif.textContent = g_detailObj.toolDif[_scoreId].tool;
+			makeDifInfoLabels(_scoreId);
 		}
-
-		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
-		let ArrowInfo = `${arrowCnts + frzCnts} <span style="font-size:${C_SIZ_DIFSELECTOR}px;">(${arrowCnts} + ${frzCnts})</span>`;
-		let ArrowInfo2 = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
+		dataTooldif.textContent = g_detailObj.toolDif[_scoreId].tool;
+		dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
+		dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
+		lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
+		dataArrowInfo.innerHTML = `${arrowCnts + frzCnts} <span style="font-size:${C_SIZ_DIFSELECTOR}px;">(${arrowCnts} + ${frzCnts})</span>`;
+		dataArrowInfo2.innerHTML = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
 			(${g_detailObj.frzCnt[_scoreId]})<br><br>
 			${push3CntStr}`.split(`,`).join(`/`);
-
-		if (document.querySelector(`#lblDouji`) === null) {
-			makeDifInfoLabel(`lblDouji`, g_lblNameObj.s_douji);
-			makeDifInfoLabel(`lblTate`, g_lblNameObj.s_tate, { x: 270 });
-			makeDifInfoLabel(`dataDouji`, g_detailObj.toolDif[_scoreId].douji, { x: 200, w: 160 });
-			makeDifInfoLabel(`dataTate`, g_detailObj.toolDif[_scoreId].tate, { x: 345, w: 160 });
-			makeDifInfoLabel(`lblArrowInfo`, g_lblNameObj.s_cnts, { x: 130, y: 45, w: 290, siz: C_SIZ_JDGCNTS });
-			makeDifInfoLabel(`dataArrowInfo`, ArrowInfo, { x: 270, y: 45, w: 160, siz: C_SIZ_JDGCNTS });
-			makeDifInfoLabel(`lblArrowInfo2`, g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt),
-				{ x: 130, y: 70, w: 200, h: 90 });
-			makeDifInfoLabel(`dataArrowInfo2`, ArrowInfo2, { x: 140, y: 70, w: 275, h: 150, overflow: `auto` });
-
-		} else {
-			dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
-			dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
-			lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
-			dataArrowInfo.innerHTML = ArrowInfo;
-			dataArrowInfo2.innerHTML = ArrowInfo2;
-		}
-
-		// データ出力ボタン
-		if (document.querySelector(`#lnkDifInfo`) === null) {
-			let printData = ``;
-			for (let j = 0; j < g_detailObj.arrowCnt.length; j++) {
-				const obj = getScoreBaseData(j);
-				printData +=
-					// 譜面番号
-					`[${j + 1}]\t` +
-					// ツール値
-					`${g_detailObj.toolDif[j].tool}\t` +
-					// 同時
-					`${g_detailObj.toolDif[j].douji}\t` +
-					// 縦連
-					`${g_detailObj.toolDif[j].tate}\t` +
-					// 総矢印数
-					`${(obj.arrowCnts + obj.frzCnts)}\t` +
-					// 矢印
-					`${obj.arrowCnts}\t` +
-					// フリーズアロー
-					`${obj.frzCnts}\t` +
-					// APM
-					`${obj.apm}\t` +
-					// 時間(分秒)
-					`${obj.playingTime}\r\n`;
-			}
-			detailToolDif.appendChild(
-				makeSettingLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 0, _ => {
-					copyTextToClipboard(
-						`****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n`
-						+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`
-					);
-					makeInfoWindow(g_msgInfoObj.I_0003, `leftToRightFade`);
-				}, {
-					x: 10, y: 30, w: 100, borderStyle: `solid`
-				}, g_cssObj.button_RevON)
-			);
-			createScText(lnkDifInfo, `DifInfo`, { targetLabel: `lnkDifInfo`, x: -10 });
-		}
 	}
 
 	// ---------------------------------------------------
@@ -4924,13 +4912,13 @@ function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, si
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  */
-function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_DIFSELECTOR_WIDTH, } = {}) {
+function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_DIFSELECTOR_WIDTH, btnStyle = `Default` } = {}) {
 	return createCss2Button(_id, _name, _func, {
 		x: x, y: C_LEN_SETLBL_HEIGHT * _heightPos,
 		w: w, h: C_LEN_SETLBL_HEIGHT,
 		siz: C_SIZ_DIFSELECTOR,
 		borderStyle: `solid`,
-	}, g_cssObj.button_Default, g_cssObj.button_ON);
+	}, g_cssObj[`button_${btnStyle}`], g_cssObj.button_ON);
 }
 
 /**
@@ -5181,15 +5169,31 @@ function keyConfigInit(_kcType = g_kcType) {
 	});
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
 	const kWidth = parseInt(keyconSprite.style.width);
+	changeSetColor();
+
+	/**
+	 * キーコンフィグ用の矢印色を取得
+	 * @param {number} _colorPos 
+	 */
+	const getKeyConfigColor = (_j, _colorPos) => {
+		let arrowColor = g_headerObj.setColor[_colorPos];
+		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
+			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
+			if (g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay][_j] === 1) {
+				arrowColor = g_headerObj.setDummyColor[_colorPos];
+			};
+		}
+		return arrowColor;
+	}
 
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
-		const stdPos = posj - ((posj <= divideCnt ? 0 : posMax) + divideCnt) / 2;
+		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2;
-		const keyconY = C_KYC_HEIGHT * (posj <= divideCnt ? 0 : 1);
+		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt));
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
 
@@ -5238,42 +5242,6 @@ function keyConfigInit(_kcType = g_kcType) {
 		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
-	/**
-	 * ConfigTypeの制御
-	 * @param {event} _evt 
-	 * @param {number} _scrollNum 
-	 */
-	function setConfigType(_scrollNum = 1) {
-		const typeNum = g_keycons.configTypes.findIndex(value => value === g_kcType);
-		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
-		g_kcType = g_keycons.configTypes[nextNum];
-		g_keycons.configFunc[nextNum](kWidth, divideCnt, keyCtrlPtn, _scrollNum === 0);
-		g_keycons.configTypeNum = nextNum;
-		lnkKcType.textContent = getStgDetailName(g_kcType);
-	}
-
-	/**
-	 * ColorTypeの制御
-	 * @param {number} _scrollNum 
-	 */
-	function setColorType(_scrollNum = 1) {
-		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
-		const nextNum = (typeNum + g_keycons.colorTypes.length + _scrollNum) % g_keycons.colorTypes.length;
-		g_colorType = g_keycons.colorTypes[nextNum];
-		if (g_headerObj.colorUse) {
-			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
-		}
-
-		g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${g_colorType}`]));
-		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-			g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${g_colorType}`][j]));
-		}
-		for (let j = 0; j < keyNum; j++) {
-			$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
-		}
-		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
-	}
-
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
@@ -5315,31 +5283,107 @@ function keyConfigInit(_kcType = g_kcType) {
 		}),
 
 	);
-	setConfigType(0);
-	setColorType(0);
 
 	/**
-	 * キーコンフィグ用の矢印色を取得
-	 * @param {number} _colorPos 
+	 * 次のカーソルへ移動
+	 * @param {number} _pos 
 	 */
-	function getKeyConfigColor(_j, _colorPos) {
-		let arrowColor = g_headerObj.setColor[_colorPos];
-		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
-			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
-			if (g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay][_j] === 1) {
-				arrowColor = g_headerObj.setDummyColor[_colorPos];
-			};
+	const searchNextCursor = _pos => {
+		for (let j = g_currentj; j < keyNum + g_currentj; j++) {
+			if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j % keyNum][_pos] !== undefined) {
+				g_currentj = j % keyNum;
+				g_currentk = _pos;
+				return true;
+			}
 		}
-		return arrowColor;
-	}
+		return false;
+	};
 
-	// ユーザカスタムイベント(初期)
-	if (typeof customKeyConfigInit === C_TYP_FUNCTION) {
-		customKeyConfigInit();
-		if (typeof customKeyConfigInit2 === C_TYP_FUNCTION) {
-			customKeyConfigInit2();
+	/**
+	 * カーソル位置の設定
+	 */
+	const setKeyConfigCursor = _ => {
+		const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
+		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
+
+		cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
+		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 45;
+		if (g_currentk >= 1) {
+			cursor.style.top = `${baseY + C_KYC_REPHEIGHT}px`;
+		} else {
+			if (g_kcType === `Replaced`) {
+				g_kcType = C_FLG_ALL;
+			}
+			lnkKcType.textContent = g_kcType;
+			cursor.style.top = `${baseY}px`;
 		}
-	}
+	};
+
+	/**
+	 * キーコンフィグ用カーソルのリセット
+	 * @param {number} _resetPos
+	 * @param {boolean} _resetCursorFlg
+	 */
+	const resetCursor = (_resetPos = 0, _resetCursorFlg = true) => {
+		g_prevKey = -1;
+		if (_resetCursorFlg) {
+			g_currentj = 0;
+			if (!searchNextCursor(_resetPos)) {
+				g_currentk = 0;
+			}
+		} else {
+			if (g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][_resetPos] === undefined) {
+				searchNextCursor(_resetPos);
+			} else {
+				g_currentk = _resetPos;
+			}
+		}
+		setKeyConfigCursor();
+	};
+
+	/**
+	 * ConfigTypeの制御
+	 * @param {event} _evt 
+	 * @param {number} _scrollNum 
+	 */
+	const setConfigType = (_scrollNum = 1) => {
+		const typeNum = g_keycons.configTypes.findIndex(value => value === g_kcType);
+		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
+		g_kcType = g_keycons.configTypes[nextNum];
+		resetCursor(Number(g_kcType === `Replaced`), _scrollNum === 0);
+		lnkKcType.textContent = getStgDetailName(g_kcType);
+	};
+
+	/**
+	 * ColorTypeの制御
+	 * @param {number} _scrollNum 
+	 */
+	const setColorType = (_scrollNum = 1) => {
+		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
+		const nextNum = (typeNum + g_keycons.colorTypes.length + _scrollNum) % g_keycons.colorTypes.length;
+		g_colorType = g_keycons.colorTypes[nextNum];
+		if (g_headerObj.colorUse) {
+			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
+		}
+		changeSetColor();
+
+		for (let j = 0; j < keyNum; j++) {
+			const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
+			const arrowColor = getKeyConfigColor(j, colorPos);
+			$id(`arrow${j}`).background = arrowColor;
+
+			if (g_headerObj.setShadowColor[colorPos] !== ``) {
+				const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? arrowColor :
+					g_headerObj.setShadowColor[colorPos]);
+				$id(`arrowShadow${j}`).background = shadowColor;
+			}
+		}
+		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
+	};
+
+	// ConfigType, ColorTypeの初期設定
+	setConfigType(0);
+	setColorType(0);
 
 	// キーパターン表示
 	const lblTransKey = hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ?
@@ -5356,6 +5400,14 @@ function keyConfigInit(_kcType = g_kcType) {
 		}
 		return _tempPtn;
 	};
+
+	// ユーザカスタムイベント(初期)
+	if (typeof customKeyConfigInit === C_TYP_FUNCTION) {
+		customKeyConfigInit();
+		if (typeof customKeyConfigInit2 === C_TYP_FUNCTION) {
+			customKeyConfigInit2();
+		}
+	}
 
 	// ラベル・ボタン描画
 	multiAppend(divRoot,
@@ -5415,7 +5467,7 @@ function keyConfigInit(_kcType = g_kcType) {
 						);
 					}
 				}
-				g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
+				resetCursor(Number(g_kcType === `Replaced`));
 			}
 		}, {
 			x: 0, y: g_sHeight - 75,
@@ -5439,12 +5491,17 @@ function keyConfigInit(_kcType = g_kcType) {
 			(keyIsDown(`MetaLeft`) && keyIsDown(`ShiftLeft`))) {
 			return;
 		}
+
 		if (setKey === C_KEY_RETRY && (!g_isMac || (g_isMac && g_currentk === 0))) {
+			// スキップ
 		} else {
+			// キー割り当て処理
 			if (setKey === C_KEY_TITLEBACK || setKey === C_KEY_RETRY) {
+				// キー無効化（代替キーのみ）
 				setKey = 0;
 			}
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][g_currentj][g_currentk] !== setKey) {
+				// 既定キーと異なる場合は色付け
 				removeClassList(g_currentj, g_currentk);
 				keyCdObj.classList.add(g_cssObj.keyconfig_Changekey);
 			}
@@ -5453,9 +5510,9 @@ function keyConfigInit(_kcType = g_kcType) {
 			g_prevKey = setKey;
 		}
 
-		// 後続に代替キーが存在する場合
-		if (g_currentk < g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj].length - 1 &&
-			g_kcType !== `Main`) {
+		// カーソル移動
+		if (g_currentk < g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj].length - 1 && g_kcType !== `Main`) {
+			// 後続に代替キーが存在する場合
 			g_currentk++;
 			cursor.style.top = `${parseInt(cursor.style.top) + C_KYC_REPHEIGHT}px`;
 
@@ -5466,19 +5523,13 @@ function keyConfigInit(_kcType = g_kcType) {
 
 			// 代替キーのみの場合は次の代替キーがあるキーを探す
 			if (g_kcType === `Replaced`) {
-				for (let j = g_currentj; j < keyNum + g_currentj; j++) {
-					if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j % keyNum][1] !== undefined) {
-						g_currentj = j % keyNum;
-						g_currentk = 1;
-						break;
-					}
-				}
+				searchNextCursor(1);
 			}
-			setKeyConfigCursor(kWidth, divideCnt, keyCtrlPtn, keyNum);
+			setKeyConfigCursor();
 
 		} else {
 			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
-			g_keycons.configFunc[g_keycons.configTypeNum](kWidth, divideCnt, keyCtrlPtn);
+			resetCursor(Number(g_kcType === `Replaced`));
 		}
 	});
 
@@ -5495,102 +5546,22 @@ function keyConfigInit(_kcType = g_kcType) {
 }
 
 /**
- * キーコンフィグ用カーソルのリセット
- * @param {number} _width 
- * @param {number} _divideCnt 
- * @param {string} _keyCtrlPtn 
- * @param {boolean} _resetCursorFlg
- * @param {number} _resetPos
+ * 初期矢印色・フリーズアロー色の変更
  */
-function resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true, _resetPos = 0) {
-
-	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
-	if (_resetCursorFlg) {
-		g_currentj = 0;
-		g_currentk = 0;
-		g_prevKey = -1;
-
-		for (let j = 0; j < keyNum; j++) {
-			if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][_resetPos] !== undefined) {
-				g_currentj = j;
-				g_currentk = _resetPos;
-				break;
-			}
+function changeSetColor() {
+	const isDefault = [`Default`, `Type0`].includes(g_colorType);
+	const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId);
+	const defaultType = scoreIdHeader + g_colorType;
+	const currentTypes = {
+		'': (isDefault ? defaultType : g_colorType),
+		'Shadow': (isDefault ? defaultType : `${scoreIdHeader}Default`),
+	};
+	Object.keys(currentTypes).forEach(pattern => {
+		g_headerObj[`set${pattern}Color`] = JSON.parse(JSON.stringify(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]));
+		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
+			g_headerObj[`frz${pattern}Color`][j] = JSON.parse(JSON.stringify(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]));
 		}
-	} else {
-		if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][g_currentj][_resetPos] === undefined) {
-			for (let j = g_currentj; j < keyNum + g_currentj; j++) {
-				if (g_keyObj[`keyCtrl${_keyCtrlPtn}`][j % keyNum][_resetPos] !== undefined) {
-					g_currentj = j % keyNum;
-					g_currentk = _resetPos;
-					break;
-				}
-			}
-		} else {
-			g_currentk = _resetPos;
-		}
-		g_prevKey = -1;
-	}
-	setKeyConfigCursor(_width, _divideCnt, _keyCtrlPtn, keyNum);
-}
-
-/**
- * カーソル位置の設定
- * @param {number} _width 
- * @param {number} _divideCnt 
- * @param {string} _keyCtrlPtn 
- * @param {number} _keyNum 
- */
-function setKeyConfigCursor(_width, _divideCnt, _keyCtrlPtn, _keyNum) {
-	const posj = g_keyObj[`pos${_keyCtrlPtn}`][g_currentj];
-	const posMax = (g_keyObj[`divMax${_keyCtrlPtn}`] !== undefined ?
-		g_keyObj[`divMax${_keyCtrlPtn}`] : g_keyObj[`pos${_keyCtrlPtn}`][_keyNum - 1] + 1);
-	const stdPos = posj - ((posj <= _divideCnt ? 0 : posMax) + _divideCnt) / 2;
-
-	cursor.style.left = `${(_width - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
-	const baseY = C_KYC_HEIGHT * (posj <= _divideCnt ? 0 : 1) + 45;
-	if (g_currentk >= 1) {
-		cursor.style.top = `${baseY + C_KYC_REPHEIGHT}px`;
-	} else {
-		if (g_kcType === `Replaced`) {
-			g_kcType = C_FLG_ALL;
-		}
-		lnkKcType.textContent = g_kcType;
-		cursor.style.top = `${baseY}px`;
-	}
-}
-
-/**
- * キーコンフィグ用カーソルのリセット(ConfigType:Main)
- * @param {number} _width
- * @param {number} _divideCnt
- * @param {string} _keyCtrlPtn
- * @param {boolean} _resetCursorFlg
- */
-function resetCursorMain(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true) {
-	resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg);
-}
-
-/**
- * キーコンフィグ用カーソルのリセット(ConfigType:Replaced)
- * @param {number} _width 
- * @param {number} _divideCnt 
- * @param {string} _keyCtrlPtn 
- * @param {boolean} _resetCursorFlg
- */
-function resetCursorReplaced(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true) {
-	resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg, 1);
-}
-
-/**
- * キーコンフィグ用カーソルのリセット(ConfigType:ALL)
- * @param {number} _width 
- * @param {number} _divideCnt 
- * @param {string} _keyCtrlPtn 
- * @param {boolean} _resetCursorFlg
- */
-function resetCursorALL(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg = true) {
-	resetCursor(_width, _divideCnt, _keyCtrlPtn, _resetCursorFlg);
+	});
 }
 
 /**
@@ -6095,7 +6066,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		if (hasVal(_dosObj[`${_header}${_scoreNo}${_footer}`]) && g_stateObj.d_speed === C_FLG_ON) {
 			let speedIdx = 0;
-			const tmpArrayData = _dosObj[`${_header}${_scoreNo}${_footer}`].split(`\r`).join(`\n`).split(`\n`);
+			const tmpArrayData = splitLF(_dosObj[`${_header}${_scoreNo}${_footer}`]);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpSpeedData = tmpData.split(`,`);
@@ -6125,7 +6096,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		if (hasVal(_dosObj[`${_header}${_scoreNo}_data`]) && g_stateObj.d_color === C_FLG_ON) {
 			let colorIdx = 0;
-			const tmpArrayData = _dosObj[`${_header}${_scoreNo}_data`].split(`\r`).join(`\n`).split(`\n`);
+			const tmpArrayData = splitLF(_dosObj[`${_header}${_scoreNo}_data`]);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpColorData = tmpData.split(`,`);
@@ -6162,9 +6133,8 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		if (hasVal(dosCssMotionData) && g_stateObj.d_arroweffect === C_FLG_ON) {
 			let motionIdx = 0;
-			const tmpArrayData = dosCssMotionData.split(`\r`).join(`\n`).split(`\n`);
 
-			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
+			splitLF(dosCssMotionData).filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpcssMotionData = tmpData.split(`,`);
 				if (isNaN(parseInt(tmpcssMotionData[0]))) {
 					return;
@@ -6220,9 +6190,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		const wordData = [];
 		let wordMaxDepth = -1;
 		let wordReverseFlg = _reverseFlg;
-
-		let tmpArrayData = _data.split(`\r`).join(`\n`);
-		tmpArrayData = tmpArrayData.split(`\n`);
+		const tmpArrayData = splitLF(_data);
 
 		if (g_headerObj.wordAutoReverse === `auto`) {
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
@@ -6964,24 +6932,22 @@ function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 
-	if (_val < 30) {
-		// 矢印のモーション
-		if (g_workObj[`mk${camelHeader}CssMotion`][_frame] === undefined) {
-			g_workObj[`mk${camelHeader}CssMotion`][_frame] = [];
-			g_workObj[`mk${camelHeader}CssMotionName`][_frame] = [];
-		}
-		if (_val < 20) {
-			const realVal = g_workObj.replaceNums[_val];
-			g_workObj[`mk${camelHeader}CssMotion`][_frame].push(realVal);
-			g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
+	// 矢印のモーション
+	if (g_workObj[`mk${camelHeader}CssMotion`][_frame] === undefined) {
+		g_workObj[`mk${camelHeader}CssMotion`][_frame] = [];
+		g_workObj[`mk${camelHeader}CssMotionName`][_frame] = [];
+	}
+	if (_val < 20 || _val >= 1000) {
+		const realVal = g_workObj.replaceNums[_val % 1000];
+		g_workObj[`mk${camelHeader}CssMotion`][_frame].push(realVal);
+		g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
 
-		} else if (_val >= 20) {
-			const colorNum = _val - 20;
-			for (let j = 0; j < keyNum; j++) {
-				if (g_keyObj[`color${keyCtrlPtn}`][j] === colorNum) {
-					g_workObj[`mk${camelHeader}CssMotion`][_frame].push(j);
-					g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
-				}
+	} else {
+		const colorNum = _val - 20;
+		for (let j = 0; j < keyNum; j++) {
+			if (g_keyObj[`color${keyCtrlPtn}`][j] === colorNum) {
+				g_workObj[`mk${camelHeader}CssMotion`][_frame].push(j);
+				g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
 			}
 		}
 	}
@@ -7050,12 +7016,13 @@ function getArrowSettings() {
 		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
 
 	g_stateObj.autoAll = (g_stateObj.autoPlay === C_FLG_ALL ? C_FLG_ON : C_FLG_OFF);
+	changeSetColor();
 
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const colorj = g_keyObj[`color${keyCtrlPtn}`][j];
-		const stdPos = posj - ((posj <= divideCnt ? 0 : posMax) + divideCnt) / 2;
+		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
 		g_workObj.dividePos[j] = ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
