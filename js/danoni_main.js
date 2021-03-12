@@ -3264,10 +3264,8 @@ function resetBaseColorList(_baseObj, _dosObj, { scoreId = `` } = {}) {
 			});
 		}
 
-		if (pattern === ``) {
-			obj[`${_name}Default`] = obj[_name].concat();
-			obj[`${_frzName}Default`] = obj[_frzName].concat();
-		}
+		obj[`${_name}Default`] = obj[_name].concat();
+		obj[`${_frzName}Default`] = obj[_frzName].concat();
 	});
 
 	return obj;
@@ -5143,6 +5141,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	});
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
 	const kWidth = parseInt(keyconSprite.style.width);
+	changeSetColor();
 
 	/**
 	 * キーコンフィグ用の矢印色を取得
@@ -5339,8 +5338,17 @@ function keyConfigInit(_kcType = g_kcType) {
 			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
 		}
 		changeSetColor();
+
 		for (let j = 0; j < keyNum; j++) {
-			$id(`arrow${j}`).background = getKeyConfigColor(j, g_keyObj[`color${keyCtrlPtn}`][j]);
+			const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
+			const arrowColor = getKeyConfigColor(j, colorPos);
+			$id(`arrow${j}`).background = arrowColor;
+
+			if (g_headerObj.setShadowColor[colorPos] !== ``) {
+				const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? arrowColor :
+					g_headerObj.setShadowColor[colorPos]);
+				$id(`arrowShadow${j}`).background = shadowColor;
+			}
 		}
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	};
@@ -5513,11 +5521,18 @@ function keyConfigInit(_kcType = g_kcType) {
  * 初期矢印色・フリーズアロー色の変更
  */
 function changeSetColor() {
-	const currentType = ([`Default`, `Type0`].includes(g_colorType) ? setScoreIdHeader(g_stateObj.scoreId) + g_colorType : g_colorType);
-	g_headerObj.setColor = JSON.parse(JSON.stringify(g_headerObj[`setColor${currentType}`]));
-	for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-		g_headerObj.frzColor[j] = JSON.parse(JSON.stringify(g_headerObj[`frzColor${currentType}`][j]));
-	}
+	const isDefault = [`Default`, `Type0`].includes(g_colorType);
+	const defaultType = setScoreIdHeader(g_stateObj.scoreId) + g_colorType;
+	const currentTypes = {
+		'': (isDefault ? defaultType : g_colorType),
+		'Shadow': (isDefault ? defaultType : `Default`),
+	};
+	Object.keys(currentTypes).forEach(pattern => {
+		g_headerObj[`set${pattern}Color`] = JSON.parse(JSON.stringify(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]));
+		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
+			g_headerObj[`frz${pattern}Color`][j] = JSON.parse(JSON.stringify(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]));
+		}
+	});
 }
 
 /**
