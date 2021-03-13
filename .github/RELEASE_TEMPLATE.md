@@ -5,10 +5,10 @@ Created: 2021/02/01
 Revised: 2021/02/28
 
 // 置換用文字列リスト
-@version@ v20.4.0
-@pre_version@ v20.3.1
-@major_version@ v20
-@pre_major_version@ v19
+@version@ v21.1.0
+@pre_version@ v21.0.0
+@major_version@ v21
+@pre_major_version@ v20
 
 -->
 
@@ -22,18 +22,18 @@ Revised: 2021/02/28
 <!-- 変更ファイル一覧 -->
 ## 🔃 Files changed (@major_version@)
 
-|フォルダ|ファイル名||最終更新|
+|フォルダ<br>Directory|ファイル名<br>FileName||最終更新<br>Last Updated|
 |----|----|----|----|
 |/js|danoni_main.js|[:inbox_tray:](../../releases/download/@version@/danoni_main.js)|**@version@**|
-|/js|[danoni_setting(-template).js](../../compare/v20.2.1...v20.3.1#files_bucket)|[:inbox_tray:](../../releases/download/v20.3.1/danoni_setting-template.js)|[v20.3.1](../../releases/tag/v20.3.1)|
-|/js/lib|danoni_constants.js|[:inbox_tray:](../../releases/download/v20.4.0/danoni_constants.js)|[v20.4.0](../../releases/tag/v20.4.0)|
-|/js/lib|danoni_legacy_function.js|[:inbox_tray:](../../releases/download/v19.0.0/danoni_legacy_function.js)|[v20.0.0](../../releases/tag/v20.0.0)|
+|/js/lib|danoni_constants.js|[:inbox_tray:](../../releases/download/v21.0.0/danoni_constants.js)|[v21.0.0](../../releases/tag/v21.0.0)|
+|/js/lib|danoni_legacy_function.js|[:inbox_tray:](../../releases/download/v21.0.0/danoni_legacy_function.js)|[v21.0.0](../../releases/tag/v21.0.0)|
 
 <details>
 <summary>（参考）@pre_major_version@以前の差分ファイル一覧</summary>
 
 |フォルダ|ファイル名||最終更新|
 |----|----|----|----|
+|/js|[danoni_setting(-template).js](../../compare/v20.2.1...v20.3.1#files_bucket)|[:inbox_tray:](../../releases/download/v20.3.1/danoni_setting-template.js)|[v20.3.1](../../releases/tag/v20.3.1)|
 |/js/lib|danoni_localbinary.js|[:inbox_tray:](../../releases/download/v15.1.0/danoni_localbinary.js)|[v15.1.0](../../releases/tag/v15.1.0)|
 |/css|danoni_main.css|[:inbox_tray:](../../releases/download/v18.5.0/danoni_main.css)|[v18.5.0](../../releases/tag/v18.5.0)|
 |/img|aaShadow.svg<br>arrow.svg<br>arrowShadow.svg<br>borderline.svg<br>c.svg<br>cursor.svg<br>giko.svg<br>iyo.svg<br>monar.svg<br>morara.svg<br>onigiri.svg|[:inbox_tray:](../../releases/download/v15.1.0/img.zip)|[v15.1.0](../../releases/tag/v15.1.0)|
@@ -79,5 +79,5 @@ Revised: 2021/02/28
 
 <!-- 直近の更新 -->
 ## 💡 Recent Changes
-- [@pre_version@](../../releases/tag/@pre_version@) / [v20.2.1](../../releases/tag/v20.2.1) / [v20.2.0](../../releases/tag/v20.2.0) / [v20.1.2](../../releases/tag/v20.1.2) / [v20.0.0](../../releases/tag/v20.0.0)
+- [@pre_version@](../../releases/tag/@pre_version@) / [v20.5.1](../../releases/tag/v20.5.1) / [v20.4.0](../../releases/tag/v20.4.0) / [v20.3.1](../../releases/tag/v20.3.1) / [v20.2.1](../../releases/tag/v20.2.1)
 </details>
