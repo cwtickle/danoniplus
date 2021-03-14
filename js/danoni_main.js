@@ -2844,6 +2844,7 @@ function headerConvert(_dosObj) {
 		survival: [`Original`, `Heavy`, `NoRecovery`, `SuddenDeath`, `Practice`, `Light`],
 		border: [`Normal`, `Hard`, `SuddenDeath`, `Easy`],
 		custom: [],
+		customDefault: [],
 
 		initSurvival: [25, 50, 100, 100, 50, 25],
 		rcvSurvival: [6, 2, 0, 0, 0, 12],
@@ -2860,6 +2861,7 @@ function headerConvert(_dosObj) {
 		clearBorder: [70, 0, 0, 70],
 
 		varCustom: [],
+		varCustomDefault: [],
 	};
 
 	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
@@ -2882,20 +2884,21 @@ function headerConvert(_dosObj) {
 		'Type0': [!obj.defaultColorgrd[0], obj.defaultColorgrd[1]],
 	};
 
+	// カスタムゲージ設定（共通設定ファイル）
+	if (typeof g_presetGaugeList === C_TYP_OBJECT) {
+		Object.keys(g_presetGaugeList).forEach(key => {
+			g_gaugeOptionObj.customDefault.push(key);
+			g_gaugeOptionObj.varCustomDefault.push((g_presetGaugeList[key] !== `V` ? C_FLG_OFF : C_FLG_ON));
+		});
+		g_gaugeOptionObj.custom = g_gaugeOptionObj.customDefault.concat();
+		g_gaugeOptionObj.varCustom = g_gaugeOptionObj.varCustomDefault.concat();
+	}
+	console.log(g_gaugeOptionObj.customDefault);
+
 	// カスタムゲージ設定、初期色設定（譜面ヘッダー）の譜面別設定
 	for (let j = 0; j < obj.difLabels.length; j++) {
 		Object.assign(g_gaugeOptionObj, resetCustomGauge(_dosObj, { scoreId: j }));
 		Object.assign(obj, resetBaseColorList(obj, _dosObj, { scoreId: j }));
-	}
-
-	// カスタムゲージ設定
-	if (g_gaugeOptionObj.custom.length === 0 && typeof g_presetGaugeList === C_TYP_OBJECT) {
-		Object.keys(g_presetGaugeList).forEach(key => {
-			g_gaugeOptionObj.custom.push(key);
-			g_gaugeOptionObj.varCustom.push((g_presetGaugeList[key] !== `V` ? C_FLG_OFF : C_FLG_ON));
-		});
-		g_gaugeOptionObj.custom0 = g_gaugeOptionObj.custom.concat();
-		g_gaugeOptionObj.varCustom0 = g_gaugeOptionObj.varCustom.concat();
 	}
 
 	// ライフ設定のカスタム部分取得（譜面ヘッダー加味）
@@ -3378,19 +3381,24 @@ function resetCustomGauge(_dosObj, { scoreId = 0, scoreLockFlg = false } = {}) {
 	const obj = {};
 	const scoreIdHeader = setScoreIdHeader(scoreId, scoreLockFlg);
 	if (hasVal(_dosObj[`customGauge${scoreIdHeader}`])) {
-		const customGauges = _dosObj[`customGauge${scoreIdHeader}`].split(`,`);
+		if (_dosObj[`customGauge${scoreIdHeader}`] === `Default`) {
+			obj[`custom${scoreId}`] = g_gaugeOptionObj.customDefault.concat();
+			obj[`varCustom${scoreId}`] = g_gaugeOptionObj.varCustomDefault.concat();
+		} else {
+			const customGauges = _dosObj[`customGauge${scoreIdHeader}`].split(`,`);
 
-		obj[`custom${scoreId}`] = [];
-		obj[`varCustom${scoreId}`] = [];
+			obj[`custom${scoreId}`] = [];
+			obj[`varCustom${scoreId}`] = [];
 
-		for (let j = 0; j < customGauges.length; j++) {
-			const customGaugeSets = customGauges[j].split(`::`);
-			obj[`custom${scoreId}`][j] = customGaugeSets[0];
-			obj[`varCustom${scoreId}`][j] = (customGaugeSets[1] !== `V` ? C_FLG_OFF : C_FLG_ON);
-		}
-		if (scoreId === 0) {
-			obj.custom = obj.custom0.concat();
-			obj.varCustom = obj.varCustom0.concat();
+			for (let j = 0; j < customGauges.length; j++) {
+				const customGaugeSets = customGauges[j].split(`::`);
+				obj[`custom${scoreId}`][j] = customGaugeSets[0];
+				obj[`varCustom${scoreId}`][j] = (customGaugeSets[1] !== `V` ? C_FLG_OFF : C_FLG_ON);
+			}
+			if (scoreId === 0) {
+				obj.custom = obj.custom0.concat();
+				obj.varCustom = obj.varCustom0.concat();
+			}
 		}
 	}
 	return obj;
@@ -4754,9 +4762,10 @@ function createOptionWindow(_sprite) {
 		lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
 
 		// ゲージ設定 (Gauge)
-		if (hasVal(g_gaugeOptionObj.custom0)) {
-			g_gaugeOptionObj.custom = (g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || g_gaugeOptionObj.custom0).concat();
-			g_gaugeOptionObj.varCustom = (g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0).concat();
+		const defaultCustomGauge = g_gaugeOptionObj.custom0 || g_gaugeOptionObj.customDefault;
+		if (hasVal(defaultCustomGauge)) {
+			g_gaugeOptionObj.custom = (g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || defaultCustomGauge).concat();
+			g_gaugeOptionObj.varCustom = (g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0 || g_gaugeOptionObj.varCustomDefault).concat();
 			g_gaugeOptionObj.custom.forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj));
 		}
 		setGauge(0);
