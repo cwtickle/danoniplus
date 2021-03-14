@@ -1275,7 +1275,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	g_stateObj.scoreLockFlg = setVal(dosLockInput !== null ? dosLockInput.value : getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
 	if (queryDos !== `` && dosDivideFlg && g_stateObj.scoreLockFlg) {
 		const scoreList = Object.keys(g_rootObj).filter(data => {
-			return data.endsWith(`_data`) || data.endsWith(`_change`) || data.endsWith(`Color`) || data === `customGauge`;
+			return listMatching(data, g_checkStr.resetDosFooter, { suffix: `$` });
 		});
 		scoreList.forEach(scoredata => g_rootObj[scoredata] = ``);
 	}
@@ -2050,8 +2050,8 @@ const isColorCd = _str => _str.substring(0, 1) === `#`;
  * @param {string} _str 
  * @returns 
  */
-const hasAnglePointInfo = _str => listMatching(_str, g_cssCheckStr.header, { prefix: `^` }) ||
-	listMatching(_str, g_cssCheckStr.footer, { suffix: `$` });
+const hasAnglePointInfo = _str => listMatching(_str, g_checkStr.cssHeader, { prefix: `^` }) ||
+	listMatching(_str, g_checkStr.cssFooter, { suffix: `$` });
 
 /**
  * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
