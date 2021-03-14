@@ -2893,7 +2893,6 @@ function headerConvert(_dosObj) {
 		g_gaugeOptionObj.custom = g_gaugeOptionObj.customDefault.concat();
 		g_gaugeOptionObj.varCustom = g_gaugeOptionObj.varCustomDefault.concat();
 	}
-	console.log(g_gaugeOptionObj.customDefault);
 
 	// カスタムゲージ設定、初期色設定（譜面ヘッダー）の譜面別設定
 	for (let j = 0; j < obj.difLabels.length; j++) {
