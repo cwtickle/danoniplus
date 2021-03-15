@@ -3241,7 +3241,7 @@ function headerConvert(_dosObj) {
  * @param {string} _obj
  */
 function addGaugeFulls(_obj) {
-	_obj.map(key => g_gaugeOptionObj.customFulls[key] = false);
+	_obj.map(key => g_gaugeOptionObj.customFulls[key] = hasVal(g_gaugeOptionObj.customFulls[key]));
 }
 
 /**
