@@ -1324,10 +1324,13 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 			_afterFunc();
 			if (_cyclicFlg) {
 				if (dosDivideFlg && g_stateObj.scoreLockFlg && _scoreId > 0) {
-					Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId, scoreLockFlg: g_stateObj.scoreLockFlg }));
+					// 初期矢印・フリーズアロー色の再定義
 					Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
 					Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
-					Object.keys(g_gaugeOptionObj.customFulls).forEach(key => getGaugeSetting(g_rootObj, key, g_headerObj));
+
+					// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
+					Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId, scoreLockFlg: g_stateObj.scoreLockFlg }));
+					Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length));
 				}
 				reloadDos(_scoreId);
 			}
@@ -2887,6 +2890,9 @@ function headerConvert(_dosObj) {
 	};
 
 	// カスタムゲージ設定（共通設定ファイル）
+	addGaugeFulls(g_gaugeOptionObj.survival);
+	addGaugeFulls(g_gaugeOptionObj.border);
+
 	if (typeof g_presetGaugeList === C_TYP_OBJECT) {
 		Object.keys(g_presetGaugeList).forEach(key => {
 			g_gaugeOptionObj.customDefault.push(key);
@@ -2894,9 +2900,7 @@ function headerConvert(_dosObj) {
 		});
 		g_gaugeOptionObj.custom = g_gaugeOptionObj.customDefault.concat();
 		g_gaugeOptionObj.varCustom = g_gaugeOptionObj.varCustomDefault.concat();
-		g_gaugeOptionObj.customDefault.forEach((key, j) => {
-			g_gaugeOptionObj.customFulls[key] = g_gaugeOptionObj.varCustomDefault[j];
-		});
+		addGaugeFulls(g_gaugeOptionObj.customDefault);
 	}
 
 	// カスタムゲージ設定、初期色設定（譜面ヘッダー）の譜面別設定
@@ -2906,10 +2910,8 @@ function headerConvert(_dosObj) {
 	}
 
 	// ライフ設定のカスタム部分取得（譜面ヘッダー加味）
-	[`survival`, `border`].forEach(gaugeType => {
-		g_gaugeOptionObj[gaugeType].forEach(gaugePtn => getGaugeSetting(_dosObj, gaugePtn, obj));
-	});
-	Object.keys(g_gaugeOptionObj.customFulls).forEach(key => getGaugeSetting(_dosObj, key, obj));
+	Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(_dosObj, gaugePtn, obj.difLabels.length));
+	console.log(g_gaugeOptionObj.customFulls);
 
 	// ダミー譜面の設定
 	if (hasVal(_dosObj.dummyId)) {
@@ -3236,6 +3238,14 @@ function headerConvert(_dosObj) {
 }
 
 /**
+ * ゲージ設定リストへの追加
+ * @param {string} _obj
+ */
+function addGaugeFulls(_obj) {
+	_obj.map(key => g_gaugeOptionObj.customFulls[key] = ``);
+}
+
+/**
  * 矢印・フリーズアロー色のデータ変換
  * @param {object} _baseObj 
  * @param {object} _dosObj
@@ -3404,11 +3414,7 @@ function resetCustomGauge(_dosObj, { scoreId = 0, scoreLockFlg = false } = {}) {
 				obj.custom = obj.custom0.concat();
 				obj.varCustom = obj.varCustom0.concat();
 			}
-			const tmpObj = {};
-			obj[`custom${scoreId}`].forEach((key, j) => {
-				tmpObj[key] = obj[`varCustom${scoreId}`][j];
-			});
-			Object.assign(g_gaugeOptionObj.customFulls, tmpObj);
+			addGaugeFulls(obj[`custom${scoreId}`]);
 		}
 	}
 	return obj;
@@ -3418,11 +3424,9 @@ function resetCustomGauge(_dosObj, { scoreId = 0, scoreLockFlg = false } = {}) {
  * ゲージ別個別設定の取得
  * @param {object} _dosObj 
  * @param {string} _name 
- * @param {number} _headerObj
+ * @param {number} _difLength
  */
-function getGaugeSetting(_dosObj, _name, _headerObj) {
-
-	const difLength = _headerObj.keyLabels.length;
+function getGaugeSetting(_dosObj, _name, _difLength) {
 
 	const obj = {
 		lifeBorders: [],
@@ -3448,8 +3452,8 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 		for (let j = 0; j < gauges.length; j++) {
 			setGaugeDetails(gauges[j].split(`,`));
 		}
-		if (gauges.length < difLength) {
-			for (let j = gauges.length; j < difLength; j++) {
+		if (gauges.length < _difLength) {
+			for (let j = gauges.length; j < _difLength; j++) {
 				setGaugeDetails(gauges[0].split(`,`));
 			}
 		}
@@ -3461,7 +3465,7 @@ function getGaugeSetting(_dosObj, _name, _headerObj) {
 			g_presetGaugeCustom[_name].Border, g_presetGaugeCustom[_name].Recovery,
 			g_presetGaugeCustom[_name].Damage, g_presetGaugeCustom[_name].Init,
 		]
-		for (let j = 0; j < difLength; j++) {
+		for (let j = 0; j < _difLength; j++) {
 			setGaugeDetails(gaugeDetails);
 		}
 		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
