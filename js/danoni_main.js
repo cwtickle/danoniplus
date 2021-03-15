@@ -1271,11 +1271,11 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	// 譜面分割あり、譜面番号固定時のみ譜面データを一時クリア
 	const dosDivideInput = document.querySelector(`#externalDosDivide`);
 	const dosLockInput = document.querySelector(`#externalDosLock`);
-	const dosDivideFlg = setVal(dosDivideInput !== null ? dosDivideInput.value : getQueryParamVal(`dosDivide`), false, C_TYP_BOOLEAN);
+	g_stateObj.dosDivideFlg = setVal(dosDivideInput !== null ? dosDivideInput.value : getQueryParamVal(`dosDivide`), false, C_TYP_BOOLEAN);
 	g_stateObj.scoreLockFlg = setVal(dosLockInput !== null ? dosLockInput.value : getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
-	if (queryDos !== `` && dosDivideFlg && g_stateObj.scoreLockFlg) {
+	if (queryDos !== `` && g_stateObj.dosDivideFlg && g_stateObj.scoreLockFlg) {
 		const scoreList = Object.keys(g_rootObj).filter(data => {
-			return listMatching(data, g_checkStr.resetDosFooter, { suffix: `$` });
+			return listMatching(data, g_checkStr.resetDosHeader, { prefix: `^` }) || listMatching(data, g_checkStr.resetDosFooter, { suffix: `$` });
 		});
 		scoreList.forEach(scoredata => g_rootObj[scoredata] = ``);
 	}
@@ -1301,7 +1301,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 		const filenameBase = queryDos.match(/.+\..*/)[0];
 		const filenameExtension = filenameBase.split(`.`).pop();
 		const filenameCommon = filenameBase.split(`.${filenameExtension}`)[0];
-		const filename = (!dosDivideFlg ?
+		const filename = (!g_stateObj.dosDivideFlg ?
 			`${filenameCommon}.${filenameExtension}` :
 			`${filenameCommon}${setScoreIdHeader(_scoreId)}.${filenameExtension}`);
 
@@ -1323,14 +1323,16 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 			}
 			_afterFunc();
 			if (_cyclicFlg) {
-				if (dosDivideFlg && g_stateObj.scoreLockFlg && _scoreId > 0) {
+				if (g_stateObj.dosDivideFlg && _scoreId > 0) {
 					// 初期矢印・フリーズアロー色の再定義
-					Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
+					if (g_stateObj.scoreLockFlg) {
+						Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
+					}
 					Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
 
 					// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
-					Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId, scoreLockFlg: g_stateObj.scoreLockFlg }));
-					Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length));
+					Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
+					Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
 				}
 				reloadDos(_scoreId);
 			}
@@ -3241,7 +3243,7 @@ function headerConvert(_dosObj) {
  * @param {string} _obj
  */
 function addGaugeFulls(_obj) {
-	_obj.map(key => g_gaugeOptionObj.customFulls[key] = hasVal(g_gaugeOptionObj.customFulls[key]));
+	_obj.map(key => g_gaugeOptionObj.customFulls[key] = false);
 }
 
 /**
@@ -3390,10 +3392,10 @@ function setColorList(_data, _colorInit, _colorInitLength,
  * @param {object} objectList
  * @returns オブジェクト ※Object.assign(obj, resetCustomGauge(...))の形で呼び出しが必要
  */
-function resetCustomGauge(_dosObj, { scoreId = 0, scoreLockFlg = false } = {}) {
+function resetCustomGauge(_dosObj, { scoreId = 0 } = {}) {
 
 	const obj = {};
-	const scoreIdHeader = setScoreIdHeader(scoreId, scoreLockFlg);
+	const scoreIdHeader = setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg);
 	if (hasVal(_dosObj[`customGauge${scoreIdHeader}`])) {
 		if (_dosObj[`customGauge${scoreIdHeader}`] === `Default`) {
 			obj[`custom${scoreId}`] = g_gaugeOptionObj.customDefault.concat();
@@ -3425,11 +3427,8 @@ function resetCustomGauge(_dosObj, { scoreId = 0, scoreLockFlg = false } = {}) {
  * @param {string} _name 
  * @param {number} _difLength
  */
-function getGaugeSetting(_dosObj, _name, _difLength) {
+function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 
-	if (g_gaugeOptionObj.customFulls[_name]) {
-		return;
-	}
 	const obj = {
 		lifeBorders: [],
 		lifeRecoverys: [],
@@ -3437,6 +3436,11 @@ function getGaugeSetting(_dosObj, _name, _difLength) {
 		lifeInits: []
 	};
 
+	/**
+	 * ゲージ別個別配列への値格納
+	 * @param {number} _scoreId 
+	 * @param {array} _gaugeDetails 
+	 */
 	const setGaugeDetails = (_scoreId, _gaugeDetails) => {
 		if (_gaugeDetails[0] === `x`) {
 			obj.lifeBorders[_scoreId] = `x`;
@@ -3448,18 +3452,42 @@ function getGaugeSetting(_dosObj, _name, _difLength) {
 		obj.lifeInits[_scoreId] = setVal(_gaugeDetails[3], ``, C_TYP_FLOAT);
 	};
 
-	if (hasVal(_dosObj[`gauge${_name}`])) {
-		const gauges = _dosObj[`gauge${_name}`].split(`$`);
-
-		for (let j = 0; j < gauges.length; j++) {
-			setGaugeDetails(j, gauges[j].split(`,`));
-		}
-		if (gauges.length < _difLength) {
-			for (let j = gauges.length; j < _difLength; j++) {
-				setGaugeDetails(j, gauges[0].split(`,`));
+	/**
+	 * gaugeNormal2, gaugeEasy2などの個別設定があった場合にその値を適用
+	 * @param {number} _scoreId 
+	 */
+	const setGaugeAnother = _scoreId => {
+		if (_scoreId > 0) {
+			const headerName = `gauge${_name}${setScoreIdHeader(_scoreId)}`;
+			if (hasVal(_dosObj[headerName])) {
+				setGaugeDetails(_scoreId, _dosObj[headerName].split(`,`));
 			}
 		}
-		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
+	};
+
+	if (hasVal(_dosObj[`gauge${_name}`])) {
+
+		if (g_stateObj.scoreLockFlg && scoreId > 0) {
+			setGaugeDetails(scoreId, _dosObj[`gauge${_name}`].split(`,`));
+			if (hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
+				Object.keys(obj).forEach(key => Object.assign(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
+			} else {
+				g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
+			}
+		} else {
+			const gauges = _dosObj[`gauge${_name}`].split(`$`);
+			for (let j = 0; j < gauges.length; j++) {
+				setGaugeDetails(j, gauges[j].split(`,`));
+				setGaugeAnother(j);
+			}
+			if (gauges.length < _difLength) {
+				for (let j = gauges.length; j < _difLength; j++) {
+					setGaugeDetails(j, gauges[0].split(`,`));
+					setGaugeAnother(j);
+				}
+			}
+			g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
+		}
 
 	} else if (typeof g_presetGaugeCustom === C_TYP_OBJECT && g_presetGaugeCustom[_name]) {
 
@@ -3469,11 +3497,10 @@ function getGaugeSetting(_dosObj, _name, _difLength) {
 		]
 		for (let j = 0; j < _difLength; j++) {
 			setGaugeDetails(j, gaugeDetails);
+			setGaugeAnother(j);
 		}
 		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
 	}
-
-	g_gaugeOptionObj.customFulls[_name] = true;
 }
 
 /**

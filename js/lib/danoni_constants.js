@@ -298,6 +298,7 @@ let C_WOD_FRAME = 30;
 
 // 譜面データ持ち回り用
 const g_stateObj = {
+    dosDivideFlg: false,
     scoreLockFlg: false,
     scoreId: 0,
     dummyId: ``,
@@ -1931,6 +1932,7 @@ const g_checkStr = {
     cssFooter: [`deg`, `rad`, `grad`, `turn`, `repeat`],
 
     // 譜面分割あり、譜面番号固定時のみ譜面データを一時クリアする際の条件
+    resetDosHeader: [`gauge`],
     resetDosFooter: [`_data`, `_change`, `Color`, `customGauge`],
 };
 
