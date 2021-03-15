@@ -3241,7 +3241,7 @@ function headerConvert(_dosObj) {
  * @param {string} _obj
  */
 function addGaugeFulls(_obj) {
-	_obj.map(key => g_gaugeOptionObj.customFulls[key] = ``);
+	_obj.map(key => g_gaugeOptionObj.customFulls[key] = false);
 }
 
 /**
@@ -3427,6 +3427,9 @@ function resetCustomGauge(_dosObj, { scoreId = 0, scoreLockFlg = false } = {}) {
  */
 function getGaugeSetting(_dosObj, _name, _difLength) {
 
+	if (g_gaugeOptionObj.customFulls[_name]) {
+		return;
+	}
 	const obj = {
 		lifeBorders: [],
 		lifeRecoverys: [],
@@ -3469,6 +3472,8 @@ function getGaugeSetting(_dosObj, _name, _difLength) {
 		}
 		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
 	}
+
+	g_gaugeOptionObj.customFulls[_name] = true;
 }
 
 /**
