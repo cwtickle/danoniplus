@@ -3437,26 +3437,26 @@ function getGaugeSetting(_dosObj, _name, _difLength) {
 		lifeInits: []
 	};
 
-	const setGaugeDetails = gaugeDetails => {
-		if (gaugeDetails[0] === `x`) {
-			obj.lifeBorders.push(`x`);
+	const setGaugeDetails = (_scoreId, _gaugeDetails) => {
+		if (_gaugeDetails[0] === `x`) {
+			obj.lifeBorders[_scoreId] = `x`;
 		} else {
-			obj.lifeBorders.push(setVal(gaugeDetails[0], ``, C_TYP_FLOAT));
+			obj.lifeBorders[_scoreId] = setVal(_gaugeDetails[0], ``, C_TYP_FLOAT);
 		}
-		obj.lifeRecoverys.push(setVal(gaugeDetails[1], ``, C_TYP_FLOAT));
-		obj.lifeDamages.push(setVal(gaugeDetails[2], ``, C_TYP_FLOAT));
-		obj.lifeInits.push(setVal(gaugeDetails[3], ``, C_TYP_FLOAT));
+		obj.lifeRecoverys[_scoreId] = setVal(_gaugeDetails[1], ``, C_TYP_FLOAT);
+		obj.lifeDamages[_scoreId] = setVal(_gaugeDetails[2], ``, C_TYP_FLOAT);
+		obj.lifeInits[_scoreId] = setVal(_gaugeDetails[3], ``, C_TYP_FLOAT);
 	};
 
 	if (hasVal(_dosObj[`gauge${_name}`])) {
 		const gauges = _dosObj[`gauge${_name}`].split(`$`);
 
 		for (let j = 0; j < gauges.length; j++) {
-			setGaugeDetails(gauges[j].split(`,`));
+			setGaugeDetails(j, gauges[j].split(`,`));
 		}
 		if (gauges.length < _difLength) {
 			for (let j = gauges.length; j < _difLength; j++) {
-				setGaugeDetails(gauges[0].split(`,`));
+				setGaugeDetails(j, gauges[0].split(`,`));
 			}
 		}
 		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
@@ -3468,7 +3468,7 @@ function getGaugeSetting(_dosObj, _name, _difLength) {
 			g_presetGaugeCustom[_name].Damage, g_presetGaugeCustom[_name].Init,
 		]
 		for (let j = 0; j < _difLength; j++) {
-			setGaugeDetails(gaugeDetails);
+			setGaugeDetails(j, gaugeDetails);
 		}
 		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
 	}
