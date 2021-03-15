@@ -2911,7 +2911,6 @@ function headerConvert(_dosObj) {
 
 	// ライフ設定のカスタム部分取得（譜面ヘッダー加味）
 	Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(_dosObj, gaugePtn, obj.difLabels.length));
-	console.log(g_gaugeOptionObj.customFulls);
 
 	// ダミー譜面の設定
 	if (hasVal(_dosObj.dummyId)) {
