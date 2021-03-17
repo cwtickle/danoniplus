@@ -3473,8 +3473,7 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 			setGaugeDetails(scoreId, _dosObj[`gauge${_name}`].split(`,`));
 			if (hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
 				Object.keys(obj).forEach(key => Object.assign(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
-			} else {
-				g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
+				return;
 			}
 		} else {
 			const gauges = _dosObj[`gauge${_name}`].split(`$`);
@@ -3487,8 +3486,8 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 					setGaugeDetails(j, getGaugeDetailList(j, defaultGaugeList));
 				}
 			}
-			g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
 		}
+		g_gaugeOptionObj[`gauge${_name}s`] = obj;
 
 	} else if (typeof g_presetGaugeCustom === C_TYP_OBJECT && g_presetGaugeCustom[_name]) {
 
@@ -3496,10 +3495,18 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 			g_presetGaugeCustom[_name].Border, g_presetGaugeCustom[_name].Recovery,
 			g_presetGaugeCustom[_name].Damage, g_presetGaugeCustom[_name].Init,
 		]
-		for (let j = 0; j < _difLength; j++) {
-			setGaugeDetails(j, getGaugeDetailList(j, gaugeDetails));
+		if (g_stateObj.scoreLockFlg) {
+			setGaugeDetails(scoreId, gaugeDetails);
+			if (hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
+				Object.keys(obj).forEach(key => Object.assign(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
+				return;
+			}
+		} else {
+			for (let j = 0; j < _difLength; j++) {
+				setGaugeDetails(j, getGaugeDetailList(j, gaugeDetails));
+			}
 		}
-		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
+		g_gaugeOptionObj[`gauge${_name}s`] = obj;
 	}
 }
 
@@ -4534,7 +4541,7 @@ function createOptionWindow(_sprite) {
 
 		// ゲージ設定別に個別設定した場合はここで設定を上書き
 		// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
-		if (g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`] !== undefined) {
+		if (hasVal(g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`])) {
 			const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
 			if (hasVal(tmpGaugeObj.lifeBorders[tmpScoreId])) {
 				changeLifeMode(tmpGaugeObj);
