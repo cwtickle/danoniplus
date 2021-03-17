@@ -3453,16 +3453,18 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 	};
 
 	/**
-	 * gaugeNormal2, gaugeEasy2などの個別設定があった場合にその値を適用
+	 * gaugeNormal2, gaugeEasy2などの個別設定があった場合にその値から配列を作成
 	 * @param {number} _scoreId 
+	 * @param {array} _defaultGaugeList
 	 */
-	const setGaugeAnother = _scoreId => {
+	const getGaugeDetailList = (_scoreId, _defaultGaugeList) => {
 		if (_scoreId > 0) {
 			const headerName = `gauge${_name}${setScoreIdHeader(_scoreId)}`;
 			if (hasVal(_dosObj[headerName])) {
-				setGaugeDetails(_scoreId, _dosObj[headerName].split(`,`));
+				return _dosObj[headerName].split(`,`);
 			}
 		}
+		return _defaultGaugeList;
 	};
 
 	if (hasVal(_dosObj[`gauge${_name}`])) {
@@ -3477,13 +3479,12 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 		} else {
 			const gauges = _dosObj[`gauge${_name}`].split(`$`);
 			for (let j = 0; j < gauges.length; j++) {
-				setGaugeDetails(j, gauges[j].split(`,`));
-				setGaugeAnother(j);
+				setGaugeDetails(j, getGaugeDetailList(j, gauges[j].split(`,`)));
 			}
 			if (gauges.length < _difLength) {
+				const defaultGaugeList = gauges[0].split(`,`);
 				for (let j = gauges.length; j < _difLength; j++) {
-					setGaugeDetails(j, gauges[0].split(`,`));
-					setGaugeAnother(j);
+					setGaugeDetails(j, getGaugeDetailList(j, defaultGaugeList));
 				}
 			}
 			g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
@@ -3496,8 +3497,7 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 			g_presetGaugeCustom[_name].Damage, g_presetGaugeCustom[_name].Init,
 		]
 		for (let j = 0; j < _difLength; j++) {
-			setGaugeDetails(j, gaugeDetails);
-			setGaugeAnother(j);
+			setGaugeDetails(j, getGaugeDetailList(j, gaugeDetails));
 		}
 		g_gaugeOptionObj[`gauge${_name}s`] = Object.assign({}, obj);
 	}
