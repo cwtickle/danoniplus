@@ -3435,7 +3435,11 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 		lifeDamages: [],
 		lifeInits: []
 	};
-	let objCreateFlg = false;
+	/** ゲージ設定再作成フラグ */
+	let gaugeCreateFlg = false;
+
+	/** ゲージ設定上書きフラグ */
+	const gaugeUpdateFlg = g_stateObj.scoreLockFlg && scoreId > 0;
 
 	/**
 	 * ゲージ別個別配列への値格納
@@ -3443,7 +3447,7 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 	 * @param {array} _gaugeDetails 
 	 * @param {boolean} _loopFlg
 	 */
-	const setGaugeDetails = (_scoreId, _gaugeDetails, _loopFlg = true) => {
+	const setGaugeDetails = (_scoreId, _gaugeDetails) => {
 		if (_gaugeDetails[0] === `x`) {
 			obj.lifeBorders[_scoreId] = `x`;
 		} else {
@@ -3453,7 +3457,7 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 		obj.lifeDamages[_scoreId] = setVal(_gaugeDetails[2], ``, C_TYP_FLOAT);
 		obj.lifeInits[_scoreId] = setVal(_gaugeDetails[3], ``, C_TYP_FLOAT);
 
-		if (!_loopFlg && hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
+		if (gaugeUpdateFlg && hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
 			Object.keys(obj).forEach(key => Object.assign(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
 			return false;
 		}
@@ -3477,17 +3481,18 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 
 	if (hasVal(_dosObj[`gauge${_name}`])) {
 
-		if (g_stateObj.scoreLockFlg && scoreId > 0) {
-			objCreateFlg = setGaugeDetails(scoreId, _dosObj[`gauge${_name}`].split(`,`), false);
+		if (gaugeUpdateFlg) {
+			gaugeCreateFlg = setGaugeDetails(scoreId, _dosObj[`gauge${_name}`].split(`,`));
 		} else {
 			const gauges = _dosObj[`gauge${_name}`].split(`$`);
-			for (let j = 0; j < gauges.length; j++) {
-				objCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, gauges[j].split(`,`)));
+			const gHeaderLen = gauges.length;
+			for (let j = 0; j < gHeaderLen; j++) {
+				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, gauges[j].split(`,`)));
 			}
-			if (gauges.length < _difLength) {
+			if (gHeaderLen < _difLength) {
 				const defaultGaugeList = gauges[0].split(`,`);
-				for (let j = gauges.length; j < _difLength; j++) {
-					objCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, defaultGaugeList));
+				for (let j = gHeaderLen; j < _difLength; j++) {
+					gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, defaultGaugeList));
 				}
 			}
 		}
@@ -3498,15 +3503,15 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 			g_presetGaugeCustom[_name].Border, g_presetGaugeCustom[_name].Recovery,
 			g_presetGaugeCustom[_name].Damage, g_presetGaugeCustom[_name].Init,
 		]
-		if (g_stateObj.scoreLockFlg) {
-			objCreateFlg = setGaugeDetails(scoreId, gaugeDetails, false);
+		if (gaugeUpdateFlg) {
+			gaugeCreateFlg = setGaugeDetails(scoreId, gaugeDetails);
 		} else {
 			for (let j = 0; j < _difLength; j++) {
-				objCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, gaugeDetails));
+				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, gaugeDetails));
 			}
 		}
 	}
-	if (objCreateFlg) {
+	if (gaugeCreateFlg) {
 		g_gaugeOptionObj[`gauge${_name}s`] = obj;
 	}
 }
