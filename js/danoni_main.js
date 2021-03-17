@@ -221,6 +221,9 @@ const hasVal = _data => _data !== undefined && _data !== ``;
 const listMatching = (_str, _list, { prefix = ``, suffix = `` } = {}) =>
 	_list.findIndex(value => _str.toLowerCase().match(new RegExp(String.raw`${prefix}${value}${suffix}`, 'i'))) !== -1;
 
+const fuzzyListMatching = (_str, _headerList, _footerList) =>
+	listMatching(_str, _headerList, { prefix: `^` }) || listMatching(_str, _footerList, { suffix: `$` });
+
 /**
  * イベントハンドラ用オブジェクト
  * 参考: http://webkatu.com/remove-eventlistener/
@@ -1275,7 +1278,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	g_stateObj.scoreLockFlg = setVal(dosLockInput !== null ? dosLockInput.value : getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
 	if (queryDos !== `` && g_stateObj.dosDivideFlg && g_stateObj.scoreLockFlg) {
 		const scoreList = Object.keys(g_rootObj).filter(data => {
-			return listMatching(data, g_checkStr.resetDosHeader, { prefix: `^` }) || listMatching(data, g_checkStr.resetDosFooter, { suffix: `$` });
+			return fuzzyListMatching(data, g_checkStr.resetDosHeader, g_checkStr.resetDosFooter);
 		});
 		scoreList.forEach(scoredata => g_rootObj[scoredata] = ``);
 	}
@@ -2056,8 +2059,7 @@ const isColorCd = _str => _str.substring(0, 1) === `#`;
  * @param {string} _str 
  * @returns 
  */
-const hasAnglePointInfo = _str => listMatching(_str, g_checkStr.cssHeader, { prefix: `^` }) ||
-	listMatching(_str, g_checkStr.cssFooter, { suffix: `$` });
+const hasAnglePointInfo = _str => fuzzyListMatching(_str, g_checkStr.cssHeader, g_checkStr.cssFooter);
 
 /**
  * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
@@ -6073,7 +6075,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		let arrowData = [];
 
 		if (_data !== undefined) {
-			const tmpData = _data.split(`\r`).join(``).split(`\n`).join(``);
+			const tmpData = splitLF(_data).join(``);
 			if (tmpData !== undefined) {
 				arrowData = tmpData.split(`,`);
 				if (isNaN(parseFloat(arrowData[0]))) {
