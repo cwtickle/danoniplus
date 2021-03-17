@@ -298,6 +298,7 @@ let C_WOD_FRAME = 30;
 
 // 譜面データ持ち回り用
 const g_stateObj = {
+    dosDivideFlg: false,
     scoreLockFlg: false,
     scoreId: 0,
     dummyId: ``,
@@ -1921,11 +1922,18 @@ const g_escapeStr = {
     ],
 };
 
-// グラデーションで、カラーコードではないパーセント表記、位置表記系を除外するためのリスト
-// 'at', 'to'のみ、'to left'や'to right'のように方向が入るため、半角スペースまで込みで判断
-const g_cssCheckStr = {
-    header: [`at `, `to `, `from`, `circle`, `ellipse`, `closest-`, `farthest-`, `transparent`],
-    footer: [`deg`, `rad`, `grad`, `turn`, `repeat`],
+/**
+ * 文字列部分一致用リスト
+ */
+const g_checkStr = {
+    // グラデーションで、カラーコードではないパーセント表記、位置表記系を除外するためのリスト
+    // 'at', 'to'のみ、'to left'や'to right'のように方向が入るため、半角スペースまで込みで判断
+    cssHeader: [`at `, `to `, `from`, `circle`, `ellipse`, `closest-`, `farthest-`, `transparent`],
+    cssFooter: [`deg`, `rad`, `grad`, `turn`, `repeat`],
+
+    // 譜面分割あり、譜面番号固定時のみ譜面データを一時クリアする際の条件
+    resetDosHeader: [`gauge`],
+    resetDosFooter: [`_data`, `_change`, `Color`, `customGauge`],
 };
 
 /** 
