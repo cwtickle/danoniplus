@@ -349,6 +349,7 @@ let C_CLR_BORDER = `#555555`;
 const C_LFE_SURVIVAL = `Survival`;
 const C_LFE_BORDER = `Border`;
 const C_LFE_CUSTOM = `Custom`;
+const C_LFE_MAXLIFE = `maxLife`;
 
 /**
  * ゲージ初期設定
@@ -362,14 +363,14 @@ const g_gaugeOptionObj = {
 
     initSurvival: [25, 50, 100, 100, 50, 25],
     rcvSurvival: [6, 2, 0, 0, 0, 12],
-    dmgSurvival: [40, 50, 50, `maxLife`, 0, 40],
+    dmgSurvival: [40, 50, 50, C_LFE_MAXLIFE, 0, 40],
     typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
     varSurvival: [C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
     clearSurvival: [0, 0, 0, 0, 0, 0],
 
     initBorder: [25, 100, 100, 25],
     rcvBorder: [2, 1, 0, 4],
-    dmgBorder: [7, 50, `maxLife`, 7],
+    dmgBorder: [7, 50, C_LFE_MAXLIFE, 7],
     typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL, C_LFE_BORDER],
     varBorder: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_ON],
     clearBorder: [70, 0, 0, 70],

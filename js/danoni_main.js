@@ -2849,7 +2849,7 @@ function headerConvert(_dosObj) {
 
 	// ゲージ初期設定（最大ライフ反映）
 	g_gaugeOptionObj.defaultList.forEach(type => {
-		const pos = g_gaugeOptionObj[`dmg${toCapitalize(type)}`].findIndex(val => val === `maxLife`);
+		const pos = g_gaugeOptionObj[`dmg${toCapitalize(type)}`].findIndex(val => val === C_LFE_MAXLIFE);
 		g_gaugeOptionObj[`dmg${toCapitalize(type)}`][pos] = obj.maxLifeVal;
 	});
 
