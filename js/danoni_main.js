@@ -2847,31 +2847,11 @@ function headerConvert(_dosObj) {
 		makeWarningWindow(g_msgInfoObj.E_0042.split(`{0}`).join(`maxLifeVal`));
 	}
 
-	// ゲージ設定詳細（初期値）
-	g_gaugeOptionObj = {
-		survival: [`Original`, `Heavy`, `NoRecovery`, `SuddenDeath`, `Practice`, `Light`],
-		border: [`Normal`, `Hard`, `SuddenDeath`, `Easy`],
-		custom: [],
-		customDefault: [],
-		customFulls: {},
-
-		initSurvival: [25, 50, 100, 100, 50, 25],
-		rcvSurvival: [6, 2, 0, 0, 0, 12],
-		dmgSurvival: [40, 50, 50, obj.maxLifeVal, 0, 40],
-		typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
-		varSurvival: [C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
-		clearSurvival: [0, 0, 0, 0, 0, 0],
-
-		initBorder: [25, 100, 100, 25],
-		rcvBorder: [2, 1, 0, 4],
-		dmgBorder: [7, 50, obj.maxLifeVal, 7],
-		typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL, C_LFE_BORDER],
-		varBorder: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_ON],
-		clearBorder: [70, 0, 0, 70],
-
-		varCustom: [],
-		varCustomDefault: [],
-	};
+	// ゲージ初期設定（最大ライフ反映）
+	g_gaugeOptionObj.defaultList.forEach(type => {
+		const pos = g_gaugeOptionObj[`dmg${toCapitalize(type)}`].findIndex(val => val === `maxLife`);
+		g_gaugeOptionObj[`dmg${toCapitalize(type)}`][pos] = obj.maxLifeVal;
+	});
 
 	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
 	if (hasVal(_dosObj.defaultFrzColorUse)) {
@@ -3398,12 +3378,16 @@ function resetCustomGauge(_dosObj, { scoreId = 0 } = {}) {
 
 	const obj = {};
 	const scoreIdHeader = setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg);
-	if (hasVal(_dosObj[`customGauge${scoreIdHeader}`])) {
-		if (_dosObj[`customGauge${scoreIdHeader}`] === `Default`) {
-			obj[`custom${scoreId}`] = g_gaugeOptionObj.customDefault.concat();
-			obj[`varCustom${scoreId}`] = g_gaugeOptionObj.varCustomDefault.concat();
+	const dosCustomGauge = _dosObj[`customGauge${scoreIdHeader}`];
+	if (hasVal(dosCustomGauge)) {
+		if (g_gaugeOptionObj.defaultPlusList.includes(dosCustomGauge)) {
+			obj[`custom${scoreId}`] = g_gaugeOptionObj[dosCustomGauge].concat();
+			obj[`varCustom${scoreId}`] = g_gaugeOptionObj[`var${toCapitalize(dosCustomGauge)}`].concat();
+			if (g_gaugeOptionObj.defaultList.includes(dosCustomGauge)) {
+				obj[`typeCustom${scoreId}`] = g_gaugeOptionObj[`type${toCapitalize(dosCustomGauge)}`].concat();
+			}
 		} else {
-			const customGauges = _dosObj[`customGauge${scoreIdHeader}`].split(`,`);
+			const customGauges = dosCustomGauge.split(`,`);
 
 			obj[`custom${scoreId}`] = [];
 			obj[`varCustom${scoreId}`] = [];
@@ -4533,7 +4517,8 @@ function createOptionWindow(_sprite) {
 		} else {
 			// 設定されたゲージ設定、カーソルに合わせて設定値を更新
 			g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
-			if (g_gaugeOptionObj.custom.length === 0) {
+			if (g_gaugeOptionObj.custom.length === 0 ||
+				g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`typeCustom${tmpScoreId}`])) {
 				g_stateObj.lifeMode = g_gaugeOptionObj[`type${g_gaugeType}`][_gaugeNum];
 				g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${g_gaugeType}`][_gaugeNum];
 				g_stateObj.lifeInit = g_gaugeOptionObj[`init${g_gaugeType}`][_gaugeNum];
