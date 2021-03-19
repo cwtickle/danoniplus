@@ -3384,6 +3384,7 @@ function resetCustomGauge(_dosObj, { scoreId = 0 } = {}) {
 			obj[`custom${scoreId}`] = g_gaugeOptionObj[dosCustomGauge].concat();
 			obj[`varCustom${scoreId}`] = g_gaugeOptionObj[`var${toCapitalize(dosCustomGauge)}`].concat();
 			if (g_gaugeOptionObj.defaultList.includes(dosCustomGauge)) {
+				obj[`defaultGauge${scoreId}`] = dosCustomGauge;
 				obj[`typeCustom${scoreId}`] = g_gaugeOptionObj[`type${toCapitalize(dosCustomGauge)}`].concat();
 			}
 		} else {
@@ -4518,12 +4519,14 @@ function createOptionWindow(_sprite) {
 			// 設定されたゲージ設定、カーソルに合わせて設定値を更新
 			g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
 			if (g_gaugeOptionObj.custom.length === 0 ||
-				g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`typeCustom${tmpScoreId}`])) {
-				g_stateObj.lifeMode = g_gaugeOptionObj[`type${g_gaugeType}`][_gaugeNum];
-				g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${g_gaugeType}`][_gaugeNum];
-				g_stateObj.lifeInit = g_gaugeOptionObj[`init${g_gaugeType}`][_gaugeNum];
-				g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${g_gaugeType}`][_gaugeNum];
-				g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${g_gaugeType}`][_gaugeNum];
+				g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`])) {
+				const gType = (g_gaugeType === C_LFE_CUSTOM ?
+					toCapitalize(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`]) : g_gaugeType);
+				g_stateObj.lifeMode = g_gaugeOptionObj[`type${gType}`][_gaugeNum];
+				g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${gType}`][_gaugeNum];
+				g_stateObj.lifeInit = g_gaugeOptionObj[`init${gType}`][_gaugeNum];
+				g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${gType}`][_gaugeNum];
+				g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${gType}`][_gaugeNum];
 			}
 		}
 
