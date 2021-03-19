@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/03/12 (v21.0.0)
+ * Revised : 2021/03/19 (v21.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -298,6 +298,7 @@ let C_WOD_FRAME = 30;
 
 // 譜面データ持ち回り用
 const g_stateObj = {
+    dosDivideFlg: false,
     scoreLockFlg: false,
     scoreId: 0,
     dummyId: ``,
@@ -348,8 +349,37 @@ let C_CLR_BORDER = `#555555`;
 const C_LFE_SURVIVAL = `Survival`;
 const C_LFE_BORDER = `Border`;
 const C_LFE_CUSTOM = `Custom`;
+const C_LFE_MAXLIFE = `maxLife`;
 
-let g_gaugeOptionObj = {};
+/**
+ * ゲージ初期設定
+ */
+const g_gaugeOptionObj = {
+    survival: [`Original`, `Heavy`, `NoRecovery`, `SuddenDeath`, `Practice`, `Light`],
+    border: [`Normal`, `Hard`, `SuddenDeath`, `Easy`],
+    custom: [],
+    customDefault: [],
+    customFulls: {},
+
+    initSurvival: [25, 50, 100, 100, 50, 25],
+    rcvSurvival: [6, 2, 0, 0, 0, 12],
+    dmgSurvival: [40, 50, 50, C_LFE_MAXLIFE, 0, 40],
+    typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
+    varSurvival: [C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
+    clearSurvival: [0, 0, 0, 0, 0, 0],
+
+    initBorder: [25, 100, 100, 25],
+    rcvBorder: [2, 1, 0, 4],
+    dmgBorder: [7, 50, C_LFE_MAXLIFE, 7],
+    typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL, C_LFE_BORDER],
+    varBorder: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_ON],
+    clearBorder: [70, 0, 0, 70],
+
+    varCustom: [],
+    varCustomDefault: [],
+    defaultList: [`survival`, `border`],
+    defaultPlusList: [`survival`, `border`, `customDefault`],
+};
 let g_gaugeType;
 
 const g_autoPlaysBase = [C_FLG_OFF, C_FLG_ALL];
@@ -1921,11 +1951,18 @@ const g_escapeStr = {
     ],
 };
 
-// グラデーションで、カラーコードではないパーセント表記、位置表記系を除外するためのリスト
-// 'at', 'to'のみ、'to left'や'to right'のように方向が入るため、半角スペースまで込みで判断
-const g_cssCheckStr = {
-    header: [`at `, `to `, `from`, `circle`, `ellipse`, `closest-`, `farthest-`, `transparent`],
-    footer: [`deg`, `rad`, `grad`, `turn`, `repeat`],
+/**
+ * 文字列部分一致用リスト
+ */
+const g_checkStr = {
+    // グラデーションで、カラーコードではないパーセント表記、位置表記系を除外するためのリスト
+    // 'at', 'to'のみ、'to left'や'to right'のように方向が入るため、半角スペースまで込みで判断
+    cssHeader: [`at `, `to `, `from`, `circle`, `ellipse`, `closest-`, `farthest-`, `transparent`],
+    cssFooter: [`deg`, `rad`, `grad`, `turn`, `repeat`],
+
+    // 譜面分割あり、譜面番号固定時のみ譜面データを一時クリアする際の条件
+    resetDosHeader: [`gauge`],
+    resetDosFooter: [`_data`, `_change`, `Color`, `customGauge`],
 };
 
 /** 
