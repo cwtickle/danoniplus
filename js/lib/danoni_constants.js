@@ -845,6 +845,7 @@ const g_shortcutObj = {
         NumpadSubtract: { id: `lnkarrowEffect` },
         NumpadDivide: { id: `lnkspecial` },
 
+        KeyZ: { id: `btnSave` },
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
@@ -888,7 +889,7 @@ const g_btnPatterns = {
     title: { Start: 0, Comment: -10 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
     difSelector: {},
-    settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Settings: -5 },
+    settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5 },
     loadingIos: { Play: 0 },
     keyConfig: { Back: -3 },
     result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0 },
