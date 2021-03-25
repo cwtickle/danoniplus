@@ -3737,6 +3737,18 @@ const commonSettingBtn = _labelName => {
 			w: C_LEN_SETMINI_WIDTH, h: 40, title: g_msgObj[`to${_labelName}`],
 			resetFunc: _ => (_labelName === `Display` ? settingsDisplayInit() : optionInit()),
 		}, g_cssObj.button_Mini),
+
+		// データセーブフラグの切替
+		createCss2Button(`btnSave`, g_lblNameObj.dataSave, evt => {
+			g_stateObj.dataSaveFlg = !g_stateObj.dataSaveFlg;
+			const [from, to] = (g_stateObj.dataSaveFlg ? [C_FLG_OFF, C_FLG_ON] : [C_FLG_ON, C_FLG_OFF]);
+			evt.target.classList.replace(g_cssObj[`button_${from}`], g_cssObj[`button_${to}`]);
+		}, {
+			x: 0, y: 5,
+			w: g_sWidth / 5, h: 16, siz: 12,
+			title: g_msgObj.dataSave,
+			borderStyle: `solid`,
+		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF)),
 	);
 };
 
@@ -3767,21 +3779,6 @@ function optionInit() {
 
 	// ボタン描画
 	commonSettingBtn(`Display`);
-
-	multiAppend(divRoot,
-
-		// データセーブフラグの切替
-		createCss2Button(`btnSave`, g_lblNameObj.dataSave, evt => {
-			g_stateObj.dataSaveFlg = !g_stateObj.dataSaveFlg;
-			const [from, to] = (g_stateObj.dataSaveFlg ? [C_FLG_OFF, C_FLG_ON] : [C_FLG_ON, C_FLG_OFF]);
-			evt.target.classList.replace(g_cssObj[`button_${from}`], g_cssObj[`button_${to}`]);
-		}, {
-			x: 0, y: 5,
-			w: g_sWidth / 5, h: 16, siz: 12,
-			title: g_msgObj.dataSave,
-			borderStyle: `solid`,
-		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF))
-	);
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage);
