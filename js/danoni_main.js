@@ -2580,17 +2580,9 @@ function titleInit() {
  * @param {boolean} _resetFlg
  */
 function makeWarningWindow(_text = ``, _resetFlg = false) {
-	let lblWarning;
 	const displayName = (g_currentPage === `initial` ? `title` : g_currentPage);
 	g_errMsgObj[displayName] = (_resetFlg ? `` : g_errMsgObj[displayName]) + (_text === `` ? `` : `<p>${_text}</p>`);
-	if (document.querySelector(`#lblWarning`) === null) {
-	} else {
-		lblWarning = document.querySelector(`#lblWarning`);
-		divRoot.removeChild(document.querySelector(`#lblWarning`));
-	}
-	lblWarning = getTitleDivLabel(`lblWarning`, g_errMsgObj[displayName], 0, 70);
-	setWindowStyle(lblWarning, `#ffcccc`, `#660000`);
-	divRoot.appendChild(lblWarning);
+	divRoot.appendChild(setWindowStyle(g_errMsgObj[displayName], `#ffcccc`, `#660000`));
 }
 
 /**
@@ -2598,14 +2590,7 @@ function makeWarningWindow(_text = ``, _resetFlg = false) {
  * @param {string} _text 
  */
 function makeInfoWindow(_text, _animationName = ``) {
-	let lblWarning;
-	if (document.querySelector(`#lblWarning`) === null) {
-	} else {
-		lblWarning = document.querySelector(`#lblWarning`);
-		divRoot.removeChild(document.querySelector(`#lblWarning`));
-	}
-	lblWarning = getTitleDivLabel(`lblWarning`, `<p>${_text}</p>`, 0, 70);
-	setWindowStyle(lblWarning, `#ccccff`, `#000066`, C_ALIGN_CENTER);
+	const lblWarning = setWindowStyle(`<p>${_text}</p>`, `#ccccff`, `#000066`, C_ALIGN_CENTER);
 	lblWarning.style.pointerEvents = C_DIS_NONE;
 
 	if (_animationName !== ``) {
@@ -2623,24 +2608,31 @@ function makeInfoWindow(_text, _animationName = ``) {
  * @param {string} _bkColor 
  * @param {string} _textColor 
  */
-function setWindowStyle(_lbl, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
+function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 
-	const len = _lbl.innerHTML.split(`<br>`).length + _lbl.innerHTML.split(`<p>`).length - 1;
+	if (document.querySelector(`#lblWarning`) === null) {
+	} else {
+		divRoot.removeChild(document.querySelector(`#lblWarning`));
+	}
+	const lbl = getTitleDivLabel(`lblWarning`, _text, 0, 70);
+	const len = lbl.innerHTML.split(`<br>`).length + lbl.innerHTML.split(`<p>`).length - 1;
 	let warnHeight;
 	if (len * 21 <= 150) {
 		warnHeight = len * 21;
 	} else {
 		warnHeight = 150;
-		_lbl.style.overflow = `auto`;
+		lbl.style.overflow = `auto`;
 	}
-	_lbl.style.backgroundColor = _bkColor;
-	_lbl.style.opacity = 0.9;
-	_lbl.style.height = `${warnHeight}px`;
-	_lbl.style.lineHeight = `15px`;
-	_lbl.style.fontSize = `${C_SIZ_MAIN}px`;
-	_lbl.style.color = _textColor;
-	_lbl.style.textAlign = _align;
-	_lbl.style.fontFamily = getBasicFont();
+	lbl.style.backgroundColor = _bkColor;
+	lbl.style.opacity = 0.9;
+	lbl.style.height = `${warnHeight}px`;
+	lbl.style.lineHeight = `15px`;
+	lbl.style.fontSize = `${C_SIZ_MAIN}px`;
+	lbl.style.color = _textColor;
+	lbl.style.textAlign = _align;
+	lbl.style.fontFamily = getBasicFont();
+
+	return lbl;
 }
 
 /**
