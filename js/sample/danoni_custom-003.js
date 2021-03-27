@@ -22,29 +22,19 @@
  */
 function customTitleInit() {
 
-	// 背景の矢印オブジェクトを表示
-	var lblC = createArrowEffect("lblC", "#ffffff", g_sWidth / 2 - 300, 0, 100, "onigiri");
-	lblC.style.opacity = 0.25;
-	divRoot.appendChild(lblC);
+	multiAppend(divRoot,
+		// 背景の矢印オブジェクトを表示
+		createColorObject2(`lblC`, {
+			x: g_sWidth / 2 - 300, y: 0, w: 100, h: 100, rotate: `onigiri`, opacity: 0.25,
+			background: `#ffffff`,
+		}),
 
-
-	// Tweetボタン描画
-	var btnTweet = createButton({
-		id: "btnTweet",
-		name: "Info",
-		x: g_sWidth / 4 * 3,
-		y: 340,
-		width: g_sWidth / 4,
-		height: C_BTN_HEIGHT,
-		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
-		hoverColor: C_CLR_TWEET,
-		align: C_ALIGN_CENTER
-	}, function () {
-		clearWindow();
-		customCommentInit();
-	});
-	divRoot.appendChild(btnTweet);
+		// Infoボタン描画
+		createCss2Button(`btnTweet`, `Info`, _ => clearTimeout(g_timeoutEvtTitleId), {
+			x: g_sWidth / 4 * 3, y: 340, w: g_sWidth / 4,
+			resetFunc: _ => customCommentInit(),
+		}, g_cssObj.button_Tweet)
+	);
 }
 
 /**
@@ -52,41 +42,35 @@ function customTitleInit() {
  */
 function customCommentInit() {
 
-	// タイトル文字描画
-	var lblTitle = getTitleDivLabel("lblTitle",
-		"<span style='color:#6666ff;font-size:40px;'>I</span>NFO", 0, 15);
-	divRoot.appendChild(lblTitle);
+	clearWindow(true);
 
-	var comment = "これはカスタムページのテストです。<br>" +
-		"このように、作品別に特殊なページを作ることもできます。<br><br>" +
-		"下記のような戻るボタンがあると良いですね。(・∀・)";
+	// テキスト
+	const comment = `これはカスタムページのテストです。<br>
+		このように、作品別に特殊なページを作ることもできます。<br><br>
+		下記のような戻るボタンがあると良いですね。(・∀・)`;
 
-	var lblComment = createDivLabel("lblComment", g_sWidth / 2 - 200, 100, 400, 20, 14, "#cccccc",
-		comment);
-	lblComment.style.textAlign = C_ALIGN_LEFT;
-	divRoot.appendChild(lblComment);
+	// 各種ラベル追加
+	multiAppend(divRoot,
 
-	var lblC = createArrowEffect("lblC", "#ffffff", g_sWidth / 2 + 200, 350, 100, "onigiri");
-	divRoot.appendChild(lblC);
+		// タイトル文字
+		getTitleDivLabel(`lblTitle`,
+			`<span style='color:#6666ff;font-size:40px;'>I</span>NFO`, 0, 15),
 
-	// 戻るボタン描画
-	var btnBack = createButton({
-		id: "btnBack",
-		name: "Back",
-		x: 0,
-		y: g_sHeight - 100,
-		width: g_sWidth / 3,
-		height: C_BTN_HEIGHT,
-		fontsize: C_LBL_BTNSIZE,
-		normalColor: C_CLR_DEFAULT,
-		hoverColor: C_CLR_BACK,
-		align: C_ALIGN_CENTER
-	}, function () {
-		// タイトル画面へ戻る
-		clearWindow();
-		titleInit();
-	});
-	divRoot.appendChild(btnBack);
+		// コメント文
+		createDivCss2Label(`lblComment`, comment, {
+			x: g_sWidth / 2 - 200, y: 100, w: 400, h: 20, siz: 14, color: `#cccccc`,
+			align: C_ALIGN_LEFT,
+		}),
+
+		// おにぎりオブジェクトの配置
+		createColorObject2(`lblC`, {
+			x: g_sWidth / 2 + 200, y: 350, w: 100, h: 100, rotate: `onigiri`,
+			background: `#ffffff`,
+		}),
+
+		// 戻るボタン描画
+		createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, { resetFunc: _ => titleInit() }, g_cssObj.button_Back),
+	)
 }
 
 /**
