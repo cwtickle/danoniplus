@@ -474,6 +474,10 @@ function importCssFile(_href, _func) {
 	link.rel = `stylesheet`;
 	link.href = _href;
 	link.onload = _ => _func();
+	link.onerror = _ => {
+		makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(_href.split(`?`)[0]), `title`);
+		_func();
+	};
 	document.head.appendChild(link);
 }
 
@@ -1470,6 +1474,20 @@ function initAfterDosLoaded() {
 			}
 		});
 
+		// 非推奨ブラウザに対して警告文を表示
+		// Firefoxはローカル環境時、Ver65以降矢印が表示されなくなるため非推奨表示
+		if (g_userAgent.indexOf(`msie`) !== -1 ||
+			g_userAgent.indexOf(`trident`) !== -1 ||
+			g_userAgent.indexOf(`edge`) !== -1 ||
+			(g_userAgent.indexOf(`firefox`) !== -1 && g_isFile)) {
+
+			makeWarningWindow(g_msgInfoObj.W_0001);
+		}
+
+		if (g_isFile) {
+			makeWarningWindow(g_msgInfoObj.W_0011);
+		}
+
 		if (g_loadObj.main) {
 			// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
 			loadCustomjs(_ => {
@@ -2371,18 +2389,8 @@ function titleInit() {
 		divRoot.appendChild(lblmusicTitle);
 	}
 
-	// 非推奨ブラウザに対して警告文を表示
-	// Firefoxはローカル環境時、Ver65以降矢印が表示されなくなるため非推奨表示
-	if (g_userAgent.indexOf(`msie`) !== -1 ||
-		g_userAgent.indexOf(`trident`) !== -1 ||
-		g_userAgent.indexOf(`edge`) !== -1 ||
-		(g_userAgent.indexOf(`firefox`) !== -1 && g_isFile)) {
-
-		makeWarningWindow(g_msgInfoObj.W_0001);
-	}
-
-	if (g_isFile) {
-		makeWarningWindow(g_msgInfoObj.W_0011);
+	if (g_errMsgObj.title !== ``) {
+		makeWarningWindow();
 	}
 
 	// ユーザカスタムイベント(初期)
@@ -2569,17 +2577,18 @@ function titleInit() {
 /**
  * 警告用ウィンドウ（汎用）を表示
  * @param {string} _text 
+ * @param {boolean} _resetFlg
  */
-function makeWarningWindow(_text) {
+function makeWarningWindow(_text = ``, _resetFlg = false) {
 	let lblWarning;
+	const displayName = (g_currentPage === `initial` ? `title` : g_currentPage);
+	g_errMsgObj[displayName] = (_resetFlg ? `` : g_errMsgObj[displayName]) + (_text === `` ? `` : `<p>${_text}</p>`);
 	if (document.querySelector(`#lblWarning`) === null) {
-		lblWarning = getTitleDivLabel(`lblWarning`, `<p>${_text}</p>`, 0, 70);
 	} else {
 		lblWarning = document.querySelector(`#lblWarning`);
-		const text = lblWarning.innerHTML + `<p>${_text}</p>`;
 		divRoot.removeChild(document.querySelector(`#lblWarning`));
-		lblWarning = getTitleDivLabel(`lblWarning`, text, 0, 70);
 	}
+	lblWarning = getTitleDivLabel(`lblWarning`, g_errMsgObj[displayName], 0, 70);
 	setWindowStyle(lblWarning, `#ffcccc`, `#660000`);
 	divRoot.appendChild(lblWarning);
 }
@@ -2597,6 +2606,7 @@ function makeInfoWindow(_text, _animationName = ``) {
 	}
 	lblWarning = getTitleDivLabel(`lblWarning`, `<p>${_text}</p>`, 0, 70);
 	setWindowStyle(lblWarning, `#ccccff`, `#000066`, C_ALIGN_CENTER);
+	lblWarning.style.pointerEvents = C_DIS_NONE;
 
 	if (_animationName !== ``) {
 		lblWarning.style.animationName = _animationName;
@@ -2631,7 +2641,6 @@ function setWindowStyle(_lbl, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 	_lbl.style.color = _textColor;
 	_lbl.style.textAlign = _align;
 	_lbl.style.fontFamily = getBasicFont();
-	_lbl.style.pointerEvents = C_DIS_NONE;
 }
 
 /**

@@ -2292,3 +2292,15 @@ const g_msgObj = {
     opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
 
 };
+
+/**
+ * エラーメッセージ管理
+ */
+const g_errMsgObj = {
+    title: ``,
+    option: ``,
+    settingsDisplay: ``,
+    loading: ``,
+    main: ``,
+    result: ``,
+};
