@@ -2890,7 +2890,7 @@ function headerConvert(_dosObj) {
 
 	// グラデーションのデフォルト中間色を設定
 	divRoot.appendChild(createDivCss2Label(`dummyLabel`, ``, { pointerEvents: C_DIS_NONE }));
-	obj.baseBrightFlg = checkLightOrDark(colorNameToCode(window.getComputedStyle(dummyLabel, ``).color));
+	obj.baseBrightFlg = setVal(_dosObj.baseBright, checkLightOrDark(colorNameToCode(window.getComputedStyle(dummyLabel, ``).color)), C_TYP_BOOLEAN);
 	const intermediateColor = obj.baseBrightFlg ? `#111111` : `#eeeeee`;
 
 	// 矢印の色変化を常時グラデーションさせる設定
