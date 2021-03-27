@@ -15,7 +15,7 @@ v14, 20の対応終了時期はv23リリース開始時を予定しています�
 
 | Version | Supported          | Latest Version | First Release | End of Support |
 | ------- | ------------------ |----------------|---------------|----------------|
-| v21     | :heavy_check_mark: |[v21.1.0](../../releases/tag/v21.1.0)          |2021-03-12|-|
+| v21     | :heavy_check_mark: |[v21.2.0](../../releases/tag/v21.2.0)          |2021-03-12|-|
 | v20     | :heavy_check_mark: |[v20.5.2](../../releases/tag/v20.5.2)          |2021-02-12|(At Release v23)|
 | v19     | :heavy_check_mark: |[v19.5.6](../../releases/tag/v19.5.6)          |2021-01-17|-|
 | v18     | :x:                |[v18.9.6 (final)](../../releases/tag/v18.9.6)  |2020-10-25|2021-03-12|

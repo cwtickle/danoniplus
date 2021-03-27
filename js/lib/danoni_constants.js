@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/03/19 (v21.1.0)
+ * Revised : 2021/03/27 (v21.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -845,6 +845,7 @@ const g_shortcutObj = {
         NumpadSubtract: { id: `lnkarrowEffect` },
         NumpadDivide: { id: `lnkspecial` },
 
+        KeyZ: { id: `btnSave` },
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
@@ -888,7 +889,7 @@ const g_btnPatterns = {
     title: { Start: 0, Comment: -10 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
     difSelector: {},
-    settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Settings: -5 },
+    settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5 },
     loadingIos: { Play: 0 },
     keyConfig: { Back: -3 },
     result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0 },
@@ -1935,6 +1936,25 @@ const g_dfColorObj = {
     ],
 };
 
+const g_dfColorLightObj = {
+    setColorType1: [`#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`],
+    setColorType2: [`#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`],
+    frzColorType1: [
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
+        [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
+    ],
+    frzColorType2: [
+        [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
+        [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
+    ],
+};
+
 const g_escapeStr = {
     escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
     escapeTag: [
@@ -2271,4 +2291,16 @@ const g_msgObj = {
     appearance: `流れる矢印の見え方を制御します。`,
     opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
 
+};
+
+/**
+ * エラーメッセージ管理
+ */
+const g_errMsgObj = {
+    title: ``,
+    option: ``,
+    settingsDisplay: ``,
+    loading: ``,
+    main: ``,
+    result: ``,
 };
