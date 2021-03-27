@@ -233,15 +233,8 @@ const checkLightOrDark = _colorStr => {
 	const r = parseInt(_colorStr.substring(1, 3), 16);
 	const g = parseInt(_colorStr.substring(3, 5), 16);
 	const b = parseInt(_colorStr.substring(5, 7), 16);
-	return ((((r * 299) + (g * 587) + (b * 114)) / 1000) >= 128);
+	return ((((r * 299) + (g * 587) + (b * 114)) / 1000) < 128);
 };
-
-/**
- * 対象のカラーコードが明暗どちらかを判定し、白もしくは黒色を返却
- * @param {string} _colorStr 
- * @returns 
- */
-const getLightOrDark = _colorStr => checkLightOrDark(_colorStr) ? `#eeeeee` : `#111111`;
 
 /**
  * イベントハンドラ用オブジェクト
@@ -2897,7 +2890,8 @@ function headerConvert(_dosObj) {
 
 	// グラデーションのデフォルト中間色を設定
 	divRoot.appendChild(createDivCss2Label(`dummyLabel`, ``, { pointerEvents: C_DIS_NONE }));
-	const intermediateColor = getLightOrDark(colorNameToCode(window.getComputedStyle(dummyLabel, ``).color));
+	obj.baseBrightFlg = checkLightOrDark(colorNameToCode(window.getComputedStyle(dummyLabel, ``).color));
+	const intermediateColor = obj.baseBrightFlg ? `#111111` : `#eeeeee`;
 
 	// 矢印の色変化を常時グラデーションさせる設定
 	obj.defaultColorgrd = [false, intermediateColor];
@@ -2934,6 +2928,9 @@ function headerConvert(_dosObj) {
 
 	// 初期色情報
 	Object.keys(g_dfColorObj).forEach(key => obj[key] = g_dfColorObj[key].concat());
+	if (obj.baseBrightFlg) {
+		Object.keys(g_dfColorLightObj).forEach(key => obj[key] = g_dfColorLightObj[key].concat());
+	}
 	obj.frzColorDefault = [];
 
 	// ダミー用初期矢印色

@@ -1936,6 +1936,25 @@ const g_dfColorObj = {
     ],
 };
 
+const g_dfColorLightObj = {
+    setColorType1: [`#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`],
+    setColorType2: [`#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`],
+    frzColorType1: [
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
+        [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
+    ],
+    frzColorType2: [
+        [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
+        [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
+    ],
+};
+
 const g_escapeStr = {
     escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
     escapeTag: [
