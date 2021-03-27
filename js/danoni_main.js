@@ -225,6 +225,25 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
 	listMatching(_str, _headerList, { prefix: `^` }) || listMatching(_str, _footerList, { suffix: `$` });
 
 /**
+ * 対象のカラーコードが明暗どちらかを判定 (true: 明色, false: 暗色)
+ * @param {string} _colorStr 
+ * @returns 
+ */
+const checkLightOrDark = _colorStr => {
+	const r = parseInt(_colorStr.substring(1, 3), 16);
+	const g = parseInt(_colorStr.substring(3, 5), 16);
+	const b = parseInt(_colorStr.substring(5, 7), 16);
+	return ((((r * 299) + (g * 587) + (b * 114)) / 1000) >= 128);
+};
+
+/**
+ * 対象のカラーコードが明暗どちらかを判定し、白もしくは黒色を返却
+ * @param {string} _colorStr 
+ * @returns 
+ */
+const getLightOrDark = _colorStr => checkLightOrDark(_colorStr) ? `#eeeeee` : `#111111`;
+
+/**
  * イベントハンドラ用オブジェクト
  * 参考: http://webkatu.com/remove-eventlistener/
  * 
@@ -455,11 +474,13 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
  * CSSファイルの読み込み（danoni_main.css以外）
  * デフォルトは danoni_skin_default.css を読み込む
  * @param {url} _href 
+ * @param {function} _func
  */
-function importCssFile(_href) {
+function importCssFile(_href, _func) {
 	const link = document.createElement(`link`);
 	link.rel = `stylesheet`;
 	link.href = _href;
+	link.onload = _ => _func();
 	document.head.appendChild(link);
 }
 
@@ -1385,13 +1406,8 @@ function initAfterDosLoaded() {
 	// クエリで譜面番号が指定されていればセット
 	g_stateObj.scoreId = setVal(getQueryParamVal(`scoreId`), 0, C_TYP_NUMBER);
 
-	// 譜面ヘッダー、特殊キー情報の読込
-	g_headerObj = headerConvert(g_rootObj);
-	keysConvert(g_rootObj);
-
-	// キー数情報を初期化
-	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-	g_keyObj.currentPtn = 0;
+	// 譜面ヘッダーの読込
+	Object.assign(g_headerObj, preheaderConvert(g_rootObj));
 
 	// CSSファイル内のbackgroundを取得するために再描画
 	if (document.querySelector(`#layer0`) === null) {
@@ -1403,58 +1419,75 @@ function initAfterDosLoaded() {
 
 	// CSSファイルの読み込み
 	const randTime = new Date().getTime();
-	importCssFile(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.css?${randTime}`);
-	if (g_headerObj.skinType2 !== ``) {
-		importCssFile(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.css?${randTime}`);
-	}
-
-	// 画像ファイルの読み込み
-	g_imgInitList.forEach(img => preloadFile(`image`, g_imgObj[img]));
-
-	// その他の画像ファイルの読み込み
-	g_headerObj.preloadImages.filter(image => hasVal(image)).forEach(preloadImage => {
-
-		// Pattern A: |preloadImages=file.png|
-		// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
-		// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
-		// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
-
-		const tmpPreloadImages = preloadImage.split(`@`);
-		if (tmpPreloadImages.length === 1) {
-			// Pattern Aの場合
-			preloadFile(`image`, preloadImage);
+	importCssFile(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.css?${randTime}`, _ => {
+		if (g_headerObj.skinType2 !== ``) {
+			importCssFile(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.css?${randTime}`, _ => initAfterCssLoaded());
 		} else {
-			const termRoopCnts = tmpPreloadImages[1].split(`-`);
-			let startCnt = 1;
-			let lastCnt;
-			let paddingLen;
-
-			if (termRoopCnts.length === 1) {
-				// Pattern Bの場合
-				lastCnt = setVal(tmpPreloadImages[1], 1, C_TYP_NUMBER);
-				paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
-			} else {
-				// Pattern C, Dの場合
-				startCnt = setVal(termRoopCnts[0], 1, C_TYP_NUMBER);
-				lastCnt = setVal(termRoopCnts[1], 1, C_TYP_NUMBER);
-				paddingLen = String(setVal(termRoopCnts[1], 1, C_TYP_STRING)).length;
-			}
-			for (let k = startCnt; k <= lastCnt; k++) {
-				preloadFile(`image`, tmpPreloadImages[0].replace(/\*/g, String(k).padStart(paddingLen, `0`)));
-			}
+			initAfterCssLoaded();
 		}
 	});
 
-	if (g_loadObj.main) {
-		// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
-		loadCustomjs(_ => {
-			loadDos(_ => {
-				getScoreDetailData(0);
-			}, 0, true);
+	/**
+	 * スキンCSSファイルを読み込んだ後の処理
+	 */
+	function initAfterCssLoaded() {
+
+		// 譜面ヘッダー、特殊キー情報の読込
+		Object.assign(g_headerObj, headerConvert(g_rootObj));
+		keysConvert(g_rootObj);
+
+		// キー数情報を初期化
+		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
+		g_keyObj.currentPtn = 0;
+
+		// 画像ファイルの読み込み
+		g_imgInitList.forEach(img => preloadFile(`image`, g_imgObj[img]));
+
+		// その他の画像ファイルの読み込み
+		g_headerObj.preloadImages.filter(image => hasVal(image)).forEach(preloadImage => {
+
+			// Pattern A: |preloadImages=file.png|
+			// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
+			// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
+			// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
+
+			const tmpPreloadImages = preloadImage.split(`@`);
+			if (tmpPreloadImages.length === 1) {
+				// Pattern Aの場合
+				preloadFile(`image`, preloadImage);
+			} else {
+				const termRoopCnts = tmpPreloadImages[1].split(`-`);
+				let startCnt = 1;
+				let lastCnt;
+				let paddingLen;
+
+				if (termRoopCnts.length === 1) {
+					// Pattern Bの場合
+					lastCnt = setVal(tmpPreloadImages[1], 1, C_TYP_NUMBER);
+					paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
+				} else {
+					// Pattern C, Dの場合
+					startCnt = setVal(termRoopCnts[0], 1, C_TYP_NUMBER);
+					lastCnt = setVal(termRoopCnts[1], 1, C_TYP_NUMBER);
+					paddingLen = String(setVal(termRoopCnts[1], 1, C_TYP_STRING)).length;
+				}
+				for (let k = startCnt; k <= lastCnt; k++) {
+					preloadFile(`image`, tmpPreloadImages[0].replace(/\*/g, String(k).padStart(paddingLen, `0`)));
+				}
+			}
 		});
-	} else {
-		getScoreDetailData(0);
-		reloadDos(0);
+
+		if (g_loadObj.main) {
+			// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
+			loadCustomjs(_ => {
+				loadDos(_ => {
+					getScoreDetailData(0);
+				}, 0, true);
+			});
+		} else {
+			getScoreDetailData(0);
+			reloadDos(0);
+		}
 	}
 }
 
@@ -2651,7 +2684,40 @@ function getMusicNameMultiLine(_musicName) {
 }
 
 /**
- * 譜面ヘッダーの分解
+ * 譜面ヘッダーの分解（スキン、jsファイルなどの設定）
+ * @param {object} _dosObj 
+ * @returns 
+ */
+function preheaderConvert(_dosObj) {
+
+	// ヘッダー群の格納先
+	const obj = {};
+
+	// 外部スキンファイルの指定
+	const tmpSkinType = _dosObj.skinType || (typeof g_presetSkinType === C_TYP_STRING ? g_presetSkinType : `default`);
+	const skinTypes = tmpSkinType.split(`,`);
+	[obj.skinType2, obj.skinRoot2] = getFilePath(skinTypes.length > 1 ? skinTypes[1] : `blank`, C_DIR_SKIN);
+	[obj.skinType, obj.skinRoot] = getFilePath(skinTypes[0], C_DIR_SKIN);
+
+	// 外部jsファイルの指定
+	const tmpCustomjs = _dosObj.customjs || (typeof g_presetCustomJs === C_TYP_STRING ? g_presetCustomJs : C_JSF_CUSTOM);
+	const customjss = tmpCustomjs.split(`,`);
+	[obj.customjs2, obj.customjs2Root] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
+	[obj.customjs, obj.customjsRoot] = getFilePath(customjss[0], C_DIR_JS);
+
+	// デフォルト曲名表示、背景、Ready表示の利用有無
+	g_titleLists.init.forEach(objName => {
+		const objUpper = toCapitalize(objName);
+		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
+			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
+				setVal(g_presetCustomDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
+	});
+
+	return obj;
+}
+
+/**
+ * 譜面ヘッダーの分解（その他の設定）
  * @param {object} _dosObj 譜面データオブジェクト
  */
 function headerConvert(_dosObj) {
@@ -2829,12 +2895,16 @@ function headerConvert(_dosObj) {
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
 	g_settings.speedNum = roundZero(g_settings.speeds.findIndex(speed => speed === g_stateObj.speed));
 
+	// グラデーションのデフォルト中間色を設定
+	divRoot.appendChild(createDivCss2Label(`dummyLabel`, ``, { pointerEvents: C_DIS_NONE }));
+	const intermediateColor = getLightOrDark(colorNameToCode(window.getComputedStyle(dummyLabel, ``).color));
+
 	// 矢印の色変化を常時グラデーションさせる設定
-	obj.defaultColorgrd = [false, `#eeeeee`];
+	obj.defaultColorgrd = [false, intermediateColor];
 	if (hasVal(_dosObj.defaultColorgrd)) {
 		obj.defaultColorgrd = _dosObj.defaultColorgrd.split(`,`);
 		obj.defaultColorgrd[0] = setVal(obj.defaultColorgrd[0], false, C_TYP_BOOLEAN);
-		obj.defaultColorgrd[1] = setVal(obj.defaultColorgrd[1], `#eeeeee`, C_TYP_STRING);
+		obj.defaultColorgrd[1] = setVal(obj.defaultColorgrd[1], intermediateColor, C_TYP_STRING);
 	}
 
 	// カラーコードのゼロパディング有無設定
@@ -2939,18 +3009,6 @@ function headerConvert(_dosObj) {
 		makeWarningWindow(g_msgInfoObj.E_0042.split(`{0}`).join(`playbackRate`));
 	}
 
-	// 外部スキンファイルの指定
-	const tmpSkinType = _dosObj.skinType || (typeof g_presetSkinType === C_TYP_STRING ? g_presetSkinType : `default`);
-	const skinTypes = tmpSkinType.split(`,`);
-	[obj.skinType2, obj.skinRoot2] = getFilePath(skinTypes.length > 1 ? skinTypes[1] : `blank`, C_DIR_SKIN);
-	[obj.skinType, obj.skinRoot] = getFilePath(skinTypes[0], C_DIR_SKIN);
-
-	// 外部jsファイルの指定
-	const tmpCustomjs = _dosObj.customjs || (typeof g_presetCustomJs === C_TYP_STRING ? g_presetCustomJs : C_JSF_CUSTOM);
-	const customjss = tmpCustomjs.split(`,`);
-	[obj.customjs2, obj.customjs2Root] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
-	[obj.customjs, obj.customjsRoot] = getFilePath(customjss[0], C_DIR_JS);
-
 	// ステップゾーン位置
 	g_posObj.stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));
 	g_posObj.stepYR = (isNaN(parseFloat(_dosObj.stepYR)) ? C_STEP_YR : parseFloat(_dosObj.stepYR));
@@ -2994,14 +3052,6 @@ function headerConvert(_dosObj) {
 
 	// 更新日
 	obj.releaseDate = setVal(_dosObj.releaseDate, ``, C_TYP_STRING);
-
-	// デフォルト曲名表示、背景、Ready表示の利用有無
-	g_titleLists.init.forEach(objName => {
-		const objUpper = toCapitalize(objName);
-		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
-			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
-				setVal(g_presetCustomDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
-	});
 
 	// デフォルトReady/リザルト表示の遅延時間設定
 	[`ready`, `result`].forEach(objName => {
