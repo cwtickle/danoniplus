@@ -34,7 +34,7 @@ let g_localVersion2 = ``;
  *  ⇒　各画面に Init がついたものが画面の基本構成(ルート)を表す。
  * 
  * ▽ スプライトの親子関係
- *  基本的にdiv要素で管理。最下層を[divRoot]とし、createSprite()でdiv子要素を作成。
+ *  基本的にdiv要素で管理。最下層を[divRoot]とし、createEmptySprite()でdiv子要素を作成。
  *  clearWindow()で[divRoot]以外の全てのスプライトを削除。
  *  特定のスプライトに限り削除する場合は deleteChildspriteAll() 。
  */
@@ -653,6 +653,7 @@ function createColorObject2(_id,
  * 空スプライト(ムービークリップ相当)の作成
  * - 作成済みの場合はすでに作成済のスプライトを返却する
  * - ここで作成したスプライトは clearWindow() により削除される
+ * @deprecated v21以降非推奨
  * @param {string} _parentObjName 親スプライト名
  * @param {string} _newObjName 作成する子スプライト名
  * @param {number} _x 作成するスプライトのx座標（親スプライト基準）
@@ -675,14 +676,39 @@ function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height, _opt
 }
 
 /**
+ * 空スプライト(ムービークリップ相当)の作成
+ * - 作成済みの場合はすでに作成済のスプライトを返却する
+ * @param {object} _parentObj 親スプライト
+ * @param {string} _newObjId 作成する子スプライト名
+ * @param {object} _obj (x, y, w, h, ...rest)
+ * @param  {...any} _classes 
+ * @returns 
+ */
+function createEmptySprite(_parentObj, _newObjId, { x = 0, y = 0, w = g_sWidth, h = g_sHeight, title = ``, ...rest } = {}, ..._classes) {
+	if (document.getElementById(_newObjId) !== null) {
+		changeStyle(_newObjId, { x, y, w, h, title, ...rest });
+		return document.getElementById(_newObjId);
+	}
+	const div = createDiv(_newObjId, x, y, w, h);
+	div.classList.add(..._classes);
+	div.title = title;
+
+	const style = div.style;
+	Object.keys(rest).forEach(property => style[property] = rest[property]);
+	_parentObj.appendChild(div);
+
+	return div;
+}
+
+/**
  * 階層スプライト（全体）の作成
  * @param {string} _baseName 
  * @param {number} _num 
  */
 function createMultipleSprite(_baseName, _num) {
-	const sprite = createSprite(`divRoot`, `${_baseName}`, 0, 0, g_sWidth, g_sHeight);
+	const sprite = createEmptySprite(divRoot, `${_baseName}`);
 	for (let j = 0; j <= _num; j++) {
-		createSprite(_baseName, `${_baseName}${j}`, 0, 0, g_sWidth, g_sHeight);
+		createEmptySprite(sprite, `${_baseName}${j}`);
 	}
 	return sprite;
 }
@@ -778,7 +804,7 @@ function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
  * @param {string} _id 
  * @param {object} _obj (x, y, w, h, siz, align, title, ...rest) 
  */
-function changeStyle(_id, { x, y, w, h, siz, align, title, ...rest } = {}) {
+function changeStyle(_id, { x, y, w, h, siz = C_SIZ_SETLBL, align, title, ...rest } = {}) {
 	const div = document.querySelector(`#${_id}`);
 	const style = div.style;
 
@@ -1171,17 +1197,8 @@ function initialControl() {
 		setVal($id(`canvas-frame`).width, 600, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
 	];
 
-	let divRoot;
-	if (document.querySelector(`#divRoot`) === null) {
-		const stage = document.querySelector(`#canvas-frame`);
-		divRoot = createDiv(`divRoot`, 0, 0, g_sWidth, g_sHeight);
-		stage.style.margin = `auto`;
-		stage.style.letterSpacing = `normal`;
-		stage.appendChild(divRoot);
-		clearWindow();
-	} else {
-		divRoot = document.querySelector(`#divRoot`);
-	}
+	const stage = document.querySelector(`#canvas-frame`);
+	const divRoot = createEmptySprite(stage, `divRoot`, { margin: `auto`, letterSpacing: `normal` });
 
 	// 背景の表示
 	if (document.querySelector(`#layer0`) !== null) {
@@ -1193,8 +1210,7 @@ function initialControl() {
 		l0ctx.fillStyle = grd;
 		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	} else {
-		const divBack = createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
-		divBack.style.background = `linear-gradient(#000000, #222222)`;
+		createEmptySprite(divRoot, `divBack`, { background: `linear-gradient(#000000, #222222)` });
 	}
 
 	// Now Loadingを表示
@@ -1417,9 +1433,9 @@ function initAfterDosLoaded() {
 	// CSSファイル内のbackgroundを取得するために再描画
 	if (document.querySelector(`#layer0`) === null) {
 		divRoot.removeChild(document.querySelector(`#divBack`));
-		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+		createEmptySprite(divRoot, `divBack`);
 	} else if (g_headerObj.skinType !== `default` && !g_headerObj.customBackUse) {
-		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+		createEmptySprite(divRoot, `divBack`);
 	}
 
 	// CSSファイルの読み込み
@@ -1843,8 +1859,7 @@ function loadMusic() {
 	request.addEventListener(`load`, _ => {
 		if (request.status >= 200 && request.status < 300) {
 			const blobUrl = URL.createObjectURL(request.response);
-			const loader = createSprite(`divRoot`, `loader`, 0, g_sHeight - 10, g_sWidth, 10);
-			loader.style.backgroundColor = `#333333`;
+			createEmptySprite(divRoot, `loader`, { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` });
 			lblLoading.textContent = g_lblNameObj.pleaseWait;
 			setAudio(blobUrl);
 		} else {
@@ -1858,9 +1873,7 @@ function loadMusic() {
 
 		if (_event.lengthComputable) {
 			const rate = _event.loaded / _event.total;
-			const loader = createSprite(`divRoot`, `loader`, 0, g_sHeight - 10, g_sWidth, 10);
-			loader.style.width = `${g_sWidth * rate}px`;
-			loader.style.backgroundColor = `#eeeeee`;
+			createEmptySprite(divRoot, `loader`, { y: g_sHeight - 10, h: 10, w: g_sWidth * rate, backgroundColor: `#eeeeee` });
 			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${Math.floor(rate * 100)}%`;
 		} else {
 			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${_event.loaded}Bytes`;
@@ -1988,11 +2001,11 @@ function drawDefaultBackImage(_key) {
 			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 
 			if (g_headerObj.skinType !== `default`) {
-				createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+				createEmptySprite(divRoot, `divBack`);
 			}
 		}
 	} else {
-		createSprite(`divRoot`, `divBack`, 0, 0, g_sWidth, g_sHeight);
+		createEmptySprite(divRoot, `divBack`);
 	}
 }
 
@@ -3831,7 +3844,7 @@ function optionInit() {
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, g_lblNameObj.settings, 0, 15, `settings_Title`));
 
 	// オプションボタン用の設置
-	createOptionWindow(`divRoot`);
+	createOptionWindow(divRoot);
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customOptionInit === C_TYP_FUNCTION) {
@@ -3888,9 +3901,10 @@ function setSpriteList(_settingList) {
 	const childY = 20;
 	const spriteList = [];
 	_settingList.forEach(setting => {
-		spriteList[setting[0]] = createSprite(`optionsprite`, `${setting[0]}Sprite`,
-			childX, setting[1] * C_LEN_SETLBL_HEIGHT + childY + setting[2],
-			optionWidth + setting[3], C_LEN_SETLBL_HEIGHT + setting[4], { description: g_msgObj[setting[0]] });
+		spriteList[setting[0]] = createEmptySprite(optionsprite, `${setting[0]}Sprite`, {
+			x: childX, y: setting[1] * C_LEN_SETLBL_HEIGHT + childY + setting[2],
+			w: optionWidth + setting[3], h: C_LEN_SETLBL_HEIGHT + setting[4], title: g_msgObj[setting[0]],
+		});
 	});
 	return spriteList;
 }
@@ -3903,7 +3917,9 @@ function createOptionWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
 	const optionWidth = (g_sWidth - 450) / 2;
-	const optionsprite = createSprite(_sprite, `optionsprite`, optionWidth, 65 + (g_sHeight - 500) / 2, 450, 325);
+	const optionsprite = createEmptySprite(_sprite, `optionsprite`, {
+		x: optionWidth, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325,
+	});
 
 	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
 	const settingList = [
@@ -4003,13 +4019,10 @@ function createOptionWindow(_sprite) {
 	const createDifWindow = (_key = ``) => {
 		g_currentPage = `difSelector`;
 		setShortcutEvent(g_currentPage);
-		const difList = createSprite(`optionsprite`, `difList`, 165, 65, 280, 255);
-		difList.style.overflow = `auto`;
-		difList.classList.toggle(g_cssObj.settings_DifSelector, true);
-		const difCover = createSprite(`optionsprite`, `difCover`, 25, 65, 140, 255);
-		difCover.style.overflow = `auto`;
-		difCover.classList.toggle(g_cssObj.settings_DifSelector, true);
-		difCover.style.opacity = 0.95;
+		const difList = createEmptySprite(optionsprite, `difList`, { x: 165, y: 65, w: 280, h: 255, overflow: `auto` }, g_cssObj.settings_DifSelector);
+		const difCover = createEmptySprite(optionsprite, `difCover`, {
+			x: 25, y: 65, w: 140, h: 255, overflow: `auto`, opacity: 0.95
+		}, g_cssObj.settings_DifSelector);
 
 		// リスト再作成
 		makeDifList(difList, _key);
@@ -4105,9 +4118,9 @@ function createOptionWindow(_sprite) {
 		);
 		g_stateObj.scoreDetailViewFlg = false;
 
-		const scoreDetail = createSprite(`optionsprite`, `scoreDetail`, 20, 90, 420, 230);
-		scoreDetail.classList.add(g_cssObj.settings_DifSelector);
-		scoreDetail.style.visibility = `hidden`;
+		const scoreDetail = createEmptySprite(optionsprite, `scoreDetail`, {
+			x: 20, y: 90, w: 420, h: 230, visibility: `hidden`,
+		}, g_cssObj.settings_DifSelector);
 		const viewScText = _ => createScText(lnkScoreDetail, `ScoreDetail`, { targetLabel: `lnkScoreDetail`, x: -10 });
 		multiAppend(scoreDetail,
 			createScoreDetail(`Speed`),
@@ -4133,7 +4146,7 @@ function createOptionWindow(_sprite) {
 	 * @param {boolean} _graphUseFlg
 	 */
 	function createScoreDetail(_name, _graphUseFlg = true) {
-		const detailObj = createSprite(`scoreDetail`, `detail${_name}`, 0, 0, 420, 230);
+		const detailObj = createEmptySprite(scoreDetail, `detail${_name}`, { w: 420, h: 230, visibility: `hidden` });
 
 		if (_graphUseFlg) {
 			const graphObj = document.createElement(`canvas`);
@@ -4151,7 +4164,6 @@ function createOptionWindow(_sprite) {
 
 			detailObj.appendChild(graphObj);
 		}
-		detailObj.style.visibility = `hidden`;
 
 		return detailObj;
 	}
@@ -5100,7 +5112,7 @@ function settingsDisplayInit() {
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, g_lblNameObj.display, 0, 15, `settings_Display`));
 
 	// オプションボタン用の設置
-	createSettingsDisplayWindow(`divRoot`);
+	createSettingsDisplayWindow(divRoot);
 
 	// ショートカットキーメッセージ
 	divRoot.appendChild(
@@ -5142,7 +5154,7 @@ function createSettingsDisplayWindow(_sprite) {
 	const optionWidth = (g_sWidth - 450) / 2;
 	const childX = 25;
 	const childY = 20;
-	createSprite(_sprite, `optionsprite`, optionWidth, 65 + (g_sHeight - 500) / 2, 450, 325);
+	createEmptySprite(_sprite, `optionsprite`, { x: optionWidth, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325 });
 
 	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
 	const settingList = [
@@ -5151,11 +5163,12 @@ function createSettingsDisplayWindow(_sprite) {
 	];
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
-	const displaySprite = createSprite(`optionsprite`, `displaySprite`, childX, childY + 10,
-		optionWidth, C_LEN_SETLBL_HEIGHT * 5);
+	const displaySprite = createEmptySprite(optionsprite, `displaySprite`, {
+		x: childX, y: childY + 10, w: optionWidth, h: C_LEN_SETLBL_HEIGHT * 5,
+	});
 	const spriteList = setSpriteList(settingList);
 
-	document.querySelector(`#${_sprite}`).appendChild(
+	_sprite.appendChild(
 		createDivCss2Label(`sdDesc`, g_lblNameObj.sdDesc, {
 			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		})
@@ -5302,7 +5315,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	);
 
 	// キーの一覧を表示
-	const keyconSprite = createSprite(`divRoot`, `keyconSprite`, 0, 100 + (g_sHeight - 500) / 2, g_sWidth, 300);
+	const keyconSprite = createEmptySprite(divRoot, `keyconSprite`, { y: 100 + (g_sHeight - 500) / 2, h: 300 });
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
@@ -7284,14 +7297,15 @@ function MainInit() {
 	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth);
 
 	// ステップゾーン、矢印のメインスプライトを作成
-	const mainSprite = createSprite(`divRoot`, `mainSprite`, g_headerObj.playingX, g_posObj.stepY - C_STEP_Y, g_headerObj.playingWidth, g_sHeight);
-	mainSprite.style.transform = `scale(${g_keyObj.scale})`;
+	const mainSprite = createEmptySprite(divRoot, `mainSprite`, {
+		x: g_headerObj.playingX, y: g_posObj.stepY - C_STEP_Y, w: g_headerObj.playingWidth, transform: `scale(${g_keyObj.scale})`,
+	});
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
-	const infoSprite = createSprite(`divRoot`, `infoSprite`, g_headerObj.playingX, 0, g_headerObj.playingWidth, g_sHeight);
+	const infoSprite = createEmptySprite(divRoot, `infoSprite`, { x: g_headerObj.playingX, w: g_headerObj.playingWidth });
 
 	// 判定系スプライトを作成（メインスプライトより上位）
-	const judgeSprite = createSprite(`divRoot`, `judgeSprite`, g_headerObj.playingX, 0, g_headerObj.playingWidth, g_sHeight);
+	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, { x: g_headerObj.playingX, w: g_headerObj.playingWidth });
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
@@ -7327,10 +7341,10 @@ function MainInit() {
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 
 		// ステップゾーンルート
-		const stepRoot = createSprite(`mainSprite`, `stepRoot${j}`,
-			g_workObj.stepX[j],
-			C_STEP_Y + g_posObj.reverseStepY * g_workObj.dividePos[j],
-			C_ARW_WIDTH, C_ARW_WIDTH);
+		const stepRoot = createEmptySprite(mainSprite, `stepRoot${j}`, {
+			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * g_workObj.dividePos[j],
+			w: C_ARW_WIDTH, h: C_ARW_WIDTH,
+		});
 
 		// 矢印の内側を塗りつぶすか否か
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
@@ -7407,8 +7421,8 @@ function MainInit() {
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
 	const arrowSprite = [
-		createSprite(`mainSprite`, `arrowSprite0`, 0, 0, g_headerObj.playingWidth, g_posObj.arrowHeight),
-		createSprite(`mainSprite`, `arrowSprite1`, 0, 0, g_headerObj.playingWidth, g_posObj.arrowHeight)
+		createEmptySprite(mainSprite, `arrowSprite0`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+		createEmptySprite(mainSprite, `arrowSprite1`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
@@ -7418,11 +7432,10 @@ function MainInit() {
 	for (let j = 0; j < keyNum; j++) {
 
 		// フリーズアローヒット部分
-		const frzHit = createSprite(`mainSprite`, `frzHit${j}`,
-			g_workObj.stepX[j], C_STEP_Y + g_posObj.reverseStepY * g_workObj.dividePos[j],
-			C_ARW_WIDTH, C_ARW_WIDTH);
-		frzHit.style.opacity = 0;
-
+		const frzHit = createEmptySprite(mainSprite, `frzHit${j}`, {
+			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * g_workObj.dividePos[j],
+			w: C_ARW_WIDTH, h: C_ARW_WIDTH, opacity: 0,
+		});
 		if (isNaN(parseFloat(g_workObj.arrowRtn[j]))) {
 			multiAppend(frzHit,
 				createColorObject2(`frzHitShadow${j}`, {
@@ -7574,15 +7587,14 @@ function MainInit() {
 	}
 
 	// 歌詞表示
-	createSprite(`judgeSprite`, `wordSprite`, 0, 0, g_headerObj.playingWidth, g_sHeight);
+	const wordSprite = createEmptySprite(judgeSprite, `wordSprite`, { w: g_headerObj.playingWidth });
 	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
 		const wordY = (j % 2 === 0 ? 10 : (g_headerObj.bottomWordSetFlg ? g_posObj.distY + 10 : g_sHeight - 60));
-		const lblWord = createSprite(`wordSprite`, `lblword${j}`, 100, wordY, g_headerObj.playingWidth - 200, 50);
-		changeStyle(`lblword${j}`, {
+		wordSprite.appendChild(createDivCss2Label(`lblword${j}`, ``, {
+			x: 100, y: wordY, w: g_headerObj.playingWidth - 200, h: 50,
 			siz: C_SIZ_MAIN, align: C_ALIGN_LEFT, color: `#ffffff`, fontFamily: getBasicFont(),
 			display: `block`, margin: `auto`,
-		})
-		lblWord.textContent = ``;
+		}));
 	}
 
 	const jdgGroups = [`J`, `FJ`];
@@ -8050,8 +8062,9 @@ function MainInit() {
 		const arrowName = `${_name}${_j}_${_arrowCnt}`;
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir;
 
-		const stepRoot = createSprite(`arrowSprite${dividePos}`, arrowName,
-			g_workObj.stepX[_j], firstPosY, C_ARW_WIDTH, C_ARW_WIDTH);
+		const stepRoot = createEmptySprite(arrowSprite[dividePos], arrowName, {
+			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
+		});
 		g_attrObj[arrowName] = {
 			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
 			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
@@ -8127,8 +8140,9 @@ function MainInit() {
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir;
 		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
 
-		const frzRoot = createSprite(`arrowSprite${dividePos}`, frzName,
-			g_workObj.stepX[_j], firstPosY, C_ARW_WIDTH, C_ARW_WIDTH + firstBarLength);
+		const frzRoot = createEmptySprite(arrowSprite[dividePos], frzName, {
+			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
+		});
 		g_attrObj[frzName] = {
 			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
 			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
@@ -9107,9 +9121,12 @@ function resultInit() {
 	// タイトル文字描画
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, g_lblNameObj.result, 0, 15, `settings_Title`));
 
-	const playDataWindow = createSprite(`divRoot`, `playDataWindow`, g_sWidth / 2 - 225, 70 + (g_sHeight - 500) / 2, 450, 110);
-	playDataWindow.classList.add(g_cssObj.result_PlayDataWindow);
-	const resultWindow = createSprite(`divRoot`, `resultWindow`, g_sWidth / 2 - 200, 185 + (g_sHeight - 500) / 2, 400, 210);
+	const playDataWindow = createEmptySprite(divRoot, `playDataWindow`, {
+		x: g_sWidth / 2 - 225, y: 70 + (g_sHeight - 500) / 2, w: 450, h: 110,
+	}, g_cssObj.result_PlayDataWindow);
+	const resultWindow = createEmptySprite(divRoot, `resultWindow`, {
+		x: g_sWidth / 2 - 200, y: 185 + (g_sHeight - 500) / 2, w: 400, h: 210,
+	});
 
 	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
 		g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan +
