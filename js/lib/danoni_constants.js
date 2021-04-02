@@ -2297,10 +2297,10 @@ const g_msgObj = {
  * エラーメッセージ管理
  */
 const g_errMsgObj = {
-    title: ``,
-    option: ``,
-    settingsDisplay: ``,
-    loading: ``,
-    main: ``,
-    result: ``,
+    title: [],
+    option: [],
+    settingsDisplay: [],
+    loading: [],
+    main: [],
+    result: [],
 };
