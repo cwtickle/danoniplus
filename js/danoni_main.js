@@ -470,12 +470,17 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
  * @param {function} _func
  */
 function importCssFile(_href, _func) {
+	const baseUrl = _href.split(`?`)[0];
+	g_loadObj[baseUrl] = false;
 	const link = document.createElement(`link`);
 	link.rel = `stylesheet`;
 	link.href = _href;
-	link.onload = _ => _func();
+	link.onload = _ => {
+		g_loadObj[baseUrl] = true;
+		_func();
+	};
 	link.onerror = _ => {
-		makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(_href.split(`?`)[0]), `title`);
+		makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(baseUrl), `title`);
 		_func();
 	};
 	document.head.appendChild(link);
@@ -879,17 +884,20 @@ function clearWindow(_redrawFlg = false, _customDisplayName = ``) {
  * @param {string} _charset (default : UTF-8)
  */
 function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
-	g_loadObj[_url.split(`?`)[0]] = true;
+	const baseUrl = _url.split(`?`)[0];
+	g_loadObj[baseUrl] = false;
 	const script = document.createElement(`script`);
 	script.type = `text/javascript`;
 	script.src = _url;
 	script.charset = _charset;
-	script.onload = _ => _callback();
+	script.onload = _ => {
+		g_loadObj[baseUrl] = true;
+		_callback();
+	};
 	script.onerror = _ => {
 		if (_requiredFlg) {
 			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(_url.split(`?`)[0]));
 		} else {
-			g_loadObj[_url.split(`?`)[0]] = false;
 			_callback();
 		}
 	};
