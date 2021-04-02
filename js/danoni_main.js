@@ -2589,8 +2589,16 @@ function titleInit() {
  */
 function makeWarningWindow(_text = ``, _resetFlg = false) {
 	const displayName = (g_currentPage === `initial` ? `title` : g_currentPage);
-	g_errMsgObj[displayName] = (_resetFlg ? `` : g_errMsgObj[displayName]) + (_text === `` ? `` : `<p>${_text}</p>`);
-	divRoot.appendChild(setWindowStyle(g_errMsgObj[displayName], `#ffcccc`, `#660000`));
+	if (_text !== ``) {
+		if (_resetFlg) {
+			g_errMsgObj[displayName] = [_text];
+		} else if (g_errMsgObj[displayName].findIndex(val => val === _text) === -1) {
+			g_errMsgObj[displayName].push(_text);
+		}
+	}
+	if (g_errMsgObj[displayName].length > 0) {
+		divRoot.appendChild(setWindowStyle(`<p>${g_errMsgObj[displayName].join('</p><p>')}</p>`, `#ffcccc`, `#660000`));
+	}
 }
 
 /**
