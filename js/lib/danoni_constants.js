@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/03/27 (v21.2.0)
+ * Revised : 2021/04/03 (v21.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2297,10 +2297,10 @@ const g_msgObj = {
  * エラーメッセージ管理
  */
 const g_errMsgObj = {
-    title: ``,
-    option: ``,
-    settingsDisplay: ``,
-    loading: ``,
-    main: ``,
-    result: ``,
+    title: [],
+    option: [],
+    settingsDisplay: [],
+    loading: [],
+    main: [],
+    result: [],
 };
