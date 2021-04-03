@@ -804,7 +804,7 @@ function createCss2Button(_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
  * @param {string} _id 
  * @param {object} _obj (x, y, w, h, siz, align, title, ...rest) 
  */
-function changeStyle(_id, { x, y, w, h, siz = C_SIZ_SETLBL, align, title, ...rest } = {}) {
+function changeStyle(_id, { x, y, w, h, siz, align, title, ...rest } = {}) {
 	const div = document.querySelector(`#${_id}`);
 	const style = div.style;
 
