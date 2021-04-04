@@ -2629,6 +2629,7 @@ function makeInfoWindow(_text, _animationName = ``) {
 		lblWarning.style.animationTimingFunction = `cubic-bezier(1.000, 0.000, 0.000, 1.000)`;
 	}
 	divRoot.appendChild(lblWarning);
+	document.querySelector(`#lblWarning > p`).style.margin = `13px 0 13px`;
 }
 
 /**
