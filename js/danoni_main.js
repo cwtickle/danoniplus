@@ -5378,10 +5378,14 @@ function keyConfigInit(_kcType = g_kcType) {
 			g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
 
 			keyconSprite.appendChild(
-				createDivCss2Label(`keycon${j}_${k}`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]], {
+				createCss2Button(`keycon${j}_${k}`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]], _ => {
+					g_currentj = j;
+					g_currentk = k;
+					setKeyConfigCursor();
+				}, {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: C_ARW_WIDTH, siz: C_SIZ_JDGCNTS,
-				})
+					w: C_ARW_WIDTH, h: C_LNK_HEIGHT, siz: C_SIZ_JDGCNTS,
+				}, g_cssObj.button_Default_NoColor)
 			);
 
 			// キーに色付け
@@ -5468,7 +5472,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
 		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 45;
 		if (g_currentk >= 1) {
-			cursor.style.top = `${baseY + C_KYC_REPHEIGHT}px`;
+			cursor.style.top = `${baseY + C_KYC_REPHEIGHT * g_currentk}px`;
 		} else {
 			if (g_kcType === `Replaced`) {
 				g_kcType = C_FLG_ALL;

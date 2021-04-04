@@ -259,6 +259,13 @@
 	color: #ffffff;
 	background-color: #666666;
 }
+/* デフォルト(色指定なし) */
+.button_Default_NoColor {
+	background-color: #00000000;
+}
+.button_Default_NoColor:hover {
+	background-color: #666666;
+}
 /* カーソル */
 .button_Mini {
 	color: #ffffff;
