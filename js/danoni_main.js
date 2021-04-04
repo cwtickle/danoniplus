@@ -5471,14 +5471,10 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
 		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 45;
-		if (g_currentk >= 1) {
-			cursor.style.top = `${baseY + C_KYC_REPHEIGHT * g_currentk}px`;
-		} else {
-			if (g_kcType === `Replaced`) {
-				g_kcType = C_FLG_ALL;
-			}
-			lnkKcType.textContent = g_kcType;
-			cursor.style.top = `${baseY}px`;
+		cursor.style.top = `${baseY + C_KYC_REPHEIGHT * g_currentk}px`;
+		if (g_currentk === 0 && g_kcType === `Replaced`) {
+			g_kcType = C_FLG_ALL;
+			lnkKcType.textContent = getStgDetailName(g_kcType);
 		}
 	};
 
