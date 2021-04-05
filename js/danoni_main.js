@@ -3592,6 +3592,86 @@ function keysConvert(_dosObj) {
 	const keyExtraList = _dosObj.keyExtraList.split(`,`);
 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
+	const toString = _str => _str;
+	const toNumber = _num => parseInt(_num, 10);
+	const toStringOrNumber = _str => isNaN(Number(_str)) ? _str : toNumber(_str);
+
+	/**
+	 * 新キー用複合パラメータ
+	 * @param {string} _key キー数
+	 * @param {string} _name 名前
+	 * @param {function} _convFunc マッピング関数
+	 * @param {string} _errCd エラーコード
+	 * @returns 最小パターン数
+	 */
+	const newKeyMultiParam = (_key, _name, _convFunc, _errCd = ``) => {
+		let tmpMinPatterns = -1;
+		const keyheader = _name + _key;
+		if (hasVal(_dosObj[keyheader])) {
+			const tmpArray = _dosObj[keyheader].split(`$`);
+			tmpMinPatterns = tmpArray.length;
+			for (let k = 0; k < tmpMinPatterns; k++) {
+				if (existParam(tmpArray[k], `${keyheader}_${k}`)) {
+					continue;
+				}
+				g_keyObj[`${keyheader}_${k}`] = tmpArray[k].split(`,`).map(n => _convFunc(n));
+			}
+		} else if (_errCd !== `` && g_keyObj[`${keyheader}_0`] === undefined) {
+			makeWarningWindow(g_msgInfoObj[_errCd].split(`{0}`).join(_key));
+		}
+		return tmpMinPatterns;
+	};
+
+	/**
+	 * 新キー用単一パラメータ
+	 * @param {string} _key キー数
+	 * @param {string} _name 名前
+	 * @param {string} _type float, number, string, boolean
+	 */
+	const newKeySingleParam = (_key, _name, _type) => {
+		const keyheader = _name + _key;
+		if (_dosObj[keyheader] !== undefined) {
+			const tmps = _dosObj[keyheader].split(`$`);
+			for (let k = 0; k < tmps.length; k++) {
+				g_keyObj[`${keyheader}_${k}`] = setVal(tmps[k], ``, _type);
+			}
+		}
+	};
+
+	/**
+	 * 新キー用複合パラメータ（パターン設定用）
+	 * @param {string} _key キー数
+	 * @param {string} _name 名前
+	 * @param {string} _pairName 詳細設定する変数名
+	 * @param {string} _defaultName パラメータの初期値
+	 * @param {number} _defaultVal パラメータの初期値の場合の一律設定値（colorX_Yの配列幅に対して設定値で埋める）
+	 */
+	const newKeyPairParam = (_key, _name, _pairName, _defaultName = ``, _defaultVal = 0) => {
+		const keyheader = _name + _key;
+		const keyheaderName = `${_name}Name${_key}`;
+
+		if (_dosObj[`${keyheader}`] !== undefined) {
+			const tmpParams = _dosObj[`${keyheader}`].split(`$`);
+			for (let k = 0; k < tmpParams.length; k++) {
+				const pairName = `${_pairName}${_key}_${k}`;
+				if (!hasVal(tmpParams[k])) {
+					continue;
+				}
+				g_keyObj[keyheaderName] = [];
+				g_keyObj[pairName] = {};
+				if (_defaultName !== ``) {
+					g_keyObj[keyheaderName].push(_defaultName);
+					g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`color${_key}_${k}`].length)].fill(_defaultVal);
+				}
+				const tmpParamPairs = tmpParams[k].split(`/`);
+				for (let m = 0; m < tmpParamPairs.length; m++) {
+					const tmpParamPair = tmpParamPairs[m].split(`::`);
+					g_keyObj[keyheaderName].push(tmpParamPair[0]);
+					g_keyObj[pairName][tmpParamPair[0]] = tmpParamPair[1].split(`,`).map(n => parseInt(n, 10));
+				}
+			}
+		}
+	};
 
 	for (let j = 0; j < keyExtraList.length; j++) {
 		const newKey = keyExtraList[j];
@@ -3600,32 +3680,10 @@ function keysConvert(_dosObj) {
 		let tmpMinPatterns = 1;
 
 		// 矢印色パターン (colorX_Y)
-		if (_dosObj[`color${newKey}`] !== undefined) {
-			const tmpColors = _dosObj[`color${newKey}`].split(`$`);
-			tmpMinPatterns = tmpColors.length;
-			for (let k = 0; k < tmpMinPatterns; k++) {
-				if (existParam(tmpColors[k], `color${newKey}_${k}`)) {
-					continue;
-				}
-				g_keyObj[`color${newKey}_${k}`] = tmpColors[k].split(`,`).map(n => parseInt(n, 10));
-			}
-		} else if (g_keyObj[`color${newKey}_0`] === undefined) {
-			makeWarningWindow(g_msgInfoObj.E_0101.split(`{0}`).join(newKey));
-		}
+		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, `E_0101`);
 
 		// 読込変数の接頭辞 (charaX_Y)
-		if (_dosObj[`chara${newKey}`] !== undefined) {
-			const tmpCharas = _dosObj[`chara${newKey}`].split(`$`);
-			for (let k = 0; k < tmpCharas.length; k++) {
-				if (existParam(tmpCharas[k], `chara${newKey}_${k}`)) {
-					continue;
-				}
-				g_keyObj[`chara${newKey}_${k}`] = tmpCharas[k].split(`,`);
-				g_keyObj[`chara${newKey}_${k}d`] = g_keyObj[`chara${newKey}_${k}`].concat();
-			}
-		} else if (g_keyObj[`chara${newKey}_0`] === undefined) {
-			makeWarningWindow(g_msgInfoObj.E_0102.split(`{0}`).join(newKey));
-		}
+		tmpMinPatterns = newKeyMultiParam(newKey, `chara`, toString, `E_0102`);
 
 		// 各キーの区切り位置 (divX_Y)
 		if (_dosObj[`div${newKey}`] !== undefined) {
@@ -3649,18 +3707,7 @@ function keysConvert(_dosObj) {
 		}
 
 		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
-		if (_dosObj[`stepRtn${newKey}`] !== undefined) {
-			const tmpStepRtns = _dosObj[`stepRtn${newKey}`].split(`$`);
-			for (let k = 0; k < tmpStepRtns.length; k++) {
-				if (existParam(tmpStepRtns[k], `stepRtn${newKey}_${k}`)) {
-					continue;
-				}
-				g_keyObj[`stepRtn${newKey}_${k}`] = tmpStepRtns[k].split(`,`).map(n => (isNaN(Number(n)) ? n : parseInt(n, 10)));
-				g_keyObj[`stepRtn${newKey}_${k}d`] = g_keyObj[`stepRtn${newKey}_${k}`].concat();
-			}
-		} else if (g_keyObj[`stepRtn${newKey}_0`] === undefined) {
-			makeWarningWindow(g_msgInfoObj.E_0103.split(`{0}`).join(newKey));
-		}
+		tmpMinPatterns = newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, `E_0103`);
 
 		// ステップゾーン位置 (posX_Y)
 		if (_dosObj[`pos${newKey}`] !== undefined) {
@@ -3722,12 +3769,7 @@ function keysConvert(_dosObj) {
 		newKeySingleParam(newKey, `transKey`, C_TYP_STRING);
 
 		// シャッフルグループ (shuffleX_Y)
-		if (_dosObj[`shuffle${newKey}`] !== undefined) {
-			const tmpshuffles = _dosObj[`shuffle${newKey}`].split(`$`);
-			for (let k = 0; k < tmpshuffles.length; k++) {
-				g_keyObj[`shuffle${newKey}_${k}`] = tmpshuffles[k].split(`,`).map(n => parseInt(n, 10));
-			}
-		}
+		newKeyMultiParam(newKey, `shuffle`, toNumber);
 
 		// スクロールパターン (scrollX_Y)
 		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
@@ -3736,52 +3778,6 @@ function keysConvert(_dosObj) {
 		// アシストパターン (assistX_Y)
 		// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
 		newKeyPairParam(newKey, `assist`, `assistPos`);
-	}
-
-	/**
-	 * 新キー用単一パラメータ
-	 * @param {string} _key キー数
-	 * @param {string} _name 名前
-	 * @param {string} _type float, number, string, boolean
-	 */
-	function newKeySingleParam(_key, _name, _type) {
-		if (_dosObj[`${_name}${_key}`] !== undefined) {
-			const tmps = _dosObj[`${_name}${_key}`].split(`$`);
-			for (let k = 0, len = tmps.length; k < len; k++) {
-				g_keyObj[`${_name}${_key}_${k}`] = setVal(tmps[k], ``, _type);
-			}
-		}
-	}
-
-	/**
-	 * 新キー用複合パラメータ（パターン設定用）
-	 * @param {string} _key キー数
-	 * @param {string} _name 名前
-	 * @param {string} _pairName 詳細設定する変数名
-	 * @param {string} _defaultName パラメータの初期値
-	 * @param {number} _defaultVal パラメータの初期値の場合の一律設定値（colorX_Yの配列幅に対して設定値で埋める）
-	 */
-	function newKeyPairParam(_key, _name, _pairName, _defaultName = ``, _defaultVal = 0) {
-		if (_dosObj[`${_name}${_key}`] !== undefined) {
-			const tmpParams = _dosObj[`${_name}${_key}`].split(`$`);
-			for (let k = 0; k < tmpParams.length; k++) {
-				if (!hasVal(tmpParams[k])) {
-					continue;
-				}
-				g_keyObj[`${_name}Name${_key}`] = [];
-				g_keyObj[`${_pairName}${_key}_${k}`] = {};
-				if (_defaultName !== ``) {
-					g_keyObj[`${_name}Name${_key}`].push(_defaultName);
-					g_keyObj[`${_pairName}${_key}_${k}`][_defaultName] = [...Array(g_keyObj[`color${_key}_${k}`].length)].fill(_defaultVal);
-				}
-				const tmpParamPairs = tmpParams[k].split(`/`);
-				for (let m = 0; m < tmpParamPairs.length; m++) {
-					const tmpParamPair = tmpParamPairs[m].split(`::`);
-					g_keyObj[`${_name}Name${_key}`].push(tmpParamPair[0]);
-					g_keyObj[`${_pairName}${_key}_${k}`][tmpParamPair[0]] = tmpParamPair[1].split(`,`).map(n => parseInt(n, 10));
-				}
-			}
-		}
 	}
 }
 
@@ -5322,10 +5318,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 
-	[`blank`, `scale`].forEach(header => {
-		g_keyObj[header] = (g_keyObj[`${header}${keyCtrlPtn}`] !== undefined ?
-			g_keyObj[`${header}${keyCtrlPtn}`] : g_keyObj[`${header}_def`]);
-	});
+	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
 	const kWidth = parseInt(keyconSprite.style.width);
 	changeSetColor();
@@ -5703,6 +5696,16 @@ function keyConfigInit(_kcType = g_kcType) {
 
 	document.oncontextmenu = _ => false;
 }
+
+/**
+ * ステップゾーン間隔、大きさの更新
+ * @param {string} _header 
+ * @param {string} _keyCtrlPtn 
+ */
+const updateKeyInfo = (_header, _keyCtrlPtn) => {
+	const kcPtn = hasVal(g_keyObj[`${_header}${_keyCtrlPtn}`]) ? _keyCtrlPtn : `_def`;
+	g_keyObj[_header] = g_keyObj[`${_header}${kcPtn}`];
+};
 
 /**
  * 初期矢印色・フリーズアロー色の変更
@@ -7122,13 +7125,7 @@ function getArrowSettings() {
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ? g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-	[`blank`, `scale`].forEach(header => {
-		if (hasVal(g_keyObj[`${header}${keyCtrlPtn}`])) {
-			g_keyObj[header] = g_keyObj[`${header}${keyCtrlPtn}`];
-		} else {
-			g_keyObj[header] = g_keyObj[`${header}_def`];
-		}
-	});
+	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	g_headerObj.tuning = g_headerObj.creatorNames[g_stateObj.scoreId];
 
 	g_workObj.stepX = [];
@@ -8278,7 +8275,7 @@ function MainInit() {
 
 		// キーの押下状態を取得
 		for (let j = 0; j < keyNum; j++) {
-			for (let m = 0, len = g_workObj.keyCtrlN[j].length; m < len; m++) {
+			for (let m = 0; m < g_workObj.keyCtrlN[j].length; m++) {
 				g_workObj.keyHitFlg[j][m] = keyIsDown(g_workObj.keyCtrlN[j][m]);
 			}
 		}
@@ -8645,7 +8642,7 @@ function changeFrzColors(_mkColor, _mkColorCd, _colorPatterns, _allFlg = ``) {
 function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
 
 	if (_mkCssMotion !== undefined) {
-		for (let j = 0, len = _mkCssMotion.length; j < len; j++) {
+		for (let j = 0; j < _mkCssMotion.length; j++) {
 			const targetj = _mkCssMotion[j];
 			g_workObj[`${_name}CssMotions`][targetj] = _mkCssMotionName[2 * j + g_workObj.dividePos[targetj]];
 		}
