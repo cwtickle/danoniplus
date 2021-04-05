@@ -957,6 +957,7 @@ const g_cssObj = {
 
     button_Start: `button_Start`,
     button_Default: `button_Default`,
+    button_Default_NoColor: `button_Default_NoColor`,
     button_Mini: `button_Mini`,
     button_Back: `button_Back`,
     button_Setting: `button_Setting`,
