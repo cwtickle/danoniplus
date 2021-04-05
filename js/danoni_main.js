@@ -3685,6 +3685,9 @@ function keysConvert(_dosObj) {
 		// 読込変数の接頭辞 (charaX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `chara`, toString, `E_0102`);
 
+		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
+		tmpMinPatterns = newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, `E_0103`);
+
 		// 各キーの区切り位置 (divX_Y)
 		if (_dosObj[`div${newKey}`] !== undefined) {
 			const tmpDivs = _dosObj[`div${newKey}`].split(`$`);
@@ -3705,9 +3708,6 @@ function keysConvert(_dosObj) {
 				}
 			}
 		}
-
-		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, `E_0103`);
 
 		// ステップゾーン位置 (posX_Y)
 		if (_dosObj[`pos${newKey}`] !== undefined) {
