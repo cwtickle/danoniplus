@@ -3595,16 +3595,17 @@ function keysConvert(_dosObj) {
 	const toString = _str => _str;
 	const toNumber = _num => parseInt(_num, 10);
 	const toStringOrNumber = _str => isNaN(Number(_str)) ? _str : toNumber(_str);
+	const toSplitArray = _str => _str.split(`/`).map(n => toNumber(n));
 
 	/**
 	 * 新キー用複合パラメータ
 	 * @param {string} _key キー数
 	 * @param {string} _name 名前
 	 * @param {function} _convFunc マッピング関数
-	 * @param {string} _errCd エラーコード
+	 * @param {string} _obj errCd エラーコード, baseCopyFlg コピー配列の準備可否
 	 * @returns 最小パターン数
 	 */
-	const newKeyMultiParam = (_key, _name, _convFunc, _errCd = ``) => {
+	const newKeyMultiParam = (_key, _name, _convFunc, { errCd = ``, baseCopyFlg = false, loopFunc = _ => true } = {}) => {
 		let tmpMinPatterns = -1;
 		const keyheader = _name + _key;
 		if (hasVal(_dosObj[keyheader])) {
@@ -3615,8 +3616,12 @@ function keysConvert(_dosObj) {
 					continue;
 				}
 				g_keyObj[`${keyheader}_${k}`] = tmpArray[k].split(`,`).map(n => _convFunc(n));
+				if (baseCopyFlg) {
+					g_keyObj[`${keyheader}_${k}d`] = g_keyObj[`${keyheader}_${k}`].concat();
+				}
+				loopFunc(k, keyheader);
 			}
-		} else if (_errCd !== `` && g_keyObj[`${keyheader}_0`] === undefined) {
+		} else if (errCd !== `` && g_keyObj[`${keyheader}_0`] === undefined) {
 			makeWarningWindow(g_msgInfoObj[_errCd].split(`{0}`).join(_key));
 		}
 		return tmpMinPatterns;
@@ -3675,18 +3680,20 @@ function keysConvert(_dosObj) {
 
 	for (let j = 0; j < keyExtraList.length; j++) {
 		const newKey = keyExtraList[j];
-		let tmpKeyCtrl = [];
 		let tmpDivPtn = [];
 		let tmpMinPatterns = 1;
 
 		// 矢印色パターン (colorX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, `E_0101`);
+		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, { errCd: `E_0101` });
 
 		// 読込変数の接頭辞 (charaX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `chara`, toString, `E_0102`);
+		tmpMinPatterns = newKeyMultiParam(newKey, `chara`, toString, { errCd: `E_0102` });
 
 		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, `E_0103`);
+		tmpMinPatterns = newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, { errCd: `E_0103` });
+
+		// キーコンフィグ (keyCtrlX_Y)
+		tmpMinPatterns = newKeyMultiParam(newKey, `keyCtrl`, toSplitArray, { errCd: `E_0104`, baseCopyFlg: true });
 
 		// 各キーの区切り位置 (divX_Y)
 		if (_dosObj[`div${newKey}`] !== undefined) {
@@ -3710,47 +3717,20 @@ function keysConvert(_dosObj) {
 		}
 
 		// ステップゾーン位置 (posX_Y)
-		if (_dosObj[`pos${newKey}`] !== undefined) {
-			const tmpPoss = _dosObj[`pos${newKey}`].split(`$`);
-			for (let k = 0; k < tmpPoss.length; k++) {
-				if (existParam(tmpPoss[k], `pos${newKey}_${k}`)) {
-					continue;
-				}
-				g_keyObj[`pos${newKey}_${k}`] = tmpPoss[k].split(`,`).map(n => parseInt(n, 10));
-
+		newKeyMultiParam(newKey, `pos`, toNumber, {
+			loopFunc: (k, keyheader) => {
 				if (g_keyObj[`divMax${newKey}_${k}`] === undefined || g_keyObj[`divMax${newKey}_${k}`] === -1) {
-					const posLength = g_keyObj[`pos${newKey}_${k}`].length;
-					g_keyObj[`divMax${newKey}_${k}`] = g_keyObj[`pos${newKey}_${k}`][posLength - 1] + 1;
+					const posLength = g_keyObj[`${keyheader}_${k}`].length;
+					g_keyObj[`divMax${newKey}_${k}`] = g_keyObj[`${keyheader}_${k}`][posLength - 1] + 1;
 				}
 			}
-
-		} else {
+		});
+		if (_dosObj[`pos${newKey}`] === undefined) {
 			for (let k = 0; k < tmpMinPatterns; k++) {
 				if (g_keyObj[`color${newKey}_${k}`] !== undefined) {
 					g_keyObj[`pos${newKey}_${k}`] = [...Array(g_keyObj[`color${newKey}_${k}`].length).keys()].map(i => i);
 				}
 			}
-		}
-
-		// キーコンフィグ (keyCtrlX_Y)
-		if (_dosObj[`keyCtrl${newKey}`] !== undefined) {
-			const tmpKeyCtrls = _dosObj[`keyCtrl${newKey}`].split(`$`);
-			for (let p = 0; p < tmpKeyCtrls.length; p++) {
-				if (existParam(tmpKeyCtrls[p], `keyCtrl${newKey}_${p}`)) {
-					continue;
-				}
-				tmpKeyCtrl = tmpKeyCtrls[p].split(`,`);
-
-				g_keyObj[`keyCtrl${newKey}_${p}`] = [];
-				g_keyObj[`keyCtrl${newKey}_${p}d`] = [];
-
-				for (let k = 0; k < tmpKeyCtrl.length; k++) {
-					g_keyObj[`keyCtrl${newKey}_${p}`][k] = tmpKeyCtrl[k].split(`/`).map(n => parseInt(n, 10));
-					g_keyObj[`keyCtrl${newKey}_${p}d`][k] = g_keyObj[`keyCtrl${newKey}_${p}`][k].concat();
-				}
-			}
-		} else if (g_keyObj[`keyCtrl${newKey}_0`] === undefined) {
-			makeWarningWindow(g_msgInfoObj.E_0104.split(`{0}`).join(newKey));
 		}
 
 		// ステップゾーン間隔 (blankX_Y)
