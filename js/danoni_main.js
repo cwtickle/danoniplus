@@ -6127,11 +6127,12 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	function storeArrowData(_data) {
 		let arrowData = [];
 
-		if (_data !== undefined) {
+		if (_data !== undefined && _data !== ``) {
 			const tmpData = splitLF(_data).join(``);
 			if (tmpData !== undefined) {
 				arrowData = tmpData.split(`,`);
 				if (isNaN(parseFloat(arrowData[0]))) {
+					return []
 				} else {
 					arrowData = arrowData.map(data => calcFrame(data));
 				}
