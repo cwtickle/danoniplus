@@ -3602,11 +3602,11 @@ function keysConvert(_dosObj) {
 	 * @param {string} _key キー数
 	 * @param {string} _name 名前
 	 * @param {function} _convFunc マッピング関数
-	 * @param {string} _obj errCd エラーコード, baseCopyFlg コピー配列の準備可否
+	 * @param {object} _obj errCd エラーコード, baseCopyFlg コピー配列の準備可否, loopFunc パターン別に処理する個別関数
 	 * @returns 最小パターン数
 	 */
 	const newKeyMultiParam = (_key, _name, _convFunc, { errCd = ``, baseCopyFlg = false, loopFunc = _ => true } = {}) => {
-		let tmpMinPatterns = -1;
+		let tmpMinPatterns = 1;
 		const keyheader = _name + _key;
 		if (hasVal(_dosObj[keyheader])) {
 			const tmpArray = _dosObj[keyheader].split(`$`);
@@ -3655,8 +3655,8 @@ function keysConvert(_dosObj) {
 		const keyheader = _name + _key;
 		const keyheaderName = `${_name}Name${_key}`;
 
-		if (_dosObj[`${keyheader}`] !== undefined) {
-			const tmpParams = _dosObj[`${keyheader}`].split(`$`);
+		if (_dosObj[keyheader] !== undefined) {
+			const tmpParams = _dosObj[keyheader].split(`$`);
 			for (let k = 0; k < tmpParams.length; k++) {
 				const pairName = `${_pairName}${_key}_${k}`;
 				if (!hasVal(tmpParams[k])) {
@@ -3678,6 +3678,7 @@ function keysConvert(_dosObj) {
 		}
 	};
 
+	// 対象キー毎に処理
 	for (let j = 0; j < keyExtraList.length; j++) {
 		const newKey = keyExtraList[j];
 		let tmpDivPtn = [];
