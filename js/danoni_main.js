@@ -237,6 +237,13 @@ const checkLightOrDark = _colorStr => {
 };
 
 /**
+ * 二次元配列のコピー
+ * @param {array2} _array2d 
+ * @returns 
+ */
+const copyArray2d = _array2d => JSON.parse(JSON.stringify(_array2d));
+
+/**
  * イベントハンドラ用オブジェクト
  * 参考: http://webkatu.com/remove-eventlistener/
  * 
@@ -3617,7 +3624,7 @@ function keysConvert(_dosObj) {
 				}
 				g_keyObj[`${keyheader}_${k}`] = tmpArray[k].split(`,`).map(n => _convFunc(n));
 				if (baseCopyFlg) {
-					g_keyObj[`${keyheader}_${k}d`] = JSON.parse(JSON.stringify(g_keyObj[`${keyheader}_${k}`]));
+					g_keyObj[`${keyheader}_${k}d`] = copyArray2d(g_keyObj[`${keyheader}_${k}`]);
 				}
 				loopFunc(k, keyheader);
 			}
@@ -4560,7 +4567,7 @@ function createOptionWindow(_sprite) {
 				g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
 				g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
-				g_settings.gauges = JSON.parse(JSON.stringify(g_gaugeOptionObj[g_gaugeType.toLowerCase()]));
+				g_settings.gauges = copyArray2d(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
 				g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
 			}
 			setLifeCategory(g_headerObj);
@@ -4835,10 +4842,10 @@ function createOptionWindow(_sprite) {
 
 		// リバース設定 (Reverse, Scroll)
 		if (g_headerObj.scrollUse) {
-			g_settings.scrolls = JSON.parse(JSON.stringify(
+			g_settings.scrolls = copyArray2d(
 				typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
 					g_keyObj[`scrollName${g_keyObj.currentKey}`] : g_keyObj.scrollName_def
-			));
+			);
 			g_stateObj.scroll = g_settings.scrolls[g_settings.scrollNum];
 			const [visibleScr, hiddenScr] = (g_settings.scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
 			spriteList[visibleScr].style.visibility = `visible`;
@@ -4848,7 +4855,7 @@ function createOptionWindow(_sprite) {
 				setReverseView(document.querySelector(`#btnReverse`));
 			}
 		} else {
-			g_settings.scrolls = JSON.parse(JSON.stringify(g_keyObj.scrollName_def));
+			g_settings.scrolls = copyArray2d(g_keyObj.scrollName_def);
 			setSetting(0, `reverse`);
 		}
 
@@ -5009,7 +5016,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 
 		g_keyCopyLists.multiple.forEach(header => {
 			if (g_keyObj[`${header}${basePtn}`] !== undefined) {
-				g_keyObj[`${header}${copyPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`${header}${basePtn}`]));
+				g_keyObj[`${header}${copyPtn}`] = copyArray2d(g_keyObj[`${header}${basePtn}`]);
 			}
 		});
 		g_keyCopyLists.simple.forEach(header => {
@@ -5718,9 +5725,9 @@ function changeSetColor() {
 		'Shadow': (isDefault ? defaultType : `${scoreIdHeader}Default`),
 	};
 	Object.keys(currentTypes).forEach(pattern => {
-		g_headerObj[`set${pattern}Color`] = JSON.parse(JSON.stringify(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]));
+		g_headerObj[`set${pattern}Color`] = copyArray2d(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]);
 		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-			g_headerObj[`frz${pattern}Color`][j] = JSON.parse(JSON.stringify(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]));
+			g_headerObj[`frz${pattern}Color`][j] = copyArray2d(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]);
 		}
 	});
 }
@@ -5785,7 +5792,7 @@ function loadingScoreInit() {
 
 		// Motionオプション適用時の矢印別の速度を取得（配列形式）
 		const motionOnFrame = setMotionOnFrame();
-		g_workObj.motionOnFrames = JSON.parse(JSON.stringify(motionOnFrame));
+		g_workObj.motionOnFrames = copyArray2d(motionOnFrame);
 
 		// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
 		const firstFrame = (g_scoreObj.frameNum === 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
@@ -5815,7 +5822,7 @@ function loadingScoreInit() {
 				for (let j = 0; j < keyNum; j++) {
 					Object.keys(noteExistObj).forEach(name => {
 						if (tmpObj[`${name}Data`][j] !== undefined && noteExistObj[name]) {
-							g_scoreObj[`${name}Data`][j] = JSON.parse(JSON.stringify(tmpObj[`${name}Data`][j]));
+							g_scoreObj[`${name}Data`][j] = copyArray2d(tmpObj[`${name}Data`][j]);
 						}
 					});
 				}
@@ -5954,7 +5961,7 @@ function applyShuffle(_keyNum, _shuffleGroup, _style) {
 
 	// indexに従って並べ替え
 	g_typeLists.arrow.forEach(type => {
-		const tmpData = JSON.parse(JSON.stringify(g_scoreObj[`${type}Data`]));
+		const tmpData = copyArray2d(g_scoreObj[`${type}Data`]);
 		for (let i = 0; i < _keyNum; i++) {
 			g_scoreObj[`${type}Data`][i] = tmpData[index[i]] || [];
 		}
@@ -5968,7 +5975,7 @@ function applyShuffle(_keyNum, _shuffleGroup, _style) {
  */
 function applyMirror(_keyNum, _shuffleGroup) {
 	// シャッフルグループごとにミラー
-	const style = JSON.parse(JSON.stringify(_shuffleGroup)).map(_group => _group.reverse());
+	const style = copyArray2d(_shuffleGroup).map(_group => _group.reverse());
 	applyShuffle(_keyNum, _shuffleGroup, style);
 }
 
@@ -5979,7 +5986,7 @@ function applyMirror(_keyNum, _shuffleGroup) {
  */
 function applyRandom(_keyNum, _shuffleGroup) {
 	// シャッフルグループごとにシャッフル(Fisher-Yates)
-	const style = JSON.parse(JSON.stringify(_shuffleGroup)).map(_group => {
+	const style = copyArray2d(_shuffleGroup).map(_group => {
 		for (let i = _group.length - 1; i > 0; i--) {
 			const random = Math.floor(Math.random() * (i + 1));
 			const tmp = _group[i];
@@ -6681,7 +6688,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj[`mk${_header}Length`][_j][_k] = getFrzLength(_speedOnFrame, _data[_k], _data[_k + 1]);
 			}
 		} else if (_frzFlg && g_workObj[`mk${_header}Length`][_j] !== undefined) {
-			g_workObj[`mk${_header}Length`][_j] = JSON.parse(JSON.stringify(g_workObj[`mk${_header}Length`][_j].slice(_k + 2)));
+			g_workObj[`mk${_header}Length`][_j] = copyArray2d(g_workObj[`mk${_header}Length`][_j].slice(_k + 2));
 		}
 	}
 
@@ -6732,7 +6739,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 				// 出現位置が開始前の場合は除外
 				if (_frzFlg && g_workObj[`mk${camelHeader}Length`][_j] !== undefined) {
-					g_workObj[`mk${camelHeader}Length`][_j] = JSON.parse(JSON.stringify(g_workObj[`mk${camelHeader}Length`][_j].slice(k + 2)));
+					g_workObj[`mk${camelHeader}Length`][_j] = copyArray2d(g_workObj[`mk${camelHeader}Length`][_j].slice(k + 2));
 				}
 				break;
 
@@ -6805,7 +6812,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		for (let k = 0; k < delBoostIdx; k++) {
 			_dataObj.boostData.shift();
 		}
-		g_workObj.boostData = JSON.parse(JSON.stringify(_dataObj.boostData));
+		g_workObj.boostData = copyArray2d(_dataObj.boostData);
 	}
 
 	// 個別・全体色変化のタイミング更新
@@ -7112,10 +7119,10 @@ function getArrowSettings() {
 	g_workObj.stepX = [];
 	g_workObj.scrollDir = [];
 	g_workObj.dividePos = [];
-	g_workObj.stepRtn = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${keyCtrlPtn}`]));
-	g_workObj.stepHitRtn = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${keyCtrlPtn}`]));
-	g_workObj.arrowRtn = JSON.parse(JSON.stringify(g_keyObj[`stepRtn${keyCtrlPtn}`]));
-	g_workObj.keyCtrl = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}`]));
+	g_workObj.stepRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.stepHitRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.arrowRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.keyCtrl = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.keyCtrlN = [];
 	g_workObj.keyHitFlg = [];
 	for (let j = 0; j < g_workObj.keyCtrl.length; j++) {
@@ -7204,7 +7211,7 @@ function getArrowSettings() {
 			g_localKeyStorage.keyCtrl = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 			if (g_keyObj.currentPtn !== -1) {
 				g_localKeyStorage.keyCtrlPtn = g_keyObj.currentPtn;
-				g_keyObj[`keyCtrl${keyCtrlPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}d`]));
+				g_keyObj[`keyCtrl${keyCtrlPtn}`] = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
 			}
 			localStorage.setItem(`danonicw-${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
 
@@ -7213,7 +7220,7 @@ function getArrowSettings() {
 			g_localStorage[`keyCtrl${g_keyObj.currentKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 			if (g_keyObj.currentPtn !== -1) {
 				g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] = g_keyObj.currentPtn;
-				g_keyObj[`keyCtrl${keyCtrlPtn}`] = JSON.parse(JSON.stringify(g_keyObj[`keyCtrl${keyCtrlPtn}d`]));
+				g_keyObj[`keyCtrl${keyCtrlPtn}`] = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
 			}
 		}
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
