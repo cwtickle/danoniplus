@@ -3617,7 +3617,7 @@ function keysConvert(_dosObj) {
 				}
 				g_keyObj[`${keyheader}_${k}`] = tmpArray[k].split(`,`).map(n => _convFunc(n));
 				if (baseCopyFlg) {
-					g_keyObj[`${keyheader}_${k}d`] = g_keyObj[`${keyheader}_${k}`].concat();
+					g_keyObj[`${keyheader}_${k}d`] = JSON.parse(JSON.stringify(g_keyObj[`${keyheader}_${k}`]));
 				}
 				loopFunc(k, keyheader);
 			}
