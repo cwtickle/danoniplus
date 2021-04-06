@@ -5338,6 +5338,30 @@ function keyConfigInit(_kcType = g_kcType) {
 		return arrowColor;
 	}
 
+	/**
+	 * 対象割り当てキーの色変更
+	 * @param {number} _j 
+	 * @param {number} _k 
+	 * @param {string} _cssName 
+	 */
+	const changeKeyConfigColor = (_j, _k, _cssName) => {
+		const obj = document.querySelector(`#keycon${_j}_${_k}`);
+
+		// CSSクラスの除去
+		if (obj.classList.contains(g_cssObj.keyconfig_Changekey)) {
+			obj.classList.remove(g_cssObj.keyconfig_Changekey);
+		}
+		if (obj.classList.contains(g_cssObj.keyconfig_Defaultkey)) {
+			obj.classList.remove(g_cssObj.keyconfig_Defaultkey);
+		}
+		if (obj.classList.contains(g_cssObj.title_base)) {
+			obj.classList.remove(g_cssObj.title_base);
+		}
+
+		// 指定されたCSSクラスを適用
+		obj.classList.add(_cssName);
+	};
+
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
@@ -5383,11 +5407,9 @@ function keyConfigInit(_kcType = g_kcType) {
 
 			// キーに色付け
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] !== g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]) {
-				removeClassList(j, k);
-				document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.keyconfig_Changekey);
+				changeKeyConfigColor(j, k, g_cssObj.keyconfig_Changekey);
 			} else if (g_keyObj.currentPtn === -1) {
-				removeClassList(j, k);
-				document.querySelector(`#keycon${j}_${k}`).classList.add(g_cssObj.keyconfig_Defaultkey);
+				changeKeyConfigColor(j, k, g_cssObj.keyconfig_Defaultkey);
 			}
 		}
 	}
@@ -5613,10 +5635,7 @@ function keyConfigInit(_kcType = g_kcType) {
 					for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
 						document.querySelector(`#keycon${j}_${k}`).textContent = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
-						removeClassList(j, k);
-						document.querySelector(`#keycon${j}_${k}`).classList.add(
-							g_keyObj.currentPtn === -1 ? g_cssObj.keyconfig_Defaultkey : g_cssObj.title_base
-						);
+						changeKeyConfigColor(j, k, g_keyObj.currentPtn === -1 ? g_cssObj.keyconfig_Defaultkey : g_cssObj.title_base);
 					}
 				}
 				resetCursor(Number(g_kcType === `Replaced`));
@@ -5654,8 +5673,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			}
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}d`][g_currentj][g_currentk] !== setKey) {
 				// 既定キーと異なる場合は色付け
-				removeClassList(g_currentj, g_currentk);
-				keyCdObj.classList.add(g_cssObj.keyconfig_Changekey);
+				changeKeyConfigColor(g_currentj, g_currentk, g_cssObj.keyconfig_Changekey);
 			}
 			keyCdObj.textContent = g_kCd[setKey];
 			g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][g_currentk] = setKey;
@@ -5724,24 +5742,6 @@ function changeSetColor() {
 			g_headerObj[`frz${pattern}Color`][j] = JSON.parse(JSON.stringify(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]));
 		}
 	});
-}
-
-/**
- * キーコンフィグ画面の対応キー色変更
- * @param {number} _j 
- * @param {number} _k 
- */
-function removeClassList(_j, _k) {
-	const obj = document.querySelector(`#keycon${_j}_${_k}`);
-	if (obj.classList.contains(g_cssObj.keyconfig_Changekey)) {
-		obj.classList.remove(g_cssObj.keyconfig_Changekey);
-	}
-	if (obj.classList.contains(g_cssObj.keyconfig_Defaultkey)) {
-		obj.classList.remove(g_cssObj.keyconfig_Defaultkey);
-	}
-	if (obj.classList.contains(g_cssObj.title_base)) {
-		obj.classList.remove(g_cssObj.title_base);
-	}
 }
 
 /*-----------------------------------------------------------*/
