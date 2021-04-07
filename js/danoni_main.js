@@ -2629,7 +2629,6 @@ function makeInfoWindow(_text, _animationName = ``) {
 		lblWarning.style.animationTimingFunction = `cubic-bezier(1.000, 0.000, 0.000, 1.000)`;
 	}
 	divRoot.appendChild(lblWarning);
-	document.querySelector(`#lblWarning > p`).style.margin = `13px 0 13px`;
 }
 
 /**
@@ -2644,23 +2643,15 @@ function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 	} else {
 		divRoot.removeChild(document.querySelector(`#lblWarning`));
 	}
-	const lbl = getTitleDivLabel(`lblWarning`, _text, 0, 70);
-	const len = lbl.innerHTML.split(`<br>`).length + lbl.innerHTML.split(`<p>`).length - 1;
-	let warnHeight;
-	if (len * 21 <= 150) {
-		warnHeight = len * 21;
-	} else {
-		warnHeight = 150;
+	const len = (_text.split(`<br>`).length + _text.split(`<p>`).length - 1) * 21;
+	const warnHeight = (len < 150 ? len : 150);
+	const lbl = createDivCss2Label(`lblWarning`, _text, {
+		x: 0, y: 70, w: g_sWidth, h: warnHeight, siz: C_SIZ_MAIN, backgroundColor: _bkColor,
+		opacity: 0.9, lineHeight: `15px`, color: _textColor, align: _align, fontFamily: getBasicFont(),
+	})
+	if (warnHeight === 150) {
 		lbl.style.overflow = `auto`;
 	}
-	lbl.style.backgroundColor = _bkColor;
-	lbl.style.opacity = 0.9;
-	lbl.style.height = `${warnHeight}px`;
-	lbl.style.lineHeight = `15px`;
-	lbl.style.fontSize = `${C_SIZ_MAIN}px`;
-	lbl.style.color = _textColor;
-	lbl.style.textAlign = _align;
-	lbl.style.fontFamily = getBasicFont();
 
 	return lbl;
 }
