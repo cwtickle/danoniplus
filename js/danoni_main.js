@@ -5389,7 +5389,7 @@ function keyConfigInit(_kcType = g_kcType) {
 				}, {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
 					w: C_ARW_WIDTH, h: C_LNK_HEIGHT, siz: C_SIZ_JDGCNTS,
-				}, g_cssObj.button_Default_NoColor)
+				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 
 			// キーに色付け
