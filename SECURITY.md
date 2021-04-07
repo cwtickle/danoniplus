@@ -15,14 +15,14 @@ v14, 20の対応終了時期はv23リリース開始時を予定しています�
 
 | Version | Supported          | Latest Version | First Release | End of Support |
 | ------- | ------------------ |----------------|---------------|----------------|
-| v21     | :heavy_check_mark: |[v21.3.0](../../releases/tag/v21.3.0)          |2021-03-12|-|
-| v20     | :heavy_check_mark: |[v20.5.2](../../releases/tag/v20.5.2)          |2021-02-12|(At Release v23)|
-| v19     | :heavy_check_mark: |[v19.5.6](../../releases/tag/v19.5.6)          |2021-01-17|-|
+| v21     | :heavy_check_mark: |[v21.4.0](../../releases/tag/v21.4.0)          |2021-03-12|-|
+| v20     | :heavy_check_mark: |[v20.5.3](../../releases/tag/v20.5.3)          |2021-02-12|(At Release v23)|
+| v19     | :heavy_check_mark: |[v19.5.7](../../releases/tag/v19.5.7)          |2021-01-17|-|
 | v18     | :x:                |[v18.9.6 (final)](../../releases/tag/v18.9.6)  |2020-10-25|2021-03-12|
 | v17     | :x:                |[v17.5.9 (final)](../../releases/tag/v17.5.9)  |2020-09-27|2021-02-12|
 | v16     | :x:                |[v16.4.10 (final)](../../releases/tag/v16.4.10)|2020-08-06|2021-01-17|
 | v15     | :x:                |[v15.7.5 (final)](../../releases/tag/v15.7.5)  |2020-05-13|2020-10-25|
-| v14     | :heavy_check_mark: |[v14.5.19](../../releases/tag/v14.5.19)        |2020-04-29|(At Release v23)|
+| v14     | :heavy_check_mark: |[v14.5.20](../../releases/tag/v14.5.20)        |2020-04-29|(At Release v23)|
 
 <details>
 <summary>過去バージョン詳細</summary>
