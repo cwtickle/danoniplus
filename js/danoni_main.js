@@ -244,6 +244,13 @@ const checkLightOrDark = _colorStr => {
 const copyArray2d = _array2d => JSON.parse(JSON.stringify(_array2d));
 
 /**
+ * 配列データを合計
+ * @param {array} _array 
+ * @returns 
+ */
+const sumData = _array => _array.reduce((p, x) => p + x);
+
+/**
  * イベントハンドラ用オブジェクト
  * 参考: http://webkatu.com/remove-eventlistener/
  * 
@@ -4170,8 +4177,8 @@ function createOptionWindow(_sprite) {
 	 * @param {number} _scoreId 
 	 */
 	function getScoreBaseData(_scoreId) {
-		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
-		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
+		const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
+		const frzCnts = sumData(g_detailObj.frzCnt[_scoreId]);
 		return {
 			arrowCnts: arrowCnts,
 			frzCnts: frzCnts,
@@ -4406,8 +4413,8 @@ function createOptionWindow(_sprite) {
 	 */
 	function makeDifInfo(_scoreId) {
 
-		const arrowCnts = g_detailObj.arrowCnt[_scoreId].reduce((p, x) => p + x);
-		const frzCnts = g_detailObj.frzCnt[_scoreId].reduce((p, x) => p + x);
+		const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
+		const frzCnts = sumData(g_detailObj.frzCnt[_scoreId]);
 		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
 
 		if (document.querySelector(`#lblTooldif`) === null) {
@@ -5888,12 +5895,8 @@ function loadingScoreInit() {
 		}
 
 		// 矢印・フリーズアロー数をカウント
-		g_allArrow = 0;
-		g_allFrz = 0;
-		for (let j = 0; j < keyNum; j++) {
-			g_allArrow += (isNaN(parseFloat(g_scoreObj.arrowData[j][0])) ? 0 : g_scoreObj.arrowData[j].length);
-			g_allFrz += (isNaN(parseFloat(g_scoreObj.frzData[j][0])) ? 0 : g_scoreObj.frzData[j].length);
-		}
+		g_allArrow = sumData(g_detailObj.arrowCnt[g_stateObj.scoreId]);
+		g_allFrz = sumData(g_detailObj.frzCnt[g_stateObj.scoreId]) * 2;
 
 		// ライフ回復・ダメージ量の計算
 		// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
@@ -6127,12 +6130,12 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	function storeArrowData(_data) {
 		let arrowData = [];
 
-		if (_data !== undefined && _data !== ``) {
+		if (hasVal(_data)) {
 			const tmpData = splitLF(_data).join(``);
 			if (tmpData !== undefined) {
 				arrowData = tmpData.split(`,`);
 				if (isNaN(parseFloat(arrowData[0]))) {
-					return []
+					return [];
 				} else {
 					arrowData = arrowData.map(data => calcFrame(data));
 				}
