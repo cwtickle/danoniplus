@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/04/03 (v21.3.0)
+ * Revised : 2021/04/07 (v21.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -957,6 +957,7 @@ const g_cssObj = {
 
     button_Start: `button_Start`,
     button_Default: `button_Default`,
+    button_Default_NoColor: `button_Default_NoColor`,
     button_Mini: `button_Mini`,
     button_Back: `button_Back`,
     button_Setting: `button_Setting`,
@@ -1867,6 +1868,7 @@ const g_keyObj = {
 
 // 特殊キーのコピー種 (simple: 代入、multiple: 配列ごと代入)
 const g_keyCopyLists = {
+    simpleDef: [`blank`, `scale`],
     simple: [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
     multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`],
 };

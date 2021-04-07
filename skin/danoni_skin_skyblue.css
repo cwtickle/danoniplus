@@ -4,7 +4,7 @@
   スキンcssファイル (skyblue)
 
   Created : 2019/11/04
-  Revised : 2020/05/01 (v14.1.0)
+  Revised : 2021/04/07 (v21.4.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -257,6 +257,13 @@
 }
 .button_Default:hover {
 	color: #000000;
+	background-color: #99ccff;
+}
+/* デフォルト(色指定なし) */
+.button_Default_NoColor {
+	background-color: #00000000;
+}
+.button_Default_NoColor:hover {
 	background-color: #99ccff;
 }
 /* カーソル */

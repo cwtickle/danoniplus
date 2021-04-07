@@ -4,7 +4,7 @@
   本体cssファイル
 
   Created : 2018/10/08
-  Revised : 2020/12/20 (v18.5.0)
+  Revised : 2021/04/07 (v21.4.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -297,4 +297,9 @@ input[type=range]:focus {
 .flex_centering {
 	display: flex;
 	justify-content: center;
+}
+
+/* 警告ウィンドウ */
+#lblWarning > p {
+	margin: 15px 5px;
 }
