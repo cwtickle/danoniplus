@@ -298,3 +298,8 @@ input[type=range]:focus {
 	display: flex;
 	justify-content: center;
 }
+
+/* 警告ウィンドウ */
+#lblWarning > p {
+	margin: 15px 5px;
+}
