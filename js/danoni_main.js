@@ -5887,8 +5887,10 @@ function loadingScoreInit() {
 		}
 
 		// 矢印・フリーズアロー数をカウント
-		g_allArrow = sumData(g_detailObj.arrowCnt[g_stateObj.scoreId]);
-		g_allFrz = sumData(g_detailObj.frzCnt[g_stateObj.scoreId]) * 2;
+		g_allArrow = 0;
+		g_allFrz = 0;
+		g_scoreObj.arrowData.forEach(data => g_allArrow += data.length);
+		g_scoreObj.frzData.forEach(data => g_allFrz += data.length);
 
 		// ライフ回復・ダメージ量の計算
 		// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
