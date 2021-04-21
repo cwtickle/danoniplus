@@ -5296,11 +5296,9 @@ function keyConfigInit(_kcType = g_kcType) {
 
 	// キーの一覧を表示
 	const keyconSprite = createEmptySprite(divRoot, `keyconSprite`, { y: 100 + (g_sHeight - 500) / 2, h: 300 });
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
-		g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
-	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+	const tkObj = getKeyInfo();
+	const [keyCtrlPtn, keyNum, posMax, divideCnt] =
+		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
 
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
@@ -5700,6 +5698,20 @@ function keyConfigInit(_kcType = g_kcType) {
 }
 
 /**
+ * キー数基礎情報の取得
+ * @returns 
+ */
+const getKeyInfo = _ => {
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
+		g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
+	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+
+	return { keyCtrlPtn: keyCtrlPtn, keyNum: keyNum, posMax: posMax, divideCnt: divideCnt };
+};
+
+/**
  * ステップゾーン間隔、大きさの更新
  * @param {string} _header 
  * @param {string} _keyCtrlPtn 
@@ -5738,8 +5750,8 @@ function changeSetColor() {
 function loadingScoreInit() {
 	// 譜面データの読み込み
 	loadDos(_ => {
-		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+		const tkObj = getKeyInfo();
+		const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 		g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
 		// ユーザカスタムイベント
@@ -6288,8 +6300,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	function makeWordData(_scoreNo) {
 		let wordDataList = [];
 		let wordReverseFlg = false;
-		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-		const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+		const divideCnt = getKeyInfo().divideCnt;
 
 		if (g_stateObj.scroll !== `---`) {
 			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data];
@@ -6757,10 +6768,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		}
 	}
 
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-
-	for (let j = 0; j < keyNum; j++) {
+	for (let j = 0; j < getKeyInfo().keyNum; j++) {
 
 		// 矢印の出現フレーム数計算
 		calcNotes(j, _dataObj.arrowData[j]);
@@ -6977,15 +6985,14 @@ function getFrzLength(_speedOnFrame, _startFrame, _endFrame) {
  * キーパターン(デフォルト)に対応する矢印番号を格納
  */
 function convertreplaceNums() {
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const tkObj = getKeyInfo();
 	const baseCharas = g_keyObj[`chara${g_keyObj.currentKey}_0`];
-	const convCharas = g_keyObj[`chara${keyCtrlPtn}`];
+	const convCharas = g_keyObj[`chara${tkObj.keyCtrlPtn}`];
 
 	g_workObj.replaceNums = [];
 
-	for (let j = 0; j < keyNum; j++) {
-		for (let k = 0; k < keyNum; k++) {
+	for (let j = 0; j < tkObj.keyNum; j++) {
+		for (let k = 0; k < tkObj.keyNum; k++) {
 			if (baseCharas[j] === convCharas[k]) {
 				g_workObj.replaceNums[j] = k;
 				continue;
@@ -7003,8 +7010,7 @@ function convertreplaceNums() {
  */
 function pushColors(_header, _frame, _val, _colorCd) {
 
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const tkObj = getKeyInfo();
 	const grdFlg = (g_colorType === `Type0` ? !g_headerObj.defaultColorgrd[0] : g_headerObj.defaultColorgrd[0])
 	const colorCd = makeColorGradation(_colorCd, { _defaultColorgrd: [grdFlg, g_headerObj.defaultColorgrd[1]] });
 
@@ -7020,8 +7026,8 @@ function pushColors(_header, _frame, _val, _colorCd) {
 			g_workObj[`mk${_header}ColorCd`][_frame].push(colorCd);
 		} else if (_val >= 20) {
 			const colorNum = _val - 20;
-			for (let j = 0; j < keyNum; j++) {
-				if (g_keyObj[`color${keyCtrlPtn}`][j] === colorNum) {
+			for (let j = 0; j < tkObj.keyNum; j++) {
+				if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
 					g_workObj[`mk${_header}Color`][_frame].push(j);
 					g_workObj[`mk${_header}ColorCd`][_frame].push(colorCd);
 				}
@@ -7061,8 +7067,7 @@ function pushColors(_header, _frame, _val, _colorCd) {
 function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
 
 	const camelHeader = toCapitalize(_header);
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const tkObj = getKeyInfo();
 
 	// 矢印のモーション
 	if (g_workObj[`mk${camelHeader}CssMotion`][_frame] === undefined) {
@@ -7076,8 +7081,8 @@ function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
 
 	} else {
 		const colorNum = _val - 20;
-		for (let j = 0; j < keyNum; j++) {
-			if (g_keyObj[`color${keyCtrlPtn}`][j] === colorNum) {
+		for (let j = 0; j < tkObj.keyNum; j++) {
+			if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
 				g_workObj[`mk${camelHeader}CssMotion`][_frame].push(j);
 				g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
 			}
@@ -7091,10 +7096,10 @@ function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
 function getArrowSettings() {
 
 	g_attrObj = {};
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ? g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
-	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+	const tkObj = getKeyInfo();
+	const [keyCtrlPtn, keyNum, posMax, divideCnt] =
+		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
+
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	g_headerObj.tuning = g_headerObj.creatorNames[g_stateObj.scoreId];
 
@@ -7274,8 +7279,8 @@ function MainInit() {
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, { x: g_headerObj.playingX, w: g_headerObj.playingWidth });
 
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const tkObj = getKeyInfo();
+	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 
 	// マスクスプライトを作成 (最上位)
 	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth);
