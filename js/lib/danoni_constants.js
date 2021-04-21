@@ -748,6 +748,7 @@ const g_shortcutObj = {
         Enter: { id: `btnStart` },
         Slash: { id: `btnHelp`, reset: true },
         F1: { id: `btnHelp`, reset: true },
+        ControlLeft_KeyC: { id: `` },
         KeyC: { id: `btnComment` },
     },
     option: {
@@ -861,6 +862,7 @@ const g_shortcutObj = {
     result: {
         Escape: { id: `btnBack` },
         ShiftLeft_Tab: { id: `btnBack` },
+        ControlLeft_KeyC: { id: `` },
         KeyC: { id: `btnCopy`, reset: true },
         KeyT: { id: `btnTweet`, reset: true },
         KeyG: { id: `btnGitter`, reset: true },
