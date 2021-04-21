@@ -5849,22 +5849,9 @@ function loadingScoreInit() {
 			};
 			shuffleGroupMap[_val].push(_i);
 		});
-		const shuffleGroup = Object.values(shuffleGroupMap);
 
 		// Mirror,Random,S-Randomの適用
-		if (g_stateObj.shuffle === `Mirror`) {
-			applyMirror(keyNum, shuffleGroup);
-		} else if (g_stateObj.shuffle === `Random`) {
-			applyRandom(keyNum, shuffleGroup);
-		} else if (g_stateObj.shuffle === `Random+`) {
-			applyRandom(keyNum, [[...Array(keyNum).keys()]]);
-		} else if (g_stateObj.shuffle === `S-Random`) {
-			applySRandom(keyNum, shuffleGroup, `arrow`, `frz`);
-			applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
-		} else if (g_stateObj.shuffle === `S-Random+`) {
-			applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
-			applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
-		}
+		g_shuffleFunc[g_stateObj.shuffle](keyNum, Object.values(shuffleGroupMap));
 
 		// アシスト用の配列があれば、ダミーデータで上書き
 		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
