@@ -1260,37 +1260,31 @@ function loadLocalStorage() {
 	url.searchParams.delete('scoreId');
 	g_localStorageUrl = url.toString();
 
+	/**
+	 * ローカルストレージの初期値設定
+	 * @param {string} _name 
+	 * @param {string} _type 
+	 * @param {number} _defaultPos 
+	 */
+	const checkLocalParam = (_name, _type = C_TYP_STRING, _defaultPos = 0) => {
+		const defaultVal = g_settings[`${_name}s`][_defaultPos];
+		if (g_localStorage[_name] !== undefined) {
+			g_stateObj[_name] = setVal(g_localStorage[_name], defaultVal, _type);
+			g_settings[`${_name}Num`] = roundZero(g_settings[`${_name}s`].findIndex(val => val === g_stateObj[_name]), defaultVal);
+		} else {
+			g_localStorage[_name] = defaultVal;
+		}
+	};
+
 	const checkStorage = localStorage.getItem(g_localStorageUrl);
 	if (checkStorage) {
 		g_localStorage = JSON.parse(checkStorage);
 
-		// Adjustment初期値設定
-		if (g_localStorage.adjustment !== undefined) {
-			g_stateObj.adjustment = setVal(g_localStorage.adjustment, 0, C_TYP_NUMBER);
-			g_settings.adjustmentNum = roundZero(g_settings.adjustments.findIndex(adjustment => adjustment === g_stateObj.adjustment), C_MAX_ADJUSTMENT);
-		} else {
-			g_localStorage.adjustment = 0;
-		}
-
-		// Volume初期値設定
-		if (g_localStorage.volume !== undefined) {
-			g_stateObj.volume = setVal(g_localStorage.volume, 100, C_TYP_NUMBER);
-			g_settings.volumeNum = roundZero(g_settings.volumes.findIndex(volume => volume === g_stateObj.volume));
-		} else {
-			g_localStorage.volume = 100;
-		}
-
-		// Appearance初期値設定
-		if (g_localStorage.appearance !== undefined) {
-			g_stateObj.appearance = g_localStorage.appearance;
-			g_settings.appearanceNum = roundZero(g_settings.appearances.findIndex(setting => setting === g_stateObj.appearance));
-		}
-
-		// Opacity初期値設定
-		if (g_localStorage.opacity !== undefined) {
-			g_stateObj.opacity = g_localStorage.opacity;
-			g_settings.opacityNum = roundZero(g_settings.opacitys.findIndex(setting => setting === g_stateObj.opacity));
-		}
+		// Adjustment, Volume, Appearance, Opacity初期値設定
+		checkLocalParam(`adjustment`, C_TYP_NUMBER, C_MAX_ADJUSTMENT);
+		checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
+		checkLocalParam(`appearance`);
+		checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
 
 		// ハイスコア取得準備
 		if (g_localStorage.highscores === undefined) {
