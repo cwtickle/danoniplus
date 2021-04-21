@@ -4040,28 +4040,20 @@ function createOptionWindow(_sprite) {
 		multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
 	};
 
-	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`,
-		``, 0, _ => {
-			if (g_headerObj.difSelectorUse) {
-				g_stateObj.filterKeys = ``;
-				if (document.querySelector(`#difList`) === null) {
-					createDifWindow();
-				} else {
-					resetDifWindow();
-				}
+	const changeDifficulty = (_num = 1) => {
+		if (g_headerObj.difSelectorUse) {
+			g_stateObj.filterKeys = ``;
+			if (document.querySelector(`#difList`) === null) {
+				createDifWindow();
 			} else {
-				nextDifficulty();
-			}
-		}, {
-		y: -10, h: C_LEN_SETLBL_HEIGHT + 10,
-		cxtFunc: _ => {
-			if (g_headerObj.difSelectorUse) {
-				g_stateObj.filterKeys = ``;
 				resetDifWindow();
-			} else {
-				nextDifficulty(-1);
 			}
-		},
+		} else {
+			nextDifficulty(_num);
+		}
+	};
+	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`, ``, 0, _ => changeDifficulty(), {
+		y: -10, h: C_LEN_SETLBL_HEIGHT + 10, cxtFunc: _ => changeDifficulty(-1),
 	});
 
 	// 譜面選択ボタン（メイン、右回し、左回し）
@@ -7318,7 +7310,7 @@ function MainInit() {
 	const dummyFrzCnts = [];
 	let speedCnts = 0;
 	let boostCnts = 0;
-	const stepZoneHideFlg = g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`;
+	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) ? C_DIS_NONE : C_DIS_INHERIT;
 
 	for (let j = 0; j < keyNum; j++) {
 
@@ -7339,7 +7331,7 @@ function MainInit() {
 			stepRoot.appendChild(
 				createColorObject2(`stepShadow${j}`, {
 					rotate: g_workObj.stepRtn[j], styleName: `ShadowStep`,
-					opacity: 0.7, display: stepZoneHideFlg ? C_DIS_NONE : C_DIS_INHERIT,
+					opacity: 0.7, display: stepZoneDisp,
 				}, g_cssObj.main_objStepShadow)
 			);
 		}
@@ -7349,21 +7341,18 @@ function MainInit() {
 
 			// 本体
 			createColorObject2(`step${j}`, {
-				rotate: g_workObj.stepRtn[j], styleName: `Step`,
-				display: stepZoneHideFlg ? C_DIS_NONE : C_DIS_INHERIT,
+				rotate: g_workObj.stepRtn[j], styleName: `Step`, display: stepZoneDisp,
 			}, g_cssObj.main_stepDefault),
 
 			// 空押し
 			createColorObject2(`stepDiv${j}`, {
-				rotate: g_workObj.stepRtn[j], styleName: `Step`,
-				display: C_DIS_NONE,
+				rotate: g_workObj.stepRtn[j], styleName: `Step`, display: C_DIS_NONE,
 			}, g_cssObj.main_stepKeyDown),
 
 			// ヒット時モーション
 			createColorObject2(`stepHit${j}`, {
 				x: -15, y: -15, w: C_ARW_WIDTH + 30, h: C_ARW_WIDTH + 30,
-				rotate: g_workObj.stepHitRtn[j], styleName: `StepHit`,
-				opacity: 0,
+				rotate: g_workObj.stepHitRtn[j], styleName: `StepHit`, opacity: 0,
 			}, g_cssObj.main_stepDefault),
 
 		);
@@ -7374,7 +7363,7 @@ function MainInit() {
 		[0, C_ARW_WIDTH].forEach((y, j) => {
 			mainSprite.appendChild(
 				createColorObject2(`stepBar${j}`, {
-					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + y,
+					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(g_stateObj.reverse === C_FLG_ON) + y,
 					w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
 				}, g_cssObj.life_Failed)
 			);
