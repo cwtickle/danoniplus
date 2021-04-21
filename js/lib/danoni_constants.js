@@ -787,6 +787,7 @@ const g_shortcutObj = {
         KeyV: { id: `lnkVolumeR` },
 
         KeyI: { id: `btnGraph` },
+        ShiftLeft_KeyQ: { id: `lnkScoreDetailB` },
         KeyQ: { id: `lnkScoreDetail` },
         KeyP: { id: `lnkDifInfo` },
         KeyZ: { id: `btnSave` },

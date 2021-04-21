@@ -4123,6 +4123,9 @@ function createOptionWindow(_sprite) {
 			createScoreDetail(`Speed`),
 			createScoreDetail(`Density`),
 			createScoreDetail(`ToolDif`, false),
+			makeSettingLblCssButton(`lnkScoreDetailB`, `- - -`, 0, _ => changeScoreDetail(-1), {
+				x: 10, w: 100, visibility: `hidden`,
+			}, g_cssObj.button_RevON),
 			makeSettingLblCssButton(`lnkScoreDetail`, `${getStgDetailName(g_stateObj.scoreDetail)}`, 0, _ => changeScoreDetail(), {
 				x: 10, w: 100, borderStyle: `solid`,
 				cxtFunc: _ => changeScoreDetail(-1),
