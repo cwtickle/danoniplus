@@ -4040,28 +4040,20 @@ function createOptionWindow(_sprite) {
 		multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
 	};
 
-	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`,
-		``, 0, _ => {
-			if (g_headerObj.difSelectorUse) {
-				g_stateObj.filterKeys = ``;
-				if (document.querySelector(`#difList`) === null) {
-					createDifWindow();
-				} else {
-					resetDifWindow();
-				}
+	const changeDifficulty = (_num = 1) => {
+		if (g_headerObj.difSelectorUse) {
+			g_stateObj.filterKeys = ``;
+			if (document.querySelector(`#difList`) === null) {
+				createDifWindow();
 			} else {
-				nextDifficulty();
-			}
-		}, {
-		y: -10, h: C_LEN_SETLBL_HEIGHT + 10,
-		cxtFunc: _ => {
-			if (g_headerObj.difSelectorUse) {
-				g_stateObj.filterKeys = ``;
 				resetDifWindow();
-			} else {
-				nextDifficulty(-1);
 			}
-		},
+		} else {
+			nextDifficulty(_num);
+		}
+	};
+	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`, ``, 0, _ => changeDifficulty(), {
+		y: -10, h: C_LEN_SETLBL_HEIGHT + 10, cxtFunc: _ => changeDifficulty(-1),
 	});
 
 	// 譜面選択ボタン（メイン、右回し、左回し）
@@ -5304,11 +5296,9 @@ function keyConfigInit(_kcType = g_kcType) {
 
 	// キーの一覧を表示
 	const keyconSprite = createEmptySprite(divRoot, `keyconSprite`, { y: 100 + (g_sHeight - 500) / 2, h: 300 });
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
-		g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
-	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+	const tkObj = getKeyInfo();
+	const [keyCtrlPtn, keyNum, posMax, divideCnt] =
+		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
 
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
@@ -5708,6 +5698,20 @@ function keyConfigInit(_kcType = g_kcType) {
 }
 
 /**
+ * キー数基礎情報の取得
+ * @returns 
+ */
+const getKeyInfo = _ => {
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
+		g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
+	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+
+	return { keyCtrlPtn: keyCtrlPtn, keyNum: keyNum, posMax: posMax, divideCnt: divideCnt };
+};
+
+/**
  * ステップゾーン間隔、大きさの更新
  * @param {string} _header 
  * @param {string} _keyCtrlPtn 
@@ -5746,8 +5750,8 @@ function changeSetColor() {
 function loadingScoreInit() {
 	// 譜面データの読み込み
 	loadDos(_ => {
-		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-		const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+		const tkObj = getKeyInfo();
+		const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 		g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
 		// ユーザカスタムイベント
@@ -5857,22 +5861,9 @@ function loadingScoreInit() {
 			};
 			shuffleGroupMap[_val].push(_i);
 		});
-		const shuffleGroup = Object.values(shuffleGroupMap);
 
 		// Mirror,Random,S-Randomの適用
-		if (g_stateObj.shuffle === `Mirror`) {
-			applyMirror(keyNum, shuffleGroup);
-		} else if (g_stateObj.shuffle === `Random`) {
-			applyRandom(keyNum, shuffleGroup);
-		} else if (g_stateObj.shuffle === `Random+`) {
-			applyRandom(keyNum, [[...Array(keyNum).keys()]]);
-		} else if (g_stateObj.shuffle === `S-Random`) {
-			applySRandom(keyNum, shuffleGroup, `arrow`, `frz`);
-			applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
-		} else if (g_stateObj.shuffle === `S-Random+`) {
-			applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
-			applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
-		}
+		g_shuffleFunc[g_stateObj.shuffle](keyNum, Object.values(shuffleGroupMap));
 
 		// アシスト用の配列があれば、ダミーデータで上書き
 		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
@@ -6309,8 +6300,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	function makeWordData(_scoreNo) {
 		let wordDataList = [];
 		let wordReverseFlg = false;
-		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-		const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+		const divideCnt = getKeyInfo().divideCnt;
 
 		if (g_stateObj.scroll !== `---`) {
 			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data];
@@ -6680,6 +6670,17 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	let tmpObj;
 	let frmPrev;
 
+	const getSpeedPos = _ => {
+		let spdk, spdPrev;
+		if (_dataObj.speedData !== undefined) {
+			spdk = _dataObj.speedData.length - 2;
+			spdPrev = _dataObj.speedData[spdk];
+		} else {
+			spdPrev = 0;
+		}
+		return [spdk, spdPrev];
+	}
+
 	function setNotes(_j, _k, _data, _startPoint, _header, _frzFlg = false) {
 		if (_startPoint >= 0) {
 			if (g_workObj[`mk${_header}Arrow`][_startPoint] === undefined) {
@@ -6711,12 +6712,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		let arrowArrivalFrm;
 		let frmPrev;
 
-		if (_dataObj.speedData !== undefined) {
-			spdk = _dataObj.speedData.length - 2;
-			spdPrev = _dataObj.speedData[spdk];
-		} else {
-			spdPrev = 0;
-		}
+		[spdk, spdPrev] = getSpeedPos();
 
 		// 最後尾のデータから計算して格納
 		const lastk = _data.length - setcnt;
@@ -6778,10 +6774,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		}
 	}
 
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-
-	for (let j = 0; j < keyNum; j++) {
+	for (let j = 0; j < getKeyInfo().keyNum; j++) {
 
 		// 矢印の出現フレーム数計算
 		calcNotes(j, _dataObj.arrowData[j]);
@@ -6830,12 +6823,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		// 個別色変化のタイミング更新
 		// フリーズアロー(ヒット時)の場合のみ、逆算をしない
 		if (colorData !== undefined && colorData.length >= 3) {
-			if (_dataObj.speedData !== undefined) {
-				spdk = _dataObj.speedData.length - 2;
-				spdPrev = _dataObj.speedData[spdk];
-			} else {
-				spdPrev = 0;
-			}
+			[spdk, spdPrev] = getSpeedPos();
 			spdNext = Infinity;
 
 			lastk = colorData.length - 3;
@@ -6889,12 +6877,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	function calcCssMotion(_header) {
 		const cssMotionData = _dataObj[`${_header}CssMotionData`];
 		if (cssMotionData !== undefined && cssMotionData.length >= 4) {
-			if (_dataObj.speedData !== undefined) {
-				spdk = _dataObj.speedData.length - 2;
-				spdPrev = _dataObj.speedData[spdk];
-			} else {
-				spdPrev = 0;
-			}
+			[spdk, spdPrev] = getSpeedPos();
 			spdNext = Infinity;
 
 			lastk = cssMotionData.length - 4;
@@ -6998,15 +6981,14 @@ function getFrzLength(_speedOnFrame, _startFrame, _endFrame) {
  * キーパターン(デフォルト)に対応する矢印番号を格納
  */
 function convertreplaceNums() {
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const tkObj = getKeyInfo();
 	const baseCharas = g_keyObj[`chara${g_keyObj.currentKey}_0`];
-	const convCharas = g_keyObj[`chara${keyCtrlPtn}`];
+	const convCharas = g_keyObj[`chara${tkObj.keyCtrlPtn}`];
 
 	g_workObj.replaceNums = [];
 
-	for (let j = 0; j < keyNum; j++) {
-		for (let k = 0; k < keyNum; k++) {
+	for (let j = 0; j < tkObj.keyNum; j++) {
+		for (let k = 0; k < tkObj.keyNum; k++) {
 			if (baseCharas[j] === convCharas[k]) {
 				g_workObj.replaceNums[j] = k;
 				continue;
@@ -7024,8 +7006,7 @@ function convertreplaceNums() {
  */
 function pushColors(_header, _frame, _val, _colorCd) {
 
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const tkObj = getKeyInfo();
 	const grdFlg = (g_colorType === `Type0` ? !g_headerObj.defaultColorgrd[0] : g_headerObj.defaultColorgrd[0])
 	const colorCd = makeColorGradation(_colorCd, { _defaultColorgrd: [grdFlg, g_headerObj.defaultColorgrd[1]] });
 
@@ -7041,8 +7022,8 @@ function pushColors(_header, _frame, _val, _colorCd) {
 			g_workObj[`mk${_header}ColorCd`][_frame].push(colorCd);
 		} else if (_val >= 20) {
 			const colorNum = _val - 20;
-			for (let j = 0; j < keyNum; j++) {
-				if (g_keyObj[`color${keyCtrlPtn}`][j] === colorNum) {
+			for (let j = 0; j < tkObj.keyNum; j++) {
+				if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
 					g_workObj[`mk${_header}Color`][_frame].push(j);
 					g_workObj[`mk${_header}ColorCd`][_frame].push(colorCd);
 				}
@@ -7082,8 +7063,7 @@ function pushColors(_header, _frame, _val, _colorCd) {
 function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
 
 	const camelHeader = toCapitalize(_header);
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const tkObj = getKeyInfo();
 
 	// 矢印のモーション
 	if (g_workObj[`mk${camelHeader}CssMotion`][_frame] === undefined) {
@@ -7097,8 +7077,8 @@ function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
 
 	} else {
 		const colorNum = _val - 20;
-		for (let j = 0; j < keyNum; j++) {
-			if (g_keyObj[`color${keyCtrlPtn}`][j] === colorNum) {
+		for (let j = 0; j < tkObj.keyNum; j++) {
+			if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
 				g_workObj[`mk${camelHeader}CssMotion`][_frame].push(j);
 				g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
 			}
@@ -7112,10 +7092,10 @@ function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
 function getArrowSettings() {
 
 	g_attrObj = {};
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ? g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
-	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+	const tkObj = getKeyInfo();
+	const [keyCtrlPtn, keyNum, posMax, divideCnt] =
+		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
+
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	g_headerObj.tuning = g_headerObj.creatorNames[g_stateObj.scoreId];
 
@@ -7295,8 +7275,8 @@ function MainInit() {
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, { x: g_headerObj.playingX, w: g_headerObj.playingWidth });
 
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const tkObj = getKeyInfo();
+	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 
 	// マスクスプライトを作成 (最上位)
 	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth);
@@ -7318,7 +7298,7 @@ function MainInit() {
 	const dummyFrzCnts = [];
 	let speedCnts = 0;
 	let boostCnts = 0;
-	const stepZoneHideFlg = g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`;
+	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) ? C_DIS_NONE : C_DIS_INHERIT;
 
 	for (let j = 0; j < keyNum; j++) {
 
@@ -7339,7 +7319,7 @@ function MainInit() {
 			stepRoot.appendChild(
 				createColorObject2(`stepShadow${j}`, {
 					rotate: g_workObj.stepRtn[j], styleName: `ShadowStep`,
-					opacity: 0.7, display: stepZoneHideFlg ? C_DIS_NONE : C_DIS_INHERIT,
+					opacity: 0.7, display: stepZoneDisp,
 				}, g_cssObj.main_objStepShadow)
 			);
 		}
@@ -7349,21 +7329,18 @@ function MainInit() {
 
 			// 本体
 			createColorObject2(`step${j}`, {
-				rotate: g_workObj.stepRtn[j], styleName: `Step`,
-				display: stepZoneHideFlg ? C_DIS_NONE : C_DIS_INHERIT,
+				rotate: g_workObj.stepRtn[j], styleName: `Step`, display: stepZoneDisp,
 			}, g_cssObj.main_stepDefault),
 
 			// 空押し
 			createColorObject2(`stepDiv${j}`, {
-				rotate: g_workObj.stepRtn[j], styleName: `Step`,
-				display: C_DIS_NONE,
+				rotate: g_workObj.stepRtn[j], styleName: `Step`, display: C_DIS_NONE,
 			}, g_cssObj.main_stepKeyDown),
 
 			// ヒット時モーション
 			createColorObject2(`stepHit${j}`, {
 				x: -15, y: -15, w: C_ARW_WIDTH + 30, h: C_ARW_WIDTH + 30,
-				rotate: g_workObj.stepHitRtn[j], styleName: `StepHit`,
-				opacity: 0,
+				rotate: g_workObj.stepHitRtn[j], styleName: `StepHit`, opacity: 0,
 			}, g_cssObj.main_stepDefault),
 
 		);
@@ -7374,7 +7351,7 @@ function MainInit() {
 		[0, C_ARW_WIDTH].forEach((y, j) => {
 			mainSprite.appendChild(
 				createColorObject2(`stepBar${j}`, {
-					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * (g_stateObj.reverse === C_FLG_OFF ? 0 : 1) + y,
+					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(g_stateObj.reverse === C_FLG_ON) + y,
 					w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
 				}, g_cssObj.life_Failed)
 			);

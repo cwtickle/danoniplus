@@ -426,6 +426,24 @@ const g_settings = {
 g_settings.volumeNum = g_settings.volumes.length - 1;
 g_settings.opacityNum = g_settings.opacitys.length - 1;
 
+/**
+ * シャッフル適用関数
+ */
+const g_shuffleFunc = {
+    'OFF': _ => true,
+    'Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup),
+    'Random': (keyNum, shuffleGroup) => applyRandom(keyNum, shuffleGroup),
+    'Random+': keyNum => applyRandom(keyNum, [[...Array(keyNum).keys()]]),
+    'S-Random': (keyNum, shuffleGroup) => {
+        applySRandom(keyNum, shuffleGroup, `arrow`, `frz`);
+        applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
+    },
+    'S-Random+': keyNum => {
+        applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
+        applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
+    },
+};
+
 const g_keycons = {
     configTypes: [`Main`, `Replaced`, `ALL`],
     configTypeNum: 0,
