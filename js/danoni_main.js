@@ -4105,19 +4105,27 @@ function createOptionWindow(_sprite) {
 			x: 20, y: 90, w: 420, h: 230, visibility: `hidden`,
 		}, g_cssObj.settings_DifSelector);
 		const viewScText = _ => createScText(lnkScoreDetail, `ScoreDetail`, { targetLabel: `lnkScoreDetail`, x: -10 });
+
+		/**
+		 * 譜面明細表示の切替
+		 * @param {number} _val 
+		 */
+		const changeScoreDetail = (_val = 1) => {
+			g_stateObj.scoreDetailViewFlg = true;
+			scoreDetail.style.visibility = `visible`;
+			$id(`detail${g_stateObj.scoreDetail}`).visibility = `hidden`;
+			setSetting(_val, `scoreDetail`);
+			viewScText();
+			$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
+		};
+
 		multiAppend(scoreDetail,
 			createScoreDetail(`Speed`),
 			createScoreDetail(`Density`),
 			createScoreDetail(`ToolDif`, false),
-			makeSettingLblCssButton(`lnkScoreDetail`, `${getStgDetailName(g_stateObj.scoreDetail)}`, 0, _ => {
-				g_stateObj.scoreDetailViewFlg = true;
-				scoreDetail.style.visibility = `visible`;
-				$id(`detail${g_stateObj.scoreDetail}`).visibility = `hidden`;
-				setSetting(1, `scoreDetail`);
-				viewScText();
-				$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
-			}, {
+			makeSettingLblCssButton(`lnkScoreDetail`, `${getStgDetailName(g_stateObj.scoreDetail)}`, 0, _ => changeScoreDetail(), {
 				x: 10, w: 100, borderStyle: `solid`,
+				cxtFunc: _ => changeScoreDetail(-1),
 			}, g_cssObj.button_RevON),
 		);
 		viewScText();
