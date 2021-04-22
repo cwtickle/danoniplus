@@ -3769,6 +3769,12 @@ function keysConvert(_dosObj) {
 
 const commonSettingBtn = _labelName => {
 
+	const switchSave = evt => {
+		g_stateObj.dataSaveFlg = !g_stateObj.dataSaveFlg;
+		const [from, to] = (g_stateObj.dataSaveFlg ? [C_FLG_OFF, C_FLG_ON] : [C_FLG_ON, C_FLG_OFF]);
+		evt.target.classList.replace(g_cssObj[`button_${from}`], g_cssObj[`button_${to}`]);
+	};
+
 	multiAppend(divRoot,
 
 		// タイトル画面へ戻る
@@ -3793,15 +3799,9 @@ const commonSettingBtn = _labelName => {
 		}, g_cssObj.button_Mini),
 
 		// データセーブフラグの切替
-		createCss2Button(`btnSave`, g_lblNameObj.dataSave, evt => {
-			g_stateObj.dataSaveFlg = !g_stateObj.dataSaveFlg;
-			const [from, to] = (g_stateObj.dataSaveFlg ? [C_FLG_OFF, C_FLG_ON] : [C_FLG_ON, C_FLG_OFF]);
-			evt.target.classList.replace(g_cssObj[`button_${from}`], g_cssObj[`button_${to}`]);
-		}, {
-			x: 0, y: 5,
-			w: g_sWidth / 5, h: 16, siz: 12,
-			title: g_msgObj.dataSave,
-			borderStyle: `solid`,
+		createCss2Button(`btnSave`, g_lblNameObj.dataSave, evt => switchSave(evt), {
+			x: 0, y: 5, w: g_sWidth / 5, h: 16, siz: 12,
+			title: g_msgObj.dataSave, borderStyle: `solid`, cxtFunc: evt => switchSave(evt),
 		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF)),
 	);
 };
@@ -5181,20 +5181,20 @@ function createSettingsDisplayWindow(_sprite) {
 		const linkId = `lnk${_name}`;
 
 		if (g_headerObj[`${_name}Use`]) {
-			displaySprite.appendChild(
-				makeSettingLblCssButton(linkId, g_lblNameObj[`d_${toCapitalize(_name)}`], _heightPos, evt => {
-					const displayFlg = g_stateObj[`d_${_name.toLowerCase()}`];
-					const displayNum = list.findIndex(flg => flg === displayFlg);
-					const nextDisplayFlg = list[(displayNum + 1) % list.length];
-					g_stateObj[`d_${_name.toLowerCase()}`] = nextDisplayFlg;
-					evt.target.classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
+			const switchDisplay = evt => {
+				const displayFlg = g_stateObj[`d_${_name.toLowerCase()}`];
+				const displayNum = list.findIndex(flg => flg === displayFlg);
+				const nextDisplayFlg = list[(displayNum + 1) % list.length];
+				g_stateObj[`d_${_name.toLowerCase()}`] = nextDisplayFlg;
+				evt.target.classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
 
-					interlockingButton(g_headerObj, _name, nextDisplayFlg, displayFlg, true);
-				}, {
-					x: 30 + 180 * _widthPos,
-					w: 170,
-					title: g_msgObj[`d_${_name.toLowerCase()}`],
-					borderStyle: `solid`,
+				interlockingButton(g_headerObj, _name, nextDisplayFlg, displayFlg, true);
+			};
+			displaySprite.appendChild(
+				makeSettingLblCssButton(linkId, g_lblNameObj[`d_${toCapitalize(_name)}`], _heightPos, evt => switchDisplay(evt), {
+					x: 30 + 180 * _widthPos, w: 170,
+					title: g_msgObj[`d_${_name.toLowerCase()}`], borderStyle: `solid`,
+					cxtFunc: evt => switchDisplay(evt),
 				}, `button_${flg}`)
 			);
 			createScText(document.getElementById(linkId), `${toCapitalize(_name)}`,
