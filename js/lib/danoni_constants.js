@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/04/07 (v21.4.2)
+ * Revised : 2021/04/22 (v21.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -426,6 +426,24 @@ const g_settings = {
 g_settings.volumeNum = g_settings.volumes.length - 1;
 g_settings.opacityNum = g_settings.opacitys.length - 1;
 
+/**
+ * シャッフル適用関数
+ */
+const g_shuffleFunc = {
+    'OFF': _ => true,
+    'Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup),
+    'Random': (keyNum, shuffleGroup) => applyRandom(keyNum, shuffleGroup),
+    'Random+': keyNum => applyRandom(keyNum, [[...Array(keyNum).keys()]]),
+    'S-Random': (keyNum, shuffleGroup) => {
+        applySRandom(keyNum, shuffleGroup, `arrow`, `frz`);
+        applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
+    },
+    'S-Random+': keyNum => {
+        applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
+        applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
+    },
+};
+
 const g_keycons = {
     configTypes: [`Main`, `Replaced`, `ALL`],
     configTypeNum: 0,
@@ -748,6 +766,7 @@ const g_shortcutObj = {
         Enter: { id: `btnStart` },
         Slash: { id: `btnHelp`, reset: true },
         F1: { id: `btnHelp`, reset: true },
+        ControlLeft_KeyC: { id: `` },
         KeyC: { id: `btnComment` },
     },
     option: {
@@ -787,6 +806,7 @@ const g_shortcutObj = {
         KeyV: { id: `lnkVolumeR` },
 
         KeyI: { id: `btnGraph` },
+        ShiftLeft_KeyQ: { id: `lnkScoreDetailB` },
         KeyQ: { id: `lnkScoreDetail` },
         KeyP: { id: `lnkDifInfo` },
         KeyZ: { id: `btnSave` },
@@ -861,6 +881,7 @@ const g_shortcutObj = {
     result: {
         Escape: { id: `btnBack` },
         ShiftLeft_Tab: { id: `btnBack` },
+        ControlLeft_KeyC: { id: `` },
         KeyC: { id: `btnCopy`, reset: true },
         KeyT: { id: `btnTweet`, reset: true },
         KeyG: { id: `btnGitter`, reset: true },
