@@ -207,7 +207,7 @@ const C_MAX_SPEED = 10;
 const C_MIN_SPEED = 1;
 
 const C_KYC_HEIGHT = 150;
-const C_KYC_REPHEIGHT = 20;
+const C_KYC_REPHEIGHT = 18;
 
 const C_FRM_AFTERFADE = 420;
 const C_FRM_FRZATTEMPT = 5;
@@ -451,6 +451,8 @@ const g_keycons = {
     colorTypes: [`Default`, `Type0`, `Type1`, `Type2`],
     colorDefs: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_OFF],
     colorTypeNum: 0,
+
+    shuffleGroupNum: 0,
 };
 
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
@@ -2222,6 +2224,7 @@ const g_lblNameObj = {
 
     ConfigType: `ConfigType`,
     ColorType: `ColorType`,
+    ShuffleGroup: `ShuffleGroup`,
     KeyPattern: `KeyPattern`,
 
     j_ii: "(・∀・)ｲｲ!!",

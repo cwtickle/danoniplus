@@ -5371,6 +5371,13 @@ function keyConfigInit(_kcType = g_kcType) {
 			x: keyconX, y: keyconY,
 			background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
 		}));
+		if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
+			keyconSprite.appendChild(
+				createDivCss2Label(`sArrow${j}`, g_keyObj[`shuffle${keyCtrlPtn}`][j] + 1, {
+					x: keyconX, y: keyconY - 12, w: C_ARW_WIDTH, h: 15, siz: 12, align: C_ALIGN_CENTER,
+				})
+			);
+		}
 
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 			g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k], 0, C_TYP_NUMBER);
@@ -5383,7 +5390,7 @@ function keyConfigInit(_kcType = g_kcType) {
 					setKeyConfigCursor();
 				}, {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: C_LNK_HEIGHT, siz: C_SIZ_JDGCNTS,
+					w: C_ARW_WIDTH, h: 18, siz: C_SIZ_JDGCNTS,
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 
@@ -5424,25 +5431,43 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		// キーコンフィグタイプ切替ボタン
 		createDivCss2Label(`lblKcType`, g_lblNameObj.ConfigType, {
-			x: 30, y: 10, w: 70,
+			x: 10, y: 0, w: 70, siz: 12, align: C_ALIGN_LEFT,
 		}, g_cssObj.keyconfig_ConfigType),
 
 		makeSettingLblCssButton(`lnkKcType`, getStgDetailName(g_kcType), 0, _ => setConfigType(), {
-			x: 30, y: 35, w: 100,
+			x: 20, y: 15, w: 100, h: 14, siz: 14, borderStyle: `solid`,
 			cxtFunc: _ => setConfigType(-1),
-		}),
+		}, g_cssObj.button_RevON),
 
 		// キーカラータイプ切替ボタン
 		createDivCss2Label(`lblcolorType`, g_lblNameObj.ColorType, {
-			x: g_sWidth - 120, y: 10, w: 70,
+			x: g_sWidth - 140, y: 0, w: 70, siz: 12, align: C_ALIGN_LEFT,
 		}, g_cssObj.keyconfig_ColorType),
 
 		makeSettingLblCssButton(`lnkColorType`, getStgDetailName(g_colorType), 0, _ => setColorType(), {
-			x: g_sWidth - 130, y: 35, w: 100,
+			x: g_sWidth - 130, y: 15, w: 100, h: 14, siz: 14, borderStyle: `solid`,
 			cxtFunc: _ => setColorType(-1),
-		}),
-
+		}, g_cssObj.button_RevON),
 	);
+
+	if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
+
+		multiAppend(divRoot,
+
+			// シャッフルグループ切替ボタン
+			createDivCss2Label(`lblshuffleGroup`, g_lblNameObj.ShuffleGroup, {
+				x: g_sWidth - 140, y: 35, w: 70, siz: 12, align: C_ALIGN_LEFT,
+			}, g_cssObj.keyconfig_ColorType),
+
+			makeSettingLblCssButton(`lnkShuffleGroup`, getStgDetailName(`Type${g_keycons.shuffleGroupNum + 1}`), 0, _ => setColorType(), {
+				x: g_sWidth - 130, y: 50, w: 100, h: 14, siz: 14, borderStyle: `solid`,
+				cxtFunc: _ => setColorType(-1),
+			}, g_cssObj.button_RevON),
+
+		);
+	} else {
+		g_keycons.shuffleGroupNum = 0;
+	}
 
 	/**
 	 * 次のカーソルへ移動
@@ -5535,6 +5560,18 @@ function keyConfigInit(_kcType = g_kcType) {
 			}
 		}
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
+	};
+
+	const setShuffleGroup = (_scrollNum = 1) => {
+		const tmpNum = g_keycons.shuffleGroupNum + _scrollNum;
+		if (g_keyObj[`shuffle${keyCtrlPtn}_${tmpNum}`] !== undefined) {
+			lnkShuffleGroup.textContent = `Type${tmpNum + 1}`;
+			g_keycons.shuffleGroupNum = tmpNum;
+
+			g_keyObj[`shuffle${keyCtrlPtn}`] = g_keyObj[`shuffle${keyCtrlPtn}_${tmpNum}`].concat();
+		} else {
+
+		}
 	};
 
 	// ConfigType, ColorTypeの初期設定
