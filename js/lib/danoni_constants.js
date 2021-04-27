@@ -2288,6 +2288,10 @@ const g_lblNameObj = {
     'u_Type1': `Type1`,
     'u_Type2': `Type2`,
 
+    'u_Group1': `Group1`,
+    'u_Group2': `Group2`,
+    'u_Group3': `Group3`,
+
     ConfigType: `ConfigType`,
     ColorType: `ColorType`,
     ShuffleGroup: `ShuffleGroup`,
