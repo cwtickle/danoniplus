@@ -925,6 +925,7 @@ const g_cssObj = {
     settings_DifSelector: `settings_DifSelector`,
     settings_Disabled: `settings_Disabled`,
     settings_FadeinBar: `settings_FadeinBar`,
+    settings_Shuffle: `settings_Shuffle`,
 
     keyconfig_warning: `keyconfig_warning`,
     keyconfig_ConfigType: `keyconfig_ConfigType`,

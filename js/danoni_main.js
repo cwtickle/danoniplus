@@ -5510,7 +5510,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
 
 		multiAppend(divRoot,
-			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 35 }, g_cssObj.keyconfig_ColorType),
+			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 35 }, g_cssObj.settings_Shuffle),
 			makeKCButton(`lnkShuffleGroup`, `Group${g_keycons.shuffleGroupNum + 1}`, _ => setShuffleGroup(), {
 				y: 50, cxtFunc: _ => setShuffleGroup(-1),
 			}),
