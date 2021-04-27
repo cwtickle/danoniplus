@@ -2395,6 +2395,10 @@ const g_msgObj = {
     appearance: `流れる矢印の見え方を制御します。`,
     opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
 
+    configType: `キーコンフィグ対象を切り替えます。\n[Main] メインキーのみ, [Replaced] 代替キーのみ, [ALL] 全て`,
+    colorType: `矢印色の配色パターンを変更します。\nType1/2選択時は色変化が自動でOFFになります。\n[Type0] グラデーション切替, [Type1/2] デフォルトパターン`,
+    shuffleGroup: `Mirror/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
+
 };
 
 /**

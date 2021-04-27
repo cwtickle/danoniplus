@@ -5496,13 +5496,13 @@ function keyConfigInit(_kcType = g_kcType) {
 		// キーコンフィグタイプ切替ボタン
 		makeKCButtonHeader(`lblKcType`, `ConfigType`, { x: 10 }, g_cssObj.keyconfig_ConfigType),
 		makeKCButton(`lnkKcType`, g_kcType, _ => setConfigType(), {
-			x: 20, cxtFunc: _ => setConfigType(-1),
+			x: 20, title: g_msgObj.configType, cxtFunc: _ => setConfigType(-1),
 		}),
 
 		// キーカラータイプ切替ボタン
 		makeKCButtonHeader(`lblcolorType`, `ColorType`, {}, g_cssObj.keyconfig_ColorType),
 		makeKCButton(`lnkColorType`, g_colorType, _ => setColorType(), {
-			cxtFunc: _ => setColorType(-1),
+			title: g_msgObj.colorType, cxtFunc: _ => setColorType(-1),
 		}),
 	);
 
@@ -5512,7 +5512,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		multiAppend(divRoot,
 			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 35 }, g_cssObj.settings_Shuffle),
 			makeKCButton(`lnkShuffleGroup`, `Group${g_keycons.shuffleGroupNum + 1}`, _ => setShuffleGroup(), {
-				y: 50, cxtFunc: _ => setShuffleGroup(-1),
+				y: 50, title: g_msgObj.shuffleGroup, cxtFunc: _ => setShuffleGroup(-1),
 			}),
 		);
 	} else {
