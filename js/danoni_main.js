@@ -5018,6 +5018,14 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 		g_keyCopyLists.simple.forEach(header => {
 			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
 		});
+
+		let maxShufflePtn = 0;
+		while (g_keyObj[`shuffle${basePtn}_${maxShufflePtn}`] !== undefined) {
+			maxShufflePtn++;
+		}
+		for (let j = 0; j < maxShufflePtn; j++) {
+			g_keyObj[`shuffle${copyPtn}_${j}`] = g_keyObj[`shuffle${basePtn}_${j}`];
+		}
 	}
 }
 
@@ -5289,7 +5297,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
 			.split(`{1}:`).join(g_isMac ? `` : `Delete:`), {
-			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+			x: 0, y: 68, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		}),
 
 	);
@@ -5371,10 +5379,10 @@ function keyConfigInit(_kcType = g_kcType) {
 			x: keyconX, y: keyconY,
 			background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
 		}));
-		if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
+		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
 			keyconSprite.appendChild(
-				createDivCss2Label(`sArrow${j}`, g_keyObj[`shuffle${keyCtrlPtn}`][j] + 1, {
-					x: keyconX, y: keyconY - 12, w: C_ARW_WIDTH, h: 15, siz: 12, align: C_ALIGN_CENTER,
+				createDivCss2Label(`sArrow${j}`, ``, {
+					x: keyconX, y: keyconY - 12, w: C_ARW_WIDTH, h: 15, siz: 12, align: C_ALIGN_CENTER, fontWeight: `bold`,
 				})
 			);
 		}
@@ -5409,6 +5417,62 @@ function keyConfigInit(_kcType = g_kcType) {
 		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
+	/**
+	 * キーコンフィグ用設定ラベル
+	 * @param {string} _id 
+	 * @param {string} _name 
+	 * @param {object} object (x, y, w, h, siz, align, ...rest) 
+	 * @param  {...any} _classes 
+	 * @returns ラベル
+	 */
+	const makeKCButtonHeader = (_id, _name, {
+		x = g_sWidth * 5 / 6 - 30, y = 0, w = g_sWidth / 6, h = 20, siz = 12, align = C_ALIGN_LEFT, ...rest
+	} = {}, ..._classes) => {
+		return createDivCss2Label(_id, g_lblNameObj[_name], { x, y, w, h, siz, align, ...rest }, ..._classes);
+	};
+
+	/**
+	 * キーコンフィグ用設定ボタン
+	 * @param {string} _id 
+	 * @param {string} _text 
+	 * @param {function} _func 
+	 * @param {object} object (x, y, w, h, siz, borderStyle, cxtFunc, ...rest)
+	 * @param {string} _mainClass 
+	 * @param  {...any} _classes 
+	 * @returns ボタン
+	 */
+	const makeKCButton = (_id, _text, _func, { x = g_sWidth * 5 / 6 - 20, y = 15, w = g_sWidth / 6, h = 18,
+		siz = C_SIZ_JDGCNTS, borderStyle = `solid`, cxtFunc, ...rest } = {}, _mainClass = g_cssObj.button_RevOFF, ..._classes) => {
+		return makeSettingLblCssButton(_id, getStgDetailName(_text), 0, _func, { x, y, w, h, siz, cxtFunc, borderStyle, ...rest }, _mainClass, ..._classes);
+	};
+
+	const viewShuffleGroup = _num => {
+		if (g_headerObj.shuffleUse) {
+			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
+				lnkShuffleGroup.textContent = getStgDetailName(`Group${_num + 1}`);
+				g_keyObj[`shuffle${keyCtrlPtn}`] = g_keyObj[`shuffle${keyCtrlPtn}_${_num}`].concat();
+			}
+			if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
+				for (let j = 0; j < keyNum; j++) {
+					document.getElementById(`sArrow${j}`).textContent = g_keyObj[`shuffle${keyCtrlPtn}`][j] + 1;
+				}
+			}
+		}
+	}
+	const setShuffleGroup = (_scrollNum = 1) => {
+		const tmpNum = g_keycons.shuffleGroupNum + _scrollNum;
+		if (g_keyObj[`shuffle${keyCtrlPtn}_${tmpNum}`] !== undefined) {
+			g_keycons.shuffleGroupNum = tmpNum;
+		} else {
+			let j = 0;
+			while (g_keyObj[`shuffle${keyCtrlPtn}_${j}`] !== undefined) {
+				j -= _scrollNum;
+			}
+			g_keycons.shuffleGroupNum = j + _scrollNum;
+		}
+		viewShuffleGroup(g_keycons.shuffleGroupNum);
+	};
+
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
@@ -5430,44 +5494,31 @@ function keyConfigInit(_kcType = g_kcType) {
 		),
 
 		// キーコンフィグタイプ切替ボタン
-		createDivCss2Label(`lblKcType`, g_lblNameObj.ConfigType, {
-			x: 10, y: 0, w: 70, siz: 12, align: C_ALIGN_LEFT,
-		}, g_cssObj.keyconfig_ConfigType),
-
-		makeSettingLblCssButton(`lnkKcType`, getStgDetailName(g_kcType), 0, _ => setConfigType(), {
-			x: 20, y: 15, w: 100, h: 14, siz: 14, borderStyle: `solid`,
-			cxtFunc: _ => setConfigType(-1),
-		}, g_cssObj.button_RevON),
+		makeKCButtonHeader(`lblKcType`, `ConfigType`, { x: 10 }, g_cssObj.keyconfig_ConfigType),
+		makeKCButton(`lnkKcType`, g_kcType, _ => setConfigType(), {
+			x: 20, cxtFunc: _ => setConfigType(-1),
+		}),
 
 		// キーカラータイプ切替ボタン
-		createDivCss2Label(`lblcolorType`, g_lblNameObj.ColorType, {
-			x: g_sWidth - 140, y: 0, w: 70, siz: 12, align: C_ALIGN_LEFT,
-		}, g_cssObj.keyconfig_ColorType),
-
-		makeSettingLblCssButton(`lnkColorType`, getStgDetailName(g_colorType), 0, _ => setColorType(), {
-			x: g_sWidth - 130, y: 15, w: 100, h: 14, siz: 14, borderStyle: `solid`,
+		makeKCButtonHeader(`lblcolorType`, `ColorType`, {}, g_cssObj.keyconfig_ColorType),
+		makeKCButton(`lnkColorType`, g_colorType, _ => setColorType(), {
 			cxtFunc: _ => setColorType(-1),
-		}, g_cssObj.button_RevON),
+		}),
 	);
 
-	if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
+	// シャッフルグループ切替ボタン（シャッフルパターンが複数ある場合のみ）
+	if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
 
 		multiAppend(divRoot,
-
-			// シャッフルグループ切替ボタン
-			createDivCss2Label(`lblshuffleGroup`, g_lblNameObj.ShuffleGroup, {
-				x: g_sWidth - 140, y: 35, w: 70, siz: 12, align: C_ALIGN_LEFT,
-			}, g_cssObj.keyconfig_ColorType),
-
-			makeSettingLblCssButton(`lnkShuffleGroup`, getStgDetailName(`Type${g_keycons.shuffleGroupNum + 1}`), 0, _ => setColorType(), {
-				x: g_sWidth - 130, y: 50, w: 100, h: 14, siz: 14, borderStyle: `solid`,
-				cxtFunc: _ => setColorType(-1),
-			}, g_cssObj.button_RevON),
-
+			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 35 }, g_cssObj.keyconfig_ColorType),
+			makeKCButton(`lnkShuffleGroup`, `Group${g_keycons.shuffleGroupNum + 1}`, _ => setShuffleGroup(), {
+				y: 50, cxtFunc: _ => setShuffleGroup(-1),
+			}),
 		);
 	} else {
 		g_keycons.shuffleGroupNum = 0;
 	}
+	viewShuffleGroup(g_keycons.shuffleGroupNum);
 
 	/**
 	 * 次のカーソルへ移動
@@ -5560,18 +5611,6 @@ function keyConfigInit(_kcType = g_kcType) {
 			}
 		}
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
-	};
-
-	const setShuffleGroup = (_scrollNum = 1) => {
-		const tmpNum = g_keycons.shuffleGroupNum + _scrollNum;
-		if (g_keyObj[`shuffle${keyCtrlPtn}_${tmpNum}`] !== undefined) {
-			lnkShuffleGroup.textContent = `Type${tmpNum + 1}`;
-			g_keycons.shuffleGroupNum = tmpNum;
-
-			g_keyObj[`shuffle${keyCtrlPtn}`] = g_keyObj[`shuffle${keyCtrlPtn}_${tmpNum}`].concat();
-		} else {
-
-		}
 	};
 
 	// ConfigType, ColorTypeの初期設定
