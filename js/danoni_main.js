@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/04/22
+ * Revised : 2021/04/28
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 21.5.0`;
-const g_revisedDate = `2021/04/22`;
+const g_version = `Ver 22.0.0`;
+const g_revisedDate = `2021/04/28`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -661,32 +661,6 @@ function createColorObject2(_id,
 	setAttrs(div, { color: rest.background || ``, type: charaStyle, cnt: 0, });
 
 	return div;
-}
-
-/**
- * 空スプライト(ムービークリップ相当)の作成
- * - 作成済みの場合はすでに作成済のスプライトを返却する
- * - ここで作成したスプライトは clearWindow() により削除される
- * @deprecated v21以降非推奨
- * @param {string} _parentObjName 親スプライト名
- * @param {string} _newObjName 作成する子スプライト名
- * @param {number} _x 作成するスプライトのx座標（親スプライト基準）
- * @param {number} _y 作成するスプライトのy座標（親スプライト基準）
- * @param {number} _width 幅
- * @param {number} _height 高さ
- */
-function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height, _options = {}) {
-	let newsprite;
-	if (document.getElementById(_newObjName) === null) {
-		newsprite = createDiv(_newObjName, _x, _y, _width, _height);
-		document.getElementById(_parentObjName).appendChild(newsprite);
-	} else {
-		newsprite = document.getElementById(_newObjName);
-	}
-	if (_options.description !== undefined) {
-		newsprite.title = _options.description;
-	}
-	return newsprite;
 }
 
 /**
@@ -2865,8 +2839,8 @@ function headerConvert(_dosObj) {
 			return setVal(data, _default, C_TYP_FLOAT);
 		};
 
-		for (let j = 0; j < difs.length; j++) {
-			const difDetails = difs[j].split(`,`);
+		difs.forEach(dif => {
+			const difDetails = dif.split(`,`);
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
 			const border = (difDetails[difpos.border]) ? difDetails[difpos.border] :
@@ -2894,7 +2868,7 @@ function headerConvert(_dosObj) {
 
 			// 初期速度
 			obj.initSpeeds.push(setVal(difDetails[difpos.speed], 3.5, C_TYP_FLOAT));
-		}
+		});
 	} else {
 		makeWarningWindow(g_msgInfoObj.E_0021);
 		obj.keyLabels = [`7`];
@@ -3679,8 +3653,7 @@ function keysConvert(_dosObj) {
 	};
 
 	// 対象キー毎に処理
-	for (let j = 0; j < keyExtraList.length; j++) {
-		const newKey = keyExtraList[j];
+	keyExtraList.forEach(newKey => {
 		let tmpDivPtn = [];
 		let tmpMinPatterns = 1;
 
@@ -3759,7 +3732,7 @@ function keysConvert(_dosObj) {
 		// アシストパターン (assistX_Y)
 		// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
 		newKeyPairParam(newKey, `assist`, `assistPos`);
-	}
+	});
 }
 
 
@@ -3874,17 +3847,24 @@ function musicAfterLoaded() {
  */
 function setSpriteList(_settingList) {
 	const optionWidth = (g_sWidth - 450) / 2;
-	const childX = 25;
-	const childY = 20;
 	const spriteList = [];
 	_settingList.forEach(setting => {
 		spriteList[setting[0]] = createEmptySprite(optionsprite, `${setting[0]}Sprite`, {
-			x: childX, y: setting[1] * C_LEN_SETLBL_HEIGHT + childY + setting[2],
+			x: 25, y: setting[1] * C_LEN_SETLBL_HEIGHT + setting[2] + 20,
 			w: optionWidth + setting[3], h: C_LEN_SETLBL_HEIGHT + setting[4], title: g_msgObj[setting[0]],
 		});
 	});
 	return spriteList;
 }
+
+/**
+ * 設定ウィンドウの作成
+ * @param {string} _sprite 
+ * @returns 
+ */
+const createOptionSprite = _sprite => createEmptySprite(_sprite, `optionsprite`, {
+	x: (g_sWidth - 450) / 2, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325,
+});
 
 /**
  * 設定・オプション画面のラベル・ボタン処理の描画
@@ -3893,10 +3873,7 @@ function setSpriteList(_settingList) {
 function createOptionWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionWidth = (g_sWidth - 450) / 2;
-	const optionsprite = createEmptySprite(_sprite, `optionsprite`, {
-		x: optionWidth, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325,
-	});
+	const optionsprite = createOptionSprite(_sprite);
 
 	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
 	const settingList = [
@@ -4746,6 +4723,7 @@ function createOptionWindow(_sprite) {
 			if (!g_settings.autoPlays.includes(g_stateObj.autoPlay)) {
 				g_settings.autoPlayNum = 0;
 			}
+			g_keycons.shuffleGroupNum = 0;
 		}
 
 		if (g_canLoadDifInfoFlg || _initFlg) {
@@ -4801,8 +4779,10 @@ function createOptionWindow(_sprite) {
 				}
 				getKeyCtrl(g_localStorage, g_keyObj.currentKey);
 			}
-
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
+				g_keyObj[`shuffle${keyCtrlPtn}`] = g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`].concat();
+			}
 			if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
 				g_headerObj.keyRetry = setVal(g_keyObj[`keyRetry${keyCtrlPtn}`], g_headerObj.keyRetryDef, C_TYP_NUMBER);
 			}
@@ -5018,6 +4998,14 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 		g_keyCopyLists.simple.forEach(header => {
 			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
 		});
+
+		let maxShufflePtn = 0;
+		while (g_keyObj[`shuffle${basePtn}_${maxShufflePtn}`] !== undefined) {
+			maxShufflePtn++;
+		}
+		for (let j = 0; j < maxShufflePtn; j++) {
+			g_keyObj[`shuffle${copyPtn}_${j}`] = g_keyObj[`shuffle${basePtn}_${j}`];
+		}
 	}
 }
 
@@ -5131,10 +5119,7 @@ function settingsDisplayInit() {
 function createSettingsDisplayWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionWidth = (g_sWidth - 450) / 2;
-	const childX = 25;
-	const childY = 20;
-	createEmptySprite(_sprite, `optionsprite`, { x: optionWidth, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325 });
+	createOptionSprite(_sprite);
 
 	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
 	const settingList = [
@@ -5144,7 +5129,7 @@ function createSettingsDisplayWindow(_sprite) {
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
 	const displaySprite = createEmptySprite(optionsprite, `displaySprite`, {
-		x: childX, y: childY + 10, w: optionWidth, h: C_LEN_SETLBL_HEIGHT * 5,
+		x: 25, y: 30, w: (g_sWidth - 450) / 2, h: C_LEN_SETLBL_HEIGHT * 5,
 	});
 	const spriteList = setSpriteList(settingList);
 
@@ -5289,7 +5274,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
 			.split(`{1}:`).join(g_isMac ? `` : `Delete:`), {
-			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+			x: 0, y: 68, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		}),
 
 	);
@@ -5349,29 +5334,55 @@ function keyConfigInit(_kcType = g_kcType) {
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
-		// キーコンフィグ表示用の矢印・おにぎりを表示
 		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2;
 		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt));
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
 
+		/**
+		 * 一時的に矢印色を変更
+		 * @param {number} _scrollNum 
+		 */
+		const changeTmpColor = (_scrollNum = 1) => {
+			const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
+			const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+
+			const setColorLen = g_headerObj.setColor.length;
+			g_keyObj[`color${keyCtrlPtn}`][j] = (g_keyObj[`color${keyCtrlPtn}`][j] + setColorLen + _scrollNum) % setColorLen;
+			g_keyObj[`color${basePtn}`][j] = g_keyObj[`color${keyCtrlPtn}`][j];
+			document.getElementById(`arrow${j}`).style.background = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
+		};
+		keyconSprite.appendChild(
+			createCss2Button(`color${j}`, ``, _ => changeTmpColor(), {
+				x: keyconX, y: keyconY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
+				cxtFunc: _ => changeTmpColor(-1),
+			}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
+		);
+
+		// キーコンフィグ表示用の矢印・おにぎりを表示
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
 			// 矢印の塗り部分
 			const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? arrowColor :
 				g_headerObj.setShadowColor[colorPos]);
 			keyconSprite.appendChild(
 				createColorObject2(`arrowShadow${j}`, {
-					x: keyconX, y: keyconY,
-					background: shadowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`,
-					opacity: 0.5,
+					x: keyconX, y: keyconY, background: shadowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
+					styleName: `Shadow`, opacity: 0.5, pointerEvents: `none`,
 				})
 			);
 		}
 		keyconSprite.appendChild(createColorObject2(`arrow${j}`, {
-			x: keyconX, y: keyconY,
-			background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
+			x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], pointerEvents: `none`,
 		}));
+		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
+			keyconSprite.appendChild(
+				createDivCss2Label(`sArrow${j}`, ``, {
+					x: keyconX, y: keyconY - 12, w: C_ARW_WIDTH, h: 15, siz: 12, align: C_ALIGN_CENTER, fontWeight: `bold`,
+				})
+			);
+		}
 
+		// 割り当て先のキー名を表示
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 			g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k], 0, C_TYP_NUMBER);
 			g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
@@ -5383,7 +5394,7 @@ function keyConfigInit(_kcType = g_kcType) {
 					setKeyConfigCursor();
 				}, {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: C_LNK_HEIGHT, siz: C_SIZ_JDGCNTS,
+					w: C_ARW_WIDTH, h: 18, siz: C_SIZ_JDGCNTS,
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 
@@ -5401,6 +5412,62 @@ function keyConfigInit(_kcType = g_kcType) {
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, g_imgObj.cursor,
 		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
+
+	/**
+	 * キーコンフィグ用設定ラベル
+	 * @param {string} _id 
+	 * @param {string} _name 
+	 * @param {object} object (x, y, w, h, siz, align, ...rest) 
+	 * @param  {...any} _classes 
+	 * @returns ラベル
+	 */
+	const makeKCButtonHeader = (_id, _name, {
+		x = g_sWidth * 5 / 6 - 30, y = 0, w = g_sWidth / 6, h = 20, siz = 12, align = C_ALIGN_LEFT, ...rest
+	} = {}, ..._classes) => {
+		return createDivCss2Label(_id, g_lblNameObj[_name], { x, y, w, h, siz, align, ...rest }, ..._classes);
+	};
+
+	/**
+	 * キーコンフィグ用設定ボタン
+	 * @param {string} _id 
+	 * @param {string} _text 
+	 * @param {function} _func 
+	 * @param {object} object (x, y, w, h, siz, borderStyle, cxtFunc, ...rest)
+	 * @param {string} _mainClass 
+	 * @param  {...any} _classes 
+	 * @returns ボタン
+	 */
+	const makeKCButton = (_id, _text, _func, { x = g_sWidth * 5 / 6 - 20, y = 15, w = g_sWidth / 6, h = 18,
+		siz = C_SIZ_JDGCNTS, borderStyle = `solid`, cxtFunc, ...rest } = {}, _mainClass = g_cssObj.button_RevOFF, ..._classes) => {
+		return makeSettingLblCssButton(_id, getStgDetailName(_text), 0, _func, { x, y, w, h, siz, cxtFunc, borderStyle, ...rest }, _mainClass, ..._classes);
+	};
+
+	const viewShuffleGroup = _num => {
+		if (g_headerObj.shuffleUse) {
+			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
+				lnkShuffleGroup.textContent = getStgDetailName(`Group${_num + 1}`);
+				g_keyObj[`shuffle${keyCtrlPtn}`] = g_keyObj[`shuffle${keyCtrlPtn}_${_num}`].concat();
+			}
+			if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
+				for (let j = 0; j < keyNum; j++) {
+					document.getElementById(`sArrow${j}`).textContent = g_keyObj[`shuffle${keyCtrlPtn}`][j] + 1;
+				}
+			}
+		}
+	}
+	const setShuffleGroup = (_scrollNum = 1) => {
+		const tmpNum = g_keycons.shuffleGroupNum + _scrollNum;
+		if (g_keyObj[`shuffle${keyCtrlPtn}_${tmpNum}`] !== undefined) {
+			g_keycons.shuffleGroupNum = tmpNum;
+		} else {
+			let j = 0;
+			while (g_keyObj[`shuffle${keyCtrlPtn}_${j}`] !== undefined) {
+				j -= _scrollNum;
+			}
+			g_keycons.shuffleGroupNum = j + _scrollNum;
+		}
+		viewShuffleGroup(g_keycons.shuffleGroupNum);
+	};
 
 	multiAppend(divRoot,
 
@@ -5423,26 +5490,31 @@ function keyConfigInit(_kcType = g_kcType) {
 		),
 
 		// キーコンフィグタイプ切替ボタン
-		createDivCss2Label(`lblKcType`, g_lblNameObj.ConfigType, {
-			x: 30, y: 10, w: 70,
-		}, g_cssObj.keyconfig_ConfigType),
-
-		makeSettingLblCssButton(`lnkKcType`, getStgDetailName(g_kcType), 0, _ => setConfigType(), {
-			x: 30, y: 35, w: 100,
-			cxtFunc: _ => setConfigType(-1),
+		makeKCButtonHeader(`lblKcType`, `ConfigType`, { x: 10 }, g_cssObj.keyconfig_ConfigType),
+		makeKCButton(`lnkKcType`, g_kcType, _ => setConfigType(), {
+			x: 20, title: g_msgObj.configType, cxtFunc: _ => setConfigType(-1),
 		}),
 
 		// キーカラータイプ切替ボタン
-		createDivCss2Label(`lblcolorType`, g_lblNameObj.ColorType, {
-			x: g_sWidth - 120, y: 10, w: 70,
-		}, g_cssObj.keyconfig_ColorType),
-
-		makeSettingLblCssButton(`lnkColorType`, getStgDetailName(g_colorType), 0, _ => setColorType(), {
-			x: g_sWidth - 130, y: 35, w: 100,
-			cxtFunc: _ => setColorType(-1),
+		makeKCButtonHeader(`lblcolorType`, `ColorType`, {}, g_cssObj.keyconfig_ColorType),
+		makeKCButton(`lnkColorType`, g_colorType, _ => setColorType(), {
+			title: g_msgObj.colorType, cxtFunc: _ => setColorType(-1),
 		}),
-
 	);
+
+	// シャッフルグループ切替ボタン（シャッフルパターンが複数ある場合のみ）
+	if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
+
+		multiAppend(divRoot,
+			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 35 }, g_cssObj.settings_Shuffle),
+			makeKCButton(`lnkShuffleGroup`, `Group${g_keycons.shuffleGroupNum + 1}`, _ => setShuffleGroup(), {
+				y: 50, title: g_msgObj.shuffleGroup, cxtFunc: _ => setShuffleGroup(-1),
+			}),
+		);
+	} else {
+		g_keycons.shuffleGroupNum = 0;
+	}
+	viewShuffleGroup(g_keycons.shuffleGroupNum);
 
 	/**
 	 * 次のカーソルへ移動
@@ -9147,7 +9219,7 @@ function resultInit() {
 		`${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${g_stateObj.autoPlay}less`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
-		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getStgDetailName(g_stateObj.shuffle)}]`)}`
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getStgDetailName(g_stateObj.shuffle)}${setScoreIdHeader(g_keycons.shuffleGroupNum)}]`)}`
 	].filter(value => value !== ``).join(` `);
 
 	let playStyleData = [
@@ -9381,7 +9453,7 @@ function resultInit() {
 	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
+		tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}${setScoreIdHeader(g_keycons.shuffleGroupNum)}`;
 	}
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);

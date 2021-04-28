@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/04/22 (v21.5.0)
+ * Revised : 2021/04/28 (v22.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -207,7 +207,7 @@ const C_MAX_SPEED = 10;
 const C_MIN_SPEED = 1;
 
 const C_KYC_HEIGHT = 150;
-const C_KYC_REPHEIGHT = 20;
+const C_KYC_REPHEIGHT = 18;
 
 const C_FRM_AFTERFADE = 420;
 const C_FRM_FRZATTEMPT = 5;
@@ -451,6 +451,8 @@ const g_keycons = {
     colorTypes: [`Default`, `Type0`, `Type1`, `Type2`],
     colorDefs: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_OFF],
     colorTypeNum: 0,
+
+    shuffleGroupNum: 0,
 };
 
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
@@ -923,6 +925,7 @@ const g_cssObj = {
     settings_DifSelector: `settings_DifSelector`,
     settings_Disabled: `settings_Disabled`,
     settings_FadeinBar: `settings_FadeinBar`,
+    settings_Shuffle: `settings_Shuffle`,
 
     keyconfig_warning: `keyconfig_warning`,
     keyconfig_ConfigType: `keyconfig_ConfigType`,
@@ -1205,6 +1208,79 @@ const g_keyObj = {
     shuffle11L_3: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
 
     shuffle9A_4: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
+
+    // シャッフルグループ(パターン1)
+    shuffle5_0_0: [0, 0, 0, 0, 1],
+    shuffle7_0_0: [0, 0, 0, 1, 0, 0, 0],
+    shuffle7i_0_0: [0, 0, 0, 1, 1, 1, 1],
+    shuffle8_0_0: [0, 0, 0, 1, 0, 0, 0, 2],
+    shuffle9A_0_0: [0, 0, 0, 0, 1, 2, 2, 2, 2],
+    shuffle9B_0_0: [0, 0, 0, 0, 1, 0, 0, 0, 0],
+    shuffle9i_0_0: [0, 0, 0, 0, 1, 1, 1, 1, 1],
+    shuffle11_0_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
+    shuffle11L_0_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
+    shuffle11W_0_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
+    shuffle11i_0_0: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
+    shuffle12_0_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle13_0_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 3, 3, 3, 3],
+    shuffle14_0_0: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle14i_0_0: [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
+    shuffle15A_0_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
+    shuffle15B_0_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
+    shuffle16i_0_0: [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 2, 2, 2, 2],
+    shuffle17_0_0: [0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2],
+    shuffle23_0_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 4, 4, 4, 4, 4, 4, 4],
+
+    shuffle5_1_0: [1, 0, 0, 0, 0],
+    shuffle7_1_0: [0, 0, 0, 1, 0, 0, 0],
+    shuffle8_1_0: [2, 0, 0, 0, 1, 0, 0, 0],
+    shuffle9A_1_0: [0, 0, 0, 0, 1, 2, 2, 2, 2],
+    shuffle9B_1_0: [0, 0, 0, 0, 1, 2, 2, 2, 2],
+    shuffle9i_1_0: [0, 0, 0, 0, 0, 1, 1, 1, 1],
+    shuffle11_1_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
+    shuffle11L_1_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
+    shuffle11W_1_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle11i_1_0: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
+    shuffle12_1_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle14_1_0: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle15A_1_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
+    shuffle15B_1_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
+    shuffle17_1_0: [0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2],
+
+    shuffle5_2_0: [0, 0, 1, 0, 0],
+    shuffle7_2_0: [1, 0, 0, 0, 0, 0, 0, 0],
+    shuffle8_2_0: [1, 0, 0, 0, 0, 0, 0, 0],
+    shuffle9A_2_0: [0, 0, 0, 0, 1, 0, 0, 0, 0],
+    shuffle9B_2_0: [0, 0, 0, 0, 1, 2, 2, 2, 2],
+    shuffle11_2_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle11L_2_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle11W_2_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+
+    shuffle7_3_0: [1, 0, 0, 0, 0, 0, 0, 0],
+    shuffle8_3_0: [1, 0, 0, 0, 0, 0, 0, 0],
+    shuffle9A_3_0: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
+    shuffle11_3_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle11L_3_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+
+    shuffle9A_4_0: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
+
+    // シャッフルグループ(パターン2)
+    shuffle11_0_1: [0, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3],
+    shuffle11L_0_1: [0, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3],
+    shuffle15A_0_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 4],
+    shuffle15B_0_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 4],
+
+    shuffle11_1_1: [0, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3],
+    shuffle11L_1_1: [0, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3],
+    shuffle15A_1_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 4],
+    shuffle15B_1_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 4],
+
+    // シャッフルグループ(パターン3)
+    shuffle15A_0_2: [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 2, 2, 2],
+    shuffle15B_0_2: [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 2, 2, 2],
+
+    shuffle15A_1_2: [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 2, 2, 2],
+    shuffle15B_1_2: [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 2, 2, 2],
 
     // 基本パターン (矢印回転、AAキャラクタ)
     // - AAキャラクタの場合、キャラクタ名を指定
@@ -2220,8 +2296,13 @@ const g_lblNameObj = {
     'u_Type1': `Type1`,
     'u_Type2': `Type2`,
 
+    'u_Group1': `Group1`,
+    'u_Group2': `Group2`,
+    'u_Group3': `Group3`,
+
     ConfigType: `ConfigType`,
     ColorType: `ColorType`,
+    ShuffleGroup: `ShuffleGroup`,
     KeyPattern: `KeyPattern`,
 
     j_ii: "(・∀・)ｲｲ!!",
@@ -2313,6 +2394,10 @@ const g_msgObj = {
 
     appearance: `流れる矢印の見え方を制御します。`,
     opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
+
+    configType: `キーコンフィグ対象を切り替えます。\n[Main] メインキーのみ, [Replaced] 代替キーのみ, [ALL] 全て`,
+    colorType: `矢印色の配色パターンを変更します。\nType1/2選択時は色変化が自動でOFFになります。\n[Type0] グラデーション切替, [Type1/2] デフォルトパターン`,
+    shuffleGroup: `Mirror/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
 
 };
 

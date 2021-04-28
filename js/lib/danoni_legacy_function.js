@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/03/12 (v21.0.0)
+ * Revised : 2021/04/28 (v22.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -45,6 +45,32 @@ let C_CLR_MAXLIFE = `#444400`;
 let C_CLR_CLEARLIFE = `#004444`;
 let C_CLR_DEFAULTLIFE = `#444444`;
 let C_CLR_BACKLIFE = `#222222`;
+
+/**
+ * 空スプライト(ムービークリップ相当)の作成
+ * - 作成済みの場合はすでに作成済のスプライトを返却する
+ * - ここで作成したスプライトは clearWindow() により削除される
+ * @deprecated v21以降非推奨
+ * @param {string} _parentObjName 親スプライト名
+ * @param {string} _newObjName 作成する子スプライト名
+ * @param {number} _x 作成するスプライトのx座標（親スプライト基準）
+ * @param {number} _y 作成するスプライトのy座標（親スプライト基準）
+ * @param {number} _width 幅
+ * @param {number} _height 高さ
+ */
+function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height, _options = {}) {
+    let newsprite;
+    if (document.getElementById(_newObjName) === null) {
+        newsprite = createDiv(_newObjName, _x, _y, _width, _height);
+        document.getElementById(_parentObjName).appendChild(newsprite);
+    } else {
+        newsprite = document.getElementById(_newObjName);
+    }
+    if (_options.description !== undefined) {
+        newsprite.title = _options.description;
+    }
+    return newsprite;
+}
 
 /**
  * ラベル文字作成（レイヤー直書き。htmlタグは使用できない）
