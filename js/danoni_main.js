@@ -666,32 +666,6 @@ function createColorObject2(_id,
 /**
  * 空スプライト(ムービークリップ相当)の作成
  * - 作成済みの場合はすでに作成済のスプライトを返却する
- * - ここで作成したスプライトは clearWindow() により削除される
- * @deprecated v21以降非推奨
- * @param {string} _parentObjName 親スプライト名
- * @param {string} _newObjName 作成する子スプライト名
- * @param {number} _x 作成するスプライトのx座標（親スプライト基準）
- * @param {number} _y 作成するスプライトのy座標（親スプライト基準）
- * @param {number} _width 幅
- * @param {number} _height 高さ
- */
-function createSprite(_parentObjName, _newObjName, _x, _y, _width, _height, _options = {}) {
-	let newsprite;
-	if (document.getElementById(_newObjName) === null) {
-		newsprite = createDiv(_newObjName, _x, _y, _width, _height);
-		document.getElementById(_parentObjName).appendChild(newsprite);
-	} else {
-		newsprite = document.getElementById(_newObjName);
-	}
-	if (_options.description !== undefined) {
-		newsprite.title = _options.description;
-	}
-	return newsprite;
-}
-
-/**
- * 空スプライト(ムービークリップ相当)の作成
- * - 作成済みの場合はすでに作成済のスプライトを返却する
  * @param {object} _parentObj 親スプライト
  * @param {string} _newObjId 作成する子スプライト名
  * @param {object} _obj (x, y, w, h, ...rest)
