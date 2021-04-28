@@ -5360,27 +5360,45 @@ function keyConfigInit(_kcType = g_kcType) {
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
-		// キーコンフィグ表示用の矢印・おにぎりを表示
 		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2;
 		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt));
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
 
+		/**
+		 * 一時的に矢印色を変更
+		 * @param {number} _scrollNum 
+		 */
+		const changeTmpColor = (_scrollNum = 1) => {
+			const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
+			const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+
+			const setColorLen = g_headerObj.setColor.length;
+			g_keyObj[`color${keyCtrlPtn}`][j] = (g_keyObj[`color${keyCtrlPtn}`][j] + setColorLen + _scrollNum) % setColorLen;
+			g_keyObj[`color${basePtn}`][j] = g_keyObj[`color${keyCtrlPtn}`][j];
+			document.getElementById(`arrow${j}`).style.background = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
+		};
+		keyconSprite.appendChild(
+			createCss2Button(`color${j}`, ``, _ => changeTmpColor(), {
+				x: keyconX, y: keyconY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
+				cxtFunc: _ => changeTmpColor(-1),
+			}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
+		);
+
+		// キーコンフィグ表示用の矢印・おにぎりを表示
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
 			// 矢印の塗り部分
 			const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? arrowColor :
 				g_headerObj.setShadowColor[colorPos]);
 			keyconSprite.appendChild(
 				createColorObject2(`arrowShadow${j}`, {
-					x: keyconX, y: keyconY,
-					background: shadowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`,
-					opacity: 0.5,
+					x: keyconX, y: keyconY, background: shadowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
+					styleName: `Shadow`, opacity: 0.5, pointerEvents: `none`,
 				})
 			);
 		}
 		keyconSprite.appendChild(createColorObject2(`arrow${j}`, {
-			x: keyconX, y: keyconY,
-			background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
+			x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], pointerEvents: `none`,
 		}));
 		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
 			keyconSprite.appendChild(
@@ -5390,6 +5408,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			);
 		}
 
+		// 割り当て先のキー名を表示
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 			g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k], 0, C_TYP_NUMBER);
 			g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k] = setVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k], 0, C_TYP_NUMBER);
