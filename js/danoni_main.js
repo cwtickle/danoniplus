@@ -4746,6 +4746,7 @@ function createOptionWindow(_sprite) {
 			if (!g_settings.autoPlays.includes(g_stateObj.autoPlay)) {
 				g_settings.autoPlayNum = 0;
 			}
+			g_keycons.shuffleGroupNum = 0;
 		}
 
 		if (g_canLoadDifInfoFlg || _initFlg) {
@@ -4801,8 +4802,10 @@ function createOptionWindow(_sprite) {
 				}
 				getKeyCtrl(g_localStorage, g_keyObj.currentKey);
 			}
-
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
+				g_keyObj[`shuffle${keyCtrlPtn}`] = g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`].concat();
+			}
 			if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
 				g_headerObj.keyRetry = setVal(g_keyObj[`keyRetry${keyCtrlPtn}`], g_headerObj.keyRetryDef, C_TYP_NUMBER);
 			}
