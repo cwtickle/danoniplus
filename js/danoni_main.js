@@ -2865,8 +2865,8 @@ function headerConvert(_dosObj) {
 			return setVal(data, _default, C_TYP_FLOAT);
 		};
 
-		for (let j = 0; j < difs.length; j++) {
-			const difDetails = difs[j].split(`,`);
+		difs.forEach(dif => {
+			const difDetails = dif.split(`,`);
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
 			const border = (difDetails[difpos.border]) ? difDetails[difpos.border] :
@@ -2894,7 +2894,7 @@ function headerConvert(_dosObj) {
 
 			// 初期速度
 			obj.initSpeeds.push(setVal(difDetails[difpos.speed], 3.5, C_TYP_FLOAT));
-		}
+		});
 	} else {
 		makeWarningWindow(g_msgInfoObj.E_0021);
 		obj.keyLabels = [`7`];
@@ -3679,8 +3679,7 @@ function keysConvert(_dosObj) {
 	};
 
 	// 対象キー毎に処理
-	for (let j = 0; j < keyExtraList.length; j++) {
-		const newKey = keyExtraList[j];
+	keyExtraList.forEach(newKey => {
 		let tmpDivPtn = [];
 		let tmpMinPatterns = 1;
 
@@ -3759,7 +3758,7 @@ function keysConvert(_dosObj) {
 		// アシストパターン (assistX_Y)
 		// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
 		newKeyPairParam(newKey, `assist`, `assistPos`);
-	}
+	});
 }
 
 
@@ -3874,17 +3873,24 @@ function musicAfterLoaded() {
  */
 function setSpriteList(_settingList) {
 	const optionWidth = (g_sWidth - 450) / 2;
-	const childX = 25;
-	const childY = 20;
 	const spriteList = [];
 	_settingList.forEach(setting => {
 		spriteList[setting[0]] = createEmptySprite(optionsprite, `${setting[0]}Sprite`, {
-			x: childX, y: setting[1] * C_LEN_SETLBL_HEIGHT + childY + setting[2],
+			x: 25, y: setting[1] * C_LEN_SETLBL_HEIGHT + setting[2] + 20,
 			w: optionWidth + setting[3], h: C_LEN_SETLBL_HEIGHT + setting[4], title: g_msgObj[setting[0]],
 		});
 	});
 	return spriteList;
 }
+
+/**
+ * 設定ウィンドウの作成
+ * @param {string} _sprite 
+ * @returns 
+ */
+const createOptionSprite = _sprite => createEmptySprite(_sprite, `optionsprite`, {
+	x: (g_sWidth - 450) / 2, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325,
+});
 
 /**
  * 設定・オプション画面のラベル・ボタン処理の描画
@@ -3893,10 +3899,7 @@ function setSpriteList(_settingList) {
 function createOptionWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionWidth = (g_sWidth - 450) / 2;
-	const optionsprite = createEmptySprite(_sprite, `optionsprite`, {
-		x: optionWidth, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325,
-	});
+	const optionsprite = createOptionSprite(_sprite);
 
 	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
 	const settingList = [
@@ -5142,10 +5145,7 @@ function settingsDisplayInit() {
 function createSettingsDisplayWindow(_sprite) {
 
 	// 各ボタン用のスプライトを作成
-	const optionWidth = (g_sWidth - 450) / 2;
-	const childX = 25;
-	const childY = 20;
-	createEmptySprite(_sprite, `optionsprite`, { x: optionWidth, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325 });
+	createOptionSprite(_sprite);
 
 	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
 	const settingList = [
@@ -5155,7 +5155,7 @@ function createSettingsDisplayWindow(_sprite) {
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
 	const displaySprite = createEmptySprite(optionsprite, `displaySprite`, {
-		x: childX, y: childY + 10, w: optionWidth, h: C_LEN_SETLBL_HEIGHT * 5,
+		x: 25, y: 30, w: (g_sWidth - 450) / 2, h: C_LEN_SETLBL_HEIGHT * 5,
 	});
 	const spriteList = setSpriteList(settingList);
 
