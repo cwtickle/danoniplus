@@ -400,7 +400,7 @@ const g_settings = {
     scrolls: [],
     scrollNum: 0,
 
-    shuffles: [C_FLG_OFF, `Mirror`, `A-Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`],
+    shuffles: [C_FLG_OFF, `Mirror`, `Asym-Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`],
     shuffleNum: 0,
 
     gauges: [],
@@ -432,7 +432,7 @@ g_settings.opacityNum = g_settings.opacitys.length - 1;
 const g_shuffleFunc = {
     'OFF': _ => true,
     'Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup),
-    'A-Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup, true),
+    'Asym-Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup, true),
     'Random': (keyNum, shuffleGroup) => applyRandom(keyNum, shuffleGroup),
     'Random+': keyNum => applyRandom(keyNum, [[...Array(keyNum).keys()]]),
     'S-Random': (keyNum, shuffleGroup) => {
@@ -2257,7 +2257,7 @@ const g_lblNameObj = {
     'u_Reverse': `Reverse`,
 
     'u_Mirror': `Mirror`,
-    'u_A-Mirror': `A-Mirror`,
+    'u_Asym-Mirror': `Asym-Mirror`,
     'u_Random': `Random`,
     'u_Random+': `Random+`,
     'u_S-Random': `S-Random`,
