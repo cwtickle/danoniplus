@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/04/28 (v22.0.0)
+ * Revised : 2021/05/03 (v22.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -400,7 +400,7 @@ const g_settings = {
     scrolls: [],
     scrollNum: 0,
 
-    shuffles: [C_FLG_OFF, `Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`],
+    shuffles: [C_FLG_OFF, `Mirror`, `Asym-Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`],
     shuffleNum: 0,
 
     gauges: [],
@@ -432,6 +432,7 @@ g_settings.opacityNum = g_settings.opacitys.length - 1;
 const g_shuffleFunc = {
     'OFF': _ => true,
     'Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup),
+    'Asym-Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup, true),
     'Random': (keyNum, shuffleGroup) => applyRandom(keyNum, shuffleGroup),
     'Random+': keyNum => applyRandom(keyNum, [[...Array(keyNum).keys()]]),
     'S-Random': (keyNum, shuffleGroup) => {
@@ -2256,6 +2257,7 @@ const g_lblNameObj = {
     'u_Reverse': `Reverse`,
 
     'u_Mirror': `Mirror`,
+    'u_Asym-Mirror': `Asym-Mirror`,
     'u_Random': `Random`,
     'u_Random+': `Random+`,
     'u_S-Random': `S-Random`,

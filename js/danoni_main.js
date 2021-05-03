@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/04/28
+ * Revised : 2021/05/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 22.0.0`;
-const g_revisedDate = `2021/04/28`;
+const g_version = `Ver 22.1.0`;
+const g_revisedDate = `2021/05/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3143,6 +3143,12 @@ function headerConvert(_dosObj) {
 	// 譜面名に制作者名を付加するかどうかのフラグ
 	obj.makerView = setVal(_dosObj.makerView, false, C_TYP_BOOLEAN);
 
+	// shuffleUse=group 時のみshuffle用配列を組み替える
+	if (_dosObj.shuffleUse === `group`) {
+		_dosObj.shuffleUse = true;
+		g_settings.shuffles = g_settings.shuffles.filter(val => !val.endsWith(`+`));
+	}
+
 	// オプション利用可否設定
 	g_canDisabledSettings.forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
@@ -6038,9 +6044,19 @@ function applyShuffle(_keyNum, _shuffleGroup, _style) {
  * @param {number} _keyNum
  * @param {array} _shuffleGroup
  */
-function applyMirror(_keyNum, _shuffleGroup) {
+function applyMirror(_keyNum, _shuffleGroup, _asymFlg = false) {
 	// シャッフルグループごとにミラー
 	const style = copyArray2d(_shuffleGroup).map(_group => _group.reverse());
+	if (_asymFlg) {
+		// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
+		style.forEach((group, i) => {
+			if (group.length % 4 === 0) {
+				for (let k = 0; k < group.length / 4; k++) {
+					[style[i][4 * k + 1], style[i][4 * k + 2]] = [style[i][4 * k + 2], style[i][4 * k + 1]];
+				}
+			}
+		});
+	}
 	applyShuffle(_keyNum, _shuffleGroup, style);
 }
 
@@ -9215,11 +9231,19 @@ function resultInit() {
 		transKeyData = `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)`;
 	}
 
+	const getShuffleName = _ => {
+		let shuffleName = getStgDetailName(g_stateObj.shuffle);
+		if (!g_stateObj.shuffle.endsWith(`+`)) {
+			shuffleName += setScoreIdHeader(g_keycons.shuffleGroupNum);
+		}
+		return shuffleName;
+	}
+
 	let difData = [
 		`${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${g_stateObj.autoPlay}less`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
-		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getStgDetailName(g_stateObj.shuffle)}${setScoreIdHeader(g_keycons.shuffleGroupNum)}]`)}`
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getShuffleName()}]`)}`
 	].filter(value => value !== ``).join(` `);
 
 	let playStyleData = [
@@ -9453,7 +9477,7 @@ function resultInit() {
 	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}${setScoreIdHeader(g_keycons.shuffleGroupNum)}`;
+		tweetDifData += `:${getShuffleName()}`;
 	}
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
