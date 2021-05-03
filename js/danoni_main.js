@@ -3143,6 +3143,12 @@ function headerConvert(_dosObj) {
 	// 譜面名に制作者名を付加するかどうかのフラグ
 	obj.makerView = setVal(_dosObj.makerView, false, C_TYP_BOOLEAN);
 
+	// shuffleUse=group 時のみshuffle用配列を組み替える
+	if (_dosObj.shuffleUse === `group`) {
+		_dosObj.shuffleUse = true;
+		g_settings.shuffles = g_settings.shuffles.filter(val => !val.endsWith(`+`));
+	}
+
 	// オプション利用可否設定
 	g_canDisabledSettings.forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
