@@ -6044,9 +6044,19 @@ function applyShuffle(_keyNum, _shuffleGroup, _style) {
  * @param {number} _keyNum
  * @param {array} _shuffleGroup
  */
-function applyMirror(_keyNum, _shuffleGroup) {
+function applyMirror(_keyNum, _shuffleGroup, _asymFlg = false) {
 	// シャッフルグループごとにミラー
 	const style = copyArray2d(_shuffleGroup).map(_group => _group.reverse());
+	if (_asymFlg) {
+		// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
+		style.forEach((group, i) => {
+			if (group.length % 4 === 0) {
+				for (let k = 0; k < group.length / 4; k++) {
+					[style[i][4 * k + 1], style[i][4 * k + 2]] = [style[i][4 * k + 2], style[i][4 * k + 1]];
+				}
+			}
+		});
+	}
 	applyShuffle(_keyNum, _shuffleGroup, style);
 }
 
