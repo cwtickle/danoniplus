@@ -5335,6 +5335,26 @@ function keyConfigInit(_kcType = g_kcType) {
 		obj.classList.add(_cssName);
 	};
 
+	/**
+	 * 一時的に矢印色を変更
+	 * @param {number} _j
+	 * @param {number} _scrollNum 
+	 */
+	const changeTmpColor = (_j, _scrollNum = 1) => {
+		const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
+		const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+
+		const setColorLen = g_headerObj.setColor.length;
+		g_keyObj[`color${keyCtrlPtn}`][_j] = (g_keyObj[`color${keyCtrlPtn}`][_j] + setColorLen + _scrollNum) % setColorLen;
+		g_keyObj[`color${basePtn}`][_j] = g_keyObj[`color${keyCtrlPtn}`][_j];
+
+		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
+		$id(`arrow${_j}`).background = arrowColor;
+		if (document.getElementById(`arrowShadow${_j}`) !== undefined) {
+			$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
+		}
+	};
+
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
@@ -5345,34 +5365,19 @@ function keyConfigInit(_kcType = g_kcType) {
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
 
-		/**
-		 * 一時的に矢印色を変更
-		 * @param {number} _scrollNum 
-		 */
-		const changeTmpColor = (_scrollNum = 1) => {
-			const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
-			const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
-
-			const setColorLen = g_headerObj.setColor.length;
-			g_keyObj[`color${keyCtrlPtn}`][j] = (g_keyObj[`color${keyCtrlPtn}`][j] + setColorLen + _scrollNum) % setColorLen;
-			g_keyObj[`color${basePtn}`][j] = g_keyObj[`color${keyCtrlPtn}`][j];
-			document.getElementById(`arrow${j}`).style.background = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
-		};
 		keyconSprite.appendChild(
-			createCss2Button(`color${j}`, ``, _ => changeTmpColor(), {
+			createCss2Button(`color${j}`, ``, _ => changeTmpColor(j), {
 				x: keyconX, y: keyconY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
-				cxtFunc: _ => changeTmpColor(-1),
+				cxtFunc: _ => changeTmpColor(j, -1),
 			}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 		);
 
 		// キーコンフィグ表示用の矢印・おにぎりを表示
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
 			// 矢印の塗り部分
-			const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? arrowColor :
-				g_headerObj.setShadowColor[colorPos]);
 			keyconSprite.appendChild(
 				createColorObject2(`arrowShadow${j}`, {
-					x: keyconX, y: keyconY, background: shadowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
+					x: keyconX, y: keyconY, background: getShadowColor(colorPos, arrowColor), rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
 					styleName: `Shadow`, opacity: 0.5, pointerEvents: `none`,
 				})
 			);
@@ -5607,9 +5612,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			$id(`arrow${j}`).background = arrowColor;
 
 			if (g_headerObj.setShadowColor[colorPos] !== ``) {
-				const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? arrowColor :
-					g_headerObj.setShadowColor[colorPos]);
-				$id(`arrowShadow${j}`).background = shadowColor;
+				$id(`arrowShadow${j}`).background = getShadowColor(colorPos, arrowColor);
 			}
 		}
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
@@ -5774,6 +5777,15 @@ function keyConfigInit(_kcType = g_kcType) {
 
 	document.oncontextmenu = _ => false;
 }
+
+/**
+ * 影矢印色の取得
+ * @param {number} _colorPos 
+ * @param {string} _arrowColor 
+ * @returns 
+ */
+const getShadowColor = (_colorPos, _arrowColor) => g_headerObj.setShadowColor[_colorPos] === `Default` ?
+	_arrowColor : g_headerObj.setShadowColor[_colorPos];
 
 /**
  * キー数基礎情報の取得
@@ -8137,10 +8149,8 @@ function MainInit() {
 		// 矢印の内側を塗りつぶすか否か
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
 			// 矢印の塗り部分
-			const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? g_workObj.arrowColors[_j] :
-				g_headerObj.setShadowColor[colorPos]);
 			const arrShadow = createColorObject2(`${_name}Shadow${_j}_${_arrowCnt}`, {
-				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: getShadowColor(colorPos, g_workObj.arrowColors[_j]), rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
 			});
 			if (g_headerObj.setShadowColor[colorPos] === `Default`) {
 				arrShadow.style.opacity = 0.5;
