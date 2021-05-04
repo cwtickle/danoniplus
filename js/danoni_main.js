@@ -5370,16 +5370,17 @@ function keyConfigInit(_kcType = g_kcType) {
 			}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 		);
 		// キーコンフィグ表示用の矢印・おにぎりを表示
-		// 矢印の塗り部分
-		keyconSprite.appendChild(
+		multiAppend(keyconSprite,
+			// 矢印の塗り部分
 			createColorObject2(`arrowShadow${j}`, {
 				x: keyconX, y: keyconY, background: hasVal(g_headerObj[`setShadowColor${g_colorType}`][colorPos]) ? getShadowColor(colorPos, arrowColor) : ``,
 				rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`, pointerEvents: `none`,
-			})
+			}),
+			// 矢印本体
+			createColorObject2(`arrow${j}`, {
+				x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], pointerEvents: `none`,
+			}),
 		);
-		keyconSprite.appendChild(createColorObject2(`arrow${j}`, {
-			x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], pointerEvents: `none`,
-		}));
 		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
 			keyconSprite.appendChild(
 				createDivCss2Label(`sArrow${j}`, ``, {
