@@ -449,8 +449,8 @@ const g_keycons = {
     configTypes: [`Main`, `Replaced`, `ALL`],
     configTypeNum: 0,
 
-    colorTypes: [`Default`, `Type0`, `Type1`, `Type2`, `Type3`],
-    colorDefs: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
+    colorTypes: [`Default`, `Type0`, `Type1`, `Type2`, `Type3`, `Type4`],
+    colorDefs: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
     colorTypeNum: 0,
 
     shuffleGroupNum: 0,
@@ -2017,12 +2017,12 @@ const g_dfColorObj = {
     setColorType1: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
     setColorType2: [`#ffffff`, `#9999ff`, `#99ccff`, `#ffccff`, `#ff9999`],
     setColorType3: [`#ffffff`, `#ffffff`, `#ffffff`, `#ffffff`, `#ffffff`],
+    setColorType4: [`#ffffff`, `#ffffff`, `#ffffff`, `#ffffff`, `#ffffff`],
 
-    //setShadowColorDefault: [],
-    setShadowColorType0: [],
-    setShadowColorType1: [],
-    setShadowColorType2: [],
+    setShadowColorType1: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
+    setShadowColorType2: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
     setShadowColorType3: [`#6666ff60`, `#99ffff60`, `#ffffff60`, `#ffff9960`, `#ff996660`],
+    setShadowColorType4: [`#ffffff60`, `#99ffff60`, `#99ccff60`, `#ffccff60`, `#ff999960`],
 
     // フリーズアロー初期色情報
     frzColorInit: [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
@@ -2048,24 +2048,25 @@ const g_dfColorObj = {
         [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
         [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
     ],
-
-    frzShadowColorDefault: [``, ``, ``, ``],
-    frzShadowColorType0: [``, ``, ``, ``],
-    frzShadowColorType1: [``, ``, ``, ``],
-    frzShadowColorType2: [``, ``, ``, ``],
-    frzShadowColorType3: [``, ``, ``, ``],
+    frzColorType4: [
+        [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
+        [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
+    ],
 };
 
 const g_dfColorLightObj = {
     setColorType1: [`#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`],
     setColorType2: [`#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`],
     setColorType3: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
+    setColorType4: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
 
-    //setShadowColorDefault: [],
-    setShadowColorType0: [],
-    setShadowColorType1: [],
-    setShadowColorType2: [],
+    setShadowColorType1: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
+    setShadowColorType2: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
     setShadowColorType3: [`#6666ff80`, `#66cccc80`, `#ffffff80`, `#99996680`, `#cc660080`],
+    setShadowColorType4: [`#00000080`, `#6666ff80`, `#cc000080`, `#cc99cc80`, `#cc336680`],
 
     frzColorType1: [
         [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
@@ -2088,12 +2089,13 @@ const g_dfColorLightObj = {
         [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
         [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
     ],
-
-    frzShadowColorDefault: [``, ``, ``, ``],
-    frzShadowColorType0: [``, ``, ``, ``],
-    frzShadowColorType1: [``, ``, ``, ``],
-    frzShadowColorType2: [``, ``, ``, ``],
-    frzShadowColorType3: [``, ``, ``, ``],
+    frzColorType4: [
+        [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+        [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
+        [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
+    ],
 };
 
 const g_escapeStr = {
@@ -2339,6 +2341,7 @@ const g_lblNameObj = {
     'u_Type1': `Type1`,
     'u_Type2': `Type2`,
     'u_Type3': `Type3`,
+    'u_Type4': `Type4`,
 
     'u_Group1': `Group1`,
     'u_Group2': `Group2`,

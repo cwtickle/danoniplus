@@ -5350,9 +5350,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
 		$id(`arrow${_j}`).background = arrowColor;
-		if (document.getElementById(`arrowShadow${_j}`) !== undefined) {
-			$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor, g_colorType);
-		}
+		$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
 	};
 
 	for (let j = 0; j < keyNum; j++) {
@@ -5375,8 +5373,8 @@ function keyConfigInit(_kcType = g_kcType) {
 		// 矢印の塗り部分
 		keyconSprite.appendChild(
 			createColorObject2(`arrowShadow${j}`, {
-				x: keyconX, y: keyconY, background: hasVal(g_headerObj[`setShadowColor${g_colorType}`][colorPos]) ? getShadowColor(colorPos, arrowColor, g_colorType) : ``,
-				rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`, opacity: 0.5, pointerEvents: `none`,
+				x: keyconX, y: keyconY, background: hasVal(g_headerObj[`setShadowColor${g_colorType}`][colorPos]) ? getShadowColor(colorPos, arrowColor) : ``,
+				rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`, pointerEvents: `none`,
 			})
 		);
 		keyconSprite.appendChild(createColorObject2(`arrow${j}`, {
@@ -5607,8 +5605,11 @@ function keyConfigInit(_kcType = g_kcType) {
 			const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 			const arrowColor = getKeyConfigColor(j, colorPos);
 			$id(`arrow${j}`).background = arrowColor;
-			$id(`arrowShadow${j}`).background = hasVal(g_headerObj[`setShadowColor${g_colorType}`][colorPos]) ?
-				getShadowColor(colorPos, arrowColor, g_colorType) : ``;
+			$id(`arrowShadow${j}`).background = hasVal(g_headerObj.setShadowColor[colorPos]) ?
+				getShadowColor(colorPos, arrowColor) : ``;
+			if (g_headerObj.setShadowColor[colorPos] === `Default`) {
+				$id(`arrowShadow${j}`).opacity = 0.5;
+			}
 		}
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	};
@@ -5777,13 +5778,10 @@ function keyConfigInit(_kcType = g_kcType) {
  * 影矢印色の取得
  * @param {number} _colorPos 
  * @param {string} _arrowColor 
- * @param {string} _type
  * @returns 
  */
-const getShadowColor = (_colorPos, _arrowColor, _type = ``) => {
-	const shadowColor = g_headerObj[`setShadowColor${_type}`][_colorPos] || g_headerObj.setShadowColor[_colorPos];
-	return shadowColor === `Default` ? _arrowColor : shadowColor;
-};
+const getShadowColor = (_colorPos, _arrowColor) => g_headerObj.setShadowColor[_colorPos] === `Default` ?
+	_arrowColor : g_headerObj.setShadowColor[_colorPos];
 
 /**
  * キー数基礎情報の取得
@@ -5824,6 +5822,9 @@ function changeSetColor() {
 		g_headerObj[`set${pattern}Color`] = copyArray2d(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]);
 		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
 			g_headerObj[`frz${pattern}Color`][j] = copyArray2d(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]);
+		}
+		if (!isDefault) {
+			g_headerObj[`set${pattern}Color`] = copyArray2d(g_headerObj[`set${pattern}Color${g_colorType}`]);
 		}
 	});
 }
@@ -7413,7 +7414,7 @@ function MainInit() {
 		});
 
 		// 矢印の内側を塗りつぶすか否か
-		if (g_headerObj[`setShadowColor${g_colorType}`][colorPos] !== ``) {
+		if (g_headerObj.setShadowColor[colorPos] !== ``) {
 			stepRoot.appendChild(
 				createColorObject2(`stepShadow${j}`, {
 					rotate: g_workObj.stepRtn[j], styleName: `ShadowStep`,
@@ -8145,12 +8146,12 @@ function MainInit() {
 		// 後に作成するほど前面に表示される。
 
 		// 矢印の内側を塗りつぶすか否か
-		if (g_headerObj[`setShadowColor${g_colorType}`][colorPos] !== ``) {
+		if (g_headerObj.setShadowColor[colorPos] !== ``) {
 			// 矢印の塗り部分
 			const arrShadow = createColorObject2(`${_name}Shadow${_j}_${_arrowCnt}`, {
-				background: getShadowColor(colorPos, g_workObj.arrowColors[_j], g_colorType), rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: getShadowColor(colorPos, g_workObj.arrowColors[_j]), rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
 			});
-			if ((g_headerObj[`setShadowColor${g_colorType}`][colorPos] || g_headerObj.setShadowColor[colorPos]) === `Default`) {
+			if (g_headerObj.setShadowColor[colorPos] === `Default`) {
 				arrShadow.style.opacity = 0.5;
 			}
 			stepRoot.appendChild(arrShadow);
