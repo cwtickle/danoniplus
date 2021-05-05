@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/05/03 (v22.1.0)
+ * Revised : 2021/05/05 (v22.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -449,8 +449,8 @@ const g_keycons = {
     configTypes: [`Main`, `Replaced`, `ALL`],
     configTypeNum: 0,
 
-    colorTypes: [`Default`, `Type0`, `Type1`, `Type2`],
-    colorDefs: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_OFF],
+    colorTypes: [`Default`, `Type0`, `Type1`, `Type2`, `Type3`, `Type4`],
+    colorDefs: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
     colorTypeNum: 0,
 
     shuffleGroupNum: 0,
@@ -1169,7 +1169,7 @@ const g_keyObj = {
     shuffle11i_0: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
     shuffle12_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
     shuffle13_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 3, 3, 3, 3],
-    shuffle14_0: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle14_0: [3, 0, 0, 0, 0, 3, 1, 2, 2, 2, 2, 2, 2, 2],
     shuffle14i_0: [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
     shuffle15A_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
     shuffle15B_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
@@ -1188,7 +1188,7 @@ const g_keyObj = {
     shuffle11W_1: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
     shuffle11i_1: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
     shuffle12_1: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
-    shuffle14_1: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle14_1: [3, 0, 0, 0, 0, 3, 1, 2, 2, 2, 2, 2, 2, 2],
     shuffle15A_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
     shuffle15B_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
     shuffle17_1: [0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2],
@@ -1224,7 +1224,7 @@ const g_keyObj = {
     shuffle11i_0_0: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
     shuffle12_0_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
     shuffle13_0_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 3, 3, 3, 3],
-    shuffle14_0_0: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle14_0_0: [3, 0, 0, 0, 0, 3, 1, 2, 2, 2, 2, 2, 2, 2],
     shuffle14i_0_0: [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
     shuffle15A_0_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
     shuffle15B_0_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
@@ -1243,7 +1243,7 @@ const g_keyObj = {
     shuffle11W_1_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
     shuffle11i_1_0: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
     shuffle12_1_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
-    shuffle14_1_0: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
+    shuffle14_1_0: [3, 0, 0, 0, 0, 3, 1, 2, 2, 2, 2, 2, 2, 2],
     shuffle15A_1_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
     shuffle15B_1_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 2],
     shuffle17_1_0: [0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2],
@@ -1268,11 +1268,13 @@ const g_keyObj = {
     // シャッフルグループ(パターン2)
     shuffle11_0_1: [0, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3],
     shuffle11L_0_1: [0, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3],
+    shuffle14_0_1: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
     shuffle15A_0_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 4],
     shuffle15B_0_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 4],
 
     shuffle11_1_1: [0, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3],
     shuffle11L_1_1: [0, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3],
+    shuffle14_1_1: [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
     shuffle15A_1_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 4],
     shuffle15B_1_1: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 4],
 
@@ -2016,6 +2018,13 @@ const g_dfColorObj = {
 
     setColorType1: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
     setColorType2: [`#ffffff`, `#9999ff`, `#99ccff`, `#ffccff`, `#ff9999`],
+    setColorType3: [`#ccccff`, `#ccffff`, `#ffffff`, `#ffffcc`, `#ffcc99`],
+    setColorType4: [`#ffffff`, `#ccccff`, `#99ccff`, `#ffccff`, `#ffcccc`],
+
+    setShadowColorType1: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
+    setShadowColorType2: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
+    setShadowColorType3: [`#6666ff60`, `#33999960`, `#66666660`, `#99993360`, `#cc663360`],
+    setShadowColorType4: [`#66666660`, `#6666ff60`, `#3366cc60`, `#99339960`, `#99333360`],
 
     // フリーズアロー初期色情報
     frzColorInit: [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
@@ -2034,24 +2043,60 @@ const g_dfColorObj = {
         [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
         [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
     ],
-};
-
-const g_dfColorLightObj = {
-    setColorType1: [`#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`],
-    setColorType2: [`#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`],
-    frzColorType1: [
+    frzColorType3: [
         [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
         [`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
         [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
         [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
         [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
     ],
-    frzColorType2: [
+    frzColorType4: [
         [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
         [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
         [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
         [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
         [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
+    ],
+};
+
+const g_dfColorLightObj = {
+    setColorType1: [`#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`],
+    setColorType2: [`#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`],
+    setColorType3: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
+    setColorType4: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
+
+    setShadowColorType1: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
+    setShadowColorType2: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
+    setShadowColorType3: [`#6666ff80`, `#66cccc80`, `#ffffff80`, `#99996680`, `#cc660080`],
+    setShadowColorType4: [`#00000080`, `#6666ff80`, `#cc000080`, `#cc99cc80`, `#cc336680`],
+
+    frzColorType1: [
+        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+        [`#00ffcc`, `#339999`, `#ffff00`, `#999900`],
+        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+        [`#cc99ff`, `#9966ff`, `#ffff00`, `#999900`],
+        [`#ff99cc`, `#ff6699`, `#ffff00`, `#999900`]
+    ],
+    frzColorType2: [
+        [`#cccccc`, `#999999`, `#ffff00`, `#999900`],
+        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+        [`#cc99cc`, `#ff99ff`, `#ffff00`, `#999900`],
+        [`#ff6666`, `#ff9999`, `#ffff00`, `#999900`]
+    ],
+    frzColorType3: [
+        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+        [`#00ffcc`, `#339999`, `#ffff00`, `#999900`],
+        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+        [`#cc99ff`, `#9966ff`, `#ffff00`, `#999900`],
+        [`#ff99cc`, `#ff6699`, `#ffff00`, `#999900`]
+    ],
+    frzColorType4: [
+        [`#cccccc`, `#999999`, `#ffff00`, `#999900`],
+        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+        [`#cc99cc`, `#ff99ff`, `#ffff00`, `#999900`],
+        [`#ff6666`, `#ff9999`, `#ffff00`, `#999900`]
     ],
 };
 
@@ -2297,6 +2342,8 @@ const g_lblNameObj = {
     'u_Type0': `Type0`,
     'u_Type1': `Type1`,
     'u_Type2': `Type2`,
+    'u_Type3': `Type3`,
+    'u_Type4': `Type4`,
 
     'u_Group1': `Group1`,
     'u_Group2': `Group2`,
@@ -2367,10 +2414,10 @@ const g_msgObj = {
     speed: `矢印の流れる速度を設定します。`,
     motion: `矢印の速度を一定ではなく、\n変動させるモーションをつけるか設定します。`,
     reverse: `矢印の流れる向きを設定します。`,
-    scroll: `各レーンのスクロール方向をパターンに沿って設定します。`,
+    scroll: `各レーンのスクロール方向をパターンに沿って設定します。\nReverse:ONでスクロール方向を反転します。`,
     shuffle: `譜面を左右反転したり、ランダムにします。\nランダムにした場合は別譜面扱いとなり、ハイスコアは保存されません。`,
     autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
-    gauge: `クリア条件を設定します。`,
+    gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量`,
     adjustment: `タイミングにズレを感じる場合、\n数値を変えることでズレを直すことができます。`,
     fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
     volume: `ゲーム内の音量を設定します。`,
@@ -2398,8 +2445,8 @@ const g_msgObj = {
     opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
 
     configType: `キーコンフィグ対象を切り替えます。\n[Main] メインキーのみ, [Replaced] 代替キーのみ, [ALL] 全て`,
-    colorType: `矢印色の配色パターンを変更します。\nType1/2選択時は色変化が自動でOFFになります。\n[Type0] グラデーション切替, [Type1/2] デフォルトパターン`,
-    shuffleGroup: `Mirror/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
+    colorType: `矢印色の配色パターンを変更します。\nType1～4選択時は色変化が自動でOFFになります。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
+    shuffleGroup: `Mirror/Asym-Mirror/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
 
 };
 

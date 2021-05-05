@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/05/03
+ * Revised : 2021/05/05
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 22.1.0`;
-const g_revisedDate = `2021/05/03`;
+const g_version = `Ver 22.2.0`;
+const g_revisedDate = `2021/05/05`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3857,7 +3857,7 @@ function setSpriteList(_settingList) {
 	_settingList.forEach(setting => {
 		spriteList[setting[0]] = createEmptySprite(optionsprite, `${setting[0]}Sprite`, {
 			x: 25, y: setting[1] * C_LEN_SETLBL_HEIGHT + setting[2] + 20,
-			w: optionWidth + setting[3], h: C_LEN_SETLBL_HEIGHT + setting[4], title: g_msgObj[setting[0]],
+			w: optionWidth + setting[3], h: C_LEN_SETLBL_HEIGHT + setting[4],
 		});
 	});
 	return spriteList;
@@ -4921,9 +4921,11 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
  * @param {string} _settingLabel 
  */
 function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName) {
-	return createDivCss2Label(`lbl${_settingName}`, g_lblNameObj[_settingLabel], {
+	const lbl = createDivCss2Label(`lbl${_settingName}`, g_lblNameObj[_settingLabel], {
 		x: 0, y: _adjY, w: 100,
 	}, `settings_${_settingName}`);
+	lbl.title = g_msgObj[`${_settingName.charAt(0).toLowerCase()}${_settingName.slice(1)}`];
+	return lbl;
 }
 
 /**
@@ -5335,6 +5337,24 @@ function keyConfigInit(_kcType = g_kcType) {
 		obj.classList.add(_cssName);
 	};
 
+	/**
+	 * 一時的に矢印色を変更
+	 * @param {number} _j
+	 * @param {number} _scrollNum 
+	 */
+	const changeTmpColor = (_j, _scrollNum = 1) => {
+		const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
+		const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+
+		const setColorLen = g_headerObj.setColor.length;
+		g_keyObj[`color${keyCtrlPtn}`][_j] = (g_keyObj[`color${keyCtrlPtn}`][_j] + setColorLen + _scrollNum) % setColorLen;
+		g_keyObj[`color${basePtn}`][_j] = g_keyObj[`color${keyCtrlPtn}`][_j];
+
+		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
+		$id(`arrow${_j}`).background = arrowColor;
+		$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
+	};
+
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
@@ -5345,41 +5365,24 @@ function keyConfigInit(_kcType = g_kcType) {
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
 
-		/**
-		 * 一時的に矢印色を変更
-		 * @param {number} _scrollNum 
-		 */
-		const changeTmpColor = (_scrollNum = 1) => {
-			const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
-			const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
-
-			const setColorLen = g_headerObj.setColor.length;
-			g_keyObj[`color${keyCtrlPtn}`][j] = (g_keyObj[`color${keyCtrlPtn}`][j] + setColorLen + _scrollNum) % setColorLen;
-			g_keyObj[`color${basePtn}`][j] = g_keyObj[`color${keyCtrlPtn}`][j];
-			document.getElementById(`arrow${j}`).style.background = g_headerObj.setColor[g_keyObj[`color${keyCtrlPtn}`][j]];
-		};
 		keyconSprite.appendChild(
-			createCss2Button(`color${j}`, ``, _ => changeTmpColor(), {
+			createCss2Button(`color${j}`, ``, _ => changeTmpColor(j), {
 				x: keyconX, y: keyconY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
-				cxtFunc: _ => changeTmpColor(-1),
+				cxtFunc: _ => changeTmpColor(j, -1),
 			}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 		);
-
 		// キーコンフィグ表示用の矢印・おにぎりを表示
-		if (g_headerObj.setShadowColor[colorPos] !== ``) {
+		multiAppend(keyconSprite,
 			// 矢印の塗り部分
-			const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? arrowColor :
-				g_headerObj.setShadowColor[colorPos]);
-			keyconSprite.appendChild(
-				createColorObject2(`arrowShadow${j}`, {
-					x: keyconX, y: keyconY, background: shadowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
-					styleName: `Shadow`, opacity: 0.5, pointerEvents: `none`,
-				})
-			);
-		}
-		keyconSprite.appendChild(createColorObject2(`arrow${j}`, {
-			x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], pointerEvents: `none`,
-		}));
+			createColorObject2(`arrowShadow${j}`, {
+				x: keyconX, y: keyconY, background: hasVal(g_headerObj[`setShadowColor${g_colorType}`][colorPos]) ? getShadowColor(colorPos, arrowColor) : ``,
+				rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`, pointerEvents: `none`,
+			}),
+			// 矢印本体
+			createColorObject2(`arrow${j}`, {
+				x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], pointerEvents: `none`,
+			}),
+		);
 		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
 			keyconSprite.appendChild(
 				createDivCss2Label(`sArrow${j}`, ``, {
@@ -5448,6 +5451,19 @@ function keyConfigInit(_kcType = g_kcType) {
 		return makeSettingLblCssButton(_id, getStgDetailName(_text), 0, _func, { x, y, w, h, siz, cxtFunc, borderStyle, ...rest }, _mainClass, ..._classes);
 	};
 
+	/**
+	 * キーコンフィグ用ミニボタン
+	 * @param {string} _id 
+	 * @param {string} _directionFlg 
+	 * @param {function} _func 
+	 * @param {*} object (x, y, w, h, siz) 
+	 * @returns 
+	 */
+	const makeMiniKCButton = (_id, _directionFlg, _func, { x = g_sWidth * 5 / 6 - 30, y = 15, w = 15, h = 20, siz = C_SIZ_MAIN } = {}) => {
+		return createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func,
+			{ x, y, w, h, siz }, g_cssObj.button_Mini);
+	}
+
 	const viewShuffleGroup = _num => {
 		if (g_headerObj.shuffleUse) {
 			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
@@ -5506,16 +5522,20 @@ function keyConfigInit(_kcType = g_kcType) {
 		makeKCButton(`lnkColorType`, g_colorType, _ => setColorType(), {
 			title: g_msgObj.colorType, cxtFunc: _ => setColorType(-1),
 		}),
+		makeMiniKCButton(`lnkColorType`, `L`, _ => setColorType(-1)),
+		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: g_sWidth - 20 }),
 	);
 
 	// シャッフルグループ切替ボタン（シャッフルパターンが複数ある場合のみ）
 	if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
 
 		multiAppend(divRoot,
-			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 35 }, g_cssObj.settings_Shuffle),
+			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 37 }, g_cssObj.settings_Shuffle),
 			makeKCButton(`lnkShuffleGroup`, `Group${g_keycons.shuffleGroupNum + 1}`, _ => setShuffleGroup(), {
 				y: 50, title: g_msgObj.shuffleGroup, cxtFunc: _ => setShuffleGroup(-1),
 			}),
+			makeMiniKCButton(`lnkShuffleGroup`, `L`, _ => setShuffleGroup(-1), { y: 50 }),
+			makeMiniKCButton(`lnkShuffleGroup`, `R`, _ => setShuffleGroup(), { x: g_sWidth - 20, y: 50 }),
 		);
 	} else {
 		g_keycons.shuffleGroupNum = 0;
@@ -5605,11 +5625,10 @@ function keyConfigInit(_kcType = g_kcType) {
 			const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 			const arrowColor = getKeyConfigColor(j, colorPos);
 			$id(`arrow${j}`).background = arrowColor;
-
-			if (g_headerObj.setShadowColor[colorPos] !== ``) {
-				const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? arrowColor :
-					g_headerObj.setShadowColor[colorPos]);
-				$id(`arrowShadow${j}`).background = shadowColor;
+			$id(`arrowShadow${j}`).background = hasVal(g_headerObj.setShadowColor[colorPos]) ?
+				getShadowColor(colorPos, arrowColor) : ``;
+			if (g_headerObj.setShadowColor[colorPos] === `Default`) {
+				$id(`arrowShadow${j}`).opacity = 0.5;
 			}
 		}
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
@@ -5776,6 +5795,15 @@ function keyConfigInit(_kcType = g_kcType) {
 }
 
 /**
+ * 影矢印色の取得
+ * @param {number} _colorPos 
+ * @param {string} _arrowColor 
+ * @returns 
+ */
+const getShadowColor = (_colorPos, _arrowColor) => g_headerObj.setShadowColor[_colorPos] === `Default` ?
+	_arrowColor : g_headerObj.setShadowColor[_colorPos];
+
+/**
  * キー数基礎情報の取得
  * @returns 
  */
@@ -5815,7 +5843,15 @@ function changeSetColor() {
 		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
 			g_headerObj[`frz${pattern}Color`][j] = copyArray2d(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]);
 		}
+		if (!isDefault) {
+			g_headerObj[`set${pattern}Color`] = copyArray2d(g_headerObj[`set${pattern}Color${g_colorType}`]);
+		}
 	});
+
+	// 影矢印が未指定の場合はType1, Type2の影矢印指定を無くす
+	if (!hasVal(g_headerObj[`setShadowColor${scoreIdHeader}Default`][0]) && [`Type1`, `Type2`].includes(g_colorType)) {
+		g_headerObj.setShadowColor = [...Array(g_headerObj.setColorInit.length)].fill(``);
+	}
 }
 
 /*-----------------------------------------------------------*/
@@ -8137,10 +8173,8 @@ function MainInit() {
 		// 矢印の内側を塗りつぶすか否か
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
 			// 矢印の塗り部分
-			const shadowColor = (g_headerObj.setShadowColor[colorPos] === `Default` ? g_workObj.arrowColors[_j] :
-				g_headerObj.setShadowColor[colorPos]);
 			const arrShadow = createColorObject2(`${_name}Shadow${_j}_${_arrowCnt}`, {
-				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: getShadowColor(colorPos, g_workObj.arrowColors[_j]), rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
 			});
 			if (g_headerObj.setShadowColor[colorPos] === `Default`) {
 				arrShadow.style.opacity = 0.5;
