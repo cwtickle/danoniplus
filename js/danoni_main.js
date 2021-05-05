@@ -3857,7 +3857,7 @@ function setSpriteList(_settingList) {
 	_settingList.forEach(setting => {
 		spriteList[setting[0]] = createEmptySprite(optionsprite, `${setting[0]}Sprite`, {
 			x: 25, y: setting[1] * C_LEN_SETLBL_HEIGHT + setting[2] + 20,
-			w: optionWidth + setting[3], h: C_LEN_SETLBL_HEIGHT + setting[4], title: g_msgObj[setting[0]],
+			w: optionWidth + setting[3], h: C_LEN_SETLBL_HEIGHT + setting[4],
 		});
 	});
 	return spriteList;
@@ -4921,9 +4921,11 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
  * @param {string} _settingLabel 
  */
 function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName) {
-	return createDivCss2Label(`lbl${_settingName}`, g_lblNameObj[_settingLabel], {
+	const lbl = createDivCss2Label(`lbl${_settingName}`, g_lblNameObj[_settingLabel], {
 		x: 0, y: _adjY, w: 100,
 	}, `settings_${_settingName}`);
+	lbl.title = g_msgObj[`${_settingName.charAt(0).toLowerCase()}${_settingName.slice(1)}`];
+	return lbl;
 }
 
 /**
