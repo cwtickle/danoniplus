@@ -5449,6 +5449,19 @@ function keyConfigInit(_kcType = g_kcType) {
 		return makeSettingLblCssButton(_id, getStgDetailName(_text), 0, _func, { x, y, w, h, siz, cxtFunc, borderStyle, ...rest }, _mainClass, ..._classes);
 	};
 
+	/**
+	 * キーコンフィグ用ミニボタン
+	 * @param {string} _id 
+	 * @param {string} _directionFlg 
+	 * @param {function} _func 
+	 * @param {*} object (x, y, w, h, siz) 
+	 * @returns 
+	 */
+	const makeMiniKCButton = (_id, _directionFlg, _func, { x = g_sWidth * 5 / 6 - 30, y = 15, w = 15, h = 20, siz = C_SIZ_MAIN } = {}) => {
+		return createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func,
+			{ x, y, w, h, siz }, g_cssObj.button_Mini);
+	}
+
 	const viewShuffleGroup = _num => {
 		if (g_headerObj.shuffleUse) {
 			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
@@ -5507,16 +5520,20 @@ function keyConfigInit(_kcType = g_kcType) {
 		makeKCButton(`lnkColorType`, g_colorType, _ => setColorType(), {
 			title: g_msgObj.colorType, cxtFunc: _ => setColorType(-1),
 		}),
+		makeMiniKCButton(`lnkColorType`, `L`, _ => setColorType(-1)),
+		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: g_sWidth - 20 }),
 	);
 
 	// シャッフルグループ切替ボタン（シャッフルパターンが複数ある場合のみ）
 	if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
 
 		multiAppend(divRoot,
-			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 35 }, g_cssObj.settings_Shuffle),
+			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 37 }, g_cssObj.settings_Shuffle),
 			makeKCButton(`lnkShuffleGroup`, `Group${g_keycons.shuffleGroupNum + 1}`, _ => setShuffleGroup(), {
 				y: 50, title: g_msgObj.shuffleGroup, cxtFunc: _ => setShuffleGroup(-1),
 			}),
+			makeMiniKCButton(`lnkShuffleGroup`, `L`, _ => setShuffleGroup(-1), { y: 50 }),
+			makeMiniKCButton(`lnkShuffleGroup`, `R`, _ => setShuffleGroup(), { x: g_sWidth - 20, y: 50 }),
 		);
 	} else {
 		g_keycons.shuffleGroupNum = 0;
