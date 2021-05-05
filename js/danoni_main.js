@@ -5350,9 +5350,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
 		$id(`arrow${_j}`).background = arrowColor;
-		if (document.getElementById(`arrowShadow${_j}`) !== undefined) {
-			$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
-		}
+		$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
 	};
 
 	for (let j = 0; j < keyNum; j++) {
@@ -5371,20 +5369,18 @@ function keyConfigInit(_kcType = g_kcType) {
 				cxtFunc: _ => changeTmpColor(j, -1),
 			}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 		);
-
 		// キーコンフィグ表示用の矢印・おにぎりを表示
-		if (g_headerObj.setShadowColor[colorPos] !== ``) {
+		multiAppend(keyconSprite,
 			// 矢印の塗り部分
-			keyconSprite.appendChild(
-				createColorObject2(`arrowShadow${j}`, {
-					x: keyconX, y: keyconY, background: getShadowColor(colorPos, arrowColor), rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j],
-					styleName: `Shadow`, opacity: 0.5, pointerEvents: `none`,
-				})
-			);
-		}
-		keyconSprite.appendChild(createColorObject2(`arrow${j}`, {
-			x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], pointerEvents: `none`,
-		}));
+			createColorObject2(`arrowShadow${j}`, {
+				x: keyconX, y: keyconY, background: hasVal(g_headerObj[`setShadowColor${g_colorType}`][colorPos]) ? getShadowColor(colorPos, arrowColor) : ``,
+				rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`, pointerEvents: `none`,
+			}),
+			// 矢印本体
+			createColorObject2(`arrow${j}`, {
+				x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], pointerEvents: `none`,
+			}),
+		);
 		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
 			keyconSprite.appendChild(
 				createDivCss2Label(`sArrow${j}`, ``, {
@@ -5453,6 +5449,19 @@ function keyConfigInit(_kcType = g_kcType) {
 		return makeSettingLblCssButton(_id, getStgDetailName(_text), 0, _func, { x, y, w, h, siz, cxtFunc, borderStyle, ...rest }, _mainClass, ..._classes);
 	};
 
+	/**
+	 * キーコンフィグ用ミニボタン
+	 * @param {string} _id 
+	 * @param {string} _directionFlg 
+	 * @param {function} _func 
+	 * @param {*} object (x, y, w, h, siz) 
+	 * @returns 
+	 */
+	const makeMiniKCButton = (_id, _directionFlg, _func, { x = g_sWidth * 5 / 6 - 30, y = 15, w = 15, h = 20, siz = C_SIZ_MAIN } = {}) => {
+		return createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func,
+			{ x, y, w, h, siz }, g_cssObj.button_Mini);
+	}
+
 	const viewShuffleGroup = _num => {
 		if (g_headerObj.shuffleUse) {
 			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
@@ -5511,16 +5520,20 @@ function keyConfigInit(_kcType = g_kcType) {
 		makeKCButton(`lnkColorType`, g_colorType, _ => setColorType(), {
 			title: g_msgObj.colorType, cxtFunc: _ => setColorType(-1),
 		}),
+		makeMiniKCButton(`lnkColorType`, `L`, _ => setColorType(-1)),
+		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: g_sWidth - 20 }),
 	);
 
 	// シャッフルグループ切替ボタン（シャッフルパターンが複数ある場合のみ）
 	if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
 
 		multiAppend(divRoot,
-			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 35 }, g_cssObj.settings_Shuffle),
+			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 37 }, g_cssObj.settings_Shuffle),
 			makeKCButton(`lnkShuffleGroup`, `Group${g_keycons.shuffleGroupNum + 1}`, _ => setShuffleGroup(), {
 				y: 50, title: g_msgObj.shuffleGroup, cxtFunc: _ => setShuffleGroup(-1),
 			}),
+			makeMiniKCButton(`lnkShuffleGroup`, `L`, _ => setShuffleGroup(-1), { y: 50 }),
+			makeMiniKCButton(`lnkShuffleGroup`, `R`, _ => setShuffleGroup(), { x: g_sWidth - 20, y: 50 }),
 		);
 	} else {
 		g_keycons.shuffleGroupNum = 0;
@@ -5610,9 +5623,10 @@ function keyConfigInit(_kcType = g_kcType) {
 			const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 			const arrowColor = getKeyConfigColor(j, colorPos);
 			$id(`arrow${j}`).background = arrowColor;
-
-			if (g_headerObj.setShadowColor[colorPos] !== ``) {
-				$id(`arrowShadow${j}`).background = getShadowColor(colorPos, arrowColor);
+			$id(`arrowShadow${j}`).background = hasVal(g_headerObj.setShadowColor[colorPos]) ?
+				getShadowColor(colorPos, arrowColor) : ``;
+			if (g_headerObj.setShadowColor[colorPos] === `Default`) {
+				$id(`arrowShadow${j}`).opacity = 0.5;
 			}
 		}
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
@@ -5827,7 +5841,15 @@ function changeSetColor() {
 		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
 			g_headerObj[`frz${pattern}Color`][j] = copyArray2d(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]);
 		}
+		if (!isDefault) {
+			g_headerObj[`set${pattern}Color`] = copyArray2d(g_headerObj[`set${pattern}Color${g_colorType}`]);
+		}
 	});
+
+	// 影矢印が未指定の場合はType1, Type2の影矢印指定を無くす
+	if (!hasVal(g_headerObj[`setShadowColor${scoreIdHeader}Default`][0]) && [`Type1`, `Type2`].includes(g_colorType)) {
+		g_headerObj.setShadowColor = [...Array(g_headerObj.setColorInit.length)].fill(``);
+	}
 }
 
 /*-----------------------------------------------------------*/
