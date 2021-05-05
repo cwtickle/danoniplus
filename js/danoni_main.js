@@ -5845,6 +5845,11 @@ function changeSetColor() {
 			g_headerObj[`set${pattern}Color`] = copyArray2d(g_headerObj[`set${pattern}Color${g_colorType}`]);
 		}
 	});
+
+	// 影矢印が未指定の場合はType1, Type2の影矢印指定を無くす
+	if (!hasVal(g_headerObj[`setShadowColor${scoreIdHeader}Default`][0]) && [`Type1`, `Type2`].includes(g_colorType)) {
+		g_headerObj.setShadowColor = [...Array(g_headerObj.setColorInit.length)].fill(``);
+	}
 }
 
 /*-----------------------------------------------------------*/
