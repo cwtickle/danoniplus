@@ -2016,13 +2016,13 @@ const g_dfColorObj = {
 
     setColorType1: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
     setColorType2: [`#ffffff`, `#9999ff`, `#99ccff`, `#ffccff`, `#ff9999`],
-    setColorType3: [`#ffffff`, `#ffffff`, `#ffffff`, `#ffffff`, `#ffffff`],
-    setColorType4: [`#ffffff`, `#ffffff`, `#ffffff`, `#ffffff`, `#ffffff`],
+    setColorType3: [`#ccccff`, `#ccffff`, `#ffffff`, `#ffffcc`, `#ffcc99`],
+    setColorType4: [`#ffffff`, `#ccccff`, `#99ccff`, `#ffccff`, `#ffcccc`],
 
     setShadowColorType1: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
     setShadowColorType2: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
-    setShadowColorType3: [`#6666ff60`, `#99ffff60`, `#ffffff60`, `#ffff9960`, `#ff996660`],
-    setShadowColorType4: [`#ffffff60`, `#99ffff60`, `#99ccff60`, `#ffccff60`, `#ff999960`],
+    setShadowColorType3: [`#6666ff60`, `#33999960`, `#66666660`, `#99993360`, `#cc663360`],
+    setShadowColorType4: [`#66666660`, `#6666ff60`, `#3366cc60`, `#99339960`, `#99333360`],
 
     // フリーズアロー初期色情報
     frzColorInit: [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
