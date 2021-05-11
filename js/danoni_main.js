@@ -5355,6 +5355,24 @@ function keyConfigInit(_kcType = g_kcType) {
 		$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
 	};
 
+	/**
+	 * 一時的にシャッフルグループ番号を変更
+	 * @param {number} _j 
+	 * @param {number} _scrollNum 
+	 */
+	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
+		const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
+		const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+
+		const tmpShuffle = (g_keyObj[`shuffle${keyCtrlPtn}`][_j] + 10 + _scrollNum) % 10;
+		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
+		g_keyObj[`shuffle${keyCtrlPtn}`][_j] = g_keyObj[`shuffle${basePtn}`][_j] = tmpShuffle;
+		if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
+			g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j] =
+				g_keyObj[`shuffle${basePtn}_${g_keycons.shuffleGroupNum}`][_j] = tmpShuffle;
+		}
+	};
+
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
@@ -5385,9 +5403,10 @@ function keyConfigInit(_kcType = g_kcType) {
 		);
 		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
 			keyconSprite.appendChild(
-				createDivCss2Label(`sArrow${j}`, ``, {
-					x: keyconX, y: keyconY - 12, w: C_ARW_WIDTH, h: 15, siz: 12, align: C_ALIGN_CENTER, fontWeight: `bold`,
-				})
+				createCss2Button(`sArrow${j}`, ``, _ => changeTmpShuffleNum(j), {
+					x: keyconX, y: keyconY - 12, w: C_ARW_WIDTH, h: 15, siz: 12, fontWeight: `bold`,
+					cxtFunc: _ => changeTmpShuffleNum(j, -1),
+				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 		}
 
