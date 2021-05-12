@@ -5370,15 +5370,17 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
-		const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
-		const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+		if (g_settings.shuffles.filter(val => val.endsWith(`+`)).length > 0) {
+			const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
+			const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
 
-		const tmpShuffle = nextPos(g_keyObj[`shuffle${keyCtrlPtn}`][_j], _scrollNum, 10);
-		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
-		g_keyObj[`shuffle${keyCtrlPtn}`][_j] = g_keyObj[`shuffle${basePtn}`][_j] = tmpShuffle;
-		if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
-			g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j] =
-				g_keyObj[`shuffle${basePtn}_${g_keycons.shuffleGroupNum}`][_j] = tmpShuffle;
+			const tmpShuffle = nextPos(g_keyObj[`shuffle${keyCtrlPtn}`][_j], _scrollNum, 10);
+			document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
+			g_keyObj[`shuffle${keyCtrlPtn}`][_j] = g_keyObj[`shuffle${basePtn}`][_j] = tmpShuffle;
+			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
+				g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j] =
+					g_keyObj[`shuffle${basePtn}_${g_keycons.shuffleGroupNum}`][_j] = tmpShuffle;
+			}
 		}
 	};
 
