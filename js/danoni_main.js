@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/05/05
+ * Revised : 2021/05/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 22.2.0`;
-const g_revisedDate = `2021/05/05`;
+const g_version = `Ver 22.3.0`;
+const g_revisedDate = `2021/05/12`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -249,6 +249,15 @@ const copyArray2d = _array2d => JSON.parse(JSON.stringify(_array2d));
  * @returns 
  */
 const sumData = _array => _array.reduce((p, x) => p + x);
+
+/**
+ * 次のカーソルへ移動
+ * @param {number} _basePos 
+ * @param {number} _num 
+ * @param {number} _length 
+ * @returns 
+ */
+const nextPos = (_basePos, _num, _length) => (_basePos + _length + _num) % _length;
 
 /**
  * イベントハンドラ用オブジェクト
@@ -3921,7 +3930,7 @@ function createOptionWindow(_sprite) {
 	 * @param {number} _scrollNum 
 	 */
 	const nextDifficulty = (_scrollNum = 1) => {
-		g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
+		g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
 		setDifficulty(true);
 		resetDifWindow();
 	};
@@ -3962,7 +3971,7 @@ function createOptionWindow(_sprite) {
 		const dir = _scrollNum === 1 ? `D` : `U`;
 		return createCss2Button(`btnDif${dir}`, g_settingBtnObj.chara[dir], _ => {
 			do {
-				g_stateObj.scoreId = (g_stateObj.scoreId + g_headerObj.keyLabels.length + _scrollNum) % g_headerObj.keyLabels.length;
+				g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
 			} while (g_stateObj.filterKeys !== `` && g_stateObj.filterKeys !== g_headerObj.keyLabels[g_stateObj.scoreId]);
 			setDifficulty(true);
 			deleteChildspriteAll(`difList`);
@@ -4650,7 +4659,7 @@ function createOptionWindow(_sprite) {
 	spriteList.fadein.appendChild(lnkFadein);
 
 	const setFadein = _sign => {
-		g_stateObj.fadein = (g_stateObj.fadein + 100 + _sign) % 100;
+		g_stateObj.fadein = nextPos(g_stateObj.fadein, _sign, 100);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.textContent = `${g_stateObj.fadein}${getStgDetailName(g_lblNameObj.percent)}`;
 	};
@@ -5347,12 +5356,30 @@ function keyConfigInit(_kcType = g_kcType) {
 		const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
 
 		const setColorLen = g_headerObj.setColor.length;
-		g_keyObj[`color${keyCtrlPtn}`][_j] = (g_keyObj[`color${keyCtrlPtn}`][_j] + setColorLen + _scrollNum) % setColorLen;
+		g_keyObj[`color${keyCtrlPtn}`][_j] = nextPos(g_keyObj[`color${keyCtrlPtn}`][_j], _scrollNum, setColorLen);
 		g_keyObj[`color${basePtn}`][_j] = g_keyObj[`color${keyCtrlPtn}`][_j];
 
 		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
 		$id(`arrow${_j}`).background = arrowColor;
 		$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
+	};
+
+	/**
+	 * 一時的にシャッフルグループ番号を変更
+	 * @param {number} _j 
+	 * @param {number} _scrollNum 
+	 */
+	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
+		const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
+		const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+
+		const tmpShuffle = nextPos(g_keyObj[`shuffle${keyCtrlPtn}`][_j], _scrollNum, 10);
+		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
+		g_keyObj[`shuffle${keyCtrlPtn}`][_j] = g_keyObj[`shuffle${basePtn}`][_j] = tmpShuffle;
+		if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
+			g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j] =
+				g_keyObj[`shuffle${basePtn}_${g_keycons.shuffleGroupNum}`][_j] = tmpShuffle;
+		}
 	};
 
 	for (let j = 0; j < keyNum; j++) {
@@ -5385,9 +5412,10 @@ function keyConfigInit(_kcType = g_kcType) {
 		);
 		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
 			keyconSprite.appendChild(
-				createDivCss2Label(`sArrow${j}`, ``, {
-					x: keyconX, y: keyconY - 12, w: C_ARW_WIDTH, h: 15, siz: 12, align: C_ALIGN_CENTER, fontWeight: `bold`,
-				})
+				createCss2Button(`sArrow${j}`, ``, _ => changeTmpShuffleNum(j), {
+					x: keyconX, y: keyconY - 12, w: C_ARW_WIDTH, h: 15, siz: 12, fontWeight: `bold`,
+					cxtFunc: _ => changeTmpShuffleNum(j, -1),
+				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 		}
 
@@ -5602,7 +5630,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	 */
 	const setConfigType = (_scrollNum = 1) => {
 		const typeNum = g_keycons.configTypes.findIndex(value => value === g_kcType);
-		const nextNum = (typeNum + g_keycons.configTypes.length + _scrollNum) % g_keycons.configTypes.length;
+		const nextNum = nextPos(typeNum, _scrollNum, g_keycons.configTypes.length);
 		g_kcType = g_keycons.configTypes[nextNum];
 		resetCursor(Number(g_kcType === `Replaced`), _scrollNum === 0);
 		lnkKcType.textContent = getStgDetailName(g_kcType);
@@ -5614,7 +5642,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	 */
 	const setColorType = (_scrollNum = 1) => {
 		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
-		const nextNum = (typeNum + g_keycons.colorTypes.length + _scrollNum) % g_keycons.colorTypes.length;
+		const nextNum = nextPos(typeNum, _scrollNum, g_keycons.colorTypes.length);
 		g_colorType = g_keycons.colorTypes[nextNum];
 		if (g_headerObj.colorUse) {
 			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
