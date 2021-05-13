@@ -5370,17 +5370,15 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
-		if (g_settings.shuffles.filter(val => val.endsWith(`+`)).length > 0) {
-			const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
-			const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+		const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
+		const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
 
-			const tmpShuffle = nextPos(g_keyObj[`shuffle${keyCtrlPtn}`][_j], _scrollNum, 10);
-			document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
-			g_keyObj[`shuffle${keyCtrlPtn}`][_j] = g_keyObj[`shuffle${basePtn}`][_j] = tmpShuffle;
-			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
-				g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j] =
-					g_keyObj[`shuffle${basePtn}_${g_keycons.shuffleGroupNum}`][_j] = tmpShuffle;
-			}
+		const tmpShuffle = nextPos(g_keyObj[`shuffle${keyCtrlPtn}`][_j], _scrollNum, 10);
+		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
+		g_keyObj[`shuffle${keyCtrlPtn}`][_j] = g_keyObj[`shuffle${basePtn}`][_j] = tmpShuffle;
+		if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
+			g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j] =
+				g_keyObj[`shuffle${basePtn}_${g_keycons.shuffleGroupNum}`][_j] = tmpShuffle;
 		}
 	};
 
@@ -5416,6 +5414,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			keyconSprite.appendChild(
 				createCss2Button(`sArrow${j}`, ``, _ => changeTmpShuffleNum(j), {
 					x: keyconX, y: keyconY - 12, w: C_ARW_WIDTH, h: 15, siz: 12, fontWeight: `bold`,
+					pointerEvents: (g_settings.shuffles.filter(val => val.endsWith(`+`)).length > 0 ? `auto` : `none`),
 					cxtFunc: _ => changeTmpShuffleNum(j, -1),
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
