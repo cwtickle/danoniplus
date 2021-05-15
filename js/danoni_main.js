@@ -5559,11 +5559,11 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {string} _type 
 	 * @param {object} obj (baseX) 
 	 */
-	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20 } = {}) => {
+	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20, cssName } = {}) => {
 		if (g_headerObj[`${_type}Use`] && g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
 			const typeName = toCapitalize(_type);
 			multiAppend(divRoot,
-				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Gr`, { x: baseX - 10, y: 37 }, g_cssObj.settings_Shuffle),
+				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Gr`, { x: baseX - 10, y: 37 }, cssName),
 				makeKCButton(`lnk${typeName}Group`, `${g_keycons[`${_type}GroupNum`] + 1}`, _ => setGroup(_type), {
 					x: baseX, y: 50, w: g_sWidth / 18, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
 				}),
@@ -5612,8 +5612,8 @@ function keyConfigInit(_kcType = g_kcType) {
 	);
 
 	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
-	makeGroupButton(`color`);
-	makeGroupButton(`shuffle`, { baseX: g_sWidth * 11 / 12 - 10 });
+	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorType });
+	makeGroupButton(`shuffle`, { baseX: g_sWidth * 11 / 12 - 10, cssName: g_cssObj.settings_Shuffle });
 
 	/**
 	 * 次のカーソルへ移動
