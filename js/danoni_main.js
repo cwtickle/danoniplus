@@ -5493,31 +5493,52 @@ function keyConfigInit(_kcType = g_kcType) {
 			{ x, y, w, h, siz }, g_cssObj.button_Mini);
 	}
 
-	const viewShuffleGroup = _num => {
-		if (g_headerObj.shuffleUse) {
-			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
-				lnkShuffleGroup.textContent = getStgDetailName(`Group${_num + 1}`);
-				g_keyObj[`shuffle${keyCtrlPtn}`] = g_keyObj[`shuffle${keyCtrlPtn}_${_num}`].concat();
-			}
-			if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
-				for (let j = 0; j < keyNum; j++) {
-					document.getElementById(`sArrow${j}`).textContent = g_keyObj[`shuffle${keyCtrlPtn}`][j] + 1;
+	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20 } = {}) => {
+		if (g_headerObj[`${_type}Use`] && g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
+			const typeName = toCapitalize(_type);
+			multiAppend(divRoot,
+				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Group`, { x: baseX - 10, y: 37 }, g_cssObj.settings_Shuffle),
+				makeKCButton(`lnk${typeName}Group`, `Group${g_keycons[`${_type}GroupNum`] + 1}`, _ => setGroup(_type), {
+					x: baseX, y: 50, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
+				}),
+				makeMiniKCButton(`lnk${typeName}Group`, `L`, _ => setGroup(_type, -1), { x: baseX - 10, y: 50 }),
+				makeMiniKCButton(`lnk${typeName}Group`, `R`, _ => setGroup(_type), { x: baseX + g_sWidth / 6, y: 50 }),
+			);
+		} else {
+			g_keycons[`${_type}GroupNum`] = 0;
+		}
+	};
+
+	const viewGroup = {
+		shuffle: _num => {
+			if (g_headerObj.shuffleUse) {
+				if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
+					lnkShuffleGroup.textContent = getStgDetailName(`Group${_num + 1}`);
+					g_keyObj[`shuffle${keyCtrlPtn}`] = g_keyObj[`shuffle${keyCtrlPtn}_${_num}`].concat();
+				}
+				if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
+					for (let j = 0; j < keyNum; j++) {
+						document.getElementById(`sArrow${j}`).textContent = g_keyObj[`shuffle${keyCtrlPtn}`][j] + 1;
+					}
 				}
 			}
-		}
+		},
+		color: _num => {
+
+		},
 	}
-	const setShuffleGroup = (_scrollNum = 1) => {
-		const tmpNum = g_keycons.shuffleGroupNum + _scrollNum;
-		if (g_keyObj[`shuffle${keyCtrlPtn}_${tmpNum}`] !== undefined) {
-			g_keycons.shuffleGroupNum = tmpNum;
+	const setGroup = (_type, _scrollNum = 1) => {
+		const tmpNum = g_keycons[`${_type}GroupNum`] + _scrollNum;
+		if (g_keyObj[`${_type}${keyCtrlPtn}_${tmpNum}`] !== undefined) {
+			g_keycons[`${_type}GroupNum`] = tmpNum;
 		} else {
 			let j = 0;
-			while (g_keyObj[`shuffle${keyCtrlPtn}_${j}`] !== undefined) {
+			while (g_keyObj[`${_type}${keyCtrlPtn}_${j}`] !== undefined) {
 				j -= _scrollNum;
 			}
-			g_keycons.shuffleGroupNum = j + _scrollNum;
+			g_keycons[`${_type}GroupNum`] = j + _scrollNum;
 		}
-		viewShuffleGroup(g_keycons.shuffleGroupNum);
+		viewGroup[_type](g_keycons[`${_type}GroupNum`]);
 	};
 
 	multiAppend(divRoot,
@@ -5556,20 +5577,8 @@ function keyConfigInit(_kcType = g_kcType) {
 	);
 
 	// シャッフルグループ切替ボタン（シャッフルパターンが複数ある場合のみ）
-	if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
-
-		multiAppend(divRoot,
-			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 37 }, g_cssObj.settings_Shuffle),
-			makeKCButton(`lnkShuffleGroup`, `Group${g_keycons.shuffleGroupNum + 1}`, _ => setShuffleGroup(), {
-				y: 50, title: g_msgObj.shuffleGroup, cxtFunc: _ => setShuffleGroup(-1),
-			}),
-			makeMiniKCButton(`lnkShuffleGroup`, `L`, _ => setShuffleGroup(-1), { y: 50 }),
-			makeMiniKCButton(`lnkShuffleGroup`, `R`, _ => setShuffleGroup(), { x: g_sWidth - 20, y: 50 }),
-		);
-	} else {
-		g_keycons.shuffleGroupNum = 0;
-	}
-	viewShuffleGroup(g_keycons.shuffleGroupNum);
+	makeGroupButton(`shuffle`, { baseX: 20 });
+	viewGroup.shuffle(g_keycons.shuffleGroupNum);
 
 	/**
 	 * 次のカーソルへ移動
@@ -5624,15 +5633,18 @@ function keyConfigInit(_kcType = g_kcType) {
 		setKeyConfigCursor();
 	};
 
+	const getNextNum = (_scrollNum, _groupName, _target) => {
+		const typeNum = g_keycons[_groupName].findIndex(value => value === _target);
+		return nextPos(typeNum, _scrollNum, g_keycons[_groupName].length);
+	};
+
 	/**
 	 * ConfigTypeの制御
 	 * @param {event} _evt 
 	 * @param {number} _scrollNum 
 	 */
 	const setConfigType = (_scrollNum = 1) => {
-		const typeNum = g_keycons.configTypes.findIndex(value => value === g_kcType);
-		const nextNum = nextPos(typeNum, _scrollNum, g_keycons.configTypes.length);
-		g_kcType = g_keycons.configTypes[nextNum];
+		g_kcType = g_keycons.configTypes[getNextNum(_scrollNum, `configTypes`, g_kcType)];
 		resetCursor(Number(g_kcType === `Replaced`), _scrollNum === 0);
 		lnkKcType.textContent = getStgDetailName(g_kcType);
 	};
@@ -5642,8 +5654,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {number} _scrollNum 
 	 */
 	const setColorType = (_scrollNum = 1) => {
-		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
-		const nextNum = nextPos(typeNum, _scrollNum, g_keycons.colorTypes.length);
+		const nextNum = getNextNum(_scrollNum, `colorTypes`, g_colorType);
 		g_colorType = g_keycons.colorTypes[nextNum];
 		if (g_headerObj.colorUse) {
 			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
