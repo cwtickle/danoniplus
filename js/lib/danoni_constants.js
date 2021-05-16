@@ -206,8 +206,8 @@ const C_MAX_ADJUSTMENT = 30;
 const C_MAX_SPEED = 10;
 const C_MIN_SPEED = 1;
 
-const C_KYC_HEIGHT = 150;
-const C_KYC_REPHEIGHT = 18;
+const C_KYC_HEIGHT = 145;
+const C_KYC_REPHEIGHT = 16;
 
 const C_FRM_AFTERFADE = 420;
 const C_FRM_FRZATTEMPT = 5;
@@ -2118,6 +2118,7 @@ const g_lblNameObj = {
     result: `RESULT`,
 
     kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
+    kcShuffleDesc: `番号はシャッフルグループを表す<br>番号もしくは矢印をクリックで割り当て先のシャッフル/カラーグループを一時的に変更可`,
     sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
     kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
     transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,

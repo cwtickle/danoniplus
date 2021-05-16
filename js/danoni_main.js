@@ -5301,6 +5301,10 @@ function keyConfigInit(_kcType = g_kcType) {
 			x: 0, y: 68, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		}),
 
+		createDivCss2Label(`kcShuffleDesc`, g_lblNameObj.kcShuffleDesc, {
+			x: 0, y: g_sHeight - 138, w: g_sWidth, h: 20, siz: 12, align: C_ALIGN_LEFT,
+		}),
+
 	);
 
 	// キーの一覧を表示
@@ -5434,7 +5438,7 @@ function keyConfigInit(_kcType = g_kcType) {
 					setKeyConfigCursor();
 				}, {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: 18, siz: C_SIZ_JDGCNTS,
+					w: C_ARW_WIDTH, h: C_KYC_REPHEIGHT, siz: C_SIZ_JDGCNTS,
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 
