@@ -3673,7 +3673,12 @@ function keysConvert(_dosObj) {
 		let tmpMinPatterns = 1;
 
 		// 矢印色パターン (colorX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, { errCd: `E_0101` });
+		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
+			errCd: `E_0101`,
+			loopFunc: (k, keyheader) => {
+				g_keyObj[`${keyheader}_${k}_0`] = g_keyObj[`${keyheader}_${k}`];
+			},
+		});
 
 		// 読込変数の接頭辞 (charaX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `chara`, toString, { errCd: `E_0102` });
@@ -5016,13 +5021,15 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
 		});
 
-		let maxShufflePtn = 0;
-		while (g_keyObj[`shuffle${basePtn}_${maxShufflePtn}`] !== undefined) {
-			maxShufflePtn++;
-		}
-		for (let j = 0; j < maxShufflePtn; j++) {
-			g_keyObj[`shuffle${copyPtn}_${j}`] = g_keyObj[`shuffle${basePtn}_${j}`];
-		}
+		[`color`, `shuffle`].forEach(type => {
+			let maxPtn = 0;
+			while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
+				maxPtn++;
+			}
+			for (let j = 0; j < maxPtn; j++) {
+				g_keyObj[`${type}${copyPtn}_${j}`] = g_keyObj[`${type}${basePtn}_${j}`];
+			}
+		});
 	}
 }
 
@@ -5294,6 +5301,10 @@ function keyConfigInit(_kcType = g_kcType) {
 			x: 0, y: 68, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		}),
 
+		createDivCss2Label(`kcShuffleDesc`, g_lblNameObj.kcShuffleDesc, {
+			x: 0, y: g_sHeight - 138, w: g_sWidth, h: 20, siz: 12, align: C_ALIGN_LEFT,
+		}),
+
 	);
 
 	// キーの一覧を表示
@@ -5352,12 +5363,9 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpColor = (_j, _scrollNum = 1) => {
-		const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
-		const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
-
 		const setColorLen = g_headerObj.setColor.length;
 		g_keyObj[`color${keyCtrlPtn}`][_j] = nextPos(g_keyObj[`color${keyCtrlPtn}`][_j], _scrollNum, setColorLen);
-		g_keyObj[`color${basePtn}`][_j] = g_keyObj[`color${keyCtrlPtn}`][_j];
+		g_keyObj[`color${getBasePtn()}`][_j] = g_keyObj[`color${keyCtrlPtn}`][_j];
 
 		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
 		$id(`arrow${_j}`).background = arrowColor;
@@ -5370,9 +5378,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
-		const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
-		const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
-
+		const basePtn = getBasePtn();
 		const tmpShuffle = nextPos(g_keyObj[`shuffle${keyCtrlPtn}`][_j], _scrollNum, 10);
 		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
 		g_keyObj[`shuffle${keyCtrlPtn}`][_j] = g_keyObj[`shuffle${basePtn}`][_j] = tmpShuffle;
@@ -5432,7 +5438,7 @@ function keyConfigInit(_kcType = g_kcType) {
 					setKeyConfigCursor();
 				}, {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: 18, siz: C_SIZ_JDGCNTS,
+					w: C_ARW_WIDTH, h: C_KYC_REPHEIGHT, siz: C_SIZ_JDGCNTS,
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 
@@ -5450,6 +5456,65 @@ function keyConfigInit(_kcType = g_kcType) {
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, g_imgObj.cursor,
 		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
+
+	const viewGroupObj = {
+		shuffle: _ => {
+			if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
+				for (let j = 0; j < keyNum; j++) {
+					document.getElementById(`sArrow${j}`).textContent = g_keyObj[`shuffle${keyCtrlPtn}`][j] + 1;
+				}
+			}
+		},
+		color: (_type = ``) => {
+			for (let j = 0; j < keyNum; j++) {
+				const colorPos = g_keyObj[`color${keyCtrlPtn}${_type}`][j];
+				const arrowColor = getKeyConfigColor(j, colorPos);
+				$id(`arrow${j}`).background = arrowColor;
+				$id(`arrowShadow${j}`).background = hasVal(g_headerObj.setShadowColor[colorPos]) ?
+					getShadowColor(colorPos, arrowColor) : ``;
+				if (g_headerObj.setShadowColor[colorPos] === `Default`) {
+					$id(`arrowShadow${j}`).opacity = 0.5;
+				}
+			}
+		},
+	}
+
+	/**
+	 * キーコンフィグを保存している場合の元パターンを取得
+	 * @returns 
+	 */
+	const getBasePtn = _ => {
+		const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
+		return `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+	};
+
+	/**
+	 * カラー・シャッフルグループ設定の表示
+	 * @param {string} _type 
+	 */
+	const viewGroup = _type => {
+		if (g_headerObj[`${_type}Use`]) {
+			if (g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
+				document.getElementById(`lnk${toCapitalize(_type)}Group`).textContent =
+					getStgDetailName(`${g_keycons[`${_type}GroupNum`] + 1}`);
+				g_keyObj[`${_type}${keyCtrlPtn}`] = g_keyObj[`${_type}${getBasePtn()}`] = g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`].concat();
+			}
+			viewGroupObj[_type](`_${g_keycons[`${_type}GroupNum`]}`);
+		}
+	}
+	const setGroup = (_type, _scrollNum = 1) => {
+		const tmpNum = g_keycons[`${_type}GroupNum`] + _scrollNum;
+		if (g_keyObj[`${_type}${keyCtrlPtn}_${tmpNum}`] !== undefined) {
+			g_keycons[`${_type}GroupNum`] = tmpNum;
+		} else {
+			let j = 0;
+			while (g_keyObj[`${_type}${keyCtrlPtn}_${j}`] !== undefined) {
+				j -= _scrollNum;
+			}
+			g_keycons[`${_type}GroupNum`] = j + _scrollNum;
+		}
+		viewGroup(_type);
+	};
 
 	/**
 	 * キーコンフィグ用設定ラベル
@@ -5493,31 +5558,26 @@ function keyConfigInit(_kcType = g_kcType) {
 			{ x, y, w, h, siz }, g_cssObj.button_Mini);
 	}
 
-	const viewShuffleGroup = _num => {
-		if (g_headerObj.shuffleUse) {
-			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
-				lnkShuffleGroup.textContent = getStgDetailName(`Group${_num + 1}`);
-				g_keyObj[`shuffle${keyCtrlPtn}`] = g_keyObj[`shuffle${keyCtrlPtn}_${_num}`].concat();
-			}
-			if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
-				for (let j = 0; j < keyNum; j++) {
-					document.getElementById(`sArrow${j}`).textContent = g_keyObj[`shuffle${keyCtrlPtn}`][j] + 1;
-				}
-			}
-		}
-	}
-	const setShuffleGroup = (_scrollNum = 1) => {
-		const tmpNum = g_keycons.shuffleGroupNum + _scrollNum;
-		if (g_keyObj[`shuffle${keyCtrlPtn}_${tmpNum}`] !== undefined) {
-			g_keycons.shuffleGroupNum = tmpNum;
+	/**
+	 * キーコンフィグ用グループ設定ラベル・ボタンの作成
+	 * @param {string} _type 
+	 * @param {object} obj (baseX) 
+	 */
+	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20, cssName } = {}) => {
+		if (g_headerObj[`${_type}Use`] && g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
+			const typeName = toCapitalize(_type);
+			multiAppend(divRoot,
+				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Group`, { x: baseX - 10, y: 37 }, cssName),
+				makeKCButton(`lnk${typeName}Group`, `${g_keycons[`${_type}GroupNum`] + 1}`, _ => setGroup(_type), {
+					x: baseX, y: 50, w: g_sWidth / 18, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
+				}),
+				makeMiniKCButton(`lnk${typeName}Group`, `L`, _ => setGroup(_type, -1), { x: baseX - 10, y: 50 }),
+				makeMiniKCButton(`lnk${typeName}Group`, `R`, _ => setGroup(_type), { x: baseX + g_sWidth / 18, y: 50 }),
+			);
 		} else {
-			let j = 0;
-			while (g_keyObj[`shuffle${keyCtrlPtn}_${j}`] !== undefined) {
-				j -= _scrollNum;
-			}
-			g_keycons.shuffleGroupNum = j + _scrollNum;
+			g_keycons[`${_type}GroupNum`] = 0;
 		}
-		viewShuffleGroup(g_keycons.shuffleGroupNum);
+		viewGroup(_type);
 	};
 
 	multiAppend(divRoot,
@@ -5555,21 +5615,9 @@ function keyConfigInit(_kcType = g_kcType) {
 		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: g_sWidth - 20 }),
 	);
 
-	// シャッフルグループ切替ボタン（シャッフルパターンが複数ある場合のみ）
-	if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
-
-		multiAppend(divRoot,
-			makeKCButtonHeader(`lblshuffleGroup`, `ShuffleGroup`, { y: 37 }, g_cssObj.settings_Shuffle),
-			makeKCButton(`lnkShuffleGroup`, `Group${g_keycons.shuffleGroupNum + 1}`, _ => setShuffleGroup(), {
-				y: 50, title: g_msgObj.shuffleGroup, cxtFunc: _ => setShuffleGroup(-1),
-			}),
-			makeMiniKCButton(`lnkShuffleGroup`, `L`, _ => setShuffleGroup(-1), { y: 50 }),
-			makeMiniKCButton(`lnkShuffleGroup`, `R`, _ => setShuffleGroup(), { x: g_sWidth - 20, y: 50 }),
-		);
-	} else {
-		g_keycons.shuffleGroupNum = 0;
-	}
-	viewShuffleGroup(g_keycons.shuffleGroupNum);
+	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
+	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorType });
+	makeGroupButton(`shuffle`, { baseX: g_sWidth * 11 / 12 - 10, cssName: g_cssObj.settings_Shuffle });
 
 	/**
 	 * 次のカーソルへ移動
@@ -5624,15 +5672,18 @@ function keyConfigInit(_kcType = g_kcType) {
 		setKeyConfigCursor();
 	};
 
+	const getNextNum = (_scrollNum, _groupName, _target) => {
+		const typeNum = g_keycons[_groupName].findIndex(value => value === _target);
+		return nextPos(typeNum, _scrollNum, g_keycons[_groupName].length);
+	};
+
 	/**
 	 * ConfigTypeの制御
 	 * @param {event} _evt 
 	 * @param {number} _scrollNum 
 	 */
 	const setConfigType = (_scrollNum = 1) => {
-		const typeNum = g_keycons.configTypes.findIndex(value => value === g_kcType);
-		const nextNum = nextPos(typeNum, _scrollNum, g_keycons.configTypes.length);
-		g_kcType = g_keycons.configTypes[nextNum];
+		g_kcType = g_keycons.configTypes[getNextNum(_scrollNum, `configTypes`, g_kcType)];
 		resetCursor(Number(g_kcType === `Replaced`), _scrollNum === 0);
 		lnkKcType.textContent = getStgDetailName(g_kcType);
 	};
@@ -5642,24 +5693,13 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {number} _scrollNum 
 	 */
 	const setColorType = (_scrollNum = 1) => {
-		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
-		const nextNum = nextPos(typeNum, _scrollNum, g_keycons.colorTypes.length);
+		const nextNum = getNextNum(_scrollNum, `colorTypes`, g_colorType);
 		g_colorType = g_keycons.colorTypes[nextNum];
 		if (g_headerObj.colorUse) {
 			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
 		}
 		changeSetColor();
-
-		for (let j = 0; j < keyNum; j++) {
-			const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
-			const arrowColor = getKeyConfigColor(j, colorPos);
-			$id(`arrow${j}`).background = arrowColor;
-			$id(`arrowShadow${j}`).background = hasVal(g_headerObj.setShadowColor[colorPos]) ?
-				getShadowColor(colorPos, arrowColor) : ``;
-			if (g_headerObj.setShadowColor[colorPos] === `Default`) {
-				$id(`arrowShadow${j}`).opacity = 0.5;
-			}
-		}
+		viewGroupObj.color();
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	};
 
