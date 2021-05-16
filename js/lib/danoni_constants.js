@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/05/16 (v22.4.0)
+ * Revised : 2021/05/16 (v22.4.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2118,7 +2118,7 @@ const g_lblNameObj = {
     result: `RESULT`,
 
     kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
-    kcShuffleDesc: `番号はシャッフルグループを表す<br>番号もしくは矢印をクリックで割り当て先のシャッフル/カラーグループを一時的に変更可`,
+    kcShuffleDesc: `番号はシャッフルグループを表す<br>番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを一時的に変更可`,
     sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
     kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
     transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
