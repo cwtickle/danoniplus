@@ -5563,7 +5563,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		if (g_headerObj[`${_type}Use`] && g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
 			const typeName = toCapitalize(_type);
 			multiAppend(divRoot,
-				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Gr`, { x: baseX - 10, y: 37 }, cssName),
+				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Group`, { x: baseX - 10, y: 37 }, cssName),
 				makeKCButton(`lnk${typeName}Group`, `${g_keycons[`${_type}GroupNum`] + 1}`, _ => setGroup(_type), {
 					x: baseX, y: 50, w: g_sWidth / 18, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
 				}),

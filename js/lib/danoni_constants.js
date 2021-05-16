@@ -2264,8 +2264,8 @@ const g_lblNameObj = {
 
     ConfigType: `ConfigType`,
     ColorType: `ColorType`,
-    ColorGr: `ColorGr.`,
-    ShuffleGr: `ShuffleGr.`,
+    ColorGroup: `ColorGr.`,
+    ShuffleGroup: `ShuffleGr.`,
     KeyPattern: `KeyPattern`,
 
     j_ii: "(・∀・)ｲｲ!!",
@@ -2360,6 +2360,7 @@ const g_msgObj = {
 
     configType: `キーコンフィグ対象を切り替えます。\n[Main] メインキーのみ, [Replaced] 代替キーのみ, [ALL] 全て`,
     colorType: `矢印色の配色パターンを変更します。\nType1～4選択時は色変化が自動でOFFになります。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
+    colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
     shuffleGroup: `Mirror/Asym-Mirror/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
 
 };
