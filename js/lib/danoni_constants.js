@@ -920,6 +920,9 @@ const g_btnPatterns = {
     result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0 },
 };
 
+// メイン画面以外でキーリピートを許可しないキーを設定
+const g_unrepeatKey = [`Enter`, `Backspace`, `Delete`, `Escape`];
+
 // CSS名称
 const g_cssObj = {
     title_base: `title_base`,
