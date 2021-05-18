@@ -921,7 +921,10 @@ const g_btnPatterns = {
 };
 
 // メイン画面以外でキーリピートを許可しないキーを設定
-const g_unrepeatKey = [`Enter`, `Backspace`, `Delete`, `Escape`];
+const g_unrepeatObj = {
+    key: [`Enter`, `Backspace`, `Delete`, `Escape`, `NumpadEnter`, `Tab`],
+    page: [`keyConfig`, `loading`, `loadingIos`],
+};
 
 // CSS名称
 const g_cssObj = {

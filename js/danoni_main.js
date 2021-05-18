@@ -315,7 +315,7 @@ const blockCode = _setCode => !C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_se
  */
 const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
 	const setCode = transCode(_evt.code);
-	if (_evt.repeat && g_unrepeatKey.includes(setCode)) {
+	if (_evt.repeat && (g_unrepeatObj.page.includes(_displayName) || g_unrepeatObj.key.includes(setCode))) {
 		return blockCode(setCode);
 	}
 	g_inputKeyBuffer[setCode] = true;
