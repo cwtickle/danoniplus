@@ -926,6 +926,11 @@ const g_unrepeatObj = {
     page: [`keyConfig`, `loading`, `loadingIos`],
 };
 
+// メイン画面でキーリピートを許可するキーを設定
+const g_mainRepeatObj = {
+    key: [`PageDown`, `PageUp`],
+};
+
 // CSS名称
 const g_cssObj = {
     title_base: `title_base`,

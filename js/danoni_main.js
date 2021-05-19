@@ -7883,7 +7883,7 @@ function MainInit() {
 		evt.preventDefault();
 		const setCode = transCode(evt.code);
 
-		if (evt.repeat) {
+		if (evt.repeat && !g_mainRepeatObj.key.includes(setCode)) {
 			return blockCode(setCode);
 		}
 
