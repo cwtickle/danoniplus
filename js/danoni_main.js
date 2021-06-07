@@ -4076,10 +4076,8 @@ function createOptionWindow(_sprite) {
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
 			createCss2Button(`btnGraph`, `i`, _ => true, {
-				x: 415, y: 0,
-				w: 23, h: 23, siz: C_SIZ_JDGCNTS,
-				title: g_msgObj.graph,
-				resetFunc: _ => setScoreDetail(),
+				x: 415, y: 0, w: 23, h: 23, siz: C_SIZ_JDGCNTS, title: g_msgObj.graph,
+				resetFunc: _ => setScoreDetail(), cxtFunc: _ => setScoreDetail(),
 			}, g_cssObj.button_Mini)
 		);
 		g_stateObj.scoreDetailViewFlg = false;
