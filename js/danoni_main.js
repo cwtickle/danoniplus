@@ -102,6 +102,7 @@ let g_currentPage = ``;
 // キーコンフィグ初期設定
 let g_kcType = `Main`;
 let g_colorType = `Default`;
+let g_imgType = `Default`;
 let g_baseDisp = `Settings`;
 
 // ライフ・ゲームオーバー・曲終了管理
@@ -2723,6 +2724,19 @@ function preheaderConvert(_dosObj) {
 }
 
 /**
+ * 画像セットの入れ替え処理
+ * @param {array} _imgType 
+ */
+function updateImgType(_imgType) {
+	resetImgs(..._imgType);
+	reloadImgObj();
+	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
+	if (_imgType[1] === undefined && typeof g_presetOverrideExtension === C_TYP_STRING) {
+		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
+	}
+}
+
+/**
  * 譜面ヘッダーの分解（その他の設定）
  * @param {object} _dosObj 譜面データオブジェクト
  */
@@ -2736,11 +2750,19 @@ function headerConvert(_dosObj) {
 	g_headerObj.customFont = obj.customFont;
 
 	// 画像ルートパス、拡張子の設定 (サーバ上のみ)
+	obj.imgType = [];
 	if (!g_isFile) {
-		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
-		if (typeof g_presetOverrideExtension === C_TYP_STRING) {
-			Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
+		let tmpImgType = ``;
+		if (hasVal(_dosObj.imgType)) {
+			tmpImgType = _dosObj.imgType;
+		} else if (typeof g_presetImageSet === C_TYP_STRING) {
+			tmpImgType = g_presetImageSet;
 		}
+		if (tmpImgType !== ``) {
+			const imgTypes = tmpImgType.split(`,`);
+			obj.imgType = [imgTypes[0], imgTypes[1] || `svg`];
+		}
+		updateImgType(obj.imgType);
 	}
 
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
@@ -5613,6 +5635,16 @@ function keyConfigInit(_kcType = g_kcType) {
 		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: g_sWidth - 20 }),
 	);
 
+	if (g_headerObj.imgType.length > 0) {
+		multiAppend(divRoot,
+			// オブジェクトタイプの切り替え（リロードあり）
+			makeKCButtonHeader(`lblImgType`, `ImgType`, { x: 10, y: 37 }, g_cssObj.keyconfig_ConfigType),
+			makeKCButton(`lnkImgType`, g_imgType, _ => setImgType(), {
+				x: 20, y: 50, title: g_msgObj.imgType, cxtFunc: _ => setImgType(-1),
+			}),
+		)
+	}
+
 	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
 	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorType });
 	makeGroupButton(`shuffle`, { baseX: g_sWidth * 11 / 12 - 10, cssName: g_cssObj.settings_Shuffle });
@@ -5700,6 +5732,13 @@ function keyConfigInit(_kcType = g_kcType) {
 		viewGroupObj.color();
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	};
+
+	const setImgType = (_scrollNum = 1) => {
+		const nextNum = getNextNum(_scrollNum, `imgTypes`, g_imgType);
+		g_imgType = g_keycons.imgTypes[nextNum];
+		updateImgType(g_imgType === `Default` ? g_headerObj.imgType : []);
+		keyConfigInit(g_kcType);
+	}
 
 	// ConfigType, ColorTypeの初期設定
 	setConfigType(0);
