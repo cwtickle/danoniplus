@@ -2400,7 +2400,7 @@ const g_msgObj = {
 
     configType: `キーコンフィグ対象を切り替えます。\n[Main] メインキーのみ, [Replaced] 代替キーのみ, [ALL] 全て`,
     colorType: `矢印色の配色パターンを変更します。\nType1～4選択時は色変化が自動でOFFになります。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
-    imgType: `オブジェクトの見た目を変更します。`,
+    imgType: `矢印・フリーズアローなどのオブジェクトの見た目を変更します。`,
     colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
     shuffleGroup: `Mirror/Asym-Mirror/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
 
