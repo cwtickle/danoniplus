@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/06/13 (v22.5.0)
+ * Revised : 2021/06/13 (v22.5.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -48,6 +48,8 @@ const C_TYP_OBJECT = `object`;
 const C_TYP_FUNCTION = `function`;
 const C_TYP_SWITCH = `switch`;
 const C_TYP_CALC = `calc`;
+
+const g_imgObj = {};
 
 // 画像ファイル
 let C_IMG_ARROW = `../img/arrow.svg`;
@@ -94,10 +96,11 @@ const C_MRK_CURRENT_DIRECTORY = `(..)`;
  * @param {string} _exp 拡張子 
  */
 const reloadImgCustomObj = (_name, _baseDir = ``, _exp = `svg`) => {
-    g_imgObj[_name] = `../img/${_baseDir}/${_name}.${_exp}`;
-    g_imgObj[`${_name}Shadow`] = `../img/${_baseDir}/${_name}Shadow.${_exp}`;
-    g_imgObj[`${_name}Step`] = `../img/${_baseDir}/${_name}.${_exp}`;
-    g_imgObj[`${_name}StepHit`] = `../img/${_baseDir}/${_name}StepHit.${_exp}`;
+    const baseDir = (_baseDir === `` ? `` : `${_baseDir}/`);
+    g_imgObj[_name] = `../img/${baseDir}${_name}.${_exp}`;
+    g_imgObj[`${_name}Shadow`] = `../img/${baseDir}${_name}Shadow.${_exp}`;
+    g_imgObj[`${_name}Step`] = `../img/${baseDir}${_name}.${_exp}`;
+    g_imgObj[`${_name}StepHit`] = `../img/${baseDir}${_name}StepHit.${_exp}`;
 };
 
 /**
@@ -107,26 +110,26 @@ const reloadImgCustomObj = (_name, _baseDir = ``, _exp = `svg`) => {
  * @param {string} _exp 
  */
 const resetImgs = (_baseDir = ``, _exp = `svg`) => {
-    C_IMG_ARROW = `../img/${_baseDir}/arrow.${_exp}`;
-    C_IMG_ARROWSD = `../img/${_baseDir}/arrowShadow.${_exp}`;
-    C_IMG_ONIGIRI = `../img/${_baseDir}/onigiri.${_exp}`;
-    C_IMG_AASD = `../img/${_baseDir}/aaShadow.${_exp}`;
-    C_IMG_GIKO = `../img/${_baseDir}/giko.${_exp}`;
-    C_IMG_IYO = `../img/${_baseDir}/iyo.${_exp}`;
-    C_IMG_C = `../img/${_baseDir}/c.${_exp}`;
-    C_IMG_MORARA = `../img/${_baseDir}/morara.${_exp}`;
-    C_IMG_MONAR = `../img/${_baseDir}/monar.${_exp}`;
-    C_IMG_CURSOR = `../img/${_baseDir}/cursor.${_exp}`;
-    C_IMG_FRZBAR = `../img/${_baseDir}/frzbar.${_exp}`;
-    C_IMG_LIFEBAR = `../img/${_baseDir}/frzbar.${_exp}`;
-    C_IMG_LIFEBORDER = `../img/${_baseDir}/borderline.${_exp}`;
+    const baseDir = (_baseDir === `` ? `` : `${_baseDir}/`);
+    C_IMG_ARROW = `../img/${baseDir}arrow.${_exp}`;
+    C_IMG_ARROWSD = `../img/${baseDir}arrowShadow.${_exp}`;
+    C_IMG_ONIGIRI = `../img/${baseDir}onigiri.${_exp}`;
+    C_IMG_AASD = `../img/${baseDir}aaShadow.${_exp}`;
+    C_IMG_GIKO = `../img/${baseDir}giko.${_exp}`;
+    C_IMG_IYO = `../img/${baseDir}iyo.${_exp}`;
+    C_IMG_C = `../img/${baseDir}c.${_exp}`;
+    C_IMG_MORARA = `../img/${baseDir}morara.${_exp}`;
+    C_IMG_MONAR = `../img/${baseDir}monar.${_exp}`;
+    C_IMG_CURSOR = `../img/${baseDir}cursor.${_exp}`;
+    C_IMG_FRZBAR = `../img/${baseDir}frzbar.${_exp}`;
+    C_IMG_LIFEBAR = `../img/${baseDir}frzbar.${_exp}`;
+    C_IMG_LIFEBORDER = `../img/${baseDir}borderline.${_exp}`;
 
     if (typeof g_presetCustomImageList === C_TYP_OBJECT) {
         g_presetCustomImageList.forEach(image => reloadImgCustomObj(image, _baseDir, _exp));
     }
 }
 
-const g_imgObj = {};
 const reloadImgObj = _ => {
     g_imgObj.arrow = C_IMG_ARROW;
     g_imgObj.arrowShadow = C_IMG_ARROWSD;
