@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/05/16
+ * Revised : 2021/06/13
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 22.4.1`;
-const g_revisedDate = `2021/05/16`;
+const g_version = `Ver 22.5.0`;
+const g_revisedDate = `2021/06/13`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -102,6 +102,7 @@ let g_currentPage = ``;
 // キーコンフィグ初期設定
 let g_kcType = `Main`;
 let g_colorType = `Default`;
+let g_imgType = `Default`;
 let g_baseDisp = `Settings`;
 
 // ライフ・ゲームオーバー・曲終了管理
@@ -315,7 +316,7 @@ const blockCode = _setCode => !C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_se
  */
 const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
 	const setCode = transCode(_evt.code);
-	if (_evt.repeat) {
+	if (_evt.repeat && (g_unrepeatObj.page.includes(_displayName) || g_unrepeatObj.key.includes(setCode))) {
 		return blockCode(setCode);
 	}
 	g_inputKeyBuffer[setCode] = true;
@@ -2723,6 +2724,19 @@ function preheaderConvert(_dosObj) {
 }
 
 /**
+ * 画像セットの入れ替え処理
+ * @param {array} _imgType 
+ */
+function updateImgType(_imgType) {
+	resetImgs(..._imgType);
+	reloadImgObj();
+	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
+	if (_imgType[1] === undefined && typeof g_presetOverrideExtension === C_TYP_STRING) {
+		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
+	}
+}
+
+/**
  * 譜面ヘッダーの分解（その他の設定）
  * @param {object} _dosObj 譜面データオブジェクト
  */
@@ -2736,11 +2750,19 @@ function headerConvert(_dosObj) {
 	g_headerObj.customFont = obj.customFont;
 
 	// 画像ルートパス、拡張子の設定 (サーバ上のみ)
+	obj.imgType = [];
 	if (!g_isFile) {
-		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
-		if (typeof g_presetOverrideExtension === C_TYP_STRING) {
-			Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
+		let tmpImgType = ``;
+		if (hasVal(_dosObj.imgType)) {
+			tmpImgType = _dosObj.imgType;
+		} else if (typeof g_presetImageSet === C_TYP_STRING) {
+			tmpImgType = g_presetImageSet;
 		}
+		if (tmpImgType !== ``) {
+			const imgTypes = tmpImgType.split(`,`);
+			obj.imgType = [imgTypes[0], imgTypes[1] || `svg`];
+		}
+		updateImgType(obj.imgType);
 	}
 
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
@@ -4076,10 +4098,8 @@ function createOptionWindow(_sprite) {
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
 			createCss2Button(`btnGraph`, `i`, _ => true, {
-				x: 415, y: 0,
-				w: 23, h: 23, siz: C_SIZ_JDGCNTS,
-				title: g_msgObj.graph,
-				resetFunc: _ => setScoreDetail(),
+				x: 415, y: 0, w: 23, h: 23, siz: C_SIZ_JDGCNTS, title: g_msgObj.graph,
+				resetFunc: _ => setScoreDetail(), cxtFunc: _ => setScoreDetail(),
 			}, g_cssObj.button_Mini)
 		);
 		g_stateObj.scoreDetailViewFlg = false;
@@ -5615,6 +5635,16 @@ function keyConfigInit(_kcType = g_kcType) {
 		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: g_sWidth - 20 }),
 	);
 
+	if (g_headerObj.imgType.length > 0) {
+		multiAppend(divRoot,
+			// オブジェクトタイプの切り替え（リロードあり）
+			makeKCButtonHeader(`lblImgType`, `ImgType`, { x: 10, y: 37 }, g_cssObj.keyconfig_ConfigType),
+			makeKCButton(`lnkImgType`, g_imgType, _ => setImgType(), {
+				x: 20, y: 50, title: g_msgObj.imgType, cxtFunc: _ => setImgType(-1),
+			}),
+		)
+	}
+
 	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
 	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorType });
 	makeGroupButton(`shuffle`, { baseX: g_sWidth * 11 / 12 - 10, cssName: g_cssObj.settings_Shuffle });
@@ -5702,6 +5732,13 @@ function keyConfigInit(_kcType = g_kcType) {
 		viewGroupObj.color();
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	};
+
+	const setImgType = (_scrollNum = 1) => {
+		const nextNum = getNextNum(_scrollNum, `imgTypes`, g_imgType);
+		g_imgType = g_keycons.imgTypes[nextNum];
+		updateImgType(g_imgType === `Default` ? g_headerObj.imgType : []);
+		keyConfigInit(g_kcType);
+	}
 
 	// ConfigType, ColorTypeの初期設定
 	setConfigType(0);
@@ -7883,7 +7920,7 @@ function MainInit() {
 		evt.preventDefault();
 		const setCode = transCode(evt.code);
 
-		if (evt.repeat) {
+		if (evt.repeat && !g_mainRepeatObj.key.includes(setCode)) {
 			return blockCode(setCode);
 		}
 
