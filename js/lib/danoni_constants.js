@@ -82,6 +82,25 @@ const C_DIR_SKIN = `../skin/`;
 const C_MRK_CURRENT_DIRECTORY = `(..)`;
 
 /**
+ * カスタム画像セットの設定（サーバ上の場合のみ有効）
+ * 
+ * 用途としては、StepRtnにて既定種以外のオブジェクトを指定するときに使用することを想定
+ * 例：stepRtn7i_0: [`giko2`, `onigiri`, `iyo`, 0, -90, 90, 180],
+ *     この場合は、`giko2`について giko2.svg(png), giko2Shadow.svg, giko2StepHit.svg というファイルを
+ *     個別にimgフォルダに入れておくことで使用できるようにする（現状、回転には非対応）
+ * 
+ * @param {string} _name 追加するオブジェクト種の名前
+ * @param {string} _baseDir ベースディレクトリ
+ * @param {string} _exp 拡張子 
+ */
+const reloadImgCustomObj = (_name, _baseDir = ``, _exp = `svg`) => {
+    g_imgObj[_name] = `../img/${_baseDir}/${_name}.${_exp}`;
+    g_imgObj[`${_name}Shadow`] = `../img/${_baseDir}/${_name}Shadow.${_exp}`;
+    g_imgObj[`${_name}Step`] = `../img/${_baseDir}/${_name}.${_exp}`;
+    g_imgObj[`${_name}StepHit`] = `../img/${_baseDir}/${_name}StepHit.${_exp}`;
+};
+
+/**
  * 画像セットのリセット処理（サーバ上の場合のみ有効）
  * 下記のreloadImgObjとセットで使用して有効になる
  * @param {string} _baseDir 
@@ -101,6 +120,10 @@ const resetImgs = (_baseDir = ``, _exp = `svg`) => {
     C_IMG_FRZBAR = `../img/${_baseDir}/frzbar.${_exp}`;
     C_IMG_LIFEBAR = `../img/${_baseDir}/frzbar.${_exp}`;
     C_IMG_LIFEBORDER = `../img/${_baseDir}/borderline.${_exp}`;
+
+    if (typeof g_presetCustomImageList === C_TYP_OBJECT) {
+        g_presetCustomImageList.forEach(image => reloadImgCustomObj(image, _baseDir, _exp));
+    }
 }
 
 const g_imgObj = {};

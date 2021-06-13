@@ -132,6 +132,16 @@ const g_presetFrzStartjdgUse = `false`;
 
 // const g_presetOverrideExtension = `svg`;
 
+/**
+ * 追加指定する画像のリスト（サーバ上の場合のみ有効）
+ * ここで設定した画像をimgフォルダに指定した名前で格納しておくことで、
+ * stepRtnX_Yで設定する名前に使用することができる
+ * 
+ * `ball`と指定した場合、下記の画像を準備する必要あり
+ * - ball.svg, ballShadow.svg, ballStepHit.svg (g_presetOverrideExtension を pngにすれば、pngに変更可)
+ */
+// const g_presetCustomImageList = [`ball`, `square`];
+
 /*
 	Reverse時の歌詞の自動反転制御設定
 
