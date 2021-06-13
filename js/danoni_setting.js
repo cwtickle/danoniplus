@@ -117,11 +117,30 @@ const g_presetSettingUse = {
 // 判定させる場合は `true` を指定
 const g_presetFrzStartjdgUse = `false`;
 
+/*
+	デフォルト画像セットの設定 (セット対象のフォルダ名,拡張子の順に指定)
+
+	事前に、[img]フォルダ配下にセット対象のサブフォルダを作成し、その中に一式を入れておく必要あり
+	下記の場合は[classic]フォルダに[png]形式の画像一式をデフォルト画像セットとして使用する
+	拡張子は、未指定の場合`svg`形式
+*/
+// const g_presetImageSet = `classic,png`;
+
 // デフォルト画像セット (C_IMG_XXXX, 厳密にはg_imgObj) に対して拡張子の上書きを行うか設定
 // 文字列の後ろ3文字をカットして、下記の値を適用する。コメントアウトした場合は、上書きを行わない。
 // `svg`: デフォルト(svg形式)、`png`: 従来画像(png形式)
 
 // const g_presetOverrideExtension = `svg`;
+
+/**
+ * 追加指定する画像のリスト（サーバ上の場合のみ有効）
+ * ここで設定した画像をimgフォルダに指定した名前で格納しておくことで、
+ * stepRtnX_Yで設定する名前に使用することができる
+ * 
+ * `ball`と指定した場合、下記の画像を準備する必要あり
+ * - ball.svg, ballShadow.svg, ballStepHit.svg (g_presetOverrideExtension を pngにすれば、pngに変更可)
+ */
+// const g_presetCustomImageList = [`ball`, `square`];
 
 /*
 	Reverse時の歌詞の自動反転制御設定

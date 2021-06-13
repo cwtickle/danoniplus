@@ -81,50 +81,97 @@ const C_DIR_SKIN = `../skin/`;
 // カレントディレクトリマーク
 const C_MRK_CURRENT_DIRECTORY = `(..)`;
 
-const g_imgObj = {
-    arrow: C_IMG_ARROW,
-    arrowShadow: C_IMG_ARROWSD,
-    onigiri: C_IMG_ONIGIRI,
-    onigiriShadow: C_IMG_AASD,
-    giko: C_IMG_GIKO,
-    gikoShadow: C_IMG_AASD,
-    iyo: C_IMG_IYO,
-    iyoShadow: C_IMG_AASD,
-    c: C_IMG_C,
-    cShadow: C_IMG_AASD,
-    morara: C_IMG_MORARA,
-    moraraShadow: C_IMG_AASD,
-    monar: C_IMG_MONAR,
-    monarShadow: C_IMG_AASD,
-
-    arrowStep: C_IMG_ARROW,
-    arrowShadowStep: C_IMG_ARROWSD,
-    onigiriStep: C_IMG_ONIGIRI,
-    onigiriShadowStep: C_IMG_AASD,
-    gikoStep: C_IMG_GIKO,
-    gikoShadowStep: C_IMG_AASD,
-    iyoStep: C_IMG_IYO,
-    iyoShadowStep: C_IMG_AASD,
-    cStep: C_IMG_C,
-    cShadowStep: C_IMG_AASD,
-    moraraStep: C_IMG_MORARA,
-    moraraShadowStep: C_IMG_AASD,
-    monarStep: C_IMG_MONAR,
-    monarShadowStep: C_IMG_AASD,
-
-    arrowStepHit: C_IMG_ARROW,
-    onigiriStepHit: C_IMG_ONIGIRI,
-    gikoStepHit: C_IMG_GIKO,
-    iyoStepHit: C_IMG_IYO,
-    cStepHit: C_IMG_C,
-    moraraStepHit: C_IMG_MORARA,
-    monarStepHit: C_IMG_MONAR,
-
-    cursor: C_IMG_CURSOR,
-    frzBar: C_IMG_FRZBAR,
-    lifeBar: C_IMG_LIFEBAR,
-    lifeBorder: C_IMG_LIFEBORDER,
+/**
+ * カスタム画像セットの設定（サーバ上の場合のみ有効）
+ * 
+ * 用途としては、StepRtnにて既定種以外のオブジェクトを指定するときに使用することを想定
+ * 例：stepRtn7i_0: [`giko2`, `onigiri`, `iyo`, 0, -90, 90, 180],
+ *     この場合は、`giko2`について giko2.svg(png), giko2Shadow.svg, giko2StepHit.svg というファイルを
+ *     個別にimgフォルダに入れておくことで使用できるようにする（現状、回転には非対応）
+ * 
+ * @param {string} _name 追加するオブジェクト種の名前
+ * @param {string} _baseDir ベースディレクトリ
+ * @param {string} _exp 拡張子 
+ */
+const reloadImgCustomObj = (_name, _baseDir = ``, _exp = `svg`) => {
+    g_imgObj[_name] = `../img/${_baseDir}/${_name}.${_exp}`;
+    g_imgObj[`${_name}Shadow`] = `../img/${_baseDir}/${_name}Shadow.${_exp}`;
+    g_imgObj[`${_name}Step`] = `../img/${_baseDir}/${_name}.${_exp}`;
+    g_imgObj[`${_name}StepHit`] = `../img/${_baseDir}/${_name}StepHit.${_exp}`;
 };
+
+/**
+ * 画像セットのリセット処理（サーバ上の場合のみ有効）
+ * 下記のreloadImgObjとセットで使用して有効になる
+ * @param {string} _baseDir 
+ * @param {string} _exp 
+ */
+const resetImgs = (_baseDir = ``, _exp = `svg`) => {
+    C_IMG_ARROW = `../img/${_baseDir}/arrow.${_exp}`;
+    C_IMG_ARROWSD = `../img/${_baseDir}/arrowShadow.${_exp}`;
+    C_IMG_ONIGIRI = `../img/${_baseDir}/onigiri.${_exp}`;
+    C_IMG_AASD = `../img/${_baseDir}/aaShadow.${_exp}`;
+    C_IMG_GIKO = `../img/${_baseDir}/giko.${_exp}`;
+    C_IMG_IYO = `../img/${_baseDir}/iyo.${_exp}`;
+    C_IMG_C = `../img/${_baseDir}/c.${_exp}`;
+    C_IMG_MORARA = `../img/${_baseDir}/morara.${_exp}`;
+    C_IMG_MONAR = `../img/${_baseDir}/monar.${_exp}`;
+    C_IMG_CURSOR = `../img/${_baseDir}/cursor.${_exp}`;
+    C_IMG_FRZBAR = `../img/${_baseDir}/frzbar.${_exp}`;
+    C_IMG_LIFEBAR = `../img/${_baseDir}/frzbar.${_exp}`;
+    C_IMG_LIFEBORDER = `../img/${_baseDir}/borderline.${_exp}`;
+
+    if (typeof g_presetCustomImageList === C_TYP_OBJECT) {
+        g_presetCustomImageList.forEach(image => reloadImgCustomObj(image, _baseDir, _exp));
+    }
+}
+
+const g_imgObj = {};
+const reloadImgObj = _ => {
+    g_imgObj.arrow = C_IMG_ARROW;
+    g_imgObj.arrowShadow = C_IMG_ARROWSD;
+    g_imgObj.onigiri = C_IMG_ONIGIRI;
+    g_imgObj.onigiriShadow = C_IMG_AASD;
+    g_imgObj.giko = C_IMG_GIKO;
+    g_imgObj.gikoShadow = C_IMG_AASD;
+    g_imgObj.iyo = C_IMG_IYO;
+    g_imgObj.iyoShadow = C_IMG_AASD;
+    g_imgObj.c = C_IMG_C;
+    g_imgObj.cShadow = C_IMG_AASD;
+    g_imgObj.morara = C_IMG_MORARA;
+    g_imgObj.moraraShadow = C_IMG_AASD;
+    g_imgObj.monar = C_IMG_MONAR;
+    g_imgObj.monarShadow = C_IMG_AASD;
+
+    g_imgObj.arrowStep = C_IMG_ARROW;
+    g_imgObj.arrowShadowStep = C_IMG_ARROWSD;
+    g_imgObj.onigiriStep = C_IMG_ONIGIRI;
+    g_imgObj.onigiriShadowStep = C_IMG_AASD;
+    g_imgObj.gikoStep = C_IMG_GIKO;
+    g_imgObj.gikoShadowStep = C_IMG_AASD;
+    g_imgObj.iyoStep = C_IMG_IYO;
+    g_imgObj.iyoShadowStep = C_IMG_AASD;
+    g_imgObj.cStep = C_IMG_C;
+    g_imgObj.cShadowStep = C_IMG_AASD;
+    g_imgObj.moraraStep = C_IMG_MORARA;
+    g_imgObj.moraraShadowStep = C_IMG_AASD;
+    g_imgObj.monarStep = C_IMG_MONAR;
+    g_imgObj.monarShadowStep = C_IMG_AASD;
+
+    g_imgObj.arrowStepHit = C_IMG_ARROW;
+    g_imgObj.onigiriStepHit = C_IMG_ONIGIRI;
+    g_imgObj.gikoStepHit = C_IMG_GIKO;
+    g_imgObj.iyoStepHit = C_IMG_IYO;
+    g_imgObj.cStepHit = C_IMG_C;
+    g_imgObj.moraraStepHit = C_IMG_MORARA;
+    g_imgObj.monarStepHit = C_IMG_MONAR;
+
+    g_imgObj.cursor = C_IMG_CURSOR;
+    g_imgObj.frzBar = C_IMG_FRZBAR;
+    g_imgObj.lifeBar = C_IMG_LIFEBAR;
+    g_imgObj.lifeBorder = C_IMG_LIFEBORDER;
+};
+reloadImgObj();
 
 // g_imgObjのうち、初期読込するリスト
 const g_imgInitList = [
@@ -452,6 +499,9 @@ const g_keycons = {
     colorTypes: [`Default`, `Type0`, `Type1`, `Type2`, `Type3`, `Type4`],
     colorDefs: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
     colorTypeNum: 0,
+
+    imgTypes: [`Default`, `Base`],
+    imgTypeNum: 0,
 
     colorGroupNum: 0,
     shuffleGroupNum: 0,
@@ -2276,6 +2326,7 @@ const g_lblNameObj = {
 
     ConfigType: `ConfigType`,
     ColorType: `ColorType`,
+    ImgType: `ImgType`,
     ColorGroup: `ColorGr.`,
     ShuffleGroup: `ShuffleGr.`,
     KeyPattern: `KeyPattern`,
@@ -2372,6 +2423,7 @@ const g_msgObj = {
 
     configType: `キーコンフィグ対象を切り替えます。\n[Main] メインキーのみ, [Replaced] 代替キーのみ, [ALL] 全て`,
     colorType: `矢印色の配色パターンを変更します。\nType1～4選択時は色変化が自動でOFFになります。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
+    imgType: `矢印・フリーズアローなどのオブジェクトの見た目を変更します。`,
     colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
     shuffleGroup: `Mirror/Asym-Mirror/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
 
