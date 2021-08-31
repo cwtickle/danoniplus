@@ -239,16 +239,20 @@ const g_settingBtnObj = {
     chara: {
         L: `<`,
         LL: `<`,
+        LLL: `<`,
         R: `>`,
         RR: `>`,
+        RRR: `>`,
         D: `↓`,
         U: `↑`,
     },
     pos: {
         L: C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH,
         LL: C_LEN_SETLBL_LEFT,
+        LLL: C_LEN_SETLBL_LEFT + C_LEN_SETMINI_WIDTH,
         R: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH,
         RR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH,
+        RRR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH * 2,
     }
 };
 
@@ -459,8 +463,8 @@ const g_settings = {
     autoPlays: [C_FLG_OFF, C_FLG_ALL],
     autoPlayNum: 0,
 
-    adjustments: [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT),
-    adjustmentNum: C_MAX_ADJUSTMENT,
+    adjustments: [...Array(C_MAX_ADJUSTMENT * 20 + 1).keys()].map(i => (i - C_MAX_ADJUSTMENT * 10) / 10),
+    adjustmentNum: C_MAX_ADJUSTMENT * 10,
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
 
@@ -850,13 +854,17 @@ const g_shortcutObj = {
         KeyG: { id: `lnkGaugeR` },
 
         ShiftLeft_Semicolon: { id: `lnkAdjustmentR` },
+        AltLeft_Semicolon: { id: `lnkAdjustmentRRR` },
         Semicolon: { id: `lnkAdjustmentRR` },
         ShiftLeft_Minus: { id: `lnkAdjustmentL` },
+        AltLeft_Minus: { id: `lnkAdjustmentLLL` },
         Minus: { id: `lnkAdjustmentLL` },
 
         ShiftLeft_NumpadAdd: { id: `lnkAdjustmentR` },
+        AltLeft_NumpadAdd: { id: `lnkAdjustmentRRR` },
         NumpadAdd: { id: `lnkAdjustmentRR` },
         ShiftLeft_NumpadSubtract: { id: `lnkAdjustmentL` },
+        AltLeft_NumpadSubtract: { id: `lnkAdjustmentLLL` },
         NumpadSubtract: { id: `lnkAdjustmentLL` },
 
         ShiftLeft_KeyV: { id: `lnkVolumeL` },
