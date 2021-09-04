@@ -953,13 +953,13 @@ class AudioPlayer {
 		}
 	}
 
-	play() {
+	play(_adjustmentTime = 0) {
 		this._source = this._context.createBufferSource();
 		this._source.buffer = this._buffer;
 		this._source.playbackRate.value = this.playbackRate;
 		this._source.connect(this._gain);
 		this._startTime = this._context.currentTime;
-		this._source.start(this._context.currentTime, this._fadeinPosition);
+		this._source.start(this._context.currentTime + _adjustmentTime, this._fadeinPosition);
 	}
 
 	pause() {
@@ -1265,7 +1265,7 @@ function loadLocalStorage() {
 		g_localStorage = JSON.parse(checkStorage);
 
 		// Adjustment, Volume, Appearance, Opacity初期値設定
-		checkLocalParam(`adjustment`, C_TYP_NUMBER, C_MAX_ADJUSTMENT);
+		checkLocalParam(`adjustment`, C_TYP_FLOAT, C_MAX_ADJUSTMENT);
 		checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
 		checkLocalParam(`appearance`);
 		checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
@@ -4671,7 +4671,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
-	createGeneralSetting(spriteList.adjustment, `adjustment`, { skipTerm: 5, scLabel: g_lblNameObj.sc_adjustment });
+	createGeneralSetting(spriteList.adjustment, `adjustment`, { skipTerm: 5, skipTerm2: 30, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5 });
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
@@ -4911,8 +4911,8 @@ function createOptionWindow(_sprite) {
  * @param {string} _settingName 
  * @param {object} _options
  */
-function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
-	settingLabel = _settingName, displayName = `option`, scLabel = `` } = {}) {
+function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0, skipTerm2 = 0,
+	settingLabel = _settingName, displayName = `option`, scLabel = ``, roundNum = 0 } = {}) {
 
 	const settingUpper = toCapitalize(_settingName);
 	const linkId = `lnk${settingUpper}`;
@@ -4923,19 +4923,29 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 
 		multiAppend(_obj,
 			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
-				_ => setSetting(1, _settingName, unitName),
-				{ cxtFunc: _ => setSetting(-1, _settingName, unitName) }),
+				_ => setSetting(1, _settingName, unitName, roundNum),
+				{ cxtFunc: _ => setSetting(-1, _settingName, unitName, roundNum) }),
 
 			// 右回し・左回しボタン（外側）
-			makeMiniCssButton(linkId, `R`, 0, _ => setSetting(skipTerm > 0 ? skipTerm : 1, _settingName, unitName)),
-			makeMiniCssButton(linkId, `L`, 0, _ => setSetting(skipTerm > 0 ? skipTerm * (-1) : -1, _settingName, unitName)),
+			makeMiniCssButton(linkId, `R`, 0, _ => setSetting(
+				skipTerm2 > 0 ? skipTerm2 : (skipTerm > 0 ? skipTerm : 1), _settingName, unitName, roundNum)),
+			makeMiniCssButton(linkId, `L`, 0, _ => setSetting(
+				skipTerm2 > 0 ? skipTerm2 * (-1) : (skipTerm > 0 ? skipTerm * (-1) : -1), _settingName, unitName, roundNum)),
 		)
 
 		// 右回し・左回しボタン（内側）
 		if (skipTerm > 0) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RR`, 0, _ => setSetting(1, _settingName, unitName)),
-				makeMiniCssButton(linkId, `LL`, 0, _ => setSetting(-1, _settingName, unitName)),
+				makeMiniCssButton(linkId, `RR`, 0, _ => setSetting(skipTerm2 > 0 ? skipTerm : 1, _settingName, unitName, roundNum)),
+				makeMiniCssButton(linkId, `LL`, 0, _ => setSetting(skipTerm2 > 0 ? skipTerm * (-1) : -1, _settingName, unitName, roundNum)),
+			);
+		}
+
+		// 右回し・左回しボタン（最内側,不可視）
+		if (skipTerm2 > 0) {
+			multiAppend(_obj,
+				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(1, _settingName, unitName, roundNum), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(-1, _settingName, unitName, roundNum), { visibility: `hidden` }),
 			);
 		}
 
@@ -4976,11 +4986,19 @@ function getStgDetailName(_name) {
  * @param {number} _scrollNum 
  * @param {string} _settingName
  * @param {string} _unitName
+ * @param {number} _roundNum
  */
-function setSetting(_scrollNum, _settingName, _unitName = ``) {
+function setSetting(_scrollNum, _settingName, _unitName = ``, _roundNum = 0) {
 	let settingNum = g_settings[`${_settingName}Num`];
 	const settingList = g_settings[`${_settingName}s`];
 	const settingMax = settingList.length - 1;
+
+	// _roundNum単位で丸める
+	if (_roundNum > 0 && _scrollNum >= _roundNum) {
+		settingNum = Math.floor(settingNum / _roundNum) * _roundNum;
+	} else if (_roundNum > 0 && -_scrollNum >= _roundNum) {
+		settingNum = Math.ceil(settingNum / _roundNum) * _roundNum;
+	}
 
 	if (_scrollNum > 0) {
 		settingNum = (settingNum === settingMax ?
@@ -5098,11 +5116,12 @@ function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_D
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func 
  */
-function makeMiniCssButton(_id, _directionFlg, _heightPos, _func, { dx = 0, dy = 0, dw = 0, dh = 0, dsiz = 0 } = {}) {
+function makeMiniCssButton(_id, _directionFlg, _heightPos, _func, { dx = 0, dy = 0, dw = 0, dh = 0, dsiz = 0, visibility = `visible` } = {}) {
 	return createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func, {
 		x: g_settingBtnObj.pos[_directionFlg] + dx,
 		y: C_LEN_SETLBL_HEIGHT * _heightPos + dy,
 		w: C_LEN_SETMINI_WIDTH + dw, h: C_LEN_SETLBL_HEIGHT + dh, siz: C_SIZ_SETLBL + dsiz,
+		visibility: visibility
 	}, g_cssObj.button_Mini);
 }
 
@@ -6067,6 +6086,9 @@ function loadingScoreInit() {
 			}
 		}
 
+		const headerAdjustment = parseFloat(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
+		g_stateObj.realAdjustment = parseFloat(g_stateObj.adjustment) + headerAdjustment + preblankFrame;
+
 		// シャッフルグループ未定義の場合
 		if (g_keyObj[`shuffle${keyCtrlPtn}`] === undefined) {
 			g_keyObj[`shuffle${keyCtrlPtn}`] = [...Array(keyNum)].fill(0);
@@ -6298,11 +6320,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	obj.frzData = [];
 	obj.dummyArrowData = [];
 	obj.dummyFrzData = [];
-	const headerAdjustment = parseInt(g_headerObj.adjustment[_scoreId] || g_headerObj.adjustment[0]);
-	const realAdjustment = parseInt(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
-	g_stateObj.realAdjustment = realAdjustment;
+
 	const blankFrame = g_headerObj.blankFrame;
-	const calcFrame = _frame => Math.round((parseInt(_frame) - blankFrame) / g_headerObj.playbackRate + blankFrame + realAdjustment);
+	const calcFrame = _frame => Math.round((parseInt(_frame) - blankFrame) / g_headerObj.playbackRate + blankFrame);
 
 	for (let j = 0; j < keyNum; j++) {
 
@@ -7656,7 +7676,7 @@ function MainInit() {
 
 	// 開始位置、楽曲再生位置の設定
 	const firstFrame = g_scoreObj.frameNum;
-	const musicStartFrame = firstFrame + g_headerObj.blankFrame;
+	const musicStartFrame = firstFrame + g_headerObj.blankFrame - Math.floor(g_stateObj.realAdjustment);
 	const fadeFlgs = { fadein: [`In`, `Out`], fadeout: [`Out`, `In`] };
 	g_audio.volume = (firstFrame === 0 ? g_stateObj.volume / 100 : 0);
 
@@ -7886,7 +7906,7 @@ function MainInit() {
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customMainInit === C_TYP_FUNCTION) {
-		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.realAdjustment;
+		g_scoreObj.baseFrame = g_scoreObj.frameNum;
 		customMainInit();
 		if (typeof customMainInit2 === C_TYP_FUNCTION) {
 			customMainInit2();
@@ -8478,11 +8498,11 @@ function MainInit() {
 
 		if (currentFrame === musicStartFrame) {
 			musicStartFlg = true;
-			g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
-			g_audio.playbackRate = g_headerObj.playbackRate;
-			g_audio.play();
-			musicStartTime = performance.now();
-			g_audio.dispatchEvent(new CustomEvent(`timeupdate`));
+			if (!(g_audio instanceof AudioPlayer)) {
+				musicStartTime = performance.now();
+				g_audio.play();
+				g_audio.dispatchEvent(new CustomEvent(`timeupdate`));
+			}
 		}
 
 		// 背景・マスクモーション
@@ -8707,7 +8727,7 @@ function MainInit() {
 			// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
 			thisTime = performance.now();
 			buffTime = 0;
-			if (currentFrame >= musicStartFrame) {
+			if (g_audio instanceof AudioPlayer || currentFrame >= musicStartFrame) {
 				buffTime = (thisTime - musicStartTime - (currentFrame - musicStartFrame) * 1000 / g_fps);
 			}
 			g_scoreObj.frameNum++;
@@ -8721,6 +8741,16 @@ function MainInit() {
 			skinMainInit2();
 		}
 	}
+
+	g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
+	g_audio.playbackRate = g_headerObj.playbackRate;
+
+	if (g_audio instanceof AudioPlayer) {
+		const musicStartAdjustment = (g_headerObj.blankFrame - g_stateObj.realAdjustment + 1) / g_fps;
+		musicStartTime = performance.now() + musicStartAdjustment * 1000;
+		g_audio.play(musicStartAdjustment);
+	}
+
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps);
 }
 
