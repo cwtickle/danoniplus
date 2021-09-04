@@ -1502,6 +1502,10 @@ function initAfterDosLoaded() {
 
 		if (g_isFile) {
 			makeWarningWindow(g_msgInfoObj.W_0011);
+			const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
+			if (!listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` })) {
+				makeWarningWindow(g_msgInfoObj.W_0012);
+			}
 		}
 
 		if (g_loadObj.main) {
