@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/06/13 (v22.5.1)
+ * Revised : 2021/09/04 (v23.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -239,16 +239,20 @@ const g_settingBtnObj = {
     chara: {
         L: `<`,
         LL: `<`,
+        LLL: `<`,
         R: `>`,
         RR: `>`,
+        RRR: `>`,
         D: `↓`,
         U: `↑`,
     },
     pos: {
         L: C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH,
         LL: C_LEN_SETLBL_LEFT,
+        LLL: C_LEN_SETLBL_LEFT + C_LEN_SETMINI_WIDTH,
         R: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH,
         RR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH,
+        RRR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH * 2,
     }
 };
 
@@ -459,8 +463,8 @@ const g_settings = {
     autoPlays: [C_FLG_OFF, C_FLG_ALL],
     autoPlayNum: 0,
 
-    adjustments: [...Array(C_MAX_ADJUSTMENT * 2 + 1).keys()].map(i => i - C_MAX_ADJUSTMENT),
-    adjustmentNum: C_MAX_ADJUSTMENT,
+    adjustments: [...Array(C_MAX_ADJUSTMENT * 20 + 1).keys()].map(i => (i - C_MAX_ADJUSTMENT * 10) / 10),
+    adjustmentNum: C_MAX_ADJUSTMENT * 10,
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
 
@@ -503,7 +507,7 @@ const g_keycons = {
     colorDefs: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
     colorTypeNum: 0,
 
-    imgTypes: [`Default`, `Base`],
+    imgTypes: [],
     imgTypeNum: 0,
 
     colorGroupNum: 0,
@@ -850,13 +854,17 @@ const g_shortcutObj = {
         KeyG: { id: `lnkGaugeR` },
 
         ShiftLeft_Semicolon: { id: `lnkAdjustmentR` },
+        AltLeft_Semicolon: { id: `lnkAdjustmentRRR` },
         Semicolon: { id: `lnkAdjustmentRR` },
         ShiftLeft_Minus: { id: `lnkAdjustmentL` },
+        AltLeft_Minus: { id: `lnkAdjustmentLLL` },
         Minus: { id: `lnkAdjustmentLL` },
 
         ShiftLeft_NumpadAdd: { id: `lnkAdjustmentR` },
+        AltLeft_NumpadAdd: { id: `lnkAdjustmentRRR` },
         NumpadAdd: { id: `lnkAdjustmentRR` },
         ShiftLeft_NumpadSubtract: { id: `lnkAdjustmentL` },
+        AltLeft_NumpadSubtract: { id: `lnkAdjustmentLLL` },
         NumpadSubtract: { id: `lnkAdjustmentLL` },
 
         ShiftLeft_KeyV: { id: `lnkVolumeL` },
@@ -2119,8 +2127,11 @@ const g_checkStr = {
 const g_msgInfoObj = {
     W_0001: `お使いのブラウザは動作保証外です。<br>
     Chrome/Opera/Vivaldiなど、WebKit系ブラウザの利用を推奨します。(W-0001)`,
-    W_0011: `fileスキームでの動作のため、内蔵の画像データを使用します。(W-0011)<br>
-    imgフォルダ以下の画像の変更は適用されません。`,
+    W_0011: `fileスキームでの動作のため、内蔵の画像データを使用します。<br>
+    imgフォルダ以下の画像の変更は適用されません。(W-0011)`,
+    W_0012: `現在の設定では音源再生方法により小数の Adjustment が利用できません。<br>
+    また、Fadein を使用した場合は通常よりズレが発生することがあります。<br>
+    音源ファイルを js/txt 化するか、サーバー上動作とすれば解消します。(W-0012)`,
 
     E_0011: `アーティスト名が未入力です。(E-0011)`,
     E_0012: `曲名情報が未設定です。(E-0012)<br>
@@ -2222,6 +2233,7 @@ const g_lblNameObj = {
     Volume: `Volume`,
 
     multi: `x`,
+    frame: `f`,
     percent: `%`,
 
     sc_speed: `←→`,
@@ -2391,14 +2403,14 @@ const g_msgObj = {
     keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
 
     difficulty: `譜面を選択します。`,
-    speed: `矢印の流れる速度を設定します。`,
+    speed: `矢印の流れる速度を設定します。\n外側のボタンは1x単位、内側は0.25x単位で変更できます。`,
     motion: `矢印の速度を一定ではなく、\n変動させるモーションをつけるか設定します。`,
     reverse: `矢印の流れる向きを設定します。`,
     scroll: `各レーンのスクロール方向をパターンに沿って設定します。\nReverse:ONでスクロール方向を反転します。`,
     shuffle: `譜面を左右反転したり、ランダムにします。\nランダムにした場合は別譜面扱いとなり、ハイスコアは保存されません。`,
     autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
     gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量`,
-    adjustment: `タイミングにズレを感じる場合、\n数値を変えることでズレを直すことができます。`,
+    adjustment: `タイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは3f刻み、内側は0.5f刻みで調整できます。`,
     fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
     volume: `ゲーム内の音量を設定します。`,
 
