@@ -507,7 +507,7 @@ const g_keycons = {
     colorDefs: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
     colorTypeNum: 0,
 
-    imgTypes: [`Default`, `Base`],
+    imgTypes: [],
     imgTypeNum: 0,
 
     colorGroupNum: 0,
