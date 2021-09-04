@@ -4944,8 +4944,8 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 		// 右回し・左回しボタン（最内側）
 		if (skipTerm2 > 0) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(1, _settingName, unitName), { dw: -C_LEN_SETMINI_WIDTH / 2, dx: C_LEN_SETMINI_WIDTH / 2 }),
-				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(-1, _settingName, unitName), { dw: -C_LEN_SETMINI_WIDTH / 2 }),
+				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(1, _settingName, unitName), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(-1, _settingName, unitName), { visibility: `hidden` }),
 			);
 		}
 
@@ -5108,11 +5108,12 @@ function makeDifLblCssButton(_id, _name, _heightPos, _func, { x = 0, w = C_LEN_D
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func 
  */
-function makeMiniCssButton(_id, _directionFlg, _heightPos, _func, { dx = 0, dy = 0, dw = 0, dh = 0, dsiz = 0 } = {}) {
+function makeMiniCssButton(_id, _directionFlg, _heightPos, _func, { dx = 0, dy = 0, dw = 0, dh = 0, dsiz = 0, visibility = `visible` } = {}) {
 	return createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func, {
 		x: g_settingBtnObj.pos[_directionFlg] + dx,
 		y: C_LEN_SETLBL_HEIGHT * _heightPos + dy,
 		w: C_LEN_SETMINI_WIDTH + dw, h: C_LEN_SETLBL_HEIGHT + dh, siz: C_SIZ_SETLBL + dsiz,
+		visibility: visibility
 	}, g_cssObj.button_Mini);
 }
 
