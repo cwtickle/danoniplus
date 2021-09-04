@@ -2233,6 +2233,7 @@ const g_lblNameObj = {
     Volume: `Volume`,
 
     multi: `x`,
+    frame: `f`,
     percent: `%`,
 
     sc_speed: `←→`,
