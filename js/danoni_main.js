@@ -102,7 +102,7 @@ let g_currentPage = ``;
 // キーコンフィグ初期設定
 let g_kcType = `Main`;
 let g_colorType = `Default`;
-let g_imgType = `Default`;
+let g_imgType = `Original`;
 let g_baseDisp = `Settings`;
 
 // ライフ・ゲームオーバー・曲終了管理
@@ -2752,17 +2752,29 @@ function headerConvert(_dosObj) {
 	// 画像ルートパス、拡張子の設定 (サーバ上のみ)
 	obj.imgType = [];
 	if (!g_isFile) {
-		let tmpImgType = ``;
+		let tmpImgTypes = [];
 		if (hasVal(_dosObj.imgType)) {
-			tmpImgType = _dosObj.imgType;
-		} else if (typeof g_presetImageSet === C_TYP_STRING) {
-			tmpImgType = g_presetImageSet;
+			tmpImgTypes = _dosObj.imgType.split(`$`);
+		} else if (typeof g_presetImageSets === C_TYP_OBJECT) {
+			tmpImgTypes = g_presetImageSets.concat();
 		}
-		if (tmpImgType !== ``) {
-			const imgTypes = tmpImgType.split(`,`);
-			obj.imgType = [imgTypes[0], imgTypes[1] || `svg`];
+		if (tmpImgTypes.length > 0) {
+			tmpImgTypes.forEach((tmpImgType, j) => {
+				const imgTypes = tmpImgType.split(`,`);
+				obj.imgType[j] = [imgTypes[0], imgTypes[1] || `svg`];
+				g_keycons.imgTypes[j] = imgTypes[0];
+			});
 		}
-		updateImgType(obj.imgType);
+	}
+
+	// 末尾にデフォルト画像セットが入るよう追加
+	obj.imgType.push([``]);
+	g_keycons.imgTypes.push(`Original`);
+	g_imgType = g_keycons.imgTypes[0];
+
+	// サーバ上の場合、画像セットを再読込（ローカルファイル時は読込済みのためスキップ）
+	if (!g_isFile) {
+		updateImgType(obj.imgType[0]);
 	}
 
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
@@ -5635,13 +5647,17 @@ function keyConfigInit(_kcType = g_kcType) {
 		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: g_sWidth - 20 }),
 	);
 
-	if (g_headerObj.imgType.length > 0) {
+	if (g_headerObj.imgType.length > 1) {
+		const imgBaseX = 20;
+		const imgBaseY = 50;
 		multiAppend(divRoot,
 			// オブジェクトタイプの切り替え（リロードあり）
 			makeKCButtonHeader(`lblImgType`, `ImgType`, { x: 10, y: 37 }, g_cssObj.keyconfig_ConfigType),
 			makeKCButton(`lnkImgType`, g_imgType, _ => setImgType(), {
-				x: 20, y: 50, title: g_msgObj.imgType, cxtFunc: _ => setImgType(-1),
+				x: imgBaseX, y: imgBaseY, title: g_msgObj.imgType, cxtFunc: _ => setImgType(-1),
 			}),
+			makeMiniKCButton(`lnkImgType`, `L`, _ => setImgType(-1), { x: imgBaseX - 10, y: imgBaseY }),
+			makeMiniKCButton(`lnkImgType`, `R`, _ => setImgType(), { x: imgBaseX + g_sWidth / 6, y: imgBaseY }),
 		)
 	}
 
@@ -5736,7 +5752,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	const setImgType = (_scrollNum = 1) => {
 		const nextNum = getNextNum(_scrollNum, `imgTypes`, g_imgType);
 		g_imgType = g_keycons.imgTypes[nextNum];
-		updateImgType(g_imgType === `Default` ? g_headerObj.imgType : []);
+		updateImgType(g_headerObj.imgType[nextNum]);
 		keyConfigInit(g_kcType);
 	}
 
