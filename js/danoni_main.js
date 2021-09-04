@@ -8737,7 +8737,7 @@ function MainInit() {
 	g_audio.playbackRate = g_headerObj.playbackRate;
 
 	if (g_audio instanceof AudioPlayer) {
-		const musicStartAdjustment = (g_headerObj.blankFrame - g_stateObj.realAdjustment) / g_fps;
+		const musicStartAdjustment = (g_headerObj.blankFrame - g_stateObj.realAdjustment + 1) / g_fps;
 		musicStartTime = performance.now() + musicStartAdjustment * 1000;
 		g_audio.play(musicStartAdjustment);
 	}
