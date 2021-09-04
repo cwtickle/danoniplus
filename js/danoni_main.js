@@ -5648,8 +5648,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	);
 
 	if (g_headerObj.imgType.length > 1) {
-		const imgBaseX = 20;
-		const imgBaseY = 50;
+		const [imgBaseX, imgBaseY] = [20, 50];
 		multiAppend(divRoot,
 			// オブジェクトタイプの切り替え（リロードあり）
 			makeKCButtonHeader(`lblImgType`, `ImgType`, { x: 10, y: 37 }, g_cssObj.keyconfig_ConfigType),
