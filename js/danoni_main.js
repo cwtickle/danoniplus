@@ -4671,7 +4671,7 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
-	createGeneralSetting(spriteList.adjustment, `adjustment`, { skipTerm: 10, skipTerm2: 50, scLabel: g_lblNameObj.sc_adjustment });
+	createGeneralSetting(spriteList.adjustment, `adjustment`, { skipTerm: 5, skipTerm2: 30, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5 });
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
@@ -4912,7 +4912,7 @@ function createOptionWindow(_sprite) {
  * @param {object} _options
  */
 function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0, skipTerm2 = 0,
-	settingLabel = _settingName, displayName = `option`, scLabel = `` } = {}) {
+	settingLabel = _settingName, displayName = `option`, scLabel = ``, roundNum = 0 } = {}) {
 
 	const settingUpper = toCapitalize(_settingName);
 	const linkId = `lnk${settingUpper}`;
@@ -4923,29 +4923,29 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 
 		multiAppend(_obj,
 			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
-				_ => setSetting(1, _settingName, unitName),
-				{ cxtFunc: _ => setSetting(-1, _settingName, unitName) }),
+				_ => setSetting(1, _settingName, unitName, roundNum),
+				{ cxtFunc: _ => setSetting(-1, _settingName, unitName, roundNum) }),
 
 			// 右回し・左回しボタン（外側）
 			makeMiniCssButton(linkId, `R`, 0, _ => setSetting(
-				skipTerm2 > 0 ? skipTerm2 : (skipTerm > 0 ? skipTerm : 1), _settingName, unitName)),
+				skipTerm2 > 0 ? skipTerm2 : (skipTerm > 0 ? skipTerm : 1), _settingName, unitName, roundNum)),
 			makeMiniCssButton(linkId, `L`, 0, _ => setSetting(
-				skipTerm2 > 0 ? skipTerm2 * (-1) : (skipTerm > 0 ? skipTerm * (-1) : -1), _settingName, unitName)),
+				skipTerm2 > 0 ? skipTerm2 * (-1) : (skipTerm > 0 ? skipTerm * (-1) : -1), _settingName, unitName, roundNum)),
 		)
 
 		// 右回し・左回しボタン（内側）
 		if (skipTerm > 0) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RR`, 0, _ => setSetting(skipTerm2 > 0 ? skipTerm : 1, _settingName, unitName)),
-				makeMiniCssButton(linkId, `LL`, 0, _ => setSetting(skipTerm2 > 0 ? skipTerm * (-1) : -1, _settingName, unitName)),
+				makeMiniCssButton(linkId, `RR`, 0, _ => setSetting(skipTerm2 > 0 ? skipTerm : 1, _settingName, unitName, roundNum)),
+				makeMiniCssButton(linkId, `LL`, 0, _ => setSetting(skipTerm2 > 0 ? skipTerm * (-1) : -1, _settingName, unitName, roundNum)),
 			);
 		}
 
-		// 右回し・左回しボタン（最内側）
+		// 右回し・左回しボタン（最内側,不可視）
 		if (skipTerm2 > 0) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(1, _settingName, unitName), { visibility: `hidden` }),
-				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(-1, _settingName, unitName), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(1, _settingName, unitName, roundNum), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(-1, _settingName, unitName, roundNum), { visibility: `hidden` }),
 			);
 		}
 
@@ -4986,11 +4986,19 @@ function getStgDetailName(_name) {
  * @param {number} _scrollNum 
  * @param {string} _settingName
  * @param {string} _unitName
+ * @param {number} _roundNum
  */
-function setSetting(_scrollNum, _settingName, _unitName = ``) {
+function setSetting(_scrollNum, _settingName, _unitName = ``, _roundNum = 0) {
 	let settingNum = g_settings[`${_settingName}Num`];
 	const settingList = g_settings[`${_settingName}s`];
 	const settingMax = settingList.length - 1;
+
+	// _roundNum単位で丸める
+	if (_roundNum > 0 && _scrollNum >= _roundNum) {
+		settingNum = Math.floor(settingNum / _roundNum) * _roundNum;
+	} else if (_roundNum > 0 && -_scrollNum >= _roundNum) {
+		settingNum = Math.ceil(settingNum / _roundNum) * _roundNum;
+	}
 
 	if (_scrollNum > 0) {
 		settingNum = (settingNum === settingMax ?
