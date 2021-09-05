@@ -6340,14 +6340,14 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	obj.dummyArrowData = [];
 	obj.dummyFrzData = [];
 
-	// allAdjustment: 全体, realAdjustment: 整数値のみ(切り捨て), decimalAdjustment: 小数値のみ
+	// realAdjustment: 全体, intAdjustment: 整数値のみ(切り捨て), decimalAdjustment: 小数値のみ
 	const headerAdjustment = parseFloat(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
-	g_stateObj.allAdjustment = parseFloat(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
-	g_stateObj.realAdjustment = Math.floor(g_stateObj.allAdjustment);
-	g_stateObj.decimalAdjustment = g_stateObj.allAdjustment - g_stateObj.realAdjustment;
+	g_stateObj.realAdjustment = parseFloat(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
+	g_stateObj.intAdjustment = Math.floor(g_stateObj.realAdjustment);
+	g_stateObj.decimalAdjustment = g_stateObj.realAdjustment - g_stateObj.intAdjustment;
 
 	const blankFrame = g_headerObj.blankFrame;
-	const calcFrame = _frame => Math.round((parseInt(_frame) - blankFrame) / g_headerObj.playbackRate + blankFrame + g_stateObj.realAdjustment);
+	const calcFrame = _frame => Math.round((parseInt(_frame) - blankFrame) / g_headerObj.playbackRate + blankFrame + g_stateObj.intAdjustment);
 
 	for (let j = 0; j < keyNum; j++) {
 
@@ -7931,7 +7931,7 @@ function MainInit() {
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customMainInit === C_TYP_FUNCTION) {
-		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.realAdjustment;
+		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
 		customMainInit();
 		if (typeof customMainInit2 === C_TYP_FUNCTION) {
 			customMainInit2();
