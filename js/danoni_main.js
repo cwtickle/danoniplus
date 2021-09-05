@@ -8523,6 +8523,8 @@ function MainInit() {
 
 		if (currentFrame === musicStartFrame) {
 			musicStartFlg = true;
+
+			// ローカルかつBase64エンコード無し(WebAudioAPI使用不可)のときは従来通り再生
 			if (!(g_audio instanceof AudioPlayer)) {
 				musicStartTime = performance.now();
 				g_audio.play();
@@ -8770,6 +8772,7 @@ function MainInit() {
 	g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
 	g_audio.playbackRate = g_headerObj.playbackRate;
 
+	// WebAudioAPIが使用できる場合は小数フレーム分だけ音源位置を調整
 	if (g_audio instanceof AudioPlayer) {
 		const musicStartAdjustment = (g_headerObj.blankFrame - g_stateObj.decimalAdjustment + 1) / g_fps;
 		musicStartTime = performance.now() + musicStartAdjustment * 1000;
