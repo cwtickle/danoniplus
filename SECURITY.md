@@ -15,7 +15,7 @@ v21の対応終了時期はv24リリース開始時を予定しています。�
 
 | Version | Supported          | Latest Version | First Release | End of Support |
 | ------- | ------------------ |----------------|---------------|----------------|
-| v22     | :heavy_check_mark: |[v23.0.0](https://github.com/cwtickle/danoniplus/releases/tag/v23.0.0)          |2021-09-04|-|
+| v22     | :heavy_check_mark: |[v23.0.1](https://github.com/cwtickle/danoniplus/releases/tag/v23.0.1)          |2021-09-04|-|
 | v22     | :heavy_check_mark: |[v22.5.1](https://github.com/cwtickle/danoniplus/releases/tag/v22.5.1)          |2021-04-28|(At Release v25)|
 | v21     | :warning:          |[v21.5.1](https://github.com/cwtickle/danoniplus/releases/tag/v21.5.1)          |2021-03-12|(At Release v24)|
 | v20     | :x:                |[v20.5.4 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v20.5.4)          |2021-02-12|2021-09-04|

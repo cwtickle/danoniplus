@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/09/04
+ * Revised : 2021/09/06
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 23.0.0`;
-const g_revisedDate = `2021/09/04`;
+const g_version = `Ver 23.0.1`;
+const g_revisedDate = `2021/09/06`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -6108,9 +6108,6 @@ function loadingScoreInit() {
 			}
 		}
 
-		const headerAdjustment = parseFloat(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
-		g_stateObj.realAdjustment = parseFloat(g_stateObj.adjustment) + headerAdjustment + preblankFrame;
-
 		// シャッフルグループ未定義の場合
 		if (g_keyObj[`shuffle${keyCtrlPtn}`] === undefined) {
 			g_keyObj[`shuffle${keyCtrlPtn}`] = [...Array(keyNum)].fill(0);
@@ -6343,8 +6340,14 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	obj.dummyArrowData = [];
 	obj.dummyFrzData = [];
 
+	// realAdjustment: 全体, intAdjustment: 整数値のみ(切り捨て), decimalAdjustment: 小数値のみ
+	const headerAdjustment = parseFloat(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
+	g_stateObj.realAdjustment = parseFloat(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
+	g_stateObj.intAdjustment = Math.floor(g_stateObj.realAdjustment);
+	g_stateObj.decimalAdjustment = g_stateObj.realAdjustment - g_stateObj.intAdjustment;
+
 	const blankFrame = g_headerObj.blankFrame;
-	const calcFrame = _frame => Math.round((parseInt(_frame) - blankFrame) / g_headerObj.playbackRate + blankFrame);
+	const calcFrame = _frame => Math.round((parseInt(_frame) - blankFrame) / g_headerObj.playbackRate + blankFrame + g_stateObj.intAdjustment);
 
 	for (let j = 0; j < keyNum; j++) {
 
@@ -7698,7 +7701,7 @@ function MainInit() {
 
 	// 開始位置、楽曲再生位置の設定
 	const firstFrame = g_scoreObj.frameNum;
-	const musicStartFrame = firstFrame + g_headerObj.blankFrame - Math.floor(g_stateObj.realAdjustment);
+	const musicStartFrame = firstFrame + g_headerObj.blankFrame;
 	const fadeFlgs = { fadein: [`In`, `Out`], fadeout: [`Out`, `In`] };
 	g_audio.volume = (firstFrame === 0 ? g_stateObj.volume / 100 : 0);
 
@@ -7928,7 +7931,7 @@ function MainInit() {
 
 	// ユーザカスタムイベント(初期)
 	if (typeof customMainInit === C_TYP_FUNCTION) {
-		g_scoreObj.baseFrame = g_scoreObj.frameNum;
+		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
 		customMainInit();
 		if (typeof customMainInit2 === C_TYP_FUNCTION) {
 			customMainInit2();
@@ -8520,6 +8523,8 @@ function MainInit() {
 
 		if (currentFrame === musicStartFrame) {
 			musicStartFlg = true;
+
+			// ローカルかつBase64エンコード無し(WebAudioAPI使用不可)のときは従来通り再生
 			if (!(g_audio instanceof AudioPlayer)) {
 				musicStartTime = performance.now();
 				g_audio.play();
@@ -8767,8 +8772,9 @@ function MainInit() {
 	g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
 	g_audio.playbackRate = g_headerObj.playbackRate;
 
+	// WebAudioAPIが使用できる場合は小数フレーム分だけ音源位置を調整
 	if (g_audio instanceof AudioPlayer) {
-		const musicStartAdjustment = (g_headerObj.blankFrame - g_stateObj.realAdjustment + 1) / g_fps;
+		const musicStartAdjustment = (g_headerObj.blankFrame - g_stateObj.decimalAdjustment + 1) / g_fps;
 		musicStartTime = performance.now() + musicStartAdjustment * 1000;
 		g_audio.play(musicStartAdjustment);
 	}
