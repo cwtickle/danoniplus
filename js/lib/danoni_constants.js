@@ -825,6 +825,7 @@ g_kCdN[240] = `CapsLock`;
 const g_shortcutObj = {
     title: {
         Enter: { id: `btnStart` },
+        NumpadEnter: { id: `btnStart` },
         Slash: { id: `btnHelp`, reset: true },
         F1: { id: `btnHelp`, reset: true },
         ControlLeft_KeyC: { id: `` },
@@ -879,6 +880,7 @@ const g_shortcutObj = {
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
+        NumpadEnter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
     },
@@ -893,6 +895,7 @@ const g_shortcutObj = {
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `lnkDifficulty` },
+        NumpadEnter: { id: `lnkDifficulty` },
         ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
     },
@@ -934,6 +937,7 @@ const g_shortcutObj = {
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
+        NumpadEnter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnSettings` },
     },
@@ -942,6 +946,7 @@ const g_shortcutObj = {
     },
     loadingIos: {
         Enter: { id: `btnPlay` },
+        NumpadEnter: { id: `btnPlay` },
     },
     result: {
         Escape: { id: `btnBack` },
