@@ -2842,8 +2842,7 @@ function headerConvert(_dosObj) {
 		obj.minSpeed = C_MIN_SPEED;
 		obj.maxSpeed = C_MAX_SPEED;
 	}
-	g_settings.speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 4 + 1).keys()].map(i => obj.minSpeed + i / 4);
-
+	g_settings.speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 20 + 1).keys()].map(i => obj.minSpeed + i / 20);
 
 	// プレイ中のショートカットキー
 	obj.keyRetry = setVal(_dosObj.keyRetry, C_KEY_RETRY, C_TYP_NUMBER);
@@ -4111,7 +4110,10 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
-	createGeneralSetting(spriteList.speed, `speed`, { unitName: ` ${getStgDetailName(g_lblNameObj.multi)}`, skipTerm: 4, scLabel: g_lblNameObj.sc_speed });
+	createGeneralSetting(spriteList.speed, `speed`, {
+		skipTerm: 5, skipTerm2: 20, scLabel: g_lblNameObj.sc_speed, roundNum: 5,
+		unitName: ` ${getStgDetailName(g_lblNameObj.multi)}`,
+	});
 
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
@@ -4944,8 +4946,8 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 
 		multiAppend(_obj,
 			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
-				_ => setSetting(1, _settingName, unitName, roundNum),
-				{ cxtFunc: _ => setSetting(-1, _settingName, unitName, roundNum) }),
+				_ => setSetting(skipTerm2 > 0 ? skipTerm : 1, _settingName, unitName, roundNum),
+				{ cxtFunc: _ => setSetting(skipTerm2 > 0 ? skipTerm * (-1) : -1, _settingName, unitName, roundNum) }),
 
 			// 右回し・左回しボタン（外側）
 			makeMiniCssButton(linkId, `R`, 0, _ => setSetting(
