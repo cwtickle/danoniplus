@@ -2766,14 +2766,16 @@ function headerConvert(_dosObj) {
 			tmpImgTypes.forEach((tmpImgType, j) => {
 				const imgTypes = tmpImgType.split(`,`);
 				obj.imgType[j] = [imgTypes[0], imgTypes[1] || `svg`];
-				g_keycons.imgTypes[j] = imgTypes[0];
+				g_keycons.imgTypes[j] = (imgTypes[0] === `` ? `Original` : imgTypes[0]);
 			});
 		}
 	}
 
 	// 末尾にデフォルト画像セットが入るよう追加
-	obj.imgType.push([``]);
-	g_keycons.imgTypes.push(`Original`);
+	if (obj.imgType.findIndex(imgSets => imgSets[0] === ``) === -1) {
+		obj.imgType.push([``]);
+		g_keycons.imgTypes.push(`Original`);
+	}
 	g_imgType = g_keycons.imgTypes[0];
 
 	// サーバ上の場合、画像セットを再読込（ローカルファイル時は読込済みのためスキップ）

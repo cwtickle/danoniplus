@@ -124,7 +124,7 @@ const g_presetFrzStartjdgUse = `false`;
 	下記の場合は[classic]フォルダに[png]形式の画像一式をデフォルト画像セットとして使用する
 	拡張子は、未指定の場合`svg`形式
 */
-// const g_presetImageSets = [`classic,png`, `classic-thin,png`];
+// const g_presetImageSets = [``, `classic,png`, `classic-thin,png`];
 
 // デフォルト画像セット (C_IMG_XXXX, 厳密にはg_imgObj) に対して拡張子の上書きを行うか設定
 // 文字列の後ろ3文字をカットして、下記の値を適用する。コメントアウトした場合は、上書きを行わない。
