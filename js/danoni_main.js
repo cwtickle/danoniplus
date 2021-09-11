@@ -2734,7 +2734,7 @@ function preheaderConvert(_dosObj) {
  * @param {array} _imgType 
  */
 function updateImgType(_imgType) {
-	resetImgs(..._imgType);
+	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
 	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
 	if (_imgType[1] === undefined && typeof g_presetOverrideExtension === C_TYP_STRING) {
@@ -2770,19 +2770,25 @@ function headerConvert(_dosObj) {
 		if (tmpImgTypes.length > 0) {
 			tmpImgTypes.forEach((tmpImgType, j) => {
 				const imgTypes = tmpImgType.split(`,`);
-				obj.imgType[j] = [imgTypes[0], imgTypes[1] || `svg`, setVal(imgTypes[2], true, C_TYP_BOOLEAN)];
+				obj.imgType[j] = {
+					name: imgTypes[0],
+					extension: imgTypes[1] || `svg`,
+					rotateEnabled: setVal(imgTypes[2], true, C_TYP_BOOLEAN),
+					flatStepHeight: setVal(imgTypes[3], C_ARW_WIDTH, C_TYP_FLOAT),
+				};
 				g_keycons.imgTypes[j] = (imgTypes[0] === `` ? `Original` : imgTypes[0]);
 			});
 		}
 	}
 
 	// 末尾にデフォルト画像セットが入るよう追加
-	if (obj.imgType.findIndex(imgSets => imgSets[0] === ``) === -1) {
-		obj.imgType.push([``, `svg`, true]);
+	if (obj.imgType.findIndex(imgSets => imgSets.name === ``) === -1) {
+		obj.imgType.push({ name: ``, extension: `svg`, rotateEnabled: true });
 		g_keycons.imgTypes.push(`Original`);
 	}
 	g_imgType = g_keycons.imgTypes[0];
-	g_stateObj.rotateEnabled = true;
+	g_stateObj.rotateEnabled = obj.imgType[0].rotateEnabled;
+	g_stateObj.flatStepHeight = obj.imgType[0].flatStepHeight;
 
 	// サーバ上の場合、画像セットを再読込（ローカルファイル時は読込済みのためスキップ）
 	if (!g_isFile) {
@@ -5785,7 +5791,9 @@ function keyConfigInit(_kcType = g_kcType) {
 	const setImgType = (_scrollNum = 1) => {
 		const nextNum = getNextNum(_scrollNum, `imgTypes`, g_imgType);
 		g_imgType = g_keycons.imgTypes[nextNum];
-		g_stateObj.rotateEnabled = g_headerObj.imgType[nextNum][2];
+		g_stateObj.rotateEnabled = g_headerObj.imgType[nextNum].rotateEnabled;
+		g_stateObj.flatStepHeight = g_headerObj.imgType[nextNum].flatStepHeight;
+
 		updateImgType(g_headerObj.imgType[nextNum]);
 		keyConfigInit(g_kcType);
 	}
@@ -7632,7 +7640,8 @@ function MainInit() {
 	if (g_stateObj.scroll === `Flat` && g_stateObj.d_stepzone === C_FLG_ON) {
 
 		// ステップゾーンの代わり
-		[0, C_ARW_WIDTH].forEach((y, j) => {
+		const lineY = [(C_ARW_WIDTH - g_stateObj.flatStepHeight) / 2, (C_ARW_WIDTH + g_stateObj.flatStepHeight) / 2];
+		lineY.forEach((y, j) => {
 			mainSprite.appendChild(
 				createColorObject2(`stepBar${j}`, {
 					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(g_stateObj.reverse === C_FLG_ON) + y,

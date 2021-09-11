@@ -118,14 +118,20 @@ const g_presetSettingUse = {
 const g_presetFrzStartjdgUse = `false`;
 
 /*
-	デフォルト画像セットの設定 (セット対象のフォルダ名,拡張子,画像回転有無(true or false)の順に指定)
+	デフォルト画像セットの設定
+	(セット対象のフォルダ名, 拡張子, 画像回転有無(true or false), Flat時ステップ間隔の順に指定)
 
 	事前に、[img]フォルダ配下にセット対象のサブフォルダを作成し、その中に一式を入れておく必要あり
 	下記の場合は[classic]フォルダに[png]形式の画像一式をデフォルト画像セットとして使用する
-	拡張子は、未指定の場合`svg`形式
-	画像回転有無は、未指定の場合true(回転有り)
+
+	未指定の場合のデフォルト値は以下の通り
+	  セット対象のフォルダ名：`` (imgフォルダ直下)
+	  拡張子：`svg`形式
+	  画像回転有無：true(回転有り)
+	  Flat時ステップ間隔：50(px) ※矢印サイズ
+	  
 */
-// const g_presetImageSets = [``, `classic,png`, `classic-thin,png`, `note,svg,false`];
+// const g_presetImageSets = [``, `classic,png`, `classic-thin,png`, `note,svg,false,0`];
 
 // デフォルト画像セット (C_IMG_XXXX, 厳密にはg_imgObj) に対して拡張子の上書きを行うか設定
 // 文字列の後ろ3文字をカットして、下記の値を適用する。コメントアウトした場合は、上書きを行わない。

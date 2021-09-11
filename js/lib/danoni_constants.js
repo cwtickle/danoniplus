@@ -398,6 +398,7 @@ const g_stateObj = {
     opacity: 100,
 
     rotateEnabled: true,
+    flatStepHeight: false,
 };
 
 const C_VAL_MAXLIFE = 1000;
