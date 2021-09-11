@@ -396,8 +396,6 @@ const g_stateObj = {
     d_special: C_FLG_ON,
     appearance: `Visible`,
     opacity: 100,
-
-    rotateEnabled: true,
 };
 
 const C_VAL_MAXLIFE = 1000;
