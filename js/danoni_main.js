@@ -2740,6 +2740,9 @@ function updateImgType(_imgType) {
 	if (_imgType[1] === undefined && typeof g_presetOverrideExtension === C_TYP_STRING) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
 	}
+	if (!g_isFile) {
+		g_imgInitList.forEach(img => preloadFile(`image`, g_imgObj[img]));
+	}
 }
 
 /**
