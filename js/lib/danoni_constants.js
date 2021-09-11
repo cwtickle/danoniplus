@@ -442,7 +442,7 @@ let g_appearanceRanges = [`Hidden+`, `Sudden+`, `Hid&Sud+`];
 
 // 設定系全般管理
 const g_settings = {
-    speeds: [...Array((C_MAX_SPEED - C_MIN_SPEED) * 4 + 1).keys()].map(i => C_MIN_SPEED + i / 4),
+    speeds: [...Array((C_MAX_SPEED - C_MIN_SPEED) * 20 + 1).keys()].map(i => C_MIN_SPEED + i / 20),
     speedNum: 0,
 
     motions: [C_FLG_OFF, `Boost`, `Brake`],
@@ -835,8 +835,10 @@ const g_shortcutObj = {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
         KeyD: { id: `lnkDifficultyR` },
         ShiftLeft_ArrowRight: { id: `lnkSpeedR` },
+        AltLeft_ArrowRight: { id: `lnkSpeedRRR` },
         ArrowRight: { id: `lnkSpeedRR` },
         ShiftLeft_ArrowLeft: { id: `lnkSpeedL` },
+        AltLeft_ArrowLeft: { id: `lnkSpeedLLL` },
         ArrowLeft: { id: `lnkSpeedLL` },
         KeyL: { id: `lnkDifficulty` },
 
