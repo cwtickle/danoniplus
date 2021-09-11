@@ -660,7 +660,9 @@ function createColorObject2(_id,
 		charaStyle = `${rotate}${styleName}`;
 	} else {
 		charaStyle = `arrow${styleName}`;
-		style.transform = `rotate(${rotate}deg)`;
+		if (g_stateObj.rotateEnabled) {
+			style.transform = `rotate(${rotate}deg)`;
+		}
 	}
 
 	style.maskImage = `url("${g_imgObj[charaStyle]}")`;
@@ -2765,7 +2767,7 @@ function headerConvert(_dosObj) {
 		if (tmpImgTypes.length > 0) {
 			tmpImgTypes.forEach((tmpImgType, j) => {
 				const imgTypes = tmpImgType.split(`,`);
-				obj.imgType[j] = [imgTypes[0], imgTypes[1] || `svg`];
+				obj.imgType[j] = [imgTypes[0], imgTypes[1] || `svg`, setVal(imgTypes[2], true, C_TYP_BOOLEAN)];
 				g_keycons.imgTypes[j] = (imgTypes[0] === `` ? `Original` : imgTypes[0]);
 			});
 		}
@@ -2773,10 +2775,11 @@ function headerConvert(_dosObj) {
 
 	// 末尾にデフォルト画像セットが入るよう追加
 	if (obj.imgType.findIndex(imgSets => imgSets[0] === ``) === -1) {
-		obj.imgType.push([``]);
+		obj.imgType.push([``, `svg`, true]);
 		g_keycons.imgTypes.push(`Original`);
 	}
 	g_imgType = g_keycons.imgTypes[0];
+	g_stateObj.rotateEnabled = true;
 
 	// サーバ上の場合、画像セットを再読込（ローカルファイル時は読込済みのためスキップ）
 	if (!g_isFile) {
@@ -5779,6 +5782,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	const setImgType = (_scrollNum = 1) => {
 		const nextNum = getNextNum(_scrollNum, `imgTypes`, g_imgType);
 		g_imgType = g_keycons.imgTypes[nextNum];
+		g_stateObj.rotateEnabled = g_headerObj.imgType[nextNum][2];
 		updateImgType(g_headerObj.imgType[nextNum]);
 		keyConfigInit(g_kcType);
 	}
