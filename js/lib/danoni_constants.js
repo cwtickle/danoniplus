@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/09/04 (v23.0.0)
+ * Revised : 2021/09/11 (v23.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -396,6 +396,9 @@ const g_stateObj = {
     d_special: C_FLG_ON,
     appearance: `Visible`,
     opacity: 100,
+
+    rotateEnabled: true,
+    flatStepHeight: false,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -442,7 +445,7 @@ let g_appearanceRanges = [`Hidden+`, `Sudden+`, `Hid&Sud+`];
 
 // 設定系全般管理
 const g_settings = {
-    speeds: [...Array((C_MAX_SPEED - C_MIN_SPEED) * 4 + 1).keys()].map(i => C_MIN_SPEED + i / 4),
+    speeds: [...Array((C_MAX_SPEED - C_MIN_SPEED) * 20 + 1).keys()].map(i => C_MIN_SPEED + i / 20),
     speedNum: 0,
 
     motions: [C_FLG_OFF, `Boost`, `Brake`],
@@ -825,6 +828,7 @@ g_kCdN[240] = `CapsLock`;
 const g_shortcutObj = {
     title: {
         Enter: { id: `btnStart` },
+        NumpadEnter: { id: `btnStart` },
         Slash: { id: `btnHelp`, reset: true },
         F1: { id: `btnHelp`, reset: true },
         ControlLeft_KeyC: { id: `` },
@@ -834,8 +838,10 @@ const g_shortcutObj = {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
         KeyD: { id: `lnkDifficultyR` },
         ShiftLeft_ArrowRight: { id: `lnkSpeedR` },
+        AltLeft_ArrowRight: { id: `lnkSpeedRRR` },
         ArrowRight: { id: `lnkSpeedRR` },
         ShiftLeft_ArrowLeft: { id: `lnkSpeedL` },
+        AltLeft_ArrowLeft: { id: `lnkSpeedLLL` },
         ArrowLeft: { id: `lnkSpeedLL` },
         KeyL: { id: `lnkDifficulty` },
 
@@ -879,6 +885,7 @@ const g_shortcutObj = {
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
+        NumpadEnter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
     },
@@ -893,6 +900,7 @@ const g_shortcutObj = {
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `lnkDifficulty` },
+        NumpadEnter: { id: `lnkDifficulty` },
         ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
     },
@@ -934,6 +942,7 @@ const g_shortcutObj = {
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
+        NumpadEnter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
         Tab: { id: `btnSettings` },
     },
@@ -942,6 +951,7 @@ const g_shortcutObj = {
     },
     loadingIos: {
         Enter: { id: `btnPlay` },
+        NumpadEnter: { id: `btnPlay` },
     },
     result: {
         Escape: { id: `btnBack` },
@@ -1168,6 +1178,7 @@ const g_keyObj = {
     chara11L_3: [`sleft`, `sdown`, `sup`, `sright`,
         `oni`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
 
+    chara7_4: [`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
     chara9A_4: [`left`, `down`, `gor`, `up`, `right`, `space`,
         `sleft`, `sdown`, `siyo`, `sup`, `sright`],
 
@@ -1224,6 +1235,7 @@ const g_keyObj = {
     color11_3_0: [3, 3, 3, 3, 2, 0, 1, 0, 1, 0, 1, 0],
     color11L_3_0: [3, 3, 3, 3, 2, 0, 1, 0, 1, 0, 1, 0],
 
+    color7_4_0: [2, 2, 2, 0, 0, 0, 0],
     color9A_4_0: [0, 0, 2, 0, 0, 2, 3, 3, 2, 3, 3],
 
     // カラーパターン(パターン2)
@@ -1288,6 +1300,7 @@ const g_keyObj = {
     shuffle11_3_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
     shuffle11L_3_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2],
 
+    shuffle7_4_0: [0, 0, 0, 1, 1, 1, 1],
     shuffle9A_4_0: [0, 0, 1, 0, 0, 2, 3, 3, 4, 3, 3],
 
     // シャッフルグループ(パターン2)
@@ -1382,6 +1395,7 @@ const g_keyObj = {
     stepRtn11_3: [0, -90, 90, 180, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
     stepRtn11L_3: [0, -90, 90, 180, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
 
+    stepRtn7_4: [`giko`, `onigiri`, `iyo`, 0, -90, 90, 180],
     stepRtn9A_4: [0, -135, `giko`, 45, 180, `onigiri`, 0, -135, `iyo`, 45, 180],
 
     // 各キーの区切り位置
@@ -1437,6 +1451,7 @@ const g_keyObj = {
     div11_3: 5,
     div11L_3: 5,
 
+    div7_4: 7,
     div9A_4: 11,
 
     // 各キーの位置関係
@@ -1492,6 +1507,7 @@ const g_keyObj = {
     pos11_3: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     pos11L_3: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
 
+    pos7_4: [0, 1, 2, 3, 4, 5, 6],
     pos9A_4: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 
     // 基本パターン (キーコンフィグ)
@@ -1552,6 +1568,7 @@ const g_keyObj = {
     keyCtrl11_3: [[89, 0], [85, 73], [56, 55, 57], [79, 0], [32, 0], [66, 0], [72, 0], [78, 77], [74, 75], [188, 0], [76, 0], [190, 0]],
     keyCtrl11L_3: [[89, 0], [85, 73], [56, 55, 57], [79, 0], [32, 0], [66, 0], [72, 0], [78, 77], [74, 75], [188, 0], [76, 0], [190, 0]],
 
+    keyCtrl7_4: [[90, 0], [88, 0], [67, 0], [37, 0], [40, 0], [38, 0], [39, 0]],
     keyCtrl9A_4: [[83, 0], [88, 67], [68, 0], [69, 82], [70, 0], [32, 0], [74, 0], [77, 188], [75, 0], [73, 79], [76, 0]],
 
     // 矢印間隔補正
@@ -1605,6 +1622,7 @@ const g_keyObj = {
     transKey11_3: '12',
     transKey11L_3: '12',
 
+    transKey7_4: '7i',
     transKey9A_4: '11i',
 
     // キー置換用(ParaFla版との互換)
@@ -1690,6 +1708,14 @@ const g_keyObj = {
         'Alternate': [-1, 1, -1, 1, -1, 1, -1, 1],
         'Twist': [1, 1, -1, -1, 1, 1, -1, -1],
         'Asymmetry': [1, 1, -1, 1, -1, -1, 1, -1],
+    },
+    scrollDir7_4: {
+        '---': [1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, -1, -1, -1, 1, 1],
+        'Split': [1, 1, 1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1],
+        'Twist': [1, 1, -1, -1, 1, 1, -1],
+        'Asymmetry': [1, -1, 1, 1, -1, 1, -1],
     },
 
     scrollDir7i_0: {

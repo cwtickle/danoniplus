@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/09/06
+ * Revised : 2021/09/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 23.0.1`;
-const g_revisedDate = `2021/09/06`;
+const g_version = `Ver 23.1.0`;
+const g_revisedDate = `2021/09/11`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -660,7 +660,9 @@ function createColorObject2(_id,
 		charaStyle = `${rotate}${styleName}`;
 	} else {
 		charaStyle = `arrow${styleName}`;
-		style.transform = `rotate(${rotate}deg)`;
+		if (g_stateObj.rotateEnabled) {
+			style.transform = `rotate(${rotate}deg)`;
+		}
 	}
 
 	style.maskImage = `url("${g_imgObj[charaStyle]}")`;
@@ -2732,11 +2734,14 @@ function preheaderConvert(_dosObj) {
  * @param {array} _imgType 
  */
 function updateImgType(_imgType) {
-	resetImgs(..._imgType);
+	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
 	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
 	if (_imgType[1] === undefined && typeof g_presetOverrideExtension === C_TYP_STRING) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
+	}
+	if (!g_isFile) {
+		g_imgInitList.forEach(img => preloadFile(`image`, g_imgObj[img]));
 	}
 }
 
@@ -2765,16 +2770,25 @@ function headerConvert(_dosObj) {
 		if (tmpImgTypes.length > 0) {
 			tmpImgTypes.forEach((tmpImgType, j) => {
 				const imgTypes = tmpImgType.split(`,`);
-				obj.imgType[j] = [imgTypes[0], imgTypes[1] || `svg`];
-				g_keycons.imgTypes[j] = imgTypes[0];
+				obj.imgType[j] = {
+					name: imgTypes[0],
+					extension: imgTypes[1] || `svg`,
+					rotateEnabled: setVal(imgTypes[2], true, C_TYP_BOOLEAN),
+					flatStepHeight: setVal(imgTypes[3], C_ARW_WIDTH, C_TYP_FLOAT),
+				};
+				g_keycons.imgTypes[j] = (imgTypes[0] === `` ? `Original` : imgTypes[0]);
 			});
 		}
 	}
 
 	// 末尾にデフォルト画像セットが入るよう追加
-	obj.imgType.push([``]);
-	g_keycons.imgTypes.push(`Original`);
+	if (obj.imgType.findIndex(imgSets => imgSets.name === ``) === -1) {
+		obj.imgType.push({ name: ``, extension: `svg`, rotateEnabled: true });
+		g_keycons.imgTypes.push(`Original`);
+	}
 	g_imgType = g_keycons.imgTypes[0];
+	g_stateObj.rotateEnabled = obj.imgType[0].rotateEnabled;
+	g_stateObj.flatStepHeight = obj.imgType[0].flatStepHeight;
 
 	// サーバ上の場合、画像セットを再読込（ローカルファイル時は読込済みのためスキップ）
 	if (!g_isFile) {
@@ -2840,8 +2854,7 @@ function headerConvert(_dosObj) {
 		obj.minSpeed = C_MIN_SPEED;
 		obj.maxSpeed = C_MAX_SPEED;
 	}
-	g_settings.speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 4 + 1).keys()].map(i => obj.minSpeed + i / 4);
-
+	g_settings.speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 20 + 1).keys()].map(i => obj.minSpeed + i / 20);
 
 	// プレイ中のショートカットキー
 	obj.keyRetry = setVal(_dosObj.keyRetry, C_KEY_RETRY, C_TYP_NUMBER);
@@ -4109,7 +4122,10 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
-	createGeneralSetting(spriteList.speed, `speed`, { unitName: ` ${getStgDetailName(g_lblNameObj.multi)}`, skipTerm: 4, scLabel: g_lblNameObj.sc_speed });
+	createGeneralSetting(spriteList.speed, `speed`, {
+		skipTerm: 5, skipTerm2: 20, scLabel: g_lblNameObj.sc_speed, roundNum: 5,
+		unitName: ` ${getStgDetailName(g_lblNameObj.multi)}`,
+	});
 
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
@@ -4942,8 +4958,8 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 
 		multiAppend(_obj,
 			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
-				_ => setSetting(1, _settingName, unitName, roundNum),
-				{ cxtFunc: _ => setSetting(-1, _settingName, unitName, roundNum) }),
+				_ => setSetting(skipTerm2 > 0 ? skipTerm : 1, _settingName, unitName, roundNum),
+				{ cxtFunc: _ => setSetting(skipTerm2 > 0 ? skipTerm * (-1) : -1, _settingName, unitName, roundNum) }),
 
 			// 右回し・左回しボタン（外側）
 			makeMiniCssButton(linkId, `R`, 0, _ => setSetting(
@@ -5777,6 +5793,9 @@ function keyConfigInit(_kcType = g_kcType) {
 	const setImgType = (_scrollNum = 1) => {
 		const nextNum = getNextNum(_scrollNum, `imgTypes`, g_imgType);
 		g_imgType = g_keycons.imgTypes[nextNum];
+		g_stateObj.rotateEnabled = g_headerObj.imgType[nextNum].rotateEnabled;
+		g_stateObj.flatStepHeight = g_headerObj.imgType[nextNum].flatStepHeight;
+
 		updateImgType(g_headerObj.imgType[nextNum]);
 		keyConfigInit(g_kcType);
 	}
@@ -7623,7 +7642,8 @@ function MainInit() {
 	if (g_stateObj.scroll === `Flat` && g_stateObj.d_stepzone === C_FLG_ON) {
 
 		// ステップゾーンの代わり
-		[0, C_ARW_WIDTH].forEach((y, j) => {
+		const lineY = [(C_ARW_WIDTH - g_stateObj.flatStepHeight) / 2, (C_ARW_WIDTH + g_stateObj.flatStepHeight) / 2];
+		lineY.forEach((y, j) => {
 			mainSprite.appendChild(
 				createColorObject2(`stepBar${j}`, {
 					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(g_stateObj.reverse === C_FLG_ON) + y,
