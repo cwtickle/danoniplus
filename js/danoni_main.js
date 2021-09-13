@@ -8931,6 +8931,11 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
 function changeHitFrz(_j, _k, _name) {
 	const frzNo = `${_j}_${_k}`;
 	const frzName = `${_name}${frzNo}`;
+
+	if (g_attrObj[frzName].keyUpFrame !== 0) {
+		return;
+	}
+
 	const styfrzBar = $id(`${_name}Bar${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
@@ -8943,6 +8948,7 @@ function changeHitFrz(_j, _k, _name) {
 	g_attrObj[frzName].frzBarLength -= delFrzLength * g_attrObj[frzName].dir;
 	g_attrObj[frzName].barY -= delFrzLength * g_attrObj[frzName].dividePos;
 	g_attrObj[frzName].btmY -= delFrzLength;
+	g_attrObj[frzName].y += delFrzLength;
 	g_attrObj[frzName].isMoving = false;
 
 	styfrzBar.top = `${g_attrObj[frzName].barY}px`;
