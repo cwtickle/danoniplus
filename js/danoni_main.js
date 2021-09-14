@@ -8495,6 +8495,18 @@ function MainInit() {
 				// フリーズアローがヒット中の処理
 				if (g_attrObj[frzName].frzBarLength > 0) {
 
+					// 早押ししたフレーム分終端の位置を動かす
+					if (g_attrObj[frzName].cnt > 0) {
+						if (g_workObj.currentSpeed !== 0) {
+							const delFrzLength = g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt] * g_attrObj[frzName].boostSpd;
+							g_attrObj[frzName].btmY -= delFrzLength;
+							g_attrObj[frzName].barY -= delFrzLength * g_attrObj[frzName].dividePos;
+							g_attrObj[frzName].frzBarLength -= delFrzLength * g_attrObj[frzName].dir;
+							g_attrObj[frzName].boostCnt--;
+						}
+						g_attrObj[frzName].cnt--;
+					}
+
 					g_attrObj[frzName].frzBarLength -= movY * g_attrObj[frzName].dir;
 					g_attrObj[frzName].barY -= movY * g_attrObj[frzName].dividePos;
 					g_attrObj[frzName].btmY -= movY;
