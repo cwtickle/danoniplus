@@ -6896,7 +6896,7 @@ function setMotionOnFrame() {
 	} else if (g_stateObj.motion === `Boost`) {
 		// ステップゾーンに近づくにつれて加速量を大きくする (16 → 85)
 		for (let j = C_MOTION_STD_POS + 1; j < C_MOTION_STD_POS + 70; j++) {
-			motionOnFrame[j] = (C_MOTION_STD_POS + 70 - j) * g_stateObj.speed * 2 / 50;
+			motionOnFrame[j] = (C_MOTION_STD_POS + 70 - j) * 3 / 50;
 		}
 	} else if (g_stateObj.motion === `Brake`) {
 		// 初期は+2x、ステップゾーンに近づくにつれて加速量を下げる (20 → 34)
