@@ -6906,11 +6906,6 @@ function setMotionOnFrame() {
 		for (let j = C_MOTION_STD_POS + 19; j <= brakeLastFrame; j++) {
 			motionOnFrame[j] = 4;
 		}
-	} else if (g_stateObj.motion === `Compress`) {
-		// ステップゾーンに近づくにつれて加速量を負数にする (16 → 85)
-		for (let j = C_MOTION_STD_POS + 1; j < C_MOTION_STD_POS + 70; j++) {
-			motionOnFrame[j] = -(C_MOTION_STD_POS + 70 - j) * 2.5 * g_stateObj.speed / 100;
-		}
 	}
 
 	return motionOnFrame;

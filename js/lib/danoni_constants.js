@@ -448,7 +448,7 @@ const g_settings = {
     speeds: [...Array((C_MAX_SPEED - C_MIN_SPEED) * 20 + 1).keys()].map(i => C_MIN_SPEED + i / 20),
     speedNum: 0,
 
-    motions: [C_FLG_OFF, `Boost`, `Brake`, `Compress`],
+    motions: [C_FLG_OFF, `Boost`, `Brake`],
     motionNum: 0,
 
     reverses: [C_FLG_OFF, C_FLG_ON],
@@ -2311,7 +2311,6 @@ const g_lblNameObj = {
     'u_ON': `ON`,
     'u_Boost': `Boost`,
     'u_Brake': `Brake`,
-    'u_Comprees': `Compress`,
 
     'u_Cross': `Cross`,
     'u_Split': `Split`,
