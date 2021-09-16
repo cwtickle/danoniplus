@@ -8246,8 +8246,8 @@ function MainInit() {
 			if (g_workObj.judgFrzCnt[_j] !== _k && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] + 1) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 
-				if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.kita] || !g_attrObj[prevFrzName].isMoving) {
-				} else {
+				if (g_attrObj[prevFrzName].isMoving &&
+					g_attrObj[prevFrzName].cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 
 					// 枠外判定前の場合、このタイミングで枠外判定を行う
 					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
