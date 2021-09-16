@@ -8241,26 +8241,22 @@ function MainInit() {
 		frzOFF: (_j, _k, _cnt) => {
 
 			// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
-			// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
+			// ただし、前のフリーズアローが押下中または判定領域がジャスト付近(キター領域)の場合は削除しない
 			// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
 			if (g_workObj.judgFrzCnt[_j] !== _k && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] + 1) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 
-				// フリーズアロー押下中の場合は削除しない
-				if (g_attrObj[prevFrzName].isMoving) {
+				if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.kita] || !g_attrObj[prevFrzName].isMoving) {
+				} else {
 
-					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
-					} else {
-
-						// 枠外判定前の場合、このタイミングで枠外判定を行う
-						if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
-							judgeIknai(_cnt);
-							if (g_headerObj.frzStartjdgUse) {
-								judgeUwan(_cnt);
-							}
+					// 枠外判定前の場合、このタイミングで枠外判定を行う
+					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
+						judgeIknai(_cnt);
+						if (g_headerObj.frzStartjdgUse) {
+							judgeUwan(_cnt);
 						}
-						judgeObjDelete.frz(_j, prevFrzName);
 					}
+					judgeObjDelete.frz(_j, prevFrzName);
 				}
 			}
 		},
