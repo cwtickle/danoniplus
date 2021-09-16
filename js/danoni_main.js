@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/06/13
+ * Revised : 2021/09/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 22.5.1`;
-const g_revisedDate = `2021/06/13`;
+const g_version = `Ver 22.5.2`;
+const g_revisedDate = `2021/09/16`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -6832,7 +6832,7 @@ function setMotionOnFrame() {
 	} else if (g_stateObj.motion === `Boost`) {
 		// ステップゾーンに近づくにつれて加速量を大きくする (16 → 85)
 		for (let j = C_MOTION_STD_POS + 1; j < C_MOTION_STD_POS + 70; j++) {
-			motionOnFrame[j] = (C_MOTION_STD_POS + 70 - j) * g_stateObj.speed * 2 / 50;
+			motionOnFrame[j] = (C_MOTION_STD_POS + 70 - j) * 3 / 50;
 		}
 	} else if (g_stateObj.motion === `Brake`) {
 		// 初期は+2x、ステップゾーンに近づくにつれて加速量を下げる (20 → 34)
@@ -8176,13 +8176,13 @@ function MainInit() {
 		frzOFF: (_j, _k, _cnt) => {
 
 			// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
-			// ただし、前のフリーズアローの判定領域がジャスト付近(キター領域)の場合は削除しない
+			// ただし、前のフリーズアローが押下中または判定領域がジャスト付近(キター領域)の場合は削除しない
 			// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
 			if (g_workObj.judgFrzCnt[_j] !== _k && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] + 1) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 
-				if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
-				} else {
+				if (g_attrObj[prevFrzName].isMoving &&
+					g_attrObj[prevFrzName].cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 
 					// 枠外判定前の場合、このタイミングで枠外判定を行う
 					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
@@ -8853,6 +8853,11 @@ function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
 function changeHitFrz(_j, _k, _name) {
 	const frzNo = `${_j}_${_k}`;
 	const frzName = `${_name}${frzNo}`;
+
+	if (g_attrObj[frzName].keyUpFrame !== 0) {
+		return;
+	}
+
 	const styfrzBar = $id(`${_name}Bar${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
@@ -8862,9 +8867,16 @@ function changeHitFrz(_j, _k, _name) {
 	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - g_attrObj[frzName].y;
 	document.getElementById(frzName).style.top = $id(`stepRoot${_j}`).top;
 
-	g_attrObj[frzName].frzBarLength -= delFrzLength * g_attrObj[frzName].dir;
-	g_attrObj[frzName].barY -= delFrzLength * g_attrObj[frzName].dividePos;
-	g_attrObj[frzName].btmY -= delFrzLength;
+	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
+	let delFrzMotionLength = 0;
+	for (let i = 0; i < g_attrObj[frzName].cnt; i++) {
+		delFrzMotionLength += g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt - i] * g_attrObj[frzName].boostSpd;
+	}
+
+	g_attrObj[frzName].frzBarLength -= (delFrzLength + delFrzMotionLength) * g_attrObj[frzName].dir;
+	g_attrObj[frzName].barY -= (delFrzLength + delFrzMotionLength) * g_attrObj[frzName].dividePos;
+	g_attrObj[frzName].btmY -= delFrzLength + delFrzMotionLength;
+	g_attrObj[frzName].y += delFrzLength;
 	g_attrObj[frzName].isMoving = false;
 
 	styfrzBar.top = `${g_attrObj[frzName].barY}px`;
