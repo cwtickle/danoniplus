@@ -8246,17 +8246,21 @@ function MainInit() {
 			if (g_workObj.judgFrzCnt[_j] !== _k && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] + 1) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 
-				if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
-				} else {
+				// フリーズアロー押下中の場合は削除しない
+				if (g_attrObj[prevFrzName].isMoving) {
 
-					// 枠外判定前の場合、このタイミングで枠外判定を行う
-					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
-						judgeIknai(_cnt);
-						if (g_headerObj.frzStartjdgUse) {
-							judgeUwan(_cnt);
+					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
+					} else {
+
+						// 枠外判定前の場合、このタイミングで枠外判定を行う
+						if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
+							judgeIknai(_cnt);
+							if (g_headerObj.frzStartjdgUse) {
+								judgeUwan(_cnt);
+							}
 						}
+						judgeObjDelete.frz(_j, prevFrzName);
 					}
-					judgeObjDelete.frz(_j, prevFrzName);
 				}
 			}
 		},
@@ -8945,17 +8949,15 @@ function changeHitFrz(_j, _k, _name) {
 	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - g_attrObj[frzName].y;
 	document.getElementById(frzName).style.top = $id(`stepRoot${_j}`).top;
 
+	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
 	let delFrzMotionLength = 0;
-	if (g_attrObj[frzName].cnt > 0) {
-		const fastFrame = g_attrObj[frzName].cnt;
-		for (let i = 0; i < fastFrame; i++) {
-			delFrzMotionLength += g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt - i] * g_attrObj[frzName].boostSpd;
-		}
+	for (let i = 0; i < g_attrObj[frzName].cnt; i++) {
+		delFrzMotionLength += g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt - i] * g_attrObj[frzName].boostSpd;
 	}
 
 	g_attrObj[frzName].frzBarLength -= (delFrzLength + delFrzMotionLength) * g_attrObj[frzName].dir;
 	g_attrObj[frzName].barY -= (delFrzLength + delFrzMotionLength) * g_attrObj[frzName].dividePos;
-	g_attrObj[frzName].btmY -= (delFrzLength + delFrzMotionLength);
+	g_attrObj[frzName].btmY -= delFrzLength + delFrzMotionLength;
 	g_attrObj[frzName].y += delFrzLength;
 	g_attrObj[frzName].isMoving = false;
 
