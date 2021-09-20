@@ -251,10 +251,12 @@ const g_settingBtnObj = {
     pos: {
         L: C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH,
         LL: C_LEN_SETLBL_LEFT,
-        LLL: C_LEN_SETLBL_LEFT + C_LEN_SETMINI_WIDTH,
+        LLL: C_LEN_SETLBL_LEFT + C_LEN_SETMINI_WIDTH + 1,
+        HL: C_LEN_SETLBL_LEFT,
         R: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH,
         RR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH,
-        RRR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH * 2,
+        RRR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH * 3 / 2 - 1,
+        HR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH,
     }
 };
 
@@ -2442,7 +2444,7 @@ const g_msgObj = {
     shuffle: `譜面を左右反転したり、ランダムにします。\nランダムにした場合は別譜面扱いとなり、ハイスコアは保存されません。`,
     autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
     gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量`,
-    adjustment: `タイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは3f刻み、内側は0.5f刻みで調整できます。`,
+    adjustment: `タイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
     fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
     volume: `ゲーム内の音量を設定します。`,
 
