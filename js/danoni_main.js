@@ -4704,7 +4704,7 @@ function createOptionWindow(_sprite) {
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
-		skipTerm: 5, skipTerm2: 30, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
+		skipTerm: 5, skipTerm2: 10, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
 		unitName: `${getStgDetailName(g_lblNameObj.frame)}`,
 	});
 
