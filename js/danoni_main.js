@@ -324,7 +324,8 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
 	// 対象ボタンを検索
 	const scLists = Object.keys(g_shortcutObj[_displayName]).filter(keys => {
 		const keyset = keys.split(`_`);
-		return (keyset.length > 1 ? keyIsDown(keyset[0]) && keyIsDown(keyset[1]) : keyIsDown(keyset[0]));
+		return (keyset.length > 2 ? keyIsDown(keyset[0]) && keyIsDown(keyset[1]) && keyIsDown(keyset[2]) :
+			(keyset.length > 1 ? keyIsDown(keyset[0]) && keyIsDown(keyset[1]) : keyIsDown(keyset[0])));
 	});
 	if (scLists.length > 0) {
 		// リンク先にジャンプする場合はonkeyUpイベントが動かないため、事前にキー状態をリセット
@@ -4123,7 +4124,7 @@ function createOptionWindow(_sprite) {
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
 	createGeneralSetting(spriteList.speed, `speed`, {
-		skipTerm: 5, skipTerm2: 20, scLabel: g_lblNameObj.sc_speed, roundNum: 5,
+		skipTerms: [20, 5, 1], hiddenBtn: true, scLabel: g_lblNameObj.sc_speed, roundNum: 5,
 		unitName: ` ${getStgDetailName(g_lblNameObj.multi)}`,
 	});
 
@@ -4704,7 +4705,7 @@ function createOptionWindow(_sprite) {
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
-		skipTerm: 5, skipTerm2: 30, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
+		skipTerms: [50, 10, 5], hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
 		unitName: `${getStgDetailName(g_lblNameObj.frame)}`,
 	});
 
@@ -4946,7 +4947,8 @@ function createOptionWindow(_sprite) {
  * @param {string} _settingName 
  * @param {object} _options
  */
-function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0, skipTerm2 = 0,
+function createGeneralSetting(_obj, _settingName, { unitName = ``,
+	skipTerms = [...Array(3)].fill(1), hiddenBtn = false,
 	settingLabel = _settingName, displayName = `option`, scLabel = ``, roundNum = 0 } = {}) {
 
 	const settingUpper = toCapitalize(_settingName);
@@ -4958,29 +4960,37 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 
 		multiAppend(_obj,
 			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
-				_ => setSetting(skipTerm2 > 0 ? skipTerm : 1, _settingName, unitName, roundNum),
-				{ cxtFunc: _ => setSetting(skipTerm2 > 0 ? skipTerm * (-1) : -1, _settingName, unitName, roundNum) }),
+				_ => setSetting(skipTerms[1], _settingName, unitName, roundNum),
+				{ cxtFunc: _ => setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum) }),
 
 			// 右回し・左回しボタン（外側）
 			makeMiniCssButton(linkId, `R`, 0, _ => setSetting(
-				skipTerm2 > 0 ? skipTerm2 : (skipTerm > 0 ? skipTerm : 1), _settingName, unitName, roundNum)),
+				skipTerms[0], _settingName, unitName, roundNum)),
 			makeMiniCssButton(linkId, `L`, 0, _ => setSetting(
-				skipTerm2 > 0 ? skipTerm2 * (-1) : (skipTerm > 0 ? skipTerm * (-1) : -1), _settingName, unitName, roundNum)),
+				skipTerms[0] * (-1), _settingName, unitName, roundNum)),
 		)
 
 		// 右回し・左回しボタン（内側）
-		if (skipTerm > 0) {
+		if (skipTerms[1] > 1) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RR`, 0, _ => setSetting(skipTerm2 > 0 ? skipTerm : 1, _settingName, unitName, roundNum)),
-				makeMiniCssButton(linkId, `LL`, 0, _ => setSetting(skipTerm2 > 0 ? skipTerm * (-1) : -1, _settingName, unitName, roundNum)),
+				makeMiniCssButton(linkId, `RR`, 0, _ => setSetting(skipTerms[1], _settingName, unitName, roundNum)),
+				makeMiniCssButton(linkId, `LL`, 0, _ => setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum)),
 			);
 		}
 
-		// 右回し・左回しボタン（最内側,不可視）
-		if (skipTerm2 > 0) {
+		// 右回し・左回しボタン（最内側）
+		if (skipTerms[2] > 1) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(1, _settingName, unitName, roundNum), { visibility: `hidden` }),
-				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(-1, _settingName, unitName, roundNum), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(skipTerms[2], _settingName, unitName, roundNum), { dx: C_LEN_SETMINI_WIDTH / 2 - 1, dw: -C_LEN_SETMINI_WIDTH / 2 }),
+				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(skipTerms[2] * (-1), _settingName, unitName, roundNum), { dx: 1, dw: -C_LEN_SETMINI_WIDTH / 2 }),
+			);
+		}
+
+		// 右回し・左回しボタン（不可視）
+		if (hiddenBtn) {
+			multiAppend(_obj,
+				makeMiniCssButton(linkId, `HR`, 0, _ => setSetting(1, _settingName, unitName, roundNum), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `HL`, 0, _ => setSetting(-1, _settingName, unitName, roundNum), { visibility: `hidden` }),
 			);
 		}
 
