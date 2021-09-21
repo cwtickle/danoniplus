@@ -4981,8 +4981,8 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``,
 		// 右回し・左回しボタン（最内側）
 		if (skipTerms[2] > 1) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(skipTerms[2], _settingName, unitName, roundNum), { dx: C_LEN_SETMINI_WIDTH / 2 - 1, dw: -C_LEN_SETMINI_WIDTH / 2 }),
-				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(skipTerms[2] * (-1), _settingName, unitName, roundNum), { dx: 1, dw: -C_LEN_SETMINI_WIDTH / 2 }),
+				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(skipTerms[2], _settingName, unitName, roundNum), { dw: -C_LEN_SETMINI_WIDTH / 2 }),
+				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(skipTerms[2] * (-1), _settingName, unitName, roundNum), { dw: -C_LEN_SETMINI_WIDTH / 2 }),
 			);
 		}
 
