@@ -1189,7 +1189,7 @@ const g_keyObj = {
         `oni`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
     chara11L_3: [`sleft`, `sdown`, `sup`, `sright`,
         `oni`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
-    chara11w_3: [`sleft`, `sdown`, `sup`, `sright`,
+    chara11W_3: [`sleft`, `sdown`, `sup`, `sright`,
         `oni`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
     chara12_3: [`sleft`, `sdown`, `sup`, `sright`,
         `oni`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
