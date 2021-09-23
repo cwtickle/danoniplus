@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/09/20
+ * Revised : 2021/09/23
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 23.2.0`;
-const g_revisedDate = `2021/09/20`;
+const g_version = `Ver 23.3.0`;
+const g_revisedDate = `2021/09/23`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4981,8 +4981,8 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``,
 		// 右回し・左回しボタン（最内側）
 		if (skipTerms[2] > 1) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(skipTerms[2], _settingName, unitName, roundNum), { dx: C_LEN_SETMINI_WIDTH / 2 - 1, dw: -C_LEN_SETMINI_WIDTH / 2 }),
-				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(skipTerms[2] * (-1), _settingName, unitName, roundNum), { dx: 1, dw: -C_LEN_SETMINI_WIDTH / 2 }),
+				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(skipTerms[2], _settingName, unitName, roundNum), { dw: -C_LEN_SETMINI_WIDTH / 2 }),
+				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(skipTerms[2] * (-1), _settingName, unitName, roundNum), { dw: -C_LEN_SETMINI_WIDTH / 2 }),
 			);
 		}
 
