@@ -3,8 +3,8 @@
 要望・不具合報告がある場合、以下のいずれかの方法で行うことができます。
 
 - リポジトリをForkして編集した後、Pull Requestを「cwtickle/danoniplus」の「develop」ブランチへ送る。
-- 当リポジトリのIssueもしくは[GitLabのIssue](https://gitlab.com/cwtickle/danonicw-issue/-/issues), もしくは[Gitter](https://gitter.im/danonicw/community)に要望・不具合内容を報告する。  
-※GitLab及びGitterは「Twitterアカウント」を持っている方でも参加可能です。  
+- 当リポジトリのIssueもしくは[Gitter](https://gitter.im/danonicw/community)に要望・不具合内容を報告する。  
+※Gitterは「Twitterアカウント」を持っている方でも参加可能です。  
 　Gitter内では、Github同様のmarkdownが使えます。お気軽にどうぞ！
 - 要望・不具合内容をティックル宛([@cw_tickle](https://twitter.com/cw_tickle))へ直接連絡する。
 
@@ -32,8 +32,8 @@ forループを除き、danoni_main.js内は極力const/letで宣言する。
 |カテゴリ|命名ルール|
 |----|----|
 |定数|"C_(カテゴリ)_(名前)"の形式。全て英大文字、数字、アンダースコアのみを使用。|
-|グローバル変数|変数の頭に"g_"をつける。|
-|関数の引数|アンダースコア始まりのキャメル表記。 例)_count, _folderName|
+|グローバルオブジェクト|変数の頭に"g_"をつける。<br>極力単独のグローバル変数を作成せず、既存カテゴリのオブジェクトのプロパティとして定義する。|
+|関数の引数|アンダースコア始まりのキャメル表記。 例)_count, _folderName<br>デフォルト引数も検討する。<br>引数が増える場合は、(構造体)オブジェクトとして定義することを検討。|
 
 ## ソース構造
 ### [Japanese]
@@ -49,13 +49,13 @@ forループを除き、danoni_main.js内は極力const/letで宣言する。
 - Make detailed settings and logic separate functions so that you can see screen sketches, and clarify the contents of execution.
 
 ## 画面の構成
-・[タイトル]-[設定・オプション]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]  
-・各画面に Init がついたものが画面の基本構成(ルート)を表す。  
+- [タイトル]-[設定・オプション]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]  
+- 各画面に Init がついたものが画面の基本構成(ルート)を表す。  
 
 ## スプライトの親子関係
-・基本的にdiv要素で管理。最下層を[difRoot]とし、createSprite()でdiv子要素を作成していく。  
-・clearWindow()で[difRoot]以外の全てのスプライトを削除できる。  
-・特定のスプライトに限り削除する場合は deleteChildspriteAll() で実現。  
+- 基本的にdiv要素で管理。最下層を[difRoot]とし、createSprite()でdiv子要素を作成していく。  
+- clearWindow()で[difRoot]以外の全てのスプライトを削除できる。  
+- 特定のスプライトに限り削除する場合は deleteChildspriteAll() で実現。  
 
 ## インデント、改行
-・タグ区切り、Java/ActionScript(K&Rスタイルの改版)
+- タグ区切り、Java/ActionScript(K&Rスタイルの改版)
