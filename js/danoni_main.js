@@ -2965,6 +2965,7 @@ function headerConvert(_dosObj) {
 		obj.defaultColorgrd[0] = setVal(obj.defaultColorgrd[0], false, C_TYP_BOOLEAN);
 		obj.defaultColorgrd[1] = setVal(obj.defaultColorgrd[1], intermediateColor, C_TYP_STRING);
 	}
+	g_rankObj.rankColorAllPerfect = intermediateColor;
 
 	// カラーコードのゼロパディング有無設定
 	obj.colorCdPaddingUse = setVal(_dosObj.colorCdPaddingUse, false, C_TYP_BOOLEAN);
@@ -9457,9 +9458,9 @@ function resultInit() {
 		if (g_resultObj.spState === ``) {
 			g_resultObj.spState = `cleared`;
 		}
-		if (g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan + g_resultObj.sfsf + g_resultObj.iknai === 0) {
-			rankMark = g_rankObj.rankMarkPF;
-			rankColor = g_rankObj.rankColorPF;
+		if (g_resultObj.spState === `perfect` || g_resultObj.spState === `allPerfect`) {
+			rankMark = g_rankObj[`rankMark${toCapitalize(g_resultObj.spState)}`];
+			rankColor = g_rankObj[`rankColor${toCapitalize(g_resultObj.spState)}`];
 		} else {
 			const rPos = g_rankObj.rankRate.findIndex(rate => resultScore * 100 / g_maxScore >= rate);
 			rankMark = g_rankObj.rankMarks[rPos];
