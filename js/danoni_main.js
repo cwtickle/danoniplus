@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/09/23
+ * Revised : 2021/09/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 23.3.0`;
-const g_revisedDate = `2021/09/23`;
+const g_version = `Ver 23.3.1`;
+const g_revisedDate = `2021/09/24`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4477,7 +4477,13 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// リバース (Reverse) / スクロール (Scroll)
 	// 縦位置: 4
-	createGeneralSetting(spriteList.reverse, `reverse`);
+	createGeneralSetting(spriteList.reverse, `reverse`, {
+		addRFunc: _ => {
+			if (g_headerObj.scrollUse && g_settings.scrolls.length > 1) {
+				setReverseView(document.getElementById(`btnReverse`));
+			}
+		}
+	});
 	if (g_headerObj.scrollUse) {
 		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: g_lblNameObj.sc_scroll });
 		[$id(`lnkScroll`).left, $id(`lnkScroll`).width] = [
@@ -4492,7 +4498,9 @@ function createOptionWindow(_sprite) {
 				cxtFunc: evt => setReverse(evt.target),
 			}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`])
 		);
-		spriteList[g_settings.scrolls.length > 1 ? `reverse` : `scroll`].style.visibility = `hidden`;
+		spriteList[g_settings.scrolls.length > 1 ? `reverse` : `scroll`].style.display = C_DIS_NONE;
+	} else {
+		spriteList.scroll.style.pointerEvents = C_DIS_NONE;
 	}
 
 	function setReverse(_btn) {
@@ -4900,8 +4908,8 @@ function createOptionWindow(_sprite) {
 			);
 			g_stateObj.scroll = g_settings.scrolls[g_settings.scrollNum];
 			const [visibleScr, hiddenScr] = (g_settings.scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
-			spriteList[visibleScr].style.visibility = `visible`;
-			spriteList[hiddenScr].style.visibility = `hidden`;
+			spriteList[visibleScr].style.display = C_DIS_INHERIT;
+			spriteList[hiddenScr].style.display = C_DIS_NONE;
 			setSetting(0, visibleScr);
 			if (g_settings.scrolls.length > 1) {
 				setReverseView(document.querySelector(`#btnReverse`));
@@ -4948,7 +4956,7 @@ function createOptionWindow(_sprite) {
  * @param {object} _options
  */
 function createGeneralSetting(_obj, _settingName, { unitName = ``,
-	skipTerms = [...Array(3)].fill(1), hiddenBtn = false,
+	skipTerms = [...Array(3)].fill(1), hiddenBtn = false, addRFunc = _ => { }, addLFunc = _ => { },
 	settingLabel = _settingName, displayName = `option`, scLabel = ``, roundNum = 0 } = {}) {
 
 	const settingUpper = toCapitalize(_settingName);
@@ -4964,10 +4972,14 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``,
 				{ cxtFunc: _ => setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum) }),
 
 			// 右回し・左回しボタン（外側）
-			makeMiniCssButton(linkId, `R`, 0, _ => setSetting(
-				skipTerms[0], _settingName, unitName, roundNum)),
-			makeMiniCssButton(linkId, `L`, 0, _ => setSetting(
-				skipTerms[0] * (-1), _settingName, unitName, roundNum)),
+			makeMiniCssButton(linkId, `R`, 0, _ => {
+				setSetting(skipTerms[0], _settingName, unitName, roundNum);
+				addRFunc();
+			}),
+			makeMiniCssButton(linkId, `L`, 0, _ => {
+				setSetting(skipTerms[0] * (-1), _settingName, unitName, roundNum);
+				addLFunc();
+			}),
 		)
 
 		// 右回し・左回しボタン（内側）
