@@ -7818,6 +7818,8 @@ function MainInit() {
 	// 曲名・アーティスト名表示
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
+	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
+	const musicSiz = getFontSize(`${musicTitle} / ${artistName}`, g_headerObj.playingWidth - 125, getBasicFont(), C_SIZ_MAIN);
 
 	multiAppend(infoSprite,
 
@@ -7848,17 +7850,22 @@ function MainInit() {
 
 		// 曲名・アーティスト名表示
 		createDivCss2Label(`lblCredit`, `${musicTitle} / ${artistName}`, {
-			x: 125, y: g_sHeight - 30, w: g_headerObj.playingWidth - 125, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_LEFT,
+			x: 125, y: g_sHeight - 35, w: g_headerObj.playingWidth - 125, h: 20, siz: musicSiz, align: C_ALIGN_LEFT,
+		}),
+
+		// 曲名・アーティスト名表示
+		createDivCss2Label(`lblDifName`, `[${g_headerObj.keyLabels[g_stateObj.scoreId]} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}]`, {
+			x: 125, y: g_sHeight - 18, w: g_headerObj.playingWidth, h: 20, siz: 12, align: C_ALIGN_LEFT,
 		}),
 
 		// 曲時間表示：現在時間
 		createDivCss2Label(`lblTime1`, `-:--`, {
-			x: 18, y: g_sHeight - 30, w: 40, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_RIGHT, display: g_workObj.musicinfoDisp,
+			x: 18, y: g_sHeight - 35, w: 40, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_RIGHT, display: g_workObj.musicinfoDisp,
 		}),
 
 		// 曲時間表示：総時間
 		createDivCss2Label(`lblTime2`, `/ ${fullTime}`, {
-			x: 60, y: g_sHeight - 30, w: 60, h: 20, siz: C_SIZ_MAIN, display: g_workObj.musicinfoDisp,
+			x: 60, y: g_sHeight - 35, w: 60, h: 20, siz: C_SIZ_MAIN, display: g_workObj.musicinfoDisp,
 		}),
 	);
 
@@ -7940,7 +7947,9 @@ function MainInit() {
 
 	// 曲情報OFF
 	if (g_stateObj.d_musicinfo === C_FLG_OFF) {
-		changeStyle(`lblCredit`, { x: 20, animationDuration: `4.0s`, animationName: `leftToRightFade`, animationFillMode: `both` });
+		[`lblCredit`, `lblDifName`].forEach(labelName => {
+			changeStyle(labelName, { x: 20, animationDuration: `4.0s`, animationName: `leftToRightFade`, animationFillMode: `both` });
+		});
 	}
 
 	// ローカル時のみフレーム数を残す
