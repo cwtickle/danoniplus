@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/06/13 (v22.5.1)
+ * Revised : 2021/09/24 (v22.5.3)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -837,8 +837,7 @@ const g_shortcutObj = {
 
         ShiftLeft_KeyM: { id: `lnkMotionL` },
         KeyM: { id: `lnkMotionR` },
-        ArrowUp: { id: `btnReverse` },
-        ShiftLeft_ArrowDown: { id: `lnkScrollL` },
+        ArrowUp: { id: `lnkScrollL` },
         ArrowDown: { id: `lnkScrollR` },
         KeyR: { id: `lnkReverseR` },
 
@@ -2225,7 +2224,7 @@ const g_lblNameObj = {
     percent: `%`,
 
     sc_speed: `←→`,
-    sc_scroll: `↑/↓`,
+    sc_scroll: `R/↑↓`,
     sc_adjustment: `- +`,
 
     g_start: `Start`,
