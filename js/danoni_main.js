@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/09/16
+ * Revised : 2021/09/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 19.5.9`;
-const g_revisedDate = `2021/09/16`;
+const g_version = `Ver 19.5.10`;
+const g_revisedDate = `2021/09/24`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4238,6 +4238,11 @@ function createOptionWindow(_sprite) {
 	// リバース (Reverse) / スクロール (Scroll)
 	// 縦位置: 4
 	createGeneralSetting(spriteList.reverse, `reverse`);
+	g_btnAddFunc.lnkReverseR = _evt => {
+		if (g_headerObj.scrollUse && g_scrolls.length > 1) {
+			setReverseView(document.getElementById(`btnReverse`));
+		}
+	};
 	if (g_headerObj.scrollUse) {
 		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: g_lblNameObj.sc_scroll });
 		[$id(`lnkScroll`).left, $id(`lnkScroll`).width] = [
@@ -4253,6 +4258,8 @@ function createOptionWindow(_sprite) {
 			}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`])
 		);
 		spriteList[g_scrolls.length > 1 ? `reverse` : `scroll`].style.visibility = `hidden`;
+	} else {
+		spriteList.scroll.style.pointerEvents = C_DIS_NONE;
 	}
 
 	function setReverse(_btn) {
