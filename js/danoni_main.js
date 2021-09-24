@@ -4478,7 +4478,11 @@ function createOptionWindow(_sprite) {
 	// リバース (Reverse) / スクロール (Scroll)
 	// 縦位置: 4
 	createGeneralSetting(spriteList.reverse, `reverse`);
-	g_btnAddFunc.lnkReverseR = _evt => setReverseView(document.getElementById(`btnReverse`));
+	g_btnAddFunc.lnkReverseR = _evt => {
+		if (g_headerObj.scrollUse && g_settings.scrolls.length > 1) {
+			setReverseView(document.getElementById(`btnReverse`));
+		}
+	};
 	if (g_headerObj.scrollUse) {
 		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: g_lblNameObj.sc_scroll });
 		[$id(`lnkScroll`).left, $id(`lnkScroll`).width] = [
@@ -4493,7 +4497,9 @@ function createOptionWindow(_sprite) {
 				cxtFunc: evt => setReverse(evt.target),
 			}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`])
 		);
-		spriteList[g_settings.scrolls.length > 1 ? `reverse` : `scroll`].style.visibility = `hidden`;
+		spriteList[g_settings.scrolls.length > 1 ? `reverse` : `scroll`].style.display = C_DIS_NONE;
+	} else {
+		spriteList.scroll.style.pointerEvents = C_DIS_NONE;
 	}
 
 	function setReverse(_btn) {
@@ -4901,8 +4907,8 @@ function createOptionWindow(_sprite) {
 			);
 			g_stateObj.scroll = g_settings.scrolls[g_settings.scrollNum];
 			const [visibleScr, hiddenScr] = (g_settings.scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
-			spriteList[visibleScr].style.visibility = `visible`;
-			spriteList[hiddenScr].style.visibility = `hidden`;
+			spriteList[visibleScr].style.display = C_DIS_INHERIT;
+			spriteList[hiddenScr].style.display = C_DIS_NONE;
 			setSetting(0, visibleScr);
 			if (g_settings.scrolls.length > 1) {
 				setReverseView(document.querySelector(`#btnReverse`));
