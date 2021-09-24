@@ -851,8 +851,7 @@ const g_shortcutObj = {
 
         ShiftLeft_KeyM: { id: `lnkMotionL` },
         KeyM: { id: `lnkMotionR` },
-        ArrowUp: { id: `btnReverse` },
-        ShiftLeft_ArrowDown: { id: `lnkScrollL` },
+        ArrowUp: { id: `lnkScrollL` },
         ArrowDown: { id: `lnkScrollR` },
         KeyR: { id: `lnkReverseR` },
 
@@ -2477,7 +2476,7 @@ const g_lblNameObj = {
     percent: `%`,
 
     sc_speed: `←→`,
-    sc_scroll: `↑/↓`,
+    sc_scroll: `R/↑↓`,
     sc_adjustment: `- +`,
 
     g_start: `Start`,

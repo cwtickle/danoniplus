@@ -4478,6 +4478,7 @@ function createOptionWindow(_sprite) {
 	// リバース (Reverse) / スクロール (Scroll)
 	// 縦位置: 4
 	createGeneralSetting(spriteList.reverse, `reverse`);
+	g_btnAddFunc.lnkReverseR = _evt => setReverseView(document.getElementById(`btnReverse`));
 	if (g_headerObj.scrollUse) {
 		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: g_lblNameObj.sc_scroll });
 		[$id(`lnkScroll`).left, $id(`lnkScroll`).width] = [
