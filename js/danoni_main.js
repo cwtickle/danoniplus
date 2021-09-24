@@ -4237,12 +4237,13 @@ function createOptionWindow(_sprite) {
 	// ---------------------------------------------------
 	// リバース (Reverse) / スクロール (Scroll)
 	// 縦位置: 4
-	createGeneralSetting(spriteList.reverse, `reverse`);
-	g_btnAddFunc.lnkReverseR = _evt => {
-		if (g_headerObj.scrollUse && g_scrolls.length > 1) {
-			setReverseView(document.getElementById(`btnReverse`));
+	createGeneralSetting(spriteList.reverse, `reverse`, {
+		addRFunc: _ => {
+			if (g_headerObj.scrollUse && g_scrolls.length > 1) {
+				setReverseView(document.getElementById(`btnReverse`));
+			}
 		}
-	};
+	});
 	if (g_headerObj.scrollUse) {
 		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: g_lblNameObj.sc_scroll });
 		[$id(`lnkScroll`).left, $id(`lnkScroll`).width] = [
@@ -4699,6 +4700,7 @@ function createOptionWindow(_sprite) {
  * @param {object} _options
  */
 function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
+	addRFunc = _ => { }, addLFunc = _ => { },
 	settingLabel = _settingName, displayName = `option`, scLabel = `` } = {}) {
 
 	const settingUpper = toCapitalize(_settingName);
@@ -4713,8 +4715,14 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``, skipTerm = 0,
 				{ cxtFunc: _ => setSetting(-1, _settingName, unitName) }),
 
 			// 右回し・左回しボタン（外側）
-			makeMiniCssButton(linkId, `R`, 0, _ => setSetting(skipTerm > 0 ? skipTerm : 1, _settingName, unitName)),
-			makeMiniCssButton(linkId, `L`, 0, _ => setSetting(skipTerm > 0 ? skipTerm * (-1) : -1, _settingName, unitName)),
+			makeMiniCssButton(linkId, `R`, 0, _ => {
+				setSetting(skipTerm > 0 ? skipTerm : 1, _settingName, unitName);
+				addRFunc();
+			}),
+			makeMiniCssButton(linkId, `L`, 0, _ => {
+				setSetting(skipTerm > 0 ? skipTerm * (-1) : -1, _settingName, unitName);
+				addLFunc();
+			}),
 		)
 
 		// 右回し・左回しボタン（内側）
