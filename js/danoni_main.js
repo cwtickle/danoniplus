@@ -2430,6 +2430,7 @@ function titleInit() {
 		customVersion += ` / ${g_localVersion2}`;
 	}
 	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
+	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${g_alphaVersion}${customVersion}${releaseDate}`;
 
 	let reloadFlg = false;
 	const getLinkSiz = _name => getFontSize(_name, g_sWidth / 2 - 20, getBasicFont(), C_LBL_LNKSIZE, 12);
@@ -2499,15 +2500,12 @@ function titleInit() {
 
 		// バージョン描画
 		createCss2Button(
-			`lnkVersion`,
-			`&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${g_alphaVersion}${customVersion}${releaseDate}`,
-			_ => true,
-			{
-				x: g_sWidth / 4, y: g_sHeight - 20,
-				w: g_sWidth * 3 / 4 - 20, h: 16, siz: 12, align: C_ALIGN_RIGHT,
-				title: g_msgObj.github,
-				resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus`),
-			},
+			`lnkVersion`, versionName, _ => true, {
+			x: g_sWidth / 4, y: g_sHeight - 20, w: g_sWidth * 3 / 4 - 20, h: 16,
+			siz: getFontSize(versionName, g_sWidth * 3 / 4 - 20, getBasicFont(), 12),
+			align: C_ALIGN_RIGHT, title: g_msgObj.github,
+			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus`),
+		},
 			g_cssObj.button_Tweet
 		),
 
