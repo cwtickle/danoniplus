@@ -5398,7 +5398,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		}),
 
 		createDivCss2Label(`kcShuffleDesc`, g_lblNameObj.kcShuffleDesc, {
-			x: 0, y: g_sHeight - 138, w: g_sWidth, h: 20, siz: 12, align: C_ALIGN_LEFT,
+			x: 0, y: g_sHeight - 163, w: g_sWidth, h: 20, siz: 12, align: C_ALIGN_LEFT,
 		}),
 
 	);
@@ -5859,19 +5859,19 @@ function keyConfigInit(_kcType = g_kcType) {
 			g_currentk = 0;
 			g_prevKey = 0;
 		}, {
-			x: g_sWidth / 3, y: g_sHeight - 75,
-			w: g_sWidth / 3, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+			x: g_sWidth / 3, y: g_sHeight - 100,
+			w: g_sWidth / 3, h: C_BTN_HEIGHT, siz: C_LBL_BTNSIZE,
 			resetFunc: _ => (g_baseDisp === `Settings` ? optionInit() : settingsDisplayInit()),
 		}, g_cssObj.button_Back),
 
 		createDivCss2Label(`lblPattern`, `${g_lblNameObj.KeyPattern}: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1}${lblTransKey}`, {
-			x: g_sWidth / 5, y: g_sHeight - 100,
+			x: g_sWidth / 5, y: g_sHeight - 125,
 			w: g_sWidth * 3 / 5, h: C_BTN_HEIGHT / 2,
 		}),
 
 		// パターン変更ボタン描画(右回り)
 		createCss2Button(`btnPtnChangeR`, `>>`, _ => true, {
-			x: g_sWidth * 4 / 5, y: g_sHeight - 100,
+			x: g_sWidth * 4 / 5, y: g_sHeight - 125,
 			w: g_sWidth / 5, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
 			resetFunc: _ => {
 				const tempPtn = searchPattern(g_keyObj.currentPtn + 1, 1, g_headerObj.transKeyUse, `transKey`);
@@ -5884,7 +5884,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		// パターン変更ボタン描画(左回り)
 		createCss2Button(`btnPtnChangeL`, `<<`, _ => true, {
-			x: 0, y: g_sHeight - 100,
+			x: 0, y: g_sHeight - 125,
 			w: g_sWidth / 5, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
 			resetFunc: _ => {
 				const tempPtn = searchPattern(g_keyObj.currentPtn - 1, -1, g_headerObj.transKeyUse, `transKey`);
@@ -5908,10 +5908,12 @@ function keyConfigInit(_kcType = g_kcType) {
 				resetCursor(Number(g_kcType === `Replaced`));
 			}
 		}, {
-			x: 0, y: g_sHeight - 75,
-			w: g_sWidth / 3, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+			x: 0, y: g_sHeight - 100,
+			w: g_sWidth / 3, h: C_BTN_HEIGHT, siz: C_LBL_BTNSIZE,
 		}, g_cssObj.button_Reset)
 
+		// プレイ開始
+		makePlayButton(_ => loadMusic()),
 	);
 
 	// キーボード押下時処理
