@@ -537,15 +537,15 @@ function getStrWidth(_str, _fontsize, _font) {
  * @param {number} _maxWidth 
  * @param {string} _font 
  * @param {number} _maxFontsize
+ * @param {number} _minFontsize
  */
-function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64) {
-	const minSiz = 5;
-	for (let siz = _maxFontsize; siz >= minSiz; siz--) {
+function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64, _minFontsize = 5) {
+	for (let siz = _maxFontsize; siz >= _minFontsize; siz--) {
 		if (_maxWidth >= getStrWidth(_str, siz, _font)) {
 			return siz;
 		}
 	}
-	return minSiz;
+	return _minFontsize;
 }
 
 /**
@@ -2432,6 +2432,7 @@ function titleInit() {
 	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
 
 	let reloadFlg = false;
+	const artistSiz = getFontSize(g_headerObj.artistName, g_sWidth / 2 - 20, getBasicFont(), C_LBL_LNKSIZE, 12);
 
 	// ボタン描画
 	multiAppend(divRoot,
@@ -2455,7 +2456,7 @@ function titleInit() {
 			}
 		}, {
 			x: 0, y: g_sHeight - 20,
-			w: g_sWidth / 5, h: 16, siz: 12,
+			w: g_sWidth / 4, h: 16, siz: 12,
 			title: g_msgObj.dataReset,
 			resetFunc: _ => {
 				if (reloadFlg) {
@@ -2482,16 +2483,16 @@ function titleInit() {
 
 		// 製作者表示
 		createCss2Button(`lnkMaker`, `${g_lblNameObj.maker}: ${g_headerObj.tuningInit}`, _ => true, {
-			x: 20, y: g_sHeight - 45,
-			w: g_sWidth / 2 - 20, h: C_LNK_HEIGHT, siz: C_LBL_LNKSIZE, align: C_ALIGN_LEFT,
+			x: 0, y: g_sHeight - 50,
+			w: g_sWidth / 2, h: C_LNK_HEIGHT, siz: C_LBL_LNKSIZE, align: C_ALIGN_LEFT,
 			title: g_headerObj.creatorUrl,
 			resetFunc: _ => openLink(g_headerObj.creatorUrl),
 		}, g_cssObj.button_Default),
 
 		// アーティスト表示
 		createCss2Button(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistName}`, _ => true, {
-			x: g_sWidth / 2, y: g_sHeight - 45,
-			w: g_sWidth / 2 - 20, h: C_LNK_HEIGHT, siz: C_LBL_LNKSIZE, align: C_ALIGN_LEFT,
+			x: g_sWidth / 2, y: g_sHeight - 50,
+			w: g_sWidth / 2, h: C_LNK_HEIGHT, siz: artistSiz, align: C_ALIGN_LEFT,
 			title: g_headerObj.artistUrl,
 			resetFunc: _ => openLink(g_headerObj.artistUrl),
 		}, g_cssObj.button_Default),
@@ -2503,7 +2504,7 @@ function titleInit() {
 			_ => true,
 			{
 				x: g_sWidth / 4, y: g_sHeight - 20,
-				w: g_sWidth * 3 / 4 - 30, h: 16, siz: 12, align: C_ALIGN_RIGHT,
+				w: g_sWidth * 3 / 4 - 20, h: 16, siz: 12, align: C_ALIGN_RIGHT,
 				title: g_msgObj.github,
 				resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus`),
 			},
@@ -2512,7 +2513,7 @@ function titleInit() {
 
 		// セキュリティリンク
 		createCss2Button(`lnkComparison`, `&#x1f6e1;`, _ => true, {
-			x: g_sWidth - 30, y: g_sHeight - 20,
+			x: g_sWidth - 20, y: g_sHeight - 20,
 			w: 20, h: 16, siz: 12,
 			title: g_msgObj.security,
 			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`),
@@ -3326,6 +3327,9 @@ function headerConvert(_dosObj) {
 
 	// プレイ左上位置(X座標)
 	obj.playingX = setVal(_dosObj.playingX, 0, C_TYP_NUMBER);
+
+	// プレイ中クレジットを表示しないエリアのサイズ(X方向)
+	obj.customViewWidth = setVal(_dosObj.customViewWidth, 0, C_TYP_FLOAT);
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (g_isLocal) ? 0 : 1;
@@ -7821,7 +7825,7 @@ function MainInit() {
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
 
 	// 曲名・アーティスト名、譜面名のサイズ調整
-	const checkMusicSiz = (_text, _siz) => getFontSize(_text, g_headerObj.playingWidth - 125, getBasicFont(), _siz);
+	const checkMusicSiz = (_text, _siz) => getFontSize(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, getBasicFont(), _siz);
 
 	const makerView = g_headerObj.makerView ? ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})` : ``;
 	let difName = `[${g_headerObj.keyLabels[g_stateObj.scoreId]} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${makerView}]`;
