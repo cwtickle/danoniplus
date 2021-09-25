@@ -332,8 +332,10 @@ const g_rankObj = {
     rankRate: [97, 90, 85, 80, 75, 70, 50, 0],
     rankColor: [`#00ccff`, `#6600ff`, `#ff9900`, `#ff0000`, `#00ff00`, `#ff00ff`, `#cc00ff`, `#cc9933`],
 
-    rankMarkPF: `PF`,
-    rankColorPF: `#cccc00`,
+    rankMarkAllPerfect: `AP`,
+    rankColorAllPerfect: ``,
+    rankMarkPerfect: `PF`,
+    rankColorPerfect: `#cccc00`,
     rankMarkC: `C`,
     rankColorC: `#cc9933`,
     rankMarkF: `F`,
