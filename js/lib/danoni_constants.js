@@ -27,7 +27,7 @@ const C_LBL_LNKSIZE = 16;
 const C_LBL_BASICFONT = `"Meiryo UI", sans-serif`;
 
 const C_BTN_HEIGHT = 50;
-const C_LNK_HEIGHT = 20;
+const C_LNK_HEIGHT = 30;
 
 // スプライト（ムービークリップ相当）のルート
 const C_SPRITE_ROOT = `divRoot`;
