@@ -7815,11 +7815,21 @@ function MainInit() {
 		lblInitColor = g_cssObj.life_Failed;
 	}
 
-	// 曲名・アーティスト名表示
+	// 曲名・アーティスト名、譜面名表示
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
-	const musicSiz = getFontSize(`${musicTitle} / ${artistName}`, g_headerObj.playingWidth - 125, getBasicFont(), C_SIZ_MAIN);
+
+	// 曲名・アーティスト名、譜面名のサイズ調整
+	const checkMusicSiz = (_text, _siz) => getFontSize(_text, g_headerObj.playingWidth - 125, getBasicFont(), _siz);
+
+	const makerView = g_headerObj.makerView ? ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})` : ``;
+	let difName = `[${g_headerObj.keyLabels[g_stateObj.scoreId]} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${makerView}]`;
+	let creditName = `${musicTitle} / ${artistName}`;
+	if (checkMusicSiz(creditName, C_SIZ_MAIN) < 12) {
+		creditName = `${musicTitle}`;
+		difName = `/ ${artistName} ` + difName;
+	}
 
 	multiAppend(infoSprite,
 
@@ -7849,23 +7859,23 @@ function MainInit() {
 		}, g_cssObj.life_Border, g_cssObj.life_BorderColor),
 
 		// 曲名・アーティスト名表示
-		createDivCss2Label(`lblCredit`, `${musicTitle} / ${artistName}`, {
-			x: 125, y: g_sHeight - 33, w: g_headerObj.playingWidth - 125, h: 20, siz: musicSiz, align: C_ALIGN_LEFT,
+		createDivCss2Label(`lblCredit`, creditName, {
+			x: 125, y: g_sHeight - 35, w: g_headerObj.playingWidth - 125, h: 20, siz: checkMusicSiz(creditName, C_SIZ_MAIN), align: C_ALIGN_LEFT,
 		}),
 
-		// 曲名・アーティスト名表示
-		createDivCss2Label(`lblDifName`, `[${g_headerObj.keyLabels[g_stateObj.scoreId]} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}]`, {
-			x: 125, y: g_sHeight - 16, w: g_headerObj.playingWidth, h: 20, siz: 12, align: C_ALIGN_LEFT,
+		// 譜面名表示
+		createDivCss2Label(`lblDifName`, difName, {
+			x: 125, y: g_sHeight - 18, w: g_headerObj.playingWidth, h: 20, siz: checkMusicSiz(difName, 12), align: C_ALIGN_LEFT,
 		}),
 
 		// 曲時間表示：現在時間
 		createDivCss2Label(`lblTime1`, `-:--`, {
-			x: 18, y: g_sHeight - 33, w: 40, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_RIGHT, display: g_workObj.musicinfoDisp,
+			x: 18, y: g_sHeight - 35, w: 40, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_RIGHT, display: g_workObj.musicinfoDisp,
 		}),
 
 		// 曲時間表示：総時間
 		createDivCss2Label(`lblTime2`, `/ ${fullTime}`, {
-			x: 60, y: g_sHeight - 33, w: 60, h: 20, siz: C_SIZ_MAIN, display: g_workObj.musicinfoDisp,
+			x: 60, y: g_sHeight - 35, w: 60, h: 20, siz: C_SIZ_MAIN, display: g_workObj.musicinfoDisp,
 		}),
 	);
 
