@@ -2432,7 +2432,7 @@ function titleInit() {
 	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
 
 	let reloadFlg = false;
-	const artistSiz = getFontSize(g_headerObj.artistName, g_sWidth / 2 - 20, getBasicFont(), C_LBL_LNKSIZE, 12);
+	const getLinkSiz = _name => getFontSize(_name, g_sWidth / 2 - 20, getBasicFont(), C_LBL_LNKSIZE, 12);
 
 	// ボタン描画
 	multiAppend(divRoot,
@@ -2483,16 +2483,16 @@ function titleInit() {
 
 		// 製作者表示
 		createCss2Button(`lnkMaker`, `${g_lblNameObj.maker}: ${g_headerObj.tuningInit}`, _ => true, {
-			x: 0, y: g_sHeight - 50,
-			w: g_sWidth / 2, h: C_LNK_HEIGHT, siz: C_LBL_LNKSIZE, align: C_ALIGN_LEFT,
+			x: 0, y: g_sHeight - 50, w: g_sWidth / 2, h: C_LNK_HEIGHT,
+			siz: getLinkSiz(`${g_lblNameObj.maker}: ${g_headerObj.tuningInit}`), align: C_ALIGN_LEFT,
 			title: g_headerObj.creatorUrl,
 			resetFunc: _ => openLink(g_headerObj.creatorUrl),
 		}, g_cssObj.button_Default),
 
 		// アーティスト表示
 		createCss2Button(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistName}`, _ => true, {
-			x: g_sWidth / 2, y: g_sHeight - 50,
-			w: g_sWidth / 2, h: C_LNK_HEIGHT, siz: artistSiz, align: C_ALIGN_LEFT,
+			x: g_sWidth / 2, y: g_sHeight - 50, w: g_sWidth / 2, h: C_LNK_HEIGHT,
+			siz: getLinkSiz(`${g_lblNameObj.artist}: ${g_headerObj.artistName}`), align: C_ALIGN_LEFT,
 			title: g_headerObj.artistUrl,
 			resetFunc: _ => openLink(g_headerObj.artistUrl),
 		}, g_cssObj.button_Default),
