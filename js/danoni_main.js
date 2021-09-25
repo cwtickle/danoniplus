@@ -5398,7 +5398,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		}),
 
 		createDivCss2Label(`kcShuffleDesc`, g_lblNameObj.kcShuffleDesc, {
-			x: 0, y: g_sHeight - 163, w: g_sWidth, h: 20, siz: 12, align: C_ALIGN_LEFT,
+			x: 0, y: g_sHeight - 142, w: g_sWidth, h: 20, siz: 12, align: C_ALIGN_LEFT,
 		}),
 
 	);
@@ -5910,10 +5910,10 @@ function keyConfigInit(_kcType = g_kcType) {
 		}, {
 			x: 0, y: g_sHeight - 100,
 			w: g_sWidth / 3, h: C_BTN_HEIGHT, siz: C_LBL_BTNSIZE,
-		}, g_cssObj.button_Reset)
+		}, g_cssObj.button_Reset),
 
 		// プレイ開始
-		makePlayButton(_ => loadMusic()),
+		makePlayButton(_ => loadMusic())
 	);
 
 	// キーボード押下時処理
