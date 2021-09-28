@@ -15,7 +15,7 @@ Dancing☆Onigiri (CW Edition)は、ブラウザで動作するキーボード�
 You can create original game data by combining a set of published sources with music files and sequences (text file). See the [wiki](../../wiki/Sidebar-En) for details.
 
 ここで公開しているソースは、以前Flashとして公開していたリズムゲーム  
-「Dancing☆Onigiri」の**HTML5 (HTML Living Standard)**版です。  
+「Dancing☆Onigiri」の **HTML5 (HTML Living Standard)** 版です。  
 これまでのParaFla版に比べ、さまざまな機能強化を行っています。  
 
 ## Demo
