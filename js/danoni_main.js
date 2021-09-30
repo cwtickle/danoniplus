@@ -3625,6 +3625,13 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 }
 
 /**
+ * キー名の取得
+ * @param {string} _key 
+ * @returns 
+ */
+const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyName${_key}`] : _key;
+
+/**
  * 一時的な追加キーの設定
  * @param {object} _dosObj 
  */
@@ -3726,6 +3733,9 @@ function keysConvert(_dosObj) {
 	keyExtraList.forEach(newKey => {
 		let tmpDivPtn = [];
 		let tmpMinPatterns = 1;
+
+		// キーの名前 (keyNameX)
+		g_keyObj[`keyName${newKey}`] = setVal(_dosObj[`keyName${newKey}`], newKey, C_TYP_STRING);
 
 		// 矢印色パターン (colorX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
@@ -4005,7 +4015,7 @@ function createOptionWindow(_sprite) {
 		let pos = 0;
 		g_headerObj.keyLabels.forEach((keyLabel, j) => {
 			if (_targetKey === `` || keyLabel === _targetKey) {
-				let text = `${keyLabel} / ${g_headerObj.difLabels[j]}`;
+				let text = `${getKeyName(keyLabel)} / ${g_headerObj.difLabels[j]}`;
 				if (g_headerObj.makerView) {
 					text += ` (${g_headerObj.creatorNames[j]})`;
 				}
@@ -4076,7 +4086,7 @@ function createOptionWindow(_sprite) {
 		let pos = 0;
 		g_headerObj.keyLists.forEach((targetKey, m) => {
 			difCover.appendChild(
-				makeDifLblCssButton(`keyFilter${m}`, `${targetKey} key`, m + 2.5, _ => {
+				makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} key`, m + 2.5, _ => {
 					resetDifWindow();
 					g_stateObj.filterKeys = targetKey;
 					createDifWindow(targetKey);
@@ -4883,7 +4893,7 @@ function createOptionWindow(_sprite) {
 
 		// 譜面名設定 (Difficulty)
 		const difWidth = parseFloat(lnkDifficulty.style.width);
-		const difNames = [`${g_keyObj.currentKey} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
+		const difNames = [`${getKeyName(g_keyObj.currentKey)} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
 		lnkDifficulty.style.fontSize = `${getFontSize(difNames[0], difWidth, getBasicFont(), C_SIZ_SETLBL)}px`;
 
 		if (g_headerObj.makerView) {
@@ -7827,7 +7837,7 @@ function MainInit() {
 	const checkMusicSiz = (_text, _siz) => getFontSize(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, getBasicFont(), _siz);
 
 	const makerView = g_headerObj.makerView ? ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})` : ``;
-	let difName = `[${g_headerObj.keyLabels[g_stateObj.scoreId]} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${makerView}]`;
+	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${makerView}]`;
 	let creditName = `${musicTitle} / ${artistName}`;
 	if (checkMusicSiz(creditName, C_SIZ_MUSIC_TITLE) < 12) {
 		creditName = `${musicTitle}`;
@@ -9514,7 +9524,7 @@ function resultInit() {
 	}
 
 	let difData = [
-		`${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
+		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${g_stateObj.autoPlay}less`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
 		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getShuffleName()}]`)}`
@@ -9749,7 +9759,7 @@ function resultInit() {
 	// Twitter用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
 	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
-	let tweetDifData = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
+	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${getShuffleName()}`;
 	}
