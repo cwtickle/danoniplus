@@ -27,7 +27,7 @@ const C_LBL_LNKSIZE = 16;
 const C_LBL_BASICFONT = `"Meiryo UI", sans-serif`;
 
 const C_BTN_HEIGHT = 50;
-const C_LNK_HEIGHT = 20;
+const C_LNK_HEIGHT = 30;
 
 // スプライト（ムービークリップ相当）のルート
 const C_SPRITE_ROOT = `divRoot`;
@@ -226,6 +226,7 @@ const C_LEN_SETMINI_WIDTH = 40;
 const C_SIZ_SETMINI = 18;
 const C_SIZ_DIFSELECTOR = 14;
 const C_SIZ_MAIN = 14;
+const C_SIZ_MUSIC_TITLE = 13;
 
 const C_LEN_GRAPH_WIDTH = 286;
 const C_LEN_GRAPH_HEIGHT = 226;
@@ -332,8 +333,10 @@ const g_rankObj = {
     rankRate: [97, 90, 85, 80, 75, 70, 50, 0],
     rankColor: [`#00ccff`, `#6600ff`, `#ff9900`, `#ff0000`, `#00ff00`, `#ff00ff`, `#cc00ff`, `#cc9933`],
 
-    rankMarkPF: `PF`,
-    rankColorPF: `#cccc00`,
+    rankMarkAllPerfect: `AP`,
+    rankColorAllPerfect: ``,
+    rankMarkPerfect: `PF`,
+    rankColorPerfect: `#cccc00`,
     rankMarkC: `C`,
     rankColorC: `#cc9933`,
     rankMarkF: `F`,
@@ -2432,7 +2435,7 @@ const g_lblNameObj = {
     result: `RESULT`,
 
     kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
-    kcShuffleDesc: `番号はシャッフルグループを表す<br>番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを一時的に変更可`,
+    kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを一時的に変更`,
     sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
     kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
     transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
