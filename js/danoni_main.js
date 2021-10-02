@@ -7906,7 +7906,7 @@ function MainInit() {
 		const wordY = (j % 2 === 0 ? 10 : (g_headerObj.bottomWordSetFlg ? g_posObj.distY + 10 : g_sHeight - 60));
 		wordSprite.appendChild(createDivCss2Label(`lblword${j}`, ``, {
 			x: 100, y: wordY, w: g_headerObj.playingWidth - 200, h: 50,
-			siz: C_SIZ_MAIN, align: C_ALIGN_LEFT, color: `#ffffff`, fontFamily: getBasicFont(),
+			siz: C_SIZ_MAIN, align: C_ALIGN_LEFT, fontFamily: getBasicFont(),
 			display: `block`, margin: `auto`,
 		}));
 	}
