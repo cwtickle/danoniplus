@@ -6551,14 +6551,19 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					} else if (tmpSpeedData[k + 1] === `-`) {
 						break;
 					}
-					speedData[speedIdx] = calcFrame(setVal(tmpSpeedData[k], ``, C_TYP_CALC));
-					speedData[speedIdx + 1] = setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC);
-					speedIdx += 2;
+					speedData[speedIdx] = {
+						frame: calcFrame(setVal(tmpSpeedData[k], ``, C_TYP_CALC)),
+						speed: setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC)
+					};
+					speedIdx++;
 				}
 			});
+			speedData.sort((_a, _b) => _a.frame - _b.frame);
 		}
+		const sortedSpeedData = [];
+		speedData.forEach(data => sortedSpeedData.push(data.frame, data.speed));
 
-		return speedData;
+		return sortedSpeedData;
 	}
 
 	/**
