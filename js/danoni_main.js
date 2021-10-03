@@ -6458,7 +6458,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				if (isNaN(parseFloat(arrowData[0]))) {
 					return [];
 				} else {
-					arrowData = arrowData.map(data => calcFrame(data));
+					arrowData = arrowData.map(data => calcFrame(data)).sort((_a, _b) => _a - _b);
 				}
 			}
 		}
