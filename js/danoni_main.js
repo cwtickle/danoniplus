@@ -6553,7 +6553,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					}
 					speedData[speedIdx] = {
 						frame: calcFrame(setVal(tmpSpeedData[k], ``, C_TYP_CALC)),
-						speed: setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC)
+						speed: setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC),
 					};
 					speedIdx++;
 				}
@@ -6586,14 +6586,20 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					} else if (tmpColorData[k + 1] === `-`) {
 						break;
 					}
-					colorData[colorIdx] = calcFrame(setVal(tmpColorData[k], ``, C_TYP_CALC));
-					colorData[colorIdx + 1] = setVal(tmpColorData[k + 1], 0, C_TYP_CALC);
-					colorData[colorIdx + 2] = tmpColorData[k + 2];
-					colorIdx += 3;
+					colorData[colorIdx] = {
+						frame: calcFrame(setVal(tmpColorData[k], ``, C_TYP_CALC)),
+						colorNum: setVal(tmpColorData[k + 1], 0, C_TYP_CALC),
+						colorCd: tmpColorData[k + 2],
+					};
+					colorIdx++;
 				}
 			});
+			colorData.sort((_a, _b) => _a.frame - _b.frame);
 		}
-		return colorData;
+		const sortedColorData = [];
+		colorData.forEach(data => sortedColorData.push(data.frame, data.colorNum, data.colorCd));
+
+		return sortedColorData;
 	}
 
 	/**
@@ -6619,14 +6625,20 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				if (isNaN(parseInt(tmpcssMotionData[0]))) {
 					return;
 				}
-				cssMotionData[motionIdx] = calcFrame(tmpcssMotionData[0]);
-				cssMotionData[motionIdx + 1] = parseFloat(tmpcssMotionData[1]);
-				cssMotionData[motionIdx + 2] = (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]);
-				cssMotionData[motionIdx + 3] = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], cssMotionData[motionIdx + 2], C_TYP_STRING));
-				motionIdx += 4;
+				cssMotionData[motionIdx] = {
+					frame: calcFrame(tmpcssMotionData[0]),
+					arrowNum: parseFloat(tmpcssMotionData[1]),
+					styleUp: (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]),
+					styleDown: (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], cssMotionData[motionIdx + 2], C_TYP_STRING)),
+				};
+				motionIdx++;
 			});
+			cssMotionData.sort((_a, _b) => _a.frame - _b.frame);
 		}
-		return cssMotionData;
+		const sortedCssMotionData = [];
+		cssMotionData.forEach(data => sortedCssMotionData.push(data.frame, data.arrowNum, data.styleUp, data.styleDown));
+
+		return sortedCssMotionData;
 	}
 
 	/**
