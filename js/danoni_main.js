@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/09/24
+ * Revised : 2021/10/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 19.5.10`;
-const g_revisedDate = `2021/09/24`;
+const g_version = `Ver 19.5.11`;
+const g_revisedDate = `2021/10/04`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -6007,7 +6007,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				if (isNaN(parseFloat(arrowData[0]))) {
 					return [];
 				} else {
-					arrowData = arrowData.map(data => calcFrame(data));
+					arrowData = arrowData.map(data => calcFrame(data)).sort((_a, _b) => _a - _b);
 				}
 			}
 		}
@@ -6100,14 +6100,19 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					} else if (tmpSpeedData[k + 1] === `-`) {
 						break;
 					}
-					speedData[speedIdx] = calcFrame(setVal(tmpSpeedData[k], ``, C_TYP_CALC));
-					speedData[speedIdx + 1] = setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC);
-					speedIdx += 2;
+					speedData[speedIdx] = {
+						frame: calcFrame(setVal(tmpSpeedData[k], ``, C_TYP_CALC)),
+						speed: setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC),
+					};
+					speedIdx++;
 				}
 			});
+			speedData.sort((_a, _b) => _a.frame - _b.frame);
 		}
+		const sortedSpeedData = [];
+		speedData.forEach(data => sortedSpeedData.push(data.frame, data.speed));
 
-		return speedData;
+		return sortedSpeedData;
 	}
 
 	/**
@@ -6130,14 +6135,20 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					} else if (tmpColorData[k + 1] === `-`) {
 						break;
 					}
-					colorData[colorIdx] = calcFrame(setVal(tmpColorData[k], ``, C_TYP_CALC));
-					colorData[colorIdx + 1] = setVal(tmpColorData[k + 1], 0, C_TYP_CALC);
-					colorData[colorIdx + 2] = tmpColorData[k + 2];
-					colorIdx += 3;
+					colorData[colorIdx] = {
+						frame: calcFrame(setVal(tmpColorData[k], ``, C_TYP_CALC)),
+						colorNum: setVal(tmpColorData[k + 1], 0, C_TYP_CALC),
+						colorCd: tmpColorData[k + 2],
+					};
+					colorIdx++;
 				}
 			});
+			colorData.sort((_a, _b) => _a.frame - _b.frame);
 		}
-		return colorData;
+		const sortedColorData = [];
+		colorData.forEach(data => sortedColorData.push(data.frame, data.colorNum, data.colorCd));
+
+		return sortedColorData;
 	}
 
 	/**
@@ -6164,14 +6175,20 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				if (isNaN(parseInt(tmpcssMotionData[0]))) {
 					return;
 				}
-				cssMotionData[motionIdx] = calcFrame(tmpcssMotionData[0]);
-				cssMotionData[motionIdx + 1] = parseFloat(tmpcssMotionData[1]);
-				cssMotionData[motionIdx + 2] = (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]);
-				cssMotionData[motionIdx + 3] = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], cssMotionData[motionIdx + 2], C_TYP_STRING));
-				motionIdx += 4;
+				cssMotionData[motionIdx] = {
+					frame: calcFrame(tmpcssMotionData[0]),
+					arrowNum: parseFloat(tmpcssMotionData[1]),
+					styleUp: (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]),
+					styleDown: (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], cssMotionData[motionIdx + 2], C_TYP_STRING)),
+				};
+				motionIdx++;
 			});
+			cssMotionData.sort((_a, _b) => _a.frame - _b.frame);
 		}
-		return cssMotionData;
+		const sortedCssMotionData = [];
+		cssMotionData.forEach(data => sortedCssMotionData.push(data.frame, data.arrowNum, data.styleUp, data.styleDown));
+
+		return sortedCssMotionData;
 	}
 
 	/**
