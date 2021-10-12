@@ -2783,7 +2783,7 @@ function headerConvert(_dosObj) {
 
 	// 末尾にデフォルト画像セットが入るよう追加
 	if (obj.imgType.findIndex(imgSets => imgSets.name === ``) === -1) {
-		obj.imgType.push({ name: ``, extension: `svg`, rotateEnabled: true });
+		obj.imgType.push({ name: ``, extension: `svg`, rotateEnabled: true, flatStepHeight: C_ARW_WIDTH });
 		g_keycons.imgTypes.push(`Original`);
 	}
 	g_imgType = g_keycons.imgTypes[0];
@@ -4000,6 +4000,7 @@ function createOptionWindow(_sprite) {
 	 * @param {number} _scrollNum 
 	 */
 	const nextDifficulty = (_scrollNum = 1) => {
+		g_keyObj.prevKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 		g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
 		setDifficulty(true);
 		resetDifWindow();
@@ -4788,6 +4789,7 @@ function createOptionWindow(_sprite) {
 		g_stateObj.extraKeyFlg = false;
 
 		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
+		const isNotSameKey = (g_keyObj.prevKey !== g_keyObj.currentKey || _initFlg);
 
 		if (g_headerObj.dummyScoreNos !== undefined) {
 			g_stateObj.dummyId = setVal(g_headerObj.dummyScoreNos[g_stateObj.scoreId], ``, C_TYP_NUMBER);
@@ -4816,36 +4818,43 @@ function createOptionWindow(_sprite) {
 			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
 			g_settings.speedNum = roundZero(g_settings.speeds.findIndex(speed => speed === g_stateObj.speed));
 			g_settings.gaugeNum = 0;
-			g_settings.scrollNum = 0;
-			if (!g_settings.autoPlays.includes(g_stateObj.autoPlay)) {
-				g_settings.autoPlayNum = 0;
+			if (isNotSameKey) {
+				g_settings.scrollNum = 0;
+				if (!g_settings.autoPlays.includes(g_stateObj.autoPlay)) {
+					g_settings.autoPlayNum = 0;
+				}
+				g_keycons.shuffleGroupNum = 0;
 			}
-			g_keycons.shuffleGroupNum = 0;
 		}
 
 		if (g_canLoadDifInfoFlg || _initFlg) {
 
-			// キー別のローカルストレージの初期設定　※特殊キーは除く
-			if (!g_stateObj.extraKeyFlg) {
-
+			if (isNotSameKey) {
 				// キーパターン初期化
 				g_keyObj.currentPtn = 0;
+			}
+
+			// キー別のローカルストレージの初期設定　※特殊キーは除く
+			if (!g_stateObj.extraKeyFlg) {
 
 				g_checkKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
 				if (g_checkKeyStorage) {
 					g_localKeyStorage = JSON.parse(g_checkKeyStorage);
 
-					// リバース初期値設定
-					if (g_localKeyStorage.reverse !== undefined) {
-						g_stateObj.reverse = setVal(g_localKeyStorage.reverse, C_FLG_OFF, C_TYP_STRING);
-						g_settings.reverseNum = roundZero(g_settings.reverses.findIndex(reverse => reverse === g_stateObj.reverse));
-					}
+					if (isNotSameKey) {
 
-					// キーコンフィグ初期値設定
-					if (g_localKeyStorage.keyCtrlPtn === undefined) {
-						g_localKeyStorage.keyCtrlPtn = 0;
+						// リバース初期値設定
+						if (g_localKeyStorage.reverse !== undefined) {
+							g_stateObj.reverse = setVal(g_localKeyStorage.reverse, C_FLG_OFF, C_TYP_STRING);
+							g_settings.reverseNum = roundZero(g_settings.reverses.findIndex(reverse => reverse === g_stateObj.reverse));
+						}
+
+						// キーコンフィグ初期値設定
+						if (g_localKeyStorage.keyCtrlPtn === undefined) {
+							g_localKeyStorage.keyCtrlPtn = 0;
+						}
+						getKeyCtrl(g_localKeyStorage);
 					}
-					getKeyCtrl(g_localKeyStorage);
 
 				} else {
 					g_localKeyStorage = {
@@ -4856,11 +4865,9 @@ function createOptionWindow(_sprite) {
 					g_stateObj.reverse = C_FLG_OFF;
 					g_settings.reverseNum = 0;
 				}
-			} else {
+			} else if (isNotSameKey) {
 
 				// 特殊キーの場合は作品毎のローカルストレージから取得
-				g_keyObj.currentPtn = 0;
-
 				// リバース初期値設定
 				if (g_localStorage[`reverse${g_keyObj.currentKey}`] !== undefined) {
 					g_stateObj.reverse = setVal(g_localStorage[`reverse${g_keyObj.currentKey}`], C_FLG_OFF, C_TYP_STRING);
