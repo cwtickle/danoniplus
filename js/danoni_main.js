@@ -1826,7 +1826,6 @@ function loadMusic() {
 
 	clearWindow(true);
 	g_currentPage = `loading`;
-	g_keyObj.prevKey = `Dummy`;
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
@@ -7535,7 +7534,11 @@ function getArrowSettings() {
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 
+	// リバース、キーコンフィグなどをローカルストレージへ保存（Data Save: ON かつ別キーモードで無い場合) 
 	if (g_stateObj.dataSaveFlg && !hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
+
+		// 次回キーコンフィグ画面へ戻ったとき、保存済みキーコンフィグ設定が表示されるようにする
+		g_keyObj.prevKey = `Dummy`;
 
 		// ローカルストレージへAdjustment, Volume, Display関連設定を保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
@@ -7562,6 +7565,10 @@ function getArrowSettings() {
 			}
 		}
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+
+	} else {
+		// データ未保存 もしくは 別キーモード時はキーコンフィグ設定を初期化しない
+		g_keyObj.prevKey = g_keyObj.currentKey;
 	}
 }
 
