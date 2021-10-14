@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/10/02 (v23.4.0)
+ * Revised : 2021/10/14 (v23.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -405,7 +405,7 @@ const g_stateObj = {
     opacity: 100,
 
     rotateEnabled: true,
-    flatStepHeight: false,
+    flatStepHeight: C_ARW_WIDTH,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -1103,6 +1103,8 @@ const g_keyObj = {
     // - 原則、キー×パターンの数だけ設定が必要
     currentKey: 7,
     currentPtn: 0,
+
+    prevKey: `Dummy`,
 
     // キー別ヘッダー
     // - 譜面データ中に出てくる矢印(ノーツ)の種類と順番(ステップゾーン表示順)を管理する。

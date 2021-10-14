@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/10/04
+ * Revised : 2021/10/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 23.4.1`;
-const g_revisedDate = `2021/10/04`;
+const g_version = `Ver 23.5.0`;
+const g_revisedDate = `2021/10/14`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -177,7 +177,6 @@ let g_localStorage;
 let g_localStorageUrl;
 
 // ローカルストレージ設定 (ドメイン・キー別)
-let g_checkKeyStorage;
 let g_localKeyStorage;
 let g_canLoadDifInfoFlg = false;
 
@@ -2783,7 +2782,7 @@ function headerConvert(_dosObj) {
 
 	// 末尾にデフォルト画像セットが入るよう追加
 	if (obj.imgType.findIndex(imgSets => imgSets.name === ``) === -1) {
-		obj.imgType.push({ name: ``, extension: `svg`, rotateEnabled: true });
+		obj.imgType.push({ name: ``, extension: `svg`, rotateEnabled: true, flatStepHeight: C_ARW_WIDTH });
 		g_keycons.imgTypes.push(`Original`);
 	}
 	g_imgType = g_keycons.imgTypes[0];
@@ -4000,6 +3999,7 @@ function createOptionWindow(_sprite) {
 	 * @param {number} _scrollNum 
 	 */
 	const nextDifficulty = (_scrollNum = 1) => {
+		g_keyObj.prevKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 		g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
 		setDifficulty(true);
 		resetDifWindow();
@@ -4788,6 +4788,7 @@ function createOptionWindow(_sprite) {
 		g_stateObj.extraKeyFlg = false;
 
 		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
+		const isNotSameKey = (g_keyObj.prevKey !== g_keyObj.currentKey);
 
 		if (g_headerObj.dummyScoreNos !== undefined) {
 			g_stateObj.dummyId = setVal(g_headerObj.dummyScoreNos[g_stateObj.scoreId], ``, C_TYP_NUMBER);
@@ -4816,65 +4817,56 @@ function createOptionWindow(_sprite) {
 			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
 			g_settings.speedNum = roundZero(g_settings.speeds.findIndex(speed => speed === g_stateObj.speed));
 			g_settings.gaugeNum = 0;
-			g_settings.scrollNum = 0;
-			if (!g_settings.autoPlays.includes(g_stateObj.autoPlay)) {
-				g_settings.autoPlayNum = 0;
+			if (isNotSameKey) {
+				g_settings.scrollNum = 0;
+				if (!g_settings.autoPlays.includes(g_stateObj.autoPlay)) {
+					g_settings.autoPlayNum = 0;
+				}
+				g_keycons.shuffleGroupNum = 0;
 			}
-			g_keycons.shuffleGroupNum = 0;
 		}
 
-		if (g_canLoadDifInfoFlg || _initFlg) {
+		// 保存した設定の再読込条件（通常、設定画面切り替え時はスキップ）
+		if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _initFlg) {
 
-			// キー別のローカルストレージの初期設定　※特殊キーは除く
-			if (!g_stateObj.extraKeyFlg) {
-
+			if (isNotSameKey) {
 				// キーパターン初期化
 				g_keyObj.currentPtn = 0;
+			}
+			const hasKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
 
-				g_checkKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
-				if (g_checkKeyStorage) {
-					g_localKeyStorage = JSON.parse(g_checkKeyStorage);
+			if (g_stateObj.extraKeyFlg) {
 
-					// リバース初期値設定
-					if (g_localKeyStorage.reverse !== undefined) {
-						g_stateObj.reverse = setVal(g_localKeyStorage.reverse, C_FLG_OFF, C_TYP_STRING);
-						g_settings.reverseNum = roundZero(g_settings.reverses.findIndex(reverse => reverse === g_stateObj.reverse));
+				// 特殊キーの場合は作品毎のローカルストレージから取得
+				if (isNotSameKey) {
+					getKeyReverse(g_localStorage, g_keyObj.currentKey);
+
+					// キーコンフィグ初期値設定
+					if (g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] === undefined) {
+						g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] = 0;
 					}
+					getKeyCtrl(g_localStorage, g_keyObj.currentKey);
+				}
+
+			} else {
+
+				// キー別のローカルストレージの初期設定　※特殊キーは除く
+				g_localKeyStorage = hasKeyStorage ? JSON.parse(hasKeyStorage) : {
+					reverse: C_FLG_OFF,
+					keyCtrl: [[]],
+					keyCtrlPtn: 0,
+				};
+
+				if (isNotSameKey) {
+					getKeyReverse(g_localKeyStorage);
 
 					// キーコンフィグ初期値設定
 					if (g_localKeyStorage.keyCtrlPtn === undefined) {
 						g_localKeyStorage.keyCtrlPtn = 0;
 					}
 					getKeyCtrl(g_localKeyStorage);
-
-				} else {
-					g_localKeyStorage = {
-						reverse: C_FLG_OFF,
-						keyCtrl: [[]],
-						keyCtrlPtn: 0,
-					};
-					g_stateObj.reverse = C_FLG_OFF;
-					g_settings.reverseNum = 0;
-				}
-			} else {
-
-				// 特殊キーの場合は作品毎のローカルストレージから取得
-				g_keyObj.currentPtn = 0;
-
-				// リバース初期値設定
-				if (g_localStorage[`reverse${g_keyObj.currentKey}`] !== undefined) {
-					g_stateObj.reverse = setVal(g_localStorage[`reverse${g_keyObj.currentKey}`], C_FLG_OFF, C_TYP_STRING);
-					g_settings.reverseNum = roundZero(g_settings.reverses.findIndex(reverse => reverse === g_stateObj.reverse));
-				} else {
-					g_stateObj.reverse = C_FLG_OFF;
-					g_settings.reverseNum = 0;
 				}
 
-				// キーコンフィグ初期値設定
-				if (g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] === undefined) {
-					g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] = 0;
-				}
-				getKeyCtrl(g_localStorage, g_keyObj.currentKey);
 			}
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
@@ -5093,6 +5085,21 @@ function makeDisabledLabel(_id, _heightPos, _defaultStr) {
 	return createDivCss2Label(_id, _defaultStr, {
 		x: C_LEN_SETLBL_LEFT, y: C_LEN_SETLBL_HEIGHT * _heightPos,
 	}, g_cssObj.settings_Disabled);
+}
+
+/**
+ * 保存済みリバース取得処理
+ * @param {object} _localStorage 保存先のローカルストレージ名
+ * @param {string} _extraKeyName 特殊キー名(通常キーは省略)
+ */
+function getKeyReverse(_localStorage, _extraKeyName = ``) {
+	if (_localStorage[`reverse${_extraKeyName}`] !== undefined) {
+		g_stateObj.reverse = setVal(_localStorage[`reverse${_extraKeyName}`], C_FLG_OFF, C_TYP_STRING);
+		g_settings.reverseNum = roundZero(g_settings.reverses.findIndex(reverse => reverse === g_stateObj.reverse));
+	} else {
+		g_stateObj.reverse = C_FLG_OFF;
+		g_settings.reverseNum = 0;
+	}
 }
 
 /**
@@ -6083,13 +6090,6 @@ function loadingScoreInit() {
 			if (typeof skinPreloadingInit2 === C_TYP_FUNCTION) {
 				skinPreloadingInit2();
 			}
-		}
-
-		// 譜面初期情報ロード許可フラグ
-		// (タイトルバック時保存したデータを設定画面にて再読み込みするため、
-		//  ローカルストレージ保存時はフラグを解除しない)
-		if (!g_stateObj.dataSaveFlg || hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
-			g_canLoadDifInfoFlg = false;
 		}
 
 		let dummyIdHeader = ``;
@@ -7528,7 +7528,11 @@ function getArrowSettings() {
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 
+	// リバース、キーコンフィグなどをローカルストレージへ保存（Data Save: ON かつ別キーモードで無い場合) 
 	if (g_stateObj.dataSaveFlg && !hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
+
+		// 次回キーコンフィグ画面へ戻ったとき、保存済みキーコンフィグ設定が表示されるようにする
+		g_keyObj.prevKey = `Dummy`;
 
 		// ローカルストレージへAdjustment, Volume, Display関連設定を保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
@@ -7555,6 +7559,12 @@ function getArrowSettings() {
 			}
 		}
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+		g_canLoadDifInfoFlg = true;
+
+	} else {
+		// データ未保存 もしくは 別キーモード時はキーコンフィグ設定を初期化しない
+		g_keyObj.prevKey = g_keyObj.currentKey;
+		g_canLoadDifInfoFlg = false;
 	}
 }
 
@@ -8074,8 +8084,8 @@ function MainInit() {
 				clearTimeout(g_timeoutEvtId);
 				titleInit();
 
-			} else if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
-				// 連打対策として指定ボリュームになるまでリトライを禁止
+			} else {
+				// その他の環境では単にRetryに対応するキーのみで適用
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
 				clearWindow();
