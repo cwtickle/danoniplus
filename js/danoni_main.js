@@ -8074,8 +8074,8 @@ function MainInit() {
 				clearTimeout(g_timeoutEvtId);
 				titleInit();
 
-			} else if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
-				// 連打対策として指定ボリュームになるまでリトライを禁止
+			} else {
+				// その他の環境では単にRetryに対応するキーのみで適用
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
 				clearWindow();
