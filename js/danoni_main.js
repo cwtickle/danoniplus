@@ -1826,6 +1826,7 @@ function loadMusic() {
 
 	clearWindow(true);
 	g_currentPage = `loading`;
+	g_canLoadDifInfoFlg = true;
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
@@ -4826,7 +4827,8 @@ function createOptionWindow(_sprite) {
 			}
 		}
 
-		if (g_canLoadDifInfoFlg || _initFlg || (isNotSameKey && g_stateObj.dataSaveFlg)) {
+		// 保存した設定の再読込条件（通常、設定画面切り替え時はスキップ）
+		if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _initFlg) {
 
 			if (isNotSameKey) {
 				// キーパターン初期化
