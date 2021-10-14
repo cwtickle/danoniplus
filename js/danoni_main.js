@@ -1826,7 +1826,6 @@ function loadMusic() {
 
 	clearWindow(true);
 	g_currentPage = `loading`;
-	g_canLoadDifInfoFlg = true;
 
 	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
 	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
@@ -6093,13 +6092,6 @@ function loadingScoreInit() {
 			}
 		}
 
-		// 譜面初期情報ロード許可フラグ
-		// (タイトルバック時保存したデータを設定画面にて再読み込みするため、
-		//  ローカルストレージ保存時はフラグを解除しない)
-		if (!g_stateObj.dataSaveFlg || hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
-			g_canLoadDifInfoFlg = false;
-		}
-
 		let dummyIdHeader = ``;
 		if (g_stateObj.dummyId !== ``) {
 			if (g_stateObj.dummyId === 0 || g_stateObj.dummyId === 1) {
@@ -7567,10 +7559,12 @@ function getArrowSettings() {
 			}
 		}
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+		g_canLoadDifInfoFlg = true;
 
 	} else {
 		// データ未保存 もしくは 別キーモード時はキーコンフィグ設定を初期化しない
 		g_keyObj.prevKey = g_keyObj.currentKey;
+		g_canLoadDifInfoFlg = false;
 	}
 }
 
