@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/10/04
+ * Revised : 2021/10/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 21.5.4`;
-const g_revisedDate = `2021/10/04`;
+const g_version = `Ver 21.5.5`;
+const g_revisedDate = `2021/10/14`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5783,13 +5783,6 @@ function loadingScoreInit() {
 			}
 		}
 
-		// 譜面初期情報ロード許可フラグ
-		// (タイトルバック時保存したデータを設定画面にて再読み込みするため、
-		//  ローカルストレージ保存時はフラグを解除しない)
-		if (!g_stateObj.dataSaveFlg || hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
-			g_canLoadDifInfoFlg = false;
-		}
-
 		let dummyIdHeader = ``;
 		if (g_stateObj.dummyId !== ``) {
 			if (g_stateObj.dummyId === 0 || g_stateObj.dummyId === 1) {
@@ -7239,6 +7232,9 @@ function getArrowSettings() {
 			}
 		}
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+		g_canLoadDifInfoFlg = true;
+	} else {
+		g_canLoadDifInfoFlg = false;
 	}
 }
 
@@ -7738,8 +7734,8 @@ function MainInit() {
 				clearTimeout(g_timeoutEvtId);
 				titleInit();
 
-			} else if (g_audio.volume >= g_stateObj.volume / 100 && g_scoreObj.frameNum >= g_headerObj.blankFrame) {
-				// 連打対策として指定ボリュームになるまでリトライを禁止
+			} else {
+				// その他の環境では単にRetryに対応するキーのみで適用
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
 				clearWindow();
