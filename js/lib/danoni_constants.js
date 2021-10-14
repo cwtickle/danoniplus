@@ -405,7 +405,7 @@ const g_stateObj = {
     opacity: 100,
 
     rotateEnabled: true,
-    flatStepHeight: false,
+    flatStepHeight: C_ARW_WIDTH,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -1103,6 +1103,8 @@ const g_keyObj = {
     // - 原則、キー×パターンの数だけ設定が必要
     currentKey: 7,
     currentPtn: 0,
+
+    prevKey: `Dummy`,
 
     // キー別ヘッダー
     // - 譜面データ中に出てくる矢印(ノーツ)の種類と順番(ステップゾーン表示順)を管理する。
