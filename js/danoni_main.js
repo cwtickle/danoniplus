@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/10/14
+ * Revised : 2021/10/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 23.5.0`;
-const g_revisedDate = `2021/10/14`;
+const g_version = `Ver 23.5.1`;
+const g_revisedDate = `2021/10/16`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5112,7 +5112,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 	const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
 	const baseKeyNum = g_keyObj[`chara${basePtn}`].length;
 
-	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined) {
+	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined && _localStorage[`keyCtrl${_extraKeyName}`][0].length > 0) {
 		g_keyObj.currentPtn = -1;
 		const copyPtn = `${g_keyObj.currentKey}_-1`;
 		g_keyObj[`keyCtrl${copyPtn}`] = [];
