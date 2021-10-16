@@ -5112,7 +5112,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 	const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
 	const baseKeyNum = g_keyObj[`chara${basePtn}`].length;
 
-	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined) {
+	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined && _localStorage[`keyCtrl${_extraKeyName}`][0].length > 0) {
 		g_keyObj.currentPtn = -1;
 		const copyPtn = `${g_keyObj.currentKey}_-1`;
 		g_keyObj[`keyCtrl${copyPtn}`] = [];
