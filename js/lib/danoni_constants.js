@@ -2550,6 +2550,7 @@ const g_lblNameObj = {
     'u_Onigiri': `Onigiri`,
     'u_Left': `Left`,
     'u_Right': `Right`,
+    'u_less': `less`,
 
     'u_Original': `Original`,
     'u_Heavy': `Heavy`,
