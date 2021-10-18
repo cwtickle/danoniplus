@@ -219,6 +219,7 @@ const g_local_msgObj = {
 const g_lblRenames = {
 	option: true,
 	settingsDisplay: true,
+	main: true,
 	keyConfig: true,
 	result: true,
 };
