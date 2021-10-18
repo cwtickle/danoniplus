@@ -7861,12 +7861,13 @@ function MainInit() {
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
+	const shuffleName = (g_stateObj.shuffle !== C_FLG_OFF ? `: ${getShuffleName()}` : ``);
 
 	// 曲名・アーティスト名、譜面名のサイズ調整
 	const checkMusicSiz = (_text, _siz) => getFontSize(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, getBasicFont(), _siz);
 
 	const makerView = g_headerObj.makerView ? ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})` : ``;
-	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${makerView}]`;
+	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${shuffleName}${makerView}]`;
 	let creditName = `${musicTitle} / ${artistName}`;
 	if (checkMusicSiz(creditName, C_SIZ_MUSIC_TITLE) < 12) {
 		creditName = `${musicTitle}`;
@@ -9544,14 +9545,6 @@ function resultInit() {
 		transKeyData = `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)`;
 	}
 
-	const getShuffleName = _ => {
-		let shuffleName = getStgDetailName(g_stateObj.shuffle);
-		if (!g_stateObj.shuffle.endsWith(`+`)) {
-			shuffleName += setScoreIdHeader(g_keycons.shuffleGroupNum);
-		}
-		return shuffleName;
-	}
-
 	let difData = [
 		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${g_stateObj.autoPlay}less`)}`,
@@ -9945,6 +9938,18 @@ function resultInit() {
 			skinResultInit2();
 		}
 	}
+}
+
+/**
+ * シャッフル名称の取得
+ * @returns 
+ */
+const getShuffleName = _ => {
+	let shuffleName = getStgDetailName(g_stateObj.shuffle);
+	if (!g_stateObj.shuffle.endsWith(`+`)) {
+		shuffleName += setScoreIdHeader(g_keycons.shuffleGroupNum);
+	}
+	return shuffleName;
 }
 
 /**
