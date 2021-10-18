@@ -4781,6 +4781,8 @@ function createOptionWindow(_sprite) {
 	 */
 	function setDifficulty(_initFlg) {
 
+		const getCurrentNo = (_list, _target) => roundZero(_list.findIndex(item => item === _target));
+
 		// ---------------------------------------------------
 		// 1. キーコンフィグ設定 (KeyConfig)
 
@@ -4803,25 +4805,29 @@ function createOptionWindow(_sprite) {
 			});
 		}
 
+		// ---------------------------------------------------
+		// 2. 初期化設定
+
+		// スクロール設定用の配列を入れ替え
+		g_settings.scrolls = copyArray2d(
+			typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
+				g_keyObj[`scrollName${g_keyObj.currentKey}`] : g_keyObj.scrollName_def
+		);
+
 		// アシスト設定の配列を入れ替え
 		g_settings.autoPlays = (typeof g_keyObj[`assistName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
 			g_autoPlaysBase.concat(g_keyObj[`assistName${g_keyObj.currentKey}`]) :
 			g_autoPlaysBase.concat());
 
-		// ---------------------------------------------------
-		// 2. 初期化設定
-
 		if (_initFlg) {
 
 			// 速度、ゲージ、リバースの初期設定
 			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
-			g_settings.speedNum = roundZero(g_settings.speeds.findIndex(speed => speed === g_stateObj.speed));
+			g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
 			g_settings.gaugeNum = 0;
 			if (isNotSameKey) {
-				g_settings.scrollNum = 0;
-				if (!g_settings.autoPlays.includes(g_stateObj.autoPlay)) {
-					g_settings.autoPlayNum = 0;
-				}
+				g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
+				g_settings.autoPlayNum = getCurrentNo(g_settings.autoPlays, g_stateObj.autoPlay);
 				g_keycons.shuffleGroupNum = 0;
 			}
 		}
@@ -4907,10 +4913,6 @@ function createOptionWindow(_sprite) {
 
 		// リバース設定 (Reverse, Scroll)
 		if (g_headerObj.scrollUse) {
-			g_settings.scrolls = copyArray2d(
-				typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
-					g_keyObj[`scrollName${g_keyObj.currentKey}`] : g_keyObj.scrollName_def
-			);
 			g_stateObj.scroll = g_settings.scrolls[g_settings.scrollNum];
 			const [visibleScr, hiddenScr] = (g_settings.scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
 			spriteList[visibleScr].style.display = C_DIS_INHERIT;
