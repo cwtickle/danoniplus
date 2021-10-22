@@ -5246,7 +5246,7 @@ function settingsDisplayInit() {
 	divRoot.appendChild(
 		createDivCss2Label(`scMsg`, g_lblNameObj.sdShortcutDesc, {
 			x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20,
-			siz: getFontSize(g_lblNameObj.kcShuffleDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
+			siz: getFontSize(g_lblNameObj.sdShortcutDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
 		})
 	);
 
@@ -5719,16 +5719,17 @@ function keyConfigInit(_kcType = g_kcType) {
 		viewGroup(_type);
 	};
 
+	const scMsg = g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
+		.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]);
+
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
 		createDivCss2Label(
-			`scMsg`,
-			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
-				.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]),
+			`scMsg`, scMsg,
 			{
 				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20,
-				siz: getFontSize(g_lblNameObj.kcShuffleDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
+				siz: getFontSize(scMsg, g_sWidth, getBasicFont(), C_SIZ_MAIN),
 			}),
 
 		// 別キーモード警告メッセージ
