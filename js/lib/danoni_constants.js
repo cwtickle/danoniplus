@@ -2711,7 +2711,7 @@ const g_lang_lblNameObj = {
         s_tate: `Jack Corr.`,
         s_cnts: `All Arrows`,
         s_linecnts: `- Arrow:<br><br>- Freeze Arrow:<br><br>- 3 push positions ({0}):`,
-        s_print: `Copy Data`,
+        s_print: `CopyData`,
         s_printTitle: `Dancing☆Onigiri Level calculator+++`,
         s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
 
@@ -2804,7 +2804,7 @@ const g_lang_msgObj = {
         motion: `Set whether to turn on acceleration or deceleration\nin the middle of the sequence.`,
         reverse: `Set the flow direction of the sequences.`,
         scroll: `Set the scroll direction for each lane according to the pattern.\nIf "Reverse:ON" sets, reverse the scroll direction.`,
-        shuffle: `Flip the chart left and right or make it random.\nIf you make it random, it will be treated as a separate score and the high score will not be saved.`,
+        shuffle: `Flip the chart left and right or make it random.\nIf you make it random, it will be treated as other charts and the high score will not be saved.`,
         autoPlay: `Set to auto play and to hit some keys automatically.\nHigh score is not saved during auto play.`,
         gauge: `Set the clear condition.\n[Start] initial value, [Border] borderline value (hyphen means zero),\n[Recovery] recovery amount, [Damage] damage amount`,
         adjustment: `If you feel a shift in timing, \nyou can correct the shift in frame units by changing the value.\nThe outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, \nand the inner button in 0.5 frame increments.`,
