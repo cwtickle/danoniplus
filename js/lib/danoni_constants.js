@@ -2430,7 +2430,7 @@ const g_lang_msgInfoObj = {
         We recommend using a WebKit browser such as Chrome, Opera and Vivaldi. (W-0001)`,
         W_0011: `Uses built-in image data for operation with the file scheme.<br>
         Changes to the images under the "img" folder will not be applied. (W-0011)`,
-        W_0012: `With the current settings, a small number of Adjustments cannot be used <br>
+        W_0012: `With the current settings, a decimal of "Adjustments" cannot be used <br>
         depending on the sound source playback method.<br>
         Also, if you use "Fadein", it may be out of alignment.<br>
         It can be solved by converting the sound source file to encoded data (js, txt) or <br>
