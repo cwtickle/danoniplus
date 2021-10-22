@@ -172,6 +172,8 @@ let g_musicEncodedFlg = false;
 let g_externalDos = ``;
 let g_musicdata = ``;
 
+let g_langStorage = {};
+
 // ローカルストレージ設定 (作品別)
 let g_localStorage;
 let g_localStorageUrl;
@@ -1261,6 +1263,13 @@ function loadLocalStorage() {
 			g_localStorage[_name] = defaultVal;
 		}
 	};
+
+	const checkLocale = localStorage.getItem(`danoni-locale`);
+	if (checkLocale) {
+		g_langStorage = JSON.parse(checkLocale);
+		g_localeObj.val = g_langStorage.locale;
+		g_localeObj.num = g_localeObj.list.findIndex(val => val === g_localeObj.val);
+	}
 
 	const checkStorage = localStorage.getItem(g_localStorageUrl);
 	if (checkStorage) {
@@ -2465,12 +2474,17 @@ function titleInit() {
 			},
 		}, g_cssObj.button_Reset),
 
-		// リロードボタン
-		createCss2Button(`btnReload`, `R`, _ => true, {
+		// ロケール切替
+		createCss2Button(`btnReload`, g_localeObj.val, _ => true, {
 			x: 10, y: 10,
 			w: 30, h: 30, siz: 20,
 			title: g_msgObj.reload,
-			resetFunc: _ => location.reload(),
+			resetFunc: _ => {
+				g_localeObj.num = (++g_localeObj.num) % g_localeObj.list.length;
+				g_langStorage.locale = g_localeObj.list[g_localeObj.num];
+				localStorage.setItem(`danoni-locale`, JSON.stringify(g_langStorage));
+				location.reload();
+			},
 		}, g_cssObj.button_Start),
 
 		// ヘルプ
@@ -2795,9 +2809,13 @@ function headerConvert(_dosObj) {
 	}
 
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
+	Object.keys(g_lang_msgInfoObj[g_localeObj.val]).forEach(property => g_msgInfoObj[property] = g_lang_msgInfoObj[g_localeObj.val][property]);
+	Object.keys(g_lang_lblNameObj[g_localeObj.val]).forEach(property => g_lblNameObj[property] = g_lang_lblNameObj[g_localeObj.val][property]);
 	if (typeof g_local_lblNameObj === C_TYP_OBJECT) {
 		Object.keys(g_local_lblNameObj).forEach(property => g_lblNameObj[property] = g_local_lblNameObj[property]);
 	}
+
+	Object.keys(g_lang_msgObj[g_localeObj.val]).forEach(property => g_msgObj[property] = g_lang_msgObj[g_localeObj.val][property]);
 	if (typeof g_local_msgObj === C_TYP_OBJECT) {
 		Object.keys(g_local_msgObj).forEach(property => g_msgObj[property] = g_local_msgObj[property]);
 	}
@@ -5227,7 +5245,8 @@ function settingsDisplayInit() {
 	// ショートカットキーメッセージ
 	divRoot.appendChild(
 		createDivCss2Label(`scMsg`, g_lblNameObj.sdShortcutDesc, {
-			x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+			x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20,
+			siz: getFontSize(g_lblNameObj.kcShuffleDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
 		})
 	);
 
@@ -5417,10 +5436,12 @@ function keyConfigInit(_kcType = g_kcType) {
 		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
 			.split(`{1}:`).join(g_isMac ? `` : `Delete:`), {
 			x: 0, y: 68, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+			siz: getFontSize(g_lblNameObj.kcDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
 		}),
 
 		createDivCss2Label(`kcShuffleDesc`, g_lblNameObj.kcShuffleDesc, {
-			x: 5, y: g_sHeight - 125, w: g_sWidth, h: 20, siz: 14, align: C_ALIGN_LEFT,
+			x: 5, y: g_sHeight - 125, w: g_sWidth, h: 20, align: C_ALIGN_LEFT,
+			siz: getFontSize(g_lblNameObj.kcShuffleDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
 		}),
 
 	);
@@ -5706,7 +5727,8 @@ function keyConfigInit(_kcType = g_kcType) {
 			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
 				.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]),
 			{
-				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20,
+				siz: getFontSize(g_lblNameObj.kcShuffleDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
 			}),
 
 		// 別キーモード警告メッセージ

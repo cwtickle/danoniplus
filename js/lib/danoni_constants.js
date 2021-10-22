@@ -32,6 +32,15 @@ const C_LNK_HEIGHT = 30;
 // スプライト（ムービークリップ相当）のルート
 const C_SPRITE_ROOT = `divRoot`;
 
+/**
+ * ロケール管理
+ */
+const g_localeObj = {
+    val: `Ja`,
+    list: [`Ja`, `En`],
+    num: 0,
+};
+
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 const g_isIos = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`]);
 const g_isMac = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`, `mac os`]);
@@ -2369,48 +2378,99 @@ const g_checkStr = {
  * - 記述不正の場合、書き方を2行目に指定すると親切。
 */
 const g_msgInfoObj = {
-    W_0001: `お使いのブラウザは動作保証外です。<br>
-    Chrome/Opera/Vivaldiなど、WebKit系ブラウザの利用を推奨します。(W-0001)`,
-    W_0011: `fileスキームでの動作のため、内蔵の画像データを使用します。<br>
-    imgフォルダ以下の画像の変更は適用されません。(W-0011)`,
-    W_0012: `現在の設定では音源再生方法により小数の Adjustment が利用できません。<br>
-    また、Fadein を使用した場合は通常よりズレが発生することがあります。<br>
-    音源ファイルを js/txt 化するか、サーバー上動作とすれば解消します。(W-0012)`,
 
-    E_0011: `アーティスト名が未入力です。(E-0011)`,
-    E_0012: `曲名情報が未設定です。(E-0012)<br>
-    |musicTitle=曲名,アーティスト名,アーティストURL|`,
-    E_0021: `譜面情報が未指定か、フォーマットが間違っています。(E-0021)<br>
-    |difData=キー数,譜面名,初期速度|`,
-    E_0022: `外部譜面ファイルのフォーマットが間違っています。(E-0022)<br>
-    function externalDosInit() { g_externalDos = \`(譜面データ)\`; }`,
-    E_0023: `譜面情報が未指定です。(E-0023)<br>
-	以下のいずれか、または両方を指定してください。<br>
-	&lt;input type="hidden" name="externalDos" id="externalDos" value="dos.txt"&gt;<br>
-    &lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>`,
-    E_0031: `楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>
-    |musicUrl=****.mp3|`,
-    E_0032: `楽曲ファイルの読み込みに失敗しました。(E-0032)`,
-    E_0033: `楽曲ファイルの読み込み中に接続がタイムアウトしました。(E-0033)`,
-    E_0034: `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`,
-    E_0035: `お使いのOSでは指定された楽曲フォーマットに対応していません。(E-0035)`,
-    E_0041: `ファイル:{0}の読み込みに失敗しました。(E-0041)<br>`,
-    E_0042: `{0}は0より大きい値を指定する必要があります。(E-0042)`,
-    E_0051: `Displayオプションのデフォルト設定(XXXXChainOFF)で、<br>指定できない組み合わせが設定されています。(E-0051)`,
-
-    E_0101: `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
-    |color{0}=0,1,0,1,0,2|`,
-    E_0102: `新しいキー:{0}の[chara]が未定義です。(E-0102)<br>
-    |chara{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|`,
-    E_0103: `新しいキー:{0}の[stepRtn]が未定義です。(E-0103)<br>
-    |stepRtn{0}=0,45,-90,135,180,onigiri|`,
-    E_0104: `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
-    |keyCtrl{0}=75,79,76,80,187,32/0|`,
-
-    I_0001: `リザルトデータをクリップボードにコピーしました！`,
-    I_0002: `入力したキーは割り当てできません。他のキーを指定してください。`,
-    I_0003: `各譜面の明細情報をクリップボードにコピーしました！`,
 };
+
+const g_lang_msgInfoObj = {
+    Ja: {
+        W_0001: `お使いのブラウザは動作保証外です。<br>
+        Chrome/Opera/Vivaldiなど、WebKit系ブラウザの利用を推奨します。(W-0001)`,
+        W_0011: `fileスキームでの動作のため、内蔵の画像データを使用します。<br>
+        imgフォルダ以下の画像の変更は適用されません。(W-0011)`,
+        W_0012: `現在の設定では音源再生方法により小数の Adjustment が利用できません。<br>
+        また、Fadein を使用した場合は通常よりズレが発生することがあります。<br>
+        音源ファイルを js/txt 化するか、サーバー上動作とすれば解消します。(W-0012)`,
+
+        E_0011: `アーティスト名が未入力です。(E-0011)`,
+        E_0012: `曲名情報が未設定です。(E-0012)<br>
+        |musicTitle=曲名,アーティスト名,アーティストURL|`,
+        E_0021: `譜面情報が未指定か、フォーマットが間違っています。(E-0021)<br>
+        |difData=キー数,譜面名,初期速度|`,
+        E_0022: `外部譜面ファイルのフォーマットが間違っています。(E-0022)<br>
+        function externalDosInit() { g_externalDos = \`(譜面データ)\`; }`,
+        E_0023: `譜面情報が未指定です。(E-0023)<br>
+	    以下のいずれか、または両方を指定してください。<br>
+	    &lt;input type="hidden" name="externalDos" id="externalDos" value="dos.txt"&gt;<br>
+        &lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>`,
+        E_0031: `楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>
+        |musicUrl=****.mp3|`,
+        E_0032: `楽曲ファイルの読み込みに失敗しました。(E-0032)`,
+        E_0033: `楽曲ファイルの読み込み中に接続がタイムアウトしました。(E-0033)`,
+        E_0034: `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`,
+        E_0035: `お使いのOSでは指定された楽曲フォーマットに対応していません。(E-0035)`,
+        E_0041: `ファイル:{0}の読み込みに失敗しました。(E-0041)<br>`,
+        E_0042: `{0}は0より大きい値を指定する必要があります。(E-0042)`,
+        E_0051: `Displayオプションのデフォルト設定(XXXXChainOFF)で、<br>指定できない組み合わせが設定されています。(E-0051)`,
+
+        E_0101: `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
+        |color{0}=0,1,0,1,0,2|`,
+        E_0102: `新しいキー:{0}の[chara]が未定義です。(E-0102)<br>
+        |chara{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|`,
+        E_0103: `新しいキー:{0}の[stepRtn]が未定義です。(E-0103)<br>
+        |stepRtn{0}=0,45,-90,135,180,onigiri|`,
+        E_0104: `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
+        |keyCtrl{0}=75,79,76,80,187,32/0|`,
+
+        I_0001: `リザルトデータをクリップボードにコピーしました！`,
+        I_0002: `入力したキーは割り当てできません。他のキーを指定してください。`,
+        I_0003: `各譜面の明細情報をクリップボードにコピーしました！`,
+    },
+    En: {
+        W_0001: `Your browser is not guaranteed to work.<br>
+        We recommend using a WebKit browser such as Chrome, Opera and Vivaldi. (W-0001)`,
+        W_0011: `Uses built-in image data for operation with the file scheme.<br>
+        Changes to the images under the "img" folder will not be applied. (W-0011)`,
+        W_0012: `With the current settings, a small number of Adjustments cannot be used <br>
+        depending on the sound source playback method.<br>
+        Also, if you use "Fadein", it may be out of alignment.<br>
+        It can be solved by converting the sound source file to encoded data (js, txt) or <br>
+        operating it on the server. (W-0012)`,
+
+        E_0011: `The artist name is not set. (E-0011)`,
+        E_0012: `The music title information is not set. (E-0012)<br>
+        |musicTitle=曲名,アーティスト名,アーティストURL|`,
+        E_0021: `Musical information is not set or the format is incorrect.(E-0021)<br>
+        |difData=キー数,譜面名,初期速度|`,
+        E_0022: `The format of the external music file is incorrect.(E-0022)<br>
+        function externalDosInit() { g_externalDos = \`(譜面データ)\`; }`,
+        E_0023: `Musical information is not set. (E-0023)<br>
+	    Specify either or both of the following:<br>
+	    &lt;input type="hidden" name="externalDos" id="externalDos" value="dos.txt"&gt;<br>
+        &lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>`,
+        E_0031: `The music file is not set or the format is incorrect.(E-0031)<br>
+        |musicUrl=****.mp3|`,
+        E_0032: `Failed to read the music file. (E-0032)`,
+        E_0033: `The connection timed out while loading a music file. (E-0033)`,
+        E_0034: `An error occurred while reading the music file. (E-0034)`,
+        E_0035: `Your OS does not support the specified music format. (E-0035)`,
+        E_0041: `Failed to read file: {0}. (E-0041)<br>`,
+        E_0042: `{0} must be greater than 0. (E-0042)`,
+        E_0051: `In the default setting (XXXXChainOFF) of the Display option, <br>a combination that cannot be specified is set. (E-0051)`,
+
+        E_0101: `New key: {0} [color] is not set. (E-0101)<br>
+        |color{0}=0,1,0,1,0,2|`,
+        E_0102: `New key: {0} [chara] is not set. (E-0102)<br>
+        |chara{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|`,
+        E_0103: `New key: {0} [stepRtn] is not set. (E-0103)<br>
+        |stepRtn{0}=0,45,-90,135,180,onigiri|`,
+        E_0104: `New key: {0} [keyCtrl] is not set. (E-0104)<br>
+        |keyCtrl{0}=75,79,76,80,187,32/0|`,
+
+        I_0001: `Your result data is copied to the clipboard!`,
+        I_0002: `The specified key cannot be assigned. Please specify another key.`,
+        I_0003: `Charts information is copied to the clipboard!`,
+    },
+}
 
 /**
  * ショートカット表示のデフォルト値設定
@@ -2424,7 +2484,7 @@ const g_scViewObj = {
 };
 
 /**
- * ラベル表示定義
+ * ラベル表示定義（共通部）
  */
 const g_lblNameObj = {
     dancing: `DANCING`,
@@ -2435,13 +2495,6 @@ const g_lblNameObj = {
     key: `KEY`,
     config: `CONFIG`,
     result: `RESULT`,
-
-    kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
-    kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを一時的に変更`,
-    sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
-    kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
-    transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
-    sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
 
     maker: `Maker`,
     artist: `Artist`,
@@ -2495,15 +2548,6 @@ const g_lblNameObj = {
     s_time: `Time`,
     s_arrow: `Arrow`,
     s_frz: `Frz`,
-
-    s_level: `Level`,
-    s_douji: `同時補正`,
-    s_tate: `縦連補正`,
-    s_cnts: `All Arrows`,
-    s_linecnts: `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 ({0}):`,
-    s_print: `データ出力`,
-    s_printTitle: `Dancing☆Onigiri レベル計算ツール+++`,
-    s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
 
     d_StepZone: `StepZone`,
     d_Judgment: `Judgment`,
@@ -2591,15 +2635,6 @@ const g_lblNameObj = {
     ShuffleGroup: `ShuffleGr.`,
     KeyPattern: `KeyPattern`,
 
-    j_ii: "(・∀・)ｲｲ!!",
-    j_shakin: "(`・ω・)ｼｬｷﾝ",
-    j_matari: "( ´∀`)ﾏﾀｰﾘ",
-    j_shobon: "(´・ω・`)ｼｮﾎﾞｰﾝ",
-    j_uwan: "( `Д´)ｳﾜｧﾝ!!",
-
-    j_kita: "(ﾟ∀ﾟ)ｷﾀ-!!",
-    j_iknai: "(・A・)ｲｸﾅｲ",
-
     j_maxCombo: `MaxCombo`,
     j_fmaxCombo: `FreezeCombo`,
     j_score: `Score`,
@@ -2634,58 +2669,176 @@ const g_lblNameObj = {
 };
 
 /**
- * オンマウステキスト、確認メッセージ定義
+ * ラベル表示定義（言語別）
+ */
+const g_lang_lblNameObj = {
+    Ja: {
+        kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
+        kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを一時的に変更`,
+        sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
+        kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
+        transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
+        sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
+
+        s_level: `Level`,
+        s_douji: `同時補正`,
+        s_tate: `縦連補正`,
+        s_cnts: `All Arrows`,
+        s_linecnts: `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 ({0}):`,
+        s_print: `データ出力`,
+        s_printTitle: `Dancing☆Onigiri レベル計算ツール+++`,
+        s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
+
+        j_ii: "(・∀・)ｲｲ!!",
+        j_shakin: "(`・ω・)ｼｬｷﾝ",
+        j_matari: "( ´∀`)ﾏﾀｰﾘ",
+        j_shobon: "(´・ω・`)ｼｮﾎﾞｰﾝ",
+        j_uwan: "( `Д´)ｳﾜｧﾝ!!",
+
+        j_kita: "(ﾟ∀ﾟ)ｷﾀ-!!",
+        j_iknai: "(・A・)ｲｸﾅｲ",
+    },
+    En: {
+        kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
+        kcShuffleDesc: `Click the number to change the shuffle group, and click the arrow to change the color.`,
+        sdDesc: `[Click to switch, gray to OFF]`,
+        kcShortcutDesc: `Shortcut during play: "{0}" Return to title / "{1}" Retry the game`,
+        transKeyDesc: `High score, key config, etc. are not saved in another key mode`,
+        sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
+
+        s_level: `Level`,
+        s_douji: `N-push`,
+        s_tate: `Jack Corr.`,
+        s_cnts: `All Arrows`,
+        s_linecnts: `- Arrow:<br><br>- Freeze Arrow:<br><br>- 3 push positions ({0}):`,
+        s_print: `Copy Data`,
+        s_printTitle: `Dancing☆Onigiri Level calculator+++`,
+        s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
+
+        j_ii: ":D PERFECT!!",
+        j_shakin: ":) GREAT!",
+        j_matari: ":| GOOD",
+        j_shobon: ":( BAD",
+        j_uwan: ":_( MISS...",
+
+        j_kita: ":) O.K.",
+        j_iknai: ":( N.G.",
+    },
+};
+
+/**
+ * オンマウステキスト、確認メッセージ定義（共通）
  */
 const g_msgObj = {
 
-    reload: `ページを再読込します。`,
-    howto: `ゲーム画面の見方や設定の詳細についてのページへ移動します（GitHub Wiki）。`,
-    dataReset: `この作品で保存されているハイスコアや\nAdjustment情報等をリセットします。`,
-    github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
-    security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
+};
 
-    dataResetConfirm: `この作品のローカル設定をクリアします。よろしいですか？\n(ハイスコアやAdjustment等のデータがクリアされます)`,
-    keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
+/**
+ * オンマウステキスト、確認メッセージ定義（言語別）
+ */
+const g_lang_msgObj = {
 
-    difficulty: `譜面を選択します。`,
-    speed: `矢印の流れる速度を設定します。\n外側のボタンは1x単位、内側は0.25x単位で変更できます。`,
-    motion: `矢印の速度を一定ではなく、\n変動させるモーションをつけるか設定します。`,
-    reverse: `矢印の流れる向きを設定します。`,
-    scroll: `各レーンのスクロール方向をパターンに沿って設定します。\nReverse:ONでスクロール方向を反転します。`,
-    shuffle: `譜面を左右反転したり、ランダムにします。\nランダムにした場合は別譜面扱いとなり、ハイスコアは保存されません。`,
-    autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
-    gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量`,
-    adjustment: `タイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
-    fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
-    volume: `ゲーム内の音量を設定します。`,
+    Ja: {
+        reload: `説明文の言語を変更します。`,
+        howto: `ゲーム画面の見方や設定の詳細についてのページへ移動します（GitHub Wiki）。`,
+        dataReset: `この作品で保存されているハイスコアや\nAdjustment情報等をリセットします。`,
+        github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
+        security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
 
-    graph: `速度変化や譜面密度状況、\n譜面の難易度など譜面の詳細情報を表示します。`,
-    dataSave: `ハイスコア、リバース設定、\nキーコンフィグの保存の有無を設定します。`,
-    toDisplay: `プレイ画面上のオブジェクトの\n表示・非表示（一部透明度）を設定します。`,
-    toSettings: `SETTINGS画面へ戻ります。`,
+        dataResetConfirm: `この作品のローカル設定をクリアします。よろしいですか？\n(ハイスコアやAdjustment等のデータがクリアされます)`,
+        keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
 
-    d_stepzone: `ステップゾーンの表示`,
-    d_judgment: `判定キャラクタ・コンボの表示`,
-    d_fastslow: `Fast/Slow表示`,
-    d_lifegauge: `ライフゲージの表示`,
-    d_score: `現時点の判定数を表示`,
-    d_musicinfo: `音楽情報（時間表示含む）`,
-    d_filterline: `Hidden+, Sudden+使用時のフィルターの境界線表示`,
-    d_speed: `途中変速、個別加速の有効化設定`,
-    d_color: `色変化の有効化設定`,
-    d_lyrics: `歌詞表示の有効化設定`,
-    d_background: `背景・マスクモーションの有効化設定`,
-    d_arroweffect: `矢印・フリーズアローモーションの有効化設定`,
-    d_special: `作品固有の特殊演出の有効化設定`,
+        difficulty: `譜面を選択します。`,
+        speed: `矢印の流れる速度を設定します。\n外側のボタンは1x単位、内側は0.25x単位で変更できます。`,
+        motion: `矢印の速度を一定ではなく、\n変動させるモーションをつけるか設定します。`,
+        reverse: `矢印の流れる向きを設定します。`,
+        scroll: `各レーンのスクロール方向をパターンに沿って設定します。\nReverse:ONでスクロール方向を反転します。`,
+        shuffle: `譜面を左右反転したり、ランダムにします。\nランダムにした場合は別譜面扱いとなり、ハイスコアは保存されません。`,
+        autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
+        gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量`,
+        adjustment: `タイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
+        fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
+        volume: `ゲーム内の音量を設定します。`,
 
-    appearance: `流れる矢印の見え方を制御します。`,
-    opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
+        graph: `速度変化や譜面密度状況、\n譜面の難易度など譜面の詳細情報を表示します。`,
+        dataSave: `ハイスコア、リバース設定、\nキーコンフィグの保存の有無を設定します。`,
+        toDisplay: `プレイ画面上のオブジェクトの\n表示・非表示（一部透明度）を設定します。`,
+        toSettings: `SETTINGS画面へ戻ります。`,
 
-    configType: `キーコンフィグ対象を切り替えます。\n[Main] メインキーのみ, [Replaced] 代替キーのみ, [ALL] 全て`,
-    colorType: `矢印色の配色パターンを変更します。\nType1～4選択時は色変化が自動でOFFになります。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
-    imgType: `矢印・フリーズアローなどのオブジェクトの見た目を変更します。`,
-    colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
-    shuffleGroup: `Mirror/Asym-Mirror/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
+        d_stepzone: `ステップゾーンの表示`,
+        d_judgment: `判定キャラクタ・コンボの表示`,
+        d_fastslow: `Fast/Slow表示`,
+        d_lifegauge: `ライフゲージの表示`,
+        d_score: `現時点の判定数を表示`,
+        d_musicinfo: `音楽情報（時間表示含む）`,
+        d_filterline: `Hidden+, Sudden+使用時のフィルターの境界線表示`,
+        d_speed: `途中変速、個別加速の有効化設定`,
+        d_color: `色変化の有効化設定`,
+        d_lyrics: `歌詞表示の有効化設定`,
+        d_background: `背景・マスクモーションの有効化設定`,
+        d_arroweffect: `矢印・フリーズアローモーションの有効化設定`,
+        d_special: `作品固有の特殊演出の有効化設定`,
+
+        appearance: `流れる矢印の見え方を制御します。`,
+        opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
+
+        configType: `キーコンフィグ対象を切り替えます。\n[Main] メインキーのみ, [Replaced] 代替キーのみ, [ALL] 全て`,
+        colorType: `矢印色の配色パターンを変更します。\nType1～4選択時は色変化が自動でOFFになります。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
+        imgType: `矢印・フリーズアローなどのオブジェクトの見た目を変更します。`,
+        colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
+        shuffleGroup: `Mirror/Asym-Mirror/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
+    },
+
+    En: {
+        reload: `Change the language of the description.`,
+        howto: `Go to the page about the game screen and settings at GitHub Wiki.`,
+        dataReset: `Resets the high score, adjustment information, etc. saved in this game.`,
+        github: `Go to the GitHub page of Dancing Onigiri (CW Edition).`,
+        security: `Go to the support information page for Dancing Onigiri (CW Edition).`,
+
+        dataResetConfirm: `Clear the local settings for this game. Is it OK?\n(High score, adjustment, volume and some settings will be deleted)`,
+        keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,
+
+        difficulty: `Select a chart.`,
+        speed: `Set the speed of the sequences.\nThe outer button can be changed in 1x increments and the inner button in 0.25x increments.`,
+        motion: `Set whether to turn on acceleration or deceleration\nin the middle of the sequence.`,
+        reverse: `Set the flow direction of the sequences.`,
+        scroll: `Set the scroll direction for each lane according to the pattern.\nIf "Reverse:ON" sets, reverse the scroll direction.`,
+        shuffle: `Flip the chart left and right or make it random.\nIf you make it random, it will be treated as a separate score and the high score will not be saved.`,
+        autoPlay: `Set to auto play and to hit some keys automatically.\nHigh score is not saved during auto play.`,
+        gauge: `Set the clear condition.\n[Start] initial value, [Border] borderline value (hyphen means zero),\n[Recovery] recovery amount, [Damage] damage amount`,
+        adjustment: `If you feel a shift in timing, \nyou can correct the shift in frame units by changing the value.\nThe outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, \nand the inner button in 0.5 frame increments.`,
+        fadein: `Plays the chart from the middle.\nIf you start in the middle, the high score will not be saved.`,
+        volume: `Set the in-game volume.`,
+
+        graph: `Displays detailed information about the chart, such as sequences' speed changes, chart's density status, and chart's difficulty.`,
+        dataSave: `Set whether to save the high score, reverse setting, and key config.`,
+        toDisplay: `Set the display or non-display (partial transparency) of objects on the play screen.`,
+        toSettings: `Return to the SETTINGS screen.`,
+
+        d_stepzone: `Display step zone`,
+        d_judgment: `Display judgment and combo counts`,
+        d_fastslow: `Display fast and slow `,
+        d_lifegauge: `Display lifegauge`,
+        d_score: `Display the current number of judgments`,
+        d_musicinfo: `Display the music credits and current time`,
+        d_filterline: `Filter border display when using "Hidden+" or "Sudden+"`,
+        d_speed: `Enable speed change settings`,
+        d_color: `Enable color change settings`,
+        d_lyrics: `Enable lyrics display`,
+        d_background: `Enable background images and animations`,
+        d_arroweffect: `Enable sequences' animations`,
+        d_special: `Enable setting of special effects to the work`,
+
+        appearance: `Controls how the flowing sequences look.`,
+        opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,
+
+        configType: `Switch the key config target.\n[Main] main keys only, [Replaced] alternate keys only, [ALL] all keys`,
+        colorType: `Change the color scheme of the sequences color.\nWhen Type 1 to 4 are selected, the color change is automatically turned off.\n[Type0] Switch the sequences color gradations, [Type1～4] default color scheme`,
+        imgType: `Change the appearance of sequences.`,
+        colorGroup: `Change the sequences color group assignment pattern.`,
+        shuffleGroup: `Change the shuffle group when Mirror, Asym-Mirror, Random or S-Random are selected.\nShuffle with the same numbers listed above.`,
+    },
 
 };
 
