@@ -2430,23 +2430,23 @@ const g_lang_msgInfoObj = {
         We recommend using a WebKit browser such as Chrome, Opera and Vivaldi. (W-0001)`,
         W_0011: `Uses built-in image data for operation with the file scheme.<br>
         Changes to the images under the "img" folder will not be applied. (W-0011)`,
-        W_0012: `With the current settings, a decimal of "Adjustments" cannot be used <br>
+        W_0012: `With the current settings, a decimal of "Adjustments" cannot be used 
         depending on the sound source playback method.<br>
         Also, if you use "Fadein", it may be out of alignment.<br>
-        It can be solved by converting the sound source file to encoded data (js, txt) or <br>
+        It can be solved by converting the sound source file to encoded data (js, txt) or 
         operating it on the server. (W-0012)`,
 
         E_0011: `The artist name is not set. (E-0011)`,
-        E_0012: `The music title information is not set. (E-0012)<br>
-        |musicTitle=曲名,アーティスト名,アーティストURL|`,
-        E_0021: `Musical information is not set or the format is incorrect.(E-0021)<br>
-        |difData=キー数,譜面名,初期速度|`,
+        E_0012: `The song title information is not set. (E-0012)<br>
+        |musicTitle=,Song title,Artist name,Artist's site URL|`,
+        E_0021: `Music information is not set or the format is incorrect.(E-0021)<br>
+        |difData=Keys' name,chart's name,Specified speed|`,
         E_0022: `The format of the external music file is incorrect.(E-0022)<br>
-        function externalDosInit() { g_externalDos = \`(譜面データ)\`; }`,
-        E_0023: `Musical information is not set. (E-0023)<br>
+        function externalDosInit() { g_externalDos = \`(Chart data)\`; }`,
+        E_0023: `Music information is not set. (E-0023)<br>
 	    Specify either or both of the following:<br>
 	    &lt;input type="hidden" name="externalDos" id="externalDos" value="dos.txt"&gt;<br>
-        &lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>`,
+        &lt;input type="hidden" name="dos" id="dos" value="(Chart data)"&gt;<br>`,
         E_0031: `The music file is not set or the format is incorrect.(E-0031)<br>
         |musicUrl=****.mp3|`,
         E_0032: `Failed to read the music file. (E-0032)`,

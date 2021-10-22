@@ -2654,15 +2654,29 @@ function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 	} else {
 		divRoot.removeChild(document.querySelector(`#lblWarning`));
 	}
-	const len = (_text.split(`<br>`).length + _text.split(`<p>`).length - 1) * 21;
+
+	// ウィンドウ枠の行を取得するために一時的な枠を作成
+	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
+		x: 0, y: 70, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+		lineHeight: `15px`, fontFamily: getBasicFont(),
+	})
+	divRoot.appendChild(tmplbl);
+	const range = new Range();
+	range.selectNode(document.querySelector(`#lblTmpWarning`));
+
+	// ウィンドウ枠の行を元に縦の長さを決定(150pxを超えた場合は縦スクロールバーを付与)
+	const len = (range.getClientRects().length) * 21;
 	const warnHeight = (len < 150 ? len : 150);
 	const lbl = createDivCss2Label(`lblWarning`, _text, {
 		x: 0, y: 70, w: g_sWidth, h: warnHeight, siz: C_SIZ_MAIN, backgroundColor: _bkColor,
 		opacity: 0.9, lineHeight: `15px`, color: _textColor, align: _align, fontFamily: getBasicFont(),
-	})
+	});
 	if (warnHeight === 150) {
 		lbl.style.overflow = `auto`;
 	}
+
+	// 一時的な枠を削除
+	divRoot.removeChild(document.querySelector(`#lblTmpWarning`));
 
 	return lbl;
 }
