@@ -2662,7 +2662,7 @@ function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 	})
 	divRoot.appendChild(tmplbl);
 	const range = new Range();
-	range.selectNode(document.querySelector(`#lblTmpWarning`));
+	range.selectNode(tmplbl);
 
 	// ウィンドウ枠の行を元に縦の長さを決定(150pxを超えた場合は縦スクロールバーを付与)
 	const len = (range.getClientRects().length) * 21;
@@ -2676,7 +2676,7 @@ function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 	}
 
 	// 一時的な枠を削除
-	divRoot.removeChild(document.querySelector(`#lblTmpWarning`));
+	divRoot.removeChild(tmplbl);
 
 	return lbl;
 }
