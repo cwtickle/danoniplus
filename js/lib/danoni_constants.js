@@ -2438,7 +2438,7 @@ const g_lang_msgInfoObj = {
 
         E_0011: `The artist name is not set. (E-0011)`,
         E_0012: `The song title information is not set. (E-0012)<br>
-        |musicTitle=,Song title,Artist name,Artist's site URL|`,
+        |musicTitle=Song title,Artist name,Artist's site URL|`,
         E_0021: `Music information is not set or the format is incorrect.(E-0021)<br>
         |difData=Keys' name,chart's name,Specified speed|`,
         E_0022: `The format of the external music file is incorrect.(E-0022)<br>
