@@ -2430,7 +2430,7 @@ const g_lang_msgInfoObj = {
         We recommend using a WebKit browser such as Chrome, Opera and Vivaldi. (W-0001)`,
         W_0011: `Uses built-in image data for operation with the file scheme.<br>
         Changes to the images under the "img" folder will not be applied. (W-0011)`,
-        W_0012: `With the current settings, a decimal of "Adjustments" cannot be used 
+        W_0012: `With the current settings, a decimal of "Adjustment" cannot be used 
         depending on the sound source playback method.<br>
         Also, if you use "Fadein", it may be out of alignment.<br>
         It can be solved by converting the sound source file to encoded data (js, txt) or 
@@ -2712,7 +2712,7 @@ const g_lang_lblNameObj = {
         s_cnts: `All Arrows`,
         s_linecnts: `- Arrow:<br><br>- Freeze Arrow:<br><br>- 3 push positions ({0}):`,
         s_print: `CopyData`,
-        s_printTitle: `Dancing☆Onigiri Level calculator+++`,
+        s_printTitle: `Dancing☆Onigiri Level Calculator+++`,
         s_printHeader: `Level\tN-Push\tJack\tAll\tArrow\tFrz\tAPM\tTime`,
 
         j_ii: ":D PERFECT!!",
@@ -2793,10 +2793,10 @@ const g_lang_msgObj = {
         reload: `Change the language of the description.`,
         howto: `Go to the page about the game screen and settings at GitHub Wiki.`,
         dataReset: `Resets the high score, adjustment information, etc. saved in this game.`,
-        github: `Go to the GitHub page of Dancing Onigiri (CW Edition).`,
-        security: `Go to the support information page for Dancing Onigiri (CW Edition).`,
+        github: `Go to the GitHub page of Dancing Onigiri "CW Edition".`,
+        security: `Go to the support information page for Dancing Onigiri "CW Edition".`,
 
-        dataResetConfirm: `Clear the local settings for this game. Is it OK?\n(High score, adjustment, volume and some settings will be deleted)`,
+        dataResetConfirm: `Delete the local settings in this game. Is it OK?\n(High score, adjustment, volume and some settings will be initialized)`,
         keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,
 
         difficulty: `Select a chart.`,
