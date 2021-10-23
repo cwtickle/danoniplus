@@ -2730,7 +2730,7 @@ const g_lang_lblNameObj = {
  * オンマウステキスト、確認メッセージ定義（共通）
  */
 const g_msgObj = {
-
+    reload: `説明文の言語を変更します。\nChange the language of the description.`,
 };
 
 /**
@@ -2739,7 +2739,6 @@ const g_msgObj = {
 const g_lang_msgObj = {
 
     Ja: {
-        reload: `説明文の言語を変更します。`,
         howto: `ゲーム画面の見方や設定の詳細についてのページへ移動します（GitHub Wiki）。`,
         dataReset: `この作品で保存されているハイスコアや\nAdjustment情報等をリセットします。`,
         github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
@@ -2790,7 +2789,6 @@ const g_lang_msgObj = {
     },
 
     En: {
-        reload: `Change the language of the description.`,
         howto: `Go to the page about the game screen and settings at GitHub Wiki.`,
         dataReset: `Resets the high score, adjustment information, etc. saved in this game.`,
         github: `Go to the GitHub page of Dancing Onigiri "CW Edition".`,
