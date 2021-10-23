@@ -201,7 +201,12 @@ const g_presetResultVals = {
  * ※設定可能項目についてはdanoni_constants.jsをご覧ください。
  */
 const g_local_lblNameObj = {
+	Ja: {
 
+	},
+	En: {
+
+	},
 };
 
 /**
@@ -210,7 +215,12 @@ const g_local_lblNameObj = {
  * ※設定可能項目についてはdanoni_constants.jsをご覧ください。
  */
 const g_local_msgObj = {
+	Ja: {
 
+	},
+	En: {
+
+	},
 };
 
 /**
