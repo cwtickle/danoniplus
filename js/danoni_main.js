@@ -2776,6 +2776,18 @@ function updateImgType(_imgType) {
 }
 
 /**
+ * 独自で設定したラベルテキスト、オンマウステキスト、確認メッセージ定義を上書き
+ */
+function updateLocalDesc() {
+	if (typeof g_local_lblNameObj === C_TYP_OBJECT && g_local_lblNameObj[g_localeObj.val] !== undefined) {
+		Object.keys(g_local_lblNameObj[g_localeObj.val]).forEach(property => g_lblNameObj[property] = g_local_lblNameObj[g_localeObj.val][property]);
+	}
+	if (typeof g_local_msgObj === C_TYP_OBJECT && g_local_msgObj[g_localeObj.val] !== undefined) {
+		Object.keys(g_local_msgObj[g_localeObj.val]).forEach(property => g_msgObj[property] = g_local_msgObj[g_localeObj.val][property]);
+	}
+}
+
+/**
  * 譜面ヘッダーの分解（その他の設定）
  * @param {object} _dosObj 譜面データオブジェクト
  */
@@ -2827,14 +2839,8 @@ function headerConvert(_dosObj) {
 
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
 	Object.keys(g_lang_lblNameObj[g_localeObj.val]).forEach(property => g_lblNameObj[property] = g_lang_lblNameObj[g_localeObj.val][property]);
-	if (typeof g_local_lblNameObj === C_TYP_OBJECT) {
-		Object.keys(g_local_lblNameObj).forEach(property => g_lblNameObj[property] = g_local_lblNameObj[property]);
-	}
-
 	Object.keys(g_lang_msgObj[g_localeObj.val]).forEach(property => g_msgObj[property] = g_lang_msgObj[g_localeObj.val][property]);
-	if (typeof g_local_msgObj === C_TYP_OBJECT) {
-		Object.keys(g_local_msgObj).forEach(property => g_msgObj[property] = g_local_msgObj[property]);
-	}
+	updateLocalDesc();
 
 	// 曲名
 	obj.musicTitles = [];
