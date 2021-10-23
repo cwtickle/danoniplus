@@ -2713,7 +2713,7 @@ const g_lang_lblNameObj = {
         s_linecnts: `- Arrow:<br><br>- Freeze Arrow:<br><br>- 3 push positions ({0}):`,
         s_print: `CopyData`,
         s_printTitle: `Dancing☆Onigiri Level calculator+++`,
-        s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
+        s_printHeader: `Level\tN-Push\tJack\tAll\tArrow\tFrz\tAPM\tTime`,
 
         j_ii: ":D PERFECT!!",
         j_shakin: ":) GREAT!",
