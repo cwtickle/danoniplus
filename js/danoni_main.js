@@ -1264,13 +1264,16 @@ function loadLocalStorage() {
 		}
 	};
 
+	// ロケールの読込、警告メッセージの入替
 	const checkLocale = localStorage.getItem(`danoni-locale`);
 	if (checkLocale) {
 		g_langStorage = JSON.parse(checkLocale);
 		g_localeObj.val = g_langStorage.locale;
 		g_localeObj.num = g_localeObj.list.findIndex(val => val === g_localeObj.val);
 	}
+	Object.keys(g_lang_msgInfoObj[g_localeObj.val]).forEach(property => g_msgInfoObj[property] = g_lang_msgInfoObj[g_localeObj.val][property]);
 
+	// 作品別ローカルストレージの読込
 	const checkStorage = localStorage.getItem(g_localStorageUrl);
 	if (checkStorage) {
 		g_localStorage = JSON.parse(checkStorage);
@@ -2823,7 +2826,6 @@ function headerConvert(_dosObj) {
 	}
 
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
-	Object.keys(g_lang_msgInfoObj[g_localeObj.val]).forEach(property => g_msgInfoObj[property] = g_lang_msgInfoObj[g_localeObj.val][property]);
 	Object.keys(g_lang_lblNameObj[g_localeObj.val]).forEach(property => g_lblNameObj[property] = g_lang_lblNameObj[g_localeObj.val][property]);
 	if (typeof g_local_lblNameObj === C_TYP_OBJECT) {
 		Object.keys(g_local_lblNameObj).forEach(property => g_lblNameObj[property] = g_local_lblNameObj[property]);
