@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/10/16
+ * Revised : 2021/10/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 23.5.1`;
-const g_revisedDate = `2021/10/16`;
+const g_version = `Ver 24.0.0`;
+const g_revisedDate = `2021/10/24`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -171,6 +171,8 @@ let g_musicEncodedFlg = false;
 // 外部dosデータ
 let g_externalDos = ``;
 let g_musicdata = ``;
+
+let g_langStorage = {};
 
 // ローカルストレージ設定 (作品別)
 let g_localStorage;
@@ -1262,6 +1264,16 @@ function loadLocalStorage() {
 		}
 	};
 
+	// ロケールの読込、警告メッセージの入替
+	const checkLocale = localStorage.getItem(`danoni-locale`);
+	if (checkLocale) {
+		g_langStorage = JSON.parse(checkLocale);
+		g_localeObj.val = g_langStorage.locale;
+		g_localeObj.num = g_localeObj.list.findIndex(val => val === g_localeObj.val);
+	}
+	Object.keys(g_lang_msgInfoObj[g_localeObj.val]).forEach(property => g_msgInfoObj[property] = g_lang_msgInfoObj[g_localeObj.val][property]);
+
+	// 作品別ローカルストレージの読込
 	const checkStorage = localStorage.getItem(g_localStorageUrl);
 	if (checkStorage) {
 		g_localStorage = JSON.parse(checkStorage);
@@ -2465,12 +2477,17 @@ function titleInit() {
 			},
 		}, g_cssObj.button_Reset),
 
-		// リロードボタン
-		createCss2Button(`btnReload`, `R`, _ => true, {
+		// ロケール切替
+		createCss2Button(`btnReload`, g_localeObj.val, _ => true, {
 			x: 10, y: 10,
 			w: 30, h: 30, siz: 20,
 			title: g_msgObj.reload,
-			resetFunc: _ => location.reload(),
+			resetFunc: _ => {
+				g_localeObj.num = (++g_localeObj.num) % g_localeObj.list.length;
+				g_langStorage.locale = g_localeObj.list[g_localeObj.num];
+				localStorage.setItem(`danoni-locale`, JSON.stringify(g_langStorage));
+				location.reload();
+			},
 		}, g_cssObj.button_Start),
 
 		// ヘルプ
@@ -2640,15 +2657,29 @@ function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 	} else {
 		divRoot.removeChild(document.querySelector(`#lblWarning`));
 	}
-	const len = (_text.split(`<br>`).length + _text.split(`<p>`).length - 1) * 21;
+
+	// ウィンドウ枠の行を取得するために一時的な枠を作成
+	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
+		x: 0, y: 70, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+		lineHeight: `15px`, fontFamily: getBasicFont(),
+	})
+	divRoot.appendChild(tmplbl);
+	const range = new Range();
+	range.selectNode(tmplbl);
+
+	// ウィンドウ枠の行を元に縦の長さを決定(150pxを超えた場合は縦スクロールバーを付与)
+	const len = (range.getClientRects().length) * 21;
 	const warnHeight = (len < 150 ? len : 150);
 	const lbl = createDivCss2Label(`lblWarning`, _text, {
 		x: 0, y: 70, w: g_sWidth, h: warnHeight, siz: C_SIZ_MAIN, backgroundColor: _bkColor,
 		opacity: 0.9, lineHeight: `15px`, color: _textColor, align: _align, fontFamily: getBasicFont(),
-	})
+	});
 	if (warnHeight === 150) {
 		lbl.style.overflow = `auto`;
 	}
+
+	// 一時的な枠を削除
+	divRoot.removeChild(tmplbl);
 
 	return lbl;
 }
@@ -2745,6 +2776,18 @@ function updateImgType(_imgType) {
 }
 
 /**
+ * 独自で設定したラベルテキスト、オンマウステキスト、確認メッセージ定義を上書き
+ */
+function updateLocalDesc() {
+	if (typeof g_local_lblNameObj === C_TYP_OBJECT && g_local_lblNameObj[g_localeObj.val] !== undefined) {
+		Object.keys(g_local_lblNameObj[g_localeObj.val]).forEach(property => g_lblNameObj[property] = g_local_lblNameObj[g_localeObj.val][property]);
+	}
+	if (typeof g_local_msgObj === C_TYP_OBJECT && g_local_msgObj[g_localeObj.val] !== undefined) {
+		Object.keys(g_local_msgObj[g_localeObj.val]).forEach(property => g_msgObj[property] = g_local_msgObj[g_localeObj.val][property]);
+	}
+}
+
+/**
  * 譜面ヘッダーの分解（その他の設定）
  * @param {object} _dosObj 譜面データオブジェクト
  */
@@ -2795,12 +2838,9 @@ function headerConvert(_dosObj) {
 	}
 
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
-	if (typeof g_local_lblNameObj === C_TYP_OBJECT) {
-		Object.keys(g_local_lblNameObj).forEach(property => g_lblNameObj[property] = g_local_lblNameObj[property]);
-	}
-	if (typeof g_local_msgObj === C_TYP_OBJECT) {
-		Object.keys(g_local_msgObj).forEach(property => g_msgObj[property] = g_local_msgObj[property]);
-	}
+	Object.keys(g_lang_lblNameObj[g_localeObj.val]).forEach(property => g_lblNameObj[property] = g_lang_lblNameObj[g_localeObj.val][property]);
+	Object.keys(g_lang_msgObj[g_localeObj.val]).forEach(property => g_msgObj[property] = g_lang_msgObj[g_localeObj.val][property]);
+	updateLocalDesc();
 
 	// 曲名
 	obj.musicTitles = [];
@@ -4781,6 +4821,8 @@ function createOptionWindow(_sprite) {
 	 */
 	function setDifficulty(_initFlg) {
 
+		const getCurrentNo = (_list, _target) => roundZero(_list.findIndex(item => item === _target));
+
 		// ---------------------------------------------------
 		// 1. キーコンフィグ設定 (KeyConfig)
 
@@ -4803,25 +4845,29 @@ function createOptionWindow(_sprite) {
 			});
 		}
 
+		// ---------------------------------------------------
+		// 2. 初期化設定
+
+		// スクロール設定用の配列を入れ替え
+		g_settings.scrolls = copyArray2d(
+			typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
+				g_keyObj[`scrollName${g_keyObj.currentKey}`] : g_keyObj.scrollName_def
+		);
+
 		// アシスト設定の配列を入れ替え
 		g_settings.autoPlays = (typeof g_keyObj[`assistName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
 			g_autoPlaysBase.concat(g_keyObj[`assistName${g_keyObj.currentKey}`]) :
 			g_autoPlaysBase.concat());
 
-		// ---------------------------------------------------
-		// 2. 初期化設定
-
 		if (_initFlg) {
 
 			// 速度、ゲージ、リバースの初期設定
 			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
-			g_settings.speedNum = roundZero(g_settings.speeds.findIndex(speed => speed === g_stateObj.speed));
+			g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
 			g_settings.gaugeNum = 0;
 			if (isNotSameKey) {
-				g_settings.scrollNum = 0;
-				if (!g_settings.autoPlays.includes(g_stateObj.autoPlay)) {
-					g_settings.autoPlayNum = 0;
-				}
+				g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
+				g_settings.autoPlayNum = getCurrentNo(g_settings.autoPlays, g_stateObj.autoPlay);
 				g_keycons.shuffleGroupNum = 0;
 			}
 		}
@@ -4907,10 +4953,6 @@ function createOptionWindow(_sprite) {
 
 		// リバース設定 (Reverse, Scroll)
 		if (g_headerObj.scrollUse) {
-			g_settings.scrolls = copyArray2d(
-				typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
-					g_keyObj[`scrollName${g_keyObj.currentKey}`] : g_keyObj.scrollName_def
-			);
 			g_stateObj.scroll = g_settings.scrolls[g_settings.scrollNum];
 			const [visibleScr, hiddenScr] = (g_settings.scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
 			spriteList[visibleScr].style.display = C_DIS_INHERIT;
@@ -5225,7 +5267,8 @@ function settingsDisplayInit() {
 	// ショートカットキーメッセージ
 	divRoot.appendChild(
 		createDivCss2Label(`scMsg`, g_lblNameObj.sdShortcutDesc, {
-			x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+			x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20,
+			siz: getFontSize(g_lblNameObj.sdShortcutDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
 		})
 	);
 
@@ -5415,10 +5458,12 @@ function keyConfigInit(_kcType = g_kcType) {
 		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
 			.split(`{1}:`).join(g_isMac ? `` : `Delete:`), {
 			x: 0, y: 68, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+			siz: getFontSize(g_lblNameObj.kcDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
 		}),
 
 		createDivCss2Label(`kcShuffleDesc`, g_lblNameObj.kcShuffleDesc, {
-			x: 5, y: g_sHeight - 125, w: g_sWidth, h: 20, siz: 14, align: C_ALIGN_LEFT,
+			x: 5, y: g_sHeight - 125, w: g_sWidth, h: 20, align: C_ALIGN_LEFT,
+			siz: getFontSize(g_lblNameObj.kcShuffleDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
 		}),
 
 	);
@@ -5696,15 +5741,17 @@ function keyConfigInit(_kcType = g_kcType) {
 		viewGroup(_type);
 	};
 
+	const scMsg = g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
+		.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]);
+
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
 		createDivCss2Label(
-			`scMsg`,
-			g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
-				.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]),
+			`scMsg`, scMsg,
 			{
-				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20,
+				siz: getFontSize(scMsg, g_sWidth, getBasicFont(), C_SIZ_MAIN),
 			}),
 
 		// 別キーモード警告メッセージ
@@ -7860,13 +7907,14 @@ function MainInit() {
 	// 曲名・アーティスト名、譜面名表示
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
-	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
+	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
+	const shuffleName = (g_stateObj.shuffle !== C_FLG_OFF ? `: ${getShuffleName()}` : ``);
 
 	// 曲名・アーティスト名、譜面名のサイズ調整
 	const checkMusicSiz = (_text, _siz) => getFontSize(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, getBasicFont(), _siz);
 
 	const makerView = g_headerObj.makerView ? ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})` : ``;
-	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${makerView}]`;
+	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${shuffleName}${makerView}]`;
 	let creditName = `${musicTitle} / ${artistName}`;
 	if (checkMusicSiz(creditName, C_SIZ_MUSIC_TITLE) < 12) {
 		creditName = `${musicTitle}`;
@@ -9544,17 +9592,9 @@ function resultInit() {
 		transKeyData = `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)`;
 	}
 
-	const getShuffleName = _ => {
-		let shuffleName = getStgDetailName(g_stateObj.shuffle);
-		if (!g_stateObj.shuffle.endsWith(`+`)) {
-			shuffleName += setScoreIdHeader(g_keycons.shuffleGroupNum);
-		}
-		return shuffleName;
-	}
-
 	let difData = [
 		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
-		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${g_stateObj.autoPlay}less`)}`,
+		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
 		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getShuffleName()}]`)}`
 	].filter(value => value !== ``).join(` `);
@@ -9945,6 +9985,18 @@ function resultInit() {
 			skinResultInit2();
 		}
 	}
+}
+
+/**
+ * シャッフル名称の取得
+ * @returns 
+ */
+const getShuffleName = _ => {
+	let shuffleName = getStgDetailName(g_stateObj.shuffle);
+	if (!g_stateObj.shuffle.endsWith(`+`)) {
+		shuffleName += setScoreIdHeader(g_keycons.shuffleGroupNum);
+	}
+	return shuffleName;
 }
 
 /**
