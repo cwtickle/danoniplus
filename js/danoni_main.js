@@ -6663,27 +6663,23 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		}
 
 		let cssMotionData = [];
+		let sortedCssMotionData = [];
 
 		if (hasVal(dosCssMotionData) && g_stateObj.d_arroweffect === C_FLG_ON) {
-			let motionIdx = 0;
-
 			splitLF(dosCssMotionData).filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpcssMotionData = tmpData.split(`,`);
 				if (isNaN(parseInt(tmpcssMotionData[0]))) {
 					return;
 				}
-				cssMotionData[motionIdx] = {
-					frame: calcFrame(tmpcssMotionData[0]),
-					arrowNum: parseFloat(tmpcssMotionData[1]),
-					styleUp: (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]),
-					styleDown: (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], cssMotionData[motionIdx + 2], C_TYP_STRING)),
-				};
-				motionIdx++;
+				const frame = calcFrame(tmpcssMotionData[0]);
+				const arrowNum = parseFloat(tmpcssMotionData[1]);
+				const styleUp = (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]);
+				const styleDown = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], styleUp, C_TYP_STRING));
+
+				cssMotionData.push([frame, arrowNum, styleUp, styleDown]);
 			});
-			cssMotionData.sort((_a, _b) => _a.frame - _b.frame);
+			sortedCssMotionData = cssMotionData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
-		const sortedCssMotionData = [];
-		cssMotionData.forEach(data => sortedCssMotionData.push(data.frame, data.arrowNum, data.styleUp, data.styleDown));
 
 		return sortedCssMotionData;
 	}
