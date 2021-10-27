@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/10/24
+ * Revised : 2021/10/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 24.0.0`;
-const g_revisedDate = `2021/10/24`;
+const g_version = `Ver 24.0.1`;
+const g_revisedDate = `2021/10/27`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -6584,10 +6584,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _footer 
 	 */
 	function setSpeedData(_header, _scoreNo, _footer = `_data`) {
-		let speedData = [];
+		const speedData = [];
 
 		if (hasVal(_dosObj[`${_header}${_scoreNo}${_footer}`]) && g_stateObj.d_speed === C_FLG_ON) {
-			let speedIdx = 0;
 			const tmpArrayData = splitLF(_dosObj[`${_header}${_scoreNo}${_footer}`]);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
@@ -6598,19 +6597,15 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					} else if (tmpSpeedData[k + 1] === `-`) {
 						break;
 					}
-					speedData[speedIdx] = {
-						frame: calcFrame(setVal(tmpSpeedData[k], ``, C_TYP_CALC)),
-						speed: setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC),
-					};
-					speedIdx++;
+					const frame = calcFrame(setVal(tmpSpeedData[k], ``, C_TYP_CALC));
+					const speed = setVal(tmpSpeedData[k + 1], 1, C_TYP_CALC);
+
+					speedData.push([frame, speed]);
 				}
 			});
-			speedData.sort((_a, _b) => _a.frame - _b.frame);
+			return speedData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
-		const sortedSpeedData = [];
-		speedData.forEach(data => sortedSpeedData.push(data.frame, data.speed));
-
-		return sortedSpeedData;
+		return [];
 	}
 
 	/**
@@ -6619,10 +6614,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	function setColorData(_header, _scoreNo) {
-		let colorData = [];
+		const colorData = [];
 
 		if (hasVal(_dosObj[`${_header}${_scoreNo}_data`]) && g_stateObj.d_color === C_FLG_ON) {
-			let colorIdx = 0;
 			const tmpArrayData = splitLF(_dosObj[`${_header}${_scoreNo}_data`]);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
@@ -6633,20 +6627,16 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					} else if (tmpColorData[k + 1] === `-`) {
 						break;
 					}
-					colorData[colorIdx] = {
-						frame: calcFrame(setVal(tmpColorData[k], ``, C_TYP_CALC)),
-						colorNum: setVal(tmpColorData[k + 1], 0, C_TYP_CALC),
-						colorCd: tmpColorData[k + 2],
-					};
-					colorIdx++;
+					const frame = calcFrame(setVal(tmpColorData[k], ``, C_TYP_CALC));
+					const colorNum = setVal(tmpColorData[k + 1], 0, C_TYP_CALC);
+					const colorCd = tmpColorData[k + 2];
+
+					colorData.push([frame, colorNum, colorCd]);
 				}
 			});
-			colorData.sort((_a, _b) => _a.frame - _b.frame);
+			return colorData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
-		const sortedColorData = [];
-		colorData.forEach(data => sortedColorData.push(data.frame, data.colorNum, data.colorCd));
-
-		return sortedColorData;
+		return [];
 	}
 
 	/**
@@ -6661,31 +6651,24 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		} else if (_dosObj[`${_header}Motion_data`] !== undefined) {
 			dosCssMotionData = _dosObj[`${_header}Motion_data`];
 		}
-
-		let cssMotionData = [];
+		const cssMotionData = [];
 
 		if (hasVal(dosCssMotionData) && g_stateObj.d_arroweffect === C_FLG_ON) {
-			let motionIdx = 0;
-
 			splitLF(dosCssMotionData).filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpcssMotionData = tmpData.split(`,`);
 				if (isNaN(parseInt(tmpcssMotionData[0]))) {
 					return;
 				}
-				cssMotionData[motionIdx] = {
-					frame: calcFrame(tmpcssMotionData[0]),
-					arrowNum: parseFloat(tmpcssMotionData[1]),
-					styleUp: (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]),
-					styleDown: (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], cssMotionData[motionIdx + 2], C_TYP_STRING)),
-				};
-				motionIdx++;
-			});
-			cssMotionData.sort((_a, _b) => _a.frame - _b.frame);
-		}
-		const sortedCssMotionData = [];
-		cssMotionData.forEach(data => sortedCssMotionData.push(data.frame, data.arrowNum, data.styleUp, data.styleDown));
+				const frame = calcFrame(tmpcssMotionData[0]);
+				const arrowNum = parseFloat(tmpcssMotionData[1]);
+				const styleUp = (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]);
+				const styleDown = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], styleUp, C_TYP_STRING));
 
-		return sortedCssMotionData;
+				cssMotionData.push([frame, arrowNum, styleUp, styleDown]);
+			});
+			return cssMotionData.sort((_a, _b) => _a[0] - _b[0]).flat();
+		}
+		return [];
 	}
 
 	/**
