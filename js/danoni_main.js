@@ -2668,7 +2668,7 @@ function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 	range.selectNode(tmplbl);
 
 	// ウィンドウ枠の行を元に縦の長さを決定(150pxを超えた場合は縦スクロールバーを付与)
-	const len = (range.getClientRects().length) * 21;
+	const len = (Math.max(range.getClientRects().length, _text.split(`<br>`).length + _text.split(`<p>`).length - 1)) * 21;
 	const warnHeight = (len < 150 ? len : 150);
 	const lbl = createDivCss2Label(`lblWarning`, _text, {
 		x: 0, y: 70, w: g_sWidth, h: warnHeight, siz: C_SIZ_MAIN, backgroundColor: _bkColor,
