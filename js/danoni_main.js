@@ -576,6 +576,19 @@ function copyTextToClipboard(_textVal) {
 }
 
 /**
+ * user-select属性の値変更
+ * @param {object} _style 
+ * @param {string} _value 
+ */
+function setUserSelect(_style, _value = C_DIS_NONE) {
+	_style.userSelect = _value;
+	_style.webkitUserSelect = _value;
+	_style.msUserSelect = _value;
+	_style.mozUserSelect = _value;
+	_style.webkitTouchCallout = _value;
+}
+
+/**
  * 図形の描画
  * - div子要素の作成。呼び出しただけでは使用できないので、親divよりappendChildすること。
  * - 詳細は @see {@link createButton} も参照のこと。 
@@ -595,12 +608,7 @@ function createDiv(_id, _x, _y, _width, _height) {
 	style.width = `${_width}px`;
 	style.height = `${_height}px`;
 	style.position = `absolute`;
-
-	style.userSelect = C_DIS_NONE;
-	style.webkitUserSelect = C_DIS_NONE;
-	style.msUserSelect = C_DIS_NONE;
-	style.mozUserSelect = C_DIS_NONE;
-	style.webkitTouchCallout = C_DIS_NONE;
+	setUserSelect(style);
 
 	return div;
 }
@@ -2630,6 +2638,7 @@ function makeWarningWindow(_text = ``, _resetFlg = false) {
 	}
 	if (g_errMsgObj[displayName].length > 0) {
 		divRoot.appendChild(setWindowStyle(`<p>${g_errMsgObj[displayName].join('</p><p>')}</p>`, `#ffcccc`, `#660000`));
+		setUserSelect(lblWarning.style, `text`);
 	}
 }
 
