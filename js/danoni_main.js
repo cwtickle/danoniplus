@@ -576,6 +576,19 @@ function copyTextToClipboard(_textVal) {
 }
 
 /**
+ * user-select属性の値変更
+ * @param {object} _style 
+ * @param {string} _value 
+ */
+function setUserSelect(_style, _value = C_DIS_NONE) {
+	_style.userSelect = _value;
+	_style.webkitUserSelect = _value;
+	_style.msUserSelect = _value;
+	_style.mozUserSelect = _value;
+	_style.webkitTouchCallout = _value;
+}
+
+/**
  * 図形の描画
  * - div子要素の作成。呼び出しただけでは使用できないので、親divよりappendChildすること。
  * - 詳細は @see {@link createButton} も参照のこと。 
@@ -595,12 +608,7 @@ function createDiv(_id, _x, _y, _width, _height) {
 	style.width = `${_width}px`;
 	style.height = `${_height}px`;
 	style.position = `absolute`;
-
-	style.userSelect = C_DIS_NONE;
-	style.webkitUserSelect = C_DIS_NONE;
-	style.msUserSelect = C_DIS_NONE;
-	style.mozUserSelect = C_DIS_NONE;
-	style.webkitTouchCallout = C_DIS_NONE;
+	setUserSelect(style);
 
 	return div;
 }
@@ -1504,20 +1512,13 @@ function initAfterDosLoaded() {
 			}
 		});
 
-		// 非推奨ブラウザに対して警告文を表示
-		// Firefoxはローカル環境時、Ver65以降矢印が表示されなくなるため非推奨表示
-		if (g_userAgent.indexOf(`msie`) !== -1 ||
-			g_userAgent.indexOf(`trident`) !== -1 ||
-			g_userAgent.indexOf(`edge`) !== -1 ||
-			(g_userAgent.indexOf(`firefox`) !== -1 && g_isFile)) {
-
-			makeWarningWindow(g_msgInfoObj.W_0001);
-		}
-
+		// ローカルファイル起動時に各種警告文を表示
 		if (g_isFile) {
 			makeWarningWindow(g_msgInfoObj.W_0011);
-			const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
-			if (!listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` })) {
+			if (!listMatching(getMusicUrl(g_stateObj.scoreId), [`.js`, `.txt`], { suffix: `$` })) {
+				if (g_userAgent.indexOf(`firefox`) !== -1) {
+					makeWarningWindow(g_msgInfoObj.W_0001);
+				}
 				makeWarningWindow(g_msgInfoObj.W_0012);
 			}
 		}
@@ -1534,6 +1535,17 @@ function initAfterDosLoaded() {
 			reloadDos(0);
 		}
 	}
+}
+
+/**
+ * MusicUrlの基本情報を取得
+ * @param {number} _scoreId 
+ * @returns 
+ */
+function getMusicUrl(_scoreId) {
+	return g_headerObj.musicUrls !== undefined ?
+		g_headerObj.musicUrls[g_headerObj.musicNos[_scoreId]] ||
+		g_headerObj.musicUrls[0] : `nosound.mp3`;
 }
 
 /**
@@ -1839,7 +1851,7 @@ function loadMusic() {
 	clearWindow(true);
 	g_currentPage = `loading`;
 
-	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
+	const musicUrl = getMusicUrl(g_stateObj.scoreId);
 	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
 	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
@@ -1874,6 +1886,7 @@ function loadMusic() {
 			setAudio(blobUrl);
 		} else {
 			makeWarningWindow(`${g_msgInfoObj.E_0032}<br>(${request.status} ${request.statusText})`);
+			commonTitleBackBtn();
 		}
 	});
 
@@ -1900,10 +1913,12 @@ function loadMusic() {
 	// エラー処理
 	request.addEventListener(`timeout`, _ => {
 		makeWarningWindow(`${g_msgInfoObj.E_0033}`);
+		commonTitleBackBtn();
 	});
 
 	request.addEventListener(`error`, _ => {
 		makeWarningWindow(`${g_msgInfoObj.E_0034}`);
+		commonTitleBackBtn();
 	});
 
 	request.send();
@@ -2521,9 +2536,7 @@ function titleInit() {
 			siz: getFontSize(versionName, g_sWidth * 3 / 4 - 20, getBasicFont(), 12),
 			align: C_ALIGN_RIGHT, title: g_msgObj.github,
 			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus`),
-		},
-			g_cssObj.button_Tweet
-		),
+		}, g_cssObj.button_Tweet),
 
 		// セキュリティリンク
 		createCss2Button(`lnkComparison`, `&#x1f6e1;`, _ => true, {
@@ -2625,6 +2638,7 @@ function makeWarningWindow(_text = ``, _resetFlg = false) {
 	}
 	if (g_errMsgObj[displayName].length > 0) {
 		divRoot.appendChild(setWindowStyle(`<p>${g_errMsgObj[displayName].join('</p><p>')}</p>`, `#ffcccc`, `#660000`));
+		setUserSelect(lblWarning.style, `text`);
 	}
 }
 
@@ -3904,6 +3918,15 @@ const commonSettingBtn = _labelName => {
 };
 
 /**
+ * タイトルバック用ボタン（エラー復帰用）
+ */
+const commonTitleBackBtn = _ => {
+	divRoot.appendChild(createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, {
+		resetFunc: _ => titleInit(),
+	}, g_cssObj.button_Back));
+};
+
+/**
  * 設定・オプション画面初期化
  */
 function optionInit() {
@@ -3961,6 +3984,7 @@ function musicAfterLoaded() {
 		g_audio.addEventListener(`error`, (_ => function f() {
 			g_audio.removeEventListener(`error`, f, false);
 			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(g_audio.src));
+			commonTitleBackBtn();
 		})(), false);
 	}
 }
