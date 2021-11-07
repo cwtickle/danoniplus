@@ -1537,7 +1537,7 @@ function initAfterDosLoaded() {
 function getMusicUrl(_scoreId) {
 	return g_headerObj.musicUrls !== undefined ?
 		g_headerObj.musicUrls[g_headerObj.musicNos[_scoreId]] ||
-		g_headerObj.musicUrls[0] : ``;
+		g_headerObj.musicUrls[0] : `nosound.mp3`;
 }
 
 /**
