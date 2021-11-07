@@ -1504,20 +1504,16 @@ function initAfterDosLoaded() {
 			}
 		});
 
-		// 非推奨ブラウザに対して警告文を表示
-		// Firefoxはローカル環境時、Ver65以降矢印が表示されなくなるため非推奨表示
-		if (g_userAgent.indexOf(`msie`) !== -1 ||
-			g_userAgent.indexOf(`trident`) !== -1 ||
-			g_userAgent.indexOf(`edge`) !== -1 ||
-			(g_userAgent.indexOf(`firefox`) !== -1 && g_isFile)) {
-
-			makeWarningWindow(g_msgInfoObj.W_0001);
-		}
-
+		// ローカルファイル起動時に各種警告文を表示
 		if (g_isFile) {
 			makeWarningWindow(g_msgInfoObj.W_0011);
-			const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
+			const musicUrl = g_headerObj.musicUrls !== undefined ?
+				g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] ||
+				g_headerObj.musicUrls[0] : ``;
 			if (!listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` })) {
+				if (g_userAgent.indexOf(`firefox`) !== -1) {
+					makeWarningWindow(g_msgInfoObj.W_0001);
+				}
 				makeWarningWindow(g_msgInfoObj.W_0012);
 			}
 		}
@@ -2521,9 +2517,7 @@ function titleInit() {
 			siz: getFontSize(versionName, g_sWidth * 3 / 4 - 20, getBasicFont(), 12),
 			align: C_ALIGN_RIGHT, title: g_msgObj.github,
 			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus`),
-		},
-			g_cssObj.button_Tweet
-		),
+		}, g_cssObj.button_Tweet),
 
 		// セキュリティリンク
 		createCss2Button(`lnkComparison`, `&#x1f6e1;`, _ => true, {
