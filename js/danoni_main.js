@@ -1507,10 +1507,7 @@ function initAfterDosLoaded() {
 		// ローカルファイル起動時に各種警告文を表示
 		if (g_isFile) {
 			makeWarningWindow(g_msgInfoObj.W_0011);
-			const musicUrl = g_headerObj.musicUrls !== undefined ?
-				g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] ||
-				g_headerObj.musicUrls[0] : ``;
-			if (!listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` })) {
+			if (!listMatching(getMusicUrl(g_stateObj.scoreId), [`.js`, `.txt`], { suffix: `$` })) {
 				if (g_userAgent.indexOf(`firefox`) !== -1) {
 					makeWarningWindow(g_msgInfoObj.W_0001);
 				}
@@ -1530,6 +1527,17 @@ function initAfterDosLoaded() {
 			reloadDos(0);
 		}
 	}
+}
+
+/**
+ * MusicUrlの基本情報を取得
+ * @param {number} _scoreId 
+ * @returns 
+ */
+function getMusicUrl(_scoreId) {
+	return g_headerObj.musicUrls !== undefined ?
+		g_headerObj.musicUrls[g_headerObj.musicNos[_scoreId]] ||
+		g_headerObj.musicUrls[0] : ``;
 }
 
 /**
@@ -1835,7 +1843,7 @@ function loadMusic() {
 	clearWindow(true);
 	g_currentPage = `loading`;
 
-	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
+	const musicUrl = getMusicUrl(g_stateObj.scoreId);
 	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
 	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
@@ -1870,6 +1878,7 @@ function loadMusic() {
 			setAudio(blobUrl);
 		} else {
 			makeWarningWindow(`${g_msgInfoObj.E_0032}<br>(${request.status} ${request.statusText})`);
+			commonTitleBackBtn();
 		}
 	});
 
@@ -1896,10 +1905,12 @@ function loadMusic() {
 	// エラー処理
 	request.addEventListener(`timeout`, _ => {
 		makeWarningWindow(`${g_msgInfoObj.E_0033}`);
+		commonTitleBackBtn();
 	});
 
 	request.addEventListener(`error`, _ => {
 		makeWarningWindow(`${g_msgInfoObj.E_0034}`);
+		commonTitleBackBtn();
 	});
 
 	request.send();
@@ -3898,6 +3909,15 @@ const commonSettingBtn = _labelName => {
 };
 
 /**
+ * タイトルバック用ボタン（エラー復帰用）
+ */
+const commonTitleBackBtn = _ => {
+	divRoot.appendChild(createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, {
+		resetFunc: _ => titleInit(),
+	}, g_cssObj.button_Back));
+};
+
+/**
  * 設定・オプション画面初期化
  */
 function optionInit() {
@@ -3955,6 +3975,7 @@ function musicAfterLoaded() {
 		g_audio.addEventListener(`error`, (_ => function f() {
 			g_audio.removeEventListener(`error`, f, false);
 			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(g_audio.src));
+			commonTitleBackBtn();
 		})(), false);
 	}
 }
