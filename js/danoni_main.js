@@ -8746,18 +8746,14 @@ function MainInit() {
 
 		// ダミーフリーズアロー生成
 		if (g_workObj.mkDummyFrzArrow[currentFrame] !== undefined) {
-			g_workObj.mkDummyFrzArrow[currentFrame].forEach(data => {
-				makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`,
-					C_CLR_DUMMY, `#888888`);
-			});
+			g_workObj.mkDummyFrzArrow[currentFrame].forEach(data =>
+				makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`, C_CLR_DUMMY, `#888888`));
 		}
 
 		// フリーズアロー生成
 		if (g_workObj.mkFrzArrow[currentFrame] !== undefined) {
-			g_workObj.mkFrzArrow[currentFrame].forEach(data => {
-				makeFrzArrow(data, ++frzCnts[data], `frz`,
-					g_workObj.frzNormalColors[data], g_workObj.frzNormalBarColors[data]);
-			});
+			g_workObj.mkFrzArrow[currentFrame].forEach(data =>
+				makeFrzArrow(data, ++frzCnts[data], `frz`, g_workObj.frzNormalColors[data], g_workObj.frzNormalBarColors[data]));
 		}
 
 		// 矢印・フリーズアロー移動＆消去
