@@ -506,7 +506,7 @@ function importCssFile(_href, _func) {
 		_func();
 	};
 	link.onerror = _ => {
-		makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(baseUrl), `title`);
+		makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(baseUrl), { resetFlg: `title` });
 		_func();
 	};
 	document.head.appendChild(link);
@@ -1909,13 +1909,11 @@ function loadMusic() {
 
 	// エラー処理
 	request.addEventListener(`timeout`, _ => {
-		makeWarningWindow(`${g_msgInfoObj.E_0033}`);
-		commonTitleBackBtn();
+		makeWarningWindow(`${g_msgInfoObj.E_0033}`, { backBtnUse: true });
 	});
 
 	request.addEventListener(`error`, _ => {
-		makeWarningWindow(`${g_msgInfoObj.E_0034}`);
-		commonTitleBackBtn();
+		makeWarningWindow(`${g_msgInfoObj.E_0034}`, { backBtnUse: true });
 	});
 
 	request.send();
@@ -2624,10 +2622,10 @@ function titleInit() {
  * @param {string} _text 
  * @param {boolean} _resetFlg
  */
-function makeWarningWindow(_text = ``, _resetFlg = false) {
+function makeWarningWindow(_text = ``, { resetFlg = false, backBtnUse = false } = {}) {
 	const displayName = (g_currentPage === `initial` ? `title` : g_currentPage);
 	if (_text !== ``) {
-		if (_resetFlg) {
+		if (resetFlg) {
 			g_errMsgObj[displayName] = [_text];
 		} else if (g_errMsgObj[displayName].findIndex(val => val === _text) === -1) {
 			g_errMsgObj[displayName].push(_text);
@@ -2636,6 +2634,9 @@ function makeWarningWindow(_text = ``, _resetFlg = false) {
 	if (g_errMsgObj[displayName].length > 0) {
 		divRoot.appendChild(setWindowStyle(`<p>${g_errMsgObj[displayName].join('</p><p>')}</p>`, `#ffcccc`, `#660000`));
 		setUserSelect(lblWarning.style, `text`);
+	}
+	if (backBtnUse) {
+		commonTitleBackBtn();
 	}
 }
 
@@ -3980,8 +3981,7 @@ function musicAfterLoaded() {
 		// エラー時
 		g_audio.addEventListener(`error`, (_ => function f() {
 			g_audio.removeEventListener(`error`, f, false);
-			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(g_audio.src));
-			commonTitleBackBtn();
+			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(g_audio.src), { backBtnUse: true });
 		})(), false);
 	}
 }
