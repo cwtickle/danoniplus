@@ -7994,7 +7994,7 @@ function MainInit() {
 	}
 
 	const jdgGroups = [`J`, `FJ`];
-	const jdgX = [g_headerObj.playingWidth / 2 - 200, g_headerObj.playingWidth / 2 - 100];
+	const jdgX = [g_headerObj.playingWidth / 2 - 220, g_headerObj.playingWidth / 2 - 120];
 	const jdgY = [(g_sHeight + g_posObj.stepYR) / 2 - 60, (g_sHeight + g_posObj.stepYR) / 2 + 10];
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.jdgPosReset) {
 	} else {
@@ -8019,14 +8019,14 @@ function MainInit() {
 
 			// コンボ表示
 			createDivCss2Label(`combo${jdg}`, ``, {
-				x: jdgX[j] + 150, y: jdgY[j],
+				x: jdgX[j] + 170, y: jdgY[j],
 				w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_JDGCHARA,
 				opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
 			}, g_cssObj[`common_${jdgCombos[j]}`]),
 
 			// Fast/Slow表示
 			createDivCss2Label(`diff${jdg}`, ``, {
-				x: jdgX[j] + 150, y: jdgY[j] + 25,
+				x: jdgX[j] + 170, y: jdgY[j] + 25,
 				w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_MAIN,
 				opacity: g_stateObj.opacity / 100, display: g_workObj.fastslowDisp,
 			}, g_cssObj.common_combo),

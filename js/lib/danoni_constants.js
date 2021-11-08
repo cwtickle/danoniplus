@@ -2717,11 +2717,11 @@ const g_lang_lblNameObj = {
         s_printTitle: `Dancing☆Onigiri Level Calculator+++`,
         s_printHeader: `Level\tN-Push\tJack\tAll\tArrow\tFrz\tAPM\tTime`,
 
-        j_ii: ":D PERFECT!!",
-        j_shakin: ":) GREAT!",
-        j_matari: ":| GOOD",
-        j_shobon: ":( BAD",
-        j_uwan: ":_( MISS...",
+        j_ii: ":D Perfect!!",
+        j_shakin: ":) Great!",
+        j_matari: ":| Good",
+        j_shobon: ":( Bad",
+        j_uwan: ":_( Miss...",
 
         j_kita: ":) O.K.",
         j_iknai: ":( N.G.",
