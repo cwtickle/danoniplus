@@ -7994,7 +7994,7 @@ function MainInit() {
 	}
 
 	const jdgGroups = [`J`, `FJ`];
-	const jdgX = [g_headerObj.playingWidth / 2 - 210, g_headerObj.playingWidth / 2 - 120];
+	const jdgX = [g_headerObj.playingWidth / 2 - 220, g_headerObj.playingWidth / 2 - 120];
 	const jdgY = [(g_sHeight + g_posObj.stepYR) / 2 - 60, (g_sHeight + g_posObj.stepYR) / 2 + 10];
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.jdgPosReset) {
 	} else {
