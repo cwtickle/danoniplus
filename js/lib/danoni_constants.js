@@ -2424,6 +2424,7 @@ const g_lang_msgInfoObj = {
         I_0001: `リザルトデータをクリップボードにコピーしました！`,
         I_0002: `入力したキーは割り当てできません。他のキーを指定してください。`,
         I_0003: `各譜面の明細情報をクリップボードにコピーしました！`,
+        I_0004: `musicUrlが設定されていないため、無音モードで再生します`,
     },
     En: {
         W_0001: `Your browser is not guaranteed to work.<br>
@@ -2469,6 +2470,7 @@ const g_lang_msgInfoObj = {
         I_0001: `Your result data is copied to the clipboard!`,
         I_0002: `The specified key cannot be assigned. Please specify another key.`,
         I_0003: `Charts information is copied to the clipboard!`,
+        I_0004: `Play in silence mode because "musicUrl" is not set`,
     },
 }
 
