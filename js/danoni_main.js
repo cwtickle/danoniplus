@@ -6663,12 +6663,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	function setCssMotionData(_header, _scoreNo) {
-		let dosCssMotionData;
-		if (_dosObj[`${_header}Motion${_scoreNo}_data`] !== undefined) {
-			dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`];
-		} else if (_dosObj[`${_header}Motion_data`] !== undefined) {
-			dosCssMotionData = _dosObj[`${_header}Motion_data`];
-		}
+		const dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`] || _dosObj[`${_header}Motion_data`];
 		const cssMotionData = [];
 
 		if (hasVal(dosCssMotionData) && g_stateObj.d_arroweffect === C_FLG_ON) {
