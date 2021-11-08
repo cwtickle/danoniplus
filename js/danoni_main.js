@@ -8019,14 +8019,14 @@ function MainInit() {
 
 			// コンボ表示
 			createDivCss2Label(`combo${jdg}`, ``, {
-				x: jdgX[j] + 175, y: jdgY[j],
+				x: jdgX[j] + 170, y: jdgY[j],
 				w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_JDGCHARA,
 				opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
 			}, g_cssObj[`common_${jdgCombos[j]}`]),
 
 			// Fast/Slow表示
 			createDivCss2Label(`diff${jdg}`, ``, {
-				x: jdgX[j] + 175, y: jdgY[j] + 25,
+				x: jdgX[j] + 170, y: jdgY[j] + 25,
 				w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_MAIN,
 				opacity: g_stateObj.opacity / 100, display: g_workObj.fastslowDisp,
 			}, g_cssObj.common_combo),
