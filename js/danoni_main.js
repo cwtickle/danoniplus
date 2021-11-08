@@ -8087,6 +8087,10 @@ function MainInit() {
 		);
 	}
 
+	if (getMusicUrl(g_stateObj.scoreId) === `nosound.mp3`) {
+		makeInfoWindow(g_msgInfoObj.I_0004, `leftToRightFade`);
+	}
+
 	// ユーザカスタムイベント(初期)
 	if (typeof customMainInit === C_TYP_FUNCTION) {
 		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
