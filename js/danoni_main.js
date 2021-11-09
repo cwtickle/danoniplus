@@ -506,7 +506,7 @@ function importCssFile(_href, _func) {
 		_func();
 	};
 	link.onerror = _ => {
-		makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(baseUrl), `title`);
+		makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(baseUrl), { resetFlg: `title` });
 		_func();
 	};
 	document.head.appendChild(link);
@@ -1572,11 +1572,8 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 
 	// 譜面密度グラフ用のデータ作成
 	const noteCnt = { arrow: [], frz: [] };
-	const densityData = [];
+	const densityData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
 	let allData = 0;
-	for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
-		densityData[j] = 0;
-	}
 
 	const types = [`arrow`, `frz`];
 	for (let j = 0; j < keyNum; j++) {
@@ -1885,8 +1882,7 @@ function loadMusic() {
 			lblLoading.textContent = g_lblNameObj.pleaseWait;
 			setAudio(blobUrl);
 		} else {
-			makeWarningWindow(`${g_msgInfoObj.E_0032}<br>(${request.status} ${request.statusText})`);
-			commonTitleBackBtn();
+			makeWarningWindow(`${g_msgInfoObj.E_0032}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
 		}
 	});
 
@@ -1912,13 +1908,11 @@ function loadMusic() {
 
 	// エラー処理
 	request.addEventListener(`timeout`, _ => {
-		makeWarningWindow(`${g_msgInfoObj.E_0033}`);
-		commonTitleBackBtn();
+		makeWarningWindow(`${g_msgInfoObj.E_0033}`, { backBtnUse: true });
 	});
 
 	request.addEventListener(`error`, _ => {
-		makeWarningWindow(`${g_msgInfoObj.E_0034}`);
-		commonTitleBackBtn();
+		makeWarningWindow(`${g_msgInfoObj.E_0034}`, { backBtnUse: true });
 	});
 
 	request.send();
@@ -2625,12 +2619,12 @@ function titleInit() {
 /**
  * 警告用ウィンドウ（汎用）を表示
  * @param {string} _text 
- * @param {boolean} _resetFlg
+ * @param {object} _options resetFlg: 警告リストをクリアして再作成, backBtnUse: Backボタンを付与
  */
-function makeWarningWindow(_text = ``, _resetFlg = false) {
+function makeWarningWindow(_text = ``, { resetFlg = false, backBtnUse = false } = {}) {
 	const displayName = (g_currentPage === `initial` ? `title` : g_currentPage);
 	if (_text !== ``) {
-		if (_resetFlg) {
+		if (resetFlg) {
 			g_errMsgObj[displayName] = [_text];
 		} else if (g_errMsgObj[displayName].findIndex(val => val === _text) === -1) {
 			g_errMsgObj[displayName].push(_text);
@@ -2639,6 +2633,12 @@ function makeWarningWindow(_text = ``, _resetFlg = false) {
 	if (g_errMsgObj[displayName].length > 0) {
 		divRoot.appendChild(setWindowStyle(`<p>${g_errMsgObj[displayName].join('</p><p>')}</p>`, `#ffcccc`, `#660000`));
 		setUserSelect(lblWarning.style, `text`);
+	}
+	if (backBtnUse) {
+		// タイトルバック用ボタン
+		divRoot.appendChild(createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, {
+			resetFunc: _ => titleInit(),
+		}, g_cssObj.button_Back));
 	}
 }
 
@@ -3918,15 +3918,6 @@ const commonSettingBtn = _labelName => {
 };
 
 /**
- * タイトルバック用ボタン（エラー復帰用）
- */
-const commonTitleBackBtn = _ => {
-	divRoot.appendChild(createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, {
-		resetFunc: _ => titleInit(),
-	}, g_cssObj.button_Back));
-};
-
-/**
  * 設定・オプション画面初期化
  */
 function optionInit() {
@@ -3983,8 +3974,7 @@ function musicAfterLoaded() {
 		// エラー時
 		g_audio.addEventListener(`error`, (_ => function f() {
 			g_audio.removeEventListener(`error`, f, false);
-			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(g_audio.src));
-			commonTitleBackBtn();
+			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(g_audio.src), { backBtnUse: true });
 		})(), false);
 	}
 }
@@ -5181,13 +5171,10 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined && _localStorage[`keyCtrl${_extraKeyName}`][0].length > 0) {
 		g_keyObj.currentPtn = -1;
 		const copyPtn = `${g_keyObj.currentKey}_-1`;
-		g_keyObj[`keyCtrl${copyPtn}`] = [];
-		g_keyObj[`keyCtrl${copyPtn}d`] = [];
+		g_keyObj[`keyCtrl${copyPtn}`] = [...Array(baseKeyNum)].map(_ => []);
+		g_keyObj[`keyCtrl${copyPtn}d`] = [...Array(baseKeyNum)].map(_ => []);
 
 		for (let j = 0; j < baseKeyNum; j++) {
-			g_keyObj[`keyCtrl${copyPtn}`][j] = [];
-			g_keyObj[`keyCtrl${copyPtn}d`][j] = [];
-
 			for (let k = 0; k < g_keyObj[`keyCtrl${basePtn}`][j].length; k++) {
 				g_keyObj[`keyCtrl${copyPtn}d`][j][k] = g_keyObj[`keyCtrl${copyPtn}`][j][k] = _localStorage[`keyCtrl${_extraKeyName}`][j][k];
 			}
@@ -6669,12 +6656,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	function setCssMotionData(_header, _scoreNo) {
-		let dosCssMotionData;
-		if (_dosObj[`${_header}Motion${_scoreNo}_data`] !== undefined) {
-			dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`];
-		} else if (_dosObj[`${_header}Motion_data`] !== undefined) {
-			dosCssMotionData = _dosObj[`${_header}Motion_data`];
-		}
+		const dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`] || _dosObj[`${_header}Motion_data`];
 		const cssMotionData = [];
 
 		if (hasVal(dosCssMotionData) && g_stateObj.d_arroweffect === C_FLG_ON) {
@@ -6990,15 +6972,11 @@ function setSpeedOnFrame(_speedData, _lastFrame) {
  */
 function setMotionOnFrame() {
 
-	const motionOnFrame = [];
-
 	// 矢印が表示される最大フレーム数
 	const motionLastFrame = g_sHeight * 20;
 	const brakeLastFrame = g_sHeight / 2;
 
-	for (let j = 0; j <= motionLastFrame; j++) {
-		motionOnFrame[j] = 0;
-	}
+	const motionOnFrame = [...Array(motionLastFrame + 1)].fill(0);
 
 	if (g_stateObj.motion === C_FLG_OFF) {
 	} else if (g_stateObj.motion === `Boost`) {
@@ -7508,11 +7486,11 @@ function getArrowSettings() {
 	g_workObj.stepHitRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.arrowRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.keyCtrl = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
-	g_workObj.keyCtrlN = [];
-	g_workObj.keyHitFlg = [];
+
+	const keyCtrlLen = g_workObj.keyCtrl.length;
+	g_workObj.keyCtrlN = [...Array(keyCtrlLen)].map(_ => []);
+	g_workObj.keyHitFlg = [...Array(keyCtrlLen)].map(_ => []);
 	for (let j = 0; j < g_workObj.keyCtrl.length; j++) {
-		g_workObj.keyCtrlN[j] = [];
-		g_workObj.keyHitFlg[j] = [];
 		for (let k = 0; k < g_workObj.keyCtrl[j].length; k++) {
 			g_workObj.keyCtrlN[j][k] = g_kCdN[g_workObj.keyCtrl[j][k]];
 			g_workObj.keyHitFlg[j][k] = false;
@@ -7630,9 +7608,8 @@ function getArrowSettings() {
  */
 function setKeyCtrl(_localStorage, _keyNum, _keyCtrlPtn) {
 	const localPtn = `${g_keyObj.currentKey}_-1`;
-	const keyCtrl = [];
+	const keyCtrl = [...Array(_keyNum)].map(_ => []);
 	for (let j = 0; j < _keyNum; j++) {
-		keyCtrl[j] = [];
 		for (let k = 0; k < g_keyObj[`keyCtrl${_keyCtrlPtn}`][j].length; k++) {
 			keyCtrl[j][k] = g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][k];
 		}
@@ -7661,17 +7638,11 @@ function MainInit() {
 	g_currentPage = `main`;
 
 	g_currentArrows = 0;
-	g_workObj.fadeInNo = [];
-	g_workObj.fadeOutNo = [];
-	g_workObj.lastFadeFrame = [];
-	g_workObj.wordFadeFrame = [];
-
-	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
-		g_workObj.fadeInNo[j] = 0;
-		g_workObj.fadeOutNo[j] = 0;
-		g_workObj.lastFadeFrame[j] = 0;
-		g_workObj.wordFadeFrame[j] = 0;
-	}
+	const wordMaxLen = g_scoreObj.wordMaxDepth + 1;
+	g_workObj.fadeInNo = [...Array(wordMaxLen)].fill(0);
+	g_workObj.fadeOutNo = [...Array(wordMaxLen)].fill(0);
+	g_workObj.lastFadeFrame = [...Array(wordMaxLen)].fill(0);
+	g_workObj.wordFadeFrame = [...Array(wordMaxLen)].fill(0);
 
 	// 背景スプライトを作成
 	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth);
@@ -7704,20 +7675,15 @@ function MainInit() {
 	}
 
 	// 矢印・フリーズアロー・速度変化 移動/判定/変化対象の初期化
-	const arrowCnts = [];
-	const frzCnts = [];
-	const dummyArrowCnts = [];
-	const dummyFrzCnts = [];
+	const arrowCnts = [...Array(keyNum)].fill(0);
+	const frzCnts = [...Array(keyNum)].fill(0);
+	const dummyArrowCnts = [...Array(keyNum)].fill(0);
+	const dummyFrzCnts = [...Array(keyNum)].fill(0);
 	let speedCnts = 0;
 	let boostCnts = 0;
 	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) ? C_DIS_NONE : C_DIS_INHERIT;
 
 	for (let j = 0; j < keyNum; j++) {
-
-		arrowCnts[j] = 0;
-		frzCnts[j] = 0;
-		dummyArrowCnts[j] = 0;
-		dummyFrzCnts[j] = 0;
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 
 		// ステップゾーンルート
@@ -8773,18 +8739,14 @@ function MainInit() {
 
 		// ダミーフリーズアロー生成
 		if (g_workObj.mkDummyFrzArrow[currentFrame] !== undefined) {
-			g_workObj.mkDummyFrzArrow[currentFrame].forEach(data => {
-				makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`,
-					C_CLR_DUMMY, `#888888`);
-			});
+			g_workObj.mkDummyFrzArrow[currentFrame].forEach(data =>
+				makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`, C_CLR_DUMMY, `#888888`));
 		}
 
 		// フリーズアロー生成
 		if (g_workObj.mkFrzArrow[currentFrame] !== undefined) {
-			g_workObj.mkFrzArrow[currentFrame].forEach(data => {
-				makeFrzArrow(data, ++frzCnts[data], `frz`,
-					g_workObj.frzNormalColors[data], g_workObj.frzNormalBarColors[data]);
-			});
+			g_workObj.mkFrzArrow[currentFrame].forEach(data =>
+				makeFrzArrow(data, ++frzCnts[data], `frz`, g_workObj.frzNormalColors[data], g_workObj.frzNormalBarColors[data]));
 		}
 
 		// 矢印・フリーズアロー移動＆消去
