@@ -1882,8 +1882,7 @@ function loadMusic() {
 			lblLoading.textContent = g_lblNameObj.pleaseWait;
 			setAudio(blobUrl);
 		} else {
-			makeWarningWindow(`${g_msgInfoObj.E_0032}<br>(${request.status} ${request.statusText})`);
-			commonTitleBackBtn();
+			makeWarningWindow(`${g_msgInfoObj.E_0032}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
 		}
 	});
 
@@ -2620,7 +2619,7 @@ function titleInit() {
 /**
  * 警告用ウィンドウ（汎用）を表示
  * @param {string} _text 
- * @param {boolean} _resetFlg
+ * @param {object} _options resetFlg: 警告リストをクリアして再作成, backBtnUse: Backボタンを付与
  */
 function makeWarningWindow(_text = ``, { resetFlg = false, backBtnUse = false } = {}) {
 	const displayName = (g_currentPage === `initial` ? `title` : g_currentPage);
@@ -2636,7 +2635,10 @@ function makeWarningWindow(_text = ``, { resetFlg = false, backBtnUse = false } 
 		setUserSelect(lblWarning.style, `text`);
 	}
 	if (backBtnUse) {
-		commonTitleBackBtn();
+		// タイトルバック用ボタン
+		divRoot.appendChild(createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, {
+			resetFunc: _ => titleInit(),
+		}, g_cssObj.button_Back));
 	}
 }
 
@@ -3913,15 +3915,6 @@ const commonSettingBtn = _labelName => {
 			title: g_msgObj.dataSave, borderStyle: `solid`, cxtFunc: evt => switchSave(evt),
 		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF)),
 	);
-};
-
-/**
- * タイトルバック用ボタン（エラー復帰用）
- */
-const commonTitleBackBtn = _ => {
-	divRoot.appendChild(createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, {
-		resetFunc: _ => titleInit(),
-	}, g_cssObj.button_Back));
 };
 
 /**
