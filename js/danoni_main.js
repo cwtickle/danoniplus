@@ -349,7 +349,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
  * @param {object} _evt 
  */
 const commonKeyUp = _evt => {
-	g_inputKeyBuffer[`MetaLeft`] = false;
+	g_inputKeyBuffer[g_kCdNameObj.metaKey] = false;
 	g_inputKeyBuffer[transCode(_evt.code)] = false;
 };
 
@@ -1907,13 +1907,8 @@ function loadMusic() {
 	});
 
 	// エラー処理
-	request.addEventListener(`timeout`, _ => {
-		makeWarningWindow(`${g_msgInfoObj.E_0033}`, { backBtnUse: true });
-	});
-
-	request.addEventListener(`error`, _ => {
-		makeWarningWindow(`${g_msgInfoObj.E_0034}`, { backBtnUse: true });
-	});
+	request.addEventListener(`timeout`, _ => makeWarningWindow(`${g_msgInfoObj.E_0033}`, { backBtnUse: true }));
+	request.addEventListener(`error`, _ => makeWarningWindow(`${g_msgInfoObj.E_0034}`, { backBtnUse: true }));
 
 	request.send();
 }
@@ -2371,10 +2366,7 @@ function titleInit() {
 		let titlefontsize = 64;
 		for (let j = 0; j < g_headerObj.musicTitleForView.length; j++) {
 			if (g_headerObj.musicTitleForView[j] !== ``) {
-				const tmpSize = getFontSize(g_headerObj.musicTitleForView[j], g_sWidth - 100, g_headerObj.titlefonts[j]);
-				if (titlefontsize > tmpSize) {
-					titlefontsize = tmpSize;
-				}
+				titlefontsize = getFontSize(g_headerObj.musicTitleForView[j], g_sWidth - 100, g_headerObj.titlefonts[j], titlefontsize);
 			}
 		}
 
@@ -2476,9 +2468,7 @@ function titleInit() {
 				reloadFlg = true;
 			}
 		}, {
-			x: 0, y: g_sHeight - 20,
-			w: g_sWidth / 4, h: 16, siz: 12,
-			title: g_msgObj.dataReset,
+			x: 0, y: g_sHeight - 20, w: g_sWidth / 4, h: 16, siz: 12, title: g_msgObj.dataReset,
 			resetFunc: _ => {
 				if (reloadFlg) {
 					location.reload();
@@ -2488,9 +2478,7 @@ function titleInit() {
 
 		// ロケール切替
 		createCss2Button(`btnReload`, g_localeObj.val, _ => true, {
-			x: 10, y: 10,
-			w: 30, h: 30, siz: 20,
-			title: g_msgObj.reload,
+			x: 10, y: 10, w: 30, h: 30, siz: 20, title: g_msgObj.reload,
 			resetFunc: _ => {
 				g_localeObj.num = (++g_localeObj.num) % g_localeObj.list.length;
 				g_langStorage.locale = g_localeObj.list[g_localeObj.num];
@@ -2501,9 +2489,7 @@ function titleInit() {
 
 		// ヘルプ
 		createCss2Button(`btnHelp`, `?`, _ => true, {
-			x: 0, y: g_sHeight - 150,
-			w: 40, h: 40, siz: 30,
-			title: g_msgObj.howto,
+			x: 0, y: g_sHeight - 150, w: 40, h: 40, siz: 30, title: g_msgObj.howto,
 			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`),
 		}, g_cssObj.button_Setting),
 
@@ -2534,8 +2520,7 @@ function titleInit() {
 
 		// セキュリティリンク
 		createCss2Button(`lnkComparison`, `&#x1f6e1;`, _ => true, {
-			x: g_sWidth - 20, y: g_sHeight - 20,
-			w: 20, h: 16, siz: 12,
+			x: g_sWidth - 20, y: g_sHeight - 20, w: 20, h: 16, siz: 12,
 			title: g_msgObj.security,
 			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`),
 		}, g_cssObj.button_Tweet),
@@ -2560,9 +2545,7 @@ function titleInit() {
 					const lblCommentDef = lblComment.style.display;
 					lblComment.style.display = (lblCommentDef === C_DIS_NONE ? C_DIS_INHERIT : C_DIS_NONE);
 				}, {
-					x: g_sWidth - 180, y: (g_sHeight / 2) + 150,
-					w: 150, h: 50, siz: 20,
-					border: `solid 1px #999999`,
+					x: g_sWidth - 180, y: (g_sHeight / 2) + 150, w: 150, h: 50, siz: 20, border: `solid 1px #999999`,
 				}, g_cssObj.button_Default),
 
 			);
@@ -2667,15 +2650,13 @@ function makeInfoWindow(_text, _animationName = ``) {
  */
 function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 
-	if (document.querySelector(`#lblWarning`) === null) {
-	} else {
-		divRoot.removeChild(document.querySelector(`#lblWarning`));
+	if (document.querySelector(`#lblWarning`) !== null) {
+		divRoot.removeChild(lblWarning);
 	}
 
 	// ウィンドウ枠の行を取得するために一時的な枠を作成
 	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
-		x: 0, y: 70, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
-		lineHeight: `15px`, fontFamily: getBasicFont(),
+		x: 0, y: 70, w: g_sWidth, h: 20, siz: C_SIZ_MAIN, lineHeight: `15px`, fontFamily: getBasicFont(),
 	})
 	divRoot.appendChild(tmplbl);
 	const range = new Range();
@@ -2726,9 +2707,7 @@ function dosConvert(_dos) {
  * @param {string} _musicName 
  */
 function getMusicNameSimple(_musicName) {
-	let tmpName = _musicName.split(`<br>`).join(` `);
-	tmpName = tmpName.split(`<nbr>`).join(``);
-	return tmpName.split(`<dbr>`).join(`　`);
+	return _musicName.split(`<br>`).join(` `).split(`<nbr>`).join(``).split(`<dbr>`).join(`　`);
 }
 
 /**
@@ -2993,9 +2972,7 @@ function headerConvert(_dosObj) {
 		obj.lifeInits = [25];
 		obj.creatorNames = [obj.tuning];
 	}
-	const keyLists = obj.keyLabels.filter((x, j, self) => {
-		return self.indexOf(x) === j;
-	});
+	const keyLists = obj.keyLabels.filter((x, j, self) => self.indexOf(x) === j);
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 
 	// 譜面変更セレクターの利用有無
@@ -5332,10 +5309,7 @@ function createSettingsDisplayWindow(_sprite) {
 			x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
 		})
 	);
-
-	g_displays.forEach((name, j) => {
-		makeDisplayButton(name, j % 7, Math.floor(j / 7));
-	});
+	g_displays.forEach((name, j) => makeDisplayButton(name, j % 7, Math.floor(j / 7)));
 
 	// ---------------------------------------------------
 	// 矢印の見え方 (Appearance)
@@ -6006,7 +5980,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
 			return;
 		} else if ((setKey === C_KEY_TITLEBACK && g_currentk === 0) ||
-			(keyIsDown(`MetaLeft`) && keyIsDown(`ShiftLeft`))) {
+			(keyIsDown(g_kCdNameObj.metaKey) && keyIsDown(g_kCdNameObj.shiftKey))) {
 			return;
 		}
 
@@ -7833,8 +7807,7 @@ function MainInit() {
 			duration = parseInt(g_headerObj.fadeFrame[fadeNo][0]) - g_headerObj.blankFrameDef;
 			g_scoreObj.fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
 
-			if (g_headerObj.fadeFrame[fadeNo].length <= 1) {
-			} else {
+			if (g_headerObj.fadeFrame[fadeNo].length > 1) {
 				g_scoreObj.fadeOutTerm = Number(g_headerObj.fadeFrame[fadeNo][1]);
 			}
 		}
@@ -8013,8 +7986,7 @@ function MainInit() {
 	// パーフェクト演出
 	judgeSprite.appendChild(
 		createDivCss2Label(`finishView`, ``, {
-			x: g_headerObj.playingWidth / 2 - 150, y: g_sHeight / 2 - 50,
-			w: 300, h: 20, siz: 50,
+			x: g_headerObj.playingWidth / 2 - 150, y: g_sHeight / 2 - 50, w: 300, h: 20, siz: 50,
 		}, g_cssObj.common_kita)
 	);
 
@@ -8103,7 +8075,7 @@ function MainInit() {
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
 
-			if (g_isMac && keyIsDown(`ShiftLeft`)) {
+			if (g_isMac && keyIsDown(g_kCdNameObj.shiftKey)) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
@@ -8120,7 +8092,7 @@ function MainInit() {
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			if (keyIsDown(`ShiftLeft`)) {
+			if (keyIsDown(g_kCdNameObj.shiftKey)) {
 				g_gameOverFlg = true;
 				g_finishFlg = false;
 				resultInit();
@@ -9688,8 +9660,7 @@ function resultInit() {
 			resultViewText(g_gameOverFlg ? `failed` :
 				(playingArrows === g_fullArrows ? g_resultObj.spState : ``)),
 			{
-				x: g_sWidth / 2 + 50, y: 40,
-				w: 200, h: 30, siz: 20,
+				x: g_sWidth / 2 + 50, y: 40, w: 200, h: 30, siz: 20,
 			}, g_cssObj.result_Cleared
 		)
 	);
@@ -9710,16 +9681,9 @@ function resultInit() {
 		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
 	}
 	const highscoreDfObj = {
-		ii: 0,
-		shakin: 0,
-		matari: 0,
-		shobon: 0,
-		uwan: 0,
-		kita: 0,
-		iknai: 0,
-		maxCombo: 0,
-		fmaxCombo: 0,
-		score: 0,
+		ii: 0, shakin: 0, matari: 0, shobon: 0, uwan: 0,
+		kita: 0, iknai: 0,
+		maxCombo: 0, fmaxCombo: 0, score: 0,
 	};
 
 	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&

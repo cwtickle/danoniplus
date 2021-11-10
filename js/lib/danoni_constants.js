@@ -840,6 +840,11 @@ g_kCdN[226] = `IntlRo`;
 g_kCdN[229] = `Backquote`;
 g_kCdN[240] = `CapsLock`;
 
+const g_kCdNameObj = {
+    shiftKey: `ShiftLeft`,
+    metaKey: `MetaLeft`,
+};
+
 // 画面別ショートカット
 const g_shortcutObj = {
     title: {
