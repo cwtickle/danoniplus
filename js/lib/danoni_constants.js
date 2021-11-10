@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/10/24 (v24.0.0)
+ * Revised : 2021/11/10 (v24.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -839,6 +839,11 @@ g_kCdN[222] = `Equal`;
 g_kCdN[226] = `IntlRo`;
 g_kCdN[229] = `Backquote`;
 g_kCdN[240] = `CapsLock`;
+
+const g_kCdNameObj = {
+    shiftKey: `ShiftLeft`,
+    metaKey: `MetaLeft`,
+};
 
 // 画面別ショートカット
 const g_shortcutObj = {
@@ -2424,6 +2429,7 @@ const g_lang_msgInfoObj = {
         I_0001: `リザルトデータをクリップボードにコピーしました！`,
         I_0002: `入力したキーは割り当てできません。他のキーを指定してください。`,
         I_0003: `各譜面の明細情報をクリップボードにコピーしました！`,
+        I_0004: `musicUrlが設定されていないため、無音モードで再生します`,
     },
     En: {
         W_0001: `Your browser is not guaranteed to work.<br>
@@ -2469,6 +2475,7 @@ const g_lang_msgInfoObj = {
         I_0001: `Your result data is copied to the clipboard!`,
         I_0002: `The specified key cannot be assigned. Please specify another key.`,
         I_0003: `Charts information is copied to the clipboard!`,
+        I_0004: `Play in silence mode because "musicUrl" is not set`,
     },
 }
 
@@ -2715,11 +2722,11 @@ const g_lang_lblNameObj = {
         s_printTitle: `Dancing☆Onigiri Level Calculator+++`,
         s_printHeader: `Level\tN-Push\tJack\tAll\tArrow\tFrz\tAPM\tTime`,
 
-        j_ii: ":D PERFECT!!",
-        j_shakin: ":) GREAT!",
-        j_matari: ":| GOOD",
-        j_shobon: ":( BAD",
-        j_uwan: ":_( MISS...",
+        j_ii: ":D Perfect!!",
+        j_shakin: ":) Great!",
+        j_matari: ":| Good",
+        j_shobon: ":( Bad",
+        j_uwan: ":_( Miss...",
 
         j_kita: ":) O.K.",
         j_iknai: ":( N.G.",
