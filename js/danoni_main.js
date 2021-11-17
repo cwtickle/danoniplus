@@ -6665,9 +6665,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		[g_localeObj.val, ``].forEach(lang => {
 			if (g_stateObj.scroll !== `---`) {
-				wordDataList.push(_dosObj[`wordAlt${_scoreNo}${lang}_data`], _dosObj[`wordAlt${lang}_data`]);
+				wordDataList.push(_dosObj[`wordAlt${lang}${_scoreNo}_data`], _dosObj[`wordAlt${lang}_data`]);
 			} else if (g_stateObj.reverse === C_FLG_ON) {
-				wordDataList.push(_dosObj[`wordRev${_scoreNo}${lang}_data`], _dosObj[`wordRev${lang}_data`]);
+				wordDataList.push(_dosObj[`wordRev${lang}${_scoreNo}_data`], _dosObj[`wordRev${lang}_data`]);
 
 				// wordRev_dataが指定されている場合はそのままの位置を採用
 				// word_dataのみ指定されている場合、下記ルールに従って設定
@@ -6680,7 +6680,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					}
 				}
 			}
-			wordDataList.push(_dosObj[`word${_scoreNo}${lang}_data`], _dosObj[`word${lang}_data`]);
+			wordDataList.push(_dosObj[`word${lang}${_scoreNo}_data`], _dosObj[`word${lang}_data`]);
 		});
 
 		const inputWordData = wordDataList.find((v) => v !== undefined);
@@ -6751,11 +6751,11 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		const dataList = [];
 		[g_localeObj.val, ``].forEach(lang => {
 			if (g_stateObj.scroll !== `---`) {
-				dataList.push(_dosObj[`${_header}Alt${_scoreNo}${lang}_data`], _dosObj[`${_header}Alt${lang}_data`]);
+				dataList.push(_dosObj[`${_header}Alt${lang}${_scoreNo}_data`], _dosObj[`${_header}Alt${lang}_data`]);
 			} else if (g_stateObj.reverse === C_FLG_ON) {
-				dataList.push(_dosObj[`${_header}Rev${_scoreNo}${lang}_data`], _dosObj[`${_header}Rev${lang}_data`]);
+				dataList.push(_dosObj[`${_header}Rev${lang}${_scoreNo}_data`], _dosObj[`${_header}Rev${lang}_data`]);
 			}
-			dataList.push(_dosObj[`${_header}${_scoreNo}${lang}_data`], _dosObj[`${_header}${lang}_data`]);
+			dataList.push(_dosObj[`${_header}${lang}${_scoreNo}_data`], _dosObj[`${_header}${lang}_data`]);
 		});
 
 		const data = dataList.find((v) => v !== undefined);
@@ -6771,9 +6771,9 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	function makeBackgroundResultData(_header, _scoreNo, _defaultHeader = ``) {
 		const dataList = [];
 		[g_localeObj.val, ``].forEach(lang => {
-			dataList.push(_dosObj[`${_header}${_scoreNo}${lang}_data`], _dosObj[`${_header}${lang}_data`]);
+			dataList.push(_dosObj[`${_header}${lang}${_scoreNo}_data`], _dosObj[`${_header}${lang}_data`]);
 			if (_defaultHeader !== ``) {
-				dataList.push(_dosObj[`${_defaultHeader}${_scoreNo}${lang}_data`], _dosObj[`${_defaultHeader}${lang}_data`]);
+				dataList.push(_dosObj[`${_defaultHeader}${lang}${_scoreNo}_data`], _dosObj[`${_defaultHeader}${lang}_data`]);
 			}
 		});
 
