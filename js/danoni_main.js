@@ -6755,7 +6755,6 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			} else if (g_stateObj.reverse === C_FLG_ON) {
 				dataList.push(_dosObj[`${_header}Rev${_scoreNo}${lang}_data`], _dosObj[`${_header}Rev${lang}_data`]);
 			}
-			console.log(`${_header}${_scoreNo}${lang}_data`);
 			dataList.push(_dosObj[`${_header}${_scoreNo}${lang}_data`], _dosObj[`${_header}${lang}_data`]);
 		});
 
