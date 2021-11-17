@@ -3308,8 +3308,11 @@ function headerConvert(_dosObj) {
 		obj[`${sprite}TitleData`] = [];
 		obj[`${sprite}TitleData`].length = 0;
 		obj[`${sprite}TitleMaxDepth`] = -1;
-		if (hasVal(_dosObj[`${sprite}title_data`])) {
-			[obj[`${sprite}TitleData`], obj[`${sprite}TitleMaxDepth`]] = makeSpriteData(_dosObj[`${sprite}title_data`]);
+
+		const dataList = [_dosObj[`${sprite}title${g_localeObj.val}_data`], _dosObj[`${sprite}title_data`]];
+		const data = dataList.find((v) => v !== undefined);
+		if (hasVal(data)) {
+			[obj[`${sprite}TitleData`], obj[`${sprite}TitleMaxDepth`]] = makeSpriteData(data);
 		}
 	});
 
@@ -6656,27 +6659,29 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _scoreNo 
 	 */
 	function makeWordData(_scoreNo) {
-		let wordDataList = [];
+		const wordDataList = [];
 		let wordReverseFlg = false;
 		const divideCnt = getKeyInfo().divideCnt;
 
-		if (g_stateObj.scroll !== `---`) {
-			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data];
-		} else if (g_stateObj.reverse === C_FLG_ON) {
-			wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data];
+		[g_localeObj.val, ``].forEach(lang => {
+			if (g_stateObj.scroll !== `---`) {
+				wordDataList.push(_dosObj[`wordAlt${_scoreNo}${lang}_data`], _dosObj[`wordAlt${lang}_data`]);
+			} else if (g_stateObj.reverse === C_FLG_ON) {
+				wordDataList.push(_dosObj[`wordRev${_scoreNo}${lang}_data`], _dosObj[`wordRev${lang}_data`]);
 
-			// wordRev_dataが指定されている場合はそのままの位置を採用
-			// word_dataのみ指定されている場合、下記ルールに従って設定
-			if (wordDataList.find((v) => v !== undefined) === undefined) {
-				// Reverse時の歌詞の自動反転制御設定
-				if (g_headerObj.wordAutoReverse !== `auto`) {
-					wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
-				} else if (keyNum === divideCnt + 1) {
-					wordReverseFlg = true;
+				// wordRev_dataが指定されている場合はそのままの位置を採用
+				// word_dataのみ指定されている場合、下記ルールに従って設定
+				if (wordDataList.find((v) => v !== undefined) === undefined) {
+					// Reverse時の歌詞の自動反転制御設定
+					if (g_headerObj.wordAutoReverse !== `auto`) {
+						wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
+					} else if (keyNum === divideCnt + 1) {
+						wordReverseFlg = true;
+					}
 				}
 			}
-		}
-		wordDataList.push(_dosObj[`word${_scoreNo}_data`], _dosObj.word_data);
+			wordDataList.push(_dosObj[`word${_scoreNo}${lang}_data`], _dosObj[`word${lang}_data`]);
+		});
 
 		const inputWordData = wordDataList.find((v) => v !== undefined);
 		return (inputWordData !== undefined ? makeSpriteWordData(inputWordData, wordReverseFlg) : [[], -1]);
@@ -6743,13 +6748,16 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _scoreNo
 	 */
 	function makeBackgroundData(_header, _scoreNo) {
-		let dataList = [];
-		if (g_stateObj.scroll !== `---`) {
-			dataList = [_dosObj[`${_header}Alt${_scoreNo}_data`], _dosObj[`${_header}Alt_data`]];
-		} else if (g_stateObj.reverse === C_FLG_ON) {
-			dataList = [_dosObj[`${_header}Rev${_scoreNo}_data`], _dosObj[`${_header}Rev_data`]];
-		}
-		dataList.push(_dosObj[`${_header}${_scoreNo}_data`], _dosObj[`${_header}_data`]);
+		const dataList = [];
+		[g_localeObj.val, ``].forEach(lang => {
+			if (g_stateObj.scroll !== `---`) {
+				dataList.push(_dosObj[`${_header}Alt${_scoreNo}${lang}_data`], _dosObj[`${_header}Alt${lang}_data`]);
+			} else if (g_stateObj.reverse === C_FLG_ON) {
+				dataList.push(_dosObj[`${_header}Rev${_scoreNo}${lang}_data`], _dosObj[`${_header}Rev${lang}_data`]);
+			}
+			console.log(`${_header}${_scoreNo}${lang}_data`);
+			dataList.push(_dosObj[`${_header}${_scoreNo}${lang}_data`], _dosObj[`${_header}${lang}_data`]);
+		});
 
 		const data = dataList.find((v) => v !== undefined);
 		return (data !== undefined ? makeSpriteData(data, calcFrame) : [[], -1]);
@@ -6762,10 +6770,13 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _defaultHeader 
 	 */
 	function makeBackgroundResultData(_header, _scoreNo, _defaultHeader = ``) {
-		const dataList = [_dosObj[`${_header}${_scoreNo}_data`], _dosObj[`${_header}_data`]];
-		if (_defaultHeader !== ``) {
-			dataList.push(_dosObj[`${_defaultHeader}${_scoreNo}_data`], _dosObj[`${_defaultHeader}_data`]);
-		}
+		const dataList = [];
+		[g_localeObj.val, ``].forEach(lang => {
+			dataList.push(_dosObj[`${_header}${_scoreNo}${lang}_data`], _dosObj[`${_header}${lang}_data`]);
+			if (_defaultHeader !== ``) {
+				dataList.push(_dosObj[`${_defaultHeader}${_scoreNo}${lang}_data`], _dosObj[`${_defaultHeader}${lang}_data`]);
+			}
+		});
 
 		const data = dataList.find((v) => v !== undefined);
 		return (data !== undefined ? makeSpriteData(data) : [[], -1]);
