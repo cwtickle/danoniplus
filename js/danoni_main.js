@@ -6663,25 +6663,31 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		let wordReverseFlg = false;
 		const divideCnt = getKeyInfo().divideCnt;
 
-		[g_localeObj.val, ``].forEach(lang => {
-			if (g_stateObj.scroll !== `---`) {
-				wordDataList.push(_dosObj[`wordAlt${lang}${_scoreNo}_data`], _dosObj[`wordAlt${lang}_data`]);
-			} else if (g_stateObj.reverse === C_FLG_ON) {
-				wordDataList.push(_dosObj[`wordRev${lang}${_scoreNo}_data`], _dosObj[`wordRev${lang}_data`]);
+		const addDataList = (_type = ``) =>
+			wordDataList.push(
+				_dosObj[`word${_type}${g_localeObj.val}${_scoreNo}_data`],
+				_dosObj[`word${_type}${g_localeObj.val}_data`],
+				_dosObj[`word${_type}${_scoreNo}_data`],
+				_dosObj[`word${_type}_data`]
+			);
 
-				// wordRev_dataが指定されている場合はそのままの位置を採用
-				// word_dataのみ指定されている場合、下記ルールに従って設定
-				if (wordDataList.find((v) => v !== undefined) === undefined) {
-					// Reverse時の歌詞の自動反転制御設定
-					if (g_headerObj.wordAutoReverse !== `auto`) {
-						wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
-					} else if (keyNum === divideCnt + 1) {
-						wordReverseFlg = true;
-					}
+		if (g_stateObj.scroll !== `---`) {
+			addDataList(`Alt`);
+		} else if (g_stateObj.reverse === C_FLG_ON) {
+			addDataList(`Rev`);
+
+			// wordRev_dataが指定されている場合はそのままの位置を採用
+			// word_dataのみ指定されている場合、下記ルールに従って設定
+			if (wordDataList.find((v) => v !== undefined) === undefined) {
+				// Reverse時の歌詞の自動反転制御設定
+				if (g_headerObj.wordAutoReverse !== `auto`) {
+					wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
+				} else if (keyNum === divideCnt + 1) {
+					wordReverseFlg = true;
 				}
 			}
-			wordDataList.push(_dosObj[`word${lang}${_scoreNo}_data`], _dosObj[`word${lang}_data`]);
-		});
+		}
+		addDataList();
 
 		const inputWordData = wordDataList.find((v) => v !== undefined);
 		return (inputWordData !== undefined ? makeSpriteWordData(inputWordData, wordReverseFlg) : [[], -1]);
@@ -6749,14 +6755,20 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	function makeBackgroundData(_header, _scoreNo) {
 		const dataList = [];
-		[g_localeObj.val, ``].forEach(lang => {
-			if (g_stateObj.scroll !== `---`) {
-				dataList.push(_dosObj[`${_header}Alt${lang}${_scoreNo}_data`], _dosObj[`${_header}Alt${lang}_data`]);
-			} else if (g_stateObj.reverse === C_FLG_ON) {
-				dataList.push(_dosObj[`${_header}Rev${lang}${_scoreNo}_data`], _dosObj[`${_header}Rev${lang}_data`]);
-			}
-			dataList.push(_dosObj[`${_header}${lang}${_scoreNo}_data`], _dosObj[`${_header}${lang}_data`]);
-		});
+		const addDataList = (_type = ``) =>
+			dataList.push(
+				_dosObj[`${_header}${_type}${g_localeObj.val}${_scoreNo}_data`],
+				_dosObj[`${_header}${_type}${g_localeObj.val}_data`],
+				_dosObj[`${_header}${_type}${_scoreNo}_data`],
+				_dosObj[`${_header}${_type}_data`]
+			);
+
+		if (g_stateObj.scroll !== `---`) {
+			addDataList(`Alt`);
+		} else if (g_stateObj.reverse === C_FLG_ON) {
+			addDataList(`Rev`);
+		}
+		addDataList();
 
 		const data = dataList.find((v) => v !== undefined);
 		return (data !== undefined ? makeSpriteData(data, calcFrame) : [[], -1]);
@@ -6770,12 +6782,17 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	function makeBackgroundResultData(_header, _scoreNo, _defaultHeader = ``) {
 		const dataList = [];
-		[g_localeObj.val, ``].forEach(lang => {
-			dataList.push(_dosObj[`${_header}${lang}${_scoreNo}_data`], _dosObj[`${_header}${lang}_data`]);
-			if (_defaultHeader !== ``) {
-				dataList.push(_dosObj[`${_defaultHeader}${lang}${_scoreNo}_data`], _dosObj[`${_defaultHeader}${lang}_data`]);
-			}
-		});
+		const addResultDataList = _headerType =>
+			dataList.push(
+				_dosObj[`${_headerType}${g_localeObj.val}${_scoreNo}_data`],
+				_dosObj[`${_headerType}${g_localeObj.val}_data`],
+				_dosObj[`${_headerType}${_scoreNo}_data`],
+				_dosObj[`${_headerType}_data`],
+			);
+		addResultDataList(_header);
+		if (_defaultHeader !== ``) {
+			addResultDataList(_defaultHeader);
+		}
 
 		const data = dataList.find((v) => v !== undefined);
 		return (data !== undefined ? makeSpriteData(data) : [[], -1]);
