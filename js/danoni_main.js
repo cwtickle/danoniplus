@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/11/10
+ * Revised : 2021/11/19
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 24.1.0`;
-const g_revisedDate = `2021/11/10`;
+const g_version = `Ver 24.2.0`;
+const g_revisedDate = `2021/11/19`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3308,8 +3308,11 @@ function headerConvert(_dosObj) {
 		obj[`${sprite}TitleData`] = [];
 		obj[`${sprite}TitleData`].length = 0;
 		obj[`${sprite}TitleMaxDepth`] = -1;
-		if (hasVal(_dosObj[`${sprite}title_data`])) {
-			[obj[`${sprite}TitleData`], obj[`${sprite}TitleMaxDepth`]] = makeSpriteData(_dosObj[`${sprite}title_data`]);
+
+		const dataList = [_dosObj[`${sprite}title${g_localeObj.val}_data`], _dosObj[`${sprite}title_data`]];
+		const data = dataList.find((v) => v !== undefined);
+		if (hasVal(data)) {
+			[obj[`${sprite}TitleData`], obj[`${sprite}TitleMaxDepth`]] = makeSpriteData(data);
 		}
 	});
 
@@ -6435,7 +6438,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	g_stateObj.decimalAdjustment = g_stateObj.realAdjustment - g_stateObj.intAdjustment;
 
 	const blankFrame = g_headerObj.blankFrame;
-	const calcFrame = _frame => Math.round((parseInt(_frame) - blankFrame) / g_headerObj.playbackRate + blankFrame + g_stateObj.intAdjustment);
+	const calcFrame = _frame => Math.round((parseFloat(_frame) - blankFrame) / g_headerObj.playbackRate + blankFrame + g_stateObj.intAdjustment);
 
 	for (let j = 0; j < keyNum; j++) {
 
@@ -6656,14 +6659,22 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _scoreNo 
 	 */
 	function makeWordData(_scoreNo) {
-		let wordDataList = [];
+		const wordDataList = [];
 		let wordReverseFlg = false;
 		const divideCnt = getKeyInfo().divideCnt;
 
+		const addDataList = (_type = ``) =>
+			wordDataList.push(
+				_dosObj[`word${_type}${g_localeObj.val}${_scoreNo}_data`],
+				_dosObj[`word${_type}${g_localeObj.val}_data`],
+				_dosObj[`word${_type}${_scoreNo}_data`],
+				_dosObj[`word${_type}_data`]
+			);
+
 		if (g_stateObj.scroll !== `---`) {
-			wordDataList = [_dosObj[`wordAlt${_scoreNo}_data`], _dosObj.wordAlt_data];
+			addDataList(`Alt`);
 		} else if (g_stateObj.reverse === C_FLG_ON) {
-			wordDataList = [_dosObj[`wordRev${_scoreNo}_data`], _dosObj.wordRev_data];
+			addDataList(`Rev`);
 
 			// wordRev_dataが指定されている場合はそのままの位置を採用
 			// word_dataのみ指定されている場合、下記ルールに従って設定
@@ -6676,7 +6687,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				}
 			}
 		}
-		wordDataList.push(_dosObj[`word${_scoreNo}_data`], _dosObj.word_data);
+		addDataList();
 
 		const inputWordData = wordDataList.find((v) => v !== undefined);
 		return (inputWordData !== undefined ? makeSpriteWordData(inputWordData, wordReverseFlg) : [[], -1]);
@@ -6743,13 +6754,21 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _scoreNo
 	 */
 	function makeBackgroundData(_header, _scoreNo) {
-		let dataList = [];
+		const dataList = [];
+		const addDataList = (_type = ``) =>
+			dataList.push(
+				_dosObj[`${_header}${_type}${g_localeObj.val}${_scoreNo}_data`],
+				_dosObj[`${_header}${_type}${g_localeObj.val}_data`],
+				_dosObj[`${_header}${_type}${_scoreNo}_data`],
+				_dosObj[`${_header}${_type}_data`]
+			);
+
 		if (g_stateObj.scroll !== `---`) {
-			dataList = [_dosObj[`${_header}Alt${_scoreNo}_data`], _dosObj[`${_header}Alt_data`]];
+			addDataList(`Alt`);
 		} else if (g_stateObj.reverse === C_FLG_ON) {
-			dataList = [_dosObj[`${_header}Rev${_scoreNo}_data`], _dosObj[`${_header}Rev_data`]];
+			addDataList(`Rev`);
 		}
-		dataList.push(_dosObj[`${_header}${_scoreNo}_data`], _dosObj[`${_header}_data`]);
+		addDataList();
 
 		const data = dataList.find((v) => v !== undefined);
 		return (data !== undefined ? makeSpriteData(data, calcFrame) : [[], -1]);
@@ -6762,9 +6781,17 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _defaultHeader 
 	 */
 	function makeBackgroundResultData(_header, _scoreNo, _defaultHeader = ``) {
-		const dataList = [_dosObj[`${_header}${_scoreNo}_data`], _dosObj[`${_header}_data`]];
+		const dataList = [];
+		const addResultDataList = _headerType =>
+			dataList.push(
+				_dosObj[`${_headerType}${g_localeObj.val}${_scoreNo}_data`],
+				_dosObj[`${_headerType}${g_localeObj.val}_data`],
+				_dosObj[`${_headerType}${_scoreNo}_data`],
+				_dosObj[`${_headerType}_data`],
+			);
+		addResultDataList(_header);
 		if (_defaultHeader !== ``) {
-			dataList.push(_dosObj[`${_defaultHeader}${_scoreNo}_data`], _dosObj[`${_defaultHeader}_data`]);
+			addResultDataList(_defaultHeader);
 		}
 
 		const data = dataList.find((v) => v !== undefined);
