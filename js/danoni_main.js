@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 24.2.0`;
+const g_version = `Ver 24.2.1`;
 const g_revisedDate = `2021/11/19`;
 const g_alphaVersion = ``;
 
@@ -3336,7 +3336,7 @@ function headerConvert(_dosObj) {
 
 	// タイトル表示用コメント
 	const newlineTag = setVal(_dosObj.commentAutoBr, true, C_TYP_BOOLEAN) ? `<br>` : ``;
-	let tmpComment = setVal(_dosObj.commentVal, ``, C_TYP_STRING);
+	let tmpComment = setVal(_dosObj[`commentVal${g_localeObj.val}`] || _dosObj.commentVal, ``, C_TYP_STRING);
 	tmpComment = tmpComment.split(`\r\n`).join(`\n`);
 	obj.commentVal = escapeHtmlForEnabledTag(tmpComment.split(`\n`).join(newlineTag));
 
