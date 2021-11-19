@@ -3336,7 +3336,7 @@ function headerConvert(_dosObj) {
 
 	// タイトル表示用コメント
 	const newlineTag = setVal(_dosObj.commentAutoBr, true, C_TYP_BOOLEAN) ? `<br>` : ``;
-	let tmpComment = setVal(_dosObj.commentVal, ``, C_TYP_STRING);
+	let tmpComment = setVal(_dosObj[`commentVal${g_localeObj.val}`] || _dosObj.commentVal, ``, C_TYP_STRING);
 	tmpComment = tmpComment.split(`\r\n`).join(`\n`);
 	obj.commentVal = escapeHtmlForEnabledTag(tmpComment.split(`\n`).join(newlineTag));
 
