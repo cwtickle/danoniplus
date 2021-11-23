@@ -3752,12 +3752,13 @@ function keysConvert(_dosObj) {
 					g_keyObj[keyheaderName].push(_defaultName);
 					g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`color${_key}_${k}`].length)].fill(_defaultVal);
 				}
-				const tmpParamPairs = tmpParams[k].split(`/`);
-				for (let m = 0; m < tmpParamPairs.length; m++) {
-					const tmpParamPair = tmpParamPairs[m].split(`::`);
-					g_keyObj[keyheaderName].push(tmpParamPair[0]);
+				tmpParams[k].split(`/`).forEach(pairs => {
+					const tmpParamPair = pairs.split(`::`);
+					if (g_keyObj[keyheaderName].find(val => val === tmpParamPair[0]) === undefined) {
+						g_keyObj[keyheaderName].push(tmpParamPair[0]);
+					}
 					g_keyObj[pairName][tmpParamPair[0]] = tmpParamPair[1].split(`,`).map(n => parseInt(n, 10));
-				}
+				});
 			}
 		}
 	};
