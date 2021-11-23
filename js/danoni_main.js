@@ -3771,9 +3771,6 @@ function keysConvert(_dosObj) {
 		// キーの名前 (keyNameX)
 		g_keyObj[`keyName${newKey}`] = setVal(_dosObj[`keyName${newKey}`], newKey, C_TYP_STRING);
 
-		// 元パターンの指定 (basePtnX)
-		newKeySingleParam(newKey, `basePtn`, C_TYP_STRING);
-
 		// 矢印色パターン (colorX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
 			errCd: `E_0101`,
