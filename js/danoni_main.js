@@ -3737,7 +3737,6 @@ function keysConvert(_dosObj) {
 	 */
 	const newKeyPairParam = (_key, _name, _pairName, _defaultName = ``, _defaultVal = 0) => {
 		const keyheader = _name + _key;
-		const keyheaderName = `${_name}Name${_key}`;
 
 		if (_dosObj[keyheader] !== undefined) {
 			const tmpParams = _dosObj[keyheader].split(`$`);
@@ -3746,18 +3745,14 @@ function keysConvert(_dosObj) {
 				if (!hasVal(tmpParams[k])) {
 					continue;
 				}
-				g_keyObj[keyheaderName] = [];
 				g_keyObj[pairName] = {};
 				if (_defaultName !== ``) {
-					g_keyObj[keyheaderName].push(_defaultName);
 					g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`color${_key}_${k}`].length)].fill(_defaultVal);
 				}
-				const tmpParamPairs = tmpParams[k].split(`/`);
-				for (let m = 0; m < tmpParamPairs.length; m++) {
-					const tmpParamPair = tmpParamPairs[m].split(`::`);
-					g_keyObj[keyheaderName].push(tmpParamPair[0]);
+				tmpParams[k].split(`/`).forEach(pairs => {
+					const tmpParamPair = pairs.split(`::`);
 					g_keyObj[pairName][tmpParamPair[0]] = tmpParamPair[1].split(`,`).map(n => parseInt(n, 10));
-				}
+				});
 			}
 		}
 	};
@@ -4842,36 +4837,14 @@ function createOptionWindow(_sprite) {
 		// ---------------------------------------------------
 		// 2. 初期化設定
 
-		// スクロール設定用の配列を入れ替え
-		g_settings.scrolls = copyArray2d(
-			typeof g_keyObj[`scrollName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
-				g_keyObj[`scrollName${g_keyObj.currentKey}`] : g_keyObj.scrollName_def
-		);
-
-		// アシスト設定の配列を入れ替え
-		g_settings.autoPlays = (typeof g_keyObj[`assistName${g_keyObj.currentKey}`] === C_TYP_OBJECT ?
-			g_autoPlaysBase.concat(g_keyObj[`assistName${g_keyObj.currentKey}`]) :
-			g_autoPlaysBase.concat());
-
-		if (_initFlg) {
-
-			// 速度、ゲージ、リバースの初期設定
-			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
-			g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
-			g_settings.gaugeNum = 0;
-			if (isNotSameKey) {
-				g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
-				g_settings.autoPlayNum = getCurrentNo(g_settings.autoPlays, g_stateObj.autoPlay);
-				g_keycons.shuffleGroupNum = 0;
-			}
-		}
-
-		// 保存した設定の再読込条件（通常、設定画面切り替え時はスキップ）
+		// 保存した設定の再読込条件（設定画面切り替え時はスキップ）
+		// ローカルストレージで保存した設定を呼び出し
 		if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _initFlg) {
 
 			if (isNotSameKey) {
-				// キーパターン初期化
+				// キーパターン、シャッフルグループ初期化
 				g_keyObj.currentPtn = 0;
+				g_keycons.shuffleGroupNum = 0;
 			}
 			const hasKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
 
@@ -4919,6 +4892,26 @@ function createOptionWindow(_sprite) {
 				g_headerObj.keyTitleBack = setVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`], g_headerObj.keyTitleBackDef, C_TYP_NUMBER);
 			}
 		}
+
+		// スクロール設定用の配列を入れ替え
+		g_settings.scrolls = copyArray2d(
+			typeof g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] === C_TYP_OBJECT ?
+				Object.keys(g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]) : g_keyObj.scrollName_def
+		);
+
+		// アシスト設定の配列を入れ替え
+		g_settings.autoPlays = (typeof g_keyObj[`assistPos${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] === C_TYP_OBJECT ?
+			g_autoPlaysBase.concat(Object.keys(g_keyObj[`assistPos${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])) :
+			g_autoPlaysBase.concat());
+
+		// 速度、ゲージ、スクロール、アシスト設定のカーソル位置調整
+		if (_initFlg) {
+			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
+			g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
+			g_settings.gaugeNum = 0;
+		}
+		g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
+		g_settings.autoPlayNum = getCurrentNo(g_settings.autoPlays, g_stateObj.autoPlay);
 
 		// ---------------------------------------------------
 		// 3. 名称の設定
