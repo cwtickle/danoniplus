@@ -1798,25 +1798,6 @@ const g_keyObj = {
 
     // スクロール拡張オプション
     scrollName_def: [`---`],
-    scrollName5: [`---`, `Cross`, `Split`, `Alternate`],
-    scrollName7: [`---`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
-    scrollName7i: [`---`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
-    scrollName8: [`---`, `Cross`, `Split`, `Alternate`, `Twist`, `Asymmetry`],
-    scrollName9A: [`---`, `Cross`, `Split`, `Alternate`],
-    scrollName9B: [`---`, `Cross`, `Split`, `Alternate`],
-    scrollName11: [`---`, `Flat`],
-    scrollName11L: [`---`, `Flat`],
-    scrollName11W: [`---`, `Flat`],
-    scrollName11i: [`---`, `Cross`, `Split`, `Alternate`],
-    scrollName12: [`---`, `Flat`],
-    scrollName13: [`---`, `Flat`],
-    scrollName14: [`---`, `Flat`],
-    scrollName14i: [`---`, `Flat`],
-    scrollName15A: [`---`, `Flat`],
-    scrollName15B: [`---`, `Flat`],
-    scrollName16i: [`---`, `Flat`],
-    scrollName23: [`---`, `Flat`],
-
     scrollDir5_0: {
         '---': [1, 1, 1, 1, 1],
         'Cross': [1, -1, -1, 1, 1],
@@ -2150,12 +2131,6 @@ const g_keyObj = {
     },
 
     // プレイアシスト設定
-    assistName5: [`Onigiri`],
-    assistName9A: [`Left`, `Right`],
-    assistName11i: [`Left`, `Right`],
-    assistName17: [`Left`, `Right`],
-    assistName23: [`Left`, `Right`],
-
     assistPos5_0: {
         'Onigiri': [0, 0, 0, 0, 1],
     },
@@ -2217,7 +2192,7 @@ keyCtrlName.forEach(property => g_keyObj[`${property}d`] = copyArray2d(g_keyObj[
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
     simple: [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
-    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`],
+    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `scrollDir`, `assistPos`],
 };
 
 // タイトル画面関連のリスト群
