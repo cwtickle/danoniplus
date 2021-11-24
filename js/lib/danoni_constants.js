@@ -2204,7 +2204,7 @@ keyCtrlName.forEach(property => g_keyObj[`${property}d`] = copyArray2d(g_keyObj[
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
     simple: [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
-    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `scrollDir`, `assistPos`],
+    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`],
 };
 
 // タイトル画面関連のリスト群
