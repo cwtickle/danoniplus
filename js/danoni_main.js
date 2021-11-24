@@ -3699,7 +3699,8 @@ function keysConvert(_dosObj) {
 				if (existParam(tmpArray[k], `${keyheader}_${k}`)) {
 					continue;
 				}
-				g_keyObj[`${keyheader}_${k}`] = tmpArray[k].split(`,`).map(n => _convFunc(n));
+				g_keyObj[`${keyheader}_${k}`] = g_keyObj[`${_name}${tmpArray[k]}`] !== undefined ?
+					copyArray2d(g_keyObj[`${_name}${tmpArray[k]}`]) : tmpArray[k].split(`,`).map(n => _convFunc(n));
 				if (baseCopyFlg) {
 					g_keyObj[`${keyheader}_${k}d`] = copyArray2d(g_keyObj[`${keyheader}_${k}`]);
 				}
@@ -3722,7 +3723,8 @@ function keysConvert(_dosObj) {
 		if (_dosObj[keyheader] !== undefined) {
 			const tmps = _dosObj[keyheader].split(`$`);
 			for (let k = 0; k < tmps.length; k++) {
-				g_keyObj[`${keyheader}_${k}`] = setVal(tmps[k], ``, _type);
+				g_keyObj[`${keyheader}_${k}`] = setVal(g_keyObj[`${_name}${tmps[k]}`],
+					setVal(tmps[k], ``, _type), C_TYP_STRING);
 			}
 		}
 	};
@@ -3746,13 +3748,17 @@ function keysConvert(_dosObj) {
 					continue;
 				}
 				g_keyObj[pairName] = {};
-				if (_defaultName !== ``) {
-					g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`color${_key}_${k}`].length)].fill(_defaultVal);
+				if (g_keyObj[`${_pairName}${tmpParams[k]}`] !== undefined) {
+					Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${tmpParams[k]}`]);
+				} else {
+					if (_defaultName !== ``) {
+						g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`color${_key}_${k}`].length)].fill(_defaultVal);
+					}
+					tmpParams[k].split(`/`).forEach(pairs => {
+						const tmpParamPair = pairs.split(`::`);
+						g_keyObj[pairName][tmpParamPair[0]] = tmpParamPair[1].split(`,`).map(n => parseInt(n, 10));
+					});
 				}
-				tmpParams[k].split(`/`).forEach(pairs => {
-					const tmpParamPair = pairs.split(`::`);
-					g_keyObj[pairName][tmpParamPair[0]] = tmpParamPair[1].split(`,`).map(n => parseInt(n, 10));
-				});
 			}
 		}
 	};
@@ -3790,9 +3796,15 @@ function keysConvert(_dosObj) {
 
 				if (setVal(tmpDivPtn[0], -1, C_TYP_NUMBER) !== -1) {
 					g_keyObj[`div${newKey}_${k}`] = setVal(tmpDivPtn[0], g_keyObj[`chara${newKey}_0`].length, C_TYP_NUMBER);
+				} else if (g_keyObj[`div${tmpDivPtn[0]}`] !== undefined) {
+					// 既定キーパターンが指定された場合、存在すればその値を適用
+					g_keyObj[`div${newKey}_${k}`] = g_keyObj[`div${tmpDivPtn[0]}`];
+					g_keyObj[`divMax${newKey}_${k}`] = setVal(g_keyObj[`divMax${tmpDivPtn[0]}`], undefined, C_TYP_NUMBER);
 				} else if (setVal(g_keyObj[`div${newKey}_${k}`], -1, C_TYP_NUMBER) !== -1) {
+					// すでに定義済みの場合はスキップ
 					continue;
 				} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
+					// 特に指定が無い場合はcharaX_Yの配列長で決定
 					g_keyObj[`div${newKey}_${k}`] = g_keyObj[`chara${newKey}_0`].length;
 				}
 
