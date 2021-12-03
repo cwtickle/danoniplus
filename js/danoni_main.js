@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/11/24
+ * Revised : 2021/12/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 24.3.0`;
-const g_revisedDate = `2021/11/24`;
+const g_version = `Ver 24.4.0`;
+const g_revisedDate = `2021/12/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2262,8 +2262,11 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
 const createScTextCommon = _displayName => {
 	Object.keys(g_btnPatterns[_displayName]).filter(target => document.getElementById(`btn${target}`) !== null)
 		.forEach(target =>
-			createScText(document.getElementById(`btn${target}`), target,
-				{ displayName: _displayName, targetLabel: `btn${target}`, x: g_btnPatterns[_displayName][target] }));
+			createScText(document.getElementById(`btn${target}`), target, {
+				displayName: _displayName, targetLabel: `btn${target}`,
+				dfLabel: setVal(g_lblNameObj[`sc_${_displayName}${target}`], ``, C_TYP_STRING),
+				x: g_btnPatterns[_displayName][target]
+			}));
 }
 
 /**
@@ -3130,7 +3133,7 @@ function headerConvert(_dosObj) {
 	}
 
 	// 自動プリロードの設定
-	obj.autoPreload = setVal(_dosObj.autoPreload, false, C_TYP_BOOLEAN);
+	obj.autoPreload = setVal(_dosObj.autoPreload, true, C_TYP_BOOLEAN);
 	g_headerObj.autoPreload = obj.autoPreload;
 
 	// 読込対象の画像を指定(rel:preload)と同じ
