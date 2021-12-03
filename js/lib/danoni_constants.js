@@ -972,6 +972,8 @@ const g_shortcutObj = {
     },
     keyConfig: {
         Escape: { id: `btnBack` },
+        Backspace_Enter: { id: `btnPlay` },
+        Backspace_NumpadEnter: { id: `btnPlay` },
     },
     loadingIos: {
         Enter: { id: `btnPlay` },
@@ -1011,7 +1013,7 @@ const g_btnPatterns = {
     difSelector: {},
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5 },
     loadingIos: { Play: 0 },
-    keyConfig: { Back: -3 },
+    keyConfig: { Back: -3, Play: 0 },
     result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0 },
 };
 
@@ -2530,6 +2532,7 @@ const g_lblNameObj = {
     sc_speed: `←→`,
     sc_scroll: `R/↑↓`,
     sc_adjustment: `- +`,
+    sc_keyConfigPlay: g_isMac ? `Del+Enter` : `BS+Enter`,
 
     g_start: `Start`,
     g_border: `Border`,

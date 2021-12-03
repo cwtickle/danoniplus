@@ -2262,8 +2262,11 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
 const createScTextCommon = _displayName => {
 	Object.keys(g_btnPatterns[_displayName]).filter(target => document.getElementById(`btn${target}`) !== null)
 		.forEach(target =>
-			createScText(document.getElementById(`btn${target}`), target,
-				{ displayName: _displayName, targetLabel: `btn${target}`, x: g_btnPatterns[_displayName][target] }));
+			createScText(document.getElementById(`btn${target}`), target, {
+				displayName: _displayName, targetLabel: `btn${target}`,
+				dfLabel: setVal(g_lblNameObj[`sc_${_displayName}${target}`], ``, C_TYP_STRING),
+				x: g_btnPatterns[_displayName][target]
+			}));
 }
 
 /**
