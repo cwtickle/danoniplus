@@ -3130,7 +3130,7 @@ function headerConvert(_dosObj) {
 	}
 
 	// 自動プリロードの設定
-	obj.autoPreload = setVal(_dosObj.autoPreload, false, C_TYP_BOOLEAN);
+	obj.autoPreload = setVal(_dosObj.autoPreload, true, C_TYP_BOOLEAN);
 	g_headerObj.autoPreload = obj.autoPreload;
 
 	// 読込対象の画像を指定(rel:preload)と同じ
