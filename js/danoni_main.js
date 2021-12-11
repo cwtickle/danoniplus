@@ -7796,12 +7796,13 @@ function MainInit() {
 	}
 
 	// Hidden+, Sudden+用のライン、パーセント表示
+	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
 	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj => {
 		mainSprite.appendChild(
 			createColorObject2(`${obj}`, {
 				w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
 				opacity: 0.0625,
-			}, g_cssObj.life_Failed)
+			}, filterCss)
 		);
 	});
 	borderBar0.style.top = `${g_posObj.stepDiffY}px`;
