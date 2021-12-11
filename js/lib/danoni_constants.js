@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2021/12/03 (v24.4.0)
+ * Revised : 2021/12/11 (v24.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -411,6 +411,7 @@ const g_stateObj = {
     d_background: C_FLG_ON,
     d_special: C_FLG_ON,
     appearance: `Visible`,
+    filterLock: C_FLG_OFF,
     opacity: 100,
 
     rotateEnabled: true,
@@ -489,6 +490,9 @@ const g_settings = {
 
     appearances: [`Visible`, `Hidden`, `Hidden+`, `Sudden`, `Sudden+`, `Hid&Sud+`],
     appearanceNum: 0,
+
+    filterLocks: [C_FLG_OFF, C_FLG_ON],
+    filterLockNum: 0,
 
     opacitys: [10, 25, 50, 75, 100],
 
@@ -2550,6 +2554,7 @@ const g_lblNameObj = {
     multi: `x`,
     frame: `f`,
     percent: `%`,
+    filterLock: `Lock`,
 
     sc_speed: `←→`,
     sc_scroll: `R/↑↓`,
