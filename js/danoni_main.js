@@ -5017,8 +5017,15 @@ function createGeneralSetting(_obj, _settingName, { unitName = ``,
 
 		multiAppend(_obj,
 			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
-				_ => setSetting(skipTerms[1], _settingName, unitName, roundNum),
-				{ cxtFunc: _ => setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum) }),
+				_ => {
+					setSetting(skipTerms[1], _settingName, unitName, roundNum);
+					addRFunc();
+				}, {
+				cxtFunc: _ => {
+					setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum);
+					addLFunc();
+				}
+			}),
 
 			// 右回し・左回しボタン（外側）
 			makeMiniCssButton(linkId, `R`, 0, _ => {
@@ -5305,7 +5312,7 @@ function createSettingsDisplayWindow(_sprite) {
 
 	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
 	const settingList = [
-		[`appearance`, 8, 10, 0, 0],
+		[`appearance`, 7.4, 10, 0, 0],
 		[`opacity`, 9, 10, 0, 0],
 	];
 
@@ -5324,8 +5331,49 @@ function createSettingsDisplayWindow(_sprite) {
 
 	// ---------------------------------------------------
 	// 矢印の見え方 (Appearance)
-	// 縦位置: 8
-	createGeneralSetting(spriteList.appearance, `appearance`, { displayName: g_currentPage });
+	// 縦位置: 7.4
+	createGeneralSetting(spriteList.appearance, `appearance`, {
+		displayName: g_currentPage,
+		addRFunc: _ => dispAppearanceSlider(),
+		addLFunc: _ => dispAppearanceSlider(),
+	});
+
+	// Hidden+/Sudden+初期値用スライダー、ロックボタン
+	multiAppend(spriteList.appearance,
+		createDivCss2Label(`lblAppearancePos`, `${g_hidSudObj.filterPos}${getStgDetailName(g_lblNameObj.percent)}`, {
+			x: C_LEN_SETLBL_LEFT, y: 20, siz: 12, align: C_ALIGN_CENTER,
+		}),
+		createDivCss2Label(`lblAppearanceBar`, `<input id="appearanceSlider" type="range" value="${g_hidSudObj.filterPos}" min="0" max="100" step="1">`, {
+			x: C_LEN_SETLBL_LEFT, y: 15,
+		}),
+		createCss2Button(`lnklockBtn`, `${getStgDetailName(g_lblNameObj.filterLock)}`, evt => setLockView(evt.target), {
+			x: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - 50, y: 0, w: 50, h: C_LEN_SETLBL_HEIGHT, siz: 12,
+			borderStyle: `solid`, cxtFunc: evt => setLockView(evt.target),
+		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.filterLock}`]),
+	);
+
+	const setLockView = (_btn) => {
+		const prevLock = g_stateObj.filterLock;
+		g_settings.filterLockNum = (g_settings.filterLockNum + 1) % 2;
+		g_stateObj.filterLock = g_settings.filterLocks[g_settings.filterLockNum];
+
+		_btn.classList.replace(g_cssObj[`button_Rev${prevLock}`],
+			g_cssObj[`button_Rev${g_stateObj.filterLock}`]);
+	}
+
+	const appearanceSlider = document.querySelector(`#appearanceSlider`);
+	appearanceSlider.addEventListener(`input`, _ => {
+		g_hidSudObj.filterPos = parseInt(appearanceSlider.value);
+		lblAppearancePos.textContent = `${g_hidSudObj.filterPos}${getStgDetailName(g_lblNameObj.percent)}`;
+	}, false);
+
+	const dispAppearanceSlider = _ => {
+		[`lblAppearancePos`, `lblAppearanceBar`, `lnklockBtn`].forEach(obj =>
+			document.getElementById(obj).style.visibility =
+			g_appearanceRanges.includes(g_stateObj.appearance) ? `Visible` : `Hidden`
+		);
+	};
+	dispAppearanceSlider();
 
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
@@ -8135,7 +8183,7 @@ function MainInit() {
 				titleInit();
 			}
 
-		} else if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+		} else if (g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_OFF) {
 			if (setCode === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
 				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos < 100 ?
 					g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
