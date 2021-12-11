@@ -5347,7 +5347,7 @@ function createSettingsDisplayWindow(_sprite) {
 			x: C_LEN_SETLBL_LEFT, y: 15,
 		}),
 		createCss2Button(`lnklockBtn`, `${getStgDetailName(g_lblNameObj.filterLock)}`, evt => setLockView(evt.target), {
-			x: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - 50, y: 0, w: 50, h: C_LEN_SETLBL_HEIGHT, siz: 12,
+			x: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - 40, y: 0, w: 40, h: C_LEN_SETLBL_HEIGHT, siz: 12,
 			borderStyle: `solid`, cxtFunc: evt => setLockView(evt.target),
 		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.filterLock}`]),
 	);
