@@ -5346,7 +5346,7 @@ function createSettingsDisplayWindow(_sprite) {
 		createDivCss2Label(`lblAppearanceBar`, `<input id="appearanceSlider" type="range" value="${g_hidSudObj.filterPos}" min="0" max="100" step="1">`, {
 			x: C_LEN_SETLBL_LEFT, y: 15,
 		}),
-		createCss2Button(`lnklockBtn`, `${getStgDetailName(g_lblNameObj.filterLock)}`, evt => setLockView(evt.target), {
+		createCss2Button(`lnkLockBtn`, `${getStgDetailName(g_lblNameObj.filterLock)}`, evt => setLockView(evt.target), {
 			x: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - 40, y: 0, w: 40, h: C_LEN_SETLBL_HEIGHT, siz: 12,
 			borderStyle: `solid`, cxtFunc: evt => setLockView(evt.target),
 		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.filterLock}`]),
@@ -5368,7 +5368,7 @@ function createSettingsDisplayWindow(_sprite) {
 	}, false);
 
 	const dispAppearanceSlider = _ => {
-		[`lblAppearancePos`, `lblAppearanceBar`, `lnklockBtn`].forEach(obj =>
+		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`].forEach(obj =>
 			document.getElementById(obj).style.visibility =
 			g_appearanceRanges.includes(g_stateObj.appearance) ? `Visible` : `Hidden`
 		);
