@@ -4856,7 +4856,7 @@ function createOptionWindow(_sprite) {
 		// ローカルストレージで保存した設定を呼び出し
 		if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _initFlg) {
 
-			if (isNotSameKey) {
+			if (isNotSameKey && g_keyObj.prevKey !== `Dummy`) {
 				// キーパターン、シャッフルグループ初期化
 				g_keyObj.currentPtn = 0;
 				g_keycons.shuffleGroupNum = 0;
@@ -5563,15 +5563,39 @@ function keyConfigInit(_kcType = g_kcType) {
 	};
 
 	/**
+	 * 一時的に矢印色・シャッフルグループを変更（共通処理）
+	 * @param {string} _type 
+	 * @param {number} _len 
+	 * @param {number} _j 
+	 * @param {number} _scrollNum 
+	 * @returns 
+	 */
+	const changeTmpData = (_type, _len, _j, _scrollNum) => {
+		const basePtn = getBasePtn();
+		const hasMultiGroup = g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined;
+		const tmpNo = nextPos(g_keyObj[`${_type}${keyCtrlPtn}`][_j], _scrollNum, _len);
+
+		const setTmpData = _ptn => {
+			g_keyObj[`${_type}${_ptn}`][_j] = tmpNo;
+			if (hasMultiGroup) {
+				g_keyObj[`${_type}${_ptn}_${g_keycons[`${_type}GroupNum`]}`][_j] = tmpNo;
+			}
+		};
+
+		setTmpData(keyCtrlPtn);
+		if (keyCtrlPtn === basePtn) {
+			setTmpData(`${g_keyObj.currentKey}_-1`);
+		}
+		return tmpNo;
+	};
+
+	/**
 	 * 一時的に矢印色を変更
 	 * @param {number} _j
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpColor = (_j, _scrollNum = 1) => {
-		const setColorLen = g_headerObj.setColor.length;
-		g_keyObj[`color${keyCtrlPtn}`][_j] = nextPos(g_keyObj[`color${keyCtrlPtn}`][_j], _scrollNum, setColorLen);
-		g_keyObj[`color${getBasePtn()}`][_j] = g_keyObj[`color${keyCtrlPtn}`][_j];
-
+		changeTmpData(`color`, g_headerObj.setColor.length, _j, _scrollNum);
 		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
 		$id(`arrow${_j}`).background = arrowColor;
 		$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
@@ -5583,14 +5607,8 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
-		const basePtn = getBasePtn();
-		const tmpShuffle = nextPos(g_keyObj[`shuffle${keyCtrlPtn}`][_j], _scrollNum, 10);
+		const tmpShuffle = changeTmpData(`shuffle`, 10, _j, _scrollNum);
 		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
-		g_keyObj[`shuffle${keyCtrlPtn}`][_j] = g_keyObj[`shuffle${basePtn}`][_j] = tmpShuffle;
-		if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
-			g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j] =
-				g_keyObj[`shuffle${basePtn}_${g_keycons.shuffleGroupNum}`][_j] = tmpShuffle;
-		}
 	};
 
 	for (let j = 0; j < keyNum; j++) {
@@ -5702,7 +5720,6 @@ function keyConfigInit(_kcType = g_kcType) {
 			if (g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
 				document.getElementById(`lnk${toCapitalize(_type)}Group`).textContent =
 					getStgDetailName(`${g_keycons[`${_type}GroupNum`] + 1}`);
-				g_keyObj[`${_type}${keyCtrlPtn}`] = g_keyObj[`${_type}${getBasePtn()}`] = g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`].concat();
 			}
 			viewGroupObj[_type](`_${g_keycons[`${_type}GroupNum`]}`);
 		}
