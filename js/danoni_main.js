@@ -5596,10 +5596,10 @@ function keyConfigInit(_kcType = g_kcType) {
 	cursor.style.transitionDuration = `0.125s`;
 
 	const viewGroupObj = {
-		shuffle: _ => {
+		shuffle: (_type = ``) => {
 			if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
 				for (let j = 0; j < keyNum; j++) {
-					document.getElementById(`sArrow${j}`).textContent = g_keyObj[`shuffle${keyCtrlPtn}`][j] + 1;
+					document.getElementById(`sArrow${j}`).textContent = g_keyObj[`shuffle${keyCtrlPtn}${_type}`][j] + 1;
 				}
 			}
 		},
