@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/10/27
+ * Revised : 2021/12/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 23.5.2`;
-const g_revisedDate = `2021/10/27`;
+const g_version = `Ver 23.5.3`;
+const g_revisedDate = `2021/12/12`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1492,20 +1492,13 @@ function initAfterDosLoaded() {
 			}
 		});
 
-		// 非推奨ブラウザに対して警告文を表示
-		// Firefoxはローカル環境時、Ver65以降矢印が表示されなくなるため非推奨表示
-		if (g_userAgent.indexOf(`msie`) !== -1 ||
-			g_userAgent.indexOf(`trident`) !== -1 ||
-			g_userAgent.indexOf(`edge`) !== -1 ||
-			(g_userAgent.indexOf(`firefox`) !== -1 && g_isFile)) {
-
-			makeWarningWindow(g_msgInfoObj.W_0001);
-		}
-
+		// ローカルファイル起動時に各種警告文を表示
 		if (g_isFile) {
 			makeWarningWindow(g_msgInfoObj.W_0011);
-			const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
-			if (!listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` })) {
+			if (!listMatching(getMusicUrl(g_stateObj.scoreId), [`.js`, `.txt`], { suffix: `$` })) {
+				if (g_userAgent.indexOf(`firefox`) !== -1) {
+					makeWarningWindow(g_msgInfoObj.W_0001);
+				}
 				makeWarningWindow(g_msgInfoObj.W_0012);
 			}
 		}
@@ -1522,6 +1515,17 @@ function initAfterDosLoaded() {
 			reloadDos(0);
 		}
 	}
+}
+
+/**
+ * MusicUrlの基本情報を取得
+ * @param {number} _scoreId 
+ * @returns 
+ */
+function getMusicUrl(_scoreId) {
+	return g_headerObj.musicUrls !== undefined ?
+		g_headerObj.musicUrls[g_headerObj.musicNos[_scoreId]] ||
+		g_headerObj.musicUrls[0] : `nosound.mp3`;
 }
 
 /**
@@ -1827,7 +1831,7 @@ function loadMusic() {
 	clearWindow(true);
 	g_currentPage = `loading`;
 
-	const musicUrl = g_headerObj.musicUrls[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicUrls[0];
+	const musicUrl = getMusicUrl(g_stateObj.scoreId);
 	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
 	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
@@ -4817,7 +4821,7 @@ function createOptionWindow(_sprite) {
 			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
 			g_settings.speedNum = roundZero(g_settings.speeds.findIndex(speed => speed === g_stateObj.speed));
 			g_settings.gaugeNum = 0;
-			if (isNotSameKey) {
+			if (isNotSameKey && g_keyObj.prevKey !== `Dummy`) {
 				g_settings.scrollNum = 0;
 				if (!g_settings.autoPlays.includes(g_stateObj.autoPlay)) {
 					g_settings.autoPlayNum = 0;
@@ -5474,15 +5478,39 @@ function keyConfigInit(_kcType = g_kcType) {
 	};
 
 	/**
+	 * 一時的に矢印色・シャッフルグループを変更（共通処理）
+	 * @param {string} _type 
+	 * @param {number} _len 
+	 * @param {number} _j 
+	 * @param {number} _scrollNum 
+	 * @returns 
+	 */
+	const changeTmpData = (_type, _len, _j, _scrollNum) => {
+		const basePtn = getBasePtn();
+		const hasMultiGroup = g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined;
+		const tmpNo = nextPos(g_keyObj[`${_type}${keyCtrlPtn}`][_j], _scrollNum, _len);
+
+		const setTmpData = _ptn => {
+			g_keyObj[`${_type}${_ptn}`][_j] = tmpNo;
+			if (hasMultiGroup) {
+				g_keyObj[`${_type}${_ptn}_${g_keycons[`${_type}GroupNum`]}`][_j] = tmpNo;
+			}
+		};
+
+		setTmpData(keyCtrlPtn);
+		if (keyCtrlPtn === basePtn) {
+			setTmpData(`${g_keyObj.currentKey}_-1`);
+		}
+		return tmpNo;
+	};
+
+	/**
 	 * 一時的に矢印色を変更
 	 * @param {number} _j
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpColor = (_j, _scrollNum = 1) => {
-		const setColorLen = g_headerObj.setColor.length;
-		g_keyObj[`color${keyCtrlPtn}`][_j] = nextPos(g_keyObj[`color${keyCtrlPtn}`][_j], _scrollNum, setColorLen);
-		g_keyObj[`color${getBasePtn()}`][_j] = g_keyObj[`color${keyCtrlPtn}`][_j];
-
+		changeTmpData(`color`, g_headerObj.setColor.length, _j, _scrollNum);
 		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
 		$id(`arrow${_j}`).background = arrowColor;
 		$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
@@ -5494,14 +5522,8 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
-		const basePtn = getBasePtn();
-		const tmpShuffle = nextPos(g_keyObj[`shuffle${keyCtrlPtn}`][_j], _scrollNum, 10);
+		const tmpShuffle = changeTmpData(`shuffle`, 10, _j, _scrollNum);
 		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
-		g_keyObj[`shuffle${keyCtrlPtn}`][_j] = g_keyObj[`shuffle${basePtn}`][_j] = tmpShuffle;
-		if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
-			g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j] =
-				g_keyObj[`shuffle${basePtn}_${g_keycons.shuffleGroupNum}`][_j] = tmpShuffle;
-		}
 	};
 
 	for (let j = 0; j < keyNum; j++) {
@@ -5613,7 +5635,6 @@ function keyConfigInit(_kcType = g_kcType) {
 			if (g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
 				document.getElementById(`lnk${toCapitalize(_type)}Group`).textContent =
 					getStgDetailName(`${g_keycons[`${_type}GroupNum`] + 1}`);
-				g_keyObj[`${_type}${keyCtrlPtn}`] = g_keyObj[`${_type}${getBasePtn()}`] = g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`].concat();
 			}
 			viewGroupObj[_type](`_${g_keycons[`${_type}GroupNum`]}`);
 		}
