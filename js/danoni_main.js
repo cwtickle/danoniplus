@@ -5569,8 +5569,11 @@ function keyConfigInit(_kcType = g_kcType) {
 	 */
 	const changeTmpColor = (_j, _scrollNum = 1) => {
 		const setColorLen = g_headerObj.setColor.length;
-		g_keyObj[`color${keyCtrlPtn}`][_j] = nextPos(g_keyObj[`color${keyCtrlPtn}`][_j], _scrollNum, setColorLen);
-		g_keyObj[`color${getBasePtn()}`][_j] = g_keyObj[`color${keyCtrlPtn}`][_j];
+		const tmpColors = nextPos(g_keyObj[`color${keyCtrlPtn}`][_j], _scrollNum, setColorLen);
+		g_keyObj[`color${keyCtrlPtn}`][_j] = tmpColors;
+		if (g_keyObj[`color${keyCtrlPtn}_1`] !== undefined) {
+			g_keyObj[`color${keyCtrlPtn}_${g_keycons.colorGroupNum}`][_j] = tmpColors;
+		}
 
 		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
 		$id(`arrow${_j}`).background = arrowColor;
@@ -5588,8 +5591,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
 		g_keyObj[`shuffle${keyCtrlPtn}`][_j] = g_keyObj[`shuffle${basePtn}`][_j] = tmpShuffle;
 		if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
-			g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j] =
-				g_keyObj[`shuffle${basePtn}_${g_keycons.shuffleGroupNum}`][_j] = tmpShuffle;
+			g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j] = tmpShuffle;
 		}
 	};
 
@@ -5702,7 +5704,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			if (g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
 				document.getElementById(`lnk${toCapitalize(_type)}Group`).textContent =
 					getStgDetailName(`${g_keycons[`${_type}GroupNum`] + 1}`);
-				g_keyObj[`${_type}${keyCtrlPtn}`] = g_keyObj[`${_type}${getBasePtn()}`] = g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`].concat();
+				g_keyObj[`${_type}${keyCtrlPtn}`] = g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`].concat();
 			}
 			viewGroupObj[_type](`_${g_keycons[`${_type}GroupNum`]}`);
 		}
