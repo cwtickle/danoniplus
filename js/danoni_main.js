@@ -8,8 +8,8 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 23.5.3`;
-const g_revisedDate = `2021/12/12`;
+const g_version = `Ver 23.5.4`;
+const g_revisedDate = `2021/12/13`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5117,6 +5117,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 	const baseKeyNum = g_keyObj[`chara${basePtn}`].length;
 
 	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined && _localStorage[`keyCtrl${_extraKeyName}`][0].length > 0) {
+		const prevPtn = g_keyObj.currentPtn;
 		g_keyObj.currentPtn = -1;
 		const copyPtn = `${g_keyObj.currentKey}_-1`;
 		g_keyObj[`keyCtrl${copyPtn}`] = [];
@@ -5132,7 +5133,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 		}
 
 		g_keyCopyLists.multiple.forEach(header => {
-			if (g_keyObj[`${header}${basePtn}`] !== undefined) {
+			if (g_keyObj[`${header}${basePtn}`] !== undefined && prevPtn !== -1) {
 				g_keyObj[`${header}${copyPtn}`] = copyArray2d(g_keyObj[`${header}${basePtn}`]);
 			}
 		});
@@ -5635,8 +5636,10 @@ function keyConfigInit(_kcType = g_kcType) {
 			if (g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
 				document.getElementById(`lnk${toCapitalize(_type)}Group`).textContent =
 					getStgDetailName(`${g_keycons[`${_type}GroupNum`] + 1}`);
+				viewGroupObj[_type](`_${g_keycons[`${_type}GroupNum`]}`);
+			} else {
+				viewGroupObj[_type]();
 			}
-			viewGroupObj[_type](`_${g_keycons[`${_type}GroupNum`]}`);
 		}
 	}
 	const setGroup = (_type, _scrollNum = 1) => {
@@ -5849,7 +5852,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
 		}
 		changeSetColor();
-		viewGroupObj.color();
+		viewGroupObj.color(g_keyObj[`color${keyCtrlPtn}_1`] !== undefined ? `_${g_keycons.colorGroupNum}` : ``);
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	};
 
