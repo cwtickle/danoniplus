@@ -5584,12 +5584,9 @@ function keyConfigInit(_kcType = g_kcType) {
 	 */
 	const changeTmpData = (_type, _len, _j, _scrollNum) => {
 		const tmpNo = nextPos(g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`][_j], _scrollNum, _len);
-		const setTmpData = _ptn => {
-			g_keyObj[`${_type}${_ptn}`][_j] = tmpNo;
-			g_keyObj[`${_type}${_ptn}_${g_keycons[`${_type}GroupNum`]}`][_j] = tmpNo;
-		};
+		g_keyObj[`${_type}${keyCtrlPtn}`][_j] = tmpNo;
+		g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`][_j] = tmpNo;
 
-		setTmpData(keyCtrlPtn);
 		return tmpNo;
 	};
 
@@ -5705,15 +5702,6 @@ function keyConfigInit(_kcType = g_kcType) {
 			}
 		},
 	}
-
-	/**
-	 * キーコンフィグを保存している場合の元パターンを取得
-	 * @returns 
-	 */
-	const getBasePtn = _ => {
-		const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
-		return `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
-	};
 
 	/**
 	 * カラー・シャッフルグループ設定の表示
