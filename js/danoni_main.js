@@ -3766,6 +3766,14 @@ function keysConvert(_dosObj) {
 		}
 	};
 
+	/**
+	 * 子構成配列へのコピー
+	 * @param {number} _k 
+	 * @param {string} _header 
+	 * @returns 
+	 */
+	const copyChildArray = (_k, _header) => g_keyObj[`${_header}_${_k}_0`] = copyArray2d(g_keyObj[`${_header}_${_k}`]);
+
 	// 対象キー毎に処理
 	keyExtraList.forEach(newKey => {
 		let tmpDivPtn = [];
@@ -3777,9 +3785,7 @@ function keysConvert(_dosObj) {
 		// 矢印色パターン (colorX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
 			errCd: `E_0101`,
-			loopFunc: (k, keyheader) => {
-				g_keyObj[`${keyheader}_${k}_0`] = g_keyObj[`${keyheader}_${k}`];
-			},
+			loopFunc: (k, keyheader) => copyChildArray(k, keyheader),
 		});
 
 		// 読込変数の接頭辞 (charaX_Y)
@@ -3851,7 +3857,9 @@ function keysConvert(_dosObj) {
 		newKeySingleParam(newKey, `transKey`, C_TYP_STRING);
 
 		// シャッフルグループ (shuffleX_Y)
-		newKeyMultiParam(newKey, `shuffle`, toNumber);
+		newKeyMultiParam(newKey, `shuffle`, toNumber, {
+			loopFunc: (k, keyheader) => copyChildArray(k, keyheader),
+		});
 
 		// スクロールパターン (scrollX_Y)
 		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
@@ -5176,8 +5184,9 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 			}
 		}
 
+		const isUpdate = prevPtn !== -1 && g_keyObj.prevKey !== g_keyObj.currentKey;
 		g_keyCopyLists.multiple.forEach(header => {
-			if (g_keyObj[`${header}${basePtn}`] !== undefined && prevPtn !== -1) {
+			if (g_keyObj[`${header}${basePtn}`] !== undefined && isUpdate) {
 				g_keyObj[`${header}${copyPtn}`] = copyArray2d(g_keyObj[`${header}${basePtn}`]);
 			}
 		});
@@ -5186,12 +5195,14 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 		});
 
 		[`color`, `shuffle`].forEach(type => {
-			let maxPtn = 0;
-			while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
-				maxPtn++;
-			}
-			for (let j = 0; j < maxPtn; j++) {
-				g_keyObj[`${type}${copyPtn}_${j}`] = g_keyObj[`${type}${basePtn}_${j}`];
+			if (isUpdate) {
+				let maxPtn = 0;
+				while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
+					maxPtn++;
+				}
+				for (let j = 0; j < maxPtn; j++) {
+					g_keyObj[`${type}${copyPtn}_${j}`] = copyArray2d(g_keyObj[`${type}${basePtn}_${j}`]);
+				}
 			}
 		});
 	}
@@ -5572,21 +5583,13 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @returns 
 	 */
 	const changeTmpData = (_type, _len, _j, _scrollNum) => {
-		const basePtn = getBasePtn();
-		const hasMultiGroup = g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined;
-		const tmpNo = nextPos(g_keyObj[`${_type}${keyCtrlPtn}`][_j], _scrollNum, _len);
-
+		const tmpNo = nextPos(g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`][_j], _scrollNum, _len);
 		const setTmpData = _ptn => {
 			g_keyObj[`${_type}${_ptn}`][_j] = tmpNo;
-			if (hasMultiGroup) {
-				g_keyObj[`${_type}${_ptn}_${g_keycons[`${_type}GroupNum`]}`][_j] = tmpNo;
-			}
+			g_keyObj[`${_type}${_ptn}_${g_keycons[`${_type}GroupNum`]}`][_j] = tmpNo;
 		};
 
 		setTmpData(keyCtrlPtn);
-		if (keyCtrlPtn === basePtn) {
-			setTmpData(`${g_keyObj.currentKey}_-1`);
-		}
 		return tmpNo;
 	};
 
@@ -5721,10 +5724,8 @@ function keyConfigInit(_kcType = g_kcType) {
 			if (g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
 				document.getElementById(`lnk${toCapitalize(_type)}Group`).textContent =
 					getStgDetailName(`${g_keycons[`${_type}GroupNum`] + 1}`);
-				viewGroupObj[_type](`_${g_keycons[`${_type}GroupNum`]}`);
-			} else {
-				viewGroupObj[_type]();
 			}
+			viewGroupObj[_type](`_${g_keycons[`${_type}GroupNum`]}`);
 		}
 	}
 	const setGroup = (_type, _scrollNum = 1) => {
@@ -5939,7 +5940,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
 		}
 		changeSetColor();
-		viewGroupObj.color(g_keyObj[`color${keyCtrlPtn}_1`] !== undefined ? `_${g_keycons.colorGroupNum}` : ``);
+		viewGroupObj.color(`_${g_keycons.colorGroupNum}`);
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	};
 
