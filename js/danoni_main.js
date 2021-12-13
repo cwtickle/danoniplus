@@ -5195,7 +5195,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 		});
 
 		[`color`, `shuffle`].forEach(type => {
-			if (prevPtn !== -1 && g_keyObj.prevKey !== g_keyObj.currentKey) {
+			if (isUpdate) {
 				let maxPtn = 0;
 				while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
 					maxPtn++;
