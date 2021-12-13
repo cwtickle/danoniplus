@@ -5184,8 +5184,9 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 			}
 		}
 
+		const isUpdate = prevPtn !== -1 && g_keyObj.prevKey !== g_keyObj.currentKey;
 		g_keyCopyLists.multiple.forEach(header => {
-			if (g_keyObj[`${header}${basePtn}`] !== undefined && prevPtn !== -1) {
+			if (g_keyObj[`${header}${basePtn}`] !== undefined && isUpdate) {
 				g_keyObj[`${header}${copyPtn}`] = copyArray2d(g_keyObj[`${header}${basePtn}`]);
 			}
 		});
@@ -5582,18 +5583,13 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @returns 
 	 */
 	const changeTmpData = (_type, _len, _j, _scrollNum) => {
-		const basePtn = getBasePtn();
 		const tmpNo = nextPos(g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`][_j], _scrollNum, _len);
-
 		const setTmpData = _ptn => {
 			g_keyObj[`${_type}${_ptn}`][_j] = tmpNo;
 			g_keyObj[`${_type}${_ptn}_${g_keycons[`${_type}GroupNum`]}`][_j] = tmpNo;
 		};
 
 		setTmpData(keyCtrlPtn);
-		if (keyCtrlPtn === basePtn) {
-			setTmpData(`${g_keyObj.currentKey}_-1`);
-		}
 		return tmpNo;
 	};
 
