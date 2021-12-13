@@ -5575,8 +5575,6 @@ function keyConfigInit(_kcType = g_kcType) {
 	 */
 	const changeTmpData = (_type, _len, _j, _scrollNum) => {
 		const basePtn = getBasePtn();
-		console.log(`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`);
-		console.log(g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`])
 		const tmpNo = nextPos(g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`][_j], _scrollNum, _len);
 
 		const setTmpData = _ptn => {
