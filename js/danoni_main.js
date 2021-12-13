@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2021/12/11
+ * Revised : 2021/12/13
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 24.5.0`;
-const g_revisedDate = `2021/12/11`;
+const g_version = `Ver 24.5.1`;
+const g_revisedDate = `2021/12/13`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3766,6 +3766,14 @@ function keysConvert(_dosObj) {
 		}
 	};
 
+	/**
+	 * 子構成配列へのコピー
+	 * @param {number} _k 
+	 * @param {string} _header 
+	 * @returns 
+	 */
+	const copyChildArray = (_k, _header) => g_keyObj[`${_header}_${_k}_0`] = copyArray2d(g_keyObj[`${_header}_${_k}`]);
+
 	// 対象キー毎に処理
 	keyExtraList.forEach(newKey => {
 		let tmpDivPtn = [];
@@ -3777,9 +3785,7 @@ function keysConvert(_dosObj) {
 		// 矢印色パターン (colorX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
 			errCd: `E_0101`,
-			loopFunc: (k, keyheader) => {
-				g_keyObj[`${keyheader}_${k}_0`] = g_keyObj[`${keyheader}_${k}`];
-			},
+			loopFunc: (k, keyheader) => copyChildArray(k, keyheader),
 		});
 
 		// 読込変数の接頭辞 (charaX_Y)
@@ -3851,7 +3857,9 @@ function keysConvert(_dosObj) {
 		newKeySingleParam(newKey, `transKey`, C_TYP_STRING);
 
 		// シャッフルグループ (shuffleX_Y)
-		newKeyMultiParam(newKey, `shuffle`, toNumber);
+		newKeyMultiParam(newKey, `shuffle`, toNumber, {
+			loopFunc: (k, keyheader) => copyChildArray(k, keyheader),
+		});
 
 		// スクロールパターン (scrollX_Y)
 		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
@@ -4856,7 +4864,7 @@ function createOptionWindow(_sprite) {
 		// ローカルストレージで保存した設定を呼び出し
 		if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _initFlg) {
 
-			if (isNotSameKey) {
+			if (isNotSameKey && g_keyObj.prevKey !== `Dummy`) {
 				// キーパターン、シャッフルグループ初期化
 				g_keyObj.currentPtn = 0;
 				g_keycons.shuffleGroupNum = 0;
@@ -5164,6 +5172,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 	const baseKeyNum = g_keyObj[`chara${basePtn}`].length;
 
 	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined && _localStorage[`keyCtrl${_extraKeyName}`][0].length > 0) {
+		const prevPtn = g_keyObj.currentPtn;
 		g_keyObj.currentPtn = -1;
 		const copyPtn = `${g_keyObj.currentKey}_-1`;
 		g_keyObj[`keyCtrl${copyPtn}`] = [...Array(baseKeyNum)].map(_ => []);
@@ -5175,8 +5184,9 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 			}
 		}
 
+		const isUpdate = prevPtn !== -1 && g_keyObj.prevKey !== g_keyObj.currentKey;
 		g_keyCopyLists.multiple.forEach(header => {
-			if (g_keyObj[`${header}${basePtn}`] !== undefined) {
+			if (g_keyObj[`${header}${basePtn}`] !== undefined && isUpdate) {
 				g_keyObj[`${header}${copyPtn}`] = copyArray2d(g_keyObj[`${header}${basePtn}`]);
 			}
 		});
@@ -5185,12 +5195,14 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
 		});
 
 		[`color`, `shuffle`].forEach(type => {
-			let maxPtn = 0;
-			while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
-				maxPtn++;
-			}
-			for (let j = 0; j < maxPtn; j++) {
-				g_keyObj[`${type}${copyPtn}_${j}`] = g_keyObj[`${type}${basePtn}_${j}`];
+			if (isUpdate) {
+				let maxPtn = 0;
+				while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
+					maxPtn++;
+				}
+				for (let j = 0; j < maxPtn; j++) {
+					g_keyObj[`${type}${copyPtn}_${j}`] = copyArray2d(g_keyObj[`${type}${basePtn}_${j}`]);
+				}
 			}
 		});
 	}
@@ -5563,15 +5575,28 @@ function keyConfigInit(_kcType = g_kcType) {
 	};
 
 	/**
+	 * 一時的に矢印色・シャッフルグループを変更（共通処理）
+	 * @param {string} _type 
+	 * @param {number} _len 
+	 * @param {number} _j 
+	 * @param {number} _scrollNum 
+	 * @returns 
+	 */
+	const changeTmpData = (_type, _len, _j, _scrollNum) => {
+		const tmpNo = nextPos(g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`][_j], _scrollNum, _len);
+		g_keyObj[`${_type}${keyCtrlPtn}`][_j] = tmpNo;
+		g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`][_j] = tmpNo;
+
+		return tmpNo;
+	};
+
+	/**
 	 * 一時的に矢印色を変更
 	 * @param {number} _j
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpColor = (_j, _scrollNum = 1) => {
-		const setColorLen = g_headerObj.setColor.length;
-		g_keyObj[`color${keyCtrlPtn}`][_j] = nextPos(g_keyObj[`color${keyCtrlPtn}`][_j], _scrollNum, setColorLen);
-		g_keyObj[`color${getBasePtn()}`][_j] = g_keyObj[`color${keyCtrlPtn}`][_j];
-
+		changeTmpData(`color`, g_headerObj.setColor.length, _j, _scrollNum);
 		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
 		$id(`arrow${_j}`).background = arrowColor;
 		$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
@@ -5583,14 +5608,8 @@ function keyConfigInit(_kcType = g_kcType) {
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
-		const basePtn = getBasePtn();
-		const tmpShuffle = nextPos(g_keyObj[`shuffle${keyCtrlPtn}`][_j], _scrollNum, 10);
+		const tmpShuffle = changeTmpData(`shuffle`, 10, _j, _scrollNum);
 		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
-		g_keyObj[`shuffle${keyCtrlPtn}`][_j] = g_keyObj[`shuffle${basePtn}`][_j] = tmpShuffle;
-		if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
-			g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j] =
-				g_keyObj[`shuffle${basePtn}_${g_keycons.shuffleGroupNum}`][_j] = tmpShuffle;
-		}
 	};
 
 	for (let j = 0; j < keyNum; j++) {
@@ -5663,10 +5682,10 @@ function keyConfigInit(_kcType = g_kcType) {
 	cursor.style.transitionDuration = `0.125s`;
 
 	const viewGroupObj = {
-		shuffle: _ => {
+		shuffle: (_type = ``) => {
 			if (g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
 				for (let j = 0; j < keyNum; j++) {
-					document.getElementById(`sArrow${j}`).textContent = g_keyObj[`shuffle${keyCtrlPtn}`][j] + 1;
+					document.getElementById(`sArrow${j}`).textContent = g_keyObj[`shuffle${keyCtrlPtn}${_type}`][j] + 1;
 				}
 			}
 		},
@@ -5685,15 +5704,6 @@ function keyConfigInit(_kcType = g_kcType) {
 	}
 
 	/**
-	 * キーコンフィグを保存している場合の元パターンを取得
-	 * @returns 
-	 */
-	const getBasePtn = _ => {
-		const baseKeyCtrlPtn = !g_stateObj.extraKeyFlg ? g_localKeyStorage.keyCtrlPtn : g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`];
-		return `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
-	};
-
-	/**
 	 * カラー・シャッフルグループ設定の表示
 	 * @param {string} _type 
 	 */
@@ -5702,7 +5712,6 @@ function keyConfigInit(_kcType = g_kcType) {
 			if (g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
 				document.getElementById(`lnk${toCapitalize(_type)}Group`).textContent =
 					getStgDetailName(`${g_keycons[`${_type}GroupNum`] + 1}`);
-				g_keyObj[`${_type}${keyCtrlPtn}`] = g_keyObj[`${_type}${getBasePtn()}`] = g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`].concat();
 			}
 			viewGroupObj[_type](`_${g_keycons[`${_type}GroupNum`]}`);
 		}
@@ -5919,7 +5928,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
 		}
 		changeSetColor();
-		viewGroupObj.color();
+		viewGroupObj.color(`_${g_keycons.colorGroupNum}`);
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 	};
 
