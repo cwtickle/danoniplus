@@ -3766,6 +3766,14 @@ function keysConvert(_dosObj) {
 		}
 	};
 
+	/**
+	 * 子構成配列へのコピー
+	 * @param {number} _k 
+	 * @param {string} _header 
+	 * @returns 
+	 */
+	const copyChildArray = (_k, _header) => g_keyObj[`${_header}_${_k}_0`] = copyArray2d(g_keyObj[`${_header}_${_k}`]);
+
 	// 対象キー毎に処理
 	keyExtraList.forEach(newKey => {
 		let tmpDivPtn = [];
@@ -3777,7 +3785,7 @@ function keysConvert(_dosObj) {
 		// 矢印色パターン (colorX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
 			errCd: `E_0101`,
-			loopFunc: (k, keyheader) => g_keyObj[`${keyheader}_${k}_0`] = copyArray2d(g_keyObj[`${keyheader}_${k}`]),
+			loopFunc: (k, keyheader) => copyChildArray(k, keyheader),
 		});
 
 		// 読込変数の接頭辞 (charaX_Y)
@@ -3850,7 +3858,7 @@ function keysConvert(_dosObj) {
 
 		// シャッフルグループ (shuffleX_Y)
 		newKeyMultiParam(newKey, `shuffle`, toNumber, {
-			loopFunc: (k, keyheader) => g_keyObj[`${keyheader}_${k}_0`] = copyArray2d(g_keyObj[`${keyheader}_${k}`]),
+			loopFunc: (k, keyheader) => copyChildArray(k, keyheader),
 		});
 
 		// スクロールパターン (scrollX_Y)
