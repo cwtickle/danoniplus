@@ -7304,15 +7304,21 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 				pushColors(`${_header}`, colorData[k], colorData[k + 1], colorData[k + 2]);
 			}
-			frontData.forEach(data => pushColor(_header, 0, data[0], data[1]));
+			frontData.forEach(data => pushColors(_header, g_scoreObj.frameNum, data[0], data[1]));
 		}
 
 		// 全体色変化のタイミング更新
 		if (acolorData !== undefined && acolorData.length >= 3) {
 
+			const frontData = [];
 			for (let k = acolorData.length - 3; k >= 0; k -= 3) {
-				pushColors(`A${_header}`, acolorData[k], acolorData[k + 1], acolorData[k + 2]);
+				if (acolorData[k] < g_scoreObj.frameNum) {
+					frontData.unshift([acolorData[k + 1], acolorData[k + 2]]);
+				} else {
+					pushColors(`A${_header}`, acolorData[k], acolorData[k + 1], acolorData[k + 2]);
+				}
 			}
+			frontData.forEach(data => pushColors(`A${_header}`, g_scoreObj.frameNum, data[0], data[1]));
 		}
 	}
 
