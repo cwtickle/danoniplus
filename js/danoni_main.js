@@ -7279,10 +7279,11 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			pushColors(``, isFrzHitColor(colorData[lastk + 1]) ? colorData[lastk] : tmpObj.frm,
 				colorData[lastk + 1], colorData[lastk + 2]);
 
+			const frontData = [];
 			for (let k = lastk - 3; k >= 0; k -= 3) {
 
 				if (colorData[k] < g_scoreObj.frameNum) {
-					break;
+					frontData.unshift([colorData[k + 1], colorData[k + 2]]);
 				} else if ((colorData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
 					&& colorData[k] < spdNext)) {
 					if (!isFrzHitColor(colorData[k + 1])) {
@@ -7303,6 +7304,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 				pushColors(`${_header}`, colorData[k], colorData[k + 1], colorData[k + 2]);
 			}
+			frontData.forEach(data => pushColor(_header, 0, data[0], data[1]));
 		}
 
 		// 全体色変化のタイミング更新
@@ -7332,10 +7334,12 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 			pushCssMotions(_header, tmpObj.frm, cssMotionData[lastk + 1], cssMotionData[lastk + 2], cssMotionData[lastk + 3]);
 
+			const frontData = [];
 			for (let k = lastk - 4; k >= 0; k -= 4) {
 
 				if (cssMotionData[k] < g_scoreObj.frameNum) {
-					break;
+					frontData.unshift([cssMotionData[k + 1], cssMotionData[k + 2], cssMotionData[k + 3]]);
+
 				} else if ((cssMotionData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
 					&& cssMotionData[k] < spdNext)) {
 					cssMotionData[k] -= g_workObj.arrivalFrame[frmPrev];
@@ -7352,6 +7356,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 				pushCssMotions(_header, cssMotionData[k], cssMotionData[k + 1], cssMotionData[k + 2], cssMotionData[k + 3]);
 			}
+			frontData.forEach(data => pushCssMotions(_header, 0, data[0], data[1], data[2]));
 		}
 	}
 
