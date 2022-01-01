@@ -214,6 +214,16 @@ const getNumAttr = (_baseObj, _attrkey) => parseFloat(_baseObj.getAttribute(_att
 const hasVal = _data => _data !== undefined && _data !== ``;
 
 /**
+ * 配列内に存在するかどうかをチェック
+ * @param {string} _val 
+ * @param {array} _array 
+ * @param {integer} _pos 
+ * @returns 
+ */
+const hasValInArray = (_val, _array, _pos = 0) =>
+	_array.findIndex(data => data[_pos] === _val) !== -1;
+
+/**
  * 部分一致検索（リストのいずれかに合致、大小文字問わず）
  * @param {string} _str 検索文字
  * @param {array} _list 検索リスト (英字は小文字にする必要あり)
@@ -7283,7 +7293,9 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			for (let k = lastk - 3; k >= 0; k -= 3) {
 
 				if (colorData[k] < g_scoreObj.frameNum) {
-					frontData.unshift([colorData[k + 1], colorData[k + 2]]);
+					if (!hasValInArray(colorData[k + 1], frontData)) {
+						frontData.unshift([colorData[k + 1], colorData[k + 2]]);
+					}
 				} else if ((colorData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
 					&& colorData[k] < spdNext)) {
 					if (!isFrzHitColor(colorData[k + 1])) {
@@ -7313,7 +7325,9 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			const frontData = [];
 			for (let k = acolorData.length - 3; k >= 0; k -= 3) {
 				if (acolorData[k] < g_scoreObj.frameNum) {
-					frontData.unshift([acolorData[k + 1], acolorData[k + 2]]);
+					if (!hasValInArray(acolorData[k + 1], frontData)) {
+						frontData.unshift([acolorData[k + 1], acolorData[k + 2]]);
+					}
 				} else {
 					pushColors(`A${_header}`, acolorData[k], acolorData[k + 1], acolorData[k + 2]);
 				}
@@ -7344,7 +7358,9 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			for (let k = lastk - 4; k >= 0; k -= 4) {
 
 				if (cssMotionData[k] < g_scoreObj.frameNum) {
-					frontData.unshift([cssMotionData[k + 1], cssMotionData[k + 2], cssMotionData[k + 3]]);
+					if (!hasValInArray(cssMotionData[k + 1], frontData)) {
+						frontData.unshift([cssMotionData[k + 1], cssMotionData[k + 2], cssMotionData[k + 3]]);
+					}
 
 				} else if ((cssMotionData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
 					&& cssMotionData[k] < spdNext)) {
