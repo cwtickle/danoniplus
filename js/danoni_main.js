@@ -7288,37 +7288,19 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		if (!hasArrayList(baseData, _term)) {
 			return;
 		}
-
-		let [spdk, spdPrev] = getSpeedPos();
-		let spdNext = Infinity;
-		let frmPrev, tmpObj;
-
 		const frontData = [];
 		for (let k = baseData.length - _term; k >= 0; k -= _term) {
+			const calcFrameFlg = (_colorFlg && !isFrzHitColor(baseData[k + 1])) || _calcFrameFlg;
 
 			if (baseData[k] < g_scoreObj.frameNum) {
 				if (!hasValInArray(baseData[k + 1], frontData)) {
 					frontData.unshift(baseData.slice(k + 1, k + _term));
 				}
 			} else {
-				const calcFrameFlg = (_colorFlg && !isFrzHitColor(baseData[k + 1])) || _calcFrameFlg;
-				if ((baseData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
-					&& baseData[k] < spdNext)) {
-					if (calcFrameFlg) {
-						baseData[k] -= g_workObj.arrivalFrame[frmPrev];
-					}
-				} else {
-					while (baseData[k] < spdPrev) {
-						spdk -= 2;
-						spdNext = spdPrev;
-						spdPrev = _dataObj.speedData[spdk];
-					}
-					tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame, _motionOnFrame);
-					frmPrev = tmpObj.frm;
-					g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-					if (calcFrameFlg) {
-						baseData[k] = tmpObj.frm;
-					}
+				if (calcFrameFlg) {
+					const tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame, _motionOnFrame);
+					g_workObj.arrivalFrame[tmpObj.frm] = tmpObj.arrivalFrm;
+					baseData[k] = tmpObj.frm;
 				}
 				_setFunc(toCapitalize(_header), ...baseData.slice(k, k + _term));
 			}
