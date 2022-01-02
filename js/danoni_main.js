@@ -7275,121 +7275,65 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		g_workObj.boostData = copyArray2d(_dataObj.boostData);
 	}
 
-	// 個別・全体色変化のタイミング更新
-	calcColorData(``);
-	calcColorData(`shadow`);
+	// 個別・全体色変化、モーションデータのタイミング更新
+	calcColorAndMotionData(`color`, ``, 3, pushColors, { _colorFlg: true });
+	calcColorAndMotionData(`color`, `a`, 3, pushColors);
+	calcColorAndMotionData(`color`, `shadow`, 3, pushColors, { _colorFlg: true });
+	calcColorAndMotionData(`color`, `ashadow`, 3, pushColors);
 
-	function calcColorData(_header) {
+	[`arrow`, `frz`, `dummyArrow`, `dummyFrz`].forEach(header =>
+		calcColorAndMotionData(`CssMotion`, header, 4, pushCssMotions, { _calcFrameFlg: true }));
 
-		const colorData = _dataObj[`${_header}colorData`];
-		const acolorData = _dataObj[`a${_header}colorData`];
+	/**
+	 * 色変化・モーションデータのタイミング更新
+	 * @param {string} _type 
+	 * @param {string} _header 
+	 * @param {integer} _term 
+	 * @param {function} _setFunc 
+	 * @param {object} obj _colorFlg: 個別色変化フラグ, _calcFrameFlg: 逆算を無条件で行うかどうかの可否
+	 * @returns 
+	 */
+	function calcColorAndMotionData(_type, _header, _term, _setFunc = _ => true,
+		{ _colorFlg = false, _calcFrameFlg = false } = {}) {
+		const baseData = _dataObj[`${_header}${_type}Data`];
 
-		// 個別色変化のタイミング更新
-		// フリーズアロー(ヒット時)の場合のみ、逆算をしない
-		if (hasArrayList(colorData, 3)) {
-			[spdk, spdPrev] = getSpeedPos();
-			spdNext = Infinity;
-
-			lastk = colorData.length - 3;
-			tmpObj = getArrowStartFrame(colorData[lastk], _speedOnFrame, _motionOnFrame);
-			frmPrev = tmpObj.frm;
-			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-			pushColors(``, isFrzHitColor(colorData[lastk + 1]) ? colorData[lastk] : tmpObj.frm,
-				colorData[lastk + 1], colorData[lastk + 2]);
-
-			const frontData = [];
-			for (let k = lastk - 3; k >= 0; k -= 3) {
-
-				if (colorData[k] < g_scoreObj.frameNum) {
-					if (!hasValInArray(colorData[k + 1], frontData)) {
-						frontData.unshift([colorData[k + 1], colorData[k + 2]]);
-					}
-				} else {
-					if ((colorData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
-						&& colorData[k] < spdNext)) {
-						if (!isFrzHitColor(colorData[k + 1])) {
-							colorData[k] -= g_workObj.arrivalFrame[frmPrev];
-						}
-					} else {
-						if (colorData[k] < spdPrev) {
-							spdk -= 2;
-							spdNext = spdPrev;
-							spdPrev = _dataObj.speedData[spdk];
-						}
-						tmpObj = getArrowStartFrame(colorData[k], _speedOnFrame, _motionOnFrame);
-						frmPrev = tmpObj.frm;
-						if (!isFrzHitColor(colorData[k + 1])) {
-							colorData[k] = tmpObj.frm;
-						}
-						g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-					}
-					pushColors(`${_header}`, colorData[k], colorData[k + 1], colorData[k + 2]);
-				}
-			}
-			frontData.forEach(data => pushColors(_header, g_scoreObj.frameNum, data[0], data[1]));
+		if (!hasArrayList(baseData, _term)) {
+			return;
 		}
+		[spdk, spdPrev] = getSpeedPos();
+		spdNext = Infinity;
 
-		// 全体色変化のタイミング更新
-		if (hasArrayList(acolorData, 3)) {
+		const frontData = [];
+		for (let k = baseData.length - _term; k >= 0; k -= _term) {
 
-			const frontData = [];
-			for (let k = acolorData.length - 3; k >= 0; k -= 3) {
-				if (acolorData[k] < g_scoreObj.frameNum) {
-					if (!hasValInArray(acolorData[k + 1], frontData)) {
-						frontData.unshift([acolorData[k + 1], acolorData[k + 2]]);
-					}
-				} else {
-					pushColors(`A${_header}`, acolorData[k], acolorData[k + 1], acolorData[k + 2]);
+			if (baseData[k] < g_scoreObj.frameNum) {
+				if (!hasValInArray(baseData[k + 1], frontData)) {
+					frontData.unshift(baseData.slice(k + 1, k + _term));
 				}
-			}
-			frontData.forEach(data => pushColors(`A${_header}`, g_scoreObj.frameNum, data[0], data[1]));
-		}
-	}
-
-	// 個別モーションのタイミング更新
-	calcCssMotion(`arrow`);
-	calcCssMotion(`frz`);
-	calcCssMotion(`dummyArrow`);
-	calcCssMotion(`dummyFrz`);
-
-	function calcCssMotion(_header) {
-		const cssMotionData = _dataObj[`${_header}CssMotionData`];
-		if (hasArrayList(cssMotionData, 4)) {
-			[spdk, spdPrev] = getSpeedPos();
-			spdNext = Infinity;
-
-			lastk = cssMotionData.length - 4;
-			tmpObj = getArrowStartFrame(cssMotionData[lastk], _speedOnFrame, _motionOnFrame);
-			frmPrev = tmpObj.frm;
-			g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-			pushCssMotions(_header, tmpObj.frm, cssMotionData[lastk + 1], cssMotionData[lastk + 2], cssMotionData[lastk + 3]);
-
-			const frontData = [];
-			for (let k = lastk - 4; k >= 0; k -= 4) {
-
-				if (cssMotionData[k] < g_scoreObj.frameNum) {
-					if (!hasValInArray(cssMotionData[k + 1], frontData)) {
-						frontData.unshift([cssMotionData[k + 1], cssMotionData[k + 2], cssMotionData[k + 3]]);
+			} else {
+				const calcFrameFlg = (_colorFlg && !isFrzHitColor(baseData[k + 1])) || _calcFrameFlg;
+				if ((baseData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
+					&& baseData[k] < spdNext)) {
+					if (calcFrameFlg) {
+						baseData[k] -= g_workObj.arrivalFrame[frmPrev];
 					}
-
-				} else if ((cssMotionData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
-					&& cssMotionData[k] < spdNext)) {
-					cssMotionData[k] -= g_workObj.arrivalFrame[frmPrev];
 				} else {
-					if (cssMotionData[k] < spdPrev) {
+					while (baseData[k] < spdPrev) {
 						spdk -= 2;
 						spdNext = spdPrev;
 						spdPrev = _dataObj.speedData[spdk];
 					}
-					tmpObj = getArrowStartFrame(cssMotionData[k], _speedOnFrame, _motionOnFrame);
+					tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame, _motionOnFrame);
 					frmPrev = tmpObj.frm;
-					cssMotionData[k] = tmpObj.frm;
 					g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+					if (calcFrameFlg) {
+						baseData[k] = tmpObj.frm;
+					}
 				}
-				pushCssMotions(_header, cssMotionData[k], cssMotionData[k + 1], cssMotionData[k + 2], cssMotionData[k + 3]);
+				_setFunc(toCapitalize(_header), ...baseData.slice(k, k + _term));
 			}
-			frontData.forEach(data => pushCssMotions(_header, 0, data[0], data[1], data[2]));
 		}
+		frontData.forEach(data => _setFunc(toCapitalize(_header), g_scoreObj.frameNum, ...data));
 	}
 
 	// 実際に処理させる途中変速配列を作成
