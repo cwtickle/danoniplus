@@ -7288,10 +7288,6 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		if (!hasArrayList(baseData, _term)) {
 			return;
 		}
-
-		let [spdk, spdPrev] = getSpeedPos();
-		let spdNext = Infinity;
-
 		const frontData = [];
 		for (let k = baseData.length - _term; k >= 0; k -= _term) {
 			const calcFrameFlg = (_colorFlg && !isFrzHitColor(baseData[k + 1])) || _calcFrameFlg;
@@ -7302,11 +7298,6 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 			} else {
 				if (calcFrameFlg) {
-					while (baseData[k] < spdPrev) {
-						spdk -= 2;
-						spdNext = spdPrev;
-						spdPrev = _dataObj.speedData[spdk];
-					}
 					const tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame, _motionOnFrame);
 					g_workObj.arrivalFrame[tmpObj.frm] = tmpObj.arrivalFrm;
 					baseData[k] = tmpObj.frm;
