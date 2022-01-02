@@ -7127,13 +7127,6 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	/** Motionの適用フレーム数 */
 	g_workObj.motionFrame = [];
 
-	let spdNext = Infinity;
-	let spdPrev = 0;
-	let spdk;
-	let lastk;
-	let tmpObj;
-	let frmPrev;
-
 	const getSpeedPos = _ => {
 		let spdk, spdPrev;
 		if (_dataObj.speedData !== undefined) {
@@ -7170,21 +7163,15 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 		const startPoint = [];
 		let spdNext = Infinity;
-		let spdPrev = 0;
-		let spdk;
-		let tmpObj;
-		let arrowArrivalFrm;
-		let frmPrev;
-
-		[spdk, spdPrev] = getSpeedPos();
+		let [spdk, spdPrev] = getSpeedPos();
 
 		// 最後尾のデータから計算して格納
 		const lastk = _data.length - setcnt;
-		arrowArrivalFrm = _data[lastk];
-		tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+		let arrowArrivalFrm = _data[lastk];
+		let tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
 
 		startPoint[lastk] = tmpObj.frm;
-		frmPrev = tmpObj.frm;
+		let frmPrev = tmpObj.frm;
 		g_workObj.initY[frmPrev] = tmpObj.startY;
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 		g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
@@ -7250,6 +7237,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 個別加速のタイミング更新
+	let tmpObj;
 	g_workObj.boostData = [];
 	g_workObj.boostData.length = 0;
 	if (hasArrayList(_dataObj.boostData, 2)) {
@@ -7276,13 +7264,13 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 個別・全体色変化、モーションデータのタイミング更新
-	calcColorAndMotionData(`color`, ``, 3, pushColors, { _colorFlg: true });
-	calcColorAndMotionData(`color`, `a`, 3, pushColors);
-	calcColorAndMotionData(`color`, `shadow`, 3, pushColors, { _colorFlg: true });
-	calcColorAndMotionData(`color`, `ashadow`, 3, pushColors);
+	calcDataTiming(`color`, ``, 3, pushColors, { _colorFlg: true });
+	calcDataTiming(`color`, `a`, 3, pushColors);
+	calcDataTiming(`color`, `shadow`, 3, pushColors, { _colorFlg: true });
+	calcDataTiming(`color`, `ashadow`, 3, pushColors);
 
 	[`arrow`, `frz`, `dummyArrow`, `dummyFrz`].forEach(header =>
-		calcColorAndMotionData(`CssMotion`, header, 4, pushCssMotions, { _calcFrameFlg: true }));
+		calcDataTiming(`CssMotion`, header, 4, pushCssMotions, { _calcFrameFlg: true }));
 
 	/**
 	 * 色変化・モーションデータのタイミング更新
@@ -7293,15 +7281,17 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	 * @param {object} obj _colorFlg: 個別色変化フラグ, _calcFrameFlg: 逆算を無条件で行うかどうかの可否
 	 * @returns 
 	 */
-	function calcColorAndMotionData(_type, _header, _term, _setFunc = _ => true,
+	function calcDataTiming(_type, _header, _term, _setFunc = _ => true,
 		{ _colorFlg = false, _calcFrameFlg = false } = {}) {
 		const baseData = _dataObj[`${_header}${_type}Data`];
 
 		if (!hasArrayList(baseData, _term)) {
 			return;
 		}
-		[spdk, spdPrev] = getSpeedPos();
-		spdNext = Infinity;
+
+		let [spdk, spdPrev] = getSpeedPos();
+		let spdNext = Infinity;
+		let frmPrev, tmpObj;
 
 		const frontData = [];
 		for (let k = baseData.length - _term; k >= 0; k -= _term) {
