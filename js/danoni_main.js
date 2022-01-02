@@ -7291,7 +7291,6 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 		let [spdk, spdPrev] = getSpeedPos();
 		let spdNext = Infinity;
-		let tmpObj;
 
 		const frontData = [];
 		for (let k = baseData.length - _term; k >= 0; k -= _term) {
@@ -7308,7 +7307,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 						spdNext = spdPrev;
 						spdPrev = _dataObj.speedData[spdk];
 					}
-					tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame, _motionOnFrame);
+					const tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame, _motionOnFrame);
 					g_workObj.arrivalFrame[tmpObj.frm] = tmpObj.arrivalFrm;
 					baseData[k] = tmpObj.frm;
 				}
