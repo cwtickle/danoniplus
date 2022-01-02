@@ -224,6 +224,14 @@ const hasValInArray = (_val, _array, _pos = 0) =>
 	_array.findIndex(data => data[_pos] === _val) !== -1;
 
 /**
+ * 配列が既定長以上かどうかをチェック
+ * @param {array} _data 
+ * @param {integer} _length 
+ * @returns 
+ */
+const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length >= _length;
+
+/**
  * 部分一致検索（リストのいずれかに合致、大小文字問わず）
  * @param {string} _str 検索文字
  * @param {array} _list 検索リスト (英字は小文字にする必要あり)
@@ -6237,7 +6245,7 @@ function loadingScoreInit() {
 		convertreplaceNums();
 
 		const setData = (_data, _minLength = 1) => {
-			return (_data !== undefined && _data.length >= _minLength ? _data.concat() : []);
+			return (hasArrayList(_data, _minLength) ? _data.concat() : []);
 		}
 
 		// フレーム・曲開始位置調整
@@ -7244,7 +7252,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	// 個別加速のタイミング更新
 	g_workObj.boostData = [];
 	g_workObj.boostData.length = 0;
-	if (_dataObj.boostData !== undefined && _dataObj.boostData.length >= 2) {
+	if (hasArrayList(_dataObj.boostData, 2)) {
 		let delBoostIdx = 0;
 		for (let k = _dataObj.boostData.length - 2; k >= 0; k -= 2) {
 			if (_dataObj.boostData[k] < g_scoreObj.frameNum) {
@@ -7278,7 +7286,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 		// 個別色変化のタイミング更新
 		// フリーズアロー(ヒット時)の場合のみ、逆算をしない
-		if (colorData !== undefined && colorData.length >= 3) {
+		if (hasArrayList(colorData, 3)) {
 			[spdk, spdPrev] = getSpeedPos();
 			spdNext = Infinity;
 
@@ -7296,31 +7304,33 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 					if (!hasValInArray(colorData[k + 1], frontData)) {
 						frontData.unshift([colorData[k + 1], colorData[k + 2]]);
 					}
-				} else if ((colorData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
-					&& colorData[k] < spdNext)) {
-					if (!isFrzHitColor(colorData[k + 1])) {
-						colorData[k] -= g_workObj.arrivalFrame[frmPrev];
-					}
 				} else {
-					if (colorData[k] < spdPrev) {
-						spdk -= 2;
-						spdNext = spdPrev;
-						spdPrev = _dataObj.speedData[spdk];
+					if ((colorData[k] - g_workObj.arrivalFrame[frmPrev] > spdPrev
+						&& colorData[k] < spdNext)) {
+						if (!isFrzHitColor(colorData[k + 1])) {
+							colorData[k] -= g_workObj.arrivalFrame[frmPrev];
+						}
+					} else {
+						if (colorData[k] < spdPrev) {
+							spdk -= 2;
+							spdNext = spdPrev;
+							spdPrev = _dataObj.speedData[spdk];
+						}
+						tmpObj = getArrowStartFrame(colorData[k], _speedOnFrame, _motionOnFrame);
+						frmPrev = tmpObj.frm;
+						if (!isFrzHitColor(colorData[k + 1])) {
+							colorData[k] = tmpObj.frm;
+						}
+						g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 					}
-					tmpObj = getArrowStartFrame(colorData[k], _speedOnFrame, _motionOnFrame);
-					frmPrev = tmpObj.frm;
-					if (!isFrzHitColor(colorData[k + 1])) {
-						colorData[k] = tmpObj.frm;
-					}
-					g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+					pushColors(`${_header}`, colorData[k], colorData[k + 1], colorData[k + 2]);
 				}
-				pushColors(`${_header}`, colorData[k], colorData[k + 1], colorData[k + 2]);
 			}
 			frontData.forEach(data => pushColors(_header, g_scoreObj.frameNum, data[0], data[1]));
 		}
 
 		// 全体色変化のタイミング更新
-		if (acolorData !== undefined && acolorData.length >= 3) {
+		if (hasArrayList(acolorData, 3)) {
 
 			const frontData = [];
 			for (let k = acolorData.length - 3; k >= 0; k -= 3) {
@@ -7344,7 +7354,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	function calcCssMotion(_header) {
 		const cssMotionData = _dataObj[`${_header}CssMotionData`];
-		if (cssMotionData !== undefined && cssMotionData.length >= 4) {
+		if (hasArrayList(cssMotionData, 4)) {
 			[spdk, spdPrev] = getSpeedPos();
 			spdNext = Infinity;
 
