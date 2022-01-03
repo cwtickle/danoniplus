@@ -7308,6 +7308,35 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		frontData.forEach(data => _setFunc(toCapitalize(_header), g_scoreObj.frameNum, ...data));
 	}
 
+	[`word`, `back`, `mask`].forEach(type =>
+		[_dataObj[`${type}Data`], _dataObj[`${type}MaxDepth`]] =
+		calcAnimationData(_dataObj[`${type}Data`], _dataObj[`${type}MaxDepth`]));
+
+	/**
+	 * 歌詞表示、背景・マスク表示のフェードイン時調整処理
+	 * @param {object} _data 
+	 * @param {integer} _maxDepth 
+	 * @returns 
+	 */
+	function calcAnimationData(_data, _maxDepth) {
+
+		const startNum = g_scoreObj.frameNum;
+		let maxDepth = _maxDepth;
+
+		if (startNum > 0 && _data[startNum] === undefined) {
+			_data[startNum] = [];
+		}
+		for (let j = _data.length - 1; j >= 0; j--) {
+			if (_data[j] !== undefined && j < g_scoreObj.frameNum) {
+				_data[startNum].unshift(..._data[j]);
+				_data[j] = undefined;
+
+				maxDepth = Math.max(maxDepth, _data[startNum].length);
+			}
+		}
+		return [_data, maxDepth];
+	}
+
 	// 実際に処理させる途中変速配列を作成
 	g_workObj.speedData = [];
 	g_workObj.speedData.length = 0;
