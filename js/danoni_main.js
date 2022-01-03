@@ -7310,19 +7310,34 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	[`word`, `back`, `mask`].forEach(type =>
 		[_dataObj[`${type}Data`], _dataObj[`${type}MaxDepth`]] =
-		calcAnimationData(_dataObj[`${type}Data`], _dataObj[`${type}MaxDepth`]));
+		calcAnimationData(type, _dataObj[`${type}Data`], _dataObj[`${type}MaxDepth`]));
 
 	/**
 	 * 歌詞表示、背景・マスク表示のフェードイン時調整処理
+	 * @param {string} _type
 	 * @param {object} _data 
 	 * @param {integer} _maxDepth 
 	 * @returns 
 	 */
-	function calcAnimationData(_data, _maxDepth) {
+	function calcAnimationData(_type, _data, _maxDepth) {
 
 		const startNum = g_scoreObj.frameNum;
+		const cgArrays = [`word`];
 		let maxDepth = _maxDepth;
 
+		const isSameDepth = (_j, _k, _type) =>
+			_data[startNum][_j] !== undefined &&
+			_data[startNum][_k] !== undefined &&
+			(cgArrays.includes(_type) ? _data[startNum][_j][0] === _data[startNum][_k][0] :
+				_data[startNum][_j].depth === _data[startNum][_k].depth);
+
+		const getLength = (_list, _type) =>
+			_list === undefined ? 0 :
+				(cgArrays.includes(_type) ? _list.length : Object.keys(_list).length);
+
+		const initialize = (_type) => cgArrays.includes(_type) ? [] : undefined;
+
+		// フェードイン位置にそれ以前のデータを前追加
 		if (startNum > 0 && _data[startNum] === undefined) {
 			_data[startNum] = [];
 		}
@@ -7330,10 +7345,24 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			if (_data[j] !== undefined && j < g_scoreObj.frameNum) {
 				_data[startNum].unshift(..._data[j]);
 				_data[j] = undefined;
-
-				maxDepth = Math.max(maxDepth, _data[startNum].length);
 			}
 		}
+
+		// 重複する深度をカット（後方優先）
+		for (let j = getLength(_data[startNum], _type) - 1; j >= 0; j--) {
+			for (let k = j - 1; k >= 0; k--) {
+				if (isSameDepth(j, k, _type)) {
+					_data[startNum][k] = initialize(_type);
+				}
+			}
+		}
+
+		// 深度の最大長を更新
+		if (getLength(_data[startNum], _type) > 0) {
+			_data[startNum] = _data[startNum].filter(list => getLength(list, _type) > 0);
+			maxDepth = Math.max(maxDepth, getLength(_data[startNum], _type));
+		}
+
 		return [_data, maxDepth];
 	}
 
