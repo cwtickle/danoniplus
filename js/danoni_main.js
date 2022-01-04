@@ -1159,6 +1159,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				command: tmpObj.path,
 				jumpFrame: tmpObj.class,
 				maxLoop: tmpObj.left,
+				animationName: tmpObj.animationName,
 				htmlText: emptyPatterns.includes(tmpObj.path) ?
 					`` : (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj)),
 			};
@@ -3395,6 +3396,16 @@ function headerConvert(_dosObj) {
 	// フェードイン時にそれ以前のデータをプリロードしない種別(word, back, mask)を指定
 	obj.unpreloadCategories = setVal(_dosObj.unpreloadCategory, ``, C_TYP_STRING).split(`,`);
 	g_fadeinStockList = g_fadeinStockList.filter(cg => obj.unpreloadCategories.indexOf(cg) === -1);
+
+	// フェードイン時にそれ以前のデータをプリロードしないパターンを指定
+	if (typeof g_presetPreloadForceDelList === C_TYP_OBJECT) {
+		Object.assign(g_preloadForceDelList, g_presetPreloadForceDelList);
+	}
+	g_fadeinStockList.forEach(type => {
+		if (hasVal(_dosObj[`${type}ForceDel`])) {
+			g_preloadForceDelList[_type] = new Set([...g_preloadForceDelList[_type], ..._dosObj[`${type}ForceDel`].split(`,`)]);
+		}
+	})
 
 	return obj;
 }
@@ -7326,19 +7337,20 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		const startNum = g_scoreObj.frameNum;
 		const cgArrays = [`word`];
 
-		const isSameDepth = (_j, _k, _type) =>
+		const isSameDepth = (_j, _k) =>
 			_data[startNum][_j] !== undefined &&
 			_data[startNum][_k] !== undefined &&
 			(cgArrays.includes(_type) ? _data[startNum][_j][0] === _data[startNum][_k][0] :
 				_data[startNum][_j].depth === _data[startNum][_k].depth);
 
+		const fuzzyCheck = (_str, _list) => listMatching(_str, _list);
 		const isExceptData = {
-			word: (_exceptList, _j) => _exceptList.word.includes(_data[startNum][_j][1]),
-			back: (_exceptList, _j) => _exceptList.back.includes(_data[startNum][_j].animationName),
-			mask: (_exceptList, _j) => _exceptList.mask.includes(_data[startNum][_j].animationName),
+			word: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j][1], _exceptList.word),
+			back: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.back),
+			mask: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.mask),
 		};
 
-		const getLength = (_list, _type) =>
+		const getLength = _list =>
 			_list === undefined ? 0 :
 				(cgArrays.includes(_type) ? _list.length : Object.keys(_list).length);
 
@@ -7354,17 +7366,26 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		}
 
 		// 重複する深度をカット（後方優先）
-		for (let j = getLength(_data[startNum], _type) - 1; j >= 0; j--) {
-			for (let k = j - 1; k >= 0; k--) {
-				if (isSameDepth(j, k, _type) && !isExceptData[_type](g_preloadExceptList, k)) {
-					_data[startNum][k] = undefined;
+		// ただし、除外リストにあるデータは残す
+		for (let j = getLength(_data[startNum]) - 1; j >= 0; j--) {
+			if (_data[startNum][j] !== undefined) {
+				for (let k = j - 1; k >= 0; k--) {
+					if (isSameDepth(j, k) && !isExceptData[_type](g_preloadExceptList, k)) {
+						_data[startNum][k] = undefined;
+					}
 				}
+			}
+		}
+		// g_preloadForceDelList に合致する消去対象データを検索し、削除
+		for (let j = getLength(_data[startNum]) - 1; j >= 0; j--) {
+			if (_data[startNum][j] !== undefined && isExceptData[_type](g_preloadForceDelList, j)) {
+				_data[startNum][j] = undefined;
 			}
 		}
 
 		// カットした箇所をリストから削除
 		if (getLength(_data[startNum], _type) > 0) {
-			_data[startNum] = _data[startNum].filter(list => getLength(list, _type) > 0);
+			_data[startNum] = _data[startNum].filter(list => getLength(list) > 0);
 		}
 
 		return _data;

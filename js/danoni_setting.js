@@ -233,3 +233,10 @@ const g_lblRenames = {
 	keyConfig: true,
 	result: true,
 };
+
+/** フェードイン時、プリロードを強制削除するリスト（英字は小文字で指定） */
+const g_presetPreloadForceDelList = {
+	word: [],
+	back: [],
+	mask: [],
+};
