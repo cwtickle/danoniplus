@@ -232,6 +232,15 @@ const hasValInArray = (_val, _array, _pos = 0) =>
 const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length >= _length;
 
 /**
+ * 重複を排除した配列の生成
+ * @param {array} _array1 
+ * @param {array} _array2 
+ * @returns 
+ */
+const makeDedupliArray = (_array1, _array2) =>
+	Array.from((new Set([..._array1, ..._array2])).values());
+
+/**
  * 部分一致検索（リストのいずれかに合致、大小文字問わず）
  * @param {string} _str 検索文字
  * @param {array} _list 検索リスト (英字は小文字にする必要あり)
@@ -3393,19 +3402,22 @@ function headerConvert(_dosObj) {
 	obj.resultFormat = escapeHtmlForEnabledTag(setVal(_dosObj.resultFormat, (typeof g_presetResultFormat === C_TYP_STRING ?
 		setVal(g_presetResultFormat, resultFormatDefault, C_TYP_STRING) : resultFormatDefault), C_TYP_STRING));
 
-	// フェードイン時にそれ以前のデータをプリロードしない種別(word, back, mask)を指定
+	// フェードイン時にそれ以前のデータを蓄積しない種別(word, back, mask)を指定
 	obj.unStockCategories = setVal(_dosObj.unStockCategory, ``, C_TYP_STRING).split(`,`);
+	if (typeof g_presetUnStockCategories === C_TYP_OBJECT) {
+		obj.unStockCategories = makeDedupliArray(obj.unStockCategories, g_presetUnStockCategories);
+	}
 	g_fadeinStockList = g_fadeinStockList.filter(cg => obj.unStockCategories.indexOf(cg) === -1);
 
-	// フェードイン時にそれ以前のデータをプリロードしないパターンを指定
+	// フェードイン時にそれ以前のデータを蓄積しないパターンを指定
 	if (typeof g_presetStockForceDelList === C_TYP_OBJECT) {
 		Object.assign(g_stockForceDelList, g_presetStockForceDelList);
 	}
 	g_fadeinStockList.forEach(type => {
 		if (hasVal(_dosObj[`${type}StockForceDel`])) {
-			g_stockForceDelList[type] = Array.from((new Set([...g_stockForceDelList[type], ..._dosObj[`${type}StockForceDel`].split(`,`)])).values());
+			g_stockForceDelList[type] = makeDedupliArray(g_stockForceDelList[type], _dosObj[`${type}StockForceDel`].split(`,`));
 		}
-	})
+	});
 
 	return obj;
 }

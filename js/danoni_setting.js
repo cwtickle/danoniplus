@@ -234,6 +234,11 @@ const g_lblRenames = {
 	result: true,
 };
 
+/**
+ * フェードイン時にそれ以前のデータを蓄積しない種別(word, back, mask)を指定
+ */
+const g_presetUnStockCategories = [];
+
 /** 
  * フェードイン時、プリロードを強制削除するリスト（英字は小文字で指定）
  * 指定例) back: [`fade`]   ※back_dataでアニメーション名に'fade'や'Fade'を含む
