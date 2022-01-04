@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/01/02 (v24.6.0)
+ * Revised : 2022/01/04 (v25.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2253,6 +2253,22 @@ const g_titleLists = {
 };
 
 const g_animationData = [`back`, `mask`];
+
+let g_fadeinStockList = [`word`, `back`, `mask`];
+
+/** フェードイン時でもプリロードを除外しないリスト */
+const g_preloadExceptList = {
+    word: [`[left]`, `[center]`, `[right]`],
+    back: [],
+    mask: [],
+};
+
+/** フェードイン時、プリロードを強制削除するリスト（初期値は空） */
+const g_stockForceDelList = {
+    word: [],
+    back: [],
+    mask: [],
+};
 
 /**
  * データ種, 最小データ長のセット
