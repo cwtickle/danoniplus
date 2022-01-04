@@ -232,6 +232,15 @@ const hasValInArray = (_val, _array, _pos = 0) =>
 const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length >= _length;
 
 /**
+ * 重複を排除した配列の生成
+ * @param {array} _array1 
+ * @param {array} _array2 
+ * @returns 
+ */
+const makeDedupliArray = (_array1, _array2) =>
+	Array.from((new Set([..._array1, ..._array2])).values());
+
+/**
  * 部分一致検索（リストのいずれかに合致、大小文字問わず）
  * @param {string} _str 検索文字
  * @param {array} _list 検索リスト (英字は小文字にする必要あり)
@@ -1159,6 +1168,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				command: tmpObj.path,
 				jumpFrame: tmpObj.class,
 				maxLoop: tmpObj.left,
+				animationName: tmpObj.animationName,
 				htmlText: emptyPatterns.includes(tmpObj.path) ?
 					`` : (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj)),
 			};
@@ -3391,6 +3401,23 @@ function headerConvert(_dosObj) {
 	const resultFormatDefault = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
 	obj.resultFormat = escapeHtmlForEnabledTag(setVal(_dosObj.resultFormat, (typeof g_presetResultFormat === C_TYP_STRING ?
 		setVal(g_presetResultFormat, resultFormatDefault, C_TYP_STRING) : resultFormatDefault), C_TYP_STRING));
+
+	// フェードイン時にそれ以前のデータを蓄積しない種別(word, back, mask)を指定
+	obj.unStockCategories = setVal(_dosObj.unStockCategory, ``, C_TYP_STRING).split(`,`);
+	if (typeof g_presetUnStockCategories === C_TYP_OBJECT) {
+		obj.unStockCategories = makeDedupliArray(obj.unStockCategories, g_presetUnStockCategories);
+	}
+	g_fadeinStockList = g_fadeinStockList.filter(cg => obj.unStockCategories.indexOf(cg) === -1);
+
+	// フェードイン時にそれ以前のデータを蓄積しないパターンを指定
+	if (typeof g_presetStockForceDelList === C_TYP_OBJECT) {
+		Object.assign(g_stockForceDelList, g_presetStockForceDelList);
+	}
+	g_fadeinStockList.forEach(type => {
+		if (hasVal(_dosObj[`${type}StockForceDel`])) {
+			g_stockForceDelList[type] = makeDedupliArray(g_stockForceDelList[type], _dosObj[`${type}StockForceDel`].split(`,`));
+		}
+	});
 
 	return obj;
 }
@@ -7269,7 +7296,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	calcDataTiming(`color`, `shadow`, 3, pushColors, { _colorFlg: true });
 	calcDataTiming(`color`, `ashadow`, 3, pushColors);
 
-	[`arrow`, `frz`, `dummyArrow`, `dummyFrz`].forEach(header =>
+	g_typeLists.arrow.forEach(header =>
 		calcDataTiming(`CssMotion`, header, 4, pushCssMotions, { _calcFrameFlg: true }));
 
 	/**
@@ -7306,6 +7333,74 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			}
 		}
 		frontData.forEach(data => _setFunc(toCapitalize(_header), g_scoreObj.frameNum, ...data));
+	}
+
+	g_fadeinStockList.forEach(type =>
+		_dataObj[`${type}Data`] = calcAnimationData(type, _dataObj[`${type}Data`]));
+
+	/**
+	 * 歌詞表示、背景・マスク表示のフェードイン時調整処理
+	 * @param {string} _type
+	 * @param {object} _data 
+	 * @returns 
+	 */
+	function calcAnimationData(_type, _data) {
+
+		const startNum = g_scoreObj.frameNum;
+		const cgArrays = [`word`];
+
+		const isSameDepth = (_j, _k) =>
+			_data[startNum][_j] !== undefined &&
+			_data[startNum][_k] !== undefined &&
+			(cgArrays.includes(_type) ? _data[startNum][_j][0] === _data[startNum][_k][0] :
+				_data[startNum][_j].depth === _data[startNum][_k].depth);
+
+		const fuzzyCheck = (_str, _list) => listMatching(_str, _list);
+		const isExceptData = {
+			word: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j][1], _exceptList.word),
+			back: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.back),
+			mask: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.mask),
+		};
+
+		const getLength = _list =>
+			_list === undefined ? 0 :
+				(cgArrays.includes(_type) ? _list.length : Object.keys(_list).length);
+
+		// フェードイン位置にそれ以前のデータを前追加
+		if (startNum > 0 && _data[startNum] === undefined) {
+			_data[startNum] = [];
+		}
+		for (let j = _data.length - 1; j >= 0; j--) {
+			if (_data[j] !== undefined && j < g_scoreObj.frameNum) {
+				_data[startNum].unshift(..._data[j]);
+				_data[j] = undefined;
+			}
+		}
+
+		// 重複する深度をカット（後方優先）
+		// ただし、除外リストにあるデータは残す
+		for (let j = getLength(_data[startNum]) - 1; j >= 0; j--) {
+			if (_data[startNum][j] !== undefined) {
+				for (let k = j - 1; k >= 0; k--) {
+					if (isSameDepth(j, k) && !isExceptData[_type](g_preloadExceptList, k)) {
+						_data[startNum][k] = undefined;
+					}
+				}
+			}
+		}
+		// g_stockForceDelList に合致する消去対象データを検索し、削除
+		for (let j = getLength(_data[startNum]) - 1; j >= 0; j--) {
+			if (_data[startNum][j] !== undefined && isExceptData[_type](g_stockForceDelList, j)) {
+				_data[startNum][j] = undefined;
+			}
+		}
+
+		// カットした箇所をリストから削除
+		if (getLength(_data[startNum], _type) > 0) {
+			_data[startNum] = _data[startNum].filter(list => getLength(list) > 0);
+		}
+
+		return _data;
 	}
 
 	// 実際に処理させる途中変速配列を作成

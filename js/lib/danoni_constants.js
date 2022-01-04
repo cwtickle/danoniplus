@@ -2254,6 +2254,22 @@ const g_titleLists = {
 
 const g_animationData = [`back`, `mask`];
 
+let g_fadeinStockList = [`word`, `back`, `mask`];
+
+/** フェードイン時でもプリロードを除外しないリスト */
+const g_preloadExceptList = {
+    word: [`[left]`, `[center]`, `[right]`],
+    back: [],
+    mask: [],
+};
+
+/** フェードイン時、プリロードを強制削除するリスト（初期値は空） */
+const g_stockForceDelList = {
+    word: [],
+    back: [],
+    mask: [],
+};
+
 /**
  * データ種, 最小データ長のセット
  */
