@@ -7269,7 +7269,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	calcDataTiming(`color`, `shadow`, 3, pushColors, { _colorFlg: true });
 	calcDataTiming(`color`, `ashadow`, 3, pushColors);
 
-	[`arrow`, `frz`, `dummyArrow`, `dummyFrz`].forEach(header =>
+	g_typeLists.arrow.forEach(header =>
 		calcDataTiming(`CssMotion`, header, 4, pushCssMotions, { _calcFrameFlg: true }));
 
 	/**
@@ -7309,21 +7309,18 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	[`word`, `back`, `mask`].forEach(type =>
-		[_dataObj[`${type}Data`], _dataObj[`${type}MaxDepth`]] =
-		calcAnimationData(type, _dataObj[`${type}Data`], _dataObj[`${type}MaxDepth`]));
+		_dataObj[`${type}Data`] = calcAnimationData(type, _dataObj[`${type}Data`]));
 
 	/**
 	 * 歌詞表示、背景・マスク表示のフェードイン時調整処理
 	 * @param {string} _type
 	 * @param {object} _data 
-	 * @param {integer} _maxDepth 
 	 * @returns 
 	 */
-	function calcAnimationData(_type, _data, _maxDepth) {
+	function calcAnimationData(_type, _data) {
 
 		const startNum = g_scoreObj.frameNum;
 		const cgArrays = [`word`];
-		let maxDepth = _maxDepth;
 
 		const isSameDepth = (_j, _k, _type) =>
 			_data[startNum][_j] !== undefined &&
@@ -7357,13 +7354,12 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			}
 		}
 
-		// 深度の最大長を更新
+		// カットした箇所をリストから削除
 		if (getLength(_data[startNum], _type) > 0) {
 			_data[startNum] = _data[startNum].filter(list => getLength(list, _type) > 0);
-			maxDepth = Math.max(maxDepth, getLength(_data[startNum], _type));
 		}
 
-		return [_data, maxDepth];
+		return _data;
 	}
 
 	// 実際に処理させる途中変速配列を作成
