@@ -2264,7 +2264,7 @@ const g_preloadExceptList = {
 };
 
 /** フェードイン時、プリロードを強制削除するリスト（初期値は空） */
-const g_preloadForceDelList = {
+const g_stockForceDelList = {
     word: [],
     back: [],
     mask: [],

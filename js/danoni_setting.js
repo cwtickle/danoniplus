@@ -238,7 +238,7 @@ const g_lblRenames = {
  * フェードイン時、プリロードを強制削除するリスト（英字は小文字で指定）
  * 指定例) back: [`fade`]   ※back_dataでアニメーション名に'fade'や'Fade'を含む
  */
-const g_presetPreloadForceDelList = {
+const g_presetStockForceDelList = {
 	word: [],
 	back: [],
 	mask: [],

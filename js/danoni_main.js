@@ -3394,16 +3394,16 @@ function headerConvert(_dosObj) {
 		setVal(g_presetResultFormat, resultFormatDefault, C_TYP_STRING) : resultFormatDefault), C_TYP_STRING));
 
 	// フェードイン時にそれ以前のデータをプリロードしない種別(word, back, mask)を指定
-	obj.unpreloadCategories = setVal(_dosObj.unpreloadCategory, ``, C_TYP_STRING).split(`,`);
-	g_fadeinStockList = g_fadeinStockList.filter(cg => obj.unpreloadCategories.indexOf(cg) === -1);
+	obj.unStockCategories = setVal(_dosObj.unStockCategory, ``, C_TYP_STRING).split(`,`);
+	g_fadeinStockList = g_fadeinStockList.filter(cg => obj.unStockCategories.indexOf(cg) === -1);
 
 	// フェードイン時にそれ以前のデータをプリロードしないパターンを指定
-	if (typeof g_presetPreloadForceDelList === C_TYP_OBJECT) {
-		Object.assign(g_preloadForceDelList, g_presetPreloadForceDelList);
+	if (typeof g_presetStockForceDelList === C_TYP_OBJECT) {
+		Object.assign(g_stockForceDelList, g_presetStockForceDelList);
 	}
 	g_fadeinStockList.forEach(type => {
-		if (hasVal(_dosObj[`${type}ForceDel`])) {
-			g_preloadForceDelList[type] = Array.from((new Set([...g_preloadForceDelList[type], ..._dosObj[`${type}ForceDel`].split(`,`)])).values());
+		if (hasVal(_dosObj[`${type}StockForceDel`])) {
+			g_stockForceDelList[type] = Array.from((new Set([...g_stockForceDelList[type], ..._dosObj[`${type}StockForceDel`].split(`,`)])).values());
 		}
 	})
 
@@ -7376,9 +7376,9 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 			}
 		}
-		// g_preloadForceDelList に合致する消去対象データを検索し、削除
+		// g_stockForceDelList に合致する消去対象データを検索し、削除
 		for (let j = getLength(_data[startNum]) - 1; j >= 0; j--) {
-			if (_data[startNum][j] !== undefined && isExceptData[_type](g_preloadForceDelList, j)) {
+			if (_data[startNum][j] !== undefined && isExceptData[_type](g_stockForceDelList, j)) {
 				_data[startNum][j] = undefined;
 			}
 		}
