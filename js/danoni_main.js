@@ -3403,7 +3403,7 @@ function headerConvert(_dosObj) {
 	}
 	g_fadeinStockList.forEach(type => {
 		if (hasVal(_dosObj[`${type}ForceDel`])) {
-			g_preloadForceDelList[_type] = new Set([...g_preloadForceDelList[_type], ..._dosObj[`${type}ForceDel`].split(`,`)]);
+			g_preloadForceDelList[type] = Array.from((new Set([...g_preloadForceDelList[type], ..._dosObj[`${type}ForceDel`].split(`,`)])).values());
 		}
 	})
 
