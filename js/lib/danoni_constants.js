@@ -2254,6 +2254,13 @@ const g_titleLists = {
 
 const g_animationData = [`back`, `mask`];
 
+let g_fadeinStockList = [`word`, `back`, `mask`];
+const g_preloadExceptList = {
+    word: [`[left]`, `[center]`, `[right]`],
+    back: [],
+    mask: [],
+};
+
 /**
  * データ種, 最小データ長のセット
  */

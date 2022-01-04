@@ -3392,6 +3392,10 @@ function headerConvert(_dosObj) {
 	obj.resultFormat = escapeHtmlForEnabledTag(setVal(_dosObj.resultFormat, (typeof g_presetResultFormat === C_TYP_STRING ?
 		setVal(g_presetResultFormat, resultFormatDefault, C_TYP_STRING) : resultFormatDefault), C_TYP_STRING));
 
+	// フェードイン時にそれ以前のデータをプリロードしない種別(word, back, mask)を指定
+	obj.unpreloadCategories = setVal(_dosObj.unpreloadCategory, ``, C_TYP_STRING).split(`,`);
+	g_fadeinStockList = g_fadeinStockList.filter(cg => obj.unpreloadCategories.indexOf(cg) === -1);
+
 	return obj;
 }
 
@@ -7308,7 +7312,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		frontData.forEach(data => _setFunc(toCapitalize(_header), g_scoreObj.frameNum, ...data));
 	}
 
-	[`word`, `back`, `mask`].forEach(type =>
+	g_fadeinStockList.forEach(type =>
 		_dataObj[`${type}Data`] = calcAnimationData(type, _dataObj[`${type}Data`]));
 
 	/**
@@ -7328,11 +7332,15 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			(cgArrays.includes(_type) ? _data[startNum][_j][0] === _data[startNum][_k][0] :
 				_data[startNum][_j].depth === _data[startNum][_k].depth);
 
+		const isExceptData = {
+			word: (_exceptList, _j) => _exceptList.word.includes(_data[startNum][_j][1]),
+			back: (_exceptList, _j) => _exceptList.back.includes(_data[startNum][_j].animationName),
+			mask: (_exceptList, _j) => _exceptList.mask.includes(_data[startNum][_j].animationName),
+		};
+
 		const getLength = (_list, _type) =>
 			_list === undefined ? 0 :
 				(cgArrays.includes(_type) ? _list.length : Object.keys(_list).length);
-
-		const initialize = (_type) => cgArrays.includes(_type) ? [] : undefined;
 
 		// フェードイン位置にそれ以前のデータを前追加
 		if (startNum > 0 && _data[startNum] === undefined) {
@@ -7348,8 +7356,8 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		// 重複する深度をカット（後方優先）
 		for (let j = getLength(_data[startNum], _type) - 1; j >= 0; j--) {
 			for (let k = j - 1; k >= 0; k--) {
-				if (isSameDepth(j, k, _type)) {
-					_data[startNum][k] = initialize(_type);
+				if (isSameDepth(j, k, _type) && !isExceptData[_type](g_preloadExceptList, k)) {
+					_data[startNum][k] = undefined;
 				}
 			}
 		}
