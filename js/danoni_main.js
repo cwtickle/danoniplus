@@ -8848,7 +8848,7 @@ function MainInit() {
 		changeColors(g_workObj.mkColor[currentFrame], g_workObj.mkColorCd[currentFrame]);
 
 		// 個別・全体色変化（フリーズアロー）
-		[`Normal`, `NormalBar`, `Hit`, `HitBar`].forEach(ctype =>
+		g_typeLists.frzColor.forEach(ctype =>
 			changeColors(g_workObj[`mkFColor${ctype}`][currentFrame], g_workObj[`mkFColor${ctype}Cd`][currentFrame], `frz${ctype}`));
 
 		// 矢印モーション
