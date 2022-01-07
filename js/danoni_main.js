@@ -6709,7 +6709,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	}
 
 	/**
-	 * 個別・全体色変化データをマージして整列
+	 * 個別・全体色変化データをマージして整列し、単純配列として返却
 	 * @param {string} _header 
 	 * @returns 
 	 */
@@ -6720,6 +6720,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	/**
 	 * 色変化データの分解・格納（フレーム数, 矢印番号）
+	 * 後で個別・全体色変化をマージするため、二次元配列として返却
 	 * @param {string} _header 
 	 * @param {number} _scoreNo 
 	 */
@@ -6742,6 +6743,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					const colorNum = setVal(tmpColorData[k + 1], 0, C_TYP_CALC);
 					const colorCd = tmpColorData[k + 2];
 
+					// フレーム数、色番号、カラーコード、全体色変化フラグをセットとして配列化
 					colorData.push([frame, colorNum, colorCd, allFlg]);
 				}
 			});
