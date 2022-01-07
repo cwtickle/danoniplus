@@ -209,6 +209,7 @@ const g_typeLists = {
         `FshadowColorHit`, `FshadowColorHitCd`, `FshadowColorHitBar`, `FshadowColorHitBarCd`,
         `ArrowCssMotion`, `ArrowCssMotionName`,
         `FrzCssMotion`, `FrzCssMotionName`,
+        `ArrowColorChangeAll`, `FrzColorChangeAll`,
     ],
 };
 

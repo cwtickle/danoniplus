@@ -6725,6 +6725,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	function setColorData(_header, _scoreNo) {
 		const colorData = [];
+		const allFlg = (_header.charAt(0) === `a`);
 
 		if (hasVal(_dosObj[`${_header}${_scoreNo}_data`]) && g_stateObj.d_color === C_FLG_ON) {
 			const tmpArrayData = splitLF(_dosObj[`${_header}${_scoreNo}_data`]);
@@ -6740,7 +6741,6 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					const frame = calcFrame(setVal(tmpColorData[k], ``, C_TYP_CALC));
 					const colorNum = setVal(tmpColorData[k + 1], 0, C_TYP_CALC);
 					const colorCd = tmpColorData[k + 2];
-					const allFlg = (_header.charAt(0) === `a`);
 
 					colorData.push([frame, colorNum, colorCd, allFlg]);
 				}
@@ -7328,7 +7328,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		}
 		const frontData = [];
 		for (let k = baseData.length - _term; k >= 0; k -= _term) {
-			const calcFrameFlg = (_colorFlg && !isFrzHitColor(baseData[k + 1])) && !baseData[k + 3] || _calcFrameFlg;
+			const calcFrameFlg = (_colorFlg && !isFrzHitColor(baseData[k + 1]) && !baseData[k + 3]) || _calcFrameFlg;
 
 			if (baseData[k] < g_scoreObj.frameNum) {
 				if (!hasValInArray(baseData[k + 1], frontData)) {
@@ -7517,10 +7517,13 @@ function pushColors(_header, _frame, _val, _colorCd, _allFlg) {
 	const colorCd = makeColorGradation(_colorCd, { _defaultColorgrd: [grdFlg, g_headerObj.defaultColorgrd[1]] });
 	const addAll = Number(_allFlg) * 1000;
 
-	const initialize = _baseStr => {
+	const initialize = (_baseStr, _type) => {
 		if (g_workObj[_baseStr][_frame] === undefined) {
 			g_workObj[_baseStr][_frame] = [];
 			g_workObj[`${_baseStr}Cd`][_frame] = [];
+		}
+		if (_allFlg) {
+			g_workObj[`mk${_type}ColorChangeAll`][_frame] = true;
 		}
 	};
 	const pushColor = (_baseStr, _cVal) => {
@@ -7537,7 +7540,7 @@ function pushColors(_header, _frame, _val, _colorCd, _allFlg) {
 
 		// 矢印の色変化 (defaultFrzColorUse=falseのときはフリーズアローも色変化)
 		baseHeaders.forEach(baseHeader => {
-			initialize(baseHeader);
+			initialize(baseHeader, `Arrow`);
 
 			if (_val < 20 || _val >= 1000) {
 				pushColor(baseHeader, g_workObj.replaceNums[_val % 1000] + addAll);
@@ -7575,7 +7578,7 @@ function pushColors(_header, _frame, _val, _colorCd, _allFlg) {
 
 			g_keyObj[`color${tkObj.keyCtrlPtn}`].forEach((cpattern, k) => {
 				if (colorPos === cpattern) {
-					initialize(baseHeader + ctype);
+					initialize(baseHeader + ctype, `Frz`);
 					pushColor(baseHeader + ctype, k + addAll);
 				}
 			});
@@ -8323,8 +8326,9 @@ function MainInit() {
 		// TODO: この部分を矢印塗りつぶし部分についても適用できるように対応
 		arrow: (_j, _k) => {
 			const arrowTop = document.querySelector(`#arrowTop${_j}_${_k}`);
-			if (arrowTop.getAttribute(`color`) !== g_workObj.arrowColors[_j]) {
-				if (g_workObj.arrowColors[_j] === g_workObj.arrowColorsAll[_j]) {
+			if (g_workObj.mkArrowColorChangeAll[g_scoreObj.frameNum]) {
+				if (arrowTop.getAttribute(`color`) !== g_workObj.arrowColors[_j] &&
+					g_workObj.arrowColors[_j] === g_workObj.arrowColorsAll[_j]) {
 					arrowTop.style.background = g_workObj.arrowColorsAll[_j];
 					arrowTop.setAttribute(`color`, g_workObj.arrowColorsAll[_j]);
 				}
@@ -8339,21 +8343,23 @@ function MainInit() {
 			const frzBar = document.querySelector(`#frzBar${_j}_${_k}`);
 			const frzBtm = document.querySelector(`#frzBtm${_j}_${_k}`);
 
-			if (frzBtm.getAttribute(`color`) !== g_workObj[`frz${_state}Colors`][_j]) {
-				const toColorCode = g_workObj[`frz${_state}ColorsAll`][_j];
-				if (g_workObj[`frz${_state}Colors`][_j] === toColorCode) {
-					if (_state === `Normal`) {
-						frzTop.style.background = toColorCode;
+			if (g_workObj.mkFrzColorChangeAll[g_scoreObj.frameNum]) {
+				if (frzBtm.getAttribute(`color`) !== g_workObj[`frz${_state}Colors`][_j]) {
+					const toColorCode = g_workObj[`frz${_state}ColorsAll`][_j];
+					if (g_workObj[`frz${_state}Colors`][_j] === toColorCode) {
+						if (_state === `Normal`) {
+							frzTop.style.background = toColorCode;
+						}
+						frzBtm.style.background = toColorCode;
+						frzBtm.setAttribute(`color`, toColorCode);
 					}
-					frzBtm.style.background = toColorCode;
-					frzBtm.setAttribute(`color`, toColorCode);
 				}
-			}
-			if (frzBar.getAttribute(`color`) !== g_workObj[`frz${_state}BarColors`][_j]) {
-				const toBarColorCode = g_workObj[`frz${_state}BarColorsAll`][_j];
-				if (g_workObj[`frz${_state}BarColors`][_j] === toBarColorCode) {
-					frzBar.style.background = toBarColorCode;
-					frzBar.setAttribute(`color`, toBarColorCode);
+				if (frzBar.getAttribute(`color`) !== g_workObj[`frz${_state}BarColors`][_j]) {
+					const toBarColorCode = g_workObj[`frz${_state}BarColorsAll`][_j];
+					if (g_workObj[`frz${_state}BarColors`][_j] === toBarColorCode) {
+						frzBar.style.background = toBarColorCode;
+						frzBar.setAttribute(`color`, toBarColorCode);
+					}
 				}
 			}
 		},
