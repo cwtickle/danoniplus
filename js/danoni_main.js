@@ -7306,23 +7306,21 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 個別・全体色変化、モーションデータのタイミング更新
-	calcDataTiming(`color`, ``, 4, pushColors, { _colorFlg: true });
-	calcDataTiming(`Color`, `shadow`, 4, pushColors, { _colorFlg: true });
+	calcDataTiming(`color`, ``, pushColors, { _colorFlg: true });
 
 	g_typeLists.arrow.forEach(header =>
-		calcDataTiming(`CssMotion`, header, 4, pushCssMotions, { _calcFrameFlg: true }));
+		calcDataTiming(`CssMotion`, header, pushCssMotions, { _calcFrameFlg: true }));
 
 	/**
 	 * 色変化・モーションデータのタイミング更新
 	 * @param {string} _type 
 	 * @param {string} _header 
-	 * @param {integer} _term 
 	 * @param {function} _setFunc 
 	 * @param {object} obj _colorFlg: 個別色変化フラグ, _calcFrameFlg: 逆算を無条件で行うかどうかの可否
 	 * @returns 
 	 */
-	function calcDataTiming(_type, _header, _term, _setFunc = _ => true,
-		{ _colorFlg = false, _calcFrameFlg = false } = {}) {
+	function calcDataTiming(_type, _header, _setFunc = _ => true,
+		{ _term = 4, _colorFlg = false, _calcFrameFlg = false } = {}) {
 		const baseData = _dataObj[`${_header}${_type}Data`];
 
 		if (!hasArrayList(baseData, _term)) {
