@@ -7516,16 +7516,34 @@ function pushColors(_header, _frame, _val, _colorCd, _allFlg) {
 	const grdFlg = (g_colorType === `Type0` ? !g_headerObj.defaultColorgrd[0] : g_headerObj.defaultColorgrd[0])
 	const colorCd = makeColorGradation(_colorCd, { _defaultColorgrd: [grdFlg, g_headerObj.defaultColorgrd[1]] });
 	const addAll = Number(_allFlg) * 1000;
+	const allUseTypes = [];
 
-	const initialize = (_baseStr, _type) => {
+	/**
+	 * 色変化用配列（フレーム別）の初期化
+	 * @param {string} _baseStr 
+	 */
+	const initialize = (_baseStr) => {
 		if (g_workObj[_baseStr][_frame] === undefined) {
 			g_workObj[_baseStr][_frame] = [];
 			g_workObj[`${_baseStr}Cd`][_frame] = [];
 		}
+	};
+
+	/**
+	 * 全体色変化の有効化（フレーム別）
+	 * @param  {...any} _types 
+	 */
+	const enabledAll = (..._types) => {
 		if (_allFlg) {
-			g_workObj[`mk${_type}ColorChangeAll`][_frame] = true;
+			_types.forEach(type => g_workObj[`mk${type}ColorChangeAll`][_frame] = true);
 		}
 	};
+
+	/**
+	 * 色変化用配列（フレーム別）へのデータ追加
+	 * @param {string} _baseStr 
+	 * @param {number} _cVal 
+	 */
 	const pushColor = (_baseStr, _cVal) => {
 		g_workObj[_baseStr][_frame].push(_cVal);
 		g_workObj[`${_baseStr}Cd`][_frame].push(colorCd);
@@ -7533,14 +7551,16 @@ function pushColors(_header, _frame, _val, _colorCd, _allFlg) {
 
 	if (_val < 30 || _val >= 1000) {
 		const baseHeaders = [`mk${_header}Color`];
+		allUseTypes.push(`Arrow`);
 		if (!g_headerObj.defaultFrzColorUse) {
 			baseHeaders.push(`mkF${_header}ColorNormal`, `mkF${_header}ColorNormalBar`,
 				`mkF${_header}ColorHit`, `mkF${_header}ColorHitBar`);
+			allUseTypes.push(`Frz`);
 		}
 
 		// 矢印の色変化 (defaultFrzColorUse=falseのときはフリーズアローも色変化)
 		baseHeaders.forEach(baseHeader => {
-			initialize(baseHeader, `Arrow`);
+			initialize(baseHeader);
 
 			if (_val < 20 || _val >= 1000) {
 				pushColor(baseHeader, g_workObj.replaceNums[_val % 1000] + addAll);
@@ -7556,6 +7576,7 @@ function pushColors(_header, _frame, _val, _colorCd, _allFlg) {
 
 	} else {
 		const baseHeader = `mkF${_header}Color`;
+		allUseTypes.push(`Frz`);
 
 		// フリーズアローの色変化
 		const tmpVals = [];
@@ -7578,12 +7599,14 @@ function pushColors(_header, _frame, _val, _colorCd, _allFlg) {
 
 			g_keyObj[`color${tkObj.keyCtrlPtn}`].forEach((cpattern, k) => {
 				if (colorPos === cpattern) {
-					initialize(baseHeader + ctype, `Frz`);
+					initialize(baseHeader + ctype);
 					pushColor(baseHeader + ctype, k + addAll);
 				}
 			});
 		});
 	}
+
+	enabledAll(...allUseTypes);
 }
 
 /**
@@ -8604,7 +8627,7 @@ function MainInit() {
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
 			// 矢印の塗り部分
 			const arrShadow = createColorObject2(`${_name}Shadow${_j}_${_arrowCnt}`, {
-				background: getShadowColor(colorPos, g_workObj.arrowColors[_j]), rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: getShadowColor(colorPos, _color), rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
 			});
 			if (g_headerObj.setShadowColor[colorPos] === `Default`) {
 				arrShadow.style.opacity = 0.5;
