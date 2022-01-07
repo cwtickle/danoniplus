@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/01/04 (v25.0.0)
+ * Revised : 2022/01/07 (v25.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -197,16 +197,16 @@ let g_imgExtensions = [`png`, `gif`, `bmp`, `jpg`, `jpeg`, `svg`];
 // オブジェクト種別
 const g_typeLists = {
     arrow: [`arrow`, `dummyArrow`, `frz`, `dummyFrz`],
-    color: [`color`, `acolor`, `shadowColor`, `ashadowColor`],
+    color: [`color`, `acolor`],
     frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`],
     dataList: [
         `Arrow`, `FrzArrow`, `FrzLength`,
-        `Color`, `ColorCd`, `FColor`, `FColorCd`,
-        `AColor`, `AColorCd`, `FAColor`, `FAColorCd`,
-        `shadowColor`, `shadowColorCd`, `FshadowColor`, `FshadowColorCd`,
-        `AshadowColor`, `AshadowColorCd`, `FAshadowColor`, `FAshadowColorCd`,
+        `Color`, `ColorCd`,
+        `FColorNormal`, `FColorNormalCd`, `FColorNormalBar`, `FColorNormalBarCd`,
+        `FColorHit`, `FColorHitCd`, `FColorHitBar`, `FColorHitBarCd`,
         `ArrowCssMotion`, `ArrowCssMotionName`,
         `FrzCssMotion`, `FrzCssMotionName`,
+        `ArrowColorChangeAll`, `FrzColorChangeAll`,
     ],
 };
 
