@@ -6631,7 +6631,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		return obj;
 	}
 
-	[`color`, `shadowColor`].forEach(sprite => obj[`${sprite}Data`] = mergeColorData(sprite));
+	obj.colorData = mergeColorData();
 
 	// 矢印モーション（個別）データの分解（3～4つで1セット, セット毎の改行区切り）
 	obj.arrowCssMotionData = setCssMotionData(`arrow`, scoreIdHeader);
@@ -6713,7 +6713,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _header 
 	 * @returns 
 	 */
-	function mergeColorData(_header = ``) {
+	function mergeColorData(_header = `color`) {
 		const tmpArr = obj[`${_header}Data`].concat(obj[`a${_header}Data`]);
 		return tmpArr.sort((_a, _b) => _a[0] - _b[0]).flat();
 	}
