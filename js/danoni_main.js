@@ -1553,11 +1553,7 @@ function initAfterDosLoaded() {
 
 		if (g_loadObj.main) {
 			// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
-			loadCustomjs(_ => {
-				loadDos(_ => {
-					getScoreDetailData(0);
-				}, 0, true);
-			});
+			loadCustomjs(_ => loadDos(_ => getScoreDetailData(0), 0, true));
 		} else {
 			getScoreDetailData(0);
 			reloadDos(0);
@@ -3949,7 +3945,7 @@ const commonSettingBtn = _labelName => {
 		createCss2Button(`btn${_labelName}`, `>`, _ => true, {
 			x: g_sWidth / 2 + 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
 			w: C_LEN_SETMINI_WIDTH, h: 40, title: g_msgObj[`to${_labelName}`],
-			resetFunc: _ => (_labelName === `Display` ? settingsDisplayInit() : optionInit()),
+			resetFunc: _ => g_jumpSettingWindow[g_currentPage](),
 		}, g_cssObj.button_Mini),
 
 		// データセーブフラグの切替
@@ -5570,7 +5566,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	);
 
 	// キーの一覧を表示
-	const keyconSprite = createEmptySprite(divRoot, `keyconSprite`, { y: 100 + (g_sHeight - 500) / 2, h: 300 });
+	const keyconSprite = createEmptySprite(divRoot, `keyconSprite`, { y: 88 + (g_sHeight - 500) / 2, h: g_sHeight, overflow: `auto` });
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum, posMax, divideCnt] =
 		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
@@ -5657,13 +5653,16 @@ function keyConfigInit(_kcType = g_kcType) {
 		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
 	};
 
+	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
+	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
+
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
-		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2;
-		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt));
+		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2 - maxLeftX;
+		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt)) + 12;
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
 
@@ -5720,10 +5719,11 @@ function keyConfigInit(_kcType = g_kcType) {
 		}
 	}
 	const posj = g_keyObj[`pos${keyCtrlPtn}`][0];
+	keyconSprite.scrollLeft = -maxLeftX;
 
 	// カーソルの作成
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, g_imgObj.cursor,
-		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
+		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 57, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
 	const viewGroupObj = {
@@ -5915,8 +5915,8 @@ function keyConfigInit(_kcType = g_kcType) {
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
-		cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
-		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 45;
+		cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - maxLeftX - 10}px`;
+		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 57;
 		cursor.style.top = `${baseY + C_KYC_REPHEIGHT * g_currentk}px`;
 		if (g_currentk === 0 && g_kcType === `Replaced`) {
 			g_kcType = C_FLG_ALL;
