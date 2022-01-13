@@ -5577,6 +5577,16 @@ function keyConfigInit(_kcType = g_kcType) {
 	changeSetColor();
 
 	/**
+	 * keyconSpriteのスクロール位置調整
+	 * @param {number} _targetX 
+	 */
+	const adjustScrollPoint = _targetX => {
+		if (maxLeftX !== 0) {
+			keyconSprite.scrollLeft = Math.max(0, _targetX - g_sWidth / 2);
+		}
+	};
+
+	/**
 	 * キーコンフィグ用の矢印色を取得
 	 * @param {number} _colorPos 
 	 */
@@ -5641,6 +5651,8 @@ function keyConfigInit(_kcType = g_kcType) {
 		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
 		$id(`arrow${_j}`).background = arrowColor;
 		$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
+
+		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
 	};
 
 	/**
@@ -5651,6 +5663,8 @@ function keyConfigInit(_kcType = g_kcType) {
 	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
 		const tmpShuffle = changeTmpData(`shuffle`, 10, _j, _scrollNum);
 		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
+
+		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
 	};
 
 	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
@@ -5924,9 +5938,7 @@ function keyConfigInit(_kcType = g_kcType) {
 		}
 
 		// 次の位置が見えなくなったらkeyconSpriteの位置を調整する
-		if (maxLeftX !== 0) {
-			keyconSprite.scrollLeft = Math.max(0, nextLeft - g_sWidth / 2);
-		}
+		adjustScrollPoint(nextLeft);
 	};
 
 	/**
