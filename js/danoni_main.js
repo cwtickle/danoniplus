@@ -5576,6 +5576,9 @@ function keyConfigInit(_kcType = g_kcType) {
 	const kWidth = parseInt(keyconSprite.style.width);
 	changeSetColor();
 
+	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
+	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
+
 	/**
 	 * keyconSpriteのスクロール位置調整
 	 * @param {number} _targetX 
@@ -5666,9 +5669,6 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
 	};
-
-	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
-	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
 
 	for (let j = 0; j < keyNum; j++) {
 
