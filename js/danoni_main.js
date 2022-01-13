@@ -5719,7 +5719,6 @@ function keyConfigInit(_kcType = g_kcType) {
 		}
 	}
 	const posj = g_keyObj[`pos${keyCtrlPtn}`][0];
-	keyconSprite.scrollLeft = -maxLeftX;
 
 	// カーソルの作成
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, g_imgObj.cursor,
@@ -5915,12 +5914,22 @@ function keyConfigInit(_kcType = g_kcType) {
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
-		cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - maxLeftX - 10}px`;
+		const nextLeft = (kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - maxLeftX - 10;
+		cursor.style.left = `${nextLeft}px`;
 		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 57;
 		cursor.style.top = `${baseY + C_KYC_REPHEIGHT * g_currentk}px`;
 		if (g_currentk === 0 && g_kcType === `Replaced`) {
 			g_kcType = C_FLG_ALL;
 			lnkKcType.textContent = getStgDetailName(g_kcType);
+		}
+
+		// 次の位置が見えなくなったらkeyconSpriteの位置を調整する
+		if (maxLeftX !== 0) {
+			if (nextLeft > keyconSprite.scrollLeft + g_sWidth - C_ARW_WIDTH) {
+				keyconSprite.scrollLeft = Math.min(keyconSprite.scrollLeft + C_ARW_WIDTH, -maxLeftX * 2);
+			} else if (nextLeft < keyconSprite.scrollLeft) {
+				keyconSprite.scrollLeft = maxLeftX;
+			}
 		}
 	};
 
