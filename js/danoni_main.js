@@ -5925,11 +5925,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		// 次の位置が見えなくなったらkeyconSpriteの位置を調整する
 		if (maxLeftX !== 0) {
-			if (nextLeft > keyconSprite.scrollLeft + g_sWidth - C_ARW_WIDTH) {
-				keyconSprite.scrollLeft = Math.min(keyconSprite.scrollLeft + C_ARW_WIDTH, -maxLeftX * 2);
-			} else if (nextLeft < keyconSprite.scrollLeft) {
-				keyconSprite.scrollLeft = maxLeftX;
-			}
+			keyconSprite.scrollLeft = Math.max(0, nextLeft - g_sWidth / 2);
 		}
 	};
 
@@ -5999,6 +5995,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	// ConfigType, ColorTypeの初期設定
 	setConfigType(0);
 	setColorType(0);
+	keyconSprite.scrollLeft = - maxLeftX;
 
 	// キーパターン表示
 	const lblTransKey = hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ?
@@ -6080,6 +6077,7 @@ function keyConfigInit(_kcType = g_kcType) {
 					}
 				}
 				resetCursor(Number(g_kcType === `Replaced`));
+				keyconSprite.scrollLeft = - maxLeftX;
 			}
 		}, {
 			x: 0, y: g_sHeight - 75,
