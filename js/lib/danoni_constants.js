@@ -504,6 +504,15 @@ g_settings.volumeNum = g_settings.volumes.length - 1;
 g_settings.opacityNum = g_settings.opacitys.length - 1;
 
 /**
+ * 設定画面間移動
+ */
+const g_jumpSettingWindow = {
+    option: _ => settingsDisplayInit(),
+    difSelector: _ => settingsDisplayInit(),
+    settingsDisplay: _ => optionInit(),
+};
+
+/**
  * シャッフル適用関数
  */
 const g_shuffleFunc = {
