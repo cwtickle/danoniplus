@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/01/07
+ * Revised : 2022/01/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 25.1.0`;
-const g_revisedDate = `2022/01/07`;
+const g_version = `Ver 25.2.0`;
+const g_revisedDate = `2022/01/15`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1553,11 +1553,7 @@ function initAfterDosLoaded() {
 
 		if (g_loadObj.main) {
 			// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
-			loadCustomjs(_ => {
-				loadDos(_ => {
-					getScoreDetailData(0);
-				}, 0, true);
-			});
+			loadCustomjs(_ => loadDos(_ => getScoreDetailData(0), 0, true));
 		} else {
 			getScoreDetailData(0);
 			reloadDos(0);
@@ -3949,7 +3945,7 @@ const commonSettingBtn = _labelName => {
 		createCss2Button(`btn${_labelName}`, `>`, _ => true, {
 			x: g_sWidth / 2 + 175 - C_LEN_SETMINI_WIDTH / 2, y: 25,
 			w: C_LEN_SETMINI_WIDTH, h: 40, title: g_msgObj[`to${_labelName}`],
-			resetFunc: _ => (_labelName === `Display` ? settingsDisplayInit() : optionInit()),
+			resetFunc: _ => g_jumpSettingWindow[g_currentPage](),
 		}, g_cssObj.button_Mini),
 
 		// データセーブフラグの切替
@@ -5570,7 +5566,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	);
 
 	// キーの一覧を表示
-	const keyconSprite = createEmptySprite(divRoot, `keyconSprite`, { y: 100 + (g_sHeight - 500) / 2, h: 300 });
+	const keyconSprite = createEmptySprite(divRoot, `keyconSprite`, { y: 88 + (g_sHeight - 500) / 2, h: g_sHeight, overflow: `auto` });
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum, posMax, divideCnt] =
 		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
@@ -5579,6 +5575,19 @@ function keyConfigInit(_kcType = g_kcType) {
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
 	const kWidth = parseInt(keyconSprite.style.width);
 	changeSetColor();
+
+	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
+	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
+
+	/**
+	 * keyconSpriteのスクロール位置調整
+	 * @param {number} _targetX 
+	 */
+	const adjustScrollPoint = _targetX => {
+		if (maxLeftX !== 0) {
+			keyconSprite.scrollLeft = Math.max(0, _targetX - g_sWidth / 2);
+		}
+	};
 
 	/**
 	 * キーコンフィグ用の矢印色を取得
@@ -5645,6 +5654,8 @@ function keyConfigInit(_kcType = g_kcType) {
 		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
 		$id(`arrow${_j}`).background = arrowColor;
 		$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
+
+		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
 	};
 
 	/**
@@ -5655,6 +5666,8 @@ function keyConfigInit(_kcType = g_kcType) {
 	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
 		const tmpShuffle = changeTmpData(`shuffle`, 10, _j, _scrollNum);
 		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
+
+		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
 	};
 
 	for (let j = 0; j < keyNum; j++) {
@@ -5662,8 +5675,8 @@ function keyConfigInit(_kcType = g_kcType) {
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
-		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2;
-		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt));
+		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2 - maxLeftX;
+		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt)) + 12;
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
 
@@ -5723,7 +5736,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 	// カーソルの作成
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, g_imgObj.cursor,
-		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 45, 15, 30));
+		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 57, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
 	const viewGroupObj = {
@@ -5915,13 +5928,17 @@ function keyConfigInit(_kcType = g_kcType) {
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
-		cursor.style.left = `${(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - 10}px`;
-		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 45;
+		const nextLeft = (kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - maxLeftX - 10;
+		cursor.style.left = `${nextLeft}px`;
+		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 57;
 		cursor.style.top = `${baseY + C_KYC_REPHEIGHT * g_currentk}px`;
 		if (g_currentk === 0 && g_kcType === `Replaced`) {
 			g_kcType = C_FLG_ALL;
 			lnkKcType.textContent = getStgDetailName(g_kcType);
 		}
+
+		// 次の位置が見えなくなったらkeyconSpriteの位置を調整する
+		adjustScrollPoint(nextLeft);
 	};
 
 	/**
@@ -5990,6 +6007,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	// ConfigType, ColorTypeの初期設定
 	setConfigType(0);
 	setColorType(0);
+	keyconSprite.scrollLeft = - maxLeftX;
 
 	// キーパターン表示
 	const lblTransKey = hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ?
@@ -6071,6 +6089,7 @@ function keyConfigInit(_kcType = g_kcType) {
 					}
 				}
 				resetCursor(Number(g_kcType === `Replaced`));
+				keyconSprite.scrollLeft = - maxLeftX;
 			}
 		}, {
 			x: 0, y: g_sHeight - 75,

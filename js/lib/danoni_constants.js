@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/01/07 (v25.1.0)
+ * Revised : 2022/01/15 (v25.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -502,6 +502,15 @@ const g_settings = {
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
 g_settings.opacityNum = g_settings.opacitys.length - 1;
+
+/**
+ * 設定画面間移動
+ */
+const g_jumpSettingWindow = {
+    option: _ => settingsDisplayInit(),
+    difSelector: _ => settingsDisplayInit(),
+    settingsDisplay: _ => optionInit(),
+};
 
 /**
  * シャッフル適用関数
