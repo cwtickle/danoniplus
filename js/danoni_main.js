@@ -1482,7 +1482,7 @@ function initAfterDosLoaded() {
 
 	// CSSファイルの読み込み
 	const skinList = g_headerObj.jsData.filter(file => file[0].indexOf(`danoni_skin`) !== -1);
-	loadMultipleFile(0, skinList, `css`, _ => initAfterCssLoaded());
+	loadMultipleFiles(0, skinList, `css`, _ => initAfterCssLoaded());
 
 	/**
 	 * スキンCSSファイルを読み込んだ後の処理
@@ -1547,7 +1547,7 @@ function initAfterDosLoaded() {
 
 		if (g_loadObj.main) {
 			// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
-			loadMultipleFile(0, g_headerObj.jsData, `js`, _ => {
+			loadMultipleFiles(0, g_headerObj.jsData, `js`, _ => {
 				loadLegacyCustomFunc();
 				loadDos(_ => getScoreDetailData(0), 0, true);
 			});
@@ -1806,7 +1806,7 @@ function calcLevel(_scoreObj) {
  * @param {string} _loadType
  * @param {function} _afterFunc 
  */
-function loadMultipleFile(_j, _fileData, _loadType, _afterFunc = _ => true) {
+function loadMultipleFiles(_j, _fileData, _loadType, _afterFunc = _ => true) {
 	if (_j < _fileData.length) {
 		const filePath = `${_fileData[_j][1]}${_fileData[_j][0]}?${new Date().getTime()}`;
 		if (_fileData[_j][0].endsWith(`.css`)) {
@@ -1816,11 +1816,11 @@ function loadMultipleFile(_j, _fileData, _loadType, _afterFunc = _ => true) {
 		// jsファイル、cssファイルにより呼び出す関数を切替
 		if (_loadType === `js`) {
 			loadScript(filePath, _ =>
-				loadMultipleFile(_j + 1, _fileData, _loadType, _afterFunc), false);
+				loadMultipleFiles(_j + 1, _fileData, _loadType, _afterFunc), false);
 		} else if (_loadType === `css`) {
 			const cssPath = filePath.split(`.js`).join(`.css`);
 			importCssFile(cssPath, _ =>
-				loadMultipleFile(_j + 1, _fileData, _loadType, _afterFunc));
+				loadMultipleFiles(_j + 1, _fileData, _loadType, _afterFunc));
 		}
 	} else {
 		_afterFunc();
