@@ -2904,6 +2904,7 @@ const g_errMsgObj = {
 
 /**
  * カスタム関数の定義
+ * - 挿入場所ごとに名前を分けて定義
  */
 const g_customJsObj = {
     title: [],
@@ -2935,6 +2936,7 @@ const g_customJsObj = {
 
 /**
  * スキン関数の定義
+ * - 挿入場所ごとに名前を分けて定義
  */
 const g_skinJsObj = {
     title: [],
@@ -2948,6 +2950,10 @@ const g_skinJsObj = {
     result: [],
 };
 
+/**
+ * 従来のカスタム関数をg_customJsObj, g_skinJsObjへ追加
+ * - customjsファイルを読み込んだ直後にこの関数を呼び出している
+ */
 const loadLegacyCustomFunc = _ => {
 
     // タイトル
