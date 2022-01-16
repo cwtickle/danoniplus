@@ -19,7 +19,10 @@ const g_presetTuningUrl = `https://www.google.co.jp/`;
 const g_presetSkinType = `default`;
 
 // 既定カスタムJs (デフォルトは danoni_custom.js)
-//const g_presetCustomJs = `danoni_custom.js`;
+//const g_presetCustomJs = `danoni_custom.js,danoni_init.js`;
+
+// 既定カスタムCss (デフォルトは指定なし、cssフォルダを参照)
+//const g_presetCustomCss = `danoni_custom.css`;
 
 // ゲージ設定（デフォルト）
 const g_presetGauge = {
