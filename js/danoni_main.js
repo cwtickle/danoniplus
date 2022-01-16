@@ -2764,7 +2764,7 @@ function preheaderConvert(_dosObj) {
 	setJsFiles(tmpCustomjs.split(`,`), C_DIR_JS);
 
 	// 外部cssファイルの指定
-	const tmpCustomcss = _dosObj.customcss || (typeof g_presetCustomCss === C_TYP_STRING ? g_presetCustomCsJs : ``);
+	const tmpCustomcss = _dosObj.customcss || (typeof g_presetCustomCss === C_TYP_STRING ? g_presetCustomCss : ``);
 	setJsFiles(tmpCustomcss.split(`,`), C_DIR_CSS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
