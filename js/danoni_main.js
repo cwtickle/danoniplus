@@ -1809,6 +1809,11 @@ function calcLevel(_scoreObj) {
 function loadMultipleFile(_j, _fileData, _loadType, _afterFunc = _ => true) {
 	if (_j < _fileData.length) {
 		const filePath = `${_fileData[_j][1]}${_fileData[_j][0]}?${new Date().getTime()}`;
+		if (_fileData[_j][0].endsWith(`.css`)) {
+			_loadType = `css`;
+		}
+
+		// jsファイル、cssファイルにより呼び出す関数を切替
 		if (_loadType === `js`) {
 			loadScript(filePath, _ =>
 				loadMultipleFile(_j + 1, _fileData, _loadType, _afterFunc), false);
@@ -2743,8 +2748,10 @@ function preheaderConvert(_dosObj) {
 
 	const setJsFiles = (_files, _defaultDir, _type = `custom`) => {
 		_files.forEach(file => {
-			const [jsFile, jsDir] = getFilePath(file, _defaultDir);
-			obj.jsData.push([_type === `skin` ? `danoni_skin_${jsFile}.js` : jsFile, jsDir]);
+			if (hasVal(file)) {
+				const [jsFile, jsDir] = getFilePath(file, _defaultDir);
+				obj.jsData.push([_type === `skin` ? `danoni_skin_${jsFile}.js` : jsFile, jsDir]);
+			}
 		});
 	};
 
@@ -2755,6 +2762,10 @@ function preheaderConvert(_dosObj) {
 	// 外部jsファイルの指定
 	const tmpCustomjs = _dosObj.customjs || (typeof g_presetCustomJs === C_TYP_STRING ? g_presetCustomJs : C_JSF_CUSTOM);
 	setJsFiles(tmpCustomjs.split(`,`), C_DIR_JS);
+
+	// 外部cssファイルの指定
+	const tmpCustomcss = _dosObj.customcss || (typeof g_presetCustomCss === C_TYP_STRING ? g_presetCustomCsJs : ``);
+	setJsFiles(tmpCustomcss.split(`,`), C_DIR_CSS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
 	g_titleLists.init.forEach(objName => {
