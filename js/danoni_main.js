@@ -9353,19 +9353,42 @@ function updateCombo() {
 }
 
 /**
- * 判定処理：イイ
- * @param {number} difFrame 
+ * 回復判定の共通処理
+ * @param {string} _name 
+ * @param {number} _difFrame 
  */
-function judgeIi(difFrame) {
-	changeJudgeCharacter(`ii`, g_lblNameObj.j_ii);
+function judgeRecovery(_name, _difFrame) {
+	changeJudgeCharacter(_name, g_lblNameObj[`j_${_name}`]);
 
 	updateCombo();
-	displayDiff(difFrame, g_headerObj.justFrames);
+	displayDiff(_difFrame, g_headerObj.justFrames);
 
 	lifeRecovery();
 	finishViewing();
 
-	g_customJsObj.judg_ii.forEach(func => func(difFrame));
+	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
+}
+
+/**
+ * ダメージ系共通処理
+ * @param {string} _name 
+ * @param {number} _difFrame 
+ */
+function judgeDamage(_name, _difFrame) {
+	changeJudgeCharacter(_name, g_lblNameObj[`j_${_name}`]);
+	g_resultObj.combo = 0;
+	comboJ.textContent = ``;
+	diffJ.textContent = ``;
+	lifeDamage();
+	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
+}
+
+/**
+ * 判定処理：イイ
+ * @param {number} difFrame 
+ */
+function judgeIi(difFrame) {
+	judgeRecovery(`ii`, difFrame);
 }
 
 /**
@@ -9373,15 +9396,7 @@ function judgeIi(difFrame) {
  * @param {number} difFrame 
  */
 function judgeShakin(difFrame) {
-	changeJudgeCharacter(`shakin`, g_lblNameObj.j_shakin);
-
-	updateCombo();
-	displayDiff(difFrame, g_headerObj.justFrames);
-
-	lifeRecovery();
-	finishViewing();
-
-	g_customJsObj.judg_shakin.forEach(func => func(difFrame));
+	judgeRecovery(`shakin`, difFrame);
 }
 
 /**
@@ -9399,24 +9414,11 @@ function judgeMatari(difFrame) {
 }
 
 /**
- * ダメージ系共通処理
- */
-function judgeDamage() {
-	g_resultObj.combo = 0;
-	comboJ.textContent = ``;
-	diffJ.textContent = ``;
-	lifeDamage();
-}
-
-/**
  * 判定処理：ショボーン
  * @param {number} difFrame 
  */
 function judgeShobon(difFrame) {
-	changeJudgeCharacter(`shobon`, g_lblNameObj.j_shobon);
-	judgeDamage();
-
-	g_customJsObj.judg_shobon.forEach(func => func(difFrame));
+	judgeDamage(`shobon`, difFrame);
 }
 
 /**
@@ -9424,10 +9426,7 @@ function judgeShobon(difFrame) {
  * @param {number} difFrame 
  */
 function judgeUwan(difFrame) {
-	changeJudgeCharacter(`uwan`, g_lblNameObj.j_uwan);
-	judgeDamage();
-
-	g_customJsObj.judg_uwan.forEach(func => func(difFrame));
+	judgeDamage(`uwan`, difFrame);
 }
 
 /**
