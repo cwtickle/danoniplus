@@ -1481,14 +1481,8 @@ function initAfterDosLoaded() {
 	}
 
 	// CSSファイルの読み込み
-	const randTime = new Date().getTime();
-	importCssFile(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.css?${randTime}`, _ => {
-		if (g_headerObj.skinType2 !== ``) {
-			importCssFile(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.css?${randTime}`, _ => initAfterCssLoaded());
-		} else {
-			initAfterCssLoaded();
-		}
-	});
+	const skinList = g_headerObj.jsData.filter(file => file[0].indexOf(`danoni_skin`) !== -1);
+	loadMultipleFile(0, skinList, `css`, _ => initAfterCssLoaded());
 
 	/**
 	 * スキンCSSファイルを読み込んだ後の処理
@@ -1553,7 +1547,10 @@ function initAfterDosLoaded() {
 
 		if (g_loadObj.main) {
 			// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
-			loadCustomjs(_ => loadDos(_ => getScoreDetailData(0), 0, true));
+			loadMultipleFile(0, g_headerObj.jsData, `js`, _ => {
+				loadLegacyCustomFunc();
+				loadDos(_ => getScoreDetailData(0), 0, true);
+			});
 		} else {
 			getScoreDetailData(0);
 			reloadDos(0);
@@ -1803,20 +1800,26 @@ function calcLevel(_scoreObj) {
 }
 
 /**
- * customjsの読込
+ * jsファイルの連続読込
+ * @param {number} _j 
+ * @param {array} _fileData 
+ * @param {string} _loadType
  * @param {function} _afterFunc 
  */
-function loadCustomjs(_afterFunc) {
-	const randTime = new Date().getTime();
-	loadScript(`${g_headerObj.customjsRoot}${g_headerObj.customjs}?${randTime}`, _ => {
-		loadScript(`${g_headerObj.customjs2Root}${g_headerObj.customjs2}?${randTime}`, _ => {
-			loadScript(`${g_headerObj.skinRoot}danoni_skin_${g_headerObj.skinType}.js?${randTime}`, _ => {
-				loadScript(`${g_headerObj.skinRoot2}danoni_skin_${g_headerObj.skinType2}.js?${randTime}`, _ => {
-					_afterFunc();
-				}, false);
-			}, false);
-		}, false);
-	}, false);
+function loadMultipleFile(_j, _fileData, _loadType, _afterFunc = _ => true) {
+	if (_j < _fileData.length) {
+		const filePath = `${_fileData[_j][1]}${_fileData[_j][0]}?${new Date().getTime()}`;
+		if (_loadType === `js`) {
+			loadScript(filePath, _ =>
+				loadMultipleFile(_j + 1, _fileData, _loadType, _afterFunc), false);
+		} else if (_loadType === `css`) {
+			const cssPath = filePath.split(`.js`).join(`.css`);
+			importCssFile(cssPath, _ =>
+				loadMultipleFile(_j + 1, _fileData, _loadType, _afterFunc));
+		}
+	} else {
+		_afterFunc();
+	}
 }
 
 /**
@@ -1922,12 +1925,7 @@ function loadMusic() {
 			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${_event.loaded}Bytes`;
 		}
 		// ユーザカスタムイベント
-		if (typeof customLoadingProgress === C_TYP_FUNCTION) {
-			customLoadingProgress(_event);
-			if (typeof customLoadingProgress2 === C_TYP_FUNCTION) {
-				customLoadingProgress2(_event);
-			}
-		}
+		g_customJsObj.progress.forEach(func => func(_event));
 	});
 
 	// エラー処理
@@ -2453,12 +2451,7 @@ function titleInit() {
 	}
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customTitleInit === C_TYP_FUNCTION) {
-		customTitleInit();
-		if (typeof customTitleInit2 === C_TYP_FUNCTION) {
-			customTitleInit2();
-		}
-	}
+	g_customJsObj.title.forEach(func => func());
 
 	// バージョン情報取得
 	let customVersion = ``;
@@ -2591,12 +2584,7 @@ function titleInit() {
 	function flowTitleTimeline() {
 
 		// ユーザカスタムイベント(フレーム毎)
-		if (typeof customTitleEnterFrame === C_TYP_FUNCTION) {
-			customTitleEnterFrame();
-			if (typeof customTitleEnterFrame2 === C_TYP_FUNCTION) {
-				customTitleEnterFrame2();
-			}
-		}
+		g_customJsObj.titleEnterFrame.forEach(func => func());
 
 		// 背景・マスクモーション
 		drawTitleResultMotion(g_currentPage);
@@ -2618,12 +2606,7 @@ function titleInit() {
 	document.oncontextmenu = _ => true;
 	divRoot.oncontextmenu = _ => false;
 
-	if (typeof skinTitleInit === C_TYP_FUNCTION) {
-		skinTitleInit();
-		if (typeof skinTitleInit2 === C_TYP_FUNCTION) {
-			skinTitleInit2();
-		}
-	}
+	g_skinJsObj.title.forEach(func => func());
 }
 
 /**
@@ -2756,17 +2739,22 @@ function preheaderConvert(_dosObj) {
 	// ヘッダー群の格納先
 	const obj = {};
 
+	obj.jsData = [];
+
+	const setJsFiles = (_files, _defaultDir, _type = `custom`) => {
+		_files.forEach(file => {
+			const [jsFile, jsDir] = getFilePath(file, _defaultDir);
+			obj.jsData.push([_type === `skin` ? `danoni_skin_${jsFile}.js` : jsFile, jsDir]);
+		});
+	};
+
 	// 外部スキンファイルの指定
 	const tmpSkinType = _dosObj.skinType || (typeof g_presetSkinType === C_TYP_STRING ? g_presetSkinType : `default`);
-	const skinTypes = tmpSkinType.split(`,`);
-	[obj.skinType2, obj.skinRoot2] = getFilePath(skinTypes.length > 1 ? skinTypes[1] : `blank`, C_DIR_SKIN);
-	[obj.skinType, obj.skinRoot] = getFilePath(skinTypes[0], C_DIR_SKIN);
+	setJsFiles(tmpSkinType.split(`,`), C_DIR_SKIN, `skin`);
 
 	// 外部jsファイルの指定
 	const tmpCustomjs = _dosObj.customjs || (typeof g_presetCustomJs === C_TYP_STRING ? g_presetCustomJs : C_JSF_CUSTOM);
-	const customjss = tmpCustomjs.split(`,`);
-	[obj.customjs2, obj.customjs2Root] = getFilePath(customjss.length > 1 ? customjss[1] : C_JSF_BLANK, C_DIR_JS);
-	[obj.customjs, obj.customjsRoot] = getFilePath(customjss[0], C_DIR_JS);
+	setJsFiles(tmpCustomjs.split(`,`), C_DIR_JS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
 	g_titleLists.init.forEach(objName => {
@@ -3974,12 +3962,7 @@ function optionInit() {
 	createOptionWindow(divRoot);
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customOptionInit === C_TYP_FUNCTION) {
-		customOptionInit();
-		if (typeof customOptionInit2 === C_TYP_FUNCTION) {
-			customOptionInit2();
-		}
-	}
+	g_customJsObj.option.forEach(func => func());
 
 	// ボタン描画
 	commonSettingBtn(`Display`);
@@ -3989,12 +3972,7 @@ function optionInit() {
 	document.oncontextmenu = _ => true;
 	g_initialFlg = true;
 
-	if (typeof skinOptionInit === C_TYP_FUNCTION) {
-		skinOptionInit();
-		if (typeof skinOptionInit2 === C_TYP_FUNCTION) {
-			skinOptionInit2();
-		}
-	}
+	g_skinJsObj.option.forEach(func => func());
 }
 
 function musicAfterLoaded() {
@@ -5030,12 +5008,7 @@ function createOptionWindow(_sprite) {
 		setGauge(0);
 
 		// ユーザカスタムイベント(初期)
-		if (typeof customSetDifficulty === C_TYP_FUNCTION) {
-			customSetDifficulty(_initFlg, g_canLoadDifInfoFlg);
-			if (typeof customSetDifficulty2 === C_TYP_FUNCTION) {
-				customSetDifficulty2(_initFlg, g_canLoadDifInfoFlg);
-			}
-		}
+		g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
 
 		// ---------------------------------------------------
 		// 4. 譜面初期情報ロード許可フラグの設定
@@ -5332,12 +5305,7 @@ function settingsDisplayInit() {
 	);
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customSettingsDisplayInit === C_TYP_FUNCTION) {
-		customSettingsDisplayInit();
-		if (typeof customSettingsDisplayInit2 === C_TYP_FUNCTION) {
-			customSettingsDisplayInit2();
-		}
-	}
+	g_customJsObj.settingsDisplay.forEach(func => func());
 
 	// ボタン描画
 	commonSettingBtn(`Settings`);
@@ -5346,12 +5314,7 @@ function settingsDisplayInit() {
 	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = _ => true;
 
-	if (typeof skinSettingsDisplayInit === C_TYP_FUNCTION) {
-		skinSettingsDisplayInit();
-		if (typeof skinSettingsDisplayInit2 === C_TYP_FUNCTION) {
-			skinSettingsDisplayInit2();
-		}
-	}
+	g_skinJsObj.settingsDisplay.forEach(func => func());
 }
 
 /**
@@ -6026,12 +5989,7 @@ function keyConfigInit(_kcType = g_kcType) {
 	};
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customKeyConfigInit === C_TYP_FUNCTION) {
-		customKeyConfigInit();
-		if (typeof customKeyConfigInit2 === C_TYP_FUNCTION) {
-			customKeyConfigInit2();
-		}
-	}
+	g_customJsObj.keyconfig.forEach(func => func());
 
 	// ラベル・ボタン描画
 	multiAppend(divRoot,
@@ -6156,15 +6114,8 @@ function keyConfigInit(_kcType = g_kcType) {
 		}
 	});
 
-	if (typeof skinKeyConfigInit === C_TYP_FUNCTION) {
-		skinKeyConfigInit();
-		if (typeof skinKeyConfigInit2 === C_TYP_FUNCTION) {
-			skinKeyConfigInit2();
-		}
-	}
-
+	g_skinJsObj.keyconfig.forEach(func => func());
 	document.onkeyup = evt => commonKeyUp(evt);
-
 	document.oncontextmenu = _ => false;
 }
 
@@ -6243,18 +6194,8 @@ function loadingScoreInit() {
 		g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
 		// ユーザカスタムイベント
-		if (typeof customPreloadingInit === C_TYP_FUNCTION) {
-			customPreloadingInit();
-			if (typeof customPreloadingInit2 === C_TYP_FUNCTION) {
-				customPreloadingInit2();
-			}
-		}
-		if (typeof skinPreloadingInit === C_TYP_FUNCTION) {
-			skinPreloadingInit();
-			if (typeof skinPreloadingInit2 === C_TYP_FUNCTION) {
-				skinPreloadingInit2();
-			}
-		}
+		g_customJsObj.preloading.forEach(func => func());
+		g_skinJsObj.preloading.forEach(func => func());
 
 		let dummyIdHeader = ``;
 		if (g_stateObj.dummyId !== ``) {
@@ -6274,7 +6215,7 @@ function loadingScoreInit() {
 
 		// 開始フレーム数の取得(フェードイン加味)
 		g_scoreObj.frameNum = getStartFrame(lastFrame, g_stateObj.fadein);
-		g_scoreObj.baseFrame;
+		g_scoreObj.baseFrame = g_scoreObj.frameNum;
 
 		// フレームごとの速度を取得（配列形式）
 		let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
@@ -6385,12 +6326,7 @@ function loadingScoreInit() {
 		getArrowSettings();
 
 		// ユーザカスタムイベント
-		if (typeof customLoadingInit === C_TYP_FUNCTION) {
-			customLoadingInit();
-			if (typeof customLoadingInit2 === C_TYP_FUNCTION) {
-				customLoadingInit2();
-			}
-		}
+		g_customJsObj.loading.forEach(func => func());
 
 		const tempId = setInterval(() => {
 			const executeMain = _ => {
@@ -8252,13 +8188,7 @@ function MainInit() {
 	}
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customMainInit === C_TYP_FUNCTION) {
-		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
-		customMainInit();
-		if (typeof customMainInit2 === C_TYP_FUNCTION) {
-			customMainInit2();
-		}
-	}
+	g_customJsObj.main.forEach(func => func());
 
 	/**
 	 * キーを押したときの処理
@@ -8462,12 +8392,7 @@ function MainInit() {
 			if (_cnt === 0) {
 				const stepDivHit = document.querySelector(`#stepHit${_j}`);
 
-				if (typeof customJudgeDummyArrow === C_TYP_FUNCTION) {
-					customJudgeDummyArrow(_cnt);
-					if (typeof customJudgeDummyArrow2 === C_TYP_FUNCTION) {
-						customJudgeDummyArrow2(_cnt);
-					}
-				}
+				g_customJsObj.dummyArrow.forEach(func => func());
 				stepDivHit.style.top = `-15px`;
 				stepDivHit.style.opacity = 1;
 				stepDivHit.classList.value = ``;
@@ -8487,12 +8412,7 @@ function MainInit() {
 
 		// ダミーフリーズアロー(成功時)
 		dummyFrzOK: (_j, _k, _frzName, _cnt) => {
-			if (typeof customJudgeDummyFrz === C_TYP_FUNCTION) {
-				customJudgeDummyFrz(_cnt);
-				if (typeof customJudgeDummyFrz2 === C_TYP_FUNCTION) {
-					customJudgeDummyFrz2(_cnt);
-				}
-			}
+			g_customJsObj.dummyFrz.forEach(func => func());
 			$id(`frzHit${_j}`).opacity = 0;
 			g_attrObj[_frzName].judgEndFlg = true;
 			judgeObjDelete.dummyFrz(_j, _frzName);
@@ -8874,11 +8794,8 @@ function MainInit() {
 		}
 
 		// ユーザカスタムイベント(フレーム毎)
-		if (typeof customMainEnterFrame === C_TYP_FUNCTION) {
-			customMainEnterFrame();
-			if (typeof customMainEnterFrame2 === C_TYP_FUNCTION) {
-				customMainEnterFrame2();
-			}
+		g_customJsObj.mainEnterFrame.forEach(func => func());
+		if (g_customJsObj.mainEnterFrame.length > 0) {
 			g_scoreObj.baseFrame++;
 		}
 
@@ -9436,24 +9353,42 @@ function updateCombo() {
 }
 
 /**
- * 判定処理：イイ
- * @param {number} difFrame 
+ * 回復判定の共通処理
+ * @param {string} _name 
+ * @param {number} _difFrame 
  */
-function judgeIi(difFrame) {
-	changeJudgeCharacter(`ii`, g_lblNameObj.j_ii);
+function judgeRecovery(_name, _difFrame) {
+	changeJudgeCharacter(_name, g_lblNameObj[`j_${_name}`]);
 
 	updateCombo();
-	displayDiff(difFrame, g_headerObj.justFrames);
+	displayDiff(_difFrame, g_headerObj.justFrames);
 
 	lifeRecovery();
 	finishViewing();
 
-	if (typeof customJudgeIi === C_TYP_FUNCTION) {
-		customJudgeIi(difFrame);
-		if (typeof customJudgeIi2 === C_TYP_FUNCTION) {
-			customJudgeIi2(difFrame);
-		}
-	}
+	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
+}
+
+/**
+ * ダメージ系共通処理
+ * @param {string} _name 
+ * @param {number} _difFrame 
+ */
+function judgeDamage(_name, _difFrame) {
+	changeJudgeCharacter(_name, g_lblNameObj[`j_${_name}`]);
+	g_resultObj.combo = 0;
+	comboJ.textContent = ``;
+	diffJ.textContent = ``;
+	lifeDamage();
+	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
+}
+
+/**
+ * 判定処理：イイ
+ * @param {number} difFrame 
+ */
+function judgeIi(difFrame) {
+	judgeRecovery(`ii`, difFrame);
 }
 
 /**
@@ -9461,20 +9396,7 @@ function judgeIi(difFrame) {
  * @param {number} difFrame 
  */
 function judgeShakin(difFrame) {
-	changeJudgeCharacter(`shakin`, g_lblNameObj.j_shakin);
-
-	updateCombo();
-	displayDiff(difFrame, g_headerObj.justFrames);
-
-	lifeRecovery();
-	finishViewing();
-
-	if (typeof customJudgeShakin === C_TYP_FUNCTION) {
-		customJudgeShakin(difFrame);
-		if (typeof customJudgeShakin2 === C_TYP_FUNCTION) {
-			customJudgeShakin2(difFrame);
-		}
-	}
+	judgeRecovery(`shakin`, difFrame);
 }
 
 /**
@@ -9488,22 +9410,7 @@ function judgeMatari(difFrame) {
 	displayDiff(difFrame, g_headerObj.justFrames);
 	finishViewing();
 
-	if (typeof customJudgeMatari === C_TYP_FUNCTION) {
-		customJudgeMatari(difFrame);
-		if (typeof customJudgeMatari2 === C_TYP_FUNCTION) {
-			customJudgeMatari2(difFrame);
-		}
-	}
-}
-
-/**
- * ダメージ系共通処理
- */
-function judgeDamage() {
-	g_resultObj.combo = 0;
-	comboJ.textContent = ``;
-	diffJ.textContent = ``;
-	lifeDamage();
+	g_customJsObj.judg_matari.forEach(func => func(difFrame));
 }
 
 /**
@@ -9511,15 +9418,7 @@ function judgeDamage() {
  * @param {number} difFrame 
  */
 function judgeShobon(difFrame) {
-	changeJudgeCharacter(`shobon`, g_lblNameObj.j_shobon);
-	judgeDamage();
-
-	if (typeof customJudgeShobon === C_TYP_FUNCTION) {
-		customJudgeShobon(difFrame);
-		if (typeof customJudgeShobon2 === C_TYP_FUNCTION) {
-			customJudgeShobon2(difFrame);
-		}
-	}
+	judgeDamage(`shobon`, difFrame);
 }
 
 /**
@@ -9527,15 +9426,7 @@ function judgeShobon(difFrame) {
  * @param {number} difFrame 
  */
 function judgeUwan(difFrame) {
-	changeJudgeCharacter(`uwan`, g_lblNameObj.j_uwan);
-	judgeDamage();
-
-	if (typeof customJudgeUwan === C_TYP_FUNCTION) {
-		customJudgeUwan(difFrame);
-		if (typeof customJudgeUwan2 === C_TYP_FUNCTION) {
-			customJudgeUwan2(difFrame);
-		}
-	}
+	judgeDamage(`uwan`, difFrame);
 }
 
 /**
@@ -9554,12 +9445,7 @@ function judgeKita(difFrame) {
 	lifeRecovery();
 	finishViewing();
 
-	if (typeof customJudgeKita === C_TYP_FUNCTION) {
-		customJudgeKita(difFrame);
-		if (typeof customJudgeKita2 === C_TYP_FUNCTION) {
-			customJudgeKita2(difFrame);
-		}
-	}
+	g_customJsObj.judg_kita.forEach(func => func(difFrame));
 }
 
 /**
@@ -9573,12 +9459,7 @@ function judgeIknai(difFrame) {
 
 	lifeDamage();
 
-	if (typeof customJudgeIknai === C_TYP_FUNCTION) {
-		customJudgeIknai(difFrame);
-		if (typeof customJudgeIknai2 === C_TYP_FUNCTION) {
-			customJudgeIknai2(difFrame);
-		}
-	}
+	g_customJsObj.judg_iknai.forEach(func => func(difFrame));
 }
 
 // クリア表示
@@ -9896,12 +9777,7 @@ function resultInit() {
 	}
 
 	// ユーザカスタムイベント(初期)
-	if (typeof customResultInit === C_TYP_FUNCTION) {
-		customResultInit();
-		if (typeof customResultInit2 === C_TYP_FUNCTION) {
-			customResultInit2();
-		}
-	}
+	g_customJsObj.result.forEach(func => func());
 
 	if (highscoreCondition) {
 
@@ -10061,12 +9937,7 @@ function resultInit() {
 	function flowResultTimeline() {
 
 		// ユーザカスタムイベント(フレーム毎)
-		if (typeof customResultEnterFrame === C_TYP_FUNCTION) {
-			customResultEnterFrame();
-			if (typeof customResultEnterFrame2 === C_TYP_FUNCTION) {
-				customResultEnterFrame2();
-			}
-		}
+		g_customJsObj.resultEnterFrame.forEach(func => func());
 
 		// 背景・マスクモーション
 		drawTitleResultMotion(g_currentPage);
@@ -10102,12 +9973,7 @@ function resultInit() {
 	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = _ => true;
 
-	if (typeof skinResultInit === C_TYP_FUNCTION) {
-		skinResultInit();
-		if (typeof skinResultInit2 === C_TYP_FUNCTION) {
-			skinResultInit2();
-		}
-	}
+	g_skinJsObj.result.forEach(func => func());
 }
 
 /**
