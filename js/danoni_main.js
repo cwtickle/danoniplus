@@ -1482,7 +1482,7 @@ function initAfterDosLoaded() {
 
 	// CSSファイルの読み込み
 	const skinList = g_headerObj.jsData.filter(file => file[0].indexOf(`danoni_skin`) !== -1);
-	loadMultipleFile(0, skinList, `css`, _ => initAfterCssLoaded());
+	loadMultipleFiles(0, skinList, `css`, _ => initAfterCssLoaded());
 
 	/**
 	 * スキンCSSファイルを読み込んだ後の処理
@@ -1547,7 +1547,7 @@ function initAfterDosLoaded() {
 
 		if (g_loadObj.main) {
 			// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
-			loadMultipleFile(0, g_headerObj.jsData, `js`, _ => {
+			loadMultipleFiles(0, g_headerObj.jsData, `js`, _ => {
 				loadLegacyCustomFunc();
 				loadDos(_ => getScoreDetailData(0), 0, true);
 			});
@@ -1806,16 +1806,21 @@ function calcLevel(_scoreObj) {
  * @param {string} _loadType
  * @param {function} _afterFunc 
  */
-function loadMultipleFile(_j, _fileData, _loadType, _afterFunc = _ => true) {
+function loadMultipleFiles(_j, _fileData, _loadType, _afterFunc = _ => true) {
 	if (_j < _fileData.length) {
 		const filePath = `${_fileData[_j][1]}${_fileData[_j][0]}?${new Date().getTime()}`;
+		if (_fileData[_j][0].endsWith(`.css`)) {
+			_loadType = `css`;
+		}
+
+		// jsファイル、cssファイルにより呼び出す関数を切替
 		if (_loadType === `js`) {
 			loadScript(filePath, _ =>
-				loadMultipleFile(_j + 1, _fileData, _loadType, _afterFunc), false);
+				loadMultipleFiles(_j + 1, _fileData, _loadType, _afterFunc), false);
 		} else if (_loadType === `css`) {
 			const cssPath = filePath.split(`.js`).join(`.css`);
 			importCssFile(cssPath, _ =>
-				loadMultipleFile(_j + 1, _fileData, _loadType, _afterFunc));
+				loadMultipleFiles(_j + 1, _fileData, _loadType, _afterFunc));
 		}
 	} else {
 		_afterFunc();
@@ -2743,8 +2748,10 @@ function preheaderConvert(_dosObj) {
 
 	const setJsFiles = (_files, _defaultDir, _type = `custom`) => {
 		_files.forEach(file => {
-			const [jsFile, jsDir] = getFilePath(file, _defaultDir);
-			obj.jsData.push([_type === `skin` ? `danoni_skin_${jsFile}.js` : jsFile, jsDir]);
+			if (hasVal(file)) {
+				const [jsFile, jsDir] = getFilePath(file, _defaultDir);
+				obj.jsData.push([_type === `skin` ? `danoni_skin_${jsFile}.js` : jsFile, jsDir]);
+			}
 		});
 	};
 
@@ -2755,6 +2762,10 @@ function preheaderConvert(_dosObj) {
 	// 外部jsファイルの指定
 	const tmpCustomjs = _dosObj.customjs || (typeof g_presetCustomJs === C_TYP_STRING ? g_presetCustomJs : C_JSF_CUSTOM);
 	setJsFiles(tmpCustomjs.split(`,`), C_DIR_JS);
+
+	// 外部cssファイルの指定
+	const tmpCustomcss = _dosObj.customcss || (typeof g_presetCustomCss === C_TYP_STRING ? g_presetCustomCss : ``);
+	setJsFiles(tmpCustomcss.split(`,`), C_DIR_CSS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
 	g_titleLists.init.forEach(objName => {
