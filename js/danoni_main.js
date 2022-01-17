@@ -6226,7 +6226,7 @@ function loadingScoreInit() {
 
 		// 開始フレーム数の取得(フェードイン加味)
 		g_scoreObj.frameNum = getStartFrame(lastFrame, g_stateObj.fadein);
-		g_scoreObj.baseFrame = g_scoreObj.frameNum;
+		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
 
 		// フレームごとの速度を取得（配列形式）
 		let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
