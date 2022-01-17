@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/01/16
+ * Revised : 2022/01/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 25.3.0`;
-const g_revisedDate = `2022/01/16`;
+const g_version = `Ver 25.3.1`;
+const g_revisedDate = `2022/01/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -6226,7 +6226,7 @@ function loadingScoreInit() {
 
 		// 開始フレーム数の取得(フェードイン加味)
 		g_scoreObj.frameNum = getStartFrame(lastFrame, g_stateObj.fadein);
-		g_scoreObj.baseFrame = g_scoreObj.frameNum;
+		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
 
 		// フレームごとの速度を取得（配列形式）
 		let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
