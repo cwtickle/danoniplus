@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/01/02
+ * Revised : 2022/01/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 24.6.0`;
-const g_revisedDate = `2022/01/02`;
+const g_version = `Ver 24.6.1`;
+const g_revisedDate = `2022/01/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7299,6 +7299,11 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			} else {
 				if (calcFrameFlg) {
 					const tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame, _motionOnFrame);
+					if (tmpObj.frm < g_scoreObj.frameNum) {
+						const diff = g_scoreObj.frameNum - tmpObj.frm;
+						tmpObj.frm = g_scoreObj.frameNum;
+						tmpObj.arrivalFrm -= diff;
+					}
 					g_workObj.arrivalFrame[tmpObj.frm] = tmpObj.arrivalFrm;
 					baseData[k] = tmpObj.frm;
 				}
