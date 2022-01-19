@@ -1476,7 +1476,7 @@ function initAfterDosLoaded() {
 	if (document.querySelector(`#layer0`) === null) {
 		divRoot.removeChild(document.querySelector(`#divBack`));
 		createEmptySprite(divRoot, `divBack`);
-	} else if (g_headerObj.skinType !== `default` && !g_headerObj.customBackUse) {
+	} else if (!g_headerObj.defaultSkinFlg && !g_headerObj.customBackUse) {
 		createEmptySprite(divRoot, `divBack`);
 	}
 
@@ -2041,7 +2041,7 @@ function drawDefaultBackImage(_key) {
 			l0ctx.fillStyle = grd;
 			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 
-			if (g_headerObj.skinType !== `default`) {
+			if (!g_headerObj.defaultSkinFlg) {
 				createEmptySprite(divRoot, `divBack`);
 			}
 		}
@@ -2757,7 +2757,9 @@ function preheaderConvert(_dosObj) {
 
 	// 外部スキンファイルの指定
 	const tmpSkinType = _dosObj.skinType || (typeof g_presetSkinType === C_TYP_STRING ? g_presetSkinType : `default`);
-	setJsFiles(tmpSkinType.split(`,`), C_DIR_SKIN, `skin`);
+	const tmpSkinTypes = tmpSkinType.split(`,`);
+	obj.defaultSkinFlg = tmpSkinTypes.includes(`default`);
+	setJsFiles(tmpSkinTypes, C_DIR_SKIN, `skin`);
 
 	// 外部jsファイルの指定
 	const tmpCustomjs = _dosObj.customjs || (typeof g_presetCustomJs === C_TYP_STRING ? g_presetCustomJs : C_JSF_CUSTOM);
