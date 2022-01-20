@@ -578,28 +578,17 @@ function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64,
 
 /**
  * クリップボードコピー関数
- * 入力値をクリップボードへコピーする
+ * 入力値をクリップボードへコピーし、メッセージを表示
  * @param {string} _textVal 入力値
+ * @param {string} _msg
  */
-function copyTextToClipboard(_textVal) {
-	// テキストエリアを用意する
-	const copyFrom = document.createElement(`textarea`);
-	// テキストエリアへ値をセット
-	copyFrom.textContent = _textVal;
-
-	// bodyタグの要素を取得
-	const bodyElm = document.getElementsByTagName(`body`)[0];
-	// 子要素にテキストエリアを配置
-	bodyElm.appendChild(copyFrom);
-
-	// テキストエリアの値を選択
-	copyFrom.select();
-	// コピーコマンド発行
-	const retVal = document.execCommand(`copy`);
-	// 追加テキストエリアを削除
-	bodyElm.removeChild(copyFrom);
-	// 処理結果を返却
-	return retVal;
+async function copyTextToClipboard(_textVal, _msg) {
+	try {
+		await navigator.clipboard.writeText(_textVal);
+		makeInfoWindow(_msg, `leftToRightFade`);
+	} catch (error) {
+		makeInfoWindow(g_msgInfoObj.W_0021, `leftToRightFade`, `#ffffcc`);
+	}
 }
 
 /**
@@ -2644,8 +2633,8 @@ function makeWarningWindow(_text = ``, { resetFlg = false, backBtnUse = false } 
  * お知らせウィンドウ（汎用）を表示
  * @param {string} _text 
  */
-function makeInfoWindow(_text, _animationName = ``) {
-	const lblWarning = setWindowStyle(`<p>${_text}</p>`, `#ccccff`, `#000066`, C_ALIGN_CENTER);
+function makeInfoWindow(_text, _animationName = ``, _backColor = `#ccccff`) {
+	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, `#000066`, C_ALIGN_CENTER);
 	lblWarning.style.pointerEvents = C_DIS_NONE;
 
 	if (_animationName !== ``) {
@@ -4533,9 +4522,8 @@ function createOptionWindow(_sprite) {
 			makeSettingLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 0, _ => {
 				copyTextToClipboard(
 					`****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n`
-					+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`
+					+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`, g_msgInfoObj.I_0003
 				);
-				makeInfoWindow(g_msgInfoObj.I_0003, `leftToRightFade`);
 			}, {
 				x: 10, y: 30, w: 100, borderStyle: `solid`
 			}, g_cssObj.button_RevON),
@@ -9896,8 +9884,7 @@ function resultInit() {
 
 		// リザルトデータをクリップボードへコピー
 		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ => {
-			copyTextToClipboard(resultText);
-			makeInfoWindow(g_msgInfoObj.I_0001, `leftToRightFade`);
+			copyTextToClipboard(resultText, g_msgInfoObj.I_0001);
 		}, {
 			x: g_sWidth / 4,
 			w: g_sWidth / 2,
