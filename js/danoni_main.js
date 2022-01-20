@@ -1143,6 +1143,8 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 			};
 			if (g_headerObj.autoPreload) {
 				if (checkImage(tmpObj.path)) {
+					const [file, dir] = getFilePath(tmpObj.path, `./`);
+					tmpObj.path = `${dir}/${file}`;
 					preloadFile(`image`, tmpObj.path);
 				}
 			}
