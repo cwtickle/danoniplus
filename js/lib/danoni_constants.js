@@ -2620,6 +2620,8 @@ const g_lblNameObj = {
 
     'u_x': `x`,
     'u_%': `%`,
+    'u_key': `key`,
+    'u_k-': `k-`,
 
     'u_OFF': `OFF`,
     'u_ON': `ON`,

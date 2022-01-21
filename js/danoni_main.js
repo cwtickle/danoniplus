@@ -4024,6 +4024,18 @@ const createOptionSprite = _sprite => createEmptySprite(_sprite, `optionsprite`,
 });
 
 /**
+ * スライダー共通処理
+ * @param {object} _slider 
+ * @param {object} _link 
+ * @returns 
+ */
+const inputSlider = (_slider, _link) => {
+	const value = parseInt(_slider.value);
+	_link.textContent = `${value}${g_lblNameObj.percent}`;
+	return value;
+}
+
+/**
  * 設定・オプション画面のラベル・ボタン処理の描画
  * @param {Object} _sprite 基準とするスプライト(ここで指定する座標は、そのスプライトからの相対位置)
  */
@@ -4211,7 +4223,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 2  短縮ショートカットあり
 	createGeneralSetting(spriteList.speed, `speed`, {
 		skipTerms: [20, 5, 1], hiddenBtn: true, scLabel: g_lblNameObj.sc_speed, roundNum: 5,
-		unitName: ` ${getStgDetailName(g_lblNameObj.multi)}`,
+		unitName: ` ${g_lblNameObj.multi}`,
 	});
 
 	if (g_headerObj.scoreDetailUse) {
@@ -4799,7 +4811,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 10  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
 		skipTerms: [50, 10, 5], hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
-		unitName: `${getStgDetailName(g_lblNameObj.frame)}`,
+		unitName: g_lblNameObj.frame,
 	});
 
 	// ---------------------------------------------------
@@ -4807,7 +4819,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 11 スライダーあり
 	spriteList.fadein.appendChild(createLblSetting(`Fadein`));
 
-	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}${getStgDetailName(g_lblNameObj.percent)}`, {
+	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}${g_lblNameObj.percent}`, {
 		x: C_LEN_SETLBL_LEFT, y: 0,
 	}, g_cssObj.settings_FadeinBar);
 	spriteList.fadein.appendChild(lnkFadein);
@@ -4815,7 +4827,7 @@ function createOptionWindow(_sprite) {
 	const setFadein = _sign => {
 		g_stateObj.fadein = nextPos(g_stateObj.fadein, _sign, 100);
 		fadeinSlider.value = g_stateObj.fadein;
-		lnkFadein.textContent = `${g_stateObj.fadein}${getStgDetailName(g_lblNameObj.percent)}`;
+		lnkFadein.textContent = `${g_stateObj.fadein}${g_lblNameObj.percent}`;
 	};
 
 	multiAppend(spriteList.fadein,
@@ -4832,15 +4844,13 @@ function createOptionWindow(_sprite) {
 	)
 
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
-	fadeinSlider.addEventListener(`input`, _ => {
-		g_stateObj.fadein = parseInt(fadeinSlider.value);
-		lnkFadein.textContent = `${g_stateObj.fadein}${getStgDetailName(g_lblNameObj.percent)}`;
-	}, false);
+	fadeinSlider.addEventListener(`input`, _ =>
+		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein), false);
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
 	// 縦位置: 12
-	createGeneralSetting(spriteList.volume, `volume`, { unitName: getStgDetailName(g_lblNameObj.percent) });
+	createGeneralSetting(spriteList.volume, `volume`, { unitName: g_lblNameObj.percent });
 
 	/**
 	 * 譜面初期化処理
@@ -4961,7 +4971,7 @@ function createOptionWindow(_sprite) {
 
 		// 譜面名設定 (Difficulty)
 		const difWidth = parseFloat(lnkDifficulty.style.width);
-		const difNames = [`${getKeyName(g_keyObj.currentKey)} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
+		const difNames = [`${getKeyName(g_keyObj.currentKey)} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
 		lnkDifficulty.style.fontSize = `${getFontSize(difNames[0], difWidth, getBasicFont(), C_SIZ_SETLBL)}px`;
 
 		if (g_headerObj.makerView) {
@@ -4974,7 +4984,7 @@ function createOptionWindow(_sprite) {
 		lnkDifficulty.innerHTML = difNames.join(``);
 
 		// 速度設定 (Speed)
-		setSetting(0, `speed`, ` ${getStgDetailName(g_lblNameObj.multi)}`);
+		setSetting(0, `speed`, ` ${g_lblNameObj.multi}`);
 		if (g_headerObj.scoreDetailUse) {
 			drawSpeedGraph(g_stateObj.scoreId);
 			drawDensityGraph(g_stateObj.scoreId);
@@ -5357,13 +5367,13 @@ function createSettingsDisplayWindow(_sprite) {
 
 	// Hidden+/Sudden+初期値用スライダー、ロックボタン
 	multiAppend(spriteList.appearance,
-		createDivCss2Label(`lblAppearancePos`, `${g_hidSudObj.filterPos}${getStgDetailName(g_lblNameObj.percent)}`, {
+		createDivCss2Label(`lblAppearancePos`, `${g_hidSudObj.filterPos}${g_lblNameObj.percent}`, {
 			x: C_LEN_SETLBL_LEFT, y: 20, siz: 12, align: C_ALIGN_CENTER,
 		}),
 		createDivCss2Label(`lblAppearanceBar`, `<input id="appearanceSlider" type="range" value="${g_hidSudObj.filterPos}" min="0" max="100" step="1">`, {
 			x: C_LEN_SETLBL_LEFT, y: 15,
 		}),
-		createCss2Button(`lnkLockBtn`, `${getStgDetailName(g_lblNameObj.filterLock)}`, evt => setLockView(evt.target), {
+		createCss2Button(`lnkLockBtn`, g_lblNameObj.filterLock, evt => setLockView(evt.target), {
 			x: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - 40, y: 0, w: 40, h: C_LEN_SETLBL_HEIGHT, siz: 12,
 			borderStyle: `solid`, cxtFunc: evt => setLockView(evt.target),
 		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.filterLock}`]),
@@ -5379,10 +5389,8 @@ function createSettingsDisplayWindow(_sprite) {
 	}
 
 	const appearanceSlider = document.querySelector(`#appearanceSlider`);
-	appearanceSlider.addEventListener(`input`, _ => {
-		g_hidSudObj.filterPos = parseInt(appearanceSlider.value);
-		lblAppearancePos.textContent = `${g_hidSudObj.filterPos}${getStgDetailName(g_lblNameObj.percent)}`;
-	}, false);
+	appearanceSlider.addEventListener(`input`, _ =>
+		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos), false);
 
 	const dispAppearanceSlider = _ => {
 		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`].forEach(obj =>
@@ -5395,7 +5403,7 @@ function createSettingsDisplayWindow(_sprite) {
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: getStgDetailName(g_lblNameObj.percent), displayName: g_currentPage });
+	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent, displayName: g_currentPage });
 
 	/**
 	 * Display表示/非表示ボタン
@@ -9611,14 +9619,14 @@ function resultInit() {
 	}
 
 	let difData = [
-		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
+		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
 		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getShuffleName()}]`)}`
 	].filter(value => value !== ``).join(` `);
 
 	let playStyleData = [
-		`${g_stateObj.speed}${getStgDetailName(g_lblNameObj.multi)}`,
+		`${g_stateObj.speed}${g_lblNameObj.multi}`,
 		`${withOptions(g_stateObj.motion, C_FLG_OFF)}`,
 		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
 			getStgDetailName(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
@@ -9749,7 +9757,7 @@ function resultInit() {
 
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
-	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
+	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_headerObj.makerView) {
 		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
 	}
@@ -9833,7 +9841,7 @@ function resultInit() {
 	// Twitter用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
 	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
-	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
+	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${getShuffleName()}`;
 	}
