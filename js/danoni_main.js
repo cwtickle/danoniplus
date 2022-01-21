@@ -1145,7 +1145,7 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 				if (checkImage(tmpObj.path)) {
 					if (g_headerObj.syncBackPath) {
 						const [file, dir] = getFilePath(tmpObj.path, `./`);
-						tmpObj.path = `${dir}/${file}`;
+						tmpObj.path = `${dir}${file}`;
 					}
 					preloadFile(`image`, tmpObj.path);
 				}
