@@ -1143,8 +1143,10 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 			};
 			if (g_headerObj.autoPreload) {
 				if (checkImage(tmpObj.path)) {
-					const [file, dir] = getFilePath(tmpObj.path, `./`);
-					tmpObj.path = `${dir}/${file}`;
+					if (g_headerObj.syncBackPath) {
+						const [file, dir] = getFilePath(tmpObj.path, `./`);
+						tmpObj.path = `${dir}/${file}`;
+					}
 					preloadFile(`image`, tmpObj.path);
 				}
 			}
@@ -2767,6 +2769,10 @@ function preheaderConvert(_dosObj) {
 			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
 				setVal(g_presetCustomDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 	});
+
+	// 背景・マスクモーションのパス指定方法を他の設定に合わせる設定
+	const tmpSyncBackPath = (typeof g_presetSyncBackPath === C_TYP_BOOLEAN ? g_presetSyncBackPath : false);
+	obj.syncBackPath = setVal(_dosObj.syncBackPath, tmpSyncBackPath, C_TYP_BOOLEAN);
 
 	return obj;
 }

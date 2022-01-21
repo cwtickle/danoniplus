@@ -24,6 +24,9 @@ const g_presetSkinType = `default`;
 // 既定カスタムCss (デフォルトは指定なし、cssフォルダを参照)
 //const g_presetCustomCss = `danoni_custom.css`;
 
+// 背景・マスクモーションで使用する画像パスの指定方法を他の設定に合わせる設定 (trueで有効化)
+// const g_presetSyncBackPath = true;
+
 // ゲージ設定（デフォルト）
 const g_presetGauge = {
 	//	Border: 70,  // ノルマ制でのボーダーライン、ライフ制にしたい場合は `x` を指定
