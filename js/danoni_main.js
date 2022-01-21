@@ -4024,6 +4024,18 @@ const createOptionSprite = _sprite => createEmptySprite(_sprite, `optionsprite`,
 });
 
 /**
+ * スライダー共通処理
+ * @param {object} _slider 
+ * @param {object} _link 
+ * @returns 
+ */
+const inputSlider = (_slider, _link) => {
+	const value = parseInt(_slider.value);
+	_link.textContent = `${value}${g_lblNameObj.percent}`;
+	return value;
+}
+
+/**
  * 設定・オプション画面のラベル・ボタン処理の描画
  * @param {Object} _sprite 基準とするスプライト(ここで指定する座標は、そのスプライトからの相対位置)
  */
@@ -4832,10 +4844,8 @@ function createOptionWindow(_sprite) {
 	)
 
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
-	fadeinSlider.addEventListener(`input`, _ => {
-		g_stateObj.fadein = parseInt(fadeinSlider.value);
-		lnkFadein.textContent = `${g_stateObj.fadein}${g_lblNameObj.percent}`;
-	}, false);
+	fadeinSlider.addEventListener(`input`, _ =>
+		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein), false);
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
@@ -5379,10 +5389,8 @@ function createSettingsDisplayWindow(_sprite) {
 	}
 
 	const appearanceSlider = document.querySelector(`#appearanceSlider`);
-	appearanceSlider.addEventListener(`input`, _ => {
-		g_hidSudObj.filterPos = parseInt(appearanceSlider.value);
-		lblAppearancePos.textContent = `${g_hidSudObj.filterPos}${g_lblNameObj.percent}`;
-	}, false);
+	appearanceSlider.addEventListener(`input`, _ =>
+		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos), false);
 
 	const dispAppearanceSlider = _ => {
 		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`].forEach(obj =>
