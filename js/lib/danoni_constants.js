@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/01/16 (v25.3.0)
+ * Revised : 2022/01/22 (v25.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2436,6 +2436,7 @@ const g_lang_msgInfoObj = {
         W_0012: `現在の設定では音源再生方法により小数の Adjustment が利用できません。<br>
         また、Fadein を使用した場合は通常よりズレが発生することがあります。<br>
         音源ファイルを js/txt 化するか、サーバー上動作とすれば解消します。(W-0012)`,
+        W_0021: `クリップボードのコピーに失敗しました。`,
 
         E_0011: `アーティスト名が未入力です。(E-0011)`,
         E_0012: `曲名情報が未設定です。(E-0012)<br>
@@ -2482,6 +2483,7 @@ const g_lang_msgInfoObj = {
         Also, if you use "Fadein", it may be out of alignment.<br>
         It can be solved by converting the sound source file to encoded data (js, txt) or 
         operating it on the server. (W-0012)`,
+        W_0021: `Failed to copy the clipboard.`,
 
         E_0011: `The artist name is not set. (E-0011)`,
         E_0012: `The song title information is not set. (E-0012)<br>
@@ -2618,6 +2620,8 @@ const g_lblNameObj = {
 
     'u_x': `x`,
     'u_%': `%`,
+    'u_key': `key`,
+    'u_k-': `k-`,
 
     'u_OFF': `OFF`,
     'u_ON': `ON`,

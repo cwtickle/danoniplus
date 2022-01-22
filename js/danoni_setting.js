@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2022/01/16 (v25.3.0)
+ * Template Update: 2022/01/22 (v25.4.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -23,6 +23,9 @@ const g_presetSkinType = `default`;
 
 // 既定カスタムCss (デフォルトは指定なし、cssフォルダを参照)
 //const g_presetCustomCss = `danoni_custom.css`;
+
+// 背景・マスクモーションで使用する画像パスの指定方法を他の設定に合わせる設定 (trueで有効化)
+// const g_presetSyncBackPath = true;
 
 // ゲージ設定（デフォルト）
 const g_presetGauge = {

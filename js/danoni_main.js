@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/01/19
+ * Revised : 2022/01/22
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 25.3.3`;
-const g_revisedDate = `2022/01/19`;
+const g_version = `Ver 25.4.0`;
+const g_revisedDate = `2022/01/22`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -578,28 +578,17 @@ function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64,
 
 /**
  * クリップボードコピー関数
- * 入力値をクリップボードへコピーする
+ * 入力値をクリップボードへコピーし、メッセージを表示
  * @param {string} _textVal 入力値
+ * @param {string} _msg
  */
-function copyTextToClipboard(_textVal) {
-	// テキストエリアを用意する
-	const copyFrom = document.createElement(`textarea`);
-	// テキストエリアへ値をセット
-	copyFrom.textContent = _textVal;
-
-	// bodyタグの要素を取得
-	const bodyElm = document.getElementsByTagName(`body`)[0];
-	// 子要素にテキストエリアを配置
-	bodyElm.appendChild(copyFrom);
-
-	// テキストエリアの値を選択
-	copyFrom.select();
-	// コピーコマンド発行
-	const retVal = document.execCommand(`copy`);
-	// 追加テキストエリアを削除
-	bodyElm.removeChild(copyFrom);
-	// 処理結果を返却
-	return retVal;
+async function copyTextToClipboard(_textVal, _msg) {
+	try {
+		await navigator.clipboard.writeText(_textVal);
+		makeInfoWindow(_msg, `leftToRightFade`);
+	} catch (error) {
+		makeInfoWindow(g_msgInfoObj.W_0021, `leftToRightFade`, `#ffffcc`);
+	}
 }
 
 /**
@@ -1154,6 +1143,10 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 			};
 			if (g_headerObj.autoPreload) {
 				if (checkImage(tmpObj.path)) {
+					if (g_headerObj.syncBackPath) {
+						const [file, dir] = getFilePath(tmpObj.path, `./`);
+						tmpObj.path = `${dir}${file}`;
+					}
 					preloadFile(`image`, tmpObj.path);
 				}
 			}
@@ -2644,8 +2637,8 @@ function makeWarningWindow(_text = ``, { resetFlg = false, backBtnUse = false } 
  * お知らせウィンドウ（汎用）を表示
  * @param {string} _text 
  */
-function makeInfoWindow(_text, _animationName = ``) {
-	const lblWarning = setWindowStyle(`<p>${_text}</p>`, `#ccccff`, `#000066`, C_ALIGN_CENTER);
+function makeInfoWindow(_text, _animationName = ``, _backColor = `#ccccff`) {
+	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, `#000066`, C_ALIGN_CENTER);
 	lblWarning.style.pointerEvents = C_DIS_NONE;
 
 	if (_animationName !== ``) {
@@ -2776,6 +2769,10 @@ function preheaderConvert(_dosObj) {
 			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
 				setVal(g_presetCustomDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 	});
+
+	// 背景・マスクモーションのパス指定方法を他の設定に合わせる設定
+	const tmpSyncBackPath = (typeof g_presetSyncBackPath === C_TYP_BOOLEAN ? g_presetSyncBackPath : false);
+	obj.syncBackPath = setVal(_dosObj.syncBackPath, tmpSyncBackPath, C_TYP_BOOLEAN);
 
 	return obj;
 }
@@ -4035,6 +4032,18 @@ const createOptionSprite = _sprite => createEmptySprite(_sprite, `optionsprite`,
 });
 
 /**
+ * スライダー共通処理
+ * @param {object} _slider 
+ * @param {object} _link 
+ * @returns 
+ */
+const inputSlider = (_slider, _link) => {
+	const value = parseInt(_slider.value);
+	_link.textContent = `${value}${g_lblNameObj.percent}`;
+	return value;
+}
+
+/**
  * 設定・オプション画面のラベル・ボタン処理の描画
  * @param {Object} _sprite 基準とするスプライト(ここで指定する座標は、そのスプライトからの相対位置)
  */
@@ -4222,7 +4231,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 2  短縮ショートカットあり
 	createGeneralSetting(spriteList.speed, `speed`, {
 		skipTerms: [20, 5, 1], hiddenBtn: true, scLabel: g_lblNameObj.sc_speed, roundNum: 5,
-		unitName: ` ${getStgDetailName(g_lblNameObj.multi)}`,
+		unitName: ` ${g_lblNameObj.multi}`,
 	});
 
 	if (g_headerObj.scoreDetailUse) {
@@ -4533,9 +4542,8 @@ function createOptionWindow(_sprite) {
 			makeSettingLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 0, _ => {
 				copyTextToClipboard(
 					`****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n`
-					+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`
+					+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`, g_msgInfoObj.I_0003
 				);
-				makeInfoWindow(g_msgInfoObj.I_0003, `leftToRightFade`);
 			}, {
 				x: 10, y: 30, w: 100, borderStyle: `solid`
 			}, g_cssObj.button_RevON),
@@ -4811,7 +4819,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 10  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
 		skipTerms: [50, 10, 5], hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
-		unitName: `${getStgDetailName(g_lblNameObj.frame)}`,
+		unitName: g_lblNameObj.frame,
 	});
 
 	// ---------------------------------------------------
@@ -4819,7 +4827,7 @@ function createOptionWindow(_sprite) {
 	// 縦位置: 11 スライダーあり
 	spriteList.fadein.appendChild(createLblSetting(`Fadein`));
 
-	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}${getStgDetailName(g_lblNameObj.percent)}`, {
+	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}${g_lblNameObj.percent}`, {
 		x: C_LEN_SETLBL_LEFT, y: 0,
 	}, g_cssObj.settings_FadeinBar);
 	spriteList.fadein.appendChild(lnkFadein);
@@ -4827,7 +4835,7 @@ function createOptionWindow(_sprite) {
 	const setFadein = _sign => {
 		g_stateObj.fadein = nextPos(g_stateObj.fadein, _sign, 100);
 		fadeinSlider.value = g_stateObj.fadein;
-		lnkFadein.textContent = `${g_stateObj.fadein}${getStgDetailName(g_lblNameObj.percent)}`;
+		lnkFadein.textContent = `${g_stateObj.fadein}${g_lblNameObj.percent}`;
 	};
 
 	multiAppend(spriteList.fadein,
@@ -4844,15 +4852,13 @@ function createOptionWindow(_sprite) {
 	)
 
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
-	fadeinSlider.addEventListener(`input`, _ => {
-		g_stateObj.fadein = parseInt(fadeinSlider.value);
-		lnkFadein.textContent = `${g_stateObj.fadein}${getStgDetailName(g_lblNameObj.percent)}`;
-	}, false);
+	fadeinSlider.addEventListener(`input`, _ =>
+		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein), false);
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
 	// 縦位置: 12
-	createGeneralSetting(spriteList.volume, `volume`, { unitName: getStgDetailName(g_lblNameObj.percent) });
+	createGeneralSetting(spriteList.volume, `volume`, { unitName: g_lblNameObj.percent });
 
 	/**
 	 * 譜面初期化処理
@@ -4973,7 +4979,7 @@ function createOptionWindow(_sprite) {
 
 		// 譜面名設定 (Difficulty)
 		const difWidth = parseFloat(lnkDifficulty.style.width);
-		const difNames = [`${getKeyName(g_keyObj.currentKey)} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
+		const difNames = [`${getKeyName(g_keyObj.currentKey)} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
 		lnkDifficulty.style.fontSize = `${getFontSize(difNames[0], difWidth, getBasicFont(), C_SIZ_SETLBL)}px`;
 
 		if (g_headerObj.makerView) {
@@ -4986,7 +4992,7 @@ function createOptionWindow(_sprite) {
 		lnkDifficulty.innerHTML = difNames.join(``);
 
 		// 速度設定 (Speed)
-		setSetting(0, `speed`, ` ${getStgDetailName(g_lblNameObj.multi)}`);
+		setSetting(0, `speed`, ` ${g_lblNameObj.multi}`);
 		if (g_headerObj.scoreDetailUse) {
 			drawSpeedGraph(g_stateObj.scoreId);
 			drawDensityGraph(g_stateObj.scoreId);
@@ -5369,13 +5375,13 @@ function createSettingsDisplayWindow(_sprite) {
 
 	// Hidden+/Sudden+初期値用スライダー、ロックボタン
 	multiAppend(spriteList.appearance,
-		createDivCss2Label(`lblAppearancePos`, `${g_hidSudObj.filterPos}${getStgDetailName(g_lblNameObj.percent)}`, {
+		createDivCss2Label(`lblAppearancePos`, `${g_hidSudObj.filterPos}${g_lblNameObj.percent}`, {
 			x: C_LEN_SETLBL_LEFT, y: 20, siz: 12, align: C_ALIGN_CENTER,
 		}),
 		createDivCss2Label(`lblAppearanceBar`, `<input id="appearanceSlider" type="range" value="${g_hidSudObj.filterPos}" min="0" max="100" step="1">`, {
 			x: C_LEN_SETLBL_LEFT, y: 15,
 		}),
-		createCss2Button(`lnkLockBtn`, `${getStgDetailName(g_lblNameObj.filterLock)}`, evt => setLockView(evt.target), {
+		createCss2Button(`lnkLockBtn`, g_lblNameObj.filterLock, evt => setLockView(evt.target), {
 			x: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - 40, y: 0, w: 40, h: C_LEN_SETLBL_HEIGHT, siz: 12,
 			borderStyle: `solid`, cxtFunc: evt => setLockView(evt.target),
 		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.filterLock}`]),
@@ -5391,10 +5397,8 @@ function createSettingsDisplayWindow(_sprite) {
 	}
 
 	const appearanceSlider = document.querySelector(`#appearanceSlider`);
-	appearanceSlider.addEventListener(`input`, _ => {
-		g_hidSudObj.filterPos = parseInt(appearanceSlider.value);
-		lblAppearancePos.textContent = `${g_hidSudObj.filterPos}${getStgDetailName(g_lblNameObj.percent)}`;
-	}, false);
+	appearanceSlider.addEventListener(`input`, _ =>
+		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos), false);
 
 	const dispAppearanceSlider = _ => {
 		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`].forEach(obj =>
@@ -5407,7 +5411,7 @@ function createSettingsDisplayWindow(_sprite) {
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: getStgDetailName(g_lblNameObj.percent), displayName: g_currentPage });
+	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent, displayName: g_currentPage });
 
 	/**
 	 * Display表示/非表示ボタン
@@ -9623,14 +9627,14 @@ function resultInit() {
 	}
 
 	let difData = [
-		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData} key / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
+		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
 		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getShuffleName()}]`)}`
 	].filter(value => value !== ``).join(` `);
 
 	let playStyleData = [
-		`${g_stateObj.speed}${getStgDetailName(g_lblNameObj.multi)}`,
+		`${g_stateObj.speed}${g_lblNameObj.multi}`,
 		`${withOptions(g_stateObj.motion, C_FLG_OFF)}`,
 		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
 			getStgDetailName(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
@@ -9761,7 +9765,7 @@ function resultInit() {
 
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
-	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
+	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_headerObj.makerView) {
 		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
 	}
@@ -9845,7 +9849,7 @@ function resultInit() {
 	// Twitter用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
 	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
-	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData}k-${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
+	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${getShuffleName()}`;
 	}
@@ -9896,8 +9900,7 @@ function resultInit() {
 
 		// リザルトデータをクリップボードへコピー
 		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ => {
-			copyTextToClipboard(resultText);
-			makeInfoWindow(g_msgInfoObj.I_0001, `leftToRightFade`);
+			copyTextToClipboard(resultText, g_msgInfoObj.I_0001);
 		}, {
 			x: g_sWidth / 4,
 			w: g_sWidth / 2,
