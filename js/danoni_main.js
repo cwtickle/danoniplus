@@ -585,9 +585,26 @@ function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64,
 async function copyTextToClipboard(_textVal, _msg) {
 	try {
 		await navigator.clipboard.writeText(_textVal);
-		makeInfoWindow(_msg, `leftToRightFade`);
+
 	} catch (error) {
-		makeInfoWindow(g_msgInfoObj.W_0021, `leftToRightFade`, `#ffffcc`);
+		// http環境では navigator.clipboard が使えないため、従来の方法を実行
+		// テキストエリアを用意し、値をセット
+		const copyFrom = document.createElement(`textarea`);
+		copyFrom.textContent = _textVal;
+
+		// bodyタグの要素を取得
+		const bodyElm = document.getElementsByTagName(`body`)[0];
+		// 子要素にテキストエリアを配置
+		bodyElm.appendChild(copyFrom);
+
+		// テキストエリアの値を選択し、コピーコマンド発行
+		copyFrom.select();
+		document.execCommand(`copy`);
+		// 追加テキストエリアを削除
+		bodyElm.removeChild(copyFrom);
+
+	} finally {
+		makeInfoWindow(_msg, `leftToRightFade`);
 	}
 }
 
