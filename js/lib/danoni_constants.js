@@ -2691,6 +2691,7 @@ const g_lblNameObj = {
 
     j_fast: `Fast`,
     j_slow: `Slow`,
+    j_adj: `C.Adj.`,
 
     allPerfect: `All Perfect!!`,
     perfect: `Perfect!!`,
