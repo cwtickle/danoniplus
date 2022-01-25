@@ -38,6 +38,9 @@ const g_presetGauge = {
 // フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
 const g_presetFrzColors = true;
 
+// 矢印色変化に対応してフリーズアロー色を追随する範囲の設定 (Normal: 通常時、Hit: ヒット時)
+// const g_presetFrzScopeFromArrowColors = [`Normal`, `Hit`];
+
 // ゲージ設定（デフォルト以外）
 const g_presetGaugeCustom = {
 	Easy: {

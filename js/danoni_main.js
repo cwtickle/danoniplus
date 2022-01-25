@@ -3063,6 +3063,18 @@ function headerConvert(_dosObj) {
 		obj.defaultFrzColorUse = true;
 	}
 
+	// 矢印色変化に対応してフリーズアロー色を追随する範囲の設定
+	obj.frzScopeFromArrowColors = [];
+	const tmpFrzScope = [];
+
+	if (hasVal(_dosObj.frzScopeFromArrowColors)) {
+		tmpFrzScope.push(..._dosObj.frzScopeFromArrowColors.split(`,`));
+	} else if (typeof g_presetFrzScopeFromArrowColors === C_TYP_OBJECT) {
+		tmpFrzScope.push(...g_presetFrzScopeFromArrowColors);
+	}
+	tmpFrzScope.filter(type => [`Normal`, `Hit`].includes(type))
+		.forEach(data => obj.frzScopeFromArrowColors.push(data));
+
 	// 初期色情報
 	Object.keys(g_dfColorObj).forEach(key => obj[key] = g_dfColorObj[key].concat());
 	if (obj.baseBrightFlg) {
@@ -7546,13 +7558,16 @@ function pushColors(_header, _frame, _val, _colorCd, _allFlg) {
 	if (_val < 30 || _val >= 1000) {
 		const baseHeaders = [`mk${_header}Color`];
 		allUseTypes.push(`Arrow`);
-		if (!g_headerObj.defaultFrzColorUse) {
-			baseHeaders.push(`mkF${_header}ColorNormal`, `mkF${_header}ColorNormalBar`,
-				`mkF${_header}ColorHit`, `mkF${_header}ColorHitBar`);
+
+		// フリーズアロー色の追随設定がある場合、対象を追加
+		g_headerObj.frzScopeFromArrowColors.forEach(type => {
+			baseHeaders.push(`mkF${_header}Color${type}`, `mkF${_header}Color${type}Bar`);
+		});
+		if (g_headerObj.frzScopeFromArrowColors.length > 0) {
 			allUseTypes.push(`Frz`);
 		}
 
-		// 矢印の色変化 (defaultFrzColorUse=falseのときはフリーズアローも色変化)
+		// 矢印の色変化 (追随指定時はフリーズアローも色変化)
 		baseHeaders.forEach(baseHeader => {
 			initialize(baseHeader);
 
