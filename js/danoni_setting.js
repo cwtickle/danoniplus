@@ -39,6 +39,8 @@ const g_presetGauge = {
 const g_presetFrzColors = true;
 
 // 矢印色変化に対応してフリーズアロー色を追随する範囲の設定 (Normal: 通常時、Hit: ヒット時)
+// ※この設定は、g_presetFrzColors = false もしくは 
+//   譜面ヘッダー：defaultFrzColorUse=false のときにのみ有効です。
 // const g_presetFrzScopeFromArrowColors = [`Normal`, `Hit`];
 
 // ゲージ設定（デフォルト以外）
