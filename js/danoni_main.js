@@ -3070,8 +3070,8 @@ function headerConvert(_dosObj) {
 	if (!obj.defaultFrzColorUse) {
 		const tmpFrzScope = [];
 
-		if (hasVal(_dosObj.frzScopeFromArrowColors)) {
-			tmpFrzScope.push(..._dosObj.frzScopeFromArrowColors.split(`,`));
+		if (hasVal(_dosObj.frzScopeFromAC)) {
+			tmpFrzScope.push(..._dosObj.frzScopeFromAC.split(`,`));
 		} else if (typeof g_presetFrzScopeFromArrowColors === C_TYP_OBJECT) {
 			tmpFrzScope.push(...g_presetFrzScopeFromArrowColors);
 		}
