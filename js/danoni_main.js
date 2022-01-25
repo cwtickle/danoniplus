@@ -3064,16 +3064,20 @@ function headerConvert(_dosObj) {
 	}
 
 	// 矢印色変化に対応してフリーズアロー色を追随する範囲の設定
+	// (defaultFrzColorUse=false時のみ)
 	obj.frzScopeFromArrowColors = [];
-	const tmpFrzScope = [];
 
-	if (hasVal(_dosObj.frzScopeFromArrowColors)) {
-		tmpFrzScope.push(..._dosObj.frzScopeFromArrowColors.split(`,`));
-	} else if (typeof g_presetFrzScopeFromArrowColors === C_TYP_OBJECT) {
-		tmpFrzScope.push(...g_presetFrzScopeFromArrowColors);
+	if (!obj.defaultFrzColorUse) {
+		const tmpFrzScope = [];
+
+		if (hasVal(_dosObj.frzScopeFromArrowColors)) {
+			tmpFrzScope.push(..._dosObj.frzScopeFromArrowColors.split(`,`));
+		} else if (typeof g_presetFrzScopeFromArrowColors === C_TYP_OBJECT) {
+			tmpFrzScope.push(...g_presetFrzScopeFromArrowColors);
+		}
+		tmpFrzScope.filter(type => [`Normal`, `Hit`].includes(type))
+			.forEach(data => obj.frzScopeFromArrowColors.push(data));
 	}
-	tmpFrzScope.filter(type => [`Normal`, `Hit`].includes(type))
-		.forEach(data => obj.frzScopeFromArrowColors.push(data));
 
 	// 初期色情報
 	Object.keys(g_dfColorObj).forEach(key => obj[key] = g_dfColorObj[key].concat());
