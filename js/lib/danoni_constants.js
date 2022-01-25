@@ -2691,7 +2691,6 @@ const g_lblNameObj = {
 
     j_fast: `Fast`,
     j_slow: `Slow`,
-    j_adj: `C.Adj.`,
 
     allPerfect: `All Perfect!!`,
     perfect: `Perfect!!`,
@@ -2748,6 +2747,8 @@ const g_lang_lblNameObj = {
 
         j_kita: "(ﾟ∀ﾟ)ｷﾀ-!!",
         j_iknai: "(・A・)ｲｸﾅｲ",
+
+        j_adj: `推定Adj`,
     },
     En: {
         kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
@@ -2774,6 +2775,8 @@ const g_lang_lblNameObj = {
 
         j_kita: ":) O.K.",
         j_iknai: ":( N.G.",
+
+        j_adj: `Est-Adj.`,
     },
 };
 
