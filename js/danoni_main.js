@@ -3072,8 +3072,8 @@ function headerConvert(_dosObj) {
 
 		if (hasVal(_dosObj.frzScopeFromAC)) {
 			tmpFrzScope.push(..._dosObj.frzScopeFromAC.split(`,`));
-		} else if (typeof g_presetFrzScopeFromArrowColors === C_TYP_OBJECT) {
-			tmpFrzScope.push(...g_presetFrzScopeFromArrowColors);
+		} else if (typeof g_presetFrzScopeFromAC === C_TYP_OBJECT) {
+			tmpFrzScope.push(...g_presetFrzScopeFromAC);
 		}
 		tmpFrzScope.filter(type => [`Normal`, `Hit`].includes(type))
 			.forEach(data => obj.frzScopeFromArrowColors.push(data));

@@ -43,7 +43,7 @@ const g_presetFrzColors = true;
 	※この設定は、g_presetFrzColors = false もしくは 
 	譜面ヘッダー：defaultFrzColorUse=false のときにのみ有効です。
 */
-// const g_presetFrzScopeFromArrowColors = [`Normal`, `Hit`];
+// const g_presetFrzScopeFromAC = [`Normal`, `Hit`];
 
 // ゲージ設定（デフォルト以外）
 const g_presetGaugeCustom = {
