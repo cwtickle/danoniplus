@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/01/18
+ * Revised : 2022/01/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 24.6.1`;
-const g_revisedDate = `2022/01/18`;
+const g_version = `Ver 24.6.2`;
+const g_revisedDate = `2022/01/26`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2257,8 +2257,7 @@ function drawTitleResultMotion(_displayName) {
  * ショートカットキー表示
  * @param {object} _obj
  * @param {string} _settingLabel 
- * @param {string} displayName 
- * @param {string} dfLabel 
+ * @param {object} objectList
  */
 const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = ``, targetLabel = `lnk${_settingLabel}R`,
 	x = g_scViewObj.x, y = g_scViewObj.y, w = g_scViewObj.w, siz = g_scViewObj.siz } = {}) => {
@@ -2665,9 +2664,10 @@ function makeInfoWindow(_text, _animationName = ``) {
 
 /**
  * 警告ウィンドウのスタイル設定
- * @param {string} _lbl 
+ * @param {string} _text
  * @param {string} _bkColor 
  * @param {string} _textColor 
+ * @param {string} _align
  */
 function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 
@@ -3397,7 +3397,7 @@ function headerConvert(_dosObj) {
 
 /**
  * ゲージ設定リストへの追加
- * @param {string} _obj
+ * @param {object} _obj
  */
 function addGaugeFulls(_obj) {
 	_obj.map(key => g_gaugeOptionObj.customFulls[key] = false);
@@ -3474,9 +3474,10 @@ function resetBaseColorList(_baseObj, _dosObj, { scoreId = `` } = {}) {
 
 /**
  * 矢印・フリーズアロー色のデータ展開
- * @param {array} _data 
+ * @param {string} _data 
  * @param {array} _colorInit 
- * @param {object} _options 
+ * @param {array} _colorInitLength
+ * @param {object} objectList 
  */
 function setColorList(_data, _colorInit, _colorInitLength,
 	{ _defaultColorgrd = g_headerObj.defaultColorgrd, _colorCdPaddingUse = false,
@@ -3588,6 +3589,7 @@ function resetCustomGauge(_dosObj, { scoreId = 0 } = {}) {
  * @param {object} _dosObj 
  * @param {string} _name 
  * @param {number} _difLength
+ * @param {object} objectList
  */
 function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 
@@ -3728,7 +3730,7 @@ function keysConvert(_dosObj) {
 				loopFunc(k, keyheader);
 			}
 		} else if (errCd !== `` && g_keyObj[`${keyheader}_0`] === undefined) {
-			makeWarningWindow(g_msgInfoObj[_errCd].split(`{0}`).join(_key));
+			makeWarningWindow(g_msgInfoObj[errCd].split(`{0}`).join(_key));
 		}
 		return tmpMinPatterns;
 	};
@@ -4423,7 +4425,7 @@ function createOptionWindow(_sprite) {
 
 	/**
 	 * グラフの縦軸を描画
-	 * @param {context} _context 
+	 * @param {object} _context 
 	 * @param {number} _resolution 
 	 */
 	function drawBaseLine(_context, _resolution = 10) {
@@ -5232,8 +5234,7 @@ function getKeyCtrl(_localStorage, _extraKeyName = ``) {
  * @param {string} _name 初期設定文字
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func 通常ボタン処理
- * @param {function} _cxtFunc 右クリック時の処理
- * @param {object} _overridePos 座標設定(既定を上書き)
+ * @param {object} objectList 座標設定(既定を上書き)
  * @param {...any} _classes 追加するクラス
  */
 function makeSettingLblCssButton(_id, _name, _heightPos, _func, { x, y, w, h, siz, cxtFunc = _ => true, ...rest } = {}, ..._classes) {
@@ -5531,7 +5532,7 @@ function keyConfigInit(_kcType = g_kcType) {
 
 		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
 			.split(`{1}:`).join(g_isMac ? `` : `Delete:`), {
-			x: 0, y: 68, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+			x: 0, y: 68, w: g_sWidth, h: 20,
 			siz: getFontSize(g_lblNameObj.kcDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
 		}),
 
@@ -5926,7 +5927,6 @@ function keyConfigInit(_kcType = g_kcType) {
 
 	/**
 	 * ConfigTypeの制御
-	 * @param {event} _evt 
 	 * @param {number} _scrollNum 
 	 */
 	const setConfigType = (_scrollNum = 1) => {
@@ -6564,7 +6564,7 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	/**
 	 * 矢印データの格納
-	 * @param {array} _data 
+	 * @param {string} _data 
 	 */
 	function storeArrowData(_data) {
 		let arrowData = [];
@@ -7462,7 +7462,8 @@ function pushColors(_header, _frame, _val, _colorCd) {
  * @param {string} _header 
  * @param {number} _frame 
  * @param {number} _val 
- * @param {string} _colorCd 
+ * @param {string} _styleName
+ * @param {string} _styleNameRev
  */
 function pushCssMotions(_header, _frame, _val, _styleName, _styleNameRev) {
 
@@ -8518,7 +8519,7 @@ function MainInit() {
 	 * @param {number} _j 
 	 * @param {number} _arrowCnt 
 	 * @param {string} _name 
-	 * @param {string} _normalcolor
+	 * @param {string} _normalColor
 	 * @param {string} _barColor 
 	 */
 	function makeFrzArrow(_j, _arrowCnt, _name, _normalColor, _barColor) {
@@ -9234,7 +9235,7 @@ function countFastSlow(_difFrame, _justFrames = 0) {
 
 /**
  * ライフゲージバーの色、数値を変更
- * @param {strint} _state 
+ * @param {string} _state 
  */
 function changeLifeColor(_state = ``) {
 	const lblLife = document.querySelector(`#lblLife`);
@@ -9993,7 +9994,7 @@ const getShuffleName = _ => {
  * @param {number} _x
  * @param {string} _class 
  * @param {number} _heightPos 
- * @param {string, number} _text
+ * @param {string} _text
  * @param {string} _align
  */
 function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align = C_ALIGN_CENTER, { w = 400, siz = C_SIZ_MAIN } = {}) {
@@ -10008,7 +10009,7 @@ function makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align = C_AL
  * @param {number} _x
  * @param {string} _class
  * @param {number} _heightPos 
- * @param {string, number} _text
+ * @param {string} _text
  * @param {string} _align
  */
 function makeCssResultSymbol(_id, _x, _class, _heightPos, _text, _align = C_ALIGN_LEFT) {

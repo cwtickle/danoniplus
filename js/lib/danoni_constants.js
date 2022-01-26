@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/01/02 (v24.6.0)
+ * Revised : 2022/01/26 (v24.6.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -551,10 +551,6 @@ let g_sHeight;
 
 const g_hidSudObj = {
     filterPos: 10,
-    pgDown: {},
-    pgUp: {},
-    std: {},
-    filterPosDefault: {},
 
     'Visible': 1,
     'Hidden': 0,
