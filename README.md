@@ -17,6 +17,8 @@ You can create original game data by combining a set of published sources with m
 ここで公開しているソースは、以前Flashとして公開していたリズムゲーム  
 「Dancing☆Onigiri」の **HTML5 (HTML Living Standard)** 版です。  
 これまでのParaFla版に比べ、さまざまな機能強化を行っています。  
+The source released here is the **HTML5 (HTML Living Standard) version** of the rhythm game *"Dancing Onigiri"* that was previously released as Flash.
+Compared to the previous ParaFla version, we have made various enhancements.
 
 ## Demo
 - [Demo1](http://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / 木下たまき  
