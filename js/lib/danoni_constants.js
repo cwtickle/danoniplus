@@ -538,10 +538,6 @@ let g_sHeight;
 
 const g_hidSudObj = {
     filterPos: 10,
-    pgDown: {},
-    pgUp: {},
-    std: {},
-    filterPosDefault: {},
 
     'Visible': 1,
     'Hidden': 0,
