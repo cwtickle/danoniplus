@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2022/01/22 (v25.4.0)
+ * Template Update: 2022/01/26 (v25.5.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -37,6 +37,13 @@ const g_presetGauge = {
 
 // フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
 const g_presetFrzColors = true;
+
+/**
+	矢印色変化に対応してフリーズアロー色を追随する範囲の設定 (Normal: 通常時、Hit: ヒット時)
+	※この設定は、g_presetFrzColors = false もしくは 
+	譜面ヘッダー：defaultFrzColorUse=false のときにのみ有効です。
+*/
+// const g_presetFrzScopeFromAC = [`Normal`, `Hit`];
 
 // ゲージ設定（デフォルト以外）
 const g_presetGaugeCustom = {

@@ -1,6 +1,6 @@
 ﻿{
     "compilerOptions": {
-        "target": "es6",
+        "target": "es2020",
         "baseUrl": "./"
     },
     "exclude": [

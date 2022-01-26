@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/01/22 (v25.4.0)
+ * Revised : 2022/01/26 (v25.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -560,10 +560,6 @@ let g_sHeight;
 
 const g_hidSudObj = {
     filterPos: 10,
-    pgDown: {},
-    pgUp: {},
-    std: {},
-    filterPosDefault: {},
 
     'Visible': 1,
     'Hidden': 0,
@@ -2751,6 +2747,8 @@ const g_lang_lblNameObj = {
 
         j_kita: "(ﾟ∀ﾟ)ｷﾀ-!!",
         j_iknai: "(・A・)ｲｸﾅｲ",
+
+        j_adj: `推定Adj`,
     },
     En: {
         kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
@@ -2777,6 +2775,8 @@ const g_lang_lblNameObj = {
 
         j_kita: ":) O.K.",
         j_iknai: ":( N.G.",
+
+        j_adj: `Est-Adj.`,
     },
 };
 

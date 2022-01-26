@@ -40,8 +40,8 @@ There are many playstyles in the *Dancing Onigiri*. For example, 5keys, 7keys, 1
 タイミング良くキーボードを押すと(・∀・)ｲｲ!!や(ﾟ∀ﾟ)ｷﾀｰ!!となり、ライフが上がります。  
 一方、タイミングを外すと(´・ω・\`)ｼｮﾎﾞｰﾝ、(\`Д´)ｳﾜｧﾝ、(・A・)ｲｸﾅｲとなり、ライフが下がります。  
 ゲーム終了までにライフゲージのライフが残っているか、ノルマ以上であればゲームクリアです。  
-When you press the keyboard with good timing (・∀・)ｲｲ!! (ﾟ∀ﾟ)ｷﾀｰ!! and life will go up.
-On the other hand, if you remove the timing (´・ω・\`)ｼｮﾎﾞｰﾝ, (\`Д´)ｳﾜｧﾝ, (・A・)ｲｸﾅｲ will be, life falls.
+When you press the keyboard with good timing *:D Perfect!!* *:) O.K.* and life will go up.
+On the other hand, if you remove the timing *:( Bad*, *:_( Miss*, *:( N.G.* will be, life falls.
 If the life of the life gauge remains by the end of the game or it is over the quota, the game is cleared.
 
 ## Works / 公開作品
@@ -62,23 +62,30 @@ If the life of the life gauge remains by the end of the game or it is over the q
 ## Difference from Flash Version / Flash版との差異について
 Dancing☆Onigiri (CW Edition)では基本的にParaFla!版の仕様に準拠していますが、  
 細かい点が従来と異なります。詳細は下記をご覧ください。  
+*Dancing Onigiri "CW Edition"* basically conforms to the specifications of *ParaFla!* Version,
+but the details are different from the conventional ones. See below for details.
 - [Flash版との差異](https://github.com/cwtickle/danoniplus/wiki/DifferenceFromFlashVer)  
 
 ## How to Contribute / 開発者の方へ 
-開発にご協力いただける方は、下記をご覧ください。GitHubアカウントの無い方でも協力できます！
+開発にご協力いただける方は、下記をご覧ください。GitHubアカウントの無い方でも協力できます！  
+If you would like to cooperate with the development, please see below. Even if you don't have a GitHub account, you can cooperate!
 - [貢献の仕方 / How to Contribute](.github/CONTRIBUTING.md)   
 - [要望・不具合報告用Gitter](https://gitter.im/danonicw/community)
 - [コントリビューター / Contributors](CONTRIBUTORS.md)
 
 ## Community / コミュニティ
+- [Dancing☆Onigiri Discordサーバー](https://discord.gg/TegbHFY7zg)
 - [得点報告用Gitter](https://gitter.im/danonicw/freeboard)
 - [Twitter #danoni](https://twitter.com/search?q=%23danoni%20OR%20%22%E3%83%80%E3%83%B3%E3%81%8A%E3%81%AB%E3%81%A3%E3%81%9F%E3%83%BC%22&src=typed_query&f=live)
 
 ## Related Tools Repository / 関連ツール
 - [Dancing☆Onigiri エディター(CW Edition 対応)](https://github.com/superkuppabros/danoni-editor) @superkuppabros
 - [ダンおに曲データjs化ツール](https://github.com/suzme/danoni-base64) @suzme
+- [ダンおに矢印色ツール](https://github.com/suzme/danoni-colorpicker) @suzme
 - [Dancing☆Onigiri Chart Reverser](https://github.com/cwtickle/danoniplus-reverser)
 - [Dancing☆Onigiri Chart Converter](https://github.com/cwtickle/danoniplus-converter)
+- [ダンおにゲージ計算機 (Gauge Calculator)](http://www.omission0.com/other/gauge_calculator/) @goe0
+- [キリズマ譜面データ変換機](https://github.com/suzme/kirizma-converter) @suzme
 
 ## License / ライセンス
 This software is released under the MIT License, see LICENSE.  
