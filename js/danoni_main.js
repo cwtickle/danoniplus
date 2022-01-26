@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 25.5.0`;
+const g_version = `Ver 25.5.1`;
 const g_revisedDate = `2022/01/26`;
 const g_alphaVersion = ``;
 
@@ -9606,7 +9606,7 @@ function resultInit() {
 	const getSign = _val => (_val > 0 ? `+` : ``);
 	const getDiffFrame = _val => `${getSign(_val)}${_val}${g_lblNameObj.frame}`;
 	const estimatedAdj = (g_workObj.diffList.length <= 20 ?
-		`` : Math.round(g_stateObj.adjustment - g_workObj.diffList.reduce((x, y) => x + y, 0) / g_workObj.diffList.length * 10) / 10);
+		`` : Math.round((g_stateObj.adjustment - g_workObj.diffList.reduce((x, y) => x + y, 0) / g_workObj.diffList.length) * 10) / 10);
 
 	// 背景スプライトを作成
 	createMultipleSprite(`backResultSprite`, g_headerObj.backResultMaxDepth);
