@@ -7657,6 +7657,7 @@ function getArrowSettings() {
 	g_workObj.stepHitRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.arrowRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.keyCtrl = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
+	g_workObj.diffList = [];
 
 	const keyCtrlLen = g_workObj.keyCtrl.length;
 	g_workObj.keyCtrlN = [...Array(keyCtrlLen)].map(_ => []);
@@ -9302,6 +9303,7 @@ function judgeArrow(_j) {
  */
 function displayDiff(_difFrame, _justFrames = 0) {
 	let diffJDisp = ``;
+	g_workObj.diffList.push(_difFrame);
 	const difCnt = Math.abs(_difFrame);
 	if (_difFrame > _justFrames) {
 		diffJDisp = `<span class="common_matari">Fast ${difCnt} Frames</span>`;
@@ -9581,6 +9583,12 @@ function resultInit() {
 		}
 	}
 
+	// diffListから適正Adjを算出（20個以下の場合は算出しない）
+	const getSign = _val => (_val > 0 ? `+` : ``);
+	const getDiffFrame = _val => `${getSign(_val)}${_val}${g_lblNameObj.frame}`;
+	const estimatedAdj = (g_workObj.diffList.length <= 20 ?
+		`` : Math.round(g_stateObj.adjustment - g_workObj.diffList.reduce((x, y) => x + y, 0) / g_workObj.diffList.length * 10) / 10);
+
 	// 背景スプライトを作成
 	createMultipleSprite(`backResultSprite`, g_headerObj.backResultMaxDepth);
 
@@ -9738,6 +9746,12 @@ function resultInit() {
 			makeCssResultSymbol(`lblFastS`, 260, g_cssObj.score, 1, g_resultObj.fast, C_ALIGN_RIGHT),
 			makeCssResultSymbol(`lblSlowS`, 260, g_cssObj.score, 3, g_resultObj.slow, C_ALIGN_RIGHT),
 		);
+		if (estimatedAdj !== ``) {
+			multiAppend(resultWindow,
+				makeCssResultSymbol(`lblAdj`, 350, g_cssObj.common_shakin, 4, g_lblNameObj.j_adj),
+				makeCssResultSymbol(`lblAdjS`, 260, g_cssObj.score, 5, `${getDiffFrame(estimatedAdj)}`, C_ALIGN_RIGHT),
+			);
+		}
 	}
 
 	// ランク描画
