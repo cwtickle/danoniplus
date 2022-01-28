@@ -7311,7 +7311,8 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 個別・全体色変化、モーションデータのタイミング更新
-	calcDataTiming(`color`, ``, pushColors, { _colorFlg: true });
+	[``, `dummy`].forEach(type =>
+		calcDataTiming(`color`, type, pushColors, { _colorFlg: true }));
 
 	g_typeLists.arrow.forEach(header =>
 		calcDataTiming(`CssMotion`, header, pushCssMotions, { _calcFrameFlg: true }));
@@ -7565,7 +7566,7 @@ function pushColors(_header, _frame, _val, _colorCd, _allFlg) {
 
 		// フリーズアロー色の追随設定がある場合、対象を追加
 		g_headerObj.frzScopeFromArrowColors.forEach(type => {
-			baseHeaders.push(`mkF${_header}Color${type}`, `mkF${_header}Color${type}Bar`);
+			baseHeaders.push(`mk${_header}FColor${type}`, `mk${_header}FColor${type}Bar`);
 		});
 		if (g_headerObj.frzScopeFromArrowColors.length > 0) {
 			allUseTypes.push(`Frz`);
@@ -7588,7 +7589,7 @@ function pushColors(_header, _frame, _val, _colorCd, _allFlg) {
 		});
 
 	} else {
-		const baseHeader = `mkF${_header}Color`;
+		const baseHeader = `mk${_header}FColor`;
 		allUseTypes.push(`Frz`);
 
 		// フリーズアローの色変化
@@ -8869,29 +8870,30 @@ function MainInit() {
 			boostCnts += 2;
 		}
 
-		// 個別・全体色変化 (矢印)
-		changeColors(g_workObj.mkColor[currentFrame], g_workObj.mkColorCd[currentFrame]);
+		[`dummy`, ``].forEach(header => {
+			const headerU = toCapitalize(header);
 
-		// 個別・全体色変化（フリーズアロー）
-		g_typeLists.frzColor.forEach(ctype =>
-			changeColors(g_workObj[`mkFColor${ctype}`][currentFrame], g_workObj[`mkFColor${ctype}Cd`][currentFrame], `frz${ctype}`));
+			// 個別・全体色変化 (矢印)
+			changeColors(g_workObj[`mk${headerU}Color`][currentFrame],
+				g_workObj[`mk${headerU}ColorCd`][currentFrame]);
 
-		// 矢印モーション
-		changeCssMotions(g_workObj.mkArrowCssMotion[currentFrame], g_workObj.mkArrowCssMotionName[currentFrame], `arrow`);
+			// 個別・全体色変化（フリーズアロー）
+			g_typeLists.frzColor.forEach(ctype =>
+				changeColors(g_workObj[`mk${headerU}FColor${ctype}`][currentFrame],
+					g_workObj[`mk${headerU}FColor${ctype}Cd`][currentFrame], `frz${ctype}`));
 
-		// フリーズアローモーション
-		changeCssMotions(g_workObj.mkFrzCssMotion[currentFrame], g_workObj.mkFrzCssMotionName[currentFrame], `frz`);
+			// 矢印モーション
+			changeCssMotions(`${headerU}Arrow`, currentFrame);
 
-		// ダミー矢印モーション
-		changeCssMotions(g_workObj.mkDummyArrowCssMotion[currentFrame], g_workObj.mkDummyArrowCssMotionName[currentFrame], `dummyArrow`);
+			// フリーズアローモーション
+			changeCssMotions(`${headerU}Frz`, currentFrame);
 
-		// ダミーフリーズアローモーション
-		changeCssMotions(g_workObj.mkDummyFrzCssMotion[currentFrame], g_workObj.mkDummyFrzCssMotionName[currentFrame], `dummyFrz`);
+		});
 
 		// ダミー矢印生成（背面に表示するため先に処理）
 		if (g_workObj.mkDummyArrow[currentFrame] !== undefined) {
 			g_workObj.mkDummyArrow[currentFrame].forEach(data =>
-				makeArrow(data, ++dummyArrowCnts[data], `dummyArrow`, C_CLR_DUMMY));
+				makeArrow(data, ++dummyArrowCnts[data], `dummyArrow`, g_workObj.dummyArrowColors[data]));
 		}
 
 		// 矢印生成
@@ -8903,7 +8905,7 @@ function MainInit() {
 		// ダミーフリーズアロー生成
 		if (g_workObj.mkDummyFrzArrow[currentFrame] !== undefined) {
 			g_workObj.mkDummyFrzArrow[currentFrame].forEach(data =>
-				makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`, C_CLR_DUMMY, `#888888`));
+				makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`, g_workObj.dummyFrzNormalColors[data], g_workObj.dummyFrzNormalBarColors[data]));
 		}
 
 		// フリーズアロー生成
@@ -9148,16 +9150,19 @@ function changeColors(_mkColor, _mkColorCd, _objType = `arrow`) {
 
 /**
  * 個別モーション
- * @param {array} _mkCssMotion 
- * @param {array} _mkCssMotionName 
  * @param {string} _name
+ * @param {number} _frameNum
  */
-function changeCssMotions(_mkCssMotion, _mkCssMotionName, _name) {
+function changeCssMotions(_name, _frameNum) {
 
-	if (_mkCssMotion !== undefined) {
-		for (let j = 0; j < _mkCssMotion.length; j++) {
-			const targetj = _mkCssMotion[j];
-			g_workObj[`${_name}CssMotions`][targetj] = _mkCssMotionName[2 * j + g_workObj.dividePos[targetj]];
+	const nameL = `${_name.slice(0, 1).toLowerCase()}${_name.slice(1)}`;
+	const frameData = g_workObj[`mk${_name}CssMotion`][_frameNum];
+
+	if (frameData !== undefined) {
+		for (let j = 0; j < frameData.length; j++) {
+			const targetj = frameData[j];
+			g_workObj[`${nameL}CssMotions`][targetj] =
+				g_workObj[`mk${_name}CssMotionName`][_frameNum][2 * j + g_workObj.dividePos[targetj]];
 		}
 	}
 }
