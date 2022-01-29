@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/01/26
+ * Revised : 2022/01/29
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 25.5.1`;
-const g_revisedDate = `2022/01/26`;
+const g_version = `Ver 25.5.2`;
+const g_revisedDate = `2022/01/29`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5799,6 +5799,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			}
 			g_keycons[`${_type}GroupNum`] = j + _scrollNum;
 		}
+		g_keyObj[`${_type}${keyCtrlPtn}`] = [...g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`]];
 		viewGroup(_type);
 	};
 
@@ -9844,9 +9845,9 @@ function resultInit() {
 		});
 
 	} else {
-		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`));
+		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 215, g_cssObj.result_noRecord, 4, `(No Record)`));
 		const lblAutoView = document.querySelector(`#lblAutoView`);
-		lblAutoView.style.fontSize = `24px`;
+		lblAutoView.style.fontSize = `20px`;
 	}
 
 	// ユーザカスタムイベント(初期)
