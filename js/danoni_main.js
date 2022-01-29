@@ -9153,7 +9153,8 @@ function makeCounterSymbol(_id, _x, _class, _heightPos, _text, _display = C_DIS_
  * 個別・全体色変化
  * @param {array} _mkColor 
  * @param {array} _mkColorCd 
- * @param {string} _objType
+ * @param {string} _header
+ * @param {string} _name
  */
 function changeColors(_mkColor, _mkColorCd, _header, _name) {
 
