@@ -9844,9 +9844,9 @@ function resultInit() {
 		});
 
 	} else {
-		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 230, g_cssObj.result_noRecord, 4, `(No Record)`));
+		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 215, g_cssObj.result_noRecord, 4, `(No Record)`));
 		const lblAutoView = document.querySelector(`#lblAutoView`);
-		lblAutoView.style.fontSize = `24px`;
+		lblAutoView.style.fontSize = `20px`;
 	}
 
 	// ユーザカスタムイベント(初期)
