@@ -5799,6 +5799,7 @@ function keyConfigInit(_kcType = g_kcType) {
 			}
 			g_keycons[`${_type}GroupNum`] = j + _scrollNum;
 		}
+		g_keyObj[`${_type}${keyCtrlPtn}`] = [...g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`]];
 		viewGroup(_type);
 	};
 
