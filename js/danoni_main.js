@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/01/29
+ * Revised : 2022/01/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 25.5.2`;
-const g_revisedDate = `2022/01/29`;
+const g_version = `Ver 25.5.3`;
+const g_revisedDate = `2022/01/30`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -9140,7 +9140,7 @@ function changeColors(_mkColor, _mkColorCd, _objType = `arrow`) {
 		g_workObj[`${_objType}Colors`][targetj] = _mkColorCd[j];
 		if (tempj >= 1000) {
 			g_workObj[`${_objType}ColorsAll`][targetj] = _mkColorCd[j];
-			if (_objType === `HitBar` && isNaN(Number(g_workObj.arrowRtn[targetj]))) {
+			if (_objType.indexOf(`HitBar`) !== -1 && isNaN(Number(g_workObj.arrowRtn[targetj]))) {
 				$id(`frzHitTop${targetj}`).background = _mkColorCd[j];
 			}
 		}
