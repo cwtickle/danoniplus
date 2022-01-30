@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 25.5.3`;
+const g_version = `Ver 25.5.4`;
 const g_revisedDate = `2022/01/30`;
 const g_alphaVersion = ``;
 
@@ -9050,12 +9050,7 @@ function MainInit() {
 			g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps - buffTime);
 		}
 	}
-	if (typeof skinMainInit === C_TYP_FUNCTION) {
-		skinMainInit();
-		if (typeof skinMainInit2 === C_TYP_FUNCTION) {
-			skinMainInit2();
-		}
-	}
+	g_skinJsObj.main.forEach(func => func());
 
 	g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
 	g_audio.playbackRate = g_headerObj.playbackRate;
