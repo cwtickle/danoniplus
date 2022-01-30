@@ -7866,6 +7866,9 @@ function MainInit() {
 	// マスクスプライトを作成 (最上位)
 	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth);
 
+	// カラー・モーションを適用するオブジェクトの種類
+	const objList = (g_stateObj.dummyId === `` ? [``] : [`dummy`, ``]);
+
 	// 背景・マスクモーション(0フレーム指定)
 	if (g_scoreObj.frameNum === 0) {
 		g_animationData.forEach(sprite => {
@@ -8894,7 +8897,7 @@ function MainInit() {
 			boostCnts += 2;
 		}
 
-		[`dummy`, ``].forEach(header => {
+		objList.forEach(header => {
 			const headerU = toCapitalize(header);
 
 			// 個別・全体色変化 (矢印)
