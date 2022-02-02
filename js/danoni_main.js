@@ -2567,7 +2567,7 @@ function titleInit() {
 				commentArea.innerHTML = g_headerObj.commentVal;
 			}
 		} else {
-			let tmpComment = g_headerObj.commentVal;
+			const tmpComment = g_headerObj.commentVal;
 			multiAppend(divRoot,
 
 				createDivCss2Label(`lblComment`, tmpComment, {
@@ -2579,10 +2579,11 @@ function titleInit() {
 					const lblCommentDef = lblComment.style.display;
 					lblComment.style.display = (lblCommentDef === C_DIS_NONE ? C_DIS_INHERIT : C_DIS_NONE);
 				}, {
-					x: g_sWidth - 180, y: (g_sHeight / 2) + 150, w: 150, h: 50, siz: 20, border: `solid 1px #999999`,
+					x: g_sWidth - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
 				}, g_cssObj.button_Default),
 
 			);
+			setUserSelect(lblComment.style, `text`);
 		}
 	}
 
