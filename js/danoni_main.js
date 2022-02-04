@@ -2562,15 +2562,23 @@ function titleInit() {
 
 	// コメントエリア作成
 	if (g_headerObj.commentVal !== ``) {
+
+		// コメント文の加工
+		const comments = g_headerObj.commentVal.split(`}`).join(`{`).split(`{`);
+		let convCommentVal = ``;
+		for (let j = 0; j < comments.length; j += 2) {
+			convCommentVal += escapeHtmlForEnabledTag(comments[j]);
+			convCommentVal += setVal(comments[j + 1], ``, C_TYP_CALC);
+		}
+
 		if (g_headerObj.commentExternal) {
 			if (document.querySelector(`#commentArea`) !== null) {
-				commentArea.innerHTML = g_headerObj.commentVal;
+				commentArea.innerHTML = convCommentVal;
 			}
 		} else {
-			const tmpComment = g_headerObj.commentVal;
 			multiAppend(divRoot,
 
-				createDivCss2Label(`lblComment`, tmpComment, {
+				createDivCss2Label(`lblComment`, convCommentVal, {
 					x: 0, y: 70, w: g_sWidth, h: g_sHeight - 180, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
 					overflow: `auto`, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
 				}),
@@ -3397,7 +3405,7 @@ function headerConvert(_dosObj) {
 	const newlineTag = setVal(_dosObj.commentAutoBr, true, C_TYP_BOOLEAN) ? `<br>` : ``;
 	let tmpComment = setVal(_dosObj[`commentVal${g_localeObj.val}`] || _dosObj.commentVal, ``, C_TYP_STRING);
 	tmpComment = tmpComment.split(`\r\n`).join(`\n`);
-	obj.commentVal = escapeHtmlForEnabledTag(tmpComment.split(`\n`).join(newlineTag));
+	obj.commentVal = tmpComment.split(`\n`).join(newlineTag);
 
 	// クレジット表示
 	if (document.querySelector(`#webMusicTitle`) !== null) {
