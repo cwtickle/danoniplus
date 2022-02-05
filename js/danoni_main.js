@@ -9706,8 +9706,16 @@ function resultInit() {
 	// diffListから適正Adjを算出（20個以下の場合は算出しない）
 	const getSign = _val => (_val > 0 ? `+` : ``);
 	const getDiffFrame = _val => `${getSign(_val)}${_val}${g_lblNameObj.frame}`;
-	const estimatedAdj = (g_workObj.diffList.length <= 20 ?
-		`` : Math.round((g_stateObj.adjustment - g_workObj.diffList.reduce((x, y) => x + y, 0) / g_workObj.diffList.length) * 10) / 10);
+	const diffLength = g_workObj.diffList.length;
+	const bayesFunc = (_offset, _length) => {
+		let result = 0;
+		for (let j = _offset; j < _length; j++) {
+			result += (_length - j) * (j + 1) * g_workObj.diffList[j];
+		}
+		return result;
+	};
+	const bayesExVal = 3 * bayesFunc(0, diffLength) / (diffLength * (diffLength + 1) * (diffLength + 2));
+	const estimatedAdj = (diffLength <= 20 ? `` : Math.round((g_stateObj.adjustment - bayesExVal) * 100) / 100);
 
 	// 背景スプライトを作成
 	createMultipleSprite(`backResultSprite`, g_headerObj.backResultMaxDepth);
