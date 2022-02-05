@@ -2389,7 +2389,7 @@ const g_escapeStr = {
     escapeTag: [
         [`*amp*`, `&amp;`], [`*pipe*`, `|`], [`*dollar*`, `$`], [`*rsquo*`, `&rsquo;`],
         [`*quot*`, `&quot;`], [`*comma*`, `&sbquo;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
-        [`*lt*`, `&lt;`], [`*gt*`, `&gt;`],
+        [`*lt*`, `&lt;`], [`*gt*`, `&gt;`], [`*lbrace*`, `{`], [`*rbrace*`, `}`],
     ],
     unEscapeTag: [
         [`&amp;`, `&`], [`&rsquo;`, `’`], [`&quot;`, `"`], [`&sbquo;`, `,`],
