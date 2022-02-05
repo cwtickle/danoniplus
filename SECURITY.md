@@ -15,8 +15,8 @@ v19, v25の対応終了時期はv28リリース開始時を予定しています
 
 | Version | Supported          | Latest Version | Logs | First Release | End of Support |
 | ------- | ------------------ |----------------|------|---------------|----------------|
-| v26     | :heavy_check_mark: |[v26.0.0](https://github.com/cwtickle/danoniplus/releases/tag/v26.0.0)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v26)|2022-01-30|-|
-| v25     | :heavy_check_mark: |[v25.5.3](https://github.com/cwtickle/danoniplus/releases/tag/v25.5.3)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v25)|2022-01-04|(At Release v28)|
+| v26     | :heavy_check_mark: |[v26.1.0](https://github.com/cwtickle/danoniplus/releases/tag/v26.1.0)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v26)|2022-01-30|-|
+| v25     | :heavy_check_mark: |[v25.5.4](https://github.com/cwtickle/danoniplus/releases/tag/v25.5.4)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v25)|2022-01-04|(At Release v28)|
 | v24     | :heavy_check_mark: |[v24.6.3](https://github.com/cwtickle/danoniplus/releases/tag/v24.6.3)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v24)|2021-10-24|(At Release v33)|
 | v23     | :x:                |[v23.5.6 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v23.5.6)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v23)|2021-09-04|2022-01-30|
 | v22     | :x:                |[v22.5.6 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v22.5.6)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v22)|2021-04-28|2022-01-04|

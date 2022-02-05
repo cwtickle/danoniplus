@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/01/30
+ * Revised : 2022/02/05
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 26.0.0`;
-const g_revisedDate = `2022/01/30`;
+const g_version = `Ver 26.1.0`;
+const g_revisedDate = `2022/02/05`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -125,7 +125,14 @@ const g_detailObj = {
 	arrowCnt: [],
 	frzCnt: [],
 	maxDensity: [],
+	maxDensity2Push: [],
+	maxDensity3Push: [],
 	densityData: [],
+	density2PushData: [],
+	density3PushData: [],
+	densityDiff: [],
+	density2PushDiff: [],
+	density3PushDiff: [],
 	startFrame: [],
 	playingFrame: [],
 	playingFrameWithBlank: [],
@@ -1607,6 +1614,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	let allData = 0;
 
 	const types = [`arrow`, `frz`];
+	let fullData = [];
 	for (let j = 0; j < keyNum; j++) {
 		noteCnt.arrow[j] = 0;
 		noteCnt.frz[j] = 0;
@@ -1625,17 +1633,53 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 				}
 			})
 		});
+		fullData = fullData.concat(..._scoreObj.arrowData[j], ...tmpFrzData);
 	}
+
+	fullData = fullData.filter(val => !isNaN(parseFloat(val))).sort((a, b) => a - b);
+	let pushCnt = 0;
+	const density2PushData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
+	const density3PushData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
+	fullData.forEach((note, j) => {
+		if (fullData[j] === fullData[j + 1]) {
+			pushCnt++;
+		} else {
+			const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+			if (point >= 0) {
+				if (pushCnt > 2) {
+					density3PushData[point] += pushCnt;
+				}
+				density2PushData[point] += pushCnt;
+			}
+			pushCnt = 0;
+		}
+	});
 
 	g_detailObj.toolDif[_scoreId] = calcLevel(_scoreObj);
 	g_detailObj.speedData[_scoreId] = _scoreObj.speedData.concat();
 	g_detailObj.boostData[_scoreId] = _scoreObj.boostData.concat();
 
-	g_detailObj.maxDensity[_scoreId] = densityData.indexOf(Math.max.apply(null, densityData));
-	g_detailObj.densityData[_scoreId] = [];
-	for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
-		g_detailObj.densityData[_scoreId].push(Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100);
+	const storeDensity = _densityData => {
+		const dataList = [];
+		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
+			dataList.push(allData === 0 ? 0 : Math.round(_densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100);
+		}
+		return dataList;
 	}
+	const diffArray = (_array1, _array2) => {
+		const list = [];
+		_array1.forEach((val, j) => list.push(_array1[j] - _array2[j]));
+		return list;
+	};
+	g_detailObj.densityData[_scoreId] = storeDensity(densityData);
+	g_detailObj.density2PushData[_scoreId] = storeDensity(density2PushData);
+	g_detailObj.density3PushData[_scoreId] = storeDensity(density3PushData);
+
+	g_detailObj.densityDiff[_scoreId] = diffArray(g_detailObj.densityData[_scoreId], g_detailObj.density2PushData[_scoreId]);
+	g_detailObj.density2PushDiff[_scoreId] = diffArray(g_detailObj.density2PushData[_scoreId], g_detailObj.density3PushData[_scoreId]);
+	g_detailObj.density3PushDiff[_scoreId] = g_detailObj.density3PushData[_scoreId].concat();
+
+	g_detailObj.maxDensity[_scoreId] = densityData.indexOf(Math.max.apply(null, densityData));
 
 	g_detailObj.arrowCnt[_scoreId] = noteCnt.arrow.concat();
 	g_detailObj.frzCnt[_scoreId] = noteCnt.frz.concat();
@@ -2562,15 +2606,23 @@ function titleInit() {
 
 	// コメントエリア作成
 	if (g_headerObj.commentVal !== ``) {
+
+		// コメント文の加工
+		const comments = g_headerObj.commentVal.split(`}`).join(`{`).split(`{`);
+		let convCommentVal = ``;
+		for (let j = 0; j < comments.length; j += 2) {
+			convCommentVal += escapeHtmlForEnabledTag(comments[j]);
+			convCommentVal += setVal(comments[j + 1], ``, C_TYP_CALC);
+		}
+
 		if (g_headerObj.commentExternal) {
 			if (document.querySelector(`#commentArea`) !== null) {
-				commentArea.innerHTML = g_headerObj.commentVal;
+				commentArea.innerHTML = convCommentVal;
 			}
 		} else {
-			let tmpComment = g_headerObj.commentVal;
 			multiAppend(divRoot,
 
-				createDivCss2Label(`lblComment`, tmpComment, {
+				createDivCss2Label(`lblComment`, convCommentVal, {
 					x: 0, y: 70, w: g_sWidth, h: g_sHeight - 180, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
 					overflow: `auto`, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
 				}),
@@ -2579,10 +2631,11 @@ function titleInit() {
 					const lblCommentDef = lblComment.style.display;
 					lblComment.style.display = (lblCommentDef === C_DIS_NONE ? C_DIS_INHERIT : C_DIS_NONE);
 				}, {
-					x: g_sWidth - 180, y: (g_sHeight / 2) + 150, w: 150, h: 50, siz: 20, border: `solid 1px #999999`,
+					x: g_sWidth - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
 				}, g_cssObj.button_Default),
 
 			);
+			setUserSelect(lblComment.style, `text`);
 		}
 	}
 
@@ -3396,7 +3449,7 @@ function headerConvert(_dosObj) {
 	const newlineTag = setVal(_dosObj.commentAutoBr, true, C_TYP_BOOLEAN) ? `<br>` : ``;
 	let tmpComment = setVal(_dosObj[`commentVal${g_localeObj.val}`] || _dosObj.commentVal, ``, C_TYP_STRING);
 	tmpComment = tmpComment.split(`\r\n`).join(`\n`);
-	obj.commentVal = escapeHtmlForEnabledTag(tmpComment.split(`\n`).join(newlineTag));
+	obj.commentVal = tmpComment.split(`\n`).join(newlineTag);
 
 	// クレジット表示
 	if (document.querySelector(`#webMusicTitle`) !== null) {
@@ -4441,12 +4494,29 @@ function createOptionWindow(_sprite) {
 		drawBaseLine(context);
 		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
 			context.beginPath();
-			context.fillStyle = (j === g_detailObj.maxDensity[_scoreId] ? C_CLR_DENSITY_MAX : C_CLR_DENSITY_DEFAULT);
-			context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * g_detailObj.densityData[_scoreId][j] / 10,
-				15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * g_detailObj.densityData[_scoreId][j] / 10
-			);
+			[``, `2Push`, `3Push`].forEach(val => {
+				context.fillStyle = (j === g_detailObj.maxDensity[_scoreId] ? g_graphColorObj[`max${val}`] : g_graphColorObj[`default${val}`]);
+				context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * g_detailObj[`density${val}Data`][_scoreId][j] / 10,
+					15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * g_detailObj[`density${val}Diff`][_scoreId][j] / 10
+				);
+			});
 			context.stroke();
 		}
+
+		const lineNames = [`1Push`, `2Push`, `3Push+`];
+		Object.keys(g_graphColorObj).filter(val => val.indexOf(`max`) !== -1).forEach((val, j) => {
+			const lineX = 70 + j * 70;
+
+			context.beginPath();
+			context.lineWidth = 3;
+			context.fillStyle = g_rankObj.rankColorAllPerfect;
+			context.strokeStyle = g_graphColorObj[val];
+			context.moveTo(lineX, 215);
+			context.lineTo(lineX + 20, 215);
+			context.stroke();
+			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
+			context.fillText(lineNames[j], lineX + 20, 218);
+		});
 
 		const obj = getScoreBaseData(_scoreId);
 		updateScoreDetailLabel(`Density`, g_lblNameObj.s_apm, obj.apm, 0);
@@ -9079,12 +9149,7 @@ function MainInit() {
 			g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps - buffTime);
 		}
 	}
-	if (typeof skinMainInit === C_TYP_FUNCTION) {
-		skinMainInit();
-		if (typeof skinMainInit2 === C_TYP_FUNCTION) {
-			skinMainInit2();
-		}
-	}
+	g_skinJsObj.main.forEach(func => func());
 
 	g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
 	g_audio.playbackRate = g_headerObj.playbackRate;
@@ -9641,8 +9706,16 @@ function resultInit() {
 	// diffListから適正Adjを算出（20個以下の場合は算出しない）
 	const getSign = _val => (_val > 0 ? `+` : ``);
 	const getDiffFrame = _val => `${getSign(_val)}${_val}${g_lblNameObj.frame}`;
-	const estimatedAdj = (g_workObj.diffList.length <= 20 ?
-		`` : Math.round((g_stateObj.adjustment - g_workObj.diffList.reduce((x, y) => x + y, 0) / g_workObj.diffList.length) * 10) / 10);
+	const diffLength = g_workObj.diffList.length;
+	const bayesFunc = (_offset, _length) => {
+		let result = 0;
+		for (let j = _offset; j < _length; j++) {
+			result += (_length - j) * (j + 1) * g_workObj.diffList[j];
+		}
+		return result;
+	};
+	const bayesExVal = 3 * bayesFunc(0, diffLength) / (diffLength * (diffLength + 1) * (diffLength + 2));
+	const estimatedAdj = (diffLength <= 20 ? `` : Math.round((g_stateObj.adjustment - bayesExVal) * 10) / 10);
 
 	// 背景スプライトを作成
 	createMultipleSprite(`backResultSprite`, g_headerObj.backResultMaxDepth);
