@@ -246,11 +246,11 @@ const C_CLR_DENSITY_DEFAULT = `#999999cc`;
 const C_LEN_DENSITY_DIVISION = 16;
 
 const g_graphColorObj = {
-    max: `#990000cc`,
+    max: `#993333cc`,
     default: `#999999cc`,
-    max2Push: `#660000cc`,
+    max2Push: `#9933cccc`,
     default2Push: `#777777cc`,
-    max3Push: `#330000cc`,
+    max3Push: `#003399cc`,
     default3Push: `#555555cc`,
 };
 

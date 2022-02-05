@@ -4495,6 +4495,21 @@ function createOptionWindow(_sprite) {
 			context.stroke();
 		}
 
+		const lineNames = [`1Push`, `2Push`, `3Push+`];
+		Object.keys(g_graphColorObj).filter(val => val.indexOf(`max`) !== -1).forEach((val, j) => {
+			const lineX = 70 + j * 70;
+
+			context.beginPath();
+			context.lineWidth = 3;
+			context.fillStyle = g_rankObj.rankColorAllPerfect;
+			context.strokeStyle = g_graphColorObj[val];
+			context.moveTo(lineX, 215);
+			context.lineTo(lineX + 20, 215);
+			context.stroke();
+			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
+			context.fillText(lineNames[j], lineX + 20, 218);
+		});
+
 		const obj = getScoreBaseData(_scoreId);
 		updateScoreDetailLabel(`Density`, g_lblNameObj.s_apm, obj.apm, 0);
 		updateScoreDetailLabel(`Density`, g_lblNameObj.s_time, obj.playingTime, 1);
