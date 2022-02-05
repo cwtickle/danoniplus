@@ -245,6 +245,15 @@ const C_CLR_DENSITY_MAX = `#990000cc`;
 const C_CLR_DENSITY_DEFAULT = `#999999cc`;
 const C_LEN_DENSITY_DIVISION = 16;
 
+const g_graphColorObj = {
+    max: `#990000cc`,
+    default: `#999999cc`,
+    max2Push: `#660000cc`,
+    default2Push: `#777777cc`,
+    max3Push: `#330000cc`,
+    default3Push: `#555555cc`,
+};
+
 const g_settingBtnObj = {
     chara: {
         L: `<`,

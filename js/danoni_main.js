@@ -125,7 +125,14 @@ const g_detailObj = {
 	arrowCnt: [],
 	frzCnt: [],
 	maxDensity: [],
+	maxDensity2Push: [],
+	maxDensity3Push: [],
 	densityData: [],
+	density2PushData: [],
+	density3PushData: [],
+	densityDiff: [],
+	density2PushDiff: [],
+	density3PushDiff: [],
 	startFrame: [],
 	playingFrame: [],
 	playingFrameWithBlank: [],
@@ -1607,6 +1614,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	let allData = 0;
 
 	const types = [`arrow`, `frz`];
+	let fullData = [];
 	for (let j = 0; j < keyNum; j++) {
 		noteCnt.arrow[j] = 0;
 		noteCnt.frz[j] = 0;
@@ -1625,17 +1633,53 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 				}
 			})
 		});
+		fullData = fullData.concat(..._scoreObj.arrowData[j], ...tmpFrzData);
 	}
+
+	fullData = fullData.filter(val => !isNaN(parseFloat(val))).sort((a, b) => a - b);
+	let pushCnt = 0;
+	const density2PushData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
+	const density3PushData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
+	fullData.forEach((note, j) => {
+		if (fullData[j] === fullData[j + 1]) {
+			pushCnt++;
+		} else {
+			const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+			if (point >= 0) {
+				if (pushCnt > 2) {
+					density3PushData[point] += pushCnt;
+				}
+				density2PushData[point] += pushCnt;
+			}
+			pushCnt = 0;
+		}
+	});
 
 	g_detailObj.toolDif[_scoreId] = calcLevel(_scoreObj);
 	g_detailObj.speedData[_scoreId] = _scoreObj.speedData.concat();
 	g_detailObj.boostData[_scoreId] = _scoreObj.boostData.concat();
 
-	g_detailObj.maxDensity[_scoreId] = densityData.indexOf(Math.max.apply(null, densityData));
-	g_detailObj.densityData[_scoreId] = [];
-	for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
-		g_detailObj.densityData[_scoreId].push(Math.round(densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100);
+	const storeDensity = _densityData => {
+		const dataList = [];
+		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
+			dataList.push(allData === 0 ? 0 : Math.round(_densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100);
+		}
+		return dataList;
 	}
+	const diffArray = (_array1, _array2) => {
+		const list = [];
+		_array1.forEach((val, j) => list.push(_array1[j] - _array2[j]));
+		return list;
+	};
+	g_detailObj.densityData[_scoreId] = storeDensity(densityData);
+	g_detailObj.density2PushData[_scoreId] = storeDensity(density2PushData);
+	g_detailObj.density3PushData[_scoreId] = storeDensity(density3PushData);
+
+	g_detailObj.densityDiff[_scoreId] = diffArray(g_detailObj.densityData[_scoreId], g_detailObj.density2PushData[_scoreId]);
+	g_detailObj.density2PushDiff[_scoreId] = diffArray(g_detailObj.density2PushData[_scoreId], g_detailObj.density3PushData[_scoreId]);
+	g_detailObj.density3PushDiff[_scoreId] = g_detailObj.density3PushData[_scoreId].concat();
+
+	g_detailObj.maxDensity[_scoreId] = densityData.indexOf(Math.max.apply(null, densityData));
 
 	g_detailObj.arrowCnt[_scoreId] = noteCnt.arrow.concat();
 	g_detailObj.frzCnt[_scoreId] = noteCnt.frz.concat();
@@ -4442,10 +4486,12 @@ function createOptionWindow(_sprite) {
 		drawBaseLine(context);
 		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
 			context.beginPath();
-			context.fillStyle = (j === g_detailObj.maxDensity[_scoreId] ? C_CLR_DENSITY_MAX : C_CLR_DENSITY_DEFAULT);
-			context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * g_detailObj.densityData[_scoreId][j] / 10,
-				15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * g_detailObj.densityData[_scoreId][j] / 10
-			);
+			[``, `2Push`, `3Push`].forEach(val => {
+				context.fillStyle = (j === g_detailObj.maxDensity[_scoreId] ? g_graphColorObj[`max${val}`] : g_graphColorObj[`default${val}`]);
+				context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * g_detailObj[`density${val}Data`][_scoreId][j] / 10,
+					15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * g_detailObj[`density${val}Diff`][_scoreId][j] / 10
+				);
+			});
 			context.stroke();
 		}
 
