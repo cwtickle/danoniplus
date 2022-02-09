@@ -9714,7 +9714,7 @@ function resultInit() {
 		}
 		return result;
 	};
-	const bayesExVal = 3 * bayesFunc(0, diffLength) / (diffLength * (diffLength + 1) * (diffLength + 2));
+	const bayesExVal = 6 * bayesFunc(0, diffLength) / (diffLength * (diffLength + 1) * (diffLength + 2));
 	const estimatedAdj = (diffLength <= 20 ? `` : Math.round((g_stateObj.adjustment - bayesExVal) * 10) / 10);
 
 	// 背景スプライトを作成
