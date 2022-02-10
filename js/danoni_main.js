@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/02/05
+ * Revised : 2022/02/10
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 26.1.0`;
-const g_revisedDate = `2022/02/05`;
+const g_version = `Ver 26.1.1`;
+const g_revisedDate = `2022/02/10`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -9714,7 +9714,7 @@ function resultInit() {
 		}
 		return result;
 	};
-	const bayesExVal = 3 * bayesFunc(0, diffLength) / (diffLength * (diffLength + 1) * (diffLength + 2));
+	const bayesExVal = 6 * bayesFunc(0, diffLength) / (diffLength * (diffLength + 1) * (diffLength + 2));
 	const estimatedAdj = (diffLength <= 20 ? `` : Math.round((g_stateObj.adjustment - bayesExVal) * 10) / 10);
 
 	// 背景スプライトを作成
