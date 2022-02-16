@@ -1,0 +1,23 @@
+{
+  "name": "danoniplus",
+  "version": "26.1.2",
+  "description": "Dancing☆Onigiri (CW Edition) - Web-based Rhythm Game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cwtickle/danoniplus.git"
+  },
+  "keywords": [
+    "rhythm-game",
+    "dancing-onigiri"
+  ],
+  "author": "tickle <quc_tickle@cw7.sakura.ne.jp> (https://github.com/cwtickle/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cwtickle/danoniplus/issues"
+  },
+  "homepage": "https://github.com/cwtickle/danoniplus#readme"
+}
