@@ -12,7 +12,7 @@ Dancing☆Onigiri (CW Edition)は、ブラウザで動作するキーボード�
 公開しているソース一式と、音楽ファイル・譜面データ(テキスト)を組み合わせることで  
 オリジナルのゲームデータを作ることができます。詳細は[Wiki](https://github.com/cwtickle/danoniplus/wiki)をご覧ください。  
 *Dancing Onigiri "CW Edition"* is a rhythm game. 
-You can create original game data by combining a set of published sources with music files and sequences (text file). See the [wiki](../../wiki/Sidebar-En) for details.
+You can create original game data by combining a set of published sources with music files and sequences (text file). See the [wiki](https://github.com/cwtickle/danoniplus/wiki/Sidebar-En) for details.
 
 ここで公開しているソースは、以前Flashとして公開していたリズムゲーム  
 「Dancing☆Onigiri」の **HTML5 (HTML Living Standard)** 版です。  
@@ -33,7 +33,7 @@ This is a rhythm game, using Keyboard on the website.
 There are many playstyles in the *Dancing Onigiri*. For example, 5keys, 7keys, 11keys, etc.
 
 詳細は下記をご覧ください。(The details are as follows.)  
--> [How to Play](../../wiki/AboutGameSystem)
+-> [How to Play](https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem)
 
 ![HowtoPlay](http://cw7.sakura.ne.jp/danoni/wiki/howtoplay1.png)  
 (画像は開発中のものです）
@@ -56,6 +56,13 @@ If the life of the life gauge remains by the end of the game or it is over the q
 - [譜面の作成概要](https://github.com/cwtickle/danoniplus/wiki/HowToMake)
 - [ParaFla!ソース利用者向け移行方法](https://github.com/cwtickle/danoniplus/wiki/forParaFlaUser)
 
+### How to Install / 導入方法
+- [Releases](https://github.com/cwtickle/danoniplus/releases)からダウンロードします。
+- npmからの導入も可能です。@以降はバージョン名を指定します(下記のxxは実際の番号に合わせます)。
+```
+npm i danoniplus@25.5.xx
+```
+
 ## System requirements / 動作環境
 ブラウザで動作します。(Using browser.)  
 - Google Chrome, Opera, Vivaldi (WebKit), Firefox (Gecko)※  
@@ -71,9 +78,9 @@ but the details are different from the conventional ones. See below for details.
 ## How to Contribute / 開発者の方へ 
 開発にご協力いただける方は、下記をご覧ください。GitHubアカウントの無い方でも協力できます！  
 If you would like to cooperate with the development, please see below. Even if you don't have a GitHub account, you can cooperate!
-- [貢献の仕方 / How to Contribute](.github/CONTRIBUTING.md)   
+- [貢献の仕方 / How to Contribute](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)   
 - [要望・不具合報告用Gitter](https://gitter.im/danonicw/community)
-- [コントリビューター / Contributors](CONTRIBUTORS.md)
+- [コントリビューター / Contributors](https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTORS.md)
 
 ## Community / コミュニティ
 - [Dancing☆Onigiri Discordサーバー](https://discord.gg/TegbHFY7zg)
