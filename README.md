@@ -54,6 +54,13 @@ If the life of the life gauge remains by the end of the game or it is over the q
 - [譜面の作成概要](https://github.com/cwtickle/danoniplus/wiki/HowToMake)
 - [ParaFla!ソース利用者向け移行方法](https://github.com/cwtickle/danoniplus/wiki/forParaFlaUser)
 
+### How to Install / 導入方法
+- [Releases](https://github.com/cwtickle/danoniplus/releases)からダウンロードします。
+- npmからの導入も可能です。@以降はバージョン名を指定します(下記のxxは実際の番号に合わせます)。
+```
+npm i danoniplus@24.6.xx
+```
+
 ## System requirements / 動作環境
 ブラウザで動作します。(Using browser.)  
 - Google Chrome, Opera, Vivaldi (WebKit), Firefox (Gecko)※  
