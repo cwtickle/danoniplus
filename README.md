@@ -57,12 +57,13 @@ If the life of the life gauge remains by the end of the game or it is over the q
 - [ParaFla!ソース利用者向け移行方法](https://github.com/cwtickle/danoniplus/wiki/forParaFlaUser)
 
 ### How to Install / 導入方法
-- [Releases](https://github.com/cwtickle/danoniplus/releases)からダウンロードします。
-- npmからの導入も可能です。
+- [Releases](https://github.com/cwtickle/danoniplus/releases)からダウンロードします。(Download from [Releases](https://github.com/cwtickle/danoniplus/releases).)
+- npmからの導入も可能です。(You can install from npm.)
 ```
 npm i danoniplus
 ```
-- バージョン名を直接指定するときは下記のようにします(@以降をバージョン指定。頭の"v"や"ver"は取る)。
+- バージョン名を直接指定するときは下記のように @以降をバージョン指定します。  
+(When directly specifying the version name, specify the version after @ as shown below.)
 ```
 npm i danoniplus@26.1.2
 ```
