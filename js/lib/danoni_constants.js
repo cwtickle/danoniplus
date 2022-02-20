@@ -134,8 +134,8 @@ const resetImgs = (_baseDir = ``, _exp = `svg`) => {
     C_IMG_LIFEBAR = `../img/${baseDir}frzbar.${_exp}`;
     C_IMG_LIFEBORDER = `../img/${baseDir}borderline.${_exp}`;
 
-    if (typeof g_presetCustomImageList === C_TYP_OBJECT) {
-        g_presetCustomImageList.forEach(image => reloadImgCustomObj(image, _baseDir, _exp));
+    if (g_presetObj.customImageList !== undefined) {
+        g_presetObj.customImageList.forEach(image => reloadImgCustomObj(image, _baseDir, _exp));
     }
 }
 
@@ -3160,3 +3160,89 @@ const loadLegacyCustomFunc = _ => {
         g_skinJsObj.result.push(skinResultInit2);
     }
 };
+
+/**
+ * 従来の共通設定変数をg_presetObjへ移動 
+ * - settingjsファイルを読み込んだ直後にこの関数を呼び出している
+ */
+const loadLegacySettingFunc = _ => {
+
+    if (typeof g_presetTuning === C_TYP_STRING) {
+        g_presetObj.tuning = g_presetTuning;
+    }
+    if (typeof g_presetTuningUrl === C_TYP_STRING) {
+        g_presetObj.tuningUrl = g_presetTuningUrl;
+    }
+    if (typeof g_presetSkinType === C_TYP_STRING) {
+        g_presetObj.skinType = g_presetSkinType;
+    }
+    if (typeof g_presetCustomJs === C_TYP_STRING) {
+        g_presetObj.customJs = g_presetCustomJs;
+    }
+    if (typeof g_presetCustomCss === C_TYP_STRING) {
+        g_presetObj.customCss = g_presetCustomCss;
+    }
+    if (typeof g_presetSyncBackPath === C_TYP_BOOLEAN) {
+        g_presetObj.syncBackPath = g_presetSyncBackPath;
+    }
+    if (typeof g_presetGauge === C_TYP_OBJECT) {
+        g_presetObj.gauge = g_presetGauge;
+    }
+    if (typeof g_presetFrzColors === C_TYP_BOOLEAN) {
+        g_presetObj.frzColors = g_presetFrzColors;
+    }
+    if (typeof g_presetFrzScopeFromAC === C_TYP_OBJECT) {
+        g_presetObj.frzScopeFromAC = g_presetFrzScopeFromAC;
+    }
+    if (typeof g_presetGaugeCustom === C_TYP_OBJECT) {
+        g_presetObj.gaugeCustom = g_presetGaugeCustom;
+    }
+    if (typeof g_presetGaugeList === C_TYP_OBJECT) {
+        g_presetObj.gaugeList = g_presetGaugeList;
+    }
+    if (typeof g_presetCustomDesignUse === C_TYP_OBJECT) {
+        g_presetObj.customDesignUse = g_presetCustomDesignUse;
+    }
+    if (typeof g_presetSettingUse === C_TYP_OBJECT) {
+        g_presetObj.settingUse = g_presetSettingUse;
+    }
+    if (typeof g_presetFrzStartjdgUse === C_TYP_STRING) {
+        g_presetObj.frzStartjdgUse = g_presetFrzStartjdgUse;
+    }
+    if (typeof g_presetImageSets === C_TYP_OBJECT) {
+        g_presetObj.imageSets = g_presetImageSets;
+    }
+    if (typeof g_presetOverrideExtension === C_TYP_STRING) {
+        g_presetObj.overrideExtension = g_presetOverrideExtension;
+    }
+    if (typeof g_presetCustomImageList === C_TYP_OBJECT) {
+        g_presetObj.customImageList = g_presetCustomImageList;
+    }
+    if (typeof g_presetWordAutoReverse === C_TYP_STRING) {
+        g_presetObj.wordAutoReverse = g_presetWordAutoReverse;
+    }
+    if (typeof g_presetResultFormat === C_TYP_STRING) {
+        g_presetObj.resultFormat = g_presetResultFormat;
+    }
+    if (typeof g_presetResultVals === C_TYP_OBJECT) {
+        g_presetObj.resultVals = g_presetResultVals;
+    }
+    if (typeof g_local_lblNameObj === C_TYP_OBJECT) {
+        g_presetObj.lblName = g_local_lblNameObj;
+    }
+    if (typeof g_local_msgObj === C_TYP_OBJECT) {
+        g_presetObj.msg = g_local_msgObj;
+    }
+    if (typeof g_lblRenames === C_TYP_OBJECT) {
+        g_presetObj.lblRenames = g_lblRenames;
+    }
+    if (typeof g_presetUnStockCategories === C_TYP_OBJECT) {
+        g_presetObj.unStockCategories = g_presetUnStockCategories;
+    }
+    if (typeof g_presetStockForceDelList === C_TYP_OBJECT) {
+        g_presetObj.stockForceDelList = g_presetStockForceDelList;
+    }
+    if (typeof g_presetKeysData === C_TYP_STRING) {
+        g_presetObj.keysData = g_presetKeysData;
+    }
+}

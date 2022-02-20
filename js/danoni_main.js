@@ -114,6 +114,7 @@ let g_finishFlg = true;
 const g_loadObj = {};
 const g_rootObj = {};
 let g_headerObj = {};
+let g_presetObj = {};
 let g_scoreObj = {};
 let g_attrObj = {};
 let g_btnAddFunc = {};
@@ -1508,8 +1509,8 @@ function initAfterDosLoaded() {
 
 		// 譜面ヘッダー、特殊キー情報の読込
 		Object.assign(g_headerObj, headerConvert(g_rootObj));
-		if (typeof g_presetKeysData === C_TYP_STRING) {
-			keysConvert(dosConvert(g_presetKeysData));
+		if (g_presetObj.keysData !== undefined) {
+			keysConvert(dosConvert(g_presetObj.keysData));
 			g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
 		}
 		g_headerObj.keyExtraList = keysConvert(g_rootObj, {
@@ -1929,6 +1930,7 @@ function loadSettingJs() {
 
 	const randTime = new Date().getTime();
 	loadScript(`${settingRoot}danoni_setting${settingType}.js?${randTime}`, _ => {
+		loadLegacySettingFunc();
 		if (document.querySelector(`#lblLoading`) !== null) {
 			divRoot.removeChild(document.querySelector(`#lblLoading`));
 		}
@@ -2826,29 +2828,29 @@ function preheaderConvert(_dosObj) {
 	};
 
 	// 外部スキンファイルの指定
-	const tmpSkinType = _dosObj.skinType || (typeof g_presetSkinType === C_TYP_STRING ? g_presetSkinType : `default`);
+	const tmpSkinType = _dosObj.skinType || g_presetObj.skinType || `default`;
 	const tmpSkinTypes = tmpSkinType.split(`,`);
 	obj.defaultSkinFlg = tmpSkinTypes.includes(`default`);
 	setJsFiles(tmpSkinTypes, C_DIR_SKIN, `skin`);
 
 	// 外部jsファイルの指定
-	const tmpCustomjs = _dosObj.customjs || (typeof g_presetCustomJs === C_TYP_STRING ? g_presetCustomJs : C_JSF_CUSTOM);
+	const tmpCustomjs = _dosObj.customjs || g_presetObj.customJs || C_JSF_CUSTOM;
 	setJsFiles(tmpCustomjs.split(`,`), C_DIR_JS);
 
 	// 外部cssファイルの指定
-	const tmpCustomcss = _dosObj.customcss || (typeof g_presetCustomCss === C_TYP_STRING ? g_presetCustomCss : ``);
+	const tmpCustomcss = _dosObj.customcss || g_presetObj.customCss || ``;
 	setJsFiles(tmpCustomcss.split(`,`), C_DIR_CSS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
 	g_titleLists.init.forEach(objName => {
 		const objUpper = toCapitalize(objName);
 		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
-			(typeof g_presetCustomDesignUse === C_TYP_OBJECT && (objName in g_presetCustomDesignUse) ?
-				setVal(g_presetCustomDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
+			(g_presetObj.customDesignUse !== undefined ?
+				setVal(g_presetObj.customDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
 	});
 
 	// 背景・マスクモーションのパス指定方法を他の設定に合わせる設定
-	const tmpSyncBackPath = (typeof g_presetSyncBackPath === C_TYP_BOOLEAN ? g_presetSyncBackPath : false);
+	const tmpSyncBackPath = setVal(g_presetObj.syncBackPath, false, C_TYP_BOOLEAN);
 	obj.syncBackPath = setVal(_dosObj.syncBackPath, tmpSyncBackPath, C_TYP_BOOLEAN);
 
 	return obj;
@@ -2862,8 +2864,8 @@ function updateImgType(_imgType) {
 	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
 	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
-	if (_imgType[1] === undefined && typeof g_presetOverrideExtension === C_TYP_STRING) {
-		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetOverrideExtension}`);
+	if (_imgType[1] === undefined && g_presetObj.overrideExtension !== undefined) {
+		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetObj.overrideExtension}`);
 	}
 	if (!g_isFile) {
 		g_imgInitList.forEach(img => preloadFile(`image`, g_imgObj[img]));
@@ -2874,11 +2876,11 @@ function updateImgType(_imgType) {
  * 独自で設定したラベルテキスト、オンマウステキスト、確認メッセージ定義を上書き
  */
 function updateLocalDesc() {
-	if (typeof g_local_lblNameObj === C_TYP_OBJECT && g_local_lblNameObj[g_localeObj.val] !== undefined) {
-		Object.keys(g_local_lblNameObj[g_localeObj.val]).forEach(property => g_lblNameObj[property] = g_local_lblNameObj[g_localeObj.val][property]);
+	if (g_presetObj.lblName !== undefined && g_presetObj.lblName[g_localeObj.val] !== undefined) {
+		Object.keys(g_presetObj.lblName[g_localeObj.val]).forEach(property => g_lblNameObj[property] = g_presetObj.lblName[g_localeObj.val][property]);
 	}
-	if (typeof g_local_msgObj === C_TYP_OBJECT && g_local_msgObj[g_localeObj.val] !== undefined) {
-		Object.keys(g_local_msgObj[g_localeObj.val]).forEach(property => g_msgObj[property] = g_local_msgObj[g_localeObj.val][property]);
+	if (g_presetObj.msg !== undefined && g_presetObj.msg[g_localeObj.val] !== undefined) {
+		Object.keys(g_presetObj.msg[g_localeObj.val]).forEach(property => g_msgObj[property] = g_presetObj.msg[g_localeObj.val][property]);
 	}
 }
 
@@ -2901,8 +2903,8 @@ function headerConvert(_dosObj) {
 		let tmpImgTypes = [];
 		if (hasVal(_dosObj.imgType)) {
 			tmpImgTypes = _dosObj.imgType.split(`$`);
-		} else if (typeof g_presetImageSets === C_TYP_OBJECT) {
-			tmpImgTypes = g_presetImageSets.concat();
+		} else if (g_presetObj.imageSets !== undefined) {
+			tmpImgTypes = g_presetObj.imageSets.concat();
 		}
 		if (tmpImgTypes.length > 0) {
 			tmpImgTypes.forEach((tmpImgType, j) => {
@@ -3005,8 +3007,8 @@ function headerConvert(_dosObj) {
 		obj.tuning = escapeHtmlForEnabledTag(tunings[0]);
 		obj.creatorUrl = (tunings.length > 1 ? tunings[1] : (typeof g_presetTuningUrl === C_TYP_STRING ? g_presetTuningUrl : ``));
 	} else {
-		obj.tuning = (typeof g_presetTuning === C_TYP_STRING ? escapeHtmlForEnabledTag(g_presetTuning) : `name`);
-		obj.creatorUrl = (typeof g_presetTuningUrl === C_TYP_STRING ? g_presetTuningUrl : ``);
+		obj.tuning = escapeHtmlForEnabledTag(setVal(g_presetObj.tuning, `name`, C_TYP_STRING));
+		obj.creatorUrl = setVal(g_presetObj.tuningUrl, ``, C_TYP_STRING);
 	}
 	obj.tuningInit = obj.tuning;
 
@@ -3028,8 +3030,7 @@ function headerConvert(_dosObj) {
 
 		const lifeData = (_name, _preData, _default) => {
 			const data = (_preData) ? _preData :
-				(typeof g_presetGauge === C_TYP_OBJECT && (_name in g_presetGauge) ?
-					g_presetGauge[_name] : _default);
+				(g_presetObj.gauge !== undefined ? g_presetObj.gauge[_name] : _default);
 			return setVal(data, _default, C_TYP_FLOAT);
 		};
 
@@ -3038,8 +3039,7 @@ function headerConvert(_dosObj) {
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
 			const border = (difDetails[difpos.border]) ? difDetails[difpos.border] :
-				(typeof g_presetGauge === C_TYP_OBJECT && (`Border` in g_presetGauge) ?
-					g_presetGauge.Border : `x`);
+				(g_presetObj.gauge !== undefined ? g_presetObj.gauge.Border : `x`);
 
 			obj.lifeBorders.push(border === `x` ? `x` : setVal(border, 70, C_TYP_FLOAT));
 			obj.lifeRecoverys.push(lifeData(`Recovery`, difDetails[difpos.recovery], 6));
@@ -3118,8 +3118,8 @@ function headerConvert(_dosObj) {
 	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
 	if (hasVal(_dosObj.defaultFrzColorUse)) {
 		obj.defaultFrzColorUse = setVal(_dosObj.defaultFrzColorUse, true, C_TYP_BOOLEAN);
-	} else if (typeof g_presetFrzColors === C_TYP_BOOLEAN) {
-		obj.defaultFrzColorUse = g_presetFrzColors;
+	} else if (g_presetObj.frzColors !== undefined) {
+		obj.defaultFrzColorUse = g_presetObj.frzColors;
 	} else {
 		obj.defaultFrzColorUse = true;
 	}
@@ -3133,8 +3133,8 @@ function headerConvert(_dosObj) {
 
 		if (hasVal(_dosObj.frzScopeFromAC)) {
 			tmpFrzScope.push(..._dosObj.frzScopeFromAC.split(`,`));
-		} else if (typeof g_presetFrzScopeFromAC === C_TYP_OBJECT) {
-			tmpFrzScope.push(...g_presetFrzScopeFromAC);
+		} else if (g_presetObj.frzScopeFromAC !== undefined) {
+			tmpFrzScope.push(...g_presetObj.frzScopeFromAC);
 		}
 		tmpFrzScope.filter(type => [`Normal`, `Hit`].includes(type))
 			.forEach(data => obj.frzScopeFromArrowColors.push(data));
@@ -3158,10 +3158,10 @@ function headerConvert(_dosObj) {
 	addGaugeFulls(g_gaugeOptionObj.survival);
 	addGaugeFulls(g_gaugeOptionObj.border);
 
-	if (typeof g_presetGaugeList === C_TYP_OBJECT) {
-		Object.keys(g_presetGaugeList).forEach(key => {
+	if (g_presetObj.gaugeList !== undefined) {
+		Object.keys(g_presetObj.gaugeList).forEach(key => {
 			g_gaugeOptionObj.customDefault.push(key);
-			g_gaugeOptionObj.varCustomDefault.push((g_presetGaugeList[key] !== `V` ? C_FLG_OFF : C_FLG_ON));
+			g_gaugeOptionObj.varCustomDefault.push((g_presetObj.gaugeList[key] !== `V` ? C_FLG_OFF : C_FLG_ON));
 		});
 		g_gaugeOptionObj.custom = g_gaugeOptionObj.customDefault.concat();
 		g_gaugeOptionObj.varCustom = g_gaugeOptionObj.varCustomDefault.concat();
@@ -3347,8 +3347,7 @@ function headerConvert(_dosObj) {
 	obj.titlelineheight = setVal(_dosObj.titlelineheight, ``, C_TYP_NUMBER);
 
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
-	obj.frzStartjdgUse = setVal(_dosObj.frzStartjdgUse,
-		(typeof g_presetFrzStartjdgUse === C_TYP_STRING ? setVal(g_presetFrzStartjdgUse, false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
+	obj.frzStartjdgUse = setVal(_dosObj.frzStartjdgUse || g_presetObj.frzStartjdgUse, false, C_TYP_BOOLEAN);
 
 	// 譜面名に制作者名を付加するかどうかのフラグ
 	obj.makerView = setVal(_dosObj.makerView, false, C_TYP_BOOLEAN);
@@ -3362,8 +3361,8 @@ function headerConvert(_dosObj) {
 	// オプション利用可否設定
 	g_canDisabledSettings.forEach(option => {
 		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
-			(typeof g_presetSettingUse === C_TYP_OBJECT ?
-				setVal(g_presetSettingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
+			(g_presetObj.settingUse !== undefined ?
+				setVal(g_presetObj.settingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
 	});
 
 	let interlockingErrorFlg = false;
@@ -3371,8 +3370,8 @@ function headerConvert(_dosObj) {
 
 		// Display使用可否設定を分解 |displayUse=false,ON|
 		const displayTempUse = setVal(_dosObj[`${option}Use`],
-			(typeof g_presetSettingUse === C_TYP_OBJECT ?
-				g_presetSettingUse[option] : `true`), C_TYP_STRING);
+			(g_presetObj.settingUse !== undefined ?
+				g_presetObj.settingUse[option] : `true`), C_TYP_STRING);
 		const displayUse = (displayTempUse !== undefined ? displayTempUse.split(`,`) : [true, C_FLG_ON]);
 
 		// displayUse -> ボタンの有効/無効, displaySet -> ボタンの初期値(ON/OFF)
@@ -3470,8 +3469,7 @@ function headerConvert(_dosObj) {
 	obj.commentExternal = setVal(_dosObj.commentExternal, false, C_TYP_BOOLEAN);
 
 	// Reverse時の歌詞の自動反転制御
-	obj.wordAutoReverse = setVal(_dosObj.wordAutoReverse,
-		(typeof g_presetWordAutoReverse === C_TYP_STRING ? setVal(g_presetWordAutoReverse, `auto`, C_TYP_STRING) : `auto`), C_TYP_STRING);
+	obj.wordAutoReverse = setVal(_dosObj.wordAutoReverse || g_presetObj.wordAutoReverse, `auto`, C_TYP_STRING);
 
 	// プレイサイズ(X方向)
 	obj.playingWidth = setVal(_dosObj.playingWidth, g_sWidth, C_TYP_NUMBER);
@@ -3487,19 +3485,18 @@ function headerConvert(_dosObj) {
 
 	// リザルトデータのカスタマイズ
 	const resultFormatDefault = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
-	obj.resultFormat = escapeHtmlForEnabledTag(setVal(_dosObj.resultFormat, (typeof g_presetResultFormat === C_TYP_STRING ?
-		setVal(g_presetResultFormat, resultFormatDefault, C_TYP_STRING) : resultFormatDefault), C_TYP_STRING));
+	obj.resultFormat = escapeHtmlForEnabledTag(setVal(_dosObj.resultFormat || g_presetObj.resultFormat, resultFormatDefault, C_TYP_STRING));
 
 	// フェードイン時にそれ以前のデータを蓄積しない種別(word, back, mask)を指定
 	obj.unStockCategories = setVal(_dosObj.unStockCategory, ``, C_TYP_STRING).split(`,`);
-	if (typeof g_presetUnStockCategories === C_TYP_OBJECT) {
-		obj.unStockCategories = makeDedupliArray(obj.unStockCategories, g_presetUnStockCategories);
+	if (g_presetObj.unStockCategories !== undefined) {
+		obj.unStockCategories = makeDedupliArray(obj.unStockCategories, g_presetObj.unStockCategories);
 	}
 	g_fadeinStockList = g_fadeinStockList.filter(cg => obj.unStockCategories.indexOf(cg) === -1);
 
 	// フェードイン時にそれ以前のデータを蓄積しないパターンを指定
-	if (typeof g_presetStockForceDelList === C_TYP_OBJECT) {
-		Object.assign(g_stockForceDelList, g_presetStockForceDelList);
+	if (g_presetObj.stockForceDelList !== undefined) {
+		Object.assign(g_stockForceDelList, g_presetObj.stockForceDelList);
 	}
 	g_fadeinStockList.forEach(type => {
 		if (hasVal(_dosObj[`${type}StockForceDel`])) {
@@ -3776,11 +3773,11 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 			}
 		}
 
-	} else if (typeof g_presetGaugeCustom === C_TYP_OBJECT && g_presetGaugeCustom[_name]) {
+	} else if (g_presetObj.gaugeCustom !== undefined && g_presetObj.gaugeCustom[_name]) {
 
 		const gaugeDetails = [
-			g_presetGaugeCustom[_name].Border, g_presetGaugeCustom[_name].Recovery,
-			g_presetGaugeCustom[_name].Damage, g_presetGaugeCustom[_name].Init,
+			g_presetObj.gaugeCustom[_name].Border, g_presetObj.gaugeCustom[_name].Recovery,
+			g_presetObj.gaugeCustom[_name].Damage, g_presetObj.gaugeCustom[_name].Init,
 		]
 		if (gaugeUpdateFlg) {
 			gaugeCreateFlg = setGaugeDetails(scoreId, gaugeDetails);
@@ -5236,8 +5233,8 @@ function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName)
  * @param {string} _name 
  */
 function getStgDetailName(_name) {
-	return g_lblNameObj[`u_${_name}`] !== undefined && (typeof g_lblRenames !== C_TYP_OBJECT ||
-		(typeof g_lblRenames === C_TYP_OBJECT && g_lblRenames[g_currentPage])) ? g_lblNameObj[`u_${_name}`] : _name;
+	return g_lblNameObj[`u_${_name}`] !== undefined &&
+		(g_presetObj.lblRenames === undefined || g_presetObj.lblRenames[g_currentPage]) ? g_lblNameObj[`u_${_name}`] : _name;
 }
 
 /**
@@ -10035,9 +10032,9 @@ function resultInit() {
 		.split(`[maxCombo]`).join(tweetMaxCombo)
 		.split(`[url]`).join(`${twiturl.toString()}`.replace(/[\t\n]/g, ``));
 
-	if (typeof g_presetResultVals === C_TYP_OBJECT) {
-		Object.keys(g_presetResultVals).forEach(key => {
-			tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_resultObj[g_presetResultVals[key]]);
+	if (g_presetObj.resultVals !== undefined) {
+		Object.keys(g_presetObj.resultVals).forEach(key => {
+			tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_resultObj[g_presetObj.resultVals[key]]);
 		});
 	}
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
