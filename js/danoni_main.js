@@ -5236,8 +5236,8 @@ function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName)
  * @param {string} _name 
  */
 function getStgDetailName(_name) {
-	return g_lblNameObj[`u_${_name}`] === undefined || typeof g_lblRenames !== C_TYP_OBJECT || !g_lblRenames[g_currentPage] ?
-		_name : g_lblNameObj[`u_${_name}`];
+	return g_lblNameObj[`u_${_name}`] !== undefined && (typeof g_lblRenames !== C_TYP_OBJECT ||
+		(typeof g_lblRenames === C_TYP_OBJECT && g_lblRenames[g_currentPage])) ? g_lblNameObj[`u_${_name}`] : _name;
 }
 
 /**
