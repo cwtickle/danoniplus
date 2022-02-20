@@ -1514,7 +1514,7 @@ function initAfterDosLoaded() {
 		}
 		g_headerObj.keyExtraList = keysConvert(g_rootObj, {
 			keyExtraList: (g_rootObj.keyExtraList !== undefined ?
-				makeDedupliArray(g_rootObj.keyExtraList, g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
+				makeDedupliArray(g_rootObj.keyExtraList.split(`,`), g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
 		});
 
 		// キー数情報を初期化
