@@ -4990,8 +4990,6 @@ function createOptionWindow(_sprite) {
 		// ---------------------------------------------------
 		// 1. キーコンフィグ設定 (KeyConfig)
 
-		// 特殊キーフラグ
-		g_stateObj.extraKeyFlg = false;
 
 		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 		const isNotSameKey = (g_keyObj.prevKey !== g_keyObj.currentKey);
@@ -4999,15 +4997,8 @@ function createOptionWindow(_sprite) {
 		if (g_headerObj.dummyScoreNos !== undefined) {
 			g_stateObj.dummyId = setVal(g_headerObj.dummyScoreNos[g_stateObj.scoreId], ``, C_TYP_NUMBER);
 		}
-
-		if (g_rootObj.keyExtraList !== undefined) {
-			g_rootObj.keyExtraList.split(`,`).some(extraKey => {
-				if (g_keyObj.currentKey === extraKey) {
-					g_stateObj.extraKeyFlg = true;
-					return true;
-				}
-			});
-		}
+		// 特殊キーフラグ
+		g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
 
 		// ---------------------------------------------------
 		// 2. 初期化設定
