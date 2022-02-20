@@ -244,7 +244,7 @@ const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length
  * @param {array} _array2 
  * @returns 
  */
-const makeDedupliArray = (_array1, _array2) =>
+const makeDedupliArray = (_array1, _array2 = []) =>
 	Array.from((new Set([..._array1, ..._array2])).values());
 
 /**
@@ -1508,7 +1508,14 @@ function initAfterDosLoaded() {
 
 		// 譜面ヘッダー、特殊キー情報の読込
 		Object.assign(g_headerObj, headerConvert(g_rootObj));
-		keysConvert(g_rootObj);
+		if (typeof g_presetKeysData === C_TYP_STRING) {
+			keysConvert(dosConvert(g_presetKeysData));
+			g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
+		}
+		g_headerObj.keyExtraList = keysConvert(g_rootObj, {
+			keyExtraList: (g_rootObj.keyExtraList !== undefined ?
+				makeDedupliArray(g_rootObj.keyExtraList, g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
+		});
 
 		// キー数情報を初期化
 		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
@@ -3067,8 +3074,9 @@ function headerConvert(_dosObj) {
 		obj.lifeInits = [25];
 		obj.creatorNames = [obj.tuning];
 	}
-	const keyLists = obj.keyLabels.filter((x, j, self) => self.indexOf(x) === j);
+	const keyLists = makeDedupliArray(obj.keyLabels);
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
+	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
 
 	// 譜面変更セレクターの利用有無
 	obj.difSelectorUse = (setVal(_dosObj.difSelectorUse, obj.keyLabels.length > 5, C_TYP_BOOLEAN));
@@ -3798,12 +3806,11 @@ const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyNam
  * 一時的な追加キーの設定
  * @param {object} _dosObj 
  */
-function keysConvert(_dosObj) {
+function keysConvert(_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) } = {}) {
 
-	if (_dosObj.keyExtraList === undefined) {
-		return;
+	if (keyExtraList === undefined) {
+		return [];
 	}
-	const keyExtraList = _dosObj.keyExtraList.split(`,`);
 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
 	const toString = _str => _str;
@@ -3996,6 +4003,8 @@ function keysConvert(_dosObj) {
 		// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
 		newKeyPairParam(newKey, `assist`, `assistPos`);
 	});
+
+	return keyExtraList;
 }
 
 
