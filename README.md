@@ -83,9 +83,9 @@ but the details are different from the conventional ones. See below for details.
 ## How to Contribute / 開発者の方へ 
 開発にご協力いただける方は、下記をご覧ください。GitHubアカウントの無い方でも協力できます！  
 If you would like to cooperate with the development, please see below. Even if you don't have a GitHub account, you can cooperate!
-- [貢献の仕方 / How to Contribute](https://github.com/cwtickle/blob/develop/.github/CONTRIBUTING.md)   
+- [貢献の仕方 / How to Contribute](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)   
 - [要望・不具合報告用Gitter](https://gitter.im/danonicw/community)
-- [コントリビューター / Contributors](https://github.com/cwtickle/blob/develop/CONTRIBUTORS.md)
+- [コントリビューター / Contributors](https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTORS.md)
 
 ## Community / コミュニティ
 - [Dancing☆Onigiri Discordサーバー](https://discord.gg/TegbHFY7zg)

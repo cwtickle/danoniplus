@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2022/01/26 (v25.5.1)
+ * Template Update: 2022/02/20 (v26.2.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -261,3 +261,35 @@ const g_presetStockForceDelList = {
 	back: [],
 	mask: [],
 };
+
+/**
+ * 特殊キー定義（共通）
+ * 指定方法は作品別に特殊キーを定義する方法と同じ（ただし、keyExtraList必須）
+ * 
+ * 定義方法は下記を参照のこと
+ * https://github.com/cwtickle/danoniplus/wiki/keys
+ * https://github.com/cwtickle/danoniplus/wiki/tips-0004-extrakeys
+ */
+/*
+const g_presetKeysData = `
+
+|keyExtraList=6,9v|
+|color6=0,1,0,1,0,2$2,0,1,0,1,0|
+|chara6=left,leftdia,down,rightdia,right,space$space,left,leftdia,down,rightdia,right|
+|div6=6$6|
+|stepRtn6=0,45,-90,135,180,onigiri$onigiri,0,45,-90,135,180|
+|keyCtrl6=75/0,79/0,76/0,80/0,187/0,32/0$32/0,75/0,79/0,76/0,80/0,187/0|
+|shuffle6=1,1,1,1,1,0$0,1,1,1,1,1|
+
+|chara9v=9B_0$9B_0|
+|color9v=1,0,1,0,2,0,1,0,1$9B_0|
+|div9v=9$9|
+|keyCtrl9v=52/0,82/0,70/0,86/0,32/0,78/0,74/0,73/0,57/0$9B_0|
+|pos9v=0,1,2,3,4,5,6,7,8$0,1,2,3,4,5,6,7,8|
+|scroll9v=---::1,1,-1,-1,-1,-1,-1,1,1/flat::1,1,1,1,1,1,1,1,1$9B_0|
+|shuffle9v=9B_0$9B_0|
+|stepRtn9v=90,120,150,180,onigiri,0,30,60,90$9B_0|
+|transKey9v=$9B|
+
+`;
+*/

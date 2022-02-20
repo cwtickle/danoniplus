@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/02/16
+ * Revised : 2022/02/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 26.1.2`;
-const g_revisedDate = `2022/02/16`;
+const g_version = `Ver 26.2.0`;
+const g_revisedDate = `2022/02/20`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -241,11 +241,11 @@ const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length
 /**
  * 重複を排除した配列の生成
  * @param {array} _array1 
- * @param {array} _array2 
+ * @param {...any} _arrays 
  * @returns 
  */
-const makeDedupliArray = (_array1, _array2) =>
-	Array.from((new Set([..._array1, ..._array2])).values());
+const makeDedupliArray = (_array1, ..._arrays) =>
+	Array.from((new Set([..._array1, ..._arrays.flat()])).values());
 
 /**
  * 部分一致検索（リストのいずれかに合致、大小文字問わず）
@@ -1508,7 +1508,14 @@ function initAfterDosLoaded() {
 
 		// 譜面ヘッダー、特殊キー情報の読込
 		Object.assign(g_headerObj, headerConvert(g_rootObj));
-		keysConvert(g_rootObj);
+		if (typeof g_presetKeysData === C_TYP_STRING) {
+			keysConvert(dosConvert(g_presetKeysData));
+			g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
+		}
+		g_headerObj.keyExtraList = keysConvert(g_rootObj, {
+			keyExtraList: (g_rootObj.keyExtraList !== undefined ?
+				makeDedupliArray(g_rootObj.keyExtraList.split(`,`), g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
+		});
 
 		// キー数情報を初期化
 		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
@@ -3067,8 +3074,9 @@ function headerConvert(_dosObj) {
 		obj.lifeInits = [25];
 		obj.creatorNames = [obj.tuning];
 	}
-	const keyLists = obj.keyLabels.filter((x, j, self) => self.indexOf(x) === j);
+	const keyLists = makeDedupliArray(obj.keyLabels);
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
+	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
 
 	// 譜面変更セレクターの利用有無
 	obj.difSelectorUse = (setVal(_dosObj.difSelectorUse, obj.keyLabels.length > 5, C_TYP_BOOLEAN));
@@ -3798,12 +3806,11 @@ const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyNam
  * 一時的な追加キーの設定
  * @param {object} _dosObj 
  */
-function keysConvert(_dosObj) {
+function keysConvert(_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) } = {}) {
 
-	if (_dosObj.keyExtraList === undefined) {
-		return;
+	if (keyExtraList === undefined) {
+		return [];
 	}
-	const keyExtraList = _dosObj.keyExtraList.split(`,`);
 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
 	const toString = _str => _str;
@@ -3996,6 +4003,8 @@ function keysConvert(_dosObj) {
 		// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
 		newKeyPairParam(newKey, `assist`, `assistPos`);
 	});
+
+	return keyExtraList;
 }
 
 
@@ -4981,8 +4990,6 @@ function createOptionWindow(_sprite) {
 		// ---------------------------------------------------
 		// 1. キーコンフィグ設定 (KeyConfig)
 
-		// 特殊キーフラグ
-		g_stateObj.extraKeyFlg = false;
 
 		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 		const isNotSameKey = (g_keyObj.prevKey !== g_keyObj.currentKey);
@@ -4990,15 +4997,8 @@ function createOptionWindow(_sprite) {
 		if (g_headerObj.dummyScoreNos !== undefined) {
 			g_stateObj.dummyId = setVal(g_headerObj.dummyScoreNos[g_stateObj.scoreId], ``, C_TYP_NUMBER);
 		}
-
-		if (g_rootObj.keyExtraList !== undefined) {
-			g_rootObj.keyExtraList.split(`,`).some(extraKey => {
-				if (g_keyObj.currentKey === extraKey) {
-					g_stateObj.extraKeyFlg = true;
-					return true;
-				}
-			});
-		}
+		// 特殊キーフラグ
+		g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
 
 		// ---------------------------------------------------
 		// 2. 初期化設定
@@ -5236,8 +5236,8 @@ function createLblSetting(_settingName, _adjY = 0, _settingLabel = _settingName)
  * @param {string} _name 
  */
 function getStgDetailName(_name) {
-	return g_lblNameObj[`u_${_name}`] === undefined || typeof g_lblRenames !== C_TYP_OBJECT || !g_lblRenames[g_currentPage] ?
-		_name : g_lblNameObj[`u_${_name}`];
+	return g_lblNameObj[`u_${_name}`] !== undefined && (typeof g_lblRenames !== C_TYP_OBJECT ||
+		(typeof g_lblRenames === C_TYP_OBJECT && g_lblRenames[g_currentPage])) ? g_lblNameObj[`u_${_name}`] : _name;
 }
 
 /**
