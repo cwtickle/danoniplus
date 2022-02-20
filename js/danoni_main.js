@@ -241,11 +241,11 @@ const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length
 /**
  * 重複を排除した配列の生成
  * @param {array} _array1 
- * @param {array} _array2 
+ * @param {...any} _arrays 
  * @returns 
  */
-const makeDedupliArray = (_array1, _array2 = []) =>
-	Array.from((new Set([..._array1, ..._array2])).values());
+const makeDedupliArray = (_array1, ..._arrays) =>
+	Array.from((new Set([..._array1, ..._arrays.flat()])).values());
 
 /**
  * 部分一致検索（リストのいずれかに合致、大小文字問わず）
