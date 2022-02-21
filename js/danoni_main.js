@@ -3003,10 +3003,10 @@ function headerConvert(_dosObj) {
 	if (hasVal(_dosObj.tuning)) {
 		const tunings = _dosObj.tuning.split(`,`);
 		obj.tuning = escapeHtmlForEnabledTag(tunings[0]);
-		obj.creatorUrl = (tunings.length > 1 ? tunings[1] : (g_presetObj?.tuningUrl ?? ``));
+		obj.creatorUrl = (tunings.length > 1 ? tunings[1] : (g_presetObj.tuningUrl ?? ``));
 	} else {
-		obj.tuning = escapeHtmlForEnabledTag(g_presetObj?.tuning ?? `name`);
-		obj.creatorUrl = g_presetObj?.tuningUrl ?? ``;
+		obj.tuning = escapeHtmlForEnabledTag(g_presetObj.tuning ?? `name`);
+		obj.creatorUrl = g_presetObj.tuningUrl ?? ``;
 	}
 	obj.tuningInit = obj.tuning;
 
@@ -3027,7 +3027,7 @@ function headerConvert(_dosObj) {
 		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
 
 		const lifeData = (_name, _preData, _default) => {
-			const data = _preData ? _preData : (g_presetObj?.gauge?.[_name] ?? _default);
+			const data = _preData ? _preData : (g_presetObj.gauge?.[_name] ?? _default);
 			return setVal(data, _default, C_TYP_FLOAT);
 		};
 
@@ -3036,7 +3036,7 @@ function headerConvert(_dosObj) {
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
 			const border = difDetails[difpos.border] ?
-				difDetails[difpos.border] : (g_presetObj?.gauge?.Border ?? `x`);
+				difDetails[difpos.border] : (g_presetObj.gauge?.Border ?? `x`);
 
 			obj.lifeBorders.push(border === `x` ? `x` : setVal(border, 70, C_TYP_FLOAT));
 			obj.lifeRecoverys.push(lifeData(`Recovery`, difDetails[difpos.recovery], 6));
@@ -3351,14 +3351,14 @@ function headerConvert(_dosObj) {
 
 	// オプション利用可否設定
 	g_canDisabledSettings.forEach(option => {
-		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`] ?? g_presetObj?.settingUse?.[option], true, C_TYP_BOOLEAN);
+		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`] ?? g_presetObj.settingUse?.[option], true, C_TYP_BOOLEAN);
 	});
 
 	let interlockingErrorFlg = false;
 	g_displays.forEach((option, j) => {
 
 		// Display使用可否設定を分解 |displayUse=false,ON|
-		const displayTempUse = setVal(_dosObj[`${option}Use`] ?? g_presetObj?.settingUse?.[option], `true`, C_TYP_STRING);
+		const displayTempUse = setVal(_dosObj[`${option}Use`] ?? g_presetObj.settingUse?.[option], `true`, C_TYP_STRING);
 		const displayUse = (displayTempUse !== undefined ? displayTempUse.split(`,`) : [true, C_FLG_ON]);
 
 		// displayUse -> ボタンの有効/無効, displaySet -> ボタンの初期値(ON/OFF)
@@ -3760,7 +3760,7 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 			}
 		}
 
-	} else if (g_presetObj?.gaugeCustom?.[_name] !== undefined) {
+	} else if (g_presetObj.gaugeCustom?.[_name] !== undefined) {
 
 		const gaugeDetails = [
 			g_presetObj.gaugeCustom[_name].Border, g_presetObj.gaugeCustom[_name].Recovery,
