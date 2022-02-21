@@ -10,25 +10,25 @@
  */
 
 // 譜面製作者名
-g_presetObj.tuning = `name`;
+const g_presetTuning = `name`;
 
 // 譜面製作者URL
-g_presetObj.tuningUrl = `https://www.google.co.jp/`;
+const g_presetTuningUrl = `https://www.google.co.jp/`;
 
 // 既定スキン (デフォルトは default)
-g_presetObj.skinType = `default`;
+const g_presetSkinType = `default`;
 
 // 既定カスタムJs (デフォルトは danoni_custom.js)
-// g_presetObj.customJs = `danoni_custom.js,danoni_init.js`;
+//const g_presetCustomJs = `danoni_custom.js,danoni_init.js`;
 
 // 既定カスタムCss (デフォルトは指定なし、cssフォルダを参照)
-// g_presetObj.customCss = `danoni_custom.css`;
+//const g_presetCustomCss = `danoni_custom.css`;
 
 // 背景・マスクモーションで使用する画像パスの指定方法を他の設定に合わせる設定 (trueで有効化)
-// g_presetObj.syncBackPath = true;
+// const g_presetSyncBackPath = true;
 
 // ゲージ設定（デフォルト）
-g_presetObj.gauge = {
+const g_presetGauge = {
 	//	Border: 70,  // ノルマ制でのボーダーライン、ライフ制にしたい場合は `x` を指定
 	//	Recovery: 2, // 回復量
 	//	Damage: 7,   // ダメージ量
@@ -36,17 +36,17 @@ g_presetObj.gauge = {
 };
 
 // フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
-g_presetObj.frzColors = true;
+const g_presetFrzColors = true;
 
 /**
 	矢印色変化に対応してフリーズアロー色を追随する範囲の設定 (Normal: 通常時、Hit: ヒット時)
-	※この設定は、g_presetObj.frzColors = false もしくは 
+	※この設定は、g_presetFrzColors = false もしくは 
 	譜面ヘッダー：defaultFrzColorUse=false のときにのみ有効です。
 */
-// g_presetObj.frzScopeFromAC = [`Normal`, `Hit`];
+// const g_presetFrzScopeFromAC = [`Normal`, `Hit`];
 
 // ゲージ設定（デフォルト以外）
-g_presetObj.gaugeCustom = {
+const g_presetGaugeCustom = {
 	Easy: {
 		Border: 70,
 		Recovery: 4,
@@ -83,7 +83,7 @@ g_presetObj.gaugeCustom = {
 // 'ゲージ名': `回復・ダメージ量設定`　の形式で指定します。
 // (F : 矢印数によらず固定, V: 矢印数により変動)
 /*
-g_presetObj.gaugeList = {
+const g_presetGaugeList = {
 	'Original': `F`,
 	'Normal': `V`,
 	'Hard': `V`,
@@ -92,7 +92,7 @@ g_presetObj.gaugeList = {
 
 // デフォルトのデザインを使用せず、独自のデザインを使用するかを指定
 // カスタムデザインにする場合は `true` を指定
-g_presetObj.customDesignUse = {
+const g_presetCustomDesignUse = {
 	title: `false`,
 	titleArrow: `false`,
 	titleAnimation: `false`,
@@ -103,7 +103,7 @@ g_presetObj.customDesignUse = {
 
 // オプション利用設定（デフォルト）
 // 一律使用させたくない場合は `false` を指定（デフォルトは `true`）
-g_presetObj.settingUse = {
+const g_presetSettingUse = {
 	motion: `true`,
 	scroll: `true`,
 	shuffle: `true`,
@@ -128,7 +128,7 @@ g_presetObj.settingUse = {
 
 // フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
 // 判定させる場合は `true` を指定
-g_presetObj.frzStartjdgUse = `false`;
+const g_presetFrzStartjdgUse = `false`;
 
 /*
 	デフォルト画像セットの設定
@@ -144,13 +144,13 @@ g_presetObj.frzStartjdgUse = `false`;
 	  Flat時ステップ間隔：50(px) ※矢印サイズ
 	  
 */
-// g_presetObj.imageSets = [``, `classic,png`, `classic-thin,png`, `note,svg,false,0`];
+// const g_presetImageSets = [``, `classic,png`, `classic-thin,png`, `note,svg,false,0`];
 
 // デフォルト画像セット (C_IMG_XXXX, 厳密にはg_imgObj) に対して拡張子の上書きを行うか設定
 // 文字列の後ろ3文字をカットして、下記の値を適用する。コメントアウトした場合は、上書きを行わない。
 // `svg`: デフォルト(svg形式)、`png`: 従来画像(png形式)
 
-// g_presetObj.overrideExtension = `svg`;
+// const g_presetOverrideExtension = `svg`;
 
 /**
  * 追加指定する画像のリスト（サーバ上の場合のみ有効）
@@ -160,7 +160,7 @@ g_presetObj.frzStartjdgUse = `false`;
  * `ball`と指定した場合、下記の画像を準備する必要あり
  * - ball.svg, ballShadow.svg, ballStepHit.svg (g_presetOverrideExtension を pngにすれば、pngに変更可)
  */
-// g_presetObj.customImageList = [`ball`, `square`];
+// const g_presetCustomImageList = [`ball`, `square`];
 
 /*
 	Reverse時の歌詞の自動反転制御設定
@@ -175,7 +175,7 @@ g_presetObj.frzStartjdgUse = `false`;
 	＜設定可能の値＞
 	`auto`(既定)：上記ルールに従い設定 / `OFF`: 上記ルールに関わらず反転しない / `ON`: 上記ルールに関わらず反転する
 */
-// g_presetObj.wordAutoReverse = `auto`;
+// const g_presetWordAutoReverse = `auto`;
 
 /*
 	リザルトデータのフォーマット設定
@@ -190,10 +190,10 @@ g_presetObj.frzStartjdgUse = `false`;
 	   [url]       scoreId付きURL
 */
 // デフォルトフォーマット
-// g_presetObj.resultFormat = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
+// const g_presetResultFormat = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
 
 // MFV2さんフォーマット（オプション設定なし・参考）
-// g_presetObj.resultFormat = `【#danoni[hashTag]】[musicTitle]/[keyLabel] /[maker] /[rank]/[arrowJdg]/[frzJdg]/Mc[maxCombo]/Sco[score]-[exScore] [url]`;
+// const g_presetResultFormat = `【#danoni[hashTag]】[musicTitle]/[keyLabel] /[maker] /[rank]/[arrowJdg]/[frzJdg]/Mc[maxCombo]/Sco[score]-[exScore] [url]`;
 
 /*
 	リザルトデータ用のカスタム変数群
@@ -204,7 +204,7 @@ g_presetObj.frzStartjdgUse = `false`;
 	   例) exScore: `exScores`,
 		   [exScore] -> g_resultObj.exScores
  */
-g_presetObj.resultVals = {
+const g_presetResultVals = {
 	// exScore: `exScore`,
 };
 
@@ -213,7 +213,7 @@ g_presetObj.resultVals = {
  * ※danoni_setting.js の他、customjsにも利用可
  * ※設定可能項目についてはdanoni_constants.jsをご覧ください。
  */
-g_presetObj.lblName = {
+const g_local_lblNameObj = {
 	Ja: {
 
 	},
@@ -227,7 +227,7 @@ g_presetObj.lblName = {
  * ※danoni_setting.js の他、customjsにも利用可
  * ※設定可能項目についてはdanoni_constants.jsをご覧ください。
  */
-g_presetObj.msg = {
+const g_local_msgObj = {
 	Ja: {
 
 	},
@@ -239,7 +239,7 @@ g_presetObj.msg = {
 /**
  * 設定名の上書き可否設定
  */
-g_presetObj.lblRenames = {
+const g_lblRenames = {
 	option: true,
 	settingsDisplay: true,
 	main: true,
@@ -250,13 +250,13 @@ g_presetObj.lblRenames = {
 /**
  * フェードイン時にそれ以前のデータを蓄積しない種別(word, back, mask)を指定
  */
-g_presetObj.unStockCategories = [];
+const g_presetUnStockCategories = [];
 
 /** 
  * フェードイン時、プリロードを強制削除するリスト（英字は小文字で指定）
  * 指定例) back: [`fade`]   ※back_dataでアニメーション名に'fade'や'Fade'を含む
  */
-g_presetObj.stockForceDelList = {
+const g_presetStockForceDelList = {
 	word: [],
 	back: [],
 	mask: [],
@@ -271,7 +271,7 @@ g_presetObj.stockForceDelList = {
  * https://github.com/cwtickle/danoniplus/wiki/tips-0004-extrakeys
  */
 /*
-g_presetObj.keysData = `
+const g_presetKeysData = `
 
 |keyExtraList=6,9v|
 |color6=0,1,0,1,0,2$2,0,1,0,1,0|

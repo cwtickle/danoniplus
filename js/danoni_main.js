@@ -113,8 +113,8 @@ let g_finishFlg = true;
 /** 共通オブジェクト */
 const g_loadObj = {};
 const g_rootObj = {};
+const g_presetObj = {};
 let g_headerObj = {};
-let g_presetObj = {};
 let g_scoreObj = {};
 let g_attrObj = {};
 let g_btnAddFunc = {};
@@ -721,7 +721,7 @@ function createColorObject2(_id,
 	style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
 	style.webkitMaskSize = `contain`;
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
-	setAttrs(div, { color: rest.background || ``, type: charaStyle, cnt: 0, });
+	setAttrs(div, { color: rest.background ?? ``, type: charaStyle, cnt: 0, });
 
 	return div;
 }
@@ -984,7 +984,7 @@ function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
 // WebAudioAPIでAudio要素風に再生するクラス
 class AudioPlayer {
 	constructor() {
-		const AudioContext = window.AudioContext || window.webkitAudioContext;
+		const AudioContext = window.AudioContext ?? window.webkitAudioContext;
 		this._context = new AudioContext();
 		this._gain = this._context.createGain();
 		this._gain.connect(this._context.destination);
@@ -1590,7 +1590,7 @@ function initAfterDosLoaded() {
  */
 function getMusicUrl(_scoreId) {
 	return g_headerObj.musicUrls !== undefined ?
-		g_headerObj.musicUrls[g_headerObj.musicNos[_scoreId]] ||
+		g_headerObj.musicUrls[g_headerObj.musicNos[_scoreId]] ??
 		g_headerObj.musicUrls[0] : `nosound.mp3`;
 }
 
@@ -1923,7 +1923,7 @@ const getFilePath = (_fileName, _directory = ``) => {
 function loadSettingJs() {
 
 	// 共通設定ファイルの指定
-	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType || ``, C_DIR_JS);
+	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType ?? ``, C_DIR_JS);
 	if (settingType !== ``) {
 		settingType = `_${settingType}`;
 	}
@@ -2828,30 +2828,28 @@ function preheaderConvert(_dosObj) {
 	};
 
 	// 外部スキンファイルの指定
-	const tmpSkinType = _dosObj.skinType || g_presetObj.skinType || `default`;
+	const tmpSkinType = _dosObj.skinType ?? g_presetObj.skinType ?? `default`;
 	const tmpSkinTypes = tmpSkinType.split(`,`);
 	obj.defaultSkinFlg = tmpSkinTypes.includes(`default`);
 	setJsFiles(tmpSkinTypes, C_DIR_SKIN, `skin`);
 
 	// 外部jsファイルの指定
-	const tmpCustomjs = _dosObj.customjs || g_presetObj.customJs || C_JSF_CUSTOM;
+	const tmpCustomjs = _dosObj.customjs ?? g_presetObj.customJs ?? C_JSF_CUSTOM;
 	setJsFiles(tmpCustomjs.split(`,`), C_DIR_JS);
 
 	// 外部cssファイルの指定
-	const tmpCustomcss = _dosObj.customcss || g_presetObj.customCss || ``;
+	const tmpCustomcss = _dosObj.customcss ?? g_presetObj.customCss ?? ``;
 	setJsFiles(tmpCustomcss.split(`,`), C_DIR_CSS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
 	g_titleLists.init.forEach(objName => {
 		const objUpper = toCapitalize(objName);
-		obj[`custom${objUpper}Use`] = setVal(_dosObj[`custom${objUpper}Use`],
-			(g_presetObj.customDesignUse !== undefined ?
-				setVal(g_presetObj.customDesignUse[objName], false, C_TYP_BOOLEAN) : false), C_TYP_BOOLEAN);
+		obj[`custom${objUpper}Use`] =
+			setVal(_dosObj[`custom${objUpper}Use`] ?? g_presetObj.customDesignUse?.[objName], false, C_TYP_BOOLEAN);
 	});
 
 	// 背景・マスクモーションのパス指定方法を他の設定に合わせる設定
-	const tmpSyncBackPath = setVal(g_presetObj.syncBackPath, false, C_TYP_BOOLEAN);
-	obj.syncBackPath = setVal(_dosObj.syncBackPath, tmpSyncBackPath, C_TYP_BOOLEAN);
+	obj.syncBackPath = setVal(_dosObj.syncBackPath ?? g_presetObj.syncBackPath, false, C_TYP_BOOLEAN);
 
 	return obj;
 }
@@ -2876,10 +2874,10 @@ function updateImgType(_imgType) {
  * 独自で設定したラベルテキスト、オンマウステキスト、確認メッセージ定義を上書き
  */
 function updateLocalDesc() {
-	if (g_presetObj.lblName !== undefined && g_presetObj.lblName[g_localeObj.val] !== undefined) {
+	if (g_presetObj.lblName?.[g_localeObj.val] !== undefined) {
 		Object.keys(g_presetObj.lblName[g_localeObj.val]).forEach(property => g_lblNameObj[property] = g_presetObj.lblName[g_localeObj.val][property]);
 	}
-	if (g_presetObj.msg !== undefined && g_presetObj.msg[g_localeObj.val] !== undefined) {
+	if (g_presetObj.msg?.[g_localeObj.val] !== undefined) {
 		Object.keys(g_presetObj.msg[g_localeObj.val]).forEach(property => g_msgObj[property] = g_presetObj.msg[g_localeObj.val][property]);
 	}
 }
@@ -2964,12 +2962,12 @@ function headerConvert(_dosObj) {
 		const musics = musicData[0].split(`,`);
 		obj.musicTitle = obj.musicTitles[0];
 		obj.musicTitleForView = obj.musicTitlesForView[0];
-		obj.artistName = obj.artistNames[0] || ``;
+		obj.artistName = obj.artistNames[0] ?? ``;
 		if (obj.artistName === ``) {
 			makeWarningWindow(g_msgInfoObj.E_0011);
 			obj.artistName = `artistName`;
 		}
-		obj.artistUrl = musics[2] || ``;
+		obj.artistUrl = musics[2] ?? ``;
 		if (musics[3] !== undefined) {
 			obj.musicTitles[0] = escapeHtml(getMusicNameSimple(musics[3]));
 			obj.musicTitlesForView[0] = escapeHtmlForArray(getMusicNameMultiLine(musics[3]));
@@ -3005,10 +3003,10 @@ function headerConvert(_dosObj) {
 	if (hasVal(_dosObj.tuning)) {
 		const tunings = _dosObj.tuning.split(`,`);
 		obj.tuning = escapeHtmlForEnabledTag(tunings[0]);
-		obj.creatorUrl = (tunings.length > 1 ? tunings[1] : (typeof g_presetTuningUrl === C_TYP_STRING ? g_presetTuningUrl : ``));
+		obj.creatorUrl = (tunings.length > 1 ? tunings[1] : (g_presetObj?.tuningUrl ?? ``));
 	} else {
-		obj.tuning = escapeHtmlForEnabledTag(setVal(g_presetObj.tuning, `name`, C_TYP_STRING));
-		obj.creatorUrl = setVal(g_presetObj.tuningUrl, ``, C_TYP_STRING);
+		obj.tuning = escapeHtmlForEnabledTag(g_presetObj?.tuning ?? `name`);
+		obj.creatorUrl = g_presetObj?.tuningUrl ?? ``;
 	}
 	obj.tuningInit = obj.tuning;
 
@@ -3029,8 +3027,7 @@ function headerConvert(_dosObj) {
 		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
 
 		const lifeData = (_name, _preData, _default) => {
-			const data = (_preData) ? _preData :
-				(g_presetObj.gauge !== undefined ? g_presetObj.gauge[_name] : _default);
+			const data = _preData ? _preData : (g_presetObj?.gauge?.[_name] ?? _default);
 			return setVal(data, _default, C_TYP_FLOAT);
 		};
 
@@ -3038,8 +3035,8 @@ function headerConvert(_dosObj) {
 			const difDetails = dif.split(`,`);
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
-			const border = (difDetails[difpos.border]) ? difDetails[difpos.border] :
-				(g_presetObj.gauge !== undefined ? g_presetObj.gauge.Border : `x`);
+			const border = difDetails[difpos.border] ?
+				difDetails[difpos.border] : (g_presetObj?.gauge?.Border ?? `x`);
 
 			obj.lifeBorders.push(border === `x` ? `x` : setVal(border, 70, C_TYP_FLOAT));
 			obj.lifeRecoverys.push(lifeData(`Recovery`, difDetails[difpos.recovery], 6));
@@ -3048,7 +3045,7 @@ function headerConvert(_dosObj) {
 
 			// キー数
 			const keyLabel = setVal(difDetails[difpos.key], `7`, C_TYP_STRING);
-			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] || keyLabel);
+			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] ?? keyLabel);
 
 			// 譜面名、制作者名
 			if (hasVal(difDetails[difpos.name])) {
@@ -3116,13 +3113,7 @@ function headerConvert(_dosObj) {
 	});
 
 	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
-	if (hasVal(_dosObj.defaultFrzColorUse)) {
-		obj.defaultFrzColorUse = setVal(_dosObj.defaultFrzColorUse, true, C_TYP_BOOLEAN);
-	} else if (g_presetObj.frzColors !== undefined) {
-		obj.defaultFrzColorUse = g_presetObj.frzColors;
-	} else {
-		obj.defaultFrzColorUse = true;
-	}
+	obj.defaultFrzColorUse = setVal(_dosObj.defaultFrzColorUse ?? g_presetObj.frzColors, true, C_TYP_BOOLEAN);
 
 	// 矢印色変化に対応してフリーズアロー色を追随する範囲の設定
 	// (defaultFrzColorUse=false時のみ)
@@ -3347,7 +3338,7 @@ function headerConvert(_dosObj) {
 	obj.titlelineheight = setVal(_dosObj.titlelineheight, ``, C_TYP_NUMBER);
 
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
-	obj.frzStartjdgUse = setVal(_dosObj.frzStartjdgUse || g_presetObj.frzStartjdgUse, false, C_TYP_BOOLEAN);
+	obj.frzStartjdgUse = setVal(_dosObj.frzStartjdgUse ?? g_presetObj.frzStartjdgUse, false, C_TYP_BOOLEAN);
 
 	// 譜面名に制作者名を付加するかどうかのフラグ
 	obj.makerView = setVal(_dosObj.makerView, false, C_TYP_BOOLEAN);
@@ -3360,25 +3351,21 @@ function headerConvert(_dosObj) {
 
 	// オプション利用可否設定
 	g_canDisabledSettings.forEach(option => {
-		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`],
-			(g_presetObj.settingUse !== undefined ?
-				setVal(g_presetObj.settingUse[option], true, C_TYP_BOOLEAN) : true), C_TYP_BOOLEAN);
+		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`] ?? g_presetObj?.settingUse?.[option], true, C_TYP_BOOLEAN);
 	});
 
 	let interlockingErrorFlg = false;
 	g_displays.forEach((option, j) => {
 
 		// Display使用可否設定を分解 |displayUse=false,ON|
-		const displayTempUse = setVal(_dosObj[`${option}Use`],
-			(g_presetObj.settingUse !== undefined ?
-				g_presetObj.settingUse[option] : `true`), C_TYP_STRING);
+		const displayTempUse = setVal(_dosObj[`${option}Use`] ?? g_presetObj?.settingUse?.[option], `true`, C_TYP_STRING);
 		const displayUse = (displayTempUse !== undefined ? displayTempUse.split(`,`) : [true, C_FLG_ON]);
 
 		// displayUse -> ボタンの有効/無効, displaySet -> ボタンの初期値(ON/OFF)
 		obj[`${option}Use`] = setVal(displayUse[0], true, C_TYP_BOOLEAN);
 		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] :
 			(obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF), ``, C_TYP_SWITCH);
-		g_stateObj[`d_${option.toLowerCase()}`] = (obj[`${option}Set`] !== `` ? obj[`${option}Set`] : C_FLG_ON);
+		g_stateObj[`d_${option.toLowerCase()}`] = setVal(obj[`${option}Set`], C_FLG_ON, C_TYP_SWITCH);
 		obj[`${option}ChainOFF`] = (_dosObj[`${option}ChainOFF`] !== undefined ? _dosObj[`${option}ChainOFF`].split(`,`) : []);
 
 		// Displayのデフォルト設定で、双方向に設定されている場合は設定をブロック
@@ -3469,7 +3456,7 @@ function headerConvert(_dosObj) {
 	obj.commentExternal = setVal(_dosObj.commentExternal, false, C_TYP_BOOLEAN);
 
 	// Reverse時の歌詞の自動反転制御
-	obj.wordAutoReverse = setVal(_dosObj.wordAutoReverse || g_presetObj.wordAutoReverse, `auto`, C_TYP_STRING);
+	obj.wordAutoReverse = setVal(_dosObj.wordAutoReverse ?? g_presetObj.wordAutoReverse, `auto`, C_TYP_STRING);
 
 	// プレイサイズ(X方向)
 	obj.playingWidth = setVal(_dosObj.playingWidth, g_sWidth, C_TYP_NUMBER);
@@ -3485,7 +3472,7 @@ function headerConvert(_dosObj) {
 
 	// リザルトデータのカスタマイズ
 	const resultFormatDefault = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
-	obj.resultFormat = escapeHtmlForEnabledTag(setVal(_dosObj.resultFormat || g_presetObj.resultFormat, resultFormatDefault, C_TYP_STRING));
+	obj.resultFormat = escapeHtmlForEnabledTag(setVal(_dosObj.resultFormat ?? g_presetObj.resultFormat, resultFormatDefault, C_TYP_STRING));
 
 	// フェードイン時にそれ以前のデータを蓄積しない種別(word, back, mask)を指定
 	obj.unStockCategories = setVal(_dosObj.unStockCategory, ``, C_TYP_STRING).split(`,`);
@@ -3773,7 +3760,7 @@ function getGaugeSetting(_dosObj, _name, _difLength, { scoreId = 0 } = {}) {
 			}
 		}
 
-	} else if (g_presetObj.gaugeCustom !== undefined && g_presetObj.gaugeCustom[_name]) {
+	} else if (g_presetObj?.gaugeCustom?.[_name] !== undefined) {
 
 		const gaugeDetails = [
 			g_presetObj.gaugeCustom[_name].Border, g_presetObj.gaugeCustom[_name].Recovery,
