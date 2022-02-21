@@ -3014,7 +3014,7 @@ function headerConvert(_dosObj) {
 	if (hasVal(_dosObj.difData)) {
 		const difs = _dosObj.difData.split(`$`);
 		const difpos = {
-			key: 0, name: 1, speed: 2, border: 3, recovery: 4, damage: 5, init: 6,
+			Key: 0, Name: 1, Speed: 2, Border: 3, Recovery: 4, Damage: 5, Init: 6,
 		};
 		obj.keyLabels = [];
 		obj.difLabels = [];
@@ -3026,30 +3026,24 @@ function headerConvert(_dosObj) {
 		obj.creatorNames = [];
 		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
 
-		const lifeData = (_name, _preData, _default) => {
-			const data = _preData ? _preData : (g_presetObj.gauge?.[_name] ?? _default);
-			return setVal(data, _default, C_TYP_FLOAT);
-		};
-
 		difs.forEach(dif => {
 			const difDetails = dif.split(`,`);
+			const lifeData = (_type, _default) =>
+				setVal(difDetails[difpos[_type]] || g_presetObj.gauge?.[_type], _default, C_TYP_FLOAT);
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
-			const border = difDetails[difpos.border] ?
-				difDetails[difpos.border] : (g_presetObj.gauge?.Border ?? `x`);
-
-			obj.lifeBorders.push(border === `x` ? `x` : setVal(border, 70, C_TYP_FLOAT));
-			obj.lifeRecoverys.push(lifeData(`Recovery`, difDetails[difpos.recovery], 6));
-			obj.lifeDamages.push(lifeData(`Damage`, difDetails[difpos.damage], 40));
-			obj.lifeInits.push(lifeData(`Init`, difDetails[difpos.init], 25));
+			obj.lifeBorders.push(lifeData(`Border`, `x`));
+			obj.lifeRecoverys.push(lifeData(`Recovery`, 6));
+			obj.lifeDamages.push(lifeData(`Damage`, 40));
+			obj.lifeInits.push(lifeData(`Init`, 25));
 
 			// キー数
-			const keyLabel = difDetails[difpos.key] ?? `7`;
+			const keyLabel = difDetails[difpos.Key] ?? `7`;
 			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] ?? keyLabel);
 
 			// 譜面名、制作者名
-			if (hasVal(difDetails[difpos.name])) {
-				const difNameInfo = difDetails[difpos.name].split(`::`);
+			if (hasVal(difDetails[difpos.Name])) {
+				const difNameInfo = difDetails[difpos.Name].split(`::`);
 				obj.difLabels.push(escapeHtml(difNameInfo[0] ?? `Normal`));
 				obj.creatorNames.push(difNameInfo.length > 1 ? escapeHtml(difNameInfo[1]) : obj.tuning);
 			} else {
@@ -3058,7 +3052,7 @@ function headerConvert(_dosObj) {
 			}
 
 			// 初期速度
-			obj.initSpeeds.push(setVal(difDetails[difpos.speed], 3.5, C_TYP_FLOAT));
+			obj.initSpeeds.push(setVal(difDetails[difpos.Speed], 3.5, C_TYP_FLOAT));
 		});
 	} else {
 		makeWarningWindow(g_msgInfoObj.E_0021);
