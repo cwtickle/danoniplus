@@ -9,25 +9,49 @@
  * 譜面データ側で |tuning=washoi| とするとその作品には製作者名として「washoi」が設定されます。
  */
 
-// 譜面製作者名
+
+/*
+------------------------------------------------------------------------
+   制作者クレジット 
+   https://github.com/cwtickle/danoniplus/wiki/dos-s0001-makerInfo 
+------------------------------------------------------------------------
+*/
+
+/** 譜面製作者名 */
 g_presetObj.tuning = `name`;
 
-// 譜面製作者URL
+/** 譜面製作者URL */
 g_presetObj.tuningUrl = `https://www.google.co.jp/`;
 
-// 既定スキン (デフォルトは default)
+
+/*
+------------------------------------------------------------------------
+   カスタムファイル設定 
+   https://github.com/cwtickle/danoniplus/wiki/dos-s0002-customFile
+------------------------------------------------------------------------
+*/
+
+/** 既定スキン (デフォルトは default) */
 g_presetObj.skinType = `default`;
 
-// 既定カスタムJs (デフォルトは danoni_custom.js)
-// g_presetObj.customJs = `danoni_custom.js,danoni_init.js`;
+/** 既定カスタムJs (デフォルトは danoni_custom.js) */
+//g_presetObj.customJs = `danoni_custom.js,danoni_init.js`;
 
-// 既定カスタムCss (デフォルトは指定なし、cssフォルダを参照)
-// g_presetObj.customCss = `danoni_custom.css`;
+/** 既定カスタムCss (デフォルトは指定なし、cssフォルダを参照) */
+//g_presetObj.customCss = `danoni_custom.css`;
 
-// 背景・マスクモーションで使用する画像パスの指定方法を他の設定に合わせる設定 (trueで有効化)
-// g_presetObj.syncBackPath = true;
+/** 背景・マスクモーションで使用する画像パスの指定方法を他の設定に合わせる設定 (trueで有効化) */
+//g_presetObj.syncBackPath = true;
 
-// ゲージ設定（デフォルト）
+
+/*
+------------------------------------------------------------------------
+   ゲージ設定 
+   https://github.com/cwtickle/danoniplus/wiki/dos-s0003-initialGauge
+------------------------------------------------------------------------
+*/
+
+/** ゲージ設定（デフォルト）*/
 g_presetObj.gauge = {
 	//	Border: 70,  // ノルマ制でのボーダーライン、ライフ制にしたい場合は `x` を指定
 	//	Recovery: 2, // 回復量
@@ -35,17 +59,7 @@ g_presetObj.gauge = {
 	//	Init: 25,    // 初期値
 };
 
-// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
-g_presetObj.frzColors = true;
-
-/**
-	矢印色変化に対応してフリーズアロー色を追随する範囲の設定 (Normal: 通常時、Hit: ヒット時)
-	※この設定は、g_presetObj.frzColors = false もしくは 
-	譜面ヘッダー：defaultFrzColorUse=false のときにのみ有効です。
-*/
-// g_presetObj.frzScopeFromAC = [`Normal`, `Hit`];
-
-// ゲージ設定（デフォルト以外）
+/** ゲージ設定（デフォルト以外）*/
 g_presetObj.gaugeCustom = {
 	Easy: {
 		Border: 70,
@@ -79,15 +93,48 @@ g_presetObj.gaugeCustom = {
 	}
 };
 
-// カスタムゲージ設定(デフォルト)
-// 'ゲージ名': `回復・ダメージ量設定`　の形式で指定します。
-// (F : 矢印数によらず固定, V: 矢印数により変動)
+/** 
+  カスタムゲージ設定(デフォルト)
+  'ゲージ名': `回復・ダメージ量設定`　の形式で指定します。
+  (F : 矢印数によらず固定, V: 矢印数により変動)
+*/
 /*
 g_presetObj.gaugeList = {
 	'Original': `F`,
 	'Normal': `V`,
 	'Hard': `V`,
 };
+*/
+
+/*
+------------------------------------------------------------------------
+   フリーズアロー設定 
+   https://github.com/cwtickle/danoniplus/wiki/dos-s0004-frzArrow
+------------------------------------------------------------------------
+*/
+
+/** フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット) */
+g_presetObj.frzColors = true;
+
+/**
+  矢印色変化に対応してフリーズアロー色を追随する範囲の設定 (Normal: 通常時、Hit: ヒット時)
+  ※この設定は、g_presetObj.frzColors = false もしくは
+	譜面ヘッダー：defaultFrzColorUse=false のときにのみ有効です。
+*/
+//g_presetObj.frzScopeFromAC = [`Normal`, `Hit`];
+
+/**
+  フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
+  判定させる場合は `true` を指定
+*/
+g_presetObj.frzStartjdgUse = `false`;
+
+
+/*
+------------------------------------------------------------------------
+   デフォルトデザイン・画像設定
+   https://github.com/cwtickle/danoniplus/wiki/dos-s0005-defaultDesign
+------------------------------------------------------------------------
 */
 
 // デフォルトのデザインを使用せず、独自のデザインを使用するかを指定
@@ -101,8 +148,50 @@ g_presetObj.customDesignUse = {
 	ready: `false`,
 }
 
-// オプション利用設定（デフォルト）
-// 一律使用させたくない場合は `false` を指定（デフォルトは `true`）
+/**
+  デフォルト画像セットの設定
+  (セット対象のフォルダ名, 拡張子, 画像回転有無(true or false), Flat時ステップ間隔の順に指定)
+
+  事前に、[img]フォルダ配下にセット対象のサブフォルダを作成し、その中に一式を入れておく必要あり
+  下記の場合は[classic]フォルダに[png]形式の画像一式をデフォルト画像セットとして使用する
+
+  未指定の場合のデフォルト値は以下の通り
+	セット対象のフォルダ名：`` (imgフォルダ直下)
+	拡張子：`svg`形式
+	画像回転有無：true(回転有り)
+	Flat時ステップ間隔：50(px) ※矢印サイズ
+*/
+//g_presetObj.imageSets = [``, `classic,png`, `classic-thin,png`, `note,svg,false,0`];
+
+/**
+  デフォルト画像セット (C_IMG_XXXX, 厳密にはg_imgObj) に対して拡張子の上書きを行うか設定
+  文字列の後ろ3文字をカットして、下記の値を適用する。コメントアウトした場合は、上書きを行わない。
+	`svg`: デフォルト(svg形式)、`png`: 従来画像(png形式)
+*/
+//g_presetObj.overrideExtension = `svg`;
+
+/**
+  追加指定する画像のリスト（サーバ上の場合のみ有効）
+  ここで設定した画像をimgフォルダに指定した名前で格納しておくことで、
+  stepRtnX_Yで設定する名前に使用することができる
+
+  `ball`と指定した場合、下記の画像を準備する必要あり
+	- ball.svg, ballShadow.svg, ballStepHit.svg (g_presetOverrideExtension を pngにすれば、pngに変更可)
+*/
+//g_presetObj.customImageList = [`ball`, `square`];
+
+
+/*
+------------------------------------------------------------------------
+   オプション有効化
+   https://github.com/cwtickle/danoniplus/wiki/dos-s0006-settingUse
+------------------------------------------------------------------------
+*/
+
+/**
+  オプション利用設定（デフォルト）
+  一律使用させたくない場合は `false` を指定（デフォルトは `true`）
+*/
 g_presetObj.settingUse = {
 	motion: `true`,
 	scroll: `true`,
@@ -126,56 +215,50 @@ g_presetObj.settingUse = {
 	//	special: `true`,
 };
 
-// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
-// 判定させる場合は `true` を指定
-g_presetObj.frzStartjdgUse = `false`;
-
 /*
-	デフォルト画像セットの設定
-	(セット対象のフォルダ名, 拡張子, 画像回転有無(true or false), Flat時ステップ間隔の順に指定)
-
-	事前に、[img]フォルダ配下にセット対象のサブフォルダを作成し、その中に一式を入れておく必要あり
-	下記の場合は[classic]フォルダに[png]形式の画像一式をデフォルト画像セットとして使用する
-
-	未指定の場合のデフォルト値は以下の通り
-	  セット対象のフォルダ名：`` (imgフォルダ直下)
-	  拡張子：`svg`形式
-	  画像回転有無：true(回転有り)
-	  Flat時ステップ間隔：50(px) ※矢印サイズ
-	  
+------------------------------------------------------------------------
+   プレイ画面制御
+   https://github.com/cwtickle/danoniplus/wiki/dos-s0007-viewControl
+------------------------------------------------------------------------
 */
-// g_presetObj.imageSets = [``, `classic,png`, `classic-thin,png`, `note,svg,false,0`];
-
-// デフォルト画像セット (C_IMG_XXXX, 厳密にはg_imgObj) に対して拡張子の上書きを行うか設定
-// 文字列の後ろ3文字をカットして、下記の値を適用する。コメントアウトした場合は、上書きを行わない。
-// `svg`: デフォルト(svg形式)、`png`: 従来画像(png形式)
-
-// g_presetObj.overrideExtension = `svg`;
 
 /**
- * 追加指定する画像のリスト（サーバ上の場合のみ有効）
- * ここで設定した画像をimgフォルダに指定した名前で格納しておくことで、
- * stepRtnX_Yで設定する名前に使用することができる
- * 
- * `ball`と指定した場合、下記の画像を準備する必要あり
- * - ball.svg, ballShadow.svg, ballStepHit.svg (g_presetOverrideExtension を pngにすれば、pngに変更可)
- */
-// g_presetObj.customImageList = [`ball`, `square`];
+  Reverse時の歌詞の自動反転制御設定
 
-/*
-	Reverse時の歌詞の自動反転制御設定
-
-	通常は以下の条件でReverseが指定された場合、歌詞表示を反転します。
-	この設定をどのように制御するか設定します。
+  通常は以下の条件でReverseが指定された場合、歌詞表示を反転します。
+  この設定をどのように制御するか設定します。
 	・上下スクロールを挟まないキーに限定（5key, 7key, 7ikey, 9A/9Bkeyなど）
 	・リバース・スクロール拡張用の歌詞表示（wordRev_data / wordAlt_data）が設定されていない作品
 	・SETTINGS 画面で Reverse：ON、Scroll：--- (指定なし) を指定してプレイ開始した場合
 	・歌詞表示がすべて1段表示の場合
 
-	＜設定可能の値＞
+  ＜設定可能の値＞
 	`auto`(既定)：上記ルールに従い設定 / `OFF`: 上記ルールに関わらず反転しない / `ON`: 上記ルールに関わらず反転する
 */
-// g_presetObj.wordAutoReverse = `auto`;
+//g_presetObj.wordAutoReverse = `auto`;
+
+/**
+ * フェードイン時にそれ以前のデータを蓄積しない種別(word, back, mask)を指定
+ */
+g_presetObj.unStockCategories = [];
+
+/** 
+ * フェードイン時、プリロードを強制削除するリスト（英字は小文字で指定）
+ * 指定例) back: [`fade`]   ※back_dataでアニメーション名に'fade'や'Fade'を含む
+ */
+g_presetObj.stockForceDelList = {
+	word: [],
+	back: [],
+	mask: [],
+};
+
+
+/*
+------------------------------------------------------------------------
+   リザルトデータ
+   https://github.com/cwtickle/danoniplus/wiki/dos-s0008-resultVals
+------------------------------------------------------------------------
+*/
 
 /*
 	リザルトデータのフォーマット設定
@@ -207,6 +290,14 @@ g_presetObj.frzStartjdgUse = `false`;
 g_presetObj.resultVals = {
 	// exScore: `exScore`,
 };
+
+
+/*
+------------------------------------------------------------------------
+   ラベルテキスト・メッセージの上書き
+   https://github.com/cwtickle/danoniplus/wiki/dos-s0009-labelUpdate
+------------------------------------------------------------------------
+*/
 
 /**
  * ラベルテキスト (g_lblNameObj) に対応するプロパティを上書きする設定
@@ -247,24 +338,17 @@ g_presetObj.lblRenames = {
 	result: true,
 };
 
-/**
- * フェードイン時にそれ以前のデータを蓄積しない種別(word, back, mask)を指定
- */
-g_presetObj.unStockCategories = [];
 
-/** 
- * フェードイン時、プリロードを強制削除するリスト（英字は小文字で指定）
- * 指定例) back: [`fade`]   ※back_dataでアニメーション名に'fade'や'Fade'を含む
- */
-g_presetObj.stockForceDelList = {
-	word: [],
-	back: [],
-	mask: [],
-};
+/*
+------------------------------------------------------------------------
+   カスタムキー定義
+   https://github.com/cwtickle/danoniplus/wiki/dos-s0010-customKeys
+------------------------------------------------------------------------
+*/
 
 /**
- * 特殊キー定義（共通）
- * 指定方法は作品別に特殊キーを定義する方法と同じ（ただし、keyExtraList必須）
+ * カスタムキー定義（共通）
+ * 指定方法は作品別にカスタムキーを定義する方法と同じ（ただし、keyExtraList必須）
  * 
  * 定義方法は下記を参照のこと
  * https://github.com/cwtickle/danoniplus/wiki/keys
