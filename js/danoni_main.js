@@ -1386,6 +1386,10 @@ async function loadBaseFiles() {
 	const skinList = g_headerObj.jsData.filter(file => file[0].indexOf(`danoni_skin`) !== -1);
 	await loadMultipleFiles2(skinList, `css`);
 
+	// JSファイルの読み込み
+	await loadMultipleFiles2(g_headerObj.jsData, `js`);
+	loadLegacyCustomFunc();
+
 	// 譜面ヘッダー、特殊キー情報の読込
 	Object.assign(g_headerObj, headerConvert(g_rootObj));
 	if (g_presetObj.keysData !== undefined) {
@@ -1450,9 +1454,7 @@ async function loadBaseFiles() {
 	}
 
 	if (g_loadObj.main) {
-		// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
-		await loadMultipleFiles2(g_headerObj.jsData, `js`);
-		loadLegacyCustomFunc();
+		// 譜面詳細情報取得のために譜面をロード
 		loadDos(_ => getScoreDetailData(0), 0, true);
 	} else {
 		getScoreDetailData(0);
