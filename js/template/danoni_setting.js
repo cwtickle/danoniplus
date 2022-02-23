@@ -1,11 +1,11 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2022/02/20 (v26.2.0)
+ * Template Update: 2022/02/23 (v26.3.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
- * 例えばこのファイルで g_presetTuning = `onigiri` とすると全ての作品に製作者名として「onigiri」が設定されますが、
+ * 例えばこのファイルで g_presetObj.tuning = `onigiri` とすると全ての作品に製作者名として「onigiri」が設定されますが、
  * 譜面データ側で |tuning=washoi| とするとその作品には製作者名として「washoi」が設定されます。
  */
 
