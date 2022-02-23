@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 26.3.0`;
+const g_version = `Ver 26.3.1`;
 const g_revisedDate = `2022/02/23`;
 const g_alphaVersion = ``;
 
@@ -1494,7 +1494,7 @@ function loadLocalStorage() {
 		g_localeObj.val = g_langStorage.locale;
 		g_localeObj.num = g_localeObj.list.findIndex(val => val === g_localeObj.val);
 	}
-	Object.keys(g_lang_msgInfoObj[g_localeObj.val]).forEach(property => g_msgInfoObj[property] = g_lang_msgInfoObj[g_localeObj.val][property]);
+	Object.assign(g_msgInfoObj, g_lang_msgInfoObj[g_localeObj.val]);
 
 	// 作品別ローカルストレージの読込
 	const checkStorage = localStorage.getItem(g_localStorageUrl);
@@ -2937,18 +2937,6 @@ function updateImgType(_imgType) {
 }
 
 /**
- * 独自で設定したラベルテキスト、オンマウステキスト、確認メッセージ定義を上書き
- */
-function updateLocalDesc() {
-	if (g_presetObj.lblName?.[g_localeObj.val] !== undefined) {
-		Object.keys(g_presetObj.lblName[g_localeObj.val]).forEach(property => g_lblNameObj[property] = g_presetObj.lblName[g_localeObj.val][property]);
-	}
-	if (g_presetObj.msg?.[g_localeObj.val] !== undefined) {
-		Object.keys(g_presetObj.msg[g_localeObj.val]).forEach(property => g_msgObj[property] = g_presetObj.msg[g_localeObj.val][property]);
-	}
-}
-
-/**
  * 譜面ヘッダーの分解（その他の設定）
  * @param {object} _dosObj 譜面データオブジェクト
  */
@@ -2999,9 +2987,8 @@ function headerConvert(_dosObj) {
 	}
 
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
-	Object.keys(g_lang_lblNameObj[g_localeObj.val]).forEach(property => g_lblNameObj[property] = g_lang_lblNameObj[g_localeObj.val][property]);
-	Object.keys(g_lang_msgObj[g_localeObj.val]).forEach(property => g_msgObj[property] = g_lang_msgObj[g_localeObj.val][property]);
-	updateLocalDesc();
+	Object.assign(g_lblNameObj, g_lang_lblNameObj[g_localeObj.val], g_presetObj.lblName?.[g_localeObj.val]);
+	Object.assign(g_msgObj, g_lang_msgObj[g_localeObj.val], g_presetObj.msg?.[g_localeObj.val]);
 
 	// 曲名
 	obj.musicTitles = [];
