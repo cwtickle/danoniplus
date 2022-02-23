@@ -549,7 +549,6 @@ function importCssFile(_href, _func) {
  * CSSファイルの読み込み (Promise)
  * デフォルトは danoni_skin_default.css を読み込む
  * @param {url} _href 
- * @param {function} _func
  */
 function importCssFile2(_href) {
 	const baseUrl = _href.split(`?`)[0];
@@ -1957,7 +1956,6 @@ function loadMultipleFiles(_j, _fileData, _loadType, _afterFunc = _ => true) {
  * js, cssファイルの連続読込 (async function)
  * @param {array} _fileData 
  * @param {string} _loadType
- * @param {function} _afterFunc 
  */
 async function loadMultipleFiles2(_fileData, _loadType) {
 
