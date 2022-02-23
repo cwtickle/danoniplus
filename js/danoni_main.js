@@ -49,19 +49,16 @@ const current = _ => {
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
 
-window.onload = _ => {
+window.onload = async () => {
 	g_loadObj.main = true;
 	g_currentPage = `initial`;
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	const randTime = new Date().getTime();
-	loadScript(`${g_rootPath}../js/lib/danoni_localbinary.js?${randTime}`, _ => {
-		loadScript(`${g_rootPath}../js/lib/danoni_constants.js?${randTime}`, _ => {
-			loadScript(`${g_rootPath}../js/lib/danoni_legacy_function.js?${randTime}`, _ => {
-				initialControl();
-			}, false);
-		});
-	}, false);
+	await loadScript2(`${g_rootPath}../js/lib/danoni_localbinary.js?${randTime}`, false);
+	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${randTime}`);
+	await loadScript2(`${g_rootPath}../js/lib/danoni_legacy_function.js?${randTime}`, false);
+	initialControl();
 };
 
 /*-----------------------------------------------------------*/
@@ -525,8 +522,9 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 }
 
 /**
- * CSSファイルの読み込み（danoni_main.css以外）
+ * CSSファイルの読み込み (callback)
  * デフォルトは danoni_skin_default.css を読み込む
+ * @deprecated v27以降非推奨予定
  * @param {url} _href 
  * @param {function} _func
  */
@@ -545,6 +543,31 @@ function importCssFile(_href, _func) {
 		_func();
 	};
 	document.head.appendChild(link);
+}
+
+/**
+ * CSSファイルの読み込み (Promise)
+ * デフォルトは danoni_skin_default.css を読み込む
+ * @param {url} _href 
+ */
+function importCssFile2(_href) {
+	const baseUrl = _href.split(`?`)[0];
+	g_loadObj[baseUrl] = false;
+
+	return new Promise(resolve => {
+		const link = document.createElement(`link`);
+		link.rel = `stylesheet`;
+		link.href = _href;
+		link.onload = _ => {
+			g_loadObj[baseUrl] = true;
+			resolve(link);
+		};
+		link.onerror = _ => {
+			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(baseUrl), { resetFlg: `title` });
+			resolve(link);
+		};
+		document.head.appendChild(link);
+	});
 }
 
 /**
@@ -953,8 +976,9 @@ function clearWindow(_redrawFlg = false, _customDisplayName = ``) {
 }
 
 /**
- * 外部jsファイルの読込
+ * 外部jsファイルの読込 (callback)
  * 読込可否を g_loadObj[ファイル名] で管理 (true: 読込成功, false: 読込失敗)
+ * @deprecated v27以降非推奨予定
  * @param {string} _url 
  * @param {function} _callback 
  * @param {boolean} _requiredFlg (default : true / 読込必須)
@@ -979,6 +1003,38 @@ function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
 		}
 	};
 	document.querySelector(`head`).appendChild(script);
+}
+
+/**
+ * 外部jsファイルの読込 (Promise)
+ * 読込可否を g_loadObj[ファイル名] で管理 (true: 読込成功, false: 読込失敗)
+ * @param {string} _url 
+ * @param {boolean} _requiredFlg (default : true / 読込必須)
+ * @param {string} _charset (default : UTF-8)
+ */
+function loadScript2(_url, _requiredFlg = true, _charset = `UTF-8`) {
+	const baseUrl = _url.split(`?`)[0];
+	g_loadObj[baseUrl] = false;
+
+	return new Promise((resolve, reject) => {
+		const script = document.createElement(`script`);
+		script.type = `text/javascript`;
+		script.src = _url;
+		script.charset = _charset;
+		script.onload = _ => {
+			g_loadObj[baseUrl] = true;
+			resolve(script);
+		};
+		script.onerror = _err => {
+			if (_requiredFlg) {
+				makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(_url.split(`?`)[0]));
+				reject(_err);
+			} else {
+				resolve(script);
+			}
+		};
+		document.querySelector(`head`).appendChild(script);
+	});
 }
 
 // WebAudioAPIでAudio要素風に再生するクラス
@@ -1290,7 +1346,120 @@ function initialControl() {
 	loadLocalStorage();
 
 	// 譜面データの読み込み
-	loadDos(_ => loadSettingJs(), 0);
+	loadDos(_ => loadBaseFiles(), 0);
+}
+
+/**
+ * 共通設定ファイル、スキンファイル、カスタムファイルの読込
+ */
+async function loadBaseFiles() {
+
+	// 共通設定ファイルの指定
+	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType ?? ``, C_DIR_JS);
+	if (settingType !== ``) {
+		settingType = `_${settingType}`;
+	}
+
+	// 共通設定ファイルの読込
+	const randTime = new Date().getTime();
+	await loadScript2(`${settingRoot}danoni_setting${settingType}.js?${randTime}`, false);
+	loadLegacySettingFunc();
+	if (document.querySelector(`#lblLoading`) !== null) {
+		divRoot.removeChild(document.querySelector(`#lblLoading`));
+	}
+
+	// クエリで譜面番号が指定されていればセット
+	g_stateObj.scoreId = setVal(getQueryParamVal(`scoreId`), 0, C_TYP_NUMBER);
+
+	// 譜面ヘッダーの読込
+	Object.assign(g_headerObj, preheaderConvert(g_rootObj));
+
+	// CSSファイル内のbackgroundを取得するために再描画
+	if (document.querySelector(`#layer0`) === null) {
+		divRoot.removeChild(document.querySelector(`#divBack`));
+		createEmptySprite(divRoot, `divBack`);
+	} else if (!g_headerObj.defaultSkinFlg && !g_headerObj.customBackUse) {
+		createEmptySprite(divRoot, `divBack`);
+	}
+
+	// CSSファイルの読み込み
+	const skinList = g_headerObj.jsData.filter(file => file[0].indexOf(`danoni_skin`) !== -1);
+	await loadMultipleFiles2(skinList, `css`);
+
+	// JSファイルの読み込み
+	await loadMultipleFiles2(g_headerObj.jsData, `js`);
+	loadLegacyCustomFunc();
+
+	// 譜面ヘッダー、特殊キー情報の読込
+	Object.assign(g_headerObj, headerConvert(g_rootObj));
+	if (g_presetObj.keysData !== undefined) {
+		keysConvert(dosConvert(g_presetObj.keysData));
+		g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
+	}
+	g_headerObj.keyExtraList = keysConvert(g_rootObj, {
+		keyExtraList: (g_rootObj.keyExtraList !== undefined ?
+			makeDedupliArray(g_rootObj.keyExtraList.split(`,`), g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
+	});
+
+	// キー数情報を初期化
+	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
+	g_keyObj.currentPtn = 0;
+
+	// 画像ファイルの読み込み
+	g_imgInitList.forEach(img => preloadFile(`image`, g_imgObj[img]));
+
+	// その他の画像ファイルの読み込み
+	g_headerObj.preloadImages.filter(image => hasVal(image)).forEach(preloadImage => {
+
+		// Pattern A: |preloadImages=file.png|
+		// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
+		// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
+		// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
+
+		const tmpPreloadImages = preloadImage.split(`@`);
+		if (tmpPreloadImages.length === 1) {
+			// Pattern Aの場合
+			preloadFile(`image`, preloadImage);
+		} else {
+			const termRoopCnts = tmpPreloadImages[1].split(`-`);
+			let startCnt = 1;
+			let lastCnt;
+			let paddingLen;
+
+			if (termRoopCnts.length === 1) {
+				// Pattern Bの場合
+				lastCnt = setVal(tmpPreloadImages[1], 1, C_TYP_NUMBER);
+				paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
+			} else {
+				// Pattern C, Dの場合
+				startCnt = setVal(termRoopCnts[0], 1, C_TYP_NUMBER);
+				lastCnt = setVal(termRoopCnts[1], 1, C_TYP_NUMBER);
+				paddingLen = String(setVal(termRoopCnts[1], 1, C_TYP_STRING)).length;
+			}
+			for (let k = startCnt; k <= lastCnt; k++) {
+				preloadFile(`image`, tmpPreloadImages[0].replace(/\*/g, String(k).padStart(paddingLen, `0`)));
+			}
+		}
+	});
+
+	// ローカルファイル起動時に各種警告文を表示
+	if (g_isFile) {
+		makeWarningWindow(g_msgInfoObj.W_0011);
+		if (!listMatching(getMusicUrl(g_stateObj.scoreId), [`.js`, `.txt`], { suffix: `$` })) {
+			if (g_userAgent.indexOf(`firefox`) !== -1) {
+				makeWarningWindow(g_msgInfoObj.W_0001);
+			}
+			makeWarningWindow(g_msgInfoObj.W_0012);
+		}
+	}
+
+	if (g_loadObj.main) {
+		// 譜面詳細情報取得のために譜面をロード
+		loadDos(_ => getScoreDetailData(0), 0, true);
+	} else {
+		getScoreDetailData(0);
+		reloadDos(0);
+	}
 }
 
 /**
@@ -1358,7 +1527,7 @@ function loadLocalStorage() {
  * @param {number} _scoreId 譜面番号
  * @param {boolean} _cyclicFlg 再読込フラグ（譜面詳細情報取得用、再帰的にloadDosを呼び出す）
  */
-function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) {
+async function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) {
 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
@@ -1411,37 +1580,36 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 			`${filenameCommon}${setScoreIdHeader(_scoreId)}.${filenameExtension}`);
 
 		const randTime = new Date().getTime();
-		loadScript(`${filename}?${randTime}`, _ => {
-			if (typeof externalDosInit === C_TYP_FUNCTION) {
-				if (document.querySelector(`#lblLoading`) !== null) {
-					divRoot.removeChild(document.querySelector(`#lblLoading`));
-				}
-
-				// 外部データを読込（ファイルが見つからなかった場合は譜面追記をスキップ）
-				externalDosInit();
-				if (g_loadObj[filename]) {
-					Object.assign(g_rootObj, dosConvert(g_externalDos));
-				}
-
-			} else {
-				makeWarningWindow(g_msgInfoObj.E_0022);
+		await loadScript2(`${filename}?${randTime}`, false, charset);
+		if (typeof externalDosInit === C_TYP_FUNCTION) {
+			if (document.querySelector(`#lblLoading`) !== null) {
+				divRoot.removeChild(document.querySelector(`#lblLoading`));
 			}
-			_afterFunc();
-			if (_cyclicFlg) {
-				if (g_stateObj.dosDivideFlg && _scoreId > 0) {
-					// 初期矢印・フリーズアロー色の再定義
-					if (g_stateObj.scoreLockFlg) {
-						Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
-					}
-					Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
 
-					// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
-					Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
-					Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
-				}
-				reloadDos(_scoreId);
+			// 外部データを読込（ファイルが見つからなかった場合は譜面追記をスキップ）
+			externalDosInit();
+			if (g_loadObj[filename]) {
+				Object.assign(g_rootObj, dosConvert(g_externalDos));
 			}
-		}, false, charset);
+
+		} else {
+			makeWarningWindow(g_msgInfoObj.E_0022);
+		}
+		_afterFunc();
+		if (_cyclicFlg) {
+			if (g_stateObj.dosDivideFlg && _scoreId > 0) {
+				// 初期矢印・フリーズアロー色の再定義
+				if (g_stateObj.scoreLockFlg) {
+					Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
+				}
+				Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
+
+				// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
+				Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
+				Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
+			}
+			reloadDos(_scoreId);
+		}
 	}
 }
 
@@ -1477,110 +1645,6 @@ function copySetColor(_baseObj, _scoreId) {
 		});
 	});
 	return obj;
-}
-
-/**
- * 初回読込後に画像プリロードを設定する処理
- */
-function initAfterDosLoaded() {
-
-	// クエリで譜面番号が指定されていればセット
-	g_stateObj.scoreId = setVal(getQueryParamVal(`scoreId`), 0, C_TYP_NUMBER);
-
-	// 譜面ヘッダーの読込
-	Object.assign(g_headerObj, preheaderConvert(g_rootObj));
-
-	// CSSファイル内のbackgroundを取得するために再描画
-	if (document.querySelector(`#layer0`) === null) {
-		divRoot.removeChild(document.querySelector(`#divBack`));
-		createEmptySprite(divRoot, `divBack`);
-	} else if (!g_headerObj.defaultSkinFlg && !g_headerObj.customBackUse) {
-		createEmptySprite(divRoot, `divBack`);
-	}
-
-	// CSSファイルの読み込み
-	const skinList = g_headerObj.jsData.filter(file => file[0].indexOf(`danoni_skin`) !== -1);
-	loadMultipleFiles(0, skinList, `css`, _ => initAfterCssLoaded());
-
-	/**
-	 * スキンCSSファイルを読み込んだ後の処理
-	 */
-	function initAfterCssLoaded() {
-
-		// 譜面ヘッダー、特殊キー情報の読込
-		Object.assign(g_headerObj, headerConvert(g_rootObj));
-		if (g_presetObj.keysData !== undefined) {
-			keysConvert(dosConvert(g_presetObj.keysData));
-			g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
-		}
-		g_headerObj.keyExtraList = keysConvert(g_rootObj, {
-			keyExtraList: (g_rootObj.keyExtraList !== undefined ?
-				makeDedupliArray(g_rootObj.keyExtraList.split(`,`), g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
-		});
-
-		// キー数情報を初期化
-		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-		g_keyObj.currentPtn = 0;
-
-		// 画像ファイルの読み込み
-		g_imgInitList.forEach(img => preloadFile(`image`, g_imgObj[img]));
-
-		// その他の画像ファイルの読み込み
-		g_headerObj.preloadImages.filter(image => hasVal(image)).forEach(preloadImage => {
-
-			// Pattern A: |preloadImages=file.png|
-			// Pattern B: |preloadImages=file*.png@10|  -> file01.png ~ file10.png
-			// Pattern C: |preloadImages=file*.png@2-9| -> file2.png  ~ file9.png
-			// Pattern D: |preloadImages=file*.png@003-018| -> file003.png  ~ file018.png
-
-			const tmpPreloadImages = preloadImage.split(`@`);
-			if (tmpPreloadImages.length === 1) {
-				// Pattern Aの場合
-				preloadFile(`image`, preloadImage);
-			} else {
-				const termRoopCnts = tmpPreloadImages[1].split(`-`);
-				let startCnt = 1;
-				let lastCnt;
-				let paddingLen;
-
-				if (termRoopCnts.length === 1) {
-					// Pattern Bの場合
-					lastCnt = setVal(tmpPreloadImages[1], 1, C_TYP_NUMBER);
-					paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
-				} else {
-					// Pattern C, Dの場合
-					startCnt = setVal(termRoopCnts[0], 1, C_TYP_NUMBER);
-					lastCnt = setVal(termRoopCnts[1], 1, C_TYP_NUMBER);
-					paddingLen = String(setVal(termRoopCnts[1], 1, C_TYP_STRING)).length;
-				}
-				for (let k = startCnt; k <= lastCnt; k++) {
-					preloadFile(`image`, tmpPreloadImages[0].replace(/\*/g, String(k).padStart(paddingLen, `0`)));
-				}
-			}
-		});
-
-		// ローカルファイル起動時に各種警告文を表示
-		if (g_isFile) {
-			makeWarningWindow(g_msgInfoObj.W_0011);
-			if (!listMatching(getMusicUrl(g_stateObj.scoreId), [`.js`, `.txt`], { suffix: `$` })) {
-				if (g_userAgent.indexOf(`firefox`) !== -1) {
-					makeWarningWindow(g_msgInfoObj.W_0001);
-				}
-				makeWarningWindow(g_msgInfoObj.W_0012);
-			}
-		}
-
-		if (g_loadObj.main) {
-			// customjsの読み込み後、譜面詳細情報取得のために譜面をロード
-			loadMultipleFiles(0, g_headerObj.jsData, `js`, _ => {
-				loadLegacyCustomFunc();
-				loadDos(_ => getScoreDetailData(0), 0, true);
-			});
-		} else {
-			getScoreDetailData(0);
-			reloadDos(0);
-		}
-	}
 }
 
 /**
@@ -1862,7 +1926,8 @@ function calcLevel(_scoreObj) {
 }
 
 /**
- * jsファイルの連続読込
+ * js, cssファイルの連続読込 (callback)
+ * @deprecated v27以降非推奨予定
  * @param {number} _j 
  * @param {array} _fileData 
  * @param {string} _loadType
@@ -1887,6 +1952,28 @@ function loadMultipleFiles(_j, _fileData, _loadType, _afterFunc = _ => true) {
 	} else {
 		_afterFunc();
 	}
+}
+
+/**
+ * js, cssファイルの連続読込 (async function)
+ * @param {array} _fileData 
+ * @param {string} _loadType
+ */
+async function loadMultipleFiles2(_fileData, _loadType) {
+	await Promise.all(_fileData.map(async filePart => {
+		const filePath = `${filePart[1]}${filePart[0]}?${new Date().getTime()}`;
+		if (filePart[0].endsWith(`.css`)) {
+			_loadType = `css`;
+		}
+
+		// jsファイル、cssファイルにより呼び出す関数を切替
+		if (_loadType === `js`) {
+			await loadScript2(filePath, false);
+		} else if (_loadType === `css`) {
+			const cssPath = filePath.split(`.js`).join(`.css`);
+			await importCssFile2(cssPath);
+		}
+	}));
 }
 
 /**
@@ -1916,27 +2003,6 @@ const getFilePath = (_fileName, _directory = ``) => {
 		return getFolderAndType(_fileName, _fileName.lastIndexOf(`/`), _directory);
 	}
 };
-
-/**
- * danoni_setting.jsの読込
- */
-function loadSettingJs() {
-
-	// 共通設定ファイルの指定
-	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType ?? ``, C_DIR_JS);
-	if (settingType !== ``) {
-		settingType = `_${settingType}`;
-	}
-
-	const randTime = new Date().getTime();
-	loadScript(`${settingRoot}danoni_setting${settingType}.js?${randTime}`, _ => {
-		loadLegacySettingFunc();
-		if (document.querySelector(`#lblLoading`) !== null) {
-			divRoot.removeChild(document.querySelector(`#lblLoading`));
-		}
-		initAfterDosLoaded();
-	}, false);
-}
 
 function loadMusic() {
 
