@@ -1958,8 +1958,7 @@ function loadMultipleFiles(_j, _fileData, _loadType, _afterFunc = _ => true) {
  * @param {string} _loadType
  */
 async function loadMultipleFiles2(_fileData, _loadType) {
-
-	_fileData.forEach(filePart => {
+	await Promise.all(_fileData.map(async filePart => {
 		const filePath = `${filePart[1]}${filePart[0]}?${new Date().getTime()}`;
 		if (filePart[0].endsWith(`.css`)) {
 			_loadType = `css`;
@@ -1972,7 +1971,7 @@ async function loadMultipleFiles2(_fileData, _loadType) {
 			const cssPath = filePath.split(`.js`).join(`.css`);
 			await importCssFile2(cssPath);
 		}
-	});
+	}));
 }
 
 /**
