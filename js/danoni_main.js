@@ -1303,7 +1303,7 @@ const transTimerToFrame = _str => {
 /* Scene : TITLE [melon] */
 /*-----------------------------------------------------------*/
 
-function initialControl() {
+async function initialControl() {
 
 	[g_sWidth, g_sHeight] = [
 		setVal($id(`canvas-frame`).width, 600, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
@@ -1345,14 +1345,8 @@ function initialControl() {
 	// 作品別ローカルストレージの読み込み
 	loadLocalStorage();
 
-	// 譜面データの読み込み
-	loadDos(_ => loadBaseFiles(), 0);
-}
-
-/**
- * 共通設定ファイル、スキンファイル、カスタムファイルの読込
- */
-async function loadBaseFiles() {
+	// 譜面データの読み込み(1ファイル目)
+	await loadChartFile(0);
 
 	// 共通設定ファイルの指定
 	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType ?? ``, C_DIR_JS);
@@ -1453,13 +1447,16 @@ async function loadBaseFiles() {
 		}
 	}
 
+	getScoreDetailData(0);
 	if (g_loadObj.main) {
 		// 譜面詳細情報取得のために譜面をロード
-		loadDos(_ => getScoreDetailData(0), 0, true);
-	} else {
-		getScoreDetailData(0);
-		reloadDos(0);
+		for (let j = 1; j < g_headerObj.keyLabels.length; j++) {
+			await loadChartFile(j);
+			getScoreDetailData(j);
+			resetColorAndGauge(j);
+		}
 	}
+	titleInit();
 }
 
 /**
@@ -1523,11 +1520,9 @@ function loadLocalStorage() {
 
 /**
  * 譜面読込
- * @param {function} _afterFunc 実行後の処理
  * @param {number} _scoreId 譜面番号
- * @param {boolean} _cyclicFlg 再読込フラグ（譜面詳細情報取得用、再帰的にloadDosを呼び出す）
  */
-async function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) {
+async function loadChartFile(_scoreId = g_stateObj.scoreId) {
 
 	const dosInput = document.querySelector(`#dos`);
 	const externalDosInput = document.querySelector(`#externalDos`);
@@ -1538,7 +1533,6 @@ async function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = f
 	if (dosInput === null && queryDos === ``) {
 		makeWarningWindow(g_msgInfoObj.E_0023);
 		g_loadObj.main = false;
-		_afterFunc();
 		return;
 	}
 
@@ -1557,12 +1551,6 @@ async function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = f
 	// HTML埋め込みdos
 	if (dosInput !== null) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
-		if (queryDos === ``) {
-			_afterFunc();
-			if (_cyclicFlg) {
-				reloadDos(_scoreId);
-			}
-		}
 	}
 
 	// 外部dos読み込み
@@ -1595,36 +1583,24 @@ async function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = f
 		} else {
 			makeWarningWindow(g_msgInfoObj.E_0022);
 		}
-		_afterFunc();
-		if (_cyclicFlg) {
-			if (g_stateObj.dosDivideFlg && _scoreId > 0) {
-				// 初期矢印・フリーズアロー色の再定義
-				if (g_stateObj.scoreLockFlg) {
-					Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
-				}
-				Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
-
-				// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
-				Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
-				Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
-			}
-			reloadDos(_scoreId);
-		}
 	}
 }
 
 /**
- * 譜面情報の再取得を行う（譜面詳細情報取得用）
- * @param {number} _scoreId 
+ * 譜面をファイルで分割している場合に初期色やゲージ情報を追加取得
+ * @param {string} _scoreId 
  */
-function reloadDos(_scoreId) {
-	_scoreId++;
-	if (g_headerObj.keyLabels !== undefined && _scoreId < g_headerObj.keyLabels.length) {
-		loadDos(_ => {
-			getScoreDetailData(_scoreId);
-		}, _scoreId, true);
-	} else {
-		titleInit();
+function resetColorAndGauge(_scoreId) {
+	if (g_stateObj.dosDivideFlg && _scoreId > 0) {
+		// 初期矢印・フリーズアロー色の再定義
+		if (g_stateObj.scoreLockFlg) {
+			Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
+		}
+		Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
+
+		// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
+		Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
+		Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
 	}
 }
 
@@ -6337,164 +6313,164 @@ function changeSetColor() {
 /**
  * 読込画面初期化
  */
-function loadingScoreInit() {
+async function loadingScoreInit() {
+
 	// 譜面データの読み込み
-	loadDos(_ => {
-		const tkObj = getKeyInfo();
-		const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
-		g_headerObj.blankFrame = g_headerObj.blankFrameDef;
+	await loadChartFile();
+	const tkObj = getKeyInfo();
+	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
+	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
-		// ユーザカスタムイベント
-		g_customJsObj.preloading.forEach(func => func());
-		g_skinJsObj.preloading.forEach(func => func());
+	// ユーザカスタムイベント
+	g_customJsObj.preloading.forEach(func => func());
+	g_skinJsObj.preloading.forEach(func => func());
 
-		let dummyIdHeader = ``;
-		if (g_stateObj.dummyId !== ``) {
-			if (g_stateObj.dummyId === 0 || g_stateObj.dummyId === 1) {
-				dummyIdHeader = ``;
-			} else {
-				dummyIdHeader = g_stateObj.dummyId;
-			}
+	let dummyIdHeader = ``;
+	if (g_stateObj.dummyId !== ``) {
+		if (g_stateObj.dummyId === 0 || g_stateObj.dummyId === 1) {
+			dummyIdHeader = ``;
+		} else {
+			dummyIdHeader = g_stateObj.dummyId;
 		}
-		g_scoreObj = scoreConvert(g_rootObj, g_stateObj.scoreId, 0, dummyIdHeader);
+	}
+	g_scoreObj = scoreConvert(g_rootObj, g_stateObj.scoreId, 0, dummyIdHeader);
 
-		// 最終フレーム数の取得
-		let lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
+	// 最終フレーム数の取得
+	let lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
 
-		// 最初の矢印データがあるフレーム数を取得
-		let firstArrowFrame = getFirstArrowFrame(g_scoreObj);
+	// 最初の矢印データがあるフレーム数を取得
+	let firstArrowFrame = getFirstArrowFrame(g_scoreObj);
 
-		// 開始フレーム数の取得(フェードイン加味)
-		g_scoreObj.frameNum = getStartFrame(lastFrame, g_stateObj.fadein);
-		g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
+	// 開始フレーム数の取得(フェードイン加味)
+	g_scoreObj.frameNum = getStartFrame(lastFrame, g_stateObj.fadein);
+	g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
 
-		// フレームごとの速度を取得（配列形式）
-		let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
+	// フレームごとの速度を取得（配列形式）
+	let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
 
-		// Motionオプション適用時の矢印別の速度を取得（配列形式）
-		const motionOnFrame = setMotionOnFrame();
-		g_workObj.motionOnFrames = copyArray2d(motionOnFrame);
+	// Motionオプション適用時の矢印別の速度を取得（配列形式）
+	const motionOnFrame = setMotionOnFrame();
+	g_workObj.motionOnFrames = copyArray2d(motionOnFrame);
 
-		// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
-		const firstFrame = (g_scoreObj.frameNum === 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
-		let arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
+	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
+	const firstFrame = (g_scoreObj.frameNum === 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
+	let arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
 
-		// キーパターン(デフォルト)に対応する矢印番号を格納
-		convertreplaceNums();
+	// キーパターン(デフォルト)に対応する矢印番号を格納
+	convertreplaceNums();
 
-		const setData = (_data, _minLength = 1) => {
-			return (hasArrayList(_data, _minLength) ? _data.concat() : []);
-		}
+	const setData = (_data, _minLength = 1) => {
+		return (hasArrayList(_data, _minLength) ? _data.concat() : []);
+	}
 
-		// フレーム・曲開始位置調整
-		let preblankFrame = 0;
-		if (g_scoreObj.frameNum === 0) {
-			if (firstArrowFrame - C_MAX_ADJUSTMENT < arrivalFrame) {
-				preblankFrame = arrivalFrame - firstArrowFrame + C_MAX_ADJUSTMENT;
+	// フレーム・曲開始位置調整
+	let preblankFrame = 0;
+	if (g_scoreObj.frameNum === 0) {
+		if (firstArrowFrame - C_MAX_ADJUSTMENT < arrivalFrame) {
+			preblankFrame = arrivalFrame - firstArrowFrame + C_MAX_ADJUSTMENT;
 
-				// 譜面データの再読み込み
-				const noteExistObj = {
-					arrow: true,
-					frz: true,
-					dummyArrow: g_stateObj.shuffle === C_FLG_OFF,
-					dummyFrz: g_stateObj.shuffle === C_FLG_OFF,
-				};
-				const tmpObj = scoreConvert(g_rootObj, g_stateObj.scoreId, preblankFrame, dummyIdHeader);
-				for (let j = 0; j < keyNum; j++) {
-					Object.keys(noteExistObj).forEach(name => {
-						if (tmpObj[`${name}Data`][j] !== undefined && noteExistObj[name]) {
-							g_scoreObj[`${name}Data`][j] = copyArray2d(tmpObj[`${name}Data`][j]);
-						}
-					});
-				}
-
-				Object.keys(g_dataMinObj).forEach(dataType => {
-					g_scoreObj[`${dataType}Data`] = setData(tmpObj[`${dataType}Data`], g_dataMinObj[dataType]);
-				});
-
-				lastFrame += preblankFrame;
-				firstArrowFrame += preblankFrame;
-				speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
-				arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
-				g_headerObj.blankFrame += preblankFrame;
-			}
-		}
-
-		// シャッフルグループ未定義の場合
-		if (g_keyObj[`shuffle${keyCtrlPtn}`] === undefined) {
-			g_keyObj[`shuffle${keyCtrlPtn}`] = [...Array(keyNum)].fill(0);
-		}
-
-		// シャッフルグループを扱いやすくする
-		// [0, 0, 0, 1, 0, 0, 0] -> [[0, 1, 2, 4, 5, 6], [3]]
-		const shuffleGroupMap = {};
-		g_keyObj[`shuffle${keyCtrlPtn}`].forEach((_val, _i) => {
-			if (shuffleGroupMap[_val] === undefined) {
-				shuffleGroupMap[_val] = [];
+			// 譜面データの再読み込み
+			const noteExistObj = {
+				arrow: true,
+				frz: true,
+				dummyArrow: g_stateObj.shuffle === C_FLG_OFF,
+				dummyFrz: g_stateObj.shuffle === C_FLG_OFF,
 			};
-			shuffleGroupMap[_val].push(_i);
-		});
-
-		// Mirror,Random,S-Randomの適用
-		g_shuffleFunc[g_stateObj.shuffle](keyNum, Object.values(shuffleGroupMap));
-
-		// アシスト用の配列があれば、ダミーデータで上書き
-		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
-			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
-			const assistArray = g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay];
+			const tmpObj = scoreConvert(g_rootObj, g_stateObj.scoreId, preblankFrame, dummyIdHeader);
 			for (let j = 0; j < keyNum; j++) {
-				if (assistArray[j] === 1) {
-					g_scoreObj.dummyArrowData[j] = g_scoreObj.arrowData[j].concat();
-					g_scoreObj.arrowData[j] = [];
-					g_scoreObj.dummyFrzData[j] = g_scoreObj.frzData[j].concat();
-					g_scoreObj.frzData[j] = [];
-				} else {
-					g_scoreObj.dummyArrowData[j] = [];
-					g_scoreObj.dummyFrzData[j] = [];
-				}
-			}
-		}
-
-		// 矢印・フリーズアロー数をカウント
-		g_allArrow = 0;
-		g_allFrz = 0;
-		g_scoreObj.arrowData.forEach(data => g_allArrow += data.length);
-		g_scoreObj.frzData.forEach(data => g_allFrz += data.length);
-
-		// ライフ回復・ダメージ量の計算
-		// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
-		if (g_headerObj.frzStartjdgUse) {
-			g_allArrow += g_allFrz / 2;
-		}
-		g_fullArrows = g_allArrow + g_allFrz / 2;
-
-		calcLifeVals(g_fullArrows);
-
-		// 矢印・フリーズアロー・速度/色変化格納処理
-		pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
-
-		// メインに入る前の最終初期化処理
-		getArrowSettings();
-
-		// ユーザカスタムイベント
-		g_customJsObj.loading.forEach(func => func());
-
-		const tempId = setInterval(() => {
-			const executeMain = _ => {
-				clearInterval(tempId);
-				MainInit();
-			}
-			if (g_audio.duration !== undefined) {
-				if (g_userAgent.indexOf(`firefox`) !== -1) {
-					if (g_preloadFiles.image.every(v => g_loadObj[v] === true)) {
-						executeMain();
+				Object.keys(noteExistObj).forEach(name => {
+					if (tmpObj[`${name}Data`][j] !== undefined && noteExistObj[name]) {
+						g_scoreObj[`${name}Data`][j] = copyArray2d(tmpObj[`${name}Data`][j]);
 					}
-				} else {
+				});
+			}
+
+			Object.keys(g_dataMinObj).forEach(dataType => {
+				g_scoreObj[`${dataType}Data`] = setData(tmpObj[`${dataType}Data`], g_dataMinObj[dataType]);
+			});
+
+			lastFrame += preblankFrame;
+			firstArrowFrame += preblankFrame;
+			speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
+			arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
+			g_headerObj.blankFrame += preblankFrame;
+		}
+	}
+
+	// シャッフルグループ未定義の場合
+	if (g_keyObj[`shuffle${keyCtrlPtn}`] === undefined) {
+		g_keyObj[`shuffle${keyCtrlPtn}`] = [...Array(keyNum)].fill(0);
+	}
+
+	// シャッフルグループを扱いやすくする
+	// [0, 0, 0, 1, 0, 0, 0] -> [[0, 1, 2, 4, 5, 6], [3]]
+	const shuffleGroupMap = {};
+	g_keyObj[`shuffle${keyCtrlPtn}`].forEach((_val, _i) => {
+		if (shuffleGroupMap[_val] === undefined) {
+			shuffleGroupMap[_val] = [];
+		};
+		shuffleGroupMap[_val].push(_i);
+	});
+
+	// Mirror,Random,S-Randomの適用
+	g_shuffleFunc[g_stateObj.shuffle](keyNum, Object.values(shuffleGroupMap));
+
+	// アシスト用の配列があれば、ダミーデータで上書き
+	if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
+		!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
+		const assistArray = g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay];
+		for (let j = 0; j < keyNum; j++) {
+			if (assistArray[j] === 1) {
+				g_scoreObj.dummyArrowData[j] = g_scoreObj.arrowData[j].concat();
+				g_scoreObj.arrowData[j] = [];
+				g_scoreObj.dummyFrzData[j] = g_scoreObj.frzData[j].concat();
+				g_scoreObj.frzData[j] = [];
+			} else {
+				g_scoreObj.dummyArrowData[j] = [];
+				g_scoreObj.dummyFrzData[j] = [];
+			}
+		}
+	}
+
+	// 矢印・フリーズアロー数をカウント
+	g_allArrow = 0;
+	g_allFrz = 0;
+	g_scoreObj.arrowData.forEach(data => g_allArrow += data.length);
+	g_scoreObj.frzData.forEach(data => g_allFrz += data.length);
+
+	// ライフ回復・ダメージ量の計算
+	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
+	if (g_headerObj.frzStartjdgUse) {
+		g_allArrow += g_allFrz / 2;
+	}
+	g_fullArrows = g_allArrow + g_allFrz / 2;
+
+	calcLifeVals(g_fullArrows);
+
+	// 矢印・フリーズアロー・速度/色変化格納処理
+	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
+
+	// メインに入る前の最終初期化処理
+	getArrowSettings();
+
+	// ユーザカスタムイベント
+	g_customJsObj.loading.forEach(func => func());
+
+	const tempId = setInterval(() => {
+		const executeMain = _ => {
+			clearInterval(tempId);
+			MainInit();
+		}
+		if (g_audio.duration !== undefined) {
+			if (g_userAgent.indexOf(`firefox`) !== -1) {
+				if (g_preloadFiles.image.every(v => g_loadObj[v] === true)) {
 					executeMain();
 				}
+			} else {
+				executeMain();
 			}
-		}, 100);
-	});
+		}
+	}, 100);
 }
 
 function setScoreIdHeader(_scoreId = 0, _scoreLockFlg = false) {
