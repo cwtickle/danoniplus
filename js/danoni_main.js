@@ -1448,12 +1448,23 @@ async function initialControl() {
 	}
 
 	getScoreDetailData(0);
+
 	if (g_loadObj.main) {
-		// 譜面詳細情報取得のために譜面をロード
+
+		// 譜面分割、譜面番号固定かどうかをチェック
+		const dosDivideInput = document.querySelector(`#externalDosDivide`);
+		const dosLockInput = document.querySelector(`#externalDosLock`);
+		g_stateObj.dosDivideFlg = setVal(dosDivideInput !== null ? dosDivideInput.value : getQueryParamVal(`dosDivide`), false, C_TYP_BOOLEAN);
+		g_stateObj.scoreLockFlg = setVal(dosLockInput !== null ? dosLockInput.value : getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
+
 		for (let j = 1; j < g_headerObj.keyLabels.length; j++) {
-			await loadChartFile(j);
+
+			// 譜面ファイルが分割されている場合、譜面詳細情報取得のために譜面をロード
+			if (g_stateObj.dosDivideFlg) {
+				await loadChartFile(j);
+				resetColorAndGauge(j);
+			}
 			getScoreDetailData(j);
-			resetColorAndGauge(j);
 		}
 	}
 	titleInit();
@@ -1537,10 +1548,6 @@ async function loadChartFile(_scoreId = g_stateObj.scoreId) {
 	}
 
 	// 譜面分割あり、譜面番号固定時のみ譜面データを一時クリア
-	const dosDivideInput = document.querySelector(`#externalDosDivide`);
-	const dosLockInput = document.querySelector(`#externalDosLock`);
-	g_stateObj.dosDivideFlg = setVal(dosDivideInput !== null ? dosDivideInput.value : getQueryParamVal(`dosDivide`), false, C_TYP_BOOLEAN);
-	g_stateObj.scoreLockFlg = setVal(dosLockInput !== null ? dosLockInput.value : getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
 	if (queryDos !== `` && g_stateObj.dosDivideFlg && g_stateObj.scoreLockFlg) {
 		const scoreList = Object.keys(g_rootObj).filter(data => {
 			return fuzzyListMatching(data, g_checkStr.resetDosHeader, g_checkStr.resetDosFooter);
@@ -1549,7 +1556,7 @@ async function loadChartFile(_scoreId = g_stateObj.scoreId) {
 	}
 
 	// HTML埋め込みdos
-	if (dosInput !== null) {
+	if (dosInput !== null && _scoreId === 0) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
 	}
 
@@ -1591,17 +1598,15 @@ async function loadChartFile(_scoreId = g_stateObj.scoreId) {
  * @param {string} _scoreId 
  */
 function resetColorAndGauge(_scoreId) {
-	if (g_stateObj.dosDivideFlg && _scoreId > 0) {
-		// 初期矢印・フリーズアロー色の再定義
-		if (g_stateObj.scoreLockFlg) {
-			Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
-		}
-		Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
-
-		// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
-		Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
-		Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
+	// 初期矢印・フリーズアロー色の再定義
+	if (g_stateObj.scoreLockFlg) {
+		Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
 	}
+	Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
+
+	// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
+	Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
+	Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
 }
 
 /**
