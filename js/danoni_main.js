@@ -48,16 +48,16 @@ const current = _ => {
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
+const g_randTime = Date.now();
 
 window.onload = async () => {
 	g_loadObj.main = true;
 	g_currentPage = `initial`;
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
-	const randTime = new Date().getTime();
-	await loadScript2(`${g_rootPath}../js/lib/danoni_localbinary.js?${randTime}`, false);
-	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${randTime}`);
-	await loadScript2(`${g_rootPath}../js/lib/danoni_legacy_function.js?${randTime}`, false);
+	await loadScript2(`${g_rootPath}../js/lib/danoni_localbinary.js?${g_randTime}`, false);
+	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${g_randTime}`);
+	await loadScript2(`${g_rootPath}../js/lib/danoni_legacy_function.js?${g_randTime}`, false);
 	initialControl();
 };
 
@@ -1355,8 +1355,7 @@ async function initialControl() {
 	}
 
 	// 共通設定ファイルの読込
-	const randTime = new Date().getTime();
-	await loadScript2(`${settingRoot}danoni_setting${settingType}.js?${randTime}`, false);
+	await loadScript2(`${settingRoot}danoni_setting${settingType}.js?${g_randTime}`, false);
 	loadLegacySettingFunc();
 	if (document.querySelector(`#lblLoading`) !== null) {
 		divRoot.removeChild(document.querySelector(`#lblLoading`));
@@ -1564,8 +1563,7 @@ async function loadChartFile(_scoreId = g_stateObj.scoreId) {
 		const fileCommon = fileBase.split(`.${fileExtension}`)[0];
 		const filename = `${fileCommon}${g_stateObj.dosDivideFlg ? setScoreIdHeader(_scoreId) : ''}.${fileExtension}`;
 
-		const randTime = new Date().getTime();
-		await loadScript2(`${filename}?${randTime}`, false, charset);
+		await loadScript2(`${filename}?${g_randTime}`, false, charset);
 		if (typeof externalDosInit === C_TYP_FUNCTION) {
 			if (document.querySelector(`#lblLoading`) !== null) {
 				divRoot.removeChild(document.querySelector(`#lblLoading`));
@@ -1932,7 +1930,7 @@ function loadMultipleFiles(_j, _fileData, _loadType, _afterFunc = _ => true) {
  */
 async function loadMultipleFiles2(_fileData, _loadType) {
 	await Promise.all(_fileData.map(async filePart => {
-		const filePath = `${filePart[1]}${filePart[0]}?${new Date().getTime()}`;
+		const filePath = `${filePart[1]}${filePart[0]}?${g_randTime}`;
 		if (filePart[0].endsWith(`.css`)) {
 			_loadType = `css`;
 		}
