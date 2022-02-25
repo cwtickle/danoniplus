@@ -1556,7 +1556,7 @@ async function loadChartFile(_scoreId = g_stateObj.scoreId) {
 	}
 
 	// HTML埋め込みdos
-	if (dosInput !== null) {
+	if (dosInput !== null && _scoreId === 0) {
 		Object.assign(g_rootObj, dosConvert(dosInput.value));
 	}
 
