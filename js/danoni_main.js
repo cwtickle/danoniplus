@@ -48,16 +48,16 @@ const current = _ => {
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
+const g_randTime = Date.now();
 
 window.onload = async () => {
 	g_loadObj.main = true;
 	g_currentPage = `initial`;
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
-	const randTime = new Date().getTime();
-	await loadScript2(`${g_rootPath}../js/lib/danoni_localbinary.js?${randTime}`, false);
-	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${randTime}`);
-	await loadScript2(`${g_rootPath}../js/lib/danoni_legacy_function.js?${randTime}`, false);
+	await loadScript2(`${g_rootPath}../js/lib/danoni_localbinary.js?${g_randTime}`, false);
+	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${g_randTime}`);
+	await loadScript2(`${g_rootPath}../js/lib/danoni_legacy_function.js?${g_randTime}`, false);
 	initialControl();
 };
 
@@ -1355,8 +1355,7 @@ async function initialControl() {
 	}
 
 	// 共通設定ファイルの読込
-	const randTime = new Date().getTime();
-	await loadScript2(`${settingRoot}danoni_setting${settingType}.js?${randTime}`, false);
+	await loadScript2(`${settingRoot}danoni_setting${settingType}.js?${g_randTime}`, false);
 	loadLegacySettingFunc();
 	if (document.querySelector(`#lblLoading`) !== null) {
 		divRoot.removeChild(document.querySelector(`#lblLoading`));
@@ -1452,10 +1451,8 @@ async function initialControl() {
 	if (g_loadObj.main) {
 
 		// 譜面分割、譜面番号固定かどうかをチェック
-		const dosDivideInput = document.querySelector(`#externalDosDivide`);
-		const dosLockInput = document.querySelector(`#externalDosLock`);
-		g_stateObj.dosDivideFlg = setVal(dosDivideInput !== null ? dosDivideInput.value : getQueryParamVal(`dosDivide`), false, C_TYP_BOOLEAN);
-		g_stateObj.scoreLockFlg = setVal(dosLockInput !== null ? dosLockInput.value : getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
+		g_stateObj.dosDivideFlg = setVal(document.querySelector(`#externalDosDivide`)?.value ?? getQueryParamVal(`dosDivide`), false, C_TYP_BOOLEAN);
+		g_stateObj.scoreLockFlg = setVal(document.querySelector(`#externalDosLock`)?.value ?? getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
 
 		for (let j = 1; j < g_headerObj.keyLabels.length; j++) {
 
@@ -1536,10 +1533,8 @@ function loadLocalStorage() {
 async function loadChartFile(_scoreId = g_stateObj.scoreId) {
 
 	const dosInput = document.querySelector(`#dos`);
-	const externalDosInput = document.querySelector(`#externalDos`);
 	const divRoot = document.querySelector(`#divRoot`);
-	const queryDos = getQueryParamVal(`dos`) !== null ? `dos/${getQueryParamVal('dos')}.txt` :
-		(externalDosInput !== null ? externalDosInput.value : ``);
+	const queryDos = getQueryParamVal(`dos`) !== null ? `dos/${getQueryParamVal('dos')}.txt` : (document.querySelector(`#externalDos`)?.value ?? ``);
 
 	if (dosInput === null && queryDos === ``) {
 		makeWarningWindow(g_msgInfoObj.E_0023);
@@ -1562,20 +1557,13 @@ async function loadChartFile(_scoreId = g_stateObj.scoreId) {
 
 	// 外部dos読み込み
 	if (queryDos !== ``) {
-		let charset = document.characterSet;
-		const charsetInput = document.querySelector(`#externalDosCharset`);
-		if (charsetInput !== null) {
-			charset = charsetInput.value;
-		}
-		const filenameBase = queryDos.match(/.+\..*/)[0];
-		const filenameExtension = filenameBase.split(`.`).pop();
-		const filenameCommon = filenameBase.split(`.${filenameExtension}`)[0];
-		const filename = (!g_stateObj.dosDivideFlg ?
-			`${filenameCommon}.${filenameExtension}` :
-			`${filenameCommon}${setScoreIdHeader(_scoreId)}.${filenameExtension}`);
+		const charset = document.querySelector(`#externalDosCharset`)?.value ?? document.characterSet;
+		const fileBase = queryDos.match(/.+\..*/)[0];
+		const fileExtension = fileBase.split(`.`).pop();
+		const fileCommon = fileBase.split(`.${fileExtension}`)[0];
+		const filename = `${fileCommon}${g_stateObj.dosDivideFlg ? setScoreIdHeader(_scoreId) : ''}.${fileExtension}`;
 
-		const randTime = new Date().getTime();
-		await loadScript2(`${filename}?${randTime}`, false, charset);
+		await loadScript2(`${filename}?${Date.now()}`, false, charset);
 		if (typeof externalDosInit === C_TYP_FUNCTION) {
 			if (document.querySelector(`#lblLoading`) !== null) {
 				divRoot.removeChild(document.querySelector(`#lblLoading`));
@@ -1942,7 +1930,7 @@ function loadMultipleFiles(_j, _fileData, _loadType, _afterFunc = _ => true) {
  */
 async function loadMultipleFiles2(_fileData, _loadType) {
 	await Promise.all(_fileData.map(async filePart => {
-		const filePath = `${filePart[1]}${filePart[0]}?${new Date().getTime()}`;
+		const filePath = `${filePart[1]}${filePart[0]}?${g_randTime}`;
 		if (filePart[0].endsWith(`.css`)) {
 			_loadType = `css`;
 		}
@@ -2084,7 +2072,7 @@ function makePlayButton(_func) {
  * iOSの場合はAudioタグによる再生
  * @param {string} _url 
  */
-function setAudio(_url) {
+async function setAudio(_url) {
 
 	const loadMp3 = _ => {
 		if (g_isFile) {
@@ -2112,16 +2100,14 @@ function setAudio(_url) {
 	};
 
 	if (g_musicEncodedFlg) {
-		loadScript(_url, _ => {
-			if (typeof musicInit === C_TYP_FUNCTION) {
-				musicInit();
-				readyToStart(_ => initWebAudioAPIfromBase64(g_musicdata));
-			} else {
-				makeWarningWindow(g_msgInfoObj.E_0031);
-				musicAfterLoaded();
-			}
-		});
-
+		await loadScript2(_url);
+		if (typeof musicInit === C_TYP_FUNCTION) {
+			musicInit();
+			readyToStart(_ => initWebAudioAPIfromBase64(g_musicdata));
+		} else {
+			makeWarningWindow(g_msgInfoObj.E_0031);
+			musicAfterLoaded();
+		}
 	} else {
 		readyToStart(_ => loadMp3());
 	}
@@ -3226,11 +3212,7 @@ function headerConvert(_dosObj) {
 	}
 
 	// タイミング調整
-	if (hasVal(_dosObj.adjustment)) {
-		obj.adjustment = _dosObj.adjustment.split(`$`);
-	} else {
-		obj.adjustment = [0];
-	}
+	obj.adjustment = (hasVal(_dosObj.adjustment) ? _dosObj.adjustment.split(`$`) : [0]);
 
 	// 再生速度
 	obj.playbackRate = setVal(_dosObj.playbackRate, 1, C_TYP_FLOAT);
@@ -3571,7 +3553,7 @@ function resetBaseColorList(_baseObj, _dosObj, { scoreId = `` } = {}) {
 		for (let j = 0; j < _baseObj.setColorInit.length; j++) {
 
 			// デフォルト配列の作成（1番目の要素をベースに、フリーズアロー初期セット or 矢印色からデータを補完）
-			let currentFrzColors = [];
+			const currentFrzColors = [];
 			const baseLength = firstFrzColors.length === 0 || _baseObj.defaultFrzColorUse ?
 				_baseObj[_frzInit].length : firstFrzColors.length;
 			for (let k = 0; k < baseLength; k++) {
