@@ -1598,17 +1598,15 @@ async function loadChartFile(_scoreId = g_stateObj.scoreId) {
  * @param {string} _scoreId 
  */
 function resetColorAndGauge(_scoreId) {
-	if (g_stateObj.dosDivideFlg && _scoreId > 0) {
-		// 初期矢印・フリーズアロー色の再定義
-		if (g_stateObj.scoreLockFlg) {
-			Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
-		}
-		Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
-
-		// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
-		Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
-		Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
+	// 初期矢印・フリーズアロー色の再定義
+	if (g_stateObj.scoreLockFlg) {
+		Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
 	}
+	Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
+
+	// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
+	Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
+	Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
 }
 
 /**
