@@ -1563,7 +1563,7 @@ async function loadChartFile(_scoreId = g_stateObj.scoreId) {
 		const fileCommon = fileBase.split(`.${fileExtension}`)[0];
 		const filename = `${fileCommon}${g_stateObj.dosDivideFlg ? setScoreIdHeader(_scoreId) : ''}.${fileExtension}`;
 
-		await loadScript2(`${filename}?${g_randTime}`, false, charset);
+		await loadScript2(`${filename}?${Date.now()}`, false, charset);
 		if (typeof externalDosInit === C_TYP_FUNCTION) {
 			if (document.querySelector(`#lblLoading`) !== null) {
 				divRoot.removeChild(document.querySelector(`#lblLoading`));
