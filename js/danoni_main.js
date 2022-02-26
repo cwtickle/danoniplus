@@ -3808,6 +3808,7 @@ function keysConvert(_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
 	const toString = _str => _str;
 	const toNumber = _num => parseInt(_num, 10);
+	const toFloat = _num => parseFloat(_num);
 	const toStringOrNumber = _str => isNaN(Number(_str)) ? _str : toNumber(_str);
 	const toSplitArray = _str => _str.split(`/`).map(n => toNumber(n));
 
@@ -3946,13 +3947,13 @@ function keysConvert(_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 				// ステップゾーン位置の最終番号
 				if (tmpDivPtn.length > 1) {
-					g_keyObj[`divMax${newKey}_${k}`] = setVal(tmpDivPtn[1], -1, C_TYP_NUMBER);
+					g_keyObj[`divMax${newKey}_${k}`] = setVal(tmpDivPtn[1], -1, C_TYP_FLOAT);
 				}
 			}
 		}
 
 		// ステップゾーン位置 (posX_Y)
-		newKeyMultiParam(newKey, `pos`, toNumber, {
+		newKeyMultiParam(newKey, `pos`, toFloat, {
 			loopFunc: (k, keyheader) => {
 				if (g_keyObj[`divMax${newKey}_${k}`] === undefined || g_keyObj[`divMax${newKey}_${k}`] === -1) {
 					const posLength = g_keyObj[`${keyheader}_${k}`].length;
