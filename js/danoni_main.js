@@ -1678,7 +1678,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	}
 
 	fullData = fullData.filter(val => !isNaN(parseFloat(val))).sort((a, b) => a - b);
-	let pushCnt = 0;
+	let pushCnt = 1;
 	const density2PushData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
 	const density3PushData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
 	fullData.forEach((note, j) => {
@@ -1694,7 +1694,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 					}
 				}
 			}
-			pushCnt = 0;
+			pushCnt = 1;
 		}
 	});
 
