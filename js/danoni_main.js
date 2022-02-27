@@ -1687,10 +1687,12 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 		} else {
 			const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 			if (point >= 0) {
-				if (pushCnt > 2) {
-					density3PushData[point] += pushCnt;
+				if (pushCnt >= 2) {
+					density2PushData[point] += pushCnt;
+					if (pushCnt >= 3) {
+						density3PushData[point] += pushCnt;
+					}
 				}
-				density2PushData[point] += pushCnt;
 			}
 			pushCnt = 0;
 		}
