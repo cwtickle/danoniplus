@@ -1678,7 +1678,7 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 	}
 
 	fullData = fullData.filter(val => !isNaN(parseFloat(val))).sort((a, b) => a - b);
-	let pushCnt = 0;
+	let pushCnt = 1;
 	const density2PushData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
 	const density3PushData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
 	fullData.forEach((note, j) => {
@@ -1687,12 +1687,14 @@ function storeBaseData(_scoreId, _scoreObj, _keyCtrlPtn) {
 		} else {
 			const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
 			if (point >= 0) {
-				if (pushCnt > 2) {
-					density3PushData[point] += pushCnt;
+				if (pushCnt >= 2) {
+					density2PushData[point] += pushCnt;
+					if (pushCnt >= 3) {
+						density3PushData[point] += pushCnt;
+					}
 				}
-				density2PushData[point] += pushCnt;
 			}
-			pushCnt = 0;
+			pushCnt = 1;
 		}
 	});
 
