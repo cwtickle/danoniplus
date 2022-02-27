@@ -1975,146 +1975,6 @@ const getFilePath = (_fileName, _directory = ``) => {
 	}
 };
 
-function loadMusic() {
-
-	clearWindow(true);
-	g_currentPage = `loading`;
-
-	const musicUrl = getMusicUrl(g_stateObj.scoreId);
-	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
-	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
-	} else if (g_headerObj.musicFolder.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-		url = `${g_headerObj.musicFolder.split(C_MRK_CURRENT_DIRECTORY)[1]}/${musicUrl}`;
-	}
-
-	g_headerObj.musicUrl = musicUrl;
-	g_musicEncodedFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
-
-	// Now Loadingを表示
-	const lblLoading = getLoadingLabel();
-	divRoot.appendChild(lblLoading);
-
-	// ローカル動作時
-	if (g_isFile) {
-		setAudio(url);
-		return;
-	}
-
-	// XHRで読み込み
-	const request = new XMLHttpRequest();
-	request.open(`GET`, url, true);
-	request.responseType = `blob`;
-
-	// 読み込み完了時
-	request.addEventListener(`load`, _ => {
-		if (request.status >= 200 && request.status < 300) {
-			const blobUrl = URL.createObjectURL(request.response);
-			createEmptySprite(divRoot, `loader`, { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` });
-			lblLoading.textContent = g_lblNameObj.pleaseWait;
-			setAudio(blobUrl);
-		} else {
-			makeWarningWindow(`${g_msgInfoObj.E_0032}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
-		}
-	});
-
-	// 進捗時
-	request.addEventListener(`progress`, _event => {
-		const lblLoading = document.querySelector(`#lblLoading`);
-
-		if (_event.lengthComputable) {
-			const rate = _event.loaded / _event.total;
-			createEmptySprite(divRoot, `loader`, { y: g_sHeight - 10, h: 10, w: g_sWidth * rate, backgroundColor: `#eeeeee` });
-			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${Math.floor(rate * 100)}%`;
-		} else {
-			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${_event.loaded}Bytes`;
-		}
-		// ユーザカスタムイベント
-		g_customJsObj.progress.forEach(func => func(_event));
-	});
-
-	// エラー処理
-	request.addEventListener(`timeout`, _ => makeWarningWindow(`${g_msgInfoObj.E_0033}`, { backBtnUse: true }));
-	request.addEventListener(`error`, _ => makeWarningWindow(`${g_msgInfoObj.E_0034}`, { backBtnUse: true }));
-
-	request.send();
-}
-
-// Base64から音声データに変換してWebAudioAPIで再生する準備
-async function initWebAudioAPIfromBase64(_base64) {
-	g_audio = new AudioPlayer();
-	musicAfterLoaded();
-	const array = Uint8Array.from(atob(_base64), v => v.charCodeAt(0))
-	await g_audio.init(array.buffer);
-}
-
-// 音声ファイルを読み込んでWebAudioAPIで再生する準備
-async function initWebAudioAPIfromURL(_url) {
-	g_audio = new AudioPlayer();
-	musicAfterLoaded();
-	const promise = await fetch(_url);
-	const arrayBuffer = await promise.arrayBuffer();
-	await g_audio.init(arrayBuffer);
-}
-
-/**
- * PLAYボタンの作成
- * @param {function} _func 
- */
-function makePlayButton(_func) {
-	return createCss2Button(`btnPlay`, g_lblNameObj.b_play, _ => true, {
-		x: g_sWidth * 2 / 3,
-		animationName: (g_initialFlg ? `` : `smallToNormalY`),
-		resetFunc: _func,
-	}, g_cssObj.button_Next);
-}
-
-/**
- * 音楽データの設定
- * iOSの場合はAudioタグによる再生
- * @param {string} _url 
- */
-async function setAudio(_url) {
-
-	const loadMp3 = _ => {
-		if (g_isFile) {
-			g_audio.src = _url;
-			musicAfterLoaded();
-		} else {
-			initWebAudioAPIfromURL(_url);
-		}
-	};
-
-	const readyToStart = _func => {
-		if (g_isIos) {
-			g_currentPage = `loadingIos`;
-			lblLoading.textContent = `Click to Start!`;
-			divRoot.appendChild(makePlayButton(evt => {
-				g_currentPage = `loading`;
-				resetKeyControl();
-				divRoot.removeChild(evt.target);
-				_func();
-			}));
-			setShortcutEvent(g_currentPage);
-		} else {
-			_func();
-		}
-	};
-
-	if (g_musicEncodedFlg) {
-		await loadScript2(_url);
-		if (typeof musicInit === C_TYP_FUNCTION) {
-			musicInit();
-			readyToStart(_ => initWebAudioAPIfromBase64(g_musicdata));
-		} else {
-			makeWarningWindow(g_msgInfoObj.E_0031);
-			musicAfterLoaded();
-		}
-	} else {
-		readyToStart(_ => loadMp3());
-	}
-}
-
 /**
  * デフォルト背景画像の描画処理
  * @param {string} _key メイン画面かどうか。Main:メイン画面、(空白):それ以外
@@ -4076,27 +3936,6 @@ function optionInit() {
 	g_initialFlg = true;
 
 	g_skinJsObj.option.forEach(func => func());
-}
-
-function musicAfterLoaded() {
-	g_audio.load();
-
-	if (g_audio.readyState === 4) {
-		// audioの読み込みが終わった後の処理
-		loadingScoreInit();
-	} else {
-		// 読込中の状態
-		g_audio.addEventListener(`canplaythrough`, (_ => function f() {
-			g_audio.removeEventListener(`canplaythrough`, f, false);
-			loadingScoreInit();
-		})(), false);
-
-		// エラー時
-		g_audio.addEventListener(`error`, (_ => function f() {
-			g_audio.removeEventListener(`error`, f, false);
-			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(g_audio.src), { backBtnUse: true });
-		})(), false);
-	}
 }
 
 /**
@@ -6299,6 +6138,167 @@ function changeSetColor() {
 /*-----------------------------------------------------------*/
 /* Scene : LOADING [strawberry] */
 /*-----------------------------------------------------------*/
+
+function loadMusic() {
+
+	clearWindow(true);
+	g_currentPage = `loading`;
+
+	const musicUrl = getMusicUrl(g_stateObj.scoreId);
+	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
+	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
+	} else if (g_headerObj.musicFolder.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+		url = `${g_headerObj.musicFolder.split(C_MRK_CURRENT_DIRECTORY)[1]}/${musicUrl}`;
+	}
+
+	g_headerObj.musicUrl = musicUrl;
+	g_musicEncodedFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
+
+	// Now Loadingを表示
+	const lblLoading = getLoadingLabel();
+	divRoot.appendChild(lblLoading);
+
+	// ローカル動作時
+	if (g_isFile) {
+		setAudio(url);
+		return;
+	}
+
+	// XHRで読み込み
+	const request = new XMLHttpRequest();
+	request.open(`GET`, url, true);
+	request.responseType = `blob`;
+
+	// 読み込み完了時
+	request.addEventListener(`load`, _ => {
+		if (request.status >= 200 && request.status < 300) {
+			const blobUrl = URL.createObjectURL(request.response);
+			createEmptySprite(divRoot, `loader`, { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` });
+			lblLoading.textContent = g_lblNameObj.pleaseWait;
+			setAudio(blobUrl);
+		} else {
+			makeWarningWindow(`${g_msgInfoObj.E_0032}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
+		}
+	});
+
+	// 進捗時
+	request.addEventListener(`progress`, _event => {
+		const lblLoading = document.querySelector(`#lblLoading`);
+
+		if (_event.lengthComputable) {
+			const rate = _event.loaded / _event.total;
+			createEmptySprite(divRoot, `loader`, { y: g_sHeight - 10, h: 10, w: g_sWidth * rate, backgroundColor: `#eeeeee` });
+			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${Math.floor(rate * 100)}%`;
+		} else {
+			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${_event.loaded}Bytes`;
+		}
+		// ユーザカスタムイベント
+		g_customJsObj.progress.forEach(func => func(_event));
+	});
+
+	// エラー処理
+	request.addEventListener(`timeout`, _ => makeWarningWindow(`${g_msgInfoObj.E_0033}`, { backBtnUse: true }));
+	request.addEventListener(`error`, _ => makeWarningWindow(`${g_msgInfoObj.E_0034}`, { backBtnUse: true }));
+
+	request.send();
+}
+
+// Base64から音声データに変換してWebAudioAPIで再生する準備
+async function initWebAudioAPIfromBase64(_base64) {
+	g_audio = new AudioPlayer();
+	musicAfterLoaded();
+	const array = Uint8Array.from(atob(_base64), v => v.charCodeAt(0))
+	await g_audio.init(array.buffer);
+}
+
+// 音声ファイルを読み込んでWebAudioAPIで再生する準備
+async function initWebAudioAPIfromURL(_url) {
+	g_audio = new AudioPlayer();
+	musicAfterLoaded();
+	const promise = await fetch(_url);
+	const arrayBuffer = await promise.arrayBuffer();
+	await g_audio.init(arrayBuffer);
+}
+
+/**
+ * PLAYボタンの作成
+ * @param {function} _func 
+ */
+function makePlayButton(_func) {
+	return createCss2Button(`btnPlay`, g_lblNameObj.b_play, _ => true, {
+		x: g_sWidth * 2 / 3,
+		animationName: (g_initialFlg ? `` : `smallToNormalY`),
+		resetFunc: _func,
+	}, g_cssObj.button_Next);
+}
+
+/**
+ * 音楽データの設定
+ * iOSの場合はAudioタグによる再生
+ * @param {string} _url 
+ */
+async function setAudio(_url) {
+
+	const loadMp3 = _ => {
+		if (g_isFile) {
+			g_audio.src = _url;
+			musicAfterLoaded();
+		} else {
+			initWebAudioAPIfromURL(_url);
+		}
+	};
+
+	const readyToStart = _func => {
+		if (g_isIos) {
+			g_currentPage = `loadingIos`;
+			lblLoading.textContent = `Click to Start!`;
+			divRoot.appendChild(makePlayButton(evt => {
+				g_currentPage = `loading`;
+				resetKeyControl();
+				divRoot.removeChild(evt.target);
+				_func();
+			}));
+			setShortcutEvent(g_currentPage);
+		} else {
+			_func();
+		}
+	};
+
+	if (g_musicEncodedFlg) {
+		await loadScript2(_url);
+		if (typeof musicInit === C_TYP_FUNCTION) {
+			musicInit();
+			readyToStart(_ => initWebAudioAPIfromBase64(g_musicdata));
+		} else {
+			makeWarningWindow(g_msgInfoObj.E_0031);
+			musicAfterLoaded();
+		}
+	} else {
+		readyToStart(_ => loadMp3());
+	}
+}
+
+function musicAfterLoaded() {
+	g_audio.load();
+
+	if (g_audio.readyState === 4) {
+		// audioの読み込みが終わった後の処理
+		loadingScoreInit();
+	} else {
+		// 読込中の状態
+		g_audio.addEventListener(`canplaythrough`, (_ => function f() {
+			g_audio.removeEventListener(`canplaythrough`, f, false);
+			loadingScoreInit();
+		})(), false);
+
+		// エラー時
+		g_audio.addEventListener(`error`, (_ => function f() {
+			g_audio.removeEventListener(`error`, f, false);
+			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(g_audio.src), { backBtnUse: true });
+		})(), false);
+	}
+}
 
 /**
  * 読込画面初期化
