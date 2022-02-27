@@ -3908,6 +3908,18 @@ const commonSettingBtn = _labelName => {
 };
 
 /**
+ * PLAYボタンの作成
+ * @param {function} _func 
+ */
+const makePlayButton = _func => {
+	return createCss2Button(`btnPlay`, g_lblNameObj.b_play, _ => true, {
+		x: g_sWidth * 2 / 3,
+		animationName: (g_initialFlg ? `` : `smallToNormalY`),
+		resetFunc: _func,
+	}, g_cssObj.button_Next);
+};
+
+/**
  * 設定・オプション画面初期化
  */
 function optionInit() {
@@ -6204,35 +6216,6 @@ function loadMusic() {
 	request.send();
 }
 
-// Base64から音声データに変換してWebAudioAPIで再生する準備
-async function initWebAudioAPIfromBase64(_base64) {
-	g_audio = new AudioPlayer();
-	musicAfterLoaded();
-	const array = Uint8Array.from(atob(_base64), v => v.charCodeAt(0))
-	await g_audio.init(array.buffer);
-}
-
-// 音声ファイルを読み込んでWebAudioAPIで再生する準備
-async function initWebAudioAPIfromURL(_url) {
-	g_audio = new AudioPlayer();
-	musicAfterLoaded();
-	const promise = await fetch(_url);
-	const arrayBuffer = await promise.arrayBuffer();
-	await g_audio.init(arrayBuffer);
-}
-
-/**
- * PLAYボタンの作成
- * @param {function} _func 
- */
-function makePlayButton(_func) {
-	return createCss2Button(`btnPlay`, g_lblNameObj.b_play, _ => true, {
-		x: g_sWidth * 2 / 3,
-		animationName: (g_initialFlg ? `` : `smallToNormalY`),
-		resetFunc: _func,
-	}, g_cssObj.button_Next);
-}
-
 /**
  * 音楽データの設定
  * iOSの場合はAudioタグによる再生
@@ -6277,6 +6260,23 @@ async function setAudio(_url) {
 	} else {
 		readyToStart(_ => loadMp3());
 	}
+}
+
+// Base64から音声データに変換してWebAudioAPIで再生する準備
+async function initWebAudioAPIfromBase64(_base64) {
+	g_audio = new AudioPlayer();
+	musicAfterLoaded();
+	const array = Uint8Array.from(atob(_base64), v => v.charCodeAt(0))
+	await g_audio.init(array.buffer);
+}
+
+// 音声ファイルを読み込んでWebAudioAPIで再生する準備
+async function initWebAudioAPIfromURL(_url) {
+	g_audio = new AudioPlayer();
+	musicAfterLoaded();
+	const promise = await fetch(_url);
+	const arrayBuffer = await promise.arrayBuffer();
+	await g_audio.init(arrayBuffer);
 }
 
 function musicAfterLoaded() {
