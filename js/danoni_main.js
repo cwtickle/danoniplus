@@ -365,16 +365,50 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
 	listMatching(_str, _headerList, { prefix: `^` }) || listMatching(_str, _footerList, { suffix: `$` });
 
 /**
- * 対象のカラーコードが明暗どちらかを判定 (true: 明色, false: 暗色)
- * @param {string} _colorStr 
- * @returns 
+ * 文字列の置換
+ * @param {string} _str 
+ * @param {array} _pairs 
  */
-const checkLightOrDark = _colorStr => {
-	const r = parseInt(_colorStr.substring(1, 3), 16);
-	const g = parseInt(_colorStr.substring(3, 5), 16);
-	const b = parseInt(_colorStr.substring(5, 7), 16);
-	return ((((r * 299) + (g * 587) + (b * 114)) / 1000) < 128);
-};
+function replaceStr(_str, _pairs) {
+	let tmpStr = _str;
+	_pairs.forEach(pair => {
+		tmpStr = tmpStr.split(pair[0]).join(pair[1]);
+	});
+	return tmpStr;
+}
+
+/**
+ * 文字列のエスケープ処理
+ * @param {string} _str 
+ * @param {array} _escapeList
+ */
+function escapeHtml(_str, _escapeList = g_escapeStr.escape) {
+	return escapeHtmlForEnabledTag(replaceStr(_str, _escapeList));
+}
+
+/**
+ * 文字列のエスケープ処理(htmlタグ許容版)
+ * @param {string} _str 
+ */
+function escapeHtmlForEnabledTag(_str) {
+	return replaceStr(_str, g_escapeStr.escapeTag);
+}
+
+/**
+ * エスケープ文字を元の文字に戻す
+ * @param {string} _str 
+ */
+function unEscapeHtml(_str) {
+	return replaceStr(_str, g_escapeStr.unEscapeTag);
+}
+
+/**
+ * 配列の中身を全てエスケープ処理
+ * @param {array} _array 
+ */
+function escapeHtmlForArray(_array) {
+	return _array.map(str => escapeHtml(str));
+}
 
 /**
  * 次のカーソルへ移動
@@ -732,6 +766,162 @@ async function loadMultipleFiles2(_fileData, _loadType) {
 	}));
 }
 
+/**
+ * 入力されたパスを、ディレクトリとそれ以外に分割
+ * 返却値：[ファイルキーワード, ルートディレクトリ]
+ * @param {string} _path 
+ * @param {number} _pos 
+ * @param {string} _directory 
+ */
+const getFolderAndType = (_path, _pos, _directory = ``) => {
+	const rootPath = (_directory === `` ? `` : g_rootPath);
+	return (_pos > 0 ? [_path.substring(_pos + 1), `${rootPath}${_path.substring(0, _pos)}/`] : [_path, `${rootPath}${_directory}`]);
+};
+
+/**
+ * 与えられたパスより、キーワードとディレクトリに分割
+ * カレントディレクトリ指定がある場合を考慮して、処理を分けている
+ * 返却値：[ファイルキーワード, ルートディレクトリ]
+ * @param {string} _fileName 
+ * @param {string} _directory 
+ */
+const getFilePath = (_fileName, _directory = ``) => {
+	if (_fileName.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+		const tmpType = _fileName.split(C_MRK_CURRENT_DIRECTORY)[1];
+		return getFolderAndType(tmpType, tmpType.indexOf(`/`));
+	} else {
+		return getFolderAndType(_fileName, _fileName.lastIndexOf(`/`), _directory);
+	}
+};
+
+/*-----------------------------------------------------------*/
+/* 色・グラデーション設定                                      */
+/*-----------------------------------------------------------*/
+
+/**
+ * 対象のカラーコードが明暗どちらかを判定 (true: 明色, false: 暗色)
+ * @param {string} _colorStr 
+ * @returns 
+ */
+const checkLightOrDark = _colorStr => {
+	const r = parseInt(_colorStr.substring(1, 3), 16);
+	const g = parseInt(_colorStr.substring(3, 5), 16);
+	const b = parseInt(_colorStr.substring(5, 7), 16);
+	return ((((r * 299) + (g * 587) + (b * 114)) / 1000) < 128);
+};
+
+/**
+ * 色名をカラーコードに変換
+ * @param {string} _color 
+ */
+const colorNameToCode = _color => {
+	const cxt = document.createElement(`canvas`).getContext(`2d`);
+	cxt.fillStyle = _color;
+	return cxt.fillStyle;
+}
+
+/**
+ * 10進 -> 16進数変換 (カラーコード形式になるよう0埋め)
+ * @param {number} _num 
+ */
+const byteToHex = _num => (`${_num.toString(16).padStart(2, '0')}`);
+
+/**
+ * カラーコードかどうかを判定 (簡易版)
+ * @param {string} _str 
+ * @returns 
+ */
+const isColorCd = _str => _str.substring(0, 1) === `#`;
+
+/**
+ * CSSの位置表記系かどうかをチェック
+ * @param {string} _str 
+ * @returns 
+ */
+const hasAnglePointInfo = _str => fuzzyListMatching(_str, g_checkStr.cssHeader, g_checkStr.cssFooter);
+
+/**
+ * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
+ * @param {string} _color 色名
+ */
+const colorToHex = (_color) => {
+
+	// すでにカラーコードのものやパーセント表記、位置表記系を除外
+	if (!isNaN(parseFloat(_color)) || isColorCd(_color) || hasAnglePointInfo(_color)) {
+		return _color;
+	}
+
+	// 色_位置;透明度 (Ex: red 20%;255) の形式で取り込み
+	// 透明度はカラーコード形式に変換してRGBの後ろに設定
+	const tmpColor = _color.split(`;`);
+	const colorSet = tmpColor[0].split(` `);
+	return colorNameToCode(colorSet[0]) +
+		(tmpColor.length > 1 ? byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER)) : '') +
+		(colorSet[1] !== undefined ? ` ${colorSet.slice(1).join(' ')}` : '');
+}
+
+/**
+ * カラーコードの前パディング (旧Option Editor対応)
+ * @param {boolean} _useFlg
+ * @param {string} _colorStr 
+ */
+const colorCdPadding = (_useFlg, _colorStr) => _useFlg ? `#${_colorStr.slice(1).padStart(6, `0`)}` : _colorStr;
+
+/**
+ * グラデーション用のカラーフォーマットを作成
+ * @param {string} _colorStr 
+ * @param {object} _options
+ *   defaultColorgrd
+ *   colorCdPaddingUse
+ *   objType (normal: 汎用, titleMusic: タイトル曲名, titleArrow: タイトル矢印)
+ *   shadowFlg
+ */
+function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultColorgrd,
+	_colorCdPaddingUse = false, _objType = `normal`, _shadowFlg = false } = {}) {
+
+	// |color_data=300,20,45deg:#ffff99:#ffffff:#9999ff@linear-gradient|
+	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
+	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
+
+	if (_colorStr === `Default` || _colorStr === ``) {
+		return _colorStr;
+	}
+
+	// 矢印の塗りつぶしの場合：透明度を50%にする
+	// 背景矢印の場合　　　　：透明度を25%にする
+	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : (_objType === `titleArrow` ? `40` : ``);
+
+	let convertColorStr = ``;
+	const tmpColorStr = _colorStr.split(`@`);
+	const colorArray = tmpColorStr[0].split(`:`);
+	for (let j = 0; j < colorArray.length; j++) {
+		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replace(/0x/g, `#`)));
+		if (isColorCd(colorArray[j]) && colorArray[j].length === 7) {
+			colorArray[j] += alphaVal;
+		}
+	}
+
+	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
+	const defaultDir = `to ${(_objType === 'titleArrow' ? 'left' : 'right')}, `;
+	if (colorArray.length === 1) {
+		if (_objType === `titleMusic`) {
+			convertColorStr = `${defaultDir}${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
+		} else if (_defaultColorgrd[0]) {
+			convertColorStr = `${defaultDir}${colorArray[0]}, ${_defaultColorgrd[1]}${alphaVal}, ${colorArray[0]}`;
+		} else {
+			return colorArray[0];
+		}
+	} else {
+		if (gradationType === `linear-gradient` && (isColorCd(colorArray[0]) || !hasAnglePointInfo(colorArray[0]))) {
+			// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
+			convertColorStr = `${defaultDir}`;
+		}
+		convertColorStr += `${colorArray.join(', ')}`;
+	}
+
+	return `${gradationType}(${convertColorStr})`;
+}
+
 /*-----------------------------------------------------------*/
 /* フォント設定                                          */
 /*-----------------------------------------------------------*/
@@ -771,38 +961,6 @@ function getFontSize(_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64,
 		}
 	}
 	return _minFontsize;
-}
-
-/**
- * クリップボードコピー関数
- * 入力値をクリップボードへコピーし、メッセージを表示
- * @param {string} _textVal 入力値
- * @param {string} _msg
- */
-async function copyTextToClipboard(_textVal, _msg) {
-	try {
-		await navigator.clipboard.writeText(_textVal);
-
-	} catch (error) {
-		// http環境では navigator.clipboard が使えないため、従来の方法を実行
-		// テキストエリアを用意し、値をセット
-		const copyFrom = document.createElement(`textarea`);
-		copyFrom.textContent = _textVal;
-
-		// bodyタグの要素を取得
-		const bodyElm = document.getElementsByTagName(`body`)[0];
-		// 子要素にテキストエリアを配置
-		bodyElm.appendChild(copyFrom);
-
-		// テキストエリアの値を選択し、コピーコマンド発行
-		copyFrom.select();
-		document.execCommand(`copy`);
-		// 追加テキストエリアを削除
-		bodyElm.removeChild(copyFrom);
-
-	} finally {
-		makeInfoWindow(_msg, `leftToRightFade`);
-	}
 }
 
 /*-----------------------------------------------------------*/
@@ -1529,6 +1687,38 @@ class AudioPlayer {
 }
 
 /**
+ * クリップボードコピー関数
+ * 入力値をクリップボードへコピーし、メッセージを表示
+ * @param {string} _textVal 入力値
+ * @param {string} _msg
+ */
+async function copyTextToClipboard(_textVal, _msg) {
+	try {
+		await navigator.clipboard.writeText(_textVal);
+
+	} catch (error) {
+		// http環境では navigator.clipboard が使えないため、従来の方法を実行
+		// テキストエリアを用意し、値をセット
+		const copyFrom = document.createElement(`textarea`);
+		copyFrom.textContent = _textVal;
+
+		// bodyタグの要素を取得
+		const bodyElm = document.getElementsByTagName(`body`)[0];
+		// 子要素にテキストエリアを配置
+		bodyElm.appendChild(copyFrom);
+
+		// テキストエリアの値を選択し、コピーコマンド発行
+		copyFrom.select();
+		document.execCommand(`copy`);
+		// 追加テキストエリアを削除
+		bodyElm.removeChild(copyFrom);
+
+	} finally {
+		makeInfoWindow(_msg, `leftToRightFade`);
+	}
+}
+
+/**
  * 現在URLのクエリパラメータから指定した値を取得
  * @param {string} _name
  */
@@ -2196,146 +2386,6 @@ function calcLevel(_scoreObj) {
 }
 
 /**
- * 入力されたパスを、ディレクトリとそれ以外に分割
- * 返却値：[ファイルキーワード, ルートディレクトリ]
- * @param {string} _path 
- * @param {number} _pos 
- * @param {string} _directory 
- */
-const getFolderAndType = (_path, _pos, _directory = ``) => {
-	const rootPath = (_directory === `` ? `` : g_rootPath);
-	return (_pos > 0 ? [_path.substring(_pos + 1), `${rootPath}${_path.substring(0, _pos)}/`] : [_path, `${rootPath}${_directory}`]);
-};
-
-/**
- * 与えられたパスより、キーワードとディレクトリに分割
- * カレントディレクトリ指定がある場合を考慮して、処理を分けている
- * 返却値：[ファイルキーワード, ルートディレクトリ]
- * @param {string} _fileName 
- * @param {string} _directory 
- */
-const getFilePath = (_fileName, _directory = ``) => {
-	if (_fileName.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-		const tmpType = _fileName.split(C_MRK_CURRENT_DIRECTORY)[1];
-		return getFolderAndType(tmpType, tmpType.indexOf(`/`));
-	} else {
-		return getFolderAndType(_fileName, _fileName.lastIndexOf(`/`), _directory);
-	}
-};
-
-/**
- * 色名をカラーコードに変換
- * @param {string} _color 
- */
-const colorNameToCode = _color => {
-	const cxt = document.createElement(`canvas`).getContext(`2d`);
-	cxt.fillStyle = _color;
-	return cxt.fillStyle;
-}
-
-/**
- * 10進 -> 16進数変換 (カラーコード形式になるよう0埋め)
- * @param {number} _num 
- */
-const byteToHex = _num => (`${_num.toString(16).padStart(2, '0')}`);
-
-/**
- * カラーコードかどうかを判定 (簡易版)
- * @param {string} _str 
- * @returns 
- */
-const isColorCd = _str => _str.substring(0, 1) === `#`;
-
-/**
- * CSSの位置表記系かどうかをチェック
- * @param {string} _str 
- * @returns 
- */
-const hasAnglePointInfo = _str => fuzzyListMatching(_str, g_checkStr.cssHeader, g_checkStr.cssFooter);
-
-/**
- * 色名をカラーコードへ変換 (元々カラーコードの場合は除外)
- * @param {string} _color 色名
- */
-const colorToHex = (_color) => {
-
-	// すでにカラーコードのものやパーセント表記、位置表記系を除外
-	if (!isNaN(parseFloat(_color)) || isColorCd(_color) || hasAnglePointInfo(_color)) {
-		return _color;
-	}
-
-	// 色_位置;透明度 (Ex: red 20%;255) の形式で取り込み
-	// 透明度はカラーコード形式に変換してRGBの後ろに設定
-	const tmpColor = _color.split(`;`);
-	const colorSet = tmpColor[0].split(` `);
-	return colorNameToCode(colorSet[0]) +
-		(tmpColor.length > 1 ? byteToHex(setVal(tmpColor[1], 255, C_TYP_NUMBER)) : '') +
-		(colorSet[1] !== undefined ? ` ${colorSet.slice(1).join(' ')}` : '');
-}
-
-/**
- * カラーコードの前パディング (旧Option Editor対応)
- * @param {boolean} _useFlg
- * @param {string} _colorStr 
- */
-const colorCdPadding = (_useFlg, _colorStr) => _useFlg ? `#${_colorStr.slice(1).padStart(6, `0`)}` : _colorStr;
-
-/**
- * グラデーション用のカラーフォーマットを作成
- * @param {string} _colorStr 
- * @param {object} _options
- *   defaultColorgrd
- *   colorCdPaddingUse
- *   objType (normal: 汎用, titleMusic: タイトル曲名, titleArrow: タイトル矢印)
- *   shadowFlg
- */
-function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultColorgrd,
-	_colorCdPaddingUse = false, _objType = `normal`, _shadowFlg = false } = {}) {
-
-	// |color_data=300,20,45deg:#ffff99:#ffffff:#9999ff@linear-gradient|
-	// |color_data=300,20,#ffff99:#ffffff:#9999ff@radial-gradient|
-	// |color_data=300,20,#ffff99:#ffffff:#9999ff@conic-gradient|
-
-	if (_colorStr === `Default` || _colorStr === ``) {
-		return _colorStr;
-	}
-
-	// 矢印の塗りつぶしの場合：透明度を50%にする
-	// 背景矢印の場合　　　　：透明度を25%にする
-	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : (_objType === `titleArrow` ? `40` : ``);
-
-	let convertColorStr = ``;
-	const tmpColorStr = _colorStr.split(`@`);
-	const colorArray = tmpColorStr[0].split(`:`);
-	for (let j = 0; j < colorArray.length; j++) {
-		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replace(/0x/g, `#`)));
-		if (isColorCd(colorArray[j]) && colorArray[j].length === 7) {
-			colorArray[j] += alphaVal;
-		}
-	}
-
-	const gradationType = (tmpColorStr.length > 1 ? tmpColorStr[1] : `linear-gradient`);
-	const defaultDir = `to ${(_objType === 'titleArrow' ? 'left' : 'right')}, `;
-	if (colorArray.length === 1) {
-		if (_objType === `titleMusic`) {
-			convertColorStr = `${defaultDir}${colorArray[0]} 100%, #eeeeee${alphaVal} 0%`;
-		} else if (_defaultColorgrd[0]) {
-			convertColorStr = `${defaultDir}${colorArray[0]}, ${_defaultColorgrd[1]}${alphaVal}, ${colorArray[0]}`;
-		} else {
-			return colorArray[0];
-		}
-	} else {
-		if (gradationType === `linear-gradient` && (isColorCd(colorArray[0]) || !hasAnglePointInfo(colorArray[0]))) {
-			// "to XXXX" もしくは "XXXdeg(rad, grad, turn)"のパターン以外は方向を補完する
-			convertColorStr = `${defaultDir}`;
-		}
-		convertColorStr += `${colorArray.join(', ')}`;
-	}
-
-	return `${gradationType}(${convertColorStr})`;
-}
-
-/**
  * 譜面ヘッダーの分解（スキン、jsファイルなどの設定）
  * @param {object} _dosObj 
  * @returns 
@@ -2981,6 +3031,23 @@ function headerConvert(_dosObj) {
 	});
 
 	return obj;
+}
+
+/**
+ * 曲名（1行）の取得
+ * @param {string} _musicName 
+ */
+function getMusicNameSimple(_musicName) {
+	return _musicName.split(`<br>`).join(` `).split(`<nbr>`).join(``).split(`<dbr>`).join(`　`);
+}
+
+/**
+ * 曲名（複数行）の取得
+ * @param {string} _musicName 
+ */
+function getMusicNameMultiLine(_musicName) {
+	const tmpName = _musicName.split(`<nbr>`).join(`<br>`).split(`<dbr>`).join(`<br>`).split(`<br>`);
+	return tmpName.length === 1 ? [tmpName[0], ``] : tmpName;
 }
 
 /**
@@ -3883,23 +3950,6 @@ function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
 	divRoot.removeChild(tmplbl);
 
 	return lbl;
-}
-
-/**
- * 曲名（1行）の取得
- * @param {string} _musicName 
- */
-function getMusicNameSimple(_musicName) {
-	return _musicName.split(`<br>`).join(` `).split(`<nbr>`).join(``).split(`<dbr>`).join(`　`);
-}
-
-/**
- * 曲名（複数行）の取得
- * @param {string} _musicName 
- */
-function getMusicNameMultiLine(_musicName) {
-	const tmpName = _musicName.split(`<nbr>`).join(`<br>`).split(`<dbr>`).join(`<br>`).split(`<br>`);
-	return tmpName.length === 1 ? [tmpName[0], ``] : tmpName;
 }
 
 
@@ -7043,52 +7093,6 @@ function scoreConvert(_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	}
 
 	return obj;
-}
-
-/**
- * 文字列の置換
- * @param {string} _str 
- * @param {array} _pairs 
- */
-function replaceStr(_str, _pairs) {
-	let tmpStr = _str;
-	_pairs.forEach(pair => {
-		tmpStr = tmpStr.split(pair[0]).join(pair[1]);
-	});
-	return tmpStr;
-}
-
-/**
- * 文字列のエスケープ処理
- * @param {string} _str 
- * @param {array} _escapeList
- */
-function escapeHtml(_str, _escapeList = g_escapeStr.escape) {
-	return escapeHtmlForEnabledTag(replaceStr(_str, _escapeList));
-}
-
-/**
- * 文字列のエスケープ処理(htmlタグ許容版)
- * @param {string} _str 
- */
-function escapeHtmlForEnabledTag(_str) {
-	return replaceStr(_str, g_escapeStr.escapeTag);
-}
-
-/**
- * エスケープ文字を元の文字に戻す
- * @param {string} _str 
- */
-function unEscapeHtml(_str) {
-	return replaceStr(_str, g_escapeStr.unEscapeTag);
-}
-
-/**
- * 配列の中身を全てエスケープ処理
- * @param {array} _array 
- */
-function escapeHtmlForArray(_array) {
-	return _array.map(str => escapeHtml(str));
 }
 
 /**
