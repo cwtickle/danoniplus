@@ -17,7 +17,7 @@ let g_localVersion = ``;
 let g_localVersion2 = ``;
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
-//  タイトル:melon  設定・オプション:lime  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
+//  共通:water　初期化:peach　タイトル:melon  設定:lime　ディスプレイ:lemon  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
 //  シーンジャンプ:Scene
 
 /**
@@ -187,6 +187,18 @@ let g_localStorageUrl;
 let g_localKeyStorage;
 let g_canLoadDifInfoFlg = false;
 
+/*-----------------------------------------------------------*/
+/* 要素・属性                                                 */
+/*-----------------------------------------------------------*/
+
+/**
+ * div要素のstyleを取得
+ * @param {string} _id 
+ */
+function $id(_id) {
+	return document.getElementById(`${_id}`).style;
+}
+
 /**
  * 複数のdiv子要素を親要素へ接続
  * @param {object} _baseObj 
@@ -212,195 +224,16 @@ const setAttrs = (_baseObj, { ...rest } = {}) => {
  */
 const getNumAttr = (_baseObj, _attrkey) => parseFloat(_baseObj.getAttribute(_attrkey));
 
+
+/*-----------------------------------------------------------*/
+/* 値や配列のチェック・変換                                    */
+/*-----------------------------------------------------------*/
+
 /**
  * 変数が存在するかどうかをチェック
  * @param {string} _data 
  */
 const hasVal = _data => _data !== undefined && _data !== ``;
-
-/**
- * 配列内に存在するかどうかをチェック
- * @param {string} _val 
- * @param {array} _array 
- * @param {integer} _pos 
- * @returns 
- */
-const hasValInArray = (_val, _array, _pos = 0) =>
-	_array.findIndex(data => data[_pos] === _val) !== -1;
-
-/**
- * 配列が既定長以上かどうかをチェック
- * @param {array} _data 
- * @param {integer} _length 
- * @returns 
- */
-const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length >= _length;
-
-/**
- * 重複を排除した配列の生成
- * @param {array} _array1 
- * @param {...any} _arrays 
- * @returns 
- */
-const makeDedupliArray = (_array1, ..._arrays) =>
-	Array.from((new Set([..._array1, ..._arrays.flat()])).values());
-
-/**
- * 部分一致検索（リストのいずれかに合致、大小文字問わず）
- * @param {string} _str 検索文字
- * @param {array} _list 検索リスト (英字は小文字にする必要あり)
- * @param {string} prefix 前方一致条件 (前方一致時は ^)
- * @param {string} suffix 後方一致条件 (後方一致時は $)
- */
-const listMatching = (_str, _list, { prefix = ``, suffix = `` } = {}) =>
-	_list.findIndex(value => _str.toLowerCase().match(new RegExp(String.raw`${prefix}${value}${suffix}`, 'i'))) !== -1;
-
-const fuzzyListMatching = (_str, _headerList, _footerList) =>
-	listMatching(_str, _headerList, { prefix: `^` }) || listMatching(_str, _footerList, { suffix: `$` });
-
-/**
- * 対象のカラーコードが明暗どちらかを判定 (true: 明色, false: 暗色)
- * @param {string} _colorStr 
- * @returns 
- */
-const checkLightOrDark = _colorStr => {
-	const r = parseInt(_colorStr.substring(1, 3), 16);
-	const g = parseInt(_colorStr.substring(3, 5), 16);
-	const b = parseInt(_colorStr.substring(5, 7), 16);
-	return ((((r * 299) + (g * 587) + (b * 114)) / 1000) < 128);
-};
-
-/**
- * 二次元配列のコピー
- * @param {array2} _array2d 
- * @returns 
- */
-const copyArray2d = _array2d => JSON.parse(JSON.stringify(_array2d));
-
-/**
- * 配列データを合計
- * @param {array} _array 
- * @returns 
- */
-const sumData = _array => _array.reduce((p, x) => p + x);
-
-/**
- * 次のカーソルへ移動
- * @param {number} _basePos 
- * @param {number} _num 
- * @param {number} _length 
- * @returns 
- */
-const nextPos = (_basePos, _num, _length) => (_basePos + _length + _num) % _length;
-
-/**
- * イベントハンドラ用オブジェクト
- * 参考: http://webkatu.com/remove-eventlistener/
- * 
- * - イベントリスナー作成時にリスナーキー(key)を発行する
- * - 削除時は発行したリスナーキーを指定して削除する
- */
-const g_handler = (_ => {
-	const events = {};
-	let key = 0;
-
-	return {
-		addListener: (_target, _type, _listener, _capture = false) => {
-			_target.addEventListener(_type, _listener, _capture);
-			events[key] = {
-				target: _target,
-				type: _type,
-				listener: _listener,
-				capture: _capture
-			};
-			return key++;
-		},
-		removeListener: key => {
-			if (key in events) {
-				const e = events[key];
-				e.target.removeEventListener(e.type, e.listener, e.capture);
-			}
-		}
-	}
-})();
-
-/**
- * 特定キーコードを置換する処理
- * @param {string} _setCode 
- */
-const transCode = _setCode => {
-	if ([`Control`, `Shift`, `Alt`].includes(_setCode.slice(0, -5))) {
-		return _setCode.replace(`Right`, `Left`);
-	}
-	return _setCode;
-}
-
-/**
- * 特定キーをブロックする処理
- * @param {string} _setCode 
- */
-const blockCode = _setCode => !C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode);
-
-/**
- * キーを押したときの動作（汎用）
- * @param {object} _evt 
- * @param {string} _displayName 
- * @param {function} _func
- */
-const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
-	const setCode = transCode(_evt.code);
-	if (_evt.repeat && (g_unrepeatObj.page.includes(_displayName) || g_unrepeatObj.key.includes(setCode))) {
-		return blockCode(setCode);
-	}
-	g_inputKeyBuffer[setCode] = true;
-
-	// 対象ボタンを検索
-	const scLists = Object.keys(g_shortcutObj[_displayName]).filter(keys => {
-		const keyset = keys.split(`_`);
-		return (keyset.length > 2 ? keyIsDown(keyset[0]) && keyIsDown(keyset[1]) && keyIsDown(keyset[2]) :
-			(keyset.length > 1 ? keyIsDown(keyset[0]) && keyIsDown(keyset[1]) : keyIsDown(keyset[0])));
-	});
-	if (scLists.length > 0) {
-		// リンク先にジャンプする場合はonkeyUpイベントが動かないため、事前にキー状態をリセット
-		if (g_shortcutObj[_displayName][scLists[0]].reset) {
-			g_inputKeyBuffer[setCode] = false;
-		}
-		// 対象ボタン処理を実行
-		const targetId = document.getElementById(g_shortcutObj[_displayName][scLists[0]].id);
-		if (targetId !== null && targetId.style.display !== C_DIS_NONE && targetId.style.pointerEvents !== C_DIS_NONE) {
-			targetId.click();
-		}
-		return blockCode(setCode);
-	}
-	_func(setCode);
-	return blockCode(setCode);
-};
-
-/**
- * キーを離したときの動作（汎用）
- * @param {object} _evt 
- */
-const commonKeyUp = _evt => {
-	g_inputKeyBuffer[g_kCdNameObj.metaKey] = false;
-	g_inputKeyBuffer[transCode(_evt.code)] = false;
-};
-
-/**
- * 外部リンクを新規タブで開く
- * @param {string} _url 
- */
-const openLink = _url => {
-	if (_url.match(`^(http|https):/`)) {
-		window.open(_url, `_blank`, `noopener`);
-	}
-}
-
-/**
- * 改行コード区切りの配列展開
- * @param {string} _str 
- * @returns 
- */
-const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
 
 /**
  * 文字列を想定された型に変換
@@ -453,14 +286,6 @@ function setVal(_checkStr, _default, _type) {
 }
 
 /**
- * div要素のstyleを取得
- * @param {string} _id 
- */
-function $id(_id) {
-	return document.getElementById(`${_id}`).style;
-}
-
-/**
  * 先頭のみ大文字に変換（それ以降はそのまま）
  * @param {string} _str 
  */
@@ -476,6 +301,230 @@ function toCapitalize(_str) {
  */
 function roundZero(_num, _init = 0) {
 	return _num < 0 ? _init : _num;
+}
+
+/**
+ * 配列内に存在するかどうかをチェック
+ * @param {string} _val 
+ * @param {array} _array 
+ * @param {integer} _pos 
+ * @returns 
+ */
+const hasValInArray = (_val, _array, _pos = 0) =>
+	_array.findIndex(data => data[_pos] === _val) !== -1;
+
+/**
+ * 配列が既定長以上かどうかをチェック
+ * @param {array} _data 
+ * @param {integer} _length 
+ * @returns 
+ */
+const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length >= _length;
+
+/**
+ * 改行コード区切りの配列展開
+ * @param {string} _str 
+ * @returns 
+ */
+const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
+
+/**
+ * 重複を排除した配列の生成
+ * @param {array} _array1 
+ * @param {...any} _arrays 
+ * @returns 
+ */
+const makeDedupliArray = (_array1, ..._arrays) =>
+	Array.from((new Set([..._array1, ..._arrays.flat()])).values());
+
+/**
+ * 二次元配列のコピー
+ * @param {array2} _array2d 
+ * @returns 
+ */
+const copyArray2d = _array2d => JSON.parse(JSON.stringify(_array2d));
+
+/**
+ * 配列データを合計
+ * @param {array} _array 
+ * @returns 
+ */
+const sumData = _array => _array.reduce((p, x) => p + x);
+
+/**
+ * 部分一致検索（リストのいずれかに合致、大小文字問わず）
+ * @param {string} _str 検索文字
+ * @param {array} _list 検索リスト (英字は小文字にする必要あり)
+ * @param {string} prefix 前方一致条件 (前方一致時は ^)
+ * @param {string} suffix 後方一致条件 (後方一致時は $)
+ */
+const listMatching = (_str, _list, { prefix = ``, suffix = `` } = {}) =>
+	_list.findIndex(value => _str.toLowerCase().match(new RegExp(String.raw`${prefix}${value}${suffix}`, 'i'))) !== -1;
+
+const fuzzyListMatching = (_str, _headerList, _footerList) =>
+	listMatching(_str, _headerList, { prefix: `^` }) || listMatching(_str, _footerList, { suffix: `$` });
+
+/**
+ * 対象のカラーコードが明暗どちらかを判定 (true: 明色, false: 暗色)
+ * @param {string} _colorStr 
+ * @returns 
+ */
+const checkLightOrDark = _colorStr => {
+	const r = parseInt(_colorStr.substring(1, 3), 16);
+	const g = parseInt(_colorStr.substring(3, 5), 16);
+	const b = parseInt(_colorStr.substring(5, 7), 16);
+	return ((((r * 299) + (g * 587) + (b * 114)) / 1000) < 128);
+};
+
+/**
+ * 次のカーソルへ移動
+ * @param {number} _basePos 
+ * @param {number} _num 
+ * @param {number} _length 
+ * @returns 
+ */
+const nextPos = (_basePos, _num, _length) => (_basePos + _length + _num) % _length;
+
+/*-----------------------------------------------------------*/
+/* キーコード関連                                             */
+/*-----------------------------------------------------------*/
+
+/**
+ * 特定キーコードを置換する処理
+ * @param {string} _setCode 
+ */
+const transCode = _setCode => {
+	if ([`Control`, `Shift`, `Alt`].includes(_setCode.slice(0, -5))) {
+		return _setCode.replace(`Right`, `Left`);
+	}
+	return _setCode;
+}
+
+/**
+ * 特定キーをブロックする処理
+ * @param {string} _setCode 
+ */
+const blockCode = _setCode => !C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode);
+
+
+/*-----------------------------------------------------------*/
+/* ショートカット制御                                          */
+/*-----------------------------------------------------------*/
+
+/**
+ * キーを押したときの動作（汎用）
+ * @param {object} _evt 
+ * @param {string} _displayName 
+ * @param {function} _func
+ */
+const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
+	const setCode = transCode(_evt.code);
+	if (_evt.repeat && (g_unrepeatObj.page.includes(_displayName) || g_unrepeatObj.key.includes(setCode))) {
+		return blockCode(setCode);
+	}
+	g_inputKeyBuffer[setCode] = true;
+
+	// 対象ボタンを検索
+	const scLists = Object.keys(g_shortcutObj[_displayName]).filter(keys => {
+		const keyset = keys.split(`_`);
+		return (keyset.length > 2 ? keyIsDown(keyset[0]) && keyIsDown(keyset[1]) && keyIsDown(keyset[2]) :
+			(keyset.length > 1 ? keyIsDown(keyset[0]) && keyIsDown(keyset[1]) : keyIsDown(keyset[0])));
+	});
+	if (scLists.length > 0) {
+		// リンク先にジャンプする場合はonkeyUpイベントが動かないため、事前にキー状態をリセット
+		if (g_shortcutObj[_displayName][scLists[0]].reset) {
+			g_inputKeyBuffer[setCode] = false;
+		}
+		// 対象ボタン処理を実行
+		const targetId = document.getElementById(g_shortcutObj[_displayName][scLists[0]].id);
+		if (targetId !== null && targetId.style.display !== C_DIS_NONE && targetId.style.pointerEvents !== C_DIS_NONE) {
+			targetId.click();
+		}
+		return blockCode(setCode);
+	}
+	_func(setCode);
+	return blockCode(setCode);
+};
+
+/**
+ * キーを離したときの動作（汎用）
+ * @param {object} _evt 
+ */
+const commonKeyUp = _evt => {
+	g_inputKeyBuffer[g_kCdNameObj.metaKey] = false;
+	g_inputKeyBuffer[transCode(_evt.code)] = false;
+};
+
+/**
+ * ショートカットキー表示
+ * @param {object} _obj
+ * @param {string} _settingLabel 
+ * @param {object} objectList 
+ */
+const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = ``, targetLabel = `lnk${_settingLabel}R`,
+	x = g_scViewObj.x, y = g_scViewObj.y, w = g_scViewObj.w, siz = g_scViewObj.siz } = {}) => {
+	const scKey = Object.keys(g_shortcutObj[displayName]).filter(key => g_shortcutObj[displayName][key].id === targetLabel);
+	if (scKey.length > 0) {
+		multiAppend(_obj,
+			createDivCss2Label(`sc${_settingLabel}`,
+				g_scViewObj.format.split(`{0}`).join(dfLabel !== `` ? `${dfLabel}` : `${g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])] ?? ''}`), {
+				x, y, w, siz, fontWeight: `bold`, opacity: 0.75, pointerEvents: C_DIS_NONE,
+			})
+		);
+	}
+}
+
+/**
+ * 各画面の汎用ショートカットキー表示
+ * @param {string} _displayName 
+ */
+const createScTextCommon = _displayName => {
+	Object.keys(g_btnPatterns[_displayName]).filter(target => document.getElementById(`btn${target}`) !== null)
+		.forEach(target =>
+			createScText(document.getElementById(`btn${target}`), target, {
+				displayName: _displayName, targetLabel: `btn${target}`,
+				dfLabel: g_lblNameObj[`sc_${_displayName}${target}`] ?? ``,
+				x: g_btnPatterns[_displayName][target],
+			}));
+}
+
+/**
+ * ショートカットキー有効化
+ * @param {string} _displayName
+ * @param {function} _func 
+ */
+const setShortcutEvent = (_displayName, _func = _ => true, _displayFlg = true) => {
+	if (_displayFlg) {
+		createScTextCommon(_displayName);
+	}
+	const evList = _ => {
+		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func);
+		document.onkeyup = evt => commonKeyUp(evt);
+	}
+	if (g_initialFlg && g_btnWaitFrame[_displayName].initial) {
+		evList();
+	} else {
+		setTimeout(_ => {
+			if (g_currentPage === _displayName) {
+				evList();
+			}
+		}, g_btnWaitFrame[_displayName].s_frame * 1000 / g_fps);
+	}
+}
+
+
+/*-----------------------------------------------------------*/
+/* ファイル・リンク制御                                        */
+/*-----------------------------------------------------------*/
+
+/**
+ * 外部リンクを新規タブで開く
+ * @param {string} _url 
+ */
+const openLink = _url => {
+	if (_url.match(`^(http|https):/`)) {
+		window.open(_url, `_blank`, `noopener`);
+	}
 }
 
 /**
@@ -519,6 +568,68 @@ function preloadFile(_as, _href, _type = ``, _crossOrigin = `anonymous`) {
 			document.head.appendChild(link);
 		}
 	}
+}
+
+/**
+ * 外部jsファイルの読込 (callback)
+ * 読込可否を g_loadObj[ファイル名] で管理 (true: 読込成功, false: 読込失敗)
+ * @deprecated v27以降非推奨予定
+ * @param {string} _url 
+ * @param {function} _callback 
+ * @param {boolean} _requiredFlg (default : true / 読込必須)
+ * @param {string} _charset (default : UTF-8)
+ */
+function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
+	const baseUrl = _url.split(`?`)[0];
+	g_loadObj[baseUrl] = false;
+	const script = document.createElement(`script`);
+	script.type = `text/javascript`;
+	script.src = _url;
+	script.charset = _charset;
+	script.onload = _ => {
+		g_loadObj[baseUrl] = true;
+		_callback();
+	};
+	script.onerror = _ => {
+		if (_requiredFlg) {
+			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(_url.split(`?`)[0]));
+		} else {
+			_callback();
+		}
+	};
+	document.querySelector(`head`).appendChild(script);
+}
+
+/**
+ * 外部jsファイルの読込 (Promise)
+ * 読込可否を g_loadObj[ファイル名] で管理 (true: 読込成功, false: 読込失敗)
+ * @param {string} _url 
+ * @param {boolean} _requiredFlg (default : true / 読込必須)
+ * @param {string} _charset (default : UTF-8)
+ */
+function loadScript2(_url, _requiredFlg = true, _charset = `UTF-8`) {
+	const baseUrl = _url.split(`?`)[0];
+	g_loadObj[baseUrl] = false;
+
+	return new Promise((resolve, reject) => {
+		const script = document.createElement(`script`);
+		script.type = `text/javascript`;
+		script.src = _url;
+		script.charset = _charset;
+		script.onload = _ => {
+			g_loadObj[baseUrl] = true;
+			resolve(script);
+		};
+		script.onerror = _err => {
+			if (_requiredFlg) {
+				makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(_url.split(`?`)[0]));
+				reject(_err);
+			} else {
+				resolve(script);
+			}
+		};
+		document.querySelector(`head`).appendChild(script);
+	});
 }
 
 /**
@@ -569,6 +680,61 @@ function importCssFile2(_href) {
 		document.head.appendChild(link);
 	});
 }
+
+/**
+ * js, cssファイルの連続読込 (callback)
+ * @deprecated v27以降非推奨予定
+ * @param {number} _j 
+ * @param {array} _fileData 
+ * @param {string} _loadType
+ * @param {function} _afterFunc 
+ */
+function loadMultipleFiles(_j, _fileData, _loadType, _afterFunc = _ => true) {
+	if (_j < _fileData.length) {
+		const filePath = `${_fileData[_j][1]}${_fileData[_j][0]}?${new Date().getTime()}`;
+		if (_fileData[_j][0].endsWith(`.css`)) {
+			_loadType = `css`;
+		}
+
+		// jsファイル、cssファイルにより呼び出す関数を切替
+		if (_loadType === `js`) {
+			loadScript(filePath, _ =>
+				loadMultipleFiles(_j + 1, _fileData, _loadType, _afterFunc), false);
+		} else if (_loadType === `css`) {
+			const cssPath = filePath.split(`.js`).join(`.css`);
+			importCssFile(cssPath, _ =>
+				loadMultipleFiles(_j + 1, _fileData, _loadType, _afterFunc));
+		}
+	} else {
+		_afterFunc();
+	}
+}
+
+/**
+ * js, cssファイルの連続読込 (async function)
+ * @param {array} _fileData 
+ * @param {string} _loadType
+ */
+async function loadMultipleFiles2(_fileData, _loadType) {
+	await Promise.all(_fileData.map(async filePart => {
+		const filePath = `${filePart[1]}${filePart[0]}?${g_randTime}`;
+		if (filePart[0].endsWith(`.css`)) {
+			_loadType = `css`;
+		}
+
+		// jsファイル、cssファイルにより呼び出す関数を切替
+		if (_loadType === `js`) {
+			await loadScript2(filePath, false);
+		} else if (_loadType === `css`) {
+			const cssPath = filePath.split(`.js`).join(`.css`);
+			await importCssFile2(cssPath);
+		}
+	}));
+}
+
+/*-----------------------------------------------------------*/
+/* フォント設定                                          */
+/*-----------------------------------------------------------*/
 
 /**
  * 画面共通のフォント設定
@@ -639,18 +805,9 @@ async function copyTextToClipboard(_textVal, _msg) {
 	}
 }
 
-/**
- * user-select属性の値変更
- * @param {object} _style 
- * @param {string} _value 
- */
-function setUserSelect(_style, _value = C_DIS_NONE) {
-	_style.userSelect = _value;
-	_style.webkitUserSelect = _value;
-	_style.msUserSelect = _value;
-	_style.mozUserSelect = _value;
-	_style.webkitTouchCallout = _value;
-}
+/*-----------------------------------------------------------*/
+/* ラベル・ボタン・オブジェクトの作成                           */
+/*-----------------------------------------------------------*/
 
 /**
  * 図形の描画
@@ -675,6 +832,19 @@ function createDiv(_id, _x, _y, _width, _height) {
 	setUserSelect(style);
 
 	return div;
+}
+
+/**
+ * user-select属性の値変更
+ * @param {object} _style 
+ * @param {string} _value 
+ */
+function setUserSelect(_style, _value = C_DIS_NONE) {
+	_style.userSelect = _value;
+	_style.webkitUserSelect = _value;
+	_style.msUserSelect = _value;
+	_style.mozUserSelect = _value;
+	_style.webkitTouchCallout = _value;
 }
 
 /**
@@ -786,6 +956,37 @@ function createMultipleSprite(_baseName, _num) {
 	}
 	return sprite;
 }
+
+/**
+ * イベントハンドラ用オブジェクト
+ * 参考: http://webkatu.com/remove-eventlistener/
+ * 
+ * - イベントリスナー作成時にリスナーキー(key)を発行する
+ * - 削除時は発行したリスナーキーを指定して削除する
+ */
+const g_handler = (_ => {
+	const events = {};
+	let key = 0;
+
+	return {
+		addListener: (_target, _type, _listener, _capture = false) => {
+			_target.addEventListener(_type, _listener, _capture);
+			events[key] = {
+				target: _target,
+				type: _type,
+				listener: _listener,
+				capture: _capture
+			};
+			return key++;
+		},
+		removeListener: key => {
+			if (key in events) {
+				const e = events[key];
+				e.target.removeEventListener(e.type, e.listener, e.capture);
+			}
+		}
+	}
+})();
 
 /**
  * 親スプライト配下の子スプライトを全削除
@@ -976,147 +1177,36 @@ function clearWindow(_redrawFlg = false, _customDisplayName = ``) {
 }
 
 /**
- * 外部jsファイルの読込 (callback)
- * 読込可否を g_loadObj[ファイル名] で管理 (true: 読込成功, false: 読込失敗)
- * @deprecated v27以降非推奨予定
- * @param {string} _url 
- * @param {function} _callback 
- * @param {boolean} _requiredFlg (default : true / 読込必須)
- * @param {string} _charset (default : UTF-8)
+ * デフォルト背景画像の描画処理
+ * @param {string} _key メイン画面かどうか。Main:メイン画面、(空白):それ以外
  */
-function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
-	const baseUrl = _url.split(`?`)[0];
-	g_loadObj[baseUrl] = false;
-	const script = document.createElement(`script`);
-	script.type = `text/javascript`;
-	script.src = _url;
-	script.charset = _charset;
-	script.onload = _ => {
-		g_loadObj[baseUrl] = true;
-		_callback();
-	};
-	script.onerror = _ => {
-		if (_requiredFlg) {
-			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(_url.split(`?`)[0]));
-		} else {
-			_callback();
-		}
-	};
-	document.querySelector(`head`).appendChild(script);
-}
+function drawDefaultBackImage(_key) {
 
-/**
- * 外部jsファイルの読込 (Promise)
- * 読込可否を g_loadObj[ファイル名] で管理 (true: 読込成功, false: 読込失敗)
- * @param {string} _url 
- * @param {boolean} _requiredFlg (default : true / 読込必須)
- * @param {string} _charset (default : UTF-8)
- */
-function loadScript2(_url, _requiredFlg = true, _charset = `UTF-8`) {
-	const baseUrl = _url.split(`?`)[0];
-	g_loadObj[baseUrl] = false;
+	g_btnAddFunc = {};
+	g_btnDeleteFlg = {};
+	g_cxtAddFunc = {};
+	g_cxtDeleteFlg = {};
 
-	return new Promise((resolve, reject) => {
-		const script = document.createElement(`script`);
-		script.type = `text/javascript`;
-		script.src = _url;
-		script.charset = _charset;
-		script.onload = _ => {
-			g_loadObj[baseUrl] = true;
-			resolve(script);
-		};
-		script.onerror = _err => {
-			if (_requiredFlg) {
-				makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(_url.split(`?`)[0]));
-				reject(_err);
-			} else {
-				resolve(script);
+	// レイヤー情報取得
+	if (document.querySelector(`#layer0`) !== null) {
+		const layer0 = document.querySelector(`#layer0`);
+		const l0ctx = layer0.getContext(`2d`);
+
+		// 画面背景を指定 (background-color)
+		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
+		if (!g_headerObj[`customBack${_key}Use`]) {
+			grd.addColorStop(0, `#000000`);
+			grd.addColorStop(1, `#222222`);
+			l0ctx.fillStyle = grd;
+			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+
+			if (!g_headerObj.defaultSkinFlg) {
+				createEmptySprite(divRoot, `divBack`);
 			}
-		};
-		document.querySelector(`head`).appendChild(script);
-	});
-}
-
-// WebAudioAPIでAudio要素風に再生するクラス
-class AudioPlayer {
-	constructor() {
-		const AudioContext = window.AudioContext ?? window.webkitAudioContext;
-		this._context = new AudioContext();
-		this._gain = this._context.createGain();
-		this._gain.connect(this._context.destination);
-		this._startTime = 0;
-		this._fadeinPosition = 0;
-		this._eventListeners = {};
-		this.playbackRate = 1;
-	}
-
-	async init(_arrayBuffer) {
-		this._arrayBuffer = _arrayBuffer;
-		await this._context.decodeAudioData(this._arrayBuffer, _buffer => {
-			this._duration = _buffer.duration;
-			this._buffer = _buffer;
-		});
-
-		if (this._eventListeners[`canplaythrough`] !== undefined) {
-			this._eventListeners[`canplaythrough`].forEach(_listener => _listener());
 		}
+	} else {
+		createEmptySprite(divRoot, `divBack`);
 	}
-
-	play(_adjustmentTime = 0) {
-		this._source = this._context.createBufferSource();
-		this._source.buffer = this._buffer;
-		this._source.playbackRate.value = this.playbackRate;
-		this._source.connect(this._gain);
-		this._startTime = this._context.currentTime;
-		this._source.start(this._context.currentTime + _adjustmentTime, this._fadeinPosition);
-	}
-
-	pause() {
-		if (this._source) {
-			this._source.stop(0);
-		}
-	}
-
-	set currentTime(_currentTime) {
-		this._fadeinPosition = _currentTime;
-	}
-
-	get volume() {
-		return this._gain.gain.value;
-	}
-
-	set volume(_volume) {
-		this._gain.gain.value = _volume;
-	}
-
-	get duration() {
-		return this._duration;
-	}
-
-	get readyState() {
-		if (this._duration) {
-			return 4;
-		} else {
-			return 0;
-		}
-	}
-
-	addEventListener(_type, _listener) {
-		if (this._eventListeners[_type] === undefined) {
-			this._eventListeners[_type] = [];
-		}
-		this._eventListeners[_type].push(_listener);
-	}
-
-	removeEventListener(_type, _listener) {
-		if (this._eventListeners[_type] === undefined) {
-			return;
-		}
-		this._eventListeners[_type] = this._eventListeners[_type].filter(_element => _element !== _listener);
-	}
-
-	load() { }
-	dispatchEvent() { }
 }
 
 /**
@@ -1253,6 +1343,192 @@ function makeSpriteData(_data, _calcFrame = _frame => _frame) {
 }
 
 /**
+ * 画像ファイルかどうかをチェック
+ * @param {string} _str 
+ */
+function checkImage(_str) {
+	return listMatching(_str, g_imgExtensions, { prefix: `[.]`, suffix: `$` });
+}
+
+/**
+ * back/masktitle(result)において、ジャンプ先のフレーム数を取得
+ * @param {string} _frames 
+ */
+function getSpriteJumpFrame(_frames) {
+	const jumpFrames = _frames.split(`:`);
+	const jumpCnt = Math.floor(Math.random() * jumpFrames.length);
+	return setVal(Number(jumpFrames[jumpCnt]) - 1, 0, C_TYP_NUMBER);
+}
+
+/**
+ * 背景・マスクモーションの表示（タイトル・リザルト用）
+ * @param {number} _frame 
+ * @param {string} _displayName title / result
+ * @param {string} _depthName back / mask
+ */
+function drawSpriteData(_frame, _displayName, _depthName) {
+
+	const spriteName = `${_depthName}${toCapitalize(_displayName)}`;
+	const tmpObjs = g_headerObj[`${spriteName}Data`][_frame];
+
+	for (let j = 0; j < tmpObjs.length; j++) {
+		const tmpObj = tmpObjs[j];
+		const baseSprite = document.querySelector(`#${spriteName}Sprite${tmpObj.depth}`);
+		if (tmpObj.command !== ``) {
+			if (tmpObj.command === `[loop]`) {
+				// キーワード指定：ループ
+				// 指定フレーム(class)へ移動する
+				g_scoreObj[`${spriteName}LoopCount`]++;
+				return getSpriteJumpFrame(tmpObj.jumpFrame);
+
+			} else if (tmpObj.command === `[jump]`) {
+				// キーワード指定：フレームジャンプ
+				// 指定回数以上のループ(maxLoop)があれば指定フレーム(jumpFrame)へ移動する
+				if (g_scoreObj[`${spriteName}LoopCount`] >= Number(tmpObj.maxLoop)) {
+					g_scoreObj[`${spriteName}LoopCount`] = 0;
+					return getSpriteJumpFrame(tmpObj.jumpFrame);
+				}
+			} else {
+				baseSprite.innerHTML = tmpObj.htmlText;
+			}
+		} else {
+			if (tmpObj.depth === C_FLG_ALL) {
+				for (let j = 0; j <= g_headerObj[`${spriteName}MaxDepth`]; j++) {
+					document.querySelector(`#${spriteName}Sprite${j}`).textContent = ``;
+				}
+			} else {
+				baseSprite.textContent = ``;
+			}
+		}
+	}
+	return _frame;
+}
+
+/**
+ * 背景・マスクモーションの表示
+ * @param {number} _frame 
+ * @param {string} _depthName 
+ */
+function drawMainSpriteData(_frame, _depthName) {
+
+	const tmpObjs = g_scoreObj[`${_depthName}Data`][_frame];
+
+	tmpObjs.forEach(tmpObj => {
+		const baseSprite = document.querySelector(`#${_depthName}Sprite${tmpObj.depth}`);
+		if (tmpObj.command !== ``) {
+			baseSprite.innerHTML = tmpObj.htmlText;
+		} else {
+			if (tmpObj.depth === C_FLG_ALL) {
+				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
+					document.querySelector(`#${_depthName}Sprite${j}`).textContent = ``;
+				}
+			} else {
+				baseSprite.textContent = ``;
+			}
+		}
+	});
+}
+
+/**
+ * タイトル・リザルトモーションの描画
+ * @param {string} _displayName
+ */
+function drawTitleResultMotion(_displayName) {
+	g_animationData.forEach(sprite => {
+		const spriteName = `${sprite}${toCapitalize(_displayName)}`;
+		if (g_headerObj[`${spriteName}Data`][g_scoreObj[`${spriteName}FrameNum`]] !== undefined) {
+			g_scoreObj[`${spriteName}FrameNum`] = drawSpriteData(g_scoreObj[`${spriteName}FrameNum`], _displayName, sprite);
+		}
+	});
+}
+
+/*-----------------------------------------------------------*/
+/* その他の共通設定                                           */
+/*-----------------------------------------------------------*/
+
+// WebAudioAPIでAudio要素風に再生するクラス
+class AudioPlayer {
+	constructor() {
+		const AudioContext = window.AudioContext ?? window.webkitAudioContext;
+		this._context = new AudioContext();
+		this._gain = this._context.createGain();
+		this._gain.connect(this._context.destination);
+		this._startTime = 0;
+		this._fadeinPosition = 0;
+		this._eventListeners = {};
+		this.playbackRate = 1;
+	}
+
+	async init(_arrayBuffer) {
+		this._arrayBuffer = _arrayBuffer;
+		await this._context.decodeAudioData(this._arrayBuffer, _buffer => {
+			this._duration = _buffer.duration;
+			this._buffer = _buffer;
+		});
+
+		if (this._eventListeners[`canplaythrough`] !== undefined) {
+			this._eventListeners[`canplaythrough`].forEach(_listener => _listener());
+		}
+	}
+
+	play(_adjustmentTime = 0) {
+		this._source = this._context.createBufferSource();
+		this._source.buffer = this._buffer;
+		this._source.playbackRate.value = this.playbackRate;
+		this._source.connect(this._gain);
+		this._startTime = this._context.currentTime;
+		this._source.start(this._context.currentTime + _adjustmentTime, this._fadeinPosition);
+	}
+
+	pause() {
+		if (this._source) {
+			this._source.stop(0);
+		}
+	}
+
+	set currentTime(_currentTime) {
+		this._fadeinPosition = _currentTime;
+	}
+
+	get volume() {
+		return this._gain.gain.value;
+	}
+
+	set volume(_volume) {
+		this._gain.gain.value = _volume;
+	}
+
+	get duration() {
+		return this._duration;
+	}
+
+	get readyState() {
+		if (this._duration) {
+			return 4;
+		} else {
+			return 0;
+		}
+	}
+
+	addEventListener(_type, _listener) {
+		if (this._eventListeners[_type] === undefined) {
+			this._eventListeners[_type] = [];
+		}
+		this._eventListeners[_type].push(_listener);
+	}
+
+	removeEventListener(_type, _listener) {
+		if (this._eventListeners[_type] === undefined) {
+			return;
+		}
+		this._eventListeners[_type] = this._eventListeners[_type].filter(_element => _element !== _listener);
+	}
+
+	load() { }
+	dispatchEvent() { }
+}
+
+/**
  * 現在URLのクエリパラメータから指定した値を取得
  * @param {string} _name
  */
@@ -1300,7 +1576,7 @@ const transTimerToFrame = _str => {
 };
 
 /*-----------------------------------------------------------*/
-/* Scene : TITLE [melon] */
+/* Scene : INITIALIZE [peach] */
 /*-----------------------------------------------------------*/
 
 async function initialControl() {
@@ -1524,6 +1800,29 @@ function loadLocalStorage() {
 			highscores: {},
 		};
 	}
+}
+
+/**
+ * 譜面データを分割して値を取得
+ * @param {string} _dos 譜面データ
+ */
+function dosConvert(_dos) {
+
+	const obj = {};
+	const paramsTmp = g_enableAmpersandSplit ? _dos.split(`&`).join(`|`) : _dos;
+	const params = paramsTmp.split(`|`);
+	for (let j = 0; j < params.length; j++) {
+		const pos = params[j].indexOf(`=`);
+		if (pos > 0) {
+			const pKey = params[j].substring(0, pos);
+			const pValue = params[j].substring(pos + 1);
+
+			if (pKey !== undefined) {
+				obj[pKey] = g_enableDecodeURI ? decodeURIComponent(pValue) : pValue;
+			}
+		}
+	}
+	return obj;
 }
 
 /**
@@ -1897,57 +2196,6 @@ function calcLevel(_scoreObj) {
 }
 
 /**
- * js, cssファイルの連続読込 (callback)
- * @deprecated v27以降非推奨予定
- * @param {number} _j 
- * @param {array} _fileData 
- * @param {string} _loadType
- * @param {function} _afterFunc 
- */
-function loadMultipleFiles(_j, _fileData, _loadType, _afterFunc = _ => true) {
-	if (_j < _fileData.length) {
-		const filePath = `${_fileData[_j][1]}${_fileData[_j][0]}?${new Date().getTime()}`;
-		if (_fileData[_j][0].endsWith(`.css`)) {
-			_loadType = `css`;
-		}
-
-		// jsファイル、cssファイルにより呼び出す関数を切替
-		if (_loadType === `js`) {
-			loadScript(filePath, _ =>
-				loadMultipleFiles(_j + 1, _fileData, _loadType, _afterFunc), false);
-		} else if (_loadType === `css`) {
-			const cssPath = filePath.split(`.js`).join(`.css`);
-			importCssFile(cssPath, _ =>
-				loadMultipleFiles(_j + 1, _fileData, _loadType, _afterFunc));
-		}
-	} else {
-		_afterFunc();
-	}
-}
-
-/**
- * js, cssファイルの連続読込 (async function)
- * @param {array} _fileData 
- * @param {string} _loadType
- */
-async function loadMultipleFiles2(_fileData, _loadType) {
-	await Promise.all(_fileData.map(async filePart => {
-		const filePath = `${filePart[1]}${filePart[0]}?${g_randTime}`;
-		if (filePart[0].endsWith(`.css`)) {
-			_loadType = `css`;
-		}
-
-		// jsファイル、cssファイルにより呼び出す関数を切替
-		if (_loadType === `js`) {
-			await loadScript2(filePath, false);
-		} else if (_loadType === `css`) {
-			const cssPath = filePath.split(`.js`).join(`.css`);
-			await importCssFile2(cssPath);
-		}
-	}));
-}
-
-/**
  * 入力されたパスを、ディレクトリとそれ以外に分割
  * 返却値：[ファイルキーワード, ルートディレクトリ]
  * @param {string} _path 
@@ -1974,126 +2222,6 @@ const getFilePath = (_fileName, _directory = ``) => {
 		return getFolderAndType(_fileName, _fileName.lastIndexOf(`/`), _directory);
 	}
 };
-
-/**
- * デフォルト背景画像の描画処理
- * @param {string} _key メイン画面かどうか。Main:メイン画面、(空白):それ以外
- */
-function drawDefaultBackImage(_key) {
-
-	g_btnAddFunc = {};
-	g_btnDeleteFlg = {};
-	g_cxtAddFunc = {};
-	g_cxtDeleteFlg = {};
-
-	// レイヤー情報取得
-	if (document.querySelector(`#layer0`) !== null) {
-		const layer0 = document.querySelector(`#layer0`);
-		const l0ctx = layer0.getContext(`2d`);
-
-		// 画面背景を指定 (background-color)
-		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-		if (!g_headerObj[`customBack${_key}Use`]) {
-			grd.addColorStop(0, `#000000`);
-			grd.addColorStop(1, `#222222`);
-			l0ctx.fillStyle = grd;
-			l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
-
-			if (!g_headerObj.defaultSkinFlg) {
-				createEmptySprite(divRoot, `divBack`);
-			}
-		}
-	} else {
-		createEmptySprite(divRoot, `divBack`);
-	}
-}
-
-/**
- * 画像ファイルかどうかをチェック
- * @param {string} _str 
- */
-function checkImage(_str) {
-	return listMatching(_str, g_imgExtensions, { prefix: `[.]`, suffix: `$` });
-}
-
-/**
- * back/masktitle(result)において、ジャンプ先のフレーム数を取得
- * @param {string} _frames 
- */
-function getSpriteJumpFrame(_frames) {
-	const jumpFrames = _frames.split(`:`);
-	const jumpCnt = Math.floor(Math.random() * jumpFrames.length);
-	return setVal(Number(jumpFrames[jumpCnt]) - 1, 0, C_TYP_NUMBER);
-}
-
-/**
- * 背景・マスクモーションの表示（タイトル・リザルト用）
- * @param {number} _frame 
- * @param {string} _displayName title / result
- * @param {string} _depthName back / mask
- */
-function drawSpriteData(_frame, _displayName, _depthName) {
-
-	const spriteName = `${_depthName}${toCapitalize(_displayName)}`;
-	const tmpObjs = g_headerObj[`${spriteName}Data`][_frame];
-
-	for (let j = 0; j < tmpObjs.length; j++) {
-		const tmpObj = tmpObjs[j];
-		const baseSprite = document.querySelector(`#${spriteName}Sprite${tmpObj.depth}`);
-		if (tmpObj.command !== ``) {
-			if (tmpObj.command === `[loop]`) {
-				// キーワード指定：ループ
-				// 指定フレーム(class)へ移動する
-				g_scoreObj[`${spriteName}LoopCount`]++;
-				return getSpriteJumpFrame(tmpObj.jumpFrame);
-
-			} else if (tmpObj.command === `[jump]`) {
-				// キーワード指定：フレームジャンプ
-				// 指定回数以上のループ(maxLoop)があれば指定フレーム(jumpFrame)へ移動する
-				if (g_scoreObj[`${spriteName}LoopCount`] >= Number(tmpObj.maxLoop)) {
-					g_scoreObj[`${spriteName}LoopCount`] = 0;
-					return getSpriteJumpFrame(tmpObj.jumpFrame);
-				}
-			} else {
-				baseSprite.innerHTML = tmpObj.htmlText;
-			}
-		} else {
-			if (tmpObj.depth === C_FLG_ALL) {
-				for (let j = 0; j <= g_headerObj[`${spriteName}MaxDepth`]; j++) {
-					document.querySelector(`#${spriteName}Sprite${j}`).textContent = ``;
-				}
-			} else {
-				baseSprite.textContent = ``;
-			}
-		}
-	}
-	return _frame;
-}
-
-/**
- * 背景・マスクモーションの表示
- * @param {number} _frame 
- * @param {string} _depthName 
- */
-function drawMainSpriteData(_frame, _depthName) {
-
-	const tmpObjs = g_scoreObj[`${_depthName}Data`][_frame];
-
-	tmpObjs.forEach(tmpObj => {
-		const baseSprite = document.querySelector(`#${_depthName}Sprite${tmpObj.depth}`);
-		if (tmpObj.command !== ``) {
-			baseSprite.innerHTML = tmpObj.htmlText;
-		} else {
-			if (tmpObj.depth === C_FLG_ALL) {
-				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
-					document.querySelector(`#${_depthName}Sprite${j}`).textContent = ``;
-				}
-			} else {
-				baseSprite.textContent = ``;
-			}
-		}
-	});
-}
 
 /**
  * 色名をカラーコードに変換
@@ -2208,500 +2336,6 @@ function makeColorGradation(_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 }
 
 /**
- * タイトル・リザルトモーションの描画
- * @param {string} _displayName
- */
-function drawTitleResultMotion(_displayName) {
-	g_animationData.forEach(sprite => {
-		const spriteName = `${sprite}${toCapitalize(_displayName)}`;
-		if (g_headerObj[`${spriteName}Data`][g_scoreObj[`${spriteName}FrameNum`]] !== undefined) {
-			g_scoreObj[`${spriteName}FrameNum`] = drawSpriteData(g_scoreObj[`${spriteName}FrameNum`], _displayName, sprite);
-		}
-	});
-}
-
-/**
- * ショートカットキー表示
- * @param {object} _obj
- * @param {string} _settingLabel 
- * @param {object} objectList 
- */
-const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = ``, targetLabel = `lnk${_settingLabel}R`,
-	x = g_scViewObj.x, y = g_scViewObj.y, w = g_scViewObj.w, siz = g_scViewObj.siz } = {}) => {
-	const scKey = Object.keys(g_shortcutObj[displayName]).filter(key => g_shortcutObj[displayName][key].id === targetLabel);
-	if (scKey.length > 0) {
-		multiAppend(_obj,
-			createDivCss2Label(`sc${_settingLabel}`,
-				g_scViewObj.format.split(`{0}`).join(dfLabel !== `` ? `${dfLabel}` : `${g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])] ?? ''}`), {
-				x, y, w, siz, fontWeight: `bold`, opacity: 0.75, pointerEvents: C_DIS_NONE,
-			})
-		);
-	}
-}
-
-/**
- * 各画面の汎用ショートカットキー表示
- * @param {string} _displayName 
- */
-const createScTextCommon = _displayName => {
-	Object.keys(g_btnPatterns[_displayName]).filter(target => document.getElementById(`btn${target}`) !== null)
-		.forEach(target =>
-			createScText(document.getElementById(`btn${target}`), target, {
-				displayName: _displayName, targetLabel: `btn${target}`,
-				dfLabel: g_lblNameObj[`sc_${_displayName}${target}`] ?? ``,
-				x: g_btnPatterns[_displayName][target],
-			}));
-}
-
-/**
- * ショートカットキー有効化
- * @param {string} _displayName
- * @param {function} _func 
- */
-const setShortcutEvent = (_displayName, _func = _ => true, _displayFlg = true) => {
-	if (_displayFlg) {
-		createScTextCommon(_displayName);
-	}
-	const evList = _ => {
-		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func);
-		document.onkeyup = evt => commonKeyUp(evt);
-	}
-	if (g_initialFlg && g_btnWaitFrame[_displayName].initial) {
-		evList();
-	} else {
-		setTimeout(_ => {
-			if (g_currentPage === _displayName) {
-				evList();
-			}
-		}, g_btnWaitFrame[_displayName].s_frame * 1000 / g_fps);
-	}
-}
-
-/**
- *  タイトル画面初期化
- */
-function titleInit() {
-
-	clearWindow(true);
-	g_currentPage = `title`;
-
-	// タイトル用フレーム初期化
-	g_scoreObj.titleFrameNum = 0;
-	g_scoreObj.backTitleFrameNum = 0;
-	g_scoreObj.maskTitleFrameNum = 0;
-
-	// タイトル用ループカウンター
-	g_scoreObj.backTitleLoopCount = 0;
-	g_scoreObj.maskTitleLoopCount = 0;
-
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-
-	// 譜面初期情報ロード許可フラグ
-	// (初回読み込み時はローカルストレージのロードが必要なため、
-	//  ローカルストレージ保存時はフラグを解除しない)
-	if (!g_stateObj.dataSaveFlg || hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
-		g_canLoadDifInfoFlg = false;
-	}
-	const divRoot = document.querySelector(`#divRoot`);
-
-	// 曲時間制御変数
-	let thisTime;
-	let buffTime;
-	let titleStartTime = performance.now();
-
-	// 背景の矢印オブジェクトを表示
-	if (!g_headerObj.customTitleArrowUse) {
-		divRoot.appendChild(
-			createColorObject2(`lblArrow`, {
-				x: (g_sWidth - 500) / 2, y: -15 + (g_sHeight - 500) / 2,
-				w: 500, h: 500,
-				background: makeColorGradation(g_headerObj.titlearrowgrds[0] || g_headerObj.setColorOrg[0], {
-					_defaultColorgrd: [false, `#eeeeee`],
-					_objType: `titleArrow`,
-				}), rotate: 180,
-			})
-		);
-	}
-
-	// 背景スプライトを作成
-	createMultipleSprite(`backTitleSprite`, g_headerObj.backTitleMaxDepth);
-
-	// タイトル文字描画
-	divRoot.appendChild(
-		getTitleDivLabel(`lblTitle`,
-			`<div class="settings_Title">${g_lblNameObj.dancing}</div>
-		<div class="settings_TitleStar">${g_lblNameObj.star}</div>
-		<div class="settings_Title2">${g_lblNameObj.onigiri}</div>`
-				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering)
-	);
-
-	// 曲名文字描画（曲名は譜面データから取得）
-	if (!g_headerObj.customTitleUse) {
-
-		// グラデーションの指定がない場合、
-		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
-		const titlegrd1 = g_headerObj.titlegrds[0] || `${g_headerObj.setColorOrg[0]}:${g_headerObj.setColorOrg[2]}`;
-		const titlegrd2 = g_headerObj.titlegrds[1] || titlegrd1;
-
-		const titlegrds = [];
-		[titlegrd1, titlegrd2].forEach((titlegrd, j) => {
-			titlegrds[j] = makeColorGradation(titlegrd, {
-				_defaultColorgrd: false, _objType: `titleMusic`,
-			});
-		});
-
-		let titlefontsize = 64;
-		for (let j = 0; j < g_headerObj.musicTitleForView.length; j++) {
-			if (g_headerObj.musicTitleForView[j] !== ``) {
-				titlefontsize = getFontSize(g_headerObj.musicTitleForView[j], g_sWidth - 100, g_headerObj.titlefonts[j], titlefontsize);
-			}
-		}
-
-		// 変数 titlesize の定義 (使用例： |titlesize=40$20|)
-		const titlefontsizes = (g_headerObj.titlesize !== `` ? g_headerObj.titlesize.split(`$`).join(`,`).split(`,`) : [titlefontsize, titlefontsize]);
-		const titlefontsize1 = setVal(titlefontsizes[0], titlefontsize, C_TYP_NUMBER);
-		const titlefontsize2 = setVal(titlefontsizes[1], titlefontsize1, C_TYP_NUMBER);
-
-		// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
-		const titlelineheight = (g_headerObj.titlelineheight !== `` ? g_headerObj.titlelineheight - (titlefontsize2 + 10) : 0);
-
-		let txtAnimations = [``, ``];
-		if (!g_headerObj.customTitleAnimationUse) {
-			for (let j = 0; j < txtAnimations.length; j++) {
-				txtAnimations[j] = `animation-name:${g_headerObj.titleAnimationName[j]};
-				animation-duration:${g_headerObj.titleAnimationDuration[j]}s;
-				animation-delay:${g_headerObj.titleAnimationDelay[j]}s;
-				animation-timing-function:${g_headerObj.titleAnimationTimingFunction[j]};`;
-			}
-		}
-		const lblmusicTitle = createDivCss2Label(`lblmusicTitle`,
-			`<div id="lblmusicTitle1" style="
-				font-family:${g_headerObj.titlefonts[0]};
-				background: ${titlegrds[0]};
-				background-clip: text;
-				-webkit-background-clip: text;
-				-webkit-text-fill-color: rgba(255,255,255,0.0);
-				${txtAnimations[0]}
-			" class="${g_headerObj.titleAnimationClass[0]}">
-				${g_headerObj.musicTitleForView[0]}
-			</div>
-			<div id="lblmusicTitle2" style="
-				font-size:${titlefontsize2}px;
-				position:relative;left:${g_headerObj.titlepos[1][0]}px;
-				top:${g_headerObj.titlepos[1][1] + titlelineheight}px;
-				font-family:${g_headerObj.titlefonts[1]};
-				background: ${titlegrds[1]};
-				background-clip: text;
-				-webkit-background-clip: text;
-				-webkit-text-fill-color: rgba(255,255,255,0.0);
-				${txtAnimations[1]}
-			" class="${g_headerObj.titleAnimationClass[1]}">
-				${g_headerObj.musicTitleForView[1] ?? ``}
-			</div>
-			`,
-			{
-				x: Number(g_headerObj.titlepos[0][0]), y: Number(g_headerObj.titlepos[0][1]),
-				w: g_sWidth, h: g_sHeight - 40, siz: titlefontsize1,
-				display: `flex`, flexDirection: `column`, justifyContent: `center`, alignItems: `center`,
-			}
-		);
-		divRoot.appendChild(lblmusicTitle);
-	}
-
-	if (g_errMsgObj.title !== ``) {
-		makeWarningWindow();
-	}
-
-	// ユーザカスタムイベント(初期)
-	g_customJsObj.title.forEach(func => func());
-
-	// バージョン情報取得
-	let customVersion = ``;
-	if (g_localVersion !== ``) {
-		customVersion = ` / ${g_localVersion}`;
-	}
-	if (g_localVersion2 !== ``) {
-		customVersion += ` / ${g_localVersion2}`;
-	}
-	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
-	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${g_alphaVersion}${customVersion}${releaseDate}`;
-
-	let reloadFlg = false;
-	const getLinkSiz = _name => getFontSize(_name, g_sWidth / 2 - 20, getBasicFont(), C_LBL_LNKSIZE, 12);
-
-	// ボタン描画
-	multiAppend(divRoot,
-
-		// Click Here
-		createCss2Button(`btnStart`, g_lblNameObj.clickHere, _ => clearTimeout(g_timeoutEvtTitleId), {
-			w: g_sWidth, siz: C_LBL_TITLESIZE, resetFunc: _ => optionInit(),
-		}, g_cssObj.button_Start),
-
-		// Reset
-		createCss2Button(`btnReset`, g_lblNameObj.dataReset, _ => {
-			reloadFlg = false;
-			if (window.confirm(g_msgObj.dataResetConfirm)) {
-				g_localStorage = {
-					adjustment: 0,
-					volume: 100,
-					highscores: {},
-				};
-				localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
-				reloadFlg = true;
-			}
-		}, {
-			x: 0, y: g_sHeight - 20, w: g_sWidth / 4, h: 16, siz: 12, title: g_msgObj.dataReset,
-			resetFunc: _ => {
-				if (reloadFlg) {
-					location.reload();
-				}
-			},
-		}, g_cssObj.button_Reset),
-
-		// ロケール切替
-		createCss2Button(`btnReload`, g_localeObj.val, _ => true, {
-			x: 10, y: 10, w: 30, h: 30, siz: 20, title: g_msgObj.reload,
-			resetFunc: _ => {
-				g_localeObj.num = (++g_localeObj.num) % g_localeObj.list.length;
-				g_langStorage.locale = g_localeObj.list[g_localeObj.num];
-				localStorage.setItem(`danoni-locale`, JSON.stringify(g_langStorage));
-				location.reload();
-			},
-		}, g_cssObj.button_Start),
-
-		// ヘルプ
-		createCss2Button(`btnHelp`, `?`, _ => true, {
-			x: 0, y: g_sHeight - 150, w: 40, h: 40, siz: 30, title: g_msgObj.howto,
-			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`),
-		}, g_cssObj.button_Setting),
-
-		// 製作者表示
-		createCss2Button(`lnkMaker`, `${g_lblNameObj.maker}: ${g_headerObj.tuningInit}`, _ => true, {
-			x: 0, y: g_sHeight - 50, w: g_sWidth / 2, h: C_LNK_HEIGHT,
-			siz: getLinkSiz(`${g_lblNameObj.maker}: ${g_headerObj.tuningInit}`), align: C_ALIGN_LEFT,
-			title: g_headerObj.creatorUrl,
-			resetFunc: _ => openLink(g_headerObj.creatorUrl),
-		}, g_cssObj.button_Default),
-
-		// アーティスト表示
-		createCss2Button(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistName}`, _ => true, {
-			x: g_sWidth / 2, y: g_sHeight - 50, w: g_sWidth / 2, h: C_LNK_HEIGHT,
-			siz: getLinkSiz(`${g_lblNameObj.artist}: ${g_headerObj.artistName}`), align: C_ALIGN_LEFT,
-			title: g_headerObj.artistUrl,
-			resetFunc: _ => openLink(g_headerObj.artistUrl),
-		}, g_cssObj.button_Default),
-
-		// バージョン描画
-		createCss2Button(
-			`lnkVersion`, versionName, _ => true, {
-			x: g_sWidth / 4, y: g_sHeight - 20, w: g_sWidth * 3 / 4 - 20, h: 16,
-			siz: getFontSize(versionName, g_sWidth * 3 / 4 - 20, getBasicFont(), 12),
-			align: C_ALIGN_RIGHT, title: g_msgObj.github,
-			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus`),
-		}, g_cssObj.button_Tweet),
-
-		// セキュリティリンク
-		createCss2Button(`lnkComparison`, `&#x1f6e1;`, _ => true, {
-			x: g_sWidth - 20, y: g_sHeight - 20, w: 20, h: 16, siz: 12,
-			title: g_msgObj.security,
-			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`),
-		}, g_cssObj.button_Tweet),
-	);
-
-	// コメントエリア作成
-	if (g_headerObj.commentVal !== ``) {
-
-		// コメント文の加工
-		const comments = g_headerObj.commentVal.split(`}`).join(`{`).split(`{`);
-		let convCommentVal = ``;
-		for (let j = 0; j < comments.length; j += 2) {
-			convCommentVal += escapeHtmlForEnabledTag(comments[j]);
-			convCommentVal += setVal(comments[j + 1], ``, C_TYP_CALC);
-		}
-
-		if (g_headerObj.commentExternal) {
-			if (document.querySelector(`#commentArea`) !== null) {
-				commentArea.innerHTML = convCommentVal;
-			}
-		} else {
-			multiAppend(divRoot,
-
-				createDivCss2Label(`lblComment`, convCommentVal, {
-					x: 0, y: 70, w: g_sWidth, h: g_sHeight - 180, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
-					overflow: `auto`, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
-				}),
-
-				createCss2Button(`btnComment`, g_lblNameObj.comment, _ => {
-					const lblCommentDef = lblComment.style.display;
-					lblComment.style.display = (lblCommentDef === C_DIS_NONE ? C_DIS_INHERIT : C_DIS_NONE);
-				}, {
-					x: g_sWidth - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
-				}, g_cssObj.button_Default),
-
-			);
-			setUserSelect(lblComment.style, `text`);
-		}
-	}
-
-	// マスクスプライトを作成
-	const maskTitleSprite = createMultipleSprite(`maskTitleSprite`, g_headerObj.maskTitleMaxDepth);
-	if (!g_headerObj.masktitleButton) {
-		maskTitleSprite.style.pointerEvents = C_DIS_NONE;
-	}
-
-	/**
-	 * タイトルのモーション設定
-	 */
-	function flowTitleTimeline() {
-
-		// ユーザカスタムイベント(フレーム毎)
-		g_customJsObj.titleEnterFrame.forEach(func => func());
-
-		// 背景・マスクモーション
-		drawTitleResultMotion(g_currentPage);
-
-		thisTime = performance.now();
-		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / g_fps;
-
-		g_scoreObj.titleFrameNum++;
-		g_scoreObj.backTitleFrameNum++;
-		g_scoreObj.maskTitleFrameNum++;
-		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps - buffTime);
-	}
-
-	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
-
-	// キー操作イベント（デフォルト）
-	setShortcutEvent(g_currentPage);
-
-	document.oncontextmenu = _ => true;
-	divRoot.oncontextmenu = _ => false;
-
-	g_skinJsObj.title.forEach(func => func());
-}
-
-/**
- * 警告用ウィンドウ（汎用）を表示
- * @param {string} _text 
- * @param {object} _options resetFlg: 警告リストをクリアして再作成, backBtnUse: Backボタンを付与
- */
-function makeWarningWindow(_text = ``, { resetFlg = false, backBtnUse = false } = {}) {
-	const displayName = (g_currentPage === `initial` ? `title` : g_currentPage);
-	if (_text !== ``) {
-		if (resetFlg) {
-			g_errMsgObj[displayName] = [_text];
-		} else if (g_errMsgObj[displayName].findIndex(val => val === _text) === -1) {
-			g_errMsgObj[displayName].push(_text);
-		}
-	}
-	if (g_errMsgObj[displayName].length > 0) {
-		divRoot.appendChild(setWindowStyle(`<p>${g_errMsgObj[displayName].join('</p><p>')}</p>`, `#ffcccc`, `#660000`));
-		setUserSelect(lblWarning.style, `text`);
-	}
-	if (backBtnUse) {
-		// タイトルバック用ボタン
-		divRoot.appendChild(createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, {
-			resetFunc: _ => titleInit(),
-		}, g_cssObj.button_Back));
-	}
-}
-
-/**
- * お知らせウィンドウ（汎用）を表示
- * @param {string} _text 
- */
-function makeInfoWindow(_text, _animationName = ``, _backColor = `#ccccff`) {
-	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, `#000066`, C_ALIGN_CENTER);
-	lblWarning.style.pointerEvents = C_DIS_NONE;
-
-	if (_animationName !== ``) {
-		lblWarning.style.animationName = _animationName;
-		lblWarning.style.animationDuration = `2.5s`;
-		lblWarning.style.animationFillMode = `forwards`;
-		lblWarning.style.animationTimingFunction = `cubic-bezier(1.000, 0.000, 0.000, 1.000)`;
-	}
-	divRoot.appendChild(lblWarning);
-}
-
-/**
- * 警告ウィンドウのスタイル設定
- * @param {string} _text 
- * @param {string} _bkColor 
- * @param {string} _textColor 
- * @param {string} _align
- */
-function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
-
-	if (document.querySelector(`#lblWarning`) !== null) {
-		divRoot.removeChild(lblWarning);
-	}
-
-	// ウィンドウ枠の行を取得するために一時的な枠を作成
-	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
-		x: 0, y: 70, w: g_sWidth, h: 20, siz: C_SIZ_MAIN, lineHeight: `15px`, fontFamily: getBasicFont(),
-	})
-	divRoot.appendChild(tmplbl);
-	const range = new Range();
-	range.selectNode(tmplbl);
-
-	// ウィンドウ枠の行を元に縦の長さを決定(150pxを超えた場合は縦スクロールバーを付与)
-	const warnHeight = Math.min(150, Math.max(range.getClientRects().length,
-		_text.split(`<br>`).length + _text.split(`<p>`).length - 1) * 21);
-	const lbl = createDivCss2Label(`lblWarning`, _text, {
-		x: 0, y: 70, w: g_sWidth, h: warnHeight, siz: C_SIZ_MAIN, backgroundColor: _bkColor,
-		opacity: 0.9, lineHeight: `15px`, color: _textColor, align: _align, fontFamily: getBasicFont(),
-	});
-	if (warnHeight === 150) {
-		lbl.style.overflow = `auto`;
-	}
-
-	// 一時的な枠を削除
-	divRoot.removeChild(tmplbl);
-
-	return lbl;
-}
-
-/**
- * 譜面データを分割して値を取得
- * @param {string} _dos 譜面データ
- */
-function dosConvert(_dos) {
-
-	const obj = {};
-	const paramsTmp = g_enableAmpersandSplit ? _dos.split(`&`).join(`|`) : _dos;
-	const params = paramsTmp.split(`|`);
-	for (let j = 0; j < params.length; j++) {
-		const pos = params[j].indexOf(`=`);
-		if (pos > 0) {
-			const pKey = params[j].substring(0, pos);
-			const pValue = params[j].substring(pos + 1);
-
-			if (pKey !== undefined) {
-				obj[pKey] = g_enableDecodeURI ? decodeURIComponent(pValue) : pValue;
-			}
-		}
-	}
-	return obj;
-}
-
-/**
- * 曲名（1行）の取得
- * @param {string} _musicName 
- */
-function getMusicNameSimple(_musicName) {
-	return _musicName.split(`<br>`).join(` `).split(`<nbr>`).join(``).split(`<dbr>`).join(`　`);
-}
-
-/**
- * 曲名（複数行）の取得
- * @param {string} _musicName 
- */
-function getMusicNameMultiLine(_musicName) {
-	const tmpName = _musicName.split(`<nbr>`).join(`<br>`).split(`<dbr>`).join(`<br>`).split(`<br>`);
-	return tmpName.length === 1 ? [tmpName[0], ``] : tmpName;
-}
-
-/**
  * 譜面ヘッダーの分解（スキン、jsファイルなどの設定）
  * @param {object} _dosObj 
  * @returns 
@@ -2747,22 +2381,6 @@ function preheaderConvert(_dosObj) {
 	obj.syncBackPath = setVal(_dosObj.syncBackPath ?? g_presetObj.syncBackPath, false, C_TYP_BOOLEAN);
 
 	return obj;
-}
-
-/**
- * 画像セットの入れ替え処理
- * @param {array} _imgType 
- */
-function updateImgType(_imgType) {
-	resetImgs(_imgType.name, _imgType.extension);
-	reloadImgObj();
-	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
-	if (_imgType[1] === undefined && g_presetObj.overrideExtension !== undefined) {
-		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetObj.overrideExtension}`);
-	}
-	if (!g_isFile) {
-		g_imgInitList.forEach(img => preloadFile(`image`, g_imgObj[img]));
-	}
 }
 
 /**
@@ -3366,6 +2984,22 @@ function headerConvert(_dosObj) {
 }
 
 /**
+ * 画像セットの入れ替え処理
+ * @param {array} _imgType 
+ */
+function updateImgType(_imgType) {
+	resetImgs(_imgType.name, _imgType.extension);
+	reloadImgObj();
+	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
+	if (_imgType[1] === undefined && g_presetObj.overrideExtension !== undefined) {
+		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetObj.overrideExtension}`);
+	}
+	if (!g_isFile) {
+		g_imgInitList.forEach(img => preloadFile(`image`, g_imgObj[img]));
+	}
+}
+
+/**
  * ゲージ設定リストへの追加
  * @param {object} _obj
  */
@@ -3861,6 +3495,411 @@ function keysConvert(_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	});
 
 	return keyExtraList;
+}
+
+/*-----------------------------------------------------------*/
+/* Scene : TITLE [melon] */
+/*-----------------------------------------------------------*/
+
+/**
+ *  タイトル画面初期化
+ */
+function titleInit() {
+
+	clearWindow(true);
+	g_currentPage = `title`;
+
+	// タイトル用フレーム初期化
+	g_scoreObj.titleFrameNum = 0;
+	g_scoreObj.backTitleFrameNum = 0;
+	g_scoreObj.maskTitleFrameNum = 0;
+
+	// タイトル用ループカウンター
+	g_scoreObj.backTitleLoopCount = 0;
+	g_scoreObj.maskTitleLoopCount = 0;
+
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+
+	// 譜面初期情報ロード許可フラグ
+	// (初回読み込み時はローカルストレージのロードが必要なため、
+	//  ローカルストレージ保存時はフラグを解除しない)
+	if (!g_stateObj.dataSaveFlg || hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
+		g_canLoadDifInfoFlg = false;
+	}
+	const divRoot = document.querySelector(`#divRoot`);
+
+	// 曲時間制御変数
+	let thisTime;
+	let buffTime;
+	let titleStartTime = performance.now();
+
+	// 背景の矢印オブジェクトを表示
+	if (!g_headerObj.customTitleArrowUse) {
+		divRoot.appendChild(
+			createColorObject2(`lblArrow`, {
+				x: (g_sWidth - 500) / 2, y: -15 + (g_sHeight - 500) / 2,
+				w: 500, h: 500,
+				background: makeColorGradation(g_headerObj.titlearrowgrds[0] || g_headerObj.setColorOrg[0], {
+					_defaultColorgrd: [false, `#eeeeee`],
+					_objType: `titleArrow`,
+				}), rotate: 180,
+			})
+		);
+	}
+
+	// 背景スプライトを作成
+	createMultipleSprite(`backTitleSprite`, g_headerObj.backTitleMaxDepth);
+
+	// タイトル文字描画
+	divRoot.appendChild(
+		getTitleDivLabel(`lblTitle`,
+			`<div class="settings_Title">${g_lblNameObj.dancing}</div>
+		<div class="settings_TitleStar">${g_lblNameObj.star}</div>
+		<div class="settings_Title2">${g_lblNameObj.onigiri}</div>`
+				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering)
+	);
+
+	// 曲名文字描画（曲名は譜面データから取得）
+	if (!g_headerObj.customTitleUse) {
+
+		// グラデーションの指定がない場合、
+		// 矢印色の1番目と3番目を使ってタイトルをグラデーション
+		const titlegrd1 = g_headerObj.titlegrds[0] || `${g_headerObj.setColorOrg[0]}:${g_headerObj.setColorOrg[2]}`;
+		const titlegrd2 = g_headerObj.titlegrds[1] || titlegrd1;
+
+		const titlegrds = [];
+		[titlegrd1, titlegrd2].forEach((titlegrd, j) => {
+			titlegrds[j] = makeColorGradation(titlegrd, {
+				_defaultColorgrd: false, _objType: `titleMusic`,
+			});
+		});
+
+		let titlefontsize = 64;
+		for (let j = 0; j < g_headerObj.musicTitleForView.length; j++) {
+			if (g_headerObj.musicTitleForView[j] !== ``) {
+				titlefontsize = getFontSize(g_headerObj.musicTitleForView[j], g_sWidth - 100, g_headerObj.titlefonts[j], titlefontsize);
+			}
+		}
+
+		// 変数 titlesize の定義 (使用例： |titlesize=40$20|)
+		const titlefontsizes = (g_headerObj.titlesize !== `` ? g_headerObj.titlesize.split(`$`).join(`,`).split(`,`) : [titlefontsize, titlefontsize]);
+		const titlefontsize1 = setVal(titlefontsizes[0], titlefontsize, C_TYP_NUMBER);
+		const titlefontsize2 = setVal(titlefontsizes[1], titlefontsize1, C_TYP_NUMBER);
+
+		// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
+		const titlelineheight = (g_headerObj.titlelineheight !== `` ? g_headerObj.titlelineheight - (titlefontsize2 + 10) : 0);
+
+		let txtAnimations = [``, ``];
+		if (!g_headerObj.customTitleAnimationUse) {
+			for (let j = 0; j < txtAnimations.length; j++) {
+				txtAnimations[j] = `animation-name:${g_headerObj.titleAnimationName[j]};
+				animation-duration:${g_headerObj.titleAnimationDuration[j]}s;
+				animation-delay:${g_headerObj.titleAnimationDelay[j]}s;
+				animation-timing-function:${g_headerObj.titleAnimationTimingFunction[j]};`;
+			}
+		}
+		const lblmusicTitle = createDivCss2Label(`lblmusicTitle`,
+			`<div id="lblmusicTitle1" style="
+				font-family:${g_headerObj.titlefonts[0]};
+				background: ${titlegrds[0]};
+				background-clip: text;
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: rgba(255,255,255,0.0);
+				${txtAnimations[0]}
+			" class="${g_headerObj.titleAnimationClass[0]}">
+				${g_headerObj.musicTitleForView[0]}
+			</div>
+			<div id="lblmusicTitle2" style="
+				font-size:${titlefontsize2}px;
+				position:relative;left:${g_headerObj.titlepos[1][0]}px;
+				top:${g_headerObj.titlepos[1][1] + titlelineheight}px;
+				font-family:${g_headerObj.titlefonts[1]};
+				background: ${titlegrds[1]};
+				background-clip: text;
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: rgba(255,255,255,0.0);
+				${txtAnimations[1]}
+			" class="${g_headerObj.titleAnimationClass[1]}">
+				${g_headerObj.musicTitleForView[1] ?? ``}
+			</div>
+			`,
+			{
+				x: Number(g_headerObj.titlepos[0][0]), y: Number(g_headerObj.titlepos[0][1]),
+				w: g_sWidth, h: g_sHeight - 40, siz: titlefontsize1,
+				display: `flex`, flexDirection: `column`, justifyContent: `center`, alignItems: `center`,
+			}
+		);
+		divRoot.appendChild(lblmusicTitle);
+	}
+
+	if (g_errMsgObj.title !== ``) {
+		makeWarningWindow();
+	}
+
+	// ユーザカスタムイベント(初期)
+	g_customJsObj.title.forEach(func => func());
+
+	// バージョン情報取得
+	let customVersion = ``;
+	if (g_localVersion !== ``) {
+		customVersion = ` / ${g_localVersion}`;
+	}
+	if (g_localVersion2 !== ``) {
+		customVersion += ` / ${g_localVersion2}`;
+	}
+	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
+	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${g_alphaVersion}${customVersion}${releaseDate}`;
+
+	let reloadFlg = false;
+	const getLinkSiz = _name => getFontSize(_name, g_sWidth / 2 - 20, getBasicFont(), C_LBL_LNKSIZE, 12);
+
+	// ボタン描画
+	multiAppend(divRoot,
+
+		// Click Here
+		createCss2Button(`btnStart`, g_lblNameObj.clickHere, _ => clearTimeout(g_timeoutEvtTitleId), {
+			w: g_sWidth, siz: C_LBL_TITLESIZE, resetFunc: _ => optionInit(),
+		}, g_cssObj.button_Start),
+
+		// Reset
+		createCss2Button(`btnReset`, g_lblNameObj.dataReset, _ => {
+			reloadFlg = false;
+			if (window.confirm(g_msgObj.dataResetConfirm)) {
+				g_localStorage = {
+					adjustment: 0,
+					volume: 100,
+					highscores: {},
+				};
+				localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+				reloadFlg = true;
+			}
+		}, {
+			x: 0, y: g_sHeight - 20, w: g_sWidth / 4, h: 16, siz: 12, title: g_msgObj.dataReset,
+			resetFunc: _ => {
+				if (reloadFlg) {
+					location.reload();
+				}
+			},
+		}, g_cssObj.button_Reset),
+
+		// ロケール切替
+		createCss2Button(`btnReload`, g_localeObj.val, _ => true, {
+			x: 10, y: 10, w: 30, h: 30, siz: 20, title: g_msgObj.reload,
+			resetFunc: _ => {
+				g_localeObj.num = (++g_localeObj.num) % g_localeObj.list.length;
+				g_langStorage.locale = g_localeObj.list[g_localeObj.num];
+				localStorage.setItem(`danoni-locale`, JSON.stringify(g_langStorage));
+				location.reload();
+			},
+		}, g_cssObj.button_Start),
+
+		// ヘルプ
+		createCss2Button(`btnHelp`, `?`, _ => true, {
+			x: 0, y: g_sHeight - 150, w: 40, h: 40, siz: 30, title: g_msgObj.howto,
+			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`),
+		}, g_cssObj.button_Setting),
+
+		// 製作者表示
+		createCss2Button(`lnkMaker`, `${g_lblNameObj.maker}: ${g_headerObj.tuningInit}`, _ => true, {
+			x: 0, y: g_sHeight - 50, w: g_sWidth / 2, h: C_LNK_HEIGHT,
+			siz: getLinkSiz(`${g_lblNameObj.maker}: ${g_headerObj.tuningInit}`), align: C_ALIGN_LEFT,
+			title: g_headerObj.creatorUrl,
+			resetFunc: _ => openLink(g_headerObj.creatorUrl),
+		}, g_cssObj.button_Default),
+
+		// アーティスト表示
+		createCss2Button(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistName}`, _ => true, {
+			x: g_sWidth / 2, y: g_sHeight - 50, w: g_sWidth / 2, h: C_LNK_HEIGHT,
+			siz: getLinkSiz(`${g_lblNameObj.artist}: ${g_headerObj.artistName}`), align: C_ALIGN_LEFT,
+			title: g_headerObj.artistUrl,
+			resetFunc: _ => openLink(g_headerObj.artistUrl),
+		}, g_cssObj.button_Default),
+
+		// バージョン描画
+		createCss2Button(
+			`lnkVersion`, versionName, _ => true, {
+			x: g_sWidth / 4, y: g_sHeight - 20, w: g_sWidth * 3 / 4 - 20, h: 16,
+			siz: getFontSize(versionName, g_sWidth * 3 / 4 - 20, getBasicFont(), 12),
+			align: C_ALIGN_RIGHT, title: g_msgObj.github,
+			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus`),
+		}, g_cssObj.button_Tweet),
+
+		// セキュリティリンク
+		createCss2Button(`lnkComparison`, `&#x1f6e1;`, _ => true, {
+			x: g_sWidth - 20, y: g_sHeight - 20, w: 20, h: 16, siz: 12,
+			title: g_msgObj.security,
+			resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`),
+		}, g_cssObj.button_Tweet),
+	);
+
+	// コメントエリア作成
+	if (g_headerObj.commentVal !== ``) {
+
+		// コメント文の加工
+		const comments = g_headerObj.commentVal.split(`}`).join(`{`).split(`{`);
+		let convCommentVal = ``;
+		for (let j = 0; j < comments.length; j += 2) {
+			convCommentVal += escapeHtmlForEnabledTag(comments[j]);
+			convCommentVal += setVal(comments[j + 1], ``, C_TYP_CALC);
+		}
+
+		if (g_headerObj.commentExternal) {
+			if (document.querySelector(`#commentArea`) !== null) {
+				commentArea.innerHTML = convCommentVal;
+			}
+		} else {
+			multiAppend(divRoot,
+
+				createDivCss2Label(`lblComment`, convCommentVal, {
+					x: 0, y: 70, w: g_sWidth, h: g_sHeight - 180, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
+					overflow: `auto`, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
+				}),
+
+				createCss2Button(`btnComment`, g_lblNameObj.comment, _ => {
+					const lblCommentDef = lblComment.style.display;
+					lblComment.style.display = (lblCommentDef === C_DIS_NONE ? C_DIS_INHERIT : C_DIS_NONE);
+				}, {
+					x: g_sWidth - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
+				}, g_cssObj.button_Default),
+
+			);
+			setUserSelect(lblComment.style, `text`);
+		}
+	}
+
+	// マスクスプライトを作成
+	const maskTitleSprite = createMultipleSprite(`maskTitleSprite`, g_headerObj.maskTitleMaxDepth);
+	if (!g_headerObj.masktitleButton) {
+		maskTitleSprite.style.pointerEvents = C_DIS_NONE;
+	}
+
+	/**
+	 * タイトルのモーション設定
+	 */
+	function flowTitleTimeline() {
+
+		// ユーザカスタムイベント(フレーム毎)
+		g_customJsObj.titleEnterFrame.forEach(func => func());
+
+		// 背景・マスクモーション
+		drawTitleResultMotion(g_currentPage);
+
+		thisTime = performance.now();
+		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / g_fps;
+
+		g_scoreObj.titleFrameNum++;
+		g_scoreObj.backTitleFrameNum++;
+		g_scoreObj.maskTitleFrameNum++;
+		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps - buffTime);
+	}
+
+	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
+
+	// キー操作イベント（デフォルト）
+	setShortcutEvent(g_currentPage);
+
+	document.oncontextmenu = _ => true;
+	divRoot.oncontextmenu = _ => false;
+
+	g_skinJsObj.title.forEach(func => func());
+}
+
+/**
+ * 警告用ウィンドウ（汎用）を表示
+ * @param {string} _text 
+ * @param {object} _options resetFlg: 警告リストをクリアして再作成, backBtnUse: Backボタンを付与
+ */
+function makeWarningWindow(_text = ``, { resetFlg = false, backBtnUse = false } = {}) {
+	const displayName = (g_currentPage === `initial` ? `title` : g_currentPage);
+	if (_text !== ``) {
+		if (resetFlg) {
+			g_errMsgObj[displayName] = [_text];
+		} else if (g_errMsgObj[displayName].findIndex(val => val === _text) === -1) {
+			g_errMsgObj[displayName].push(_text);
+		}
+	}
+	if (g_errMsgObj[displayName].length > 0) {
+		divRoot.appendChild(setWindowStyle(`<p>${g_errMsgObj[displayName].join('</p><p>')}</p>`, `#ffcccc`, `#660000`));
+		setUserSelect(lblWarning.style, `text`);
+	}
+	if (backBtnUse) {
+		// タイトルバック用ボタン
+		divRoot.appendChild(createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, {
+			resetFunc: _ => titleInit(),
+		}, g_cssObj.button_Back));
+	}
+}
+
+/**
+ * お知らせウィンドウ（汎用）を表示
+ * @param {string} _text 
+ */
+function makeInfoWindow(_text, _animationName = ``, _backColor = `#ccccff`) {
+	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, `#000066`, C_ALIGN_CENTER);
+	lblWarning.style.pointerEvents = C_DIS_NONE;
+
+	if (_animationName !== ``) {
+		lblWarning.style.animationName = _animationName;
+		lblWarning.style.animationDuration = `2.5s`;
+		lblWarning.style.animationFillMode = `forwards`;
+		lblWarning.style.animationTimingFunction = `cubic-bezier(1.000, 0.000, 0.000, 1.000)`;
+	}
+	divRoot.appendChild(lblWarning);
+}
+
+/**
+ * 警告ウィンドウのスタイル設定
+ * @param {string} _text 
+ * @param {string} _bkColor 
+ * @param {string} _textColor 
+ * @param {string} _align
+ */
+function setWindowStyle(_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) {
+
+	if (document.querySelector(`#lblWarning`) !== null) {
+		divRoot.removeChild(lblWarning);
+	}
+
+	// ウィンドウ枠の行を取得するために一時的な枠を作成
+	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
+		x: 0, y: 70, w: g_sWidth, h: 20, siz: C_SIZ_MAIN, lineHeight: `15px`, fontFamily: getBasicFont(),
+	})
+	divRoot.appendChild(tmplbl);
+	const range = new Range();
+	range.selectNode(tmplbl);
+
+	// ウィンドウ枠の行を元に縦の長さを決定(150pxを超えた場合は縦スクロールバーを付与)
+	const warnHeight = Math.min(150, Math.max(range.getClientRects().length,
+		_text.split(`<br>`).length + _text.split(`<p>`).length - 1) * 21);
+	const lbl = createDivCss2Label(`lblWarning`, _text, {
+		x: 0, y: 70, w: g_sWidth, h: warnHeight, siz: C_SIZ_MAIN, backgroundColor: _bkColor,
+		opacity: 0.9, lineHeight: `15px`, color: _textColor, align: _align, fontFamily: getBasicFont(),
+	});
+	if (warnHeight === 150) {
+		lbl.style.overflow = `auto`;
+	}
+
+	// 一時的な枠を削除
+	divRoot.removeChild(tmplbl);
+
+	return lbl;
+}
+
+/**
+ * 曲名（1行）の取得
+ * @param {string} _musicName 
+ */
+function getMusicNameSimple(_musicName) {
+	return _musicName.split(`<br>`).join(` `).split(`<nbr>`).join(``).split(`<dbr>`).join(`　`);
+}
+
+/**
+ * 曲名（複数行）の取得
+ * @param {string} _musicName 
+ */
+function getMusicNameMultiLine(_musicName) {
+	const tmpName = _musicName.split(`<nbr>`).join(`<br>`).split(`<dbr>`).join(`<br>`).split(`<br>`);
+	return tmpName.length === 1 ? [tmpName[0], ``] : tmpName;
 }
 
 
