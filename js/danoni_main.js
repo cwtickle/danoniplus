@@ -5386,7 +5386,7 @@ const createSettingsDisplayWindow = _sprite => {
 				x: 30 + 180 * _widthPos, y: 3 + C_LEN_SETLBL_HEIGHT * _heightPos,
 				w: 170, siz: C_SIZ_DIFSELECTOR,
 			}, g_cssObj[`button_Disabled${flg}`]);
-		}
+		};
 
 		if (g_headerObj[`${_name}Use`]) {
 			const switchDisplay = evt => {
