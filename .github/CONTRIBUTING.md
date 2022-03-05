@@ -22,18 +22,18 @@ If you have a request or defect report, you can do it in one of the following wa
 　 In Gitter, you can use markdown similar to Github. Feel free to help yourself!
 - Contact the tickle directly ([@cw_tickle](https://twitter.com/cw_tickle)) with the request / problem content.
 
-# ソースのコーディングルール
-細かい縛りは入れない予定ですが、コード作法の混在を防ぐため、必要なルールは決めていきます。  
+# コーディングルール 
+- 機能実装については[機能実装方針](https://github.com/cwtickle/danoniplus/wiki/FunctionalPolicy)をご覧ください。
 
 ## 変数・定数
-定数・変数名はわかりやすく、名前で判断がつくように。  
+- 定数・変数名はわかりやすく、名前で判断がつくように。  
 forループを除き、danoni_main.js内は極力const/letで宣言する。  
 
 |カテゴリ|命名ルール|
 |----|----|
-|定数|"C_(カテゴリ)_(名前)"の形式。全て英大文字、数字、アンダースコアのみを使用。|
 |グローバルオブジェクト|変数の頭に"g_"をつける。<br>極力単独のグローバル変数を作成せず、既存カテゴリのオブジェクトのプロパティとして定義する。|
 |関数の引数|アンダースコア始まりのキャメル表記。 例)_count, _folderName<br>デフォルト引数も検討する。<br>引数が増える場合は、(構造体)オブジェクトとして定義することを検討。|
+|定数|"C_(カテゴリ)_(名前)"の形式。全て英大文字、数字、アンダースコアのみを使用。<br>今後は利用しない方針。|
 
 ## ソース構造
 ### [Japanese]
@@ -49,7 +49,7 @@ forループを除き、danoni_main.js内は極力const/letで宣言する。
 - Make detailed settings and logic separate functions so that you can see screen sketches, and clarify the contents of execution.
 
 ## 画面の構成
-- [タイトル]-[設定・オプション]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]  
+- [タイトル]-[設定]-[ディスプレイ]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]  
 - 各画面に Init がついたものが画面の基本構成(ルート)を表す。  
 
 ## スプライトの親子関係
