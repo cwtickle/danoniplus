@@ -1666,7 +1666,7 @@ class AudioPlayer {
 
 	load() { }
 	dispatchEvent() { }
-};
+}
 
 /**
  * クリップボードコピー関数
@@ -9553,47 +9553,47 @@ const judgeDamage = (_name, _difFrame) => {
 
 /**
  * 判定処理：イイ
- * @param {number} difFrame 
+ * @param {number} _difFrame 
  */
-const judgeIi = difFrame => judgeRecovery(`ii`, difFrame);
+const judgeIi = _difFrame => judgeRecovery(`ii`, _difFrame);
 
 /**
  * 判定処理：シャキン
- * @param {number} difFrame 
+ * @param {number} _difFrame 
  */
-const judgeShakin = difFrame => judgeRecovery(`shakin`, difFrame);
+const judgeShakin = _difFrame => judgeRecovery(`shakin`, _difFrame);
 
 /**
  * 判定処理：マターリ
- * @param {number} difFrame 
+ * @param {number} _difFrame 
  */
-const judgeMatari = difFrame => {
+const judgeMatari = _difFrame => {
 	changeJudgeCharacter(`matari`, g_lblNameObj.j_matari);
 	comboJ.textContent = ``;
 
 	displayDiff(difFrame, g_headerObj.justFrames);
 	finishViewing();
 
-	g_customJsObj.judg_matari.forEach(func => func(difFrame));
+	g_customJsObj.judg_matari.forEach(func => func(_difFrame));
 };
 
 /**
  * 判定処理：ショボーン
- * @param {number} difFrame 
+ * @param {number} _difFrame 
  */
-const judgeShobon = difFrame => judgeDamage(`shobon`, difFrame);
+const judgeShobon = _difFrame => judgeDamage(`shobon`, _difFrame);
 
 /**
  * 判定処理：ウワァン
- * @param {number} difFrame 
+ * @param {number} _difFrame 
  */
-const judgeUwan = difFrame => judgeDamage(`uwan`, difFrame);
+const judgeUwan = _difFrame => judgeDamage(`uwan`, _difFrame);
 
 /**
  * 判定処理：キター
- * @param {number} difFrame 
+ * @param {number} _difFrame 
  */
-const judgeKita = difFrame => {
+const judgeKita = _difFrame => {
 	changeJudgeCharacter(`kita`, g_lblNameObj.j_kita, `F`);
 
 	if (++g_resultObj.fCombo > g_resultObj.fmaxCombo) {
@@ -9605,21 +9605,21 @@ const judgeKita = difFrame => {
 	lifeRecovery();
 	finishViewing();
 
-	g_customJsObj.judg_kita.forEach(func => func(difFrame));
+	g_customJsObj.judg_kita.forEach(func => func(_difFrame));
 };
 
 /**
  * 判定処理：イクナイ
- * @param {number} difFrame 
+ * @param {number} _difFrame 
  */
-const judgeIknai = difFrame => {
+const judgeIknai = _difFrame => {
 	changeJudgeCharacter(`iknai`, g_lblNameObj.j_iknai, `F`);
 	comboFJ.textContent = ``;
 	g_resultObj.fCombo = 0;
 
 	lifeDamage();
 
-	g_customJsObj.judg_iknai.forEach(func => func(difFrame));
+	g_customJsObj.judg_iknai.forEach(func => func(_difFrame));
 };
 
 const jdgList = [`ii`, `shakin`, `matari`, `shobon`].map(jdg => toCapitalize(jdg));
