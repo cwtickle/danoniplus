@@ -21,6 +21,7 @@
 |ショウタ||[@sssyouta](https://twitter.com/sssyouta)|機能提案、不具合報告|
 |しょーでん||[@ricetask68934](https://twitter.com/ricetask68934)|機能提案|
 |すずめ|[@suzme](https://github.com/suzme)|[@suzume_danoni](https://twitter.com/suzume_danoni)|コーディング、機能提案、不具合報告、事象解析|
+|ふみのり||[@fuminori_0406](https://twitter.com/fuminori_0406)|不具合報告|
 |ぷろろーぐ||[@prologue25](https://twitter.com/prologue25)|機能提案、不具合報告、事象解析|
 |★ぞろり★||[@zri3147](https://twitter.com/zri3147)|機能提案、不具合報告|
 |ティックル|[@cwtickle](https://github.com/cwtickle)|[@cw_tickle](https://twitter.com/cw_tickle)|仕様設計、コーディング、機能提案、不具合報告、事象解析、ドキュメント整備|
