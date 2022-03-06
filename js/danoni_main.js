@@ -9571,7 +9571,7 @@ const judgeMatari = _difFrame => {
 	changeJudgeCharacter(`matari`, g_lblNameObj.j_matari);
 	comboJ.textContent = ``;
 
-	displayDiff(difFrame, g_headerObj.justFrames);
+	displayDiff(_difFrame, g_headerObj.justFrames);
 	finishViewing();
 
 	g_customJsObj.judg_matari.forEach(func => func(_difFrame));
