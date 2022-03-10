@@ -5,7 +5,8 @@
 - 修正対象のバージョンは下記の通りです。
 - 基本的には、同一メジャーバージョンの最新版がサポート対象です。
 - v1～v18, v20～23は**更新を終了しました。**  
-v19, v25の対応終了時期はv28リリース開始時を予定しています。（変更可能性あり）
+v19, v25の対応終了時期はv28リリース開始時を予定しています。（変更可能性あり）  
+バージョン別の更新継続可否は現状、[ライフサイクルポリシー](https://github.com/cwtickle/danoniplus/wiki/LifecyclePolicy)に従います。
 - 各バージョンの概要は[更新情報](https://github.com/cwtickle/danoniplus/wiki/UpdateInfo)に記載しています。
 
 :heavy_check_mark: サポート中 / 
