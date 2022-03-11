@@ -8684,22 +8684,10 @@ const MainInit = _ => {
 	 * @param _j 矢印の位置
 	 */
 	const checkKeyUpFunc = {
-
-		frzOFF: (_j) => {
-			return g_workObj.keyHitFlg[_j].find(flg => flg);
-		},
-
-		frzON: (_j) => {
-			return true;
-		},
-
-		dummyFrzOFF: (_j) => {
-			return true;
-		},
-
-		dummyFrzON: (_j) => {
-			return true;
-		},
+		frzOFF: (_j) => g_workObj.keyHitFlg[_j].find(flg => flg),
+		frzON: (_j) => true,
+		dummyFrzOFF: (_j) => true,
+		dummyFrzON: (_j) => true,
 	};
 
 	/**
@@ -9780,10 +9768,7 @@ const resultInit = _ => {
 	}
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	let transKeyData = ``;
-	if (hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
-		transKeyData = `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)`;
-	}
+	const transKeyData = hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)` : ``;
 
 	/**
 	 * プレイスタイルのカスタム有無
