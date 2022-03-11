@@ -10037,7 +10037,7 @@ const resultInit = _ => {
 		.split(`[arrowJdg]`).join(`${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`)
 		.split(`[frzJdg]`).join(tweetFrzJdg)
 		.split(`[maxCombo]`).join(tweetMaxCombo)
-		.split(`[url]`).join(`${twiturl.toString()}`.replace(/[\t\n]/g, ``));
+		.split(`[url]`).join(g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``));
 
 	if (g_presetObj.resultVals !== undefined) {
 		Object.keys(g_presetObj.resultVals).forEach(key => {
