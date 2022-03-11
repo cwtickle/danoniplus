@@ -3017,9 +3017,7 @@ const headerConvert = _dosObj => {
  * 曲名（1行）の取得
  * @param {string} _musicName 
  */
-const getMusicNameSimple = _musicName => {
-	return _musicName.split(`<br>`).join(` `).split(`<nbr>`).join(``).split(`<dbr>`).join(`　`);
-};
+const getMusicNameSimple = _musicName => replaceStr(_musicName, [[`<br>`, ` `], [`<nbr>`, ``], [`<dbr>`, `　`]]);
 
 /**
  * 曲名（複数行）の取得
@@ -6722,17 +6720,18 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		}
 
 		// 矢印名からフリーズアロー名への変換
-		let frzName = g_keyObj[`chara${_keyCtrlPtn}`][j].replace(`leftdia`, `frzLdia`);
-		frzName = frzName.replace(`rightdia`, `frzRdia`);
-		frzName = frzName.replace(`left`, `frzLeft`);
-		frzName = frzName.replace(`down`, `frzDown`);
-		frzName = frzName.replace(`up`, `frzUp`);
-		frzName = frzName.replace(`right`, `frzRight`);
-		frzName = frzName.replace(`space`, `frzSpace`);
-		frzName = frzName.replace(`iyo`, `frzIyo`);
-		frzName = frzName.replace(`gor`, `frzGor`);
-		frzName = frzName.replace(`oni`, `foni`);
-
+		let frzName = replaceStr(g_keyObj[`chara${_keyCtrlPtn}`][j], [
+			[`leftdia`, `frzLdia`],
+			[`rightdia`, `frzRdia`],
+			[`left`, `frzLeft`],
+			[`down`, `frzDown`],
+			[`up`, `frzUp`],
+			[`right`, `frzRight`],
+			[`space`, `frzSpace`],
+			[`iyo`, `frzIyo`],
+			[`gor`, `frzGor`],
+			[`oni`, `foni`]
+		]);
 		if (frzName.indexOf(`frz`) === -1 && frzName.indexOf(`foni`) === -1) {
 			if ((frzName.startsWith(`s`)) || frzName.startsWith(`t`) ||
 				(frzName.startsWith(`a`) && !frzName.startsWith(`arrow`))) {
@@ -10012,18 +10011,19 @@ const resultInit = _ => {
 		tweetMaxCombo += `-${g_resultObj.fmaxCombo}`;
 	}
 
-	let tweetResultTmp = g_headerObj.resultFormat.split(`[hashTag]`).join(`${hashTag}`)
-		.split(`[musicTitle]`).join(`${musicTitle}`)
-		.split(`[keyLabel]`).join(`${tweetDifData}`)
-		.split(`[maker]`).join(`${g_headerObj.tuning}`)
-		.split(`[rank]`).join(`${rankMark}`)
-		.split(`[score]`).join(`${g_resultObj.score}`)
-		.split(`[playStyle]`).join(`${playStyleData}`)
-		.split(`[arrowJdg]`).join(`${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`)
-		.split(`[frzJdg]`).join(tweetFrzJdg)
-		.split(`[maxCombo]`).join(tweetMaxCombo)
-		.split(`[url]`).join(g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``));
-
+	let tweetResultTmp = replaceStr(g_headerObj.resultFormat, [
+		[`[hashTag]`, hashTag],
+		[`[musicTitle]`, musicTitle],
+		[`[keyLabel]`, tweetDifData],
+		[`[maker]`, g_headerObj.tuning],
+		[`[rank]`, rankMark],
+		[`[score]`, g_resultObj.score],
+		[`[playStyle]`, playStyleData],
+		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`],
+		[`[frzJdg]`, tweetFrzJdg],
+		[`[maxCombo]`, tweetMaxCombo],
+		[`[url]`, g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``)]
+	]);
 	if (g_presetObj.resultVals !== undefined) {
 		Object.keys(g_presetObj.resultVals).forEach(key => {
 			tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_resultObj[g_presetObj.resultVals[key]]);
