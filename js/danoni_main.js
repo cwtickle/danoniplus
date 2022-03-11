@@ -9133,7 +9133,7 @@ const MainInit = _ => {
 			}
 			resetKeyControl();
 			clearTimeout(g_timeoutEvtId);
-			setTimeout(_ => resultInit(), 100);
+			resultInit();
 
 		} else if (g_workObj.lifeVal === 0 && g_workObj.lifeBorder === 0) {
 
