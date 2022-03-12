@@ -366,7 +366,7 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
 const replaceStr = (_str, _pairs) => {
 	let tmpStr = _str;
 	_pairs.forEach(pair => {
-		tmpStr = tmpStr.split(pair[0]).join(pair[1]);
+		tmpStr = tmpStr.replaceAll(pair[0], pair[1]);
 	});
 	return tmpStr;
 };
@@ -415,7 +415,7 @@ const nextPos = (_basePos, _num, _length) => (_basePos + _length + _num) % _leng
  */
 const transCode = _setCode => {
 	if ([`Control`, `Shift`, `Alt`].includes(_setCode.slice(0, -5))) {
-		return _setCode.replace(`Right`, `Left`);
+		return _setCode.replaceAll(`Right`, `Left`);
 	}
 	return _setCode;
 };
@@ -881,7 +881,7 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const tmpColorStr = _colorStr.split(`@`);
 	const colorArray = tmpColorStr[0].split(`:`);
 	for (let j = 0; j < colorArray.length; j++) {
-		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replace(/0x/g, `#`)));
+		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replaceAll(`0x`, `#`)));
 		if (isColorCd(colorArray[j]) && colorArray[j].length === 7) {
 			colorArray[j] += alphaVal;
 		}
@@ -1876,7 +1876,7 @@ const initialControl = async () => {
 				paddingLen = String(setVal(termRoopCnts[1], 1, C_TYP_STRING)).length;
 			}
 			for (let k = startCnt; k <= lastCnt; k++) {
-				preloadFile(`image`, tmpPreloadImages[0].replace(/\*/g, String(k).padStart(paddingLen, `0`)));
+				preloadFile(`image`, tmpPreloadImages[0].replaceAll(`*`, String(k).padStart(paddingLen, `0`)));
 			}
 		}
 	});
@@ -2800,7 +2800,7 @@ const headerConvert = _dosObj => {
 	obj.titlefonts = g_titleLists.defaultFonts.concat();
 	if (hasVal(_dosObj.titlefont)) {
 		_dosObj.titlefont.split(`$`).forEach((font, j) => {
-			obj.titlefonts[j] = `'${(font.replace(/,/g, `', '`))}'`;
+			obj.titlefonts[j] = `'${(font.replaceAll(`,`, `', '`))}'`;
 		});
 		if (obj.titlefonts[1] === undefined) {
 			obj.titlefonts[1] = obj.titlefonts[0];
@@ -2811,7 +2811,7 @@ const headerConvert = _dosObj => {
 	g_titleLists.grdList.forEach(_name => {
 		obj[`${_name}s`] = [];
 		if (hasVal(_dosObj[_name])) {
-			const tmpTitlegrd = _dosObj[_name].replace(/,/g, `:`);
+			const tmpTitlegrd = _dosObj[_name].replaceAll(`,`, `:`);
 			obj[`${_name}s`] = tmpTitlegrd.split(`$`);
 			obj[`${_name}`] = obj[`${_name}s`][0] ?? ``;
 		}
@@ -3164,7 +3164,7 @@ const setColorList = (_data, _colorInit, _colorInitLength,
 		colorList = colorStr.concat();
 
 		for (let j = 0; j < colorList.length; j++) {
-			const tmpSetColorOrg = colorStr[j].replace(/0x/g, `#`).split(`:`);
+			const tmpSetColorOrg = colorStr[j].replace(`0x`, `#`).split(`:`);
 			const hasColor = tmpSetColorOrg.some(tmpColorOrg => {
 				if (hasVal(tmpColorOrg) && (isColorCd(tmpColorOrg) || !hasAnglePointInfo(tmpColorOrg) || tmpColorOrg === `Default`)) {
 					colorOrg[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(tmpColorOrg));
@@ -6724,9 +6724,9 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		if (frzName.indexOf(`frz`) === -1 && frzName.indexOf(`foni`) === -1) {
 			if ((frzName.startsWith(`s`)) || frzName.startsWith(`t`) ||
 				(frzName.startsWith(`a`) && !frzName.startsWith(`arrow`))) {
-				frzName = frzName.replace(frzName.slice(1), `frz${toCapitalize(frzName.slice(1))}`);
+				frzName = frzName.replaceAll(frzName.slice(1), `frz${toCapitalize(frzName.slice(1))}`);
 			} else {
-				frzName = frzName.replace(frzName, `frz${toCapitalize(frzName)}`);
+				frzName = frzName.replaceAll(frzName, `frz${toCapitalize(frzName)}`);
 			}
 		}
 
