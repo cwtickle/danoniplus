@@ -2393,6 +2393,10 @@ const g_dfColorLightObj = {
     ],
 };
 
+/**
+ * 特殊文字列の置き換えリスト
+ * (置き換え元、置き換え先の組で二次元配列として定義。主にreplaceStr関数で使用)
+ */
 const g_escapeStr = {
     escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
     escapeTag: [
@@ -2406,6 +2410,17 @@ const g_escapeStr = {
     ],
     escapeCode: [
         [`<script>`, ``], [`</script>`, ``],
+    ],
+    musicNameSimple: [
+        [`<br>`, ` `], [`<nbr>`, ``], [`<dbr>`, `　`],
+    ],
+    musicNameMultiLine: [
+        [`<nbr>`, `<br>`], [`<dbr>`, `<br>`],
+    ],
+    frzName: [
+        [`leftdia`, `frzLdia`], [`rightdia`, `frzRdia`],
+        [`left`, `frzLeft`], [`down`, `frzDown`], [`up`, `frzUp`], [`right`, `frzRight`],
+        [`space`, `frzSpace`], [`iyo`, `frzIyo`], [`gor`, `frzGor`], [`oni`, `foni`],
     ],
 };
 
