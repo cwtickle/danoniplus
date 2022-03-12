@@ -6722,12 +6722,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		// 矢印名からフリーズアロー名への変換
 		let frzName = replaceStr(g_keyObj[`chara${_keyCtrlPtn}`][j], g_escapeStr.frzName);
 		if (frzName.indexOf(`frz`) === -1 && frzName.indexOf(`foni`) === -1) {
-			if ((frzName.startsWith(`s`)) || frzName.startsWith(`t`) ||
-				(frzName.startsWith(`a`) && !frzName.startsWith(`arrow`))) {
-				frzName = frzName.replaceAll(frzName.slice(1), `frz${toCapitalize(frzName.slice(1))}`);
-			} else {
-				frzName = frzName.replaceAll(frzName, `frz${toCapitalize(frzName)}`);
-			}
+			frzName = frzName.replaceAll(frzName, `frz${toCapitalize(frzName)}`);
 		}
 
 		// フリーズアローデータの分解 (2つで1セット)
