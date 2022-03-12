@@ -591,36 +591,6 @@ const preloadFile = (_as, _href, _type = ``, _crossOrigin = `anonymous`) => {
 };
 
 /**
- * 外部jsファイルの読込 (callback)
- * 読込可否を g_loadObj[ファイル名] で管理 (true: 読込成功, false: 読込失敗)
- * @deprecated v27以降非推奨予定
- * @param {string} _url 
- * @param {function} _callback 
- * @param {boolean} _requiredFlg (default : true / 読込必須)
- * @param {string} _charset (default : UTF-8)
- */
-function loadScript(_url, _callback, _requiredFlg = true, _charset = `UTF-8`) {
-	const baseUrl = _url.split(`?`)[0];
-	g_loadObj[baseUrl] = false;
-	const script = document.createElement(`script`);
-	script.type = `text/javascript`;
-	script.src = _url;
-	script.charset = _charset;
-	script.onload = _ => {
-		g_loadObj[baseUrl] = true;
-		_callback();
-	};
-	script.onerror = _ => {
-		if (_requiredFlg) {
-			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(_url.split(`?`)[0]));
-		} else {
-			_callback();
-		}
-	};
-	document.querySelector(`head`).appendChild(script);
-}
-
-/**
  * 外部jsファイルの読込 (Promise)
  * 読込可否を g_loadObj[ファイル名] で管理 (true: 読込成功, false: 読込失敗)
  * @param {string} _url 
@@ -653,30 +623,6 @@ const loadScript2 = (_url, _requiredFlg = true, _charset = `UTF-8`) => {
 };
 
 /**
- * CSSファイルの読み込み (callback)
- * デフォルトは danoni_skin_default.css を読み込む
- * @deprecated v27以降非推奨予定
- * @param {url} _href 
- * @param {function} _func
- */
-function importCssFile(_href, _func) {
-	const baseUrl = _href.split(`?`)[0];
-	g_loadObj[baseUrl] = false;
-	const link = document.createElement(`link`);
-	link.rel = `stylesheet`;
-	link.href = _href;
-	link.onload = _ => {
-		g_loadObj[baseUrl] = true;
-		_func();
-	};
-	link.onerror = _ => {
-		makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(baseUrl), { resetFlg: `title` });
-		_func();
-	};
-	document.head.appendChild(link);
-}
-
-/**
  * CSSファイルの読み込み (Promise)
  * デフォルトは danoni_skin_default.css を読み込む
  * @param {url} _href 
@@ -700,35 +646,6 @@ const importCssFile2 = _href => {
 		document.head.appendChild(link);
 	});
 };
-
-/**
- * js, cssファイルの連続読込 (callback)
- * @deprecated v27以降非推奨予定
- * @param {number} _j 
- * @param {array} _fileData 
- * @param {string} _loadType
- * @param {function} _afterFunc 
- */
-function loadMultipleFiles(_j, _fileData, _loadType, _afterFunc = _ => true) {
-	if (_j < _fileData.length) {
-		const filePath = `${_fileData[_j][1]}${_fileData[_j][0]}?${new Date().getTime()}`;
-		if (_fileData[_j][0].endsWith(`.css`)) {
-			_loadType = `css`;
-		}
-
-		// jsファイル、cssファイルにより呼び出す関数を切替
-		if (_loadType === `js`) {
-			loadScript(filePath, _ =>
-				loadMultipleFiles(_j + 1, _fileData, _loadType, _afterFunc), false);
-		} else if (_loadType === `css`) {
-			const cssPath = filePath.split(`.js`).join(`.css`);
-			importCssFile(cssPath, _ =>
-				loadMultipleFiles(_j + 1, _fileData, _loadType, _afterFunc));
-		}
-	} else {
-		_afterFunc();
-	}
-}
 
 /**
  * js, cssファイルの連続読込 (async function)
