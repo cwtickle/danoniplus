@@ -3017,14 +3017,14 @@ const headerConvert = _dosObj => {
  * 曲名（1行）の取得
  * @param {string} _musicName 
  */
-const getMusicNameSimple = _musicName => replaceStr(_musicName, [[`<br>`, ` `], [`<nbr>`, ``], [`<dbr>`, `　`]]);
+const getMusicNameSimple = _musicName => replaceStr(_musicName, g_escapeStr.musicNameSimple);
 
 /**
  * 曲名（複数行）の取得
  * @param {string} _musicName 
  */
 const getMusicNameMultiLine = _musicName => {
-	const tmpName = _musicName.split(`<nbr>`).join(`<br>`).split(`<dbr>`).join(`<br>`).split(`<br>`);
+	const tmpName = replaceStr(_musicName, g_escapeStr.musicNameMultiLine).split(`<br>`);
 	return tmpName.length === 1 ? [tmpName[0], ``] : tmpName;
 };
 
@@ -6720,18 +6720,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		}
 
 		// 矢印名からフリーズアロー名への変換
-		let frzName = replaceStr(g_keyObj[`chara${_keyCtrlPtn}`][j], [
-			[`leftdia`, `frzLdia`],
-			[`rightdia`, `frzRdia`],
-			[`left`, `frzLeft`],
-			[`down`, `frzDown`],
-			[`up`, `frzUp`],
-			[`right`, `frzRight`],
-			[`space`, `frzSpace`],
-			[`iyo`, `frzIyo`],
-			[`gor`, `frzGor`],
-			[`oni`, `foni`]
-		]);
+		let frzName = replaceStr(g_keyObj[`chara${_keyCtrlPtn}`][j], g_escapeStr.frzName);
 		if (frzName.indexOf(`frz`) === -1 && frzName.indexOf(`foni`) === -1) {
 			if ((frzName.startsWith(`s`)) || frzName.startsWith(`t`) ||
 				(frzName.startsWith(`a`) && !frzName.startsWith(`arrow`))) {
