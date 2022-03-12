@@ -3164,7 +3164,7 @@ const setColorList = (_data, _colorInit, _colorInitLength,
 		colorList = colorStr.concat();
 
 		for (let j = 0; j < colorList.length; j++) {
-			const tmpSetColorOrg = colorStr[j].replace(`0x`, `#`).split(`:`);
+			const tmpSetColorOrg = colorStr[j].replaceAll(`0x`, `#`).split(`:`);
 			const hasColor = tmpSetColorOrg.some(tmpColorOrg => {
 				if (hasVal(tmpColorOrg) && (isColorCd(tmpColorOrg) || !hasAnglePointInfo(tmpColorOrg) || tmpColorOrg === `Default`)) {
 					colorOrg[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(tmpColorOrg));
