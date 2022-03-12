@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/03/06
+ * Revised : 2022/03/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 26.6.1`;
-const g_revisedDate = `2022/03/06`;
+const g_version = `Ver 26.7.0`;
+const g_revisedDate = `2022/03/12`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3017,16 +3017,14 @@ const headerConvert = _dosObj => {
  * 曲名（1行）の取得
  * @param {string} _musicName 
  */
-const getMusicNameSimple = _musicName => {
-	return _musicName.split(`<br>`).join(` `).split(`<nbr>`).join(``).split(`<dbr>`).join(`　`);
-};
+const getMusicNameSimple = _musicName => replaceStr(_musicName, g_escapeStr.musicNameSimple);
 
 /**
  * 曲名（複数行）の取得
  * @param {string} _musicName 
  */
 const getMusicNameMultiLine = _musicName => {
-	const tmpName = _musicName.split(`<nbr>`).join(`<br>`).split(`<dbr>`).join(`<br>`).split(`<br>`);
+	const tmpName = replaceStr(_musicName, g_escapeStr.musicNameMultiLine).split(`<br>`);
 	return tmpName.length === 1 ? [tmpName[0], ``] : tmpName;
 };
 
@@ -6722,17 +6720,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		}
 
 		// 矢印名からフリーズアロー名への変換
-		let frzName = g_keyObj[`chara${_keyCtrlPtn}`][j].replace(`leftdia`, `frzLdia`);
-		frzName = frzName.replace(`rightdia`, `frzRdia`);
-		frzName = frzName.replace(`left`, `frzLeft`);
-		frzName = frzName.replace(`down`, `frzDown`);
-		frzName = frzName.replace(`up`, `frzUp`);
-		frzName = frzName.replace(`right`, `frzRight`);
-		frzName = frzName.replace(`space`, `frzSpace`);
-		frzName = frzName.replace(`iyo`, `frzIyo`);
-		frzName = frzName.replace(`gor`, `frzGor`);
-		frzName = frzName.replace(`oni`, `foni`);
-
+		let frzName = replaceStr(g_keyObj[`chara${_keyCtrlPtn}`][j], g_escapeStr.frzName);
 		if (frzName.indexOf(`frz`) === -1 && frzName.indexOf(`foni`) === -1) {
 			if ((frzName.startsWith(`s`)) || frzName.startsWith(`t`) ||
 				(frzName.startsWith(`a`) && !frzName.startsWith(`arrow`))) {
@@ -8684,22 +8672,10 @@ const MainInit = _ => {
 	 * @param _j 矢印の位置
 	 */
 	const checkKeyUpFunc = {
-
-		frzOFF: (_j) => {
-			return g_workObj.keyHitFlg[_j].find(flg => flg);
-		},
-
-		frzON: (_j) => {
-			return true;
-		},
-
-		dummyFrzOFF: (_j) => {
-			return true;
-		},
-
-		dummyFrzON: (_j) => {
-			return true;
-		},
+		frzOFF: (_j) => g_workObj.keyHitFlg[_j].find(flg => flg),
+		frzON: (_j) => true,
+		dummyFrzOFF: (_j) => true,
+		dummyFrzON: (_j) => true,
 	};
 
 	/**
@@ -9780,10 +9756,7 @@ const resultInit = _ => {
 	}
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	let transKeyData = ``;
-	if (hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
-		transKeyData = `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)`;
-	}
+	const transKeyData = hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(` + g_keyObj[`transKey${keyCtrlPtn}`] + `)` : ``;
 
 	/**
 	 * プレイスタイルのカスタム有無
@@ -10027,18 +10000,19 @@ const resultInit = _ => {
 		tweetMaxCombo += `-${g_resultObj.fmaxCombo}`;
 	}
 
-	let tweetResultTmp = g_headerObj.resultFormat.split(`[hashTag]`).join(`${hashTag}`)
-		.split(`[musicTitle]`).join(`${musicTitle}`)
-		.split(`[keyLabel]`).join(`${tweetDifData}`)
-		.split(`[maker]`).join(`${g_headerObj.tuning}`)
-		.split(`[rank]`).join(`${rankMark}`)
-		.split(`[score]`).join(`${g_resultObj.score}`)
-		.split(`[playStyle]`).join(`${playStyleData}`)
-		.split(`[arrowJdg]`).join(`${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`)
-		.split(`[frzJdg]`).join(tweetFrzJdg)
-		.split(`[maxCombo]`).join(tweetMaxCombo)
-		.split(`[url]`).join(`${twiturl.toString()}`.replace(/[\t\n]/g, ``));
-
+	let tweetResultTmp = replaceStr(g_headerObj.resultFormat, [
+		[`[hashTag]`, hashTag],
+		[`[musicTitle]`, musicTitle],
+		[`[keyLabel]`, tweetDifData],
+		[`[maker]`, g_headerObj.tuning],
+		[`[rank]`, rankMark],
+		[`[score]`, g_resultObj.score],
+		[`[playStyle]`, playStyleData],
+		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`],
+		[`[frzJdg]`, tweetFrzJdg],
+		[`[maxCombo]`, tweetMaxCombo],
+		[`[url]`, g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``)]
+	]);
 	if (g_presetObj.resultVals !== undefined) {
 		Object.keys(g_presetObj.resultVals).forEach(key => {
 			tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_resultObj[g_presetObj.resultVals[key]]);

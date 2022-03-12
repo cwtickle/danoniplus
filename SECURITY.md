@@ -5,7 +5,8 @@
 - 修正対象のバージョンは下記の通りです。
 - 基本的には、同一メジャーバージョンの最新版がサポート対象です。
 - v1～v18, v20～23は**更新を終了しました。**  
-v19, v25の対応終了時期はv28リリース開始時を予定しています。（変更可能性あり）
+v19, v25の対応終了時期はv28リリース開始時を予定しています。（変更可能性あり）  
+バージョン別の更新継続可否は現状、[ライフサイクルポリシー](https://github.com/cwtickle/danoniplus/wiki/LifecyclePolicy)に従います。
 - 各バージョンの概要は[更新情報](https://github.com/cwtickle/danoniplus/wiki/UpdateInfo)に記載しています。
 
 :heavy_check_mark: サポート中 / 
@@ -15,7 +16,7 @@ v19, v25の対応終了時期はv28リリース開始時を予定しています
 
 | Version | Supported          | Latest Version | Logs | First Release | End of Support |
 | ------- | ------------------ |----------------|------|---------------|----------------|
-| v26     | :heavy_check_mark: |[v26.6.1](https://github.com/cwtickle/danoniplus/releases/tag/v26.6.1)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v26)|2022-01-30|-|
+| v26     | :heavy_check_mark: |[v26.7.0](https://github.com/cwtickle/danoniplus/releases/tag/v26.7.0)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v26)|2022-01-30|-|
 | v25     | :heavy_check_mark: |[v25.5.6](https://github.com/cwtickle/danoniplus/releases/tag/v25.5.6)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v25)|2022-01-04|(At Release v28)|
 | v24     | :heavy_check_mark: |[v24.6.5](https://github.com/cwtickle/danoniplus/releases/tag/v24.6.5)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v24)|2021-10-24|(At Release v33)|
 | v23     | :x:                |[v23.5.6 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v23.5.6)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v23)|2021-09-04|2022-01-30|
