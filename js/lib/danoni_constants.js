@@ -2421,7 +2421,7 @@ const g_escapeStr = {
         [`leftdia`, `frzLdia`], [`rightdia`, `frzRdia`],
         [`left`, `frzLeft`], [`down`, `frzDown`], [`up`, `frzUp`], [`right`, `frzRight`],
         [`space`, `frzSpace`], [`iyo`, `frzIyo`], [`gor`, `frzGor`], [`oni`, `foni`],
-    ]
+    ],
 };
 
 /**
