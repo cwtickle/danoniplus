@@ -282,6 +282,14 @@ const setVal = (_checkStr, _default, _type) => {
 };
 
 /**
+ * ブール値への変換
+ * @param {string} _val 
+ * @param {boolean} _defaultVal 
+ * @returns 
+ */
+const setBoolVal = (_val, _defaultVal = false) => setVal(_val, _defaultVal, C_TYP_BOOLEAN);
+
+/**
  * 先頭のみ大文字に変換（それ以降はそのまま）
  * @param {string} _str 
  */
@@ -1682,12 +1690,12 @@ const initialControl = async () => {
 	// 譜面データの読み込みオプション
 	const ampSplitInput = document.querySelector(`#enableAmpersandSplit`);
 	if (ampSplitInput !== null) {
-		g_enableAmpersandSplit = setVal(ampSplitInput.value, true, C_TYP_BOOLEAN);
+		g_enableAmpersandSplit = setBoolVal(ampSplitInput.value, true);
 	}
 
 	const decodeUriInput = document.querySelector(`#enableDecodeURI`);
 	if (decodeUriInput !== null) {
-		g_enableDecodeURI = setVal(decodeUriInput.value, false, C_TYP_BOOLEAN);
+		g_enableDecodeURI = setBoolVal(decodeUriInput.value);
 	}
 
 	// 作品別ローカルストレージの読み込み
@@ -1799,8 +1807,8 @@ const initialControl = async () => {
 	if (g_loadObj.main) {
 
 		// 譜面分割、譜面番号固定かどうかをチェック
-		g_stateObj.dosDivideFlg = setVal(document.querySelector(`#externalDosDivide`)?.value ?? getQueryParamVal(`dosDivide`), false, C_TYP_BOOLEAN);
-		g_stateObj.scoreLockFlg = setVal(document.querySelector(`#externalDosLock`)?.value ?? getQueryParamVal(`dosLock`), false, C_TYP_BOOLEAN);
+		g_stateObj.dosDivideFlg = setBoolVal(document.querySelector(`#externalDosDivide`)?.value ?? getQueryParamVal(`dosDivide`));
+		g_stateObj.scoreLockFlg = setBoolVal(document.querySelector(`#externalDosLock`)?.value ?? getQueryParamVal(`dosLock`));
 
 		for (let j = 1; j < g_headerObj.keyLabels.length; j++) {
 
@@ -2306,11 +2314,11 @@ const preheaderConvert = _dosObj => {
 	g_titleLists.init.forEach(objName => {
 		const objUpper = toCapitalize(objName);
 		obj[`custom${objUpper}Use`] =
-			setVal(_dosObj[`custom${objUpper}Use`] ?? g_presetObj.customDesignUse?.[objName], false, C_TYP_BOOLEAN);
+			setBoolVal(_dosObj[`custom${objUpper}Use`] ?? g_presetObj.customDesignUse?.[objName]);
 	});
 
 	// 背景・マスクモーションのパス指定方法を他の設定に合わせる設定
-	obj.syncBackPath = setVal(_dosObj.syncBackPath ?? g_presetObj.syncBackPath, false, C_TYP_BOOLEAN);
+	obj.syncBackPath = setBoolVal(_dosObj.syncBackPath ?? g_presetObj.syncBackPath);
 
 	return obj;
 };
@@ -2343,7 +2351,7 @@ const headerConvert = _dosObj => {
 				obj.imgType[j] = {
 					name: imgTypes[0],
 					extension: imgTypes[1] || `svg`,
-					rotateEnabled: setVal(imgTypes[2], true, C_TYP_BOOLEAN),
+					rotateEnabled: setBoolVal(imgTypes[2], true),
 					flatStepHeight: setVal(imgTypes[3], C_ARW_WIDTH, C_TYP_FLOAT),
 				};
 				g_keycons.imgTypes[j] = (imgTypes[0] === `` ? `Original` : imgTypes[0]);
@@ -2517,13 +2525,13 @@ const headerConvert = _dosObj => {
 	obj.defaultColorgrd = [false, intermediateColor];
 	if (hasVal(_dosObj.defaultColorgrd)) {
 		obj.defaultColorgrd = _dosObj.defaultColorgrd.split(`,`);
-		obj.defaultColorgrd[0] = setVal(obj.defaultColorgrd[0], false, C_TYP_BOOLEAN);
+		obj.defaultColorgrd[0] = setBoolVal(obj.defaultColorgrd[0]);
 		obj.defaultColorgrd[1] = obj.defaultColorgrd[1] ?? intermediateColor;
 	}
 	g_rankObj.rankColorAllPerfect = intermediateColor;
 
 	// カラーコードのゼロパディング有無設定
-	obj.colorCdPaddingUse = setVal(_dosObj.colorCdPaddingUse, false, C_TYP_BOOLEAN);
+	obj.colorCdPaddingUse = setBoolVal(_dosObj.colorCdPaddingUse);
 
 	// 最大ライフ
 	obj.maxLifeVal = setVal(_dosObj.maxLifeVal, C_VAL_MAXLIFE, C_TYP_FLOAT);
@@ -2539,7 +2547,7 @@ const headerConvert = _dosObj => {
 	});
 
 	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
-	obj.defaultFrzColorUse = setVal(_dosObj.defaultFrzColorUse ?? g_presetObj.frzColors, true, C_TYP_BOOLEAN);
+	obj.defaultFrzColorUse = setBoolVal(_dosObj.defaultFrzColorUse ?? g_presetObj.frzColors, true);
 
 	// 矢印色変化に対応してフリーズアロー色を追随する範囲の設定
 	// (defaultFrzColorUse=false時のみ)
@@ -2640,7 +2648,7 @@ const headerConvert = _dosObj => {
 	g_posObj.distY = g_sHeight - C_STEP_Y + g_posObj.stepYR;
 	g_posObj.reverseStepY = g_posObj.distY - g_posObj.stepY - g_posObj.stepDiffY - C_ARW_WIDTH;
 	g_posObj.arrowHeight = g_sHeight + g_posObj.stepYR - g_posObj.stepDiffY * 2;
-	obj.bottomWordSetFlg = setVal(_dosObj.bottomWordSet, false, C_TYP_BOOLEAN);
+	obj.bottomWordSetFlg = setBoolVal(_dosObj.bottomWordSet);
 
 	// 矢印・フリーズアロー判定位置補正
 	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
@@ -2662,7 +2670,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// 自動プリロードの設定
-	obj.autoPreload = setVal(_dosObj.autoPreload, true, C_TYP_BOOLEAN);
+	obj.autoPreload = setBoolVal(_dosObj.autoPreload, true);
 	g_headerObj.autoPreload = obj.autoPreload;
 
 	// 読込対象の画像を指定(rel:preload)と同じ
@@ -2760,10 +2768,10 @@ const headerConvert = _dosObj => {
 	obj.titlelineheight = setVal(_dosObj.titlelineheight, ``, C_TYP_NUMBER);
 
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
-	obj.frzStartjdgUse = setVal(_dosObj.frzStartjdgUse ?? g_presetObj.frzStartjdgUse, false, C_TYP_BOOLEAN);
+	obj.frzStartjdgUse = setBoolVal(_dosObj.frzStartjdgUse ?? g_presetObj.frzStartjdgUse);
 
 	// 譜面名に制作者名を付加するかどうかのフラグ
-	obj.makerView = setVal(_dosObj.makerView, false, C_TYP_BOOLEAN);
+	obj.makerView = setBoolVal(_dosObj.makerView);
 
 	// shuffleUse=group 時のみshuffle用配列を組み替える
 	if (_dosObj.shuffleUse === `group`) {
@@ -2773,7 +2781,7 @@ const headerConvert = _dosObj => {
 
 	// オプション利用可否設定
 	g_canDisabledSettings.forEach(option => {
-		obj[`${option}Use`] = setVal(_dosObj[`${option}Use`] ?? g_presetObj.settingUse?.[option], true, C_TYP_BOOLEAN);
+		obj[`${option}Use`] = setBoolVal(_dosObj[`${option}Use`] ?? g_presetObj.settingUse?.[option], true);
 	});
 
 	let interlockingErrorFlg = false;
@@ -2784,7 +2792,7 @@ const headerConvert = _dosObj => {
 		const displayUse = (displayTempUse !== undefined ? displayTempUse.split(`,`) : [true, C_FLG_ON]);
 
 		// displayUse -> ボタンの有効/無効, displaySet -> ボタンの初期値(ON/OFF)
-		obj[`${option}Use`] = setVal(displayUse[0], true, C_TYP_BOOLEAN);
+		obj[`${option}Use`] = setBoolVal(displayUse[0], true);
 		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] :
 			(obj[`${option}Use`] ? C_FLG_ON : C_FLG_OFF), ``, C_TYP_SWITCH);
 		g_stateObj[`d_${option.toLowerCase()}`] = setVal(obj[`${option}Set`], C_FLG_ON, C_TYP_SWITCH);
@@ -2827,7 +2835,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// 別キーパターンの使用有無
-	obj.transKeyUse = setVal(_dosObj.transKeyUse, true, C_TYP_BOOLEAN);
+	obj.transKeyUse = setBoolVal(_dosObj.transKeyUse, true);
 
 	// タイトル画面用・背景/マスクデータの分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
@@ -2844,25 +2852,25 @@ const headerConvert = _dosObj => {
 	});
 
 	// 結果画面用のマスク透過設定
-	obj.masktitleButton = setVal(_dosObj.masktitleButton, false, C_TYP_BOOLEAN);
+	obj.masktitleButton = setBoolVal(_dosObj.masktitleButton);
 
 	// 結果画面用のマスク透過設定
-	obj.maskresultButton = setVal(_dosObj.maskresultButton, false, C_TYP_BOOLEAN);
+	obj.maskresultButton = setBoolVal(_dosObj.maskresultButton);
 
 	// color_dataの過去バージョン互換設定
 	obj.colorDataType = _dosObj.colorDataType ?? ``;
 
 	// リザルトモーションをDisplay:BackgroundのON/OFFと連動させるかどうかの設定
-	obj.resultMotionSet = setVal(_dosObj.resultMotionSet, true, C_TYP_BOOLEAN);
+	obj.resultMotionSet = setBoolVal(_dosObj.resultMotionSet, true);
 
 	// 譜面明細の使用可否
-	obj.scoreDetailUse = setVal(_dosObj.scoreDetailUse, true, C_TYP_BOOLEAN);
+	obj.scoreDetailUse = setBoolVal(_dosObj.scoreDetailUse, true);
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
-	obj.jdgPosReset = setVal(_dosObj.jdgPosReset, true, C_TYP_BOOLEAN);
+	obj.jdgPosReset = setBoolVal(_dosObj.jdgPosReset, true);
 
 	// タイトル表示用コメント
-	const newlineTag = setVal(_dosObj.commentAutoBr, true, C_TYP_BOOLEAN) ? `<br>` : ``;
+	const newlineTag = setBoolVal(_dosObj.commentAutoBr, true) ? `<br>` : ``;
 	const tmpComment = (_dosObj[`commentVal${g_localeObj.val}`] ?? _dosObj.commentVal ?? ``).split(`\r\n`).join(`\n`);
 	obj.commentVal = tmpComment.split(`\n`).join(newlineTag);
 
@@ -2874,7 +2882,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// コメントの外部化設定
-	obj.commentExternal = setVal(_dosObj.commentExternal, false, C_TYP_BOOLEAN);
+	obj.commentExternal = setBoolVal(_dosObj.commentExternal);
 
 	// Reverse時の歌詞の自動反転制御
 	obj.wordAutoReverse = _dosObj.wordAutoReverse ?? g_presetObj.wordAutoReverse ?? `auto`;
