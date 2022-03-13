@@ -1079,7 +1079,6 @@ const createCss2Button = (_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 	div.classList.add(`button_common`, ..._classes);
 	div.innerHTML = _text;
 	div.title = title;
-	div.ontouchstart = ``;
 
 	const style = div.style;
 	style.textAlign = align;
@@ -1196,8 +1195,6 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 		const layer0 = document.querySelector(`#layer0`);
 		const l0ctx = layer0.getContext(`2d`);
 
-		const C_MARGIN = 0;
-
 		// 線画、図形をクリア
 		l0ctx.clearRect(0, 0, g_sWidth, g_sHeight);
 
@@ -1209,14 +1206,14 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 			// 線画 (title-line)
 			l1ctx.beginPath();
 			l1ctx.strokeStyle = `#cccccc`;
-			l1ctx.moveTo(C_MARGIN, C_MARGIN);
-			l1ctx.lineTo(g_sWidth - C_MARGIN, C_MARGIN);
+			l1ctx.moveTo(0, 0);
+			l1ctx.lineTo(g_sWidth, 0);
 			l1ctx.stroke();
 
 			l1ctx.beginPath();
 			l1ctx.strokeStyle = `#cccccc`;
-			l1ctx.moveTo(C_MARGIN, g_sHeight - C_MARGIN);
-			l1ctx.lineTo(g_sWidth - C_MARGIN, g_sHeight - C_MARGIN);
+			l1ctx.moveTo(0, g_sHeight);
+			l1ctx.lineTo(g_sWidth, g_sHeight);
 			l1ctx.stroke();
 		}
 		if (document.querySelector(`#layer2`) !== null) {
@@ -1273,17 +1270,14 @@ const drawDefaultBackImage = _key => {
  * @param {object} _obj 
  */
 const makeSpriteImage = _obj => {
-	let tmpInnerHTML = `<img src=${_obj.path} class="${_obj.class}"
-					style="position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
-	if (_obj.width !== 0 && _obj.width > 0) {
+	let tmpInnerHTML = `<img src=${_obj.path} class="${_obj.class}"	style="position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
+	if (_obj.width > 0) {
 		tmpInnerHTML += `;width:${_obj.width}px`;
 	}
-	if (_obj.height !== `` && setVal(_obj.height, 0, C_TYP_NUMBER) > 0) {
+	if (setVal(_obj.height, 0, C_TYP_NUMBER) > 0) {
 		tmpInnerHTML += `;height:${_obj.height}px`;
 	}
-	tmpInnerHTML += `;animation-name:${_obj.animationName}
-					;animation-duration:${_obj.animationDuration}s
-					;opacity:${_obj.opacity}">`;
+	tmpInnerHTML += `;animation-name:${_obj.animationName};animation-duration:${_obj.animationDuration}s;opacity:${_obj.opacity}">`;
 	return tmpInnerHTML;
 };
 
@@ -1292,11 +1286,10 @@ const makeSpriteImage = _obj => {
  * @param {object} _obj 
  */
 const makeSpriteText = _obj => {
-	let tmpInnerHTML = `<span class="${_obj.class}"
-					style="display:inline-block;position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
+	let tmpInnerHTML = `<span class="${_obj.class}"	style="display:inline-block;position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
 
 	// この場合のwidthは font-size と解釈する
-	if (_obj.width !== 0 && _obj.width > 0) {
+	if (_obj.width > 0) {
 		tmpInnerHTML += `;font-size:${_obj.width}px`;
 	}
 
@@ -1304,9 +1297,7 @@ const makeSpriteText = _obj => {
 	if (_obj.height !== ``) {
 		tmpInnerHTML += `;color:${_obj.height}`;
 	}
-	tmpInnerHTML += `;animation-name:${_obj.animationName}
-					;animation-duration:${_obj.animationDuration}s
-					;opacity:${_obj.opacity}">${_obj.path}</span>`;
+	tmpInnerHTML += `;animation-name:${_obj.animationName};animation-duration:${_obj.animationDuration}s;opacity:${_obj.opacity}">${_obj.path}</span>`;
 	return tmpInnerHTML;
 };
 
@@ -1418,6 +1409,29 @@ const getSpriteJumpFrame = _frames => {
 };
 
 /**
+ * 背景・マスクモーションの表示（共通処理）
+ * @param {object} _spriteData 
+ * @param {string} _name 
+ * @param {boolean} _condition 
+ */
+const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
+	const baseSprite = document.querySelector(`#${_name}Sprite${_spriteData.depth}`);
+	if (_spriteData.command === ``) {
+		if (_spriteData.depth === C_FLG_ALL) {
+			for (let j = 0; j <= g_scoreObj[`${_name}MaxDepth`]; j++) {
+				document.querySelector(`#${_name}Sprite${j}`).textContent = ``;
+			}
+		} else {
+			baseSprite.textContent = ``;
+		}
+	} else {
+		if (_condition) {
+			baseSprite.innerHTML = _spriteData.htmlText;
+		}
+	}
+}
+
+/**
  * 背景・マスクモーションの表示（タイトル・リザルト用）
  * @param {number} _frame 
  * @param {string} _displayName title / result
@@ -1430,31 +1444,19 @@ const drawSpriteData = (_frame, _displayName, _depthName) => {
 
 	for (let j = 0; j < tmpObjs.length; j++) {
 		const tmpObj = tmpObjs[j];
-		const baseSprite = document.querySelector(`#${spriteName}Sprite${tmpObj.depth}`);
-		if (tmpObj.command !== ``) {
-			if (tmpObj.command === `[loop]`) {
-				// キーワード指定：ループ
-				// 指定フレーム(class)へ移動する
-				g_scoreObj[`${spriteName}LoopCount`]++;
-				return getSpriteJumpFrame(tmpObj.jumpFrame);
+		drawBaseSpriteData(tmpObj, spriteName, ![`[loop]`, `[jump]`].includes(tmpObj.command));
+		if (tmpObj.command === `[loop]`) {
+			// キーワード指定：ループ
+			// 指定フレーム(class)へ移動する
+			g_scoreObj[`${spriteName}LoopCount`]++;
+			return getSpriteJumpFrame(tmpObj.jumpFrame);
 
-			} else if (tmpObj.command === `[jump]`) {
-				// キーワード指定：フレームジャンプ
-				// 指定回数以上のループ(maxLoop)があれば指定フレーム(jumpFrame)へ移動する
-				if (g_scoreObj[`${spriteName}LoopCount`] >= Number(tmpObj.maxLoop)) {
-					g_scoreObj[`${spriteName}LoopCount`] = 0;
-					return getSpriteJumpFrame(tmpObj.jumpFrame);
-				}
-			} else {
-				baseSprite.innerHTML = tmpObj.htmlText;
-			}
-		} else {
-			if (tmpObj.depth === C_FLG_ALL) {
-				for (let j = 0; j <= g_headerObj[`${spriteName}MaxDepth`]; j++) {
-					document.querySelector(`#${spriteName}Sprite${j}`).textContent = ``;
-				}
-			} else {
-				baseSprite.textContent = ``;
+		} else if (tmpObj.command === `[jump]`) {
+			// キーワード指定：フレームジャンプ
+			// 指定回数以上のループ(maxLoop)があれば指定フレーム(jumpFrame)へ移動する
+			if (g_scoreObj[`${spriteName}LoopCount`] >= Number(tmpObj.maxLoop)) {
+				g_scoreObj[`${spriteName}LoopCount`] = 0;
+				return getSpriteJumpFrame(tmpObj.jumpFrame);
 			}
 		}
 	}
@@ -1466,25 +1468,8 @@ const drawSpriteData = (_frame, _displayName, _depthName) => {
  * @param {number} _frame 
  * @param {string} _depthName 
  */
-const drawMainSpriteData = (_frame, _depthName) => {
-
-	const tmpObjs = g_scoreObj[`${_depthName}Data`][_frame];
-
-	tmpObjs.forEach(tmpObj => {
-		const baseSprite = document.querySelector(`#${_depthName}Sprite${tmpObj.depth}`);
-		if (tmpObj.command !== ``) {
-			baseSprite.innerHTML = tmpObj.htmlText;
-		} else {
-			if (tmpObj.depth === C_FLG_ALL) {
-				for (let j = 0; j <= g_scoreObj[`${_depthName}MaxDepth`]; j++) {
-					document.querySelector(`#${_depthName}Sprite${j}`).textContent = ``;
-				}
-			} else {
-				baseSprite.textContent = ``;
-			}
-		}
-	});
-};
+const drawMainSpriteData = (_frame, _depthName) =>
+	g_scoreObj[`${_depthName}Data`][_frame].forEach(tmpObj => drawBaseSpriteData(tmpObj, _depthName));
 
 /**
  * タイトル・リザルトモーションの描画
@@ -6754,6 +6739,20 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	};
 
 	/**
+	 * 譜面データの優先順配列の取得
+	 * @param {string} _header 
+	 * @param {string} _type 
+	 * @param {number} _scoreNo 
+	 * @returns 
+	 */
+	const getPriorityList = (_header, _type, _scoreNo) => [
+		_dosObj[`${_header}${_type}${g_localeObj.val}${_scoreNo}_data`],
+		_dosObj[`${_header}${_type}${g_localeObj.val}_data`],
+		_dosObj[`${_header}${_type}${_scoreNo}_data`],
+		_dosObj[`${_header}${_type}_data`]
+	];
+
+	/**
 	 * 歌詞データの分解
 	 * @param {string} _scoreNo 
 	 */
@@ -6761,14 +6760,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		const wordDataList = [];
 		let wordReverseFlg = false;
 		const divideCnt = getKeyInfo().divideCnt;
-
-		const addDataList = (_type = ``) =>
-			wordDataList.push(
-				_dosObj[`word${_type}${g_localeObj.val}${_scoreNo}_data`],
-				_dosObj[`word${_type}${g_localeObj.val}_data`],
-				_dosObj[`word${_type}${_scoreNo}_data`],
-				_dosObj[`word${_type}_data`]
-			);
+		const addDataList = (_type = ``) => wordDataList.push(...getPriorityList(`word`, _type, _scoreNo));
 
 		if (g_stateObj.scroll !== `---`) {
 			addDataList(`Alt`);
@@ -6854,13 +6846,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	const makeBackgroundData = (_header, _scoreNo) => {
 		const dataList = [];
-		const addDataList = (_type = ``) =>
-			dataList.push(
-				_dosObj[`${_header}${_type}${g_localeObj.val}${_scoreNo}_data`],
-				_dosObj[`${_header}${_type}${g_localeObj.val}_data`],
-				_dosObj[`${_header}${_type}${_scoreNo}_data`],
-				_dosObj[`${_header}${_type}_data`]
-			);
+		const addDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
 
 		if (g_stateObj.scroll !== `---`) {
 			addDataList(`Alt`);
@@ -6881,13 +6867,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	const makeBackgroundResultData = (_header, _scoreNo, _defaultHeader = ``) => {
 		const dataList = [];
-		const addResultDataList = _headerType =>
-			dataList.push(
-				_dosObj[`${_headerType}${g_localeObj.val}${_scoreNo}_data`],
-				_dosObj[`${_headerType}${g_localeObj.val}_data`],
-				_dosObj[`${_headerType}${_scoreNo}_data`],
-				_dosObj[`${_headerType}_data`],
-			);
+		const addResultDataList = _headerType => dataList.push(...getPriorityList(``, _headerType, _scoreNo));
 		addResultDataList(_header);
 		if (_defaultHeader !== ``) {
 			addResultDataList(_defaultHeader);
