@@ -7662,6 +7662,7 @@ const getArrowSettings = _ => {
 	g_workObj.arrowRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.keyCtrl = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
+	g_workObj.mainEndTime = 0;
 
 	const keyCtrlLen = g_workObj.keyCtrl.length;
 	g_workObj.keyCtrlN = [...Array(keyCtrlLen)].map(_ => []);
@@ -9009,6 +9010,7 @@ const MainInit = _ => {
 			}
 			resetKeyControl();
 			clearTimeout(g_timeoutEvtId);
+			g_workObj.mainEndTime = thisTime;
 			resultInit();
 
 		} else if (g_workObj.lifeVal === 0 && g_workObj.lifeBorder === 0) {
@@ -9561,7 +9563,7 @@ const resultInit = _ => {
 	// 曲時間制御変数
 	let thisTime;
 	let buffTime;
-	let resultStartTime = performance.now();
+	let resultStartTime = g_workObj.mainEndTime > 0 ? g_workObj.mainEndTime : performance.now();
 
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
 	} else {
@@ -10025,8 +10027,7 @@ const resultInit = _ => {
 		g_scoreObj.maskResultFrameNum++;
 		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps - buffTime);
 	};
-
-	g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps);
+	flowResultTimeline();
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage);
