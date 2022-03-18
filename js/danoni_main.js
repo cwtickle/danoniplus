@@ -3570,7 +3570,7 @@ const titleInit = _ => {
 				background: ${titlegrds[0]};
 				background-clip: text;
 				-webkit-background-clip: text;
-				-webkit-text-fill-color: rgba(255,255,255,0.0);
+				color: rgba(255,255,255,0.0);
 				${txtAnimations[0]}
 			" class="${g_headerObj.titleAnimationClass[0]}">
 				${g_headerObj.musicTitleForView[0]}
@@ -3583,7 +3583,7 @@ const titleInit = _ => {
 				background: ${titlegrds[1]};
 				background-clip: text;
 				-webkit-background-clip: text;
-				-webkit-text-fill-color: rgba(255,255,255,0.0);
+				color: rgba(255,255,255,0.0);
 				${txtAnimations[1]}
 			" class="${g_headerObj.titleAnimationClass[1]}">
 				${g_headerObj.musicTitleForView[1] ?? ``}
