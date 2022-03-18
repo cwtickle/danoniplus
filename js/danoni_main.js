@@ -1372,7 +1372,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				class: escapeHtml(tmpSpriteData[3] ?? ``),                          // CSSクラス
 				left: setVal(tmpSpriteData[4], 0, C_TYP_CALC),                      // X座標
 				top: setVal(tmpSpriteData[5], 0, C_TYP_CALC),                       // Y座標
-				width: setIntVal(tmpSpriteData[6]),					                // spanタグの場合は font-size
+				width: setIntVal(tmpSpriteData[6]),                                 // spanタグの場合は font-size
 				height: escapeHtml(tmpSpriteData[7] ?? ``),                         // spanタグの場合は color(文字列可)
 				opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
 				animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING)),
@@ -1669,12 +1669,8 @@ const transTimerToFrame = _str => {
 
 const initialControl = async () => {
 
-	[g_sWidth, g_sHeight] = [
-		setVal($id(`canvas-frame`).width, 600, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
-	];
-
 	const stage = document.querySelector(`#canvas-frame`);
-	const divRoot = createEmptySprite(stage, `divRoot`, { margin: `auto`, letterSpacing: `normal` });
+	const divRoot = createEmptySprite(stage, `divRoot`, g_windowObj.divRoot);
 
 	// 背景の表示
 	if (document.querySelector(`#layer0`) !== null) {
@@ -1686,7 +1682,7 @@ const initialControl = async () => {
 		l0ctx.fillStyle = grd;
 		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
 	} else {
-		createEmptySprite(divRoot, `divBack`, { background: `linear-gradient(#000000, #222222)` });
+		createEmptySprite(divRoot, `divBack`, g_windowObj.divBack);
 	}
 
 	// Now Loadingを表示
@@ -3956,9 +3952,7 @@ const setSpriteList = _settingList => {
  * @param {string} _sprite 
  * @returns 
  */
-const createOptionSprite = _sprite => createEmptySprite(_sprite, `optionsprite`, {
-	x: (g_sWidth - 450) / 2, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325,
-});
+const createOptionSprite = _sprite => createEmptySprite(_sprite, `optionsprite`, g_windowObj.optionSprite);
 
 /**
  * スライダー共通処理
@@ -4080,10 +4074,8 @@ const createOptionWindow = _sprite => {
 	const createDifWindow = (_key = ``) => {
 		g_currentPage = `difSelector`;
 		setShortcutEvent(g_currentPage);
-		const difList = createEmptySprite(optionsprite, `difList`, { x: 165, y: 65, w: 280, h: 255, overflow: `auto` }, g_cssObj.settings_DifSelector);
-		const difCover = createEmptySprite(optionsprite, `difCover`, {
-			x: 25, y: 65, w: 140, h: 255, overflow: `auto`, opacity: 0.95
-		}, g_cssObj.settings_DifSelector);
+		const difList = createEmptySprite(optionsprite, `difList`, g_windowObj.difList, g_cssObj.settings_DifSelector);
+		const difCover = createEmptySprite(optionsprite, `difCover`, g_windowObj.difCover, g_cssObj.settings_DifSelector);
 
 		// リスト再作成
 		makeDifList(difList, _key);
@@ -4169,7 +4161,7 @@ const createOptionWindow = _sprite => {
 	 * @param {boolean} _graphUseFlg
 	 */
 	const createScoreDetail = (_name, _graphUseFlg = true) => {
-		const detailObj = createEmptySprite(scoreDetail, `detail${_name}`, { w: 420, h: 230, visibility: `hidden` });
+		const detailObj = createEmptySprite(scoreDetail, `detail${_name}`, g_windowObj.detailObj);
 
 		if (_graphUseFlg) {
 			const graphObj = document.createElement(`canvas`);
@@ -4199,10 +4191,7 @@ const createOptionWindow = _sprite => {
 			}, g_cssObj.button_Mini)
 		);
 		g_stateObj.scoreDetailViewFlg = false;
-
-		const scoreDetail = createEmptySprite(optionsprite, `scoreDetail`, {
-			x: 20, y: 90, w: 420, h: 230, visibility: `hidden`,
-		}, g_cssObj.settings_DifSelector);
+		const scoreDetail = createEmptySprite(optionsprite, `scoreDetail`, g_windowObj.scoreDetail, g_cssObj.settings_DifSelector);
 		const viewScText = _ => createScText(lnkScoreDetail, `ScoreDetail`, { targetLabel: `lnkScoreDetail`, x: -10 });
 
 		/**
@@ -5339,9 +5328,7 @@ const createSettingsDisplayWindow = _sprite => {
 	];
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
-	const displaySprite = createEmptySprite(optionsprite, `displaySprite`, {
-		x: 25, y: 30, w: (g_sWidth - 450) / 2, h: C_LEN_SETLBL_HEIGHT * 5,
-	});
+	const displaySprite = createEmptySprite(optionsprite, `displaySprite`, g_windowObj.displaySprite);
 	const spriteList = setSpriteList(settingList);
 
 	_sprite.appendChild(
@@ -5481,7 +5468,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	);
 
 	// キーの一覧を表示
-	const keyconSprite = createEmptySprite(divRoot, `keyconSprite`, { y: 88 + (g_sHeight - 500) / 2, h: g_sHeight, overflow: `auto` });
+	const keyconSprite = createEmptySprite(divRoot, `keyconSprite`, g_windowObj.keyconSprite);
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum, posMax, divideCnt] =
 		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
@@ -6170,7 +6157,7 @@ const loadMusic = _ => {
 	request.addEventListener(`load`, _ => {
 		if (request.status >= 200 && request.status < 300) {
 			const blobUrl = URL.createObjectURL(request.response);
-			createEmptySprite(divRoot, `loader`, { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` });
+			createEmptySprite(divRoot, `loader`, g_windowObj.loader);
 			lblLoading.textContent = g_lblNameObj.pleaseWait;
 			setAudio(blobUrl);
 		} else {
@@ -9614,12 +9601,8 @@ const resultInit = _ => {
 	// タイトル文字描画
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, g_lblNameObj.result, 0, 15, `settings_Title`));
 
-	const playDataWindow = createEmptySprite(divRoot, `playDataWindow`, {
-		x: g_sWidth / 2 - 225, y: 70 + (g_sHeight - 500) / 2, w: 450, h: 110,
-	}, g_cssObj.result_PlayDataWindow);
-	const resultWindow = createEmptySprite(divRoot, `resultWindow`, {
-		x: g_sWidth / 2 - 200, y: 185 + (g_sHeight - 500) / 2, w: 400, h: 210,
-	});
+	const playDataWindow = createEmptySprite(divRoot, `playDataWindow`, g_windowObj.playDataWindow, g_cssObj.result_PlayDataWindow);
+	const resultWindow = createEmptySprite(divRoot, `resultWindow`, g_windowObj.resultWindow);
 
 	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
 		g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan +
