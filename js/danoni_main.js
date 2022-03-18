@@ -1080,6 +1080,17 @@ const deleteChildspriteAll = _parentObjName => {
 };
 
 /**
+ * div要素の削除
+ * @param {object} _parentId 
+ * @param {string} _idName 
+ */
+const deleteDiv = (_parentId, _idName) => {
+	if (document.getElementById(_idName) !== null) {
+		_parentId.removeChild(document.getElementById(_idName));
+	}
+};
+
+/**
  * ボタンの作成 (CSS版・拡張属性対応)
  * @param {string} _id 
  * @param {string} _text
@@ -1717,9 +1728,7 @@ const initialControl = async () => {
 	// 共通設定ファイルの読込
 	await loadScript2(`${settingRoot}danoni_setting${settingType}.js?${g_randTime}`, false);
 	loadLegacySettingFunc();
-	if (document.querySelector(`#lblLoading`) !== null) {
-		divRoot.removeChild(document.querySelector(`#lblLoading`));
-	}
+	deleteDiv(divRoot, `lblLoading`);
 
 	// クエリで譜面番号が指定されていればセット
 	g_stateObj.scoreId = setIntVal(getQueryParamVal(`scoreId`));
@@ -1729,7 +1738,7 @@ const initialControl = async () => {
 
 	// CSSファイル内のbackgroundを取得するために再描画
 	if (document.querySelector(`#layer0`) === null) {
-		divRoot.removeChild(document.querySelector(`#divBack`));
+		deleteDiv(divRoot, `divBack`);
 		createEmptySprite(divRoot, `divBack`);
 	} else if (!g_headerObj.defaultSkinFlg && !g_headerObj.customBackUse) {
 		createEmptySprite(divRoot, `divBack`);
@@ -1948,9 +1957,7 @@ const loadChartFile = async (_scoreId = g_stateObj.scoreId) => {
 
 		await loadScript2(`${filename}?${Date.now()}`, false, charset);
 		if (typeof externalDosInit === C_TYP_FUNCTION) {
-			if (document.querySelector(`#lblLoading`) !== null) {
-				divRoot.removeChild(document.querySelector(`#lblLoading`));
-			}
+			deleteDiv(divRoot, `lblLoading`);
 
 			// 外部データを読込（ファイルが見つからなかった場合は譜面追記をスキップ）
 			externalDosInit();
@@ -3815,9 +3822,7 @@ const makeInfoWindow = (_text, _animationName = ``, _backColor = `#ccccff`) => {
  */
 const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) => {
 
-	if (document.querySelector(`#lblWarning`) !== null) {
-		divRoot.removeChild(lblWarning);
-	}
+	deleteDiv(divRoot, `lblWarning`);
 
 	// ウィンドウ枠の行を取得するために一時的な枠を作成
 	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
