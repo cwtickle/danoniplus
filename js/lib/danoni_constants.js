@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/03/12 (v26.7.0)
+ * Revised : 2022/03/18 (v27.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -28,6 +28,19 @@ const C_LBL_BASICFONT = `"Meiryo UI", sans-serif`;
 
 const C_BTN_HEIGHT = 50;
 const C_LNK_HEIGHT = 30;
+const C_LEN_SETLBL_LEFT = 160;
+const C_LEN_SETLBL_WIDTH = 210;
+const C_LEN_DIFSELECTOR_WIDTH = 250;
+const C_LEN_DIFCOVER_WIDTH = 110;
+const C_LEN_SETLBL_HEIGHT = 23;
+const C_SIZ_SETLBL = 17;
+const C_LEN_SETDIFLBL_HEIGHT = 25;
+const C_SIZ_SETDIFLBL = 17;
+const C_LEN_SETMINI_WIDTH = 40;
+const C_SIZ_SETMINI = 18;
+const C_SIZ_DIFSELECTOR = 14;
+const C_SIZ_MAIN = 14;
+const C_SIZ_MUSIC_TITLE = 13;
 
 // スプライト（ムービークリップ相当）のルート
 const C_SPRITE_ROOT = `divRoot`;
@@ -57,6 +70,32 @@ const C_TYP_OBJECT = `object`;
 const C_TYP_FUNCTION = `function`;
 const C_TYP_SWITCH = `switch`;
 const C_TYP_CALC = `calc`;
+
+// ウィンドウサイズ
+let [g_sWidth, g_sHeight] = [
+    setVal($id(`canvas-frame`).width, 600, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
+];
+
+// 固定ウィンドウサイズ
+const g_windowObj = {
+    divRoot: { margin: `auto`, letterSpacing: `normal` },
+    divBack: { background: `linear-gradient(#000000, #222222)` },
+
+    optionSprite: { x: (g_sWidth - 450) / 2, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325 },
+    difList: { x: 165, y: 65, w: 280, h: 255, overflow: `auto` },
+    difCover: { x: 25, y: 65, w: 140, h: 255, overflow: `auto`, opacity: 0.95 },
+
+    scoreDetail: { x: 20, y: 90, w: 420, h: 230, visibility: `hidden` },
+    detailObj: { w: 420, h: 230, visibility: `hidden` },
+
+    displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: C_LEN_SETLBL_HEIGHT * 5 },
+    keyconSprite: { y: 88 + (g_sHeight - 500) / 2, h: g_sHeight, overflow: `auto` },
+
+    loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
+
+    playDataWindow: { x: g_sWidth / 2 - 225, y: 70 + (g_sHeight - 500) / 2, w: 450, h: 110 },
+    resultWindow: { x: g_sWidth / 2 - 200, y: 185 + (g_sHeight - 500) / 2, w: 400, h: 210 },
+};
 
 const g_imgObj = {};
 
@@ -223,20 +262,6 @@ const C_BLOCK_KEYS = [
 ];
 
 /** 設定・オプション画面用共通 */
-const C_LEN_SETLBL_LEFT = 160;
-const C_LEN_SETLBL_WIDTH = 210;
-const C_LEN_DIFSELECTOR_WIDTH = 250;
-const C_LEN_DIFCOVER_WIDTH = 110;
-const C_LEN_SETLBL_HEIGHT = 23;
-const C_SIZ_SETLBL = 17;
-const C_LEN_SETDIFLBL_HEIGHT = 25;
-const C_SIZ_SETDIFLBL = 17;
-const C_LEN_SETMINI_WIDTH = 40;
-const C_SIZ_SETMINI = 18;
-const C_SIZ_DIFSELECTOR = 14;
-const C_SIZ_MAIN = 14;
-const C_SIZ_MUSIC_TITLE = 13;
-
 const C_LEN_GRAPH_WIDTH = 286;
 const C_LEN_GRAPH_HEIGHT = 226;
 const C_CLR_SPEEDGRAPH_SPEED = `#cc3333`;
@@ -562,10 +587,6 @@ let g_storeSettings = [`appearance`, `opacity`, `d_stepzone`, `d_judgment`, `d_f
     `d_score`, `d_musicinfo`, `d_filterline`];
 
 let g_canDisabledSettings = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `appearance`];
-
-// サイズ(後で指定)
-let g_sWidth;
-let g_sHeight;
 
 const g_hidSudObj = {
     filterPos: 10,
