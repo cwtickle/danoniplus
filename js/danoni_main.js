@@ -54,6 +54,10 @@ const g_randTime = Date.now();
 window.onload = async () => {
 	g_loadObj.main = true;
 	g_currentPage = `initial`;
+	const links = document.querySelectorAll(`link`);
+	if (Array.from(links).filter(elem => elem.getAttribute(`href`).indexOf(`danoni_main.css`) !== -1).length === 0) {
+		await importCssFile2(`${g_rootPath}../css/danoni_main.css?${g_randTime}`);
+	}
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	await loadScript2(`${g_rootPath}../js/lib/danoni_localbinary.js?${g_randTime}`, false);
