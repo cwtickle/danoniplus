@@ -2714,13 +2714,9 @@ const headerConvert = _dosObj => {
 	// デフォルト曲名表示のフォント名
 	// (使用例： |titlefont=Century,Meiryo UI|)
 	obj.titlefonts = g_titleLists.defaultFonts.concat();
-	if (hasVal(_dosObj.titlefont)) {
-		_dosObj.titlefont.split(`$`).forEach((font, j) => {
-			obj.titlefonts[j] = `'${(font.replaceAll(`,`, `', '`))}'`;
-		});
-		if (obj.titlefonts[1] === undefined) {
-			obj.titlefonts[1] = obj.titlefonts[0];
-		}
+	_dosObj.titlefont?.split(`$`).forEach((font, j) => obj.titlefonts[j] = `'${(font.replaceAll(`,`, `', '`))}'`);
+	if (obj.titlefonts[1] === undefined) {
+		obj.titlefonts[1] = obj.titlefonts[0];
 	}
 
 	// デフォルト曲名表示, 背景矢印のグラデーション指定css
@@ -2735,11 +2731,7 @@ const headerConvert = _dosObj => {
 
 	// デフォルト曲名表示の表示位置調整
 	obj.titlepos = [[0, 0], [0, 0]];
-	if (hasVal(_dosObj.titlepos)) {
-		_dosObj.titlepos.split(`$`).forEach((pos, j) => {
-			obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x));
-		});
-	}
+	_dosObj.titlepos?.split(`$`).forEach((pos, j) => obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x)));
 
 	// タイトル文字のアニメーション設定
 	obj.titleAnimationName = [`leftToRight`];
@@ -2747,20 +2739,18 @@ const headerConvert = _dosObj => {
 	obj.titleAnimationDelay = [0];
 	obj.titleAnimationTimingFunction = [`ease`];
 	obj.titleAnimationClass = [``];
-	if (hasVal(_dosObj.titleanimation)) {
-		_dosObj.titleanimation.split(`$`).forEach((pos, j) => {
-			const titleAnimation = pos.split(`,`);
-			obj.titleAnimationName[j] = setVal(titleAnimation[0], obj.titleAnimationName[0]);
-			obj.titleAnimationDuration[j] = setVal(titleAnimation[1] / g_fps, obj.titleAnimationDuration[0], C_TYP_FLOAT);
-			obj.titleAnimationDelay[j] = setVal(titleAnimation[2] / g_fps, obj.titleAnimationDelay[0], C_TYP_FLOAT);
-			obj.titleAnimationTimingFunction[j] = setVal(titleAnimation[3], obj.titleAnimationName[3]);
-		});
-	}
-	if (hasVal(_dosObj.titleanimationclass)) {
-		_dosObj.titleanimationclass.split(`$`).forEach((animationClass, j) => {
-			obj.titleAnimationClass[j] = animationClass ?? ``;
-		});
-	}
+
+	_dosObj.titleanimation?.split(`$`).forEach((pos, j) => {
+		const titleAnimation = pos.split(`,`);
+		obj.titleAnimationName[j] = setVal(titleAnimation[0], obj.titleAnimationName[0]);
+		obj.titleAnimationDuration[j] = setVal(titleAnimation[1] / g_fps, obj.titleAnimationDuration[0], C_TYP_FLOAT);
+		obj.titleAnimationDelay[j] = setVal(titleAnimation[2] / g_fps, obj.titleAnimationDelay[0], C_TYP_FLOAT);
+		obj.titleAnimationTimingFunction[j] = setVal(titleAnimation[3], obj.titleAnimationName[3]);
+	});
+	_dosObj.titleanimationclass?.split(`$`).forEach((animationClass, j) => {
+		obj.titleAnimationClass[j] = animationClass ?? ``;
+	});
+
 	if (obj.titleAnimationName.length === 1) {
 		g_titleLists.animation.forEach(pattern => {
 			obj[`titleAnimation${pattern}`][1] = obj[`titleAnimation${pattern}`][0];
