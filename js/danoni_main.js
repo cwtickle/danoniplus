@@ -2954,9 +2954,7 @@ const updateImgType = _imgType => {
  * ゲージ設定リストへの追加
  * @param {object} _obj
  */
-const addGaugeFulls = _obj => {
-	_obj.map(key => g_gaugeOptionObj.customFulls[key] = false);
-};
+const addGaugeFulls = _obj => _obj.map(key => g_gaugeOptionObj.customFulls[key] = false);
 
 /**
  * 矢印・フリーズアロー色のデータ変換
@@ -3008,16 +3006,15 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 					_baseObj.defaultFrzColorUse ? _baseObj[_frzInit][k] : obj[`${_name}Str`][j]);
 			}
 
-			Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
+			Object.keys(_baseObj.dfColorgrdSet).forEach(type =>
 				[obj[`${_frzName}${type}`][j], obj[`${_frzName}Str${type}`][j], obj[`${_frzName}Org${type}`][j]] =
-					setColorList(tmpFrzColors[j], currentFrzColors, _baseObj[_frzInit].length, {
-						_defaultColorgrd: _baseObj.dfColorgrdSet[type],
-						_colorCdPaddingUse: _baseObj.colorCdPaddingUse,
-						_defaultFrzColorUse: _baseObj.defaultFrzColorUse,
-						_objType: `frz`,
-						_shadowFlg: pattern === `Shadow`,
-					});
-			});
+				setColorList(tmpFrzColors[j], currentFrzColors, _baseObj[_frzInit].length, {
+					_defaultColorgrd: _baseObj.dfColorgrdSet[type],
+					_colorCdPaddingUse: _baseObj.colorCdPaddingUse,
+					_defaultFrzColorUse: _baseObj.defaultFrzColorUse,
+					_objType: `frz`,
+					_shadowFlg: pattern === `Shadow`,
+				}));
 		}
 
 		obj[`${_name}Default`] = obj[_name].concat();
@@ -3518,11 +3515,8 @@ const titleInit = _ => {
 		const titlegrd2 = g_headerObj.titlegrds[1] || titlegrd1;
 
 		const titlegrds = [];
-		[titlegrd1, titlegrd2].forEach((titlegrd, j) => {
-			titlegrds[j] = makeColorGradation(titlegrd, {
-				_defaultColorgrd: false, _objType: `titleMusic`,
-			});
-		});
+		[titlegrd1, titlegrd2].forEach((titlegrd, j) =>
+			titlegrds[j] = makeColorGradation(titlegrd, { _defaultColorgrd: false, _objType: `titleMusic` }));
 
 		let titlefontsize = 64;
 		for (let j = 0; j < g_headerObj.musicTitleForView.length; j++) {
@@ -3927,12 +3921,11 @@ const optionInit = _ => {
 const setSpriteList = _settingList => {
 	const optionWidth = (g_sWidth - 450) / 2;
 	const spriteList = [];
-	_settingList.forEach(setting => {
+	_settingList.forEach(setting =>
 		spriteList[setting[0]] = createEmptySprite(optionsprite, `${setting[0]}Sprite`, {
 			x: 25, y: setting[1] * C_LEN_SETLBL_HEIGHT + setting[2] + 20,
 			w: optionWidth + setting[3], h: C_LEN_SETLBL_HEIGHT + setting[4],
-		});
-	});
+		}));
 	return spriteList;
 };
 
@@ -4194,7 +4187,7 @@ const createOptionWindow = _sprite => {
 			setSetting(_val, `scoreDetail`);
 			viewScText();
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
-		}
+		};
 
 		multiAppend(scoreDetail,
 			createScoreDetail(`Speed`),
@@ -4424,9 +4417,8 @@ const createOptionWindow = _sprite => {
 		 * @param {string} _data 
 		 * @param {object} _obj 
 		 */
-		const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = C_SIZ_DIFSELECTOR, ...rest } = {}) => {
-			return createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest });
-		}
+		const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = C_SIZ_DIFSELECTOR, ...rest } = {}) =>
+			createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest });
 
 		let printData = ``;
 		for (let j = 0; j < g_detailObj.arrowCnt.length; j++) {
