@@ -244,7 +244,7 @@ const hasVal = _data => _data !== undefined && _data !== ``;
  * @param {string} _default 
  * @param {string} _type 
  */
-const setVal = (_checkStr, _default, _type) => {
+const setVal = (_checkStr, _default, _type = C_TYP_STRING) => {
 
 	let convertStr = _checkStr;
 
@@ -1390,7 +1390,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				width: setIntVal(tmpSpriteData[6]),                                 // spanタグの場合は font-size
 				height: escapeHtml(tmpSpriteData[7] ?? ``),                         // spanタグの場合は color(文字列可)
 				opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
-				animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING)),
+				animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE)),
 				animationDuration: setIntVal(tmpSpriteData[10]) / g_fps,
 			};
 			if (g_headerObj.autoPreload) {
@@ -1707,15 +1707,8 @@ const initialControl = async () => {
 	g_canLoadDifInfoFlg = true;
 
 	// 譜面データの読み込みオプション
-	const ampSplitInput = document.querySelector(`#enableAmpersandSplit`);
-	if (ampSplitInput !== null) {
-		g_enableAmpersandSplit = setBoolVal(ampSplitInput.value, true);
-	}
-
-	const decodeUriInput = document.querySelector(`#enableDecodeURI`);
-	if (decodeUriInput !== null) {
-		g_enableDecodeURI = setBoolVal(decodeUriInput.value);
-	}
+	g_enableAmpersandSplit = setBoolVal(document.querySelector(`#enableAmpersandSplit`)?.value, true);
+	g_enableDecodeURI = setBoolVal(document.querySelector(`#enableDecodeURI`)?.value);
 
 	// 作品別ローカルストレージの読み込み
 	loadLocalStorage();
@@ -1795,12 +1788,12 @@ const initialControl = async () => {
 			if (termRoopCnts.length === 1) {
 				// Pattern Bの場合
 				lastCnt = setIntVal(tmpPreloadImages[1], 1);
-				paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
+				paddingLen = String(setVal(tmpPreloadImages[1], 1)).length;
 			} else {
 				// Pattern C, Dの場合
 				startCnt = setIntVal(termRoopCnts[0], 1);
 				lastCnt = setIntVal(termRoopCnts[1], 1);
-				paddingLen = String(setVal(termRoopCnts[1], 1, C_TYP_STRING)).length;
+				paddingLen = String(setVal(termRoopCnts[1], 1)).length;
 			}
 			for (let k = startCnt; k <= lastCnt; k++) {
 				preloadFile(`image`, tmpPreloadImages[0].replaceAll(`*`, String(k).padStart(paddingLen, `0`)));
@@ -2680,9 +2673,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// ハッシュタグ
-	if (hasVal(_dosObj.hashTag)) {
-		obj.hashTag = _dosObj.hashTag;
-	}
+	obj.hashTag = setVal(_dosObj.hashTag, ``);
 
 	// 自動プリロードの設定
 	obj.autoPreload = setBoolVal(_dosObj.autoPreload, true);
@@ -2759,10 +2750,10 @@ const headerConvert = _dosObj => {
 	if (hasVal(_dosObj.titleanimation)) {
 		_dosObj.titleanimation.split(`$`).forEach((pos, j) => {
 			const titleAnimation = pos.split(`,`);
-			obj.titleAnimationName[j] = setVal(titleAnimation[0], obj.titleAnimationName[0], C_TYP_STRING);
+			obj.titleAnimationName[j] = setVal(titleAnimation[0], obj.titleAnimationName[0]);
 			obj.titleAnimationDuration[j] = setVal(titleAnimation[1] / g_fps, obj.titleAnimationDuration[0], C_TYP_FLOAT);
 			obj.titleAnimationDelay[j] = setVal(titleAnimation[2] / g_fps, obj.titleAnimationDelay[0], C_TYP_FLOAT);
-			obj.titleAnimationTimingFunction[j] = setVal(titleAnimation[3], obj.titleAnimationName[3], C_TYP_STRING);
+			obj.titleAnimationTimingFunction[j] = setVal(titleAnimation[3], obj.titleAnimationName[3]);
 		});
 	}
 	if (hasVal(_dosObj.titleanimationclass)) {
@@ -3024,7 +3015,7 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 				_baseObj[_frzInit].length : firstFrzColors.length;
 			for (let k = 0; k < baseLength; k++) {
 				currentFrzColors[k] = setVal(firstFrzColors[k],
-					_baseObj.defaultFrzColorUse ? _baseObj[_frzInit][k] : obj[`${_name}Str`][j], C_TYP_STRING);
+					_baseObj.defaultFrzColorUse ? _baseObj[_frzInit][k] : obj[`${_name}Str`][j]);
 			}
 
 			Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
@@ -3320,8 +3311,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		if (_dosObj[keyheader] !== undefined) {
 			const tmps = _dosObj[keyheader].split(`$`);
 			for (let k = 0; k < tmps.length; k++) {
-				g_keyObj[`${keyheader}_${k}`] = setVal(g_keyObj[`${_name}${tmps[k]}`],
-					setVal(tmps[k], ``, _type), C_TYP_STRING);
+				g_keyObj[`${keyheader}_${k}`] = setVal(g_keyObj[`${_name}${tmps[k]}`], setVal(tmps[k], ``, _type));
 			}
 		}
 	};
@@ -6741,7 +6731,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const frame = calcFrame(tmpcssMotionData[0]);
 				const arrowNum = parseFloat(tmpcssMotionData[1]);
 				const styleUp = (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]);
-				const styleDown = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], styleUp, C_TYP_STRING));
+				const styleDown = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], styleUp));
 
 				cssMotionData.push([frame, arrowNum, styleUp, styleDown]);
 			});
@@ -9887,7 +9877,7 @@ const resultInit = _ => {
 
 	// Twitter用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
-	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
+	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${getShuffleName()}`;
