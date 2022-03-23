@@ -1760,6 +1760,18 @@ const initialControl = async () => {
 			makeDedupliArray(g_rootObj.keyExtraList.split(`,`), g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
 	});
 
+	// 自動横幅拡張設定
+	if (g_presetObj.autoWidth ?? false) {
+		const widthList = [g_sWidth];
+		g_headerObj.keyLists.filter(val => g_keyObj[`minWidth${val}`] !== undefined).forEach(key => widthList.push(g_keyObj[`minWidth${key}`]));
+
+		g_sWidth = Math.max(...widthList);
+		$id(`canvas-frame`).width = `${g_sWidth}px`;
+	}
+
+	// 可変ウィンドウサイズを更新
+	updateWindowSiz();
+
 	// キー数情報を初期化
 	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 	g_keyObj.currentPtn = 0;
@@ -3352,6 +3364,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 		// キーの名前 (keyNameX)
 		g_keyObj[`keyName${newKey}`] = _dosObj[`keyName${newKey}`] ?? newKey;
+
+		// キーの最小横幅 (minWidthX)
+		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj.minWidth;
 
 		// 矢印色パターン (colorX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {

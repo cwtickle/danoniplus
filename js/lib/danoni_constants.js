@@ -75,26 +75,38 @@ const C_TYP_CALC = `calc`;
 let [g_sWidth, g_sHeight] = [
     setVal($id(`canvas-frame`).width, 600, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
 ];
+$id(`canvas-frame`).width = `${g_sWidth}px`;
+$id(`canvas-frame`).margin = `auto`;
 
 // 固定ウィンドウサイズ
 const g_windowObj = {
     divRoot: { margin: `auto`, letterSpacing: `normal` },
     divBack: { background: `linear-gradient(#000000, #222222)` },
 
-    optionSprite: { x: (g_sWidth - 450) / 2, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325 },
+    optionSprite: { w: 450, h: 325 },
     difList: { x: 165, y: 65, w: 280, h: 255, overflow: `auto` },
     difCover: { x: 25, y: 65, w: 140, h: 255, overflow: `auto`, opacity: 0.95 },
 
     scoreDetail: { x: 20, y: 90, w: 420, h: 230, visibility: `hidden` },
     detailObj: { w: 420, h: 230, visibility: `hidden` },
 
-    displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: C_LEN_SETLBL_HEIGHT * 5 },
-    keyconSprite: { y: 88 + (g_sHeight - 500) / 2, h: g_sHeight, overflow: `auto` },
+    displaySprite: { x: 25, y: 30, h: C_LEN_SETLBL_HEIGHT * 5 },
+    keyconSprite: { overflow: `auto` },
 
-    loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
+    loader: { h: 10, backgroundColor: `#333333` },
 
-    playDataWindow: { x: g_sWidth / 2 - 225, y: 70 + (g_sHeight - 500) / 2, w: 450, h: 110 },
-    resultWindow: { x: g_sWidth / 2 - 200, y: 185 + (g_sHeight - 500) / 2, w: 400, h: 210 },
+    playDataWindow: { w: 450, h: 110 },
+    resultWindow: { w: 400, h: 210 },
+};
+
+// 可変部分のウィンドウサイズを更新
+const updateWindowSiz = _ => {
+    Object.assign(g_windowObj.optionSprite, { x: (g_sWidth - 450) / 2, y: 65 + (g_sHeight - 500) / 2 });
+    Object.assign(g_windowObj.displaySprite, { w: (g_sWidth - 450) / 2 });
+    Object.assign(g_windowObj.keyconSprite, { y: 88 + (g_sHeight - 500) / 2, h: g_sHeight });
+    Object.assign(g_windowObj.loader, { y: g_sHeight - 10 });
+    Object.assign(g_windowObj.playDataWindow, { x: g_sWidth / 2 - 225, y: 70 + (g_sHeight - 500) / 2 });
+    Object.assign(g_windowObj.resultWindow, { x: g_sWidth / 2 - 200, y: 185 + (g_sHeight - 500) / 2 });
 };
 
 const g_imgObj = {};
@@ -2252,7 +2264,16 @@ const g_keyObj = {
         'Right': [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
     },
 
-    dummy: 0	// ダミー(カンマ抜け落ち防止)
+    // 横幅最小値
+    minWidth: 600,
+    minWidth5: 500,
+    minWidth9A: 650,
+    minWidth9B: 650,
+    minWidth11i: 650,
+    minWidth13: 650,
+    minWidth17: 800,
+    minWidth23: 900,
+
 };
 
 // デフォルト配列のコピー (g_keyObj.aaa_X から g_keyObj.aaa_Xd を作成)
