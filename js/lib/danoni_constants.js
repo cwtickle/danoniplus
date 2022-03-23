@@ -2265,7 +2265,9 @@ const g_keyObj = {
     },
 
     // 横幅最小値
-    minWidth: 600,
+    minWidth: 500,
+    minWidthDefault: 600,
+
     minWidth5: 500,
     minWidth7i: 550,
     minWidth9A: 650,
