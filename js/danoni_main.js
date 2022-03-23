@@ -3375,7 +3375,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		g_keyObj[`keyName${newKey}`] = _dosObj[`keyName${newKey}`] ?? newKey;
 
 		// キーの最小横幅 (minWidthX)
-		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj.minWidth;
+		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
 		// 矢印色パターン (colorX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
