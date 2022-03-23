@@ -73,7 +73,7 @@ const C_TYP_CALC = `calc`;
 
 // ウィンドウサイズ
 let [g_sWidth, g_sHeight] = [
-    setVal($id(`canvas-frame`).width, 600, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
+    setVal($id(`canvas-frame`).width, 500, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
 ];
 $id(`canvas-frame`).width = `${g_sWidth}px`;
 $id(`canvas-frame`).margin = `auto`;
@@ -2267,10 +2267,12 @@ const g_keyObj = {
     // 横幅最小値
     minWidth: 600,
     minWidth5: 500,
+    minWidth7i: 550,
     minWidth9A: 650,
     minWidth9B: 650,
     minWidth11i: 650,
     minWidth13: 650,
+    minWidth16i: 650,
     minWidth17: 800,
     minWidth23: 900,
 

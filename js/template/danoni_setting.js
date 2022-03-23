@@ -43,8 +43,11 @@ g_presetObj.skinType = `default`;
 /** 背景・マスクモーションで使用する画像パスの指定方法を他の設定に合わせる設定 (trueで有効化) */
 //g_presetObj.syncBackPath = true;
 
-/** 自動横幅拡張設定 */
-//g_presetObj.autoWidth = true;
+/** 自動横幅拡張設定 (true:有効、false:無効 / デフォルトは true) */
+//g_presetObj.autoSpread = false;
+
+/** 個人サイト別の最小横幅設定 */
+//g_presetObj.autoMinWidth = 600;
 
 /*
 ------------------------------------------------------------------------

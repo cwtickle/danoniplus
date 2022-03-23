@@ -1761,12 +1761,15 @@ const initialControl = async () => {
 	});
 
 	// 自動横幅拡張設定
-	if (g_presetObj.autoWidth ?? false) {
+	if (g_headerObj.autoSpread) {
 		const widthList = [g_sWidth];
-		g_headerObj.keyLists.filter(val => g_keyObj[`minWidth${val}`] !== undefined).forEach(key => widthList.push(g_keyObj[`minWidth${key}`]));
+		g_headerObj.keyLists.forEach(key => widthList.push(g_keyObj[`minWidth${key}`] ?? g_keyObj.minWidth));
 
-		g_sWidth = Math.max(...widthList);
+		g_sWidth = Math.max(...widthList, g_presetObj.autoMinWidth ?? g_keyObj.minWidth);
 		$id(`canvas-frame`).width = `${g_sWidth}px`;
+	}
+	if (g_headerObj.playingWidth === `default`) {
+		g_headerObj.playingWidth = g_sWidth;
 	}
 
 	// 可変ウィンドウサイズを更新
@@ -2397,6 +2400,9 @@ const headerConvert = _dosObj => {
 	Object.assign(g_lblNameObj, g_lang_lblNameObj[g_localeObj.val], g_presetObj.lblName?.[g_localeObj.val]);
 	Object.assign(g_msgObj, g_lang_msgObj[g_localeObj.val], g_presetObj.msg?.[g_localeObj.val]);
 
+	// 自動横幅拡張設定
+	obj.autoSpread = setBoolVal(_dosObj.autoSpread, g_presetObj.autoSpread ?? true);
+
 	// 曲名
 	obj.musicTitles = [];
 	obj.musicTitlesForView = [];
@@ -2896,7 +2902,7 @@ const headerConvert = _dosObj => {
 	obj.wordAutoReverse = _dosObj.wordAutoReverse ?? g_presetObj.wordAutoReverse ?? `auto`;
 
 	// プレイサイズ(X方向)
-	obj.playingWidth = setIntVal(_dosObj.playingWidth, g_sWidth);
+	obj.playingWidth = setIntVal(_dosObj.playingWidth, `default`);
 
 	// プレイ左上位置(X座標)
 	obj.playingX = setIntVal(_dosObj.playingX);
