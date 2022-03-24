@@ -1762,7 +1762,7 @@ const initialControl = async () => {
 
 	// 自動横幅拡張設定
 	if (g_headerObj.autoSpread) {
-		const widthList = [g_sWidth, g_headerObj.autoMinWidth];
+		const widthList = [g_sWidth, g_presetObj.autoMinWidth ?? g_keyObj.minWidth];
 		g_headerObj.keyLists.forEach(key => widthList.push(g_keyObj[`minWidth${key}`] ?? g_keyObj.minWidthDefault));
 
 		g_sWidth = Math.max(...widthList);
@@ -2403,8 +2403,11 @@ const headerConvert = _dosObj => {
 	// 自動横幅拡張設定
 	obj.autoSpread = setBoolVal(_dosObj.autoSpread, g_presetObj.autoSpread ?? true);
 
-	// 最小横幅（自動横幅拡張：有効時）
-	obj.autoMinWidth = setIntVal(_dosObj.autoMinWidth, g_presetObj.autoMinWidth ?? g_keyObj.minWidth);
+	// 横幅設定
+	if (hasVal(_dosObj.baseWidth)) {
+		g_sWidth = setIntVal(_dosObj.baseWidth, g_sWidth);
+		$id(`canvas-frame`).width = `${g_sWidth}px`;
+	}
 
 	// 曲名
 	obj.musicTitles = [];
