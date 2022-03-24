@@ -2308,6 +2308,12 @@ const preheaderConvert = _dosObj => {
 	// ヘッダー群の格納先
 	const obj = {};
 
+	// ウィンドウ位置の設定
+	const align = _dosObj.windowAlign ?? g_presetObj.windowAlign;
+	if (align !== undefined) {
+		g_windowAlign[align]();
+	}
+
 	obj.jsData = [];
 
 	const setJsFiles = (_files, _defaultDir, _type = `custom`) => {
@@ -2404,8 +2410,8 @@ const headerConvert = _dosObj => {
 	obj.autoSpread = setBoolVal(_dosObj.autoSpread, g_presetObj.autoSpread ?? true);
 
 	// 横幅設定
-	if (hasVal(_dosObj.baseWidth)) {
-		g_sWidth = setIntVal(_dosObj.baseWidth, g_sWidth);
+	if (hasVal(_dosObj.windowWidth)) {
+		g_sWidth = setIntVal(_dosObj.windowWidth, g_sWidth);
 		$id(`canvas-frame`).width = `${g_sWidth}px`;
 	}
 

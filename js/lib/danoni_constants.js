@@ -109,6 +109,21 @@ const updateWindowSiz = _ => {
     Object.assign(g_windowObj.resultWindow, { x: g_sWidth / 2 - 200, y: 185 + (g_sHeight - 500) / 2 });
 };
 
+// ウィンドウ位置
+const g_windowAlign = {
+    left: _ => {
+        $id(`canvas-frame`).marginLeft = `0px`;
+        $id(`canvas-frame`).marginRight = `auto`;
+    },
+    center: _ => {
+        $id(`canvas-frame`).margin = `auto`;
+    },
+    right: _ => {
+        $id(`canvas-frame`).marginLeft = `auto`;
+        $id(`canvas-frame`).marginRight = `0px`;
+    },
+}
+
 const g_imgObj = {};
 
 // 画像ファイル

@@ -49,6 +49,9 @@ g_presetObj.skinType = `default`;
 /** 個人サイト別の最小横幅設定 */
 //g_presetObj.autoMinWidth = 600;
 
+/** 個人サイト別のウィンドウ位置 (left:左寄せ, center:中央, right:右寄せ)*/
+//g_presetObj.windowAlign = `center`;
+
 /*
 ------------------------------------------------------------------------
    ゲージ設定 
