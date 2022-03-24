@@ -1760,6 +1760,21 @@ const initialControl = async () => {
 			makeDedupliArray(g_rootObj.keyExtraList.split(`,`), g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
 	});
 
+	// 自動横幅拡張設定
+	if (g_headerObj.autoSpread) {
+		const widthList = [g_sWidth, g_presetObj.autoMinWidth ?? g_keyObj.minWidth];
+		g_headerObj.keyLists.forEach(key => widthList.push(g_keyObj[`minWidth${key}`] ?? g_keyObj.minWidthDefault));
+
+		g_sWidth = Math.max(...widthList);
+		$id(`canvas-frame`).width = `${g_sWidth}px`;
+	}
+	if (g_headerObj.playingWidth === `default`) {
+		g_headerObj.playingWidth = g_sWidth;
+	}
+
+	// 可変ウィンドウサイズを更新
+	updateWindowSiz();
+
 	// キー数情報を初期化
 	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 	g_keyObj.currentPtn = 0;
@@ -2293,6 +2308,12 @@ const preheaderConvert = _dosObj => {
 	// ヘッダー群の格納先
 	const obj = {};
 
+	// ウィンドウ位置の設定
+	const align = _dosObj.windowAlign ?? g_presetObj.windowAlign;
+	if (align !== undefined) {
+		g_windowAlign[align]();
+	}
+
 	obj.jsData = [];
 
 	const setJsFiles = (_files, _defaultDir, _type = `custom`) => {
@@ -2384,6 +2405,15 @@ const headerConvert = _dosObj => {
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
 	Object.assign(g_lblNameObj, g_lang_lblNameObj[g_localeObj.val], g_presetObj.lblName?.[g_localeObj.val]);
 	Object.assign(g_msgObj, g_lang_msgObj[g_localeObj.val], g_presetObj.msg?.[g_localeObj.val]);
+
+	// 自動横幅拡張設定
+	obj.autoSpread = setBoolVal(_dosObj.autoSpread, g_presetObj.autoSpread ?? true);
+
+	// 横幅設定
+	if (hasVal(_dosObj.windowWidth)) {
+		g_sWidth = setIntVal(_dosObj.windowWidth, g_sWidth);
+		$id(`canvas-frame`).width = `${g_sWidth}px`;
+	}
 
 	// 曲名
 	obj.musicTitles = [];
@@ -2884,7 +2914,7 @@ const headerConvert = _dosObj => {
 	obj.wordAutoReverse = _dosObj.wordAutoReverse ?? g_presetObj.wordAutoReverse ?? `auto`;
 
 	// プレイサイズ(X方向)
-	obj.playingWidth = setIntVal(_dosObj.playingWidth, g_sWidth);
+	obj.playingWidth = setIntVal(_dosObj.playingWidth, `default`);
 
 	// プレイ左上位置(X座標)
 	obj.playingX = setIntVal(_dosObj.playingX);
@@ -3352,6 +3382,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 		// キーの名前 (keyNameX)
 		g_keyObj[`keyName${newKey}`] = _dosObj[`keyName${newKey}`] ?? newKey;
+
+		// キーの最小横幅 (minWidthX)
+		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
 		// 矢印色パターン (colorX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
