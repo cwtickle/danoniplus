@@ -12,7 +12,7 @@
 
 /*
 ------------------------------------------------------------------------
-   制作者クレジット 
+   制作者クレジット・基本設定 
    https://github.com/cwtickle/danoniplus/wiki/dos-s0001-makerInfo 
 ------------------------------------------------------------------------
 */
@@ -23,6 +23,14 @@ g_presetObj.tuning = `name`;
 /** 譜面製作者URL */
 g_presetObj.tuningUrl = `https://www.google.co.jp/`;
 
+/** 自動横幅拡張設定 (true:有効、false:無効 / デフォルトは true) */
+//g_presetObj.autoSpread = false;
+
+/** 個人サイト別の最小横幅設定 */
+//g_presetObj.autoMinWidth = 600;
+
+/** 個人サイト別のウィンドウ位置 (left:左寄せ, center:中央, right:右寄せ)*/
+//g_presetObj.windowAlign = `center`;
 
 /*
 ------------------------------------------------------------------------
@@ -42,15 +50,6 @@ g_presetObj.skinType = `default`;
 
 /** 背景・マスクモーションで使用する画像パスの指定方法を他の設定に合わせる設定 (trueで有効化) */
 //g_presetObj.syncBackPath = true;
-
-/** 自動横幅拡張設定 (true:有効、false:無効 / デフォルトは true) */
-//g_presetObj.autoSpread = false;
-
-/** 個人サイト別の最小横幅設定 */
-//g_presetObj.autoMinWidth = 600;
-
-/** 個人サイト別のウィンドウ位置 (left:左寄せ, center:中央, right:右寄せ)*/
-//g_presetObj.windowAlign = `center`;
 
 /*
 ------------------------------------------------------------------------
