@@ -2333,11 +2333,11 @@ const preheaderConvert = _dosObj => {
 
 	// 外部jsファイルの指定
 	const tmpCustomjs = _dosObj.customjs ?? g_presetObj.customJs ?? C_JSF_CUSTOM;
-	setJsFiles(tmpCustomjs.split(`,`), C_DIR_JS);
+	setJsFiles(tmpCustomjs.replaceAll(`*`, g_presetObj.customJs).split(`,`), C_DIR_JS);
 
 	// 外部cssファイルの指定
 	const tmpCustomcss = _dosObj.customcss ?? g_presetObj.customCss ?? ``;
-	setJsFiles(tmpCustomcss.split(`,`), C_DIR_CSS);
+	setJsFiles(tmpCustomcss.replaceAll(`*`, g_presetObj.customCss).split(`,`), C_DIR_CSS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
 	g_titleLists.init.forEach(objName => {
