@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/03/12
+ * Revised : 2022/03/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 27.0.0`;
-const g_revisedDate = `2022/03/18`;
+const g_version = `Ver 27.1.0`;
+const g_revisedDate = `2022/03/25`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -54,6 +54,10 @@ const g_randTime = Date.now();
 window.onload = async () => {
 	g_loadObj.main = true;
 	g_currentPage = `initial`;
+	const links = document.querySelectorAll(`link`);
+	if (Array.from(links).filter(elem => elem.getAttribute(`href`).indexOf(`danoni_main.css`) !== -1).length === 0) {
+		await importCssFile2(`${g_rootPath}../css/danoni_main.css?${g_randTime}`);
+	}
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	await loadScript2(`${g_rootPath}../js/lib/danoni_localbinary.js?${g_randTime}`, false);
@@ -240,7 +244,7 @@ const hasVal = _data => _data !== undefined && _data !== ``;
  * @param {string} _default 
  * @param {string} _type 
  */
-const setVal = (_checkStr, _default, _type) => {
+const setVal = (_checkStr, _default, _type = C_TYP_STRING) => {
 
 	let convertStr = _checkStr;
 
@@ -1386,7 +1390,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				width: setIntVal(tmpSpriteData[6]),                                 // spanタグの場合は font-size
 				height: escapeHtml(tmpSpriteData[7] ?? ``),                         // spanタグの場合は color(文字列可)
 				opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
-				animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE, C_TYP_STRING)),
+				animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE)),
 				animationDuration: setIntVal(tmpSpriteData[10]) / g_fps,
 			};
 			if (g_headerObj.autoPreload) {
@@ -1703,15 +1707,8 @@ const initialControl = async () => {
 	g_canLoadDifInfoFlg = true;
 
 	// 譜面データの読み込みオプション
-	const ampSplitInput = document.querySelector(`#enableAmpersandSplit`);
-	if (ampSplitInput !== null) {
-		g_enableAmpersandSplit = setBoolVal(ampSplitInput.value, true);
-	}
-
-	const decodeUriInput = document.querySelector(`#enableDecodeURI`);
-	if (decodeUriInput !== null) {
-		g_enableDecodeURI = setBoolVal(decodeUriInput.value);
-	}
+	g_enableAmpersandSplit = setBoolVal(document.querySelector(`#enableAmpersandSplit`)?.value, true);
+	g_enableDecodeURI = setBoolVal(document.querySelector(`#enableDecodeURI`)?.value);
 
 	// 作品別ローカルストレージの読み込み
 	loadLocalStorage();
@@ -1763,6 +1760,21 @@ const initialControl = async () => {
 			makeDedupliArray(g_rootObj.keyExtraList.split(`,`), g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
 	});
 
+	// 自動横幅拡張設定
+	if (g_headerObj.autoSpread) {
+		const widthList = [g_sWidth, g_presetObj.autoMinWidth ?? g_keyObj.minWidth];
+		g_headerObj.keyLists.forEach(key => widthList.push(g_keyObj[`minWidth${key}`] ?? g_keyObj.minWidthDefault));
+
+		g_sWidth = Math.max(...widthList);
+		$id(`canvas-frame`).width = `${g_sWidth}px`;
+	}
+	if (g_headerObj.playingWidth === `default`) {
+		g_headerObj.playingWidth = g_sWidth;
+	}
+
+	// 可変ウィンドウサイズを更新
+	updateWindowSiz();
+
 	// キー数情報を初期化
 	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 	g_keyObj.currentPtn = 0;
@@ -1791,12 +1803,12 @@ const initialControl = async () => {
 			if (termRoopCnts.length === 1) {
 				// Pattern Bの場合
 				lastCnt = setIntVal(tmpPreloadImages[1], 1);
-				paddingLen = String(setVal(tmpPreloadImages[1], 1, C_TYP_STRING)).length;
+				paddingLen = String(setVal(tmpPreloadImages[1], 1)).length;
 			} else {
 				// Pattern C, Dの場合
 				startCnt = setIntVal(termRoopCnts[0], 1);
 				lastCnt = setIntVal(termRoopCnts[1], 1);
-				paddingLen = String(setVal(termRoopCnts[1], 1, C_TYP_STRING)).length;
+				paddingLen = String(setVal(termRoopCnts[1], 1)).length;
 			}
 			for (let k = startCnt; k <= lastCnt; k++) {
 				preloadFile(`image`, tmpPreloadImages[0].replaceAll(`*`, String(k).padStart(paddingLen, `0`)));
@@ -2296,6 +2308,12 @@ const preheaderConvert = _dosObj => {
 	// ヘッダー群の格納先
 	const obj = {};
 
+	// ウィンドウ位置の設定
+	const align = _dosObj.windowAlign ?? g_presetObj.windowAlign;
+	if (align !== undefined) {
+		g_windowAlign[align]();
+	}
+
 	obj.jsData = [];
 
 	const setJsFiles = (_files, _defaultDir, _type = `custom`) => {
@@ -2315,11 +2333,11 @@ const preheaderConvert = _dosObj => {
 
 	// 外部jsファイルの指定
 	const tmpCustomjs = _dosObj.customjs ?? g_presetObj.customJs ?? C_JSF_CUSTOM;
-	setJsFiles(tmpCustomjs.split(`,`), C_DIR_JS);
+	setJsFiles(tmpCustomjs.replaceAll(`*`, g_presetObj.customJs).split(`,`), C_DIR_JS);
 
 	// 外部cssファイルの指定
 	const tmpCustomcss = _dosObj.customcss ?? g_presetObj.customCss ?? ``;
-	setJsFiles(tmpCustomcss.split(`,`), C_DIR_CSS);
+	setJsFiles(tmpCustomcss.replaceAll(`*`, g_presetObj.customCss).split(`,`), C_DIR_CSS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
 	g_titleLists.init.forEach(objName => {
@@ -2387,6 +2405,15 @@ const headerConvert = _dosObj => {
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
 	Object.assign(g_lblNameObj, g_lang_lblNameObj[g_localeObj.val], g_presetObj.lblName?.[g_localeObj.val]);
 	Object.assign(g_msgObj, g_lang_msgObj[g_localeObj.val], g_presetObj.msg?.[g_localeObj.val]);
+
+	// 自動横幅拡張設定
+	obj.autoSpread = setBoolVal(_dosObj.autoSpread, g_presetObj.autoSpread ?? true);
+
+	// 横幅設定
+	if (hasVal(_dosObj.windowWidth)) {
+		g_sWidth = setIntVal(_dosObj.windowWidth, g_sWidth);
+		$id(`canvas-frame`).width = `${g_sWidth}px`;
+	}
 
 	// 曲名
 	obj.musicTitles = [];
@@ -2676,9 +2703,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// ハッシュタグ
-	if (hasVal(_dosObj.hashTag)) {
-		obj.hashTag = _dosObj.hashTag;
-	}
+	obj.hashTag = setVal(_dosObj.hashTag, ``);
 
 	// 自動プリロードの設定
 	obj.autoPreload = setBoolVal(_dosObj.autoPreload, true);
@@ -2719,13 +2744,9 @@ const headerConvert = _dosObj => {
 	// デフォルト曲名表示のフォント名
 	// (使用例： |titlefont=Century,Meiryo UI|)
 	obj.titlefonts = g_titleLists.defaultFonts.concat();
-	if (hasVal(_dosObj.titlefont)) {
-		_dosObj.titlefont.split(`$`).forEach((font, j) => {
-			obj.titlefonts[j] = `'${(font.replaceAll(`,`, `', '`))}'`;
-		});
-		if (obj.titlefonts[1] === undefined) {
-			obj.titlefonts[1] = obj.titlefonts[0];
-		}
+	_dosObj.titlefont?.split(`$`).forEach((font, j) => obj.titlefonts[j] = `'${(font.replaceAll(`,`, `', '`))}'`);
+	if (obj.titlefonts[1] === undefined) {
+		obj.titlefonts[1] = obj.titlefonts[0];
 	}
 
 	// デフォルト曲名表示, 背景矢印のグラデーション指定css
@@ -2740,11 +2761,7 @@ const headerConvert = _dosObj => {
 
 	// デフォルト曲名表示の表示位置調整
 	obj.titlepos = [[0, 0], [0, 0]];
-	if (hasVal(_dosObj.titlepos)) {
-		_dosObj.titlepos.split(`$`).forEach((pos, j) => {
-			obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x));
-		});
-	}
+	_dosObj.titlepos?.split(`$`).forEach((pos, j) => obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x)));
 
 	// タイトル文字のアニメーション設定
 	obj.titleAnimationName = [`leftToRight`];
@@ -2752,20 +2769,18 @@ const headerConvert = _dosObj => {
 	obj.titleAnimationDelay = [0];
 	obj.titleAnimationTimingFunction = [`ease`];
 	obj.titleAnimationClass = [``];
-	if (hasVal(_dosObj.titleanimation)) {
-		_dosObj.titleanimation.split(`$`).forEach((pos, j) => {
-			const titleAnimation = pos.split(`,`);
-			obj.titleAnimationName[j] = setVal(titleAnimation[0], obj.titleAnimationName[0], C_TYP_STRING);
-			obj.titleAnimationDuration[j] = setVal(titleAnimation[1] / g_fps, obj.titleAnimationDuration[0], C_TYP_FLOAT);
-			obj.titleAnimationDelay[j] = setVal(titleAnimation[2] / g_fps, obj.titleAnimationDelay[0], C_TYP_FLOAT);
-			obj.titleAnimationTimingFunction[j] = setVal(titleAnimation[3], obj.titleAnimationName[3], C_TYP_STRING);
-		});
-	}
-	if (hasVal(_dosObj.titleanimationclass)) {
-		_dosObj.titleanimationclass.split(`$`).forEach((animationClass, j) => {
-			obj.titleAnimationClass[j] = animationClass ?? ``;
-		});
-	}
+
+	_dosObj.titleanimation?.split(`$`).forEach((pos, j) => {
+		const titleAnimation = pos.split(`,`);
+		obj.titleAnimationName[j] = setVal(titleAnimation[0], obj.titleAnimationName[0]);
+		obj.titleAnimationDuration[j] = setVal(titleAnimation[1] / g_fps, obj.titleAnimationDuration[0], C_TYP_FLOAT);
+		obj.titleAnimationDelay[j] = setVal(titleAnimation[2] / g_fps, obj.titleAnimationDelay[0], C_TYP_FLOAT);
+		obj.titleAnimationTimingFunction[j] = setVal(titleAnimation[3], obj.titleAnimationName[3]);
+	});
+	_dosObj.titleanimationclass?.split(`$`).forEach((animationClass, j) => {
+		obj.titleAnimationClass[j] = animationClass ?? ``;
+	});
+
 	if (obj.titleAnimationName.length === 1) {
 		g_titleLists.animation.forEach(pattern => {
 			obj[`titleAnimation${pattern}`][1] = obj[`titleAnimation${pattern}`][0];
@@ -2899,7 +2914,7 @@ const headerConvert = _dosObj => {
 	obj.wordAutoReverse = _dosObj.wordAutoReverse ?? g_presetObj.wordAutoReverse ?? `auto`;
 
 	// プレイサイズ(X方向)
-	obj.playingWidth = setIntVal(_dosObj.playingWidth, g_sWidth);
+	obj.playingWidth = setIntVal(_dosObj.playingWidth, `default`);
 
 	// プレイ左上位置(X座標)
 	obj.playingX = setIntVal(_dosObj.playingX);
@@ -2969,9 +2984,7 @@ const updateImgType = _imgType => {
  * ゲージ設定リストへの追加
  * @param {object} _obj
  */
-const addGaugeFulls = _obj => {
-	_obj.map(key => g_gaugeOptionObj.customFulls[key] = false);
-};
+const addGaugeFulls = _obj => _obj.map(key => g_gaugeOptionObj.customFulls[key] = false);
 
 /**
  * 矢印・フリーズアロー色のデータ変換
@@ -3020,19 +3033,18 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 				_baseObj[_frzInit].length : firstFrzColors.length;
 			for (let k = 0; k < baseLength; k++) {
 				currentFrzColors[k] = setVal(firstFrzColors[k],
-					_baseObj.defaultFrzColorUse ? _baseObj[_frzInit][k] : obj[`${_name}Str`][j], C_TYP_STRING);
+					_baseObj.defaultFrzColorUse ? _baseObj[_frzInit][k] : obj[`${_name}Str`][j]);
 			}
 
-			Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
+			Object.keys(_baseObj.dfColorgrdSet).forEach(type =>
 				[obj[`${_frzName}${type}`][j], obj[`${_frzName}Str${type}`][j], obj[`${_frzName}Org${type}`][j]] =
-					setColorList(tmpFrzColors[j], currentFrzColors, _baseObj[_frzInit].length, {
-						_defaultColorgrd: _baseObj.dfColorgrdSet[type],
-						_colorCdPaddingUse: _baseObj.colorCdPaddingUse,
-						_defaultFrzColorUse: _baseObj.defaultFrzColorUse,
-						_objType: `frz`,
-						_shadowFlg: pattern === `Shadow`,
-					});
-			});
+				setColorList(tmpFrzColors[j], currentFrzColors, _baseObj[_frzInit].length, {
+					_defaultColorgrd: _baseObj.dfColorgrdSet[type],
+					_colorCdPaddingUse: _baseObj.colorCdPaddingUse,
+					_defaultFrzColorUse: _baseObj.defaultFrzColorUse,
+					_objType: `frz`,
+					_shadowFlg: pattern === `Shadow`,
+				}));
 		}
 
 		obj[`${_name}Default`] = obj[_name].concat();
@@ -3316,8 +3328,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		if (_dosObj[keyheader] !== undefined) {
 			const tmps = _dosObj[keyheader].split(`$`);
 			for (let k = 0; k < tmps.length; k++) {
-				g_keyObj[`${keyheader}_${k}`] = setVal(g_keyObj[`${_name}${tmps[k]}`],
-					setVal(tmps[k], ``, _type), C_TYP_STRING);
+				g_keyObj[`${keyheader}_${k}`] = setVal(g_keyObj[`${_name}${tmps[k]}`], setVal(tmps[k], ``, _type));
 			}
 		}
 	};
@@ -3371,6 +3382,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 		// キーの名前 (keyNameX)
 		g_keyObj[`keyName${newKey}`] = _dosObj[`keyName${newKey}`] ?? newKey;
+
+		// キーの最小横幅 (minWidthX)
+		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
 		// 矢印色パターン (colorX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
@@ -3534,11 +3548,8 @@ const titleInit = _ => {
 		const titlegrd2 = g_headerObj.titlegrds[1] || titlegrd1;
 
 		const titlegrds = [];
-		[titlegrd1, titlegrd2].forEach((titlegrd, j) => {
-			titlegrds[j] = makeColorGradation(titlegrd, {
-				_defaultColorgrd: false, _objType: `titleMusic`,
-			});
-		});
+		[titlegrd1, titlegrd2].forEach((titlegrd, j) =>
+			titlegrds[j] = makeColorGradation(titlegrd, { _defaultColorgrd: false, _objType: `titleMusic` }));
 
 		let titlefontsize = 64;
 		for (let j = 0; j < g_headerObj.musicTitleForView.length; j++) {
@@ -3943,12 +3954,11 @@ const optionInit = _ => {
 const setSpriteList = _settingList => {
 	const optionWidth = (g_sWidth - 450) / 2;
 	const spriteList = [];
-	_settingList.forEach(setting => {
+	_settingList.forEach(setting =>
 		spriteList[setting[0]] = createEmptySprite(optionsprite, `${setting[0]}Sprite`, {
 			x: 25, y: setting[1] * C_LEN_SETLBL_HEIGHT + setting[2] + 20,
 			w: optionWidth + setting[3], h: C_LEN_SETLBL_HEIGHT + setting[4],
-		});
-	});
+		}));
 	return spriteList;
 };
 
@@ -4210,7 +4220,7 @@ const createOptionWindow = _sprite => {
 			setSetting(_val, `scoreDetail`);
 			viewScText();
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
-		}
+		};
 
 		multiAppend(scoreDetail,
 			createScoreDetail(`Speed`),
@@ -4440,9 +4450,8 @@ const createOptionWindow = _sprite => {
 		 * @param {string} _data 
 		 * @param {object} _obj 
 		 */
-		const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = C_SIZ_DIFSELECTOR, ...rest } = {}) => {
-			return createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest });
-		}
+		const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = C_SIZ_DIFSELECTOR, ...rest } = {}) =>
+			createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest });
 
 		let printData = ``;
 		for (let j = 0; j < g_detailObj.arrowCnt.length; j++) {
@@ -6737,7 +6746,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const frame = calcFrame(tmpcssMotionData[0]);
 				const arrowNum = parseFloat(tmpcssMotionData[1]);
 				const styleUp = (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]);
-				const styleDown = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], styleUp, C_TYP_STRING));
+				const styleDown = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], styleUp));
 
 				cssMotionData.push([frame, arrowNum, styleUp, styleDown]);
 			});
@@ -9883,7 +9892,7 @@ const resultInit = _ => {
 
 	// Twitter用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
-	const hashTag = (g_headerObj.hashTag !== undefined ? ` ${g_headerObj.hashTag}` : ``);
+	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${getShuffleName()}`;
