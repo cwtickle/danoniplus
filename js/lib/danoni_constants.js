@@ -92,6 +92,7 @@ const g_windowObj = {
 
     displaySprite: { x: 25, y: 30, h: C_LEN_SETLBL_HEIGHT * 5 },
     keyconSprite: { overflow: `auto` },
+    colorPickSprite: { x: 0, y: 90, w: 50, h: 280 },
 
     loader: { h: 10, backgroundColor: `#333333` },
 
@@ -2369,88 +2370,94 @@ const g_dfColorObj = {
     setColorInit: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
     setShadowColorInit: [``, ``, ``, ``, ``],
 
-    setColorType1: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
-    setColorType2: [`#ffffff`, `#9999ff`, `#99ccff`, `#ffccff`, `#ff9999`],
-    setColorType3: [`#ccccff`, `#ccffff`, `#ffffff`, `#ffffcc`, `#ffcc99`],
-    setColorType4: [`#ffffff`, `#ccccff`, `#99ccff`, `#ffccff`, `#ffcccc`],
-
-    setShadowColorType1: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
-    setShadowColorType2: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
-    setShadowColorType3: [`#6666ff60`, `#33999960`, `#66666660`, `#99993360`, `#cc663360`],
-    setShadowColorType4: [`#66666660`, `#6666ff60`, `#3366cc60`, `#99339960`, `#99333360`],
-
     // フリーズアロー初期色情報
     frzColorInit: [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
     frzShadowColorInit: [``, ``, ``, ``],
-    frzColorType1: [
-        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-        [`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
-        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-        [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
-        [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
-    ],
-    frzColorType2: [
-        [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
-        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-        [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
-        [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
-    ],
-    frzColorType3: [
-        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-        [`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
-        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-        [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
-        [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
-    ],
-    frzColorType4: [
-        [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
-        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-        [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
-        [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
-        [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
-    ],
+
 };
 
-const g_dfColorLightObj = {
-    setColorType1: [`#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`],
-    setColorType2: [`#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`],
-    setColorType3: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
-    setColorType4: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
+const g_dfColorBaseObj = {
 
-    setShadowColorType1: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
-    setShadowColorType2: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
-    setShadowColorType3: [`#6666ff80`, `#66cccc80`, `#ffffff80`, `#99996680`, `#cc660080`],
-    setShadowColorType4: [`#00000080`, `#6666ff80`, `#cc000080`, `#cc99cc80`, `#cc336680`],
+    dark: {
+        setColorType1: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
+        setColorType2: [`#ffffff`, `#9999ff`, `#99ccff`, `#ffccff`, `#ff9999`],
+        setColorType3: [`#ccccff`, `#ccffff`, `#ffffff`, `#ffffcc`, `#ffcc99`],
+        setColorType4: [`#ffffff`, `#ccccff`, `#99ccff`, `#ffccff`, `#ffcccc`],
 
-    frzColorType1: [
-        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
-        [`#00ffcc`, `#339999`, `#ffff00`, `#999900`],
-        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
-        [`#cc99ff`, `#9966ff`, `#ffff00`, `#999900`],
-        [`#ff99cc`, `#ff6699`, `#ffff00`, `#999900`]
-    ],
-    frzColorType2: [
-        [`#cccccc`, `#999999`, `#ffff00`, `#999900`],
-        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
-        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
-        [`#cc99cc`, `#ff99ff`, `#ffff00`, `#999900`],
-        [`#ff6666`, `#ff9999`, `#ffff00`, `#999900`]
-    ],
-    frzColorType3: [
-        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
-        [`#00ffcc`, `#339999`, `#ffff00`, `#999900`],
-        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
-        [`#cc99ff`, `#9966ff`, `#ffff00`, `#999900`],
-        [`#ff99cc`, `#ff6699`, `#ffff00`, `#999900`]
-    ],
-    frzColorType4: [
-        [`#cccccc`, `#999999`, `#ffff00`, `#999900`],
-        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
-        [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
-        [`#cc99cc`, `#ff99ff`, `#ffff00`, `#999900`],
-        [`#ff6666`, `#ff9999`, `#ffff00`, `#999900`]
-    ],
+        setShadowColorType1: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
+        setShadowColorType2: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
+        setShadowColorType3: [`#6666ff60`, `#33999960`, `#66666660`, `#99993360`, `#cc663360`],
+        setShadowColorType4: [`#66666660`, `#6666ff60`, `#3366cc60`, `#99339960`, `#99333360`],
+
+        frzColorType1: [
+            [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+            [`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
+            [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+            [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
+            [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
+        ],
+        frzColorType2: [
+            [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
+            [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+            [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+            [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
+            [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
+        ],
+        frzColorType3: [
+            [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+            [`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
+            [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+            [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
+            [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
+        ],
+        frzColorType4: [
+            [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
+            [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+            [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
+            [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
+            [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
+        ],
+    },
+    light: {
+        setColorType1: [`#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`],
+        setColorType2: [`#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`],
+        setColorType3: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
+        setColorType4: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
+
+        setShadowColorType1: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
+        setShadowColorType2: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
+        setShadowColorType3: [`#6666ff80`, `#66cccc80`, `#ffffff80`, `#99996680`, `#cc660080`],
+        setShadowColorType4: [`#00000080`, `#6666ff80`, `#cc000080`, `#cc99cc80`, `#cc336680`],
+
+        frzColorType1: [
+            [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+            [`#00ffcc`, `#339999`, `#ffff00`, `#999900`],
+            [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+            [`#cc99ff`, `#9966ff`, `#ffff00`, `#999900`],
+            [`#ff99cc`, `#ff6699`, `#ffff00`, `#999900`]
+        ],
+        frzColorType2: [
+            [`#cccccc`, `#999999`, `#ffff00`, `#999900`],
+            [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+            [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+            [`#cc99cc`, `#ff99ff`, `#ffff00`, `#999900`],
+            [`#ff6666`, `#ff9999`, `#ffff00`, `#999900`]
+        ],
+        frzColorType3: [
+            [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+            [`#00ffcc`, `#339999`, `#ffff00`, `#999900`],
+            [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+            [`#cc99ff`, `#9966ff`, `#ffff00`, `#999900`],
+            [`#ff99cc`, `#ff6699`, `#ffff00`, `#999900`]
+        ],
+        frzColorType4: [
+            [`#cccccc`, `#999999`, `#ffff00`, `#999900`],
+            [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+            [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
+            [`#cc99cc`, `#ff99ff`, `#ffff00`, `#999900`],
+            [`#ff6666`, `#ff9999`, `#ffff00`, `#999900`]
+        ],
+    },
 };
 
 /**
@@ -2884,6 +2891,7 @@ const g_lang_msgObj = {
 
         dataResetConfirm: `この作品のローカル設定をクリアします。よろしいですか？\n(ハイスコアやAdjustment等のデータがクリアされます)`,
         keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
+        colorCopyConfirm: `フリーズアローの配色を矢印色に置き換えます\n(通常・ヒット時双方を置き換えます)。よろしいですか？`,
 
         difficulty: `譜面を選択します。`,
         speed: `矢印の流れる速度を設定します。\n外側のボタンは1x単位、内側は0.25x単位で変更できます。`,
@@ -2934,6 +2942,7 @@ const g_lang_msgObj = {
 
         dataResetConfirm: `Delete the local settings in this game. Is it OK?\n(High score, adjustment, volume and some settings will be initialized)`,
         keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,
+        colorCopyConfirm: `Replace freeze arrow color scheme with arrow color\n(replace both normal and hit). Is this OK?`,
 
         difficulty: `Select a chart.`,
         speed: `Set the speed of the sequences.\nThe outer button can be changed in 1x increments and the inner button in 0.25x increments.`,
