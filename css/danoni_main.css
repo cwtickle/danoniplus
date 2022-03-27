@@ -4,7 +4,7 @@
   本体cssファイル
 
   Created : 2018/10/08
-  Revised : 2021/04/07 (v21.4.2)
+  Revised : 2022/03/27 (v27.2.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -47,6 +47,12 @@ input[type=range]::-moz-range-thumb{
 }
 input[type=range]:focus {
 	outline: 0;
+}
+
+input[type=color] {
+	width:25px;
+	height:25px;
+	border:none;
 }
 
 /* 左から右へ */
