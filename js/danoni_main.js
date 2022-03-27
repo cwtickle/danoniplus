@@ -972,11 +972,10 @@ const createImg = (_id, _imgPath, _x, _y, _width, _height) => {
  * @param {object} _obj 
  * @returns 
  */
-const createColorPicker = (_parentObj, _id, _color, { x = 0, y = 0 } = {}) => {
+const createColorPicker = (_parentObj, _id, { x = 0, y = 0 } = {}) => {
 	const picker = document.createElement(`input`);
 	picker.setAttribute(`type`, `color`);
 	picker.id = _id;
-	picker.value = _color;
 	picker.style.left = `${x}px`;
 	picker.style.top = `${y}px`;
 	picker.style.position = `absolute`;
@@ -2623,10 +2622,9 @@ const headerConvert = _dosObj => {
 	}
 
 	// 初期色情報
+	const baseColor = (obj.baseBrightFlg ? `light` : `dark`);
+	Object.assign(g_dfColorObj, g_dfColorBaseObj[baseColor]);
 	Object.keys(g_dfColorObj).forEach(key => obj[key] = g_dfColorObj[key].concat());
-	if (obj.baseBrightFlg) {
-		Object.keys(g_dfColorLightObj).forEach(key => obj[key] = g_dfColorLightObj[key].concat());
-	}
 	obj.frzColorDefault = [];
 
 	// ダミー用初期矢印色
@@ -5915,10 +5913,25 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	};
 
 	/**
+	 * ColorPickerの色切替
+	 * @param {number} _j 
+	 * @param {string} _type 
+	 * @param {string} _color 
+	 */
+	const changeColorPicker = (_j, _type, _color) => {
+		if (_color !== ``) {
+			document.getElementById(`pick${_type}${_j}`).value = _color.slice(0, 7);
+			document.getElementById(`pick${_type}${_j}`).style.display = ([`Default`, `Type0`].includes(g_colorType) ? C_DIS_NONE : C_DIS_INHERIT);
+		} else {
+			document.getElementById(`pick${_type}${_j}`).style.display = C_DIS_NONE;
+		}
+	};
+
+	/**
 	 * ColorTypeの制御
 	 * @param {number} _scrollNum 
 	 */
-	const setColorType = (_scrollNum = 1) => {
+	const setColorType = (_scrollNum = 1, _reloadFlg = true) => {
 		const nextNum = getNextNum(_scrollNum, `colorTypes`, g_colorType);
 		g_colorType = g_keycons.colorTypes[nextNum];
 		if (g_headerObj.colorUse) {
@@ -5927,9 +5940,12 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		changeSetColor();
 		viewGroupObj.color(`_${g_keycons.colorGroupNum}`);
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
-		if (_scrollNum !== 0) {
-			for (let j = 0; j < 5; j++) {
-				document.getElementById(`pick${j}`).value = g_headerObj.setColor[j];
+		if (_reloadFlg) {
+			for (let j = 0; j < g_headerObj.setColor.length; j++) {
+				changeColorPicker(j, `arrow`, g_headerObj.setColor[j]);
+				changeColorPicker(j, `arrowShadow`, g_headerObj.setShadowColor[j]);
+				changeColorPicker(j, `frz`, g_headerObj.frzColor[j][0]);
+				changeColorPicker(j, `frzBar`, g_headerObj.frzColor[j][1]);
 			}
 		}
 	};
@@ -5943,6 +5959,42 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		updateImgType(g_headerObj.imgType[nextNum]);
 		keyConfigInit(g_kcType);
 	};
+
+
+	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, { x: 0, y: 90, w: 50, h: 300 });
+
+	/**
+	 * ColorPicker部分の作成
+	 * @param {number} _j 
+	 * @param {string} _type 
+	 * @param {function} _func 
+	 * @param {object} _obj 
+	 */
+	const createColorPickWindow = (_j, _type, _func, { x = 0, y = 0 } = {}) => {
+		const picker = createColorPicker(colorPickSprite, `pick${_type}${_j}`, { x, y: y + 25 * _j });
+		if ([`Default`, `Type0`].includes(g_colorType)) {
+			picker.style.display = C_DIS_NONE;
+		}
+		picker.addEventListener(`change`, _func);
+	};
+
+	for (let j = 0; j < g_headerObj.setColor.length; j++) {
+		createColorPickWindow(j, `arrow`, _ => {
+			g_headerObj[`setColor${g_colorType}`][j] = document.getElementById(`pickarrow${j}`).value;
+			setColorType(0, false);
+		});
+
+		createColorPickWindow(j, `arrowShadow`, _ => {
+			g_headerObj[`setShadowColor${g_colorType}`][j] = `${document.getElementById(`pickarrowShadow${j}`).value}80`;
+			setColorType(0, false);
+		}, { x: 25 });
+
+		createColorPickWindow(j, `frz`, _ =>
+			g_headerObj[`frzColor${g_colorType}`][j][0] = document.getElementById(`pickfrz${j}`).value, { y: 140 });
+
+		createColorPickWindow(j, `frzBar`, _ =>
+			g_headerObj[`frzColor${g_colorType}`][j][1] = document.getElementById(`pickfrzBar${j}`).value, { x: 25, y: 140 });
+	}
 
 	// ConfigType, ColorTypeの初期設定
 	setConfigType(0);
@@ -5964,15 +6016,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		}
 		return _tempPtn;
 	};
-
-	for (let j = 0; j < 5; j++) {
-		const picker = createColorPicker(divRoot, `pick${j}`,
-			g_headerObj[`setColor${setScoreIdHeader(g_stateObj.scoreId)}${g_colorType}`][j], { y: 70 + 30 * j });
-		picker.addEventListener(`input`, _ => {
-			g_headerObj[`setColor${setScoreIdHeader(g_stateObj.scoreId)}${g_colorType}`][j] = picker.value;
-			g_headerObj.setColor[j] = picker.value;
-		});
-	}
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.keyconfig.forEach(func => func());

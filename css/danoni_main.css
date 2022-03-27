@@ -49,6 +49,11 @@ input[type=range]:focus {
 	outline: 0;
 }
 
+input[type=color] {
+	width:25px;
+	height:25px;
+}
+
 /* 左から右へ */
 @keyframes leftToRight {
 	0% {
