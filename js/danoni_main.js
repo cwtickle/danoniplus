@@ -5921,7 +5921,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const changeColorPicker = (_j, _type, _color) => {
 		if (_color !== ``) {
 			document.getElementById(`pick${_type}${_j}`).value = _color.slice(0, 7);
-			document.getElementById(`pick${_type}${_j}`).style.display = ([`Default`, `Type0`].includes(g_colorType) ? C_DIS_NONE : C_DIS_INHERIT);
+			document.getElementById(`pick${_type}${_j}`).style.display = C_DIS_INHERIT;
 		} else {
 			document.getElementById(`pick${_type}${_j}`).style.display = C_DIS_NONE;
 		}
@@ -5941,6 +5941,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		viewGroupObj.color(`_${g_keycons.colorGroupNum}`);
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 		if (_reloadFlg) {
+			colorPickSprite.style.display = ([`Default`, `Type0`].includes(g_colorType) ? C_DIS_NONE : C_DIS_INHERIT);
 			for (let j = 0; j < g_headerObj.setColor.length; j++) {
 				changeColorPicker(j, `arrow`, g_headerObj.setColor[j]);
 				changeColorPicker(j, `arrowShadow`, g_headerObj.setShadowColor[j]);
@@ -5961,7 +5962,21 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	};
 
 
-	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, { x: 0, y: 90, w: 50, h: 300 });
+	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, { x: 0, y: 90, w: 50, h: 280, background: `#00000080` });
+	if ([`Default`, `Type0`].includes(g_colorType)) {
+		colorPickSprite.style.display = C_DIS_NONE;
+	}
+	multiAppend(colorPickSprite,
+		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_arrow, { x: 0, y: 0, siz: 11, align: C_ALIGN_LEFT }),
+		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_frz, { x: 0, y: 140, siz: 11, align: C_ALIGN_LEFT }),
+		createCss2Button(`lnkColorCopy`, `[↓]`, _ => {
+			for (let j = 0; j < g_headerObj.setColor.length; j++) {
+				g_headerObj[`frzColor${g_colorType}`][j] = [...Array(g_headerObj[`frzColor${g_colorType}`][j].length)].fill(g_headerObj[`setColor${g_colorType}`][j]);
+				document.getElementById(`pickfrz${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][0];
+				document.getElementById(`pickfrzBar${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][1];
+			}
+		}, { x: 35, y: 0, w: 30, h: 15, siz: 11 }, g_cssObj.button_Start),
+	);
 
 	/**
 	 * ColorPicker部分の作成
@@ -5970,11 +5985,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {function} _func 
 	 * @param {object} _obj 
 	 */
-	const createColorPickWindow = (_j, _type, _func, { x = 0, y = 0 } = {}) => {
+	const createColorPickWindow = (_j, _type, _func, { x = 0, y = 15 } = {}) => {
 		const picker = createColorPicker(colorPickSprite, `pick${_type}${_j}`, { x, y: y + 25 * _j });
-		if ([`Default`, `Type0`].includes(g_colorType)) {
-			picker.style.display = C_DIS_NONE;
-		}
 		picker.addEventListener(`change`, _func);
 	};
 
@@ -5990,10 +6002,10 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		}, { x: 25 });
 
 		createColorPickWindow(j, `frz`, _ =>
-			g_headerObj[`frzColor${g_colorType}`][j][0] = document.getElementById(`pickfrz${j}`).value, { y: 140 });
+			g_headerObj[`frzColor${g_colorType}`][j][0] = document.getElementById(`pickfrz${j}`).value, { y: 155 });
 
 		createColorPickWindow(j, `frzBar`, _ =>
-			g_headerObj[`frzColor${g_colorType}`][j][1] = document.getElementById(`pickfrzBar${j}`).value, { x: 25, y: 140 });
+			g_headerObj[`frzColor${g_colorType}`][j][1] = document.getElementById(`pickfrzBar${j}`).value, { x: 25, y: 155 });
 	}
 
 	// ConfigType, ColorTypeの初期設定
