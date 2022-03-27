@@ -5976,8 +5976,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			if (window.confirm(g_msgObj.colorCopyConfirm)) {
 				for (let j = 0; j < g_headerObj.setColor.length; j++) {
 					g_headerObj[`frzColor${g_colorType}`][j] = [...Array(g_headerObj[`frzColor${g_colorType}`][j].length)].fill(g_headerObj[`setColor${g_colorType}`][j]);
-					document.getElementById(`pickfrz${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][0];
-					document.getElementById(`pickfrzBar${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][1];
+					[``, `Bar`].forEach((val, k) =>
+						document.getElementById(`pickfrz${val}${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][k]);
 				}
 			}
 		}, { x: 35, y: -5, w: 30, h: 20, siz: 14 }, g_cssObj.button_Start),
@@ -6006,11 +6006,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			setColorType(0, false);
 		}, { x: 25 });
 
-		createColorPickWindow(j, `frz`, _ =>
-			g_headerObj[`frzColor${g_colorType}`][j][0] = document.getElementById(`pickfrz${j}`).value, { y: 155 });
-
-		createColorPickWindow(j, `frzBar`, _ =>
-			g_headerObj[`frzColor${g_colorType}`][j][1] = document.getElementById(`pickfrzBar${j}`).value, { x: 25, y: 155 });
+		[``, `Bar`].forEach((val, k) =>
+			createColorPickWindow(j, `frz${val}`, _ =>
+				g_headerObj[`frzColor${g_colorType}`][j][k] = document.getElementById(`pickfrz${val}${j}`).value, { x: 25 * k, y: 155 }));
 	}
 
 	// ConfigType, ColorTypeの初期設定
