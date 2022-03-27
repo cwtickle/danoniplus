@@ -966,6 +966,25 @@ const createImg = (_id, _imgPath, _x, _y, _width, _height) => {
 };
 
 /**
+ * ColorPickerの作成
+ * @param {string} _id 
+ * @param {string} _color 
+ * @param {object} _obj 
+ * @returns 
+ */
+const createColorPicker = (_parentObj, _id, _color, { x = 0, y = 0 } = {}) => {
+	const picker = document.createElement(`input`);
+	picker.setAttribute(`type`, `color`);
+	picker.id = _id;
+	picker.value = _color;
+	picker.style.left = `${x}px`;
+	picker.style.top = `${y}px`;
+	picker.style.position = `absolute`;
+	_parentObj.appendChild(picker);
+	return picker;
+};
+
+/**
  * 色付きオブジェクトの作成 (拡張属性対応)
  * @param {string} _id 
  * @param {object} _obj (x, y, w, h, color, rotate, styleName, ...rest) 
@@ -5908,6 +5927,11 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		changeSetColor();
 		viewGroupObj.color(`_${g_keycons.colorGroupNum}`);
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
+		if (_scrollNum !== 0) {
+			for (let j = 0; j < 5; j++) {
+				document.getElementById(`pick${j}`).value = g_headerObj.setColor[j];
+			}
+		}
 	};
 
 	const setImgType = (_scrollNum = 1) => {
@@ -5940,6 +5964,15 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		}
 		return _tempPtn;
 	};
+
+	for (let j = 0; j < 5; j++) {
+		const picker = createColorPicker(divRoot, `pick${j}`,
+			g_headerObj[`setColor${setScoreIdHeader(g_stateObj.scoreId)}${g_colorType}`][j], { y: 70 + 30 * j });
+		picker.addEventListener(`input`, _ => {
+			g_headerObj[`setColor${setScoreIdHeader(g_stateObj.scoreId)}${g_colorType}`][j] = picker.value;
+			g_headerObj.setColor[j] = picker.value;
+		});
+	}
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.keyconfig.forEach(func => func());
