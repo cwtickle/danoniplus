@@ -5961,14 +5961,14 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		keyConfigInit(g_kcType);
 	};
 
-
-	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, { x: 0, y: 90, w: 50, h: 280, background: `#00000080` });
+	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, { x: 0, y: 90, w: 50, h: 280 });
 	if ([`Default`, `Type0`].includes(g_colorType)) {
 		colorPickSprite.style.display = C_DIS_NONE;
 	}
+	const pickPos = { x: 0, w: 50, h: 15, siz: 11, align: C_ALIGN_LEFT, background: `#00000020` };
 	multiAppend(colorPickSprite,
-		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_arrow, { x: 0, y: 0, siz: 11, align: C_ALIGN_LEFT }),
-		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_frz, { x: 0, y: 140, siz: 11, align: C_ALIGN_LEFT }),
+		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_arrow, Object.assign({ y: 0 }, pickPos)),
+		createDivCss2Label(`lblPickFrz`, g_lblNameObj.s_frz, Object.assign({ y: 140 }, pickPos)),
 		createCss2Button(`lnkColorCopy`, `[↓]`, _ => {
 			if (window.confirm(g_msgObj.colorCopyConfirm)) {
 				for (let j = 0; j < g_headerObj.setColor.length; j++) {
