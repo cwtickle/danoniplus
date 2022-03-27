@@ -1225,6 +1225,7 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 		// レイヤー情報取得
 		const layer0 = document.querySelector(`#layer0`);
 		const l0ctx = layer0.getContext(`2d`);
+		layer0.width = g_sWidth;
 
 		// 線画、図形をクリア
 		l0ctx.clearRect(0, 0, g_sWidth, g_sHeight);
@@ -1232,24 +1233,26 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 		if (document.querySelector(`#layer1`) !== null) {
 			const layer1 = document.querySelector(`#layer1`);
 			const l1ctx = layer1.getContext(`2d`);
+			layer1.width = g_sWidth;
 			l1ctx.clearRect(0, 0, g_sWidth, g_sHeight);
 
 			// 線画 (title-line)
 			l1ctx.beginPath();
 			l1ctx.strokeStyle = `#cccccc`;
 			l1ctx.moveTo(0, 0);
-			l1ctx.lineTo(g_sWidth, 0);
+			l1ctx.lineTo(layer1.width, 0);
 			l1ctx.stroke();
 
 			l1ctx.beginPath();
 			l1ctx.strokeStyle = `#cccccc`;
 			l1ctx.moveTo(0, g_sHeight);
-			l1ctx.lineTo(g_sWidth, g_sHeight);
+			l1ctx.lineTo(layer1.width, g_sHeight);
 			l1ctx.stroke();
 		}
 		if (document.querySelector(`#layer2`) !== null) {
 			const layer2 = document.querySelector(`#layer2`);
 			const l2ctx = layer2.getContext(`2d`);
+			layer2.width = g_sWidth;
 			l2ctx.clearRect(0, 0, g_sWidth, g_sHeight);
 		}
 	}
