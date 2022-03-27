@@ -5977,7 +5977,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 					document.getElementById(`pickfrzBar${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][1];
 				}
 			}
-		}, { x: 35, y: 0, w: 30, h: 15, siz: 11 }, g_cssObj.button_Start),
+		}, { x: 35, y: -5, w: 30, h: 20, siz: 14 }, g_cssObj.button_Start),
 	);
 
 	/**
