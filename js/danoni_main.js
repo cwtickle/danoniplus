@@ -5970,10 +5970,12 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_arrow, { x: 0, y: 0, siz: 11, align: C_ALIGN_LEFT }),
 		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_frz, { x: 0, y: 140, siz: 11, align: C_ALIGN_LEFT }),
 		createCss2Button(`lnkColorCopy`, `[↓]`, _ => {
-			for (let j = 0; j < g_headerObj.setColor.length; j++) {
-				g_headerObj[`frzColor${g_colorType}`][j] = [...Array(g_headerObj[`frzColor${g_colorType}`][j].length)].fill(g_headerObj[`setColor${g_colorType}`][j]);
-				document.getElementById(`pickfrz${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][0];
-				document.getElementById(`pickfrzBar${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][1];
+			if (window.confirm(g_msgObj.colorCopyConfirm)) {
+				for (let j = 0; j < g_headerObj.setColor.length; j++) {
+					g_headerObj[`frzColor${g_colorType}`][j] = [...Array(g_headerObj[`frzColor${g_colorType}`][j].length)].fill(g_headerObj[`setColor${g_colorType}`][j]);
+					document.getElementById(`pickfrz${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][0];
+					document.getElementById(`pickfrzBar${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][1];
+				}
 			}
 		}, { x: 35, y: 0, w: 30, h: 15, siz: 11 }, g_cssObj.button_Start),
 	);
