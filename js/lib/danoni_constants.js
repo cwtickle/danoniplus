@@ -92,6 +92,7 @@ const g_windowObj = {
 
     displaySprite: { x: 25, y: 30, h: C_LEN_SETLBL_HEIGHT * 5 },
     keyconSprite: { overflow: `auto` },
+    colorPickSprite: { x: 0, y: 90, w: 50, h: 280 },
 
     loader: { h: 10, backgroundColor: `#333333` },
 
