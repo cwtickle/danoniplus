@@ -52,6 +52,7 @@ input[type=range]:focus {
 input[type=color] {
 	width:25px;
 	height:25px;
+	border:none;
 }
 
 /* 左から右へ */
