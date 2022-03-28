@@ -967,18 +967,20 @@ const createImg = (_id, _imgPath, _x, _y, _width, _height) => {
 
 /**
  * ColorPickerの作成
- * @param {string} _id 
- * @param {string} _color 
+ * @param {string} _parentObj
+ * @param {string} _id
+ * @param {function} _func 
  * @param {object} _obj 
  * @returns 
  */
-const createColorPicker = (_parentObj, _id, { x = 0, y = 0 } = {}) => {
+const createColorPicker = (_parentObj, _id, _func, { x = 0, y = 0 } = {}) => {
 	const picker = document.createElement(`input`);
 	picker.setAttribute(`type`, `color`);
 	picker.id = _id;
 	picker.style.left = `${x}px`;
 	picker.style.top = `${y}px`;
 	picker.style.position = `absolute`;
+	picker.addEventListener(`change`, _func);
 	_parentObj.appendChild(picker);
 	return picker;
 };
@@ -5990,10 +5992,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {function} _func 
 	 * @param {object} _obj 
 	 */
-	const createColorPickWindow = (_j, _type, _func, { x = 0, y = 15 } = {}) => {
-		const picker = createColorPicker(colorPickSprite, `pick${_type}${_j}`, { x, y: y + 25 * _j });
-		picker.addEventListener(`change`, _func);
-	};
+	const createColorPickWindow = (_j, _type, _func, { x = 0, y = 15 } = {}) =>
+		createColorPicker(colorPickSprite, `pick${_type}${_j}`, _func, { x, y: y + 25 * _j });
 
 	for (let j = 0; j < g_headerObj.setColor.length; j++) {
 		createColorPickWindow(j, `arrow`, _ => {
