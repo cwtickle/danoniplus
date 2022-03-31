@@ -9672,10 +9672,9 @@ const resultInit = _ => {
 			const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg);
 
 			g_animationData.forEach(sprite => {
-				if (g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] !== undefined) {
-					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = makeSpriteData(g_rootObj[`${sprite}failedS${scoreIdHeader}_data`]);
-				} else if (g_rootObj[`${sprite}failedS_data`] !== undefined) {
-					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = makeSpriteData(g_rootObj[`${sprite}failedS_data`]);
+				const failedData = g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] ?? g_rootObj[`${sprite}failedS_data`];
+				if (failedData !== undefined) {
+					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = makeSpriteData(failedData);
 				}
 			});
 		} else if (g_gameOverFlg) {
