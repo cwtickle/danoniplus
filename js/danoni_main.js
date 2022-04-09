@@ -9934,20 +9934,20 @@ const resultInit = _ => {
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
 
 	/** 音源、ループ処理の停止 */
-	const resetProcess = _ => {
-		if (g_finishFlg) {
-			g_audio.pause();
-		}
-		clearTimeout(g_timeoutEvtId);
-		clearTimeout(g_timeoutEvtResultId);
-	};
+	const resetCommonBtn = (_id, _name, _posObj, _func, _cssClass) =>
+		createCss2Button(_id, _name, _ => {
+			if (g_finishFlg) {
+				g_audio.pause();
+			}
+			clearTimeout(g_timeoutEvtId);
+			clearTimeout(g_timeoutEvtResultId);
+		}, Object.assign(_posObj, { resetFunc: _func }), _cssClass);
 
 	// ボタン描画
 	multiAppend(divRoot,
 
 		// タイトル画面へ戻る
-		createCss2Button(`btnBack`, g_lblNameObj.b_back, resetProcess,
-			Object.assign(g_lblPosObj.btnRsBack, { resetFunc: _ => titleInit() }), g_cssObj.button_Back),
+		resetCommonBtn(`btnBack`, g_lblNameObj.b_back, g_lblPosObj.btnRsBack, titleInit, g_cssObj.button_Back),
 
 		// リザルトデータをクリップボードへコピー
 		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ => {
@@ -9965,8 +9965,7 @@ const resultInit = _ => {
 		}), g_cssObj.button_Default),
 
 		// リトライ
-		createCss2Button(`btnRetry`, g_lblNameObj.b_retry, resetProcess,
-			Object.assign(g_lblPosObj.btnRsRetry, { resetFunc: _ => loadMusic() }), g_cssObj.button_Reset),
+		resetCommonBtn(`btnRetry`, g_lblNameObj.b_retry, g_lblPosObj.btnRsRetry, loadMusic, g_cssObj.button_Reset),
 	);
 
 	// マスクスプライトを作成
