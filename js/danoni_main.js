@@ -9933,17 +9933,21 @@ const resultInit = _ => {
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
 
+	/** 音源、ループ処理の停止 */
+	const resetProcess = _ => {
+		if (g_finishFlg) {
+			g_audio.pause();
+		}
+		clearTimeout(g_timeoutEvtId);
+		clearTimeout(g_timeoutEvtResultId);
+	};
+
 	// ボタン描画
 	multiAppend(divRoot,
 
 		// タイトル画面へ戻る
-		createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => {
-			if (g_finishFlg) {
-				g_audio.pause();
-			}
-			clearTimeout(g_timeoutEvtId);
-			clearTimeout(g_timeoutEvtResultId);
-		}, Object.assign(g_lblPosObj.btnRsBack, { resetFunc: _ => titleInit() }), g_cssObj.button_Back),
+		createCss2Button(`btnBack`, g_lblNameObj.b_back, resetProcess,
+			Object.assign(g_lblPosObj.btnRsBack, { resetFunc: _ => titleInit() }), g_cssObj.button_Back),
 
 		// リザルトデータをクリップボードへコピー
 		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ => {
@@ -9961,13 +9965,8 @@ const resultInit = _ => {
 		}), g_cssObj.button_Default),
 
 		// リトライ
-		createCss2Button(`btnRetry`, g_lblNameObj.b_retry, _ => {
-			if (g_finishFlg) {
-				g_audio.pause();
-			}
-			clearTimeout(g_timeoutEvtId);
-			clearTimeout(g_timeoutEvtResultId);
-		}, Object.assign(g_lblPosObj.btnRsRetry, { resetFunc: _ => loadMusic() }), g_cssObj.button_Reset),
+		createCss2Button(`btnRetry`, g_lblNameObj.b_retry, resetProcess,
+			Object.assign(g_lblPosObj.btnRsRetry, { resetFunc: _ => loadMusic() }), g_cssObj.button_Reset),
 	);
 
 	// マスクスプライトを作成
