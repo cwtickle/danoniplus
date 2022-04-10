@@ -41,11 +41,11 @@ let g_localVersion2 = ``;
  */
 const current = _ => {
 	if (document.currentScript) {
-		return document.currentScript.src;
+		return encodeURI(document.currentScript.src);
 	}
 	const scripts = document.getElementsByTagName(`script`);
 	const targetScript = scripts[scripts.length - 1];
-	return targetScript.src;
+	return encodeURI(targetScript.src);
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
@@ -1973,7 +1973,8 @@ const loadChartFile = async (_scoreId = g_stateObj.scoreId) => {
 
 	const dosInput = document.querySelector(`#dos`);
 	const divRoot = document.querySelector(`#divRoot`);
-	const queryDos = getQueryParamVal(`dos`) !== null ? `dos/${getQueryParamVal('dos')}.txt` : (document.querySelector(`#externalDos`)?.value ?? ``);
+	const queryDos = getQueryParamVal(`dos`) !== null ?
+		`dos/${getQueryParamVal('dos')}.txt` : encodeURI(document.querySelector(`#externalDos`)?.value ?? ``);
 
 	if (dosInput === null && queryDos === ``) {
 		makeWarningWindow(g_msgInfoObj.E_0023);
