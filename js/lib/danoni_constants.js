@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/04/10 (v27.3.0)
+ * Revised : 2022/04/10 (v27.3.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3228,6 +3228,7 @@ const g_errMsgObj = {
  * - 挿入場所ごとに名前を分けて定義
  */
 const g_customJsObj = {
+    preTitle: [],
     title: [],
     titleEnterFrame: [],
     option: [],
