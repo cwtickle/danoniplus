@@ -8,8 +8,8 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 19.5.14`;
-const g_revisedDate = `2022/02/16`;
+const g_version = `Ver 19.5.15`;
+const g_revisedDate = `2022/04/10`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -40,11 +40,11 @@ let g_localVersion2 = ``;
  */
 const current = _ => {
 	if (document.currentScript) {
-		return document.currentScript.src;
+		return encodeURI(document.currentScript.src);
 	}
 	const scripts = document.getElementsByTagName(`script`);
 	const targetScript = scripts[scripts.length - 1];
-	return targetScript.src;
+	return encodeURI(targetScript.src);
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
@@ -1301,7 +1301,7 @@ function loadDos(_afterFunc, _scoreId = g_stateObj.scoreId, _cyclicFlg = false) 
 	const externalDosInput = document.querySelector(`#externalDos`);
 	const divRoot = document.querySelector(`#divRoot`);
 	const queryDos = getQueryParamVal(`dos`) !== null ? `dos/${getQueryParamVal('dos')}.txt` :
-		(externalDosInput !== null ? externalDosInput.value : ``);
+		encodeURI(externalDosInput !== null ? externalDosInput.value : ``);
 
 	if (dosInput === null && queryDos === ``) {
 		makeWarningWindow(g_msgInfoObj.E_0023);
