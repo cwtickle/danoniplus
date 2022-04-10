@@ -885,6 +885,18 @@ const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64,
 	return _minFontsize;
 };
 
+/**
+ * 補足説明部分のラベル作成
+ * @param {string} _id 
+ * @param {string} _str 
+ * @param {string} _altId
+ * @returns 
+ */
+const createDescDiv = (_id, _str, _altId = _id) =>
+	createDivCss2Label(_id, _str, Object.assign(g_lblPosObj[_altId], {
+		siz: getFontSize(_str, g_sWidth, getBasicFont(), C_SIZ_MAIN),
+	}));
+
 /*-----------------------------------------------------------*/
 /* ラベル・ボタン・オブジェクトの作成                           */
 /*-----------------------------------------------------------*/
@@ -5251,11 +5263,7 @@ const settingsDisplayInit = _ => {
 	createSettingsDisplayWindow(divRoot);
 
 	// ショートカットキーメッセージ
-	divRoot.appendChild(
-		createDivCss2Label(`scMsg`, g_lblNameObj.sdShortcutDesc, Object.assign(g_lblPosObj.scMsg, {
-			siz: getFontSize(g_lblNameObj.sdShortcutDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
-		}))
-	);
+	divRoot.appendChild(createDescDiv(`scMsg`, g_lblNameObj.sdShortcutDesc));
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.settingsDisplay.forEach(func => func());
@@ -5457,17 +5465,10 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			`<div class="settings_Title">${g_lblNameObj.key}</div><div class="settings_Title2">${g_lblNameObj.config}</div>`
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
-		createDivCss2Label(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
-			.split(`{1}:`).join(g_isMac ? `` : `Delete:`),
-			Object.assign(g_lblPosObj.kcDesc, {
-				siz: getFontSize(g_lblNameObj.kcDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
-			})),
+		createDescDiv(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
+			.split(`{1}:`).join(g_isMac ? `` : `Delete:`)),
 
-		createDivCss2Label(`kcShuffleDesc`, g_lblNameObj.kcShuffleDesc,
-			Object.assign(g_lblPosObj.kcShuffleDesc, {
-				siz: getFontSize(g_lblNameObj.kcShuffleDesc, g_sWidth, getBasicFont(), C_SIZ_MAIN),
-			})),
-
+		createDescDiv(`kcShuffleDesc`, g_lblNameObj.kcShuffleDesc),
 	);
 
 	// キーの一覧を表示
@@ -5758,26 +5759,17 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		viewGroup(_type);
 	};
 
-	const scMsg = g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
-		.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]);
-
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
-		createDivCss2Label(
-			`scMsg`, scMsg,
-			{
-				x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20,
-				siz: getFontSize(scMsg, g_sWidth, getBasicFont(), C_SIZ_MAIN),
-			}),
+		createDescDiv(`scMsg`, g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
+			.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]), `scKcMsg`),
 
 		// 別キーモード警告メッセージ
 		createDivCss2Label(
 			`kcMsg`,
 			hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? g_lblNameObj.transKeyDesc : ``,
-			{
-				x: 0, y: g_sHeight - 25, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
-			}, g_cssObj.keyconfig_warning
+			g_lblPosObj.kcMsg, g_cssObj.keyconfig_warning
 		),
 
 		// キーコンフィグタイプ切替ボタン
@@ -5937,10 +5929,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	if ([`Default`, `Type0`].includes(g_colorType)) {
 		colorPickSprite.style.display = C_DIS_NONE;
 	}
-	const pickPos = { x: 0, w: 50, h: 15, siz: 11, align: C_ALIGN_LEFT, background: `#${g_headerObj.baseBrightFlg ? `eeeeee` : `111111`}80` };
 	multiAppend(colorPickSprite,
-		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_arrow, Object.assign({ y: 0 }, pickPos)),
-		createDivCss2Label(`lblPickFrz`, g_lblNameObj.s_frz, Object.assign({ y: 140 }, pickPos)),
+		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_arrow, Object.assign({ y: 0 }, g_lblPosObj.pickPos)),
+		createDivCss2Label(`lblPickFrz`, g_lblNameObj.s_frz, Object.assign({ y: 140 }, g_lblPosObj.pickPos)),
 		createCss2Button(`lnkColorCopy`, `[↓]`, _ => {
 			if (window.confirm(g_msgObj.colorCopyConfirm)) {
 				for (let j = 0; j < g_headerObj.setColor.length; j++) {
