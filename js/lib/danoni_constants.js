@@ -229,11 +229,20 @@ const updateWindowSiz = _ => {
         },
 
         /** キーコンフィグ画面 */
+        scKcMsg: {
+            x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20,
+        },
+        kcMsg: {
+            x: 0, y: g_sHeight - 25, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+        },
         kcDesc: {
             x: 0, y: 68, w: g_sWidth, h: 20,
         },
         kcShuffleDesc: {
             x: 5, y: g_sHeight - 125, w: g_sWidth, h: 20, align: C_ALIGN_LEFT,
+        },
+        pickPos: {
+            x: 0, w: 50, h: 15, siz: 11, align: C_ALIGN_LEFT, background: `#${g_headerObj.baseBrightFlg ? `eeeeee` : `111111`}80`,
         },
         lnkColorCopy: {
             x: 35, y: -5, w: 30, h: 20, siz: 14,
