@@ -3228,6 +3228,7 @@ const g_errMsgObj = {
  * - 挿入場所ごとに名前を分けて定義
  */
 const g_customJsObj = {
+    preTitle: [],
     title: [],
     titleEnterFrame: [],
     option: [],
