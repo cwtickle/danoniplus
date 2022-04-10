@@ -1880,6 +1880,7 @@ const initialControl = async () => {
 			getScoreDetailData(j);
 		}
 	}
+	g_customJsObj.preTitle.forEach(func => func());
 	titleInit();
 };
 
