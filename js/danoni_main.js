@@ -910,8 +910,9 @@ const createDescDiv = (_id, _str, _altId = _id) =>
  * @param {number} _y 
  * @param {number} _width 
  * @param {number} _height 
+ * @param {array} _classes
  */
-const createDiv = (_id, _x, _y, _width, _height) => {
+const createDiv = (_id, _x, _y, _width, _height, _classes = []) => {
 	const div = document.createElement(`div`);
 
 	div.id = _id;
@@ -921,6 +922,7 @@ const createDiv = (_id, _x, _y, _width, _height) => {
 	style.width = `${_width}px`;
 	style.height = `${_height}px`;
 	style.position = `absolute`;
+	div.classList.add(..._classes);
 	setUserSelect(style);
 
 	return div;
@@ -948,8 +950,7 @@ const setUserSelect = (_style, _value = C_DIS_NONE) => {
  */
 const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = C_LEN_SETLBL_WIDTH, h = C_LEN_SETLBL_HEIGHT,
 	siz = C_SIZ_SETLBL, align = C_ALIGN_CENTER, ...rest } = {}, ..._classes) => {
-	const div = createDiv(_id, x, y, w, h);
-	div.classList.add(g_cssObj.title_base, ..._classes);
+	const div = createDiv(_id, x, y, w, h, [g_cssObj.title_base, ..._classes]);
 
 	const style = div.style;
 	style.fontSize = `${siz}px`;
@@ -1006,19 +1007,20 @@ const createColorPicker = (_parentObj, _id, _func, { x = 0, y = 0 } = {}) => {
 const createColorObject2 = (_id,
 	{ x = 0, y = 0, w = C_ARW_WIDTH, h = C_ARW_WIDTH, rotate = ``, styleName = ``, ...rest } = {}, ..._classes) => {
 
-	const div = createDiv(_id, x, y, w, h);
-	div.classList.add(..._classes);
+	const div = createDiv(_id, x, y, w, h, _classes);
 	const style = div.style;
 
 	// 矢印・オブジェクト判定
 	let charaStyle;
 	if (isNaN(parseFloat(rotate))) {
-		charaStyle = `${rotate}${styleName}`;
+		const objData = rotate.split(`:`);
+		rotate = setVal(objData[1], 0, C_TYP_FLOAT);
+		charaStyle = `${objData[0]}${styleName}`;
 	} else {
 		charaStyle = `arrow${styleName}`;
-		if (g_stateObj.rotateEnabled) {
-			style.transform = `rotate(${rotate}deg)`;
-		}
+	}
+	if (g_stateObj.rotateEnabled) {
+		style.transform = `rotate(${rotate}deg)`;
 	}
 
 	style.maskImage = `url("${g_imgObj[charaStyle]}")`;
@@ -1045,8 +1047,7 @@ const createEmptySprite = (_parentObj, _newObjId, { x = 0, y = 0, w = g_sWidth, 
 		changeStyle(_newObjId, { x, y, w, h, title, ...rest });
 		return document.getElementById(_newObjId);
 	}
-	const div = createDiv(_newObjId, x, y, w, h);
-	div.classList.add(..._classes);
+	const div = createDiv(_newObjId, x, y, w, h, _classes);
 	div.title = title;
 
 	const style = div.style;
@@ -1138,8 +1139,7 @@ const createCss2Button = (_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, groupName = g_currentPage, initDisabledFlg = true,
 	resetFunc = _ => true, cxtFunc = _ => true, ...rest } = {}, ..._classes) => {
 
-	const div = createDiv(_id, x, y, w, h);
-	div.classList.add(`button_common`, ..._classes);
+	const div = createDiv(_id, x, y, w, h, [`button_common`, ..._classes]);
 	div.innerHTML = _text;
 	div.title = title;
 
