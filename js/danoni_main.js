@@ -6372,7 +6372,7 @@ const loadingScoreInit = async () => {
 	let arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
 
 	// キーパターン(デフォルト)に対応する矢印番号を格納
-	convertreplaceNums();
+	convertReplaceNums();
 
 	const setData = (_data, _minLength = 1) => {
 		return (hasArrayList(_data, _minLength) ? _data.concat() : []);
@@ -6474,7 +6474,7 @@ const loadingScoreInit = async () => {
 	const tempId = setInterval(() => {
 		const executeMain = _ => {
 			clearInterval(tempId);
-			MainInit();
+			mainInit();
 		}
 		if (g_audio.duration !== undefined) {
 			if (g_userAgent.indexOf(`firefox`) !== -1) {
@@ -7529,7 +7529,7 @@ const getFrzLength = (_speedOnFrame, _startFrame, _endFrame) => {
 /**
  * キーパターン(デフォルト)に対応する矢印番号を格納
  */
-const convertreplaceNums = _ => {
+const convertReplaceNums = _ => {
 	const tkObj = getKeyInfo();
 	const baseCharas = g_keyObj[`chara${g_keyObj.currentKey}_0`];
 	const convCharas = g_keyObj[`chara${tkObj.keyCtrlPtn}`];
@@ -7857,7 +7857,7 @@ const setKeyCtrl = (_localStorage, _keyNum, _keyCtrlPtn) => {
 /**
  * メイン画面初期化
  */
-const MainInit = _ => {
+const mainInit = _ => {
 	clearWindow(true, `Main`);
 	const divRoot = document.querySelector(`#divRoot`);
 	document.oncontextmenu = _ => false;
@@ -8437,7 +8437,7 @@ const MainInit = _ => {
 
 	/**
 	 * 自動判定
-	 * ※MainInit内部で指定必須（arrowSprite指定）
+	 * ※mainInit内部で指定必須（arrowSprite指定）
 	 * 
 	 * @param _j 矢印位置
 	 * @param _arrow 矢印(オブジェクト)
