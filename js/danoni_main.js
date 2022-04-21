@@ -7545,7 +7545,6 @@ const convertReplaceNums = _ => {
 		}
 	}
 };
-const convertreplaceNums = _ => convertReplaceNums();
 
 /**
  * 色情報の格納
@@ -9076,7 +9075,6 @@ const mainInit = _ => {
 
 	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps);
 };
-const MainInit = _ => mainInit();
 
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
