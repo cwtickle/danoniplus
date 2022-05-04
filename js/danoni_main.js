@@ -5520,17 +5520,16 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 */
 	const changeKeyConfigColor = (_j, _k, _cssName) => {
 		const obj = document.querySelector(`#keycon${_j}_${_k}`);
+		const resetClass = _className => {
+			if (obj.classList.contains(_className)) {
+				obj.classList.remove(_className);
+			}
+		};
 
 		// CSSクラスの除去
-		if (obj.classList.contains(g_cssObj.keyconfig_Changekey)) {
-			obj.classList.remove(g_cssObj.keyconfig_Changekey);
-		}
-		if (obj.classList.contains(g_cssObj.keyconfig_Defaultkey)) {
-			obj.classList.remove(g_cssObj.keyconfig_Defaultkey);
-		}
-		if (obj.classList.contains(g_cssObj.title_base)) {
-			obj.classList.remove(g_cssObj.title_base);
-		}
+		resetClass(g_cssObj.keyconfig_Changekey);
+		resetClass(g_cssObj.keyconfig_Defaultkey);
+		resetClass(g_cssObj.title_base);
 
 		// 指定されたCSSクラスを適用
 		obj.classList.add(_cssName);
