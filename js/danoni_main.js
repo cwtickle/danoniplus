@@ -2470,7 +2470,7 @@ const headerConvert = _dosObj => {
 		const musicData = splitLF2(_dosObj.musicTitle);
 
 		if (hasVal(_dosObj.musicNo)) {
-			obj.musicNos = splitLF2(_dosObj.musicNo);
+			obj.musicNos = _dosObj.musicNo.split(`$`);
 		}
 
 		for (let j = 0; j < musicData.length; j++) {
