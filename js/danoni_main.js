@@ -2562,7 +2562,7 @@ const headerConvert = _dosObj => {
 			obj.lifeInits.push(lifeData(`Init`, 25));
 
 			// キー数
-			const keyLabel = difDetails[difpos.Key] ?? `7`;
+			const keyLabel = difDetails[difpos.Key] || `7`;
 			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] ?? keyLabel);
 
 			// 譜面名、制作者名
