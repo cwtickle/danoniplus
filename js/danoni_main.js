@@ -343,6 +343,15 @@ const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length
 const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
 
 /**
+ * 改行コード区切りを本来の区切り文字に変換して配列展開
+ * （改行区切りで間が空行だった場合は無効化）
+ * @param {string} _str 
+ * @param {string} _delim 
+ * @returns 
+ */
+const splitLF2 = (_str, _delim = `$`) => splitLF(_str).filter(val => val !== ``).join(_delim).split(_delim);
+
+/**
  * 重複を排除した配列の生成
  * @param {array} _array1 
  * @param {...any} _arrays 
@@ -2407,7 +2416,7 @@ const headerConvert = _dosObj => {
 	if (!g_isFile) {
 		let tmpImgTypes = [];
 		if (hasVal(_dosObj.imgType)) {
-			tmpImgTypes = _dosObj.imgType.split(`$`);
+			tmpImgTypes = splitLF2(_dosObj.imgType);
 		} else if (g_presetObj.imageSets !== undefined) {
 			tmpImgTypes = g_presetObj.imageSets.concat();
 		}
@@ -2459,7 +2468,7 @@ const headerConvert = _dosObj => {
 	obj.musicNos = [];
 
 	if (hasVal(_dosObj.musicTitle)) {
-		const musicData = _dosObj.musicTitle.split(`$`);
+		const musicData = splitLF2(_dosObj.musicTitle);
 
 		if (hasVal(_dosObj.musicNo)) {
 			obj.musicNos = _dosObj.musicNo.split(`$`);
@@ -2527,7 +2536,7 @@ const headerConvert = _dosObj => {
 
 	// 譜面情報
 	if (hasVal(_dosObj.difData)) {
-		const difs = _dosObj.difData.split(`$`);
+		const difs = splitLF2(_dosObj.difData);
 		const difpos = {
 			Key: 0, Name: 1, Speed: 2, Border: 3, Recovery: 4, Damage: 5, Init: 6,
 		};
@@ -2553,7 +2562,7 @@ const headerConvert = _dosObj => {
 			obj.lifeInits.push(lifeData(`Init`, 25));
 
 			// キー数
-			const keyLabel = difDetails[difpos.Key] ?? `7`;
+			const keyLabel = difDetails[difpos.Key] || `7`;
 			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] ?? keyLabel);
 
 			// 譜面名、制作者名
@@ -2733,7 +2742,7 @@ const headerConvert = _dosObj => {
 
 	// 楽曲URL
 	if (hasVal(_dosObj.musicUrl)) {
-		obj.musicUrls = _dosObj.musicUrl.split(`$`);
+		obj.musicUrls = splitLF2(_dosObj.musicUrl);
 	} else {
 		makeWarningWindow(g_msgInfoObj.E_0031);
 	}
@@ -3058,7 +3067,7 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 		});
 
 		// フリーズアロー色
-		const tmpFrzColors = (frzColorTxt !== undefined ? frzColorTxt.split(`$`) : []);
+		const tmpFrzColors = (frzColorTxt !== undefined ? splitLF2(frzColorTxt) : []);
 		const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
 
 		for (let j = 0; j < _baseObj.setColorInit.length; j++) {
@@ -3266,7 +3275,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 		if (gaugeUpdateFlg) {
 			gaugeCreateFlg = setGaugeDetails(scoreId, _dosObj[`gauge${_name}`].split(`,`));
 		} else {
-			const gauges = _dosObj[`gauge${_name}`].split(`$`);
+			const gauges = splitLF2(_dosObj[`gauge${_name}`]);
 			const gHeaderLen = gauges.length;
 			for (let j = 0; j < gHeaderLen; j++) {
 				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, gauges[j].split(`,`)));
@@ -3334,7 +3343,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		let tmpMinPatterns = 1;
 		const keyheader = _name + _key;
 		if (hasVal(_dosObj[keyheader])) {
-			const tmpArray = _dosObj[keyheader].split(`$`);
+			const tmpArray = splitLF2(_dosObj[keyheader]);
 			tmpMinPatterns = tmpArray.length;
 			for (let k = 0; k < tmpMinPatterns; k++) {
 				if (existParam(tmpArray[k], `${keyheader}_${k}`)) {
@@ -3381,7 +3390,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		const keyheader = _name + _key;
 
 		if (_dosObj[keyheader] !== undefined) {
-			const tmpParams = _dosObj[keyheader].split(`$`);
+			const tmpParams = splitLF2(_dosObj[keyheader]);
 			for (let k = 0; k < tmpParams.length; k++) {
 				const pairName = `${_pairName}${_key}_${k}`;
 				if (!hasVal(tmpParams[k])) {
