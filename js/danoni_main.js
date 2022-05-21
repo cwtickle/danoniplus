@@ -343,12 +343,13 @@ const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length
 const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
 
 /**
- * 区切り文字を改行コードに変換して配列展開
+ * 改行コード区切りを本来の区切り文字に変換して配列展開
+ * （改行区切りで間が空行だった場合は無効化）
  * @param {string} _str 
  * @param {string} _delim 
  * @returns 
  */
-const splitLF2 = (_str, _delim = `$`) => splitLF(_str.split(_delim).join(`\r`)).filter(val => val !== ``);
+const splitLF2 = (_str, _delim = `$`) => splitLF(_str).filter(val => val !== ``).join(_delim).split(_delim);
 
 /**
  * 重複を排除した配列の生成
