@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/04/16 (v27.4.0)
+ * Revised : 2022/05/21 (v27.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3279,6 +3279,10 @@ const g_skinJsObj = {
     main: [],
     result: [],
 };
+
+/** 過去関数の互換 */
+const convertreplaceNums = _ => convertReplaceNums();
+const MainInit = _ => mainInit();
 
 /**
  * 従来のカスタム関数をg_customJsObj, g_skinJsObjへ追加

@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/04/16
+ * Revised : 2022/05/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 27.4.0`;
-const g_revisedDate = `2022/04/16`;
+const g_version = `Ver 27.5.0`;
+const g_revisedDate = `2022/05/21`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -341,6 +341,15 @@ const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length
  * @returns 
  */
 const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
+
+/**
+ * 改行コード区切りを本来の区切り文字に変換して配列展開
+ * （改行区切りで間が空行だった場合は無効化）
+ * @param {string} _str 
+ * @param {string} _delim 
+ * @returns 
+ */
+const splitLF2 = (_str, _delim = `$`) => splitLF(_str).filter(val => val !== ``).join(_delim).split(_delim);
 
 /**
  * 重複を排除した配列の生成
@@ -2407,7 +2416,7 @@ const headerConvert = _dosObj => {
 	if (!g_isFile) {
 		let tmpImgTypes = [];
 		if (hasVal(_dosObj.imgType)) {
-			tmpImgTypes = _dosObj.imgType.split(`$`);
+			tmpImgTypes = splitLF2(_dosObj.imgType);
 		} else if (g_presetObj.imageSets !== undefined) {
 			tmpImgTypes = g_presetObj.imageSets.concat();
 		}
@@ -2459,7 +2468,7 @@ const headerConvert = _dosObj => {
 	obj.musicNos = [];
 
 	if (hasVal(_dosObj.musicTitle)) {
-		const musicData = _dosObj.musicTitle.split(`$`);
+		const musicData = splitLF2(_dosObj.musicTitle);
 
 		if (hasVal(_dosObj.musicNo)) {
 			obj.musicNos = _dosObj.musicNo.split(`$`);
@@ -2527,7 +2536,7 @@ const headerConvert = _dosObj => {
 
 	// 譜面情報
 	if (hasVal(_dosObj.difData)) {
-		const difs = _dosObj.difData.split(`$`);
+		const difs = splitLF2(_dosObj.difData);
 		const difpos = {
 			Key: 0, Name: 1, Speed: 2, Border: 3, Recovery: 4, Damage: 5, Init: 6,
 		};
@@ -2553,7 +2562,7 @@ const headerConvert = _dosObj => {
 			obj.lifeInits.push(lifeData(`Init`, 25));
 
 			// キー数
-			const keyLabel = difDetails[difpos.Key] ?? `7`;
+			const keyLabel = difDetails[difpos.Key] || `7`;
 			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] ?? keyLabel);
 
 			// 譜面名、制作者名
@@ -2733,7 +2742,7 @@ const headerConvert = _dosObj => {
 
 	// 楽曲URL
 	if (hasVal(_dosObj.musicUrl)) {
-		obj.musicUrls = _dosObj.musicUrl.split(`$`);
+		obj.musicUrls = splitLF2(_dosObj.musicUrl);
 	} else {
 		makeWarningWindow(g_msgInfoObj.E_0031);
 	}
@@ -3058,7 +3067,7 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 		});
 
 		// フリーズアロー色
-		const tmpFrzColors = (frzColorTxt !== undefined ? frzColorTxt.split(`$`) : []);
+		const tmpFrzColors = (frzColorTxt !== undefined ? splitLF2(frzColorTxt) : []);
 		const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
 
 		for (let j = 0; j < _baseObj.setColorInit.length; j++) {
@@ -3266,7 +3275,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 		if (gaugeUpdateFlg) {
 			gaugeCreateFlg = setGaugeDetails(scoreId, _dosObj[`gauge${_name}`].split(`,`));
 		} else {
-			const gauges = _dosObj[`gauge${_name}`].split(`$`);
+			const gauges = splitLF2(_dosObj[`gauge${_name}`]);
 			const gHeaderLen = gauges.length;
 			for (let j = 0; j < gHeaderLen; j++) {
 				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, gauges[j].split(`,`)));
@@ -3334,7 +3343,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		let tmpMinPatterns = 1;
 		const keyheader = _name + _key;
 		if (hasVal(_dosObj[keyheader])) {
-			const tmpArray = _dosObj[keyheader].split(`$`);
+			const tmpArray = splitLF2(_dosObj[keyheader]);
 			tmpMinPatterns = tmpArray.length;
 			for (let k = 0; k < tmpMinPatterns; k++) {
 				if (existParam(tmpArray[k], `${keyheader}_${k}`)) {
@@ -3381,7 +3390,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		const keyheader = _name + _key;
 
 		if (_dosObj[keyheader] !== undefined) {
-			const tmpParams = _dosObj[keyheader].split(`$`);
+			const tmpParams = splitLF2(_dosObj[keyheader]);
 			for (let k = 0; k < tmpParams.length; k++) {
 				const pairName = `${_pairName}${_key}_${k}`;
 				if (!hasVal(tmpParams[k])) {
@@ -5520,17 +5529,16 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 */
 	const changeKeyConfigColor = (_j, _k, _cssName) => {
 		const obj = document.querySelector(`#keycon${_j}_${_k}`);
+		const resetClass = _className => {
+			if (obj.classList.contains(_className)) {
+				obj.classList.remove(_className);
+			}
+		};
 
 		// CSSクラスの除去
-		if (obj.classList.contains(g_cssObj.keyconfig_Changekey)) {
-			obj.classList.remove(g_cssObj.keyconfig_Changekey);
-		}
-		if (obj.classList.contains(g_cssObj.keyconfig_Defaultkey)) {
-			obj.classList.remove(g_cssObj.keyconfig_Defaultkey);
-		}
-		if (obj.classList.contains(g_cssObj.title_base)) {
-			obj.classList.remove(g_cssObj.title_base);
-		}
+		resetClass(g_cssObj.keyconfig_Changekey);
+		resetClass(g_cssObj.keyconfig_Defaultkey);
+		resetClass(g_cssObj.title_base);
 
 		// 指定されたCSSクラスを適用
 		obj.classList.add(_cssName);
@@ -6372,7 +6380,7 @@ const loadingScoreInit = async () => {
 	let arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
 
 	// キーパターン(デフォルト)に対応する矢印番号を格納
-	convertreplaceNums();
+	convertReplaceNums();
 
 	const setData = (_data, _minLength = 1) => {
 		return (hasArrayList(_data, _minLength) ? _data.concat() : []);
@@ -6474,7 +6482,7 @@ const loadingScoreInit = async () => {
 	const tempId = setInterval(() => {
 		const executeMain = _ => {
 			clearInterval(tempId);
-			MainInit();
+			mainInit();
 		}
 		if (g_audio.duration !== undefined) {
 			if (g_userAgent.indexOf(`firefox`) !== -1) {
@@ -7529,7 +7537,7 @@ const getFrzLength = (_speedOnFrame, _startFrame, _endFrame) => {
 /**
  * キーパターン(デフォルト)に対応する矢印番号を格納
  */
-const convertreplaceNums = _ => {
+const convertReplaceNums = _ => {
 	const tkObj = getKeyInfo();
 	const baseCharas = g_keyObj[`chara${g_keyObj.currentKey}_0`];
 	const convCharas = g_keyObj[`chara${tkObj.keyCtrlPtn}`];
@@ -7857,7 +7865,7 @@ const setKeyCtrl = (_localStorage, _keyNum, _keyCtrlPtn) => {
 /**
  * メイン画面初期化
  */
-const MainInit = _ => {
+const mainInit = _ => {
 	clearWindow(true, `Main`);
 	const divRoot = document.querySelector(`#divRoot`);
 	document.oncontextmenu = _ => false;
@@ -8437,7 +8445,7 @@ const MainInit = _ => {
 
 	/**
 	 * 自動判定
-	 * ※MainInit内部で指定必須（arrowSprite指定）
+	 * ※mainInit内部で指定必須（arrowSprite指定）
 	 * 
 	 * @param _j 矢印位置
 	 * @param _arrow 矢印(オブジェクト)
