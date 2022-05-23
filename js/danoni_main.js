@@ -43,8 +43,8 @@ const current = _ => {
 	if (document.currentScript) {
 		return document.currentScript.src;
 	}
-	const scripts = document.getElementsByTagName(`script`);
-	const targetScript = scripts[scripts.length - 1];
+	const scripts = Array.from(document.getElementsByTagName(`script`));
+	const targetScript = scripts.find(file => file.src.endsWith(`danoni_main.js`));
 	return targetScript.src;
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
