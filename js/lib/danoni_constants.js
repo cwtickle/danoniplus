@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/05/21 (v27.5.0)
+ * Revised : 2022/06/07 (v27.6.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1412,6 +1412,7 @@ const g_keyObj = {
     currentPtn: 0,
 
     prevKey: `Dummy`,
+    dfPtnNum: 0,
 
     // キー別ヘッダー
     // - 譜面データ中に出てくる矢印(ノーツ)の種類と順番(ステップゾーン表示順)を管理する。

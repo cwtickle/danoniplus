@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/05/22
+ * Revised : 2022/06/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 27.5.1`;
-const g_revisedDate = `2022/05/22`;
+const g_version = `Ver 27.6.0`;
+const g_revisedDate = `2022/06/07`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -43,8 +43,8 @@ const current = _ => {
 	if (document.currentScript) {
 		return document.currentScript.src;
 	}
-	const scripts = document.getElementsByTagName(`script`);
-	const targetScript = scripts[scripts.length - 1];
+	const scripts = Array.from(document.getElementsByTagName(`script`));
+	const targetScript = scripts.find(file => file.src.endsWith(`danoni_main.js`));
 	return targetScript.src;
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
@@ -465,8 +465,12 @@ const blockCode = _setCode => !C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_se
  * @param {object} _evt 
  * @param {string} _displayName 
  * @param {function} _func
+ * @param {boolean} _dfEvtFlg
  */
-const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
+const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
+	if (!_dfEvtFlg) {
+		_evt.preventDefault();
+	}
 	const setCode = transCode(_evt.code);
 	if (_evt.repeat && (g_unrepeatObj.page.includes(_displayName) || g_unrepeatObj.key.includes(setCode))) {
 		return blockCode(setCode);
@@ -542,12 +546,12 @@ const createScTextCommon = _displayName => {
  * @param {string} _displayName
  * @param {function} _func 
  */
-const setShortcutEvent = (_displayName, _func = _ => true, _displayFlg = true) => {
-	if (_displayFlg) {
+const setShortcutEvent = (_displayName, _func = _ => true, { displayFlg = true, dfEvtFlg = false } = {}) => {
+	if (displayFlg) {
 		createScTextCommon(_displayName);
 	}
 	const evList = _ => {
-		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func);
+		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func, dfEvtFlg);
 		document.onkeyup = evt => commonKeyUp(evt);
 	};
 	if (g_initialFlg && g_btnWaitFrame[_displayName].initial) {
@@ -1248,7 +1252,10 @@ const getTitleDivLabel = (_id, _titlename, _x, _y, ..._classes) =>
  */
 const resetKeyControl = _ => {
 	document.onkeyup = _ => { };
-	document.onkeydown = evt => blockCode(transCode(evt.code));
+	document.onkeydown = evt => {
+		evt.preventDefault();
+		return blockCode(transCode(evt.code));
+	};
 	g_inputKeyBuffer = {};
 };
 
@@ -3342,17 +3349,18 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	const newKeyMultiParam = (_key, _name, _convFunc, { errCd = ``, baseCopyFlg = false, loopFunc = _ => true } = {}) => {
 		let tmpMinPatterns = 1;
 		const keyheader = _name + _key;
+		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 		if (hasVal(_dosObj[keyheader])) {
 			const tmpArray = splitLF2(_dosObj[keyheader]);
 			tmpMinPatterns = tmpArray.length;
 			for (let k = 0; k < tmpMinPatterns; k++) {
-				if (existParam(tmpArray[k], `${keyheader}_${k}`)) {
+				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
 					continue;
 				}
-				g_keyObj[`${keyheader}_${k}`] = g_keyObj[`${_name}${tmpArray[k]}`] !== undefined ?
+				g_keyObj[`${keyheader}_${k + dfPtn}`] = g_keyObj[`${_name}${tmpArray[k]}`] !== undefined ?
 					copyArray2d(g_keyObj[`${_name}${tmpArray[k]}`]) : tmpArray[k].split(`,`).map(n => _convFunc(n));
 				if (baseCopyFlg) {
-					g_keyObj[`${keyheader}_${k}d`] = copyArray2d(g_keyObj[`${keyheader}_${k}`]);
+					g_keyObj[`${keyheader}_${k + dfPtn}d`] = copyArray2d(g_keyObj[`${keyheader}_${k + dfPtn}`]);
 				}
 				loopFunc(k, keyheader);
 			}
@@ -3370,10 +3378,11 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	 */
 	const newKeySingleParam = (_key, _name, _type) => {
 		const keyheader = _name + _key;
+		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 		if (_dosObj[keyheader] !== undefined) {
 			const tmps = _dosObj[keyheader].split(`$`);
 			for (let k = 0; k < tmps.length; k++) {
-				g_keyObj[`${keyheader}_${k}`] = setVal(g_keyObj[`${_name}${tmps[k]}`], setVal(tmps[k], ``, _type));
+				g_keyObj[`${keyheader}_${k + dfPtn}`] = setVal(g_keyObj[`${_name}${tmps[k]}`], setVal(tmps[k], ``, _type));
 			}
 		}
 	};
@@ -3388,11 +3397,12 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	 */
 	const newKeyPairParam = (_key, _name, _pairName, _defaultName = ``, _defaultVal = 0) => {
 		const keyheader = _name + _key;
+		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 
 		if (_dosObj[keyheader] !== undefined) {
 			const tmpParams = splitLF2(_dosObj[keyheader]);
 			for (let k = 0; k < tmpParams.length; k++) {
-				const pairName = `${_pairName}${_key}_${k}`;
+				const pairName = `${_pairName}${_key}_${k + dfPtn}`;
 				if (!hasVal(tmpParams[k])) {
 					continue;
 				}
@@ -3401,7 +3411,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 					Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${tmpParams[k]}`]);
 				} else {
 					if (_defaultName !== ``) {
-						g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`color${_key}_${k}`].length)].fill(_defaultVal);
+						g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`color${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
 					}
 					tmpParams[k].split(`/`).forEach(pairs => {
 						const tmpParamPair = pairs.split(`::`);
@@ -3418,18 +3428,31 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	 * @param {string} _header 
 	 * @returns 
 	 */
-	const copyChildArray = (_k, _header) => g_keyObj[`${_header}_${_k}_0`] = copyArray2d(g_keyObj[`${_header}_${_k}`]);
+	const copyChildArray = (_k, _header) =>
+		g_keyObj[`${_header}_${_k + g_keyObj.dfPtnNum}_0`] = copyArray2d(g_keyObj[`${_header}_${_k + g_keyObj.dfPtnNum}`]);
 
 	// 対象キー毎に処理
 	keyExtraList.forEach(newKey => {
 		let tmpDivPtn = [];
 		let tmpMinPatterns = 1;
+		g_keyObj.dfPtnNum = 0;
+
+		// キーパターンの追記 (appendX)
+		if (setBoolVal(_dosObj[`append${newKey}`])) {
+			for (let j = 0; ; j++) {
+				if (g_keyObj[`color${newKey}_${j}`] === undefined) {
+					break;
+				}
+				g_keyObj.dfPtnNum++;
+			}
+		}
+		const dfPtnNum = g_keyObj.dfPtnNum;
 
 		// キーの名前 (keyNameX)
 		g_keyObj[`keyName${newKey}`] = _dosObj[`keyName${newKey}`] ?? newKey;
 
 		// キーの最小横幅 (minWidthX)
-		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
+		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
 		// 矢印色パターン (colorX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
@@ -3451,24 +3474,25 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 			const tmpDivs = _dosObj[`div${newKey}`].split(`$`);
 			for (let k = 0; k < tmpDivs.length; k++) {
 				tmpDivPtn = tmpDivs[k].split(`,`);
+				const ptnName = `${newKey}_${k + dfPtnNum}`;
 
 				if (setIntVal(tmpDivPtn[0], -1) !== -1) {
-					g_keyObj[`div${newKey}_${k}`] = setIntVal(tmpDivPtn[0], g_keyObj[`chara${newKey}_0`].length);
+					g_keyObj[`div${ptnName}`] = setIntVal(tmpDivPtn[0], g_keyObj[`chara${newKey}_0`].length);
 				} else if (g_keyObj[`div${tmpDivPtn[0]}`] !== undefined) {
 					// 既定キーパターンが指定された場合、存在すればその値を適用
-					g_keyObj[`div${newKey}_${k}`] = g_keyObj[`div${tmpDivPtn[0]}`];
-					g_keyObj[`divMax${newKey}_${k}`] = setIntVal(g_keyObj[`divMax${tmpDivPtn[0]}`], undefined);
-				} else if (setIntVal(g_keyObj[`div${newKey}_${k}`], -1) !== -1) {
+					g_keyObj[`div${ptnName}`] = g_keyObj[`div${tmpDivPtn[0]}`];
+					g_keyObj[`divMax${ptnName}`] = setIntVal(g_keyObj[`divMax${tmpDivPtn[0]}`], undefined);
+				} else if (setIntVal(g_keyObj[`div${ptnName}`], -1) !== -1) {
 					// すでに定義済みの場合はスキップ
 					continue;
 				} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
 					// 特に指定が無い場合はcharaX_Yの配列長で決定
-					g_keyObj[`div${newKey}_${k}`] = g_keyObj[`chara${newKey}_0`].length;
+					g_keyObj[`div${ptnName}`] = g_keyObj[`chara${newKey}_0`].length;
 				}
 
 				// ステップゾーン位置の最終番号
 				if (tmpDivPtn.length > 1) {
-					g_keyObj[`divMax${newKey}_${k}`] = setVal(tmpDivPtn[1], -1, C_TYP_FLOAT);
+					g_keyObj[`divMax${ptnName}`] = setVal(tmpDivPtn[1], -1, C_TYP_FLOAT);
 				}
 			}
 		}
@@ -3476,16 +3500,18 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		// ステップゾーン位置 (posX_Y)
 		newKeyMultiParam(newKey, `pos`, toFloat, {
 			loopFunc: (k, keyheader) => {
-				if (g_keyObj[`divMax${newKey}_${k}`] === undefined || g_keyObj[`divMax${newKey}_${k}`] === -1) {
-					const posLength = g_keyObj[`${keyheader}_${k}`].length;
-					g_keyObj[`divMax${newKey}_${k}`] = g_keyObj[`${keyheader}_${k}`][posLength - 1] + 1;
+				const ptnName = `${newKey}_${k + dfPtnNum}`;
+				if (g_keyObj[`divMax${ptnName}`] === undefined || g_keyObj[`divMax${ptnName}`] === -1) {
+					const posLength = g_keyObj[`${keyheader}_${k + dfPtnNum}`].length;
+					g_keyObj[`divMax${ptnName}`] = g_keyObj[`${keyheader}_${k + dfPtnNum}`][posLength - 1] + 1;
 				}
 			}
 		});
 		if (_dosObj[`pos${newKey}`] === undefined) {
 			for (let k = 0; k < tmpMinPatterns; k++) {
-				if (g_keyObj[`color${newKey}_${k}`] !== undefined) {
-					g_keyObj[`pos${newKey}_${k}`] = [...Array(g_keyObj[`color${newKey}_${k}`].length).keys()].map(i => i);
+				const ptnName = `${newKey}_${k + dfPtnNum}`;
+				if (g_keyObj[`color${ptnName}`] !== undefined) {
+					g_keyObj[`pos${ptnName}`] = [...Array(g_keyObj[`color${ptnName}`].length).keys()].map(i => i);
 				}
 			}
 		}
@@ -3807,7 +3833,7 @@ const titleInit = _ => {
 	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	setShortcutEvent(g_currentPage);
+	setShortcutEvent(g_currentPage, _ => true, { dfEvtFlg: true });
 
 	document.oncontextmenu = _ => true;
 	divRoot.oncontextmenu = _ => false;
@@ -3972,7 +3998,7 @@ const optionInit = _ => {
 	commonSettingBtn(`Display`);
 
 	// キー操作イベント（デフォルト）
-	setShortcutEvent(g_currentPage);
+	setShortcutEvent(g_currentPage, _ => true, { dfEvtFlg: true });
 	document.oncontextmenu = _ => true;
 	g_initialFlg = true;
 
@@ -4053,7 +4079,7 @@ const createOptionWindow = _sprite => {
 			deleteChildspriteAll(`difList`);
 			[`difList`, `difCover`, `btnDifU`, `btnDifD`].forEach(obj => optionsprite.removeChild(document.getElementById(obj)));
 			g_currentPage = `option`;
-			setShortcutEvent(g_currentPage, _ => true, false);
+			setShortcutEvent(g_currentPage, _ => true, { displayFlg: false, dfEvtFlg: true });
 		}
 	};
 
