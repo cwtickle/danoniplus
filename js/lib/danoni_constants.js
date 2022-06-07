@@ -1412,6 +1412,7 @@ const g_keyObj = {
     currentPtn: 0,
 
     prevKey: `Dummy`,
+    dfPtnNum: 0,
 
     // キー別ヘッダー
     // - 譜面データ中に出てくる矢印(ノーツ)の種類と順番(ステップゾーン表示順)を管理する。
