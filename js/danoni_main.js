@@ -465,8 +465,12 @@ const blockCode = _setCode => !C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_se
  * @param {object} _evt 
  * @param {string} _displayName 
  * @param {function} _func
+ * @param {boolean} _dfEvtFlg
  */
-const commonKeyDown = (_evt, _displayName, _func = _code => { }) => {
+const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
+	if (!_dfEvtFlg) {
+		_evt.preventDefault();
+	}
 	const setCode = transCode(_evt.code);
 	if (_evt.repeat && (g_unrepeatObj.page.includes(_displayName) || g_unrepeatObj.key.includes(setCode))) {
 		return blockCode(setCode);
@@ -542,12 +546,12 @@ const createScTextCommon = _displayName => {
  * @param {string} _displayName
  * @param {function} _func 
  */
-const setShortcutEvent = (_displayName, _func = _ => true, _displayFlg = true) => {
-	if (_displayFlg) {
+const setShortcutEvent = (_displayName, _func = _ => true, { displayFlg = true, dfEvtFlg = false } = {}) => {
+	if (displayFlg) {
 		createScTextCommon(_displayName);
 	}
 	const evList = _ => {
-		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func);
+		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func, dfEvtFlg);
 		document.onkeyup = evt => commonKeyUp(evt);
 	};
 	if (g_initialFlg && g_btnWaitFrame[_displayName].initial) {
@@ -1248,7 +1252,10 @@ const getTitleDivLabel = (_id, _titlename, _x, _y, ..._classes) =>
  */
 const resetKeyControl = _ => {
 	document.onkeyup = _ => { };
-	document.onkeydown = evt => blockCode(transCode(evt.code));
+	document.onkeydown = evt => {
+		evt.preventDefault();
+		return blockCode(transCode(evt.code));
+	};
 	g_inputKeyBuffer = {};
 };
 
@@ -3807,7 +3814,7 @@ const titleInit = _ => {
 	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
-	setShortcutEvent(g_currentPage);
+	setShortcutEvent(g_currentPage, _ => true, { dfEvtFlg: true });
 
 	document.oncontextmenu = _ => true;
 	divRoot.oncontextmenu = _ => false;
@@ -3972,7 +3979,7 @@ const optionInit = _ => {
 	commonSettingBtn(`Display`);
 
 	// キー操作イベント（デフォルト）
-	setShortcutEvent(g_currentPage);
+	setShortcutEvent(g_currentPage, _ => true, { dfEvtFlg: true });
 	document.oncontextmenu = _ => true;
 	g_initialFlg = true;
 
@@ -4053,7 +4060,7 @@ const createOptionWindow = _sprite => {
 			deleteChildspriteAll(`difList`);
 			[`difList`, `difCover`, `btnDifU`, `btnDifD`].forEach(obj => optionsprite.removeChild(document.getElementById(obj)));
 			g_currentPage = `option`;
-			setShortcutEvent(g_currentPage, _ => true, false);
+			setShortcutEvent(g_currentPage, _ => true, { displayFlg: false, dfEvtFlg: true });
 		}
 	};
 
