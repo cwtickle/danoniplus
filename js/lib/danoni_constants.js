@@ -626,7 +626,7 @@ let g_currentArrows = 0;
 const g_rankObj = {
     rankMarks: [`SS`, `S`, `SA`, `AAA`, `AA`, `A`, `B`, `C`, `D`],
     rankRate: [97, 90, 85, 80, 75, 70, 65, 60, 0],
-    rankColor: [`#00ccff`, `#6600ff`, `#ff9900`, `#ff0000`, `#00ff00`, `#ff00ff`, `#cc00ff`, `#cc9933`, `#6666ff`],
+    rankColor: [`#00ccff`, `#6600ff`, `#ff9900`, `#ff0000`, `#00ff00`, `#ff00ff`, `#cc00ff`, `#cc9933`, `#33cc99`],
 
     rankMarkAllPerfect: `AP`,
     rankColorAllPerfect: ``,
