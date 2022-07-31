@@ -1223,6 +1223,7 @@ const g_shortcutObj = {
         Numpad1: { id: `lnkSpeedG` },
         Numpad2: { id: `lnkDensityG` },
         Numpad3: { id: `lnkToolDifG` },
+        KeyP: { id: `lnkDifInfo` },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
