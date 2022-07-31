@@ -207,7 +207,7 @@ const updateWindowSiz = _ => {
             x: 140, y: 70, w: 275, h: 150, overflow: `auto`,
         },
         lnkDifInfo: {
-            x: 10, y: 30, w: 100, borderStyle: `solid`,
+            w: C_LEN_DIFCOVER_WIDTH, borderStyle: `solid`,
         },
 
         /** ディスプレイ画面 */
@@ -1192,8 +1192,12 @@ const g_shortcutObj = {
         KeyV: { id: `lnkVolumeR` },
 
         KeyI: { id: `btnGraph` },
-        ShiftLeft_KeyQ: { id: `lnkScoreDetailB` },
-        KeyQ: { id: `lnkScoreDetail` },
+        Digit1: { id: `lnkSpeedG` },
+        Digit2: { id: `lnkDensityG` },
+        Digit3: { id: `lnkToolDifG` },
+        Numpad1: { id: `lnkSpeedG` },
+        Numpad2: { id: `lnkDensityG` },
+        Numpad3: { id: `lnkToolDifG` },
         KeyP: { id: `lnkDifInfo` },
         KeyZ: { id: `btnSave` },
 
