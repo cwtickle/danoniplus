@@ -1212,6 +1212,7 @@ const g_shortcutObj = {
         ArrowDown: { id: `btnDifD` },
         ArrowUp: { id: `btnDifU` },
 
+        KeyI: { id: `btnGraph` },
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `lnkDifficulty` },

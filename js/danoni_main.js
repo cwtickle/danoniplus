@@ -4259,7 +4259,7 @@ const createOptionWindow = _sprite => {
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
 			createCss2Button(`btnGraph`, `i`, _ => true, {
-				x: 415, y: 0, w: 23, h: 23, siz: C_SIZ_JDGCNTS, title: g_msgObj.graph,
+				x: -25, y: -60, w: 30, h: 30, siz: C_SIZ_JDGCHARA, title: g_msgObj.graph,
 				resetFunc: _ => setScoreDetail(), cxtFunc: _ => setScoreDetail(),
 			}, g_cssObj.button_Mini)
 		);
@@ -4298,6 +4298,10 @@ const createOptionWindow = _sprite => {
 	 * 譜面明細表示／非表示ボタンの処理
 	 */
 	const setScoreDetail = _ => {
+		if (g_currentPage === `difSelector`) {
+			resetDifWindow();
+			g_stateObj.scoreDetailViewFlg = false;
+		}
 		const scoreDetail = document.querySelector(`#scoreDetail`);
 		const detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
 		const visibles = [`hidden`, `visible`];
