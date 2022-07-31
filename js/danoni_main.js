@@ -4271,6 +4271,9 @@ const createOptionWindow = _sprite => {
 		 * @param {number} _val 
 		 */
 		const changeScoreDetail = (_val = 0) => {
+			if (g_currentPage === `difSelector`) {
+				resetDifWindow();
+			}
 			g_stateObj.scoreDetailViewFlg = true;
 			scoreDetail.style.visibility = `visible`;
 
