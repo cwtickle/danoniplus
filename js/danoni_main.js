@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/07/01
+ * Revised : 2022/07/31
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 27.7.0`;
-const g_revisedDate = `2022/07/01`;
+const g_version = `Ver 27.8.0`;
+const g_revisedDate = `2022/07/31`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4259,45 +4259,55 @@ const createOptionWindow = _sprite => {
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
 			createCss2Button(`btnGraph`, `i`, _ => true, {
-				x: 415, y: 0, w: 23, h: 23, siz: C_SIZ_JDGCNTS, title: g_msgObj.graph,
+				x: -25, y: -60, w: 30, h: 30, siz: C_SIZ_JDGCHARA, title: g_msgObj.graph,
 				resetFunc: _ => setScoreDetail(), cxtFunc: _ => setScoreDetail(),
 			}, g_cssObj.button_Mini)
 		);
 		g_stateObj.scoreDetailViewFlg = false;
 		const scoreDetail = createEmptySprite(optionsprite, `scoreDetail`, g_windowObj.scoreDetail, g_cssObj.settings_DifSelector);
-		const viewScText = _ => createScText(lnkScoreDetail, `ScoreDetail`, { targetLabel: `lnkScoreDetail`, x: -10 });
 
 		/**
 		 * 譜面明細表示の切替
 		 * @param {number} _val 
 		 */
-		const changeScoreDetail = (_val = 1) => {
+		const changeScoreDetail = (_val = 0) => {
+			if (g_currentPage === `difSelector`) {
+				resetDifWindow();
+			}
 			g_stateObj.scoreDetailViewFlg = true;
 			scoreDetail.style.visibility = `visible`;
+
+			// 表示内容を非表示化、ボタン色をデフォルトに戻す
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `hidden`;
-			setSetting(_val, `scoreDetail`);
-			viewScText();
+			document.getElementById(`lnk${g_stateObj.scoreDetail}G`).classList.replace(g_cssObj.button_Setting, g_cssObj.button_Default);
+
+			// 選択先を表示、ボタン色を選択中に変更
+			g_stateObj.scoreDetail = g_settings.scoreDetails[_val];
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
+			document.getElementById(`lnk${g_stateObj.scoreDetail}G`).classList.replace(g_cssObj.button_Default, g_cssObj.button_Setting);
 		};
 
 		multiAppend(scoreDetail,
 			createScoreDetail(`Speed`),
 			createScoreDetail(`Density`),
 			createScoreDetail(`ToolDif`, false),
-			makeSettingLblCssButton(`lnkScoreDetailB`, `- - -`, 0, _ => changeScoreDetail(-1),
-				g_lblPosObj.lnkScoreDetailB, g_cssObj.button_RevON),
-			makeSettingLblCssButton(`lnkScoreDetail`, `${getStgDetailName(g_stateObj.scoreDetail)}`, 0, _ => changeScoreDetail(),
-				Object.assign(g_lblPosObj.lnkScoreDetail, {
-					cxtFunc: _ => changeScoreDetail(-1),
-				}), g_cssObj.button_RevON),
 		);
-		viewScText();
+		g_settings.scoreDetails.forEach((sd, j) => {
+			scoreDetail.appendChild(
+				makeDifLblCssButton(`lnk${sd}G`, getStgDetailName(sd), j, _ => changeScoreDetail(j), { w: C_LEN_DIFCOVER_WIDTH, btnStyle: (g_stateObj.scoreDetail === sd ? `Setting` : `Default`) })
+			);
+			createScText(document.getElementById(`lnk${sd}G`), sd, { targetLabel: `lnk${sd}G`, x: -10 });
+		});
 	}
 
 	/**
 	 * 譜面明細表示／非表示ボタンの処理
 	 */
 	const setScoreDetail = _ => {
+		if (g_currentPage === `difSelector`) {
+			resetDifWindow();
+			g_stateObj.scoreDetailViewFlg = false;
+		}
 		const scoreDetail = document.querySelector(`#scoreDetail`);
 		const detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
 		const visibles = [`hidden`, `visible`];
@@ -4439,7 +4449,7 @@ const createOptionWindow = _sprite => {
 		const baseLabel = (_bLabel, _bLabelname, _bAlign) =>
 			document.querySelector(`#detail${_name}`).appendChild(
 				createDivCss2Label(`${_bLabel}`, `${_bLabelname}`, {
-					x: 10, y: 65 + _pos * 20, w: 100, h: 20, siz: C_SIZ_DIFSELECTOR, align: _bAlign,
+					x: 10, y: 105 + _pos * 20, w: 100, h: 20, siz: C_SIZ_DIFSELECTOR, align: _bAlign,
 				})
 			);
 		if (document.querySelector(`#data${_label}`) === null) {
@@ -4544,7 +4554,7 @@ const createOptionWindow = _sprite => {
 			makeDifInfoLabel(`dataArrowInfo`, ``, g_lblPosObj.dataArrowInfo),
 			makeDifInfoLabel(`lblArrowInfo2`, ``, g_lblPosObj.lblArrowInfo2),
 			makeDifInfoLabel(`dataArrowInfo2`, ``, g_lblPosObj.dataArrowInfo2),
-			makeSettingLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 0, _ => {
+			makeDifLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 8, _ => {
 				copyTextToClipboard(
 					`****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n`
 					+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`, g_msgInfoObj.I_0003
