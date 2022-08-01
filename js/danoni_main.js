@@ -4296,7 +4296,7 @@ const createOptionWindow = _sprite => {
 			scoreDetail.appendChild(
 				makeDifLblCssButton(`lnk${sd}G`, getStgDetailName(sd), j, _ => changeScoreDetail(j), { w: C_LEN_DIFCOVER_WIDTH, btnStyle: (g_stateObj.scoreDetail === sd ? `Setting` : `Default`) })
 			);
-			createScText(document.getElementById(`lnk${sd}G`), sd, { targetLabel: `lnk${sd}G`, x: -10 });
+			createScText(document.getElementById(`lnk${sd}G`), `${sd}G`, { targetLabel: `lnk${sd}G`, x: -10 });
 		});
 	}
 
@@ -4391,7 +4391,7 @@ const createOptionWindow = _sprite => {
 			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 
-			updateScoreDetailLabel(`Speed`, g_lblNameObj[`s_${speedType}`], speedObj[speedType].cnt, j);
+			updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 		});
 	};
 
@@ -4431,10 +4431,10 @@ const createOptionWindow = _sprite => {
 		});
 
 		const obj = getScoreBaseData(_scoreId);
-		updateScoreDetailLabel(`Density`, g_lblNameObj.s_apm, obj.apm, 0);
-		updateScoreDetailLabel(`Density`, g_lblNameObj.s_time, obj.playingTime, 1);
-		updateScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, obj.arrowCnts, 3);
-		updateScoreDetailLabel(`Density`, g_lblNameObj.s_frz, obj.frzCnts, 4);
+		updateScoreDetailLabel(`Density`, `APM`, obj.apm, 0, g_lblNameObj.s_apm);
+		updateScoreDetailLabel(`Density`, `Time`, obj.playingTime, 1, g_lblNameObj.s_time);
+		updateScoreDetailLabel(`Density`, `Arrow`, obj.arrowCnts, 3, g_lblNameObj.s_arrow);
+		updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4, g_lblNameObj.s_frz);
 	};
 
 	/**
