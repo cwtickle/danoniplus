@@ -1,6 +1,6 @@
 {
   "name": "danoniplus",
-  "version": "26.7.3",
+  "version": "26.7.4",
   "description": "Dancing☆Onigiri (CW Edition) - Web-based Rhythm Game",
   "main": "index.js",
   "scripts": {
