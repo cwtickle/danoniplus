@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/05/22
+ * Revised : 2022/08/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 19.5.16`;
-const g_revisedDate = `2022/05/22`;
+const g_version = `Ver 19.5.17`;
+const g_revisedDate = `2022/08/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4023,7 +4023,7 @@ function createOptionWindow(_sprite) {
 			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 
-			makeScoreDetailLabel(`Speed`, g_lblNameObj[`s_${speedType}`], speedObj[speedType].cnt, j);
+			makeScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 		});
 	}
 
@@ -4049,13 +4049,13 @@ function createOptionWindow(_sprite) {
 		}
 
 		const apm = Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60));
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_apm, apm, 0);
+		makeScoreDetailLabel(`Density`, `APM`, apm, 0, g_lblNameObj.s_apm);
 		const minutes = Math.floor(g_detailObj.playingFrameWithBlank[_scoreId] / g_fps / 60);
 		const seconds = `00${Math.floor((g_detailObj.playingFrameWithBlank[_scoreId] / g_fps) % 60)}`.slice(-2);
 		const playingTime = `${minutes}:${seconds}`;
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_time, playingTime, 1);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, arrowCnts, 3);
-		makeScoreDetailLabel(`Density`, g_lblNameObj.s_frz, frzCnts, 4);
+		makeScoreDetailLabel(`Density`, `Time`, playingTime, 1, g_lblNameObj.s_time);
+		makeScoreDetailLabel(`Density`, `Arrow`, arrowCnts, 3, g_lblNameObj.s_arrow);
+		makeScoreDetailLabel(`Density`, `Frz`, frzCnts, 4, g_lblNameObj.s_frz);
 	}
 
 	/**
