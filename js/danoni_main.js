@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/05/22
+ * Revised : 2022/08/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 25.5.9`;
-const g_revisedDate = `2022/05/22`;
+const g_version = `Ver 25.5.10`;
+const g_revisedDate = `2022/08/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4426,7 +4426,7 @@ function createOptionWindow(_sprite) {
 			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 
-			updateScoreDetailLabel(`Speed`, g_lblNameObj[`s_${speedType}`], speedObj[speedType].cnt, j);
+			updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 		});
 	}
 
@@ -4449,10 +4449,10 @@ function createOptionWindow(_sprite) {
 		}
 
 		const obj = getScoreBaseData(_scoreId);
-		updateScoreDetailLabel(`Density`, g_lblNameObj.s_apm, obj.apm, 0);
-		updateScoreDetailLabel(`Density`, g_lblNameObj.s_time, obj.playingTime, 1);
-		updateScoreDetailLabel(`Density`, g_lblNameObj.s_arrow, obj.arrowCnts, 3);
-		updateScoreDetailLabel(`Density`, g_lblNameObj.s_frz, obj.frzCnts, 4);
+		updateScoreDetailLabel(`Density`, `APM`, obj.apm, 0, g_lblNameObj.s_apm);
+		updateScoreDetailLabel(`Density`, `Time`, obj.playingTime, 1, g_lblNameObj.s_time);
+		updateScoreDetailLabel(`Density`, `Arrow`, obj.arrowCnts, 3, g_lblNameObj.s_arrow);
+		updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4, g_lblNameObj.s_frz);
 	}
 
 	/**
