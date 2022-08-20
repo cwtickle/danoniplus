@@ -4283,6 +4283,7 @@ const createOptionWindow = _sprite => {
 
 			// 選択先を表示、ボタン色を選択中に変更
 			g_stateObj.scoreDetail = g_settings.scoreDetails[_val];
+			g_shortcutObj.option.KeyQ.id = `lnk${g_settings.scoreDetails[(_val + 1) % g_settings.scoreDetails.length]}G`;
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
 			document.getElementById(`lnk${g_stateObj.scoreDetail}G`).classList.replace(g_cssObj.button_Default, g_cssObj.button_Setting);
 		};

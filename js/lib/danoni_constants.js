@@ -1198,6 +1198,7 @@ const g_shortcutObj = {
         Numpad1: { id: `lnkSpeedG` },
         Numpad2: { id: `lnkDensityG` },
         Numpad3: { id: `lnkToolDifG` },
+        KeyQ: { id: `lnkSpeedG` },
         KeyP: { id: `lnkDifInfo` },
         KeyZ: { id: `btnSave` },
 
