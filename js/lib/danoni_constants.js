@@ -171,13 +171,6 @@ const updateWindowSiz = _ => {
         },
 
         /** 設定: 譜面明細子画面 */
-        lnkScoreDetailB: {
-            x: 10, w: 100, visibility: `hidden`,
-        },
-        lnkScoreDetail: {
-            x: 10, w: 100, borderStyle: `solid`,
-        },
-
         lblTooldif: {
             y: 5, w: 250, siz: C_SIZ_JDGCNTS,
         },
@@ -783,11 +776,13 @@ const g_settings = {
     opacitys: [10, 25, 50, 75, 100],
 
     scoreDetails: [`Speed`, `Density`, `ToolDif`],
-    scoreDetailNum: 0,
+    scoreDetailCursors: [],
 };
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
 g_settings.opacityNum = g_settings.opacitys.length - 1;
+g_settings.scoreDetailCursors = g_settings.scoreDetails.map(val => `lnk${val}G`);
+g_settings.scoreDetailCursors.push(`btnGraph`);
 
 /**
  * 設定画面間移動
@@ -1198,6 +1193,7 @@ const g_shortcutObj = {
         Numpad1: { id: `lnkSpeedG` },
         Numpad2: { id: `lnkDensityG` },
         Numpad3: { id: `lnkToolDifG` },
+        KeyQ: { id: `lnkSpeedG` },
         KeyP: { id: `lnkDifInfo` },
         KeyZ: { id: `btnSave` },
 
@@ -1223,6 +1219,7 @@ const g_shortcutObj = {
         Numpad1: { id: `lnkSpeedG` },
         Numpad2: { id: `lnkDensityG` },
         Numpad3: { id: `lnkToolDifG` },
+        KeyQ: { id: `lnkSpeedG` },
         KeyP: { id: `lnkDifInfo` },
 
         Escape: { id: `btnBack` },

@@ -4282,7 +4282,10 @@ const createOptionWindow = _sprite => {
 			document.getElementById(`lnk${g_stateObj.scoreDetail}G`).classList.replace(g_cssObj.button_Setting, g_cssObj.button_Default);
 
 			// 選択先を表示、ボタン色を選択中に変更
+			// Qキーを押したときのリンク先を次の明細へ変更
 			g_stateObj.scoreDetail = g_settings.scoreDetails[_val];
+			[`option`, `difSelector`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[(_val + 1) % g_settings.scoreDetailCursors.length]);
+
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
 			document.getElementById(`lnk${g_stateObj.scoreDetail}G`).classList.replace(g_cssObj.button_Default, g_cssObj.button_Setting);
 		};
@@ -4307,6 +4310,7 @@ const createOptionWindow = _sprite => {
 		if (g_currentPage === `difSelector`) {
 			resetDifWindow();
 			g_stateObj.scoreDetailViewFlg = false;
+			g_shortcutObj.difSelector.KeyQ.id = g_settings.scoreDetailCursors[0];
 		}
 		const scoreDetail = document.querySelector(`#scoreDetail`);
 		const detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
@@ -4315,6 +4319,9 @@ const createOptionWindow = _sprite => {
 		g_stateObj.scoreDetailViewFlg = !g_stateObj.scoreDetailViewFlg;
 		scoreDetail.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
 		detailObj.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
+
+		// Qキーを押したときのカーソル位置を先頭に初期化
+		g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
 	};
 
 	/**
