@@ -765,7 +765,7 @@ const g_settings = {
 
     adjustments: [...Array(C_MAX_ADJUSTMENT * 20 + 1).keys()].map(i => (i - C_MAX_ADJUSTMENT * 10) / 10),
     adjustmentNum: C_MAX_ADJUSTMENT * 10,
-    adjustmentTerms: (g_isFile ? [50, 10, 1] : [50, 10, 5]),
+    adjustmentTerms: [50, 10, 5],
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
 
