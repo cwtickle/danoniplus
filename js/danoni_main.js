@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/08/01
+ * Revised : 2022/08/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 27.8.1`;
-const g_revisedDate = `2022/08/01`;
+const g_version = `Ver 28.0.0`;
+const g_revisedDate = `2022/08/21`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -365,7 +365,7 @@ const makeDedupliArray = (_array1, ..._arrays) =>
  * @param {array2} _array2d 
  * @returns 
  */
-const copyArray2d = _array2d => JSON.parse(JSON.stringify(_array2d));
+const copyArray2d = _array2d => structuredClone(_array2d);
 
 /**
  * 配列データを合計
@@ -4224,7 +4224,7 @@ const createOptionWindow = _sprite => {
 	// 速度(Speed)
 	// 縦位置: 2  短縮ショートカットあり
 	createGeneralSetting(spriteList.speed, `speed`, {
-		skipTerms: [20, 5, 1], hiddenBtn: true, scLabel: g_lblNameObj.sc_speed, roundNum: 5,
+		skipTerms: g_settings.speedTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_speed, roundNum: 5,
 		unitName: ` ${g_lblNameObj.multi}`,
 	});
 
@@ -4282,7 +4282,10 @@ const createOptionWindow = _sprite => {
 			document.getElementById(`lnk${g_stateObj.scoreDetail}G`).classList.replace(g_cssObj.button_Setting, g_cssObj.button_Default);
 
 			// 選択先を表示、ボタン色を選択中に変更
+			// Qキーを押したときのリンク先を次の明細へ変更
 			g_stateObj.scoreDetail = g_settings.scoreDetails[_val];
+			[`option`, `difSelector`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[(_val + 1) % g_settings.scoreDetailCursors.length]);
+
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
 			document.getElementById(`lnk${g_stateObj.scoreDetail}G`).classList.replace(g_cssObj.button_Default, g_cssObj.button_Setting);
 		};
@@ -4307,6 +4310,7 @@ const createOptionWindow = _sprite => {
 		if (g_currentPage === `difSelector`) {
 			resetDifWindow();
 			g_stateObj.scoreDetailViewFlg = false;
+			g_shortcutObj.difSelector.KeyQ.id = g_settings.scoreDetailCursors[0];
 		}
 		const scoreDetail = document.querySelector(`#scoreDetail`);
 		const detailObj = document.querySelector(`#detail${g_stateObj.scoreDetail}`);
@@ -4315,6 +4319,9 @@ const createOptionWindow = _sprite => {
 		g_stateObj.scoreDetailViewFlg = !g_stateObj.scoreDetailViewFlg;
 		scoreDetail.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
 		detailObj.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
+
+		// Qキーを押したときのカーソル位置を先頭に初期化
+		g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
 	};
 
 	/**
@@ -4824,7 +4831,7 @@ const createOptionWindow = _sprite => {
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
-		skipTerms: [50, 10, 5], hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
+		skipTerms: g_settings.adjustmentTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
 		unitName: g_lblNameObj.frame,
 	});
 

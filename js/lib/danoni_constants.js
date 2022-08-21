@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/07/31 (v27.8.0)
+ * Revised : 2022/08/21 (v28.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -171,13 +171,6 @@ const updateWindowSiz = _ => {
         },
 
         /** 設定: 譜面明細子画面 */
-        lnkScoreDetailB: {
-            x: 10, w: 100, visibility: `hidden`,
-        },
-        lnkScoreDetail: {
-            x: 10, w: 100, borderStyle: `solid`,
-        },
-
         lblTooldif: {
             y: 5, w: 250, siz: C_SIZ_JDGCNTS,
         },
@@ -750,6 +743,7 @@ let g_appearanceRanges = [`Hidden+`, `Sudden+`, `Hid&Sud+`];
 const g_settings = {
     speeds: [...Array((C_MAX_SPEED - C_MIN_SPEED) * 20 + 1).keys()].map(i => C_MIN_SPEED + i / 20),
     speedNum: 0,
+    speedTerms: [20, 5, 1],
 
     motions: [C_FLG_OFF, `Boost`, `Brake`],
     motionNum: 0,
@@ -771,6 +765,7 @@ const g_settings = {
 
     adjustments: [...Array(C_MAX_ADJUSTMENT * 20 + 1).keys()].map(i => (i - C_MAX_ADJUSTMENT * 10) / 10),
     adjustmentNum: C_MAX_ADJUSTMENT * 10,
+    adjustmentTerms: (g_isFile ? [50, 10, 1] : [50, 10, 5]),
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
 
@@ -783,11 +778,13 @@ const g_settings = {
     opacitys: [10, 25, 50, 75, 100],
 
     scoreDetails: [`Speed`, `Density`, `ToolDif`],
-    scoreDetailNum: 0,
+    scoreDetailCursors: [],
 };
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
 g_settings.opacityNum = g_settings.opacitys.length - 1;
+g_settings.scoreDetailCursors = g_settings.scoreDetails.map(val => `lnk${val}G`);
+g_settings.scoreDetailCursors.push(`btnGraph`);
 
 /**
  * 設定画面間移動
@@ -1198,6 +1195,7 @@ const g_shortcutObj = {
         Numpad1: { id: `lnkSpeedG` },
         Numpad2: { id: `lnkDensityG` },
         Numpad3: { id: `lnkToolDifG` },
+        KeyQ: { id: `lnkSpeedG` },
         KeyP: { id: `lnkDifInfo` },
         KeyZ: { id: `btnSave` },
 
@@ -1223,6 +1221,7 @@ const g_shortcutObj = {
         Numpad1: { id: `lnkSpeedG` },
         Numpad2: { id: `lnkDensityG` },
         Numpad3: { id: `lnkToolDifG` },
+        KeyQ: { id: `lnkSpeedG` },
         KeyP: { id: `lnkDifInfo` },
 
         Escape: { id: `btnBack` },

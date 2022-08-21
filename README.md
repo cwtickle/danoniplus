@@ -90,16 +90,26 @@ If you would like to cooperate with the development, please see below. Even if y
 ## Community / コミュニティ
 - [Dancing☆Onigiri Discordサーバー](https://discord.gg/TegbHFY7zg)
 - [得点報告用Gitter](https://gitter.im/danonicw/freeboard)
-- [Twitter #danoni](https://twitter.com/search?q=%23danoni%20OR%20%22%E3%83%80%E3%83%B3%E3%81%8A%E3%81%AB%E3%81%A3%E3%81%9F%E3%83%BC%22&src=typed_query&f=live)
+- [Twitter #danoni](https://twitter.com/search?q=%23danoni&src=typed_query&f=live)
 
-## Related Tools Repository / 関連ツール
+## Related Tools Repository / 関連リポジトリ・ツール
+### Dancing☆Onigiri
 - [Dancing☆Onigiri エディター(CW Edition 対応)](https://github.com/superkuppabros/danoni-editor) @superkuppabros
 - [ダンおに曲データjs化ツール](https://github.com/suzme/danoni-base64) @suzme
 - [ダンおに矢印色ツール](https://github.com/suzme/danoni-colorpicker) @suzme
-- [Dancing☆Onigiri Chart Reverser](https://github.com/cwtickle/danoniplus-reverser)
-- [Dancing☆Onigiri Chart Converter](https://github.com/cwtickle/danoniplus-converter)
+- [Dancing☆Onigiri Chart Reverser](https://github.com/cwtickle/danoniplus-reverser) @cwtickle
+- [Dancing☆Onigiri Chart Converter](https://github.com/cwtickle/danoniplus-converter) @cwtickle
 - [ダンおにゲージ計算機 (Gauge Calculator)](http://www.omission0.com/other/gauge_calculator/) @goe0
+
+### キリズマ
 - [キリズマ譜面データ変換機](https://github.com/suzme/kirizma-converter) @suzme
+- [キリズマ歌詞表示作成ツール](https://github.com/prlg25/kirizma_lyric) @prlg25
+- [キリズマ難易度表](https://github.com/suzme/kirizma) @suzme
+
+### Punching◇Panels
+- [Punching◇Panels](https://github.com/cwtickle/punching-panels) @cwtickle
+- [Punching◇Panels エディター](https://github.com/suzme/punpane-editor) @suzme
+- [Punching◇Panels 難易度表](https://github.com/suzme/punpane) @suzme
 
 ## License / ライセンス
 This software is released under the MIT License, see LICENSE.  
