@@ -365,7 +365,7 @@ const makeDedupliArray = (_array1, ..._arrays) =>
  * @param {array2} _array2d 
  * @returns 
  */
-const copyArray2d = _array2d => JSON.parse(JSON.stringify(_array2d));
+const copyArray2d = _array2d => structuredClone(_array2d);
 
 /**
  * 配列データを合計
