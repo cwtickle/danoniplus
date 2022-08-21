@@ -743,6 +743,7 @@ let g_appearanceRanges = [`Hidden+`, `Sudden+`, `Hid&Sud+`];
 const g_settings = {
     speeds: [...Array((C_MAX_SPEED - C_MIN_SPEED) * 20 + 1).keys()].map(i => C_MIN_SPEED + i / 20),
     speedNum: 0,
+    speedTerms: [20, 5, 1],
 
     motions: [C_FLG_OFF, `Boost`, `Brake`],
     motionNum: 0,
@@ -764,6 +765,7 @@ const g_settings = {
 
     adjustments: [...Array(C_MAX_ADJUSTMENT * 20 + 1).keys()].map(i => (i - C_MAX_ADJUSTMENT * 10) / 10),
     adjustmentNum: C_MAX_ADJUSTMENT * 10,
+    adjustmentTerms: (g_isFile ? [50, 10, 1] : [50, 10, 5]),
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
 
