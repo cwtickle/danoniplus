@@ -574,12 +574,13 @@ const setShortcutEvent = (_displayName, _func = _ => true, { displayFlg = true, 
  * @param {function} _func 
  * @param {object} _obj
  */
-const checkFunc = (_func, { pos = ``, ended = false, errTxt = `error` } = {}) => {
+const checkFunc = (_func, { pos = ``, ended = true, errTxt = `error` } = {}) => {
 	try {
 		_func;
 	} catch (err) {
 		console.error(`${pos}:\n${err}`);
 		if (ended) {
+			makeWarningWindow(`${errTxt} ${pos}:<br>${err}`);
 			throw errTxt;
 		}
 	}
