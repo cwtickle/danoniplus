@@ -565,6 +565,25 @@ const setShortcutEvent = (_displayName, _func = _ => true, { displayFlg = true, 
 	}
 };
 
+/*-----------------------------------------------------------*/
+/* 例外処理                                                   */
+/*-----------------------------------------------------------*/
+
+/**
+ * 関数の例外処理を制御
+ * @param {function} _func 
+ * @param {object} _obj
+ */
+const checkFunc = (_func, { pos = ``, ended = false, errTxt = `error` } = {}) => {
+	try {
+		_func;
+	} catch (err) {
+		console.error(`${pos}:\n${err}`);
+		if (ended) {
+			throw errTxt;
+		}
+	}
+};
 
 /*-----------------------------------------------------------*/
 /* ファイル・リンク制御                                        */
@@ -3816,7 +3835,7 @@ const titleInit = _ => {
 	const flowTitleTimeline = _ => {
 
 		// ユーザカスタムイベント(フレーム毎)
-		g_customJsObj.titleEnterFrame.forEach(func => func());
+		checkFunc(g_customJsObj.titleEnterFrame.forEach(func => func()), { pos: g_scoreObj.titleFrameNum, errTxt: `g_customJsObj.titleEnterFrame` });
 
 		// 背景・マスクモーション
 		drawTitleResultMotion(g_currentPage);
@@ -8915,7 +8934,7 @@ const mainInit = _ => {
 		}
 
 		// ユーザカスタムイベント(フレーム毎)
-		g_customJsObj.mainEnterFrame.forEach(func => func());
+		checkFunc(g_customJsObj.mainEnterFrame.forEach(func => func()), { pos: g_scoreObj.frameNum, errTxt: `g_customJsObj.mainEnterFrame` });
 		if (g_customJsObj.mainEnterFrame.length > 0) {
 			g_scoreObj.baseFrame++;
 		}
@@ -10034,7 +10053,7 @@ const resultInit = _ => {
 	const flowResultTimeline = _ => {
 
 		// ユーザカスタムイベント(フレーム毎)
-		g_customJsObj.resultEnterFrame.forEach(func => func());
+		checkFunc(g_customJsObj.resultEnterFrame.forEach(func => func()), { pos: g_scoreObj.resultFrameNum, errTxt: `g_customJsObj.resultEnterFrame` });
 
 		// 背景・マスクモーション
 		drawTitleResultMotion(g_currentPage);
