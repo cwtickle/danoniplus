@@ -4977,6 +4977,7 @@ const createOptionWindow = _sprite => {
 
 				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 
+				// カラーグループ、シャッフルグループの設定
 				[`color`, `shuffle`].forEach(type => {
 					let k = 1;
 					g_keycons[`${type}Groups`] = [0];
@@ -4987,14 +4988,12 @@ const createOptionWindow = _sprite => {
 
 					if (g_keyObj.currentPtn === -1) {
 						if (storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] !== undefined) {
-							g_keycons[`${type}GroupNum`] = -1;
-							g_keycons[`${type}Groups`] = addValtoArray(g_keycons[`${type}Groups`], -1);
+							resetGroupList(type);
 							g_keyObj[`${type}${g_keyObj.currentKey}_-1`] = structuredClone(storageObj[`${type}${g_keyObj.currentKey}_-1_-1`]);
 						}
 						g_keyObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${g_keyObj.currentKey}_-1`]);
 					} else {
-						g_keycons[`${type}GroupNum`] = 0;
-						g_keycons[`${type}Groups`] = g_keycons[`${type}Groups`].filter(val => val !== -1);
+						resetGroupList(type);
 						g_keyObj[`${type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_0`]);
 					}
 				});
@@ -5350,6 +5349,20 @@ const makeMiniCssButton = (_id, _directionFlg, _heightPos, _func, { dx = 0, dy =
 	}, g_cssObj.button_Mini);
 };
 
+/**
+ * カラーグループ、シャッフルグループの再設定
+ * @param {string} _type 
+ */
+const resetGroupList = (_type) => {
+	if (g_keyObj.currentPtn === -1) {
+		g_keycons[`${_type}GroupNum`] = -1;
+		g_keycons[`${_type}Groups`] = addValtoArray(g_keycons[`${_type}Groups`], -1);
+	} else {
+		g_keycons[`${_type}GroupNum`] = 0;
+		g_keycons[`${_type}Groups`] = g_keycons[`${_type}Groups`].filter(val => val !== -1);
+	}
+};
+
 /*-----------------------------------------------------------*/
 /* Scene : SETTINGS-DISPLAY [lemon] */
 /*-----------------------------------------------------------*/
@@ -5593,15 +5606,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
 	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
 
-	[`color`, `shuffle`].forEach(type => {
-		if (g_keyObj.currentPtn === -1) {
-			g_keycons[`${type}GroupNum`] = -1;
-			g_keycons[`${type}Groups`] = addValtoArray(g_keycons[`${type}Groups`], -1);
-		} else {
-			g_keycons[`${type}GroupNum`] = 0;
-			g_keycons[`${type}Groups`] = g_keycons[`${type}Groups`].filter(val => val !== -1);
-		}
-	});
+	// カラーグループ、シャッフルグループの再設定
+	[`color`, `shuffle`].forEach(type => resetGroupList(type));
 
 	/**
 	 * keyconSpriteのスクロール位置調整
