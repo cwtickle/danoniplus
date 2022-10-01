@@ -1949,16 +1949,12 @@ const loadLocalStorage = _ => {
 		if (g_localStorage.highscores === undefined) {
 			g_localStorage.highscores = {};
 		}
-		if (g_localStorage.setColor === undefined) {
-			g_localStorage.setColor = [];
-		}
 
 	} else {
 		g_localStorage = {
 			adjustment: 0,
 			volume: 100,
 			highscores: {},
-			setColor: [],
 		};
 	}
 };
@@ -2910,12 +2906,6 @@ const headerConvert = _dosObj => {
 		g_stateObj[setting] = g_localStorage[setting]);
 	if (g_localStorage.colorType !== undefined) {
 		g_colorType = g_localStorage.colorType;
-		if (g_localStorage.setColor.length > 0) {
-			g_colorType = `TypeS`;
-			g_keycons.colorTypes.unshift(`TypeS`);
-			resetColorType({ _fromObj: g_localStorage, _toObj: obj, _to: `TypeS` });
-			resetColorType({ _fromObj: g_localStorage, _toObj: g_dfColorObj, _to: `TypeS` });
-		}
 		if (obj.colorUse) {
 			g_stateObj.d_color = g_keycons.colorDefTypes.findIndex(val => val === g_colorType) !== -1 ? C_FLG_ON : C_FLG_OFF;
 		}
@@ -4906,8 +4896,6 @@ const createOptionWindow = _sprite => {
 
 		// ---------------------------------------------------
 		// 1. キーコンフィグ設定 (KeyConfig)
-
-
 		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 		const isNotSameKey = (g_keyObj.prevKey !== g_keyObj.currentKey);
 
@@ -4939,6 +4927,7 @@ const createOptionWindow = _sprite => {
 					reverse: C_FLG_OFF,
 					keyCtrl: [[]],
 					keyCtrlPtn: 0,
+					setColor: [],
 				};
 				storageObj = g_localKeyStorage;
 
@@ -4954,6 +4943,21 @@ const createOptionWindow = _sprite => {
 					storageObj[`keyCtrlPtn${addKey}`] = 0;
 				}
 				getKeyCtrl(storageObj, addKey);
+
+				// カラーセット初期値設定
+				if (storageObj[`setColor${addKey}`] === undefined) {
+					storageObj[`setColor${addKey}`] = [];
+				}
+				if (storageObj[`setColor${addKey}`].length > 0) {
+					if (!g_keycons.colorTypes.includes(`TypeS`)) {
+						g_keycons.colorTypes.unshift(`TypeS`);
+					}
+					resetColorType({ _fromObj: storageObj, _from: addKey, _to: `TypeS` });
+					resetColorType({ _fromObj: storageObj, _from: addKey, _toObj: g_dfColorObj, _to: `TypeS` });
+				} else {
+					g_colorType = `Default`;
+					g_keycons.colorTypes = g_keycons.colorTypes.filter(val => val !== `TypeS`);
+				}
 			}
 
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -7860,26 +7864,6 @@ const getArrowSettings = _ => {
 		g_localStorage.volume = g_stateObj.volume;
 		g_localStorage.colorType = g_colorType;
 
-		// カラーセットの保存（作品別）
-		if (!g_keycons.colorDefTypes.includes(g_colorType)) {
-
-			resetColorType({ _toObj: g_localStorage });
-			resetColorType({ _from: g_colorType, _to: g_colorType, _fromObj: g_dfColorObj });
-
-			g_colorType = `TypeS`;
-			g_localStorage.colorType = `TypeS`;
-			if (!g_keycons.colorTypes.includes(`TypeS`)) {
-				g_keycons.colorTypes.unshift(`TypeS`);
-			}
-			resetColorType({ _to: `TypeS` });
-
-		} else {
-			g_keycons.colorTypes = g_keycons.colorTypes.filter(val => val !== `TypeS`);
-			g_localStorage.setColor = [];
-			g_localStorage.setShadowColor = [];
-			g_localStorage.frzColor = [];
-			g_localStorage.frzShadowColor = [];
-		}
 		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
 
 		let storageObj = g_localKeyStorage;
@@ -7895,6 +7879,20 @@ const getArrowSettings = _ => {
 		if (g_keyObj.currentPtn !== -1) {
 			storageObj[`keyCtrlPtn${addKey}`] = g_keyObj.currentPtn;
 			g_keyObj[`keyCtrl${keyCtrlPtn}`] = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
+		}
+
+		// カラーセットの保存（キー別）
+		if (!g_keycons.colorDefTypes.includes(g_colorType)) {
+
+			resetColorType({ _toObj: storageObj, _to: addKey });
+			resetColorType({ _from: g_colorType, _to: g_colorType, _fromObj: g_dfColorObj });
+
+			g_colorType = `TypeS`;
+			g_localStorage.colorType = `TypeS`;
+			if (!g_keycons.colorTypes.includes(`TypeS`)) {
+				g_keycons.colorTypes.unshift(`TypeS`);
+			}
+			resetColorType({ _to: `TypeS` });
 		}
 
 		if (!g_stateObj.extraKeyFlg) {
