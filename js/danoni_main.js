@@ -2402,6 +2402,11 @@ const preheaderConvert = _dosObj => {
 	// 背景・マスクモーションのパス指定方法を他の設定に合わせる設定
 	obj.syncBackPath = setBoolVal(_dosObj.syncBackPath ?? g_presetObj.syncBackPath);
 
+	[`color`, `shuffle`].forEach(type => {
+		const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type) && val.endsWith(`_0`));
+		tmpName.forEach(property => g_dfKeyObj[property] = structuredClone(g_keyObj[property]));
+	});
+
 	return obj;
 };
 
@@ -2906,9 +2911,8 @@ const headerConvert = _dosObj => {
 		g_stateObj[setting] = g_localStorage[setting]);
 	if (g_localStorage.colorType !== undefined) {
 		g_colorType = g_localStorage.colorType;
-		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
 		if (obj.colorUse) {
-			g_stateObj.d_color = g_keycons.colorDefs[typeNum];
+			g_stateObj.d_color = g_keycons.colorDefTypes.findIndex(val => val === g_colorType) !== -1 ? C_FLG_ON : C_FLG_OFF;
 		}
 	}
 
@@ -2999,6 +3003,30 @@ const headerConvert = _dosObj => {
 	});
 
 	return obj;
+};
+
+/**
+ * カラーセットの格納
+ * @param {object} obj 
+ */
+const resetColorType = ({ _from = ``, _to = ``, _fromObj = g_headerObj, _toObj = g_headerObj } = {}) => {
+	_toObj[`setColor${_to}`] = structuredClone(_fromObj[`setColor${_from}`]);
+	_toObj[`setShadowColor${_to}`] = structuredClone(_fromObj[`setShadowColor${_from}`]);
+	_toObj[`frzColor${_to}`] = structuredClone(_fromObj[`frzColor${_from}`]);
+	_toObj[`frzShadowColor${_to}`] = structuredClone(_fromObj[`frzShadowColor${_from}`]);
+};
+
+/**
+ * 配列にデータを先頭に追加
+ * @param {array} _arr 
+ * @param {string} _target 
+ * @returns 
+ */
+const addValtoArray = (_arr, _target) => {
+	if (!_arr.includes(_target)) {
+		_arr.unshift(_target);
+	}
+	return _arr;
 };
 
 /**
@@ -4886,8 +4914,6 @@ const createOptionWindow = _sprite => {
 
 		// ---------------------------------------------------
 		// 1. キーコンフィグ設定 (KeyConfig)
-
-
 		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
 		const isNotSameKey = (g_keyObj.prevKey !== g_keyObj.currentKey);
 
@@ -4905,49 +4931,76 @@ const createOptionWindow = _sprite => {
 		if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _initFlg) {
 
 			if (isNotSameKey && g_keyObj.prevKey !== `Dummy`) {
-				// キーパターン、シャッフルグループ初期化
+				// キーパターン初期化
 				g_keyObj.currentPtn = 0;
-				g_keycons.shuffleGroupNum = 0;
 			}
 			const hasKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
+			let storageObj, addKey = ``;
 
-			if (g_stateObj.extraKeyFlg) {
-
-				// 特殊キーの場合は作品毎のローカルストレージから取得
-				if (isNotSameKey) {
-					getKeyReverse(g_localStorage, g_keyObj.currentKey);
-
-					// キーコンフィグ初期値設定
-					if (g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] === undefined) {
-						g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] = 0;
-					}
-					getKeyCtrl(g_localStorage, g_keyObj.currentKey);
-				}
-
-			} else {
+			if (!g_stateObj.extraKeyFlg) {
 
 				// キー別のローカルストレージの初期設定　※特殊キーは除く
 				g_localKeyStorage = hasKeyStorage ? JSON.parse(hasKeyStorage) : {
 					reverse: C_FLG_OFF,
 					keyCtrl: [[]],
 					keyCtrlPtn: 0,
+					setColor: [],
 				};
+				storageObj = g_localKeyStorage;
 
-				if (isNotSameKey) {
-					getKeyReverse(g_localKeyStorage);
+			} else {
+				storageObj = g_localStorage;
+				addKey = g_keyObj.currentKey;
+			}
+			if (isNotSameKey) {
+				getKeyReverse(storageObj, addKey);
 
-					// キーコンフィグ初期値設定
-					if (g_localKeyStorage.keyCtrlPtn === undefined) {
-						g_localKeyStorage.keyCtrlPtn = 0;
-					}
-					getKeyCtrl(g_localKeyStorage);
+				// キーコンフィグ初期値設定
+				if (storageObj[`keyCtrlPtn${addKey}`] === undefined) {
+					storageObj[`keyCtrlPtn${addKey}`] = 0;
+				}
+				getKeyCtrl(storageObj, addKey);
+
+				// カラーセット初期値設定
+				if (storageObj[`setColor${addKey}`] === undefined) {
+					storageObj[`setColor${addKey}`] = [];
+				}
+				if (storageObj[`setColor${addKey}`].length > 0) {
+					g_keycons.colorTypes = addValtoArray(g_keycons.colorTypes, g_keycons.colorSelf);
+					resetColorType({ _fromObj: storageObj, _from: addKey, _to: g_keycons.colorSelf });
+					resetColorType({ _fromObj: storageObj, _from: addKey, _toObj: g_dfColorObj, _to: g_keycons.colorSelf });
+
+				} else {
+					g_colorType = `Default`;
+					g_keycons.colorTypes = g_keycons.colorTypes.filter(val => val !== g_keycons.colorSelf);
 				}
 
+				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+
+				// カラーグループ、シャッフルグループの設定
+				[`color`, `shuffle`].forEach(type => {
+					let k = 1;
+					g_keycons[`${type}Groups`] = [0];
+					while (g_keyObj[`${type}${keyCtrlPtn}_${k}`] !== undefined) {
+						g_keycons[`${type}Groups`].push(k);
+						k++;
+					}
+
+					if (g_keyObj.currentPtn === -1) {
+						if (storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] !== undefined) {
+							resetGroupList(type);
+							g_keyObj[`${type}${g_keyObj.currentKey}_-1`] = structuredClone(storageObj[`${type}${g_keyObj.currentKey}_-1_-1`]);
+						}
+						g_keyObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${g_keyObj.currentKey}_-1`]);
+					} else {
+						resetGroupList(type);
+						g_keyObj[`${type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_0`]);
+					}
+				});
+
 			}
+
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
-				g_keyObj[`shuffle${keyCtrlPtn}`] = g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`].concat();
-			}
 			if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
 				g_headerObj.keyRetry = setIntVal(g_keyObj[`keyRetry${keyCtrlPtn}`], g_headerObj.keyRetryDef);
 			}
@@ -5296,6 +5349,20 @@ const makeMiniCssButton = (_id, _directionFlg, _heightPos, _func, { dx = 0, dy =
 	}, g_cssObj.button_Mini);
 };
 
+/**
+ * カラーグループ、シャッフルグループの再設定
+ * @param {string} _type 
+ */
+const resetGroupList = (_type) => {
+	if (g_keyObj.currentPtn === -1) {
+		g_keycons[`${_type}GroupNum`] = -1;
+		g_keycons[`${_type}Groups`] = addValtoArray(g_keycons[`${_type}Groups`], -1);
+	} else {
+		g_keycons[`${_type}GroupNum`] = 0;
+		g_keycons[`${_type}Groups`] = g_keycons[`${_type}Groups`].filter(val => val !== -1);
+	}
+};
+
 /*-----------------------------------------------------------*/
 /* Scene : SETTINGS-DISPLAY [lemon] */
 /*-----------------------------------------------------------*/
@@ -5539,6 +5606,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
 	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
 
+	// カラーグループ、シャッフルグループの再設定
+	[`color`, `shuffle`].forEach(type => resetGroupList(type));
+
 	/**
 	 * keyconSpriteのスクロール位置調整
 	 * @param {number} _targetX 
@@ -5726,25 +5796,17 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 */
 	const viewGroup = _type => {
 		if (g_headerObj[`${_type}Use`]) {
-			if (g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
-				document.getElementById(`lnk${toCapitalize(_type)}Group`).textContent =
-					getStgDetailName(`${g_keycons[`${_type}GroupNum`] + 1}`);
+			const num = g_keycons[`${_type}GroupNum`] === -1 ? g_keycons.groupSelf : g_keycons[`${_type}GroupNum`] + 1;
+			if (document.getElementById(`lnk${toCapitalize(_type)}Group`) !== null) {
+				document.getElementById(`lnk${toCapitalize(_type)}Group`).textContent = getStgDetailName(num);
 			}
 			viewGroupObj[_type](`_${g_keycons[`${_type}GroupNum`]}`);
 		}
 	};
 	const setGroup = (_type, _scrollNum = 1) => {
-		const tmpNum = g_keycons[`${_type}GroupNum`] + _scrollNum;
-		if (g_keyObj[`${_type}${keyCtrlPtn}_${tmpNum}`] !== undefined) {
-			g_keycons[`${_type}GroupNum`] = tmpNum;
-		} else {
-			let j = 0;
-			while (g_keyObj[`${_type}${keyCtrlPtn}_${j}`] !== undefined) {
-				j -= _scrollNum;
-			}
-			g_keycons[`${_type}GroupNum`] = j + _scrollNum;
-		}
-		g_keyObj[`${_type}${keyCtrlPtn}`] = [...g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`]];
+		const groupNum = g_keycons[`${_type}GroupNum`];
+		g_keycons[`${_type}GroupNum`] = g_keycons[`${_type}Groups`][getNextNum(_scrollNum, `${_type}Groups`, groupNum)];
+		g_keyObj[`${_type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${_type}${keyCtrlPtn}_${groupNum}`]);
 		viewGroup(_type);
 	};
 
@@ -5796,11 +5858,12 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {object} obj (baseX) 
 	 */
 	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20, cssName } = {}) => {
-		if (g_headerObj[`${_type}Use`] && g_keyObj[`${_type}${keyCtrlPtn}_1`] !== undefined) {
+		if (g_headerObj[`${_type}Use`] && g_keycons[`${_type}Groups`].length > 1) {
 			const typeName = toCapitalize(_type);
+			const num = g_keycons[`${_type}GroupNum`] === -1 ? g_keycons.groupSelf : g_keycons[`${_type}GroupNum`] + 1;
 			multiAppend(divRoot,
 				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Group`, { x: baseX - 10, y: 37 }, cssName),
-				makeKCButton(`lnk${typeName}Group`, `${g_keycons[`${_type}GroupNum`] + 1}`, _ => setGroup(_type), {
+				makeKCButton(`lnk${typeName}Group`, `${num}`, _ => setGroup(_type), {
 					x: baseX, y: 50, w: g_sWidth / 18, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
 				}),
 				makeMiniKCButton(`lnk${typeName}Group`, `L`, _ => setGroup(_type, -1), { x: baseX - 10, y: 50 }),
@@ -5952,7 +6015,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		const nextNum = getNextNum(_scrollNum, `colorTypes`, g_colorType);
 		g_colorType = g_keycons.colorTypes[nextNum];
 		if (g_headerObj.colorUse) {
-			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
+			g_stateObj.d_color = g_keycons.colorDefTypes.findIndex(val => val === g_colorType) !== -1 ? C_FLG_ON : C_FLG_OFF;
 		}
 		changeSetColor();
 		viewGroupObj.color(`_${g_keycons.colorGroupNum}`);
@@ -7847,25 +7910,44 @@ const getArrowSettings = _ => {
 		g_localStorage.adjustment = g_stateObj.adjustment;
 		g_localStorage.volume = g_stateObj.volume;
 		g_localStorage.colorType = g_colorType;
+
 		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
 
-		// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
-		if (!g_stateObj.extraKeyFlg) {
-			g_localKeyStorage.reverse = g_stateObj.reverse;
-			g_localKeyStorage.keyCtrl = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
-			if (g_keyObj.currentPtn !== -1) {
-				g_localKeyStorage.keyCtrlPtn = g_keyObj.currentPtn;
-				g_keyObj[`keyCtrl${keyCtrlPtn}`] = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
-			}
-			localStorage.setItem(`danonicw-${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
+		let storageObj = g_localKeyStorage;
+		let addKey = ``;
 
-		} else {
-			g_localStorage[`reverse${g_keyObj.currentKey}`] = g_stateObj.reverse;
-			g_localStorage[`keyCtrl${g_keyObj.currentKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
-			if (g_keyObj.currentPtn !== -1) {
-				g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] = g_keyObj.currentPtn;
-				g_keyObj[`keyCtrl${keyCtrlPtn}`] = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
-			}
+		// リバース、キーコンフィグの保存（キー別）
+		if (g_stateObj.extraKeyFlg) {
+			storageObj = g_localStorage;
+			addKey = g_keyObj.currentKey;
+		}
+		storageObj[`reverse${addKey}`] = g_stateObj.reverse;
+		storageObj[`keyCtrl${addKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
+		if (g_keyObj.currentPtn !== -1) {
+			storageObj[`keyCtrlPtn${addKey}`] = g_keyObj.currentPtn;
+			g_keyObj[`keyCtrl${keyCtrlPtn}`] = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
+		}
+
+		// カラーセットの保存（キー別）
+		if (!g_keycons.colorDefTypes.includes(g_colorType)) {
+
+			resetColorType({ _toObj: storageObj, _to: addKey });
+			resetColorType({ _from: g_colorType, _to: g_colorType, _fromObj: g_dfColorObj });
+
+			g_colorType = g_keycons.colorSelf;
+			g_localStorage.colorType = g_keycons.colorSelf;
+			g_keycons.colorTypes = addValtoArray(g_keycons.colorTypes, g_keycons.colorSelf);
+			resetColorType({ _to: g_keycons.colorSelf });
+		}
+
+		[`color`, `shuffle`].forEach(type => {
+			const groupNum = g_keycons[`${type}GroupNum`];
+			storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]); g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
+			g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
+		});
+
+		if (!g_stateObj.extraKeyFlg) {
+			localStorage.setItem(`danonicw-${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
 		}
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 		g_canLoadDifInfoFlg = true;
