@@ -821,12 +821,17 @@ const g_keycons = {
     colorTypes: [`Default`, `Type0`, `Type1`, `Type2`, `Type3`, `Type4`],
     colorDefTypes: [`Default`, `Type0`],
     colorTypeNum: 0,
+    colorSelf: `TypeS`,
 
     imgTypes: [],
     imgTypeNum: 0,
 
+    colorGroups: [0],
     colorGroupNum: 0,
+
+    shuffleGroups: [0],
     shuffleGroupNum: 0,
+    groupSelf: `S`,
 };
 
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
@@ -1412,6 +1417,8 @@ const g_cssObj = {
 
     flex_centering: `flex_centering`,
 };
+
+const g_dfKeyObj = {};
 
 // キー別の設定（一旦ここで定義）
 // ステップゾーンの位置関係は自動化を想定
