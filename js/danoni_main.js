@@ -4930,21 +4930,9 @@ const createOptionWindow = _sprite => {
 				g_keycons.shuffleGroupNum = 0;
 			}
 			const hasKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
+			let storageObj, addKey = ``;
 
-			if (g_stateObj.extraKeyFlg) {
-
-				// 特殊キーの場合は作品毎のローカルストレージから取得
-				if (isNotSameKey) {
-					getKeyReverse(g_localStorage, g_keyObj.currentKey);
-
-					// キーコンフィグ初期値設定
-					if (g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] === undefined) {
-						g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] = 0;
-					}
-					getKeyCtrl(g_localStorage, g_keyObj.currentKey);
-				}
-
-			} else {
+			if (!g_stateObj.extraKeyFlg) {
 
 				// キー別のローカルストレージの初期設定　※特殊キーは除く
 				g_localKeyStorage = hasKeyStorage ? JSON.parse(hasKeyStorage) : {
@@ -4952,18 +4940,22 @@ const createOptionWindow = _sprite => {
 					keyCtrl: [[]],
 					keyCtrlPtn: 0,
 				};
+				storageObj = g_localKeyStorage;
 
-				if (isNotSameKey) {
-					getKeyReverse(g_localKeyStorage);
-
-					// キーコンフィグ初期値設定
-					if (g_localKeyStorage.keyCtrlPtn === undefined) {
-						g_localKeyStorage.keyCtrlPtn = 0;
-					}
-					getKeyCtrl(g_localKeyStorage);
-				}
-
+			} else {
+				storageObj = g_localStorage;
+				addKey = g_keyObj.currentKey;
 			}
+			if (isNotSameKey) {
+				getKeyReverse(storageObj, addKey);
+
+				// キーコンフィグ初期値設定
+				if (storageObj[`keyCtrlPtn${addKey}`] === undefined) {
+					storageObj[`keyCtrlPtn${addKey}`] = 0;
+				}
+				getKeyCtrl(storageObj, addKey);
+			}
+
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 			if (g_keyObj[`shuffle${keyCtrlPtn}_1`] !== undefined) {
 				g_keyObj[`shuffle${keyCtrlPtn}`] = g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`].concat();
@@ -7868,6 +7860,7 @@ const getArrowSettings = _ => {
 		g_localStorage.volume = g_stateObj.volume;
 		g_localStorage.colorType = g_colorType;
 
+		// カラーセットの保存（作品別）
 		if (!g_keycons.colorDefTypes.includes(g_colorType)) {
 
 			resetColorType({ _toObj: g_localStorage });
@@ -7889,23 +7882,23 @@ const getArrowSettings = _ => {
 		}
 		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
 
-		// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
-		if (!g_stateObj.extraKeyFlg) {
-			g_localKeyStorage.reverse = g_stateObj.reverse;
-			g_localKeyStorage.keyCtrl = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
-			if (g_keyObj.currentPtn !== -1) {
-				g_localKeyStorage.keyCtrlPtn = g_keyObj.currentPtn;
-				g_keyObj[`keyCtrl${keyCtrlPtn}`] = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
-			}
-			localStorage.setItem(`danonicw-${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
+		let storageObj = g_localKeyStorage;
+		let addKey = ``;
 
-		} else {
-			g_localStorage[`reverse${g_keyObj.currentKey}`] = g_stateObj.reverse;
-			g_localStorage[`keyCtrl${g_keyObj.currentKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
-			if (g_keyObj.currentPtn !== -1) {
-				g_localStorage[`keyCtrlPtn${g_keyObj.currentKey}`] = g_keyObj.currentPtn;
-				g_keyObj[`keyCtrl${keyCtrlPtn}`] = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
-			}
+		// リバース、キーコンフィグの保存（キー別）
+		if (g_stateObj.extraKeyFlg) {
+			storageObj = g_localStorage;
+			addKey = g_keyObj.currentKey;
+		}
+		storageObj[`reverse${addKey}`] = g_stateObj.reverse;
+		storageObj[`keyCtrl${addKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
+		if (g_keyObj.currentPtn !== -1) {
+			storageObj[`keyCtrlPtn${addKey}`] = g_keyObj.currentPtn;
+			g_keyObj[`keyCtrl${keyCtrlPtn}`] = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
+		}
+
+		if (!g_stateObj.extraKeyFlg) {
+			localStorage.setItem(`danonicw-${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
 		}
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 		g_canLoadDifInfoFlg = true;
