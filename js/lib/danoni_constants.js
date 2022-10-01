@@ -819,7 +819,7 @@ const g_keycons = {
     configTypeNum: 0,
 
     colorTypes: [`Default`, `Type0`, `Type1`, `Type2`, `Type3`, `Type4`],
-    colorDefs: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
+    colorDefTypes: [`Default`, `Type0`],
     colorTypeNum: 0,
 
     imgTypes: [],

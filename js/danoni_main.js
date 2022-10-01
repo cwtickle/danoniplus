@@ -1949,12 +1949,16 @@ const loadLocalStorage = _ => {
 		if (g_localStorage.highscores === undefined) {
 			g_localStorage.highscores = {};
 		}
+		if (g_localStorage.setColor === undefined) {
+			g_localStorage.setColor = [];
+		}
 
 	} else {
 		g_localStorage = {
 			adjustment: 0,
 			volume: 100,
 			highscores: {},
+			setColor: [],
 		};
 	}
 };
@@ -2906,9 +2910,14 @@ const headerConvert = _dosObj => {
 		g_stateObj[setting] = g_localStorage[setting]);
 	if (g_localStorage.colorType !== undefined) {
 		g_colorType = g_localStorage.colorType;
-		const typeNum = g_keycons.colorTypes.findIndex(value => value === g_colorType);
+		if (g_localStorage.setColor.length > 0) {
+			g_colorType = `TypeS`;
+			g_keycons.colorTypes.unshift(`TypeS`);
+			resetColorType({ _fromObj: g_localStorage, _toObj: obj, _to: `TypeS` });
+			resetColorType({ _fromObj: g_localStorage, _toObj: g_dfColorObj, _to: `TypeS` });
+		}
 		if (obj.colorUse) {
-			g_stateObj.d_color = g_keycons.colorDefs[typeNum];
+			g_stateObj.d_color = g_keycons.colorDefTypes.findIndex(val => val === g_colorType) !== -1 ? C_FLG_ON : C_FLG_OFF;
 		}
 	}
 
@@ -2999,6 +3008,17 @@ const headerConvert = _dosObj => {
 	});
 
 	return obj;
+};
+
+/**
+ * カラーセットの格納
+ * @param {object} obj 
+ */
+const resetColorType = ({ _from = ``, _to = ``, _fromObj = g_headerObj, _toObj = g_headerObj } = {}) => {
+	_toObj[`setColor${_to}`] = structuredClone(_fromObj[`setColor${_from}`]);
+	_toObj[`setShadowColor${_to}`] = structuredClone(_fromObj[`setShadowColor${_from}`]);
+	_toObj[`frzColor${_to}`] = structuredClone(_fromObj[`frzColor${_from}`]);
+	_toObj[`frzShadowColor${_to}`] = structuredClone(_fromObj[`frzShadowColor${_from}`]);
 };
 
 /**
@@ -5952,7 +5972,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		const nextNum = getNextNum(_scrollNum, `colorTypes`, g_colorType);
 		g_colorType = g_keycons.colorTypes[nextNum];
 		if (g_headerObj.colorUse) {
-			g_stateObj.d_color = g_keycons.colorDefs[nextNum];
+			g_stateObj.d_color = g_keycons.colorDefTypes.findIndex(val => val === g_colorType) !== -1 ? C_FLG_ON : C_FLG_OFF;
 		}
 		changeSetColor();
 		viewGroupObj.color(`_${g_keycons.colorGroupNum}`);
@@ -7847,6 +7867,26 @@ const getArrowSettings = _ => {
 		g_localStorage.adjustment = g_stateObj.adjustment;
 		g_localStorage.volume = g_stateObj.volume;
 		g_localStorage.colorType = g_colorType;
+
+		if (!g_keycons.colorDefTypes.includes(g_colorType)) {
+
+			resetColorType({ _toObj: g_localStorage });
+			resetColorType({ _from: g_colorType, _to: g_colorType, _fromObj: g_dfColorObj });
+
+			g_colorType = `TypeS`;
+			g_localStorage.colorType = `TypeS`;
+			if (!g_keycons.colorTypes.includes(`TypeS`)) {
+				g_keycons.colorTypes.unshift(`TypeS`);
+			}
+			resetColorType({ _to: `TypeS` });
+
+		} else {
+			g_keycons.colorTypes = g_keycons.colorTypes.filter(val => val !== `TypeS`);
+			g_localStorage.setColor = [];
+			g_localStorage.setShadowColor = [];
+			g_localStorage.frzColor = [];
+			g_localStorage.frzShadowColor = [];
+		}
 		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
 
 		// ローカルストレージ(キー別)へデータ保存　※特殊キーは除く
