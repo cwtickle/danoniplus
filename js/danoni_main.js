@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 28.1.1`;
+const g_version = `Ver 28.1.2`;
 const g_revisedDate = `2022/10/02`;
 const g_alphaVersion = ``;
 
@@ -4981,21 +4981,13 @@ const createOptionWindow = _sprite => {
 
 				// カラーグループ、シャッフルグループの設定
 				[`color`, `shuffle`].forEach(type => {
-					let k = 1;
-					g_keycons[`${type}Groups`] = [0];
-					while (g_keyObj[`${type}${keyCtrlPtn}_${k}`] !== undefined) {
-						g_keycons[`${type}Groups`].push(k);
-						k++;
-					}
-
+					resetGroupList(type, keyCtrlPtn);
 					if (g_keyObj.currentPtn === -1) {
 						if (storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] !== undefined) {
-							resetGroupList(type);
 							g_keyObj[`${type}${g_keyObj.currentKey}_-1`] = structuredClone(storageObj[`${type}${g_keyObj.currentKey}_-1_-1`]);
 						}
 						g_keyObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${g_keyObj.currentKey}_-1`]);
 					} else {
-						resetGroupList(type);
 						g_keyObj[`${type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_0`]);
 					}
 				});
@@ -5355,13 +5347,19 @@ const makeMiniCssButton = (_id, _directionFlg, _heightPos, _func, { dx = 0, dy =
  * カラーグループ、シャッフルグループの再設定
  * @param {string} _type 
  */
-const resetGroupList = (_type) => {
+const resetGroupList = (_type, _keyCtrlPtn) => {
+	let k = 1;
+	g_keycons[`${_type}Groups`] = [0];
+
 	if (g_keyObj.currentPtn === -1) {
 		g_keycons[`${_type}GroupNum`] = -1;
 		g_keycons[`${_type}Groups`] = addValtoArray(g_keycons[`${_type}Groups`], -1);
 	} else {
 		g_keycons[`${_type}GroupNum`] = 0;
-		g_keycons[`${_type}Groups`] = g_keycons[`${_type}Groups`].filter(val => val !== -1);
+	}
+	while (g_keyObj[`${_type}${_keyCtrlPtn}_${k}`] !== undefined) {
+		g_keycons[`${_type}Groups`].push(k);
+		k++;
 	}
 };
 
@@ -5609,7 +5607,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
 
 	// カラーグループ、シャッフルグループの再設定
-	[`color`, `shuffle`].forEach(type => resetGroupList(type));
+	[`color`, `shuffle`].forEach(type => resetGroupList(type, keyCtrlPtn));
 
 	/**
 	 * keyconSpriteのスクロール位置調整
@@ -5806,9 +5804,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		}
 	};
 	const setGroup = (_type, _scrollNum = 1) => {
-		const groupNum = g_keycons[`${_type}GroupNum`];
-		g_keycons[`${_type}GroupNum`] = g_keycons[`${_type}Groups`][getNextNum(_scrollNum, `${_type}Groups`, groupNum)];
-		g_keyObj[`${_type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${_type}${keyCtrlPtn}_${groupNum}`]);
+		g_keycons[`${_type}GroupNum`] = g_keycons[`${_type}Groups`][getNextNum(_scrollNum, `${_type}Groups`, g_keycons[`${_type}GroupNum`])];
+		g_keyObj[`${_type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`]);
 		viewGroup(_type);
 	};
 
@@ -7944,7 +7941,8 @@ const getArrowSettings = _ => {
 
 		[`color`, `shuffle`].forEach(type => {
 			const groupNum = g_keycons[`${type}GroupNum`];
-			storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]); g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
+			storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
+			g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
 			g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
 		});
 
@@ -8233,7 +8231,7 @@ const mainInit = _ => {
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
-	const shuffleName = (g_stateObj.shuffle !== C_FLG_OFF ? `: ${getShuffleName()}` : ``);
+	const shuffleName = (g_stateObj.shuffle !== C_FLG_OFF ? `: ${getStgDetailName(g_stateObj.shuffle)}` : ``);
 
 	// 曲名・アーティスト名、譜面名のサイズ調整
 	const checkMusicSiz = (_text, _siz) => getFontSize(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, getBasicFont(), _siz);
@@ -9821,7 +9819,7 @@ const resultInit = _ => {
 		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
-		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getShuffleName()}]`)}`
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getStgDetailName(g_stateObj.shuffle)}]`)}`
 	].filter(value => value !== ``).join(` `);
 
 	let playStyleData = [
@@ -10028,7 +10026,7 @@ const resultInit = _ => {
 	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `:${getShuffleName()}`;
+		tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
 	}
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
@@ -10154,18 +10152,6 @@ const resultInit = _ => {
 	document.oncontextmenu = _ => true;
 
 	g_skinJsObj.result.forEach(func => func());
-};
-
-/**
- * シャッフル名称の取得
- * @returns 
- */
-const getShuffleName = _ => {
-	let shuffleName = getStgDetailName(g_stateObj.shuffle);
-	if (!g_stateObj.shuffle.endsWith(`+`)) {
-		shuffleName += setScoreIdHeader(g_keycons.shuffleGroupNum);
-	}
-	return shuffleName;
 };
 
 /**
