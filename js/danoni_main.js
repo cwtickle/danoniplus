@@ -2402,8 +2402,9 @@ const preheaderConvert = _dosObj => {
 	// 背景・マスクモーションのパス指定方法を他の設定に合わせる設定
 	obj.syncBackPath = setBoolVal(_dosObj.syncBackPath ?? g_presetObj.syncBackPath);
 
+	// デフォルトのカラー・シャッフルグループ設定を退避
 	[`color`, `shuffle`].forEach(type => {
-		const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type) && val.endsWith(`_0`));
+		const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type));
 		tmpName.forEach(property => g_dfKeyObj[property] = structuredClone(g_keyObj[property]));
 	});
 
