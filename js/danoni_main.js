@@ -4981,21 +4981,13 @@ const createOptionWindow = _sprite => {
 
 				// カラーグループ、シャッフルグループの設定
 				[`color`, `shuffle`].forEach(type => {
-					let k = 1;
-					g_keycons[`${type}Groups`] = [0];
-					while (g_keyObj[`${type}${keyCtrlPtn}_${k}`] !== undefined) {
-						g_keycons[`${type}Groups`].push(k);
-						k++;
-					}
-
+					resetGroupList(type, keyCtrlPtn);
 					if (g_keyObj.currentPtn === -1) {
 						if (storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] !== undefined) {
-							resetGroupList(type);
 							g_keyObj[`${type}${g_keyObj.currentKey}_-1`] = structuredClone(storageObj[`${type}${g_keyObj.currentKey}_-1_-1`]);
 						}
 						g_keyObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${g_keyObj.currentKey}_-1`]);
 					} else {
-						resetGroupList(type);
 						g_keyObj[`${type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_0`]);
 					}
 				});
@@ -5355,13 +5347,19 @@ const makeMiniCssButton = (_id, _directionFlg, _heightPos, _func, { dx = 0, dy =
  * カラーグループ、シャッフルグループの再設定
  * @param {string} _type 
  */
-const resetGroupList = (_type) => {
+const resetGroupList = (_type, _keyCtrlPtn) => {
+	let k = 1;
+	g_keycons[`${_type}Groups`] = [0];
+
 	if (g_keyObj.currentPtn === -1) {
 		g_keycons[`${_type}GroupNum`] = -1;
 		g_keycons[`${_type}Groups`] = addValtoArray(g_keycons[`${_type}Groups`], -1);
 	} else {
 		g_keycons[`${_type}GroupNum`] = 0;
-		g_keycons[`${_type}Groups`] = g_keycons[`${_type}Groups`].filter(val => val !== -1);
+	}
+	while (g_keyObj[`${_type}${_keyCtrlPtn}_${k}`] !== undefined) {
+		g_keycons[`${_type}Groups`].push(k);
+		k++;
 	}
 };
 
@@ -5609,7 +5607,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
 
 	// カラーグループ、シャッフルグループの再設定
-	[`color`, `shuffle`].forEach(type => resetGroupList(type));
+	[`color`, `shuffle`].forEach(type => resetGroupList(type, keyCtrlPtn));
 
 	/**
 	 * keyconSpriteのスクロール位置調整
