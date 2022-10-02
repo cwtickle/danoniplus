@@ -4971,7 +4971,9 @@ const createOptionWindow = _sprite => {
 					resetColorType({ _fromObj: storageObj, _from: addKey, _toObj: g_dfColorObj, _to: g_keycons.colorSelf });
 
 				} else {
-					g_colorType = `Default`;
+					if (g_localStorage.colorType === g_keycons.colorSelf) {
+						g_colorType = `Default`;
+					}
 					g_keycons.colorTypes = g_keycons.colorTypes.filter(val => val !== g_keycons.colorSelf);
 				}
 
