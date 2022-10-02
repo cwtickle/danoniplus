@@ -5806,9 +5806,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		}
 	};
 	const setGroup = (_type, _scrollNum = 1) => {
-		const groupNum = g_keycons[`${_type}GroupNum`];
-		g_keycons[`${_type}GroupNum`] = g_keycons[`${_type}Groups`][getNextNum(_scrollNum, `${_type}Groups`, groupNum)];
-		g_keyObj[`${_type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${_type}${keyCtrlPtn}_${groupNum}`]);
+		g_keycons[`${_type}GroupNum`] = g_keycons[`${_type}Groups`][getNextNum(_scrollNum, `${_type}Groups`, g_keycons[`${_type}GroupNum`])];
+		g_keyObj[`${_type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`]);
 		viewGroup(_type);
 	};
 
@@ -7944,7 +7943,8 @@ const getArrowSettings = _ => {
 
 		[`color`, `shuffle`].forEach(type => {
 			const groupNum = g_keycons[`${type}GroupNum`];
-			storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]); g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
+			storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
+			g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
 			g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
 		});
 
