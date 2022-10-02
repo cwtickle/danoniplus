@@ -8233,7 +8233,7 @@ const mainInit = _ => {
 	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
-	const shuffleName = (g_stateObj.shuffle !== C_FLG_OFF ? `: ${getShuffleName()}` : ``);
+	const shuffleName = (g_stateObj.shuffle !== C_FLG_OFF ? `: ${getStgDetailName(g_stateObj.shuffle)}` : ``);
 
 	// 曲名・アーティスト名、譜面名のサイズ調整
 	const checkMusicSiz = (_text, _siz) => getFontSize(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, getBasicFont(), _siz);
@@ -9821,7 +9821,7 @@ const resultInit = _ => {
 		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
-		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getShuffleName()}]`)}`
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getStgDetailName(g_stateObj.shuffle)}]`)}`
 	].filter(value => value !== ``).join(` `);
 
 	let playStyleData = [
@@ -10028,7 +10028,7 @@ const resultInit = _ => {
 	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `:${getShuffleName()}`;
+		tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
 	}
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
@@ -10154,18 +10154,6 @@ const resultInit = _ => {
 	document.oncontextmenu = _ => true;
 
 	g_skinJsObj.result.forEach(func => func());
-};
-
-/**
- * シャッフル名称の取得
- * @returns 
- */
-const getShuffleName = _ => {
-	let shuffleName = getStgDetailName(g_stateObj.shuffle);
-	if (!g_stateObj.shuffle.endsWith(`+`)) {
-		shuffleName += setScoreIdHeader(g_keycons.shuffleGroupNum);
-	}
-	return shuffleName;
 };
 
 /**
