@@ -5308,14 +5308,12 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 		});
 
 		[`color`, `shuffle`].forEach(type => {
-			if (isUpdate) {
-				let maxPtn = 0;
-				while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
-					maxPtn++;
-				}
-				for (let j = 0; j < maxPtn; j++) {
-					g_keyObj[`${type}${copyPtn}_${j}`] = copyArray2d(g_keyObj[`${type}${basePtn}_${j}`]);
-				}
+			let maxPtn = 0;
+			while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
+				maxPtn++;
+			}
+			for (let j = 0; j < maxPtn; j++) {
+				g_keyObj[`${type}${copyPtn}_${j}`] = copyArray2d(g_keyObj[`${type}${basePtn}_${j}`]);
 			}
 		});
 	}
@@ -5890,10 +5888,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20, cssName } = {}) => {
 		if (g_headerObj[`${_type}Use`] && g_keycons[`${_type}Groups`].length > 1) {
 			const typeName = toCapitalize(_type);
-			const num = g_keycons[`${_type}GroupNum`] === -1 ? g_keycons.groupSelf : g_keycons[`${_type}GroupNum`] + 1;
 			multiAppend(divRoot,
 				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Group`, { x: baseX - 10, y: 37 }, cssName),
-				makeKCButton(`lnk${typeName}Group`, `${num}`, _ => setGroup(_type), {
+				makeKCButton(`lnk${typeName}Group`, ``, _ => setGroup(_type), {
 					x: baseX, y: 50, w: g_sWidth / 18, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
 				}),
 				makeMiniKCButton(`lnk${typeName}Group`, `L`, _ => setGroup(_type, -1), { x: baseX - 10, y: 50 }),
