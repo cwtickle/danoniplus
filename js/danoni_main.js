@@ -5308,14 +5308,12 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 		});
 
 		[`color`, `shuffle`].forEach(type => {
-			if (isUpdate) {
-				let maxPtn = 0;
-				while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
-					maxPtn++;
-				}
-				for (let j = 0; j < maxPtn; j++) {
-					g_keyObj[`${type}${copyPtn}_${j}`] = copyArray2d(g_keyObj[`${type}${basePtn}_${j}`]);
-				}
+			let maxPtn = 0;
+			while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
+				maxPtn++;
+			}
+			for (let j = 0; j < maxPtn; j++) {
+				g_keyObj[`${type}${copyPtn}_${j}`] = copyArray2d(g_keyObj[`${type}${basePtn}_${j}`]);
 			}
 		});
 	}
