@@ -1811,6 +1811,12 @@ const initialControl = async () => {
 			makeDedupliArray(g_rootObj.keyExtraList.split(`,`), g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
 	});
 
+	// デフォルトのカラー・シャッフルグループ設定を退避
+	[`color`, `shuffle`].forEach(type => {
+		const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type));
+		tmpName.forEach(property => g_dfKeyObj[property] = structuredClone(g_keyObj[property]));
+	});
+
 	// 自動横幅拡張設定
 	if (g_headerObj.autoSpread) {
 		const widthList = [g_sWidth, g_presetObj.autoMinWidth ?? g_keyObj.minWidth];
@@ -2401,12 +2407,6 @@ const preheaderConvert = _dosObj => {
 
 	// 背景・マスクモーションのパス指定方法を他の設定に合わせる設定
 	obj.syncBackPath = setBoolVal(_dosObj.syncBackPath ?? g_presetObj.syncBackPath);
-
-	// デフォルトのカラー・シャッフルグループ設定を退避
-	[`color`, `shuffle`].forEach(type => {
-		const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type));
-		tmpName.forEach(property => g_dfKeyObj[property] = structuredClone(g_keyObj[property]));
-	});
 
 	return obj;
 };
@@ -3379,6 +3379,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		let tmpMinPatterns = 1;
 		const keyheader = _name + _key;
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
+
 		if (hasVal(_dosObj[keyheader])) {
 			const tmpArray = splitLF2(_dosObj[keyheader]);
 			tmpMinPatterns = tmpArray.length;
@@ -3393,6 +3394,49 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				}
 				loopFunc(k, keyheader);
 			}
+
+		} else if (errCd !== `` && g_keyObj[`${keyheader}_0`] === undefined) {
+			makeWarningWindow(g_msgInfoObj[errCd].split(`{0}`).join(_key));
+		}
+		return tmpMinPatterns;
+	};
+
+	/**
+	 * 新キー用複合パラメータ（特殊）
+	 * @param {string} _key キー数
+	 * @param {string} _name 名前
+	 * @param {object} _obj errCd エラーコード
+	 * @returns 最小パターン数
+	 */
+	const newKeyTripleParam = (_key, _name, { errCd = `` } = {}) => {
+		let tmpMinPatterns = 1;
+		const keyheader = _name + _key;
+		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
+
+		if (hasVal(_dosObj[keyheader])) {
+			const tmpArray = splitLF2(_dosObj[keyheader]);
+			tmpMinPatterns = tmpArray.length;
+			for (let k = 0; k < tmpMinPatterns; k++) {
+				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
+					continue;
+				}
+				if (g_keyObj[`${_name}${tmpArray[k]}_0`] !== undefined) {
+
+					// 他のキーパターン (例: |shuffle8i=8_0| ) を指定した場合、該当があれば既存パターンからコピー
+					let m = 0;
+					while (g_keyObj[`${_name}${tmpArray[k]}_${m}`] !== undefined) {
+						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = structuredClone(g_keyObj[`${_name}${tmpArray[k]}_${m}`]);
+						m++;
+					}
+				} else {
+
+					// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
+					tmpArray[k].split(`/`).forEach((list, m) =>
+						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = list.split(`,`).map(n => parseInt(n, 10)));
+				}
+				g_keyObj[`${keyheader}_${k + dfPtn}`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}_0`]);
+			}
+
 		} else if (errCd !== `` && g_keyObj[`${keyheader}_0`] === undefined) {
 			makeWarningWindow(g_msgInfoObj[errCd].split(`{0}`).join(_key));
 		}
@@ -3451,15 +3495,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		}
 	};
 
-	/**
-	 * 子構成配列へのコピー
-	 * @param {number} _k 
-	 * @param {string} _header 
-	 * @returns 
-	 */
-	const copyChildArray = (_k, _header) =>
-		g_keyObj[`${_header}_${_k + g_keyObj.dfPtnNum}_0`] = copyArray2d(g_keyObj[`${_header}_${_k + g_keyObj.dfPtnNum}`]);
-
 	// 対象キー毎に処理
 	keyExtraList.forEach(newKey => {
 		let tmpDivPtn = [];
@@ -3484,10 +3519,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
 		// 矢印色パターン (colorX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
-			errCd: `E_0101`,
-			loopFunc: (k, keyheader) => copyChildArray(k, keyheader),
-		});
+		tmpMinPatterns = newKeyTripleParam(newKey, `color`, { errCd: `E_0101` });
 
 		// 読込変数の接頭辞 (charaX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `chara`, toString, { errCd: `E_0102` });
@@ -3561,9 +3593,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		newKeySingleParam(newKey, `transKey`, C_TYP_STRING);
 
 		// シャッフルグループ (shuffleX_Y)
-		newKeyMultiParam(newKey, `shuffle`, toNumber, {
-			loopFunc: (k, keyheader) => copyChildArray(k, keyheader),
-		});
+		newKeyTripleParam(newKey, `shuffle`);
 
 		// スクロールパターン (scrollX_Y)
 		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
