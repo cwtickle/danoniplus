@@ -5014,11 +5014,13 @@ const createOptionWindow = _sprite => {
 				[`color`, `shuffle`].forEach(type => {
 					resetGroupList(type, keyCtrlPtn);
 					if (g_keyObj.currentPtn === -1) {
+						g_keycons[`${type}GroupNum`] = -1;
 						if (storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] !== undefined) {
 							g_keyObj[`${type}${g_keyObj.currentKey}_-1`] = structuredClone(storageObj[`${type}${g_keyObj.currentKey}_-1_-1`]);
 						}
 						g_keyObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${g_keyObj.currentKey}_-1`]);
 					} else {
+						g_keycons[`${type}GroupNum`] = 0;
 						g_keyObj[`${type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_0`]);
 					}
 				});
@@ -5381,10 +5383,10 @@ const resetGroupList = (_type, _keyCtrlPtn) => {
 	g_keycons[`${_type}Groups`] = [0];
 
 	if (g_keyObj.currentPtn === -1) {
-		g_keycons[`${_type}GroupNum`] = -1;
 		g_keycons[`${_type}Groups`] = addValtoArray(g_keycons[`${_type}Groups`], -1);
-	} else {
-		g_keycons[`${_type}GroupNum`] = 0;
+	}
+	if (!g_canLoadDifInfoFlg) {
+		g_keycons[`${_type}GroupNum`] = (g_keyObj.currentPtn === -1 ? -1 : 0);
 	}
 	while (g_keyObj[`${_type}${_keyCtrlPtn}_${k}`] !== undefined) {
 		g_keycons[`${_type}Groups`].push(k);
@@ -5605,9 +5607,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	g_kcType = _kcType;
 	g_currentPage = `keyConfig`;
 
-	// 譜面初期情報ロード許可フラグ
-	g_canLoadDifInfoFlg = false;
-
 	multiAppend(divRoot,
 
 		// キーコンフィグ画面タイトル
@@ -5637,6 +5636,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 	// カラーグループ、シャッフルグループの再設定
 	[`color`, `shuffle`].forEach(type => resetGroupList(type, keyCtrlPtn));
+
+	// 譜面初期情報ロード許可フラグ
+	g_canLoadDifInfoFlg = false;
 
 	/**
 	 * keyconSpriteのスクロール位置調整
