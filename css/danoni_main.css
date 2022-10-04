@@ -13,6 +13,7 @@
 	height:500px;
 	position: relative;
 	overflow: hidden;
+	white-space: nowrap;
 }
 #canvas-frame canvas {
 	position: absolute;

@@ -1824,6 +1824,7 @@ const initialControl = async () => {
 
 		g_sWidth = Math.max(...widthList);
 		$id(`canvas-frame`).width = `${g_sWidth}px`;
+		$id(`divRoot`).width = `${g_sWidth}px`;
 	}
 	if (g_headerObj.playingWidth === `default`) {
 		g_headerObj.playingWidth = g_sWidth;
