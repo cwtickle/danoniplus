@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/10/02
+ * Revised : 2022/10/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 28.1.2`;
-const g_revisedDate = `2022/10/02`;
+const g_version = `Ver 28.2.0`;
+const g_revisedDate = `2022/10/04`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1811,6 +1811,12 @@ const initialControl = async () => {
 			makeDedupliArray(g_rootObj.keyExtraList.split(`,`), g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
 	});
 
+	// デフォルトのカラー・シャッフルグループ設定を退避
+	[`color`, `shuffle`].forEach(type => {
+		const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type));
+		tmpName.forEach(property => g_dfKeyObj[property] = structuredClone(g_keyObj[property]));
+	});
+
 	// 自動横幅拡張設定
 	if (g_headerObj.autoSpread) {
 		const widthList = [g_sWidth, g_presetObj.autoMinWidth ?? g_keyObj.minWidth];
@@ -2401,11 +2407,6 @@ const preheaderConvert = _dosObj => {
 
 	// 背景・マスクモーションのパス指定方法を他の設定に合わせる設定
 	obj.syncBackPath = setBoolVal(_dosObj.syncBackPath ?? g_presetObj.syncBackPath);
-
-	[`color`, `shuffle`].forEach(type => {
-		const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type) && val.endsWith(`_0`));
-		tmpName.forEach(property => g_dfKeyObj[property] = structuredClone(g_keyObj[property]));
-	});
 
 	return obj;
 };
@@ -3378,6 +3379,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		let tmpMinPatterns = 1;
 		const keyheader = _name + _key;
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
+
 		if (hasVal(_dosObj[keyheader])) {
 			const tmpArray = splitLF2(_dosObj[keyheader]);
 			tmpMinPatterns = tmpArray.length;
@@ -3392,6 +3394,49 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				}
 				loopFunc(k, keyheader);
 			}
+
+		} else if (errCd !== `` && g_keyObj[`${keyheader}_0`] === undefined) {
+			makeWarningWindow(g_msgInfoObj[errCd].split(`{0}`).join(_key));
+		}
+		return tmpMinPatterns;
+	};
+
+	/**
+	 * 新キー用複合パラメータ（特殊）
+	 * @param {string} _key キー数
+	 * @param {string} _name 名前
+	 * @param {object} _obj errCd エラーコード
+	 * @returns 最小パターン数
+	 */
+	const newKeyTripleParam = (_key, _name, { errCd = `` } = {}) => {
+		let tmpMinPatterns = 1;
+		const keyheader = _name + _key;
+		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
+
+		if (hasVal(_dosObj[keyheader])) {
+			const tmpArray = splitLF2(_dosObj[keyheader]);
+			tmpMinPatterns = tmpArray.length;
+			for (let k = 0; k < tmpMinPatterns; k++) {
+				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
+					continue;
+				}
+				if (g_keyObj[`${_name}${tmpArray[k]}_0`] !== undefined) {
+
+					// 他のキーパターン (例: |shuffle8i=8_0| ) を指定した場合、該当があれば既存パターンからコピー
+					let m = 0;
+					while (g_keyObj[`${_name}${tmpArray[k]}_${m}`] !== undefined) {
+						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = structuredClone(g_keyObj[`${_name}${tmpArray[k]}_${m}`]);
+						m++;
+					}
+				} else {
+
+					// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
+					tmpArray[k].split(`/`).forEach((list, m) =>
+						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = list.split(`,`).map(n => parseInt(n, 10)));
+				}
+				g_keyObj[`${keyheader}_${k + dfPtn}`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}_0`]);
+			}
+
 		} else if (errCd !== `` && g_keyObj[`${keyheader}_0`] === undefined) {
 			makeWarningWindow(g_msgInfoObj[errCd].split(`{0}`).join(_key));
 		}
@@ -3450,15 +3495,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		}
 	};
 
-	/**
-	 * 子構成配列へのコピー
-	 * @param {number} _k 
-	 * @param {string} _header 
-	 * @returns 
-	 */
-	const copyChildArray = (_k, _header) =>
-		g_keyObj[`${_header}_${_k + g_keyObj.dfPtnNum}_0`] = copyArray2d(g_keyObj[`${_header}_${_k + g_keyObj.dfPtnNum}`]);
-
 	// 対象キー毎に処理
 	keyExtraList.forEach(newKey => {
 		let tmpDivPtn = [];
@@ -3483,10 +3519,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
 		// 矢印色パターン (colorX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `color`, toNumber, {
-			errCd: `E_0101`,
-			loopFunc: (k, keyheader) => copyChildArray(k, keyheader),
-		});
+		tmpMinPatterns = newKeyTripleParam(newKey, `color`, { errCd: `E_0101` });
 
 		// 読込変数の接頭辞 (charaX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `chara`, toString, { errCd: `E_0102` });
@@ -3560,9 +3593,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		newKeySingleParam(newKey, `transKey`, C_TYP_STRING);
 
 		// シャッフルグループ (shuffleX_Y)
-		newKeyMultiParam(newKey, `shuffle`, toNumber, {
-			loopFunc: (k, keyheader) => copyChildArray(k, keyheader),
-		});
+		newKeyTripleParam(newKey, `shuffle`);
 
 		// スクロールパターン (scrollX_Y)
 		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
@@ -5277,14 +5308,12 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 		});
 
 		[`color`, `shuffle`].forEach(type => {
-			if (isUpdate) {
-				let maxPtn = 0;
-				while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
-					maxPtn++;
-				}
-				for (let j = 0; j < maxPtn; j++) {
-					g_keyObj[`${type}${copyPtn}_${j}`] = copyArray2d(g_keyObj[`${type}${basePtn}_${j}`]);
-				}
+			let maxPtn = 0;
+			while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
+				maxPtn++;
+			}
+			for (let j = 0; j < maxPtn; j++) {
+				g_keyObj[`${type}${copyPtn}_${j}`] = copyArray2d(g_keyObj[`${type}${basePtn}_${j}`]);
 			}
 		});
 	}
@@ -5352,11 +5381,9 @@ const resetGroupList = (_type, _keyCtrlPtn) => {
 	g_keycons[`${_type}Groups`] = [0];
 
 	if (g_keyObj.currentPtn === -1) {
-		g_keycons[`${_type}GroupNum`] = -1;
 		g_keycons[`${_type}Groups`] = addValtoArray(g_keycons[`${_type}Groups`], -1);
-	} else {
-		g_keycons[`${_type}GroupNum`] = 0;
 	}
+	g_keycons[`${_type}GroupNum`] = (g_keyObj.currentPtn === -1 ? -1 : 0);
 	while (g_keyObj[`${_type}${_keyCtrlPtn}_${k}`] !== undefined) {
 		g_keycons[`${_type}Groups`].push(k);
 		k++;
@@ -5605,9 +5632,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
 	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
-
-	// カラーグループ、シャッフルグループの再設定
-	[`color`, `shuffle`].forEach(type => resetGroupList(type, keyCtrlPtn));
 
 	/**
 	 * keyconSpriteのスクロール位置調整
@@ -5859,10 +5883,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20, cssName } = {}) => {
 		if (g_headerObj[`${_type}Use`] && g_keycons[`${_type}Groups`].length > 1) {
 			const typeName = toCapitalize(_type);
-			const num = g_keycons[`${_type}GroupNum`] === -1 ? g_keycons.groupSelf : g_keycons[`${_type}GroupNum`] + 1;
 			multiAppend(divRoot,
 				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Group`, { x: baseX - 10, y: 37 }, cssName),
-				makeKCButton(`lnk${typeName}Group`, `${num}`, _ => setGroup(_type), {
+				makeKCButton(`lnk${typeName}Group`, ``, _ => setGroup(_type), {
 					x: baseX, y: 50, w: g_sWidth / 18, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
 				}),
 				makeMiniKCButton(`lnk${typeName}Group`, `L`, _ => setGroup(_type, -1), { x: baseX - 10, y: 50 }),
@@ -6093,16 +6116,53 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const lblTransKey = hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ?
 		`(${g_keyObj[`transKey${keyCtrlPtn}`] ?? ''})` : ``;
 
-	// パターン検索
-	const searchPattern = (_tempPtn, _sign, _transKeyUse = false, _keyCheck = `keyCtrl`) => {
-		while (hasVal(g_keyObj[`${_keyCheck}${g_keyObj.currentKey}_${_tempPtn}`]) &&
-			_transKeyUse === false) {
-			_tempPtn += _sign;
-			if (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${_tempPtn}`] === undefined) {
-				break;
+	/**
+	 * キーパターン検索
+	 * @param {number} _tempPtn 
+	 * @param {number} _sign 
+	 * @param {boolean} _transKeyUse 
+	 * @returns 
+	 */
+	const searchPattern = (_tempPtn, _sign, _transKeyUse = false) => {
+		let nextPtn = _tempPtn + _sign;
+
+		const searchStart = _ => {
+			nextPtn = 0;
+			while (hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${nextPtn}`])) {
+				nextPtn -= _sign;
+			}
+			nextPtn += _sign;
+		};
+
+		if (hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${nextPtn}`])) {
+		} else {
+			searchStart();
+		}
+		if (!_transKeyUse) {
+			while (hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${nextPtn}`])) {
+				nextPtn += _sign;
+			}
+			if (!hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${nextPtn}`])) {
+				searchStart();
 			}
 		}
-		return _tempPtn;
+		return nextPtn;
+	};
+
+	/**
+	 * キーパターン変更時処理
+	 * @param {number} _sign 
+	 */
+	const changePattern = (_sign = 1) => {
+
+		// キーパターンの変更
+		g_keyObj.currentPtn = searchPattern(g_keyObj.currentPtn, _sign, g_headerObj.transKeyUse);
+
+		// カラーグループ、シャッフルグループの再設定
+		[`color`, `shuffle`].forEach(type => resetGroupList(type, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`));
+
+		// キーコンフィグ画面を再呼び出し
+		keyConfigInit();
 	};
 
 	// ユーザカスタムイベント(初期)
@@ -6125,24 +6185,12 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 		// パターン変更ボタン描画(右回り)
 		createCss2Button(`btnPtnChangeR`, `>>`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeR, {
-			resetFunc: _ => {
-				const tempPtn = searchPattern(g_keyObj.currentPtn + 1, 1, g_headerObj.transKeyUse, `transKey`);
-				g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
-					tempPtn : (g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`] !== undefined ? -1 : 0));
-
-				keyConfigInit();
-			},
+			resetFunc: _ => changePattern(),
 		}), g_cssObj.button_Setting),
 
 		// パターン変更ボタン描画(左回り)
 		createCss2Button(`btnPtnChangeL`, `<<`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeL, {
-			resetFunc: _ => {
-				const tempPtn = searchPattern(g_keyObj.currentPtn - 1, -1, g_headerObj.transKeyUse, `transKey`);
-				g_keyObj.currentPtn = (g_keyObj[`keyCtrl${g_keyObj.currentKey}_${tempPtn}`] !== undefined ?
-					tempPtn : searchPattern(searchPattern(0, 1) - 1, -1, g_headerObj.transKeyUse, `transKey`));
-
-				keyConfigInit();
-			},
+			resetFunc: _ => changePattern(-1),
 		}), g_cssObj.button_Setting),
 
 		// キーコンフィグリセットボタン描画
