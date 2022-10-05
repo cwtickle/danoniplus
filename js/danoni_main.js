@@ -1956,6 +1956,13 @@ const loadLocalStorage = _ => {
 			g_localStorage.highscores = {};
 		}
 
+		// 廃棄済みリストからデータを消去
+		g_storeSettingsEx.forEach(val => {
+			if (g_localStorage[val] !== undefined) {
+				delete g_localStorage[val];
+			}
+		});
+
 	} else {
 		g_localStorage = {
 			adjustment: 0,
@@ -2907,7 +2914,7 @@ const headerConvert = _dosObj => {
 		});
 	}
 
-	// ローカルストレージに保存済みのDisplay設定・ColorType設定を戻す
+	// ローカルストレージに保存済みのAppearance, Opacity設定・ColorType設定を戻す
 	g_storeSettings.filter(tmpSetting => hasVal(g_localStorage[tmpSetting])).forEach(setting =>
 		g_stateObj[setting] = g_localStorage[setting]);
 	if (g_localStorage.colorType !== undefined) {
