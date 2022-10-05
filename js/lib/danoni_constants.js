@@ -2924,7 +2924,7 @@ const g_lblNameObj = {
     filterLock: `Lock`,
 
     sc_speed: `←→`,
-    sc_scroll: `R/↑↓`,
+    sc_scroll: `R/<br>↑↓`,
     sc_adjustment: `- +`,
     sc_keyConfigPlay: g_isMac ? `Del+Enter` : `BS+Enter`,
 
