@@ -7993,6 +7993,11 @@ const getArrowSettings = _ => {
 			storageObj[`${type}${addKey}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
 			g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}d`]);
 			g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}d`]);
+
+			// 古いキーデータの削除 (互換用)
+			if (storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] !== undefined) {
+				delete storageObj[`${type}${g_keyObj.currentKey}_-1_-1`];
+			}
 		});
 
 		if (!g_stateObj.extraKeyFlg) {
