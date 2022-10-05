@@ -1814,7 +1814,7 @@ const initialControl = async () => {
 	// デフォルトのカラー・シャッフルグループ設定を退避
 	[`color`, `shuffle`].forEach(type => {
 		const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type));
-		tmpName.forEach(property => g_dfKeyObj[property] = structuredClone(g_keyObj[property]));
+		tmpName.forEach(property => g_keyObj[`${property}d`] = structuredClone(g_keyObj[property]));
 	});
 
 	// 自動横幅拡張設定
@@ -1955,6 +1955,13 @@ const loadLocalStorage = _ => {
 		if (g_localStorage.highscores === undefined) {
 			g_localStorage.highscores = {};
 		}
+
+		// 廃棄済みリストからデータを消去
+		g_storeSettingsEx.forEach(val => {
+			if (g_localStorage[val] !== undefined) {
+				delete g_localStorage[val];
+			}
+		});
 
 	} else {
 		g_localStorage = {
@@ -2907,7 +2914,7 @@ const headerConvert = _dosObj => {
 		});
 	}
 
-	// ローカルストレージに保存済みのDisplay設定・ColorType設定を戻す
+	// ローカルストレージに保存済みのAppearance, Opacity設定・ColorType設定を戻す
 	g_storeSettings.filter(tmpSetting => hasVal(g_localStorage[tmpSetting])).forEach(setting =>
 		g_stateObj[setting] = g_localStorage[setting]);
 	if (g_localStorage.colorType !== undefined) {
@@ -5014,8 +5021,9 @@ const createOptionWindow = _sprite => {
 				[`color`, `shuffle`].forEach(type => {
 					resetGroupList(type, keyCtrlPtn);
 					if (g_keyObj.currentPtn === -1) {
-						if (storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] !== undefined) {
-							g_keyObj[`${type}${g_keyObj.currentKey}_-1`] = structuredClone(storageObj[`${type}${g_keyObj.currentKey}_-1_-1`]);
+						const storageKeyName = storageObj[`${type}${addKey}`] || storageObj[`${type}${g_keyObj.currentKey}_-1_-1`];
+						if (storageKeyName !== undefined) {
+							g_keyObj[`${type}${g_keyObj.currentKey}_-1`] = structuredClone(storageKeyName);
 						}
 						g_keyObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${g_keyObj.currentKey}_-1`]);
 					} else {
@@ -7989,14 +7997,20 @@ const getArrowSettings = _ => {
 
 		[`color`, `shuffle`].forEach(type => {
 			const groupNum = g_keycons[`${type}GroupNum`];
-			storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
-			g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
-			g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
+			storageObj[`${type}${addKey}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
+			g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}d`]);
+			g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}d`]);
+
+			// 古いキーデータの削除 (互換用)
+			if (storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] !== undefined) {
+				delete storageObj[`${type}${g_keyObj.currentKey}_-1_-1`];
+			}
 		});
 
 		if (!g_stateObj.extraKeyFlg) {
 			localStorage.setItem(`danonicw-${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
 		}
+
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 		g_canLoadDifInfoFlg = true;
 
