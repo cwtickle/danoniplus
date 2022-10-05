@@ -1418,8 +1418,6 @@ const g_cssObj = {
     flex_centering: `flex_centering`,
 };
 
-const g_dfKeyObj = {};
-
 // キー別の設定（一旦ここで定義）
 // ステップゾーンの位置関係は自動化を想定
 const g_keyObj = {
@@ -3067,7 +3065,7 @@ const g_lblNameObj = {
 const g_lang_lblNameObj = {
     Ja: {
         kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
-        kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを一時的に変更`,
+        kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを変更`,
         sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
         kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
         transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,

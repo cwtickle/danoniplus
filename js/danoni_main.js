@@ -1814,7 +1814,7 @@ const initialControl = async () => {
 	// デフォルトのカラー・シャッフルグループ設定を退避
 	[`color`, `shuffle`].forEach(type => {
 		const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type));
-		tmpName.forEach(property => g_dfKeyObj[property] = structuredClone(g_keyObj[property]));
+		tmpName.forEach(property => g_keyObj[`${property}d`] = structuredClone(g_keyObj[property]));
 	});
 
 	// 自動横幅拡張設定
@@ -5014,8 +5014,9 @@ const createOptionWindow = _sprite => {
 				[`color`, `shuffle`].forEach(type => {
 					resetGroupList(type, keyCtrlPtn);
 					if (g_keyObj.currentPtn === -1) {
-						if (storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] !== undefined) {
-							g_keyObj[`${type}${g_keyObj.currentKey}_-1`] = structuredClone(storageObj[`${type}${g_keyObj.currentKey}_-1_-1`]);
+						const storageKeyName = storageObj[`${type}${addKey}`] || storageObj[`${type}${g_keyObj.currentKey}_-1_-1`];
+						if (storageKeyName !== undefined) {
+							g_keyObj[`${type}${g_keyObj.currentKey}_-1`] = structuredClone(storageKeyName);
 						}
 						g_keyObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${g_keyObj.currentKey}_-1`]);
 					} else {
@@ -7989,9 +7990,9 @@ const getArrowSettings = _ => {
 
 		[`color`, `shuffle`].forEach(type => {
 			const groupNum = g_keycons[`${type}GroupNum`];
-			storageObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
-			g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
-			g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`] = structuredClone(g_dfKeyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
+			storageObj[`${type}${addKey}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
+			g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}d`]);
+			g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}d`]);
 		});
 
 		if (!g_stateObj.extraKeyFlg) {
