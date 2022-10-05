@@ -4,29 +4,32 @@
   本体cssファイル
 
   Created : 2018/10/08
-  Revised : 2022/03/27 (v27.2.0)
+  Revised : 2022/10/05 (v28.2.1)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
 
 #canvas-frame {
-	height:500px;
+	height: 500px;
 	position: relative;
 	overflow: hidden;
+	white-space: nowrap;
 }
+
 #canvas-frame canvas {
 	position: absolute;
-	left:0;
+	left: 0;
 	overflow: hidden;
 }
 
-input[type=range] {
+input[type="range"] {
 	-webkit-appearance: none;
 	background: transparent;
 	height: 20px;
 	width: 205px;
 }
-input[type=range]::-webkit-slider-thumb {
+
+input[type="range"]::-webkit-slider-thumb {
 	-webkit-appearance: none;
 	background: #606060;
 	height: 20px;
@@ -34,10 +37,12 @@ input[type=range]::-webkit-slider-thumb {
 	opacity: 0.5;
 	border-radius: 50%;
 }
-input[type=range]::-moz-range-track{
+
+input[type="range"]::-moz-range-track {
 	height: 0;
 }
-input[type=range]::-moz-range-thumb{
+
+input[type="range"]::-moz-range-thumb {
 	background: #606060;
 	height: 20px;
 	width: 20px;
@@ -45,24 +50,27 @@ input[type=range]::-moz-range-thumb{
 	border: none;
 	border-radius: 50%;
 }
-input[type=range]:focus {
+
+input[type="range"]:focus {
 	outline: 0;
 }
 
-input[type=color] {
-	width:25px;
-	height:25px;
-	border:none;
+input[type="color"] {
+	width: 25px;
+	height: 25px;
+	border: none;
+	padding: 1px;
 }
 
 /* 左から右へ */
 @keyframes leftToRight {
 	0% {
-		opacity: 0;/* 透明 */
+		opacity: 0;
 		transform: translateX(-50px);
 	}
+
 	100% {
-		opacity: 1;/* 不透明 */
+		opacity: 1;
 		transform: translateX(0);
 	}
 }
@@ -70,11 +78,12 @@ input[type=color] {
 /* 上から下へ */
 @keyframes upToDown {
 	0% {
-		opacity: 0;/* 透明 */
+		opacity: 0;
 		transform: translateY(-50px);
 	}
+
 	100% {
-		opacity: 1;/* 不透明 */
+		opacity: 1;
 		transform: translateY(0);
 	}
 }
@@ -82,19 +91,22 @@ input[type=color] {
 /* 左から右へ移動し、フェードアウト（結果画面で使用） */
 @keyframes leftToRightFade {
 	0% {
-		opacity: 0;/* 透明 */
+		opacity: 0;
 		transform: translateX(-30px);
 	}
+
 	30% {
-		opacity: 1;/* 不透明 */
+		opacity: 1;
 		transform: translateX(0);
 	}
+
 	60% {
-		opacity: 1;/* 不透明 */
+		opacity: 1;
 		transform: translateX(0);
 	}
+
 	100% {
-		opacity: 0;/* 透明 */
+		opacity: 0;
 		transform: translateX(30px);
 	}
 }
@@ -102,19 +114,22 @@ input[type=color] {
 /* 上から下へ移動し、フェードアウト（結果画面で使用） */
 @keyframes upToDownFade {
 	0% {
-		opacity: 0;/* 透明 */
+		opacity: 0;
 		transform: translateY(-30px);
 	}
+
 	30% {
-		opacity: 1;/* 不透明 */
+		opacity: 1;
 		transform: translateY(0);
 	}
+
 	80% {
-		opacity: 1;/* 不透明 */
+		opacity: 1;
 		transform: translateY(0);
 	}
+
 	100% {
-		opacity: 0;/* 透明 */
+		opacity: 0;
 		transform: translateY(10px);
 	}
 }
@@ -122,25 +137,27 @@ input[type=color] {
 /* 徐々に表示（結果画面で使用） */
 @keyframes slowlyAppearing {
 	0% {
-		opacity: 0.5;/* 透明 */
+		opacity: 0.5;
 	}
+
 	80% {
-		opacity: 0.5;/* 透明 */
+		opacity: 0.5;
 	}
+
 	100% {
-		opacity: 1;/* 不透明 */
+		opacity: 1;
 	}
 }
 
 /* 文字拡大から元のサイズへ戻る */
 @keyframes fromBig {
 	0% {
-		opacity: 0;/* 透明 */
+		opacity: 0;
 		transform: scale(1.5, 1.5);
-		
 	}
+
 	100% {
-		opacity: 1;/* 不透明 */
+		opacity: 1;
 		transform: scale(1, 1);
 	}
 }
@@ -148,11 +165,12 @@ input[type=color] {
 /* 徐々に表示(Y方向) */
 @keyframes smallToNormalY {
 	0% {
-		opacity: 0;/* 透明 */
+		opacity: 0;
 		transform: scale(1, 0);
 	}
+
 	100% {
-		opacity: 1;/* 不透明 */
+		opacity: 1;
 		transform: scale(1, 1);
 	}
 }
@@ -162,6 +180,7 @@ input[type=color] {
 	0% {
 		transform: rotateX(0deg);
 	}
+
 	100% {
 		transform: rotateX(360deg);
 	}
@@ -172,6 +191,7 @@ input[type=color] {
 	0% {
 		transform: rotateY(0deg);
 	}
+
 	100% {
 		transform: rotateY(360deg);
 	}
@@ -182,6 +202,7 @@ input[type=color] {
 	0% {
 		transform: rotateZ(0deg);
 	}
+
 	100% {
 		transform: rotateZ(360deg);
 	}
@@ -192,6 +213,7 @@ input[type=color] {
 	0% {
 		filter: blur(8px);
 	}
+
 	100% {
 		filter: blur(0);
 	}
@@ -202,12 +224,15 @@ input[type=color] {
 	0% {
 		filter: brightness(0.0);
 	}
+
 	30% {
 		filter: brightness(2.0);
 	}
+
 	70% {
 		filter: brightness(0.0);
 	}
+
 	100% {
 		filter: brightness(1.0);
 	}
@@ -218,6 +243,7 @@ input[type=color] {
 	0% {
 		opacity: 0;
 	}
+
 	100% {
 		opacity: 1;
 	}
@@ -227,6 +253,7 @@ input[type=color] {
 	0% {
 		opacity: 0;
 	}
+
 	100% {
 		opacity: 1;
 	}
@@ -237,6 +264,7 @@ input[type=color] {
 	0% {
 		opacity: 1;
 	}
+
 	100% {
 		opacity: 0;
 	}
@@ -246,6 +274,7 @@ input[type=color] {
 	0% {
 		opacity: 1;
 	}
+
 	100% {
 		opacity: 0;
 	}
@@ -254,29 +283,35 @@ input[type=color] {
 .toRight {
 	animation-name: leftToRight;
 }
+
 .toSpin {
 	animation-name: spinY;
 }
 
 /* 設定画面：ゲージ設定詳細 */
 .settings_gaugeVal {
-	font-size:12px;
+	font-size: 12px;
 }
+
 .settings_gaugeDivCover {
 	border: 1px #666666 solid;
 	width: 280px;
 }
+
 .settings_gaugeDivTable {
 	display: table;
 	width: 279px;
 }
+
 .settings_gaugeDivTableCol {
 	display: table-cell;
 	border-collapse: collapse;
 }
+
 .settings_gaugeStart {
 	width: 85px;
 }
+
 .settings_gaugeEtc {
 	width: 65px;
 }
@@ -296,6 +331,7 @@ input[type=color] {
 	justify-content: center;
 	cursor: default;
 }
+
 .button_common:hover {
 	cursor: pointer;
 }
@@ -306,6 +342,6 @@ input[type=color] {
 }
 
 /* 警告ウィンドウ */
-#lblWarning > p {
+#lblWarning>p {
 	margin: 15px 5px;
 }
