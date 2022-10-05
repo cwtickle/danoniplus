@@ -10089,7 +10089,7 @@ const resultInit = _ => {
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
 	}
-	const twiturl = new URL(g_localStorageUrl);
+	const twiturl = new URL(g_localStorageOrgUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 
 	let tweetFrzJdg = ``;
