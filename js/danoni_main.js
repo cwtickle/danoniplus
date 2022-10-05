@@ -1915,7 +1915,7 @@ const loadLocalStorage = _ => {
 	const url = new URL(location.href);
 	url.searchParams.delete('scoreId');
 	g_localStorageOrgUrl = url.toString();
-	g_localStorageUrl = url.pathname;
+	g_localStorageUrl = `${url.pathname}${url.search}`;
 
 	/**
 	 * ローカルストレージの初期値設定
