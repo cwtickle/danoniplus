@@ -187,7 +187,6 @@ let g_langStorage = {};
 // ローカルストレージ設定 (作品別)
 let g_localStorage;
 let g_localStorageUrl;
-let g_localStorageOrgUrl;
 
 // ローカルストレージ設定 (ドメイン・キー別)
 let g_localKeyStorage;
@@ -1914,8 +1913,7 @@ const loadLocalStorage = _ => {
 	// URLからscoreIdを削除
 	const url = new URL(location.href);
 	url.searchParams.delete('scoreId');
-	g_localStorageOrgUrl = url.toString();
-	g_localStorageUrl = `${url.pathname}${url.search}`;
+	g_localStorageUrl = url.toString();
 
 	/**
 	 * ローカルストレージの初期値設定
@@ -1943,7 +1941,7 @@ const loadLocalStorage = _ => {
 	Object.assign(g_msgInfoObj, g_lang_msgInfoObj[g_localeObj.val]);
 
 	// 作品別ローカルストレージの読込
-	const checkStorage = localStorage.getItem(g_localStorageUrl) || localStorage.getItem(g_localStorageOrgUrl);
+	const checkStorage = localStorage.getItem(g_localStorageUrl);
 	if (checkStorage) {
 		g_localStorage = JSON.parse(checkStorage);
 
@@ -8006,10 +8004,6 @@ const getArrowSettings = _ => {
 			localStorage.setItem(`danonicw-${g_keyObj.currentKey}k`, JSON.stringify(g_localKeyStorage));
 		}
 
-		// 古いキーデータの削除（互換用、作品別）
-		if (localStorage.getItem(g_localStorageOrgUrl)) {
-			localStorage.removeItem(g_localStorageOrgUrl);
-		}
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 		g_canLoadDifInfoFlg = true;
 
@@ -10089,7 +10083,7 @@ const resultInit = _ => {
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
 	}
-	const twiturl = new URL(g_localStorageOrgUrl);
+	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 
 	let tweetFrzJdg = ``;
