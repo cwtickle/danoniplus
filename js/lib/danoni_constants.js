@@ -3187,8 +3187,7 @@ const g_lang_msgObj = {
         colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
         shuffleGroup: `Mirror/Asym-Mirror/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
 
-        pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）をカラーピッカーから選んで変更できます。`,
-        pickFrz: `色番号ごとの通常時のフリーズアロー色（枠、帯）をカラーピッカーから選んで変更できます。`,
+        pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）、通常時のフリーズアロー色（枠、帯）を\nカラーピッカーから選んで変更できます。`,
         pickColorCopy: `このボタンを押すと、フリーズアローの配色を矢印（枠）の色で上書きします。\nヒット時のフリーズアローの色も上書きします。`,
     },
 
@@ -3242,9 +3241,8 @@ const g_lang_msgObj = {
         colorGroup: `Change the sequences color group assignment pattern.`,
         shuffleGroup: `Change the shuffle group when Mirror, Asym-Mirror, Random or S-Random are selected.\nShuffle with the same numbers listed above.`,
 
-        pickArrow: `Change the frame or fill of arrow color for each color number from the color picker.`,
-        pickFrz: `Change the frame or bar of normal freeze-arrow color for each color number from the color picker.`,
-        pickColorCopy: `Pressing this button will override the color scheme of the freeze arrow with the frame color of the arrow. It also overrides the color of the freeze arrow on hit.`,
+        pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,
+        pickColorCopy: `Pressing this button will override the color scheme of the freeze arrow with the frame color of the arrow. \nIt also overrides the color of the freeze arrow on hit.`,
     },
 
 };

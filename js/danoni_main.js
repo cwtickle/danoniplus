@@ -6072,7 +6072,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		keyConfigInit(g_kcType);
 	};
 
-	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, g_windowObj.colorPickSprite);
+	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, Object.assign({ title: g_msgObj.pickArrow }, g_windowObj.colorPickSprite));
 	if ([`Default`, `Type0`].includes(g_colorType)) {
 		colorPickSprite.style.display = C_DIS_NONE;
 	}
@@ -6089,8 +6089,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			}
 		}, g_lblPosObj.lnkColorCopy, g_cssObj.button_Start),
 	);
-	document.getElementById(`lblPickArrow`).title = g_msgObj.pickArrow;
-	document.getElementById(`lblPickFrz`).title = g_msgObj.pickFrz;
 
 	/**
 	 * ColorPicker部分の作成
