@@ -889,7 +889,7 @@ const getStrWidth = (_str, _fontsize, _font) => {
  * @param {number} _maxFontsize
  * @param {number} _minFontsize
  */
-const getFontSize = (_str, _maxWidth, _font = getBasicreateDivCss2LabelcFont(), _maxFontsize = 64, _minFontsize = 5) => {
+const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64, _minFontsize = 5) => {
 	for (let siz = _maxFontsize; siz >= _minFontsize; siz--) {
 		if (_maxWidth >= getStrWidth(_str, siz, _font)) {
 			return siz;
