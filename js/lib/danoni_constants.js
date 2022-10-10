@@ -2054,7 +2054,7 @@ const g_keyObj = {
     // 矢印群の倍率指定
     scale: 1,
     scale_def: 1,
-    scale17_0: 0.85,
+    scale17_0: 0.95,
 
     // ショートカットキーコード
     keyRetry: 8,
@@ -2544,7 +2544,7 @@ const g_keyObj = {
     minWidth11i: 650,
     minWidth13: 650,
     minWidth16i: 650,
-    minWidth17: 800,
+    minWidth17: 850,
     minWidth23: 900,
 
 };
