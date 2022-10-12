@@ -5813,6 +5813,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 	/**
 	 * カラー・シャッフルグループ設定の表示
+	 * - シャッフルグループではデフォルトからの差異表示もここで行う
 	 * @param {string} _type 
 	 */
 	const viewGroup = _type => {
@@ -6165,6 +6166,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// キーコンフィグ画面を再呼び出し
 		keyConfigInit();
 
+		// シャッフルグループのデフォルト値からの差異表示（色付け）
+		// 再描画後で無いと色付けできないため、keyConfigInit() 実行後に処理
 		changeShuffleConfigColor(`${g_keyObj.currentKey}_${g_keyObj.currentPtn}`, g_keyObj[`shuffle${g_keyObj.currentKey}_${g_keyObj.currentPtn}_${g_keycons.shuffleGroupNum}`]);
 	};
 
@@ -6366,8 +6369,8 @@ const changeConfigColor = (_obj, _cssName) => {
  */
 const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
 	const changeTargetColor = (_val, _k) => {
-		const equalShuffleGr = (_val === g_keyObj[`shuffle${_keyCtrlPtn}_0d`][_k]);
-		changeConfigColor(document.getElementById(`sArrow${_k}`), equalShuffleGr ? g_cssObj.title_base : g_cssObj.keyconfig_Changekey);
+		const isEqualShuffleGr = (_val === g_keyObj[`shuffle${_keyCtrlPtn}_0d`][_k]);
+		changeConfigColor(document.getElementById(`sArrow${_k}`), isEqualShuffleGr ? g_cssObj.title_base : g_cssObj.keyconfig_Changekey);
 	};
 
 	if (_j === -1) {
