@@ -6359,7 +6359,10 @@ const changeConfigColor = (_obj, _cssName) => {
 
 /**
  * シャッフルグループの色変更
- * @param {array} _vals 
+ * - デフォルト値と違う番号になった場合、色付けする
+ * @param {string} _keyCtrlPtn キーコンフィグパターン
+ * @param {array} _vals シャッフルグループ番号（群）
+ * @param {number} _j (-1: 全体に対して色付け, それ以外: 指定箇所のみ色付け)
  */
 const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
 	const changeTargetColor = (_val, _k) => {
@@ -6368,7 +6371,7 @@ const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
 	};
 
 	if (_j === -1) {
-		_vals.forEach((val, j) => changeTargetColor(val, j));
+		_vals.forEach((val, m) => changeTargetColor(val, m));
 	} else {
 		changeTargetColor(_vals, _j);
 	}
