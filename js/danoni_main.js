@@ -5292,7 +5292,6 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 	const baseKeyCtrlPtn = _localStorage[`keyCtrlPtn${_extraKeyName}`];
 	const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
 	const baseKeyNum = g_keyObj[`chara${basePtn}`].length;
-	g_keyObj.basePtn = basePtn;
 
 	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined && _localStorage[`keyCtrl${_extraKeyName}`][0].length > 0) {
 		const prevPtn = g_keyObj.currentPtn;
