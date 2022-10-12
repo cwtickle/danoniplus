@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/10/05
+ * Revised : 2022/10/13
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 28.2.1`;
-const g_revisedDate = `2022/10/05`;
+const g_version = `Ver 28.3.0`;
+const g_revisedDate = `2022/10/13`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5324,6 +5324,7 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 			for (let j = 0; j < maxPtn; j++) {
 				g_keyObj[`${type}${copyPtn}_${j}`] = copyArray2d(g_keyObj[`${type}${basePtn}_${j}`]);
 			}
+			g_keyObj[`${type}${copyPtn}_0d`] = structuredClone(g_keyObj[`${type}${copyPtn}_0`]);
 		});
 	}
 };
@@ -5673,22 +5674,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {number} _k 
 	 * @param {string} _cssName 
 	 */
-	const changeKeyConfigColor = (_j, _k, _cssName) => {
-		const obj = document.querySelector(`#keycon${_j}_${_k}`);
-		const resetClass = _className => {
-			if (obj.classList.contains(_className)) {
-				obj.classList.remove(_className);
-			}
-		};
-
-		// CSSクラスの除去
-		resetClass(g_cssObj.keyconfig_Changekey);
-		resetClass(g_cssObj.keyconfig_Defaultkey);
-		resetClass(g_cssObj.title_base);
-
-		// 指定されたCSSクラスを適用
-		obj.classList.add(_cssName);
-	};
+	const changeKeyConfigColor = (_j, _k, _cssName) =>
+		changeConfigColor(document.querySelector(`#keycon${_j}_${_k}`), _cssName);
 
 	/**
 	 * 一時的に矢印色・シャッフルグループを変更（共通処理）
@@ -5729,6 +5716,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		const tmpShuffle = changeTmpData(`shuffle`, 10, _j, _scrollNum);
 		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
 
+		changeShuffleConfigColor(keyCtrlPtn, g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j], _j);
 		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
 	};
 
@@ -5825,6 +5813,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 	/**
 	 * カラー・シャッフルグループ設定の表示
+	 * - シャッフルグループではデフォルトからの差異表示もここで行う
 	 * @param {string} _type 
 	 */
 	const viewGroup = _type => {
@@ -5834,6 +5823,10 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				document.getElementById(`lnk${toCapitalize(_type)}Group`).textContent = getStgDetailName(num);
 			}
 			viewGroupObj[_type](`_${g_keycons[`${_type}GroupNum`]}`);
+
+			if (_type === `shuffle`) {
+				changeShuffleConfigColor(keyCtrlPtn, g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`]);
+			}
 		}
 	};
 	const setGroup = (_type, _scrollNum = 1) => {
@@ -6072,7 +6065,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		keyConfigInit(g_kcType);
 	};
 
-	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, g_windowObj.colorPickSprite);
+	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, Object.assign({ title: g_msgObj.pickArrow }, g_windowObj.colorPickSprite));
 	if ([`Default`, `Type0`].includes(g_colorType)) {
 		colorPickSprite.style.display = C_DIS_NONE;
 	}
@@ -6172,6 +6165,12 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 		// キーコンフィグ画面を再呼び出し
 		keyConfigInit();
+
+		// シャッフルグループのデフォルト値からの差異表示（色付け）
+		// 再描画後で無いと色付けできないため、keyConfigInit() 実行後に処理
+		if (g_headerObj.shuffleUse) {
+			changeShuffleConfigColor(`${g_keyObj.currentKey}_${g_keyObj.currentPtn}`, g_keyObj[`shuffle${g_keyObj.currentKey}_${g_keyObj.currentPtn}_${g_keycons.shuffleGroupNum}`]);
+		}
 	};
 
 	// ユーザカスタムイベント(初期)
@@ -6339,6 +6338,47 @@ const changeSetColor = _ => {
 	// 影矢印が未指定の場合はType1, Type2の影矢印指定を無くす
 	if (!hasVal(g_headerObj[`setShadowColor${scoreIdHeader}Default`][0]) && [`Type1`, `Type2`].includes(g_colorType)) {
 		g_headerObj.setShadowColor = [...Array(g_headerObj.setColorInit.length)].fill(``);
+	}
+};
+
+/**
+ * コンフィグの色変更
+ * @param {object} _obj 
+ * @param {string} _cssName 
+ */
+const changeConfigColor = (_obj, _cssName) => {
+	const resetClass = _className => {
+		if (_obj.classList.contains(_className)) {
+			_obj.classList.remove(_className);
+		}
+	};
+
+	// CSSクラスの除去
+	resetClass(g_cssObj.keyconfig_Changekey);
+	resetClass(g_cssObj.keyconfig_Defaultkey);
+	resetClass(g_cssObj.title_base);
+
+	// 指定されたCSSクラスを適用
+	_obj.classList.add(_cssName);
+};
+
+/**
+ * シャッフルグループの色変更
+ * - デフォルト値と違う番号になった場合、色付けする
+ * @param {string} _keyCtrlPtn キーコンフィグパターン
+ * @param {array} _vals シャッフルグループ番号（群）
+ * @param {number} _j (-1: 全体に対して色付け, それ以外: 指定箇所のみ色付け)
+ */
+const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
+	const changeTargetColor = (_val, _k) => {
+		const isEqualShuffleGr = (_val === g_keyObj[`shuffle${_keyCtrlPtn}_0d`][_k]);
+		changeConfigColor(document.getElementById(`sArrow${_k}`), isEqualShuffleGr ? g_cssObj.title_base : g_cssObj.keyconfig_Changekey);
+	};
+
+	if (_j === -1) {
+		_vals.forEach((val, m) => changeTargetColor(val, m));
+	} else {
+		changeTargetColor(_vals, _j);
 	}
 };
 
