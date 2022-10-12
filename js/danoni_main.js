@@ -6168,7 +6168,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 		// シャッフルグループのデフォルト値からの差異表示（色付け）
 		// 再描画後で無いと色付けできないため、keyConfigInit() 実行後に処理
-		changeShuffleConfigColor(`${g_keyObj.currentKey}_${g_keyObj.currentPtn}`, g_keyObj[`shuffle${g_keyObj.currentKey}_${g_keyObj.currentPtn}_${g_keycons.shuffleGroupNum}`]);
+		if (g_headerObj.shuffleUse) {
+			changeShuffleConfigColor(`${g_keyObj.currentKey}_${g_keyObj.currentPtn}`, g_keyObj[`shuffle${g_keyObj.currentKey}_${g_keyObj.currentPtn}_${g_keycons.shuffleGroupNum}`]);
+		}
 	};
 
 	// ユーザカスタムイベント(初期)
