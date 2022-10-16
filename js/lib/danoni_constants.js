@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/10/13 (v28.3.0)
+ * Revised : 2022/10/16 (v28.3.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -135,6 +135,7 @@ const updateWindowSiz = _ => {
         lblComment: {
             x: 0, y: 70, w: g_sWidth, h: g_sHeight - 180, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
             overflow: `auto`, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
+            whiteSpace: `normal`,
         },
         btnComment: {
             x: g_sWidth - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,

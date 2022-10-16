@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/10/13
+ * Revised : 2022/10/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 28.3.0`;
-const g_revisedDate = `2022/10/13`;
+const g_version = `Ver 28.3.1`;
+const g_revisedDate = `2022/10/16`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -949,8 +949,6 @@ const createDiv = (_id, _x, _y, _width, _height, _classes = []) => {
 const setUserSelect = (_style, _value = C_DIS_NONE) => {
 	_style.userSelect = _value;
 	_style.webkitUserSelect = _value;
-	_style.msUserSelect = _value;
-	_style.mozUserSelect = _value;
 	_style.webkitTouchCallout = _value;
 };
 
@@ -1573,7 +1571,6 @@ const drawTitleResultMotion = _displayName => {
 // WebAudioAPIでAudio要素風に再生するクラス
 class AudioPlayer {
 	constructor() {
-		const AudioContext = window.AudioContext ?? window.webkitAudioContext;
 		this._context = new AudioContext();
 		this._gain = this._context.createGain();
 		this._gain.connect(this._context.destination);
@@ -3965,6 +3962,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) => {
 	// ウィンドウ枠の行を取得するために一時的な枠を作成
 	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
 		x: 0, y: 70, w: g_sWidth, h: 20, siz: C_SIZ_MAIN, lineHeight: `15px`, fontFamily: getBasicFont(),
+		whiteSpace: `normal`,
 	})
 	divRoot.appendChild(tmplbl);
 	const range = new Range();
@@ -3976,6 +3974,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) => {
 	const lbl = createDivCss2Label(`lblWarning`, _text, {
 		x: 0, y: 70, w: g_sWidth, h: warnHeight, siz: C_SIZ_MAIN, backgroundColor: _bkColor,
 		opacity: 0.9, lineHeight: `15px`, color: _textColor, align: _align, fontFamily: getBasicFont(),
+		whiteSpace: `normal`,
 	});
 	if (warnHeight === 150) {
 		lbl.style.overflow = `auto`;
@@ -5544,7 +5543,7 @@ const createSettingsDisplayWindow = _sprite => {
 		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos), false);
 
 	const dispAppearanceSlider = _ => {
-		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`].forEach(obj =>
+		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
 			document.getElementById(obj).style.visibility =
 			g_appearanceRanges.includes(g_stateObj.appearance) ? `Visible` : `Hidden`
 		);
@@ -5554,7 +5553,13 @@ const createSettingsDisplayWindow = _sprite => {
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent, displayName: g_currentPage });
+	let opacityUse = false;
+	[`judgment`, `fastSlow`, `filterLine`].forEach(display =>
+		opacityUse ||= g_headerObj[`${display}Use`] || g_headerObj[`${display}Set`] === C_FLG_ON);
+
+	if (opacityUse) {
+		createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent, displayName: g_currentPage });
+	}
 };
 
 /**
@@ -9329,9 +9334,7 @@ const changeAppearanceFilter = (_appearance, _num = 10) => {
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
 
 	$id(`arrowSprite${topNum}`).clipPath = topShape;
-	$id(`arrowSprite${topNum}`).webkitClipPath = topShape;
 	$id(`arrowSprite${bottomNum}`).clipPath = bottomShape;
-	$id(`arrowSprite${bottomNum}`).webkitClipPath = bottomShape;
 
 	$id(`filterBar0`).top = `${g_posObj.arrowHeight * _num / 100}px`;
 	$id(`filterBar1`).top = `${g_posObj.arrowHeight * (100 - _num) / 100}px`;
