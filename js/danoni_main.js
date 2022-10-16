@@ -5553,7 +5553,11 @@ const createSettingsDisplayWindow = _sprite => {
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	if (g_headerObj.judgmentUse || g_headerObj.fastSlowUse || g_headerObj.appearanceUse) {
+	let opacityUse = false;
+	[`judgment`, `fastSlow`, `filterLine`].forEach(display =>
+		opacityUse ||= g_headerObj[`${display}Use`] || g_headerObj[`${display}Set`] === C_FLG_ON);
+
+	if (opacityUse) {
 		createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent, displayName: g_currentPage });
 	}
 };
