@@ -3962,6 +3962,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) => {
 	// ウィンドウ枠の行を取得するために一時的な枠を作成
 	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
 		x: 0, y: 70, w: g_sWidth, h: 20, siz: C_SIZ_MAIN, lineHeight: `15px`, fontFamily: getBasicFont(),
+		whiteSpace: `normal`,
 	})
 	divRoot.appendChild(tmplbl);
 	const range = new Range();
@@ -3973,6 +3974,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) => {
 	const lbl = createDivCss2Label(`lblWarning`, _text, {
 		x: 0, y: 70, w: g_sWidth, h: warnHeight, siz: C_SIZ_MAIN, backgroundColor: _bkColor,
 		opacity: 0.9, lineHeight: `15px`, color: _textColor, align: _align, fontFamily: getBasicFont(),
+		whiteSpace: `normal`,
 	});
 	if (warnHeight === 150) {
 		lbl.style.overflow = `auto`;
