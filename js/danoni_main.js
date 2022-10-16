@@ -5543,7 +5543,7 @@ const createSettingsDisplayWindow = _sprite => {
 		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos), false);
 
 	const dispAppearanceSlider = _ => {
-		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`].forEach(obj =>
+		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
 			document.getElementById(obj).style.visibility =
 			g_appearanceRanges.includes(g_stateObj.appearance) ? `Visible` : `Hidden`
 		);
@@ -5553,7 +5553,9 @@ const createSettingsDisplayWindow = _sprite => {
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent, displayName: g_currentPage });
+	if (g_headerObj.judgmentUse || g_headerObj.fastSlowUse || g_headerObj.appearanceUse) {
+		createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent, displayName: g_currentPage });
+	}
 };
 
 /**
