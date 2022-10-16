@@ -949,8 +949,6 @@ const createDiv = (_id, _x, _y, _width, _height, _classes = []) => {
 const setUserSelect = (_style, _value = C_DIS_NONE) => {
 	_style.userSelect = _value;
 	_style.webkitUserSelect = _value;
-	_style.msUserSelect = _value;
-	_style.mozUserSelect = _value;
 	_style.webkitTouchCallout = _value;
 };
 
@@ -9329,9 +9327,7 @@ const changeAppearanceFilter = (_appearance, _num = 10) => {
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
 
 	$id(`arrowSprite${topNum}`).clipPath = topShape;
-	$id(`arrowSprite${topNum}`).webkitClipPath = topShape;
 	$id(`arrowSprite${bottomNum}`).clipPath = bottomShape;
-	$id(`arrowSprite${bottomNum}`).webkitClipPath = bottomShape;
 
 	$id(`filterBar0`).top = `${g_posObj.arrowHeight * _num / 100}px`;
 	$id(`filterBar1`).top = `${g_posObj.arrowHeight * (100 - _num) / 100}px`;
