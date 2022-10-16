@@ -5543,7 +5543,7 @@ const createSettingsDisplayWindow = _sprite => {
 		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos), false);
 
 	const dispAppearanceSlider = _ => {
-		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`].forEach(obj =>
+		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
 			document.getElementById(obj).style.visibility =
 			g_appearanceRanges.includes(g_stateObj.appearance) ? `Visible` : `Hidden`
 		);
