@@ -23,14 +23,14 @@
 }
 
 input[type="range"] {
-	-webkit-appearance: none;
+	appearance: none;
 	background: transparent;
 	height: 20px;
 	width: 205px;
 }
 
 input[type="range"]::-webkit-slider-thumb {
-	-webkit-appearance: none;
+	appearance: none;
 	background: #606060;
 	height: 20px;
 	width: 20px;
