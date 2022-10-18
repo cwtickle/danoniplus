@@ -746,7 +746,7 @@ const g_settings = {
     speedNum: 0,
     speedTerms: [20, 5, 1],
 
-    motions: [C_FLG_OFF, `Boost`, `Brake`, `Hi-Boost`, `Compress`],
+    motions: [C_FLG_OFF, `Boost`, `Hi-Boost`, `Brake`],
     motionNum: 0,
 
     reverses: [C_FLG_OFF, C_FLG_ON],
@@ -823,9 +823,8 @@ const g_shuffleFunc = {
 const g_motionFunc = {
     'OFF': _frms => _frms,
     'Boost': _frms => getBoostTrace(_frms, 3),
-    'Brake': _frms => getBrakeTrace(_frms),
     'Hi-Boost': _frms => getBoostTrace(_frms, g_stateObj.speed * 2),
-    'Compress': _frms => getBoostTrace(_frms, g_stateObj.speed, -1),
+    'Brake': _frms => getBrakeTrace(_frms),
 };
 
 const g_keycons = {
@@ -2981,9 +2980,8 @@ const g_lblNameObj = {
     'u_OFF': `OFF`,
     'u_ON': `ON`,
     'u_Boost': `Boost`,
-    'u_Brake': `Brake`,
     'u_Hi-Boost': `Hi-Boost`,
-    'u_Compress': `Compress`,
+    'u_Brake': `Brake`,
 
     'u_Cross': `Cross`,
     'u_Split': `Split`,
