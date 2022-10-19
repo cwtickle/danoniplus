@@ -746,7 +746,7 @@ const g_settings = {
     speedNum: 0,
     speedTerms: [20, 5, 1],
 
-    motions: [C_FLG_OFF, `Boost`, `Brake`],
+    motions: [C_FLG_OFF, `Boost`, `Hi-Boost`, `Brake`],
     motionNum: 0,
 
     reverses: [C_FLG_OFF, C_FLG_ON],
@@ -813,6 +813,18 @@ const g_shuffleFunc = {
         applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
         applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
     },
+};
+
+/**
+ * モーション適用関数
+ * - frmsはフレーム別の速度設定用配列。
+ * - 配列の15がステップゾーン上、0～14は矢印の枠外管理用
+ */
+const g_motionFunc = {
+    'OFF': _frms => _frms,
+    'Boost': _frms => getBoostTrace(_frms, 3),
+    'Hi-Boost': _frms => getBoostTrace(_frms, g_stateObj.speed * 2),
+    'Brake': _frms => getBrakeTrace(_frms),
 };
 
 const g_keycons = {
@@ -2968,6 +2980,7 @@ const g_lblNameObj = {
     'u_OFF': `OFF`,
     'u_ON': `ON`,
     'u_Boost': `Boost`,
+    'u_Hi-Boost': `Hi-Boost`,
     'u_Brake': `Brake`,
 
     'u_Cross': `Cross`,

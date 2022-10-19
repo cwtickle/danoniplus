@@ -7345,34 +7345,39 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
 
 /**
  * Motionオプション適用時の矢印別の速度設定
- * - 配列の数字は小さいほどステップゾーンに近いことを示す。
- * - 15がステップゾーン上、0～14は矢印の枠外管理用
+ * - 矢印が表示される最大フレーム数を 縦ピクセル数×20 と定義。
  */
-const setMotionOnFrame = _ => {
+const setMotionOnFrame = _ => g_motionFunc[g_stateObj.motion]([...Array(g_sHeight * 20 + 1)].fill(0));
 
-	// 矢印が表示される最大フレーム数
-	const motionLastFrame = g_sHeight * 20;
-	const brakeLastFrame = g_sHeight / 2;
-
-	const motionOnFrame = [...Array(motionLastFrame + 1)].fill(0);
-
-	if (g_stateObj.motion === C_FLG_OFF) {
-	} else if (g_stateObj.motion === `Boost`) {
-		// ステップゾーンに近づくにつれて加速量を大きくする (16 → 85)
-		for (let j = C_MOTION_STD_POS + 1; j < C_MOTION_STD_POS + 70; j++) {
-			motionOnFrame[j] = (C_MOTION_STD_POS + 70 - j) * 3 / 50;
-		}
-	} else if (g_stateObj.motion === `Brake`) {
-		// 初期は+2x、ステップゾーンに近づくにつれて加速量を下げる (20 → 34)
-		for (let j = C_MOTION_STD_POS + 5; j < C_MOTION_STD_POS + 19; j++) {
-			motionOnFrame[j] = (j - 15) * 4 / 14;
-		}
-		for (let j = C_MOTION_STD_POS + 19; j <= brakeLastFrame; j++) {
-			motionOnFrame[j] = 4;
-		}
+/**
+ * Boost用の適用関数
+ * - ステップゾーンに近づくにつれて加速量を大きく/小さくする (16 → 85)
+ * @param {array} _frms 
+ * @param {number} _spd 
+ * @param {number} _pnFlg 正負(1 もしくは -1) 
+ * @returns 
+ */
+const getBoostTrace = (_frms, _spd, _pnFlg = 1) => {
+	for (let j = C_MOTION_STD_POS + 1; j < C_MOTION_STD_POS + 70; j++) {
+		_frms[j] = (C_MOTION_STD_POS + 70 - j) * _pnFlg * _spd / 50;
 	}
+	return _frms;
+};
 
-	return motionOnFrame;
+/**
+ * Brake用の適用関数
+ * - 初期は+2x、ステップゾーンに近づくにつれて加速量を下げる (20 → 34)
+ * @param {array} _frms 
+ * @returns 
+ */
+const getBrakeTrace = _frms => {
+	for (let j = C_MOTION_STD_POS + 5; j < C_MOTION_STD_POS + 19; j++) {
+		_frms[j] = (j - 15) * 4 / 14;
+	}
+	for (let j = C_MOTION_STD_POS + 19; j <= g_sHeight / 2; j++) {
+		_frms[j] = 4;
+	}
+	return _frms;
 };
 
 /**
