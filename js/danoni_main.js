@@ -8325,7 +8325,7 @@ const mainInit = _ => {
 
 	// フレーム数
 	divRoot.appendChild(
-		createDivCss2Label(`lblframe`, g_scoreObj.frameNum, { x: 0, y: 0, w: 100, h: 30, siz: 20, display: g_workObj.lifegaugeDisp, })
+		createDivCss2Label(`lblframe`, g_scoreObj.nominalFrameNum, { x: 0, y: 0, w: 100, h: 30, siz: 20, display: g_workObj.lifegaugeDisp, })
 	);
 
 	// ライフ(数字)部作成
@@ -9069,7 +9069,7 @@ const mainInit = _ => {
 	const flowTimeline = _ => {
 
 		const currentFrame = g_scoreObj.frameNum;
-		lblframe.textContent = currentFrame;
+		lblframe.textContent = g_scoreObj.nominalFrameNum;
 
 		// キーの押下状態を取得
 		for (let j = 0; j < keyNum; j++) {
