@@ -7541,18 +7541,13 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	if (hasArrayList(_dataObj.boostData, 2)) {
 		let delBoostIdx = 0;
 		for (let k = _dataObj.boostData.length - 2; k >= 0; k -= 2) {
-			if (_dataObj.boostData[k] < g_scoreObj.frameNum) {
-				delBoostIdx = k + 2;
+			tmpObj = getArrowStartFrame(_dataObj.boostData[k], _speedOnFrame, _motionOnFrame);
+			if (tmpObj.frm < g_scoreObj.frameNum) {
+				_dataObj.boostData[k] = g_scoreObj.frameNum;
+				delBoostIdx = k;
 				break;
 			} else {
-				tmpObj = getArrowStartFrame(_dataObj.boostData[k], _speedOnFrame, _motionOnFrame);
-				if (tmpObj.frm < g_scoreObj.frameNum) {
-					_dataObj.boostData[k] = g_scoreObj.frameNum;
-					delBoostIdx = k;
-					break;
-				} else {
-					_dataObj.boostData[k] = tmpObj.frm;
-				}
+				_dataObj.boostData[k] = tmpObj.frm;
 			}
 		}
 		for (let k = 0; k < delBoostIdx; k++) {
