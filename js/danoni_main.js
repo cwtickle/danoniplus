@@ -8259,6 +8259,7 @@ const mainInit = _ => {
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
 	g_workObj.boostSpd = 1;
+	g_workObj.boostDir = 1;
 
 	// 開始位置、楽曲再生位置の設定
 	const firstFrame = g_scoreObj.frameNum;
@@ -8851,7 +8852,7 @@ const mainInit = _ => {
 		const arrowName = `${_name}${_j}_${_arrowCnt}`;
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
 			(g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd +
-				sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[g_scoreObj.frameNum]))) * g_workObj.scrollDir[_j];
+				sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[g_scoreObj.frameNum])) * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 
 		const stepRoot = createEmptySprite(arrowSprite[dividePos], arrowName, {
 			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
@@ -8859,7 +8860,8 @@ const mainInit = _ => {
 		g_attrObj[arrowName] = {
 			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
 			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
-			boostSpd: g_workObj.boostSpd, dividePos: dividePos, dir: g_workObj.scrollDir[_j],
+			boostSpd: g_workObj.boostSpd, dividePos: dividePos,
+			dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
 			prevY: firstPosY, y: firstPosY,
 		};
 		arrowSprite[dividePos].appendChild(stepRoot);
@@ -8906,7 +8908,7 @@ const mainInit = _ => {
 		if (g_workObj.currentSpeed !== 0) {
 			const boostCnt = g_attrObj[arrowName].boostCnt;
 			g_attrObj[arrowName].prevY = g_attrObj[arrowName].y;
-			g_attrObj[arrowName].y -= (g_workObj.currentSpeed * g_attrObj[arrowName].boostSpd + g_workObj.motionOnFrames[boostCnt]) * g_attrObj[arrowName].dir;
+			g_attrObj[arrowName].y -= (g_workObj.currentSpeed * g_attrObj[arrowName].boostSpd + g_workObj.motionOnFrames[boostCnt] * g_attrObj[arrowName].boostDir) * g_attrObj[arrowName].dir;
 			document.getElementById(arrowName).style.top = `${g_attrObj[arrowName].y}px`;
 			g_attrObj[arrowName].boostCnt--;
 		}
@@ -8927,7 +8929,7 @@ const mainInit = _ => {
 		const frzName = `${_name}${frzNo}`;
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
 			(g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd +
-				sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[g_scoreObj.frameNum]))) * g_workObj.scrollDir[_j];
+				sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[g_scoreObj.frameNum])) * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
 
 		const frzRoot = createEmptySprite(arrowSprite[dividePos], frzName, {
@@ -8937,10 +8939,8 @@ const mainInit = _ => {
 			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
 			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
 			judgEndFlg: false, isMoving: true, frzBarLength: firstBarLength, keyUpFrame: 0,
-			boostSpd: g_workObj.boostSpd, dividePos: dividePos, dir: g_workObj.scrollDir[_j],
-			y: firstPosY,
-			barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos,
-			btmY: firstBarLength * g_workObj.scrollDir[_j],
+			boostSpd: g_workObj.boostSpd, dividePos: dividePos, dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
+			y: firstPosY, barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos, btmY: firstBarLength * g_workObj.scrollDir[_j],
 		};
 		arrowSprite[dividePos].appendChild(frzRoot);
 
@@ -9010,7 +9010,7 @@ const mainInit = _ => {
 
 				// 移動
 				if (g_workObj.currentSpeed !== 0) {
-					g_attrObj[frzName].y -= movY + g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt] * g_attrObj[frzName].dir;
+					g_attrObj[frzName].y -= movY + g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt] * g_attrObj[frzName].dir * g_attrObj[frzName].boostDir;
 					document.getElementById(frzName).style.top = `${g_attrObj[frzName].y}px`;
 					g_attrObj[frzName].boostCnt--;
 				}
@@ -9117,6 +9117,7 @@ const mainInit = _ => {
 		}
 		while (g_workObj.boostData !== undefined && currentFrame >= g_workObj.boostData[boostCnts]) {
 			g_workObj.boostSpd = g_workObj.boostData[boostCnts + 1];
+			g_workObj.boostDir = (g_workObj.boostSpd > 0 ? 1 : -1);
 			boostCnts += 2;
 		}
 
