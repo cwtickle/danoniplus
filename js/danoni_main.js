@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/10/16
+ * Revised : 2022/10/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 28.3.1`;
-const g_revisedDate = `2022/10/16`;
+const g_version = `Ver 28.4.0`;
+const g_revisedDate = `2022/10/20`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7345,34 +7345,39 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
 
 /**
  * Motionオプション適用時の矢印別の速度設定
- * - 配列の数字は小さいほどステップゾーンに近いことを示す。
- * - 15がステップゾーン上、0～14は矢印の枠外管理用
+ * - 矢印が表示される最大フレーム数を 縦ピクセル数×20 と定義。
  */
-const setMotionOnFrame = _ => {
+const setMotionOnFrame = _ => g_motionFunc[g_stateObj.motion]([...Array(g_sHeight * 20 + 1)].fill(0));
 
-	// 矢印が表示される最大フレーム数
-	const motionLastFrame = g_sHeight * 20;
-	const brakeLastFrame = g_sHeight / 2;
-
-	const motionOnFrame = [...Array(motionLastFrame + 1)].fill(0);
-
-	if (g_stateObj.motion === C_FLG_OFF) {
-	} else if (g_stateObj.motion === `Boost`) {
-		// ステップゾーンに近づくにつれて加速量を大きくする (16 → 85)
-		for (let j = C_MOTION_STD_POS + 1; j < C_MOTION_STD_POS + 70; j++) {
-			motionOnFrame[j] = (C_MOTION_STD_POS + 70 - j) * 3 / 50;
-		}
-	} else if (g_stateObj.motion === `Brake`) {
-		// 初期は+2x、ステップゾーンに近づくにつれて加速量を下げる (20 → 34)
-		for (let j = C_MOTION_STD_POS + 5; j < C_MOTION_STD_POS + 19; j++) {
-			motionOnFrame[j] = (j - 15) * 4 / 14;
-		}
-		for (let j = C_MOTION_STD_POS + 19; j <= brakeLastFrame; j++) {
-			motionOnFrame[j] = 4;
-		}
+/**
+ * Boost用の適用関数
+ * - ステップゾーンに近づくにつれて加速量を大きく/小さくする (16 → 85)
+ * @param {array} _frms 
+ * @param {number} _spd 
+ * @param {number} _pnFlg 正負(1 もしくは -1) 
+ * @returns 
+ */
+const getBoostTrace = (_frms, _spd, _pnFlg = 1) => {
+	for (let j = C_MOTION_STD_POS + 1; j < C_MOTION_STD_POS + 70; j++) {
+		_frms[j] = (C_MOTION_STD_POS + 70 - j) * _pnFlg * _spd / 50;
 	}
+	return _frms;
+};
 
-	return motionOnFrame;
+/**
+ * Brake用の適用関数
+ * - 初期は+2x、ステップゾーンに近づくにつれて加速量を下げる (20 → 34)
+ * @param {array} _frms 
+ * @returns 
+ */
+const getBrakeTrace = _frms => {
+	for (let j = C_MOTION_STD_POS + 5; j < C_MOTION_STD_POS + 19; j++) {
+		_frms[j] = (j - 15) * 4 / 14;
+	}
+	for (let j = C_MOTION_STD_POS + 19; j <= g_sHeight / 2; j++) {
+		_frms[j] = 4;
+	}
+	return _frms;
 };
 
 /**
@@ -7390,7 +7395,6 @@ const getFirstArrivalFrame = (_startFrame, _speedOnFrame, _motionOnFrame) => {
 		startY += _speedOnFrame[frm];
 
 		if (_speedOnFrame[frm] !== 0) {
-			startY += _motionOnFrame[motionFrm];
 			motionFrm++;
 		}
 		frm++;
@@ -7537,18 +7541,13 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	if (hasArrayList(_dataObj.boostData, 2)) {
 		let delBoostIdx = 0;
 		for (let k = _dataObj.boostData.length - 2; k >= 0; k -= 2) {
-			if (_dataObj.boostData[k] < g_scoreObj.frameNum) {
-				delBoostIdx = k + 2;
+			tmpObj = getArrowStartFrame(_dataObj.boostData[k], _speedOnFrame, _motionOnFrame);
+			if (tmpObj.frm < g_scoreObj.frameNum) {
+				_dataObj.boostData[k] = g_scoreObj.frameNum;
+				delBoostIdx = k;
 				break;
 			} else {
-				tmpObj = getArrowStartFrame(_dataObj.boostData[k], _speedOnFrame, _motionOnFrame);
-				if (tmpObj.frm < g_scoreObj.frameNum) {
-					_dataObj.boostData[k] = g_scoreObj.frameNum;
-					delBoostIdx = k;
-					break;
-				} else {
-					_dataObj.boostData[k] = tmpObj.frm;
-				}
+				_dataObj.boostData[k] = tmpObj.frm;
 			}
 		}
 		for (let k = 0; k < delBoostIdx; k++) {
@@ -7710,7 +7709,6 @@ const getArrowStartFrame = (_frame, _speedOnFrame, _motionOnFrame) => {
 		obj.startY += _speedOnFrame[obj.frm];
 
 		if (_speedOnFrame[obj.frm] !== 0) {
-			obj.startY += _motionOnFrame[obj.motionFrm];
 			obj.motionFrm++;
 		}
 		obj.frm--;
@@ -8261,6 +8259,7 @@ const mainInit = _ => {
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
 	g_workObj.boostSpd = 1;
+	g_workObj.boostDir = 1;
 
 	// 開始位置、楽曲再生位置の設定
 	const firstFrame = g_scoreObj.frameNum;
@@ -8321,7 +8320,7 @@ const mainInit = _ => {
 
 	// フレーム数
 	divRoot.appendChild(
-		createDivCss2Label(`lblframe`, g_scoreObj.frameNum, { x: 0, y: 0, w: 100, h: 30, siz: 20, display: g_workObj.lifegaugeDisp, })
+		createDivCss2Label(`lblframe`, g_scoreObj.nominalFrameNum, { x: 0, y: 0, w: 100, h: 30, siz: 20, display: g_workObj.lifegaugeDisp, })
 	);
 
 	// ライフ(数字)部作成
@@ -8847,12 +8846,13 @@ const mainInit = _ => {
 	 * @param {string} _color 矢印色
 	 */
 	const makeArrow = (_j, _arrowCnt, _name, _color) => {
-		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 		const dividePos = g_workObj.dividePos[_j];
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 
 		const arrowName = `${_name}${_j}_${_arrowCnt}`;
-		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir;
+		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
+			(g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd +
+				sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[g_scoreObj.frameNum])) * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 
 		const stepRoot = createEmptySprite(arrowSprite[dividePos], arrowName, {
 			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
@@ -8860,7 +8860,8 @@ const mainInit = _ => {
 		g_attrObj[arrowName] = {
 			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
 			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
-			boostSpd: boostSpdDir, dividePos: dividePos,
+			boostSpd: g_workObj.boostSpd, dividePos: dividePos,
+			dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
 			prevY: firstPosY, y: firstPosY,
 		};
 		arrowSprite[dividePos].appendChild(stepRoot);
@@ -8907,7 +8908,7 @@ const mainInit = _ => {
 		if (g_workObj.currentSpeed !== 0) {
 			const boostCnt = g_attrObj[arrowName].boostCnt;
 			g_attrObj[arrowName].prevY = g_attrObj[arrowName].y;
-			g_attrObj[arrowName].y -= (g_workObj.currentSpeed + g_workObj.motionOnFrames[boostCnt]) * g_attrObj[arrowName].boostSpd;
+			g_attrObj[arrowName].y -= (g_workObj.currentSpeed * g_attrObj[arrowName].boostSpd + g_workObj.motionOnFrames[boostCnt] * g_attrObj[arrowName].boostDir) * g_attrObj[arrowName].dir;
 			document.getElementById(arrowName).style.top = `${g_attrObj[arrowName].y}px`;
 			g_attrObj[arrowName].boostCnt--;
 		}
@@ -8923,11 +8924,12 @@ const mainInit = _ => {
 	 * @param {string} _barColor 
 	 */
 	const makeFrzArrow = (_j, _arrowCnt, _name, _normalColor, _barColor) => {
-		const boostSpdDir = g_workObj.boostSpd * g_workObj.scrollDir[_j];
 		const dividePos = g_workObj.dividePos[_j];
 		const frzNo = `${_j}_${_arrowCnt}`;
 		const frzName = `${_name}${frzNo}`;
-		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos + g_workObj.initY[g_scoreObj.frameNum] * boostSpdDir;
+		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
+			(g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd +
+				sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[g_scoreObj.frameNum])) * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
 
 		const frzRoot = createEmptySprite(arrowSprite[dividePos], frzName, {
@@ -8937,10 +8939,8 @@ const mainInit = _ => {
 			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
 			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
 			judgEndFlg: false, isMoving: true, frzBarLength: firstBarLength, keyUpFrame: 0,
-			boostSpd: boostSpdDir, dividePos: dividePos, dir: g_workObj.scrollDir[_j],
-			y: firstPosY,
-			barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos,
-			btmY: firstBarLength * g_workObj.scrollDir[_j],
+			boostSpd: g_workObj.boostSpd, dividePos: dividePos, dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
+			y: firstPosY, barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos, btmY: firstBarLength * g_workObj.scrollDir[_j],
 		};
 		arrowSprite[dividePos].appendChild(frzRoot);
 
@@ -9000,7 +9000,7 @@ const mainInit = _ => {
 	const movFrzArrow = (_j, _k, _name) => {
 		const frzNo = `${_j}_${_k}`;
 		const frzName = `${_name}${frzNo}`;
-		const movY = g_workObj.currentSpeed * g_attrObj[frzName].boostSpd;
+		const movY = g_workObj.currentSpeed * g_attrObj[frzName].boostSpd * g_attrObj[frzName].dir;
 
 		if (!g_attrObj[frzName].judgEndFlg) {
 			if (g_attrObj[frzName].isMoving) {
@@ -9010,7 +9010,7 @@ const mainInit = _ => {
 
 				// 移動
 				if (g_workObj.currentSpeed !== 0) {
-					g_attrObj[frzName].y -= movY + g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt] * g_attrObj[frzName].boostSpd;
+					g_attrObj[frzName].y -= movY + g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt] * g_attrObj[frzName].dir * g_attrObj[frzName].boostDir;
 					document.getElementById(frzName).style.top = `${g_attrObj[frzName].y}px`;
 					g_attrObj[frzName].boostCnt--;
 				}
@@ -9064,7 +9064,7 @@ const mainInit = _ => {
 	const flowTimeline = _ => {
 
 		const currentFrame = g_scoreObj.frameNum;
-		lblframe.textContent = currentFrame;
+		lblframe.textContent = g_scoreObj.nominalFrameNum;
 
 		// キーの押下状態を取得
 		for (let j = 0; j < keyNum; j++) {
@@ -9117,6 +9117,7 @@ const mainInit = _ => {
 		}
 		while (g_workObj.boostData !== undefined && currentFrame >= g_workObj.boostData[boostCnts]) {
 			g_workObj.boostSpd = g_workObj.boostData[boostCnts + 1];
+			g_workObj.boostDir = (g_workObj.boostSpd > 0 ? 1 : -1);
 			boostCnts += 2;
 		}
 
@@ -9439,7 +9440,7 @@ const changeHitFrz = (_j, _k, _name) => {
 	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
 	let delFrzMotionLength = 0;
 	for (let i = 0; i < g_attrObj[frzName].cnt; i++) {
-		delFrzMotionLength += g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt - i] * g_attrObj[frzName].boostSpd;
+		delFrzMotionLength += g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt - i];
 	}
 
 	g_attrObj[frzName].frzBarLength -= (delFrzLength + delFrzMotionLength) * g_attrObj[frzName].dir;
