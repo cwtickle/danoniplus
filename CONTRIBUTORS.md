@@ -7,6 +7,7 @@
 |----|----|----|----|
 |aconite||[@aconite_ac](https://twitter.com/aconite_ac)|機能提案、不具合報告、事象解析|
 |apoi||[@kwbredda3](https://twitter.com/kwbredda3)|機能提案、不具合報告|
+|chip||[@chipstar64](https://twitter.com/chipstar64)|機能提案|
 |eintritt（decresc.）||[@schmachtent](https://twitter.com/schmachtent)|機能提案、不具合報告|
 |FUJI||[@FUJI_kt](https://twitter.com/FUJI_kt)|機能提案|
 |goe |[@goe0](https://github.com/goe0)|[@goe_0](https://twitter.com/goe_0)|コーディング、機能提案、不具合報告、事象解析、関連ツール作成|
