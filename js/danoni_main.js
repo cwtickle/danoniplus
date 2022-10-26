@@ -7420,6 +7420,8 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	/** 矢印の移動距離 */
 	g_workObj.initY = [];
+	/** 矢印の移動距離 (Motion加算分) */
+	g_workObj.initBoostY = [];
 	/** 矢印がステップゾーンに到達するまでのフレーム数 */
 	g_workObj.arrivalFrame = [];
 	/** Motionの適用フレーム数 */
@@ -7473,6 +7475,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		g_workObj.initY[frmPrev] = tmpObj.startY;
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 		g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+		g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
 
 		if (_frzFlg) {
 			g_workObj[`mk${camelHeader}Length`][_j] = [];
@@ -7500,6 +7503,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
 				g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
 				g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
+				g_workObj.initBoostY[tmpFrame] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
 
 			} else {
 
@@ -7516,6 +7520,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj.initY[frmPrev] = tmpObj.startY;
 				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 				g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+				g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
 			}
 
 			// 出現タイミングを保存
@@ -8852,7 +8857,7 @@ const mainInit = _ => {
 		const arrowName = `${_name}${_j}_${_arrowCnt}`;
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
 			(g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd +
-				sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[g_scoreObj.frameNum])) * g_workObj.boostDir) * g_workObj.scrollDir[_j];
+				g_workObj.initBoostY[g_scoreObj.frameNum] * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 
 		const stepRoot = createEmptySprite(arrowSprite[dividePos], arrowName, {
 			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
@@ -8929,7 +8934,7 @@ const mainInit = _ => {
 		const frzName = `${_name}${frzNo}`;
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
 			(g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd +
-				sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[g_scoreObj.frameNum])) * g_workObj.boostDir) * g_workObj.scrollDir[_j];
+				g_workObj.initBoostY[g_scoreObj.frameNum] * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
 
 		const frzRoot = createEmptySprite(arrowSprite[dividePos], frzName, {
