@@ -8773,7 +8773,12 @@ const mainInit = _ => {
 	judgeMotionFunc.dummyArrowON = (_j, _arrowName, _cnt) => judgeMotionFunc.dummyArrowOFF(_j, _arrowName, _cnt);
 
 	/**
-	 * 次フリーズアローへ判定を移すかチェック
+	 * 次矢印・フリーズアローへ判定を移すかチェック
+	 * 
+	 * - 判定対象の矢印／フリーズアローが未判定の状態で、現在の矢印／フリーズアローの判定領域が回復判定内に入った場合、
+	 *   自身より前の判定をNG判定とした上で、判定対象の矢印／フリーズアローを強制的に削除
+	 * - ただし、判定対象の矢印／フリーズアローがジャスト付近の場合は判定対象を優先する
+	 *   (フリーズアローの場合、ヒット中の場合も判定対象が優先される)
 	 * 
 	 * @param _j 矢印の位置
 	 * @param _k 矢印の表示順
@@ -8781,18 +8786,35 @@ const mainInit = _ => {
 	 */
 	const judgeNextFunc = {
 
+		arrowOFF: (_j, _k, _cnt) => {
+
+			if (g_workObj.judgArrowCnt[_j] === _k - 1 && _cnt <= g_judgObj.arrowJ[g_judgPosObj.shakin]) {
+				const prevArrowName = `arrow${_j}_${g_workObj.judgArrowCnt[_j]}`;
+
+				if (g_attrObj[prevArrowName].cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.ii]) {
+
+					// 自身より前の矢印が未判定の場合、強制的に枠外判定を行い矢印を削除
+					if (g_attrObj[prevArrowName].cnt >= (-1) * g_judgObj.arrowJ[g_judgPosObj.uwan]) {
+						judgeUwan(g_attrObj[prevArrowName].cnt);
+						judgeObjDelete.arrow(_j, prevArrowName);
+					}
+				}
+			}
+		},
+
+		arrowON: (_j, _k, _cnt) => true,
+		dummyArrowOFF: (_j, _k, _cnt) => true,
+		dummyArrowON: (_j, _k, _cnt) => true,
+
 		frzOFF: (_j, _k, _cnt) => {
 
-			// フリーズアローの判定領域に入った場合、前のフリーズアローを強制的に削除
-			// ただし、前のフリーズアローが押下中または判定領域がジャスト付近(キター領域)の場合は削除しない
-			// 削除する場合、前のフリーズアローの判定はイクナイ(＆ウワァン)扱い
-			if (g_workObj.judgFrzCnt[_j] !== _k && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] + 1) {
+			if (g_workObj.judgFrzCnt[_j] === _k - 1 && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 
 				if (g_attrObj[prevFrzName].isMoving &&
 					g_attrObj[prevFrzName].cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 
-					// 枠外判定前の場合、このタイミングで枠外判定を行う
+					// 自身より前のフリーズアローが未判定の場合、強制的に枠外判定を行いフリーズアローを削除
 					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
 						judgeIknai(g_attrObj[prevFrzName].cnt);
 						if (g_headerObj.frzStartjdgUse) {
@@ -8913,6 +8935,7 @@ const mainInit = _ => {
 			g_attrObj[arrowName].boostCnt--;
 		}
 		judgeMotionFunc[`${_name}${g_stateObj.autoAll}`](_j, arrowName, --g_attrObj[arrowName].cnt);
+		judgeNextFunc[`${_name}${g_stateObj.autoAll}`](_j, _k, g_attrObj[arrowName].cnt);
 	};
 
 	/**
