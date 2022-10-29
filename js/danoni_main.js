@@ -8794,9 +8794,9 @@ const mainInit = _ => {
 
 					// 枠外判定前の場合、このタイミングで枠外判定を行う
 					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
-						judgeIknai(_cnt);
+						judgeIknai(g_attrObj[prevFrzName].cnt);
 						if (g_headerObj.frzStartjdgUse) {
-							judgeUwan(_cnt);
+							judgeUwan(g_attrObj[prevFrzName].cnt);
 						}
 					}
 					judgeObjDelete.frz(_j, prevFrzName);
