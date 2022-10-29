@@ -8694,8 +8694,6 @@ const mainInit = _ => {
 			if (_cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.uwan]) {
 				judgeUwan(_cnt);
 				judgeObjDelete.arrow(_j, _arrowName);
-			} else {
-				judgeNextFunc.arrowOFF(_j, _arrowName, _cnt);
 			}
 		},
 
@@ -8788,10 +8786,11 @@ const mainInit = _ => {
 	 */
 	const judgeNextFunc = {
 
-		arrowOFF: (_j, _arrowName, _cnt) => {
+		arrowOFF: (_j, _k, _cnt) => {
 
-			const prevArrowName = `arrow${_j}_${g_workObj.judgArrowCnt[_j]}`;
-			if (_arrowName !== prevArrowName && _cnt <= g_judgObj.arrowJ[g_judgPosObj.shakin] + 1) {
+			if (g_workObj.judgArrowCnt[_j] === _k - 1 && _cnt <= g_judgObj.arrowJ[g_judgPosObj.shakin]) {
+				const prevArrowName = `arrow${_j}_${g_workObj.judgArrowCnt[_j]}`;
+
 				if (g_attrObj[prevArrowName].cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.ii]) {
 
 					// 自身より前の矢印が未判定の場合、強制的に枠外判定を行い矢印を削除
@@ -8803,9 +8802,13 @@ const mainInit = _ => {
 			}
 		},
 
+		arrowON: (_j, _k, _cnt) => true,
+		dummyArrowOFF: (_j, _k, _cnt) => true,
+		dummyArrowON: (_j, _k, _cnt) => true,
+
 		frzOFF: (_j, _k, _cnt) => {
 
-			if (g_workObj.judgFrzCnt[_j] !== _k && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] + 1) {
+			if (g_workObj.judgFrzCnt[_j] === _k - 1 && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 
 				if (g_attrObj[prevFrzName].isMoving &&
@@ -8932,6 +8935,7 @@ const mainInit = _ => {
 			g_attrObj[arrowName].boostCnt--;
 		}
 		judgeMotionFunc[`${_name}${g_stateObj.autoAll}`](_j, arrowName, --g_attrObj[arrowName].cnt);
+		judgeNextFunc[`${_name}${g_stateObj.autoAll}`](_j, _k, g_attrObj[arrowName].cnt);
 	};
 
 	/**
