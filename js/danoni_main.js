@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/08/01
+ * Revised : 2022/10/29
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 27.8.1`;
-const g_revisedDate = `2022/08/01`;
+const g_version = `Ver 27.8.2`;
+const g_revisedDate = `2022/10/29`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -8598,9 +8598,9 @@ const mainInit = _ => {
 
 					// 枠外判定前の場合、このタイミングで枠外判定を行う
 					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
-						judgeIknai(_cnt);
+						judgeIknai(g_attrObj[prevFrzName].cnt);
 						if (g_headerObj.frzStartjdgUse) {
-							judgeUwan(_cnt);
+							judgeUwan(g_attrObj[prevFrzName].cnt);
 						}
 					}
 					judgeObjDelete.frz(_j, prevFrzName);
