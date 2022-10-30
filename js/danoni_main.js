@@ -8325,7 +8325,7 @@ const mainInit = _ => {
 
 	// フレーム数
 	divRoot.appendChild(
-		createDivCss2Label(`lblframe`, g_scoreObj.nominalFrameNum, { x: 0, y: 0, w: 100, h: 30, siz: 20, display: g_workObj.lifegaugeDisp, })
+		createDivCss2Label(`lblframe`, g_scoreObj.baseFrame, { x: 0, y: 0, w: 100, h: 30, siz: 20, display: g_workObj.lifegaugeDisp, })
 	);
 
 	// ライフ(数字)部作成
