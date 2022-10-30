@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/10/29
+ * Revised : 2022/10/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 28.5.0`;
-const g_revisedDate = `2022/10/29`;
+const g_version = `Ver 28.5.1`;
+const g_revisedDate = `2022/10/30`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -8325,7 +8325,7 @@ const mainInit = _ => {
 
 	// フレーム数
 	divRoot.appendChild(
-		createDivCss2Label(`lblframe`, g_scoreObj.nominalFrameNum, { x: 0, y: 0, w: 100, h: 30, siz: 20, display: g_workObj.lifegaugeDisp, })
+		createDivCss2Label(`lblframe`, g_scoreObj.baseFrame, { x: 0, y: 0, w: 100, h: 30, siz: 20, display: g_workObj.lifegaugeDisp, })
 	);
 
 	// ライフ(数字)部作成
