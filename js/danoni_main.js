@@ -6573,7 +6573,6 @@ const loadingScoreInit = async () => {
 
 	// 開始フレーム数の取得(フェードイン加味)
 	g_scoreObj.frameNum = getStartFrame(lastFrame, g_stateObj.fadein);
-	g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
 
 	// フレームごとの速度を取得（配列形式）
 	let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
@@ -6626,6 +6625,7 @@ const loadingScoreInit = async () => {
 			g_headerObj.blankFrame += preblankFrame;
 		}
 	}
+	g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
 
 	// シャッフルグループ未定義の場合
 	if (g_keyObj[`shuffle${keyCtrlPtn}`] === undefined) {
@@ -8318,10 +8318,7 @@ const mainInit = _ => {
 		fullFrame += g_scoreObj.fadeOutTerm;
 	}
 	g_scoreObj.fullFrame = fullFrame;
-
-	const nominalDiff = g_headerObj.blankFrame - g_headerObj.blankFrameDef + g_stateObj.adjustment;
-	g_scoreObj.nominalFrameNum = g_scoreObj.frameNum - nominalDiff;
-	const fullTime = transFrameToTimer(fullFrame - nominalDiff);
+	const fullTime = transFrameToTimer(fullFrame - g_stateObj.intAdjustment);
 
 	// フレーム数
 	divRoot.appendChild(
@@ -9092,7 +9089,7 @@ const mainInit = _ => {
 	const flowTimeline = _ => {
 
 		const currentFrame = g_scoreObj.frameNum;
-		lblframe.textContent = g_scoreObj.nominalFrameNum;
+		lblframe.textContent = g_scoreObj.baseFrame;
 
 		// キーの押下状態を取得
 		for (let j = 0; j < keyNum; j++) {
@@ -9134,9 +9131,6 @@ const mainInit = _ => {
 
 		// ユーザカスタムイベント(フレーム毎)
 		g_customJsObj.mainEnterFrame.forEach(func => func());
-		if (g_customJsObj.mainEnterFrame.length > 0) {
-			g_scoreObj.baseFrame++;
-		}
 
 		// 速度変化 (途中変速, 個別加速)
 		while (g_workObj.speedData !== undefined && currentFrame >= g_workObj.speedData[speedCnts]) {
@@ -9314,9 +9308,9 @@ const mainInit = _ => {
 		} else {
 
 			// タイマー
-			if (Math.floor(g_scoreObj.nominalFrameNum % g_fps) === 0) {
-				if (g_scoreObj.nominalFrameNum >= 0) {
-					lblTime1.textContent = transFrameToTimer(g_scoreObj.nominalFrameNum);
+			if (Math.floor(g_scoreObj.baseFrame % g_fps) === 0) {
+				if (g_scoreObj.baseFrame >= 0) {
+					lblTime1.textContent = transFrameToTimer(g_scoreObj.baseFrame);
 				}
 			}
 
@@ -9327,7 +9321,7 @@ const mainInit = _ => {
 				buffTime = (thisTime - musicStartTime - (currentFrame - musicStartFrame) * 1000 / g_fps);
 			}
 			g_scoreObj.frameNum++;
-			g_scoreObj.nominalFrameNum++;
+			g_scoreObj.baseFrame++;
 			g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps - buffTime);
 		}
 	};
