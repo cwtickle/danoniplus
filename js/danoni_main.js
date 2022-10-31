@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/10/29
+ * Revised : 2022/10/31
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 26.7.5`;
-const g_revisedDate = `2022/10/29`;
+const g_version = `Ver 26.7.6`;
+const g_revisedDate = `2022/10/31`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -6400,7 +6400,6 @@ const loadingScoreInit = async () => {
 
 	// 開始フレーム数の取得(フェードイン加味)
 	g_scoreObj.frameNum = getStartFrame(lastFrame, g_stateObj.fadein);
-	g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
 
 	// フレームごとの速度を取得（配列形式）
 	let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
@@ -6453,6 +6452,7 @@ const loadingScoreInit = async () => {
 			g_headerObj.blankFrame += preblankFrame;
 		}
 	}
+	g_scoreObj.baseFrame = g_scoreObj.frameNum - g_stateObj.intAdjustment;
 
 	// シャッフルグループ未定義の場合
 	if (g_keyObj[`shuffle${keyCtrlPtn}`] === undefined) {
