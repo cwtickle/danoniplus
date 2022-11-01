@@ -3774,7 +3774,7 @@ const titleInit = _ => {
 	 */
 	const createCreditBtn = (_id, _text, _url) =>
 		createCss2Button(_id, _text, _ => true,
-			Object.assign(g_lblPosObj[_id], { siz: getLinkSiz(_text), resetFunc: _ => openLink(_url) }), g_cssObj.button_Default);
+			Object.assign(g_lblPosObj[_id], { siz: getLinkSiz(_text), whiteSpace: `normal`, resetFunc: _ => openLink(_url) }), g_cssObj.button_Default);
 
 	// ボタン描画
 	multiAppend(divRoot,
