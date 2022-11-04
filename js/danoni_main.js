@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/10/31
+ * Revised : 2022/11/05
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 28.6.0`;
-const g_revisedDate = `2022/10/31`;
+const g_version = `Ver 29.0.0`;
+const g_revisedDate = `2022/11/05`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1809,7 +1809,7 @@ const initialControl = async () => {
 	});
 
 	// デフォルトのカラー・シャッフルグループ設定を退避
-	[`color`, `shuffle`].forEach(type => {
+	g_keycons.groups.forEach(type => {
 		const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type));
 		tmpName.forEach(property => g_keyObj[`${property}d`] = structuredClone(g_keyObj[property]));
 	});
@@ -2766,7 +2766,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// ハッシュタグ
-	obj.hashTag = setVal(_dosObj.hashTag, ``);
+	obj.hashTag = _dosObj.hashTag ?? ``;
 
 	// 自動プリロードの設定
 	obj.autoPreload = setBoolVal(_dosObj.autoPreload, true);
@@ -3317,15 +3317,8 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 			gaugeCreateFlg = setGaugeDetails(scoreId, _dosObj[`gauge${_name}`].split(`,`));
 		} else {
 			const gauges = splitLF2(_dosObj[`gauge${_name}`]);
-			const gHeaderLen = gauges.length;
-			for (let j = 0; j < gHeaderLen; j++) {
-				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, gauges[j].split(`,`)));
-			}
-			if (gHeaderLen < _difLength) {
-				const defaultGaugeList = gauges[0].split(`,`);
-				for (let j = gHeaderLen; j < _difLength; j++) {
-					gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, defaultGaugeList));
-				}
+			for (let j = 0; j < _difLength; j++) {
+				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, (gauges[j] ?? gauges[0]).split(`,`)));
 			}
 		}
 
@@ -3774,7 +3767,7 @@ const titleInit = _ => {
 	 */
 	const createCreditBtn = (_id, _text, _url) =>
 		createCss2Button(_id, _text, _ => true,
-			Object.assign(g_lblPosObj[_id], { siz: getLinkSiz(_text), resetFunc: _ => openLink(_url) }), g_cssObj.button_Default);
+			Object.assign(g_lblPosObj[_id], { siz: getLinkSiz(_text), whiteSpace: `normal`, resetFunc: _ => openLink(_url) }), g_cssObj.button_Default);
 
 	// ボタン描画
 	multiAppend(divRoot,
@@ -5018,7 +5011,7 @@ const createOptionWindow = _sprite => {
 				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 
 				// カラーグループ、シャッフルグループの設定
-				[`color`, `shuffle`].forEach(type => {
+				g_keycons.groups.forEach(type => {
 					resetGroupList(type, keyCtrlPtn);
 					if (g_keyObj.currentPtn === -1) {
 						const storageKeyName = storageObj[`${type}${addKey}`] || storageObj[`${type}${g_keyObj.currentKey}_-1_-1`];
@@ -5315,7 +5308,7 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
 		});
 
-		[`color`, `shuffle`].forEach(type => {
+		g_keycons.groups.forEach(type => {
 			let maxPtn = 0;
 			while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
 				maxPtn++;
@@ -6166,7 +6159,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		g_keyObj.currentPtn = searchPattern(g_keyObj.currentPtn, _sign, g_headerObj.transKeyUse);
 
 		// カラーグループ、シャッフルグループの再設定
-		[`color`, `shuffle`].forEach(type => resetGroupList(type, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`));
+		g_keycons.groups.forEach(type => resetGroupList(type, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`));
 
 		// キーコンフィグ画面を再呼び出し
 		keyConfigInit();
@@ -8044,7 +8037,7 @@ const getArrowSettings = _ => {
 			resetColorType({ _to: g_keycons.colorSelf });
 		}
 
-		[`color`, `shuffle`].forEach(type => {
+		g_keycons.groups.forEach(type => {
 			const groupNum = g_keycons[`${type}GroupNum`];
 			storageObj[`${type}${addKey}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
 			g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}d`]);
@@ -9536,7 +9529,7 @@ const judgeArrow = _j => {
 		if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan]) {
 			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
 			resultFunc(_difFrame);
-			countFastSlow(_difFrame, g_headerObj.justFrames);
+			countFastSlow(_difFrame);
 
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
 			stepDivHit.style.top = `${g_attrObj[arrowName].prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
@@ -9554,15 +9547,18 @@ const judgeArrow = _j => {
 
 	const judgeTargetFrzArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
-		if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] && !g_attrObj[frzName].judgEndFlg) {
-			if (g_headerObj.frzStartjdgUse &&
-				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
+		if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] && !g_attrObj[frzName].judgEndFlg
+			&& g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
+
+			if (g_headerObj.frzStartjdgUse) {
 				const [resultFunc] = checkJudgment(_difCnt);
 				resultFunc(_difFrame);
-				countFastSlow(_difFrame, g_headerObj.justFrames);
-				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
+			} else {
+				displayDiff(_difFrame, `F`);
 			}
+			countFastSlow(_difFrame);
 			changeHitFrz(_j, fcurrentNo, `frz`);
+			g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			return true;
 		}
 		return false;
@@ -9584,9 +9580,10 @@ const judgeArrow = _j => {
 /**
  * タイミングズレを表示
  * @param {number} _difFrame 
+ * @param {string} _fjdg
  * @param {number} _justFrames
  */
-const displayDiff = (_difFrame, _justFrames = 0) => {
+const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames) => {
 	let diffJDisp = ``;
 	g_workObj.diffList.push(_difFrame);
 	const difCnt = Math.abs(_difFrame);
@@ -9595,7 +9592,7 @@ const displayDiff = (_difFrame, _justFrames = 0) => {
 	} else if (_difFrame < _justFrames * (-1)) {
 		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
 	}
-	diffJ.innerHTML = diffJDisp;
+	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
 };
 
 /**
@@ -9603,7 +9600,7 @@ const displayDiff = (_difFrame, _justFrames = 0) => {
  * @param {number} _difFrame 
  * @param {number} _justFrames 
  */
-const countFastSlow = (_difFrame, _justFrames = 0) => {
+const countFastSlow = (_difFrame, _justFrames = g_headerObj.justFrames) => {
 	if (_difFrame > _justFrames) {
 		g_resultObj.fast++;
 	} else if (_difFrame < _justFrames * (-1)) {
@@ -9688,7 +9685,7 @@ const judgeRecovery = (_name, _difFrame) => {
 	changeJudgeCharacter(_name, g_lblNameObj[`j_${_name}`]);
 
 	updateCombo();
-	displayDiff(_difFrame, g_headerObj.justFrames);
+	displayDiff(_difFrame);
 
 	lifeRecovery();
 	finishViewing();
@@ -9730,7 +9727,7 @@ const judgeMatari = _difFrame => {
 	changeJudgeCharacter(`matari`, g_lblNameObj.j_matari);
 	comboJ.textContent = ``;
 
-	displayDiff(_difFrame, g_headerObj.justFrames);
+	displayDiff(_difFrame);
 	finishViewing();
 
 	g_customJsObj.judg_matari.forEach(func => func(_difFrame));
