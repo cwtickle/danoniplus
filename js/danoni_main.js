@@ -9536,7 +9536,7 @@ const judgeArrow = _j => {
 		if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan]) {
 			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
 			resultFunc(_difFrame);
-			countFastSlow(_difFrame, g_headerObj.justFrames);
+			countFastSlow(_difFrame);
 
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
 			stepDivHit.style.top = `${g_attrObj[arrowName].prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
@@ -9554,15 +9554,18 @@ const judgeArrow = _j => {
 
 	const judgeTargetFrzArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
-		if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] && !g_attrObj[frzName].judgEndFlg) {
-			if (g_headerObj.frzStartjdgUse &&
-				(g_workObj.judgFrzHitCnt[_j] === undefined || g_workObj.judgFrzHitCnt[_j] <= fcurrentNo)) {
+		if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] && !g_attrObj[frzName].judgEndFlg
+			&& g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
+
+			if (g_headerObj.frzStartjdgUse) {
 				const [resultFunc] = checkJudgment(_difCnt);
 				resultFunc(_difFrame);
-				countFastSlow(_difFrame, g_headerObj.justFrames);
-				g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
+			} else {
+				displayDiff(_difFrame, `F`);
 			}
+			countFastSlow(_difFrame);
 			changeHitFrz(_j, fcurrentNo, `frz`);
+			g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			return true;
 		}
 		return false;
@@ -9584,9 +9587,10 @@ const judgeArrow = _j => {
 /**
  * タイミングズレを表示
  * @param {number} _difFrame 
+ * @param {string} _fjdg
  * @param {number} _justFrames
  */
-const displayDiff = (_difFrame, _justFrames = 0) => {
+const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames) => {
 	let diffJDisp = ``;
 	g_workObj.diffList.push(_difFrame);
 	const difCnt = Math.abs(_difFrame);
@@ -9595,7 +9599,7 @@ const displayDiff = (_difFrame, _justFrames = 0) => {
 	} else if (_difFrame < _justFrames * (-1)) {
 		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
 	}
-	diffJ.innerHTML = diffJDisp;
+	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
 };
 
 /**
@@ -9603,7 +9607,7 @@ const displayDiff = (_difFrame, _justFrames = 0) => {
  * @param {number} _difFrame 
  * @param {number} _justFrames 
  */
-const countFastSlow = (_difFrame, _justFrames = 0) => {
+const countFastSlow = (_difFrame, _justFrames = g_headerObj.justFrames) => {
 	if (_difFrame > _justFrames) {
 		g_resultObj.fast++;
 	} else if (_difFrame < _justFrames * (-1)) {
@@ -9688,7 +9692,7 @@ const judgeRecovery = (_name, _difFrame) => {
 	changeJudgeCharacter(_name, g_lblNameObj[`j_${_name}`]);
 
 	updateCombo();
-	displayDiff(_difFrame, g_headerObj.justFrames);
+	displayDiff(_difFrame);
 
 	lifeRecovery();
 	finishViewing();
@@ -9730,7 +9734,7 @@ const judgeMatari = _difFrame => {
 	changeJudgeCharacter(`matari`, g_lblNameObj.j_matari);
 	comboJ.textContent = ``;
 
-	displayDiff(_difFrame, g_headerObj.justFrames);
+	displayDiff(_difFrame);
 	finishViewing();
 
 	g_customJsObj.judg_matari.forEach(func => func(_difFrame));
