@@ -2766,7 +2766,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// ハッシュタグ
-	obj.hashTag = setVal(_dosObj.hashTag, ``);
+	obj.hashTag = _dosObj.hashTag ?? ``;
 
 	// 自動プリロードの設定
 	obj.autoPreload = setBoolVal(_dosObj.autoPreload, true);
@@ -3317,15 +3317,8 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 			gaugeCreateFlg = setGaugeDetails(scoreId, _dosObj[`gauge${_name}`].split(`,`));
 		} else {
 			const gauges = splitLF2(_dosObj[`gauge${_name}`]);
-			const gHeaderLen = gauges.length;
-			for (let j = 0; j < gHeaderLen; j++) {
-				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, gauges[j].split(`,`)));
-			}
-			if (gHeaderLen < _difLength) {
-				const defaultGaugeList = gauges[0].split(`,`);
-				for (let j = gHeaderLen; j < _difLength; j++) {
-					gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, defaultGaugeList));
-				}
+			for (let j = 0; j < _difLength; j++) {
+				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, (gauges[j] ?? gauges[0]).split(`,`)));
 			}
 		}
 
