@@ -1809,7 +1809,7 @@ const initialControl = async () => {
 	});
 
 	// デフォルトのカラー・シャッフルグループ設定を退避
-	[`color`, `shuffle`].forEach(type => {
+	g_keycons.groups.forEach(type => {
 		const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type));
 		tmpName.forEach(property => g_keyObj[`${property}d`] = structuredClone(g_keyObj[property]));
 	});
@@ -2766,7 +2766,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// ハッシュタグ
-	obj.hashTag = setVal(_dosObj.hashTag, ``);
+	obj.hashTag = _dosObj.hashTag ?? ``;
 
 	// 自動プリロードの設定
 	obj.autoPreload = setBoolVal(_dosObj.autoPreload, true);
@@ -3317,15 +3317,8 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 			gaugeCreateFlg = setGaugeDetails(scoreId, _dosObj[`gauge${_name}`].split(`,`));
 		} else {
 			const gauges = splitLF2(_dosObj[`gauge${_name}`]);
-			const gHeaderLen = gauges.length;
-			for (let j = 0; j < gHeaderLen; j++) {
-				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, gauges[j].split(`,`)));
-			}
-			if (gHeaderLen < _difLength) {
-				const defaultGaugeList = gauges[0].split(`,`);
-				for (let j = gHeaderLen; j < _difLength; j++) {
-					gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, defaultGaugeList));
-				}
+			for (let j = 0; j < _difLength; j++) {
+				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, (gauges[j] ?? gauges[0]).split(`,`)));
 			}
 		}
 
@@ -5018,7 +5011,7 @@ const createOptionWindow = _sprite => {
 				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 
 				// カラーグループ、シャッフルグループの設定
-				[`color`, `shuffle`].forEach(type => {
+				g_keycons.groups.forEach(type => {
 					resetGroupList(type, keyCtrlPtn);
 					if (g_keyObj.currentPtn === -1) {
 						const storageKeyName = storageObj[`${type}${addKey}`] || storageObj[`${type}${g_keyObj.currentKey}_-1_-1`];
@@ -5315,7 +5308,7 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
 		});
 
-		[`color`, `shuffle`].forEach(type => {
+		g_keycons.groups.forEach(type => {
 			let maxPtn = 0;
 			while (g_keyObj[`${type}${basePtn}_${maxPtn}`] !== undefined) {
 				maxPtn++;
@@ -6166,7 +6159,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		g_keyObj.currentPtn = searchPattern(g_keyObj.currentPtn, _sign, g_headerObj.transKeyUse);
 
 		// カラーグループ、シャッフルグループの再設定
-		[`color`, `shuffle`].forEach(type => resetGroupList(type, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`));
+		g_keycons.groups.forEach(type => resetGroupList(type, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`));
 
 		// キーコンフィグ画面を再呼び出し
 		keyConfigInit();
@@ -8044,7 +8037,7 @@ const getArrowSettings = _ => {
 			resetColorType({ _to: g_keycons.colorSelf });
 		}
 
-		[`color`, `shuffle`].forEach(type => {
+		g_keycons.groups.forEach(type => {
 			const groupNum = g_keycons[`${type}GroupNum`];
 			storageObj[`${type}${addKey}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}`]);
 			g_keyObj[`${type}${g_keyObj.currentKey}_-1_${groupNum}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_${groupNum}d`]);
