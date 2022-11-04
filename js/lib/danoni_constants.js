@@ -845,6 +845,8 @@ const g_keycons = {
     shuffleGroups: [0],
     shuffleGroupNum: 0,
     groupSelf: `S`,
+
+    groups: [`color`, `shuffle`],
 };
 
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
@@ -2566,7 +2568,7 @@ const g_keyObj = {
 const keyCtrlName = Object.keys(g_keyObj).filter(val => val.startsWith(`keyCtrl`));
 keyCtrlName.forEach(property => g_keyObj[`${property}d`] = copyArray2d(g_keyObj[property]));
 
-[`color`, `shuffle`].forEach(type => {
+g_keycons.groups.forEach(type => {
     const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type) && val.endsWith(`_0`));
     tmpName.forEach(property => g_keyObj[`${property.slice(0, -2)}`] = g_keyObj[property].concat());
 });
