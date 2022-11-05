@@ -2485,8 +2485,9 @@ const headerConvert = _dosObj => {
 	obj.artistNames = [];
 	obj.musicNos = [];
 
-	if (hasVal(_dosObj.musicTitle)) {
-		const musicData = splitLF2(_dosObj.musicTitle);
+	const dosMusicTitle = _dosObj[`musicTitle${g_localeObj.val}`] ?? _dosObj.musicTitle;
+	if (hasVal(dosMusicTitle)) {
+		const musicData = splitLF2(dosMusicTitle);
 
 		if (hasVal(_dosObj.musicNo)) {
 			obj.musicNos = _dosObj.musicNo.split(`$`);
