@@ -9588,10 +9588,10 @@ const judgeArrow = _j => {
 /**
  * タイミングズレを表示
  * @param {number} _difFrame 
- * @param {string} _fjdg
+ * @param {string} _freezeFlg
  * @param {number} _justFrames
  */
-const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames) => {
+const displayDiff = (_difFrame, _freezeFlg = ``, _justFrames = g_headerObj.justFrames) => {
 	let diffJDisp = ``;
 	g_workObj.diffList.push(_difFrame);
 	const difCnt = Math.abs(_difFrame);
@@ -9600,7 +9600,7 @@ const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames
 	} else if (_difFrame < _justFrames * (-1)) {
 		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
 	}
-	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
+	document.getElementById(`diff${_freezeFlg}J`).innerHTML = diffJDisp;
 };
 
 /**
