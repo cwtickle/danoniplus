@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.0.1`;
+const g_version = `Ver 29.1.0`;
 const g_revisedDate = `2022/11/05`;
 const g_alphaVersion = ``;
 
@@ -2485,8 +2485,9 @@ const headerConvert = _dosObj => {
 	obj.artistNames = [];
 	obj.musicNos = [];
 
-	if (hasVal(_dosObj.musicTitle)) {
-		const musicData = splitLF2(_dosObj.musicTitle);
+	const dosMusicTitle = _dosObj[`musicTitle${g_localeObj.val}`] ?? _dosObj.musicTitle;
+	if (hasVal(dosMusicTitle)) {
+		const musicData = splitLF2(dosMusicTitle);
 
 		if (hasVal(_dosObj.musicNo)) {
 			obj.musicNos = _dosObj.musicNo.split(`$`);
@@ -8548,8 +8549,10 @@ const mainInit = _ => {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			if (keyIsDown(g_kCdNameObj.shiftKey)) {
-				g_gameOverFlg = true;
-				g_finishFlg = false;
+				if (g_currentArrows !== g_fullArrows || g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
+					g_gameOverFlg = true;
+					g_finishFlg = false;
+				}
 				resultInit();
 			} else {
 				titleInit();
@@ -9660,13 +9663,13 @@ const lifeDamage = _ => {
  * 判定キャラクタの表示、判定済矢印数・判定数のカウンタ
  * @param {string} _name 
  * @param {string} _character 
- * @param {string} _freezeFlg 
+ * @param {string} _fjdg 
  */
-const changeJudgeCharacter = (_name, _character, _freezeFlg = ``) => {
+const changeJudgeCharacter = (_name, _character, _fjdg = ``) => {
 	g_resultObj[_name]++;
 	g_currentArrows++;
-	document.querySelector(`#chara${_freezeFlg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
-	document.querySelector(`#chara${_freezeFlg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
+	document.querySelector(`#chara${_fjdg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
+	document.querySelector(`#chara${_fjdg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
 	document.querySelector(`#lbl${toCapitalize(_name)}`).textContent = g_resultObj[_name];
 };
 
