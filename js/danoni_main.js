@@ -8548,8 +8548,10 @@ const mainInit = _ => {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			if (keyIsDown(g_kCdNameObj.shiftKey)) {
-				g_gameOverFlg = true;
-				g_finishFlg = false;
+				if (g_currentArrows !== g_fullArrows || g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
+					g_gameOverFlg = true;
+					g_finishFlg = false;
+				}
 				resultInit();
 			} else {
 				titleInit();
