@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.0.0`;
+const g_version = `Ver 29.0.1`;
 const g_revisedDate = `2022/11/05`;
 const g_alphaVersion = ``;
 
@@ -9547,7 +9547,7 @@ const judgeArrow = _j => {
 
 	const judgeTargetFrzArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
-		if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.sfsf] && !g_attrObj[frzName].judgEndFlg
+		if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.iknai] && !g_attrObj[frzName].judgEndFlg
 			&& g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
 
 			if (g_headerObj.frzStartjdgUse) {
@@ -9557,7 +9557,12 @@ const judgeArrow = _j => {
 				displayDiff(_difFrame, `F`);
 			}
 			countFastSlow(_difFrame);
-			changeHitFrz(_j, fcurrentNo, `frz`);
+
+			if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
+				changeHitFrz(_j, fcurrentNo, `frz`);
+			} else {
+				changeFailedFrz(_j, fcurrentNo);
+			}
 			g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			return true;
 		}
