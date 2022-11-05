@@ -9588,10 +9588,10 @@ const judgeArrow = _j => {
 /**
  * タイミングズレを表示
  * @param {number} _difFrame 
- * @param {string} _jdgf
+ * @param {string} _fjdg
  * @param {number} _justFrames
  */
-const displayDiff = (_difFrame, _jdgf = ``, _justFrames = g_headerObj.justFrames) => {
+const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames) => {
 	let diffJDisp = ``;
 	g_workObj.diffList.push(_difFrame);
 	const difCnt = Math.abs(_difFrame);
@@ -9600,7 +9600,7 @@ const displayDiff = (_difFrame, _jdgf = ``, _justFrames = g_headerObj.justFrames
 	} else if (_difFrame < _justFrames * (-1)) {
 		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
 	}
-	document.getElementById(`diff${_jdgf}J`).innerHTML = diffJDisp;
+	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
 };
 
 /**
@@ -9663,13 +9663,13 @@ const lifeDamage = _ => {
  * 判定キャラクタの表示、判定済矢印数・判定数のカウンタ
  * @param {string} _name 
  * @param {string} _character 
- * @param {string} _jdgf 
+ * @param {string} _fjdg 
  */
-const changeJudgeCharacter = (_name, _character, _jdgf = ``) => {
+const changeJudgeCharacter = (_name, _character, _fjdg = ``) => {
 	g_resultObj[_name]++;
 	g_currentArrows++;
-	document.querySelector(`#chara${_jdgf}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
-	document.querySelector(`#chara${_jdgf}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
+	document.querySelector(`#chara${_fjdg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
+	document.querySelector(`#chara${_fjdg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
 	document.querySelector(`#lbl${toCapitalize(_name)}`).textContent = g_resultObj[_name];
 };
 
