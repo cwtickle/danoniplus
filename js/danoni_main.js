@@ -9663,13 +9663,13 @@ const lifeDamage = _ => {
  * 判定キャラクタの表示、判定済矢印数・判定数のカウンタ
  * @param {string} _name 
  * @param {string} _character 
- * @param {string} _freezeFlg 
+ * @param {string} _fjdg 
  */
-const changeJudgeCharacter = (_name, _character, _freezeFlg = ``) => {
+const changeJudgeCharacter = (_name, _character, _fjdg = ``) => {
 	g_resultObj[_name]++;
 	g_currentArrows++;
-	document.querySelector(`#chara${_freezeFlg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
-	document.querySelector(`#chara${_freezeFlg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
+	document.querySelector(`#chara${_fjdg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
+	document.querySelector(`#chara${_fjdg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
 	document.querySelector(`#lbl${toCapitalize(_name)}`).textContent = g_resultObj[_name];
 };
 
