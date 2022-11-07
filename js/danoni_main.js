@@ -2543,12 +2543,13 @@ const headerConvert = _dosObj => {
 	obj.frzAttempt = setIntVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT);
 
 	// 製作者表示
-	if (hasVal(_dosObj.tuning)) {
-		const tunings = _dosObj.tuning.split(`,`);
+	const dosTuning = _dosObj[`tuning${g_localeObj.val}`] ?? _dosObj.tuning;
+	if (hasVal(dosTuning)) {
+		const tunings = dosTuning.split(`,`);
 		obj.tuning = escapeHtmlForEnabledTag(tunings[0]);
 		obj.creatorUrl = (tunings.length > 1 ? tunings[1] : (g_presetObj.tuningUrl ?? ``));
 	} else {
-		obj.tuning = escapeHtmlForEnabledTag(g_presetObj.tuning ?? `name`);
+		obj.tuning = escapeHtmlForEnabledTag(g_presetObj[`tuning${g_localeObj.val}`] ?? g_presetObj.tuning ?? `name`);
 		obj.creatorUrl = g_presetObj.tuningUrl ?? ``;
 	}
 	obj.tuningInit = obj.tuning;
