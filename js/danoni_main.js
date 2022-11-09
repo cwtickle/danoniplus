@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/11/05
+ * Revised : 2022/11/09
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.1.0`;
-const g_revisedDate = `2022/11/05`;
+const g_version = `Ver 29.2.0`;
+const g_revisedDate = `2022/11/09`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2543,12 +2543,13 @@ const headerConvert = _dosObj => {
 	obj.frzAttempt = setIntVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT);
 
 	// 製作者表示
-	if (hasVal(_dosObj.tuning)) {
-		const tunings = _dosObj.tuning.split(`,`);
+	const dosTuning = _dosObj[`tuning${g_localeObj.val}`] ?? _dosObj.tuning;
+	if (hasVal(dosTuning)) {
+		const tunings = dosTuning.split(`,`);
 		obj.tuning = escapeHtmlForEnabledTag(tunings[0]);
 		obj.creatorUrl = (tunings.length > 1 ? tunings[1] : (g_presetObj.tuningUrl ?? ``));
 	} else {
-		obj.tuning = escapeHtmlForEnabledTag(g_presetObj.tuning ?? `name`);
+		obj.tuning = escapeHtmlForEnabledTag(g_presetObj[`tuning${g_localeObj.val}`] ?? g_presetObj.tuning ?? `name`);
 		obj.creatorUrl = g_presetObj.tuningUrl ?? ``;
 	}
 	obj.tuningInit = obj.tuning;
@@ -9532,7 +9533,7 @@ const judgeArrow = _j => {
 		if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan]) {
 			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
 			resultFunc(_difFrame);
-			countFastSlow(_difFrame);
+			displayDiff(_difFrame);
 
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
 			stepDivHit.style.top = `${g_attrObj[arrowName].prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
@@ -9556,10 +9557,10 @@ const judgeArrow = _j => {
 			if (g_headerObj.frzStartjdgUse) {
 				const [resultFunc] = checkJudgment(_difCnt);
 				resultFunc(_difFrame);
+				displayDiff(_difFrame);
 			} else {
 				displayDiff(_difFrame, `F`);
 			}
-			countFastSlow(_difFrame);
 
 			if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
 				changeHitFrz(_j, fcurrentNo, `frz`);
@@ -9597,23 +9598,12 @@ const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames
 	const difCnt = Math.abs(_difFrame);
 	if (_difFrame > _justFrames) {
 		diffJDisp = `<span class="common_matari">Fast ${difCnt} Frames</span>`;
-	} else if (_difFrame < _justFrames * (-1)) {
-		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
-	}
-	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
-};
-
-/**
- * Fast/Slowカウンタ
- * @param {number} _difFrame 
- * @param {number} _justFrames 
- */
-const countFastSlow = (_difFrame, _justFrames = g_headerObj.justFrames) => {
-	if (_difFrame > _justFrames) {
 		g_resultObj.fast++;
 	} else if (_difFrame < _justFrames * (-1)) {
+		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
 		g_resultObj.slow++;
 	}
+	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
 };
 
 /**
@@ -9691,10 +9681,7 @@ const updateCombo = _ => {
  */
 const judgeRecovery = (_name, _difFrame) => {
 	changeJudgeCharacter(_name, g_lblNameObj[`j_${_name}`]);
-
 	updateCombo();
-	displayDiff(_difFrame);
-
 	lifeRecovery();
 	finishViewing();
 
@@ -9734,8 +9721,6 @@ const judgeShakin = _difFrame => judgeRecovery(`shakin`, _difFrame);
 const judgeMatari = _difFrame => {
 	changeJudgeCharacter(`matari`, g_lblNameObj.j_matari);
 	comboJ.textContent = ``;
-
-	displayDiff(_difFrame);
 	finishViewing();
 
 	g_customJsObj.judg_matari.forEach(func => func(_difFrame));
