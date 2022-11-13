@@ -2425,6 +2425,14 @@ const headerConvert = _dosObj => {
 	// ヘッダー群の格納先
 	const obj = {};
 
+	/**
+	 * ロケールを含んだヘッダーの取得
+	 * @param {object} _obj 
+	 * @param {string} _param 
+	 * @returns 
+	 */
+	const getHeader = (_obj, _param) => _obj[`${_param}${g_localeObj.val}`] ?? _obj[_param];
+
 	// フォントの設定
 	obj.customFont = _dosObj.customFont ?? ``;
 	g_headerObj.customFont = obj.customFont;
@@ -2485,7 +2493,7 @@ const headerConvert = _dosObj => {
 	obj.artistNames = [];
 	obj.musicNos = [];
 
-	const dosMusicTitle = _dosObj[`musicTitle${g_localeObj.val}`] ?? _dosObj.musicTitle;
+	const dosMusicTitle = getHeader(_dosObj, `musicTitle`);
 	if (hasVal(dosMusicTitle)) {
 		const musicData = splitLF2(dosMusicTitle);
 
@@ -2543,13 +2551,13 @@ const headerConvert = _dosObj => {
 	obj.frzAttempt = setIntVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT);
 
 	// 製作者表示
-	const dosTuning = _dosObj[`tuning${g_localeObj.val}`] ?? _dosObj.tuning;
+	const dosTuning = getHeader(_dosObj, `tuning`);
 	if (hasVal(dosTuning)) {
 		const tunings = dosTuning.split(`,`);
 		obj.tuning = escapeHtmlForEnabledTag(tunings[0]);
 		obj.creatorUrl = (tunings.length > 1 ? tunings[1] : (g_presetObj.tuningUrl ?? ``));
 	} else {
-		obj.tuning = escapeHtmlForEnabledTag(g_presetObj[`tuning${g_localeObj.val}`] ?? g_presetObj.tuning ?? `name`);
+		obj.tuning = escapeHtmlForEnabledTag(getHeader(g_presetObj, `tuning`) ?? `name`);
 		obj.creatorUrl = g_presetObj.tuningUrl ?? ``;
 	}
 	obj.tuningInit = obj.tuning;
@@ -2804,12 +2812,12 @@ const headerConvert = _dosObj => {
 	obj.readyHtml = _dosObj.readyHtml ?? ``;
 
 	// デフォルト曲名表示のフォントサイズ
-	obj.titlesize = _dosObj.titlesize ?? ``;
+	obj.titlesize = getHeader(_dosObj, `titlesize`) ?? ``;
 
 	// デフォルト曲名表示のフォント名
 	// (使用例： |titlefont=Century,Meiryo UI|)
 	obj.titlefonts = g_titleLists.defaultFonts.concat();
-	_dosObj.titlefont?.split(`$`).forEach((font, j) => obj.titlefonts[j] = `'${(font.replaceAll(`,`, `', '`))}'`);
+	getHeader(_dosObj, `titlefont`)?.split(`$`).forEach((font, j) => obj.titlefonts[j] = `'${(font.replaceAll(`,`, `', '`))}'`);
 	if (obj.titlefonts[1] === undefined) {
 		obj.titlefonts[1] = obj.titlefonts[0];
 	}
@@ -2826,7 +2834,7 @@ const headerConvert = _dosObj => {
 
 	// デフォルト曲名表示の表示位置調整
 	obj.titlepos = [[0, 0], [0, 0]];
-	_dosObj.titlepos?.split(`$`).forEach((pos, j) => obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x)));
+	getHeader(_dosObj, `titlepos`)?.split(`$`).forEach((pos, j) => obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x)));
 
 	// タイトル文字のアニメーション設定
 	obj.titleAnimationName = [`leftToRight`];
@@ -2856,7 +2864,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// デフォルト曲名表示の複数行時の縦間隔
-	obj.titlelineheight = setIntVal(_dosObj.titlelineheight, ``);
+	obj.titlelineheight = setIntVal(getHeader(_dosObj, `titlelineheight`), ``);
 
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
 	obj.frzStartjdgUse = setBoolVal(_dosObj.frzStartjdgUse ?? g_presetObj.frzStartjdgUse);
