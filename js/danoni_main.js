@@ -5634,7 +5634,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		createDescDiv(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
 			.split(`{1}:`).join(g_isMac ? `` : `Delete:`)),
 
-		createDescDiv(`kcShuffleDesc`, g_lblNameObj.kcShuffleDesc),
+		createDescDiv(`kcShuffleDesc`, g_headerObj.shuffleUse ? g_lblNameObj.kcShuffleDesc : g_lblNameObj.kcNoShuffleDesc),
 	);
 
 	// キーの一覧を表示

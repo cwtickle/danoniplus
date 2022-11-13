@@ -3086,6 +3086,7 @@ const g_lang_lblNameObj = {
     Ja: {
         kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
         kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを変更`,
+        kcNoShuffleDesc: `矢印をクリックでカラーグループを変更`,
         sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
         kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
         transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
@@ -3114,6 +3115,7 @@ const g_lang_lblNameObj = {
     En: {
         kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
         kcShuffleDesc: `Click the number to change the shuffle group, and click the arrow to change the color.`,
+        kcNoShuffleDesc: `Click the arrow to change the color group.`,
         sdDesc: `[Click to switch, gray to OFF]`,
         kcShortcutDesc: `Shortcut during play: "{0}" Return to title / "{1}" Retry the game`,
         transKeyDesc: `High score, key config, etc. are not saved in another key mode`,
