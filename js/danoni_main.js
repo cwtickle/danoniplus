@@ -9469,7 +9469,7 @@ const changeHitFrz = (_j, _k, _name) => {
 	document.getElementById(frzName).style.top = $id(`stepRoot${_j}`).top;
 
 	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
-	const delFrzMotionLength = sumData(g_workObj.motionOnFrames.slice(0, currentFrz.boostCnt));
+	const delFrzMotionLength = sumData(g_workObj.motionOnFrames.slice(0, currentFrz.boostCnt + 1));
 
 	currentFrz.frzBarLength -= (delFrzLength + delFrzMotionLength) * currentFrz.dir;
 	currentFrz.barY -= (delFrzLength + delFrzMotionLength) * currentFrz.dividePos;
