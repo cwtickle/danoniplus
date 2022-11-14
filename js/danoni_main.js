@@ -7392,14 +7392,9 @@ const getBrakeTrace = _frms => {
 const getFirstArrivalFrame = (_startFrame, _speedOnFrame, _motionOnFrame) => {
 	let startY = 0;
 	let frm = _startFrame;
-	let motionFrm = C_MOTION_STD_POS;
 
 	while (g_posObj.distY - startY > 0) {
 		startY += _speedOnFrame[frm];
-
-		if (_speedOnFrame[frm] !== 0) {
-			motionFrm++;
-		}
 		frm++;
 	}
 	return frm;
