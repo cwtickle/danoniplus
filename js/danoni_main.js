@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/11/04
+ * Revised : 2022/11/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 28.6.1`;
-const g_revisedDate = `2022/11/04`;
+const g_version = `Ver 28.6.2`;
+const g_revisedDate = `2022/11/15`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -9461,8 +9461,8 @@ const changeHitFrz = (_j, _k, _name) => {
 
 	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
 	let delFrzMotionLength = 0;
-	for (let i = 0; i < g_attrObj[frzName].cnt; i++) {
-		delFrzMotionLength += g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt - i];
+	for (let i = 0; i <= g_attrObj[frzName].boostCnt; i++) {
+		delFrzMotionLength += g_workObj.motionOnFrames[i];
 	}
 
 	g_attrObj[frzName].frzBarLength -= (delFrzLength + delFrzMotionLength) * g_attrObj[frzName].dir;
