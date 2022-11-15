@@ -7392,14 +7392,9 @@ const getBrakeTrace = _frms => {
 const getFirstArrivalFrame = (_startFrame, _speedOnFrame, _motionOnFrame) => {
 	let startY = 0;
 	let frm = _startFrame;
-	let motionFrm = C_MOTION_STD_POS;
 
 	while (g_posObj.distY - startY > 0) {
 		startY += _speedOnFrame[frm];
-
-		if (_speedOnFrame[frm] !== 0) {
-			motionFrm++;
-		}
 		frm++;
 	}
 	return frm;
@@ -8797,12 +8792,13 @@ const mainInit = _ => {
 
 			if (g_workObj.judgArrowCnt[_j] === _k - 1 && _cnt <= g_judgObj.arrowJ[g_judgPosObj.shakin]) {
 				const prevArrowName = `arrow${_j}_${g_workObj.judgArrowCnt[_j]}`;
+				const prevArrow = g_attrObj[prevArrowName];
 
-				if (g_attrObj[prevArrowName].cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.ii]) {
+				if (prevArrow.cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.ii]) {
 
 					// 自身より前の矢印が未判定の場合、強制的に枠外判定を行い矢印を削除
-					if (g_attrObj[prevArrowName].cnt >= (-1) * g_judgObj.arrowJ[g_judgPosObj.uwan]) {
-						judgeUwan(g_attrObj[prevArrowName].cnt);
+					if (prevArrow.cnt >= (-1) * g_judgObj.arrowJ[g_judgPosObj.uwan]) {
+						judgeUwan(prevArrow.cnt);
 						judgeObjDelete.arrow(_j, prevArrowName);
 					}
 				}
@@ -8817,15 +8813,15 @@ const mainInit = _ => {
 
 			if (g_workObj.judgFrzCnt[_j] === _k - 1 && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
+				const prevFrz = g_attrObj[prevFrzName];
 
-				if (g_attrObj[prevFrzName].isMoving &&
-					g_attrObj[prevFrzName].cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
+				if (prevFrz.isMoving && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 
 					// 自身より前のフリーズアローが未判定の場合、強制的に枠外判定を行いフリーズアローを削除
-					if (g_attrObj[prevFrzName].cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
-						judgeIknai(g_attrObj[prevFrzName].cnt);
+					if (prevFrz.cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
+						judgeIknai(prevFrz.cnt);
 						if (g_headerObj.frzStartjdgUse) {
-							judgeUwan(g_attrObj[prevFrzName].cnt);
+							judgeUwan(prevFrz.cnt);
 						}
 					}
 					judgeObjDelete.frz(_j, prevFrzName);
@@ -8929,20 +8925,21 @@ const mainInit = _ => {
 	 */
 	const movArrow = (_j, _k, _name) => {
 		const arrowName = `${_name}${_j}_${_k}`;
+		const currentArrow = g_attrObj[arrowName];
 
 		// 全体色変化 (移動時)
 		changeColorFunc[_name](_j, _k);
 
 		// 移動
 		if (g_workObj.currentSpeed !== 0) {
-			const boostCnt = g_attrObj[arrowName].boostCnt;
-			g_attrObj[arrowName].prevY = g_attrObj[arrowName].y;
-			g_attrObj[arrowName].y -= (g_workObj.currentSpeed * g_attrObj[arrowName].boostSpd + g_workObj.motionOnFrames[boostCnt] * g_attrObj[arrowName].boostDir) * g_attrObj[arrowName].dir;
-			document.getElementById(arrowName).style.top = `${g_attrObj[arrowName].y}px`;
-			g_attrObj[arrowName].boostCnt--;
+			const boostCnt = currentArrow.boostCnt;
+			currentArrow.prevY = currentArrow.y;
+			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd + g_workObj.motionOnFrames[boostCnt] * currentArrow.boostDir) * currentArrow.dir;
+			document.getElementById(arrowName).style.top = `${currentArrow.y}px`;
+			currentArrow.boostCnt--;
 		}
-		judgeMotionFunc[`${_name}${g_stateObj.autoAll}`](_j, arrowName, --g_attrObj[arrowName].cnt);
-		judgeNextFunc[`${_name}${g_stateObj.autoAll}`](_j, _k, g_attrObj[arrowName].cnt);
+		judgeMotionFunc[`${_name}${g_stateObj.autoAll}`](_j, arrowName, --currentArrow.cnt);
+		judgeNextFunc[`${_name}${g_stateObj.autoAll}`](_j, _k, currentArrow.cnt);
 	};
 
 	/**
@@ -9030,24 +9027,25 @@ const mainInit = _ => {
 	const movFrzArrow = (_j, _k, _name) => {
 		const frzNo = `${_j}_${_k}`;
 		const frzName = `${_name}${frzNo}`;
-		const movY = g_workObj.currentSpeed * g_attrObj[frzName].boostSpd * g_attrObj[frzName].dir;
+		const currentFrz = g_attrObj[frzName];
+		const movY = g_workObj.currentSpeed * currentFrz.boostSpd * currentFrz.dir;
 
-		if (!g_attrObj[frzName].judgEndFlg) {
-			if (g_attrObj[frzName].isMoving) {
+		if (!currentFrz.judgEndFlg) {
+			if (currentFrz.isMoving) {
 
 				// 全体色変化 (通常時)
 				changeColorFunc[_name](_j, _k, `Normal`);
 
 				// 移動
 				if (g_workObj.currentSpeed !== 0) {
-					g_attrObj[frzName].y -= movY + g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt] * g_attrObj[frzName].dir * g_attrObj[frzName].boostDir;
-					document.getElementById(frzName).style.top = `${g_attrObj[frzName].y}px`;
-					g_attrObj[frzName].boostCnt--;
+					currentFrz.y -= movY + g_workObj.motionOnFrames[currentFrz.boostCnt] * currentFrz.dir * currentFrz.boostDir;
+					document.getElementById(frzName).style.top = `${currentFrz.y}px`;
+					currentFrz.boostCnt--;
 				}
-				g_attrObj[frzName].cnt--;
+				currentFrz.cnt--;
 
 				// 次フリーズアローへ判定を移すかチェック
-				judgeNextFunc[`${_name}${g_stateObj.autoAll}`](_j, _k, g_attrObj[frzName].cnt);
+				judgeNextFunc[`${_name}${g_stateObj.autoAll}`](_j, _k, currentFrz.cnt);
 
 			} else {
 
@@ -9055,33 +9053,33 @@ const mainInit = _ => {
 				changeColorFunc[_name](_j, _k, `Hit`);
 
 				// フリーズアローがヒット中の処理
-				if (g_attrObj[frzName].frzBarLength > 0) {
+				if (currentFrz.frzBarLength > 0) {
 
-					g_attrObj[frzName].frzBarLength -= movY * g_attrObj[frzName].dir;
-					g_attrObj[frzName].barY -= movY * g_attrObj[frzName].dividePos;
-					g_attrObj[frzName].btmY -= movY;
+					currentFrz.frzBarLength -= movY * currentFrz.dir;
+					currentFrz.barY -= movY * currentFrz.dividePos;
+					currentFrz.btmY -= movY;
 
-					$id(`${_name}Bar${frzNo}`).height = `${g_attrObj[frzName].frzBarLength}px`;
-					$id(`${_name}Bar${frzNo}`).top = `${g_attrObj[frzName].barY}px`;
-					$id(`${_name}Btm${frzNo}`).top = `${g_attrObj[frzName].btmY}px`;
-					$id(`${_name}BtmShadow${frzNo}`).top = `${g_attrObj[frzName].btmY}px`;
+					$id(`${_name}Bar${frzNo}`).height = `${currentFrz.frzBarLength}px`;
+					$id(`${_name}Bar${frzNo}`).top = `${currentFrz.barY}px`;
+					$id(`${_name}Btm${frzNo}`).top = `${currentFrz.btmY}px`;
+					$id(`${_name}BtmShadow${frzNo}`).top = `${currentFrz.btmY}px`;
 
 					if (!checkKeyUpFunc[`${_name}${g_stateObj.autoAll}`](_j)) {
-						g_attrObj[frzName].keyUpFrame++;
-						judgeMotionFunc[`${_name}KeyUp`](_j, _k, frzName, g_attrObj[frzName].cnt);
+						currentFrz.keyUpFrame++;
+						judgeMotionFunc[`${_name}KeyUp`](_j, _k, frzName, currentFrz.cnt);
 					}
 				} else {
-					judgeMotionFunc[`${_name}OK`](_j, _k, frzName, g_attrObj[frzName].cnt);
+					judgeMotionFunc[`${_name}OK`](_j, _k, frzName, currentFrz.cnt);
 				}
 			}
 			// フリーズアローが枠外に出たときの処理
-			judgeMotionFunc[`${_name}NG`](_j, _k, frzName, g_attrObj[frzName].cnt);
+			judgeMotionFunc[`${_name}NG`](_j, _k, frzName, currentFrz.cnt);
 
 		} else {
-			g_attrObj[frzName].frzBarLength -= g_workObj.currentSpeed;
-			if (g_attrObj[frzName].frzBarLength > 0) {
-				g_attrObj[frzName].y -= movY;
-				document.getElementById(frzName).style.top = `${g_attrObj[frzName].y}px`;
+			currentFrz.frzBarLength -= g_workObj.currentSpeed;
+			if (currentFrz.frzBarLength > 0) {
+				currentFrz.y -= movY;
+				document.getElementById(frzName).style.top = `${currentFrz.y}px`;
 			} else {
 				judgeObjDelete[_name](_j, frzName);
 			}
@@ -9450,8 +9448,9 @@ const changeCssMotions = (_header, _name, _frameNum) => {
 const changeHitFrz = (_j, _k, _name) => {
 	const frzNo = `${_j}_${_k}`;
 	const frzName = `${_name}${frzNo}`;
+	const currentFrz = g_attrObj[frzName];
 
-	if (g_attrObj[frzName].keyUpFrame !== 0) {
+	if (currentFrz.keyUpFrame !== 0) {
 		return;
 	}
 
@@ -9461,25 +9460,22 @@ const changeHitFrz = (_j, _k, _name) => {
 	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
-	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - g_attrObj[frzName].y;
+	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - currentFrz.y;
 	document.getElementById(frzName).style.top = $id(`stepRoot${_j}`).top;
 
 	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
-	let delFrzMotionLength = 0;
-	for (let i = 0; i < g_attrObj[frzName].cnt; i++) {
-		delFrzMotionLength += g_workObj.motionOnFrames[g_attrObj[frzName].boostCnt - i];
-	}
+	const delFrzMotionLength = sumData(g_workObj.motionOnFrames.slice(0, currentFrz.boostCnt + 1));
 
-	g_attrObj[frzName].frzBarLength -= (delFrzLength + delFrzMotionLength) * g_attrObj[frzName].dir;
-	g_attrObj[frzName].barY -= (delFrzLength + delFrzMotionLength) * g_attrObj[frzName].dividePos;
-	g_attrObj[frzName].btmY -= delFrzLength + delFrzMotionLength;
-	g_attrObj[frzName].y += delFrzLength;
-	g_attrObj[frzName].isMoving = false;
+	currentFrz.frzBarLength -= (delFrzLength + delFrzMotionLength) * currentFrz.dir;
+	currentFrz.barY -= (delFrzLength + delFrzMotionLength) * currentFrz.dividePos;
+	currentFrz.btmY -= delFrzLength + delFrzMotionLength;
+	currentFrz.y += delFrzLength;
+	currentFrz.isMoving = false;
 
-	styfrzBar.top = `${g_attrObj[frzName].barY}px`;
-	styfrzBar.height = `${g_attrObj[frzName].frzBarLength}px`;
+	styfrzBar.top = `${currentFrz.barY}px`;
+	styfrzBar.height = `${currentFrz.frzBarLength}px`;
 	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
-	styfrzBtm.top = `${g_attrObj[frzName].btmY}px`;
+	styfrzBtm.top = `${currentFrz.btmY}px`;
 	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
@@ -9530,10 +9526,12 @@ const judgeArrow = _j => {
 
 	const currentNo = g_workObj.judgArrowCnt[_j];
 	const arrowName = `arrow${_j}_${currentNo}`;
+	const currentArrow = g_attrObj[arrowName];
 	const existJudgArrow = document.getElementById(arrowName) !== null;
 
 	const fcurrentNo = g_workObj.judgFrzCnt[_j];
 	const frzName = `frz${_j}_${fcurrentNo}`;
+	const currentFrz = g_attrObj[frzName];
 	const existJudgFrz = document.getElementById(frzName) !== null;
 
 	const judgeTargetArrow = _difFrame => {
@@ -9544,7 +9542,7 @@ const judgeArrow = _j => {
 			displayDiff(_difFrame);
 
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
-			stepDivHit.style.top = `${g_attrObj[arrowName].prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
+			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
 			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
@@ -9559,7 +9557,7 @@ const judgeArrow = _j => {
 
 	const judgeTargetFrzArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
-		if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.iknai] && !g_attrObj[frzName].judgEndFlg
+		if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.iknai] && !currentFrz.judgEndFlg
 			&& g_workObj.judgFrzHitCnt[_j] <= fcurrentNo) {
 
 			if (g_headerObj.frzStartjdgUse) {
@@ -9582,8 +9580,8 @@ const judgeArrow = _j => {
 	};
 
 	let judgeFlg = false;
-	const difFrame = (existJudgArrow ? g_attrObj[arrowName].cnt : Infinity);
-	const frzDifFrame = (existJudgFrz ? g_attrObj[frzName].cnt : Infinity);
+	const difFrame = (existJudgArrow ? currentArrow.cnt : Infinity);
+	const frzDifFrame = (existJudgFrz ? currentFrz.cnt : Infinity);
 	if (difFrame < frzDifFrame) {
 		judgeFlg = judgeTargetArrow(difFrame);
 	} else if (difFrame > frzDifFrame) {
