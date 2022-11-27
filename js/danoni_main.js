@@ -3821,7 +3821,7 @@ const titleInit = _ => {
 		// ヘルプ
 		createCss2Button(`btnHelp`, `?`, _ => true,
 			Object.assign(g_lblPosObj.btnHelp, {
-				resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`),
+				resetFunc: _ => openLink(g_lblNameObj.helpUrl),
 			}), g_cssObj.button_Setting),
 
 		// 製作者表示
