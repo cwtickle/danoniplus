@@ -3113,6 +3113,7 @@ const g_lang_lblNameObj = {
         j_adj: `推定Adj`,
 
         helpUrl: `https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`,
+        securityUrl: `https://github.com/cwtickle/danoniplus/security/policy`,
     },
     En: {
         kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
@@ -3144,6 +3145,7 @@ const g_lang_lblNameObj = {
         j_adj: `Est-Adj.`,
 
         helpUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/AboutGameSystem`,
+        securityUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/SecurityPolicy`,
     },
 };
 
