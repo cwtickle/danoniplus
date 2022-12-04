@@ -3821,7 +3821,7 @@ const titleInit = _ => {
 		// ヘルプ
 		createCss2Button(`btnHelp`, `?`, _ => true,
 			Object.assign(g_lblPosObj.btnHelp, {
-				resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`),
+				resetFunc: _ => openLink(g_lblNameObj.helpUrl),
 			}), g_cssObj.button_Setting),
 
 		// 製作者表示
@@ -3840,7 +3840,7 @@ const titleInit = _ => {
 		// セキュリティリンク
 		createCss2Button(`lnkComparison`, `&#x1f6e1;`, _ => true,
 			Object.assign(g_lblPosObj.lnkComparison, {
-				resetFunc: _ => openLink(`https://github.com/cwtickle/danoniplus/security/policy`),
+				resetFunc: _ => openLink(g_lblNameObj.securityUrl),
 			}), g_cssObj.button_Tweet),
 	);
 

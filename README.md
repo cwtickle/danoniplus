@@ -12,7 +12,7 @@ Dancing☆Onigiri (CW Edition)は、ブラウザで動作するキーボード�
 公開しているソース一式と、音楽ファイル・譜面データ(テキスト)を組み合わせることで  
 オリジナルのゲームデータを作ることができます。詳細は[Wiki](https://github.com/cwtickle/danoniplus/wiki)をご覧ください。  
 *Dancing Onigiri "CW Edition"* is a rhythm game. 
-You can create original game data by combining a set of published sources with music files and sequences (text file). See the [wiki](https://github.com/cwtickle/danoniplus/wiki/Sidebar-En) for details.
+You can create original game data by combining a set of published sources with music files and sequences (text file). See the [wiki](https://github.com/cwtickle/danoniplus-docs/wiki) for details.
 
 ここで公開しているソースは、以前Flashとして公開していたリズムゲーム  
 「Dancing☆Onigiri」の **HTML5 (HTML Living Standard)** 版です。  
@@ -21,9 +21,9 @@ The source released here is the **HTML5 (HTML Living Standard) version** of the 
 Compared to the previous ParaFla version, we have made various enhancements.
 
 ## Demo
-- [Demo1](http://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / 木下たまき  
-- [Demo2](http://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) シャイニングスター / 魔王魂  
-- [Demo3](http://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) プチ・マギエ / Napi  
+- [Demo1](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / 木下たまき  
+- [Demo2](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) シャイニングスター / 魔王魂  
+- [Demo3](https://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) プチ・マギエ / Napi  
 
 ## How to Play / 遊び方
 リズムに合わせてやってくる矢印・フリーズアローを、ステップゾーン上で押すリズムゲームです。  
