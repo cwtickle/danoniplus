@@ -58,7 +58,7 @@ If the life of the life gauge remains by the end of the game or it is over the q
 - [Dancing☆Onigiri 作品一覧](https://cw7.sakura.ne.jp/lst/)  
 
 ## How to Make / 作り方
-- [How to make chart overview](https://github.com/cwtickle/danoniplus-docs/wiki/HowToMake) / [譜面の作成概要](https://github.com/cwtickle/danoniplus/wiki/HowToMake)
+- [How to make chart overview](https://github.com/cwtickle/danoniplus-docs/wiki/HowtoMake) / [譜面の作成概要](https://github.com/cwtickle/danoniplus/wiki/HowtoMake)
 - [ParaFla!ソース利用者向け移行方法 (Japanese Only)](https://github.com/cwtickle/danoniplus/wiki/forParaFlaUser)
 
 ### How to Install / 導入方法
