@@ -36,7 +36,7 @@ The details are as follows.
 キーボードを使って遊びます。  
 下記は7keyの例ですが、他にも5keyや11keyなど多様なプレイスタイルがあります。  
 
-詳細は下記をご覧ください。(The details are as follows.)  
+詳細は下記をご覧ください。  
 -> [How to Play](https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem)
 
 ![HowtoPlay](http://cw7.sakura.ne.jp/danoni/wiki/howtoplay1.png)  
@@ -62,22 +62,13 @@ If the life of the life gauge remains by the end of the game or it is over the q
 - [ParaFla!ソース利用者向け移行方法](https://github.com/cwtickle/danoniplus/wiki/forParaFlaUser)
 
 ### How to Install / 導入方法
-- Download from [Changelog](https://github.com/cwtickle/danoniplus-docs/wiki/Changelog-latest).
-- You can also install from npm.
+- Download from [Changelog](https://github.com/cwtickle/danoniplus-docs/wiki/Changelog-latest). You can also install from npm.
+    - [Releases](https://github.com/cwtickle/danoniplus/releases)からダウンロードします。npmからの導入も可能です。
 ```
 npm i danoniplus
 ```
 - When directly specifying the version name, specify the version after @ as shown below.
-```
-npm i danoniplus@26.1.2
-```
-
-- [Releases](https://github.com/cwtickle/danoniplus/releases)からダウンロードします。
-- npmからの導入も可能です。
-```
-npm i danoniplus
-```
-- バージョン名を直接指定するときは下記のように @以降をバージョン指定します。
+    - バージョン名を直接指定するときは下記のように @以降をバージョン指定します。
 ```
 npm i danoniplus@26.1.2
 ```
@@ -85,7 +76,7 @@ npm i danoniplus@26.1.2
 ## System requirements / 動作環境
 - Google Chrome, Opera, Vivaldi (WebKit), Firefox (Gecko) 
 
-## Difference from Flash Version / Flash版との差異について (Japanese Only)
+## Difference from Flash Version / Flash版との差異 (Japanese Only)
 *Dancing Onigiri "CW Edition"* basically conforms to the specifications of *ParaFla!* Version, but the details are different from the conventional ones. See below for details.
 
 Dancing☆Onigiri (CW Edition)では基本的にParaFla!版の仕様に準拠していますが、  
