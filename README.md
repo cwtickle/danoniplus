@@ -22,9 +22,9 @@ Dancing☆Onigiri (CW Edition)は、ブラウザで動作するキーボード�
 これまでのParaFla版に比べ、さまざまな機能強化を行っています。  
 
 ## Demo
-- [Demo1](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) Cllema / Kinoshita Tamaki  
-- [Demo2](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) Shining star / MaouDamashii 
-- [Demo3](https://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) Petit Magie / Napi  
+- [Demo1](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / Kinoshita Tamaki  
+- [Demo2](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) シャイニングスター / MaouDamashii 
+- [Demo3](https://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) プチ・マギエ / Napi  
 
 ## How to Play / 遊び方
 This is a rhythm game, using Keyboard on the website.   
