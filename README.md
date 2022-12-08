@@ -74,7 +74,8 @@ npm i danoniplus@26.1.2
 ```
 
 ## System requirements / 動作環境
-- Google Chrome, Opera, Vivaldi (WebKit), Firefox (Gecko) 
+- Windows, Mac OS, Linux, Android, iPad OS
+- Google Chrome, Microsoft Edge, Opera, Vivaldi, Safari (WebKit), Firefox (Gecko) 
 
 ## Difference from Flash Version / Flash版との差異 (Japanese Only)
 *Dancing Onigiri "CW Edition"* basically conforms to the specifications of *ParaFla!* Version, but the details are different from the conventional ones. See below for details.
