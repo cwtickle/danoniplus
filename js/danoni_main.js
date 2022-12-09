@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/11/15
+ * Revised : 2022/12/09
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 24.6.11`;
-const g_revisedDate = `2022/11/15`;
+const g_version = `Ver 24.6.12`;
+const g_revisedDate = `2022/12/09`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7346,9 +7346,9 @@ function getArrowStartFrame(_frame, _speedOnFrame, _motionOnFrame) {
 	};
 
 	while (g_posObj.distY - obj.startY > 0) {
-		obj.startY += _speedOnFrame[obj.frm];
+		obj.startY += _speedOnFrame[obj.frm - 1];
 
-		if (_speedOnFrame[obj.frm] !== 0) {
+		if (_speedOnFrame[obj.frm - 1] !== 0) {
 			obj.startY += _motionOnFrame[obj.motionFrm];
 			obj.motionFrm++;
 		}
