@@ -4635,7 +4635,7 @@ const createOptionWindow = _sprite => {
 					`****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n`
 					+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`, g_msgInfoObj.I_0003
 				);
-			}, g_lblPosObj.lnkDifInfo, g_cssObj.button_RevON),
+			}, g_lblPosObj.lnkDifInfo),
 		);
 		createScText(lnkDifInfo, `DifInfo`, { targetLabel: `lnkDifInfo`, x: -10 });
 	};
@@ -7659,7 +7659,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		}
 
 		// カットした箇所をリストから削除
-		if (getLength(_data[startNum], _type) > 0) {
+		if (getLength(_data[startNum]) > 0) {
 			_data[startNum] = _data[startNum].filter(list => getLength(list) > 0);
 		}
 
