@@ -7207,7 +7207,7 @@ function pushArrows(_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			} else {
 
 				// 速度変化が間に入るときは再計算
-				if (arrowArrivalFrm < spdPrev) {
+				while (arrowArrivalFrm < spdPrev) {
 					spdk -= 2;
 					spdNext = spdPrev;
 					spdPrev = _dataObj.speedData[spdk];
