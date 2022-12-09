@@ -341,7 +341,7 @@ const g_windowAlign = {
         $id(`canvas-frame`).marginLeft = `auto`;
         $id(`canvas-frame`).marginRight = `0px`;
     },
-}
+};
 
 const g_imgObj = {};
 
@@ -422,7 +422,7 @@ const resetImgs = (_baseDir = ``, _exp = `svg`) => {
     if (g_presetObj.customImageList !== undefined) {
         g_presetObj.customImageList.forEach(image => reloadImgCustomObj(image, _baseDir, _exp));
     }
-}
+};
 
 const reloadImgObj = _ => {
     g_imgObj.arrow = C_IMG_ARROW;
@@ -642,7 +642,7 @@ const g_pointAllocation = {
     sfsf: 4,
     maxCombo: 2,
     fmaxCombo: 2,
-}
+};
 
 let C_WOD_FRAME = 30;
 
@@ -904,7 +904,7 @@ const g_posObj = {
     stepYR: 0,
     stepDiffY: 0,
     arrowHeight: 0,
-}
+};
 
 const g_diffObj = {
     arrowJdgY: 0,
@@ -2876,7 +2876,7 @@ const g_lang_msgInfoObj = {
         I_0003: `Charts information is copied to the clipboard!`,
         I_0004: `Play in silence mode because "musicUrl" is not set`,
     },
-}
+};
 
 /**
  * ショートカット表示のデフォルト値設定
@@ -3618,4 +3618,4 @@ const loadLegacySettingFunc = _ => {
     if (typeof g_presetKeysData === C_TYP_STRING) {
         g_presetObj.keysData = g_presetKeysData;
     }
-}
+};

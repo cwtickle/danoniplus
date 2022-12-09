@@ -291,7 +291,7 @@ function createButton(_obj, _func) {
     div.onmouseover = _ => {
         style.backgroundColor = _obj.hoverColor;
         style.cursor = `pointer`;
-    }
+    };
     const lsnrkeyTS = g_handler.addListener(div, `touchstart`, _ => {
         style.backgroundColor = _obj.hoverColor;
         style.cursor = `pointer`;
@@ -301,7 +301,7 @@ function createButton(_obj, _func) {
     div.onmouseout = _ => {
         style.backgroundColor = _obj.normalColor;
         style.cursor = `default`;
-    }
+    };
     const lsnrkeyTE = g_handler.addListener(div, `touchend`, _ => {
         style.backgroundColor = _obj.normalColor;
         style.cursor = `default`;

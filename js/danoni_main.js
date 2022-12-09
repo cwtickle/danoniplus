@@ -1509,7 +1509,7 @@ const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
 			baseSprite.innerHTML = _spriteData.htmlText;
 		}
 	}
-}
+};
 
 /**
  * 背景・マスクモーションの表示（タイトル・リザルト用）
@@ -3337,7 +3337,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 		const gaugeDetails = [
 			g_presetObj.gaugeCustom[_name].Border, g_presetObj.gaugeCustom[_name].Recovery,
 			g_presetObj.gaugeCustom[_name].Damage, g_presetObj.gaugeCustom[_name].Init,
-		]
+		];
 		if (gaugeUpdateFlg) {
 			gaugeCreateFlg = setGaugeDetails(scoreId, gaugeDetails);
 		} else {
@@ -3966,7 +3966,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) => {
 	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
 		x: 0, y: 70, w: g_sWidth, h: 20, siz: C_SIZ_MAIN, lineHeight: `15px`, fontFamily: getBasicFont(),
 		whiteSpace: `normal`,
-	})
+	});
 	divRoot.appendChild(tmplbl);
 	const range = new Range();
 	range.selectNode(tmplbl);
@@ -4279,7 +4279,7 @@ const createOptionWindow = _sprite => {
 		lnkDifficulty,
 		makeMiniCssButton(`lnkDifficulty`, `R`, 0, _ => nextDifficulty(), { dy: -10, dh: 10 }),
 		makeMiniCssButton(`lnkDifficulty`, `L`, 0, _ => nextDifficulty(-1), { dy: -10, dh: 10 }),
-	)
+	);
 	createScText(spriteList.difficulty, `Difficulty`);
 	if (g_headerObj.difSelectorUse) {
 		createScText(spriteList.difficulty, `DifficultyList`, { x: 147, y: -10, targetLabel: `lnkDifficulty` });
@@ -4929,7 +4929,7 @@ const createOptionWindow = _sprite => {
 		createDivCss2Label(`lblFadeinBar`, `<input id="fadeinSlider" type="range" value="${g_stateObj.fadein}" min="0" max="99" step="1">`,
 			g_lblPosObj.lblFadeinBar),
 
-	)
+	);
 
 	const fadeinSlider = document.querySelector(`#fadeinSlider`);
 	fadeinSlider.addEventListener(`input`, _ =>
@@ -5168,7 +5168,7 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 				setSetting(skipTerms[0] * (-1), _settingName, unitName, roundNum);
 				addLFunc();
 			}),
-		)
+		);
 
 		// 右回し・左回しボタン（内側）
 		if (skipTerms[1] > 1) {
@@ -5945,7 +5945,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			}),
 			makeMiniKCButton(`lnkImgType`, `L`, _ => setImgType(-1), { x: imgBaseX - 10, y: imgBaseY }),
 			makeMiniKCButton(`lnkImgType`, `R`, _ => setImgType(), { x: imgBaseX + g_sWidth / 6, y: imgBaseY }),
-		)
+		);
 	}
 
 	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
@@ -7773,7 +7773,7 @@ const convertReplaceNums = _ => {
 const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 
 	const tkObj = getKeyInfo();
-	const grdFlg = (g_colorType === `Type0` ? !g_headerObj.defaultColorgrd[0] : g_headerObj.defaultColorgrd[0])
+	const grdFlg = (g_colorType === `Type0` ? !g_headerObj.defaultColorgrd[0] : g_headerObj.defaultColorgrd[0]);
 	const colorCd = makeColorGradation(_colorCd, { _defaultColorgrd: [grdFlg, g_headerObj.defaultColorgrd[1]] });
 	const addAll = Number(_allFlg) * 1000;
 	const allUseTypes = [];

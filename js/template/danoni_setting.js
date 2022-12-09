@@ -153,7 +153,7 @@ g_presetObj.customDesignUse = {
 	back: `false`,
 	backMain: `false`,
 	ready: `false`,
-}
+};
 
 /**
   デフォルト画像セットの設定
