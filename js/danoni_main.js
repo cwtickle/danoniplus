@@ -7506,7 +7506,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			} else {
 
 				// 速度変化が間に入るときは再計算
-				if (arrowArrivalFrm < spdPrev) {
+				while (arrowArrivalFrm < spdPrev) {
 					spdk -= 2;
 					spdNext = spdPrev;
 					spdPrev = _dataObj.speedData[spdk];
@@ -7709,9 +7709,9 @@ const getArrowStartFrame = (_frame, _speedOnFrame, _motionOnFrame) => {
 	};
 
 	while (g_posObj.distY - obj.startY > 0) {
-		obj.startY += _speedOnFrame[obj.frm];
+		obj.startY += _speedOnFrame[obj.frm - 1];
 
-		if (_speedOnFrame[obj.frm] !== 0) {
+		if (_speedOnFrame[obj.frm - 1] !== 0) {
 			obj.motionFrm++;
 		}
 		obj.frm--;
