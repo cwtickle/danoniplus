@@ -9572,6 +9572,10 @@ const judgeArrow = _j => {
 				changeHitFrz(_j, fcurrentNo, `frz`);
 			} else {
 				changeFailedFrz(_j, fcurrentNo);
+				if (g_headerObj.frzStartjdgUse) {
+					judgeIknai(_difFrame);
+					currentFrz.judgEndFlg = true;
+				}
 			}
 			g_workObj.judgFrzHitCnt[_j] = fcurrentNo + 1;
 			return true;
