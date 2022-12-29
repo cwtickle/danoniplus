@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/12/21
+ * Revised : 2022/12/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.3.2`;
-const g_revisedDate = `2022/12/21`;
+const g_version = `Ver 29.3.3`;
+const g_revisedDate = `2022/12/30`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -8815,7 +8815,7 @@ const mainInit = _ => {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 				const prevFrz = g_attrObj[prevFrzName];
 
-				if (prevFrz.isMoving && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
+				if (prevFrz.isMoving && !prevFrz.judgEndFlg && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 
 					// 自身より前のフリーズアローが未判定の場合、強制的に枠外判定を行いフリーズアローを削除
 					if (prevFrz.cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
