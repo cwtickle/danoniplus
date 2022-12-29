@@ -8815,7 +8815,7 @@ const mainInit = _ => {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 				const prevFrz = g_attrObj[prevFrzName];
 
-				if (prevFrz.isMoving && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
+				if (prevFrz.isMoving && !prevFrz.judgEndFlg && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 
 					// 自身より前のフリーズアローが未判定の場合、強制的に枠外判定を行いフリーズアローを削除
 					if (prevFrz.cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
