@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2022/12/09
+ * Revised : 2023/01/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 27.8.5`;
-const g_revisedDate = `2022/12/09`;
+const g_version = `Ver 27.8.6`;
+const g_revisedDate = `2023/01/07`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4415,7 +4415,7 @@ const createOptionWindow = _sprite => {
 			context.stroke();
 		}
 
-		const lineNames = [`1Push`, `2Push`, `3Push+`];
+		const lineNames = [`Single`, `Chord`, `Triad+`];
 		Object.keys(g_graphColorObj).filter(val => val.indexOf(`max`) !== -1).forEach((val, j) => {
 			const lineX = 70 + j * 70;
 
