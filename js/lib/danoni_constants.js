@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2022/10/20 (v28.4.0)
+ * Revised : 2023/01/07 (v28.6.4)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3118,13 +3118,13 @@ const g_lang_lblNameObj = {
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
 
         s_level: `Level`,
-        s_douji: `N-push`,
+        s_douji: `Chords`,
         s_tate: `Jack Corr.`,
         s_cnts: `All Arrows`,
-        s_linecnts: `- Arrow:<br><br>- Freeze Arrow:<br><br>- 3 push positions ({0}):`,
+        s_linecnts: `- Arrow:<br><br>- Freeze Arrow:<br><br>- Polychord positions ({0}):`,
         s_print: `CopyData`,
         s_printTitle: `Dancing☆Onigiri Level Calculator+++`,
-        s_printHeader: `Level\tN-Push\tJack\tAll\tArrow\tFrz\tAPM\tTime`,
+        s_printHeader: `Level\tChords\tJack\tAll\tArrow\tFrz\tAPM\tTime`,
 
         j_ii: ":D Perfect!!",
         j_shakin: ":) Great!",
