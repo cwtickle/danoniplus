@@ -4491,7 +4491,7 @@ const createOptionWindow = _sprite => {
 			context.stroke();
 		}
 
-		const lineNames = [`1Push`, `2Push`, `3Push+`];
+		const lineNames = [`Single`, `Chord`, `Triad+`];
 		Object.keys(g_graphColorObj).filter(val => val.indexOf(`max`) !== -1).forEach((val, j) => {
 			const lineX = 70 + j * 70;
 
