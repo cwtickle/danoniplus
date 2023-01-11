@@ -9169,10 +9169,10 @@ const mainInit = _ => {
 			// 矢印モーション
 			changeCssMotions(header, `arrow`, currentFrame);
 
-			// フリーズアローモーション
+			// フリーズアローモーション（全体）
 			changeCssMotions(header, `frz`, currentFrame);
 
-			// フリーズアローモーション
+			// フリーズアローモーション（始点）
 			changeCssMotions(header, `frzTop`, currentFrame);
 
 		});
