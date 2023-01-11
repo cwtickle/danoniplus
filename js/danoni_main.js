@@ -7183,9 +7183,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	// 矢印モーション（個別）データの分解（3～4つで1セット, セット毎の改行区切り）
 	obj.arrowCssMotionData = setCssMotionData(`arrow`, scoreIdHeader);
 	obj.frzCssMotionData = setCssMotionData(`frz`, scoreIdHeader);
+	obj.frzTopCssMotionData = setCssMotionData(`frzTop`, scoreIdHeader);
 	if (g_stateObj.dummyId !== ``) {
 		obj.dummyArrowCssMotionData = setCssMotionData(`arrow`, _dummyNo);
 		obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
+		obj.dummyFrzTopCssMotionData = setCssMotionData(`frzTop`, _dummyNo);
 	}
 
 	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
@@ -7670,7 +7672,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	[``, `dummy`].forEach(type =>
 		calcDataTiming(`color`, type, pushColors, { _colorFlg: true }));
 
-	g_typeLists.arrow.forEach(header =>
+	g_typeLists.cssMotion.forEach(header =>
 		calcDataTiming(`cssMotion`, header, pushCssMotions, { _calcFrameFlg: true }));
 
 	g_fadeinStockList.forEach(type =>
@@ -7959,7 +7961,7 @@ const getArrowSettings = _ => {
 	});
 
 	// モーション管理
-	g_typeLists.arrow.forEach(type => g_workObj[`${type}CssMotions`] = [...Array(keyNum)].fill(``));
+	g_typeLists.cssMotion.forEach(type => g_workObj[`${type}CssMotions`] = [...Array(keyNum)].fill(``));
 
 	const scrollDirOptions = (g_keyObj[`scrollDir${keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
@@ -9016,6 +9018,12 @@ const mainInit = _ => {
 			}),
 
 		);
+
+		if (g_workObj[`${_name}TopCssMotions`][_j] !== ``) {
+			const frzTop = document.getElementById(`${_name}Top${frzNo}`);
+			frzTop.classList.add(g_workObj[`${_name}TopCssMotions`][_j]);
+			frzTop.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
+		}
 	};
 
 	/**
@@ -9161,8 +9169,11 @@ const mainInit = _ => {
 			// 矢印モーション
 			changeCssMotions(header, `arrow`, currentFrame);
 
-			// フリーズアローモーション
+			// フリーズアローモーション（全体）
 			changeCssMotions(header, `frz`, currentFrame);
+
+			// フリーズアローモーション（始点）
+			changeCssMotions(header, `frzTop`, currentFrame);
 
 		});
 
