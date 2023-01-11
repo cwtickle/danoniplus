@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/01/07 (v29.3.4)
+ * Revised : 2023/01/11 (v29.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -484,6 +484,7 @@ const g_typeLists = {
     arrow: [`arrow`, `dummyArrow`, `frz`, `dummyFrz`],
     color: [`color`, `acolor`],
     frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`],
+    cssMotion: [`arrow`, `dummyArrow`, `frz`, `dummyFrz`, `frzTop`, `dummyFrzTop`],
     dataList: [
         `Arrow`, `FrzArrow`, `FrzLength`,
         `Color`, `ColorCd`,
@@ -491,6 +492,7 @@ const g_typeLists = {
         `FColorHit`, `FColorHitCd`, `FColorHitBar`, `FColorHitBarCd`,
         `ArrowCssMotion`, `ArrowCssMotionName`,
         `FrzCssMotion`, `FrzCssMotionName`,
+        `FrzTopCssMotion`, `FrzTopCssMotionName`,
         `ArrowColorChangeAll`, `FrzColorChangeAll`,
     ],
 };
