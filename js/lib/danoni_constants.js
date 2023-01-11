@@ -484,7 +484,6 @@ const g_typeLists = {
     arrow: [`arrow`, `dummyArrow`, `frz`, `dummyFrz`],
     color: [`color`, `acolor`],
     frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`],
-    cssMotion: [`arrow`, `dummyArrow`, `frz`, `dummyFrz`, `frzTop`, `dummyFrzTop`],
     dataList: [
         `Arrow`, `FrzArrow`, `FrzLength`,
         `Color`, `ColorCd`,
@@ -492,7 +491,6 @@ const g_typeLists = {
         `FColorHit`, `FColorHitCd`, `FColorHitBar`, `FColorHitBarCd`,
         `ArrowCssMotion`, `ArrowCssMotionName`,
         `FrzCssMotion`, `FrzCssMotionName`,
-        `FrzTopCssMotion`, `FrzTopCssMotionName`,
         `ArrowColorChangeAll`, `FrzColorChangeAll`,
     ],
 };
