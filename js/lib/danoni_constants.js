@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/01/07 (v28.6.4)
+ * Revised : 2023/01/20 (v28.6.5)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2574,7 +2574,7 @@ keyCtrlName.forEach(property => g_keyObj[`${property}d`] = copyArray2d(g_keyObj[
 // 特殊キーのコピー種 (simple: 代入、multiple: 配列ごと代入)
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
-    simple: [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
+    simple: [`div`, `divMax`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
     multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`],
 };
 
