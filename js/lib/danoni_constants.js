@@ -2576,7 +2576,7 @@ g_keycons.groups.forEach(type => {
 // 特殊キーのコピー種 (simple: 代入、multiple: 配列ごと代入)
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
-    simple: [`div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
+    simple: [`div`, `divMax`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
     multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`],
 };
 
