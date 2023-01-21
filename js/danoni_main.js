@@ -581,6 +581,17 @@ const openLink = _url => {
 };
 
 /**
+ * URLのフルパスを取得
+ * @param {string} _url 
+ * @returns 
+ */
+const getFullPath = _url => {
+	const link = document.createElement(`a`);
+	link.href = _url;
+	return link.href;
+};
+
+/**
  * プリロードするファイルの設定
  * @param {string} _as 
  * @param {string} _href 
@@ -645,7 +656,7 @@ const loadScript2 = (_url, _requiredFlg = true, _charset = `UTF-8`) => {
 		};
 		script.onerror = _err => {
 			if (_requiredFlg) {
-				makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(_url.split(`?`)[0]));
+				makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(getFullPath(baseUrl)));
 				reject(_err);
 			} else {
 				resolve(script);
@@ -673,7 +684,7 @@ const importCssFile2 = _href => {
 			resolve(link);
 		};
 		link.onerror = _ => {
-			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(baseUrl), { resetFlg: `title` });
+			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(getFullPath(baseUrl)), { resetFlg: `title` });
 			resolve(link);
 		};
 		document.head.appendChild(link);
@@ -6433,7 +6444,7 @@ const loadMusic = _ => {
 			lblLoading.textContent = g_lblNameObj.pleaseWait;
 			setAudio(blobUrl);
 		} else {
-			makeWarningWindow(`${g_msgInfoObj.E_0032}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
+			makeWarningWindow(`${g_msgInfoObj.E_0041.split('{0}').join(getFullPath(musicUrl))}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
 		}
 	});
 
