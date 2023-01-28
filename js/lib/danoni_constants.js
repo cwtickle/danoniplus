@@ -1182,7 +1182,7 @@ const g_shortcutObj = {
         KeyM: { id: `lnkMotionR` },
         ArrowUp: { id: `lnkScrollL` },
         ArrowDown: { id: `lnkScrollR` },
-        KeyR: { id: `lnkReverseR` },
+        KeyR: { id: `lnkReverseR`, dfId: `lnkReverseR`, exId: `btnReverse` },
 
         ShiftLeft_KeyS: { id: `lnkShuffleL` },
         KeyS: { id: `lnkShuffleR` },

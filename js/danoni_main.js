@@ -4707,15 +4707,22 @@ const createOptionWindow = _sprite => {
 	}
 
 	const setReverse = _btn => {
-		g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
-		g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
-		setReverseView(_btn);
+		if (!g_settings.scrolls.includes(`Reverse`)) {
+			g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
+			g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
+			setReverseView(_btn);
+		}
 	};
 
 	const setReverseView = _btn => {
 		_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
 			g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
-		_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
+		if (!g_settings.scrolls.includes(`Reverse`)) {
+			_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
+		} else {
+			_btn.textContent = `X`;
+			setReverseDefault();
+		}
 	};
 
 	// ---------------------------------------------------
@@ -5108,6 +5115,10 @@ const createOptionWindow = _sprite => {
 			spriteList[visibleScr].style.display = C_DIS_INHERIT;
 			spriteList[hiddenScr].style.display = C_DIS_NONE;
 			setSetting(0, visibleScr);
+
+			g_shortcutObj.option.KeyR.id = g_settings.scrolls.includes(`Reverse`) ?
+				g_shortcutObj.option.KeyR.exId : g_shortcutObj.option.KeyR.dfId;
+
 			if (g_settings.scrolls.length > 1) {
 				setReverseView(document.querySelector(`#btnReverse`));
 			}
@@ -5291,9 +5302,16 @@ const getKeyReverse = (_localStorage, _extraKeyName = ``) => {
 		g_stateObj.reverse = _localStorage[`reverse${_extraKeyName}`] ?? C_FLG_OFF;
 		g_settings.reverseNum = roundZero(g_settings.reverses.findIndex(reverse => reverse === g_stateObj.reverse));
 	} else {
-		g_stateObj.reverse = C_FLG_OFF;
-		g_settings.reverseNum = 0;
+		setReverseDefault();
 	}
+};
+
+/**
+ * リバースのデフォルト化処理
+ */
+const setReverseDefault = _ => {
+	g_stateObj.reverse = C_FLG_OFF;
+	g_settings.reverseNum = 0;
 };
 
 /**
