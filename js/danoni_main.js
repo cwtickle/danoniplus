@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/01/20
+ * Revised : 2023/01/28
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.3.5`;
-const g_revisedDate = `2023/01/20`;
+const g_version = `Ver 29.4.1`;
+const g_revisedDate = `2023/01/28`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -581,6 +581,17 @@ const openLink = _url => {
 };
 
 /**
+ * URLのフルパスを取得
+ * @param {string} _url 
+ * @returns 
+ */
+const getFullPath = _url => {
+	const link = document.createElement(`a`);
+	link.href = _url;
+	return link.href;
+};
+
+/**
  * プリロードするファイルの設定
  * @param {string} _as 
  * @param {string} _href 
@@ -645,7 +656,7 @@ const loadScript2 = (_url, _requiredFlg = true, _charset = `UTF-8`) => {
 		};
 		script.onerror = _err => {
 			if (_requiredFlg) {
-				makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(_url.split(`?`)[0]));
+				makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(getFullPath(baseUrl)));
 				reject(_err);
 			} else {
 				resolve(script);
@@ -673,7 +684,7 @@ const importCssFile2 = _href => {
 			resolve(link);
 		};
 		link.onerror = _ => {
-			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(baseUrl), { resetFlg: `title` });
+			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(getFullPath(baseUrl)), { resetFlg: `title` });
 			resolve(link);
 		};
 		document.head.appendChild(link);
@@ -4696,15 +4707,22 @@ const createOptionWindow = _sprite => {
 	}
 
 	const setReverse = _btn => {
-		g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
-		g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
-		setReverseView(_btn);
+		if (!g_settings.scrolls.includes(`Reverse`)) {
+			g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
+			g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
+			setReverseView(_btn);
+		}
 	};
 
 	const setReverseView = _btn => {
 		_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
 			g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
-		_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
+		if (!g_settings.scrolls.includes(`Reverse`)) {
+			_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
+		} else {
+			_btn.textContent = `X`;
+			setReverseDefault();
+		}
 	};
 
 	// ---------------------------------------------------
@@ -5097,6 +5115,10 @@ const createOptionWindow = _sprite => {
 			spriteList[visibleScr].style.display = C_DIS_INHERIT;
 			spriteList[hiddenScr].style.display = C_DIS_NONE;
 			setSetting(0, visibleScr);
+
+			g_shortcutObj.option.KeyR.id = g_settings.scrolls.includes(`Reverse`) ?
+				g_shortcutObj.option.KeyR.exId : g_shortcutObj.option.KeyR.dfId;
+
 			if (g_settings.scrolls.length > 1) {
 				setReverseView(document.querySelector(`#btnReverse`));
 			}
@@ -5280,9 +5302,16 @@ const getKeyReverse = (_localStorage, _extraKeyName = ``) => {
 		g_stateObj.reverse = _localStorage[`reverse${_extraKeyName}`] ?? C_FLG_OFF;
 		g_settings.reverseNum = roundZero(g_settings.reverses.findIndex(reverse => reverse === g_stateObj.reverse));
 	} else {
-		g_stateObj.reverse = C_FLG_OFF;
-		g_settings.reverseNum = 0;
+		setReverseDefault();
 	}
+};
+
+/**
+ * リバースのデフォルト化処理
+ */
+const setReverseDefault = _ => {
+	g_stateObj.reverse = C_FLG_OFF;
+	g_settings.reverseNum = 0;
 };
 
 /**
@@ -6433,7 +6462,7 @@ const loadMusic = _ => {
 			lblLoading.textContent = g_lblNameObj.pleaseWait;
 			setAudio(blobUrl);
 		} else {
-			makeWarningWindow(`${g_msgInfoObj.E_0032}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
+			makeWarningWindow(`${g_msgInfoObj.E_0041.split('{0}').join(getFullPath(musicUrl))}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
 		}
 	});
 
