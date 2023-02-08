@@ -5680,6 +5680,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
 	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
 
+	g_keycons.cursorNumList = [...Array(keyNum).keys()].map(i => i);
+
 	/**
 	 * keyconSpriteのスクロール位置調整
 	 * @param {number} _targetX 
@@ -5982,21 +5984,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	makeGroupButton(`shuffle`, { baseX: g_sWidth * 11 / 12 - 10, cssName: g_cssObj.settings_Shuffle });
 
 	/**
-	 * 次のカーソルへ移動
-	 * @param {number} _pos 
-	 */
-	const searchNextCursor = _pos => {
-		for (let j = g_currentj; j < keyNum + g_currentj; j++) {
-			if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j % keyNum][_pos] !== undefined) {
-				g_currentj = j % keyNum;
-				g_currentk = _pos;
-				return true;
-			}
-		}
-		return false;
-	};
-
-	/**
 	 * カーソル位置の設定
 	 */
 	const setKeyConfigCursor = _ => {
@@ -6017,25 +6004,20 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	};
 
 	/**
-	 * キーコンフィグ用カーソルのリセット
-	 * @param {number} _resetPos
-	 * @param {boolean} _resetCursorFlg
+	 * カーソル位置の変更
+	 * @param {number} _nextj 
 	 */
-	const resetCursor = (_resetPos = 0, _resetCursorFlg = true) => {
-		g_prevKey = -1;
-		if (_resetCursorFlg) {
-			g_currentj = 0;
-			if (!searchNextCursor(_resetPos)) {
-				g_currentk = 0;
-			}
-		} else {
-			if (g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][_resetPos] === undefined) {
-				searchNextCursor(_resetPos);
-			} else {
-				g_currentk = _resetPos;
-			}
+	const changeConfigCursor = (_nextj = ++g_keycons.cursorNum % g_keycons.cursorNumList.length) => {
+		g_keycons.cursorNum = _nextj;
+		const nextj = g_keycons.cursorNumList[g_keycons.cursorNum];
+
+		g_currentj = g_keycons.cursorNumList[nextj];
+		g_currentk = 0;
+		if (g_kcType === `Replaced` && (g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][1] !== undefined)) {
+			g_currentk = 1;
 		}
 		setKeyConfigCursor();
+		keyconSprite.scrollLeft = - maxLeftX;
 	};
 
 	const getNextNum = (_scrollNum, _groupName, _target) => {
@@ -6049,7 +6031,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 */
 	const setConfigType = (_scrollNum = 1) => {
 		g_kcType = g_keycons.configTypes[getNextNum(_scrollNum, `configTypes`, g_kcType)];
-		resetCursor(Number(g_kcType === `Replaced`), _scrollNum === 0);
+		changeConfigCursor(g_keycons.cursorNum);
 		lnkKcType.textContent = getStgDetailName(g_kcType);
 	};
 
@@ -6213,6 +6195,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.keyconfig.forEach(func => func());
 
+	// カーソル位置の初期化
+	changeConfigCursor(0);
+
 	// ラベル・ボタン描画
 	multiAppend(divRoot,
 
@@ -6248,7 +6233,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 						changeKeyConfigColor(j, k, g_keyObj.currentPtn === -1 ? g_cssObj.keyconfig_Defaultkey : g_cssObj.title_base);
 					}
 				}
-				resetCursor(Number(g_kcType === `Replaced`));
+				changeConfigCursor(0);
 				keyconSprite.scrollLeft = - maxLeftX;
 			}
 		}, g_lblPosObj.btnKcReset, g_cssObj.button_Reset),
@@ -6296,20 +6281,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			g_currentk++;
 			cursor.style.top = `${parseInt(cursor.style.top) + C_KYC_REPHEIGHT}px`;
 
-		} else if (g_currentj < keyNum - 1) {
-			// 他の代替キーが存在せず、次の矢印がある場合
-			g_currentj++;
-			g_currentk = 0;
-
-			// 代替キーのみの場合は次の代替キーがあるキーを探す
-			if (g_kcType === `Replaced`) {
-				searchNextCursor(1);
-			}
-			setKeyConfigCursor();
-
 		} else {
-			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
-			resetCursor(Number(g_kcType === `Replaced`));
+			changeConfigCursor();
 		}
 	});
 

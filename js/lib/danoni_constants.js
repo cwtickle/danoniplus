@@ -847,6 +847,9 @@ const g_keycons = {
     groupSelf: `S`,
 
     groups: [`color`, `shuffle`],
+
+    cursorNumList: [],
+    cursorNum: 0,
 };
 
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
