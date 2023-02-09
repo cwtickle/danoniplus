@@ -3385,6 +3385,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	const toFloat = _num => parseFloat(_num);
 	const toStringOrNumber = _str => isNaN(Number(_str)) ? _str : toNumber(_str);
 	const toSplitArray = _str => _str.split(`/`).map(n => toNumber(n));
+	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
 	/**
 	 * 新キー用複合パラメータ
@@ -3613,6 +3614,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 		// シャッフルグループ (shuffleX_Y)
 		newKeyTripleParam(newKey, `shuffle`);
+
+		// キーグループ (keyGroupX_Y)
+		newKeyMultiParam(newKey, `keyGroup`, toSplitArrayStr);
 
 		// スクロールパターン (scrollX_Y)
 		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
@@ -6009,9 +6013,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 */
 	const changeConfigCursor = (_nextj = ++g_keycons.cursorNum % g_keycons.cursorNumList.length) => {
 		g_keycons.cursorNum = _nextj;
-		const nextj = g_keycons.cursorNumList[g_keycons.cursorNum];
 
-		g_currentj = g_keycons.cursorNumList[nextj];
+		g_currentj = g_keycons.cursorNumList[_nextj];
 		g_currentk = 0;
 		if (g_kcType === `Replaced` && (g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][1] !== undefined)) {
 			g_currentk = 1;
@@ -6033,6 +6036,45 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		g_kcType = g_keycons.configTypes[getNextNum(_scrollNum, `configTypes`, g_kcType)];
 		changeConfigCursor(g_keycons.cursorNum);
 		lnkKcType.textContent = getStgDetailName(g_kcType);
+	};
+
+	/**
+	 * 一部のキーコンフィグを表示する
+	 * （キーグループ毎にフィルターされたもののみを表示する）
+	 * @param {number} _num 
+	 */
+	const appearConfigSteps = _num => {
+
+		const appearConfigView = (_j, _display) => {
+			document.getElementById(`arrow${_j}`).style.display = _display;
+			document.getElementById(`arrowShadow${_j}`).style.display = _display;
+			document.getElementById(`sArrow${_j}`).style.display = _display;
+			document.getElementById(`color${_j}`).style.display = _display;
+			const ctrlPtn = g_keyObj[`keyCtrl${g_headerObj.keyLabels[g_stateObj.scoreId]}_${g_keyObj.currentPtn}`][_j];
+			for (let k = 0; k < ctrlPtn.length; k++) {
+				document.getElementById(`keycon${_j}_${k}`).style.display = _display;
+			}
+		};
+
+		g_keycons.keySwitchNum = _num;
+		g_keycons.cursorNumList = [];
+		for (let j = 0; j < keyNum; j++) {
+			appearConfigView(j, C_DIS_NONE);
+
+			if (tkObj.keyGroupMaps[j].includes(tkObj.keyGroupList[_num])) {
+				g_keycons.cursorNumList.push(j);
+				appearConfigView(j, C_DIS_INHERIT);
+			}
+		}
+		changeConfigCursor(0);
+
+		// keySwitchボタンを一旦非選択にして、選択中のものを再度色付け
+		if (tkObj.keyGroupList.length > 1) {
+			for (let j = 0; j < tkObj.keyGroupList.length; j++) {
+				document.getElementById(`key${j}`).classList.replace(g_cssObj.button_Next, g_cssObj.button_Mini);
+			}
+			document.getElementById(`key${_num}`).classList.replace(g_cssObj.button_Mini, g_cssObj.button_Next);
+		}
 	};
 
 	/**
@@ -6195,8 +6237,21 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.keyconfig.forEach(func => func());
 
+	// 部分キー表示用ボタン描画
+	if (tkObj.keyGroupList.length > 1) {
+		multiAppend(divRoot,
+			createDivCss2Label(`lblkey`, `KeySwitch`, { x: g_sWidth - 80, y: 90, w: 60, h: 20, siz: 14 }));
+		tkObj.keyGroupList.forEach((val, j) => {
+			divRoot.appendChild(
+				createCss2Button(`key${j}`, `${j + 1}`, _ => {
+					appearConfigSteps(j);
+				}, { x: g_sWidth - 60, y: 110 + j * 20, w: 50, h: 20, siz: 14 }, g_cssObj.button_Mini),
+			);
+		});
+	}
+
 	// カーソル位置の初期化
-	changeConfigCursor(0);
+	appearConfigSteps(g_keycons.keySwitchNum);
 
 	// ラベル・ボタン描画
 	multiAppend(divRoot,
@@ -6226,7 +6281,10 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// キーコンフィグリセットボタン描画
 		createCss2Button(`btnReset`, g_lblNameObj.b_reset, _ => {
 			if (window.confirm(g_msgObj.keyResetConfirm)) {
-				for (let j = 0; j < keyNum; j++) {
+				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+
+				for (let m = 0; m < g_keycons.cursorNumList.length; m++) {
+					const j = g_keycons.cursorNumList[m];
 					for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setIntVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k]);
 						document.querySelector(`#keycon${j}_${k}`).textContent = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
@@ -6310,8 +6368,13 @@ const getKeyInfo = _ => {
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+	const keyGroupMaps = setVal(g_keyObj[`keyGroup${keyCtrlPtn}`], [...Array(keyNum)].fill([0]), C_TYP_STRING);
+	const keyGroupList = makeDedupliArray(keyGroupMaps.flat()).sort((a, b) => parseInt(a) - parseInt(b));
 
-	return { keyCtrlPtn: keyCtrlPtn, keyNum: keyNum, posMax: posMax, divideCnt: divideCnt };
+	return {
+		keyCtrlPtn: keyCtrlPtn, keyNum: keyNum, posMax: posMax, divideCnt: divideCnt,
+		keyGroupMaps: keyGroupMaps, keyGroupList: keyGroupList,
+	};
 };
 
 /**
@@ -7228,6 +7291,17 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		});
 	}
 
+	// キー変化定義
+	obj.keychFrames = [];
+	if (hasVal(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`])) {
+		const keychdata = _dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`]?.split(`,`);
+		obj.keychFrames = keychdata.filter((val, j) => j % 2 === 0);
+		obj.keychTarget = keychdata.filter((val, j) => j % 2 === 1);
+	} else {
+		obj.keychFrames = [0];
+		obj.keychTarget = [0];
+	}
+
 	return obj;
 };
 
@@ -7931,6 +8005,9 @@ const getArrowSettings = _ => {
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
 
+	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
+	g_workObj.keyGroupList = tkObj.keyGroupList;
+
 	const keyCtrlLen = g_workObj.keyCtrl.length;
 	g_workObj.keyCtrlN = [...Array(keyCtrlLen)].map(_ => []);
 	g_workObj.keyHitFlg = [...Array(keyCtrlLen)].map(_ => []);
@@ -8154,6 +8231,7 @@ const mainInit = _ => {
 	const dummyFrzCnts = [...Array(keyNum)].fill(0);
 	let speedCnts = 0;
 	let boostCnts = 0;
+	let keychCnts = 0;
 	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) ? C_DIS_NONE : C_DIS_INHERIT;
 
 	for (let j = 0; j < keyNum; j++) {
@@ -8174,6 +8252,8 @@ const mainInit = _ => {
 				}, g_cssObj.main_objStepShadow)
 			);
 		}
+
+		appearStepZone(j, C_DIS_NONE);
 
 		// ステップゾーン
 		multiAppend(stepRoot,
@@ -9168,6 +9248,14 @@ const mainInit = _ => {
 
 		});
 
+		// キー変化
+		while (currentFrame >= g_scoreObj.keychFrames[keychCnts]) {
+			for (let j = 0; j < keyNum; j++) {
+				appearKeyTypes(j, g_scoreObj.keychTarget[keychCnts]);
+			}
+			keychCnts++;
+		}
+
 		// ダミー矢印生成（背面に表示するため先に処理）
 		if (g_workObj.mkDummyArrow[currentFrame] !== undefined) {
 			g_workObj.mkDummyArrow[currentFrame].forEach(data =>
@@ -9393,6 +9481,25 @@ const makeCounterSymbol = (_id, _x, _class, _heightPos, _text, _display = C_DIS_
 		w: C_LEN_JDGCNTS_WIDTH, h: C_LEN_JDGCNTS_HEIGHT, siz: C_SIZ_JDGCNTS, align: C_ALIGN_RIGHT,
 		display: _display,
 	}, _class);
+};
+
+/**
+ * ステップゾーンの表示・非表示切替
+ * @param {number} _j
+ * @param {string} _display 
+ */
+const appearStepZone = (_j, _display) => document.getElementById(`stepRoot${_j}`).style.display = _display;
+
+/**
+ * 部分キーのステップゾーン出現処理
+ * @param {number} _j 
+ * @param {string} _target 
+ */
+const appearKeyTypes = (_j, _target) => {
+	appearStepZone(_j, C_DIS_NONE);
+	if (g_workObj.keyGroupMaps[_j].includes(_target)) {
+		appearStepZone(_j, C_DIS_INHERIT);
+	}
 };
 
 // TODO: この部分を矢印塗りつぶし部分についても適用できるように関数を見直し

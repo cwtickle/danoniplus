@@ -850,6 +850,7 @@ const g_keycons = {
 
     cursorNumList: [],
     cursorNum: 0,
+    keySwitchNum: 0,
 };
 
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
@@ -2580,7 +2581,7 @@ g_keycons.groups.forEach(type => {
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
     simple: [`div`, `divMax`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
-    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`],
+    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroup`],
 };
 
 // タイトル画面関連のリスト群
