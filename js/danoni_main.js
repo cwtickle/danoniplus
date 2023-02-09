@@ -2799,6 +2799,12 @@ const headerConvert = _dosObj => {
 		obj.preloadImages = _dosObj.preloadImages.split(`,`).filter(image => hasVal(image)).map(preloadImage => preloadImage);
 	}
 
+	// 初期表示する部分キーの設定
+	obj.keyGroupOrder = [];
+	_dosObj.keyGroupOrder?.split(`$`).forEach((val, j) => {
+		obj.keyGroupOrder[j] = val?.split(`,`) ?? [];
+	});
+
 	// 最終演出表示有無（noneで無効化）
 	obj.finishView = _dosObj.finishView ?? ``;
 
@@ -4996,6 +5002,7 @@ const createOptionWindow = _sprite => {
 			if (isNotSameKey && g_keyObj.prevKey !== `Dummy`) {
 				// キーパターン初期化
 				g_keyObj.currentPtn = 0;
+				g_keycons.keySwitchNum = 0;
 			}
 			const hasKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
 			let storageObj, addKey = ``;
@@ -5685,6 +5692,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
 
 	g_keycons.cursorNumList = [...Array(keyNum).keys()].map(i => i);
+	const configKeyGroupList = g_headerObj.keyGroupOrder[g_stateObj.scoreId] ?? tkObj.keyGroupList;
 
 	/**
 	 * keyconSpriteのスクロール位置調整
@@ -6061,7 +6069,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		for (let j = 0; j < keyNum; j++) {
 			appearConfigView(j, C_DIS_NONE);
 
-			if (tkObj.keyGroupMaps[j].includes(tkObj.keyGroupList[_num])) {
+			if (tkObj.keyGroupMaps[j].includes(configKeyGroupList[_num])) {
 				g_keycons.cursorNumList.push(j);
 				appearConfigView(j, C_DIS_INHERIT);
 			}
@@ -6069,8 +6077,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		changeConfigCursor(0);
 
 		// keySwitchボタンを一旦非選択にして、選択中のものを再度色付け
-		if (tkObj.keyGroupList.length > 1) {
-			for (let j = 0; j < tkObj.keyGroupList.length; j++) {
+		if (configKeyGroupList.length > 1) {
+			for (let j = 0; j < configKeyGroupList.length; j++) {
 				document.getElementById(`key${j}`).classList.replace(g_cssObj.button_Next, g_cssObj.button_Mini);
 			}
 			document.getElementById(`key${_num}`).classList.replace(g_cssObj.button_Mini, g_cssObj.button_Next);
@@ -6238,10 +6246,10 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	g_customJsObj.keyconfig.forEach(func => func());
 
 	// 部分キー表示用ボタン描画
-	if (tkObj.keyGroupList.length > 1) {
+	if (configKeyGroupList.length > 1) {
 		multiAppend(divRoot,
 			createDivCss2Label(`lblkey`, `KeySwitch`, { x: g_sWidth - 80, y: 90, w: 60, h: 20, siz: 14 }));
-		tkObj.keyGroupList.forEach((val, j) => {
+		configKeyGroupList.forEach((val, j) => {
 			divRoot.appendChild(
 				createCss2Button(`key${j}`, `${j + 1}`, _ => {
 					appearConfigSteps(j);
