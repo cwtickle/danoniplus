@@ -2802,7 +2802,9 @@ const headerConvert = _dosObj => {
 	// 初期表示する部分キーの設定
 	obj.keyGroupOrder = [];
 	_dosObj.keyGroupOrder?.split(`$`).forEach((val, j) => {
-		obj.keyGroupOrder[j] = val?.split(`,`) ?? [];
+		if (val !== ``) {
+			obj.keyGroupOrder[j] = val.split(`,`);
+		}
 	});
 
 	// 最終演出表示有無（noneで無効化）
