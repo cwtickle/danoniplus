@@ -7104,6 +7104,29 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	];
 
 	/**
+	 * 歌詞表示、背景・マスクデータの優先順取得 
+	 * @returns 
+	 */
+	const getPriorityHeader = _ => {
+		const list = [];
+		let type = ``;
+		if (g_stateObj.scroll !== `---`) {
+			type = `Alt`;
+		} else if (g_stateObj.reverse === C_FLG_ON) {
+			type = `Rev`;
+		}
+		if (hasVal(g_keyObj[`transKey${_keyCtrlPtn}`])) {
+			list.push(`${type}A`);
+		}
+		if (type !== ``) {
+			list.push(type);
+		}
+		list.push(``);
+
+		return list;
+	};
+
+	/**
 	 * 歌詞データの分解
 	 * @param {string} _scoreNo 
 	 */
@@ -7112,11 +7135,9 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		let wordReverseFlg = false;
 		const divideCnt = getKeyInfo().divideCnt;
 		const addDataList = (_type = ``) => wordDataList.push(...getPriorityList(`word`, _type, _scoreNo));
+		getPriorityHeader().forEach(val => addDataList(val));
 
-		if (g_stateObj.scroll !== `---`) {
-			addDataList(`Alt`);
-		} else if (g_stateObj.reverse === C_FLG_ON) {
-			addDataList(`Rev`);
+		if (g_stateObj.reverse === C_FLG_ON) {
 
 			// wordRev_dataが指定されている場合はそのままの位置を採用
 			// word_dataのみ指定されている場合、下記ルールに従って設定
@@ -7129,7 +7150,6 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				}
 			}
 		}
-		addDataList();
 
 		const inputWordData = wordDataList.find((v) => v !== undefined);
 		return (inputWordData !== undefined ? makeSpriteWordData(inputWordData, wordReverseFlg) : [[], -1]);
@@ -7198,13 +7218,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	const makeBackgroundData = (_header, _scoreNo) => {
 		const dataList = [];
 		const addDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
-
-		if (g_stateObj.scroll !== `---`) {
-			addDataList(`Alt`);
-		} else if (g_stateObj.reverse === C_FLG_ON) {
-			addDataList(`Rev`);
-		}
-		addDataList();
+		getPriorityHeader().forEach(val => addDataList(val));
 
 		const data = dataList.find((v) => v !== undefined);
 		return (data !== undefined ? makeSpriteData(data, calcFrame) : [[], -1]);
