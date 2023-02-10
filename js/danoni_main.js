@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/01/28
+ * Revised : 2023/02/10
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.4.1`;
-const g_revisedDate = `2023/01/28`;
+const g_version = `Ver 30.0.0`;
+const g_revisedDate = `2023/02/10`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2799,6 +2799,14 @@ const headerConvert = _dosObj => {
 		obj.preloadImages = _dosObj.preloadImages.split(`,`).filter(image => hasVal(image)).map(preloadImage => preloadImage);
 	}
 
+	// 初期表示する部分キーの設定
+	obj.keyGroupOrder = [];
+	_dosObj.keyGroupOrder?.split(`$`).forEach((val, j) => {
+		if (val !== ``) {
+			obj.keyGroupOrder[j] = val.split(`,`);
+		}
+	});
+
 	// 最終演出表示有無（noneで無効化）
 	obj.finishView = _dosObj.finishView ?? ``;
 
@@ -3385,6 +3393,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	const toFloat = _num => parseFloat(_num);
 	const toStringOrNumber = _str => isNaN(Number(_str)) ? _str : toNumber(_str);
 	const toSplitArray = _str => _str.split(`/`).map(n => toNumber(n));
+	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
 	/**
 	 * 新キー用複合パラメータ
@@ -3613,6 +3622,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 		// シャッフルグループ (shuffleX_Y)
 		newKeyTripleParam(newKey, `shuffle`);
+
+		// キーグループ (keyGroupX_Y)
+		newKeyMultiParam(newKey, `keyGroup`, toSplitArrayStr);
 
 		// スクロールパターン (scrollX_Y)
 		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
@@ -4992,6 +5004,7 @@ const createOptionWindow = _sprite => {
 			if (isNotSameKey && g_keyObj.prevKey !== `Dummy`) {
 				// キーパターン初期化
 				g_keyObj.currentPtn = 0;
+				g_keycons.keySwitchNum = 0;
 			}
 			const hasKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
 			let storageObj, addKey = ``;
@@ -5680,6 +5693,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
 	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
 
+	g_keycons.cursorNumList = [...Array(keyNum).keys()].map(i => i);
+	const configKeyGroupList = g_headerObj.keyGroupOrder[g_stateObj.scoreId] ?? tkObj.keyGroupList;
+
 	/**
 	 * keyconSpriteのスクロール位置調整
 	 * @param {number} _targetX 
@@ -5804,6 +5820,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				createCss2Button(`keycon${j}_${k}`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]], _ => {
 					g_currentj = j;
 					g_currentk = k;
+					g_keycons.cursorNum = g_keycons.cursorNumList.findIndex(val => val === g_currentj);
 					setKeyConfigCursor();
 				}, {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
@@ -5982,21 +5999,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	makeGroupButton(`shuffle`, { baseX: g_sWidth * 11 / 12 - 10, cssName: g_cssObj.settings_Shuffle });
 
 	/**
-	 * 次のカーソルへ移動
-	 * @param {number} _pos 
-	 */
-	const searchNextCursor = _pos => {
-		for (let j = g_currentj; j < keyNum + g_currentj; j++) {
-			if (g_keyObj[`keyCtrl${keyCtrlPtn}`][j % keyNum][_pos] !== undefined) {
-				g_currentj = j % keyNum;
-				g_currentk = _pos;
-				return true;
-			}
-		}
-		return false;
-	};
-
-	/**
 	 * カーソル位置の設定
 	 */
 	const setKeyConfigCursor = _ => {
@@ -6017,25 +6019,19 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	};
 
 	/**
-	 * キーコンフィグ用カーソルのリセット
-	 * @param {number} _resetPos
-	 * @param {boolean} _resetCursorFlg
+	 * カーソル位置の変更
+	 * @param {number} _nextj 
 	 */
-	const resetCursor = (_resetPos = 0, _resetCursorFlg = true) => {
-		g_prevKey = -1;
-		if (_resetCursorFlg) {
-			g_currentj = 0;
-			if (!searchNextCursor(_resetPos)) {
-				g_currentk = 0;
-			}
-		} else {
-			if (g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][_resetPos] === undefined) {
-				searchNextCursor(_resetPos);
-			} else {
-				g_currentk = _resetPos;
-			}
+	const changeConfigCursor = (_nextj = ++g_keycons.cursorNum % g_keycons.cursorNumList.length) => {
+		g_keycons.cursorNum = _nextj;
+
+		g_currentj = g_keycons.cursorNumList[_nextj];
+		g_currentk = 0;
+		if (g_kcType === `Replaced` && (g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][1] !== undefined)) {
+			g_currentk = 1;
 		}
 		setKeyConfigCursor();
+		keyconSprite.scrollLeft = - maxLeftX;
 	};
 
 	const getNextNum = (_scrollNum, _groupName, _target) => {
@@ -6049,8 +6045,47 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 */
 	const setConfigType = (_scrollNum = 1) => {
 		g_kcType = g_keycons.configTypes[getNextNum(_scrollNum, `configTypes`, g_kcType)];
-		resetCursor(Number(g_kcType === `Replaced`), _scrollNum === 0);
+		changeConfigCursor(g_keycons.cursorNum);
 		lnkKcType.textContent = getStgDetailName(g_kcType);
+	};
+
+	/**
+	 * 一部のキーコンフィグを表示する
+	 * （キーグループ毎にフィルターされたもののみを表示する）
+	 * @param {number} _num 
+	 */
+	const appearConfigSteps = _num => {
+
+		const appearConfigView = (_j, _display) => {
+			document.getElementById(`arrow${_j}`).style.display = _display;
+			document.getElementById(`arrowShadow${_j}`).style.display = _display;
+			document.getElementById(`sArrow${_j}`).style.display = _display;
+			document.getElementById(`color${_j}`).style.display = _display;
+			const ctrlPtn = g_keyObj[`keyCtrl${g_headerObj.keyLabels[g_stateObj.scoreId]}_${g_keyObj.currentPtn}`][_j];
+			for (let k = 0; k < ctrlPtn.length; k++) {
+				document.getElementById(`keycon${_j}_${k}`).style.display = _display;
+			}
+		};
+
+		g_keycons.keySwitchNum = _num;
+		g_keycons.cursorNumList = [];
+		for (let j = 0; j < keyNum; j++) {
+			appearConfigView(j, C_DIS_NONE);
+
+			if (tkObj.keyGroupMaps[j].includes(configKeyGroupList[_num])) {
+				g_keycons.cursorNumList.push(j);
+				appearConfigView(j, C_DIS_INHERIT);
+			}
+		}
+		changeConfigCursor(0);
+
+		// keySwitchボタンを一旦非選択にして、選択中のものを再度色付け
+		if (configKeyGroupList.length > 1) {
+			for (let j = 0; j < configKeyGroupList.length; j++) {
+				document.getElementById(`key${j}`).classList.replace(g_cssObj.button_Next, g_cssObj.button_Mini);
+			}
+			document.getElementById(`key${_num}`).classList.replace(g_cssObj.button_Mini, g_cssObj.button_Next);
+		}
 	};
 
 	/**
@@ -6213,6 +6248,22 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.keyconfig.forEach(func => func());
 
+	// 部分キー表示用ボタン描画
+	if (configKeyGroupList.length > 1) {
+		multiAppend(divRoot,
+			createDivCss2Label(`lblkey`, `KeySwitch`, { x: g_sWidth - 80, y: 90, w: 60, h: 20, siz: 14 }));
+		configKeyGroupList.forEach((val, j) => {
+			divRoot.appendChild(
+				createCss2Button(`key${j}`, `${j + 1}`, _ => {
+					appearConfigSteps(j);
+				}, { x: g_sWidth - 60, y: 110 + j * 20, w: 50, h: 20, siz: 14 }, g_cssObj.button_Mini),
+			);
+		});
+	}
+
+	// カーソル位置の初期化
+	appearConfigSteps(g_keycons.keySwitchNum);
+
 	// ラベル・ボタン描画
 	multiAppend(divRoot,
 
@@ -6241,14 +6292,17 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// キーコンフィグリセットボタン描画
 		createCss2Button(`btnReset`, g_lblNameObj.b_reset, _ => {
 			if (window.confirm(g_msgObj.keyResetConfirm)) {
-				for (let j = 0; j < keyNum; j++) {
+				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+
+				for (let m = 0; m < g_keycons.cursorNumList.length; m++) {
+					const j = g_keycons.cursorNumList[m];
 					for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
 						g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setIntVal(g_keyObj[`keyCtrl${keyCtrlPtn}d`][j][k]);
 						document.querySelector(`#keycon${j}_${k}`).textContent = g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]];
 						changeKeyConfigColor(j, k, g_keyObj.currentPtn === -1 ? g_cssObj.keyconfig_Defaultkey : g_cssObj.title_base);
 					}
 				}
-				resetCursor(Number(g_kcType === `Replaced`));
+				changeConfigCursor(0);
 				keyconSprite.scrollLeft = - maxLeftX;
 			}
 		}, g_lblPosObj.btnKcReset, g_cssObj.button_Reset),
@@ -6296,20 +6350,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			g_currentk++;
 			cursor.style.top = `${parseInt(cursor.style.top) + C_KYC_REPHEIGHT}px`;
 
-		} else if (g_currentj < keyNum - 1) {
-			// 他の代替キーが存在せず、次の矢印がある場合
-			g_currentj++;
-			g_currentk = 0;
-
-			// 代替キーのみの場合は次の代替キーがあるキーを探す
-			if (g_kcType === `Replaced`) {
-				searchNextCursor(1);
-			}
-			setKeyConfigCursor();
-
 		} else {
-			// 全ての矢印・代替キーの巡回が終わった場合は元の位置に戻す
-			resetCursor(Number(g_kcType === `Replaced`));
+			changeConfigCursor();
 		}
 	});
 
@@ -6337,8 +6379,13 @@ const getKeyInfo = _ => {
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`divMax${keyCtrlPtn}`] : g_keyObj[`pos${keyCtrlPtn}`][keyNum - 1] + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+	const keyGroupMaps = setVal(g_keyObj[`keyGroup${keyCtrlPtn}`], [...Array(keyNum)].fill([0]), C_TYP_STRING);
+	const keyGroupList = makeDedupliArray(keyGroupMaps.flat()).sort((a, b) => parseInt(a) - parseInt(b));
 
-	return { keyCtrlPtn: keyCtrlPtn, keyNum: keyNum, posMax: posMax, divideCnt: divideCnt };
+	return {
+		keyCtrlPtn: keyCtrlPtn, keyNum: keyNum, posMax: posMax, divideCnt: divideCnt,
+		keyGroupMaps: keyGroupMaps, keyGroupList: keyGroupList,
+	};
 };
 
 /**
@@ -7057,6 +7104,29 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	];
 
 	/**
+	 * 歌詞表示、背景・マスクデータの優先順取得 
+	 * @returns 
+	 */
+	const getPriorityHeader = _ => {
+		const list = [];
+		let type = ``;
+		if (g_stateObj.scroll !== `---`) {
+			type = `Alt`;
+		} else if (g_stateObj.reverse === C_FLG_ON) {
+			type = `Rev`;
+		}
+		if (hasVal(g_keyObj[`transKey${_keyCtrlPtn}`])) {
+			list.push(`${type}A`);
+		}
+		if (type !== ``) {
+			list.push(type);
+		}
+		list.push(``);
+
+		return list;
+	};
+
+	/**
 	 * 歌詞データの分解
 	 * @param {string} _scoreNo 
 	 */
@@ -7065,11 +7135,9 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		let wordReverseFlg = false;
 		const divideCnt = getKeyInfo().divideCnt;
 		const addDataList = (_type = ``) => wordDataList.push(...getPriorityList(`word`, _type, _scoreNo));
+		getPriorityHeader().forEach(val => addDataList(val));
 
-		if (g_stateObj.scroll !== `---`) {
-			addDataList(`Alt`);
-		} else if (g_stateObj.reverse === C_FLG_ON) {
-			addDataList(`Rev`);
+		if (g_stateObj.reverse === C_FLG_ON) {
 
 			// wordRev_dataが指定されている場合はそのままの位置を採用
 			// word_dataのみ指定されている場合、下記ルールに従って設定
@@ -7082,7 +7150,6 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				}
 			}
 		}
-		addDataList();
 
 		const inputWordData = wordDataList.find((v) => v !== undefined);
 		return (inputWordData !== undefined ? makeSpriteWordData(inputWordData, wordReverseFlg) : [[], -1]);
@@ -7151,13 +7218,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	const makeBackgroundData = (_header, _scoreNo) => {
 		const dataList = [];
 		const addDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
-
-		if (g_stateObj.scroll !== `---`) {
-			addDataList(`Alt`);
-		} else if (g_stateObj.reverse === C_FLG_ON) {
-			addDataList(`Rev`);
-		}
-		addDataList();
+		getPriorityHeader().forEach(val => addDataList(val));
 
 		const data = dataList.find((v) => v !== undefined);
 		return (data !== undefined ? makeSpriteData(data, calcFrame) : [[], -1]);
@@ -7253,6 +7314,17 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			[g_headerObj[`${sprite}FailedData`], g_headerObj[`${sprite}FailedMaxDepth`]] =
 				makeBackgroundResultData(`${sprite}failed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `${sprite}result`);
 		});
+	}
+
+	// キー変化定義
+	obj.keychFrames = [];
+	if (hasVal(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`])) {
+		const keychdata = _dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`]?.split(`,`);
+		obj.keychFrames = keychdata.filter((val, j) => j % 2 === 0);
+		obj.keychTarget = keychdata.filter((val, j) => j % 2 === 1);
+	} else {
+		obj.keychFrames = [0];
+		obj.keychTarget = [0];
 	}
 
 	return obj;
@@ -7958,6 +8030,9 @@ const getArrowSettings = _ => {
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
 
+	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
+	g_workObj.keyGroupList = tkObj.keyGroupList;
+
 	const keyCtrlLen = g_workObj.keyCtrl.length;
 	g_workObj.keyCtrlN = [...Array(keyCtrlLen)].map(_ => []);
 	g_workObj.keyHitFlg = [...Array(keyCtrlLen)].map(_ => []);
@@ -8181,7 +8256,8 @@ const mainInit = _ => {
 	const dummyFrzCnts = [...Array(keyNum)].fill(0);
 	let speedCnts = 0;
 	let boostCnts = 0;
-	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) ? C_DIS_NONE : C_DIS_INHERIT;
+	let keychCnts = 0;
+	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_settings.scrollFlat.includes(g_stateObj.scroll)) ? C_DIS_NONE : C_DIS_INHERIT;
 
 	for (let j = 0; j < keyNum; j++) {
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
@@ -8201,6 +8277,8 @@ const mainInit = _ => {
 				}, g_cssObj.main_objStepShadow)
 			);
 		}
+
+		appearStepZone(j, C_DIS_NONE);
 
 		// ステップゾーン
 		multiAppend(stepRoot,
@@ -8222,14 +8300,17 @@ const mainInit = _ => {
 
 		);
 	}
-	if (g_stateObj.scroll === `Flat` && g_stateObj.d_stepzone === C_FLG_ON) {
+	if (g_settings.scrollFlat.includes(g_stateObj.scroll) && g_stateObj.d_stepzone === C_FLG_ON) {
+
+		// スクロール名に`R-`が含まれていればリバースと見做す
+		const reverseFlg = g_stateObj.reverse === C_FLG_ON || g_stateObj.scroll.startsWith(`R-`);
 
 		// ステップゾーンの代わり
 		const lineY = [(C_ARW_WIDTH - g_stateObj.flatStepHeight) / 2, (C_ARW_WIDTH + g_stateObj.flatStepHeight) / 2];
 		lineY.forEach((y, j) => {
 			mainSprite.appendChild(
 				createColorObject2(`stepBar${j}`, {
-					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(g_stateObj.reverse === C_FLG_ON) + y,
+					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(reverseFlg) + y,
 					w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
 				}, g_cssObj.life_Failed)
 			);
@@ -9195,6 +9276,14 @@ const mainInit = _ => {
 
 		});
 
+		// キー変化
+		while (currentFrame >= g_scoreObj.keychFrames[keychCnts]) {
+			for (let j = 0; j < keyNum; j++) {
+				appearKeyTypes(j, g_scoreObj.keychTarget[keychCnts]);
+			}
+			keychCnts++;
+		}
+
 		// ダミー矢印生成（背面に表示するため先に処理）
 		if (g_workObj.mkDummyArrow[currentFrame] !== undefined) {
 			g_workObj.mkDummyArrow[currentFrame].forEach(data =>
@@ -9420,6 +9509,25 @@ const makeCounterSymbol = (_id, _x, _class, _heightPos, _text, _display = C_DIS_
 		w: C_LEN_JDGCNTS_WIDTH, h: C_LEN_JDGCNTS_HEIGHT, siz: C_SIZ_JDGCNTS, align: C_ALIGN_RIGHT,
 		display: _display,
 	}, _class);
+};
+
+/**
+ * ステップゾーンの表示・非表示切替
+ * @param {number} _j
+ * @param {string} _display 
+ */
+const appearStepZone = (_j, _display) => document.getElementById(`stepRoot${_j}`).style.display = _display;
+
+/**
+ * 部分キーのステップゾーン出現処理
+ * @param {number} _j 
+ * @param {string} _target 
+ */
+const appearKeyTypes = (_j, _target) => {
+	appearStepZone(_j, C_DIS_NONE);
+	if (g_workObj.keyGroupMaps[_j].includes(_target)) {
+		appearStepZone(_j, C_DIS_INHERIT);
+	}
 };
 
 // TODO: この部分を矢印塗りつぶし部分についても適用できるように関数を見直し

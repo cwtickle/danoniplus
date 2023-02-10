@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/01/28 (v29.4.1)
+ * Revised : 2023/02/10 (v30.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -754,6 +754,7 @@ const g_settings = {
 
     scrolls: [],
     scrollNum: 0,
+    scrollFlat: [`Flat`, `R-Flat`],
 
     shuffles: [C_FLG_OFF, `Mirror`, `Asym-Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`],
     shuffleNum: 0,
@@ -847,6 +848,10 @@ const g_keycons = {
     groupSelf: `S`,
 
     groups: [`color`, `shuffle`],
+
+    cursorNumList: [],
+    cursorNum: 0,
+    keySwitchNum: 0,
 };
 
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
@@ -2577,7 +2582,7 @@ g_keycons.groups.forEach(type => {
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
     simple: [`div`, `divMax`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
-    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`],
+    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroup`],
 };
 
 // タイトル画面関連のリスト群
