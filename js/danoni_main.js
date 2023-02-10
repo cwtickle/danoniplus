@@ -5820,6 +5820,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				createCss2Button(`keycon${j}_${k}`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]], _ => {
 					g_currentj = j;
 					g_currentk = k;
+					g_keycons.cursorNum = g_keycons.cursorNumList.findIndex(val => val === g_currentj);
 					setKeyConfigCursor();
 				}, {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
