@@ -8243,7 +8243,7 @@ const mainInit = _ => {
 	let speedCnts = 0;
 	let boostCnts = 0;
 	let keychCnts = 0;
-	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_stateObj.scroll === `Flat`) ? C_DIS_NONE : C_DIS_INHERIT;
+	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_settings.scrollFlat.includes(g_stateObj.scroll)) ? C_DIS_NONE : C_DIS_INHERIT;
 
 	for (let j = 0; j < keyNum; j++) {
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
@@ -8286,14 +8286,17 @@ const mainInit = _ => {
 
 		);
 	}
-	if (g_stateObj.scroll === `Flat` && g_stateObj.d_stepzone === C_FLG_ON) {
+	if (g_settings.scrollFlat.includes(g_stateObj.scroll) && g_stateObj.d_stepzone === C_FLG_ON) {
+
+		// スクロール名に`R-`が含まれていればリバースと見做す
+		const reverseFlg = g_stateObj.reverse === C_FLG_ON || g_stateObj.scroll.startsWith(`R-`);
 
 		// ステップゾーンの代わり
 		const lineY = [(C_ARW_WIDTH - g_stateObj.flatStepHeight) / 2, (C_ARW_WIDTH + g_stateObj.flatStepHeight) / 2];
 		lineY.forEach((y, j) => {
 			mainSprite.appendChild(
 				createColorObject2(`stepBar${j}`, {
-					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(g_stateObj.reverse === C_FLG_ON) + y,
+					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(reverseFlg) + y,
 					w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
 				}, g_cssObj.life_Failed)
 			);
