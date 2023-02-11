@@ -6059,8 +6059,10 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		const appearConfigView = (_j, _display) => {
 			document.getElementById(`arrow${_j}`).style.display = _display;
 			document.getElementById(`arrowShadow${_j}`).style.display = _display;
-			document.getElementById(`sArrow${_j}`).style.display = _display;
 			document.getElementById(`color${_j}`).style.display = _display;
+			if (document.getElementById(`sArrow${_j}`) !== null) {
+				document.getElementById(`sArrow${_j}`).style.display = _display;
+			}
 			const ctrlPtn = g_keyObj[`keyCtrl${g_headerObj.keyLabels[g_stateObj.scoreId]}_${g_keyObj.currentPtn}`][_j];
 			for (let k = 0; k < ctrlPtn.length; k++) {
 				document.getElementById(`keycon${_j}_${k}`).style.display = _display;
