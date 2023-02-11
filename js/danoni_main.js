@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/02/10
+ * Revised : 2023/02/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 30.0.0`;
-const g_revisedDate = `2023/02/10`;
+const g_version = `Ver 30.0.1`;
+const g_revisedDate = `2023/02/11`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5589,8 +5589,7 @@ const createSettingsDisplayWindow = _sprite => {
 
 	const dispAppearanceSlider = _ => {
 		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
-			document.getElementById(obj).style.visibility =
-			g_appearanceRanges.includes(g_stateObj.appearance) ? `Visible` : `Hidden`
+			$id(obj).visibility = g_appearanceRanges.includes(g_stateObj.appearance) ? `Visible` : `Hidden`
 		);
 	};
 	dispAppearanceSlider();
@@ -6057,13 +6056,15 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const appearConfigSteps = _num => {
 
 		const appearConfigView = (_j, _display) => {
-			document.getElementById(`arrow${_j}`).style.display = _display;
-			document.getElementById(`arrowShadow${_j}`).style.display = _display;
-			document.getElementById(`sArrow${_j}`).style.display = _display;
-			document.getElementById(`color${_j}`).style.display = _display;
+			$id(`arrow${_j}`).display = _display;
+			$id(`arrowShadow${_j}`).display = _display;
+			$id(`color${_j}`).display = _display;
+			if (document.getElementById(`sArrow${_j}`) !== null) {
+				$id(`sArrow${_j}`).display = _display;
+			}
 			const ctrlPtn = g_keyObj[`keyCtrl${g_headerObj.keyLabels[g_stateObj.scoreId]}_${g_keyObj.currentPtn}`][_j];
 			for (let k = 0; k < ctrlPtn.length; k++) {
-				document.getElementById(`keycon${_j}_${k}`).style.display = _display;
+				$id(`keycon${_j}_${k}`).display = _display;
 			}
 		};
 
@@ -6097,9 +6098,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const changeColorPicker = (_j, _type, _color) => {
 		if (_color !== ``) {
 			document.getElementById(`pick${_type}${_j}`).value = _color.slice(0, 7);
-			document.getElementById(`pick${_type}${_j}`).style.display = C_DIS_INHERIT;
+			$id(`pick${_type}${_j}`).display = C_DIS_INHERIT;
 		} else {
-			document.getElementById(`pick${_type}${_j}`).style.display = C_DIS_NONE;
+			$id(`pick${_type}${_j}`).display = C_DIS_NONE;
 		}
 	};
 
@@ -9045,7 +9046,7 @@ const mainInit = _ => {
 			const boostCnt = currentArrow.boostCnt;
 			currentArrow.prevY = currentArrow.y;
 			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd + g_workObj.motionOnFrames[boostCnt] * currentArrow.boostDir) * currentArrow.dir;
-			document.getElementById(arrowName).style.top = `${currentArrow.y}px`;
+			$id(arrowName).top = `${currentArrow.y}px`;
 			currentArrow.boostCnt--;
 		}
 		judgeMotionFunc[`${_name}${g_stateObj.autoAll}`](_j, arrowName, --currentArrow.cnt);
@@ -9149,7 +9150,7 @@ const mainInit = _ => {
 				// 移動
 				if (g_workObj.currentSpeed !== 0) {
 					currentFrz.y -= movY + g_workObj.motionOnFrames[currentFrz.boostCnt] * currentFrz.dir * currentFrz.boostDir;
-					document.getElementById(frzName).style.top = `${currentFrz.y}px`;
+					$id(frzName).top = `${currentFrz.y}px`;
 					currentFrz.boostCnt--;
 				}
 				currentFrz.cnt--;
@@ -9189,7 +9190,7 @@ const mainInit = _ => {
 			currentFrz.frzBarLength -= g_workObj.currentSpeed;
 			if (currentFrz.frzBarLength > 0) {
 				currentFrz.y -= movY;
-				document.getElementById(frzName).style.top = `${currentFrz.y}px`;
+				$id(frzName).top = `${currentFrz.y}px`;
 			} else {
 				judgeObjDelete[_name](_j, frzName);
 			}
@@ -9516,7 +9517,7 @@ const makeCounterSymbol = (_id, _x, _class, _heightPos, _text, _display = C_DIS_
  * @param {number} _j
  * @param {string} _display 
  */
-const appearStepZone = (_j, _display) => document.getElementById(`stepRoot${_j}`).style.display = _display;
+const appearStepZone = (_j, _display) => $id(`stepRoot${_j}`).display = _display;
 
 /**
  * 部分キーのステップゾーン出現処理
@@ -9598,7 +9599,7 @@ const changeHitFrz = (_j, _k, _name) => {
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
 	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - currentFrz.y;
-	document.getElementById(frzName).style.top = $id(`stepRoot${_j}`).top;
+	$id(frzName).top = $id(`stepRoot${_j}`).top;
 
 	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
 	const delFrzMotionLength = sumData(g_workObj.motionOnFrames.slice(0, currentFrz.boostCnt + 1));
