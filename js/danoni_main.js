@@ -1468,15 +1468,34 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				checkDuplicatedObjects(spriteData[tmpFrame]);
 
 			const emptyPatterns = [``, `[loop]`, `[jump]`];
+			const colorObjFlg = tmpSpriteData[2]?.startsWith(`[c]`) || false;
 			spriteData[tmpFrame][addFrame] = {
 				depth: tmpDepth,
-				command: tmpObj.path,
-				jumpFrame: tmpObj.class,
-				maxLoop: tmpObj.left,
-				animationName: tmpObj.animationName,
-				htmlText: emptyPatterns.includes(tmpObj.path) ?
-					`` : (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj)),
 			};
+
+			if (colorObjFlg) {
+				// [c]始まりの場合、カラーオブジェクト用の作成準備を行う
+				const data = tmpObj.path.slice(`[c]`.length).split(`/`);
+				spriteData[tmpFrame][addFrame].colorObjInfo = {
+					x: tmpObj.left, y: tmpObj.top, w: tmpObj.width, h: tmpObj.height,
+					rotate: data[0], background: data[1] ?? `#ffffff`,
+					animationName: tmpObj.animationName,
+					animationDuration: `${tmpObj.animationDuration}s`,
+				};
+				spriteData[tmpFrame][addFrame].colorObjId = `${tmpFrame}_${addFrame}`;
+				spriteData[tmpFrame][addFrame].colorObjClass = setVal(tmpObj.class, undefined);
+
+			} else if (emptyPatterns.includes(tmpObj.path)) {
+				// ループ、フレームジャンプ、空の場合の処理
+				spriteData[tmpFrame][addFrame].command = tmpObj.path;
+				spriteData[tmpFrame][addFrame].jumpFrame = tmpObj.class;
+				spriteData[tmpFrame][addFrame].maxLoop = tmpObj.left;
+				spriteData[tmpFrame][addFrame].htmlText = ``;
+			} else {
+				// それ以外の画像、テキストの場合
+				spriteData[tmpFrame][addFrame].animationName = tmpObj.animationName;
+				spriteData[tmpFrame][addFrame].htmlText = (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj));
+			}
 		}
 	});
 
@@ -1517,7 +1536,15 @@ const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
 		}
 	} else {
 		if (_condition) {
-			baseSprite.innerHTML = _spriteData.htmlText;
+			if (_spriteData.colorObjInfo !== undefined) {
+				const colorObjClass = _spriteData.colorObjClass?.split(`/`) ?? [];
+				baseSprite.appendChild(
+					createColorObject2(`${_name}${_spriteData.depth}${_spriteData.colorObjId}`,
+						_spriteData.colorObjInfo, ...colorObjClass)
+				);
+			} else {
+				baseSprite.innerHTML = _spriteData.htmlText;
+			}
 		}
 	}
 };
