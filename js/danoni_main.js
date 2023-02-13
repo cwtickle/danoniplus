@@ -1478,7 +1478,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				const data = tmpObj.path.slice(`[c]`.length).split(`/`);
 				spriteData[tmpFrame][addFrame].colorObjInfo = {
 					x: tmpObj.left, y: tmpObj.top, w: tmpObj.width, h: tmpObj.height,
-					rotate: data[0], background: data[1] ?? `#ffffff`,
+					rotate: data[0], background: makeColorGradation(data[1] ?? `#ffffff`),
 					opacity: tmpObj.opacity,
 					animationName: tmpObj.animationName,
 					animationDuration: `${tmpObj.animationDuration}s`,
