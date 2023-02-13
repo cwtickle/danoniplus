@@ -1479,6 +1479,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				spriteData[tmpFrame][addFrame].colorObjInfo = {
 					x: tmpObj.left, y: tmpObj.top, w: tmpObj.width, h: tmpObj.height,
 					rotate: data[0], background: data[1] ?? `#ffffff`,
+					opacity: tmpObj.opacity,
 					animationName: tmpObj.animationName,
 					animationDuration: `${tmpObj.animationDuration}s`,
 				};
