@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2022/03/25 (v27.1.0)
+ * Template Update: 2023/02/14 (v30.1.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -186,6 +186,14 @@ g_presetObj.customDesignUse = {
 	- ball.svg, ballShadow.svg, ballStepHit.svg (g_presetOverrideExtension を pngにすれば、pngに変更可)
 */
 //g_presetObj.customImageList = [`ball`, `square`];
+
+/**
+ * 背景・マスクモーションで利用する「animationFillMode」のデフォルト値
+ * - none      : 初期画像へ戻す
+ * - forwards  : アニメーション100%の状態を維持（デフォルト）
+ * - backwards : アニメーション  0%の状態に戻す
+ */
+//g_presetObj.animationFillMode = `none`;
 
 
 /*

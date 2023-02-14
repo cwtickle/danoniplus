@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/02/11
+ * Revised : 2023/02/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 30.0.1`;
-const g_revisedDate = `2023/02/11`;
+const g_version = `Ver 30.1.0`;
+const g_revisedDate = `2023/02/14`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1453,6 +1453,9 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE)),
 				animationDuration: setIntVal(tmpSpriteData[10]) / g_fps,
 			};
+			if (setVal(tmpSpriteData[11], g_presetObj.animationFillMode) !== undefined) {
+				tmpObj.animationFillMode = setVal(tmpSpriteData[11], g_presetObj.animationFillMode);
+			}
 			if (g_headerObj.autoPreload) {
 				if (checkImage(tmpObj.path)) {
 					if (g_headerObj.syncBackPath) {
@@ -1468,15 +1471,38 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				checkDuplicatedObjects(spriteData[tmpFrame]);
 
 			const emptyPatterns = [``, `[loop]`, `[jump]`];
+			const colorObjFlg = tmpSpriteData[2]?.startsWith(`[c]`) || false;
 			spriteData[tmpFrame][addFrame] = {
 				depth: tmpDepth,
-				command: tmpObj.path,
-				jumpFrame: tmpObj.class,
-				maxLoop: tmpObj.left,
-				animationName: tmpObj.animationName,
-				htmlText: emptyPatterns.includes(tmpObj.path) ?
-					`` : (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj)),
 			};
+
+			if (colorObjFlg) {
+				// [c]始まりの場合、カラーオブジェクト用の作成準備を行う
+				const data = tmpObj.path.slice(`[c]`.length).split(`/`);
+				spriteData[tmpFrame][addFrame].colorObjInfo = {
+					x: tmpObj.left, y: tmpObj.top, w: tmpObj.width, h: tmpObj.height,
+					rotate: setVal(data[0], `0`), opacity: tmpObj.opacity,
+					background: makeColorGradation(setVal(data[1], `#ffffff`), { _defaultColorgrd: false }),
+					animationName: tmpObj.animationName,
+					animationDuration: `${tmpObj.animationDuration}s`,
+				};
+				spriteData[tmpFrame][addFrame].colorObjId = `${tmpFrame}_${addFrame}`;
+				spriteData[tmpFrame][addFrame].colorObjClass = setVal(tmpObj.class, undefined);
+				if (tmpObj.animationFillMode !== undefined) {
+					spriteData[tmpFrame][addFrame].colorObjInfo.animationFillMode = tmpObj.animationFillMode;
+				}
+
+			} else if (emptyPatterns.includes(tmpObj.path)) {
+				// ループ、フレームジャンプ、空の場合の処理
+				spriteData[tmpFrame][addFrame].command = tmpObj.path;
+				spriteData[tmpFrame][addFrame].jumpFrame = tmpObj.class;
+				spriteData[tmpFrame][addFrame].maxLoop = tmpObj.left;
+				spriteData[tmpFrame][addFrame].htmlText = ``;
+			} else {
+				// それ以外の画像、テキストの場合
+				spriteData[tmpFrame][addFrame].animationName = tmpObj.animationName;
+				spriteData[tmpFrame][addFrame].htmlText = (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj));
+			}
 		}
 	});
 
@@ -1517,7 +1543,15 @@ const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
 		}
 	} else {
 		if (_condition) {
-			baseSprite.innerHTML = _spriteData.htmlText;
+			if (_spriteData.colorObjInfo !== undefined) {
+				const colorObjClass = _spriteData.colorObjClass?.split(`/`) ?? [];
+				baseSprite.appendChild(
+					createColorObject2(`${_name}${_spriteData.depth}${_spriteData.colorObjId}`,
+						_spriteData.colorObjInfo, ...colorObjClass)
+				);
+			} else {
+				baseSprite.innerHTML = _spriteData.htmlText;
+			}
 		}
 	}
 };
