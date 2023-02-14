@@ -1452,6 +1452,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
 				animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE)),
 				animationDuration: setIntVal(tmpSpriteData[10]) / g_fps,
+				animationFillMode: setVal(tmpSpriteData[11], g_presetObj.animationFillMode ?? `forwards`),
 			};
 			if (g_headerObj.autoPreload) {
 				if (checkImage(tmpObj.path)) {
@@ -1482,7 +1483,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 					background: makeColorGradation(setVal(data[1], `#ffffff`), { _defaultColorgrd: false }),
 					animationName: tmpObj.animationName,
 					animationDuration: `${tmpObj.animationDuration}s`,
-					animationFillMode: setVal(data[2], `forwards`),
+					animationFillMode: tmpObj.animationFillMode,
 				};
 				spriteData[tmpFrame][addFrame].colorObjId = `${tmpFrame}_${addFrame}`;
 				spriteData[tmpFrame][addFrame].colorObjClass = setVal(tmpObj.class, undefined);

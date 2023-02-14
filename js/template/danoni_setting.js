@@ -187,6 +187,14 @@ g_presetObj.customDesignUse = {
 */
 //g_presetObj.customImageList = [`ball`, `square`];
 
+/**
+ * 背景・マスクモーションで利用する「animationFillMode」のデフォルト値
+ * - none      : 初期画像へ戻す
+ * - forwards  : アニメーション100%の状態を維持（デフォルト）
+ * - backwards : アニメーション  0%の状態に戻す
+ */
+//g_presetObj.animationFillMode = `none`;
+
 
 /*
 ------------------------------------------------------------------------
