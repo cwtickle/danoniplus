@@ -1452,8 +1452,10 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
 				animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE)),
 				animationDuration: setIntVal(tmpSpriteData[10]) / g_fps,
-				animationFillMode: setVal(tmpSpriteData[11], g_presetObj.animationFillMode ?? `forwards`),
 			};
+			if (setVal(tmpSpriteData[11], g_presetObj.animationFillMode) !== undefined) {
+				tmpObj.animationFillMode = setVal(tmpSpriteData[11], g_presetObj.animationFillMode);
+			}
 			if (g_headerObj.autoPreload) {
 				if (checkImage(tmpObj.path)) {
 					if (g_headerObj.syncBackPath) {
@@ -1483,10 +1485,12 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 					background: makeColorGradation(setVal(data[1], `#ffffff`), { _defaultColorgrd: false }),
 					animationName: tmpObj.animationName,
 					animationDuration: `${tmpObj.animationDuration}s`,
-					animationFillMode: tmpObj.animationFillMode,
 				};
 				spriteData[tmpFrame][addFrame].colorObjId = `${tmpFrame}_${addFrame}`;
 				spriteData[tmpFrame][addFrame].colorObjClass = setVal(tmpObj.class, undefined);
+				if (tmpObj.animationFillMode !== undefined) {
+					spriteData[tmpFrame][addFrame].animationFillMode = tmpObj.animationFillMode;
+				}
 
 			} else if (emptyPatterns.includes(tmpObj.path)) {
 				// ループ、フレームジャンプ、空の場合の処理
