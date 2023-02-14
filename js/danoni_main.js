@@ -1489,7 +1489,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				spriteData[tmpFrame][addFrame].colorObjId = `${tmpFrame}_${addFrame}`;
 				spriteData[tmpFrame][addFrame].colorObjClass = setVal(tmpObj.class, undefined);
 				if (tmpObj.animationFillMode !== undefined) {
-					spriteData[tmpFrame][addFrame].animationFillMode = tmpObj.animationFillMode;
+					spriteData[tmpFrame][addFrame].colorObjInfo.animationFillMode = tmpObj.animationFillMode;
 				}
 
 			} else if (emptyPatterns.includes(tmpObj.path)) {
