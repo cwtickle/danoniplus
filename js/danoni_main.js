@@ -1482,6 +1482,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 					background: makeColorGradation(setVal(data[1], `#ffffff`), { _defaultColorgrd: false }),
 					animationName: tmpObj.animationName,
 					animationDuration: `${tmpObj.animationDuration}s`,
+					animationFillMode: setVal(data[2], `forwards`),
 				};
 				spriteData[tmpFrame][addFrame].colorObjId = `${tmpFrame}_${addFrame}`;
 				spriteData[tmpFrame][addFrame].colorObjClass = setVal(tmpObj.class, undefined);
