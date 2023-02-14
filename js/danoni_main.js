@@ -1458,8 +1458,10 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 			const tmpObj = {
 				path: escapeHtml(tmpSpriteData[2] ?? ``, g_escapeStr.escapeCode),   // 画像パス or テキスト
 				class: escapeHtml(tmpSpriteData[3] ?? ``),                          // CSSクラス
-				left: setVal(tmpSpriteData[4], `0`).includes(`{`) ? `${setVal(tmpSpriteData[4], 0)}` : `{${setVal(tmpSpriteData[4], 0)}}`, // X座標
-				top: setVal(tmpSpriteData[5], `0`).includes(`{`) ? `${setVal(tmpSpriteData[5], 0)}` : `{${setVal(tmpSpriteData[5], 0)}}`, // Y座標
+				left: setVal(tmpSpriteData[4], `0`).includes(`{`) ?
+					`${setVal(tmpSpriteData[4], 0)}` : `{${setVal(tmpSpriteData[4], 0)}}`, // X座標
+				top: setVal(tmpSpriteData[5], `0`).includes(`{`) ?
+					`${setVal(tmpSpriteData[5], 0)}` : `{${setVal(tmpSpriteData[5], 0)}}`, // Y座標
 				width: `${setIntVal(tmpSpriteData[6])}`,                            // spanタグの場合は font-size
 				height: `${escapeHtml(tmpSpriteData[7] ?? ``)}`,                    // spanタグの場合は color(文字列可)
 				opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
