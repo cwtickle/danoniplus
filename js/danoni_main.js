@@ -224,6 +224,19 @@ const setAttrs = (_baseObj, { ...rest } = {}) =>
  */
 const getNumAttr = (_baseObj, _attrkey) => parseFloat(_baseObj.getAttribute(_attrkey));
 
+/**
+ * 文字列に埋め込まれた変数を展開
+ * @param {string} _str 
+ */
+const convertStrToVal = _str => {
+	const strs = _str.split(`}`).join(`{`).split(`{`);
+	let convStrs = ``;
+	for (let j = 0; j < strs.length; j += 2) {
+		convStrs += escapeHtmlForEnabledTag(strs[j]);
+		convStrs += setVal(strs[j + 1], ``, C_TYP_CALC);
+	}
+	return convStrs;
+};
 
 /*-----------------------------------------------------------*/
 /* 値や配列のチェック・変換                                    */
@@ -1445,10 +1458,10 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 			const tmpObj = {
 				path: escapeHtml(tmpSpriteData[2] ?? ``, g_escapeStr.escapeCode),   // 画像パス or テキスト
 				class: escapeHtml(tmpSpriteData[3] ?? ``),                          // CSSクラス
-				left: setVal(tmpSpriteData[4], 0, C_TYP_CALC),                      // X座標
-				top: setVal(tmpSpriteData[5], 0, C_TYP_CALC),                       // Y座標
-				width: setIntVal(tmpSpriteData[6]),                                 // spanタグの場合は font-size
-				height: escapeHtml(tmpSpriteData[7] ?? ``),                         // spanタグの場合は color(文字列可)
+				left: setVal(tmpSpriteData[4], `0`).includes(`{`) ? `${setVal(tmpSpriteData[4], 0)}` : `{${setVal(tmpSpriteData[4], 0)}}`, // X座標
+				top: setVal(tmpSpriteData[5], `0`).includes(`{`) ? `${setVal(tmpSpriteData[5], 0)}` : `{${setVal(tmpSpriteData[5], 0)}}`, // Y座標
+				width: `${setIntVal(tmpSpriteData[6])}`,                            // spanタグの場合は font-size
+				height: `${escapeHtml(tmpSpriteData[7] ?? ``)}`,                    // spanタグの場合は color(文字列可)
 				opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
 				animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE)),
 				animationDuration: setIntVal(tmpSpriteData[10]) / g_fps,
@@ -1545,12 +1558,13 @@ const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
 		if (_condition) {
 			if (_spriteData.colorObjInfo !== undefined) {
 				const colorObjClass = _spriteData.colorObjClass?.split(`/`) ?? [];
+				const id = `${_name}${_spriteData.depth}${_spriteData.colorObjId}`;
+				[`x`, `y`, `w`, `h`].forEach(val => _spriteData.colorObjInfo[val] = convertStrToVal(_spriteData.colorObjInfo[val]));
 				baseSprite.appendChild(
-					createColorObject2(`${_name}${_spriteData.depth}${_spriteData.colorObjId}`,
-						_spriteData.colorObjInfo, ...colorObjClass)
+					createColorObject2(id, _spriteData.colorObjInfo, ...colorObjClass)
 				);
 			} else {
-				baseSprite.innerHTML = _spriteData.htmlText;
+				baseSprite.innerHTML = convertStrToVal(_spriteData.htmlText);
 			}
 		}
 	}
@@ -3905,13 +3919,7 @@ const titleInit = _ => {
 	if (g_headerObj.commentVal !== ``) {
 
 		// コメント文の加工
-		const comments = g_headerObj.commentVal.split(`}`).join(`{`).split(`{`);
-		let convCommentVal = ``;
-		for (let j = 0; j < comments.length; j += 2) {
-			convCommentVal += escapeHtmlForEnabledTag(comments[j]);
-			convCommentVal += setVal(comments[j + 1], ``, C_TYP_CALC);
-		}
-
+		const convCommentVal = convertStrToVal(g_headerObj.commentVal);
 		if (g_headerObj.commentExternal) {
 			if (document.querySelector(`#commentArea`) !== null) {
 				commentArea.innerHTML = convCommentVal;
@@ -3964,6 +3972,7 @@ const titleInit = _ => {
 
 	g_skinJsObj.title.forEach(func => func());
 };
+
 
 /**
  * 警告用ウィンドウ（汎用）を表示
