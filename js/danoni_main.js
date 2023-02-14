@@ -3975,7 +3975,6 @@ const titleInit = _ => {
 	g_skinJsObj.title.forEach(func => func());
 };
 
-
 /**
  * 警告用ウィンドウ（汎用）を表示
  * @param {string} _text 
