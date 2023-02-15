@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/02/14
+ * Revised : 2023/02/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 30.1.1`;
-const g_revisedDate = `2023/02/14`;
+const g_version = `Ver 30.1.2`;
+const g_revisedDate = `2023/02/15`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7154,19 +7154,23 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	const getPriorityHeader = _ => {
 		const list = [];
+		const anotherKeyFlg = hasVal(g_keyObj[`transKey${_keyCtrlPtn}`]);
+		const addPriorityList = (_type = ``) => {
+			if (anotherKeyFlg) {
+				list.push(`${_type}A`);
+			}
+			list.push(_type);
+		};
 		let type = ``;
 		if (g_stateObj.scroll !== `---`) {
 			type = `Alt`;
 		} else if (g_stateObj.reverse === C_FLG_ON) {
 			type = `Rev`;
 		}
-		if (hasVal(g_keyObj[`transKey${_keyCtrlPtn}`])) {
-			list.push(`${type}A`);
-		}
 		if (type !== ``) {
-			list.push(type);
+			addPriorityList(type);
 		}
-		list.push(``);
+		addPriorityList();
 
 		return list;
 	};
