@@ -7134,6 +7134,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		return [];
 	};
 
+	/**
+	 * スクロール変化データの分解
+	 * @param {number} _scoreNo 
+	 */
 	const setScrollchData = (_scoreNo) => {
 		const dosScrollchData = _dosObj[`scrollch${_scoreNo}_data`] || _dosObj.scrollch_data;
 		const scrollchData = [];
