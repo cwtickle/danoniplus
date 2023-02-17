@@ -7134,6 +7134,27 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		return [];
 	};
 
+	const setScrchData = (_scoreNo) => {
+		const dosScrchData = _dosObj[`scrch${_scoreNo}_data`] || _dosObj.scrch_data;
+		const scrchData = [];
+
+		if (hasVal(dosScrchData)) {
+			splitLF(dosScrchData).filter(data => hasVal(data)).forEach(tmpData => {
+				const tmpScrchData = tmpData.split(`,`);
+				if (isNaN(parseInt(tmpScrchData[0]))) {
+					return;
+				}
+				const frame = calcFrame(tmpScrchData[0]);
+				const arrowNum = parseFloat(tmpScrchData[1]);
+				const scrollDir = parseFloat(tmpScrchData[2] ?? `1`);
+
+				scrchData.push([frame, frame, arrowNum, scrollDir]);
+			});
+			return scrchData.sort((_a, _b) => _a[0] - _b[0]).flat();
+		}
+		return [];
+	};
+
 	/**
 	 * 譜面データの優先順配列の取得
 	 * @param {string} _header 
@@ -7326,6 +7347,9 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		obj.dummyFrzCssMotionData = setCssMotionData(`frz`, _dummyNo);
 	}
 
+	// スクロール変化データの分解
+	obj.scrchData = setScrchData(scoreIdHeader);
+
 	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
 	obj.wordData = [];
 	obj.wordMaxDepth = -1;
@@ -7367,7 +7391,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	// キー変化定義
 	obj.keychFrames = [];
 	if (hasVal(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`])) {
-		const keychdata = _dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`]?.split(`,`);
+		const keychdata = splitLF2(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`], `,`);
 		obj.keychFrames = keychdata.filter((val, j) => j % 2 === 0);
 		obj.keychTarget = keychdata.filter((val, j) => j % 2 === 1);
 	} else {
@@ -7687,26 +7711,27 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 個別加速のタイミング更新
-	let tmpObj;
-	g_workObj.boostData = [];
-	g_workObj.boostData.length = 0;
-	if (hasArrayList(_dataObj.boostData, 2)) {
-		let delBoostIdx = 0;
-		for (let k = _dataObj.boostData.length - 2; k >= 0; k -= 2) {
-			tmpObj = getArrowStartFrame(_dataObj.boostData[k], _speedOnFrame, _motionOnFrame);
-			if (tmpObj.frm < g_scoreObj.frameNum) {
-				_dataObj.boostData[k] = g_scoreObj.frameNum;
-				delBoostIdx = k;
-				break;
-			} else {
-				_dataObj.boostData[k] = tmpObj.frm;
+	const getTimingData = _data => {
+		if (hasArrayList(_data, 2)) {
+			let delIdx = 0;
+			for (let k = _data.length - 2; k >= 0; k -= 2) {
+				const tmpObj = getArrowStartFrame(_data[k], _speedOnFrame, _motionOnFrame);
+				if (tmpObj.frm < g_scoreObj.frameNum) {
+					_data[k] = g_scoreObj.frameNum;
+					delIdx = k;
+					break;
+				} else {
+					_data[k] = tmpObj.frm;
+				}
 			}
+			for (let k = 0; k < delIdx; k++) {
+				_data.shift();
+			}
+			return copyArray2d(_data);
 		}
-		for (let k = 0; k < delBoostIdx; k++) {
-			_dataObj.boostData.shift();
-		}
-		g_workObj.boostData = copyArray2d(_dataObj.boostData);
-	}
+		return [];
+	};
+	g_workObj.boostData = getTimingData(_dataObj.boostData);
 
 	/**
 	 * 色変化・モーションデータのタイミング更新
@@ -7821,6 +7846,8 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	g_typeLists.arrow.forEach(header =>
 		calcDataTiming(`cssMotion`, header, pushCssMotions, { _calcFrameFlg: true }));
+
+	calcDataTiming(`scrch`, ``, pushScrchs, { _calcFrameFlg: true });
 
 	g_fadeinStockList.forEach(type =>
 		_dataObj[`${type}Data`] = calcAnimationData(type, _dataObj[`${type}Data`]));
@@ -8050,6 +8077,48 @@ const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev) => {
 			if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
 				g_workObj[`mk${camelHeader}CssMotion`][_frame].push(j);
 				g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
+			}
+		}
+	}
+};
+
+/**
+ * スクロール変化情報の格納
+ * @param {string} _header 
+ * @param {number} _frameArrow 
+ * @param {number} _frameStep 
+ * @param {number} _val 
+ * @param {number} _scrollDir 
+ */
+const pushScrchs = (_header, _frameArrow, _frameStep, _val, _scrollDir) => {
+	const tkObj = getKeyInfo();
+
+	const frameArrow = Math.max(_frameArrow, g_scoreObj.frameNum);
+	const frameStep = Math.max(_frameStep, g_scoreObj.frameNum);
+
+	if (g_workObj.mkScrchArrow[frameArrow] === undefined) {
+		g_workObj.mkScrchArrow[frameArrow] = [];
+		g_workObj.mkScrchArrowDir[frameArrow] = [];
+	}
+	if (g_workObj.mkScrchStep[frameStep] === undefined) {
+		g_workObj.mkScrchStep[frameStep] = [];
+		g_workObj.mkScrchStepDir[frameStep] = [];
+	}
+	if (_val < 20 || _val >= 1000) {
+		const realVal = g_workObj.replaceNums[_val % 1000];
+		g_workObj.mkScrchArrow[frameArrow].push(realVal);
+		g_workObj.mkScrchArrowDir[frameArrow].push(_scrollDir);
+		g_workObj.mkScrchStep[frameStep].push(realVal);
+		g_workObj.mkScrchStepDir[frameStep].push(_scrollDir);
+
+	} else {
+		const colorNum = _val - 20;
+		for (let j = 0; j < tkObj.keyNum; j++) {
+			if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
+				g_workObj.mkScrchArrow[frameArrow].push(j);
+				g_workObj.mkScrchArrowDir[frameArrow].push(_scrollDir);
+				g_workObj.mkScrchStep[frameStep].push(j);
+				g_workObj.mkScrchStepDir[frameStep].push(_scrollDir);
 			}
 		}
 	}
@@ -9332,6 +9401,10 @@ const mainInit = _ => {
 			keychCnts++;
 		}
 
+		// スクロール変化
+		changeScrollArrowDirs(currentFrame);
+		changeStepY(currentFrame);
+
 		// ダミー矢印生成（背面に表示するため先に処理）
 		if (g_workObj.mkDummyArrow[currentFrame] !== undefined) {
 			g_workObj.mkDummyArrow[currentFrame].forEach(data =>
@@ -9621,6 +9694,38 @@ const changeCssMotions = (_header, _name, _frameNum) => {
 			const targetj = frameData[j];
 			g_workObj[`${camelHeader}CssMotions`][targetj] =
 				g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + g_workObj.dividePos[targetj]];
+		}
+	}
+};
+
+/**
+ * スクロール方向の変更（矢印・フリーズアロー）
+ * @param {number} _frameNum 
+ */
+const changeScrollArrowDirs = (_frameNum) => {
+	const frameData = g_workObj.mkScrchArrow[_frameNum];
+	if (frameData !== undefined) {
+		for (let j = 0; j < frameData.length; j++) {
+			const targetj = frameData[j];
+			g_workObj.scrollDir[targetj] = (g_stateObj.reverse === C_FLG_OFF ? 1 : -1) * g_workObj.mkScrchArrowDir[_frameNum][j];
+			g_workObj.dividePos[targetj] = (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
+		}
+	}
+};
+
+/**
+ * ステップゾーンの位置反転
+ * @param {number} _frameNum 
+ */
+const changeStepY = (_frameNum) => {
+	const frameData = g_workObj.mkScrchStep[_frameNum];
+	if (frameData !== undefined) {
+		for (let j = 0; j < frameData.length; j++) {
+			const targetj = frameData[j];
+			const dividePos = ((g_stateObj.reverse === C_FLG_OFF ? 1 : -1) * g_workObj.mkScrchStepDir[_frameNum][j] === 1 ? 0 : 1);
+			const baseY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
+			$id(`stepRoot${targetj}`).top = `${baseY}px`;
+			$id(`frzHit${targetj}`).top = `${baseY}px`;
 		}
 	}
 };

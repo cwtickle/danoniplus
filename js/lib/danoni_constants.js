@@ -486,7 +486,7 @@ const g_typeLists = {
     frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`],
     dataList: [
         `Arrow`, `FrzArrow`, `FrzLength`,
-        `Color`, `ColorCd`,
+        `Color`, `ColorCd`, `ScrchArrow`, `ScrchStep`, `ScrchArrowDir`, `ScrchStepDir`,
         `FColorNormal`, `FColorNormalCd`, `FColorNormalBar`, `FColorNormalBarCd`,
         `FColorHit`, `FColorHitCd`, `FColorHitBar`, `FColorHitBarCd`,
         `ArrowCssMotion`, `ArrowCssMotionName`,
