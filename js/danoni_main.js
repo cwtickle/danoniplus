@@ -7155,24 +7155,23 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	const getPriorityHeader = _ => {
 		const list = [];
 		const anotherKeyFlg = hasVal(g_keyObj[`transKey${_keyCtrlPtn}`]);
-		const addPriorityList = (_type = ``) => {
-			if (anotherKeyFlg) {
-				list.push(`${_type}A`);
-			}
-			list.push(_type);
-		};
 		let type = ``;
 		if (g_stateObj.scroll !== `---`) {
 			type = `Alt`;
 		} else if (g_stateObj.reverse === C_FLG_ON) {
 			type = `Rev`;
 		}
-		if (type !== ``) {
-			addPriorityList(type);
-		}
-		addPriorityList();
 
-		return list;
+		if (anotherKeyFlg) {
+			list.push(`${g_stateObj.scroll}A`);
+			list.push(`${type}A`);
+			list.push(`A`);
+		}
+		list.push(g_stateObj.scroll);
+		list.push(type);
+		list.push(``);
+
+		return makeDedupliArray(list);
 	};
 
 	/**
