@@ -8139,6 +8139,7 @@ const getArrowSettings = _ => {
 
 	g_workObj.stepX = [];
 	g_workObj.scrollDir = [];
+	g_workObj.scrollDirDefault = [];
 	g_workObj.dividePos = [];
 	g_workObj.stepRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.stepHitRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
@@ -8210,6 +8211,7 @@ const getArrowSettings = _ => {
 			});
 		});
 	}
+	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
 
 	Object.keys(g_resultObj).forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 	g_resultObj.spState = ``;
@@ -9707,7 +9709,7 @@ const changeScrollArrowDirs = (_frameNum) => {
 	if (frameData !== undefined) {
 		for (let j = 0; j < frameData.length; j++) {
 			const targetj = frameData[j];
-			g_workObj.scrollDir[targetj] = (g_stateObj.reverse === C_FLG_OFF ? 1 : -1) * g_workObj.mkScrollchArrowDir[_frameNum][j];
+			g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
 			g_workObj.dividePos[targetj] = (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
 		}
 	}
@@ -9722,7 +9724,7 @@ const changeStepY = (_frameNum) => {
 	if (frameData !== undefined) {
 		for (let j = 0; j < frameData.length; j++) {
 			const targetj = frameData[j];
-			const dividePos = ((g_stateObj.reverse === C_FLG_OFF ? 1 : -1) * g_workObj.mkScrollchStepDir[_frameNum][j] === 1 ? 0 : 1);
+			const dividePos = (g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchStepDir[_frameNum][j] === 1 ? 0 : 1);
 			const baseY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
 			$id(`stepRoot${targetj}`).top = `${baseY}px`;
 			$id(`frzHit${targetj}`).top = `${baseY}px`;
