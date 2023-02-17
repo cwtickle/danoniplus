@@ -7134,23 +7134,23 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		return [];
 	};
 
-	const setScrchData = (_scoreNo) => {
-		const dosScrchData = _dosObj[`scrch${_scoreNo}_data`] || _dosObj.scrch_data;
-		const scrchData = [];
+	const setScrollchData = (_scoreNo) => {
+		const dosScrollchData = _dosObj[`scrollch${_scoreNo}_data`] || _dosObj.scrollch_data;
+		const scrollchData = [];
 
-		if (hasVal(dosScrchData)) {
-			splitLF(dosScrchData).filter(data => hasVal(data)).forEach(tmpData => {
-				const tmpScrchData = tmpData.split(`,`);
-				if (isNaN(parseInt(tmpScrchData[0]))) {
+		if (hasVal(dosScrollchData)) {
+			splitLF(dosScrollchData).filter(data => hasVal(data)).forEach(tmpData => {
+				const tmpScrollchData = tmpData.split(`,`);
+				if (isNaN(parseInt(tmpScrollchData[0]))) {
 					return;
 				}
-				const frame = calcFrame(tmpScrchData[0]);
-				const arrowNum = parseFloat(tmpScrchData[1]);
-				const scrollDir = parseFloat(tmpScrchData[2] ?? `1`);
+				const frame = calcFrame(tmpScrollchData[0]);
+				const arrowNum = parseFloat(tmpScrollchData[1]);
+				const scrollDir = parseFloat(tmpScrollchData[2] ?? `1`);
 
-				scrchData.push([frame, frame, arrowNum, scrollDir]);
+				scrollchData.push([frame, frame, arrowNum, scrollDir]);
 			});
-			return scrchData.sort((_a, _b) => _a[0] - _b[0]).flat();
+			return scrollchData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
 		return [];
 	};
@@ -7348,7 +7348,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	}
 
 	// スクロール変化データの分解
-	obj.scrchData = setScrchData(scoreIdHeader);
+	obj.scrollchData = setScrollchData(scoreIdHeader);
 
 	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
 	obj.wordData = [];
@@ -7847,7 +7847,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	g_typeLists.arrow.forEach(header =>
 		calcDataTiming(`cssMotion`, header, pushCssMotions, { _calcFrameFlg: true }));
 
-	calcDataTiming(`scrch`, ``, pushScrchs, { _calcFrameFlg: true });
+	calcDataTiming(`scrollch`, ``, pushScrollchs, { _calcFrameFlg: true });
 
 	g_fadeinStockList.forEach(type =>
 		_dataObj[`${type}Data`] = calcAnimationData(type, _dataObj[`${type}Data`]));
@@ -8090,35 +8090,35 @@ const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev) => {
  * @param {number} _val 
  * @param {number} _scrollDir 
  */
-const pushScrchs = (_header, _frameArrow, _frameStep, _val, _scrollDir) => {
+const pushScrollchs = (_header, _frameArrow, _frameStep, _val, _scrollDir) => {
 	const tkObj = getKeyInfo();
 
 	const frameArrow = Math.max(_frameArrow, g_scoreObj.frameNum);
 	const frameStep = Math.max(_frameStep, g_scoreObj.frameNum);
 
-	if (g_workObj.mkScrchArrow[frameArrow] === undefined) {
-		g_workObj.mkScrchArrow[frameArrow] = [];
-		g_workObj.mkScrchArrowDir[frameArrow] = [];
+	if (g_workObj.mkScrollchArrow[frameArrow] === undefined) {
+		g_workObj.mkScrollchArrow[frameArrow] = [];
+		g_workObj.mkScrollchArrowDir[frameArrow] = [];
 	}
-	if (g_workObj.mkScrchStep[frameStep] === undefined) {
-		g_workObj.mkScrchStep[frameStep] = [];
-		g_workObj.mkScrchStepDir[frameStep] = [];
+	if (g_workObj.mkScrollchStep[frameStep] === undefined) {
+		g_workObj.mkScrollchStep[frameStep] = [];
+		g_workObj.mkScrollchStepDir[frameStep] = [];
 	}
 	if (_val < 20 || _val >= 1000) {
 		const realVal = g_workObj.replaceNums[_val % 1000];
-		g_workObj.mkScrchArrow[frameArrow].push(realVal);
-		g_workObj.mkScrchArrowDir[frameArrow].push(_scrollDir);
-		g_workObj.mkScrchStep[frameStep].push(realVal);
-		g_workObj.mkScrchStepDir[frameStep].push(_scrollDir);
+		g_workObj.mkScrollchArrow[frameArrow].push(realVal);
+		g_workObj.mkScrollchArrowDir[frameArrow].push(_scrollDir);
+		g_workObj.mkScrollchStep[frameStep].push(realVal);
+		g_workObj.mkScrollchStepDir[frameStep].push(_scrollDir);
 
 	} else {
 		const colorNum = _val - 20;
 		for (let j = 0; j < tkObj.keyNum; j++) {
 			if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
-				g_workObj.mkScrchArrow[frameArrow].push(j);
-				g_workObj.mkScrchArrowDir[frameArrow].push(_scrollDir);
-				g_workObj.mkScrchStep[frameStep].push(j);
-				g_workObj.mkScrchStepDir[frameStep].push(_scrollDir);
+				g_workObj.mkScrollchArrow[frameArrow].push(j);
+				g_workObj.mkScrollchArrowDir[frameArrow].push(_scrollDir);
+				g_workObj.mkScrollchStep[frameStep].push(j);
+				g_workObj.mkScrollchStepDir[frameStep].push(_scrollDir);
 			}
 		}
 	}
@@ -9703,11 +9703,11 @@ const changeCssMotions = (_header, _name, _frameNum) => {
  * @param {number} _frameNum 
  */
 const changeScrollArrowDirs = (_frameNum) => {
-	const frameData = g_workObj.mkScrchArrow[_frameNum];
+	const frameData = g_workObj.mkScrollchArrow[_frameNum];
 	if (frameData !== undefined) {
 		for (let j = 0; j < frameData.length; j++) {
 			const targetj = frameData[j];
-			g_workObj.scrollDir[targetj] = (g_stateObj.reverse === C_FLG_OFF ? 1 : -1) * g_workObj.mkScrchArrowDir[_frameNum][j];
+			g_workObj.scrollDir[targetj] = (g_stateObj.reverse === C_FLG_OFF ? 1 : -1) * g_workObj.mkScrollchArrowDir[_frameNum][j];
 			g_workObj.dividePos[targetj] = (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
 		}
 	}
@@ -9718,11 +9718,11 @@ const changeScrollArrowDirs = (_frameNum) => {
  * @param {number} _frameNum 
  */
 const changeStepY = (_frameNum) => {
-	const frameData = g_workObj.mkScrchStep[_frameNum];
+	const frameData = g_workObj.mkScrollchStep[_frameNum];
 	if (frameData !== undefined) {
 		for (let j = 0; j < frameData.length; j++) {
 			const targetj = frameData[j];
-			const dividePos = ((g_stateObj.reverse === C_FLG_OFF ? 1 : -1) * g_workObj.mkScrchStepDir[_frameNum][j] === 1 ? 0 : 1);
+			const dividePos = ((g_stateObj.reverse === C_FLG_OFF ? 1 : -1) * g_workObj.mkScrollchStepDir[_frameNum][j] === 1 ? 0 : 1);
 			const baseY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
 			$id(`stepRoot${targetj}`).top = `${baseY}px`;
 			$id(`frzHit${targetj}`).top = `${baseY}px`;
