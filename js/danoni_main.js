@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/02/17
+ * Revised : 2023/02/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 30.2.0`;
-const g_revisedDate = `2023/02/17`;
+const g_version = `Ver 30.2.1`;
+const g_revisedDate = `2023/02/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7152,7 +7152,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const arrowNum = parseFloat(tmpScrollchData[1]);
 				const scrollDir = parseFloat(tmpScrollchData[2] ?? `1`);
 
-				scrollchData.push([frame, frame, arrowNum, scrollDir]);
+				scrollchData.push([frame, arrowNum, frame, scrollDir]);
 			});
 			return scrollchData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
@@ -7738,7 +7738,8 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	g_workObj.boostData = getTimingData(_dataObj.boostData);
 
 	/**
-	 * 色変化・モーションデータのタイミング更新
+	 * 色変化・モーションデータ・スクロール反転データのタイミング更新
+	 * - この関数を使用する場合、配列グループの先頭2つが「フレーム数、矢印番号」となっていないと動作しない
 	 * @param {string} _type 
 	 * @param {string} _header 
 	 * @param {function} _setFunc 
@@ -7759,6 +7760,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			const calcFrameFlg = (_colorFlg && !isFrzHitColor(baseData[k + 1]) && !baseData[k + 3]) || _calcFrameFlg;
 
 			if (baseData[k] < g_scoreObj.frameNum) {
+				// フェードイン直前にある色変化・モーションデータ・スクロール反転データを取得して格納
 				if (!hasValInArray(baseData[k + 1], frontData)) {
 					frontData.unshift(baseData.slice(k + 1, k + _term));
 				}
@@ -7844,7 +7846,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		return _data;
 	};
 
-	// 個別・全体色変化、モーションデータのタイミング更新
+	// 個別・全体色変化、モーションデータ・スクロール反転データのタイミング更新
 	[``, `dummy`].forEach(type =>
 		calcDataTiming(`color`, type, pushColors, { _colorFlg: true }));
 
@@ -8094,7 +8096,7 @@ const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev) => {
  * @param {number} _val 
  * @param {number} _scrollDir 
  */
-const pushScrollchs = (_header, _frameArrow, _frameStep, _val, _scrollDir) => {
+const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir) => {
 	const tkObj = getKeyInfo();
 
 	const frameArrow = Math.max(_frameArrow, g_scoreObj.frameNum);
