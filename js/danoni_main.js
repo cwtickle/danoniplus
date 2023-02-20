@@ -6424,7 +6424,7 @@ const getKeyInfo = _ => {
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`divMax${keyCtrlPtn}`] : Math.max(...g_keyObj[`pos${keyCtrlPtn}`]) + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-	const keyGroupMaps = setVal(g_keyObj[`keyGroup${keyCtrlPtn}`], [...Array(keyNum)].fill([0]), C_TYP_STRING);
+	const keyGroupMaps = setVal(g_keyObj[`keyGroup${keyCtrlPtn}`], [...Array(keyNum)].fill([`0`]), C_TYP_STRING);
 	const keyGroupList = makeDedupliArray(keyGroupMaps.flat()).sort((a, b) => parseInt(a) - parseInt(b));
 
 	return {
