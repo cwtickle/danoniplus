@@ -7393,14 +7393,12 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	}
 
 	// キー変化定義
-	obj.keychFrames = [];
+	obj.keychFrames = [0];
+	obj.keychTarget = [`0`];
 	if (hasVal(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`])) {
 		const keychdata = splitLF2(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`], `,`);
-		obj.keychFrames = keychdata.filter((val, j) => j % 2 === 0);
-		obj.keychTarget = keychdata.filter((val, j) => j % 2 === 1);
-	} else {
-		obj.keychFrames = [0];
-		obj.keychTarget = [0];
+		obj.keychFrames.push(...keychdata.filter((val, j) => j % 2 === 0));
+		obj.keychTarget.push(...keychdata.filter((val, j) => j % 2 === 1));
 	}
 
 	return obj;
