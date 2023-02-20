@@ -6424,7 +6424,7 @@ const getKeyInfo = _ => {
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`divMax${keyCtrlPtn}`] : Math.max(...g_keyObj[`pos${keyCtrlPtn}`]) + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-	const keyGroupMaps = setVal(g_keyObj[`keyGroup${keyCtrlPtn}`], [...Array(keyNum)].fill([0]), C_TYP_STRING);
+	const keyGroupMaps = setVal(g_keyObj[`keyGroup${keyCtrlPtn}`], [...Array(keyNum)].fill([`0`]), C_TYP_STRING);
 	const keyGroupList = makeDedupliArray(keyGroupMaps.flat()).sort((a, b) => parseInt(a) - parseInt(b));
 
 	return {
@@ -7393,14 +7393,12 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	}
 
 	// キー変化定義
-	obj.keychFrames = [];
+	obj.keychFrames = [0];
+	obj.keychTarget = [`0`];
 	if (hasVal(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`])) {
 		const keychdata = splitLF2(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`], `,`);
-		obj.keychFrames = keychdata.filter((val, j) => j % 2 === 0);
-		obj.keychTarget = keychdata.filter((val, j) => j % 2 === 1);
-	} else {
-		obj.keychFrames = [0];
-		obj.keychTarget = [0];
+		obj.keychFrames.push(...keychdata.filter((val, j) => j % 2 === 0));
+		obj.keychTarget.push(...keychdata.filter((val, j) => j % 2 === 1));
 	}
 
 	return obj;
