@@ -1,3 +1,5 @@
+**[English](https://github.com/cwtickle/danoniplus-docs/wiki/SecurityPolicy) | Japanese** 
+
 # Security Policy
 
 ## Supported Versions / サポートバージョン
