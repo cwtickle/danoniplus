@@ -3678,6 +3678,14 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 		// シャッフルグループ (shuffleX_Y)
 		newKeyTripleParam(newKey, `shuffle`);
+		if (g_keyObj[`shuffle${newKey}_${dfPtnNum}_0`] === undefined) {
+			// 特に指定が無い場合はcolorX_Yの配列長で決定
+			for (let k = 0; k < tmpMinPatterns; k++) {
+				const ptnName = `${newKey}_${k + dfPtnNum}`;
+				g_keyObj[`shuffle${ptnName}_0`] = [...Array(g_keyObj[`color${ptnName}`].length)].fill(0);
+				g_keyObj[`shuffle${ptnName}`] = structuredClone(g_keyObj[`shuffle${ptnName}_0`]);
+			}
+		}
 
 		// キーグループ (keyGroupX_Y)
 		newKeyMultiParam(newKey, `keyGroup`, toSplitArrayStr);
