@@ -3634,6 +3634,12 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 					g_keyObj[`divMax${ptnName}`] = setVal(tmpDivPtn[1], -1, C_TYP_FLOAT);
 				}
 			}
+		} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
+			// 特に指定が無い場合はcharaX_Yの配列長で決定
+			for (let k = 0; k < tmpMinPatterns; k++) {
+				const ptnName = `${newKey}_${k + dfPtnNum}`;
+				g_keyObj[`div${ptnName}`] = g_keyObj[`chara${newKey}_0`].length;
+			}
 		}
 
 		// ステップゾーン位置 (posX_Y)
