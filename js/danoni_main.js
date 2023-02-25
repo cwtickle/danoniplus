@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/01/20
+ * Revised : 2023/02/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 24.6.14`;
-const g_revisedDate = `2023/01/20`;
+const g_version = `Ver 24.6.15`;
+const g_revisedDate = `2023/02/26`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3842,6 +3842,12 @@ function keysConvert(_dosObj) {
 					g_keyObj[`divMax${newKey}_${k}`] = setVal(tmpDivPtn[1], -1, C_TYP_NUMBER);
 				}
 			}
+		} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
+			// 特に指定が無い場合はcharaX_Yの配列長で決定
+			for (let k = 0; k < tmpMinPatterns; k++) {
+				const ptnName = `${newKey}_${k}`;
+				g_keyObj[`div${ptnName}`] = g_keyObj[`chara${newKey}_0`].length;
+			}
 		}
 
 		// ステップゾーン位置 (posX_Y)
@@ -3880,6 +3886,14 @@ function keysConvert(_dosObj) {
 		newKeyMultiParam(newKey, `shuffle`, toNumber, {
 			loopFunc: (k, keyheader) => copyChildArray(k, keyheader),
 		});
+		if (g_keyObj[`shuffle${newKey}_0`] === undefined) {
+			// 特に指定が無い場合はcolorX_Yの配列長で決定
+			for (let k = 0; k < tmpMinPatterns; k++) {
+				const ptnName = `${newKey}_${k}`;
+				g_keyObj[`shuffle${ptnName}_0`] = [...Array(g_keyObj[`color${ptnName}`].length)].fill(0);
+				g_keyObj[`shuffle${ptnName}`] = structuredClone(g_keyObj[`shuffle${ptnName}_0`]);
+			}
+		}
 
 		// スクロールパターン (scrollX_Y)
 		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
