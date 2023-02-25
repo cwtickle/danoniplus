@@ -3641,8 +3641,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 			loopFunc: (k, keyheader) => {
 				const ptnName = `${newKey}_${k + dfPtnNum}`;
 				if (g_keyObj[`divMax${ptnName}`] === undefined || g_keyObj[`divMax${ptnName}`] === -1) {
-					const posLength = g_keyObj[`${keyheader}_${k + dfPtnNum}`].length;
-					g_keyObj[`divMax${ptnName}`] = g_keyObj[`${keyheader}_${k + dfPtnNum}`][posLength - 1] + 1;
+					g_keyObj[`divMax${ptnName}`] = Math.max(...g_keyObj[`${keyheader}_${k + dfPtnNum}`]) + 1;
 				}
 			}
 		});
