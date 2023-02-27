@@ -3575,7 +3575,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 	// 対象キー毎に処理
 	keyExtraList.forEach(newKey => {
-		let tmpDivPtn = [];
 		let tmpMinPatterns = 1;
 		g_keyObj.dfPtnNum = 0;
 
@@ -3623,15 +3622,15 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		if (_dosObj[`div${newKey}`] !== undefined) {
 			const tmpDivs = _dosObj[`div${newKey}`].split(`$`);
 			for (let k = 0; k < tmpDivs.length; k++) {
-				tmpDivPtn = tmpDivs[k].split(`,`);
+				const tmpDivPtn = tmpDivs[k].split(`,`);
 				const ptnName = `${newKey}_${k + dfPtnNum}`;
 
 				if (g_keyObj[`div${tmpDivPtn[0]}`] !== undefined) {
 					// 既定キーパターンが指定された場合、存在すればその値を適用
 					g_keyObj[`div${ptnName}`] = g_keyObj[`div${tmpDivPtn[0]}`];
 					g_keyObj[`divMax${ptnName}`] = setVal(g_keyObj[`divMax${tmpDivPtn[0]}`], Math.max(...g_keyObj[`pos${ptnName}`]) + 1, C_TYP_FLOAT);
-				} else if (setIntVal(g_keyObj[`div${ptnName}`], -1) !== -1) {
-					// すでに定義済みの場合はスキップ
+				} else if (!hasVal(tmpDivPtn[0]) && setIntVal(g_keyObj[`div${ptnName}`], -1) !== -1) {
+					// カスタムキー側のdivXが未定義だが、すでに初期設定で定義済みの場合はスキップ
 					continue;
 				} else {
 					// それ以外の場合は指定された値を適用（未指定時はその後で指定）
