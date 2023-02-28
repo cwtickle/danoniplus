@@ -3510,7 +3510,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 					// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
 					tmpArray[k].split(`/`).forEach((list, m) =>
-						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = list.split(`,`).map(n => parseInt(n, 10)));
+						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = (list === `` ?
+							[...Array(g_keyObj[`color${_key}_${k + dfPtn}`].length)].fill(0) : list.split(`,`).map(n => parseInt(n, 10))));
 				}
 				g_keyObj[`${keyheader}_${k + dfPtn}`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}_0`]);
 			}
