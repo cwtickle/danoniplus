@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/02/26
+ * Revised : 2023/03/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 30.2.3`;
-const g_revisedDate = `2023/02/26`;
+const g_version = `Ver 30.3.0`;
+const g_revisedDate = `2023/03/01`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3510,7 +3510,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 					// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
 					tmpArray[k].split(`/`).forEach((list, m) =>
-						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = list.split(`,`).map(n => parseInt(n, 10)));
+						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = (list === `` ?
+							[...Array(g_keyObj[`color${_key}_${k + dfPtn}`].length)].fill(0) : list.split(`,`).map(n => parseInt(n, 10))));
 				}
 				g_keyObj[`${keyheader}_${k + dfPtn}`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}_0`]);
 			}
@@ -3575,7 +3576,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 	// 対象キー毎に処理
 	keyExtraList.forEach(newKey => {
-		let tmpDivPtn = [];
 		let tmpMinPatterns = 1;
 		g_keyObj.dfPtnNum = 0;
 
@@ -3608,55 +3608,44 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		// キーコンフィグ (keyCtrlX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `keyCtrl`, toSplitArray, { errCd: `E_0104`, baseCopyFlg: true });
 
-		// 各キーの区切り位置 (divX_Y)
-		if (_dosObj[`div${newKey}`] !== undefined) {
-			const tmpDivs = _dosObj[`div${newKey}`].split(`$`);
-			for (let k = 0; k < tmpDivs.length; k++) {
-				tmpDivPtn = tmpDivs[k].split(`,`);
-				const ptnName = `${newKey}_${k + dfPtnNum}`;
-
-				if (setIntVal(tmpDivPtn[0], -1) !== -1) {
-					g_keyObj[`div${ptnName}`] = setIntVal(tmpDivPtn[0], g_keyObj[`chara${newKey}_0`].length);
-				} else if (g_keyObj[`div${tmpDivPtn[0]}`] !== undefined) {
-					// 既定キーパターンが指定された場合、存在すればその値を適用
-					g_keyObj[`div${ptnName}`] = g_keyObj[`div${tmpDivPtn[0]}`];
-					g_keyObj[`divMax${ptnName}`] = setIntVal(g_keyObj[`divMax${tmpDivPtn[0]}`], undefined);
-				} else if (setIntVal(g_keyObj[`div${ptnName}`], -1) !== -1) {
-					// すでに定義済みの場合はスキップ
-					continue;
-				} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
-					// 特に指定が無い場合はcharaX_Yの配列長で決定
-					g_keyObj[`div${ptnName}`] = g_keyObj[`chara${newKey}_0`].length;
-				}
-
-				// ステップゾーン位置の最終番号
-				if (tmpDivPtn.length > 1) {
-					g_keyObj[`divMax${ptnName}`] = setVal(tmpDivPtn[1], -1, C_TYP_FLOAT);
-				}
-			}
-		} else if (g_keyObj[`chara${newKey}_0`] !== undefined) {
-			// 特に指定が無い場合はcharaX_Yの配列長で決定
-			for (let k = 0; k < tmpMinPatterns; k++) {
-				const ptnName = `${newKey}_${k + dfPtnNum}`;
-				g_keyObj[`div${ptnName}`] = g_keyObj[`chara${newKey}_0`].length;
-			}
-		}
-
 		// ステップゾーン位置 (posX_Y)
-		newKeyMultiParam(newKey, `pos`, toFloat, {
-			loopFunc: (k, keyheader) => {
-				const ptnName = `${newKey}_${k + dfPtnNum}`;
-				if (g_keyObj[`divMax${ptnName}`] === undefined || g_keyObj[`divMax${ptnName}`] === -1) {
-					g_keyObj[`divMax${ptnName}`] = Math.max(...g_keyObj[`${keyheader}_${k + dfPtnNum}`]) + 1;
-				}
-			}
-		});
+		newKeyMultiParam(newKey, `pos`, toFloat);
 		if (_dosObj[`pos${newKey}`] === undefined) {
 			for (let k = 0; k < tmpMinPatterns; k++) {
 				const ptnName = `${newKey}_${k + dfPtnNum}`;
 				if (g_keyObj[`color${ptnName}`] !== undefined) {
 					g_keyObj[`pos${ptnName}`] = [...Array(g_keyObj[`color${ptnName}`].length).keys()].map(i => i);
 				}
+			}
+		}
+
+		// 各キーの区切り位置 (divX_Y)
+		if (_dosObj[`div${newKey}`] !== undefined) {
+			const tmpDivs = _dosObj[`div${newKey}`].split(`$`);
+			for (let k = 0; k < tmpDivs.length; k++) {
+				const tmpDivPtn = tmpDivs[k].split(`,`);
+				const ptnName = `${newKey}_${k + dfPtnNum}`;
+
+				if (g_keyObj[`div${tmpDivPtn[0]}`] !== undefined) {
+					// 既定キーパターンが指定された場合、存在すればその値を適用
+					g_keyObj[`div${ptnName}`] = g_keyObj[`div${tmpDivPtn[0]}`];
+					g_keyObj[`divMax${ptnName}`] = setVal(g_keyObj[`divMax${tmpDivPtn[0]}`], Math.max(...g_keyObj[`pos${ptnName}`]) + 1, C_TYP_FLOAT);
+				} else if (!hasVal(tmpDivPtn[0]) && setIntVal(g_keyObj[`div${ptnName}`], -1) !== -1) {
+					// カスタムキー側のdivXが未定義だが、すでに初期設定で定義済みの場合はスキップ
+					continue;
+				} else {
+					// それ以外の場合は指定された値を適用（未指定時はその後で指定）
+					g_keyObj[`div${ptnName}`] = setVal(tmpDivPtn[0], undefined, C_TYP_NUMBER);
+					g_keyObj[`divMax${ptnName}`] = setVal(tmpDivPtn[1], undefined, C_TYP_FLOAT);
+				}
+			}
+		}
+		// divX_Yが未指定の場合はposX_Yを元に適用
+		for (let k = 0; k < tmpMinPatterns; k++) {
+			const ptnName = `${newKey}_${k + dfPtnNum}`;
+			if (g_keyObj[`div${ptnName}`] === undefined) {
+				g_keyObj[`div${ptnName}`] = Math.max(...g_keyObj[`pos${ptnName}`]) + 1;
+				g_keyObj[`divMax${ptnName}`] = g_keyObj[`div${ptnName}`];
 			}
 		}
 
