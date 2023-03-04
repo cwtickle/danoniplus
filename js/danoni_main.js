@@ -3610,14 +3610,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 		// ステップゾーン位置 (posX_Y)
 		newKeyMultiParam(newKey, `pos`, toFloat);
-		if (_dosObj[`pos${newKey}`] === undefined) {
-			for (let k = 0; k < tmpMinPatterns; k++) {
-				const ptnName = `${newKey}_${k + dfPtnNum}`;
-				if (g_keyObj[`color${ptnName}`] !== undefined) {
-					g_keyObj[`pos${ptnName}`] = [...Array(g_keyObj[`color${ptnName}`].length).keys()].map(i => i);
-				}
-			}
-		}
 
 		// 各キーの区切り位置 (divX_Y)
 		if (_dosObj[`div${newKey}`] !== undefined) {
@@ -3629,7 +3621,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				if (g_keyObj[`div${tmpDivPtn[0]}`] !== undefined) {
 					// 既定キーパターンが指定された場合、存在すればその値を適用
 					g_keyObj[`div${ptnName}`] = g_keyObj[`div${tmpDivPtn[0]}`];
-					g_keyObj[`divMax${ptnName}`] = setVal(g_keyObj[`divMax${tmpDivPtn[0]}`], Math.max(...g_keyObj[`pos${ptnName}`]) + 1, C_TYP_FLOAT);
+					g_keyObj[`divMax${ptnName}`] = setVal(g_keyObj[`divMax${tmpDivPtn[0]}`], undefined, C_TYP_FLOAT);
 				} else if (!hasVal(tmpDivPtn[0]) && setIntVal(g_keyObj[`div${ptnName}`], -1) !== -1) {
 					// カスタムキー側のdivXが未定義だが、すでに初期設定で定義済みの場合はスキップ
 					continue;
@@ -3640,13 +3632,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				}
 			}
 		}
-		// divX_Yが未指定の場合はposX_Yを元に適用
+		// posX_Y, divX_Y, divMaxX_Yが未指定の場合はcharaX_Yを元に適用
 		for (let k = 0; k < tmpMinPatterns; k++) {
-			const ptnName = `${newKey}_${k + dfPtnNum}`;
-			if (g_keyObj[`div${ptnName}`] === undefined) {
-				g_keyObj[`div${ptnName}`] = Math.max(...g_keyObj[`pos${ptnName}`]) + 1;
-				g_keyObj[`divMax${ptnName}`] = g_keyObj[`div${ptnName}`];
-			}
+			setKeyDfVal(`${newKey}_${k + dfPtnNum}`);
 		}
 
 		// ステップゾーン間隔 (blankX_Y)
@@ -3688,6 +3676,22 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	});
 
 	return keyExtraList;
+};
+
+/**
+ * キーパターンのデフォルト値設定
+ * @param {string} _ptnName 
+ */
+const setKeyDfVal = _ptnName => {
+	if (g_keyObj[`pos${_ptnName}`] === undefined) {
+		g_keyObj[`pos${_ptnName}`] = [...Array(g_keyObj[`chara${_ptnName}`].length).keys()].map(i => i);
+	}
+	if (g_keyObj[`div${_ptnName}`] === undefined) {
+		g_keyObj[`div${_ptnName}`] = Math.max(...g_keyObj[`pos${_ptnName}`]) + 1;
+	}
+	if (g_keyObj[`divMax${_ptnName}`] === undefined) {
+		g_keyObj[`divMax${_ptnName}`] = Math.max(...g_keyObj[`pos${_ptnName}`]) + 1;
+	}
 };
 
 /*-----------------------------------------------------------*/
@@ -6423,8 +6427,7 @@ const getShadowColor = (_colorPos, _arrowColor) => g_headerObj.setShadowColor[_c
 const getKeyInfo = _ => {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
-	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
-		g_keyObj[`divMax${keyCtrlPtn}`] : Math.max(...g_keyObj[`pos${keyCtrlPtn}`]) + 1);
+	const posMax = g_keyObj[`divMax${keyCtrlPtn}`];
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 	const keyGroupMaps = setVal(g_keyObj[`keyGroup${keyCtrlPtn}`], [...Array(keyNum)].fill([`0`]), C_TYP_STRING);
 	const keyGroupList = makeDedupliArray(keyGroupMaps.flat()).sort((a, b) => parseInt(a) - parseInt(b));

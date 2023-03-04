@@ -1936,15 +1936,9 @@ const g_keyObj = {
 
 };
 
-// posX_Y, divX_Yが未定義のときに0からの連番で補完する処理 (charaX_Yが定義されていることが前提)
+// posX_Y, divX_Y, divMaxX_Yが未定義のときに0からの連番で補完する処理 (charaX_Yが定義されていることが前提)
 Object.keys(g_keyObj).filter(val => val.startsWith(`chara`)).forEach(charaPtn => {
-    const ptnName = charaPtn.slice(`chara`.length);
-    if (g_keyObj[`pos${ptnName}`] === undefined) {
-        g_keyObj[`pos${ptnName}`] = [...Array(g_keyObj[`chara${ptnName}`].length).keys()].map(i => i);
-    }
-    if (g_keyObj[`div${ptnName}`] === undefined) {
-        g_keyObj[`div${ptnName}`] = g_keyObj[`chara${ptnName}`].length;
-    }
+    setKeyDfVal(charaPtn.slice(`chara`.length));
 });
 
 // キーパターンのコピーリスト
@@ -2028,6 +2022,7 @@ Object.keys(g_copyKeyPtn).forEach(keyPtnTo => {
     copyKeyPtn(`assistPos`);
 
     copyKeyPtnVal(`div`);
+    copyKeyPtnVal(`divMax`);
     copyKeyPtnVal(`blank`);
     copyKeyPtnVal(`scale`);
     copyKeyPtnVal(`keyRetry`);
