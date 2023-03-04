@@ -3511,7 +3511,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 					// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
 					tmpArray[k].split(`/`).forEach((list, m) =>
 						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = (list === `` ?
-							[...Array(g_keyObj[`color${_key}_${k + dfPtn}`].length)].fill(0) : list.split(`,`).map(n => parseInt(n, 10))));
+							[...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(0) : list.split(`,`).map(n => parseInt(n, 10))));
 				}
 				g_keyObj[`${keyheader}_${k + dfPtn}`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}_0`]);
 			}
@@ -3563,7 +3563,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 					Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${tmpParams[k]}`]);
 				} else {
 					if (_defaultName !== ``) {
-						g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`color${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
+						g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
 					}
 					tmpParams[k].split(`/`).forEach(pairs => {
 						const tmpParamPair = pairs.split(`::`);
@@ -3582,7 +3582,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		// キーパターンの追記 (appendX)
 		if (setBoolVal(_dosObj[`append${newKey}`])) {
 			for (let j = 0; ; j++) {
-				if (g_keyObj[`color${newKey}_${j}`] === undefined) {
+				if (g_keyObj[`chara${newKey}_${j}`] === undefined) {
 					break;
 				}
 				g_keyObj.dfPtnNum++;
@@ -3658,7 +3658,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 			// 特に指定が無い場合はcolorX_Yの配列長で決定
 			for (let k = 0; k < tmpMinPatterns; k++) {
 				const ptnName = `${newKey}_${k + dfPtnNum}`;
-				g_keyObj[`shuffle${ptnName}_0`] = [...Array(g_keyObj[`color${ptnName}`].length)].fill(0);
+				g_keyObj[`shuffle${ptnName}_0`] = [...Array(g_keyObj[`chara${ptnName}`].length)].fill(0);
 				g_keyObj[`shuffle${ptnName}`] = structuredClone(g_keyObj[`shuffle${ptnName}_0`]);
 			}
 		}
