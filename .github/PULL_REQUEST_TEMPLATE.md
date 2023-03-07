@@ -8,7 +8,7 @@
 -->
 
 ## :bookmark: 関連Issue, 変更理由 / Related Issues, Reason for Changes
-<!-- 今回の変更に関連したIssue番号 もしくは GitterコメントやTwitterのリンクを入れてください -->
+<!-- 今回の変更に関連したIssue番号 もしくは GitLab Issues, Twitterのリンクを入れてください -->
 <!-- いずれにも該当しない場合は、変更理由を書いてください -->
 
 ## :camera: スクリーンショット / Screenshot

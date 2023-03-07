@@ -3,9 +3,9 @@
 要望・不具合報告がある場合、以下のいずれかの方法で行うことができます。
 
 - リポジトリをForkして編集した後、Pull Requestを「cwtickle/danoniplus」の「develop」ブランチへ送る。
-- 当リポジトリのIssueもしくは[Gitter](https://gitter.im/danonicw/community)に要望・不具合内容を報告する。  
-※Gitterは「Twitterアカウント」を持っている方でも参加可能です。  
-　Gitter内では、Github同様のmarkdownが使えます。お気軽にどうぞ！
+- 当リポジトリのIssueもしくは[GitLab Issues](https://gitlab.com/cwtickle/danonicw/-/issues)に要望・不具合内容を報告する。  
+※GitLabは「Twitterアカウント」を持っている方でも参加可能です。  
+　GitLab内では、Github同様のmarkdownが使えます。お気軽にどうぞ！
 - 要望・不具合内容をティックル宛([@cw_tickle](https://twitter.com/cw_tickle))へ直接連絡する。
 
 ## [English]
@@ -17,9 +17,9 @@ If you have a request or defect report, you can do it in one of the following wa
 1. Commit your changes (git commit -am 'Added some feature')
 1. Push to the branch (git push origin my-new-feature)
 1. Create new Pull Request to develop branch
-- Report the request / problem contents to [Gitter](https://gitter.im/danonicw/community).  
-※ Gitter can participate even if you have "Twitter account".  
-　 In Gitter, you can use markdown similar to Github. Feel free to help yourself!
+- Report the request / problem contents to [GitLab Issues](https://gitlab.com/cwtickle/danonicw/-/issues).  
+※ GitLab can participate even if you have "Twitter account".  
+　 In GitLab, you can use markdown similar to Github. Feel free to help yourself!
 - Contact the tickle directly ([@cw_tickle](https://twitter.com/cw_tickle)) with the request / problem content.
 
 # コーディングルール 

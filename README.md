@@ -2,7 +2,7 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/9558f21e17a47a4dc987/maintainability)](https://codeclimate.com/github/cwtickle/danoniplus/maintainability)
 [![CodeQL](https://github.com/cwtickle/danoniplus/workflows/CodeQL/badge.svg)](https://github.com/cwtickle/danoniplus/actions?query=workflow%3ACodeQL)
-[![Join the chat at https://gitter.im/danonicw/community](https://badges.gitter.im/danonicw/community.svg)](https://gitter.im/danonicw/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)  
+[![GitLab Community](https://img.shields.io/gitlab/issues/open/cwtickle/danonicw?gitlab_url=https%3A%2F%2Fgitlab.com%2F&label=Community&logo=gitlab)](https://gitlab.com/cwtickle/danonicw/-/issues)  
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cwtickle/danoniplus?sort=semver)](https://github.com/cwtickle/danoniplus/security/policy)
 [![GitHub All Releases](https://img.shields.io/github/downloads/cwtickle/danoniplus/total?color=%23ff3399&label=downloads%20%28recently%29)](https://github.com/cwtickle/danoniplus/releases)
 [![GitHub](https://img.shields.io/github/license/cwtickle/danoniplus)](https://github.com/cwtickle/danoniplus/blob/develop/LICENSE)  
@@ -89,12 +89,12 @@ If you would like to cooperate with the development, please see below. Even if y
 
 開発にご協力いただける方は、下記をご覧ください。GitHubアカウントの無い方でも協力できます！  
 - [How to Contribute / 貢献の仕方](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)   
-- [Gitter for requests and bug reports / 要望・不具合報告(Gitter)](https://gitter.im/danonicw/community)
+- [GitLab community for requests and bug reports / 要望・不具合報告(GitLab Issues)](https://gitlab.com/cwtickle/danonicw/-/issues)
 - [Contributors / コントリビューター](https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTORS.md)
 
 ## Community / コミュニティ
 - [Dancing☆Onigiri Discord server](https://discord.gg/TegbHFY7zg)
-- [Gitter for score reporting / 得点報告(Gitter)](https://gitter.im/danonicw/freeboard)
+- [Gitter for score reporting / 得点報告(Gitter)](https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im)
 - [Twitter #danoni](https://twitter.com/search?q=%23danoni&src=typed_query&f=live)
 
 ## Related Tools Repository / 関連リポジトリ・ツール
