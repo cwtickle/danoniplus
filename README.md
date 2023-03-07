@@ -89,12 +89,12 @@ If you would like to cooperate with the development, please see below. Even if y
 
 開発にご協力いただける方は、下記をご覧ください。GitHubアカウントの無い方でも協力できます！  
 - [How to Contribute / 貢献の仕方](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)   
-- [Gitter for requests and bug reports / 要望・不具合報告(Gitter)](https://gitter.im/danonicw/community)
+- [GitLab community for requests and bug reports / 要望・不具合報告(GitLab Issues)](https://gitlab.com/cwtickle/danonicw/-/issues)
 - [Contributors / コントリビューター](https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTORS.md)
 
 ## Community / コミュニティ
 - [Dancing☆Onigiri Discord server](https://discord.gg/TegbHFY7zg)
-- [Gitter for score reporting / 得点報告(Gitter)](https://gitter.im/danonicw/freeboard)
+- [Gitter for score reporting / 得点報告(Gitter)](https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im)
 - [Twitter #danoni](https://twitter.com/search?q=%23danoni&src=typed_query&f=live)
 
 ## Related Tools Repository / 関連リポジトリ・ツール
