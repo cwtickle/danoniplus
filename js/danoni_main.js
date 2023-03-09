@@ -3502,8 +3502,11 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				let ptnCnt = 0;
 				tmpArray[k].split(`/`).forEach(list => {
 
-					if (g_keyObj[`${_name}${list}_0`] !== undefined) {
+					if (list === ``) {
+						// 空指定の場合は一律同じグループへ割り当て
+						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = [...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(0);
 
+					} else if (g_keyObj[`${_name}${list}_0`] !== undefined) {
 						// 他のキーパターン (例: |shuffle8i=8_0| ) を指定した場合、該当があれば既存パターンからコピー
 						let m = 0;
 						while (g_keyObj[`${_name}${list}_${m}`] !== undefined) {
@@ -3512,10 +3515,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 							ptnCnt++;
 						}
 					} else {
-
 						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
-						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = (list === `` ?
-							[...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(0) : list.split(`,`).map(n => parseInt(n, 10)));
+						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = list.split(`,`).map(n => parseInt(n, 10));
 						ptnCnt++;
 					}
 				});
@@ -3602,11 +3603,11 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		// キーの最小横幅 (minWidthX)
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
-		// 矢印色パターン (colorX_Y)
-		tmpMinPatterns = newKeyTripleParam(newKey, `color`, { errCd: `E_0101` });
-
 		// 読込変数の接頭辞 (charaX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `chara`, toString, { errCd: `E_0102` });
+
+		// 矢印色パターン (colorX_Y)
+		tmpMinPatterns = newKeyTripleParam(newKey, `color`, { errCd: `E_0101` });
 
 		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
 		tmpMinPatterns = newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, { errCd: `E_0103` });
