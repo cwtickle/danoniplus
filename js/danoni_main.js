@@ -3498,21 +3498,27 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
 					continue;
 				}
-				if (g_keyObj[`${_name}${tmpArray[k]}_0`] !== undefined) {
 
-					// 他のキーパターン (例: |shuffle8i=8_0| ) を指定した場合、該当があれば既存パターンからコピー
-					let m = 0;
-					while (g_keyObj[`${_name}${tmpArray[k]}_${m}`] !== undefined) {
-						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = structuredClone(g_keyObj[`${_name}${tmpArray[k]}_${m}`]);
-						m++;
+				let ptnCnt = 0;
+				tmpArray[k].split(`/`).forEach(list => {
+
+					if (g_keyObj[`${_name}${list}_0`] !== undefined) {
+
+						// 他のキーパターン (例: |shuffle8i=8_0| ) を指定した場合、該当があれば既存パターンからコピー
+						let m = 0;
+						while (g_keyObj[`${_name}${list}_${m}`] !== undefined) {
+							g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = structuredClone(g_keyObj[`${_name}${list}_${m}`]);
+							m++;
+							ptnCnt++;
+						}
+					} else {
+
+						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
+						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = (list === `` ?
+							[...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(0) : list.split(`,`).map(n => parseInt(n, 10)));
+						ptnCnt++;
 					}
-				} else {
-
-					// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
-					tmpArray[k].split(`/`).forEach((list, m) =>
-						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = (list === `` ?
-							[...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(0) : list.split(`,`).map(n => parseInt(n, 10))));
-				}
+				});
 				g_keyObj[`${keyheader}_${k + dfPtn}`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}_0`]);
 			}
 
