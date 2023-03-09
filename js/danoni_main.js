@@ -3523,6 +3523,13 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				g_keyObj[`${keyheader}_${k + dfPtn}`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}_0`]);
 			}
 
+		} else if (g_keyObj[`${keyheader}_${dfPtn}_0`] === undefined) {
+			// 特に指定が無い場合はcharaX_Yの配列長で決定
+			for (let k = 0; k < g_keyObj.minPatterns; k++) {
+				const ptnName = `${_key}_${k + dfPtn}`;
+				g_keyObj[`${_name}${ptnName}_0`] = [...Array(g_keyObj[`chara${ptnName}`].length)].fill(0);
+				g_keyObj[`${_name}${ptnName}`] = structuredClone(g_keyObj[`${_name}${ptnName}_0`]);
+			}
 		} else if (errCd !== `` && g_keyObj[`${keyheader}_0`] === undefined) {
 			makeWarningWindow(g_msgInfoObj[errCd].split(`{0}`).join(_key));
 		}
@@ -3583,7 +3590,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 	// 対象キー毎に処理
 	keyExtraList.forEach(newKey => {
-		let tmpMinPatterns = 1;
+		g_keyObj.minPatterns = 1;
 		g_keyObj.dfPtnNum = 0;
 
 		// キーパターンの追記 (appendX)
@@ -3604,16 +3611,16 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
 		// 読込変数の接頭辞 (charaX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `chara`, toString, { errCd: `E_0102` });
+		g_keyObj.minPatterns = newKeyMultiParam(newKey, `chara`, toString, { errCd: `E_0102` });
 
 		// 矢印色パターン (colorX_Y)
-		tmpMinPatterns = newKeyTripleParam(newKey, `color`, { errCd: `E_0101` });
+		newKeyTripleParam(newKey, `color`, { errCd: `E_0101` });
 
 		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, { errCd: `E_0103` });
+		newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, { errCd: `E_0103` });
 
 		// キーコンフィグ (keyCtrlX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `keyCtrl`, toSplitArray, { errCd: `E_0104`, baseCopyFlg: true });
+		newKeyMultiParam(newKey, `keyCtrl`, toSplitArray, { errCd: `E_0104`, baseCopyFlg: true });
 
 		// ステップゾーン位置 (posX_Y)
 		newKeyMultiParam(newKey, `pos`, toFloat);
@@ -3640,7 +3647,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 			}
 		}
 		// posX_Y, divX_Y, divMaxX_Yが未指定の場合はcharaX_Yを元に適用
-		for (let k = 0; k < tmpMinPatterns; k++) {
+		for (let k = 0; k < g_keyObj.minPatterns; k++) {
 			setKeyDfVal(`${newKey}_${k + dfPtnNum}`);
 		}
 
@@ -3661,14 +3668,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 		// シャッフルグループ (shuffleX_Y)
 		newKeyTripleParam(newKey, `shuffle`);
-		if (g_keyObj[`shuffle${newKey}_${dfPtnNum}_0`] === undefined) {
-			// 特に指定が無い場合はcolorX_Yの配列長で決定
-			for (let k = 0; k < tmpMinPatterns; k++) {
-				const ptnName = `${newKey}_${k + dfPtnNum}`;
-				g_keyObj[`shuffle${ptnName}_0`] = [...Array(g_keyObj[`chara${ptnName}`].length)].fill(0);
-				g_keyObj[`shuffle${ptnName}`] = structuredClone(g_keyObj[`shuffle${ptnName}_0`]);
-			}
-		}
 
 		// キーグループ (keyGroupX_Y)
 		newKeyMultiParam(newKey, `keyGroup`, toSplitArrayStr);
