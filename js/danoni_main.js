@@ -10517,7 +10517,7 @@ const resultInit = _ => {
 
 		// Gitterへのリンク
 		createCss2Button(`btnGitter`, g_lblNameObj.b_gitter, _ => true, Object.assign(g_lblPosObj.btnRsGitter, {
-			resetFunc: _ => openLink(`https://gitter.im/danonicw/freeboard`),
+			resetFunc: _ => openLink(`https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im`),
 		}), g_cssObj.button_Default),
 
 		// リトライ
