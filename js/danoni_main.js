@@ -3483,10 +3483,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	 * 新キー用複合パラメータ（特殊）
 	 * @param {string} _key キー数
 	 * @param {string} _name 名前
-	 * @param {object} _obj errCd エラーコード
 	 * @returns 最小パターン数
 	 */
-	const newKeyTripleParam = (_key, _name, { errCd = `` } = {}) => {
+	const newKeyTripleParam = (_key, _name) => {
 		let tmpMinPatterns = 1;
 		const keyheader = _name + _key;
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
@@ -3530,8 +3529,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				g_keyObj[`${_name}${ptnName}_0`] = [...Array(g_keyObj[`chara${ptnName}`].length)].fill(0);
 				g_keyObj[`${_name}${ptnName}`] = structuredClone(g_keyObj[`${_name}${ptnName}_0`]);
 			}
-		} else if (errCd !== `` && g_keyObj[`${keyheader}_0`] === undefined) {
-			makeWarningWindow(g_msgInfoObj[errCd].split(`{0}`).join(_key));
 		}
 		return tmpMinPatterns;
 	};
@@ -3614,7 +3611,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		g_keyObj.minPatterns = newKeyMultiParam(newKey, `chara`, toString, { errCd: `E_0102` });
 
 		// 矢印色パターン (colorX_Y)
-		newKeyTripleParam(newKey, `color`, { errCd: `E_0101` });
+		newKeyTripleParam(newKey, `color`);
 
 		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
 		newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, { errCd: `E_0103` });
