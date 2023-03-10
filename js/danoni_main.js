@@ -3483,17 +3483,14 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	 * 新キー用複合パラメータ（特殊）
 	 * @param {string} _key キー数
 	 * @param {string} _name 名前
-	 * @returns 最小パターン数
 	 */
 	const newKeyTripleParam = (_key, _name) => {
-		let tmpMinPatterns = 1;
 		const keyheader = _name + _key;
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 
 		if (hasVal(_dosObj[keyheader])) {
 			const tmpArray = splitLF2(_dosObj[keyheader]);
-			tmpMinPatterns = tmpArray.length;
-			for (let k = 0; k < tmpMinPatterns; k++) {
+			for (let k = 0; k < tmpArray.length; k++) {
 				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
 					continue;
 				}
@@ -3530,7 +3527,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				g_keyObj[`${_name}${ptnName}`] = structuredClone(g_keyObj[`${_name}${ptnName}_0`]);
 			}
 		}
-		return tmpMinPatterns;
 	};
 
 	/**
