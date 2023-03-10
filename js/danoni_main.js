@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/03/04
+ * Revised : 2023/03/10
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 30.3.1`;
-const g_revisedDate = `2023/03/04`;
+const g_version = `Ver 30.4.0`;
+const g_revisedDate = `2023/03/10`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3483,43 +3483,50 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	 * 新キー用複合パラメータ（特殊）
 	 * @param {string} _key キー数
 	 * @param {string} _name 名前
-	 * @param {object} _obj errCd エラーコード
-	 * @returns 最小パターン数
 	 */
-	const newKeyTripleParam = (_key, _name, { errCd = `` } = {}) => {
-		let tmpMinPatterns = 1;
+	const newKeyTripleParam = (_key, _name) => {
 		const keyheader = _name + _key;
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 
 		if (hasVal(_dosObj[keyheader])) {
 			const tmpArray = splitLF2(_dosObj[keyheader]);
-			tmpMinPatterns = tmpArray.length;
-			for (let k = 0; k < tmpMinPatterns; k++) {
+			for (let k = 0; k < tmpArray.length; k++) {
 				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
 					continue;
 				}
-				if (g_keyObj[`${_name}${tmpArray[k]}_0`] !== undefined) {
 
-					// 他のキーパターン (例: |shuffle8i=8_0| ) を指定した場合、該当があれば既存パターンからコピー
-					let m = 0;
-					while (g_keyObj[`${_name}${tmpArray[k]}_${m}`] !== undefined) {
-						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = structuredClone(g_keyObj[`${_name}${tmpArray[k]}_${m}`]);
-						m++;
+				let ptnCnt = 0;
+				tmpArray[k].split(`/`).forEach(list => {
+
+					if (list === ``) {
+						// 空指定の場合は一律同じグループへ割り当て
+						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = [...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(0);
+
+					} else if (g_keyObj[`${_name}${list}_0`] !== undefined) {
+						// 他のキーパターン (例: |shuffle8i=8_0| ) を指定した場合、該当があれば既存パターンからコピー
+						let m = 0;
+						while (g_keyObj[`${_name}${list}_${m}`] !== undefined) {
+							g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = structuredClone(g_keyObj[`${_name}${list}_${m}`]);
+							m++;
+							ptnCnt++;
+						}
+					} else {
+						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
+						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = list.split(`,`).map(n => parseInt(n, 10));
+						ptnCnt++;
 					}
-				} else {
-
-					// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
-					tmpArray[k].split(`/`).forEach((list, m) =>
-						g_keyObj[`${keyheader}_${k + dfPtn}_${m}`] = (list === `` ?
-							[...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(0) : list.split(`,`).map(n => parseInt(n, 10))));
-				}
+				});
 				g_keyObj[`${keyheader}_${k + dfPtn}`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}_0`]);
 			}
 
-		} else if (errCd !== `` && g_keyObj[`${keyheader}_0`] === undefined) {
-			makeWarningWindow(g_msgInfoObj[errCd].split(`{0}`).join(_key));
+		} else if (g_keyObj[`${keyheader}_${dfPtn}_0`] === undefined) {
+			// 特に指定が無い場合はcharaX_Yの配列長で決定
+			for (let k = 0; k < g_keyObj.minPatterns; k++) {
+				const ptnName = `${_key}_${k + dfPtn}`;
+				g_keyObj[`${_name}${ptnName}_0`] = [...Array(g_keyObj[`chara${ptnName}`].length)].fill(0);
+				g_keyObj[`${_name}${ptnName}`] = structuredClone(g_keyObj[`${_name}${ptnName}_0`]);
+			}
 		}
-		return tmpMinPatterns;
 	};
 
 	/**
@@ -3576,7 +3583,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 	// 対象キー毎に処理
 	keyExtraList.forEach(newKey => {
-		let tmpMinPatterns = 1;
+		g_keyObj.minPatterns = 1;
 		g_keyObj.dfPtnNum = 0;
 
 		// キーパターンの追記 (appendX)
@@ -3596,17 +3603,17 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		// キーの最小横幅 (minWidthX)
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
-		// 矢印色パターン (colorX_Y)
-		tmpMinPatterns = newKeyTripleParam(newKey, `color`, { errCd: `E_0101` });
-
 		// 読込変数の接頭辞 (charaX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `chara`, toString, { errCd: `E_0102` });
+		g_keyObj.minPatterns = newKeyMultiParam(newKey, `chara`, toString, { errCd: `E_0102` });
+
+		// 矢印色パターン (colorX_Y)
+		newKeyTripleParam(newKey, `color`);
 
 		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, { errCd: `E_0103` });
+		newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, { errCd: `E_0103` });
 
 		// キーコンフィグ (keyCtrlX_Y)
-		tmpMinPatterns = newKeyMultiParam(newKey, `keyCtrl`, toSplitArray, { errCd: `E_0104`, baseCopyFlg: true });
+		newKeyMultiParam(newKey, `keyCtrl`, toSplitArray, { errCd: `E_0104`, baseCopyFlg: true });
 
 		// ステップゾーン位置 (posX_Y)
 		newKeyMultiParam(newKey, `pos`, toFloat);
@@ -3633,7 +3640,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 			}
 		}
 		// posX_Y, divX_Y, divMaxX_Yが未指定の場合はcharaX_Yを元に適用
-		for (let k = 0; k < tmpMinPatterns; k++) {
+		for (let k = 0; k < g_keyObj.minPatterns; k++) {
 			setKeyDfVal(`${newKey}_${k + dfPtnNum}`);
 		}
 
@@ -3654,14 +3661,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 
 		// シャッフルグループ (shuffleX_Y)
 		newKeyTripleParam(newKey, `shuffle`);
-		if (g_keyObj[`shuffle${newKey}_${dfPtnNum}_0`] === undefined) {
-			// 特に指定が無い場合はcolorX_Yの配列長で決定
-			for (let k = 0; k < tmpMinPatterns; k++) {
-				const ptnName = `${newKey}_${k + dfPtnNum}`;
-				g_keyObj[`shuffle${ptnName}_0`] = [...Array(g_keyObj[`chara${ptnName}`].length)].fill(0);
-				g_keyObj[`shuffle${ptnName}`] = structuredClone(g_keyObj[`shuffle${ptnName}_0`]);
-			}
-		}
 
 		// キーグループ (keyGroupX_Y)
 		newKeyMultiParam(newKey, `keyGroup`, toSplitArrayStr);
@@ -10518,7 +10517,7 @@ const resultInit = _ => {
 
 		// Gitterへのリンク
 		createCss2Button(`btnGitter`, g_lblNameObj.b_gitter, _ => true, Object.assign(g_lblPosObj.btnRsGitter, {
-			resetFunc: _ => openLink(`https://gitter.im/danonicw/freeboard`),
+			resetFunc: _ => openLink(`https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im`),
 		}), g_cssObj.button_Default),
 
 		// リトライ
