@@ -6284,28 +6284,38 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {boolean} _transKeyUse 
 	 * @returns 
 	 */
-	const searchPattern = (_tempPtn, _sign, _transKeyUse = false) => {
+	const searchPattern = (_tempPtn, _sign, _transKeyUse = false, _skipFlg = false) => {
 		let nextPtn = _tempPtn + _sign;
+		const initialPtn = hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_-1`]) ? -1 : 0;
 
 		const searchStart = _ => {
-			nextPtn = 0;
-			while (hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${nextPtn}`])) {
-				nextPtn -= _sign;
+			if (!hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${nextPtn}`])) {
+				nextPtn = 0;
+				while (hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${nextPtn}`])) {
+					nextPtn -= _sign;
+				}
+				nextPtn += _sign;
 			}
-			nextPtn += _sign;
 		};
 
-		if (hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${nextPtn}`])) {
-		} else {
+		const searchNextGroup = _ => {
+			while (nextPtn !== initialPtn &&
+				g_keyObj[`transKey${g_keyObj.currentKey}_${_tempPtn}`] === g_keyObj[`transKey${g_keyObj.currentKey}_${nextPtn}`] &&
+				hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${nextPtn}`])) {
+				nextPtn += _sign;
+			}
+		};
+
+		searchStart();
+		if (_skipFlg) {
+			searchNextGroup();
 			searchStart();
 		}
 		if (!_transKeyUse) {
 			while (hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${nextPtn}`])) {
 				nextPtn += _sign;
 			}
-			if (!hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${nextPtn}`])) {
-				searchStart();
-			}
+			searchStart();
 		}
 		return nextPtn;
 	};
@@ -6313,11 +6323,12 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	/**
 	 * キーパターン変更時処理
 	 * @param {number} _sign 
+	 * @param {boolean} _skipFlg
 	 */
-	const changePattern = (_sign = 1) => {
+	const changePattern = (_sign = 1, _skipFlg = false) => {
 
 		// キーパターンの変更
-		g_keyObj.currentPtn = searchPattern(g_keyObj.currentPtn, _sign, g_headerObj.transKeyUse);
+		g_keyObj.currentPtn = searchPattern(g_keyObj.currentPtn, _sign, g_headerObj.transKeyUse, _skipFlg);
 
 		// カラーグループ、シャッフルグループの再設定
 		g_keycons.groups.forEach(type => resetGroupList(type, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`));
@@ -6367,13 +6378,23 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			'Self' : g_keyObj.currentPtn + 1}${lblTransKey}`, g_lblPosObj.lblPattern),
 
 		// パターン変更ボタン描画(右回り)
-		createCss2Button(`btnPtnChangeR`, `>>`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeR, {
+		createCss2Button(`btnPtnChangeR`, `>`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeR, {
 			resetFunc: _ => changePattern(),
+		}), g_cssObj.button_Start),
+
+		// パターン変更ボタン描画(左回り)
+		createCss2Button(`btnPtnChangeL`, `<`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeL, {
+			resetFunc: _ => changePattern(-1),
+		}), g_cssObj.button_Start),
+
+		// パターン変更ボタン描画(右回り)
+		createCss2Button(`btnPtnChangeRR`, `|>`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeRR, {
+			resetFunc: _ => changePattern(1, true),
 		}), g_cssObj.button_Setting),
 
 		// パターン変更ボタン描画(左回り)
-		createCss2Button(`btnPtnChangeL`, `<<`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeL, {
-			resetFunc: _ => changePattern(-1),
+		createCss2Button(`btnPtnChangeLL`, `<|`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeLL, {
+			resetFunc: _ => changePattern(-1, true),
 		}), g_cssObj.button_Setting),
 
 		// キーコンフィグリセットボタン描画
