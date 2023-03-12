@@ -251,11 +251,19 @@ const updateWindowSiz = _ => {
         },
         btnPtnChangeR: {
             x: g_sWidth / 2, y: g_sHeight - 100,
-            w: g_sWidth / 6, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+            w: g_sWidth / 9, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
         },
         btnPtnChangeL: {
+            x: g_sWidth / 18, y: g_sHeight - 100,
+            w: g_sWidth / 9, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+        },
+        btnPtnChangeRR: {
+            x: g_sWidth * 11 / 18, y: g_sHeight - 100,
+            w: g_sWidth / 18, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+        },
+        btnPtnChangeLL: {
             x: 0, y: g_sHeight - 100,
-            w: g_sWidth / 6, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+            w: g_sWidth / 18, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
         },
         btnKcReset: {
             x: 0, y: g_sHeight - 75,
