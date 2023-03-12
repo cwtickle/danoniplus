@@ -3445,6 +3445,13 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	const toSplitArray = _str => _str.split(`/`).map(n => toNumber(n));
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
+	/**
+	 * キーパターン（相対パターン）をキーパターン（実際のパターン番号）に変換
+	 * 例) 12_(0) -> 12_4
+	 * それ以外の文字列が来た場合は、そのままの値を戻す
+	 * @param {string} _str 
+	 * @returns 
+	 */
 	const getKeyPtnName = _str => {
 		const regex = /\((\d+)\)/;
 		const checkStr = _str.match(regex);
