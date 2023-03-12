@@ -3446,6 +3446,22 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
 	/**
+	 * キーパターン（相対パターン）をキーパターン（実際のパターン番号）に変換
+	 * 例) 12_(0) -> 12_4
+	 * それ以外の文字列が来た場合は、そのままの値を戻す
+	 * @param {string} _str 
+	 * @returns 
+	 */
+	const getKeyPtnName = _str => {
+		const regex = /\((\d+)\)/;
+		const checkStr = _str.match(regex);
+		if (checkStr !== null) {
+			return _str.replace(regex, (match, p) => `${parseInt(p, 10) + setIntVal(g_keyObj.dfPtnNum)}`);
+		}
+		return _str;
+	};
+
+	/**
 	 * 新キー用複合パラメータ
 	 * @param {string} _key キー数
 	 * @param {string} _name 名前
@@ -3465,8 +3481,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
 					continue;
 				}
-				g_keyObj[`${keyheader}_${k + dfPtn}`] = g_keyObj[`${_name}${tmpArray[k]}`] !== undefined ?
-					copyArray2d(g_keyObj[`${_name}${tmpArray[k]}`]) : tmpArray[k].split(`,`).map(n => _convFunc(n));
+				const keyPtn = getKeyPtnName(tmpArray[k]);
+				g_keyObj[`${keyheader}_${k + dfPtn}`] = g_keyObj[`${_name}${keyPtn}`] !== undefined ?
+					copyArray2d(g_keyObj[`${_name}${keyPtn}`]) : tmpArray[k].split(`,`).map(n => _convFunc(n));
 				if (baseCopyFlg) {
 					g_keyObj[`${keyheader}_${k + dfPtn}d`] = copyArray2d(g_keyObj[`${keyheader}_${k + dfPtn}`]);
 				}
@@ -3498,15 +3515,16 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				let ptnCnt = 0;
 				tmpArray[k].split(`/`).forEach(list => {
 
+					const keyPtn = getKeyPtnName(list);
 					if (list === ``) {
 						// 空指定の場合は一律同じグループへ割り当て
 						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = [...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(0);
 
-					} else if (g_keyObj[`${_name}${list}_0`] !== undefined) {
+					} else if (g_keyObj[`${_name}${keyPtn}_0`] !== undefined) {
 						// 他のキーパターン (例: |shuffle8i=8_0| ) を指定した場合、該当があれば既存パターンからコピー
 						let m = 0;
-						while (g_keyObj[`${_name}${list}_${m}`] !== undefined) {
-							g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = structuredClone(g_keyObj[`${_name}${list}_${m}`]);
+						while (g_keyObj[`${_name}${keyPtn}_${m}`] !== undefined) {
+							g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = structuredClone(g_keyObj[`${_name}${keyPtn}_${m}`]);
 							m++;
 							ptnCnt++;
 						}
@@ -3566,17 +3584,23 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 					continue;
 				}
 				g_keyObj[pairName] = {}
-				if (g_keyObj[`${_pairName}${tmpParams[k]}`] !== undefined) {
-					Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${tmpParams[k]}`]);
-				} else {
-					if (_defaultName !== ``) {
-						g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
-					}
-					tmpParams[k].split(`/`).forEach(pairs => {
+
+				// デフォルト項目がある場合は先に定義
+				if (_defaultName !== ``) {
+					g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
+				}
+				tmpParams[k].split(`/`).forEach(pairs => {
+					const keyPtn = getKeyPtnName(pairs);
+					if (pairs === ``) {
+					} else if (g_keyObj[`${_pairName}${keyPtn}`] !== undefined) {
+						// 他のキーパターン指定時、該当があればプロパティを全コピー
+						Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${keyPtn}`]);
+					} else {
+						// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-1,-1,-1,1,1/Split::1,1,1,1,-1,-1,-1,-1|）から取り込み
 						const tmpParamPair = pairs.split(`::`);
 						g_keyObj[pairName][tmpParamPair[0]] = tmpParamPair[1].split(`,`).map(n => parseInt(n, 10));
-					});
-				}
+					}
+				});
 			}
 		}
 	};
