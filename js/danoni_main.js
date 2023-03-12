@@ -388,6 +388,19 @@ const copyArray2d = _array2d => structuredClone(_array2d);
 const sumData = _array => _array.reduce((p, x) => p + x);
 
 /**
+ * 最小配列長の配列を作成
+ * @param {array} _array 
+ * @param {number} _minLength 
+ * @param {number} _defaultVal 
+ * @returns 
+ */
+const makeBaseArray = (_array, _minLength, _defaultVal) => {
+	const baseArray = [...Array(_minLength)].fill(_defaultVal);
+	_array.forEach((val, j) => baseArray[j] = val);
+	return baseArray;
+};
+
+/**
  * 部分一致検索（リストのいずれかに合致、大小文字問わず）
  * @param {string} _str 検索文字
  * @param {array} _list 検索リスト (英字は小文字にする必要あり)
@@ -3442,7 +3455,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 	const toNumber = _num => parseInt(_num, 10);
 	const toFloat = _num => parseFloat(_num);
 	const toStringOrNumber = _str => isNaN(Number(_str)) ? _str : toNumber(_str);
-	const toSplitArray = _str => _str.split(`/`).map(n => toNumber(n));
+	const toKeyCtrlArray = _str => makeBaseArray(_str.split(`/`).map(n => toNumber(n)), g_keyObj.minKeyCtrlNum, 0);
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
 	/**
@@ -3637,7 +3650,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, { errCd: `E_0103` });
 
 		// キーコンフィグ (keyCtrlX_Y)
-		newKeyMultiParam(newKey, `keyCtrl`, toSplitArray, { errCd: `E_0104`, baseCopyFlg: true });
+		newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, { errCd: `E_0104`, baseCopyFlg: true });
 
 		// ステップゾーン位置 (posX_Y)
 		newKeyMultiParam(newKey, `pos`, toFloat);
