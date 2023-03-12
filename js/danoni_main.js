@@ -3584,18 +3584,22 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 					continue;
 				}
 				g_keyObj[pairName] = {}
-				const keyPtn = getKeyPtnName(tmpParams[k]);
-				if (g_keyObj[`${_pairName}${keyPtn}`] !== undefined) {
-					Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${keyPtn}`]);
-				} else {
-					if (_defaultName !== ``) {
-						g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
-					}
-					tmpParams[k].split(`/`).forEach(pairs => {
+
+				// デフォルト項目がある場合は先に定義
+				if (_defaultName !== ``) {
+					g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
+				}
+				tmpParams[k].split(`/`).forEach(pairs => {
+					const keyPtn = getKeyPtnName(pairs);
+					if (g_keyObj[`${_pairName}${keyPtn}`] !== undefined) {
+						// 他のキーパターン指定時、該当があればプロパティを全コピー
+						Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${keyPtn}`]);
+					} else {
+						// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-1,-1,-1,1,1/Split::1,1,1,1,-1,-1,-1,-1|）から取り込み
 						const tmpParamPair = pairs.split(`::`);
 						g_keyObj[pairName][tmpParamPair[0]] = tmpParamPair[1].split(`,`).map(n => parseInt(n, 10));
-					});
-				}
+					}
+				});
 			}
 		}
 	};
