@@ -3591,7 +3591,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				}
 				tmpParams[k].split(`/`).forEach(pairs => {
 					const keyPtn = getKeyPtnName(pairs);
-					if (g_keyObj[`${_pairName}${keyPtn}`] !== undefined) {
+					if (pairs === ``) {
+					} else if (g_keyObj[`${_pairName}${keyPtn}`] !== undefined) {
 						// 他のキーパターン指定時、該当があればプロパティを全コピー
 						Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${keyPtn}`]);
 					} else {
