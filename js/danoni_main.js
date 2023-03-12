@@ -6380,19 +6380,19 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// パターン変更ボタン描画(右回り)
 		createCss2Button(`btnPtnChangeR`, `>`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeR, {
 			resetFunc: _ => changePattern(),
-		}), g_cssObj.button_Start),
+		}), g_cssObj.button_Mini),
 
 		// パターン変更ボタン描画(左回り)
 		createCss2Button(`btnPtnChangeL`, `<`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeL, {
 			resetFunc: _ => changePattern(-1),
-		}), g_cssObj.button_Start),
+		}), g_cssObj.button_Mini),
 
-		// パターン変更ボタン描画(右回り)
+		// パターン変更ボタン描画(右回り/別キーモード間スキップ)
 		createCss2Button(`btnPtnChangeRR`, `|>`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeRR, {
 			resetFunc: _ => changePattern(1, true),
 		}), g_cssObj.button_Setting),
 
-		// パターン変更ボタン描画(左回り)
+		// パターン変更ボタン描画(左回り/別キーモード間スキップ)
 		createCss2Button(`btnPtnChangeLL`, `<|`, _ => true, Object.assign(g_lblPosObj.btnPtnChangeLL, {
 			resetFunc: _ => changePattern(-1, true),
 		}), g_cssObj.button_Setting),
