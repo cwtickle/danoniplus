@@ -6094,8 +6094,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		cursor.style.left = `${nextLeft}px`;
 		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 57;
 		cursor.style.top = `${baseY + C_KYC_REPHEIGHT * g_currentk}px`;
-		if (g_currentk === 0 && g_kcType === `Replaced`) {
-			g_kcType = C_FLG_ALL;
+		if (g_kcType !== C_FLG_ALL) {
+			g_kcType = (g_currentk === 0 ? `Main` : `Replaced`);
 			lnkKcType.textContent = getStgDetailName(g_kcType);
 		}
 
@@ -6112,9 +6112,23 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 		g_currentj = g_keycons.cursorNumList[_nextj];
 		g_currentk = 0;
-		if (g_kcType === `Replaced` && (g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][1] !== undefined)) {
+		if (g_kcType === `Replaced`) {
 			g_currentk = 1;
+
+			// 代替キー設定の場合は次の代替キーが見つかるまで移動
+			while (g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][1] === undefined) {
+				g_keycons.cursorNum = (g_keycons.cursorNum + 1) % g_keycons.cursorNumList.length;
+				g_currentj = g_keycons.cursorNumList[g_keycons.cursorNum];
+
+				// 一周して対象が無い場合は代替キーが無いため処理を抜ける（無限ループ対策）
+				if (g_keycons.cursorNum === _nextj) {
+					g_kcType = `Main`;
+					g_currentk = 0;
+					break;
+				}
+			}
 		}
+
 		setKeyConfigCursor();
 		keyconSprite.scrollLeft = - maxLeftX;
 	};
