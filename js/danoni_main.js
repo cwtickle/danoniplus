@@ -9835,8 +9835,8 @@ const changeHitFrz = (_j, _k, _name) => {
 	const delFrzMotionLength = sumData(g_workObj.motionOnFrames.slice(0, currentFrz.boostCnt + 1));
 
 	currentFrz.frzBarLength -= (delFrzLength + delFrzMotionLength) * currentFrz.dir;
-	currentFrz.barY -= (delFrzLength + delFrzMotionLength) * currentFrz.dividePos;
-	currentFrz.btmY -= delFrzLength + delFrzMotionLength;
+	currentFrz.barY -= (delFrzLength + delFrzMotionLength) * currentFrz.dividePos + g_stateObj.judgAdj * g_workObj.scrollDir[_j];
+	currentFrz.btmY -= delFrzLength + delFrzMotionLength + g_stateObj.judgAdj * g_workObj.scrollDir[_j];
 	currentFrz.y += delFrzLength;
 	currentFrz.isMoving = false;
 
@@ -9910,7 +9910,7 @@ const judgeArrow = _j => {
 			displayDiff(_difFrame);
 
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
-			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
+			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_stateObj.judgAdj * g_workObj.scrollDir[_j]}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
 			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
