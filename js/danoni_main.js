@@ -4237,8 +4237,9 @@ const createOptionWindow = _sprite => {
 		[`autoPlay`, 6.5, 0, 0, 0],
 		[`gauge`, 7.5, 0, 0, 0],
 		[`adjustment`, 10, 0, 0, 0],
-		[`fadein`, 11, 0, 0, 0],
-		[`volume`, 12, 0, 0, 0],
+		[`judgAdj`, 11, 0, 0, 0],
+		[`fadein`, 12, 0, 0, 0],
+		[`volume`, 13, 0, 0, 0],
 	];
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
@@ -5013,16 +5014,24 @@ const createOptionWindow = _sprite => {
 	}
 
 	// ---------------------------------------------------
-	// タイミング調整 (Adjustment)
+	// タイミング調整 (Adjustment - Music)
 	// 縦位置: 10  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
 		skipTerms: g_settings.adjustmentTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
-		unitName: g_lblNameObj.frame,
+		unitName: g_lblNameObj.frame, adjY: -20,
+	});
+
+	// ---------------------------------------------------
+	// タイミング調整 (Adjustment - Judgment)
+	// 縦位置: 11
+	createGeneralSetting(spriteList.judgAdj, `judgAdj`, {
+		skipTerms: g_settings.judgAdjTerms, scLabel: g_lblNameObj.sc_judgAdj, roundNum: 5,
+		unitName: g_lblNameObj.pixel,
 	});
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
-	// 縦位置: 11 スライダーあり
+	// 縦位置: 12 スライダーあり
 	spriteList.fadein.appendChild(createLblSetting(`Fadein`));
 
 	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}${g_lblNameObj.percent}`,
@@ -5053,7 +5062,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
-	// 縦位置: 12
+	// 縦位置: 13
 	createGeneralSetting(spriteList.volume, `volume`, { unitName: g_lblNameObj.percent });
 
 	/**
@@ -5259,12 +5268,12 @@ const createOptionWindow = _sprite => {
  */
 const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 	skipTerms = [...Array(3)].fill(1), hiddenBtn = false, addRFunc = _ => { }, addLFunc = _ => { },
-	settingLabel = _settingName, displayName = `option`, scLabel = ``, roundNum = 0 } = {}) => {
+	settingLabel = _settingName, displayName = `option`, scLabel = ``, roundNum = 0, adjY = 0 } = {}) => {
 
 	const settingUpper = toCapitalize(_settingName);
 	const linkId = `lnk${settingUpper}`;
 	const initName = `${getStgDetailName(g_stateObj[_settingName])}${unitName}`;
-	_obj.appendChild(createLblSetting(settingUpper, 0, toCapitalize(settingLabel)));
+	_obj.appendChild(createLblSetting(settingUpper, adjY, toCapitalize(settingLabel)));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
 
@@ -8522,8 +8531,8 @@ const mainInit = _ => {
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
 	const arrowSprite = [
-		createEmptySprite(mainSprite, `arrowSprite0`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-		createEmptySprite(mainSprite, `arrowSprite1`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+		createEmptySprite(mainSprite, `arrowSprite0`, { y: g_stateObj.judgAdj, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+		createEmptySprite(mainSprite, `arrowSprite1`, { y: -g_stateObj.judgAdj, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す

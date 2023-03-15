@@ -32,7 +32,7 @@ const C_LEN_SETLBL_LEFT = 160;
 const C_LEN_SETLBL_WIDTH = 210;
 const C_LEN_DIFSELECTOR_WIDTH = 250;
 const C_LEN_DIFCOVER_WIDTH = 110;
-const C_LEN_SETLBL_HEIGHT = 23;
+const C_LEN_SETLBL_HEIGHT = 21.5;
 const C_SIZ_SETLBL = 17;
 const C_LEN_SETDIFLBL_HEIGHT = 25;
 const C_SIZ_SETDIFLBL = 17;
@@ -559,6 +559,7 @@ const g_settingBtnObj = {
 };
 
 const C_MAX_ADJUSTMENT = 30;
+const C_MAX_STEP_ADJUSTMENT = 30;
 const C_MAX_SPEED = 10;
 const C_MIN_SPEED = 1;
 
@@ -669,6 +670,7 @@ const g_stateObj = {
     autoAll: C_FLG_OFF,
     gauge: `Normal`,
     adjustment: 0,
+    judgAdj: 0,
     fadein: 0,
     volume: 100,
     lifeRcv: 2,
@@ -776,6 +778,10 @@ const g_settings = {
     adjustments: [...Array(C_MAX_ADJUSTMENT * 20 + 1).keys()].map(i => (i - C_MAX_ADJUSTMENT * 10) / 10),
     adjustmentNum: C_MAX_ADJUSTMENT * 10,
     adjustmentTerms: [50, 10, 5],
+
+    judgAdjs: [...Array(C_MAX_ADJUSTMENT * 20 + 1).keys()].map(i => (i - C_MAX_ADJUSTMENT * 10) / 10),
+    judgAdjNum: C_MAX_ADJUSTMENT * 10,
+    judgAdjTerms: [10, 5],
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
 
@@ -2421,13 +2427,15 @@ const g_lblNameObj = {
     Shuffle: `Shuffle`,
     AutoPlay: `AutoPlay`,
     Gauge: `Gauge`,
-    Adjustment: `Adjustment`,
+    Adjustment: `Adjustment<br><small>Music)</small>`,
+    JudgAdj: `<small>Judgment)</small>`,
     Fadein: `Fadein`,
     Volume: `Volume`,
 
     multi: `x`,
     frame: `f`,
     percent: `%`,
+    pixel: `px`,
     filterLock: `Lock`,
 
     sc_speed: `←→`,
