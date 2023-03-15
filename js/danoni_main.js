@@ -1879,10 +1879,10 @@ const initialControl = async () => {
 		keysConvert(dosConvert(_data));
 		g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
 	};
+	g_presetObj.keysDataLib.forEach(list => importKeysData(list));
 	if (g_presetObj.keysData !== undefined) {
 		importKeysData(g_presetObj.keysData);
 	}
-	g_presetObj.keysDataLib.forEach(list => importKeysData(list));
 	g_headerObj.keyExtraList = keysConvert(g_rootObj, {
 		keyExtraList: (g_rootObj.keyExtraList !== undefined ?
 			makeDedupliArray(g_rootObj.keyExtraList.split(`,`), g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
