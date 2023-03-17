@@ -86,7 +86,7 @@ const g_windowObj = {
     difList: { x: 165, y: 65, w: 280, h: 255, overflow: `auto` },
     difCover: { x: 25, y: 65, w: 140, h: 255, overflow: `auto`, opacity: 0.95 },
 
-    scoreDetail: { x: 20, y: 90, w: 420, h: 230, visibility: `hidden` },
+    scoreDetail: { x: 20, y: 85, w: 420, h: 236, visibility: `hidden` },
     detailObj: { w: 420, h: 230, visibility: `hidden` },
 
     colorPickSprite: { x: 0, y: 90, w: 50, h: 280 },
