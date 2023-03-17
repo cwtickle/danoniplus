@@ -115,7 +115,9 @@ let g_finishFlg = true;
 /** 共通オブジェクト */
 const g_loadObj = {};
 const g_rootObj = {};
-const g_presetObj = {};
+const g_presetObj = {
+	keysDataLib: [],
+};
 let g_headerObj = {};
 let g_scoreObj = {};
 let g_attrObj = {};
@@ -1873,9 +1875,13 @@ const initialControl = async () => {
 
 	// 譜面ヘッダー、特殊キー情報の読込
 	Object.assign(g_headerObj, headerConvert(g_rootObj));
-	if (g_presetObj.keysData !== undefined) {
-		keysConvert(dosConvert(g_presetObj.keysData));
+	const importKeysData = _data => {
+		keysConvert(dosConvert(_data));
 		g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
+	};
+	g_presetObj.keysDataLib.forEach(list => importKeysData(list));
+	if (g_presetObj.keysData !== undefined) {
+		importKeysData(g_presetObj.keysData);
 	}
 	g_headerObj.keyExtraList = keysConvert(g_rootObj, {
 		keyExtraList: (g_rootObj.keyExtraList !== undefined ?
