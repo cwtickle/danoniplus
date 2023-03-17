@@ -781,7 +781,7 @@ const g_settings = {
 
     judgAdjs: [...Array(C_MAX_ADJUSTMENT * 20 + 1).keys()].map(i => (i - C_MAX_ADJUSTMENT * 10) / 10),
     judgAdjNum: C_MAX_ADJUSTMENT * 10,
-    judgAdjTerms: [10, 5],
+    judgAdjTerms: [50, 10],
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
 
@@ -1227,6 +1227,11 @@ const g_shortcutObj = {
         ShiftLeft_NumpadSubtract: { id: `lnkAdjustmentL` },
         AltLeft_NumpadSubtract: { id: `lnkAdjustmentLLL` },
         NumpadSubtract: { id: `lnkAdjustmentLL` },
+
+        ShiftLeft_KeyB: { id: `lnkJudgAdjR` },
+        KeyB: { id: `lnkJudgAdjRR` },
+        ShiftLeft_KeyT: { id: `lnkJudgAdjL` },
+        KeyT: { id: `lnkJudgAdjLL` },
 
         ShiftLeft_KeyV: { id: `lnkVolumeL` },
         KeyV: { id: `lnkVolumeR` },
@@ -2427,8 +2432,8 @@ const g_lblNameObj = {
     Shuffle: `Shuffle`,
     AutoPlay: `AutoPlay`,
     Gauge: `Gauge`,
-    Adjustment: `Adjustment<br><small>Music)</small>`,
-    JudgAdj: `<small>Judgment)</small>`,
+    Adjustment: `Adjustment<br><small>[ Music ]</small>`,
+    JudgAdj: `<small>[ Judgment ]</small>`,
     Fadein: `Fadein`,
     Volume: `Volume`,
 
@@ -2441,6 +2446,7 @@ const g_lblNameObj = {
     sc_speed: `←→`,
     sc_scroll: `R/<br>↑↓`,
     sc_adjustment: `- +`,
+    sc_judgAdj: `T B`,
     sc_keyConfigPlay: g_isMac ? `Del+Enter` : `BS+Enter`,
 
     g_start: `Start`,
