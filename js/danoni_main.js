@@ -2017,8 +2017,9 @@ const loadLocalStorage = _ => {
 	if (checkStorage) {
 		g_localStorage = JSON.parse(checkStorage);
 
-		// Adjustment, Volume, Appearance, Opacity初期値設定
+		// Adjustment(Music, Judgment), Volume, Appearance, Opacity初期値設定
 		checkLocalParam(`adjustment`, C_TYP_FLOAT, C_MAX_ADJUSTMENT);
+		checkLocalParam(`judgAdj`, C_TYP_FLOAT, C_MAX_ADJUSTMENT);
 		checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
 		checkLocalParam(`appearance`);
 		checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
@@ -2038,6 +2039,7 @@ const loadLocalStorage = _ => {
 	} else {
 		g_localStorage = {
 			adjustment: 0,
+			judgAdj: 0,
 			volume: 100,
 			highscores: {},
 		};
@@ -8309,6 +8311,7 @@ const getArrowSettings = _ => {
 
 		// ローカルストレージへAdjustment, Volume, Display関連設定を保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
+		g_localStorage.judgAdj = g_stateObj.judgAdj;
 		g_localStorage.volume = g_stateObj.volume;
 		g_localStorage.colorType = g_colorType;
 
