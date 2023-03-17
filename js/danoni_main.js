@@ -9824,6 +9824,7 @@ const changeHitFrz = (_j, _k, _name) => {
 
 	const styfrzBar = $id(`${_name}Bar${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
+	const styfrzTopShadow = $id(`${_name}TopShadow${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
 	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 
@@ -9834,9 +9835,12 @@ const changeHitFrz = (_j, _k, _name) => {
 	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
 	const delFrzMotionLength = sumData(g_workObj.motionOnFrames.slice(0, currentFrz.boostCnt + 1));
 
+	// 判定位置調整分の補正
+	const judgPos = g_stateObj.judgAdj * g_workObj.scrollDir[_j];
+
 	currentFrz.frzBarLength -= (delFrzLength + delFrzMotionLength) * currentFrz.dir;
-	currentFrz.barY -= (delFrzLength + delFrzMotionLength) * currentFrz.dividePos + g_stateObj.judgAdj * g_workObj.scrollDir[_j];
-	currentFrz.btmY -= delFrzLength + delFrzMotionLength + g_stateObj.judgAdj * g_workObj.scrollDir[_j];
+	currentFrz.barY -= (delFrzLength + delFrzMotionLength) * currentFrz.dividePos + judgPos;
+	currentFrz.btmY -= delFrzLength + delFrzMotionLength + judgPos;
 	currentFrz.y += delFrzLength;
 	currentFrz.isMoving = false;
 
@@ -9845,6 +9849,7 @@ const changeHitFrz = (_j, _k, _name) => {
 	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
 	styfrzBtm.top = `${currentFrz.btmY}px`;
 	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
+	styfrzTopShadow.opacity = 0;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
 		if (g_headerObj.frzShadowColor[colorPos][1] !== ``) {
@@ -9869,9 +9874,15 @@ const changeFailedFrz = (_j, _k) => {
 	$id(`frzHit${_j}`).opacity = 0;
 	$id(`frzTop${frzNo}`).display = C_DIS_INHERIT;
 	$id(`frzTop${frzNo}`).background = `#cccccc`;
+	$id(`frzTopShadow${frzNo}`).opacity = 1;
 	$id(`frzBar${frzNo}`).background = `#999999`;
 	$id(`frzBar${frzNo}`).opacity = 1;
 	$id(`frzBtm${frzNo}`).background = `#cccccc`;
+
+	// 判定位置調整分の補正
+	const judgPos = g_stateObj.judgAdj * g_workObj.scrollDir[_j];
+	$id(`frzTop${frzNo}`).top = `${- judgPos}px`;
+	$id(`frzTopShadow${frzNo}`).top = `${- judgPos}px`;
 
 	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
