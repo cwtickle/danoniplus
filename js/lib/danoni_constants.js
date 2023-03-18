@@ -558,8 +558,11 @@ const g_settingBtnObj = {
     }
 };
 
+const g_limitObj = {
+    musicAdj: 30,
+    judgAdj: 50,
+};
 const C_MAX_ADJUSTMENT = 30;
-const C_MAX_STEP_ADJUSTMENT = 30;
 const C_MAX_SPEED = 10;
 const C_MIN_SPEED = 1;
 
@@ -775,13 +778,13 @@ const g_settings = {
     autoPlays: [C_FLG_OFF, C_FLG_ALL],
     autoPlayNum: 0,
 
-    adjustments: [...Array(C_MAX_ADJUSTMENT * 20 + 1).keys()].map(i => (i - C_MAX_ADJUSTMENT * 10) / 10),
-    adjustmentNum: C_MAX_ADJUSTMENT * 10,
+    adjustments: [...Array(g_limitObj.musicAdj * 20 + 1).keys()].map(i => (i - g_limitObj.musicAdj * 10) / 10),
+    adjustmentNum: g_limitObj.musicAdj * 10,
     adjustmentTerms: [50, 10, 5],
 
-    judgAdjs: [...Array(C_MAX_ADJUSTMENT * 20 + 1).keys()].map(i => (i - C_MAX_ADJUSTMENT * 10) / 10),
-    judgAdjNum: C_MAX_ADJUSTMENT * 10,
-    judgAdjTerms: [50, 10],
+    judgAdjs: [...Array(g_limitObj.judgAdj * 4 + 1).keys()].map(i => (i - g_limitObj.judgAdj * 2) / 2),
+    judgAdjNum: g_limitObj.judgAdj * 2,
+    judgAdjTerms: [10, 2],
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
 
