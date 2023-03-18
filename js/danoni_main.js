@@ -8265,6 +8265,7 @@ const getArrowSettings = _ => {
 		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
 
 	g_stateObj.autoAll = (g_stateObj.autoPlay === C_FLG_ALL ? C_FLG_ON : C_FLG_OFF);
+	g_workObj.judgAdj = (g_stateObj.autoAll ? 0 : g_stateObj.judgAdj);
 	changeSetColor();
 
 	for (let j = 0; j < keyNum; j++) {
@@ -8534,8 +8535,8 @@ const mainInit = _ => {
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
 	const arrowSprite = [
-		createEmptySprite(mainSprite, `arrowSprite0`, { y: g_stateObj.judgAdj, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-		createEmptySprite(mainSprite, `arrowSprite1`, { y: -g_stateObj.judgAdj, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+		createEmptySprite(mainSprite, `arrowSprite0`, { y: g_workObj.judgAdj, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+		createEmptySprite(mainSprite, `arrowSprite1`, { y: -g_workObj.judgAdj, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
@@ -9839,7 +9840,7 @@ const changeHitFrz = (_j, _k, _name) => {
 	const delFrzMotionLength = sumData(g_workObj.motionOnFrames.slice(0, currentFrz.boostCnt + 1));
 
 	// 判定位置調整分の補正
-	const judgPos = g_stateObj.judgAdj * g_workObj.scrollDir[_j];
+	const judgPos = g_workObj.judgAdj * g_workObj.scrollDir[_j];
 
 	currentFrz.frzBarLength -= (delFrzLength + delFrzMotionLength) * currentFrz.dir;
 	currentFrz.barY -= (delFrzLength + delFrzMotionLength) * currentFrz.dividePos + judgPos;
@@ -9883,7 +9884,7 @@ const changeFailedFrz = (_j, _k) => {
 	$id(`frzBtm${frzNo}`).background = `#cccccc`;
 
 	// 判定位置調整分の補正
-	const judgPos = g_stateObj.judgAdj * g_workObj.scrollDir[_j];
+	const judgPos = g_workObj.judgAdj * g_workObj.scrollDir[_j];
 	$id(`frzTop${frzNo}`).top = `${- judgPos}px`;
 	$id(`frzTopShadow${frzNo}`).top = `${- judgPos}px`;
 
@@ -9924,7 +9925,7 @@ const judgeArrow = _j => {
 			displayDiff(_difFrame);
 
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
-			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_stateObj.judgAdj * g_workObj.scrollDir[_j]}px`;
+			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_workObj.judgAdj * g_workObj.scrollDir[_j]}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
 			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
