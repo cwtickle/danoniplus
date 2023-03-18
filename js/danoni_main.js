@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/03/12
+ * Revised : 2023/03/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 30.5.0`;
-const g_revisedDate = `2023/03/12`;
+const g_version = `Ver 30.6.0`;
+const g_revisedDate = `2023/03/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -115,7 +115,9 @@ let g_finishFlg = true;
 /** 共通オブジェクト */
 const g_loadObj = {};
 const g_rootObj = {};
-const g_presetObj = {};
+const g_presetObj = {
+	keysDataLib: [],
+};
 let g_headerObj = {};
 let g_scoreObj = {};
 let g_attrObj = {};
@@ -1873,9 +1875,13 @@ const initialControl = async () => {
 
 	// 譜面ヘッダー、特殊キー情報の読込
 	Object.assign(g_headerObj, headerConvert(g_rootObj));
-	if (g_presetObj.keysData !== undefined) {
-		keysConvert(dosConvert(g_presetObj.keysData));
+	const importKeysData = _data => {
+		keysConvert(dosConvert(_data));
 		g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
+	};
+	g_presetObj.keysDataLib.forEach(list => importKeysData(list));
+	if (g_presetObj.keysData !== undefined) {
+		importKeysData(g_presetObj.keysData);
 	}
 	g_headerObj.keyExtraList = keysConvert(g_rootObj, {
 		keyExtraList: (g_rootObj.keyExtraList !== undefined ?
@@ -5905,6 +5911,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				createCss2Button(`keycon${j}_${k}`, g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]], _ => {
 					g_currentj = j;
 					g_currentk = k;
+					g_prevKey = -1;
 					g_keycons.cursorNum = g_keycons.cursorNumList.findIndex(val => val === g_currentj);
 					setKeyConfigCursor();
 				}, {
@@ -6094,8 +6101,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		cursor.style.left = `${nextLeft}px`;
 		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 57;
 		cursor.style.top = `${baseY + C_KYC_REPHEIGHT * g_currentk}px`;
-		if (g_currentk === 0 && g_kcType === `Replaced`) {
-			g_kcType = C_FLG_ALL;
+		if (g_kcType !== C_FLG_ALL) {
+			g_kcType = (g_currentk === 0 ? `Main` : `Replaced`);
 			lnkKcType.textContent = getStgDetailName(g_kcType);
 		}
 
@@ -6112,9 +6119,23 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 		g_currentj = g_keycons.cursorNumList[_nextj];
 		g_currentk = 0;
-		if (g_kcType === `Replaced` && (g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][1] !== undefined)) {
+		if (g_kcType === `Replaced`) {
 			g_currentk = 1;
+
+			// 代替キー設定の場合は次の代替キーが見つかるまで移動
+			while (g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj][1] === undefined) {
+				g_keycons.cursorNum = (g_keycons.cursorNum + 1) % g_keycons.cursorNumList.length;
+				g_currentj = g_keycons.cursorNumList[g_keycons.cursorNum];
+
+				// 一周して対象が無い場合は代替キーが無いため処理を抜ける（無限ループ対策）
+				if (g_keycons.cursorNum === _nextj) {
+					g_kcType = `Main`;
+					g_currentk = 0;
+					break;
+				}
+			}
 		}
+
 		setKeyConfigCursor();
 		keyconSprite.scrollLeft = - maxLeftX;
 	};
