@@ -782,9 +782,9 @@ const g_settings = {
     adjustmentNum: g_limitObj.musicAdj * 10,
     adjustmentTerms: [50, 10, 5],
 
-    judgAdjs: [...Array(g_limitObj.judgAdj * 4 + 1).keys()].map(i => (i - g_limitObj.judgAdj * 2) / 2),
-    judgAdjNum: g_limitObj.judgAdj * 2,
-    judgAdjTerms: [10, 2],
+    judgAdjs: [...Array(g_limitObj.judgAdj * 20 + 1).keys()].map(i => (i - g_limitObj.judgAdj * 10) / 10),
+    judgAdjNum: g_limitObj.judgAdj * 10,
+    judgAdjTerms: [50, 10],
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
 
