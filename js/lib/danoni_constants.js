@@ -2478,7 +2478,7 @@ const g_lblNameObj = {
     d_Special: `Special`,
 
     Appearance: `Appearance`,
-    Opacity: `Judg. opacity`,
+    Opacity: `Opacity`,
     HitPosition: `Hit position`,
 
     'u_x': `x`,
