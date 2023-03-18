@@ -32,7 +32,7 @@ const C_LEN_SETLBL_LEFT = 160;
 const C_LEN_SETLBL_WIDTH = 210;
 const C_LEN_DIFSELECTOR_WIDTH = 250;
 const C_LEN_DIFCOVER_WIDTH = 110;
-const C_LEN_SETLBL_HEIGHT = 21.5;
+const C_LEN_SETLBL_HEIGHT = 22;
 const C_SIZ_SETLBL = 17;
 const C_LEN_SETDIFLBL_HEIGHT = 25;
 const C_SIZ_SETDIFLBL = 17;
@@ -559,8 +559,8 @@ const g_settingBtnObj = {
 };
 
 const g_limitObj = {
-    musicAdj: 30,
-    judgAdj: 50,
+    adjustment: 30,
+    hitPosition: 50,
 };
 const C_MAX_ADJUSTMENT = 30;
 const C_MAX_SPEED = 10;
@@ -673,7 +673,7 @@ const g_stateObj = {
     autoAll: C_FLG_OFF,
     gauge: `Normal`,
     adjustment: 0,
-    judgAdj: 0,
+    hitPosition: 0,
     fadein: 0,
     volume: 100,
     lifeRcv: 2,
@@ -778,13 +778,13 @@ const g_settings = {
     autoPlays: [C_FLG_OFF, C_FLG_ALL],
     autoPlayNum: 0,
 
-    adjustments: [...Array(g_limitObj.musicAdj * 20 + 1).keys()].map(i => (i - g_limitObj.musicAdj * 10) / 10),
-    adjustmentNum: g_limitObj.musicAdj * 10,
+    adjustments: [...Array(g_limitObj.adjustment * 20 + 1).keys()].map(i => (i - g_limitObj.adjustment * 10) / 10),
+    adjustmentNum: g_limitObj.adjustment * 10,
     adjustmentTerms: [50, 10, 5],
 
-    judgAdjs: [...Array(g_limitObj.judgAdj * 20 + 1).keys()].map(i => (i - g_limitObj.judgAdj * 10) / 10),
-    judgAdjNum: g_limitObj.judgAdj * 10,
-    judgAdjTerms: [50, 10],
+    hitPositions: [...Array(g_limitObj.hitPosition * 20 + 1).keys()].map(i => (i - g_limitObj.hitPosition * 10) / 10),
+    hitPositionNum: g_limitObj.hitPosition * 10,
+    hitPositionTerms: [50, 10],
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
 
@@ -1231,11 +1231,6 @@ const g_shortcutObj = {
         AltLeft_NumpadSubtract: { id: `lnkAdjustmentLLL` },
         NumpadSubtract: { id: `lnkAdjustmentLL` },
 
-        ShiftLeft_KeyB: { id: `lnkJudgAdjR` },
-        KeyB: { id: `lnkJudgAdjRR` },
-        ShiftLeft_KeyT: { id: `lnkJudgAdjL` },
-        KeyT: { id: `lnkJudgAdjLL` },
-
         ShiftLeft_KeyV: { id: `lnkVolumeL` },
         KeyV: { id: `lnkVolumeR` },
 
@@ -1287,6 +1282,11 @@ const g_shortcutObj = {
         KeyA: { id: `lnkAppearanceR` },
         ShiftLeft_KeyO: { id: `lnkOpacityL` },
         KeyO: { id: `lnkOpacityR` },
+
+        ShiftLeft_KeyB: { id: `lnkHitPositionR` },
+        KeyB: { id: `lnkHitPositionRR` },
+        ShiftLeft_KeyT: { id: `lnkHitPositionL` },
+        KeyT: { id: `lnkHitPositionLL` },
 
         Digit1: { id: `lnkstepZone` },
         Digit2: { id: `lnkjudgment` },
@@ -2435,8 +2435,7 @@ const g_lblNameObj = {
     Shuffle: `Shuffle`,
     AutoPlay: `AutoPlay`,
     Gauge: `Gauge`,
-    Adjustment: `Adjustment<br><small>[ Music ]</small>`,
-    JudgAdj: `<small>[ Judgment ]</small>`,
+    Adjustment: `Adjustment`,
     Fadein: `Fadein`,
     Volume: `Volume`,
 
@@ -2449,7 +2448,7 @@ const g_lblNameObj = {
     sc_speed: `←→`,
     sc_scroll: `R/<br>↑↓`,
     sc_adjustment: `- +`,
-    sc_judgAdj: `T B`,
+    sc_hitPosition: `T B`,
     sc_keyConfigPlay: g_isMac ? `Del+Enter` : `BS+Enter`,
 
     g_start: `Start`,
@@ -2479,7 +2478,8 @@ const g_lblNameObj = {
     d_Special: `Special`,
 
     Appearance: `Appearance`,
-    Opacity: `Opacity`,
+    Opacity: `Judg. opacity`,
+    HitPosition: `Hit position`,
 
     'u_x': `x`,
     'u_%': `%`,
@@ -2687,7 +2687,7 @@ const g_lang_msgObj = {
         autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
         gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量`,
         adjustment: `曲とのタイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
-        judgAdj: `判定位置にズレを感じる場合、\n数値を変えることで判定の中央位置を1px単位で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
+        hitPosition: `判定位置にズレを感じる場合、\n数値を変えることで判定の中央位置を1px単位で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
         fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
         volume: `ゲーム内の音量を設定します。`,
 
@@ -2742,7 +2742,7 @@ const g_lang_msgObj = {
         autoPlay: `Set to auto play and to hit some keys automatically.\nHigh score is not saved during auto play.`,
         gauge: `Set the clear condition.\n[Start] initial value, [Border] borderline value (hyphen means zero),\n[Recovery] recovery amount, [Damage] damage amount`,
         adjustment: `If you feel that the timing is out of sync with the music, \nyou can correct the shift in frame units by changing the value.\nThe outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, \nand the inner button in 0.5 frame increments.`,
-        judgAdj: `If you feel a discrepancy in the judgment position, \nyou can adjust the center position of the judgment in 1px increments \nby changing the numerical value. \nUse this function when there is a tendency to push too fast or too slow.`,
+        hitPosition: `If you feel a discrepancy in the judgment position, \nyou can adjust the center position of the judgment in 1px increments \nby changing the numerical value. \nUse this function when there is a tendency to push too fast or too slow.`,
         fadein: `Plays the chart from the middle.\nIf you start in the middle, the high score will not be saved.`,
         volume: `Set the in-game volume.`,
 
