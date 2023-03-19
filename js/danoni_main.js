@@ -2017,12 +2017,12 @@ const loadLocalStorage = _ => {
 	if (checkStorage) {
 		g_localStorage = JSON.parse(checkStorage);
 
-		// Adjustment(Music, Judgment), Volume, Appearance, Opacity初期値設定
-		checkLocalParam(`adjustment`, C_TYP_FLOAT, g_limitObj.adjustment);
-		checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_limitObj.hitPosition);
+		// Adjustment, Volume, Appearance, Opacity, hitPosition初期値設定
+		checkLocalParam(`adjustment`, C_TYP_FLOAT, g_settings.adjustmentNum);
 		checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
 		checkLocalParam(`appearance`);
 		checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
+		checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
 
 		// ハイスコア取得準備
 		if (g_localStorage.highscores === undefined) {
@@ -8309,7 +8309,7 @@ const getArrowSettings = _ => {
 		// 次回キーコンフィグ画面へ戻ったとき、保存済みキーコンフィグ設定が表示されるようにする
 		g_keyObj.prevKey = `Dummy`;
 
-		// ローカルストレージへAdjustment, Volume, Display関連設定を保存
+		// ローカルストレージへAdjustment, hitPosition, Volume, colorType設定を保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
 		g_localStorage.hitPosition = g_stateObj.hitPosition;
 		g_localStorage.volume = g_stateObj.volume;
