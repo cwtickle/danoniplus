@@ -5261,7 +5261,7 @@ const createOptionWindow = _sprite => {
  */
 const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 	skipTerms = [...Array(3)].fill(1), hiddenBtn = false, addRFunc = _ => { }, addLFunc = _ => { },
-	settingLabel = _settingName, displayName = `option`, scLabel = ``, roundNum = 0, adjY = 0 } = {}) => {
+	settingLabel = _settingName, displayName = g_currentPage, scLabel = ``, roundNum = 0, adjY = 0 } = {}) => {
 
 	const settingUpper = toCapitalize(_settingName);
 	const linkId = `lnk${settingUpper}`;
@@ -5647,7 +5647,6 @@ const createSettingsDisplayWindow = _sprite => {
 	// 矢印の見え方 (Appearance)
 	// 縦位置: 7.4
 	createGeneralSetting(spriteList.appearance, `appearance`, {
-		displayName: g_currentPage,
 		addRFunc: _ => dispAppearanceSlider(),
 		addLFunc: _ => dispAppearanceSlider(),
 	});
@@ -5691,7 +5690,7 @@ const createSettingsDisplayWindow = _sprite => {
 		opacityUse ||= g_headerObj[`${display}Use`] || g_headerObj[`${display}Set`] === C_FLG_ON);
 
 	if (opacityUse) {
-		createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent, displayName: g_currentPage });
+		createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent });
 	}
 
 	// ---------------------------------------------------
