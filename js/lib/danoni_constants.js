@@ -2462,7 +2462,7 @@ const g_lblNameObj = {
     d_Special: `Special`,
 
     Appearance: `Appearance`,
-    Opacity: `Opacity`,
+    Opacity: `Judg.opacity`,
 
     'u_x': `x`,
     'u_%': `%`,
