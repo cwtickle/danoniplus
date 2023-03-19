@@ -559,7 +559,7 @@ const g_settingBtnObj = {
 };
 
 const g_limitObj = {
-    musicAdj: 30,
+    chartAdj: 30,
     judgAdj: 50,
 };
 const C_MAX_ADJUSTMENT = 30;
@@ -778,8 +778,8 @@ const g_settings = {
     autoPlays: [C_FLG_OFF, C_FLG_ALL],
     autoPlayNum: 0,
 
-    adjustments: [...Array(g_limitObj.musicAdj * 20 + 1).keys()].map(i => (i - g_limitObj.musicAdj * 10) / 10),
-    adjustmentNum: g_limitObj.musicAdj * 10,
+    adjustments: [...Array(g_limitObj.chartAdj * 20 + 1).keys()].map(i => (i - g_limitObj.chartAdj * 10) / 10),
+    adjustmentNum: g_limitObj.chartAdj * 10,
     adjustmentTerms: [50, 10, 5],
 
     judgAdjs: [...Array(g_limitObj.judgAdj * 20 + 1).keys()].map(i => (i - g_limitObj.judgAdj * 10) / 10),
@@ -2435,8 +2435,8 @@ const g_lblNameObj = {
     Shuffle: `Shuffle`,
     AutoPlay: `AutoPlay`,
     Gauge: `Gauge`,
-    Adjustment: `Adjustment<br><small>[ Music ]</small>`,
-    JudgAdj: `<small>[ Judgment ]</small>`,
+    Adjustment: `Adjustment<br><small>[ Chart ]</small>`,
+    JudgAdj: `<small>[ Hit Position ]</small>`,
     Fadein: `Fadein`,
     Volume: `Volume`,
 
