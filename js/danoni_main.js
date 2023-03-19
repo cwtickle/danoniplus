@@ -2018,7 +2018,7 @@ const loadLocalStorage = _ => {
 		g_localStorage = JSON.parse(checkStorage);
 
 		// Adjustment(Music, Judgment), Volume, Appearance, Opacity初期値設定
-		checkLocalParam(`adjustment`, C_TYP_FLOAT, g_limitObj.musicAdj);
+		checkLocalParam(`adjustment`, C_TYP_FLOAT, g_limitObj.adjustment);
 		checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_limitObj.hitPosition);
 		checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
 		checkLocalParam(`appearance`);
@@ -6793,8 +6793,8 @@ const loadingScoreInit = async () => {
 	// フレーム・曲開始位置調整
 	let preblankFrame = 0;
 	if (g_scoreObj.frameNum === 0) {
-		if (firstArrowFrame - g_limitObj.musicAdj < arrivalFrame) {
-			preblankFrame = arrivalFrame - firstArrowFrame + g_limitObj.musicAdj;
+		if (firstArrowFrame - g_limitObj.adjustment < arrivalFrame) {
+			preblankFrame = arrivalFrame - firstArrowFrame + g_limitObj.adjustment;
 
 			// 譜面データの再読み込み
 			const noteExistObj = {
@@ -7549,7 +7549,7 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
 
 		data.filter(data => hasVal(data)).forEach(_objData => {
 			if (_objData[0] !== ``) {
-				if (_objData[0] < tmpFirstNum && _objData[0] + g_limitObj.musicAdj > 0) {
+				if (_objData[0] < tmpFirstNum && _objData[0] + g_limitObj.adjustment > 0) {
 					tmpFirstNum = _objData[0];
 				}
 			}
