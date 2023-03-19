@@ -2479,7 +2479,7 @@ const g_lblNameObj = {
 
     Appearance: `Appearance`,
     Opacity: `Opacity`,
-    HitPosition: `Hit position`,
+    HitPosition: `HitPosition`,
 
     'u_x': `x`,
     'u_%': `%`,
