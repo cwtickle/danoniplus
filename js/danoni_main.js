@@ -2023,11 +2023,12 @@ const loadLocalStorage = _ => {
 	if (checkStorage) {
 		g_localStorage = JSON.parse(checkStorage);
 
-		// Adjustment, Volume, Appearance, Opacity初期値設定
-		checkLocalParam(`adjustment`, C_TYP_FLOAT, C_MAX_ADJUSTMENT);
+		// Adjustment, Volume, Appearance, Opacity, hitPosition初期値設定
+		checkLocalParam(`adjustment`, C_TYP_FLOAT, g_settings.adjustmentNum);
 		checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
 		checkLocalParam(`appearance`);
 		checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
+		checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
 
 		// ハイスコア取得準備
 		if (g_localStorage.highscores === undefined) {
@@ -2044,6 +2045,7 @@ const loadLocalStorage = _ => {
 	} else {
 		g_localStorage = {
 			adjustment: 0,
+			hitPosition: 0,
 			volume: 100,
 			highscores: {},
 		};
@@ -4242,9 +4244,9 @@ const createOptionWindow = _sprite => {
 		[`shuffle`, 5.5, 0, 0, 0],
 		[`autoPlay`, 6.5, 0, 0, 0],
 		[`gauge`, 7.5, 0, 0, 0],
-		[`adjustment`, 10, 0, 0, 0],
-		[`fadein`, 11, 0, 0, 0],
-		[`volume`, 12, 0, 0, 0],
+		[`adjustment`, 10.5, 0, 0, 0],
+		[`fadein`, 11.5, 0, 0, 0],
+		[`volume`, 12.5, 0, 0, 0],
 	];
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
@@ -5020,7 +5022,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
-	// 縦位置: 10  短縮ショートカットあり
+	// 縦位置: 10.5  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
 		skipTerms: g_settings.adjustmentTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
 		unitName: g_lblNameObj.frame,
@@ -5028,7 +5030,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
-	// 縦位置: 11 スライダーあり
+	// 縦位置: 11.5 スライダーあり
 	spriteList.fadein.appendChild(createLblSetting(`Fadein`));
 
 	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}${g_lblNameObj.percent}`,
@@ -5059,7 +5061,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
-	// 縦位置: 12
+	// 縦位置: 12.5
 	createGeneralSetting(spriteList.volume, `volume`, { unitName: g_lblNameObj.percent });
 
 	/**
@@ -5265,12 +5267,12 @@ const createOptionWindow = _sprite => {
  */
 const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 	skipTerms = [...Array(3)].fill(1), hiddenBtn = false, addRFunc = _ => { }, addLFunc = _ => { },
-	settingLabel = _settingName, displayName = `option`, scLabel = ``, roundNum = 0 } = {}) => {
+	settingLabel = _settingName, displayName = g_currentPage, scLabel = ``, roundNum = 0, adjY = 0 } = {}) => {
 
 	const settingUpper = toCapitalize(_settingName);
 	const linkId = `lnk${settingUpper}`;
 	const initName = `${getStgDetailName(g_stateObj[_settingName])}${unitName}`;
-	_obj.appendChild(createLblSetting(settingUpper, 0, toCapitalize(settingLabel)));
+	_obj.appendChild(createLblSetting(settingUpper, adjY, toCapitalize(settingLabel)));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
 
@@ -5637,6 +5639,7 @@ const createSettingsDisplayWindow = _sprite => {
 	const settingList = [
 		[`appearance`, 7.4, 10, 0, 0],
 		[`opacity`, 9, 10, 0, 0],
+		[`hitPosition`, 10, 10, 0, 0],
 	];
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
@@ -5650,7 +5653,6 @@ const createSettingsDisplayWindow = _sprite => {
 	// 矢印の見え方 (Appearance)
 	// 縦位置: 7.4
 	createGeneralSetting(spriteList.appearance, `appearance`, {
-		displayName: g_currentPage,
 		addRFunc: _ => dispAppearanceSlider(),
 		addLFunc: _ => dispAppearanceSlider(),
 	});
@@ -5694,8 +5696,16 @@ const createSettingsDisplayWindow = _sprite => {
 		opacityUse ||= g_headerObj[`${display}Use`] || g_headerObj[`${display}Set`] === C_FLG_ON);
 
 	if (opacityUse) {
-		createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent, displayName: g_currentPage });
+		createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent });
 	}
+
+	// ---------------------------------------------------
+	// タイミング調整 (HitPosition)
+	// 縦位置: 10
+	createGeneralSetting(spriteList.hitPosition, `hitPosition`, {
+		skipTerms: g_settings.hitPositionTerms, scLabel: g_lblNameObj.sc_hitPosition, roundNum: 5,
+		unitName: g_lblNameObj.pixel,
+	});
 };
 
 /**
@@ -6803,8 +6813,8 @@ const loadingScoreInit = async () => {
 	// フレーム・曲開始位置調整
 	let preblankFrame = 0;
 	if (g_scoreObj.frameNum === 0) {
-		if (firstArrowFrame - C_MAX_ADJUSTMENT < arrivalFrame) {
-			preblankFrame = arrivalFrame - firstArrowFrame + C_MAX_ADJUSTMENT;
+		if (firstArrowFrame - g_limitObj.adjustment < arrivalFrame) {
+			preblankFrame = arrivalFrame - firstArrowFrame + g_limitObj.adjustment;
 
 			// 譜面データの再読み込み
 			const noteExistObj = {
@@ -7559,7 +7569,7 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
 
 		data.filter(data => hasVal(data)).forEach(_objData => {
 			if (_objData[0] !== ``) {
-				if (_objData[0] < tmpFirstNum && _objData[0] + C_MAX_ADJUSTMENT > 0) {
+				if (_objData[0] < tmpFirstNum && _objData[0] + g_limitObj.adjustment > 0) {
 					tmpFirstNum = _objData[0];
 				}
 			}
@@ -8275,6 +8285,7 @@ const getArrowSettings = _ => {
 		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
 
 	g_stateObj.autoAll = (g_stateObj.autoPlay === C_FLG_ALL ? C_FLG_ON : C_FLG_OFF);
+	g_workObj.hitPosition = (g_stateObj.autoAll ? 0 : g_stateObj.hitPosition);
 	changeSetColor();
 
 	for (let j = 0; j < keyNum; j++) {
@@ -8319,8 +8330,9 @@ const getArrowSettings = _ => {
 		// 次回キーコンフィグ画面へ戻ったとき、保存済みキーコンフィグ設定が表示されるようにする
 		g_keyObj.prevKey = `Dummy`;
 
-		// ローカルストレージへAdjustment, Volume, Display関連設定を保存
+		// ローカルストレージへAdjustment, hitPosition, Volume, colorType設定を保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
+		g_localStorage.hitPosition = g_stateObj.hitPosition;
 		g_localStorage.volume = g_stateObj.volume;
 		g_localStorage.colorType = g_colorType;
 
@@ -8543,8 +8555,8 @@ const mainInit = _ => {
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
 	const arrowSprite = [
-		createEmptySprite(mainSprite, `arrowSprite0`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-		createEmptySprite(mainSprite, `arrowSprite1`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+		createEmptySprite(mainSprite, `arrowSprite0`, { y: g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+		createEmptySprite(mainSprite, `arrowSprite1`, { y: -g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
@@ -9836,6 +9848,7 @@ const changeHitFrz = (_j, _k, _name) => {
 
 	const styfrzBar = $id(`${_name}Bar${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
+	const styfrzTopShadow = $id(`${_name}TopShadow${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
 	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 
@@ -9846,9 +9859,12 @@ const changeHitFrz = (_j, _k, _name) => {
 	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
 	const delFrzMotionLength = sumData(g_workObj.motionOnFrames.slice(0, currentFrz.boostCnt + 1));
 
+	// 判定位置調整分の補正
+	const hitPos = g_workObj.hitPosition * g_workObj.scrollDir[_j];
+
 	currentFrz.frzBarLength -= (delFrzLength + delFrzMotionLength) * currentFrz.dir;
-	currentFrz.barY -= (delFrzLength + delFrzMotionLength) * currentFrz.dividePos;
-	currentFrz.btmY -= delFrzLength + delFrzMotionLength;
+	currentFrz.barY -= (delFrzLength + delFrzMotionLength) * currentFrz.dividePos + hitPos;
+	currentFrz.btmY -= delFrzLength + delFrzMotionLength + hitPos;
 	currentFrz.y += delFrzLength;
 	currentFrz.isMoving = false;
 
@@ -9857,6 +9873,7 @@ const changeHitFrz = (_j, _k, _name) => {
 	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
 	styfrzBtm.top = `${currentFrz.btmY}px`;
 	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
+	styfrzTopShadow.opacity = 0;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
 		if (g_headerObj.frzShadowColor[colorPos][1] !== ``) {
@@ -9881,9 +9898,15 @@ const changeFailedFrz = (_j, _k) => {
 	$id(`frzHit${_j}`).opacity = 0;
 	$id(`frzTop${frzNo}`).display = C_DIS_INHERIT;
 	$id(`frzTop${frzNo}`).background = `#cccccc`;
+	$id(`frzTopShadow${frzNo}`).opacity = 1;
 	$id(`frzBar${frzNo}`).background = `#999999`;
 	$id(`frzBar${frzNo}`).opacity = 1;
 	$id(`frzBtm${frzNo}`).background = `#cccccc`;
+
+	// 判定位置調整分の補正
+	const hitPos = g_workObj.hitPosition * g_workObj.scrollDir[_j];
+	$id(`frzTop${frzNo}`).top = `${- hitPos}px`;
+	$id(`frzTopShadow${frzNo}`).top = `${- hitPos}px`;
 
 	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
@@ -9922,7 +9945,7 @@ const judgeArrow = _j => {
 			displayDiff(_difFrame);
 
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
-			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
+			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_workObj.hitPosition * g_workObj.scrollDir[_j]}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
 			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);

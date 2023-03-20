@@ -32,7 +32,7 @@ const C_LEN_SETLBL_LEFT = 160;
 const C_LEN_SETLBL_WIDTH = 210;
 const C_LEN_DIFSELECTOR_WIDTH = 250;
 const C_LEN_DIFCOVER_WIDTH = 110;
-const C_LEN_SETLBL_HEIGHT = 23;
+const C_LEN_SETLBL_HEIGHT = 22;
 const C_SIZ_SETLBL = 17;
 const C_LEN_SETDIFLBL_HEIGHT = 25;
 const C_SIZ_SETDIFLBL = 17;
@@ -83,10 +83,10 @@ const g_windowObj = {
     divRoot: { margin: `auto`, letterSpacing: `normal` },
     divBack: { background: `linear-gradient(#000000, #222222)` },
 
-    difList: { x: 165, y: 65, w: 280, h: 255, overflow: `auto` },
-    difCover: { x: 25, y: 65, w: 140, h: 255, overflow: `auto`, opacity: 0.95 },
+    difList: { x: 165, y: 60, w: 280, h: 261, overflow: `auto` },
+    difCover: { x: 25, y: 60, w: 140, h: 261, overflow: `auto`, opacity: 0.95 },
 
-    scoreDetail: { x: 20, y: 90, w: 420, h: 230, visibility: `hidden` },
+    scoreDetail: { x: 20, y: 85, w: 420, h: 236, visibility: `hidden` },
     detailObj: { w: 420, h: 230, visibility: `hidden` },
 
     colorPickSprite: { x: 0, y: 90, w: 50, h: 280 },
@@ -558,6 +558,10 @@ const g_settingBtnObj = {
     }
 };
 
+const g_limitObj = {
+    adjustment: 30,
+    hitPosition: 50,
+};
 const C_MAX_ADJUSTMENT = 30;
 const C_MAX_SPEED = 10;
 const C_MIN_SPEED = 1;
@@ -669,6 +673,7 @@ const g_stateObj = {
     autoAll: C_FLG_OFF,
     gauge: `Normal`,
     adjustment: 0,
+    hitPosition: 0,
     fadein: 0,
     volume: 100,
     lifeRcv: 2,
@@ -773,9 +778,13 @@ const g_settings = {
     autoPlays: [C_FLG_OFF, C_FLG_ALL],
     autoPlayNum: 0,
 
-    adjustments: [...Array(C_MAX_ADJUSTMENT * 20 + 1).keys()].map(i => (i - C_MAX_ADJUSTMENT * 10) / 10),
-    adjustmentNum: C_MAX_ADJUSTMENT * 10,
+    adjustments: [...Array(g_limitObj.adjustment * 20 + 1).keys()].map(i => (i - g_limitObj.adjustment * 10) / 10),
+    adjustmentNum: g_limitObj.adjustment * 10,
     adjustmentTerms: [50, 10, 5],
+
+    hitPositions: [...Array(g_limitObj.hitPosition * 20 + 1).keys()].map(i => (i - g_limitObj.hitPosition * 10) / 10),
+    hitPositionNum: g_limitObj.hitPosition * 10,
+    hitPositionTerms: [50, 10],
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
 
@@ -1273,6 +1282,11 @@ const g_shortcutObj = {
         KeyA: { id: `lnkAppearanceR` },
         ShiftLeft_KeyO: { id: `lnkOpacityL` },
         KeyO: { id: `lnkOpacityR` },
+
+        ShiftLeft_KeyB: { id: `lnkHitPositionR` },
+        KeyB: { id: `lnkHitPositionRR` },
+        ShiftLeft_KeyT: { id: `lnkHitPositionL` },
+        KeyT: { id: `lnkHitPositionLL` },
 
         Digit1: { id: `lnkstepZone` },
         Digit2: { id: `lnkjudgment` },
@@ -2428,11 +2442,13 @@ const g_lblNameObj = {
     multi: `x`,
     frame: `f`,
     percent: `%`,
+    pixel: `px`,
     filterLock: `Lock`,
 
     sc_speed: `←→`,
     sc_scroll: `R/<br>↑↓`,
     sc_adjustment: `- +`,
+    sc_hitPosition: `T B`,
     sc_keyConfigPlay: g_isMac ? `Del+Enter` : `BS+Enter`,
 
     g_start: `Start`,
@@ -2463,6 +2479,7 @@ const g_lblNameObj = {
 
     Appearance: `Appearance`,
     Opacity: `Opacity`,
+    HitPosition: `HitPosition`,
 
     'u_x': `x`,
     'u_%': `%`,
@@ -2669,7 +2686,7 @@ const g_lang_msgObj = {
         shuffle: `譜面を左右反転したり、ランダムにします。\nランダムにした場合は別譜面扱いとなり、ハイスコアは保存されません。`,
         autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
         gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量`,
-        adjustment: `タイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
+        adjustment: `曲とのタイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
         fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
         volume: `ゲーム内の音量を設定します。`,
 
@@ -2694,6 +2711,7 @@ const g_lang_msgObj = {
 
         appearance: `流れる矢印の見え方を制御します。`,
         opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
+        hitPosition: `判定位置にズレを感じる場合、\n数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
 
         configType: `キーコンフィグ対象を切り替えます。\n[Main] メインキーのみ, [Replaced] 代替キーのみ, [ALL] 全て`,
         colorType: `矢印色の配色パターンを変更します。\nType1～4選択時は色変化が自動でOFFになります。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
@@ -2723,7 +2741,7 @@ const g_lang_msgObj = {
         shuffle: `Flip the chart left and right or make it random.\nIf you make it random, it will be treated as other charts and the high score will not be saved.`,
         autoPlay: `Set to auto play and to hit some keys automatically.\nHigh score is not saved during auto play.`,
         gauge: `Set the clear condition.\n[Start] initial value, [Border] borderline value (hyphen means zero),\n[Recovery] recovery amount, [Damage] damage amount`,
-        adjustment: `If you feel a shift in timing, \nyou can correct the shift in frame units by changing the value.\nThe outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, \nand the inner button in 0.5 frame increments.`,
+        adjustment: `If you feel that the timing is out of sync with the music, \nyou can correct the shift in frame units by changing the value.\nThe outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, \nand the inner button in 0.5 frame increments.`,
         fadein: `Plays the chart from the middle.\nIf you start in the middle, the high score will not be saved.`,
         volume: `Set the in-game volume.`,
 
@@ -2748,6 +2766,7 @@ const g_lang_msgObj = {
 
         appearance: `Controls how the flowing sequences look.`,
         opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,
+        hitPosition: `If you feel a discrepancy in the judgment position, \nyou can adjust the center position of the judgment in 1px increments \n (plus: in front, minus: at the back) by changing the numerical value. \nUse this function when there is a tendency to push too fast or too slow.`,
 
         configType: `Switch the key config target.\n[Main] main keys only, [Replaced] alternate keys only, [ALL] all keys`,
         colorType: `Change the color scheme of the sequences color.\nWhen Type 1 to 4 are selected, the color change is automatically turned off.\n[Type0] Switch the sequences color gradations, [Type1～4] default color scheme`,

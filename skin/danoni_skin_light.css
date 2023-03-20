@@ -1,4 +1,5 @@
 ﻿@charset "UTF-8";
+
 /* ----------------------------------------
   Dancing☆Onigiri (CW Edition)
   スキンcssファイル (light)
@@ -10,102 +11,129 @@
 ------------------------------------------ */
 /* 背景 */
 #divBack {
-    background: linear-gradient(#dddddd, #ffffff);
+	background: linear-gradient(#dddddd, #ffffff);
 }
 
 /* タイトル */
 .title_base {
-	color:#222222;
+	color: #222222;
 }
 
 /* 設定別カラー */
 .settings_Title::first-letter {
-	color:#000099;
-	font-size:40px;
+	color: #000099;
+	font-size: 40px;
 }
+
 .settings_Title2::first-letter {
-	color:#990000;
-	font-size:40px;
+	color: #990000;
+	font-size: 40px;
 }
+
 .settings_TitleStar::first-letter {
-	color:#999900;
-	font-size:40px;
+	color: #999900;
+	font-size: 40px;
 }
+
 .settings_Display::first-letter {
-	color:#777700;
-	font-size:40px;
+	color: #777700;
+	font-size: 40px;
 }
+
 .settings_Difficulty::first-letter {
-	color:#990000;
+	color: #990000;
 }
+
 .settings_Speed::first-letter {
-	color:#777700;
+	color: #777700;
 }
+
 .settings_Motion::first-letter {
-	color:#667700;
+	color: #667700;
 }
+
 .settings_Reverse::first-letter {
-	color:#557733;
+	color: #557733;
 }
+
 .settings_Scroll::first-letter {
-	color:#557733;
+	color: #557733;
 }
+
 .settings_Shuffle::first-letter {
-	color:#337733;
+	color: #337733;
 }
+
 .settings_AutoPlay::first-letter {
-	color:#337744;
+	color: #337744;
 }
+
 .settings_Gauge::first-letter {
-	color:#227755;
+	color: #227755;
 }
+
 .settings_Adjustment::first-letter {
-	color:#007777;
+	color: #007777;
 }
+
 .settings_Fadein::first-letter {
-	color:#005577;
+	color: #005577;
 }
+
 .settings_Volume::first-letter {
-	color:#003377;
+	color: #003377;
 }
+
 .settings_Appearance::first-letter {
-	color:#9900ff;
+	color: #9900ff;
 }
+
 .settings_Opacity::first-letter {
-	color:#666666;
+	color: #cc00ff;
+}
+
+.settings_HitPosition::first-letter {
+	color: #ff00ff;
 }
 
 .settings_DifSelector {
-	background-color:#eeeeee;
+	background-color: #eeeeee;
 }
+
 .settings_Disabled {
-	color:#999999;
+	color: #999999;
 }
+
 .settings_FadeinBar {
-	color:#000000;
+	color: #000000;
 }
 
 /* 設定画面：ゲージ設定詳細 */
 .settings_lifeVal {
 	color: #996600;
 }
+
 .settings_gaugeTableBorder {
-	border-color: #222222; 
+	border-color: #222222;
 }
 
 /* キーコンフィグ */
 .keyconfig_warning {
 	color: #999900;
 }
+
 .keyconfig_ConfigType::first-letter {
 	color: #003377;
 }
+
 .keyconfig_ColorType::first-letter {
 	color: #773300;
 }
+
 .keyconfig_Changekey {
 	color: #999900;
 }
+
 .keyconfig_Defaultkey {
 	color: #000099;
 }
@@ -114,21 +142,27 @@
 .main_stepKeyDown {
 	background-color: #009999;
 }
+
 .main_stepDefault {
 	background-color: #666666;
 }
+
 .main_stepDummy {
 	background-color: #666666;
 }
+
 .main_stepIi {
 	background-color: #009999;
 }
+
 .main_stepShakin {
 	background-color: #009900;
 }
+
 .main_stepMatari {
 	background-color: #cc8800;
 }
+
 .main_stepShobon {
 	background-color: #0000cc;
 }
@@ -136,9 +170,11 @@
 .main_objStepShadow {
 	background-color: #eeeeee;
 }
+
 .main_objShadow {
 	background-color: #666666;
 }
+
 .main_frzHitTop {
 	background-color: #cccccc;
 }
@@ -147,24 +183,29 @@
 .life_Max {
 	background-color: #cccc66;
 }
+
 .life_Cleared {
 	background-color: #66cccc;
 }
+
 .life_Failed {
 	background-color: #999999;
 }
+
 .life_Background {
 	background-color: #cccccc;
 }
+
 .life_BorderColor {
 	background-color: #555555;
-	color:#cccccc;
+	color: #cccccc;
 }
 
 /* 結果画面：項目、設定値 */
 .result_lbl {
 	color: #333333;
 }
+
 .result_style {
 	color: #111111;
 }
@@ -173,27 +214,35 @@
 .common_ii {
 	color: #009999;
 }
+
 .common_shakin {
 	color: #009900;
 }
+
 .common_matari {
 	color: #cc8800;
 }
+
 .common_shobon {
 	color: #0000cc;
 }
+
 .common_uwan {
 	color: #cc0000;
 }
+
 .common_kita {
 	color: #999900;
 }
+
 .common_iknai {
 	color: #669900;
 }
+
 .common_combo {
 	color: #000000;
 }
+
 .common_score {
 	color: #000000;
 }
@@ -202,42 +251,53 @@
 .result_PlayDataWindow {
 	border: solid 0.5px #666666;
 }
+
 /* 結果画面：スコア */
 .result_score {
 	color: #000000;
 }
+
 /* 結果画面：ハイスコア差分、ハイスコア時のカラー */
 .result_scoreHiBlanket {
 	color: #222222;
 }
+
 .result_scoreHi {
 	color: #000000;
 }
+
 .result_scoreHiPlus {
 	color: #777700;
 }
+
 /* 結果画面：ハイスコア更新外の表示色 */
 .result_noRecord {
 	color: #222222;
 }
+
 /* 結果画面：完全PF、PF、FC、Cleared、Failed */
 .result_AllPerfect {
 	color: #999999;
 }
+
 .result_Perfect {
 	color: #999900;
 }
+
 .result_FullCombo {
 	color: #007777;
 }
+
 .result_Cleared {
 	color: #666600;
 }
+
 .result_Failed {
 	color: #990000;
 }
+
 .result_Window::first-letter {
-	font-size:80px;
+	font-size: 80px;
 }
 
 /* ボタン */
@@ -246,76 +306,93 @@
 	color: #000000;
 	background-color: #dddddd;
 }
+
 .button_Start:hover {
 	color: #000000;
 	background-color: #999999;
 }
+
 /* デフォルト */
 .button_Default {
 	color: #000000;
 	background-color: #eeeeee;
 }
+
 .button_Default:hover {
 	color: #000000;
 	background-color: #bbbbbb;
 }
+
 /* デフォルト(色指定なし) */
 .button_Default_NoColor {
 	background-color: #00000000;
 }
+
 .button_Default_NoColor:hover {
 	background-color: #bbbbbb;
 }
+
 /* カーソル */
 .button_Mini {
 	color: #000000;
 	background-color: #cccccc;
 }
+
 .button_Mini:hover {
 	color: #000000;
 	background-color: #999999;
 }
+
 /* 戻る */
 .button_Back {
-    color: #000000;
+	color: #000000;
 	background-color: #ccccff;
 }
+
 .button_Back:hover {
-    color: #000000;
+	color: #000000;
 	background-color: #9999ff;
 }
+
 /* 設定 */
 .button_Setting {
 	color: #000000;
 	background-color: #ffffcc;
 }
+
 .button_Setting:hover {
 	color: #000000;
 	background-color: #ffff66;
 }
+
 /* 進む */
 .button_Next {
 	color: #000000;
 	background-color: #ffcccc;
 }
+
 .button_Next:hover {
 	color: #000000;
 	background-color: #ff9999;
 }
+
 /* リセット */
 .button_Reset {
 	color: #000000;
 	background-color: #ccffcc;
 }
+
 .button_Reset:hover {
 	color: #000000;
 	background-color: #99ff99;
 }
+
 /* ツイート */
 .button_Tweet {
 	color: #000000;
 	background-color: #ccffff;
 }
+
 .button_Tweet:hover {
 	color: #000000;
 	background-color: #66ffff;
@@ -324,26 +401,31 @@
 /* ボタン：ON/OFF */
 .button_OFF {
 	color: #cccccc;
-	border-color: #00000000 #cccccc; 
+	border-color: #00000000 #cccccc;
 }
+
 .button_ON {
 	color: #000000;
-	border-color: #00000000 #333333; 
+	border-color: #00000000 #333333;
 }
+
 /* ボタン：ON/OFF リバース用 */
 .button_RevOFF {
 	color: #666666;
-	border-color: #00000000 #666666; 
+	border-color: #00000000 #666666;
 }
+
 .button_RevON {
 	color: #000000;
-	border-color: #00000000 #557733; 
+	border-color: #00000000 #557733;
 }
+
 /* ボタン：ON/OFF 無効化ボタン用 */
 .button_DisabledOFF {
 	color: #999999;
 	background-color: #333333;
 }
+
 .button_DisabledON {
 	color: #ffffff;
 	background-color: #009999;
