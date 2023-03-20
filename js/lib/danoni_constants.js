@@ -1529,7 +1529,8 @@ const g_keyObj = {
     chara5_2: [`left`, `down`, `space`, `up`, `right`],
     chara8_2: [`sleft`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
 
-    // カラーパターン(パターン1)
+    // ColorGroup - 1
+    //  - 同じ数字が同じグループになります
     color5_0_0: [0, 0, 0, 0, 2],
     color7_0_0: [0, 1, 0, 2, 0, 1, 0],
     color7i_0_0: [2, 2, 2, 0, 0, 0, 0],
@@ -1562,22 +1563,23 @@ const g_keyObj = {
     color9A_2_0: [3, 0, 3, 0, 2, 0, 3, 0, 3],
     color9B_2_0: [0, 0, 0, 0, 2, 1, 1, 1, 1],
 
-    // カラーパターン(パターン2)
+    // ColorGroup - 2
     color9B_0_1: [4, 3, 1, 0, 2, 0, 1, 3, 4],
-    color9A_2_1: [4, 1, 3, 0, 2, 0, 3, 1, 4],
     color17_0_1: [1, 0, 1, 0, 1, 0, 1, 0, 2, 0, 1, 0, 1, 0, 1, 0, 1],
 
     color17_1_1: [1, 1, 1, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
 
-    // カラーパターン(パターン3)
+    color9A_2_1: [4, 1, 3, 0, 2, 0, 3, 1, 4],
+
+    // ColorGroup - 3
     color17_0_2: [1, 4, 0, 3, 1, 4, 0, 3, 2, 3, 0, 4, 1, 3, 0, 4, 1],
     color17_1_2: [1, 0, 1, 0, 2, 0, 1, 0, 1, 3, 4, 3, 4, 4, 3, 4, 3],
 
-    // カラーパターン(パターン4)
+    // ColorGroup - 4
     color17_0_3: [1, 1, 0, 0, 1, 1, 0, 0, 2, 0, 0, 1, 1, 0, 0, 1, 1],
     color17_1_3: [1, 0, 1, 0, 2, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1],
 
-    // シャッフルグループ(パターン1)
+    // ShuffleGroup - 1
     //  - Mirror, Random, S-Random使用時、同じグループ同士で入れ替えます
     //  - 同じ数字が同じグループになります
     shuffle5_0_0: [0, 0, 0, 0, 1],
@@ -1608,7 +1610,7 @@ const g_keyObj = {
     shuffle5_2_0: [0, 0, 1, 0, 0],
     shuffle8_2_0: [1, 0, 0, 0, 0, 0, 0, 0],
 
-    // シャッフルグループ(パターン2)
+    // ShuffleGroup - 2
     shuffle9A_0_1: [0, 0, 0, 0, 1, 0, 0, 0, 0],
     shuffle11_0_1: [0, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3],
     shuffle11L_0_1: [0, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3],
@@ -1618,12 +1620,12 @@ const g_keyObj = {
 
     shuffle17_1_1: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 
-    // シャッフルグループ(パターン3)
+    // ShuffleGroup - 3
     shuffle15A_0_2: [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 2, 2, 2],
     shuffle17_0_2: [0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 2, 0, 2, 0, 2, 0],
     shuffle17_1_2: [0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2],
 
-    // 基本パターン (矢印回転、AAキャラクタ)
+    // ShapeGroup - 1 (矢印回転、AAキャラクタ)
     // - AAキャラクタの場合、キャラクタ名を指定
     stepRtn5_0_0: [0, -90, 90, 180, `onigiri`],
     stepRtn7_0_0: [0, -45, -90, `onigiri`, 90, 135, 180],
@@ -1642,18 +1644,8 @@ const g_keyObj = {
     stepRtn14i_0_0: [`giko`, `onigiri`, `iyo`, 0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
     stepRtn15A_0_0: [0, -90, 90, 180, 0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
     stepRtn16i_0_0: [`giko`, `onigiri`, `iyo`, 0, -90, 90, 180, 45, 0, -45, -90, `onigiri`, 90, 135, 180, 225],
-    stepRtn17_0_0: [0, -22.5, -45, -67.5, -90, -112.5, -135, -157.5, `onigiri`,
-        22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180],
+    stepRtn17_0_0: [0, -22.5, -45, -67.5, -90, -112.5, -135, -157.5, `onigiri`, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180],
     stepRtn23_0_0: [0, -90, 90, 180, 0, -90, 90, 180, 0, 30, 60, 90, 120, 150, 180, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
-
-    // 変則パターン (矢印回転、AAキャラクタ)
-    // - 末尾の番号をカウントアップさせることで実現できる。keyCtrlと合わせること
-    // - 配列の数は、通常パターンと同数で無くてはいけない（keyCtrlも同様）
-    stepRtn11i_0_1: [0, -135, `giko`, 45, 180, `onigiri`, 0, -135, `iyo`, 45, 180],
-    stepRtn17_0_1: [-30, 0, 30, 60, 90, 120, 150, 180, `onigiri`,
-        0, 30, 60, 90, 120, 150, 180, 210],
-    stepRtn17_0_2: [45, 45, 0, 0, -45, -45, -90, -90, `onigiri`,
-        90, 90, 135, 135, 180, 180, 225, 225],
 
     stepRtn5_1_0: [`onigiri`, 0, -90, 90, 180],
     stepRtn8_1_0: [`onigiri`, 0, -45, -90, `onigiri`, 90, 135, 180],
@@ -1665,6 +1657,13 @@ const g_keyObj = {
 
     stepRtn5_2_0: [0, -90, `onigiri`, 90, 180],
     stepRtn8_2_0: [`onigiri`, 0, 30, 60, 90, 120, 150, 180],
+
+    // ShapeGroup - 2 (矢印回転、AAキャラクタ)
+    stepRtn11i_0_1: [0, -135, `giko`, 45, 180, `onigiri`, 0, -135, `iyo`, 45, 180],
+    stepRtn17_0_1: [-30, 0, 30, 60, 90, 120, 150, 180, `onigiri`, 0, 30, 60, 90, 120, 150, 180, 210],
+
+    // ShapeGroup - 3 (矢印回転、AAキャラクタ)
+    stepRtn17_0_2: [45, 45, 0, 0, -45, -45, -90, -90, `onigiri`, 90, 90, 135, 135, 180, 180, 225, 225],
 
     // 各キーの区切り位置
     div9i_0: 6,
@@ -2091,10 +2090,10 @@ Object.keys(g_copyKeyPtn).forEach(keyPtnTo => {
 const keyCtrlName = Object.keys(g_keyObj).filter(val => val.startsWith(`keyCtrl`));
 keyCtrlName.forEach(property => {
     g_keyObj[property].forEach((list, j) => g_keyObj[property][j] = makeBaseArray(g_keyObj[property][j], g_keyObj.minKeyCtrlNum, 0));
-    g_keyObj[`${property}d`] = copyArray2d(g_keyObj[property]);
+    g_keyObj[`${property}d`] = structuredClone(g_keyObj[property]);
 });
 
-// shuffleX_Y, colorX_Yについてデフォルト配列を作成
+// shuffleX_Y, colorX_Y, stepRtnX_Yについてデフォルト配列を作成
 g_keycons.groups.forEach(type => {
     const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type) && val.endsWith(`_0`));
     tmpName.forEach(property => g_keyObj[`${property.slice(0, -2)}`] = g_keyObj[property].concat());

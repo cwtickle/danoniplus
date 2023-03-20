@@ -3505,9 +3505,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				}
 				const keyPtn = getKeyPtnName(tmpArray[k]);
 				g_keyObj[`${keyheader}_${k + dfPtn}`] = g_keyObj[`${_name}${keyPtn}`] !== undefined ?
-					copyArray2d(g_keyObj[`${_name}${keyPtn}`]) : tmpArray[k].split(`,`).map(n => _convFunc(n));
+					structuredClone(g_keyObj[`${_name}${keyPtn}`]) : tmpArray[k].split(`,`).map(n => _convFunc(n));
 				if (baseCopyFlg) {
-					g_keyObj[`${keyheader}_${k + dfPtn}d`] = copyArray2d(g_keyObj[`${keyheader}_${k + dfPtn}`]);
+					g_keyObj[`${keyheader}_${k + dfPtn}d`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}`]);
 				}
 				loopFunc(k, keyheader);
 			}
@@ -4921,7 +4921,7 @@ const createOptionWindow = _sprite => {
 				g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
 				g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
-				g_settings.gauges = copyArray2d(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
+				g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
 				g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
 			}
 			setLifeCategory(g_headerObj);
@@ -5172,7 +5172,7 @@ const createOptionWindow = _sprite => {
 		}
 
 		// スクロール設定用の配列を入れ替え
-		g_settings.scrolls = copyArray2d(
+		g_settings.scrolls = structuredClone(
 			typeof g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] === C_TYP_OBJECT ?
 				Object.keys(g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]) : g_keyObj.scrollName_def
 		);
@@ -5231,7 +5231,7 @@ const createOptionWindow = _sprite => {
 				setReverseView(document.querySelector(`#btnReverse`));
 			}
 		} else {
-			g_settings.scrolls = copyArray2d(g_keyObj.scrollName_def);
+			g_settings.scrolls = structuredClone(g_keyObj.scrollName_def);
 			setSetting(0, `reverse`);
 		}
 
@@ -5448,7 +5448,7 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 		const isUpdate = prevPtn !== -1 && g_keyObj.prevKey !== g_keyObj.currentKey;
 		g_keyCopyLists.multiple.forEach(header => {
 			if (g_keyObj[`${header}${basePtn}`] !== undefined && isUpdate) {
-				g_keyObj[`${header}${copyPtn}`] = copyArray2d(g_keyObj[`${header}${basePtn}`]);
+				g_keyObj[`${header}${copyPtn}`] = structuredClone(g_keyObj[`${header}${basePtn}`]);
 			}
 		});
 		g_keyCopyLists.simple.forEach(header => {
@@ -5461,7 +5461,7 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 				maxPtn++;
 			}
 			for (let j = 0; j < maxPtn; j++) {
-				g_keyObj[`${type}${copyPtn}_${j}`] = copyArray2d(g_keyObj[`${type}${basePtn}_${j}`]);
+				g_keyObj[`${type}${copyPtn}_${j}`] = structuredClone(g_keyObj[`${type}${basePtn}_${j}`]);
 			}
 			g_keyObj[`${type}${copyPtn}_0d`] = structuredClone(g_keyObj[`${type}${copyPtn}_0`]);
 		});
@@ -6545,12 +6545,12 @@ const changeSetColor = _ => {
 		'Shadow': (isDefault ? defaultType : `${scoreIdHeader}Default`),
 	};
 	Object.keys(currentTypes).forEach(pattern => {
-		g_headerObj[`set${pattern}Color`] = copyArray2d(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]);
+		g_headerObj[`set${pattern}Color`] = structuredClone(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]);
 		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-			g_headerObj[`frz${pattern}Color`][j] = copyArray2d(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]);
+			g_headerObj[`frz${pattern}Color`][j] = structuredClone(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]);
 		}
 		if (!isDefault) {
-			g_headerObj[`set${pattern}Color`] = copyArray2d(g_headerObj[`set${pattern}Color${g_colorType}`]);
+			g_headerObj[`set${pattern}Color`] = structuredClone(g_headerObj[`set${pattern}Color${g_colorType}`]);
 		}
 	});
 
@@ -6793,7 +6793,7 @@ const loadingScoreInit = async () => {
 
 	// Motionオプション適用時の矢印別の速度を取得（配列形式）
 	const motionOnFrame = setMotionOnFrame();
-	g_workObj.motionOnFrames = copyArray2d(motionOnFrame);
+	g_workObj.motionOnFrames = structuredClone(motionOnFrame);
 
 	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
 	const firstFrame = (g_scoreObj.frameNum === 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
@@ -6823,7 +6823,7 @@ const loadingScoreInit = async () => {
 			for (let j = 0; j < keyNum; j++) {
 				Object.keys(noteExistObj).forEach(name => {
 					if (tmpObj[`${name}Data`][j] !== undefined && noteExistObj[name]) {
-						g_scoreObj[`${name}Data`][j] = copyArray2d(tmpObj[`${name}Data`][j]);
+						g_scoreObj[`${name}Data`][j] = structuredClone(tmpObj[`${name}Data`][j]);
 					}
 				});
 			}
@@ -6942,7 +6942,7 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
 
 	// indexに従って並べ替え
 	g_typeLists.arrow.forEach(type => {
-		const tmpData = copyArray2d(g_scoreObj[`${type}Data`]);
+		const tmpData = structuredClone(g_scoreObj[`${type}Data`]);
 		for (let i = 0; i < _keyNum; i++) {
 			g_scoreObj[`${type}Data`][i] = tmpData[index[i]] || [];
 		}
@@ -6956,7 +6956,7 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
  */
 const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
 	// シャッフルグループごとにミラー
-	const style = copyArray2d(_shuffleGroup).map(_group => _group.reverse());
+	const style = structuredClone(_shuffleGroup).map(_group => _group.reverse());
 	if (_asymFlg) {
 		// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
 		style.forEach((group, i) => {
@@ -6977,7 +6977,7 @@ const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
  */
 const applyRandom = (_keyNum, _shuffleGroup) => {
 	// シャッフルグループごとにシャッフル(Fisher-Yates)
-	const style = copyArray2d(_shuffleGroup).map(_group => {
+	const style = structuredClone(_shuffleGroup).map(_group => {
 		for (let i = _group.length - 1; i > 0; i--) {
 			const random = Math.floor(Math.random() * (i + 1));
 			const tmp = _group[i];
@@ -7712,7 +7712,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj[`mk${_header}Length`][_j][_k] = getFrzLength(_speedOnFrame, _data[_k], _data[_k + 1]);
 			}
 		} else if (_frzFlg && g_workObj[`mk${_header}Length`][_j] !== undefined) {
-			g_workObj[`mk${_header}Length`][_j] = copyArray2d(g_workObj[`mk${_header}Length`][_j].slice(_k + 2));
+			g_workObj[`mk${_header}Length`][_j] = structuredClone(g_workObj[`mk${_header}Length`][_j].slice(_k + 2));
 		}
 	};
 
@@ -7753,7 +7753,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 				// 出現位置が開始前の場合は除外
 				if (_frzFlg && g_workObj[`mk${camelHeader}Length`][_j] !== undefined) {
-					g_workObj[`mk${camelHeader}Length`][_j] = copyArray2d(g_workObj[`mk${camelHeader}Length`][_j].slice(k + 2));
+					g_workObj[`mk${camelHeader}Length`][_j] = structuredClone(g_workObj[`mk${camelHeader}Length`][_j].slice(k + 2));
 				}
 				break;
 
@@ -7819,7 +7819,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			for (let k = 0; k < delIdx; k++) {
 				_data.shift();
 			}
-			return copyArray2d(_data);
+			return structuredClone(_data);
 		}
 		return [];
 	};
@@ -8235,10 +8235,10 @@ const getArrowSettings = _ => {
 	g_workObj.scrollDir = [];
 	g_workObj.scrollDirDefault = [];
 	g_workObj.dividePos = [];
-	g_workObj.stepRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
-	g_workObj.stepHitRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
-	g_workObj.arrowRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
-	g_workObj.keyCtrl = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
+	g_workObj.stepRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.stepHitRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.arrowRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
 
@@ -8346,7 +8346,7 @@ const getArrowSettings = _ => {
 		storageObj[`keyCtrl${addKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 		if (g_keyObj.currentPtn !== -1) {
 			storageObj[`keyCtrlPtn${addKey}`] = g_keyObj.currentPtn;
-			g_keyObj[`keyCtrl${keyCtrlPtn}`] = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
+			g_keyObj[`keyCtrl${keyCtrlPtn}`] = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
 		}
 
 		// カラーセットの保存（キー別）
