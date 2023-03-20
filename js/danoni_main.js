@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/03/18
+ * Revised : 2023/03/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 30.6.0`;
-const g_revisedDate = `2023/03/18`;
+const g_version = `Ver 31.0.0`;
+const g_revisedDate = `2023/03/20`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2023,11 +2023,12 @@ const loadLocalStorage = _ => {
 	if (checkStorage) {
 		g_localStorage = JSON.parse(checkStorage);
 
-		// Adjustment, Volume, Appearance, Opacity初期値設定
-		checkLocalParam(`adjustment`, C_TYP_FLOAT, C_MAX_ADJUSTMENT);
+		// Adjustment, Volume, Appearance, Opacity, hitPosition初期値設定
+		checkLocalParam(`adjustment`, C_TYP_FLOAT, g_settings.adjustmentNum);
 		checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
 		checkLocalParam(`appearance`);
 		checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
+		checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
 
 		// ハイスコア取得準備
 		if (g_localStorage.highscores === undefined) {
@@ -2044,6 +2045,7 @@ const loadLocalStorage = _ => {
 	} else {
 		g_localStorage = {
 			adjustment: 0,
+			hitPosition: 0,
 			volume: 100,
 			highscores: {},
 		};
@@ -2459,6 +2461,7 @@ const preheaderConvert = _dosObj => {
 	}
 
 	obj.jsData = [];
+	obj.stepRtnUse = true;
 
 	const setJsFiles = (_files, _defaultDir, _type = `custom`) => {
 		_files.forEach(file => {
@@ -3502,9 +3505,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 				}
 				const keyPtn = getKeyPtnName(tmpArray[k]);
 				g_keyObj[`${keyheader}_${k + dfPtn}`] = g_keyObj[`${_name}${keyPtn}`] !== undefined ?
-					copyArray2d(g_keyObj[`${_name}${keyPtn}`]) : tmpArray[k].split(`,`).map(n => _convFunc(n));
+					structuredClone(g_keyObj[`${_name}${keyPtn}`]) : tmpArray[k].split(`,`).map(n => _convFunc(n));
 				if (baseCopyFlg) {
-					g_keyObj[`${keyheader}_${k + dfPtn}d`] = copyArray2d(g_keyObj[`${keyheader}_${k + dfPtn}`]);
+					g_keyObj[`${keyheader}_${k + dfPtn}d`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}`]);
 				}
 				loopFunc(k, keyheader);
 			}
@@ -3549,7 +3552,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 						}
 					} else {
 						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
-						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = list.split(`,`).map(n => parseInt(n, 10));
+						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = list.split(`,`).map(n => isNaN(Number(n)) ? n : parseInt(n, 10));
 						ptnCnt++;
 					}
 				});
@@ -3653,7 +3656,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		newKeyTripleParam(newKey, `color`);
 
 		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
-		newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, { errCd: `E_0103` });
+		newKeyTripleParam(newKey, `stepRtn`);
 
 		// キーコンフィグ (keyCtrlX_Y)
 		newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, { errCd: `E_0104`, baseCopyFlg: true });
@@ -4242,9 +4245,9 @@ const createOptionWindow = _sprite => {
 		[`shuffle`, 5.5, 0, 0, 0],
 		[`autoPlay`, 6.5, 0, 0, 0],
 		[`gauge`, 7.5, 0, 0, 0],
-		[`adjustment`, 10, 0, 0, 0],
-		[`fadein`, 11, 0, 0, 0],
-		[`volume`, 12, 0, 0, 0],
+		[`adjustment`, 10.5, 0, 0, 0],
+		[`fadein`, 11.5, 0, 0, 0],
+		[`volume`, 12.5, 0, 0, 0],
 	];
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
@@ -4918,7 +4921,7 @@ const createOptionWindow = _sprite => {
 				g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
 				g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
-				g_settings.gauges = copyArray2d(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
+				g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
 				g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
 			}
 			setLifeCategory(g_headerObj);
@@ -5020,7 +5023,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
-	// 縦位置: 10  短縮ショートカットあり
+	// 縦位置: 10.5  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
 		skipTerms: g_settings.adjustmentTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
 		unitName: g_lblNameObj.frame,
@@ -5028,7 +5031,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
-	// 縦位置: 11 スライダーあり
+	// 縦位置: 11.5 スライダーあり
 	spriteList.fadein.appendChild(createLblSetting(`Fadein`));
 
 	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}${g_lblNameObj.percent}`,
@@ -5059,7 +5062,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
-	// 縦位置: 12
+	// 縦位置: 12.5
 	createGeneralSetting(spriteList.volume, `volume`, { unitName: g_lblNameObj.percent });
 
 	/**
@@ -5169,7 +5172,7 @@ const createOptionWindow = _sprite => {
 		}
 
 		// スクロール設定用の配列を入れ替え
-		g_settings.scrolls = copyArray2d(
+		g_settings.scrolls = structuredClone(
 			typeof g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] === C_TYP_OBJECT ?
 				Object.keys(g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]) : g_keyObj.scrollName_def
 		);
@@ -5228,7 +5231,7 @@ const createOptionWindow = _sprite => {
 				setReverseView(document.querySelector(`#btnReverse`));
 			}
 		} else {
-			g_settings.scrolls = copyArray2d(g_keyObj.scrollName_def);
+			g_settings.scrolls = structuredClone(g_keyObj.scrollName_def);
 			setSetting(0, `reverse`);
 		}
 
@@ -5265,12 +5268,12 @@ const createOptionWindow = _sprite => {
  */
 const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 	skipTerms = [...Array(3)].fill(1), hiddenBtn = false, addRFunc = _ => { }, addLFunc = _ => { },
-	settingLabel = _settingName, displayName = `option`, scLabel = ``, roundNum = 0 } = {}) => {
+	settingLabel = _settingName, displayName = g_currentPage, scLabel = ``, roundNum = 0, adjY = 0 } = {}) => {
 
 	const settingUpper = toCapitalize(_settingName);
 	const linkId = `lnk${settingUpper}`;
 	const initName = `${getStgDetailName(g_stateObj[_settingName])}${unitName}`;
-	_obj.appendChild(createLblSetting(settingUpper, 0, toCapitalize(settingLabel)));
+	_obj.appendChild(createLblSetting(settingUpper, adjY, toCapitalize(settingLabel)));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
 
@@ -5445,7 +5448,7 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 		const isUpdate = prevPtn !== -1 && g_keyObj.prevKey !== g_keyObj.currentKey;
 		g_keyCopyLists.multiple.forEach(header => {
 			if (g_keyObj[`${header}${basePtn}`] !== undefined && isUpdate) {
-				g_keyObj[`${header}${copyPtn}`] = copyArray2d(g_keyObj[`${header}${basePtn}`]);
+				g_keyObj[`${header}${copyPtn}`] = structuredClone(g_keyObj[`${header}${basePtn}`]);
 			}
 		});
 		g_keyCopyLists.simple.forEach(header => {
@@ -5458,7 +5461,7 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 				maxPtn++;
 			}
 			for (let j = 0; j < maxPtn; j++) {
-				g_keyObj[`${type}${copyPtn}_${j}`] = copyArray2d(g_keyObj[`${type}${basePtn}_${j}`]);
+				g_keyObj[`${type}${copyPtn}_${j}`] = structuredClone(g_keyObj[`${type}${basePtn}_${j}`]);
 			}
 			g_keyObj[`${type}${copyPtn}_0d`] = structuredClone(g_keyObj[`${type}${copyPtn}_0`]);
 		});
@@ -5637,6 +5640,7 @@ const createSettingsDisplayWindow = _sprite => {
 	const settingList = [
 		[`appearance`, 7.4, 10, 0, 0],
 		[`opacity`, 9, 10, 0, 0],
+		[`hitPosition`, 10, 10, 0, 0],
 	];
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
@@ -5650,7 +5654,6 @@ const createSettingsDisplayWindow = _sprite => {
 	// 矢印の見え方 (Appearance)
 	// 縦位置: 7.4
 	createGeneralSetting(spriteList.appearance, `appearance`, {
-		displayName: g_currentPage,
 		addRFunc: _ => dispAppearanceSlider(),
 		addLFunc: _ => dispAppearanceSlider(),
 	});
@@ -5694,8 +5697,16 @@ const createSettingsDisplayWindow = _sprite => {
 		opacityUse ||= g_headerObj[`${display}Use`] || g_headerObj[`${display}Set`] === C_FLG_ON);
 
 	if (opacityUse) {
-		createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent, displayName: g_currentPage });
+		createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent });
 	}
+
+	// ---------------------------------------------------
+	// タイミング調整 (HitPosition)
+	// 縦位置: 10
+	createGeneralSetting(spriteList.hitPosition, `hitPosition`, {
+		skipTerms: g_settings.hitPositionTerms, scLabel: g_lblNameObj.sc_hitPosition, roundNum: 5,
+		unitName: g_lblNameObj.pixel,
+	});
 };
 
 /**
@@ -5885,11 +5896,11 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			// 矢印の塗り部分
 			createColorObject2(`arrowShadow${j}`, {
 				x: keyconX, y: keyconY, background: hasVal(g_headerObj[`setShadowColor${g_colorType}`][colorPos]) ? getShadowColor(colorPos, arrowColor) : ``,
-				rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`, pointerEvents: `none`,
+				rotate: g_keyObj[`stepRtn${keyCtrlPtn}_${g_keycons.stepRtnGroupNum}`][j], styleName: `Shadow`, pointerEvents: `none`,
 			}),
 			// 矢印本体
 			createColorObject2(`arrow${j}`, {
-				x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], pointerEvents: `none`,
+				x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}_${g_keycons.stepRtnGroupNum}`][j], pointerEvents: `none`,
 			}),
 		);
 		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
@@ -5955,6 +5966,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				}
 			}
 		},
+		stepRtn: (_type = ``) => { },
 	};
 
 	/**
@@ -5979,6 +5991,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		g_keycons[`${_type}GroupNum`] = g_keycons[`${_type}Groups`][getNextNum(_scrollNum, `${_type}Groups`, g_keycons[`${_type}GroupNum`])];
 		g_keyObj[`${_type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`]);
 		viewGroup(_type);
+		if (_type === `stepRtn`) {
+			keyConfigInit(g_kcType);
+		}
 	};
 
 	/**
@@ -6028,16 +6043,16 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {string} _type 
 	 * @param {object} obj (baseX) 
 	 */
-	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20, cssName } = {}) => {
+	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20, baseY = 0, cssName } = {}) => {
 		if (g_headerObj[`${_type}Use`] && g_keycons[`${_type}Groups`].length > 1) {
 			const typeName = toCapitalize(_type);
 			multiAppend(divRoot,
-				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Group`, { x: baseX - 10, y: 37 }, cssName),
+				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Group`, { x: baseX - 10, y: baseY }, cssName),
 				makeKCButton(`lnk${typeName}Group`, ``, _ => setGroup(_type), {
-					x: baseX, y: 50, w: g_sWidth / 18, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
+					x: baseX, y: baseY + 13, w: g_sWidth / 18, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
 				}),
-				makeMiniKCButton(`lnk${typeName}Group`, `L`, _ => setGroup(_type, -1), { x: baseX - 10, y: 50 }),
-				makeMiniKCButton(`lnk${typeName}Group`, `R`, _ => setGroup(_type), { x: baseX + g_sWidth / 18, y: 50 }),
+				makeMiniKCButton(`lnk${typeName}Group`, `L`, _ => setGroup(_type, -1), { x: baseX - 10, y: baseY + 13 }),
+				makeMiniKCButton(`lnk${typeName}Group`, `R`, _ => setGroup(_type), { x: baseX + g_sWidth / 18, y: baseY + 13 }),
 			);
 		} else {
 			g_keycons[`${_type}GroupNum`] = 0;
@@ -6058,19 +6073,13 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			g_lblPosObj.kcMsg, g_cssObj.keyconfig_warning
 		),
 
-		// キーコンフィグタイプ切替ボタン
-		makeKCButtonHeader(`lblKcType`, `ConfigType`, { x: 10 }, g_cssObj.keyconfig_ConfigType),
-		makeKCButton(`lnkKcType`, g_kcType, _ => setConfigType(), {
-			x: 20, title: g_msgObj.configType, cxtFunc: _ => setConfigType(-1),
-		}),
-
 		// キーカラータイプ切替ボタン
-		makeKCButtonHeader(`lblcolorType`, `ColorType`, {}, g_cssObj.keyconfig_ColorType),
+		makeKCButtonHeader(`lblcolorType`, `ColorType`, { x: 10 }, g_cssObj.keyconfig_ColorType),
 		makeKCButton(`lnkColorType`, g_colorType, _ => setColorType(), {
-			title: g_msgObj.colorType, cxtFunc: _ => setColorType(-1),
+			x: 20, title: g_msgObj.colorType, cxtFunc: _ => setColorType(-1),
 		}),
-		makeMiniKCButton(`lnkColorType`, `L`, _ => setColorType(-1)),
-		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: g_sWidth - 20 }),
+		makeMiniKCButton(`lnkColorType`, `L`, _ => setColorType(-1), { x: 10 }),
+		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: 20 + g_sWidth / 6 }),
 	);
 
 	if (g_headerObj.imgType.length > 1) {
@@ -6089,6 +6098,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
 	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorType });
 	makeGroupButton(`shuffle`, { baseX: g_sWidth * 11 / 12 - 10, cssName: g_cssObj.settings_Shuffle });
+	makeGroupButton(`stepRtn`, { baseY: 37, cssName: g_cssObj.settings_Adjustment });
 
 	/**
 	 * カーソル位置の設定
@@ -6101,10 +6111,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		cursor.style.left = `${nextLeft}px`;
 		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 57;
 		cursor.style.top = `${baseY + C_KYC_REPHEIGHT * g_currentk}px`;
-		if (g_kcType !== C_FLG_ALL) {
-			g_kcType = (g_currentk === 0 ? `Main` : `Replaced`);
-			lnkKcType.textContent = getStgDetailName(g_kcType);
-		}
+		g_kcType = (g_currentk === 0 ? `Main` : `Replaced`);
 
 		// 次の位置が見えなくなったらkeyconSpriteの位置を調整する
 		adjustScrollPoint(nextLeft);
@@ -6152,7 +6159,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const setConfigType = (_scrollNum = 1) => {
 		g_kcType = g_keycons.configTypes[getNextNum(_scrollNum, `configTypes`, g_kcType)];
 		changeConfigCursor(g_keycons.cursorNum);
-		lnkKcType.textContent = getStgDetailName(g_kcType);
 	};
 
 	/**
@@ -6539,12 +6545,12 @@ const changeSetColor = _ => {
 		'Shadow': (isDefault ? defaultType : `${scoreIdHeader}Default`),
 	};
 	Object.keys(currentTypes).forEach(pattern => {
-		g_headerObj[`set${pattern}Color`] = copyArray2d(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]);
+		g_headerObj[`set${pattern}Color`] = structuredClone(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]);
 		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
-			g_headerObj[`frz${pattern}Color`][j] = copyArray2d(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]);
+			g_headerObj[`frz${pattern}Color`][j] = structuredClone(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]);
 		}
 		if (!isDefault) {
-			g_headerObj[`set${pattern}Color`] = copyArray2d(g_headerObj[`set${pattern}Color${g_colorType}`]);
+			g_headerObj[`set${pattern}Color`] = structuredClone(g_headerObj[`set${pattern}Color${g_colorType}`]);
 		}
 	});
 
@@ -6787,7 +6793,7 @@ const loadingScoreInit = async () => {
 
 	// Motionオプション適用時の矢印別の速度を取得（配列形式）
 	const motionOnFrame = setMotionOnFrame();
-	g_workObj.motionOnFrames = copyArray2d(motionOnFrame);
+	g_workObj.motionOnFrames = structuredClone(motionOnFrame);
 
 	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
 	const firstFrame = (g_scoreObj.frameNum === 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
@@ -6803,8 +6809,8 @@ const loadingScoreInit = async () => {
 	// フレーム・曲開始位置調整
 	let preblankFrame = 0;
 	if (g_scoreObj.frameNum === 0) {
-		if (firstArrowFrame - C_MAX_ADJUSTMENT < arrivalFrame) {
-			preblankFrame = arrivalFrame - firstArrowFrame + C_MAX_ADJUSTMENT;
+		if (firstArrowFrame - g_limitObj.adjustment < arrivalFrame) {
+			preblankFrame = arrivalFrame - firstArrowFrame + g_limitObj.adjustment;
 
 			// 譜面データの再読み込み
 			const noteExistObj = {
@@ -6817,7 +6823,7 @@ const loadingScoreInit = async () => {
 			for (let j = 0; j < keyNum; j++) {
 				Object.keys(noteExistObj).forEach(name => {
 					if (tmpObj[`${name}Data`][j] !== undefined && noteExistObj[name]) {
-						g_scoreObj[`${name}Data`][j] = copyArray2d(tmpObj[`${name}Data`][j]);
+						g_scoreObj[`${name}Data`][j] = structuredClone(tmpObj[`${name}Data`][j]);
 					}
 				});
 			}
@@ -6936,7 +6942,7 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
 
 	// indexに従って並べ替え
 	g_typeLists.arrow.forEach(type => {
-		const tmpData = copyArray2d(g_scoreObj[`${type}Data`]);
+		const tmpData = structuredClone(g_scoreObj[`${type}Data`]);
 		for (let i = 0; i < _keyNum; i++) {
 			g_scoreObj[`${type}Data`][i] = tmpData[index[i]] || [];
 		}
@@ -6950,7 +6956,7 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
  */
 const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
 	// シャッフルグループごとにミラー
-	const style = copyArray2d(_shuffleGroup).map(_group => _group.reverse());
+	const style = structuredClone(_shuffleGroup).map(_group => _group.reverse());
 	if (_asymFlg) {
 		// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
 		style.forEach((group, i) => {
@@ -6971,7 +6977,7 @@ const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
  */
 const applyRandom = (_keyNum, _shuffleGroup) => {
 	// シャッフルグループごとにシャッフル(Fisher-Yates)
-	const style = copyArray2d(_shuffleGroup).map(_group => {
+	const style = structuredClone(_shuffleGroup).map(_group => {
 		for (let i = _group.length - 1; i > 0; i--) {
 			const random = Math.floor(Math.random() * (i + 1));
 			const tmp = _group[i];
@@ -7559,7 +7565,7 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
 
 		data.filter(data => hasVal(data)).forEach(_objData => {
 			if (_objData[0] !== ``) {
-				if (_objData[0] < tmpFirstNum && _objData[0] + C_MAX_ADJUSTMENT > 0) {
+				if (_objData[0] < tmpFirstNum && _objData[0] + g_limitObj.adjustment > 0) {
 					tmpFirstNum = _objData[0];
 				}
 			}
@@ -7706,7 +7712,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj[`mk${_header}Length`][_j][_k] = getFrzLength(_speedOnFrame, _data[_k], _data[_k + 1]);
 			}
 		} else if (_frzFlg && g_workObj[`mk${_header}Length`][_j] !== undefined) {
-			g_workObj[`mk${_header}Length`][_j] = copyArray2d(g_workObj[`mk${_header}Length`][_j].slice(_k + 2));
+			g_workObj[`mk${_header}Length`][_j] = structuredClone(g_workObj[`mk${_header}Length`][_j].slice(_k + 2));
 		}
 	};
 
@@ -7747,7 +7753,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 				// 出現位置が開始前の場合は除外
 				if (_frzFlg && g_workObj[`mk${camelHeader}Length`][_j] !== undefined) {
-					g_workObj[`mk${camelHeader}Length`][_j] = copyArray2d(g_workObj[`mk${camelHeader}Length`][_j].slice(k + 2));
+					g_workObj[`mk${camelHeader}Length`][_j] = structuredClone(g_workObj[`mk${camelHeader}Length`][_j].slice(k + 2));
 				}
 				break;
 
@@ -7813,7 +7819,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			for (let k = 0; k < delIdx; k++) {
 				_data.shift();
 			}
-			return copyArray2d(_data);
+			return structuredClone(_data);
 		}
 		return [];
 	};
@@ -8229,10 +8235,10 @@ const getArrowSettings = _ => {
 	g_workObj.scrollDir = [];
 	g_workObj.scrollDirDefault = [];
 	g_workObj.dividePos = [];
-	g_workObj.stepRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
-	g_workObj.stepHitRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
-	g_workObj.arrowRtn = copyArray2d(g_keyObj[`stepRtn${keyCtrlPtn}`]);
-	g_workObj.keyCtrl = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
+	g_workObj.stepRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.stepHitRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.arrowRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
 
@@ -8275,6 +8281,7 @@ const getArrowSettings = _ => {
 		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
 
 	g_stateObj.autoAll = (g_stateObj.autoPlay === C_FLG_ALL ? C_FLG_ON : C_FLG_OFF);
+	g_workObj.hitPosition = (g_stateObj.autoAll ? 0 : g_stateObj.hitPosition);
 	changeSetColor();
 
 	for (let j = 0; j < keyNum; j++) {
@@ -8319,8 +8326,9 @@ const getArrowSettings = _ => {
 		// 次回キーコンフィグ画面へ戻ったとき、保存済みキーコンフィグ設定が表示されるようにする
 		g_keyObj.prevKey = `Dummy`;
 
-		// ローカルストレージへAdjustment, Volume, Display関連設定を保存
+		// ローカルストレージへAdjustment, hitPosition, Volume, colorType設定を保存
 		g_localStorage.adjustment = g_stateObj.adjustment;
+		g_localStorage.hitPosition = g_stateObj.hitPosition;
 		g_localStorage.volume = g_stateObj.volume;
 		g_localStorage.colorType = g_colorType;
 
@@ -8338,7 +8346,7 @@ const getArrowSettings = _ => {
 		storageObj[`keyCtrl${addKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 		if (g_keyObj.currentPtn !== -1) {
 			storageObj[`keyCtrlPtn${addKey}`] = g_keyObj.currentPtn;
-			g_keyObj[`keyCtrl${keyCtrlPtn}`] = copyArray2d(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
+			g_keyObj[`keyCtrl${keyCtrlPtn}`] = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
 		}
 
 		// カラーセットの保存（キー別）
@@ -8543,8 +8551,8 @@ const mainInit = _ => {
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
 	const arrowSprite = [
-		createEmptySprite(mainSprite, `arrowSprite0`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-		createEmptySprite(mainSprite, `arrowSprite1`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+		createEmptySprite(mainSprite, `arrowSprite0`, { y: g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+		createEmptySprite(mainSprite, `arrowSprite1`, { y: -g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
@@ -9836,6 +9844,7 @@ const changeHitFrz = (_j, _k, _name) => {
 
 	const styfrzBar = $id(`${_name}Bar${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
+	const styfrzTopShadow = $id(`${_name}TopShadow${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
 	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 
@@ -9846,9 +9855,12 @@ const changeHitFrz = (_j, _k, _name) => {
 	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
 	const delFrzMotionLength = sumData(g_workObj.motionOnFrames.slice(0, currentFrz.boostCnt + 1));
 
+	// 判定位置調整分の補正
+	const hitPos = g_workObj.hitPosition * g_workObj.scrollDir[_j];
+
 	currentFrz.frzBarLength -= (delFrzLength + delFrzMotionLength) * currentFrz.dir;
-	currentFrz.barY -= (delFrzLength + delFrzMotionLength) * currentFrz.dividePos;
-	currentFrz.btmY -= delFrzLength + delFrzMotionLength;
+	currentFrz.barY -= (delFrzLength + delFrzMotionLength) * currentFrz.dividePos + hitPos;
+	currentFrz.btmY -= delFrzLength + delFrzMotionLength + hitPos;
 	currentFrz.y += delFrzLength;
 	currentFrz.isMoving = false;
 
@@ -9857,6 +9869,7 @@ const changeHitFrz = (_j, _k, _name) => {
 	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
 	styfrzBtm.top = `${currentFrz.btmY}px`;
 	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
+	styfrzTopShadow.opacity = 0;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
 		if (g_headerObj.frzShadowColor[colorPos][1] !== ``) {
@@ -9881,9 +9894,15 @@ const changeFailedFrz = (_j, _k) => {
 	$id(`frzHit${_j}`).opacity = 0;
 	$id(`frzTop${frzNo}`).display = C_DIS_INHERIT;
 	$id(`frzTop${frzNo}`).background = `#cccccc`;
+	$id(`frzTopShadow${frzNo}`).opacity = 1;
 	$id(`frzBar${frzNo}`).background = `#999999`;
 	$id(`frzBar${frzNo}`).opacity = 1;
 	$id(`frzBtm${frzNo}`).background = `#cccccc`;
+
+	// 判定位置調整分の補正
+	const hitPos = g_workObj.hitPosition * g_workObj.scrollDir[_j];
+	$id(`frzTop${frzNo}`).top = `${- hitPos}px`;
+	$id(`frzTopShadow${frzNo}`).top = `${- hitPos}px`;
 
 	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
@@ -9922,7 +9941,7 @@ const judgeArrow = _j => {
 			displayDiff(_difFrame);
 
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
-			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15}px`;
+			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_workObj.hitPosition * g_workObj.scrollDir[_j]}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
 			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
