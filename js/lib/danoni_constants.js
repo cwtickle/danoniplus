@@ -862,9 +862,13 @@ const g_keycons = {
 
     shuffleGroups: [0],
     shuffleGroupNum: 0,
+
+    stepRtnGroups: [0],
+    stepRtnGroupNum: 0,
+
     groupSelf: `S`,
 
-    groups: [`color`, `shuffle`],
+    groups: [`color`, `shuffle`, `stepRtn`],
 
     cursorNumList: [],
     cursorNum: 0,
@@ -1390,6 +1394,7 @@ const g_cssObj = {
     settings_Disabled: `settings_Disabled`,
     settings_FadeinBar: `settings_FadeinBar`,
     settings_Shuffle: `settings_Shuffle`,
+    settings_Adjustment: `settings_Adjustment`,
 
     keyconfig_warning: `keyconfig_warning`,
     keyconfig_ConfigType: `keyconfig_ConfigType`,
@@ -1610,39 +1615,40 @@ const g_keyObj = {
 
     // 基本パターン (矢印回転、AAキャラクタ)
     // - AAキャラクタの場合、キャラクタ名を指定
-    stepRtn5_0: [0, -90, 90, 180, `onigiri`],
-    stepRtn7_0: [0, -45, -90, `onigiri`, 90, 135, 180],
-    stepRtn7i_0: [`giko`, `onigiri`, `iyo`, 0, -90, 90, 180],
-    stepRtn8_0: [0, -45, -90, `onigiri`, 90, 135, 180, `onigiri`],
-    stepRtn9A_0: [0, -90, 90, 180, `onigiri`, 0, -90, 90, 180],
-    stepRtn9B_0: [45, 0, -45, -90, `onigiri`, 90, 135, 180, 225],
-    stepRtn9i_0: [0, -90, 90, 180, `monar`, `giko`, `c`, `morara`, `onigiri`],
-    stepRtn11_0: [0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
-    stepRtn11L_0: [0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
-    stepRtn11W_0: [`giko`, 135, 45, `iyo`, 0, -45, -90, `onigiri`, 90, 135, 180],
-    stepRtn11i_0: [0, -90, `giko`, 90, 180, `onigiri`, 0, -90, `iyo`, 90, 180],
-    stepRtn12_0: [0, -90, 90, 180, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
-    stepRtn13_0: [0, -90, 90, 180, 0, -90, 90, 180, `onigiri`, 0, -90, 90, 180],
-    stepRtn14_0: [45, 0, -90, 90, 180, 135, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
-    stepRtn14i_0: [`giko`, `onigiri`, `iyo`, 0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
-    stepRtn15A_0: [0, -90, 90, 180, 0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
-    stepRtn16i_0: [`giko`, `onigiri`, `iyo`, 0, -90, 90, 180, 45, 0, -45, -90, `onigiri`, 90, 135, 180, 225],
-    stepRtn17_0: [0, -22.5, -45, -67.5, -90, -112.5, -135, -157.5, `onigiri`,
+    stepRtn5_0_0: [0, -90, 90, 180, `onigiri`],
+    stepRtn7_0_0: [0, -45, -90, `onigiri`, 90, 135, 180],
+    stepRtn7i_0_0: [`giko`, `onigiri`, `iyo`, 0, -90, 90, 180],
+    stepRtn8_0_0: [0, -45, -90, `onigiri`, 90, 135, 180, `onigiri`],
+    stepRtn9A_0_0: [0, -90, 90, 180, `onigiri`, 0, -90, 90, 180],
+    stepRtn9B_0_0: [45, 0, -45, -90, `onigiri`, 90, 135, 180, 225],
+    stepRtn9i_0_0: [0, -90, 90, 180, `monar`, `giko`, `c`, `morara`, `onigiri`],
+    stepRtn11_0_0: [0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
+    stepRtn11L_0_0: [0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
+    stepRtn11W_0_0: [`giko`, 135, 45, `iyo`, 0, -45, -90, `onigiri`, 90, 135, 180],
+    stepRtn11i_0_0: [0, -90, `giko`, 90, 180, `onigiri`, 0, -90, `iyo`, 90, 180],
+    stepRtn12_0_0: [0, -90, 90, 180, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
+    stepRtn13_0_0: [0, -90, 90, 180, 0, -90, 90, 180, `onigiri`, 0, -90, 90, 180],
+    stepRtn14_0_0: [45, 0, -90, 90, 180, 135, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
+    stepRtn14i_0_0: [`giko`, `onigiri`, `iyo`, 0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
+    stepRtn15A_0_0: [0, -90, 90, 180, 0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
+    stepRtn16i_0_0: [`giko`, `onigiri`, `iyo`, 0, -90, 90, 180, 45, 0, -45, -90, `onigiri`, 90, 135, 180, 225],
+    stepRtn17_0_0: [0, -22.5, -45, -67.5, -90, -112.5, -135, -157.5, `onigiri`,
         22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180],
-    stepRtn23_0: [0, -90, 90, 180, 0, -90, 90, 180, 0, 30, 60, 90, 120, 150, 180, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
+    stepRtn23_0_0: [0, -90, 90, 180, 0, -90, 90, 180, 0, 30, 60, 90, 120, 150, 180, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
 
     // 変則パターン (矢印回転、AAキャラクタ)
     // - 末尾の番号をカウントアップさせることで実現できる。keyCtrlと合わせること
     // - 配列の数は、通常パターンと同数で無くてはいけない（keyCtrlも同様）
-    stepRtn5_1: [`onigiri`, 0, -90, 90, 180],
-    stepRtn8_1: [`onigiri`, 0, -45, -90, `onigiri`, 90, 135, 180],
-    stepRtn9i_1: [`monar`, `giko`, `c`, `morara`, `onigiri`, 0, -90, 90, 180],
-    stepRtn11i_1: [0, -135, `giko`, 45, 180, `onigiri`, 0, -135, `iyo`, 45, 180],
-    stepRtn17_1: [0, -45, -90, -135, `onigiri`, 45, 90, 135, 180,
+    stepRtn11i_0_1: [0, -135, `giko`, 45, 180, `onigiri`, 0, -135, `iyo`, 45, 180],
+
+    stepRtn5_1_0: [`onigiri`, 0, -90, 90, 180],
+    stepRtn8_1_0: [`onigiri`, 0, -45, -90, `onigiri`, 90, 135, 180],
+    stepRtn9i_1_0: [`monar`, `giko`, `c`, `morara`, `onigiri`, 0, -90, 90, 180],
+    stepRtn17_1_0: [0, -45, -90, -135, `onigiri`, 45, 90, 135, 180,
         -22.5, -67.5, -112.5, -157.5, 22.5, 67.5, 112.5, 157.5],
 
-    stepRtn5_2: [0, -90, `onigiri`, 90, 180],
-    stepRtn8_2: [`onigiri`, 0, 30, 60, 90, 120, 150, 180],
+    stepRtn5_2_0: [0, -90, `onigiri`, 90, 180],
+    stepRtn8_2_0: [`onigiri`, 0, 30, 60, 90, 120, 150, 180],
 
     // 各キーの区切り位置
     div9i_0: 6,
@@ -1983,11 +1989,9 @@ const g_copyKeyPtn = {
     '7_5': `8_4`,
     '7_6': `8_5`,
 
-    '11i_1': `11i_0`,
     '9A_1': `9A_0`,
     '9A_2': `9B_0`,
     '9A_3': `11i_0`,
-    '9A_4': `11i_1`,
     '9B_1': `9A_0`,
     '9B_2': `9A_1`,
 
@@ -2021,7 +2025,7 @@ const g_copyKeyPtn = {
 // キーパターンのコピー処理
 // ただし、すでに定義済みの場合は定義済みのものを優先する
 Object.keys(g_copyKeyPtn).forEach(keyPtnTo => {
-    let colorGr = 0, shuffleGr = 0;
+    let colorGr = 0, shuffleGr = 0, stepRtnGr = 0;
     const keyPtnFrom = g_copyKeyPtn[keyPtnTo];
     const copyKeyPtn = (_name, _from = keyPtnFrom, _to = keyPtnTo) => {
         if (g_keyObj[`${_name}${_to}`] === undefined) {
@@ -2042,8 +2046,11 @@ Object.keys(g_copyKeyPtn).forEach(keyPtnTo => {
         copyKeyPtn(`shuffle`, `${keyPtnFrom}_${shuffleGr}`, `${keyPtnTo}_${shuffleGr}`);
         shuffleGr++;
     }
+    while (g_keyObj[`stepRtn${keyPtnFrom}_${stepRtnGr}`] !== undefined) {
+        copyKeyPtn(`stepRtn`, `${keyPtnFrom}_${stepRtnGr}`, `${keyPtnTo}_${stepRtnGr}`);
+        stepRtnGr++;
+    }
     copyKeyPtn(`chara`);
-    copyKeyPtn(`stepRtn`);
     copyKeyPtn(`pos`);
     copyKeyPtn(`keyCtrl`);
     copyKeyPtn(`scrollDir`);
@@ -2551,6 +2558,7 @@ const g_lblNameObj = {
     ImgType: `ImgType`,
     ColorGroup: `ColorGr.`,
     ShuffleGroup: `ShuffleGr.`,
+    StepRtnGroup: `ShapeGr.`,
     KeyPattern: `KeyPattern`,
 
     j_maxCombo: `MaxCombo`,

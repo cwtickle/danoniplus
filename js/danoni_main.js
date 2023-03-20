@@ -2461,6 +2461,7 @@ const preheaderConvert = _dosObj => {
 	}
 
 	obj.jsData = [];
+	obj.stepRtnUse = true;
 
 	const setJsFiles = (_files, _defaultDir, _type = `custom`) => {
 		_files.forEach(file => {
@@ -3551,7 +3552,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 						}
 					} else {
 						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
-						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = list.split(`,`).map(n => parseInt(n, 10));
+						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = list.split(`,`).map(n => isNaN(Number(n)) ? n : parseInt(n, 10));
 						ptnCnt++;
 					}
 				});
@@ -3655,7 +3656,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) }
 		newKeyTripleParam(newKey, `color`);
 
 		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
-		newKeyMultiParam(newKey, `stepRtn`, toStringOrNumber, { errCd: `E_0103` });
+		newKeyTripleParam(newKey, `stepRtn`);
 
 		// キーコンフィグ (keyCtrlX_Y)
 		newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, { errCd: `E_0104`, baseCopyFlg: true });
@@ -5895,11 +5896,11 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			// 矢印の塗り部分
 			createColorObject2(`arrowShadow${j}`, {
 				x: keyconX, y: keyconY, background: hasVal(g_headerObj[`setShadowColor${g_colorType}`][colorPos]) ? getShadowColor(colorPos, arrowColor) : ``,
-				rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], styleName: `Shadow`, pointerEvents: `none`,
+				rotate: g_keyObj[`stepRtn${keyCtrlPtn}_${g_keycons.stepRtnGroupNum}`][j], styleName: `Shadow`, pointerEvents: `none`,
 			}),
 			// 矢印本体
 			createColorObject2(`arrow${j}`, {
-				x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}`][j], pointerEvents: `none`,
+				x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}_${g_keycons.stepRtnGroupNum}`][j], pointerEvents: `none`,
 			}),
 		);
 		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
@@ -5965,6 +5966,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				}
 			}
 		},
+		stepRtn: (_type = ``) => { },
 	};
 
 	/**
@@ -5989,6 +5991,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		g_keycons[`${_type}GroupNum`] = g_keycons[`${_type}Groups`][getNextNum(_scrollNum, `${_type}Groups`, g_keycons[`${_type}GroupNum`])];
 		g_keyObj[`${_type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`]);
 		viewGroup(_type);
+		if (_type === `stepRtn`) {
+			keyConfigInit(g_kcType);
+		}
 	};
 
 	/**
@@ -6038,16 +6043,16 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {string} _type 
 	 * @param {object} obj (baseX) 
 	 */
-	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20, cssName } = {}) => {
+	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20, baseY = 0, cssName } = {}) => {
 		if (g_headerObj[`${_type}Use`] && g_keycons[`${_type}Groups`].length > 1) {
 			const typeName = toCapitalize(_type);
 			multiAppend(divRoot,
-				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Group`, { x: baseX - 10, y: 37 }, cssName),
+				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Group`, { x: baseX - 10, y: baseY }, cssName),
 				makeKCButton(`lnk${typeName}Group`, ``, _ => setGroup(_type), {
-					x: baseX, y: 50, w: g_sWidth / 18, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
+					x: baseX, y: baseY + 13, w: g_sWidth / 18, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
 				}),
-				makeMiniKCButton(`lnk${typeName}Group`, `L`, _ => setGroup(_type, -1), { x: baseX - 10, y: 50 }),
-				makeMiniKCButton(`lnk${typeName}Group`, `R`, _ => setGroup(_type), { x: baseX + g_sWidth / 18, y: 50 }),
+				makeMiniKCButton(`lnk${typeName}Group`, `L`, _ => setGroup(_type, -1), { x: baseX - 10, y: baseY + 13 }),
+				makeMiniKCButton(`lnk${typeName}Group`, `R`, _ => setGroup(_type), { x: baseX + g_sWidth / 18, y: baseY + 13 }),
 			);
 		} else {
 			g_keycons[`${_type}GroupNum`] = 0;
@@ -6068,19 +6073,13 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			g_lblPosObj.kcMsg, g_cssObj.keyconfig_warning
 		),
 
-		// キーコンフィグタイプ切替ボタン
-		makeKCButtonHeader(`lblKcType`, `ConfigType`, { x: 10 }, g_cssObj.keyconfig_ConfigType),
-		makeKCButton(`lnkKcType`, g_kcType, _ => setConfigType(), {
-			x: 20, title: g_msgObj.configType, cxtFunc: _ => setConfigType(-1),
-		}),
-
 		// キーカラータイプ切替ボタン
-		makeKCButtonHeader(`lblcolorType`, `ColorType`, {}, g_cssObj.keyconfig_ColorType),
+		makeKCButtonHeader(`lblcolorType`, `ColorType`, { x: 10 }, g_cssObj.keyconfig_ColorType),
 		makeKCButton(`lnkColorType`, g_colorType, _ => setColorType(), {
-			title: g_msgObj.colorType, cxtFunc: _ => setColorType(-1),
+			x: 20, title: g_msgObj.colorType, cxtFunc: _ => setColorType(-1),
 		}),
-		makeMiniKCButton(`lnkColorType`, `L`, _ => setColorType(-1)),
-		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: g_sWidth - 20 }),
+		makeMiniKCButton(`lnkColorType`, `L`, _ => setColorType(-1), { x: 10 }),
+		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: 20 + g_sWidth / 6 }),
 	);
 
 	if (g_headerObj.imgType.length > 1) {
@@ -6099,6 +6098,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
 	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorType });
 	makeGroupButton(`shuffle`, { baseX: g_sWidth * 11 / 12 - 10, cssName: g_cssObj.settings_Shuffle });
+	makeGroupButton(`stepRtn`, { baseY: 37, cssName: g_cssObj.settings_Adjustment });
 
 	/**
 	 * カーソル位置の設定
@@ -6111,10 +6111,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		cursor.style.left = `${nextLeft}px`;
 		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 57;
 		cursor.style.top = `${baseY + C_KYC_REPHEIGHT * g_currentk}px`;
-		if (g_kcType !== C_FLG_ALL) {
-			g_kcType = (g_currentk === 0 ? `Main` : `Replaced`);
-			lnkKcType.textContent = getStgDetailName(g_kcType);
-		}
+		g_kcType = (g_currentk === 0 ? `Main` : `Replaced`);
 
 		// 次の位置が見えなくなったらkeyconSpriteの位置を調整する
 		adjustScrollPoint(nextLeft);
@@ -6162,7 +6159,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const setConfigType = (_scrollNum = 1) => {
 		g_kcType = g_keycons.configTypes[getNextNum(_scrollNum, `configTypes`, g_kcType)];
 		changeConfigCursor(g_keycons.cursorNum);
-		lnkKcType.textContent = getStgDetailName(g_kcType);
 	};
 
 	/**
