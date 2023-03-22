@@ -4322,6 +4322,9 @@ const createOptionWindow = _sprite => {
 			setDifficulty(true);
 			deleteChildspriteAll(`difList`);
 			makeDifList(difList, g_stateObj.filterKeys);
+			if (g_keyObj.prevKey !== g_keyObj.currentKey) {
+				g_keyObj.prevKey = g_keyObj.currentKey;
+			}
 		}, {
 			x: 430 + _scrollNum * 10, y: 40, w: 20, h: 20, siz: C_SIZ_JDGCNTS,
 		}, g_cssObj.button_Mini);
