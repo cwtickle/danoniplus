@@ -561,6 +561,9 @@ const g_settingBtnObj = {
 const g_limitObj = {
     adjustment: 30,
     hitPosition: 50,
+
+    densityDivision: 16,
+    densityMaxVals: 3,
 };
 const C_MAX_ADJUSTMENT = 30;
 const C_MAX_SPEED = 10;
