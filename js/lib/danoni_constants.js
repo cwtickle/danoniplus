@@ -2797,7 +2797,7 @@ const g_lang_msgObj = {
         imgType: `Change the appearance of sequences.`,
         colorGroup: `Change the sequences color group assignment pattern.`,
         shuffleGroup: `Change the shuffle group when Mirror, Asym-Mirror, Random or S-Random are selected.\nShuffle with the same numbers listed above.`,
-        stepRtnGroup: `Switches the type of notes, such as arrows, and the pattern regarding rotation. This can only be changed if it has been set in advance.`,
+        stepRtnGroup: `Switches the type of notes, such as arrows, and the pattern regarding rotation.\nThis can only be changed if it has been set in advance.`,
 
         pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,
         pickColorCopy: `Pressing this button will override the color scheme of the freeze arrow with the frame color of the arrow. \nIt also overrides the color of the freeze arrow on hit.`,
