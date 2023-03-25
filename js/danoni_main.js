@@ -403,6 +403,39 @@ const makeBaseArray = (_array, _minLength, _defaultVal) => {
 };
 
 /**
+ * 配列から上位N番目までに一致する位置を取得
+ * 
+ * ex. 上位3番目 (_num = 3) の場合
+ *     [1, 3, 2, 4, 6, 4, 5] -> [[4], [6], [3, 5]]
+ *     [9, 6, 9, 9, 8, 7, 5] -> [[0, 2, 3]]
+ * @param {array} _array 
+ * @param {number} _num 
+ * @returns 
+ */
+const getMaxValIdxs = (_array, _num = 1) => {
+	const getMaxVal = (_a, _b) => Math.max(_a, _b);
+	let baseArray = _array.concat();
+	const maxIdxs = [];
+
+	for (let j = 0; j < _num; j++) {
+		maxIdxs[j] = [];
+		const maxVal = baseArray.reduce((a, b) => getMaxVal(a, b));
+		_array.map((val, idx) => {
+			if (val === maxVal) {
+				maxIdxs[j].push(idx);
+			}
+		});
+		baseArray = baseArray.filter(val => val < maxVal);
+
+		// 同率で上位N番目まで取得した場合は途中で終了
+		if (baseArray.length === 0 || maxIdxs.flat().length >= _num) {
+			break;
+		}
+	}
+	return maxIdxs;
+};
+
+/**
  * 部分一致検索（リストのいずれかに合致、大小文字問わず）
  * @param {string} _str 検索文字
  * @param {array} _list 検索リスト (英字は小文字にする必要あり)
@@ -2199,7 +2232,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 	// 譜面密度グラフ用のデータ作成
 	const noteCnt = { arrow: [], frz: [] };
-	const densityData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
+	const densityData = [...Array(g_limitObj.densityDivision)].fill(0);
 	let allData = 0;
 
 	const types = [`arrow`, `frz`];
@@ -2214,7 +2247,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 				if (isNaN(parseFloat(note))) {
 					return;
 				}
-				const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+				const point = Math.floor((note - firstArrowFrame) / playingFrame * g_limitObj.densityDivision);
 				if (point >= 0) {
 					densityData[point]++;
 					noteCnt[types[m]][j]++;
@@ -2227,13 +2260,13 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 	fullData = fullData.filter(val => !isNaN(parseFloat(val))).sort((a, b) => a - b);
 	let pushCnt = 1;
-	const density2PushData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
-	const density3PushData = [...Array(C_LEN_DENSITY_DIVISION)].fill(0);
+	const density2PushData = [...Array(g_limitObj.densityDivision)].fill(0);
+	const density3PushData = [...Array(g_limitObj.densityDivision)].fill(0);
 	fullData.forEach((note, j) => {
 		if (fullData[j] === fullData[j + 1]) {
 			pushCnt++;
 		} else {
-			const point = Math.floor((note - firstArrowFrame) / playingFrame * C_LEN_DENSITY_DIVISION);
+			const point = Math.floor((note - firstArrowFrame) / playingFrame * g_limitObj.densityDivision);
 			if (point >= 0) {
 				if (pushCnt >= 2) {
 					density2PushData[point] += pushCnt;
@@ -2252,8 +2285,8 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 	const storeDensity = _densityData => {
 		const dataList = [];
-		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
-			dataList.push(allData === 0 ? 0 : Math.round(_densityData[j] / allData * C_LEN_DENSITY_DIVISION * 10000) / 100);
+		for (let j = 0; j < g_limitObj.densityDivision; j++) {
+			dataList.push(allData === 0 ? 0 : Math.round(_densityData[j] / allData * g_limitObj.densityDivision * 10000) / 100);
 		}
 		return dataList;
 	};
@@ -2270,7 +2303,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	g_detailObj.density2PushDiff[_scoreId] = diffArray(g_detailObj.density2PushData[_scoreId], g_detailObj.density3PushData[_scoreId]);
 	g_detailObj.density3PushDiff[_scoreId] = g_detailObj.density3PushData[_scoreId].concat();
 
-	g_detailObj.maxDensity[_scoreId] = densityData.indexOf(Math.max.apply(null, densityData));
+	g_detailObj.maxDensity[_scoreId] = getMaxValIdxs(densityData, g_limitObj.densityMaxVals).flat();
 
 	g_detailObj.arrowCnt[_scoreId] = noteCnt.arrow.concat();
 	g_detailObj.frzCnt[_scoreId] = noteCnt.frz.concat();
@@ -4601,12 +4634,12 @@ const createOptionWindow = _sprite => {
 		const canvas = document.querySelector(`#graphDensity`);
 		const context = canvas.getContext(`2d`);
 		drawBaseLine(context);
-		for (let j = 0; j < C_LEN_DENSITY_DIVISION; j++) {
+		for (let j = 0; j < g_limitObj.densityDivision; j++) {
 			context.beginPath();
 			[``, `2Push`, `3Push`].forEach(val => {
-				context.fillStyle = (j === g_detailObj.maxDensity[_scoreId] ? g_graphColorObj[`max${val}`] : g_graphColorObj[`default${val}`]);
-				context.fillRect(16 * j * 16 / C_LEN_DENSITY_DIVISION + 30, 195 - 9 * g_detailObj[`density${val}Data`][_scoreId][j] / 10,
-					15.5 * 16 / C_LEN_DENSITY_DIVISION, 9 * g_detailObj[`density${val}Diff`][_scoreId][j] / 10
+				context.fillStyle = (g_detailObj.maxDensity[_scoreId].includes(j) ? g_graphColorObj[`max${val}`] : g_graphColorObj[`default${val}`]);
+				context.fillRect(16 * j * 16 / g_limitObj.densityDivision + 30, 195 - 9 * g_detailObj[`density${val}Data`][_scoreId][j] / 10,
+					15.5 * 16 / g_limitObj.densityDivision, 9 * g_detailObj[`density${val}Diff`][_scoreId][j] / 10
 				);
 			});
 			context.stroke();
