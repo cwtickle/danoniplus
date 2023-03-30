@@ -7307,10 +7307,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @returns 
 	 */
 	const getPriorityList = (_header, _type, _scoreNo) => [
-		getRefList(`${_header}${_type}`, `${g_localeObj.val}${_scoreNo}_data`),
-		getRefList(`${_header}${_type}`, `${g_localeObj.val}_data`),
-		getRefList(`${_header}${_type}`, `${_scoreNo}_data`),
-		getRefList(`${_header}${_type}`, `_data`)
+		getRefList(_header, `${_type}${g_localeObj.val}${_scoreNo}_data`),
+		getRefList(_header, `${_type}${g_localeObj.val}_data`),
+		getRefList(_header, `${_type}${_scoreNo}_data`),
+		getRefList(_header, `${_type}_data`)
 	];
 
 	/**
@@ -7440,15 +7440,16 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	/**
 	 * リザルトモーションデータ(結果画面用背景・マスクデータ)の分解
 	 * @param {string} _header 
+	 * @param {string} _type
 	 * @param {string} _scoreNo 
-	 * @param {string} _defaultHeader 
+	 * @param {string} _defaultType 
 	 */
-	const makeBackgroundResultData = (_header, _scoreNo, _defaultHeader = ``) => {
+	const makeBackgroundResultData = (_header, _type, _scoreNo, _defaultType = ``) => {
 		const dataList = [];
-		const addResultDataList = _headerType => dataList.push(...getPriorityList(``, _headerType, _scoreNo));
-		addResultDataList(_header);
-		if (_defaultHeader !== ``) {
-			addResultDataList(_defaultHeader);
+		const addResultDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
+		addResultDataList(_type);
+		if (_defaultType !== ``) {
+			addResultDataList(_defaultType);
 		}
 
 		const data = dataList.find((v) => v !== undefined);
@@ -7526,9 +7527,9 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	} else {
 		g_animationData.forEach(sprite => {
 			[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] =
-				makeBackgroundResultData(`${sprite}result`, scoreIdHeader);
+				makeBackgroundResultData(sprite, `result`, scoreIdHeader);
 			[g_headerObj[`${sprite}FailedData`], g_headerObj[`${sprite}FailedMaxDepth`]] =
-				makeBackgroundResultData(`${sprite}failed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `${sprite}result`);
+				makeBackgroundResultData(sprite, `failed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `result`);
 		});
 	}
 
