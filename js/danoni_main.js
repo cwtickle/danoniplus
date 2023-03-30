@@ -7439,15 +7439,15 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	/**
 	 * リザルトモーションデータ(結果画面用背景・マスクデータ)の分解
-	 * @param {string} _header 
-	 * @param {string} _type
-	 * @param {string} _scoreNo 
-	 * @param {string} _defaultType 
+	 * @param {string} _header 背景、マスク (back, mask)
+	 * @param {string} _resultType リザルトモーションの種類 (result, failedB, failedS)
+	 * @param {string} _scoreNo 譜面番号
+	 * @param {string} _defaultType _resultTypeが無いときの代替名
 	 */
-	const makeBackgroundResultData = (_header, _type, _scoreNo, _defaultType = ``) => {
+	const makeBackgroundResultData = (_header, _resultType, _scoreNo, _defaultType = ``) => {
 		const dataList = [];
 		const addResultDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
-		addResultDataList(_type);
+		addResultDataList(_resultType);
 		if (_defaultType !== ``) {
 			addResultDataList(_defaultType);
 		}
