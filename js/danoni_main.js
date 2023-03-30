@@ -7289,7 +7289,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	/**
 	 * 譜面データに別の関連名が含まれていた場合、関連名の変数を返す
-	 * 例) |back2A_data=back_data| -> back_dataで定義された値を使用
+	 * 例) |backA2_data=back_data| -> back_dataで定義された値を使用
 	 * @param {string} _header 
 	 * @param {string} _dataName 
 	 * @returns 
@@ -7535,8 +7535,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	// キー変化定義
 	obj.keychFrames = [0];
 	obj.keychTarget = [`0`];
-	if (hasVal(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`])) {
-		const keychdata = splitLF2(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`], `,`);
+	if (hasVal(getRefList(`keych`, `${scoreIdHeader}_data`))) {
+		const keychdata = splitLF2(getRefList(`keych`, `${scoreIdHeader}_data`), `,`);
 		obj.keychFrames.push(...keychdata.filter((val, j) => j % 2 === 0));
 		obj.keychTarget.push(...keychdata.filter((val, j) => j % 2 === 1));
 	}
