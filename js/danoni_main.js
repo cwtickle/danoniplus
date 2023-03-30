@@ -7164,10 +7164,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _footer 
 	 */
 	const setSpeedData = (_header, _scoreNo, _footer = `_data`) => {
+		const dosSpeedData = getRefList(_header, `${_scoreNo}${_footer}`);
 		const speedData = [];
 
-		if (hasVal(_dosObj[`${_header}${_scoreNo}${_footer}`]) && g_stateObj.d_speed === C_FLG_ON) {
-			const tmpArrayData = splitLF(_dosObj[`${_header}${_scoreNo}${_footer}`]);
+		if (hasVal(dosSpeedData) && g_stateObj.d_speed === C_FLG_ON) {
+			const tmpArrayData = splitLF(dosSpeedData);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpSpeedData = tmpData.split(`,`);
@@ -7206,11 +7207,12 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	const setColorData = (_header, _scoreNo) => {
+		const dosColorData = getRefList(_header, `${_scoreNo}_data`);
 		const colorData = [];
 		const allFlg = (_header.charAt(0) === `a`);
 
-		if (hasVal(_dosObj[`${_header}${_scoreNo}_data`]) && g_stateObj.d_color === C_FLG_ON) {
-			const tmpArrayData = splitLF(_dosObj[`${_header}${_scoreNo}_data`]);
+		if (hasVal(dosColorData) && g_stateObj.d_color === C_FLG_ON) {
+			const tmpArrayData = splitLF(dosColorData);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpColorData = tmpData.split(`,`);
@@ -7239,7 +7241,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	const setCssMotionData = (_header, _scoreNo) => {
-		const dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`] || _dosObj[`${_header}Motion_data`];
+		const dosCssMotionData = getRefList(`${_header}Motion`, `${_scoreNo}_data`) || getRefList(`${_header}Motion`, `_data`);
 		const cssMotionData = [];
 
 		if (hasVal(dosCssMotionData) && g_stateObj.d_arroweffect === C_FLG_ON) {
@@ -7265,7 +7267,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	const setScrollchData = (_scoreNo) => {
-		const dosScrollchData = _dosObj[`scrollch${_scoreNo}_data`] || _dosObj.scrollch_data;
+		const dosScrollchData = getRefList(`scrollch`, `${_scoreNo}_data`) || getRefList(`scrollch`, `_data`);
 		const scrollchData = [];
 
 		if (hasVal(dosScrollchData)) {
@@ -7286,6 +7288,18 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	};
 
 	/**
+	 * 譜面データに別の関連名が含まれていた場合、関連名の変数を返す
+	 * 例) |back2A_data=back_data| -> back_dataで定義された値を使用
+	 * @param {string} _header 
+	 * @param {string} _dataName 
+	 * @returns 
+	 */
+	const getRefList = (_header, _dataName) => {
+		const data = _dosObj[`${_header}${_dataName}`];
+		return data?.startsWith(_header) ? _dosObj[data] : data;
+	}
+
+	/**
 	 * 譜面データの優先順配列の取得
 	 * @param {string} _header 
 	 * @param {string} _type 
@@ -7293,10 +7307,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @returns 
 	 */
 	const getPriorityList = (_header, _type, _scoreNo) => [
-		_dosObj[`${_header}${_type}${g_localeObj.val}${_scoreNo}_data`],
-		_dosObj[`${_header}${_type}${g_localeObj.val}_data`],
-		_dosObj[`${_header}${_type}${_scoreNo}_data`],
-		_dosObj[`${_header}${_type}_data`]
+		getRefList(`${_header}${_type}`, `${g_localeObj.val}${_scoreNo}_data`),
+		getRefList(`${_header}${_type}`, `${g_localeObj.val}_data`),
+		getRefList(`${_header}${_type}`, `${_scoreNo}_data`),
+		getRefList(`${_header}${_type}`, `_data`)
 	];
 
 	/**
