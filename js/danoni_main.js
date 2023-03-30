@@ -7446,10 +7446,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	const makeBackgroundResultData = (_header, _resultType, _scoreNo, _defaultType = ``) => {
 		const dataList = [];
-		const addResultDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
-		addResultDataList(_resultType);
+		const addDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
+		addDataList(_resultType);
 		if (_defaultType !== ``) {
-			addResultDataList(_defaultType);
+			addDataList(_defaultType);
 		}
 
 		const data = dataList.find((v) => v !== undefined);
