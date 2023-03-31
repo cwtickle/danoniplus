@@ -3217,15 +3217,22 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 
 	const obj = {};
 	const scoreIdHeader = setScoreIdHeader(scoreId);
+	const getRefData = (_header, _dataName) => {
+		const data = _dosObj[`${_header}${_dataName}`];
+		return data?.startsWith(_header) ? _dosObj[data] : data;
+	}
 
 	[``, `Shadow`].forEach(pattern => {
-		const _name = `set${pattern}Color${scoreIdHeader}`;
-		const _frzName = `frz${pattern}Color${scoreIdHeader}`;
-		const _arrowInit = `set${pattern}ColorInit`;
-		const _frzInit = `frz${pattern}ColorInit`;
+		const _arrowCommon = `set${pattern}Color`;
+		const _frzCommon = `frz${pattern}Color`;
 
-		const arrowColorTxt = _dosObj[_name] || _dosObj[`set${pattern}Color`];
-		const frzColorTxt = _dosObj[_frzName] || _dosObj[`frz${pattern}Color`];
+		const _name = `${_arrowCommon}${scoreIdHeader}`;
+		const _frzName = `${_frzCommon}${scoreIdHeader}`;
+		const _arrowInit = `${_arrowCommon}Init`;
+		const _frzInit = `${_frzCommon}Init`;
+
+		const arrowColorTxt = getRefData(_arrowCommon, scoreIdHeader) || _dosObj[_arrowCommon];
+		const frzColorTxt = getRefData(_frzCommon, scoreIdHeader) || _dosObj[_frzCommon];
 
 		// 矢印色
 		Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
@@ -7164,10 +7171,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _footer 
 	 */
 	const setSpeedData = (_header, _scoreNo, _footer = `_data`) => {
+		const dosSpeedData = getRefData(_header, `${_scoreNo}${_footer}`);
 		const speedData = [];
 
-		if (hasVal(_dosObj[`${_header}${_scoreNo}${_footer}`]) && g_stateObj.d_speed === C_FLG_ON) {
-			const tmpArrayData = splitLF(_dosObj[`${_header}${_scoreNo}${_footer}`]);
+		if (hasVal(dosSpeedData) && g_stateObj.d_speed === C_FLG_ON) {
+			const tmpArrayData = splitLF(dosSpeedData);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpSpeedData = tmpData.split(`,`);
@@ -7206,11 +7214,12 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	const setColorData = (_header, _scoreNo) => {
+		const dosColorData = getRefData(_header, `${_scoreNo}_data`);
 		const colorData = [];
 		const allFlg = (_header.charAt(0) === `a`);
 
-		if (hasVal(_dosObj[`${_header}${_scoreNo}_data`]) && g_stateObj.d_color === C_FLG_ON) {
-			const tmpArrayData = splitLF(_dosObj[`${_header}${_scoreNo}_data`]);
+		if (hasVal(dosColorData) && g_stateObj.d_color === C_FLG_ON) {
+			const tmpArrayData = splitLF(dosColorData);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpColorData = tmpData.split(`,`);
@@ -7239,7 +7248,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	const setCssMotionData = (_header, _scoreNo) => {
-		const dosCssMotionData = _dosObj[`${_header}Motion${_scoreNo}_data`] || _dosObj[`${_header}Motion_data`];
+		const dosCssMotionData = getRefData(`${_header}Motion`, `${_scoreNo}_data`) || _dosObj[`${_header}Motion_data`];
 		const cssMotionData = [];
 
 		if (hasVal(dosCssMotionData) && g_stateObj.d_arroweffect === C_FLG_ON) {
@@ -7265,7 +7274,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	const setScrollchData = (_scoreNo) => {
-		const dosScrollchData = _dosObj[`scrollch${_scoreNo}_data`] || _dosObj.scrollch_data;
+		const dosScrollchData = getRefData(`scrollch`, `${_scoreNo}_data`) || _dosObj.scrollch_data;
 		const scrollchData = [];
 
 		if (hasVal(dosScrollchData)) {
@@ -7286,6 +7295,18 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	};
 
 	/**
+	 * 譜面データに別の関連名が含まれていた場合、関連名の変数を返す
+	 * 例) |backA2_data=back_data| -> back_dataで定義された値を使用
+	 * @param {string} _header 
+	 * @param {string} _dataName 
+	 * @returns 
+	 */
+	const getRefData = (_header, _dataName) => {
+		const data = _dosObj[`${_header}${_dataName}`];
+		return data?.startsWith(_header) ? _dosObj[data] : data;
+	}
+
+	/**
 	 * 譜面データの優先順配列の取得
 	 * @param {string} _header 
 	 * @param {string} _type 
@@ -7293,10 +7314,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @returns 
 	 */
 	const getPriorityList = (_header, _type, _scoreNo) => [
-		_dosObj[`${_header}${_type}${g_localeObj.val}${_scoreNo}_data`],
-		_dosObj[`${_header}${_type}${g_localeObj.val}_data`],
-		_dosObj[`${_header}${_type}${_scoreNo}_data`],
-		_dosObj[`${_header}${_type}_data`]
+		getRefData(_header, `${_type}${g_localeObj.val}${_scoreNo}_data`),
+		getRefData(_header, `${_type}${g_localeObj.val}_data`),
+		getRefData(_header, `${_type}${_scoreNo}_data`),
+		getRefData(_header, `${_type}_data`)
 	];
 
 	/**
@@ -7425,16 +7446,17 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	/**
 	 * リザルトモーションデータ(結果画面用背景・マスクデータ)の分解
-	 * @param {string} _header 
-	 * @param {string} _scoreNo 
-	 * @param {string} _defaultHeader 
+	 * @param {string} _header 背景、マスク (back, mask)
+	 * @param {string} _resultType リザルトモーションの種類 (result, failedB, failedS)
+	 * @param {string} _scoreNo 譜面番号
+	 * @param {string} _defaultType _resultTypeが無いときの代替名
 	 */
-	const makeBackgroundResultData = (_header, _scoreNo, _defaultHeader = ``) => {
+	const makeBackgroundResultData = (_header, _resultType, _scoreNo, _defaultType = ``) => {
 		const dataList = [];
-		const addResultDataList = _headerType => dataList.push(...getPriorityList(``, _headerType, _scoreNo));
-		addResultDataList(_header);
-		if (_defaultHeader !== ``) {
-			addResultDataList(_defaultHeader);
+		const addDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
+		addDataList(_resultType);
+		if (_defaultType !== ``) {
+			addDataList(_defaultType);
 		}
 
 		const data = dataList.find((v) => v !== undefined);
@@ -7512,17 +7534,17 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	} else {
 		g_animationData.forEach(sprite => {
 			[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] =
-				makeBackgroundResultData(`${sprite}result`, scoreIdHeader);
+				makeBackgroundResultData(sprite, `result`, scoreIdHeader);
 			[g_headerObj[`${sprite}FailedData`], g_headerObj[`${sprite}FailedMaxDepth`]] =
-				makeBackgroundResultData(`${sprite}failed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `${sprite}result`);
+				makeBackgroundResultData(sprite, `failed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `result`);
 		});
 	}
 
 	// キー変化定義
 	obj.keychFrames = [0];
 	obj.keychTarget = [`0`];
-	if (hasVal(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`])) {
-		const keychdata = splitLF2(_dosObj[`keych${setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg)}_data`], `,`);
+	if (hasVal(getRefData(`keych`, `${scoreIdHeader}_data`))) {
+		const keychdata = splitLF2(getRefData(`keych`, `${scoreIdHeader}_data`), `,`);
 		obj.keychFrames.push(...keychdata.filter((val, j) => j % 2 === 0));
 		obj.keychTarget.push(...keychdata.filter((val, j) => j % 2 === 1));
 	}
