@@ -7164,7 +7164,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _footer 
 	 */
 	const setSpeedData = (_header, _scoreNo, _footer = `_data`) => {
-		const dosSpeedData = getRefList(_header, `${_scoreNo}${_footer}`);
+		const dosSpeedData = getRefData(_header, `${_scoreNo}${_footer}`);
 		const speedData = [];
 
 		if (hasVal(dosSpeedData) && g_stateObj.d_speed === C_FLG_ON) {
@@ -7207,7 +7207,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	const setColorData = (_header, _scoreNo) => {
-		const dosColorData = getRefList(_header, `${_scoreNo}_data`);
+		const dosColorData = getRefData(_header, `${_scoreNo}_data`);
 		const colorData = [];
 		const allFlg = (_header.charAt(0) === `a`);
 
@@ -7241,7 +7241,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	const setCssMotionData = (_header, _scoreNo) => {
-		const dosCssMotionData = getRefList(`${_header}Motion`, `${_scoreNo}_data`) || getRefList(`${_header}Motion`, `_data`);
+		const dosCssMotionData = getRefData(`${_header}Motion`, `${_scoreNo}_data`) || getRefData(`${_header}Motion`, `_data`);
 		const cssMotionData = [];
 
 		if (hasVal(dosCssMotionData) && g_stateObj.d_arroweffect === C_FLG_ON) {
@@ -7267,7 +7267,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	const setScrollchData = (_scoreNo) => {
-		const dosScrollchData = getRefList(`scrollch`, `${_scoreNo}_data`) || getRefList(`scrollch`, `_data`);
+		const dosScrollchData = getRefData(`scrollch`, `${_scoreNo}_data`) || getRefData(`scrollch`, `_data`);
 		const scrollchData = [];
 
 		if (hasVal(dosScrollchData)) {
@@ -7294,7 +7294,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _dataName 
 	 * @returns 
 	 */
-	const getRefList = (_header, _dataName) => {
+	const getRefData = (_header, _dataName) => {
 		const data = _dosObj[`${_header}${_dataName}`];
 		return data?.startsWith(_header) ? _dosObj[data] : data;
 	}
@@ -7307,10 +7307,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @returns 
 	 */
 	const getPriorityList = (_header, _type, _scoreNo) => [
-		getRefList(_header, `${_type}${g_localeObj.val}${_scoreNo}_data`),
-		getRefList(_header, `${_type}${g_localeObj.val}_data`),
-		getRefList(_header, `${_type}${_scoreNo}_data`),
-		getRefList(_header, `${_type}_data`)
+		getRefData(_header, `${_type}${g_localeObj.val}${_scoreNo}_data`),
+		getRefData(_header, `${_type}${g_localeObj.val}_data`),
+		getRefData(_header, `${_type}${_scoreNo}_data`),
+		getRefData(_header, `${_type}_data`)
 	];
 
 	/**
@@ -7536,8 +7536,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	// キー変化定義
 	obj.keychFrames = [0];
 	obj.keychTarget = [`0`];
-	if (hasVal(getRefList(`keych`, `${scoreIdHeader}_data`))) {
-		const keychdata = splitLF2(getRefList(`keych`, `${scoreIdHeader}_data`), `,`);
+	if (hasVal(getRefData(`keych`, `${scoreIdHeader}_data`))) {
+		const keychdata = splitLF2(getRefData(`keych`, `${scoreIdHeader}_data`), `,`);
 		obj.keychFrames.push(...keychdata.filter((val, j) => j % 2 === 0));
 		obj.keychTarget.push(...keychdata.filter((val, j) => j % 2 === 1));
 	}
