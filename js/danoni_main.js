@@ -3217,15 +3217,22 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 
 	const obj = {};
 	const scoreIdHeader = setScoreIdHeader(scoreId);
+	const getRefData = (_header, _dataName) => {
+		const data = _dosObj[`${_header}${_dataName}`];
+		return data?.startsWith(_header) ? _dosObj[data] : data;
+	}
 
 	[``, `Shadow`].forEach(pattern => {
-		const _name = `set${pattern}Color${scoreIdHeader}`;
-		const _frzName = `frz${pattern}Color${scoreIdHeader}`;
-		const _arrowInit = `set${pattern}ColorInit`;
-		const _frzInit = `frz${pattern}ColorInit`;
+		const _arrowCommon = `set${pattern}Color`;
+		const _frzCommon = `frz${pattern}Color`;
 
-		const arrowColorTxt = _dosObj[_name] || _dosObj[`set${pattern}Color`];
-		const frzColorTxt = _dosObj[_frzName] || _dosObj[`frz${pattern}Color`];
+		const _name = `${_arrowCommon}${scoreIdHeader}`;
+		const _frzName = `${_frzCommon}${scoreIdHeader}`;
+		const _arrowInit = `${_arrowCommon}Init`;
+		const _frzInit = `${_frzCommon}Init`;
+
+		const arrowColorTxt = getRefData(_arrowCommon, scoreIdHeader) || _dosObj[_arrowCommon];
+		const frzColorTxt = getRefData(_frzCommon, scoreIdHeader) || _dosObj[_frzCommon];
 
 		// 矢印色
 		Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
@@ -7241,7 +7248,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	const setCssMotionData = (_header, _scoreNo) => {
-		const dosCssMotionData = getRefData(`${_header}Motion`, `${_scoreNo}_data`) || getRefData(`${_header}Motion`, `_data`);
+		const dosCssMotionData = getRefData(`${_header}Motion`, `${_scoreNo}_data`) || _dosObj[`${_header}Motion_data`];
 		const cssMotionData = [];
 
 		if (hasVal(dosCssMotionData) && g_stateObj.d_arroweffect === C_FLG_ON) {
@@ -7267,7 +7274,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {number} _scoreNo 
 	 */
 	const setScrollchData = (_scoreNo) => {
-		const dosScrollchData = getRefData(`scrollch`, `${_scoreNo}_data`) || getRefData(`scrollch`, `_data`);
+		const dosScrollchData = getRefData(`scrollch`, `${_scoreNo}_data`) || _dosObj.scrollch_data;
 		const scrollchData = [];
 
 		if (hasVal(dosScrollchData)) {
