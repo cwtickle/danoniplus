@@ -21,10 +21,12 @@ const C_VALIGN_TOP = `top`;
 const C_VALIGN_MIDDLE = `middle`;
 const C_VALIGN_BOTTOM = `bottom`;
 
+const C_LBL_BASICFONT = `"Meiryo UI", sans-serif`;
+
+/** 廃止予定の定数群 */
 const C_LBL_TITLESIZE = 32;
 const C_LBL_BTNSIZE = 28;
 const C_LBL_LNKSIZE = 16;
-const C_LBL_BASICFONT = `"Meiryo UI", sans-serif`;
 
 const C_BTN_HEIGHT = 50;
 const C_LNK_HEIGHT = 30;
@@ -41,6 +43,76 @@ const C_SIZ_SETMINI = 18;
 const C_SIZ_DIFSELECTOR = 14;
 const C_SIZ_MAIN = 14;
 const C_SIZ_MUSIC_TITLE = 13;
+
+const C_LEN_JDGCHARA_WIDTH = 200;
+const C_LEN_JDGCHARA_HEIGHT = 20;
+const C_SIZ_JDGCHARA = 20;
+
+const C_LEN_JDGCNTS_WIDTH = 100;
+const C_LEN_JDGCNTS_HEIGHT = 20;
+const C_SIZ_JDGCNTS = 16;
+
+const C_LEN_GRAPH_WIDTH = 286;
+const C_LEN_GRAPH_HEIGHT = 226;
+const C_CLR_SPEEDGRAPH_SPEED = `#cc3333`;
+const C_CLR_SPEEDGRAPH_BOOST = `#999900`;
+const C_CLR_DENSITY_MAX = `#990000cc`;
+const C_CLR_DENSITY_DEFAULT = `#999999cc`;
+const C_LEN_DENSITY_DIVISION = 16;
+
+const C_MAX_ADJUSTMENT = 30;
+
+/** 設定幅、位置などを管理するプロパティ */
+const g_limitObj = {
+
+    // Adjustment, HitPositionの設定幅
+    adjustment: 30,
+    hitPosition: 50,
+
+    // 譜面密度グラフの分割数、上位色付け数
+    densityDivision: 16,
+    densityMaxVals: 3,
+
+    // ボタン・リンクの高さ、フォントサイズ
+    btnHeight: 50,
+    btnSiz: 28,
+    lnkHeight: 30,
+    lnkSiz: 16,
+
+    // 設定画面用のボタンの位置、幅、高さ、フォントサイズ
+    setLblLeft: 160,
+    setLblWidth: 210,
+    setLblHeight: 22,
+    setLblSiz: 17,
+
+    // 設定画面の左右移動ボタンの幅、フォントサイズ
+    setMiniWidth: 40,
+    setMiniSiz: 18,
+
+    // 譜面選択エリアの幅、フォントサイズ
+    difSelectorWidth: 250,
+    difSelectorSiz: 14,
+    difCoverWidth: 110,
+
+    // 判定キャラクタの幅、高さ、フォントサイズ
+    jdgCharaWidth: 200,
+    jdgCharaHeight: 20,
+    jdgCharaSiz: 20,
+
+    // 判定数の幅、高さ、フォントサイズ
+    jdgCntsWidth: 100,
+    jdgCntsHeight: 20,
+    jdgCntsSiz: 16,
+
+    // グラフ表示部分の幅、高さ
+    graphWidth: 286,
+    graphHeight: 226,
+
+    // その他のフォントサイズ
+    titleSiz: 32,
+    mainSiz: 14,
+    musicTitleSiz: 13,
+};
 
 // スプライト（ムービークリップ相当）のルート
 const C_SPRITE_ROOT = `divRoot`;
@@ -98,7 +170,7 @@ const g_lblPosObj = {};
 const updateWindowSiz = _ => {
     Object.assign(g_windowObj, {
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325 },
-        displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: C_LEN_SETLBL_HEIGHT * 5 },
+        displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
         keyconSprite: { y: 88 + (g_sHeight - 500) / 2, h: g_sHeight, overflow: `auto` },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70 + (g_sHeight - 500) / 2, w: 450, h: 110 },
@@ -118,11 +190,11 @@ const updateWindowSiz = _ => {
             x: 0, y: g_sHeight - 150, w: 40, h: 40, siz: 30, title: g_msgObj.howto,
         },
         lnkMaker: {
-            x: 0, y: g_sHeight - 50, w: g_sWidth / 2, h: C_LNK_HEIGHT,
+            x: 0, y: g_sHeight - 50, w: g_sWidth / 2, h: g_limitObj.lnkHeight,
             align: C_ALIGN_LEFT, title: g_headerObj.creatorUrl,
         },
         lnkArtist: {
-            x: g_sWidth / 2, y: g_sHeight - 50, w: g_sWidth / 2, h: C_LNK_HEIGHT,
+            x: g_sWidth / 2, y: g_sHeight - 50, w: g_sWidth / 2, h: g_limitObj.lnkHeight,
             align: C_ALIGN_LEFT, title: g_headerObj.artistUrl,
         },
         lnkVersion: {
@@ -133,7 +205,7 @@ const updateWindowSiz = _ => {
             x: g_sWidth - 20, y: g_sHeight - 20, w: 20, h: 16, siz: 12, title: g_msgObj.security,
         },
         lblComment: {
-            x: 0, y: 70, w: g_sWidth, h: g_sHeight - 180, siz: C_SIZ_DIFSELECTOR, align: C_ALIGN_LEFT,
+            x: 0, y: 70, w: g_sWidth, h: g_sHeight - 180, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
             overflow: `auto`, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
             whiteSpace: `normal`,
         },
@@ -150,7 +222,7 @@ const updateWindowSiz = _ => {
             x: g_sWidth * 2 / 3,
         },
         btnSwitchSetting: {
-            x: g_sWidth / 2 + 175 - C_LEN_SETMINI_WIDTH / 2, y: 25, w: C_LEN_SETMINI_WIDTH, h: 40,
+            x: g_sWidth / 2 + 175 - g_limitObj.setMiniWidth / 2, y: 25, w: g_limitObj.setMiniWidth, h: 40,
         },
         btnSave: {
             x: 0, y: 5, w: g_sWidth / 5, h: 16, siz: 12,
@@ -158,22 +230,22 @@ const updateWindowSiz = _ => {
         },
 
         btnReverse: {
-            x: 160, y: 0, w: 90, h: 21, siz: C_SIZ_DIFSELECTOR, borderStyle: `solid`,
+            x: 160, y: 0, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
         },
         lblGauge2: {
-            x: C_LEN_SETLBL_LEFT - 35, y: C_LEN_SETLBL_HEIGHT,
-            w: C_LEN_SETLBL_WIDTH + 60, h: C_LEN_SETLBL_HEIGHT * 2, siz: 11,
+            x: g_limitObj.setLblLeft - 35, y: g_limitObj.setLblHeight,
+            w: g_limitObj.setLblWidth + 60, h: g_limitObj.setLblHeight * 2, siz: 11,
         },
         lnkFadein: {
-            x: C_LEN_SETLBL_LEFT, y: 0,
+            x: g_limitObj.setLblLeft, y: 0,
         },
         lblFadeinBar: {
-            x: C_LEN_SETLBL_LEFT, y: 0,
+            x: g_limitObj.setLblLeft, y: 0,
         },
 
         /** 設定: 譜面明細子画面 */
         lblTooldif: {
-            y: 5, w: 250, siz: C_SIZ_JDGCNTS,
+            y: 5, w: 250, siz: g_limitObj.jdgCntsSiz,
         },
         dataTooldif: {
             x: 270, y: 3, w: 160, siz: 18,
@@ -189,10 +261,10 @@ const updateWindowSiz = _ => {
             x: 345, w: 160,
         },
         lblArrowInfo: {
-            x: 130, y: 45, w: 290, siz: C_SIZ_JDGCNTS,
+            x: 130, y: 45, w: 290, siz: g_limitObj.jdgCntsSiz,
         },
         dataArrowInfo: {
-            x: 270, y: 45, w: 160, siz: C_SIZ_JDGCNTS,
+            x: 270, y: 45, w: 160, siz: g_limitObj.jdgCntsSiz,
         },
         lblArrowInfo2: {
             x: 130, y: 70, w: 200, h: 90,
@@ -201,7 +273,7 @@ const updateWindowSiz = _ => {
             x: 140, y: 70, w: 275, h: 150, overflow: `auto`,
         },
         lnkDifInfo: {
-            w: C_LEN_DIFCOVER_WIDTH, borderStyle: `solid`,
+            w: g_limitObj.difCoverWidth, borderStyle: `solid`,
         },
 
         /** ディスプレイ画面 */
@@ -209,16 +281,16 @@ const updateWindowSiz = _ => {
             x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20,
         },
         sdDesc: {
-            x: 0, y: 65, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+            x: 0, y: 65, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz,
         },
         lblAppearancePos: {
-            x: C_LEN_SETLBL_LEFT, y: 20, siz: 12, align: C_ALIGN_CENTER,
+            x: g_limitObj.setLblLeft, y: 20, siz: 12, align: C_ALIGN_CENTER,
         },
         lblAppearanceBar: {
-            x: C_LEN_SETLBL_LEFT, y: 15,
+            x: g_limitObj.setLblLeft, y: 15,
         },
         lnkLockBtn: {
-            x: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - 40, y: 0, w: 40, h: C_LEN_SETLBL_HEIGHT, siz: 12,
+            x: g_limitObj.setLblLeft + g_limitObj.setLblWidth - 40, y: 0, w: 40, h: g_limitObj.setLblHeight, siz: 12,
             borderStyle: `solid`,
         },
 
@@ -227,7 +299,7 @@ const updateWindowSiz = _ => {
             x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20,
         },
         kcMsg: {
-            x: 0, y: g_sHeight - 25, w: g_sWidth, h: 20, siz: C_SIZ_MAIN,
+            x: 0, y: g_sHeight - 25, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz,
         },
         kcDesc: {
             x: 0, y: 68, w: g_sWidth, h: 20,
@@ -244,30 +316,30 @@ const updateWindowSiz = _ => {
 
         btnKcBack: {
             x: g_sWidth / 3, y: g_sHeight - 75,
-            w: g_sWidth / 3, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+            w: g_sWidth / 3, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
         lblPattern: {
-            x: g_sWidth / 6, y: g_sHeight - 100, w: g_sWidth / 3, h: C_BTN_HEIGHT / 2,
+            x: g_sWidth / 6, y: g_sHeight - 100, w: g_sWidth / 3, h: g_limitObj.btnHeight / 2,
         },
         btnPtnChangeR: {
             x: g_sWidth / 2, y: g_sHeight - 100,
-            w: g_sWidth / 9, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+            w: g_sWidth / 9, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
         btnPtnChangeL: {
             x: g_sWidth / 18, y: g_sHeight - 100,
-            w: g_sWidth / 9, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+            w: g_sWidth / 9, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
         btnPtnChangeRR: {
             x: g_sWidth * 11 / 18, y: g_sHeight - 100,
-            w: g_sWidth / 18, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+            w: g_sWidth / 18, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
         btnPtnChangeLL: {
             x: 0, y: g_sHeight - 100,
-            w: g_sWidth / 18, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+            w: g_sWidth / 18, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
         btnKcReset: {
             x: 0, y: g_sHeight - 75,
-            w: g_sWidth / 3, h: C_BTN_HEIGHT / 2, siz: C_LBL_BTNSIZE * 2 / 3,
+            w: g_sWidth / 3, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
 
         /** メイン画面 */
@@ -290,14 +362,14 @@ const updateWindowSiz = _ => {
             x: 125, y: g_sHeight - 16, w: g_headerObj.playingWidth, h: 20, align: C_ALIGN_LEFT,
         },
         lblTime1: {
-            x: 18, y: g_sHeight - 30, w: 40, h: 20, siz: C_SIZ_MAIN, align: C_ALIGN_RIGHT,
+            x: 18, y: g_sHeight - 30, w: 40, h: 20, siz: g_limitObj.mainSiz, align: C_ALIGN_RIGHT,
         },
         lblTime2: {
-            x: 60, y: g_sHeight - 30, w: 60, h: 20, siz: C_SIZ_MAIN,
+            x: 60, y: g_sHeight - 30, w: 60, h: 20, siz: g_limitObj.mainSiz,
         },
         lblWord: {
             x: 100, w: g_headerObj.playingWidth - 200, h: 50,
-            siz: C_SIZ_MAIN, align: C_ALIGN_LEFT, display: `block`, margin: `auto`,
+            siz: g_limitObj.mainSiz, align: C_ALIGN_LEFT, display: `block`, margin: `auto`,
         },
         finishView: {
             x: g_headerObj.playingWidth / 2 - 150, y: g_sHeight / 2 - 50, w: 300, h: 20, siz: 50,
@@ -317,21 +389,21 @@ const updateWindowSiz = _ => {
             x: g_sWidth / 2 + 50, y: 40, w: 200, h: 30, siz: 20,
         },
         btnRsBack: {
-            w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 4, animationName: `smallToNormalY`,
+            w: g_sWidth / 4, h: g_limitObj.btnHeight * 5 / 4, animationName: `smallToNormalY`,
         },
         btnRsCopy: {
-            x: g_sWidth / 4, w: g_sWidth / 2, h: C_BTN_HEIGHT * 5 / 8, siz: 24, animationName: `smallToNormalY`,
+            x: g_sWidth / 4, w: g_sWidth / 2, h: g_limitObj.btnHeight * 5 / 8, siz: 24, animationName: `smallToNormalY`,
         },
         btnRsTweet: {
-            x: g_sWidth / 4, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
-            w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 8, siz: 24, animationName: `smallToNormalY`,
+            x: g_sWidth / 4, y: g_sHeight - 100 + g_limitObj.btnHeight * 5 / 8,
+            w: g_sWidth / 4, h: g_limitObj.btnHeight * 5 / 8, siz: 24, animationName: `smallToNormalY`,
         },
         btnRsGitter: {
-            x: g_sWidth / 2, y: g_sHeight - 100 + C_BTN_HEIGHT * 5 / 8,
-            w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 8, siz: 24, animationName: `smallToNormalY`,
+            x: g_sWidth / 2, y: g_sHeight - 100 + g_limitObj.btnHeight * 5 / 8,
+            w: g_sWidth / 4, h: g_limitObj.btnHeight * 5 / 8, siz: 24, animationName: `smallToNormalY`,
         },
         btnRsRetry: {
-            x: g_sWidth / 4 * 3, w: g_sWidth / 4, h: C_BTN_HEIGHT * 5 / 4, animationName: `smallToNormalY`,
+            x: g_sWidth / 4 * 3, w: g_sWidth / 4, h: g_limitObj.btnHeight * 5 / 4, animationName: `smallToNormalY`,
         },
     });
 };
@@ -516,14 +588,6 @@ const C_BLOCK_KEYS = [
 ];
 
 /** 設定・オプション画面用共通 */
-const C_LEN_GRAPH_WIDTH = 286;
-const C_LEN_GRAPH_HEIGHT = 226;
-const C_CLR_SPEEDGRAPH_SPEED = `#cc3333`;
-const C_CLR_SPEEDGRAPH_BOOST = `#999900`;
-const C_CLR_DENSITY_MAX = `#990000cc`;
-const C_CLR_DENSITY_DEFAULT = `#999999cc`;
-const C_LEN_DENSITY_DIVISION = 16;
-
 const g_graphColorObj = {
     max: `#993333cc`,
     default: `#999999cc`,
@@ -531,6 +595,9 @@ const g_graphColorObj = {
     default2Push: `#777777cc`,
     max3Push: `#003399cc`,
     default3Push: `#555555cc`,
+
+    speed: `#cc3333`,
+    boost: `#999900`,
 };
 
 const g_settingBtnObj = {
@@ -547,25 +614,17 @@ const g_settingBtnObj = {
         U: `↑`,
     },
     pos: {
-        L: C_LEN_SETLBL_LEFT - C_LEN_SETMINI_WIDTH,
-        LL: C_LEN_SETLBL_LEFT,
-        LLL: C_LEN_SETLBL_LEFT + C_LEN_SETMINI_WIDTH + 1,
-        HL: C_LEN_SETLBL_LEFT,
-        R: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH,
-        RR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH,
-        RRR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH * 3 / 2 - 1,
-        HR: C_LEN_SETLBL_LEFT + C_LEN_SETLBL_WIDTH - C_LEN_SETMINI_WIDTH,
+        L: g_limitObj.setLblLeft - g_limitObj.setMiniWidth,
+        LL: g_limitObj.setLblLeft,
+        LLL: g_limitObj.setLblLeft + g_limitObj.setMiniWidth + 1,
+        HL: g_limitObj.setLblLeft,
+        R: g_limitObj.setLblLeft + g_limitObj.setLblWidth,
+        RR: g_limitObj.setLblLeft + g_limitObj.setLblWidth - g_limitObj.setMiniWidth,
+        RRR: g_limitObj.setLblLeft + g_limitObj.setLblWidth - g_limitObj.setMiniWidth * 3 / 2 - 1,
+        HR: g_limitObj.setLblLeft + g_limitObj.setLblWidth - g_limitObj.setMiniWidth,
     }
 };
 
-const g_limitObj = {
-    adjustment: 30,
-    hitPosition: 50,
-
-    densityDivision: 16,
-    densityMaxVals: 3,
-};
-const C_MAX_ADJUSTMENT = 30;
 const C_MAX_SPEED = 10;
 const C_MIN_SPEED = 1;
 
@@ -590,14 +649,6 @@ const g_judgPosObj = {
 };
 
 const C_CLR_DUMMY = `#777777`;
-
-const C_LEN_JDGCHARA_WIDTH = 200;
-const C_LEN_JDGCHARA_HEIGHT = 20;
-const C_SIZ_JDGCHARA = 20;
-
-const C_LEN_JDGCNTS_WIDTH = 100;
-const C_LEN_JDGCNTS_HEIGHT = 20;
-const C_SIZ_JDGCNTS = 16;
 
 let C_FRM_HITMOTION = 4;
 let C_FRM_JDGMOTION = 60;
