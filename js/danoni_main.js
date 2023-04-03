@@ -979,7 +979,7 @@ const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64,
  */
 const createDescDiv = (_id, _str, _altId = _id) =>
 	createDivCss2Label(_id, _str, Object.assign(g_lblPosObj[_altId], {
-		siz: getFontSize(_str, g_sWidth, getBasicFont(), C_SIZ_MAIN),
+		siz: getFontSize(_str, g_sWidth, getBasicFont(), g_limitObj.mainSiz),
 	}));
 
 /*-----------------------------------------------------------*/
@@ -1031,8 +1031,8 @@ const setUserSelect = (_style, _value = C_DIS_NONE) => {
  * @param {object} _obj (x, y, w, h, siz, align, ...rest)
  * @param {...any} _classes 
  */
-const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = C_LEN_SETLBL_WIDTH, h = C_LEN_SETLBL_HEIGHT,
-	siz = C_SIZ_SETLBL, align = C_ALIGN_CENTER, ...rest } = {}, ..._classes) => {
+const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWidth, h = g_limitObj.setLblHeight,
+	siz = g_limitObj.setLblSiz, align = C_ALIGN_CENTER, ...rest } = {}, ..._classes) => {
 	const div = createDiv(_id, x, y, w, h, [g_cssObj.title_base, ..._classes]);
 
 	const style = div.style;
@@ -1218,8 +1218,8 @@ const deleteDiv = (_parentId, _idName) => {
  * @param {object} _obj (x, y, w, h, siz, align, title, groupName, initDisabledFlg, ...rest)
  * @param {...any} _classes 
  */
-const createCss2Button = (_id, _text, _func = _ => true, { x = 0, y = g_sHeight - 100, w = g_sWidth / 3, h = C_BTN_HEIGHT,
-	siz = C_LBL_BTNSIZE, align = C_ALIGN_CENTER, title = ``, groupName = g_currentPage, initDisabledFlg = true,
+const createCss2Button = (_id, _text, _func = _ => true, { x = 0, y = g_sHeight - 100, w = g_sWidth / 3, h = g_limitObj.btnHeight,
+	siz = g_limitObj.btnSiz, align = C_ALIGN_CENTER, title = ``, groupName = g_currentPage, initDisabledFlg = true,
 	resetFunc = _ => true, cxtFunc = _ => true, ...rest } = {}, ..._classes) => {
 
 	const div = createDiv(_id, x, y, w, h, [`button_common`, ..._classes]);
@@ -1315,7 +1315,7 @@ const changeStyle = (_id, { x, y, w, h, siz, align, title, ...rest } = {}) => {
  * @param {number} _y 
  */
 const getTitleDivLabel = (_id, _titlename, _x, _y, ..._classes) =>
-	createDivCss2Label(_id, _titlename, { x: _x, y: _y, w: g_sWidth, h: 50, siz: C_LBL_BTNSIZE }, ..._classes);
+	createDivCss2Label(_id, _titlename, { x: _x, y: _y, w: g_sWidth, h: 50, siz: g_limitObj.btnSiz }, ..._classes);
 
 /**
  * キーコントロールの初期化
@@ -1803,8 +1803,8 @@ const getQueryParamVal = _name => {
  * ローディング文字用ラベルの作成
  */
 const getLoadingLabel = _ => createDivCss2Label(`lblLoading`, g_lblNameObj.nowLoading, {
-	x: 0, y: g_sHeight - 40, w: g_sWidth, h: C_LEN_SETLBL_HEIGHT,
-	siz: C_SIZ_SETLBL, align: C_ALIGN_RIGHT,
+	x: 0, y: g_sHeight - 40, w: g_sWidth, h: g_limitObj.setLblHeight,
+	siz: g_limitObj.setLblSiz, align: C_ALIGN_RIGHT,
 });
 
 /**
@@ -3930,7 +3930,7 @@ const titleInit = _ => {
 	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${g_alphaVersion}${customVersion}${releaseDate}`;
 
 	let reloadFlg = false;
-	const getLinkSiz = _name => getFontSize(_name, g_sWidth / 2 - 20, getBasicFont(), C_LBL_LNKSIZE, 12);
+	const getLinkSiz = _name => getFontSize(_name, g_sWidth / 2 - 20, getBasicFont(), g_limitObj.lnkSiz, 12);
 
 	/**
 	 * クレジット用リンク作成
@@ -3948,7 +3948,7 @@ const titleInit = _ => {
 
 		// Click Here
 		createCss2Button(`btnStart`, g_lblNameObj.clickHere, _ => clearTimeout(g_timeoutEvtTitleId), {
-			w: g_sWidth, siz: C_LBL_TITLESIZE, resetFunc: _ => optionInit(),
+			w: g_sWidth, siz: g_limitObj.titleSiz, resetFunc: _ => optionInit(),
 		}, g_cssObj.button_Start),
 
 		// Reset
@@ -4122,7 +4122,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) => {
 
 	// ウィンドウ枠の行を取得するために一時的な枠を作成
 	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
-		x: 0, y: 70, w: g_sWidth, h: 20, siz: C_SIZ_MAIN, lineHeight: `15px`, fontFamily: getBasicFont(),
+		x: 0, y: 70, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz, lineHeight: `15px`, fontFamily: getBasicFont(),
 		whiteSpace: `normal`,
 	});
 	divRoot.appendChild(tmplbl);
@@ -4133,7 +4133,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) => {
 	const warnHeight = Math.min(150, Math.max(range.getClientRects().length,
 		_text.split(`<br>`).length + _text.split(`<p>`).length - 1) * 21);
 	const lbl = createDivCss2Label(`lblWarning`, _text, {
-		x: 0, y: 70, w: g_sWidth, h: warnHeight, siz: C_SIZ_MAIN, backgroundColor: _bkColor,
+		x: 0, y: 70, w: g_sWidth, h: warnHeight, siz: g_limitObj.mainSiz, backgroundColor: _bkColor,
 		opacity: 0.9, lineHeight: `15px`, color: _textColor, align: _align, fontFamily: getBasicFont(),
 		whiteSpace: `normal`,
 	});
@@ -4239,10 +4239,10 @@ const optionInit = _ => {
 const setSpriteList = _settingList => {
 	const optionWidth = (g_sWidth - 450) / 2;
 	const spriteList = [];
-	_settingList.forEach(setting =>
-		spriteList[setting[0]] = createEmptySprite(optionsprite, `${setting[0]}Sprite`, {
-			x: 25, y: setting[1] * C_LEN_SETLBL_HEIGHT + setting[2] + 20,
-			w: optionWidth + setting[3], h: C_LEN_SETLBL_HEIGHT + setting[4],
+	Object.keys(_settingList).forEach(setting =>
+		spriteList[setting] = createEmptySprite(optionsprite, `${setting}Sprite`, {
+			x: 25, y: _settingList[setting].heightPos * g_limitObj.setLblHeight + _settingList[setting].y + 20,
+			w: optionWidth + _settingList[setting].dw, h: g_limitObj.setLblHeight + _settingList[setting].dh,
 		}));
 	return spriteList;
 };
@@ -4275,23 +4275,8 @@ const createOptionWindow = _sprite => {
 	// 各ボタン用のスプライトを作成
 	const optionsprite = createOptionSprite(_sprite);
 
-	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
-	const settingList = [
-		[`difficulty`, 0, -5, 0, 10],
-		[`speed`, 2, 0, 0, 0],
-		[`motion`, 3, 0, 0, 0],
-		[`reverse`, 4, 0, 0, 0],
-		[`scroll`, 4, 0, 0, 0],
-		[`shuffle`, 5.5, 0, 0, 0],
-		[`autoPlay`, 6.5, 0, 0, 0],
-		[`gauge`, 7.5, 0, 0, 0],
-		[`adjustment`, 10.5, 0, 0, 0],
-		[`fadein`, 11.5, 0, 0, 0],
-		[`volume`, 12.5, 0, 0, 0],
-	];
-
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
-	const spriteList = setSpriteList(settingList);
+	const spriteList = setSpriteList(g_settingPos.option);
 
 	// ---------------------------------------------------
 	// 難易度 (Difficulty)
@@ -4344,7 +4329,7 @@ const createOptionWindow = _sprite => {
 				k++;
 			}
 		});
-		const overlength = pos * C_LEN_SETLBL_HEIGHT - parseInt(difList.style.height);
+		const overlength = pos * g_limitObj.setLblHeight - parseInt(difList.style.height);
 		difList.scrollTop = (overlength > 0 ? overlength : 0);
 	};
 
@@ -4366,7 +4351,7 @@ const createOptionWindow = _sprite => {
 				g_keyObj.prevKey = g_keyObj.currentKey;
 			}
 		}, {
-			x: 430 + _scrollNum * 10, y: 40, w: 20, h: 20, siz: C_SIZ_JDGCNTS,
+			x: 430 + _scrollNum * 10, y: 40, w: 20, h: 20, siz: g_limitObj.jdgCntsSiz,
 		}, g_cssObj.button_Mini);
 	};
 
@@ -4387,7 +4372,7 @@ const createOptionWindow = _sprite => {
 		difCover.appendChild(
 			makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
 				nextDifficulty(Math.floor(Math.random() * g_headerObj.keyLabels.length));
-			}, { w: C_LEN_DIFCOVER_WIDTH })
+			}, { w: g_limitObj.difCoverWidth })
 		);
 
 		// 全リスト
@@ -4396,7 +4381,7 @@ const createOptionWindow = _sprite => {
 				resetDifWindow();
 				g_stateObj.filterKeys = ``;
 				createDifWindow();
-			}, { w: C_LEN_DIFCOVER_WIDTH, btnStyle: (g_stateObj.filterKeys === `` ? `Setting` : `Default`) })
+			}, { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.filterKeys === `` ? `Setting` : `Default`) })
 		);
 
 		// キー別フィルタボタン作成
@@ -4407,13 +4392,13 @@ const createOptionWindow = _sprite => {
 					resetDifWindow();
 					g_stateObj.filterKeys = targetKey;
 					createDifWindow(targetKey);
-				}, { w: C_LEN_DIFCOVER_WIDTH, btnStyle: (g_stateObj.filterKeys === targetKey ? `Setting` : `Default`) })
+				}, { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.filterKeys === targetKey ? `Setting` : `Default`) })
 			);
 			if (g_stateObj.filterKeys === targetKey) {
 				pos = m + 9;
 			}
 		});
-		const overlength = pos * C_LEN_SETLBL_HEIGHT - parseInt(difCover.style.height);
+		const overlength = pos * g_limitObj.setLblHeight - parseInt(difCover.style.height);
 		difCover.scrollTop = (overlength > 0 ? overlength : 0);
 
 		multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
@@ -4432,7 +4417,7 @@ const createOptionWindow = _sprite => {
 		}
 	};
 	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`, ``, 0, _ => changeDifficulty(), {
-		y: -10, h: C_LEN_SETLBL_HEIGHT + 10, cxtFunc: _ => changeDifficulty(-1),
+		y: -10, h: g_limitObj.setLblHeight + 10, cxtFunc: _ => changeDifficulty(-1),
 	});
 
 	// 譜面選択ボタン（メイン、右回し、左回し）
@@ -4472,8 +4457,8 @@ const createOptionWindow = _sprite => {
 			const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
 
 			graphObj.id = `graph${_name}`;
-			graphObj.width = C_LEN_GRAPH_WIDTH;
-			graphObj.height = C_LEN_GRAPH_HEIGHT;
+			graphObj.width = g_limitObj.graphWidth;
+			graphObj.height = g_limitObj.graphHeight;
 			graphObj.style.left = `125px`;
 			graphObj.style.top = `0px`;
 			graphObj.style.position = `absolute`;
@@ -4489,7 +4474,7 @@ const createOptionWindow = _sprite => {
 	if (g_headerObj.scoreDetailUse) {
 		spriteList.speed.appendChild(
 			createCss2Button(`btnGraph`, `i`, _ => true, {
-				x: -25, y: -60, w: 30, h: 30, siz: C_SIZ_JDGCHARA, title: g_msgObj.graph,
+				x: -25, y: -60, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz, title: g_msgObj.graph,
 				resetFunc: _ => setScoreDetail(), cxtFunc: _ => setScoreDetail(),
 			}, g_cssObj.button_Mini)
 		);
@@ -4527,7 +4512,7 @@ const createOptionWindow = _sprite => {
 		);
 		g_settings.scoreDetails.forEach((sd, j) => {
 			scoreDetail.appendChild(
-				makeDifLblCssButton(`lnk${sd}G`, getStgDetailName(sd), j, _ => changeScoreDetail(j), { w: C_LEN_DIFCOVER_WIDTH, btnStyle: (g_stateObj.scoreDetail === sd ? `Setting` : `Default`) })
+				makeDifLblCssButton(`lnk${sd}G`, getStgDetailName(sd), j, _ => changeScoreDetail(j), { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.scoreDetail === sd ? `Setting` : `Default`) })
 			);
 			createScText(document.getElementById(`lnk${sd}G`), `${sd}G`, { targetLabel: `lnk${sd}G`, x: -10 });
 		});
@@ -4577,8 +4562,8 @@ const createOptionWindow = _sprite => {
 		const startFrame = g_detailObj.startFrame[_scoreId];
 		const playingFrame = g_detailObj.playingFrameWithBlank[_scoreId];
 		const speedObj = {
-			speed: { frame: [0], speed: [1], cnt: 0, strokeColor: C_CLR_SPEEDGRAPH_SPEED },
-			boost: { frame: [0], speed: [1], cnt: 0, strokeColor: C_CLR_SPEEDGRAPH_BOOST }
+			speed: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.speed },
+			boost: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.boost }
 		};
 
 		Object.keys(speedObj).forEach(speedType => {
@@ -4608,7 +4593,7 @@ const createOptionWindow = _sprite => {
 			let preY;
 
 			for (let i = 0; i < speedObj[speedType].frame.length; i++) {
-				const x = speedObj[speedType].frame[i] * (C_LEN_GRAPH_WIDTH - 30) / playingFrame + 30;
+				const x = speedObj[speedType].frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
 				const y = (speedObj[speedType].speed[i] - 1) * -90 + 105;
 
 				context.lineTo(x, preY);
@@ -4625,7 +4610,7 @@ const createOptionWindow = _sprite => {
 			context.moveTo(lineX, 215);
 			context.lineTo(lineX + 30, 215);
 			context.stroke();
-			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
+			context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
 			context.fillText(speedType, lineX + 35, 218);
 
 			updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
@@ -4663,7 +4648,7 @@ const createOptionWindow = _sprite => {
 			context.moveTo(lineX, 215);
 			context.lineTo(lineX + 20, 215);
 			context.stroke();
-			context.font = `${C_SIZ_DIFSELECTOR}px ${getBasicFont()}`;
+			context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
 			context.fillText(lineNames[j], lineX + 20, 218);
 		});
 
@@ -4686,7 +4671,7 @@ const createOptionWindow = _sprite => {
 		const baseLabel = (_bLabel, _bLabelname, _bAlign) =>
 			document.querySelector(`#detail${_name}`).appendChild(
 				createDivCss2Label(`${_bLabel}`, `${_bLabelname}`, {
-					x: 10, y: 105 + _pos * 20, w: 100, h: 20, siz: C_SIZ_DIFSELECTOR, align: _bAlign,
+					x: 10, y: 105 + _pos * 20, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: _bAlign,
 				})
 			);
 		if (document.querySelector(`#data${_label}`) === null) {
@@ -4703,7 +4688,7 @@ const createOptionWindow = _sprite => {
 	 * @param {number} _resolution 
 	 */
 	const drawBaseLine = (_context, _resolution = 10) => {
-		_context.clearRect(0, 0, C_LEN_GRAPH_WIDTH, C_LEN_GRAPH_HEIGHT);
+		_context.clearRect(0, 0, g_limitObj.graphWidth, g_limitObj.graphHeight);
 
 		for (let j = 0; j <= 2 * _resolution; j += 5) {
 			drawLine(_context, j / _resolution, `main`, 2);
@@ -4724,7 +4709,7 @@ const createOptionWindow = _sprite => {
 		const lineY = (_y - 1) * -90 + 105;
 		_context.beginPath();
 		_context.moveTo(30, lineY);
-		_context.lineTo(C_LEN_GRAPH_WIDTH, lineY);
+		_context.lineTo(g_limitObj.graphWidth, lineY);
 		_context.lineWidth = 1;
 
 		if (_lineType === `main`) {
@@ -4754,7 +4739,7 @@ const createOptionWindow = _sprite => {
 		 * @param {string} _data 
 		 * @param {object} _obj 
 		 */
-		const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = C_SIZ_DIFSELECTOR, ...rest } = {}) =>
+		const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = g_limitObj.difSelectorSiz, ...rest } = {}) =>
 			createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest });
 
 		let printData = ``;
@@ -4818,7 +4803,7 @@ const createOptionWindow = _sprite => {
 		dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
 		dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
 		lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
-		dataArrowInfo.innerHTML = `${arrowCnts + frzCnts} <span style="font-size:${C_SIZ_DIFSELECTOR}px;">(${arrowCnts} + ${frzCnts})</span>`;
+		dataArrowInfo.innerHTML = `${arrowCnts + frzCnts} <span style="font-size:${g_limitObj.difSelectorSiz}px;">(${arrowCnts} + ${frzCnts})</span>`;
 		dataArrowInfo2.innerHTML = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
 			(${g_detailObj.frzCnt[_scoreId]})<br><br>
 			${push3CntStr}`.split(`,`).join(`/`);
@@ -5240,7 +5225,7 @@ const createOptionWindow = _sprite => {
 		// 譜面名設定 (Difficulty)
 		const difWidth = parseFloat(lnkDifficulty.style.width);
 		const difNames = [`${getKeyName(g_keyObj.currentKey)} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
-		lnkDifficulty.style.fontSize = `${getFontSize(difNames[0], difWidth, getBasicFont(), C_SIZ_SETLBL)}px`;
+		lnkDifficulty.style.fontSize = `${getFontSize(difNames[0], difWidth, getBasicFont(), g_limitObj.setLblSiz)}px`;
 
 		if (g_headerObj.makerView) {
 			difNames.push(`(${g_headerObj.creatorNames[g_stateObj.scoreId]})`);
@@ -5354,8 +5339,8 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 		// 右回し・左回しボタン（最内側）
 		if (skipTerms[2] > 1) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(skipTerms[2], _settingName, unitName, roundNum), { dw: -C_LEN_SETMINI_WIDTH / 2 }),
-				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(skipTerms[2] * (-1), _settingName, unitName, roundNum), { dw: -C_LEN_SETMINI_WIDTH / 2 }),
+				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(skipTerms[2], _settingName, unitName, roundNum), { dw: -g_limitObj.setMiniWidth / 2 }),
+				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(skipTerms[2] * (-1), _settingName, unitName, roundNum), { dw: -g_limitObj.setMiniWidth / 2 }),
 			);
 		}
 
@@ -5439,7 +5424,7 @@ const setSetting = (_scrollNum, _settingName, _unitName = ``, _roundNum = 0) => 
  */
 const makeDisabledLabel = (_id, _heightPos, _defaultStr) => {
 	return createDivCss2Label(_id, _defaultStr, {
-		x: C_LEN_SETLBL_LEFT, y: C_LEN_SETLBL_HEIGHT * _heightPos,
+		x: g_limitObj.setLblLeft, y: g_limitObj.setLblHeight * _heightPos,
 	}, g_cssObj.settings_Disabled);
 };
 
@@ -5522,11 +5507,11 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
  */
 const makeSettingLblCssButton = (_id, _name, _heightPos, _func, { x, y, w, h, siz, cxtFunc = _ => true, ...rest } = {}, ..._classes) => {
 	const tmpObj = {
-		x: x !== undefined ? x : C_LEN_SETLBL_LEFT,
-		y: y !== undefined ? y : C_LEN_SETLBL_HEIGHT * _heightPos,
-		w: w !== undefined ? w : C_LEN_SETLBL_WIDTH,
-		h: h !== undefined ? h : C_LEN_SETLBL_HEIGHT,
-		siz: siz !== undefined ? siz : C_SIZ_SETLBL,
+		x: x !== undefined ? x : g_limitObj.setLblLeft,
+		y: y !== undefined ? y : g_limitObj.setLblHeight * _heightPos,
+		w: w !== undefined ? w : g_limitObj.setLblWidth,
+		h: h !== undefined ? h : g_limitObj.setLblHeight,
+		siz: siz !== undefined ? siz : g_limitObj.setLblSiz,
 		cxtFunc: cxtFunc !== undefined ? cxtFunc : _ => true,
 	};
 	return createCss2Button(_id, _name, _func, { ...tmpObj, ...rest }, g_cssObj.button_Default, ..._classes);
@@ -5539,11 +5524,11 @@ const makeSettingLblCssButton = (_id, _name, _heightPos, _func, { x, y, w, h, si
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  */
-const makeDifLblCssButton = (_id, _name, _heightPos, _func, { x = 0, w = C_LEN_DIFSELECTOR_WIDTH, btnStyle = `Default` } = {}) => {
+const makeDifLblCssButton = (_id, _name, _heightPos, _func, { x = 0, w = g_limitObj.difSelectorWidth, btnStyle = `Default` } = {}) => {
 	return createCss2Button(_id, _name, _func, {
-		x: x, y: C_LEN_SETLBL_HEIGHT * _heightPos,
-		w: w, h: C_LEN_SETLBL_HEIGHT,
-		siz: C_SIZ_DIFSELECTOR,
+		x: x, y: g_limitObj.setLblHeight * _heightPos,
+		w: w, h: g_limitObj.setLblHeight,
+		siz: g_limitObj.difSelectorSiz,
 		borderStyle: `solid`,
 	}, g_cssObj[`button_${btnStyle}`], g_cssObj.button_ON);
 };
@@ -5558,8 +5543,8 @@ const makeDifLblCssButton = (_id, _name, _heightPos, _func, { x = 0, w = C_LEN_D
 const makeMiniCssButton = (_id, _directionFlg, _heightPos, _func, { dx = 0, dy = 0, dw = 0, dh = 0, dsiz = 0, visibility = `visible` } = {}) => {
 	return createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func, {
 		x: g_settingBtnObj.pos[_directionFlg] + dx,
-		y: C_LEN_SETLBL_HEIGHT * _heightPos + dy,
-		w: C_LEN_SETMINI_WIDTH + dw, h: C_LEN_SETLBL_HEIGHT + dh, siz: C_SIZ_SETLBL + dsiz,
+		y: g_limitObj.setLblHeight * _heightPos + dy,
+		w: g_limitObj.setMiniWidth + dw, h: g_limitObj.setLblHeight + dh, siz: g_limitObj.setLblSiz + dsiz,
 		visibility: visibility
 	}, g_cssObj.button_Mini);
 };
@@ -5646,8 +5631,8 @@ const createSettingsDisplayWindow = _sprite => {
 		 */
 		const makeDisabledDisplayLabel = (_id, _heightPos, _widthPos, _defaultStr, _flg) => {
 			return createDivCss2Label(_id, _defaultStr, {
-				x: 30 + 180 * _widthPos, y: 3 + C_LEN_SETLBL_HEIGHT * _heightPos,
-				w: 170, siz: C_SIZ_DIFSELECTOR,
+				x: 30 + 180 * _widthPos, y: 3 + g_limitObj.setLblHeight * _heightPos,
+				w: 170, siz: g_limitObj.difSelectorSiz,
 			}, g_cssObj[`button_Disabled${flg}`]);
 		};
 
@@ -5679,16 +5664,9 @@ const createSettingsDisplayWindow = _sprite => {
 	// 各ボタン用のスプライトを作成
 	createOptionSprite(_sprite);
 
-	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
-	const settingList = [
-		[`appearance`, 7.4, 10, 0, 0],
-		[`opacity`, 9, 10, 0, 0],
-		[`hitPosition`, 10, 10, 0, 0],
-	];
-
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
 	const displaySprite = createEmptySprite(optionsprite, `displaySprite`, g_windowObj.displaySprite);
-	const spriteList = setSpriteList(settingList);
+	const spriteList = setSpriteList(g_settingPos.settingsDisplay);
 
 	_sprite.appendChild(createDivCss2Label(`sdDesc`, g_lblNameObj.sdDesc, g_lblPosObj.sdDesc));
 	g_displays.forEach((name, j) => makeDisplayButton(name, j % 7, Math.floor(j / 7)));
@@ -5970,7 +5948,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 					setKeyConfigCursor();
 				}, {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: C_KYC_REPHEIGHT, siz: C_SIZ_JDGCNTS,
+					w: C_ARW_WIDTH, h: C_KYC_REPHEIGHT, siz: g_limitObj.jdgCntsSiz,
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 
@@ -6064,7 +6042,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @returns ボタン
 	 */
 	const makeKCButton = (_id, _text, _func, { x = g_sWidth * 5 / 6 - 20, y = 15, w = g_sWidth / 6, h = 18,
-		siz = C_SIZ_JDGCNTS, borderStyle = `solid`, cxtFunc, ...rest } = {}, _mainClass = g_cssObj.button_RevOFF, ..._classes) => {
+		siz = g_limitObj.jdgCntsSiz, borderStyle = `solid`, cxtFunc, ...rest } = {}, _mainClass = g_cssObj.button_RevOFF, ..._classes) => {
 		return makeSettingLblCssButton(_id, getStgDetailName(_text), 0, _func, { x, y, w, h, siz, cxtFunc, borderStyle, ...rest }, _mainClass, ..._classes);
 	};
 
@@ -6076,7 +6054,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {*} object (x, y, w, h, siz) 
 	 * @returns 
 	 */
-	const makeMiniKCButton = (_id, _directionFlg, _func, { x = g_sWidth * 5 / 6 - 30, y = 15, w = 15, h = 20, siz = C_SIZ_MAIN } = {}) => {
+	const makeMiniKCButton = (_id, _directionFlg, _func, { x = g_sWidth * 5 / 6 - 30, y = 15, w = 15, h = 20, siz = g_limitObj.mainSiz } = {}) => {
 		return createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func,
 			{ x, y, w, h, siz }, g_cssObj.button_Mini);
 	};
@@ -8729,7 +8707,7 @@ const mainInit = _ => {
 	const makerView = g_headerObj.makerView ? ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})` : ``;
 	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${shuffleName}${makerView}]`;
 	let creditName = `${musicTitle} / ${artistName}`;
-	if (checkMusicSiz(creditName, C_SIZ_MUSIC_TITLE) < 12) {
+	if (checkMusicSiz(creditName, g_limitObj.musicTitleSiz) < 12) {
 		creditName = `${musicTitle}`;
 		difName = `/ ${artistName} ` + difName;
 	}
@@ -8738,7 +8716,7 @@ const mainInit = _ => {
 
 		// ライフ（数字）
 		createDivCss2Label(`lblLife`, intLifeVal, {
-			x: 0, y: 30, w: 70, h: 20, siz: C_SIZ_JDGCNTS, display: g_workObj.lifegaugeDisp,
+			x: 0, y: 30, w: 70, h: 20, siz: g_limitObj.jdgCntsSiz, display: g_workObj.lifegaugeDisp,
 		}, lblInitColor),
 
 		// ライフ背景
@@ -8762,7 +8740,7 @@ const mainInit = _ => {
 		}, g_cssObj.life_Border, g_cssObj.life_BorderColor),
 
 		// 曲名・アーティスト名表示
-		createDivCss2Label(`lblCredit`, creditName, Object.assign(g_lblPosObj.lblCredit, { siz: checkMusicSiz(creditName, C_SIZ_MUSIC_TITLE) })),
+		createDivCss2Label(`lblCredit`, creditName, Object.assign(g_lblPosObj.lblCredit, { siz: checkMusicSiz(creditName, g_limitObj.musicTitleSiz) })),
 
 		// 譜面名表示
 		createDivCss2Label(`lblDifName`, difName, Object.assign(g_lblPosObj.lblDifName, { siz: checkMusicSiz(difName, 12) })),
@@ -8801,7 +8779,7 @@ const mainInit = _ => {
 		// キャラクタ表示
 		const charaJ = createDivCss2Label(`chara${jdg}`, ``, {
 			x: jdgX[j], y: jdgY[j],
-			w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_JDGCHARA,
+			w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.jdgCharaSiz,
 			opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
 		}, g_cssObj.common_ii);
 		charaJ.setAttribute(`cnt`, 0);
@@ -8814,14 +8792,14 @@ const mainInit = _ => {
 			// コンボ表示
 			createDivCss2Label(`combo${jdg}`, ``, {
 				x: jdgX[j] + 170, y: jdgY[j],
-				w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_JDGCHARA,
+				w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.jdgCharaSiz,
 				opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
 			}, g_cssObj[`common_${jdgCombos[j]}`]),
 
 			// Fast/Slow表示
 			createDivCss2Label(`diff${jdg}`, ``, {
 				x: jdgX[j] + 170, y: jdgY[j] + 25,
-				w: C_LEN_JDGCHARA_WIDTH, h: C_LEN_JDGCHARA_HEIGHT, siz: C_SIZ_MAIN,
+				w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.mainSiz,
 				opacity: g_stateObj.opacity / 100, display: g_workObj.fastslowDisp,
 			}, g_cssObj.common_combo),
 
@@ -9652,7 +9630,7 @@ const mainInit = _ => {
 				} else if (/\[fontSize=\d+\]/.test(g_wordObj.wordDat)) {
 
 					// フォントサイズ変更
-					const fontSize = setIntVal(g_wordObj.wordDat.match(/\d+/)[0], C_SIZ_MAIN);
+					const fontSize = setIntVal(g_wordObj.wordDat.match(/\d+/)[0], g_limitObj.mainSiz);
 					g_wordSprite.style.fontSize = `${fontSize}px`;
 
 				} else {
@@ -9782,8 +9760,8 @@ const changeAppearanceFilter = (_appearance, _num = 10) => {
  */
 const makeCounterSymbol = (_id, _x, _class, _heightPos, _text, _display = C_DIS_INHERIT) => {
 	return createDivCss2Label(_id, _text, {
-		x: _x, y: C_LEN_JDGCNTS_HEIGHT * _heightPos,
-		w: C_LEN_JDGCNTS_WIDTH, h: C_LEN_JDGCNTS_HEIGHT, siz: C_SIZ_JDGCNTS, align: C_ALIGN_RIGHT,
+		x: _x, y: g_limitObj.jdgCntsHeight * _heightPos,
+		w: g_limitObj.jdgCntsWidth, h: g_limitObj.jdgCntsHeight, siz: g_limitObj.jdgCntsSiz, align: C_ALIGN_RIGHT,
 		display: _display,
 	}, _class);
 };
@@ -10749,9 +10727,9 @@ const resultInit = _ => {
  * @param {string} _text
  * @param {string} _align
  */
-const makeCssResultPlayData = (_id, _x, _class, _heightPos, _text, _align = C_ALIGN_CENTER, { w = 400, siz = C_SIZ_MAIN } = {}) =>
+const makeCssResultPlayData = (_id, _x, _class, _heightPos, _text, _align = C_ALIGN_CENTER, { w = 400, siz = g_limitObj.mainSiz } = {}) =>
 	createDivCss2Label(_id, _text, {
-		x: _x, y: C_SIZ_SETMINI * _heightPos, w, h: C_SIZ_SETMINI, siz, align: _align,
+		x: _x, y: g_limitObj.setMiniSiz * _heightPos, w, h: g_limitObj.setMiniSiz, siz, align: _align,
 	}, _class);
 
 /**
@@ -10764,7 +10742,7 @@ const makeCssResultPlayData = (_id, _x, _class, _heightPos, _text, _align = C_AL
  * @param {string} _align
  */
 const makeCssResultSymbol = (_id, _x, _class, _heightPos, _text, _align = C_ALIGN_LEFT) =>
-	makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align, { w: 150, siz: C_SIZ_JDGCNTS });
+	makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align, { w: 150, siz: g_limitObj.jdgCntsSiz });
 
 // ライセンス原文、以下は削除しないでください
 /*-----------------------------------------------------------*/
