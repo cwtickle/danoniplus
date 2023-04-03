@@ -114,6 +114,28 @@ const g_limitObj = {
     musicTitleSiz: 13,
 };
 
+/** 設定項目の位置 */
+const g_settingPos = {
+    option: {
+        difficulty: { heightPos: 0, y: -5, dw: 0, dh: 10 },
+        speed: { heightPos: 2, y: 0, dw: 0, dh: 0 },
+        motion: { heightPos: 3, y: 0, dw: 0, dh: 0 },
+        reverse: { heightPos: 4, y: 0, dw: 0, dh: 0 },
+        scroll: { heightPos: 4, y: 0, dw: 0, dh: 0 },
+        shuffle: { heightPos: 5.5, y: 0, dw: 0, dh: 0 },
+        autoPlay: { heightPos: 6.5, y: 0, dw: 0, dh: 0 },
+        gauge: { heightPos: 7.5, y: 0, dw: 0, dh: 0 },
+        adjustment: { heightPos: 10.5, y: 0, dw: 0, dh: 0 },
+        fadein: { heightPos: 11.5, y: 0, dw: 0, dh: 0 },
+        volume: { heightPos: 12.5, y: 0, dw: 0, dh: 0 },
+    },
+    settingsDisplay: {
+        appearance: { heightPos: 7.4, y: 10, dw: 0, dh: 0 },
+        opacity: { heightPos: 9, y: 10, dw: 0, dh: 0 },
+        hitPosition: { heightPos: 10, y: 10, dw: 0, dh: 0 },
+    },
+};
+
 // スプライト（ムービークリップ相当）のルート
 const C_SPRITE_ROOT = `divRoot`;
 

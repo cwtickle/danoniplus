@@ -4239,10 +4239,10 @@ const optionInit = _ => {
 const setSpriteList = _settingList => {
 	const optionWidth = (g_sWidth - 450) / 2;
 	const spriteList = [];
-	_settingList.forEach(setting =>
-		spriteList[setting[0]] = createEmptySprite(optionsprite, `${setting[0]}Sprite`, {
-			x: 25, y: setting[1] * g_limitObj.setLblHeight + setting[2] + 20,
-			w: optionWidth + setting[3], h: g_limitObj.setLblHeight + setting[4],
+	Object.keys(_settingList).forEach(setting =>
+		spriteList[setting] = createEmptySprite(optionsprite, `${setting}Sprite`, {
+			x: 25, y: _settingList[setting].heightPos * g_limitObj.setLblHeight + _settingList[setting].y + 20,
+			w: optionWidth + _settingList[setting].dw, h: g_limitObj.setLblHeight + _settingList[setting].dh,
 		}));
 	return spriteList;
 };
@@ -4275,23 +4275,8 @@ const createOptionWindow = _sprite => {
 	// 各ボタン用のスプライトを作成
 	const optionsprite = createOptionSprite(_sprite);
 
-	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
-	const settingList = [
-		[`difficulty`, 0, -5, 0, 10],
-		[`speed`, 2, 0, 0, 0],
-		[`motion`, 3, 0, 0, 0],
-		[`reverse`, 4, 0, 0, 0],
-		[`scroll`, 4, 0, 0, 0],
-		[`shuffle`, 5.5, 0, 0, 0],
-		[`autoPlay`, 6.5, 0, 0, 0],
-		[`gauge`, 7.5, 0, 0, 0],
-		[`adjustment`, 10.5, 0, 0, 0],
-		[`fadein`, 11.5, 0, 0, 0],
-		[`volume`, 12.5, 0, 0, 0],
-	];
-
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
-	const spriteList = setSpriteList(settingList);
+	const spriteList = setSpriteList(g_settingPos.option);
 
 	// ---------------------------------------------------
 	// 難易度 (Difficulty)
@@ -5679,16 +5664,9 @@ const createSettingsDisplayWindow = _sprite => {
 	// 各ボタン用のスプライトを作成
 	createOptionSprite(_sprite);
 
-	// 設定名、縦位置、縦位置差分、幅差分、高さ差分
-	const settingList = [
-		[`appearance`, 7.4, 10, 0, 0],
-		[`opacity`, 9, 10, 0, 0],
-		[`hitPosition`, 10, 10, 0, 0],
-	];
-
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
 	const displaySprite = createEmptySprite(optionsprite, `displaySprite`, g_windowObj.displaySprite);
-	const spriteList = setSpriteList(settingList);
+	const spriteList = setSpriteList(g_settingPos.settingsDisplay);
 
 	_sprite.appendChild(createDivCss2Label(`sdDesc`, g_lblNameObj.sdDesc, g_lblPosObj.sdDesc));
 	g_displays.forEach((name, j) => makeDisplayButton(name, j % 7, Math.floor(j / 7)));
