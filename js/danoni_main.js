@@ -3519,7 +3519,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	const toString = _str => _str;
 	const toNumber = _num => parseInt(_num, 10);
 	const toFloat = _num => parseFloat(_num);
-	const toStringOrNumber = _str => isNaN(Number(_str)) ? _str : toNumber(_str);
 	const toKeyCtrlArray = _str => makeBaseArray(_str.split(`/`).map(n => toNumber(n)), g_keyObj.minKeyCtrlNum, 0);
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
