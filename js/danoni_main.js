@@ -396,10 +396,17 @@ const sumData = _array => _array.reduce((p, x) => p + x);
  * @param {number} _defaultVal 
  * @returns 
  */
-const makeBaseArray = (_array, _minLength, _defaultVal) => {
-	const baseArray = [...Array(_minLength)].fill(_defaultVal);
-	_array.forEach((val, j) => baseArray[j] = val);
-	return baseArray;
+const makeBaseArray = (_array = [], _minLength, _defaultVal) => padArray(_array, [...Array(_minLength)].fill(_defaultVal));
+
+/**
+ * ベースとする配列に対して別の配列で上書き
+ * @param {array} _array 
+ * @param {array} _baseArray ベースとする配列
+ * @returns 
+ */
+const padArray = (_array, _baseArray) => {
+	_array?.forEach((val, j) => _baseArray[j] = val);
+	return _baseArray;
 };
 
 /**
@@ -3597,7 +3604,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						}
 					} else {
 						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
-						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = list.split(`,`).map(n => isNaN(Number(n)) ? n : parseInt(n, 10));
+						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] =
+							makeBaseArray(list.split(`,`).map(n => isNaN(Number(n)) ? n : parseInt(n, 10)),
+								g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
 						ptnCnt++;
 					}
 				});
@@ -3665,7 +3674,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					} else {
 						// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-1,-1,-1,1,1/Split::1,1,1,1,-1,-1,-1,-1|）から取り込み
 						const tmpParamPair = pairs.split(`::`);
-						g_keyObj[pairName][tmpParamPair[0]] = tmpParamPair[1].split(`,`).map(n => parseInt(n, 10));
+						g_keyObj[pairName][tmpParamPair[0]] =
+							makeBaseArray(tmpParamPair[1].split(`,`).map(n => parseInt(n, 10)),
+								g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
 					}
 				});
 			}
@@ -3773,12 +3784,10 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
  * @param {string} _ptnName 
  */
 const setKeyDfVal = _ptnName => {
-	if (g_keyObj[`chara${_ptnName}`] === undefined) {
-		g_keyObj[`chara${_ptnName}`] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${_ptnName}`].length).keys()].map(i => `${i + 1}a`);
-	}
-	if (g_keyObj[`pos${_ptnName}`] === undefined) {
-		g_keyObj[`pos${_ptnName}`] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${_ptnName}`].length).keys()].map(i => i);
-	}
+	const baseLength = g_keyObj[`${g_keyObj.defaultProp}${_ptnName}`].length;
+	g_keyObj[`chara${_ptnName}`] = padArray(g_keyObj[`chara${_ptnName}`], [...Array(baseLength).keys()].map(i => `${i + 1}a`));
+	g_keyObj[`pos${_ptnName}`] = padArray(g_keyObj[`pos${_ptnName}`], [...Array(baseLength).keys()].map(i => i));
+
 	if (g_keyObj[`div${_ptnName}`] === undefined) {
 		g_keyObj[`div${_ptnName}`] = Math.max(...g_keyObj[`pos${_ptnName}`]) + 1;
 	}
