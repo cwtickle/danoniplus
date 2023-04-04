@@ -3745,7 +3745,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 				}
 			}
 		}
-		// charaX_Y, posX_Y, divX_Y, divMaxX_Yが未指定の場合はkeyCtrlX_Yを元に適用
+		// charaX_Y, posX_Y, keyGroupX_Y, divX_Y, divMaxX_Yが未指定の場合はkeyCtrlX_Yを元に適用
 		for (let k = 0; k < g_keyObj.minPatterns; k++) {
 			setKeyDfVal(`${newKey}_${k + dfPtnNum}`);
 		}
@@ -3791,6 +3791,7 @@ const setKeyDfVal = _ptnName => {
 	const baseLength = g_keyObj[`${g_keyObj.defaultProp}${_ptnName}`].length;
 	g_keyObj[`chara${_ptnName}`] = padArray(g_keyObj[`chara${_ptnName}`], [...Array(baseLength).keys()].map(i => `${i + 1}a`));
 	g_keyObj[`pos${_ptnName}`] = padArray(g_keyObj[`pos${_ptnName}`], [...Array(baseLength).keys()].map(i => i));
+	g_keyObj[`keyGroup${_ptnName}`] = padArray(g_keyObj[`keyGroup${_ptnName}`], [...Array(baseLength)].fill([`0`]));
 
 	if (g_keyObj[`div${_ptnName}`] === undefined) {
 		g_keyObj[`div${_ptnName}`] = Math.max(...g_keyObj[`pos${_ptnName}`]) + 1;
