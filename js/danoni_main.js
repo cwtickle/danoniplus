@@ -405,7 +405,11 @@ const makeBaseArray = (_array = [], _minLength, _defaultVal) => padArray(_array,
  * @returns 
  */
 const padArray = (_array, _baseArray) => {
-	_array?.forEach((val, j) => _baseArray[j] = val);
+	_array?.forEach((val, j) => {
+		if (hasVal(val)) {
+			_baseArray[j] = val;
+		}
+	});
 	return _baseArray;
 };
 
@@ -3605,7 +3609,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					} else {
 						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
 						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] =
-							makeBaseArray(list.split(`,`).map(n => isNaN(Number(n)) ? n : parseInt(n, 10)),
+							makeBaseArray(list.split(`,`).map(n => isNaN(parseInt(n)) ? n : parseInt(n, 10)),
 								g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
 						ptnCnt++;
 					}
