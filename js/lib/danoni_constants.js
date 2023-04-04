@@ -1554,6 +1554,7 @@ const g_keyObj = {
     // - 原則、キー×パターンの数だけ設定が必要
     currentKey: 7,
     currentPtn: 0,
+    defaultProp: `keyCtrl`,
 
     prevKey: `Dummy`,
     dfPtnNum: 0,
@@ -2061,9 +2062,12 @@ const g_keyObj = {
 
 };
 
-// posX_Y, divX_Y, divMaxX_Yが未定義のときに0からの連番で補完する処理 (charaX_Yが定義されていることが前提)
-Object.keys(g_keyObj).filter(val => val.startsWith(`chara`)).forEach(charaPtn => {
-    setKeyDfVal(charaPtn.slice(`chara`.length));
+// g_keyObj.defaultProp の上書きを禁止
+Object.defineProperty(g_keyObj, `defaultProp`, { writable: false });
+
+// charaX_Y, posX_Y, divX_Y, divMaxX_Yが未定義のときに0からの連番で補完する処理 (keyCtrlX_Yが定義されていることが前提)
+Object.keys(g_keyObj).filter(val => val.startsWith(g_keyObj.defaultProp)).forEach(charaPtn => {
+    setKeyDfVal(charaPtn.slice(g_keyObj.defaultProp.length));
 });
 
 // キーパターンのコピーリスト
@@ -2141,9 +2145,9 @@ Object.keys(g_copyKeyPtn).forEach(keyPtnTo => {
         copyKeyPtn(`stepRtn`, `${keyPtnFrom}_${stepRtnGr}`, `${keyPtnTo}_${stepRtnGr}`);
         stepRtnGr++;
     }
+    copyKeyPtn(`keyCtrl`);
     copyKeyPtn(`chara`);
     copyKeyPtn(`pos`);
-    copyKeyPtn(`keyCtrl`);
     copyKeyPtn(`scrollDir`);
     copyKeyPtn(`assistPos`);
 
