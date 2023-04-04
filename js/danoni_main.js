@@ -373,7 +373,7 @@ const splitLF2 = (_str, _delim = `$`) => splitLF(_str).filter(val => val !== ``)
  * @returns 
  */
 const makeDedupliArray = (_array1, ..._arrays) =>
-	Array.from((new Set([..._array1, ..._arrays.flat()])).values());
+	Array.from((new Set([..._array1, ..._arrays.flat()])).values()).filter(val => val !== undefined);
 
 /**
  * 二次元配列のコピー
@@ -1917,8 +1917,7 @@ const initialControl = async () => {
 		importKeysData(g_presetObj.keysData);
 	}
 	g_headerObj.keyExtraList = keysConvert(g_rootObj, {
-		keyExtraList: (g_rootObj.keyExtraList !== undefined ?
-			makeDedupliArray(g_rootObj.keyExtraList.split(`,`), g_headerObj.undefinedKeyLists) : g_headerObj.undefinedKeyLists),
+		keyExtraList: makeDedupliArray(g_headerObj.undefinedKeyLists, g_rootObj.keyExtraList?.split(`,`)),
 	});
 
 	// デフォルトのカラー・シャッフルグループ設定を退避
@@ -2089,7 +2088,7 @@ const loadLocalStorage = _ => {
  * 譜面データを分割して値を取得
  * @param {string} _dos 譜面データ
  */
-const dosConvert = _dos => {
+const dosConvert = (_dos = ``) => {
 
 	const obj = {};
 	const paramsTmp = g_enableAmpersandSplit ? _dos.split(`&`).join(`|`) : _dos;
@@ -3493,10 +3492,16 @@ const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyNam
  * 一時的な追加キーの設定
  * @param {object} _dosObj 
  */
-const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList.split(`,`) } = {}) => {
+const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) } = {}) => {
 
 	if (keyExtraList === undefined) {
-		return [];
+		keyExtraList = [];
+		Object.keys(_dosObj).filter(val => val.startsWith(`chara`))
+			.forEach(keyName => keyExtraList.push(keyName.slice(`chara`.length)));
+
+		if (keyExtraList.length === 0) {
+			return [];
+		}
 	}
 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
