@@ -396,10 +396,21 @@ const sumData = _array => _array.reduce((p, x) => p + x);
  * @param {number} _defaultVal 
  * @returns 
  */
-const makeBaseArray = (_array, _minLength, _defaultVal) => {
-	const baseArray = [...Array(_minLength)].fill(_defaultVal);
-	_array.forEach((val, j) => baseArray[j] = val);
-	return baseArray;
+const makeBaseArray = (_array = [], _minLength, _defaultVal) => padArray(_array, [...Array(_minLength)].fill(_defaultVal));
+
+/**
+ * ベースとする配列に対して別の配列で上書き
+ * @param {array} _array 
+ * @param {array} _baseArray ベースとする配列
+ * @returns 
+ */
+const padArray = (_array, _baseArray) => {
+	_array?.forEach((val, j) => {
+		if (hasVal(val)) {
+			_baseArray[j] = val;
+		}
+	});
+	return _baseArray;
 };
 
 /**
@@ -1910,7 +1921,7 @@ const initialControl = async () => {
 	Object.assign(g_headerObj, headerConvert(g_rootObj));
 	const importKeysData = _data => {
 		keysConvert(dosConvert(_data));
-		g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
+		g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
 	};
 	g_presetObj.keysDataLib.forEach(list => importKeysData(list));
 	if (g_presetObj.keysData !== undefined) {
@@ -2227,7 +2238,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	const startFrame = getStartFrame(lastFrame, 0, _scoreId);
 	const firstArrowFrame = getFirstArrowFrame(_scoreObj, _keyCtrlPtn);
 	const playingFrame = lastFrame - firstArrowFrame;
-	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
+	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${_keyCtrlPtn}`].length;
 
 	// 譜面密度グラフ用のデータ作成
 	const noteCnt = { arrow: [], frz: [] };
@@ -2734,7 +2745,7 @@ const headerConvert = _dosObj => {
 	}
 	const keyLists = makeDedupliArray(obj.keyLabels);
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
-	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`chara${key}_0`] === undefined);
+	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
 
 	// 譜面変更セレクターの利用有無
 	obj.difSelectorUse = (setBoolVal(_dosObj.difSelectorUse, obj.keyLabels.length > 5));
@@ -3496,8 +3507,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 	if (keyExtraList === undefined) {
 		keyExtraList = [];
-		Object.keys(_dosObj).filter(val => val.startsWith(`chara`))
-			.forEach(keyName => keyExtraList.push(keyName.slice(`chara`.length)));
+		Object.keys(_dosObj).filter(val => val.startsWith(g_keyObj.defaultProp))
+			.forEach(keyName => keyExtraList.push(keyName.slice(g_keyObj.defaultProp.length)));
 
 		if (keyExtraList.length === 0) {
 			return [];
@@ -3508,7 +3519,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	const toString = _str => _str;
 	const toNumber = _num => parseInt(_num, 10);
 	const toFloat = _num => parseFloat(_num);
-	const toStringOrNumber = _str => isNaN(Number(_str)) ? _str : toNumber(_str);
 	const toKeyCtrlArray = _str => makeBaseArray(_str.split(`/`).map(n => toNumber(n)), g_keyObj.minKeyCtrlNum, 0);
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
@@ -3585,7 +3595,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					const keyPtn = getKeyPtnName(list);
 					if (list === ``) {
 						// 空指定の場合は一律同じグループへ割り当て
-						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = [...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(0);
+						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length)].fill(0);
 
 					} else if (g_keyObj[`${_name}${keyPtn}_0`] !== undefined) {
 						// 他のキーパターン (例: |shuffle8i=8_0| ) を指定した場合、該当があれば既存パターンからコピー
@@ -3597,7 +3607,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						}
 					} else {
 						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
-						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = list.split(`,`).map(n => isNaN(Number(n)) ? n : parseInt(n, 10));
+						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] =
+							makeBaseArray(list.split(`,`).map(n => isNaN(parseInt(n)) ? n : parseInt(n, 10)),
+								g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
 						ptnCnt++;
 					}
 				});
@@ -3605,10 +3617,10 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 			}
 
 		} else if (g_keyObj[`${keyheader}_${dfPtn}_0`] === undefined) {
-			// 特に指定が無い場合はcharaX_Yの配列長で決定
+			// 特に指定が無い場合はkeyCtrlX_Yの配列長で決定
 			for (let k = 0; k < g_keyObj.minPatterns; k++) {
 				const ptnName = `${_key}_${k + dfPtn}`;
-				g_keyObj[`${_name}${ptnName}_0`] = [...Array(g_keyObj[`chara${ptnName}`].length)].fill(0);
+				g_keyObj[`${_name}${ptnName}_0`] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${ptnName}`].length)].fill(0);
 				g_keyObj[`${_name}${ptnName}`] = structuredClone(g_keyObj[`${_name}${ptnName}_0`]);
 			}
 		}
@@ -3654,7 +3666,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 				// デフォルト項目がある場合は先に定義
 				if (_defaultName !== ``) {
-					g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`chara${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
+					g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
 				}
 				tmpParams[k].split(`/`).forEach(pairs => {
 					const keyPtn = getKeyPtnName(pairs);
@@ -3665,7 +3677,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					} else {
 						// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-1,-1,-1,1,1/Split::1,1,1,1,-1,-1,-1,-1|）から取り込み
 						const tmpParamPair = pairs.split(`::`);
-						g_keyObj[pairName][tmpParamPair[0]] = tmpParamPair[1].split(`,`).map(n => parseInt(n, 10));
+						g_keyObj[pairName][tmpParamPair[0]] =
+							makeBaseArray(tmpParamPair[1].split(`,`).map(n => parseInt(n, 10)),
+								g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
 					}
 				});
 			}
@@ -3680,7 +3694,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		// キーパターンの追記 (appendX)
 		if (setBoolVal(_dosObj[`append${newKey}`])) {
 			for (let j = 0; ; j++) {
-				if (g_keyObj[`chara${newKey}_${j}`] === undefined) {
+				if (g_keyObj[`${g_keyObj.defaultProp}${newKey}_${j}`] === undefined) {
 					break;
 				}
 				g_keyObj.dfPtnNum++;
@@ -3694,17 +3708,17 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		// キーの最小横幅 (minWidthX)
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
+		// キーコンフィグ (keyCtrlX_Y)
+		g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, { errCd: `E_0104`, baseCopyFlg: true });
+
 		// 読込変数の接頭辞 (charaX_Y)
-		g_keyObj.minPatterns = newKeyMultiParam(newKey, `chara`, toString, { errCd: `E_0102` });
+		newKeyMultiParam(newKey, `chara`, toString);
 
 		// 矢印色パターン (colorX_Y)
 		newKeyTripleParam(newKey, `color`);
 
 		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
 		newKeyTripleParam(newKey, `stepRtn`);
-
-		// キーコンフィグ (keyCtrlX_Y)
-		newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, { errCd: `E_0104`, baseCopyFlg: true });
 
 		// ステップゾーン位置 (posX_Y)
 		newKeyMultiParam(newKey, `pos`, toFloat);
@@ -3730,7 +3744,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 				}
 			}
 		}
-		// posX_Y, divX_Y, divMaxX_Yが未指定の場合はcharaX_Yを元に適用
+		// charaX_Y, posX_Y, keyGroupX_Y, divX_Y, divMaxX_Yが未指定の場合はkeyCtrlX_Yを元に適用
 		for (let k = 0; k < g_keyObj.minPatterns; k++) {
 			setKeyDfVal(`${newKey}_${k + dfPtnNum}`);
 		}
@@ -3773,9 +3787,11 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
  * @param {string} _ptnName 
  */
 const setKeyDfVal = _ptnName => {
-	if (g_keyObj[`pos${_ptnName}`] === undefined) {
-		g_keyObj[`pos${_ptnName}`] = [...Array(g_keyObj[`chara${_ptnName}`].length).keys()].map(i => i);
-	}
+	const baseLength = g_keyObj[`${g_keyObj.defaultProp}${_ptnName}`].length;
+	g_keyObj[`chara${_ptnName}`] = padArray(g_keyObj[`chara${_ptnName}`], [...Array(baseLength).keys()].map(i => `${i + 1}a`));
+	g_keyObj[`pos${_ptnName}`] = padArray(g_keyObj[`pos${_ptnName}`], [...Array(baseLength).keys()].map(i => i));
+	g_keyObj[`keyGroup${_ptnName}`] = padArray(g_keyObj[`keyGroup${_ptnName}`], [...Array(baseLength)].fill([`0`]));
+
 	if (g_keyObj[`div${_ptnName}`] === undefined) {
 		g_keyObj[`div${_ptnName}`] = Math.max(...g_keyObj[`pos${_ptnName}`]) + 1;
 	}
@@ -5463,7 +5479,7 @@ const setReverseDefault = _ => {
 const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 	const baseKeyCtrlPtn = _localStorage[`keyCtrlPtn${_extraKeyName}`];
 	const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
-	const baseKeyNum = g_keyObj[`chara${basePtn}`].length;
+	const baseKeyNum = g_keyObj[`${g_keyObj.defaultProp}${basePtn}`].length;
 
 	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined && _localStorage[`keyCtrl${_extraKeyName}`][0].length > 0) {
 		const prevPtn = g_keyObj.currentPtn;
@@ -6536,7 +6552,7 @@ const getShadowColor = (_colorPos, _arrowColor) => g_headerObj.setShadowColor[_c
  */
 const getKeyInfo = _ => {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`chara${keyCtrlPtn}`].length;
+	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length;
 	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
 		g_keyObj[`divMax${keyCtrlPtn}`] : Math.max(...g_keyObj[`pos${keyCtrlPtn}`]) + 1);
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
@@ -7087,7 +7103,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	const obj = {};
 
 	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg);
-	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
+	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${_keyCtrlPtn}`].length;
 	obj.arrowData = [];
 	obj.frzData = [];
 	obj.dummyArrowData = [];
@@ -7567,7 +7583,7 @@ const calcLifeVal = (_val, _allArrows) => Math.round(_val * g_headerObj.maxLifeV
 const getLastFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`) => {
 
 	let tmpLastNum = 0;
-	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
+	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${_keyCtrlPtn}`].length;
 
 	for (let j = 0; j < keyNum; j++) {
 		const data = [
@@ -7594,7 +7610,7 @@ const getLastFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj
 const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`) => {
 
 	let tmpFirstNum = Infinity;
-	const keyNum = g_keyObj[`chara${_keyCtrlPtn}`].length;
+	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${_keyCtrlPtn}`].length;
 
 	for (let j = 0; j < keyNum; j++) {
 		const data = [
