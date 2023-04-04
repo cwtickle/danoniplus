@@ -2065,9 +2065,10 @@ const g_keyObj = {
 // g_keyObj.defaultProp の上書きを禁止
 Object.defineProperty(g_keyObj, `defaultProp`, { writable: false });
 
-// charaX_Y, posX_Y, keyGroupX_Y, divX_Y, divMaxX_Yが未定義のときに0からの連番で補完する処理 (keyCtrlX_Yが定義されていることが前提)
-Object.keys(g_keyObj).filter(val => val.startsWith(g_keyObj.defaultProp)).forEach(charaPtn => {
-    setKeyDfVal(charaPtn.slice(g_keyObj.defaultProp.length));
+// charaX_Y, posX_Y, keyGroupX_Y, divX_Y, divMaxX_Yが未定義のときに0からの連番で補完する処理 (charaX_Yが定義されていることが前提)
+// この後g_copyKeyPtnにてデータコピーするため、ここのみcharaX_Yがあるものだけについて処理
+Object.keys(g_keyObj).filter(val => val.startsWith(`chara`)).forEach(charaPtn => {
+    setKeyDfVal(charaPtn.slice(`chara`.length));
 });
 
 // キーパターンのコピーリスト
