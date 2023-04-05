@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/04/05 (v31.3.0)
+ * Revised : 2023/04/05 (v31.3.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2065,11 +2065,6 @@ const g_keyObj = {
 // g_keyObj.defaultProp の上書きを禁止
 Object.defineProperty(g_keyObj, `defaultProp`, { writable: false });
 
-// charaX_Y, posX_Y, keyGroupX_Y, divX_Y, divMaxX_Yが未定義のときに0からの連番で補完する処理 (keyCtrlX_Yが定義されていることが前提)
-Object.keys(g_keyObj).filter(val => val.startsWith(g_keyObj.defaultProp)).forEach(charaPtn => {
-    setKeyDfVal(charaPtn.slice(g_keyObj.defaultProp.length));
-});
-
 // キーパターンのコピーリスト
 // ・コピー先：コピー元の順に指定する
 // ・上から順に処理する
@@ -2116,6 +2111,13 @@ const g_copyKeyPtn = {
     '15A_1': `15B_0`,
     '15B_1': `15A_0`,
 };
+
+// charaX_Y, posX_Y, keyGroupX_Y, divX_Y, divMaxX_Yが未定義のときに0からの連番で補完する処理 (charaX_Yが定義されていることが前提)
+// この後g_copyKeyPtnにてデータコピーするため、ここのみcharaX_Yがあるものだけについて処理
+Object.keys(g_keyObj).filter(val => val.startsWith(`chara`) &&
+    !Object.keys(g_copyKeyPtn).includes(val.slice(`chara`.length))).forEach(charaPtn => {
+        setKeyDfVal(charaPtn.slice(`chara`.length));
+    });
 
 // キーパターンのコピー処理
 // ただし、すでに定義済みの場合は定義済みのものを優先する
