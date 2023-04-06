@@ -3516,10 +3516,12 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	}
 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
+	const getKeyCtrlVal = _kCdN => Object.keys(g_kCdN).findIndex(val => g_kCdN[val] === _kCdN);
 	const toString = _str => _str;
 	const toNumber = _num => parseInt(_num, 10);
 	const toFloat = _num => parseFloat(_num);
-	const toKeyCtrlArray = _str => makeBaseArray(_str.split(`/`).map(n => toNumber(n)), g_keyObj.minKeyCtrlNum, 0);
+	const toKeyCtrlArray = _str =>
+		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n) !== -1 ? getKeyCtrlVal(n) : toNumber(n)), g_keyObj.minKeyCtrlNum, 0);
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
 	/**
