@@ -3500,6 +3500,16 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyName${_key}`] : _key;
 
 /**
+ * KeyBoardEvent.code の値をCW Edition用のキーコードに変換
+ * 簡略指定ができるように、以下の記述を許容
+ * 例) KeyD -> D, ArrowDown -> Down, AltLeft -> Alt
+ * @param {string} _kCdN 
+ * @returns 
+ */
+const getKeyCtrlVal = _kCdN => Object.keys(g_kCdN).findIndex(val =>
+	[_kCdN, `Key${_kCdN}`, `Arrow${_kCdN}`].includes(g_kCdN[val]) || _kCdN === g_kCdN[val].replace(`Left`, ``));
+
+/**
  * 一時的な追加キーの設定
  * @param {object} _dosObj 
  */
@@ -3516,12 +3526,14 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	}
 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
-	const getKeyCtrlVal = _kCdN => Object.keys(g_kCdN).findIndex(val => g_kCdN[val] === _kCdN);
 	const toString = _str => _str;
 	const toNumber = _num => parseInt(_num, 10);
 	const toFloat = _num => parseFloat(_num);
 	const toKeyCtrlArray = _str =>
-		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n) !== -1 ? getKeyCtrlVal(n) : toNumber(n)), g_keyObj.minKeyCtrlNum, 0);
+		makeBaseArray(_str.split(`/`).map(n => {
+			const keyVal = getKeyCtrlVal(n);
+			return keyVal !== -1 ? keyVal : toNumber(n);
+		}), g_keyObj.minKeyCtrlNum, 0);
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
 	/**
