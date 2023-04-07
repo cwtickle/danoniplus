@@ -2668,9 +2668,9 @@ const headerConvert = _dosObj => {
 	g_settings.speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 20 + 1).keys()].map(i => obj.minSpeed + i / 20);
 
 	// プレイ中のショートカットキー
-	obj.keyRetry = setIntVal(_dosObj.keyRetry, C_KEY_RETRY);
+	obj.keyRetry = setIntVal(getKeyCtrlVal(_dosObj.keyRetry), C_KEY_RETRY);
 	obj.keyRetryDef = obj.keyRetry;
-	obj.keyTitleBack = setIntVal(_dosObj.keyTitleBack, C_KEY_TITLEBACK);
+	obj.keyTitleBack = setIntVal(getKeyCtrlVal(_dosObj.keyTitleBack), C_KEY_TITLEBACK);
 	obj.keyTitleBackDef = obj.keyTitleBack;
 
 	// フリーズアローの許容フレーム数設定
@@ -3506,8 +3506,11 @@ const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyNam
  * @param {string} _kCdN 
  * @returns 
  */
-const getKeyCtrlVal = _kCdN => Object.keys(g_kCdN).findIndex(val =>
-	[_kCdN, `Key${_kCdN}`, `Arrow${_kCdN}`].includes(g_kCdN[val]) || _kCdN === replaceStr(g_kCdN[val], g_escapeStr.keyCtrlName));
+const getKeyCtrlVal = _kCdN => {
+	const convVal = Object.keys(g_kCdN).findIndex(val =>
+		[_kCdN, `Key${_kCdN}`, `Arrow${_kCdN}`].includes(g_kCdN[val]) || _kCdN === replaceStr(g_kCdN[val], g_escapeStr.keyCtrlName));
+	return convVal !== -1 ? convVal : parseInt(_kCdN, 10);
+};
 
 /**
  * 一時的な追加キーの設定
@@ -3530,10 +3533,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	const toNumber = _num => parseInt(_num, 10);
 	const toFloat = _num => parseFloat(_num);
 	const toKeyCtrlArray = _str =>
-		makeBaseArray(_str.split(`/`).map(n => {
-			const keyVal = getKeyCtrlVal(n);
-			return keyVal !== -1 ? keyVal : toNumber(n);
-		}), g_keyObj.minKeyCtrlNum, 0);
+		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n)), g_keyObj.minKeyCtrlNum, 0);
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
 	/**
@@ -5227,10 +5227,10 @@ const createOptionWindow = _sprite => {
 
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 			if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
-				g_headerObj.keyRetry = setIntVal(g_keyObj[`keyRetry${keyCtrlPtn}`], g_headerObj.keyRetryDef);
+				g_headerObj.keyRetry = setIntVal(getKeyCtrlVal(g_keyObj[`keyRetry${keyCtrlPtn}`]), g_headerObj.keyRetryDef);
 			}
 			if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
-				g_headerObj.keyTitleBack = setIntVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`], g_headerObj.keyTitleBackDef);
+				g_headerObj.keyTitleBack = setIntVal(getKeyCtrlVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`]), g_headerObj.keyTitleBackDef);
 			}
 		}
 

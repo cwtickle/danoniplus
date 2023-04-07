@@ -2206,12 +2206,7 @@ Object.keys(g_copyKeyPtn).forEach(keyPtnTo => {
 // keyCtrlX_Yについて1キーにつき2キー割り当てできるように配列を補完
 const keyCtrlName = Object.keys(g_keyObj).filter(val => val.startsWith(`keyCtrl`));
 keyCtrlName.forEach(property => {
-    g_keyObj[property].forEach((list, j) => {
-        g_keyObj[property][j] = list.map(valN => {
-            const keyVal = getKeyCtrlVal(valN);
-            return keyVal !== -1 ? keyVal : valN;
-        });
-    });
+    g_keyObj[property].forEach((list, j) => g_keyObj[property][j] = list.map(valN => getKeyCtrlVal(valN)));
     g_keyObj[property].forEach((list, j) => g_keyObj[property][j] = makeBaseArray(g_keyObj[property][j], g_keyObj.minKeyCtrlNum, 0));
     g_keyObj[`${property}d`] = structuredClone(g_keyObj[property]);
 });
