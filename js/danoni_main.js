@@ -3507,7 +3507,7 @@ const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyNam
  * @returns 
  */
 const getKeyCtrlVal = _kCdN => Object.keys(g_kCdN).findIndex(val =>
-	[_kCdN, `Key${_kCdN}`, `Arrow${_kCdN}`].includes(g_kCdN[val]) || _kCdN === g_kCdN[val].replace(`Left`, ``));
+	[_kCdN, `Key${_kCdN}`, `Arrow${_kCdN}`].includes(g_kCdN[val]) || _kCdN === replaceStr(g_kCdN[val], g_escapeStr.keyCtrlName));
 
 /**
  * 一時的な追加キーの設定

@@ -609,6 +609,41 @@ const C_BLOCK_KEYS = [
     27 /* Esc */
 ];
 
+/**
+ * 特殊文字列の置き換えリスト
+ * (置き換え元、置き換え先の組で二次元配列として定義。主にreplaceStr関数で使用)
+ */
+const g_escapeStr = {
+    escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
+    escapeTag: [
+        [`*amp*`, `&amp;`], [`*pipe*`, `|`], [`*dollar*`, `$`], [`*rsquo*`, `&rsquo;`],
+        [`*quot*`, `&quot;`], [`*comma*`, `&sbquo;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
+        [`*lt*`, `&lt;`], [`*gt*`, `&gt;`], [`*lbrace*`, `{`], [`*rbrace*`, `}`],
+    ],
+    unEscapeTag: [
+        [`&amp;`, `&`], [`&rsquo;`, `’`], [`&quot;`, `"`], [`&sbquo;`, `,`],
+        [`&lt;`, `<`], [`&gt;`, `>`], [`&#39;`, `'`], [`&#96;`, `\``],
+    ],
+    escapeCode: [
+        [`<script>`, ``], [`</script>`, ``],
+    ],
+    musicNameSimple: [
+        [`<br>`, ` `], [`<nbr>`, ``], [`<dbr>`, `　`],
+    ],
+    musicNameMultiLine: [
+        [`<nbr>`, `<br>`], [`<dbr>`, `<br>`],
+    ],
+    frzName: [
+        [`leftdia`, `frzLdia`], [`rightdia`, `frzRdia`],
+        [`left`, `frzLeft`], [`down`, `frzDown`], [`up`, `frzUp`], [`right`, `frzRight`],
+        [`space`, `frzSpace`], [`iyo`, `frzIyo`], [`gor`, `frzGor`], [`oni`, `foni`],
+    ],
+    keyCtrlName: [
+        [`Left`, ``], [`Digit`, `D`], [`Numpad`, `N`], [`Semicolon`, `;`],
+        [`Multiply`, `*`], [`Add`, `+`], [`Subtract`, `-`], [`Decimal`, `.`], [`Divide`, `Div`],
+    ],
+};
+
 /** 設定・オプション画面用共通 */
 const g_graphColorObj = {
     max: `#993333cc`,
@@ -1777,21 +1812,21 @@ const g_keyObj = {
     keyCtrl7i_0: [[`Z`], [`X`], [`C`], [`Left`], [`Down`], [`Up`], [`Right`]],
     keyCtrl8_0: [[`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`Enter`]],
     keyCtrl9A_0: [[`S`], [`D`], [`E`, `R`], [`F`], [`Space`], [`J`], [`K`], [`I`], [`L`]],
-    keyCtrl9B_0: [[`A`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`Semicolon`]],
+    keyCtrl9B_0: [[`A`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`;`]],
     keyCtrl9i_0: [[`Left`], [`Down`], [`Up`], [`Right`], [`A`], [`S`], [`D`], [`F`], [`Space`]],
     keyCtrl11_0: [[`Left`], [`Down`], [`Up`], [`Right`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
-    keyCtrl11L_0: [[`W`], [`E`], [`Digit3`, `Digit4`], [`R`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
-    keyCtrl11W_0: [[`Digit1`, `Digit2`], [`T`], [`Y`], [`Digit0`, `Minus`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
+    keyCtrl11L_0: [[`W`], [`E`], [`D3`, `D4`], [`R`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
+    keyCtrl11W_0: [[`D1`, `D2`], [`T`], [`Y`], [`D0`, `Minus`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
     keyCtrl11i_0: [[`S`], [`X`, `C`], [`D`], [`E`, `R`], [`F`], [`Space`], [`J`], [`M`, `Comma`], [`K`], [`I`, `O`], [`L`]],
-    keyCtrl12_0: [[`U`], [`I`], [`Digit8`, `Digit9`], [`O`], [`Space`], [`N`], [`J`], [`M`], [`K`], [`Comma`], [`L`], [`Period`]],
+    keyCtrl12_0: [[`U`], [`I`], [`D8`, `D9`], [`O`], [`Space`], [`N`], [`J`], [`M`], [`K`], [`Comma`], [`L`], [`Period`]],
     keyCtrl13_0: [[`Left`], [`Down`], [`Up`], [`Right`], [`S`], [`D`], [`E`, `R`], [`F`], [`Space`], [`J`], [`K`], [`I`], [`L`]],
-    keyCtrl14_0: [[`T`, `Y`], [`U`], [`I`], [`Digit8`, `Digit7`, `Digit9`, `Digit0`], [`O`], [`BracketLeft`, `P`], [`Space`], [`N`], [`J`], [`M`], [`K`], [`Comma`], [`L`], [`Period`]],
+    keyCtrl14_0: [[`T`, `Y`], [`U`], [`I`], [`D8`, `D7`, `D9`, `D0`], [`O`], [`BracketLeft`, `P`], [`Space`], [`N`], [`J`], [`M`], [`K`], [`Comma`], [`L`], [`Period`]],
     keyCtrl14i_0: [[`Z`, `W`], [`X`, `E`], [`C`, `R`], [`Left`], [`Down`], [`Up`], [`Right`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
-    keyCtrl15A_0: [[`W`], [`E`], [`Digit3`, `Digit4`], [`R`], [`Left`], [`Down`], [`Up`], [`Right`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
-    keyCtrl15B_0: [[`W`], [`E`], [`Digit3`, `Digit4`], [`R`], [`U`], [`I`], [`Digit8`, `Digit9`], [`O`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
-    keyCtrl16i_0: [[`Z`, `W`], [`X`, `E`], [`C`, `R`], [`Left`], [`Down`], [`Up`], [`Right`], [`A`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`Semicolon`]],
-    keyCtrl17_0: [[`A`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`], [`Space`], [`N`], [`J`], [`M`], [`K`], [`Comma`], [`L`], [`Period`], [`Semicolon`]],
-    keyCtrl23_0: [[`W`], [`E`], [`Digit3`, `Digit4`], [`R`], [`U`], [`I`], [`Digit8`, `Digit9`], [`O`],
+    keyCtrl15A_0: [[`W`], [`E`], [`D3`, `D4`], [`R`], [`Left`], [`Down`], [`Up`], [`Right`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
+    keyCtrl15B_0: [[`W`], [`E`], [`D3`, `D4`], [`R`], [`U`], [`I`], [`D8`, `D9`], [`O`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
+    keyCtrl16i_0: [[`Z`, `W`], [`X`, `E`], [`C`, `R`], [`Left`], [`Down`], [`Up`], [`Right`], [`A`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`;`]],
+    keyCtrl17_0: [[`A`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`], [`Space`], [`N`], [`J`], [`M`], [`K`], [`Comma`], [`L`], [`Period`], [`;`]],
+    keyCtrl23_0: [[`W`], [`E`], [`D3`, `D4`], [`R`], [`U`], [`I`], [`D8`, `D9`], [`O`],
     [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`], [`Space`], [`N`], [`J`], [`M`], [`K`], [`Comma`], [`L`], [`Period`]],
 
     // 変則パターン (キーコンフィグ)
@@ -1801,18 +1836,18 @@ const g_keyObj = {
     keyCtrl8_1: [[`Enter`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
     keyCtrl9A_1: [[`S`], [`D`], [`E`, `R`], [`F`], [`Space`], [`Left`], [`Down`], [`Up`], [`Right`]],
     keyCtrl9i_1: [[`A`], [`S`], [`D`], [`F`], [`Space`], [`Left`], [`Down`], [`Up`], [`Right`]],
-    keyCtrl12_1: [[`Y`], [`U`, `I`], [`Digit8`, `Digit7`, `Digit9`], [`O`], [`Space`], [`B`], [`H`], [`N`, `M`], [`J`, `K`], [`Comma`], [`L`], [`Period`]],
-    keyCtrl14_1: [[`R`, `T`], [`Y`], [`U`, `I`], [`Digit8`, `Digit6`, `Digit7`, `Digit9`, `Digit0`], [`O`], [`BracketLeft`, `P`], [`Space`], [`B`], [`H`], [`N`, `M`], [`J`, `K`], [`Comma`], [`L`], [`Period`]],
-    keyCtrl17_1: [[`A`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`Semicolon`], [`Z`], [`X`], [`C`], [`V`], [`N`], [`M`], [`Comma`], [`Period`]],
+    keyCtrl12_1: [[`Y`], [`U`, `I`], [`D8`, `D7`, `D9`], [`O`], [`Space`], [`B`], [`H`], [`N`, `M`], [`J`, `K`], [`Comma`], [`L`], [`Period`]],
+    keyCtrl14_1: [[`R`, `T`], [`Y`], [`U`, `I`], [`D8`, `D6`, `D7`, `D9`, `D0`], [`O`], [`BracketLeft`, `P`], [`Space`], [`B`], [`H`], [`N`, `M`], [`J`, `K`], [`Comma`], [`L`], [`Period`]],
+    keyCtrl17_1: [[`A`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`;`], [`Z`], [`X`], [`C`], [`V`], [`N`], [`M`], [`Comma`], [`Period`]],
 
     keyCtrl5_2: [[`D`], [`F`], [`Space`], [`J`], [`K`]],
     keyCtrl8_2: [[`Space`], [`N`], [`J`], [`M`], [`K`], [`Comma`], [`L`], [`Period`]],
-    keyCtrl12_2: [[`W`], [`E`], [`Digit3`, `Digit4`], [`R`], [`Shift`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`]],
-    keyCtrl14_2: [[`Tab`, `Q`], [`W`], [`E`], [`Digit3`, `Digit2`, `Digit4`, `Digit5`], [`R`], [`Y`, `T`], [`Shift`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`]],
+    keyCtrl12_2: [[`W`], [`E`], [`D3`, `D4`], [`R`], [`Shift`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`]],
+    keyCtrl14_2: [[`Tab`, `Q`], [`W`], [`E`], [`D3`, `D2`, `D4`, `D5`], [`R`], [`Y`, `T`], [`Shift`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`]],
 
     keyCtrl8_3: [[`Space`], [`B`], [`H`], [`N`, `M`], [`J`, `K`], [`Comma`], [`L`], [`Period`]],
-    keyCtrl12_3: [[`W`], [`E`, `R`], [`Digit3`, `Digit4`, `Digit5`], [`T`], [`Shift`], [`Z`], [`S`], [`X`, `C`], [`D`, `F`], [`V`], [`G`], [`B`]],
-    keyCtrl14_3: [[`Tab`, `Q`], [`W`], [`E`, `R`], [`Digit3`, `Digit2`, `Digit4`, `Digit5`, `Digit6`], [`T`], [`U`, `Y`], [`Shift`], [`Z`], [`S`], [`X`, `C`], [`D`, `F`], [`V`], [`G`], [`B`]],
+    keyCtrl12_3: [[`W`], [`E`, `R`], [`D3`, `D4`, `D5`], [`T`], [`Shift`], [`Z`], [`S`], [`X`, `C`], [`D`, `F`], [`V`], [`G`], [`B`]],
+    keyCtrl14_3: [[`Tab`, `Q`], [`W`], [`E`, `R`], [`D3`, `D2`, `D4`, `D5`, `D6`], [`T`], [`U`, `Y`], [`Shift`], [`Z`], [`S`], [`X`, `C`], [`D`, `F`], [`V`], [`G`], [`B`]],
 
     keyCtrl8_4: [[`Shift`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`]],
 
@@ -2341,37 +2376,6 @@ const g_dfColorBaseObj = {
             [`#ff6666`, `#ff9999`, `#ffff00`, `#999900`]
         ],
     },
-};
-
-/**
- * 特殊文字列の置き換えリスト
- * (置き換え元、置き換え先の組で二次元配列として定義。主にreplaceStr関数で使用)
- */
-const g_escapeStr = {
-    escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
-    escapeTag: [
-        [`*amp*`, `&amp;`], [`*pipe*`, `|`], [`*dollar*`, `$`], [`*rsquo*`, `&rsquo;`],
-        [`*quot*`, `&quot;`], [`*comma*`, `&sbquo;`], [`*squo*`, `&#39;`], [`*bkquo*`, `&#96;`],
-        [`*lt*`, `&lt;`], [`*gt*`, `&gt;`], [`*lbrace*`, `{`], [`*rbrace*`, `}`],
-    ],
-    unEscapeTag: [
-        [`&amp;`, `&`], [`&rsquo;`, `’`], [`&quot;`, `"`], [`&sbquo;`, `,`],
-        [`&lt;`, `<`], [`&gt;`, `>`], [`&#39;`, `'`], [`&#96;`, `\``],
-    ],
-    escapeCode: [
-        [`<script>`, ``], [`</script>`, ``],
-    ],
-    musicNameSimple: [
-        [`<br>`, ` `], [`<nbr>`, ``], [`<dbr>`, `　`],
-    ],
-    musicNameMultiLine: [
-        [`<nbr>`, `<br>`], [`<dbr>`, `<br>`],
-    ],
-    frzName: [
-        [`leftdia`, `frzLdia`], [`rightdia`, `frzRdia`],
-        [`left`, `frzLeft`], [`down`, `frzDown`], [`up`, `frzUp`], [`right`, `frzRight`],
-        [`space`, `frzSpace`], [`iyo`, `frzIyo`], [`gor`, `frzGor`], [`oni`, `foni`],
-    ],
 };
 
 /**
