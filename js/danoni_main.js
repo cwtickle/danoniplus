@@ -525,7 +525,7 @@ const transCode = _setCode => {
  * 特定キーをブロックする処理
  * @param {string} _setCode 
  */
-const blockCode = _setCode => !C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode);
+const blockCode = _setCode => !C_BLOCK_KEYS.includes(_setCode);
 
 
 /*-----------------------------------------------------------*/
@@ -2668,9 +2668,9 @@ const headerConvert = _dosObj => {
 	g_settings.speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 20 + 1).keys()].map(i => obj.minSpeed + i / 20);
 
 	// プレイ中のショートカットキー
-	obj.keyRetry = setIntVal(_dosObj.keyRetry, C_KEY_RETRY);
+	obj.keyRetry = setIntVal(getKeyCtrlVal(_dosObj.keyRetry), C_KEY_RETRY);
 	obj.keyRetryDef = obj.keyRetry;
-	obj.keyTitleBack = setIntVal(_dosObj.keyTitleBack, C_KEY_TITLEBACK);
+	obj.keyTitleBack = setIntVal(getKeyCtrlVal(_dosObj.keyTitleBack), C_KEY_TITLEBACK);
 	obj.keyTitleBackDef = obj.keyTitleBack;
 
 	// フリーズアローの許容フレーム数設定
@@ -3500,6 +3500,19 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyName${_key}`] : _key;
 
 /**
+ * KeyBoardEvent.code の値をCW Edition用のキーコードに変換
+ * 簡略指定ができるように、以下の記述を許容
+ * 例) KeyD -> D, ArrowDown -> Down, AltLeft -> Alt
+ * @param {string} _kCdN 
+ * @returns 
+ */
+const getKeyCtrlVal = _kCdN => {
+	const convVal = Object.keys(g_kCdN).findIndex(val =>
+		[_kCdN, `Key${_kCdN}`, `Arrow${_kCdN}`].includes(g_kCdN[val]) || _kCdN === replaceStr(g_kCdN[val], g_escapeStr.keyCtrlName));
+	return convVal !== -1 ? convVal : parseInt(_kCdN, 10);
+};
+
+/**
  * 一時的な追加キーの設定
  * @param {object} _dosObj 
  */
@@ -3517,9 +3530,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
 	const toString = _str => _str;
-	const toNumber = _num => parseInt(_num, 10);
 	const toFloat = _num => parseFloat(_num);
-	const toKeyCtrlArray = _str => makeBaseArray(_str.split(`/`).map(n => toNumber(n)), g_keyObj.minKeyCtrlNum, 0);
+	const toKeyCtrlArray = _str =>
+		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n)), g_keyObj.minKeyCtrlNum, 0);
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
 	/**
@@ -3756,10 +3769,10 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		newKeySingleParam(newKey, `scale`, C_TYP_FLOAT);
 
 		// プレイ中ショートカット：リトライ (keyRetryX_Y)
-		newKeySingleParam(newKey, `keyRetry`, C_TYP_NUMBER);
+		newKeySingleParam(newKey, `keyRetry`, C_TYP_STRING);
 
 		// プレイ中ショートカット：タイトルバック (keyTitleBackX_Y)
-		newKeySingleParam(newKey, `keyTitleBack`, C_TYP_NUMBER);
+		newKeySingleParam(newKey, `keyTitleBack`, C_TYP_STRING);
 
 		// 別キーフラグ (transKeyX_Y)
 		newKeySingleParam(newKey, `transKey`, C_TYP_STRING);
@@ -3777,6 +3790,10 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		// アシストパターン (assistX_Y)
 		// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
 		newKeyPairParam(newKey, `assist`, `assistPos`);
+
+		// keyRetry, keyTitleBackのキー名をキーコードに変換
+		const keyTypePatterns = Object.keys(g_keyObj).filter(val => val.startsWith(`keyRetry${newKey}`) || val.startsWith(`keyTitleBack${newKey}`));
+		keyTypePatterns.forEach(name => g_keyObj[name] = getKeyCtrlVal(g_keyObj[name]));
 	});
 
 	return keyExtraList;
@@ -5213,10 +5230,10 @@ const createOptionWindow = _sprite => {
 
 			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 			if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
-				g_headerObj.keyRetry = setIntVal(g_keyObj[`keyRetry${keyCtrlPtn}`], g_headerObj.keyRetryDef);
+				g_headerObj.keyRetry = setIntVal(getKeyCtrlVal(g_keyObj[`keyRetry${keyCtrlPtn}`]), g_headerObj.keyRetryDef);
 			}
 			if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
-				g_headerObj.keyTitleBack = setIntVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`], g_headerObj.keyTitleBackDef);
+				g_headerObj.keyTitleBack = setIntVal(getKeyCtrlVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`]), g_headerObj.keyTitleBackDef);
 			}
 		}
 
