@@ -3530,7 +3530,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
 	const toString = _str => _str;
-	const toNumber = _num => parseInt(_num, 10);
 	const toFloat = _num => parseFloat(_num);
 	const toKeyCtrlArray = _str =>
 		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n)), g_keyObj.minKeyCtrlNum, 0);
@@ -3770,10 +3769,10 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		newKeySingleParam(newKey, `scale`, C_TYP_FLOAT);
 
 		// プレイ中ショートカット：リトライ (keyRetryX_Y)
-		newKeySingleParam(newKey, `keyRetry`, C_TYP_NUMBER);
+		newKeySingleParam(newKey, `keyRetry`, C_TYP_STRING);
 
 		// プレイ中ショートカット：タイトルバック (keyTitleBackX_Y)
-		newKeySingleParam(newKey, `keyTitleBack`, C_TYP_NUMBER);
+		newKeySingleParam(newKey, `keyTitleBack`, C_TYP_STRING);
 
 		// 別キーフラグ (transKeyX_Y)
 		newKeySingleParam(newKey, `transKey`, C_TYP_STRING);
@@ -3791,6 +3790,10 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		// アシストパターン (assistX_Y)
 		// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
 		newKeyPairParam(newKey, `assist`, `assistPos`);
+
+		// keyRetry, keyTitleBackのキー名をキーコードに変換
+		const keyTypePatterns = Object.keys(g_keyObj).filter(val => val.startsWith(`keyRetry${newKey}`) || val.startsWith(`keyTitleBack${newKey}`));
+		keyTypePatterns.forEach(name => g_keyObj[name] = getKeyCtrlVal(g_keyObj[name]));
 	});
 
 	return keyExtraList;

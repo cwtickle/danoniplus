@@ -2154,6 +2154,10 @@ Object.keys(g_keyObj).filter(val => val.startsWith(`chara`) &&
         setKeyDfVal(charaPtn.slice(`chara`.length));
     });
 
+// キー名をキーコードに変換
+Object.keys(g_keyObj).filter(val => val.startsWith(`keyCtrl`)).forEach(property =>
+    g_keyObj[property].forEach((list, j) => g_keyObj[property][j] = list.map(valN => getKeyCtrlVal(valN))));
+
 // キーパターンのコピー処理
 // ただし、すでに定義済みの場合は定義済みのものを優先する
 Object.keys(g_copyKeyPtn).forEach(keyPtnTo => {
@@ -2206,7 +2210,6 @@ Object.keys(g_copyKeyPtn).forEach(keyPtnTo => {
 // keyCtrlX_Yについて1キーにつき2キー割り当てできるように配列を補完
 const keyCtrlName = Object.keys(g_keyObj).filter(val => val.startsWith(`keyCtrl`));
 keyCtrlName.forEach(property => {
-    g_keyObj[property].forEach((list, j) => g_keyObj[property][j] = list.map(valN => getKeyCtrlVal(valN)));
     g_keyObj[property].forEach((list, j) => g_keyObj[property][j] = makeBaseArray(g_keyObj[property][j], g_keyObj.minKeyCtrlNum, 0));
     g_keyObj[`${property}d`] = structuredClone(g_keyObj[property]);
 });
