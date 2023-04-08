@@ -525,7 +525,7 @@ const transCode = _setCode => {
  * 特定キーをブロックする処理
  * @param {string} _setCode 
  */
-const blockCode = _setCode => !C_BLOCK_KEYS.map(key => g_kCdN[key]).includes(_setCode);
+const blockCode = _setCode => !C_BLOCK_KEYS.includes(_setCode);
 
 
 /*-----------------------------------------------------------*/

@@ -600,13 +600,12 @@ const g_typeLists = {
 // Motionオプション配列の基準位置
 const C_MOTION_STD_POS = 15;
 
-// キーブロック対象(キーコードを指定)
+// キーブロック対象(KeyBoardEvent.codeを指定)
 const C_BLOCK_KEYS = [
-    8, 9, 13, 17, 18, 32, /* BackSpace, Tab, Enter, Ctrl, Alt, Space */
-    33, 34, 35, 36,       /* PageUp, PageDown, End, Home */
-    37, 38, 39, 40, 46,   /* Left, Down, Up, Right, Delete */
-    112, 113, 114, 115, 0, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, /* F1～F15 (F5は除く) */
-    27 /* Esc */
+    `Backspace`, `Tab`, `Enter`, `ControlLeft`, `ControlRight`, `AltLeft`, `AltRight`, `Space`,
+    `PageUp`, `PageDown`, `End`, `Home`,
+    `ArrowLeft`, `ArrowDown`, `ArrowUp`, `ArrowRight`, `Delete`,
+    `F1`, `F2`, `F3`, `F4`, `F6`, `F7`, `F8`, `F9`, `F10`, `F11`, `F12`, `F13`, `F14`, `F15`, `Escape`
 ];
 
 /**
