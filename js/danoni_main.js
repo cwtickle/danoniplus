@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/04/08
+ * Revised : 2023/04/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 31.4.0`;
-const g_revisedDate = `2023/04/08`;
+const g_version = `Ver 31.4.1`;
+const g_revisedDate = `2023/04/15`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3530,7 +3530,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
 	const toString = _str => _str;
-	const toFloat = _num => parseFloat(_num);
+	const toFloat = _num => isNaN(parseFloat(_num)) ? _num : parseFloat(_num);
 	const toKeyCtrlArray = _str =>
 		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n)), g_keyObj.minKeyCtrlNum, 0);
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
