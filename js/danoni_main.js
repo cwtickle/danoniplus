@@ -3530,7 +3530,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
 	const toString = _str => _str;
-	const toFloat = _num => parseFloat(_num);
+	const toFloat = _num => isNaN(_num) ? parseFloat(_num) : _num;
 	const toKeyCtrlArray = _str =>
 		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n)), g_keyObj.minKeyCtrlNum, 0);
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
