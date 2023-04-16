@@ -989,7 +989,7 @@ let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `mus
     `speed`, `color`, `lyrics`, `background`, `arrowEffect`, `special`];
 
 // ローカルストレージ保存対象
-let g_storeSettings = [`appearance`, `opacity`];
+let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`];
 
 // 廃棄対象のリスト(過去の登録対象をリスト化。ここに乗せるとローカルストレージから自動消去される)
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
@@ -2708,7 +2708,7 @@ const g_lang_lblNameObj = {
         kcNoShuffleDesc: `矢印をクリックでカラーグループを変更`,
         sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
         kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
-        transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
+        transKeyDesc: `別キーモードではキーコンフィグ、ColorType等は保存されません`,
         sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
 
         s_level: `Level`,
@@ -2740,7 +2740,7 @@ const g_lang_lblNameObj = {
         kcNoShuffleDesc: `Click the arrow to change the color group.`,
         sdDesc: `[Click to switch, gray to OFF]`,
         kcShortcutDesc: `Shortcut during play: "{0}" Return to title / "{1}" Retry the game`,
-        transKeyDesc: `High score, key config, etc. are not saved in another key mode`,
+        transKeyDesc: `Key config, Color type, etc. are not saved in another key mode`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
 
         s_level: `Level`,

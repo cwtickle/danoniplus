@@ -3056,9 +3056,7 @@ const headerConvert = _dosObj => {
 		});
 	}
 
-	// ローカルストレージに保存済みのAppearance, Opacity設定・ColorType設定を戻す
-	g_storeSettings.filter(tmpSetting => hasVal(g_localStorage[tmpSetting])).forEach(setting =>
-		g_stateObj[setting] = g_localStorage[setting]);
+	// ローカルストレージに保存済みのColorType設定からDisplayのColor設定を反映
 	if (g_localStorage.colorType !== undefined) {
 		g_colorType = g_localStorage.colorType;
 		if (obj.colorUse) {
@@ -8394,19 +8392,20 @@ const getArrowSettings = _ => {
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 
+	if (g_stateObj.dataSaveFlg) {
+		// ローカルストレージへAdjustment, hitPosition, Volume設定を保存
+		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
+		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+	}
+
 	// リバース、キーコンフィグなどをローカルストレージへ保存（Data Save: ON かつ別キーモードで無い場合) 
 	if (g_stateObj.dataSaveFlg && !hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
 
 		// 次回キーコンフィグ画面へ戻ったとき、保存済みキーコンフィグ設定が表示されるようにする
 		g_keyObj.prevKey = `Dummy`;
 
-		// ローカルストレージへAdjustment, hitPosition, Volume, colorType設定を保存
-		g_localStorage.adjustment = g_stateObj.adjustment;
-		g_localStorage.hitPosition = g_stateObj.hitPosition;
-		g_localStorage.volume = g_stateObj.volume;
+		// ローカルストレージへcolorType設定を保存
 		g_localStorage.colorType = g_colorType;
-
-		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
 
 		let storageObj = g_localKeyStorage;
 		let addKey = ``;
@@ -10542,7 +10541,9 @@ const resultInit = _ => {
 
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
-	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
+	const mirrorName = (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 ? `-Mirror` : ``);
+	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
+	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${mirrorName}`;
 	if (g_headerObj.makerView) {
 		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
 	}
@@ -10552,9 +10553,7 @@ const resultInit = _ => {
 		maxCombo: 0, fmaxCombo: 0, score: 0,
 	};
 
-	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
-		!hasVal(g_keyObj[`transKey${keyCtrlPtn}`]));
-
+	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && (g_stateObj.shuffle === C_FLG_OFF || mirrorName !== ``));
 	if (highscoreCondition) {
 
 		// ハイスコア差分描画
