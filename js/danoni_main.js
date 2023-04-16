@@ -7037,9 +7037,7 @@ const applyRandom = (_keyNum, _shuffleGroup) => {
 	const style = structuredClone(_shuffleGroup).map(_group => {
 		for (let i = _group.length - 1; i > 0; i--) {
 			const random = Math.floor(Math.random() * (i + 1));
-			const tmp = _group[i];
-			_group[i] = _group[random];
-			_group[random] = tmp;
+			[_group[i], _group[random]] = [_group[random], _group[i]];
 		}
 		return _group;
 	});
