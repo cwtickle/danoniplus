@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/04/15
+ * Revised : 2023/04/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 31.4.1`;
-const g_revisedDate = `2023/04/15`;
+const g_version = `Ver 31.5.0`;
+const g_revisedDate = `2023/04/16`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2066,7 +2066,7 @@ const loadLocalStorage = _ => {
 	if (checkStorage) {
 		g_localStorage = JSON.parse(checkStorage);
 
-		// Adjustment, Volume, Appearance, Opacity, hitPosition初期値設定
+		// Adjustment, Volume, Appearance, Opacity, HitPosition初期値設定
 		checkLocalParam(`adjustment`, C_TYP_FLOAT, g_settings.adjustmentNum);
 		checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
 		checkLocalParam(`appearance`);
@@ -3056,9 +3056,7 @@ const headerConvert = _dosObj => {
 		});
 	}
 
-	// ローカルストレージに保存済みのAppearance, Opacity設定・ColorType設定を戻す
-	g_storeSettings.filter(tmpSetting => hasVal(g_localStorage[tmpSetting])).forEach(setting =>
-		g_stateObj[setting] = g_localStorage[setting]);
+	// ローカルストレージに保存済みのColorType設定からDisplayのColor設定を反映
 	if (g_localStorage.colorType !== undefined) {
 		g_colorType = g_localStorage.colorType;
 		if (obj.colorUse) {
@@ -7030,6 +7028,20 @@ const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
 };
 
 /**
+ * Turningの適用
+ * @param {number} _keyNum 
+ * @param {array} _shuffleGroup 
+ */
+const applyTurning = (_keyNum, _shuffleGroup) => {
+	const mirrorOrNot = _array => Math.random() >= 0.5 ? _array.reverse() : _array;
+	const style = structuredClone(_shuffleGroup).map(_group => {
+		const startNum = Math.floor(Math.random() * (_group.length - 1)) + 1;
+		return mirrorOrNot(makeDedupliArray(_group.slice(startNum), _group.slice(0, startNum)));
+	});
+	applyShuffle(_keyNum, _shuffleGroup, style);
+};
+
+/**
  * Randomの適用
  * @param {number} _keyNum
  * @param {array} _shuffleGroup
@@ -7039,9 +7051,7 @@ const applyRandom = (_keyNum, _shuffleGroup) => {
 	const style = structuredClone(_shuffleGroup).map(_group => {
 		for (let i = _group.length - 1; i > 0; i--) {
 			const random = Math.floor(Math.random() * (i + 1));
-			const tmp = _group[i];
-			_group[i] = _group[random];
-			_group[random] = tmp;
+			[_group[i], _group[random]] = [_group[random], _group[i]];
 		}
 		return _group;
 	});
@@ -8394,19 +8404,20 @@ const getArrowSettings = _ => {
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 
+	if (g_stateObj.dataSaveFlg) {
+		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
+		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
+		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+	}
+
 	// リバース、キーコンフィグなどをローカルストレージへ保存（Data Save: ON かつ別キーモードで無い場合) 
 	if (g_stateObj.dataSaveFlg && !hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
 
 		// 次回キーコンフィグ画面へ戻ったとき、保存済みキーコンフィグ設定が表示されるようにする
 		g_keyObj.prevKey = `Dummy`;
 
-		// ローカルストレージへAdjustment, hitPosition, Volume, colorType設定を保存
-		g_localStorage.adjustment = g_stateObj.adjustment;
-		g_localStorage.hitPosition = g_stateObj.hitPosition;
-		g_localStorage.volume = g_stateObj.volume;
+		// ローカルストレージへcolorType設定を保存
 		g_localStorage.colorType = g_colorType;
-
-		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
 
 		let storageObj = g_localKeyStorage;
 		let addKey = ``;
@@ -10542,7 +10553,9 @@ const resultInit = _ => {
 
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
-	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
+	const mirrorName = (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 ? `-Mirror` : ``);
+	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
+	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${mirrorName}`;
 	if (g_headerObj.makerView) {
 		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
 	}
@@ -10552,9 +10565,7 @@ const resultInit = _ => {
 		maxCombo: 0, fmaxCombo: 0, score: 0,
 	};
 
-	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && g_stateObj.shuffle === C_FLG_OFF &&
-		!hasVal(g_keyObj[`transKey${keyCtrlPtn}`]));
-
+	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && (g_stateObj.shuffle === C_FLG_OFF || mirrorName !== ``));
 	if (highscoreCondition) {
 
 		// ハイスコア差分描画

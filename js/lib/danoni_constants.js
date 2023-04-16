@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/04/08 (v31.4.0)
+ * Revised : 2023/04/16 (v31.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -879,7 +879,7 @@ const g_settings = {
     scrollNum: 0,
     scrollFlat: [`Flat`, `R-Flat`],
 
-    shuffles: [C_FLG_OFF, `Mirror`, `Asym-Mirror`, `Random`, `Random+`, `S-Random`, `S-Random+`],
+    shuffles: [C_FLG_OFF, `Mirror`, `Asym-Mirror`, `Turning`, `Random`, `Random+`, `S-Random`, `S-Random+`],
     shuffleNum: 0,
 
     gauges: [],
@@ -931,6 +931,7 @@ const g_shuffleFunc = {
     'OFF': _ => true,
     'Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup),
     'Asym-Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup, true),
+    'Turning': (keyNum, shuffleGroup) => applyTurning(keyNum, shuffleGroup),
     'Random': (keyNum, shuffleGroup) => applyRandom(keyNum, shuffleGroup),
     'Random+': keyNum => applyRandom(keyNum, [[...Array(keyNum).keys()]]),
     'S-Random': (keyNum, shuffleGroup) => {
@@ -989,7 +990,7 @@ let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `mus
     `speed`, `color`, `lyrics`, `background`, `arrowEffect`, `special`];
 
 // ローカルストレージ保存対象
-let g_storeSettings = [`appearance`, `opacity`];
+let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`];
 
 // 廃棄対象のリスト(過去の登録対象をリスト化。ここに乗せるとローカルストレージから自動消去される)
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
@@ -2614,6 +2615,7 @@ const g_lblNameObj = {
 
     'u_Mirror': `Mirror`,
     'u_Asym-Mirror': `Asym-Mirror`,
+    'u_Turning': `Turning`,
     'u_Random': `Random`,
     'u_Random+': `Random+`,
     'u_S-Random': `S-Random`,
@@ -2708,7 +2710,7 @@ const g_lang_lblNameObj = {
         kcNoShuffleDesc: `矢印をクリックでカラーグループを変更`,
         sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
         kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
-        transKeyDesc: `別キーモードではハイスコア、キーコンフィグ等は保存されません`,
+        transKeyDesc: `別キーモードではキーコンフィグ、ColorType等は保存されません`,
         sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
 
         s_level: `Level`,
@@ -2740,7 +2742,7 @@ const g_lang_lblNameObj = {
         kcNoShuffleDesc: `Click the arrow to change the color group.`,
         sdDesc: `[Click to switch, gray to OFF]`,
         kcShortcutDesc: `Shortcut during play: "{0}" Return to title / "{1}" Retry the game`,
-        transKeyDesc: `High score, key config, etc. are not saved in another key mode`,
+        transKeyDesc: `Key config, Color type, etc. are not saved in another key mode`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
 
         s_level: `Level`,
@@ -2829,7 +2831,7 @@ const g_lang_msgObj = {
         colorType: `矢印・フリーズアローの配色セットをあらかじめ定義されたリストから選択できます。\nType1～4選択時は色変化が自動でOFFになり、カラーピッカーから好きな色に変更できます。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
         imgType: `矢印・フリーズアローなどのオブジェクトの見た目を変更します。`,
         colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
-        shuffleGroup: `Mirror/Asym-Mirror/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
+        shuffleGroup: `Mirror/Asym-Mirror/Turning/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
         stepRtnGroup: `矢印などノーツの種類、回転に関するパターンを切り替えます。\nあらかじめ設定されている場合のみ変更可能です。`,
 
         pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）、通常時のフリーズアロー色（枠、帯）を\nカラーピッカーから選んで変更できます。`,
@@ -2885,7 +2887,7 @@ const g_lang_msgObj = {
         colorType: `Change the color scheme set for arrows and freeze-arrows from the predefined set.\nWhen Type1 to 4 is selected, color change is automatically turned off and can be changed to any color from the color picker.\n[Type0] Switch the sequences color gradations, [Type1～4] default color scheme`,
         imgType: `Change the appearance of sequences.`,
         colorGroup: `Change the sequences color group assignment pattern.`,
-        shuffleGroup: `Change the shuffle group when Mirror, Asym-Mirror, Random or S-Random are selected.\nShuffle with the same numbers listed above.`,
+        shuffleGroup: `Change the shuffle group when Mirror, Asym-Mirror, Turning, Random or S-Random are selected.\nShuffle with the same numbers listed above.`,
         stepRtnGroup: `Switches the type of notes, such as arrows, and the pattern regarding rotation.\nThis can only be changed if it has been set in advance.`,
 
         pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,
