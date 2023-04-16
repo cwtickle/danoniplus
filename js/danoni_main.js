@@ -2066,7 +2066,7 @@ const loadLocalStorage = _ => {
 	if (checkStorage) {
 		g_localStorage = JSON.parse(checkStorage);
 
-		// Adjustment, Volume, Appearance, Opacity, hitPosition初期値設定
+		// Adjustment, Volume, Appearance, Opacity, HitPosition初期値設定
 		checkLocalParam(`adjustment`, C_TYP_FLOAT, g_settings.adjustmentNum);
 		checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
 		checkLocalParam(`appearance`);
@@ -8405,7 +8405,7 @@ const getArrowSettings = _ => {
 	g_finishFlg = true;
 
 	if (g_stateObj.dataSaveFlg) {
-		// ローカルストレージへAdjustment, hitPosition, Volume設定を保存
+		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
 		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 	}
