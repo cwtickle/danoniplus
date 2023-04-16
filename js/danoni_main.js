@@ -7028,6 +7028,20 @@ const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
 };
 
 /**
+ * Turningの適用
+ * @param {number} _keyNum 
+ * @param {array} _shuffleGroup 
+ */
+const applyTurning = (_keyNum, _shuffleGroup) => {
+	const mirrorOrNot = _array => Math.random() >= 0.5 ? _array.reverse() : _array;
+	const style = structuredClone(_shuffleGroup).map(_group => {
+		const startNum = Math.floor(Math.random() * (_group.length - 1)) + 1;
+		return mirrorOrNot(makeDedupliArray(_group.slice(startNum), _group.slice(0, startNum)));
+	});
+	applyShuffle(_keyNum, _shuffleGroup, style);
+};
+
+/**
  * Randomの適用
  * @param {number} _keyNum
  * @param {array} _shuffleGroup
