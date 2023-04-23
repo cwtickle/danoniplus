@@ -4423,6 +4423,18 @@ const createDifWindow = (_key = ``) => {
 	multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
 };
 
+const changeDifficulty = (_num = 1) => {
+	if (g_headerObj.difSelectorUse) {
+		g_stateObj.filterKeys = ``;
+		if (document.querySelector(`#difList`) === null) {
+			createDifWindow();
+		} else {
+			resetDifWindow();
+		}
+	} else {
+		nextDifficulty(_num);
+	}
+};
 
 /**
  * 譜面基礎データの取得
@@ -5079,18 +5091,6 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 0 
 	spriteList.difficulty.appendChild(createLblSetting(`Difficulty`, -5));
 
-	const changeDifficulty = (_num = 1) => {
-		if (g_headerObj.difSelectorUse) {
-			g_stateObj.filterKeys = ``;
-			if (document.querySelector(`#difList`) === null) {
-				createDifWindow();
-			} else {
-				resetDifWindow();
-			}
-		} else {
-			nextDifficulty(_num);
-		}
-	};
 	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`, ``, 0, _ => changeDifficulty(), {
 		y: -10, h: g_limitObj.setLblHeight + 10, cxtFunc: _ => changeDifficulty(-1),
 	});
