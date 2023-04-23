@@ -4706,184 +4706,6 @@ const makeDifInfo = _scoreId => {
 			${push3CntStr}`.split(`,`).join(`/`);
 };
 
-const setReverse = _btn => {
-	if (!g_settings.scrolls.includes(`Reverse`)) {
-		g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
-		g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
-		setReverseView(_btn);
-	}
-};
-
-const setReverseView = _btn => {
-	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
-		g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
-	if (!g_settings.scrolls.includes(`Reverse`)) {
-		_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
-	} else {
-		_btn.textContent = `X`;
-		setReverseDefault();
-	}
-};
-
-/**
- * ゲージ設定メイン
- * @param {number} _scrollNum 
- */
-const setGauge = _scrollNum => {
-
-	// カーソルを動かさない場合は先にゲージ設定をリロード
-	if (_scrollNum === 0) {
-		gaugeChange(g_settings.gaugeNum);
-	}
-	setSetting(_scrollNum, `gauge`);
-
-	// カーソルを動かす場合は設定変更後にゲージ設定を再設定
-	if (_scrollNum !== 0) {
-		gaugeChange(g_settings.gaugeNum);
-	}
-	lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
-		g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
-};
-
-/**
- * ゲージ設定の切替処理
- * @param {number} _gaugeNum 
- */
-const gaugeChange = _gaugeNum => {
-	const tmpScoreId = g_stateObj.scoreId;
-
-	/**
-	 * ゲージ詳細変更
-	 * @param {object} _baseProperty 
-	 * @param {string} _setProperty 
-	 * @param {number} _magnification 
-	 */
-	const setLife = (_baseProperty, _setProperty, _magnification = 1) => {
-		if (setVal(_baseProperty[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
-			g_stateObj[_setProperty] = _baseProperty[tmpScoreId] * _magnification;
-		}
-	};
-
-	/**
-	 * ゲージ詳細一括変更
-	 * @param {object} _baseObj 
-	 * @param {object} _obj 
-	 */
-	const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
-		setLife(_baseObj.lifeInits, `lifeInit`, _magInit);
-		setLife(_baseObj.lifeRecoverys, `lifeRcv`, _magRcv);
-		setLife(_baseObj.lifeDamages, `lifeDmg`, _magDmg);
-	};
-
-	/**
-	 * ライフモード切替
-	 * @param {object} _baseObj 
-	 */
-	const changeLifeMode = (_baseObj) => {
-		if (_baseObj.lifeBorders[tmpScoreId] === `x`) {
-			g_stateObj.lifeBorder = 0;
-			g_stateObj.lifeMode = C_LFE_SURVIVAL;
-		} else {
-			g_stateObj.lifeBorder = _baseObj.lifeBorders[tmpScoreId];
-			g_stateObj.lifeMode = C_LFE_BORDER;
-		}
-	};
-
-	// ゲージ初期化
-	if (_gaugeNum === 0) {
-		if (hasVal(g_headerObj.lifeBorders[tmpScoreId])) {
-			changeLifeMode(g_headerObj);
-			g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
-
-			g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
-			g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
-			g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
-		}
-		setLifeCategory(g_headerObj);
-
-	} else {
-		// 設定されたゲージ設定、カーソルに合わせて設定値を更新
-		g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
-		if (g_gaugeOptionObj.custom.length === 0 ||
-			g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`])) {
-			const gType = (g_gaugeType === C_LFE_CUSTOM ?
-				toCapitalize(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`]) : g_gaugeType);
-			g_stateObj.lifeMode = g_gaugeOptionObj[`type${gType}`][_gaugeNum];
-			g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${gType}`][_gaugeNum];
-			g_stateObj.lifeInit = g_gaugeOptionObj[`init${gType}`][_gaugeNum];
-			g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${gType}`][_gaugeNum];
-			g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${gType}`][_gaugeNum];
-		}
-	}
-
-	// ゲージ設定(Light, Easy)の初期化
-	if (g_stateObj.gauge === `Light` || g_stateObj.gauge === `Easy`) {
-		setLifeCategory(g_headerObj, { _magRcv: 2 });
-	}
-
-	// ゲージ設定別に個別設定した場合はここで設定を上書き
-	// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
-	if (hasVal(g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`])) {
-		const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
-		if (hasVal(tmpGaugeObj.lifeBorders[tmpScoreId])) {
-			changeLifeMode(tmpGaugeObj);
-		}
-		setLifeCategory(tmpGaugeObj);
-	}
-};
-
-/**
- * ゲージ設定の詳細表示を整形
- */
-const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
-	const initVal = g_headerObj.maxLifeVal * _init / 100;
-	const borderVal = (_mode === C_LFE_BORDER && _border !== 0 ?
-		Math.round(g_headerObj.maxLifeVal * _border / 100) : `-`);
-
-	let lifeValCss = ``;
-	if (_lifeValFlg === C_FLG_ON) {
-		lifeValCss = ` settings_lifeVal`;
-	}
-
-	// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
-	const init = Math.round(initVal);
-	const border = (borderVal !== `-` ? borderVal : `-`);
-	const rcv = Math.round(_rcv * 100) / 100;
-	const dmg = Math.round(_dmg * 100) / 100;
-
-	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
-		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
-			<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
-				${g_lblNameObj.g_start}
-			</div>
-			<div id="lblGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeEtc">
-				${g_lblNameObj.g_border}
-			</div>
-			<div id="lblGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeEtc">
-				${g_lblNameObj.g_recovery}
-			</div>
-			<div id="lblGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeEtc">
-				${g_lblNameObj.g_damage}
-			</div>
-		</div>
-		<div id="dataGaugeDivTable" class="settings_gaugeDivTable">
-			<div id="dataGaugeStart" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
-				${init}/${g_headerObj.maxLifeVal}
-			</div>
-			<div id="dataGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
-				${border}
-			</div>
-			<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
-				${rcv}
-			</div>
-			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
-				${dmg}
-			</div>
-		</div>
-	</div>
-	`;
-};
-
 /**
  * 譜面初期化処理
  * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
@@ -5485,6 +5307,184 @@ const getKeyReverse = (_localStorage, _extraKeyName = ``) => {
 const setReverseDefault = _ => {
 	g_stateObj.reverse = C_FLG_OFF;
 	g_settings.reverseNum = 0;
+};
+
+const setReverse = _btn => {
+	if (!g_settings.scrolls.includes(`Reverse`)) {
+		g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
+		g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
+		setReverseView(_btn);
+	}
+};
+
+const setReverseView = _btn => {
+	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
+		g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
+	if (!g_settings.scrolls.includes(`Reverse`)) {
+		_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
+	} else {
+		_btn.textContent = `X`;
+		setReverseDefault();
+	}
+};
+
+/**
+ * ゲージ設定メイン
+ * @param {number} _scrollNum 
+ */
+const setGauge = _scrollNum => {
+
+	// カーソルを動かさない場合は先にゲージ設定をリロード
+	if (_scrollNum === 0) {
+		gaugeChange(g_settings.gaugeNum);
+	}
+	setSetting(_scrollNum, `gauge`);
+
+	// カーソルを動かす場合は設定変更後にゲージ設定を再設定
+	if (_scrollNum !== 0) {
+		gaugeChange(g_settings.gaugeNum);
+	}
+	lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
+		g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
+};
+
+/**
+ * ゲージ設定の切替処理
+ * @param {number} _gaugeNum 
+ */
+const gaugeChange = _gaugeNum => {
+	const tmpScoreId = g_stateObj.scoreId;
+
+	/**
+	 * ゲージ詳細変更
+	 * @param {object} _baseProperty 
+	 * @param {string} _setProperty 
+	 * @param {number} _magnification 
+	 */
+	const setLife = (_baseProperty, _setProperty, _magnification = 1) => {
+		if (setVal(_baseProperty[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
+			g_stateObj[_setProperty] = _baseProperty[tmpScoreId] * _magnification;
+		}
+	};
+
+	/**
+	 * ゲージ詳細一括変更
+	 * @param {object} _baseObj 
+	 * @param {object} _obj 
+	 */
+	const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
+		setLife(_baseObj.lifeInits, `lifeInit`, _magInit);
+		setLife(_baseObj.lifeRecoverys, `lifeRcv`, _magRcv);
+		setLife(_baseObj.lifeDamages, `lifeDmg`, _magDmg);
+	};
+
+	/**
+	 * ライフモード切替
+	 * @param {object} _baseObj 
+	 */
+	const changeLifeMode = (_baseObj) => {
+		if (_baseObj.lifeBorders[tmpScoreId] === `x`) {
+			g_stateObj.lifeBorder = 0;
+			g_stateObj.lifeMode = C_LFE_SURVIVAL;
+		} else {
+			g_stateObj.lifeBorder = _baseObj.lifeBorders[tmpScoreId];
+			g_stateObj.lifeMode = C_LFE_BORDER;
+		}
+	};
+
+	// ゲージ初期化
+	if (_gaugeNum === 0) {
+		if (hasVal(g_headerObj.lifeBorders[tmpScoreId])) {
+			changeLifeMode(g_headerObj);
+			g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
+
+			g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
+			g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
+			g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+		}
+		setLifeCategory(g_headerObj);
+
+	} else {
+		// 設定されたゲージ設定、カーソルに合わせて設定値を更新
+		g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
+		if (g_gaugeOptionObj.custom.length === 0 ||
+			g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`])) {
+			const gType = (g_gaugeType === C_LFE_CUSTOM ?
+				toCapitalize(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`]) : g_gaugeType);
+			g_stateObj.lifeMode = g_gaugeOptionObj[`type${gType}`][_gaugeNum];
+			g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${gType}`][_gaugeNum];
+			g_stateObj.lifeInit = g_gaugeOptionObj[`init${gType}`][_gaugeNum];
+			g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${gType}`][_gaugeNum];
+			g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${gType}`][_gaugeNum];
+		}
+	}
+
+	// ゲージ設定(Light, Easy)の初期化
+	if (g_stateObj.gauge === `Light` || g_stateObj.gauge === `Easy`) {
+		setLifeCategory(g_headerObj, { _magRcv: 2 });
+	}
+
+	// ゲージ設定別に個別設定した場合はここで設定を上書き
+	// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
+	if (hasVal(g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`])) {
+		const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
+		if (hasVal(tmpGaugeObj.lifeBorders[tmpScoreId])) {
+			changeLifeMode(tmpGaugeObj);
+		}
+		setLifeCategory(tmpGaugeObj);
+	}
+};
+
+/**
+ * ゲージ設定の詳細表示を整形
+ */
+const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
+	const initVal = g_headerObj.maxLifeVal * _init / 100;
+	const borderVal = (_mode === C_LFE_BORDER && _border !== 0 ?
+		Math.round(g_headerObj.maxLifeVal * _border / 100) : `-`);
+
+	let lifeValCss = ``;
+	if (_lifeValFlg === C_FLG_ON) {
+		lifeValCss = ` settings_lifeVal`;
+	}
+
+	// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
+	const init = Math.round(initVal);
+	const border = (borderVal !== `-` ? borderVal : `-`);
+	const rcv = Math.round(_rcv * 100) / 100;
+	const dmg = Math.round(_dmg * 100) / 100;
+
+	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
+		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
+			<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
+				${g_lblNameObj.g_start}
+			</div>
+			<div id="lblGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeEtc">
+				${g_lblNameObj.g_border}
+			</div>
+			<div id="lblGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeEtc">
+				${g_lblNameObj.g_recovery}
+			</div>
+			<div id="lblGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeEtc">
+				${g_lblNameObj.g_damage}
+			</div>
+		</div>
+		<div id="dataGaugeDivTable" class="settings_gaugeDivTable">
+			<div id="dataGaugeStart" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
+				${init}/${g_headerObj.maxLifeVal}
+			</div>
+			<div id="dataGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+				${border}
+			</div>
+			<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+				${rcv}
+			</div>
+			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+				${dmg}
+			</div>
+		</div>
+	</div>
+	`;
 };
 
 /**
