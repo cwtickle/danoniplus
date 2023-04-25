@@ -1580,8 +1580,8 @@ const g_cssObj = {
     flex_centering: `flex_centering`,
 };
 
-// キー別の設定（一旦ここで定義）
-// ステップゾーンの位置関係は自動化を想定
+// キーパターンの定義
+// - カスタムキーの定義は keysConvert により、このオブジェクト内で同様に定義される
 const g_keyObj = {
 
     // 現在の選択キー、選択パターン
@@ -1597,8 +1597,8 @@ const g_keyObj = {
     minKeyCtrlNum: 2,
 
     // キー別ヘッダー
-    // - 譜面データ中に出てくる矢印(ノーツ)の種類と順番(ステップゾーン表示順)を管理する。
-    // - ここで出てくる順番は、この後のstepRtn, keyCtrlとも対応している。 
+    // - 譜面データ中に出てくる矢印(ノーツ)の種類と順番(ステップゾーン表示順)を管理する
+    // - ここで出てくる順番は、この後のstepRtn, keyCtrlとも対応している
     chara5_0: [`left`, `down`, `up`, `right`, `space`],
     chara7_0: [`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
     chara7i_0: [`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
@@ -1642,7 +1642,7 @@ const g_keyObj = {
     chara8_2: [`sleft`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
 
     // ColorGroup - 1
-    //  - 同じ数字が同じグループになります
+    //  - 同じ数字が同じグループになる
     color5_0_0: [0, 0, 0, 0, 2],
     color7_0_0: [0, 1, 0, 2, 0, 1, 0],
     color7i_0_0: [2, 2, 2, 0, 0, 0, 0],
@@ -1692,8 +1692,8 @@ const g_keyObj = {
     color17_1_3: [1, 0, 1, 0, 2, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1],
 
     // ShuffleGroup - 1
-    //  - Mirror, Random, S-Random使用時、同じグループ同士で入れ替えます
-    //  - 同じ数字が同じグループになります
+    //  - Mirror, Random, S-Random使用時、同じグループ同士で入れ替える
+    //  - 同じ数字が同じグループになる
     shuffle5_0_0: [0, 0, 0, 0, 1],
     shuffle7_0_0: [0, 0, 0, 1, 0, 0, 0],
     shuffle7i_0_0: [0, 0, 0, 1, 1, 1, 1],
@@ -1778,6 +1778,7 @@ const g_keyObj = {
     stepRtn17_0_2: [45, 45, 0, 0, -45, -45, -90, -90, `onigiri`, 90, 90, 135, 135, 180, 180, 225, 225],
 
     // 各キーの区切り位置
+    // - 未指定の場合は下段への折り返し無し
     div9i_0: 6,
     div11_0: 6,
     div11L_0: 6,
@@ -1793,6 +1794,7 @@ const g_keyObj = {
     div17_1: 9,
 
     // 各キーの位置関係
+    // - 未指定の場合は0からの連番が入る
     pos9i_0: [2, 3, 4, 5, 6, 7, 8, 9, 10],
     pos11_0: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     pos11L_0: [0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12],
@@ -1853,7 +1855,7 @@ const g_keyObj = {
 
     keyCtrl8_5: [[`Shift`], [`Z`], [`S`], [`X`, `C`], [`D`, `F`], [`V`], [`G`], [`B`]],
 
-    // 矢印間隔補正
+    // 隣接するステップゾーン間の距離
     blank: 55,
     blank_def: 55,
     blank11i_0: 50,
