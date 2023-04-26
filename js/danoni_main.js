@@ -4366,9 +4366,7 @@ const makeDifBtn = (_scrollNum = 1) => {
 		setDifficulty(true);
 		deleteChildspriteAll(`difList`);
 		makeDifList(difList, g_stateObj.filterKeys);
-		if (g_keyObj.prevKey !== g_keyObj.currentKey) {
-			g_keyObj.prevKey = g_keyObj.currentKey;
-		}
+		g_keyObj.prevKey = g_keyObj.currentKey;
 	}, {
 		x: 430 + _scrollNum * 10, y: 40, w: 20, h: 20, siz: g_limitObj.jdgCntsSiz,
 	}, g_cssObj.button_Mini);
@@ -4427,6 +4425,7 @@ const changeDifficulty = (_num = 1) => {
 	if (g_headerObj.difSelectorUse) {
 		g_stateObj.filterKeys = ``;
 		if (document.querySelector(`#difList`) === null) {
+			g_keyObj.prevKey = g_keyObj.currentKey;
 			createDifWindow();
 		} else {
 			resetDifWindow();
