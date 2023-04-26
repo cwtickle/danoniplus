@@ -4348,8 +4348,8 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			k++;
 		}
 	});
-	const overlength = pos * g_limitObj.setLblHeight - parseInt(difList.style.height);
-	difList.scrollTop = (overlength > 0 ? overlength : 0);
+	const overlength = pos * g_limitObj.setLblHeight - parseInt(_difList.style.height);
+	_difList.scrollTop = (overlength > 0 ? overlength : 0);
 };
 
 /**
