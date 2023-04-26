@@ -4318,9 +4318,9 @@ const resetDifWindow = _ => {
  * 譜面選択処理
  * @param {number} _scrollNum 
  */
-const nextDifficulty = (_scrollNum = 1) => {
-	g_keyObj.prevKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-	g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
+const nextDifficulty = (_scrollNum = 1, _baseDifList = g_headerObj.keyLabels) => {
+	g_keyObj.prevKey = _baseDifList[g_stateObj.scoreId];
+	g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, _baseDifList.length);
 	setDifficulty(true);
 	resetDifWindow();
 };
@@ -4330,14 +4330,16 @@ const nextDifficulty = (_scrollNum = 1) => {
  * @param {object} _difList 
  * @param {string} _targetKey 
  */
-const makeDifList = (_difList, _targetKey = ``) => {
+const makeDifList = (_difList, _targetKey = ``, {
+	baseDifList = g_headerObj.keyLabels, difNameList = g_headerObj.difLabels, creatorNameList = g_headerObj.creatorNames
+} = {}) => {
 	let k = 0;
 	let pos = 0;
-	g_headerObj.keyLabels.forEach((keyLabel, j) => {
+	baseDifList.forEach((keyLabel, j) => {
 		if (_targetKey === `` || keyLabel === _targetKey) {
-			let text = `${getKeyName(keyLabel)} / ${g_headerObj.difLabels[j]}`;
+			let text = `${getKeyName(keyLabel)} / ${difNameList[j]}`;
 			if (g_headerObj.makerView) {
-				text += ` (${g_headerObj.creatorNames[j]})`;
+				text += ` (${creatorNameList[j]})`;
 			}
 			_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
 				nextDifficulty(j - g_stateObj.scoreId);
@@ -4348,8 +4350,8 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			k++;
 		}
 	});
-	const overlength = pos * g_limitObj.setLblHeight - parseInt(difList.style.height);
-	difList.scrollTop = (overlength > 0 ? overlength : 0);
+	const overlength = pos * g_limitObj.setLblHeight - parseInt(_difList.style.height);
+	_difList.scrollTop = (overlength > 0 ? overlength : 0);
 };
 
 /**
@@ -4357,12 +4359,12 @@ const makeDifList = (_difList, _targetKey = ``) => {
  * @param {number} _scrollNum 
  * @returns 
  */
-const makeDifBtn = (_scrollNum = 1) => {
+const makeDifBtn = (_scrollNum = 1, _baseDifList = g_headerObj.keyLabels) => {
 	const dir = _scrollNum === 1 ? `D` : `U`;
 	return createCss2Button(`btnDif${dir}`, g_settingBtnObj.chara[dir], _ => {
 		do {
-			g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
-		} while (g_stateObj.filterKeys !== `` && g_stateObj.filterKeys !== g_headerObj.keyLabels[g_stateObj.scoreId]);
+			g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, _baseDifList.length);
+		} while (g_stateObj.filterKeys !== `` && g_stateObj.filterKeys !== _baseDifList[g_stateObj.scoreId]);
 		setDifficulty(true);
 		deleteChildspriteAll(`difList`);
 		makeDifList(difList, g_stateObj.filterKeys);
