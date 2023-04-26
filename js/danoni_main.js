@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/03/22
+ * Revised : 2023/04/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 24.6.17`;
-const g_revisedDate = `2023/03/22`;
+const g_version = `Ver 24.6.18`;
+const g_revisedDate = `2023/04/26`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4132,9 +4132,7 @@ function createOptionWindow(_sprite) {
 			setDifficulty(true);
 			deleteChildspriteAll(`difList`);
 			makeDifList(difList, g_stateObj.filterKeys);
-			if (g_keyObj.prevKey !== g_keyObj.currentKey) {
-				g_keyObj.prevKey = g_keyObj.currentKey;
-			}
+			g_keyObj.prevKey = g_keyObj.currentKey;
 		}, {
 			x: 430 + _scrollNum * 10, y: 40, w: 20, h: 20, siz: C_SIZ_JDGCNTS,
 		}, g_cssObj.button_Mini);
@@ -4195,6 +4193,7 @@ function createOptionWindow(_sprite) {
 		if (g_headerObj.difSelectorUse) {
 			g_stateObj.filterKeys = ``;
 			if (document.querySelector(`#difList`) === null) {
+				g_keyObj.prevKey = g_keyObj.currentKey;
 				createDifWindow();
 			} else {
 				resetDifWindow();
