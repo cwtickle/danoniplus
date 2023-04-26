@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/04/16
+ * Revised : 2023/04/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 31.5.0`;
-const g_revisedDate = `2023/04/16`;
+const g_version = `Ver 31.6.0`;
+const g_revisedDate = `2023/04/26`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4303,6 +4303,599 @@ const inputSlider = (_slider, _link) => {
 };
 
 /**
+ * 譜面変更セレクターの削除
+ */
+const resetDifWindow = _ => {
+	if (document.querySelector(`#difList`) !== null) {
+		deleteChildspriteAll(`difList`);
+		[`difList`, `difCover`, `btnDifU`, `btnDifD`].forEach(obj => optionsprite.removeChild(document.getElementById(obj)));
+		g_currentPage = `option`;
+		setShortcutEvent(g_currentPage, _ => true, { displayFlg: false, dfEvtFlg: true });
+	}
+};
+
+/**
+ * 譜面選択処理
+ * @param {number} _scrollNum 
+ */
+const nextDifficulty = (_scrollNum = 1) => {
+	g_keyObj.prevKey = g_headerObj.keyLabels[g_stateObj.scoreId];
+	g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
+	setDifficulty(true);
+	resetDifWindow();
+};
+
+/**
+ * 譜面リストの作成
+ * @param {object} _difList 
+ * @param {string} _targetKey 
+ */
+const makeDifList = (_difList, _targetKey = ``) => {
+	let k = 0;
+	let pos = 0;
+	g_headerObj.keyLabels.forEach((keyLabel, j) => {
+		if (_targetKey === `` || keyLabel === _targetKey) {
+			let text = `${getKeyName(keyLabel)} / ${g_headerObj.difLabels[j]}`;
+			if (g_headerObj.makerView) {
+				text += ` (${g_headerObj.creatorNames[j]})`;
+			}
+			_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
+				nextDifficulty(j - g_stateObj.scoreId);
+			}, { btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
+			if (j === g_stateObj.scoreId) {
+				pos = k + 6;
+			}
+			k++;
+		}
+	});
+	const overlength = pos * g_limitObj.setLblHeight - parseInt(_difList.style.height);
+	_difList.scrollTop = (overlength > 0 ? overlength : 0);
+};
+
+/**
+ * 譜面セレクター位置の変更ボタン
+ * @param {number} _scrollNum 
+ * @returns 
+ */
+const makeDifBtn = (_scrollNum = 1) => {
+	const dir = _scrollNum === 1 ? `D` : `U`;
+	return createCss2Button(`btnDif${dir}`, g_settingBtnObj.chara[dir], _ => {
+		do {
+			g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
+		} while (g_stateObj.filterKeys !== `` && g_stateObj.filterKeys !== g_headerObj.keyLabels[g_stateObj.scoreId]);
+		setDifficulty(true);
+		deleteChildspriteAll(`difList`);
+		makeDifList(difList, g_stateObj.filterKeys);
+		g_keyObj.prevKey = g_keyObj.currentKey;
+	}, {
+		x: 430 + _scrollNum * 10, y: 40, w: 20, h: 20, siz: g_limitObj.jdgCntsSiz,
+	}, g_cssObj.button_Mini);
+};
+
+/**
+ * 譜面変更セレクターの作成・再作成
+ * @param {string} _key
+ */
+const createDifWindow = (_key = ``) => {
+	g_currentPage = `difSelector`;
+	setShortcutEvent(g_currentPage);
+	const difList = createEmptySprite(optionsprite, `difList`, g_windowObj.difList, g_cssObj.settings_DifSelector);
+	const difCover = createEmptySprite(optionsprite, `difCover`, g_windowObj.difCover, g_cssObj.settings_DifSelector);
+
+	// リスト再作成
+	makeDifList(difList, _key);
+
+	// ランダム選択
+	difCover.appendChild(
+		makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
+			nextDifficulty(Math.floor(Math.random() * g_headerObj.keyLabels.length));
+		}, { w: g_limitObj.difCoverWidth })
+	);
+
+	// 全リスト
+	difCover.appendChild(
+		makeDifLblCssButton(`keyFilter`, `ALL`, 1.5, _ => {
+			resetDifWindow();
+			g_stateObj.filterKeys = ``;
+			createDifWindow();
+		}, { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.filterKeys === `` ? `Setting` : `Default`) })
+	);
+
+	// キー別フィルタボタン作成
+	let pos = 0;
+	g_headerObj.keyLists.forEach((targetKey, m) => {
+		difCover.appendChild(
+			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m + 2.5, _ => {
+				resetDifWindow();
+				g_stateObj.filterKeys = targetKey;
+				createDifWindow(targetKey);
+			}, { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.filterKeys === targetKey ? `Setting` : `Default`) })
+		);
+		if (g_stateObj.filterKeys === targetKey) {
+			pos = m + 9;
+		}
+	});
+	const overlength = pos * g_limitObj.setLblHeight - parseInt(difCover.style.height);
+	difCover.scrollTop = (overlength > 0 ? overlength : 0);
+
+	multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
+};
+
+const changeDifficulty = (_num = 1) => {
+	if (g_headerObj.difSelectorUse) {
+		g_stateObj.filterKeys = ``;
+		if (document.querySelector(`#difList`) === null) {
+			g_keyObj.prevKey = g_keyObj.currentKey;
+			createDifWindow();
+		} else {
+			resetDifWindow();
+		}
+	} else {
+		nextDifficulty(_num);
+	}
+};
+
+/**
+ * 譜面基礎データの取得
+ * @param {number} _scoreId 
+ */
+const getScoreBaseData = _scoreId => {
+	const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
+	const frzCnts = sumData(g_detailObj.frzCnt[_scoreId]);
+	return {
+		arrowCnts: arrowCnts,
+		frzCnts: frzCnts,
+		apm: Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60)),
+		playingTime: transFrameToTimer(g_detailObj.playingFrame[_scoreId]),
+	};
+};
+
+/**
+ * 速度変化グラフの描画
+ * @param {number} _scoreId
+ */
+const drawSpeedGraph = _scoreId => {
+	const startFrame = g_detailObj.startFrame[_scoreId];
+	const playingFrame = g_detailObj.playingFrameWithBlank[_scoreId];
+	const speedObj = {
+		speed: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.speed },
+		boost: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.boost }
+	};
+
+	Object.keys(speedObj).forEach(speedType => {
+		let frame = speedObj[speedType].frame;
+		let speed = speedObj[speedType].speed;
+		const speedData = g_detailObj[`${speedType}Data`][_scoreId];
+
+		if (speedData !== undefined) {
+			for (let i = 0; i < speedData.length; i += 2) {
+				if (speedData[i] >= startFrame) {
+					frame.push(speedData[i] - startFrame);
+					speed.push(speedData[i + 1]);
+				}
+				speedObj[speedType].cnt++;
+			}
+			frame.push(playingFrame);
+			speed.push(speed[speed.length - 1]);
+		}
+	});
+
+	const canvas = document.querySelector(`#graphSpeed`);
+	const context = canvas.getContext(`2d`);
+	drawBaseLine(context);
+
+	Object.keys(speedObj).forEach((speedType, j) => {
+		context.beginPath();
+		let preY;
+
+		for (let i = 0; i < speedObj[speedType].frame.length; i++) {
+			const x = speedObj[speedType].frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
+			const y = (speedObj[speedType].speed[i] - 1) * -90 + 105;
+
+			context.lineTo(x, preY);
+			context.lineTo(x, y);
+			preY = y;
+		}
+
+		context.lineWidth = 1;
+		context.strokeStyle = speedObj[speedType].strokeColor;
+		context.stroke();
+
+		const lineX = (speedType === `speed`) ? 125 : 210;
+		context.beginPath();
+		context.moveTo(lineX, 215);
+		context.lineTo(lineX + 30, 215);
+		context.stroke();
+		context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
+		context.fillText(speedType, lineX + 35, 218);
+
+		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
+	});
+};
+
+/**
+ * 譜面密度グラフの描画
+ * @param {number} _scoreId 
+ */
+const drawDensityGraph = _scoreId => {
+
+	const canvas = document.querySelector(`#graphDensity`);
+	const context = canvas.getContext(`2d`);
+	drawBaseLine(context);
+	for (let j = 0; j < g_limitObj.densityDivision; j++) {
+		context.beginPath();
+		[``, `2Push`, `3Push`].forEach(val => {
+			context.fillStyle = (g_detailObj.maxDensity[_scoreId].includes(j) ? g_graphColorObj[`max${val}`] : g_graphColorObj[`default${val}`]);
+			context.fillRect(16 * j * 16 / g_limitObj.densityDivision + 30, 195 - 9 * g_detailObj[`density${val}Data`][_scoreId][j] / 10,
+				15.5 * 16 / g_limitObj.densityDivision, 9 * g_detailObj[`density${val}Diff`][_scoreId][j] / 10
+			);
+		});
+		context.stroke();
+	}
+
+	const lineNames = [`Single`, `Chord`, `Triad+`];
+	Object.keys(g_graphColorObj).filter(val => val.indexOf(`max`) !== -1).forEach((val, j) => {
+		const lineX = 70 + j * 70;
+
+		context.beginPath();
+		context.lineWidth = 3;
+		context.fillStyle = g_rankObj.rankColorAllPerfect;
+		context.strokeStyle = g_graphColorObj[val];
+		context.moveTo(lineX, 215);
+		context.lineTo(lineX + 20, 215);
+		context.stroke();
+		context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
+		context.fillText(lineNames[j], lineX + 20, 218);
+	});
+
+	const obj = getScoreBaseData(_scoreId);
+	updateScoreDetailLabel(`Density`, `APM`, obj.apm, 0, g_lblNameObj.s_apm);
+	updateScoreDetailLabel(`Density`, `Time`, obj.playingTime, 1, g_lblNameObj.s_time);
+	updateScoreDetailLabel(`Density`, `Arrow`, obj.arrowCnts, 3, g_lblNameObj.s_arrow);
+	updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4, g_lblNameObj.s_frz);
+};
+
+/**
+ * 譜面明細内の補足情報の登録・更新
+ * @param {string} _name 表示する譜面明細のラベル
+ * @param {string} _label 
+ * @param {string} _value 
+ * @param {number} _pos 表示位置
+ * @param {string} _labelname
+ */
+const updateScoreDetailLabel = (_name, _label, _value, _pos = 0, _labelname = _label) => {
+	const baseLabel = (_bLabel, _bLabelname, _bAlign) =>
+		document.querySelector(`#detail${_name}`).appendChild(
+			createDivCss2Label(`${_bLabel}`, `${_bLabelname}`, {
+				x: 10, y: 105 + _pos * 20, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: _bAlign,
+			})
+		);
+	if (document.querySelector(`#data${_label}`) === null) {
+		baseLabel(`lbl${_label}`, `${_labelname}`, C_ALIGN_LEFT);
+		baseLabel(`data${_label}`, `${_value}`, C_ALIGN_RIGHT);
+	} else {
+		document.querySelector(`#data${_label}`).textContent = `${_value}`;
+	}
+};
+
+/**
+ * グラフの縦軸を描画
+ * @param {object} _context 
+ * @param {number} _resolution 
+ */
+const drawBaseLine = (_context, _resolution = 10) => {
+	_context.clearRect(0, 0, g_limitObj.graphWidth, g_limitObj.graphHeight);
+
+	for (let j = 0; j <= 2 * _resolution; j += 5) {
+		drawLine(_context, j / _resolution, `main`, 2);
+		for (let k = 1; k < 5; k++) {
+			drawLine(_context, (j + k) / _resolution, `sub`, 2);
+		}
+	}
+};
+
+/**
+ * グラフ上に目盛を表示
+ * @param {object} _context 
+ * @param {number} _y 
+ * @param {string} _lineType 
+ * @param {number} _fixed
+ */
+const drawLine = (_context, _y, _lineType, _fixed = 0) => {
+	const lineY = (_y - 1) * -90 + 105;
+	_context.beginPath();
+	_context.moveTo(30, lineY);
+	_context.lineTo(g_limitObj.graphWidth, lineY);
+	_context.lineWidth = 1;
+
+	if (_lineType === `main`) {
+		const textBaseObj = document.querySelector(`#lnkDifficulty`);
+		const textColor = window.getComputedStyle(textBaseObj, ``).color;
+		_context.strokeStyle = textColor;
+		_context.font = `12px ${getBasicFont()}`;
+		_context.fillStyle = textColor;
+		_context.fillText(_y.toFixed(_fixed), 0, lineY + 4);
+	} else {
+		_context.strokeStyle = `#646464`;
+	}
+	_context.stroke();
+};
+
+/**
+ * 譜面の難易度情報用ラベル作成
+ * @param {number} _scoreId 
+ */
+const makeDifInfoLabels = _scoreId => {
+
+	// ツール難易度
+	const detailToolDif = document.querySelector(`#detailToolDif`);
+	/**
+	 * 譜面の難易度情報ラベルの作成
+	 * @param {string} _lbl 
+	 * @param {string} _data 
+	 * @param {object} _obj 
+	 */
+	const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = g_limitObj.difSelectorSiz, ...rest } = {}) =>
+		createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest });
+
+	let printData = ``;
+	for (let j = 0; j < g_detailObj.arrowCnt.length; j++) {
+		const obj = getScoreBaseData(j);
+		printData +=
+			// 譜面番号
+			`[${j + 1}]\t` +
+			// ツール値
+			`${g_detailObj.toolDif[j].tool}\t` +
+			// 同時
+			`${g_detailObj.toolDif[j].douji}\t` +
+			// 縦連
+			`${g_detailObj.toolDif[j].tate}\t` +
+			// 総矢印数
+			`${(obj.arrowCnts + obj.frzCnts)}\t` +
+			// 矢印
+			`${obj.arrowCnts}\t` +
+			// フリーズアロー
+			`${obj.frzCnts}\t` +
+			// APM
+			`${obj.apm}\t` +
+			// 時間(分秒)
+			`${obj.playingTime}\r\n`;
+	}
+	multiAppend(detailToolDif,
+		makeDifInfoLabel(`lblTooldif`, g_lblNameObj.s_level, g_lblPosObj.lblTooldif),
+		makeDifInfoLabel(`dataTooldif`, ``, g_lblPosObj.dataTooldif),
+		makeDifInfoLabel(`lblDouji`, g_lblNameObj.s_douji, g_lblPosObj.lblDouji),
+		makeDifInfoLabel(`lblTate`, g_lblNameObj.s_tate, g_lblPosObj.lblTate),
+		makeDifInfoLabel(`dataDouji`, ``, g_lblPosObj.dataDouji),
+		makeDifInfoLabel(`dataTate`, ``, g_lblPosObj.dataTate),
+		makeDifInfoLabel(`lblArrowInfo`, g_lblNameObj.s_cnts, g_lblPosObj.lblArrowInfo),
+		makeDifInfoLabel(`dataArrowInfo`, ``, g_lblPosObj.dataArrowInfo),
+		makeDifInfoLabel(`lblArrowInfo2`, ``, g_lblPosObj.lblArrowInfo2),
+		makeDifInfoLabel(`dataArrowInfo2`, ``, g_lblPosObj.dataArrowInfo2),
+		makeDifLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 8, _ => {
+			copyTextToClipboard(
+				`****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n`
+				+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`, g_msgInfoObj.I_0003
+			);
+		}, g_lblPosObj.lnkDifInfo),
+	);
+	createScText(lnkDifInfo, `DifInfo`, { targetLabel: `lnkDifInfo`, x: -10 });
+};
+
+/**
+ * 譜面の難易度情報更新
+ * @param {number} _scoreId 
+ */
+const makeDifInfo = _scoreId => {
+
+	const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
+	const frzCnts = sumData(g_detailObj.frzCnt[_scoreId]);
+	const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
+
+	if (document.querySelector(`#lblTooldif`) === null) {
+		makeDifInfoLabels(_scoreId);
+	}
+	dataTooldif.textContent = g_detailObj.toolDif[_scoreId].tool;
+	dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
+	dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
+	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
+	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts} <span style="font-size:${g_limitObj.difSelectorSiz}px;">(${arrowCnts} + ${frzCnts})</span>`;
+	dataArrowInfo2.innerHTML = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
+			(${g_detailObj.frzCnt[_scoreId]})<br><br>
+			${push3CntStr}`.split(`,`).join(`/`);
+};
+
+/**
+ * 譜面初期化処理
+ * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
+ * - g_canLoadDifInfoFlg は譜面初期化フラグで、初期化したくない場合は対象画面にて false にしておく
+ *   (Display設定画面、キーコンフィグ画面では通常OFF)
+ *   この関数を実行後、このフラグはONに戻るようになっている 
+ * - [キーコン]->[初期化]->[名称設定]の順に配置する。
+ *   初期化処理にてキー数関連の設定を行っているため、この順序で無いとデータが正しく格納されない
+ */
+const setDifficulty = (_initFlg) => {
+
+	const getCurrentNo = (_list, _target) => roundZero(_list.findIndex(item => item === _target));
+
+	// ---------------------------------------------------
+	// 1. キーコンフィグ設定 (KeyConfig)
+	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
+	const isNotSameKey = (g_keyObj.prevKey !== g_keyObj.currentKey);
+
+	if (g_headerObj.dummyScoreNos !== undefined) {
+		g_stateObj.dummyId = setIntVal(g_headerObj.dummyScoreNos[g_stateObj.scoreId], ``);
+	}
+	// 特殊キーフラグ
+	g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
+
+	// ---------------------------------------------------
+	// 2. 初期化設定
+
+	// 保存した設定の再読込条件（設定画面切り替え時はスキップ）
+	// ローカルストレージで保存した設定を呼び出し
+	if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _initFlg) {
+
+		if (isNotSameKey && g_keyObj.prevKey !== `Dummy`) {
+			// キーパターン初期化
+			g_keyObj.currentPtn = 0;
+			g_keycons.keySwitchNum = 0;
+		}
+		const hasKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
+		let storageObj, addKey = ``;
+
+		if (!g_stateObj.extraKeyFlg) {
+
+			// キー別のローカルストレージの初期設定　※特殊キーは除く
+			g_localKeyStorage = hasKeyStorage ? JSON.parse(hasKeyStorage) : {
+				reverse: C_FLG_OFF,
+				keyCtrl: [[]],
+				keyCtrlPtn: 0,
+				setColor: [],
+			};
+			storageObj = g_localKeyStorage;
+
+		} else {
+			storageObj = g_localStorage;
+			addKey = g_keyObj.currentKey;
+		}
+		if (isNotSameKey) {
+			getKeyReverse(storageObj, addKey);
+
+			// キーコンフィグ初期値設定
+			if (storageObj[`keyCtrlPtn${addKey}`] === undefined) {
+				storageObj[`keyCtrlPtn${addKey}`] = 0;
+			}
+			getKeyCtrl(storageObj, addKey);
+
+			// カラーセット初期値設定
+			if (storageObj[`setColor${addKey}`] === undefined) {
+				storageObj[`setColor${addKey}`] = [];
+			}
+			if (storageObj[`setColor${addKey}`].length > 0) {
+				g_keycons.colorTypes = addValtoArray(g_keycons.colorTypes, g_keycons.colorSelf);
+				resetColorType({ _fromObj: storageObj, _from: addKey, _to: g_keycons.colorSelf });
+				resetColorType({ _fromObj: storageObj, _from: addKey, _toObj: g_dfColorObj, _to: g_keycons.colorSelf });
+
+			} else {
+				if (g_localStorage.colorType === g_keycons.colorSelf) {
+					g_colorType = `Default`;
+				}
+				g_keycons.colorTypes = g_keycons.colorTypes.filter(val => val !== g_keycons.colorSelf);
+			}
+
+			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+
+			// カラーグループ、シャッフルグループの設定
+			g_keycons.groups.forEach(type => {
+				resetGroupList(type, keyCtrlPtn);
+				if (g_keyObj.currentPtn === -1) {
+					const storageKeyName = storageObj[`${type}${addKey}`] || storageObj[`${type}${g_keyObj.currentKey}_-1_-1`];
+					if (storageKeyName !== undefined) {
+						g_keyObj[`${type}${g_keyObj.currentKey}_-1`] = structuredClone(storageKeyName);
+					}
+					g_keyObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${g_keyObj.currentKey}_-1`]);
+				} else {
+					g_keyObj[`${type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_0`]);
+				}
+			});
+
+		}
+
+		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+		if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
+			g_headerObj.keyRetry = setIntVal(getKeyCtrlVal(g_keyObj[`keyRetry${keyCtrlPtn}`]), g_headerObj.keyRetryDef);
+		}
+		if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
+			g_headerObj.keyTitleBack = setIntVal(getKeyCtrlVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`]), g_headerObj.keyTitleBackDef);
+		}
+	}
+
+	// スクロール設定用の配列を入れ替え
+	g_settings.scrolls = structuredClone(
+		typeof g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] === C_TYP_OBJECT ?
+			Object.keys(g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]) : g_keyObj.scrollName_def
+	);
+
+	// アシスト設定の配列を入れ替え
+	g_settings.autoPlays = (typeof g_keyObj[`assistPos${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] === C_TYP_OBJECT ?
+		g_autoPlaysBase.concat(Object.keys(g_keyObj[`assistPos${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])) :
+		g_autoPlaysBase.concat());
+
+	// 速度、ゲージ、スクロール、アシスト設定のカーソル位置調整
+	if (_initFlg) {
+		g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
+		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
+		g_settings.gaugeNum = 0;
+	}
+	g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
+	g_settings.autoPlayNum = getCurrentNo(g_settings.autoPlays, g_stateObj.autoPlay);
+
+	// ---------------------------------------------------
+	// 3. 名称の設定
+
+	// 譜面名設定 (Difficulty)
+	const difWidth = parseFloat(lnkDifficulty.style.width);
+	const difNames = [`${getKeyName(g_keyObj.currentKey)} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
+	lnkDifficulty.style.fontSize = `${getFontSize(difNames[0], difWidth, getBasicFont(), g_limitObj.setLblSiz)}px`;
+
+	if (g_headerObj.makerView) {
+		difNames.push(`(${g_headerObj.creatorNames[g_stateObj.scoreId]})`);
+		difNames.forEach((difName, j) => {
+			const tmpSize = getFontSize(difName, difWidth, getBasicFont(), 14);
+			difNames[j] = `<span style="font-size:${tmpSize}px">${difName}</span>`;
+		});
+	}
+	lnkDifficulty.innerHTML = difNames.join(``);
+
+	// 速度設定 (Speed)
+	setSetting(0, `speed`, ` ${g_lblNameObj.multi}`);
+	if (g_headerObj.scoreDetailUse) {
+		drawSpeedGraph(g_stateObj.scoreId);
+		drawDensityGraph(g_stateObj.scoreId);
+		makeDifInfo(g_stateObj.scoreId);
+	}
+
+	// リバース設定 (Reverse, Scroll)
+	if (g_headerObj.scrollUse) {
+		g_stateObj.scroll = g_settings.scrolls[g_settings.scrollNum];
+		const [visibleScr, hiddenScr] = (g_settings.scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
+		document.getElementById(`${visibleScr}Sprite`).style.display = C_DIS_INHERIT;
+		document.getElementById(`${hiddenScr}Sprite`).style.display = C_DIS_NONE;
+		setSetting(0, visibleScr);
+
+		g_shortcutObj.option.KeyR.id = g_settings.scrolls.includes(`Reverse`) ?
+			g_shortcutObj.option.KeyR.exId : g_shortcutObj.option.KeyR.dfId;
+
+		if (g_settings.scrolls.length > 1) {
+			setReverseView(document.querySelector(`#btnReverse`));
+		}
+	} else {
+		g_settings.scrolls = structuredClone(g_keyObj.scrollName_def);
+		setSetting(0, `reverse`);
+	}
+
+	// オート・アシスト設定 (AutoPlay)
+	g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
+	lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
+
+	// ゲージ設定 (Gauge)
+	const defaultCustomGauge = g_gaugeOptionObj.custom0 || g_gaugeOptionObj.customDefault;
+	if (hasVal(defaultCustomGauge)) {
+		g_gaugeOptionObj.custom = (g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || defaultCustomGauge).concat();
+		g_gaugeOptionObj.varCustom = (g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0 || g_gaugeOptionObj.varCustomDefault).concat();
+	}
+	setGauge(0);
+
+	// ユーザカスタムイベント(初期)
+	g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
+
+	// ---------------------------------------------------
+	// 4. 譜面初期情報ロード許可フラグの設定
+	g_canLoadDifInfoFlg = true;
+};
+
+/**
  * 設定・オプション画面のラベル・ボタン処理の描画
  * @param {Object} _sprite 基準とするスプライト(ここで指定する座標は、そのスプライトからの相対位置)
  */
@@ -4319,139 +4912,6 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 0 
 	spriteList.difficulty.appendChild(createLblSetting(`Difficulty`, -5));
 
-	/**
-	 * 譜面変更セレクターの削除
-	 */
-	const resetDifWindow = _ => {
-		if (document.querySelector(`#difList`) !== null) {
-			deleteChildspriteAll(`difList`);
-			[`difList`, `difCover`, `btnDifU`, `btnDifD`].forEach(obj => optionsprite.removeChild(document.getElementById(obj)));
-			g_currentPage = `option`;
-			setShortcutEvent(g_currentPage, _ => true, { displayFlg: false, dfEvtFlg: true });
-		}
-	};
-
-	/**
-	 * 譜面選択処理
-	 * @param {number} _scrollNum 
-	 */
-	const nextDifficulty = (_scrollNum = 1) => {
-		g_keyObj.prevKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-		g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
-		setDifficulty(true);
-		resetDifWindow();
-	};
-
-	/**
-	 * 譜面リストの作成
-	 * @param {object} _difList 
-	 * @param {string} _targetKey 
-	 */
-	const makeDifList = (_difList, _targetKey = ``) => {
-		let k = 0;
-		let pos = 0;
-		g_headerObj.keyLabels.forEach((keyLabel, j) => {
-			if (_targetKey === `` || keyLabel === _targetKey) {
-				let text = `${getKeyName(keyLabel)} / ${g_headerObj.difLabels[j]}`;
-				if (g_headerObj.makerView) {
-					text += ` (${g_headerObj.creatorNames[j]})`;
-				}
-				_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => {
-					nextDifficulty(j - g_stateObj.scoreId);
-				}, { btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
-				if (j === g_stateObj.scoreId) {
-					pos = k + 6;
-				}
-				k++;
-			}
-		});
-		const overlength = pos * g_limitObj.setLblHeight - parseInt(difList.style.height);
-		difList.scrollTop = (overlength > 0 ? overlength : 0);
-	};
-
-	/**
-	 * 譜面セレクター位置の変更ボタン
-	 * @param {number} _scrollNum 
-	 * @returns 
-	 */
-	const makeDifBtn = (_scrollNum = 1) => {
-		const dir = _scrollNum === 1 ? `D` : `U`;
-		return createCss2Button(`btnDif${dir}`, g_settingBtnObj.chara[dir], _ => {
-			do {
-				g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
-			} while (g_stateObj.filterKeys !== `` && g_stateObj.filterKeys !== g_headerObj.keyLabels[g_stateObj.scoreId]);
-			setDifficulty(true);
-			deleteChildspriteAll(`difList`);
-			makeDifList(difList, g_stateObj.filterKeys);
-			if (g_keyObj.prevKey !== g_keyObj.currentKey) {
-				g_keyObj.prevKey = g_keyObj.currentKey;
-			}
-		}, {
-			x: 430 + _scrollNum * 10, y: 40, w: 20, h: 20, siz: g_limitObj.jdgCntsSiz,
-		}, g_cssObj.button_Mini);
-	};
-
-	/**
-	 * 譜面変更セレクターの作成・再作成
-	 * @param {string} _key
-	 */
-	const createDifWindow = (_key = ``) => {
-		g_currentPage = `difSelector`;
-		setShortcutEvent(g_currentPage);
-		const difList = createEmptySprite(optionsprite, `difList`, g_windowObj.difList, g_cssObj.settings_DifSelector);
-		const difCover = createEmptySprite(optionsprite, `difCover`, g_windowObj.difCover, g_cssObj.settings_DifSelector);
-
-		// リスト再作成
-		makeDifList(difList, _key);
-
-		// ランダム選択
-		difCover.appendChild(
-			makeDifLblCssButton(`difRandom`, `RANDOM`, 0, _ => {
-				nextDifficulty(Math.floor(Math.random() * g_headerObj.keyLabels.length));
-			}, { w: g_limitObj.difCoverWidth })
-		);
-
-		// 全リスト
-		difCover.appendChild(
-			makeDifLblCssButton(`keyFilter`, `ALL`, 1.5, _ => {
-				resetDifWindow();
-				g_stateObj.filterKeys = ``;
-				createDifWindow();
-			}, { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.filterKeys === `` ? `Setting` : `Default`) })
-		);
-
-		// キー別フィルタボタン作成
-		let pos = 0;
-		g_headerObj.keyLists.forEach((targetKey, m) => {
-			difCover.appendChild(
-				makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} key`, m + 2.5, _ => {
-					resetDifWindow();
-					g_stateObj.filterKeys = targetKey;
-					createDifWindow(targetKey);
-				}, { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.filterKeys === targetKey ? `Setting` : `Default`) })
-			);
-			if (g_stateObj.filterKeys === targetKey) {
-				pos = m + 9;
-			}
-		});
-		const overlength = pos * g_limitObj.setLblHeight - parseInt(difCover.style.height);
-		difCover.scrollTop = (overlength > 0 ? overlength : 0);
-
-		multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
-	};
-
-	const changeDifficulty = (_num = 1) => {
-		if (g_headerObj.difSelectorUse) {
-			g_stateObj.filterKeys = ``;
-			if (document.querySelector(`#difList`) === null) {
-				createDifWindow();
-			} else {
-				resetDifWindow();
-			}
-		} else {
-			nextDifficulty(_num);
-		}
-	};
 	const lnkDifficulty = makeSettingLblCssButton(`lnkDifficulty`, ``, 0, _ => changeDifficulty(), {
 		y: -10, h: g_limitObj.setLblHeight + 10, cxtFunc: _ => changeDifficulty(-1),
 	});
@@ -4575,276 +5035,6 @@ const createOptionWindow = _sprite => {
 		g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
 	};
 
-	/**
-	 * 譜面基礎データの取得
-	 * @param {number} _scoreId 
-	 */
-	const getScoreBaseData = _scoreId => {
-		const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
-		const frzCnts = sumData(g_detailObj.frzCnt[_scoreId]);
-		return {
-			arrowCnts: arrowCnts,
-			frzCnts: frzCnts,
-			apm: Math.round((arrowCnts + frzCnts) / (g_detailObj.playingFrame[_scoreId] / g_fps / 60)),
-			playingTime: transFrameToTimer(g_detailObj.playingFrame[_scoreId]),
-		};
-	};
-
-	/**
-	 * 速度変化グラフの描画
-	 * @param {number} _scoreId
-	 */
-	const drawSpeedGraph = _scoreId => {
-		const startFrame = g_detailObj.startFrame[_scoreId];
-		const playingFrame = g_detailObj.playingFrameWithBlank[_scoreId];
-		const speedObj = {
-			speed: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.speed },
-			boost: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.boost }
-		};
-
-		Object.keys(speedObj).forEach(speedType => {
-			let frame = speedObj[speedType].frame;
-			let speed = speedObj[speedType].speed;
-			const speedData = g_detailObj[`${speedType}Data`][_scoreId];
-
-			if (speedData !== undefined) {
-				for (let i = 0; i < speedData.length; i += 2) {
-					if (speedData[i] >= startFrame) {
-						frame.push(speedData[i] - startFrame);
-						speed.push(speedData[i + 1]);
-					}
-					speedObj[speedType].cnt++;
-				}
-				frame.push(playingFrame);
-				speed.push(speed[speed.length - 1]);
-			}
-		});
-
-		const canvas = document.querySelector(`#graphSpeed`);
-		const context = canvas.getContext(`2d`);
-		drawBaseLine(context);
-
-		Object.keys(speedObj).forEach((speedType, j) => {
-			context.beginPath();
-			let preY;
-
-			for (let i = 0; i < speedObj[speedType].frame.length; i++) {
-				const x = speedObj[speedType].frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
-				const y = (speedObj[speedType].speed[i] - 1) * -90 + 105;
-
-				context.lineTo(x, preY);
-				context.lineTo(x, y);
-				preY = y;
-			}
-
-			context.lineWidth = 1;
-			context.strokeStyle = speedObj[speedType].strokeColor;
-			context.stroke();
-
-			const lineX = (speedType === `speed`) ? 125 : 210;
-			context.beginPath();
-			context.moveTo(lineX, 215);
-			context.lineTo(lineX + 30, 215);
-			context.stroke();
-			context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
-			context.fillText(speedType, lineX + 35, 218);
-
-			updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
-		});
-	};
-
-	/**
-	 * 譜面密度グラフの描画
-	 * @param {number} _scoreId 
-	 */
-	const drawDensityGraph = _scoreId => {
-
-		const canvas = document.querySelector(`#graphDensity`);
-		const context = canvas.getContext(`2d`);
-		drawBaseLine(context);
-		for (let j = 0; j < g_limitObj.densityDivision; j++) {
-			context.beginPath();
-			[``, `2Push`, `3Push`].forEach(val => {
-				context.fillStyle = (g_detailObj.maxDensity[_scoreId].includes(j) ? g_graphColorObj[`max${val}`] : g_graphColorObj[`default${val}`]);
-				context.fillRect(16 * j * 16 / g_limitObj.densityDivision + 30, 195 - 9 * g_detailObj[`density${val}Data`][_scoreId][j] / 10,
-					15.5 * 16 / g_limitObj.densityDivision, 9 * g_detailObj[`density${val}Diff`][_scoreId][j] / 10
-				);
-			});
-			context.stroke();
-		}
-
-		const lineNames = [`Single`, `Chord`, `Triad+`];
-		Object.keys(g_graphColorObj).filter(val => val.indexOf(`max`) !== -1).forEach((val, j) => {
-			const lineX = 70 + j * 70;
-
-			context.beginPath();
-			context.lineWidth = 3;
-			context.fillStyle = g_rankObj.rankColorAllPerfect;
-			context.strokeStyle = g_graphColorObj[val];
-			context.moveTo(lineX, 215);
-			context.lineTo(lineX + 20, 215);
-			context.stroke();
-			context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
-			context.fillText(lineNames[j], lineX + 20, 218);
-		});
-
-		const obj = getScoreBaseData(_scoreId);
-		updateScoreDetailLabel(`Density`, `APM`, obj.apm, 0, g_lblNameObj.s_apm);
-		updateScoreDetailLabel(`Density`, `Time`, obj.playingTime, 1, g_lblNameObj.s_time);
-		updateScoreDetailLabel(`Density`, `Arrow`, obj.arrowCnts, 3, g_lblNameObj.s_arrow);
-		updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4, g_lblNameObj.s_frz);
-	};
-
-	/**
-	 * 譜面明細内の補足情報の登録・更新
-	 * @param {string} _name 表示する譜面明細のラベル
-	 * @param {string} _label 
-	 * @param {string} _value 
-	 * @param {number} _pos 表示位置
-	 * @param {string} _labelname
-	 */
-	const updateScoreDetailLabel = (_name, _label, _value, _pos = 0, _labelname = _label) => {
-		const baseLabel = (_bLabel, _bLabelname, _bAlign) =>
-			document.querySelector(`#detail${_name}`).appendChild(
-				createDivCss2Label(`${_bLabel}`, `${_bLabelname}`, {
-					x: 10, y: 105 + _pos * 20, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: _bAlign,
-				})
-			);
-		if (document.querySelector(`#data${_label}`) === null) {
-			baseLabel(`lbl${_label}`, `${_labelname}`, C_ALIGN_LEFT);
-			baseLabel(`data${_label}`, `${_value}`, C_ALIGN_RIGHT);
-		} else {
-			document.querySelector(`#data${_label}`).textContent = `${_value}`;
-		}
-	};
-
-	/**
-	 * グラフの縦軸を描画
-	 * @param {object} _context 
-	 * @param {number} _resolution 
-	 */
-	const drawBaseLine = (_context, _resolution = 10) => {
-		_context.clearRect(0, 0, g_limitObj.graphWidth, g_limitObj.graphHeight);
-
-		for (let j = 0; j <= 2 * _resolution; j += 5) {
-			drawLine(_context, j / _resolution, `main`, 2);
-			for (let k = 1; k < 5; k++) {
-				drawLine(_context, (j + k) / _resolution, `sub`, 2);
-			}
-		}
-	};
-
-	/**
-	 * グラフ上に目盛を表示
-	 * @param {object} _context 
-	 * @param {number} _y 
-	 * @param {string} _lineType 
-	 * @param {number} _fixed
-	 */
-	const drawLine = (_context, _y, _lineType, _fixed = 0) => {
-		const lineY = (_y - 1) * -90 + 105;
-		_context.beginPath();
-		_context.moveTo(30, lineY);
-		_context.lineTo(g_limitObj.graphWidth, lineY);
-		_context.lineWidth = 1;
-
-		if (_lineType === `main`) {
-			const textBaseObj = document.querySelector(`#lnkDifficulty`);
-			const textColor = window.getComputedStyle(textBaseObj, ``).color;
-			_context.strokeStyle = textColor;
-			_context.font = `12px ${getBasicFont()}`;
-			_context.fillStyle = textColor;
-			_context.fillText(_y.toFixed(_fixed), 0, lineY + 4);
-		} else {
-			_context.strokeStyle = `#646464`;
-		}
-		_context.stroke();
-	};
-
-	/**
-	 * 譜面の難易度情報用ラベル作成
-	 * @param {number} _scoreId 
-	 */
-	const makeDifInfoLabels = _scoreId => {
-
-		// ツール難易度
-		const detailToolDif = document.querySelector(`#detailToolDif`);
-		/**
-		 * 譜面の難易度情報ラベルの作成
-		 * @param {string} _lbl 
-		 * @param {string} _data 
-		 * @param {object} _obj 
-		 */
-		const makeDifInfoLabel = (_lbl, _data, { x = 130, y = 25, w = 125, h = 35, siz = g_limitObj.difSelectorSiz, ...rest } = {}) =>
-			createDivCss2Label(_lbl, _data, { x, y, w, h, siz, align: C_ALIGN_LEFT, ...rest });
-
-		let printData = ``;
-		for (let j = 0; j < g_detailObj.arrowCnt.length; j++) {
-			const obj = getScoreBaseData(j);
-			printData +=
-				// 譜面番号
-				`[${j + 1}]\t` +
-				// ツール値
-				`${g_detailObj.toolDif[j].tool}\t` +
-				// 同時
-				`${g_detailObj.toolDif[j].douji}\t` +
-				// 縦連
-				`${g_detailObj.toolDif[j].tate}\t` +
-				// 総矢印数
-				`${(obj.arrowCnts + obj.frzCnts)}\t` +
-				// 矢印
-				`${obj.arrowCnts}\t` +
-				// フリーズアロー
-				`${obj.frzCnts}\t` +
-				// APM
-				`${obj.apm}\t` +
-				// 時間(分秒)
-				`${obj.playingTime}\r\n`;
-		}
-		multiAppend(detailToolDif,
-			makeDifInfoLabel(`lblTooldif`, g_lblNameObj.s_level, g_lblPosObj.lblTooldif),
-			makeDifInfoLabel(`dataTooldif`, ``, g_lblPosObj.dataTooldif),
-			makeDifInfoLabel(`lblDouji`, g_lblNameObj.s_douji, g_lblPosObj.lblDouji),
-			makeDifInfoLabel(`lblTate`, g_lblNameObj.s_tate, g_lblPosObj.lblTate),
-			makeDifInfoLabel(`dataDouji`, ``, g_lblPosObj.dataDouji),
-			makeDifInfoLabel(`dataTate`, ``, g_lblPosObj.dataTate),
-			makeDifInfoLabel(`lblArrowInfo`, g_lblNameObj.s_cnts, g_lblPosObj.lblArrowInfo),
-			makeDifInfoLabel(`dataArrowInfo`, ``, g_lblPosObj.dataArrowInfo),
-			makeDifInfoLabel(`lblArrowInfo2`, ``, g_lblPosObj.lblArrowInfo2),
-			makeDifInfoLabel(`dataArrowInfo2`, ``, g_lblPosObj.dataArrowInfo2),
-			makeDifLblCssButton(`lnkDifInfo`, g_lblNameObj.s_print, 8, _ => {
-				copyTextToClipboard(
-					`****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n`
-					+ `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`, g_msgInfoObj.I_0003
-				);
-			}, g_lblPosObj.lnkDifInfo),
-		);
-		createScText(lnkDifInfo, `DifInfo`, { targetLabel: `lnkDifInfo`, x: -10 });
-	};
-
-	/**
-	 * 譜面の難易度情報更新
-	 * @param {number} _scoreId 
-	 */
-	const makeDifInfo = _scoreId => {
-
-		const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
-		const frzCnts = sumData(g_detailObj.frzCnt[_scoreId]);
-		const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
-
-		if (document.querySelector(`#lblTooldif`) === null) {
-			makeDifInfoLabels(_scoreId);
-		}
-		dataTooldif.textContent = g_detailObj.toolDif[_scoreId].tool;
-		dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
-		dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
-		lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
-		dataArrowInfo.innerHTML = `${arrowCnts + frzCnts} <span style="font-size:${g_limitObj.difSelectorSiz}px;">(${arrowCnts} + ${frzCnts})</span>`;
-		dataArrowInfo2.innerHTML = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
-			(${g_detailObj.frzCnt[_scoreId]})<br><br>
-			${push3CntStr}`.split(`,`).join(`/`);
-	};
-
 	// ---------------------------------------------------
 	// 速度モーション (Motion)
 	// 縦位置: 3
@@ -4877,25 +5067,6 @@ const createOptionWindow = _sprite => {
 		spriteList.scroll.style.pointerEvents = C_DIS_NONE;
 	}
 
-	const setReverse = _btn => {
-		if (!g_settings.scrolls.includes(`Reverse`)) {
-			g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
-			g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
-			setReverseView(_btn);
-		}
-	};
-
-	const setReverseView = _btn => {
-		_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
-			g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
-		if (!g_settings.scrolls.includes(`Reverse`)) {
-			_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
-		} else {
-			_btn.textContent = `X`;
-			setReverseDefault();
-		}
-	};
-
 	// ---------------------------------------------------
 	// ミラー・ランダム (Shuffle)
 	// 縦位置: 5.5
@@ -4913,165 +5084,6 @@ const createOptionWindow = _sprite => {
 
 	// ゲージ設定詳細　縦位置: ゲージ設定+1
 	spriteList.gauge.appendChild(createDivCss2Label(`lblGauge2`, ``, g_lblPosObj.lblGauge2));
-
-	/**
-	 * ゲージ設定メイン
-	 * @param {number} _scrollNum 
-	 */
-	const setGauge = _scrollNum => {
-
-		// カーソルを動かさない場合は先にゲージ設定をリロード
-		if (_scrollNum === 0) {
-			gaugeChange(g_settings.gaugeNum);
-		}
-		setSetting(_scrollNum, `gauge`);
-
-		// カーソルを動かす場合は設定変更後にゲージ設定を再設定
-		if (_scrollNum !== 0) {
-			gaugeChange(g_settings.gaugeNum);
-		}
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
-			g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
-	};
-
-	/**
-	 * ゲージ設定の切替処理
-	 * @param {number} _gaugeNum 
-	 */
-	const gaugeChange = _gaugeNum => {
-		const tmpScoreId = g_stateObj.scoreId;
-
-		/**
-		 * ゲージ詳細変更
-		 * @param {object} _baseProperty 
-		 * @param {string} _setProperty 
-		 * @param {number} _magnification 
-		 */
-		const setLife = (_baseProperty, _setProperty, _magnification = 1) => {
-			if (setVal(_baseProperty[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
-				g_stateObj[_setProperty] = _baseProperty[tmpScoreId] * _magnification;
-			}
-		};
-
-		/**
-		 * ゲージ詳細一括変更
-		 * @param {object} _baseObj 
-		 * @param {object} _obj 
-		 */
-		const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
-			setLife(_baseObj.lifeInits, `lifeInit`, _magInit);
-			setLife(_baseObj.lifeRecoverys, `lifeRcv`, _magRcv);
-			setLife(_baseObj.lifeDamages, `lifeDmg`, _magDmg);
-		};
-
-		/**
-		 * ライフモード切替
-		 * @param {object} _baseObj 
-		 */
-		const changeLifeMode = (_baseObj) => {
-			if (_baseObj.lifeBorders[tmpScoreId] === `x`) {
-				g_stateObj.lifeBorder = 0;
-				g_stateObj.lifeMode = C_LFE_SURVIVAL;
-			} else {
-				g_stateObj.lifeBorder = _baseObj.lifeBorders[tmpScoreId];
-				g_stateObj.lifeMode = C_LFE_BORDER;
-			}
-		};
-
-		// ゲージ初期化
-		if (_gaugeNum === 0) {
-			if (hasVal(g_headerObj.lifeBorders[tmpScoreId])) {
-				changeLifeMode(g_headerObj);
-				g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
-
-				g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
-				g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
-				g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
-			}
-			setLifeCategory(g_headerObj);
-
-		} else {
-			// 設定されたゲージ設定、カーソルに合わせて設定値を更新
-			g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
-			if (g_gaugeOptionObj.custom.length === 0 ||
-				g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`])) {
-				const gType = (g_gaugeType === C_LFE_CUSTOM ?
-					toCapitalize(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`]) : g_gaugeType);
-				g_stateObj.lifeMode = g_gaugeOptionObj[`type${gType}`][_gaugeNum];
-				g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${gType}`][_gaugeNum];
-				g_stateObj.lifeInit = g_gaugeOptionObj[`init${gType}`][_gaugeNum];
-				g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${gType}`][_gaugeNum];
-				g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${gType}`][_gaugeNum];
-			}
-		}
-
-		// ゲージ設定(Light, Easy)の初期化
-		if (g_stateObj.gauge === `Light` || g_stateObj.gauge === `Easy`) {
-			setLifeCategory(g_headerObj, { _magRcv: 2 });
-		}
-
-		// ゲージ設定別に個別設定した場合はここで設定を上書き
-		// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
-		if (hasVal(g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`])) {
-			const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
-			if (hasVal(tmpGaugeObj.lifeBorders[tmpScoreId])) {
-				changeLifeMode(tmpGaugeObj);
-			}
-			setLifeCategory(tmpGaugeObj);
-		}
-	};
-
-	/**
-	 * ゲージ設定の詳細表示を整形
-	 */
-	const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
-		const initVal = g_headerObj.maxLifeVal * _init / 100;
-		const borderVal = (_mode === C_LFE_BORDER && _border !== 0 ?
-			Math.round(g_headerObj.maxLifeVal * _border / 100) : `-`);
-
-		let lifeValCss = ``;
-		if (_lifeValFlg === C_FLG_ON) {
-			lifeValCss = ` settings_lifeVal`;
-		}
-
-		// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
-		const init = Math.round(initVal);
-		const border = (borderVal !== `-` ? borderVal : `-`);
-		const rcv = Math.round(_rcv * 100) / 100;
-		const dmg = Math.round(_dmg * 100) / 100;
-
-		return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
-					<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
-						<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
-							${g_lblNameObj.g_start}
-						</div>
-						<div id="lblGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeEtc">
-							${g_lblNameObj.g_border}
-						</div>
-						<div id="lblGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeEtc">
-							${g_lblNameObj.g_recovery}
-						</div>
-						<div id="lblGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeEtc">
-							${g_lblNameObj.g_damage}
-						</div>
-					</div>
-					<div id="dataGaugeDivTable" class="settings_gaugeDivTable">
-						<div id="dataGaugeStart" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
-							${init}/${g_headerObj.maxLifeVal}
-						</div>
-						<div id="dataGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
-							${border}
-						</div>
-						<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
-							${rcv}
-						</div>
-						<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
-							${dmg}
-						</div>
-					</div>
-				</div>
-				`;
-	};
 
 	if (g_headerObj.gaugeUse) {
 		multiAppend(spriteList.gauge,
@@ -5128,196 +5140,6 @@ const createOptionWindow = _sprite => {
 	// ボリューム (Volume) 
 	// 縦位置: 12.5
 	createGeneralSetting(spriteList.volume, `volume`, { unitName: g_lblNameObj.percent });
-
-	/**
-	 * 譜面初期化処理
-	 * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
-	 * - g_canLoadDifInfoFlg は譜面初期化フラグで、初期化したくない場合は対象画面にて false にしておく
-	 *   (Display設定画面、キーコンフィグ画面では通常OFF)
-	 *   この関数を実行後、このフラグはONに戻るようになっている 
-	 * - [キーコン]->[初期化]->[名称設定]の順に配置する。
-	 *   初期化処理にてキー数関連の設定を行っているため、この順序で無いとデータが正しく格納されない
-	 */
-	const setDifficulty = (_initFlg) => {
-
-		const getCurrentNo = (_list, _target) => roundZero(_list.findIndex(item => item === _target));
-
-		// ---------------------------------------------------
-		// 1. キーコンフィグ設定 (KeyConfig)
-		g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-		const isNotSameKey = (g_keyObj.prevKey !== g_keyObj.currentKey);
-
-		if (g_headerObj.dummyScoreNos !== undefined) {
-			g_stateObj.dummyId = setIntVal(g_headerObj.dummyScoreNos[g_stateObj.scoreId], ``);
-		}
-		// 特殊キーフラグ
-		g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
-
-		// ---------------------------------------------------
-		// 2. 初期化設定
-
-		// 保存した設定の再読込条件（設定画面切り替え時はスキップ）
-		// ローカルストレージで保存した設定を呼び出し
-		if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _initFlg) {
-
-			if (isNotSameKey && g_keyObj.prevKey !== `Dummy`) {
-				// キーパターン初期化
-				g_keyObj.currentPtn = 0;
-				g_keycons.keySwitchNum = 0;
-			}
-			const hasKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
-			let storageObj, addKey = ``;
-
-			if (!g_stateObj.extraKeyFlg) {
-
-				// キー別のローカルストレージの初期設定　※特殊キーは除く
-				g_localKeyStorage = hasKeyStorage ? JSON.parse(hasKeyStorage) : {
-					reverse: C_FLG_OFF,
-					keyCtrl: [[]],
-					keyCtrlPtn: 0,
-					setColor: [],
-				};
-				storageObj = g_localKeyStorage;
-
-			} else {
-				storageObj = g_localStorage;
-				addKey = g_keyObj.currentKey;
-			}
-			if (isNotSameKey) {
-				getKeyReverse(storageObj, addKey);
-
-				// キーコンフィグ初期値設定
-				if (storageObj[`keyCtrlPtn${addKey}`] === undefined) {
-					storageObj[`keyCtrlPtn${addKey}`] = 0;
-				}
-				getKeyCtrl(storageObj, addKey);
-
-				// カラーセット初期値設定
-				if (storageObj[`setColor${addKey}`] === undefined) {
-					storageObj[`setColor${addKey}`] = [];
-				}
-				if (storageObj[`setColor${addKey}`].length > 0) {
-					g_keycons.colorTypes = addValtoArray(g_keycons.colorTypes, g_keycons.colorSelf);
-					resetColorType({ _fromObj: storageObj, _from: addKey, _to: g_keycons.colorSelf });
-					resetColorType({ _fromObj: storageObj, _from: addKey, _toObj: g_dfColorObj, _to: g_keycons.colorSelf });
-
-				} else {
-					if (g_localStorage.colorType === g_keycons.colorSelf) {
-						g_colorType = `Default`;
-					}
-					g_keycons.colorTypes = g_keycons.colorTypes.filter(val => val !== g_keycons.colorSelf);
-				}
-
-				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-
-				// カラーグループ、シャッフルグループの設定
-				g_keycons.groups.forEach(type => {
-					resetGroupList(type, keyCtrlPtn);
-					if (g_keyObj.currentPtn === -1) {
-						const storageKeyName = storageObj[`${type}${addKey}`] || storageObj[`${type}${g_keyObj.currentKey}_-1_-1`];
-						if (storageKeyName !== undefined) {
-							g_keyObj[`${type}${g_keyObj.currentKey}_-1`] = structuredClone(storageKeyName);
-						}
-						g_keyObj[`${type}${g_keyObj.currentKey}_-1_-1`] = structuredClone(g_keyObj[`${type}${g_keyObj.currentKey}_-1`]);
-					} else {
-						g_keyObj[`${type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_0`]);
-					}
-				});
-
-			}
-
-			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-			if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
-				g_headerObj.keyRetry = setIntVal(getKeyCtrlVal(g_keyObj[`keyRetry${keyCtrlPtn}`]), g_headerObj.keyRetryDef);
-			}
-			if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
-				g_headerObj.keyTitleBack = setIntVal(getKeyCtrlVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`]), g_headerObj.keyTitleBackDef);
-			}
-		}
-
-		// スクロール設定用の配列を入れ替え
-		g_settings.scrolls = structuredClone(
-			typeof g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] === C_TYP_OBJECT ?
-				Object.keys(g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]) : g_keyObj.scrollName_def
-		);
-
-		// アシスト設定の配列を入れ替え
-		g_settings.autoPlays = (typeof g_keyObj[`assistPos${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] === C_TYP_OBJECT ?
-			g_autoPlaysBase.concat(Object.keys(g_keyObj[`assistPos${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])) :
-			g_autoPlaysBase.concat());
-
-		// 速度、ゲージ、スクロール、アシスト設定のカーソル位置調整
-		if (_initFlg) {
-			g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
-			g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
-			g_settings.gaugeNum = 0;
-		}
-		g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
-		g_settings.autoPlayNum = getCurrentNo(g_settings.autoPlays, g_stateObj.autoPlay);
-
-		// ---------------------------------------------------
-		// 3. 名称の設定
-
-		// 譜面名設定 (Difficulty)
-		const difWidth = parseFloat(lnkDifficulty.style.width);
-		const difNames = [`${getKeyName(g_keyObj.currentKey)} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
-		lnkDifficulty.style.fontSize = `${getFontSize(difNames[0], difWidth, getBasicFont(), g_limitObj.setLblSiz)}px`;
-
-		if (g_headerObj.makerView) {
-			difNames.push(`(${g_headerObj.creatorNames[g_stateObj.scoreId]})`);
-			difNames.forEach((difName, j) => {
-				const tmpSize = getFontSize(difName, difWidth, getBasicFont(), 14);
-				difNames[j] = `<span style="font-size:${tmpSize}px">${difName}</span>`;
-			});
-		}
-		lnkDifficulty.innerHTML = difNames.join(``);
-
-		// 速度設定 (Speed)
-		setSetting(0, `speed`, ` ${g_lblNameObj.multi}`);
-		if (g_headerObj.scoreDetailUse) {
-			drawSpeedGraph(g_stateObj.scoreId);
-			drawDensityGraph(g_stateObj.scoreId);
-			makeDifInfo(g_stateObj.scoreId);
-		}
-
-		// リバース設定 (Reverse, Scroll)
-		if (g_headerObj.scrollUse) {
-			g_stateObj.scroll = g_settings.scrolls[g_settings.scrollNum];
-			const [visibleScr, hiddenScr] = (g_settings.scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
-			spriteList[visibleScr].style.display = C_DIS_INHERIT;
-			spriteList[hiddenScr].style.display = C_DIS_NONE;
-			setSetting(0, visibleScr);
-
-			g_shortcutObj.option.KeyR.id = g_settings.scrolls.includes(`Reverse`) ?
-				g_shortcutObj.option.KeyR.exId : g_shortcutObj.option.KeyR.dfId;
-
-			if (g_settings.scrolls.length > 1) {
-				setReverseView(document.querySelector(`#btnReverse`));
-			}
-		} else {
-			g_settings.scrolls = structuredClone(g_keyObj.scrollName_def);
-			setSetting(0, `reverse`);
-		}
-
-		// オート・アシスト設定 (AutoPlay)
-		g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
-		lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
-
-		// ゲージ設定 (Gauge)
-		const defaultCustomGauge = g_gaugeOptionObj.custom0 || g_gaugeOptionObj.customDefault;
-		if (hasVal(defaultCustomGauge)) {
-			g_gaugeOptionObj.custom = (g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || defaultCustomGauge).concat();
-			g_gaugeOptionObj.varCustom = (g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0 || g_gaugeOptionObj.varCustomDefault).concat();
-		}
-		setGauge(0);
-
-		// ユーザカスタムイベント(初期)
-		g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
-
-		// ---------------------------------------------------
-		// 4. 譜面初期情報ロード許可フラグの設定
-		g_canLoadDifInfoFlg = true;
-	};
 
 	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
 	setDifficulty(false);
@@ -5484,6 +5306,184 @@ const getKeyReverse = (_localStorage, _extraKeyName = ``) => {
 const setReverseDefault = _ => {
 	g_stateObj.reverse = C_FLG_OFF;
 	g_settings.reverseNum = 0;
+};
+
+const setReverse = _btn => {
+	if (!g_settings.scrolls.includes(`Reverse`)) {
+		g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
+		g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
+		setReverseView(_btn);
+	}
+};
+
+const setReverseView = _btn => {
+	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
+		g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
+	if (!g_settings.scrolls.includes(`Reverse`)) {
+		_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
+	} else {
+		_btn.textContent = `X`;
+		setReverseDefault();
+	}
+};
+
+/**
+ * ゲージ設定メイン
+ * @param {number} _scrollNum 
+ */
+const setGauge = _scrollNum => {
+
+	// カーソルを動かさない場合は先にゲージ設定をリロード
+	if (_scrollNum === 0) {
+		gaugeChange(g_settings.gaugeNum);
+	}
+	setSetting(_scrollNum, `gauge`);
+
+	// カーソルを動かす場合は設定変更後にゲージ設定を再設定
+	if (_scrollNum !== 0) {
+		gaugeChange(g_settings.gaugeNum);
+	}
+	lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
+		g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
+};
+
+/**
+ * ゲージ設定の切替処理
+ * @param {number} _gaugeNum 
+ */
+const gaugeChange = _gaugeNum => {
+	const tmpScoreId = g_stateObj.scoreId;
+
+	/**
+	 * ゲージ詳細変更
+	 * @param {object} _baseProperty 
+	 * @param {string} _setProperty 
+	 * @param {number} _magnification 
+	 */
+	const setLife = (_baseProperty, _setProperty, _magnification = 1) => {
+		if (setVal(_baseProperty[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
+			g_stateObj[_setProperty] = _baseProperty[tmpScoreId] * _magnification;
+		}
+	};
+
+	/**
+	 * ゲージ詳細一括変更
+	 * @param {object} _baseObj 
+	 * @param {object} _obj 
+	 */
+	const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
+		setLife(_baseObj.lifeInits, `lifeInit`, _magInit);
+		setLife(_baseObj.lifeRecoverys, `lifeRcv`, _magRcv);
+		setLife(_baseObj.lifeDamages, `lifeDmg`, _magDmg);
+	};
+
+	/**
+	 * ライフモード切替
+	 * @param {object} _baseObj 
+	 */
+	const changeLifeMode = (_baseObj) => {
+		if (_baseObj.lifeBorders[tmpScoreId] === `x`) {
+			g_stateObj.lifeBorder = 0;
+			g_stateObj.lifeMode = C_LFE_SURVIVAL;
+		} else {
+			g_stateObj.lifeBorder = _baseObj.lifeBorders[tmpScoreId];
+			g_stateObj.lifeMode = C_LFE_BORDER;
+		}
+	};
+
+	// ゲージ初期化
+	if (_gaugeNum === 0) {
+		if (hasVal(g_headerObj.lifeBorders[tmpScoreId])) {
+			changeLifeMode(g_headerObj);
+			g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
+
+			g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
+			g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
+			g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+		}
+		setLifeCategory(g_headerObj);
+
+	} else {
+		// 設定されたゲージ設定、カーソルに合わせて設定値を更新
+		g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
+		if (g_gaugeOptionObj.custom.length === 0 ||
+			g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`])) {
+			const gType = (g_gaugeType === C_LFE_CUSTOM ?
+				toCapitalize(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`]) : g_gaugeType);
+			g_stateObj.lifeMode = g_gaugeOptionObj[`type${gType}`][_gaugeNum];
+			g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${gType}`][_gaugeNum];
+			g_stateObj.lifeInit = g_gaugeOptionObj[`init${gType}`][_gaugeNum];
+			g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${gType}`][_gaugeNum];
+			g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${gType}`][_gaugeNum];
+		}
+	}
+
+	// ゲージ設定(Light, Easy)の初期化
+	if (g_stateObj.gauge === `Light` || g_stateObj.gauge === `Easy`) {
+		setLifeCategory(g_headerObj, { _magRcv: 2 });
+	}
+
+	// ゲージ設定別に個別設定した場合はここで設定を上書き
+	// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
+	if (hasVal(g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`])) {
+		const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
+		if (hasVal(tmpGaugeObj.lifeBorders[tmpScoreId])) {
+			changeLifeMode(tmpGaugeObj);
+		}
+		setLifeCategory(tmpGaugeObj);
+	}
+};
+
+/**
+ * ゲージ設定の詳細表示を整形
+ */
+const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
+	const initVal = g_headerObj.maxLifeVal * _init / 100;
+	const borderVal = (_mode === C_LFE_BORDER && _border !== 0 ?
+		Math.round(g_headerObj.maxLifeVal * _border / 100) : `-`);
+
+	let lifeValCss = ``;
+	if (_lifeValFlg === C_FLG_ON) {
+		lifeValCss = ` settings_lifeVal`;
+	}
+
+	// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
+	const init = Math.round(initVal);
+	const border = (borderVal !== `-` ? borderVal : `-`);
+	const rcv = Math.round(_rcv * 100) / 100;
+	const dmg = Math.round(_dmg * 100) / 100;
+
+	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
+		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
+			<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
+				${g_lblNameObj.g_start}
+			</div>
+			<div id="lblGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeEtc">
+				${g_lblNameObj.g_border}
+			</div>
+			<div id="lblGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeEtc">
+				${g_lblNameObj.g_recovery}
+			</div>
+			<div id="lblGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeEtc">
+				${g_lblNameObj.g_damage}
+			</div>
+		</div>
+		<div id="dataGaugeDivTable" class="settings_gaugeDivTable">
+			<div id="dataGaugeStart" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
+				${init}/${g_headerObj.maxLifeVal}
+			</div>
+			<div id="dataGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+				${border}
+			</div>
+			<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+				${rcv}
+			</div>
+			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
+				${dmg}
+			</div>
+		</div>
+	</div>
+	`;
 };
 
 /**
