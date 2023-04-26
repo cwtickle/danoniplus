@@ -4407,7 +4407,7 @@ const createDifWindow = (_key = ``) => {
 	let pos = 0;
 	g_headerObj.keyLists.forEach((targetKey, m) => {
 		difCover.appendChild(
-			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} key`, m + 2.5, _ => {
+			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m + 2.5, _ => {
 				resetDifWindow();
 				g_stateObj.filterKeys = targetKey;
 				createDifWindow(targetKey);
