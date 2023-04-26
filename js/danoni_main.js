@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/03/22
+ * Revised : 2023/04/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 30.6.1`;
-const g_revisedDate = `2023/03/22`;
+const g_version = `Ver 30.6.2`;
+const g_revisedDate = `2023/04/26`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -4319,9 +4319,7 @@ const createOptionWindow = _sprite => {
 			setDifficulty(true);
 			deleteChildspriteAll(`difList`);
 			makeDifList(difList, g_stateObj.filterKeys);
-			if (g_keyObj.prevKey !== g_keyObj.currentKey) {
-				g_keyObj.prevKey = g_keyObj.currentKey;
-			}
+			g_keyObj.prevKey = g_keyObj.currentKey;
 		}, {
 			x: 430 + _scrollNum * 10, y: 40, w: 20, h: 20, siz: C_SIZ_JDGCNTS,
 		}, g_cssObj.button_Mini);
@@ -4360,7 +4358,7 @@ const createOptionWindow = _sprite => {
 		let pos = 0;
 		g_headerObj.keyLists.forEach((targetKey, m) => {
 			difCover.appendChild(
-				makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} key`, m + 2.5, _ => {
+				makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m + 2.5, _ => {
 					resetDifWindow();
 					g_stateObj.filterKeys = targetKey;
 					createDifWindow(targetKey);
@@ -4380,6 +4378,7 @@ const createOptionWindow = _sprite => {
 		if (g_headerObj.difSelectorUse) {
 			g_stateObj.filterKeys = ``;
 			if (document.querySelector(`#difList`) === null) {
+				g_keyObj.prevKey = g_keyObj.currentKey;
 				createDifWindow();
 			} else {
 				resetDifWindow();
