@@ -9967,6 +9967,8 @@ const changeHitFrz = (_j, _k, _name) => {
 			$id(`frzHitTop${_j}`).background = g_workObj.frzHitColors[_j];
 		}
 	}
+
+	g_customJsObj[`judg_${_name}Hit`].forEach(func => func(_difFrame));
 };
 
 /**
