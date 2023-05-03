@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/04/26
+ * Revised : 2023/05/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 31.6.0`;
-const g_revisedDate = `2023/04/26`;
+const g_version = `Ver 31.7.0`;
+const g_revisedDate = `2023/05/03`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2465,7 +2465,7 @@ const calcLevel = _scoreObj => {
 	const push3Cnt = push3List.length;
 	const calcArrowCnt = allCnt - push3Cnt - 3;
 	const toDecimal2 = num => Math.round(num * 100) / 100;
-	const calcDifLevel = num => calcArrowCnt <= 0 ? 0 : toDecimal2(num / Math.sqrt(calcArrowCnt) * 4);
+	const calcDifLevel = num => Math.max(toDecimal2(num / Math.sqrt(calcArrowCnt) * 4), 0);
 
 	const baseDifLevel = calcDifLevel(levelcount);
 	const difLevel = toDecimal2(baseDifLevel * (allCnt - 3) / calcArrowCnt);
@@ -2744,11 +2744,12 @@ const headerConvert = _dosObj => {
 		obj.creatorNames = [obj.tuning];
 	}
 	const keyLists = makeDedupliArray(obj.keyLabels);
+	obj.viewLists = [...Array(obj.keyLabels.length).keys()];
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
 
 	// 譜面変更セレクターの利用有無
-	obj.difSelectorUse = (setBoolVal(_dosObj.difSelectorUse, obj.keyLabels.length > 5));
+	obj.difSelectorUse = getDifSelectorUse(_dosObj.difSelectorUse, obj.viewLists);
 
 	// 初期速度の設定
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
@@ -3152,6 +3153,14 @@ const headerConvert = _dosObj => {
 
 	return obj;
 };
+
+/**
+ * 譜面リスト作成有無の状態を取得
+ * @param {boolean} _headerFlg 
+ * @param {array} _viewLists 
+ * @returns 
+ */
+const getDifSelectorUse = (_headerFlg, _viewLists = g_headerObj.viewLists) => setBoolVal(_headerFlg, _viewLists.length > 5);
 
 /**
  * カラーセットの格納
@@ -4315,12 +4324,24 @@ const resetDifWindow = _ => {
 };
 
 /**
+ * 次の譜面番号を取得 
+ * @param {number} _scoreId 
+ * @param {number} _scrollNum 
+ * @returns 
+ */
+const getNextDifficulty = (_scoreId, _scrollNum) => {
+	const currentPosIdx = g_headerObj.viewLists.findIndex(val => val === _scoreId);
+	const nextPosIdx = (currentPosIdx === -1 ? 0 : nextPos(currentPosIdx, _scrollNum, g_headerObj.viewLists.length));
+	return g_headerObj.viewLists[nextPosIdx];
+};
+
+/**
  * 譜面選択処理
  * @param {number} _scrollNum 
  */
 const nextDifficulty = (_scrollNum = 1) => {
 	g_keyObj.prevKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-	g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
+	g_stateObj.scoreId = getNextDifficulty(g_stateObj.scoreId, _scrollNum);
 	setDifficulty(true);
 	resetDifWindow();
 };
@@ -4333,7 +4354,8 @@ const nextDifficulty = (_scrollNum = 1) => {
 const makeDifList = (_difList, _targetKey = ``) => {
 	let k = 0;
 	let pos = 0;
-	g_headerObj.keyLabels.forEach((keyLabel, j) => {
+	g_headerObj.viewLists.forEach(j => {
+		const keyLabel = g_headerObj.keyLabels[j];
 		if (_targetKey === `` || keyLabel === _targetKey) {
 			let text = `${getKeyName(keyLabel)} / ${g_headerObj.difLabels[j]}`;
 			if (g_headerObj.makerView) {
@@ -4348,8 +4370,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			k++;
 		}
 	});
-	const overlength = pos * g_limitObj.setLblHeight - parseInt(_difList.style.height);
-	_difList.scrollTop = (overlength > 0 ? overlength : 0);
+	_difList.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(_difList.style.height), 0);
 };
 
 /**
@@ -4361,7 +4382,7 @@ const makeDifBtn = (_scrollNum = 1) => {
 	const dir = _scrollNum === 1 ? `D` : `U`;
 	return createCss2Button(`btnDif${dir}`, g_settingBtnObj.chara[dir], _ => {
 		do {
-			g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
+			g_stateObj.scoreId = getNextDifficulty(g_stateObj.scoreId, _scrollNum);
 		} while (g_stateObj.filterKeys !== `` && g_stateObj.filterKeys !== g_headerObj.keyLabels[g_stateObj.scoreId]);
 		setDifficulty(true);
 		deleteChildspriteAll(`difList`);
@@ -4403,7 +4424,7 @@ const createDifWindow = (_key = ``) => {
 
 	// キー別フィルタボタン作成
 	let pos = 0;
-	g_headerObj.keyLists.forEach((targetKey, m) => {
+	g_headerObj.viewKeyLists.forEach((targetKey, m) => {
 		difCover.appendChild(
 			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m + 2.5, _ => {
 				resetDifWindow();
@@ -4415,8 +4436,7 @@ const createDifWindow = (_key = ``) => {
 			pos = m + 9;
 		}
 	});
-	const overlength = pos * g_limitObj.setLblHeight - parseInt(difCover.style.height);
-	difCover.scrollTop = (overlength > 0 ? overlength : 0);
+	difCover.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(difCover.style.height), 0);
 
 	multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
 };
@@ -5141,6 +5161,12 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 12.5
 	createGeneralSetting(spriteList.volume, `volume`, { unitName: g_lblNameObj.percent });
 
+	// 譜面番号の再取得
+	g_stateObj.scoreId = getNextDifficulty(g_stateObj.scoreId, 0);
+	const keyLists = g_headerObj.viewLists.map(j => g_headerObj.keyLabels[j]);
+	g_headerObj.viewKeyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
+	g_headerObj.difSelectorUse = getDifSelectorUse(g_rootObj.difSelectorUse);
+
 	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
 	setDifficulty(false);
 	optionsprite.oncontextmenu = _ => false;
@@ -5262,11 +5288,9 @@ const setSetting = (_scrollNum, _settingName, _unitName = ``, _roundNum = 0) => 
 	}
 
 	if (_scrollNum > 0) {
-		settingNum = (settingNum === settingMax ?
-			0 : (settingNum + _scrollNum > settingMax ? settingMax : settingNum + _scrollNum));
+		settingNum = (settingNum === settingMax ? 0 : Math.min(settingNum + _scrollNum, settingMax));
 	} else if (_scrollNum < 0) {
-		settingNum = (settingNum === 0 ?
-			settingMax : (settingNum + _scrollNum <= 0 ? 0 : settingNum + _scrollNum));
+		settingNum = (settingNum === 0 ? settingMax : Math.max(settingNum + _scrollNum, 0));
 	}
 	g_stateObj[_settingName] = settingList[settingNum];
 	g_settings[`${_settingName}Num`] = settingNum;
@@ -9535,11 +9559,9 @@ const mainInit = _ => {
 			musicStartFlg = false;
 		}
 		if (musicStartFlg) {
-			const tmpVolume = (g_audio.volume + (3 * g_stateObj.volume / 100) / 1000);
-			g_audio.volume = (tmpVolume > 1 ? 1 : tmpVolume);
+			g_audio.volume = Math.min((g_audio.volume + (3 * g_stateObj.volume / 100) / 1000), 1);
 		} else if (isFadeOutArea) {
-			const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
-			g_audio.volume = (tmpVolume < 0 ? 0 : tmpVolume);
+			g_audio.volume = Math.max((g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000), 0);
 		}
 
 		// ユーザカスタムイベント(フレーム毎)
@@ -9917,8 +9939,10 @@ const changeStepY = (_frameNum) => {
  * フリーズアローヒット時の描画変更
  * @param {number} _j 
  * @param {number} _k 
+ * @param {string} _name
+ * @param {number} _difFrame
  */
-const changeHitFrz = (_j, _k, _name) => {
+const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	const frzNo = `${_j}_${_k}`;
 	const frzName = `${_name}${frzNo}`;
 	const currentFrz = g_attrObj[frzName];
@@ -9967,6 +9991,8 @@ const changeHitFrz = (_j, _k, _name) => {
 			$id(`frzHitTop${_j}`).background = g_workObj.frzHitColors[_j];
 		}
 	}
+
+	g_customJsObj[`judg_${_name}Hit`].forEach(func => func(_difFrame));
 };
 
 /**
@@ -10053,7 +10079,7 @@ const judgeArrow = _j => {
 			}
 
 			if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
-				changeHitFrz(_j, fcurrentNo, `frz`);
+				changeHitFrz(_j, fcurrentNo, `frz`, _difFrame);
 			} else {
 				changeFailedFrz(_j, fcurrentNo);
 				if (g_headerObj.frzStartjdgUse) {
