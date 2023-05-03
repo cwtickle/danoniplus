@@ -9917,8 +9917,10 @@ const changeStepY = (_frameNum) => {
  * フリーズアローヒット時の描画変更
  * @param {number} _j 
  * @param {number} _k 
+ * @param {string} _name
+ * @param {number} _difFrame
  */
-const changeHitFrz = (_j, _k, _name) => {
+const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	const frzNo = `${_j}_${_k}`;
 	const frzName = `${_name}${frzNo}`;
 	const currentFrz = g_attrObj[frzName];
@@ -9967,6 +9969,8 @@ const changeHitFrz = (_j, _k, _name) => {
 			$id(`frzHitTop${_j}`).background = g_workObj.frzHitColors[_j];
 		}
 	}
+
+	g_customJsObj[`judg_${_name}Hit`].forEach(func => func(_difFrame));
 };
 
 /**
@@ -10053,7 +10057,7 @@ const judgeArrow = _j => {
 			}
 
 			if (_difCnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
-				changeHitFrz(_j, fcurrentNo, `frz`);
+				changeHitFrz(_j, fcurrentNo, `frz`, _difFrame);
 			} else {
 				changeFailedFrz(_j, fcurrentNo);
 				if (g_headerObj.frzStartjdgUse) {

@@ -2946,6 +2946,9 @@ const g_customJsObj = {
     judg_kita: [],
     judg_iknai: [],
 
+    judg_frzHit: [],
+    judg_dummyFrzHit: [],
+
     mainEnterFrame: [],
     result: [],
     resultEnterFrame: [],
