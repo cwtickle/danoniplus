@@ -2744,11 +2744,12 @@ const headerConvert = _dosObj => {
 		obj.creatorNames = [obj.tuning];
 	}
 	const keyLists = makeDedupliArray(obj.keyLabels);
+	obj.viewLists = [...Array(obj.keyLabels.length).keys()];
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
 
 	// 譜面変更セレクターの利用有無
-	obj.difSelectorUse = (setBoolVal(_dosObj.difSelectorUse, obj.keyLabels.length > 5));
+	obj.difSelectorUse = getDifSelectorUse(_dosObj.difSelectorUse, obj.viewLists);
 
 	// 初期速度の設定
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
@@ -3152,6 +3153,14 @@ const headerConvert = _dosObj => {
 
 	return obj;
 };
+
+/**
+ * 譜面リスト作成有無の状態を取得
+ * @param {boolean} _headerFlg 
+ * @param {array} _viewLists 
+ * @returns 
+ */
+const getDifSelectorUse = (_headerFlg, _viewLists = g_headerObj.viewLists) => setBoolVal(_headerFlg, _viewLists.length > 5);
 
 /**
  * カラーセットの格納
@@ -4315,12 +4324,24 @@ const resetDifWindow = _ => {
 };
 
 /**
+ * 次の譜面番号を取得 
+ * @param {number} _scoreId 
+ * @param {number} _scrollNum 
+ * @returns 
+ */
+const getNextDifficulty = (_scoreId, _scrollNum) => {
+	const currentPosIdx = g_headerObj.viewLists.findIndex(val => val === _scoreId);
+	const nextPosIdx = (currentPosIdx === -1 ? 0 : nextPos(currentPosIdx, _scrollNum, g_headerObj.viewLists.length));
+	return g_headerObj.viewLists[nextPosIdx];
+};
+
+/**
  * 譜面選択処理
  * @param {number} _scrollNum 
  */
 const nextDifficulty = (_scrollNum = 1) => {
 	g_keyObj.prevKey = g_headerObj.keyLabels[g_stateObj.scoreId];
-	g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
+	g_stateObj.scoreId = getNextDifficulty(g_stateObj.scoreId, _scrollNum);
 	setDifficulty(true);
 	resetDifWindow();
 };
@@ -4333,7 +4354,8 @@ const nextDifficulty = (_scrollNum = 1) => {
 const makeDifList = (_difList, _targetKey = ``) => {
 	let k = 0;
 	let pos = 0;
-	g_headerObj.keyLabels.forEach((keyLabel, j) => {
+	g_headerObj.viewLists.forEach(j => {
+		const keyLabel = g_headerObj.keyLabels[j];
 		if (_targetKey === `` || keyLabel === _targetKey) {
 			let text = `${getKeyName(keyLabel)} / ${g_headerObj.difLabels[j]}`;
 			if (g_headerObj.makerView) {
@@ -4360,7 +4382,7 @@ const makeDifBtn = (_scrollNum = 1) => {
 	const dir = _scrollNum === 1 ? `D` : `U`;
 	return createCss2Button(`btnDif${dir}`, g_settingBtnObj.chara[dir], _ => {
 		do {
-			g_stateObj.scoreId = nextPos(g_stateObj.scoreId, _scrollNum, g_headerObj.keyLabels.length);
+			g_stateObj.scoreId = getNextDifficulty(g_stateObj.scoreId, _scrollNum);
 		} while (g_stateObj.filterKeys !== `` && g_stateObj.filterKeys !== g_headerObj.keyLabels[g_stateObj.scoreId]);
 		setDifficulty(true);
 		deleteChildspriteAll(`difList`);
@@ -4402,7 +4424,7 @@ const createDifWindow = (_key = ``) => {
 
 	// キー別フィルタボタン作成
 	let pos = 0;
-	g_headerObj.keyLists.forEach((targetKey, m) => {
+	g_headerObj.viewKeyLists.forEach((targetKey, m) => {
 		difCover.appendChild(
 			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m + 2.5, _ => {
 				resetDifWindow();
@@ -5138,6 +5160,12 @@ const createOptionWindow = _sprite => {
 	// ボリューム (Volume) 
 	// 縦位置: 12.5
 	createGeneralSetting(spriteList.volume, `volume`, { unitName: g_lblNameObj.percent });
+
+	// 譜面番号の再取得
+	g_stateObj.scoreId = getNextDifficulty(g_stateObj.scoreId, 0);
+	const keyLists = g_headerObj.viewLists.map(j => g_headerObj.keyLabels[j]);
+	g_headerObj.viewKeyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
+	g_headerObj.difSelectorUse = getDifSelectorUse(g_rootObj.difSelectorUse);
 
 	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
 	setDifficulty(false);
