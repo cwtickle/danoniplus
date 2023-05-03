@@ -2465,7 +2465,7 @@ const calcLevel = _scoreObj => {
 	const push3Cnt = push3List.length;
 	const calcArrowCnt = allCnt - push3Cnt - 3;
 	const toDecimal2 = num => Math.round(num * 100) / 100;
-	const calcDifLevel = num => calcArrowCnt <= 0 ? 0 : toDecimal2(num / Math.sqrt(calcArrowCnt) * 4);
+	const calcDifLevel = num => Math.max(toDecimal2(num / Math.sqrt(calcArrowCnt) * 4), 0);
 
 	const baseDifLevel = calcDifLevel(levelcount);
 	const difLevel = toDecimal2(baseDifLevel * (allCnt - 3) / calcArrowCnt);
@@ -4348,8 +4348,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			k++;
 		}
 	});
-	const overlength = pos * g_limitObj.setLblHeight - parseInt(_difList.style.height);
-	_difList.scrollTop = (overlength > 0 ? overlength : 0);
+	_difList.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(_difList.style.height), 0);
 };
 
 /**
@@ -4415,8 +4414,7 @@ const createDifWindow = (_key = ``) => {
 			pos = m + 9;
 		}
 	});
-	const overlength = pos * g_limitObj.setLblHeight - parseInt(difCover.style.height);
-	difCover.scrollTop = (overlength > 0 ? overlength : 0);
+	difCover.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(difCover.style.height), 0);
 
 	multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
 };
@@ -5262,11 +5260,9 @@ const setSetting = (_scrollNum, _settingName, _unitName = ``, _roundNum = 0) => 
 	}
 
 	if (_scrollNum > 0) {
-		settingNum = (settingNum === settingMax ?
-			0 : (settingNum + _scrollNum > settingMax ? settingMax : settingNum + _scrollNum));
+		settingNum = (settingNum === settingMax ? 0 : Math.min(settingNum + _scrollNum, settingMax));
 	} else if (_scrollNum < 0) {
-		settingNum = (settingNum === 0 ?
-			settingMax : (settingNum + _scrollNum <= 0 ? 0 : settingNum + _scrollNum));
+		settingNum = (settingNum === 0 ? settingMax : Math.max(settingNum + _scrollNum, 0));
 	}
 	g_stateObj[_settingName] = settingList[settingNum];
 	g_settings[`${_settingName}Num`] = settingNum;
@@ -9535,11 +9531,9 @@ const mainInit = _ => {
 			musicStartFlg = false;
 		}
 		if (musicStartFlg) {
-			const tmpVolume = (g_audio.volume + (3 * g_stateObj.volume / 100) / 1000);
-			g_audio.volume = (tmpVolume > 1 ? 1 : tmpVolume);
+			g_audio.volume = Math.min((g_audio.volume + (3 * g_stateObj.volume / 100) / 1000), 1);
 		} else if (isFadeOutArea) {
-			const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
-			g_audio.volume = (tmpVolume < 0 ? 0 : tmpVolume);
+			g_audio.volume = Math.max((g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000), 0);
 		}
 
 		// ユーザカスタムイベント(フレーム毎)
