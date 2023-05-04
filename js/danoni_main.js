@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/05/03
+ * Revised : 2023/05/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 31.7.0`;
-const g_revisedDate = `2023/05/03`;
+const g_version = `Ver 31.7.1`;
+const g_revisedDate = `2023/05/04`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -5163,7 +5163,7 @@ const createOptionWindow = _sprite => {
 
 	// 譜面番号の再取得
 	g_stateObj.scoreId = getNextDifficulty(g_stateObj.scoreId, 0);
-	const keyLists = g_headerObj.viewLists.map(j => g_headerObj.keyLabels[j]);
+	const keyLists = makeDedupliArray(g_headerObj.viewLists.map(j => g_headerObj.keyLabels[j]));
 	g_headerObj.viewKeyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 	g_headerObj.difSelectorUse = getDifSelectorUse(g_rootObj.difSelectorUse);
 
