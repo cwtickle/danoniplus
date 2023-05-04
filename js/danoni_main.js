@@ -5164,7 +5164,7 @@ const createOptionWindow = _sprite => {
 	// 譜面番号の再取得
 	g_stateObj.scoreId = getNextDifficulty(g_stateObj.scoreId, 0);
 	const keyLists = g_headerObj.viewLists.map(j => g_headerObj.keyLabels[j]);
-	g_headerObj.viewKeyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
+	g_headerObj.viewKeyLists = makeDedupliArray(keyLists.sort((a, b) => parseInt(a) - parseInt(b)));
 	g_headerObj.difSelectorUse = getDifSelectorUse(g_rootObj.difSelectorUse);
 
 	// 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
