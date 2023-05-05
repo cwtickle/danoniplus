@@ -3704,7 +3704,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						g_keyObj[pairName][tmpParamPair[0]] =
 							makeBaseArray(tmpParamPair[1].split(`,`).map(n =>
 								g_keyObj[`${_pairName}${getKeyPtnName(n)}`] !== undefined ?
-									structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`][tmpParamPair[0]]) : [parseInt(n, 10)]
+									structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`][tmpParamPair[0]]) : [n === `-` ? -1 : parseInt(n, 10)]
 							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
 					}
 				});
