@@ -3578,9 +3578,11 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
 					continue;
 				}
-				const keyPtn = getKeyPtnName(tmpArray[k]);
-				g_keyObj[`${keyheader}_${k + dfPtn}`] = g_keyObj[`${_name}${keyPtn}`] !== undefined ?
-					structuredClone(g_keyObj[`${_name}${keyPtn}`]) : tmpArray[k].split(`,`).map(n => _convFunc(n));
+				g_keyObj[`${keyheader}_${k + dfPtn}`] =
+					tmpArray[k].split(`,`).map(n =>
+						g_keyObj[`${_name}${getKeyPtnName(n)}`] !== undefined ?
+							structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) : [_convFunc(n)]
+					).flat();
 				if (baseCopyFlg) {
 					g_keyObj[`${keyheader}_${k + dfPtn}d`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}`]);
 				}
@@ -3628,8 +3630,10 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					} else {
 						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
 						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] =
-							makeBaseArray(list.split(`,`).map(n => isNaN(parseInt(n)) ? n : parseInt(n, 10)),
-								g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
+							makeBaseArray(list.split(`,`).map(n =>
+								g_keyObj[`${_name}${getKeyPtnName(n)}`] !== undefined ?
+									structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) : [isNaN(parseInt(n)) ? n : parseInt(n, 10)]
+							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
 						ptnCnt++;
 					}
 				});
