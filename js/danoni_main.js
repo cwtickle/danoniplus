@@ -3698,7 +3698,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-1,-1,-1,1,1/Split::1,1,1,1,-1,-1,-1,-1|）から取り込み
 						const tmpParamPair = pairs.split(`::`);
 						g_keyObj[pairName][tmpParamPair[0]] =
-							makeBaseArray(tmpParamPair[1].split(`,`).map(n => parseInt(n, 10)),
+							makeBaseArray(tmpParamPair[1].split(`,`).map(n => n === `-` ? -1 : parseInt(n, 10)),
 								g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
 					}
 				});
