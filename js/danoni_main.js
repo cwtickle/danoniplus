@@ -543,7 +543,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 	if (!_dfEvtFlg) {
 		_evt.preventDefault();
 	}
-	const setCode = transCode(_evt.code);
+	const setCode = _evt.code;
 	if (_evt.repeat && (g_unrepeatObj.page.includes(_displayName) || g_unrepeatObj.key.includes(setCode))) {
 		return blockCode(setCode);
 	}
@@ -576,8 +576,9 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
  * @param {object} _evt 
  */
 const commonKeyUp = _evt => {
-	g_inputKeyBuffer[g_kCdNameObj.metaKey] = false;
-	g_inputKeyBuffer[transCode(_evt.code)] = false;
+	g_inputKeyBuffer[g_kCdNameObj.metaLKey] = false;
+	g_inputKeyBuffer[g_kCdNameObj.metaRKey] = false;
+	g_inputKeyBuffer[_evt.code] = false;
 };
 
 /**
@@ -1335,7 +1336,7 @@ const resetKeyControl = _ => {
 	document.onkeyup = _ => { };
 	document.onkeydown = evt => {
 		evt.preventDefault();
-		return blockCode(transCode(evt.code));
+		return blockCode(evt.code);
 	};
 	g_inputKeyBuffer = {};
 };
@@ -6020,7 +6021,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 					setKeyConfigCursor();
 				}, {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: C_KYC_REPHEIGHT, siz: g_limitObj.jdgCntsSiz,
+					w: C_ARW_WIDTH, h: C_KYC_REPHEIGHT, siz: g_limitObj.keySetSiz,
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 
@@ -6546,12 +6547,13 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
-		const disabledKeys = [229, 240, 242, 243, 244, 91, 29, 28, 27, g_prevKey];
+		const disabledKeys = [229, 240, 242, 243, 244, 91, 29, 28, 27, 259, g_prevKey];
 		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
 			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
 			return;
 		} else if ((setKey === C_KEY_TITLEBACK && g_currentk === 0) ||
-			(keyIsDown(g_kCdNameObj.metaKey) && keyIsDown(g_kCdNameObj.shiftKey))) {
+			((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) &&
+				(keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)))) {
 			return;
 		}
 
@@ -8969,7 +8971,7 @@ const mainInit = _ => {
 	// キー操作イベント
 	document.onkeydown = evt => {
 		evt.preventDefault();
-		const setCode = transCode(evt.code);
+		const setCode = evt.code;
 
 		if (evt.repeat && !g_mainRepeatObj.key.includes(setCode)) {
 			return blockCode(setCode);
@@ -8998,7 +9000,7 @@ const mainInit = _ => {
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			if (keyIsDown(g_kCdNameObj.shiftKey)) {
+			if (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)) {
 				if (g_currentArrows !== g_fullArrows || g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 					g_gameOverFlg = true;
 					g_finishFlg = false;
@@ -9037,7 +9039,7 @@ const mainInit = _ => {
 	};
 
 	document.onkeyup = evt => {
-		const setCode = transCode(evt.code);
+		const setCode = evt.code;
 		g_inputKeyBuffer[setCode] = false;
 		mainKeyUpActFunc[g_stateObj.autoAll]();
 	};

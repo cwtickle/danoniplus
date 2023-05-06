@@ -112,6 +112,7 @@ const g_limitObj = {
     titleSiz: 32,
     mainSiz: 14,
     musicTitleSiz: 13,
+    keySetSiz: 16,
 };
 
 /** 設定項目の位置 */
@@ -638,8 +639,11 @@ const g_escapeStr = {
         [`space`, `frzSpace`], [`iyo`, `frzIyo`], [`gor`, `frzGor`], [`oni`, `foni`],
     ],
     keyCtrlName: [
-        [`Left`, ``], [`Digit`, `D`], [`Numpad`, `N`], [`Semicolon`, `;`],
+        [`ShiftLeft`, `Shift`], [`ControlLeft`, `Control`], [`AltLeft`, `Alt`],
+        [`Digit`, `D`], [`Numpad`, `N`], [`Semicolon`, `;`],
         [`Multiply`, `*`], [`Add`, `+`], [`Subtract`, `-`], [`Decimal`, `.`], [`Divide`, `Div`],
+        [`Quote`, `Ja-Colon`], [`BracketLeft`, `Ja-@`], [`BracketRight`, `Ja-[`],
+        [`Backslash`, `Ja-]`], [`Equal`, `Ja-^`],
     ],
 };
 
@@ -1056,7 +1060,7 @@ let g_prevKey = -1;
 // キーコード
 const g_kCd = [];
 const g_kCdN = [];
-for (let j = 0; j < 255; j++) {
+for (let j = 0; j < 260; j++) {
     g_kCd[j] = ``;
     g_kCdN[j] = ``;
 }
@@ -1068,9 +1072,9 @@ g_kCd[8] = (g_isMac ? `Delete` : `BackSpace`);
 g_kCd[9] = `Tab`;
 g_kCd[12] = `Clear`;
 g_kCd[13] = `Enter`;
-g_kCd[16] = `Shift`;
-g_kCd[17] = `Ctrl`;
-g_kCd[18] = `Alt`;
+g_kCd[16] = `L)Shift`;
+g_kCd[17] = `L)Ctrl`;
+g_kCd[18] = `L)Alt`;
 g_kCd[19] = `Pause`;
 g_kCd[27] = `Esc`;
 g_kCd[28] = `Conv`;
@@ -1174,6 +1178,9 @@ g_kCd[222] = `^ ~`;
 g_kCd[226] = `\\ _`;
 g_kCd[229] = `IME`;
 g_kCd[240] = `CapsLk`;
+g_kCd[256] = `R)Shift`;
+g_kCd[257] = `R)Ctrl`;
+g_kCd[258] = `R)Alt`;
 
 // 従来のキーコードとの変換用
 g_kCdN[0] = `- - -`; // 無効値
@@ -1288,10 +1295,16 @@ g_kCdN[222] = `Equal`;
 g_kCdN[226] = `IntlRo`;
 g_kCdN[229] = `Backquote`;
 g_kCdN[240] = `CapsLock`;
+g_kCdN[256] = `ShiftRight`;
+g_kCdN[257] = `ControlRight`;
+g_kCdN[258] = `AltRight`;
+g_kCdN[259] = `MetaRight`;
 
 const g_kCdNameObj = {
-    shiftKey: `ShiftLeft`,
-    metaKey: `MetaLeft`,
+    shiftLKey: `ShiftLeft`,
+    shiftRKey: `ShiftRight`,
+    metaLKey: `MetaLeft`,
+    metaRKey: `MetaRight`,
 };
 
 // 画面別ショートカット
@@ -1306,47 +1319,79 @@ const g_shortcutObj = {
     },
     option: {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
+        ShiftRight_KeyD: { id: `lnkDifficultyL` },
         KeyD: { id: `lnkDifficultyR` },
+
         ShiftLeft_ArrowRight: { id: `lnkSpeedR` },
+        ShiftRight_ArrowRight: { id: `lnkSpeedR` },
         AltLeft_ArrowRight: { id: `lnkSpeedHR` },
+        AltRight_ArrowRight: { id: `lnkSpeedHR` },
         ArrowRight: { id: `lnkSpeedRR` },
         ShiftLeft_ArrowLeft: { id: `lnkSpeedL` },
+        ShiftRight_ArrowLeft: { id: `lnkSpeedL` },
         AltLeft_ArrowLeft: { id: `lnkSpeedHL` },
+        AltRight_ArrowLeft: { id: `lnkSpeedHL` },
         ArrowLeft: { id: `lnkSpeedLL` },
+
         KeyL: { id: `lnkDifficulty` },
 
         ShiftLeft_KeyM: { id: `lnkMotionL` },
+        ShiftRight_KeyM: { id: `lnkMotionL` },
         KeyM: { id: `lnkMotionR` },
         ArrowUp: { id: `lnkScrollL` },
         ArrowDown: { id: `lnkScrollR` },
         KeyR: { id: `lnkReverseR`, dfId: `lnkReverseR`, exId: `btnReverse` },
 
         ShiftLeft_KeyS: { id: `lnkShuffleL` },
+        ShiftRight_KeyS: { id: `lnkShuffleL` },
         KeyS: { id: `lnkShuffleR` },
         ShiftLeft_KeyA: { id: `lnkAutoPlayL` },
+        ShiftRight_KeyA: { id: `lnkAutoPlayL` },
         KeyA: { id: `lnkAutoPlayR` },
         ShiftLeft_KeyG: { id: `lnkGaugeL` },
+        ShiftRight_KeyG: { id: `lnkGaugeL` },
         KeyG: { id: `lnkGaugeR` },
 
         AltLeft_ShiftLeft_Semicolon: { id: `lnkAdjustmentHR` },
+        AltLeft_ShiftRight_Semicolon: { id: `lnkAdjustmentHR` },
+        AltRight_ShiftLeft_Semicolon: { id: `lnkAdjustmentHR` },
+        AltRight_ShiftRight_Semicolon: { id: `lnkAdjustmentHR` },
         ShiftLeft_Semicolon: { id: `lnkAdjustmentR` },
+        ShiftRight_Semicolon: { id: `lnkAdjustmentR` },
         AltLeft_Semicolon: { id: `lnkAdjustmentRRR` },
+        AltRight_Semicolon: { id: `lnkAdjustmentRRR` },
         Semicolon: { id: `lnkAdjustmentRR` },
         AltLeft_ShiftLeft_Minus: { id: `lnkAdjustmentHL` },
+        AltLeft_ShiftRight_Minus: { id: `lnkAdjustmentHL` },
+        AltRight_ShiftLeft_Minus: { id: `lnkAdjustmentHL` },
+        AltRight_ShiftRight_Minus: { id: `lnkAdjustmentHL` },
         ShiftLeft_Minus: { id: `lnkAdjustmentL` },
+        ShiftRight_Minus: { id: `lnkAdjustmentL` },
         AltLeft_Minus: { id: `lnkAdjustmentLLL` },
+        AltRight_Minus: { id: `lnkAdjustmentLLL` },
         Minus: { id: `lnkAdjustmentLL` },
 
         AltLeft_ShiftLeft_NumpadAdd: { id: `lnkAdjustmentHR` },
+        AltLeft_ShiftRight_NumpadAdd: { id: `lnkAdjustmentHR` },
+        AltRight_ShiftLeft_NumpadAdd: { id: `lnkAdjustmentHR` },
+        AltRight_ShiftRight_NumpadAdd: { id: `lnkAdjustmentHR` },
         ShiftLeft_NumpadAdd: { id: `lnkAdjustmentR` },
+        ShiftRight_NumpadAdd: { id: `lnkAdjustmentR` },
         AltLeft_NumpadAdd: { id: `lnkAdjustmentRRR` },
+        AltRight_NumpadAdd: { id: `lnkAdjustmentRRR` },
         NumpadAdd: { id: `lnkAdjustmentRR` },
         AltLeft_ShiftLeft_NumpadSubtract: { id: `lnkAdjustmentHL` },
+        AltLeft_ShiftRight_NumpadSubtract: { id: `lnkAdjustmentHL` },
+        AltRight_ShiftLeft_NumpadSubtract: { id: `lnkAdjustmentHL` },
+        AltRight_ShiftRight_NumpadSubtract: { id: `lnkAdjustmentHL` },
         ShiftLeft_NumpadSubtract: { id: `lnkAdjustmentL` },
+        ShiftRight_NumpadSubtract: { id: `lnkAdjustmentL` },
         AltLeft_NumpadSubtract: { id: `lnkAdjustmentLLL` },
+        ShiftRight_NumpadSubtract: { id: `lnkAdjustmentL` },
         NumpadSubtract: { id: `lnkAdjustmentLL` },
 
         ShiftLeft_KeyV: { id: `lnkVolumeL` },
+        ShiftRight_KeyV: { id: `lnkVolumeL` },
         KeyV: { id: `lnkVolumeR` },
 
         KeyI: { id: `btnGraph` },
@@ -1365,10 +1410,12 @@ const g_shortcutObj = {
         Enter: { id: `btnPlay` },
         NumpadEnter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
     },
     difSelector: {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
+        ShiftRight_KeyD: { id: `lnkDifficultyL` },
         KeyD: { id: `lnkDifficultyR` },
         KeyR: { id: `difRandom` },
         KeyL: { id: `lnkDifficulty` },
@@ -1390,17 +1437,22 @@ const g_shortcutObj = {
         Enter: { id: `lnkDifficulty` },
         NumpadEnter: { id: `lnkDifficulty` },
         ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
     },
     settingsDisplay: {
         ShiftLeft_KeyA: { id: `lnkAppearanceL` },
+        ShiftRight_KeyA: { id: `lnkAppearanceL` },
         KeyA: { id: `lnkAppearanceR` },
         ShiftLeft_KeyO: { id: `lnkOpacityL` },
+        ShiftRight_KeyO: { id: `lnkOpacityL` },
         KeyO: { id: `lnkOpacityR` },
 
         ShiftLeft_KeyB: { id: `lnkHitPositionR` },
+        ShiftRight_KeyB: { id: `lnkHitPositionR` },
         KeyB: { id: `lnkHitPositionRR` },
         ShiftLeft_KeyT: { id: `lnkHitPositionL` },
+        ShiftRight_KeyT: { id: `lnkHitPositionL` },
         KeyT: { id: `lnkHitPositionLL` },
 
         Digit1: { id: `lnkstepZone` },
@@ -1437,6 +1489,7 @@ const g_shortcutObj = {
         Enter: { id: `btnPlay` },
         NumpadEnter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
         Tab: { id: `btnSettings` },
     },
     keyConfig: {
@@ -1451,7 +1504,9 @@ const g_shortcutObj = {
     result: {
         Escape: { id: `btnBack` },
         ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
         ControlLeft_KeyC: { id: `` },
+        ControlRight_KeyC: { id: `` },
         KeyC: { id: `btnCopy`, reset: true },
         KeyT: { id: `btnTweet`, reset: true },
         KeyG: { id: `btnGitter`, reset: true },
