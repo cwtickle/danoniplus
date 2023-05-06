@@ -8983,7 +8983,7 @@ const mainInit = _ => {
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
 
-			if (g_isMac && keyIsDown(g_kCdNameObj.shiftKey)) {
+			if (g_isMac && (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey))) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
