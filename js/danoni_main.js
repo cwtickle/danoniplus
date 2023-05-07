@@ -3660,14 +3660,19 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	 * @param {string} _key キー数
 	 * @param {string} _name 名前
 	 * @param {string} _type float, number, string, boolean
+	 * @param {string} _defaultVal
 	 */
-	const newKeySingleParam = (_key, _name, _type) => {
+	const newKeySingleParam = (_key, _name, _type, _defaultVal) => {
 		const keyheader = _name + _key;
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 		if (_dosObj[keyheader] !== undefined) {
 			const tmps = _dosObj[keyheader].split(`$`);
 			for (let k = 0; k < tmps.length; k++) {
-				g_keyObj[`${keyheader}_${k + dfPtn}`] = setVal(g_keyObj[`${_name}${tmps[k]}`], setVal(tmps[k], ``, _type));
+				g_keyObj[`${keyheader}_${k + dfPtn}`] = setVal(g_keyObj[`${_name}${getKeyPtnName(tmps[k])}`],
+					tmps[k].indexOf(`_`) !== -1 ? _defaultVal : setVal(tmps[k], ``, _type));
+			}
+			for (let k = tmps.length; k < g_keyObj.minPatterns; k++) {
+				g_keyObj[`${keyheader}_${k + dfPtn}`] = g_keyObj[`${keyheader}_0`];
 			}
 		}
 	};
@@ -3783,19 +3788,19 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		}
 
 		// ステップゾーン間隔 (blankX_Y)
-		newKeySingleParam(newKey, `blank`, C_TYP_FLOAT);
+		newKeySingleParam(newKey, `blank`, C_TYP_FLOAT, g_keyObj.blank_def);
 
 		// 矢印群の倍率 (scaleX_Y)
-		newKeySingleParam(newKey, `scale`, C_TYP_FLOAT);
+		newKeySingleParam(newKey, `scale`, C_TYP_FLOAT, g_keyObj.scale_def);
 
 		// プレイ中ショートカット：リトライ (keyRetryX_Y)
-		newKeySingleParam(newKey, `keyRetry`, C_TYP_STRING);
+		newKeySingleParam(newKey, `keyRetry`, C_TYP_STRING, C_KEY_RETRY);
 
 		// プレイ中ショートカット：タイトルバック (keyTitleBackX_Y)
-		newKeySingleParam(newKey, `keyTitleBack`, C_TYP_STRING);
+		newKeySingleParam(newKey, `keyTitleBack`, C_TYP_STRING, C_KEY_TITLEBACK);
 
 		// 別キーフラグ (transKeyX_Y)
-		newKeySingleParam(newKey, `transKey`, C_TYP_STRING);
+		newKeySingleParam(newKey, `transKey`, C_TYP_STRING, ``);
 
 		// シャッフルグループ (shuffleX_Y)
 		newKeyTripleParam(newKey, `shuffle`);
