@@ -4,13 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/05/04
+ * Revised : 2023/05/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 31.7.1`;
-const g_revisedDate = `2023/05/04`;
-const g_alphaVersion = ``;
+const g_version = `Ver 32.0.0`;
+const g_revisedDate = `2023/05/07`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3990,7 +3989,7 @@ const titleInit = _ => {
 		customVersion += ` / ${g_localVersion2}`;
 	}
 	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
-	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${g_alphaVersion}${customVersion}${releaseDate}`;
+	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${customVersion}${releaseDate}`;
 
 	let reloadFlg = false;
 	const getLinkSiz = _name => getFontSize(_name, g_sWidth / 2 - 20, getBasicFont(), g_limitObj.lnkSiz, 12);
