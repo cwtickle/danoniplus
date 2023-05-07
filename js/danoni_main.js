@@ -4,13 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/05/04
+ * Revised : 2023/05/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 31.7.1`;
-const g_revisedDate = `2023/05/04`;
-const g_alphaVersion = ``;
+const g_version = `Ver 32.0.0`;
+const g_revisedDate = `2023/05/07`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -543,7 +542,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 	if (!_dfEvtFlg) {
 		_evt.preventDefault();
 	}
-	const setCode = transCode(_evt.code);
+	const setCode = _evt.code;
 	if (_evt.repeat && (g_unrepeatObj.page.includes(_displayName) || g_unrepeatObj.key.includes(setCode))) {
 		return blockCode(setCode);
 	}
@@ -576,8 +575,9 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
  * @param {object} _evt 
  */
 const commonKeyUp = _evt => {
-	g_inputKeyBuffer[g_kCdNameObj.metaKey] = false;
-	g_inputKeyBuffer[transCode(_evt.code)] = false;
+	g_inputKeyBuffer[g_kCdNameObj.metaLKey] = false;
+	g_inputKeyBuffer[g_kCdNameObj.metaRKey] = false;
+	g_inputKeyBuffer[_evt.code] = false;
 };
 
 /**
@@ -1335,7 +1335,7 @@ const resetKeyControl = _ => {
 	document.onkeyup = _ => { };
 	document.onkeydown = evt => {
 		evt.preventDefault();
-		return blockCode(transCode(evt.code));
+		return blockCode(evt.code);
 	};
 	g_inputKeyBuffer = {};
 };
@@ -3578,9 +3578,12 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
 					continue;
 				}
-				const keyPtn = getKeyPtnName(tmpArray[k]);
-				g_keyObj[`${keyheader}_${k + dfPtn}`] = g_keyObj[`${_name}${keyPtn}`] !== undefined ?
-					structuredClone(g_keyObj[`${_name}${keyPtn}`]) : tmpArray[k].split(`,`).map(n => _convFunc(n));
+				// |keyCtrl9j=Tab,7_0,Enter| -> |keyCtrl9j=Tab,S,D,F,Space,J,K,L,Enter| のように補完
+				g_keyObj[`${keyheader}_${k + dfPtn}`] =
+					tmpArray[k].split(`,`).map(n =>
+						g_keyObj[`${_name}${getKeyPtnName(n)}`] !== undefined ?
+							structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) : [_convFunc(n)]
+					).flat();
 				if (baseCopyFlg) {
 					g_keyObj[`${keyheader}_${k + dfPtn}d`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}`]);
 				}
@@ -3618,7 +3621,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length)].fill(0);
 
 					} else if (g_keyObj[`${_name}${keyPtn}_0`] !== undefined) {
-						// 他のキーパターン (例: |shuffle8i=8_0| ) を指定した場合、該当があれば既存パターンからコピー
+						// 他のキーパターン (例: |shuffle8i=8_0| ) を直接指定した場合、該当があれば既存パターンからコピー
+						// 既存パターンが複数ある場合、全てコピーする
 						let m = 0;
 						while (g_keyObj[`${_name}${keyPtn}_${m}`] !== undefined) {
 							g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] = structuredClone(g_keyObj[`${_name}${keyPtn}_${m}`]);
@@ -3627,9 +3631,13 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						}
 					} else {
 						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
+						// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |shuffle9j=2,7_0_0,2|)
 						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] =
-							makeBaseArray(list.split(`,`).map(n => isNaN(parseInt(n)) ? n : parseInt(n, 10)),
-								g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
+							makeBaseArray(list.split(`,`).map(n =>
+								g_keyObj[`${_name}${getKeyPtnName(n)}`] !== undefined ?
+									structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) :
+									[isNaN(parseInt(n)) ? n : parseInt(n, 10)]
+							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
 						ptnCnt++;
 					}
 				});
@@ -3651,14 +3659,19 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	 * @param {string} _key キー数
 	 * @param {string} _name 名前
 	 * @param {string} _type float, number, string, boolean
+	 * @param {string} _defaultVal
 	 */
-	const newKeySingleParam = (_key, _name, _type) => {
+	const newKeySingleParam = (_key, _name, _type, _defaultVal) => {
 		const keyheader = _name + _key;
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 		if (_dosObj[keyheader] !== undefined) {
 			const tmps = _dosObj[keyheader].split(`$`);
 			for (let k = 0; k < tmps.length; k++) {
-				g_keyObj[`${keyheader}_${k + dfPtn}`] = setVal(g_keyObj[`${_name}${tmps[k]}`], setVal(tmps[k], ``, _type));
+				g_keyObj[`${keyheader}_${k + dfPtn}`] = setVal(g_keyObj[`${_name}${getKeyPtnName(tmps[k])}`],
+					tmps[k].indexOf(`_`) !== -1 ? _defaultVal : setVal(tmps[k], ``, _type));
+			}
+			for (let k = tmps.length; k < g_keyObj.minPatterns; k++) {
+				g_keyObj[`${keyheader}_${k + dfPtn}`] = g_keyObj[`${keyheader}_0`];
 			}
 		}
 	};
@@ -3695,11 +3708,15 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						// 他のキーパターン指定時、該当があればプロパティを全コピー
 						Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${keyPtn}`]);
 					} else {
-						// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-1,-1,-1,1,1/Split::1,1,1,1,-1,-1,-1,-1|）から取り込み
+						// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-,-,-,1,1/Split::1,1,1,1,-,-,-,-|）から取り込み
+						// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |scroll9j=Cross::1,7_0,1|)
 						const tmpParamPair = pairs.split(`::`);
 						g_keyObj[pairName][tmpParamPair[0]] =
-							makeBaseArray(tmpParamPair[1].split(`,`).map(n => parseInt(n, 10)),
-								g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
+							makeBaseArray(tmpParamPair[1].split(`,`).map(n =>
+								g_keyObj[`${_pairName}${getKeyPtnName(n)}`] !== undefined ?
+									structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`][tmpParamPair[0]]) :
+									[n === `-` ? -1 : parseInt(n, 10)]
+							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
 					}
 				});
 			}
@@ -3770,19 +3787,19 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		}
 
 		// ステップゾーン間隔 (blankX_Y)
-		newKeySingleParam(newKey, `blank`, C_TYP_FLOAT);
+		newKeySingleParam(newKey, `blank`, C_TYP_FLOAT, g_keyObj.blank_def);
 
 		// 矢印群の倍率 (scaleX_Y)
-		newKeySingleParam(newKey, `scale`, C_TYP_FLOAT);
+		newKeySingleParam(newKey, `scale`, C_TYP_FLOAT, g_keyObj.scale_def);
 
 		// プレイ中ショートカット：リトライ (keyRetryX_Y)
-		newKeySingleParam(newKey, `keyRetry`, C_TYP_STRING);
+		newKeySingleParam(newKey, `keyRetry`, C_TYP_STRING, C_KEY_RETRY);
 
 		// プレイ中ショートカット：タイトルバック (keyTitleBackX_Y)
-		newKeySingleParam(newKey, `keyTitleBack`, C_TYP_STRING);
+		newKeySingleParam(newKey, `keyTitleBack`, C_TYP_STRING, C_KEY_TITLEBACK);
 
 		// 別キーフラグ (transKeyX_Y)
-		newKeySingleParam(newKey, `transKey`, C_TYP_STRING);
+		newKeySingleParam(newKey, `transKey`, C_TYP_STRING, ``);
 
 		// シャッフルグループ (shuffleX_Y)
 		newKeyTripleParam(newKey, `shuffle`);
@@ -3972,7 +3989,7 @@ const titleInit = _ => {
 		customVersion += ` / ${g_localVersion2}`;
 	}
 	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
-	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${g_alphaVersion}${customVersion}${releaseDate}`;
+	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${customVersion}${releaseDate}`;
 
 	let reloadFlg = false;
 	const getLinkSiz = _name => getFontSize(_name, g_sWidth / 2 - 20, getBasicFont(), g_limitObj.lnkSiz, 12);
@@ -6008,7 +6025,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 					setKeyConfigCursor();
 				}, {
 					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: C_KYC_REPHEIGHT, siz: g_limitObj.jdgCntsSiz,
+					w: C_ARW_WIDTH, h: C_KYC_REPHEIGHT, siz: g_limitObj.keySetSiz,
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 
@@ -6534,12 +6551,13 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
-		const disabledKeys = [229, 240, 242, 243, 244, 91, 29, 28, 27, g_prevKey];
+		const disabledKeys = [229, 240, 242, 243, 244, 91, 29, 28, 27, 259, g_prevKey];
 		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
 			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
 			return;
 		} else if ((setKey === C_KEY_TITLEBACK && g_currentk === 0) ||
-			(keyIsDown(g_kCdNameObj.metaKey) && keyIsDown(g_kCdNameObj.shiftKey))) {
+			((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) &&
+				(keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)))) {
 			return;
 		}
 
@@ -8957,7 +8975,7 @@ const mainInit = _ => {
 	// キー操作イベント
 	document.onkeydown = evt => {
 		evt.preventDefault();
-		const setCode = transCode(evt.code);
+		const setCode = evt.code;
 
 		if (evt.repeat && !g_mainRepeatObj.key.includes(setCode)) {
 			return blockCode(setCode);
@@ -8969,7 +8987,7 @@ const mainInit = _ => {
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
 
-			if (g_isMac && keyIsDown(g_kCdNameObj.shiftKey)) {
+			if (g_isMac && (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey))) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
@@ -8986,7 +9004,7 @@ const mainInit = _ => {
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			if (keyIsDown(g_kCdNameObj.shiftKey)) {
+			if (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)) {
 				if (g_currentArrows !== g_fullArrows || g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 					g_gameOverFlg = true;
 					g_finishFlg = false;
@@ -9025,7 +9043,7 @@ const mainInit = _ => {
 	};
 
 	document.onkeyup = evt => {
-		const setCode = transCode(evt.code);
+		const setCode = evt.code;
 		g_inputKeyBuffer[setCode] = false;
 		mainKeyUpActFunc[g_stateObj.autoAll]();
 	};
