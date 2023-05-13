@@ -8,8 +8,8 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 32.0.0`;
-const g_revisedDate = `2023/05/07`;
+const g_version = `Ver 32.1.0`;
+const g_revisedDate = `2023/05/13`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -120,6 +120,10 @@ const g_presetObj = {
 let g_headerObj = {};
 let g_scoreObj = {};
 let g_attrObj = {};
+
+const g_btnFunc = {
+	base: {}, reset: {}, cxt: {},
+};
 let g_btnAddFunc = {};
 let g_btnDeleteFlg = {};
 let g_cxtAddFunc = {};
@@ -1268,6 +1272,8 @@ const createCss2Button = (_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 			resetFunc(evt);
 		}
 	});
+	g_btnFunc.base[_id] = _func;
+	g_btnFunc.reset[_id] = resetFunc;
 
 	// 右クリック時の処理
 	div.oncontextmenu = evt => {
@@ -1278,6 +1284,8 @@ const createCss2Button = (_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 			if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
 				g_cxtAddFunc[_id](evt, cxtFunc);
 			}
+			g_btnFunc.cxt[_id] = cxtFunc;
+
 		} else if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
 			g_cxtAddFunc[_id](evt);
 		}
@@ -2848,10 +2856,12 @@ const headerConvert = _dosObj => {
 	// 無音のフレーム数
 	obj.blankFrame = 200;
 	obj.blankFrameDef = 200;
+	obj.blankFrameDefs = [];
 	if (isNaN(parseFloat(_dosObj.blankFrame))) {
 	} else {
-		obj.blankFrame = parseInt(_dosObj.blankFrame);
-		obj.blankFrameDef = parseInt(_dosObj.blankFrame);
+		obj.blankFrameDefs = _dosObj.blankFrame.split(`$`).map(val => parseInt(val));
+		obj.blankFrame = obj.blankFrameDefs[0];
+		obj.blankFrameDef = obj.blankFrameDefs[0];
 	}
 
 	// 開始フレーム数（0以外の場合はフェードインスタート）、終了フレーム数
@@ -6862,6 +6872,7 @@ const loadingScoreInit = async () => {
 	await loadChartFile();
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
+	g_headerObj.blankFrameDef = setVal(g_headerObj.blankFrameDefs[g_stateObj.scoreId], g_headerObj.blankFrameDefs[0]);
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
 	// ユーザカスタムイベント
