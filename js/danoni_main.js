@@ -120,6 +120,10 @@ const g_presetObj = {
 let g_headerObj = {};
 let g_scoreObj = {};
 let g_attrObj = {};
+
+const g_btnFunc = {
+	base: {}, reset: {}, cxt: {},
+};
 let g_btnAddFunc = {};
 let g_btnDeleteFlg = {};
 let g_cxtAddFunc = {};
@@ -1268,6 +1272,8 @@ const createCss2Button = (_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 			resetFunc(evt);
 		}
 	});
+	g_btnFunc.base[_id] = _func;
+	g_btnFunc.reset[_id] = resetFunc;
 
 	// 右クリック時の処理
 	div.oncontextmenu = evt => {
@@ -1278,6 +1284,8 @@ const createCss2Button = (_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 			if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
 				g_cxtAddFunc[_id](evt, cxtFunc);
 			}
+			g_btnFunc.cxt[_id] = cxtFunc;
+
 		} else if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
 			g_cxtAddFunc[_id](evt);
 		}
