@@ -2848,10 +2848,12 @@ const headerConvert = _dosObj => {
 	// 無音のフレーム数
 	obj.blankFrame = 200;
 	obj.blankFrameDef = 200;
+	obj.blankFrameDefs = [];
 	if (isNaN(parseFloat(_dosObj.blankFrame))) {
 	} else {
-		obj.blankFrame = parseInt(_dosObj.blankFrame);
-		obj.blankFrameDef = parseInt(_dosObj.blankFrame);
+		obj.blankFrameDefs = _dosObj.blankFrame.split(`$`).map(val => parseInt(val));
+		obj.blankFrame = obj.blankFrameDefs[0];
+		obj.blankFrameDef = obj.blankFrameDefs[0];
 	}
 
 	// 開始フレーム数（0以外の場合はフェードインスタート）、終了フレーム数
@@ -6862,6 +6864,7 @@ const loadingScoreInit = async () => {
 	await loadChartFile();
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
+	g_headerObj.blankFrameDef = setVal(g_headerObj.blankFrameDefs[g_stateObj.scoreId], g_headerObj.blankFrameDefs[0]);
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
 	// ユーザカスタムイベント
