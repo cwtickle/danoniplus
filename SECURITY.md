@@ -18,7 +18,7 @@ v24, v30の対応終了時期はv33リリース開始時を予定しています
 
 | Version | Supported          | Latest Version | Logs | First Release | End of Support |
 | ------- | ------------------ |----------------|------|---------------|----------------|
-| v32     | :heavy_check_mark: |[v32.0.0](https://github.com/cwtickle/danoniplus/releases/tag/v32.0.0)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest)|2023-05-07|(At Release v35)|
+| v32     | :heavy_check_mark: |[v32.1.0](https://github.com/cwtickle/danoniplus/releases/tag/v32.1.0)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest)|2023-05-07|(At Release v35)|
 | v31     | :heavy_check_mark: |[v31.7.1](https://github.com/cwtickle/danoniplus/releases/tag/v31.7.1)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v31)|2023-03-20|(At Release v34)|
 | v30     | :warning:          |[v30.6.2](https://github.com/cwtickle/danoniplus/releases/tag/v30.6.2)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v30)|2023-02-10|(At Release v33)|
 | v29 :anchor:    | :heavy_check_mark: |[v29.4.5](https://github.com/cwtickle/danoniplus/releases/tag/v29.4.5)          |[:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v29)|2022-11-05|(At Release v38)|
