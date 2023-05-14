@@ -3105,7 +3105,8 @@ const headerConvert = _dosObj => {
 	obj.resultMotionSet = setBoolVal(_dosObj.resultMotionSet, true);
 
 	// 譜面明細の使用可否
-	obj.scoreDetailUse = setBoolVal(_dosObj.scoreDetailUse, true);
+	g_settings.scoreDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`) || g_settings.scoreDetailDefs;
+	g_stateObj.scoreDetail = g_settings.scoreDetails[0] || ``;
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
 	obj.jdgPosReset = setBoolVal(_dosObj.jdgPosReset, true);
@@ -4897,7 +4898,7 @@ const setDifficulty = (_initFlg) => {
 
 	// 速度設定 (Speed)
 	setSetting(0, `speed`, ` ${g_lblNameObj.multi}`);
-	if (g_headerObj.scoreDetailUse) {
+	if (g_settings.scoreDetails.length > 0) {
 		drawSpeedGraph(g_stateObj.scoreId);
 		drawDensityGraph(g_stateObj.scoreId);
 		makeDifInfo(g_stateObj.scoreId);
@@ -5014,7 +5015,7 @@ const createOptionWindow = _sprite => {
 		return detailObj;
 	};
 
-	if (g_headerObj.scoreDetailUse) {
+	if (g_settings.scoreDetails.length > 0) {
 		spriteList.speed.appendChild(
 			createCss2Button(`btnGraph`, `i`, _ => true, {
 				x: -25, y: -60, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz, title: g_msgObj.graph,

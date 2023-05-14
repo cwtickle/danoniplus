@@ -910,7 +910,8 @@ const g_settings = {
 
     opacitys: [10, 25, 50, 75, 100],
 
-    scoreDetails: [`Speed`, `Density`, `ToolDif`],
+    scoreDetailDefs: [`Speed`, `Density`, `ToolDif`],
+    scoreDetails: [],
     scoreDetailCursors: [],
 };
 
