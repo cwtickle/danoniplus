@@ -7065,17 +7065,25 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
  * @param {array} _shuffleGroup
  */
 const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
+
 	// シャッフルグループごとにミラー
 	const style = structuredClone(_shuffleGroup).map(_group => _group.reverse());
-	if (_asymFlg) {
-		// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
-		style.forEach((group, i) => {
-			if (group.length % 4 === 0) {
-				for (let k = 0; k < group.length / 4; k++) {
-					[style[i][4 * k + 1], style[i][4 * k + 2]] = [style[i][4 * k + 2], style[i][4 * k + 1]];
-				}
+
+	// Asym-Mirror作成用の入れ替え関数
+	// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
+	const switchAsymNumbers = (_group, _i, _divideNum) => {
+		if (_group.length % _divideNum === 0) {
+			for (let k = 0; k < _group.length / _divideNum; k++) {
+				const swap1 = Math.floor(_divideNum * (k + 1 / 2) - 1);
+				const swap2 = Math.ceil(_divideNum * (k + 1 / 2));
+				[style[_i][swap1], style[_i][swap2]] = [style[_i][swap2], style[_i][swap1]];
 			}
-		});
+		}
+	};
+
+	if (_asymFlg) {
+		const swapPattern = [4, 5, 6, 7];
+		style.forEach((group, i) => swapPattern.forEach(val => switchAsymNumbers(group, i, val)));
 	}
 	applyShuffle(_keyNum, _shuffleGroup, style);
 };
