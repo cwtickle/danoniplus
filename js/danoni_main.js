@@ -7068,11 +7068,13 @@ const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
 
 	// シャッフルグループごとにミラー
 	const style = structuredClone(_shuffleGroup).map(_group => _group.reverse());
+	let swapFlg = false;
 
 	// Asym-Mirror作成用の入れ替え関数
 	// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
 	const switchAsymNumbers = (_group, _i, _divideNum) => {
 		if (_group.length % _divideNum === 0) {
+			swapFlg = true;
 			for (let k = 0; k < _group.length / _divideNum; k++) {
 				const swap1 = Math.floor(_divideNum * (k + 1 / 2) - 1);
 				const swap2 = Math.ceil(_divideNum * (k + 1 / 2));
@@ -7084,6 +7086,9 @@ const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
 	if (_asymFlg) {
 		const swapPattern = [4, 5, 6, 7];
 		style.forEach((group, i) => swapPattern.forEach(val => switchAsymNumbers(group, i, val)));
+		if (!swapFlg) {
+			g_stateObj.shuffle = `Mirror`;
+		}
 	}
 	applyShuffle(_keyNum, _shuffleGroup, style);
 };
@@ -10616,7 +10621,7 @@ const resultInit = _ => {
 
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
-	const mirrorName = (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 ? `-Mirror` : ``);
+	const mirrorName = (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 ? `-${g_stateObj.shuffle}` : ``);
 	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
 	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${mirrorName}`;
 	if (g_headerObj.makerView) {
