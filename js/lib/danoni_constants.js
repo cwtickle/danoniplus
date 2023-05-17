@@ -885,6 +885,7 @@ const g_settings = {
 
     shuffles: [C_FLG_OFF, `Mirror`, `Asym-Mirror`, `Turning`, `Random`, `Random+`, `S-Random`, `S-Random+`],
     shuffleNum: 0,
+    asymSwapPattern: [4, 5, 6, 7],
 
     gauges: [],
     gaugeNum: 0,

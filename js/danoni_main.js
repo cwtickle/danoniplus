@@ -7084,8 +7084,7 @@ const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
 	};
 
 	if (_asymFlg) {
-		const swapPattern = [4, 5, 6, 7];
-		style.forEach((group, i) => swapPattern.forEach(val => switchAsymNumbers(group, i, val)));
+		style.forEach((group, i) => g_settings.asymSwapPattern.forEach(val => switchAsymNumbers(group, i, val)));
 		if (!swapFlg) {
 			g_stateObj.shuffle = `Mirror`;
 		}
