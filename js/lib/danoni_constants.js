@@ -883,9 +883,9 @@ const g_settings = {
     scrollNum: 0,
     scrollFlat: [`Flat`, `R-Flat`],
 
-    shuffles: [C_FLG_OFF, `Mirror`, `Asym-Mirror`, `Turning`, `Random`, `Random+`, `S-Random`, `S-Random+`],
+    shuffles: [C_FLG_OFF, `Mirror`, `X-Mirror`, `Turning`, `Random`, `Random+`, `S-Random`, `S-Random+`],
     shuffleNum: 0,
-    asymSwapPattern: [4, 5, 6, 7],
+    swapPattern: [4, 5, 6, 7],
 
     gauges: [],
     gaugeNum: 0,
@@ -935,7 +935,7 @@ const g_jumpSettingWindow = {
 const g_shuffleFunc = {
     'OFF': _ => true,
     'Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup),
-    'Asym-Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup, true),
+    'X-Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup, true),
     'Turning': (keyNum, shuffleGroup) => applyTurning(keyNum, shuffleGroup),
     'Random': (keyNum, shuffleGroup) => applyRandom(keyNum, shuffleGroup),
     'Random+': keyNum => applyRandom(keyNum, [[...Array(keyNum).keys()]]),
@@ -2680,7 +2680,7 @@ const g_lblNameObj = {
     'u_Reverse': `Reverse`,
 
     'u_Mirror': `Mirror`,
-    'u_Asym-Mirror': `Asym-Mirror`,
+    'u_X-Mirror': `X-Mirror`,
     'u_Turning': `Turning`,
     'u_Random': `Random`,
     'u_Random+': `Random+`,
@@ -2897,7 +2897,7 @@ const g_lang_msgObj = {
         colorType: `矢印・フリーズアローの配色セットをあらかじめ定義されたリストから選択できます。\nType1～4選択時は色変化が自動でOFFになり、カラーピッカーから好きな色に変更できます。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
         imgType: `矢印・フリーズアローなどのオブジェクトの見た目を変更します。`,
         colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
-        shuffleGroup: `Mirror/Asym-Mirror/Turning/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
+        shuffleGroup: `Mirror/X-Mirror/Turning/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
         stepRtnGroup: `矢印などノーツの種類、回転に関するパターンを切り替えます。\nあらかじめ設定されている場合のみ変更可能です。`,
 
         pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）、通常時のフリーズアロー色（枠、帯）を\nカラーピッカーから選んで変更できます。`,
@@ -2953,7 +2953,7 @@ const g_lang_msgObj = {
         colorType: `Change the color scheme set for arrows and freeze-arrows from the predefined set.\nWhen Type1 to 4 is selected, color change is automatically turned off and can be changed to any color from the color picker.\n[Type0] Switch the sequences color gradations, [Type1～4] default color scheme`,
         imgType: `Change the appearance of sequences.`,
         colorGroup: `Change the sequences color group assignment pattern.`,
-        shuffleGroup: `Change the shuffle group when Mirror, Asym-Mirror, Turning, Random or S-Random are selected.\nShuffle with the same numbers listed above.`,
+        shuffleGroup: `Change the shuffle group when Mirror, X-Mirror, Turning, Random or S-Random are selected.\nShuffle with the same numbers listed above.`,
         stepRtnGroup: `Switches the type of notes, such as arrows, and the pattern regarding rotation.\nThis can only be changed if it has been set in advance.`,
 
         pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,

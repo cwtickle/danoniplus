@@ -7064,15 +7064,15 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
  * @param {number} _keyNum
  * @param {array} _shuffleGroup
  */
-const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
+const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
 
 	// シャッフルグループごとにミラー
 	const style = structuredClone(_shuffleGroup).map(_group => _group.reverse());
-	let swapFlg = false;
+	let swapUseFlg = false;
 
-	// Asym-Mirror作成用の入れ替え関数
+	// X-Mirror作成用の入れ替え関数
 	// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
-	const switchAsymNumbers = (_group, _i, _divideNum) => {
+	const swapGroupNums = (_group, _i, _divideNum) => {
 		if (_group.length % _divideNum === 0) {
 			swapFlg = true;
 			for (let k = 0; k < _group.length / _divideNum; k++) {
@@ -7083,9 +7083,9 @@ const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
 		}
 	};
 
-	if (_asymFlg) {
-		style.forEach((group, i) => g_settings.asymSwapPattern.forEach(val => switchAsymNumbers(group, i, val)));
-		if (!swapFlg) {
+	if (_swapFlg) {
+		style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(group, i, val)));
+		if (!swapUseFlg) {
 			g_stateObj.shuffle = `Mirror`;
 		}
 	}
