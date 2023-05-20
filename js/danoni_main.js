@@ -4531,6 +4531,7 @@ const drawSpeedGraph = _scoreId => {
 	const context = canvas.getContext(`2d`);
 	drawBaseLine(context);
 
+	const avgX = [0, 0];
 	Object.keys(speedObj).forEach((speedType, j) => {
 		context.beginPath();
 		let preY;
@@ -4542,7 +4543,9 @@ const drawSpeedGraph = _scoreId => {
 			context.lineTo(x, preY);
 			context.lineTo(x, y);
 			preY = y;
+			avgX[j] += (speedObj[speedType].frame[i] - (speedObj[speedType].frame[i - 1] ?? startFrame)) * (speedObj[speedType].speed[i - 1] ?? 1);
 		}
+		avgX[j] /= playingFrame;
 
 		context.lineWidth = 1;
 		context.strokeStyle = speedObj[speedType].strokeColor;
@@ -4558,6 +4561,7 @@ const drawSpeedGraph = _scoreId => {
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 	});
+	updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
 };
 
 /**
