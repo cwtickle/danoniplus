@@ -7074,7 +7074,7 @@ const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
 	// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
 	const swapGroupNums = (_group, _i, _divideNum) => {
 		if (_group.length % _divideNum === 0) {
-			swapFlg = true;
+			swapUseFlg = true;
 			for (let k = 0; k < _group.length / _divideNum; k++) {
 				const swap1 = Math.floor(_divideNum * (k + 1 / 2) - 1);
 				const swap2 = Math.ceil(_divideNum * (k + 1 / 2));
