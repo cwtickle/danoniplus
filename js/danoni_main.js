@@ -4532,7 +4532,7 @@ const drawSpeedGraph = _scoreId => {
 	drawBaseLine(context);
 
 	const avgX = [0, 0];
-	const avgSubX = [0, 0];
+	const avgSubX = [1, 1];
 	Object.keys(speedObj).forEach((speedType, j) => {
 		context.beginPath();
 		let preY;
@@ -4551,7 +4551,7 @@ const drawSpeedGraph = _scoreId => {
 			if ((speedObj[speedType].speed[i - 1] ?? 1) === 1) {
 				avgSubFrame -= deltaFrame;
 			} else {
-				avgSubX[j] += deltaFrame * (speedObj[speedType].speed[i - 1] - 1);
+				avgSubX[j] += deltaFrame * (speedObj[speedType].speed[i - 1]);
 			}
 		}
 		avgX[j] /= playingFrame;
@@ -4570,7 +4570,7 @@ const drawSpeedGraph = _scoreId => {
 		context.fillText(speedType, lineX + 35, 218);
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
-		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, `${avgSubX[j] > 0 ? '+' : ''}${(avgSubX[j]).toFixed(2)}`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
+		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
 	});
 	updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
 };
