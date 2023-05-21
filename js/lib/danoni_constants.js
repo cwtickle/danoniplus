@@ -2637,6 +2637,10 @@ const g_lblNameObj = {
 
     s_speed: `Speed`,
     s_boost: `Boost`,
+    s_avg: `Avg.`,
+    s_avgDspeed: `AvgS)`,
+    s_avgDboost: `AvgB)`,
+
     s_apm: `APM`,
     s_time: `Time`,
     s_arrow: `Arrow`,
