@@ -7065,18 +7065,30 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
  * @param {number} _keyNum
  * @param {array} _shuffleGroup
  */
-const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
+const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
+
 	// シャッフルグループごとにミラー
 	const style = structuredClone(_shuffleGroup).map(_group => _group.reverse());
-	if (_asymFlg) {
-		// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
-		style.forEach((group, i) => {
-			if (group.length % 4 === 0) {
-				for (let k = 0; k < group.length / 4; k++) {
-					[style[i][4 * k + 1], style[i][4 * k + 2]] = [style[i][4 * k + 2], style[i][4 * k + 1]];
-				}
+	let swapUseFlg = false;
+
+	// X-Mirror作成用の入れ替え関数
+	// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
+	const swapGroupNums = (_group, _i, _divideNum) => {
+		if (_group.length % _divideNum === 0) {
+			swapUseFlg = true;
+			for (let k = 0; k < _group.length / _divideNum; k++) {
+				const swap1 = Math.floor(_divideNum * (k + 1 / 2) - 1);
+				const swap2 = Math.ceil(_divideNum * (k + 1 / 2));
+				[style[_i][swap1], style[_i][swap2]] = [style[_i][swap2], style[_i][swap1]];
 			}
-		});
+		}
+	};
+
+	if (_swapFlg) {
+		style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(group, i, val)));
+		if (!swapUseFlg) {
+			g_stateObj.shuffle = `Mirror`;
+		}
 	}
 	applyShuffle(_keyNum, _shuffleGroup, style);
 };
@@ -10609,7 +10621,7 @@ const resultInit = _ => {
 
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
-	const mirrorName = (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 ? `-Mirror` : ``);
+	const mirrorName = (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 ? `-${g_stateObj.shuffle}` : ``);
 	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
 	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${mirrorName}`;
 	if (g_headerObj.makerView) {
