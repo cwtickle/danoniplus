@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/05/07
+ * Revised : 2023/05/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 32.1.0`;
-const g_revisedDate = `2023/05/13`;
+const g_version = `Ver 32.2.0`;
+const g_revisedDate = `2023/05/21`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3105,7 +3105,8 @@ const headerConvert = _dosObj => {
 	obj.resultMotionSet = setBoolVal(_dosObj.resultMotionSet, true);
 
 	// 譜面明細の使用可否
-	obj.scoreDetailUse = setBoolVal(_dosObj.scoreDetailUse, true);
+	g_settings.scoreDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`) || g_settings.scoreDetailDefs;
+	g_stateObj.scoreDetail = g_settings.scoreDetails[0] || ``;
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
 	obj.jdgPosReset = setBoolVal(_dosObj.jdgPosReset, true);
@@ -4531,9 +4532,12 @@ const drawSpeedGraph = _scoreId => {
 	const context = canvas.getContext(`2d`);
 	drawBaseLine(context);
 
+	const avgX = [0, 0];
+	const avgSubX = [1, 1];
 	Object.keys(speedObj).forEach((speedType, j) => {
 		context.beginPath();
 		let preY;
+		let avgSubFrame = playingFrame;
 
 		for (let i = 0; i < speedObj[speedType].frame.length; i++) {
 			const x = speedObj[speedType].frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
@@ -4542,7 +4546,17 @@ const drawSpeedGraph = _scoreId => {
 			context.lineTo(x, preY);
 			context.lineTo(x, y);
 			preY = y;
+
+			const deltaFrame = speedObj[speedType].frame[i] - (speedObj[speedType].frame[i - 1] ?? startFrame);
+			avgX[j] += deltaFrame * (speedObj[speedType].speed[i - 1] ?? 1);
+			if ((speedObj[speedType].speed[i - 1] ?? 1) === 1) {
+				avgSubFrame -= deltaFrame;
+			} else {
+				avgSubX[j] += deltaFrame * (speedObj[speedType].speed[i - 1]);
+			}
 		}
+		avgX[j] /= playingFrame;
+		avgSubX[j] /= Math.max(avgSubFrame, 1);
 
 		context.lineWidth = 1;
 		context.strokeStyle = speedObj[speedType].strokeColor;
@@ -4557,7 +4571,9 @@ const drawSpeedGraph = _scoreId => {
 		context.fillText(speedType, lineX + 35, 218);
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
+		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
 	});
+	updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
 };
 
 /**
@@ -4897,7 +4913,7 @@ const setDifficulty = (_initFlg) => {
 
 	// 速度設定 (Speed)
 	setSetting(0, `speed`, ` ${g_lblNameObj.multi}`);
-	if (g_headerObj.scoreDetailUse) {
+	if (g_settings.scoreDetails.length > 0) {
 		drawSpeedGraph(g_stateObj.scoreId);
 		drawDensityGraph(g_stateObj.scoreId);
 		makeDifInfo(g_stateObj.scoreId);
@@ -5014,7 +5030,7 @@ const createOptionWindow = _sprite => {
 		return detailObj;
 	};
 
-	if (g_headerObj.scoreDetailUse) {
+	if (g_settings.scoreDetails.length > 0) {
 		spriteList.speed.appendChild(
 			createCss2Button(`btnGraph`, `i`, _ => true, {
 				x: -25, y: -60, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz, title: g_msgObj.graph,
@@ -7064,18 +7080,30 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
  * @param {number} _keyNum
  * @param {array} _shuffleGroup
  */
-const applyMirror = (_keyNum, _shuffleGroup, _asymFlg = false) => {
+const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
+
 	// シャッフルグループごとにミラー
 	const style = structuredClone(_shuffleGroup).map(_group => _group.reverse());
-	if (_asymFlg) {
-		// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
-		style.forEach((group, i) => {
-			if (group.length % 4 === 0) {
-				for (let k = 0; k < group.length / 4; k++) {
-					[style[i][4 * k + 1], style[i][4 * k + 2]] = [style[i][4 * k + 2], style[i][4 * k + 1]];
-				}
+	let swapUseFlg = false;
+
+	// X-Mirror作成用の入れ替え関数
+	// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
+	const swapGroupNums = (_group, _i, _divideNum) => {
+		if (_group.length % _divideNum === 0) {
+			swapUseFlg = true;
+			for (let k = 0; k < _group.length / _divideNum; k++) {
+				const swap1 = Math.floor(_divideNum * (k + 1 / 2) - 1);
+				const swap2 = Math.ceil(_divideNum * (k + 1 / 2));
+				[style[_i][swap1], style[_i][swap2]] = [style[_i][swap2], style[_i][swap1]];
 			}
-		});
+		}
+	};
+
+	if (_swapFlg) {
+		style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(group, i, val)));
+		if (!swapUseFlg) {
+			g_stateObj.shuffle = `Mirror`;
+		}
 	}
 	applyShuffle(_keyNum, _shuffleGroup, style);
 };
@@ -10608,7 +10636,7 @@ const resultInit = _ => {
 
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
-	const mirrorName = (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 ? `-Mirror` : ``);
+	const mirrorName = (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 ? `-${g_stateObj.shuffle}` : ``);
 	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
 	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${mirrorName}`;
 	if (g_headerObj.makerView) {
