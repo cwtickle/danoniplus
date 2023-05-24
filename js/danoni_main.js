@@ -3107,6 +3107,8 @@ const headerConvert = _dosObj => {
 	// 譜面明細の使用可否
 	g_settings.scoreDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`) || g_settings.scoreDetailDefs;
 	g_stateObj.scoreDetail = g_settings.scoreDetails[0] || ``;
+	g_settings.scoreDetailCursors = g_settings.scoreDetails.map(val => `lnk${val}G`);
+	g_settings.scoreDetailCursors.push(`btnGraph`);
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
 	obj.jdgPosReset = setBoolVal(_dosObj.jdgPosReset, true);
