@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/05/21
+ * Revised : 2023/05/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 32.2.0`;
-const g_revisedDate = `2023/05/21`;
+const g_version = `Ver 32.2.1`;
+const g_revisedDate = `2023/05/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3107,6 +3107,8 @@ const headerConvert = _dosObj => {
 	// 譜面明細の使用可否
 	g_settings.scoreDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`) || g_settings.scoreDetailDefs;
 	g_stateObj.scoreDetail = g_settings.scoreDetails[0] || ``;
+	g_settings.scoreDetailCursors = g_settings.scoreDetails.map(val => `lnk${val}G`);
+	g_settings.scoreDetailCursors.push(`btnGraph`);
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
 	obj.jdgPosReset = setBoolVal(_dosObj.jdgPosReset, true);
@@ -4571,7 +4573,7 @@ const drawSpeedGraph = _scoreId => {
 		context.fillText(speedType, lineX + 35, 218);
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
-		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
+		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, avgSubX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
 	});
 	updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
 };

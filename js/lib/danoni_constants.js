@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/05/21 (v32.2.0)
+ * Revised : 2023/05/25 (v32.2.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -918,8 +918,6 @@ const g_settings = {
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
 g_settings.opacityNum = g_settings.opacitys.length - 1;
-g_settings.scoreDetailCursors = g_settings.scoreDetails.map(val => `lnk${val}G`);
-g_settings.scoreDetailCursors.push(`btnGraph`);
 
 /**
  * 設定画面間移動
