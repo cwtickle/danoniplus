@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/05/25
+ * Revised : 2023/05/26
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 32.2.1`;
-const g_revisedDate = `2023/05/25`;
+const g_version = `Ver 32.2.2`;
+const g_revisedDate = `2023/05/26`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2854,15 +2854,13 @@ const headerConvert = _dosObj => {
 	}
 
 	// 無音のフレーム数
-	obj.blankFrame = 200;
-	obj.blankFrameDef = 200;
-	obj.blankFrameDefs = [];
+	obj.blankFrameDefs = [200];
 	if (isNaN(parseFloat(_dosObj.blankFrame))) {
 	} else {
 		obj.blankFrameDefs = _dosObj.blankFrame.split(`$`).map(val => parseInt(val));
-		obj.blankFrame = obj.blankFrameDefs[0];
-		obj.blankFrameDef = obj.blankFrameDefs[0];
 	}
+	obj.blankFrame = obj.blankFrameDefs[0];
+	obj.blankFrameDef = obj.blankFrameDefs[0];
 
 	// 開始フレーム数（0以外の場合はフェードインスタート）、終了フレーム数
 	[`startFrame`, `endFrame`].filter(tmpParam => hasVal(_dosObj[tmpParam])).forEach(param => {
