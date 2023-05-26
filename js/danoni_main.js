@@ -2854,15 +2854,13 @@ const headerConvert = _dosObj => {
 	}
 
 	// 無音のフレーム数
-	obj.blankFrame = 200;
-	obj.blankFrameDef = 200;
-	obj.blankFrameDefs = [];
+	obj.blankFrameDefs = [200];
 	if (isNaN(parseFloat(_dosObj.blankFrame))) {
 	} else {
 		obj.blankFrameDefs = _dosObj.blankFrame.split(`$`).map(val => parseInt(val));
-		obj.blankFrame = obj.blankFrameDefs[0];
-		obj.blankFrameDef = obj.blankFrameDefs[0];
 	}
+	obj.blankFrame = obj.blankFrameDefs[0];
+	obj.blankFrameDef = obj.blankFrameDefs[0];
 
 	// 開始フレーム数（0以外の場合はフェードインスタート）、終了フレーム数
 	[`startFrame`, `endFrame`].filter(tmpParam => hasVal(_dosObj[tmpParam])).forEach(param => {
