@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/04/26
+ * Revised : 2023/05/31
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.4.5`;
-const g_revisedDate = `2023/04/26`;
+const g_version = `Ver 29.4.6`;
+const g_revisedDate = `2023/05/31`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3003,7 +3003,7 @@ const headerConvert = _dosObj => {
 	obj.playingX = setIntVal(_dosObj.playingX);
 
 	// プレイ中クレジットを表示しないエリアのサイズ(X方向)
-	obj.customViewWidth = setVal(_dosObj.customViewWidth, 0, C_TYP_FLOAT);
+	obj.customViewWidth = setVal(_dosObj.customViewWidth ?? _dosObj.customCreditWidth, 0, C_TYP_FLOAT);
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (g_isLocal) ? 0 : 1;
