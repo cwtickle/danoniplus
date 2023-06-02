@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/05/31
+ * Revised : 2023/06/02
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 31.7.2`;
-const g_revisedDate = `2023/05/31`;
+const g_version = `Ver 31.7.3`;
+const g_revisedDate = `2023/06/02`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2465,7 +2465,7 @@ const calcLevel = _scoreObj => {
 	const push3Cnt = push3List.length;
 	const calcArrowCnt = allCnt - push3Cnt - 3;
 	const toDecimal2 = num => Math.round(num * 100) / 100;
-	const calcDifLevel = num => Math.max(toDecimal2(num / Math.sqrt(calcArrowCnt) * 4), 0);
+	const calcDifLevel = num => calcArrowCnt > 0 ? toDecimal2(num / Math.sqrt(calcArrowCnt) * 4) : 0;
 
 	const baseDifLevel = calcDifLevel(levelcount);
 	const difLevel = toDecimal2(baseDifLevel * (allCnt - 3) / calcArrowCnt);
