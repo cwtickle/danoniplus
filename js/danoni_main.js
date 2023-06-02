@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/05/26
+ * Revised : 2023/06/02
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 32.2.2`;
-const g_revisedDate = `2023/05/26`;
+const g_version = `Ver 32.3.0`;
+const g_revisedDate = `2023/06/02`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2473,7 +2473,7 @@ const calcLevel = _scoreObj => {
 	const push3Cnt = push3List.length;
 	const calcArrowCnt = allCnt - push3Cnt - 3;
 	const toDecimal2 = num => Math.round(num * 100) / 100;
-	const calcDifLevel = num => Math.max(toDecimal2(num / Math.sqrt(calcArrowCnt) * 4), 0);
+	const calcDifLevel = num => calcArrowCnt > 0 ? toDecimal2(num / Math.sqrt(calcArrowCnt) * 4) : 0;
 
 	const baseDifLevel = calcDifLevel(levelcount);
 	const difLevel = toDecimal2(baseDifLevel * (allCnt - 3) / calcArrowCnt);
@@ -3136,7 +3136,7 @@ const headerConvert = _dosObj => {
 	obj.playingX = setIntVal(_dosObj.playingX);
 
 	// プレイ中クレジットを表示しないエリアのサイズ(X方向)
-	obj.customViewWidth = setVal(_dosObj.customViewWidth, 0, C_TYP_FLOAT);
+	obj.customViewWidth = setVal(_dosObj.customViewWidth ?? _dosObj.customCreditWidth, 0, C_TYP_FLOAT);
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (g_isLocal) ? 0 : 1;
