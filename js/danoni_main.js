@@ -2473,7 +2473,7 @@ const calcLevel = _scoreObj => {
 	const push3Cnt = push3List.length;
 	const calcArrowCnt = allCnt - push3Cnt - 3;
 	const toDecimal2 = num => Math.round(num * 100) / 100;
-	const calcDifLevel = num => Math.max(toDecimal2(num / Math.sqrt(calcArrowCnt) * 4), 0);
+	const calcDifLevel = num => calcArrowCnt > 0 ? toDecimal2(num / Math.sqrt(calcArrowCnt) * 4) : 0;
 
 	const baseDifLevel = calcDifLevel(levelcount);
 	const difLevel = toDecimal2(baseDifLevel * (allCnt - 3) / calcArrowCnt);
