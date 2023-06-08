@@ -5523,8 +5523,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 		if (allCnts > 0) {
 			realRcv = Math.min(calcLifeVal(_rcv, allCnts), g_headerObj.maxLifeVal);
 			realDmg = Math.min(calcLifeVal(_dmg, allCnts), g_headerObj.maxLifeVal);
-			rcvText = `${realRcv.toFixed(2)}<br>`;
-			dmgText = `${realDmg.toFixed(2)}<br>`;
+			rcvText = `${toFixed2(realRcv)}<br>`;
+			dmgText = `${toFixed2(realDmg)}<br>`;
 		}
 		rcvText += `<span class="settings_lifeVal">(${toFixed2(_rcv)})</span>`;
 		dmgText += `<span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
