@@ -256,7 +256,7 @@ const updateWindowSiz = _ => {
             x: 160, y: 0, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
         },
         lblGauge2: {
-            x: g_limitObj.setLblLeft - 60, y: g_limitObj.setLblHeight,
+            x: g_limitObj.setLblLeft - 55, y: g_limitObj.setLblHeight,
             w: g_limitObj.setLblWidth + 60, h: g_limitObj.setLblHeight * 2, siz: 11,
         },
         lnkFadein: {

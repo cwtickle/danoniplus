@@ -5533,12 +5533,17 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	// 達成率(Rate)の計算
 	const justPoint = realRcv + realDmg > 0 ? Math.max(borderVal - initVal + realDmg * allCnts, 0) / (realRcv + realDmg) : 0;
 	const minRecovery = (_border === 0 ? Math.floor(justPoint + 1) : Math.ceil(justPoint));
-	const rate = allCnts > 0 ? Math.max(minRecovery / allCnts * 100, 0) : 0;
-	const rateText = rate <= 100 ? `${rate.toFixed(2)}%` : `<span class="settings_lifeVal">${rate.toFixed(2)}%</span>`;
+	const rate = Math.max(minRecovery / allCnts * 100, 0);
+	let rateText = allCnts > 0 ? (rate <= 100 ? `${rate.toFixed(2)}%` : `<span class="settings_lifeVal">${rate.toFixed(2)}%</span>`) : `----`;
 
 	// 許容ミス数の計算
 	const allowableCnts = Math.min(allCnts - minRecovery, allCnts);
-	const allowableCntsText = allowableCnts >= 0 ? `${allowableCnts}miss↓` : `Impossible (${allowableCnts}miss)`;
+	let allowableCntsText = allCnts > 0 ? (allowableCnts >= 0 ? `${allowableCnts}miss↓` : `Impossible (${allowableCnts}miss)`) : ``;
+
+	if (realRcv === 0 && realDmg === 0) {
+		rateText = `----`;
+		allowableCntsText = ``;
+	}
 
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
