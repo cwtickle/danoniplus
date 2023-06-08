@@ -256,7 +256,7 @@ const updateWindowSiz = _ => {
             x: 160, y: 0, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
         },
         lblGauge2: {
-            x: g_limitObj.setLblLeft - 35, y: g_limitObj.setLblHeight,
+            x: g_limitObj.setLblLeft - 60, y: g_limitObj.setLblHeight,
             w: g_limitObj.setLblWidth + 60, h: g_limitObj.setLblHeight * 2, siz: 11,
         },
         lnkFadein: {
@@ -2632,6 +2632,7 @@ const g_lblNameObj = {
     g_border: `Border`,
     g_recovery: `Recovery`,
     g_damage: `Damage`,
+    g_rate: `Rate`,
 
     s_speed: `Speed`,
     s_boost: `Boost`,

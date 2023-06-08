@@ -5509,16 +5509,30 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const borderVal = (_mode === C_LFE_BORDER && _border !== 0 ?
 		Math.round(g_headerObj.maxLifeVal * _border / 100) : `-`);
 
-	let lifeValCss = ``;
-	if (_lifeValFlg === C_FLG_ON) {
-		lifeValCss = ` settings_lifeVal`;
-	}
-
 	// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
 	const init = Math.round(initVal);
 	const border = (borderVal !== `-` ? borderVal : `-`);
-	const rcv = Math.round(_rcv * 100) / 100;
-	const dmg = Math.round(_dmg * 100) / 100;
+	const toFixed2 = _val => Math.round(_val * 100) / 100;
+
+	let rcvText = toFixed2(_rcv), dmgText = toFixed2(_dmg);
+	let realRcv = _rcv, realDmg = _dmg;
+	const allCnts = sumData(g_detailObj.arrowCnt[g_stateObj.scoreId]) +
+		(g_headerObj.frzStartjdgUse ? 2 : 1) * sumData(g_detailObj.frzCnt[g_stateObj.scoreId]);
+
+	if (_lifeValFlg === C_FLG_ON) {
+		if (allCnts > 0) {
+			realRcv = Math.min(_rcv * g_headerObj.maxLifeVal / allCnts, g_headerObj.maxLifeVal);
+			realDmg = Math.min(_dmg * g_headerObj.maxLifeVal / allCnts, g_headerObj.maxLifeVal);
+			rcvText = `${realRcv.toFixed(2)}<br><span class="settings_lifeVal">(${toFixed2(_rcv)})</span>`;
+			dmgText = `${realDmg.toFixed(2)}<br><span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
+		} else {
+			rcvText = `<span class="settings_lifeVal">(${toFixed2(_rcv)})</span>`;
+			dmgText = `<span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
+		}
+	}
+	const justPoint = (g_headerObj.maxLifeVal * _border / 100 - initVal + realDmg * allCnts) / (realRcv + realDmg);
+	const minRecovery = (_border === 0 ? Math.floor(justPoint + 1) : Math.ceil(justPoint));
+	let rateText = `${(allCnts > 0 ? minRecovery / allCnts * 100 : 0).toFixed(2)}%`;
 
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
@@ -5534,6 +5548,9 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 			<div id="lblGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeEtc">
 				${g_lblNameObj.g_damage}
 			</div>
+			<div id="lblGaugeRate" class="settings_gaugeDivTableCol settings_gaugeEtc">
+				${g_lblNameObj.g_rate}
+			</div>
 		</div>
 		<div id="dataGaugeDivTable" class="settings_gaugeDivTable">
 			<div id="dataGaugeStart" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
@@ -5542,11 +5559,14 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 			<div id="dataGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
 				${border}
 			</div>
-			<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
-				${rcv}
+			<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+				${rcvText}
 			</div>
-			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
-				${dmg}
+			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+				${dmgText}
+			</div>
+			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+				${rateText}
 			</div>
 		</div>
 	</div>
