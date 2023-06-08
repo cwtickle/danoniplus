@@ -5506,12 +5506,11 @@ const gaugeChange = _gaugeNum => {
  */
 const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const initVal = g_headerObj.maxLifeVal * _init / 100;
-	const borderVal = (_mode === C_LFE_BORDER && _border !== 0 ?
-		Math.round(g_headerObj.maxLifeVal * _border / 100) : `-`);
+	const borderVal = g_headerObj.maxLifeVal * _border / 100;
 
 	// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
 	const init = Math.round(initVal);
-	const border = (borderVal !== `-` ? borderVal : `-`);
+	const borderText = (_mode === C_LFE_BORDER && _border !== 0 ? Math.round(borderVal) : `-`);
 	const toFixed2 = _val => Math.round(_val * 100) / 100;
 
 	let rcvText = toFixed2(_rcv), dmgText = toFixed2(_dmg);
@@ -5530,9 +5529,9 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 			dmgText = `<span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
 		}
 	}
-	const justPoint = (g_headerObj.maxLifeVal * _border / 100 - initVal + realDmg * allCnts) / (realRcv + realDmg);
+	const justPoint = (borderVal - initVal + realDmg * allCnts) / (realRcv + realDmg);
 	const minRecovery = (_border === 0 ? Math.floor(justPoint + 1) : Math.ceil(justPoint));
-	let rateText = `${(allCnts > 0 ? minRecovery / allCnts * 100 : 0).toFixed(2)}%`;
+	const rateText = `${(allCnts > 0 ? minRecovery / allCnts * 100 : 0).toFixed(2)}%`;
 
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
@@ -5557,7 +5556,7 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 				${init}/${g_headerObj.maxLifeVal}
 			</div>
 			<div id="dataGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
-				${border}
+				${borderText}
 			</div>
 			<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
 				${rcvText}
