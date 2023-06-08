@@ -5533,6 +5533,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const minRecovery = (_border === 0 ? Math.floor(justPoint + 1) : Math.ceil(justPoint));
 	const rate = allCnts > 0 ? Math.max(minRecovery / allCnts * 100, 0) : 0;
 	const rateText = rate <= 100 ? `${rate.toFixed(2)}%` : `<span class="settings_lifeVal">${rate.toFixed(2)}%</span>`;
+	const allowableCnts = Math.min(allCnts - minRecovery, allCnts);
+	const allowableCntsText = allowableCnts >= 0 ? `${allowableCnts}miss↓` : `Impossible (${allowableCnts}miss)`;
 
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
@@ -5565,7 +5567,7 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
 				${dmgText}
 			</div>
-			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" title="${allowableCntsText}">
 				${rateText}
 			</div>
 		</div>
