@@ -5521,18 +5521,22 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	if (_lifeValFlg === C_FLG_ON) {
 		rcvText = ``, dmgText = ``;
 		if (allCnts > 0) {
-			realRcv = Math.min(_rcv * g_headerObj.maxLifeVal / allCnts, g_headerObj.maxLifeVal);
-			realDmg = Math.min(_dmg * g_headerObj.maxLifeVal / allCnts, g_headerObj.maxLifeVal);
+			realRcv = Math.min(calcLifeVal(_rcv, allCnts), g_headerObj.maxLifeVal);
+			realDmg = Math.min(calcLifeVal(_dmg, allCnts), g_headerObj.maxLifeVal);
 			rcvText = `${realRcv.toFixed(2)}<br>`;
 			dmgText = `${realDmg.toFixed(2)}<br>`;
 		}
 		rcvText += `<span class="settings_lifeVal">(${toFixed2(_rcv)})</span>`;
 		dmgText += `<span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
 	}
-	const justPoint = (borderVal - initVal + realDmg * allCnts) / (realRcv + realDmg);
+
+	// 達成率(Rate)の計算
+	const justPoint = realRcv + realDmg > 0 ? Math.max(borderVal - initVal + realDmg * allCnts, 0) / (realRcv + realDmg) : 0;
 	const minRecovery = (_border === 0 ? Math.floor(justPoint + 1) : Math.ceil(justPoint));
 	const rate = allCnts > 0 ? Math.max(minRecovery / allCnts * 100, 0) : 0;
 	const rateText = rate <= 100 ? `${rate.toFixed(2)}%` : `<span class="settings_lifeVal">${rate.toFixed(2)}%</span>`;
+
+	// 許容ミス数の計算
 	const allowableCnts = Math.min(allCnts - minRecovery, allCnts);
 	const allowableCntsText = allowableCnts >= 0 ? `${allowableCnts}miss↓` : `Impossible (${allowableCnts}miss)`;
 
