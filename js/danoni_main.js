@@ -5519,19 +5519,20 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 		(g_headerObj.frzStartjdgUse ? 2 : 1) * sumData(g_detailObj.frzCnt[g_stateObj.scoreId]);
 
 	if (_lifeValFlg === C_FLG_ON) {
+		rcvText = ``, dmgText = ``;
 		if (allCnts > 0) {
 			realRcv = Math.min(_rcv * g_headerObj.maxLifeVal / allCnts, g_headerObj.maxLifeVal);
 			realDmg = Math.min(_dmg * g_headerObj.maxLifeVal / allCnts, g_headerObj.maxLifeVal);
-			rcvText = `${realRcv.toFixed(2)}<br><span class="settings_lifeVal">(${toFixed2(_rcv)})</span>`;
-			dmgText = `${realDmg.toFixed(2)}<br><span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
-		} else {
-			rcvText = `<span class="settings_lifeVal">(${toFixed2(_rcv)})</span>`;
-			dmgText = `<span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
+			rcvText = `${realRcv.toFixed(2)}<br>`;
+			dmgText = `${realDmg.toFixed(2)}<br>`;
 		}
+		rcvText += `<span class="settings_lifeVal">(${toFixed2(_rcv)})</span>`;
+		dmgText += `<span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
 	}
 	const justPoint = (borderVal - initVal + realDmg * allCnts) / (realRcv + realDmg);
 	const minRecovery = (_border === 0 ? Math.floor(justPoint + 1) : Math.ceil(justPoint));
-	const rateText = `${(allCnts > 0 ? minRecovery / allCnts * 100 : 0).toFixed(2)}%`;
+	const rate = allCnts > 0 ? Math.max(minRecovery / allCnts * 100, 0) : 0;
+	const rateText = rate <= 100 ? `${rate.toFixed(2)}%` : `<span class="settings_lifeVal">${rate.toFixed(2)}%</span>`;
 
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
