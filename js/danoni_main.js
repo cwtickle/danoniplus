@@ -5503,6 +5503,13 @@ const gaugeChange = _gaugeNum => {
 
 /**
  * ゲージ設定の詳細表示を整形
+ * @param {string} _mode 
+ * @param {number} _border 
+ * @param {number} _rcv 
+ * @param {number} _dmg 
+ * @param {number} _init 
+ * @param {string} _lifeValFlg 
+ * @returns 
  */
 const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const initVal = g_headerObj.maxLifeVal * _init / 100;
@@ -5515,14 +5522,14 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 
 	let rcvText = toFixed2(_rcv), dmgText = toFixed2(_dmg);
 	let realRcv = _rcv, realDmg = _dmg;
-	const allCnts = sumData(g_detailObj.arrowCnt[g_stateObj.scoreId]) +
+	const allCnt = sumData(g_detailObj.arrowCnt[g_stateObj.scoreId]) +
 		(g_headerObj.frzStartjdgUse ? 2 : 1) * sumData(g_detailObj.frzCnt[g_stateObj.scoreId]);
 
 	if (_lifeValFlg === C_FLG_ON) {
 		rcvText = ``, dmgText = ``;
-		if (allCnts > 0) {
-			realRcv = Math.min(calcLifeVal(_rcv, allCnts), g_headerObj.maxLifeVal);
-			realDmg = Math.min(calcLifeVal(_dmg, allCnts), g_headerObj.maxLifeVal);
+		if (allCnt > 0) {
+			realRcv = Math.min(calcLifeVal(_rcv, allCnt), g_headerObj.maxLifeVal);
+			realDmg = Math.min(calcLifeVal(_dmg, allCnt), g_headerObj.maxLifeVal);
 			rcvText = `${toFixed2(realRcv)}<br>`;
 			dmgText = `${toFixed2(realDmg)}<br>`;
 		}
@@ -5530,20 +5537,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 		dmgText += `<span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
 	}
 
-	// 達成率(Rate)の計算
-	const justPoint = realRcv + realDmg > 0 ? Math.max(borderVal - initVal + realDmg * allCnts, 0) / (realRcv + realDmg) : 0;
-	const minRecovery = (_border === 0 ? Math.floor(justPoint + 1) : Math.ceil(justPoint));
-	const rate = Math.max(minRecovery / allCnts * 100, 0);
-	let rateText = allCnts > 0 ? (rate <= 100 ? `${rate.toFixed(2)}%` : `<span class="settings_lifeVal">${rate.toFixed(2)}%</span>`) : `----`;
-
-	// 許容ミス数の計算
-	const allowableCnts = Math.min(allCnts - minRecovery, allCnts);
-	let allowableCntsText = allCnts > 0 ? (allowableCnts >= 0 ? `${allowableCnts}miss↓` : `Impossible (${allowableCnts}miss)`) : ``;
-
-	if (realRcv === 0 && realDmg === 0) {
-		rateText = `----`;
-		allowableCntsText = ``;
-	}
+	// 達成率(Rate)・許容ミス数の計算
+	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
 
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
@@ -5582,6 +5577,32 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 		</div>
 	</div>
 	`;
+};
+
+/**
+ * 達成率、許容ミス数の取得
+ * @param {number} _border 
+ * @param {number} _rcv 
+ * @param {number} _dmg 
+ * @param {number} _init 
+ * @param {number} _allCnt 
+ * @returns 
+ */
+const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
+	const justPoint = _rcv + _dmg > 0 ? Math.max(_border - _init + _dmg * _allCnt, 0) / (_rcv + _dmg) : 0;
+	const minRecovery = (_border === 0 ? Math.floor(justPoint + 1) : Math.ceil(justPoint));
+	const rate = Math.max(minRecovery / _allCnt * 100, 0);
+	let rateText = _allCnt > 0 ? (rate <= 100 ? `${rate.toFixed(2)}%` : `<span class="settings_lifeVal">${rate.toFixed(2)}%</span>`) : `----`;
+
+	// 許容ミス数の計算
+	const allowableCnts = Math.min(_allCnt - minRecovery, _allCnt);
+	let allowableCntsText = _allCnt > 0 ? (allowableCnts >= 0 ? `${allowableCnts}miss↓` : `Impossible (${allowableCnts}miss)`) : ``;
+
+	if (_rcv <= 0 && _dmg <= 0) {
+		rateText = `----`;
+		allowableCntsText = ``;
+	}
+	return [rateText, allowableCntsText];
 };
 
 /**
