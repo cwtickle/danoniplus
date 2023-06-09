@@ -2632,7 +2632,7 @@ const g_lblNameObj = {
     g_border: `Border`,
     g_recovery: `Recovery`,
     g_damage: `Damage`,
-    g_rate: `Rate`,
+    g_rate: `Accuracy`,
 
     s_speed: `Speed`,
     s_boost: `Boost`,
