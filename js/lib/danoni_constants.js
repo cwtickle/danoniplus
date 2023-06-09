@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/06/02 (v32.3.0)
+ * Revised : 2023/06/09 (v32.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -256,7 +256,7 @@ const updateWindowSiz = _ => {
             x: 160, y: 0, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
         },
         lblGauge2: {
-            x: g_limitObj.setLblLeft - 35, y: g_limitObj.setLblHeight,
+            x: g_limitObj.setLblLeft - 55, y: g_limitObj.setLblHeight,
             w: g_limitObj.setLblWidth + 60, h: g_limitObj.setLblHeight * 2, siz: 11,
         },
         lnkFadein: {
@@ -2632,6 +2632,7 @@ const g_lblNameObj = {
     g_border: `Border`,
     g_recovery: `Recovery`,
     g_damage: `Damage`,
+    g_rate: `Accuracy`,
 
     s_speed: `Speed`,
     s_boost: `Boost`,
@@ -2868,7 +2869,7 @@ const g_lang_msgObj = {
         scroll: `各レーンのスクロール方向をパターンに沿って設定します。\nReverse:ONでスクロール方向を反転します。`,
         shuffle: `譜面を左右反転したり、ランダムにします。\nランダムにした場合は別譜面扱いとなり、ハイスコアは保存されません。`,
         autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
-        gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量`,
+        gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量, [Accuracy] クリアに必要な正確率(オンマウスで許容ミス数表示)`,
         adjustment: `曲とのタイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
         fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
         volume: `ゲーム内の音量を設定します。`,
@@ -2924,7 +2925,7 @@ const g_lang_msgObj = {
         scroll: `Set the scroll direction for each lane according to the pattern.\nIf "Reverse:ON" sets, reverse the scroll direction.`,
         shuffle: `Flip the chart left and right or make it random.\nIf you make it random, it will be treated as other charts and the high score will not be saved.`,
         autoPlay: `Set to auto play and to hit some keys automatically.\nHigh score is not saved during auto play.`,
-        gauge: `Set the clear condition.\n[Start] initial value, [Border] borderline value (hyphen means zero),\n[Recovery] recovery amount, [Damage] damage amount`,
+        gauge: `Set the clear condition.\n[Start] initial value, [Border] borderline value (hyphen means zero),\n[Recovery] recovery amount, [Damage] damage amount,\n[Accuracy] accuracy required to clear (mouseover to see the number of allowed mistakes)`,
         adjustment: `If you feel that the timing is out of sync with the music, \nyou can correct the shift in frame units by changing the value.\nThe outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, \nand the inner button in 0.5 frame increments.`,
         fadein: `Plays the chart from the middle.\nIf you start in the middle, the high score will not be saved.`,
         volume: `Set the in-game volume.`,

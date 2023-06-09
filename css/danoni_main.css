@@ -4,7 +4,7 @@
   本体cssファイル
 
   Created : 2018/10/08
-  Revised : 2022/10/16 (v28.3.1)
+  Revised : 2023/06/09 (v32.4.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -295,12 +295,13 @@ input[type="color"] {
 
 .settings_gaugeDivCover {
 	border: 1px #666666 solid;
-	width: 280px;
+	width: 305px;
+	line-height: 14px;
 }
 
 .settings_gaugeDivTable {
 	display: table;
-	width: 279px;
+	width: 304px;
 }
 
 .settings_gaugeDivTableCol {
@@ -313,7 +314,7 @@ input[type="color"] {
 }
 
 .settings_gaugeEtc {
-	width: 65px;
+	width: 55px;
 }
 
 /* ライフゲージボーダー */
