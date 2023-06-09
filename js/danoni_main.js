@@ -5503,22 +5503,42 @@ const gaugeChange = _gaugeNum => {
 
 /**
  * ゲージ設定の詳細表示を整形
+ * @param {string} _mode 
+ * @param {number} _border 
+ * @param {number} _rcv 
+ * @param {number} _dmg 
+ * @param {number} _init 
+ * @param {string} _lifeValFlg 
+ * @returns 
  */
 const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const initVal = g_headerObj.maxLifeVal * _init / 100;
-	const borderVal = (_mode === C_LFE_BORDER && _border !== 0 ?
-		Math.round(g_headerObj.maxLifeVal * _border / 100) : `-`);
-
-	let lifeValCss = ``;
-	if (_lifeValFlg === C_FLG_ON) {
-		lifeValCss = ` settings_lifeVal`;
-	}
+	const borderVal = g_headerObj.maxLifeVal * _border / 100;
 
 	// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
 	const init = Math.round(initVal);
-	const border = (borderVal !== `-` ? borderVal : `-`);
-	const rcv = Math.round(_rcv * 100) / 100;
-	const dmg = Math.round(_dmg * 100) / 100;
+	const borderText = (_mode === C_LFE_BORDER && _border !== 0 ? Math.round(borderVal) : `-`);
+	const toFixed2 = _val => Math.round(_val * 100) / 100;
+
+	let rcvText = toFixed2(_rcv), dmgText = toFixed2(_dmg);
+	let realRcv = _rcv, realDmg = _dmg;
+	const allCnt = sumData(g_detailObj.arrowCnt[g_stateObj.scoreId]) +
+		(g_headerObj.frzStartjdgUse ? 2 : 1) * sumData(g_detailObj.frzCnt[g_stateObj.scoreId]);
+
+	if (_lifeValFlg === C_FLG_ON) {
+		rcvText = ``, dmgText = ``;
+		if (allCnt > 0) {
+			realRcv = Math.min(calcLifeVal(_rcv, allCnt), g_headerObj.maxLifeVal);
+			realDmg = Math.min(calcLifeVal(_dmg, allCnt), g_headerObj.maxLifeVal);
+			rcvText = `${toFixed2(realRcv)}<br>`;
+			dmgText = `${toFixed2(realDmg)}<br>`;
+		}
+		rcvText += `<span class="settings_lifeVal">(${toFixed2(_rcv)})</span>`;
+		dmgText += `<span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
+	}
+
+	// 達成率(Accuracy)・許容ミス数の計算
+	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
 
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
@@ -5534,23 +5554,55 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 			<div id="lblGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeEtc">
 				${g_lblNameObj.g_damage}
 			</div>
+			<div id="lblGaugeRate" class="settings_gaugeDivTableCol settings_gaugeEtc">
+				${g_lblNameObj.g_rate}
+			</div>
 		</div>
 		<div id="dataGaugeDivTable" class="settings_gaugeDivTable">
 			<div id="dataGaugeStart" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
 				${init}/${g_headerObj.maxLifeVal}
 			</div>
 			<div id="dataGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
-				${border}
+				${borderText}
 			</div>
-			<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
-				${rcv}
+			<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+				${rcvText}
 			</div>
-			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc${lifeValCss}">
-				${dmg}
+			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
+				${dmgText}
+			</div>
+			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" title="${allowableCntsText}">
+				${rateText}
 			</div>
 		</div>
 	</div>
 	`;
+};
+
+/**
+ * 達成率、許容ミス数の取得
+ * @param {number} _border 
+ * @param {number} _rcv 
+ * @param {number} _dmg 
+ * @param {number} _init 
+ * @param {number} _allCnt 
+ * @returns 
+ */
+const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
+	const justPoint = _rcv + _dmg > 0 ? Math.max(_border - _init + _dmg * _allCnt, 0) / (_rcv + _dmg) : 0;
+	const minRecovery = (_border === 0 ? Math.floor(justPoint + 1) : Math.ceil(justPoint));
+	const rate = Math.max(minRecovery / _allCnt * 100, 0);
+	let rateText = _allCnt > 0 ? (rate <= 100 ? `${rate.toFixed(2)}%` : `<span class="settings_lifeVal">${rate.toFixed(2)}%</span>`) : `----`;
+
+	// 許容ミス数の計算
+	const allowableCnts = Math.min(_allCnt - minRecovery, _allCnt);
+	let allowableCntsText = _allCnt > 0 ? (allowableCnts >= 0 ? `${allowableCnts}miss↓` : `Impossible (${allowableCnts}miss)`) : ``;
+
+	if ((_rcv === 0 && _dmg === 0) || _rcv < 0 || _dmg < 0) {
+		rateText = `----`;
+		allowableCntsText = ``;
+	}
+	return [rateText, allowableCntsText];
 };
 
 /**
