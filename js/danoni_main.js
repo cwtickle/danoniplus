@@ -5537,7 +5537,7 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 		dmgText += `<span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
 	}
 
-	// 達成率(Rate)・許容ミス数の計算
+	// 達成率(Accuracy)・許容ミス数の計算
 	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
 
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
@@ -5598,7 +5598,7 @@ const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
 	const allowableCnts = Math.min(_allCnt - minRecovery, _allCnt);
 	let allowableCntsText = _allCnt > 0 ? (allowableCnts >= 0 ? `${allowableCnts}miss↓` : `Impossible (${allowableCnts}miss)`) : ``;
 
-	if (_rcv <= 0 && _dmg <= 0) {
+	if ((_rcv === 0 && _dmg === 0) || _rcv < 0 || _dmg < 0) {
 		rateText = `----`;
 		allowableCntsText = ``;
 	}
