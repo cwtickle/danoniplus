@@ -700,7 +700,7 @@ const C_KEY_TITLEBACK = 46;
 
 /** 判定系共通オブジェクト */
 const g_judgObj = {
-    arrowJ: [2, 4, 6, 8, 8],
+    arrowJ: [2, 4, 6, 8, 16],
     frzJ: [2, 4, 8]
 };
 const g_judgPosObj = {
@@ -1575,6 +1575,7 @@ const g_cssObj = {
     main_stepShakin: `main_stepShakin`,
     main_stepMatari: `main_stepMatari`,
     main_stepShobon: `main_stepShobon`,
+    main_stepUwan: `main_stepUwan`,
 
     main_objStepShadow: `main_objStepShadow`,
     main_objShadow: `main_objShadow`,

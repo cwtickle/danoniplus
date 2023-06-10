@@ -3012,6 +3012,9 @@ const headerConvert = _dosObj => {
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
 	obj.frzStartjdgUse = setBoolVal(_dosObj.frzStartjdgUse ?? g_presetObj.frzStartjdgUse);
 
+	// 空押し判定を行うか
+	obj.emptyJdgUse = setBoolVal(_dosObj.emptyJdgUse ?? g_presetObj.emptyJdgUse);
+
 	// 譜面名に制作者名を付加するかどうかのフラグ
 	obj.makerView = setBoolVal(_dosObj.makerView);
 
@@ -9236,7 +9239,7 @@ const mainInit = _ => {
 
 		// 矢印(枠外判定、AutoPlay: OFF)
 		arrowOFF: (_j, _arrowName, _cnt) => {
-			if (_cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.uwan]) {
+			if (_cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.shobon]) {
 				judgeUwan(_cnt);
 				judgeObjDelete.arrow(_j, _arrowName);
 			}
@@ -10155,18 +10158,28 @@ const judgeArrow = _j => {
 
 	const judgeTargetArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
-		if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan]) {
-			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
-			resultFunc(_difFrame);
-			displayDiff(_difFrame);
-
+		const stepHitTargetArrow = _resultJdg => {
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
 			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_workObj.hitPosition * g_workObj.scrollDir[_j]}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
-			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
+			stepDivHit.classList.add(g_cssObj[`main_step${_resultJdg}`]);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
+		}
 
+		// 空押し判定
+		if (g_headerObj.emptyJdgUse && _difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan] && _difCnt > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
+			resultFunc(_difFrame, true);
+			stepHitTargetArrow(resultJdg);
+			return true;
+
+		// 通常判定
+		} else if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
+			resultFunc(_difFrame);
+			displayDiff(_difFrame);
+			stepHitTargetArrow(resultJdg);
 			document.getElementById(arrowName).remove();
 			g_workObj.judgArrowCnt[_j]++;
 			return true;
@@ -10267,8 +10280,8 @@ const lifeRecovery = _ => {
 	}
 };
 
-const lifeDamage = _ => {
-	g_workObj.lifeVal -= g_workObj.lifeDmg;
+const lifeDamage = _emptyJdg => {
+	g_workObj.lifeVal -= g_workObj.lifeDmg * (_emptyJdg ? 0.25 : 1);
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
@@ -10286,7 +10299,14 @@ const lifeDamage = _ => {
  */
 const changeJudgeCharacter = (_name, _character, _fjdg = ``) => {
 	g_resultObj[_name]++;
-	g_currentArrows++;
+
+	if (_name === `emptyUwan`) {
+		g_resultObj.uwan++;
+		_name = `uwan`;
+	} else {
+		g_currentArrows++;
+	}
+
 	document.querySelector(`#chara${_fjdg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
 	document.querySelector(`#chara${_fjdg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
 	document.querySelector(`#lbl${toCapitalize(_name)}`).textContent = g_resultObj[_name];
@@ -10321,13 +10341,17 @@ const judgeRecovery = (_name, _difFrame) => {
  * ダメージ系共通処理
  * @param {string} _name 
  * @param {number} _difFrame 
+ * @param {boolean} _emptyJdg 
  */
-const judgeDamage = (_name, _difFrame) => {
-	changeJudgeCharacter(_name, g_lblNameObj[`j_${_name}`]);
-	g_resultObj.combo = 0;
-	comboJ.textContent = ``;
+const judgeDamage = (_name, _difFrame, _emptyJdg) => {
+	changeJudgeCharacter((_emptyJdg ? `emptyUwan` : _name), g_lblNameObj[`j_${_name}`]);
+	if (!_emptyJdg) {
+		g_resultObj.combo = 0;
+		comboJ.textContent = ``;
+	}
 	diffJ.textContent = ``;
-	lifeDamage();
+	lifeDamage(_emptyJdg);
+
 	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
 };
 
@@ -10359,13 +10383,14 @@ const judgeMatari = _difFrame => {
  * 判定処理：ショボーン
  * @param {number} _difFrame 
  */
-const judgeShobon = _difFrame => judgeDamage(`shobon`, _difFrame);
+const judgeShobon = _difFrame => judgeDamage(`shobon`, _difFrame, false);
 
 /**
  * 判定処理：ウワァン
  * @param {number} _difFrame 
+ * @param {boolean} _emptyJdg 
  */
-const judgeUwan = _difFrame => judgeDamage(`uwan`, _difFrame);
+const judgeUwan = (_difFrame, _emptyJdg = false) => judgeDamage(`uwan`, _difFrame, _emptyJdg);
 
 /**
  * 判定処理：キター
@@ -10400,8 +10425,8 @@ const judgeIknai = _difFrame => {
 	g_customJsObj.judg_iknai.forEach(func => func(_difFrame));
 };
 
-const jdgList = [`ii`, `shakin`, `matari`, `shobon`].map(jdg => toCapitalize(jdg));
-const jdgFuncList = [judgeIi, judgeShakin, judgeMatari, judgeShobon];
+const jdgList = [`ii`, `shakin`, `matari`, `shobon`, `uwan`].map(jdg => toCapitalize(jdg));
+const jdgFuncList = [judgeIi, judgeShakin, judgeMatari, judgeShobon, judgeUwan];
 const checkJudgment = (_difCnt) => {
 	const idx = g_judgObj.arrowJ.findIndex(jdgCnt => _difCnt <= jdgCnt);
 	return [jdgFuncList[idx], jdgList[idx]];
@@ -10428,7 +10453,7 @@ const finishViewing = _ => {
 			g_resultObj.spState = `allPerfect`;
 		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === g_fullArrows) {
 			g_resultObj.spState = `perfect`;
-		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
+		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.matari + g_resultObj.kita === g_fullArrows) {
 			g_resultObj.spState = `fullCombo`;
 		}
 		if (g_headerObj.finishView !== C_DIS_NONE && [`allPerfect`, `perfect`, `fullCombo`].includes(g_resultObj.spState)) {
@@ -10510,7 +10535,7 @@ const resultInit = _ => {
 
 	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
 		g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan +
-		g_resultObj.kita + g_resultObj.iknai;
+		g_resultObj.kita + g_resultObj.iknai - g_resultObj.emptyUwan;
 
 	// スコア計算(一括)
 	const scoreTmp = Object.keys(g_pointAllocation).reduce(
@@ -10635,9 +10660,11 @@ const resultInit = _ => {
 
 	// キャラクタ、スコア描画
 	Object.keys(jdgScoreObj).forEach(score => {
+		const jdgCount = (g_headerObj.emptyJdgUse && score === `uwan`) ?
+			`${g_resultObj.uwan - g_resultObj.emptyUwan}(+${g_resultObj.emptyUwan})` : g_resultObj[score];
 		multiAppend(resultWindow,
 			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}`, 0, g_cssObj[`common_${jdgScoreObj[score].color}`], jdgScoreObj[score].pos, jdgScoreObj[score].label),
-			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}S`, 50, g_cssObj.common_score, jdgScoreObj[score].pos, g_resultObj[score], C_ALIGN_RIGHT),
+			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}S`, 50, g_cssObj.common_score, jdgScoreObj[score].pos, jdgCount, C_ALIGN_RIGHT),
 		);
 	});
 	if (g_stateObj.autoAll === C_FLG_OFF) {
@@ -10779,6 +10806,7 @@ const resultInit = _ => {
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 
+	const tweetUwan = g_headerObj.emptyJdgUse ? `${g_resultObj.uwan - g_resultObj.emptyUwan}(+${g_resultObj.emptyUwan})` : g_resultObj.uwan;
 	let tweetFrzJdg = ``;
 	let tweetMaxCombo = `${g_resultObj.maxCombo}`;
 	if (g_allFrz > 0) {
@@ -10794,7 +10822,7 @@ const resultInit = _ => {
 		[`[rank]`, rankMark],
 		[`[score]`, g_resultObj.score],
 		[`[playStyle]`, playStyleData],
-		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`],
+		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${tweetUwan}`],
 		[`[frzJdg]`, tweetFrzJdg],
 		[`[maxCombo]`, tweetMaxCombo],
 		[`[url]`, g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``)]
