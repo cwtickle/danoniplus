@@ -720,6 +720,7 @@ const g_resultObj = {
     matari: 0,
     shobon: 0,
     uwan: 0,
+    emptyUwan: 0,
     kita: 0,
     sfsf: 0,
     iknai: 0,
