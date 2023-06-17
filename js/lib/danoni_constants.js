@@ -911,7 +911,7 @@ const g_settings = {
 
     opacitys: [10, 25, 50, 75, 100],
 
-    scoreDetailDefs: [`Speed`, `Density`, `ToolDif`],
+    scoreDetailDefs: [`Density`, `Speed`, `ToolDif`],
     scoreDetails: [],
     scoreDetailCursors: [],
 };
@@ -1395,13 +1395,13 @@ const g_shortcutObj = {
         KeyV: { id: `lnkVolumeR` },
 
         KeyI: { id: `btnGraph` },
-        Digit1: { id: `lnkSpeedG` },
-        Digit2: { id: `lnkDensityG` },
+        Digit1: { id: `lnkDensityG` },
+        Digit2: { id: `lnkSpeedG` },
         Digit3: { id: `lnkToolDifG` },
-        Numpad1: { id: `lnkSpeedG` },
-        Numpad2: { id: `lnkDensityG` },
+        Numpad1: { id: `lnkDensityG` },
+        Numpad2: { id: `lnkSpeedG` },
         Numpad3: { id: `lnkToolDifG` },
-        KeyQ: { id: `lnkSpeedG` },
+        KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
         KeyZ: { id: `btnSave` },
 
@@ -1423,13 +1423,13 @@ const g_shortcutObj = {
         ArrowUp: { id: `btnDifU` },
 
         KeyI: { id: `btnGraph` },
-        Digit1: { id: `lnkSpeedG` },
-        Digit2: { id: `lnkDensityG` },
+        Digit1: { id: `lnkDensityG` },
+        Digit2: { id: `lnkSpeedG` },
         Digit3: { id: `lnkToolDifG` },
-        Numpad1: { id: `lnkSpeedG` },
-        Numpad2: { id: `lnkDensityG` },
+        Numpad1: { id: `lnkDensityG` },
+        Numpad2: { id: `lnkSpeedG` },
         Numpad3: { id: `lnkToolDifG` },
-        KeyQ: { id: `lnkSpeedG` },
+        KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
 
         Escape: { id: `btnBack` },
