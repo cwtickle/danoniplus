@@ -914,6 +914,8 @@ const g_settings = {
     scoreDetailDefs: [`Density`, `Speed`, `ToolDif`],
     scoreDetails: [],
     scoreDetailCursors: [],
+
+    scoreDetailTrans: [[`Velocity`, `Speed`], [`DifLevel`, `ToolDif`]],
 };
 
 g_settings.volumeNum = g_settings.volumes.length - 1;

@@ -3103,10 +3103,14 @@ const headerConvert = _dosObj => {
 	obj.resultMotionSet = setBoolVal(_dosObj.resultMotionSet, true);
 
 	// 譜面明細の使用可否
-	g_settings.scoreDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`) || g_settings.scoreDetailDefs;
+	const tmpDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`)
+		.map(val => replaceStr(val, g_settings.scoreDetailTrans));
+	g_settings.scoreDetails = g_settings.scoreDetailDefs.filter(val => tmpDetails?.includes(val) || tmpDetails === undefined);
+
 	g_stateObj.scoreDetail = g_settings.scoreDetails[0] || ``;
 	g_settings.scoreDetailCursors = g_settings.scoreDetails.map(val => `lnk${val}G`);
 	g_settings.scoreDetailCursors.push(`btnGraph`);
+	[`option`, `difSelector`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[0]);
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
 	obj.jdgPosReset = setBoolVal(_dosObj.jdgPosReset, true);
