@@ -2717,7 +2717,7 @@ const g_lblNameObj = {
 
     'u_Speed': `Velocity`,
     'u_Density': `Density`,
-    'u_ToolDif': `ToolDif`,
+    'u_ToolDif': `DifLevel`,
 
     'u_Main': `Main`,
     'u_Replaced': `Replaced`,
