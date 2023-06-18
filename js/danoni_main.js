@@ -3109,7 +3109,7 @@ const headerConvert = _dosObj => {
 
 	g_stateObj.scoreDetail = g_settings.scoreDetails[0] || ``;
 	g_settings.scoreDetailCursors = g_settings.scoreDetails.map(val => `lnk${val}G`);
-	g_settings.scoreDetailCursors.push(`btnGraph`);
+	g_settings.scoreDetailCursors.push(`btnGraphB`);
 	[`option`, `difSelector`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[0]);
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
@@ -5035,7 +5035,10 @@ const createOptionWindow = _sprite => {
 	};
 
 	if (g_settings.scoreDetails.length > 0) {
-		spriteList.speed.appendChild(
+		multiAppend(spriteList.speed,
+			createCss2Button(`btnGraphB`, ``, _ => true, {
+				x: -25, y: -60, w: 0, h: 0, opacity: 0, resetFunc: _ => setScoreDetail(true),
+			}, g_cssObj.button_Mini),
 			createCss2Button(`btnGraph`, `i`, _ => true, {
 				x: -25, y: -60, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz, title: g_msgObj.graph,
 				resetFunc: _ => setScoreDetail(), cxtFunc: _ => setScoreDetail(),
@@ -5084,7 +5087,7 @@ const createOptionWindow = _sprite => {
 	/**
 	 * 譜面明細表示／非表示ボタンの処理
 	 */
-	const setScoreDetail = _ => {
+	const setScoreDetail = (_resetFlg = false) => {
 		if (g_currentPage === `difSelector`) {
 			resetDifWindow();
 			g_stateObj.scoreDetailViewFlg = false;
@@ -5099,7 +5102,9 @@ const createOptionWindow = _sprite => {
 		detailObj.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
 
 		// Qキーを押したときのカーソル位置を先頭に初期化
-		g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
+		if (_resetFlg) {
+			g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
+		}
 	};
 
 	// ---------------------------------------------------

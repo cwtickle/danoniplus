@@ -2876,7 +2876,7 @@ const g_lang_msgObj = {
         fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
         volume: `ゲーム内の音量を設定します。`,
 
-        graph: `速度変化や譜面密度状況、\n譜面の難易度など譜面の詳細情報を表示します。`,
+        graph: `譜面密度や速度変化状況、\n譜面の難易度などの情報を表示します。`,
         dataSave: `ハイスコア、リバース設定、\nキーコンフィグの保存の有無を設定します。`,
         toDisplay: `プレイ画面上のオブジェクトの\n表示・非表示（一部透明度）を設定します。`,
         toSettings: `SETTINGS画面へ戻ります。`,
@@ -2932,7 +2932,7 @@ const g_lang_msgObj = {
         fadein: `Plays the chart from the middle.\nIf you start in the middle, the high score will not be saved.`,
         volume: `Set the in-game volume.`,
 
-        graph: `Displays detailed information about the chart, such as sequences' speed changes, chart's density status, and chart's difficulty.`,
+        graph: `Displays detailed information about the chart, such as chart's density status, sequences' velocity changes, and chart's difficulty.`,
         dataSave: `Set whether to save the high score, reverse setting, and key config.`,
         toDisplay: `Set the display or non-display (partial transparency) of objects on the play screen.`,
         toSettings: `Return to the SETTINGS screen.`,
