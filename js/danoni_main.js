@@ -3103,10 +3103,14 @@ const headerConvert = _dosObj => {
 	obj.resultMotionSet = setBoolVal(_dosObj.resultMotionSet, true);
 
 	// 譜面明細の使用可否
-	g_settings.scoreDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`) || g_settings.scoreDetailDefs;
+	const tmpDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`)
+		.map(val => replaceStr(val, g_settings.scoreDetailTrans));
+	g_settings.scoreDetails = g_settings.scoreDetailDefs.filter(val => tmpDetails?.includes(val) || tmpDetails === undefined);
+
 	g_stateObj.scoreDetail = g_settings.scoreDetails[0] || ``;
 	g_settings.scoreDetailCursors = g_settings.scoreDetails.map(val => `lnk${val}G`);
-	g_settings.scoreDetailCursors.push(`btnGraph`);
+	g_settings.scoreDetailCursors.push(`btnGraphB`);
+	[`option`, `difSelector`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[0]);
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
 	obj.jdgPosReset = setBoolVal(_dosObj.jdgPosReset, true);
@@ -4565,10 +4569,10 @@ const drawSpeedGraph = _scoreId => {
 		const lineX = (speedType === `speed`) ? 125 : 210;
 		context.beginPath();
 		context.moveTo(lineX, 215);
-		context.lineTo(lineX + 30, 215);
+		context.lineTo(lineX + 25, 215);
 		context.stroke();
 		context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
-		context.fillText(speedType, lineX + 35, 218);
+		context.fillText(g_lblNameObj[`s_${speedType}`], lineX + 30, 218);
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, avgSubX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
@@ -5031,7 +5035,10 @@ const createOptionWindow = _sprite => {
 	};
 
 	if (g_settings.scoreDetails.length > 0) {
-		spriteList.speed.appendChild(
+		multiAppend(spriteList.speed,
+			createCss2Button(`btnGraphB`, ``, _ => true, {
+				x: -25, y: -60, w: 0, h: 0, opacity: 0, resetFunc: _ => setScoreDetail(true),
+			}, g_cssObj.button_Mini),
 			createCss2Button(`btnGraph`, `i`, _ => true, {
 				x: -25, y: -60, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz, title: g_msgObj.graph,
 				resetFunc: _ => setScoreDetail(), cxtFunc: _ => setScoreDetail(),
@@ -5080,7 +5087,7 @@ const createOptionWindow = _sprite => {
 	/**
 	 * 譜面明細表示／非表示ボタンの処理
 	 */
-	const setScoreDetail = _ => {
+	const setScoreDetail = (_resetFlg = false) => {
 		if (g_currentPage === `difSelector`) {
 			resetDifWindow();
 			g_stateObj.scoreDetailViewFlg = false;
@@ -5095,7 +5102,9 @@ const createOptionWindow = _sprite => {
 		detailObj.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
 
 		// Qキーを押したときのカーソル位置を先頭に初期化
-		g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
+		if (_resetFlg) {
+			g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
+		}
 	};
 
 	// ---------------------------------------------------

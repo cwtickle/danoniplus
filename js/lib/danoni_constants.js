@@ -911,9 +911,11 @@ const g_settings = {
 
     opacitys: [10, 25, 50, 75, 100],
 
-    scoreDetailDefs: [`Speed`, `Density`, `ToolDif`],
+    scoreDetailDefs: [`Density`, `Speed`, `ToolDif`],
     scoreDetails: [],
     scoreDetailCursors: [],
+
+    scoreDetailTrans: [[`Velocity`, `Speed`], [`DifLevel`, `ToolDif`]],
 };
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
@@ -1395,13 +1397,13 @@ const g_shortcutObj = {
         KeyV: { id: `lnkVolumeR` },
 
         KeyI: { id: `btnGraph` },
-        Digit1: { id: `lnkSpeedG` },
-        Digit2: { id: `lnkDensityG` },
+        Digit1: { id: `lnkDensityG` },
+        Digit2: { id: `lnkSpeedG` },
         Digit3: { id: `lnkToolDifG` },
-        Numpad1: { id: `lnkSpeedG` },
-        Numpad2: { id: `lnkDensityG` },
+        Numpad1: { id: `lnkDensityG` },
+        Numpad2: { id: `lnkSpeedG` },
         Numpad3: { id: `lnkToolDifG` },
-        KeyQ: { id: `lnkSpeedG` },
+        KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
         KeyZ: { id: `btnSave` },
 
@@ -1423,13 +1425,13 @@ const g_shortcutObj = {
         ArrowUp: { id: `btnDifU` },
 
         KeyI: { id: `btnGraph` },
-        Digit1: { id: `lnkSpeedG` },
-        Digit2: { id: `lnkDensityG` },
+        Digit1: { id: `lnkDensityG` },
+        Digit2: { id: `lnkSpeedG` },
         Digit3: { id: `lnkToolDifG` },
-        Numpad1: { id: `lnkSpeedG` },
-        Numpad2: { id: `lnkDensityG` },
+        Numpad1: { id: `lnkDensityG` },
+        Numpad2: { id: `lnkSpeedG` },
         Numpad3: { id: `lnkToolDifG` },
-        KeyQ: { id: `lnkSpeedG` },
+        KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
 
         Escape: { id: `btnBack` },
@@ -2634,10 +2636,10 @@ const g_lblNameObj = {
     g_damage: `Damage`,
     g_rate: `Accuracy`,
 
-    s_speed: `Speed`,
+    s_speed: `Overall`,
     s_boost: `Boost`,
     s_avg: `Avg.`,
-    s_avgDspeed: `AvgS)`,
+    s_avgDspeed: `AvgO)`,
     s_avgDboost: `AvgB)`,
 
     s_apm: `APM`,
@@ -2715,9 +2717,9 @@ const g_lblNameObj = {
     'u_Sudden+': `Sudden+`,
     'u_Hid&Sud+': `Hid&Sud+`,
 
-    'u_Speed': `Speed`,
+    'u_Speed': `Velocity`,
     'u_Density': `Density`,
-    'u_ToolDif': `ToolDif`,
+    'u_ToolDif': `DifLevel`,
 
     'u_Main': `Main`,
     'u_Replaced': `Replaced`,
@@ -2874,7 +2876,7 @@ const g_lang_msgObj = {
         fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
         volume: `ゲーム内の音量を設定します。`,
 
-        graph: `速度変化や譜面密度状況、\n譜面の難易度など譜面の詳細情報を表示します。`,
+        graph: `譜面密度や速度変化状況、\n譜面の難易度などの情報を表示します。`,
         dataSave: `ハイスコア、リバース設定、\nキーコンフィグの保存の有無を設定します。`,
         toDisplay: `プレイ画面上のオブジェクトの\n表示・非表示（一部透明度）を設定します。`,
         toSettings: `SETTINGS画面へ戻ります。`,
@@ -2930,7 +2932,7 @@ const g_lang_msgObj = {
         fadein: `Plays the chart from the middle.\nIf you start in the middle, the high score will not be saved.`,
         volume: `Set the in-game volume.`,
 
-        graph: `Displays detailed information about the chart, such as sequences' speed changes, chart's density status, and chart's difficulty.`,
+        graph: `Displays detailed information about the chart, such as chart's density status, sequences' velocity changes, and chart's difficulty.`,
         dataSave: `Set whether to save the high score, reverse setting, and key config.`,
         toDisplay: `Set the display or non-display (partial transparency) of objects on the play screen.`,
         toSettings: `Return to the SETTINGS screen.`,
