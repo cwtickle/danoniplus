@@ -4565,10 +4565,10 @@ const drawSpeedGraph = _scoreId => {
 		const lineX = (speedType === `speed`) ? 125 : 210;
 		context.beginPath();
 		context.moveTo(lineX, 215);
-		context.lineTo(lineX + 30, 215);
+		context.lineTo(lineX + 25, 215);
 		context.stroke();
 		context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
-		context.fillText(speedType, lineX + 35, 218);
+		context.fillText(g_lblNameObj[`s_${speedType}`], lineX + 30, 218);
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, avgSubX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);

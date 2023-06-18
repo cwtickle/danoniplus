@@ -2634,10 +2634,10 @@ const g_lblNameObj = {
     g_damage: `Damage`,
     g_rate: `Accuracy`,
 
-    s_speed: `Speed`,
+    s_speed: `Overall`,
     s_boost: `Boost`,
     s_avg: `Avg.`,
-    s_avgDspeed: `AvgS)`,
+    s_avgDspeed: `AvgO)`,
     s_avgDboost: `AvgB)`,
 
     s_apm: `APM`,
@@ -2715,7 +2715,7 @@ const g_lblNameObj = {
     'u_Sudden+': `Sudden+`,
     'u_Hid&Sud+': `Hid&Sud+`,
 
-    'u_Speed': `Speed`,
+    'u_Speed': `Velocity`,
     'u_Density': `Density`,
     'u_ToolDif': `ToolDif`,
 
