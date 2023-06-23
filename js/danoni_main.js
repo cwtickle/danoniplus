@@ -3013,7 +3013,9 @@ const headerConvert = _dosObj => {
 	obj.frzStartjdgUse = setBoolVal(_dosObj.frzStartjdgUse ?? g_presetObj.frzStartjdgUse);
 
 	// 空押し判定を行うか
-	obj.emptyJdgUse = setBoolVal(_dosObj.emptyJdgUse ?? g_presetObj.emptyJdgUse);
+	obj.excessiveJdgUse = setBoolVal(_dosObj.excessiveJdgUse ?? g_presetObj.excessiveJdgUse);
+	g_stateObj.excessive = obj.excessiveJdgUse ? C_FLG_ON : C_FLG_OFF;
+	g_settings.excessiveNum = obj.excessiveJdgUse ? 1 : 0;
 
 	// 譜面名に制作者名を付加するかどうかのフラグ
 	obj.makerView = setBoolVal(_dosObj.makerView);
@@ -5163,6 +5165,16 @@ const createOptionWindow = _sprite => {
 		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, getStgDetailName(g_stateObj.gauge)));
 	}
 
+	// 空押し判定設定 (Excessive)
+	if (g_headerObj.excessiveUse) {
+		spriteList.gauge.appendChild(
+			createCss2Button(`lnkExcessive`, g_lblNameObj.Excessive, evt => setExcessive(evt.target),
+				Object.assign(g_lblPosObj.btnExcessive, {
+					title: g_msgObj.excessive, cxtFunc: evt => setExcessive(evt.target),
+				}), g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`])
+		);
+	}
+
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10.5  短縮ショートカットあり
@@ -5606,6 +5618,16 @@ const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
 		allowableCntsText = ``;
 	}
 	return [rateText, allowableCntsText];
+};
+
+/**
+ * 空押し判定の設定
+ */
+const setExcessive = _btn => {
+	g_settings.excessiveNum = (g_settings.excessiveNum + 1) % 2;
+	g_stateObj.excessive = g_settings.excessives[g_settings.excessiveNum];
+	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.excessives[(g_settings.excessiveNum + 1) % 2]}`],
+		g_cssObj[`button_Rev${g_settings.excessives[g_settings.excessiveNum]}`]);
 };
 
 /**
@@ -10168,10 +10190,9 @@ const judgeArrow = _j => {
 		}
 
 		// 空押し判定
-		if (g_headerObj.emptyJdgUse && _difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan] && _difCnt > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
-			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
-			resultFunc(_difFrame, true);
-			stepHitTargetArrow(resultJdg);
+		if (g_stateObj.excessive === C_FLG_ON && _difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan] && _difCnt > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+			displayDiff(_difFrame);
+			stepHitTargetArrow(`Excessive`);
 			return true;
 
 		// 通常判定
@@ -10238,7 +10259,11 @@ const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames
 	let diffJDisp = ``;
 	g_workObj.diffList.push(_difFrame);
 	const difCnt = Math.abs(_difFrame);
-	if (_difFrame > _justFrames) {
+	if (_difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+		diffJDisp = `<span class="common_kita">Excessive</span>`;
+		g_resultObj.excessive++;
+		lifeDamage(true);
+	} else if (_difFrame > _justFrames) {
 		diffJDisp = `<span class="common_matari">Fast ${difCnt} Frames</span>`;
 		g_resultObj.fast++;
 	} else if (_difFrame < _justFrames * (-1)) {
@@ -10280,8 +10305,12 @@ const lifeRecovery = _ => {
 	}
 };
 
-const lifeDamage = _emptyJdg => {
-	g_workObj.lifeVal -= g_workObj.lifeDmg * (_emptyJdg ? 0.25 : 1);
+/**
+ * ゲージダメージ処理
+ * @param {boolean} _excessive 
+ */
+const lifeDamage = (_excessive = false) => {
+	g_workObj.lifeVal -= g_workObj.lifeDmg * (_excessive ? 0.25 : 1);
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
@@ -10299,13 +10328,7 @@ const lifeDamage = _emptyJdg => {
  */
 const changeJudgeCharacter = (_name, _character, _fjdg = ``) => {
 	g_resultObj[_name]++;
-
-	if (_name === `emptyUwan`) {
-		g_resultObj.uwan++;
-		_name = `uwan`;
-	} else {
-		g_currentArrows++;
-	}
+	g_currentArrows++;
 
 	document.querySelector(`#chara${_fjdg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
 	document.querySelector(`#chara${_fjdg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
@@ -10341,16 +10364,13 @@ const judgeRecovery = (_name, _difFrame) => {
  * ダメージ系共通処理
  * @param {string} _name 
  * @param {number} _difFrame 
- * @param {boolean} _emptyJdg 
  */
-const judgeDamage = (_name, _difFrame, _emptyJdg) => {
-	changeJudgeCharacter((_emptyJdg ? `emptyUwan` : _name), g_lblNameObj[`j_${_name}`]);
-	if (!_emptyJdg) {
-		g_resultObj.combo = 0;
-		comboJ.textContent = ``;
-	}
+const judgeDamage = (_name, _difFrame) => {
+	changeJudgeCharacter(_name, g_lblNameObj[`j_${_name}`]);
+	g_resultObj.combo = 0;
+	comboJ.textContent = ``;
 	diffJ.textContent = ``;
-	lifeDamage(_emptyJdg);
+	lifeDamage();
 
 	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
 };
@@ -10383,14 +10403,13 @@ const judgeMatari = _difFrame => {
  * 判定処理：ショボーン
  * @param {number} _difFrame 
  */
-const judgeShobon = _difFrame => judgeDamage(`shobon`, _difFrame, false);
+const judgeShobon = _difFrame => judgeDamage(`shobon`, _difFrame);
 
 /**
  * 判定処理：ウワァン
  * @param {number} _difFrame 
- * @param {boolean} _emptyJdg 
  */
-const judgeUwan = (_difFrame, _emptyJdg = false) => judgeDamage(`uwan`, _difFrame, _emptyJdg);
+const judgeUwan = (_difFrame) => judgeDamage(`uwan`, _difFrame);
 
 /**
  * 判定処理：キター
@@ -10425,8 +10444,8 @@ const judgeIknai = _difFrame => {
 	g_customJsObj.judg_iknai.forEach(func => func(_difFrame));
 };
 
-const jdgList = [`ii`, `shakin`, `matari`, `shobon`, `uwan`].map(jdg => toCapitalize(jdg));
-const jdgFuncList = [judgeIi, judgeShakin, judgeMatari, judgeShobon, judgeUwan];
+const jdgList = [`ii`, `shakin`, `matari`, `shobon`].map(jdg => toCapitalize(jdg));
+const jdgFuncList = [judgeIi, judgeShakin, judgeMatari, judgeShobon];
 const checkJudgment = (_difCnt) => {
 	const idx = g_judgObj.arrowJ.findIndex(jdgCnt => _difCnt <= jdgCnt);
 	return [jdgFuncList[idx], jdgList[idx]];
@@ -10535,7 +10554,7 @@ const resultInit = _ => {
 
 	const playingArrows = g_resultObj.ii + g_resultObj.shakin +
 		g_resultObj.matari + g_resultObj.shobon + g_resultObj.uwan +
-		g_resultObj.kita + g_resultObj.iknai - g_resultObj.emptyUwan;
+		g_resultObj.kita + g_resultObj.iknai;
 
 	// スコア計算(一括)
 	const scoreTmp = Object.keys(g_pointAllocation).reduce(
@@ -10552,7 +10571,7 @@ const resultInit = _ => {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
 		g_resultObj.spState = `failed`;
-	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF) {
+	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF && !(g_headerObj.excessiveJdgUse && g_stateObj.excessive === C_FLG_OFF) ) {
 		if (g_resultObj.spState === ``) {
 			g_resultObj.spState = `cleared`;
 		}
@@ -10660,11 +10679,9 @@ const resultInit = _ => {
 
 	// キャラクタ、スコア描画
 	Object.keys(jdgScoreObj).forEach(score => {
-		const jdgCount = (g_headerObj.emptyJdgUse && score === `uwan`) ?
-			`${g_resultObj.uwan - g_resultObj.emptyUwan}(+${g_resultObj.emptyUwan})` : g_resultObj[score];
 		multiAppend(resultWindow,
 			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}`, 0, g_cssObj[`common_${jdgScoreObj[score].color}`], jdgScoreObj[score].pos, jdgScoreObj[score].label),
-			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}S`, 50, g_cssObj.common_score, jdgScoreObj[score].pos, jdgCount, C_ALIGN_RIGHT),
+			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}S`, 50, g_cssObj.common_score, jdgScoreObj[score].pos, g_resultObj[score], C_ALIGN_RIGHT),
 		);
 	});
 	if (g_stateObj.autoAll === C_FLG_OFF) {
@@ -10678,6 +10695,12 @@ const resultInit = _ => {
 			multiAppend(resultWindow,
 				makeCssResultSymbol(`lblAdj`, 350, g_cssObj.common_shakin, 4, g_lblNameObj.j_adj),
 				makeCssResultSymbol(`lblAdjS`, 260, g_cssObj.score, 5, `${getDiffFrame(estimatedAdj)}`, C_ALIGN_RIGHT),
+			);
+		}
+		if (g_stateObj.excessive === C_FLG_ON) {
+			multiAppend(resultWindow,
+				makeCssResultSymbol(`lblExcessive`, 350, g_cssObj.common_kita, 6, `Excessive`),
+				makeCssResultSymbol(`lblExcessiveS`, 260, g_cssObj.score, 7, g_resultObj.excessive, C_ALIGN_RIGHT),
 			);
 		}
 	}
@@ -10806,7 +10829,6 @@ const resultInit = _ => {
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 
-	const tweetUwan = g_headerObj.emptyJdgUse ? `${g_resultObj.uwan - g_resultObj.emptyUwan}(+${g_resultObj.emptyUwan})` : g_resultObj.uwan;
 	let tweetFrzJdg = ``;
 	let tweetMaxCombo = `${g_resultObj.maxCombo}`;
 	if (g_allFrz > 0) {
@@ -10822,7 +10844,7 @@ const resultInit = _ => {
 		[`[rank]`, rankMark],
 		[`[score]`, g_resultObj.score],
 		[`[playStyle]`, playStyleData],
-		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${tweetUwan}`],
+		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}(+${g_resultObj.excessive})`],
 		[`[frzJdg]`, tweetFrzJdg],
 		[`[maxCombo]`, tweetMaxCombo],
 		[`[url]`, g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``)]

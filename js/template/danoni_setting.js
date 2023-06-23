@@ -147,7 +147,7 @@ g_presetObj.frzStartjdgUse = `false`;
   空押し判定を行うか
   判定させる場合は `true` を指定
 */
-g_presetObj.emptyJdgUse = `false`;
+g_presetObj.excessiveJdgUse = `false`;
 
 
 /*
@@ -226,6 +226,7 @@ g_presetObj.settingUse = {
 	shuffle: `true`,
 	autoPlay: `true`,
 	gauge: `true`,
+	excessive: `true`,
 	appearance: `true`,
 
 	//	stepZone: `true`,
