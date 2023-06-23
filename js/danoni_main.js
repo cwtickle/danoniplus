@@ -10329,7 +10329,6 @@ const lifeDamage = (_excessive = false) => {
 const changeJudgeCharacter = (_name, _character, _fjdg = ``) => {
 	g_resultObj[_name]++;
 	g_currentArrows++;
-
 	document.querySelector(`#chara${_fjdg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
 	document.querySelector(`#chara${_fjdg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
 	document.querySelector(`#lbl${toCapitalize(_name)}`).textContent = g_resultObj[_name];
@@ -10371,7 +10370,6 @@ const judgeDamage = (_name, _difFrame) => {
 	comboJ.textContent = ``;
 	diffJ.textContent = ``;
 	lifeDamage();
-
 	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
 };
 
@@ -10409,7 +10407,7 @@ const judgeShobon = _difFrame => judgeDamage(`shobon`, _difFrame);
  * 判定処理：ウワァン
  * @param {number} _difFrame 
  */
-const judgeUwan = (_difFrame) => judgeDamage(`uwan`, _difFrame);
+const judgeUwan = _difFrame => judgeDamage(`uwan`, _difFrame);
 
 /**
  * 判定処理：キター
@@ -10472,7 +10470,7 @@ const finishViewing = _ => {
 			g_resultObj.spState = `allPerfect`;
 		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.kita === g_fullArrows) {
 			g_resultObj.spState = `perfect`;
-		} else if (g_resultObj.ii + g_resultObj.shakin + g_resultObj.matari + g_resultObj.kita === g_fullArrows) {
+		} else if (g_resultObj.uwan === 0 && g_resultObj.shobon === 0 && g_resultObj.iknai === 0) {
 			g_resultObj.spState = `fullCombo`;
 		}
 		if (g_headerObj.finishView !== C_DIS_NONE && [`allPerfect`, `perfect`, `fullCombo`].includes(g_resultObj.spState)) {
