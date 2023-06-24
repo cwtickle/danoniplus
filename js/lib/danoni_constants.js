@@ -2936,7 +2936,7 @@ const g_lang_msgObj = {
         shuffle: `Flip the chart left and right or make it random.\nIf you make it random, it will be treated as other charts and the high score will not be saved.`,
         autoPlay: `Set to auto play and to hit some keys automatically.\nHigh score is not saved during auto play.`,
         gauge: `Set the clear condition.\n[Start] initial value, [Border] borderline value (hyphen means zero),\n[Recovery] recovery amount, [Damage] damage amount,\n[Accuracy] accuracy required to clear (mouseover to see the number of allowed mistakes)`,
-        excessive: `Set whether to use excessive judgement.`,
+        excessive: `Set whether to use excessive miss judgment.`,
         adjustment: `If you feel that the timing is out of sync with the music, \nyou can correct the shift in frame units by changing the value.\nThe outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, \nand the inner button in 0.5 frame increments.`,
         fadein: `Plays the chart from the middle.\nIf you start in the middle, the high score will not be saved.`,
         volume: `Set the in-game volume.`,

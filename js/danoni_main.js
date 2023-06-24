@@ -10190,7 +10190,7 @@ const judgeArrow = _j => {
 		}
 
 		// 空押し判定
-		if (g_stateObj.excessive === C_FLG_ON && _difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan] && _difCnt > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+		if (g_stateObj.excessive === C_FLG_ON && _difFrame <= g_judgObj.arrowJ[g_judgPosObj.uwan] && _difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
 			displayDiff(_difFrame);
 			stepHitTargetArrow(`Excessive`);
 			return true;
