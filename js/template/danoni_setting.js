@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2023/02/14 (v30.1.1)
+ * Template Update: 2023/06/24 (v32.5.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -113,6 +113,13 @@ g_presetObj.gaugeList = {
 };
 */
 
+/**
+  空押し判定を行うか
+  判定させる場合は `true` を指定
+*/
+g_presetObj.excessiveJdgUse = `false`;
+
+
 /*
 ------------------------------------------------------------------------
    フリーズアロー設定 
@@ -135,7 +142,6 @@ g_presetObj.frzColors = true;
   判定させる場合は `true` を指定
 */
 g_presetObj.frzStartjdgUse = `false`;
-
 
 /*
 ------------------------------------------------------------------------
@@ -213,6 +219,7 @@ g_presetObj.settingUse = {
 	shuffle: `true`,
 	autoPlay: `true`,
 	gauge: `true`,
+	excessive: `true`,
 	appearance: `true`,
 
 	//	stepZone: `true`,

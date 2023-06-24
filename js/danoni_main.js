@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/06/09
+ * Revised : 2023/06/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 32.4.0`;
-const g_revisedDate = `2023/06/09`;
+const g_version = `Ver 32.5.0`;
+const g_revisedDate = `2023/06/24`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3012,6 +3012,11 @@ const headerConvert = _dosObj => {
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
 	obj.frzStartjdgUse = setBoolVal(_dosObj.frzStartjdgUse ?? g_presetObj.frzStartjdgUse);
 
+	// 空押し判定を行うか
+	obj.excessiveJdgUse = setBoolVal(_dosObj.excessiveJdgUse ?? g_presetObj.excessiveJdgUse);
+	g_stateObj.excessive = obj.excessiveJdgUse ? C_FLG_ON : C_FLG_OFF;
+	g_settings.excessiveNum = obj.excessiveJdgUse ? 1 : 0;
+
 	// 譜面名に制作者名を付加するかどうかのフラグ
 	obj.makerView = setBoolVal(_dosObj.makerView);
 
@@ -3103,10 +3108,14 @@ const headerConvert = _dosObj => {
 	obj.resultMotionSet = setBoolVal(_dosObj.resultMotionSet, true);
 
 	// 譜面明細の使用可否
-	g_settings.scoreDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`) || g_settings.scoreDetailDefs;
+	const tmpDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`)
+		.map(val => replaceStr(val, g_settings.scoreDetailTrans));
+	g_settings.scoreDetails = g_settings.scoreDetailDefs.filter(val => tmpDetails?.includes(val) || tmpDetails === undefined);
+
 	g_stateObj.scoreDetail = g_settings.scoreDetails[0] || ``;
 	g_settings.scoreDetailCursors = g_settings.scoreDetails.map(val => `lnk${val}G`);
-	g_settings.scoreDetailCursors.push(`btnGraph`);
+	g_settings.scoreDetailCursors.push(`btnGraphB`);
+	[`option`, `difSelector`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[0]);
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
 	obj.jdgPosReset = setBoolVal(_dosObj.jdgPosReset, true);
@@ -4565,10 +4574,10 @@ const drawSpeedGraph = _scoreId => {
 		const lineX = (speedType === `speed`) ? 125 : 210;
 		context.beginPath();
 		context.moveTo(lineX, 215);
-		context.lineTo(lineX + 30, 215);
+		context.lineTo(lineX + 25, 215);
 		context.stroke();
 		context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
-		context.fillText(speedType, lineX + 35, 218);
+		context.fillText(g_lblNameObj[`s_${speedType}`], lineX + 30, 218);
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, avgSubX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
@@ -5031,7 +5040,10 @@ const createOptionWindow = _sprite => {
 	};
 
 	if (g_settings.scoreDetails.length > 0) {
-		spriteList.speed.appendChild(
+		multiAppend(spriteList.speed,
+			createCss2Button(`btnGraphB`, ``, _ => true, {
+				x: -25, y: -60, w: 0, h: 0, opacity: 0, resetFunc: _ => setScoreDetail(true),
+			}, g_cssObj.button_Mini),
 			createCss2Button(`btnGraph`, `i`, _ => true, {
 				x: -25, y: -60, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz, title: g_msgObj.graph,
 				resetFunc: _ => setScoreDetail(), cxtFunc: _ => setScoreDetail(),
@@ -5080,7 +5092,7 @@ const createOptionWindow = _sprite => {
 	/**
 	 * 譜面明細表示／非表示ボタンの処理
 	 */
-	const setScoreDetail = _ => {
+	const setScoreDetail = (_resetFlg = false) => {
 		if (g_currentPage === `difSelector`) {
 			resetDifWindow();
 			g_stateObj.scoreDetailViewFlg = false;
@@ -5095,7 +5107,9 @@ const createOptionWindow = _sprite => {
 		detailObj.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
 
 		// Qキーを押したときのカーソル位置を先頭に初期化
-		g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
+		if (_resetFlg) {
+			g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
+		}
 	};
 
 	// ---------------------------------------------------
@@ -5158,6 +5172,16 @@ const createOptionWindow = _sprite => {
 	} else {
 		lblGauge.classList.add(g_cssObj.settings_Disabled);
 		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, getStgDetailName(g_stateObj.gauge)));
+	}
+
+	// 空押し判定設定 (Excessive)
+	if (g_headerObj.excessiveUse) {
+		spriteList.gauge.appendChild(
+			createCss2Button(`lnkExcessive`, g_lblNameObj.Excessive, evt => setExcessive(evt.target),
+				Object.assign(g_lblPosObj.btnExcessive, {
+					title: g_msgObj.excessive, cxtFunc: evt => setExcessive(evt.target),
+				}), g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`])
+		);
 	}
 
 	// ---------------------------------------------------
@@ -5603,6 +5627,16 @@ const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
 		allowableCntsText = ``;
 	}
 	return [rateText, allowableCntsText];
+};
+
+/**
+ * 空押し判定の設定
+ */
+const setExcessive = _btn => {
+	g_settings.excessiveNum = (g_settings.excessiveNum + 1) % 2;
+	g_stateObj.excessive = g_settings.excessives[g_settings.excessiveNum];
+	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.excessives[(g_settings.excessiveNum + 1) % 2]}`],
+		g_cssObj[`button_Rev${g_settings.excessives[g_settings.excessiveNum]}`]);
 };
 
 /**
@@ -9236,7 +9270,7 @@ const mainInit = _ => {
 
 		// 矢印(枠外判定、AutoPlay: OFF)
 		arrowOFF: (_j, _arrowName, _cnt) => {
-			if (_cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.uwan]) {
+			if (_cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.shobon]) {
 				judgeUwan(_cnt);
 				judgeObjDelete.arrow(_j, _arrowName);
 			}
@@ -10155,18 +10189,27 @@ const judgeArrow = _j => {
 
 	const judgeTargetArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
-		if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan]) {
-			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
-			resultFunc(_difFrame);
-			displayDiff(_difFrame);
-
+		const stepHitTargetArrow = _resultJdg => {
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
 			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_workObj.hitPosition * g_workObj.scrollDir[_j]}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
-			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
+			stepDivHit.classList.add(g_cssObj[`main_step${_resultJdg}`]);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
+		}
 
+		if (g_stateObj.excessive === C_FLG_ON && _difFrame <= g_judgObj.arrowJ[g_judgPosObj.uwan] && _difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+			// 空押し判定（有効かつ早押し時のみ）
+			displayDiff(_difFrame);
+			stepHitTargetArrow(`Excessive`);
+			return true;
+
+		} else if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+			// 通常判定
+			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
+			resultFunc(_difFrame);
+			displayDiff(_difFrame);
+			stepHitTargetArrow(resultJdg);
 			document.getElementById(arrowName).remove();
 			g_workObj.judgArrowCnt[_j]++;
 			return true;
@@ -10225,7 +10268,11 @@ const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames
 	let diffJDisp = ``;
 	g_workObj.diffList.push(_difFrame);
 	const difCnt = Math.abs(_difFrame);
-	if (_difFrame > _justFrames) {
+	if (_difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+		diffJDisp = `<span class="common_kita">Excessive</span>`;
+		g_resultObj.excessive++;
+		lifeDamage(true);
+	} else if (_difFrame > _justFrames) {
 		diffJDisp = `<span class="common_matari">Fast ${difCnt} Frames</span>`;
 		g_resultObj.fast++;
 	} else if (_difFrame < _justFrames * (-1)) {
@@ -10267,8 +10314,12 @@ const lifeRecovery = _ => {
 	}
 };
 
-const lifeDamage = _ => {
-	g_workObj.lifeVal -= g_workObj.lifeDmg;
+/**
+ * ゲージダメージ処理
+ * @param {boolean} _excessive 
+ */
+const lifeDamage = (_excessive = false) => {
+	g_workObj.lifeVal -= g_workObj.lifeDmg * (_excessive ? 0.25 : 1);
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
@@ -10527,7 +10578,7 @@ const resultInit = _ => {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
 		g_resultObj.spState = `failed`;
-	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF) {
+	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF && !(g_headerObj.excessiveJdgUse && g_stateObj.excessive === C_FLG_OFF)) {
 		if (g_resultObj.spState === ``) {
 			g_resultObj.spState = `cleared`;
 		}
@@ -10651,6 +10702,12 @@ const resultInit = _ => {
 			multiAppend(resultWindow,
 				makeCssResultSymbol(`lblAdj`, 350, g_cssObj.common_shakin, 4, g_lblNameObj.j_adj),
 				makeCssResultSymbol(`lblAdjS`, 260, g_cssObj.score, 5, `${getDiffFrame(estimatedAdj)}`, C_ALIGN_RIGHT),
+			);
+		}
+		if (g_stateObj.excessive === C_FLG_ON) {
+			multiAppend(resultWindow,
+				makeCssResultSymbol(`lblExcessive`, 350, g_cssObj.common_kita, 6, g_lblNameObj.j_excessive),
+				makeCssResultSymbol(`lblExcessiveS`, 260, g_cssObj.score, 7, g_resultObj.excessive, C_ALIGN_RIGHT),
 			);
 		}
 	}
@@ -10779,6 +10836,8 @@ const resultInit = _ => {
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 
+	const tweetExcessive = (g_stateObj.excessive === C_FLG_ON) ? `(+${g_resultObj.excessive})` : ``;
+
 	let tweetFrzJdg = ``;
 	let tweetMaxCombo = `${g_resultObj.maxCombo}`;
 	if (g_allFrz > 0) {
@@ -10794,7 +10853,7 @@ const resultInit = _ => {
 		[`[rank]`, rankMark],
 		[`[score]`, g_resultObj.score],
 		[`[playStyle]`, playStyleData],
-		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`],
+		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}${tweetExcessive}`],
 		[`[frzJdg]`, tweetFrzJdg],
 		[`[maxCombo]`, tweetMaxCombo],
 		[`[url]`, g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``)]

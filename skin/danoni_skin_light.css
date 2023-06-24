@@ -5,7 +5,7 @@
   スキンcssファイル (light)
 
   Created : 2019/11/04
-  Revised : 2023/03/20 (v31.0.0)
+  Revised : 2023/06/24 (v32.5.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -165,6 +165,10 @@
 
 .main_stepShobon {
 	background-color: #0000cc;
+}
+
+.main_stepExcessive {
+	background-color: #999900;
 }
 
 .main_objStepShadow {
