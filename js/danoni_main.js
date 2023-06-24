@@ -3012,6 +3012,11 @@ const headerConvert = _dosObj => {
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
 	obj.frzStartjdgUse = setBoolVal(_dosObj.frzStartjdgUse ?? g_presetObj.frzStartjdgUse);
 
+	// 空押し判定を行うか
+	obj.excessiveJdgUse = setBoolVal(_dosObj.excessiveJdgUse ?? g_presetObj.excessiveJdgUse);
+	g_stateObj.excessive = obj.excessiveJdgUse ? C_FLG_ON : C_FLG_OFF;
+	g_settings.excessiveNum = obj.excessiveJdgUse ? 1 : 0;
+
 	// 譜面名に制作者名を付加するかどうかのフラグ
 	obj.makerView = setBoolVal(_dosObj.makerView);
 
@@ -5169,6 +5174,16 @@ const createOptionWindow = _sprite => {
 		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, getStgDetailName(g_stateObj.gauge)));
 	}
 
+	// 空押し判定設定 (Excessive)
+	if (g_headerObj.excessiveUse) {
+		spriteList.gauge.appendChild(
+			createCss2Button(`lnkExcessive`, g_lblNameObj.Excessive, evt => setExcessive(evt.target),
+				Object.assign(g_lblPosObj.btnExcessive, {
+					title: g_msgObj.excessive, cxtFunc: evt => setExcessive(evt.target),
+				}), g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`])
+		);
+	}
+
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
 	// 縦位置: 10.5  短縮ショートカットあり
@@ -5612,6 +5627,16 @@ const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
 		allowableCntsText = ``;
 	}
 	return [rateText, allowableCntsText];
+};
+
+/**
+ * 空押し判定の設定
+ */
+const setExcessive = _btn => {
+	g_settings.excessiveNum = (g_settings.excessiveNum + 1) % 2;
+	g_stateObj.excessive = g_settings.excessives[g_settings.excessiveNum];
+	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.excessives[(g_settings.excessiveNum + 1) % 2]}`],
+		g_cssObj[`button_Rev${g_settings.excessives[g_settings.excessiveNum]}`]);
 };
 
 /**
@@ -9245,7 +9270,7 @@ const mainInit = _ => {
 
 		// 矢印(枠外判定、AutoPlay: OFF)
 		arrowOFF: (_j, _arrowName, _cnt) => {
-			if (_cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.uwan]) {
+			if (_cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.shobon]) {
 				judgeUwan(_cnt);
 				judgeObjDelete.arrow(_j, _arrowName);
 			}
@@ -10164,18 +10189,27 @@ const judgeArrow = _j => {
 
 	const judgeTargetArrow = _difFrame => {
 		const _difCnt = Math.abs(_difFrame);
-		if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.uwan]) {
-			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
-			resultFunc(_difFrame);
-			displayDiff(_difFrame);
-
+		const stepHitTargetArrow = _resultJdg => {
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
 			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_workObj.hitPosition * g_workObj.scrollDir[_j]}px`;
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
-			stepDivHit.classList.add(g_cssObj[`main_step${resultJdg}`]);
+			stepDivHit.classList.add(g_cssObj[`main_step${_resultJdg}`]);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
+		}
 
+		// 空押し判定
+		if (g_stateObj.excessive === C_FLG_ON && _difFrame <= g_judgObj.arrowJ[g_judgPosObj.uwan] && _difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+			displayDiff(_difFrame);
+			stepHitTargetArrow(`Excessive`);
+			return true;
+
+		// 通常判定
+		} else if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
+			resultFunc(_difFrame);
+			displayDiff(_difFrame);
+			stepHitTargetArrow(resultJdg);
 			document.getElementById(arrowName).remove();
 			g_workObj.judgArrowCnt[_j]++;
 			return true;
@@ -10234,7 +10268,11 @@ const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames
 	let diffJDisp = ``;
 	g_workObj.diffList.push(_difFrame);
 	const difCnt = Math.abs(_difFrame);
-	if (_difFrame > _justFrames) {
+	if (_difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+		diffJDisp = `<span class="common_kita">Excessive</span>`;
+		g_resultObj.excessive++;
+		lifeDamage(true);
+	} else if (_difFrame > _justFrames) {
 		diffJDisp = `<span class="common_matari">Fast ${difCnt} Frames</span>`;
 		g_resultObj.fast++;
 	} else if (_difFrame < _justFrames * (-1)) {
@@ -10276,8 +10314,12 @@ const lifeRecovery = _ => {
 	}
 };
 
-const lifeDamage = _ => {
-	g_workObj.lifeVal -= g_workObj.lifeDmg;
+/**
+ * ゲージダメージ処理
+ * @param {boolean} _excessive 
+ */
+const lifeDamage = (_excessive = false) => {
+	g_workObj.lifeVal -= g_workObj.lifeDmg * (_excessive ? 0.25 : 1);
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
@@ -10536,7 +10578,7 @@ const resultInit = _ => {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
 		g_resultObj.spState = `failed`;
-	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF) {
+	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF && !(g_headerObj.excessiveJdgUse && g_stateObj.excessive === C_FLG_OFF) ) {
 		if (g_resultObj.spState === ``) {
 			g_resultObj.spState = `cleared`;
 		}
@@ -10660,6 +10702,12 @@ const resultInit = _ => {
 			multiAppend(resultWindow,
 				makeCssResultSymbol(`lblAdj`, 350, g_cssObj.common_shakin, 4, g_lblNameObj.j_adj),
 				makeCssResultSymbol(`lblAdjS`, 260, g_cssObj.score, 5, `${getDiffFrame(estimatedAdj)}`, C_ALIGN_RIGHT),
+			);
+		}
+		if (g_stateObj.excessive === C_FLG_ON) {
+			multiAppend(resultWindow,
+				makeCssResultSymbol(`lblExcessive`, 350, g_cssObj.common_kita, 6, `Excessive`),
+				makeCssResultSymbol(`lblExcessiveS`, 260, g_cssObj.score, 7, g_resultObj.excessive, C_ALIGN_RIGHT),
 			);
 		}
 	}
@@ -10788,6 +10836,8 @@ const resultInit = _ => {
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 
+	const tweetExcessive = (g_stateObj.excessive === C_FLG_ON) ? `(+${g_resultObj.excessive})` : ``;
+
 	let tweetFrzJdg = ``;
 	let tweetMaxCombo = `${g_resultObj.maxCombo}`;
 	if (g_allFrz > 0) {
@@ -10803,7 +10853,7 @@ const resultInit = _ => {
 		[`[rank]`, rankMark],
 		[`[score]`, g_resultObj.score],
 		[`[playStyle]`, playStyleData],
-		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}`],
+		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}${tweetExcessive}`],
 		[`[frzJdg]`, tweetFrzJdg],
 		[`[maxCombo]`, tweetMaxCombo],
 		[`[url]`, g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``)]

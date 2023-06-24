@@ -139,6 +139,19 @@ g_presetObj.frzStartjdgUse = `false`;
 
 /*
 ------------------------------------------------------------------------
+   判定処理設定
+------------------------------------------------------------------------
+*/
+
+/**
+  空押し判定を行うか
+  判定させる場合は `true` を指定
+*/
+g_presetObj.excessiveJdgUse = `false`;
+
+
+/*
+------------------------------------------------------------------------
    デフォルトデザイン・画像設定
    https://github.com/cwtickle/danoniplus/wiki/dos-s0005-defaultDesign
 ------------------------------------------------------------------------
@@ -213,6 +226,7 @@ g_presetObj.settingUse = {
 	shuffle: `true`,
 	autoPlay: `true`,
 	gauge: `true`,
+	excessive: `true`,
 	appearance: `true`,
 
 	//	stepZone: `true`,
