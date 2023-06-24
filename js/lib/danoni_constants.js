@@ -2813,6 +2813,7 @@ const g_lang_lblNameObj = {
         j_iknai: "(・A・)ｲｸﾅｲ",
 
         j_adj: `推定Adj`,
+        j_excessive: `Excessive`,
 
         helpUrl: `https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`,
         securityUrl: `https://github.com/cwtickle/danoniplus/security/policy`,
@@ -2845,6 +2846,7 @@ const g_lang_lblNameObj = {
         j_iknai: ":( N.G.",
 
         j_adj: `Est-Adj.`,
+        j_excessive: `Excessive`,
 
         helpUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/AboutGameSystem`,
         securityUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/SecurityPolicy`,

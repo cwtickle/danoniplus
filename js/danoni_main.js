@@ -10198,14 +10198,14 @@ const judgeArrow = _j => {
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 		}
 
-		// 空押し判定
 		if (g_stateObj.excessive === C_FLG_ON && _difFrame <= g_judgObj.arrowJ[g_judgPosObj.uwan] && _difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+			// 空押し判定（有効かつ早押し時のみ）
 			displayDiff(_difFrame);
 			stepHitTargetArrow(`Excessive`);
 			return true;
 
-		// 通常判定
 		} else if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+			// 通常判定
 			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
 			resultFunc(_difFrame);
 			displayDiff(_difFrame);
@@ -10578,7 +10578,7 @@ const resultInit = _ => {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
 		g_resultObj.spState = `failed`;
-	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF && !(g_headerObj.excessiveJdgUse && g_stateObj.excessive === C_FLG_OFF) ) {
+	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF && !(g_headerObj.excessiveJdgUse && g_stateObj.excessive === C_FLG_OFF)) {
 		if (g_resultObj.spState === ``) {
 			g_resultObj.spState = `cleared`;
 		}
@@ -10706,7 +10706,7 @@ const resultInit = _ => {
 		}
 		if (g_stateObj.excessive === C_FLG_ON) {
 			multiAppend(resultWindow,
-				makeCssResultSymbol(`lblExcessive`, 350, g_cssObj.common_kita, 6, `Excessive`),
+				makeCssResultSymbol(`lblExcessive`, 350, g_cssObj.common_kita, 6, g_lblNameObj.j_excessive),
 				makeCssResultSymbol(`lblExcessiveS`, 260, g_cssObj.score, 7, g_resultObj.excessive, C_ALIGN_RIGHT),
 			);
 		}
