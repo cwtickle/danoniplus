@@ -10827,6 +10827,8 @@ const resultInit = _ => {
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
 
+	const tweetExcessive = (g_stateObj.excessive === C_FLG_ON) ? `(+${g_resultObj.excessive})` : ``;
+
 	let tweetFrzJdg = ``;
 	let tweetMaxCombo = `${g_resultObj.maxCombo}`;
 	if (g_allFrz > 0) {
@@ -10842,7 +10844,7 @@ const resultInit = _ => {
 		[`[rank]`, rankMark],
 		[`[score]`, g_resultObj.score],
 		[`[playStyle]`, playStyleData],
-		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}(+${g_resultObj.excessive})`],
+		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}${tweetExcessive}`],
 		[`[frzJdg]`, tweetFrzJdg],
 		[`[maxCombo]`, tweetMaxCombo],
 		[`[url]`, g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``)]
