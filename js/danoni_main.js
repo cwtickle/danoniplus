@@ -4624,7 +4624,7 @@ const drawDensityGraph = _scoreId => {
 	updateScoreDetailLabel(`Density`, `APM`, obj.apm, 0, g_lblNameObj.s_apm);
 	updateScoreDetailLabel(`Density`, `Time`, obj.playingTime, 1, g_lblNameObj.s_time);
 	updateScoreDetailLabel(`Density`, `Arrow`, obj.arrowCnts, 3, g_lblNameObj.s_arrow);
-	updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4, g_lblNameObj.s_frz);
+	updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4, `${g_lblNameObj.s_frz}${g_headerObj.frzStartjdgUse ? ' <span class="bold">(2x)</span>' : ''}`);
 };
 
 /**
@@ -4771,7 +4771,8 @@ const makeDifInfo = _scoreId => {
 	dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
 	dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
 	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
-	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} <span style="font-size:${g_limitObj.difSelectorSiz}px;">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' x 2' : ''})</span>`;
+	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} 
+	<span style="font-size:${g_limitObj.difSelectorSiz}px;">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="bold">x 2</span>' : ''})</span>`;
 	dataArrowInfo2.innerHTML = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
 			(${g_detailObj.frzCnt[_scoreId]})<br><br>
 			${push3CntStr}`.split(`,`).join(`/`);
