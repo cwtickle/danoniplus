@@ -4771,7 +4771,7 @@ const makeDifInfo = _scoreId => {
 	dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
 	dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
 	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
-	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts} <span style="font-size:${g_limitObj.difSelectorSiz}px;">(${arrowCnts} + ${frzCnts})</span>`;
+	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} <span style="font-size:${g_limitObj.difSelectorSiz}px;">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' x 2' : ''})</span>`;
 	dataArrowInfo2.innerHTML = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
 			(${g_detailObj.frzCnt[_scoreId]})<br><br>
 			${push3CntStr}`.split(`,`).join(`/`);
