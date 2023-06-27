@@ -342,6 +342,10 @@ input[type="color"] {
 	justify-content: center;
 }
 
+.common_bold {
+	font-weight: bold;
+}
+
 /* 警告ウィンドウ */
 #lblWarning>p {
 	margin: 15px 5px;
