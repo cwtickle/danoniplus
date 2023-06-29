@@ -4902,15 +4902,10 @@ const setDifficulty = (_initFlg) => {
 		g_autoPlaysBase.concat(Object.keys(g_keyObj[`assistPos${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])) :
 		g_autoPlaysBase.concat());
 
-	// ゲージ設定 (Gauge)
-	const defaultCustomGauge = g_gaugeOptionObj.custom0 || g_gaugeOptionObj.customDefault;
-	if (hasVal(defaultCustomGauge)) {
-		g_gaugeOptionObj.custom = (g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || defaultCustomGauge).concat();
-		g_gaugeOptionObj.varCustom = (g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0 || g_gaugeOptionObj.varCustomDefault).concat();
-	}
+	// ゲージ設定及びカーソル位置調整
 	setGauge(0, true);
 
-	// 速度、ゲージ、スクロール、アシスト設定のカーソル位置調整
+	// 速度、スクロール、アシスト設定のカーソル位置調整
 	if (_initFlg) {
 		g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
@@ -5433,7 +5428,7 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 
 	// ゲージ初期化
 	if (_gaugeInitFlg) {
-		initializeGauges(g_settings.gaugeNum);
+		initializeGauges();
 	}
 	setSetting(_scrollNum, `gauge`);
 
@@ -5459,12 +5454,21 @@ const changeLifeMode = (_baseObj) => {
 
 /**
  * ゲージ配列の初期化
- * @param {number} _gaugeNum 
  */
-const initializeGauges = _gaugeNum => {
+const initializeGauges = _ => {
+
+	// カスタムゲージの設定取得
+	const defaultCustomGauge = g_gaugeOptionObj.custom0 || g_gaugeOptionObj.customDefault;
+	if (hasVal(defaultCustomGauge)) {
+		g_gaugeOptionObj.custom = (g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || defaultCustomGauge).concat();
+		g_gaugeOptionObj.varCustom = (g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0 || g_gaugeOptionObj.varCustomDefault).concat();
+	}
+
+	// ゲージタイプの設定
 	changeLifeMode(g_headerObj);
 	g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
+	// ゲージ配列を入れ替え
 	g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
 	g_settings.gaugeNum = getCurrentNo(g_settings.gauges, g_stateObj.gauge);
 	g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
