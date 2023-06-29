@@ -5487,13 +5487,15 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 	// デフォルトゲージの設定を適用（g_gaugeOptionObjから取得）
 	if (g_gaugeOptionObj.custom.length === 0 ||
 		g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${g_stateObj.scoreId}`])) {
+
 		const gType = (g_gaugeType === C_LFE_CUSTOM ?
 			toCapitalize(g_gaugeOptionObj[`defaultGauge${g_stateObj.scoreId}`]) : g_gaugeType);
-		g_stateObj.lifeMode = g_gaugeOptionObj[`type${gType}`][g_settings.gaugeNum];
-		g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${gType}`][g_settings.gaugeNum];
-		g_stateObj.lifeInit = g_gaugeOptionObj[`init${gType}`][g_settings.gaugeNum];
-		g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${gType}`][g_settings.gaugeNum];
-		g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${gType}`][g_settings.gaugeNum];
+		const getGaugeVal = _type => g_gaugeOptionObj[`${_type}${gType}`][g_settings.gaugeNum];
+		g_stateObj.lifeMode = getGaugeVal(`type`);
+		g_stateObj.lifeBorder = getGaugeVal(`clear`);
+		g_stateObj.lifeInit = getGaugeVal(`init`);
+		g_stateObj.lifeRcv = getGaugeVal(`rcv`);
+		g_stateObj.lifeDmg = getGaugeVal(`dmg`);
 	}
 
 	// デフォルトゲージの初期設定（Light, Easyでは回復量を2倍にする）
