@@ -4,7 +4,7 @@
   本体cssファイル
 
   Created : 2018/10/08
-  Revised : 2023/06/09 (v32.4.0)
+  Revised : 2023/06/30 (v32.6.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -340,6 +340,10 @@ input[type="color"] {
 .flex_centering {
 	display: flex;
 	justify-content: center;
+}
+
+.common_bold {
+	font-weight: bold;
 }
 
 /* 警告ウィンドウ */

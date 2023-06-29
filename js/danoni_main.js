@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/06/24
+ * Revised : 2023/06/30
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 32.5.0`;
-const g_revisedDate = `2023/06/24`;
+const g_version = `Ver 32.6.0`;
+const g_revisedDate = `2023/06/30`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -334,6 +334,15 @@ const toCapitalize = _str => {
  * @param {number} _init 0未満の場合に設定する値
  */
 const roundZero = (_num, _init = 0) => _num < 0 ? _init : _num;
+
+/**
+ * 配列から_targetに合致する配列位置を返す
+ * 存在しない場合は0を返却
+ * @param {array} _list 
+ * @param {string} _target 
+ * @returns 
+ */
+const getCurrentNo = (_list, _target) => roundZero(_list.indexOf(_target));
 
 /**
  * 配列内に存在するかどうかをチェック
@@ -4624,7 +4633,7 @@ const drawDensityGraph = _scoreId => {
 	updateScoreDetailLabel(`Density`, `APM`, obj.apm, 0, g_lblNameObj.s_apm);
 	updateScoreDetailLabel(`Density`, `Time`, obj.playingTime, 1, g_lblNameObj.s_time);
 	updateScoreDetailLabel(`Density`, `Arrow`, obj.arrowCnts, 3, g_lblNameObj.s_arrow);
-	updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4, g_lblNameObj.s_frz);
+	updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4, `${g_lblNameObj.s_frz}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">(2x)</span>' : ''}`);
 };
 
 /**
@@ -4771,7 +4780,8 @@ const makeDifInfo = _scoreId => {
 	dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
 	dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
 	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
-	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts} <span style="font-size:${g_limitObj.difSelectorSiz}px;">(${arrowCnts} + ${frzCnts})</span>`;
+	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} 
+	<span style="font-size:${g_limitObj.difSelectorSiz}px;">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})</span>`;
 	dataArrowInfo2.innerHTML = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
 			(${g_detailObj.frzCnt[_scoreId]})<br><br>
 			${push3CntStr}`.split(`,`).join(`/`);
@@ -4787,8 +4797,6 @@ const makeDifInfo = _scoreId => {
  *   初期化処理にてキー数関連の設定を行っているため、この順序で無いとデータが正しく格納されない
  */
 const setDifficulty = (_initFlg) => {
-
-	const getCurrentNo = (_list, _target) => roundZero(_list.findIndex(item => item === _target));
 
 	// ---------------------------------------------------
 	// 1. キーコンフィグ設定 (KeyConfig)
@@ -4894,11 +4902,13 @@ const setDifficulty = (_initFlg) => {
 		g_autoPlaysBase.concat(Object.keys(g_keyObj[`assistPos${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])) :
 		g_autoPlaysBase.concat());
 
-	// 速度、ゲージ、スクロール、アシスト設定のカーソル位置調整
+	// ゲージ設定及びカーソル位置調整
+	setGauge(0, true);
+
+	// 速度、スクロール、アシスト設定のカーソル位置調整
 	if (_initFlg) {
 		g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
-		g_settings.gaugeNum = 0;
 	}
 	g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
 	g_settings.autoPlayNum = getCurrentNo(g_settings.autoPlays, g_stateObj.autoPlay);
@@ -4950,14 +4960,6 @@ const setDifficulty = (_initFlg) => {
 	// オート・アシスト設定 (AutoPlay)
 	g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
 	lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
-
-	// ゲージ設定 (Gauge)
-	const defaultCustomGauge = g_gaugeOptionObj.custom0 || g_gaugeOptionObj.customDefault;
-	if (hasVal(defaultCustomGauge)) {
-		g_gaugeOptionObj.custom = (g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || defaultCustomGauge).concat();
-		g_gaugeOptionObj.varCustom = (g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0 || g_gaugeOptionObj.varCustomDefault).concat();
-	}
-	setGauge(0);
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
@@ -5422,28 +5424,7 @@ const setReverseView = _btn => {
  * ゲージ設定メイン
  * @param {number} _scrollNum 
  */
-const setGauge = _scrollNum => {
-
-	// カーソルを動かさない場合は先にゲージ設定をリロード
-	if (_scrollNum === 0) {
-		gaugeChange(g_settings.gaugeNum);
-	}
-	setSetting(_scrollNum, `gauge`);
-
-	// カーソルを動かす場合は設定変更後にゲージ設定を再設定
-	if (_scrollNum !== 0) {
-		gaugeChange(g_settings.gaugeNum);
-	}
-	lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
-		g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
-};
-
-/**
- * ゲージ設定の切替処理
- * @param {number} _gaugeNum 
- */
-const gaugeChange = _gaugeNum => {
-	const tmpScoreId = g_stateObj.scoreId;
+const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 
 	/**
 	 * ゲージ詳細変更
@@ -5452,8 +5433,8 @@ const gaugeChange = _gaugeNum => {
 	 * @param {number} _magnification 
 	 */
 	const setLife = (_baseProperty, _setProperty, _magnification = 1) => {
-		if (setVal(_baseProperty[tmpScoreId], ``, C_TYP_FLOAT) !== ``) {
-			g_stateObj[_setProperty] = _baseProperty[tmpScoreId] * _magnification;
+		if (setVal(_baseProperty[g_stateObj.scoreId], ``, C_TYP_FLOAT) !== ``) {
+			g_stateObj[_setProperty] = _baseProperty[g_stateObj.scoreId] * _magnification;
 		}
 	};
 
@@ -5473,56 +5454,68 @@ const gaugeChange = _gaugeNum => {
 	 * @param {object} _baseObj 
 	 */
 	const changeLifeMode = (_baseObj) => {
-		if (_baseObj.lifeBorders[tmpScoreId] === `x`) {
+		if (_baseObj.lifeBorders[g_stateObj.scoreId] === `x`) {
 			g_stateObj.lifeBorder = 0;
 			g_stateObj.lifeMode = C_LFE_SURVIVAL;
 		} else {
-			g_stateObj.lifeBorder = _baseObj.lifeBorders[tmpScoreId];
+			g_stateObj.lifeBorder = _baseObj.lifeBorders[g_stateObj.scoreId];
 			g_stateObj.lifeMode = C_LFE_BORDER;
 		}
 	};
 
 	// ゲージ初期化
-	if (_gaugeNum === 0) {
-		if (hasVal(g_headerObj.lifeBorders[tmpScoreId])) {
-			changeLifeMode(g_headerObj);
-			g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
-
-			g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
-			g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
-			g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+	if (_gaugeInitFlg) {
+		// カスタムゲージの設定取得
+		const defaultCustomGauge = g_gaugeOptionObj.custom0 || g_gaugeOptionObj.customDefault;
+		if (hasVal(defaultCustomGauge)) {
+			g_gaugeOptionObj.custom = (g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || defaultCustomGauge).concat();
+			g_gaugeOptionObj.varCustom = (g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0 || g_gaugeOptionObj.varCustomDefault).concat();
 		}
-		setLifeCategory(g_headerObj);
 
-	} else {
-		// 設定されたゲージ設定、カーソルに合わせて設定値を更新
-		g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][_gaugeNum];
-		if (g_gaugeOptionObj.custom.length === 0 ||
-			g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`])) {
-			const gType = (g_gaugeType === C_LFE_CUSTOM ?
-				toCapitalize(g_gaugeOptionObj[`defaultGauge${tmpScoreId}`]) : g_gaugeType);
-			g_stateObj.lifeMode = g_gaugeOptionObj[`type${gType}`][_gaugeNum];
-			g_stateObj.lifeBorder = g_gaugeOptionObj[`clear${gType}`][_gaugeNum];
-			g_stateObj.lifeInit = g_gaugeOptionObj[`init${gType}`][_gaugeNum];
-			g_stateObj.lifeRcv = g_gaugeOptionObj[`rcv${gType}`][_gaugeNum];
-			g_stateObj.lifeDmg = g_gaugeOptionObj[`dmg${gType}`][_gaugeNum];
-		}
+		// ゲージタイプの設定
+		changeLifeMode(g_headerObj);
+		g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
+
+		// ゲージ配列を入れ替え
+		g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
+		g_settings.gaugeNum = getCurrentNo(g_settings.gauges, g_stateObj.gauge);
+		g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+	}
+	setSetting(_scrollNum, `gauge`);
+	g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][g_settings.gaugeNum];
+
+	// デフォルトゲージの設定を適用（g_gaugeOptionObjから取得）
+	if (g_gaugeOptionObj.custom.length === 0 ||
+		g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${g_stateObj.scoreId}`])) {
+
+		const gType = (g_gaugeType === C_LFE_CUSTOM ?
+			toCapitalize(g_gaugeOptionObj[`defaultGauge${g_stateObj.scoreId}`]) : g_gaugeType);
+		const getGaugeVal = _type => g_gaugeOptionObj[`${_type}${gType}`][g_settings.gaugeNum];
+		g_stateObj.lifeMode = getGaugeVal(`type`);
+		g_stateObj.lifeBorder = getGaugeVal(`clear`);
+		g_stateObj.lifeInit = getGaugeVal(`init`);
+		g_stateObj.lifeRcv = getGaugeVal(`rcv`);
+		g_stateObj.lifeDmg = getGaugeVal(`dmg`);
 	}
 
-	// ゲージ設定(Light, Easy)の初期化
-	if (g_stateObj.gauge === `Light` || g_stateObj.gauge === `Easy`) {
-		setLifeCategory(g_headerObj, { _magRcv: 2 });
+	// デフォルトゲージの初期設定（Light, Easyでは回復量を2倍にする）
+	if ([`Original`, `Light`, `Normal`, `Easy`].includes(g_stateObj.gauge)) {
+		setLifeCategory(g_headerObj, { _magRcv: [`Light`, `Easy`].includes(g_stateObj.gauge) ? 2 : 1 });
 	}
 
 	// ゲージ設定別に個別設定した場合はここで設定を上書き
 	// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
 	if (hasVal(g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`])) {
 		const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
-		if (hasVal(tmpGaugeObj.lifeBorders[tmpScoreId])) {
+		if (hasVal(tmpGaugeObj.lifeBorders[g_stateObj.scoreId])) {
 			changeLifeMode(tmpGaugeObj);
 		}
 		setLifeCategory(tmpGaugeObj);
 	}
+
+	// ゲージ詳細情報を表示
+	lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
+		g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
 };
 
 /**
