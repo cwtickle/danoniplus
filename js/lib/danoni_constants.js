@@ -1360,6 +1360,7 @@ const g_shortcutObj = {
         ShiftLeft_KeyG: { id: `lnkGaugeL` },
         ShiftRight_KeyG: { id: `lnkGaugeL` },
         KeyG: { id: `lnkGaugeR` },
+        KeyE: { id: `lnkExcessive` },
 
         AltLeft_ShiftLeft_Semicolon: { id: `lnkAdjustmentHR` },
         AltLeft_ShiftRight_Semicolon: { id: `lnkAdjustmentHR` },
