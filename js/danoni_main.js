@@ -4034,7 +4034,7 @@ const titleInit = _ => {
 	multiAppend(divRoot,
 
 		// Click Here
-		createCss2Button(`btnStart`, g_lblNameObj.clickHere, _ => clearTimeout(g_timeoutEvtTitleId), {
+		createCss2Button(`btnStart`, g_lblNameObj.clickHere, _ => cancelAnimationFrame(g_timeoutEvtTitleId), {
 			w: g_sWidth, siz: g_limitObj.titleSiz, resetFunc: _ => optionInit(),
 		}, g_cssObj.button_Start),
 
@@ -9097,20 +9097,20 @@ const mainInit = _ => {
 			if (g_isMac && (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey))) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
 				g_audio.pause();
-				clearTimeout(g_timeoutEvtId);
+				cancelAnimationFrame(g_timeoutEvtId);
 				titleInit();
 
 			} else {
 				// その他の環境では単にRetryに対応するキーのみで適用
 				g_audio.pause();
-				clearTimeout(g_timeoutEvtId);
+				cancelAnimationFrame(g_timeoutEvtId);
 				clearWindow();
 				musicAfterLoaded();
 			}
 
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
 			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
+			cancelAnimationFrame(g_timeoutEvtId);
 			if (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)) {
 				if (g_currentArrows !== g_fullArrows || g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 					g_gameOverFlg = true;
@@ -9665,7 +9665,6 @@ const mainInit = _ => {
 
 			// ローカルかつBase64エンコード無し(WebAudioAPI使用不可)のときは従来通り再生
 			if (!(g_audio instanceof AudioPlayer)) {
-				musicStartTime = performance.now();
 				g_audio.play();
 				g_audio.dispatchEvent(new CustomEvent(`timeupdate`));
 			}
@@ -9864,14 +9863,14 @@ const mainInit = _ => {
 				g_gameOverFlg = true;
 			}
 			resetKeyControl();
-			clearTimeout(g_timeoutEvtId);
+			cancelAnimationFrame(g_timeoutEvtId);
 			resultInit();
 
 		} else if (g_workObj.lifeVal === 0 && g_workObj.lifeBorder === 0) {
 
 			// ライフ制＆ライフ０の場合は途中終了
 			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
+			cancelAnimationFrame(g_timeoutEvtId);
 			g_gameOverFlg = true;
 			g_finishFlg = false;
 			resultInit();
@@ -9898,7 +9897,6 @@ const mainInit = _ => {
 	// WebAudioAPIが使用できる場合は小数フレーム分だけ音源位置を調整
 	if (g_audio instanceof AudioPlayer) {
 		const musicStartAdjustment = (g_headerObj.blankFrame - g_stateObj.decimalAdjustment + 1) / C_FPS;
-		musicStartTime = performance.now() + musicStartAdjustment * 1000;
 		g_audio.play(musicStartAdjustment);
 	}
 
@@ -10842,8 +10840,8 @@ const resultInit = _ => {
 			if (g_finishFlg) {
 				g_audio.pause();
 			}
-			clearTimeout(g_timeoutEvtId);
-			clearTimeout(g_timeoutEvtResultId);
+			cancelAnimationFrame(g_timeoutEvtId);
+			cancelAnimationFrame(g_timeoutEvtResultId);
 		}, Object.assign(_posObj, { resetFunc: _func }), _cssClass);
 
 	// ボタン描画
@@ -10901,14 +10899,14 @@ const resultInit = _ => {
 		// リザルト画面移行後のフェードアウト処理
 		if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
 			if (g_scoreObj.frameNum >= g_scoreObj.fullFrame) {
-				clearTimeout(g_timeoutEvtId);
+				cancelAnimationFrame(g_timeoutEvtId);
 			}
 			g_scoreObj.frameNum++;
 		} else {
 			const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
 			if (tmpVolume < 0) {
 				g_audio.volume = 0;
-				clearTimeout(g_timeoutEvtId);
+				cancelAnimationFrame(g_timeoutEvtId);
 			} else {
 				g_audio.volume = tmpVolume;
 			}
