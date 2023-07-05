@@ -70,7 +70,8 @@ window.onload = async () => {
 /*-----------------------------------------------------------*/
 
 // fps(デフォルトは60)
-let g_fps = 60;
+const C_FPS = 60;
+let g_fps = C_FPS;
 
 // 譜面データの&区切りを有効にするか
 let g_enableAmpersandSplit = true;
@@ -3901,11 +3902,6 @@ const titleInit = _ => {
 	}
 	const divRoot = document.querySelector(`#divRoot`);
 
-	// 曲時間制御変数
-	let thisTime;
-	let buffTime;
-	let titleStartTime = performance.now();
-
 	// 背景の矢印オブジェクトを表示
 	if (!g_headerObj.customTitleArrowUse) {
 		divRoot.appendChild(
@@ -4137,16 +4133,13 @@ const titleInit = _ => {
 		// 背景・マスクモーション
 		drawTitleResultMotion(g_currentPage);
 
-		thisTime = performance.now();
-		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / g_fps;
-
 		g_scoreObj.titleFrameNum++;
 		g_scoreObj.backTitleFrameNum++;
 		g_scoreObj.maskTitleFrameNum++;
-		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps - buffTime);
+		g_timeoutEvtTitleId = requestAnimationFrame(_ => flowTitleTimeline());
 	};
 
-	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
+	g_timeoutEvtTitleId = requestAnimationFrame(_ => flowTitleTimeline());
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage, _ => true, { dfEvtFlg: true });
@@ -7303,7 +7296,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	g_stateObj.decimalAdjustment = g_stateObj.realAdjustment - g_stateObj.intAdjustment;
 
 	const blankFrame = g_headerObj.blankFrame;
-	const calcFrame = _frame => Math.round((parseFloat(_frame) - blankFrame) / g_headerObj.playbackRate + blankFrame + g_stateObj.intAdjustment);
+	const calcFrame = _frame => Math.round((parseFloat(_frame) - blankFrame) / g_headerObj.playbackRate * C_FPS / g_fps + blankFrame + g_stateObj.intAdjustment);
 
 	/**
 	 * 矢印データの格納
@@ -8484,7 +8477,6 @@ const getArrowSettings = _ => {
 	g_workObj.arrowRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
-	g_workObj.mainEndTime = 0;
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
 	g_workObj.keyGroupList = tkObj.keyGroupList;
@@ -8841,9 +8833,6 @@ const mainInit = _ => {
 	g_audio.volume = (firstFrame === 0 ? g_stateObj.volume / 100 : 0);
 
 	// 曲時間制御変数
-	let thisTime;
-	let buffTime;
-	let musicStartTime;
 	let musicStartFlg = false;
 
 	g_inputKeyBuffer = {};
@@ -9876,7 +9865,6 @@ const mainInit = _ => {
 			}
 			resetKeyControl();
 			clearTimeout(g_timeoutEvtId);
-			g_workObj.mainEndTime = thisTime;
 			resultInit();
 
 		} else if (g_workObj.lifeVal === 0 && g_workObj.lifeBorder === 0) {
@@ -9891,36 +9879,30 @@ const mainInit = _ => {
 		} else {
 
 			// タイマー
-			if (Math.floor(g_scoreObj.baseFrame % g_fps) === 0) {
+			if (Math.floor(g_scoreObj.baseFrame % C_FPS) === 0) {
 				if (g_scoreObj.baseFrame >= 0) {
 					lblTime1.textContent = transFrameToTimer(g_scoreObj.baseFrame);
 				}
 			}
 
-			// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
-			thisTime = performance.now();
-			buffTime = 0;
-			if (g_audio instanceof AudioPlayer || currentFrame >= musicStartFrame) {
-				buffTime = (thisTime - musicStartTime - (currentFrame - musicStartFrame) * 1000 / g_fps);
-			}
 			g_scoreObj.frameNum++;
 			g_scoreObj.baseFrame++;
-			g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps - buffTime);
+			g_timeoutEvtId = requestAnimationFrame(_ => flowTimeline());
 		}
 	};
 	g_skinJsObj.main.forEach(func => func());
 
-	g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
+	g_audio.currentTime = firstFrame / C_FPS * g_headerObj.playbackRate;
 	g_audio.playbackRate = g_headerObj.playbackRate;
 
 	// WebAudioAPIが使用できる場合は小数フレーム分だけ音源位置を調整
 	if (g_audio instanceof AudioPlayer) {
-		const musicStartAdjustment = (g_headerObj.blankFrame - g_stateObj.decimalAdjustment + 1) / g_fps;
+		const musicStartAdjustment = (g_headerObj.blankFrame - g_stateObj.decimalAdjustment + 1) / C_FPS;
 		musicStartTime = performance.now() + musicStartAdjustment * 1000;
 		g_audio.play(musicStartAdjustment);
 	}
 
-	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps);
+	g_timeoutEvtId = requestAnimationFrame(_ => flowTimeline());
 };
 
 /**
@@ -10504,11 +10486,6 @@ const resultInit = _ => {
 
 	const divRoot = document.querySelector(`#divRoot`);
 
-	// 曲時間制御変数
-	let thisTime;
-	let buffTime;
-	let resultStartTime = g_workObj.mainEndTime > 0 ? g_workObj.mainEndTime : performance.now();
-
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
 	} else {
 		// ゲームオーバー時は失敗時のリザルトモーションを適用
@@ -10937,13 +10914,10 @@ const resultInit = _ => {
 			}
 		}
 
-		thisTime = performance.now();
-		buffTime = thisTime - resultStartTime - g_scoreObj.resultFrameNum * 1000 / g_fps;
-
 		g_scoreObj.resultFrameNum++;
 		g_scoreObj.backResultFrameNum++;
 		g_scoreObj.maskResultFrameNum++;
-		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps - buffTime);
+		g_timeoutEvtResultId = requestAnimationFrame(_ => flowResultTimeline());
 	};
 	flowResultTimeline();
 
