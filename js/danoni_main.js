@@ -3954,7 +3954,7 @@ const titleInit = _ => {
 		// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
 		const titlelineheight = (g_headerObj.titlelineheight !== `` ? g_headerObj.titlelineheight - (titlefontsize2 + 10) : 0);
 
-		let txtAnimations = [``, ``];
+		const txtAnimations = [``, ``];
 		if (!g_headerObj.customTitleAnimationUse) {
 			for (let j = 0; j < txtAnimations.length; j++) {
 				txtAnimations[j] = `animation-name:${g_headerObj.titleAnimationName[j]};
@@ -4524,8 +4524,8 @@ const drawSpeedGraph = _scoreId => {
 	};
 
 	Object.keys(speedObj).forEach(speedType => {
-		let frame = speedObj[speedType].frame;
-		let speed = speedObj[speedType].speed;
+		const frame = speedObj[speedType].frame;
+		const speed = speedObj[speedType].speed;
 		const speedData = g_detailObj[`${speedType}Data`][_scoreId];
 
 		if (speedData !== undefined) {
