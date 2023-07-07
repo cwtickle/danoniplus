@@ -1723,10 +1723,7 @@ class AudioPlayer {
 			this._duration = _buffer.duration;
 			this._buffer = _buffer;
 		});
-
-		if (this._eventListeners[`canplaythrough`] !== undefined) {
-			this._eventListeners[`canplaythrough`].forEach(_listener => _listener());
-		}
+		this._eventListeners[`canplaythrough`]?.forEach(_listener => _listener());
 	}
 
 	play(_adjustmentTime = 0) {
@@ -3790,26 +3787,24 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		newKeyMultiParam(newKey, `pos`, toFloat);
 
 		// 各キーの区切り位置 (divX_Y)
-		if (_dosObj[`div${newKey}`] !== undefined) {
-			const tmpDivs = _dosObj[`div${newKey}`].split(`$`);
-			for (let k = 0; k < tmpDivs.length; k++) {
-				const tmpDivPtn = tmpDivs[k].split(`,`);
-				const ptnName = `${newKey}_${k + dfPtnNum}`;
+		_dosObj[`div${newKey}`]?.split(`$`).forEach((tmpDiv, k) => {
+			const tmpDivPtn = tmpDiv.split(`,`);
+			const ptnName = `${newKey}_${k + dfPtnNum}`;
 
-				if (g_keyObj[`div${tmpDivPtn[0]}`] !== undefined) {
-					// 既定キーパターンが指定された場合、存在すればその値を適用
-					g_keyObj[`div${ptnName}`] = g_keyObj[`div${tmpDivPtn[0]}`];
-					g_keyObj[`divMax${ptnName}`] = setVal(g_keyObj[`divMax${tmpDivPtn[0]}`], undefined, C_TYP_FLOAT);
-				} else if (!hasVal(tmpDivPtn[0]) && setIntVal(g_keyObj[`div${ptnName}`], -1) !== -1) {
-					// カスタムキー側のdivXが未定義だが、すでに初期設定で定義済みの場合はスキップ
-					continue;
-				} else {
-					// それ以外の場合は指定された値を適用（未指定時はその後で指定）
-					g_keyObj[`div${ptnName}`] = setVal(tmpDivPtn[0], undefined, C_TYP_NUMBER);
-					g_keyObj[`divMax${ptnName}`] = setVal(tmpDivPtn[1], undefined, C_TYP_FLOAT);
-				}
+			if (g_keyObj[`div${tmpDivPtn[0]}`] !== undefined) {
+				// 既定キーパターンが指定された場合、存在すればその値を適用
+				g_keyObj[`div${ptnName}`] = g_keyObj[`div${tmpDivPtn[0]}`];
+				g_keyObj[`divMax${ptnName}`] = setVal(g_keyObj[`divMax${tmpDivPtn[0]}`], undefined, C_TYP_FLOAT);
+			} else if (!hasVal(tmpDivPtn[0]) && setIntVal(g_keyObj[`div${ptnName}`], -1) !== -1) {
+				// カスタムキー側のdivXが未定義だが、すでに初期設定で定義済みの場合はスキップ
+				return;
+			} else {
+				// それ以外の場合は指定された値を適用（未指定時はその後で指定）
+				g_keyObj[`div${ptnName}`] = setVal(tmpDivPtn[0], undefined, C_TYP_NUMBER);
+				g_keyObj[`divMax${ptnName}`] = setVal(tmpDivPtn[1], undefined, C_TYP_FLOAT);
 			}
-		}
+		});
+
 		// charaX_Y, posX_Y, keyGroupX_Y, divX_Y, divMaxX_Yが未指定の場合はkeyCtrlX_Yを元に適用
 		for (let k = 0; k < g_keyObj.minPatterns; k++) {
 			setKeyDfVal(`${newKey}_${k + dfPtnNum}`);
@@ -9747,28 +9742,20 @@ const mainInit = _ => {
 		changeStepY(currentFrame);
 
 		// ダミー矢印生成（背面に表示するため先に処理）
-		if (g_workObj.mkDummyArrow[currentFrame] !== undefined) {
-			g_workObj.mkDummyArrow[currentFrame].forEach(data =>
-				makeArrow(data, ++dummyArrowCnts[data], `dummyArrow`, g_workObj.dummyArrowColors[data]));
-		}
+		g_workObj.mkDummyArrow[currentFrame]?.forEach(data =>
+			makeArrow(data, ++dummyArrowCnts[data], `dummyArrow`, g_workObj.dummyArrowColors[data]));
 
 		// 矢印生成
-		if (g_workObj.mkArrow[currentFrame] !== undefined) {
-			g_workObj.mkArrow[currentFrame].forEach(data =>
-				makeArrow(data, ++arrowCnts[data], `arrow`, g_workObj.arrowColors[data]));
-		}
+		g_workObj.mkArrow[currentFrame]?.forEach(data =>
+			makeArrow(data, ++arrowCnts[data], `arrow`, g_workObj.arrowColors[data]));
 
 		// ダミーフリーズアロー生成
-		if (g_workObj.mkDummyFrzArrow[currentFrame] !== undefined) {
-			g_workObj.mkDummyFrzArrow[currentFrame].forEach(data =>
-				makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`, g_workObj.dummyFrzNormalColors[data], g_workObj.dummyFrzNormalBarColors[data]));
-		}
+		g_workObj.mkDummyFrzArrow[currentFrame]?.forEach(data =>
+			makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`, g_workObj.dummyFrzNormalColors[data], g_workObj.dummyFrzNormalBarColors[data]));
 
 		// フリーズアロー生成
-		if (g_workObj.mkFrzArrow[currentFrame] !== undefined) {
-			g_workObj.mkFrzArrow[currentFrame].forEach(data =>
-				makeFrzArrow(data, ++frzCnts[data], `frz`, g_workObj.frzNormalColors[data], g_workObj.frzNormalBarColors[data]));
-		}
+		g_workObj.mkFrzArrow[currentFrame]?.forEach(data =>
+			makeFrzArrow(data, ++frzCnts[data], `frz`, g_workObj.frzNormalColors[data], g_workObj.frzNormalBarColors[data]));
 
 		// 矢印・フリーズアロー移動＆消去
 		for (let j = 0; j < keyNum; j++) {
@@ -9805,56 +9792,54 @@ const mainInit = _ => {
 		}
 
 		// 歌詞表示
-		if (g_scoreObj.wordData[currentFrame] !== undefined) {
-			g_scoreObj.wordData[currentFrame].forEach(tmpObj => {
-				g_wordObj.wordDir = tmpObj[0];
-				g_wordObj.wordDat = tmpObj[1];
-				g_wordSprite = document.querySelector(`#lblword${g_wordObj.wordDir}`);
+		g_scoreObj.wordData[currentFrame]?.forEach(tmpObj => {
+			g_wordObj.wordDir = tmpObj[0];
+			g_wordObj.wordDat = tmpObj[1];
+			g_wordSprite = document.querySelector(`#lblword${g_wordObj.wordDir}`);
 
-				const wordDepth = Number(g_wordObj.wordDir);
-				if (g_wordObj.wordDat.substring(0, 5) === `[fade`) {
+			const wordDepth = Number(g_wordObj.wordDir);
+			if (g_wordObj.wordDat.substring(0, 5) === `[fade`) {
 
-					// フェードイン・アウト開始
-					const fkey = fadeFlgs[Object.keys(fadeFlgs).find(flg => g_wordObj.wordDat === `[${flg}]`)];
-					g_wordObj[`fade${fkey[0]}Flg${wordDepth}`] = true;
-					g_wordObj[`fade${fkey[1]}Flg${wordDepth}`] = false;
-					g_wordSprite.style.animationName =
-						`fade${fkey[0]}${(++g_workObj[`fade${fkey[0]}No`][wordDepth] % 2)}`;
+				// フェードイン・アウト開始
+				const fkey = fadeFlgs[Object.keys(fadeFlgs).find(flg => g_wordObj.wordDat === `[${flg}]`)];
+				g_wordObj[`fade${fkey[0]}Flg${wordDepth}`] = true;
+				g_wordObj[`fade${fkey[1]}Flg${wordDepth}`] = false;
+				g_wordSprite.style.animationName =
+					`fade${fkey[0]}${(++g_workObj[`fade${fkey[0]}No`][wordDepth] % 2)}`;
 
-					g_workObj.lastFadeFrame[wordDepth] = currentFrame;
-					g_workObj.wordFadeFrame[wordDepth] = (tmpObj.length > 2 ?
-						setIntVal(tmpObj[2], C_WOD_FRAME) : C_WOD_FRAME);
+				g_workObj.lastFadeFrame[wordDepth] = currentFrame;
+				g_workObj.wordFadeFrame[wordDepth] = (tmpObj.length > 2 ?
+					setIntVal(tmpObj[2], C_WOD_FRAME) : C_WOD_FRAME);
 
-					g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / g_fps}s`;
-					g_wordSprite.style.animationTimingFunction = `linear`;
-					g_wordSprite.style.animationFillMode = `forwards`;
+				g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / g_fps}s`;
+				g_wordSprite.style.animationTimingFunction = `linear`;
+				g_wordSprite.style.animationFillMode = `forwards`;
 
-				} else if ([`[center]`, `[left]`, `[right]`].includes(g_wordObj.wordDat)) {
+			} else if ([`[center]`, `[left]`, `[right]`].includes(g_wordObj.wordDat)) {
 
-					// 歌詞位置変更
-					g_wordSprite.style.textAlign = g_wordObj.wordDat.slice(1, -1);
+				// 歌詞位置変更
+				g_wordSprite.style.textAlign = g_wordObj.wordDat.slice(1, -1);
 
-				} else if (/\[fontSize=\d+\]/.test(g_wordObj.wordDat)) {
+			} else if (/\[fontSize=\d+\]/.test(g_wordObj.wordDat)) {
 
-					// フォントサイズ変更
-					const fontSize = setIntVal(g_wordObj.wordDat.match(/\d+/)[0], g_limitObj.mainSiz);
-					g_wordSprite.style.fontSize = `${fontSize}px`;
+				// フォントサイズ変更
+				const fontSize = setIntVal(g_wordObj.wordDat.match(/\d+/)[0], g_limitObj.mainSiz);
+				g_wordSprite.style.fontSize = `${fontSize}px`;
 
-				} else {
+			} else {
 
-					// フェードイン・アウト処理後、表示する歌詞を表示
-					const fadingFlg = currentFrame - g_workObj.lastFadeFrame[wordDepth] >= g_workObj.wordFadeFrame[wordDepth];
-					[`Out`, `In`].forEach(pattern => {
-						if (g_wordObj[`fade${pattern}Flg${g_wordObj.wordDir}`] && fadingFlg) {
-							g_wordSprite.style.animationName = `none`;
-							g_wordObj[`fade${pattern}Flg${g_wordObj.wordDir}`] = false;
-						}
-					});
-					g_workObj[`word${g_wordObj.wordDir}Data`] = g_wordObj.wordDat;
-					g_wordSprite.innerHTML = g_wordObj.wordDat;
-				}
-			});
-		}
+				// フェードイン・アウト処理後、表示する歌詞を表示
+				const fadingFlg = currentFrame - g_workObj.lastFadeFrame[wordDepth] >= g_workObj.wordFadeFrame[wordDepth];
+				[`Out`, `In`].forEach(pattern => {
+					if (g_wordObj[`fade${pattern}Flg${g_wordObj.wordDir}`] && fadingFlg) {
+						g_wordSprite.style.animationName = `none`;
+						g_wordObj[`fade${pattern}Flg${g_wordObj.wordDir}`] = false;
+					}
+				});
+				g_workObj[`word${g_wordObj.wordDir}Data`] = g_wordObj.wordDat;
+				g_wordSprite.innerHTML = g_wordObj.wordDat;
+			}
+		});
 
 		// 判定キャラクタ消去
 		jdgGroups.forEach(jdg => {
@@ -10026,17 +10011,11 @@ const changeColors = (_mkColor, _mkColorCd, _header, _name) => {
  * @param {number} _frameNum
  */
 const changeCssMotions = (_header, _name, _frameNum) => {
-
 	const camelHeader = _header === `` ? _name : `${_header}${toCapitalize(_name)}`;
-	const frameData = g_workObj[`mk${toCapitalize(camelHeader)}CssMotion`][_frameNum];
-
-	if (frameData !== undefined) {
-		for (let j = 0; j < frameData.length; j++) {
-			const targetj = frameData[j];
-			g_workObj[`${camelHeader}CssMotions`][targetj] =
-				g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + g_workObj.dividePos[targetj]];
-		}
-	}
+	g_workObj[`mk${toCapitalize(camelHeader)}CssMotion`][_frameNum]?.forEach((targetj, j) => {
+		g_workObj[`${camelHeader}CssMotions`][targetj] =
+			g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + g_workObj.dividePos[targetj]];
+	});
 };
 
 /**
@@ -10044,14 +10023,10 @@ const changeCssMotions = (_header, _name, _frameNum) => {
  * @param {number} _frameNum 
  */
 const changeScrollArrowDirs = (_frameNum) => {
-	const frameData = g_workObj.mkScrollchArrow[_frameNum];
-	if (frameData !== undefined) {
-		for (let j = 0; j < frameData.length; j++) {
-			const targetj = frameData[j];
-			g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
-			g_workObj.dividePos[targetj] = (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
-		}
-	}
+	g_workObj.mkScrollchArrow[_frameNum]?.forEach((targetj, j) => {
+		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
+		g_workObj.dividePos[targetj] = (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
+	});
 };
 
 /**
@@ -10059,16 +10034,12 @@ const changeScrollArrowDirs = (_frameNum) => {
  * @param {number} _frameNum 
  */
 const changeStepY = (_frameNum) => {
-	const frameData = g_workObj.mkScrollchStep[_frameNum];
-	if (frameData !== undefined) {
-		for (let j = 0; j < frameData.length; j++) {
-			const targetj = frameData[j];
-			const dividePos = (g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchStepDir[_frameNum][j] === 1 ? 0 : 1);
-			const baseY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
-			$id(`stepRoot${targetj}`).top = `${baseY}px`;
-			$id(`frzHit${targetj}`).top = `${baseY}px`;
-		}
-	}
+	g_workObj.mkScrollchStep[_frameNum]?.forEach((targetj, j) => {
+		const dividePos = (g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchStepDir[_frameNum][j] === 1 ? 0 : 1);
+		const baseY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
+		$id(`stepRoot${targetj}`).top = `${baseY}px`;
+		$id(`frzHit${targetj}`).top = `${baseY}px`;
+	});
 };
 
 /**
