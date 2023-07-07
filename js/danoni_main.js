@@ -478,9 +478,7 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
  */
 const replaceStr = (_str, _pairs) => {
 	let tmpStr = _str;
-	_pairs.forEach(pair => {
-		tmpStr = tmpStr.replaceAll(pair[0], pair[1]);
-	});
+	_pairs.forEach(pair => tmpStr = tmpStr.replaceAll(pair[0], pair[1]));
 	return tmpStr;
 };
 
@@ -616,7 +614,7 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
  * 各画面の汎用ショートカットキー表示
  * @param {string} _displayName 
  */
-const createScTextCommon = _displayName => {
+const createScTextCommon = _displayName =>
 	Object.keys(g_btnPatterns[_displayName]).filter(target => document.getElementById(`btn${target}`) !== null)
 		.forEach(target =>
 			createScText(document.getElementById(`btn${target}`), target, {
@@ -624,7 +622,6 @@ const createScTextCommon = _displayName => {
 				dfLabel: g_lblNameObj[`sc_${_displayName}${target}`] ?? ``,
 				x: g_btnPatterns[_displayName][target],
 			}));
-};
 
 /**
  * ショートカットキー有効化
@@ -2266,7 +2263,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 		noteCnt.frz[j] = 0;
 
 		const tmpFrzData = _scoreObj.frzData[j].filter((data, k) => k % 2 === 0);
-		[_scoreObj.arrowData[j], tmpFrzData].forEach((typeData, m) => {
+		[_scoreObj.arrowData[j], tmpFrzData].forEach((typeData, m) =>
 			typeData.forEach(note => {
 				if (isNaN(parseFloat(note))) {
 					return;
@@ -2277,8 +2274,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 					noteCnt[types[m]][j]++;
 					allData++;
 				}
-			});
-		});
+			}));
 		fullData = fullData.concat(..._scoreObj.arrowData[j], ...tmpFrzData);
 	}
 
@@ -2520,14 +2516,13 @@ const preheaderConvert = _dosObj => {
 	obj.jsData = [];
 	obj.stepRtnUse = true;
 
-	const setJsFiles = (_files, _defaultDir, _type = `custom`) => {
+	const setJsFiles = (_files, _defaultDir, _type = `custom`) =>
 		_files.forEach(file => {
 			if (hasVal(file)) {
 				const [jsFile, jsDir] = getFilePath(file, _defaultDir);
 				obj.jsData.push([_type === `skin` ? `danoni_skin_${jsFile}.js` : jsFile, jsDir]);
 			}
 		});
-	};
 
 	// 外部スキンファイルの指定
 	const tmpSkinType = _dosObj.skinType ?? g_presetObj.skinType ?? `default`;
@@ -2999,14 +2994,12 @@ const headerConvert = _dosObj => {
 		obj.titleAnimationDelay[j] = setVal(titleAnimation[2] / g_fps, obj.titleAnimationDelay[0], C_TYP_FLOAT);
 		obj.titleAnimationTimingFunction[j] = setVal(titleAnimation[3], obj.titleAnimationName[3]);
 	});
-	_dosObj.titleanimationclass?.split(`$`).forEach((animationClass, j) => {
-		obj.titleAnimationClass[j] = animationClass ?? ``;
-	});
+	_dosObj.titleanimationclass?.split(`$`).forEach((animationClass, j) =>
+		obj.titleAnimationClass[j] = animationClass ?? ``);
 
 	if (obj.titleAnimationName.length === 1) {
-		g_titleLists.animation.forEach(pattern => {
-			obj[`titleAnimation${pattern}`][1] = obj[`titleAnimation${pattern}`][0];
-		});
+		g_titleLists.animation.forEach(pattern =>
+			obj[`titleAnimation${pattern}`][1] = obj[`titleAnimation${pattern}`][0]);
 	}
 	if (obj.titleAnimationClass.length === 1) {
 		obj.titleAnimationClass[1] = obj.titleAnimationClass[0];
@@ -3033,9 +3026,8 @@ const headerConvert = _dosObj => {
 	}
 
 	// オプション利用可否設定
-	g_canDisabledSettings.forEach(option => {
-		obj[`${option}Use`] = setBoolVal(_dosObj[`${option}Use`] ?? g_presetObj.settingUse?.[option], true);
-	});
+	g_canDisabledSettings.forEach(option =>
+		obj[`${option}Use`] = setBoolVal(_dosObj[`${option}Use`] ?? g_presetObj.settingUse?.[option], true));
 
 	let interlockingErrorFlg = false;
 	g_displays.forEach((option, j) => {
@@ -3068,12 +3060,11 @@ const headerConvert = _dosObj => {
 	});
 
 	if (!interlockingErrorFlg) {
-		g_displays.forEach(option => {
+		g_displays.forEach(option =>
 			obj[`${option}ChainOFF`].forEach(defaultOption => {
 				g_stateObj[`d_${defaultOption.toLowerCase()}`] = C_FLG_OFF;
 				interlockingButton(obj, defaultOption, C_FLG_OFF, C_FLG_ON);
-			});
-		});
+			}));
 	}
 
 	// ローカルストレージに保存済みのColorType設定からDisplayのColor設定を反映
@@ -5656,9 +5647,7 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 				g_keyObj[`${header}${copyPtn}`] = structuredClone(g_keyObj[`${header}${basePtn}`]);
 			}
 		});
-		g_keyCopyLists.simple.forEach(header => {
-			g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`];
-		});
+		g_keyCopyLists.simple.forEach(header => g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`]);
 
 		g_keycons.groups.forEach(type => {
 			let maxPtn = 0;
@@ -5880,11 +5869,10 @@ const createSettingsDisplayWindow = _sprite => {
 	appearanceSlider.addEventListener(`input`, _ =>
 		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos), false);
 
-	const dispAppearanceSlider = _ => {
+	const dispAppearanceSlider = _ =>
 		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
 			$id(obj).visibility = g_appearanceRanges.includes(g_stateObj.appearance) ? `Visible` : `Hidden`
 		);
-	};
 	dispAppearanceSlider();
 
 	// ---------------------------------------------------
@@ -7002,9 +6990,7 @@ const loadingScoreInit = async () => {
 	// キーパターン(デフォルト)に対応する矢印番号を格納
 	convertReplaceNums();
 
-	const setData = (_data, _minLength = 1) => {
-		return (hasArrayList(_data, _minLength) ? _data.concat() : []);
-	};
+	const setData = (_data, _minLength = 1) => hasArrayList(_data, _minLength) ? _data.concat() : [];
 
 	// フレーム・曲開始位置調整
 	let preblankFrame = 0;
@@ -7028,9 +7014,8 @@ const loadingScoreInit = async () => {
 				});
 			}
 
-			Object.keys(g_dataMinObj).forEach(dataType => {
-				g_scoreObj[`${dataType}Data`] = setData(tmpObj[`${dataType}Data`], g_dataMinObj[dataType]);
-			});
+			Object.keys(g_dataMinObj).forEach(dataType =>
+				g_scoreObj[`${dataType}Data`] = setData(tmpObj[`${dataType}Data`], g_dataMinObj[dataType]));
 
 			lastFrame += preblankFrame;
 			firstArrowFrame += preblankFrame;
@@ -7699,9 +7684,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	obj.backMaxDepth = -1;
 	if (g_stateObj.d_background === C_FLG_OFF) {
 	} else {
-		g_animationData.forEach(sprite => {
-			[obj[`${sprite}Data`], obj[`${sprite}MaxDepth`]] = makeBackgroundData(sprite, scoreIdHeader);
-		});
+		g_animationData.forEach(sprite =>
+			[obj[`${sprite}Data`], obj[`${sprite}MaxDepth`]] = makeBackgroundData(sprite, scoreIdHeader));
 	}
 
 	// 結果画面用・背景/マスクデータの分解 (下記すべてで1セット、改行区切り)
@@ -9015,10 +8999,9 @@ const mainInit = _ => {
 		Ii: [`ii`, 0], Shakin: [`shakin`, 1], Matari: [`matari`, 2], Shobon: [`shobon`, 3], Uwan: [`uwan`, 4],
 		MCombo: [`combo`, 5], Kita: [`kita`, 7], Iknai: [`iknai`, 8], FCombo: [`combo`, 9],
 	};
-	Object.keys(jdgMainScoreObj).forEach(jdgScore => {
+	Object.keys(jdgMainScoreObj).forEach(jdgScore =>
 		infoSprite.appendChild(makeCounterSymbol(`lbl${jdgScore}`, g_headerObj.playingWidth - 110,
-			g_cssObj[`common_${jdgMainScoreObj[jdgScore][0]}`], jdgMainScoreObj[jdgScore][1] + 1, 0, g_workObj.scoreDisp));
-	});
+			g_cssObj[`common_${jdgMainScoreObj[jdgScore][0]}`], jdgMainScoreObj[jdgScore][1] + 1, 0, g_workObj.scoreDisp)));
 
 	// パーフェクト演出
 	judgeSprite.appendChild(createDivCss2Label(`finishView`, ``, g_lblPosObj.finishView, g_cssObj.common_kita));
@@ -9235,12 +9218,11 @@ const mainInit = _ => {
 	 * @param _deleteObj 削除オブジェクト
 	 */
 	const judgeObjDelete = {};
-	g_typeLists.arrow.forEach(type => {
+	g_typeLists.arrow.forEach(type =>
 		judgeObjDelete[type] = (_j, _deleteName) => {
 			g_workObj[`judg${toCapitalize(type)}Cnt`][_j]++;
 			arrowSprite[g_attrObj[_deleteName].dividePos].removeChild(document.getElementById(_deleteName));
-		}
-	});
+		});
 
 	/**
 	 * 自動判定
@@ -10012,35 +9994,32 @@ const changeColors = (_mkColor, _mkColorCd, _header, _name) => {
  */
 const changeCssMotions = (_header, _name, _frameNum) => {
 	const camelHeader = _header === `` ? _name : `${_header}${toCapitalize(_name)}`;
-	g_workObj[`mk${toCapitalize(camelHeader)}CssMotion`][_frameNum]?.forEach((targetj, j) => {
+	g_workObj[`mk${toCapitalize(camelHeader)}CssMotion`][_frameNum]?.forEach((targetj, j) =>
 		g_workObj[`${camelHeader}CssMotions`][targetj] =
-			g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + g_workObj.dividePos[targetj]];
-	});
+		g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + g_workObj.dividePos[targetj]]);
 };
 
 /**
  * スクロール方向の変更（矢印・フリーズアロー）
  * @param {number} _frameNum 
  */
-const changeScrollArrowDirs = (_frameNum) => {
+const changeScrollArrowDirs = (_frameNum) =>
 	g_workObj.mkScrollchArrow[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
 		g_workObj.dividePos[targetj] = (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
 	});
-};
 
 /**
  * ステップゾーンの位置反転
  * @param {number} _frameNum 
  */
-const changeStepY = (_frameNum) => {
+const changeStepY = (_frameNum) =>
 	g_workObj.mkScrollchStep[_frameNum]?.forEach((targetj, j) => {
 		const dividePos = (g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchStepDir[_frameNum][j] === 1 ? 0 : 1);
 		const baseY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
 		$id(`stepRoot${targetj}`).top = `${baseY}px`;
 		$id(`frzHit${targetj}`).top = `${baseY}px`;
 	});
-};
 
 /**
  * フリーズアローヒット時の描画変更
@@ -10561,9 +10540,8 @@ const resultInit = _ => {
 
 	const mTitleForView = [g_headerObj.musicTitleForView[0], g_headerObj.musicTitleForView[1] || ``];
 	if (g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]] !== undefined) {
-		mTitleForView.forEach((mTitle, j) => {
-			mTitleForView[j] = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][j];
-		});
+		mTitleForView.forEach((mTitle, j) =>
+			mTitleForView[j] = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][j]);
 	}
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -10649,12 +10627,11 @@ const resultInit = _ => {
 	};
 
 	// キャラクタ、スコア描画
-	Object.keys(jdgScoreObj).forEach(score => {
+	Object.keys(jdgScoreObj).forEach(score =>
 		multiAppend(resultWindow,
 			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}`, 0, g_cssObj[`common_${jdgScoreObj[score].color}`], jdgScoreObj[score].pos, jdgScoreObj[score].label),
 			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}S`, 50, g_cssObj.common_score, jdgScoreObj[score].pos, g_resultObj[score], C_ALIGN_RIGHT),
-		);
-	});
+		));
 	if (g_stateObj.autoAll === C_FLG_OFF) {
 		multiAppend(resultWindow,
 			makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_matari, 0, g_lblNameObj.j_fast),
@@ -10823,9 +10800,8 @@ const resultInit = _ => {
 		[`[url]`, g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``)]
 	]);
 	if (g_presetObj.resultVals !== undefined) {
-		Object.keys(g_presetObj.resultVals).forEach(key => {
-			tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_resultObj[g_presetObj.resultVals[key]]);
-		});
+		Object.keys(g_presetObj.resultVals).forEach(key =>
+			tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_resultObj[g_presetObj.resultVals[key]]));
 	}
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
@@ -10847,9 +10823,8 @@ const resultInit = _ => {
 		resetCommonBtn(`btnBack`, g_lblNameObj.b_back, g_lblPosObj.btnRsBack, titleInit, g_cssObj.button_Back),
 
 		// リザルトデータをクリップボードへコピー
-		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ => {
-			copyTextToClipboard(resultText, g_msgInfoObj.I_0001);
-		}, g_lblPosObj.btnRsCopy, g_cssObj.button_Setting),
+		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ => copyTextToClipboard(resultText, g_msgInfoObj.I_0001),
+			g_lblPosObj.btnRsCopy, g_cssObj.button_Setting),
 
 		// リザルトデータをTwitterへ転送
 		createCss2Button(`btnTweet`, g_lblNameObj.b_tweet, _ => true, Object.assign(g_lblPosObj.btnRsTweet, {
