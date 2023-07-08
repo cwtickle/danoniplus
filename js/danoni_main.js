@@ -2660,7 +2660,7 @@ const headerConvert = _dosObj => {
 		obj.minSpeed = C_MIN_SPEED;
 		obj.maxSpeed = C_MAX_SPEED;
 	}
-	g_settings.speeds = [...Array((obj.maxSpeed - obj.minSpeed) * 20 + 1).keys()].map(i => obj.minSpeed + i / 20);
+	g_settings.speeds = makeSpeedList(obj.minSpeed, obj.maxSpeed);
 
 	// プレイ中のショートカットキー
 	obj.keyRetry = setIntVal(getKeyCtrlVal(_dosObj.keyRetry), C_KEY_RETRY);
@@ -5399,26 +5399,20 @@ const setReverseView = _btn => {
 const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 
 	/**
-	 * ゲージ詳細変更
-	 * @param {object} _baseProperty 
-	 * @param {string} _setProperty 
-	 * @param {number} _magnification 
-	 */
-	const setLife = (_baseProperty, _setProperty, _magnification = 1) => {
-		if (setVal(_baseProperty[g_stateObj.scoreId], ``, C_TYP_FLOAT) !== ``) {
-			g_stateObj[_setProperty] = _baseProperty[g_stateObj.scoreId] * _magnification;
-		}
-	};
-
-	/**
 	 * ゲージ詳細一括変更
 	 * @param {object} _baseObj 
 	 * @param {object} _obj 
 	 */
 	const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
-		setLife(_baseObj.lifeInits, `lifeInit`, _magInit);
-		setLife(_baseObj.lifeRecoverys, `lifeRcv`, _magRcv);
-		setLife(_baseObj.lifeDamages, `lifeDmg`, _magDmg);
+		if (hasVal(_baseObj.lifeInits[g_stateObj.scoreId])) {
+			g_stateObj.lifeInit = _baseObj.lifeInits[g_stateObj.scoreId] * _magInit;
+		}
+		if (hasVal(_baseObj.lifeRecoverys[g_stateObj.scoreId])) {
+			g_stateObj.lifeRcv = _baseObj.lifeRecoverys[g_stateObj.scoreId] * _magRcv;
+		}
+		if (hasVal(_baseObj.lifeDamages[g_stateObj.scoreId])) {
+			g_stateObj.lifeDmg = _baseObj.lifeDamages[g_stateObj.scoreId] * _magDmg;
+		}
 	};
 
 	/**
