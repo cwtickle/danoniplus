@@ -254,6 +254,32 @@ const convertStrToVal = _str => {
 const hasVal = _data => _data !== undefined && _data !== ``;
 
 /**
+ * 変数が存在するかどうかをチェック(null無しを含む)
+ * @param {string} _data 
+ * @returns 
+ */
+const hasValN = _data => hasVal(_data) && _data !== null;
+
+/**
+ * 文字列から他の型へ変換する処理群
+ */
+const g_convFunc = {
+	float: (_checkStr, _default) => isNaN(parseFloat(_checkStr)) ? _default : parseFloat(_checkStr),
+	number: (_checkStr, _default) => isNaN(parseInt(_checkStr)) ? _default : parseInt(_checkStr),
+	boolean: (_checkStr, _default) => _checkStr.toString().toLowerCase() === `true` ? true :
+		(_checkStr.toString().toLowerCase() === `false` ? false : _default),
+	switch: (_checkStr, _default) => [C_FLG_OFF, C_FLG_ON].includes(_checkStr.toString().toUpperCase()) ? _checkStr.toString().toUpperCase() : _default,
+	calc: (_checkStr, _default) => {
+		try {
+			return new Function(`return ${_checkStr}`)();
+		} catch (err) {
+			return _default;
+		}
+	},
+	string: (_checkStr) => _checkStr,
+};
+
+/**
  * 文字列を想定された型に変換
  * - _type は `float`(小数)、`number`(整数)、`boolean`(真偽値)、
  *   `switch`(ON/OFF), `calc`(数式), `string`(文字列)から選択
@@ -262,32 +288,8 @@ const hasVal = _data => _data !== undefined && _data !== ``;
  * @param {string} _default 
  * @param {string} _type 
  */
-const setVal = (_checkStr, _default, _type = C_TYP_STRING) => {
-
-	let convertStr = _checkStr;
-
-	// 値がundefined相当の場合は無条件でデフォルト値を返却
-	if (_checkStr === undefined || _checkStr === null || _checkStr === ``) {
-		return _default;
-	}
-
-	const convFunc = {
-		float: _ => isNaN(parseFloat(_checkStr)) ? _default : parseFloat(_checkStr),
-		number: _ => isNaN(parseInt(_checkStr)) ? _default : parseInt(_checkStr),
-		boolean: _ => _checkStr.toString().toLowerCase() === `true` ? true :
-			(_checkStr.toString().toLowerCase() === `false` ? false : _default),
-		switch: _ => [C_FLG_OFF, C_FLG_ON].includes(_checkStr.toString().toUpperCase()) ? _checkStr.toString().toUpperCase() : _default,
-		calc: _ => {
-			try {
-				return new Function(`return ${_checkStr}`)();
-			} catch (err) {
-				return _default;
-			}
-		},
-		string: _ => convertStr,
-	};
-	return convFunc[_type]();
-};
+const setVal = (_checkStr, _default, _type = C_TYP_STRING) =>
+	hasValN(_checkStr) ? g_convFunc[_type](_checkStr, _default) : _default;
 
 /**
  * ブール値への変換
@@ -295,7 +297,7 @@ const setVal = (_checkStr, _default, _type = C_TYP_STRING) => {
  * @param {boolean} _defaultVal 
  * @returns 
  */
-const setBoolVal = (_val, _defaultVal = false) => setVal(_val, _defaultVal, C_TYP_BOOLEAN);
+const setBoolVal = (_val, _defaultVal = false) => hasValN(_val) ? g_convFunc.boolean(_val, _defaultVal) : _defaultVal;
 
 /**
  * 整数値への変換
@@ -303,7 +305,7 @@ const setBoolVal = (_val, _defaultVal = false) => setVal(_val, _defaultVal, C_TY
  * @param {number} _defaultVal 
  * @returns 
  */
-const setIntVal = (_val, _defaultVal = 0) => setVal(_val, _defaultVal, C_TYP_NUMBER);
+const setIntVal = (_val, _defaultVal = 0) => hasValN(_val) ? g_convFunc.number(_val, _defaultVal) : _defaultVal;
 
 /**
  * 先頭のみ大文字に変換（それ以降はそのまま）
@@ -1500,83 +1502,84 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 		const tmpSpriteData = tmpData.split(`,`);
 
 		// 深度が"-"の場合はスキップ
-		if (tmpSpriteData.length > 1 && tmpSpriteData[1] !== `-`) {
+		if (tmpSpriteData.length <= 1 || tmpSpriteData[1] === `-`) {
+			return;
+		}
 
-			// 値チェックとエスケープ処理
-			let tmpFrame;
-			if (setIntVal(tmpSpriteData[0], -1) === 0) {
-				tmpFrame = 0;
-			} else {
-				tmpFrame = roundZero(_calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC)));
-			}
-			const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_CALC));
-			if (tmpDepth !== C_FLG_ALL && tmpDepth > maxDepth) {
-				maxDepth = tmpDepth;
-			}
+		// 値チェックとエスケープ処理
+		let tmpFrame;
+		if (setIntVal(tmpSpriteData[0], -1) === 0) {
+			tmpFrame = 0;
+		} else {
+			tmpFrame = roundZero(_calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC)));
+		}
+		const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_CALC));
+		if (tmpDepth !== C_FLG_ALL && tmpDepth > maxDepth) {
+			maxDepth = tmpDepth;
+		}
 
-			const tmpObj = {
-				path: escapeHtml(tmpSpriteData[2] ?? ``, g_escapeStr.escapeCode),   // 画像パス or テキスト
-				class: escapeHtml(tmpSpriteData[3] ?? ``),                          // CSSクラス
-				left: setVal(tmpSpriteData[4], `0`).includes(`{`) ?
-					`${setVal(tmpSpriteData[4], 0)}` : `{${setVal(tmpSpriteData[4], 0)}}`, // X座標
-				top: setVal(tmpSpriteData[5], `0`).includes(`{`) ?
-					`${setVal(tmpSpriteData[5], 0)}` : `{${setVal(tmpSpriteData[5], 0)}}`, // Y座標
-				width: `${setIntVal(tmpSpriteData[6])}`,                            // spanタグの場合は font-size
-				height: `${escapeHtml(tmpSpriteData[7] ?? ``)}`,                    // spanタグの場合は color(文字列可)
-				opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
-				animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE)),
-				animationDuration: setIntVal(tmpSpriteData[10]) / g_fps,
-			};
-			if (setVal(tmpSpriteData[11], g_presetObj.animationFillMode) !== undefined) {
-				tmpObj.animationFillMode = setVal(tmpSpriteData[11], g_presetObj.animationFillMode);
-			}
-			if (g_headerObj.autoPreload) {
-				if (checkImage(tmpObj.path)) {
-					if (g_headerObj.syncBackPath) {
-						const [file, dir] = getFilePath(tmpObj.path, `./`);
-						tmpObj.path = `${dir}${file}`;
-					}
-					preloadFile(`image`, tmpObj.path);
+		const tmpObj = {
+			path: escapeHtml(tmpSpriteData[2] ?? ``, g_escapeStr.escapeCode),   // 画像パス or テキスト
+			class: escapeHtml(tmpSpriteData[3] ?? ``),                          // CSSクラス
+			left: setVal(tmpSpriteData[4], `0`).includes(`{`) ?
+				`${setVal(tmpSpriteData[4], 0)}` : `{${setVal(tmpSpriteData[4], 0)}}`, // X座標
+			top: setVal(tmpSpriteData[5], `0`).includes(`{`) ?
+				`${setVal(tmpSpriteData[5], 0)}` : `{${setVal(tmpSpriteData[5], 0)}}`, // Y座標
+			width: `${setIntVal(tmpSpriteData[6])}`,                            // spanタグの場合は font-size
+			height: `${escapeHtml(tmpSpriteData[7] ?? ``)}`,                    // spanタグの場合は color(文字列可)
+			opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
+			animationName: escapeHtml(setVal(tmpSpriteData[9], C_DIS_NONE)),
+			animationDuration: setIntVal(tmpSpriteData[10]) / g_fps,
+		};
+		if (setVal(tmpSpriteData[11], g_presetObj.animationFillMode) !== undefined) {
+			tmpObj.animationFillMode = setVal(tmpSpriteData[11], g_presetObj.animationFillMode);
+		}
+		if (g_headerObj.autoPreload) {
+			if (checkImage(tmpObj.path)) {
+				if (g_headerObj.syncBackPath) {
+					const [file, dir] = getFilePath(tmpObj.path, `./`);
+					tmpObj.path = `${dir}${file}`;
 				}
+				preloadFile(`image`, tmpObj.path);
 			}
+		}
 
-			let addFrame = 0;
-			[spriteData[tmpFrame], addFrame] =
-				checkDuplicatedObjects(spriteData[tmpFrame]);
+		let addFrame = 0;
+		[spriteData[tmpFrame], addFrame] =
+			checkDuplicatedObjects(spriteData[tmpFrame]);
 
-			const emptyPatterns = [``, `[loop]`, `[jump]`];
-			const colorObjFlg = tmpSpriteData[2]?.startsWith(`[c]`) || false;
-			spriteData[tmpFrame][addFrame] = {
-				depth: tmpDepth,
+		const emptyPatterns = [``, `[loop]`, `[jump]`];
+		const colorObjFlg = tmpSpriteData[2]?.startsWith(`[c]`) || false;
+		const spriteFrameData = spriteData[tmpFrame][addFrame] = {
+			depth: tmpDepth,
+		};
+
+		if (colorObjFlg) {
+			// [c]始まりの場合、カラーオブジェクト用の作成準備を行う
+			const data = tmpObj.path.slice(`[c]`.length).split(`/`);
+			spriteFrameData.colorObjInfo = {
+				x: tmpObj.left, y: tmpObj.top, w: tmpObj.width, h: tmpObj.height,
+				rotate: setVal(data[0], `0`), opacity: tmpObj.opacity,
+				background: makeColorGradation(setVal(data[1], `#ffffff`), { _defaultColorgrd: false }),
+				animationName: tmpObj.animationName,
+				animationDuration: `${tmpObj.animationDuration}s`,
 			};
-
-			if (colorObjFlg) {
-				// [c]始まりの場合、カラーオブジェクト用の作成準備を行う
-				const data = tmpObj.path.slice(`[c]`.length).split(`/`);
-				spriteData[tmpFrame][addFrame].colorObjInfo = {
-					x: tmpObj.left, y: tmpObj.top, w: tmpObj.width, h: tmpObj.height,
-					rotate: setVal(data[0], `0`), opacity: tmpObj.opacity,
-					background: makeColorGradation(setVal(data[1], `#ffffff`), { _defaultColorgrd: false }),
-					animationName: tmpObj.animationName,
-					animationDuration: `${tmpObj.animationDuration}s`,
-				};
-				spriteData[tmpFrame][addFrame].colorObjId = `${tmpFrame}_${addFrame}`;
-				spriteData[tmpFrame][addFrame].colorObjClass = setVal(tmpObj.class, undefined);
-				if (tmpObj.animationFillMode !== undefined) {
-					spriteData[tmpFrame][addFrame].colorObjInfo.animationFillMode = tmpObj.animationFillMode;
-				}
-
-			} else if (emptyPatterns.includes(tmpObj.path)) {
-				// ループ、フレームジャンプ、空の場合の処理
-				spriteData[tmpFrame][addFrame].command = tmpObj.path;
-				spriteData[tmpFrame][addFrame].jumpFrame = tmpObj.class;
-				spriteData[tmpFrame][addFrame].maxLoop = tmpObj.left;
-				spriteData[tmpFrame][addFrame].htmlText = ``;
-			} else {
-				// それ以外の画像、テキストの場合
-				spriteData[tmpFrame][addFrame].animationName = tmpObj.animationName;
-				spriteData[tmpFrame][addFrame].htmlText = (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj));
+			spriteFrameData.colorObjId = `${tmpFrame}_${addFrame}`;
+			spriteFrameData.colorObjClass = setVal(tmpObj.class, undefined);
+			if (tmpObj.animationFillMode !== undefined) {
+				spriteFrameData.colorObjInfo.animationFillMode = tmpObj.animationFillMode;
 			}
+
+		} else if (emptyPatterns.includes(tmpObj.path)) {
+			// ループ、フレームジャンプ、空の場合の処理
+			spriteFrameData.command = tmpObj.path;
+			spriteFrameData.jumpFrame = tmpObj.class;
+			spriteFrameData.maxLoop = tmpObj.left;
+			spriteFrameData.htmlText = ``;
+		} else {
+			// それ以外の画像、テキストの場合
+			spriteFrameData.animationName = tmpObj.animationName;
+			spriteFrameData.htmlText = (checkImage(tmpObj.path) ? makeSpriteImage(tmpObj) : makeSpriteText(tmpObj));
 		}
 	});
 
@@ -4115,10 +4118,10 @@ const titleInit = _ => {
 		g_scoreObj.titleFrameNum++;
 		g_scoreObj.backTitleFrameNum++;
 		g_scoreObj.maskTitleFrameNum++;
-		g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps - buffTime);
+		g_timeoutEvtTitleId = setTimeout(flowTitleTimeline, 1000 / g_fps - buffTime);
 	};
 
-	g_timeoutEvtTitleId = setTimeout(_ => flowTitleTimeline(), 1000 / g_fps);
+	g_timeoutEvtTitleId = setTimeout(flowTitleTimeline, 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage, _ => true, { dfEvtFlg: true });
@@ -9852,7 +9855,7 @@ const mainInit = _ => {
 			}
 			g_scoreObj.frameNum++;
 			g_scoreObj.baseFrame++;
-			g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps - buffTime);
+			g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps - buffTime);
 		}
 	};
 	g_skinJsObj.main.forEach(func => func());
@@ -9867,7 +9870,7 @@ const mainInit = _ => {
 		g_audio.play(musicStartAdjustment);
 	}
 
-	g_timeoutEvtId = setTimeout(_ => flowTimeline(), 1000 / g_fps);
+	g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps);
 };
 
 /**
@@ -10869,7 +10872,7 @@ const resultInit = _ => {
 		g_scoreObj.resultFrameNum++;
 		g_scoreObj.backResultFrameNum++;
 		g_scoreObj.maskResultFrameNum++;
-		g_timeoutEvtResultId = setTimeout(_ => flowResultTimeline(), 1000 / g_fps - buffTime);
+		g_timeoutEvtResultId = setTimeout(flowResultTimeline, 1000 / g_fps - buffTime);
 	};
 	flowResultTimeline();
 
