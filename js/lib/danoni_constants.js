@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/06/09 (v32.5.0)
+ * Revised : 2023/07/08 (v32.6.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -871,9 +871,11 @@ const g_autoPlaysBase = [C_FLG_OFF, C_FLG_ALL];
 
 let g_appearanceRanges = [`Hidden+`, `Sudden+`, `Hid&Sud+`];
 
+const makeSpeedList = (_minSpd, _maxSpd) => [...Array((_maxSpd - _minSpd) * 20 + 1).keys()].map(i => _minSpd + i / 20);
+
 // 設定系全般管理
 const g_settings = {
-    speeds: [...Array((C_MAX_SPEED - C_MIN_SPEED) * 20 + 1).keys()].map(i => C_MIN_SPEED + i / 20),
+    speeds: makeSpeedList(C_MIN_SPEED, C_MAX_SPEED),
     speedNum: 0,
     speedTerms: [20, 5, 1],
 
@@ -1360,6 +1362,7 @@ const g_shortcutObj = {
         ShiftLeft_KeyG: { id: `lnkGaugeL` },
         ShiftRight_KeyG: { id: `lnkGaugeL` },
         KeyG: { id: `lnkGaugeR` },
+        KeyE: { id: `lnkExcessive` },
 
         AltLeft_ShiftLeft_Semicolon: { id: `lnkAdjustmentHR` },
         AltLeft_ShiftRight_Semicolon: { id: `lnkAdjustmentHR` },
