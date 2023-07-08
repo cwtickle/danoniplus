@@ -170,7 +170,7 @@ const g_wordObj = {
 	fadeInFlg0: false,
 	fadeInFlg1: false,
 	fadeOutFlg0: false,
-	fadeOutFlg1: false
+	fadeOutFlg1: false,
 };
 
 // オーディオ設定・タイマー管理
@@ -271,36 +271,22 @@ const setVal = (_checkStr, _default, _type = C_TYP_STRING) => {
 		return _default;
 	}
 
-	if (_type === C_TYP_FLOAT) {
-		// 数値型(小数可)の場合
-		const toFloat = parseFloat(_checkStr);
-		convertStr = (isNaN(toFloat) ? _default : toFloat);
-
-	} else if (_type === C_TYP_NUMBER) {
-		// 数値型(整数のみ)の場合
-		const toInt = parseInt(_checkStr);
-		convertStr = (isNaN(toInt) ? _default : toInt);
-
-	} else if (_type === C_TYP_BOOLEAN) {
-		// 真偽値の場合
-		const lowerCase = _checkStr.toString().toLowerCase();
-		convertStr = (lowerCase === `true` ? true : (lowerCase === `false` ? false : _default));
-
-	} else if (_type === C_TYP_SWITCH) {
-		// ON/OFFスイッチの場合
-		const toSwtich = _checkStr.toString().toUpperCase();
-		convertStr = [C_FLG_OFF, C_FLG_ON].includes(toSwtich) ? toSwtich : _default;
-
-	} else if (_type === C_TYP_CALC) {
-		try {
-			convertStr = new Function(`return ${_checkStr}`)();
-		} catch (err) {
-			convertStr = _default;
-		}
-	}
-
-	// 文字列型の場合 (最初でチェック済みのためそのまま値を返却)
-	return convertStr;
+	const convFunc = {
+		float: _ => isNaN(parseFloat(_checkStr)) ? _default : parseFloat(_checkStr),
+		number: _ => isNaN(parseInt(_checkStr)) ? _default : parseInt(_checkStr),
+		boolean: _ => _checkStr.toString().toLowerCase() === `true` ? true :
+			(_checkStr.toString().toLowerCase() === `false` ? false : _default),
+		switch: _ => [C_FLG_OFF, C_FLG_ON].includes(_checkStr.toString().toUpperCase()) ? _checkStr.toString().toUpperCase() : _default,
+		calc: _ => {
+			try {
+				return new Function(`return ${_checkStr}`)();
+			} catch (err) {
+				return _default;
+			}
+		},
+		string: _ => convertStr,
+	};
+	return convFunc[_type]();
 };
 
 /**
