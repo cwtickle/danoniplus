@@ -871,9 +871,11 @@ const g_autoPlaysBase = [C_FLG_OFF, C_FLG_ALL];
 
 let g_appearanceRanges = [`Hidden+`, `Sudden+`, `Hid&Sud+`];
 
+const makeSpeedList = (_minSpd, _maxSpd) => [...Array((_maxSpd - _minSpd) * 20 + 1).keys()].map(i => _minSpd + i / 20);
+
 // 設定系全般管理
 const g_settings = {
-    speeds: [...Array((C_MAX_SPEED - C_MIN_SPEED) * 20 + 1).keys()].map(i => C_MIN_SPEED + i / 20),
+    speeds: makeSpeedList(C_MIN_SPEED, C_MAX_SPEED),
     speedNum: 0,
     speedTerms: [20, 5, 1],
 
