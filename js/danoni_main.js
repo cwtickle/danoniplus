@@ -9154,6 +9154,7 @@ const mainInit = _ => {
 		judgeObjDelete[type] = (_j, _deleteName) => {
 			g_workObj[`judg${toCapitalize(type)}Cnt`][_j]++;
 			arrowSprite[g_attrObj[_deleteName].dividePos].removeChild(document.getElementById(_deleteName));
+			delete g_attrObj[_deleteName];
 		});
 
 	/**
