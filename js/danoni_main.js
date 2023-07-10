@@ -2527,9 +2527,22 @@ const headerConvert = _dosObj => {
 	/**
 	 * ロケールを含んだヘッダーの取得
 	 * @param {object} _obj 
-	 * @param {string} _param
+	 * @param {...any} _params
 	 */
-	const getHeader = (_obj, _param) => _obj[`${_param}${g_localeObj.val}`] ?? _obj[_param];
+	const getHeader = (_obj, ..._params) => {
+		let headerLocale, headerDf;
+		Object.keys(_params).forEach(j => {
+			headerLocale ??= _obj[`${_params[j]}${g_localeObj.val}`];
+			headerDf ??= _obj[_params[j]];
+		});
+		return headerLocale ?? headerDf;
+	};
+
+	/**
+	 * ヘッダー名の互換設定
+	 * @param {string} _param 
+	 */
+	const getHname = _param => [_param, _param.toLowerCase()];
 
 	// フォントの設定
 	obj.customFont = _dosObj.customFont ?? ``;
@@ -2919,12 +2932,12 @@ const headerConvert = _dosObj => {
 	obj.readyHtml = _dosObj.readyHtml ?? ``;
 
 	// デフォルト曲名表示のフォントサイズ
-	obj.titlesize = getHeader(_dosObj, `titlesize`) ?? ``;
+	obj.titlesize = getHeader(_dosObj, ...getHname(`titleSize`)) ?? ``;
 
 	// デフォルト曲名表示のフォント名
 	// (使用例： |titlefont=Century,Meiryo UI|)
 	obj.titlefonts = g_titleLists.defaultFonts.concat();
-	getHeader(_dosObj, `titlefont`)?.split(`$`).forEach((font, j) => obj.titlefonts[j] = `'${(font.replaceAll(`,`, `', '`))}'`);
+	getHeader(_dosObj, ...getHname(`titleFont`))?.split(`$`).forEach((font, j) => obj.titlefonts[j] = `'${(font.replaceAll(`,`, `', '`))}'`);
 	if (obj.titlefonts[1] === undefined) {
 		obj.titlefonts[1] = obj.titlefonts[0];
 	}
@@ -2941,7 +2954,7 @@ const headerConvert = _dosObj => {
 
 	// デフォルト曲名表示の表示位置調整
 	obj.titlepos = [[0, 0], [0, 0]];
-	getHeader(_dosObj, `titlepos`)?.split(`$`).forEach((pos, j) => obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x)));
+	getHeader(_dosObj, ...getHname(`titlePos`))?.split(`$`).forEach((pos, j) => obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x)));
 
 	// タイトル文字のアニメーション設定
 	obj.titleAnimationName = [`leftToRight`];
@@ -2950,14 +2963,14 @@ const headerConvert = _dosObj => {
 	obj.titleAnimationTimingFunction = [`ease`];
 	obj.titleAnimationClass = [``];
 
-	_dosObj.titleanimation?.split(`$`).forEach((pos, j) => {
+	getHeader(_dosObj, ...getHname(`titleAnimation`))?.split(`$`).forEach((pos, j) => {
 		const titleAnimation = pos.split(`,`);
 		obj.titleAnimationName[j] = setVal(titleAnimation[0], obj.titleAnimationName[0]);
 		obj.titleAnimationDuration[j] = setVal(titleAnimation[1] / g_fps, obj.titleAnimationDuration[0], C_TYP_FLOAT);
 		obj.titleAnimationDelay[j] = setVal(titleAnimation[2] / g_fps, obj.titleAnimationDelay[0], C_TYP_FLOAT);
 		obj.titleAnimationTimingFunction[j] = setVal(titleAnimation[3], obj.titleAnimationName[3]);
 	});
-	_dosObj.titleanimationclass?.split(`$`).forEach((animationClass, j) =>
+	getHeader(_dosObj, ...getHname(`titleAnimationClass`))?.split(`$`).forEach((animationClass, j) =>
 		obj.titleAnimationClass[j] = animationClass ?? ``);
 
 	if (obj.titleAnimationName.length === 1) {
@@ -2969,7 +2982,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// デフォルト曲名表示の複数行時の縦間隔
-	obj.titlelineheight = setIntVal(getHeader(_dosObj, `titlelineheight`), ``);
+	obj.titlelineheight = setIntVal(getHeader(_dosObj, ...getHname(`titleLineHeight`)), ``);
 
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
 	obj.frzStartjdgUse = setBoolVal(_dosObj.frzStartjdgUse ?? g_presetObj.frzStartjdgUse);
