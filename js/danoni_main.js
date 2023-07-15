@@ -2516,6 +2516,20 @@ const preheaderConvert = _dosObj => {
 };
 
 /**
+ * ロケールを含んだヘッダーの優先度設定
+ * @param {object} _obj 
+ * @param {...any} _params
+ */
+const getHeader = (_obj, ..._params) => {
+	let headerLocale, headerDf;
+	Object.keys(_params).forEach(j => {
+		headerLocale ??= _obj[`${_params[j]}${g_localeObj.val}`];
+		headerDf ??= _obj[_params[j]];
+	});
+	return headerLocale ?? headerDf;
+};
+
+/**
  * 譜面ヘッダーの分解（その他の設定）
  * @param {object} _dosObj 譜面データオブジェクト
  */
@@ -2523,20 +2537,6 @@ const headerConvert = _dosObj => {
 
 	// ヘッダー群の格納先
 	const obj = {};
-
-	/**
-	 * ロケールを含んだヘッダーの取得
-	 * @param {object} _obj 
-	 * @param {...any} _params
-	 */
-	const getHeader = (_obj, ..._params) => {
-		let headerLocale, headerDf;
-		Object.keys(_params).forEach(j => {
-			headerLocale ??= _obj[`${_params[j]}${g_localeObj.val}`];
-			headerDf ??= _obj[_params[j]];
-		});
-		return headerLocale ?? headerDf;
-	};
 
 	/**
 	 * ヘッダー名の互換設定
