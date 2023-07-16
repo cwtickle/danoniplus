@@ -348,7 +348,7 @@ const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length
  * 改行コード区切りの配列展開
  * @param {string} _str
  */
-const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
+const splitLF = _str => _str?.split(`\r`).join(`\n`).split(`\n`);
 
 /**
  * 改行コード区切りを本来の区切り文字に変換して配列展開
@@ -356,7 +356,7 @@ const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
  * @param {string} _str 
  * @param {string} _delim
  */
-const splitLF2 = (_str, _delim = `$`) => splitLF(_str).filter(val => val !== ``).join(_delim).split(_delim);
+const splitLF2 = (_str, _delim = `$`) => splitLF(_str)?.filter(val => val !== ``).join(_delim).split(_delim);
 
 /**
  * 重複を排除した配列の生成
@@ -3581,14 +3581,13 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 
 		if (hasVal(_dosObj[keyheader])) {
-			const tmpArray = splitLF2(_dosObj[keyheader]);
-			for (let k = 0; k < tmpArray.length; k++) {
-				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
-					continue;
+			splitLF2(_dosObj[keyheader])?.forEach((tmpParam, k) => {
+				if (existParam(tmpParam, `${keyheader}_${k + dfPtn}`)) {
+					return;
 				}
 
 				let ptnCnt = 0;
-				tmpArray[k].split(`/`).forEach(list => {
+				tmpParam.split(`/`).forEach(list => {
 
 					const keyPtn = getKeyPtnName(list);
 					if (list === ``) {
@@ -3617,7 +3616,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					}
 				});
 				g_keyObj[`${keyheader}_${k + dfPtn}`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}_0`]);
-			}
+			});
 
 		} else if (g_keyObj[`${keyheader}_${dfPtn}_0`] === undefined) {
 			// 特に指定が無い場合はkeyCtrlX_Yの配列長で決定
@@ -3663,39 +3662,36 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		const keyheader = _name + _key;
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 
-		if (_dosObj[keyheader] !== undefined) {
-			const tmpParams = splitLF2(_dosObj[keyheader]);
-			for (let k = 0; k < tmpParams.length; k++) {
-				const pairName = `${_pairName}${_key}_${k + dfPtn}`;
-				if (!hasVal(tmpParams[k])) {
-					continue;
-				}
-				g_keyObj[pairName] = {}
-
-				// デフォルト項目がある場合は先に定義
-				if (_defaultName !== ``) {
-					g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
-				}
-				tmpParams[k].split(`/`).forEach(pairs => {
-					const keyPtn = getKeyPtnName(pairs);
-					if (pairs === ``) {
-					} else if (g_keyObj[`${_pairName}${keyPtn}`] !== undefined) {
-						// 他のキーパターン指定時、該当があればプロパティを全コピー
-						Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${keyPtn}`]);
-					} else {
-						// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-,-,-,1,1/Split::1,1,1,1,-,-,-,-|）から取り込み
-						// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |scroll9j=Cross::1,7_0,1|)
-						const tmpParamPair = pairs.split(`::`);
-						g_keyObj[pairName][tmpParamPair[0]] =
-							makeBaseArray(tmpParamPair[1].split(`,`).map(n =>
-								g_keyObj[`${_pairName}${getKeyPtnName(n)}`] !== undefined ?
-									structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`][tmpParamPair[0]]) :
-									[n === `-` ? -1 : parseInt(n, 10)]
-							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
-					}
-				});
+		splitLF2(_dosObj[keyheader])?.forEach((tmpParam, k) => {
+			const pairName = `${_pairName}${_key}_${k + dfPtn}`;
+			if (!hasVal(tmpParam)) {
+				return;
 			}
-		}
+			g_keyObj[pairName] = {}
+
+			// デフォルト項目がある場合は先に定義
+			if (_defaultName !== ``) {
+				g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
+			}
+			tmpParam.split(`/`).forEach(pairs => {
+				const keyPtn = getKeyPtnName(pairs);
+				if (pairs === ``) {
+				} else if (g_keyObj[`${_pairName}${keyPtn}`] !== undefined) {
+					// 他のキーパターン指定時、該当があればプロパティを全コピー
+					Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${keyPtn}`]);
+				} else {
+					// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-,-,-,1,1/Split::1,1,1,1,-,-,-,-|）から取り込み
+					// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |scroll9j=Cross::1,7_0,1|)
+					const tmpParamPair = pairs.split(`::`);
+					g_keyObj[pairName][tmpParamPair[0]] =
+						makeBaseArray(tmpParamPair[1]?.split(`,`).map(n =>
+							g_keyObj[`${_pairName}${getKeyPtnName(n)}`] !== undefined ?
+								structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`][tmpParamPair[0]]) :
+								[n === `-` ? -1 : parseInt(n, 10)]
+						).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
+				}
+			});
+		});
 	};
 
 	// 対象キー毎に処理
