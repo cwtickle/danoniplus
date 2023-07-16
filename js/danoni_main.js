@@ -7225,22 +7225,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * 矢印データの格納
 	 * @param {string} _data 
 	 */
-	const storeArrowData = _data => {
-		let arrowData = [];
-
-		if (hasVal(_data)) {
-			const tmpData = splitLF(_data).join(``);
-			if (tmpData !== undefined) {
-				arrowData = tmpData.split(`,`);
-				if (isNaN(parseFloat(arrowData[0]))) {
-					return [];
-				} else {
-					arrowData = arrowData.map(data => calcFrame(data)).sort((_a, _b) => _a - _b);
-				}
-			}
-		}
-		return arrowData;
-	};
+	const storeArrowData = _data => hasVal(_data) ?
+		splitLF(_data)?.join(``).split(`,`).filter(data => !isNaN(parseFloat(data))).map(data => calcFrame(data)).sort((_a, _b) => _a - _b) : [];
 
 	for (let j = 0; j < keyNum; j++) {
 
