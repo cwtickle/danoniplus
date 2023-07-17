@@ -3045,7 +3045,6 @@ const headerConvert = _dosObj => {
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	g_animationData.forEach(sprite => {
 		obj[`${sprite}TitleData`] = [];
-		obj[`${sprite}TitleData`].length = 0;
 		obj[`${sprite}TitleMaxDepth`] = -1;
 
 		const dataList = [_dosObj[`${sprite}title${g_localeObj.val}_data`], _dosObj[`${sprite}title_data`]];
@@ -4487,6 +4486,7 @@ const drawSpeedGraph = _scoreId => {
 
 	const avgX = [0, 0];
 	const avgSubX = [1, 1];
+	const lineX = [125, 210];
 	Object.keys(speedObj).forEach((speedType, j) => {
 		context.beginPath();
 		let preY;
@@ -4515,13 +4515,12 @@ const drawSpeedGraph = _scoreId => {
 		context.strokeStyle = speedObj[speedType].strokeColor;
 		context.stroke();
 
-		const lineX = (speedType === `speed`) ? 125 : 210;
 		context.beginPath();
-		context.moveTo(lineX, 215);
-		context.lineTo(lineX + 25, 215);
+		context.moveTo(lineX[j], 215);
+		context.lineTo(lineX[j] + 25, 215);
 		context.stroke();
 		context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
-		context.fillText(g_lblNameObj[`s_${speedType}`], lineX + 30, 218);
+		context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, 218);
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, avgSubX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
@@ -8023,11 +8022,10 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			(cgArrays.includes(_type) ? _data[startNum][_j][0] === _data[startNum][_k][0] :
 				_data[startNum][_j].depth === _data[startNum][_k].depth);
 
-		const fuzzyCheck = (_str, _list) => listMatching(_str, _list);
 		const isExceptData = {
-			word: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j][1], _exceptList.word),
-			back: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.back),
-			mask: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.mask),
+			word: (_exceptList, _j) => listMatching(_data[startNum][_j][1], _exceptList.word),
+			back: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.back),
+			mask: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.mask),
 		};
 
 		const getLength = _list =>
@@ -8086,7 +8084,6 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	// 実際に処理させる途中変速配列を作成
 	g_workObj.speedData = [];
-	g_workObj.speedData.length = 0;
 	g_workObj.speedData.push(g_scoreObj.frameNum);
 	g_workObj.speedData.push(_speedOnFrame[g_scoreObj.frameNum]);
 
