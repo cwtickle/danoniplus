@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/07/08
+ * Revised : 2023/07/17
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 32.6.1`;
-const g_revisedDate = `2023/07/08`;
+const g_version = `Ver 32.7.0`;
+const g_revisedDate = `2023/07/17`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -348,7 +348,7 @@ const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length
  * 改行コード区切りの配列展開
  * @param {string} _str
  */
-const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
+const splitLF = _str => _str?.split(`\r`).join(`\n`).split(`\n`);
 
 /**
  * 改行コード区切りを本来の区切り文字に変換して配列展開
@@ -356,7 +356,7 @@ const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
  * @param {string} _str 
  * @param {string} _delim
  */
-const splitLF2 = (_str, _delim = `$`) => splitLF(_str).filter(val => val !== ``).join(_delim).split(_delim);
+const splitLF2 = (_str, _delim = `$`) => splitLF(_str)?.filter(val => val !== ``).join(_delim).split(_delim);
 
 /**
  * 重複を排除した配列の生成
@@ -2463,6 +2463,26 @@ const calcLevel = _scoreObj => {
 };
 
 /**
+ * ロケールを含んだヘッダーの優先度設定
+ * @param {object} _obj 
+ * @param {...any} _params
+ */
+const getHeader = (_obj, ..._params) => {
+	let headerLocale, headerDf;
+	Object.keys(_params).forEach(j => {
+		headerLocale ??= _obj[`${_params[j]}${g_localeObj.val}`];
+		headerDf ??= _obj[_params[j]];
+	});
+	return headerLocale ?? headerDf;
+};
+
+/**
+ * ヘッダー名の互換設定
+ * @param {string} _param 
+ */
+const getHname = _param => [_param, _param.toLowerCase()];
+
+/**
  * 譜面ヘッダーの分解（スキン、jsファイルなどの設定）
  * @param {object} _dosObj
  */
@@ -2495,11 +2515,11 @@ const preheaderConvert = _dosObj => {
 	setJsFiles(tmpSkinTypes, C_DIR_SKIN, `skin`);
 
 	// 外部jsファイルの指定
-	const tmpCustomjs = _dosObj.customjs ?? g_presetObj.customJs ?? C_JSF_CUSTOM;
+	const tmpCustomjs = getHeader(_dosObj, ...getHname(`customJs`)) ?? g_presetObj.customJs ?? C_JSF_CUSTOM;
 	setJsFiles(tmpCustomjs.replaceAll(`*`, g_presetObj.customJs).split(`,`), C_DIR_JS);
 
 	// 外部cssファイルの指定
-	const tmpCustomcss = _dosObj.customcss ?? g_presetObj.customCss ?? ``;
+	const tmpCustomcss = getHeader(_dosObj, ...getHname(`customCss`)) ?? g_presetObj.customCss ?? ``;
 	setJsFiles(tmpCustomcss.replaceAll(`*`, g_presetObj.customCss).split(`,`), C_DIR_CSS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
@@ -2523,13 +2543,6 @@ const headerConvert = _dosObj => {
 
 	// ヘッダー群の格納先
 	const obj = {};
-
-	/**
-	 * ロケールを含んだヘッダーの取得
-	 * @param {object} _obj 
-	 * @param {string} _param
-	 */
-	const getHeader = (_obj, _param) => _obj[`${_param}${g_localeObj.val}`] ?? _obj[_param];
 
 	// フォントの設定
 	obj.customFont = _dosObj.customFont ?? ``;
@@ -2919,29 +2932,30 @@ const headerConvert = _dosObj => {
 	obj.readyHtml = _dosObj.readyHtml ?? ``;
 
 	// デフォルト曲名表示のフォントサイズ
-	obj.titlesize = getHeader(_dosObj, `titlesize`) ?? ``;
+	obj.titlesize = getHeader(_dosObj, ...getHname(`titleSize`)) ?? ``;
 
 	// デフォルト曲名表示のフォント名
 	// (使用例： |titlefont=Century,Meiryo UI|)
 	obj.titlefonts = g_titleLists.defaultFonts.concat();
-	getHeader(_dosObj, `titlefont`)?.split(`$`).forEach((font, j) => obj.titlefonts[j] = `'${(font.replaceAll(`,`, `', '`))}'`);
+	getHeader(_dosObj, ...getHname(`titleFont`))?.split(`$`).forEach((font, j) => obj.titlefonts[j] = `'${(font.replaceAll(`,`, `', '`))}'`);
 	if (obj.titlefonts[1] === undefined) {
 		obj.titlefonts[1] = obj.titlefonts[0];
 	}
 
 	// デフォルト曲名表示, 背景矢印のグラデーション指定css
-	g_titleLists.grdList.forEach(_name => {
-		obj[`${_name}s`] = [];
-		if (hasVal(_dosObj[_name])) {
-			const tmpTitlegrd = _dosObj[_name].replaceAll(`,`, `:`);
-			obj[`${_name}s`] = tmpTitlegrd.split(`$`);
-			obj[`${_name}`] = obj[`${_name}s`][0] ?? ``;
+	[`titlegrd`, `titleArrowgrd`].forEach(_name => {
+		const objName = `${_name.toLowerCase()}`;
+		obj[`${objName}s`] = [];
+		const tmpTitlegrd = getHeader(_dosObj, ...getHname(_name))?.replaceAll(`,`, `:`);
+		if (hasVal(tmpTitlegrd)) {
+			obj[`${objName}s`] = tmpTitlegrd.split(`$`);
+			obj[`${objName}`] = obj[`${objName}s`][0] ?? ``;
 		}
 	});
 
 	// デフォルト曲名表示の表示位置調整
 	obj.titlepos = [[0, 0], [0, 0]];
-	getHeader(_dosObj, `titlepos`)?.split(`$`).forEach((pos, j) => obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x)));
+	getHeader(_dosObj, ...getHname(`titlePos`))?.split(`$`).forEach((pos, j) => obj.titlepos[j] = pos.split(`,`).map(x => parseFloat(x)));
 
 	// タイトル文字のアニメーション設定
 	obj.titleAnimationName = [`leftToRight`];
@@ -2950,14 +2964,14 @@ const headerConvert = _dosObj => {
 	obj.titleAnimationTimingFunction = [`ease`];
 	obj.titleAnimationClass = [``];
 
-	_dosObj.titleanimation?.split(`$`).forEach((pos, j) => {
+	getHeader(_dosObj, ...getHname(`titleAnimation`))?.split(`$`).forEach((pos, j) => {
 		const titleAnimation = pos.split(`,`);
 		obj.titleAnimationName[j] = setVal(titleAnimation[0], obj.titleAnimationName[0]);
 		obj.titleAnimationDuration[j] = setVal(titleAnimation[1] / g_fps, obj.titleAnimationDuration[0], C_TYP_FLOAT);
 		obj.titleAnimationDelay[j] = setVal(titleAnimation[2] / g_fps, obj.titleAnimationDelay[0], C_TYP_FLOAT);
 		obj.titleAnimationTimingFunction[j] = setVal(titleAnimation[3], obj.titleAnimationName[3]);
 	});
-	_dosObj.titleanimationclass?.split(`$`).forEach((animationClass, j) =>
+	getHeader(_dosObj, ...getHname(`titleAnimationClass`))?.split(`$`).forEach((animationClass, j) =>
 		obj.titleAnimationClass[j] = animationClass ?? ``);
 
 	if (obj.titleAnimationName.length === 1) {
@@ -2969,7 +2983,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// デフォルト曲名表示の複数行時の縦間隔
-	obj.titlelineheight = setIntVal(getHeader(_dosObj, `titlelineheight`), ``);
+	obj.titlelineheight = setIntVal(getHeader(_dosObj, ...getHname(`titleLineHeight`)), ``);
 
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
 	obj.frzStartjdgUse = setBoolVal(_dosObj.frzStartjdgUse ?? g_presetObj.frzStartjdgUse);
@@ -3045,7 +3059,6 @@ const headerConvert = _dosObj => {
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	g_animationData.forEach(sprite => {
 		obj[`${sprite}TitleData`] = [];
-		obj[`${sprite}TitleData`].length = 0;
 		obj[`${sprite}TitleMaxDepth`] = -1;
 
 		const dataList = [_dosObj[`${sprite}title${g_localeObj.val}_data`], _dosObj[`${sprite}title_data`]];
@@ -3068,7 +3081,7 @@ const headerConvert = _dosObj => {
 	obj.resultMotionSet = setBoolVal(_dosObj.resultMotionSet, true);
 
 	// 譜面明細の使用可否
-	const tmpDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`)
+	const tmpDetails = getHeader(_dosObj, `scoreDetailUse`, `chartDetailUse`)?.split(`,`).filter(val => hasVal(val) && val !== `false`)
 		.map(val => replaceStr(val, g_settings.scoreDetailTrans));
 	g_settings.scoreDetails = g_settings.scoreDetailDefs.filter(val => tmpDetails?.includes(val) || tmpDetails === undefined);
 
@@ -3581,14 +3594,13 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 
 		if (hasVal(_dosObj[keyheader])) {
-			const tmpArray = splitLF2(_dosObj[keyheader]);
-			for (let k = 0; k < tmpArray.length; k++) {
-				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
-					continue;
+			splitLF2(_dosObj[keyheader])?.forEach((tmpParam, k) => {
+				if (existParam(tmpParam, `${keyheader}_${k + dfPtn}`)) {
+					return;
 				}
 
 				let ptnCnt = 0;
-				tmpArray[k].split(`/`).forEach(list => {
+				tmpParam.split(`/`).forEach(list => {
 
 					const keyPtn = getKeyPtnName(list);
 					if (list === ``) {
@@ -3617,7 +3629,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					}
 				});
 				g_keyObj[`${keyheader}_${k + dfPtn}`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}_0`]);
-			}
+			});
 
 		} else if (g_keyObj[`${keyheader}_${dfPtn}_0`] === undefined) {
 			// 特に指定が無い場合はkeyCtrlX_Yの配列長で決定
@@ -3663,39 +3675,36 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		const keyheader = _name + _key;
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 
-		if (_dosObj[keyheader] !== undefined) {
-			const tmpParams = splitLF2(_dosObj[keyheader]);
-			for (let k = 0; k < tmpParams.length; k++) {
-				const pairName = `${_pairName}${_key}_${k + dfPtn}`;
-				if (!hasVal(tmpParams[k])) {
-					continue;
-				}
-				g_keyObj[pairName] = {}
-
-				// デフォルト項目がある場合は先に定義
-				if (_defaultName !== ``) {
-					g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
-				}
-				tmpParams[k].split(`/`).forEach(pairs => {
-					const keyPtn = getKeyPtnName(pairs);
-					if (pairs === ``) {
-					} else if (g_keyObj[`${_pairName}${keyPtn}`] !== undefined) {
-						// 他のキーパターン指定時、該当があればプロパティを全コピー
-						Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${keyPtn}`]);
-					} else {
-						// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-,-,-,1,1/Split::1,1,1,1,-,-,-,-|）から取り込み
-						// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |scroll9j=Cross::1,7_0,1|)
-						const tmpParamPair = pairs.split(`::`);
-						g_keyObj[pairName][tmpParamPair[0]] =
-							makeBaseArray(tmpParamPair[1].split(`,`).map(n =>
-								g_keyObj[`${_pairName}${getKeyPtnName(n)}`] !== undefined ?
-									structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`][tmpParamPair[0]]) :
-									[n === `-` ? -1 : parseInt(n, 10)]
-							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
-					}
-				});
+		splitLF2(_dosObj[keyheader])?.forEach((tmpParam, k) => {
+			const pairName = `${_pairName}${_key}_${k + dfPtn}`;
+			if (!hasVal(tmpParam)) {
+				return;
 			}
-		}
+			g_keyObj[pairName] = {}
+
+			// デフォルト項目がある場合は先に定義
+			if (_defaultName !== ``) {
+				g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
+			}
+			tmpParam.split(`/`).forEach(pairs => {
+				const keyPtn = getKeyPtnName(pairs);
+				if (pairs === ``) {
+				} else if (g_keyObj[`${_pairName}${keyPtn}`] !== undefined) {
+					// 他のキーパターン指定時、該当があればプロパティを全コピー
+					Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${keyPtn}`]);
+				} else {
+					// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-,-,-,1,1/Split::1,1,1,1,-,-,-,-|）から取り込み
+					// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |scroll9j=Cross::1,7_0,1|)
+					const tmpParamPair = pairs.split(`::`);
+					g_keyObj[pairName][tmpParamPair[0]] =
+						makeBaseArray(tmpParamPair[1]?.split(`,`).map(n =>
+							g_keyObj[`${_pairName}${getKeyPtnName(n)}`] !== undefined ?
+								structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`][tmpParamPair[0]]) :
+								[n === `-` ? -1 : parseInt(n, 10)]
+						).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
+				}
+			});
+		});
 	};
 
 	// 対象キー毎に処理
@@ -4491,6 +4500,7 @@ const drawSpeedGraph = _scoreId => {
 
 	const avgX = [0, 0];
 	const avgSubX = [1, 1];
+	const lineX = [125, 210];
 	Object.keys(speedObj).forEach((speedType, j) => {
 		context.beginPath();
 		let preY;
@@ -4519,13 +4529,12 @@ const drawSpeedGraph = _scoreId => {
 		context.strokeStyle = speedObj[speedType].strokeColor;
 		context.stroke();
 
-		const lineX = (speedType === `speed`) ? 125 : 210;
 		context.beginPath();
-		context.moveTo(lineX, 215);
-		context.lineTo(lineX + 25, 215);
+		context.moveTo(lineX[j], 215);
+		context.lineTo(lineX[j] + 25, 215);
 		context.stroke();
 		context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
-		context.fillText(g_lblNameObj[`s_${speedType}`], lineX + 30, 218);
+		context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, 218);
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, avgSubX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
@@ -7229,22 +7238,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * 矢印データの格納
 	 * @param {string} _data 
 	 */
-	const storeArrowData = _data => {
-		let arrowData = [];
-
-		if (hasVal(_data)) {
-			const tmpData = splitLF(_data).join(``);
-			if (tmpData !== undefined) {
-				arrowData = tmpData.split(`,`);
-				if (isNaN(parseFloat(arrowData[0]))) {
-					return [];
-				} else {
-					arrowData = arrowData.map(data => calcFrame(data)).sort((_a, _b) => _a - _b);
-				}
-			}
-		}
-		return arrowData;
-	};
+	const storeArrowData = _data => hasVal(_data) ?
+		splitLF(_data)?.join(``).split(`,`).filter(data => !isNaN(parseFloat(data))).map(data => calcFrame(data)).sort((_a, _b) => _a - _b) : [];
 
 	for (let j = 0; j < keyNum; j++) {
 
@@ -8041,11 +8036,10 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			(cgArrays.includes(_type) ? _data[startNum][_j][0] === _data[startNum][_k][0] :
 				_data[startNum][_j].depth === _data[startNum][_k].depth);
 
-		const fuzzyCheck = (_str, _list) => listMatching(_str, _list);
 		const isExceptData = {
-			word: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j][1], _exceptList.word),
-			back: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.back),
-			mask: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.mask),
+			word: (_exceptList, _j) => listMatching(_data[startNum][_j][1], _exceptList.word),
+			back: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.back),
+			mask: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.mask),
 		};
 
 		const getLength = _list =>
@@ -8104,7 +8098,6 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	// 実際に処理させる途中変速配列を作成
 	g_workObj.speedData = [];
-	g_workObj.speedData.length = 0;
 	g_workObj.speedData.push(g_scoreObj.frameNum);
 	g_workObj.speedData.push(_speedOnFrame[g_scoreObj.frameNum]);
 
