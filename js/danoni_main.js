@@ -348,7 +348,7 @@ const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length
  * 改行コード区切りの配列展開
  * @param {string} _str
  */
-const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
+const splitLF = _str => _str?.split(`\r`).join(`\n`).split(`\n`);
 
 /**
  * 改行コード区切りを本来の区切り文字に変換して配列展開
@@ -356,7 +356,7 @@ const splitLF = _str => _str.split(`\r`).join(`\n`).split(`\n`);
  * @param {string} _str 
  * @param {string} _delim
  */
-const splitLF2 = (_str, _delim = `$`) => splitLF(_str).filter(val => val !== ``).join(_delim).split(_delim);
+const splitLF2 = (_str, _delim = `$`) => splitLF(_str)?.filter(val => val !== ``).join(_delim).split(_delim);
 
 /**
  * 重複を排除した配列の生成
@@ -3045,7 +3045,6 @@ const headerConvert = _dosObj => {
 	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
 	g_animationData.forEach(sprite => {
 		obj[`${sprite}TitleData`] = [];
-		obj[`${sprite}TitleData`].length = 0;
 		obj[`${sprite}TitleMaxDepth`] = -1;
 
 		const dataList = [_dosObj[`${sprite}title${g_localeObj.val}_data`], _dosObj[`${sprite}title_data`]];
@@ -3581,14 +3580,13 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 
 		if (hasVal(_dosObj[keyheader])) {
-			const tmpArray = splitLF2(_dosObj[keyheader]);
-			for (let k = 0; k < tmpArray.length; k++) {
-				if (existParam(tmpArray[k], `${keyheader}_${k + dfPtn}`)) {
-					continue;
+			splitLF2(_dosObj[keyheader])?.forEach((tmpParam, k) => {
+				if (existParam(tmpParam, `${keyheader}_${k + dfPtn}`)) {
+					return;
 				}
 
 				let ptnCnt = 0;
-				tmpArray[k].split(`/`).forEach(list => {
+				tmpParam.split(`/`).forEach(list => {
 
 					const keyPtn = getKeyPtnName(list);
 					if (list === ``) {
@@ -3617,7 +3615,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					}
 				});
 				g_keyObj[`${keyheader}_${k + dfPtn}`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}_0`]);
-			}
+			});
 
 		} else if (g_keyObj[`${keyheader}_${dfPtn}_0`] === undefined) {
 			// 特に指定が無い場合はkeyCtrlX_Yの配列長で決定
@@ -3663,39 +3661,36 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		const keyheader = _name + _key;
 		const dfPtn = setIntVal(g_keyObj.dfPtnNum);
 
-		if (_dosObj[keyheader] !== undefined) {
-			const tmpParams = splitLF2(_dosObj[keyheader]);
-			for (let k = 0; k < tmpParams.length; k++) {
-				const pairName = `${_pairName}${_key}_${k + dfPtn}`;
-				if (!hasVal(tmpParams[k])) {
-					continue;
-				}
-				g_keyObj[pairName] = {}
-
-				// デフォルト項目がある場合は先に定義
-				if (_defaultName !== ``) {
-					g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
-				}
-				tmpParams[k].split(`/`).forEach(pairs => {
-					const keyPtn = getKeyPtnName(pairs);
-					if (pairs === ``) {
-					} else if (g_keyObj[`${_pairName}${keyPtn}`] !== undefined) {
-						// 他のキーパターン指定時、該当があればプロパティを全コピー
-						Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${keyPtn}`]);
-					} else {
-						// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-,-,-,1,1/Split::1,1,1,1,-,-,-,-|）から取り込み
-						// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |scroll9j=Cross::1,7_0,1|)
-						const tmpParamPair = pairs.split(`::`);
-						g_keyObj[pairName][tmpParamPair[0]] =
-							makeBaseArray(tmpParamPair[1].split(`,`).map(n =>
-								g_keyObj[`${_pairName}${getKeyPtnName(n)}`] !== undefined ?
-									structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`][tmpParamPair[0]]) :
-									[n === `-` ? -1 : parseInt(n, 10)]
-							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
-					}
-				});
+		splitLF2(_dosObj[keyheader])?.forEach((tmpParam, k) => {
+			const pairName = `${_pairName}${_key}_${k + dfPtn}`;
+			if (!hasVal(tmpParam)) {
+				return;
 			}
-		}
+			g_keyObj[pairName] = {}
+
+			// デフォルト項目がある場合は先に定義
+			if (_defaultName !== ``) {
+				g_keyObj[pairName][_defaultName] = [...Array(g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length)].fill(_defaultVal);
+			}
+			tmpParam.split(`/`).forEach(pairs => {
+				const keyPtn = getKeyPtnName(pairs);
+				if (pairs === ``) {
+				} else if (g_keyObj[`${_pairName}${keyPtn}`] !== undefined) {
+					// 他のキーパターン指定時、該当があればプロパティを全コピー
+					Object.assign(g_keyObj[pairName], g_keyObj[`${_pairName}${keyPtn}`]);
+				} else {
+					// 通常の指定方法（例：|scroll8i=Cross::1,1,1,-,-,-,1,1/Split::1,1,1,1,-,-,-,-|）から取り込み
+					// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |scroll9j=Cross::1,7_0,1|)
+					const tmpParamPair = pairs.split(`::`);
+					g_keyObj[pairName][tmpParamPair[0]] =
+						makeBaseArray(tmpParamPair[1]?.split(`,`).map(n =>
+							g_keyObj[`${_pairName}${getKeyPtnName(n)}`] !== undefined ?
+								structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`][tmpParamPair[0]]) :
+								[n === `-` ? -1 : parseInt(n, 10)]
+						).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
+				}
+			});
+		});
 	};
 
 	// 対象キー毎に処理
@@ -4491,6 +4486,7 @@ const drawSpeedGraph = _scoreId => {
 
 	const avgX = [0, 0];
 	const avgSubX = [1, 1];
+	const lineX = [125, 210];
 	Object.keys(speedObj).forEach((speedType, j) => {
 		context.beginPath();
 		let preY;
@@ -4519,13 +4515,12 @@ const drawSpeedGraph = _scoreId => {
 		context.strokeStyle = speedObj[speedType].strokeColor;
 		context.stroke();
 
-		const lineX = (speedType === `speed`) ? 125 : 210;
 		context.beginPath();
-		context.moveTo(lineX, 215);
-		context.lineTo(lineX + 25, 215);
+		context.moveTo(lineX[j], 215);
+		context.lineTo(lineX[j] + 25, 215);
 		context.stroke();
 		context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
-		context.fillText(g_lblNameObj[`s_${speedType}`], lineX + 30, 218);
+		context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, 218);
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, avgSubX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
@@ -7229,22 +7224,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * 矢印データの格納
 	 * @param {string} _data 
 	 */
-	const storeArrowData = _data => {
-		let arrowData = [];
-
-		if (hasVal(_data)) {
-			const tmpData = splitLF(_data).join(``);
-			if (tmpData !== undefined) {
-				arrowData = tmpData.split(`,`);
-				if (isNaN(parseFloat(arrowData[0]))) {
-					return [];
-				} else {
-					arrowData = arrowData.map(data => calcFrame(data)).sort((_a, _b) => _a - _b);
-				}
-			}
-		}
-		return arrowData;
-	};
+	const storeArrowData = _data => hasVal(_data) ?
+		splitLF(_data)?.join(``).split(`,`).filter(data => !isNaN(parseFloat(data))).map(data => calcFrame(data)).sort((_a, _b) => _a - _b) : [];
 
 	for (let j = 0; j < keyNum; j++) {
 
@@ -8041,11 +8022,10 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			(cgArrays.includes(_type) ? _data[startNum][_j][0] === _data[startNum][_k][0] :
 				_data[startNum][_j].depth === _data[startNum][_k].depth);
 
-		const fuzzyCheck = (_str, _list) => listMatching(_str, _list);
 		const isExceptData = {
-			word: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j][1], _exceptList.word),
-			back: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.back),
-			mask: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.mask),
+			word: (_exceptList, _j) => listMatching(_data[startNum][_j][1], _exceptList.word),
+			back: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.back),
+			mask: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.mask),
 		};
 
 		const getLength = _list =>
@@ -8104,7 +8084,6 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	// 実際に処理させる途中変速配列を作成
 	g_workObj.speedData = [];
-	g_workObj.speedData.length = 0;
 	g_workObj.speedData.push(g_scoreObj.frameNum);
 	g_workObj.speedData.push(_speedOnFrame[g_scoreObj.frameNum]);
 
