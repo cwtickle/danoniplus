@@ -2463,6 +2463,26 @@ const calcLevel = _scoreObj => {
 };
 
 /**
+ * ロケールを含んだヘッダーの優先度設定
+ * @param {object} _obj 
+ * @param {...any} _params
+ */
+const getHeader = (_obj, ..._params) => {
+	let headerLocale, headerDf;
+	Object.keys(_params).forEach(j => {
+		headerLocale ??= _obj[`${_params[j]}${g_localeObj.val}`];
+		headerDf ??= _obj[_params[j]];
+	});
+	return headerLocale ?? headerDf;
+};
+
+/**
+ * ヘッダー名の互換設定
+ * @param {string} _param 
+ */
+const getHname = _param => [_param, _param.toLowerCase()];
+
+/**
  * 譜面ヘッダーの分解（スキン、jsファイルなどの設定）
  * @param {object} _dosObj
  */
@@ -2514,26 +2534,6 @@ const preheaderConvert = _dosObj => {
 
 	return obj;
 };
-
-/**
- * ロケールを含んだヘッダーの優先度設定
- * @param {object} _obj 
- * @param {...any} _params
- */
-const getHeader = (_obj, ..._params) => {
-	let headerLocale, headerDf;
-	Object.keys(_params).forEach(j => {
-		headerLocale ??= _obj[`${_params[j]}${g_localeObj.val}`];
-		headerDf ??= _obj[_params[j]];
-	});
-	return headerLocale ?? headerDf;
-};
-
-/**
- * ヘッダー名の互換設定
- * @param {string} _param 
- */
-const getHname = _param => [_param, _param.toLowerCase()];
 
 /**
  * 譜面ヘッダーの分解（その他の設定）
