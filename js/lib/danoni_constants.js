@@ -2313,9 +2313,6 @@ const g_titleLists = {
     /** タイトルのデフォルトフォント */
     defaultFonts: [`'メイリオ'`],
 
-    /** グラデーション関連初期リスト */
-    grdList: [`titlegrd`, `titlearrowgrd`],
-
     /** タイトル用アニメーションの設定種 */
     animation: [`Name`, `Duration`, `Delay`, `TimingFunction`],
 
