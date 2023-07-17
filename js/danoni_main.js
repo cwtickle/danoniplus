@@ -2495,11 +2495,11 @@ const preheaderConvert = _dosObj => {
 	setJsFiles(tmpSkinTypes, C_DIR_SKIN, `skin`);
 
 	// 外部jsファイルの指定
-	const tmpCustomjs = _dosObj.customjs ?? g_presetObj.customJs ?? C_JSF_CUSTOM;
+	const tmpCustomjs = getHeader(_dosObj, ...getHname(`customJs`)) ?? g_presetObj.customJs ?? C_JSF_CUSTOM;
 	setJsFiles(tmpCustomjs.replaceAll(`*`, g_presetObj.customJs).split(`,`), C_DIR_JS);
 
 	// 外部cssファイルの指定
-	const tmpCustomcss = _dosObj.customcss ?? g_presetObj.customCss ?? ``;
+	const tmpCustomcss = getHeader(_dosObj, ...getHname(`customCss`)) ?? g_presetObj.customCss ?? ``;
 	setJsFiles(tmpCustomcss.replaceAll(`*`, g_presetObj.customCss).split(`,`), C_DIR_CSS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
@@ -2530,6 +2530,12 @@ const getHeader = (_obj, ..._params) => {
 };
 
 /**
+ * ヘッダー名の互換設定
+ * @param {string} _param 
+ */
+const getHname = _param => [_param, _param.toLowerCase()];
+
+/**
  * 譜面ヘッダーの分解（その他の設定）
  * @param {object} _dosObj 譜面データオブジェクト
  */
@@ -2537,12 +2543,6 @@ const headerConvert = _dosObj => {
 
 	// ヘッダー群の格納先
 	const obj = {};
-
-	/**
-	 * ヘッダー名の互換設定
-	 * @param {string} _param 
-	 */
-	const getHname = _param => [_param, _param.toLowerCase()];
 
 	// フォントの設定
 	obj.customFont = _dosObj.customFont ?? ``;
@@ -2943,12 +2943,13 @@ const headerConvert = _dosObj => {
 	}
 
 	// デフォルト曲名表示, 背景矢印のグラデーション指定css
-	g_titleLists.grdList.forEach(_name => {
-		obj[`${_name}s`] = [];
-		if (hasVal(_dosObj[_name])) {
-			const tmpTitlegrd = _dosObj[_name].replaceAll(`,`, `:`);
-			obj[`${_name}s`] = tmpTitlegrd.split(`$`);
-			obj[`${_name}`] = obj[`${_name}s`][0] ?? ``;
+	[`titlegrd`, `titleArrowgrd`].forEach(_name => {
+		const objName = `${_name.toLowerCase()}`;
+		obj[`${objName}s`] = [];
+		const tmpTitlegrd = getHeader(_dosObj, ...getHname(_name))?.replaceAll(`,`, `:`);
+		if (hasVal(tmpTitlegrd)) {
+			obj[`${objName}s`] = tmpTitlegrd.split(`$`);
+			obj[`${objName}`] = obj[`${objName}s`][0] ?? ``;
 		}
 	});
 
@@ -3081,7 +3082,7 @@ const headerConvert = _dosObj => {
 	obj.resultMotionSet = setBoolVal(_dosObj.resultMotionSet, true);
 
 	// 譜面明細の使用可否
-	const tmpDetails = _dosObj.scoreDetailUse?.split(`,`).filter(val => hasVal(val) && val !== `false`)
+	const tmpDetails = getHeader(_dosObj, `scoreDetailUse`, `chartDetailUse`)?.split(`,`).filter(val => hasVal(val) && val !== `false`)
 		.map(val => replaceStr(val, g_settings.scoreDetailTrans));
 	g_settings.scoreDetails = g_settings.scoreDetailDefs.filter(val => tmpDetails?.includes(val) || tmpDetails === undefined);
 
