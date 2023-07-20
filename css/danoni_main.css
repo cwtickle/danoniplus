@@ -350,3 +350,431 @@ input[type="color"] {
 #lblWarning>p {
 	margin: 15px 5px;
 }
+
+/* スキン定義 ------------------------------------------------------------*/
+
+/* 背景 */
+#divBack {
+	background: var(--background, linear-gradient(#000000, #222222));
+}
+
+/* タイトル */
+.title_base {
+	color: var(--title-base, #cccccc);
+}
+
+/* 設定別カラー */
+.settings_Title::first-letter {
+	color: var(--title-dancing, #6666ff);
+	font-size: var(--title-siz-x, 40px);
+}
+
+.settings_Title2::first-letter {
+	color: var(--title-onigiri, #ff6666);
+	font-size: var(--title-siz-x, 40px);
+}
+
+.settings_TitleStar {
+	color: var(--title-star, #ffff66);
+	font-size: var(--title-siz-x, 40px);
+}
+
+.settings_Display::first-letter {
+	color: var(--title-display, #ffff66);
+	font-size: var(--title-siz-x, 40px);
+}
+
+.settings_Difficulty::first-letter {
+	color: var(--settings-difficulty, #ff9999);
+}
+
+.settings_Speed::first-letter {
+	color: var(--settings-speed, #ffff99);
+}
+
+.settings_Motion::first-letter {
+	color: var(--settings-motion, #eeff99);
+}
+
+.settings_Reverse::first-letter {
+	color: var(--settings-scroll, #ddff99);
+}
+
+.settings_Scroll::first-letter {
+	color: var(--settings-scroll, #ddff99);
+}
+
+.settings_Shuffle::first-letter {
+	color: var(--settings-shuffle, #99ff99);
+}
+
+.settings_AutoPlay::first-letter {
+	color: var(--settings-autoPlay, #99ffbb);
+}
+
+.settings_Gauge::first-letter {
+	color: var(--settings-gauge, #99ffdd);
+}
+
+.settings_Adjustment::first-letter {
+	color: var(--settings-adjustment, #99ffff);
+}
+
+.settings_Fadein::first-letter {
+	color: var(--settings-fadein, #99eeff);
+}
+
+.settings_Volume::first-letter {
+	color: var(--settings-volume, #99ddff);
+}
+
+.settings_Appearance::first-letter {
+	color: var(--settings-appearance, #cc99ff);
+}
+
+.settings_Opacity::first-letter {
+	color: var(--settings-opacity, #ee99ff);
+}
+
+.settings_HitPosition::first-letter {
+	color: var(--settings-hitPosition, #ff99ff);
+}
+
+.settings_DifSelector {
+	background: var(--settings-difselector, #111111);
+}
+
+.settings_Disabled {
+	color: var(--settings-disabled, #666666);
+}
+
+.settings_FadeinBar {
+	color: var(--settings-fadeinBar, #ffffff);
+}
+
+/* 設定画面：ゲージ設定詳細 */
+.settings_lifeVal {
+	color: var(--settings-lifeVal, #ff9966);
+}
+
+.settings_gaugeTableBorder {
+	border-color: var(--settings-gaugeTable, #666666);
+}
+
+/* キーコンフィグ */
+.keyconfig_warning {
+	color: var(--keyconfig-warning, #ffff99);
+}
+
+.keyconfig_ConfigType::first-letter {
+	color: var(--keyconfig-imgType, #99ddff);
+}
+
+.keyconfig_ColorType::first-letter {
+	color: var(--keyconfig-colorType, #ffdd99);
+}
+
+.keyconfig_Changekey {
+	color: var(--keyconfig-changekey, #ffff00);
+}
+
+.keyconfig_Defaultkey {
+	color: var(--keyconfig-defaultkey, #99ccff);
+}
+
+/* ステップゾーン */
+.main_stepKeyDown {
+	background: var(--main-stepKeyDown, #66ffff);
+}
+
+.main_stepDefault {
+	background: var(--main-stepDefault, #999999);
+}
+
+.main_stepDummy {
+	background: var(--main-stepDummy, #777777);
+}
+
+.main_stepIi {
+	background: var(--main-stepIi, #66ffff);
+}
+
+.main_stepShakin {
+	background: var(--main-stepShakin, #99ff99);
+}
+
+.main_stepMatari {
+	background: var(--main-stepMatari, #ff9966);
+}
+
+.main_stepShobon {
+	background: var(--main-stepShobon, #ccccff);
+}
+
+.main_stepExcessive {
+	background: var(--main-stepExcessive, #ffff99);
+}
+
+.main_objStepShadow {
+	background: var(--main-objStepShadow, #000000);
+}
+
+.main_objShadow {
+	background: var(--main-objShadow, #000000);
+}
+
+.main_frzHitTop {
+	background: var(--main-frzHitTop, #ffffff);
+}
+
+/* ライフゲージ */
+.life_Max {
+	background: var(--life-max, #444400);
+}
+
+.life_Cleared {
+	background: var(--life-cleared, #004444);
+}
+
+.life_Failed {
+	background: var(--life-failed, #444444);
+}
+
+.life_Background {
+	background: var(--life-background, #222222);
+}
+
+.life_BorderColor {
+	background: var(--life-bg-border, #555555);
+	color: var(--life-color-border, #cccccc);
+}
+
+/* 結果画面：項目、設定値 */
+.result_lbl {
+	color: var(--result-lbl, #999999);
+}
+
+.result_style {
+	color: var(--result-style, #cccccc);
+}
+
+/* 結果画面：判定名 */
+.common_ii {
+	color: var(--common-ii, #66ffff);
+}
+
+.common_shakin {
+	color: var(--common-shakin, #99ff99);
+}
+
+.common_matari {
+	color: var(--common-matari, #ff9966);
+}
+
+.common_shobon {
+	color: var(--common-shobon, #ccccff);
+}
+
+.common_uwan {
+	color: var(--common-uwan, #ff9999);
+}
+
+.common_kita {
+	color: var(--common-kita, #ffff99);
+}
+
+.common_iknai {
+	color: var(--common-iknai, #99ff66);
+}
+
+.common_combo {
+	color: var(--common-combo, #ffffff);
+}
+
+.common_score {
+	color: var(--common-score, #ffffff);
+}
+
+/* 結果画面：枠 */
+.result_PlayDataWindow {
+	border: var(--result-playwindow-x, solid 0.5px #666666);
+}
+
+/* 結果画面：スコア */
+.result_score {
+	color: var(--result-score, #ffffff);
+}
+
+/* 結果画面：ハイスコア差分、ハイスコア時のカラー */
+.result_scoreHiBlanket {
+	color: var(--result-scoreHiBracket, #999999);
+}
+
+.result_scoreHi {
+	color: var(--result-scoreHi, #cccccc);
+}
+
+.result_scoreHiPlus {
+	color: var(--result-scoreHiPlus, #ffff99);
+}
+
+/* 結果画面：ハイスコア更新外の表示色 */
+.result_noRecord {
+	color: var(--result-noRecord, #999999);
+}
+
+/* 結果画面：完全PF、PF、FC、Cleared、Failed */
+.result_AllPerfect {
+	color: var(--result-allPerfect, #ffffff);
+}
+
+.result_Perfect {
+	color: var(--result-perfect, #ffffcc);
+}
+
+.result_FullCombo {
+	color: var(--result-fullCombo, #66ffff);
+}
+
+.result_Cleared {
+	color: var(--result-cleared, #ffff66);
+}
+
+.result_Failed {
+	color: var(--result-failed, #ff6666);
+}
+
+.result_Window::first-letter {
+	font-size: var(--result-siz-window-x, 80px);
+}
+
+/* ボタン */
+/* Click Here */
+.button_Start {
+	color: var(--button-color-start, #ffffff);
+	background: var(--button-bg-start, #333333);
+}
+
+.button_Start:hover {
+	color: var(--button-colorHover-start, #ffffff);
+	background: var(--button-bgHover-start, #666666);
+}
+
+/* デフォルト */
+.button_Default {
+	color: var(--button-color-default, #ffffff);
+	background: var(--button-bg-default, #111111);
+}
+
+.button_Default:hover {
+	color: var(--button-colorHover-default, #ffffff);
+	background: var(--button-bgHover-default, #666666);
+}
+
+/* デフォルト(色指定なし) */
+.button_Default_NoColor {
+	background: var(--button-bg-defaultNo, #00000000);
+}
+
+.button_Default_NoColor:hover {
+	background: var(--button-bgHover-defaultNo, #666666);
+}
+
+/* カーソル */
+.button_Mini {
+	color: var(--button-color-mini, #ffffff);
+	background: var(--button-bg-mini, #333333);
+}
+
+.button_Mini:hover {
+	color: var(--button-colorHover-mini, #ffffff);
+	background: var(--button-bgHover-mini, #999900);
+}
+
+/* 戻る */
+.button_Back {
+	color: var(--button-color-back, #cccccc);
+	background: var(--button-bg-back, #111133);
+}
+
+.button_Back:hover {
+	color: var(--button-colorHover-back, #cccccc);
+	background: var(--button-bgHover-back, #000099);
+}
+
+/* 設定 */
+.button_Setting {
+	color: var(--button-color-setting, #ffffff);
+	background: var(--button-bg-setting, #333311);
+}
+
+.button_Setting:hover {
+	color: var(--button-colorHover-setting, #ffffff);
+	background: var(--button-bgHover-setting, #999900);
+}
+
+/* 進む */
+.button_Next {
+	color: var(--button-color-next, #ffffff);
+	background: var(--button-bg-next, #331111);
+}
+
+.button_Next:hover {
+	color: var(--button-colorHover-next, #ffffff);
+	background: var(--button-bgHover-next, #990000);
+}
+
+/* リセット */
+.button_Reset {
+	color: var(--button-color-reset, #ffffff);
+	background: var(--button-bg-reset, #113311);
+}
+
+.button_Reset:hover {
+	color: var(--button-colorHover-reset, #ffffff);
+	background: var(--button-bgHover-reset, #009900);
+}
+
+/* ツイート */
+.button_Tweet {
+	color: var(--button-color-tweet, #ffffff);
+	background: var(--button-bg-tweet, #113333);
+}
+
+.button_Tweet:hover {
+	color: var(--button-colorHover-tweet, #ffffff);
+	background: var(--button-bgHover-tweet, #009999);
+}
+
+/* ボタン：ON/OFF */
+.button_OFF {
+	color: var(--button-color-off, #666666);
+	border-color: var(--button-border-off-x, #000000 #333333);
+}
+
+.button_ON {
+	color: var(--button-color-on, #ffffff);
+	border-color: var(--button-border-on-x, #000000 #cccccc);
+}
+
+/* ボタン：ON/OFF リバース用 */
+.button_RevOFF {
+	color: var(--button-color-offRev, #cccccc);
+	border-color: var(--button-border-offRev-x, #000000 #999999);
+}
+
+.button_RevON {
+	color: var(--button-color-onRev, #ffffff);
+	border-color: var(--button-border-onRev-x, #000000 #ddff99);
+}
+
+/* ボタン：ON/OFF 無効化ボタン用 */
+.button_DisabledOFF {
+	color: var(--button-color-offDisabled, #999999);
+	background: var(--button-bg-offDisabled, #333333);
+}
+
+.button_DisabledON {
+	color: var(--button-color-onDisabled, #ffffff);
+	background: var(--button-bg-onDisabled, #009999);
+}

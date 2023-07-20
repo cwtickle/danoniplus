@@ -890,7 +890,16 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : (_objType === `titleArrow` ? `40` : ``);
 
 	let convertColorStr = ``;
-	const tmpColorStr = _colorStr.split(`@`);
+	const tmpBackgroundStr = _colorStr.split(`;`);
+
+	// 色情報以外の部分を退避
+	const addData = tmpBackgroundStr[1] !== undefined ? tmpBackgroundStr.slice(1).join(` `) : ``;
+	if ([``, `-`, `none`].includes(tmpBackgroundStr[0])) {
+		return addData;
+	}
+
+	// 色情報からグラデーションを作成
+	const tmpColorStr = tmpBackgroundStr[0].split(`@`);
 	const colorArray = tmpColorStr[0].split(`:`);
 	for (let j = 0; j < colorArray.length; j++) {
 		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replaceAll(`0x`, `#`)));
@@ -917,7 +926,7 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 		convertColorStr += `${colorArray.join(', ')}`;
 	}
 
-	return `${gradationType}(${convertColorStr})`;
+	return `${hasVal(addData) ? `${addData} ` : ''}${gradationType}(${convertColorStr})`;
 };
 
 /*-----------------------------------------------------------*/
@@ -2543,6 +2552,11 @@ const headerConvert = _dosObj => {
 
 	// ヘッダー群の格納先
 	const obj = {};
+
+	// スタイルの変更
+	Object.keys(_dosObj).filter(val => val.startsWith(`--`) && hasVal(_dosObj[val])).forEach(prop =>
+		document.documentElement.style.setProperty(prop, prop.endsWith(`-x`) ?
+			_dosObj[prop] : makeColorGradation(_dosObj[prop], { _defaultColorgrd: false })));
 
 	// フォントの設定
 	obj.customFont = _dosObj.customFont ?? ``;
