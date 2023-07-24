@@ -1631,7 +1631,7 @@ const makeStyleData = (_data, _calcFrame = _frame => _frame) => {
 		let dataCnts = 0;
 		[spriteData[tmpFrame], dataCnts] = checkDuplicatedObjects(spriteData[tmpFrame]);
 		spriteData[tmpFrame][dataCnts] = {
-			name: tmpSpriteData[1],
+			depth: tmpSpriteData[1],
 			styleData: tmpSpriteData[1].endsWith(`-x`) ? tmpSpriteData[2] :
 				makeColorGradation(tmpSpriteData[2], { _defaultColorgrd: false }),
 		};
@@ -1734,14 +1734,14 @@ const drawMainSpriteData = (_frame, _depthName) =>
  */
 const drawStyleData = (_frame, _displayName) => {
 	g_headerObj[`style${toCapitalize(_displayName)}Data`][_frame].forEach(tmpObj =>
-		document.documentElement.style.setProperty(tmpObj.name, tmpObj.styleData));
+		document.documentElement.style.setProperty(tmpObj.depth, tmpObj.styleData));
 
 	return _frame;
 };
 
 const drawMainStyleData = (_frame) =>
 	g_scoreObj.styleData[_frame].forEach(tmpObj =>
-		document.documentElement.style.setProperty(tmpObj.name, tmpObj.styleData));
+		document.documentElement.style.setProperty(tmpObj.depth, tmpObj.styleData));
 
 /**
  * タイトル・リザルトモーションの描画
@@ -8122,6 +8122,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			word: (_exceptList, _j) => listMatching(_data[startNum][_j][1], _exceptList.word),
 			back: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.back),
 			mask: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.mask),
+			style: (_exceptList, _j) => listMatching(_data[startNum][_j].depth, _exceptList.style),
 		};
 
 		const getLength = _list =>
@@ -8685,7 +8686,7 @@ const mainInit = _ => {
 	// カラー・モーションを適用するオブジェクトの種類
 	const objList = (g_stateObj.dummyId === `` ? [``] : [`dummy`, ``]);
 
-	// 背景・マスクモーション(0フレーム指定)
+	// 背景・マスクモーション、スキン変更(0フレーム指定)
 	if (g_scoreObj.frameNum === 0) {
 		g_animationData.forEach(sprite => {
 			if (g_scoreObj[`${sprite}Data`][0] !== undefined) {
@@ -9667,7 +9668,7 @@ const mainInit = _ => {
 			}
 		}
 
-		// 背景・マスクモーション
+		// 背景・マスクモーション、スキン変更
 		g_animationData.forEach(sprite => {
 			if (g_scoreObj[`${sprite}Data`][currentFrame] !== undefined) {
 				g_animationFunc.drawMain[sprite](currentFrame, sprite);
@@ -10872,7 +10873,7 @@ const resultInit = _ => {
 		// ユーザカスタムイベント(フレーム毎)
 		g_customJsObj.resultEnterFrame.forEach(func => func());
 
-		// 背景・マスクモーション
+		// 背景・マスクモーション、スキン変更
 		drawTitleResultMotion(g_currentPage);
 
 		// リザルト画面移行後のフェードアウト処理

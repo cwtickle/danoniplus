@@ -2337,13 +2337,14 @@ const g_animationFunc = {
     },
 };
 
-let g_fadeinStockList = [`word`, `back`, `mask`];
+let g_fadeinStockList = [`word`, `back`, `mask`, `style`];
 
 /** フェードイン時でもプリロードを除外しないリスト */
 const g_preloadExceptList = {
     word: [`[left]`, `[center]`, `[right]`],
     back: [],
     mask: [],
+    style: [],
 };
 
 /** フェードイン時、プリロードを強制削除するリスト（初期値は空） */
@@ -2351,6 +2352,7 @@ const g_stockForceDelList = {
     word: [],
     back: [],
     mask: [],
+    style: [],
 };
 
 /**
@@ -2370,6 +2372,7 @@ const g_dataMinObj = {
     word: 3,
     mask: 1,
     back: 1,
+    style: 1,
 };
 
 const g_dfColorObj = {
