@@ -18,70 +18,70 @@
 	--title-base: #222222;
 
 	/* 画面タイトル色 */
-	--title-dancing: #000099;
-	--title-onigiri: #990000;
-	--title-star: #999900;
-	--title-display: #777700;
+	--title-dancing-x: #000099;
+	--title-onigiri-x: #990000;
+	--title-star-x: #999900;
+	--title-display-x: #777700;
 
 	/* タイトルサイズ */
 	--title-siz-x: 40px;
 
 	/* 設定別ヘッダー */
-	--settings-difficulty: #990000;
-	--settings-speed: #777700;
-	--settings-motion: #667700;
-	--settings-scroll: #557733;
-	--settings-shuffle: #337733;
-	--settings-autoPlay: #337744;
-	--settings-gauge: #227755;
-	--settings-adjustment: #007777;
-	--settings-fadein: #005577;
-	--settings-volume: #003377;
-	--settings-appearance: #9900ff;
-	--settings-opacity: #cc00ff;
-	--settings-hitPosition: #ff00ff;
+	--settings-difficulty-x: #990000;
+	--settings-speed-x: #777700;
+	--settings-motion-x: #667700;
+	--settings-scroll-x: #557733;
+	--settings-shuffle-x: #337733;
+	--settings-autoPlay-x: #337744;
+	--settings-gauge-x: #227755;
+	--settings-adjustment-x: #007777;
+	--settings-fadein-x: #005577;
+	--settings-volume-x: #003377;
+	--settings-appearance-x: #9900ff;
+	--settings-opacity-x: #cc00ff;
+	--settings-hitPosition-x: #ff00ff;
 
 	/* 譜面選択部分背景 */
 	--settings-difselector: #eeeeee;
 
 	/* 設定無効化時 */
-	--settings-disabled: #999999;
+	--settings-disabled-x: #999999;
 
 	/* フェードインバー */
-	--settings-fadeinBar: #000000;
+	--settings-fadeinBar-x: #000000;
 
 	/* ゲージ表示 (可変) */
-	--settings-lifeVal: #996600;
+	--settings-lifeVal-x: #996600;
 
 	/* ゲージ設定枠 */
-	--settings-gaugeTable: #222222;
+	--settings-gaugeTable-x: #222222;
 
 	/* キーコンフィグ関連 */
-	--keyconfig-warning: #999900;
-	--keyconfig-imgType: #003377;
-	--keyconfig-colorType: #773300;
-	--keyconfig-changekey: #999900;
-	--keyconfig-defaultkey: #000099;
+	--keyconfig-warning-x: #999900;
+	--keyconfig-imgType-x: #003377;
+	--keyconfig-colorType-x: #773300;
+	--keyconfig-changekey-x: #999900;
+	--keyconfig-defaultkey-x: #000099;
 
 	/* 判定 */
-	--common-ii: #009999;
-	--common-shakin: #009900;
-	--common-matari: #cc8800;
-	--common-shobon: #0000cc;
-	--common-uwan: #cc0000;
-	--common-kita: #999900;
-	--common-iknai: #669900;
-	--common-combo: #000000;
-	--common-score: #000000;
+	--common-ii-x: #009999;
+	--common-shakin-x: #009900;
+	--common-matari-x: #cc8800;
+	--common-shobon-x: #0000cc;
+	--common-uwan-x: #cc0000;
+	--common-kita-x: #999900;
+	--common-iknai-x: #669900;
+	--common-combo-x: #000000;
+	--common-score-x: #000000;
 
 	/* ステップゾーン */
 	--main-stepKeyDown: #009999;
 	--main-stepDefault: #666666;
 	--main-stepDummy: #666666;
-	--main-stepIi: var(--common-ii);
-	--main-stepShakin: var(--common-shakin);
-	--main-stepMatari: var(--common-matari);
-	--main-stepShobon: var(--common-shobon);
+	--main-stepIi: var(--common-ii-x);
+	--main-stepShakin: var(--common-shakin-x);
+	--main-stepMatari: var(--common-matari-x);
+	--main-stepShobon: var(--common-shobon-x);
 	--main-stepExcessive: #999900;
 	--main-objStepShadow: #eeeeee;
 	--main-objFrzShadow: #666666;
@@ -95,24 +95,24 @@
 	/* ライフゲージ本体 */
 	--life-background: #cccccc;
 	--life-bg-border: #555555;
-	--life-color-border: #cccccc;
+	--life-color-border-x: #cccccc;
 
 	/* 結果画面 */
-	--result-lbl: #333333;
-	--result-style: #111111;
+	--result-lbl-x: #333333;
+	--result-style-x: #111111;
 
 	--result-playwindow-x: solid 0.5px #666666;
-	--result-score: #000000;
-	--result-scoreHiBracket: #222222;
-	--result-scoreHi: #000000;
-	--result-scoreHiPlus: #777700;
-	--result-noRecord: #222222;
+	--result-score-x: #000000;
+	--result-scoreHiBracket-x: #222222;
+	--result-scoreHi-x: #000000;
+	--result-scoreHiPlus-x: #777700;
+	--result-noRecord-x: #222222;
 
-	--result-allPerfect: #999999;
-	--result-perfect: #999900;
-	--result-fullCombo: #007777;
-	--result-cleared: #666600;
-	--result-failed: #990000;
+	--result-allPerfect-x: #999999;
+	--result-perfect-x: #999900;
+	--result-fullCombo-x: #007777;
+	--result-cleared-x: #666600;
+	--result-failed-x: #990000;
 
 	/* 結果画面のCleared/Failedを表示している文字のサイズ */
 	--result-siz-window-x: 80px;
@@ -120,15 +120,15 @@
 	/* ボタン */
 	/* Click Here */
 	--button-bg-start: #dddddd;
-	--button-color-start: #000000;
+	--button-color-start-x: #000000;
 	--button-bgHover-start: #999999;
-	--button-colorHover-start: #000000;
+	--button-colorHover-start-x: #000000;
 
 	/* 汎用 */
 	--button-bg-default: #eeeeee;
-	--button-color-default: #000000;
+	--button-color-default-x: #000000;
 	--button-bgHover-default: #bbbbbb;
-	--button-colorHover-default: #000000;
+	--button-colorHover-default-x: #000000;
 
 	/* 汎用(背景が透明) */
 	--button-bg-defaultNo: #00000000;
@@ -136,55 +136,55 @@
 
 	/* 設定用ミニボタン */
 	--button-bg-mini: #cccccc;
-	--button-color-mini: #000000;
+	--button-color-mini-x: #000000;
 	--button-bgHover-mini: #999999;
-	--button-colorHover-mini: #000000;
+	--button-colorHover-mini-x: #000000;
 
 	/* 戻るボタン */
 	--button-bg-back: #ccccff;
-	--button-color-back: #000000;
+	--button-color-back-x: #000000;
 	--button-bgHover-back: #9999ff;
-	--button-colorHover-back: #000000;
+	--button-colorHover-back-x: #000000;
 
 	/* 設定ボタン */
 	--button-bg-setting: #ffffcc;
-	--button-color-setting: #000000;
+	--button-color-setting-x: #000000;
 	--button-bgHover-setting: #ffff66;
-	--button-colorHover-setting: #000000;
+	--button-colorHover-setting-x: #000000;
 
 	/* 開始ボタン */
 	--button-bg-next: #ffcccc;
-	--button-color-next: #000000;
+	--button-color-next-x: #000000;
 	--button-bgHover-next: #ff9999;
-	--button-colorHover-next: #000000;
+	--button-colorHover-next-x: #000000;
 
 	/* リセットボタン */
 	--button-bg-reset: #ccffcc;
-	--button-color-reset: #000000;
+	--button-color-reset-x: #000000;
 	--button-bgHover-reset: #99ff99;
-	--button-colorHover-reset: #000000;
+	--button-colorHover-reset-x: #000000;
 
 	/* 外部SNSボタン */
 	--button-bg-tweet: #ccffff;
-	--button-color-tweet: #000000;
+	--button-color-tweet-x: #000000;
 	--button-bgHover-tweet: #66ffff;
-	--button-colorHover-tweet: #000000;
+	--button-colorHover-tweet-x: #000000;
 
 	/* ON/OFFボタン */
-	--button-color-off: #cccccc;
+	--button-color-off-x: #cccccc;
 	--button-border-off-x: #00000000 #cccccc;
-	--button-color-on: #000000;
+	--button-color-on-x: #000000;
 	--button-border-on-x: #00000000 #333333;
 
 	/* ON/OFFボタン Reverse用 */
-	--button-color-offRev: #666666;
+	--button-color-offRev-x: #666666;
 	--button-border-offRev-x: #00000000 #666666;
-	--button-color-onRev: #000000;
+	--button-color-onRev-x: #000000;
 	--button-border-onRev-x: #00000000 #557733;
 
 	/* ON/OFFボタン 無効時 */
 	--button-bg-offDisabled: #999999;
-	--button-color-offDisabled: #333333;
+	--button-color-offDisabled-x: #333333;
 	--button-bg-onDisabled: #ffffff;
-	--button-color-onDisabled: #009999;
+	--button-color-onDisabled-x: #009999;
 }

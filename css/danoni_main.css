@@ -365,79 +365,79 @@ input[type="color"] {
 
 /* 設定別カラー */
 .settings_Title::first-letter {
-	color: var(--title-dancing, #6666ff);
+	color: var(--title-dancing-x, #6666ff);
 	font-size: var(--title-siz-x, 40px);
 }
 
 .settings_Title2::first-letter {
-	color: var(--title-onigiri, #ff6666);
+	color: var(--title-onigiri-x, #ff6666);
 	font-size: var(--title-siz-x, 40px);
 }
 
 .settings_TitleStar {
-	color: var(--title-star, #ffff66);
+	color: var(--title-star-x, #ffff66);
 	font-size: var(--title-siz-x, 40px);
 }
 
 .settings_Display::first-letter {
-	color: var(--title-display, #ffff66);
+	color: var(--title-display-x, #ffff66);
 	font-size: var(--title-siz-x, 40px);
 }
 
 .settings_Difficulty::first-letter {
-	color: var(--settings-difficulty, #ff9999);
+	color: var(--settings-difficulty-x, #ff9999);
 }
 
 .settings_Speed::first-letter {
-	color: var(--settings-speed, #ffff99);
+	color: var(--settings-speed-x, #ffff99);
 }
 
 .settings_Motion::first-letter {
-	color: var(--settings-motion, #eeff99);
+	color: var(--settings-motion-x, #eeff99);
 }
 
 .settings_Reverse::first-letter {
-	color: var(--settings-scroll, #ddff99);
+	color: var(--settings-scroll-x, #ddff99);
 }
 
 .settings_Scroll::first-letter {
-	color: var(--settings-scroll, #ddff99);
+	color: var(--settings-scroll-x, #ddff99);
 }
 
 .settings_Shuffle::first-letter {
-	color: var(--settings-shuffle, #99ff99);
+	color: var(--settings-shuffle-x, #99ff99);
 }
 
 .settings_AutoPlay::first-letter {
-	color: var(--settings-autoPlay, #99ffbb);
+	color: var(--settings-autoPlay-x, #99ffbb);
 }
 
 .settings_Gauge::first-letter {
-	color: var(--settings-gauge, #99ffdd);
+	color: var(--settings-gauge-x, #99ffdd);
 }
 
 .settings_Adjustment::first-letter {
-	color: var(--settings-adjustment, #99ffff);
+	color: var(--settings-adjustment-x, #99ffff);
 }
 
 .settings_Fadein::first-letter {
-	color: var(--settings-fadein, #99eeff);
+	color: var(--settings-fadein-x, #99eeff);
 }
 
 .settings_Volume::first-letter {
-	color: var(--settings-volume, #99ddff);
+	color: var(--settings-volume-x, #99ddff);
 }
 
 .settings_Appearance::first-letter {
-	color: var(--settings-appearance, #cc99ff);
+	color: var(--settings-appearance-x, #cc99ff);
 }
 
 .settings_Opacity::first-letter {
-	color: var(--settings-opacity, #ee99ff);
+	color: var(--settings-opacity-x, #ee99ff);
 }
 
 .settings_HitPosition::first-letter {
-	color: var(--settings-hitPosition, #ff99ff);
+	color: var(--settings-hitPosition-x, #ff99ff);
 }
 
 .settings_DifSelector {
@@ -445,41 +445,41 @@ input[type="color"] {
 }
 
 .settings_Disabled {
-	color: var(--settings-disabled, #666666);
+	color: var(--settings-disabled-x, #666666);
 }
 
 .settings_FadeinBar {
-	color: var(--settings-fadeinBar, #ffffff);
+	color: var(--settings-fadeinBar-x, #ffffff);
 }
 
 /* 設定画面：ゲージ設定詳細 */
 .settings_lifeVal {
-	color: var(--settings-lifeVal, #ff9966);
+	color: var(--settings-lifeVal-x, #ff9966);
 }
 
 .settings_gaugeTableBorder {
-	border-color: var(--settings-gaugeTable, #666666);
+	border-color: var(--settings-gaugeTable-x, #666666);
 }
 
 /* キーコンフィグ */
 .keyconfig_warning {
-	color: var(--keyconfig-warning, #ffff99);
+	color: var(--keyconfig-warning-x, #ffff99);
 }
 
 .keyconfig_ConfigType::first-letter {
-	color: var(--keyconfig-imgType, #99ddff);
+	color: var(--keyconfig-imgType-x, #99ddff);
 }
 
 .keyconfig_ColorType::first-letter {
-	color: var(--keyconfig-colorType, #ffdd99);
+	color: var(--keyconfig-colorType-x, #ffdd99);
 }
 
 .keyconfig_Changekey {
-	color: var(--keyconfig-changekey, #ffff00);
+	color: var(--keyconfig-changekey-x, #ffff00);
 }
 
 .keyconfig_Defaultkey {
-	color: var(--keyconfig-defaultkey, #99ccff);
+	color: var(--keyconfig-defaultkey-x, #99ccff);
 }
 
 /* ステップゾーン */
@@ -546,53 +546,53 @@ input[type="color"] {
 
 .life_BorderColor {
 	background: var(--life-bg-border, #555555);
-	color: var(--life-color-border, #cccccc);
+	color: var(--life-color-border-x, #cccccc);
 }
 
 /* 結果画面：項目、設定値 */
 .result_lbl {
-	color: var(--result-lbl, #999999);
+	color: var(--result-lbl-x, #999999);
 }
 
 .result_style {
-	color: var(--result-style, #cccccc);
+	color: var(--result-style-x, #cccccc);
 }
 
 /* 結果画面：判定名 */
 .common_ii {
-	color: var(--common-ii, #66ffff);
+	color: var(--common-ii-x, #66ffff);
 }
 
 .common_shakin {
-	color: var(--common-shakin, #99ff99);
+	color: var(--common-shakin-x, #99ff99);
 }
 
 .common_matari {
-	color: var(--common-matari, #ff9966);
+	color: var(--common-matari-x, #ff9966);
 }
 
 .common_shobon {
-	color: var(--common-shobon, #ccccff);
+	color: var(--common-shobon-x, #ccccff);
 }
 
 .common_uwan {
-	color: var(--common-uwan, #ff9999);
+	color: var(--common-uwan-x, #ff9999);
 }
 
 .common_kita {
-	color: var(--common-kita, #ffff99);
+	color: var(--common-kita-x, #ffff99);
 }
 
 .common_iknai {
-	color: var(--common-iknai, #99ff66);
+	color: var(--common-iknai-x, #99ff66);
 }
 
 .common_combo {
-	color: var(--common-combo, #ffffff);
+	color: var(--common-combo-x, #ffffff);
 }
 
 .common_score {
-	color: var(--common-score, #ffffff);
+	color: var(--common-score-x, #ffffff);
 }
 
 /* 結果画面：枠 */
@@ -602,46 +602,46 @@ input[type="color"] {
 
 /* 結果画面：スコア */
 .result_score {
-	color: var(--result-score, #ffffff);
+	color: var(--result-score-x, #ffffff);
 }
 
 /* 結果画面：ハイスコア差分、ハイスコア時のカラー */
 .result_scoreHiBlanket {
-	color: var(--result-scoreHiBracket, #999999);
+	color: var(--result-scoreHiBracket-x, #999999);
 }
 
 .result_scoreHi {
-	color: var(--result-scoreHi, #cccccc);
+	color: var(--result-scoreHi-x, #cccccc);
 }
 
 .result_scoreHiPlus {
-	color: var(--result-scoreHiPlus, #ffff99);
+	color: var(--result-scoreHiPlus-x, #ffff99);
 }
 
 /* 結果画面：ハイスコア更新外の表示色 */
 .result_noRecord {
-	color: var(--result-noRecord, #999999);
+	color: var(--result-noRecord-x, #999999);
 }
 
 /* 結果画面：完全PF、PF、FC、Cleared、Failed */
 .result_AllPerfect {
-	color: var(--result-allPerfect, #ffffff);
+	color: var(--result-allPerfect-x, #ffffff);
 }
 
 .result_Perfect {
-	color: var(--result-perfect, #ffffcc);
+	color: var(--result-perfect-x, #ffffcc);
 }
 
 .result_FullCombo {
-	color: var(--result-fullCombo, #66ffff);
+	color: var(--result-fullCombo-x, #66ffff);
 }
 
 .result_Cleared {
-	color: var(--result-cleared, #ffff66);
+	color: var(--result-cleared-x, #ffff66);
 }
 
 .result_Failed {
-	color: var(--result-failed, #ff6666);
+	color: var(--result-failed-x, #ff6666);
 }
 
 .result_Window::first-letter {
@@ -651,23 +651,23 @@ input[type="color"] {
 /* ボタン */
 /* Click Here */
 .button_Start {
-	color: var(--button-color-start, #ffffff);
+	color: var(--button-color-start-x, #ffffff);
 	background: var(--button-bg-start, #333333);
 }
 
 .button_Start:hover {
-	color: var(--button-colorHover-start, #ffffff);
+	color: var(--button-colorHover-start-x, #ffffff);
 	background: var(--button-bgHover-start, #666666);
 }
 
 /* デフォルト */
 .button_Default {
-	color: var(--button-color-default, #ffffff);
+	color: var(--button-color-default-x, #ffffff);
 	background: var(--button-bg-default, #111111);
 }
 
 .button_Default:hover {
-	color: var(--button-colorHover-default, #ffffff);
+	color: var(--button-colorHover-default-x, #ffffff);
 	background: var(--button-bgHover-default, #666666);
 }
 
@@ -682,99 +682,99 @@ input[type="color"] {
 
 /* カーソル */
 .button_Mini {
-	color: var(--button-color-mini, #ffffff);
+	color: var(--button-color-mini-x, #ffffff);
 	background: var(--button-bg-mini, #333333);
 }
 
 .button_Mini:hover {
-	color: var(--button-colorHover-mini, #ffffff);
+	color: var(--button-colorHover-mini-x, #ffffff);
 	background: var(--button-bgHover-mini, #999900);
 }
 
 /* 戻る */
 .button_Back {
-	color: var(--button-color-back, #cccccc);
+	color: var(--button-color-back-x, #cccccc);
 	background: var(--button-bg-back, #111133);
 }
 
 .button_Back:hover {
-	color: var(--button-colorHover-back, #cccccc);
+	color: var(--button-colorHover-back-x, #cccccc);
 	background: var(--button-bgHover-back, #000099);
 }
 
 /* 設定 */
 .button_Setting {
-	color: var(--button-color-setting, #ffffff);
+	color: var(--button-color-setting-x, #ffffff);
 	background: var(--button-bg-setting, #333311);
 }
 
 .button_Setting:hover {
-	color: var(--button-colorHover-setting, #ffffff);
+	color: var(--button-colorHover-setting-x, #ffffff);
 	background: var(--button-bgHover-setting, #999900);
 }
 
 /* 進む */
 .button_Next {
-	color: var(--button-color-next, #ffffff);
+	color: var(--button-color-next-x, #ffffff);
 	background: var(--button-bg-next, #331111);
 }
 
 .button_Next:hover {
-	color: var(--button-colorHover-next, #ffffff);
+	color: var(--button-colorHover-next-x, #ffffff);
 	background: var(--button-bgHover-next, #990000);
 }
 
 /* リセット */
 .button_Reset {
-	color: var(--button-color-reset, #ffffff);
+	color: var(--button-color-reset-x, #ffffff);
 	background: var(--button-bg-reset, #113311);
 }
 
 .button_Reset:hover {
-	color: var(--button-colorHover-reset, #ffffff);
+	color: var(--button-colorHover-reset-x, #ffffff);
 	background: var(--button-bgHover-reset, #009900);
 }
 
 /* ツイート */
 .button_Tweet {
-	color: var(--button-color-tweet, #ffffff);
+	color: var(--button-color-tweet-x, #ffffff);
 	background: var(--button-bg-tweet, #113333);
 }
 
 .button_Tweet:hover {
-	color: var(--button-colorHover-tweet, #ffffff);
+	color: var(--button-colorHover-tweet-x, #ffffff);
 	background: var(--button-bgHover-tweet, #009999);
 }
 
 /* ボタン：ON/OFF */
 .button_OFF {
-	color: var(--button-color-off, #666666);
+	color: var(--button-color-off-x, #666666);
 	border-color: var(--button-border-off-x, #000000 #333333);
 }
 
 .button_ON {
-	color: var(--button-color-on, #ffffff);
+	color: var(--button-color-on-x, #ffffff);
 	border-color: var(--button-border-on-x, #000000 #cccccc);
 }
 
 /* ボタン：ON/OFF リバース用 */
 .button_RevOFF {
-	color: var(--button-color-offRev, #cccccc);
+	color: var(--button-color-offRev-x, #cccccc);
 	border-color: var(--button-border-offRev-x, #000000 #999999);
 }
 
 .button_RevON {
-	color: var(--button-color-onRev, #ffffff);
+	color: var(--button-color-onRev-x, #ffffff);
 	border-color: var(--button-border-onRev-x, #000000 #ddff99);
 }
 
 /* ボタン：ON/OFF 無効化ボタン用 */
 .button_DisabledOFF {
-	color: var(--button-color-offDisabled, #999999);
+	color: var(--button-color-offDisabled-x, #999999);
 	background: var(--button-bg-offDisabled, #333333);
 }
 
 .button_DisabledON {
-	color: var(--button-color-onDisabled, #ffffff);
+	color: var(--button-color-onDisabled-x, #ffffff);
 	background: var(--button-bg-onDisabled, #009999);
 }

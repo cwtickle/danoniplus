@@ -929,7 +929,7 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 
 	// 色情報以外の部分を退避
 	const addData = tmpBackgroundStr[1] !== undefined ? tmpBackgroundStr.slice(1).join(` `) : ``;
-	if ([``, `-`, `none`].includes(tmpBackgroundStr[0])) {
+	if ([``, `-`, `none`].includes(tmpBackgroundStr[0]) || tmpBackgroundStr[0].startsWith(`url(`)) {
 		return addData;
 	}
 
