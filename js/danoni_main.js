@@ -47,7 +47,7 @@ const current = _ => {
 	return targetScript.src;
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
-const g_workPath = location.href.match(/(^.*\/)/)[0];
+const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
 const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
 const g_randTime = Date.now();
 
