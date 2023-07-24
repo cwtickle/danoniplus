@@ -1381,7 +1381,6 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 	// 背景を再描画
 	if (_redrawFlg) {
 		drawDefaultBackImage(_customDisplayName);
-		resetCssCustomProperties();
 	}
 };
 
@@ -1416,6 +1415,14 @@ const drawDefaultBackImage = _key => {
 	} else {
 		createEmptySprite(divRoot, `divBack`);
 	}
+
+	// CSSスタイルの初期化
+	Object.keys(g_cssBkProperties).forEach(prop =>
+		document.documentElement.style.setProperty(prop, g_cssBkProperties[prop]));
+
+	Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
+		document.documentElement.style.setProperty(prop, prop.endsWith(`-x`) ?
+			g_headerObj[prop] : makeColorGradation(g_headerObj[prop], { _defaultColorgrd: false })));
 };
 
 /**
@@ -1449,18 +1456,6 @@ const getCssCustomProperties = _ => {
 			}
 		}
 	}
-}
-
-/**
- * CSSスタイルの初期化
- */
-const resetCssCustomProperties = _ => {
-	Object.keys(g_cssBkProperties).forEach(prop =>
-		document.documentElement.style.setProperty(prop, g_cssBkProperties[prop]));
-
-	Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
-		document.documentElement.style.setProperty(prop, prop.endsWith(`-x`) ?
-			g_headerObj[prop] : makeColorGradation(g_headerObj[prop], { _defaultColorgrd: false })));
 }
 
 /**
