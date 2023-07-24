@@ -84,13 +84,15 @@
 	--main-stepShobon: var(--common-shobon);
 	--main-stepExcessive: #ffff99;
 	--main-objStepShadow: #000000;
-	--main-objShadow: #000000;
+	--main-objFrzShadow: #000000;
 	--main-frzHitTop: #ffffff;
 
 	/* ライフゲージ */
 	--life-max: #444400;
 	--life-cleared: #004444;
 	--life-failed: #444444;
+
+	/* ライフゲージ本体 */
 	--life-background: #222222;
 	--life-bg-border: #555555;
 	--life-color-border: #cccccc;
@@ -112,62 +114,75 @@
 	--result-cleared: #ffff66;
 	--result-failed: #ff6666;
 
+	/* 結果画面のCleared/Failedを表示している文字のサイズ */
 	--result-siz-window-x: 80px;
 
 	/* ボタン */
+	/* Click Here */
 	--button-bg-start: #333333;
 	--button-color-start: #ffffff;
 	--button-bgHover-start: #666666;
 	--button-colorHover-start: #ffffff;
 
+	/* 汎用 */
 	--button-bg-default: #111111;
 	--button-color-default: #ffffff;
 	--button-bgHover-default: #666666;
 	--button-colorHover-default: #ffffff;
 
+	/* 汎用(背景が透明) */
 	--button-bg-defaultNo: #00000000;
 	--button-bgHover-defaultNo: #666666;
 
+	/* 設定用ミニボタン */
 	--button-bg-mini: #333333;
 	--button-color-mini: #ffffff;
 	--button-bgHover-mini: #999900;
 	--button-colorHover-mini: #ffffff;
 
+	/* 戻るボタン */
 	--button-bg-back: #111133;
 	--button-color-back: #cccccc;
 	--button-bgHover-back: #000099;
 	--button-colorHover-back: #cccccc;
 
+	/* 設定ボタン */
 	--button-bg-setting: #333311;
 	--button-color-setting: #ffffff;
 	--button-bgHover-setting: #999900;
 	--button-colorHover-setting: #ffffff;
 
+	/* 開始ボタン */
 	--button-bg-next: #331111;
 	--button-color-next: #ffffff;
 	--button-bgHover-next: #990000;
 	--button-colorHover-next: #ffffff;
 
+	/* リセットボタン */
 	--button-bg-reset: #113311;
 	--button-color-reset: #ffffff;
 	--button-bgHover-reset: #009900;
 	--button-colorHover-reset: #ffffff;
 
+	/* 外部SNSボタン */
 	--button-bg-tweet: #113333;
 	--button-color-tweet: #ffffff;
 	--button-bgHover-tweet: #009999;
 	--button-colorHover-tweet: #ffffff;
 
+	/* ON/OFFボタン */
 	--button-color-off: #666666;
 	--button-border-off-x: #000000 #333333;
 	--button-color-on: #ffffff;
 	--button-border-on-x: #000000 #cccccc;
 
+	/* ON/OFFボタン Reverse用 */
 	--button-color-offRev: #cccccc;
 	--button-border-offRev-x: #000000 #999999;
 	--button-color-onRev: #ffffff;
 	--button-border-onRev-x: #000000 #ddff99;
 
+	/* ON/OFFボタン 無効時 */
 	--button-bg-offDisabled: #333333;
 	--button-color-offDisabled: #999999;
 	--button-bg-onDisabled: #009999;
