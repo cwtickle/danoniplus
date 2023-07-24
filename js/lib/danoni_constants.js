@@ -2318,7 +2318,24 @@ const g_titleLists = {
 
 };
 
-const g_animationData = [`back`, `mask`];
+const g_animationData = [`back`, `mask`, `style`];
+const g_animationFunc = {
+    make: {
+        back: makeSpriteData,
+        mask: makeSpriteData,
+        style: makeStyleData,
+    },
+    draw: {
+        back: drawSpriteData,
+        mask: drawSpriteData,
+        style: drawStyleData,
+    },
+    drawMain: {
+        back: drawMainSpriteData,
+        mask: drawMainSpriteData,
+        style: drawMainStyleData,
+    },
+};
 
 let g_fadeinStockList = [`word`, `back`, `mask`];
 
@@ -2366,6 +2383,8 @@ const g_dfColorObj = {
     frzShadowColorInit: [``, ``, ``, ``],
 
 };
+
+const g_cssBkProperties = {};
 
 const g_dfColorBaseObj = {
 

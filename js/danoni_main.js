@@ -1381,6 +1381,7 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 	// 背景を再描画
 	if (_redrawFlg) {
 		drawDefaultBackImage(_customDisplayName);
+		resetCssCustomProperties();
 	}
 };
 
@@ -1416,6 +1417,51 @@ const drawDefaultBackImage = _key => {
 		createEmptySprite(divRoot, `divBack`);
 	}
 };
+
+/**
+ * CSSカスタムプロパティの値をオブジェクトへ退避
+ */
+const getCssCustomProperties = _ => {
+	if (g_userAgent.indexOf(`firefox`) !== -1) {
+
+		// FirefoxではcomputedStyleMapが使えないため、
+		// CSSの全スタイルシート定義から :root がセレクタのルールを抽出し、カスタムプロパティを抽出
+		const sheets = document.styleSheets;
+		for (const sheet of sheets) {
+			if (!g_isFile && sheet.cssRules) {
+				for (const rule of sheet.cssRules) {
+					if (rule.selectorText === ':root') {
+						for (let i = 0; i < rule.style.length; i++) {
+							const propertyName = rule.style.item(i);
+							if (/^--/.test(propertyName)) {
+								g_cssBkProperties[propertyName] = rule.style.getPropertyValue(propertyName);
+							}
+						}
+					}
+				}
+			}
+		}
+	} else {
+		const htmlStyle = document.documentElement.computedStyleMap();
+		for (const [propertyName, value] of htmlStyle.entries()) {
+			if (/^--/.test(propertyName)) {
+				g_cssBkProperties[propertyName] = value.toString();
+			}
+		}
+	}
+}
+
+/**
+ * CSSスタイルの初期化
+ */
+const resetCssCustomProperties = _ => {
+	Object.keys(g_cssBkProperties).forEach(prop =>
+		document.documentElement.style.setProperty(prop, g_cssBkProperties[prop]));
+
+	Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
+		document.documentElement.style.setProperty(prop, prop.endsWith(`-x`) ?
+			g_headerObj[prop] : makeColorGradation(g_headerObj[prop], { _defaultColorgrd: false })));
+}
 
 /**
  * 背景・マスク用画像の描画
@@ -1459,7 +1505,7 @@ const makeSpriteText = _obj => {
  * @param {object, array} _obj 
  */
 const checkDuplicatedObjects = _obj => {
-	let addFrame = 0;
+	let dataCnts = 0;
 	if (_obj === undefined) {
 		_obj = [];
 		_obj[0] = [];
@@ -1467,17 +1513,17 @@ const checkDuplicatedObjects = _obj => {
 		for (let m = 1; ; m++) {
 			if (_obj[m] === undefined) {
 				_obj[m] = [];
-				addFrame = m;
+				dataCnts = m;
 				break;
 			}
 		}
 	}
-	return [_obj, addFrame];
+	return [_obj, dataCnts];
 };
 
 /**
  * 多層スプライトデータの作成処理
- * @param {array} _data 
+ * @param {string} _data 
  * @param {function} _calcFrame 
  */
 const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
@@ -1494,12 +1540,8 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 		}
 
 		// 値チェックとエスケープ処理
-		let tmpFrame;
-		if (setIntVal(tmpSpriteData[0], -1) === 0) {
-			tmpFrame = 0;
-		} else {
-			tmpFrame = roundZero(_calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC)));
-		}
+		const tmpFrame = setIntVal(tmpSpriteData[0], -1) === 0 ? 0 :
+			roundZero(_calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC)));
 		const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_CALC));
 		if (tmpDepth !== C_FLG_ALL && tmpDepth > maxDepth) {
 			maxDepth = tmpDepth;
@@ -1531,13 +1573,13 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 			}
 		}
 
-		let addFrame = 0;
-		[spriteData[tmpFrame], addFrame] =
+		let dataCnts = 0;
+		[spriteData[tmpFrame], dataCnts] =
 			checkDuplicatedObjects(spriteData[tmpFrame]);
 
 		const emptyPatterns = [``, `[loop]`, `[jump]`];
 		const colorObjFlg = tmpSpriteData[2]?.startsWith(`[c]`) || false;
-		const spriteFrameData = spriteData[tmpFrame][addFrame] = {
+		const spriteFrameData = spriteData[tmpFrame][dataCnts] = {
 			depth: tmpDepth,
 		};
 
@@ -1551,7 +1593,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				animationName: tmpObj.animationName,
 				animationDuration: `${tmpObj.animationDuration}s`,
 			};
-			spriteFrameData.colorObjId = `${tmpFrame}_${addFrame}`;
+			spriteFrameData.colorObjId = `${tmpFrame}_${dataCnts}`;
 			spriteFrameData.colorObjClass = setVal(tmpObj.class, undefined);
 			if (tmpObj.animationFillMode !== undefined) {
 				spriteFrameData.colorObjInfo.animationFillMode = tmpObj.animationFillMode;
@@ -1571,6 +1613,35 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 	});
 
 	return [spriteData, maxDepth];
+};
+
+/**
+ * スタイル変更データの作成処理
+ * @param {string} _data 
+ * @param {function} _calcFrame 
+ * @returns 
+ */
+const makeStyleData = (_data, _calcFrame = _frame => _frame) => {
+	const spriteData = [];
+	splitLF(_data).filter(data => hasVal(data)).forEach(tmpData => {
+		const tmpSpriteData = tmpData.split(`,`);
+
+		// 深度が"-"の場合はスキップ
+		if (tmpSpriteData.length <= 1 || tmpSpriteData[1] === `-`) {
+			return;
+		}
+		const tmpFrame = setIntVal(tmpSpriteData[0], -1) === 0 ? 0 :
+			roundZero(_calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC)));
+
+		let dataCnts = 0;
+		[spriteData[tmpFrame], dataCnts] = checkDuplicatedObjects(spriteData[tmpFrame]);
+		spriteData[tmpFrame][dataCnts] = {
+			name: tmpSpriteData[1],
+			styleData: tmpSpriteData[1].endsWith(`-x`) ? tmpSpriteData[2] :
+				makeColorGradation(tmpSpriteData[2], { _defaultColorgrd: false }),
+		};
+	});
+	return [spriteData, 1];
 };
 
 /**
@@ -1662,6 +1733,22 @@ const drawMainSpriteData = (_frame, _depthName) =>
 	g_scoreObj[`${_depthName}Data`][_frame].forEach(tmpObj => drawBaseSpriteData(tmpObj, _depthName));
 
 /**
+ * スタイル切替
+ * @param {number} _frame 
+ * @param {string} _displayName
+ */
+const drawStyleData = (_frame, _displayName) => {
+	g_headerObj[`style${toCapitalize(_displayName)}Data`][_frame].forEach(tmpObj =>
+		document.documentElement.style.setProperty(tmpObj.name, tmpObj.styleData));
+
+	return _frame;
+};
+
+const drawMainStyleData = (_frame) =>
+	g_scoreObj.styleData[_frame].forEach(tmpObj =>
+		document.documentElement.style.setProperty(tmpObj.name, tmpObj.styleData));
+
+/**
  * タイトル・リザルトモーションの描画
  * @param {string} _displayName
  */
@@ -1669,7 +1756,7 @@ const drawTitleResultMotion = _displayName => {
 	g_animationData.forEach(sprite => {
 		const spriteName = `${sprite}${toCapitalize(_displayName)}`;
 		if (g_headerObj[`${spriteName}Data`][g_scoreObj[`${spriteName}FrameNum`]] !== undefined) {
-			g_scoreObj[`${spriteName}FrameNum`] = drawSpriteData(g_scoreObj[`${spriteName}FrameNum`], _displayName, sprite);
+			g_scoreObj[`${spriteName}FrameNum`] = g_animationFunc.draw[sprite](g_scoreObj[`${spriteName}FrameNum`], _displayName, sprite);
 		}
 	});
 };
@@ -2492,16 +2579,6 @@ const getHeader = (_obj, ..._params) => {
 const getHname = _param => [_param, _param.toLowerCase()];
 
 /**
- * 一時的にスタイルを変更
- * @param {object} _dosObj 
- * @returns 
- */
-const setTmpStyle = _dosObj =>
-	Object.keys(_dosObj).filter(val => val.startsWith(`--`) && hasVal(_dosObj[val])).forEach(prop =>
-		document.documentElement.style.setProperty(prop, prop.endsWith(`-x`) ?
-			_dosObj[prop] : makeColorGradation(_dosObj[prop], { _defaultColorgrd: false })));
-
-/**
  * 譜面ヘッダーの分解（スキン、jsファイルなどの設定）
  * @param {object} _dosObj
  */
@@ -2563,8 +2640,15 @@ const headerConvert = _dosObj => {
 	// ヘッダー群の格納先
 	const obj = {};
 
-	// スタイルの変更
-	setTmpStyle(_dosObj);
+	console.log(document.documentElement.style.cssText)
+
+	// デフォルトスタイルのバックアップ
+	getCssCustomProperties();
+
+	// 初期で変更するカスタムプロパティを設定
+	Object.keys(_dosObj).filter(val => val.startsWith(`--`) && hasVal(_dosObj[val])).forEach(prop =>
+		g_cssBkProperties[prop] = prop.endsWith(`-x`) ?
+			_dosObj[prop] : makeColorGradation(_dosObj[prop], { _defaultColorgrd: false }));
 
 	// フォントの設定
 	obj.customFont = _dosObj.customFont ?? ``;
@@ -3086,7 +3170,7 @@ const headerConvert = _dosObj => {
 		const dataList = [_dosObj[`${sprite}title${g_localeObj.val}_data`], _dosObj[`${sprite}title_data`]];
 		const data = dataList.find((v) => v !== undefined);
 		if (hasVal(data)) {
-			[obj[`${sprite}TitleData`], obj[`${sprite}TitleMaxDepth`]] = makeSpriteData(data);
+			[obj[`${sprite}TitleData`], obj[`${sprite}TitleMaxDepth`]] = g_animationFunc.make[sprite](data);
 		}
 	});
 
@@ -3859,12 +3943,12 @@ const titleInit = _ => {
 
 	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
-	g_scoreObj.backTitleFrameNum = 0;
-	g_scoreObj.maskTitleFrameNum = 0;
 
-	// タイトル用ループカウンター
-	g_scoreObj.backTitleLoopCount = 0;
-	g_scoreObj.maskTitleLoopCount = 0;
+	// タイトルアニメーション用フレーム初期化、ループカウンター設定
+	g_animationData.forEach(sprite => {
+		g_scoreObj[`${sprite}TitleFrameNum`] = 0;
+		g_scoreObj[`${sprite}TitleLoopCount`] = 0;
+	});
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 
@@ -4115,8 +4199,7 @@ const titleInit = _ => {
 		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / g_fps;
 
 		g_scoreObj.titleFrameNum++;
-		g_scoreObj.backTitleFrameNum++;
-		g_scoreObj.maskTitleFrameNum++;
+		g_animationData.forEach(sprite => g_scoreObj[`${sprite}TitleFrameNum`]++);
 		g_timeoutEvtTitleId = setTimeout(flowTitleTimeline, 1000 / g_fps - buffTime);
 	};
 
@@ -7534,17 +7617,17 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					wordMaxDepth = tmpWordData[k + 1];
 				}
 
-				let addFrame = 0;
-				[wordData[tmpWordData[k]], addFrame] =
+				let dataCnts = 0;
+				[wordData[tmpWordData[k]], dataCnts] =
 					checkDuplicatedObjects(wordData[tmpWordData[k]]);
 
 				if (tmpWordData.length > 3 && tmpWordData.length < 6) {
 					tmpWordData[3] = setIntVal(tmpWordData[3], C_WOD_FRAME);
-					wordData[tmpWordData[0]][addFrame].push(tmpWordData[1],
+					wordData[tmpWordData[0]][dataCnts].push(tmpWordData[1],
 						escapeHtmlForEnabledTag(tmpWordData[2]), tmpWordData[3]);
 					break;
 				} else {
-					wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1],
+					wordData[tmpWordData[k]][dataCnts].push(tmpWordData[k + 1],
 						escapeHtmlForEnabledTag(tmpWordData[k + 2] ?? ``));
 				}
 			}
@@ -7566,7 +7649,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		getPriorityHeader(resultTypes).forEach(val => addDataList(val));
 
 		const data = dataList.find((v) => v !== undefined);
-		return (data !== undefined ? makeSpriteData(data, calcFrameFunc) : [[], -1]);
+		return (data !== undefined ? g_animationFunc.make[_header](data, calcFrameFunc) : [[], -1]);
 	};
 
 	// 速度変化データの分解 (2つで1セット)
@@ -7618,32 +7701,27 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	// 背景・マスクデータの分解 (下記すべてで1セット、改行区切り)
 	// [フレーム数, 階層, 背景パス, class(CSSで別定義), X, Y, width, height, opacity, animationName, animationDuration]
-	obj.maskData = [];
-	obj.maskMaxDepth = -1;
-	obj.backData = [];
-	obj.backMaxDepth = -1;
-	if (g_stateObj.d_background === C_FLG_OFF) {
-	} else {
-		g_animationData.forEach(sprite =>
-			[obj[`${sprite}Data`], obj[`${sprite}MaxDepth`]] = makeBackgroundData(sprite, scoreIdHeader));
-	}
+	g_animationData.forEach(sprite => {
+		obj[`${sprite}Data`] = [];
+		obj[`${sprite}MaxDepth`] = -1;
 
-	// 結果画面用・背景/マスクデータの分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
-		const backgroundResults = [`backResult`, `maskResult`, `backFailed`, `maskFailed`];
-		backgroundResults.forEach(backName => {
-			g_headerObj[`${backName}Data`] = [];
-			g_headerObj[`${backName}MaxDepth`] = -1;
-		});
-	} else {
-		g_animationData.forEach(sprite => {
+		if (g_stateObj.d_background === C_FLG_OFF) {
+		} else {
+			[obj[`${sprite}Data`], obj[`${sprite}MaxDepth`]] = makeBackgroundData(sprite, scoreIdHeader);
+		}
+
+		if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
+			[`Result`, `Failed`].forEach(backName => {
+				g_headerObj[`${backName}Data`] = [];
+				g_headerObj[`${backName}MaxDepth`] = -1;
+			});
+		} else {
 			[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] =
 				makeBackgroundData(sprite, scoreIdHeader, { resultTypes: [`result`] });
 			[g_headerObj[`${sprite}FailedData`], g_headerObj[`${sprite}FailedMaxDepth`]] =
 				makeBackgroundData(sprite, scoreIdHeader, { resultTypes: [`failed${g_stateObj.lifeMode.slice(0, 1)}`, `result`] });
-		});
-	}
+		}
+	});
 
 	// キー変化定義
 	obj.keychFrames = [0];
@@ -8616,7 +8694,7 @@ const mainInit = _ => {
 	if (g_scoreObj.frameNum === 0) {
 		g_animationData.forEach(sprite => {
 			if (g_scoreObj[`${sprite}Data`][0] !== undefined) {
-				drawMainSpriteData(0, sprite);
+				g_animationFunc.drawMain[sprite](0, sprite);
 				g_scoreObj[`${sprite}Data`][0] = undefined;
 			}
 		});
@@ -9017,7 +9095,6 @@ const mainInit = _ => {
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
 
-			setTmpStyle(g_headerObj);
 			if (g_isMac && (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey))) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
 				g_audio.pause();
@@ -9033,7 +9110,6 @@ const mainInit = _ => {
 			}
 
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
-			setTmpStyle(g_headerObj);
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			if (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)) {
@@ -9599,7 +9675,7 @@ const mainInit = _ => {
 		// 背景・マスクモーション
 		g_animationData.forEach(sprite => {
 			if (g_scoreObj[`${sprite}Data`][currentFrame] !== undefined) {
-				drawMainSpriteData(currentFrame, sprite);
+				g_animationFunc.drawMain[sprite](currentFrame, sprite);
 			}
 		});
 
@@ -10382,12 +10458,12 @@ const resultInit = _ => {
 
 	// 結果画面用フレーム初期化
 	g_scoreObj.resultFrameNum = 0;
-	g_scoreObj.backResultFrameNum = 0;
-	g_scoreObj.maskResultFrameNum = 0;
 
-	// 結果画面用ループカウンター
-	g_scoreObj.backResultLoopCount = 0;
-	g_scoreObj.maskResultLoopCount = 0;
+	// リザルトアニメーション用フレーム初期化、ループカウンター設定
+	g_animationData.forEach(sprite => {
+		g_scoreObj[`${sprite}ResultFrameNum`] = 0;
+		g_scoreObj[`${sprite}ResultLoopCount`] = 0;
+	});
 
 	const divRoot = document.querySelector(`#divRoot`);
 
@@ -10405,14 +10481,14 @@ const resultInit = _ => {
 			g_animationData.forEach(sprite => {
 				const failedData = g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] ?? g_rootObj[`${sprite}failedS_data`];
 				if (failedData !== undefined) {
-					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = makeSpriteData(failedData);
+					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = g_animationFunc.make[sprite](failedData);
 				}
 			});
 		} else if (g_gameOverFlg) {
-			g_headerObj.backResultData = g_headerObj.backFailedData.concat();
-			g_headerObj.maskResultData = g_headerObj.maskFailedData.concat();
-			g_headerObj.backResultMaxDepth = g_headerObj.backFailedMaxDepth;
-			g_headerObj.maskResultMaxDepth = g_headerObj.maskFailedMaxDepth;
+			g_animationData.forEach(sprite => {
+				g_headerObj[`${sprite}ResultData`] = g_headerObj[`${sprite}FailedData`].concat();
+				g_headerObj[`${sprite}ResultMaxDepth`] = g_headerObj[`${sprite}FailedMaxDepth`];
+			});
 		}
 	}
 
@@ -10787,7 +10863,7 @@ const resultInit = _ => {
 	g_animationData.forEach(sprite => {
 		if (g_scoreObj[`${sprite}ResultFrameNum`] === 0) {
 			if (g_headerObj[`${sprite}ResultData`][0] !== undefined) {
-				g_scoreObj[`${sprite}ResultFrameNum`] = drawSpriteData(0, `result`, sprite);
+				g_scoreObj[`${sprite}ResultFrameNum`] = g_animationFunc.draw[sprite](0, `result`, sprite);
 				g_headerObj[`${sprite}ResultData`][0] = undefined;
 			}
 		}
@@ -10824,8 +10900,7 @@ const resultInit = _ => {
 		buffTime = thisTime - resultStartTime - g_scoreObj.resultFrameNum * 1000 / g_fps;
 
 		g_scoreObj.resultFrameNum++;
-		g_scoreObj.backResultFrameNum++;
-		g_scoreObj.maskResultFrameNum++;
+		g_animationData.forEach(sprite => g_scoreObj[`${sprite}ResultFrameNum`]++);
 		g_timeoutEvtResultId = setTimeout(flowResultTimeline, 1000 / g_fps - buffTime);
 	};
 	flowResultTimeline();
