@@ -1621,8 +1621,8 @@ const makeStyleData = (_data, _calcFrame = _frame => _frame) => {
 	splitLF(_data).filter(data => hasVal(data)).forEach(tmpData => {
 		const tmpSpriteData = tmpData.split(`,`);
 
-		// 深度が"-"の場合はスキップ
-		if (tmpSpriteData.length <= 1 || tmpSpriteData[1] === `-`) {
+		// カスタムプロパティの名称(--始まり)で無い場合はコメントと見做してスキップ
+		if (tmpSpriteData.length <= 1 || !tmpSpriteData[1].startsWith(`--`)) {
 			return;
 		}
 		const tmpFrame = setIntVal(tmpSpriteData[0], -1) === 0 ? 0 :
