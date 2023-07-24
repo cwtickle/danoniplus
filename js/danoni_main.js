@@ -2492,6 +2492,16 @@ const getHeader = (_obj, ..._params) => {
 const getHname = _param => [_param, _param.toLowerCase()];
 
 /**
+ * 一時的にスタイルを変更
+ * @param {object} _dosObj 
+ * @returns 
+ */
+const setTmpStyle = _dosObj =>
+	Object.keys(_dosObj).filter(val => val.startsWith(`--`) && hasVal(_dosObj[val])).forEach(prop =>
+		document.documentElement.style.setProperty(prop, prop.endsWith(`-x`) ?
+			_dosObj[prop] : makeColorGradation(_dosObj[prop], { _defaultColorgrd: false })));
+
+/**
  * 譜面ヘッダーの分解（スキン、jsファイルなどの設定）
  * @param {object} _dosObj
  */
@@ -2554,9 +2564,7 @@ const headerConvert = _dosObj => {
 	const obj = {};
 
 	// スタイルの変更
-	Object.keys(_dosObj).filter(val => val.startsWith(`--`) && hasVal(_dosObj[val])).forEach(prop =>
-		document.documentElement.style.setProperty(prop, prop.endsWith(`-x`) ?
-			_dosObj[prop] : makeColorGradation(_dosObj[prop], { _defaultColorgrd: false })));
+	setTmpStyle(_dosObj);
 
 	// フォントの設定
 	obj.customFont = _dosObj.customFont ?? ``;
@@ -7435,7 +7443,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	/**
 	 * 歌詞表示、背景・マスクデータの優先順取得 
 	 */
-	const getPriorityHeader = _ => {
+	const getPriorityHeader = (_defaultHeaders = []) => {
+		if (_defaultHeaders.length > 0) {
+			return makeDedupliArray(_defaultHeaders);
+		}
+
 		const list = [];
 		const anotherKeyFlg = hasVal(g_keyObj[`transKey${_keyCtrlPtn}`]);
 		let type = ``;
@@ -7544,34 +7556,17 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	/**
 	 * 背景・マスクデータの分解
 	 * @param {string} _header 
-	 * @param {string} _scoreNo
-	 */
-	const makeBackgroundData = (_header, _scoreNo) => {
-		const dataList = [];
-		const addDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
-		getPriorityHeader().forEach(val => addDataList(val));
-
-		const data = dataList.find((v) => v !== undefined);
-		return (data !== undefined ? makeSpriteData(data, calcFrame) : [[], -1]);
-	};
-
-	/**
-	 * リザルトモーションデータ(結果画面用背景・マスクデータ)の分解
-	 * @param {string} _header 背景、マスク (back, mask)
-	 * @param {string} _resultType リザルトモーションの種類 (result, failedB, failedS)
 	 * @param {string} _scoreNo 譜面番号
-	 * @param {string} _defaultType _resultTypeが無いときの代替名
+	 * @param {array} resultTypes リザルトモーションの種類 (result, failedB, failedS)
 	 */
-	const makeBackgroundResultData = (_header, _resultType, _scoreNo, _defaultType = ``) => {
+	const makeBackgroundData = (_header, _scoreNo, { resultTypes = [] } = {}) => {
 		const dataList = [];
+		const calcFrameFunc = resultTypes.length > 0 ? calcFrame : undefined;
 		const addDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
-		addDataList(_resultType);
-		if (_defaultType !== ``) {
-			addDataList(_defaultType);
-		}
+		getPriorityHeader(resultTypes).forEach(val => addDataList(val));
 
 		const data = dataList.find((v) => v !== undefined);
-		return (data !== undefined ? makeSpriteData(data) : [[], -1]);
+		return (data !== undefined ? makeSpriteData(data, calcFrameFunc) : [[], -1]);
 	};
 
 	// 速度変化データの分解 (2つで1セット)
@@ -7644,9 +7639,9 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	} else {
 		g_animationData.forEach(sprite => {
 			[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] =
-				makeBackgroundResultData(sprite, `result`, scoreIdHeader);
+				makeBackgroundData(sprite, scoreIdHeader, { resultTypes: [`result`] });
 			[g_headerObj[`${sprite}FailedData`], g_headerObj[`${sprite}FailedMaxDepth`]] =
-				makeBackgroundResultData(sprite, `failed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `result`);
+				makeBackgroundData(sprite, scoreIdHeader, { resultTypes: [`failed${g_stateObj.lifeMode.slice(0, 1)}`, `result`] });
 		});
 	}
 
@@ -9022,6 +9017,7 @@ const mainInit = _ => {
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
 
+			setTmpStyle(g_headerObj);
 			if (g_isMac && (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey))) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
 				g_audio.pause();
@@ -9037,6 +9033,7 @@ const mainInit = _ => {
 			}
 
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
+			setTmpStyle(g_headerObj);
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			if (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)) {
