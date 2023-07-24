@@ -824,7 +824,7 @@ const getImageUrlPath = _str => {
 const reviseCssText = _str => {
 	if (getImageUrlPath(_str) !== ``) {
 		const imgOriginal = getImageUrlPath(_str);
-		const imgPath = preloadImgFile(imgOriginal, { directory: C_DIR_SKIN });
+		const imgPath = preloadImgFile(imgOriginal);
 		return replaceStr(_str, [[imgOriginal, imgPath]]);
 	}
 	return _str;
