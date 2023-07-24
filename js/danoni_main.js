@@ -47,6 +47,7 @@ const current = _ => {
 	return targetScript.src;
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
+const g_workPath = location.href.match(/(^.*\/)/)[0];
 const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
 const g_randTime = Date.now();
 
@@ -768,31 +769,65 @@ const loadMultipleFiles2 = async (_fileData, _loadType) => {
 };
 
 /**
- * 入力されたパスを、ディレクトリとそれ以外に分割
+ * 与えられたパスより、キーワードとディレクトリに分割
  * 返却値：[ファイルキーワード, ルートディレクトリ]
- * @param {string} _path 
- * @param {number} _pos 
- * @param {string} _directory 
+ * @param {string} _fileName 
+ * @param {string} _directory
  */
-const getFolderAndType = (_path, _pos, _directory = ``) => {
-	const rootPath = (_directory === `` ? `` : g_rootPath);
-	return (_pos > 0 ? [_path.substring(_pos + 1), `${rootPath}${_path.substring(0, _pos)}/`] : [_path, `${rootPath}${_directory}`]);
+const getFilePath = (_fileName, _directory = ``) => {
+	let fullPath;
+	if (_fileName.startsWith(C_MRK_CURRENT_DIRECTORY)) {
+		fullPath = `${g_workPath}${_fileName.slice(C_MRK_CURRENT_DIRECTORY.length)}`;
+	} else {
+		fullPath = `${g_rootPath}${_directory}${_fileName}`;
+	}
+	const dirPos = fullPath.lastIndexOf(`/`);
+	return [fullPath.slice(dirPos + 1), fullPath.slice(0, dirPos + 1)];
+}
+
+/**
+ * 画像ファイルの存在チェック後、プリロードする処理
+ * @param {string} _imgPath 
+ * @param {string} directory
+ * @param {boolean} syncBackPath 
+ * @returns 
+ */
+const preloadImgFile = (_imgPath, { directory = ``, syncBackPath = true } = {}) => {
+
+	let imgPath = _imgPath;
+	if (g_headerObj.autoPreload) {
+		if (checkImage(_imgPath)) {
+			if (syncBackPath) {
+				const [file, dir] = getFilePath(_imgPath, directory);
+				imgPath = `${dir}${file}`;
+			}
+			preloadFile(`image`, imgPath);
+		}
+	}
+	return imgPath;
 };
 
 /**
- * 与えられたパスより、キーワードとディレクトリに分割
- * カレントディレクトリ指定がある場合を考慮して、処理を分けている
- * 返却値：[ファイルキーワード, ルートディレクトリ]
- * @param {string} _fileName 
- * @param {string} _directory 
+ * 画像パス部分の取得
+ * @param {string} _str 
+ * @returns 
  */
-const getFilePath = (_fileName, _directory = ``) => {
-	if (_fileName.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-		const tmpType = _fileName.split(C_MRK_CURRENT_DIRECTORY)[1];
-		return getFolderAndType(tmpType, tmpType.indexOf(`/`));
-	} else {
-		return getFolderAndType(_fileName, _fileName.lastIndexOf(`/`), _directory);
+const getImageUrlPath = _str => {
+	const matches = _str?.match(/url\("([^"]*)"\)/);
+	return matches && matches.length >= 2 ? matches[1] : ``;
+};
+
+/**
+ * カレントディレクトリを含む文字列を置換し、変更後の文字列を作成
+ * @param {string} _str  
+ */
+const reviseCssText = _str => {
+	if (getImageUrlPath(_str) !== ``) {
+		const imgOriginal = getImageUrlPath(_str);
+		const imgPath = preloadImgFile(imgOriginal, { directory: C_DIR_CSS });
+		return replaceStr(_str, [[imgOriginal, imgPath]]);
 	}
+	return _str;
 };
 
 /*-----------------------------------------------------------*/
@@ -1558,15 +1593,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 		if (setVal(tmpSpriteData[11], g_presetObj.animationFillMode) !== undefined) {
 			tmpObj.animationFillMode = setVal(tmpSpriteData[11], g_presetObj.animationFillMode);
 		}
-		if (g_headerObj.autoPreload) {
-			if (checkImage(tmpObj.path)) {
-				if (g_headerObj.syncBackPath) {
-					const [file, dir] = getFilePath(tmpObj.path, `./`);
-					tmpObj.path = `${dir}${file}`;
-				}
-				preloadFile(`image`, tmpObj.path);
-			}
-		}
+		tmpObj.path = preloadImgFile(tmpObj.path, { syncBackPath: g_headerObj.syncBackPath });
 
 		let dataCnts = 0;
 		[spriteData[tmpFrame], dataCnts] =
@@ -1635,6 +1662,9 @@ const makeStyleData = (_data, _calcFrame = _frame => _frame) => {
 			styleData: tmpSpriteData[1].endsWith(`-x`) ? tmpSpriteData[2] :
 				makeColorGradation(tmpSpriteData[2], { _defaultColorgrd: false }),
 		};
+
+		// CSSデータからurl情報を取得し、絶対パスに置き換える
+		spriteData[tmpFrame][dataCnts].styleData = reviseCssText(spriteData[tmpFrame][dataCnts].styleData);
 	});
 	return [spriteData, 1];
 };
@@ -1954,7 +1984,7 @@ const initialControl = async () => {
 	await loadChartFile(0);
 
 	// 共通設定ファイルの指定
-	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType ?? ``, C_DIR_JS);
+	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType ?? ``);
 	if (settingType !== ``) {
 		settingType = `_${settingType}`;
 	}
@@ -2635,7 +2665,9 @@ const headerConvert = _dosObj => {
 	// ヘッダー群の格納先
 	const obj = {};
 
-	console.log(document.documentElement.style.cssText)
+	// 自動プリロードの設定
+	obj.autoPreload = setBoolVal(_dosObj.autoPreload, true);
+	g_headerObj.autoPreload = obj.autoPreload;
 
 	// デフォルトスタイルのバックアップ
 	getCssCustomProperties();
@@ -2643,7 +2675,7 @@ const headerConvert = _dosObj => {
 	// 初期で変更するカスタムプロパティを設定
 	Object.keys(_dosObj).filter(val => val.startsWith(`--`) && hasVal(_dosObj[val])).forEach(prop =>
 		g_cssBkProperties[prop] = prop.endsWith(`-x`) ?
-			_dosObj[prop] : makeColorGradation(_dosObj[prop], { _defaultColorgrd: false }));
+			_dosObj[prop] : reviseCssText(makeColorGradation(_dosObj[prop], { _defaultColorgrd: false })));
 
 	// フォントの設定
 	obj.customFont = _dosObj.customFont ?? ``;
@@ -2990,10 +3022,6 @@ const headerConvert = _dosObj => {
 
 	// ハッシュタグ
 	obj.hashTag = _dosObj.hashTag ?? ``;
-
-	// 自動プリロードの設定
-	obj.autoPreload = setBoolVal(_dosObj.autoPreload, true);
-	g_headerObj.autoPreload = obj.autoPreload;
 
 	// 読込対象の画像を指定(rel:preload)と同じ
 	obj.preloadImages = [];
@@ -4187,7 +4215,7 @@ const titleInit = _ => {
 		// ユーザカスタムイベント(フレーム毎)
 		g_customJsObj.titleEnterFrame.forEach(func => func());
 
-		// 背景・マスクモーション
+		// 背景・マスクモーション、スキン変更
 		drawTitleResultMotion(g_currentPage);
 
 		thisTime = performance.now();
@@ -7632,7 +7660,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	};
 
 	/**
-	 * 背景・マスクデータの分解
+	 * 背景・マスク、スキン変更データの分解
 	 * @param {string} _header 
 	 * @param {string} _scoreNo 譜面番号
 	 * @param {array} resultTypes リザルトモーションの種類 (result, failedB, failedS)
@@ -7694,8 +7722,9 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		[obj.wordData, obj.wordMaxDepth] = makeWordData(scoreIdHeader);
 	}
 
-	// 背景・マスクデータの分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数, 階層, 背景パス, class(CSSで別定義), X, Y, width, height, opacity, animationName, animationDuration]
+	// 背景・マスク・スキン変更データの分解 (下記すべてで1セット、改行区切り)
+	// - 背景・マスク: [フレーム数, 階層, 背景パス, class(CSSで別定義), X, Y, width, height, opacity, animationName, animationDuration, animationFillMode]
+	// - スキン変更  : [フレーム数, CSSカスタムプロパティ名, 設定内容]
 	g_animationData.forEach(sprite => {
 		obj[`${sprite}Data`] = [];
 		obj[`${sprite}MaxDepth`] = -1;
