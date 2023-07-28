@@ -1464,8 +1464,14 @@ const drawDefaultBackImage = _key => {
  * CSSカスタムプロパティの値をオブジェクトへ退避
  */
 const getCssCustomProperties = _ => {
-	if (g_userAgent.indexOf(`firefox`) !== -1) {
-
+	try {
+		const htmlStyle = document.documentElement.computedStyleMap();
+		for (const [propertyName, value] of htmlStyle.entries()) {
+			if (/^--/.test(propertyName)) {
+				g_cssBkProperties[propertyName] = value.toString();
+			}
+		}
+	} catch (error) {
 		// FirefoxではcomputedStyleMapが使えないため、
 		// CSSの全スタイルシート定義から :root がセレクタのルールを抽出し、カスタムプロパティを抽出
 		const sheets = document.styleSheets;
@@ -1481,13 +1487,6 @@ const getCssCustomProperties = _ => {
 						}
 					}
 				}
-			}
-		}
-	} else {
-		const htmlStyle = document.documentElement.computedStyleMap();
-		for (const [propertyName, value] of htmlStyle.entries()) {
-			if (/^--/.test(propertyName)) {
-				g_cssBkProperties[propertyName] = value.toString();
 			}
 		}
 	}
