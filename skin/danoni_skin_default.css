@@ -14,8 +14,8 @@
 	/* 背景 */
 	--background: linear-gradient(#000000, #222222);
 	/* --back-chartDetail: var(--background); */
-	/* --back-difCover: var(--background); */
-	/* --back-difList: var(--back-difCover, var(--background)); */
+	/* --back-difListL: var(--background); */
+	/* --back-difListR: var(--back-difListL, var(--background)); */
 
 	/* タイトル共通色 */
 	--title-base: #cccccc;

@@ -364,11 +364,11 @@ input[type="color"] {
 }
 
 #difCover {
-	background: var(--back-difCover, var(--background));
+	background: var(--back-difListL, var(--background));
 }
 
 #difList {
-	background: var(--back-difList, var(--back-difCover, var(--background)));
+	background: var(--back-difListR, var(--back-difListL, var(--background)));
 }
 
 /* タイトル */
