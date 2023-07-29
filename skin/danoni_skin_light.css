@@ -42,7 +42,7 @@
 	--settings-hitPosition-x: #ff00ff;
 
 	/* 譜面選択部分背景 */
-	--settings-difselector: #eeeeee;
+	--settings-difSelector: #eeeeee;
 
 	/* 設定無効化時 */
 	--settings-disabled-x: #999999;
@@ -54,7 +54,9 @@
 	--settings-lifeVal-x: #996600;
 
 	/* ゲージ設定枠 */
-	--settings-gaugeTable-x: #222222;
+	--settings-bc-gaugeTable: #222222;
+	--settings-slice-gaugeTable-x: 1;
+	--settings-border-gaugeTable-x: 1px;
 
 	/* キーコンフィグ関連 */
 	--keyconfig-warning-x: #999900;
@@ -101,7 +103,10 @@
 	--result-lbl-x: #333333;
 	--result-style-x: #111111;
 
-	--result-playwindow-x: solid 0.5px #666666;
+	--result-bc-playwindow: #666666;
+	--result-slice-playwindow-x: 1;
+	--result-border-playwindow-x: 1px;
+
 	--result-score-x: #000000;
 	--result-scoreHiBracket-x: #222222;
 	--result-scoreHi-x: #000000;

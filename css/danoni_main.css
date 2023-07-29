@@ -295,6 +295,7 @@ input[type="color"] {
 
 .settings_gaugeDivCover {
 	border: 1px #666666 solid;
+	border-image: var(--settings-bc-gaugeTable, #666666) var(--settings-slice-gaugeTable-x, 1)/var(--settings-border-gaugeTable-x, 1px);
 	width: 305px;
 	line-height: 14px;
 }
@@ -441,7 +442,7 @@ input[type="color"] {
 }
 
 .settings_DifSelector {
-	background: var(--settings-difselector, #111111);
+	background: var(--settings-difSelector, #111111);
 }
 
 .settings_Disabled {
@@ -455,10 +456,6 @@ input[type="color"] {
 /* 設定画面：ゲージ設定詳細 */
 .settings_lifeVal {
 	color: var(--settings-lifeVal-x, #ff9966);
-}
-
-.settings_gaugeTableBorder {
-	border-color: var(--settings-gaugeTable-x, #666666);
 }
 
 /* キーコンフィグ */
@@ -597,7 +594,8 @@ input[type="color"] {
 
 /* 結果画面：枠 */
 .result_PlayDataWindow {
-	border: var(--result-playwindow-x, solid 0.5px #666666);
+	border: solid 0.5px #666666;
+	border-image: var(--result-bc-playwindow, #666666) var(--settings-slice-playwindow-x, 1)/var(--result-border-playwindow-x, 1/1px);
 }
 
 /* 結果画面：スコア */
