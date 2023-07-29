@@ -604,6 +604,30 @@ input[type="color"] {
 	color: var(--common-score-x, #ffffff);
 }
 
+.common_comboJ {
+	background: var(--common-comboJ, var(--common-kita));
+}
+
+.common_comboFJ {
+	background: var(--common-comboFJ, var(--common-ii));
+}
+
+.common_diffFast {
+	background: var(--common-diffFast, var(--common-matari));
+}
+
+.common_diffSlow {
+	background: var(--common-diffSlow, var(--common-shobon));
+}
+
+.common_excessive {
+	background: var(--common-excessive, var(--common-kita));
+}
+
+.common_estAdj {
+	background: var(--common-estAdj, var(--common-shakin));
+}
+
 /* 結果画面：枠 */
 .result_PlayDataWindow {
 	border: solid 0.5px #666666;
@@ -801,6 +825,12 @@ input[type="color"] {
 .common_kita,
 .common_iknai,
 .common_combo,
+.common_comboJ,
+.common_comboFJ,
+.common_diffFast,
+.common_diffSlow,
+.common_excessive,
+.common_estAdj,
 .result_AllPerfect,
 .result_Perfect,
 .result_FullCombo,

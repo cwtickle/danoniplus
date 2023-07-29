@@ -929,7 +929,8 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 
 	// 色情報以外の部分を退避
 	const addData = tmpBackgroundStr[1] !== undefined ? tmpBackgroundStr.slice(1).join(` `) : ``;
-	if ([``, `-`, `none`].includes(tmpBackgroundStr[0]) || tmpBackgroundStr[0].startsWith(`url(`)) {
+	if ([``, `-`, `none`].includes(tmpBackgroundStr[0]) ||
+		tmpBackgroundStr[0].startsWith(`url(`) || tmpBackgroundStr[0].startsWith(`var(`)) {
 		return addData;
 	}
 
@@ -1456,9 +1457,16 @@ const drawDefaultBackImage = _key => {
 		document.documentElement.style.setProperty(prop, g_cssBkProperties[prop]));
 
 	Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
-		document.documentElement.style.setProperty(prop, prop.endsWith(`-x`) ?
-			g_headerObj[prop] : makeColorGradation(g_headerObj[prop], { _defaultColorgrd: false })));
+		document.documentElement.style.setProperty(prop, getCssCustomProperty(prop, g_headerObj[prop])));
+
 };
+
+const getCssCustomProperty = (_prop, _propData) =>
+	document.documentElement.style.getPropertyValue(_propData) !== `` ?
+		document.documentElement.style.getPropertyValue(_propData) :
+		g_cssBkProperties[_propData] !== undefined ?
+			g_cssBkProperties[_propData] :
+			_prop.endsWith(`-x`) ? _propData : reviseCssText(makeColorGradation(_propData, { _defaultColorgrd: false }));
 
 /**
  * CSSカスタムプロパティの値をオブジェクトへ退避
@@ -1658,12 +1666,8 @@ const makeStyleData = (_data, _calcFrame = _frame => _frame) => {
 		[spriteData[tmpFrame], dataCnts] = checkDuplicatedObjects(spriteData[tmpFrame]);
 		spriteData[tmpFrame][dataCnts] = {
 			depth: tmpSpriteData[1],
-			styleData: tmpSpriteData[1].endsWith(`-x`) ? tmpSpriteData[2] :
-				makeColorGradation(tmpSpriteData[2], { _defaultColorgrd: false }),
+			styleData: getCssCustomProperty(tmpSpriteData[1], tmpSpriteData[2]),
 		};
-
-		// CSSデータからurl情報を取得し、絶対パスに置き換える
-		spriteData[tmpFrame][dataCnts].styleData = reviseCssText(spriteData[tmpFrame][dataCnts].styleData);
 	});
 	return [spriteData, 1];
 };
@@ -2672,9 +2676,10 @@ const headerConvert = _dosObj => {
 	getCssCustomProperties();
 
 	// 初期で変更するカスタムプロパティを設定
-	Object.keys(_dosObj).filter(val => val.startsWith(`--`) && hasVal(_dosObj[val])).forEach(prop =>
-		g_cssBkProperties[prop] = prop.endsWith(`-x`) ?
-			_dosObj[prop] : reviseCssText(makeColorGradation(_dosObj[prop], { _defaultColorgrd: false })));
+	Object.keys(_dosObj).filter(val => val.startsWith(`--`) && hasVal(_dosObj[val])).forEach(prop => {
+		g_cssBkProperties[prop] = getCssCustomProperty(prop, _dosObj[prop]);
+		document.documentElement.style.setProperty(prop, g_cssBkProperties[prop]);
+	});
 
 	// フォントの設定
 	obj.customFont = _dosObj.customFont ?? ``;
@@ -9018,7 +9023,7 @@ const mainInit = _ => {
 				x: jdgX[j] + 170, y: jdgY[j],
 				w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.jdgCharaSiz,
 				opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
-			}, g_cssObj[`common_${jdgCombos[j]}`]),
+			}, g_cssObj[`common_combo${jdg}`]),
 
 			// Fast/Slow表示
 			createDivCss2Label(`diff${jdg}`, ``, {
@@ -10249,14 +10254,14 @@ const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames
 	g_workObj.diffList.push(_difFrame);
 	const difCnt = Math.abs(_difFrame);
 	if (_difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
-		diffJDisp = `<span class="common_kita">Excessive</span>`;
+		diffJDisp = `<span class="common_excessive">Excessive</span>`;
 		g_resultObj.excessive++;
 		lifeDamage(true);
 	} else if (_difFrame > _justFrames) {
-		diffJDisp = `<span class="common_matari">Fast ${difCnt} Frames</span>`;
+		diffJDisp = `<span class="common_diffFast">Fast ${difCnt} Frames</span>`;
 		g_resultObj.fast++;
 	} else if (_difFrame < _justFrames * (-1)) {
-		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
+		diffJDisp = `<span class="common_diffSlow">Slow ${difCnt} Frames</span>`;
 		g_resultObj.slow++;
 	}
 	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
@@ -10671,20 +10676,20 @@ const resultInit = _ => {
 		));
 	if (g_stateObj.autoAll === C_FLG_OFF) {
 		multiAppend(resultWindow,
-			makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_matari, 0, g_lblNameObj.j_fast),
-			makeCssResultSymbol(`lblSlow`, 350, g_cssObj.common_shobon, 2, g_lblNameObj.j_slow),
+			makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_diffFast, 0, g_lblNameObj.j_fast),
+			makeCssResultSymbol(`lblSlow`, 350, g_cssObj.common_diffSlow, 2, g_lblNameObj.j_slow),
 			makeCssResultSymbol(`lblFastS`, 260, g_cssObj.score, 1, g_resultObj.fast, C_ALIGN_RIGHT),
 			makeCssResultSymbol(`lblSlowS`, 260, g_cssObj.score, 3, g_resultObj.slow, C_ALIGN_RIGHT),
 		);
 		if (estimatedAdj !== ``) {
 			multiAppend(resultWindow,
-				makeCssResultSymbol(`lblAdj`, 350, g_cssObj.common_shakin, 4, g_lblNameObj.j_adj),
+				makeCssResultSymbol(`lblAdj`, 350, g_cssObj.common_estAdj, 4, g_lblNameObj.j_adj),
 				makeCssResultSymbol(`lblAdjS`, 260, g_cssObj.score, 5, `${getDiffFrame(estimatedAdj)}`, C_ALIGN_RIGHT),
 			);
 		}
 		if (g_stateObj.excessive === C_FLG_ON) {
 			multiAppend(resultWindow,
-				makeCssResultSymbol(`lblExcessive`, 350, g_cssObj.common_kita, 6, g_lblNameObj.j_excessive),
+				makeCssResultSymbol(`lblExcessive`, 350, g_cssObj.common_excessive, 6, g_lblNameObj.j_excessive),
 				makeCssResultSymbol(`lblExcessiveS`, 260, g_cssObj.score, 7, g_resultObj.excessive, C_ALIGN_RIGHT),
 			);
 		}

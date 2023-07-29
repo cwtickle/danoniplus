@@ -96,7 +96,7 @@ const g_limitObj = {
 
     // 判定キャラクタの幅、高さ、フォントサイズ
     jdgCharaWidth: 200,
-    jdgCharaHeight: 20,
+    jdgCharaHeight: 22,
     jdgCharaSiz: 20,
 
     // 判定数の幅、高さ、フォントサイズ
@@ -1612,6 +1612,13 @@ const g_cssObj = {
     common_iknai: `common_iknai`,
     common_combo: `common_combo`,
     common_score: `common_score`,
+
+    common_comboJ: `common_comboJ`,
+    common_comboFJ: `common_comboFJ`,
+    common_diffSlow: `common_diffSlow`,
+    common_diffFast: `common_diffFast`,
+    common_excessive: `common_excessive`,
+    common_estAdj: `common_estAdj`,
 
     result_score: `result_score`,
     result_scoreHiBlanket: `result_scoreHiBlanket`,

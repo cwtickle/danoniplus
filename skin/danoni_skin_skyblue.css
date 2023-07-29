@@ -78,15 +78,21 @@
 	--common-iknai: #669900;
 	--common-combo: #000000;
 	--common-score-x: #000000;
+	/* --common-comboJ: var(--common-kita); */
+	/* --common-comboFJ: var(--common-ii); */
+	/* --common-diffFast: var(--common-matari); */
+	/* --common-diffSlow: var(--common-shobon); */
+	/* --common-excessive: var(--common-kita); */
+	/* --common-estAdj: var(--common-shakin); */
 
 	/* ステップゾーン */
 	--main-stepKeyDown: #009999;
 	--main-stepDefault: #666666;
 	--main-stepDummy: #666666;
-	--main-stepIi: var(--common-ii-x);
-	--main-stepShakin: var(--common-shakin-x);
-	--main-stepMatari: var(--common-matari-x);
-	--main-stepShobon: var(--common-shobon-x);
+	--main-stepIi: var(--common-ii);
+	--main-stepShakin: var(--common-shakin);
+	--main-stepMatari: var(--common-matari);
+	--main-stepShobon: var(--common-shobon);
 	--main-stepExcessive: #999900;
 	--main-objStepShadow: #eeeeee;
 	--main-objFrzShadow: #666666;
