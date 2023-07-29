@@ -1461,6 +1461,11 @@ const drawDefaultBackImage = _key => {
 
 };
 
+/**
+ * CSSカスタムプロパティの値を作成
+ * @param {string} _prop 
+ * @param {string} _propData 
+ */
 const getCssCustomProperty = (_prop, _propData) =>
 	document.documentElement.style.getPropertyValue(_propData) !== `` ?
 		document.documentElement.style.getPropertyValue(_propData) :
