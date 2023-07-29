@@ -5,432 +5,200 @@
   スキンcssファイル (light)
 
   Created : 2019/11/04
-  Revised : 2023/06/24 (v32.5.0)
+  Revised : 2023/07/29 (v33.0.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
-/* 背景 */
-#divBack {
-	background: linear-gradient(#dddddd, #ffffff);
-}
-
-/* タイトル */
-.title_base {
-	color: #222222;
-}
-
-/* 設定別カラー */
-.settings_Title::first-letter {
-	color: #000099;
-	font-size: 40px;
-}
-
-.settings_Title2::first-letter {
-	color: #990000;
-	font-size: 40px;
-}
-
-.settings_TitleStar::first-letter {
-	color: #999900;
-	font-size: 40px;
-}
-
-.settings_Display::first-letter {
-	color: #777700;
-	font-size: 40px;
-}
-
-.settings_Difficulty::first-letter {
-	color: #990000;
-}
-
-.settings_Speed::first-letter {
-	color: #777700;
-}
-
-.settings_Motion::first-letter {
-	color: #667700;
-}
-
-.settings_Reverse::first-letter {
-	color: #557733;
-}
-
-.settings_Scroll::first-letter {
-	color: #557733;
-}
-
-.settings_Shuffle::first-letter {
-	color: #337733;
-}
-
-.settings_AutoPlay::first-letter {
-	color: #337744;
-}
-
-.settings_Gauge::first-letter {
-	color: #227755;
-}
-
-.settings_Adjustment::first-letter {
-	color: #007777;
-}
-
-.settings_Fadein::first-letter {
-	color: #005577;
-}
-
-.settings_Volume::first-letter {
-	color: #003377;
-}
-
-.settings_Appearance::first-letter {
-	color: #9900ff;
-}
-
-.settings_Opacity::first-letter {
-	color: #cc00ff;
-}
-
-.settings_HitPosition::first-letter {
-	color: #ff00ff;
-}
-
-.settings_DifSelector {
-	background-color: #eeeeee;
-}
-
-.settings_Disabled {
-	color: #999999;
-}
-
-.settings_FadeinBar {
-	color: #000000;
-}
-
-/* 設定画面：ゲージ設定詳細 */
-.settings_lifeVal {
-	color: #996600;
-}
-
-.settings_gaugeTableBorder {
-	border-color: #222222;
-}
-
-/* キーコンフィグ */
-.keyconfig_warning {
-	color: #999900;
-}
-
-.keyconfig_ConfigType::first-letter {
-	color: #003377;
-}
-
-.keyconfig_ColorType::first-letter {
-	color: #773300;
-}
-
-.keyconfig_Changekey {
-	color: #999900;
-}
-
-.keyconfig_Defaultkey {
-	color: #000099;
-}
-
-/* ステップゾーン */
-.main_stepKeyDown {
-	background-color: #009999;
-}
-
-.main_stepDefault {
-	background-color: #666666;
-}
-
-.main_stepDummy {
-	background-color: #666666;
-}
-
-.main_stepIi {
-	background-color: #009999;
-}
-
-.main_stepShakin {
-	background-color: #009900;
-}
-
-.main_stepMatari {
-	background-color: #cc8800;
-}
-
-.main_stepShobon {
-	background-color: #0000cc;
-}
-
-.main_stepExcessive {
-	background-color: #999900;
-}
-
-.main_objStepShadow {
-	background-color: #eeeeee;
-}
-
-.main_objShadow {
-	background-color: #666666;
-}
-
-.main_frzHitTop {
-	background-color: #cccccc;
-}
-
-/* ライフゲージ */
-.life_Max {
-	background-color: #cccc66;
-}
-
-.life_Cleared {
-	background-color: #66cccc;
-}
-
-.life_Failed {
-	background-color: #999999;
-}
-
-.life_Background {
-	background-color: #cccccc;
-}
-
-.life_BorderColor {
-	background-color: #555555;
-	color: #cccccc;
-}
-
-/* 結果画面：項目、設定値 */
-.result_lbl {
-	color: #333333;
-}
-
-.result_style {
-	color: #111111;
-}
-
-/* 結果画面：判定名 */
-.common_ii {
-	color: #009999;
-}
-
-.common_shakin {
-	color: #009900;
-}
-
-.common_matari {
-	color: #cc8800;
-}
-
-.common_shobon {
-	color: #0000cc;
-}
-
-.common_uwan {
-	color: #cc0000;
-}
-
-.common_kita {
-	color: #999900;
-}
-
-.common_iknai {
-	color: #669900;
-}
-
-.common_combo {
-	color: #000000;
-}
-
-.common_score {
-	color: #000000;
-}
-
-/* 結果画面：枠 */
-.result_PlayDataWindow {
-	border: solid 0.5px #666666;
-}
-
-/* 結果画面：スコア */
-.result_score {
-	color: #000000;
-}
-
-/* 結果画面：ハイスコア差分、ハイスコア時のカラー */
-.result_scoreHiBlanket {
-	color: #222222;
-}
-
-.result_scoreHi {
-	color: #000000;
-}
-
-.result_scoreHiPlus {
-	color: #777700;
-}
-
-/* 結果画面：ハイスコア更新外の表示色 */
-.result_noRecord {
-	color: #222222;
-}
-
-/* 結果画面：完全PF、PF、FC、Cleared、Failed */
-.result_AllPerfect {
-	color: #999999;
-}
-
-.result_Perfect {
-	color: #999900;
-}
-
-.result_FullCombo {
-	color: #007777;
-}
-
-.result_Cleared {
-	color: #666600;
-}
-
-.result_Failed {
-	color: #990000;
-}
-
-.result_Window::first-letter {
-	font-size: 80px;
-}
-
-/* ボタン */
-/* Click Here */
-.button_Start {
-	color: #000000;
-	background-color: #dddddd;
-}
-
-.button_Start:hover {
-	color: #000000;
-	background-color: #999999;
-}
-
-/* デフォルト */
-.button_Default {
-	color: #000000;
-	background-color: #eeeeee;
-}
-
-.button_Default:hover {
-	color: #000000;
-	background-color: #bbbbbb;
-}
-
-/* デフォルト(色指定なし) */
-.button_Default_NoColor {
-	background-color: #00000000;
-}
-
-.button_Default_NoColor:hover {
-	background-color: #bbbbbb;
-}
-
-/* カーソル */
-.button_Mini {
-	color: #000000;
-	background-color: #cccccc;
-}
-
-.button_Mini:hover {
-	color: #000000;
-	background-color: #999999;
-}
-
-/* 戻る */
-.button_Back {
-	color: #000000;
-	background-color: #ccccff;
-}
-
-.button_Back:hover {
-	color: #000000;
-	background-color: #9999ff;
-}
-
-/* 設定 */
-.button_Setting {
-	color: #000000;
-	background-color: #ffffcc;
-}
-
-.button_Setting:hover {
-	color: #000000;
-	background-color: #ffff66;
-}
-
-/* 進む */
-.button_Next {
-	color: #000000;
-	background-color: #ffcccc;
-}
-
-.button_Next:hover {
-	color: #000000;
-	background-color: #ff9999;
-}
-
-/* リセット */
-.button_Reset {
-	color: #000000;
-	background-color: #ccffcc;
-}
-
-.button_Reset:hover {
-	color: #000000;
-	background-color: #99ff99;
-}
-
-/* ツイート */
-.button_Tweet {
-	color: #000000;
-	background-color: #ccffff;
-}
-
-.button_Tweet:hover {
-	color: #000000;
-	background-color: #66ffff;
-}
-
-/* ボタン：ON/OFF */
-.button_OFF {
-	color: #cccccc;
-	border-color: #00000000 #cccccc;
-}
-
-.button_ON {
-	color: #000000;
-	border-color: #00000000 #333333;
-}
-
-/* ボタン：ON/OFF リバース用 */
-.button_RevOFF {
-	color: #666666;
-	border-color: #00000000 #666666;
-}
-
-.button_RevON {
-	color: #000000;
-	border-color: #00000000 #557733;
-}
-
-/* ボタン：ON/OFF 無効化ボタン用 */
-.button_DisabledOFF {
-	color: #999999;
-	background-color: #333333;
-}
-
-.button_DisabledON {
-	color: #ffffff;
-	background-color: #009999;
+
+:root {
+	/* 背景 */
+	--background: linear-gradient(#dddddd, #ffffff);
+	/* --back-chartDetail: var(--background); */
+	/* --back-difListL: var(--background); */
+	/* --back-difListR: var(--back-difListL, var(--background)); */
+
+	/* タイトル共通色 */
+	--title-base: #222222;
+
+	/* 画面タイトル色 */
+	--title-dancing: #000099;
+	--title-onigiri: #990000;
+	--title-star: #999900;
+	--title-display: #777700;
+
+	/* タイトルサイズ */
+	--title-siz-x: 40px;
+
+	/* 設定別ヘッダー */
+	--settings-difficulty-x: #990000;
+	--settings-speed-x: #777700;
+	--settings-motion-x: #667700;
+	--settings-scroll-x: #557733;
+	--settings-shuffle-x: #337733;
+	--settings-autoPlay-x: #337744;
+	--settings-gauge-x: #227755;
+	--settings-adjustment-x: #007777;
+	--settings-fadein-x: #005577;
+	--settings-volume-x: #003377;
+	--settings-appearance-x: #9900ff;
+	--settings-opacity-x: #cc00ff;
+	--settings-hitPosition-x: #ff00ff;
+
+	/* 譜面選択部分背景 */
+	--settings-difSelector: #eeeeee;
+
+	/* 設定無効化時 */
+	--settings-disabled-x: #999999;
+
+	/* フェードインバー */
+	--settings-fadeinBar-x: #000000;
+
+	/* ゲージ表示 (可変) */
+	--settings-lifeVal-x: #996600;
+
+	/* ゲージ設定枠 */
+	--settings-bc-gaugeTable: #222222;
+	--settings-slice-gaugeTable-x: 1;
+	--settings-border-gaugeTable-x: 1px;
+
+	/* キーコンフィグ関連 */
+	--keyconfig-warning-x: #999900;
+	--keyconfig-imgType-x: #003377;
+	--keyconfig-colorType-x: #773300;
+	--keyconfig-changekey-x: #999900;
+	--keyconfig-defaultkey-x: #000099;
+
+	/* 判定 */
+	--common-ii: #009999;
+	--common-shakin: #009900;
+	--common-matari: #cc8800;
+	--common-shobon: #0000cc;
+	--common-uwan: #cc0000;
+	--common-kita: #999900;
+	--common-iknai: #669900;
+	--common-combo: #000000;
+	--common-score-x: #000000;
+	/* --common-comboJ: var(--common-kita); */
+	/* --common-comboFJ: var(--common-ii); */
+	/* --common-diffFast: var(--common-matari); */
+	/* --common-diffSlow: var(--common-shobon); */
+	/* --common-estAdj: var(--common-shakin); */
+	/* --common-excessive: var(--common-kita); */
+
+	/* ステップゾーン */
+	--main-stepKeyDown: #009999;
+	--main-stepDefault: #666666;
+	--main-stepDummy: #666666;
+	--main-stepIi: var(--common-ii);
+	--main-stepShakin: var(--common-shakin);
+	--main-stepMatari: var(--common-matari);
+	--main-stepShobon: var(--common-shobon);
+	--main-stepExcessive: #999900;
+	--main-objStepShadow: #eeeeee;
+	--main-objFrzShadow: #666666;
+	--main-frzHitTop: #cccccc;
+
+	/* ライフゲージ */
+	--life-max: #cccc66;
+	--life-cleared: #66cccc;
+	--life-failed: #999999;
+
+	/* ライフゲージ本体 */
+	--life-background: #cccccc;
+	--life-bg-border: #555555;
+	--life-color-border-x: #cccccc;
+
+	/* 結果画面 */
+	--result-lbl-x: #333333;
+	--result-style-x: #111111;
+
+	--result-bc-playwindow: #666666;
+	--result-slice-playwindow-x: 1;
+	--result-border-playwindow-x: 1px;
+
+	--result-score-x: #000000;
+	--result-scoreHiBracket-x: #222222;
+	--result-scoreHi-x: #000000;
+	--result-scoreHiPlus-x: #777700;
+	--result-noRecord-x: #222222;
+
+	--result-allPerfect: #999999;
+	--result-perfect: #999900;
+	--result-fullCombo: #007777;
+	--result-cleared: #666600;
+	--result-failed: #990000;
+
+	/* 結果画面のCleared/Failedを表示している文字のサイズ */
+	--result-siz-window-x: 80px;
+
+	/* ボタン */
+	/* Click Here */
+	--button-bg-start: #dddddd;
+	--button-color-start-x: #000000;
+	--button-bgHover-start: #999999;
+	--button-colorHover-start-x: #000000;
+
+	/* 汎用 */
+	--button-bg-default: #eeeeee;
+	--button-color-default-x: #000000;
+	--button-bgHover-default: #bbbbbb;
+	--button-colorHover-default-x: #000000;
+
+	/* 汎用(背景が透明) */
+	--button-bg-defaultNo: #00000000;
+	--button-bgHover-defaultNo: #bbbbbb;
+
+	/* 設定用ミニボタン */
+	--button-bg-mini: #cccccc;
+	--button-color-mini-x: #000000;
+	--button-bgHover-mini: #999999;
+	--button-colorHover-mini-x: #000000;
+
+	/* 戻るボタン */
+	--button-bg-back: #ccccff;
+	--button-color-back-x: #000000;
+	--button-bgHover-back: #9999ff;
+	--button-colorHover-back-x: #000000;
+
+	/* 設定ボタン */
+	--button-bg-setting: #ffffcc;
+	--button-color-setting-x: #000000;
+	--button-bgHover-setting: #ffff66;
+	--button-colorHover-setting-x: #000000;
+
+	/* 開始ボタン */
+	--button-bg-next: #ffcccc;
+	--button-color-next-x: #000000;
+	--button-bgHover-next: #ff9999;
+	--button-colorHover-next-x: #000000;
+
+	/* リセットボタン */
+	--button-bg-reset: #ccffcc;
+	--button-color-reset-x: #000000;
+	--button-bgHover-reset: #99ff99;
+	--button-colorHover-reset-x: #000000;
+
+	/* 外部SNSボタン */
+	--button-bg-sns: #ccffff;
+	--button-color-sns-x: #000000;
+	--button-bgHover-sns: #66ffff;
+	--button-colorHover-sns-x: #000000;
+
+	/* ON/OFFボタン */
+	--button-color-off-x: #cccccc;
+	--button-border-off-x: #00000000 #cccccc;
+	--button-color-on-x: #000000;
+	--button-border-on-x: #00000000 #333333;
+
+	/* ON/OFFボタン Reverse用 */
+	--button-color-offRev-x: #666666;
+	--button-border-offRev-x: #00000000 #666666;
+	--button-color-onRev-x: #000000;
+	--button-border-onRev-x: #00000000 #557733;
+
+	/* ON/OFFボタン 無効時 */
+	--button-bg-offDisabled: #999999;
+	--button-color-offDisabled-x: #333333;
+	--button-bg-onDisabled: #ffffff;
+	--button-color-onDisabled-x: #009999;
 }

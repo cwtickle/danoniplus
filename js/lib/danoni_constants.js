@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/07/17 (v32.7.0)
+ * Revised : 2023/07/29 (v33.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -96,7 +96,7 @@ const g_limitObj = {
 
     // 判定キャラクタの幅、高さ、フォントサイズ
     jdgCharaWidth: 200,
-    jdgCharaHeight: 20,
+    jdgCharaHeight: 22,
     jdgCharaSiz: 20,
 
     // 判定数の幅、高さ、フォントサイズ
@@ -1613,6 +1613,13 @@ const g_cssObj = {
     common_combo: `common_combo`,
     common_score: `common_score`,
 
+    common_comboJ: `common_comboJ`,
+    common_comboFJ: `common_comboFJ`,
+    common_diffSlow: `common_diffSlow`,
+    common_diffFast: `common_diffFast`,
+    common_excessive: `common_excessive`,
+    common_estAdj: `common_estAdj`,
+
     result_score: `result_score`,
     result_scoreHiBlanket: `result_scoreHiBlanket`,
     result_scoreHi: `result_scoreHi`,
@@ -2318,15 +2325,33 @@ const g_titleLists = {
 
 };
 
-const g_animationData = [`back`, `mask`];
+const g_animationData = [`back`, `mask`, `style`];
+const g_animationFunc = {
+    make: {
+        back: makeSpriteData,
+        mask: makeSpriteData,
+        style: makeStyleData,
+    },
+    draw: {
+        back: drawSpriteData,
+        mask: drawSpriteData,
+        style: drawStyleData,
+    },
+    drawMain: {
+        back: drawMainSpriteData,
+        mask: drawMainSpriteData,
+        style: drawMainStyleData,
+    },
+};
 
-let g_fadeinStockList = [`word`, `back`, `mask`];
+let g_fadeinStockList = [`word`, `back`, `mask`, `style`];
 
 /** フェードイン時でもプリロードを除外しないリスト */
 const g_preloadExceptList = {
     word: [`[left]`, `[center]`, `[right]`],
     back: [],
     mask: [],
+    style: [],
 };
 
 /** フェードイン時、プリロードを強制削除するリスト（初期値は空） */
@@ -2334,6 +2359,7 @@ const g_stockForceDelList = {
     word: [],
     back: [],
     mask: [],
+    style: [],
 };
 
 /**
@@ -2353,6 +2379,7 @@ const g_dataMinObj = {
     word: 3,
     mask: 1,
     back: 1,
+    style: 1,
 };
 
 const g_dfColorObj = {
@@ -2366,6 +2393,8 @@ const g_dfColorObj = {
     frzShadowColorInit: [``, ``, ``, ``],
 
 };
+
+const g_cssBkProperties = {};
 
 const g_dfColorBaseObj = {
 
