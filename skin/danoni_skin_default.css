@@ -18,10 +18,10 @@
 	--title-base: #cccccc;
 
 	/* 画面タイトル色 */
-	--title-dancing-x: #6666ff;
-	--title-onigiri-x: #ff6666;
-	--title-star-x: #ffff66;
-	--title-display-x: #ffff66;
+	--title-dancing: #6666ff;
+	--title-onigiri: #ff6666;
+	--title-star: #ffff66;
+	--title-display: #ffff66;
 
 	/* タイトルサイズ */
 	--title-siz-x: 40px;
@@ -66,14 +66,14 @@
 	--keyconfig-defaultkey-x: #99ccff;
 
 	/* 判定 */
-	--common-ii-x: #66ffff;
-	--common-shakin-x: #99ff99;
-	--common-matari-x: #ff9966;
-	--common-shobon-x: #ccccff;
-	--common-uwan-x: #ff9999;
-	--common-kita-x: #ffff99;
-	--common-iknai-x: #99ff66;
-	--common-combo-x: #ffffff;
+	--common-ii: #66ffff;
+	--common-shakin: #99ff99;
+	--common-matari: #ff9966;
+	--common-shobon: #ccccff;
+	--common-uwan: #ff9999;
+	--common-kita: #ffff99;
+	--common-iknai: #99ff66;
+	--common-combo: #ffffff;
 	--common-score-x: #ffffff;
 
 	/* ステップゾーン */
@@ -113,11 +113,11 @@
 	--result-scoreHiPlus-x: #ffff99;
 	--result-noRecord-x: #999999;
 
-	--result-allPerfect-x: #ffffff;
-	--result-perfect-x: #ffffcc;
-	--result-fullCombo-x: #66ffff;
-	--result-cleared-x: #ffff66;
-	--result-failed-x: #ff6666;
+	--result-allPerfect: #ffffff;
+	--result-perfect: #ffffcc;
+	--result-fullCombo: #66ffff;
+	--result-cleared: #ffff66;
+	--result-failed: #ff6666;
 
 	/* 結果画面のCleared/Failedを表示している文字のサイズ */
 	--result-siz-window-x: 80px;

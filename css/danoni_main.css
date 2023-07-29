@@ -366,22 +366,22 @@ input[type="color"] {
 
 /* 設定別カラー */
 .settings_Title::first-letter {
-	color: var(--title-dancing-x, #6666ff);
+	background: var(--title-dancing, #6666ff);
 	font-size: var(--title-siz-x, 40px);
 }
 
 .settings_Title2::first-letter {
-	color: var(--title-onigiri-x, #ff6666);
+	background: var(--title-onigiri, #ff6666);
 	font-size: var(--title-siz-x, 40px);
 }
 
 .settings_TitleStar {
-	color: var(--title-star-x, #ffff66);
+	background: var(--title-star, #ffff66);
 	font-size: var(--title-siz-x, 40px);
 }
 
 .settings_Display::first-letter {
-	color: var(--title-display-x, #ffff66);
+	background: var(--title-display, #ffff66);
 	font-size: var(--title-siz-x, 40px);
 }
 
@@ -557,35 +557,35 @@ input[type="color"] {
 
 /* 結果画面：判定名 */
 .common_ii {
-	color: var(--common-ii-x, #66ffff);
+	background: var(--common-ii, #66ffff);
 }
 
 .common_shakin {
-	color: var(--common-shakin-x, #99ff99);
+	background: var(--common-shakin, #99ff99);
 }
 
 .common_matari {
-	color: var(--common-matari-x, #ff9966);
+	background: var(--common-matari, #ff9966);
 }
 
 .common_shobon {
-	color: var(--common-shobon-x, #ccccff);
+	background: var(--common-shobon, #ccccff);
 }
 
 .common_uwan {
-	color: var(--common-uwan-x, #ff9999);
+	background: var(--common-uwan, #ff9999);
 }
 
 .common_kita {
-	color: var(--common-kita-x, #ffff99);
+	background: var(--common-kita, #ffff99);
 }
 
 .common_iknai {
-	color: var(--common-iknai-x, #99ff66);
+	background: var(--common-iknai, #99ff66);
 }
 
 .common_combo {
-	color: var(--common-combo-x, #ffffff);
+	background: var(--common-combo, #ffffff);
 }
 
 .common_score {
@@ -623,23 +623,23 @@ input[type="color"] {
 
 /* 結果画面：完全PF、PF、FC、Cleared、Failed */
 .result_AllPerfect {
-	color: var(--result-allPerfect-x, #ffffff);
+	background: var(--result-allPerfect, #ffffff);
 }
 
 .result_Perfect {
-	color: var(--result-perfect-x, #ffffcc);
+	background: var(--result-perfect, #ffffcc);
 }
 
 .result_FullCombo {
-	color: var(--result-fullCombo-x, #66ffff);
+	background: var(--result-fullCombo, #66ffff);
 }
 
 .result_Cleared {
-	color: var(--result-cleared-x, #ffff66);
+	background: var(--result-cleared, #ffff66);
 }
 
 .result_Failed {
-	color: var(--result-failed-x, #ff6666);
+	background: var(--result-failed, #ff6666);
 }
 
 .result_Window::first-letter {
@@ -775,4 +775,26 @@ input[type="color"] {
 .button_DisabledON {
 	color: var(--button-color-onDisabled-x, #ffffff);
 	background: var(--button-bg-onDisabled, #009999);
+}
+
+.settings_Title::first-letter,
+.settings_Title2::first-letter,
+.settings_TitleStar,
+.settings_Display::first-letter,
+.common_ii,
+.common_shakin,
+.common_matari,
+.common_shobon,
+.common_uwan,
+.common_kita,
+.common_iknai,
+.common_combo,
+.result_AllPerfect,
+.result_Perfect,
+.result_FullCombo,
+.result_Cleared,
+.result_Failed {
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: rgba(255, 255, 255, 0.0);
 }
