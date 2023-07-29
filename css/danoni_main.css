@@ -771,13 +771,13 @@ input[type="color"] {
 
 /* ツイート */
 .button_Tweet {
-	color: var(--button-color-tweet-x, #ffffff);
-	background: var(--button-bg-tweet, #113333);
+	color: var(--button-color-sns-x, #ffffff);
+	background: var(--button-bg-sns, #113333);
 }
 
 .button_Tweet:hover {
-	color: var(--button-colorHover-tweet-x, #ffffff);
-	background: var(--button-bgHover-tweet, #009999);
+	color: var(--button-colorHover-sns-x, #ffffff);
+	background: var(--button-bgHover-sns, #009999);
 }
 
 /* ボタン：ON/OFF */

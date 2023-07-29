@@ -179,10 +179,10 @@
 	--button-colorHover-reset-x: #ffffff;
 
 	/* 外部SNSボタン */
-	--button-bg-tweet: #113333;
-	--button-color-tweet-x: #ffffff;
-	--button-bgHover-tweet: #009999;
-	--button-colorHover-tweet-x: #ffffff;
+	--button-bg-sns: #113333;
+	--button-color-sns-x: #ffffff;
+	--button-bgHover-sns: #009999;
+	--button-colorHover-sns-x: #ffffff;
 
 	/* ON/OFFボタン */
 	--button-color-off-x: #666666;
