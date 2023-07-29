@@ -620,12 +620,12 @@ input[type="color"] {
 	background: var(--common-diffSlow, var(--common-shobon));
 }
 
-.common_excessive {
-	background: var(--common-excessive, var(--common-kita));
-}
-
 .common_estAdj {
 	background: var(--common-estAdj, var(--common-shakin));
+}
+
+.common_excessive {
+	background: var(--common-excessive, var(--common-kita));
 }
 
 /* 結果画面：枠 */
@@ -829,8 +829,8 @@ input[type="color"] {
 .common_comboFJ,
 .common_diffFast,
 .common_diffSlow,
-.common_excessive,
 .common_estAdj,
+.common_excessive,
 .result_AllPerfect,
 .result_Perfect,
 .result_FullCombo,
