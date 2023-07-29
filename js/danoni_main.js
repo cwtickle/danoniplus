@@ -47,6 +47,7 @@ const current = _ => {
 	return targetScript.src;
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
+const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
 const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
 const g_randTime = Date.now();
 
@@ -768,31 +769,65 @@ const loadMultipleFiles2 = async (_fileData, _loadType) => {
 };
 
 /**
- * 入力されたパスを、ディレクトリとそれ以外に分割
+ * 与えられたパスより、キーワードとディレクトリに分割
  * 返却値：[ファイルキーワード, ルートディレクトリ]
- * @param {string} _path 
- * @param {number} _pos 
- * @param {string} _directory 
+ * @param {string} _fileName 
+ * @param {string} _directory
  */
-const getFolderAndType = (_path, _pos, _directory = ``) => {
-	const rootPath = (_directory === `` ? `` : g_rootPath);
-	return (_pos > 0 ? [_path.substring(_pos + 1), `${rootPath}${_path.substring(0, _pos)}/`] : [_path, `${rootPath}${_directory}`]);
+const getFilePath = (_fileName, _directory = ``) => {
+	let fullPath;
+	if (_fileName.startsWith(C_MRK_CURRENT_DIRECTORY)) {
+		fullPath = `${g_workPath}${_fileName.slice(C_MRK_CURRENT_DIRECTORY.length)}`;
+	} else {
+		fullPath = `${g_rootPath}${_directory}${_fileName}`;
+	}
+	const dirPos = fullPath.lastIndexOf(`/`);
+	return [fullPath.slice(dirPos + 1), fullPath.slice(0, dirPos + 1)];
+}
+
+/**
+ * 画像ファイルの存在チェック後、プリロードする処理
+ * @param {string} _imgPath 
+ * @param {string} directory
+ * @param {boolean} syncBackPath 
+ * @returns 
+ */
+const preloadImgFile = (_imgPath, { directory = ``, syncBackPath = true } = {}) => {
+
+	let imgPath = _imgPath;
+	if (g_headerObj.autoPreload) {
+		if (checkImage(_imgPath)) {
+			if (syncBackPath) {
+				const [file, dir] = getFilePath(_imgPath, directory);
+				imgPath = `${dir}${file}`;
+			}
+			preloadFile(`image`, imgPath);
+		}
+	}
+	return imgPath;
 };
 
 /**
- * 与えられたパスより、キーワードとディレクトリに分割
- * カレントディレクトリ指定がある場合を考慮して、処理を分けている
- * 返却値：[ファイルキーワード, ルートディレクトリ]
- * @param {string} _fileName 
- * @param {string} _directory 
+ * 画像パス部分の取得
+ * @param {string} _str 
+ * @returns 
  */
-const getFilePath = (_fileName, _directory = ``) => {
-	if (_fileName.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-		const tmpType = _fileName.split(C_MRK_CURRENT_DIRECTORY)[1];
-		return getFolderAndType(tmpType, tmpType.indexOf(`/`));
-	} else {
-		return getFolderAndType(_fileName, _fileName.lastIndexOf(`/`), _directory);
+const getImageUrlPath = _str => {
+	const matches = _str?.match(/url\("([^"]*)"\)/);
+	return matches && matches.length >= 2 ? matches[1] : ``;
+};
+
+/**
+ * カレントディレクトリを含む文字列を置換し、変更後の文字列を作成
+ * @param {string} _str  
+ */
+const reviseCssText = _str => {
+	if (getImageUrlPath(_str) !== ``) {
+		const imgOriginal = getImageUrlPath(_str);
+		const imgPath = preloadImgFile(imgOriginal);
+		return replaceStr(_str, [[imgOriginal, imgPath]]);
 	}
+	return _str;
 };
 
 /*-----------------------------------------------------------*/
@@ -890,7 +925,17 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : (_objType === `titleArrow` ? `40` : ``);
 
 	let convertColorStr = ``;
-	const tmpColorStr = _colorStr.split(`@`);
+	const tmpBackgroundStr = _colorStr.split(`;`);
+
+	// 色情報以外の部分を退避
+	const addData = tmpBackgroundStr[1] !== undefined ? tmpBackgroundStr.slice(1).join(` `) : ``;
+	if ([``, `-`, `none`].includes(tmpBackgroundStr[0]) ||
+		tmpBackgroundStr[0].startsWith(`url(`) || tmpBackgroundStr[0].startsWith(`var(`)) {
+		return addData;
+	}
+
+	// 色情報からグラデーションを作成
+	const tmpColorStr = tmpBackgroundStr[0].split(`@`);
 	const colorArray = tmpColorStr[0].split(`:`);
 	for (let j = 0; j < colorArray.length; j++) {
 		colorArray[j] = colorCdPadding(_colorCdPaddingUse, colorToHex(colorArray[j].replaceAll(`0x`, `#`)));
@@ -917,7 +962,7 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 		convertColorStr += `${colorArray.join(', ')}`;
 	}
 
-	return `${gradationType}(${convertColorStr})`;
+	return `${hasVal(addData) ? `${addData} ` : ''}${gradationType}(${convertColorStr})`;
 };
 
 /*-----------------------------------------------------------*/
@@ -1406,7 +1451,59 @@ const drawDefaultBackImage = _key => {
 	} else {
 		createEmptySprite(divRoot, `divBack`);
 	}
+
+	// CSSスタイルの初期化
+	Object.keys(g_cssBkProperties).forEach(prop =>
+		document.documentElement.style.setProperty(prop, g_cssBkProperties[prop]));
+
+	Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
+		document.documentElement.style.setProperty(prop, getCssCustomProperty(prop, g_headerObj[prop])));
+
 };
+
+/**
+ * CSSカスタムプロパティの値を作成
+ * @param {string} _prop 
+ * @param {string} _propData 
+ */
+const getCssCustomProperty = (_prop, _propData) =>
+	document.documentElement.style.getPropertyValue(_propData) !== `` ?
+		document.documentElement.style.getPropertyValue(_propData) :
+		g_cssBkProperties[_propData] !== undefined ?
+			g_cssBkProperties[_propData] :
+			_prop.endsWith(`-x`) ? _propData : reviseCssText(makeColorGradation(_propData, { _defaultColorgrd: false }));
+
+/**
+ * CSSカスタムプロパティの値をオブジェクトへ退避
+ */
+const getCssCustomProperties = _ => {
+	try {
+		const htmlStyle = document.documentElement.computedStyleMap();
+		for (const [propertyName, value] of htmlStyle.entries()) {
+			if (/^--/.test(propertyName)) {
+				g_cssBkProperties[propertyName] = value.toString();
+			}
+		}
+	} catch (error) {
+		// FirefoxではcomputedStyleMapが使えないため、
+		// CSSの全スタイルシート定義から :root がセレクタのルールを抽出し、カスタムプロパティを抽出
+		const sheets = document.styleSheets;
+		for (const sheet of sheets) {
+			if (!g_isFile && sheet.cssRules) {
+				for (const rule of sheet.cssRules) {
+					if (rule.selectorText === ':root') {
+						for (let i = 0; i < rule.style.length; i++) {
+							const propertyName = rule.style.item(i);
+							if (/^--/.test(propertyName)) {
+								g_cssBkProperties[propertyName] = rule.style.getPropertyValue(propertyName);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 /**
  * 背景・マスク用画像の描画
@@ -1450,7 +1547,7 @@ const makeSpriteText = _obj => {
  * @param {object, array} _obj 
  */
 const checkDuplicatedObjects = _obj => {
-	let addFrame = 0;
+	let dataCnts = 0;
 	if (_obj === undefined) {
 		_obj = [];
 		_obj[0] = [];
@@ -1458,17 +1555,17 @@ const checkDuplicatedObjects = _obj => {
 		for (let m = 1; ; m++) {
 			if (_obj[m] === undefined) {
 				_obj[m] = [];
-				addFrame = m;
+				dataCnts = m;
 				break;
 			}
 		}
 	}
-	return [_obj, addFrame];
+	return [_obj, dataCnts];
 };
 
 /**
  * 多層スプライトデータの作成処理
- * @param {array} _data 
+ * @param {string} _data 
  * @param {function} _calcFrame 
  */
 const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
@@ -1485,12 +1582,8 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 		}
 
 		// 値チェックとエスケープ処理
-		let tmpFrame;
-		if (setIntVal(tmpSpriteData[0], -1) === 0) {
-			tmpFrame = 0;
-		} else {
-			tmpFrame = roundZero(_calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC)));
-		}
+		const tmpFrame = setIntVal(tmpSpriteData[0], -1) === 0 ? 0 :
+			roundZero(_calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC)));
 		const tmpDepth = (tmpSpriteData[1] === C_FLG_ALL ? C_FLG_ALL : setVal(tmpSpriteData[1], 0, C_TYP_CALC));
 		if (tmpDepth !== C_FLG_ALL && tmpDepth > maxDepth) {
 			maxDepth = tmpDepth;
@@ -1512,23 +1605,15 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 		if (setVal(tmpSpriteData[11], g_presetObj.animationFillMode) !== undefined) {
 			tmpObj.animationFillMode = setVal(tmpSpriteData[11], g_presetObj.animationFillMode);
 		}
-		if (g_headerObj.autoPreload) {
-			if (checkImage(tmpObj.path)) {
-				if (g_headerObj.syncBackPath) {
-					const [file, dir] = getFilePath(tmpObj.path, `./`);
-					tmpObj.path = `${dir}${file}`;
-				}
-				preloadFile(`image`, tmpObj.path);
-			}
-		}
+		tmpObj.path = preloadImgFile(tmpObj.path, { syncBackPath: g_headerObj.syncBackPath });
 
-		let addFrame = 0;
-		[spriteData[tmpFrame], addFrame] =
+		let dataCnts = 0;
+		[spriteData[tmpFrame], dataCnts] =
 			checkDuplicatedObjects(spriteData[tmpFrame]);
 
 		const emptyPatterns = [``, `[loop]`, `[jump]`];
 		const colorObjFlg = tmpSpriteData[2]?.startsWith(`[c]`) || false;
-		const spriteFrameData = spriteData[tmpFrame][addFrame] = {
+		const spriteFrameData = spriteData[tmpFrame][dataCnts] = {
 			depth: tmpDepth,
 		};
 
@@ -1542,7 +1627,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				animationName: tmpObj.animationName,
 				animationDuration: `${tmpObj.animationDuration}s`,
 			};
-			spriteFrameData.colorObjId = `${tmpFrame}_${addFrame}`;
+			spriteFrameData.colorObjId = `${tmpFrame}_${dataCnts}`;
 			spriteFrameData.colorObjClass = setVal(tmpObj.class, undefined);
 			if (tmpObj.animationFillMode !== undefined) {
 				spriteFrameData.colorObjInfo.animationFillMode = tmpObj.animationFillMode;
@@ -1562,6 +1647,34 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 	});
 
 	return [spriteData, maxDepth];
+};
+
+/**
+ * スタイル変更データの作成処理
+ * @param {string} _data 
+ * @param {function} _calcFrame 
+ * @returns 
+ */
+const makeStyleData = (_data, _calcFrame = _frame => _frame) => {
+	const spriteData = [];
+	splitLF(_data).filter(data => hasVal(data)).forEach(tmpData => {
+		const tmpSpriteData = tmpData.split(`,`);
+
+		// カスタムプロパティの名称(--始まり)で無い場合はコメントと見做してスキップ
+		if (tmpSpriteData.length <= 1 || !tmpSpriteData[1].startsWith(`--`)) {
+			return;
+		}
+		const tmpFrame = setIntVal(tmpSpriteData[0], -1) === 0 ? 0 :
+			roundZero(_calcFrame(setVal(tmpSpriteData[0], 200, C_TYP_CALC)));
+
+		let dataCnts = 0;
+		[spriteData[tmpFrame], dataCnts] = checkDuplicatedObjects(spriteData[tmpFrame]);
+		spriteData[tmpFrame][dataCnts] = {
+			depth: tmpSpriteData[1],
+			styleData: getCssCustomProperty(tmpSpriteData[1], tmpSpriteData[2]),
+		};
+	});
+	return [spriteData, 1];
 };
 
 /**
@@ -1653,6 +1766,22 @@ const drawMainSpriteData = (_frame, _depthName) =>
 	g_scoreObj[`${_depthName}Data`][_frame].forEach(tmpObj => drawBaseSpriteData(tmpObj, _depthName));
 
 /**
+ * スタイル切替
+ * @param {number} _frame 
+ * @param {string} _displayName
+ */
+const drawStyleData = (_frame, _displayName) => {
+	g_headerObj[`style${toCapitalize(_displayName)}Data`][_frame].forEach(tmpObj =>
+		document.documentElement.style.setProperty(tmpObj.depth, tmpObj.styleData));
+
+	return _frame;
+};
+
+const drawMainStyleData = (_frame) =>
+	g_scoreObj.styleData[_frame].forEach(tmpObj =>
+		document.documentElement.style.setProperty(tmpObj.depth, tmpObj.styleData));
+
+/**
  * タイトル・リザルトモーションの描画
  * @param {string} _displayName
  */
@@ -1660,7 +1789,7 @@ const drawTitleResultMotion = _displayName => {
 	g_animationData.forEach(sprite => {
 		const spriteName = `${sprite}${toCapitalize(_displayName)}`;
 		if (g_headerObj[`${spriteName}Data`][g_scoreObj[`${spriteName}FrameNum`]] !== undefined) {
-			g_scoreObj[`${spriteName}FrameNum`] = drawSpriteData(g_scoreObj[`${spriteName}FrameNum`], _displayName, sprite);
+			g_scoreObj[`${spriteName}FrameNum`] = g_animationFunc.draw[sprite](g_scoreObj[`${spriteName}FrameNum`], _displayName, sprite);
 		}
 	});
 };
@@ -1863,7 +1992,7 @@ const initialControl = async () => {
 	await loadChartFile(0);
 
 	// 共通設定ファイルの指定
-	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType ?? ``, C_DIR_JS);
+	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType ?? ``);
 	if (settingType !== ``) {
 		settingType = `_${settingType}`;
 	}
@@ -2544,6 +2673,19 @@ const headerConvert = _dosObj => {
 	// ヘッダー群の格納先
 	const obj = {};
 
+	// 自動プリロードの設定
+	obj.autoPreload = setBoolVal(_dosObj.autoPreload, true);
+	g_headerObj.autoPreload = obj.autoPreload;
+
+	// デフォルトスタイルのバックアップ
+	getCssCustomProperties();
+
+	// 初期で変更するカスタムプロパティを設定
+	Object.keys(_dosObj).filter(val => val.startsWith(`--`) && hasVal(_dosObj[val])).forEach(prop => {
+		g_cssBkProperties[prop] = getCssCustomProperty(prop, _dosObj[prop]);
+		document.documentElement.style.setProperty(prop, g_cssBkProperties[prop]);
+	});
+
 	// フォントの設定
 	obj.customFont = _dosObj.customFont ?? ``;
 	g_headerObj.customFont = obj.customFont;
@@ -2890,10 +3032,6 @@ const headerConvert = _dosObj => {
 	// ハッシュタグ
 	obj.hashTag = _dosObj.hashTag ?? ``;
 
-	// 自動プリロードの設定
-	obj.autoPreload = setBoolVal(_dosObj.autoPreload, true);
-	g_headerObj.autoPreload = obj.autoPreload;
-
 	// 読込対象の画像を指定(rel:preload)と同じ
 	obj.preloadImages = [];
 	if (hasVal(_dosObj.preloadImages)) {
@@ -3064,7 +3202,7 @@ const headerConvert = _dosObj => {
 		const dataList = [_dosObj[`${sprite}title${g_localeObj.val}_data`], _dosObj[`${sprite}title_data`]];
 		const data = dataList.find((v) => v !== undefined);
 		if (hasVal(data)) {
-			[obj[`${sprite}TitleData`], obj[`${sprite}TitleMaxDepth`]] = makeSpriteData(data);
+			[obj[`${sprite}TitleData`], obj[`${sprite}TitleMaxDepth`]] = g_animationFunc.make[sprite](data);
 		}
 	});
 
@@ -3837,12 +3975,12 @@ const titleInit = _ => {
 
 	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
-	g_scoreObj.backTitleFrameNum = 0;
-	g_scoreObj.maskTitleFrameNum = 0;
 
-	// タイトル用ループカウンター
-	g_scoreObj.backTitleLoopCount = 0;
-	g_scoreObj.maskTitleLoopCount = 0;
+	// タイトルアニメーション用フレーム初期化、ループカウンター設定
+	g_animationData.forEach(sprite => {
+		g_scoreObj[`${sprite}TitleFrameNum`] = 0;
+		g_scoreObj[`${sprite}TitleLoopCount`] = 0;
+	});
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 
@@ -4086,15 +4224,14 @@ const titleInit = _ => {
 		// ユーザカスタムイベント(フレーム毎)
 		g_customJsObj.titleEnterFrame.forEach(func => func());
 
-		// 背景・マスクモーション
+		// 背景・マスクモーション、スキン変更
 		drawTitleResultMotion(g_currentPage);
 
 		thisTime = performance.now();
 		buffTime = thisTime - titleStartTime - g_scoreObj.titleFrameNum * 1000 / g_fps;
 
 		g_scoreObj.titleFrameNum++;
-		g_scoreObj.backTitleFrameNum++;
-		g_scoreObj.maskTitleFrameNum++;
+		g_animationData.forEach(sprite => g_scoreObj[`${sprite}TitleFrameNum`]++);
 		g_timeoutEvtTitleId = setTimeout(flowTitleTimeline, 1000 / g_fps - buffTime);
 	};
 
@@ -7421,7 +7558,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	/**
 	 * 歌詞表示、背景・マスクデータの優先順取得 
 	 */
-	const getPriorityHeader = _ => {
+	const getPriorityHeader = (_defaultHeaders = []) => {
+		if (_defaultHeaders.length > 0) {
+			return makeDedupliArray(_defaultHeaders);
+		}
+
 		const list = [];
 		const anotherKeyFlg = hasVal(g_keyObj[`transKey${_keyCtrlPtn}`]);
 		let type = ``;
@@ -7508,17 +7649,17 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					wordMaxDepth = tmpWordData[k + 1];
 				}
 
-				let addFrame = 0;
-				[wordData[tmpWordData[k]], addFrame] =
+				let dataCnts = 0;
+				[wordData[tmpWordData[k]], dataCnts] =
 					checkDuplicatedObjects(wordData[tmpWordData[k]]);
 
 				if (tmpWordData.length > 3 && tmpWordData.length < 6) {
 					tmpWordData[3] = setIntVal(tmpWordData[3], C_WOD_FRAME);
-					wordData[tmpWordData[0]][addFrame].push(tmpWordData[1],
+					wordData[tmpWordData[0]][dataCnts].push(tmpWordData[1],
 						escapeHtmlForEnabledTag(tmpWordData[2]), tmpWordData[3]);
 					break;
 				} else {
-					wordData[tmpWordData[k]][addFrame].push(tmpWordData[k + 1],
+					wordData[tmpWordData[k]][dataCnts].push(tmpWordData[k + 1],
 						escapeHtmlForEnabledTag(tmpWordData[k + 2] ?? ``));
 				}
 			}
@@ -7528,36 +7669,19 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	};
 
 	/**
-	 * 背景・マスクデータの分解
+	 * 背景・マスク、スキン変更データの分解
 	 * @param {string} _header 
-	 * @param {string} _scoreNo
-	 */
-	const makeBackgroundData = (_header, _scoreNo) => {
-		const dataList = [];
-		const addDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
-		getPriorityHeader().forEach(val => addDataList(val));
-
-		const data = dataList.find((v) => v !== undefined);
-		return (data !== undefined ? makeSpriteData(data, calcFrame) : [[], -1]);
-	};
-
-	/**
-	 * リザルトモーションデータ(結果画面用背景・マスクデータ)の分解
-	 * @param {string} _header 背景、マスク (back, mask)
-	 * @param {string} _resultType リザルトモーションの種類 (result, failedB, failedS)
 	 * @param {string} _scoreNo 譜面番号
-	 * @param {string} _defaultType _resultTypeが無いときの代替名
+	 * @param {array} resultTypes リザルトモーションの種類 (result, failedB, failedS)
 	 */
-	const makeBackgroundResultData = (_header, _resultType, _scoreNo, _defaultType = ``) => {
+	const makeBackgroundData = (_header, _scoreNo, { resultTypes = [] } = {}) => {
 		const dataList = [];
+		const calcFrameFunc = resultTypes.length > 0 ? calcFrame : undefined;
 		const addDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
-		addDataList(_resultType);
-		if (_defaultType !== ``) {
-			addDataList(_defaultType);
-		}
+		getPriorityHeader(resultTypes).forEach(val => addDataList(val));
 
 		const data = dataList.find((v) => v !== undefined);
-		return (data !== undefined ? makeSpriteData(data) : [[], -1]);
+		return (data !== undefined ? g_animationFunc.make[_header](data, calcFrameFunc) : [[], -1]);
 	};
 
 	// 速度変化データの分解 (2つで1セット)
@@ -7607,34 +7731,30 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		[obj.wordData, obj.wordMaxDepth] = makeWordData(scoreIdHeader);
 	}
 
-	// 背景・マスクデータの分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数, 階層, 背景パス, class(CSSで別定義), X, Y, width, height, opacity, animationName, animationDuration]
-	obj.maskData = [];
-	obj.maskMaxDepth = -1;
-	obj.backData = [];
-	obj.backMaxDepth = -1;
-	if (g_stateObj.d_background === C_FLG_OFF) {
-	} else {
-		g_animationData.forEach(sprite =>
-			[obj[`${sprite}Data`], obj[`${sprite}MaxDepth`]] = makeBackgroundData(sprite, scoreIdHeader));
-	}
+	// 背景・マスク・スキン変更データの分解 (下記すべてで1セット、改行区切り)
+	// - 背景・マスク: [フレーム数, 階層, 背景パス, class(CSSで別定義), X, Y, width, height, opacity, animationName, animationDuration, animationFillMode]
+	// - スキン変更  : [フレーム数, CSSカスタムプロパティ名, 設定内容]
+	g_animationData.forEach(sprite => {
+		obj[`${sprite}Data`] = [];
+		obj[`${sprite}MaxDepth`] = -1;
 
-	// 結果画面用・背景/マスクデータの分解 (下記すべてで1セット、改行区切り)
-	// [フレーム数,階層,背景パス,class(CSSで別定義),X,Y,width,height,opacity,animationName,animationDuration]
-	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
-		const backgroundResults = [`backResult`, `maskResult`, `backFailed`, `maskFailed`];
-		backgroundResults.forEach(backName => {
-			g_headerObj[`${backName}Data`] = [];
-			g_headerObj[`${backName}MaxDepth`] = -1;
-		});
-	} else {
-		g_animationData.forEach(sprite => {
+		if (g_stateObj.d_background === C_FLG_OFF) {
+		} else {
+			[obj[`${sprite}Data`], obj[`${sprite}MaxDepth`]] = makeBackgroundData(sprite, scoreIdHeader);
+		}
+
+		if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.resultMotionSet) {
+			[`Result`, `Failed`].forEach(backName => {
+				g_headerObj[`${backName}Data`] = [];
+				g_headerObj[`${backName}MaxDepth`] = -1;
+			});
+		} else {
 			[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] =
-				makeBackgroundResultData(sprite, `result`, scoreIdHeader);
+				makeBackgroundData(sprite, scoreIdHeader, { resultTypes: [`result`] });
 			[g_headerObj[`${sprite}FailedData`], g_headerObj[`${sprite}FailedMaxDepth`]] =
-				makeBackgroundResultData(sprite, `failed${g_stateObj.lifeMode.slice(0, 1)}`, scoreIdHeader, `result`);
-		});
-	}
+				makeBackgroundData(sprite, scoreIdHeader, { resultTypes: [`failed${g_stateObj.lifeMode.slice(0, 1)}`, `result`] });
+		}
+	});
 
 	// キー変化定義
 	obj.keychFrames = [0];
@@ -8040,6 +8160,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			word: (_exceptList, _j) => listMatching(_data[startNum][_j][1], _exceptList.word),
 			back: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.back),
 			mask: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.mask),
+			style: (_exceptList, _j) => listMatching(_data[startNum][_j].depth, _exceptList.style),
 		};
 
 		const getLength = _list =>
@@ -8603,11 +8724,11 @@ const mainInit = _ => {
 	// カラー・モーションを適用するオブジェクトの種類
 	const objList = (g_stateObj.dummyId === `` ? [``] : [`dummy`, ``]);
 
-	// 背景・マスクモーション(0フレーム指定)
+	// 背景・マスクモーション、スキン変更(0フレーム指定)
 	if (g_scoreObj.frameNum === 0) {
 		g_animationData.forEach(sprite => {
 			if (g_scoreObj[`${sprite}Data`][0] !== undefined) {
-				drawMainSpriteData(0, sprite);
+				g_animationFunc.drawMain[sprite](0, sprite);
 				g_scoreObj[`${sprite}Data`][0] = undefined;
 			}
 		});
@@ -8907,7 +9028,7 @@ const mainInit = _ => {
 				x: jdgX[j] + 170, y: jdgY[j],
 				w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.jdgCharaSiz,
 				opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
-			}, g_cssObj[`common_${jdgCombos[j]}`]),
+			}, g_cssObj[`common_combo${jdg}`]),
 
 			// Fast/Slow表示
 			createDivCss2Label(`diff${jdg}`, ``, {
@@ -9585,10 +9706,10 @@ const mainInit = _ => {
 			}
 		}
 
-		// 背景・マスクモーション
+		// 背景・マスクモーション、スキン変更
 		g_animationData.forEach(sprite => {
 			if (g_scoreObj[`${sprite}Data`][currentFrame] !== undefined) {
-				drawMainSpriteData(currentFrame, sprite);
+				g_animationFunc.drawMain[sprite](currentFrame, sprite);
 			}
 		});
 
@@ -10138,14 +10259,14 @@ const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames
 	g_workObj.diffList.push(_difFrame);
 	const difCnt = Math.abs(_difFrame);
 	if (_difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
-		diffJDisp = `<span class="common_kita">Excessive</span>`;
+		diffJDisp = `<span class="common_excessive">Excessive</span>`;
 		g_resultObj.excessive++;
 		lifeDamage(true);
 	} else if (_difFrame > _justFrames) {
-		diffJDisp = `<span class="common_matari">Fast ${difCnt} Frames</span>`;
+		diffJDisp = `<span class="common_diffFast">Fast ${difCnt} Frames</span>`;
 		g_resultObj.fast++;
 	} else if (_difFrame < _justFrames * (-1)) {
-		diffJDisp = `<span class="common_shobon">Slow ${difCnt} Frames</span>`;
+		diffJDisp = `<span class="common_diffSlow">Slow ${difCnt} Frames</span>`;
 		g_resultObj.slow++;
 	}
 	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
@@ -10371,12 +10492,12 @@ const resultInit = _ => {
 
 	// 結果画面用フレーム初期化
 	g_scoreObj.resultFrameNum = 0;
-	g_scoreObj.backResultFrameNum = 0;
-	g_scoreObj.maskResultFrameNum = 0;
 
-	// 結果画面用ループカウンター
-	g_scoreObj.backResultLoopCount = 0;
-	g_scoreObj.maskResultLoopCount = 0;
+	// リザルトアニメーション用フレーム初期化、ループカウンター設定
+	g_animationData.forEach(sprite => {
+		g_scoreObj[`${sprite}ResultFrameNum`] = 0;
+		g_scoreObj[`${sprite}ResultLoopCount`] = 0;
+	});
 
 	const divRoot = document.querySelector(`#divRoot`);
 
@@ -10394,14 +10515,14 @@ const resultInit = _ => {
 			g_animationData.forEach(sprite => {
 				const failedData = g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] ?? g_rootObj[`${sprite}failedS_data`];
 				if (failedData !== undefined) {
-					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = makeSpriteData(failedData);
+					[g_headerObj[`${sprite}ResultData`], g_headerObj[`${sprite}ResultMaxDepth`]] = g_animationFunc.make[sprite](failedData);
 				}
 			});
 		} else if (g_gameOverFlg) {
-			g_headerObj.backResultData = g_headerObj.backFailedData.concat();
-			g_headerObj.maskResultData = g_headerObj.maskFailedData.concat();
-			g_headerObj.backResultMaxDepth = g_headerObj.backFailedMaxDepth;
-			g_headerObj.maskResultMaxDepth = g_headerObj.maskFailedMaxDepth;
+			g_animationData.forEach(sprite => {
+				g_headerObj[`${sprite}ResultData`] = g_headerObj[`${sprite}FailedData`].concat();
+				g_headerObj[`${sprite}ResultMaxDepth`] = g_headerObj[`${sprite}FailedMaxDepth`];
+			});
 		}
 	}
 
@@ -10560,20 +10681,20 @@ const resultInit = _ => {
 		));
 	if (g_stateObj.autoAll === C_FLG_OFF) {
 		multiAppend(resultWindow,
-			makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_matari, 0, g_lblNameObj.j_fast),
-			makeCssResultSymbol(`lblSlow`, 350, g_cssObj.common_shobon, 2, g_lblNameObj.j_slow),
+			makeCssResultSymbol(`lblFast`, 350, g_cssObj.common_diffFast, 0, g_lblNameObj.j_fast),
+			makeCssResultSymbol(`lblSlow`, 350, g_cssObj.common_diffSlow, 2, g_lblNameObj.j_slow),
 			makeCssResultSymbol(`lblFastS`, 260, g_cssObj.score, 1, g_resultObj.fast, C_ALIGN_RIGHT),
 			makeCssResultSymbol(`lblSlowS`, 260, g_cssObj.score, 3, g_resultObj.slow, C_ALIGN_RIGHT),
 		);
 		if (estimatedAdj !== ``) {
 			multiAppend(resultWindow,
-				makeCssResultSymbol(`lblAdj`, 350, g_cssObj.common_shakin, 4, g_lblNameObj.j_adj),
+				makeCssResultSymbol(`lblAdj`, 350, g_cssObj.common_estAdj, 4, g_lblNameObj.j_adj),
 				makeCssResultSymbol(`lblAdjS`, 260, g_cssObj.score, 5, `${getDiffFrame(estimatedAdj)}`, C_ALIGN_RIGHT),
 			);
 		}
 		if (g_stateObj.excessive === C_FLG_ON) {
 			multiAppend(resultWindow,
-				makeCssResultSymbol(`lblExcessive`, 350, g_cssObj.common_kita, 6, g_lblNameObj.j_excessive),
+				makeCssResultSymbol(`lblExcessive`, 350, g_cssObj.common_excessive, 6, g_lblNameObj.j_excessive),
 				makeCssResultSymbol(`lblExcessiveS`, 260, g_cssObj.score, 7, g_resultObj.excessive, C_ALIGN_RIGHT),
 			);
 		}
@@ -10776,7 +10897,7 @@ const resultInit = _ => {
 	g_animationData.forEach(sprite => {
 		if (g_scoreObj[`${sprite}ResultFrameNum`] === 0) {
 			if (g_headerObj[`${sprite}ResultData`][0] !== undefined) {
-				g_scoreObj[`${sprite}ResultFrameNum`] = drawSpriteData(0, `result`, sprite);
+				g_scoreObj[`${sprite}ResultFrameNum`] = g_animationFunc.draw[sprite](0, `result`, sprite);
 				g_headerObj[`${sprite}ResultData`][0] = undefined;
 			}
 		}
@@ -10790,7 +10911,7 @@ const resultInit = _ => {
 		// ユーザカスタムイベント(フレーム毎)
 		g_customJsObj.resultEnterFrame.forEach(func => func());
 
-		// 背景・マスクモーション
+		// 背景・マスクモーション、スキン変更
 		drawTitleResultMotion(g_currentPage);
 
 		// リザルト画面移行後のフェードアウト処理
@@ -10813,8 +10934,7 @@ const resultInit = _ => {
 		buffTime = thisTime - resultStartTime - g_scoreObj.resultFrameNum * 1000 / g_fps;
 
 		g_scoreObj.resultFrameNum++;
-		g_scoreObj.backResultFrameNum++;
-		g_scoreObj.maskResultFrameNum++;
+		g_animationData.forEach(sprite => g_scoreObj[`${sprite}ResultFrameNum`]++);
 		g_timeoutEvtResultId = setTimeout(flowResultTimeline, 1000 / g_fps - buffTime);
 	};
 	flowResultTimeline();
