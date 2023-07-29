@@ -359,6 +359,18 @@ input[type="color"] {
 	background: var(--background, linear-gradient(#000000, #222222));
 }
 
+#scoreDetail {
+	background: var(--back-chartDetail, var(--background));
+}
+
+#difCover {
+	background: var(--back-difCover, var(--background));
+}
+
+#difList {
+	background: var(--back-difList, var(--back-difCover, var(--background)));
+}
+
 /* タイトル */
 .title_base {
 	color: var(--title-base, #cccccc);

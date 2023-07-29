@@ -13,6 +13,9 @@
 :root {
 	/* 背景 */
 	--background: linear-gradient(#dddddd, #ffffff);
+	/* --back-chartDetail: var(--background); */
+	/* --back-difCover: var(--background); */
+	/* --back-difList: var(--back-difCover, var(--background)); */
 
 	/* タイトル共通色 */
 	--title-base: #222222;
