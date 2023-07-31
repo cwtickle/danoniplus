@@ -10929,7 +10929,7 @@ const resultInit = _ => {
 			}
 		}
 		drawText(rankMark, { x: 240, hy: 17, siz: 50, color: rankColor, font: `"Bookman Old Style"` });
-		drawText(baseTwitUrl, { x: 30, hy: 18 });
+		drawText(baseTwitUrl, { x: 30, hy: 18, siz: 8 });
 		drawText(new Date().toLocaleString(), { x: 30, hy: 19 });
 
 		divRoot.appendChild(resultImageObj);
