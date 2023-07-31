@@ -10823,6 +10823,7 @@ const resultInit = _ => {
 	}
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
+	const baseTwitUrl = g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``);
 
 	const tweetExcessive = (g_stateObj.excessive === C_FLG_ON) ? `(+${g_resultObj.excessive})` : ``;
 
@@ -10844,7 +10845,7 @@ const resultInit = _ => {
 		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}${tweetExcessive}`],
 		[`[frzJdg]`, tweetFrzJdg],
 		[`[maxCombo]`, tweetMaxCombo],
-		[`[url]`, g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``)]
+		[`[url]`, baseTwitUrl]
 	]);
 	if (g_presetObj.resultVals !== undefined) {
 		Object.keys(g_presetObj.resultVals).forEach(key =>
@@ -10852,6 +10853,113 @@ const resultInit = _ => {
 	}
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
+
+	// クリップボードコピー
+	const copyResultImageData = _msg => {
+		const resultImageObj = document.createElement(`canvas`);
+
+		resultImageObj.id = `resultImage`;
+		resultImageObj.width = 400;
+		resultImageObj.height = 400;
+		resultImageObj.style.left = `100px`;
+		resultImageObj.style.top = `5px`;
+		resultImageObj.style.position = `absolute`;
+		resultImageObj.style.opacity = 0;
+
+		const context = resultImageObj.getContext(`2d`);
+		const drawText = (_text, { x, dx = 0, hy, siz = 15, color = `#cccccc`, align = C_ALIGN_LEFT, font } = {}) => {
+			context.font = `${siz}px ${getBasicFont(font)}`;
+			context.fillStyle = color;
+			context.textAlign = align;
+			context.fillText(_text, x, 35 + hy * 18 + dx);
+		};
+		const grd = context.createLinearGradient(0, 0, 0, resultImageObj.height);
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		context.fillStyle = grd;
+		context.fillRect(0, 0, g_sWidth, g_sHeight);
+
+		drawText(`R`, { x: 30, dx: -5, hy: 0, siz: 40, color: `#9999ff` });
+		drawText(`ESULT`, { x: 57, dx: -5, hy: 0, siz: 25 });
+		drawText(`${g_lblNameObj.dancing}${g_lblNameObj.star}${g_lblNameObj.onigiri}`,
+			{ x: 280, dx: -15, hy: 0, siz: 20, color: `#999999`, align: C_ALIGN_CENTER });
+		drawText(mTitleForView[0], { x: 30, hy: 1 });
+		drawText(mTitleForView[1], { x: 30, hy: 2 });
+		drawText(difData, { x: 30, hy: 3 });
+		drawText(playStyleData, { x: 30, hy: 4 });
+
+		drawText(g_lblNameObj.j_ii, { x: 30, hy: 6, color: `#66ffff` });
+		drawText(g_resultObj.ii, { x: 200, hy: 6, align: C_ALIGN_RIGHT });
+		drawText(g_lblNameObj.j_shakin, { x: 30, hy: 7, color: `#99ff99` });
+		drawText(g_resultObj.shakin, { x: 200, hy: 7, align: C_ALIGN_RIGHT });
+		drawText(g_lblNameObj.j_matari, { x: 30, hy: 8, color: `#ff9966` });
+		drawText(g_resultObj.matari, { x: 200, hy: 8, align: C_ALIGN_RIGHT });
+		drawText(g_lblNameObj.j_shobon, { x: 30, hy: 9, color: `#ccccff` });
+		drawText(g_resultObj.shobon, { x: 200, hy: 9, align: C_ALIGN_RIGHT });
+		drawText(g_lblNameObj.j_uwan, { x: 30, hy: 10, color: `#ff9999` });
+		drawText(g_resultObj.uwan, { x: 200, hy: 10, align: C_ALIGN_RIGHT });
+		drawText(g_lblNameObj.j_kita, { x: 30, hy: 11, color: `#ffff99` });
+		drawText(g_resultObj.kita, { x: 200, hy: 11, align: C_ALIGN_RIGHT });
+		drawText(g_lblNameObj.j_iknai, { x: 30, hy: 12, color: `#99ff66` });
+		drawText(g_resultObj.iknai, { x: 200, hy: 12, align: C_ALIGN_RIGHT });
+		drawText(g_lblNameObj.j_maxCombo, { x: 30, hy: 13, color: `#ffffff` });
+		drawText(g_resultObj.maxCombo, { x: 200, hy: 13, align: C_ALIGN_RIGHT });
+		drawText(g_lblNameObj.j_fmaxCombo, { x: 30, hy: 14, color: `#ffffff` });
+		drawText(g_resultObj.fmaxCombo, { x: 200, hy: 14, align: C_ALIGN_RIGHT });
+		drawText(g_lblNameObj.j_score, { x: 30, hy: 16, color: `#ffffff` });
+		drawText(g_resultObj.score, { x: 200, hy: 16, align: C_ALIGN_RIGHT });
+
+		if (highscoreCondition) {
+			drawText(`(${highscoreDfObj.score >= 0 ? '+' : '-'} ${Math.abs(highscoreDfObj.score)})`,
+				{ x: 206, hy: 17, color: highscoreDfObj.score > 0 ? `#ffff99` : `#cccccc`, align: C_ALIGN_RIGHT });
+		}
+
+		if (g_stateObj.autoAll === C_FLG_OFF) {
+			drawText(g_lblNameObj.j_fast, { x: 240, hy: 6, color: `#ff9966` });
+			drawText(g_resultObj.fast, { x: 360, hy: 6, align: C_ALIGN_RIGHT });
+			drawText(g_lblNameObj.j_slow, { x: 240, hy: 7, color: `#ccccff` });
+			drawText(g_resultObj.slow, { x: 360, hy: 7, align: C_ALIGN_RIGHT });
+			if (estimatedAdj !== ``) {
+				drawText(g_lblNameObj.j_adj, { x: 240, hy: 8, color: `#99ff99` });
+				drawText(getDiffFrame(estimatedAdj), { x: 360, hy: 8, align: C_ALIGN_RIGHT });
+			}
+			if (g_stateObj.excessive === C_FLG_ON) {
+				drawText(g_lblNameObj.j_excessive, { x: 240, hy: 9, color: `#ffff99` });
+				drawText(g_resultObj.excessive, { x: 360, hy: 9, align: C_ALIGN_RIGHT });
+			}
+		}
+		drawText(rankMark, { x: 240, hy: 17, siz: 50, color: rankColor, font: `"Bookman Old Style"` });
+		drawText(baseTwitUrl, { x: 30, hy: 18 });
+		drawText(new Date().toLocaleString(), { x: 30, hy: 19 });
+
+		divRoot.appendChild(resultImageObj);
+
+		// Canvas の内容を PNG 画像として取得
+		let png = resultImageObj.toDataURL('image/png');
+		png = png.replace(/^.*,/, '');
+
+		// バイナリ変換
+		const bin = atob(png);
+		const buffer = new Uint8Array(bin.length);
+		for (let i = 0; i < bin.length; i++) {
+			buffer[i] = bin.charCodeAt(i);
+		}
+		// イメージバッファから Blob を生成
+		const blob = new Blob([buffer], { type: 'image/png' });
+
+		try {
+			navigator.clipboard.write([
+				new ClipboardItem({
+					'image/png': blob
+				})
+			]);
+
+		} catch (err) {
+			console.log(err);
+		} finally {
+			makeInfoWindow(_msg, `leftToRightFade`);
+		}
+	};
 
 	/** 音源、ループ処理の停止 */
 	const resetCommonBtn = (_id, _name, _posObj, _func, _cssClass) =>
@@ -10885,6 +10993,11 @@ const resultInit = _ => {
 
 		// リトライ
 		resetCommonBtn(`btnRetry`, g_lblNameObj.b_retry, g_lblPosObj.btnRsRetry, loadMusic, g_cssObj.button_Reset),
+
+		createCss2Button(`btnCopyImage`, `📷`, _ => true,
+			Object.assign(g_lblPosObj.btnRsCopyImage, {
+				resetFunc: _ => copyResultImageData(g_msgInfoObj.I_0001),
+			}), g_cssObj.button_Default_NoColor),
 	);
 
 	// マスクスプライトを作成

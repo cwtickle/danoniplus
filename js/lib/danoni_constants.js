@@ -431,6 +431,9 @@ const updateWindowSiz = _ => {
         btnRsRetry: {
             x: g_sWidth / 4 * 3, w: g_sWidth / 4, h: g_limitObj.btnHeight * 5 / 4, animationName: `smallToNormalY`,
         },
+        btnRsCopyImage: {
+            x: g_sWidth - 40, y: 0, w: 40, h: 40, siz: 30,
+        },
     });
 };
 
@@ -1522,6 +1525,7 @@ const g_shortcutObj = {
         KeyC: { id: `btnCopy`, reset: true },
         KeyT: { id: `btnTweet`, reset: true },
         KeyG: { id: `btnGitter`, reset: true },
+        KeyP: { id: `btnCopyImage` },
         Backspace: { id: `btnRetry` },
     },
 };
