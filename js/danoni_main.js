@@ -10661,16 +10661,16 @@ const resultInit = _ => {
 
 	// キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
 	const jdgScoreObj = {
-		ii: { pos: 0, id: `Ii`, color: `ii`, label: g_lblNameObj.j_ii, },
-		shakin: { pos: 1, id: `Shakin`, color: `shakin`, label: g_lblNameObj.j_shakin, },
-		matari: { pos: 2, id: `Matari`, color: `matari`, label: g_lblNameObj.j_matari, },
-		shobon: { pos: 3, id: `Shobon`, color: `shobon`, label: g_lblNameObj.j_shobon, },
-		uwan: { pos: 4, id: `Uwan`, color: `uwan`, label: g_lblNameObj.j_uwan, },
-		kita: { pos: 5, id: `Kita`, color: `kita`, label: g_lblNameObj.j_kita, },
-		iknai: { pos: 6, id: `Iknai`, color: `iknai`, label: g_lblNameObj.j_iknai, },
-		maxCombo: { pos: 7, id: `MCombo`, color: `combo`, label: g_lblNameObj.j_maxCombo, },
-		fmaxCombo: { pos: 8, id: `FCombo`, color: `combo`, label: g_lblNameObj.j_fmaxCombo, },
-		score: { pos: 10, id: `Score`, color: `score`, label: g_lblNameObj.j_score, },
+		ii: { pos: 0, id: `Ii`, color: `ii`, label: g_lblNameObj.j_ii, dfColor: `#66ffff`, },
+		shakin: { pos: 1, id: `Shakin`, color: `shakin`, label: g_lblNameObj.j_shakin, dfColor: `#99ff99`, },
+		matari: { pos: 2, id: `Matari`, color: `matari`, label: g_lblNameObj.j_matari, dfColor: `#ff9966`, },
+		shobon: { pos: 3, id: `Shobon`, color: `shobon`, label: g_lblNameObj.j_shobon, dfColor: `#ccccff`, },
+		uwan: { pos: 4, id: `Uwan`, color: `uwan`, label: g_lblNameObj.j_uwan, dfColor: `#ff9999`, },
+		kita: { pos: 5, id: `Kita`, color: `kita`, label: g_lblNameObj.j_kita, dfColor: `#ffff99`, },
+		iknai: { pos: 6, id: `Iknai`, color: `iknai`, label: g_lblNameObj.j_iknai, dfColor: `#99ff66`, },
+		maxCombo: { pos: 7, id: `MCombo`, color: `combo`, label: g_lblNameObj.j_maxCombo, dfColor: `#ffffff`, },
+		fmaxCombo: { pos: 8, id: `FCombo`, color: `combo`, label: g_lblNameObj.j_fmaxCombo, dfColor: `#ffffff`, },
+		score: { pos: 10, id: `Score`, color: `score`, label: g_lblNameObj.j_score, dfColor: `#ffffff`, },
 	};
 
 	// キャラクタ、スコア描画
@@ -10857,10 +10857,11 @@ const resultInit = _ => {
 	// クリップボードコピー
 	const copyResultImageData = _msg => {
 		const resultImageObj = document.createElement(`canvas`);
+		const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 
 		resultImageObj.id = `resultImage`;
 		resultImageObj.width = 400;
-		resultImageObj.height = 400;
+		resultImageObj.height = 410;
 		resultImageObj.style.left = `100px`;
 		resultImageObj.style.top = `5px`;
 		resultImageObj.style.position = `absolute`;
@@ -10885,52 +10886,37 @@ const resultInit = _ => {
 			{ x: 280, dx: -15, hy: 0, siz: 20, color: `#999999`, align: C_ALIGN_CENTER });
 		drawText(mTitleForView[0], { x: 30, hy: 1 });
 		drawText(mTitleForView[1], { x: 30, hy: 2 });
-		drawText(difData, { x: 30, hy: 3 });
-		drawText(playStyleData, { x: 30, hy: 4 });
+		drawText(`📝 ${g_headerObj.tuning} / 🎵 ${artistName}`, { x: 30, hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
+		drawText(difData, { x: 30, hy: 4 });
+		drawText(playStyleData, { x: 30, hy: 5 });
 
-		drawText(g_lblNameObj.j_ii, { x: 30, hy: 6, color: `#66ffff` });
-		drawText(g_resultObj.ii, { x: 200, hy: 6, align: C_ALIGN_RIGHT });
-		drawText(g_lblNameObj.j_shakin, { x: 30, hy: 7, color: `#99ff99` });
-		drawText(g_resultObj.shakin, { x: 200, hy: 7, align: C_ALIGN_RIGHT });
-		drawText(g_lblNameObj.j_matari, { x: 30, hy: 8, color: `#ff9966` });
-		drawText(g_resultObj.matari, { x: 200, hy: 8, align: C_ALIGN_RIGHT });
-		drawText(g_lblNameObj.j_shobon, { x: 30, hy: 9, color: `#ccccff` });
-		drawText(g_resultObj.shobon, { x: 200, hy: 9, align: C_ALIGN_RIGHT });
-		drawText(g_lblNameObj.j_uwan, { x: 30, hy: 10, color: `#ff9999` });
-		drawText(g_resultObj.uwan, { x: 200, hy: 10, align: C_ALIGN_RIGHT });
-		drawText(g_lblNameObj.j_kita, { x: 30, hy: 11, color: `#ffff99` });
-		drawText(g_resultObj.kita, { x: 200, hy: 11, align: C_ALIGN_RIGHT });
-		drawText(g_lblNameObj.j_iknai, { x: 30, hy: 12, color: `#99ff66` });
-		drawText(g_resultObj.iknai, { x: 200, hy: 12, align: C_ALIGN_RIGHT });
-		drawText(g_lblNameObj.j_maxCombo, { x: 30, hy: 13, color: `#ffffff` });
-		drawText(g_resultObj.maxCombo, { x: 200, hy: 13, align: C_ALIGN_RIGHT });
-		drawText(g_lblNameObj.j_fmaxCombo, { x: 30, hy: 14, color: `#ffffff` });
-		drawText(g_resultObj.fmaxCombo, { x: 200, hy: 14, align: C_ALIGN_RIGHT });
-		drawText(g_lblNameObj.j_score, { x: 30, hy: 16, color: `#ffffff` });
-		drawText(g_resultObj.score, { x: 200, hy: 16, align: C_ALIGN_RIGHT });
+		Object.keys(jdgScoreObj).forEach(score => {
+			drawText(g_lblNameObj[`j_${score}`], { x: 30, hy: 7 + jdgScoreObj[score].pos, color: jdgScoreObj[score].dfColor });
+			drawText(g_resultObj[score], { x: 200, hy: 7 + jdgScoreObj[score].pos, align: C_ALIGN_RIGHT });
+		});
 
 		if (highscoreCondition) {
 			drawText(`(${highscoreDfObj.score >= 0 ? '+' : '-'} ${Math.abs(highscoreDfObj.score)})`,
-				{ x: 206, hy: 17, color: highscoreDfObj.score > 0 ? `#ffff99` : `#cccccc`, align: C_ALIGN_RIGHT });
+				{ x: 206, hy: 18, color: highscoreDfObj.score > 0 ? `#ffff99` : `#cccccc`, align: C_ALIGN_RIGHT });
 		}
 
 		if (g_stateObj.autoAll === C_FLG_OFF) {
-			drawText(g_lblNameObj.j_fast, { x: 240, hy: 6, color: `#ff9966` });
-			drawText(g_resultObj.fast, { x: 360, hy: 6, align: C_ALIGN_RIGHT });
-			drawText(g_lblNameObj.j_slow, { x: 240, hy: 7, color: `#ccccff` });
-			drawText(g_resultObj.slow, { x: 360, hy: 7, align: C_ALIGN_RIGHT });
+			drawText(g_lblNameObj.j_fast, { x: 240, hy: 7, color: `#ff9966` });
+			drawText(g_resultObj.fast, { x: 360, hy: 7, align: C_ALIGN_RIGHT });
+			drawText(g_lblNameObj.j_slow, { x: 240, hy: 8, color: `#ccccff` });
+			drawText(g_resultObj.slow, { x: 360, hy: 8, align: C_ALIGN_RIGHT });
 			if (estimatedAdj !== ``) {
-				drawText(g_lblNameObj.j_adj, { x: 240, hy: 8, color: `#99ff99` });
-				drawText(getDiffFrame(estimatedAdj), { x: 360, hy: 8, align: C_ALIGN_RIGHT });
+				drawText(g_lblNameObj.j_adj, { x: 240, hy: 9, color: `#99ff99` });
+				drawText(getDiffFrame(estimatedAdj), { x: 360, hy: 9, align: C_ALIGN_RIGHT });
 			}
 			if (g_stateObj.excessive === C_FLG_ON) {
-				drawText(g_lblNameObj.j_excessive, { x: 240, hy: 9, color: `#ffff99` });
-				drawText(g_resultObj.excessive, { x: 360, hy: 9, align: C_ALIGN_RIGHT });
+				drawText(g_lblNameObj.j_excessive, { x: 240, hy: 10, color: `#ffff99` });
+				drawText(g_resultObj.excessive, { x: 360, hy: 10, align: C_ALIGN_RIGHT });
 			}
 		}
-		drawText(rankMark, { x: 240, hy: 17, siz: 50, color: rankColor, font: `"Bookman Old Style"` });
-		drawText(baseTwitUrl, { x: 30, hy: 18, siz: 8 });
-		drawText(new Date().toLocaleString(), { x: 30, hy: 19 });
+		drawText(rankMark, { x: 240, hy: 18, siz: 50, color: rankColor, font: `"Bookman Old Style"` });
+		drawText(baseTwitUrl, { x: 30, hy: 19, siz: 8 });
+		drawText(new Date().toLocaleString(), { x: 30, hy: 20 });
 
 		divRoot.appendChild(resultImageObj);
 
