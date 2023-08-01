@@ -10856,25 +10856,25 @@ const resultInit = _ => {
 
 	// クリップボードコピー
 	const copyResultImageData = _msg => {
-		const resultImageObj = document.createElement(`canvas`);
+		const canvas = document.createElement(`canvas`);
 		const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 
-		resultImageObj.id = `resultImage`;
-		resultImageObj.width = 400;
-		resultImageObj.height = 410;
-		resultImageObj.style.left = `100px`;
-		resultImageObj.style.top = `5px`;
-		resultImageObj.style.position = `absolute`;
-		resultImageObj.style.opacity = 0;
+		canvas.id = `resultImage`;
+		canvas.width = 400;
+		canvas.height = 410;
+		canvas.style.left = `100px`;
+		canvas.style.top = `5px`;
+		canvas.style.position = `absolute`;
+		canvas.style.opacity = 0;
 
-		const context = resultImageObj.getContext(`2d`);
+		const context = canvas.getContext(`2d`);
 		const drawText = (_text, { x, dx = 0, hy, siz = 15, color = `#cccccc`, align = C_ALIGN_LEFT, font } = {}) => {
 			context.font = `${siz}px ${getBasicFont(font)}`;
 			context.fillStyle = color;
 			context.textAlign = align;
 			context.fillText(_text, x, 35 + hy * 18 + dx);
 		};
-		const grd = context.createLinearGradient(0, 0, 0, resultImageObj.height);
+		const grd = context.createLinearGradient(0, 0, 0, canvas.height);
 		grd.addColorStop(0, `#000000`);
 		grd.addColorStop(1, `#222222`);
 		context.fillStyle = grd;
@@ -10918,31 +10918,52 @@ const resultInit = _ => {
 		drawText(baseTwitUrl, { x: 30, hy: 19, siz: 8 });
 		drawText(new Date().toLocaleString(), { x: 30, hy: 20 });
 
-		divRoot.appendChild(resultImageObj);
-
-		// Canvas の内容を PNG 画像として取得
-		let png = resultImageObj.toDataURL('image/png');
-		png = png.replace(/^.*,/, '');
-
-		// バイナリ変換
-		const bin = atob(png);
-		const buffer = new Uint8Array(bin.length);
-		for (let i = 0; i < bin.length; i++) {
-			buffer[i] = bin.charCodeAt(i);
-		}
-		// イメージバッファから Blob を生成
-		const blob = new Blob([buffer], { type: 'image/png' });
+		divRoot.appendChild(canvas);
 
 		try {
-			navigator.clipboard.write([
-				new ClipboardItem({
-					'image/png': blob
-				})
-			]);
+			if (ClipboardItem === undefined) {
+				throw new Error(`error`);
+			}
+			// Canvas の内容を PNG 画像として取得
+			canvas.toBlob(async blob => {
+				await navigator.clipboard.write([
+					new ClipboardItem({
+						'image/png': blob
+					})
+				]);
+			});
 
 		} catch (err) {
-			console.log(err);
+			const selectText = _element => {
+				if (document.body.createTextRange) {
+					const range = document.body.createTextRange();
+					range.moveToElementText(_element);
+					range.select();
+				} else if (window.getSelection) {
+					const selection = window.getSelection();
+					const range = document.createRange();
+					range.selectNodeContents(_element);
+					selection.removeAllRanges();
+					selection.addRange(range);
+				}
+			};
+			const img = document.createElement(`img`);
+			img.src = canvas.toDataURL();
+			document.body.appendChild(img);
+
+			const div = document.createElement(`div`);
+			div.contentEditable = true;
+			div.appendChild(img);
+			document.body.appendChild(div);
+
+			selectText(div);
+			document.execCommand(`copy`);
+			window.getSelection().removeAllRanges();
+			div.contentEditable = false;
+			document.body.removeChild(div);
+
 		} finally {
+			divRoot.removeChild(canvas);
 			makeInfoWindow(_msg, `leftToRightFade`);
 		}
 	};
