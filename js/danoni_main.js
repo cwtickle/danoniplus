@@ -10853,6 +10853,7 @@ const resultInit = _ => {
 	}
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
+	const currentDateTime = new Date().toLocaleString();
 
 	// クリップボードコピー
 	const copyResultImageData = _msg => {
@@ -10865,7 +10866,6 @@ const resultInit = _ => {
 		canvas.style.left = `100px`;
 		canvas.style.top = `5px`;
 		canvas.style.position = `absolute`;
-		canvas.style.opacity = 0;
 
 		const context = canvas.getContext(`2d`);
 		const drawText = (_text, { x, dx = 0, hy, siz = 15, color = `#cccccc`, align = C_ALIGN_LEFT, font } = {}) => {
@@ -10916,7 +10916,7 @@ const resultInit = _ => {
 		}
 		drawText(rankMark, { x: 240, hy: 18, siz: 50, color: rankColor, font: `"Bookman Old Style"` });
 		drawText(baseTwitUrl, { x: 30, hy: 19, siz: 8 });
-		drawText(new Date().toLocaleString(), { x: 30, hy: 20 });
+		drawText(currentDateTime, { x: 30, hy: 20 });
 
 		divRoot.appendChild(canvas);
 
@@ -10932,38 +10932,28 @@ const resultInit = _ => {
 					})
 				]);
 			});
+			divRoot.removeChild(canvas);
 
 		} catch (err) {
-			const selectText = _element => {
-				if (document.body.createTextRange) {
-					const range = document.body.createTextRange();
-					range.moveToElementText(_element);
-					range.select();
-				} else if (window.getSelection) {
-					const selection = window.getSelection();
-					const range = document.createRange();
-					range.selectNodeContents(_element);
-					selection.removeAllRanges();
-					selection.addRange(range);
-				}
-			};
+			divRoot.removeChild(canvas);
 			const img = document.createElement(`img`);
 			img.src = canvas.toDataURL();
-			document.body.appendChild(img);
 
 			const div = document.createElement(`div`);
 			div.contentEditable = true;
 			div.appendChild(img);
-			document.body.appendChild(div);
+			divRoot.appendChild(div);
 
-			selectText(div);
+			const selection = window.getSelection();
+			const range = document.createRange();
+			range.selectNodeContents(div);
+			selection.removeAllRanges();
+			selection.addRange(range);
+
 			document.execCommand(`copy`);
-			window.getSelection().removeAllRanges();
-			div.contentEditable = false;
-			document.body.removeChild(div);
+			divRoot.removeChild(div);
 
 		} finally {
-			divRoot.removeChild(canvas);
 			makeInfoWindow(_msg, `leftToRightFade`);
 		}
 	};
