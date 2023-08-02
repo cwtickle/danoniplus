@@ -10855,7 +10855,10 @@ const resultInit = _ => {
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
 	const currentDateTime = new Date().toLocaleString();
 
-	// クリップボードコピー
+	/**
+	 * リザルト画像をCanvasで作成しクリップボードへコピー
+	 * @param {string} _msg 
+	 */
 	const copyResultImageData = _msg => {
 		const tmpDiv = createEmptySprite(divRoot, `tmpDiv`, { x: 0, y: 0, w: g_sWidth, h: g_sHeight });
 		tmpDiv.style.background = `#000000cc`;
@@ -10939,6 +10942,7 @@ const resultInit = _ => {
 			makeInfoWindow(_msg, `leftToRightFade`);
 
 		} catch (err) {
+			// 画像をクリップボードへコピーできないときは代替で画像保存可能な画面を表示
 			if (document.getElementById(`tmpClose`) === null) {
 				divRoot.oncontextmenu = _ => true;
 				makeLinkButton(tmpDiv, `Tmp`);
