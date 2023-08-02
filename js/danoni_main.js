@@ -10857,14 +10857,16 @@ const resultInit = _ => {
 
 	// クリップボードコピー
 	const copyResultImageData = _msg => {
+		const tmpDiv = createEmptySprite(divRoot, `tmpDiv`, { x: 0, y: 0, w: g_sWidth, h: g_sHeight });
+		tmpDiv.style.background = `#000000cc`;
 		const canvas = document.createElement(`canvas`);
 		const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 
 		canvas.id = `resultImage`;
 		canvas.width = 400;
 		canvas.height = 410;
-		canvas.style.left = `100px`;
-		canvas.style.top = `5px`;
+		canvas.style.left = `${(g_sWidth - canvas.width) / 2}px`;
+		canvas.style.top = `20px`;
 		canvas.style.position = `absolute`;
 
 		const context = canvas.getContext(`2d`);
@@ -10918,7 +10920,7 @@ const resultInit = _ => {
 		drawText(baseTwitUrl, { x: 30, hy: 19, siz: 8 });
 		drawText(currentDateTime, { x: 30, hy: 20 });
 
-		divRoot.appendChild(canvas);
+		tmpDiv.appendChild(canvas);
 
 		try {
 			if (ClipboardItem === undefined) {
@@ -10932,29 +10934,24 @@ const resultInit = _ => {
 					})
 				]);
 			});
-			divRoot.removeChild(canvas);
+			tmpDiv.removeChild(canvas);
+			divRoot.removeChild(tmpDiv);
+			makeInfoWindow(_msg, `leftToRightFade`);
 
 		} catch (err) {
-			divRoot.removeChild(canvas);
-			const img = document.createElement(`img`);
-			img.src = canvas.toDataURL();
-
-			const div = document.createElement(`div`);
-			div.contentEditable = true;
-			div.appendChild(img);
-			divRoot.appendChild(div);
-
-			const selection = window.getSelection();
-			const range = document.createRange();
-			range.selectNodeContents(div);
-			selection.removeAllRanges();
-			selection.addRange(range);
-
-			document.execCommand(`copy`);
-			divRoot.removeChild(div);
-
-		} finally {
-			makeInfoWindow(_msg, `leftToRightFade`);
+			if (document.getElementById(`tmpClose`) === null) {
+				divRoot.oncontextmenu = _ => true;
+				makeLinkButton(tmpDiv, `Tmp`);
+				tmpDiv.appendChild(createCss2Button(`tmpClose`, g_lblNameObj.b_close, _ => true,
+					Object.assign(g_lblPosObj.btnRsCopyClose, {
+						resetFunc: _ => {
+							tmpDiv.removeChild(canvas);
+							divRoot.removeChild(tmpDiv);
+							divRoot.oncontextmenu = _ => false;
+						},
+					}), g_cssObj.button_Back));
+				tmpDiv.appendChild(createDescDiv(`resultImageDesc`, g_lblNameObj.resultImageDesc));
+			}
 		}
 	};
 
@@ -10968,6 +10965,25 @@ const resultInit = _ => {
 			clearTimeout(g_timeoutEvtResultId);
 		}, Object.assign(_posObj, { resetFunc: _func }), _cssClass);
 
+	/**
+	 * 外部リンクボタンを作成
+	 * @param {object} _div 
+	 * @param {string} _param 
+	 */
+	const makeLinkButton = (_div = divRoot, _param = ``) => {
+		multiAppend(_div,
+			// リザルトデータをTwitterへ転送
+			createCss2Button(`btnTweet${_param}`, g_lblNameObj.b_tweet, _ => true, Object.assign(g_lblPosObj.btnRsTweet, {
+				resetFunc: _ => openLink(tweetResult),
+			}), g_cssObj.button_Tweet),
+
+			// Gitterへのリンク
+			createCss2Button(`btnGitter${_param}`, g_lblNameObj.b_gitter, _ => true, Object.assign(g_lblPosObj.btnRsGitter, {
+				resetFunc: _ => openLink(`https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im`),
+			}), g_cssObj.button_Default),
+		);
+	}
+
 	// ボタン描画
 	multiAppend(divRoot,
 
@@ -10977,17 +10993,9 @@ const resultInit = _ => {
 		// リザルトデータをクリップボードへコピー
 		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ => copyTextToClipboard(resultText, g_msgInfoObj.I_0001),
 			g_lblPosObj.btnRsCopy, g_cssObj.button_Setting),
-
-		// リザルトデータをTwitterへ転送
-		createCss2Button(`btnTweet`, g_lblNameObj.b_tweet, _ => true, Object.assign(g_lblPosObj.btnRsTweet, {
-			resetFunc: _ => openLink(tweetResult),
-		}), g_cssObj.button_Tweet),
-
-		// Gitterへのリンク
-		createCss2Button(`btnGitter`, g_lblNameObj.b_gitter, _ => true, Object.assign(g_lblPosObj.btnRsGitter, {
-			resetFunc: _ => openLink(`https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im`),
-		}), g_cssObj.button_Default),
-
+	);
+	makeLinkButton();
+	multiAppend(divRoot,
 		// リトライ
 		resetCommonBtn(`btnRetry`, g_lblNameObj.b_retry, g_lblPosObj.btnRsRetry, loadMusic, g_cssObj.button_Reset),
 
@@ -11050,7 +11058,7 @@ const resultInit = _ => {
 	flowResultTimeline();
 
 	// キー操作イベント（デフォルト）
-	setShortcutEvent(g_currentPage);
+	setShortcutEvent(g_currentPage, _ => true, { dfEvtFlg: true });
 	document.oncontextmenu = _ => true;
 
 	g_skinJsObj.result.forEach(func => func());
