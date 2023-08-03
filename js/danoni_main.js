@@ -1485,23 +1485,10 @@ const getCssCustomProperties = _ => {
 			}
 		}
 	} catch (error) {
+
 		// FirefoxではcomputedStyleMapが使えないため、
-		// CSSの全スタイルシート定義から :root がセレクタのルールを抽出し、カスタムプロパティを抽出
-		const sheets = document.styleSheets;
-		for (const sheet of sheets) {
-			if (!g_isFile && sheet.cssRules) {
-				for (const rule of sheet.cssRules) {
-					if (rule.selectorText === ':root') {
-						for (let i = 0; i < rule.style.length; i++) {
-							const propertyName = rule.style.item(i);
-							if (/^--/.test(propertyName)) {
-								g_cssBkProperties[propertyName] = rule.style.getPropertyValue(propertyName);
-							}
-						}
-					}
-				}
-			}
-		}
+		// g_cssBkProperties は未定義にする
+
 	}
 }
 
