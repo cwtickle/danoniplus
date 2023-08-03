@@ -153,9 +153,6 @@ const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chr
 const g_isIos = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`]);
 const g_isMac = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`, `mac os`]);
 
-const g_isFile = location.href.match(/^file/);
-const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
-
 // 変数型
 const C_TYP_BOOLEAN = `boolean`;
 const C_TYP_NUMBER = `number`;
