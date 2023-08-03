@@ -726,7 +726,7 @@ const loadScript2 = (_url, _requiredFlg = true, _charset = `UTF-8`) => {
  * デフォルトは danoni_skin_default.css を読み込む
  * @param {url} _href 
  */
-const importCssFile2 = _href => {
+const importCssFile2 = (_href, { crossOrigin = `anonymous` } = {}) => {
 	const baseUrl = _href.split(`?`)[0];
 	g_loadObj[baseUrl] = false;
 
@@ -734,6 +734,7 @@ const importCssFile2 = _href => {
 		const link = document.createElement(`link`);
 		link.rel = `stylesheet`;
 		link.href = _href;
+		link.crossOrigin = crossOrigin;
 		link.onload = _ => {
 			g_loadObj[baseUrl] = true;
 			resolve(link);
@@ -1485,22 +1486,26 @@ const getCssCustomProperties = _ => {
 			}
 		}
 	} catch (error) {
-		// FirefoxではcomputedStyleMapが使えないため、
-		// CSSの全スタイルシート定義から :root がセレクタのルールを抽出し、カスタムプロパティを抽出
-		const sheets = document.styleSheets;
-		for (const sheet of sheets) {
-			if (!g_isFile && sheet.cssRules) {
-				for (const rule of sheet.cssRules) {
-					if (rule.selectorText === ':root') {
-						for (let i = 0; i < rule.style.length; i++) {
-							const propertyName = rule.style.item(i);
-							if (/^--/.test(propertyName)) {
-								g_cssBkProperties[propertyName] = rule.style.getPropertyValue(propertyName);
+
+		try {
+			// FirefoxではcomputedStyleMapが使えないため、
+			// CSSの全スタイルシート定義から :root がセレクタのルールを抽出し、カスタムプロパティを抽出
+			const sheets = document.styleSheets;
+			Array.from(sheets).filter(sheet => !g_isFile && sheet.href !== null &&
+				sheet.href.includes(`danoni_skin_`) && sheet.cssRules).forEach(sheet => {
+					for (const rule of sheet.cssRules) {
+						if (rule.selectorText === ':root') {
+							for (let i = 0; i < rule.style.length; i++) {
+								const propertyName = rule.style.item(i);
+								if (/^--/.test(propertyName)) {
+									g_cssBkProperties[propertyName] = rule.style.getPropertyValue(propertyName);
+								}
 							}
 						}
 					}
-				}
-			}
+				});
+		} catch (error) {
+			// 上記でもNGの場合は何もしない
 		}
 	}
 }
