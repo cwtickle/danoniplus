@@ -10612,12 +10612,14 @@ const resultInit = _ => {
 	const withOptions = (_flg, _defaultSet, _displayText = _flg) =>
 		(_flg !== _defaultSet ? getStgDetailName(_displayText) : ``);
 
-	let difData = [
+	const difDatas = [
 		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
 		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getStgDetailName(g_stateObj.shuffle)}]`)}`
-	].filter(value => value !== ``).join(` `);
+	];
+	let difData = difDatas.filter(value => value !== ``).join(` `);
+	const difDataForImage = difDatas.filter((value, j) => value !== `` && j !== 2).join(` `);
 
 	let playStyleData = [
 		`${g_stateObj.speed}${g_lblNameObj.multi}`,
@@ -10901,7 +10903,7 @@ const resultInit = _ => {
 		drawText(mTitleForView[0], { hy: 1 });
 		drawText(mTitleForView[1], { hy: 2 });
 		drawText(`📝 ${g_headerObj.tuning} / 🎵 ${artistName}`, { hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
-		drawText(difData, { hy: 4 });
+		drawText(difDataForImage, { hy: 4 });
 		drawText(playStyleData, { hy: 5 });
 
 		Object.keys(jdgScoreObj).forEach(score => {
