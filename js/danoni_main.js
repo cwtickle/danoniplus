@@ -10878,11 +10878,11 @@ const resultInit = _ => {
 		canvas.style.position = `absolute`;
 
 		const context = canvas.getContext(`2d`);
-		const drawText = (_text, { x, dx = 0, hy, siz = 15, color = `#cccccc`, align = C_ALIGN_LEFT, font } = {}) => {
+		const drawText = (_text, { x = 30, dy = 0, hy, siz = 15, color = `#cccccc`, align = C_ALIGN_LEFT, font } = {}) => {
 			context.font = `${siz}px ${getBasicFont(font)}`;
 			context.fillStyle = color;
 			context.textAlign = align;
-			context.fillText(_text, x, 35 + hy * 18 + dx);
+			context.fillText(_text, x, 35 + hy * 18 + dy);
 		};
 		const grd = context.createLinearGradient(0, 0, 0, canvas.height);
 		grd.addColorStop(0, `#000000`);
@@ -10890,18 +10890,18 @@ const resultInit = _ => {
 		context.fillStyle = grd;
 		context.fillRect(0, 0, g_sWidth, g_sHeight);
 
-		drawText(`R`, { x: 30, dx: -5, hy: 0, siz: 40, color: `#9999ff` });
-		drawText(`ESULT`, { x: 57, dx: -5, hy: 0, siz: 25 });
+		drawText(`R`, { dy: -5, hy: 0, siz: 40, color: `#9999ff` });
+		drawText(`ESULT`, { x: 57, dy: -5, hy: 0, siz: 25 });
 		drawText(`${g_lblNameObj.dancing}${g_lblNameObj.star}${g_lblNameObj.onigiri}`,
-			{ x: 280, dx: -15, hy: 0, siz: 20, color: `#999999`, align: C_ALIGN_CENTER });
-		drawText(mTitleForView[0], { x: 30, hy: 1 });
-		drawText(mTitleForView[1], { x: 30, hy: 2 });
-		drawText(`📝 ${g_headerObj.tuning} / 🎵 ${artistName}`, { x: 30, hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
-		drawText(difData, { x: 30, hy: 4 });
-		drawText(playStyleData, { x: 30, hy: 5 });
+			{ x: 280, dy: -15, hy: 0, siz: 20, color: `#999999`, align: C_ALIGN_CENTER });
+		drawText(mTitleForView[0], { hy: 1 });
+		drawText(mTitleForView[1], { hy: 2 });
+		drawText(`📝 ${g_headerObj.tuning} / 🎵 ${artistName}`, { hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
+		drawText(difData, { hy: 4 });
+		drawText(playStyleData, { hy: 5 });
 
 		Object.keys(jdgScoreObj).forEach(score => {
-			drawText(g_lblNameObj[`j_${score}`], { x: 30, hy: 7 + jdgScoreObj[score].pos, color: jdgScoreObj[score].dfColor });
+			drawText(g_lblNameObj[`j_${score}`], { hy: 7 + jdgScoreObj[score].pos, color: jdgScoreObj[score].dfColor });
 			drawText(g_resultObj[score], { x: 200, hy: 7 + jdgScoreObj[score].pos, align: C_ALIGN_RIGHT });
 		});
 
@@ -10925,8 +10925,8 @@ const resultInit = _ => {
 			}
 		}
 		drawText(rankMark, { x: 240, hy: 18, siz: 50, color: rankColor, font: `"Bookman Old Style"` });
-		drawText(baseTwitUrl, { x: 30, hy: 19, siz: 8 });
-		drawText(currentDateTime, { x: 30, hy: 20 });
+		drawText(baseTwitUrl, { hy: 19, siz: 8 });
+		drawText(currentDateTime, { hy: 20 });
 
 		tmpDiv.appendChild(canvas);
 
