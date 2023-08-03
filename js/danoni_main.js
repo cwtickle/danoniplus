@@ -7685,7 +7685,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	const makeBackgroundData = (_header, _scoreNo, { resultTypes = [] } = {}) => {
 		const dataList = [];
-		const calcFrameFunc = resultTypes.length > 0 ? calcFrame : undefined;
+		const calcFrameFunc = resultTypes.length > 0 ? undefined : calcFrame;
 		const addDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
 		getPriorityHeader(resultTypes).forEach(val => addDataList(val));
 
