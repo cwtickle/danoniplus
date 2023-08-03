@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/07/29 (v33.0.0)
+ * Revised : 2023/08/03 (v33.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -152,9 +152,6 @@ const g_localeObj = {
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
 const g_isIos = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`]);
 const g_isMac = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`, `mac os`]);
-
-const g_isFile = location.href.match(/^file/);
-const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
 
 // 変数型
 const C_TYP_BOOLEAN = `boolean`;
@@ -430,6 +427,15 @@ const updateWindowSiz = _ => {
         },
         btnRsRetry: {
             x: g_sWidth / 4 * 3, w: g_sWidth / 4, h: g_limitObj.btnHeight * 5 / 4, animationName: `smallToNormalY`,
+        },
+        btnRsCopyImage: {
+            x: g_sWidth - 40, y: 0, w: 40, h: 40, siz: 30,
+        },
+        btnRsCopyClose: {
+            x: g_sWidth - 80, y: 0, w: 80, h: 40, siz: 20,
+        },
+        resultImageDesc: {
+            x: 0, y: g_sHeight - 30, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz,
         },
     });
 };
@@ -1522,6 +1528,7 @@ const g_shortcutObj = {
         KeyC: { id: `btnCopy`, reset: true },
         KeyT: { id: `btnTweet`, reset: true },
         KeyG: { id: `btnGitter`, reset: true },
+        KeyP: { id: `btnCopyImage` },
         Backspace: { id: `btnRetry` },
     },
 };
@@ -2642,6 +2649,7 @@ const g_lblNameObj = {
     b_tweet: `Tweet`,
     b_gitter: `Gitter`,
     b_retry: `Retry`,
+    b_close: `Close`,
 
     Difficulty: `Difficulty`,
     Speed: `Speed`,
@@ -2822,6 +2830,7 @@ const g_lang_lblNameObj = {
         kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
         transKeyDesc: `別キーモードではキーコンフィグ、ColorType等は保存されません`,
         sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
+        resultImageDesc: `画像を右クリックしてコピーできます`,
 
         s_level: `Level`,
         s_douji: `同時補正`,
@@ -2855,6 +2864,7 @@ const g_lang_lblNameObj = {
         kcShortcutDesc: `Shortcut during play: "{0}" Return to title / "{1}" Retry the game`,
         transKeyDesc: `Key config, Color type, etc. are not saved in another key mode`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
+        resultImageDesc: `You can copy the image by right-clicking on it.`,
 
         s_level: `Level`,
         s_douji: `Chords`,

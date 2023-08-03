@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/07/29
+ * Revised : 2023/08/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 33.0.0`;
-const g_revisedDate = `2023/07/29`;
+const g_version = `Ver 33.1.0`;
+const g_revisedDate = `2023/08/03`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -50,6 +50,8 @@ const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
 const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
 const g_randTime = Date.now();
+const g_isFile = location.href.match(/^file/);
+const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
 
 window.onload = async () => {
 	g_loadObj.main = true;
@@ -726,7 +728,7 @@ const loadScript2 = (_url, _requiredFlg = true, _charset = `UTF-8`) => {
  * デフォルトは danoni_skin_default.css を読み込む
  * @param {url} _href 
  */
-const importCssFile2 = _href => {
+const importCssFile2 = (_href, { crossOrigin = `anonymous` } = {}) => {
 	const baseUrl = _href.split(`?`)[0];
 	g_loadObj[baseUrl] = false;
 
@@ -734,6 +736,9 @@ const importCssFile2 = _href => {
 		const link = document.createElement(`link`);
 		link.rel = `stylesheet`;
 		link.href = _href;
+		if (!g_isFile) {
+			link.crossOrigin = crossOrigin;
+		}
 		link.onload = _ => {
 			g_loadObj[baseUrl] = true;
 			resolve(link);
@@ -1485,22 +1490,26 @@ const getCssCustomProperties = _ => {
 			}
 		}
 	} catch (error) {
-		// FirefoxではcomputedStyleMapが使えないため、
-		// CSSの全スタイルシート定義から :root がセレクタのルールを抽出し、カスタムプロパティを抽出
-		const sheets = document.styleSheets;
-		for (const sheet of sheets) {
-			if (!g_isFile && sheet.cssRules) {
-				for (const rule of sheet.cssRules) {
-					if (rule.selectorText === ':root') {
-						for (let i = 0; i < rule.style.length; i++) {
-							const propertyName = rule.style.item(i);
-							if (/^--/.test(propertyName)) {
-								g_cssBkProperties[propertyName] = rule.style.getPropertyValue(propertyName);
+
+		try {
+			// FirefoxではcomputedStyleMapが使えないため、
+			// CSSの全スタイルシート定義から :root がセレクタのルールを抽出し、カスタムプロパティを抽出
+			const sheets = document.styleSheets;
+			Array.from(sheets).filter(sheet => !g_isFile && sheet.href !== null &&
+				sheet.href.includes(`danoni_skin_`) && sheet.cssRules).forEach(sheet => {
+					for (const rule of sheet.cssRules) {
+						if (rule.selectorText === ':root') {
+							for (let i = 0; i < rule.style.length; i++) {
+								const propertyName = rule.style.item(i);
+								if (/^--/.test(propertyName)) {
+									g_cssBkProperties[propertyName] = rule.style.getPropertyValue(propertyName);
+								}
 							}
 						}
 					}
-				}
-			}
+				});
+		} catch (error) {
+			// 上記でもNGの場合は何もしない
 		}
 	}
 }
@@ -10603,12 +10612,14 @@ const resultInit = _ => {
 	const withOptions = (_flg, _defaultSet, _displayText = _flg) =>
 		(_flg !== _defaultSet ? getStgDetailName(_displayText) : ``);
 
-	let difData = [
+	const difDatas = [
 		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
 		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getStgDetailName(g_stateObj.shuffle)}]`)}`
-	].filter(value => value !== ``).join(` `);
+	];
+	let difData = difDatas.filter(value => value !== ``).join(` `);
+	const difDataForImage = difDatas.filter((value, j) => value !== `` && j !== 2).join(` `);
 
 	let playStyleData = [
 		`${g_stateObj.speed}${g_lblNameObj.multi}`,
@@ -10661,16 +10672,16 @@ const resultInit = _ => {
 
 	// キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
 	const jdgScoreObj = {
-		ii: { pos: 0, id: `Ii`, color: `ii`, label: g_lblNameObj.j_ii, },
-		shakin: { pos: 1, id: `Shakin`, color: `shakin`, label: g_lblNameObj.j_shakin, },
-		matari: { pos: 2, id: `Matari`, color: `matari`, label: g_lblNameObj.j_matari, },
-		shobon: { pos: 3, id: `Shobon`, color: `shobon`, label: g_lblNameObj.j_shobon, },
-		uwan: { pos: 4, id: `Uwan`, color: `uwan`, label: g_lblNameObj.j_uwan, },
-		kita: { pos: 5, id: `Kita`, color: `kita`, label: g_lblNameObj.j_kita, },
-		iknai: { pos: 6, id: `Iknai`, color: `iknai`, label: g_lblNameObj.j_iknai, },
-		maxCombo: { pos: 7, id: `MCombo`, color: `combo`, label: g_lblNameObj.j_maxCombo, },
-		fmaxCombo: { pos: 8, id: `FCombo`, color: `combo`, label: g_lblNameObj.j_fmaxCombo, },
-		score: { pos: 10, id: `Score`, color: `score`, label: g_lblNameObj.j_score, },
+		ii: { pos: 0, id: `Ii`, color: `ii`, label: g_lblNameObj.j_ii, dfColor: `#66ffff`, },
+		shakin: { pos: 1, id: `Shakin`, color: `shakin`, label: g_lblNameObj.j_shakin, dfColor: `#99ff99`, },
+		matari: { pos: 2, id: `Matari`, color: `matari`, label: g_lblNameObj.j_matari, dfColor: `#ff9966`, },
+		shobon: { pos: 3, id: `Shobon`, color: `shobon`, label: g_lblNameObj.j_shobon, dfColor: `#ccccff`, },
+		uwan: { pos: 4, id: `Uwan`, color: `uwan`, label: g_lblNameObj.j_uwan, dfColor: `#ff9999`, },
+		kita: { pos: 5, id: `Kita`, color: `kita`, label: g_lblNameObj.j_kita, dfColor: `#ffff99`, },
+		iknai: { pos: 6, id: `Iknai`, color: `iknai`, label: g_lblNameObj.j_iknai, dfColor: `#99ff66`, },
+		maxCombo: { pos: 7, id: `MCombo`, color: `combo`, label: g_lblNameObj.j_maxCombo, dfColor: `#ffffff`, },
+		fmaxCombo: { pos: 8, id: `FCombo`, color: `combo`, label: g_lblNameObj.j_fmaxCombo, dfColor: `#ffffff`, },
+		score: { pos: 10, id: `Score`, color: `score`, label: g_lblNameObj.j_score, dfColor: `#ffffff`, },
 	};
 
 	// キャラクタ、スコア描画
@@ -10823,6 +10834,7 @@ const resultInit = _ => {
 	}
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
+	const baseTwitUrl = g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``);
 
 	const tweetExcessive = (g_stateObj.excessive === C_FLG_ON) ? `(+${g_resultObj.excessive})` : ``;
 
@@ -10844,7 +10856,7 @@ const resultInit = _ => {
 		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}${tweetExcessive}`],
 		[`[frzJdg]`, tweetFrzJdg],
 		[`[maxCombo]`, tweetMaxCombo],
-		[`[url]`, g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``)]
+		[`[url]`, baseTwitUrl]
 	]);
 	if (g_presetObj.resultVals !== undefined) {
 		Object.keys(g_presetObj.resultVals).forEach(key =>
@@ -10852,6 +10864,111 @@ const resultInit = _ => {
 	}
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
+	const currentDateTime = new Date().toLocaleString();
+
+	/**
+	 * リザルト画像をCanvasで作成しクリップボードへコピー
+	 * @param {string} _msg 
+	 */
+	const copyResultImageData = _msg => {
+		const tmpDiv = createEmptySprite(divRoot, `tmpDiv`, { x: 0, y: 0, w: g_sWidth, h: g_sHeight });
+		tmpDiv.style.background = `#000000cc`;
+		const canvas = document.createElement(`canvas`);
+		const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
+
+		canvas.id = `resultImage`;
+		canvas.width = 400;
+		canvas.height = 410;
+		canvas.style.left = `${(g_sWidth - canvas.width) / 2}px`;
+		canvas.style.top = `20px`;
+		canvas.style.position = `absolute`;
+
+		const context = canvas.getContext(`2d`);
+		const drawText = (_text, { x = 30, dy = 0, hy, siz = 15, color = `#cccccc`, align = C_ALIGN_LEFT, font } = {}) => {
+			context.font = `${siz}px ${getBasicFont(font)}`;
+			context.fillStyle = color;
+			context.textAlign = align;
+			context.fillText(_text, x, 35 + hy * 18 + dy);
+		};
+		const grd = context.createLinearGradient(0, 0, 0, canvas.height);
+		grd.addColorStop(0, `#000000`);
+		grd.addColorStop(1, `#222222`);
+		context.fillStyle = grd;
+		context.fillRect(0, 0, g_sWidth, g_sHeight);
+
+		drawText(`R`, { dy: -5, hy: 0, siz: 40, color: `#9999ff` });
+		drawText(`ESULT`, { x: 57, dy: -5, hy: 0, siz: 25 });
+		drawText(`${g_lblNameObj.dancing}${g_lblNameObj.star}${g_lblNameObj.onigiri}`,
+			{ x: 280, dy: -15, hy: 0, siz: 20, color: `#999999`, align: C_ALIGN_CENTER });
+		drawText(mTitleForView[0], { hy: 1 });
+		drawText(mTitleForView[1], { hy: 2 });
+		drawText(`📝 ${g_headerObj.tuning} / 🎵 ${artistName}`, { hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
+		drawText(difDataForImage, { hy: 4 });
+		drawText(playStyleData, { hy: 5 });
+
+		Object.keys(jdgScoreObj).forEach(score => {
+			drawText(g_lblNameObj[`j_${score}`], { hy: 7 + jdgScoreObj[score].pos, color: jdgScoreObj[score].dfColor });
+			drawText(g_resultObj[score], { x: 200, hy: 7 + jdgScoreObj[score].pos, align: C_ALIGN_RIGHT });
+		});
+
+		if (highscoreCondition) {
+			drawText(`(${highscoreDfObj.score >= 0 ? '+' : '-'} ${Math.abs(highscoreDfObj.score)})`,
+				{ x: 206, hy: 18, color: highscoreDfObj.score > 0 ? `#ffff99` : `#cccccc`, align: C_ALIGN_RIGHT });
+		}
+
+		if (g_stateObj.autoAll === C_FLG_OFF) {
+			drawText(g_lblNameObj.j_fast, { x: 240, hy: 7, color: `#ff9966` });
+			drawText(g_resultObj.fast, { x: 360, hy: 7, align: C_ALIGN_RIGHT });
+			drawText(g_lblNameObj.j_slow, { x: 240, hy: 8, color: `#ccccff` });
+			drawText(g_resultObj.slow, { x: 360, hy: 8, align: C_ALIGN_RIGHT });
+			if (estimatedAdj !== ``) {
+				drawText(g_lblNameObj.j_adj, { x: 240, hy: 9, color: `#99ff99` });
+				drawText(getDiffFrame(estimatedAdj), { x: 360, hy: 9, align: C_ALIGN_RIGHT });
+			}
+			if (g_stateObj.excessive === C_FLG_ON) {
+				drawText(g_lblNameObj.j_excessive, { x: 240, hy: 10, color: `#ffff99` });
+				drawText(g_resultObj.excessive, { x: 360, hy: 10, align: C_ALIGN_RIGHT });
+			}
+		}
+		drawText(rankMark, { x: 240, hy: 18, siz: 50, color: rankColor, font: `"Bookman Old Style"` });
+		drawText(baseTwitUrl, { hy: 19, siz: 8 });
+		drawText(currentDateTime, { hy: 20 });
+
+		tmpDiv.appendChild(canvas);
+
+		try {
+			if (ClipboardItem === undefined) {
+				throw new Error(`error`);
+			}
+			// Canvas の内容を PNG 画像として取得
+			canvas.toBlob(async blob => {
+				await navigator.clipboard.write([
+					new ClipboardItem({
+						'image/png': blob
+					})
+				]);
+			});
+			tmpDiv.removeChild(canvas);
+			divRoot.removeChild(tmpDiv);
+			makeInfoWindow(_msg, `leftToRightFade`);
+
+		} catch (err) {
+			// 画像をクリップボードへコピーできないときは代替で画像保存可能な画面を表示
+			if (document.getElementById(`tmpClose`) === null) {
+				divRoot.oncontextmenu = _ => true;
+				makeLinkButton(tmpDiv, `Tmp`);
+				tmpDiv.appendChild(createCss2Button(`tmpClose`, g_lblNameObj.b_close, _ => true,
+					Object.assign(g_lblPosObj.btnRsCopyClose, {
+						resetFunc: _ => {
+							tmpDiv.removeChild(canvas);
+							divRoot.removeChild(tmpDiv);
+							divRoot.oncontextmenu = _ => false;
+						},
+					}), g_cssObj.button_Back));
+				tmpDiv.appendChild(createDescDiv(`resultImageDesc`, g_lblNameObj.resultImageDesc));
+			}
+		}
+	};
 
 	/** 音源、ループ処理の停止 */
 	const resetCommonBtn = (_id, _name, _posObj, _func, _cssClass) =>
@@ -10863,6 +10980,25 @@ const resultInit = _ => {
 			clearTimeout(g_timeoutEvtResultId);
 		}, Object.assign(_posObj, { resetFunc: _func }), _cssClass);
 
+	/**
+	 * 外部リンクボタンを作成
+	 * @param {object} _div 
+	 * @param {string} _param 
+	 */
+	const makeLinkButton = (_div = divRoot, _param = ``) => {
+		multiAppend(_div,
+			// リザルトデータをTwitterへ転送
+			createCss2Button(`btnTweet${_param}`, g_lblNameObj.b_tweet, _ => true, Object.assign(g_lblPosObj.btnRsTweet, {
+				resetFunc: _ => openLink(tweetResult),
+			}), g_cssObj.button_Tweet),
+
+			// Gitterへのリンク
+			createCss2Button(`btnGitter${_param}`, g_lblNameObj.b_gitter, _ => true, Object.assign(g_lblPosObj.btnRsGitter, {
+				resetFunc: _ => openLink(`https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im`),
+			}), g_cssObj.button_Default),
+		);
+	}
+
 	// ボタン描画
 	multiAppend(divRoot,
 
@@ -10872,19 +11008,16 @@ const resultInit = _ => {
 		// リザルトデータをクリップボードへコピー
 		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ => copyTextToClipboard(resultText, g_msgInfoObj.I_0001),
 			g_lblPosObj.btnRsCopy, g_cssObj.button_Setting),
-
-		// リザルトデータをTwitterへ転送
-		createCss2Button(`btnTweet`, g_lblNameObj.b_tweet, _ => true, Object.assign(g_lblPosObj.btnRsTweet, {
-			resetFunc: _ => openLink(tweetResult),
-		}), g_cssObj.button_Tweet),
-
-		// Gitterへのリンク
-		createCss2Button(`btnGitter`, g_lblNameObj.b_gitter, _ => true, Object.assign(g_lblPosObj.btnRsGitter, {
-			resetFunc: _ => openLink(`https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im`),
-		}), g_cssObj.button_Default),
-
+	);
+	makeLinkButton();
+	multiAppend(divRoot,
 		// リトライ
 		resetCommonBtn(`btnRetry`, g_lblNameObj.b_retry, g_lblPosObj.btnRsRetry, loadMusic, g_cssObj.button_Reset),
+
+		createCss2Button(`btnCopyImage`, `📷`, _ => true,
+			Object.assign(g_lblPosObj.btnRsCopyImage, {
+				resetFunc: _ => copyResultImageData(g_msgInfoObj.I_0001),
+			}), g_cssObj.button_Default_NoColor),
 	);
 
 	// マスクスプライトを作成
@@ -10940,7 +11073,7 @@ const resultInit = _ => {
 	flowResultTimeline();
 
 	// キー操作イベント（デフォルト）
-	setShortcutEvent(g_currentPage);
+	setShortcutEvent(g_currentPage, _ => true, { dfEvtFlg: true });
 	document.oncontextmenu = _ => true;
 
 	g_skinJsObj.result.forEach(func => func());
