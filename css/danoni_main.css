@@ -569,35 +569,35 @@ input[type="color"] {
 
 /* 結果画面：判定名 */
 .common_ii {
-	background: var(--common-ii, #66ffff);
+	color: var(--common-ii, #66ffff);
 }
 
 .common_shakin {
-	background: var(--common-shakin, #99ff99);
+	color: var(--common-shakin, #99ff99);
 }
 
 .common_matari {
-	background: var(--common-matari, #ff9966);
+	color: var(--common-matari, #ff9966);
 }
 
 .common_shobon {
-	background: var(--common-shobon, #ccccff);
+	color: var(--common-shobon, #ccccff);
 }
 
 .common_uwan {
-	background: var(--common-uwan, #ff9999);
+	color: var(--common-uwan, #ff9999);
 }
 
 .common_kita {
-	background: var(--common-kita, #ffff99);
+	color: var(--common-kita, #ffff99);
 }
 
 .common_iknai {
-	background: var(--common-iknai, #99ff66);
+	color: var(--common-iknai, #99ff66);
 }
 
 .common_combo {
-	background: var(--common-combo, #ffffff);
+	color: var(--common-combo, #ffffff);
 }
 
 .common_score {
@@ -605,27 +605,27 @@ input[type="color"] {
 }
 
 .common_comboJ {
-	background: var(--common-comboJ, var(--common-kita));
+	color: var(--common-comboJ, var(--common-kita));
 }
 
 .common_comboFJ {
-	background: var(--common-comboFJ, var(--common-ii));
+	color: var(--common-comboFJ, var(--common-ii));
 }
 
 .common_diffFast {
-	background: var(--common-diffFast, var(--common-matari));
+	color: var(--common-diffFast, var(--common-matari));
 }
 
 .common_diffSlow {
-	background: var(--common-diffSlow, var(--common-shobon));
+	color: var(--common-diffSlow, var(--common-shobon));
 }
 
 .common_estAdj {
-	background: var(--common-estAdj, var(--common-shakin));
+	color: var(--common-estAdj, var(--common-shakin));
 }
 
 .common_excessive {
-	background: var(--common-excessive, var(--common-kita));
+	color: var(--common-excessive, var(--common-kita));
 }
 
 /* 結果画面：枠 */
@@ -817,20 +817,6 @@ input[type="color"] {
 .settings_Title2::first-letter,
 .settings_TitleStar,
 .settings_Display::first-letter,
-.common_ii,
-.common_shakin,
-.common_matari,
-.common_shobon,
-.common_uwan,
-.common_kita,
-.common_iknai,
-.common_combo,
-.common_comboJ,
-.common_comboFJ,
-.common_diffFast,
-.common_diffSlow,
-.common_estAdj,
-.common_excessive,
 .result_AllPerfect,
 .result_Perfect,
 .result_FullCombo,
