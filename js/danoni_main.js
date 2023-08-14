@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/08/04
+ * Revised : 2023/08/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 33.1.1`;
-const g_revisedDate = `2023/08/04`;
+const g_version = `Ver 33.1.2`;
+const g_revisedDate = `2023/08/14`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -9414,7 +9414,7 @@ const mainInit = _ => {
 
 		frzOFF: (_j, _k, _cnt) => {
 
-			if (g_workObj.judgFrzCnt[_j] === _k - 1 && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
+			if (g_workObj.judgFrzCnt[_j] === _k - 1) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 				const prevFrz = g_attrObj[prevFrzName];
 
