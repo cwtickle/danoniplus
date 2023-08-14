@@ -9414,7 +9414,7 @@ const mainInit = _ => {
 
 		frzOFF: (_j, _k, _cnt) => {
 
-			if (g_workObj.judgFrzCnt[_j] === _k - 1 && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
+			if (g_workObj.judgFrzCnt[_j] === _k - 1) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 				const prevFrz = g_attrObj[prevFrzName];
 
