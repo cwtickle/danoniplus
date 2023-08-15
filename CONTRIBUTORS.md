@@ -22,6 +22,7 @@
 |ショウタ||[@sssyouta](https://twitter.com/sssyouta)|機能提案、不具合報告|
 |しょーでん||[@ricetask68934](https://twitter.com/ricetask68934)|機能提案|
 |すずめ|[@suzme](https://github.com/suzme)|[@suzume_danoni](https://twitter.com/suzume_danoni)|コーディング、機能提案、不具合報告、事象解析、関連ツール作成|
+|長月||[@ngtk_d](https://twitter.com/ngtk_d)|事象解析|
 |ふみのり||[@fuminori_0406](https://twitter.com/fuminori_0406)|不具合報告|
 |ぷろろーぐ|[@prlg25](https://github.com/prlg25)|[@prologue25](https://twitter.com/prologue25)|機能提案、不具合報告、事象解析、関連ツール作成|
 |★ぞろり★||[@zri3147](https://twitter.com/zri3147)|機能提案、不具合報告|
