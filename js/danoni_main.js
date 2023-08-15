@@ -10900,10 +10900,10 @@ const resultInit = _ => {
 		drawText(`ESULT`, { x: 57, dy: -5, hy: 0, siz: 25 });
 		drawText(`${g_lblNameObj.dancing}${g_lblNameObj.star}${g_lblNameObj.onigiri}`,
 			{ x: 280, dy: -15, hy: 0, siz: 20, color: `#999999`, align: C_ALIGN_CENTER });
-		drawText(mTitleForView[0], { hy: 1 });
-		drawText(mTitleForView[1], { hy: 2 });
-		drawText(`📝 ${g_headerObj.tuning} / 🎵 ${artistName}`, { hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
-		drawText(difDataForImage, { hy: 4 });
+		drawText(unEscapeHtml(mTitleForView[0]), { hy: 1 });
+		drawText(unEscapeHtml(mTitleForView[1]), { hy: 2 });
+		drawText(`📝 ${unEscapeHtml(g_headerObj.tuning)} / 🎵 ${unEscapeHtml(artistName)}`, { hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
+		drawText(unEscapeHtml(difDataForImage), { hy: 4 });
 		drawText(playStyleData, { hy: 5 });
 
 		Object.keys(jdgScoreObj).forEach(score => {
