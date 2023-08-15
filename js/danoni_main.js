@@ -10904,7 +10904,7 @@ const resultInit = _ => {
 		drawText(unEscapeHtml(mTitleForView[1]), { hy: 2 });
 		drawText(`📝 ${unEscapeHtml(g_headerObj.tuning)} / 🎵 ${unEscapeHtml(artistName)}`, { hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
 		drawText(unEscapeHtml(difDataForImage), { hy: 4 });
-		drawText(unEscapeHtml(playStyleData), { hy: 5 });
+		drawText(playStyleData, { hy: 5 });
 
 		Object.keys(jdgScoreObj).forEach(score => {
 			drawText(g_lblNameObj[`j_${score}`], { hy: 7 + jdgScoreObj[score].pos, color: jdgScoreObj[score].dfColor });
