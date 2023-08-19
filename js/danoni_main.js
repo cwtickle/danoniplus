@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/08/14
+ * Revised : 2023/08/19
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 31.7.4`;
-const g_revisedDate = `2023/08/14`;
+const g_version = `Ver 31.7.5`;
+const g_revisedDate = `2023/08/19`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7591,13 +7591,15 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	}
 
 	// キー変化定義
-	obj.keychFrames = [0];
-	obj.keychTarget = [`0`];
+	obj.keychFrames = [];
+	obj.keychTarget = [];
 	if (hasVal(getRefData(`keych`, `${scoreIdHeader}_data`))) {
 		const keychdata = splitLF2(getRefData(`keych`, `${scoreIdHeader}_data`), `,`);
-		obj.keychFrames.push(...keychdata.filter((val, j) => j % 2 === 0));
+		obj.keychFrames.push(...(keychdata.filter((val, j) => j % 2 === 0)).map(val => val === `0` ? 0 : calcFrame(val)));
 		obj.keychTarget.push(...keychdata.filter((val, j) => j % 2 === 1));
 	}
+	obj.keychFrames.unshift(0);
+	obj.keychTarget.unshift(`0`);
 
 	return obj;
 };
