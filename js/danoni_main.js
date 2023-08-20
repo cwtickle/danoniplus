@@ -8168,10 +8168,10 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				_data[startNum][_j].depth === _data[startNum][_k].depth);
 
 		const isExceptData = {
-			word: (_exceptList, _j) => listMatching(_data[startNum][_j][1], _exceptList.word),
-			back: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.back),
-			mask: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.mask),
-			style: (_exceptList, _j) => listMatching(_data[startNum][_j].depth, _exceptList.style),
+			word: (_exceptList, _j) => listMatching(_data[startNum][_j][1] || ``, _exceptList.word),
+			back: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName || ``, _exceptList.back),
+			mask: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName || ``, _exceptList.mask),
+			style: (_exceptList, _j) => listMatching(_data[startNum][_j].depth || ``, _exceptList.style),
 		};
 
 		const getLength = _list =>
