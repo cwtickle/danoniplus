@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/08/14
+ * Revised : 2023/08/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.4.7`;
-const g_revisedDate = `2023/08/14`;
+const g_version = `Ver 29.4.8`;
+const g_revisedDate = `2023/08/20`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7665,9 +7665,9 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 		const fuzzyCheck = (_str, _list) => listMatching(_str, _list);
 		const isExceptData = {
-			word: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j][1], _exceptList.word),
-			back: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.back),
-			mask: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName, _exceptList.mask),
+			word: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j][1] || ``, _exceptList.word),
+			back: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName || ``, _exceptList.back),
+			mask: (_exceptList, _j) => fuzzyCheck(_data[startNum][_j].animationName || ``, _exceptList.mask),
 		};
 
 		const getLength = _list =>
