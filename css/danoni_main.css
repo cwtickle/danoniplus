@@ -355,6 +355,11 @@ input[type="color"] {
 /* スキン定義 ------------------------------------------------------------*/
 
 /* 背景 */
+#canvas-frame {
+	border-top: 1px solid var(--back-border-x, #666666);
+	border-bottom: 1px solid var(--back-border-x, #666666);
+}
+
 #divBack {
 	background: var(--background, linear-gradient(#000000, #222222));
 }
