@@ -356,8 +356,8 @@ input[type="color"] {
 
 /* 背景 */
 #canvas-frame {
-	border-top: 1px solid #666666;
-	border-bottom: 1px solid #666666;
+	border-top: 1px solid var(--back-border-x, #666666);
+	border-bottom: 1px solid var(--back-border-x, #666666);
 }
 
 #divBack {
