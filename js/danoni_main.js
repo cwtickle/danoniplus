@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/08/19
+ * Revised : 2023/08/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 32.7.2`;
-const g_revisedDate = `2023/08/19`;
+const g_version = `Ver 32.7.3`;
+const g_revisedDate = `2023/08/20`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8039,9 +8039,9 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				_data[startNum][_j].depth === _data[startNum][_k].depth);
 
 		const isExceptData = {
-			word: (_exceptList, _j) => listMatching(_data[startNum][_j][1], _exceptList.word),
-			back: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.back),
-			mask: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName, _exceptList.mask),
+			word: (_exceptList, _j) => listMatching(_data[startNum][_j][1] || ``, _exceptList.word),
+			back: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName || ``, _exceptList.back),
+			mask: (_exceptList, _j) => listMatching(_data[startNum][_j].animationName || ``, _exceptList.mask),
 		};
 
 		const getLength = _list =>
