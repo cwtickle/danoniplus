@@ -42,6 +42,9 @@ g_presetObj.tuningUrl = `https://www.google.co.jp/`;
 /** 既定スキン (デフォルトは default) */
 g_presetObj.skinType = `default`;
 
+/** skinTypeがdefaultのとき、Canvas背景を有効にするかどうかのフラグ (デフォルトは有効(true)。falseで無効化) */
+//g_presetObj.bgCanvasUse = false;
+
 /** 既定カスタムJs (デフォルトは danoni_custom.js) */
 //g_presetObj.customJs = `danoni_custom.js,danoni_init.js`;
 
