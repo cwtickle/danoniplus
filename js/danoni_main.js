@@ -2649,7 +2649,7 @@ const preheaderConvert = _dosObj => {
 	// 外部スキンファイルの指定
 	const tmpSkinType = _dosObj.skinType ?? g_presetObj.skinType ?? `default`;
 	const tmpSkinTypes = tmpSkinType.split(`,`);
-	obj.defaultSkinFlg = tmpSkinTypes.includes(`default`);
+	obj.defaultSkinFlg = tmpSkinTypes.includes(`default`) && setBoolVal(_dosObj.bgCanvasUse ?? g_presetObj.bgCanvasUse, true);
 	setJsFiles(tmpSkinTypes, C_DIR_SKIN, `skin`);
 
 	// 外部jsファイルの指定
