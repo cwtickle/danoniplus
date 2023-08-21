@@ -10931,6 +10931,14 @@ const resultInit = _ => {
 				drawText(g_lblNameObj.j_excessive, { x: 240, hy: 10, color: `#ffff99` });
 				drawText(g_resultObj.excessive, { x: 360, hy: 10, align: C_ALIGN_RIGHT });
 			}
+			if (g_presetObj.resultVals !== undefined) {
+				Object.keys(g_presetObj.resultVals)
+					.filter(key => hasVal(g_resultObj[g_presetObj.resultVals[key]]))
+					.forEach((key, j) => {
+						drawText(g_presetObj.resultVals[key], { x: 240, hy: j + 12, color: `#ffffff` });
+						drawText(g_resultObj[g_presetObj.resultVals[key]], { x: 360, hy: j + 12, align: C_ALIGN_RIGHT });
+					});
+			}
 		}
 		drawText(rankMark, { x: 240, hy: 18, siz: 50, color: rankColor, font: `"Bookman Old Style"` });
 		drawText(baseTwitUrl, { hy: 19, siz: 8 });
