@@ -6926,7 +6926,7 @@ const loadMusic = _ => {
 			lblLoading.textContent = g_lblNameObj.pleaseWait;
 			setAudio(blobUrl);
 		} else {
-			makeWarningWindow(`${g_msgInfoObj.E_0041.split('{0}').join(getFullPath(musicUrl))}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
+			makeWarningWindow(`${g_msgInfoObj.E_0041.split('{0}').join(getFullPath(url))}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
 		}
 	});
 
