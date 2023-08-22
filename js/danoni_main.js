@@ -3274,6 +3274,9 @@ const headerConvert = _dosObj => {
 	const resultFormatDefault = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
 	obj.resultFormat = escapeHtmlForEnabledTag(_dosObj.resultFormat ?? g_presetObj.resultFormat ?? resultFormatDefault);
 
+	// リザルト画像データのカスタム設定
+	obj.resultValsView = _dosObj.resultValsView?.split(`,`) ?? g_presetObj.resultValsView ?? Array.from(Object.keys(g_presetObj.resultVals ?? {}));
+
 	// フェードイン時にそれ以前のデータを蓄積しない種別(word, back, mask)を指定
 	obj.unStockCategories = (_dosObj.unStockCategory ?? ``).split(`,`);
 	if (g_presetObj.unStockCategories !== undefined) {
@@ -10931,6 +10934,12 @@ const resultInit = _ => {
 				drawText(g_lblNameObj.j_excessive, { x: 240, hy: 10, color: `#ffff99` });
 				drawText(g_resultObj.excessive, { x: 360, hy: 10, align: C_ALIGN_RIGHT });
 			}
+			g_headerObj.resultValsView
+				.filter(key => hasVal(g_resultObj[g_presetObj.resultVals[key]]))
+				.forEach((key, j) => {
+					drawText(g_presetObj.resultVals[key], { x: 240, hy: j + 12, color: `#ffffff` });
+					drawText(g_resultObj[g_presetObj.resultVals[key]], { x: 360, hy: j + 12, align: C_ALIGN_RIGHT });
+				});
 		}
 		drawText(rankMark, { x: 240, hy: 18, siz: 50, color: rankColor, font: `"Bookman Old Style"` });
 		drawText(baseTwitUrl, { hy: 19, siz: 8 });
