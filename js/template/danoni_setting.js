@@ -142,7 +142,7 @@ g_presetObj.frzColors = true;
 
 /**
   フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
-  判定させる場合は `true` を指定
+  判定させる場合は true を指定
 */
 g_presetObj.frzStartjdgUse = false;
 
@@ -154,7 +154,7 @@ g_presetObj.frzStartjdgUse = false;
 */
 
 // デフォルトのデザインを使用せず、独自のデザインを使用するかを指定
-// カスタムデザインにする場合は `true` を指定
+// カスタムデザインにする場合は true を指定
 g_presetObj.customDesignUse = {
 	title: false,
 	titleArrow: false,
