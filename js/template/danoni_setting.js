@@ -118,9 +118,9 @@ g_presetObj.gaugeList = {
 
 /**
   空押し判定を行うか
-  判定させる場合は `true` を指定
+  判定させる場合は true を指定
 */
-g_presetObj.excessiveJdgUse = `false`;
+g_presetObj.excessiveJdgUse = false;
 
 
 /*
@@ -144,7 +144,7 @@ g_presetObj.frzColors = true;
   フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
   判定させる場合は `true` を指定
 */
-g_presetObj.frzStartjdgUse = `false`;
+g_presetObj.frzStartjdgUse = false;
 
 /*
 ------------------------------------------------------------------------
@@ -156,12 +156,12 @@ g_presetObj.frzStartjdgUse = `false`;
 // デフォルトのデザインを使用せず、独自のデザインを使用するかを指定
 // カスタムデザインにする場合は `true` を指定
 g_presetObj.customDesignUse = {
-	title: `false`,
-	titleArrow: `false`,
-	titleAnimation: `false`,
-	back: `false`,
-	backMain: `false`,
-	ready: `false`,
+	title: false,
+	titleArrow: false,
+	titleAnimation: false,
+	back: false,
+	backMain: false,
+	ready: false,
 };
 
 /**
@@ -215,6 +215,7 @@ g_presetObj.customDesignUse = {
 /**
   オプション利用設定（デフォルト）
   一律使用させたくない場合は `false` を指定（デフォルトは `true`）
+  Display設定の場合は `true,OFF`(設定は有効だが初期値はOFF)といったことができる
 */
 g_presetObj.settingUse = {
 	motion: `true`,
