@@ -316,6 +316,11 @@ g_presetObj.resultVals = {
 	// exScore: `exScore`,
 };
 
+/* 
+	リザルトカスタムデータの表示設定
+	g_presetObj.resultVals から、リザルト画像データに表示したい項目を列挙します。
+ */
+//g_presetObj.resultValsView = [`exScore`];
 
 /*
 ------------------------------------------------------------------------
