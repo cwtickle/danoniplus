@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2023/06/24 (v32.5.0)
+ * Template Update: 2023/08/22 (v33.3.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -41,6 +41,9 @@ g_presetObj.tuningUrl = `https://www.google.co.jp/`;
 
 /** 既定スキン (デフォルトは default) */
 g_presetObj.skinType = `default`;
+
+/** skinTypeがdefaultのとき、Canvas背景を有効にするかどうかのフラグ (デフォルトは有効(true)。falseで無効化) */
+//g_presetObj.bgCanvasUse = false;
 
 /** 既定カスタムJs (デフォルトは danoni_custom.js) */
 //g_presetObj.customJs = `danoni_custom.js,danoni_init.js`;
@@ -115,9 +118,9 @@ g_presetObj.gaugeList = {
 
 /**
   空押し判定を行うか
-  判定させる場合は `true` を指定
+  判定させる場合は true を指定
 */
-g_presetObj.excessiveJdgUse = `false`;
+g_presetObj.excessiveJdgUse = false;
 
 
 /*
@@ -139,9 +142,9 @@ g_presetObj.frzColors = true;
 
 /**
   フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
-  判定させる場合は `true` を指定
+  判定させる場合は true を指定
 */
-g_presetObj.frzStartjdgUse = `false`;
+g_presetObj.frzStartjdgUse = false;
 
 /*
 ------------------------------------------------------------------------
@@ -151,14 +154,14 @@ g_presetObj.frzStartjdgUse = `false`;
 */
 
 // デフォルトのデザインを使用せず、独自のデザインを使用するかを指定
-// カスタムデザインにする場合は `true` を指定
+// カスタムデザインにする場合は true を指定
 g_presetObj.customDesignUse = {
-	title: `false`,
-	titleArrow: `false`,
-	titleAnimation: `false`,
-	back: `false`,
-	backMain: `false`,
-	ready: `false`,
+	title: false,
+	titleArrow: false,
+	titleAnimation: false,
+	back: false,
+	backMain: false,
+	ready: false,
 };
 
 /**
@@ -212,6 +215,7 @@ g_presetObj.customDesignUse = {
 /**
   オプション利用設定（デフォルト）
   一律使用させたくない場合は `false` を指定（デフォルトは `true`）
+  Display設定の場合は `true,OFF`(設定は有効だが初期値はOFF)といったことができる
 */
 g_presetObj.settingUse = {
 	motion: `true`,
@@ -313,6 +317,11 @@ g_presetObj.resultVals = {
 	// exScore: `exScore`,
 };
 
+/* 
+	リザルトカスタムデータの表示設定
+	g_presetObj.resultVals から、リザルト画像データに表示したい項目を列挙します。
+ */
+//g_presetObj.resultValsView = [`exScore`];
 
 /*
 ------------------------------------------------------------------------
