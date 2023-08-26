@@ -1386,7 +1386,6 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 	// 拡張範囲を取得
 	const diffX = (_customDisplayName === `Main` && g_workObj.nonDefaultSc ?
 		g_headerObj.scAreaWidth * (g_headerObj.playingLayout ? 2 : 1) : 0);
-	console.log(g_headerObj.scAreaWidth)
 
 	const getLayerWithClear = (_name) => {
 		const layer = document.getElementById(_name);
@@ -4290,8 +4289,8 @@ const makeWarningWindow = (_text = ``, { resetFlg = false, backBtnUse = false } 
  * お知らせウィンドウ（汎用）を表示
  * @param {string} _text 
  */
-const makeInfoWindow = (_text, _animationName = ``, _backColor = `#ccccff`) => {
-	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, `#000066`, C_ALIGN_CENTER);
+const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff`, _x = 0 } = {}) => {
+	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, `#000066`, C_ALIGN_CENTER, { _x: _x });
 	lblWarning.style.pointerEvents = C_DIS_NONE;
 
 	if (_animationName !== ``) {
@@ -4310,7 +4309,7 @@ const makeInfoWindow = (_text, _animationName = ``, _backColor = `#ccccff`) => {
  * @param {string} _textColor 
  * @param {string} _align
  */
-const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) => {
+const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x = 0 } = {}) => {
 
 	deleteDiv(divRoot, `lblWarning`);
 
@@ -4327,7 +4326,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT) => {
 	const warnHeight = Math.min(150, Math.max(range.getClientRects().length,
 		_text.split(`<br>`).length + _text.split(`<p>`).length - 1) * 21);
 	const lbl = createDivCss2Label(`lblWarning`, _text, {
-		x: 0, y: 70, w: g_sWidth, h: warnHeight, siz: g_limitObj.mainSiz, backgroundColor: _bkColor,
+		x: _x, y: 70, w: g_sWidth, h: warnHeight, siz: g_limitObj.mainSiz, backgroundColor: _bkColor,
 		opacity: 0.9, lineHeight: `15px`, color: _textColor, align: _align, fontFamily: getBasicFont(),
 		whiteSpace: `normal`,
 	});
@@ -9120,7 +9119,7 @@ const mainInit = _ => {
 	}
 
 	if (getMusicUrl(g_stateObj.scoreId) === `nosound.mp3`) {
-		makeInfoWindow(g_msgInfoObj.I_0004, `leftToRightFade`);
+		makeInfoWindow(g_msgInfoObj.I_0004, `leftToRightFade`, { _x: g_workObj.playingX });
 	}
 
 	// ユーザカスタムイベント(初期)
