@@ -1384,7 +1384,8 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 	deleteChildspriteAll(`divRoot`);
 
 	// 拡張範囲を取得
-	const diffX = (_customDisplayName === `Main` && g_workObj.nonDefaultSc ? g_headerObj.scAreaWidth * 2 : 0);
+	const diffX = (_customDisplayName === `Main` && g_workObj.nonDefaultSc ?
+		g_headerObj.scAreaWidth * (g_headerObj.playingLayout ? 2 : 1) : 0);
 	console.log(g_headerObj.scAreaWidth)
 
 	const getLayerWithClear = (_name) => {
@@ -3259,7 +3260,14 @@ const headerConvert = _dosObj => {
 	obj.customViewWidth = setVal(_dosObj.customViewWidth ?? _dosObj.customCreditWidth, 0, C_TYP_FLOAT);
 
 	// ショートカットキーが既定値ではない場合の左右の拡張エリアのサイズ
-	obj.scAreaWidth = setVal(_dosObj.scAreaWidth ?? g_presetObj.scAreaWidth, 0, C_TYP_FLOAT);
+	if (hasVal(_dosObj.scAreaSetting)) {
+		const tmp = _dosObj.scAreaSetting.split(`,`);
+		obj.scAreaWidth = setVal(tmp[0], 0, C_TYP_FLOAT);
+		obj.playingLayout = tmp[1] !== `left`;
+	} else {
+		obj.scAreaWidth = g_presetObj.scAreaWidth ?? 0;
+		obj.playingLayout = g_presetObj.playingLayout ?? true;
+	}
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (g_isLocal) ? 0 : 1;
@@ -8597,7 +8605,7 @@ const getArrowSettings = _ => {
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 	g_workObj.nonDefaultSc = g_headerObj.keyRetry !== C_KEY_RETRY || g_headerObj.keyTitleBack !== C_KEY_TITLEBACK;
-	g_workObj.playingX = g_headerObj.playingX + (g_workObj.nonDefaultSc ? g_headerObj.scAreaWidth : 0);
+	g_workObj.playingX = g_headerObj.playingX + (g_workObj.nonDefaultSc && g_headerObj.playingLayout ? g_headerObj.scAreaWidth : 0);
 
 	if (g_stateObj.dataSaveFlg) {
 		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
