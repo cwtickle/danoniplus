@@ -113,7 +113,6 @@ const g_limitObj = {
     mainSiz: 14,
     musicTitleSiz: 13,
     keySetSiz: 16,
-    nonDefaultScWidth: 160,
 };
 
 /** 設定項目の位置 */
@@ -401,8 +400,11 @@ const updateWindowSiz = _ => {
         musicInfoOFF: {
             x: 20, animationDuration: `4.0s`, animationName: `leftToRightFade`, animationFillMode: `both`,
         },
-        lblMainSc: {
-            x: g_sWidth + 5, w: g_limitObj.nonDefaultScWidth, h: 20, siz: 12, align: C_ALIGN_LEFT,
+        lblMainScHeader: {
+            x: g_sWidth + g_headerObj.scAreaWidth - 85, w: 80, h: 20, siz: 12, align: C_ALIGN_RIGHT,
+        },
+        lblMainScKey: {
+            x: g_sWidth + g_headerObj.scAreaWidth - 85, w: 80, h: 20, siz: 12, align: C_ALIGN_RIGHT,
         },
 
         /** 結果画面 */

@@ -1384,7 +1384,8 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 	deleteChildspriteAll(`divRoot`);
 
 	// 拡張範囲を取得
-	const diffX = (_customDisplayName === `Main` && g_workObj.nonDefaultSc ? g_limitObj.nonDefaultScWidth : 0);
+	const diffX = (_customDisplayName === `Main` && g_workObj.nonDefaultSc ? g_headerObj.scAreaWidth * 2 : 0);
+	console.log(g_headerObj.scAreaWidth)
 
 	const getLayerWithClear = (_name) => {
 		const layer = document.getElementById(_name);
@@ -3256,6 +3257,9 @@ const headerConvert = _dosObj => {
 
 	// プレイ中クレジットを表示しないエリアのサイズ(X方向)
 	obj.customViewWidth = setVal(_dosObj.customViewWidth ?? _dosObj.customCreditWidth, 0, C_TYP_FLOAT);
+
+	// ショートカットキーが既定値ではない場合の左右の拡張エリアのサイズ
+	obj.scAreaWidth = setVal(_dosObj.scAreaWidth ?? g_presetObj.scAreaWidth, 0, C_TYP_FLOAT);
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
 	obj.justFrames = (g_isLocal) ? 0 : 1;
@@ -8593,7 +8597,7 @@ const getArrowSettings = _ => {
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 	g_workObj.nonDefaultSc = g_headerObj.keyRetry !== C_KEY_RETRY || g_headerObj.keyTitleBack !== C_KEY_TITLEBACK;
-	g_workObj.playingX = g_headerObj.playingX + (g_workObj.nonDefaultSc ? g_limitObj.nonDefaultScWidth / 2 : 0);
+	g_workObj.playingX = g_headerObj.playingX + (g_workObj.nonDefaultSc ? g_headerObj.scAreaWidth : 0);
 
 	if (g_stateObj.dataSaveFlg) {
 		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
@@ -8994,17 +8998,18 @@ const mainInit = _ => {
 
 	if (g_workObj.nonDefaultSc) {
 		multiAppend(infoSprite,
-			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, Object.assign(g_lblPosObj.lblMainSc, { y: g_sHeight - 65 })),
+			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, Object.assign(g_lblPosObj.lblMainScHeader, { y: g_sHeight - 65 })),
 		);
 		multiAppend(infoSprite,
 			createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry],
-				Object.assign(g_lblPosObj.lblMainSc, { y: g_sHeight - 50 })),
+				Object.assign(g_lblPosObj.lblMainScKey, { y: g_sHeight - 50, fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold` })),
 		);
 		multiAppend(infoSprite,
-			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, Object.assign(g_lblPosObj.lblMainSc, { y: g_sHeight - 35 })),
+			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, Object.assign(g_lblPosObj.lblMainScHeader, { y: g_sHeight - 35 })),
 		);
 		multiAppend(infoSprite,
-			createDivCss2Label(`lblTitleBackSc`, g_kCd[g_headerObj.keyTitleBack], Object.assign(g_lblPosObj.lblMainSc, { y: g_sHeight - 20 })),
+			createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack],
+				Object.assign(g_lblPosObj.lblMainScKey, { y: g_sHeight - 20, fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold` })),
 		);
 	}
 
@@ -9067,7 +9072,7 @@ const mainInit = _ => {
 		MCombo: [`combo`, 5], Kita: [`kita`, 7], Iknai: [`iknai`, 8], FCombo: [`combo`, 9],
 	};
 	Object.keys(jdgMainScoreObj).forEach(jdgScore =>
-		infoSprite.appendChild(makeCounterSymbol(`lbl${jdgScore}`, g_headerObj.playingWidth - 110 + (g_workObj.nonDefaultSc ? g_limitObj.nonDefaultScWidth / 2 : 0),
+		infoSprite.appendChild(makeCounterSymbol(`lbl${jdgScore}`, g_headerObj.playingWidth - 110 + (g_workObj.nonDefaultSc ? g_headerObj.scAreaWidth : 0),
 			g_cssObj[`common_${jdgMainScoreObj[jdgScore][0]}`], jdgMainScoreObj[jdgScore][1] + 1, 0, g_workObj.scoreDisp)));
 
 	// パーフェクト演出
