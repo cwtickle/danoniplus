@@ -3259,8 +3259,8 @@ const headerConvert = _dosObj => {
 	obj.customViewWidth = setVal(_dosObj.customViewWidth ?? _dosObj.customCreditWidth, 0, C_TYP_FLOAT);
 
 	// ショートカットキーが既定値ではない場合の左右の拡張エリアのサイズ
-	if (hasVal(_dosObj.scAreaSetting)) {
-		const tmp = _dosObj.scAreaSetting.split(`,`);
+	if (hasVal(_dosObj.scArea)) {
+		const tmp = _dosObj.scArea.split(`,`);
 		obj.scAreaWidth = setVal(tmp[0], 0, C_TYP_FLOAT);
 		obj.playingLayout = tmp[1] !== `left`;
 	} else {
