@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/08/03 (v33.1.0)
+ * Revised : 2023/08/27 (v33.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -399,6 +399,12 @@ const updateWindowSiz = _ => {
         },
         musicInfoOFF: {
             x: 20, animationDuration: `4.0s`, animationName: `leftToRightFade`, animationFillMode: `both`,
+        },
+        lblMainScHeader: {
+            x: g_sWidth + g_headerObj.scAreaWidth - 85, w: 80, h: 20, siz: 12, align: C_ALIGN_RIGHT,
+        },
+        lblMainScKey: {
+            x: g_sWidth + g_headerObj.scAreaWidth - 85, w: 80, h: 20, siz: 12, align: C_ALIGN_RIGHT,
         },
 
         /** 結果画面 */
@@ -2853,6 +2859,9 @@ const g_lang_lblNameObj = {
         j_adj: `推定Adj`,
         j_excessive: `Excessive`,
 
+        l_retry: `リトライ`,
+        l_titleBack: `タイトルバック`,
+
         helpUrl: `https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`,
         securityUrl: `https://github.com/cwtickle/danoniplus/security/policy`,
     },
@@ -2886,6 +2895,9 @@ const g_lang_lblNameObj = {
 
         j_adj: `Est-Adj.`,
         j_excessive: `Excessive`,
+
+        l_retry: `Retry`,
+        l_titleBack: `Go to title`,
 
         helpUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/AboutGameSystem`,
         securityUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/SecurityPolicy`,
