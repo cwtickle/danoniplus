@@ -3697,6 +3697,22 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	};
 
 	/**
+	 * divMaxX, posXの下段補完処理
+	 * ・divXの1番目の指定があるとき、その値を元に下段の位置を補完
+	 * 例) |div11x=7,b6|pos11x=0,1,2,3,4,5,6,b0,b1,b5,b6|
+	 *  -> |div11x=7,13|pos11x=0,1,2,3,4,5,6,7,8,12,13|
+	 * @param {number} _num 
+	 * @param {number} _divNum 
+	 * @returns 
+	 */
+	const getKeyPosNum = (_num, _divNum = 0) => {
+		if (!hasVal(_num) || (!_num.startsWith(`b`) && isNaN(parseFloat(_num)))) {
+			return _num;
+		}
+		return _num.startsWith(`b`) ? parseFloat(_num.slice(1)) + _divNum : parseFloat(_num);
+	}
+
+	/**
 	 * 新キー用複合パラメータ
 	 * @param {string} _key キー数
 	 * @param {string} _name 名前
@@ -3891,9 +3907,6 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
 		newKeyTripleParam(newKey, `stepRtn`);
 
-		// ステップゾーン位置 (posX_Y)
-		newKeyMultiParam(newKey, `pos`, toFloat);
-
 		// 各キーの区切り位置 (divX_Y)
 		_dosObj[`div${newKey}`]?.split(`$`).forEach((tmpDiv, k) => {
 			const tmpDivPtn = tmpDiv.split(`,`);
@@ -3909,8 +3922,17 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 			} else {
 				// それ以外の場合は指定された値を適用（未指定時はその後で指定）
 				g_keyObj[`div${ptnName}`] = setVal(tmpDivPtn[0], undefined, C_TYP_NUMBER);
-				g_keyObj[`divMax${ptnName}`] = setVal(tmpDivPtn[1], undefined, C_TYP_FLOAT);
+				g_keyObj[`divMax${ptnName}`] = setVal(getKeyPosNum(tmpDivPtn[1], g_keyObj[`div${ptnName}`]), undefined, C_TYP_FLOAT);
 			}
+		});
+
+		// ステップゾーン位置 (posX_Y)
+		newKeyMultiParam(newKey, `pos`, toFloat, {
+			loopFunc: (k, keyheader) => {
+				g_keyObj[`${keyheader}_${k + dfPtnNum}`].forEach((val, j) => {
+					g_keyObj[`${keyheader}_${k + dfPtnNum}`][j] = getKeyPosNum(String(val), g_keyObj[`div${newKey}_${k + dfPtnNum}`]);
+				});
+			},
 		});
 
 		// charaX_Y, posX_Y, keyGroupX_Y, divX_Y, divMaxX_Yが未指定の場合はkeyCtrlX_Yを元に適用
