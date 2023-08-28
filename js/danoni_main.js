@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/08/27
+ * Revised : 2023/08/28
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 33.4.0`;
-const g_revisedDate = `2023/08/27`;
+const g_version = `Ver 33.4.1`;
+const g_revisedDate = `2023/08/28`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1183,10 +1183,10 @@ const createEmptySprite = (_parentObj, _newObjId, { x = 0, y = 0, w = g_sWidth, 
  * @param {string} _baseName 
  * @param {number} _num 
  */
-const createMultipleSprite = (_baseName, _num) => {
+const createMultipleSprite = (_baseName, _num, { x = 0 } = {}) => {
 	const sprite = createEmptySprite(divRoot, `${_baseName}`);
 	for (let j = 0; j <= _num; j++) {
-		createEmptySprite(sprite, `${_baseName}${j}`);
+		createEmptySprite(sprite, `${_baseName}${j}`, { x });
 	}
 	return sprite;
 };
@@ -8626,7 +8626,8 @@ const getArrowSettings = _ => {
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 	g_workObj.nonDefaultSc = g_headerObj.keyRetry !== C_KEY_RETRY || g_headerObj.keyTitleBack !== C_KEY_TITLEBACK;
-	g_workObj.playingX = g_headerObj.playingX + (g_workObj.nonDefaultSc && g_headerObj.playingLayout ? g_headerObj.scAreaWidth : 0);
+	g_workObj.backX = (g_workObj.nonDefaultSc && g_headerObj.playingLayout ? g_headerObj.scAreaWidth : 0);
+	g_workObj.playingX = g_headerObj.playingX + g_workObj.backX;
 
 	if (g_stateObj.dataSaveFlg) {
 		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
@@ -8741,7 +8742,7 @@ const mainInit = _ => {
 	g_workObj.wordFadeFrame = [...Array(wordMaxLen)].fill(0);
 
 	// 背景スプライトを作成
-	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth);
+	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth, { x: g_workObj.backX });
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createEmptySprite(divRoot, `mainSprite`, {
@@ -8758,7 +8759,7 @@ const mainInit = _ => {
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 
 	// マスクスプライトを作成 (最上位)
-	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth);
+	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth, { x: g_workObj.backX });
 
 	// カラー・モーションを適用するオブジェクトの種類
 	const objList = (g_stateObj.dummyId === `` ? [``] : [`dummy`, ``]);
