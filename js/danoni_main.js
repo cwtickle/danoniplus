@@ -10989,24 +10989,7 @@ const resultInit = _ => {
 
 		tmpDiv.appendChild(canvas);
 
-		try {
-			if (ClipboardItem === undefined) {
-				throw new Error(`error`);
-			}
-			// Canvas の内容を PNG 画像として取得
-			canvas.toBlob(async blob => {
-				await navigator.clipboard.write([
-					new ClipboardItem({
-						'image/png': blob
-					})
-				]);
-			});
-			tmpDiv.removeChild(canvas);
-			divRoot.removeChild(tmpDiv);
-			makeInfoWindow(_msg, `leftToRightFade`);
-
-		} catch (err) {
-			// 画像をクリップボードへコピーできないときは代替で画像保存可能な画面を表示
+		const viewResultImage = _ => {
 			if (document.getElementById(`tmpClose`) === null) {
 				divRoot.oncontextmenu = _ => true;
 				makeLinkButton(tmpDiv, `Tmp`);
@@ -11020,6 +11003,31 @@ const resultInit = _ => {
 					}), g_cssObj.button_Back));
 				tmpDiv.appendChild(createDescDiv(`resultImageDesc`, g_lblNameObj.resultImageDesc));
 			}
+		};
+
+		try {
+			if (ClipboardItem === undefined) {
+				throw new Error(`error`);
+			}
+			if (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)) {
+				viewResultImage();
+			} else {
+				// Canvas の内容を PNG 画像として取得
+				canvas.toBlob(async blob => {
+					await navigator.clipboard.write([
+						new ClipboardItem({
+							'image/png': blob
+						})
+					]);
+				});
+				tmpDiv.removeChild(canvas);
+				divRoot.removeChild(tmpDiv);
+				makeInfoWindow(_msg, `leftToRightFade`);
+			}
+
+		} catch (err) {
+			// 画像をクリップボードへコピーできないときは代替で画像保存可能な画面を表示
+			viewResultImage();
 		}
 	};
 
