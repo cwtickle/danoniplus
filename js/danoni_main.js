@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/08/28
+ * Revised : 2023/09/02
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 33.4.1`;
-const g_revisedDate = `2023/08/28`;
+const g_version = `Ver 33.5.0`;
+const g_revisedDate = `2023/09/02`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
