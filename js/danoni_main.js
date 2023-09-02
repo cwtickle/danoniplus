@@ -2466,7 +2466,7 @@ const calcLevel = _scoreObj => {
 
 	allScorebook.sort((a, b) => a - b);
 	allScorebook.unshift(allScorebook[0] - 100);
-	allScorebook.push(allScorebook[allScorebook.length - 1] + 100);
+	allScorebook.push(allScorebook.at(-1) + 100);
 	const allCnt = allScorebook.length;
 
 	frzEndData.push(allScorebook[allCnt - 1]);
@@ -4486,9 +4486,10 @@ const nextDifficulty = (_scrollNum = 1) => {
  */
 const makeDifList = (_difList, _targetKey = ``) => {
 	let k = 0, pos = 0;
-	g_headerObj.viewLists.filter(j => _targetKey === `` || _targetKey === g_headerObj.keyLabels[j])
-		.forEach(j => {
-			let text = `${getKeyName(g_headerObj.keyLabels[j])} / ${g_headerObj.difLabels[j]}`;
+	g_headerObj.viewLists.forEach(j => {
+		const keyLabel = g_headerObj.keyLabels[j];
+		if (_targetKey === `` || keyLabel === _targetKey) {
+			let text = `${getKeyName(keyLabel)} / ${g_headerObj.difLabels[j]}`;
 			if (g_headerObj.makerView) {
 				text += ` (${g_headerObj.creatorNames[j]})`;
 			}
@@ -4498,7 +4499,8 @@ const makeDifList = (_difList, _targetKey = ``) => {
 				pos = k + 6;
 			}
 			k++;
-		});
+		}
+	});
 	_difList.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(_difList.style.height), 0);
 };
 
@@ -4624,7 +4626,7 @@ const drawSpeedGraph = _scoreId => {
 				speedObj[speedType].cnt++;
 			}
 			frame.push(playingFrame);
-			speed.push(speed[speed.length - 1]);
+			speed.push(speed.at(-1));
 		}
 	});
 
@@ -7796,8 +7798,11 @@ const getLastFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj
 			_dataObj.dummyFrzData[j]
 		];
 
-		data.filter(data => hasVal(data) && data?.[data.length - 1] > tmpLastNum)
-			.forEach(_objData => tmpLastNum = _objData[_objData.length - 1]);
+		data.filter(data => hasVal(data)).forEach(_objData => {
+			if (_objData.at(-1) > tmpLastNum) {
+				tmpLastNum = _objData.at(-1);
+			}
+		});
 	}
 	return tmpLastNum;
 };
@@ -7820,8 +7825,11 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
 			_dataObj.dummyFrzData[j]
 		];
 
-		data.filter(data => hasVal(data) && data[0] !== `` && data[0] < tmpFirstNum && data[0] + g_limitObj.adjustment > 0)
-			.forEach(_objData => tmpFirstNum = _objData[0]);
+		data.filter(data => hasVal(data)).forEach(_objData => {
+			if (data[0] !== `` && data[0] < tmpFirstNum && data[0] + g_limitObj.adjustment > 0) {
+				tmpFirstNum = _objData[0];
+			}
+		});
 	}
 	return (tmpFirstNum === Infinity ? 0 : tmpFirstNum);
 };
