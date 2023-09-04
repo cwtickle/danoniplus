@@ -165,9 +165,10 @@ const C_TYP_CALC = `calc`;
 
 // ウィンドウサイズ
 let [g_sWidth, g_sHeight] = [
-    setVal($id(`canvas-frame`).width, 500, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
+    setVal($id(`canvas-frame`).width, window.innerWidth - 20, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, window.innerHeight - 150, C_TYP_FLOAT)
 ];
 $id(`canvas-frame`).width = `${g_sWidth}px`;
+$id(`canvas-frame`).height = `${g_sHeight}px`;
 $id(`canvas-frame`).margin = `auto`;
 
 // 固定ウィンドウサイズ
