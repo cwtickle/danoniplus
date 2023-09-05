@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/09/02
+ * Revised : 2023/09/05
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 33.5.0`;
-const g_revisedDate = `2023/09/02`;
+const g_version = `Ver 33.5.1`;
+const g_revisedDate = `2023/09/05`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -927,7 +927,7 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : (_objType === `titleArrow` ? `40` : ``);
 
 	let convertColorStr = ``;
-	const tmpBackgroundStr = _colorStr.split(`;`);
+	const tmpBackgroundStr = _colorStr.split(`;;`);
 
 	// 色情報以外の部分を退避
 	const addData = tmpBackgroundStr[1] !== undefined ? tmpBackgroundStr.slice(1).join(` `) : ``;
