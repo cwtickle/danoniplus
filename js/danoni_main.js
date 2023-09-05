@@ -927,7 +927,7 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : (_objType === `titleArrow` ? `40` : ``);
 
 	let convertColorStr = ``;
-	const tmpBackgroundStr = _colorStr.split(`;`);
+	const tmpBackgroundStr = _colorStr.split(`;;`);
 
 	// 色情報以外の部分を退避
 	const addData = tmpBackgroundStr[1] !== undefined ? tmpBackgroundStr.slice(1).join(` `) : ``;
