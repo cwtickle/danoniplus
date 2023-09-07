@@ -2714,8 +2714,13 @@ const headerConvert = _dosObj => {
 
 	// 横幅設定
 	if (hasVal(_dosObj.windowWidth)) {
-		g_sWidth = setIntVal(_dosObj.windowWidth, g_sWidth);
+		g_sWidth = Math.max(setIntVal(_dosObj.windowWidth, g_sWidth), g_sWidth);
 		$id(`canvas-frame`).width = `${g_sWidth}px`;
+	}
+	// 高さ設定
+	if (hasVal(_dosObj.windowHeight)) {
+		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_sHeight), g_sHeight);
+		$id(`canvas-frame`).height = `${g_sHeight}px`;
 	}
 
 	// 曲名
@@ -2983,13 +2988,21 @@ const headerConvert = _dosObj => {
 		makeWarningWindow(g_msgInfoObj.E_0042.split(`{0}`).join(`playbackRate`));
 	}
 
+	// プレイサイズ(X方向, Y方向)
+	obj.playingWidth = setIntVal(_dosObj.playingWidth, `default`);
+	obj.playingHeight = setIntVal(_dosObj.playingHeight, g_sHeight);
+
+	// プレイ左上位置(X座標, Y座標)
+	obj.playingX = setIntVal(_dosObj.playingX);
+	obj.playingY = setIntVal(_dosObj.playingY);
+
 	// ステップゾーン位置
 	g_posObj.stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));
 	g_posObj.stepYR = (isNaN(parseFloat(_dosObj.stepYR)) ? C_STEP_YR : parseFloat(_dosObj.stepYR));
 	g_posObj.stepDiffY = g_posObj.stepY - C_STEP_Y;
-	g_posObj.distY = g_sHeight - C_STEP_Y + g_posObj.stepYR;
+	g_posObj.distY = obj.playingHeight - C_STEP_Y + g_posObj.stepYR;
 	g_posObj.reverseStepY = g_posObj.distY - g_posObj.stepY - g_posObj.stepDiffY - C_ARW_WIDTH;
-	g_posObj.arrowHeight = g_sHeight + g_posObj.stepYR - g_posObj.stepDiffY * 2;
+	g_posObj.arrowHeight = obj.playingHeight + g_posObj.stepYR - g_posObj.stepDiffY * 2;
 	obj.bottomWordSetFlg = setBoolVal(_dosObj.bottomWordSet);
 
 	// 矢印・フリーズアロー判定位置補正
@@ -3218,12 +3231,6 @@ const headerConvert = _dosObj => {
 
 	// Reverse時の歌詞の自動反転制御
 	obj.wordAutoReverse = _dosObj.wordAutoReverse ?? g_presetObj.wordAutoReverse ?? `auto`;
-
-	// プレイサイズ(X方向)
-	obj.playingWidth = setIntVal(_dosObj.playingWidth, `default`);
-
-	// プレイ左上位置(X座標)
-	obj.playingX = setIntVal(_dosObj.playingX);
 
 	// プレイ中クレジットを表示しないエリアのサイズ(X方向)
 	obj.customViewWidth = setVal(_dosObj.customViewWidth ?? _dosObj.customCreditWidth, 0, C_TYP_FLOAT);
@@ -4277,8 +4284,8 @@ const makeWarningWindow = (_text = ``, { resetFlg = false, backBtnUse = false } 
  * お知らせウィンドウ（汎用）を表示
  * @param {string} _text 
  */
-const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff`, _x = 0 } = {}) => {
-	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, `#000066`, C_ALIGN_CENTER, { _x: _x });
+const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff`, _x = 0, _y = 0 } = {}) => {
+	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, `#000066`, C_ALIGN_CENTER, { _x, _y });
 	lblWarning.style.pointerEvents = C_DIS_NONE;
 
 	if (_animationName !== ``) {
@@ -4297,7 +4304,7 @@ const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff`, _x
  * @param {string} _textColor 
  * @param {string} _align
  */
-const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x = 0 } = {}) => {
+const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x = 0, _y = 0 } = {}) => {
 
 	deleteDiv(divRoot, `lblWarning`);
 
@@ -4314,7 +4321,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 	const warnHeight = Math.min(150, Math.max(range.getClientRects().length,
 		_text.split(`<br>`).length + _text.split(`<p>`).length - 1) * 21);
 	const lbl = createDivCss2Label(`lblWarning`, _text, {
-		x: _x, y: 70, w: g_sWidth, h: warnHeight, siz: g_limitObj.mainSiz, backgroundColor: _bkColor,
+		x: _x, y: 70 + _y, w: g_sWidth, h: warnHeight, siz: g_limitObj.mainSiz, backgroundColor: _bkColor,
 		opacity: 0.9, lineHeight: `15px`, color: _textColor, align: _align, fontFamily: getBasicFont(),
 		whiteSpace: `normal`,
 	});
@@ -4496,7 +4503,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => nextDifficulty(j - g_stateObj.scoreId),
 				{ btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
 			if (j === g_stateObj.scoreId) {
-				pos = k + 6;
+				pos = k + 6 + (g_sHeight - 500) / 50;
 			}
 			k++;
 		}
@@ -7875,7 +7882,7 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
  * Motionオプション適用時の矢印別の速度設定
  * - 矢印が表示される最大フレーム数を 縦ピクセル数×20 と定義。
  */
-const setMotionOnFrame = _ => g_motionFunc[g_stateObj.motion]([...Array(g_sHeight * 20 + 1)].fill(0));
+const setMotionOnFrame = _ => g_motionFunc[g_stateObj.motion]([...Array(g_headerObj.playingHeight * 20 + 1)].fill(0));
 
 /**
  * Boost用の適用関数
@@ -7900,7 +7907,7 @@ const getBrakeTrace = _frms => {
 	for (let j = C_MOTION_STD_POS + 5; j < C_MOTION_STD_POS + 19; j++) {
 		_frms[j] = (j - 15) * 4 / 14;
 	}
-	for (let j = C_MOTION_STD_POS + 19; j <= g_sHeight / 2; j++) {
+	for (let j = C_MOTION_STD_POS + 19; j <= g_headerObj.playingHeight / 2; j++) {
 		_frms[j] = 4;
 	}
 	return _frms;
@@ -8686,14 +8693,15 @@ const mainInit = _ => {
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createEmptySprite(divRoot, `mainSprite`, {
-		x: g_workObj.playingX, y: g_posObj.stepY - C_STEP_Y, w: g_headerObj.playingWidth, transform: `scale(${g_keyObj.scale})`,
+		x: g_workObj.playingX, y: g_posObj.stepY - C_STEP_Y + g_headerObj.playingY, w: g_headerObj.playingWidth, h: g_headerObj.playingHeight,
+		transform: `scale(${g_keyObj.scale})`,
 	});
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
-	const infoSprite = createEmptySprite(divRoot, `infoSprite`, { x: g_workObj.playingX, w: g_headerObj.playingWidth });
+	const infoSprite = createEmptySprite(divRoot, `infoSprite`, { x: g_workObj.playingX, y: g_headerObj.playingY, w: g_headerObj.playingWidth, h: g_headerObj.playingHeight });
 
 	// 判定系スプライトを作成（メインスプライトより上位）
-	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, { x: g_workObj.playingX, w: g_headerObj.playingWidth });
+	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, { x: g_workObj.playingX, y: g_headerObj.playingY, w: g_headerObj.playingWidth, h: g_headerObj.playingHeight });
 
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
@@ -8931,20 +8939,20 @@ const mainInit = _ => {
 
 		// ライフ背景
 		createColorObject2(`lifeBackObj`, {
-			x: 5, y: 50, w: 15, h: g_sHeight - 100, styleName: `lifeBar`, display: g_workObj.lifegaugeDisp,
+			x: 5, y: 50, w: 15, h: g_headerObj.playingHeight - 100, styleName: `lifeBar`, display: g_workObj.lifegaugeDisp,
 		}, g_cssObj.life_Background),
 
 		// ライフ本体
 		createColorObject2(`lifeBar`, {
-			x: 5, y: 50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal,
-			w: 15, h: (g_sHeight - 100) * intLifeVal / g_headerObj.maxLifeVal, styleName: `lifeBar`,
+			x: 5, y: 50 + (g_headerObj.playingHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal,
+			w: 15, h: (g_headerObj.playingHeight - 100) * intLifeVal / g_headerObj.maxLifeVal, styleName: `lifeBar`,
 			display: g_workObj.lifegaugeDisp,
 		}, lblInitColor),
 
 		// ライフ：ボーダーライン
 		// この背景の画像は40x16で作成しているが、`padding-right:5px`があるためサイズを35x16で作成
 		createColorObject2(`lifeBorderObj`, {
-			x: 10, y: 42 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
+			x: 10, y: 42 + (g_headerObj.playingHeight - 100) * (g_headerObj.maxLifeVal - g_workObj.lifeBorder) / g_headerObj.maxLifeVal,
 			w: 35, h: 16, background: C_CLR_BORDER, styleName: `lifeBorder`,
 			fontFamily: getBasicFont(), display: g_workObj.lifegaugeDisp,
 		}, g_cssObj.life_Border, g_cssObj.life_BorderColor),
@@ -8964,18 +8972,18 @@ const mainInit = _ => {
 
 	if (g_workObj.nonDefaultSc) {
 		multiAppend(infoSprite,
-			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, Object.assign(g_lblPosObj.lblMainScHeader, { y: g_sHeight - 65 })),
+			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, Object.assign(g_lblPosObj.lblMainScHeader, { y: g_headerObj.playingHeight - 65 })),
 		);
 		multiAppend(infoSprite,
 			createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry],
-				Object.assign(g_lblPosObj.lblMainScKey, { y: g_sHeight - 50, fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold` })),
+				Object.assign(g_lblPosObj.lblMainScKey, { y: g_headerObj.playingHeight - 50, fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold` })),
 		);
 		multiAppend(infoSprite,
-			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, Object.assign(g_lblPosObj.lblMainScHeader, { y: g_sHeight - 35 })),
+			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, Object.assign(g_lblPosObj.lblMainScHeader, { y: g_headerObj.playingHeight - 35 })),
 		);
 		multiAppend(infoSprite,
 			createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack],
-				Object.assign(g_lblPosObj.lblMainScKey, { y: g_sHeight - 20, fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold` })),
+				Object.assign(g_lblPosObj.lblMainScKey, { y: g_headerObj.playingHeight - 20, fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold` })),
 		);
 	}
 
@@ -8988,13 +8996,13 @@ const mainInit = _ => {
 	// 歌詞表示
 	const wordSprite = createEmptySprite(judgeSprite, `wordSprite`, { w: g_headerObj.playingWidth });
 	for (let j = 0; j <= g_scoreObj.wordMaxDepth; j++) {
-		const wordY = (j % 2 === 0 ? 10 : (g_headerObj.bottomWordSetFlg ? g_posObj.distY + 10 : g_sHeight - 60));
+		const wordY = (j % 2 === 0 ? 10 : (g_headerObj.bottomWordSetFlg ? g_posObj.distY + 10 : g_headerObj.playingHeight - 60));
 		wordSprite.appendChild(createDivCss2Label(`lblword${j}`, ``, Object.assign(g_lblPosObj.lblWord, { y: wordY, fontFamily: getBasicFont() })));
 	}
 
 	const jdgGroups = [`J`, `FJ`];
 	const jdgX = [g_headerObj.playingWidth / 2 - 220, g_headerObj.playingWidth / 2 - 120];
-	const jdgY = [(g_sHeight + g_posObj.stepYR) / 2 - 60, (g_sHeight + g_posObj.stepYR) / 2 + 10];
+	const jdgY = [(g_headerObj.playingHeight + g_posObj.stepYR) / 2 - 60, (g_headerObj.playingHeight + g_posObj.stepYR) / 2 + 10];
 	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.jdgPosReset) {
 	} else {
 		jdgY[0] += g_diffObj.arrowJdgY;
@@ -9068,7 +9076,7 @@ const mainInit = _ => {
 		divRoot.appendChild(
 			createDivCss2Label(`lblReady`, readyHtml, {
 				x: g_workObj.playingX + (g_headerObj.playingWidth - g_sWidth) / 2,
-				y: (g_sHeight + g_posObj.stepYR) / 2 - 75,
+				y: g_headerObj.playingY + (g_headerObj.playingHeight + g_posObj.stepYR) / 2 - 75,
 				w: g_sWidth, h: 50, siz: 40,
 				animationDuration: `${g_headerObj.readyAnimationFrame / g_fps}s`,
 				animationName: g_headerObj.readyAnimationName,
@@ -9078,7 +9086,7 @@ const mainInit = _ => {
 	}
 
 	if (getMusicUrl(g_stateObj.scoreId) === `nosound.mp3`) {
-		makeInfoWindow(g_msgInfoObj.I_0004, `leftToRightFade`, { _x: g_workObj.playingX });
+		makeInfoWindow(g_msgInfoObj.I_0004, `leftToRightFade`, { _x: g_workObj.playingX, _y: g_headerObj.playingY });
 	}
 
 	// ユーザカスタムイベント(初期)
@@ -10275,8 +10283,8 @@ const changeLifeColor = (_state = ``) => {
 
 	const intLifeVal = Math.floor(g_workObj.lifeVal);
 	lblLife.textContent = intLifeVal;
-	lifeBar.style.top = `${50 + (g_sHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal}px`;
-	lifeBar.style.height = `${(g_sHeight - 100) * intLifeVal / g_headerObj.maxLifeVal}px`;
+	lifeBar.style.top = `${50 + (g_headerObj.playingHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal}px`;
+	lifeBar.style.height = `${(g_headerObj.playingHeight - 100) * intLifeVal / g_headerObj.maxLifeVal}px`;
 };
 
 const lifeRecovery = _ => {
@@ -10839,7 +10847,7 @@ const resultInit = _ => {
 
 		canvas.id = `resultImage`;
 		canvas.width = 400;
-		canvas.height = 410;
+		canvas.height = g_sHeight - 90;
 		canvas.style.left = `${(g_sWidth - canvas.width) / 2}px`;
 		canvas.style.top = `20px`;
 		canvas.style.position = `absolute`;
