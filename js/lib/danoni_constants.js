@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/08/27 (v33.4.0)
+ * Revised : 2023/09/07 (v33.6.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -167,16 +167,14 @@ const C_TYP_CALC = `calc`;
 let [g_sWidth, g_sHeight] = [
     setVal($id(`canvas-frame`).width, 500, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
 ];
-$id(`canvas-frame`).width = `${g_sWidth}px`;
+$id(`canvas-frame`).width = `${Math.max(g_sWidth, 500)}px`;
+$id(`canvas-frame`).height = `${Math.max(g_sHeight, 500)}px`;
 $id(`canvas-frame`).margin = `auto`;
 
 // 固定ウィンドウサイズ
 const g_windowObj = {
     divRoot: { margin: `auto`, letterSpacing: `normal` },
     divBack: { background: `linear-gradient(#000000, #222222)` },
-
-    difList: { x: 165, y: 60, w: 280, h: 261, overflow: `auto` },
-    difCover: { x: 25, y: 60, w: 140, h: 261, overflow: `auto`, opacity: 0.95 },
 
     scoreDetail: { x: 20, y: 85, w: 420, h: 236, visibility: `hidden` },
     detailObj: { w: 420, h: 230, visibility: `hidden` },
@@ -189,12 +187,14 @@ const g_lblPosObj = {};
 // 可変部分のウィンドウサイズを更新
 const updateWindowSiz = _ => {
     Object.assign(g_windowObj, {
-        optionSprite: { x: (g_sWidth - 450) / 2, y: 65 + (g_sHeight - 500) / 2, w: 450, h: 325 },
+        optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
+        difList: { x: 165, y: 60, w: 280, h: 261 + g_sHeight - 500, overflow: `auto` },
+        difCover: { x: 25, y: 60, w: 140, h: 261 + g_sHeight - 500, overflow: `auto`, opacity: 0.95 },
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
-        keyconSprite: { y: 88 + (g_sHeight - 500) / 2, h: g_sHeight, overflow: `auto` },
+        keyconSprite: { y: 88, h: g_sHeight, overflow: `auto` },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
-        playDataWindow: { x: g_sWidth / 2 - 225, y: 70 + (g_sHeight - 500) / 2, w: 450, h: 110 },
-        resultWindow: { x: g_sWidth / 2 - 200, y: 185 + (g_sHeight - 500) / 2, w: 400, h: 210 },
+        playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
+        resultWindow: { x: g_sWidth / 2 - 200, y: 185, w: 400, h: 210 },
     });
 
     Object.assign(g_lblPosObj, {
@@ -379,23 +379,23 @@ const updateWindowSiz = _ => {
             x: -8, y: -8, w: C_ARW_WIDTH + 16, h: C_ARW_WIDTH + 16,
         },
         lblCredit: {
-            x: 125, y: g_sHeight - 30, w: g_headerObj.playingWidth - 125, h: 20, align: C_ALIGN_LEFT,
+            x: 125, y: g_headerObj.playingHeight - 30, w: g_headerObj.playingWidth - 125, h: 20, align: C_ALIGN_LEFT,
         },
         lblDifName: {
-            x: 125, y: g_sHeight - 16, w: g_headerObj.playingWidth, h: 20, align: C_ALIGN_LEFT,
+            x: 125, y: g_headerObj.playingHeight - 16, w: g_headerObj.playingWidth, h: 20, align: C_ALIGN_LEFT,
         },
         lblTime1: {
-            x: 18, y: g_sHeight - 30, w: 40, h: 20, siz: g_limitObj.mainSiz, align: C_ALIGN_RIGHT,
+            x: 18, y: g_headerObj.playingHeight - 30, w: 40, h: 20, siz: g_limitObj.mainSiz, align: C_ALIGN_RIGHT,
         },
         lblTime2: {
-            x: 60, y: g_sHeight - 30, w: 60, h: 20, siz: g_limitObj.mainSiz,
+            x: 60, y: g_headerObj.playingHeight - 30, w: 60, h: 20, siz: g_limitObj.mainSiz,
         },
         lblWord: {
             x: 100, w: g_headerObj.playingWidth - 200, h: 50,
             siz: g_limitObj.mainSiz, align: C_ALIGN_LEFT, display: `block`, margin: `auto`,
         },
         finishView: {
-            x: g_headerObj.playingWidth / 2 - 150, y: g_sHeight / 2 - 50, w: 300, h: 20, siz: 50,
+            x: g_headerObj.playingWidth / 2 - 150, y: g_headerObj.playingHeight / 2 - 50, w: 300, h: 20, siz: 50,
         },
         musicInfoOFF: {
             x: 20, animationDuration: `4.0s`, animationName: `leftToRightFade`, animationFillMode: `both`,
@@ -412,7 +412,7 @@ const updateWindowSiz = _ => {
             x: 340, y: 160, w: 70, h: 20, siz: 50, align: C_ALIGN_CENTER,
         },
         lblResultPre: {
-            x: g_sWidth / 2 - 150, y: g_sHeight / 2 - 160, w: 200, h: 50, siz: 60, opacity: 0,
+            x: g_sWidth / 2 - 150, y: 90, w: 200, h: 50, siz: 60, opacity: 0,
         },
         lblResultPre2: {
             x: g_sWidth / 2 + 50, y: 40, w: 200, h: 30, siz: 20,
