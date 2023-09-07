@@ -412,7 +412,7 @@ const updateWindowSiz = _ => {
             x: 340, y: 160, w: 70, h: 20, siz: 50, align: C_ALIGN_CENTER,
         },
         lblResultPre: {
-            x: g_sWidth / 2 - 150, y: g_sHeight / 2 - 160, w: 200, h: 50, siz: 60, opacity: 0,
+            x: g_sWidth / 2 - 150, y: 90, w: 200, h: 50, siz: 60, opacity: 0,
         },
         lblResultPre2: {
             x: g_sWidth / 2 + 50, y: 40, w: 200, h: 30, siz: 20,
