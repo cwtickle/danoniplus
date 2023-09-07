@@ -3,7 +3,7 @@
 - 開発にご協力いただける方は、[How to Contribute](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)をご覧ください。
 - 名前(Name)は昇順で表記しています。
 
-|Name|GitHub|Twitter|Contribution|
+|Name|GitHub|X(Twitter)|Contribution|
 |----|----|----|----|
 |aconite||[@aconite_ac](https://twitter.com/aconite_ac)|機能提案、不具合報告、事象解析|
 |apoi||[@kwbredda3](https://twitter.com/kwbredda3)|機能提案、不具合報告|
@@ -13,6 +13,7 @@
 |goe |[@goe0](https://github.com/goe0)|[@goe_0](https://twitter.com/goe_0)|コーディング、機能提案、不具合報告、事象解析、関連ツール作成|
 |izkdic||[@vdos2643](https://twitter.com/vdos2643)|機能提案、不具合報告、事象解析|
 |kuroclef|[@kuroclef](https://github.com/kuroclef)|[@kuroclef](https://twitter.com/kuroclef)|コーディング|
+|LaV|[@lvenier](https://github.com/lvenier)||機能提案|
 |MFV2|[@MFV2](https://github.com/MFV2)|[@MFV2_](https://twitter.com/MFV2_)|コーディング、機能提案、不具合報告、事象解析|
 |natu||[@natu_ame_](https://twitter.com/natu_ame_)|機能提案|
 |SKB|[@superkuppabros](https://github.com/superkuppabros)|[@superkuppabros](https://twitter.com/superkuppabros)|機能提案、不具合報告、関連ツール作成|
