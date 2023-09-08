@@ -29,6 +29,9 @@ g_presetObj.tuningUrl = `https://www.google.co.jp/`;
 /** 個人サイト別の最小横幅設定 */
 //g_presetObj.autoMinWidth = 600;
 
+/** 個人サイト別の最小高さ設定 */
+//g_presetObj.autoMinHeight = 500;
+
 /** 個人サイト別のウィンドウ位置 (left:左寄せ, center:中央, right:右寄せ)*/
 //g_presetObj.windowAlign = `center`;
 
@@ -291,6 +294,15 @@ g_presetObj.stockForceDelList = {
  * - 現状影響する範囲は「scAreaWidth」の設定のみ
  */
 //g_presetObj.playingLayout = `left`;
+
+/**
+ * プレイ画面の位置調整
+ * - 譜面ヘッダーのplayingX, playingY, playingWidth, playingHeightと同じ
+ */
+//g_presetObj.playingX = 0;
+//g_presetObj.playingY = 0;
+//g_presetObj.playingWidth = 600;
+//g_presetObj.playingHeight = 500;
 
 /*
 ------------------------------------------------------------------------
