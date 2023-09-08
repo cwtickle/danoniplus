@@ -297,6 +297,7 @@ g_presetObj.stockForceDelList = {
 
 /**
  * プレイ画面の位置調整
+ * - 譜面ヘッダーのplayingX, playingY, playingWidth, playingHeightと同じ
  */
 //g_presetObj.playingX = 0;
 //g_presetObj.playingY = 0;
