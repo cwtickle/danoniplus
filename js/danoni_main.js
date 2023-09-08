@@ -2990,12 +2990,12 @@ const headerConvert = _dosObj => {
 	}
 
 	// プレイサイズ(X方向, Y方向)
-	obj.playingWidth = setIntVal(_dosObj.playingWidth, `default`);
-	obj.playingHeight = setIntVal(_dosObj.playingHeight, g_sHeight);
+	obj.playingWidth = setIntVal(_dosObj.playingWidth, g_presetObj.playingWidth ?? `default`);
+	obj.playingHeight = setIntVal(_dosObj.playingHeight, g_presetObj.playingHeight ?? g_sHeight);
 
 	// プレイ左上位置(X座標, Y座標)
-	obj.playingX = setIntVal(_dosObj.playingX);
-	obj.playingY = setIntVal(_dosObj.playingY);
+	obj.playingX = setIntVal(_dosObj.playingX, g_presetObj.playingX ?? 0);
+	obj.playingY = setIntVal(_dosObj.playingY, g_presetObj.playingY ?? 0);
 
 	// ステップゾーン位置
 	g_posObj.stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));

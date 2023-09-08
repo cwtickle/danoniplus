@@ -295,6 +295,14 @@ g_presetObj.stockForceDelList = {
  */
 //g_presetObj.playingLayout = `left`;
 
+/**
+ * プレイ画面の位置調整
+ */
+//g_presetObj.playingX = 0;
+//g_presetObj.playingY = 0;
+//g_presetObj.playingWidth = 600;
+//g_presetObj.playingHeight = 500;
+
 /*
 ------------------------------------------------------------------------
    リザルトデータ
