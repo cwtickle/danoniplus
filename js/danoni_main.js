@@ -7833,7 +7833,7 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
 		];
 
 		data.filter(data => hasVal(data)).forEach(_objData => {
-			if (data[0] !== `` && data[0] < tmpFirstNum && data[0] + g_limitObj.adjustment > 0) {
+			if (_objData[0] !== `` && _objData[0] < tmpFirstNum && _objData[0] + g_limitObj.adjustment > 0) {
 				tmpFirstNum = _objData[0];
 			}
 		});
