@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/09/07
+ * Revised : 2023/09/08
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 33.6.0`;
-const g_revisedDate = `2023/09/07`;
+const g_version = `Ver 33.7.0`;
+const g_revisedDate = `2023/09/08`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2718,8 +2718,9 @@ const headerConvert = _dosObj => {
 		$id(`canvas-frame`).width = `${g_sWidth}px`;
 	}
 	// 高さ設定
-	if (hasVal(_dosObj.windowHeight)) {
-		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_sHeight), g_sHeight);
+	if (hasVal(_dosObj.windowHeight) || hasVal(g_presetObj.autoMinHeight)) {
+		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_sHeight),
+			setIntVal(g_presetObj.autoMinHeight, g_sHeight), g_sHeight);
 		$id(`canvas-frame`).height = `${g_sHeight}px`;
 	}
 
@@ -2989,12 +2990,12 @@ const headerConvert = _dosObj => {
 	}
 
 	// プレイサイズ(X方向, Y方向)
-	obj.playingWidth = setIntVal(_dosObj.playingWidth, `default`);
-	obj.playingHeight = setIntVal(_dosObj.playingHeight, g_sHeight);
+	obj.playingWidth = setIntVal(_dosObj.playingWidth, g_presetObj.playingWidth ?? `default`);
+	obj.playingHeight = setIntVal(_dosObj.playingHeight, g_presetObj.playingHeight ?? g_sHeight);
 
 	// プレイ左上位置(X座標, Y座標)
-	obj.playingX = setIntVal(_dosObj.playingX);
-	obj.playingY = setIntVal(_dosObj.playingY);
+	obj.playingX = setIntVal(_dosObj.playingX, g_presetObj.playingX ?? 0);
+	obj.playingY = setIntVal(_dosObj.playingY, g_presetObj.playingY ?? 0);
 
 	// ステップゾーン位置
 	g_posObj.stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));
@@ -7833,7 +7834,7 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
 		];
 
 		data.filter(data => hasVal(data)).forEach(_objData => {
-			if (data[0] !== `` && data[0] < tmpFirstNum && data[0] + g_limitObj.adjustment > 0) {
+			if (_objData[0] !== `` && _objData[0] < tmpFirstNum && _objData[0] + g_limitObj.adjustment > 0) {
 				tmpFirstNum = _objData[0];
 			}
 		});
