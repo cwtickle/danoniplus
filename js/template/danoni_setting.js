@@ -29,6 +29,9 @@ g_presetObj.tuningUrl = `https://www.google.co.jp/`;
 /** 個人サイト別の最小横幅設定 */
 //g_presetObj.autoMinWidth = 600;
 
+/** 個人サイト別の最小高さ設定 */
+//g_presetObj.autoMinHeight = 500;
+
 /** 個人サイト別のウィンドウ位置 (left:左寄せ, center:中央, right:右寄せ)*/
 //g_presetObj.windowAlign = `center`;
 

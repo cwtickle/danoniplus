@@ -2718,8 +2718,9 @@ const headerConvert = _dosObj => {
 		$id(`canvas-frame`).width = `${g_sWidth}px`;
 	}
 	// 高さ設定
-	if (hasVal(_dosObj.windowHeight)) {
-		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_sHeight), g_sHeight);
+	if (hasVal(_dosObj.windowHeight) || hasVal(g_presetObj.autoMinHeight)) {
+		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_sHeight),
+			setIntVal(g_presetObj.autoMinHeight, g_sHeight), g_sHeight);
 		$id(`canvas-frame`).height = `${g_sHeight}px`;
 	}
 
