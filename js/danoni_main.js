@@ -2223,7 +2223,7 @@ const loadChartFile = async (_scoreId = g_stateObj.scoreId) => {
 	const divRoot = document.querySelector(`#divRoot`);
 	const queryDospath = getQueryParamVal(`dospath`) || 'dos/';
 	const queryDos = getQueryParamVal(`dos`) !== null ?
-		queryDospath + `${getQueryParamVal('dos')}.txt` : encodeURI(document.querySelector(`#externalDos`)?.value ?? ``);
+		queryDospath + `${getQueryParamVal('dos')}` : encodeURI(document.querySelector(`#externalDos`)?.value ?? ``);
 
 	if (dosInput === null && queryDos === ``) {
 		makeWarningWindow(g_msgInfoObj.E_0023);
