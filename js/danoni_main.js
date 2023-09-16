@@ -4392,8 +4392,7 @@ const commonSettingBtn = _labelName => {
  */
 const makePlayButton = _func => createCss2Button(`btnPlay`, g_lblNameObj.b_play, _ => true,
 	Object.assign(g_lblPosObj.btnPlay, {
-		animationName: (g_initialFlg ? `` : `smallToNormalY`),
-		resetFunc: _func,
+		animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: _func,
 	}), g_cssObj.button_Next);
 
 /**
@@ -4441,12 +4440,6 @@ const setSpriteList = _settingList => {
 		}));
 	return spriteList;
 };
-
-/**
- * 設定ウィンドウの作成
- * @param {string} _sprite 
- */
-const createOptionSprite = _sprite => createEmptySprite(_sprite, `optionsprite`, g_windowObj.optionSprite);
 
 /**
  * スライダー共通処理
@@ -5074,7 +5067,7 @@ const setDifficulty = (_initFlg) => {
 const createOptionWindow = _sprite => {
 
 	// 各ボタン用のスプライトを作成
-	const optionsprite = createOptionSprite(_sprite);
+	const optionsprite = createEmptySprite(_sprite, `optionsprite`, g_windowObj.optionSprite);
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
 	const spriteList = setSpriteList(g_settingPos.option);
@@ -5929,7 +5922,7 @@ const createSettingsDisplayWindow = _sprite => {
 	};
 
 	// 各ボタン用のスプライトを作成
-	createOptionSprite(_sprite);
+	const optionsprite = createEmptySprite(_sprite, `optionsprite`, g_windowObj.optionSprite);
 
 	// 設定毎に個別のスプライトを作成し、その中にラベル・ボタン類を配置
 	const displaySprite = createEmptySprite(optionsprite, `displaySprite`, g_windowObj.displaySprite);
@@ -5978,13 +5971,11 @@ const createSettingsDisplayWindow = _sprite => {
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	let opacityUse = false;
+	g_headerObj.opacityUse = false;
 	[`judgment`, `fastSlow`, `filterLine`].forEach(display =>
-		opacityUse ||= g_headerObj[`${display}Use`] || g_headerObj[`${display}Set`] === C_FLG_ON);
+		g_headerObj.opacityUse ||= g_headerObj[`${display}Use`] || g_headerObj[`${display}Set`] === C_FLG_ON);
 
-	if (opacityUse) {
-		createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent });
-	}
+	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent });
 
 	// ---------------------------------------------------
 	// タイミング調整 (HitPosition)
@@ -6290,9 +6281,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 */
 	const makeKCButtonHeader = (_id, _name, {
 		x = g_sWidth * 5 / 6 - 30, y = 0, w = g_sWidth / 6, h = 20, siz = 12, align = C_ALIGN_LEFT, ...rest
-	} = {}, ..._classes) => {
-		return createDivCss2Label(_id, g_lblNameObj[_name], { x, y, w, h, siz, align, ...rest }, ..._classes);
-	};
+	} = {}, ..._classes) => createDivCss2Label(_id, g_lblNameObj[_name], { x, y, w, h, siz, align, ...rest }, ..._classes);
 
 	/**
 	 * キーコンフィグ用設定ボタン
@@ -6305,9 +6294,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @returns ボタン
 	 */
 	const makeKCButton = (_id, _text, _func, { x = g_sWidth * 5 / 6 - 20, y = 15, w = g_sWidth / 6, h = 18,
-		siz = g_limitObj.jdgCntsSiz, borderStyle = `solid`, cxtFunc, ...rest } = {}, _mainClass = g_cssObj.button_RevOFF, ..._classes) => {
-		return makeSettingLblCssButton(_id, getStgDetailName(_text), 0, _func, { x, y, w, h, siz, cxtFunc, borderStyle, ...rest }, _mainClass, ..._classes);
-	};
+		siz = g_limitObj.jdgCntsSiz, borderStyle = `solid`, cxtFunc, ...rest } = {}, _mainClass = g_cssObj.button_RevOFF, ..._classes) =>
+		makeSettingLblCssButton(_id, getStgDetailName(_text), 0, _func, { x, y, w, h, siz, cxtFunc, borderStyle, ...rest }, _mainClass, ..._classes);
 
 	/**
 	 * キーコンフィグ用ミニボタン
@@ -6316,10 +6304,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {function} _func 
 	 * @param {*} object (x, y, w, h, siz) 
 	 */
-	const makeMiniKCButton = (_id, _directionFlg, _func, { x = g_sWidth * 5 / 6 - 30, y = 15, w = 15, h = 20, siz = g_limitObj.mainSiz } = {}) => {
-		return createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func,
-			{ x, y, w, h, siz }, g_cssObj.button_Mini);
-	};
+	const makeMiniKCButton = (_id, _directionFlg, _func, { x = g_sWidth * 5 / 6 - 30, y = 15, w = 15, h = 20, siz = g_limitObj.mainSiz } = {}) =>
+		createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func, { x, y, w, h, siz }, g_cssObj.button_Mini);
 
 	/**
 	 * キーコンフィグ用グループ設定ラベル・ボタンの作成
@@ -6346,7 +6332,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
-		createDescDiv(`scMsg`, g_lblNameObj.kcShortcutDesc.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
+		createDescDiv(`scMsg`, g_lblNameObj.kcShortcutDesc.split(`{0}`)
+			.join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
 			.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]), `scKcMsg`),
 
 		// 別キーモード警告メッセージ
@@ -6392,8 +6379,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 		const nextLeft = (kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - maxLeftX - 10;
 		cursor.style.left = `${nextLeft}px`;
-		const baseY = C_KYC_HEIGHT * Number(posj > divideCnt) + 57;
-		cursor.style.top = `${baseY + C_KYC_REPHEIGHT * g_currentk}px`;
+		cursor.style.top = `${C_KYC_HEIGHT * Number(posj > divideCnt) + 57 + C_KYC_REPHEIGHT * g_currentk}px`;
 		g_kcType = (g_currentk === 0 ? `Main` : `Replaced`);
 
 		// 次の位置が見えなくなったらkeyconSpriteの位置を調整する
@@ -6430,10 +6416,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		keyconSprite.scrollLeft = - maxLeftX;
 	};
 
-	const getNextNum = (_scrollNum, _groupName, _target) => {
-		const typeNum = g_keycons[_groupName].findIndex(value => value === _target);
-		return nextPos(typeNum, _scrollNum, g_keycons[_groupName].length);
-	};
+	const getNextNum = (_scrollNum, _groupName, _target) =>
+		nextPos(g_keycons[_groupName].findIndex(value => value === _target), _scrollNum, g_keycons[_groupName].length);
 
 	/**
 	 * ConfigTypeの制御
@@ -6584,8 +6568,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	keyconSprite.scrollLeft = - maxLeftX;
 
 	// キーパターン表示
-	const lblTransKey = hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ?
-		`(${g_keyObj[`transKey${keyCtrlPtn}`] ?? ''})` : ``;
+	const lblTransKey = hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`] ?? ''})` : ``;
 
 	/**
 	 * キーパターン検索
@@ -6845,18 +6828,7 @@ const changeSetColor = _ => {
  * @param {string} _cssName 
  */
 const changeConfigColor = (_obj, _cssName) => {
-	const resetClass = _className => {
-		if (_obj.classList.contains(_className)) {
-			_obj.classList.remove(_className);
-		}
-	};
-
-	// CSSクラスの除去
-	resetClass(g_cssObj.keyconfig_Changekey);
-	resetClass(g_cssObj.keyconfig_Defaultkey);
-	resetClass(g_cssObj.title_base);
-
-	// 指定されたCSSクラスを適用
+	_obj.classList.remove(g_cssObj.keyconfig_Changekey, g_cssObj.keyconfig_Defaultkey, g_cssObj.title_base);
 	_obj.classList.add(_cssName);
 };
 
