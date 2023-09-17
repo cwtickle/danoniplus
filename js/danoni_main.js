@@ -8043,7 +8043,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	}
 
 	// 個別加速のタイミング更新
-	const getTimingData = _data => {
+	const calcBoostData = _data => {
 		if (hasArrayList(_data, 2)) {
 			let delIdx = 0;
 			for (let k = _data.length - 2; k >= 0; k -= 2) {
@@ -8063,7 +8063,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		}
 		return [];
 	};
-	g_workObj.boostData = getTimingData(_dataObj.boostData);
+	g_workObj.boostData = calcBoostData(_dataObj.boostData);
 
 	/**
 	 * 色変化・モーションデータ・スクロール反転データのタイミング更新
