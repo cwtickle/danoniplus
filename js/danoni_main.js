@@ -7514,7 +7514,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	const getRefData = (_header, _dataName) => {
 		const data = _dosObj[`${_header}${_dataName}`];
-		return data?.startsWith(_header) ? _dosObj[data] : data;
+		let dataStr = data;
+		splitLF(data)?.filter(val => val?.startsWith(_header) && _dosObj[val] !== undefined)
+			.forEach(val => dataStr = dataStr.replace(val, _dosObj[val]));
+		return dataStr;
 	}
 
 	/**
