@@ -7542,8 +7542,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		}
 
 		const list = [];
-		const anotherKeyName = g_keyObj[`transKey${_keyCtrlPtn}`];
-		const anotherKeyFlg = hasVal(anotherKeyName);
+		const ptnName = `[${g_keyObj.currentPtn + 1}]`;
 		let type = ``;
 		if (g_stateObj.scroll !== `---`) {
 			type = `Alt`;
@@ -7551,15 +7550,17 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			type = `Rev`;
 		}
 
-		if (anotherKeyFlg) {
+		if (hasVal(g_keyObj[`transKey${_keyCtrlPtn}`])) {
 			list.push(
-				`${g_stateObj.scroll}${anotherKeyName}`,
+				`${g_stateObj.scroll}${ptnName}`,
 				`${g_stateObj.scroll}A`,
-				`${type}${anotherKeyName}`,
+				`${type}${ptnName}`,
 				`${type}A`,
-				`${anotherKeyName}`,
+				`${ptnName}`,
 				`A`,
 			);
+		} else {
+			list.push(`${g_stateObj.scroll}${ptnName}`, `${type}${ptnName}`, `${ptnName}`);
 		}
 		list.push(g_stateObj.scroll, type, ``);
 
