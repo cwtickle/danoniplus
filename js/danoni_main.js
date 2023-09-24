@@ -7542,7 +7542,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		}
 
 		const list = [];
-		const ptnName = `[${g_keyObj.currentPtn + 1}]`;
+		const ptnName = `${g_keyObj.currentPtn + 1}`;
+		const anotherKeyName = g_keyObj[`transKey${_keyCtrlPtn}`];
 		let type = ``;
 		if (g_stateObj.scroll !== `---`) {
 			type = `Alt`;
@@ -7550,18 +7551,12 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			type = `Rev`;
 		}
 
-		if (hasVal(g_keyObj[`transKey${_keyCtrlPtn}`])) {
-			list.push(
-				`${g_stateObj.scroll}${ptnName}`,
-				`${g_stateObj.scroll}A`,
-				`${type}${ptnName}`,
-				`${type}A`,
-				`${ptnName}`,
-				`A`,
-			);
-		} else {
-			list.push(`${g_stateObj.scroll}${ptnName}`, `${type}${ptnName}`, `${ptnName}`);
-		}
+		[g_stateObj.scroll, type, ``].forEach(header => {
+			list.push(`${header}[${ptnName}]`);
+			if (hasVal(anotherKeyName)) {
+				list.push(`${header}}<${anotherKeyName}>`, `${header}A`);
+			}
+		});
 		list.push(g_stateObj.scroll, type, ``);
 
 		return makeDedupliArray(list);
