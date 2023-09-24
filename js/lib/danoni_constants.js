@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/09/07 (v33.6.0)
+ * Revised : 2023/09/24 (v34.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1677,6 +1677,7 @@ const g_keyObj = {
     // - 原則、キー×パターンの数だけ設定が必要
     currentKey: 7,
     currentPtn: 0,
+    storagePtn: 0,
     defaultProp: `keyCtrl`,
 
     prevKey: `Dummy`,
