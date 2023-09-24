@@ -1677,6 +1677,7 @@ const g_keyObj = {
     // - 原則、キー×パターンの数だけ設定が必要
     currentKey: 7,
     currentPtn: 0,
+    storagePtn: 0,
     defaultProp: `keyCtrl`,
 
     prevKey: `Dummy`,

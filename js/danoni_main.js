@@ -5721,8 +5721,8 @@ const setExcessive = _btn => {
  * @param {string} _extraKeyName 特殊キー名(通常キーは省略)
  */
 const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
-	const baseKeyCtrlPtn = _localStorage[`keyCtrlPtn${_extraKeyName}`];
-	const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+	g_keyObj.storagePtn = _localStorage[`keyCtrlPtn${_extraKeyName}`];
+	const basePtn = `${g_keyObj.currentKey}_${g_keyObj.storagePtn}`;
 	const baseKeyNum = g_keyObj[`${g_keyObj.defaultProp}${basePtn}`].length;
 
 	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined && _localStorage[`keyCtrl${_extraKeyName}`][0].length > 0) {
@@ -7514,7 +7514,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	const getRefData = (_header, _dataName) => {
 		const data = _dosObj[`${_header}${_dataName}`];
-		return data?.startsWith(_header) ? _dosObj[data] : data;
+		let dataStr = data;
+		splitLF(data)?.filter(val => val?.startsWith(_header) && _dosObj[val] !== undefined)
+			.forEach(val => dataStr = dataStr.replace(val, _dosObj[val]));
+		return dataStr;
 	}
 
 	/**
@@ -7539,7 +7542,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		}
 
 		const list = [];
-		const anotherKeyFlg = hasVal(g_keyObj[`transKey${_keyCtrlPtn}`]);
+		const ptnName = `${(g_keyObj.currentPtn === -1 ? g_keyObj.storagePtn : g_keyObj.currentPtn) + 1}`;
+		const keyName = setVal(g_keyObj[`transKey${_keyCtrlPtn}`], g_keyObj.currentKey);
 		let type = ``;
 		if (g_stateObj.scroll !== `---`) {
 			type = `Alt`;
@@ -7547,14 +7551,13 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			type = `Rev`;
 		}
 
-		if (anotherKeyFlg) {
-			list.push(`${g_stateObj.scroll}A`);
-			list.push(`${type}A`);
-			list.push(`A`);
-		}
-		list.push(g_stateObj.scroll);
-		list.push(type);
-		list.push(``);
+		[g_stateObj.scroll, type, ``].forEach(header => {
+			list.push(`${header}[${ptnName}]`, `${header}<${keyName}>`);
+			if (hasVal(g_keyObj[`transKey${_keyCtrlPtn}`])) {
+				list.push(`${header}A`);
+			}
+		});
+		list.push(g_stateObj.scroll, type, ``);
 
 		return makeDedupliArray(list);
 	};
