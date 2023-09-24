@@ -5721,8 +5721,8 @@ const setExcessive = _btn => {
  * @param {string} _extraKeyName 特殊キー名(通常キーは省略)
  */
 const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
-	const baseKeyCtrlPtn = _localStorage[`keyCtrlPtn${_extraKeyName}`];
-	const basePtn = `${g_keyObj.currentKey}_${baseKeyCtrlPtn}`;
+	g_keyObj.storagePtn = _localStorage[`keyCtrlPtn${_extraKeyName}`];
+	const basePtn = `${g_keyObj.currentKey}_${g_keyObj.storagePtn}`;
 	const baseKeyNum = g_keyObj[`${g_keyObj.defaultProp}${basePtn}`].length;
 
 	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined && _localStorage[`keyCtrl${_extraKeyName}`][0].length > 0) {
@@ -7542,7 +7542,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		}
 
 		const list = [];
-		const ptnName = `${g_keyObj.currentPtn + 1}`;
+		const ptnName = `${(g_keyObj.currentPtn === -1 ? g_keyObj.storagePtn : g_keyObj.currentPtn) + 1}`;
 		const anotherKeyName = g_keyObj[`transKey${_keyCtrlPtn}`];
 		let type = ``;
 		if (g_stateObj.scroll !== `---`) {
@@ -7554,7 +7554,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		[g_stateObj.scroll, type, ``].forEach(header => {
 			list.push(`${header}[${ptnName}]`);
 			if (hasVal(anotherKeyName)) {
-				list.push(`${header}}<${anotherKeyName}>`, `${header}A`);
+				list.push(`${header}<${anotherKeyName}>`, `${header}A`);
 			}
 		});
 		list.push(g_stateObj.scroll, type, ``);
