@@ -7623,6 +7623,14 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					wordMaxDepth = tmpWordData[k + 1];
 				}
 
+				// 同一行数で数字が取得できるまでは歌詞表示と見做して結合
+				let m = 3;
+				while (hasVal(tmpWordData[m]) && isNaN(parseInt(tmpWordData[m])) && m < tmpWordData.length) {
+					tmpWordData[k + 2] += `,${tmpWordData[k + m]}`;
+					tmpWordData.splice(k + m, 1);
+				}
+
+				// 歌詞表示データの格納
 				let dataCnts = 0;
 				[wordData[tmpWordData[k]], dataCnts] =
 					checkDuplicatedObjects(wordData[tmpWordData[k]]);
