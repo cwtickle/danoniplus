@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/09/24
+ * Revised : 2023/09/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 34.0.0`;
-const g_revisedDate = `2023/09/24`;
+const g_version = `Ver 34.1.0`;
+const g_revisedDate = `2023/09/27`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -367,6 +367,13 @@ const splitLF = _str => _str?.split(`\r`).join(`\n`).split(`\n`);
  * @param {string} _delim
  */
 const splitLF2 = (_str, _delim = `$`) => splitLF(_str)?.filter(val => val !== ``).join(_delim).split(_delim);
+
+/**
+ * カンマ区切り処理
+ * （ただし、カンマ+半角スペースの組の場合は区切り文字と見做さない）
+ * @param {string} _str 
+ */
+const splitComma = _str => _str?.split(`, `).join(`*comma* `).split(`,`);
 
 /**
  * 重複を排除した配列の生成
@@ -2743,7 +2750,7 @@ const headerConvert = _dosObj => {
 		}
 
 		for (let j = 0; j < musicData.length; j++) {
-			const musics = musicData[j].split(`,`);
+			const musics = splitComma(musicData[j]);
 
 			if (obj.musicNos.length >= j) {
 				obj.musicTitles[j] = escapeHtml(getMusicNameSimple(musics[0]));
@@ -2751,7 +2758,7 @@ const headerConvert = _dosObj => {
 				obj.artistNames[j] = escapeHtml(musics[1] ?? ``);
 			}
 		}
-		const musics = musicData[0].split(`,`);
+		const musics = splitComma(musicData[0]);
 		obj.musicTitle = obj.musicTitles[0];
 		obj.musicTitleForView = obj.musicTitlesForView[0];
 		obj.artistName = obj.artistNames[0] ?? ``;
@@ -7623,6 +7630,14 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					wordMaxDepth = tmpWordData[k + 1];
 				}
 
+				// 同一行数で数字が取得できるまでは歌詞表示と見做して結合
+				let m = 3;
+				while (hasVal(tmpWordData[m]) && isNaN(parseInt(tmpWordData[m])) && m < tmpWordData.length) {
+					tmpWordData[k + 2] += `,${tmpWordData[k + m]}`;
+					tmpWordData.splice(k + m, 1);
+				}
+
+				// 歌詞表示データの格納
 				let dataCnts = 0;
 				[wordData[tmpWordData[k]], dataCnts] =
 					checkDuplicatedObjects(wordData[tmpWordData[k]]);
