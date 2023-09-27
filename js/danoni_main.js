@@ -369,6 +369,13 @@ const splitLF = _str => _str?.split(`\r`).join(`\n`).split(`\n`);
 const splitLF2 = (_str, _delim = `$`) => splitLF(_str)?.filter(val => val !== ``).join(_delim).split(_delim);
 
 /**
+ * カンマ区切り処理
+ * （ただし、カンマ+半角スペースの組の場合は区切り文字と見做さない）
+ * @param {string} _str 
+ */
+const splitComma = _str => _str?.split(`, `).join(`*comma* `).split(`,`);
+
+/**
  * 重複を排除した配列の生成
  * @param {array} _array1 
  * @param {...any} _arrays
@@ -2743,7 +2750,7 @@ const headerConvert = _dosObj => {
 		}
 
 		for (let j = 0; j < musicData.length; j++) {
-			const musics = musicData[j].split(`,`);
+			const musics = splitComma(musicData[j]);
 
 			if (obj.musicNos.length >= j) {
 				obj.musicTitles[j] = escapeHtml(getMusicNameSimple(musics[0]));
@@ -2751,7 +2758,7 @@ const headerConvert = _dosObj => {
 				obj.artistNames[j] = escapeHtml(musics[1] ?? ``);
 			}
 		}
-		const musics = musicData[0].split(`,`);
+		const musics = splitComma(musicData[0]);
 		obj.musicTitle = obj.musicTitles[0];
 		obj.musicTitleForView = obj.musicTitlesForView[0];
 		obj.artistName = obj.artistNames[0] ?? ``;
