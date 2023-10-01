@@ -2174,6 +2174,7 @@ const loadLocalStorage = _ => {
 		g_localeObj.num = g_localeObj.list.findIndex(val => val === g_localeObj.val);
 	}
 	Object.assign(g_msgInfoObj, g_lang_msgInfoObj[g_localeObj.val]);
+	Object.assign(g_kCd, g_lang_kCd[g_localeObj.val]);
 
 	// 作品別ローカルストレージの読込
 	const checkStorage = localStorage.getItem(g_localStorageUrl);
@@ -6724,7 +6725,10 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
-		const disabledKeys = [229, 240, 242, 243, 244, 91, 29, 28, 27, 259, g_prevKey];
+		const disabledKeys = [240, 242, 243, 244, 91, 29, 28, 27, 259, g_prevKey];
+		if (g_localeObj.val === `Ja`) {
+			disabledKeys.unshift(229);
+		}
 		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
 			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
 			return;
