@@ -301,6 +301,14 @@ const setVal = (_checkStr, _default, _type = C_TYP_STRING) =>
 const boolToSwitch = _condition => _condition ? C_FLG_ON : C_FLG_OFF;
 
 /**
+ * 単位付きの値を返却
+ * @param {number} _val 
+ * @param {string} _unitName 
+ * @returns 
+ */
+const wUnit = (_val, _unitName = `px`) => `${_val}${_unitName}`;
+
+/**
  * ブール値への変換
  * @param {string} _val 
  * @param {boolean} _defaultVal
@@ -999,7 +1007,7 @@ const getBasicFont = (_priorityFont = ``) =>
  */
 const getStrWidth = (_str, _fontsize, _font) => {
 	const ctx = document.createElement(`canvas`).getContext(`2d`);
-	ctx.font = `${_fontsize}px ${_font}`;
+	ctx.font = `${wUnit(_fontsize)} ${_font}`;
 	return ctx.measureText(unEscapeHtml(_str)).width;
 };
 
@@ -1051,10 +1059,10 @@ const createDiv = (_id, _x, _y, _width, _height, _classes = []) => {
 
 	div.id = _id;
 	const style = div.style;
-	style.left = `${_x}px`;
-	style.top = `${_y}px`;
-	style.width = `${_width}px`;
-	style.height = `${_height}px`;
+	style.left = wUnit(_x);
+	style.top = wUnit(_y);
+	style.width = wUnit(_width);
+	style.height = wUnit(_height);
 	style.position = `absolute`;
 	div.classList.add(..._classes);
 	setUserSelect(style);
@@ -1085,7 +1093,7 @@ const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWid
 	const div = createDiv(_id, x, y, w, h, [g_cssObj.title_base, ..._classes]);
 
 	const style = div.style;
-	style.fontSize = `${siz}px`;
+	style.fontSize = wUnit(siz);
 	style.fontFamily = getBasicFont();
 	style.textAlign = `${align}`;
 	div.innerHTML = _text;
@@ -1105,7 +1113,7 @@ const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWid
  */
 const createImg = (_id, _imgPath, _x, _y, _width, _height) => {
 	const div = createDiv(_id, _x, _y, _width, _height);
-	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${_width}px;height:${_height}px"${g_isFile ? `` : ` crossOrigin="anonimous"`}>`;
+	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${wUnit(_width)};height:${wUnit(_height)}"${g_isFile ? `` : ` crossOrigin="anonimous"`}>`;
 
 	return div;
 };
@@ -1121,8 +1129,8 @@ const createColorPicker = (_parentObj, _id, _func, { x = 0, y = 0 } = {}) => {
 	const picker = document.createElement(`input`);
 	picker.setAttribute(`type`, `color`);
 	picker.id = _id;
-	picker.style.left = `${x}px`;
-	picker.style.top = `${y}px`;
+	picker.style.left = wUnit(x);
+	picker.style.top = wUnit(y);
 	picker.style.position = `absolute`;
 	picker.addEventListener(`change`, _func);
 	_parentObj.appendChild(picker);
@@ -1275,7 +1283,7 @@ const createCss2Button = (_id, _text, _func = _ => true, { x = 0, y = g_sHeight 
 
 	const style = div.style;
 	style.textAlign = align;
-	style.fontSize = `${siz}px`;
+	style.fontSize = wUnit(siz);
 	style.fontFamily = getBasicFont();
 	if (rest.animationName !== undefined) {
 		style.animationDuration = `1s`;
@@ -1347,7 +1355,7 @@ const changeStyle = (_id, { x, y, w, h, siz, align, title, ...rest } = {}) => {
 		fontSize: siz,
 	};
 	Object.keys(obj).filter(property => setVal(obj[property], ``, C_TYP_FLOAT) !== ``)
-		.forEach(property => style[property] = `${obj[property]}px`);
+		.forEach(property => style[property] = wUnit(obj[property]));
 
 	if (align !== undefined) {
 		style.textAlign = `${align}`;
@@ -1430,7 +1438,7 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 
 		if (_redrawFlg) {
 			// 画面背景を指定 (background-color)
-			$id(`canvas-frame`).width = `${g_sWidth + diffX}px`;
+			$id(`canvas-frame`).width = wUnit(g_sWidth + diffX);
 			layer0.width = g_sWidth + diffX;
 			const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
 			if (!g_headerObj[`customBack${_customDisplayName}Use`]) {
@@ -1452,7 +1460,7 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 		if (document.querySelector(`#layer0`) === null ||
 			(!g_headerObj[`customBack${_customDisplayName}Use`] && !g_headerObj.defaultSkinFlg)) {
 
-			$id(`canvas-frame`).width = `${g_sWidth + diffX}px`;
+			$id(`canvas-frame`).width = wUnit(g_sWidth + diffX);
 			createEmptySprite(divRoot, `divBack`, { w: g_sWidth + diffX });
 		}
 
@@ -1519,12 +1527,12 @@ const getCssCustomProperties = _ => {
  * @param {object} _obj 
  */
 const makeSpriteImage = _obj => {
-	let tmpInnerHTML = `<img src=${_obj.path} class="${_obj.class}"	style="position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
+	let tmpInnerHTML = `<img src=${_obj.path} class="${_obj.class}"	style="position:absolute;left:${wUnit(_obj.left)};top:${wUnit(_obj.top)}`;
 	if (_obj.width > 0) {
-		tmpInnerHTML += `;width:${_obj.width}px`;
+		tmpInnerHTML += `;width:${wUnit(_obj.width)}`;
 	}
 	if (setIntVal(_obj.height) > 0) {
-		tmpInnerHTML += `;height:${_obj.height}px`;
+		tmpInnerHTML += `;height:${wUnit(_obj.height)}`;
 	}
 	tmpInnerHTML += `;animation-name:${_obj.animationName};animation-duration:${_obj.animationDuration}s;opacity:${_obj.opacity}">`;
 	return tmpInnerHTML;
@@ -1535,11 +1543,11 @@ const makeSpriteImage = _obj => {
  * @param {object} _obj 
  */
 const makeSpriteText = _obj => {
-	let tmpInnerHTML = `<span class="${_obj.class}"	style="display:inline-block;position:absolute;left:${_obj.left}px;top:${_obj.top}px`;
+	let tmpInnerHTML = `<span class="${_obj.class}"	style="display:inline-block;position:absolute;left:${wUnit(_obj.left)};top:${wUnit(_obj.top)}`;
 
 	// この場合のwidthは font-size と解釈する
 	if (_obj.width > 0) {
-		tmpInnerHTML += `;font-size:${_obj.width}px`;
+		tmpInnerHTML += `;font-size:${wUnit(_obj.width)}`;
 	}
 
 	// この場合のheightは color と解釈する
@@ -2057,8 +2065,8 @@ const initialControl = async () => {
 		g_headerObj.keyLists.forEach(key => widthList.push(g_keyObj[`minWidth${key}`] ?? g_keyObj.minWidthDefault));
 
 		g_sWidth = Math.max(...widthList);
-		$id(`canvas-frame`).width = `${g_sWidth}px`;
-		$id(`divRoot`).width = `${g_sWidth}px`;
+		$id(`canvas-frame`).width = wUnit(g_sWidth);
+		$id(`divRoot`).width = wUnit(g_sWidth);
 	}
 	if (g_headerObj.playingWidth === `default`) {
 		g_headerObj.playingWidth = g_sWidth;
@@ -2727,13 +2735,13 @@ const headerConvert = _dosObj => {
 	// 横幅設定
 	if (hasVal(_dosObj.windowWidth)) {
 		g_sWidth = Math.max(setIntVal(_dosObj.windowWidth, g_sWidth), g_sWidth);
-		$id(`canvas-frame`).width = `${g_sWidth}px`;
+		$id(`canvas-frame`).width = wUnit(g_sWidth);
 	}
 	// 高さ設定
 	if (hasVal(_dosObj.windowHeight) || hasVal(g_presetObj.autoMinHeight)) {
 		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_sHeight),
 			setIntVal(g_presetObj.autoMinHeight, g_sHeight), g_sHeight);
-		$id(`canvas-frame`).height = `${g_sHeight}px`;
+		$id(`canvas-frame`).height = wUnit(g_sHeight);
 	}
 
 	// 曲名
@@ -3235,8 +3243,8 @@ const headerConvert = _dosObj => {
 	// クレジット表示
 	if (document.querySelector(`#webMusicTitle`) !== null) {
 		webMusicTitle.innerHTML =
-			`<span style="font-size:32px">${obj.musicTitleForView.join(`<br>`)}</span><br>
-			<span style="font-size:16px">(Artist: <a href="${obj.artistUrl}" target="_blank">${obj.artistName}</a>)</span>`;
+			`<span style="font-size:${wUnit(32)}">${obj.musicTitleForView.join(`<br>`)}</span><br>
+			<span style="font-size:${wUnit(16)}">(Artist: <a href="${obj.artistUrl}" target="_blank">${obj.artistName}</a>)</span>`;
 	}
 
 	// コメントの外部化設定
@@ -4092,9 +4100,9 @@ const titleInit = _ => {
 				${g_headerObj.musicTitleForView[0]}
 			</div>
 			<div id="lblmusicTitle2" style="
-				font-size:${titlefontsize2}px;
-				position:relative;left:${g_headerObj.titlepos[1][0]}px;
-				top:${g_headerObj.titlepos[1][1] + titlelineheight}px;
+				font-size:${wUnit(titlefontsize2)};
+				position:relative;left:${wUnit(g_headerObj.titlepos[1][0])};
+				top:${wUnit(g_headerObj.titlepos[1][1] + titlelineheight)};
 				font-family:${g_headerObj.titlefonts[1]};
 				background: ${titlegrds[1]};
 				background-clip: text;
@@ -4323,7 +4331,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 
 	// ウィンドウ枠の行を取得するために一時的な枠を作成
 	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
-		x: 0, y: 70, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz, lineHeight: `15px`, fontFamily: getBasicFont(),
+		x: 0, y: 70, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz, lineHeight: wUnit(15), fontFamily: getBasicFont(),
 		whiteSpace: `normal`,
 	});
 	divRoot.appendChild(tmplbl);
@@ -4335,7 +4343,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 		_text.split(`<br>`).length + _text.split(`<p>`).length - 1) * 21);
 	const lbl = createDivCss2Label(`lblWarning`, _text, {
 		x: _x, y: 70 + _y, w: g_sWidth, h: warnHeight, siz: g_limitObj.mainSiz, backgroundColor: _bkColor,
-		opacity: 0.9, lineHeight: `15px`, color: _textColor, align: _align, fontFamily: getBasicFont(),
+		opacity: 0.9, lineHeight: wUnit(15), color: _textColor, align: _align, fontFamily: getBasicFont(),
 		whiteSpace: `normal`,
 	});
 	if (warnHeight === 150) {
@@ -4684,7 +4692,7 @@ const drawSpeedGraph = _scoreId => {
 		context.moveTo(lineX[j], 215);
 		context.lineTo(lineX[j] + 25, 215);
 		context.stroke();
-		context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
+		context.font = `${wUnit(g_limitObj.difSelectorSiz)} ${getBasicFont()}`;
 		context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, 218);
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
@@ -4724,7 +4732,7 @@ const drawDensityGraph = _scoreId => {
 		context.moveTo(lineX, 215);
 		context.lineTo(lineX + 20, 215);
 		context.stroke();
-		context.font = `${g_limitObj.difSelectorSiz}px ${getBasicFont()}`;
+		context.font = `${wUnit(g_limitObj.difSelectorSiz)} ${getBasicFont()}`;
 		context.fillText(lineNames[j], lineX + 20, 218);
 	});
 
@@ -4792,7 +4800,7 @@ const drawLine = (_context, _y, _lineType, _fixed = 0) => {
 		const textBaseObj = document.querySelector(`#lnkDifficulty`);
 		const textColor = window.getComputedStyle(textBaseObj, ``).color;
 		_context.strokeStyle = textColor;
-		_context.font = `12px ${getBasicFont()}`;
+		_context.font = `${wUnit(12)} ${getBasicFont()}`;
 		_context.fillStyle = textColor;
 		_context.fillText(_y.toFixed(_fixed), 0, lineY + 4);
 	} else {
@@ -4880,7 +4888,7 @@ const makeDifInfo = _scoreId => {
 	dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
 	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
 	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} 
-	<span style="font-size:${g_limitObj.difSelectorSiz}px;">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})</span>`;
+	<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})</span>`;
 	dataArrowInfo2.innerHTML = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
 			(${g_detailObj.frzCnt[_scoreId]})<br><br>
 			${push3CntStr}`.split(`,`).join(`/`);
@@ -5018,13 +5026,13 @@ const setDifficulty = (_initFlg) => {
 	// 譜面名設定 (Difficulty)
 	const difWidth = parseFloat(lnkDifficulty.style.width);
 	const difNames = [`${getKeyName(g_keyObj.currentKey)} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
-	lnkDifficulty.style.fontSize = `${getFontSize(difNames[0], difWidth, getBasicFont(), g_limitObj.setLblSiz)}px`;
+	lnkDifficulty.style.fontSize = wUnit(getFontSize(difNames[0], difWidth, getBasicFont(), g_limitObj.setLblSiz));
 
 	if (g_headerObj.makerView) {
 		difNames.push(`(${g_headerObj.creatorNames[g_stateObj.scoreId]})`);
 		difNames.forEach((difName, j) => {
 			const tmpSize = getFontSize(difName, difWidth, getBasicFont(), 14);
-			difNames[j] = `<span style="font-size:${tmpSize}px">${difName}</span>`;
+			difNames[j] = `<span style="font-size:${wUnit(tmpSize)}">${difName}</span>`;
 		});
 	}
 	lnkDifficulty.innerHTML = difNames.join(``);
@@ -5128,11 +5136,11 @@ const createOptionWindow = _sprite => {
 			graphObj.id = `graph${_name}`;
 			graphObj.width = g_limitObj.graphWidth;
 			graphObj.height = g_limitObj.graphHeight;
-			graphObj.style.left = `125px`;
-			graphObj.style.top = `0px`;
+			graphObj.style.left = wUnit(125);
+			graphObj.style.top = wUnit(0);
 			graphObj.style.position = `absolute`;
 			graphObj.style.background = bkColor;
-			graphObj.style.border = `dotted 2px`;
+			graphObj.style.border = `dotted ${wUnit(2)}`;
 
 			detailObj.appendChild(graphObj);
 		}
@@ -5231,7 +5239,7 @@ const createOptionWindow = _sprite => {
 	if (g_headerObj.scrollUse) {
 		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: g_lblNameObj.sc_scroll });
 		[$id(`lnkScroll`).left, $id(`lnkScroll`).width] = [
-			`${parseFloat($id(`lnkScroll`).left) + 90}px`, `${parseFloat($id(`lnkScroll`).width) - 90}px`
+			wUnit(parseFloat($id(`lnkScroll`).left) + 90), wUnit(parseFloat($id(`lnkScroll`).width) - 90)
 		];
 
 		spriteList.scroll.appendChild(
@@ -6386,8 +6394,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
 		const nextLeft = (kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - maxLeftX - 10;
-		cursor.style.left = `${nextLeft}px`;
-		cursor.style.top = `${C_KYC_HEIGHT * Number(posj > divideCnt) + 57 + C_KYC_REPHEIGHT * g_currentk}px`;
+		cursor.style.left = wUnit(nextLeft);
+		cursor.style.top = wUnit(C_KYC_HEIGHT * Number(posj > divideCnt) + 57 + C_KYC_REPHEIGHT * g_currentk);
 		g_kcType = (g_currentk === 0 ? `Main` : `Replaced`);
 
 		// 次の位置が見えなくなったらkeyconSpriteの位置を調整する
@@ -6759,7 +6767,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		if (g_currentk < g_keyObj[`keyCtrl${keyCtrlPtn}`][g_currentj].length - 1 && g_kcType !== `Main`) {
 			// 後続に代替キーが存在する場合
 			g_currentk++;
-			cursor.style.top = `${parseInt(cursor.style.top) + C_KYC_REPHEIGHT}px`;
+			cursor.style.top = wUnit(parseInt(cursor.style.top) + C_KYC_REPHEIGHT);
 
 		} else {
 			changeConfigCursor();
@@ -8793,8 +8801,8 @@ const mainInit = _ => {
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
 	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj =>
 		mainSprite.appendChild(createColorObject2(obj, g_lblPosObj.filterBar, filterCss)));
-	borderBar0.style.top = `${g_posObj.stepDiffY}px`;
-	borderBar1.style.top = `${g_posObj.stepDiffY + g_posObj.arrowHeight}px`;
+	borderBar0.style.top = wUnit(g_posObj.stepDiffY);
+	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight);
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
@@ -9071,7 +9079,7 @@ const mainInit = _ => {
 			readyDelayFrame = g_headerObj.readyDelayFrame + g_stateObj.adjustment;
 		}
 		const readyHtml = (g_headerObj.readyHtml !== `` ? g_headerObj.readyHtml :
-			`<span style='color:${readyColor};font-size:60px;'>R</span>EADY<span style='font-size:50px;'>?</span>`);
+			`<span style='color:${readyColor};font-size:${wUnit(60)};'>R</span>EADY<span style='font-size:${wUnit(50)};'>?</span>`);
 
 		divRoot.appendChild(
 			createDivCss2Label(`lblReady`, readyHtml, {
@@ -9310,7 +9318,7 @@ const mainInit = _ => {
 				const stepDivHit = document.querySelector(`#stepHit${_j}`);
 
 				g_customJsObj.dummyArrow.forEach(func => func());
-				stepDivHit.style.top = `-15px`;
+				stepDivHit.style.top = wUnit(-15);
 				stepDivHit.style.opacity = 1;
 				stepDivHit.classList.value = ``;
 				stepDivHit.classList.add(g_cssObj.main_stepDummy);
@@ -9528,7 +9536,7 @@ const mainInit = _ => {
 			const boostCnt = currentArrow.boostCnt;
 			currentArrow.prevY = currentArrow.y;
 			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd + g_workObj.motionOnFrames[boostCnt] * currentArrow.boostDir) * currentArrow.dir;
-			$id(arrowName).top = `${currentArrow.y}px`;
+			$id(arrowName).top = wUnit(currentArrow.y);
 			currentArrow.boostCnt--;
 		}
 		judgeMotionFunc[`${_name}${g_stateObj.autoAll}`](_j, arrowName, --currentArrow.cnt);
@@ -9632,7 +9640,7 @@ const mainInit = _ => {
 				// 移動
 				if (g_workObj.currentSpeed !== 0) {
 					currentFrz.y -= movY + g_workObj.motionOnFrames[currentFrz.boostCnt] * currentFrz.dir * currentFrz.boostDir;
-					$id(frzName).top = `${currentFrz.y}px`;
+					$id(frzName).top = wUnit(currentFrz.y);
 					currentFrz.boostCnt--;
 				}
 				currentFrz.cnt--;
@@ -9652,10 +9660,10 @@ const mainInit = _ => {
 					currentFrz.barY -= movY * currentFrz.dividePos;
 					currentFrz.btmY -= movY;
 
-					$id(`${_name}Bar${frzNo}`).height = `${currentFrz.frzBarLength}px`;
-					$id(`${_name}Bar${frzNo}`).top = `${currentFrz.barY}px`;
-					$id(`${_name}Btm${frzNo}`).top = `${currentFrz.btmY}px`;
-					$id(`${_name}BtmShadow${frzNo}`).top = `${currentFrz.btmY}px`;
+					$id(`${_name}Bar${frzNo}`).height = wUnit(currentFrz.frzBarLength);
+					$id(`${_name}Bar${frzNo}`).top = wUnit(currentFrz.barY);
+					$id(`${_name}Btm${frzNo}`).top = wUnit(currentFrz.btmY);
+					$id(`${_name}BtmShadow${frzNo}`).top = wUnit(currentFrz.btmY);
 
 					if (!checkKeyUpFunc[`${_name}${g_stateObj.autoAll}`](_j)) {
 						currentFrz.keyUpFrame++;
@@ -9672,7 +9680,7 @@ const mainInit = _ => {
 			currentFrz.frzBarLength -= g_workObj.currentSpeed;
 			if (currentFrz.frzBarLength > 0) {
 				currentFrz.y -= movY;
-				$id(frzName).top = `${currentFrz.y}px`;
+				$id(frzName).top = wUnit(currentFrz.y);
 			} else {
 				judgeObjDelete[_name](_j, frzName);
 			}
@@ -9849,7 +9857,7 @@ const mainInit = _ => {
 
 				// フォントサイズ変更
 				const fontSize = setIntVal(g_wordObj.wordDat.match(/\d+/)[0], g_limitObj.mainSiz);
-				g_wordSprite.style.fontSize = `${fontSize}px`;
+				g_wordSprite.style.fontSize = wUnit(fontSize);
 
 			} else {
 
@@ -9950,8 +9958,8 @@ const changeAppearanceFilter = (_appearance, _num = 10) => {
 	$id(`arrowSprite${topNum}`).clipPath = topShape;
 	$id(`arrowSprite${bottomNum}`).clipPath = bottomShape;
 
-	$id(`filterBar0`).top = `${g_posObj.arrowHeight * _num / 100}px`;
-	$id(`filterBar1`).top = `${g_posObj.arrowHeight * (100 - _num) / 100}px`;
+	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / 100);
+	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (100 - _num) / 100);
 
 	if (g_appearanceRanges.includes(_appearance)) {
 		$id(`filterView`).top =
@@ -10058,8 +10066,8 @@ const changeStepY = (_frameNum) =>
 	g_workObj.mkScrollchStep[_frameNum]?.forEach((targetj, j) => {
 		const dividePos = (g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchStepDir[_frameNum][j] === 1 ? 0 : 1);
 		const baseY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
-		$id(`stepRoot${targetj}`).top = `${baseY}px`;
-		$id(`frzHit${targetj}`).top = `${baseY}px`;
+		$id(`stepRoot${targetj}`).top = wUnit(baseY);
+		$id(`frzHit${targetj}`).top = wUnit(baseY);
 	});
 
 /**
@@ -10100,10 +10108,10 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	currentFrz.y += delFrzLength;
 	currentFrz.isMoving = false;
 
-	styfrzBar.top = `${currentFrz.barY}px`;
-	styfrzBar.height = `${currentFrz.frzBarLength}px`;
+	styfrzBar.top = wUnit(currentFrz.barY);
+	styfrzBar.height = wUnit(currentFrz.frzBarLength);
 	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
-	styfrzBtm.top = `${currentFrz.btmY}px`;
+	styfrzBtm.top = wUnit(currentFrz.btmY);
 	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
 	styfrzTopShadow.opacity = 0;
 	styfrzBtmShadow.top = styfrzBtm.top;
@@ -10139,8 +10147,8 @@ const changeFailedFrz = (_j, _k) => {
 
 	// 判定位置調整分の補正
 	const hitPos = g_workObj.hitPosition * g_workObj.scrollDir[_j];
-	$id(`frzTop${frzNo}`).top = `${- hitPos}px`;
-	$id(`frzTopShadow${frzNo}`).top = `${- hitPos}px`;
+	$id(`frzTop${frzNo}`).top = wUnit(- hitPos);
+	$id(`frzTopShadow${frzNo}`).top = wUnit(- hitPos);
 
 	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
@@ -10175,7 +10183,7 @@ const judgeArrow = _j => {
 		const _difCnt = Math.abs(_difFrame);
 		const stepHitTargetArrow = _resultJdg => {
 			const stepDivHit = document.querySelector(`#stepHit${_j}`);
-			stepDivHit.style.top = `${currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_workObj.hitPosition * g_workObj.scrollDir[_j]}px`;
+			stepDivHit.style.top = wUnit(currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_workObj.hitPosition * g_workObj.scrollDir[_j]);
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
 			stepDivHit.classList.add(g_cssObj[`main_step${_resultJdg}`]);
@@ -10283,8 +10291,8 @@ const changeLifeColor = (_state = ``) => {
 
 	const intLifeVal = Math.floor(g_workObj.lifeVal);
 	lblLife.textContent = intLifeVal;
-	lifeBar.style.top = `${50 + (g_headerObj.playingHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal}px`;
-	lifeBar.style.height = `${(g_headerObj.playingHeight - 100) * intLifeVal / g_headerObj.maxLifeVal}px`;
+	lifeBar.style.top = wUnit(50 + (g_headerObj.playingHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal);
+	lifeBar.style.height = wUnit((g_headerObj.playingHeight - 100) * intLifeVal / g_headerObj.maxLifeVal);
 };
 
 const lifeRecovery = _ => {
@@ -10755,7 +10763,7 @@ const resultInit = _ => {
 	} else {
 		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 215, g_cssObj.result_noRecord, 4, `(No Record)`));
 		const lblAutoView = document.querySelector(`#lblAutoView`);
-		lblAutoView.style.fontSize = `20px`;
+		lblAutoView.style.fontSize = wUnit(20);
 	}
 
 	// ユーザカスタムイベント(初期)
@@ -10848,13 +10856,13 @@ const resultInit = _ => {
 		canvas.id = `resultImage`;
 		canvas.width = 400;
 		canvas.height = g_sHeight - 90;
-		canvas.style.left = `${(g_sWidth - canvas.width) / 2}px`;
-		canvas.style.top = `20px`;
+		canvas.style.left = wUnit((g_sWidth - canvas.width) / 2);
+		canvas.style.top = wUnit(20);
 		canvas.style.position = `absolute`;
 
 		const context = canvas.getContext(`2d`);
 		const drawText = (_text, { x = 30, dy = 0, hy, siz = 15, color = `#cccccc`, align = C_ALIGN_LEFT, font } = {}) => {
-			context.font = `${siz}px ${getBasicFont(font)}`;
+			context.font = `${wUnit(siz)} ${getBasicFont(font)}`;
 			context.fillStyle = color;
 			context.textAlign = align;
 			context.fillText(_text, x, 35 + hy * 18 + dy);
