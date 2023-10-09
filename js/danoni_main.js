@@ -1387,6 +1387,18 @@ const resetKeyControl = _ => {
 };
 
 /**
+ * Canvasのベース背景を作成
+ * @param {*} _ctx 
+ */
+const makeBgCanvas = (_ctx, { w = g_sWidth, h = g_sHeight } = {}) => {
+	const grd = _ctx.createLinearGradient(0, 0, 0, h);
+	grd.addColorStop(0, `#000000`);
+	grd.addColorStop(1, `#222222`);
+	_ctx.fillStyle = grd;
+	_ctx.fillRect(0, 0, w, h);
+};
+
+/**
  * 画面上の描画・オブジェクトを全てクリアし、背景を再描画
  * - divオブジェクト(ボタンなど)はdivRoot配下で管理しているため、子要素のみを全削除している。
  * - dicRoot自体を削除しないよう注意すること。
@@ -1438,12 +1450,8 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 			// 画面背景を指定 (background-color)
 			$id(`canvas-frame`).width = wUnit(g_sWidth + diffX);
 			layer0.width = g_sWidth + diffX;
-			const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
 			if (!g_headerObj[`customBack${_customDisplayName}Use`]) {
-				grd.addColorStop(0, `#000000`);
-				grd.addColorStop(1, `#222222`);
-				l0ctx.fillStyle = grd;
-				l0ctx.fillRect(0, 0, g_sWidth + diffX, g_sHeight);
+				makeBgCanvas(l0ctx, { w: g_sWidth + diffX });
 			}
 		}
 	}
@@ -1979,12 +1987,7 @@ const initialControl = async () => {
 	// 背景の表示
 	if (document.querySelector(`#layer0`) !== null) {
 		const layer0 = document.querySelector(`#layer0`);
-		const l0ctx = layer0.getContext(`2d`);
-		const grd = l0ctx.createLinearGradient(0, 0, 0, g_sHeight);
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		l0ctx.fillStyle = grd;
-		l0ctx.fillRect(0, 0, g_sWidth, g_sHeight);
+		makeBgCanvas(layer0.getContext(`2d`));
 	} else {
 		createEmptySprite(divRoot, `divBack`, g_windowObj.divBack);
 	}
@@ -10849,11 +10852,7 @@ const resultInit = _ => {
 			context.textAlign = align;
 			context.fillText(_text, x, 35 + hy * 18 + dy);
 		};
-		const grd = context.createLinearGradient(0, 0, 0, canvas.height);
-		grd.addColorStop(0, `#000000`);
-		grd.addColorStop(1, `#222222`);
-		context.fillStyle = grd;
-		context.fillRect(0, 0, g_sWidth, g_sHeight);
+		makeBgCanvas(context, { h: canvas.height });
 
 		drawText(`R`, { dy: -5, hy: 0, siz: 40, color: `#9999ff` });
 		drawText(`ESULT`, { x: 57, dy: -5, hy: 0, siz: 25 });
