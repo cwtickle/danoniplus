@@ -5186,7 +5186,7 @@ const createOptionWindow = _sprite => {
 			scoreDetail.appendChild(
 				makeDifLblCssButton(`lnk${sd}G`, getStgDetailName(sd), j, _ => changeScoreDetail(j), { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.scoreDetail === sd ? `Setting` : `Default`) })
 			);
-			createScText(document.getElementById(`lnk${sd}G`), `${sd}G`, { targetLabel: `lnk${sd}G`, x: -10 });
+			createScText(document.getElementById(`lnk${sd}G`), `${sd}G`, { targetLabel: `lnk${sd}G`, x: -5 });
 		});
 	}
 
