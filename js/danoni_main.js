@@ -508,7 +508,7 @@ const escapeHtmlForArray = _array => _array.map(str => escapeHtml(str));
  * @param {number} _num 
  * @param {number} _length
  */
-const nextPos = (_basePos, _num, _length) => (_basePos + _length + _num) % _length;
+const nextPos = (_basePos, _num, _length) => (_basePos + _num + _length) % _length;
 
 /*-----------------------------------------------------------*/
 /* キーコード関連                                             */
@@ -818,14 +818,12 @@ const getFilePath = (_fileName, _directory = ``) => {
 const preloadImgFile = (_imgPath, { directory = ``, syncBackPath = true } = {}) => {
 
 	let imgPath = _imgPath;
-	if (g_headerObj.autoPreload) {
-		if (checkImage(_imgPath)) {
-			if (syncBackPath) {
-				const [file, dir] = getFilePath(_imgPath, directory);
-				imgPath = `${dir}${file}`;
-			}
-			preloadFile(`image`, imgPath);
+	if (g_headerObj.autoPreload && checkImage(_imgPath)) {
+		if (syncBackPath) {
+			const [file, dir] = getFilePath(_imgPath, directory);
+			imgPath = `${dir}${file}`;
 		}
+		preloadFile(`image`, imgPath);
 	}
 	return imgPath;
 };
@@ -2322,8 +2320,7 @@ const copySetColor = (_baseObj, _scoreId) => {
  * @param {number} _scoreId
  */
 const getMusicUrl = _scoreId =>
-	g_headerObj.musicUrls !== undefined ?
-		g_headerObj.musicUrls[g_headerObj.musicNos[_scoreId]] ?? g_headerObj.musicUrls[0] : `nosound.mp3`;
+	g_headerObj.musicUrls?.[g_headerObj.musicNos[_scoreId]] ?? g_headerObj.musicUrls?.[0] ?? `nosound.mp3`;
 
 /**
  * 譜面ファイル読込後処理（譜面詳細情報取得用）
@@ -2489,7 +2486,7 @@ const calcLevel = _scoreObj => {
 	allScorebook.push(allScorebook.at(-1) + 100);
 	const allCnt = allScorebook.length;
 
-	frzEndData.push(allScorebook[allCnt - 1]);
+	frzEndData.push(allScorebook.at(-1));
 
 	//--------------------------------------------------------------
 	//＜間隔フレーム数の調和平均計算+いろいろ補正＞
@@ -2697,18 +2694,16 @@ const headerConvert = _dosObj => {
 		} else if (g_presetObj.imageSets !== undefined) {
 			tmpImgTypes = g_presetObj.imageSets.concat();
 		}
-		if (tmpImgTypes.length > 0) {
-			tmpImgTypes.forEach((tmpImgType, j) => {
-				const imgTypes = tmpImgType.split(`,`);
-				obj.imgType[j] = {
-					name: imgTypes[0],
-					extension: imgTypes[1] || `svg`,
-					rotateEnabled: setBoolVal(imgTypes[2], true),
-					flatStepHeight: setVal(imgTypes[3], C_ARW_WIDTH, C_TYP_FLOAT),
-				};
-				g_keycons.imgTypes[j] = (imgTypes[0] === `` ? `Original` : imgTypes[0]);
-			});
-		}
+		tmpImgTypes.forEach((tmpImgType, j) => {
+			const imgTypes = tmpImgType.split(`,`);
+			obj.imgType[j] = {
+				name: imgTypes[0],
+				extension: imgTypes[1] || `svg`,
+				rotateEnabled: setBoolVal(imgTypes[2], true),
+				flatStepHeight: setVal(imgTypes[3], C_ARW_WIDTH, C_TYP_FLOAT),
+			};
+			g_keycons.imgTypes[j] = (imgTypes[0] === `` ? `Original` : imgTypes[0]);
+		});
 	}
 
 	// 末尾にデフォルト画像セットが入るよう追加
@@ -7856,10 +7851,7 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
  * @param {number} _scoreId
  */
 const getStartFrame = (_lastFrame, _fadein = 0, _scoreId = g_stateObj.scoreId) => {
-	let frameNum = 0;
-	if (g_headerObj.startFrame !== undefined) {
-		frameNum = parseInt(g_headerObj.startFrame[_scoreId] || g_headerObj.startFrame[0] || 0);
-	}
+	let frameNum = parseInt(g_headerObj.startFrame[_scoreId] ?? g_headerObj.startFrame[0] ?? 0);
 	if (_lastFrame >= frameNum) {
 		frameNum = Math.round(_fadein / 100 * (_lastFrame - frameNum)) + frameNum;
 	}
@@ -7960,17 +7952,6 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	/** Motionの適用フレーム数 */
 	g_workObj.motionFrame = [];
 
-	const getSpeedPos = _ => {
-		let spdk, spdPrev;
-		if (_dataObj.speedData !== undefined) {
-			spdk = _dataObj.speedData.length - 2;
-			spdPrev = _dataObj.speedData[spdk];
-		} else {
-			spdPrev = 0;
-		}
-		return [spdk, spdPrev];
-	};
-
 	const setNotes = (_j, _k, _data, _startPoint, _header, _frzFlg = false) => {
 		if (_startPoint >= 0) {
 			if (g_workObj[`mk${_header}Arrow`][_startPoint] === undefined) {
@@ -7996,7 +7977,8 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 		const startPoint = [];
 		let spdNext = Infinity;
-		let [spdk, spdPrev] = getSpeedPos();
+		let spdk = (_dataObj.speedData?.length ?? 0) - 2;
+		let spdPrev = _dataObj.speedData?.[spdk] ?? 0;
 
 		// 最後尾のデータから計算して格納
 		const lastk = _data.length - setcnt;
@@ -8089,7 +8071,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			for (let k = 0; k < delIdx; k++) {
 				_data.shift();
 			}
-			return structuredClone(_data);
+			return _data;
 		}
 		return [];
 	};
