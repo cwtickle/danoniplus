@@ -5584,8 +5584,9 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 	g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][g_settings.gaugeNum];
 
 	// デフォルトゲージの設定を適用（g_gaugeOptionObjから取得）
-	if (g_gaugeOptionObj.custom.length === 0 ||
-		g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${g_stateObj.scoreId}`])) {
+	if (g_settings.gaugeNum !== 0 &&
+		(g_gaugeOptionObj.custom.length === 0 ||
+			g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${g_stateObj.scoreId}`]))) {
 
 		const gType = (g_gaugeType === C_LFE_CUSTOM ?
 			toCapitalize(g_gaugeOptionObj[`defaultGauge${g_stateObj.scoreId}`]) : g_gaugeType);
