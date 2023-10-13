@@ -5563,23 +5563,23 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 	};
 
 	// ゲージ初期化
-	if (_gaugeInitFlg) {
-		// カスタムゲージの設定取得
-		const defaultCustomGauge = g_gaugeOptionObj.custom0 || g_gaugeOptionObj.customDefault;
-		if (hasVal(defaultCustomGauge)) {
-			g_gaugeOptionObj.custom = (g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || defaultCustomGauge).concat();
-			g_gaugeOptionObj.varCustom = (g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0 || g_gaugeOptionObj.varCustomDefault).concat();
-		}
 
-		// ゲージタイプの設定
-		changeLifeMode(g_headerObj);
-		g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
-
-		// ゲージ配列を入れ替え
-		g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
-		g_settings.gaugeNum = getCurrentNo(g_settings.gauges, g_stateObj.gauge);
-		g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+	// カスタムゲージの設定取得
+	const defaultCustomGauge = g_gaugeOptionObj.custom0 || g_gaugeOptionObj.customDefault;
+	if (hasVal(defaultCustomGauge)) {
+		g_gaugeOptionObj.custom = (g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || defaultCustomGauge).concat();
+		g_gaugeOptionObj.varCustom = (g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0 || g_gaugeOptionObj.varCustomDefault).concat();
 	}
+
+	// ゲージタイプの設定
+	changeLifeMode(g_headerObj);
+	g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
+
+	// ゲージ配列を入れ替え
+	g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
+	g_settings.gaugeNum = getCurrentNo(g_settings.gauges, g_stateObj.gauge);
+	g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+
 	setSetting(_scrollNum, `gauge`);
 	g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][g_settings.gaugeNum];
 
