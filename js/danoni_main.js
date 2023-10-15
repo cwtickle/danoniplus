@@ -7855,7 +7855,7 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
  * @param {number} _scoreId
  */
 const getStartFrame = (_lastFrame, _fadein = 0, _scoreId = g_stateObj.scoreId) => {
-	let frameNum = parseInt(g_headerObj.startFrame[_scoreId] ?? g_headerObj.startFrame[0] ?? 0);
+	let frameNum = parseInt(g_headerObj.startFrame?.[_scoreId] ?? g_headerObj.startFrame?.[0] ?? 0);
 	if (_lastFrame >= frameNum) {
 		frameNum = Math.round(_fadein / 100 * (_lastFrame - frameNum)) + frameNum;
 	}
