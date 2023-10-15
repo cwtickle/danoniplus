@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/10/13
+ * Revised : 2023/10/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 34.3.0`;
-const g_revisedDate = `2023/10/13`;
+const g_version = `Ver 34.3.1`;
+const g_revisedDate = `2023/10/15`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7855,7 +7855,7 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
  * @param {number} _scoreId
  */
 const getStartFrame = (_lastFrame, _fadein = 0, _scoreId = g_stateObj.scoreId) => {
-	let frameNum = parseInt(g_headerObj.startFrame[_scoreId] ?? g_headerObj.startFrame[0] ?? 0);
+	let frameNum = parseInt(g_headerObj.startFrame?.[_scoreId] ?? g_headerObj.startFrame?.[0] ?? 0);
 	if (_lastFrame >= frameNum) {
 		frameNum = Math.round(_fadein / 100 * (_lastFrame - frameNum)) + frameNum;
 	}
