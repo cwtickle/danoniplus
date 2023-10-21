@@ -8528,7 +8528,7 @@ const getArrowSettings = _ => {
 		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
 
 	g_stateObj.autoAll = boolToSwitch(g_stateObj.autoPlay === C_FLG_ALL);
-	g_workObj.hitPosition = (g_stateObj.autoAll ? 0 : g_stateObj.hitPosition);
+	g_workObj.hitPosition = (g_stateObj.autoAll === C_FLG_ON ? 0 : g_stateObj.hitPosition);
 	changeSetColor();
 
 	for (let j = 0; j < keyNum; j++) {
