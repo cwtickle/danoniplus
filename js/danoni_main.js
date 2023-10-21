@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/10/13
+ * Revised : 2023/10/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 32.7.5`;
-const g_revisedDate = `2023/10/13`;
+const g_version = `Ver 32.7.6`;
+const g_revisedDate = `2023/10/21`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8432,7 +8432,7 @@ const getArrowSettings = _ => {
 		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
 
 	g_stateObj.autoAll = (g_stateObj.autoPlay === C_FLG_ALL ? C_FLG_ON : C_FLG_OFF);
-	g_workObj.hitPosition = (g_stateObj.autoAll ? 0 : g_stateObj.hitPosition);
+	g_workObj.hitPosition = (g_stateObj.autoAll === C_FLG_ON ? 0 : g_stateObj.hitPosition);
 	changeSetColor();
 
 	for (let j = 0; j < keyNum; j++) {
