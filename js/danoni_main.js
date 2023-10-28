@@ -571,7 +571,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 		}
 		return blockCode(setCode);
 	}
-	_func(setCode);
+	_func(setCode, _evt.key);
 	return blockCode(setCode);
 };
 
@@ -3890,7 +3890,21 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
 		// キーコンフィグ (keyCtrlX_Y)
-		g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, { errCd: `E_0104`, baseCopyFlg: true });
+		g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, {
+			errCd: `E_0104`, baseCopyFlg: true,
+			loopFunc: (k, keyheader) => {
+				const addShiftRKey = (_pattern = ``) => {
+					const keyCtrls = g_keyObj[`${keyheader}_${k + g_keyObj.dfPtnNum}${_pattern}`];
+					for (let j = 0; j < keyCtrls.length; j++) {
+						if (keyCtrls[j].includes(256) && !keyCtrls[j].includes(260)) {
+							keyCtrls[j].push(260);
+						}
+					}
+				};
+				addShiftRKey();
+				addShiftRKey(`d`);
+			},
+		});
 
 		// 読込変数の接頭辞 (charaX_Y)
 		newKeyMultiParam(newKey, `chara`, toString);
@@ -6216,8 +6230,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 					g_keycons.cursorNum = g_keycons.cursorNumList.findIndex(val => val === g_currentj);
 					setKeyConfigCursor();
 				}, {
-					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: C_KYC_REPHEIGHT, siz: g_limitObj.keySetSiz,
+					x: keyconX - 5, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
+					w: C_ARW_WIDTH + 10, h: C_KYC_REPHEIGHT, siz: g_limitObj.keySetSiz,
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 
@@ -6726,9 +6740,15 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	);
 
 	// キーボード押下時処理
-	setShortcutEvent(g_currentPage, setCode => {
+	setShortcutEvent(g_currentPage, (kbCode, kbKey) => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
-		let setKey = g_kCdN.findIndex(kCd => kCd === setCode);
+		let setKey = g_kCdN.findIndex(kCd => kCd === kbCode);
+
+		// 右シフトキー対応
+		if (setKey === 1 && kbKey === `Shift`) {
+			setKey = 260;
+			g_kCdNameObj.shiftRKey = ``;
+		}
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
