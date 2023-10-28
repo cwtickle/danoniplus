@@ -3890,7 +3890,21 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
 		// キーコンフィグ (keyCtrlX_Y)
-		g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, { errCd: `E_0104`, baseCopyFlg: true });
+		g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, {
+			errCd: `E_0104`, baseCopyFlg: true,
+			loopFunc: (k, keyheader) => {
+				const addShiftRKey = (_pattern = ``) => {
+					const keyCtrls = g_keyObj[`${keyheader}_${k + g_keyObj.dfPtnNum}${_pattern}`];
+					for (let j = 0; j < keyCtrls.length; j++) {
+						if (keyCtrls[j].includes(256) && !keyCtrls[j].includes(260)) {
+							keyCtrls[j].push(260);
+						}
+					}
+				};
+				addShiftRKey();
+				addShiftRKey(`d`);
+			},
+		});
 
 		// 読込変数の接頭辞 (charaX_Y)
 		newKeyMultiParam(newKey, `chara`, toString);
@@ -6216,8 +6230,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 					g_keycons.cursorNum = g_keycons.cursorNumList.findIndex(val => val === g_currentj);
 					setKeyConfigCursor();
 				}, {
-					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: C_KYC_REPHEIGHT, siz: g_limitObj.keySetSiz,
+					x: keyconX - 5, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
+					w: C_ARW_WIDTH + 10, h: C_KYC_REPHEIGHT, siz: g_limitObj.keySetSiz,
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 

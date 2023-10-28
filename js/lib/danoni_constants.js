@@ -112,7 +112,7 @@ const g_limitObj = {
     titleSiz: 32,
     mainSiz: 14,
     musicTitleSiz: 13,
-    keySetSiz: 16,
+    keySetSiz: 15,
 };
 
 /** 設定項目の位置 */
@@ -1235,7 +1235,7 @@ g_kCd[256] = `R)Shift`;
 g_kCd[257] = `R)Ctrl`;
 g_kCd[258] = `R)Alt`;
 g_kCd[259] = `Window`;
-g_kCd[260] = `R)Shift`;
+g_kCd[260] = `R-Shift`;
 
 // 従来のキーコードとの変換用
 g_kCdN[0] = `- - -`; // 無効値
