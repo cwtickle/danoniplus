@@ -8381,11 +8381,12 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 			const ctype = (targetj >= 10 ? `Hit` : `Normal`) + (targetj % 2 === 0 ? `` : `Bar`);
 			const colorPos = Math.ceil((targetj % 10 - 1) / 2);
 
-			g_keyObj[`color${tkObj.keyCtrlPtn}`].filter(cpattern => colorPos === cpattern)
-				.forEach((cpattern, k) => {
+			g_keyObj[`color${tkObj.keyCtrlPtn}`].forEach((cpattern, k) => {
+				if (colorPos === cpattern) {
 					initialize(baseHeader + ctype);
 					pushColor(baseHeader + ctype, k + addAll);
-				});
+				}
+			});
 		});
 	}
 
