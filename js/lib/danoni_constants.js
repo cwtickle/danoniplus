@@ -1234,6 +1234,8 @@ g_kCd[240] = `CapsLk`;
 g_kCd[256] = `R)Shift`;
 g_kCd[257] = `R)Ctrl`;
 g_kCd[258] = `R)Alt`;
+g_kCd[259] = `Window`;
+g_kCd[260] = `R)Shift`;
 
 // 従来のキーコードとの変換用
 g_kCdN[0] = `- - -`; // 無効値
@@ -1352,6 +1354,7 @@ g_kCdN[256] = `ShiftRight`;
 g_kCdN[257] = `ControlRight`;
 g_kCdN[258] = `AltRight`;
 g_kCdN[259] = `MetaRight`;
+g_kCdN[260] = ``;
 
 const g_kCdNameObj = {
     shiftLKey: `ShiftLeft`,

@@ -571,7 +571,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 		}
 		return blockCode(setCode);
 	}
-	_func(setCode);
+	_func(setCode, _evt.key);
 	return blockCode(setCode);
 };
 
@@ -6726,9 +6726,15 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	);
 
 	// キーボード押下時処理
-	setShortcutEvent(g_currentPage, setCode => {
+	setShortcutEvent(g_currentPage, (kbCode, kbKey) => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
-		let setKey = g_kCdN.findIndex(kCd => kCd === setCode);
+		let setKey = g_kCdN.findIndex(kCd => kCd === kbCode);
+
+		// 右シフトキー対応
+		if (setKey === 1 && kbKey === `Shift`) {
+			setKey = 260;
+			g_kCdNameObj.shiftRKey = ``;
+		}
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
