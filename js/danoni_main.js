@@ -552,6 +552,9 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 		return blockCode(setCode);
 	}
 	g_inputKeyBuffer[setCode] = true;
+	if (_evt.key === `Shift` && setCode === ``) {
+		g_inputKeyBuffer.ShiftRight = true;
+	}
 
 	// 対象ボタンを検索
 	const scLists = Object.keys(g_shortcutObj[_displayName]).filter(keys => {
@@ -563,6 +566,9 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 		// リンク先にジャンプする場合はonkeyUpイベントが動かないため、事前にキー状態をリセット
 		if (g_shortcutObj[_displayName][scLists[0]].reset) {
 			g_inputKeyBuffer[setCode] = false;
+			if (_evt.key === `Shift` && setCode === ``) {
+				g_inputKeyBuffer.ShiftRight = false;
+			}
 		}
 		// 対象ボタン処理を実行
 		const targetId = document.getElementById(g_shortcutObj[_displayName][scLists[0]].id);
@@ -6747,7 +6753,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// 右シフトキー対応
 		if (setKey === 1 && kbKey === `Shift`) {
 			setKey = 260;
-			g_kCdNameObj.shiftRKey = ``;
 		}
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
@@ -9118,9 +9123,11 @@ const mainInit = _ => {
 			for (let j = 0; j < keyNum; j++) {
 				matchKeys[j].filter((key, k) => _keyCode === key && !g_workObj.keyHitFlg[j][k] && !g_judgObj.lockFlgs[j])
 					.forEach(() => {
-						g_judgObj.lockFlgs[j] = true;
-						judgeArrow(j);
-						g_judgObj.lockFlgs[j] = false;
+						if (_keyCode !== `` || (_keyCode === `` && g_inputKeyBuffer.ShiftRight)) {
+							g_judgObj.lockFlgs[j] = true;
+							judgeArrow(j);
+							g_judgObj.lockFlgs[j] = false;
+						}
 					});
 			}
 		},
@@ -9138,6 +9145,9 @@ const mainInit = _ => {
 		}
 
 		g_inputKeyBuffer[setCode] = true;
+		if (evt.key === `Shift` && setCode === ``) {
+			g_inputKeyBuffer.ShiftRight = true;
+		}
 		mainKeyDownActFunc[g_stateObj.autoAll](setCode);
 
 		// 曲中リトライ、タイトルバック
@@ -9201,6 +9211,9 @@ const mainInit = _ => {
 	document.onkeyup = evt => {
 		const setCode = evt.code;
 		g_inputKeyBuffer[setCode] = false;
+		if (evt.key === `Shift` && setCode === ``) {
+			g_inputKeyBuffer.ShiftRight = false;
+		}
 		mainKeyUpActFunc[g_stateObj.autoAll]();
 	};
 
