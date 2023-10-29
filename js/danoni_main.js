@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/10/21
+ * Revised : 2023/10/29
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 34.3.2`;
-const g_revisedDate = `2023/10/21`;
+const g_version = `Ver 34.4.0`;
+const g_revisedDate = `2023/10/29`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -552,6 +552,9 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 		return blockCode(setCode);
 	}
 	g_inputKeyBuffer[setCode] = true;
+	if (_evt.key === `Shift` && setCode === ``) {
+		g_inputKeyBuffer.ShiftRight = true;
+	}
 
 	// 対象ボタンを検索
 	const scLists = Object.keys(g_shortcutObj[_displayName]).filter(keys => {
@@ -563,6 +566,9 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 		// リンク先にジャンプする場合はonkeyUpイベントが動かないため、事前にキー状態をリセット
 		if (g_shortcutObj[_displayName][scLists[0]].reset) {
 			g_inputKeyBuffer[setCode] = false;
+			if (_evt.key === `Shift` && setCode === ``) {
+				g_inputKeyBuffer.ShiftRight = false;
+			}
 		}
 		// 対象ボタン処理を実行
 		const targetId = document.getElementById(g_shortcutObj[_displayName][scLists[0]].id);
@@ -571,7 +577,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 		}
 		return blockCode(setCode);
 	}
-	_func(setCode);
+	_func(setCode, _evt.key);
 	return blockCode(setCode);
 };
 
@@ -3890,7 +3896,21 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
 		// キーコンフィグ (keyCtrlX_Y)
-		g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, { errCd: `E_0104`, baseCopyFlg: true });
+		g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, {
+			errCd: `E_0104`, baseCopyFlg: true,
+			loopFunc: (k, keyheader) => {
+				const addShiftRKey = (_pattern = ``) => {
+					const keyCtrls = g_keyObj[`${keyheader}_${k + g_keyObj.dfPtnNum}${_pattern}`];
+					for (let j = 0; j < keyCtrls.length; j++) {
+						if (keyCtrls[j].includes(256) && !keyCtrls[j].includes(260)) {
+							keyCtrls[j].push(260);
+						}
+					}
+				};
+				addShiftRKey();
+				addShiftRKey(`d`);
+			},
+		});
 
 		// 読込変数の接頭辞 (charaX_Y)
 		newKeyMultiParam(newKey, `chara`, toString);
@@ -6216,8 +6236,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 					g_keycons.cursorNum = g_keycons.cursorNumList.findIndex(val => val === g_currentj);
 					setKeyConfigCursor();
 				}, {
-					x: keyconX, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
-					w: C_ARW_WIDTH, h: C_KYC_REPHEIGHT, siz: g_limitObj.keySetSiz,
+					x: keyconX - 5, y: 50 + C_KYC_REPHEIGHT * k + keyconY,
+					w: C_ARW_WIDTH + 10, h: C_KYC_REPHEIGHT, siz: g_limitObj.keySetSiz,
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 
@@ -6726,9 +6746,14 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	);
 
 	// キーボード押下時処理
-	setShortcutEvent(g_currentPage, setCode => {
+	setShortcutEvent(g_currentPage, (kbCode, kbKey) => {
 		const keyCdObj = document.querySelector(`#keycon${g_currentj}_${g_currentk}`);
-		let setKey = g_kCdN.findIndex(kCd => kCd === setCode);
+		let setKey = g_kCdN.findIndex(kCd => kCd === kbCode);
+
+		// 右シフトキー対応
+		if (setKey === 1 && kbKey === `Shift`) {
+			setKey = 260;
+		}
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -8381,11 +8406,12 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 			const ctype = (targetj >= 10 ? `Hit` : `Normal`) + (targetj % 2 === 0 ? `` : `Bar`);
 			const colorPos = Math.ceil((targetj % 10 - 1) / 2);
 
-			g_keyObj[`color${tkObj.keyCtrlPtn}`].filter(cpattern => colorPos === cpattern)
-				.forEach((cpattern, k) => {
+			g_keyObj[`color${tkObj.keyCtrlPtn}`].forEach((cpattern, k) => {
+				if (colorPos === cpattern) {
 					initialize(baseHeader + ctype);
 					pushColor(baseHeader + ctype, k + addAll);
-				});
+				}
+			});
 		});
 	}
 
@@ -9097,9 +9123,11 @@ const mainInit = _ => {
 			for (let j = 0; j < keyNum; j++) {
 				matchKeys[j].filter((key, k) => _keyCode === key && !g_workObj.keyHitFlg[j][k] && !g_judgObj.lockFlgs[j])
 					.forEach(() => {
-						g_judgObj.lockFlgs[j] = true;
-						judgeArrow(j);
-						g_judgObj.lockFlgs[j] = false;
+						if (_keyCode !== `` || (_keyCode === `` && g_inputKeyBuffer.ShiftRight)) {
+							g_judgObj.lockFlgs[j] = true;
+							judgeArrow(j);
+							g_judgObj.lockFlgs[j] = false;
+						}
 					});
 			}
 		},
@@ -9117,6 +9145,9 @@ const mainInit = _ => {
 		}
 
 		g_inputKeyBuffer[setCode] = true;
+		if (evt.key === `Shift` && setCode === ``) {
+			g_inputKeyBuffer.ShiftRight = true;
+		}
 		mainKeyDownActFunc[g_stateObj.autoAll](setCode);
 
 		// 曲中リトライ、タイトルバック
@@ -9180,6 +9211,9 @@ const mainInit = _ => {
 	document.onkeyup = evt => {
 		const setCode = evt.code;
 		g_inputKeyBuffer[setCode] = false;
+		if (evt.key === `Shift` && setCode === ``) {
+			g_inputKeyBuffer.ShiftRight = false;
+		}
 		mainKeyUpActFunc[g_stateObj.autoAll]();
 	};
 
