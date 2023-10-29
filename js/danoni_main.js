@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/10/21
+ * Revised : 2023/10/29
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 33.7.2`;
-const g_revisedDate = `2023/10/21`;
+const g_version = `Ver 33.7.3`;
+const g_revisedDate = `2023/10/29`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8389,11 +8389,12 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 			const ctype = (targetj >= 10 ? `Hit` : `Normal`) + (targetj % 2 === 0 ? `` : `Bar`);
 			const colorPos = Math.ceil((targetj % 10 - 1) / 2);
 
-			g_keyObj[`color${tkObj.keyCtrlPtn}`].filter(cpattern => colorPos === cpattern)
-				.forEach((cpattern, k) => {
+			g_keyObj[`color${tkObj.keyCtrlPtn}`].forEach((cpattern, k) => {
+				if (colorPos === cpattern) {
 					initialize(baseHeader + ctype);
 					pushColor(baseHeader + ctype, k + addAll);
-				});
+				}
+			});
 		});
 	}
 
