@@ -1363,6 +1363,12 @@ const g_kCdNameObj = {
     metaRKey: `MetaRight`,
 };
 
+const g_kCdObj = {
+    unknown: 1,
+    shiftRkey: 256,
+    shiftRAltKey: 260,
+};
+
 // 画面別ショートカット
 const g_shortcutObj = {
     title: {

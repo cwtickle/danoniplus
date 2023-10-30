@@ -537,6 +537,21 @@ const blockCode = _setCode => !C_BLOCK_KEYS.includes(_setCode);
 /*-----------------------------------------------------------*/
 
 /**
+ * キーを押した状態を格納
+ * (KeyboardEvent.codeが空のときは、別キーとして扱う)
+ * @param {object} _evt 
+ * @param {boolean} _keyHitFlg 
+ */
+const switchKeyHit = (_evt, _keyHitFlg = false) => {
+	if (_evt.code === ``) {
+		g_inputKeyBuffer[''] = false;
+		g_inputKeyBuffer[_evt.key === `Shift` ? `ShiftRight` : `Unknown`] = _keyHitFlg;
+	} else {
+		g_inputKeyBuffer[_evt.code] = _keyHitFlg;
+	}
+}
+
+/**
  * キーを押したときの動作（汎用）
  * @param {object} _evt 
  * @param {string} _displayName 
@@ -551,10 +566,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 	if (_evt.repeat && (g_unrepeatObj.page.includes(_displayName) || g_unrepeatObj.key.includes(setCode))) {
 		return blockCode(setCode);
 	}
-	g_inputKeyBuffer[setCode] = true;
-	if (_evt.key === `Shift` && setCode === ``) {
-		g_inputKeyBuffer.ShiftRight = true;
-	}
+	switchKeyHit(_evt, true);
 
 	// 対象ボタンを検索
 	const scLists = Object.keys(g_shortcutObj[_displayName]).filter(keys => {
@@ -565,10 +577,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 	if (scLists.length > 0) {
 		// リンク先にジャンプする場合はonkeyUpイベントが動かないため、事前にキー状態をリセット
 		if (g_shortcutObj[_displayName][scLists[0]].reset) {
-			g_inputKeyBuffer[setCode] = false;
-			if (_evt.key === `Shift` && setCode === ``) {
-				g_inputKeyBuffer.ShiftRight = false;
-			}
+			switchKeyHit(_evt);
 		}
 		// 対象ボタン処理を実行
 		const targetId = document.getElementById(g_shortcutObj[_displayName][scLists[0]].id);
@@ -3900,10 +3909,10 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 			errCd: `E_0104`, baseCopyFlg: true,
 			loopFunc: (k, keyheader) => {
 				const addShiftRKey = (_pattern = ``) => {
-					const keyCtrls = g_keyObj[`${keyheader}_${k + g_keyObj.dfPtnNum}${_pattern}`];
+					const keyCtrls = g_keyObj[`${keyheader}_${k + dfPtnNum}${_pattern}`];
 					for (let j = 0; j < keyCtrls.length; j++) {
-						if (keyCtrls[j].includes(256) && !keyCtrls[j].includes(260)) {
-							keyCtrls[j].push(260);
+						if (keyCtrls[j].includes(g_kCdObj.shiftRkey) && !keyCtrls[j].includes(g_kCdObj.shiftRAltKey)) {
+							keyCtrls[j].push(g_kCdObj.shiftRAltKey);
 						}
 					}
 				};
@@ -6751,8 +6760,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		let setKey = g_kCdN.findIndex(kCd => kCd === kbCode);
 
 		// 右シフトキー対応
-		if (setKey === 1 && kbKey === `Shift`) {
-			setKey = 260;
+		if (setKey === g_kCdObj.unknown && kbKey === `Shift`) {
+			setKey = g_kCdObj.shiftRAltKey;
 		}
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
@@ -8527,6 +8536,13 @@ const getArrowSettings = _ => {
 	for (let j = 0; j < g_workObj.keyCtrl.length; j++) {
 		for (let k = 0; k < g_workObj.keyCtrl[j].length; k++) {
 			g_workObj.keyCtrlN[j][k] = g_kCdN[g_workObj.keyCtrl[j][k]];
+
+			// 内部のキーコードにより、KeyboardEvent.codeの値を切り替え
+			if (g_workObj.keyCtrl[j][k] === g_kCdObj.unknown) {
+				g_workObj.keyCtrlN[j][k] = `Unknown`;
+			} else if (g_workObj.keyCtrl[j][k] === g_kCdObj.shiftRAltKey) {
+				g_workObj.keyCtrlN[j][k] = `ShiftRight`;
+			}
 			g_workObj.keyHitFlg[j][k] = false;
 		}
 	}
@@ -9117,17 +9133,16 @@ const mainInit = _ => {
 	 */
 	const mainKeyDownActFunc = {
 
-		OFF: (_keyCode) => {
+		OFF: (_code, _key) => {
+			const convCode = (_code === `` ? (_key === `Shift` ? `ShiftRight` : `Unknown`) : _code);
 			const matchKeys = g_workObj.keyCtrlN;
 
 			for (let j = 0; j < keyNum; j++) {
-				matchKeys[j].filter((key, k) => _keyCode === key && !g_workObj.keyHitFlg[j][k] && !g_judgObj.lockFlgs[j])
+				matchKeys[j].filter((key, k) => convCode === key && !g_workObj.keyHitFlg[j][k] && !g_judgObj.lockFlgs[j])
 					.forEach(() => {
-						if (_keyCode !== `` || (_keyCode === `` && g_inputKeyBuffer.ShiftRight)) {
-							g_judgObj.lockFlgs[j] = true;
-							judgeArrow(j);
-							g_judgObj.lockFlgs[j] = false;
-						}
+						g_judgObj.lockFlgs[j] = true;
+						judgeArrow(j);
+						g_judgObj.lockFlgs[j] = false;
 					});
 			}
 		},
@@ -9143,12 +9158,8 @@ const mainInit = _ => {
 		if (evt.repeat && !g_mainRepeatObj.key.includes(setCode)) {
 			return blockCode(setCode);
 		}
-
-		g_inputKeyBuffer[setCode] = true;
-		if (evt.key === `Shift` && setCode === ``) {
-			g_inputKeyBuffer.ShiftRight = true;
-		}
-		mainKeyDownActFunc[g_stateObj.autoAll](setCode);
+		switchKeyHit(evt, true);
+		mainKeyDownActFunc[g_stateObj.autoAll](setCode, evt.key);
 
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
@@ -9209,11 +9220,7 @@ const mainInit = _ => {
 	};
 
 	document.onkeyup = evt => {
-		const setCode = evt.code;
-		g_inputKeyBuffer[setCode] = false;
-		if (evt.key === `Shift` && setCode === ``) {
-			g_inputKeyBuffer.ShiftRight = false;
-		}
+		switchKeyHit(evt);
 		mainKeyUpActFunc[g_stateObj.autoAll]();
 	};
 
