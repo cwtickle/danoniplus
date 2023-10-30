@@ -1361,6 +1361,13 @@ const g_kCdNameObj = {
     shiftRKey: `ShiftRight`,
     metaLKey: `MetaLeft`,
     metaRKey: `MetaRight`,
+    unknownKey: `Unknown`,
+};
+
+const g_kCdObj = {
+    unknown: 1,
+    shiftRkey: 256,
+    shiftRAltKey: 260,
 };
 
 // 画面別ショートカット
