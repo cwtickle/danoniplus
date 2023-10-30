@@ -545,7 +545,7 @@ const blockCode = _setCode => !C_BLOCK_KEYS.includes(_setCode);
 const switchKeyHit = (_evt, _keyHitFlg = false) => {
 	if (_evt.code === ``) {
 		g_inputKeyBuffer[''] = false;
-		g_inputKeyBuffer[_evt.key === `Shift` ? `ShiftRight` : `Unknown`] = _keyHitFlg;
+		g_inputKeyBuffer[_evt.key === `Shift` ? g_kCdNameObj.shiftRKey : g_kCdNameObj.unknownKey] = _keyHitFlg;
 	} else {
 		g_inputKeyBuffer[_evt.code] = _keyHitFlg;
 	}
@@ -8539,9 +8539,9 @@ const getArrowSettings = _ => {
 
 			// 内部のキーコードにより、KeyboardEvent.codeの値を切り替え
 			if (g_workObj.keyCtrl[j][k] === g_kCdObj.unknown) {
-				g_workObj.keyCtrlN[j][k] = `Unknown`;
+				g_workObj.keyCtrlN[j][k] = g_kCdNameObj.unknownKey;
 			} else if (g_workObj.keyCtrl[j][k] === g_kCdObj.shiftRAltKey) {
-				g_workObj.keyCtrlN[j][k] = `ShiftRight`;
+				g_workObj.keyCtrlN[j][k] = g_kCdNameObj.shiftRKey;
 			}
 			g_workObj.keyHitFlg[j][k] = false;
 		}
@@ -9134,7 +9134,7 @@ const mainInit = _ => {
 	const mainKeyDownActFunc = {
 
 		OFF: (_code, _key) => {
-			const convCode = (_code === `` ? (_key === `Shift` ? `ShiftRight` : `Unknown`) : _code);
+			const convCode = (_code === `` ? (_key === `Shift` ? g_kCdNameObj.shiftRKey : g_kCdNameObj.unknownKey) : _code);
 			const matchKeys = g_workObj.keyCtrlN;
 
 			for (let j = 0; j < keyNum; j++) {
