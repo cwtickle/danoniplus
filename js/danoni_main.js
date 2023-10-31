@@ -360,7 +360,7 @@ const hasValInArray = (_val, _array, _pos = 0) =>
  * @param {array} _data 
  * @param {integer} _length
  */
-const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length >= _length;
+const hasArrayList = (_data, _length = 1) => _data?.length >= _length;
 
 /**
  * 改行コード区切りの配列展開
@@ -1501,11 +1501,9 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
  * @param {string} _propData 
  */
 const getCssCustomProperty = (_prop, _propData) =>
-	document.documentElement.style.getPropertyValue(_propData) !== `` ?
-		document.documentElement.style.getPropertyValue(_propData) :
-		g_cssBkProperties[_propData] !== undefined ?
-			g_cssBkProperties[_propData] :
-			_prop.endsWith(`-x`) ? _propData : reviseCssText(makeColorGradation(_propData, { _defaultColorgrd: false }));
+	document.documentElement.style.getPropertyValue(_propData) || (g_cssBkProperties[_propData] ?? (
+		_prop.endsWith(`-x`) ? _propData : reviseCssText(makeColorGradation(_propData, { _defaultColorgrd: false }))
+	));
 
 /**
  * CSSカスタムプロパティの値をオブジェクトへ退避
@@ -3169,14 +3167,14 @@ const headerConvert = _dosObj => {
 
 		// Display使用可否設定を分解 |displayUse=false,ON|
 		const displayTempUse = _dosObj[`${option}Use`] ?? g_presetObj.settingUse?.[option] ?? `true`;
-		const displayUse = (displayTempUse !== undefined ? displayTempUse.split(`,`) : [true, C_FLG_ON]);
+		const displayUse = displayTempUse?.split(`,`) ?? [true, C_FLG_ON];
 
 		// displayUse -> ボタンの有効/無効, displaySet -> ボタンの初期値(ON/OFF)
 		obj[`${option}Use`] = setBoolVal(displayUse[0], true);
 		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] :
 			boolToSwitch(obj[`${option}Use`]), ``, C_TYP_SWITCH);
 		g_stateObj[`d_${option.toLowerCase()}`] = setVal(obj[`${option}Set`], C_FLG_ON, C_TYP_SWITCH);
-		obj[`${option}ChainOFF`] = (_dosObj[`${option}ChainOFF`] !== undefined ? _dosObj[`${option}ChainOFF`].split(`,`) : []);
+		obj[`${option}ChainOFF`] = _dosObj[`${option}ChainOFF`]?.split(`,`) ?? [];
 
 		// Displayのデフォルト設定で、双方向に設定されている場合は設定をブロック
 		g_displays.filter((option2, k) =>
@@ -3417,7 +3415,7 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 
 		// フリーズアロー色
 		const tmpFrzColors = (frzColorTxt !== undefined ? splitLF2(frzColorTxt) : []);
-		const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
+		const firstFrzColors = tmpFrzColors[0]?.split(`,`) ?? [];
 
 		for (let j = 0; j < _baseObj.setColorInit.length; j++) {
 
@@ -3744,8 +3742,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 				// |keyCtrl9j=Tab,7_0,Enter| -> |keyCtrl9j=Tab,S,D,F,Space,J,K,L,Enter| のように補完
 				g_keyObj[`${keyheader}_${k + dfPtn}`] =
 					tmpArray[k].split(`,`).map(n =>
-						g_keyObj[`${_name}${getKeyPtnName(n)}`] !== undefined ?
-							structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) : [_convFunc(n)]
+						structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ?? [_convFunc(n)]
 					).flat();
 				if (baseCopyFlg) {
 					g_keyObj[`${keyheader}_${k + dfPtn}d`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}`]);
@@ -3796,9 +3793,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |shuffle9j=2,7_0_0,2|)
 						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] =
 							makeBaseArray(list.split(`,`).map(n =>
-								g_keyObj[`${_name}${getKeyPtnName(n)}`] !== undefined ?
-									structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) :
-									[isNaN(parseInt(n)) ? n : parseInt(n, 10)]
+								structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ??
+								[isNaN(parseInt(n)) ? n : parseInt(n, 10)]
 							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
 						ptnCnt++;
 					}
@@ -3873,9 +3869,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					const tmpParamPair = pairs.split(`::`);
 					g_keyObj[pairName][tmpParamPair[0]] =
 						makeBaseArray(tmpParamPair[1]?.split(`,`).map(n =>
-							g_keyObj[`${_pairName}${getKeyPtnName(n)}`] !== undefined ?
-								structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`][tmpParamPair[0]]) :
-								[n === `-` ? -1 : parseInt(n, 10)]
+							structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`]?.[tmpParamPair[0]]) ??
+							[n === `-` ? -1 : parseInt(n, 10)]
 						).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
 				}
 			});
@@ -5769,7 +5764,7 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 	const basePtn = `${g_keyObj.currentKey}_${g_keyObj.storagePtn}`;
 	const baseKeyNum = g_keyObj[`${g_keyObj.defaultProp}${basePtn}`].length;
 
-	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined && _localStorage[`keyCtrl${_extraKeyName}`][0].length > 0) {
+	if (_localStorage[`keyCtrl${_extraKeyName}`]?.[0].length > 0) {
 		const prevPtn = g_keyObj.currentPtn;
 		g_keyObj.currentPtn = -1;
 		const copyPtn = `${g_keyObj.currentKey}_-1`;
@@ -5811,12 +5806,12 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
  */
 const makeSettingLblCssButton = (_id, _name, _heightPos, _func, { x, y, w, h, siz, cxtFunc = _ => true, ...rest } = {}, ..._classes) => {
 	const tmpObj = {
-		x: x !== undefined ? x : g_limitObj.setLblLeft,
-		y: y !== undefined ? y : g_limitObj.setLblHeight * _heightPos,
-		w: w !== undefined ? w : g_limitObj.setLblWidth,
-		h: h !== undefined ? h : g_limitObj.setLblHeight,
-		siz: siz !== undefined ? siz : g_limitObj.setLblSiz,
-		cxtFunc: cxtFunc !== undefined ? cxtFunc : _ => true,
+		x: x ?? g_limitObj.setLblLeft,
+		y: y ?? g_limitObj.setLblHeight * _heightPos,
+		w: w ?? g_limitObj.setLblWidth,
+		h: h ?? g_limitObj.setLblHeight,
+		siz: siz ?? g_limitObj.setLblSiz,
+		cxtFunc: cxtFunc ?? (_ => true),
 	};
 	return createCss2Button(_id, _name, _func, { ...tmpObj, ...rest }, g_cssObj.button_Default, ..._classes);
 };
@@ -6826,8 +6821,7 @@ const getShadowColor = (_colorPos, _arrowColor) => g_headerObj.setShadowColor[_c
 const getKeyInfo = _ => {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length;
-	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
-		g_keyObj[`divMax${keyCtrlPtn}`] : Math.max(...g_keyObj[`pos${keyCtrlPtn}`]) + 1);
+	const posMax = g_keyObj[`divMax${keyCtrlPtn}`] ?? Math.max(...g_keyObj[`pos${keyCtrlPtn}`]) + 1;
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 	const keyGroupMaps = setVal(g_keyObj[`keyGroup${keyCtrlPtn}`], [...Array(keyNum)].fill([`0`]), C_TYP_STRING);
 	const keyGroupList = makeDedupliArray(keyGroupMaps.flat()).sort((a, b) => parseInt(a) - parseInt(b));
@@ -8566,8 +8560,7 @@ const getArrowSettings = _ => {
 	// モーション管理
 	g_typeLists.arrow.forEach(type => g_workObj[`${type}CssMotions`] = [...Array(keyNum)].fill(``));
 
-	const scrollDirOptions = (g_keyObj[`scrollDir${keyCtrlPtn}`] !== undefined ?
-		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
+	const scrollDirOptions = g_keyObj[`scrollDir${keyCtrlPtn}`]?.[g_stateObj.scroll] ?? [...Array(keyNum)].fill(1);
 
 	g_stateObj.autoAll = boolToSwitch(g_stateObj.autoPlay === C_FLG_ALL);
 	g_workObj.hitPosition = (g_stateObj.autoAll === C_FLG_ON ? 0 : g_stateObj.hitPosition);
@@ -9759,11 +9752,11 @@ const mainInit = _ => {
 		g_customJsObj.mainEnterFrame.forEach(func => func());
 
 		// 速度変化 (途中変速, 個別加速)
-		while (g_workObj.speedData !== undefined && currentFrame >= g_workObj.speedData[speedCnts]) {
+		while (currentFrame >= g_workObj.speedData?.[speedCnts]) {
 			g_workObj.currentSpeed = g_workObj.speedData[speedCnts + 1];
 			speedCnts += 2;
 		}
-		while (g_workObj.boostData !== undefined && currentFrame >= g_workObj.boostData[boostCnts]) {
+		while (currentFrame >= g_workObj.boostData?.[boostCnts]) {
 			g_workObj.boostSpd = g_workObj.boostData[boostCnts + 1];
 			g_workObj.boostDir = (g_workObj.boostSpd > 0 ? 1 : -1);
 			boostCnts += 2;
