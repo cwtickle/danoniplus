@@ -694,11 +694,7 @@ const preloadFile = (_as, _href, _type = ``, _crossOrigin = `anonymous`) => {
 
 	if (preloadFlg === undefined) {
 		g_preloadFiles.all.push(_href);
-
-		if (g_preloadFiles[_as] === undefined) {
-			g_preloadFiles[_as] = [];
-		}
-		g_preloadFiles[_as].push(_href);
+		g_preloadFiles[_as]?.push(_href) || (g_preloadFiles[_as] = [_href]);
 
 		if (g_userAgent.indexOf(`firefox`) !== -1 && _as === `image`) {
 			// Firefoxの場合のみpreloadが効かないため、画像読込形式にする
@@ -1894,10 +1890,7 @@ class AudioPlayer {
 	}
 
 	addEventListener(_type, _listener) {
-		if (this._eventListeners[_type] === undefined) {
-			this._eventListeners[_type] = [];
-		}
-		this._eventListeners[_type].push(_listener);
+		this._eventListeners[_type]?.push(_listener) || (this._eventListeners[_type] = [_listener]);
 	}
 
 	removeEventListener(_type, _listener) {
@@ -4662,17 +4655,15 @@ const drawSpeedGraph = _scoreId => {
 		const speed = speedObj[speedType].speed;
 		const speedData = g_detailObj[`${speedType}Data`][_scoreId];
 
-		if (speedData !== undefined) {
-			for (let i = 0; i < speedData.length; i += 2) {
-				if (speedData[i] >= startFrame) {
-					frame.push(speedData[i] - startFrame);
-					speed.push(speedData[i + 1]);
-				}
-				speedObj[speedType].cnt++;
+		for (let i = 0; i < speedData?.length; i += 2) {
+			if (speedData[i] >= startFrame) {
+				frame.push(speedData[i] - startFrame);
+				speed.push(speedData[i + 1]);
 			}
-			frame.push(playingFrame);
-			speed.push(speed.at(-1));
+			speedObj[speedType].cnt++;
 		}
+		frame.push(playingFrame);
+		speed.push(speed.at(-1));
 	});
 
 	const canvas = document.querySelector(`#graphSpeed`);
@@ -7141,12 +7132,8 @@ const loadingScoreInit = async () => {
 	// シャッフルグループを扱いやすくする
 	// [0, 0, 0, 1, 0, 0, 0] -> [[0, 1, 2, 4, 5, 6], [3]]
 	const shuffleGroupMap = {};
-	g_keyObj[`shuffle${keyCtrlPtn}`].forEach((_val, _i) => {
-		if (shuffleGroupMap[_val] === undefined) {
-			shuffleGroupMap[_val] = [];
-		}
-		shuffleGroupMap[_val].push(_i);
-	});
+	g_keyObj[`shuffle${keyCtrlPtn}`].forEach((_val, _i) =>
+		shuffleGroupMap[_val]?.push(_i) || (shuffleGroupMap[_val] = [_i]));
 
 	// Mirror,Random,S-Randomの適用
 	g_shuffleFunc[g_stateObj.shuffle](keyNum, Object.values(shuffleGroupMap));
@@ -7901,7 +7888,7 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
 	let currentSpeed = g_stateObj.speed * 2;
 
 	for (let frm = 0, s = 0; frm <= _lastFrame; frm++) {
-		while (_speedData !== undefined && frm >= _speedData[s]) {
+		while (frm >= _speedData?.[s]) {
 			currentSpeed = _speedData[s + 1] * g_stateObj.speed * 2;
 			s += 2;
 		}
@@ -7986,11 +7973,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	const setNotes = (_j, _k, _data, _startPoint, _header, _frzFlg = false) => {
 		if (_startPoint >= 0) {
-			if (g_workObj[`mk${_header}Arrow`][_startPoint] === undefined) {
-				g_workObj[`mk${_header}Arrow`][_startPoint] = [];
-			}
-			g_workObj[`mk${_header}Arrow`][_startPoint].push(_j);
-
+			g_workObj[`mk${_header}Arrow`][_startPoint]?.push(_j) || (g_workObj[`mk${_header}Arrow`][_startPoint] = [_j]);
 			if (_frzFlg) {
 				g_workObj[`mk${_header}Length`][_j][_k] = getFrzLength(_speedOnFrame, _data[_k], _data[_k + 1]);
 			}
@@ -8233,12 +8216,10 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	g_workObj.speedData.push(g_scoreObj.frameNum);
 	g_workObj.speedData.push(_speedOnFrame[g_scoreObj.frameNum]);
 
-	if (_dataObj.speedData !== undefined) {
-		for (let k = 0; k < _dataObj.speedData.length; k += 2) {
-			if (_dataObj.speedData[k] >= g_scoreObj.frameNum) {
-				g_workObj.speedData.push(_dataObj.speedData[k]);
-				g_workObj.speedData.push(_speedOnFrame[_dataObj.speedData[k]]);
-			}
+	for (let k = 0; k < _dataObj?.speedData.length; k += 2) {
+		if (_dataObj.speedData[k] >= g_scoreObj.frameNum) {
+			g_workObj.speedData.push(_dataObj.speedData[k]);
+			g_workObj.speedData.push(_speedOnFrame[_dataObj.speedData[k]]);
 		}
 	}
 };
@@ -8892,31 +8873,27 @@ const mainInit = _ => {
 	g_scoreObj.fadeOutTerm = C_FRM_AFTERFADE;
 
 	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
-	if (g_headerObj.fadeFrame !== undefined) {
-		let fadeNo = -1;
-		if (g_headerObj.fadeFrame.length >= g_stateObj.scoreId + 1) {
-			fadeNo = (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId][0])) ? -1 : g_stateObj.scoreId);
-		}
-		if (fadeNo !== -1) {
-			// フェードアウト指定の場合、曲長(フェードアウト開始まで)は FadeFrame - (本来のblankFrame)
-			duration = parseInt(g_headerObj.fadeFrame[fadeNo][0]) - g_headerObj.blankFrameDef;
-			g_scoreObj.fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
+	let fadeNo = -1;
+	if (g_headerObj.fadeFrame?.length >= g_stateObj.scoreId + 1) {
+		fadeNo = (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId][0])) ? -1 : g_stateObj.scoreId);
+	}
+	if (fadeNo !== -1) {
+		// フェードアウト指定の場合、曲長(フェードアウト開始まで)は FadeFrame - (本来のblankFrame)
+		duration = parseInt(g_headerObj.fadeFrame[fadeNo][0]) - g_headerObj.blankFrameDef;
+		g_scoreObj.fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
 
-			if (g_headerObj.fadeFrame[fadeNo].length > 1) {
-				g_scoreObj.fadeOutTerm = Number(g_headerObj.fadeFrame[fadeNo][1]);
-			}
+		if (g_headerObj.fadeFrame[fadeNo].length > 1) {
+			g_scoreObj.fadeOutTerm = Number(g_headerObj.fadeFrame[fadeNo][1]);
 		}
 	}
 
 	// 終了時間指定の場合、その値を適用する
 	let endFrameUseFlg = false;
-	if (g_headerObj.endFrame !== undefined) {
-		const tmpEndFrame = g_headerObj.endFrame[g_stateObj.scoreId] || g_headerObj.endFrame[0];
-		if (!isNaN(parseInt(tmpEndFrame))) {
-			// 終了時間指定の場合、曲長は EndFrame - (本来のblankFrame)
-			duration = parseInt(tmpEndFrame) - g_headerObj.blankFrameDef;
-			endFrameUseFlg = true;
-		}
+	const tmpEndFrame = g_headerObj.endFrame?.[g_stateObj.scoreId] || g_headerObj.endFrame?.[0];
+	if (!isNaN(parseInt(tmpEndFrame))) {
+		// 終了時間指定の場合、曲長は EndFrame - (本来のblankFrame)
+		duration = parseInt(tmpEndFrame) - g_headerObj.blankFrameDef;
+		endFrameUseFlg = true;
 	}
 
 	let fullFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
