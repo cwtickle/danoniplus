@@ -612,7 +612,7 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
 	if (scKey.length > 0) {
 		multiAppend(_obj,
 			createDivCss2Label(`sc${_settingLabel}`,
-				g_scViewObj.format.split(`{0}`).join(dfLabel !== `` ? `${dfLabel}` : `${g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])] ?? ''}`), {
+				g_scViewObj.format.split(`{0}`).join(dfLabel || (`${g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])] ?? ''}`)), {
 				x, y, w, siz, fontWeight: `bold`, opacity: 0.75, pointerEvents: C_DIS_NONE,
 			})
 		);
@@ -4087,7 +4087,7 @@ const titleInit = _ => {
 		}
 
 		// 変数 titlesize の定義 (使用例： |titlesize=40$20|)
-		const titlefontsizes = (g_headerObj.titlesize !== `` ? g_headerObj.titlesize.split(`$`).join(`,`).split(`,`) : [titlefontsize, titlefontsize]);
+		const titlefontsizes = (g_headerObj.titlesize?.split(`$`).join(`,`).split(`,`) || [titlefontsize, titlefontsize]);
 		const titlefontsize1 = setIntVal(titlefontsizes[0], titlefontsize);
 		const titlefontsize2 = setIntVal(titlefontsizes[1], titlefontsize1);
 
@@ -9050,14 +9050,14 @@ const mainInit = _ => {
 
 	// Ready?表示
 	if (!g_headerObj.customReadyUse) {
-		const readyColor = (g_headerObj.readyColor !== `` ? g_headerObj.readyColor : g_headerObj.setColorOrg[0]);
+		const readyColor = g_headerObj.readyColor || g_headerObj.setColorOrg[0];
 		let readyDelayFrame = 0;
 		if (g_stateObj.fadein === 0 && g_headerObj.readyDelayFrame > 0 &&
 			g_headerObj.readyDelayFrame + g_stateObj.adjustment > 0) {
 			readyDelayFrame = g_headerObj.readyDelayFrame + g_stateObj.adjustment;
 		}
-		const readyHtml = (g_headerObj.readyHtml !== `` ? g_headerObj.readyHtml :
-			`<span style='color:${readyColor};font-size:${wUnit(60)};'>R</span>EADY<span style='font-size:${wUnit(50)};'>?</span>`);
+		const readyHtml = g_headerObj.readyHtml ||
+			`<span style='color:${readyColor};font-size:${wUnit(60)};'>R</span>EADY<span style='font-size:${wUnit(50)};'>?</span>`;
 
 		divRoot.appendChild(
 			createDivCss2Label(`lblReady`, readyHtml, {
@@ -9084,7 +9084,7 @@ const mainInit = _ => {
 	const mainKeyDownActFunc = {
 
 		OFF: (_code, _key) => {
-			const convCode = (_code === `` ? (_key === `Shift` ? g_kCdNameObj.shiftRKey : g_kCdNameObj.unknownKey) : _code);
+			const convCode = _code || (_key === `Shift` ? g_kCdNameObj.shiftRKey : g_kCdNameObj.unknownKey);
 			const matchKeys = g_workObj.keyCtrlN;
 
 			for (let j = 0; j < keyNum; j++) {
