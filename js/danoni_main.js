@@ -8310,17 +8310,6 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 	const allUseTypes = [];
 
 	/**
-	 * 色変化用配列（フレーム別）の初期化
-	 * @param {string} _baseStr 
-	 */
-	const initialize = (_baseStr) => {
-		if (g_workObj[_baseStr][_frame] === undefined) {
-			g_workObj[_baseStr][_frame] = [];
-			g_workObj[`${_baseStr}Cd`][_frame] = [];
-		}
-	};
-
-	/**
 	 * 全体色変化の有効化（フレーム別）
 	 * @param  {...any} _types 
 	 */
@@ -8336,8 +8325,8 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 	 * @param {number} _cVal 
 	 */
 	const pushColor = (_baseStr, _cVal) => {
-		g_workObj[_baseStr][_frame].push(_cVal);
-		g_workObj[`${_baseStr}Cd`][_frame].push(colorCd);
+		g_workObj[_baseStr][_frame]?.push(_cVal) || (g_workObj[_baseStr][_frame] = [_cVal]);
+		g_workObj[`${_baseStr}Cd`][_frame]?.push(colorCd) || (g_workObj[`${_baseStr}Cd`][_frame] = [colorCd]);
 	};
 
 	if (_val < 30 || _val >= 1000) {
@@ -8353,8 +8342,6 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 
 		// 矢印の色変化 (追随指定時はフリーズアローも色変化)
 		baseHeaders.forEach(baseHeader => {
-			initialize(baseHeader);
-
 			if (_val < 20 || _val >= 1000) {
 				pushColor(baseHeader, g_workObj.replaceNums[_val % 1000] + addAll);
 			} else if (_val >= 20) {
@@ -8392,7 +8379,6 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 
 			g_keyObj[`color${tkObj.keyCtrlPtn}`].forEach((cpattern, k) => {
 				if (colorPos === cpattern) {
-					initialize(baseHeader + ctype);
 					pushColor(baseHeader + ctype, k + addAll);
 				}
 			});
@@ -8449,30 +8435,24 @@ const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir) => {
 
 	const frameArrow = Math.max(_frameArrow, g_scoreObj.frameNum);
 	const frameStep = Math.max(_frameStep, g_scoreObj.frameNum);
+	const pushData = (_pattern, _frame, _val) =>
+		g_workObj[`mkScrollch${_pattern}`][_frame]?.push(_val) || (g_workObj[`mkScrollch${_pattern}`][_frame] = [_val]);
 
-	if (g_workObj.mkScrollchArrow[frameArrow] === undefined) {
-		g_workObj.mkScrollchArrow[frameArrow] = [];
-		g_workObj.mkScrollchArrowDir[frameArrow] = [];
-	}
-	if (g_workObj.mkScrollchStep[frameStep] === undefined) {
-		g_workObj.mkScrollchStep[frameStep] = [];
-		g_workObj.mkScrollchStepDir[frameStep] = [];
-	}
 	if (_val < 20 || _val >= 1000) {
 		const realVal = g_workObj.replaceNums[_val % 1000];
-		g_workObj.mkScrollchArrow[frameArrow].push(realVal);
-		g_workObj.mkScrollchArrowDir[frameArrow].push(_scrollDir);
-		g_workObj.mkScrollchStep[frameStep].push(realVal);
-		g_workObj.mkScrollchStepDir[frameStep].push(_scrollDir);
+		pushData(`Arrow`, frameArrow, realVal);
+		pushData(`ArrowDir`, frameArrow, _scrollDir);
+		pushData(`Step`, frameStep, realVal);
+		pushData(`StepDir`, frameStep, _scrollDir);
 
 	} else {
 		const colorNum = _val - 20;
 		for (let j = 0; j < tkObj.keyNum; j++) {
 			if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
-				g_workObj.mkScrollchArrow[frameArrow].push(j);
-				g_workObj.mkScrollchArrowDir[frameArrow].push(_scrollDir);
-				g_workObj.mkScrollchStep[frameStep].push(j);
-				g_workObj.mkScrollchStepDir[frameStep].push(_scrollDir);
+				pushData(`Arrow`, frameArrow, j);
+				pushData(`ArrowDir`, frameArrow, _scrollDir);
+				pushData(`Step`, frameStep, j);
+				pushData(`StepDir`, frameStep, _scrollDir);
 			}
 		}
 	}
