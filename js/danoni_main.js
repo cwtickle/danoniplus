@@ -360,7 +360,7 @@ const hasValInArray = (_val, _array, _pos = 0) =>
  * @param {array} _data 
  * @param {integer} _length
  */
-const hasArrayList = (_data, _length = 1) => _data !== undefined && _data.length >= _length;
+const hasArrayList = (_data, _length = 1) => _data?.length >= _length;
 
 /**
  * 改行コード区切りの配列展開
@@ -612,7 +612,7 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
 	if (scKey.length > 0) {
 		multiAppend(_obj,
 			createDivCss2Label(`sc${_settingLabel}`,
-				g_scViewObj.format.split(`{0}`).join(dfLabel !== `` ? `${dfLabel}` : `${g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])] ?? ''}`), {
+				g_scViewObj.format.split(`{0}`).join(dfLabel || (`${g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])] ?? ''}`)), {
 				x, y, w, siz, fontWeight: `bold`, opacity: 0.75, pointerEvents: C_DIS_NONE,
 			})
 		);
@@ -694,11 +694,7 @@ const preloadFile = (_as, _href, _type = ``, _crossOrigin = `anonymous`) => {
 
 	if (preloadFlg === undefined) {
 		g_preloadFiles.all.push(_href);
-
-		if (g_preloadFiles[_as] === undefined) {
-			g_preloadFiles[_as] = [];
-		}
-		g_preloadFiles[_as].push(_href);
+		g_preloadFiles[_as]?.push(_href) || (g_preloadFiles[_as] = [_href]);
 
 		if (g_userAgent.indexOf(`firefox`) !== -1 && _as === `image`) {
 			// Firefoxの場合のみpreloadが効かないため、画像読込形式にする
@@ -1501,11 +1497,9 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
  * @param {string} _propData 
  */
 const getCssCustomProperty = (_prop, _propData) =>
-	document.documentElement.style.getPropertyValue(_propData) !== `` ?
-		document.documentElement.style.getPropertyValue(_propData) :
-		g_cssBkProperties[_propData] !== undefined ?
-			g_cssBkProperties[_propData] :
-			_prop.endsWith(`-x`) ? _propData : reviseCssText(makeColorGradation(_propData, { _defaultColorgrd: false }));
+	document.documentElement.style.getPropertyValue(_propData) || (g_cssBkProperties[_propData] ?? (
+		_prop.endsWith(`-x`) ? _propData : reviseCssText(makeColorGradation(_propData, { _defaultColorgrd: false }))
+	));
 
 /**
  * CSSカスタムプロパティの値をオブジェクトへ退避
@@ -1896,10 +1890,7 @@ class AudioPlayer {
 	}
 
 	addEventListener(_type, _listener) {
-		if (this._eventListeners[_type] === undefined) {
-			this._eventListeners[_type] = [];
-		}
-		this._eventListeners[_type].push(_listener);
+		this._eventListeners[_type]?.push(_listener) || (this._eventListeners[_type] = [_listener]);
 	}
 
 	removeEventListener(_type, _listener) {
@@ -3169,14 +3160,14 @@ const headerConvert = _dosObj => {
 
 		// Display使用可否設定を分解 |displayUse=false,ON|
 		const displayTempUse = _dosObj[`${option}Use`] ?? g_presetObj.settingUse?.[option] ?? `true`;
-		const displayUse = (displayTempUse !== undefined ? displayTempUse.split(`,`) : [true, C_FLG_ON]);
+		const displayUse = displayTempUse?.split(`,`) ?? [true, C_FLG_ON];
 
 		// displayUse -> ボタンの有効/無効, displaySet -> ボタンの初期値(ON/OFF)
 		obj[`${option}Use`] = setBoolVal(displayUse[0], true);
 		obj[`${option}Set`] = setVal(displayUse.length > 1 ? displayUse[1] :
 			boolToSwitch(obj[`${option}Use`]), ``, C_TYP_SWITCH);
 		g_stateObj[`d_${option.toLowerCase()}`] = setVal(obj[`${option}Set`], C_FLG_ON, C_TYP_SWITCH);
-		obj[`${option}ChainOFF`] = (_dosObj[`${option}ChainOFF`] !== undefined ? _dosObj[`${option}ChainOFF`].split(`,`) : []);
+		obj[`${option}ChainOFF`] = _dosObj[`${option}ChainOFF`]?.split(`,`) ?? [];
 
 		// Displayのデフォルト設定で、双方向に設定されている場合は設定をブロック
 		g_displays.filter((option2, k) =>
@@ -3417,7 +3408,7 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 
 		// フリーズアロー色
 		const tmpFrzColors = (frzColorTxt !== undefined ? splitLF2(frzColorTxt) : []);
-		const firstFrzColors = (tmpFrzColors[0] !== undefined ? tmpFrzColors[0].split(`,`) : []);
+		const firstFrzColors = tmpFrzColors[0]?.split(`,`) ?? [];
 
 		for (let j = 0; j < _baseObj.setColorInit.length; j++) {
 
@@ -3744,8 +3735,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 				// |keyCtrl9j=Tab,7_0,Enter| -> |keyCtrl9j=Tab,S,D,F,Space,J,K,L,Enter| のように補完
 				g_keyObj[`${keyheader}_${k + dfPtn}`] =
 					tmpArray[k].split(`,`).map(n =>
-						g_keyObj[`${_name}${getKeyPtnName(n)}`] !== undefined ?
-							structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) : [_convFunc(n)]
+						structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ?? [_convFunc(n)]
 					).flat();
 				if (baseCopyFlg) {
 					g_keyObj[`${keyheader}_${k + dfPtn}d`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}`]);
@@ -3796,9 +3786,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |shuffle9j=2,7_0_0,2|)
 						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] =
 							makeBaseArray(list.split(`,`).map(n =>
-								g_keyObj[`${_name}${getKeyPtnName(n)}`] !== undefined ?
-									structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) :
-									[isNaN(parseInt(n)) ? n : parseInt(n, 10)]
+								structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ??
+								[isNaN(parseInt(n)) ? n : parseInt(n, 10)]
 							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
 						ptnCnt++;
 					}
@@ -3873,9 +3862,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					const tmpParamPair = pairs.split(`::`);
 					g_keyObj[pairName][tmpParamPair[0]] =
 						makeBaseArray(tmpParamPair[1]?.split(`,`).map(n =>
-							g_keyObj[`${_pairName}${getKeyPtnName(n)}`] !== undefined ?
-								structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`][tmpParamPair[0]]) :
-								[n === `-` ? -1 : parseInt(n, 10)]
+							structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`]?.[tmpParamPair[0]]) ??
+							[n === `-` ? -1 : parseInt(n, 10)]
 						).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
 				}
 			});
@@ -4099,7 +4087,7 @@ const titleInit = _ => {
 		}
 
 		// 変数 titlesize の定義 (使用例： |titlesize=40$20|)
-		const titlefontsizes = (g_headerObj.titlesize !== `` ? g_headerObj.titlesize.split(`$`).join(`,`).split(`,`) : [titlefontsize, titlefontsize]);
+		const titlefontsizes = (g_headerObj.titlesize?.split(`$`).join(`,`).split(`,`) || [titlefontsize, titlefontsize]);
 		const titlefontsize1 = setIntVal(titlefontsizes[0], titlefontsize);
 		const titlefontsize2 = setIntVal(titlefontsizes[1], titlefontsize1);
 
@@ -4667,17 +4655,15 @@ const drawSpeedGraph = _scoreId => {
 		const speed = speedObj[speedType].speed;
 		const speedData = g_detailObj[`${speedType}Data`][_scoreId];
 
-		if (speedData !== undefined) {
-			for (let i = 0; i < speedData.length; i += 2) {
-				if (speedData[i] >= startFrame) {
-					frame.push(speedData[i] - startFrame);
-					speed.push(speedData[i + 1]);
-				}
-				speedObj[speedType].cnt++;
+		for (let i = 0; i < speedData?.length; i += 2) {
+			if (speedData[i] >= startFrame) {
+				frame.push(speedData[i] - startFrame);
+				speed.push(speedData[i + 1]);
 			}
-			frame.push(playingFrame);
-			speed.push(speed.at(-1));
+			speedObj[speedType].cnt++;
 		}
+		frame.push(playingFrame);
+		speed.push(speed.at(-1));
 	});
 
 	const canvas = document.querySelector(`#graphSpeed`);
@@ -5769,7 +5755,7 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 	const basePtn = `${g_keyObj.currentKey}_${g_keyObj.storagePtn}`;
 	const baseKeyNum = g_keyObj[`${g_keyObj.defaultProp}${basePtn}`].length;
 
-	if (_localStorage[`keyCtrl${_extraKeyName}`] !== undefined && _localStorage[`keyCtrl${_extraKeyName}`][0].length > 0) {
+	if (_localStorage[`keyCtrl${_extraKeyName}`]?.[0].length > 0) {
 		const prevPtn = g_keyObj.currentPtn;
 		g_keyObj.currentPtn = -1;
 		const copyPtn = `${g_keyObj.currentKey}_-1`;
@@ -5811,12 +5797,12 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
  */
 const makeSettingLblCssButton = (_id, _name, _heightPos, _func, { x, y, w, h, siz, cxtFunc = _ => true, ...rest } = {}, ..._classes) => {
 	const tmpObj = {
-		x: x !== undefined ? x : g_limitObj.setLblLeft,
-		y: y !== undefined ? y : g_limitObj.setLblHeight * _heightPos,
-		w: w !== undefined ? w : g_limitObj.setLblWidth,
-		h: h !== undefined ? h : g_limitObj.setLblHeight,
-		siz: siz !== undefined ? siz : g_limitObj.setLblSiz,
-		cxtFunc: cxtFunc !== undefined ? cxtFunc : _ => true,
+		x: x ?? g_limitObj.setLblLeft,
+		y: y ?? g_limitObj.setLblHeight * _heightPos,
+		w: w ?? g_limitObj.setLblWidth,
+		h: h ?? g_limitObj.setLblHeight,
+		siz: siz ?? g_limitObj.setLblSiz,
+		cxtFunc: cxtFunc ?? (_ => true),
 	};
 	return createCss2Button(_id, _name, _func, { ...tmpObj, ...rest }, g_cssObj.button_Default, ..._classes);
 };
@@ -6826,8 +6812,7 @@ const getShadowColor = (_colorPos, _arrowColor) => g_headerObj.setShadowColor[_c
 const getKeyInfo = _ => {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length;
-	const posMax = (g_keyObj[`divMax${keyCtrlPtn}`] !== undefined ?
-		g_keyObj[`divMax${keyCtrlPtn}`] : Math.max(...g_keyObj[`pos${keyCtrlPtn}`]) + 1);
+	const posMax = g_keyObj[`divMax${keyCtrlPtn}`] ?? Math.max(...g_keyObj[`pos${keyCtrlPtn}`]) + 1;
 	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
 	const keyGroupMaps = setVal(g_keyObj[`keyGroup${keyCtrlPtn}`], [...Array(keyNum)].fill([`0`]), C_TYP_STRING);
 	const keyGroupList = makeDedupliArray(keyGroupMaps.flat()).sort((a, b) => parseInt(a) - parseInt(b));
@@ -7147,12 +7132,8 @@ const loadingScoreInit = async () => {
 	// シャッフルグループを扱いやすくする
 	// [0, 0, 0, 1, 0, 0, 0] -> [[0, 1, 2, 4, 5, 6], [3]]
 	const shuffleGroupMap = {};
-	g_keyObj[`shuffle${keyCtrlPtn}`].forEach((_val, _i) => {
-		if (shuffleGroupMap[_val] === undefined) {
-			shuffleGroupMap[_val] = [];
-		}
-		shuffleGroupMap[_val].push(_i);
-	});
+	g_keyObj[`shuffle${keyCtrlPtn}`].forEach((_val, _i) =>
+		shuffleGroupMap[_val]?.push(_i) || (shuffleGroupMap[_val] = [_i]));
 
 	// Mirror,Random,S-Randomの適用
 	g_shuffleFunc[g_stateObj.shuffle](keyNum, Object.values(shuffleGroupMap));
@@ -7907,7 +7888,7 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
 	let currentSpeed = g_stateObj.speed * 2;
 
 	for (let frm = 0, s = 0; frm <= _lastFrame; frm++) {
-		while (_speedData !== undefined && frm >= _speedData[s]) {
+		while (frm >= _speedData?.[s]) {
 			currentSpeed = _speedData[s + 1] * g_stateObj.speed * 2;
 			s += 2;
 		}
@@ -7992,11 +7973,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 	const setNotes = (_j, _k, _data, _startPoint, _header, _frzFlg = false) => {
 		if (_startPoint >= 0) {
-			if (g_workObj[`mk${_header}Arrow`][_startPoint] === undefined) {
-				g_workObj[`mk${_header}Arrow`][_startPoint] = [];
-			}
-			g_workObj[`mk${_header}Arrow`][_startPoint].push(_j);
-
+			g_workObj[`mk${_header}Arrow`][_startPoint]?.push(_j) || (g_workObj[`mk${_header}Arrow`][_startPoint] = [_j]);
 			if (_frzFlg) {
 				g_workObj[`mk${_header}Length`][_j][_k] = getFrzLength(_speedOnFrame, _data[_k], _data[_k + 1]);
 			}
@@ -8239,12 +8216,10 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	g_workObj.speedData.push(g_scoreObj.frameNum);
 	g_workObj.speedData.push(_speedOnFrame[g_scoreObj.frameNum]);
 
-	if (_dataObj.speedData !== undefined) {
-		for (let k = 0; k < _dataObj.speedData.length; k += 2) {
-			if (_dataObj.speedData[k] >= g_scoreObj.frameNum) {
-				g_workObj.speedData.push(_dataObj.speedData[k]);
-				g_workObj.speedData.push(_speedOnFrame[_dataObj.speedData[k]]);
-			}
+	for (let k = 0; k < _dataObj?.speedData.length; k += 2) {
+		if (_dataObj.speedData[k] >= g_scoreObj.frameNum) {
+			g_workObj.speedData.push(_dataObj.speedData[k]);
+			g_workObj.speedData.push(_speedOnFrame[_dataObj.speedData[k]]);
 		}
 	}
 };
@@ -8335,17 +8310,6 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 	const allUseTypes = [];
 
 	/**
-	 * 色変化用配列（フレーム別）の初期化
-	 * @param {string} _baseStr 
-	 */
-	const initialize = (_baseStr) => {
-		if (g_workObj[_baseStr][_frame] === undefined) {
-			g_workObj[_baseStr][_frame] = [];
-			g_workObj[`${_baseStr}Cd`][_frame] = [];
-		}
-	};
-
-	/**
 	 * 全体色変化の有効化（フレーム別）
 	 * @param  {...any} _types 
 	 */
@@ -8361,8 +8325,8 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 	 * @param {number} _cVal 
 	 */
 	const pushColor = (_baseStr, _cVal) => {
-		g_workObj[_baseStr][_frame].push(_cVal);
-		g_workObj[`${_baseStr}Cd`][_frame].push(colorCd);
+		g_workObj[_baseStr][_frame]?.push(_cVal) || (g_workObj[_baseStr][_frame] = [_cVal]);
+		g_workObj[`${_baseStr}Cd`][_frame]?.push(colorCd) || (g_workObj[`${_baseStr}Cd`][_frame] = [colorCd]);
 	};
 
 	if (_val < 30 || _val >= 1000) {
@@ -8378,8 +8342,6 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 
 		// 矢印の色変化 (追随指定時はフリーズアローも色変化)
 		baseHeaders.forEach(baseHeader => {
-			initialize(baseHeader);
-
 			if (_val < 20 || _val >= 1000) {
 				pushColor(baseHeader, g_workObj.replaceNums[_val % 1000] + addAll);
 			} else if (_val >= 20) {
@@ -8417,7 +8379,6 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 
 			g_keyObj[`color${tkObj.keyCtrlPtn}`].forEach((cpattern, k) => {
 				if (colorPos === cpattern) {
-					initialize(baseHeader + ctype);
 					pushColor(baseHeader + ctype, k + addAll);
 				}
 			});
@@ -8474,30 +8435,24 @@ const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir) => {
 
 	const frameArrow = Math.max(_frameArrow, g_scoreObj.frameNum);
 	const frameStep = Math.max(_frameStep, g_scoreObj.frameNum);
+	const pushData = (_pattern, _frame, _val) =>
+		g_workObj[`mkScrollch${_pattern}`][_frame]?.push(_val) || (g_workObj[`mkScrollch${_pattern}`][_frame] = [_val]);
 
-	if (g_workObj.mkScrollchArrow[frameArrow] === undefined) {
-		g_workObj.mkScrollchArrow[frameArrow] = [];
-		g_workObj.mkScrollchArrowDir[frameArrow] = [];
-	}
-	if (g_workObj.mkScrollchStep[frameStep] === undefined) {
-		g_workObj.mkScrollchStep[frameStep] = [];
-		g_workObj.mkScrollchStepDir[frameStep] = [];
-	}
 	if (_val < 20 || _val >= 1000) {
 		const realVal = g_workObj.replaceNums[_val % 1000];
-		g_workObj.mkScrollchArrow[frameArrow].push(realVal);
-		g_workObj.mkScrollchArrowDir[frameArrow].push(_scrollDir);
-		g_workObj.mkScrollchStep[frameStep].push(realVal);
-		g_workObj.mkScrollchStepDir[frameStep].push(_scrollDir);
+		pushData(`Arrow`, frameArrow, realVal);
+		pushData(`ArrowDir`, frameArrow, _scrollDir);
+		pushData(`Step`, frameStep, realVal);
+		pushData(`StepDir`, frameStep, _scrollDir);
 
 	} else {
 		const colorNum = _val - 20;
 		for (let j = 0; j < tkObj.keyNum; j++) {
 			if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
-				g_workObj.mkScrollchArrow[frameArrow].push(j);
-				g_workObj.mkScrollchArrowDir[frameArrow].push(_scrollDir);
-				g_workObj.mkScrollchStep[frameStep].push(j);
-				g_workObj.mkScrollchStepDir[frameStep].push(_scrollDir);
+				pushData(`Arrow`, frameArrow, j);
+				pushData(`ArrowDir`, frameArrow, _scrollDir);
+				pushData(`Step`, frameStep, j);
+				pushData(`StepDir`, frameStep, _scrollDir);
 			}
 		}
 	}
@@ -8566,8 +8521,7 @@ const getArrowSettings = _ => {
 	// モーション管理
 	g_typeLists.arrow.forEach(type => g_workObj[`${type}CssMotions`] = [...Array(keyNum)].fill(``));
 
-	const scrollDirOptions = (g_keyObj[`scrollDir${keyCtrlPtn}`] !== undefined ?
-		g_keyObj[`scrollDir${keyCtrlPtn}`][g_stateObj.scroll] : [...Array(keyNum)].fill(1));
+	const scrollDirOptions = g_keyObj[`scrollDir${keyCtrlPtn}`]?.[g_stateObj.scroll] ?? [...Array(keyNum)].fill(1);
 
 	g_stateObj.autoAll = boolToSwitch(g_stateObj.autoPlay === C_FLG_ALL);
 	g_workObj.hitPosition = (g_stateObj.autoAll === C_FLG_ON ? 0 : g_stateObj.hitPosition);
@@ -8899,31 +8853,27 @@ const mainInit = _ => {
 	g_scoreObj.fadeOutTerm = C_FRM_AFTERFADE;
 
 	// フェードアウト時間指定の場合、その7秒(=420フレーム)後に終了する
-	if (g_headerObj.fadeFrame !== undefined) {
-		let fadeNo = -1;
-		if (g_headerObj.fadeFrame.length >= g_stateObj.scoreId + 1) {
-			fadeNo = (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId][0])) ? -1 : g_stateObj.scoreId);
-		}
-		if (fadeNo !== -1) {
-			// フェードアウト指定の場合、曲長(フェードアウト開始まで)は FadeFrame - (本来のblankFrame)
-			duration = parseInt(g_headerObj.fadeFrame[fadeNo][0]) - g_headerObj.blankFrameDef;
-			g_scoreObj.fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
+	let fadeNo = -1;
+	if (g_headerObj.fadeFrame?.length >= g_stateObj.scoreId + 1) {
+		fadeNo = (isNaN(parseInt(g_headerObj.fadeFrame[g_stateObj.scoreId][0])) ? -1 : g_stateObj.scoreId);
+	}
+	if (fadeNo !== -1) {
+		// フェードアウト指定の場合、曲長(フェードアウト開始まで)は FadeFrame - (本来のblankFrame)
+		duration = parseInt(g_headerObj.fadeFrame[fadeNo][0]) - g_headerObj.blankFrameDef;
+		g_scoreObj.fadeOutFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
 
-			if (g_headerObj.fadeFrame[fadeNo].length > 1) {
-				g_scoreObj.fadeOutTerm = Number(g_headerObj.fadeFrame[fadeNo][1]);
-			}
+		if (g_headerObj.fadeFrame[fadeNo].length > 1) {
+			g_scoreObj.fadeOutTerm = Number(g_headerObj.fadeFrame[fadeNo][1]);
 		}
 	}
 
 	// 終了時間指定の場合、その値を適用する
 	let endFrameUseFlg = false;
-	if (g_headerObj.endFrame !== undefined) {
-		const tmpEndFrame = g_headerObj.endFrame[g_stateObj.scoreId] || g_headerObj.endFrame[0];
-		if (!isNaN(parseInt(tmpEndFrame))) {
-			// 終了時間指定の場合、曲長は EndFrame - (本来のblankFrame)
-			duration = parseInt(tmpEndFrame) - g_headerObj.blankFrameDef;
-			endFrameUseFlg = true;
-		}
+	const tmpEndFrame = g_headerObj.endFrame?.[g_stateObj.scoreId] || g_headerObj.endFrame?.[0];
+	if (!isNaN(parseInt(tmpEndFrame))) {
+		// 終了時間指定の場合、曲長は EndFrame - (本来のblankFrame)
+		duration = parseInt(tmpEndFrame) - g_headerObj.blankFrameDef;
+		endFrameUseFlg = true;
 	}
 
 	let fullFrame = Math.ceil(duration / g_headerObj.playbackRate + g_headerObj.blankFrame + g_stateObj.adjustment);
@@ -9100,14 +9050,14 @@ const mainInit = _ => {
 
 	// Ready?表示
 	if (!g_headerObj.customReadyUse) {
-		const readyColor = (g_headerObj.readyColor !== `` ? g_headerObj.readyColor : g_headerObj.setColorOrg[0]);
+		const readyColor = g_headerObj.readyColor || g_headerObj.setColorOrg[0];
 		let readyDelayFrame = 0;
 		if (g_stateObj.fadein === 0 && g_headerObj.readyDelayFrame > 0 &&
 			g_headerObj.readyDelayFrame + g_stateObj.adjustment > 0) {
 			readyDelayFrame = g_headerObj.readyDelayFrame + g_stateObj.adjustment;
 		}
-		const readyHtml = (g_headerObj.readyHtml !== `` ? g_headerObj.readyHtml :
-			`<span style='color:${readyColor};font-size:${wUnit(60)};'>R</span>EADY<span style='font-size:${wUnit(50)};'>?</span>`);
+		const readyHtml = g_headerObj.readyHtml ||
+			`<span style='color:${readyColor};font-size:${wUnit(60)};'>R</span>EADY<span style='font-size:${wUnit(50)};'>?</span>`;
 
 		divRoot.appendChild(
 			createDivCss2Label(`lblReady`, readyHtml, {
@@ -9134,7 +9084,7 @@ const mainInit = _ => {
 	const mainKeyDownActFunc = {
 
 		OFF: (_code, _key) => {
-			const convCode = (_code === `` ? (_key === `Shift` ? g_kCdNameObj.shiftRKey : g_kCdNameObj.unknownKey) : _code);
+			const convCode = _code || (_key === `Shift` ? g_kCdNameObj.shiftRKey : g_kCdNameObj.unknownKey);
 			const matchKeys = g_workObj.keyCtrlN;
 
 			for (let j = 0; j < keyNum; j++) {
@@ -9759,11 +9709,11 @@ const mainInit = _ => {
 		g_customJsObj.mainEnterFrame.forEach(func => func());
 
 		// 速度変化 (途中変速, 個別加速)
-		while (g_workObj.speedData !== undefined && currentFrame >= g_workObj.speedData[speedCnts]) {
+		while (currentFrame >= g_workObj.speedData?.[speedCnts]) {
 			g_workObj.currentSpeed = g_workObj.speedData[speedCnts + 1];
 			speedCnts += 2;
 		}
-		while (g_workObj.boostData !== undefined && currentFrame >= g_workObj.boostData[boostCnts]) {
+		while (currentFrame >= g_workObj.boostData?.[boostCnts]) {
 			g_workObj.boostSpd = g_workObj.boostData[boostCnts + 1];
 			g_workObj.boostDir = (g_workObj.boostSpd > 0 ? 1 : -1);
 			boostCnts += 2;
