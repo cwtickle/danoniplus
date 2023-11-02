@@ -569,11 +569,8 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 	switchKeyHit(_evt, true);
 
 	// 対象ボタンを検索
-	const scLists = Object.keys(g_shortcutObj[_displayName]).filter(keys => {
-		const keyset = keys.split(`_`);
-		return (keyset.length > 2 ? keyIsDown(keyset[0]) && keyIsDown(keyset[1]) && keyIsDown(keyset[2]) :
-			(keyset.length > 1 ? keyIsDown(keyset[0]) && keyIsDown(keyset[1]) : keyIsDown(keyset[0])));
-	});
+	const scLists = Object.keys(g_shortcutObj[_displayName])
+		.filter(keys => keys.split(`_`).every(key => keyIsDown(key)));
 	if (scLists.length > 0) {
 		// リンク先にジャンプする場合はonkeyUpイベントが動かないため、事前にキー状態をリセット
 		if (g_shortcutObj[_displayName][scLists[0]].reset) {
@@ -597,7 +594,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 const commonKeyUp = _evt => {
 	g_inputKeyBuffer[g_kCdNameObj.metaLKey] = false;
 	g_inputKeyBuffer[g_kCdNameObj.metaRKey] = false;
-	g_inputKeyBuffer[_evt.code] = false;
+	switchKeyHit(_evt);
 };
 
 /**
@@ -6765,7 +6762,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			return;
 		}
 
-		if (setKey === C_KEY_RETRY && (!g_isMac || (g_isMac && g_currentk === 0))) {
+		if (setKey === C_KEY_RETRY && (!g_isMac || g_currentk === 0)) {
 			// スキップ
 		} else {
 			// キー割り当て処理
