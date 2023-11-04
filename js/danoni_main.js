@@ -2586,9 +2586,9 @@ const calcLevel = _scoreObj => {
 		// 同時押し補正
 		douji: calcDifLevel(twoPushCount),
 		// 3つ押し数
-		push3cnt: push3Cnt,
+		push3cnt: makeDedupliArray(push3List)?.length ?? 0,
 		// 3つ押しリスト
-		push3: push3List,
+		push3: makeDedupliArray(push3List),
 	};
 };
 
@@ -4897,9 +4897,24 @@ const makeDifInfo = _scoreId => {
 	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
 	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} 
 	<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})</span>`;
-	dataArrowInfo2.innerHTML = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
-			(${g_detailObj.frzCnt[_scoreId]})<br><br>
-			${push3CntStr}`.split(`,`).join(`/`);
+
+	const makeArrowCntsView = (_cntlist) => {
+		const maxPos = getMaxValIdxs(_cntlist, g_limitObj.densityMaxVals).flat();
+		const cntlist = structuredClone(_cntlist);
+		let divFlg = false;
+		_cntlist.forEach((val, j) => {
+			cntlist[j] = maxPos.includes(j) && val > 0 ? `<span class="common_kita common_bold">${_cntlist[j]}</span>` : _cntlist[j];
+			if (!divFlg && g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`] <= g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j + 1]) {
+				cntlist[j] += ` /`;
+				divFlg = true;
+			}
+		});
+		return cntlist;
+	}
+
+	dataArrowInfo2.innerHTML = `<br>(${makeArrowCntsView(g_detailObj.arrowCnt[_scoreId])})<br><br>
+			(${makeArrowCntsView(g_detailObj.frzCnt[_scoreId])})<br><br>
+			${push3CntStr}`.split(`,`).join(`, `).split(`/,`).join(`/`);
 };
 
 /**
