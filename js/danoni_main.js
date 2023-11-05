@@ -4900,8 +4900,12 @@ const makeDifInfo = _scoreId => {
 
 	const makeArrowCntsView = (_cntlist) => {
 		const cntlist = [
-			_cntlist.filter((val, j) => g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j] < g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`]),
-			_cntlist.filter((val, j) => g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j] >= g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`])
+			_cntlist.filter((val, j) =>
+				g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j] <
+				g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`]),
+			_cntlist.filter((val, j) =>
+				g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j] >=
+				g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`])
 		];
 		const getMaxVal = _list => _list.reduce((a, b) => Math.max(a, b));
 		const getMinVal = _list => _list.reduce((a, b) => Math.min(a, b));
