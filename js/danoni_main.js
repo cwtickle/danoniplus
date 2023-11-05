@@ -4885,7 +4885,7 @@ const makeDifInfo = _scoreId => {
 
 	const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
 	const frzCnts = sumData(g_detailObj.frzCnt[_scoreId]);
-	const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
+	const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3.split(',').join(', ')})`);
 
 	if (document.getElementById(`lblTooldif`) === null) {
 		makeDifInfoLabels(_scoreId);
@@ -4899,28 +4899,32 @@ const makeDifInfo = _scoreId => {
 	<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})</span>`;
 
 	const makeArrowCntsView = (_cntlist) => {
-		const cntlist = structuredClone(_cntlist);
-		const maxVal = _cntlist.reduce((a, b) => Math.max(a, b));
-		const minVal = _cntlist.reduce((a, b) => Math.min(a, b));
+		const cntlist = [
+			_cntlist.filter((val, j) => g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j] < g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`]),
+			_cntlist.filter((val, j) => g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j] >= g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`])
+		];
+		const getMaxVal = _list => _list.reduce((a, b) => Math.max(a, b));
+		const getMinVal = _list => _list.reduce((a, b) => Math.min(a, b));
 
-		let divFlg = false;
-		_cntlist.forEach((val, j) => {
-			if (maxVal !== minVal) {
-				cntlist[j] = val === minVal ?
+		let cntlistStr = ``;
+		cntlist.filter(array => array.length > 0).forEach(array => {
+			const maxVal = getMaxVal(array);
+			const minVal = getMinVal(array);
+
+			cntlistStr += `[ `;
+			array.forEach((val, j) => {
+				array[j] = val === minVal ?
 					`<span class="settings_minArrowCnts">${val}</span>` :
 					(val === maxVal ? `<span class="settings_maxArrowCnts common_bold">${val}</span>` : val);
-			}
-			if (!divFlg && g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`] <= g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j + 1]) {
-				cntlist[j] += ` /`;
-				divFlg = true;
-			}
+			});
+			cntlistStr += array.join(`, `) + ` ]`;
 		});
-		return cntlist;
+
+		return cntlistStr;
 	}
 
-	dataArrowInfo2.innerHTML = `<br>[ ${makeArrowCntsView(g_detailObj.arrowCnt[_scoreId])} ]<br><br>
-			[ ${makeArrowCntsView(g_detailObj.frzCnt[_scoreId])} ]<br><br>
-			${push3CntStr}`.split(`,`).join(`, `).split(`/,`).join(`][`);
+	dataArrowInfo2.innerHTML = `<br>${makeArrowCntsView(g_detailObj.arrowCnt[_scoreId])}<br><br>
+			${makeArrowCntsView(g_detailObj.frzCnt[_scoreId])}<br><br>${push3CntStr}`;
 };
 
 /**

@@ -292,7 +292,7 @@ const updateWindowSiz = _ => {
             x: 130, y: 70, w: 200, h: 90,
         },
         dataArrowInfo2: {
-            x: 140, y: 70, w: (g_sWidth - 500) / 2 + 285, h: 150, overflow: `auto`,
+            x: 140, y: 70, w: (g_sWidth - 500) / 2 + 275, h: 150, overflow: `auto`,
         },
         lnkDifInfo: {
             w: g_limitObj.difCoverWidth, borderStyle: `solid`,
