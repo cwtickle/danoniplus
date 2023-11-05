@@ -475,6 +475,15 @@ input[type="color"] {
 	color: var(--settings-lifeVal-x, #ff9966);
 }
 
+/* 設定画面：レーンごとの矢印数 */
+.settings_maxArrowCnts {
+	color: var(--settings-maxArrowCnts-x, var(--common-uwan));
+}
+
+.settings_minArrowCnts {
+	color: var(--settings-maxArrowCnts-x, var(--common-ii));
+}
+
 /* キーコンフィグ */
 .keyconfig_warning {
 	color: var(--keyconfig-warning-x, #ffff99);
