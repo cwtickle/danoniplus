@@ -477,7 +477,7 @@ input[type="color"] {
 
 /* 設定画面：レーンごとの矢印数 */
 .settings_maxArrowCnts {
-	color: var(--settings-maxArrowCnts-x, var(--common-kita));
+	color: var(--settings-maxArrowCnts-x, var(--common-uwan));
 }
 
 .settings_minArrowCnts {

@@ -4918,9 +4918,9 @@ const makeDifInfo = _scoreId => {
 		return cntlist;
 	}
 
-	dataArrowInfo2.innerHTML = `<br>(${makeArrowCntsView(g_detailObj.arrowCnt[_scoreId])})<br><br>
-			(${makeArrowCntsView(g_detailObj.frzCnt[_scoreId])})<br><br>
-			${push3CntStr}`.split(`,`).join(`, `).split(`/,`).join(`/`);
+	dataArrowInfo2.innerHTML = `<br>[ ${makeArrowCntsView(g_detailObj.arrowCnt[_scoreId])} ]<br><br>
+			[ ${makeArrowCntsView(g_detailObj.frzCnt[_scoreId])} ]<br><br>
+			${push3CntStr}`.split(`,`).join(`, `).split(`/,`).join(`][`);
 };
 
 /**
