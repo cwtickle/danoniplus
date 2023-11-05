@@ -2585,7 +2585,7 @@ const calcLevel = _scoreObj => {
 		// 同時押し補正
 		douji: calcDifLevel(twoPushCount),
 		// 3つ押し数
-		push3cnt: makeDedupliArray(push3List)?.length ?? 0,
+		push3cnt: push3Cnt,
 		// 3つ押しリスト
 		push3: makeDedupliArray(push3List),
 	};
@@ -4893,7 +4893,8 @@ const makeDifInfo = _scoreId => {
 	dataTooldif.textContent = g_detailObj.toolDif[_scoreId].tool;
 	dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
 	dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
-	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
+	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`)
+		.join(`${makeDedupliArray(g_detailObj.toolDif[_scoreId].push3).length} /cnt:${g_detailObj.toolDif[_scoreId].push3cnt}`);
 	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} 
 	<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})</span>`;
 
