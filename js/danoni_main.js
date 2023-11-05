@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/10/29
+ * Revised : 2023/11/05
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 33.7.3`;
-const g_revisedDate = `2023/10/29`;
+const g_version = `Ver 33.7.4`;
+const g_revisedDate = `2023/11/05`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3031,8 +3031,11 @@ const headerConvert = _dosObj => {
 
 	// 初期表示する部分キーの設定
 	obj.keyGroupOrder = [];
-	_dosObj.keyGroupOrder?.split(`$`).filter(val => val !== ``)
-		.forEach((val, j) => obj.keyGroupOrder[j] = val.split(`,`));
+	_dosObj.keyGroupOrder?.split(`$`).forEach((val, j) => {
+		if (val !== ``) {
+			obj.keyGroupOrder[j] = val.split(`,`);
+		}
+	});
 
 	// 最終演出表示有無（noneで無効化）
 	obj.finishView = _dosObj.finishView ?? ``;
