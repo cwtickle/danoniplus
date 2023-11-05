@@ -4885,7 +4885,7 @@ const makeDifInfo = _scoreId => {
 
 	const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
 	const frzCnts = sumData(g_detailObj.frzCnt[_scoreId]);
-	const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3.split(',').join(', ')})`);
+	const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3.join(', ')})`);
 
 	if (document.getElementById(`lblTooldif`) === null) {
 		makeDifInfoLabels(_scoreId);
