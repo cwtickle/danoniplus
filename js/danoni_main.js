@@ -3050,8 +3050,11 @@ const headerConvert = _dosObj => {
 
 	// 初期表示する部分キーの設定
 	obj.keyGroupOrder = [];
-	_dosObj.keyGroupOrder?.split(`$`).filter(val => val !== ``)
-		.forEach((val, j) => obj.keyGroupOrder[j] = val.split(`,`));
+	_dosObj.keyGroupOrder?.split(`$`).forEach((val, j) => {
+		if (val !== ``) {
+			obj.keyGroupOrder[j] = val.split(`,`);
+		}
+	});
 
 	// 最終演出表示有無（noneで無効化）
 	obj.finishView = _dosObj.finishView ?? ``;
