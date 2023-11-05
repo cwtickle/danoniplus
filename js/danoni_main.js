@@ -4899,21 +4899,18 @@ const makeDifInfo = _scoreId => {
 	<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})</span>`;
 
 	const makeArrowCntsView = (_cntlist) => {
+		const targetKey = g_headerObj.keyLabels[_scoreId];
 		const cntlist = [
 			_cntlist.filter((val, j) =>
-				g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j] <
-				g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`]),
+				g_keyObj[`pos${targetKey}_0`][j] < g_keyObj[`div${targetKey}_0`]),
 			_cntlist.filter((val, j) =>
-				g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j] >=
-				g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`])
+				g_keyObj[`pos${targetKey}_0`][j] >= g_keyObj[`div${targetKey}_0`])
 		];
-		const getMaxVal = _list => _list.reduce((a, b) => Math.max(a, b));
-		const getMinVal = _list => _list.reduce((a, b) => Math.min(a, b));
 
 		let cntlistStr = ``;
 		cntlist.filter(array => array.length > 0).forEach(array => {
-			const maxVal = getMaxVal(array);
-			const minVal = getMinVal(array);
+			const maxVal = array.reduce((a, b) => Math.max(a, b));
+			const minVal = array.reduce((a, b) => Math.min(a, b));
 
 			cntlistStr += `[ `;
 			array.forEach((val, j) => {
