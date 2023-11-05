@@ -4904,17 +4904,17 @@ const makeDifInfo = _scoreId => {
 		const minVal = _cntlist.reduce((a, b) => Math.min(a, b));
 
 		let divFlg = false;
-		if (maxVal !== minVal) {
-			_cntlist.forEach((val, j) => {
+		_cntlist.forEach((val, j) => {
+			if (maxVal !== minVal) {
 				cntlist[j] = val === minVal ?
 					`<span class="settings_minArrowCnts">${val}</span>` :
 					(val === maxVal ? `<span class="settings_maxArrowCnts common_bold">${val}</span>` : val);
-				if (!divFlg && g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`] <= g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j + 1]) {
-					cntlist[j] += ` /`;
-					divFlg = true;
-				}
-			});
-		}
+			}
+			if (!divFlg && g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`] <= g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j + 1]) {
+				cntlist[j] += ` /`;
+				divFlg = true;
+			}
+		});
 		return cntlist;
 	}
 
