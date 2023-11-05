@@ -431,13 +431,12 @@ const padArray = (_array, _baseArray) => {
  * @param {number} _num
  */
 const getMaxValIdxs = (_array, _num = 1) => {
-	const getMaxVal = (_a, _b) => Math.max(_a, _b);
 	let baseArray = _array.concat();
 	const maxIdxs = [];
 
 	for (let j = 0; j < _num; j++) {
 		maxIdxs[j] = [];
-		const maxVal = baseArray.reduce((a, b) => getMaxVal(a, b));
+		const maxVal = baseArray.reduce((a, b) => Math.max(a, b));
 		_array.map((val, idx) => {
 			if (val === maxVal) {
 				maxIdxs[j].push(idx);
@@ -4899,16 +4898,22 @@ const makeDifInfo = _scoreId => {
 	<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})</span>`;
 
 	const makeArrowCntsView = (_cntlist) => {
-		const maxPos = getMaxValIdxs(_cntlist, g_limitObj.densityMaxVals).flat();
 		const cntlist = structuredClone(_cntlist);
+		const maxVal = _cntlist.reduce((a, b) => Math.max(a, b));
+		const minVal = _cntlist.reduce((a, b) => Math.min(a, b));
+
 		let divFlg = false;
-		_cntlist.forEach((val, j) => {
-			cntlist[j] = maxPos.includes(j) && val > 0 ? `<span class="common_kita common_bold">${_cntlist[j]}</span>` : _cntlist[j];
-			if (!divFlg && g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`] <= g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j + 1]) {
-				cntlist[j] += ` /`;
-				divFlg = true;
-			}
-		});
+		if (maxVal !== minVal) {
+			_cntlist.forEach((val, j) => {
+				cntlist[j] = val === minVal ?
+					`<span class="settings_minArrowCnts">${val}</span>` :
+					(val === maxVal ? `<span class="settings_maxArrowCnts common_bold">${val}</span>` : val);
+				if (!divFlg && g_keyObj[`div${g_headerObj.keyLabels[_scoreId]}_0`] <= g_keyObj[`pos${g_headerObj.keyLabels[_scoreId]}_0`][j + 1]) {
+					cntlist[j] += ` /`;
+					divFlg = true;
+				}
+			});
+		}
 		return cntlist;
 	}
 
