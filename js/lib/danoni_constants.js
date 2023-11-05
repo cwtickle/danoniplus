@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/10/31 (v34.4.1)
+ * Revised : 2023/11/05 (v34.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -176,9 +176,6 @@ const g_windowObj = {
     divRoot: { margin: `auto`, letterSpacing: `normal` },
     divBack: { background: `linear-gradient(#000000, #222222)` },
 
-    scoreDetail: { x: 20, y: 85, w: 420, h: 236, visibility: `hidden` },
-    detailObj: { w: 420, h: 230, visibility: `hidden` },
-
     colorPickSprite: { x: 0, y: 90, w: 50, h: 280 },
 };
 
@@ -191,6 +188,8 @@ const updateWindowSiz = _ => {
         difList: { x: 165, y: 60, w: 280, h: 261 + g_sHeight - 500, overflow: `auto` },
         difCover: { x: 25, y: 60, w: 140, h: 261 + g_sHeight - 500, overflow: `auto`, opacity: 0.95 },
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
+        scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 236, visibility: `hidden` },
+        detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
         keyconSprite: { y: 88, h: g_sHeight, overflow: `auto` },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
@@ -293,7 +292,7 @@ const updateWindowSiz = _ => {
             x: 130, y: 70, w: 200, h: 90,
         },
         dataArrowInfo2: {
-            x: 140, y: 70, w: 275, h: 150, overflow: `auto`,
+            x: 140, y: 70, w: (g_sWidth - 500) / 2 + 275, h: 150, overflow: `auto`,
         },
         lnkDifInfo: {
             w: g_limitObj.difCoverWidth, borderStyle: `solid`,

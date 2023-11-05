@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/11/03
+ * Revised : 2023/11/05
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 34.4.2`;
-const g_revisedDate = `2023/11/03`;
+const g_version = `Ver 34.5.0`;
+const g_revisedDate = `2023/11/05`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -431,13 +431,12 @@ const padArray = (_array, _baseArray) => {
  * @param {number} _num
  */
 const getMaxValIdxs = (_array, _num = 1) => {
-	const getMaxVal = (_a, _b) => Math.max(_a, _b);
 	let baseArray = _array.concat();
 	const maxIdxs = [];
 
 	for (let j = 0; j < _num; j++) {
 		maxIdxs[j] = [];
-		const maxVal = baseArray.reduce((a, b) => getMaxVal(a, b));
+		const maxVal = baseArray.reduce((a, b) => Math.max(a, b));
 		_array.map((val, idx) => {
 			if (val === maxVal) {
 				maxIdxs[j].push(idx);
@@ -2588,7 +2587,7 @@ const calcLevel = _scoreObj => {
 		// 3つ押し数
 		push3cnt: push3Cnt,
 		// 3つ押しリスト
-		push3: push3List,
+		push3: makeDedupliArray(push3List),
 	};
 };
 
@@ -3050,8 +3049,11 @@ const headerConvert = _dosObj => {
 
 	// 初期表示する部分キーの設定
 	obj.keyGroupOrder = [];
-	_dosObj.keyGroupOrder?.split(`$`).filter(val => val !== ``)
-		.forEach((val, j) => obj.keyGroupOrder[j] = val.split(`,`));
+	_dosObj.keyGroupOrder?.split(`$`).forEach((val, j) => {
+		if (val !== ``) {
+			obj.keyGroupOrder[j] = val.split(`,`);
+		}
+	});
 
 	// 最終演出表示有無（noneで無効化）
 	obj.finishView = _dosObj.finishView ?? ``;
@@ -4886,7 +4888,7 @@ const makeDifInfo = _scoreId => {
 
 	const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
 	const frzCnts = sumData(g_detailObj.frzCnt[_scoreId]);
-	const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3})`);
+	const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3.join(', ')})`);
 
 	if (document.getElementById(`lblTooldif`) === null) {
 		makeDifInfoLabels(_scoreId);
@@ -4894,12 +4896,40 @@ const makeDifInfo = _scoreId => {
 	dataTooldif.textContent = g_detailObj.toolDif[_scoreId].tool;
 	dataDouji.textContent = g_detailObj.toolDif[_scoreId].douji;
 	dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
-	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`).join(g_detailObj.toolDif[_scoreId].push3cnt);
+	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`)
+		.join(`${makeDedupliArray(g_detailObj.toolDif[_scoreId].push3).length} /cnt:${g_detailObj.toolDif[_scoreId].push3cnt}`);
 	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} 
 	<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})</span>`;
-	dataArrowInfo2.innerHTML = `<br>(${g_detailObj.arrowCnt[_scoreId]})<br><br>
-			(${g_detailObj.frzCnt[_scoreId]})<br><br>
-			${push3CntStr}`.split(`,`).join(`/`);
+
+	const makeArrowCntsView = (_cntlist) => {
+		const targetKey = g_headerObj.keyLabels[_scoreId];
+		const cntlist = [
+			_cntlist.filter((val, j) =>
+				g_keyObj[`pos${targetKey}_0`][j] < g_keyObj[`div${targetKey}_0`]),
+			_cntlist.filter((val, j) =>
+				g_keyObj[`pos${targetKey}_0`][j] >= g_keyObj[`div${targetKey}_0`])
+		];
+
+		let cntlistStr = ``;
+		cntlist.filter(array => array.length > 0).forEach(array => {
+			const maxVal = array.reduce((a, b) => Math.max(a, b));
+			const minVal = array.reduce((a, b) => Math.min(a, b));
+
+			cntlistStr += `[ `;
+			array.forEach((val, j) => {
+				if (maxVal !== minVal) {
+					array[j] = (val === minVal ? `<span class="settings_minArrowCnts">${val}</span>` :
+						(val === maxVal ? `<span class="settings_maxArrowCnts common_bold">${val}</span>` : val));
+				}
+			});
+			cntlistStr += array.join(`, `) + ` ]`;
+		});
+
+		return cntlistStr;
+	}
+
+	dataArrowInfo2.innerHTML = `<br>${makeArrowCntsView(g_detailObj.arrowCnt[_scoreId])}<br><br>
+			${makeArrowCntsView(g_detailObj.frzCnt[_scoreId])}<br><br>${push3CntStr}`;
 };
 
 /**
