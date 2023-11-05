@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/10/21
+ * Revised : 2023/11/05
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 32.7.6`;
-const g_revisedDate = `2023/10/21`;
+const g_version = `Ver 32.7.7`;
+const g_revisedDate = `2023/11/05`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -495,13 +495,14 @@ const nextPos = (_basePos, _num, _length) => (_basePos + _length + _num) % _leng
 
 /**
  * 特定キーコードを置換する処理
- * @param {string} _setCode 
+ * @param {object} _evt 
  */
-const transCode = _setCode => {
-	if ([`Control`, `Shift`, `Alt`].includes(_setCode.slice(0, -5))) {
-		return _setCode.replaceAll(`Right`, `Left`);
+const transCode = _evt => {
+	const evtCode = _evt.code;
+	if (evtCode === `` && _evt.key === `Shift`) {
+		return `ShiftRight`;
 	}
-	return _setCode;
+	return evtCode;
 };
 
 /**
@@ -526,7 +527,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 	if (!_dfEvtFlg) {
 		_evt.preventDefault();
 	}
-	const setCode = _evt.code;
+	const setCode = transCode(_evt);
 	if (_evt.repeat && (g_unrepeatObj.page.includes(_displayName) || g_unrepeatObj.key.includes(setCode))) {
 		return blockCode(setCode);
 	}
@@ -561,7 +562,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 const commonKeyUp = _evt => {
 	g_inputKeyBuffer[g_kCdNameObj.metaLKey] = false;
 	g_inputKeyBuffer[g_kCdNameObj.metaRKey] = false;
-	g_inputKeyBuffer[_evt.code] = false;
+	g_inputKeyBuffer[transCode(_evt)] = false;
 };
 
 /**
@@ -1315,7 +1316,7 @@ const resetKeyControl = _ => {
 	document.onkeyup = _ => { };
 	document.onkeydown = evt => {
 		evt.preventDefault();
-		return blockCode(evt.code);
+		return blockCode(transCode(evt));
 	};
 	g_inputKeyBuffer = {};
 };
@@ -8999,7 +9000,7 @@ const mainInit = _ => {
 	// キー操作イベント
 	document.onkeydown = evt => {
 		evt.preventDefault();
-		const setCode = evt.code;
+		const setCode = transCode(evt);
 
 		if (evt.repeat && !g_mainRepeatObj.key.includes(setCode)) {
 			return blockCode(setCode);
@@ -9067,7 +9068,7 @@ const mainInit = _ => {
 	};
 
 	document.onkeyup = evt => {
-		const setCode = evt.code;
+		const setCode = transCode(evt);
 		g_inputKeyBuffer[setCode] = false;
 		mainKeyUpActFunc[g_stateObj.autoAll]();
 	};
