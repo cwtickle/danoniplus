@@ -4914,9 +4914,8 @@ const makeDifInfo = _scoreId => {
 			cntlistStr += `[ `;
 			array.forEach((val, j) => {
 				if (maxVal !== minVal) {
-					array[j] = (val === minVal) ?
-						`<span class="settings_minArrowCnts">${val}</span>` :
-						(val === maxVal ? `<span class="settings_maxArrowCnts common_bold">${val}</span>` : val);
+					array[j] = (val === minVal ? `<span class="settings_minArrowCnts">${val}</span>` :
+						(val === maxVal ? `<span class="settings_maxArrowCnts common_bold">${val}</span>` : val));
 				}
 			});
 			cntlistStr += array.join(`, `) + ` ]`;
