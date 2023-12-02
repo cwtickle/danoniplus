@@ -8,8 +8,8 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 34.5.1`;
-const g_revisedDate = `2023/11/05`;
+const g_version = `Ver 34.5.2`;
+const g_revisedDate = `2023/12/02`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7850,7 +7850,7 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
  * @param {number} _scoreId
  */
 const getStartFrame = (_lastFrame, _fadein = 0, _scoreId = g_stateObj.scoreId) => {
-	let frameNum = parseInt(g_headerObj.startFrame?.[_scoreId] ?? g_headerObj.startFrame?.[0] ?? 0);
+	let frameNum = setIntVal(g_headerObj.startFrame?.[_scoreId], setIntVal(g_headerObj.startFrame?.[0], 0));
 	if (_lastFrame >= frameNum) {
 		frameNum = Math.round(_fadein / 100 * (_lastFrame - frameNum)) + frameNum;
 	}
