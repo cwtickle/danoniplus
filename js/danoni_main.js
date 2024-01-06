@@ -4494,7 +4494,7 @@ const nextDifficulty = (_scrollNum = 1) => {
  * @param {string} _targetKey 
  */
 const makeDifList = (_difList, _targetKey = ``) => {
-	let k = 0, pos = 0;
+	let k = 0, pos = 0, curk = 0;
 	g_headerObj.viewLists.forEach(j => {
 		const keyLabel = g_headerObj.keyLabels[j];
 		if (_targetKey === `` || keyLabel === _targetKey) {
@@ -4506,10 +4506,17 @@ const makeDifList = (_difList, _targetKey = ``) => {
 				{ btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
 			if (j === g_stateObj.scoreId) {
 				pos = k + 6 + (g_sHeight - 500) / 50;
+				curk = k;
 			}
 			k++;
 		}
 	});
+	if (document.getElementById(`lblDifCnt`) === null) {
+		difCover.appendChild(createDivCss2Label(`lblDifCnt`, ``, {
+			x: 0, y: 22.5, w: g_limitObj.difCoverWidth, h: 16, siz: 12, fontWeight: `bold`,
+		}));
+	}
+	lblDifCnt.innerHTML = `${_targetKey === '' ? 'ALL' : _targetKey + 'k'}: ${curk + 1} / ${k}`;
 	_difList.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(_difList.style.height), 0);
 };
 
@@ -4554,7 +4561,7 @@ const createDifWindow = (_key = ``) => {
 
 	// 全リスト
 	difCover.appendChild(
-		makeDifLblCssButton(`keyFilter`, `ALL`, 1.5, _ => {
+		makeDifLblCssButton(`keyFilter`, `ALL`, 1.7, _ => {
 			resetDifWindow();
 			g_stateObj.filterKeys = ``;
 			createDifWindow();
@@ -4565,7 +4572,7 @@ const createDifWindow = (_key = ``) => {
 	let pos = 0;
 	g_headerObj.viewKeyLists.forEach((targetKey, m) => {
 		difCover.appendChild(
-			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m + 2.5, _ => {
+			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m + 2.7, _ => {
 				resetDifWindow();
 				g_stateObj.filterKeys = targetKey;
 				createDifWindow(targetKey);
