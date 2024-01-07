@@ -2114,15 +2114,13 @@ const initialControl = async () => {
 		}
 	}
 
-	getScoreDetailData(0);
-
 	if (g_loadObj.main) {
 
 		// 譜面分割、譜面番号固定かどうかをチェック
 		g_stateObj.dosDivideFlg = setBoolVal(document.getElementById(`externalDosDivide`)?.value ?? getQueryParamVal(`dosDivide`));
 		g_stateObj.scoreLockFlg = setBoolVal(document.getElementById(`externalDosLock`)?.value ?? getQueryParamVal(`dosLock`));
 
-		for (let j = 1; j < g_headerObj.keyLabels.length; j++) {
+		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
 
 			// 譜面ファイルが分割されている場合、譜面詳細情報取得のために譜面をロード
 			if (g_stateObj.dosDivideFlg) {
@@ -2825,7 +2823,19 @@ const headerConvert = _dosObj => {
 		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
 
 		if (hasVal(_dosObj.dosNo)) {
-			splitLF2(_dosObj.dosNo).map((val, j) => [obj.dosNos[j], obj.scoreNos[j]] = padArray(val.split(`,`), [j, 1]));
+			splitLF2(_dosObj.dosNo).map((val, j) => [obj.dosNos[j], obj.scoreNos[j]] = val.split(`,`));
+			const dosNoCnt = {};
+			obj.dosNos.forEach((val, j) => {
+				if (dosNoCnt[val] === undefined) {
+					dosNoCnt[val] = 0;
+				}
+				if (obj.scoreNos[j] === undefined) {
+					dosNoCnt[val]++;
+					obj.scoreNos[j] = dosNoCnt[val];
+				} else {
+					dosNoCnt[val] = Number(obj.scoreNos[j]);
+				}
+			});
 		}
 
 		difs.forEach(dif => {
