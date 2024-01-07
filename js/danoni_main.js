@@ -10791,6 +10791,7 @@ const resultInit = _ => {
 		[`[url]`, baseTwitUrl]
 	]);
 	let tweetResultTmp = makeResultText(g_headerObj.resultFormat);
+	let resultCommonTmp = makeResultText(g_templateObj.resultFormatDf);
 
 	if (g_presetObj.resultVals !== undefined) {
 		Object.keys(g_presetObj.resultVals).forEach(key =>
@@ -10799,7 +10800,6 @@ const resultInit = _ => {
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
 	const currentDateTime = new Date().toLocaleString();
-	let resultCommonTmp = makeResultText(`${g_templateObj.resultFormatCommon}|${currentDateTime}| `);
 
 	/**
 	 * リザルト画像をCanvasで作成しクリップボードへコピー

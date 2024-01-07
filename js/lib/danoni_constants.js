@@ -777,7 +777,6 @@ const g_rankObj = {
 
 const g_templateObj = {
     resultFormatDf: `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`,
-    resultFormatCommon: `【#danoni[hashTag]】Music:[musicTitle]([keyLabel])|Maker:[maker]|Rank:[rank]|Score:[score]|Playstyle:[playStyle]|[arrowJdg]/[frzJdg]/[maxCombo]`,
 };
 
 const g_pointAllocation = {
