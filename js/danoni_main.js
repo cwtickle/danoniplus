@@ -2114,15 +2114,13 @@ const initialControl = async () => {
 		}
 	}
 
-	getScoreDetailData(0);
-
 	if (g_loadObj.main) {
 
 		// 譜面分割、譜面番号固定かどうかをチェック
 		g_stateObj.dosDivideFlg = setBoolVal(document.getElementById(`externalDosDivide`)?.value ?? getQueryParamVal(`dosDivide`));
 		g_stateObj.scoreLockFlg = setBoolVal(document.getElementById(`externalDosLock`)?.value ?? getQueryParamVal(`dosLock`));
 
-		for (let j = 1; j < g_headerObj.keyLabels.length; j++) {
+		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
 
 			// 譜面ファイルが分割されている場合、譜面詳細情報取得のために譜面をロード
 			if (g_stateObj.dosDivideFlg) {
@@ -2256,7 +2254,8 @@ const loadChartFile = async (_scoreId = g_stateObj.scoreId) => {
 		const fileBase = queryDos.match(/.+\..*/)[0];
 		const fileExtension = fileBase.split(`.`).pop();
 		const fileCommon = fileBase.split(`.${fileExtension}`)[0];
-		const filename = `${fileCommon}${g_stateObj.dosDivideFlg ? setScoreIdHeader(_scoreId) : ''}.${fileExtension}`;
+		const filename = `${fileCommon}${g_stateObj.dosDivideFlg ?
+			setDosIdHeader(_scoreId, g_stateObj.scoreLockFlg) : ''}.${fileExtension}`;
 
 		await loadScript2(`${filename}?${Date.now()}`, false, charset);
 		if (typeof externalDosInit === C_TYP_FUNCTION) {
@@ -2297,10 +2296,12 @@ const resetColorAndGauge = _scoreId => {
  */
 const copySetColor = (_baseObj, _scoreId) => {
 	const obj = {};
-	const scoreIdHeader = setScoreIdHeader(_scoreId);
+	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg);
+	const idHeader = setScoreIdHeader(_scoreId);
 	[``, `Shadow`].forEach(pattern =>
 		[`set`, `frz`].filter(arrow => hasVal(_baseObj[`${arrow}${pattern}Color`]))
-			.forEach(arrow => obj[`${arrow}${pattern}Color${scoreIdHeader}`] = _baseObj[`${arrow}${pattern}Color`].concat()));
+			.forEach(arrow => obj[`${arrow}${pattern}Color${idHeader}`] =
+				(_baseObj[`${arrow}${pattern}Color${scoreIdHeader}`] ?? _baseObj[`${arrow}${pattern}Color`]).concat()));
 	return obj;
 };
 
@@ -2802,6 +2803,24 @@ const headerConvert = _dosObj => {
 		obj.creatorUrl = g_presetObj.tuningUrl ?? ``;
 	}
 	obj.tuningInit = obj.tuning;
+
+	obj.dosNos = [];
+	obj.scoreNos = [];
+	if (hasVal(_dosObj.dosNo)) {
+		splitLF2(_dosObj.dosNo).map((val, j) => [obj.dosNos[j], obj.scoreNos[j]] = val.split(`,`));
+		const dosNoCnt = {};
+		obj.dosNos.forEach((val, j) => {
+			if (dosNoCnt[val] === undefined) {
+				dosNoCnt[val] = 0;
+			}
+			if (obj.scoreNos[j] === undefined) {
+				dosNoCnt[val]++;
+				obj.scoreNos[j] = dosNoCnt[val];
+			} else {
+				dosNoCnt[val] = Number(obj.scoreNos[j]);
+			}
+		});
+	}
 
 	// 譜面情報
 	if (hasVal(_dosObj.difData)) {
@@ -3356,7 +3375,7 @@ const addGaugeFulls = _obj => _obj.map(key => g_gaugeOptionObj.customFulls[key] 
 const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 
 	const obj = {};
-	const scoreIdHeader = setScoreIdHeader(scoreId);
+	const idHeader = setScoreIdHeader(scoreId);
 	const getRefData = (_header, _dataName) => {
 		const data = _dosObj[`${_header}${_dataName}`];
 		return data?.startsWith(_header) ? _dosObj[data] : data;
@@ -3366,13 +3385,13 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 		const _arrowCommon = `set${pattern}Color`;
 		const _frzCommon = `frz${pattern}Color`;
 
-		const _name = `${_arrowCommon}${scoreIdHeader}`;
-		const _frzName = `${_frzCommon}${scoreIdHeader}`;
+		const _name = `${_arrowCommon}${idHeader}`;
+		const _frzName = `${_frzCommon}${idHeader}`;
 		const _arrowInit = `${_arrowCommon}Init`;
 		const _frzInit = `${_frzCommon}Init`;
 
-		const arrowColorTxt = getRefData(_arrowCommon, scoreIdHeader) || _dosObj[_arrowCommon];
-		const frzColorTxt = getRefData(_frzCommon, scoreIdHeader) || _dosObj[_frzCommon];
+		const arrowColorTxt = getRefData(_arrowCommon, idHeader) || _dosObj[_arrowCommon];
+		const frzColorTxt = getRefData(_frzCommon, idHeader) || _dosObj[_frzCommon];
 
 		// 矢印色
 		Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
@@ -3584,7 +3603,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	 */
 	const getGaugeDetailList = (_scoreId, _defaultGaugeList) => {
 		if (_scoreId > 0) {
-			const headerName = `gauge${_name}${setScoreIdHeader(_scoreId)}`;
+			const headerName = `gauge${_name}${setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg)}`;
 			if (hasVal(_dosObj[headerName])) {
 				return _dosObj[headerName].split(`,`);
 			}
@@ -6823,11 +6842,11 @@ const updateKeyInfo = (_header, _keyCtrlPtn) => {
  */
 const changeSetColor = _ => {
 	const isDefault = [`Default`, `Type0`].includes(g_colorType);
-	const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId);
-	const defaultType = scoreIdHeader + g_colorType;
+	const idHeader = setScoreIdHeader(g_stateObj.scoreId);
+	const defaultType = idHeader + g_colorType;
 	const currentTypes = {
 		'': (isDefault ? defaultType : g_colorType),
-		'Shadow': (isDefault ? defaultType : `${scoreIdHeader}Default`),
+		'Shadow': (isDefault ? defaultType : `${idHeader}Default`),
 	};
 	Object.keys(currentTypes).forEach(pattern => {
 		g_headerObj[`set${pattern}Color`] = structuredClone(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]);
@@ -6840,7 +6859,7 @@ const changeSetColor = _ => {
 	});
 
 	// 影矢印が未指定の場合はType1, Type2の影矢印指定を無くす
-	if (!hasVal(g_headerObj[`setShadowColor${scoreIdHeader}Default`][0]) && [`Type1`, `Type2`].includes(g_colorType)) {
+	if (!hasVal(g_headerObj[`setShadowColor${idHeader}Default`][0]) && [`Type1`, `Type2`].includes(g_colorType)) {
 		g_headerObj.setShadowColor = [...Array(g_headerObj.setColorInit.length)].fill(``);
 	}
 };
@@ -7182,8 +7201,31 @@ const loadingScoreInit = async () => {
 	}, 100);
 };
 
+/**
+ * 譜面番号の取得
+ * @param {number} _scoreId 
+ * @param {boolean} _scoreLockFlg 
+ * @returns 
+ */
 const setScoreIdHeader = (_scoreId = 0, _scoreLockFlg = false) => {
-	if (_scoreId > 0 && _scoreLockFlg === false) {
+	if (!_scoreLockFlg && _scoreId > 0) {
+		return Number(_scoreId) + 1;
+	} else if (_scoreLockFlg && g_headerObj.scoreNos?.[_scoreId] > 1) {
+		return g_headerObj.scoreNos[_scoreId];
+	}
+	return ``;
+};
+
+/**
+ * 譜面ファイル番号の取得
+ * @param {number} _scoreId 
+ * @param {boolean} _scoreLockFlg 
+ * @returns 
+ */
+const setDosIdHeader = (_scoreId = 0, _scoreLockFlg = false) => {
+	if (_scoreLockFlg && g_headerObj.dosNos?.[_scoreId] > 0) {
+		return g_headerObj.dosNos?.[_scoreId] > 1 ? g_headerObj.dosNos[_scoreId] : ``;
+	} else if (_scoreId > 0) {
 		return Number(_scoreId) + 1;
 	}
 	return ``;
