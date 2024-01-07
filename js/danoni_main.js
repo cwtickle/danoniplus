@@ -2804,6 +2804,24 @@ const headerConvert = _dosObj => {
 	}
 	obj.tuningInit = obj.tuning;
 
+	obj.dosNos = [];
+	obj.scoreNos = [];
+	if (hasVal(_dosObj.dosNo)) {
+		splitLF2(_dosObj.dosNo).map((val, j) => [obj.dosNos[j], obj.scoreNos[j]] = val.split(`,`));
+		const dosNoCnt = {};
+		obj.dosNos.forEach((val, j) => {
+			if (dosNoCnt[val] === undefined) {
+				dosNoCnt[val] = 0;
+			}
+			if (obj.scoreNos[j] === undefined) {
+				dosNoCnt[val]++;
+				obj.scoreNos[j] = dosNoCnt[val];
+			} else {
+				dosNoCnt[val] = Number(obj.scoreNos[j]);
+			}
+		});
+	}
+
 	// 譜面情報
 	if (hasVal(_dosObj.difData)) {
 		const difs = splitLF2(_dosObj.difData);
@@ -2818,25 +2836,7 @@ const headerConvert = _dosObj => {
 		obj.lifeDamages = [];
 		obj.lifeInits = [];
 		obj.creatorNames = [];
-		obj.dosNos = [];
-		obj.scoreNos = [];
 		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
-
-		if (hasVal(_dosObj.dosNo)) {
-			splitLF2(_dosObj.dosNo).map((val, j) => [obj.dosNos[j], obj.scoreNos[j]] = val.split(`,`));
-			const dosNoCnt = {};
-			obj.dosNos.forEach((val, j) => {
-				if (dosNoCnt[val] === undefined) {
-					dosNoCnt[val] = 0;
-				}
-				if (obj.scoreNos[j] === undefined) {
-					dosNoCnt[val]++;
-					obj.scoreNos[j] = dosNoCnt[val];
-				} else {
-					dosNoCnt[val] = Number(obj.scoreNos[j]);
-				}
-			});
-		}
 
 		difs.forEach(dif => {
 			const difDetails = dif.split(`,`);
