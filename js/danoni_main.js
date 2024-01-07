@@ -3257,8 +3257,7 @@ const headerConvert = _dosObj => {
 	obj.justFrames = (g_isLocal) ? 0 : 1;
 
 	// リザルトデータのカスタマイズ
-	const resultFormatDefault = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
-	obj.resultFormat = escapeHtmlForEnabledTag(_dosObj.resultFormat ?? g_presetObj.resultFormat ?? resultFormatDefault);
+	obj.resultFormat = escapeHtmlForEnabledTag(_dosObj.resultFormat ?? g_presetObj.resultFormat ?? g_templateObj.resultFormatDf);
 
 	// リザルト画像データのカスタム設定
 	obj.resultValsView = _dosObj.resultValsView?.split(`,`) ?? g_presetObj.resultValsView ?? Array.from(Object.keys(g_presetObj.resultVals ?? {}));
@@ -10778,7 +10777,7 @@ const resultInit = _ => {
 		tweetMaxCombo += `-${g_resultObj.fmaxCombo}`;
 	}
 
-	let tweetResultTmp = replaceStr(g_headerObj.resultFormat, [
+	const makeResultText = _format => replaceStr(_format, [
 		[`[hashTag]`, hashTag],
 		[`[musicTitle]`, musicTitle],
 		[`[keyLabel]`, tweetDifData],
@@ -10791,6 +10790,9 @@ const resultInit = _ => {
 		[`[maxCombo]`, tweetMaxCombo],
 		[`[url]`, baseTwitUrl]
 	]);
+	let tweetResultTmp = makeResultText(g_headerObj.resultFormat);
+	let resultCommonTmp = makeResultText(g_templateObj.resultFormatDf);
+
 	if (g_presetObj.resultVals !== undefined) {
 		Object.keys(g_presetObj.resultVals).forEach(key =>
 			tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_resultObj[g_presetObj.resultVals[key]]));
@@ -10949,7 +10951,9 @@ const resultInit = _ => {
 		resetCommonBtn(`btnBack`, g_lblNameObj.b_back, g_lblPosObj.btnRsBack, titleInit, g_cssObj.button_Back),
 
 		// リザルトデータをクリップボードへコピー
-		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ => copyTextToClipboard(resultText, g_msgInfoObj.I_0001),
+		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ =>
+			copyTextToClipboard(keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey) ?
+				unEscapeHtml(resultCommonTmp) : resultText, g_msgInfoObj.I_0001),
 			g_lblPosObj.btnRsCopy, g_cssObj.button_Setting),
 	);
 	makeLinkButton();

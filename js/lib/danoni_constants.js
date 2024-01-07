@@ -775,6 +775,10 @@ const g_rankObj = {
     rankColorX: `#996600`
 };
 
+const g_templateObj = {
+    resultFormatDf: `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`,
+};
+
 const g_pointAllocation = {
     ii: 8,
     shakin: 4,
