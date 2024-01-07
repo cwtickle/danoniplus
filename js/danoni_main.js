@@ -2256,7 +2256,8 @@ const loadChartFile = async (_scoreId = g_stateObj.scoreId) => {
 		const fileBase = queryDos.match(/.+\..*/)[0];
 		const fileExtension = fileBase.split(`.`).pop();
 		const fileCommon = fileBase.split(`.${fileExtension}`)[0];
-		const filename = `${fileCommon}${g_stateObj.dosDivideFlg ? setScoreIdHeader(_scoreId) : ''}.${fileExtension}`;
+		const filename = `${fileCommon}${g_stateObj.dosDivideFlg ?
+			setDosIdHeader(_scoreId, g_stateObj.scoreLockFlg) : ''}.${fileExtension}`;
 
 		await loadScript2(`${filename}?${Date.now()}`, false, charset);
 		if (typeof externalDosInit === C_TYP_FUNCTION) {
@@ -2817,7 +2818,13 @@ const headerConvert = _dosObj => {
 		obj.lifeDamages = [];
 		obj.lifeInits = [];
 		obj.creatorNames = [];
+		obj.dosNos = [];
+		obj.scoreNos = [];
 		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
+
+		if (hasVal(_dosObj.dosNo)) {
+			splitLF2(_dosObj.dosNo).map((val, j) => [obj.dosNos[j], obj.scoreNos[j]] = padArray(val.split(`,`), [j, 1]));
+		}
 
 		difs.forEach(dif => {
 			const difDetails = dif.split(`,`);
@@ -7182,8 +7189,31 @@ const loadingScoreInit = async () => {
 	}, 100);
 };
 
+/**
+ * 譜面番号の取得
+ * @param {number} _scoreId 
+ * @param {boolean} _scoreLockFlg 
+ * @returns 
+ */
 const setScoreIdHeader = (_scoreId = 0, _scoreLockFlg = false) => {
-	if (_scoreId > 0 && _scoreLockFlg === false) {
+	if (!_scoreLockFlg && _scoreId > 0) {
+		return Number(_scoreId) + 1;
+	} else if (_scoreLockFlg && g_headerObj.scoreNos?.[_scoreId] > 1) {
+		return g_headerObj.scoreNos[_scoreId];
+	}
+	return ``;
+};
+
+/**
+ * 譜面ファイル番号の取得
+ * @param {number} _scoreId 
+ * @param {boolean} _scoreLockFlg 
+ * @returns 
+ */
+const setDosIdHeader = (_scoreId = 0, _scoreLockFlg = false) => {
+	if (_scoreLockFlg && g_headerObj.dosNos?.[_scoreId] > 0) {
+		return g_headerObj.dosNos?.[_scoreId] > 1 ? g_headerObj.dosNos[_scoreId] : ``;
+	} else if (_scoreId > 0) {
 		return Number(_scoreId) + 1;
 	}
 	return ``;
