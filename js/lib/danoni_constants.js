@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/11/05 (v34.5.0)
+ * Revised : 2024/01/07 (v34.6.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -773,6 +773,10 @@ const g_rankObj = {
     rankColorF: `#999999`,
     rankMarkX: `X`,
     rankColorX: `#996600`
+};
+
+const g_templateObj = {
+    resultFormatDf: `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`,
 };
 
 const g_pointAllocation = {
