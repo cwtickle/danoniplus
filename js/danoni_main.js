@@ -4493,7 +4493,7 @@ const nextDifficulty = (_scrollNum = 1) => {
  * @param {string} _targetKey 
  */
 const makeDifList = (_difList, _targetKey = ``) => {
-	let k = 0, pos = 0, curk = 0;
+	let k = 0, pos = 0, curk = -1;
 	g_headerObj.viewLists.forEach(j => {
 		const keyLabel = g_headerObj.keyLabels[j];
 		if (_targetKey === `` || keyLabel === _targetKey) {
@@ -4515,7 +4515,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			x: 0, y: 22.5, w: g_limitObj.difCoverWidth, h: 16, siz: 12, fontWeight: `bold`,
 		}));
 	}
-	lblDifCnt.innerHTML = `${_targetKey === '' ? 'ALL' : _targetKey + 'k'}: ${curk + 1} / ${k}`;
+	lblDifCnt.innerHTML = `${_targetKey === '' ? 'ALL' : _targetKey + 'k'}: ${curk === -1 ? '-' : curk + 1} / ${k}`;
 	_difList.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(_difList.style.height), 0);
 };
 
