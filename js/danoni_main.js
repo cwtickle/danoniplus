@@ -4566,6 +4566,7 @@ const createDifWindow = (_key = ``) => {
 	setShortcutEvent(g_currentPage);
 	const difList = createEmptySprite(optionsprite, `difList`, g_windowObj.difList, g_cssObj.settings_DifSelector);
 	const difCover = createEmptySprite(optionsprite, `difCover`, g_windowObj.difCover, g_cssObj.settings_DifSelector);
+	const difFilter = createEmptySprite(difCover, `difFilter`, g_windowObj.difFilter, g_cssObj.settings_DifSelector)
 
 	// リスト再作成
 	makeDifList(difList, _key);
@@ -4589,18 +4590,18 @@ const createDifWindow = (_key = ``) => {
 	// キー別フィルタボタン作成
 	let pos = 0;
 	g_headerObj.viewKeyLists.forEach((targetKey, m) => {
-		difCover.appendChild(
-			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m + 2.7, _ => {
+		difFilter.appendChild(
+			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m, _ => {
 				resetDifWindow();
 				g_stateObj.filterKeys = targetKey;
 				createDifWindow(targetKey);
 			}, { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.filterKeys === targetKey ? `Setting` : `Default`) })
 		);
 		if (g_stateObj.filterKeys === targetKey) {
-			pos = m + 9;
+			pos = m + 7;
 		}
 	});
-	difCover.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(difCover.style.height), 0);
+	difFilter.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(difCover.style.height), 0);
 
 	multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
 };
