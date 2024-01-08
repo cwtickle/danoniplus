@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/01/07
+ * Revised : 2024/01/08
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 34.6.0`;
-const g_revisedDate = `2024/01/07`;
+const g_version = `Ver 34.6.1`;
+const g_revisedDate = `2024/01/08`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -4523,7 +4523,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => nextDifficulty(j - g_stateObj.scoreId),
 				{ btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
 			if (j === g_stateObj.scoreId) {
-				pos = k + 6 + (g_sHeight - 500) / 50;
+				pos = k + 6.5 * (g_sHeight - 239) / 261;
 				curk = k;
 			}
 			k++;
@@ -4566,6 +4566,7 @@ const createDifWindow = (_key = ``) => {
 	setShortcutEvent(g_currentPage);
 	const difList = createEmptySprite(optionsprite, `difList`, g_windowObj.difList, g_cssObj.settings_DifSelector);
 	const difCover = createEmptySprite(optionsprite, `difCover`, g_windowObj.difCover, g_cssObj.settings_DifSelector);
+	const difFilter = createEmptySprite(difCover, `difFilter`, g_windowObj.difFilter, g_cssObj.settings_DifSelector)
 
 	// リスト再作成
 	makeDifList(difList, _key);
@@ -4589,18 +4590,18 @@ const createDifWindow = (_key = ``) => {
 	// キー別フィルタボタン作成
 	let pos = 0;
 	g_headerObj.viewKeyLists.forEach((targetKey, m) => {
-		difCover.appendChild(
-			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m + 2.7, _ => {
+		difFilter.appendChild(
+			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m, _ => {
 				resetDifWindow();
 				g_stateObj.filterKeys = targetKey;
 				createDifWindow(targetKey);
 			}, { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.filterKeys === targetKey ? `Setting` : `Default`) })
 		);
 		if (g_stateObj.filterKeys === targetKey) {
-			pos = m + 9;
+			pos = m + 5 * (g_sHeight - 300) / 200;
 		}
 	});
-	difCover.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(difCover.style.height), 0);
+	difFilter.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(difFilter.style.height), 0);
 
 	multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
 };

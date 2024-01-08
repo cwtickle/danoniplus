@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/01/07 (v34.6.0)
+ * Revised : 2024/01/08 (v34.6.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -186,7 +186,8 @@ const updateWindowSiz = _ => {
     Object.assign(g_windowObj, {
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
         difList: { x: 165, y: 60, w: 280, h: 261 + g_sHeight - 500, overflow: `auto` },
-        difCover: { x: 25, y: 60, w: 140, h: 261 + g_sHeight - 500, overflow: `auto`, opacity: 0.95 },
+        difCover: { x: 25, y: 60, w: 140, h: 261 + g_sHeight - 500, opacity: 0.95 },
+        difFilter: { x: 0, y: 61, w: 140, h: 200 + g_sHeight - 500, overflow: `auto` },
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
         scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 236, visibility: `hidden` },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
