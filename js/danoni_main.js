@@ -4523,7 +4523,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, _ => nextDifficulty(j - g_stateObj.scoreId),
 				{ btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
 			if (j === g_stateObj.scoreId) {
-				pos = k + 6 + (g_sHeight - 500) / 50;
+				pos = k + 6.5 * (g_sHeight - 239) / 261;
 				curk = k;
 			}
 			k++;
@@ -4598,10 +4598,10 @@ const createDifWindow = (_key = ``) => {
 			}, { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.filterKeys === targetKey ? `Setting` : `Default`) })
 		);
 		if (g_stateObj.filterKeys === targetKey) {
-			pos = m + 7;
+			pos = m + 5 * (g_sHeight - 300) / 200;
 		}
 	});
-	difFilter.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(difCover.style.height), 0);
+	difFilter.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(difFilter.style.height), 0);
 
 	multiAppend(optionsprite, makeDifBtn(-1), makeDifBtn());
 };
