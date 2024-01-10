@@ -2707,7 +2707,9 @@ const headerConvert = _dosObj => {
 
 	// サーバ上の場合、画像セットを再読込（ローカルファイル時は読込済みのためスキップ）
 	if (!g_isFile) {
-		updateImgType(obj.imgType[0]);
+		updateImgType(obj.imgType[0], true);
+	} else {
+		g_imgObj.titleArrow = C_IMG_ARROW;
 	}
 
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
@@ -3347,7 +3349,10 @@ const getMusicNameMultiLine = _musicName => {
  * 画像セットの入れ替え処理
  * @param {array} _imgType 
  */
-const updateImgType = _imgType => {
+const updateImgType = (_imgType, _initFlg = false) => {
+	if (_initFlg) {
+		C_IMG_TITLE_ARROW = `../img/${_imgType.name}arrow.${_imgType.extension}`;
+	}
 	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
 	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
@@ -4039,7 +4044,7 @@ const titleInit = _ => {
 				background: makeColorGradation(g_headerObj.titlearrowgrds[0] || g_headerObj.setColorOrg[0], {
 					_defaultColorgrd: [false, `#eeeeee`],
 					_objType: `titleArrow`,
-				}), rotate: 180,
+				}), rotate: `titleArrow:180`,
 			})
 		);
 	}

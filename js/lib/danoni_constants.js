@@ -477,6 +477,7 @@ let C_IMG_CURSOR = `../img/cursor.svg`;
 let C_IMG_FRZBAR = `../img/frzbar.svg`;
 let C_IMG_LIFEBAR = `../img/frzbar.svg`;
 let C_IMG_LIFEBORDER = `../img/borderline.svg`;
+let C_IMG_TITLE_ARROW;
 
 if (typeof loadBinary === C_TYP_FUNCTION) {
     loadBinary();
@@ -585,6 +586,8 @@ const reloadImgObj = _ => {
     g_imgObj.frzBar = C_IMG_FRZBAR;
     g_imgObj.lifeBar = C_IMG_LIFEBAR;
     g_imgObj.lifeBorder = C_IMG_LIFEBORDER;
+
+    g_imgObj.titleArrow = C_IMG_TITLE_ARROW;
 };
 reloadImgObj();
 
