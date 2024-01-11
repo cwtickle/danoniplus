@@ -2705,9 +2705,14 @@ const headerConvert = _dosObj => {
 	g_stateObj.rotateEnabled = obj.imgType[0].rotateEnabled;
 	g_stateObj.flatStepHeight = obj.imgType[0].flatStepHeight;
 
+	const [titleArrowName, titleArrowRotate] = padArray(_dosObj.titleArrowName?.split(`:`), [`Original`, 180]);
+	obj.titleArrowNo = roundZero(g_keycons.imgTypes.findIndex(imgType => imgType === titleArrowName));
+	obj.titleArrowRotate = titleArrowRotate;
+
 	// サーバ上の場合、画像セットを再読込（ローカルファイル時は読込済みのためスキップ）
 	if (!g_isFile) {
-		updateImgType(obj.imgType[0], true);
+		updateImgType(obj.imgType[obj.titleArrowNo], true);
+		updateImgType(obj.imgType[0]);
 	} else {
 		g_imgObj.titleArrow = C_IMG_ARROW;
 	}
@@ -3351,7 +3356,7 @@ const getMusicNameMultiLine = _musicName => {
  */
 const updateImgType = (_imgType, _initFlg = false) => {
 	if (_initFlg) {
-		C_IMG_TITLE_ARROW = `../img/${_imgType.name}arrow.${_imgType.extension}`;
+		C_IMG_TITLE_ARROW = `../img/${_imgType.name}/arrow.${_imgType.extension}`;
 	}
 	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
@@ -4044,7 +4049,7 @@ const titleInit = _ => {
 				background: makeColorGradation(g_headerObj.titlearrowgrds[0] || g_headerObj.setColorOrg[0], {
 					_defaultColorgrd: [false, `#eeeeee`],
 					_objType: `titleArrow`,
-				}), rotate: `titleArrow:180`,
+				}), rotate: `titleArrow:${g_headerObj.titleArrowRotate}`,
 			})
 		);
 	}
