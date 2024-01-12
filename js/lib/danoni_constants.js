@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/01/08 (v34.6.1)
+ * Revised : 2024/01/12 (v34.7.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -477,6 +477,7 @@ let C_IMG_CURSOR = `../img/cursor.svg`;
 let C_IMG_FRZBAR = `../img/frzbar.svg`;
 let C_IMG_LIFEBAR = `../img/frzbar.svg`;
 let C_IMG_LIFEBORDER = `../img/borderline.svg`;
+let C_IMG_TITLE_ARROW;
 
 if (typeof loadBinary === C_TYP_FUNCTION) {
     loadBinary();
@@ -585,6 +586,8 @@ const reloadImgObj = _ => {
     g_imgObj.frzBar = C_IMG_FRZBAR;
     g_imgObj.lifeBar = C_IMG_LIFEBAR;
     g_imgObj.lifeBorder = C_IMG_LIFEBORDER;
+
+    g_imgObj.titleArrow = C_IMG_TITLE_ARROW;
 };
 reloadImgObj();
 
