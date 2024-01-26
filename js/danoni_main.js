@@ -3036,6 +3036,9 @@ const headerConvert = _dosObj => {
 	g_posObj.arrowHeight = obj.playingHeight + g_posObj.stepYR - g_posObj.stepDiffY * 2;
 	obj.bottomWordSetFlg = setBoolVal(_dosObj.bottomWordSet);
 
+	// ウィンドウサイズ(高さ)とステップゾーン位置の組み合わせで基準速度を変更
+	obj.baseSpeed = (g_posObj.distY - (g_posObj.stepY - C_STEP_Y) * 2) / (500 - C_STEP_Y);
+
 	// 矢印・フリーズアロー判定位置補正
 	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
 	g_diffObj.frzJdgY = (isNaN(parseFloat(_dosObj.frzJdgY)) ? 0 : parseFloat(_dosObj.frzJdgY));
@@ -7924,11 +7927,11 @@ const getStartFrame = (_lastFrame, _fadein = 0, _scoreId = g_stateObj.scoreId) =
 const setSpeedOnFrame = (_speedData, _lastFrame) => {
 
 	const speedOnFrame = [];
-	let currentSpeed = g_stateObj.speed * 2;
+	let currentSpeed = g_stateObj.speed * g_headerObj.baseSpeed * 2;
 
 	for (let frm = 0, s = 0; frm <= _lastFrame; frm++) {
 		while (frm >= _speedData?.[s]) {
-			currentSpeed = _speedData[s + 1] * g_stateObj.speed * 2;
+			currentSpeed = _speedData[s + 1] * g_stateObj.speed * g_headerObj.baseSpeed * 2;
 			s += 2;
 		}
 		speedOnFrame[frm] = currentSpeed;
