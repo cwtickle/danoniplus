@@ -1062,6 +1062,15 @@ const g_hidSudObj = {
         'Sudden+': { OFF: 1, ON: 0, },
         'Hid&Sud+': { OFF: 1, ON: 0, },
     },
+    distH: {
+        'Visible': _ => ``,
+        'Hidden': _ => `50${g_lblNameObj.percent} (${Math.round(g_posObj.arrowHeight * 50 / 100)}px)`,
+        'Hidden+': (_filterPos) => `${_filterPos}${g_lblNameObj.percent} (${Math.min(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100), g_posObj.arrowHeight - g_posObj.stepY)}px)`,
+        'Sudden': _ => `40${g_lblNameObj.percent} (${Math.round(g_posObj.arrowHeight * 60 / 100) - g_posObj.stepY}px)`,
+        'Sudden+': (_filterPos) => `${_filterPos}${g_lblNameObj.percent} (${Math.max(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100) - g_posObj.stepY, 0)}px)`,
+        'Hid&Sud+': (_filterPos) => `${_filterPos}${g_lblNameObj.percent} (${Math.max(Math.max(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100) - g_posObj.stepY, 0)
+            - (g_posObj.arrowHeight - g_posObj.stepY - Math.min(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100), g_posObj.arrowHeight - g_posObj.stepY)), 0)}px)`,
+    },
 };
 
 // ステップゾーン位置、到達距離(後で指定)

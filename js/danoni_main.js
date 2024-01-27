@@ -2138,9 +2138,10 @@ const initialControl = async () => {
  * 作品別ローカルストレージの読み込み・初期設定
  */
 const loadLocalStorage = _ => {
-	// URLからscoreIdを削除
+	// URLからscoreId, h(高さ)を削除
 	const url = new URL(location.href);
-	url.searchParams.delete('scoreId');
+	url.searchParams.delete(`scoreId`);
+	url.searchParams.delete(`h`);
 	g_localStorageUrl = url.toString();
 
 	/**
@@ -2730,9 +2731,11 @@ const headerConvert = _dosObj => {
 		$id(`canvas-frame`).width = wUnit(g_sWidth);
 	}
 	// 高さ設定
-	if (hasVal(_dosObj.windowHeight) || hasVal(g_presetObj.autoMinHeight)) {
+	if (hasVal(_dosObj.windowHeight || g_presetObj.autoMinHeight)
+		|| (getQueryParamVal(`h`) !== null && (_dosObj.heightVariable || g_presetObj.heightVariable || false))) {
 		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_sHeight),
-			setIntVal(g_presetObj.autoMinHeight, g_sHeight), g_sHeight);
+			setIntVal(g_presetObj.autoMinHeight, g_sHeight),
+			setIntVal(getQueryParamVal(`h`), g_sHeight), g_sHeight);
 		$id(`canvas-frame`).height = wUnit(g_sHeight);
 	}
 
@@ -4486,6 +4489,17 @@ const inputSlider = (_slider, _link) => {
 };
 
 /**
+ * スライダー共通処理
+ * @param {object} _slider 
+ * @param {object} _link 
+ */
+const inputSliderAppearance = (_slider, _link) => {
+	const value = parseInt(_slider.value);
+	_link.textContent = `${g_hidSudObj.distH[g_stateObj.appearance](value)}`;
+	return value;
+};
+
+/**
  * 譜面変更セレクターの削除
  */
 const resetDifWindow = _ => {
@@ -5170,6 +5184,11 @@ const createOptionWindow = _sprite => {
 		skipTerms: g_settings.speedTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_speed, roundNum: 5,
 		unitName: ` ${g_lblNameObj.multi}`,
 	});
+	if (g_headerObj.baseSpeed !== 1) {
+		divRoot.appendChild(
+			createDivCss2Label(`lblBaseSpd`, `Δv: ${Math.round(g_headerObj.baseSpeed * 100) / 100}x`, { x: g_sWidth - 100, y: 0, w: 100, h: 20, siz: 14 })
+		);
+	}
 
 	/**
 	 * 譜面明細子画面・グラフの作成
@@ -5995,7 +6014,7 @@ const createSettingsDisplayWindow = _sprite => {
 
 	// Hidden+/Sudden+初期値用スライダー、ロックボタン
 	multiAppend(spriteList.appearance,
-		createDivCss2Label(`lblAppearancePos`, `${g_hidSudObj.filterPos}${g_lblNameObj.percent}`, g_lblPosObj.lblAppearancePos),
+		createDivCss2Label(`lblAppearancePos`, `${g_hidSudObj.distH[g_stateObj.appearance](g_hidSudObj.filterPos)}`, g_lblPosObj.lblAppearancePos),
 		createDivCss2Label(`lblAppearanceBar`, `<input id="appearanceSlider" type="range" value="${g_hidSudObj.filterPos}" min="0" max="100" step="1">`,
 			g_lblPosObj.lblAppearanceBar),
 		createCss2Button(`lnkLockBtn`, g_lblNameObj.filterLock, evt => setLockView(evt.target),
@@ -6015,11 +6034,13 @@ const createSettingsDisplayWindow = _sprite => {
 
 	const appearanceSlider = document.getElementById(`appearanceSlider`);
 	appearanceSlider.addEventListener(`input`, _ =>
-		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos), false);
+		g_hidSudObj.filterPos = inputSliderAppearance(appearanceSlider, lblAppearancePos), false);
 
-	const dispAppearanceSlider = _ =>
-		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
+	const dispAppearanceSlider = _ => {
+		[`lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
 			$id(obj).visibility = g_appearanceRanges.includes(g_stateObj.appearance) ? `Visible` : `Hidden`);
+		inputSliderAppearance(appearanceSlider, lblAppearancePos);
+	};
 	dispAppearanceSlider();
 
 	// ---------------------------------------------------
