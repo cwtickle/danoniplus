@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/01/12 (v34.7.0)
+ * Revised : 2024/01/28 (v35.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1032,6 +1032,13 @@ let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`
 
 let g_canDisabledSettings = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `excessive`, `appearance`];
 
+const g_hidSudFunc = {
+    filterPos: _filterPos => `${_filterPos}${g_lblNameObj.percent}`,
+    range: _ => `${Math.round(g_posObj.arrowHeight - g_posObj.stepY)}px`,
+    hidden: _filterPos => `${Math.min(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100), g_posObj.arrowHeight - g_posObj.stepY)}`,
+    sudden: _filterPos => `${Math.max(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100) - g_posObj.stepY, 0)}`,
+};
+
 const g_hidSudObj = {
     filterPos: 10,
 
@@ -1061,6 +1068,15 @@ const g_hidSudObj = {
         'Hidden+': { OFF: 0, ON: 1, },
         'Sudden+': { OFF: 1, ON: 0, },
         'Hid&Sud+': { OFF: 1, ON: 0, },
+    },
+    distH: {
+        'Visible': _ => ``,
+        'Hidden': _ => `${g_hidSudFunc.filterPos(50)} (${g_hidSudFunc.hidden(50)} / ${g_hidSudFunc.range()})`,
+        'Hidden+': (_filterPos) => `${g_hidSudFunc.filterPos(_filterPos)} (${g_hidSudFunc.hidden(_filterPos)} / ${g_hidSudFunc.range()})`,
+        'Sudden': _ => `${g_hidSudFunc.filterPos(40)} (${g_hidSudFunc.sudden(40)} / ${g_hidSudFunc.range()})`,
+        'Sudden+': (_filterPos) => `${g_hidSudFunc.filterPos(_filterPos)} (${g_hidSudFunc.sudden(_filterPos)} / ${g_hidSudFunc.range()})`,
+        'Hid&Sud+': (_filterPos) => `${g_hidSudFunc.filterPos(_filterPos)} (${Math.max(g_hidSudFunc.sudden(_filterPos)
+            - (g_posObj.arrowHeight - g_posObj.stepY - g_hidSudFunc.hidden(_filterPos)), 0)} / ${g_hidSudFunc.range()})`,
     },
 };
 

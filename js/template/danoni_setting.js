@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2023/09/08 (v33.7.0)
+ * Template Update: 2024/01/28 (v35.0.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -31,6 +31,9 @@ g_presetObj.tuningUrl = `https://www.google.co.jp/`;
 
 /** 個人サイト別の最小高さ設定 */
 //g_presetObj.autoMinHeight = 500;
+
+/** 個人サイト別の高さ可変設定 (true: 有効、false: 無効 / デフォルトは false)*/
+//g_presetObj.heightVariable = true;
 
 /** 個人サイト別のウィンドウ位置 (left:左寄せ, center:中央, right:右寄せ)*/
 //g_presetObj.windowAlign = `center`;
