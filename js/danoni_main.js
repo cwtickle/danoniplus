@@ -3041,7 +3041,7 @@ const headerConvert = _dosObj => {
 	obj.bottomWordSetFlg = setBoolVal(_dosObj.bottomWordSet);
 
 	// ウィンドウサイズ(高さ)とステップゾーン位置の組み合わせで基準速度を変更
-	obj.baseSpeed = (g_posObj.distY - (g_posObj.stepY - C_STEP_Y) * 2) / (500 - C_STEP_Y);
+	obj.baseSpeed = 1 + ((g_posObj.distY - (g_posObj.stepY - C_STEP_Y) * 2) / (500 - C_STEP_Y) - 1) * 0.85;
 
 	// 矢印・フリーズアロー判定位置補正
 	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
