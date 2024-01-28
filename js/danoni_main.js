@@ -2731,10 +2731,9 @@ const headerConvert = _dosObj => {
 		$id(`canvas-frame`).width = wUnit(g_sWidth);
 	}
 	// 高さ設定
-	if (hasVal(_dosObj.windowHeight || g_presetObj.autoMinHeight)
-		|| (getQueryParamVal(`h`) !== null && (_dosObj.heightVariable || g_presetObj.heightVariable || false))) {
-		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_sHeight),
-			setIntVal(g_presetObj.autoMinHeight, g_sHeight),
+	obj.heightVariable = getQueryParamVal(`h`) !== null && (_dosObj.heightVariable || g_presetObj.heightVariable || false);
+	if (hasVal(_dosObj.windowHeight || g_presetObj.autoMinHeight) || obj.heightVariable) {
+		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_presetObj.autoMinHeight ?? g_sHeight),
 			setIntVal(getQueryParamVal(`h`), g_sHeight), g_sHeight);
 		$id(`canvas-frame`).height = wUnit(g_sHeight);
 	}
@@ -3024,11 +3023,13 @@ const headerConvert = _dosObj => {
 
 	// プレイサイズ(X方向, Y方向)
 	obj.playingWidth = setIntVal(_dosObj.playingWidth, g_presetObj.playingWidth ?? `default`);
-	obj.playingHeight = setIntVal(_dosObj.playingHeight, g_presetObj.playingHeight ?? g_sHeight);
+	const tmpPlayingHeight = setIntVal(_dosObj.playingHeight, g_presetObj.playingHeight ?? g_sHeight);
+	obj.playingHeight = Math.max(obj.heightVariable ?
+		setIntVal(getQueryParamVal(`h`) - (g_sHeight - tmpPlayingHeight), tmpPlayingHeight) : tmpPlayingHeight, 400);
 
 	// プレイ左上位置(X座標, Y座標)
 	obj.playingX = setIntVal(_dosObj.playingX, g_presetObj.playingX ?? 0);
-	obj.playingY = setIntVal(_dosObj.playingY, g_presetObj.playingY ?? 0);
+	obj.playingY = setIntVal(_dosObj.playingY, g_presetObj.playingY ?? Math.max((g_sHeight - obj.playingHeight) / 2, 0));
 
 	// ステップゾーン位置
 	g_posObj.stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));
