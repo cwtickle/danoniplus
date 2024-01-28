@@ -3029,7 +3029,7 @@ const headerConvert = _dosObj => {
 
 	// プレイ左上位置(X座標, Y座標)
 	obj.playingX = setIntVal(_dosObj.playingX, g_presetObj.playingX ?? 0);
-	obj.playingY = setIntVal(_dosObj.playingY, g_presetObj.playingY ?? Math.max((g_sHeight - obj.playingHeight) / 2, 0));
+	obj.playingY = setIntVal(_dosObj.playingY, g_presetObj.playingY ?? 0);
 
 	// ステップゾーン位置
 	g_posObj.stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));
