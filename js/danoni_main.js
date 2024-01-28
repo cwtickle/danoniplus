@@ -2138,9 +2138,10 @@ const initialControl = async () => {
  * 作品別ローカルストレージの読み込み・初期設定
  */
 const loadLocalStorage = _ => {
-	// URLからscoreIdを削除
+	// URLからscoreId, h(高さ)を削除
 	const url = new URL(location.href);
-	url.searchParams.delete('scoreId');
+	url.searchParams.delete(`scoreId`);
+	url.searchParams.delete(`h`);
 	g_localStorageUrl = url.toString();
 
 	/**
@@ -2730,9 +2731,10 @@ const headerConvert = _dosObj => {
 		$id(`canvas-frame`).width = wUnit(g_sWidth);
 	}
 	// 高さ設定
-	if (hasVal(_dosObj.windowHeight) || hasVal(g_presetObj.autoMinHeight)) {
-		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_sHeight),
-			setIntVal(g_presetObj.autoMinHeight, g_sHeight), g_sHeight);
+	obj.heightVariable = getQueryParamVal(`h`) !== null && (_dosObj.heightVariable || g_presetObj.heightVariable || false);
+	if (hasVal(_dosObj.windowHeight || g_presetObj.autoMinHeight) || obj.heightVariable) {
+		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_presetObj.autoMinHeight ?? g_sHeight),
+			setIntVal(getQueryParamVal(`h`), g_sHeight), g_sHeight);
 		$id(`canvas-frame`).height = wUnit(g_sHeight);
 	}
 
@@ -3021,7 +3023,9 @@ const headerConvert = _dosObj => {
 
 	// プレイサイズ(X方向, Y方向)
 	obj.playingWidth = setIntVal(_dosObj.playingWidth, g_presetObj.playingWidth ?? `default`);
-	obj.playingHeight = setIntVal(_dosObj.playingHeight, g_presetObj.playingHeight ?? g_sHeight);
+	const tmpPlayingHeight = setIntVal(_dosObj.playingHeight, g_presetObj.playingHeight ?? g_sHeight);
+	obj.playingHeight = Math.max(obj.heightVariable ?
+		setIntVal(getQueryParamVal(`h`) - (g_sHeight - tmpPlayingHeight), tmpPlayingHeight) : tmpPlayingHeight, 400);
 
 	// プレイ左上位置(X座標, Y座標)
 	obj.playingX = setIntVal(_dosObj.playingX, g_presetObj.playingX ?? 0);
@@ -3035,6 +3039,9 @@ const headerConvert = _dosObj => {
 	g_posObj.reverseStepY = g_posObj.distY - g_posObj.stepY - g_posObj.stepDiffY - C_ARW_WIDTH;
 	g_posObj.arrowHeight = obj.playingHeight + g_posObj.stepYR - g_posObj.stepDiffY * 2;
 	obj.bottomWordSetFlg = setBoolVal(_dosObj.bottomWordSet);
+
+	// ウィンドウサイズ(高さ)とステップゾーン位置の組み合わせで基準速度を変更
+	obj.baseSpeed = 1 + ((g_posObj.distY - (g_posObj.stepY - C_STEP_Y) * 2) / (500 - C_STEP_Y) - 1) * 0.85;
 
 	// 矢印・フリーズアロー判定位置補正
 	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
@@ -4483,6 +4490,17 @@ const inputSlider = (_slider, _link) => {
 };
 
 /**
+ * スライダー共通処理
+ * @param {object} _slider 
+ * @param {object} _link 
+ */
+const inputSliderAppearance = (_slider, _link) => {
+	const value = parseInt(_slider.value);
+	_link.textContent = `${g_hidSudObj.distH[g_stateObj.appearance](value)}`;
+	return value;
+};
+
+/**
  * 譜面変更セレクターの削除
  */
 const resetDifWindow = _ => {
@@ -5167,6 +5185,11 @@ const createOptionWindow = _sprite => {
 		skipTerms: g_settings.speedTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_speed, roundNum: 5,
 		unitName: ` ${g_lblNameObj.multi}`,
 	});
+	if (g_headerObj.baseSpeed !== 1) {
+		divRoot.appendChild(
+			createDivCss2Label(`lblBaseSpd`, `Δv: ${Math.round(g_headerObj.baseSpeed * 100) / 100}x`, { x: g_sWidth - 100, y: 0, w: 100, h: 20, siz: 14 })
+		);
+	}
 
 	/**
 	 * 譜面明細子画面・グラフの作成
@@ -5992,7 +6015,7 @@ const createSettingsDisplayWindow = _sprite => {
 
 	// Hidden+/Sudden+初期値用スライダー、ロックボタン
 	multiAppend(spriteList.appearance,
-		createDivCss2Label(`lblAppearancePos`, `${g_hidSudObj.filterPos}${g_lblNameObj.percent}`, g_lblPosObj.lblAppearancePos),
+		createDivCss2Label(`lblAppearancePos`, `${g_hidSudObj.distH[g_stateObj.appearance](g_hidSudObj.filterPos)}`, g_lblPosObj.lblAppearancePos),
 		createDivCss2Label(`lblAppearanceBar`, `<input id="appearanceSlider" type="range" value="${g_hidSudObj.filterPos}" min="0" max="100" step="1">`,
 			g_lblPosObj.lblAppearanceBar),
 		createCss2Button(`lnkLockBtn`, g_lblNameObj.filterLock, evt => setLockView(evt.target),
@@ -6012,11 +6035,13 @@ const createSettingsDisplayWindow = _sprite => {
 
 	const appearanceSlider = document.getElementById(`appearanceSlider`);
 	appearanceSlider.addEventListener(`input`, _ =>
-		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos), false);
+		g_hidSudObj.filterPos = inputSliderAppearance(appearanceSlider, lblAppearancePos), false);
 
-	const dispAppearanceSlider = _ =>
-		[`lblAppearancePos`, `lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
+	const dispAppearanceSlider = _ => {
+		[`lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
 			$id(obj).visibility = g_appearanceRanges.includes(g_stateObj.appearance) ? `Visible` : `Hidden`);
+		inputSliderAppearance(appearanceSlider, lblAppearancePos);
+	};
 	dispAppearanceSlider();
 
 	// ---------------------------------------------------
@@ -7924,11 +7949,11 @@ const getStartFrame = (_lastFrame, _fadein = 0, _scoreId = g_stateObj.scoreId) =
 const setSpeedOnFrame = (_speedData, _lastFrame) => {
 
 	const speedOnFrame = [];
-	let currentSpeed = g_stateObj.speed * 2;
+	let currentSpeed = g_stateObj.speed * g_headerObj.baseSpeed * 2;
 
 	for (let frm = 0, s = 0; frm <= _lastFrame; frm++) {
 		while (frm >= _speedData?.[s]) {
-			currentSpeed = _speedData[s + 1] * g_stateObj.speed * 2;
+			currentSpeed = _speedData[s + 1] * g_stateObj.speed * g_headerObj.baseSpeed * 2;
 			s += 2;
 		}
 		speedOnFrame[frm] = currentSpeed;
