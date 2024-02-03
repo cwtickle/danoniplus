@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/01/28
+ * Revised : 2024/02/03
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 35.0.0`;
-const g_revisedDate = `2024/01/28`;
+const g_version = `Ver 35.1.0`;
+const g_revisedDate = `2024/02/03`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3977,6 +3977,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		// キーグループ (keyGroupX_Y)
 		newKeyMultiParam(newKey, `keyGroup`, toSplitArrayStr);
 
+		// キーグループの表示制御 (keyGroupOrderX_Y)
+		newKeyMultiParam(newKey, `keyGroupOrder`, toString);
+
 		// スクロールパターン (scrollX_Y)
 		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
 		newKeyPairParam(newKey, `scroll`, `scrollDir`, `---`, 1);
@@ -6148,7 +6151,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
 
 	g_keycons.cursorNumList = [...Array(keyNum).keys()].map(i => i);
-	const configKeyGroupList = g_headerObj.keyGroupOrder[g_stateObj.scoreId] ?? tkObj.keyGroupList;
+	const configKeyGroupList = g_headerObj.keyGroupOrder[g_stateObj.scoreId] ??
+		g_keyObj[`keyGroupOrder${keyCtrlPtn}`] ?? tkObj.keyGroupList;
 
 	/**
 	 * keyconSpriteのスクロール位置調整
@@ -6534,14 +6538,18 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				appearConfigView(j, C_DIS_INHERIT);
 			}
 		}
-		changeConfigCursor(0);
+		if (g_keycons.cursorNumList.length === 0) {
+			appearConfigSteps(0);
+		} else {
+			changeConfigCursor(0);
 
-		// keySwitchボタンを一旦非選択にして、選択中のものを再度色付け
-		if (configKeyGroupList.length > 1) {
-			for (let j = 0; j < configKeyGroupList.length; j++) {
-				document.getElementById(`key${j}`).classList.replace(g_cssObj.button_Next, g_cssObj.button_Mini);
+			// keySwitchボタンを一旦非選択にして、選択中のものを再度色付け
+			if (configKeyGroupList.length > 1) {
+				for (let j = 0; j < configKeyGroupList.length; j++) {
+					document.getElementById(`key${j}`).classList.replace(g_cssObj.button_Next, g_cssObj.button_Mini);
+				}
+				document.getElementById(`key${_num}`).classList.replace(g_cssObj.button_Mini, g_cssObj.button_Next);
 			}
-			document.getElementById(`key${_num}`).classList.replace(g_cssObj.button_Mini, g_cssObj.button_Next);
 		}
 	};
 
