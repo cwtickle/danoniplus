@@ -1793,6 +1793,11 @@ const g_keyObj = {
     chara5_2: [`left`, `down`, `space`, `up`, `right`],
     chara8_2: [`sleft`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
 
+    // 頻度の高い譜面データ名パターン
+    // 後で charaT4_0, charaT4_a, charaT4_b, ... に変換する
+    ptcharaT4: [`left`, `down`, `up`, `right`],
+    ptcharaT6: [`left`, `leftdia`, `down`, `up`, `rightdia`, `right`],
+
     // ColorGroup - 1
     //  - 同じ数字が同じグループになる
     color5_0_0: [0, 0, 0, 0, 2],
@@ -1930,6 +1935,12 @@ const g_keyObj = {
     // ShapeGroup - 3 (矢印回転、AAキャラクタ)
     stepRtn17_0_2: [45, 45, 0, 0, -45, -45, -90, -90, `onigiri`, 90, 90, 135, 135, 180, 180, 225, 225],
 
+    // 頻度の高い部分ShapeGroupの定義
+    stepRtnT4_a: [0, -90, 90, 180],
+    stepRtnT3_a: [0, -45, -90],
+    stepRtnT3_b: [90, 135, 180],
+    stepRtnT3_c: [`giko`, `onigiri`, `iyo`],
+
     // 各キーの区切り位置
     // - 未指定の場合は下段への折り返し無し
     div9i_0: 6,
@@ -2007,6 +2018,17 @@ const g_keyObj = {
     keyCtrl8_4: [[`Shift`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`]],
 
     keyCtrl8_5: [[`Shift`], [`Z`], [`S`], [`X`, `C`], [`D`, `F`], [`V`], [`G`], [`B`]],
+
+    // 頻度の高い部分キーコンフィグの定義
+    keyCtrlT4_a: [[`Left`], [`Down`], [`Up`], [`Right`]],
+    keyCtrlT4_b: [[`S`], [`D`], [`E`, `R`], [`F`]],
+    keyCtrlT4_c: [[`J`], [`K`], [`I`, `O`], [`L`]],
+    keyCtrlT4_d: [[`W`], [`E`], [`D3`, `D4`], [`R`]],
+    keyCtrlT4_e: [[`U`], [`I`], [`D8`, `D9`], [`O`]],
+    keyCtrlT3_a: [[`S`, `D`, `F`]],
+    keyCtrlT3_b: [[`J`, `K`, `L`]],
+    keyCtrlT3_c: [[`W`, `E`, `R`]],
+    keyCtrlT3_d: [[`Z`, `X`, `C`]],
 
     // 隣接するステップゾーン間の距離
     blank: 55,
@@ -2366,6 +2388,13 @@ Object.keys(g_copyKeyPtn).forEach(keyPtnTo => {
     } else if (g_keyObj[`transKey${keyPtnTo}`] === undefined && keyPtnFrom.split(`_`)[0] !== keyPtnTo.split(`_`)[0]) {
         g_keyObj[`transKey${keyPtnTo}`] = keyPtnFrom.split(`_`)[0];
     }
+});
+
+// 頻度の高い譜面データ名の自動生成 (left -> aleft, bleft, ..., zleft を生成)
+Object.keys(g_keyObj).filter(val => val.startsWith(`ptchara`)).forEach(charaPtn => {
+    g_keyObj[`${charaPtn.slice(2)}`] = g_keyObj[charaPtn].concat();
+    [...Array(26)].map((a, b) => (10 + b).toString(36)).forEach(alphabet =>
+        g_keyObj[`${charaPtn.slice(2)}_${alphabet}`] = g_keyObj[charaPtn].map(str => `${alphabet}${str}`));
 });
 
 // デフォルト配列のコピー (g_keyObj.aaa_X から g_keyObj.aaa_Xd を作成)
