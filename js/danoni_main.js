@@ -3724,7 +3724,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	 * @param {string} _str
 	 */
 	const toSameValStr = _str => {
-		const nums = _str?.split(`@=`);
+		const nums = _str?.split(`@:`);
 		return nums.length === 2 && !isNaN(parseInt(nums[1])) ?
 			[...Array(Math.floor(parseInt(nums[1])))].fill(nums[0]).join(`,`) : _str;
 	};
