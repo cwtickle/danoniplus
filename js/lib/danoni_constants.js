@@ -1795,10 +1795,10 @@ const g_keyObj = {
 
     // 頻度の高い譜面データ名パターン
     // 後で charaT4_0, charaT4_a, charaT4_b, ... に変換する
-    ptcharaT4: [`left`, `down`, `up`, `right`],
-    ptcharaT3_s: [`left`, `leftdia`, `down`],
-    ptcharaT3_j: [`up`, `rightdia`, `right`],
-    ptcharaT7: [`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
+    ptchara4A: [`left`, `down`, `up`, `right`],
+    ptchara3S: [`left`, `leftdia`, `down`],
+    ptchara3J: [`up`, `rightdia`, `right`],
+    ptchara7: [`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
 
     // ColorGroup - 1
     //  - 同じ数字が同じグループになる
@@ -1938,10 +1938,10 @@ const g_keyObj = {
     stepRtn17_0_2: [45, 45, 0, 0, -45, -45, -90, -90, `onigiri`, 90, 90, 135, 135, 180, 180, 225, 225],
 
     // 頻度の高い部分ShapeGroupの定義
-    stepRtnT4_arrow: [0, -90, 90, 180],
-    stepRtnT3_s: [0, -45, -90],
-    stepRtnT3_j: [90, 135, 180],
-    stepRtnT3_z: [`giko`, `onigiri`, `iyo`],
+    stepRtn4A: [0, -90, 90, 180],
+    stepRtn3S: [0, -45, -90],
+    stepRtn3J: [90, 135, 180],
+    stepRtn3Z: [`giko`, `onigiri`, `iyo`],
 
     // 各キーの区切り位置
     // - 未指定の場合は下段への折り返し無し
@@ -2022,15 +2022,15 @@ const g_keyObj = {
     keyCtrl8_5: [[`Shift`], [`Z`], [`S`], [`X`, `C`], [`D`, `F`], [`V`], [`G`], [`B`]],
 
     // 頻度の高い部分キーコンフィグの定義
-    keyCtrlT4_arrow: [[`Left`], [`Down`], [`Up`], [`Right`]],
-    keyCtrlT4_s: [[`S`], [`D`], [`E`, `R`], [`F`]],
-    keyCtrlT4_j: [[`J`], [`K`], [`I`, `O`], [`L`]],
-    keyCtrlT4_w: [[`W`], [`E`], [`D3`, `D4`], [`R`]],
-    keyCtrlT4_u: [[`U`], [`I`], [`D8`, `D9`], [`O`]],
-    keyCtrlT3_s: [[`S`], [`D`], [`F`]],
-    keyCtrlT3_j: [[`J`], [`K`], [`L`]],
-    keyCtrlT3_w: [[`W`], [`E`], [`R`]],
-    keyCtrlT3_z: [[`Z`], [`X`], [`C`]],
+    keyCtrl4A: [[`Left`], [`Down`], [`Up`], [`Right`]],
+    keyCtrl4S: [[`S`], [`D`], [`E`, `R`], [`F`]],
+    keyCtrl4J: [[`J`], [`K`], [`I`, `O`], [`L`]],
+    keyCtrl4W: [[`W`], [`E`], [`D3`, `D4`], [`R`]],
+    keyCtrl4U: [[`U`], [`I`], [`D8`, `D9`], [`O`]],
+    keyCtrl3S: [[`S`], [`D`], [`F`]],
+    keyCtrl3J: [[`J`], [`K`], [`L`]],
+    keyCtrl3W: [[`W`], [`E`], [`R`]],
+    keyCtrl3Z: [[`Z`], [`X`], [`C`]],
 
     // 隣接するステップゾーン間の距離
     blank: 55,
