@@ -3720,13 +3720,14 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	};
 
 	/**
-	 * 略記記法を元の文字列に変換 (1@5 -> 1,1,1,1,1)
+	 * 略記記法を元の文字列に変換 (1@:5 -> 1,1,1,1,1 / onigiri!giko!c@:2 -> onigiri,giko,c,onigiri,giko,c)
 	 * @param {string} _str
 	 */
 	const toSameValStr = _str => {
 		const nums = _str?.split(`@:`);
+		const groupStr = nums[0].split(`!`).join(`,`);
 		return nums.length === 2 && !isNaN(parseInt(nums[1])) ?
-			[...Array(Math.floor(parseInt(nums[1])))].fill(nums[0]).join(`,`) : _str;
+			[...Array(Math.floor(parseInt(nums[1])))].fill(groupStr).join(`,`) : _str;
 	};
 
 	/**
