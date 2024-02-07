@@ -3695,6 +3695,18 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
 	const toString = _str => _str;
 	const toFloat = _num => isNaN(parseFloat(_num)) ? _num : parseFloat(_num);
+	const toFloatArray = _num => {
+		const nums = _num?.split(`..`).map(n => parseFloat(n));
+		if (nums.length === 2) {
+			const arr = [];
+			for (let k = nums[0]; k <= (nums[1] || 0); k++) {
+				arr.push(k);
+			}
+			return arr.join(`,`);
+		} else {
+			return _num;
+		}
+	};
 	const toKeyCtrlArray = _str =>
 		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n)), g_keyObj.minKeyCtrlNum, 0);
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
@@ -3751,8 +3763,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					continue;
 				}
 				// |keyCtrl9j=Tab,7_0,Enter| -> |keyCtrl9j=Tab,S,D,F,Space,J,K,L,Enter| のように補完
+				// |pos9j=0..4,6..9| -> |pos9j=0,1,2,3,4,6,7,8,9|
 				g_keyObj[`${keyheader}_${k + dfPtn}`] =
-					tmpArray[k].split(`,`).map(n =>
+					tmpArray[k].split(`,`).map(n => toFloatArray(n)).join(`,`).split(`,`).map(n =>
 						structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ?? [_convFunc(n)]
 					).flat();
 				if (baseCopyFlg) {
