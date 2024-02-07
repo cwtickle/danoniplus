@@ -3695,21 +3695,39 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
 	const toString = _str => _str;
 	const toFloat = _num => isNaN(parseFloat(_num)) ? _num : parseFloat(_num);
-	const toFloatArray = _num => {
-		const nums = _num?.split(`..`).map(n => parseFloat(n));
-		if (nums.length === 2) {
+	const toKeyCtrlArray = _str =>
+		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n)), g_keyObj.minKeyCtrlNum, 0);
+	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
+
+	// 略記記法を元の文字列に復元後、配列に変換 (1...3,5...7 -> 1,2,3,5,6,7)
+	const toOriginalArray = (_val, _func) => _val?.split(`,`).map(n => _func(n)).join(`,`).split(`,`);
+
+	/**
+	 * 略記記法を元の文字列に変換 (1...5 -> 1,2,3,4,5)
+	 * @param {string} _str 
+	 */
+	const toFloatStr = _str => {
+		const nums = _str?.split(`...`).map(n => parseFloat(n));
+		if (nums.length === 2 && !isNaN(nums[0]) && !isNaN(nums[1])) {
 			const arr = [];
 			for (let k = nums[0]; k <= (nums[1] || 0); k++) {
 				arr.push(k);
 			}
 			return arr.join(`,`);
 		} else {
-			return _num;
+			return _str;
 		}
 	};
-	const toKeyCtrlArray = _str =>
-		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n)), g_keyObj.minKeyCtrlNum, 0);
-	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
+
+	/**
+	 * 略記記法を元の文字列に変換 (1@5 -> 1,1,1,1,1)
+	 * @param {string} _str
+	 */
+	const toSameValStr = _str => {
+		const nums = _str?.split(`@=`).map(n => parseFloat(n));
+		return nums.length === 2 && !isNaN(nums[0]) && !isNaN(nums[1]) ?
+			[...Array(Math.floor(nums[1]))].fill(nums[0]).join(`,`) : _str;
+	};
 
 	/**
 	 * キーパターン（相対パターン）をキーパターン（実際のパターン番号）に変換
@@ -3765,7 +3783,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 				// |keyCtrl9j=Tab,7_0,Enter| -> |keyCtrl9j=Tab,S,D,F,Space,J,K,L,Enter| のように補完
 				// |pos9j=0..4,6..9| -> |pos9j=0,1,2,3,4,6,7,8,9|
 				g_keyObj[`${keyheader}_${k + dfPtn}`] =
-					tmpArray[k].split(`,`).map(n => toFloatArray(n)).join(`,`).split(`,`).map(n =>
+					toOriginalArray(tmpArray[k], toFloatStr).map(n =>
 						structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ?? [_convFunc(n)]
 					).flat();
 				if (baseCopyFlg) {
@@ -3816,7 +3834,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
 						// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |shuffle9j=2,7_0_0,2|)
 						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] =
-							makeBaseArray(list.split(`,`).map(n =>
+							makeBaseArray(toOriginalArray(list, toSameValStr).map(n =>
 								structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ??
 								[isNaN(parseInt(n)) ? n : parseInt(n, 10)]
 							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
