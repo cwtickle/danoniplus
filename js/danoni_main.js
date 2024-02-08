@@ -3703,14 +3703,16 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	const toOriginalArray = (_val, _func) => _val?.split(`,`).map(n => _func(n)).join(`,`).split(`,`);
 
 	/**
-	 * 略記記法を元の文字列に変換 (1...5 -> 1,2,3,4,5)
+	 * 略記記法を元の文字列に変換 (1...5 -> 1,2,3,4,5 / 3...+4 -> 3,4,5,6,7)
 	 * @param {string} _str 
 	 */
 	const toFloatStr = _str => {
-		const nums = _str?.split(`...`).map(n => parseFloat(n));
-		if (nums.length === 2 && !isNaN(nums[0]) && !isNaN(nums[1])) {
+		const nums = _str?.split(`...`);
+		const [startN, endN] = [parseFloat(nums[0]), parseFloat(nums[1])];
+		if (nums.length === 2 && !isNaN(startN) && !isNaN(endN)) {
+			const endN2 = nums[1].startsWith(`+`) ? startN + endN : endN;
 			const arr = [];
-			for (let k = nums[0]; k <= (nums[1] || 0); k++) {
+			for (let k = startN; k <= endN2; k++) {
 				arr.push(k);
 			}
 			return arr.join(`,`);
