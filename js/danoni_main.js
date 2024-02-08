@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/02/03
+ * Revised : 2024/02/08
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 35.1.0`;
-const g_revisedDate = `2024/02/03`;
+const g_version = `Ver 35.2.0`;
+const g_revisedDate = `2024/02/08`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3699,6 +3699,39 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n)), g_keyObj.minKeyCtrlNum, 0);
 	const toSplitArrayStr = _str => _str.split(`/`).map(n => n);
 
+	// 略記記法を元の文字列に復元後、配列に変換 (1...3,5...7 -> 1,2,3,5,6,7)
+	const toOriginalArray = (_val, _func) => _val?.split(`,`).map(n => _func(n)).join(`,`).split(`,`);
+
+	/**
+	 * 略記記法を元の文字列に変換 (1...5 -> 1,2,3,4,5 / 3...+4 -> 3,4,5,6,7)
+	 * @param {string} _str 
+	 */
+	const toFloatStr = _str => {
+		const nums = _str?.split(`...`);
+		const [startN, endN] = [parseFloat(nums[0]), parseFloat(nums[1])];
+		if (nums.length === 2 && !isNaN(startN) && !isNaN(endN)) {
+			const endN2 = nums[1].startsWith(`+`) ? startN + endN : endN;
+			const arr = [];
+			for (let k = startN; k <= endN2; k++) {
+				arr.push(k);
+			}
+			return arr.join(`,`);
+		} else {
+			return _str;
+		}
+	};
+
+	/**
+	 * 略記記法を元の文字列に変換 (1@:5 -> 1,1,1,1,1 / onigiri!giko!c@:2 -> onigiri,giko,c,onigiri,giko,c)
+	 * @param {string} _str
+	 */
+	const toSameValStr = _str => {
+		const nums = _str?.split(`@:`);
+		const groupStr = nums[0].split(`!`).join(`,`);
+		return nums.length === 2 && !isNaN(parseInt(nums[1])) ?
+			[...Array(Math.floor(parseInt(nums[1])))].fill(groupStr).join(`,`) : _str;
+	};
+
 	/**
 	 * キーパターン（相対パターン）をキーパターン（実際のパターン番号）に変換
 	 * 例) 12_(0) -> 12_4
@@ -3751,8 +3784,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					continue;
 				}
 				// |keyCtrl9j=Tab,7_0,Enter| -> |keyCtrl9j=Tab,S,D,F,Space,J,K,L,Enter| のように補完
+				// |pos9j=0..4,6..9| -> |pos9j=0,1,2,3,4,6,7,8,9|
 				g_keyObj[`${keyheader}_${k + dfPtn}`] =
-					tmpArray[k].split(`,`).map(n =>
+					toOriginalArray(tmpArray[k], toFloatStr).map(n =>
 						structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ?? [_convFunc(n)]
 					).flat();
 				if (baseCopyFlg) {
@@ -3803,7 +3837,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						// 通常の指定方法 (例: |shuffle8i=1,1,1,2,0,0,0,0/1,1,1,1,0,0,0,0| )の場合の取り込み
 						// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |shuffle9j=2,7_0_0,2|)
 						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] =
-							makeBaseArray(list.split(`,`).map(n =>
+							makeBaseArray(toOriginalArray(list, toSameValStr).map(n =>
 								structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ??
 								[isNaN(parseInt(n)) ? n : parseInt(n, 10)]
 							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
