@@ -3708,12 +3708,14 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	 */
 	const toFloatStr = _str => {
 		const nums = _str?.split(`...`);
-		const [startN, endN] = [parseFloat(nums[0]), parseFloat(nums[1])];
+		const bottomMark = nums[0].startsWith(`b`) ? `b` : ``;
+		const [startN, endN] = [parseFloat(bottomMark === `b` ? nums[0].slice(1) : nums[0]), parseFloat(nums[1])];
+
 		if (nums.length === 2 && !isNaN(startN) && !isNaN(endN)) {
 			const endN2 = nums[1].startsWith(`+`) ? startN + endN : endN;
 			const arr = [];
 			for (let k = startN; k <= endN2; k++) {
-				arr.push(k);
+				arr.push(`${bottomMark}${k}`);
 			}
 			return arr.join(`,`);
 		} else {
