@@ -3731,7 +3731,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		const nums = _str?.split(`@:`);
 		const groupStr = toFloatStr(nums[0]).split(`!`).join(`,`);
 		return nums.length === 2 && !isNaN(parseInt(nums[1])) ?
-			[...Array(Math.floor(parseInt(nums[1])))].fill(groupStr).join(`,`) : _str;
+			[...Array(Math.floor(parseInt(nums[1])))].fill(groupStr).join(`,`) : groupStr;
 	};
 
 	/**
