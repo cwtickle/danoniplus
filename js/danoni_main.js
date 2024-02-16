@@ -3729,9 +3729,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	 */
 	const toSameValStr = _str => {
 		const nums = _str?.split(`@:`);
-		const groupStr = nums[0].split(`!`).join(`,`);
+		const groupStr = toFloatStr(nums[0]).split(`!`).join(`,`);
 		return nums.length === 2 && !isNaN(parseInt(nums[1])) ?
-			[...Array(Math.floor(parseInt(nums[1])))].fill(groupStr).join(`,`) : _str;
+			[...Array(Math.floor(parseInt(nums[1])))].fill(groupStr).join(`,`) : groupStr;
 	};
 
 	/**
@@ -3788,7 +3788,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 				// |keyCtrl9j=Tab,7_0,Enter| -> |keyCtrl9j=Tab,S,D,F,Space,J,K,L,Enter| のように補完
 				// |pos9j=0..4,6..9| -> |pos9j=0,1,2,3,4,6,7,8,9|
 				g_keyObj[`${keyheader}_${k + dfPtn}`] =
-					toOriginalArray(tmpArray[k], toFloatStr).map(n =>
+					toOriginalArray(tmpArray[k], toSameValStr).map(n =>
 						structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ?? [_convFunc(n)]
 					).flat();
 				if (baseCopyFlg) {
@@ -3915,7 +3915,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |scroll9j=Cross::1,7_0,1|)
 					const tmpParamPair = pairs.split(`::`);
 					g_keyObj[pairName][tmpParamPair[0]] =
-						makeBaseArray(tmpParamPair[1]?.split(`,`).map(n =>
+						makeBaseArray(toOriginalArray(tmpParamPair[1], toSameValStr)?.map(n =>
 							structuredClone(g_keyObj[`${_pairName}${getKeyPtnName(n)}`]?.[tmpParamPair[0]]) ??
 							[n === `-` ? -1 : parseInt(n, 10)]
 						).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, _defaultVal);
