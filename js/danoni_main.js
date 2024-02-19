@@ -4007,6 +4007,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		// 別キーフラグ (transKeyX_Y)
 		newKeySingleParam(newKey, `transKey`, C_TYP_STRING, ``);
 
+		// フラットモード (flatModeX_Y)
+		newKeySingleParam(newKey, `flatMode`, C_TYP_BOOLEAN, false);
+
 		// シャッフルグループ (shuffleX_Y)
 		newKeyTripleParam(newKey, `shuffle`);
 
@@ -6002,25 +6005,36 @@ const createSettingsDisplayWindow = _sprite => {
 	const makeDisplayButton = (_name, _heightPos, _widthPos) => {
 
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
-		const list = [C_FLG_OFF, C_FLG_ON];
+		const list = g_settings[`d_${_name}s`] || [C_FLG_OFF, C_FLG_ON];
+		const cssList = g_settings[`d_css_${_name}s`] || [C_FLG_OFF, C_FLG_ON];
+		const lbls = g_settings[`d_view_${_name}s`] || [toCapitalize(_name), toCapitalize(_name)];
 		const linkId = `lnk${_name}`;
 
 		if (g_headerObj[`${_name}Use`]) {
-			const switchDisplay = evt => {
-				const displayFlg = g_stateObj[`d_${_name.toLowerCase()}`];
-				const displayNum = list.findIndex(flg => flg === displayFlg);
-				const nextDisplayFlg = list[(displayNum + 1) % list.length];
-				g_stateObj[`d_${_name.toLowerCase()}`] = nextDisplayFlg;
+			const switchDisplay = (evt, _scrollNum = 1) => {
+				const displayFlg = cssList[g_settings.displayNum[_name]];
+				g_settings.displayNum[_name] = (g_settings.displayNum[_name] + _scrollNum) % list.length;
+
+				const nextDisplayFlg = cssList[g_settings.displayNum[_name]];
+				g_stateObj[`d_${_name.toLowerCase()}`] = list[g_settings.displayNum[_name]];
+				evt.target.innerHTML = getStgDetailName(lbls[g_settings.displayNum[_name]]);
 				evt.target.classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
+
+				createScText(document.getElementById(linkId), `${toCapitalize(_name)}`,
+					{ displayName: g_currentPage, targetLabel: linkId, x: -5 });
 
 				interlockingButton(g_headerObj, _name, nextDisplayFlg, displayFlg, true);
 			}
+
+			g_settings.displayNum[_name] = list.findIndex(flg => flg === g_stateObj[`d_${_name.toLowerCase()}`]);
+			const dispView = [C_FLG_OFF, C_FLG_ON].includes(g_stateObj[`d_${_name.toLowerCase()}`]) ?
+				g_lblNameObj[`d_${toCapitalize(_name)}`] : getStgDetailName(lbls[g_settings.displayNum[_name]]);
 			displaySprite.appendChild(
-				makeSettingLblCssButton(linkId, g_lblNameObj[`d_${toCapitalize(_name)}`], _heightPos, evt => switchDisplay(evt), {
+				makeSettingLblCssButton(linkId, dispView, _heightPos, evt => switchDisplay(evt), {
 					x: 30 + 180 * _widthPos, w: 170,
 					title: g_msgObj[`d_${_name.toLowerCase()}`], borderStyle: `solid`,
-					cxtFunc: evt => switchDisplay(evt),
-				}, `button_${flg}`)
+					cxtFunc: evt => switchDisplay(evt, -1),
+				}, `button_${cssList[g_settings.displayNum[_name]]}`)
 			);
 			createScText(document.getElementById(linkId), `${toCapitalize(_name)}`,
 				{ displayName: g_currentPage, targetLabel: linkId, x: -5 });
@@ -8819,7 +8833,8 @@ const mainInit = _ => {
 	let speedCnts = 0;
 	let boostCnts = 0;
 	let keychCnts = 0;
-	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_settings.scrollFlat.includes(g_stateObj.scroll)) ? C_DIS_NONE : C_DIS_INHERIT;
+	const flatMode = g_stateObj.d_stepzone === `FlatBar` || g_stateObj.scroll.endsWith(`Flat`) || g_keyObj[`flatMode${keyCtrlPtn}`];
+	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
 
 	for (let j = 0; j < keyNum; j++) {
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
@@ -8862,17 +8877,22 @@ const mainInit = _ => {
 
 		);
 	}
-	if (g_settings.scrollFlat.includes(g_stateObj.scroll) && g_stateObj.d_stepzone === C_FLG_ON) {
+	if (flatMode && g_stateObj.d_stepzone !== C_FLG_OFF) {
 
 		// スクロール名に`R-`が含まれていればリバースと見做す
 		const reverseFlg = g_stateObj.reverse === C_FLG_ON || g_stateObj.scroll.startsWith(`R-`);
 
 		// ステップゾーンの代わり
 		const lineY = [(C_ARW_WIDTH - g_stateObj.flatStepHeight) / 2, (C_ARW_WIDTH + g_stateObj.flatStepHeight) / 2];
+		const reverses = [reverseFlg, reverseFlg];
+		if (makeDedupliArray(g_workObj.scrollDir).length > 1) {
+			lineY.push(lineY[0], lineY[1]);
+			reverses.push(!reverses[0], !reverses[1]);
+		}
 		lineY.forEach((y, j) => {
 			mainSprite.appendChild(
 				createColorObject2(`stepBar${j}`, {
-					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(reverseFlg) + y,
+					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(reverses[j]) + y,
 					w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
 				}, g_cssObj.life_Failed)
 			);
@@ -10701,7 +10721,8 @@ const resultInit = _ => {
 	].filter(value => value !== ``).join(`, `);
 
 	let displayData = [
-		withOptions(g_stateObj.d_stepzone, C_FLG_ON, g_lblNameObj.rd_StepZone),
+		withOptions(g_stateObj.d_stepzone, C_FLG_ON, g_lblNameObj.rd_StepZone +
+			`${g_stateObj.d_stepzone === C_FLG_OFF ? `` : ` : ${g_stateObj.d_stepzone}`}`),
 		withOptions(g_stateObj.d_judgment, C_FLG_ON, g_lblNameObj.rd_Judgment),
 		withOptions(g_stateObj.d_fastslow, C_FLG_ON, g_lblNameObj.rd_FastSlow),
 		withOptions(g_stateObj.d_lifegauge, C_FLG_ON, g_lblNameObj.rd_LifeGauge),
@@ -10712,7 +10733,10 @@ const resultInit = _ => {
 	if (displayData === ``) {
 		displayData = `All Visible`;
 	} else {
-		displayData += ` : OFF`;
+		if (!displayData.includes(`,`) && g_stateObj.d_stepzone !== C_FLG_OFF) {
+		} else {
+			displayData += ` : OFF`;
+		}
 	}
 
 	let display2Data = [
