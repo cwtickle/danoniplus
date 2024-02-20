@@ -945,9 +945,13 @@ const g_settings = {
 
     scoreDetailTrans: [[`Velocity`, `Speed`], [`DifLevel`, `ToolDif`]],
 
-    // Display設定の拡張 (d_xx : 設定名、d_css_xx: CSS名)
+    // Display設定の拡張用デザイン
+    d_cssBarExName: `RevON`,
+    d_cssBgName: `Default`,
+    d_cssBgExName: `Setting`,
+
+    // Display設定の拡張リスト
     d_stepZones: [`FlatBar`],
-    d_css_stepZones: [`RevON`],
 
     displayNum: {
         stepZone: 0,

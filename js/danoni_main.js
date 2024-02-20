@@ -6009,8 +6009,10 @@ const createSettingsDisplayWindow = _sprite => {
 
 		if (g_headerObj[`${_name}Use`]) {
 
+			// 設定名、CSS名(2種)、表示名
 			const list = [C_FLG_OFF, C_FLG_ON].concat(g_settings[`d_${_name}s`] || []);
-			const cssList = [C_FLG_OFF, C_FLG_ON].concat(g_settings[`d_css_${_name}s`] || []);
+			const cssBarList = [C_FLG_OFF, C_FLG_ON].concat(Array(g_settings[`d_${_name}s`]?.length).fill(g_settings.d_cssBarExName) || []);
+			const cssBgList = [g_settings.d_cssBgName, g_settings.d_cssBgName].concat(Array(g_settings[`d_${_name}s`]?.length).fill(g_settings.d_cssBgExName) || []);
 			const lbls = [toCapitalize(_name), toCapitalize(_name)].concat(g_settings[`d_${_name}s`] || []);
 
 			const dispView = _ => [C_FLG_OFF, C_FLG_ON].includes(g_stateObj[`d_${_name.toLowerCase()}`]) ?
@@ -6025,16 +6027,20 @@ const createSettingsDisplayWindow = _sprite => {
 			 * @param {boolean} _filterFlg 
 			 */
 			const switchDisplay = (_scrollNum = 1, _filterFlg = true) => {
-				const displayFlg = cssList[g_settings.displayNum[_name]];
-				g_settings.displayNum[_name] = (g_settings.displayNum[_name] + _scrollNum) % (_filterFlg ? 2 : list.length);
+				const prevDisp = g_settings.displayNum[_name];
+				const [prevBarColor, prevBgColor] = [cssBarList[prevDisp], cssBgList[prevDisp]];
 
-				const nextDisplayFlg = cssList[g_settings.displayNum[_name]];
+				g_settings.displayNum[_name] = (prevDisp + _scrollNum) % (_filterFlg ? 2 : list.length);
+				const nextDisp = g_settings.displayNum[_name];
+				const [nextBarColor, nextBgColor] = [cssBarList[nextDisp], cssBgList[nextDisp]];
+
 				g_stateObj[`d_${_name.toLowerCase()}`] = list[g_settings.displayNum[_name]];
 				document.getElementById(linkId).innerHTML = dispView();
-				document.getElementById(linkId).classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
+				document.getElementById(linkId).classList.replace(g_cssObj[`button_${prevBarColor}`], g_cssObj[`button_${nextBarColor}`]);
+				document.getElementById(linkId).classList.replace(g_cssObj[`button_${prevBgColor}`], g_cssObj[`button_${nextBgColor}`]);
 
 				withShortCutDesc();
-				interlockingButton(g_headerObj, _name, nextDisplayFlg, displayFlg, true);
+				interlockingButton(g_headerObj, _name, nextBarColor, prevBarColor, true);
 			};
 
 			// Displayボタン初期化
@@ -6044,7 +6050,7 @@ const createSettingsDisplayWindow = _sprite => {
 					x: 30 + 180 * _widthPos, w: 170,
 					title: g_msgObj[`d_${_name.toLowerCase()}`], borderStyle: `solid`,
 					cxtFunc: _ => switchDisplay(-1),
-				}, `button_${cssList[g_settings.displayNum[_name]]}`)
+				}, `button_${cssBgList[g_settings.displayNum[_name]]}`, `button_${cssBarList[g_settings.displayNum[_name]]}`)
 			);
 			withShortCutDesc();
 
