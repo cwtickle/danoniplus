@@ -6057,7 +6057,7 @@ const createSettingsDisplayWindow = _sprite => {
 			// Display切替ボタン（ON/OFF以外用）
 			if (g_settings[`d_${_name}s`] !== undefined) {
 				displaySprite.appendChild(
-					makeSettingLblCssButton(linkId, `>`, _heightPos, _ => switchDisplay(1, false), {
+					makeSettingLblCssButton(`${linkId}R`, `>`, _heightPos, _ => switchDisplay(1, false), {
 						x: 175 + 180 * _widthPos, w: 25,
 					}, g_cssObj.button_Mini)
 				);
