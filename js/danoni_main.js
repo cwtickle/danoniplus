@@ -6005,39 +6005,57 @@ const createSettingsDisplayWindow = _sprite => {
 	const makeDisplayButton = (_name, _heightPos, _widthPos) => {
 
 		const flg = g_stateObj[`d_${_name.toLowerCase()}`];
-		const list = g_settings[`d_${_name}s`] || [C_FLG_OFF, C_FLG_ON];
-		const cssList = g_settings[`d_css_${_name}s`] || [C_FLG_OFF, C_FLG_ON];
-		const lbls = g_settings[`d_view_${_name}s`] || [toCapitalize(_name), toCapitalize(_name)];
 		const linkId = `lnk${_name}`;
 
 		if (g_headerObj[`${_name}Use`]) {
-			const switchDisplay = (evt, _scrollNum = 1) => {
+
+			const list = [C_FLG_OFF, C_FLG_ON].concat(g_settings[`d_${_name}s`] || []);
+			const cssList = [C_FLG_OFF, C_FLG_ON].concat(g_settings[`d_css_${_name}s`] || []);
+			const lbls = [toCapitalize(_name), toCapitalize(_name)].concat(g_settings[`d_${_name}s`] || []);
+
+			const dispView = _ => [C_FLG_OFF, C_FLG_ON].includes(g_stateObj[`d_${_name.toLowerCase()}`]) ?
+				g_lblNameObj[`d_${toCapitalize(_name)}`] : getStgDetailName(lbls[g_settings.displayNum[_name]]);
+
+			const withShortCutDesc = _ => createScText(document.getElementById(linkId), `${toCapitalize(_name)}`,
+				{ displayName: g_currentPage, targetLabel: linkId, x: -5 });
+
+			/**
+			 * Displayボタン処理
+			 * @param {number} _scrollNum 
+			 * @param {boolean} _filterFlg 
+			 */
+			const switchDisplay = (_scrollNum = 1, _filterFlg = true) => {
 				const displayFlg = cssList[g_settings.displayNum[_name]];
-				g_settings.displayNum[_name] = (g_settings.displayNum[_name] + _scrollNum) % list.length;
+				g_settings.displayNum[_name] = (g_settings.displayNum[_name] + _scrollNum) % (_filterFlg ? 2 : list.length);
 
 				const nextDisplayFlg = cssList[g_settings.displayNum[_name]];
 				g_stateObj[`d_${_name.toLowerCase()}`] = list[g_settings.displayNum[_name]];
-				evt.target.innerHTML = getStgDetailName(lbls[g_settings.displayNum[_name]]);
-				evt.target.classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
+				document.getElementById(linkId).innerHTML = dispView();
+				document.getElementById(linkId).classList.replace(g_cssObj[`button_${displayFlg}`], g_cssObj[`button_${nextDisplayFlg}`]);
 
-				createScText(document.getElementById(linkId), `${toCapitalize(_name)}`,
-					{ displayName: g_currentPage, targetLabel: linkId, x: -5 });
-
+				withShortCutDesc();
 				interlockingButton(g_headerObj, _name, nextDisplayFlg, displayFlg, true);
-			}
+			};
 
+			// Displayボタン初期化
 			g_settings.displayNum[_name] = list.findIndex(flg => flg === g_stateObj[`d_${_name.toLowerCase()}`]);
-			const dispView = [C_FLG_OFF, C_FLG_ON].includes(g_stateObj[`d_${_name.toLowerCase()}`]) ?
-				g_lblNameObj[`d_${toCapitalize(_name)}`] : getStgDetailName(lbls[g_settings.displayNum[_name]]);
 			displaySprite.appendChild(
-				makeSettingLblCssButton(linkId, dispView, _heightPos, evt => switchDisplay(evt), {
+				makeSettingLblCssButton(linkId, dispView(), _heightPos, _ => switchDisplay(), {
 					x: 30 + 180 * _widthPos, w: 170,
 					title: g_msgObj[`d_${_name.toLowerCase()}`], borderStyle: `solid`,
-					cxtFunc: evt => switchDisplay(evt, -1),
+					cxtFunc: _ => switchDisplay(-1),
 				}, `button_${cssList[g_settings.displayNum[_name]]}`)
 			);
-			createScText(document.getElementById(linkId), `${toCapitalize(_name)}`,
-				{ displayName: g_currentPage, targetLabel: linkId, x: -5 });
+			withShortCutDesc();
+
+			// Display切替ボタン（ON/OFF以外用）
+			if (g_settings[`d_${_name}s`] !== undefined) {
+				displaySprite.appendChild(
+					makeSettingLblCssButton(linkId, `>`, _heightPos, _ => switchDisplay(1, false), {
+						x: 175 + 180 * _widthPos, w: 25,
+					}, g_cssObj.button_Mini)
+				);
+			}
 		} else {
 			displaySprite.appendChild(
 				createDivCss2Label(linkId, g_lblNameObj[`d_${toCapitalize(_name)}`] + `:${g_headerObj[`${_name}Set`]}`, {

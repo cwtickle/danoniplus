@@ -945,10 +945,10 @@ const g_settings = {
 
     scoreDetailTrans: [[`Velocity`, `Speed`], [`DifLevel`, `ToolDif`]],
 
-    // 設定名、CSS定義名、設定画面上の名前が異なるため3種類定義
-    d_stepZones: [C_FLG_OFF, `FlatBar`, C_FLG_ON],
-    d_css_stepZones: [C_FLG_OFF, `RevON`, C_FLG_ON],
-    d_view_stepZones: [`StepZone`, `FlatBar`, `StepZone`],
+    // Display設定の拡張 (d_xx : 設定名、d_css_xx: CSS名)
+    d_stepZones: [`FlatBar`],
+    d_css_stepZones: [`RevON`],
+
     displayNum: {
         stepZone: 0,
         judgment: 0,
@@ -1743,7 +1743,6 @@ const g_cssObj = {
     button_ON: `button_ON`,
     button_RevOFF: `button_RevOFF`,
     button_RevON: `button_RevON`,
-    button_FlatBar: `button_FlatBar`,
 
     button_DisabledOFF: `button_DisabledOFF`,
     button_DisabledON: `button_DisabledON`,
@@ -2821,7 +2820,7 @@ const g_lblNameObj = {
     d_Score: `Score`,
     d_MusicInfo: `MusicInfo`,
     d_FilterLine: `FilterLine`,
-    d_Speed: `Speed`,
+    d_Speed: `Velocity`,
     d_Color: `Color`,
     d_Lyrics: `Lyrics`,
     d_Background: `Background`,
