@@ -906,7 +906,6 @@ const g_settings = {
 
     scrolls: [],
     scrollNum: 0,
-    scrollFlat: [`Flat`, `R-Flat`],
 
     shuffles: [C_FLG_OFF, `Mirror`, `X-Mirror`, `Turning`, `Random`, `Random+`, `S-Random`, `S-Random+`],
     shuffleNum: 0,
