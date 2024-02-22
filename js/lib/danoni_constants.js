@@ -1846,7 +1846,7 @@ const g_keyObj = {
     ptchara4A: [`left`, `down`, `up`, `right`],
     ptchara3S: [`left`, `leftdia`, `down`],
     ptchara3J: [`up`, `rightdia`, `right`],
-    ptchara7S: [`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
+    ptchara7: [`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
 
     // ColorGroup - 1
     //  - 同じ数字が同じグループになる
