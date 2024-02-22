@@ -3766,6 +3766,24 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	}
 
 	/**
+	 * キーパターンの略名から実際のデータへ展開
+	 * @param {string} _str 
+	 * @param {string} _name 
+	 * @param {function} _convFunc
+	 */
+	const expandKeyPtn = (_str, _name, _convFunc) => {
+		const pos = _str.indexOf(`>`);
+		const expandData = _ptnstr => structuredClone(g_keyObj[`${_name}${getKeyPtnName(_ptnstr)}`]) ?? [_convFunc(_ptnstr)];
+
+		if (pos > 0 && _name === `chara`) {
+			const [header, ptn] = [_str.substring(0, pos), _str.substring(pos + 1)];
+			return expandData(ptn)?.map(n => `${header}${n}`);
+		} else {
+			return expandData(_str);
+		}
+	};
+
+	/**
 	 * 新キー用複合パラメータ
 	 * @param {string} _key キー数
 	 * @param {string} _name 名前
@@ -3788,9 +3806,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 				// |keyCtrl9j=Tab,7_0,Enter| -> |keyCtrl9j=Tab,S,D,F,Space,J,K,L,Enter| のように補完
 				// |pos9j=0..4,6..9| -> |pos9j=0,1,2,3,4,6,7,8,9|
 				g_keyObj[`${keyheader}_${k + dfPtn}`] =
-					toOriginalArray(tmpArray[k], toSameValStr).map(n =>
-						structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ?? [_convFunc(n)]
-					).flat();
+					toOriginalArray(tmpArray[k], toSameValStr).map(n => expandKeyPtn(n, _name, _convFunc)).flat();
 				if (baseCopyFlg) {
 					g_keyObj[`${keyheader}_${k + dfPtn}d`] = structuredClone(g_keyObj[`${keyheader}_${k + dfPtn}`]);
 				}
@@ -3840,8 +3856,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 						// 部分的にキーパターン指定があった場合は既存パターンを展開 (例: |shuffle9j=2,7_0_0,2|)
 						g_keyObj[`${keyheader}_${k + dfPtn}_${ptnCnt}`] =
 							makeBaseArray(toOriginalArray(list, toSameValStr).map(n =>
-								structuredClone(g_keyObj[`${_name}${getKeyPtnName(n)}`]) ??
-								[isNaN(parseInt(n)) ? n : parseInt(n, 10)]
+								expandKeyPtn(n, _name, _str => isNaN(parseInt(_str)) ? _str : parseInt(_str, 10))
 							).flat(), g_keyObj[`${g_keyObj.defaultProp}${_key}_${k + dfPtn}`].length, 0);
 						ptnCnt++;
 					}
