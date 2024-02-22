@@ -1843,11 +1843,10 @@ const g_keyObj = {
     chara8_2: [`sleft`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
 
     // 頻度の高い譜面データ名パターン
-    // 後で chara4A, chara4A_a, chara4A_b, ... に変換する
     ptchara4A: [`left`, `down`, `up`, `right`],
     ptchara3S: [`left`, `leftdia`, `down`],
     ptchara3J: [`up`, `rightdia`, `right`],
-    ptchara7: [`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
+    ptchara7S: [`left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
 
     // ColorGroup - 1
     //  - 同じ数字が同じグループになる
