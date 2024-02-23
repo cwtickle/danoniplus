@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/02/23 (v35.4.0)
+ * Revised : 2024/02/23 (v35.4.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1604,6 +1604,33 @@ const g_shortcutObj = {
         Semicolon: { id: `lnkbackground` },
         Minus: { id: `lnkarrowEffect` },
         Slash: { id: `lnkspecial` },
+
+        ShiftLeft_Numpad1: { id: `lnkstepZoneR` },
+        ShiftRight_Numpad1: { id: `lnkstepZoneR` },
+        ShiftLeft_Numpad2: { id: `lnkjudgmentR` },
+        ShiftRight_Numpad2: { id: `lnkjudgmentR` },
+        ShiftLeft_Numpad3: { id: `lnkfastSlowR` },
+        ShiftRight_Numpad3: { id: `lnkfastSlowR` },
+        ShiftLeft_Numpad4: { id: `lnklifeGaugeR` },
+        ShiftRight_Numpad4: { id: `lnklifeGaugeR` },
+        ShiftLeft_Numpad5: { id: `lnkscoreR` },
+        ShiftRight_Numpad5: { id: `lnkscoreR` },
+        ShiftLeft_Numpad6: { id: `lnkmusicInfoR` },
+        ShiftRight_Numpad6: { id: `lnkmusicInfoR` },
+        ShiftLeft_Numpad7: { id: `lnkfilterLineR` },
+        ShiftRight_Numpad7: { id: `lnkfilterLineR` },
+        ShiftLeft_Numpad8: { id: `lnkspeedR` },
+        ShiftRight_Numpad8: { id: `lnkspeedR` },
+        ShiftLeft_Numpad9: { id: `lnkcolorR` },
+        ShiftRight_Numpad9: { id: `lnkcolorR` },
+        ShiftLeft_Numpad0: { id: `lnklyricsR` },
+        ShiftRight_Numpad0: { id: `lnklyricsR` },
+        ShiftLeft_NumpadAdd: { id: `lnkbackgroundR` },
+        ShiftRight_NumpadAdd: { id: `lnkbackgroundR` },
+        ShiftLeft_NumpadSubtract: { id: `lnkarrowEffectR` },
+        ShiftRight_NumpadSubtract: { id: `lnkarrowEffectR` },
+        ShiftLeft_NumpadDivide: { id: `lnkspecialR` },
+        ShiftRight_NumpadDivide: { id: `lnkspecialR` },
 
         Numpad1: { id: `lnkstepZone` },
         Numpad2: { id: `lnkjudgment` },
