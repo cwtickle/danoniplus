@@ -3363,7 +3363,8 @@ const getMusicNameMultiLine = _musicName => {
  */
 const updateImgType = (_imgType, _initFlg = false) => {
 	if (_initFlg) {
-		C_IMG_TITLE_ARROW = `../img/${_imgType.name}/arrow.${_imgType.extension}`;
+		const baseDir = (_imgType.name === `` ? `` : `${_imgType.name}/`);
+		C_IMG_TITLE_ARROW = `../img/${baseDir}arrow.${_imgType.extension}`;
 	}
 	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
