@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/01/27
+ * Revised : 2024/02/29
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 34.7.1`;
-const g_revisedDate = `2024/01/27`;
+const g_version = `Ver 34.7.2`;
+const g_revisedDate = `2024/02/29`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3356,7 +3356,8 @@ const getMusicNameMultiLine = _musicName => {
  */
 const updateImgType = (_imgType, _initFlg = false) => {
 	if (_initFlg) {
-		C_IMG_TITLE_ARROW = `../img/${_imgType.name}/arrow.${_imgType.extension}`;
+		const baseDir = (_imgType.name === `` ? `` : `${_imgType.name}/`);
+		C_IMG_TITLE_ARROW = `../img/${baseDir}arrow.${_imgType.extension}`;
 	}
 	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
