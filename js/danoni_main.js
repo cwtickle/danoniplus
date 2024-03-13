@@ -9549,7 +9549,7 @@ const mainInit = _ => {
 
 		frzOFF: (_j, _k, _cnt) => {
 
-			if (g_workObj.judgFrzCnt[_j] === _k - 1) {
+			if (g_workObj.judgFrzCnt[_j] === _k - 1 && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 				const prevFrz = g_attrObj[prevFrzName];
 
@@ -10311,9 +10311,16 @@ const judgeArrow = _j => {
 	const currentArrow = g_attrObj[arrowName];
 	const existJudgArrow = document.getElementById(arrowName) !== null;
 
-	const fcurrentNo = g_workObj.judgFrzCnt[_j];
-	const frzName = `frz${_j}_${fcurrentNo}`;
-	const currentFrz = g_attrObj[frzName];
+	let fcurrentNo = g_workObj.judgFrzCnt[_j];
+	let frzName = `frz${_j}_${fcurrentNo}`;
+	let currentFrz = g_attrObj[frzName];
+
+	if (currentFrz?.judgEndFlg) {
+		fcurrentNo = g_workObj.judgFrzCnt[_j] + 1;
+		frzName = `frz${_j}_${fcurrentNo}`;
+		currentFrz = g_attrObj[frzName];
+	}
+
 	const existJudgFrz = document.getElementById(frzName) !== null;
 
 	const judgeTargetArrow = _difFrame => {
