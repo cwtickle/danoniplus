@@ -9553,10 +9553,10 @@ const mainInit = _ => {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 				const prevFrz = g_attrObj[prevFrzName];
 
-				if (prevFrz.isMoving && !prevFrz.judgEndFlg && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
+				if (prevFrz.isMoving && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 
 					// 自身より前のフリーズアローが未判定の場合、強制的に枠外判定を行いフリーズアローを削除
-					if (prevFrz.cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
+					if (prevFrz.cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai] && !prevFrz.judgEndFlg) {
 						judgeIknai(prevFrz.cnt);
 						if (g_headerObj.frzStartjdgUse) {
 							judgeUwan(prevFrz.cnt);
@@ -10311,16 +10311,9 @@ const judgeArrow = _j => {
 	const currentArrow = g_attrObj[arrowName];
 	const existJudgArrow = document.getElementById(arrowName) !== null;
 
-	let fcurrentNo = g_workObj.judgFrzCnt[_j];
-	let frzName = `frz${_j}_${fcurrentNo}`;
-	let currentFrz = g_attrObj[frzName];
-
-	if (currentFrz?.judgEndFlg) {
-		fcurrentNo = g_workObj.judgFrzCnt[_j] + 1;
-		frzName = `frz${_j}_${fcurrentNo}`;
-		currentFrz = g_attrObj[frzName];
-	}
-
+	const fcurrentNo = g_workObj.judgFrzCnt[_j];
+	const frzName = `frz${_j}_${fcurrentNo}`;
+	const currentFrz = g_attrObj[frzName];
 	const existJudgFrz = document.getElementById(frzName) !== null;
 
 	const judgeTargetArrow = _difFrame => {
