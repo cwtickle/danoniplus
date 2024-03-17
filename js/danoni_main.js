@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2023/11/05
+ * Revised : 2024/03/17
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.4.10`;
-const g_revisedDate = `2023/11/05`;
+const g_version = `Ver 29.4.11`;
+const g_revisedDate = `2024/03/17`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -8859,19 +8859,22 @@ const mainInit = _ => {
 
 		frzOFF: (_j, _k, _cnt) => {
 
-			if (g_workObj.judgFrzCnt[_j] === _k - 1) {
+			// 判定対象が自身より前のフリーズアローで、自身の判定範囲がキター(O.K.)の範囲内のとき
+			if (g_workObj.judgFrzCnt[_j] === _k - 1 && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 				const prevFrz = g_attrObj[prevFrzName];
 
-				if (prevFrz.isMoving && !prevFrz.judgEndFlg && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
+				// 自身より前のフリーズアローが移動中かつキター(O.K.)の領域外のとき
+				if (prevFrz.isMoving && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 
-					// 自身より前のフリーズアローが未判定の場合、強制的に枠外判定を行いフリーズアローを削除
-					if (prevFrz.cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
+					// 自身より前のフリーズアローが未判定の場合、強制的に枠外判定を行う
+					if (prevFrz.cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai] && !prevFrz.judgEndFlg) {
 						judgeIknai(prevFrz.cnt);
 						if (g_headerObj.frzStartjdgUse) {
 							judgeUwan(prevFrz.cnt);
 						}
 					}
+					// 自身より前のフリーズアローを削除して判定対象を自身に変更 (g_workObj.judgFrzCnt[_j]をカウントアップ)
 					judgeObjDelete.frz(_j, prevFrzName);
 				}
 			}
