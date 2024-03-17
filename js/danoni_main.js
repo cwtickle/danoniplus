@@ -9549,19 +9549,22 @@ const mainInit = _ => {
 
 		frzOFF: (_j, _k, _cnt) => {
 
+			// 判定対象が自身より前のフリーズアローで、自身の判定範囲がキター(O.K.)の範囲内のとき
 			if (g_workObj.judgFrzCnt[_j] === _k - 1 && _cnt <= g_judgObj.frzJ[g_judgPosObj.sfsf]) {
 				const prevFrzName = `frz${_j}_${g_workObj.judgFrzCnt[_j]}`;
 				const prevFrz = g_attrObj[prevFrzName];
 
+				// 自身より前のフリーズアローが移動中かつキター(O.K.)の領域外のとき
 				if (prevFrz.isMoving && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 
-					// 自身より前のフリーズアローが未判定の場合、強制的に枠外判定を行いフリーズアローを削除
+					// 自身より前のフリーズアローが未判定の場合、強制的に枠外判定を行う
 					if (prevFrz.cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai] && !prevFrz.judgEndFlg) {
 						judgeIknai(prevFrz.cnt);
 						if (g_headerObj.frzStartjdgUse) {
 							judgeUwan(prevFrz.cnt);
 						}
 					}
+					// 自身より前のフリーズアローを削除して判定対象を自身に変更 (g_workObj.judgFrzCnt[_j]をカウントアップ)
 					judgeObjDelete.frz(_j, prevFrzName);
 				}
 			}
