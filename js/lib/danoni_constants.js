@@ -2493,7 +2493,7 @@ g_keycons.groups.forEach(type => {
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
     simple: [`div`, `divMax`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
-    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroup`],
+    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroup`, `keyGroupOrder`],
 };
 
 // タイトル画面関連のリスト群
