@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/02/23 (v35.4.1)
+ * Revised : 2024/03/27 (v35.4.4)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2493,7 +2493,7 @@ g_keycons.groups.forEach(type => {
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
     simple: [`div`, `divMax`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
-    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroup`],
+    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroup`, `keyGroupOrder`],
 };
 
 // タイトル画面関連のリスト群
