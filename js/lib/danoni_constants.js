@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/03/27 (v35.4.4)
+ * Revised : 2024/03/28 (v35.4.5)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2492,7 +2492,7 @@ g_keycons.groups.forEach(type => {
 // 特殊キーのコピー種 (simple: 代入、multiple: 配列ごと代入)
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
-    simple: [`div`, `divMax`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`],
+    simple: [`div`, `divMax`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`, `flatMode`],
     multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroup`, `keyGroupOrder`],
 };
 
