@@ -1262,7 +1262,8 @@ const deleteDiv = (_parentId, _idName) => {
  * @param {object} _obj (x, y, w, h, siz, align, title, groupName, initDisabledFlg, ...rest)
  * @param {...any} _classes 
  */
-const createCss2Button = (_id, _text, _func = _ => true, { x = 0, y = g_sHeight - 100, w = g_sWidth / 3, h = g_limitObj.btnHeight,
+const createCss2Button = (_id, _text, _func = _ => true, {
+	x = 0, y = g_sHeight - 100, w = g_btnWidth() / 3, h = g_limitObj.btnHeight,
 	siz = g_limitObj.btnSiz, align = C_ALIGN_CENTER, title = ``, groupName = g_currentPage, initDisabledFlg = true,
 	resetFunc = _ => true, cxtFunc = _ => true, ...rest } = {}, ..._classes) => {
 
@@ -6450,7 +6451,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @returns ラベル
 	 */
 	const makeKCButtonHeader = (_id, _name, {
-		x = g_sWidth * 5 / 6 - 30, y = 0, w = g_sWidth / 6, h = 20, siz = 12, align = C_ALIGN_LEFT, ...rest
+		x = g_btnX(5 / 6) - 30, y = 0, w = g_btnWidth(1 / 6), h = 20, siz = 12, align = C_ALIGN_LEFT, ...rest
 	} = {}, ..._classes) => createDivCss2Label(_id, g_lblNameObj[_name], { x, y, w, h, siz, align, ...rest }, ..._classes);
 
 	/**
@@ -6463,7 +6464,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param  {...any} _classes 
 	 * @returns ボタン
 	 */
-	const makeKCButton = (_id, _text, _func, { x = g_sWidth * 5 / 6 - 20, y = 15, w = g_sWidth / 6, h = 18,
+	const makeKCButton = (_id, _text, _func, { x = g_btnX(5 / 6) - 20, y = 15, w = g_btnWidth(1 / 6), h = 18,
 		siz = g_limitObj.jdgCntsSiz, borderStyle = `solid`, cxtFunc, ...rest } = {}, _mainClass = g_cssObj.button_RevOFF, ..._classes) =>
 		makeSettingLblCssButton(_id, getStgDetailName(_text), 0, _func, { x, y, w, h, siz, cxtFunc, borderStyle, ...rest }, _mainClass, ..._classes);
 
@@ -6474,7 +6475,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {function} _func 
 	 * @param {*} object (x, y, w, h, siz) 
 	 */
-	const makeMiniKCButton = (_id, _directionFlg, _func, { x = g_sWidth * 5 / 6 - 30, y = 15, w = 15, h = 20, siz = g_limitObj.mainSiz } = {}) =>
+	const makeMiniKCButton = (_id, _directionFlg, _func, { x = g_btnX(5 / 6) - 30, y = 15, w = 15, h = 20, siz = g_limitObj.mainSiz } = {}) =>
 		createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func, { x, y, w, h, siz }, g_cssObj.button_Mini);
 
 	/**
@@ -6482,16 +6483,16 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {string} _type 
 	 * @param {object} obj (baseX) 
 	 */
-	const makeGroupButton = (_type, { baseX = g_sWidth * 5 / 6 - 20, baseY = 0, cssName } = {}) => {
+	const makeGroupButton = (_type, { baseX = g_btnX(5 / 6) - 20, baseY = 0, cssName } = {}) => {
 		if (g_headerObj[`${_type}Use`] && g_keycons[`${_type}Groups`].length > 1) {
 			const typeName = toCapitalize(_type);
 			multiAppend(divRoot,
 				makeKCButtonHeader(`lbl${_type}Group`, `${typeName}Group`, { x: baseX - 10, y: baseY }, cssName),
 				makeKCButton(`lnk${typeName}Group`, ``, _ => setGroup(_type), {
-					x: baseX, y: baseY + 13, w: g_sWidth / 18, title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
+					x: baseX, y: baseY + 13, w: g_btnWidth(1 / 18), title: g_msgObj[`${_type}Group`], cxtFunc: _ => setGroup(_type, -1),
 				}),
 				makeMiniKCButton(`lnk${typeName}Group`, `L`, _ => setGroup(_type, -1), { x: baseX - 10, y: baseY + 13 }),
-				makeMiniKCButton(`lnk${typeName}Group`, `R`, _ => setGroup(_type), { x: baseX + g_sWidth / 18, y: baseY + 13 }),
+				makeMiniKCButton(`lnk${typeName}Group`, `R`, _ => setGroup(_type), { x: baseX + g_btnWidth(1 / 18), y: baseY + 13 }),
 			);
 		} else {
 			g_keycons[`${_type}GroupNum`] = 0;
@@ -6514,16 +6515,16 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		),
 
 		// キーカラータイプ切替ボタン
-		makeKCButtonHeader(`lblcolorType`, `ColorType`, { x: 10 }, g_cssObj.keyconfig_ColorType),
+		makeKCButtonHeader(`lblcolorType`, `ColorType`, { x: 10 + g_btnX() }, g_cssObj.keyconfig_ColorType),
 		makeKCButton(`lnkColorType`, g_colorType, _ => setColorType(), {
-			x: 20, title: g_msgObj.colorType, cxtFunc: _ => setColorType(-1),
+			x: 20 + g_btnX(), title: g_msgObj.colorType, cxtFunc: _ => setColorType(-1),
 		}),
-		makeMiniKCButton(`lnkColorType`, `L`, _ => setColorType(-1), { x: 10 }),
-		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: 20 + g_sWidth / 6 }),
+		makeMiniKCButton(`lnkColorType`, `L`, _ => setColorType(-1), { x: 10 + g_btnX() }),
+		makeMiniKCButton(`lnkColorType`, `R`, _ => setColorType(), { x: 20 + g_btnX(1 / 6) }),
 	);
 
 	if (g_headerObj.imgType.length > 1) {
-		const [imgBaseX, imgBaseY] = [20, 50];
+		const [imgBaseX, imgBaseY] = [20 + g_btnX(), 50];
 		multiAppend(divRoot,
 			// オブジェクトタイプの切り替え（リロードあり）
 			makeKCButtonHeader(`lblImgType`, `ImgType`, { x: 10, y: 37 }, g_cssObj.keyconfig_ConfigType),
@@ -6531,13 +6532,13 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				x: imgBaseX, y: imgBaseY, title: g_msgObj.imgType, cxtFunc: _ => setImgType(-1),
 			}),
 			makeMiniKCButton(`lnkImgType`, `L`, _ => setImgType(-1), { x: imgBaseX - 10, y: imgBaseY }),
-			makeMiniKCButton(`lnkImgType`, `R`, _ => setImgType(), { x: imgBaseX + g_sWidth / 6, y: imgBaseY }),
+			makeMiniKCButton(`lnkImgType`, `R`, _ => setImgType(), { x: imgBaseX + g_btnWidth(1 / 6), y: imgBaseY }),
 		);
 	}
 
 	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
 	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorType });
-	makeGroupButton(`shuffle`, { baseX: g_sWidth * 11 / 12 - 10, cssName: g_cssObj.settings_Shuffle });
+	makeGroupButton(`shuffle`, { baseX: g_btnX(11 / 12) - 10, cssName: g_cssObj.settings_Shuffle });
 	makeGroupButton(`stepRtn`, { baseY: 37, cssName: g_cssObj.settings_Adjustment });
 
 	/**
