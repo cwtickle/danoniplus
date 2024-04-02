@@ -4238,7 +4238,7 @@ const titleInit = _ => {
 
 		// Click Here
 		createCss2Button(`btnStart`, g_lblNameObj.clickHere, _ => clearTimeout(g_timeoutEvtTitleId), {
-			w: g_sWidth, siz: g_limitObj.titleSiz, resetFunc: _ => optionInit(),
+			x: g_btnX(), w: g_btnWidth(), siz: g_limitObj.titleSiz, resetFunc: _ => optionInit(),
 		}, g_cssObj.button_Start),
 
 		// Reset
@@ -4385,8 +4385,8 @@ const makeWarningWindow = (_text = ``, { resetFlg = false, backBtnUse = false } 
  * お知らせウィンドウ（汎用）を表示
  * @param {string} _text 
  */
-const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff`, _x = 0, _y = 0 } = {}) => {
-	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, `#000066`, C_ALIGN_CENTER, { _x, _y });
+const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff` } = {}) => {
+	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, `#000066`, C_ALIGN_CENTER);
 	lblWarning.style.pointerEvents = C_DIS_NONE;
 
 	if (_animationName !== ``) {
@@ -4405,13 +4405,13 @@ const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff`, _x
  * @param {string} _textColor 
  * @param {string} _align
  */
-const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x = 0, _y = 0 } = {}) => {
+const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x = g_btnX(), _y = 0, _w = g_btnWidth() } = {}) => {
 
 	deleteDiv(divRoot, `lblWarning`);
 
 	// ウィンドウ枠の行を取得するために一時的な枠を作成
 	const tmplbl = createDivCss2Label(`lblTmpWarning`, _text, {
-		x: 0, y: 70, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz, lineHeight: wUnit(15), fontFamily: getBasicFont(),
+		x: _x, y: 70, w: _w, h: 20, siz: g_limitObj.mainSiz, lineHeight: wUnit(15), fontFamily: getBasicFont(),
 		whiteSpace: `normal`,
 	});
 	divRoot.appendChild(tmplbl);
@@ -4422,7 +4422,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 	const warnHeight = Math.min(150, Math.max(range.getClientRects().length,
 		_text.split(`<br>`).length + _text.split(`<p>`).length - 1) * 21);
 	const lbl = createDivCss2Label(`lblWarning`, _text, {
-		x: _x, y: 70 + _y, w: g_sWidth, h: warnHeight, siz: g_limitObj.mainSiz, backgroundColor: _bkColor,
+		x: _x, y: 70 + _y, w: _w, h: warnHeight, siz: g_limitObj.mainSiz, backgroundColor: _bkColor,
 		opacity: 0.9, lineHeight: wUnit(15), color: _textColor, align: _align, fontFamily: getBasicFont(),
 		whiteSpace: `normal`,
 	});

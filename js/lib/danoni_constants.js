@@ -114,7 +114,7 @@ const g_limitObj = {
     musicTitleSiz: 13,
     keySetSiz: 15,
 
-    btnBaseWidth: 750,
+    btnBaseWidth: 900,
 };
 
 /** 設定項目の位置 */
@@ -206,36 +206,36 @@ const updateWindowSiz = _ => {
 
         /** タイトル画面 */
         btnReset: {
-            x: 0, y: g_sHeight - 20, w: g_sWidth / 4, h: 16, siz: 12, title: g_msgObj.dataReset,
+            x: g_btnX(), y: g_sHeight - 20, w: g_btnWidth(1 / 4), h: 16, siz: 12, title: g_msgObj.dataReset,
         },
         btnReload: {
-            x: 10, y: 10, w: 30, h: 30, siz: 20, title: g_msgObj.reload,
+            x: 10 + g_btnX(), y: 10, w: 30, h: 30, siz: 20, title: g_msgObj.reload,
         },
         btnHelp: {
-            x: 0, y: g_sHeight - 150, w: 40, h: 40, siz: 30, title: g_msgObj.howto,
+            x: g_btnX(), y: g_sHeight - 150, w: 40, h: 40, siz: 30, title: g_msgObj.howto,
         },
         lnkMaker: {
-            x: 0, y: g_sHeight - 50, w: g_sWidth / 2, h: g_limitObj.lnkHeight,
+            x: g_btnX(), y: g_sHeight - 50, w: g_btnWidth(1 / 2), h: g_limitObj.lnkHeight,
             align: C_ALIGN_LEFT, title: g_headerObj.creatorUrl,
         },
         lnkArtist: {
-            x: g_sWidth / 2, y: g_sHeight - 50, w: g_sWidth / 2, h: g_limitObj.lnkHeight,
+            x: g_btnX(1 / 2), y: g_sHeight - 50, w: g_btnWidth(1 / 2), h: g_limitObj.lnkHeight,
             align: C_ALIGN_LEFT, title: g_headerObj.artistUrl,
         },
         lnkVersion: {
-            x: g_sWidth / 4, y: g_sHeight - 20, w: g_sWidth * 3 / 4 - 20, h: 16,
+            x: g_btnX(1 / 4), y: g_sHeight - 20, w: g_btnWidth(3 / 4) - 20, h: 16,
             align: C_ALIGN_RIGHT, title: g_msgObj.github,
         },
         lnkComparison: {
-            x: g_sWidth - 20, y: g_sHeight - 20, w: 20, h: 16, siz: 12, title: g_msgObj.security,
+            x: g_btnX(1) - 20, y: g_sHeight - 20, w: 20, h: 16, siz: 12, title: g_msgObj.security,
         },
         lblComment: {
-            x: 0, y: 70, w: g_sWidth, h: g_sHeight - 180, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+            x: g_btnX(), y: 70, w: g_btnWidth(), h: g_sHeight - 180, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
             overflow: `auto`, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
             whiteSpace: `normal`,
         },
         btnComment: {
-            x: g_sWidth - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
+            x: g_btnX(1) - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
         },
 
         /** 設定画面 */
