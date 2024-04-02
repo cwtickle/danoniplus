@@ -442,10 +442,10 @@ const updateWindowSiz = _ => {
             x: g_btnX(3 / 4), w: g_btnWidth(1 / 4), h: g_limitObj.btnHeight * 5 / 4, animationName: `smallToNormalY`,
         },
         btnRsCopyImage: {
-            x: g_sWidth - 40, y: 0, w: 40, h: 40, siz: 30,
+            x: g_btnX(1) - 40, y: 0, w: 40, h: 40, siz: 30,
         },
         btnRsCopyClose: {
-            x: g_sWidth - 80, y: 0, w: 80, h: 40, siz: 20,
+            x: g_btnX(1) - 80, y: 0, w: 80, h: 40, siz: 20,
         },
         resultImageDesc: {
             x: 0, y: g_sHeight - 30, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz,

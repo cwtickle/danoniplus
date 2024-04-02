@@ -6527,7 +6527,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		const [imgBaseX, imgBaseY] = [20 + g_btnX(), 50];
 		multiAppend(divRoot,
 			// オブジェクトタイプの切り替え（リロードあり）
-			makeKCButtonHeader(`lblImgType`, `ImgType`, { x: 10, y: 37 }, g_cssObj.keyconfig_ConfigType),
+			makeKCButtonHeader(`lblImgType`, `ImgType`, { x: imgBaseX - 10, y: 37 }, g_cssObj.keyconfig_ConfigType),
 			makeKCButton(`lnkImgType`, g_imgType, _ => setImgType(), {
 				x: imgBaseX, y: imgBaseY, title: g_msgObj.imgType, cxtFunc: _ => setImgType(-1),
 			}),
