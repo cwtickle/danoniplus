@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/03/28 (v35.4.5)
+ * Revised : 2024/04/03 (v35.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -113,6 +113,12 @@ const g_limitObj = {
     mainSiz: 14,
     musicTitleSiz: 13,
     keySetSiz: 15,
+
+    // ボタン基準横幅（最大）
+    btnBaseWidth: 900,
+
+    // キーコンフィグのカラーピッカー幅
+    kcColorPickerX: 60,
 };
 
 /** 設定項目の位置 */
@@ -171,6 +177,9 @@ $id(`canvas-frame`).width = `${Math.max(g_sWidth, 500)}px`;
 $id(`canvas-frame`).height = `${Math.max(g_sHeight, 500)}px`;
 $id(`canvas-frame`).margin = `auto`;
 
+const g_btnWidth = (_multi = 1) => Math.min(g_sWidth, g_limitObj.btnBaseWidth) * _multi;
+const g_btnX = (_multi = 0) => g_btnWidth(_multi) + Math.max((g_sWidth - g_limitObj.btnBaseWidth) / 2, 0);
+
 // 固定ウィンドウサイズ
 const g_windowObj = {
     divRoot: { margin: `auto`, letterSpacing: `normal` },
@@ -191,7 +200,7 @@ const updateWindowSiz = _ => {
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
         scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 236, visibility: `hidden` },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
-        keyconSprite: { y: 88, h: g_sHeight, overflow: `auto` },
+        keyconSprite: { y: 88, h: g_sHeight - 85, overflow: `auto` },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
         resultWindow: { x: g_sWidth / 2 - 200, y: 185, w: 400, h: 210 },
@@ -201,51 +210,53 @@ const updateWindowSiz = _ => {
 
         /** タイトル画面 */
         btnReset: {
-            x: 0, y: g_sHeight - 20, w: g_sWidth / 4, h: 16, siz: 12, title: g_msgObj.dataReset,
+            x: g_btnX(), y: g_sHeight - 20, w: g_btnWidth(1 / 4), h: 16, siz: 12, title: g_msgObj.dataReset,
         },
         btnReload: {
-            x: 10, y: 10, w: 30, h: 30, siz: 20, title: g_msgObj.reload,
+            x: 10 + g_btnX(), y: 10, w: 30, h: 30, siz: 20, title: g_msgObj.reload,
         },
         btnHelp: {
-            x: 0, y: g_sHeight - 150, w: 40, h: 40, siz: 30, title: g_msgObj.howto,
+            x: g_btnX(), y: g_sHeight - 150, w: 40, h: 40, siz: 30, title: g_msgObj.howto,
         },
         lnkMaker: {
-            x: 0, y: g_sHeight - 50, w: g_sWidth / 2, h: g_limitObj.lnkHeight,
+            x: g_btnX(), y: g_sHeight - 50, w: g_btnWidth(1 / 2), h: g_limitObj.lnkHeight,
             align: C_ALIGN_LEFT, title: g_headerObj.creatorUrl,
         },
         lnkArtist: {
-            x: g_sWidth / 2, y: g_sHeight - 50, w: g_sWidth / 2, h: g_limitObj.lnkHeight,
+            x: g_btnX(1 / 2), y: g_sHeight - 50, w: g_btnWidth(1 / 2), h: g_limitObj.lnkHeight,
             align: C_ALIGN_LEFT, title: g_headerObj.artistUrl,
         },
         lnkVersion: {
-            x: g_sWidth / 4, y: g_sHeight - 20, w: g_sWidth * 3 / 4 - 20, h: 16,
+            x: g_btnX(1 / 4), y: g_sHeight - 20, w: g_btnWidth(3 / 4) - 20, h: 16,
             align: C_ALIGN_RIGHT, title: g_msgObj.github,
         },
         lnkComparison: {
-            x: g_sWidth - 20, y: g_sHeight - 20, w: 20, h: 16, siz: 12, title: g_msgObj.security,
+            x: g_btnX(1) - 20, y: g_sHeight - 20, w: 20, h: 16, siz: 12, title: g_msgObj.security,
         },
         lblComment: {
-            x: 0, y: 70, w: g_sWidth, h: g_sHeight - 180, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+            x: g_btnX(), y: 70, w: g_btnWidth(), h: g_sHeight - 180, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
             overflow: `auto`, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
             whiteSpace: `normal`,
         },
         btnComment: {
-            x: g_sWidth - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
+            x: g_btnX(1) - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
         },
 
         /** 設定画面 */
-        btnBack: {},
+        btnBack: {
+            x: g_btnX(),
+        },
         btnKeyConfig: {
-            x: g_sWidth / 3,
+            x: g_btnX(1 / 3),
         },
         btnPlay: {
-            x: g_sWidth * 2 / 3,
+            x: g_btnX(2 / 3),
         },
         btnSwitchSetting: {
             x: g_sWidth / 2 + 175 - g_limitObj.setMiniWidth / 2, y: 25, w: g_limitObj.setMiniWidth, h: 40,
         },
         btnSave: {
-            x: 0, y: 5, w: g_sWidth / 5, h: 16, siz: 12,
+            x: g_btnX(), y: 5, w: g_btnWidth(1 / 5), h: 16, siz: 12,
             title: g_msgObj.dataSave, borderStyle: `solid`,
         },
 
@@ -319,16 +330,17 @@ const updateWindowSiz = _ => {
 
         /** キーコンフィグ画面 */
         scKcMsg: {
-            x: 0, y: g_sHeight - 45, w: g_sWidth, h: 20,
+            x: g_btnX(), y: g_sHeight - 50, w: g_btnWidth(), h: 20,
         },
         kcMsg: {
-            x: 0, y: g_sHeight - 25, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz,
+            x: g_btnX(), y: g_sHeight - 33, w: g_btnWidth(), h: 20, siz: g_limitObj.mainSiz,
+            pointerEvents: `none`,
         },
         kcDesc: {
-            x: 0, y: 68, w: g_sWidth, h: 20,
+            x: g_btnX(), y: 68, w: g_btnWidth(), h: 20,
         },
         kcShuffleDesc: {
-            x: 5, y: g_sHeight - 125, w: g_sWidth, h: 20, align: C_ALIGN_LEFT,
+            x: 5 + g_btnX(), y: g_sHeight - 125, w: g_btnWidth(), h: 20, align: C_ALIGN_LEFT,
         },
         pickPos: {
             x: 0, w: 50, h: 15, siz: 11, align: C_ALIGN_LEFT, background: `#${g_headerObj.baseBrightFlg ? `eeeeee` : `111111`}80`,
@@ -338,31 +350,31 @@ const updateWindowSiz = _ => {
         },
 
         btnKcBack: {
-            x: g_sWidth / 3, y: g_sHeight - 75,
-            w: g_sWidth / 3, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
+            x: g_btnX(1 / 3), y: g_sHeight - 75,
+            w: g_btnWidth(1 / 3), h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
         lblPattern: {
-            x: g_sWidth / 6, y: g_sHeight - 100, w: g_sWidth / 3, h: g_limitObj.btnHeight / 2,
+            x: g_btnX(1 / 6), y: g_sHeight - 100, w: g_btnWidth() / 3, h: g_limitObj.btnHeight / 2,
         },
         btnPtnChangeR: {
-            x: g_sWidth / 2, y: g_sHeight - 100,
-            w: g_sWidth / 9, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
+            x: g_btnX(1 / 2), y: g_sHeight - 100,
+            w: g_btnWidth(1 / 9), h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
         btnPtnChangeL: {
-            x: g_sWidth / 18, y: g_sHeight - 100,
-            w: g_sWidth / 9, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
+            x: g_btnX(1 / 18), y: g_sHeight - 100,
+            w: g_btnWidth(1 / 9), h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
         btnPtnChangeRR: {
-            x: g_sWidth * 11 / 18, y: g_sHeight - 100,
-            w: g_sWidth / 18, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
+            x: g_btnX(11 / 18), y: g_sHeight - 100,
+            w: g_btnWidth(1 / 18), h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
         btnPtnChangeLL: {
-            x: 0, y: g_sHeight - 100,
-            w: g_sWidth / 18, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
+            x: g_btnX(), y: g_sHeight - 100,
+            w: g_btnWidth(1 / 18), h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
         btnKcReset: {
-            x: 0, y: g_sHeight - 75,
-            w: g_sWidth / 3, h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
+            x: g_btnX(), y: g_sHeight - 75,
+            w: g_btnWidth(1 / 3), h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
         },
 
         /** メイン画面 */
@@ -418,27 +430,27 @@ const updateWindowSiz = _ => {
             x: g_sWidth / 2 + 50, y: 40, w: 200, h: 30, siz: 20,
         },
         btnRsBack: {
-            w: g_sWidth / 4, h: g_limitObj.btnHeight * 5 / 4, animationName: `smallToNormalY`,
+            x: g_btnX(), w: g_btnWidth(1 / 4), h: g_limitObj.btnHeight * 5 / 4, animationName: `smallToNormalY`,
         },
         btnRsCopy: {
-            x: g_sWidth / 4, w: g_sWidth / 2, h: g_limitObj.btnHeight * 5 / 8, siz: 24, animationName: `smallToNormalY`,
+            x: g_btnX(1 / 4), w: g_btnWidth(1 / 2), h: g_limitObj.btnHeight * 5 / 8, siz: 24, animationName: `smallToNormalY`,
         },
         btnRsTweet: {
-            x: g_sWidth / 4, y: g_sHeight - 100 + g_limitObj.btnHeight * 5 / 8,
-            w: g_sWidth / 4, h: g_limitObj.btnHeight * 5 / 8, siz: 24, animationName: `smallToNormalY`,
+            x: g_btnX(1 / 4), y: g_sHeight - 100 + g_limitObj.btnHeight * 5 / 8,
+            w: g_btnWidth(1 / 4), h: g_limitObj.btnHeight * 5 / 8, siz: 24, animationName: `smallToNormalY`,
         },
         btnRsGitter: {
-            x: g_sWidth / 2, y: g_sHeight - 100 + g_limitObj.btnHeight * 5 / 8,
-            w: g_sWidth / 4, h: g_limitObj.btnHeight * 5 / 8, siz: 24, animationName: `smallToNormalY`,
+            x: g_btnX(1 / 2), y: g_sHeight - 100 + g_limitObj.btnHeight * 5 / 8,
+            w: g_btnWidth(1 / 4), h: g_limitObj.btnHeight * 5 / 8, siz: 24, animationName: `smallToNormalY`,
         },
         btnRsRetry: {
-            x: g_sWidth / 4 * 3, w: g_sWidth / 4, h: g_limitObj.btnHeight * 5 / 4, animationName: `smallToNormalY`,
+            x: g_btnX(3 / 4), w: g_btnWidth(1 / 4), h: g_limitObj.btnHeight * 5 / 4, animationName: `smallToNormalY`,
         },
         btnRsCopyImage: {
-            x: g_sWidth - 40, y: 0, w: 40, h: 40, siz: 30,
+            x: g_btnX(1) - 40, y: 0, w: 40, h: 40, siz: 30,
         },
         btnRsCopyClose: {
-            x: g_sWidth - 80, y: 0, w: 80, h: 40, siz: 20,
+            x: g_btnX(1) - 80, y: 0, w: 80, h: 40, siz: 20,
         },
         resultImageDesc: {
             x: 0, y: g_sHeight - 30, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz,
