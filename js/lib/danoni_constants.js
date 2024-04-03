@@ -200,7 +200,7 @@ const updateWindowSiz = _ => {
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
         scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 236, visibility: `hidden` },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
-        keyconSprite: { y: 88, h: g_sHeight, overflow: `auto` },
+        keyconSprite: { y: 88, h: g_sHeight - 85, overflow: `auto` },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
         resultWindow: { x: g_sWidth / 2 - 200, y: 185, w: 400, h: 210 },
@@ -330,10 +330,11 @@ const updateWindowSiz = _ => {
 
         /** キーコンフィグ画面 */
         scKcMsg: {
-            x: g_btnX(), y: g_sHeight - 45, w: g_btnWidth(), h: 20,
+            x: g_btnX(), y: g_sHeight - 50, w: g_btnWidth(), h: 20,
         },
         kcMsg: {
-            x: g_btnX(), y: g_sHeight - 25, w: g_btnWidth(), h: 20, siz: g_limitObj.mainSiz,
+            x: g_btnX(), y: g_sHeight - 33, w: g_btnWidth(), h: 20, siz: g_limitObj.mainSiz,
+            pointerEvents: `none`,
         },
         kcDesc: {
             x: g_btnX(), y: 68, w: g_btnWidth(), h: 20,
