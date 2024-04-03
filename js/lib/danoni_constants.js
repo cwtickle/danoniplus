@@ -114,7 +114,11 @@ const g_limitObj = {
     musicTitleSiz: 13,
     keySetSiz: 15,
 
+    // ボタン基準横幅（最大）
     btnBaseWidth: 900,
+
+    // キーコンフィグのカラーピッカー幅
+    kcColorPickerX: 60,
 };
 
 /** 設定項目の位置 */

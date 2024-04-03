@@ -6321,12 +6321,13 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
 	};
 
+	const addLeft = (maxLeftX === 0 ? 0 : - maxLeftX + g_limitObj.kcColorPickerX);
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
-		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2 - maxLeftX;
+		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2 + addLeft;
 		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt)) + 12;
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
@@ -6548,7 +6549,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
-		const nextLeft = (kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos - maxLeftX - 10;
+		const nextLeft = (kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos + addLeft - 10;
 		cursor.style.left = wUnit(nextLeft);
 		cursor.style.top = wUnit(C_KYC_HEIGHT * Number(posj > divideCnt) + 57 + C_KYC_REPHEIGHT * g_currentk);
 		g_kcType = (g_currentk === 0 ? `Main` : `Replaced`);
@@ -6584,7 +6585,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		}
 
 		setKeyConfigCursor();
-		keyconSprite.scrollLeft = - maxLeftX;
+		//keyconSprite.scrollLeft = - maxLeftX;
 	};
 
 	const getNextNum = (_scrollNum, _groupName, _target) =>
@@ -6877,7 +6878,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 					}
 				}
 				changeConfigCursor(0);
-				keyconSprite.scrollLeft = - maxLeftX;
 			}
 		}, g_lblPosObj.btnKcReset, g_cssObj.button_Reset),
 
