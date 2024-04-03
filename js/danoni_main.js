@@ -6585,7 +6585,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		}
 
 		setKeyConfigCursor();
-		//keyconSprite.scrollLeft = - maxLeftX;
 	};
 
 	const getNextNum = (_scrollNum, _groupName, _target) =>
