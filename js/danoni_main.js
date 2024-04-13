@@ -8799,9 +8799,6 @@ const getArrowSettings = _ => {
 			});
 		});
 	}
-	console.log(g_workObj[`frzNormalColors`])
-	console.log(g_workObj[`frzHitColors`])
-	console.log(g_workObj[`frzHitBarColors`])
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
 
 	Object.keys(g_resultObj).forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
