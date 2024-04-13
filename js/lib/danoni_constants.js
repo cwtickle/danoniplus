@@ -679,6 +679,11 @@ const g_escapeStr = {
         [`Backslash`, `Ja-]`], [`Equal`, `Ja-^`],
     ],
     frzPatternName: [
+        [`AS`, `ArrowShadow`],
+        [`NA`, `Normal`], [`NB`, `NormalBar`], [`NS`, `NormalShadow`],
+        [`HA`, `Hit`], [`HB`, `HitBar`], [`HS`, `HitShadow`],
+        [`FN`, `Normal/NormalBar`], [`FH`, `Hit/HitBar`], [`FS`, `NormalShadow/HitShadow`],
+        [`AF`, `Arrow/Normal/NormalBar/Hit/HitBar`],
         [`FrzNormal`, `Normal/NormalBar`], [`FrzHit`, `Hit/HitBar`],
         [`FrzShadow`, `NormalShadow/HitShadow`],
         [`Frz`, `Normal/NormalBar/Hit/HitBar`],
