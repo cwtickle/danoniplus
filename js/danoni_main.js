@@ -7647,6 +7647,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					const colorCd = tmpColorData[k + 2];
 
 					// フレーム数、色番号、カラーコード、全体色変化フラグをセットとして配列化
+					// フリーズアローヒット時の個別色変化は互換のため全体色変化として扱う
 					colorData.push([frame, colorNum, colorCd, isFrzHitColor(colorNum) && !allFlg ? true : allFlg]);
 				}
 			});
@@ -7673,22 +7674,23 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 			splitLF(dosColorData).filter(data => hasVal(data)).forEach(tmpData => {
 				const tmpColorData = tmpData.split(`,`);
-				if (!hasVal(tmpColorData[0])) {
-					return;
-				} else if (tmpColorData[1] === `-`) {
+				if (!hasVal(tmpColorData[0]) || tmpColorData[1] === `-`) {
 					return;
 				}
 				const frame = calcFrame(setVal(trimStr(tmpColorData[0]), ``, C_TYP_CALC));
 				const colorCd = trimStr(tmpColorData[2]);
 
+				// 色変化対象の取得
 				const pos = tmpColorData[1]?.indexOf(`:`);
 				const patternStr = pos > 0 ? [trimStr(tmpColorData[1].substring(0, pos)), trimStr(tmpColorData[1].substring(pos + 1))]
 					: [trimStr(tmpColorData[1])];
 				const patterns = replaceStr(trimStr(patternStr[1]), g_escapeStr.colorPatternName)?.split(`/`) || [`Arrow`];
 
+				// 矢印番号の組み立て
 				const colorVals = [];
 				replaceStr(patternStr[0], g_escapeStr.targetPatternName)?.split(`/`)?.forEach(val => {
 					if (val.startsWith('g')) {
+						// g付きの場合は矢印グループから対象の矢印番号を検索
 						const groupVal = setIntVal(val.slice(1));
 						for (let j = 0; j < keyNum; j++) {
 							if (g_keyObj[`color${_keyCtrlPtn}`][j] === groupVal) {
@@ -7696,6 +7698,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 							}
 						}
 					} else if (val.indexOf(`...`) > 0) {
+						// 範囲指定表記の補完　例. 0...3 -> 0/1/2/3
 						const [valMin, valMax] = [val.split(`...`)[0], val.split(`...`)[1]].map(val => setIntVal(val));
 						for (let k = valMin; k <= valMax; k++) {
 							colorVals.push(setIntVal(k));
@@ -7705,11 +7708,12 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					}
 				});
 
-				// フレーム数、色番号、カラーコード、全体色変化フラグ、変更対象をセットとして配列化
+				// フレーム数、色番号、カラーコード、全体色変化フラグ、変更対象をセットとして配列化し、色変化対象ごとのプロパティへ追加
 				patterns.forEach(pattern => {
 					colorVals.forEach(val => colorData[pattern].push([frame, val, colorCd, hasVal(tmpColorData[3]), pattern]));
 				});
 			});
+			// 色変化対象ごとにフレーム数をキーにソートしてフラット化
 			Object.keys(colorData).forEach(pattern =>
 				colorData[pattern] = colorData[pattern].sort((_a, _b) => _a[0] - _b[0]).flat());
 		}
@@ -7948,6 +7952,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			obj[`${sprite}DummyData`] = setColorData(sprite, _dummyNo);
 		}
 	});
+	// 色変化（新形式）の分解（3～4つで1セット, セット毎の改行区切り）
 	obj.ncolorData = setColor2Data(`ncolor`, scoreIdHeader);
 	if (g_stateObj.dummyId !== ``) {
 		obj.ncolorDummyData = setColor2Data(`ncolor`, _dummyNo);
@@ -9453,6 +9458,7 @@ const mainInit = _ => {
 
 			/**
 			 * 全体色の変更処理
+			 * - 次の全体色変化対象の色と比較して一致した場合に色を変更
 			 * @param {string} _type 
 			 * @param {element} _baseObj 
 			 */
@@ -9493,7 +9499,6 @@ const mainInit = _ => {
 			const frzBtm = document.getElementById(`${_name}Btm${frzNo}`);
 			const frzTopShadow = document.getElementById(`${_name}TopShadow${frzNo}`);
 			const frzBtmShadow = document.getElementById(`${_name}BtmShadow${frzNo}`);
-			const frzPattern = `${_name}${_state}`;
 
 			/**
 			 * 全体色の変更処理
@@ -9502,8 +9507,8 @@ const mainInit = _ => {
 			 * @param {element} _baseObj2 
 			 */
 			const changeColor = (_type, _baseObj, _baseObj2) => {
-				const cFrzColor = g_workObj[`${frzPattern}${_type}Colors`][_j];
-				const cFrzColorAll = g_workObj[`${frzPattern}${_type}ColorsAll`][_j];
+				const cFrzColor = g_workObj[`${_name}${_state}${_type}Colors`][_j];
+				const cFrzColorAll = g_workObj[`${_name}${_state}${_type}ColorsAll`][_j];
 				if (_baseObj.getAttribute(`color`) !== cFrzColorAll && cFrzColor === cFrzColorAll) {
 					if (_baseObj2 && _state === `Normal`) {
 						_baseObj2.style.background = cFrzColorAll;
