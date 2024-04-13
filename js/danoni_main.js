@@ -7672,12 +7672,13 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				} else if (tmpColorData[1] === `-`) {
 					return;
 				}
-				const frame = calcFrame(setVal(tmpColorData[0], ``, C_TYP_CALC));
+				const frame = calcFrame(setVal(tmpColorData[0].trim(), ``, C_TYP_CALC));
 				const colorCd = tmpColorData[2];
 
 				const pos = tmpColorData[1]?.indexOf(`:`);
-				const patternStr = pos > 0 ? [tmpColorData[1].substring(0, pos), tmpColorData[1].substring(pos + 1)] : [tmpColorData[1]];
-				const patterns = replaceStr(patternStr[1], g_escapeStr.frzPatternName)?.split(`/`) || [`Arrow`];
+				const patternStr = pos > 0 ? [tmpColorData[1].substring(0, pos).trim(), tmpColorData[1].substring(pos + 1).trim()]
+					: [tmpColorData[1]?.trim()];
+				const patterns = replaceStr(patternStr[1]?.trim(), g_escapeStr.frzPatternName)?.split(`/`) || [`Arrow`];
 
 				const colorVals = [];
 				patternStr[0]?.split(`/`)?.forEach(val => {
