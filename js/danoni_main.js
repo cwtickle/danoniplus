@@ -10412,6 +10412,8 @@ const changeFailedFrz = (_j, _k) => {
 	$id(`frzTop${frzNo}`).display = C_DIS_INHERIT;
 	$id(`frzTop${frzNo}`).background = `#cccccc`;
 	$id(`frzTopShadow${frzNo}`).opacity = 1;
+	$id(`frzTopShadow${frzNo}`).background = `#333333`;
+	$id(`frzBtmShadow${frzNo}`).background = `#333333`;
 	$id(`frzBar${frzNo}`).background = `#999999`;
 	$id(`frzBar${frzNo}`).opacity = 1;
 	$id(`frzBtm${frzNo}`).background = `#cccccc`;
@@ -10420,12 +10422,6 @@ const changeFailedFrz = (_j, _k) => {
 	const hitPos = g_workObj.hitPosition * g_workObj.scrollDir[_j];
 	$id(`frzTop${frzNo}`).top = wUnit(- hitPos);
 	$id(`frzTopShadow${frzNo}`).top = wUnit(- hitPos);
-
-	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
-	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
-		$id(`frzTopShadow${frzNo}`).background = `#333333`;
-		$id(`frzBtmShadow${frzNo}`).background = `#333333`;
-	}
 };
 
 /**
