@@ -2756,6 +2756,8 @@ const g_lang_msgInfoObj = {
         E_0104: `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
         |keyCtrl{0}=75,79,76,80,187,32/0|`,
 
+        E_0201: `色変化データで指定した色変化対象が存在しません。[pattern={0}] (E-0201)`,
+
         I_0001: `リザルトデータをクリップボードにコピーしました！`,
         I_0002: `入力したキーは割り当てできません。他のキーを指定してください。`,
         I_0003: `各譜面の明細情報をクリップボードにコピーしました！`,
@@ -2802,6 +2804,8 @@ const g_lang_msgInfoObj = {
         |stepRtn{0}=0,45,-90,135,180,onigiri|`,
         E_0104: `New key: {0} [keyCtrl] is not set. (E-0104)<br>
         |keyCtrl{0}=75,79,76,80,187,32/0|`,
+
+        E_0201: `The color change target specified in the color change data does not exist. [pattern={0}] (E-0201)`,
 
         I_0001: `Your result data is copied to the clipboard!`,
         I_0002: `The specified key cannot be assigned. Please specify another key.`,

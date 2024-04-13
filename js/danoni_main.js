@@ -7710,7 +7710,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 				// フレーム数、色番号、カラーコード、全体色変化フラグ、変更対象をセットとして配列化し、色変化対象ごとのプロパティへ追加
 				patterns.forEach(pattern => {
-					colorVals.forEach(val => colorData[pattern].push([frame, val, colorCd, hasVal(tmpColorData[3]), pattern]));
+					try {
+						colorVals.forEach(val => colorData[pattern].push([frame, val, colorCd, hasVal(tmpColorData[3]), pattern]));
+					} catch (error) {
+						makeWarningWindow(g_msgInfoObj.E_0201.split(`{0}`).join(pattern));
+					}
 				});
 			});
 			// 色変化対象ごとにフレーム数をキーにソートしてフラット化
