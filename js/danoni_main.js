@@ -10293,8 +10293,7 @@ const changeColors = (_mkColor, _mkColorCd, _header, _name) => {
 		g_workObj[`${camelHeader}Colors`][targetj] = _mkColorCd[j];
 		if (tempj >= 1000) {
 			g_workObj[`${camelHeader}ColorsAll`][targetj] = _mkColorCd[j];
-			if ((camelHeader.indexOf(`frzHitBar`) !== -1 || camelHeader.indexOf(`frzHitShadow`) !== -1)
-				&& isNaN(Number(g_workObj.arrowRtn[targetj]))) {
+			if (camelHeader.indexOf(`frzHitBar`) !== -1 && isNaN(Number(g_workObj.arrowRtn[targetj]))) {
 				$id(`frzHitTop${targetj}`).background = _mkColorCd[j];
 			}
 		}
