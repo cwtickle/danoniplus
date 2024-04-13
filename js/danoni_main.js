@@ -7684,7 +7684,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const pos = tmpColorData[1]?.indexOf(`:`);
 				const patternStr = pos > 0 ? [trimStr(tmpColorData[1].substring(0, pos)), trimStr(tmpColorData[1].substring(pos + 1))]
 					: [trimStr(tmpColorData[1])];
-				const patterns = replaceStr(trimStr(patternStr[1]), g_escapeStr.frzPatternName)?.split(`/`) || [`Arrow`];
+				const patterns = replaceStr(trimStr(patternStr[1]), g_escapeStr.colorPatternName)?.split(`/`) || [`Arrow`];
 
 				const colorVals = [];
 				replaceStr(patternStr[0], g_escapeStr.targetPatternName)?.split(`/`)?.forEach(val => {

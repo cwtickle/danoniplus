@@ -678,8 +678,8 @@ const g_escapeStr = {
         [`Quote`, `Ja-Colon`], [`BracketLeft`, `Ja-@`], [`BracketRight`, `Ja-[`],
         [`Backslash`, `Ja-]`], [`Equal`, `Ja-^`],
     ],
-    frzPatternName: [
-        [`AS`, `ArrowShadow`],
+    colorPatternName: [
+        [`AR`, `Arrow`], [`AS`, `ArrowShadow`],
         [`NA`, `Normal`], [`NB`, `NormalBar`], [`NS`, `NormalShadow`],
         [`HA`, `Hit`], [`HB`, `HitBar`], [`HS`, `HitShadow`],
         [`FN`, `Normal/NormalBar`], [`FH`, `Hit/HitBar`], [`FS`, `NormalShadow/HitShadow`],
