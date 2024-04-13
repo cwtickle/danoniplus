@@ -616,10 +616,11 @@ let g_imgExtensions = [`png`, `gif`, `bmp`, `jpg`, `jpeg`, `svg`];
 const g_typeLists = {
     arrow: [`arrow`, `dummyArrow`, `frz`, `dummyFrz`],
     color: [`color`, `acolor`],
+    arrowColor: [``, `Shadow`],
     frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`, `NormalShadow`, `HitShadow`],
     dataList: [
         `Arrow`, `FrzArrow`, `FrzLength`,
-        `Color`, `ColorCd`, `ScrollchArrow`, `ScrollchStep`, `ScrollchArrowDir`, `ScrollchStepDir`,
+        `Color`, `ColorCd`, `ColorShadow`, `ColorShadowCd`, `ScrollchArrow`, `ScrollchStep`, `ScrollchArrowDir`, `ScrollchStepDir`,
         `FColorNormal`, `FColorNormalCd`, `FColorNormalBar`, `FColorNormalBarCd`,
         `FColorNormalShadow`, `FColorNormalShadowCd`,
         `FColorHit`, `FColorHitCd`, `FColorHitBar`, `FColorHitBarCd`,
