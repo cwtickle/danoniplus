@@ -7692,16 +7692,16 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 						const groupVal = setIntVal(val.slice(1));
 						for (let j = 0; j < keyNum; j++) {
 							if (g_keyObj[`color${_keyCtrlPtn}`][j] === groupVal) {
-								colorVals.push(j + 1000);
+								colorVals.push(j);
 							}
 						}
 					} else if (val.indexOf(`...`) > 0) {
 						const [valMin, valMax] = [val.split(`...`)[0], val.split(`...`)[1]].map(val => setIntVal(val));
 						for (let k = valMin; k <= valMax; k++) {
-							colorVals.push(setIntVal(k) + 1000);
+							colorVals.push(setIntVal(k));
 						}
 					} else {
-						colorVals.push(setIntVal(val) + 1000);
+						colorVals.push(setIntVal(val));
 					}
 				});
 
@@ -8566,8 +8566,6 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg, _pattern = ``) => 
 	const pushColor = (_baseStr, _cVal) => {
 		g_workObj[_baseStr][_frame]?.push(_cVal) || (g_workObj[_baseStr][_frame] = [_cVal]);
 		g_workObj[`${_baseStr}Cd`][_frame]?.push(colorCd) || (g_workObj[`${_baseStr}Cd`][_frame] = [colorCd]);
-		console.log(_baseStr)
-		console.log(g_workObj[`${_baseStr}Cd`][_frame])
 	};
 
 	/**
@@ -8592,7 +8590,7 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg, _pattern = ``) => 
 			allUseTypes.push(`Frz`);
 		}
 		// 色変化情報の格納
-		baseHeaders.forEach(baseHeader => pushColor(baseHeader, g_workObj.replaceNums[_val % 1000] + addAll));
+		baseHeaders.forEach(baseHeader => pushColor(baseHeader, g_workObj.replaceNums[_val] + addAll));
 	};
 
 	/**
