@@ -7647,7 +7647,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					const colorCd = tmpColorData[k + 2];
 
 					// フレーム数、色番号、カラーコード、全体色変化フラグをセットとして配列化
-					colorData.push([frame, colorNum, colorCd, !isFrzHitColor(colorNum) && !allFlg ? true : allFlg]);
+					colorData.push([frame, colorNum, colorCd, isFrzHitColor(colorNum) && !allFlg ? true : allFlg]);
 				}
 			});
 			return colorData.sort((_a, _b) => _a[0] - _b[0]);
@@ -8770,11 +8770,14 @@ const getArrowSettings = _ => {
 	g_judgObj.lockFlgs = [...Array(keyNum)].fill(false);
 
 	// 矢印色管理 (個別・全体)
-	[`arrow`, `dummyArrow`].forEach(arrowType =>
-		g_typeLists.arrowColor.forEach(objType => g_workObj[`${arrowType}${objType}Colors`] = []));
+	const eachOrAll = [``, `All`];
+	eachOrAll.forEach(type => {
+		[`arrow`, `dummyArrow`].forEach(arrowType =>
+			g_typeLists.arrowColor.forEach(objType => g_workObj[`${arrowType}${objType}Colors${type}`] = []));
 
-	[`frz`, `dummyFrz`].forEach(arrowType =>
-		g_typeLists.frzColor.forEach(frzType => g_workObj[`${arrowType}${frzType}Colors`] = []));
+		[`frz`, `dummyFrz`].forEach(arrowType =>
+			g_typeLists.frzColor.forEach(frzType => g_workObj[`${arrowType}${frzType}Colors${type}`] = []));
+	});
 
 	// モーション管理
 	g_typeLists.arrow.forEach(type => g_workObj[`${type}CssMotions`] = [...Array(keyNum)].fill(``));
@@ -8795,17 +8798,19 @@ const getArrowSettings = _ => {
 		g_workObj.dividePos[j] = ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
 		g_workObj.scrollDir[j] = (posj <= divideCnt ? 1 : -1) * scrollDirOptions[j] * (g_stateObj.reverse === C_FLG_OFF ? 1 : -1);
 
-		g_workObj[`arrowColors`][j] = g_headerObj.setColor[colorj];
-		g_workObj[`dummyArrowColors`][j] = g_headerObj.setDummyColor[colorj];
-		g_workObj[`arrowShadowColors`][j] = g_headerObj.setShadowColor[colorj] || ``;
-		g_workObj[`dummyArrowShadowColors`][j] = g_headerObj.setDummyColor[colorj] || ``;
+		eachOrAll.forEach(type => {
+			g_workObj[`arrowColors${type}`][j] = g_headerObj.setColor[colorj];
+			g_workObj[`dummyArrowColors${type}`][j] = g_headerObj.setDummyColor[colorj];
+			g_workObj[`arrowShadowColors${type}`][j] = g_headerObj.setShadowColor[colorj] || ``;
+			g_workObj[`dummyArrowShadowColors${type}`][j] = g_headerObj.setDummyColor[colorj] || ``;
 
-		g_typeLists.frzColor.forEach((frzType, k) => {
-			g_workObj[`frz${frzType}Colors`][j] = g_headerObj.frzColor[colorj][k] || ``;
-			g_workObj[`dummyFrz${frzType}Colors`][j] = g_headerObj.setDummyColor[colorj];
+			g_typeLists.frzColor.forEach((frzType, k) => {
+				g_workObj[`frz${frzType}Colors${type}`][j] = g_headerObj.frzColor[colorj][k] || ``;
+				g_workObj[`dummyFrz${frzType}Colors${type}`][j] = g_headerObj.setDummyColor[colorj];
+			});
+			g_workObj[`frzNormalShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][0] || ``;
+			g_workObj[`frzHitShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][1] || ``;
 		});
-		g_workObj[`frzNormalShadowColors`][j] = g_headerObj.frzShadowColor[colorj][0] || ``;
-		g_workObj[`frzHitShadowColors`][j] = g_headerObj.frzShadowColor[colorj][1] || ``;
 	}
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
 
@@ -9445,22 +9450,29 @@ const mainInit = _ => {
 	 */
 	const changeArrowColor = (_j, _k, _name) => {
 		if (g_workObj[`mk${toCapitalize(_name)}ColorChangeAll`][g_scoreObj.frameNum]) {
+
+			/**
+			 * 全体色の変更処理
+			 * @param {string} _type 
+			 * @param {element} _baseObj 
+			 */
+			const changeColor = (_type, _baseObj) => {
+				const cArrowColor = g_workObj[`${_name}${_type}Colors`][_j];
+				const cArrowColorAll = g_workObj[`${_name}${_type}ColorsAll`][_j];
+				if (_baseObj.getAttribute(`color`) !== cArrowColor && cArrowColorAll === cArrowColor) {
+					_baseObj.style.background = cArrowColorAll;
+					_baseObj.setAttribute(`color`, cArrowColorAll);
+				}
+			};
+
+			// 矢印枠の色変化
 			const arrowTop = document.getElementById(`${_name}Top${_j}_${_k}`);
-			const arrowName = `${_name}${_j}_${_k}`;
-			const cArrowColor = g_workObj[`${_name}Colors`][_j];
+			changeColor(``, arrowTop);
 
-			if (g_attrObj[arrowName].Arrow !== cArrowColor) {
-				arrowTop.style.background = cArrowColor;
-				g_attrObj[arrowName].Arrow = cArrowColor;
-			}
-
+			// 矢印塗りつぶし部分の色変化
 			if (g_headerObj.setShadowColor[0] !== ``) {
 				const arrowShadow = document.getElementById(`${_name}Shadow${_j}_${_k}`);
-				const cArrowShadowColor = g_workObj[`${_name}ShadowColors`][_j];
-				if (g_attrObj[arrowName].ArrowShadow !== cArrowShadowColor) {
-					arrowShadow.style.background = cArrowShadowColor;
-					g_attrObj[arrowName].ArrowShadow = cArrowShadowColor;
-				}
+				changeColor(`Shadow`, arrowShadow);
 			}
 		}
 	};
@@ -9476,7 +9488,6 @@ const mainInit = _ => {
 
 		if (g_workObj[`mk${toCapitalize(_name)}ColorChangeAll`][g_scoreObj.frameNum]) {
 			const frzNo = `${_j}_${_k}`;
-			const frzName = `${_name}${frzNo}`;
 			const frzTop = document.getElementById(`${_name}Top${frzNo}`);
 			const frzBar = document.getElementById(`${_name}Bar${frzNo}`);
 			const frzBtm = document.getElementById(`${_name}Btm${frzNo}`);
@@ -9484,28 +9495,32 @@ const mainInit = _ => {
 			const frzBtmShadow = document.getElementById(`${_name}BtmShadow${frzNo}`);
 			const frzPattern = `${_name}${_state}`;
 
-			// 矢印部分の色変化
-			const cFrzArrowColor = g_workObj[`${frzPattern}Colors`][_j];
-			if (g_attrObj[frzName][`${_state}`] !== cFrzArrowColor) {
-				if (_state === `Normal`) {
-					frzTop.style.background = cFrzArrowColor;
+			/**
+			 * 全体色の変更処理
+			 * @param {string} _type 
+			 * @param {element} _baseObj 
+			 * @param {element} _baseObj2 
+			 */
+			const changeColor = (_type, _baseObj, _baseObj2) => {
+				const cFrzColor = g_workObj[`${frzPattern}${_type}Colors`][_j];
+				const cFrzColorAll = g_workObj[`${frzPattern}${_type}ColorsAll`][_j];
+				if (_baseObj.getAttribute(`color`) !== cFrzColorAll && cFrzColor === cFrzColorAll) {
+					if (_baseObj2 && _state === `Normal`) {
+						_baseObj2.style.background = cFrzColorAll;
+					}
+					_baseObj.style.background = cFrzColorAll;
+					_baseObj.setAttribute(`color`, cFrzColorAll);
 				}
-				frzBtm.style.background = cFrzArrowColor;
-				g_attrObj[frzName][`${_state}`] = cFrzArrowColor;
-			}
+			};
+
+			// 矢印部分の色変化
+			changeColor(``, frzBtm, frzTop);
+
 			// 帯部分の色変化
-			const cFrzBarColor = g_workObj[`${frzPattern}BarColors`][_j];
-			if (g_attrObj[frzName][`${_state}Bar`] !== cFrzBarColor) {
-				frzBar.style.background = cFrzBarColor;
-				g_attrObj[frzName][`${_state}Bar`] = cFrzBarColor;
-			}
+			changeColor(`Bar`, frzBar);
+
 			// 矢印塗りつぶし部分の色変化
-			const cFrzShadowColor = g_workObj[`${frzPattern}ShadowColors`][_j];
-			if (g_attrObj[frzName][`${_state}Shadow`] !== cFrzShadowColor) {
-				frzTopShadow.style.background = cFrzShadowColor;
-				frzBtmShadow.style.background = cFrzShadowColor;
-				g_attrObj[frzName][`${_state}Shadow`] = cFrzShadowColor;
-			}
+			changeColor(`Shadow`, frzBtmShadow, frzTopShadow);
 		}
 	};
 
@@ -9729,6 +9744,7 @@ const mainInit = _ => {
 	 * @param {number} _arrowCnt 現在の判定矢印順
 	 * @param {string} _name 矢印名
 	 * @param {string} _color 矢印色
+	 * @param {string} _shadowColor 矢印塗りつぶし部分の色
 	 */
 	const makeArrow = (_j, _arrowCnt, _name, _color, _shadowColor) => {
 		const dividePos = g_workObj.dividePos[_j];
@@ -9811,6 +9827,7 @@ const mainInit = _ => {
 	 * @param {string} _name 
 	 * @param {string} _normalColor
 	 * @param {string} _barColor 
+	 * @param {string} _shadowColor
 	 */
 	const makeFrzArrow = (_j, _arrowCnt, _name, _normalColor, _barColor, _shadowColor) => {
 		const dividePos = g_workObj.dividePos[_j];
@@ -10285,6 +10302,7 @@ const changeColors = (_mkColor, _mkColorCd, _header, _name) => {
 		const targetj = tempj % 1000;
 		g_workObj[`${camelHeader}Colors`][targetj] = _mkColorCd[j];
 		if (tempj >= 1000) {
+			g_workObj[`${camelHeader}ColorsAll`][targetj] = _mkColorCd[j];
 			if (camelHeader.indexOf(`frzHitBar`) !== -1 && isNaN(Number(g_workObj.arrowRtn[targetj]))) {
 				$id(`frzHitTop${targetj}`).background = _mkColorCd[j];
 			}
