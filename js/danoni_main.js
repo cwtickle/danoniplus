@@ -7662,7 +7662,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			Arrow: [], Normal: [], NormalBar: [], NormalShadow: [],
 			Hit: [], HitBar: [], HitShadow: [],
 		};
-		const trimStr = _str => _str?.split(`\t`).join(``).split(`　`).join(``).trim();
+		const trimStr = _str => _str?.split(`\t`).join(``).split(`　`).join(``).trimStart().trimEnd();
 
 		if (hasVal(dosColorData) && g_stateObj.d_color === C_FLG_ON) {
 
@@ -7673,8 +7673,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				} else if (tmpColorData[1] === `-`) {
 					return;
 				}
-				const frame = calcFrame(setVal(tmpColorData[0].trim(), ``, C_TYP_CALC));
-				const colorCd = tmpColorData[2];
+				const frame = calcFrame(setVal(trimStr(tmpColorData[0]), ``, C_TYP_CALC));
+				const colorCd = trimStr(tmpColorData[2]);
 
 				const pos = tmpColorData[1]?.indexOf(`:`);
 				const patternStr = pos > 0 ? [trimStr(tmpColorData[1].substring(0, pos)), trimStr(tmpColorData[1].substring(pos + 1))]
