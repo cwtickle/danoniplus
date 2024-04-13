@@ -247,6 +247,12 @@ const convertStrToVal = _str => {
 	return convStrs;
 };
 
+/**
+ * 半角スペース、タブを文字列から除去
+ * @param {string} _str 
+ */
+const trimStr = _str => _str?.split(`\t`).join(``).trimStart().trimEnd();
+
 /*-----------------------------------------------------------*/
 /* 値や配列のチェック・変換                                    */
 /*-----------------------------------------------------------*/
@@ -7662,7 +7668,6 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			Arrow: [], Normal: [], NormalBar: [], NormalShadow: [],
 			Hit: [], HitBar: [], HitShadow: [],
 		};
-		const trimStr = _str => _str?.split(`\t`).join(``).split(`　`).join(``).trimStart().trimEnd();
 
 		if (hasVal(dosColorData) && g_stateObj.d_color === C_FLG_ON) {
 
