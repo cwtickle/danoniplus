@@ -7647,7 +7647,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					const colorCd = tmpColorData[k + 2];
 
 					// フレーム数、色番号、カラーコード、全体色変化フラグをセットとして配列化
-					colorData.push([frame, colorNum, colorCd, allFlg]);
+					colorData.push([frame, colorNum, colorCd, !isFrzHitColor(colorNum) && !allFlg ? true : allFlg]);
 				}
 			});
 			return colorData.sort((_a, _b) => _a[0] - _b[0]);
@@ -7705,7 +7705,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					}
 				});
 
-				// フレーム数、色番号、カラーコード、全体色変化フラグをセットとして配列化
+				// フレーム数、色番号、カラーコード、全体色変化フラグ、変更対象をセットとして配列化
 				patterns.forEach(pattern => {
 					colorVals.forEach(val => colorData[pattern].push([frame, val, colorCd, hasVal(tmpColorData[3]), pattern]));
 				});
@@ -8344,7 +8344,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		}
 		const frontData = [];
 		for (let k = baseData.length - _term; k >= 0; k -= _term) {
-			const calcFrameFlg = (_colorFlg && !isFrzHitColor(baseData[k + 1]) && !baseData[k + 3]) || _calcFrameFlg;
+			const calcFrameFlg = (_colorFlg && !baseData[k + 3]) || _calcFrameFlg;
 
 			if (baseData[k] < g_scoreObj.frameNum) {
 				// フェードイン直前にある色変化・モーションデータ・スクロール反転データを取得して格納
@@ -8770,14 +8770,11 @@ const getArrowSettings = _ => {
 	g_judgObj.lockFlgs = [...Array(keyNum)].fill(false);
 
 	// 矢印色管理 (個別・全体)
-	const eachOrAll = [``, `All`];
-	eachOrAll.forEach(type => {
-		[`arrow`, `dummyArrow`].forEach(arrowType =>
-			g_typeLists.arrowColor.forEach(objType => g_workObj[`${arrowType}${objType}Colors${type}`] = []));
+	[`arrow`, `dummyArrow`].forEach(arrowType =>
+		g_typeLists.arrowColor.forEach(objType => g_workObj[`${arrowType}${objType}Colors`] = []));
 
-		[`frz`, `dummyFrz`].forEach(arrowType =>
-			g_typeLists.frzColor.forEach(frzType => g_workObj[`${arrowType}${frzType}Colors${type}`] = []));
-	});
+	[`frz`, `dummyFrz`].forEach(arrowType =>
+		g_typeLists.frzColor.forEach(frzType => g_workObj[`${arrowType}${frzType}Colors`] = []));
 
 	// モーション管理
 	g_typeLists.arrow.forEach(type => g_workObj[`${type}CssMotions`] = [...Array(keyNum)].fill(``));
@@ -8798,19 +8795,17 @@ const getArrowSettings = _ => {
 		g_workObj.dividePos[j] = ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
 		g_workObj.scrollDir[j] = (posj <= divideCnt ? 1 : -1) * scrollDirOptions[j] * (g_stateObj.reverse === C_FLG_OFF ? 1 : -1);
 
-		eachOrAll.forEach(type => {
-			g_workObj[`arrowColors${type}`][j] = g_headerObj.setColor[colorj];
-			g_workObj[`dummyArrowColors${type}`][j] = g_headerObj.setDummyColor[colorj];
-			g_workObj[`arrowShadowColors${type}`][j] = g_headerObj.setShadowColor[colorj] || ``;
-			g_workObj[`dummyArrowShadowColors${type}`][j] = g_headerObj.setDummyColor[colorj] || ``;
+		g_workObj[`arrowColors`][j] = g_headerObj.setColor[colorj];
+		g_workObj[`dummyArrowColors`][j] = g_headerObj.setDummyColor[colorj];
+		g_workObj[`arrowShadowColors`][j] = g_headerObj.setShadowColor[colorj] || ``;
+		g_workObj[`dummyArrowShadowColors`][j] = g_headerObj.setDummyColor[colorj] || ``;
 
-			g_typeLists.frzColor.forEach((frzType, k) => {
-				g_workObj[`frz${frzType}Colors${type}`][j] = g_headerObj.frzColor[colorj][k] || ``;
-				g_workObj[`dummyFrz${frzType}Colors${type}`][j] = g_headerObj.setDummyColor[colorj];
-			});
-			g_workObj[`frzNormalShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][0] || ``;
-			g_workObj[`frzHitShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][1] || ``;
+		g_typeLists.frzColor.forEach((frzType, k) => {
+			g_workObj[`frz${frzType}Colors`][j] = g_headerObj.frzColor[colorj][k] || ``;
+			g_workObj[`dummyFrz${frzType}Colors`][j] = g_headerObj.setDummyColor[colorj];
 		});
+		g_workObj[`frzNormalShadowColors`][j] = g_headerObj.frzShadowColor[colorj][0] || ``;
+		g_workObj[`frzHitShadowColors`][j] = g_headerObj.frzShadowColor[colorj][1] || ``;
 	}
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
 
@@ -9450,21 +9445,21 @@ const mainInit = _ => {
 	 */
 	const changeArrowColor = (_j, _k, _name) => {
 		if (g_workObj[`mk${toCapitalize(_name)}ColorChangeAll`][g_scoreObj.frameNum]) {
-			const colorSelf = g_workObj[`${_name}Colors`][_j];
-			const colorAll = g_workObj[`${_name}ColorsAll`][_j];
 			const arrowTop = document.getElementById(`${_name}Top${_j}_${_k}`);
+			const arrowName = `${_name}${_j}_${_k}`;
+			const cArrowColor = g_workObj[`${_name}Colors`][_j];
 
-			if (arrowTop.getAttribute(`color`) !== colorSelf && colorAll === colorSelf) {
-				arrowTop.style.background = colorAll;
-				arrowTop.setAttribute(`color`, colorAll);
+			if (g_attrObj[arrowName].Arrow !== cArrowColor) {
+				arrowTop.style.background = cArrowColor;
+				g_attrObj[arrowName].Arrow = cArrowColor;
 			}
 
 			if (g_headerObj.setShadowColor[0] !== ``) {
 				const arrowShadow = document.getElementById(`${_name}Shadow${_j}_${_k}`);
-				const toShadowColor = g_workObj[`${_name}ShadowColorsAll`][_j];
-				if (arrowShadow.getAttribute(`color`) !== g_workObj[`${_name}ShadowColors`][_j]) {
-					arrowShadow.style.background = toShadowColor;
-					arrowShadow.setAttribute(`color`, toShadowColor);
+				const cArrowShadowColor = g_workObj[`${_name}ShadowColors`][_j];
+				if (g_attrObj[arrowName].ArrowShadow !== cArrowShadowColor) {
+					arrowShadow.style.background = cArrowShadowColor;
+					g_attrObj[arrowName].ArrowShadow = cArrowShadowColor;
 				}
 			}
 		}
@@ -9481,40 +9476,35 @@ const mainInit = _ => {
 
 		if (g_workObj[`mk${toCapitalize(_name)}ColorChangeAll`][g_scoreObj.frameNum]) {
 			const frzNo = `${_j}_${_k}`;
+			const frzName = `${_name}${frzNo}`;
 			const frzTop = document.getElementById(`${_name}Top${frzNo}`);
 			const frzBar = document.getElementById(`${_name}Bar${frzNo}`);
 			const frzBtm = document.getElementById(`${_name}Btm${frzNo}`);
 			const frzTopShadow = document.getElementById(`${_name}TopShadow${frzNo}`);
 			const frzBtmShadow = document.getElementById(`${_name}BtmShadow${frzNo}`);
-			const frzName = `${_name}${_state}`;
+			const frzPattern = `${_name}${_state}`;
 
 			// 矢印部分の色変化
-			if (frzBtm.getAttribute(`color`) !== g_workObj[`${frzName}Colors`][_j]) {
-				const toColorCode = g_workObj[`${frzName}ColorsAll`][_j];
-				if (g_workObj[`${frzName}Colors`][_j] === toColorCode) {
-					if (_state === `Normal`) {
-						frzTop.style.background = toColorCode;
-					}
-					frzBtm.style.background = toColorCode;
-					frzBtm.setAttribute(`color`, toColorCode);
+			const cFrzArrowColor = g_workObj[`${frzPattern}Colors`][_j];
+			if (g_attrObj[frzName][`${_state}`] !== cFrzArrowColor) {
+				if (_state === `Normal`) {
+					frzTop.style.background = cFrzArrowColor;
 				}
+				frzBtm.style.background = cFrzArrowColor;
+				g_attrObj[frzName][`${_state}`] = cFrzArrowColor;
 			}
 			// 帯部分の色変化
-			if (frzBar.getAttribute(`color`) !== g_workObj[`${frzName}BarColors`][_j]) {
-				const toBarColorCode = g_workObj[`${frzName}BarColorsAll`][_j];
-				if (g_workObj[`${frzName}BarColors`][_j] === toBarColorCode) {
-					frzBar.style.background = toBarColorCode;
-					frzBar.setAttribute(`color`, toBarColorCode);
-				}
+			const cFrzBarColor = g_workObj[`${frzPattern}BarColors`][_j];
+			if (g_attrObj[frzName][`${_state}Bar`] !== cFrzBarColor) {
+				frzBar.style.background = cFrzBarColor;
+				g_attrObj[frzName][`${_state}Bar`] = cFrzBarColor;
 			}
-			// 影部分の色変化
-			if (frzTopShadow.getAttribute(`color`) !== g_workObj[`${frzName}ShadowColors`][_j]) {
-				const toShadowColorCode = g_workObj[`${frzName}ShadowColorsAll`][_j];
-				if (g_workObj[`${frzName}ShadowColors`][_j] === toShadowColorCode) {
-					frzTopShadow.style.background = toShadowColorCode;
-					frzBtmShadow.style.background = toShadowColorCode;
-					frzTopShadow.setAttribute(`color`, toShadowColorCode);
-				}
+			// 矢印塗りつぶし部分の色変化
+			const cFrzShadowColor = g_workObj[`${frzPattern}ShadowColors`][_j];
+			if (g_attrObj[frzName][`${_state}Shadow`] !== cFrzShadowColor) {
+				frzTopShadow.style.background = cFrzShadowColor;
+				frzBtmShadow.style.background = cFrzShadowColor;
+				g_attrObj[frzName][`${_state}Shadow`] = cFrzShadowColor;
 			}
 		}
 	};
@@ -9759,6 +9749,7 @@ const mainInit = _ => {
 			dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
 			prevY: firstPosY, y: firstPosY,
 		};
+		g_typeLists.arrowColor.forEach(val => g_attrObj[arrowName][`Arrow${val}`] = g_workObj[`${_name}${val}Colors`][_j]);
 		arrowSprite[dividePos].appendChild(stepRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
@@ -9840,6 +9831,8 @@ const mainInit = _ => {
 			boostSpd: g_workObj.boostSpd, dividePos: dividePos, dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
 			y: firstPosY, barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos, btmY: firstBarLength * g_workObj.scrollDir[_j],
 		};
+		g_typeLists.frzColor.forEach(val => g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j]);
+
 		arrowSprite[dividePos].appendChild(frzRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
@@ -10292,7 +10285,6 @@ const changeColors = (_mkColor, _mkColorCd, _header, _name) => {
 		const targetj = tempj % 1000;
 		g_workObj[`${camelHeader}Colors`][targetj] = _mkColorCd[j];
 		if (tempj >= 1000) {
-			g_workObj[`${camelHeader}ColorsAll`][targetj] = _mkColorCd[j];
 			if (camelHeader.indexOf(`frzHitBar`) !== -1 && isNaN(Number(g_workObj.arrowRtn[targetj]))) {
 				$id(`frzHitTop${targetj}`).background = _mkColorCd[j];
 			}
@@ -10355,7 +10347,6 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
 	const styfrzTopShadow = $id(`${_name}TopShadow${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
-	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
 	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - currentFrz.y;
@@ -10375,14 +10366,13 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 
 	styfrzBar.top = wUnit(currentFrz.barY);
 	styfrzBar.height = wUnit(currentFrz.frzBarLength);
-	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
+	styfrzBar.background = currentFrz.HitBar;
 	styfrzBtm.top = wUnit(currentFrz.btmY);
-	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
+	styfrzBtm.background = currentFrz.Hit;
 	styfrzTopShadow.opacity = 0;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
-		styfrzBtmShadow.background = g_workObj[`${_name}HitShadowColors`][_j] === `Default` ?
-			g_workObj[`${_name}HitColors`][_j] : g_workObj[`${_name}HitShadowColors`][_j];
+		styfrzBtmShadow.background = currentFrz.HitShadow === `Default` ? currentFrz.Hit : currentFrz.HitShadow;
 		$id(`frzHit${_j}`).opacity = 0.9;
 		$id(`frzTop${frzNo}`).display = C_DIS_NONE;
 		if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
