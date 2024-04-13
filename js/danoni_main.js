@@ -7687,7 +7687,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const patterns = replaceStr(trimStr(patternStr[1]), g_escapeStr.frzPatternName)?.split(`/`) || [`Arrow`];
 
 				const colorVals = [];
-				patternStr[0]?.split(`/`)?.forEach(val => {
+				replaceStr(patternStr[0], g_escapeStr.targetPatternName)?.split(`/`)?.forEach(val => {
 					if (val.startsWith('g')) {
 						const groupVal = setIntVal(val.slice(1));
 						for (let j = 0; j < keyNum; j++) {

@@ -683,6 +683,9 @@ const g_escapeStr = {
         [`FrzShadow`, `NormalShadow/HitShadow`],
         [`Frz`, `Normal/NormalBar/Hit/HitBar`],
     ],
+    targetPatternName: [
+        [`all`, `g0/g1/g2/g3/g4`],
+    ],
 };
 
 /** 設定・オプション画面用共通 */
