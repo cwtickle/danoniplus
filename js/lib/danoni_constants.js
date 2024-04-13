@@ -616,12 +616,14 @@ let g_imgExtensions = [`png`, `gif`, `bmp`, `jpg`, `jpeg`, `svg`];
 const g_typeLists = {
     arrow: [`arrow`, `dummyArrow`, `frz`, `dummyFrz`],
     color: [`color`, `acolor`],
-    frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`],
+    frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`, `NormalShadow`, `HitShadow`],
     dataList: [
         `Arrow`, `FrzArrow`, `FrzLength`,
         `Color`, `ColorCd`, `ScrollchArrow`, `ScrollchStep`, `ScrollchArrowDir`, `ScrollchStepDir`,
         `FColorNormal`, `FColorNormalCd`, `FColorNormalBar`, `FColorNormalBarCd`,
+        `FColorNormalShadow`, `FColorNormalShadowCd`,
         `FColorHit`, `FColorHitCd`, `FColorHitBar`, `FColorHitBarCd`,
+        `FColorHitShadow`, `FColorHitShadowCd`,
         `ArrowCssMotion`, `ArrowCssMotionName`,
         `FrzCssMotion`, `FrzCssMotionName`,
         `ArrowColorChangeAll`, `FrzColorChangeAll`,
@@ -674,6 +676,11 @@ const g_escapeStr = {
         [`Multiply`, `*`], [`Add`, `+`], [`Subtract`, `-`], [`Decimal`, `.`], [`Divide`, `Div`],
         [`Quote`, `Ja-Colon`], [`BracketLeft`, `Ja-@`], [`BracketRight`, `Ja-[`],
         [`Backslash`, `Ja-]`], [`Equal`, `Ja-^`],
+    ],
+    frzPatternName: [
+        [`FrzNormal`, `Normal/NormalBar`], [`FrzHit`, `Hit/HitBar`],
+        [`FrzShadow`, `NormalShadow/HitShadow`],
+        [`Frz`, `Normal/NormalBar/Hit/HitBar`],
     ],
 };
 
