@@ -9513,12 +9513,12 @@ const mainInit = _ => {
 			const changeColor = (_type, _baseObj, _baseObj2) => {
 				const cFrzColor = g_workObj[`${_name}${_state}${_type}Colors`][_j];
 				const cFrzColorAll = g_workObj[`${_name}${_state}${_type}ColorsAll`][_j];
-				if (_baseObj.getAttribute(`color`) !== cFrzColorAll && cFrzColor === cFrzColorAll) {
+				if (_baseObj.getAttribute(`color${_state}`) !== cFrzColor && cFrzColorAll === cFrzColor) {
 					if (_baseObj2 && _state === `Normal`) {
 						_baseObj2.style.background = cFrzColorAll;
 					}
 					_baseObj.style.background = cFrzColorAll;
-					_baseObj.setAttribute(`color`, cFrzColorAll);
+					_baseObj.setAttribute(`color${_state}`, cFrzColorAll);
 				}
 			};
 
@@ -10393,13 +10393,14 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 
 	styfrzBar.top = wUnit(currentFrz.barY);
 	styfrzBar.height = wUnit(currentFrz.frzBarLength);
-	styfrzBar.background = currentFrz.HitBar;
+	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
 	styfrzBtm.top = wUnit(currentFrz.btmY);
-	styfrzBtm.background = currentFrz.Hit;
+	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
 	styfrzTopShadow.opacity = 0;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
-		styfrzBtmShadow.background = currentFrz.HitShadow === `Default` ? currentFrz.Hit : currentFrz.HitShadow;
+		styfrzBtmShadow.background = g_workObj[`${_name}HitShadowColors`][_j] === `Default` ?
+			g_workObj[`${_name}HitColors`][_j] : g_workObj[`${_name}HitShadowColors`][_j];
 		$id(`frzHit${_j}`).opacity = 0.9;
 		$id(`frzTop${frzNo}`).display = C_DIS_NONE;
 		if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
