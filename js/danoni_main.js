@@ -1593,7 +1593,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 	let maxDepth = -1;
 
 	splitLF(_data).filter(data => hasVal(data)).forEach(tmpData => {
-		const tmpSpriteData = tmpData.split(`,`);
+		const tmpSpriteData = tmpData.split(`,`).map(val => trimStr(val));
 
 		// 深度が"-"の場合はスキップ
 		if (tmpSpriteData.length <= 1 || tmpSpriteData[1] === `-`) {
@@ -1677,7 +1677,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 const makeStyleData = (_data, _calcFrame = _frame => _frame) => {
 	const spriteData = [];
 	splitLF(_data).filter(data => hasVal(data)).forEach(tmpData => {
-		const tmpSpriteData = tmpData.split(`,`);
+		const tmpSpriteData = tmpData.split(`,`).map(val => trimStr(val));
 
 		// カスタムプロパティの名称(--始まり)で無い場合はコメントと見做してスキップ
 		if (tmpSpriteData.length <= 1 || !tmpSpriteData[1].startsWith(`--`)) {
@@ -7673,17 +7673,17 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		if (hasVal(dosColorData) && g_stateObj.d_color === C_FLG_ON) {
 
 			splitLF(dosColorData).filter(data => hasVal(data)).forEach(tmpData => {
-				const tmpColorData = tmpData.split(`,`);
+				const tmpColorData = tmpData.split(`,`).map(val => trimStr(val));
 				if (!hasVal(tmpColorData[0]) || tmpColorData[1] === `-`) {
 					return;
 				}
-				const frame = calcFrame(setVal(trimStr(tmpColorData[0]), ``, C_TYP_CALC));
-				const colorCd = trimStr(tmpColorData[2]);
+				const frame = calcFrame(setVal(tmpColorData[0], ``, C_TYP_CALC));
+				const colorCd = tmpColorData[2];
 
 				// 色変化対象の取得
 				const pos = tmpColorData[1]?.indexOf(`:`);
 				const patternStr = pos > 0 ? [trimStr(tmpColorData[1].substring(0, pos)), trimStr(tmpColorData[1].substring(pos + 1))]
-					: [trimStr(tmpColorData[1])];
+					: [tmpColorData[1]];
 				const patterns = replaceStr(trimStr(patternStr[1]), g_escapeStr.colorPatternName)?.split(`/`) || [`Arrow`];
 
 				// 矢印番号の組み立て
@@ -7877,7 +7877,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		}
 
 		tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
-			const tmpWordData = tmpData.split(`,`);
+			const tmpWordData = tmpData.split(`,`).map(val => trimStr(val));
 			for (let k = 0; k < tmpWordData.length; k += 3) {
 				if (!hasVal(tmpWordData[k])) {
 					continue;
