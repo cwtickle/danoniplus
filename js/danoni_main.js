@@ -684,27 +684,17 @@ const preloadFile = (_as, _href, _type = ``, _crossOrigin = `anonymous`) => {
 		g_preloadFiles.all.push(_href);
 		g_preloadFiles[_as]?.push(_href) || (g_preloadFiles[_as] = [_href]);
 
-		if (_as === `image`) {
-			// Imageの場合のみ、画像読込形式にする
-			g_loadObj[_href] = false;
-			const img = new Image();
-			img.src = _href;
-			img.onload = _ => g_loadObj[_href] = true;
-
-		} else {
-			// それ以外の場合はrel=preloadを利用
-			const link = document.createElement(`link`);
-			link.rel = `preload`;
-			link.as = _as;
-			link.href = _href;
-			if (_type !== ``) {
-				link.type = _type;
-			}
-			if (!g_isFile) {
-				link.crossOrigin = _crossOrigin;
-			}
-			document.head.appendChild(link);
+		const link = document.createElement(`link`);
+		link.rel = `preload`;
+		link.as = _as;
+		link.href = _href;
+		if (_type !== ``) {
+			link.type = _type;
 		}
+		if (!g_isFile) {
+			link.crossOrigin = _crossOrigin;
+		}
+		document.head.appendChild(link);
 	}
 };
 
@@ -7320,17 +7310,7 @@ const loadingScoreInit = async () => {
 	// ユーザカスタムイベント
 	g_customJsObj.loading.forEach(func => func());
 
-	const tempId = setInterval(() => {
-		const executeMain = _ => {
-			clearInterval(tempId);
-			mainInit();
-		}
-		if (g_audio.duration !== undefined) {
-			if (g_preloadFiles.image.every(v => g_loadObj[v] === true)) {
-				executeMain();
-			}
-		}
-	}, 100);
+	mainInit();
 };
 
 /**
