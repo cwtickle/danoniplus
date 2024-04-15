@@ -837,6 +837,5 @@ input[type="color"] {
 .result_Cleared,
 .result_Failed {
 	background-clip: text;
-	-webkit-background-clip: text;
 	color: rgba(255, 255, 255, 0.0);
 }

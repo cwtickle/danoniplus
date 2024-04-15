@@ -684,15 +684,15 @@ const preloadFile = (_as, _href, _type = ``, _crossOrigin = `anonymous`) => {
 		g_preloadFiles.all.push(_href);
 		g_preloadFiles[_as]?.push(_href) || (g_preloadFiles[_as] = [_href]);
 
-		if (g_userAgent.indexOf(`firefox`) !== -1 && _as === `image`) {
-			// Firefoxの場合のみpreloadが効かないため、画像読込形式にする
+		if (_as === `image`) {
+			// Imageの場合のみ、画像読込形式にする
 			g_loadObj[_href] = false;
 			const img = new Image();
 			img.src = _href;
 			img.onload = _ => g_loadObj[_href] = true;
 
 		} else {
-			// それ以外のブラウザの場合はrel=preloadを利用
+			// それ以外の場合はrel=preloadを利用
 			const link = document.createElement(`link`);
 			link.rel = `preload`;
 			link.as = _as;
@@ -1159,8 +1159,6 @@ const createColorObject2 = (_id,
 
 	style.maskImage = `url("${g_imgObj[charaStyle]}")`;
 	style.maskSize = `contain`;
-	style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
-	style.webkitMaskSize = `contain`;
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 	setAttrs(div, { color: rest.background ?? ``, type: charaStyle, cnt: 0, });
 
@@ -4179,7 +4177,6 @@ const titleInit = _ => {
 				font-family:${g_headerObj.titlefonts[0]};
 				background: ${titlegrds[0]};
 				background-clip: text;
-				-webkit-background-clip: text;
 				color: rgba(255,255,255,0.0);
 				${txtAnimations[0]}
 			" class="${g_headerObj.titleAnimationClass[0]}">
@@ -4192,7 +4189,6 @@ const titleInit = _ => {
 				font-family:${g_headerObj.titlefonts[1]};
 				background: ${titlegrds[1]};
 				background-clip: text;
-				-webkit-background-clip: text;
 				color: rgba(255,255,255,0.0);
 				${txtAnimations[1]}
 			" class="${g_headerObj.titleAnimationClass[1]}">
@@ -7330,11 +7326,7 @@ const loadingScoreInit = async () => {
 			mainInit();
 		}
 		if (g_audio.duration !== undefined) {
-			if (g_userAgent.indexOf(`firefox`) !== -1) {
-				if (g_preloadFiles.image.every(v => g_loadObj[v] === true)) {
-					executeMain();
-				}
-			} else {
+			if (g_preloadFiles.image.every(v => g_loadObj[v] === true)) {
 				executeMain();
 			}
 		}
