@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/04/03
+ * Revised : 2024/04/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 35.5.0`;
-const g_revisedDate = `2024/04/03`;
+const g_version = `Ver 36.0.0`;
+const g_revisedDate = `2024/04/15`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -247,6 +247,12 @@ const convertStrToVal = _str => {
 	return convStrs;
 };
 
+/**
+ * 半角スペース、タブを文字列から除去
+ * @param {string} _str 
+ */
+const trimStr = _str => _str?.split(`\t`).join(``).trimStart().trimEnd();
+
 /*-----------------------------------------------------------*/
 /* 値や配列のチェック・変換                                    */
 /*-----------------------------------------------------------*/
@@ -472,7 +478,7 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
  */
 const replaceStr = (_str, _pairs) => {
 	let tmpStr = _str;
-	_pairs.forEach(pair => tmpStr = tmpStr.replaceAll(pair[0], pair[1]));
+	_pairs.forEach(pair => tmpStr = tmpStr?.replaceAll(pair[0], pair[1]));
 	return tmpStr;
 };
 
@@ -1587,7 +1593,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 	let maxDepth = -1;
 
 	splitLF(_data).filter(data => hasVal(data)).forEach(tmpData => {
-		const tmpSpriteData = tmpData.split(`,`);
+		const tmpSpriteData = tmpData.split(`,`).map(val => trimStr(val));
 
 		// 深度が"-"の場合はスキップ
 		if (tmpSpriteData.length <= 1 || tmpSpriteData[1] === `-`) {
@@ -1671,7 +1677,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 const makeStyleData = (_data, _calcFrame = _frame => _frame) => {
 	const spriteData = [];
 	splitLF(_data).filter(data => hasVal(data)).forEach(tmpData => {
-		const tmpSpriteData = tmpData.split(`,`);
+		const tmpSpriteData = tmpData.split(`,`).map(val => trimStr(val));
 
 		// カスタムプロパティの名称(--始まり)で無い場合はコメントと見做してスキップ
 		if (tmpSpriteData.length <= 1 || !tmpSpriteData[1].startsWith(`--`)) {
@@ -7641,12 +7647,81 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					const colorCd = tmpColorData[k + 2];
 
 					// フレーム数、色番号、カラーコード、全体色変化フラグをセットとして配列化
-					colorData.push([frame, colorNum, colorCd, allFlg]);
+					// フリーズアローヒット時の個別色変化は互換のため全体色変化として扱う
+					colorData.push([frame, colorNum, colorCd, isFrzHitColor(colorNum) && !allFlg ? true : allFlg]);
 				}
 			});
 			return colorData.sort((_a, _b) => _a[0] - _b[0]);
 		}
 		return [];
+	};
+
+	/**
+	 * 色変化データの分解・格納（新形式）
+	 * - 個別・全体色変化を一体で管理するため通常の配列で返却
+	 * @param {string} _header 
+	 * @param {number} _scoreNo 
+	 * @returns 
+	 */
+	const setColor2Data = (_header, _scoreNo) => {
+		const dosColorData = getRefData(_header, `${_scoreNo}_data`);
+		const colorData = {
+			Arrow: [], ArrowShadow: [], Normal: [], NormalBar: [], NormalShadow: [],
+			Hit: [], HitBar: [], HitShadow: [],
+		};
+
+		if (hasVal(dosColorData) && g_stateObj.d_color === C_FLG_ON) {
+
+			splitLF(dosColorData).filter(data => hasVal(data)).forEach(tmpData => {
+				const tmpColorData = tmpData.split(`,`).map(val => trimStr(val));
+				if (!hasVal(tmpColorData[0]) || tmpColorData[1] === `-`) {
+					return;
+				}
+				const frame = calcFrame(setVal(tmpColorData[0], ``, C_TYP_CALC));
+				const colorCd = tmpColorData[2];
+
+				// 色変化対象の取得
+				const pos = tmpColorData[1]?.indexOf(`:`);
+				const patternStr = pos > 0 ? [trimStr(tmpColorData[1].substring(0, pos)), trimStr(tmpColorData[1].substring(pos + 1))]
+					: [tmpColorData[1]];
+				const patterns = replaceStr(trimStr(patternStr[1]), g_escapeStr.colorPatternName)?.split(`/`) || [`Arrow`];
+
+				// 矢印番号の組み立て
+				const colorVals = [];
+				replaceStr(patternStr[0], g_escapeStr.targetPatternName)?.split(`/`)?.forEach(val => {
+					if (val.startsWith('g')) {
+						// g付きの場合は矢印グループから対象の矢印番号を検索
+						const groupVal = setIntVal(val.slice(1));
+						for (let j = 0; j < keyNum; j++) {
+							if (g_keyObj[`color${_keyCtrlPtn}`][j] === groupVal) {
+								colorVals.push(j);
+							}
+						}
+					} else if (val.indexOf(`...`) > 0) {
+						// 範囲指定表記の補完　例. 0...3 -> 0/1/2/3
+						const [valMin, valMax] = [val.split(`...`)[0], val.split(`...`)[1]].map(val => setIntVal(val));
+						for (let k = valMin; k <= valMax; k++) {
+							colorVals.push(setIntVal(k));
+						}
+					} else {
+						colorVals.push(setIntVal(val));
+					}
+				});
+
+				// フレーム数、色番号、カラーコード、全体色変化フラグ、変更対象をセットとして配列化し、色変化対象ごとのプロパティへ追加
+				patterns.forEach(pattern => {
+					try {
+						colorVals.forEach(val => colorData[pattern].push([frame, val, colorCd, hasVal(tmpColorData[3]), pattern]));
+					} catch (error) {
+						makeWarningWindow(g_msgInfoObj.E_0201.split(`{0}`).join(pattern));
+					}
+				});
+			});
+			// 色変化対象ごとにフレーム数をキーにソートしてフラット化
+			Object.keys(colorData).forEach(pattern =>
+				colorData[pattern] = colorData[pattern].sort((_a, _b) => _a[0] - _b[0]).flat());
+		}
+		return colorData;
 	};
 
 	/**
@@ -7802,7 +7877,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		}
 
 		tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
-			const tmpWordData = tmpData.split(`,`);
+			const tmpWordData = tmpData.split(`,`).map(val => trimStr(val));
 			for (let k = 0; k < tmpWordData.length; k += 3) {
 				if (!hasVal(tmpWordData[k])) {
 					continue;
@@ -7881,6 +7956,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			obj[`${sprite}DummyData`] = setColorData(sprite, _dummyNo);
 		}
 	});
+	// 色変化（新形式）の分解（3～4つで1セット, セット毎の改行区切り）
+	obj.ncolorData = setColor2Data(`ncolor`, scoreIdHeader);
+	if (g_stateObj.dummyId !== ``) {
+		obj.ncolorDummyData = setColor2Data(`ncolor`, _dummyNo);
+	}
 
 	if (_scoreAnalyzeFlg) {
 		return obj;
@@ -8263,17 +8343,17 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	 * @param {object} obj _colorFlg: 個別色変化フラグ, _calcFrameFlg: 逆算を無条件で行うかどうかの可否
 	 */
 	const calcDataTiming = (_type, _header, _setFunc = _ => true,
-		{ _term = 4, _colorFlg = false, _calcFrameFlg = false } = {}) => {
+		{ _term = 4, _colorFlg = false, _calcFrameFlg = false, _propName = `` } = {}) => {
 
 		const camelHeader = _header === `` ? _type : `${_header}${toCapitalize(_type)}`;
-		const baseData = _dataObj[`${camelHeader}Data`];
+		const baseData = hasVal(_propName) ? _dataObj[`${camelHeader}Data`][_propName] : _dataObj[`${camelHeader}Data`];
 
 		if (!hasArrayList(baseData, _term)) {
 			return;
 		}
 		const frontData = [];
 		for (let k = baseData.length - _term; k >= 0; k -= _term) {
-			const calcFrameFlg = (_colorFlg && !isFrzHitColor(baseData[k + 1]) && !baseData[k + 3]) || _calcFrameFlg;
+			const calcFrameFlg = (_colorFlg && !baseData[k + 3]) || _calcFrameFlg;
 
 			if (baseData[k] < g_scoreObj.frameNum) {
 				// フェードイン直前にある色変化・モーションデータ・スクロール反転データを取得して格納
@@ -8362,7 +8442,13 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	};
 
 	// 個別・全体色変化、モーションデータ・スクロール反転データのタイミング更新
-	[``, `dummy`].forEach(type => calcDataTiming(`color`, type, pushColors, { _colorFlg: true }));
+	[``, `dummy`].forEach(type => {
+		calcDataTiming(`color`, type, pushColors, { _colorFlg: true });
+		if (_dataObj[`ncolor${type}Data`] !== undefined) {
+			Object.keys(_dataObj[`ncolor${type}Data`]).forEach(pattern =>
+				calcDataTiming(`ncolor`, type, pushColors, { _term: 5, _colorFlg: true, _propName: pattern }));
+		}
+	});
 
 	g_typeLists.arrow.forEach(header =>
 		calcDataTiming(`cssMotion`, header, pushCssMotions, { _calcFrameFlg: true }));
@@ -8463,7 +8549,7 @@ const convertReplaceNums = _ => {
  * @param {string} _colorCd 
  * @param {string} _allFlg
  */
-const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
+const pushColors = (_header, _frame, _val, _colorCd, _allFlg, _pattern = ``) => {
 
 	const tkObj = getKeyInfo();
 	const grdFlg = (g_colorType === `Type0` ? !g_headerObj.defaultColorgrd[0] : g_headerObj.defaultColorgrd[0]);
@@ -8491,62 +8577,93 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg) => {
 		g_workObj[`${_baseStr}Cd`][_frame]?.push(colorCd) || (g_workObj[`${_baseStr}Cd`][_frame] = [colorCd]);
 	};
 
-	if (_val < 30 || _val >= 1000) {
-		const baseHeaders = [`mk${_header}Color`];
-		allUseTypes.push(`Arrow`);
+	/**
+	 * 色変化データ(ncolor_data)の格納処理
+	 */
+	const executePushColors = () => {
+		const baseHeaders = [];
+		if (_pattern.startsWith(`Arrow`)) {
+			baseHeaders.push(`mk${_header}Color${_pattern.slice('Arrow'.length)}`);
+			allUseTypes.push(`Arrow`);
 
-		// フリーズアロー色の追随設定がある場合、対象を追加
-		g_headerObj.frzScopeFromArrowColors.forEach(type =>
-			baseHeaders.push(`mk${_header}FColor${type}`, `mk${_header}FColor${type}Bar`));
-		if (g_headerObj.frzScopeFromArrowColors.length > 0) {
+			// フリーズアロー色の追随設定がある場合、対象を追加
+			if (_pattern === `Arrow`) {
+				g_headerObj.frzScopeFromArrowColors.forEach(type =>
+					baseHeaders.push(`mk${_header}FColor${type}`, `mk${_header}FColor${type}Bar`));
+				if (g_headerObj.frzScopeFromArrowColors.length > 0) {
+					allUseTypes.push(`Frz`);
+				}
+			}
+		} else {
+			baseHeaders.push(`mk${_header}FColor${_pattern}`);
 			allUseTypes.push(`Frz`);
 		}
+		// 色変化情報の格納
+		baseHeaders.forEach(baseHeader => pushColor(baseHeader, g_workObj.replaceNums[_val] + addAll));
+	};
 
-		// 矢印の色変化 (追随指定時はフリーズアローも色変化)
-		baseHeaders.forEach(baseHeader => {
-			if (_val < 20 || _val >= 1000) {
-				pushColor(baseHeader, g_workObj.replaceNums[_val % 1000] + addAll);
-			} else if (_val >= 20) {
-				const colorNum = _val - 20;
-				for (let j = 0; j < tkObj.keyNum; j++) {
-					if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
-						pushColor(baseHeader, j + addAll);
+	/**
+	 * 従来の色変化データ派生(color_data, acolor_data)の格納処理
+	 */
+	const executePushColorsOld = () => {
+
+		if (_val < 30 || _val >= 1000) {
+			const baseHeaders = [`mk${_header}Color`];
+			allUseTypes.push(`Arrow`);
+
+			// フリーズアロー色の追随設定がある場合、対象を追加
+			g_headerObj.frzScopeFromArrowColors.forEach(type =>
+				baseHeaders.push(`mk${_header}FColor${type}`, `mk${_header}FColor${type}Bar`));
+			if (g_headerObj.frzScopeFromArrowColors.length > 0) {
+				allUseTypes.push(`Frz`);
+			}
+
+			// 矢印の色変化 (追随指定時はフリーズアローも色変化)
+			baseHeaders.forEach(baseHeader => {
+				if (_val < 20 || _val >= 1000) {
+					pushColor(baseHeader, g_workObj.replaceNums[_val % 1000] + addAll);
+				} else if (_val >= 20) {
+					const colorNum = _val - 20;
+					for (let j = 0; j < tkObj.keyNum; j++) {
+						if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
+							pushColor(baseHeader, j + addAll);
+						}
 					}
 				}
-			}
-		});
-
-	} else {
-		const baseHeader = `mk${_header}FColor`;
-		allUseTypes.push(`Frz`);
-
-		// フリーズアローの色変化
-		const tmpVals = [];
-		if (_val < 50) {
-			tmpVals.push(_val % 30);
-		} else if (_val < 60) {
-			tmpVals.push((_val % 50) * 2, (_val % 50) * 2 + 1);
-		} else {
-			if (_val === 60) {
-				tmpVals.push(...Array(8).keys());
-			} else {
-				tmpVals.push(...[...Array(8).keys()].map(j => j + 10));
-			}
-		}
-		tmpVals.forEach(targetj => {
-
-			// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
-			const ctype = (targetj >= 10 ? `Hit` : `Normal`) + (targetj % 2 === 0 ? `` : `Bar`);
-			const colorPos = Math.ceil((targetj % 10 - 1) / 2);
-
-			g_keyObj[`color${tkObj.keyCtrlPtn}`].forEach((cpattern, k) => {
-				if (colorPos === cpattern) {
-					pushColor(baseHeader + ctype, k + addAll);
-				}
 			});
-		});
-	}
 
+		} else {
+			const baseHeader = `mk${_header}FColor`;
+			allUseTypes.push(`Frz`);
+
+			// フリーズアローの色変化
+			const tmpVals = [];
+			if (_val < 50) {
+				tmpVals.push(_val % 30);
+			} else if (_val < 60) {
+				tmpVals.push((_val % 50) * 2, (_val % 50) * 2 + 1);
+			} else {
+				if (_val === 60) {
+					tmpVals.push(...Array(8).keys());
+				} else {
+					tmpVals.push(...[...Array(8).keys()].map(j => j + 10));
+				}
+			}
+			tmpVals.forEach(targetj => {
+
+				// targetj=0,2,4,6,8 ⇒ Arrow, 1,3,5,7,9 ⇒ Bar
+				const ctype = (targetj >= 10 ? `Hit` : `Normal`) + (targetj % 2 === 0 ? `` : `Bar`);
+				const colorPos = Math.ceil((targetj % 10 - 1) / 2);
+
+				g_keyObj[`color${tkObj.keyCtrlPtn}`].forEach((cpattern, k) => {
+					if (colorPos === cpattern) {
+						pushColor(baseHeader + ctype, k + addAll);
+					}
+				});
+			});
+		}
+	};
+	hasVal(_pattern) ? executePushColors() : executePushColorsOld();
 	enabledAll(...allUseTypes);
 };
 
@@ -8661,13 +8778,11 @@ const getArrowSettings = _ => {
 	g_workObj.judgFrzHitCnt = [...Array(keyNum)].fill(1);
 	g_judgObj.lockFlgs = [...Array(keyNum)].fill(false);
 
-	// TODO: この部分を矢印塗りつぶし部分についても適用できるように変数を作成
-
 	// 矢印色管理 (個別・全体)
 	const eachOrAll = [``, `All`];
 	eachOrAll.forEach(type => {
-		g_workObj[`arrowColors${type}`] = [];
-		g_workObj[`dummyArrowColors${type}`] = [];
+		[`arrow`, `dummyArrow`].forEach(arrowType =>
+			g_typeLists.arrowColor.forEach(objType => g_workObj[`${arrowType}${objType}Colors${type}`] = []));
 
 		[`frz`, `dummyFrz`].forEach(arrowType =>
 			g_typeLists.frzColor.forEach(frzType => g_workObj[`${arrowType}${frzType}Colors${type}`] = []));
@@ -8692,16 +8807,18 @@ const getArrowSettings = _ => {
 		g_workObj.dividePos[j] = ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
 		g_workObj.scrollDir[j] = (posj <= divideCnt ? 1 : -1) * scrollDirOptions[j] * (g_stateObj.reverse === C_FLG_OFF ? 1 : -1);
 
-		// TODO: この部分を矢印塗りつぶし部分についても適用できるように変数を作成
-
 		eachOrAll.forEach(type => {
 			g_workObj[`arrowColors${type}`][j] = g_headerObj.setColor[colorj];
 			g_workObj[`dummyArrowColors${type}`][j] = g_headerObj.setDummyColor[colorj];
+			g_workObj[`arrowShadowColors${type}`][j] = g_headerObj.setShadowColor[colorj] || ``;
+			g_workObj[`dummyArrowShadowColors${type}`][j] = g_headerObj.setDummyColor[colorj] || ``;
 
 			g_typeLists.frzColor.forEach((frzType, k) => {
-				g_workObj[`frz${frzType}Colors${type}`][j] = g_headerObj.frzColor[colorj][k];
+				g_workObj[`frz${frzType}Colors${type}`][j] = g_headerObj.frzColor[colorj][k] || ``;
 				g_workObj[`dummyFrz${frzType}Colors${type}`][j] = g_headerObj.setDummyColor[colorj];
 			});
+			g_workObj[`frzNormalShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][0] || ``;
+			g_workObj[`frzHitShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][1] || ``;
 		});
 	}
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
@@ -9342,13 +9459,30 @@ const mainInit = _ => {
 	 */
 	const changeArrowColor = (_j, _k, _name) => {
 		if (g_workObj[`mk${toCapitalize(_name)}ColorChangeAll`][g_scoreObj.frameNum]) {
-			const colorSelf = g_workObj[`${_name}Colors`][_j];
-			const colorAll = g_workObj[`${_name}ColorsAll`][_j];
-			const arrowTop = document.getElementById(`${_name}Top${_j}_${_k}`);
 
-			if (arrowTop.getAttribute(`color`) !== colorSelf && colorAll === colorSelf) {
-				arrowTop.style.background = colorAll;
-				arrowTop.setAttribute(`color`, colorAll);
+			/**
+			 * 全体色の変更処理
+			 * - 次の全体色変化対象の色と比較して一致した場合に色を変更
+			 * @param {string} _type 
+			 * @param {element} _baseObj 
+			 */
+			const changeColor = (_type, _baseObj) => {
+				const cArrowColor = g_workObj[`${_name}${_type}Colors`][_j];
+				const cArrowColorAll = g_workObj[`${_name}${_type}ColorsAll`][_j];
+				if (_baseObj.getAttribute(`color`) !== cArrowColor && cArrowColorAll === cArrowColor) {
+					_baseObj.style.background = cArrowColorAll;
+					_baseObj.setAttribute(`color`, cArrowColorAll);
+				}
+			};
+
+			// 矢印枠の色変化
+			const arrowTop = document.getElementById(`${_name}Top${_j}_${_k}`);
+			changeColor(``, arrowTop);
+
+			// 矢印塗りつぶし部分の色変化
+			if (g_headerObj.setShadowColor[0] !== ``) {
+				const arrowShadow = document.getElementById(`${_name}Shadow${_j}_${_k}`);
+				changeColor(`Shadow`, arrowShadow);
 			}
 		}
 	};
@@ -9363,30 +9497,39 @@ const mainInit = _ => {
 	const changeFrzColor = (_j, _k, _name, _state) => {
 
 		if (g_workObj[`mk${toCapitalize(_name)}ColorChangeAll`][g_scoreObj.frameNum]) {
-			const frzTop = document.getElementById(`${_name}Top${_j}_${_k}`);
-			const frzBar = document.getElementById(`${_name}Bar${_j}_${_k}`);
-			const frzBtm = document.getElementById(`${_name}Btm${_j}_${_k}`);
-			const frzName = `${_name}${_state}`;
+			const frzNo = `${_j}_${_k}`;
+			const frzTop = document.getElementById(`${_name}Top${frzNo}`);
+			const frzBar = document.getElementById(`${_name}Bar${frzNo}`);
+			const frzBtm = document.getElementById(`${_name}Btm${frzNo}`);
+			const frzTopShadow = document.getElementById(`${_name}TopShadow${frzNo}`);
+			const frzBtmShadow = document.getElementById(`${_name}BtmShadow${frzNo}`);
+
+			/**
+			 * 全体色の変更処理
+			 * @param {string} _type 
+			 * @param {element} _baseObj 
+			 * @param {element} _baseObj2 
+			 */
+			const changeColor = (_type, _baseObj, _baseObj2) => {
+				const cFrzColor = g_workObj[`${_name}${_state}${_type}Colors`][_j];
+				const cFrzColorAll = g_workObj[`${_name}${_state}${_type}ColorsAll`][_j];
+				if (_baseObj.getAttribute(`color${_state}`) !== cFrzColor && cFrzColorAll === cFrzColor) {
+					if (_baseObj2 && _state === `Normal`) {
+						_baseObj2.style.background = cFrzColorAll;
+					}
+					_baseObj.style.background = cFrzColorAll;
+					_baseObj.setAttribute(`color${_state}`, cFrzColorAll);
+				}
+			};
 
 			// 矢印部分の色変化
-			if (frzBtm.getAttribute(`color`) !== g_workObj[`${frzName}Colors`][_j]) {
-				const toColorCode = g_workObj[`${frzName}ColorsAll`][_j];
-				if (g_workObj[`${frzName}Colors`][_j] === toColorCode) {
-					if (_state === `Normal`) {
-						frzTop.style.background = toColorCode;
-					}
-					frzBtm.style.background = toColorCode;
-					frzBtm.setAttribute(`color`, toColorCode);
-				}
-			}
+			changeColor(``, frzBtm, frzTop);
+
 			// 帯部分の色変化
-			if (frzBar.getAttribute(`color`) !== g_workObj[`${frzName}BarColors`][_j]) {
-				const toBarColorCode = g_workObj[`${frzName}BarColorsAll`][_j];
-				if (g_workObj[`${frzName}BarColors`][_j] === toBarColorCode) {
-					frzBar.style.background = toBarColorCode;
-					frzBar.setAttribute(`color`, toBarColorCode);
-				}
-			}
+			changeColor(`Bar`, frzBar);
+
+			// 矢印塗りつぶし部分の色変化
+			changeColor(`Shadow`, frzBtmShadow, frzTopShadow);
 		}
 	};
 
@@ -9610,8 +9753,9 @@ const mainInit = _ => {
 	 * @param {number} _arrowCnt 現在の判定矢印順
 	 * @param {string} _name 矢印名
 	 * @param {string} _color 矢印色
+	 * @param {string} _shadowColor 矢印塗りつぶし部分の色
 	 */
-	const makeArrow = (_j, _arrowCnt, _name, _color) => {
+	const makeArrow = (_j, _arrowCnt, _name, _color, _shadowColor) => {
 		const dividePos = g_workObj.dividePos[_j];
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 
@@ -9630,6 +9774,7 @@ const mainInit = _ => {
 			dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
 			prevY: firstPosY, y: firstPosY,
 		};
+		g_typeLists.arrowColor.forEach(val => g_attrObj[arrowName][`Arrow${val}`] = g_workObj[`${_name}${val}Colors`][_j]);
 		arrowSprite[dividePos].appendChild(stepRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
@@ -9644,9 +9789,10 @@ const mainInit = _ => {
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
 			// 矢印の塗り部分
 			const arrShadow = createColorObject2(`${_name}Shadow${_j}_${_arrowCnt}`, {
-				background: getShadowColor(colorPos, _color), rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: _shadowColor === `Default` ? _color : _shadowColor,
+				rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
 			});
-			if (g_headerObj.setShadowColor[colorPos] === `Default`) {
+			if (_shadowColor === `Default`) {
 				arrShadow.style.opacity = 0.5;
 			}
 			stepRoot.appendChild(arrShadow);
@@ -9690,8 +9836,9 @@ const mainInit = _ => {
 	 * @param {string} _name 
 	 * @param {string} _normalColor
 	 * @param {string} _barColor 
+	 * @param {string} _shadowColor
 	 */
-	const makeFrzArrow = (_j, _arrowCnt, _name, _normalColor, _barColor) => {
+	const makeFrzArrow = (_j, _arrowCnt, _name, _normalColor, _barColor, _shadowColor) => {
 		const dividePos = g_workObj.dividePos[_j];
 		const frzNo = `${_j}_${_arrowCnt}`;
 		const frzName = `${_name}${frzNo}`;
@@ -9710,19 +9857,15 @@ const mainInit = _ => {
 			boostSpd: g_workObj.boostSpd, dividePos: dividePos, dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
 			y: firstPosY, barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos, btmY: firstBarLength * g_workObj.scrollDir[_j],
 		};
+		g_typeLists.frzColor.forEach(val => g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j]);
+
 		arrowSprite[dividePos].appendChild(frzRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
 			frzRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
 		}
-
-		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
-		let shadowColor = ``;
-		if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
-			shadowColor = (g_headerObj.frzShadowColor[colorPos][0] === `Default` ?
-				_normalColor : g_headerObj.frzShadowColor[colorPos][0]);
-		}
+		let shadowColor = _shadowColor === `Default` ? _normalColor : _shadowColor;
 
 		// フリーズアローは、下記の順で作成する。
 		// 後に作成するほど前面に表示される。
@@ -9886,8 +10029,9 @@ const mainInit = _ => {
 			const headerU = toCapitalize(header);
 
 			// 個別・全体色変化 (矢印)
-			changeColors(g_workObj[`mk${headerU}Color`][currentFrame],
-				g_workObj[`mk${headerU}ColorCd`][currentFrame], header, `arrow`);
+			g_typeLists.arrowColor.forEach(ctype =>
+				changeColors(g_workObj[`mk${headerU}Color${ctype}`][currentFrame],
+					g_workObj[`mk${headerU}Color${ctype}Cd`][currentFrame], header, `arrow${ctype}`));
 
 			// 個別・全体色変化（フリーズアロー）
 			g_typeLists.frzColor.forEach(ctype =>
@@ -9916,19 +10060,21 @@ const mainInit = _ => {
 
 		// ダミー矢印生成（背面に表示するため先に処理）
 		g_workObj.mkDummyArrow[currentFrame]?.forEach(data =>
-			makeArrow(data, ++dummyArrowCnts[data], `dummyArrow`, g_workObj.dummyArrowColors[data]));
+			makeArrow(data, ++dummyArrowCnts[data], `dummyArrow`, g_workObj.dummyArrowColors[data], g_workObj.dummyArrowShadowColors[data]));
 
 		// 矢印生成
 		g_workObj.mkArrow[currentFrame]?.forEach(data =>
-			makeArrow(data, ++arrowCnts[data], `arrow`, g_workObj.arrowColors[data]));
+			makeArrow(data, ++arrowCnts[data], `arrow`, g_workObj.arrowColors[data], g_workObj.arrowShadowColors[data]));
 
 		// ダミーフリーズアロー生成
 		g_workObj.mkDummyFrzArrow[currentFrame]?.forEach(data =>
-			makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`, g_workObj.dummyFrzNormalColors[data], g_workObj.dummyFrzNormalBarColors[data]));
+			makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`, g_workObj.dummyFrzNormalColors[data],
+				_workObj.dummyFrzNormalBarColors[data], g_workObj.dummyFrzNormalShadowColors[data]));
 
 		// フリーズアロー生成
 		g_workObj.mkFrzArrow[currentFrame]?.forEach(data =>
-			makeFrzArrow(data, ++frzCnts[data], `frz`, g_workObj.frzNormalColors[data], g_workObj.frzNormalBarColors[data]));
+			makeFrzArrow(data, ++frzCnts[data], `frz`, g_workObj.frzNormalColors[data],
+				g_workObj.frzNormalBarColors[data], g_workObj.frzNormalShadowColors[data]));
 
 		// 矢印・フリーズアロー移動＆消去
 		for (let j = 0; j < keyNum; j++) {
@@ -10148,8 +10294,6 @@ const appearKeyTypes = (_j, _target) => {
 	}
 };
 
-// TODO: この部分を矢印塗りつぶし部分についても適用できるように関数を見直し
-
 /**
  * 個別・全体色変化
  * @param {array} _mkColor 
@@ -10230,7 +10374,6 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
 	const styfrzTopShadow = $id(`${_name}TopShadow${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
-	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
 	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - currentFrz.y;
@@ -10256,10 +10399,8 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	styfrzTopShadow.opacity = 0;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
-		if (g_headerObj.frzShadowColor[colorPos][1] !== ``) {
-			styfrzBtmShadow.background = (g_headerObj.frzShadowColor[colorPos][1] === `Default` ?
-				g_workObj.frzHitColors[_j] : g_headerObj.frzShadowColor[colorPos][1]);
-		}
+		styfrzBtmShadow.background = g_workObj[`${_name}HitShadowColors`][_j] === `Default` ?
+			g_workObj[`${_name}HitColors`][_j] : g_workObj[`${_name}HitShadowColors`][_j];
 		$id(`frzHit${_j}`).opacity = 0.9;
 		$id(`frzTop${frzNo}`).display = C_DIS_NONE;
 		if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
@@ -10281,6 +10422,8 @@ const changeFailedFrz = (_j, _k) => {
 	$id(`frzTop${frzNo}`).display = C_DIS_INHERIT;
 	$id(`frzTop${frzNo}`).background = `#cccccc`;
 	$id(`frzTopShadow${frzNo}`).opacity = 1;
+	$id(`frzTopShadow${frzNo}`).background = `#333333`;
+	$id(`frzBtmShadow${frzNo}`).background = `#333333`;
 	$id(`frzBar${frzNo}`).background = `#999999`;
 	$id(`frzBar${frzNo}`).opacity = 1;
 	$id(`frzBtm${frzNo}`).background = `#cccccc`;
@@ -10289,12 +10432,6 @@ const changeFailedFrz = (_j, _k) => {
 	const hitPos = g_workObj.hitPosition * g_workObj.scrollDir[_j];
 	$id(`frzTop${frzNo}`).top = wUnit(- hitPos);
 	$id(`frzTopShadow${frzNo}`).top = wUnit(- hitPos);
-
-	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
-	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
-		$id(`frzTopShadow${frzNo}`).background = `#333333`;
-		$id(`frzBtmShadow${frzNo}`).background = `#333333`;
-	}
 };
 
 /**

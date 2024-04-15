@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/04/03 (v35.5.0)
+ * Revised : 2024/04/15 (v36.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -616,12 +616,15 @@ let g_imgExtensions = [`png`, `gif`, `bmp`, `jpg`, `jpeg`, `svg`];
 const g_typeLists = {
     arrow: [`arrow`, `dummyArrow`, `frz`, `dummyFrz`],
     color: [`color`, `acolor`],
-    frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`],
+    arrowColor: [``, `Shadow`],
+    frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`, `NormalShadow`, `HitShadow`],
     dataList: [
         `Arrow`, `FrzArrow`, `FrzLength`,
-        `Color`, `ColorCd`, `ScrollchArrow`, `ScrollchStep`, `ScrollchArrowDir`, `ScrollchStepDir`,
+        `Color`, `ColorCd`, `ColorShadow`, `ColorShadowCd`, `ScrollchArrow`, `ScrollchStep`, `ScrollchArrowDir`, `ScrollchStepDir`,
         `FColorNormal`, `FColorNormalCd`, `FColorNormalBar`, `FColorNormalBarCd`,
+        `FColorNormalShadow`, `FColorNormalShadowCd`,
         `FColorHit`, `FColorHitCd`, `FColorHitBar`, `FColorHitBarCd`,
+        `FColorHitShadow`, `FColorHitShadowCd`,
         `ArrowCssMotion`, `ArrowCssMotionName`,
         `FrzCssMotion`, `FrzCssMotionName`,
         `ArrowColorChangeAll`, `FrzColorChangeAll`,
@@ -674,6 +677,19 @@ const g_escapeStr = {
         [`Multiply`, `*`], [`Add`, `+`], [`Subtract`, `-`], [`Decimal`, `.`], [`Divide`, `Div`],
         [`Quote`, `Ja-Colon`], [`BracketLeft`, `Ja-@`], [`BracketRight`, `Ja-[`],
         [`Backslash`, `Ja-]`], [`Equal`, `Ja-^`],
+    ],
+    colorPatternName: [
+        [`AR`, `Arrow`], [`AS`, `ArrowShadow`],
+        [`NA`, `Normal`], [`NB`, `NormalBar`], [`NS`, `NormalShadow`],
+        [`HA`, `Hit`], [`HB`, `HitBar`], [`HS`, `HitShadow`],
+        [`FN`, `Normal/NormalBar`], [`FH`, `Hit/HitBar`], [`FS`, `NormalShadow/HitShadow`],
+        [`AF`, `Arrow/Normal/NormalBar/Hit/HitBar`],
+        [`FrzNormal`, `Normal/NormalBar`], [`FrzHit`, `Hit/HitBar`],
+        [`FrzShadow`, `NormalShadow/HitShadow`],
+        [`Frz`, `Normal/NormalBar/Hit/HitBar`],
+    ],
+    targetPatternName: [
+        [`all`, `g0/g1/g2/g3/g4`],
     ],
 };
 
@@ -2740,6 +2756,8 @@ const g_lang_msgInfoObj = {
         E_0104: `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
         |keyCtrl{0}=75,79,76,80,187,32/0|`,
 
+        E_0201: `色変化データで指定した色変化対象が存在しません。[pattern={0}] (E-0201)`,
+
         I_0001: `リザルトデータをクリップボードにコピーしました！`,
         I_0002: `入力したキーは割り当てできません。他のキーを指定してください。`,
         I_0003: `各譜面の明細情報をクリップボードにコピーしました！`,
@@ -2786,6 +2804,8 @@ const g_lang_msgInfoObj = {
         |stepRtn{0}=0,45,-90,135,180,onigiri|`,
         E_0104: `New key: {0} [keyCtrl] is not set. (E-0104)<br>
         |keyCtrl{0}=75,79,76,80,187,32/0|`,
+
+        E_0201: `The color change target specified in the color change data does not exist. [pattern={0}] (E-0201)`,
 
         I_0001: `Your result data is copied to the clipboard!`,
         I_0002: `The specified key cannot be assigned. Please specify another key.`,
