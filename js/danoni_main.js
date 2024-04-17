@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/04/15
+ * Revised : 2024/04/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 36.0.0`;
-const g_revisedDate = `2024/04/15`;
+const g_version = `Ver 36.1.0`;
+const g_revisedDate = `2024/04/18`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -684,27 +684,17 @@ const preloadFile = (_as, _href, _type = ``, _crossOrigin = `anonymous`) => {
 		g_preloadFiles.all.push(_href);
 		g_preloadFiles[_as]?.push(_href) || (g_preloadFiles[_as] = [_href]);
 
-		if (g_userAgent.indexOf(`firefox`) !== -1 && _as === `image`) {
-			// Firefoxの場合のみpreloadが効かないため、画像読込形式にする
-			g_loadObj[_href] = false;
-			const img = new Image();
-			img.src = _href;
-			img.onload = _ => g_loadObj[_href] = true;
-
-		} else {
-			// それ以外のブラウザの場合はrel=preloadを利用
-			const link = document.createElement(`link`);
-			link.rel = `preload`;
-			link.as = _as;
-			link.href = _href;
-			if (_type !== ``) {
-				link.type = _type;
-			}
-			if (!g_isFile) {
-				link.crossOrigin = _crossOrigin;
-			}
-			document.head.appendChild(link);
+		const link = document.createElement(`link`);
+		link.rel = `preload`;
+		link.as = _as;
+		link.href = _href;
+		if (_type !== ``) {
+			link.type = _type;
 		}
+		if (!g_isFile) {
+			link.crossOrigin = _crossOrigin;
+		}
+		document.head.appendChild(link);
 	}
 };
 
@@ -1159,8 +1149,6 @@ const createColorObject2 = (_id,
 
 	style.maskImage = `url("${g_imgObj[charaStyle]}")`;
 	style.maskSize = `contain`;
-	style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
-	style.webkitMaskSize = `contain`;
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 	setAttrs(div, { color: rest.background ?? ``, type: charaStyle, cnt: 0, });
 
@@ -3243,9 +3231,6 @@ const headerConvert = _dosObj => {
 	// 結果画面用のマスク透過設定
 	obj.maskresultButton = setBoolVal(_dosObj.maskresultButton);
 
-	// color_dataの過去バージョン互換設定
-	obj.colorDataType = _dosObj.colorDataType ?? ``;
-
 	// リザルトモーションをDisplay:BackgroundのON/OFFと連動させるかどうかの設定
 	obj.resultMotionSet = setBoolVal(_dosObj.resultMotionSet, true);
 
@@ -4179,7 +4164,6 @@ const titleInit = _ => {
 				font-family:${g_headerObj.titlefonts[0]};
 				background: ${titlegrds[0]};
 				background-clip: text;
-				-webkit-background-clip: text;
 				color: rgba(255,255,255,0.0);
 				${txtAnimations[0]}
 			" class="${g_headerObj.titleAnimationClass[0]}">
@@ -4192,7 +4176,6 @@ const titleInit = _ => {
 				font-family:${g_headerObj.titlefonts[1]};
 				background: ${titlegrds[1]};
 				background-clip: text;
-				-webkit-background-clip: text;
 				color: rgba(255,255,255,0.0);
 				${txtAnimations[1]}
 			" class="${g_headerObj.titleAnimationClass[1]}">
@@ -7324,21 +7307,7 @@ const loadingScoreInit = async () => {
 	// ユーザカスタムイベント
 	g_customJsObj.loading.forEach(func => func());
 
-	const tempId = setInterval(() => {
-		const executeMain = _ => {
-			clearInterval(tempId);
-			mainInit();
-		}
-		if (g_audio.duration !== undefined) {
-			if (g_userAgent.indexOf(`firefox`) !== -1) {
-				if (g_preloadFiles.image.every(v => g_loadObj[v] === true)) {
-					executeMain();
-				}
-			} else {
-				executeMain();
-			}
-		}
-	}, 100);
+	mainInit();
 };
 
 /**
@@ -7647,8 +7616,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					const colorCd = tmpColorData[k + 2];
 
 					// フレーム数、色番号、カラーコード、全体色変化フラグをセットとして配列化
-					// フリーズアローヒット時の個別色変化は互換のため全体色変化として扱う
-					colorData.push([frame, colorNum, colorCd, isFrzHitColor(colorNum) && !allFlg ? true : allFlg]);
+					colorData.push([frame, colorNum, colorCd, allFlg]);
 				}
 			});
 			return colorData.sort((_a, _b) => _a[0] - _b[0]);
@@ -8499,12 +8467,6 @@ const getArrowStartFrame = (_frame, _speedOnFrame, _motionOnFrame) => {
 
 	return obj;
 };
-
-/**
- * 個別色変化におけるフリーズアロー(ヒット時)判定
- * @param {number} _val 
- */
-const isFrzHitColor = _val => (g_headerObj.colorDataType === `` && ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61));
 
 /**
  * 速度を加味したフリーズアローの長さを取得
@@ -9858,7 +9820,6 @@ const mainInit = _ => {
 			y: firstPosY, barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos, btmY: firstBarLength * g_workObj.scrollDir[_j],
 		};
 		g_typeLists.frzColor.forEach(val => g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j]);
-
 		arrowSprite[dividePos].appendChild(frzRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
@@ -10391,20 +10352,32 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	currentFrz.y += delFrzLength;
 	currentFrz.isMoving = false;
 
+	/**
+	 * フリーズアロー(ヒット時)の色変更
+	 * - 生成時以降で全体色変化がある場合はその値へ置き換える
+	 * @param {string} _type 
+	 */
+	const getColor = (_type) => {
+		const cColor = g_workObj[`${_name}${_type}Colors`][_j];
+		const cColorAll = g_workObj[`${_name}${_type}ColorsAll`][_j];
+		return currentFrz[_type] !== cColor && cColorAll === cColor ? cColorAll : currentFrz[_type];
+	};
+
+	const tmpHitColor = getColor(`Hit`);
 	styfrzBar.top = wUnit(currentFrz.barY);
 	styfrzBar.height = wUnit(currentFrz.frzBarLength);
-	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
+	styfrzBar.background = getColor(`HitBar`);
 	styfrzBtm.top = wUnit(currentFrz.btmY);
-	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
+	styfrzBtm.background = tmpHitColor;
 	styfrzTopShadow.opacity = 0;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
-		styfrzBtmShadow.background = g_workObj[`${_name}HitShadowColors`][_j] === `Default` ?
-			g_workObj[`${_name}HitColors`][_j] : g_workObj[`${_name}HitShadowColors`][_j];
+		const tmpShadowColor = getColor(`HitShadow`);
+		styfrzBtmShadow.background = tmpShadowColor === `Default` ? tmpHitColor : tmpShadowColor;
 		$id(`frzHit${_j}`).opacity = 0.9;
 		$id(`frzTop${frzNo}`).display = C_DIS_NONE;
 		if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
-			$id(`frzHitTop${_j}`).background = g_workObj.frzHitColors[_j];
+			$id(`frzHitTop${_j}`).background = tmpHitColor;
 		}
 	}
 
