@@ -3243,9 +3243,6 @@ const headerConvert = _dosObj => {
 	// 結果画面用のマスク透過設定
 	obj.maskresultButton = setBoolVal(_dosObj.maskresultButton);
 
-	// color_dataの過去バージョン互換設定
-	obj.colorDataType = _dosObj.colorDataType ?? ``;
-
 	// リザルトモーションをDisplay:BackgroundのON/OFFと連動させるかどうかの設定
 	obj.resultMotionSet = setBoolVal(_dosObj.resultMotionSet, true);
 
@@ -7647,8 +7644,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 					const colorCd = tmpColorData[k + 2];
 
 					// フレーム数、色番号、カラーコード、全体色変化フラグをセットとして配列化
-					// フリーズアローヒット時の個別色変化は互換のため全体色変化として扱う
-					colorData.push([frame, colorNum, colorCd, isFrzHitColor(colorNum) && !allFlg ? true : allFlg]);
+					colorData.push([frame, colorNum, colorCd, allFlg]);
 				}
 			});
 			return colorData.sort((_a, _b) => _a[0] - _b[0]);
@@ -8499,12 +8495,6 @@ const getArrowStartFrame = (_frame, _speedOnFrame, _motionOnFrame) => {
 
 	return obj;
 };
-
-/**
- * 個別色変化におけるフリーズアロー(ヒット時)判定
- * @param {number} _val 
- */
-const isFrzHitColor = _val => (g_headerObj.colorDataType === `` && ((_val >= 40 && _val < 50) || (_val >= 55 && _val < 60) || _val === 61));
 
 /**
  * 速度を加味したフリーズアローの長さを取得
@@ -9858,7 +9848,6 @@ const mainInit = _ => {
 			y: firstPosY, barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos, btmY: firstBarLength * g_workObj.scrollDir[_j],
 		};
 		g_typeLists.frzColor.forEach(val => g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j]);
-
 		arrowSprite[dividePos].appendChild(frzRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
@@ -10391,20 +10380,32 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	currentFrz.y += delFrzLength;
 	currentFrz.isMoving = false;
 
+	/**
+	 * フリーズアロー(ヒット時)の色変更
+	 * - 生成時以降で全体色変化がある場合はその値へ置き換える
+	 * @param {string} _type 
+	 */
+	const getColor = (_type) => {
+		const cColor = g_workObj[`${_name}${_type}Colors`][_j];
+		const cColorAll = g_workObj[`${_name}${_type}ColorsAll`][_j];
+		return currentFrz[_type] !== cColor && cColorAll === cColor ? cColorAll : currentFrz[_type];
+	};
+
+	const tmpHitColor = getColor(`Hit`);
 	styfrzBar.top = wUnit(currentFrz.barY);
 	styfrzBar.height = wUnit(currentFrz.frzBarLength);
-	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
+	styfrzBar.background = getColor(`HitBar`);
 	styfrzBtm.top = wUnit(currentFrz.btmY);
-	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
+	styfrzBtm.background = tmpHitColor;
 	styfrzTopShadow.opacity = 0;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
-		styfrzBtmShadow.background = g_workObj[`${_name}HitShadowColors`][_j] === `Default` ?
-			g_workObj[`${_name}HitColors`][_j] : g_workObj[`${_name}HitShadowColors`][_j];
+		const tmpShadowColor = getColor(`HitShadow`);
+		styfrzBtmShadow.background = tmpShadowColor === `Default` ? tmpHitColor : tmpShadowColor;
 		$id(`frzHit${_j}`).opacity = 0.9;
 		$id(`frzTop${frzNo}`).display = C_DIS_NONE;
 		if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
-			$id(`frzHitTop${_j}`).background = g_workObj.frzHitColors[_j];
+			$id(`frzHitTop${_j}`).background = tmpHitColor;
 		}
 	}
 
