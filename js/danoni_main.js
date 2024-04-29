@@ -5009,6 +5009,97 @@ const makeDifInfo = _scoreId => {
 };
 
 /**
+ * ハイスコア表示
+ * @param {number} _scoreId 
+ */
+const makeHighScore = _scoreId => {
+	const detailHighScore = document.getElementById(`detailHighScore`);
+	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	if (g_headerObj.makerView) {
+		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
+	}
+
+	const createScoreLabel = (_id, _text, { xPos = 0, yPos = 0, dx = 0, colorName = _id, align = C_ALIGN_LEFT } = {}) =>
+		createDivCss2Label(`lblH${toCapitalize(_id)}`, _text, {
+			x: xPos * 150 + 130 + dx, y: yPos * 16 + 5, w: 150, h: 17, siz: 14, align,
+		}, g_cssObj[`common_${colorName}`]);
+
+	deleteChildspriteAll(`detailHighScore`);
+	const charas = [
+		`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `maxCombo`, `fmaxCombo`, ``, `score`,
+	];
+	const extData = {
+		fast: `matari`,
+		slow: `shobon`,
+		adj: `shakin`,
+	};
+	charas.forEach((chara, j) => {
+		if (chara === ``) {
+			return;
+		}
+		multiAppend(detailHighScore,
+			createScoreLabel(chara, g_lblNameObj[`j_${chara}`], { yPos: j }),
+			createScoreLabel(`${chara}S`, g_localStorage.highscores?.[scoreName]?.[chara] ?? `---`,
+				{ xPos: 0, yPos: j, align: C_ALIGN_RIGHT }),
+		);
+	});
+	Object.keys(extData).forEach((chara, j) => {
+		multiAppend(detailHighScore,
+			createScoreLabel(chara, g_lblNameObj[`j_${chara}`], { xPos: 1, yPos: j, dx: 20, colorName: extData[chara] }),
+			createScoreLabel(`${chara}S`, g_localStorage.highscores?.[scoreName]?.[chara] ?? `---`,
+				{ xPos: 1, yPos: j, dx: -25, align: C_ALIGN_RIGHT }),
+		);
+	});
+	multiAppend(detailHighScore,
+		createDivCss2Label(`lblHRank`, g_localStorage.highscores?.[scoreName]?.rankMark ?? `--`, Object.assign(g_lblPosObj.lblHRank, {
+			color: g_localStorage.highscores?.[scoreName]?.rankColor ?? `#666666`,
+			fontFamily: getBasicFont(`"Bookman Old Style"`),
+		})),
+		createScoreLabel(`lblHDateTime`, g_localStorage.highscores?.[scoreName]?.dateTime ?? `----/--/-- --/--`, { yPos: 12 }),
+		createScoreLabel(`lblHMarks`,
+			`${g_localStorage.highscores?.[scoreName]?.fullCombo ?? '' ? '<span class="result_FullCombo">◆</span>' : ''}` +
+			`${g_localStorage.highscores?.[scoreName]?.perfect ?? '' ? '<span class="result_Perfect">◆</span>' : ''}` +
+			`${g_localStorage.highscores?.[scoreName]?.allPerfect ?? '' ? '<span class="result_AllPerfect">◆</span>' : ''}`, { xPos: 1, dx: 20, yPos: 12 }),
+		createScoreLabel(`lblHClearLamps`, `Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? `---`), { yPos: 13 }),
+	);
+
+	if (g_localStorage.highscores?.[scoreName] !== undefined) {
+		const twiturl = new URL(g_localStorageUrl);
+		twiturl.searchParams.append(`scoreId`, _scoreId);
+		const baseTwitUrl = g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``);
+
+		let tweetFrzJdg = ``;
+		let tweetMaxCombo = `${g_localStorage.highscores?.[scoreName]?.maxCombo}`;
+		if (g_allFrz > 0) {
+			tweetFrzJdg = `${g_localStorage.highscores?.[scoreName]?.kita}-${g_localStorage.highscores?.[scoreName]?.iknai}`;
+			tweetMaxCombo += `-${g_localStorage.highscores?.[scoreName]?.fmaxCombo}`;
+		}
+
+		const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[_scoreId]] || g_headerObj.musicTitle;
+		let tweetResultTmp = makeResultText(g_headerObj.resultFormat, {
+			hashTag: ``,
+			musicTitle: musicTitle,
+			tweetDifData: `${getKeyName(g_headerObj.keyLabels[_scoreId])}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}`,
+			tuning: g_headerObj.creatorNames[_scoreId],
+			rankMark: g_localStorage.highscores?.[scoreName]?.rankMark,
+			score: g_localStorage.highscores?.[scoreName]?.score,
+			playStyleData: g_localStorage.highscores[scoreName].playStyle,
+			highscore: g_localStorage.highscores[scoreName],
+			tweetExcessive: ``,
+			tweetFrzJdg,
+			tweetMaxCombo,
+			baseTwitUrl,
+		});
+		const resultText = `${unEscapeHtml(tweetResultTmp)}`;
+		multiAppend(detailHighScore,
+			makeDifLblCssButton(`lnkHighScore`, g_lblNameObj.s_result, 8, _ => {
+				copyTextToClipboard(resultText, g_msgInfoObj.I_0001);
+			}, g_lblPosObj.lnkDifInfo),
+		);
+	}
+};
+
+/**
  * 譜面初期化処理
  * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
  * - g_canLoadDifInfoFlg は譜面初期化フラグで、初期化したくない場合は対象画面にて false にしておく
@@ -5157,6 +5248,7 @@ const setDifficulty = (_initFlg) => {
 		drawSpeedGraph(g_stateObj.scoreId);
 		drawDensityGraph(g_stateObj.scoreId);
 		makeDifInfo(g_stateObj.scoreId);
+		makeHighScore(g_stateObj.scoreId);
 	}
 
 	// リバース設定 (Reverse, Scroll)
@@ -5308,6 +5400,7 @@ const createOptionWindow = _sprite => {
 			createScoreDetail(`Speed`),
 			createScoreDetail(`Density`),
 			createScoreDetail(`ToolDif`, false),
+			createScoreDetail(`HighScore`, false),
 		);
 		g_settings.scoreDetails.forEach((sd, j) => {
 			scoreDetail.appendChild(
@@ -5775,6 +5868,7 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 
 	// 達成率(Accuracy)・許容ミス数の計算
 	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
+	g_resultObj.requiredAccuracy = rateText;
 
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
@@ -11021,6 +11115,7 @@ const resultInit = _ => {
 	}
 
 	// ユーザカスタムイベント(初期)
+	const currentDateTime = new Date().toLocaleString();
 	g_customJsObj.result.forEach(func => func());
 
 	if (highscoreCondition) {
@@ -11029,10 +11124,47 @@ const resultInit = _ => {
 			.forEach(judge => highscoreDfObj[judge] = g_resultObj[judge] -
 				(scoreName in g_localStorage.highscores ? g_localStorage.highscores[scoreName][judge] : 0));
 
-		if (highscoreDfObj.score > 0 && g_stateObj.dataSaveFlg) {
-			g_localStorage.highscores[scoreName] = {};
-			Object.keys(jdgScoreObj).filter(judge => judge !== ``)
-				.forEach(judge => g_localStorage.highscores[scoreName][judge] = g_resultObj[judge]);
+		if (g_stateObj.dataSaveFlg) {
+			if (highscoreDfObj.score > 0) {
+				if (g_localStorage.highscores[scoreName] === undefined) {
+					g_localStorage.highscores[scoreName] = {};
+				}
+
+				Object.keys(jdgScoreObj).filter(judge => judge !== ``)
+					.forEach(judge => g_localStorage.highscores[scoreName][judge] = g_resultObj[judge]);
+
+				g_localStorage.highscores[scoreName].dateTime = currentDateTime;
+				g_localStorage.highscores[scoreName].rankMark = rankMark;
+				g_localStorage.highscores[scoreName].rankColor = rankColor;
+				g_localStorage.highscores[scoreName].playStyle = playStyleData;
+
+				g_localStorage.highscores[scoreName].fast = g_resultObj.fast;
+				g_localStorage.highscores[scoreName].slow = g_resultObj.slow;
+				g_localStorage.highscores[scoreName].adj = estimatedAdj;
+			}
+
+			// All Perfect時はFast+Slowが最小のときに更新処理を行う
+			if (g_localStorage.highscores[scoreName].rankMark === g_rankObj.rankMarkAllPerfect) {
+				if (g_localStorage.highscores[scoreName].fast + g_localStorage.highscores[scoreName].slow > g_resultObj.fast + g_resultObj.slow) {
+					g_localStorage.highscores[scoreName].dateTime = currentDateTime;
+					g_localStorage.highscores[scoreName].score = g_resultObj.score;
+					g_localStorage.highscores[scoreName].fast = g_resultObj.fast;
+					g_localStorage.highscores[scoreName].slow = g_resultObj.slow;
+					g_localStorage.highscores[scoreName].adj = estimatedAdj;
+				}
+			}
+
+			// クリアランプ点灯処理
+			if (![``, `failed`, `cleared`].includes(g_resultObj.spState)) {
+				g_localStorage.highscores[scoreName][g_resultObj.spState] = true;
+			}
+			if (!g_gameOverFlg && g_finishFlg && g_resultObj.requiredAccuracy !== `----`) {
+				if (g_localStorage.highscores[scoreName].clearLamps === undefined) {
+					g_localStorage.highscores[scoreName].clearLamps = [];
+				}
+				g_localStorage.highscores[scoreName].clearLamps =
+					makeDedupliArray(g_localStorage.highscores[scoreName].clearLamps, [g_stateObj.gauge]);
+			}
 			localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 		}
 
@@ -11098,7 +11230,6 @@ const resultInit = _ => {
 	}
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
-	const currentDateTime = new Date().toLocaleString();
 
 	/**
 	 * リザルト画像をCanvasで作成しクリップボードへコピー
@@ -11321,6 +11452,23 @@ const resultInit = _ => {
 
 	g_skinJsObj.result.forEach(func => func());
 };
+
+const makeResultText = (_format, {
+	hashTag, musicTitle, tweetDifData, tuning, rankMark, score, playStyleData,
+	highscore, tweetExcessive, tweetFrzJdg, tweetMaxCombo, baseTwitUrl } = {}) =>
+	replaceStr(_format, [
+		[`[hashTag]`, hashTag],
+		[`[musicTitle]`, musicTitle],
+		[`[keyLabel]`, tweetDifData],
+		[`[maker]`, tuning],
+		[`[rank]`, rankMark],
+		[`[score]`, score],
+		[`[playStyle]`, playStyleData],
+		[`[arrowJdg]`, `${highscore?.ii}-${highscore?.shakin}-${highscore?.matari}-${highscore?.shobon}-${highscore?.uwan}${tweetExcessive}`],
+		[`[frzJdg]`, tweetFrzJdg],
+		[`[maxCombo]`, tweetMaxCombo],
+		[`[url]`, baseTwitUrl]
+	]);
 
 /**
  * 結果表示作成（曲名、オプション）
