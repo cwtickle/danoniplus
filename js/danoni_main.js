@@ -5087,10 +5087,14 @@ const makeHighScore = _scoreId => {
 		}
 
 		const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[_scoreId]] || g_headerObj.musicTitle;
+		let tweetDifData = `${getKeyName(g_headerObj.keyLabels[_scoreId])}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[_scoreId]}${assistFlg}`;
+		if (g_stateObj.shuffle !== `OFF`) {
+			tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
+		}
 		let tweetResultTmp = makeResultText(g_headerObj.resultFormat, {
 			hashTag: ``,
 			musicTitle: musicTitle,
-			tweetDifData: scoreName,
+			tweetDifData,
 			tuning: g_headerObj.creatorNames[_scoreId],
 			rankMark: g_localStorage.highscores?.[scoreName]?.rankMark,
 			playStyleData: g_localStorage.highscores[scoreName].playStyle,
