@@ -11143,8 +11143,9 @@ const resultInit = _ => {
 
 		if (g_stateObj.dataSaveFlg) {
 
-			// All Perfect時はFast+Slowが最小のときに更新処理を行う
-			if (rankMark === g_rankObj.rankMarkAllPerfect) {
+			// All Perfect時(かつスコアが同一時)はFast+Slowが最小のときに更新処理を行う
+			if (rankMark === g_rankObj.rankMarkAllPerfect &&
+				g_localStorage.highscores[scoreName]?.score === g_resultObj.score) {
 				if (g_localStorage.highscores[scoreName].fast + g_localStorage.highscores[scoreName].slow > g_resultObj.fast + g_resultObj.slow) {
 					g_localStorage.highscores[scoreName].dateTime = currentDateTime;
 					g_localStorage.highscores[scoreName].rankMark = rankMark;
