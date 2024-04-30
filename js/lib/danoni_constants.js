@@ -307,7 +307,13 @@ const updateWindowSiz = _ => {
             x: 140, y: 70, w: (g_sWidth - 500) / 2 + 275, h: 150, overflow: `auto`,
         },
         lnkDifInfo: {
-            w: g_limitObj.difCoverWidth, borderStyle: `solid`,
+            w: g_limitObj.difCoverWidth, h: 20, borderStyle: `solid`,
+        },
+        lnkHighScore: {
+            w: g_limitObj.difCoverWidth, h: 20, borderStyle: `solid`,
+        },
+        lblHRank: {
+            x: 320, y: 145, w: 70, h: 20, siz: 50, align: C_ALIGN_CENTER,
         },
 
         /** ディスプレイ画面 */
@@ -422,9 +428,6 @@ const updateWindowSiz = _ => {
         /** 結果画面 */
         lblRank: {
             x: 340, y: 160, w: 70, h: 20, siz: 50, align: C_ALIGN_CENTER,
-        },
-        lblHRank: {
-            x: 340, y: 145, w: 70, h: 20, siz: 50, align: C_ALIGN_CENTER,
         },
         lblResultPre: {
             x: g_sWidth / 2 - 150, y: 90, w: 200, h: 50, siz: 60, opacity: 0,
@@ -3054,7 +3057,7 @@ const g_lang_lblNameObj = {
         s_cnts: `All Arrows`,
         s_linecnts: `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 ({0}):`,
         s_print: `データ出力`,
-        s_result: `Cp.Result`,
+        s_result: `CopyResult`,
         s_printTitle: `Dancing☆Onigiri レベル計算ツール+++`,
         s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
 
@@ -3092,7 +3095,7 @@ const g_lang_lblNameObj = {
         s_cnts: `All Arrows`,
         s_linecnts: `- Arrow:<br><br>- Freeze Arrow:<br><br>- Polychord positions ({0}):`,
         s_print: `CopyData`,
-        s_result: `Cp.Result`,
+        s_result: `CopyResult`,
         s_printTitle: `Dancing☆Onigiri Level Calculator+++`,
         s_printHeader: `Level\tChords\tJack\tAll\tArrow\tFrz\tAPM\tTime`,
 
