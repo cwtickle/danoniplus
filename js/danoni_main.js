@@ -5036,9 +5036,7 @@ const makeHighScore = _scoreId => {
 		`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `maxCombo`, `fmaxCombo`, ``, `score`,
 	];
 	const extData = {
-		fast: `matari`,
-		slow: `shobon`,
-		adj: `shakin`,
+		fast: `diffFast`, slow: `diffSlow`, adj: `estAdj`,
 	};
 	charas.forEach((chara, j) => {
 		if (chara === ``) {
@@ -5075,7 +5073,7 @@ const makeHighScore = _scoreId => {
 		createScoreLabel(`lblHMarks`,
 			`${g_localStorage.highscores?.[scoreName]?.fullCombo ?? '' ? '<span class="result_FullCombo">◆</span>' : ''}` +
 			`${g_localStorage.highscores?.[scoreName]?.perfect ?? '' ? '<span class="result_Perfect">◆</span>' : ''}` +
-			`${g_localStorage.highscores?.[scoreName]?.allPerfect ?? '' ? '<span class="result_AllPerfect">◆</span>' : ''}`, { xPos: 1, dx: 20, yPos: 12 }),
+			`${g_localStorage.highscores?.[scoreName]?.allPerfect ?? '' ? '<span class="result_AllPerfect">◆</span>' : ''}`, { xPos: 1, dx: 20, yPos: 12, w: 100, align: C_ALIGN_CENTER }),
 		createScoreLabel(`lblHClearLamps`, `Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? `---`), { yPos: 13, overflow: `auto`, w: g_sWidth / 2 + 40, h: 37 }),
 
 		createScoreLabel(`lblHShuffle`, g_stateObj.shuffle.indexOf(`Mirror`) < 0 ? `` : `Shuffle: <span class="common_iknai">${g_stateObj.shuffle}</span>`, { yPos: 11.5, dx: -130 }),
@@ -5083,6 +5081,7 @@ const makeHighScore = _scoreId => {
 		createScoreLabel(`lblHAnother`, !hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `` : `A.Keymode: <span class="common_ii">${g_keyObj[`transKey${keyCtrlPtn}`]}</span>`, { yPos: 13.5, dx: -130 }),
 	);
 
+	// 結果をクリップボードへコピー (ハイスコア保存分)
 	if (g_localStorage.highscores?.[scoreName] !== undefined) {
 		const twiturl = new URL(g_localStorageUrl);
 		twiturl.searchParams.append(`scoreId`, _scoreId);
