@@ -313,7 +313,7 @@ const updateWindowSiz = _ => {
             w: g_limitObj.difCoverWidth, h: 20, borderStyle: `solid`,
         },
         lblHRank: {
-            x: 320, y: 145, w: 70, h: 20, siz: 50, align: C_ALIGN_CENTER,
+            x: 290, y: 145, w: 120, h: 20, siz: 50, align: C_ALIGN_CENTER,
         },
 
         /** ディスプレイ画面 */
