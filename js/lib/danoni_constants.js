@@ -2770,7 +2770,7 @@ const g_lang_msgInfoObj = {
         E_0103: `新しいキー:{0}の[stepRtn]が未定義です。(E-0103)<br>
         |stepRtn{0}=0,45,-90,135,180,onigiri|`,
         E_0104: `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
-        |keyCtrl{0}=75,79,76,80,187,32/0|`,
+        |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|`,
 
         E_0201: `色変化データで指定した色変化対象が存在しません。[pattern={0}] (E-0201)`,
 
@@ -2819,7 +2819,7 @@ const g_lang_msgInfoObj = {
         E_0103: `New key: {0} [stepRtn] is not set. (E-0103)<br>
         |stepRtn{0}=0,45,-90,135,180,onigiri|`,
         E_0104: `New key: {0} [keyCtrl] is not set. (E-0104)<br>
-        |keyCtrl{0}=75,79,76,80,187,32/0|`,
+        |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|`,
 
         E_0201: `The color change target specified in the color change data does not exist. [pattern={0}] (E-0201)`,
 
