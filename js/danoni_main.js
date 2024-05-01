@@ -5057,6 +5057,15 @@ const makeHighScore = _scoreId => {
 				{ xPos: 1, yPos: j, dx: -25, align: C_ALIGN_RIGHT }),
 		);
 	});
+	g_headerObj.resultValsView
+		.filter(key => hasVal(g_localStorage.highscores?.[scoreName]?.[g_presetObj.resultVals?.[key]]))
+		.forEach((key, j) => {
+			multiAppend(detailHighScore,
+				createScoreLabel(key, g_presetObj.resultVals[key], { xPos: 1, yPos: j + 4, dx: 20 }),
+				createScoreLabel(`${key}S`, g_localStorage.highscores?.[scoreName]?.[g_presetObj.resultVals[key]],
+					{ xPos: 1, yPos: j + 4, dx: -25, align: C_ALIGN_RIGHT }),
+			);
+		});
 	multiAppend(detailHighScore,
 		createDivCss2Label(`lblHRank`, g_localStorage.highscores?.[scoreName]?.rankMark ?? `--`, Object.assign(g_lblPosObj.lblHRank, {
 			color: g_localStorage.highscores?.[scoreName]?.rankColor ?? `#666666`,
@@ -5091,7 +5100,8 @@ const makeHighScore = _scoreId => {
 		if (g_stateObj.shuffle !== `OFF`) {
 			tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
 		}
-		let tweetResultTmp = makeResultText(g_headerObj.resultFormat, {
+
+		const resultParams = {
 			hashTag: (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``),
 			tuning: g_headerObj.creatorNames[_scoreId],
 			rankMark: g_localStorage.highscores?.[scoreName]?.rankMark || `--`,
@@ -5099,7 +5109,9 @@ const makeHighScore = _scoreId => {
 			highscore: g_localStorage.highscores[scoreName],
 			tweetExcessive: ``,
 			musicTitle, tweetDifData, tweetFrzJdg, tweetMaxCombo, baseTwitUrl,
-		});
+		};
+		const resultCommon = unEscapeHtml(makeResultText(g_templateObj.resultFormatDf, resultParams));
+		let tweetResultTmp = makeResultText(g_headerObj.resultFormat, resultParams);
 		if (g_presetObj.resultVals !== undefined) {
 			Object.keys(g_presetObj.resultVals).forEach(key =>
 				tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_localStorage.highscores[scoreName][g_presetObj.resultVals[key]] || ``));
@@ -5107,7 +5119,7 @@ const makeHighScore = _scoreId => {
 		const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 		multiAppend(detailHighScore,
 			makeDifLblCssButton(`lnkHighScore`, g_lblNameObj.s_result, 8, _ => {
-				copyTextToClipboard(resultText, g_msgInfoObj.I_0001);
+				copyTextToClipboard(keyIsShift() ? resultCommon : resultText, g_msgInfoObj.I_0001);
 			}, g_lblPosObj.lnkHighScore),
 		);
 	}
@@ -7004,8 +7016,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
 			return;
 		} else if ((setKey === C_KEY_TITLEBACK && g_currentk === 0) ||
-			((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) &&
-				(keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)))) {
+			((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) && keyIsShift())) {
 			return;
 		}
 
@@ -9469,7 +9480,7 @@ const mainInit = _ => {
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
 
-			if (g_isMac && (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey))) {
+			if (g_isMac && keyIsShift()) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
@@ -9486,7 +9497,7 @@ const mainInit = _ => {
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			if (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)) {
+			if (keyIsShift()) {
 				if (g_currentArrows !== g_fullArrows || g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 					g_gameOverFlg = true;
 					g_finishFlg = false;
@@ -10530,6 +10541,11 @@ const changeFailedFrz = (_j, _k) => {
 const keyIsDown = _keyCode => g_inputKeyBuffer[_keyCode];
 
 /**
+ * 押したキーがシフトキーかどうかを判定
+ */
+const keyIsShift = _ => keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey);
+
+/**
  * 矢印・フリーズアロー判定
  * @param {number} _j 対象矢印・フリーズアロー
  */
@@ -11354,7 +11370,7 @@ const resultInit = _ => {
 			if (ClipboardItem === undefined) {
 				throw new Error(`error`);
 			}
-			if (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)) {
+			if (keyIsShift()) {
 				viewResultImage();
 			} else {
 				// Canvas の内容を PNG 画像として取得
@@ -11413,7 +11429,7 @@ const resultInit = _ => {
 
 		// リザルトデータをクリップボードへコピー
 		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ =>
-			copyTextToClipboard(keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey) ?
+			copyTextToClipboard(keyIsShift() ?
 				unEscapeHtml(resultCommonTmp) : resultText, g_msgInfoObj.I_0001),
 			g_lblPosObj.btnRsCopy, g_cssObj.button_Setting),
 	);
