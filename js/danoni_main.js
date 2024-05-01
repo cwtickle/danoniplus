@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/04/18
+ * Revised : 2024/05/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 36.1.0`;
-const g_revisedDate = `2024/04/18`;
+const g_version = `Ver 36.2.0`;
+const g_revisedDate = `2024/05/01`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -261,13 +261,13 @@ const trimStr = _str => _str?.split(`\t`).join(``).trimStart().trimEnd();
  * 変数が存在するかどうかをチェック
  * @param {string} _data 
  */
-const hasVal = _data => _data !== undefined && _data !== ``;
+const hasVal = (_data, ...strs) => _data !== undefined && _data !== `` && (!strs || strs.every(str => _data !== str));
 
 /**
  * 変数が存在するかどうかをチェック(null無しを含む)
  * @param {string} _data
  */
-const hasValN = _data => hasVal(_data) && _data !== null;
+const hasValN = (_data, ...strs) => hasVal(_data, ...strs) && _data !== null;
 
 /**
  * 文字列から他の型へ変換する処理群
@@ -4841,7 +4841,7 @@ const updateScoreDetailLabel = (_name, _label, _value, _pos = 0, _labelname = _l
 	const baseLabel = (_bLabel, _bLabelname, _bAlign) =>
 		document.getElementById(`detail${_name}`).appendChild(
 			createDivCss2Label(_bLabel, _bLabelname, {
-				x: 10, y: 105 + _pos * 20, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: _bAlign,
+				x: 10, y: 110 + _pos * 20, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: _bAlign,
 			})
 		);
 	if (document.getElementById(`data${_label}`) === null) {
@@ -5009,6 +5009,139 @@ const makeDifInfo = _scoreId => {
 };
 
 /**
+ * ハイスコア表示
+ * @param {number} _scoreId 
+ */
+const makeHighScore = _scoreId => {
+	const detailHighScore = document.getElementById(`detailHighScore`);
+
+	// 再描画のため一度クリア
+	deleteChildspriteAll(`detailHighScore`);
+
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
+	const mirrorName = (g_stateObj.shuffle === C_FLG_OFF ? `` : `-${g_stateObj.shuffle}`);
+	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
+	let scoreName = `${g_headerObj.keyLabels[_scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[_scoreId]}${assistFlg}${mirrorName}`;
+	if (g_headerObj.makerView) {
+		scoreName += `-${g_headerObj.creatorNames[_scoreId]}`;
+	}
+
+	const createScoreLabel = (_id, _text, { xPos = 0, yPos = 0, dx = 0, w = 150, h = 17, colorName = _id, align = C_ALIGN_LEFT, overflow = `visible` } = {}) =>
+		createDivCss2Label(`lblH${toCapitalize(_id)}`, _text, {
+			x: xPos * 150 + 130 + dx, y: yPos * 16 + 5, w, h, siz: 14, align, overflow,
+		}, g_cssObj[`common_${colorName}`]);
+
+	const charas = [
+		`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `maxCombo`, `fmaxCombo`, ``, `score`,
+	];
+	const extData = {
+		fast: `diffFast`, slow: `diffSlow`, adj: `estAdj`, excessive: `excessive`,
+	};
+	// 各判定 (FreezeComboとScoreの間に1行の空白を入れる)
+	charas.forEach((chara, j) => {
+		if (chara === ``) {
+			return;
+		}
+		multiAppend(detailHighScore,
+			createScoreLabel(chara, g_lblNameObj[`j_${chara}`], { yPos: j }),
+			createScoreLabel(`${chara}S`, g_localStorage.highscores?.[scoreName]?.[chara] ?? `---`,
+				{ xPos: 0, yPos: j, align: C_ALIGN_RIGHT }),
+		);
+	});
+	// Fast, Slow, 推定Adj, Excessive (値が無ければスキップ)
+	Object.keys(extData).forEach((chara, j) => {
+		if (!hasVal(g_localStorage.highscores?.[scoreName]?.[chara], `---`)) {
+			return;
+		}
+		multiAppend(detailHighScore,
+			createScoreLabel(chara, g_lblNameObj[`j_${chara}`], { xPos: 1, yPos: j, dx: 20, colorName: extData[chara] }),
+			createScoreLabel(`${chara}S`, g_localStorage.highscores?.[scoreName]?.[chara],
+				{ xPos: 1, yPos: j, dx: -25, align: C_ALIGN_RIGHT }),
+		);
+	});
+	if (hasVal(g_localStorage.highscores?.[scoreName]?.adj)) {
+		multiAppend(detailHighScore, createScoreLabel(`adjF`, `f`, { xPos: 2, yPos: 2, dx: -23 }));
+	}
+
+	// カスタム表示 (resultValsViewに指定した表示のみ)
+	g_headerObj.resultValsView
+		.filter(key => hasVal(g_localStorage.highscores?.[scoreName]?.[g_presetObj.resultVals?.[key]]))
+		.forEach((key, j) => {
+			multiAppend(detailHighScore,
+				createScoreLabel(key, g_presetObj.resultVals[key], { xPos: 1, yPos: j + 5, dx: 20 }),
+				createScoreLabel(`${key}S`, g_localStorage.highscores?.[scoreName]?.[g_presetObj.resultVals[key]],
+					{ xPos: 1, yPos: j + 5, dx: -25, align: C_ALIGN_RIGHT }),
+			);
+		});
+	// ランク、クリアランプ、特殊設定条件
+	multiAppend(detailHighScore,
+		createDivCss2Label(`lblHRank`, g_localStorage.highscores?.[scoreName]?.rankMark ?? `--`, Object.assign(g_lblPosObj.lblHRank, {
+			color: g_localStorage.highscores?.[scoreName]?.rankColor ?? `#666666`,
+			fontFamily: getBasicFont(`"Bookman Old Style"`),
+		})),
+		createScoreLabel(`lblHDateTime`, g_localStorage.highscores?.[scoreName]?.dateTime ?? `----/--/-- --/--`, { yPos: 12 }),
+		createScoreLabel(`lblHMarks`,
+			`${g_localStorage.highscores?.[scoreName]?.fullCombo ?? '' ? '<span class="result_FullCombo">◆</span>' : ''}` +
+			`${g_localStorage.highscores?.[scoreName]?.perfect ?? '' ? '<span class="result_Perfect">◆</span>' : ''}` +
+			`${g_localStorage.highscores?.[scoreName]?.allPerfect ?? '' ? '<span class="result_AllPerfect">◆</span>' : ''}`, { xPos: 1, dx: 20, yPos: 12, w: 100, align: C_ALIGN_CENTER }),
+		createScoreLabel(`lblHClearLamps`, `Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? `---`), { yPos: 13, overflow: `auto`, w: g_sWidth / 2 + 40, h: 37 }),
+
+		createScoreLabel(`lblHShuffle`, g_stateObj.shuffle.indexOf(`Mirror`) < 0 ? `` : `Shuffle: <span class="common_iknai">${g_stateObj.shuffle}</span>`, { yPos: 11.5, dx: -130 }),
+		createScoreLabel(`lblHAssist`, g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `Assist: <span class="common_kita">${g_stateObj.autoPlay}</span>`, { yPos: 12.5, dx: -130 }),
+		createScoreLabel(`lblHAnother`, !hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `` : `A.Keymode: <span class="common_ii">${g_keyObj[`transKey${keyCtrlPtn}`]}</span>`, { yPos: 13.5, dx: -130 }),
+	);
+
+	// 結果をクリップボードへコピー (ハイスコア保存分)
+	if (g_localStorage.highscores?.[scoreName] !== undefined) {
+		const twiturl = new URL(g_localStorageUrl);
+		twiturl.searchParams.append(`scoreId`, _scoreId);
+		const baseTwitUrl = g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``);
+
+		let tweetFrzJdg = ``;
+		let tweetMaxCombo = `${g_localStorage.highscores?.[scoreName]?.maxCombo}`;
+		if (g_allFrz > 0) {
+			tweetFrzJdg = `${g_localStorage.highscores?.[scoreName]?.kita}-${g_localStorage.highscores?.[scoreName]?.iknai}`;
+			tweetMaxCombo += `-${g_localStorage.highscores?.[scoreName]?.fmaxCombo}`;
+		}
+
+		const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[_scoreId]] || g_headerObj.musicTitle;
+		let tweetDifData = `${getKeyName(g_headerObj.keyLabels[_scoreId])}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[_scoreId]}${assistFlg}`;
+		if (g_stateObj.shuffle !== `OFF`) {
+			tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
+		}
+
+		const resultParams = {
+			hashTag: (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``),
+			tuning: g_headerObj.creatorNames[_scoreId],
+			rankMark: g_localStorage.highscores?.[scoreName]?.rankMark || `--`,
+			playStyleData: g_localStorage.highscores[scoreName]?.playStyle || `--`,
+			highscore: g_localStorage.highscores[scoreName],
+			tweetExcessive: hasVal(g_localStorage.highscores[scoreName]?.excessive, `---`) ? `(+${g_resultObj.excessive})` : ``,
+			musicTitle, tweetDifData, tweetFrzJdg, tweetMaxCombo, baseTwitUrl,
+		};
+		const resultCommon = unEscapeHtml(makeResultText(g_templateObj.resultFormatDf, resultParams));
+		let tweetResultTmp = makeResultText(g_headerObj.resultFormat, resultParams);
+		if (g_presetObj.resultVals !== undefined) {
+			Object.keys(g_presetObj.resultVals).forEach(key =>
+				tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_localStorage.highscores[scoreName][g_presetObj.resultVals[key]] || ``));
+		}
+		const resultText = `${unEscapeHtml(tweetResultTmp)}`;
+		multiAppend(detailHighScore,
+			makeDifLblCssButton(`lnkResetHighScore`, g_lblNameObj.s_resetResult, 7, _ => {
+				if (window.confirm(g_msgObj.highscResetConfirm)) {
+					delete g_localStorage.highscores[scoreName];
+					makeHighScore(_scoreId);
+				}
+			}, Object.assign({ btnStyle: `Reset` }, g_lblPosObj.lnkHighScore)),
+			makeDifLblCssButton(`lnkHighScore`, g_lblNameObj.s_result, 8, _ => {
+				copyTextToClipboard(keyIsShift() ? resultCommon : resultText, g_msgInfoObj.I_0001);
+			}, g_lblPosObj.lnkHighScore),
+		);
+	}
+};
+
+/**
  * 譜面初期化処理
  * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
  * - g_canLoadDifInfoFlg は譜面初期化フラグで、初期化したくない場合は対象画面にて false にしておく
@@ -5153,11 +5286,6 @@ const setDifficulty = (_initFlg) => {
 
 	// 速度設定 (Speed)
 	setSetting(0, `speed`, ` ${g_lblNameObj.multi}`);
-	if (g_settings.scoreDetails.length > 0) {
-		drawSpeedGraph(g_stateObj.scoreId);
-		drawDensityGraph(g_stateObj.scoreId);
-		makeDifInfo(g_stateObj.scoreId);
-	}
 
 	// リバース設定 (Reverse, Scroll)
 	if (g_headerObj.scrollUse) {
@@ -5181,6 +5309,14 @@ const setDifficulty = (_initFlg) => {
 	// オート・アシスト設定 (AutoPlay)
 	g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
 	lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
+
+	// 譜面明細画面の再描画
+	if (g_settings.scoreDetails.length > 0) {
+		drawSpeedGraph(g_stateObj.scoreId);
+		drawDensityGraph(g_stateObj.scoreId);
+		makeDifInfo(g_stateObj.scoreId);
+		makeHighScore(g_stateObj.scoreId);
+	}
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
@@ -5308,10 +5444,11 @@ const createOptionWindow = _sprite => {
 			createScoreDetail(`Speed`),
 			createScoreDetail(`Density`),
 			createScoreDetail(`ToolDif`, false),
+			createScoreDetail(`HighScore`, false),
 		);
 		g_settings.scoreDetails.forEach((sd, j) => {
 			scoreDetail.appendChild(
-				makeDifLblCssButton(`lnk${sd}G`, getStgDetailName(sd), j, _ => changeScoreDetail(j), { w: g_limitObj.difCoverWidth, btnStyle: (g_stateObj.scoreDetail === sd ? `Setting` : `Default`) })
+				makeDifLblCssButton(`lnk${sd}G`, getStgDetailName(sd), j, _ => changeScoreDetail(j), { w: g_limitObj.difCoverWidth, h: 20, btnStyle: (g_stateObj.scoreDetail === sd ? `Setting` : `Default`) })
 			);
 			createScText(document.getElementById(`lnk${sd}G`), `${sd}G`, { targetLabel: `lnk${sd}G`, x: -5 });
 		});
@@ -5375,12 +5512,18 @@ const createOptionWindow = _sprite => {
 	// ---------------------------------------------------
 	// ミラー・ランダム (Shuffle)
 	// 縦位置: 5.5
-	createGeneralSetting(spriteList.shuffle, `shuffle`);
+	createGeneralSetting(spriteList.shuffle, `shuffle`, g_settings.scoreDetails.length > 0 ? {
+		addRFunc: _ => makeHighScore(g_stateObj.scoreId),
+		addLFunc: _ => makeHighScore(g_stateObj.scoreId),
+	} : {});
 
 	// ---------------------------------------------------
 	// 鑑賞モード設定 (AutoPlay)
 	// 縦位置: 6.5
-	createGeneralSetting(spriteList.autoPlay, `autoPlay`);
+	createGeneralSetting(spriteList.autoPlay, `autoPlay`, g_settings.scoreDetails.length > 0 ? {
+		addRFunc: _ => makeHighScore(g_stateObj.scoreId),
+		addLFunc: _ => makeHighScore(g_stateObj.scoreId),
+	} : {});
 
 	// ---------------------------------------------------
 	// ゲージ設定 (Gauge)
@@ -5775,6 +5918,7 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 
 	// 達成率(Accuracy)・許容ミス数の計算
 	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
+	g_resultObj.requiredAccuracy = rateText;
 
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
@@ -5919,10 +6063,10 @@ const makeSettingLblCssButton = (_id, _name, _heightPos, _func, { x, y, w, h, si
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  */
-const makeDifLblCssButton = (_id, _name, _heightPos, _func, { x = 0, w = g_limitObj.difSelectorWidth, btnStyle = `Default` } = {}) =>
+const makeDifLblCssButton = (_id, _name, _heightPos, _func, { x = 0, w = g_limitObj.difSelectorWidth, h = g_limitObj.setLblHeight, btnStyle = `Default` } = {}) =>
 	createCss2Button(_id, _name, _func, {
-		x, y: g_limitObj.setLblHeight * _heightPos,
-		w, h: g_limitObj.setLblHeight,
+		x, y: h * _heightPos,
+		w, h,
 		siz: g_limitObj.difSelectorSiz,
 		borderStyle: `solid`,
 	}, g_cssObj[`button_${btnStyle}`], g_cssObj.button_ON);
@@ -6888,8 +7032,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
 			return;
 		} else if ((setKey === C_KEY_TITLEBACK && g_currentk === 0) ||
-			((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) &&
-				(keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)))) {
+			((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) && keyIsShift())) {
 			return;
 		}
 
@@ -9353,7 +9496,7 @@ const mainInit = _ => {
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
 
-			if (g_isMac && (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey))) {
+			if (g_isMac && keyIsShift()) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
 				g_audio.pause();
 				clearTimeout(g_timeoutEvtId);
@@ -9370,7 +9513,7 @@ const mainInit = _ => {
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
-			if (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)) {
+			if (keyIsShift()) {
 				if (g_currentArrows !== g_fullArrows || g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 					g_gameOverFlg = true;
 					g_finishFlg = false;
@@ -10414,6 +10557,11 @@ const changeFailedFrz = (_j, _k) => {
 const keyIsDown = _keyCode => g_inputKeyBuffer[_keyCode];
 
 /**
+ * 押したキーがシフトキーかどうかを判定
+ */
+const keyIsShift = _ => keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey);
+
+/**
  * 矢印・フリーズアロー判定
  * @param {number} _j 対象矢印・フリーズアロー
  */
@@ -11021,6 +11169,7 @@ const resultInit = _ => {
 	}
 
 	// ユーザカスタムイベント(初期)
+	const currentDateTime = new Date().toLocaleString();
 	g_customJsObj.result.forEach(func => func());
 
 	if (highscoreCondition) {
@@ -11029,10 +11178,58 @@ const resultInit = _ => {
 			.forEach(judge => highscoreDfObj[judge] = g_resultObj[judge] -
 				(scoreName in g_localStorage.highscores ? g_localStorage.highscores[scoreName][judge] : 0));
 
-		if (highscoreDfObj.score > 0 && g_stateObj.dataSaveFlg) {
-			g_localStorage.highscores[scoreName] = {};
-			Object.keys(jdgScoreObj).filter(judge => judge !== ``)
-				.forEach(judge => g_localStorage.highscores[scoreName][judge] = g_resultObj[judge]);
+		if (g_stateObj.dataSaveFlg) {
+
+			const setScoreData = _ => {
+				g_localStorage.highscores[scoreName].dateTime = currentDateTime;
+				g_localStorage.highscores[scoreName].rankMark = rankMark;
+				g_localStorage.highscores[scoreName].rankColor = rankColor;
+				g_localStorage.highscores[scoreName].playStyle = playStyleData;
+
+				g_localStorage.highscores[scoreName].fast = g_resultObj.fast;
+				g_localStorage.highscores[scoreName].slow = g_resultObj.slow;
+				g_localStorage.highscores[scoreName].adj = estimatedAdj;
+				g_localStorage.highscores[scoreName].excessive = g_stateObj.excessive === C_FLG_ON ?
+					g_resultObj.excessive : `---`;
+
+				if (g_presetObj.resultVals !== undefined) {
+					Object.keys(g_presetObj.resultVals).forEach(key =>
+						g_localStorage.highscores[scoreName][g_presetObj.resultVals[key]] = g_resultObj[g_presetObj.resultVals[key]]);
+				}
+			};
+
+			// All Perfect時(かつスコアが同一時)はFast+Slowが最小のときに更新処理を行う
+			if (rankMark === g_rankObj.rankMarkAllPerfect &&
+				g_localStorage.highscores[scoreName]?.score === g_resultObj.score) {
+				if (g_localStorage.highscores[scoreName].fast === undefined ||
+					g_localStorage.highscores[scoreName].fast + g_localStorage.highscores[scoreName].slow >
+					g_resultObj.fast + g_resultObj.slow) {
+					setScoreData();
+					g_localStorage.highscores[scoreName].score = g_resultObj.score;
+				}
+			}
+
+			// ハイスコア更新時処理
+			if (highscoreDfObj.score > 0) {
+				if (g_localStorage.highscores[scoreName] === undefined) {
+					g_localStorage.highscores[scoreName] = {};
+				}
+				Object.keys(jdgScoreObj).filter(judge => judge !== ``)
+					.forEach(judge => g_localStorage.highscores[scoreName][judge] = g_resultObj[judge]);
+				setScoreData();
+			}
+
+			// クリアランプ点灯処理
+			if (![``, `failed`, `cleared`].includes(g_resultObj.spState)) {
+				g_localStorage.highscores[scoreName][g_resultObj.spState] = true;
+			}
+			if (!g_gameOverFlg && g_finishFlg && g_resultObj.requiredAccuracy !== `----`) {
+				if (g_localStorage.highscores[scoreName].clearLamps === undefined) {
+					g_localStorage.highscores[scoreName].clearLamps = [];
+				}
+				g_localStorage.highscores[scoreName].clearLamps =
+					makeDedupliArray(g_localStorage.highscores[scoreName].clearLamps, [g_stateObj.gauge]);
+			}
 			localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 		}
 
@@ -11076,21 +11273,14 @@ const resultInit = _ => {
 		tweetMaxCombo += `-${g_resultObj.fmaxCombo}`;
 	}
 
-	const makeResultText = _format => replaceStr(_format, [
-		[`[hashTag]`, hashTag],
-		[`[musicTitle]`, musicTitle],
-		[`[keyLabel]`, tweetDifData],
-		[`[maker]`, g_headerObj.tuning],
-		[`[rank]`, rankMark],
-		[`[score]`, g_resultObj.score],
-		[`[playStyle]`, playStyleData],
-		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}${tweetExcessive}`],
-		[`[frzJdg]`, tweetFrzJdg],
-		[`[maxCombo]`, tweetMaxCombo],
-		[`[url]`, baseTwitUrl]
-	]);
-	let tweetResultTmp = makeResultText(g_headerObj.resultFormat);
-	let resultCommonTmp = makeResultText(g_templateObj.resultFormatDf);
+	const resultParams = {
+		tuning: g_headerObj.tuning,
+		highscore: g_resultObj,
+		hashTag, musicTitle, tweetDifData, playStyleData, rankMark,
+		tweetExcessive, tweetFrzJdg, tweetMaxCombo, baseTwitUrl
+	};
+	let tweetResultTmp = makeResultText(g_headerObj.resultFormat, resultParams);
+	let resultCommonTmp = makeResultText(g_templateObj.resultFormatDf, resultParams);
 
 	if (g_presetObj.resultVals !== undefined) {
 		Object.keys(g_presetObj.resultVals).forEach(key =>
@@ -11098,7 +11288,6 @@ const resultInit = _ => {
 	}
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
-	const currentDateTime = new Date().toLocaleString();
 
 	/**
 	 * リザルト画像をCanvasで作成しクリップボードへコピー
@@ -11192,7 +11381,7 @@ const resultInit = _ => {
 			if (ClipboardItem === undefined) {
 				throw new Error(`error`);
 			}
-			if (keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey)) {
+			if (keyIsShift()) {
 				viewResultImage();
 			} else {
 				// Canvas の内容を PNG 画像として取得
@@ -11251,7 +11440,7 @@ const resultInit = _ => {
 
 		// リザルトデータをクリップボードへコピー
 		createCss2Button(`btnCopy`, g_lblNameObj.b_copy, _ =>
-			copyTextToClipboard(keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey) ?
+			copyTextToClipboard(keyIsShift() ?
 				unEscapeHtml(resultCommonTmp) : resultText, g_msgInfoObj.I_0001),
 			g_lblPosObj.btnRsCopy, g_cssObj.button_Setting),
 	);
@@ -11321,6 +11510,29 @@ const resultInit = _ => {
 
 	g_skinJsObj.result.forEach(func => func());
 };
+
+/**
+ * リザルトフォーマットの整形処理
+ * @param {string} _format 
+ * @param {object} フォーマット置き換え変数群 
+ * @returns 
+ */
+const makeResultText = (_format, {
+	hashTag, musicTitle, tweetDifData, tuning, rankMark, playStyleData,
+	highscore, tweetExcessive, tweetFrzJdg, tweetMaxCombo, baseTwitUrl } = {}) =>
+	replaceStr(_format, [
+		[`[hashTag]`, hashTag],
+		[`[musicTitle]`, musicTitle],
+		[`[keyLabel]`, tweetDifData],
+		[`[maker]`, tuning],
+		[`[rank]`, rankMark],
+		[`[score]`, highscore?.score],
+		[`[playStyle]`, playStyleData],
+		[`[arrowJdg]`, `${highscore?.ii}-${highscore?.shakin}-${highscore?.matari}-${highscore?.shobon}-${highscore?.uwan}${tweetExcessive}`],
+		[`[frzJdg]`, tweetFrzJdg],
+		[`[maxCombo]`, tweetMaxCombo],
+		[`[url]`, baseTwitUrl]
+	]);
 
 /**
  * 結果表示作成（曲名、オプション）
