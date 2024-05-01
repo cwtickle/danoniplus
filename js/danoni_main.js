@@ -5092,18 +5092,18 @@ const makeHighScore = _scoreId => {
 			tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
 		}
 		let tweetResultTmp = makeResultText(g_headerObj.resultFormat, {
-			hashTag: ``,
-			musicTitle: musicTitle,
-			tweetDifData,
+			hashTag: (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``),
 			tuning: g_headerObj.creatorNames[_scoreId],
 			rankMark: g_localStorage.highscores?.[scoreName]?.rankMark || `--`,
 			playStyleData: g_localStorage.highscores[scoreName]?.playStyle || `--`,
 			highscore: g_localStorage.highscores[scoreName],
 			tweetExcessive: ``,
-			tweetFrzJdg,
-			tweetMaxCombo,
-			baseTwitUrl,
+			musicTitle, tweetDifData, tweetFrzJdg, tweetMaxCombo, baseTwitUrl,
 		});
+		if (g_presetObj.resultVals !== undefined) {
+			Object.keys(g_presetObj.resultVals).forEach(key =>
+				tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_localStorage.highscores[scoreName][g_presetObj.resultVals[key]] || ``));
+		}
 		const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 		multiAppend(detailHighScore,
 			makeDifLblCssButton(`lnkHighScore`, g_lblNameObj.s_result, 8, _ => {
@@ -11148,32 +11148,7 @@ const resultInit = _ => {
 
 		if (g_stateObj.dataSaveFlg) {
 
-			// All Perfect時(かつスコアが同一時)はFast+Slowが最小のときに更新処理を行う
-			if (rankMark === g_rankObj.rankMarkAllPerfect &&
-				g_localStorage.highscores[scoreName]?.score === g_resultObj.score) {
-				if (g_localStorage.highscores[scoreName].fast === undefined ||
-					g_localStorage.highscores[scoreName].fast + g_localStorage.highscores[scoreName].slow >
-					g_resultObj.fast + g_resultObj.slow) {
-
-					g_localStorage.highscores[scoreName].dateTime = currentDateTime;
-					g_localStorage.highscores[scoreName].rankMark = rankMark;
-					g_localStorage.highscores[scoreName].rankColor = rankColor;
-					g_localStorage.highscores[scoreName].score = g_resultObj.score;
-					g_localStorage.highscores[scoreName].fast = g_resultObj.fast;
-					g_localStorage.highscores[scoreName].slow = g_resultObj.slow;
-					g_localStorage.highscores[scoreName].adj = estimatedAdj;
-				}
-			}
-
-			// ハイスコア更新時処理
-			if (highscoreDfObj.score > 0) {
-				if (g_localStorage.highscores[scoreName] === undefined) {
-					g_localStorage.highscores[scoreName] = {};
-				}
-
-				Object.keys(jdgScoreObj).filter(judge => judge !== ``)
-					.forEach(judge => g_localStorage.highscores[scoreName][judge] = g_resultObj[judge]);
-
+			const setScoreData = _ => {
 				g_localStorage.highscores[scoreName].dateTime = currentDateTime;
 				g_localStorage.highscores[scoreName].rankMark = rankMark;
 				g_localStorage.highscores[scoreName].rankColor = rankColor;
@@ -11182,6 +11157,32 @@ const resultInit = _ => {
 				g_localStorage.highscores[scoreName].fast = g_resultObj.fast;
 				g_localStorage.highscores[scoreName].slow = g_resultObj.slow;
 				g_localStorage.highscores[scoreName].adj = estimatedAdj;
+
+				if (g_presetObj.resultVals !== undefined) {
+					Object.keys(g_presetObj.resultVals).forEach(key =>
+						g_localStorage.highscores[scoreName][g_presetObj.resultVals[key]] = g_resultObj[g_presetObj.resultVals[key]]);
+				}
+			};
+
+			// All Perfect時(かつスコアが同一時)はFast+Slowが最小のときに更新処理を行う
+			if (rankMark === g_rankObj.rankMarkAllPerfect &&
+				g_localStorage.highscores[scoreName]?.score === g_resultObj.score) {
+				if (g_localStorage.highscores[scoreName].fast === undefined ||
+					g_localStorage.highscores[scoreName].fast + g_localStorage.highscores[scoreName].slow >
+					g_resultObj.fast + g_resultObj.slow) {
+					setScoreData();
+					g_localStorage.highscores[scoreName].score = g_resultObj.score;
+				}
+			}
+
+			// ハイスコア更新時処理
+			if (highscoreDfObj.score > 0) {
+				if (g_localStorage.highscores[scoreName] === undefined) {
+					g_localStorage.highscores[scoreName] = {};
+				}
+				Object.keys(jdgScoreObj).filter(judge => judge !== ``)
+					.forEach(judge => g_localStorage.highscores[scoreName][judge] = g_resultObj[judge]);
+				setScoreData();
 			}
 
 			// クリアランプ点灯処理
