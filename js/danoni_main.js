@@ -261,13 +261,13 @@ const trimStr = _str => _str?.split(`\t`).join(``).trimStart().trimEnd();
  * 変数が存在するかどうかをチェック
  * @param {string} _data 
  */
-const hasVal = _data => _data !== undefined && _data !== ``;
+const hasVal = (_data, ...strs) => _data !== undefined && _data !== `` && (!strs || strs.every(str => _data !== str));
 
 /**
  * 変数が存在するかどうかをチェック(null無しを含む)
  * @param {string} _data
  */
-const hasValN = _data => hasVal(_data) && _data !== null;
+const hasValN = (_data, ...strs) => hasVal(_data, ...strs) && _data !== null;
 
 /**
  * 文字列から他の型へ変換する処理群
@@ -5038,6 +5038,7 @@ const makeHighScore = _scoreId => {
 	const extData = {
 		fast: `diffFast`, slow: `diffSlow`, adj: `estAdj`, excessive: `excessive`,
 	};
+	// 各判定 (FreezeComboとScoreの間に1行の空白を入れる)
 	charas.forEach((chara, j) => {
 		if (chara === ``) {
 			return;
@@ -5048,25 +5049,32 @@ const makeHighScore = _scoreId => {
 				{ xPos: 0, yPos: j, align: C_ALIGN_RIGHT }),
 		);
 	});
+	// Fast, Slow, 推定Adj, Excessive (値が無ければスキップ)
 	Object.keys(extData).forEach((chara, j) => {
-		if (!hasVal(g_localStorage.highscores?.[scoreName]?.[chara])) {
+		if (!hasVal(g_localStorage.highscores?.[scoreName]?.[chara], `---`)) {
 			return;
 		}
 		multiAppend(detailHighScore,
 			createScoreLabel(chara, g_lblNameObj[`j_${chara}`], { xPos: 1, yPos: j, dx: 20, colorName: extData[chara] }),
-			createScoreLabel(`${chara}S`, g_localStorage.highscores?.[scoreName]?.[chara] ?? `---`,
+			createScoreLabel(`${chara}S`, g_localStorage.highscores?.[scoreName]?.[chara],
 				{ xPos: 1, yPos: j, dx: -25, align: C_ALIGN_RIGHT }),
 		);
 	});
+	if (hasVal(g_localStorage.highscores?.[scoreName]?.adj)) {
+		multiAppend(detailHighScore, createScoreLabel(`adjF`, `f`, { xPos: 2, yPos: 2, dx: -23 }));
+	}
+
+	// カスタム表示 (resultValsViewに指定した表示のみ)
 	g_headerObj.resultValsView
 		.filter(key => hasVal(g_localStorage.highscores?.[scoreName]?.[g_presetObj.resultVals?.[key]]))
 		.forEach((key, j) => {
 			multiAppend(detailHighScore,
-				createScoreLabel(key, g_presetObj.resultVals[key], { xPos: 1, yPos: j + 4, dx: 20 }),
+				createScoreLabel(key, g_presetObj.resultVals[key], { xPos: 1, yPos: j + 5, dx: 20 }),
 				createScoreLabel(`${key}S`, g_localStorage.highscores?.[scoreName]?.[g_presetObj.resultVals[key]],
-					{ xPos: 1, yPos: j + 4, dx: -25, align: C_ALIGN_RIGHT }),
+					{ xPos: 1, yPos: j + 5, dx: -25, align: C_ALIGN_RIGHT }),
 			);
 		});
+	// ランク、クリアランプ、特殊設定条件
 	multiAppend(detailHighScore,
 		createDivCss2Label(`lblHRank`, g_localStorage.highscores?.[scoreName]?.rankMark ?? `--`, Object.assign(g_lblPosObj.lblHRank, {
 			color: g_localStorage.highscores?.[scoreName]?.rankColor ?? `#666666`,
@@ -5109,7 +5117,7 @@ const makeHighScore = _scoreId => {
 			rankMark: g_localStorage.highscores?.[scoreName]?.rankMark || `--`,
 			playStyleData: g_localStorage.highscores[scoreName]?.playStyle || `--`,
 			highscore: g_localStorage.highscores[scoreName],
-			tweetExcessive: g_localStorage.highscores[scoreName]?.excessive ?? `---` === `---` ? `` : `(+${g_resultObj.excessive})`,
+			tweetExcessive: hasVal(g_localStorage.highscores[scoreName]?.excessive, `---`) ? `(+${g_resultObj.excessive})` : ``,
 			musicTitle, tweetDifData, tweetFrzJdg, tweetMaxCombo, baseTwitUrl,
 		};
 		const resultCommon = unEscapeHtml(makeResultText(g_templateObj.resultFormatDf, resultParams));
