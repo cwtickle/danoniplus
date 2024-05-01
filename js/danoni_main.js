@@ -5036,7 +5036,7 @@ const makeHighScore = _scoreId => {
 		`ii`, `shakin`, `matari`, `shobon`, `uwan`, `kita`, `iknai`, `maxCombo`, `fmaxCombo`, ``, `score`,
 	];
 	const extData = {
-		fast: `diffFast`, slow: `diffSlow`, adj: `estAdj`,
+		fast: `diffFast`, slow: `diffSlow`, adj: `estAdj`, excessive: `excessive`,
 	};
 	charas.forEach((chara, j) => {
 		if (chara === ``) {
@@ -5049,6 +5049,9 @@ const makeHighScore = _scoreId => {
 		);
 	});
 	Object.keys(extData).forEach((chara, j) => {
+		if (!hasVal(g_localStorage.highscores?.[scoreName]?.[chara])) {
+			return;
+		}
 		multiAppend(detailHighScore,
 			createScoreLabel(chara, g_lblNameObj[`j_${chara}`], { xPos: 1, yPos: j, dx: 20, colorName: extData[chara] }),
 			createScoreLabel(`${chara}S`, g_localStorage.highscores?.[scoreName]?.[chara] ?? `---`,
@@ -5106,7 +5109,7 @@ const makeHighScore = _scoreId => {
 			rankMark: g_localStorage.highscores?.[scoreName]?.rankMark || `--`,
 			playStyleData: g_localStorage.highscores[scoreName]?.playStyle || `--`,
 			highscore: g_localStorage.highscores[scoreName],
-			tweetExcessive: ``,
+			tweetExcessive: g_localStorage.highscores[scoreName]?.excessive || `---` === `---` ? `(+${g_resultObj.excessive})` : ``,
 			musicTitle, tweetDifData, tweetFrzJdg, tweetMaxCombo, baseTwitUrl,
 		};
 		const resultCommon = unEscapeHtml(makeResultText(g_templateObj.resultFormatDf, resultParams));
@@ -11172,6 +11175,8 @@ const resultInit = _ => {
 				g_localStorage.highscores[scoreName].fast = g_resultObj.fast;
 				g_localStorage.highscores[scoreName].slow = g_resultObj.slow;
 				g_localStorage.highscores[scoreName].adj = estimatedAdj;
+				g_localStorage.highscores[scoreName].excessive = g_stateObj.excessive === C_FLG_ON ?
+					g_resultObj.excessive : `---`;
 
 				if (g_presetObj.resultVals !== undefined) {
 					Object.keys(g_presetObj.resultVals).forEach(key =>
