@@ -11255,21 +11255,14 @@ const resultInit = _ => {
 		tweetMaxCombo += `-${g_resultObj.fmaxCombo}`;
 	}
 
-	const makeResultText = _format => replaceStr(_format, [
-		[`[hashTag]`, hashTag],
-		[`[musicTitle]`, musicTitle],
-		[`[keyLabel]`, tweetDifData],
-		[`[maker]`, g_headerObj.tuning],
-		[`[rank]`, rankMark],
-		[`[score]`, g_resultObj.score],
-		[`[playStyle]`, playStyleData],
-		[`[arrowJdg]`, `${g_resultObj.ii}-${g_resultObj.shakin}-${g_resultObj.matari}-${g_resultObj.shobon}-${g_resultObj.uwan}${tweetExcessive}`],
-		[`[frzJdg]`, tweetFrzJdg],
-		[`[maxCombo]`, tweetMaxCombo],
-		[`[url]`, baseTwitUrl]
-	]);
-	let tweetResultTmp = makeResultText(g_headerObj.resultFormat);
-	let resultCommonTmp = makeResultText(g_templateObj.resultFormatDf);
+	const resultParams = {
+		tuning: g_headerObj.tuning,
+		highscore: g_resultObj,
+		hashTag, musicTitle, tweetDifData, playStyleData, rankMark,
+		tweetExcessive, tweetFrzJdg, tweetMaxCombo, baseTwitUrl
+	};
+	let tweetResultTmp = makeResultText(g_headerObj.resultFormat, resultParams);
+	let resultCommonTmp = makeResultText(g_templateObj.resultFormatDf, resultParams);
 
 	if (g_presetObj.resultVals !== undefined) {
 		Object.keys(g_presetObj.resultVals).forEach(key =>
@@ -11500,6 +11493,12 @@ const resultInit = _ => {
 	g_skinJsObj.result.forEach(func => func());
 };
 
+/**
+ * リザルトフォーマットの整形処理
+ * @param {string} _format 
+ * @param {object} フォーマット置き換え変数群 
+ * @returns 
+ */
 const makeResultText = (_format, {
 	hashTag, musicTitle, tweetDifData, tuning, rankMark, playStyleData,
 	highscore, tweetExcessive, tweetFrzJdg, tweetMaxCombo, baseTwitUrl } = {}) =>
