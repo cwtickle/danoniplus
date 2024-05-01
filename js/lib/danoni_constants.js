@@ -198,7 +198,7 @@ const updateWindowSiz = _ => {
         difCover: { x: 25, y: 60, w: 140, h: 261 + g_sHeight - 500, opacity: 0.95 },
         difFilter: { x: 0, y: 61, w: 140, h: 200 + g_sHeight - 500, overflow: `auto` },
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
-        scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 236, visibility: `hidden` },
+        scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 240, visibility: `hidden` },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
         keyconSprite: { y: 88, h: g_sHeight - 85, overflow: `auto` },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },

@@ -5027,9 +5027,9 @@ const makeHighScore = _scoreId => {
 		scoreName += `-${g_headerObj.creatorNames[_scoreId]}`;
 	}
 
-	const createScoreLabel = (_id, _text, { xPos = 0, yPos = 0, dx = 0, colorName = _id, align = C_ALIGN_LEFT } = {}) =>
+	const createScoreLabel = (_id, _text, { xPos = 0, yPos = 0, dx = 0, w = 150, h = 17, colorName = _id, align = C_ALIGN_LEFT, overflow = `visible` } = {}) =>
 		createDivCss2Label(`lblH${toCapitalize(_id)}`, _text, {
-			x: xPos * 150 + 130 + dx, y: yPos * 16 + 5, w: 150, h: 17, siz: 14, align,
+			x: xPos * 150 + 130 + dx, y: yPos * 16 + 5, w, h, siz: 14, align, overflow,
 		}, g_cssObj[`common_${colorName}`]);
 
 	const charas = [
@@ -5067,10 +5067,10 @@ const makeHighScore = _scoreId => {
 			`${g_localStorage.highscores?.[scoreName]?.fullCombo ?? '' ? '<span class="result_FullCombo">◆</span>' : ''}` +
 			`${g_localStorage.highscores?.[scoreName]?.perfect ?? '' ? '<span class="result_Perfect">◆</span>' : ''}` +
 			`${g_localStorage.highscores?.[scoreName]?.allPerfect ?? '' ? '<span class="result_AllPerfect">◆</span>' : ''}`, { xPos: 1, dx: 20, yPos: 12 }),
-		createScoreLabel(`lblHClearLamps`, `Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? `---`), { yPos: 13 }),
+		createScoreLabel(`lblHClearLamps`, `Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? `---`), { yPos: 13, overflow: `auto`, w: g_sWidth / 2 + 40, h: 40 }),
 
-		createScoreLabel(`lblHShuffle`, g_stateObj.shuffle.indexOf(`Mirror`) < 0 ? `` : `Shuffle: <span class="common_kita">${g_stateObj.shuffle}</span>`, { yPos: 11.5, dx: -130 }),
-		createScoreLabel(`lblHAssist`, g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `Assist: <span class="common_iknai">${g_stateObj.autoPlay}</span>`, { yPos: 12.5, dx: -130 }),
+		createScoreLabel(`lblHShuffle`, g_stateObj.shuffle.indexOf(`Mirror`) < 0 ? `` : `Shuffle: <span class="common_iknai">${g_stateObj.shuffle}</span>`, { yPos: 11.5, dx: -130 }),
+		createScoreLabel(`lblHAssist`, g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `Assist: <span class="common_kita">${g_stateObj.autoPlay}</span>`, { yPos: 12.5, dx: -130 }),
 		createScoreLabel(`lblHAnother`, !hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `` : `A.Keymode: <span class="common_ii">${g_keyObj[`transKey${keyCtrlPtn}`]}</span>`, { yPos: 13.5, dx: -130 }),
 	);
 
@@ -5258,12 +5258,6 @@ const setDifficulty = (_initFlg) => {
 
 	// 速度設定 (Speed)
 	setSetting(0, `speed`, ` ${g_lblNameObj.multi}`);
-	if (g_settings.scoreDetails.length > 0) {
-		drawSpeedGraph(g_stateObj.scoreId);
-		drawDensityGraph(g_stateObj.scoreId);
-		makeDifInfo(g_stateObj.scoreId);
-		makeHighScore(g_stateObj.scoreId);
-	}
 
 	// リバース設定 (Reverse, Scroll)
 	if (g_headerObj.scrollUse) {
@@ -5287,7 +5281,14 @@ const setDifficulty = (_initFlg) => {
 	// オート・アシスト設定 (AutoPlay)
 	g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
 	lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
-	makeHighScore(g_stateObj.scoreId);
+
+	// 譜面明細画面の再描画
+	if (g_settings.scoreDetails.length > 0) {
+		drawSpeedGraph(g_stateObj.scoreId);
+		drawDensityGraph(g_stateObj.scoreId);
+		makeDifInfo(g_stateObj.scoreId);
+		makeHighScore(g_stateObj.scoreId);
+	}
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
@@ -5483,18 +5484,18 @@ const createOptionWindow = _sprite => {
 	// ---------------------------------------------------
 	// ミラー・ランダム (Shuffle)
 	// 縦位置: 5.5
-	createGeneralSetting(spriteList.shuffle, `shuffle`, {
+	createGeneralSetting(spriteList.shuffle, `shuffle`, g_settings.scoreDetails.length > 0 ? {
 		addRFunc: _ => makeHighScore(g_stateObj.scoreId),
 		addLFunc: _ => makeHighScore(g_stateObj.scoreId),
-	});
+	} : {});
 
 	// ---------------------------------------------------
 	// 鑑賞モード設定 (AutoPlay)
 	// 縦位置: 6.5
-	createGeneralSetting(spriteList.autoPlay, `autoPlay`, {
+	createGeneralSetting(spriteList.autoPlay, `autoPlay`, g_settings.scoreDetails.length > 0 ? {
 		addRFunc: _ => makeHighScore(g_stateObj.scoreId),
 		addLFunc: _ => makeHighScore(g_stateObj.scoreId),
-	});
+	} : {});
 
 	// ---------------------------------------------------
 	// ゲージ設定 (Gauge)
