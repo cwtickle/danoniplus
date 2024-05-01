@@ -3067,6 +3067,7 @@ const g_lang_lblNameObj = {
         s_linecnts: `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 ({0}):`,
         s_print: `データ出力`,
         s_result: `CopyResult`,
+        s_resetResult: `Reset`,
         s_printTitle: `Dancing☆Onigiri レベル計算ツール+++`,
         s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
 
@@ -3105,6 +3106,7 @@ const g_lang_lblNameObj = {
         s_linecnts: `- Arrow:<br><br>- Freeze Arrow:<br><br>- Polychord positions ({0}):`,
         s_print: `CopyData`,
         s_result: `CopyResult`,
+        s_resetResult: `Reset`,
         s_printTitle: `Dancing☆Onigiri Level Calculator+++`,
         s_printHeader: `Level\tChords\tJack\tAll\tArrow\tFrz\tAPM\tTime`,
 
@@ -3146,8 +3148,9 @@ const g_lang_msgObj = {
         github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
         security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
 
-        dataResetConfirm: `この作品のローカル設定をクリアします。よろしいですか？\n(ハイスコアやAdjustment等のデータがクリアされます)`,
+        dataResetConfirm: `この作品のローカル設定をクリアします。よろしいですか？\n(ハイスコアやAdjustment等のデータが全てクリアされます)`,
         keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
+        highscResetConfirm: `この譜面のハイスコアを消去します。よろしいですか？`,
         colorCopyConfirm: `フリーズアローの配色を矢印色に置き換えます\n(通常・ヒット時双方を置き換えます)。よろしいですか？`,
 
         difficulty: `譜面を選択します。`,
@@ -3205,6 +3208,7 @@ const g_lang_msgObj = {
 
         dataResetConfirm: `Delete the local settings in this game. Is it OK?\n(High score, adjustment, volume and some settings will be initialized)`,
         keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,
+        highscResetConfirm: `Erases the high score for this chart. Is it OK?`,
         colorCopyConfirm: `Replace freeze arrow color scheme with arrow color\n(replace both normal and hit). Is this OK?`,
 
         difficulty: `Select a chart.`,

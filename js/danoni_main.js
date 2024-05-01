@@ -5128,6 +5128,12 @@ const makeHighScore = _scoreId => {
 		}
 		const resultText = `${unEscapeHtml(tweetResultTmp)}`;
 		multiAppend(detailHighScore,
+			makeDifLblCssButton(`lnkResetHighScore`, g_lblNameObj.s_resetResult, 7, _ => {
+				if (window.confirm(g_msgObj.highscResetConfirm)) {
+					delete g_localStorage.highscores[scoreName];
+					makeHighScore(_scoreId);
+				}
+			}, Object.assign({ btnStyle: `Reset` }, g_lblPosObj.lnkHighScore)),
 			makeDifLblCssButton(`lnkHighScore`, g_lblNameObj.s_result, 8, _ => {
 				copyTextToClipboard(keyIsShift() ? resultCommon : resultText, g_msgInfoObj.I_0001);
 			}, g_lblPosObj.lnkHighScore),
