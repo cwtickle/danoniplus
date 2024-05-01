@@ -5109,7 +5109,7 @@ const makeHighScore = _scoreId => {
 			rankMark: g_localStorage.highscores?.[scoreName]?.rankMark || `--`,
 			playStyleData: g_localStorage.highscores[scoreName]?.playStyle || `--`,
 			highscore: g_localStorage.highscores[scoreName],
-			tweetExcessive: g_localStorage.highscores[scoreName]?.excessive || `---` === `---` ? `(+${g_resultObj.excessive})` : ``,
+			tweetExcessive: g_localStorage.highscores[scoreName]?.excessive ?? `---` === `---` ? `` : `(+${g_resultObj.excessive})`,
 			musicTitle, tweetDifData, tweetFrzJdg, tweetMaxCombo, baseTwitUrl,
 		};
 		const resultCommon = unEscapeHtml(makeResultText(g_templateObj.resultFormatDf, resultParams));
