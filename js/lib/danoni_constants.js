@@ -198,7 +198,7 @@ const updateWindowSiz = _ => {
         difCover: { x: 25, y: 60, w: 140, h: 261 + g_sHeight - 500, opacity: 0.95 },
         difFilter: { x: 0, y: 61, w: 140, h: 200 + g_sHeight - 500, overflow: `auto` },
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
-        scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 236, visibility: `hidden` },
+        scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 240, visibility: `hidden` },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
         keyconSprite: { y: 88, h: g_sHeight - 85, overflow: `auto` },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
@@ -307,7 +307,13 @@ const updateWindowSiz = _ => {
             x: 140, y: 70, w: (g_sWidth - 500) / 2 + 275, h: 150, overflow: `auto`,
         },
         lnkDifInfo: {
-            w: g_limitObj.difCoverWidth, borderStyle: `solid`,
+            w: g_limitObj.difCoverWidth, h: 20, borderStyle: `solid`,
+        },
+        lnkHighScore: {
+            w: g_limitObj.difCoverWidth, h: 20, borderStyle: `solid`,
+        },
+        lblHRank: {
+            x: 290, y: 145, w: 120, h: 20, siz: 50, align: C_ALIGN_CENTER,
         },
 
         /** ディスプレイ画面 */
@@ -966,7 +972,7 @@ const g_settings = {
 
     opacitys: [10, 25, 50, 75, 100],
 
-    scoreDetailDefs: [`Density`, `Speed`, `ToolDif`],
+    scoreDetailDefs: [`Density`, `Speed`, `ToolDif`, `HighScore`],
     scoreDetails: [],
     scoreDetailCursors: [],
 
@@ -1535,12 +1541,17 @@ const g_shortcutObj = {
         Digit1: { id: `lnkDensityG` },
         Digit2: { id: `lnkSpeedG` },
         Digit3: { id: `lnkToolDifG` },
+        Digit4: { id: `lnkHighScoreG` },
         Numpad1: { id: `lnkDensityG` },
         Numpad2: { id: `lnkSpeedG` },
         Numpad3: { id: `lnkToolDifG` },
+        Numpad4: { id: `lnkHighScoreG` },
         KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
         KeyZ: { id: `btnSave` },
+        ControlLeft_KeyC: { id: `` },
+        ControlRight_KeyC: { id: `` },
+        KeyC: { id: `lnkHighScore`, reset: true },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
@@ -1563,11 +1574,16 @@ const g_shortcutObj = {
         Digit1: { id: `lnkDensityG` },
         Digit2: { id: `lnkSpeedG` },
         Digit3: { id: `lnkToolDifG` },
+        Digit4: { id: `lnkHighScoreG` },
         Numpad1: { id: `lnkDensityG` },
         Numpad2: { id: `lnkSpeedG` },
         Numpad3: { id: `lnkToolDifG` },
+        Numpad4: { id: `lnkHighScoreG` },
         KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
+        ControlLeft_KeyC: { id: `` },
+        ControlRight_KeyC: { id: `` },
+        KeyC: { id: `lnkHighScore`, reset: true },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
@@ -2977,6 +2993,7 @@ const g_lblNameObj = {
     'u_Speed': `Velocity`,
     'u_Density': `Density`,
     'u_ToolDif': `DifLevel`,
+    'u_HighScore': `HighScore`,
 
     'u_Main': `Main`,
     'u_Replaced': `Replaced`,
@@ -3049,6 +3066,7 @@ const g_lang_lblNameObj = {
         s_cnts: `All Arrows`,
         s_linecnts: `- 矢印 Arrow:<br><br>- 氷矢 Frz:<br><br>- 3つ押し位置 ({0}):`,
         s_print: `データ出力`,
+        s_result: `CopyResult`,
         s_printTitle: `Dancing☆Onigiri レベル計算ツール+++`,
         s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
 
@@ -3086,6 +3104,7 @@ const g_lang_lblNameObj = {
         s_cnts: `All Arrows`,
         s_linecnts: `- Arrow:<br><br>- Freeze Arrow:<br><br>- Polychord positions ({0}):`,
         s_print: `CopyData`,
+        s_result: `CopyResult`,
         s_printTitle: `Dancing☆Onigiri Level Calculator+++`,
         s_printHeader: `Level\tChords\tJack\tAll\tArrow\tFrz\tAPM\tTime`,
 
