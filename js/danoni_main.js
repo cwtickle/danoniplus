@@ -5918,7 +5918,7 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 
 	// 達成率(Accuracy)・許容ミス数の計算
 	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
-	g_resultObj.requiredAccuracy = rateText;
+	g_workObj.requiredAccuracy = rateText;
 
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
@@ -11223,7 +11223,7 @@ const resultInit = _ => {
 			if (![``, `failed`, `cleared`].includes(g_resultObj.spState)) {
 				g_localStorage.highscores[scoreName][g_resultObj.spState] = true;
 			}
-			if (!g_gameOverFlg && g_finishFlg && g_resultObj.requiredAccuracy !== `----`) {
+			if (!g_gameOverFlg && g_finishFlg && g_workObj.requiredAccuracy !== `----`) {
 				if (g_localStorage.highscores[scoreName].clearLamps === undefined) {
 					g_localStorage.highscores[scoreName].clearLamps = [];
 				}
