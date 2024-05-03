@@ -260,6 +260,9 @@ const updateWindowSiz = _ => {
             title: g_msgObj.dataSave, borderStyle: `solid`,
         },
 
+        lblBaseSpd: {
+            x: g_sWidth - 100, y: 0, w: 100, h: 20, siz: 14,
+        },
         btnReverse: {
             x: 160, y: 0, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
         },
@@ -354,6 +357,12 @@ const updateWindowSiz = _ => {
         lnkColorCopy: {
             x: 35, y: -5, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorCopy,
         },
+        lblkey: {
+            x: g_sWidth - 80, y: 90, w: 60, h: 20, siz: 14,
+        },
+        lnkKeySwitch: {
+            x: g_sWidth - 60, w: 50, h: 20, siz: 14,
+        },
 
         btnKcBack: {
             x: g_btnX(1 / 3), y: g_sHeight - 75,
@@ -395,6 +404,9 @@ const updateWindowSiz = _ => {
         },
         frzHitTop: {
             x: -8, y: -8, w: C_ARW_WIDTH + 16, h: C_ARW_WIDTH + 16,
+        },
+        lblframe: {
+            x: 0, y: 0, w: 100, h: 30, siz: 20,
         },
         lblCredit: {
             x: 125, y: g_headerObj.playingHeight - 30, w: g_headerObj.playingWidth - 125, h: 20, align: C_ALIGN_LEFT,
