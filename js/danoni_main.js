@@ -6809,7 +6809,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 		if (_reloadFlg) {
 			colorPickSprite.style.display = ([`Default`, `Type0`].includes(g_colorType) ? C_DIS_NONE : C_DIS_INHERIT);
-			for (let j = 0; j < g_headerObj.setColor.length; j++) {
+			for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
 				changeColorPicker(j, `arrow`, g_headerObj.setColor[j]);
 				changeColorPicker(j, `arrowShadow`, g_headerObj.setShadowColor[j]);
 				changeColorPicker(j, `frz`, g_headerObj.frzColor[j][0]);
@@ -6839,8 +6839,10 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			if (window.confirm(g_msgObj.colorCopyConfirm)) {
 				for (let j = 0; j < g_headerObj.setColor.length; j++) {
 					g_headerObj[`frzColor${g_colorType}`][j] = fillArray(g_headerObj[`frzColor${g_colorType}`][j].length, g_headerObj[`setColor${g_colorType}`][j]);
-					[``, `Bar`].forEach((val, k) =>
-						document.getElementById(`pickfrz${val}${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][k]);
+					if (j < g_limitObj.kcColorPickerNum) {
+						[``, `Bar`].forEach((val, k) =>
+							document.getElementById(`pickfrz${val}${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][k]);
+					}
 				}
 			}
 		}, g_lblPosObj.lnkColorCopy, g_cssObj.button_Start),
@@ -6856,7 +6858,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const createColorPickWindow = (_j, _type, _func, { x = 0, y = 15 } = {}) =>
 		createColorPicker(colorPickSprite, `pick${_type}${_j}`, _func, { x, y: y + 25 * _j });
 
-	for (let j = 0; j < g_headerObj.setColor.length; j++) {
+	for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
 		createColorPickWindow(j, `arrow`, _ => {
 			g_headerObj[`setColor${g_colorType}`][j] = document.getElementById(`pickarrow${j}`).value;
 			setColorType(0, false);
