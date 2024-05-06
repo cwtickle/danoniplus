@@ -358,7 +358,7 @@ const updateWindowSiz = _ => {
             x: 0, w: 50, h: 15, siz: 11, align: C_ALIGN_LEFT, background: `#${g_headerObj.baseBrightFlg ? `eeeeee` : `111111`}80`,
         },
         lnkColorR: {
-            x: 0, y: -20, w: 40, h: 20, siz: 14, title: g_msgObj.pickColorCopy,
+            x: 0, y: -20, w: 40, h: 20, siz: 14, title: g_msgObj.pickColorR,
         },
         lnkColorCopy: {
             x: 35, y: -5, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorCopy,
@@ -3256,6 +3256,7 @@ const g_lang_msgObj = {
         stepRtnGroup: `矢印などノーツの種類、回転に関するパターンを切り替えます。\nあらかじめ設定されている場合のみ変更可能です。`,
 
         pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）、通常時のフリーズアロー色（枠、帯）を\nカラーピッカーから選んで変更できます。`,
+        pickColorR: `設定する矢印色の種類を切り替えます。`,
         pickColorCopy: `このボタンを押すと、フリーズアローの配色を矢印（枠）の色で上書きします。\nヒット時のフリーズアローの色も上書きします。`,
     },
 
@@ -3314,6 +3315,7 @@ const g_lang_msgObj = {
         stepRtnGroup: `Switches the type of notes, such as arrows, and the pattern regarding rotation.\nThis can only be changed if it has been set in advance.`,
 
         pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,
+        pickColorR: `Switches the arrow color type to be set.`,
         pickColorCopy: `Pressing this button will override the color scheme of the freeze arrow with the frame color of the arrow. \nIt also overrides the color of the freeze arrow on hit.`,
     },
 
