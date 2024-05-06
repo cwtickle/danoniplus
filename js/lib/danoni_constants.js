@@ -122,6 +122,9 @@ const g_limitObj = {
 
     // キーコンフィグで表示するカラーピッカー数
     kcColorPickerNum: 5,
+
+    // キーコンフィグで設定できるシャッフルグループ上限数
+    kcShuffleNums: 20,
 };
 
 /** 設定項目の位置 */

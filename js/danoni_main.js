@@ -6450,7 +6450,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
-		const tmpShuffle = changeTmpData(`shuffle`, 10, _j, _scrollNum);
+		const tmpShuffle = changeTmpData(`shuffle`, g_limitObj.kcShuffleNums, _j, _scrollNum);
 		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
 
 		changeShuffleConfigColor(keyCtrlPtn, g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j], _j);
