@@ -6855,11 +6855,11 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				for (let j = 0; j < g_headerObj.setColor.length; j++) {
 					g_headerObj.frzColor[j] = g_headerObj[`frzColor${g_colorType}`][j] =
 						fillArray(g_headerObj[`frzColor${g_colorType}`][j].length, g_headerObj[`setColor${g_colorType}`][j]);
-					if (j < g_limitObj.kcColorPickerNum) {
-						const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
-						[``, `Bar`].forEach((val, k) =>
-							document.getElementById(`pickfrz${val}${j}`).value = g_headerObj[`frzColor${g_colorType}`][m][k]);
-					}
+				}
+				for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
+					const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
+					[``, `Bar`].forEach((val, k) =>
+						document.getElementById(`pickfrz${val}${j}`).value = g_headerObj[`frzColor${g_colorType}`][m][k]);
 				}
 			}
 		}, g_lblPosObj.lnkColorCopy, g_cssObj.button_Start),

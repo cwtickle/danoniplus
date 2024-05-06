@@ -2646,15 +2646,15 @@ const g_cssBkProperties = {};
 const g_dfColorBaseObj = {
 
     dark: {
-        setColorType1: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`, `#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
-        setColorType2: [`#ffffff`, `#9999ff`, `#99ccff`, `#ffccff`, `#ff9999`, `#ffffff`, `#9999ff`, `#99ccff`, `#ffccff`, `#ff9999`],
-        setColorType3: [`#ccccff`, `#ccffff`, `#ffffff`, `#ffffcc`, `#ffcc99`, `#ccccff`, `#ccffff`, `#ffffff`, `#ffffcc`, `#ffcc99`],
-        setColorType4: [`#ffffff`, `#ccccff`, `#99ccff`, `#ffccff`, `#ffcccc`, `#ffffff`, `#ccccff`, `#99ccff`, `#ffccff`, `#ffcccc`],
+        setColorType1: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`, `#ff9999`, `#ff6699`, `#99ff99`, `#6699ff`, `#9966ff`],
+        setColorType2: [`#ffffff`, `#9999ff`, `#99ccff`, `#ffccff`, `#ff9999`, `#669966`, `#ccffcc`, `#cc99ff`, `#ffff99`, `#cc9966`],
+        setColorType3: [`#ccccff`, `#ccffff`, `#ffffff`, `#ffffcc`, `#ffcc99`, `#ffcccc`, `#ff99cc`, `#ccffcc`, `#99ccff`, `#cc99ff`],
+        setColorType4: [`#ffffff`, `#ccccff`, `#99ccff`, `#ffccff`, `#ffcccc`, `#99cc99`, `#ccffcc`, `#cc99ff`, `#ffff99`, `#ffcc99`],
 
         setShadowColorType1: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
         setShadowColorType2: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
-        setShadowColorType3: [`#6666ff60`, `#33999960`, `#66666660`, `#99993360`, `#cc663360`, `#6666ff60`, `#33999960`, `#66666660`, `#99993360`, `#cc663360`],
-        setShadowColorType4: [`#66666660`, `#6666ff60`, `#3366cc60`, `#99339960`, `#99333360`, `#66666660`, `#6666ff60`, `#3366cc60`, `#99339960`, `#99333360`],
+        setShadowColorType3: [`#6666ff60`, `#33999960`, `#66666660`, `#99993360`, `#cc663360`, `#99666660`, `#99336660`, `#33993360`, `#33669960`, `#66339960`],
+        setShadowColorType4: [`#66666660`, `#6666ff60`, `#3366cc60`, `#99339960`, `#99333360`, `#33663360`, `#66996660`, `#66339960`, `#66663360`, `#99663360`],
 
         frzColorType1: [
             [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
@@ -2706,15 +2706,15 @@ const g_dfColorBaseObj = {
         ],
     },
     light: {
-        setColorType1: [`#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`, `#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`],
-        setColorType2: [`#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`, `#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`],
+        setColorType1: [`#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`, `#996666`, `#ff6699`, `#66cc66`, `#3399ff`, `#6633cc`],
+        setColorType2: [`#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`, `#669966`, `#336633`, `#9966cc`, `#999900`, `#996633`],
         setColorType3: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
         setColorType4: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
 
         setShadowColorType1: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
         setShadowColorType2: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
-        setShadowColorType3: [`#6666ff80`, `#66cccc80`, `#ffffff80`, `#99996680`, `#cc660080`, `#6666ff80`, `#66cccc80`, `#ffffff80`, `#99996680`, `#cc660080`],
-        setShadowColorType4: [`#00000080`, `#6666ff80`, `#cc000080`, `#cc99cc80`, `#cc336680`, `#00000080`, `#6666ff80`, `#cc000080`, `#cc99cc80`, `#cc336680`],
+        setShadowColorType3: [`#6666ff80`, `#66cccc80`, `#ffffff80`, `#99996680`, `#cc660080`, `#ff666680`, `#cc669980`, `#99cc9980`, `#6699cc80`, `#9966cc80`],
+        setShadowColorType4: [`#00000080`, `#6666ff80`, `#cc000080`, `#cc99cc80`, `#cc336680`, `#66996680`, `#99cc9980`, `#9966cc80`, `#99993380`, `#cc996680`],
 
         frzColorType1: [
             [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
