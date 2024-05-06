@@ -6379,6 +6379,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	g_keycons.cursorNumList = [...Array(keyNum).keys()].map(i => i);
 	const configKeyGroupList = g_headerObj.keyGroupOrder[g_stateObj.scoreId] ??
 		g_keyObj[`keyGroupOrder${keyCtrlPtn}`] ?? tkObj.keyGroupList;
+	g_keycons.colorCursorNum = 0;
 
 	/**
 	 * keyconSpriteのスクロール位置調整
@@ -6795,6 +6796,20 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	};
 
 	/**
+	 * ColorPicker（一式）の切替
+	 */
+	const changeColorPickers = _ => {
+		lnkColorR.innerHTML = `[${g_keycons.colorCursorNum + 1}>]`;
+		for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
+			const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
+			changeColorPicker(j, `arrow`, g_headerObj.setColor[m]);
+			changeColorPicker(j, `arrowShadow`, g_headerObj.setShadowColor[m]);
+			changeColorPicker(j, `frz`, g_headerObj.frzColor[m][0]);
+			changeColorPicker(j, `frzBar`, g_headerObj.frzColor[m][1]);
+		}
+	};
+
+	/**
 	 * ColorTypeの制御
 	 * @param {number} _scrollNum 
 	 */
@@ -6809,12 +6824,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
 		if (_reloadFlg) {
 			colorPickSprite.style.display = ([`Default`, `Type0`].includes(g_colorType) ? C_DIS_NONE : C_DIS_INHERIT);
-			for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
-				changeColorPicker(j, `arrow`, g_headerObj.setColor[j]);
-				changeColorPicker(j, `arrowShadow`, g_headerObj.setShadowColor[j]);
-				changeColorPicker(j, `frz`, g_headerObj.frzColor[j][0]);
-				changeColorPicker(j, `frzBar`, g_headerObj.frzColor[j][1]);
-			}
+			g_keycons.colorCursorNum = g_keycons.colorCursorNum % Math.ceil(g_headerObj.setColor.length / g_limitObj.kcColorPickerNum);
+			changeColorPickers();
 		}
 	};
 
@@ -6833,15 +6844,21 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		colorPickSprite.style.display = C_DIS_NONE;
 	}
 	multiAppend(colorPickSprite,
+		createCss2Button(`lnkColorR`, `[${g_keycons.colorCursorNum + 1}>]`, _ => {
+			g_keycons.colorCursorNum = (g_keycons.colorCursorNum + 1) % Math.ceil(g_headerObj.setColor.length / g_limitObj.kcColorPickerNum);
+			changeColorPickers();
+		}, g_lblPosObj.lnkColorR, g_cssObj.button_Start),
 		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_arrow, Object.assign({ y: 0 }, g_lblPosObj.pickPos)),
 		createDivCss2Label(`lblPickFrz`, g_lblNameObj.s_frz, Object.assign({ y: 140 }, g_lblPosObj.pickPos)),
 		createCss2Button(`lnkColorCopy`, `[↓]`, _ => {
 			if (window.confirm(g_msgObj.colorCopyConfirm)) {
 				for (let j = 0; j < g_headerObj.setColor.length; j++) {
-					g_headerObj[`frzColor${g_colorType}`][j] = fillArray(g_headerObj[`frzColor${g_colorType}`][j].length, g_headerObj[`setColor${g_colorType}`][j]);
+					g_headerObj.frzColor[j] = g_headerObj[`frzColor${g_colorType}`][j] =
+						fillArray(g_headerObj[`frzColor${g_colorType}`][j].length, g_headerObj[`setColor${g_colorType}`][j]);
 					if (j < g_limitObj.kcColorPickerNum) {
+						const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
 						[``, `Bar`].forEach((val, k) =>
-							document.getElementById(`pickfrz${val}${j}`).value = g_headerObj[`frzColor${g_colorType}`][j][k]);
+							document.getElementById(`pickfrz${val}${j}`).value = g_headerObj[`frzColor${g_colorType}`][m][k]);
 					}
 				}
 			}
@@ -6860,18 +6877,22 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 	for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
 		createColorPickWindow(j, `arrow`, _ => {
-			g_headerObj[`setColor${g_colorType}`][j] = document.getElementById(`pickarrow${j}`).value;
+			const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
+			g_headerObj[`setColor${g_colorType}`][m] = document.getElementById(`pickarrow${j}`).value;
 			setColorType(0, false);
 		});
 
 		createColorPickWindow(j, `arrowShadow`, _ => {
-			g_headerObj[`setShadowColor${g_colorType}`][j] = `${document.getElementById(`pickarrowShadow${j}`).value}80`;
+			const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
+			g_headerObj[`setShadowColor${g_colorType}`][m] = `${document.getElementById(`pickarrowShadow${j}`).value}80`;
 			setColorType(0, false);
 		}, { x: 25 });
 
 		[``, `Bar`].forEach((val, k) =>
-			createColorPickWindow(j, `frz${val}`, _ =>
-				g_headerObj[`frzColor${g_colorType}`][j][k] = document.getElementById(`pickfrz${val}${j}`).value, { x: 25 * k, y: 155 }));
+			createColorPickWindow(j, `frz${val}`, _ => {
+				const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
+				g_headerObj[`frzColor${g_colorType}`][m][k] = document.getElementById(`pickfrz${val}${j}`).value;
+			}, { x: 25 * k, y: 155 }));
 	}
 
 	// ConfigType, ColorTypeの初期設定

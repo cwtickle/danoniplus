@@ -357,6 +357,9 @@ const updateWindowSiz = _ => {
         pickPos: {
             x: 0, w: 50, h: 15, siz: 11, align: C_ALIGN_LEFT, background: `#${g_headerObj.baseBrightFlg ? `eeeeee` : `111111`}80`,
         },
+        lnkColorR: {
+            x: 0, y: -20, w: 40, h: 20, siz: 14, title: g_msgObj.pickColorCopy,
+        },
         lnkColorCopy: {
             x: 35, y: -5, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorCopy,
         },
@@ -1089,6 +1092,7 @@ const g_keycons = {
     cursorNumList: [],
     cursorNum: 0,
     keySwitchNum: 0,
+    colorCursorNum: 0,
 };
 
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
