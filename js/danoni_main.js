@@ -1028,9 +1028,9 @@ const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64,
  * @param {string} _str 
  * @param {string} _altId
  */
-const createDescDiv = (_id, _str, _altId = _id) =>
-	createDivCss2Label(_id, _str, Object.assign(g_lblPosObj[_altId], {
-		siz: getFontSize(_str, g_sWidth, getBasicFont(), g_limitObj.mainSiz),
+const createDescDiv = (_id, _str, { altId = _id, siz = g_limitObj.mainSiz } = {}) =>
+	createDivCss2Label(_id, _str, Object.assign(g_lblPosObj[altId], {
+		siz: getFontSize(_str, g_lblPosObj[altId]?.w || g_sWidth, getBasicFont(), siz),
 	}));
 
 /*-----------------------------------------------------------*/
@@ -6642,7 +6642,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// ショートカットキーメッセージ
 		createDescDiv(`scMsg`, g_lblNameObj.kcShortcutDesc.split(`{0}`)
 			.join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
-			.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]), `scKcMsg`),
+			.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]), { altId: `scKcMsg` }),
 
 		// 別キーモード警告メッセージ
 		createDivCss2Label(
@@ -6799,7 +6799,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * ColorPicker（一式）の切替
 	 */
 	const changeColorPickers = _ => {
-		lnkColorR.innerHTML = `[${g_keycons.colorCursorNum + 1}>]`;
+		lnkColorR.innerHTML = `[${g_keycons.colorCursorNum + 1} /`;
 		for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
 			const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
 			changeColorPicker(j, `arrow`, g_headerObj.setColor[m]);
@@ -6844,13 +6844,14 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		colorPickSprite.style.display = C_DIS_NONE;
 	}
 	multiAppend(colorPickSprite,
-		createCss2Button(`lnkColorR`, `[${g_keycons.colorCursorNum + 1}>]`, _ => {
+		createCss2Button(`lnkColorR`, `[${g_keycons.colorCursorNum + 1} /`, _ => {
 			g_keycons.colorCursorNum = (g_keycons.colorCursorNum + 1) % Math.ceil(g_headerObj.setColor.length / g_limitObj.kcColorPickerNum);
 			changeColorPickers();
 		}, g_lblPosObj.lnkColorR, g_cssObj.button_Start),
+
 		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_arrow, Object.assign({ y: 0 }, g_lblPosObj.pickPos)),
 		createDivCss2Label(`lblPickFrz`, g_lblNameObj.s_frz, Object.assign({ y: 140 }, g_lblPosObj.pickPos)),
-		createCss2Button(`lnkColorCopy`, `[↓]`, _ => {
+		createCss2Button(`lnkColorCopy`, `↓]`, _ => {
 			if (window.confirm(g_msgObj.colorCopyConfirm)) {
 				for (let j = 0; j < g_headerObj.setColor.length; j++) {
 					g_headerObj.frzColor[j] = g_headerObj[`frzColor${g_colorType}`][j] =
@@ -6863,6 +6864,24 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				}
 			}
 		}, g_lblPosObj.lnkColorCopy, g_cssObj.button_Start),
+
+		createCss2Button(`lnkColorReset`, `Reset`, _ => {
+			if (window.confirm(g_msgObj.colorResetConfirm)) {
+				resetColorType({ _from: g_colorType, _to: ``, _fromObj: g_dfColorObj });
+				resetColorType({ _from: g_colorType, _to: g_colorType, _fromObj: g_dfColorObj });
+
+				// 影矢印が未指定の場合はType1, Type2の影矢印指定を無くす
+				if (!hasVal(g_headerObj[`setShadowColor${setScoreIdHeader(g_stateObj.scoreId)}Default`][0]) &&
+					[`Type1`, `Type2`].includes(g_colorType)) {
+
+					g_headerObj.setShadowColor = fillArray(g_headerObj.setColorInit.length, ``);
+					g_headerObj[`setShadowColor${g_colorType}`] = fillArray(g_headerObj.setColorInit.length, ``);
+				}
+
+				changeColorPickers();
+				viewGroupObj.color(`_${g_keycons.colorGroupNum}`);
+			}
+		}, g_lblPosObj.lnkColorReset, g_cssObj.button_Reset),
 	);
 
 	/**
@@ -7140,6 +7159,9 @@ const changeSetColor = _ => {
 	};
 	Object.keys(currentTypes).forEach(pattern => {
 		g_headerObj[`set${pattern}Color`] = structuredClone(g_headerObj[`set${pattern}Color${currentTypes[pattern]}`]);
+		if (g_headerObj[`frz${pattern}Color`] === undefined) {
+			g_headerObj[`frz${pattern}Color`] = fillArray(g_headerObj.setColorInit.length, ``);
+		}
 		for (let j = 0; j < g_headerObj.setColorInit.length; j++) {
 			g_headerObj[`frz${pattern}Color`][j] = structuredClone(g_headerObj[`frz${pattern}Color${currentTypes[pattern]}`][j]);
 		}

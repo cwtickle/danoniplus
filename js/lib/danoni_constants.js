@@ -206,7 +206,7 @@ const updateWindowSiz = _ => {
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
         scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 240, visibility: `hidden` },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
-        keyconSprite: { y: 88, h: g_sHeight - 85, overflow: `auto` },
+        keyconSprite: { y: 105, h: g_sHeight - 85, overflow: `auto` },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
         resultWindow: { x: g_sWidth / 2 - 200, y: 185, w: 400, h: 210 },
@@ -355,16 +355,19 @@ const updateWindowSiz = _ => {
             x: g_btnX(), y: 68, w: g_btnWidth(), h: 20,
         },
         kcShuffleDesc: {
-            x: 5 + g_btnX(), y: g_sHeight - 125, w: g_btnWidth(), h: 20, align: C_ALIGN_LEFT,
+            x: g_btnX(), y: 85, w: g_btnWidth(), h: 20,
         },
         pickPos: {
             x: 0, w: 50, h: 15, siz: 11, align: C_ALIGN_LEFT, background: `#${g_headerObj.baseBrightFlg ? `eeeeee` : `111111`}80`,
         },
         lnkColorR: {
-            x: 0, y: -20, w: 40, h: 20, siz: 14, title: g_msgObj.pickColorR,
+            x: 0, y: -25, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorR,
         },
         lnkColorCopy: {
-            x: 35, y: -5, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorCopy,
+            x: 30, y: -25, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorCopy,
+        },
+        lnkColorReset: {
+            x: 0, y: 280, w: 50, h: 20, siz: 14, title: g_msgObj.pickColorReset,
         },
         lblkey: {
             x: g_sWidth - 80, y: 90, w: 60, h: 20, siz: 14,
@@ -3214,6 +3217,7 @@ const g_lang_msgObj = {
         keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
         highscResetConfirm: `この譜面のハイスコアを消去します。よろしいですか？`,
         colorCopyConfirm: `フリーズアローの配色を矢印色に置き換えます\n(通常・ヒット時双方を置き換えます)。よろしいですか？`,
+        colorResetConfirm: `矢印・フリーズアローの配色を元に戻します。よろしいですか？`,
 
         difficulty: `譜面を選択します。`,
         speed: `矢印の流れる速度を設定します。\n外側のボタンは1x単位、内側は0.25x単位で変更できます。`,
@@ -3261,6 +3265,7 @@ const g_lang_msgObj = {
         pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）、通常時のフリーズアロー色（枠、帯）を\nカラーピッカーから選んで変更できます。`,
         pickColorR: `設定する矢印色の種類を切り替えます。`,
         pickColorCopy: `このボタンを押すと、フリーズアローの配色を矢印（枠）の色で上書きします。\nヒット時のフリーズアローの色も上書きします。`,
+        pickColorReset: `矢印・フリーズアローの配色を元に戻します。`,
     },
 
     En: {
@@ -3273,6 +3278,7 @@ const g_lang_msgObj = {
         keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,
         highscResetConfirm: `Erases the high score for this chart. Is it OK?`,
         colorCopyConfirm: `Replace freeze arrow color scheme with arrow color\n(replace both normal and hit). Is this OK?`,
+        colorResetConfirm: `Restore the color scheme for arrows and freeze arrows. Is this OK?`,
 
         difficulty: `Select a chart.`,
         speed: `Set the speed of the sequences.\nThe outer button can be changed in 1x increments and the inner button in 0.25x increments.`,
@@ -3320,6 +3326,7 @@ const g_lang_msgObj = {
         pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,
         pickColorR: `Switches the arrow color type to be set.`,
         pickColorCopy: `Pressing this button will override the color scheme of the freeze arrow with the frame color of the arrow. \nIt also overrides the color of the freeze arrow on hit.`,
+        pickColorReset: `Restore the color scheme for arrows and freeze arrows.`,
     },
 
 };
