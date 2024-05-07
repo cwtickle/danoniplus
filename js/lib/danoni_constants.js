@@ -352,19 +352,19 @@ const updateWindowSiz = _ => {
             pointerEvents: `none`,
         },
         kcDesc: {
-            x: g_btnX(), y: 68, w: g_btnWidth(), h: 20,
+            x: g_btnX() + 50, y: 68, w: g_btnWidth() - 100, h: 20,
         },
         kcShuffleDesc: {
-            x: g_btnX(), y: 85, w: g_btnWidth(), h: 20,
+            x: g_btnX() + 50, y: 85, w: g_btnWidth() - 100, h: 20,
         },
         pickPos: {
             x: 0, w: 50, h: 15, siz: 11, align: C_ALIGN_LEFT, background: `#${g_headerObj.baseBrightFlg ? `eeeeee` : `111111`}80`,
         },
         lnkColorR: {
-            x: 0, y: -25, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorR,
+            x: 0, y: -20, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorR,
         },
         lnkColorCopy: {
-            x: 30, y: -25, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorCopy,
+            x: 30, y: -20, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorCopy,
         },
         lnkColorReset: {
             x: 0, y: 280, w: 50, h: 20, siz: 14, title: g_msgObj.pickColorReset,
@@ -402,6 +402,7 @@ const updateWindowSiz = _ => {
         btnKcReset: {
             x: g_btnX(), y: g_sHeight - 75,
             w: g_btnWidth(1 / 3), h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
+            title: g_msgObj.kcReset,
         },
 
         /** メイン画面 */
@@ -2933,7 +2934,7 @@ const g_lblNameObj = {
     b_back: `Back`,
     b_keyConfig: `KeyConfig`,
     b_play: `PLAY!`,
-    b_reset: `Reset`,
+    b_reset: `Reset Key`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
     b_tweet: `Tweet`,
@@ -3261,6 +3262,7 @@ const g_lang_msgObj = {
         colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
         shuffleGroup: `Mirror/X-Mirror/Turning/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
         stepRtnGroup: `矢印などノーツの種類、回転に関するパターンを切り替えます。\nあらかじめ設定されている場合のみ変更可能です。`,
+        kcReset: `対応するキーの割り当てを元に戻します。`,
 
         pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）、通常時のフリーズアロー色（枠、帯）を\nカラーピッカーから選んで変更できます。`,
         pickColorR: `設定する矢印色の種類を切り替えます。`,
@@ -3322,6 +3324,7 @@ const g_lang_msgObj = {
         colorGroup: `Change the sequences color group assignment pattern.`,
         shuffleGroup: `Change the shuffle group when Mirror, X-Mirror, Turning, Random or S-Random are selected.\nShuffle with the same numbers listed above.`,
         stepRtnGroup: `Switches the type of notes, such as arrows, and the pattern regarding rotation.\nThis can only be changed if it has been set in advance.`,
+        kcReset: `Restores the corresponding key assignments.`,
 
         pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,
         pickColorR: `Switches the arrow color type to be set.`,
