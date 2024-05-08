@@ -6850,13 +6850,14 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		colorPickSprite.style.display = C_DIS_NONE;
 	}
 	multiAppend(colorPickSprite,
+
+		// ColorPickerの切替
 		createCss2Button(`lnkColorR`, `[${g_keycons.colorCursorNum + 1} /`, _ => {
 			g_keycons.colorCursorNum = (g_keycons.colorCursorNum + 1) % Math.ceil(g_headerObj.setColor.length / g_limitObj.kcColorPickerNum);
 			changeColorPickers();
 		}, g_lblPosObj.lnkColorR, g_cssObj.button_Start),
 
-		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_arrow, Object.assign({ y: 0 }, g_lblPosObj.pickPos)),
-		createDivCss2Label(`lblPickFrz`, g_lblNameObj.s_frz, Object.assign({ y: 140 }, g_lblPosObj.pickPos)),
+		// 矢印の配色をフリーズアローへ反映
 		createCss2Button(`lnkColorCopy`, `↓]`, _ => {
 			if (window.confirm(g_msgObj.colorCopyConfirm)) {
 				for (let j = 0; j < g_headerObj.setColor.length; j++) {
@@ -6871,6 +6872,10 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			}
 		}, g_lblPosObj.lnkColorCopy, g_cssObj.button_Start),
 
+		createDivCss2Label(`lblPickArrow`, g_lblNameObj.s_arrow, Object.assign({ y: 0 }, g_lblPosObj.pickPos)),
+		createDivCss2Label(`lblPickFrz`, g_lblNameObj.s_frz, Object.assign({ y: 140 }, g_lblPosObj.pickPos)),
+
+		// ColorPickerの色を元に戻す
 		createCss2Button(`lnkColorReset`, g_lblNameObj.b_cReset, _ => {
 			if (window.confirm(g_msgObj.colorResetConfirm)) {
 				resetColorType({ _from: g_colorType, _to: ``, _fromObj: g_dfColorObj });
