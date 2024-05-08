@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/05/01 (v36.2.0)
+ * Revised : 2024/05/08 (v36.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -119,6 +119,12 @@ const g_limitObj = {
 
     // キーコンフィグのカラーピッカー幅
     kcColorPickerX: 60,
+
+    // キーコンフィグで表示するカラーピッカー数
+    kcColorPickerNum: 5,
+
+    // キーコンフィグで設定できるシャッフルグループ上限数
+    kcShuffleNums: 20,
 };
 
 /** 設定項目の位置 */
@@ -200,7 +206,7 @@ const updateWindowSiz = _ => {
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
         scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 240, visibility: `hidden` },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
-        keyconSprite: { y: 88, h: g_sHeight - 85, overflow: `auto` },
+        keyconSprite: { y: 105, h: g_sHeight - 85, overflow: `auto` },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
         resultWindow: { x: g_sWidth / 2 - 200, y: 185, w: 400, h: 210 },
@@ -260,6 +266,9 @@ const updateWindowSiz = _ => {
             title: g_msgObj.dataSave, borderStyle: `solid`,
         },
 
+        lblBaseSpd: {
+            x: g_sWidth - 100, y: 0, w: 100, h: 20, siz: 14,
+        },
         btnReverse: {
             x: 160, y: 0, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
         },
@@ -343,16 +352,28 @@ const updateWindowSiz = _ => {
             pointerEvents: `none`,
         },
         kcDesc: {
-            x: g_btnX(), y: 68, w: g_btnWidth(), h: 20,
+            x: g_btnX() + 50, y: 68, w: g_btnWidth() - 100, h: 20,
         },
         kcShuffleDesc: {
-            x: 5 + g_btnX(), y: g_sHeight - 125, w: g_btnWidth(), h: 20, align: C_ALIGN_LEFT,
+            x: g_btnX() + 50, y: 85, w: g_btnWidth() - 100, h: 20,
         },
         pickPos: {
             x: 0, w: 50, h: 15, siz: 11, align: C_ALIGN_LEFT, background: `#${g_headerObj.baseBrightFlg ? `eeeeee` : `111111`}80`,
         },
+        lnkColorR: {
+            x: 0, y: -20, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorR,
+        },
         lnkColorCopy: {
-            x: 35, y: -5, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorCopy,
+            x: 30, y: -20, w: 30, h: 20, siz: 14, title: g_msgObj.pickColorCopy,
+        },
+        lnkColorReset: {
+            x: 0, y: 280, w: 50, h: 20, siz: 14, title: g_msgObj.pickColorReset,
+        },
+        lblkey: {
+            x: g_sWidth - 80, y: 90, w: 60, h: 20, siz: 14,
+        },
+        lnkKeySwitch: {
+            x: g_sWidth - 60, w: 50, h: 20, siz: 14,
         },
 
         btnKcBack: {
@@ -381,6 +402,7 @@ const updateWindowSiz = _ => {
         btnKcReset: {
             x: g_btnX(), y: g_sHeight - 75,
             w: g_btnWidth(1 / 3), h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
+            title: g_msgObj.kcReset,
         },
 
         /** メイン画面 */
@@ -395,6 +417,9 @@ const updateWindowSiz = _ => {
         },
         frzHitTop: {
             x: -8, y: -8, w: C_ARW_WIDTH + 16, h: C_ARW_WIDTH + 16,
+        },
+        lblframe: {
+            x: 0, y: 0, w: 100, h: 30, siz: 20,
         },
         lblCredit: {
             x: 125, y: g_headerObj.playingHeight - 30, w: g_headerObj.playingWidth - 125, h: 20, align: C_ALIGN_LEFT,
@@ -1074,6 +1099,7 @@ const g_keycons = {
     cursorNumList: [],
     cursorNum: 0,
     keySwitchNum: 0,
+    colorCursorNum: 0,
 };
 
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
@@ -2613,8 +2639,8 @@ const g_dataMinObj = {
 const g_dfColorObj = {
 
     // 矢印初期色情報
-    setColorInit: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
-    setShadowColorInit: [``, ``, ``, ``, ``],
+    setColorInit: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`, `#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
+    setShadowColorInit: [``, ``, ``, ``, ``, ``, ``, ``, ``, ``],
 
     // フリーズアロー初期色情報
     frzColorInit: [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
@@ -2627,83 +2653,123 @@ const g_cssBkProperties = {};
 const g_dfColorBaseObj = {
 
     dark: {
-        setColorType1: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`],
-        setColorType2: [`#ffffff`, `#9999ff`, `#99ccff`, `#ffccff`, `#ff9999`],
-        setColorType3: [`#ccccff`, `#ccffff`, `#ffffff`, `#ffffcc`, `#ffcc99`],
-        setColorType4: [`#ffffff`, `#ccccff`, `#99ccff`, `#ffccff`, `#ffcccc`],
+        setColorType1: [`#6666ff`, `#99ffff`, `#ffffff`, `#ffff99`, `#ff9966`, `#ff9999`, `#ff6699`, `#99ff99`, `#6699ff`, `#9966ff`],
+        setColorType2: [`#ffffff`, `#9999ff`, `#99ccff`, `#ffccff`, `#ff9999`, `#669966`, `#ccffcc`, `#cc99ff`, `#ffff99`, `#cc9966`],
+        setColorType3: [`#ccccff`, `#ccffff`, `#ffffff`, `#ffffcc`, `#ffcc99`, `#ffcccc`, `#ff99cc`, `#ccffcc`, `#99ccff`, `#cc99ff`],
+        setColorType4: [`#ffffff`, `#ccccff`, `#99ccff`, `#ffccff`, `#ffcccc`, `#99cc99`, `#ccffcc`, `#cc99ff`, `#ffff99`, `#ffcc99`],
 
-        setShadowColorType1: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
-        setShadowColorType2: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
-        setShadowColorType3: [`#6666ff60`, `#33999960`, `#66666660`, `#99993360`, `#cc663360`],
-        setShadowColorType4: [`#66666660`, `#6666ff60`, `#3366cc60`, `#99339960`, `#99333360`],
+        setShadowColorType1: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
+        setShadowColorType2: [`#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`, `#00000080`],
+        setShadowColorType3: [`#6666ff60`, `#33999960`, `#66666660`, `#99993360`, `#cc663360`, `#99666660`, `#99336660`, `#33993360`, `#33669960`, `#66339960`],
+        setShadowColorType4: [`#66666660`, `#6666ff60`, `#3366cc60`, `#99339960`, `#99333360`, `#33663360`, `#66996660`, `#66339960`, `#66663360`, `#99663360`],
 
         frzColorType1: [
             [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
             [`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
             [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
             [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
-            [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
+            [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`],
+            [`#ff9999`, `#ffcccc`, `#cccc33`, `#999933`],
+            [`#ff6699`, `#ff99cc`, `#cccc33`, `#999933`],
+            [`#99ff99`, `#ccffcc`, `#cccc33`, `#999933`],
+            [`#6699ff`, `#99ccff`, `#cccc33`, `#999933`],
+            [`#9966ff`, `#cc99ff`, `#cccc33`, `#999933`],
         ],
         frzColorType2: [
             [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
             [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
             [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
             [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
-            [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
+            [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`],
+            [`#669966`, `#669966`, `#cccc33`, `#999933`],
+            [`#ccffcc`, `#ccffcc`, `#cccc33`, `#999933`],
+            [`#cc99ff`, `#cc99ff`, `#cccc33`, `#999933`],
+            [`#ffff99`, `#ffff99`, `#cccc33`, `#999933`],
+            [`#cc9966`, `#cc9966`, `#cccc33`, `#999933`],
         ],
         frzColorType3: [
             [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
             [`#00ffcc`, `#339999`, `#cccc33`, `#999933`],
             [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
             [`#cc99ff`, `#9966ff`, `#cccc33`, `#999933`],
-            [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`]
+            [`#ff99cc`, `#ff6699`, `#cccc33`, `#999933`],
+            [`#ff9999`, `#ffcccc`, `#cccc33`, `#999933`],
+            [`#ff6699`, `#ff99cc`, `#cccc33`, `#999933`],
+            [`#99ff99`, `#ccffcc`, `#cccc33`, `#999933`],
+            [`#6699ff`, `#99ccff`, `#cccc33`, `#999933`],
+            [`#9966ff`, `#cc99ff`, `#cccc33`, `#999933`],
         ],
         frzColorType4: [
             [`#cccccc`, `#999999`, `#cccc33`, `#999933`],
             [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
             [`#66ffff`, `#6600ff`, `#cccc33`, `#999933`],
             [`#cc99cc`, `#ff99ff`, `#cccc33`, `#999933`],
-            [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`]
+            [`#ff6666`, `#ff9999`, `#cccc33`, `#999933`],
+            [`#669966`, `#669966`, `#cccc33`, `#999933`],
+            [`#ccffcc`, `#ccffcc`, `#cccc33`, `#999933`],
+            [`#cc99ff`, `#cc99ff`, `#cccc33`, `#999933`],
+            [`#ffff99`, `#ffff99`, `#cccc33`, `#999933`],
+            [`#cc9966`, `#cc9966`, `#cccc33`, `#999933`],
         ],
     },
     light: {
-        setColorType1: [`#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`],
-        setColorType2: [`#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`],
-        setColorType3: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
-        setColorType4: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
+        setColorType1: [`#6666ff`, `#66cccc`, `#000000`, `#999966`, `#cc6600`, `#996666`, `#ff6699`, `#66cc66`, `#3399ff`, `#6633cc`],
+        setColorType2: [`#000000`, `#6666ff`, `#cc0000`, `#cc99cc`, `#cc3366`, `#669966`, `#336633`, `#9966cc`, `#999900`, `#996633`],
+        setColorType3: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
+        setColorType4: [`#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`, `#000000`],
 
-        setShadowColorType1: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
-        setShadowColorType2: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
-        setShadowColorType3: [`#6666ff80`, `#66cccc80`, `#ffffff80`, `#99996680`, `#cc660080`],
-        setShadowColorType4: [`#00000080`, `#6666ff80`, `#cc000080`, `#cc99cc80`, `#cc336680`],
+        setShadowColorType1: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
+        setShadowColorType2: [`#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`, `#ffffff80`],
+        setShadowColorType3: [`#6666ff80`, `#66cccc80`, `#ffffff80`, `#99996680`, `#cc660080`, `#ff666680`, `#cc669980`, `#99cc9980`, `#6699cc80`, `#9966cc80`],
+        setShadowColorType4: [`#00000080`, `#6666ff80`, `#cc000080`, `#cc99cc80`, `#cc336680`, `#66996680`, `#99cc9980`, `#9966cc80`, `#99993380`, `#cc996680`],
 
         frzColorType1: [
             [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
             [`#00ffcc`, `#339999`, `#ffff00`, `#999900`],
             [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
             [`#cc99ff`, `#9966ff`, `#ffff00`, `#999900`],
-            [`#ff99cc`, `#ff6699`, `#ffff00`, `#999900`]
+            [`#ff99cc`, `#ff6699`, `#ffff00`, `#999900`],
+            [`#996666`, `#996666`, `#cccc33`, `#999933`],
+            [`#ff6699`, `#ff6699`, `#cccc33`, `#999933`],
+            [`#66cc66`, `#66cc66`, `#cccc33`, `#999933`],
+            [`#3399ff`, `#3399ff`, `#cccc33`, `#999933`],
+            [`#6633cc`, `#6633cc`, `#cccc33`, `#999933`],
         ],
         frzColorType2: [
             [`#cccccc`, `#999999`, `#ffff00`, `#999900`],
             [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
             [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
             [`#cc99cc`, `#ff99ff`, `#ffff00`, `#999900`],
-            [`#ff6666`, `#ff9999`, `#ffff00`, `#999900`]
+            [`#ff6666`, `#ff9999`, `#ffff00`, `#999900`],
+            [`#669966`, `#669966`, `#cccc33`, `#999933`],
+            [`#336633`, `#336633`, `#cccc33`, `#999933`],
+            [`#9966cc`, `#9966cc`, `#cccc33`, `#999933`],
+            [`#999900`, `#999900`, `#cccc33`, `#999933`],
+            [`#996633`, `#996633`, `#cccc33`, `#999933`],
         ],
         frzColorType3: [
             [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
             [`#00ffcc`, `#339999`, `#ffff00`, `#999900`],
             [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
             [`#cc99ff`, `#9966ff`, `#ffff00`, `#999900`],
-            [`#ff99cc`, `#ff6699`, `#ffff00`, `#999900`]
+            [`#ff99cc`, `#ff6699`, `#ffff00`, `#999900`],
+            [`#996666`, `#996666`, `#cccc33`, `#999933`],
+            [`#ff6699`, `#ff6699`, `#cccc33`, `#999933`],
+            [`#66cc66`, `#66cc66`, `#cccc33`, `#999933`],
+            [`#3399ff`, `#3399ff`, `#cccc33`, `#999933`],
+            [`#6633cc`, `#6633cc`, `#cccc33`, `#999933`],
         ],
         frzColorType4: [
             [`#cccccc`, `#999999`, `#ffff00`, `#999900`],
             [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
             [`#66ffff`, `#6600ff`, `#ffff00`, `#999900`],
             [`#cc99cc`, `#ff99ff`, `#ffff00`, `#999900`],
-            [`#ff6666`, `#ff9999`, `#ffff00`, `#999900`]
+            [`#ff6666`, `#ff9999`, `#ffff00`, `#999900`],
+            [`#669966`, `#669966`, `#cccc33`, `#999933`],
+            [`#336633`, `#336633`, `#cccc33`, `#999933`],
+            [`#9966cc`, `#9966cc`, `#cccc33`, `#999933`],
+            [`#999900`, `#999900`, `#cccc33`, `#999933`],
+            [`#996633`, `#996633`, `#cccc33`, `#999933`],
         ],
     },
 };
@@ -2868,13 +2934,14 @@ const g_lblNameObj = {
     b_back: `Back`,
     b_keyConfig: `KeyConfig`,
     b_play: `PLAY!`,
-    b_reset: `Reset`,
+    b_reset: `Reset Key`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
     b_tweet: `Tweet`,
     b_gitter: `Gitter`,
     b_retry: `Retry`,
     b_close: `Close`,
+    b_cReset: `Reset`,
 
     Difficulty: `Difficulty`,
     Speed: `Speed`,
@@ -3152,6 +3219,7 @@ const g_lang_msgObj = {
         keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
         highscResetConfirm: `この譜面のハイスコアを消去します。よろしいですか？`,
         colorCopyConfirm: `フリーズアローの配色を矢印色に置き換えます\n(通常・ヒット時双方を置き換えます)。よろしいですか？`,
+        colorResetConfirm: `矢印・フリーズアローの配色を元に戻します。よろしいですか？`,
 
         difficulty: `譜面を選択します。`,
         speed: `矢印の流れる速度を設定します。\n外側のボタンは1x単位、内側は0.25x単位で変更できます。`,
@@ -3195,9 +3263,12 @@ const g_lang_msgObj = {
         colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
         shuffleGroup: `Mirror/X-Mirror/Turning/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
         stepRtnGroup: `矢印などノーツの種類、回転に関するパターンを切り替えます。\nあらかじめ設定されている場合のみ変更可能です。`,
+        kcReset: `対応するキーの割り当てを元に戻します。`,
 
         pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）、通常時のフリーズアロー色（枠、帯）を\nカラーピッカーから選んで変更できます。`,
+        pickColorR: `設定する矢印色の種類を切り替えます。`,
         pickColorCopy: `このボタンを押すと、フリーズアローの配色を矢印（枠）の色で上書きします。\nヒット時のフリーズアローの色も上書きします。`,
+        pickColorReset: `矢印・フリーズアローの配色を元に戻します。`,
     },
 
     En: {
@@ -3210,6 +3281,7 @@ const g_lang_msgObj = {
         keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,
         highscResetConfirm: `Erases the high score for this chart. Is it OK?`,
         colorCopyConfirm: `Replace freeze arrow color scheme with arrow color\n(replace both normal and hit). Is this OK?`,
+        colorResetConfirm: `Restore the color scheme for arrows and freeze arrows. Is this OK?`,
 
         difficulty: `Select a chart.`,
         speed: `Set the speed of the sequences.\nThe outer button can be changed in 1x increments and the inner button in 0.25x increments.`,
@@ -3253,9 +3325,12 @@ const g_lang_msgObj = {
         colorGroup: `Change the sequences color group assignment pattern.`,
         shuffleGroup: `Change the shuffle group when Mirror, X-Mirror, Turning, Random or S-Random are selected.\nShuffle with the same numbers listed above.`,
         stepRtnGroup: `Switches the type of notes, such as arrows, and the pattern regarding rotation.\nThis can only be changed if it has been set in advance.`,
+        kcReset: `Restores the corresponding key assignments.`,
 
         pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,
+        pickColorR: `Switches the arrow color type to be set.`,
         pickColorCopy: `Pressing this button will override the color scheme of the freeze arrow with the frame color of the arrow. \nIt also overrides the color of the freeze arrow on hit.`,
+        pickColorReset: `Restore the color scheme for arrows and freeze arrows.`,
     },
 
 };
