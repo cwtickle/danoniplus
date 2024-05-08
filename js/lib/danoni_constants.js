@@ -2941,6 +2941,7 @@ const g_lblNameObj = {
     b_gitter: `Gitter`,
     b_retry: `Retry`,
     b_close: `Close`,
+    b_cReset: `Reset`,
 
     Difficulty: `Difficulty`,
     Speed: `Speed`,

@@ -6796,12 +6796,18 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	};
 
 	/**
+	 * ColorPickerに対応する実際の番号を取得
+	 * @param {number} _j 
+	 */
+	const getGroupNum = _j => _j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
+
+	/**
 	 * ColorPicker（一式）の切替
 	 */
 	const changeColorPickers = _ => {
 		lnkColorR.innerHTML = `[${g_keycons.colorCursorNum + 1} /`;
 		for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
-			const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
+			const m = getGroupNum(j);
 			changeColorPicker(j, `arrow`, g_headerObj.setColor[m]);
 			changeColorPicker(j, `arrowShadow`, g_headerObj.setShadowColor[m]);
 			changeColorPicker(j, `frz`, g_headerObj.frzColor[m][0]);
@@ -6858,14 +6864,14 @@ const keyConfigInit = (_kcType = g_kcType) => {
 						fillArray(g_headerObj[`frzColor${g_colorType}`][j].length, g_headerObj[`setColor${g_colorType}`][j]);
 				}
 				for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
-					const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
+					const m = getGroupNum(j);
 					[``, `Bar`].forEach((val, k) =>
 						document.getElementById(`pickfrz${val}${j}`).value = g_headerObj[`frzColor${g_colorType}`][m][k]);
 				}
 			}
 		}, g_lblPosObj.lnkColorCopy, g_cssObj.button_Start),
 
-		createCss2Button(`lnkColorReset`, `Reset`, _ => {
+		createCss2Button(`lnkColorReset`, g_lblNameObj.b_cReset, _ => {
 			if (window.confirm(g_msgObj.colorResetConfirm)) {
 				resetColorType({ _from: g_colorType, _to: ``, _fromObj: g_dfColorObj });
 				resetColorType({ _from: g_colorType, _to: g_colorType, _fromObj: g_dfColorObj });
@@ -6896,21 +6902,18 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 	for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
 		createColorPickWindow(j, `arrow`, _ => {
-			const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
-			g_headerObj[`setColor${g_colorType}`][m] = document.getElementById(`pickarrow${j}`).value;
+			g_headerObj[`setColor${g_colorType}`][getGroupNum(j)] = document.getElementById(`pickarrow${j}`).value;
 			setColorType(0, false);
 		});
 
 		createColorPickWindow(j, `arrowShadow`, _ => {
-			const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
-			g_headerObj[`setShadowColor${g_colorType}`][m] = `${document.getElementById(`pickarrowShadow${j}`).value}80`;
+			g_headerObj[`setShadowColor${g_colorType}`][getGroupNum(j)] = `${document.getElementById(`pickarrowShadow${j}`).value}80`;
 			setColorType(0, false);
 		}, { x: 25 });
 
 		[``, `Bar`].forEach((val, k) =>
 			createColorPickWindow(j, `frz${val}`, _ => {
-				const m = j + g_keycons.colorCursorNum * g_limitObj.kcColorPickerNum;
-				g_headerObj[`frzColor${g_colorType}`][m][k] = document.getElementById(`pickfrz${val}${j}`).value;
+				g_headerObj[`frzColor${g_colorType}`][getGroupNum(j)][k] = document.getElementById(`pickfrz${val}${j}`).value;
 			}, { x: 25 * k, y: 155 }));
 	}
 
