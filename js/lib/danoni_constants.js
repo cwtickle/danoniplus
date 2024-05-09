@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/05/08 (v36.3.0)
+ * Revised : 2024/05/09 (v36.3.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -720,8 +720,8 @@ const g_escapeStr = {
         [`Frz`, `Normal/NormalBar/Hit/HitBar`],
     ],
     targetPatternName: [
-        [`all`, `g0/g1/g2/g3/g4`],
-    ],
+        [`all`, [...Array(50).keys()].map(i => `g${i}`).join(`/`)],
+    ]
 };
 
 /** 設定・オプション画面用共通 */
