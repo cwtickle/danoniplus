@@ -720,8 +720,8 @@ const g_escapeStr = {
         [`Frz`, `Normal/NormalBar/Hit/HitBar`],
     ],
     targetPatternName: [
-        [`all`, `g0/g1/g2/g3/g4`],
-    ],
+        [`all`, [...Array(50).keys()].map(i => `g${i}`).join(`/`)],
+    ]
 };
 
 /** 設定・オプション画面用共通 */
