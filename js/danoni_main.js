@@ -6370,6 +6370,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
+	console.log((1 + g_keyObj.scale) / 2)
+	keyconSprite.style.height = `${parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2)}px`;
 	const kWidth = parseInt(keyconSprite.style.width);
 	changeSetColor();
 
