@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/05/09
+ * Revised : 2024/05/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 36.3.1`;
-const g_revisedDate = `2024/05/09`;
+const g_version = `Ver 36.3.2`;
+const g_revisedDate = `2024/05/11`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -6370,6 +6370,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
+	keyconSprite.style.height = `${parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2)}px`;
 	const kWidth = parseInt(keyconSprite.style.width);
 	changeSetColor();
 

@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/05/09 (v36.3.1)
+ * Revised : 2024/05/11 (v36.3.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -206,7 +206,7 @@ const updateWindowSiz = _ => {
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
         scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 240, visibility: `hidden` },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
-        keyconSprite: { y: 105, h: g_sHeight - 85, overflow: `auto` },
+        keyconSprite: { y: 105, h: g_sHeight - 105, overflow: `auto` },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
         resultWindow: { x: g_sWidth / 2 - 200, y: 185, w: 400, h: 210 },
