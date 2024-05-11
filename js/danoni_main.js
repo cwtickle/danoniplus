@@ -5560,6 +5560,12 @@ const createOptionWindow = _sprite => {
 					title: g_msgObj.excessive, cxtFunc: evt => setExcessive(evt.target),
 				}), g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`])
 		);
+	} else if (g_headerObj.excessiveJdgUse) {
+		spriteList.gauge.appendChild(
+			createDivCss2Label(`lnkExcessive`, `${g_lblNameObj.Excessive}:${C_FLG_ON}`,
+				Object.assign(g_lblPosObj.btnExcessive, { x: 0, w: 100, border: C_DIS_NONE }), g_cssObj[`button_Disabled${C_FLG_ON}`]
+			)
+		);
 	}
 
 	// ---------------------------------------------------
