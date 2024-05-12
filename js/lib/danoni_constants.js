@@ -1799,9 +1799,9 @@ const g_cssObj = {
     keyconfig_warning: `keyconfig_warning`,
     keyconfig_ConfigType: `keyconfig_ConfigType`,
     keyconfig_ColorType: `keyconfig_ColorType`,
-    keyconfig_ColorGroup: `keyconfig_ColorGroup`,
-    keyconfig_ShuffleGroup: `keyconfig_ShuffleGroup`,
-    keyconfig_StepRtnGroup: `keyconfig_StepRtnGroup`,
+    keyconfig_ColorGr: `keyconfig_ColorGr`,
+    keyconfig_ShuffleGr: `keyconfig_ShuffleGr`,
+    keyconfig_StepRtnGr: `keyconfig_StepRtnGr`,
     keyconfig_Changekey: `keyconfig_Changekey`,
     keyconfig_Defaultkey: `keyconfig_Defaultkey`,
 

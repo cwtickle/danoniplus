@@ -514,16 +514,16 @@ input[type="color"] {
 	color: var(--keyconfig-colorType-x, #ffdd99);
 }
 
-.keyconfig_ColorGroup::first-letter {
-	color: var(--keyconfig-colorG-x, var(--keyconfig-colorType-x, #ffdd99));
+.keyconfig_ColorGr::first-letter {
+	color: var(--keyconfig-colorGr-x, var(--keyconfig-colorType-x, #ffdd99));
 }
 
-.keyconfig_ShuffleGroup::first-letter {
-	color: var(--keyconfig-shuffleG-x, var(--settings-shuffle-x, #99ff99));
+.keyconfig_ShuffleGr::first-letter {
+	color: var(--keyconfig-shuffleGr-x, var(--settings-shuffle-x, #99ff99));
 }
 
-.keyconfig_StepRtnGroup::first-letter {
-	color: var(--keyconfig-stepRtnG-x, var(--settings-adjustment-x, #99ffff));
+.keyconfig_StepRtnGr::first-letter {
+	color: var(--keyconfig-stepRtnGr-x, var(--settings-adjustment-x, #99ffff));
 }
 
 .keyconfig_Changekey {
