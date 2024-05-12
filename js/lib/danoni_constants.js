@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/05/11 (v36.3.2)
+ * Revised : 2024/05/12 (v36.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -200,9 +200,9 @@ const g_lblPosObj = {};
 const updateWindowSiz = _ => {
     Object.assign(g_windowObj, {
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
-        difList: { x: 165, y: 60, w: 280, h: 261 + g_sHeight - 500, overflow: `auto` },
-        difCover: { x: 25, y: 60, w: 140, h: 261 + g_sHeight - 500, opacity: 0.95 },
-        difFilter: { x: 0, y: 61, w: 140, h: 200 + g_sHeight - 500, overflow: `auto` },
+        difList: { x: 165, y: 60, w: 280, h: 265 + g_sHeight - 500, overflow: `auto` },
+        difCover: { x: 20, y: 60, w: 145, h: 265 + g_sHeight - 500, opacity: 0.95 },
+        difFilter: { x: 0, y: 61, w: 140, h: 204 + g_sHeight - 500, overflow: `auto` },
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
         scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 240, visibility: `hidden` },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
@@ -1799,6 +1799,9 @@ const g_cssObj = {
     keyconfig_warning: `keyconfig_warning`,
     keyconfig_ConfigType: `keyconfig_ConfigType`,
     keyconfig_ColorType: `keyconfig_ColorType`,
+    keyconfig_ColorGr: `keyconfig_ColorGr`,
+    keyconfig_ShuffleGr: `keyconfig_ShuffleGr`,
+    keyconfig_StepRtnGr: `keyconfig_StepRtnGr`,
     keyconfig_Changekey: `keyconfig_Changekey`,
     keyconfig_Defaultkey: `keyconfig_Defaultkey`,
 
@@ -2861,7 +2864,7 @@ const g_lang_msgInfoObj = {
         E_0012: `The song title information is not set. (E-0012)<br>
         |musicTitle=Song title,Artist name,Artist's site URL|`,
         E_0021: `Music information is not set or the format is incorrect.(E-0021)<br>
-        |difData=Keys' name,chart's name,Specified speed|`,
+        |difData=Key type's name,chart's name,Specified speed|`,
         E_0022: `The format of the external music file is incorrect.(E-0022)<br>
         function externalDosInit() { g_externalDos = \`(Chart data)\`; }`,
         E_0023: `Music information is not set. (E-0023)<br>
@@ -3253,6 +3256,14 @@ const g_lang_msgObj = {
         d_arroweffect: `矢印・フリーズアローモーションの有効化設定`,
         d_special: `作品固有の特殊演出の有効化設定`,
 
+        lnkSpeedG: `譜面の進行別の速度変化状況を表示`,
+        lnkDensityG: `譜面の密度状況を表示`,
+        lnkToolDifG: `譜面の難易度、矢印・フリーズアローの分布状況を表示`,
+        lnkHighScoreG: `譜面のハイスコアを表示`,
+        lnkDifInfo: `譜面の難易度、矢印・フリーズアローの分布状況をクリップボードへコピー`,
+        lnkResetHighScore: `譜面のハイスコア情報を消去`,
+        lnkHighScore: `譜面のハイスコアをクリップボードへコピー`,
+
         appearance: `流れる矢印の見え方を制御します。`,
         opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
         hitPosition: `判定位置にズレを感じる場合、\n数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
@@ -3314,6 +3325,14 @@ const g_lang_msgObj = {
         d_background: `Enable background images and animations`,
         d_arroweffect: `Enable sequences' animations`,
         d_special: `Enable setting of special effects to the work`,
+
+        lnkSpeedG: `Displays the speed change status by progression of the chart.`,
+        lnkDensityG: `Displays the density status of the chart.`,
+        lnkToolDifG: `Displays the difficulty level of the chart and the distribution of arrows and freeze arrows.`,
+        lnkHighScoreG: `Displays the high score of the chart.`,
+        lnkDifInfo: `Copy the difficulty of the chart and the distribution of arrows and freeze arrows to the clipboard.`,
+        lnkResetHighScore: `Erase the high score information in the chart.`,
+        lnkHighScore: `Copies the high score of the chart to the clipboard.`,
 
         appearance: `Controls how the flowing sequences look.`,
         opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,

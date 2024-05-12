@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/05/11
+ * Revised : 2024/05/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 36.3.2`;
-const g_revisedDate = `2024/05/11`;
+const g_version = `Ver 36.4.0`;
+const g_revisedDate = `2024/05/12`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -5455,7 +5455,10 @@ const createOptionWindow = _sprite => {
 		);
 		g_settings.scoreDetails.forEach((sd, j) => {
 			scoreDetail.appendChild(
-				makeDifLblCssButton(`lnk${sd}G`, getStgDetailName(sd), j, _ => changeScoreDetail(j), { w: g_limitObj.difCoverWidth, h: 20, btnStyle: (g_stateObj.scoreDetail === sd ? `Setting` : `Default`) })
+				makeDifLblCssButton(`lnk${sd}G`, getStgDetailName(sd), j, _ => changeScoreDetail(j), {
+					w: g_limitObj.difCoverWidth, h: 20, title: g_msgObj[`s_${sd}`],
+					btnStyle: (g_stateObj.scoreDetail === sd ? `Setting` : `Default`),
+				})
 			);
 			createScText(document.getElementById(`lnk${sd}G`), `${sd}G`, { targetLabel: `lnk${sd}G`, x: -5 });
 		});
@@ -5559,6 +5562,12 @@ const createOptionWindow = _sprite => {
 				Object.assign(g_lblPosObj.btnExcessive, {
 					title: g_msgObj.excessive, cxtFunc: evt => setExcessive(evt.target),
 				}), g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`])
+		);
+	} else if (g_headerObj.excessiveJdgUse) {
+		spriteList.gauge.appendChild(
+			createDivCss2Label(`lnkExcessive`, `${g_lblNameObj.Excessive}:${C_FLG_ON}`,
+				Object.assign(g_lblPosObj.btnExcessive, { x: 0, w: 100, border: C_DIS_NONE }), g_cssObj[`button_Disabled${C_FLG_ON}`]
+			)
 		);
 	}
 
@@ -6070,9 +6079,10 @@ const makeSettingLblCssButton = (_id, _name, _heightPos, _func, { x, y, w, h, si
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  */
-const makeDifLblCssButton = (_id, _name, _heightPos, _func, { x = 0, w = g_limitObj.difSelectorWidth, h = g_limitObj.setLblHeight, btnStyle = `Default` } = {}) =>
+const makeDifLblCssButton = (_id, _name, _heightPos, _func,
+	{ x = 0, w = g_limitObj.difSelectorWidth, h = g_limitObj.setLblHeight, btnStyle = `Default` } = {}) =>
 	createCss2Button(_id, _name, _func, {
-		x, y: h * _heightPos, w, h, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
+		x, y: h * _heightPos, w, h, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`, title: g_msgObj[_id] ?? ``,
 	}, g_cssObj[`button_${btnStyle}`], g_cssObj.button_ON);
 
 /**
@@ -6675,9 +6685,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	}
 
 	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
-	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorType });
-	makeGroupButton(`shuffle`, { baseX: g_btnX(11 / 12) - 10, cssName: g_cssObj.settings_Shuffle });
-	makeGroupButton(`stepRtn`, { baseY: 37, cssName: g_cssObj.settings_Adjustment });
+	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorGr });
+	makeGroupButton(`shuffle`, { baseX: g_btnX(11 / 12) - 10, cssName: g_cssObj.keyconfig_ShuffleGr });
+	makeGroupButton(`stepRtn`, { baseY: 37, cssName: g_cssObj.keyconfig_StepRtnGr });
 
 	/**
 	 * カーソル位置の設定
