@@ -470,6 +470,23 @@ input[type="color"] {
 	color: var(--settings-fadeinBar-x, #ffffff);
 }
 
+.settings_Difficulty:hover,
+.settings_Speed:hover,
+.settings_Motion:hover,
+.settings_Reverse:hover,
+.settings_Scroll:hover,
+.settings_Shuffle:hover,
+.settings_AutoPlay:hover,
+.settings_Gauge:hover,
+.settings_Adjustment:hover,
+.settings_Fadein:hover,
+.settings_Volume:hover,
+.settings_Appearance:hover,
+.settings_Opacity:hover,
+.settings_HitPosition:hover {
+	border-bottom: solid 1px;
+}
+
 /* 設定画面：ゲージ設定詳細 */
 .settings_lifeVal {
 	color: var(--settings-lifeVal-x, #ff9966);
