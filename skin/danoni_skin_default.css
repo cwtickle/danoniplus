@@ -67,6 +67,9 @@
 	--keyconfig-colorType-x: #ffdd99;
 	--keyconfig-changekey-x: #ffff00;
 	--keyconfig-defaultkey-x: #99ccff;
+	/* --keyconfig-colorGr-x: var(--settings-colorType-x); */
+	/* --keyconfig-shuffleGr-x: var(--settings-shuffle-x); */
+	/* --keyconfig-stepRtnGr-x: var(--settings-adjustment-x); */
 
 	/* 判定 */
 	--common-ii: #66ffff;
