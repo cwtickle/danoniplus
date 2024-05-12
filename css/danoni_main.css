@@ -514,6 +514,18 @@ input[type="color"] {
 	color: var(--keyconfig-colorType-x, #ffdd99);
 }
 
+.keyconfig_ColorGroup::first-letter {
+	color: var(--keyconfig-colorType-x, #ffdd99);
+}
+
+.keyconfig_ShuffleGroup::first-letter {
+	color: var(--settings-shuffle-x, #99ff99);
+}
+
+.keyconfig_StepRtnGroup::first-letter {
+	color: var(--settings-adjustment-x, #99ffff);
+}
+
 .keyconfig_Changekey {
 	color: var(--keyconfig-changekey-x, #ffff00);
 }

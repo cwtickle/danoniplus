@@ -5455,7 +5455,10 @@ const createOptionWindow = _sprite => {
 		);
 		g_settings.scoreDetails.forEach((sd, j) => {
 			scoreDetail.appendChild(
-				makeDifLblCssButton(`lnk${sd}G`, getStgDetailName(sd), j, _ => changeScoreDetail(j), { w: g_limitObj.difCoverWidth, h: 20, btnStyle: (g_stateObj.scoreDetail === sd ? `Setting` : `Default`) })
+				makeDifLblCssButton(`lnk${sd}G`, getStgDetailName(sd), j, _ => changeScoreDetail(j), {
+					w: g_limitObj.difCoverWidth, h: 20, title: g_msgObj[`s_${sd}`],
+					btnStyle: (g_stateObj.scoreDetail === sd ? `Setting` : `Default`),
+				})
 			);
 			createScText(document.getElementById(`lnk${sd}G`), `${sd}G`, { targetLabel: `lnk${sd}G`, x: -5 });
 		});
@@ -6076,9 +6079,10 @@ const makeSettingLblCssButton = (_id, _name, _heightPos, _func, { x, y, w, h, si
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  */
-const makeDifLblCssButton = (_id, _name, _heightPos, _func, { x = 0, w = g_limitObj.difSelectorWidth, h = g_limitObj.setLblHeight, btnStyle = `Default` } = {}) =>
+const makeDifLblCssButton = (_id, _name, _heightPos, _func,
+	{ x = 0, w = g_limitObj.difSelectorWidth, h = g_limitObj.setLblHeight, btnStyle = `Default` } = {}) =>
 	createCss2Button(_id, _name, _func, {
-		x, y: h * _heightPos, w, h, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
+		x, y: h * _heightPos, w, h, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`, title: g_msgObj[_id] ?? ``,
 	}, g_cssObj[`button_${btnStyle}`], g_cssObj.button_ON);
 
 /**
@@ -6682,8 +6686,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
 	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorType });
-	makeGroupButton(`shuffle`, { baseX: g_btnX(11 / 12) - 10, cssName: g_cssObj.settings_Shuffle });
-	makeGroupButton(`stepRtn`, { baseY: 37, cssName: g_cssObj.settings_Adjustment });
+	makeGroupButton(`shuffle`, { baseX: g_btnX(11 / 12) - 10, cssName: g_cssObj.keyconfig_ShuffleGroup });
+	makeGroupButton(`stepRtn`, { baseY: 37, cssName: g_cssObj.keyconfig_StepRtnGroup });
 
 	/**
 	 * カーソル位置の設定
