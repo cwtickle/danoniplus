@@ -22,10 +22,9 @@ Dancing☆Onigiri (CW Edition)は、ブラウザで動作するキーボード�
 
 ## Demo
 
-- [Demo1](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / Kinoshita Tamaki  
-- [Demo2](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) シャイニングスター / MaouDamashii 
-- [Demo3](https://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) プチ・マギエ / Napi  
-
+- [Demo1](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / Kinoshita Tamaki
+- [Demo2](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) シャイニングスター / MaouDamashii
+- [Demo3](https://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) プチ・マギエ / Napi
 
 ## How to Play / 遊び方
 
