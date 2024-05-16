@@ -57,7 +57,8 @@ If the life of the life gauge remains by the end of the game or it is over the q
 ## Works / 公開作品
 
 - [Dancing☆Onigiri 難易度表 for.js](http://dodl4.g3.xrea.com/) 
-- [多鍵データベース](http://apoi108.sakura.ne.jp/danoni/ta/index.php)
+- [多鍵データベース](http://apoi108.sakura.ne.jp/danoni/ta/)
+- [メジャー多鍵データベース](https://apoi108.sakura.ne.jp/danoni/danoni_all_list/)
 - [Dancing☆Onigiri サイト一覧](https://cw7.sakura.ne.jp/danonidb/)  
 - [Dancing☆Onigiri 作品一覧](https://cw7.sakura.ne.jp/lst/)  
 
