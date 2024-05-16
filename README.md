@@ -1,8 +1,7 @@
 # Dancing☆Onigiri (CW Edition)
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/9558f21e17a47a4dc987/maintainability)](https://codeclimate.com/github/cwtickle/danoniplus/maintainability)
-[![CodeQL](https://github.com/cwtickle/danoniplus/workflows/CodeQL/badge.svg)](https://github.com/cwtickle/danoniplus/actions?query=workflow%3ACodeQL)
-[![GitLab Community](https://img.shields.io/gitlab/issues/open/cwtickle/danonicw?gitlab_url=https%3A%2F%2Fgitlab.com%2F&label=Community&logo=gitlab)](https://gitlab.com/cwtickle/danonicw/-/issues)  
+[![CodeQL](https://github.com/cwtickle/danoniplus/workflows/CodeQL/badge.svg)](https://github.com/cwtickle/danoniplus/actions?query=workflow%3ACodeQL)  
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cwtickle/danoniplus?sort=semver)](https://github.com/cwtickle/danoniplus/security/policy)
 [![GitHub All Releases](https://img.shields.io/github/downloads/cwtickle/danoniplus/total?color=%23ff3399&label=downloads%20%28recently%29)](https://github.com/cwtickle/danoniplus/releases)
 [![GitHub](https://img.shields.io/github/license/cwtickle/danoniplus)](https://github.com/cwtickle/danoniplus/blob/develop/LICENSE)  
@@ -92,13 +91,16 @@ If you would like to cooperate with the development, please see below. Even if y
 - [GitLab community for requests and bug reports / 要望・不具合報告(GitLab Issues)](https://gitlab.com/cwtickle/danonicw/-/issues)
 - [Contributors / コントリビューター](https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTORS.md)
 
+## Portal Site / ポータルサイト
+- [Dancing☆Onigiri Wiki](https://wikiwiki.jp/danoniplus/)
+
 ## Community / コミュニティ
 - [Dancing☆Onigiri Discord server](https://discord.gg/TegbHFY7zg)
-- [Gitter for score reporting / 得点報告(Gitter)](https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im)
-- [Twitter #danoni](https://twitter.com/search?q=%23danoni&src=typed_query&f=live)
+- [X #danoni](https://twitter.com/search?q=%23danoni&src=typed_query&f=live)
 
 ## Related Tools Repository / 関連リポジトリ・ツール
 ### Dancing☆Onigiri
+- [Dancing☆Onigiri Preview](https://danonicw.skr.jp/)
 - [Dancing☆Onigiri エディター(CW Edition 対応)](https://github.com/superkuppabros/danoni-editor) @superkuppabros
 - [ダンおに曲データjs化ツール](https://github.com/suzme/danoni-base64) @suzme
 - [ダンおに矢印色ツール](https://github.com/suzme/danoni-colorpicker) @suzme
