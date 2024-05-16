@@ -10,6 +10,7 @@ If you have a request or defect report, you can do it in one of the following wa
 1. Commit your changes (git commit -am 'Added some feature')
 1. Push to the branch (git push origin my-new-feature)
 1. Create new Pull Request to develop branch
+
 - Report the request / problem contents to [Discord](https://discord.com/channels/698460971231870977/944491021918683196).  
 - Contact the tickle directly ([@cw_tickle](https://twitter.com/cw_tickle)) with the request / problem content.
 
