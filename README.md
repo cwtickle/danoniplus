@@ -70,12 +70,12 @@ If the life of the life gauge remains by the end of the game or it is over the q
 ### How to Install / 導入方法
 
 - Download from [Changelog](https://github.com/cwtickle/danoniplus-docs/wiki/Changelog-latest). You can also install from npm.
-    - [Releases](https://github.com/cwtickle/danoniplus/releases)からダウンロードします。npmからの導入も可能です。
+  - [Releases](https://github.com/cwtickle/danoniplus/releases)からダウンロードします。npmからの導入も可能です。
 ```
 npm i danoniplus
 ```
 - When directly specifying the version name, specify the version after @ as shown below.
-    - バージョン名を直接指定するときは下記のように @以降をバージョン指定します。
+  - バージョン名を直接指定するときは下記のように @以降をバージョン指定します。
 ```
 npm i danoniplus@26.1.2
 ```
@@ -90,14 +90,16 @@ npm i danoniplus@26.1.2
 *Dancing Onigiri "CW Edition"* basically conforms to the specifications of *ParaFla!* Version, but the details are different from the conventional ones. See below for details.
 
 Dancing☆Onigiri (CW Edition)では基本的にParaFla!版の仕様に準拠していますが、  
-細かい点が従来と異なります。詳細は下記をご覧ください。  
+細かい点が従来と異なります。詳細は下記をご覧ください。
+
 - [Difference from Flash Version / Flash版との差異 (Japanese)](https://github.com/cwtickle/danoniplus/wiki/DifferenceFromFlashVer)  
 
 ## How to Contribute / 開発者の方へ  
 
 If you would like to cooperate with the development, please see below. Even if you don't have a GitHub account, you can cooperate!
 
-開発にご協力いただける方は、下記をご覧ください。GitHubアカウントの無い方でも協力できます！  
+開発にご協力いただける方は、下記をご覧ください。GitHubアカウントの無い方でも協力できます！
+
 - [How to Contribute / 貢献の仕方](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)   
 - [GitLab community for requests and bug reports / 要望・不具合報告(GitLab Issues)](https://gitlab.com/cwtickle/danonicw/-/issues)
 - [Contributors / コントリビューター](https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTORS.md)
