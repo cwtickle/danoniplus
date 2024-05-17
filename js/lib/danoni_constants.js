@@ -2941,7 +2941,7 @@ const g_lblNameObj = {
     b_reset: `Reset Key`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
-    b_tweet: `X Post`,
+    b_tweet: `Post X`,
     b_gitter: `Discord`,
     b_retry: `Retry`,
     b_close: `Close`,
