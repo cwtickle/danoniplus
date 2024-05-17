@@ -11308,7 +11308,7 @@ const resultInit = _ => {
 
 	}
 
-	// Twitter用リザルト
+	// X (Twitter)用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
 	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
@@ -11342,7 +11342,7 @@ const resultInit = _ => {
 			tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_resultObj[g_presetObj.resultVals[key]]));
 	}
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
-	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
+	const tweetResult = `${g_linkObj.x}?text=${encodeURIComponent(resultText)}`;
 
 	/**
 	 * リザルト画像をCanvasで作成しクリップボードへコピー
@@ -11475,15 +11475,15 @@ const resultInit = _ => {
 	 */
 	const makeLinkButton = (_div = divRoot, _param = ``) => {
 		multiAppend(_div,
-			// リザルトデータをTwitterへ転送
+			// リザルトデータをX (Twitter)へ転送
 			createCss2Button(`btnTweet${_param}`, g_lblNameObj.b_tweet, _ => true, Object.assign(g_lblPosObj.btnRsTweet, {
 				resetFunc: _ => openLink(tweetResult),
 			}), g_cssObj.button_Tweet),
 
-			// Gitterへのリンク
+			// Discordへのリンク
 			createCss2Button(`btnGitter${_param}`, g_lblNameObj.b_gitter, _ => true, Object.assign(g_lblPosObj.btnRsGitter, {
-				resetFunc: _ => openLink(`https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im`),
-			}), g_cssObj.button_Default),
+				resetFunc: _ => openLink(g_linkObj.discord),
+			}), g_cssObj.button_Discord),
 		);
 	}
 
