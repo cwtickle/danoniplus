@@ -3122,7 +3122,7 @@ const g_lblNameObj = {
  */
 const g_linkObj = {
     x: `https://x.com/intent/tweet`,
-    discord: `https://discord.com/channels/698460971231870977/1091169536931283014`,
+    discord: `https://discord.gg/5Hxu4wDEZR`,
 };
 
 /**
