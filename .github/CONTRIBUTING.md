@@ -13,7 +13,7 @@ If you have a request or defect report, you can do it in one of the following wa
 1. Create new Pull Request to develop branch
 
 - Report the request or issue contents to [Discord server](https://discord.gg/5sTXnVag77).  
-- Contact the tickle directly ([@cw_tickle](https://twitter.com/cw_tickle)) with the request / problem content.
+- Contact the tickle directly ([@cw_tickle](https://x.com/cw_tickle)) with the request / problem content.
 
 ## [Japanese]
 
