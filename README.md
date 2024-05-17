@@ -111,7 +111,7 @@ If you would like to cooperate with the development, please see below. Even if y
 ## Community / コミュニティ
 
 - [Dancing☆Onigiri Discord server](https://discord.gg/TegbHFY7zg)
-- [X #danoni](https://twitter.com/search?q=%23danoni&src=typed_query&f=live)
+- [X #danoni](https://x.com/search?q=%23danoni&src=typed_query&f=live)
 
 ## Related Tools Repository / 関連リポジトリ・ツール
 

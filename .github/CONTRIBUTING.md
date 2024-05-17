@@ -5,6 +5,7 @@
 If you have a request or defect report, you can do it in one of the following ways.
 
 - Fork and edit the repository, send Pull Request to "cwtickle / danoniplus" "develop" branch.
+
 1. Fork it
 1. Create your feature branch (git checkout -b my-new-feature)
 1. Commit your changes (git commit -am 'Added some feature')
@@ -20,7 +21,7 @@ If you have a request or defect report, you can do it in one of the following wa
 
 - リポジトリをForkして編集した後、Pull Requestを「cwtickle/danoniplus」の「develop」ブランチへ送る。
 - 当リポジトリのIssueもしくは[Discord](https://discord.com/channels/698460971231870977/944491021918683196)に要望・不具合内容を報告する。  
-- 要望・不具合内容をティックル宛([@cw_tickle](https://twitter.com/cw_tickle))へ直接連絡する。
+- 要望・不具合内容をティックル宛([@cw_tickle](https://x.com/cw_tickle))へ直接連絡する。
 
 ### 機能実装方針
 
