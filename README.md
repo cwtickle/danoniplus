@@ -2,7 +2,8 @@
 
 [![CodeFactor](https://www.codefactor.io/repository/github/cwtickle/danoniplus/badge)](https://www.codefactor.io/repository/github/cwtickle/danoniplus)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/1213a18348c34328ac4f10c9e8a2b987)](https://app.codacy.com/gh/cwtickle/danoniplus/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![CodeQL](https://github.com/cwtickle/danoniplus/workflows/CodeQL/badge.svg)](https://github.com/cwtickle/danoniplus/actions?query=workflow%3ACodeQL)  
+[![CodeQL](https://github.com/cwtickle/danoniplus/workflows/CodeQL/badge.svg)](https://github.com/cwtickle/danoniplus/actions?query=workflow%3ACodeQL)
+[![Discord](https://img.shields.io/discord/698460971231870977?style=flat&logo=discord&logoColor=%23ffffff&label=Discord&labelColor=%236666ff&color=%23000066)](https://discord.gg/YVWUdUGyMy)  
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cwtickle/danoniplus?sort=semver)](https://github.com/cwtickle/danoniplus/security/policy)
 [![GitHub All Releases](https://img.shields.io/github/downloads/cwtickle/danoniplus/total?color=%23ff3399&label=downloads%20%28recently%29)](https://github.com/cwtickle/danoniplus/releases)
 [![GitHub](https://img.shields.io/github/license/cwtickle/danoniplus)](https://github.com/cwtickle/danoniplus/blob/develop/LICENSE)  
