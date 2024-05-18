@@ -14,6 +14,8 @@
 	position: relative;
 	overflow: hidden;
 	white-space: nowrap;
+	border-top: 1px solid var(--back-border-x, #666666);
+	border-bottom: 1px solid var(--back-border-x, #666666);
 }
 
 #canvas-frame canvas {
@@ -353,12 +355,6 @@ input[type="color"] {
 }
 
 /* スキン定義 ------------------------------------------------------------*/
-
-/* 背景 */
-#canvas-frame {
-	border-top: 1px solid var(--back-border-x, #666666);
-	border-bottom: 1px solid var(--back-border-x, #666666);
-}
 
 #divBack {
 	background: var(--background, linear-gradient(#000000, #222222));
@@ -738,7 +734,8 @@ input[type="color"] {
 }
 
 /* デフォルト */
-.button_Default {
+.button_Default,
+.button_Discord {
 	color: var(--button-color-default-x, #ffffff);
 	background: var(--button-bg-default, #111111);
 }
@@ -812,7 +809,7 @@ input[type="color"] {
 	background: var(--button-bgHover-reset, #009900);
 }
 
-/* ツイート */
+/* X Post */
 .button_Tweet {
 	color: var(--button-color-sns-x, #ffffff);
 	background: var(--button-bg-sns, #113333);
@@ -821,6 +818,12 @@ input[type="color"] {
 .button_Tweet:hover {
 	color: var(--button-colorHover-sns-x, #ffffff);
 	background: var(--button-bgHover-sns, #009999);
+}
+
+/* Discord */
+.button_Discord:hover {
+	color: var(--button-colorHover-default-x, #ffffff);
+	background: var(--button-bgHover-discord, var(--button-bgHover-default, #666699));
 }
 
 /* ボタン：ON/OFF */
