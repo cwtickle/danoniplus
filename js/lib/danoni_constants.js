@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/05/12 (v36.4.0)
+ * Revised : 2024/05/18 (v36.4.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1741,8 +1741,8 @@ const g_shortcutObj = {
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `btnCopy`, reset: true },
-        KeyT: { id: `btnTweet`, reset: true },
-        KeyG: { id: `btnGitter`, reset: true },
+        KeyX: { id: `btnTweet`, reset: true }, // x
+        KeyD: { id: `btnGitter`, reset: true }, // Discord
         KeyP: { id: `btnCopyImage` },
         Backspace: { id: `btnRetry` },
     },
@@ -1868,6 +1868,7 @@ const g_cssObj = {
     button_Next: `button_Next`,
     button_Reset: `button_Reset`,
     button_Tweet: `button_Tweet`,
+    button_Discord: `button_Discord`,
 
     button_OFF: `button_OFF`,
     button_ON: `button_ON`,
@@ -2940,8 +2941,8 @@ const g_lblNameObj = {
     b_reset: `Reset Key`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
-    b_tweet: `Tweet`,
-    b_gitter: `Gitter`,
+    b_tweet: `Post X`,
+    b_gitter: `Discord`,
     b_retry: `Retry`,
     b_close: `Close`,
     b_cReset: `Reset`,
@@ -3114,6 +3115,14 @@ const g_lblNameObj = {
     rd_Background: `Back`,
     rd_ArrowEffect: `Effect`,
     rd_Special: `SP`,
+};
+
+/**
+ * リンク先管理
+ */
+const g_linkObj = {
+    x: `https://x.com/intent/tweet`,
+    discord: `https://discord.gg/5Hxu4wDEZR`,
 };
 
 /**

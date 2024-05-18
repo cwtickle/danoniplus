@@ -1,4 +1,5 @@
 # Dancing☆Onigiri (CW Edition) - Contributors
+
 - Dancing☆Onigiri (CW Edition)は、以下の方のご協力により成り立っています。
 - 開発にご協力いただける方は、[How to Contribute](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)をご覧ください。
 - 名前(Name)は昇順で表記しています。

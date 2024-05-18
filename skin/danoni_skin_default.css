@@ -5,7 +5,7 @@
   スキンcssファイル (default)
 
   Created : 2019/11/04
-  Revised : 2023/07/29 (v33.0.0)
+  Revised : 2024/05/18 (v36.4.1)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -186,6 +186,7 @@
 	--button-color-sns-x: #ffffff;
 	--button-bgHover-sns: #009999;
 	--button-colorHover-sns-x: #ffffff;
+	--button-bgHover-discord: #666699;
 
 	/* ON/OFFボタン */
 	--button-color-off-x: #666666;

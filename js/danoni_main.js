@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/05/12
+ * Revised : 2024/05/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 36.4.0`;
-const g_revisedDate = `2024/05/12`;
+const g_version = `Ver 36.4.1`;
+const g_revisedDate = `2024/05/18`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -20,15 +20,6 @@ let g_localVersion2 = ``;
 //  シーンジャンプ:Scene
 
 /**
- * ▽ ソースコーディング
- * https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md
- * 
- * - 定数・変数名
- * -- グローバル変数： 変数の頭に`g_`をつける。基本はオブジェクトプロパティとして定義。
- * -- 関数の引数　　： アンダースコア始まりのキャメル表記。
- * -- 定数　　　　　： `C_(カテゴリ)_(名前)`の形式。全て英大文字、数字、アンダースコアのみを使用。
- *                    ※この定義方法は今後使用しない方針。
- * 
  * ▽ 画面の構成
  *  [タイトル]-[設定]-[ディスプレイ]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]
  *  ⇒　各画面に Init がついたものが画面の基本構成(ルート)を表す。
@@ -11317,7 +11308,7 @@ const resultInit = _ => {
 
 	}
 
-	// Twitter用リザルト
+	// X (Twitter)用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
 	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
@@ -11351,7 +11342,7 @@ const resultInit = _ => {
 			tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_resultObj[g_presetObj.resultVals[key]]));
 	}
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
-	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
+	const tweetResult = `${g_linkObj.x}?text=${encodeURIComponent(resultText)}`;
 
 	/**
 	 * リザルト画像をCanvasで作成しクリップボードへコピー
@@ -11484,15 +11475,15 @@ const resultInit = _ => {
 	 */
 	const makeLinkButton = (_div = divRoot, _param = ``) => {
 		multiAppend(_div,
-			// リザルトデータをTwitterへ転送
+			// リザルトデータをX (Twitter)へ転送
 			createCss2Button(`btnTweet${_param}`, g_lblNameObj.b_tweet, _ => true, Object.assign(g_lblPosObj.btnRsTweet, {
 				resetFunc: _ => openLink(tweetResult),
 			}), g_cssObj.button_Tweet),
 
-			// Gitterへのリンク
+			// Discordへのリンク
 			createCss2Button(`btnGitter${_param}`, g_lblNameObj.b_gitter, _ => true, Object.assign(g_lblPosObj.btnRsGitter, {
-				resetFunc: _ => openLink(`https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im`),
-			}), g_cssObj.button_Default),
+				resetFunc: _ => openLink(g_linkObj.discord),
+			}), g_cssObj.button_Discord),
 		);
 	}
 
