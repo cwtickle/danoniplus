@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/01/12 (v34.7.0)
+ * Revised : 2024/05/18 (v34.7.5)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1579,8 +1579,8 @@ const g_shortcutObj = {
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `btnCopy`, reset: true },
-        KeyT: { id: `btnTweet`, reset: true },
-        KeyG: { id: `btnGitter`, reset: true },
+        KeyX: { id: `btnTweet`, reset: true },  // X
+        KeyD: { id: `btnGitter`, reset: true }, // Discord
         KeyP: { id: `btnCopyImage` },
         Backspace: { id: `btnRetry` },
     },
@@ -2700,8 +2700,8 @@ const g_lblNameObj = {
     b_reset: `Reset`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
-    b_tweet: `Tweet`,
-    b_gitter: `Gitter`,
+    b_tweet: `Post X`,
+    b_gitter: `Discord`,
     b_retry: `Retry`,
     b_close: `Close`,
 
