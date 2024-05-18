@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2023/03/04 (v29.4.3)
+ * Revised : 2024/05/18 (v29.4.12)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2919,8 +2919,8 @@ const g_lblNameObj = {
     b_reset: `Reset`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
-    b_tweet: `Tweet`,
-    b_gitter: `Gitter`,
+    b_tweet: `Post X`,
+    b_gitter: `Discord`,
     b_retry: `Retry`,
 
     Difficulty: `Difficulty`,

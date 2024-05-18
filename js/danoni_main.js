@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/03/17
+ * Revised : 2024/05/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.4.11`;
-const g_revisedDate = `2024/03/17`;
+const g_version = `Ver 29.4.12`;
+const g_revisedDate = `2024/05/18`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -10201,7 +10201,7 @@ const resultInit = _ => {
 
 	}
 
-	// Twitter用リザルト
+	// X (Twitter)用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
 	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
@@ -10237,7 +10237,7 @@ const resultInit = _ => {
 		});
 	}
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
-	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
+	const tweetResult = `https://x.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
 
 	/** 音源、ループ処理の停止 */
 	const resetCommonBtn = (_id, _name, _posObj, _func, _cssClass) =>
@@ -10260,14 +10260,14 @@ const resultInit = _ => {
 			copyTextToClipboard(resultText, g_msgInfoObj.I_0001);
 		}, g_lblPosObj.btnRsCopy, g_cssObj.button_Setting),
 
-		// リザルトデータをTwitterへ転送
+		// リザルトデータをX (Twitter)へ転送
 		createCss2Button(`btnTweet`, g_lblNameObj.b_tweet, _ => true, Object.assign(g_lblPosObj.btnRsTweet, {
 			resetFunc: _ => openLink(tweetResult),
 		}), g_cssObj.button_Tweet),
 
 		// Gitterへのリンク
 		createCss2Button(`btnGitter`, g_lblNameObj.b_gitter, _ => true, Object.assign(g_lblPosObj.btnRsGitter, {
-			resetFunc: _ => openLink(`https://gitter.im/danonicw/freeboard`),
+			resetFunc: _ => openLink(`https://discord.gg/5Hxu4wDEZR`),
 		}), g_cssObj.button_Default),
 
 		// リトライ
