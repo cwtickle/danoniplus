@@ -1311,8 +1311,8 @@ const g_shortcutObj = {
         ShiftLeft_Tab: { id: `btnBack` },
         ControlLeft_KeyC: { id: `` },
         KeyC: { id: `btnCopy`, reset: true },
-        KeyT: { id: `btnTweet`, reset: true },
-        KeyG: { id: `btnGitter`, reset: true },
+        KeyX: { id: `btnTweet`, reset: true },
+        KeyD: { id: `btnGitter`, reset: true },
         Backspace: { id: `btnRetry` },
     },
 };

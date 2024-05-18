@@ -21,15 +21,6 @@ let g_localVersion2 = ``;
 //  シーンジャンプ:Scene
 
 /**
- * ▽ ソースコーディング
- * https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md
- * 
- * - 定数・変数名
- * -- グローバル変数： 変数の頭に`g_`をつける。基本はオブジェクトプロパティとして定義。
- * -- 関数の引数　　： アンダースコア始まりのキャメル表記。
- * -- 定数　　　　　： `C_(カテゴリ)_(名前)`の形式。全て英大文字、数字、アンダースコアのみを使用。
- *                    ※この定義方法は今後使用しない方針。
- * 
  * ▽ 画面の構成
  *  [タイトル]-[設定]-[ディスプレイ]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]
  *  ⇒　各画面に Init がついたものが画面の基本構成(ルート)を表す。
@@ -10265,7 +10256,7 @@ const resultInit = _ => {
 			resetFunc: _ => openLink(tweetResult),
 		}), g_cssObj.button_Tweet),
 
-		// Gitterへのリンク
+		// Discordへのリンク
 		createCss2Button(`btnGitter`, g_lblNameObj.b_gitter, _ => true, Object.assign(g_lblPosObj.btnRsGitter, {
 			resetFunc: _ => openLink(`https://discord.gg/5Hxu4wDEZR`),
 		}), g_cssObj.button_Default),
