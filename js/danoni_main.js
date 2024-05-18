@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/04/03
+ * Revised : 2024/05/18
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 35.5.0`;
-const g_revisedDate = `2024/04/03`;
+const g_version = `Ver 35.5.1`;
+const g_revisedDate = `2024/05/18`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -10946,7 +10946,7 @@ const resultInit = _ => {
 
 	}
 
-	// Twitter用リザルト
+	// X (Twitter)用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
 	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyData}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
@@ -10987,7 +10987,7 @@ const resultInit = _ => {
 			tweetResultTmp = tweetResultTmp.split(`[${key}]`).join(g_resultObj[g_presetObj.resultVals[key]]));
 	}
 	const resultText = `${unEscapeHtml(tweetResultTmp)}`;
-	const tweetResult = `https://twitter.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
+	const tweetResult = `https://x.com/intent/tweet?text=${encodeURIComponent(resultText)}`;
 	const currentDateTime = new Date().toLocaleString();
 
 	/**
@@ -11121,14 +11121,14 @@ const resultInit = _ => {
 	 */
 	const makeLinkButton = (_div = divRoot, _param = ``) => {
 		multiAppend(_div,
-			// リザルトデータをTwitterへ転送
+			// リザルトデータをX (Twitter)へ転送
 			createCss2Button(`btnTweet${_param}`, g_lblNameObj.b_tweet, _ => true, Object.assign(g_lblPosObj.btnRsTweet, {
 				resetFunc: _ => openLink(tweetResult),
 			}), g_cssObj.button_Tweet),
 
-			// Gitterへのリンク
+			// Discordへのリンク
 			createCss2Button(`btnGitter${_param}`, g_lblNameObj.b_gitter, _ => true, Object.assign(g_lblPosObj.btnRsGitter, {
-				resetFunc: _ => openLink(`https://app.gitter.im/#/room/#danonicw_freeboard:gitter.im`),
+				resetFunc: _ => openLink(`https://discord.gg/5Hxu4wDEZR`),
 			}), g_cssObj.button_Default),
 		);
 	}
