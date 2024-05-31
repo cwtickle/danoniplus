@@ -242,7 +242,7 @@ const convertStrToVal = _str => {
  * 半角スペース、タブを文字列から除去
  * @param {string} _str 
  */
-const trimStr = _str => _str?.split(`\t`).join(``).trimStart().trimEnd();
+const trimStr = _str => _str?.split(`\t`).join(``).replace(/^ +| +$/g, ``);
 
 /*-----------------------------------------------------------*/
 /* 値や配列のチェック・変換                                    */
