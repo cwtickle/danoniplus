@@ -1582,7 +1582,8 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 		const tmpSpriteData = tmpData.split(`,`).map(val => trimStr(val));
 
 		// 深度が"-"の場合はスキップ
-		if (!hasVal(tmpSpriteData[1], `-`)) {
+		if (tmpSpriteData[1] === undefined || tmpSpriteData[1] === `-` ||
+			(tmpSpriteData[1] === `` && ![`[loop]`, `[jump]`].includes(tmpSpriteData[2]))) {
 			return;
 		}
 
