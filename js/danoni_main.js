@@ -7638,6 +7638,7 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 
 	const tmpArrowData = [...Array(_keyNum)].map(_ => []);
 	const tmpFrzData = [...Array(_keyNum)].map(_ => []);
+	const scatterFrame = 10;
 
 	// シャッフルグループごとに処理
 	_shuffleGroup.forEach(_group => {
@@ -7654,9 +7655,16 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 		// 重ならないようにフリーズを配置
 		allFreezeArrows.forEach(_freeze => {
 			// 置ける場所を検索
+			const freeSpacesFlat = _group.filter(
+				_key => tmpFrzData[_key].find(_other => _freeze.begin - scatterFrame <= _other.end + scatterFrame) === undefined
+			);
 			const freeSpaces = _group.filter(
 				_key => tmpFrzData[_key].find(_other => _freeze.begin <= _other.end) === undefined
 			);
+			let currentFreeSpaces = freeSpaces;
+			if (g_stateObj.shuffle.startsWith(`Scatter`)) {
+				currentFreeSpaces = freeSpacesFlat.length > 0 ? freeSpacesFlat : freeSpaces;
+			}
 			// ランダムに配置
 			const random = Math.floor(Math.random() * freeSpaces.length);
 			tmpFrzData[freeSpaces[random]].push(_freeze);
@@ -7665,17 +7673,44 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 		// 通常矢印の配置
 		const allArrows = _group.map(_key => g_scoreObj[`${_arrowHeader}Data`][_key]).flat();
 		allArrows.sort((_a, _b) => _a - _b);
+		let prev2Num = 0, prevNum = 0;
 		allArrows.forEach(_arrow => {
+
+			if (prev2Num !== _arrow) {
+				if (prevNum !== _arrow) {
+					prev2Num = prevNum;
+					prevNum = _arrow;
+				}
+			}
+
 			// 置ける場所を検索
+			const freeSpacesFlat = _group.filter(_key =>
+				// フリーズと重ならない(前後10フレーム)
+				tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin - scatterFrame && _arrow <= _freeze.end + scatterFrame) === undefined
+				// 通常矢印と重ならない(前後10フレーム)
+				&& tmpArrowData[_key].find(_other => _arrow >= _other - scatterFrame && _arrow <= _other + scatterFrame) === undefined
+				// 直前の矢印と重ならない
+				&& tmpArrowData[_key].find(_other => prev2Num === _other) === undefined
+			);
 			const freeSpaces = _group.filter(_key =>
 				// フリーズと重ならない
 				tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin && _arrow <= _freeze.end) === undefined
 				// 通常矢印と重ならない
 				&& tmpArrowData[_key].find(_other => _arrow === _other) === undefined
 			);
+			const freeSpacesAlt = _group.filter(_key =>
+				// 通常矢印と重ならない
+				tmpArrowData[_key].find(_other => _arrow === _other) === undefined
+			);
 			// ランダムに配置
-			const random = Math.floor(Math.random() * freeSpaces.length);
-			tmpArrowData[freeSpaces[random]].push(_arrow);
+			let currentFreeSpaces = freeSpaces.length > 0 ? freeSpaces : freeSpacesAlt;
+			if (g_stateObj.shuffle.startsWith(`Scatter`)) {
+				currentFreeSpaces = freeSpacesFlat.length > 0 ? freeSpacesFlat : currentFreeSpaces;
+			}
+
+			const random = Math.floor(Math.random() * currentFreeSpaces.length);
+			tmpArrowData[currentFreeSpaces[random]].push(_arrow);
+
 		})
 	});
 
