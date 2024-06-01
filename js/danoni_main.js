@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/05/18
+ * Revised : 2024/06/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 36.4.1`;
-const g_revisedDate = `2024/05/18`;
+const g_version = `Ver 36.4.2`;
+const g_revisedDate = `2024/06/01`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -242,7 +242,7 @@ const convertStrToVal = _str => {
  * 半角スペース、タブを文字列から除去
  * @param {string} _str 
  */
-const trimStr = _str => _str?.split(`\t`).join(``).trimStart().trimEnd();
+const trimStr = _str => _str?.split(`\t`).join(``).replace(/^ +| +$/g, ``);
 
 /*-----------------------------------------------------------*/
 /* 値や配列のチェック・変換                                    */
@@ -1582,7 +1582,8 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 		const tmpSpriteData = tmpData.split(`,`).map(val => trimStr(val));
 
 		// 深度が"-"の場合はスキップ
-		if (!hasVal(tmpSpriteData[1], `-`)) {
+		if (tmpSpriteData[1] === undefined || tmpSpriteData[1] === `-` ||
+			(tmpSpriteData[1] === `` && ![`[loop]`, `[jump]`].includes(tmpSpriteData[2]))) {
 			return;
 		}
 
