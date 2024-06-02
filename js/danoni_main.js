@@ -7707,10 +7707,8 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 			if (g_stateObj.shuffle.startsWith(`Scatter`)) {
 				currentFreeSpaces = freeSpacesFlat.length > 0 ? freeSpacesFlat : currentFreeSpaces;
 			}
-
 			const random = Math.floor(Math.random() * currentFreeSpaces.length);
 			tmpArrowData[currentFreeSpaces[random]].push(_arrow);
-
 		})
 	});
 
