@@ -7666,7 +7666,7 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 				currentFreeSpaces = freeSpacesFlat.length > 0 ? freeSpacesFlat : freeSpaces;
 			}
 			// ランダムに配置
-			const random = Math.floor(Math.random() * freeSpaces.length);
+			const random = Math.floor(Math.random() * currentFreeSpaces.length);
 			tmpFrzData[currentFreeSpaces[random]].push(_freeze);
 		});
 
