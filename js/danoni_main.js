@@ -7667,7 +7667,7 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 			}
 			// ランダムに配置
 			const random = Math.floor(Math.random() * freeSpaces.length);
-			tmpFrzData[freeSpaces[random]].push(_freeze);
+			tmpFrzData[currentFreeSpaces[random]].push(_freeze);
 		});
 
 		// 通常矢印の配置
@@ -7685,9 +7685,9 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 
 			// 置ける場所を検索
 			const freeSpacesFlat = _group.filter(_key =>
-				// フリーズと重ならない(前後10フレーム)
+				// フリーズと重ならない (前後10フレーム)
 				tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin - scatterFrame && _arrow <= _freeze.end + scatterFrame) === undefined
-				// 通常矢印と重ならない(前後10フレーム)
+				// 通常矢印と重ならない (前後10フレーム)
 				&& tmpArrowData[_key].find(_other => _arrow >= _other - scatterFrame && _arrow <= _other + scatterFrame) === undefined
 				// 直前の矢印と重ならない
 				&& tmpArrowData[_key].find(_other => prev2Num === _other) === undefined
