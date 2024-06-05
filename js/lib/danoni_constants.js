@@ -966,7 +966,7 @@ const g_settings = {
     scrolls: [],
     scrollNum: 0,
 
-    shuffles: [C_FLG_OFF, `Mirror`, `X-Mirror`, `Turning`, `Random`, `Random+`, `S-Random`, `S-Random+`],
+    shuffles: [C_FLG_OFF, `Mirror`, `X-Mirror`, `Turning`, `Random`, `Random+`, `S-Random`, `S-Random+`, `Scatter`, `Scatter+`],
     shuffleNum: 0,
     swapPattern: [4, 5, 6, 7],
 
@@ -1054,6 +1054,14 @@ const g_shuffleFunc = {
         applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
     },
     'S-Random+': keyNum => {
+        applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
+        applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
+    },
+    'Scatter': (keyNum, shuffleGroup) => {
+        applySRandom(keyNum, shuffleGroup, `arrow`, `frz`);
+        applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
+    },
+    'Scatter+': keyNum => {
         applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
         applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
     },
