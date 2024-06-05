@@ -7676,6 +7676,7 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 		let prev2Num = 0, prevNum = 0;
 		allArrows.forEach(_arrow => {
 
+			// 直前の矢印のフレーム数を取得
 			if (prev2Num !== _arrow) {
 				if (prevNum !== _arrow) {
 					prev2Num = prevNum;
