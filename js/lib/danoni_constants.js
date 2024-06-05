@@ -3129,7 +3129,7 @@ const g_lblNameObj = {
  * リンク先管理
  */
 const g_linkObj = {
-    x: `https://x.com/intent/tweet`,
+    x: `https://x.com/intent/post`,
     discord: `https://discord.gg/5Hxu4wDEZR`,
 };
 
