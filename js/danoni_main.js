@@ -9543,8 +9543,17 @@ const mainInit = _ => {
 		);
 	}
 
+	const msg = [];
 	if (getMusicUrl(g_stateObj.scoreId) === `nosound.mp3`) {
-		makeInfoWindow(g_msgInfoObj.I_0004, `leftToRightFade`, { _x: g_workObj.playingX, _y: g_headerObj.playingY });
+		msg.push(g_msgInfoObj.I_0004);
+	}
+	if (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 &&
+		g_stateObj.dataSaveFlg && g_stateObj.autoAll === C_FLG_OFF &&
+		g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length > 0) {
+		msg.push(g_msgInfoObj.I_0005);
+	}
+	if (msg.length > 0) {
+		makeInfoWindow(msg.join(`<br>`), `leftToRightFade`, { _x: g_workObj.playingX, _y: g_headerObj.playingY });
 	}
 
 	// ユーザカスタムイベント(初期)
@@ -11233,9 +11242,6 @@ const resultInit = _ => {
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
 	const mirrorName = (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 ? `-${g_stateObj.shuffle}` : ``);
-	if (mirrorName !== `` && !orgShuffleFlg) {
-		makeInfoWindow(g_msgInfoObj.I_0005, `leftToRightFade`);
-	}
 	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${mirrorName}`;
 	if (g_headerObj.makerView) {
 		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
