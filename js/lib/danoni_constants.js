@@ -3041,6 +3041,7 @@ const g_lblNameObj = {
     'u_Random+': `Random+`,
     'u_S-Random': `S-Random`,
     'u_S-Random+': `S-Random+`,
+    'u_(S)': `(S)`,
 
     'u_ALL': `ALL`,
     'u_Onigiri': `Onigiri`,
