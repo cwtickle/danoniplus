@@ -122,9 +122,6 @@ const g_limitObj = {
 
     // キーコンフィグで表示するカラーピッカー数
     kcColorPickerNum: 5,
-
-    // キーコンフィグで設定できるシャッフルグループ上限数
-    kcShuffleNums: 20,
 };
 
 /** 設定項目の位置 */
@@ -2856,6 +2853,7 @@ const g_lang_msgInfoObj = {
         I_0002: `入力したキーは割り当てできません。他のキーを指定してください。`,
         I_0003: `各譜面の明細情報をクリップボードにコピーしました！`,
         I_0004: `musicUrlが設定されていないため、無音モードで再生します`,
+        I_0005: `正規のミラー譜面で無いため、ハイスコアは保存されません`,
     },
     En: {
         W_0001: `Your browser is not guaranteed to work.<br>
@@ -2905,6 +2903,7 @@ const g_lang_msgInfoObj = {
         I_0002: `The specified key cannot be assigned. Please specify another key.`,
         I_0003: `Charts information is copied to the clipboard!`,
         I_0004: `Play in silence mode because "musicUrl" is not set`,
+        I_0005: `Highscore is not saved because not a regular mirrored chart.`,
     },
 };
 
@@ -3042,6 +3041,7 @@ const g_lblNameObj = {
     'u_Random+': `Random+`,
     'u_S-Random': `S-Random`,
     'u_S-Random+': `S-Random+`,
+    'u_(S)': `(S)`,
 
     'u_ALL': `ALL`,
     'u_Onigiri': `Onigiri`,
