@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/06/01
+ * Revised : 2024/06/08
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 36.5.0`;
-const g_revisedDate = `2024/06/05`;
+const g_version = `Ver 36.6.0`;
+const g_revisedDate = `2024/06/08`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -6453,7 +6453,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
-		const tmpShuffle = changeTmpData(`shuffle`, g_limitObj.kcShuffleNums, _j, _scrollNum);
+		const tmpShuffle = changeTmpData(`shuffle`, g_keyObj[`keyCtrl${keyCtrlPtn}`].length - 1, _j, _scrollNum);
 		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
 
 		changeShuffleConfigColor(keyCtrlPtn, g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j], _j);
@@ -9257,8 +9257,8 @@ const mainInit = _ => {
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
 	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj =>
 		mainSprite.appendChild(createColorObject2(obj, g_lblPosObj.filterBar, filterCss)));
-	borderBar0.style.top = wUnit(g_posObj.stepDiffY);
-	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight);
+	borderBar0.style.top = wUnit(g_posObj.stepDiffY + g_stateObj.hitPosition);
+	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight - g_stateObj.hitPosition);
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
@@ -9543,8 +9543,17 @@ const mainInit = _ => {
 		);
 	}
 
+	const msg = [];
 	if (getMusicUrl(g_stateObj.scoreId) === `nosound.mp3`) {
-		makeInfoWindow(g_msgInfoObj.I_0004, `leftToRightFade`, { _x: g_workObj.playingX, _y: g_headerObj.playingY });
+		msg.push(g_msgInfoObj.I_0004);
+	}
+	if (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 &&
+		g_stateObj.dataSaveFlg && g_stateObj.autoAll === C_FLG_OFF &&
+		g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length > 0) {
+		msg.push(g_msgInfoObj.I_0005);
+	}
+	if (msg.length > 0) {
+		makeInfoWindow(msg.join(`<br>`), `leftToRightFade`, { _x: g_workObj.playingX, _y: g_headerObj.playingY });
 	}
 
 	// ユーザカスタムイベント(初期)
@@ -10437,8 +10446,8 @@ const changeAppearanceFilter = (_appearance, _num = 10) => {
 	$id(`arrowSprite${topNum}`).clipPath = topShape;
 	$id(`arrowSprite${bottomNum}`).clipPath = bottomShape;
 
-	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / 100);
-	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (100 - _num) / 100);
+	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / 100 + g_stateObj.hitPosition);
+	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (100 - _num) / 100 - g_stateObj.hitPosition);
 
 	if (g_appearanceRanges.includes(_appearance)) {
 		$id(`filterView`).top =
@@ -11082,6 +11091,8 @@ const resultInit = _ => {
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
+	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
+	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
 
 	/**
 	 * プレイスタイルのカスタム有無
@@ -11096,7 +11107,7 @@ const resultInit = _ => {
 		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
-		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getStgDetailName(g_stateObj.shuffle)}]`)}`
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${shuffleName}]`)}`
 	];
 	let difData = difDatas.filter(value => value !== ``).join(` `);
 	const difDataForImage = difDatas.filter((value, j) => value !== `` && j !== 2).join(` `);
@@ -11241,7 +11252,7 @@ const resultInit = _ => {
 		maxCombo: 0, fmaxCombo: 0, score: 0,
 	};
 
-	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && (g_stateObj.shuffle === C_FLG_OFF || mirrorName !== ``));
+	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && (g_stateObj.shuffle === C_FLG_OFF || (mirrorName !== `` && orgShuffleFlg)));
 	if (highscoreCondition) {
 
 		// ハイスコア差分描画
@@ -11348,7 +11359,7 @@ const resultInit = _ => {
 	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
 	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
-		tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
+		tweetDifData += `:${shuffleName}`;
 	}
 	const twiturl = new URL(g_localStorageUrl);
 	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
