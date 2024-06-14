@@ -8218,13 +8218,24 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	// キー変化定義
 	obj.keychFrames = [];
 	obj.keychTarget = [];
+	obj.keychTargetAlpha = [];
 	if (hasVal(getRefData(`keych`, `${scoreIdHeader}_data`))) {
 		const keychdata = splitLF2(getRefData(`keych`, `${scoreIdHeader}_data`), `,`);
 		obj.keychFrames.push(...(keychdata.filter((val, j) => j % 2 === 0)).map(val => val === `0` ? 0 : calcFrame(val)));
-		obj.keychTarget.push(...keychdata.filter((val, j) => j % 2 === 1));
+
+		keychdata.filter((val, j) => j % 2 === 1)?.forEach(targets => {
+			const targetKeyList = [], targetKeyAlpha = [];
+			targets?.split(`/`).forEach(target => {
+				targetKeyList.push(target?.split(`:`)[0]);
+				targetKeyAlpha.push(target?.split(`:`)[1] || 1);
+			})
+			obj.keychTarget.push(targetKeyList);
+			obj.keychTargetAlpha.push(targetKeyAlpha);
+		});
 	}
 	obj.keychFrames.unshift(0);
-	obj.keychTarget.unshift(`0`);
+	obj.keychTarget.unshift([`0`]);
+	obj.keychTargetAlpha.unshift([1]);
 
 	return obj;
 };
@@ -10251,7 +10262,7 @@ const mainInit = _ => {
 		// キー変化
 		while (currentFrame >= g_scoreObj.keychFrames[keychCnts]) {
 			for (let j = 0; j < keyNum; j++) {
-				appearKeyTypes(j, g_scoreObj.keychTarget[keychCnts]);
+				appearKeyTypes(j, g_scoreObj.keychTarget[keychCnts], g_scoreObj.keychTargetAlpha[keychCnts]);
 			}
 			keychCnts++;
 		}
@@ -10482,18 +10493,23 @@ const makeCounterSymbol = (_id, _x, _class, _heightPos, _text, _display = C_DIS_
  * @param {number} _j
  * @param {string} _display 
  */
-const appearStepZone = (_j, _display) => $id(`stepRoot${_j}`).display = _display;
+const appearStepZone = (_j, _display, _alpha = 1) => {
+	$id(`stepRoot${_j}`).display = _display;
+	$id(`stepRoot${_j}`).opacity = _alpha;
+};
 
 /**
  * 部分キーのステップゾーン出現処理
  * @param {number} _j 
- * @param {string} _target 
+ * @param {array} _targets 
  */
-const appearKeyTypes = (_j, _target) => {
+const appearKeyTypes = (_j, _targets, _alphas = fillArray(_targets.length, 1)) => {
 	appearStepZone(_j, C_DIS_NONE);
-	if (g_workObj.keyGroupMaps[_j].includes(_target)) {
-		appearStepZone(_j, C_DIS_INHERIT);
-	}
+	_targets.forEach((target, k) => {
+		if (g_workObj.keyGroupMaps[_j].includes(target)) {
+			appearStepZone(_j, C_DIS_INHERIT, _alphas[k]);
+		}
+	});
 };
 
 /**
