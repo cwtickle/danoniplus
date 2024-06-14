@@ -8226,8 +8226,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		keychdata.filter((val, j) => j % 2 === 1)?.forEach(targets => {
 			const targetKeyList = [], targetKeyAlpha = [];
 			targets?.split(`/`).forEach(target => {
-				targetKeyList.push(target?.split(`:`)[0]);
-				targetKeyAlpha.push(target?.split(`:`)[1] || 1);
+				targetKeyList.push(trimStr(target?.split(`:`)[0]));
+				targetKeyAlpha.push(trimStr(target?.split(`:`)[1]) || 1);
 			})
 			obj.keychTarget.push(targetKeyList);
 			obj.keychTargetAlpha.push(targetKeyAlpha);
