@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/06/08 (v36.6.0)
+ * Revised : 2024/06/15 (v37.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -22,45 +22,6 @@ const C_VALIGN_MIDDLE = `middle`;
 const C_VALIGN_BOTTOM = `bottom`;
 
 const C_LBL_BASICFONT = `"Meiryo UI", sans-serif`;
-
-/** 廃止予定の定数群 */
-const C_LBL_TITLESIZE = 32;
-const C_LBL_BTNSIZE = 28;
-const C_LBL_LNKSIZE = 16;
-
-const C_BTN_HEIGHT = 50;
-const C_LNK_HEIGHT = 30;
-const C_LEN_SETLBL_LEFT = 160;
-const C_LEN_SETLBL_WIDTH = 210;
-const C_LEN_DIFSELECTOR_WIDTH = 250;
-const C_LEN_DIFCOVER_WIDTH = 110;
-const C_LEN_SETLBL_HEIGHT = 22;
-const C_SIZ_SETLBL = 17;
-const C_LEN_SETDIFLBL_HEIGHT = 25;
-const C_SIZ_SETDIFLBL = 17;
-const C_LEN_SETMINI_WIDTH = 40;
-const C_SIZ_SETMINI = 18;
-const C_SIZ_DIFSELECTOR = 14;
-const C_SIZ_MAIN = 14;
-const C_SIZ_MUSIC_TITLE = 13;
-
-const C_LEN_JDGCHARA_WIDTH = 200;
-const C_LEN_JDGCHARA_HEIGHT = 20;
-const C_SIZ_JDGCHARA = 20;
-
-const C_LEN_JDGCNTS_WIDTH = 100;
-const C_LEN_JDGCNTS_HEIGHT = 20;
-const C_SIZ_JDGCNTS = 16;
-
-const C_LEN_GRAPH_WIDTH = 286;
-const C_LEN_GRAPH_HEIGHT = 226;
-const C_CLR_SPEEDGRAPH_SPEED = `#cc3333`;
-const C_CLR_SPEEDGRAPH_BOOST = `#999900`;
-const C_CLR_DENSITY_MAX = `#990000cc`;
-const C_CLR_DENSITY_DEFAULT = `#999999cc`;
-const C_LEN_DENSITY_DIVISION = 16;
-
-const C_MAX_ADJUSTMENT = 30;
 
 /** 設定幅、位置などを管理するプロパティ */
 const g_limitObj = {
