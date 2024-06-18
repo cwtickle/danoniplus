@@ -8004,6 +8004,13 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		getRefData(_header, `${_type}_data`)
 	];
 
+	const getPriorityListVal = (_type, _scoreNo) => [
+		`${_type}${g_localeObj.val}${_scoreNo}_data`,
+		`${_type}${g_localeObj.val}_data`,
+		`${_type}${_scoreNo}_data`,
+		`${_type}_data`
+	];
+
 	/**
 	 * 歌詞表示、背景・マスクデータの優先順取得 
 	 */
@@ -8039,16 +8046,18 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	const makeWordData = _scoreNo => {
 		const wordDataList = [];
+		const wordTargets = [];
 		let wordReverseFlg = false;
 		const divideCnt = getKeyInfo().divideCnt;
-		const addDataList = (_type = ``) => wordDataList.push(...getPriorityList(`word`, _type, _scoreNo));
+		const addDataList = (_type = ``) => wordTargets.push(...getPriorityListVal(_type, _scoreNo));
 		getPriorityHeader().forEach(val => addDataList(val));
+		makeDedupliArray(wordTargets).forEach(val => wordDataList.push(getRefData(`word`, val)));
 
 		if (g_stateObj.reverse === C_FLG_ON) {
 
 			// wordRev_dataが指定されている場合はそのままの位置を採用
 			// word_dataのみ指定されている場合、下記ルールに従って設定
-			if (wordDataList.find((v) => v !== undefined) === undefined) {
+			if (wordDataList.slice(0, -1).find((v) => v !== undefined) === undefined) {
 				// Reverse時の歌詞の自動反転制御設定
 				if (g_headerObj.wordAutoReverse !== `auto`) {
 					wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
