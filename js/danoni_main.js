@@ -8047,11 +8047,12 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 		if (g_stateObj.reverse === C_FLG_ON) {
 			let wordTarget = ``;
-			makeDedupliArray(wordTargets).forEach(val => {
+			for (let val of makeDedupliArray(wordTargets)) {
 				if (getRefData(`word`, val) !== undefined) {
 					wordTarget = val;
+					break;
 				}
-			});
+			}
 
 			// wordRev_dataが指定されている場合はそのままの位置を採用
 			// word_dataのみ指定されている場合、下記ルールに従って設定
