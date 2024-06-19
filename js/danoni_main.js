@@ -7992,16 +7992,15 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	}
 
 	/**
-	 * 譜面データの優先順配列の取得
-	 * @param {string} _header 
+	 * 譜面データの優先順配列パターンの取得
 	 * @param {string} _type 
 	 * @param {number} _scoreNo 
 	 */
-	const getPriorityList = (_header, _type, _scoreNo) => [
-		getRefData(_header, `${_type}${g_localeObj.val}${_scoreNo}_data`),
-		getRefData(_header, `${_type}${g_localeObj.val}_data`),
-		getRefData(_header, `${_type}${_scoreNo}_data`),
-		getRefData(_header, `${_type}_data`)
+	const getPriorityVal = (_type, _scoreNo) => [
+		`${_type}${g_localeObj.val}${_scoreNo}_data`,
+		`${_type}${g_localeObj.val}_data`,
+		`${_type}${_scoreNo}_data`,
+		`${_type}_data`
 	];
 
 	/**
@@ -8039,16 +8038,24 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	const makeWordData = _scoreNo => {
 		const wordDataList = [];
+		const wordTargets = [];
 		let wordReverseFlg = false;
 		const divideCnt = getKeyInfo().divideCnt;
-		const addDataList = (_type = ``) => wordDataList.push(...getPriorityList(`word`, _type, _scoreNo));
+		const addDataList = (_type = ``) => wordTargets.push(...getPriorityVal(_type, _scoreNo));
 		getPriorityHeader().forEach(val => addDataList(val));
+		makeDedupliArray(wordTargets).forEach(val => wordDataList.push(getRefData(`word`, val)));
 
 		if (g_stateObj.reverse === C_FLG_ON) {
+			let wordTarget = ``;
+			makeDedupliArray(wordTargets).forEach(val => {
+				if (getRefData(`word`, val) !== undefined) {
+					wordTarget = val;
+				}
+			});
 
 			// wordRev_dataが指定されている場合はそのままの位置を採用
 			// word_dataのみ指定されている場合、下記ルールに従って設定
-			if (wordDataList.find((v) => v !== undefined) === undefined) {
+			if (!wordTarget.includes(`Rev`) && g_stateObj.scroll === `---`) {
 				// Reverse時の歌詞の自動反転制御設定
 				if (g_headerObj.wordAutoReverse !== `auto`) {
 					wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
@@ -8129,9 +8136,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	const makeBackgroundData = (_header, _scoreNo, { resultTypes = [] } = {}) => {
 		const dataList = [];
+		const animationTargets = [];
 		const calcFrameFunc = resultTypes.length > 0 ? undefined : calcFrame;
-		const addDataList = (_type = ``) => dataList.push(...getPriorityList(_header, _type, _scoreNo));
+		const addDataList = (_type = ``) => animationTargets.push(...getPriorityVal(_type, _scoreNo));
 		getPriorityHeader(resultTypes).forEach(val => addDataList(val));
+		makeDedupliArray(animationTargets).forEach(val => dataList.push(getRefData(_header, val)));
 
 		const data = dataList.find((v) => v !== undefined);
 		return (data !== undefined ? g_animationFunc.make[_header](data, calcFrameFunc) : [[], -1]);
