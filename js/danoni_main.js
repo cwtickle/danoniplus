@@ -9030,7 +9030,8 @@ const getArrowSettings = _ => {
 
 			g_typeLists.frzColor.forEach((frzType, k) => {
 				g_workObj[`frz${frzType}Colors${type}`][j] = g_headerObj.frzColor[colorj][k] || ``;
-				g_workObj[`dummyFrz${frzType}Colors${type}`][j] = g_headerObj.setDummyColor[colorj];
+				g_workObj[`dummyFrz${frzType}Colors${type}`][j] =
+					frzType.includes(`Shadow`) ? `` : g_headerObj.setDummyColor[colorj] || ``;
 			});
 			g_workObj[`frzNormalShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][0] || ``;
 			g_workObj[`frzHitShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][1] || ``;
@@ -10290,7 +10291,7 @@ const mainInit = _ => {
 		// ダミーフリーズアロー生成
 		g_workObj.mkDummyFrzArrow[currentFrame]?.forEach(data =>
 			makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`, g_workObj.dummyFrzNormalColors[data],
-				_workObj.dummyFrzNormalBarColors[data], g_workObj.dummyFrzNormalShadowColors[data]));
+				g_workObj.dummyFrzNormalBarColors[data], g_workObj.dummyFrzNormalShadowColors[data]));
 
 		// フリーズアロー生成
 		g_workObj.mkFrzArrow[currentFrame]?.forEach(data =>
@@ -10598,6 +10599,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 
 	const styfrzBar = $id(`${_name}Bar${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
+	const styfrzTop = $id(`${_name}Top${frzNo}`);
 	const styfrzTopShadow = $id(`${_name}TopShadow${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
 
@@ -10634,7 +10636,8 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	styfrzBar.background = getColor(`HitBar`);
 	styfrzBtm.top = wUnit(currentFrz.btmY);
 	styfrzBtm.background = tmpHitColor;
-	styfrzTopShadow.opacity = 0;
+	styfrzTop.top = wUnit(parseFloat(styfrzTop.top) - hitPos);
+	styfrzTopShadow.top = styfrzTop.top;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
 		const tmpShadowColor = getColor(`HitShadow`);
