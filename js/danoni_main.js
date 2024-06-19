@@ -8055,7 +8055,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 			// wordRev_dataが指定されている場合はそのままの位置を採用
 			// word_dataのみ指定されている場合、下記ルールに従って設定
-			if (!wordTarget.includes(`Rev`) && !wordTarget.includes(g_stateObj.scroll)) {
+			if (!wordTarget.includes(`Rev`) && g_stateObj.scroll === `---`) {
 				// Reverse時の歌詞の自動反転制御設定
 				if (g_headerObj.wordAutoReverse !== `auto`) {
 					wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
