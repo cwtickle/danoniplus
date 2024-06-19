@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/06/08
+ * Revised : 2024/06/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 35.5.2`;
-const g_revisedDate = `2024/06/08`;
+const g_version = `Ver 35.5.3`;
+const g_revisedDate = `2024/06/20`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7729,6 +7729,19 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	];
 
 	/**
+	 * 譜面データの優先順配列パターンの取得
+	 * @param {string} _type 
+	 * @param {number} _scoreNo 
+	 * @returns 
+	 */
+	const getPriorityVal = (_type, _scoreNo) => [
+		`${_type}${g_localeObj.val}${_scoreNo}_data`,
+		`${_type}${g_localeObj.val}_data`,
+		`${_type}${_scoreNo}_data`,
+		`${_type}_data`
+	];
+
+	/**
 	 * 歌詞表示、背景・マスクデータの優先順取得 
 	 */
 	const getPriorityHeader = (_defaultHeaders = []) => {
@@ -7763,16 +7776,25 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 */
 	const makeWordData = _scoreNo => {
 		const wordDataList = [];
+		const wordTargets = [];
 		let wordReverseFlg = false;
 		const divideCnt = getKeyInfo().divideCnt;
-		const addDataList = (_type = ``) => wordDataList.push(...getPriorityList(`word`, _type, _scoreNo));
+		const addDataList = (_type = ``) => wordTargets.push(...getPriorityVal(_type, _scoreNo));
 		getPriorityHeader().forEach(val => addDataList(val));
+		makeDedupliArray(wordTargets).forEach(val => wordDataList.push(getRefData(`word`, val)));
 
 		if (g_stateObj.reverse === C_FLG_ON) {
+			let wordTarget = ``;
+			for (let val of makeDedupliArray(wordTargets)) {
+				if (getRefData(`word`, val) !== undefined) {
+					wordTarget = val;
+					break;
+				}
+			}
 
 			// wordRev_dataが指定されている場合はそのままの位置を採用
 			// word_dataのみ指定されている場合、下記ルールに従って設定
-			if (wordDataList.find((v) => v !== undefined) === undefined) {
+			if (!wordTarget.includes(`Rev`) && g_stateObj.scroll === `---`) {
 				// Reverse時の歌詞の自動反転制御設定
 				if (g_headerObj.wordAutoReverse !== `auto`) {
 					wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
@@ -10228,6 +10250,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 
 	const styfrzBar = $id(`${_name}Bar${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
+	const styfrzTop = $id(`${_name}Top${frzNo}`);
 	const styfrzTopShadow = $id(`${_name}TopShadow${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
 	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
@@ -10253,7 +10276,8 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	styfrzBar.background = g_workObj[`${_name}HitBarColors`][_j];
 	styfrzBtm.top = wUnit(currentFrz.btmY);
 	styfrzBtm.background = g_workObj[`${_name}HitColors`][_j];
-	styfrzTopShadow.opacity = 0;
+	styfrzTop.top = wUnit(- hitPos);
+	styfrzTopShadow.top = styfrzTop.top;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
 		if (g_headerObj.frzShadowColor[colorPos][1] !== ``) {
@@ -10280,15 +10304,9 @@ const changeFailedFrz = (_j, _k) => {
 	$id(`frzHit${_j}`).opacity = 0;
 	$id(`frzTop${frzNo}`).display = C_DIS_INHERIT;
 	$id(`frzTop${frzNo}`).background = `#cccccc`;
-	$id(`frzTopShadow${frzNo}`).opacity = 1;
 	$id(`frzBar${frzNo}`).background = `#999999`;
 	$id(`frzBar${frzNo}`).opacity = 1;
 	$id(`frzBtm${frzNo}`).background = `#cccccc`;
-
-	// 判定位置調整分の補正
-	const hitPos = g_workObj.hitPosition * g_workObj.scrollDir[_j];
-	$id(`frzTop${frzNo}`).top = wUnit(- hitPos);
-	$id(`frzTopShadow${frzNo}`).top = wUnit(- hitPos);
 
 	const colorPos = g_keyObj[`color${g_keyObj.currentKey}_${g_keyObj.currentPtn}`][_j];
 	if (g_headerObj.frzShadowColor[colorPos][0] !== ``) {
