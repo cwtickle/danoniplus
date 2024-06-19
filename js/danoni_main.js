@@ -10636,7 +10636,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	styfrzBar.background = getColor(`HitBar`);
 	styfrzBtm.top = wUnit(currentFrz.btmY);
 	styfrzBtm.background = tmpHitColor;
-	styfrzTop.top = wUnit(parseFloat(styfrzTop.top) - hitPos);
+	styfrzTop.top = wUnit(- hitPos);
 	styfrzTopShadow.top = styfrzTop.top;
 	styfrzBtmShadow.top = styfrzBtm.top;
 	if (_name === `frz`) {
@@ -10662,17 +10662,11 @@ const changeFailedFrz = (_j, _k) => {
 	$id(`frzHit${_j}`).opacity = 0;
 	$id(`frzTop${frzNo}`).display = C_DIS_INHERIT;
 	$id(`frzTop${frzNo}`).background = `#cccccc`;
-	$id(`frzTopShadow${frzNo}`).opacity = 1;
 	$id(`frzTopShadow${frzNo}`).background = `#333333`;
 	$id(`frzBtmShadow${frzNo}`).background = `#333333`;
 	$id(`frzBar${frzNo}`).background = `#999999`;
 	$id(`frzBar${frzNo}`).opacity = 1;
 	$id(`frzBtm${frzNo}`).background = `#cccccc`;
-
-	// 判定位置調整分の補正
-	const hitPos = g_workObj.hitPosition * g_workObj.scrollDir[_j];
-	$id(`frzTop${frzNo}`).top = wUnit(- hitPos);
-	$id(`frzTopShadow${frzNo}`).top = wUnit(- hitPos);
 };
 
 /**
