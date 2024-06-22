@@ -1589,6 +1589,7 @@ const g_shortcutObj = {
         ShiftLeft_KeyA: { id: `lnkAppearanceL` },
         ShiftRight_KeyA: { id: `lnkAppearanceL` },
         KeyA: { id: `lnkAppearanceR` },
+        KeyL: { id: `lnkLockBtn` },
         ShiftLeft_KeyO: { id: `lnkOpacityL` },
         ShiftRight_KeyO: { id: `lnkOpacityL` },
         KeyO: { id: `lnkOpacityR` },
