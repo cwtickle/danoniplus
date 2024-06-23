@@ -67,7 +67,8 @@ const g_limitObj = {
 
     // グラフ表示部分の幅、高さ
     graphWidth: 286,
-    graphHeight: 226,
+    graphHeight: 240,
+    graphMiniSiz: 12,
 
     // その他のフォントサイズ
     titleSiz: 32,
@@ -158,11 +159,11 @@ const g_lblPosObj = {};
 const updateWindowSiz = _ => {
     Object.assign(g_windowObj, {
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
-        difList: { x: 165, y: 60, w: 280, h: 265 + g_sHeight - 500, overflow: `auto` },
-        difCover: { x: 20, y: 60, w: 145, h: 265 + g_sHeight - 500, opacity: 0.95 },
-        difFilter: { x: 0, y: 61, w: 140, h: 204 + g_sHeight - 500, overflow: `auto` },
+        difList: { x: 165, y: 60, w: 280, h: 270 + g_sHeight - 500, overflow: `auto` },
+        difCover: { x: 20, y: 60, w: 145, h: 270 + g_sHeight - 500, opacity: 0.95 },
+        difFilter: { x: 0, y: 66, w: 140, h: 204 + g_sHeight - 500, overflow: `auto` },
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
-        scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 240, visibility: `hidden` },
+        scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 245, visibility: `hidden` },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
         keyconSprite: { y: 105, h: g_sHeight - 105, overflow: `auto` },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },

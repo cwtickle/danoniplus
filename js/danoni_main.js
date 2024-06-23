@@ -4605,7 +4605,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
 	});
 	if (document.getElementById(`lblDifCnt`) === null) {
 		difCover.appendChild(createDivCss2Label(`lblDifCnt`, ``, {
-			x: 0, y: 22.5, w: g_limitObj.difCoverWidth, h: 16, siz: 12, fontWeight: `bold`,
+			x: 0, y: 27, w: g_limitObj.difCoverWidth, h: 16, siz: 12, fontWeight: `bold`,
 		}));
 	}
 	lblDifCnt.innerHTML = `${_targetKey === '' ? 'ALL' : _targetKey + 'k'}: ${curk === -1 ? '-' : curk + 1} / ${k}`;
@@ -4654,7 +4654,7 @@ const createDifWindow = (_key = ``) => {
 
 	// 全リスト
 	difCover.appendChild(
-		makeDifLblCssButton(`keyFilter`, `ALL`, 1.7, _ => {
+		makeDifLblCssButton(`keyFilter`, `ALL`, 1.9, _ => {
 			resetDifWindow();
 			g_stateObj.filterKeys = ``;
 			createDifWindow();
@@ -4742,7 +4742,7 @@ const drawSpeedGraph = _scoreId => {
 	drawBaseLine(context);
 
 	const avgX = [0, 0];
-	const avgSubX = [1, 1];
+	const avgSubX = [0, 0];
 	const lineX = [0, 150], lineY = 208;
 	Object.keys(speedObj).forEach((speedType, j) => {
 		const frame = speedObj[speedType].frame;
@@ -4750,7 +4750,7 @@ const drawSpeedGraph = _scoreId => {
 
 		context.beginPath();
 		let preY;
-		let avgSubFrame = playingFrame;
+		let avgSubFrame = 0;
 
 		for (let i = 0; i < frame.length; i++) {
 			const x = frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
@@ -4762,9 +4762,8 @@ const drawSpeedGraph = _scoreId => {
 
 			const deltaFrame = frame[i] - (frame[i - 1] ?? startFrame);
 			avgX[j] += deltaFrame * (speed[i - 1] ?? 1);
-			if ((speed[i - 1] ?? 1) === 1) {
-				avgSubFrame -= deltaFrame;
-			} else {
+			if ((speed[i - 1] ?? 1) !== 1) {
+				avgSubFrame += deltaFrame;
 				avgSubX[j] += deltaFrame * (speed[i - 1]);
 			}
 		}
@@ -4784,11 +4783,9 @@ const drawSpeedGraph = _scoreId => {
 
 		const maxSpeed = Math.max(...speed);
 		const minSpeed = Math.min(...speed);
-
 		context.fillText(`(${minSpeed.toFixed(2)}x` + (minSpeed === maxSpeed ? `` : ` -- ${Math.max(...speed).toFixed(2)}x`) + `)`, lineX[j] + 30, lineY + 16);
-
+		context.fillText(`Avg. ` + (avgX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`), lineX[j] + 30, lineY + 29);
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
-		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, avgSubX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
 	});
 	updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
 };
