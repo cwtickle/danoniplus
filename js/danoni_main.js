@@ -4743,26 +4743,29 @@ const drawSpeedGraph = _scoreId => {
 
 	const avgX = [0, 0];
 	const avgSubX = [1, 1];
-	const lineX = [125, 210];
+	const lineX = [0, 150], lineY = 208;
 	Object.keys(speedObj).forEach((speedType, j) => {
+		const frame = speedObj[speedType].frame;
+		const speed = speedObj[speedType].speed;
+
 		context.beginPath();
 		let preY;
 		let avgSubFrame = playingFrame;
 
-		for (let i = 0; i < speedObj[speedType].frame.length; i++) {
-			const x = speedObj[speedType].frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
-			const y = (speedObj[speedType].speed[i] - 1) * -90 + 105;
+		for (let i = 0; i < frame.length; i++) {
+			const x = frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
+			const y = (speed[i] - 1) * -90 + 105;
 
 			context.lineTo(x, preY);
 			context.lineTo(x, y);
 			preY = y;
 
-			const deltaFrame = speedObj[speedType].frame[i] - (speedObj[speedType].frame[i - 1] ?? startFrame);
-			avgX[j] += deltaFrame * (speedObj[speedType].speed[i - 1] ?? 1);
-			if ((speedObj[speedType].speed[i - 1] ?? 1) === 1) {
+			const deltaFrame = frame[i] - (frame[i - 1] ?? startFrame);
+			avgX[j] += deltaFrame * (speed[i - 1] ?? 1);
+			if ((speed[i - 1] ?? 1) === 1) {
 				avgSubFrame -= deltaFrame;
 			} else {
-				avgSubX[j] += deltaFrame * (speedObj[speedType].speed[i - 1]);
+				avgSubX[j] += deltaFrame * (speed[i - 1]);
 			}
 		}
 		avgX[j] /= playingFrame;
@@ -4773,11 +4776,16 @@ const drawSpeedGraph = _scoreId => {
 		context.stroke();
 
 		context.beginPath();
-		context.moveTo(lineX[j], 215);
-		context.lineTo(lineX[j] + 25, 215);
+		context.moveTo(lineX[j], lineY);
+		context.lineTo(lineX[j] + 25, lineY);
 		context.stroke();
-		context.font = `${wUnit(g_limitObj.difSelectorSiz)} ${getBasicFont()}`;
-		context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, 218);
+		context.font = `${wUnit(g_limitObj.graphMiniSiz)} ${getBasicFont()}`;
+		context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, lineY + 3);
+
+		const maxSpeed = Math.max(...speed);
+		const minSpeed = Math.min(...speed);
+
+		context.fillText(`(${minSpeed.toFixed(2)}x` + (minSpeed === maxSpeed ? `` : ` -- ${Math.max(...speed).toFixed(2)}x`) + `)`, lineX[j] + 30, lineY + 16);
 
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, avgSubX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
