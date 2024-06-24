@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/06/20
+ * Revised : 2024/06/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 37.0.1`;
-const g_revisedDate = `2024/06/20`;
+const g_version = `Ver 37.1.0`;
+const g_revisedDate = `2024/06/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -4605,7 +4605,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
 	});
 	if (document.getElementById(`lblDifCnt`) === null) {
 		difCover.appendChild(createDivCss2Label(`lblDifCnt`, ``, {
-			x: 0, y: 22.5, w: g_limitObj.difCoverWidth, h: 16, siz: 12, fontWeight: `bold`,
+			x: 0, y: 27, w: g_limitObj.difCoverWidth, h: 16, siz: 12, fontWeight: `bold`,
 		}));
 	}
 	lblDifCnt.innerHTML = `${_targetKey === '' ? 'ALL' : _targetKey + 'k'}: ${curk === -1 ? '-' : curk + 1} / ${k}`;
@@ -4654,7 +4654,7 @@ const createDifWindow = (_key = ``) => {
 
 	// 全リスト
 	difCover.appendChild(
-		makeDifLblCssButton(`keyFilter`, `ALL`, 1.7, _ => {
+		makeDifLblCssButton(`keyFilter`, `ALL`, 1.9, _ => {
 			resetDifWindow();
 			g_stateObj.filterKeys = ``;
 			createDifWindow();
@@ -4739,48 +4739,56 @@ const drawSpeedGraph = _scoreId => {
 
 	const canvas = document.getElementById(`graphSpeed`);
 	const context = canvas.getContext(`2d`);
-	drawBaseLine(context);
+	const [_a, _b] = [-75, 100];
+	const [_min, _max] = [-0.2, 2.2];
+	drawBaseLine(context, { _fixed: 1, _mark: `x`, _a, _b, _min, _max });
 
 	const avgX = [0, 0];
-	const avgSubX = [1, 1];
-	const lineX = [125, 210];
+	const avgSubX = [0, 0];
+	const lineX = [0, 150], lineY = 208;
 	Object.keys(speedObj).forEach((speedType, j) => {
+		const frame = speedObj[speedType].frame;
+		const speed = speedObj[speedType].speed;
+
 		context.beginPath();
 		let preY;
-		let avgSubFrame = playingFrame;
+		let avgSubFrame = 0;
 
-		for (let i = 0; i < speedObj[speedType].frame.length; i++) {
-			const x = speedObj[speedType].frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
-			const y = (speedObj[speedType].speed[i] - 1) * -90 + 105;
+		for (let i = 0; i < frame.length; i++) {
+			const x = frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
+			const y = (Math.min(Math.max(speed[i], _min - 0.05), _max + 0.05) - 1) * _a + _b;
 
 			context.lineTo(x, preY);
 			context.lineTo(x, y);
 			preY = y;
 
-			const deltaFrame = speedObj[speedType].frame[i] - (speedObj[speedType].frame[i - 1] ?? startFrame);
-			avgX[j] += deltaFrame * (speedObj[speedType].speed[i - 1] ?? 1);
-			if ((speedObj[speedType].speed[i - 1] ?? 1) === 1) {
-				avgSubFrame -= deltaFrame;
-			} else {
-				avgSubX[j] += deltaFrame * (speedObj[speedType].speed[i - 1]);
+			const deltaFrame = frame[i] - (frame[i - 1] ?? startFrame);
+			avgX[j] += deltaFrame * (speed[i - 1] ?? 1);
+			if ((speed[i - 1] ?? 1) !== 1) {
+				avgSubFrame += deltaFrame;
+				avgSubX[j] += deltaFrame * (speed[i - 1]);
 			}
 		}
 		avgX[j] /= playingFrame;
 		avgSubX[j] /= Math.max(avgSubFrame, 1);
 
-		context.lineWidth = 1;
+		context.lineWidth = 2;
 		context.strokeStyle = speedObj[speedType].strokeColor;
 		context.stroke();
 
 		context.beginPath();
-		context.moveTo(lineX[j], 215);
-		context.lineTo(lineX[j] + 25, 215);
+		context.moveTo(lineX[j], lineY);
+		context.lineTo(lineX[j] + 25, lineY);
 		context.stroke();
-		context.font = `${wUnit(g_limitObj.difSelectorSiz)} ${getBasicFont()}`;
-		context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, 218);
+		context.font = `${wUnit(g_limitObj.mainSiz)} ${getBasicFont()}`;
+		context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, lineY + 3);
 
+		const maxSpeed = Math.max(...speed);
+		const minSpeed = Math.min(...speed);
+		context.font = `${wUnit(g_limitObj.graphMiniSiz)} ${getBasicFont()}`;
+		context.fillText(`(${minSpeed.toFixed(2)}x` + (minSpeed === maxSpeed ? `` : ` -- ${Math.max(...speed).toFixed(2)}x`) + `)`, lineX[j] + 30, lineY + 16);
+		context.fillText(`Avg. ` + (avgX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`), lineX[j] + 30, lineY + 29);
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
-		updateScoreDetailLabel(`Speed`, `avgD${speedType}`, avgSubX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`, j + 4, g_lblNameObj[`s_avgD${speedType}`]);
 	});
 	updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
 };
@@ -4855,13 +4863,16 @@ const updateScoreDetailLabel = (_name, _label, _value, _pos = 0, _labelname = _l
  * @param {object} _context 
  * @param {number} _resolution 
  */
-const drawBaseLine = (_context, _resolution = 10) => {
+const drawBaseLine = (_context, { _fixed = 2, _mark = ``, _resolution = 10, _a = -90, _b = 105, _min = 0, _max = 2 } = {}) => {
 	_context.clearRect(0, 0, g_limitObj.graphWidth, g_limitObj.graphHeight);
 
-	for (let j = 0; j <= 2 * _resolution; j += 5) {
-		drawLine(_context, j / _resolution, `main`, 2);
-		for (let k = 1; k < 5; k++) {
-			drawLine(_context, (j + k) / _resolution, `sub`, 2);
+	for (let j = _min * _resolution; j <= _max * _resolution; j += 5) {
+		for (let k = 0; k < 5; k++) {
+			if ((j + k) % 5 === 0) {
+				drawLine(_context, (j + k) / _resolution, `main`, { _fixed, _mark, _a, _b });
+			} else {
+				drawLine(_context, (j + k) / _resolution, `sub`, { _fixed, _mark, _a, _b });
+			}
 		}
 	}
 };
@@ -4873,8 +4884,8 @@ const drawBaseLine = (_context, _resolution = 10) => {
  * @param {string} _lineType 
  * @param {number} _fixed
  */
-const drawLine = (_context, _y, _lineType, _fixed = 0) => {
-	const lineY = (_y - 1) * -90 + 105;
+const drawLine = (_context, _y, _lineType, { _fixed, _mark, _a, _b } = {}) => {
+	const lineY = (_y - 1) * _a + _b;
 	_context.beginPath();
 	_context.moveTo(30, lineY);
 	_context.lineTo(g_limitObj.graphWidth, lineY);
@@ -4886,7 +4897,7 @@ const drawLine = (_context, _y, _lineType, _fixed = 0) => {
 		_context.strokeStyle = textColor;
 		_context.font = `${wUnit(12)} ${getBasicFont()}`;
 		_context.fillStyle = textColor;
-		_context.fillText(_y.toFixed(_fixed), 0, lineY + 4);
+		_context.fillText(_y.toFixed(_fixed) + _mark, 2, lineY + 4);
 	} else {
 		_context.strokeStyle = `#646464`;
 	}
