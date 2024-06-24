@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/06/20
+ * Revised : 2024/06/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 35.5.3`;
-const g_revisedDate = `2024/06/20`;
+const g_version = `Ver 35.5.4`;
+const g_revisedDate = `2024/06/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -4755,7 +4755,7 @@ const drawSpeedGraph = _scoreId => {
 	drawBaseLine(context);
 
 	const avgX = [0, 0];
-	const avgSubX = [1, 1];
+	const avgSubX = [0, 0];
 	const lineX = [125, 210];
 	Object.keys(speedObj).forEach((speedType, j) => {
 		context.beginPath();
