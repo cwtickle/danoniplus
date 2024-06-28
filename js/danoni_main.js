@@ -11300,7 +11300,8 @@ const resultInit = _ => {
 		maxCombo: 0, fmaxCombo: 0, score: 0,
 	};
 
-	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && (g_stateObj.shuffle === C_FLG_OFF || (mirrorName !== `` && orgShuffleFlg)));
+	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && g_headerObj.playbackRate === 1 &&
+		(g_stateObj.shuffle === C_FLG_OFF || (mirrorName !== `` && orgShuffleFlg)));
 	if (highscoreCondition) {
 
 		// ハイスコア差分描画
