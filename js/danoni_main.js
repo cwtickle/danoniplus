@@ -5526,7 +5526,6 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 5.5
 	createGeneralSetting(spriteList.shuffle, `shuffle`, g_settings.scoreDetails.length > 0 ? {
 		addRFunc: _ => makeHighScore(g_stateObj.scoreId),
-		addLFunc: _ => makeHighScore(g_stateObj.scoreId),
 	} : {});
 
 	// ---------------------------------------------------
@@ -5534,7 +5533,6 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 6.5
 	createGeneralSetting(spriteList.autoPlay, `autoPlay`, g_settings.scoreDetails.length > 0 ? {
 		addRFunc: _ => makeHighScore(g_stateObj.scoreId),
-		addLFunc: _ => makeHighScore(g_stateObj.scoreId),
 	} : {});
 
 	// ---------------------------------------------------
@@ -5578,9 +5576,7 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 10.5  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
 		skipTerms: g_settings.adjustmentTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
-		unitName: g_lblNameObj.frame,
-		addRFunc: _ => viewAdjustment(),
-		addLFunc: _ => viewAdjustment(),
+		unitName: g_lblNameObj.frame, addRFunc: _ => viewAdjustment(),
 	});
 
 	const viewAdjustment = _ => {
@@ -5648,7 +5644,7 @@ const createOptionWindow = _sprite => {
  * @param {object} _options
  */
 const createGeneralSetting = (_obj, _settingName, { unitName = ``,
-	skipTerms = fillArray(3, 1), hiddenBtn = false, addRFunc = _ => { }, addLFunc = _ => { },
+	skipTerms = fillArray(3, 1), hiddenBtn = false, addRFunc = _ => { }, addLFunc = addRFunc,
 	settingLabel = _settingName, displayName = g_currentPage, scLabel = ``, roundNum = 0, adjY = 0 } = {}) => {
 
 	const settingUpper = toCapitalize(_settingName);
@@ -6265,7 +6261,6 @@ const createSettingsDisplayWindow = _sprite => {
 	// 縦位置: 7.4
 	createGeneralSetting(spriteList.appearance, `appearance`, {
 		addRFunc: _ => dispAppearanceSlider(),
-		addLFunc: _ => dispAppearanceSlider(),
 	});
 
 	// Hidden+/Sudden+初期値用スライダー、ロックボタン
