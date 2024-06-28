@@ -5579,7 +5579,18 @@ const createOptionWindow = _sprite => {
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
 		skipTerms: g_settings.adjustmentTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
 		unitName: g_lblNameObj.frame,
+		addRFunc: _ => viewAdjustment(),
+		addLFunc: _ => viewAdjustment(),
 	});
+
+	const viewAdjustment = _ => {
+		if (g_headerObj.playbackRate !== 1) {
+			document.getElementById(`lnkAdjustment`).innerHTML +=
+				`<br>(${(Math.round(g_stateObj.adjustment * 100 / g_headerObj.playbackRate) / 100).toFixed(2)}${g_lblNameObj.frame})`;
+			document.getElementById(`lnkAdjustment`).style.fontSize = `12px`;
+		}
+	};
+	viewAdjustment();
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
@@ -5648,47 +5659,47 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 		multiAppend(_obj,
 			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
 				_ => {
-					setSetting(skipTerms[1], _settingName, unitName, roundNum);
-					addRFunc();
+					setSetting(skipTerms[1], _settingName, unitName, roundNum, { func: _ => addRFunc() });
 				}, {
 				cxtFunc: _ => {
-					setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum);
-					addLFunc();
+					setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum, { func: _ => addLFunc() });
 				}
 			}),
 
 			// 右回し・左回しボタン（外側）
-			makeMiniCssButton(linkId, `R`, 0, _ => {
-				setSetting(skipTerms[0], _settingName, unitName, roundNum);
-				addRFunc();
-			}),
-			makeMiniCssButton(linkId, `L`, 0, _ => {
-				setSetting(skipTerms[0] * (-1), _settingName, unitName, roundNum);
-				addLFunc();
-			}),
+			makeMiniCssButton(linkId, `R`, 0, _ =>
+				setSetting(skipTerms[0], _settingName, unitName, roundNum, { func: _ => addRFunc() })),
+			makeMiniCssButton(linkId, `L`, 0, _ =>
+				setSetting(skipTerms[0] * (-1), _settingName, unitName, roundNum, { func: _ => addLFunc() })),
 		);
 
 		// 右回し・左回しボタン（内側）
 		if (skipTerms[1] > 1) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RR`, 0, _ => setSetting(skipTerms[1], _settingName, unitName, roundNum)),
-				makeMiniCssButton(linkId, `LL`, 0, _ => setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum)),
+				makeMiniCssButton(linkId, `RR`, 0, _ =>
+					setSetting(skipTerms[1], _settingName, unitName, roundNum, { func: _ => addRFunc() })),
+				makeMiniCssButton(linkId, `LL`, 0, _ =>
+					setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum, { func: _ => addLFunc() })),
 			);
 		}
 
 		// 右回し・左回しボタン（最内側）
 		if (skipTerms[2] > 1) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(skipTerms[2], _settingName, unitName, roundNum), { dw: -g_limitObj.setMiniWidth / 2 }),
-				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(skipTerms[2] * (-1), _settingName, unitName, roundNum), { dw: -g_limitObj.setMiniWidth / 2 }),
+				makeMiniCssButton(linkId, `RRR`, 0, _ =>
+					setSetting(skipTerms[2], _settingName, unitName, roundNum, { func: _ => addRFunc() })
+					, { dw: -g_limitObj.setMiniWidth / 2 }),
+				makeMiniCssButton(linkId, `LLL`, 0, _ =>
+					setSetting(skipTerms[2] * (-1), _settingName, unitName, roundNum, { func: _ => addLFunc() })
+					, { dw: -g_limitObj.setMiniWidth / 2 }),
 			);
 		}
 
 		// 右回し・左回しボタン（不可視）
 		if (hiddenBtn) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `HR`, 0, _ => setSetting(1, _settingName, unitName, roundNum), { visibility: `hidden` }),
-				makeMiniCssButton(linkId, `HL`, 0, _ => setSetting(-1, _settingName, unitName, roundNum), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `HR`, 0, _ => setSetting(1, _settingName, unitName, roundNum, { func: _ => addRFunc() }), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `HL`, 0, _ => setSetting(-1, _settingName, unitName, roundNum, { func: _ => addLFunc() }), { visibility: `hidden` }),
 			);
 		}
 
@@ -5731,7 +5742,7 @@ const getStgDetailName = _name => {
  * @param {string} _unitName
  * @param {number} _roundNum
  */
-const setSetting = (_scrollNum, _settingName, _unitName = ``, _roundNum = 0) => {
+const setSetting = (_scrollNum, _settingName, _unitName = ``, _roundNum = 0, { func = _ => true } = {}) => {
 	let settingNum = g_settings[`${_settingName}Num`];
 	const settingList = g_settings[`${_settingName}s`];
 	const settingMax = settingList.length - 1;
@@ -5752,6 +5763,7 @@ const setSetting = (_scrollNum, _settingName, _unitName = ``, _roundNum = 0) => 
 	g_settings[`${_settingName}Num`] = settingNum;
 	document.getElementById(`lnk${toCapitalize(_settingName)}`).textContent =
 		`${getStgDetailName(g_stateObj[_settingName])}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
+	func();
 };
 
 /**
@@ -7753,7 +7765,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	// realAdjustment: 全体, intAdjustment: 整数値のみ(切り捨て), decimalAdjustment: 小数値のみ
 	const headerAdjustment = parseFloat(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
-	g_stateObj.realAdjustment = parseFloat(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
+	g_stateObj.realAdjustment = (parseFloat(g_stateObj.adjustment) + headerAdjustment) / g_headerObj.playbackRate + _preblankFrame;
 	g_stateObj.intAdjustment = Math.floor(g_stateObj.realAdjustment);
 	g_stateObj.decimalAdjustment = g_stateObj.realAdjustment - g_stateObj.intAdjustment;
 
