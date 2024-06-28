@@ -5585,9 +5585,11 @@ const createOptionWindow = _sprite => {
 
 	const viewAdjustment = _ => {
 		if (g_headerObj.playbackRate !== 1) {
-			document.getElementById(`lnkAdjustment`).innerHTML +=
-				`<br>(${(Math.round(g_stateObj.adjustment * 100 / g_headerObj.playbackRate) / 100).toFixed(2)}${g_lblNameObj.frame})`;
+			document.getElementById(`lnkAdjustment`).innerHTML =
+				`${(Math.round(g_stateObj.adjustment * 100 / g_headerObj.playbackRate) / 100).toFixed(1)}${g_lblNameObj.frame}`
+				+ `<span style="font-size:${g_limitObj.adjustmentViewOrgSiz}px"> (${g_stateObj.adjustment.toFixed(1)}${g_localStorage.adjustment === g_stateObj.adjustment ? '*' : ''})</span>`;
 			document.getElementById(`lnkAdjustment`).style.fontSize = `${g_limitObj.adjustmentViewSiz}px`;
+			document.getElementById(`lnkAdjustment`).style.lineHeight = `${g_limitObj.adjustmentLineHeight}px`;
 		}
 	};
 	viewAdjustment();
