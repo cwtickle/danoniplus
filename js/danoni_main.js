@@ -5587,7 +5587,7 @@ const createOptionWindow = _sprite => {
 		if (g_headerObj.playbackRate !== 1) {
 			document.getElementById(`lnkAdjustment`).innerHTML +=
 				`<br>(${(Math.round(g_stateObj.adjustment * 100 / g_headerObj.playbackRate) / 100).toFixed(2)}${g_lblNameObj.frame})`;
-			document.getElementById(`lnkAdjustment`).style.fontSize = `12px`;
+			document.getElementById(`lnkAdjustment`).style.fontSize = `${g_limitObj.adjustmentViewSiz}px`;
 		}
 	};
 	viewAdjustment();

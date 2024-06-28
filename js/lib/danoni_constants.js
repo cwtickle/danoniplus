@@ -29,6 +29,7 @@ const g_limitObj = {
     // Adjustment, HitPositionの設定幅
     adjustment: 30,
     hitPosition: 50,
+    adjustmentViewSiz: 12,
 
     // 譜面密度グラフの分割数、上位色付け数
     densityDivision: 16,
