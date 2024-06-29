@@ -5584,7 +5584,7 @@ const createOptionWindow = _sprite => {
 		if (g_headerObj.playbackRate !== 1) {
 			const adjustmentVal = isLocalMusicFile(g_stateObj.scoreId) ?
 				Math.round(g_stateObj.adjustment / g_headerObj.playbackRate) :
-				(Math.round(g_stateObj.adjustment * 100 / g_headerObj.playbackRate) / 100).toFixed(1);
+				(g_stateObj.adjustment / g_headerObj.playbackRate).toFixed(1);
 			document.getElementById(`lnkAdjustment`).innerHTML = `${adjustmentVal}${g_lblNameObj.frame}`
 				+ `<span style="font-size:${g_limitObj.adjustmentViewOrgSiz}px"> (${g_stateObj.adjustment.toFixed(1)}${g_localStorage.adjustment === g_stateObj.adjustment ? '*' : ''})</span>`;
 			document.getElementById(`lnkAdjustment`).style.fontSize = `${g_limitObj.adjustmentViewSiz}px`;
