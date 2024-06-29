@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/06/25 (v37.1.0)
+ * Revised : 2024/06/29 (v37.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -29,6 +29,11 @@ const g_limitObj = {
     // Adjustment, HitPositionの設定幅
     adjustment: 30,
     hitPosition: 50,
+
+    // playbackRate有効時のAdjustmentの設定値の文字サイズ、行幅
+    adjustmentViewSiz: 14,
+    adjustmentViewOrgSiz: 11,
+    adjustmentLineHeight: 12,
 
     // 譜面密度グラフの分割数、上位色付け数
     densityDivision: 16,
