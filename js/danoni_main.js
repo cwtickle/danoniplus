@@ -43,6 +43,7 @@ const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) 
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
+const isLocalMusicFile = _scoreId => g_isFile && !listMatching(getMusicUrl(g_stateObj.scoreId), [`.js`, `.txt`], { suffix: `$` });
 
 window.onload = async () => {
 	g_loadObj.main = true;
@@ -5526,7 +5527,6 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 5.5
 	createGeneralSetting(spriteList.shuffle, `shuffle`, g_settings.scoreDetails.length > 0 ? {
 		addRFunc: _ => makeHighScore(g_stateObj.scoreId),
-		addLFunc: _ => makeHighScore(g_stateObj.scoreId),
 	} : {});
 
 	// ---------------------------------------------------
@@ -5534,7 +5534,6 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 6.5
 	createGeneralSetting(spriteList.autoPlay, `autoPlay`, g_settings.scoreDetails.length > 0 ? {
 		addRFunc: _ => makeHighScore(g_stateObj.scoreId),
-		addLFunc: _ => makeHighScore(g_stateObj.scoreId),
 	} : {});
 
 	// ---------------------------------------------------
@@ -5578,8 +5577,21 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 10.5  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
 		skipTerms: g_settings.adjustmentTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
-		unitName: g_lblNameObj.frame,
+		unitName: g_lblNameObj.frame, addRFunc: _ => viewAdjustment(),
 	});
+
+	const viewAdjustment = _ => {
+		if (g_headerObj.playbackRate !== 1) {
+			const adjustmentVal = isLocalMusicFile(g_stateObj.scoreId) ?
+				Math.round(g_stateObj.adjustment / g_headerObj.playbackRate) :
+				(g_stateObj.adjustment / g_headerObj.playbackRate).toFixed(1);
+			document.getElementById(`lnkAdjustment`).innerHTML = `${adjustmentVal}${g_lblNameObj.frame}`
+				+ `<span style="font-size:${g_limitObj.adjustmentViewOrgSiz}px"> (${g_stateObj.adjustment.toFixed(1)}${g_localStorage.adjustment === g_stateObj.adjustment ? '*' : ''})</span>`;
+			document.getElementById(`lnkAdjustment`).style.fontSize = `${g_limitObj.adjustmentViewSiz}px`;
+			document.getElementById(`lnkAdjustment`).style.lineHeight = `${g_limitObj.adjustmentLineHeight}px`;
+		}
+	};
+	viewAdjustment();
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
@@ -5635,7 +5647,7 @@ const createOptionWindow = _sprite => {
  * @param {object} _options
  */
 const createGeneralSetting = (_obj, _settingName, { unitName = ``,
-	skipTerms = fillArray(3, 1), hiddenBtn = false, addRFunc = _ => { }, addLFunc = _ => { },
+	skipTerms = fillArray(3, 1), hiddenBtn = false, addRFunc = _ => { }, addLFunc = addRFunc,
 	settingLabel = _settingName, displayName = g_currentPage, scLabel = ``, roundNum = 0, adjY = 0 } = {}) => {
 
 	const settingUpper = toCapitalize(_settingName);
@@ -5648,47 +5660,47 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 		multiAppend(_obj,
 			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
 				_ => {
-					setSetting(skipTerms[1], _settingName, unitName, roundNum);
-					addRFunc();
+					setSetting(skipTerms[1], _settingName, unitName, roundNum, { func: _ => addRFunc() });
 				}, {
 				cxtFunc: _ => {
-					setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum);
-					addLFunc();
+					setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum, { func: _ => addLFunc() });
 				}
 			}),
 
 			// 右回し・左回しボタン（外側）
-			makeMiniCssButton(linkId, `R`, 0, _ => {
-				setSetting(skipTerms[0], _settingName, unitName, roundNum);
-				addRFunc();
-			}),
-			makeMiniCssButton(linkId, `L`, 0, _ => {
-				setSetting(skipTerms[0] * (-1), _settingName, unitName, roundNum);
-				addLFunc();
-			}),
+			makeMiniCssButton(linkId, `R`, 0, _ =>
+				setSetting(skipTerms[0], _settingName, unitName, roundNum, { func: _ => addRFunc() })),
+			makeMiniCssButton(linkId, `L`, 0, _ =>
+				setSetting(skipTerms[0] * (-1), _settingName, unitName, roundNum, { func: _ => addLFunc() })),
 		);
 
 		// 右回し・左回しボタン（内側）
 		if (skipTerms[1] > 1) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RR`, 0, _ => setSetting(skipTerms[1], _settingName, unitName, roundNum)),
-				makeMiniCssButton(linkId, `LL`, 0, _ => setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum)),
+				makeMiniCssButton(linkId, `RR`, 0, _ =>
+					setSetting(skipTerms[1], _settingName, unitName, roundNum, { func: _ => addRFunc() })),
+				makeMiniCssButton(linkId, `LL`, 0, _ =>
+					setSetting(skipTerms[1] * (-1), _settingName, unitName, roundNum, { func: _ => addLFunc() })),
 			);
 		}
 
 		// 右回し・左回しボタン（最内側）
 		if (skipTerms[2] > 1) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `RRR`, 0, _ => setSetting(skipTerms[2], _settingName, unitName, roundNum), { dw: -g_limitObj.setMiniWidth / 2 }),
-				makeMiniCssButton(linkId, `LLL`, 0, _ => setSetting(skipTerms[2] * (-1), _settingName, unitName, roundNum), { dw: -g_limitObj.setMiniWidth / 2 }),
+				makeMiniCssButton(linkId, `RRR`, 0, _ =>
+					setSetting(skipTerms[2], _settingName, unitName, roundNum, { func: _ => addRFunc() })
+					, { dw: -g_limitObj.setMiniWidth / 2 }),
+				makeMiniCssButton(linkId, `LLL`, 0, _ =>
+					setSetting(skipTerms[2] * (-1), _settingName, unitName, roundNum, { func: _ => addLFunc() })
+					, { dw: -g_limitObj.setMiniWidth / 2 }),
 			);
 		}
 
 		// 右回し・左回しボタン（不可視）
 		if (hiddenBtn) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `HR`, 0, _ => setSetting(1, _settingName, unitName, roundNum), { visibility: `hidden` }),
-				makeMiniCssButton(linkId, `HL`, 0, _ => setSetting(-1, _settingName, unitName, roundNum), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `HR`, 0, _ => setSetting(1, _settingName, unitName, roundNum, { func: _ => addRFunc() }), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `HL`, 0, _ => setSetting(-1, _settingName, unitName, roundNum, { func: _ => addLFunc() }), { visibility: `hidden` }),
 			);
 		}
 
@@ -5731,7 +5743,7 @@ const getStgDetailName = _name => {
  * @param {string} _unitName
  * @param {number} _roundNum
  */
-const setSetting = (_scrollNum, _settingName, _unitName = ``, _roundNum = 0) => {
+const setSetting = (_scrollNum, _settingName, _unitName = ``, _roundNum = 0, { func = _ => true } = {}) => {
 	let settingNum = g_settings[`${_settingName}Num`];
 	const settingList = g_settings[`${_settingName}s`];
 	const settingMax = settingList.length - 1;
@@ -5752,6 +5764,7 @@ const setSetting = (_scrollNum, _settingName, _unitName = ``, _roundNum = 0) => 
 	g_settings[`${_settingName}Num`] = settingNum;
 	document.getElementById(`lnk${toCapitalize(_settingName)}`).textContent =
 		`${getStgDetailName(g_stateObj[_settingName])}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
+	func();
 };
 
 /**
@@ -6251,7 +6264,6 @@ const createSettingsDisplayWindow = _sprite => {
 	// 縦位置: 7.4
 	createGeneralSetting(spriteList.appearance, `appearance`, {
 		addRFunc: _ => dispAppearanceSlider(),
-		addLFunc: _ => dispAppearanceSlider(),
 	});
 
 	// Hidden+/Sudden+初期値用スライダー、ロックボタン
@@ -7751,10 +7763,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	obj.dummyArrowData = [];
 	obj.dummyFrzData = [];
 
-	// realAdjustment: 全体, intAdjustment: 整数値のみ(切り捨て), decimalAdjustment: 小数値のみ
+	// realAdjustment: 全体, intAdjustment: 整数値のみ(切り捨て、ファイル時のみ四捨五入), decimalAdjustment: 小数値のみ
 	const headerAdjustment = parseFloat(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
-	g_stateObj.realAdjustment = parseFloat(g_stateObj.adjustment) + headerAdjustment + _preblankFrame;
-	g_stateObj.intAdjustment = Math.floor(g_stateObj.realAdjustment);
+	g_stateObj.realAdjustment = (parseFloat(g_stateObj.adjustment) + headerAdjustment) / g_headerObj.playbackRate + _preblankFrame;
+	g_stateObj.intAdjustment = isLocalMusicFile(g_stateObj.scoreId) ?
+		Math.round(g_stateObj.realAdjustment) : Math.floor(g_stateObj.realAdjustment);
 	g_stateObj.decimalAdjustment = g_stateObj.realAdjustment - g_stateObj.intAdjustment;
 
 	const blankFrame = g_headerObj.blankFrame;
@@ -9404,7 +9417,8 @@ const mainInit = _ => {
 	}
 
 	// 曲名・アーティスト名、譜面名表示
-	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
+	const playbackView = (g_headerObj.playbackRate === 1 ? `` : ` [Rate:${g_headerObj.playbackRate}]`);
+	const musicTitle = (g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle) + playbackView;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
 	const shuffleName = (g_stateObj.shuffle !== C_FLG_OFF ? `: ${getStgDetailName(g_stateObj.shuffle)}` : ``);
@@ -11069,7 +11083,7 @@ const resultInit = _ => {
 		return result;
 	};
 	const bayesExVal = 6 * bayesFunc(0, diffLength) / (diffLength * (diffLength + 1) * (diffLength + 2));
-	const estimatedAdj = (diffLength <= 20 ? `` : Math.round((g_stateObj.adjustment - bayesExVal) * 10) / 10);
+	const estimatedAdj = (diffLength <= 20 ? `` : Math.round((g_stateObj.adjustment / g_headerObj.playbackRate - bayesExVal) * 10) / 10);
 
 	// 背景スプライトを作成
 	createMultipleSprite(`backResultSprite`, g_headerObj.backResultMaxDepth);
@@ -11114,12 +11128,13 @@ const resultInit = _ => {
 	}
 
 	// 曲名・オプション描画
-	const musicTitle = g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle;
+	const playbackView = (g_headerObj.playbackRate === 1 ? `` : ` [Rate:${g_headerObj.playbackRate}]`);
+	const musicTitle = (g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle) + playbackView;
 
-	const mTitleForView = [g_headerObj.musicTitleForView[0], g_headerObj.musicTitleForView[1] || ``];
+	const mTitleForView = [g_headerObj.musicTitleForView[0], (g_headerObj.musicTitleForView[1] || ``) + playbackView];
 	if (g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]] !== undefined) {
 		mTitleForView.forEach((mTitle, j) =>
-			mTitleForView[j] = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][j]);
+			mTitleForView[j] = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][j] + (j === 1 ? playbackView : ``));
 	}
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -11285,7 +11300,8 @@ const resultInit = _ => {
 		maxCombo: 0, fmaxCombo: 0, score: 0,
 	};
 
-	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && (g_stateObj.shuffle === C_FLG_OFF || (mirrorName !== `` && orgShuffleFlg)));
+	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && g_headerObj.playbackRate === 1 &&
+		(g_stateObj.shuffle === C_FLG_OFF || (mirrorName !== `` && orgShuffleFlg)));
 	if (highscoreCondition) {
 
 		// ハイスコア差分描画
