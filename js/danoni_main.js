@@ -43,6 +43,7 @@ const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) 
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
+const isLocalMusicFile = _scoreId => g_isFile && !listMatching(getMusicUrl(g_stateObj.scoreId), [`.js`, `.txt`], { suffix: `$` });
 
 window.onload = async () => {
 	g_loadObj.main = true;
@@ -5581,8 +5582,10 @@ const createOptionWindow = _sprite => {
 
 	const viewAdjustment = _ => {
 		if (g_headerObj.playbackRate !== 1) {
-			document.getElementById(`lnkAdjustment`).innerHTML =
-				`${(Math.round(g_stateObj.adjustment * 100 / g_headerObj.playbackRate) / 100).toFixed(1)}${g_lblNameObj.frame}`
+			const adjustmentVal = isLocalMusicFile(g_stateObj.scoreId) ?
+				Math.round(g_stateObj.adjustment / g_headerObj.playbackRate) :
+				(Math.round(g_stateObj.adjustment * 100 / g_headerObj.playbackRate) / 100).toFixed(1);
+			document.getElementById(`lnkAdjustment`).innerHTML = `${adjustmentVal}${g_lblNameObj.frame}`
 				+ `<span style="font-size:${g_limitObj.adjustmentViewOrgSiz}px"> (${g_stateObj.adjustment.toFixed(1)}${g_localStorage.adjustment === g_stateObj.adjustment ? '*' : ''})</span>`;
 			document.getElementById(`lnkAdjustment`).style.fontSize = `${g_limitObj.adjustmentViewSiz}px`;
 			document.getElementById(`lnkAdjustment`).style.lineHeight = `${g_limitObj.adjustmentLineHeight}px`;
@@ -7760,10 +7763,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	obj.dummyArrowData = [];
 	obj.dummyFrzData = [];
 
-	// realAdjustment: 全体, intAdjustment: 整数値のみ(切り捨て), decimalAdjustment: 小数値のみ
+	// realAdjustment: 全体, intAdjustment: 整数値のみ(切り捨て、ファイル時のみ四捨五入), decimalAdjustment: 小数値のみ
 	const headerAdjustment = parseFloat(g_headerObj.adjustment[g_stateObj.scoreId] || g_headerObj.adjustment[0]);
 	g_stateObj.realAdjustment = (parseFloat(g_stateObj.adjustment) + headerAdjustment) / g_headerObj.playbackRate + _preblankFrame;
-	g_stateObj.intAdjustment = Math.floor(g_stateObj.realAdjustment);
+	g_stateObj.intAdjustment = isLocalMusicFile(g_stateObj.scoreId) ?
+		Math.round(g_stateObj.realAdjustment) : Math.floor(g_stateObj.realAdjustment);
 	g_stateObj.decimalAdjustment = g_stateObj.realAdjustment - g_stateObj.intAdjustment;
 
 	const blankFrame = g_headerObj.blankFrame;
