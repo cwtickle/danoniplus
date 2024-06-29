@@ -30,6 +30,7 @@ const g_limitObj = {
     adjustment: 30,
     hitPosition: 50,
 
+    // playbackRate有効時のAdjustmentの設定値の文字サイズ、行幅
     adjustmentViewSiz: 14,
     adjustmentViewOrgSiz: 11,
     adjustmentLineHeight: 12,
