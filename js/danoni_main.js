@@ -1147,6 +1147,8 @@ const createColorObject2 = (_id,
 
 	style.maskImage = `url("${g_imgObj[charaStyle]}")`;
 	style.maskSize = `contain`;
+	style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
+	style.webkitMaskSize = `contain`;
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 	setAttrs(div, { color: rest.background ?? ``, type: charaStyle, cnt: 0, });
 
@@ -4163,6 +4165,7 @@ const titleInit = _ => {
 				font-family:${g_headerObj.titlefonts[0]};
 				background: ${titlegrds[0]};
 				background-clip: text;
+				-webkit-background-clip: text;
 				color: rgba(255,255,255,0.0);
 				${txtAnimations[0]}
 			" class="${g_headerObj.titleAnimationClass[0]}">
@@ -4175,6 +4178,7 @@ const titleInit = _ => {
 				font-family:${g_headerObj.titlefonts[1]};
 				background: ${titlegrds[1]};
 				background-clip: text;
+				-webkit-background-clip: text;
 				color: rgba(255,255,255,0.0);
 				${txtAnimations[1]}
 			" class="${g_headerObj.titleAnimationClass[1]}">
