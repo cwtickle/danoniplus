@@ -4,7 +4,7 @@
   本体cssファイル
 
   Created : 2018/10/08
-  Revised : 2024/05/18 (v36.4.1)
+  Revised : 2024/06/30 (v37.2.1)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -869,5 +869,6 @@ input[type="color"] {
 .result_Cleared,
 .result_Failed {
 	background-clip: text;
+	-webkit-background-clip: text;
 	color: rgba(255, 255, 255, 0.0);
 }
