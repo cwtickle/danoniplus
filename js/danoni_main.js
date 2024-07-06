@@ -8463,9 +8463,24 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	/** Motionの適用フレーム数 */
 	g_workObj.motionFrame = [];
 
-	const setNotes = (_j, _k, _data, _startPoint, _header, _frzFlg = false) => {
+	const setNotes = (_j, _k, _data, _startPoint, _header, _frzFlg = false, { initY, initBoostY, arrivalFrame, motionFrame } = {}) => {
 		if (_startPoint >= 0) {
-			g_workObj[`mk${_header}Arrow`][_startPoint]?.push(_j) || (g_workObj[`mk${_header}Arrow`][_startPoint] = [_j]);
+			const arrowAttrs = { pos: _j, initY, initBoostY, arrivalFrame, motionFrame };
+			if (g_workObj[`mk${_header}Arrow`][_startPoint] === undefined) {
+				g_workObj[`mk${_header}Arrow`][_startPoint] = [arrowAttrs];
+			} else {
+				let insertFlg = false;
+				for (let m = 0; m < g_workObj[`mk${_header}Arrow`][_startPoint].length; m++) {
+					if (arrowAttrs.arrivalFrame < g_workObj[`mk${_header}Arrow`][_startPoint][m].arrivalFrame) {
+						g_workObj[`mk${_header}Arrow`][_startPoint].splice(m, 0, arrowAttrs);
+						insertFlg = true;
+						break;
+					}
+				}
+				if (!insertFlg) {
+					g_workObj[`mk${_header}Arrow`][_startPoint].push(arrowAttrs);
+				}
+			}
 			if (_frzFlg) {
 				g_workObj[`mk${_header}Length`][_j][_k] = getFrzLength(_speedOnFrame, _data[_k], _data[_k + 1]);
 			}
@@ -8502,7 +8517,8 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		if (_frzFlg) {
 			g_workObj[`mk${camelHeader}Length`][_j] = [];
 		}
-		setNotes(_j, lastk, _data, startPoint[lastk], camelHeader, _frzFlg);
+		setNotes(_j, lastk, _data, startPoint[lastk], camelHeader, _frzFlg,
+			{ initY: tmpObj.startY, initBoostY: g_workObj.initBoostY[frmPrev], arrivalFrame: tmpObj.arrivalFrm, motionFrame: tmpObj.motionFrm });
 
 		// 矢印は1つずつ、フリーズアローは2つで1セット
 		for (let k = lastk - setcnt; k >= 0; k -= setcnt) {
@@ -8546,7 +8562,9 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			}
 
 			// 出現タイミングを保存
-			setNotes(_j, k, _data, startPoint[k], camelHeader, _frzFlg);
+			setNotes(_j, k, _data, startPoint[k], camelHeader, _frzFlg,
+				{ initY: tmpObj.startY, initBoostY: g_workObj.initBoostY[frmPrev], arrivalFrame: tmpObj.arrivalFrm, motionFrame: tmpObj.motionFrm }
+			);
 		}
 	};
 
@@ -8993,6 +9011,11 @@ const getArrowSettings = _ => {
 
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	g_headerObj.tuning = g_headerObj.creatorNames[g_stateObj.scoreId];
+
+	delete g_workObj.initY;
+	delete g_workObj.initBoostY;
+	delete g_workObj.arrivalFrame;
+	delete g_workObj.motionFrame;
 
 	g_workObj.stepX = [];
 	g_workObj.scrollDir = [];
@@ -10002,27 +10025,30 @@ const mainInit = _ => {
 
 	/**
 	 * 矢印生成
-	 * @param {number} _j 矢印の位置
+	 * @param {number} _attrs 矢印個別の属性
+	 *   (pos: 矢印種類, arrivalFrame: 到達フレーム数, initY: 初期表示位置, 
+	 *    initBoostY: Motion有効時の初期表示位置加算, motionFrame: アニメーション有効フレーム数)
 	 * @param {number} _arrowCnt 現在の判定矢印順
 	 * @param {string} _name 矢印名
 	 * @param {string} _color 矢印色
 	 * @param {string} _shadowColor 矢印塗りつぶし部分の色
 	 */
-	const makeArrow = (_j, _arrowCnt, _name, _color, _shadowColor) => {
+	const makeArrow = (_attrs, _arrowCnt, _name, _color, _shadowColor) => {
+		const _j = _attrs.pos;
 		const dividePos = g_workObj.dividePos[_j];
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 
 		const arrowName = `${_name}${_j}_${_arrowCnt}`;
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
-			(g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd +
-				g_workObj.initBoostY[g_scoreObj.frameNum] * g_workObj.boostDir) * g_workObj.scrollDir[_j];
+			(_attrs.initY * g_workObj.boostSpd +
+				_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 
 		const stepRoot = createEmptySprite(arrowSprite[dividePos], arrowName, {
 			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
 		});
 		g_attrObj[arrowName] = {
-			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
-			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
+			cnt: _attrs.arrivalFrame + 1,
+			boostCnt: _attrs.motionFrame,
 			boostSpd: g_workObj.boostSpd, dividePos: dividePos,
 			dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
 			prevY: firstPosY, y: firstPosY,
@@ -10032,7 +10058,7 @@ const mainInit = _ => {
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			stepRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
-			stepRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
+			stepRoot.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
 		}
 
 		// 内側塗りつぶし矢印は、下記の順で作成する。
@@ -10084,28 +10110,29 @@ const mainInit = _ => {
 
 	/**
 	 * フリーズアロー生成
-	 * @param {number} _j 
+	 * @param {number} _attrs 
 	 * @param {number} _arrowCnt 
 	 * @param {string} _name 
 	 * @param {string} _normalColor
 	 * @param {string} _barColor 
 	 * @param {string} _shadowColor
 	 */
-	const makeFrzArrow = (_j, _arrowCnt, _name, _normalColor, _barColor, _shadowColor) => {
+	const makeFrzArrow = (_attrs, _arrowCnt, _name, _normalColor, _barColor, _shadowColor) => {
+		const _j = _attrs.pos;
 		const dividePos = g_workObj.dividePos[_j];
 		const frzNo = `${_j}_${_arrowCnt}`;
 		const frzName = `${_name}${frzNo}`;
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
-			(g_workObj.initY[g_scoreObj.frameNum] * g_workObj.boostSpd +
-				g_workObj.initBoostY[g_scoreObj.frameNum] * g_workObj.boostDir) * g_workObj.scrollDir[_j];
+			(_attrs.initY * g_workObj.boostSpd +
+				_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
 
 		const frzRoot = createEmptySprite(arrowSprite[dividePos], frzName, {
 			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
 		});
 		g_attrObj[frzName] = {
-			cnt: g_workObj.arrivalFrame[g_scoreObj.frameNum] + 1,
-			boostCnt: g_workObj.motionFrame[g_scoreObj.frameNum],
+			cnt: _attrs.arrivalFrame + 1,
+			boostCnt: _attrs.motionFrame,
 			judgEndFlg: false, isMoving: true, frzBarLength: firstBarLength, keyUpFrame: 0,
 			boostSpd: g_workObj.boostSpd, dividePos: dividePos, dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
 			y: firstPosY, barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos, btmY: firstBarLength * g_workObj.scrollDir[_j],
@@ -10115,7 +10142,7 @@ const mainInit = _ => {
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
-			frzRoot.style.animationDuration = `${g_workObj.arrivalFrame[g_scoreObj.frameNum] / g_fps}s`;
+			frzRoot.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
 		}
 		let shadowColor = _shadowColor === `Default` ? _normalColor : _shadowColor;
 
@@ -10312,21 +10339,21 @@ const mainInit = _ => {
 
 		// ダミー矢印生成（背面に表示するため先に処理）
 		g_workObj.mkDummyArrow[currentFrame]?.forEach(data =>
-			makeArrow(data, ++dummyArrowCnts[data], `dummyArrow`, g_workObj.dummyArrowColors[data], g_workObj.dummyArrowShadowColors[data]));
+			makeArrow(data, ++dummyArrowCnts[data.pos], `dummyArrow`, g_workObj.dummyArrowColors[data.pos], g_workObj.dummyArrowShadowColors[data.pos]));
 
 		// 矢印生成
 		g_workObj.mkArrow[currentFrame]?.forEach(data =>
-			makeArrow(data, ++arrowCnts[data], `arrow`, g_workObj.arrowColors[data], g_workObj.arrowShadowColors[data]));
+			makeArrow(data, ++arrowCnts[data.pos], `arrow`, g_workObj.arrowColors[data.pos], g_workObj.arrowShadowColors[data.pos]));
 
 		// ダミーフリーズアロー生成
 		g_workObj.mkDummyFrzArrow[currentFrame]?.forEach(data =>
-			makeFrzArrow(data, ++dummyFrzCnts[data], `dummyFrz`, g_workObj.dummyFrzNormalColors[data],
-				g_workObj.dummyFrzNormalBarColors[data], g_workObj.dummyFrzNormalShadowColors[data]));
+			makeFrzArrow(data, ++dummyFrzCnts[data.pos], `dummyFrz`, g_workObj.dummyFrzNormalColors[data.pos],
+				g_workObj.dummyFrzNormalBarColors[data.pos], g_workObj.dummyFrzNormalShadowColors[data.pos]));
 
 		// フリーズアロー生成
 		g_workObj.mkFrzArrow[currentFrame]?.forEach(data =>
-			makeFrzArrow(data, ++frzCnts[data], `frz`, g_workObj.frzNormalColors[data],
-				g_workObj.frzNormalBarColors[data], g_workObj.frzNormalShadowColors[data]));
+			makeFrzArrow(data, ++frzCnts[data.pos], `frz`, g_workObj.frzNormalColors[data.pos],
+				g_workObj.frzNormalBarColors[data.pos], g_workObj.frzNormalShadowColors[data.pos]));
 
 		// 矢印・フリーズアロー移動＆消去
 		for (let j = 0; j < keyNum; j++) {
