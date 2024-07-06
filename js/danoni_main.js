@@ -10025,7 +10025,9 @@ const mainInit = _ => {
 
 	/**
 	 * 矢印生成
-	 * @param {number} _j 矢印の位置
+	 * @param {number} _attrs 矢印個別の属性
+	 *   (pos: 矢印種類, arrivalFrame: 到達フレーム数, initY: 初期表示位置, 
+	 *    initBoostY: Motion有効時の初期表示位置加算, motionFrame: アニメーション有効フレーム数)
 	 * @param {number} _arrowCnt 現在の判定矢印順
 	 * @param {string} _name 矢印名
 	 * @param {string} _color 矢印色
@@ -10108,7 +10110,7 @@ const mainInit = _ => {
 
 	/**
 	 * フリーズアロー生成
-	 * @param {number} _j 
+	 * @param {number} _attrs 
 	 * @param {number} _arrowCnt 
 	 * @param {string} _name 
 	 * @param {string} _normalColor
