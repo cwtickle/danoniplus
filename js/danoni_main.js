@@ -7516,7 +7516,7 @@ const loadingScoreInit = async () => {
 	g_allArrow = 0;
 	g_allFrz = 0;
 	g_scoreObj.arrowData.forEach(data => g_allArrow += data.length);
-	g_scoreObj.frzData.forEach(data => g_allFrz += data.length);
+	g_scoreObj.frzData.forEach(data => g_allFrz += Math.floor(data.length / 2) * 2);
 
 	// ライフ回復・ダメージ量の計算
 	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
