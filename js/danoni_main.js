@@ -2406,7 +2406,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	g_detailObj.maxDensity[_scoreId] = getMaxValIdxs(densityData, g_limitObj.densityMaxVals).flat();
 
 	g_detailObj.arrowCnt[_scoreId] = noteCnt.arrow.concat();
-	g_detailObj.frzCnt[_scoreId] = noteCnt.frz.concat();
+	g_detailObj.frzCnt[_scoreId] = noteCnt.frz.map((val, k) => _scoreObj.frzData[k].length % 2 === 0 ? val : val - 1);
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
 	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;
@@ -8496,6 +8496,9 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 		const camelHeader = toCapitalize(_header);
 		const setcnt = (_frzFlg ? 2 : 1);
+		if (_frzFlg && _data.length % 2 !== 0) {
+			_data.pop();
+		}
 
 		const startPoint = [];
 		let spdNext = Infinity;
