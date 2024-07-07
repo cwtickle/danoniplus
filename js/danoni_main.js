@@ -2406,7 +2406,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	g_detailObj.maxDensity[_scoreId] = getMaxValIdxs(densityData, g_limitObj.densityMaxVals).flat();
 
 	g_detailObj.arrowCnt[_scoreId] = noteCnt.arrow.concat();
-	g_detailObj.frzCnt[_scoreId] = noteCnt.frz.concat();
+	g_detailObj.frzCnt[_scoreId] = noteCnt.frz.map((val, k) => _scoreObj.frzData[k].length % 2 === 0 ? val : val - 0.5);
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
 	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;
@@ -4977,7 +4977,7 @@ const makeDifInfoLabels = _scoreId => {
 const makeDifInfo = _scoreId => {
 
 	const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
-	const frzCnts = sumData(g_detailObj.frzCnt[_scoreId]);
+	const frzCnts = sumData(g_detailObj.frzCnt[_scoreId].map(val => Math.floor(val)));
 	const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3.join(', ')})`);
 
 	if (document.getElementById(`lblTooldif`) === null) {
@@ -5010,6 +5010,9 @@ const makeDifInfo = _scoreId => {
 				if (maxVal !== minVal) {
 					array[j] = (val === minVal ? `<span class="settings_minArrowCnts">${val}</span>` :
 						(val === maxVal ? `<span class="settings_maxArrowCnts common_bold">${val}</span>` : val));
+				}
+				if (val - Math.floor(val) > 0) {
+					array[j] = `<span class="keyconfig_warning">${val}</span>`;
 				}
 			});
 			cntlistStr += array.join(`, `) + ` ]`;
@@ -7513,7 +7516,7 @@ const loadingScoreInit = async () => {
 	g_allArrow = 0;
 	g_allFrz = 0;
 	g_scoreObj.arrowData.forEach(data => g_allArrow += data.length);
-	g_scoreObj.frzData.forEach(data => g_allFrz += data.length);
+	g_scoreObj.frzData.forEach(data => g_allFrz += Math.floor(data.length / 2) * 2);
 
 	// ライフ回復・ダメージ量の計算
 	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
@@ -8496,6 +8499,9 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 
 		const camelHeader = toCapitalize(_header);
 		const setcnt = (_frzFlg ? 2 : 1);
+		if (_frzFlg && _data.length % 2 !== 0) {
+			_data.pop();
+		}
 
 		const startPoint = [];
 		let spdNext = Infinity;
