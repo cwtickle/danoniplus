@@ -476,7 +476,7 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
  */
 const replaceStr = (_str, _pairs) => {
 	let tmpStr = _str;
-	_pairs.forEach(pair => tmpStr = tmpStr?.replaceAll(pair[0], pair[1]));
+	_pairs.forEach(pair => tmpStr = tmpStr?.replaceAll(String(pair[0]), String(pair[1]).replaceAll(`$&`, `$ &`)));
 	return tmpStr;
 };
 
