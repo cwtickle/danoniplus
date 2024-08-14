@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/05/18
+ * Revised : 2024/08/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.4.12`;
-const g_revisedDate = `2024/05/18`;
+const g_version = `Ver 29.4.13`;
+const g_revisedDate = `2024/08/14`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -384,9 +384,9 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
  * @param {array} _pairs 
  */
 const replaceStr = (_str, _pairs) => {
-	let tmpStr = _str;
+	let tmpStr = _str || ``;
 	_pairs.forEach(pair => {
-		tmpStr = tmpStr.replaceAll(pair[0], pair[1]);
+		tmpStr = tmpStr.split(pair[0]).join(pair[1]);
 	});
 	return tmpStr;
 };
