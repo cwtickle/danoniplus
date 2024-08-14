@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/07/07
+ * Revised : 2024/08/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 37.3.1`;
-const g_revisedDate = `2024/07/07`;
+const g_version = `Ver 37.4.0`;
+const g_revisedDate = `2024/08/14`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -475,8 +475,8 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
  * @param {array} _pairs 
  */
 const replaceStr = (_str, _pairs) => {
-	let tmpStr = _str;
-	_pairs.forEach(pair => tmpStr = tmpStr?.replaceAll(pair[0], pair[1]));
+	let tmpStr = _str || ``;
+	_pairs.forEach(pair => tmpStr = tmpStr.split(pair[0]).join(pair[1]));
 	return tmpStr;
 };
 
@@ -494,10 +494,16 @@ const escapeHtml = (_str, _escapeList = g_escapeStr.escape) => escapeHtmlForEnab
 const escapeHtmlForEnabledTag = _str => replaceStr(_str, g_escapeStr.escapeTag);
 
 /**
+ * HTML Entityから元の文字に戻す
+ * @param {string} _str 
+ */
+const unEscapeEmoji = _str => _str?.replace(/&#(.*?);/g, (_, p1) => String.fromCodePoint(`0${p1}`));
+
+/**
  * エスケープ文字を元の文字に戻す
  * @param {string} _str 
  */
-const unEscapeHtml = _str => replaceStr(_str, g_escapeStr.unEscapeTag);
+const unEscapeHtml = _str => unEscapeEmoji(replaceStr(_str, g_escapeStr.unEscapeTag));
 
 /**
  * 配列の中身を全てエスケープ処理

@@ -19,6 +19,7 @@
 |natu||[@natu_ame_](https://twitter.com/natu_ame_)|機能提案|
 |SKB|[@superkuppabros](https://github.com/superkuppabros)|[@superkuppabros](https://twitter.com/superkuppabros)|機能提案、不具合報告、関連ツール作成|
 |Tarwil||[@Tarwil1503](https://twitter.com/Tarwil1503)|コーディング、機能提案|
+|zaql0|||不具合報告|
 |蒼宮野あいすかぁびぃ４号||[@icekirby4](https://twitter.com/icekirby4)|機能提案|
 |さつき|[@satsukizzz](https://github.com/satsukizzz)|[@satsukizzz](https://twitter.com/satsukizzz)|機能提案、不具合報告|
 |ショウタ||[@sssyouta](https://twitter.com/sssyouta)|機能提案、不具合報告|
