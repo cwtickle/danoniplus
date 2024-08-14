@@ -476,7 +476,7 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
  */
 const replaceStr = (_str, _pairs) => {
 	let tmpStr = _str;
-	_pairs.forEach(pair => tmpStr = tmpStr?.replaceAll(pair[0], pair[1]));
+	_pairs.forEach(pair => tmpStr = tmpStr?.replaceAll(pair[0], String(pair[1]).replaceAll(`$&`, `$ &`)));
 	return tmpStr;
 };
 
@@ -494,10 +494,16 @@ const escapeHtml = (_str, _escapeList = g_escapeStr.escape) => escapeHtmlForEnab
 const escapeHtmlForEnabledTag = _str => replaceStr(_str, g_escapeStr.escapeTag);
 
 /**
+ * HTML Entityから元の文字に戻す
+ * @param {string} _str 
+ */
+const unEscapeEmoji = _str => _str?.replace(/&#(.*?);/g, (_, p1) => String.fromCodePoint(`0${p1}`));
+
+/**
  * エスケープ文字を元の文字に戻す
  * @param {string} _str 
  */
-const unEscapeHtml = _str => replaceStr(_str, g_escapeStr.unEscapeTag);
+const unEscapeHtml = _str => unEscapeEmoji(replaceStr(_str, g_escapeStr.unEscapeTag));
 
 /**
  * 配列の中身を全てエスケープ処理
