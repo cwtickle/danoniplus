@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/08/14
+ * Revised : 2024/09/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 37.4.0`;
-const g_revisedDate = `2024/08/14`;
+const g_version = `Ver 37.5.0`;
+const g_revisedDate = `2024/09/04`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -5797,7 +5797,7 @@ const makeDisabledLabel = (_id, _heightPos, _defaultStr) =>
  * @param {string} _extraKeyName 特殊キー名(通常キーは省略)
  */
 const getKeyReverse = (_localStorage, _extraKeyName = ``) => {
-	if (_localStorage[`reverse${_extraKeyName}`] !== undefined) {
+	if (_localStorage[`reverse${_extraKeyName}`] !== undefined && g_headerObj.reverseUse) {
 		g_stateObj.reverse = _localStorage[`reverse${_extraKeyName}`] ?? C_FLG_OFF;
 		g_settings.reverseNum = roundZero(g_settings.reverses.findIndex(reverse => reverse === g_stateObj.reverse));
 	} else {
@@ -5814,7 +5814,7 @@ const setReverseDefault = _ => {
 };
 
 const setReverse = _btn => {
-	if (!g_settings.scrolls.includes(`Reverse`)) {
+	if (!g_settings.scrolls.includes(`Reverse`) && g_headerObj.reverseUse) {
 		g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
 		g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
 		setReverseView(_btn);
@@ -5824,7 +5824,7 @@ const setReverse = _btn => {
 const setReverseView = _btn => {
 	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
 		g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
-	if (!g_settings.scrolls.includes(`Reverse`)) {
+	if (!g_settings.scrolls.includes(`Reverse`) && g_headerObj.reverseUse) {
 		_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
 	} else {
 		_btn.textContent = `X`;
@@ -9141,7 +9141,9 @@ const getArrowSettings = _ => {
 			storageObj = g_localStorage;
 			addKey = g_keyObj.currentKey;
 		}
-		storageObj[`reverse${addKey}`] = g_stateObj.reverse;
+		if (g_headerObj.reverseUse) {
+			storageObj[`reverse${addKey}`] = g_stateObj.reverse;
+		}
 		storageObj[`keyCtrl${addKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 		if (g_keyObj.currentPtn !== -1) {
 			storageObj[`keyCtrlPtn${addKey}`] = g_keyObj.currentPtn;

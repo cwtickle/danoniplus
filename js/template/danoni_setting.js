@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2024/01/28 (v35.0.0)
+ * Template Update: 2024/09/04 (v37.5.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -226,6 +226,7 @@ g_presetObj.customDesignUse = {
 g_presetObj.settingUse = {
 	motion: `true`,
 	scroll: `true`,
+	// reverse: `true`,
 	shuffle: `true`,
 	autoPlay: `true`,
 	gauge: `true`,

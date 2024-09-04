@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/08/14 (v37.4.0)
+ * Revised : 2024/09/04 (v37.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1084,7 +1084,7 @@ let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosi
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
     `d_score`, `d_musicinfo`, `d_filterline`];
 
-let g_canDisabledSettings = [`motion`, `scroll`, `shuffle`, `autoPlay`, `gauge`, `excessive`, `appearance`];
+let g_canDisabledSettings = [`motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`, `excessive`, `appearance`];
 
 const g_hidSudFunc = {
     filterPos: _filterPos => `${_filterPos}${g_lblNameObj.percent}`,
@@ -1960,6 +1960,7 @@ const g_keyObj = {
     // ColorGroup - 2
     color9A_0_1: [0, 0, 3, 0, 2, 0, 0, 3, 0],
     color9B_0_1: [4, 3, 1, 0, 2, 0, 1, 3, 4],
+    color13_0_1: [4, 4, 3, 4, 0, 0, 3, 0, 2, 0, 0, 3, 0],
     color17_0_1: [0, 1, 0, 1, 0, 1, 0, 1, 2, 3, 4, 3, 4, 3, 4, 3, 4],
 
     color9B_1_1: [0, 0, 1, 0, 2, 0, 0, 1, 0],
