@@ -226,6 +226,7 @@ g_presetObj.customDesignUse = {
 g_presetObj.settingUse = {
 	motion: `true`,
 	scroll: `true`,
+	// reverse: `true`,
 	shuffle: `true`,
 	autoPlay: `true`,
 	gauge: `true`,
