@@ -3661,15 +3661,16 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 /**
  * キー名の取得
  * @param {string} _key
+ * @returns キー名
  */
-const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyName${_key}`] : _key;
+const getKeyName = _key => g_keyObj[`keyName${_key}`]?.[0] ?? _key;
 
 /**
  * キー単位名の取得
  * @param {string} _key 
  * @returns キー単位名(デフォルト: key)
  */
-const getKeyUnitName = _key => g_keyObj[`keyUnitName${_key}`] ?? `key`;
+const getKeyUnitName = _key => g_keyObj[`keyName${_key}`]?.[1] ?? `key`;
 
 /**
  * KeyBoardEvent.code の値をCW Edition用のキーコードに変換
@@ -3963,10 +3964,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		const dfPtnNum = g_keyObj.dfPtnNum;
 
 		// キーの名前 (keyNameX)
-		g_keyObj[`keyName${newKey}`] = _dosObj[`keyName${newKey}`] ?? newKey;
-
-		// キーの単位の名前 (keyUnitNameX)
-		g_keyObj[`keyUnitName${newKey}`] = _dosObj[`keyUnitName${newKey}`] ?? `key`;
+		g_keyObj[`keyName${newKey}`] = _dosObj[`keyName${newKey}`]?.split(`,`) ?? [newKey, `key`];
 
 		// キーの最小横幅 (minWidthX)
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
