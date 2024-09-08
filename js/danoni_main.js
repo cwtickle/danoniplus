@@ -3668,7 +3668,7 @@ const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyNam
  * キー単位名の取得
  * @param {string} _key 
  */
-const getKeyUnitName = _key => hasVal(g_keyObj[`keyUnitName${_key}`]) ? g_keyObj[`keyUnitName${_key}`] : `key`;
+const getKeyUnitName = _key => g_keyObj[`keyUnitName${_key}`] ?? `key`;
 
 /**
  * KeyBoardEvent.code の値をCW Edition用のキーコードに変換
