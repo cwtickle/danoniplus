@@ -3665,6 +3665,12 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyName${_key}`] : _key;
 
 /**
+ * キー単位名の取得
+ * @param {string} _key 
+ */
+const getKeyUnitName = _key => hasVal(g_keyObj[`keyUnitName${_key}`]) ? g_keyObj[`keyUnitName${_key}`] : `key`;
+
+/**
  * KeyBoardEvent.code の値をCW Edition用のキーコードに変換
  * 簡略指定ができるように、以下の記述を許容
  * 例) KeyD -> D, ArrowDown -> Down, AltLeft -> Alt
@@ -3957,6 +3963,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 		// キーの名前 (keyNameX)
 		g_keyObj[`keyName${newKey}`] = _dosObj[`keyName${newKey}`] ?? newKey;
+
+		// キーの単位の名前 (keyUnitNameX)
+		g_keyObj[`keyUnitName${newKey}`] = _dosObj[`keyUnitName${newKey}`] ?? `key`;
 
 		// キーの最小横幅 (minWidthX)
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
@@ -4619,7 +4628,8 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			x: 0, y: 27, w: g_limitObj.difCoverWidth, h: 16, siz: 12, fontWeight: `bold`,
 		}));
 	}
-	lblDifCnt.innerHTML = `${_targetKey === '' ? 'ALL' : _targetKey + 'k'}: ${curk === -1 ? '-' : curk + 1} / ${k}`;
+	const keyUnitAbbName = getKeyUnitName(_targetKey).slice(0, 1) ?? ``;
+	lblDifCnt.innerHTML = `${_targetKey === '' ? 'ALL' : getKeyName(_targetKey) + keyUnitAbbName}: ${curk === -1 ? '-' : curk + 1} / ${k}`;
 	_difList.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(_difList.style.height), 0);
 };
 
@@ -4676,7 +4686,7 @@ const createDifWindow = (_key = ``) => {
 	let pos = 0;
 	g_headerObj.viewKeyLists.forEach((targetKey, m) => {
 		difFilter.appendChild(
-			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName('key')}`, m, _ => {
+			makeDifLblCssButton(`keyFilter${m}`, `${getKeyName(targetKey)} ${getStgDetailName(getKeyUnitName(targetKey))}`, m, _ => {
 				resetDifWindow();
 				g_stateObj.filterKeys = targetKey;
 				createDifWindow(targetKey);
@@ -5295,7 +5305,8 @@ const setDifficulty = (_initFlg) => {
 
 	// 譜面名設定 (Difficulty)
 	const difWidth = parseFloat(lnkDifficulty.style.width);
-	const difNames = [`${getKeyName(g_keyObj.currentKey)} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
+	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
+	const difNames = [`${getKeyName(g_keyObj.currentKey)} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
 	lnkDifficulty.style.fontSize = wUnit(getFontSize(difNames[0], difWidth, getBasicFont(), g_limitObj.setLblSiz));
 
 	if (g_headerObj.makerView) {
@@ -11196,8 +11207,9 @@ const resultInit = _ => {
 	const withOptions = (_flg, _defaultSet, _displayText = _flg) =>
 		(_flg !== _defaultSet ? getStgDetailName(_displayText) : ``);
 
+	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
 	const difDatas = [
-		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} ${getStgDetailName('key')} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
+		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
 		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${shuffleName}]`)}`
@@ -11451,7 +11463,8 @@ const resultInit = _ => {
 	// X (Twitter)用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
 	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
-	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
+	const keyUnitAbbName = keyUnitName.slice(0, 1) ?? ``;
+	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName}${getStgDetailName(keyUnitAbbName + '-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${shuffleName}`;
 	}
