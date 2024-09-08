@@ -3667,6 +3667,7 @@ const getKeyName = _key => hasVal(g_keyObj[`keyName${_key}`]) ? g_keyObj[`keyNam
 /**
  * キー単位名の取得
  * @param {string} _key 
+ * @returns キー単位名(デフォルト: key)
  */
 const getKeyUnitName = _key => g_keyObj[`keyUnitName${_key}`] ?? `key`;
 
@@ -4628,7 +4629,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			x: 0, y: 27, w: g_limitObj.difCoverWidth, h: 16, siz: 12, fontWeight: `bold`,
 		}));
 	}
-	const keyUnitAbbName = getKeyUnitName(_targetKey).slice(0, 1) ?? ``;
+	const keyUnitAbbName = getKeyUnitName(_targetKey).slice(0, 1) || ``;
 	lblDifCnt.innerHTML = `${_targetKey === '' ? 'ALL' : getKeyName(_targetKey) + keyUnitAbbName}: ${curk === -1 ? '-' : curk + 1} / ${k}`;
 	_difList.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(_difList.style.height), 0);
 };
@@ -11463,7 +11464,7 @@ const resultInit = _ => {
 	// X (Twitter)用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
 	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
-	const keyUnitAbbName = keyUnitName.slice(0, 1) ?? ``;
+	const keyUnitAbbName = keyUnitName.slice(0, 1) || ``;
 	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName}${getStgDetailName(keyUnitAbbName + '-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${shuffleName}`;
