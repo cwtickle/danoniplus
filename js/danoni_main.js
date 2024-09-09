@@ -4627,7 +4627,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			x: 0, y: 27, w: g_limitObj.difCoverWidth, h: 16, siz: 12, fontWeight: `bold`,
 		}));
 	}
-	const keyUnitAbbName = getKeyUnitName(_targetKey).slice(0, 1) || ``;
+	const keyUnitAbbName = getStgDetailName(getKeyUnitName(_targetKey)).slice(0, 1) || ``;
 	lblDifCnt.innerHTML = `${_targetKey === '' ? 'ALL' : getKeyName(_targetKey) + keyUnitAbbName}: ${curk === -1 ? '-' : curk + 1} / ${k}`;
 	_difList.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(_difList.style.height), 0);
 };
