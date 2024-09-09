@@ -3661,16 +3661,16 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 /**
  * キー名の取得
  * @param {string} _key
- * @returns キー名
+ * @returns {string} キー名
  */
-const getKeyName = _key => g_keyObj[`keyName${_key}`]?.[0] ?? _key;
+const getKeyName = _key => unEscapeHtml(escapeHtml(g_keyObj[`keyName${_key}`]?.[0] ?? _key));
 
 /**
  * キー単位名の取得
  * @param {string} _key 
- * @returns キー単位名(デフォルト: key)
+ * @returns {string} キー単位名(デフォルト: key)
  */
-const getKeyUnitName = _key => g_keyObj[`keyName${_key}`]?.[1] ?? `key`;
+const getKeyUnitName = _key => unEscapeHtml(escapeHtml(g_keyObj[`keyName${_key}`]?.[1] ?? `key`));
 
 /**
  * KeyBoardEvent.code の値をCW Edition用のキーコードに変換
