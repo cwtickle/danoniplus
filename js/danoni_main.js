@@ -4627,6 +4627,8 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			x: 0, y: 27, w: g_limitObj.difCoverWidth, h: 16, siz: 12, fontWeight: `bold`,
 		}));
 	}
+	// フィルタなし> ALL: 1/ 5, フィルタあり> 7k: 1/ 1 のように現在位置と(フィルタされた)譜面数を表示
+	// 現在位置が不確定の場合は、7k: -/ 1 のように現在位置を「-」で表示
 	const keyUnitAbbName = getStgDetailName(getKeyUnitName(_targetKey)).slice(0, 1) || ``;
 	lblDifCnt.innerHTML = `${_targetKey === '' ? 'ALL' : getKeyName(_targetKey) + keyUnitAbbName}: ${curk === -1 ? '-' : curk + 1} / ${k}`;
 	_difList.scrollTop = Math.max(pos * g_limitObj.setLblHeight - parseInt(_difList.style.height), 0);
@@ -11206,6 +11208,7 @@ const resultInit = _ => {
 	const withOptions = (_flg, _defaultSet, _displayText = _flg) =>
 		(_flg !== _defaultSet ? getStgDetailName(_displayText) : ``);
 
+	// 譜面名の組み立て処理 (Ex: 9Akey / Normal-Leftless (maker) [X-Mirror])
 	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
 	const difDatas = [
 		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
@@ -11216,6 +11219,7 @@ const resultInit = _ => {
 	let difData = difDatas.filter(value => value !== ``).join(` `);
 	const difDataForImage = difDatas.filter((value, j) => value !== `` && j !== 2).join(` `);
 
+	// 設定の組み立て処理 (Ex: 4x, Brake, Reverse, Sudden+, NoRecovery)
 	let playStyleData = [
 		`${g_stateObj.speed}${g_lblNameObj.multi}`,
 		`${withOptions(g_stateObj.motion, C_FLG_OFF)}`,
@@ -11225,6 +11229,7 @@ const resultInit = _ => {
 		`${withOptions(g_stateObj.gauge, g_settings.gauges[0])}`
 	].filter(value => value !== ``).join(`, `);
 
+	// Display設定の組み立て処理 (Ex: Step : FlatBar, Judge, Life : OFF)
 	let displayData = [
 		withOptions(g_stateObj.d_stepzone, C_FLG_ON, g_lblNameObj.rd_StepZone +
 			`${g_stateObj.d_stepzone === C_FLG_OFF ? `` : ` : ${g_stateObj.d_stepzone}`}`),
