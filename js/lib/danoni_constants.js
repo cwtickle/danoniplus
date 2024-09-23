@@ -163,7 +163,7 @@ const g_windowObj = {
 const g_lblPosObj = {};
 
 // 可変部分のウィンドウサイズを更新
-const updateWindowSiz = (_) => {
+const updateWindowSiz = () => {
   Object.assign(g_windowObj, {
     optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
     difList: {
@@ -755,14 +755,14 @@ const updateWindowSiz = (_) => {
 
 // ウィンドウ位置
 const g_windowAlign = {
-  left: (_) => {
+  left: () => {
     $id(`canvas-frame`).marginLeft = `0px`;
     $id(`canvas-frame`).marginRight = `auto`;
   },
-  center: (_) => {
+  center: () => {
     $id(`canvas-frame`).margin = `auto`;
   },
-  right: (_) => {
+  right: () => {
     $id(`canvas-frame`).marginLeft = `auto`;
     $id(`canvas-frame`).marginRight = `0px`;
   },
@@ -852,7 +852,7 @@ const resetImgs = (_baseDir = ``, _exp = `svg`) => {
   }
 };
 
-const reloadImgObj = (_) => {
+const reloadImgObj = () => {
   g_imgObj.arrow = C_IMG_ARROW;
   g_imgObj.arrowShadow = C_IMG_ARROWSD;
   g_imgObj.onigiri = C_IMG_ONIGIRI;
@@ -1484,16 +1484,16 @@ g_settings.opacityNum = g_settings.opacitys.length - 1;
  * 設定画面間移動
  */
 const g_jumpSettingWindow = {
-  option: (_) => settingsDisplayInit(),
-  difSelector: (_) => settingsDisplayInit(),
-  settingsDisplay: (_) => optionInit(),
+  option: () => settingsDisplayInit(),
+  difSelector: () => settingsDisplayInit(),
+  settingsDisplay: () => optionInit(),
 };
 
 /**
  * シャッフル適用関数
  */
 const g_shuffleFunc = {
-  OFF: (_) => true,
+  OFF: () => true,
   Mirror: (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup),
   "X-Mirror": (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup, true),
   Turning: (keyNum, shuffleGroup) => applyTurning(keyNum, shuffleGroup),
@@ -1609,7 +1609,7 @@ let g_canDisabledSettings = [
 
 const g_hidSudFunc = {
   filterPos: (_filterPos) => `${_filterPos}${g_lblNameObj.percent}`,
-  range: (_) => `${Math.round(g_posObj.arrowHeight - g_posObj.stepY)}px`,
+  range: () => `${Math.round(g_posObj.arrowHeight - g_posObj.stepY)}px`,
   hidden: (_filterPos) =>
     `${Math.min(
       Math.round((g_posObj.arrowHeight * (100 - _filterPos)) / 100),
@@ -1654,8 +1654,8 @@ const g_hidSudObj = {
     "Hid&Sud+": { OFF: 1, ON: 0 },
   },
   distH: {
-    Visible: (_) => ``,
-    Hidden: (_) =>
+    Visible: () => ``,
+    Hidden: () =>
       `${g_hidSudFunc.filterPos(50)} (${g_hidSudFunc.hidden(
         50
       )} / ${g_hidSudFunc.range()})`,
@@ -1663,7 +1663,7 @@ const g_hidSudObj = {
       `${g_hidSudFunc.filterPos(_filterPos)} (${g_hidSudFunc.hidden(
         _filterPos
       )} / ${g_hidSudFunc.range()})`,
-    Sudden: (_) =>
+    Sudden: () =>
       `${g_hidSudFunc.filterPos(40)} (${g_hidSudFunc.sudden(
         40
       )} / ${g_hidSudFunc.range()})`,
@@ -5067,14 +5067,14 @@ const g_skinJsObj = {
 };
 
 /** 過去関数の互換 */
-const convertreplaceNums = (_) => convertReplaceNums();
-const MainInit = (_) => mainInit();
+const convertreplaceNums = () => convertReplaceNums();
+const MainInit = () => mainInit();
 
 /**
  * 従来のカスタム関数をg_customJsObj, g_skinJsObjへ追加
  * - customjsファイルを読み込んだ直後にこの関数を呼び出している
  */
-const loadLegacyCustomFunc = (_) => {
+const loadLegacyCustomFunc = () => {
   // タイトル
   if (typeof customTitleInit === C_TYP_FUNCTION) {
     g_customJsObj.title.push(customTitleInit);
@@ -5271,7 +5271,7 @@ const loadLegacyCustomFunc = (_) => {
  * 従来の共通設定変数をg_presetObjへ移動
  * - settingjsファイルを読み込んだ直後にこの関数を呼び出している
  */
-const loadLegacySettingFunc = (_) => {
+const loadLegacySettingFunc = () => {
   if (typeof g_presetTuning === C_TYP_STRING) {
     g_presetObj.tuning = g_presetTuning;
   }

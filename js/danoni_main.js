@@ -29,7 +29,7 @@ let g_localVersion2 = ``;
  *  clearWindow()で[divRoot]以外の全てのスプライトを削除。
  *  特定のスプライトに限り削除する場合は deleteChildspriteAll() 。
  */
-const current = (_) => {
+const current = () => {
   if (document.currentScript) {
     return document.currentScript.src;
   }
@@ -734,13 +734,13 @@ const createScTextCommon = (_displayName) =>
  */
 const setShortcutEvent = (
   _displayName,
-  _func = (_) => true,
+  _func = () => true,
   { displayFlg = true, dfEvtFlg = false } = {}
 ) => {
   if (displayFlg) {
     createScTextCommon(_displayName);
   }
-  const evList = (_) => {
+  const evList = () => {
     document.onkeydown = (evt) =>
       commonKeyDown(evt, _displayName, _func, dfEvtFlg);
     document.onkeyup = (evt) => commonKeyUp(evt);
@@ -748,7 +748,7 @@ const setShortcutEvent = (
   if (g_initialFlg && g_btnWaitFrame[_displayName].initial) {
     evList();
   } else {
-    setTimeout((_) => {
+    setTimeout(() => {
       if (g_currentPage === _displayName) {
         evList();
       }
@@ -824,7 +824,7 @@ const loadScript2 = (_url, _requiredFlg = true, _charset = `UTF-8`) => {
     script.type = `text/javascript`;
     script.src = _url;
     script.charset = _charset;
-    script.onload = (_) => {
+    script.onload = () => {
       g_loadObj[baseUrl] = true;
       resolve(script);
     };
@@ -858,11 +858,11 @@ const importCssFile2 = (_href, { crossOrigin = `anonymous` } = {}) => {
     if (!g_isFile) {
       link.crossOrigin = crossOrigin;
     }
-    link.onload = (_) => {
+    link.onload = () => {
       g_loadObj[baseUrl] = true;
       resolve(link);
     };
-    link.onerror = (_) => {
+    link.onerror = () => {
       makeWarningWindow(
         g_msgInfoObj.E_0041.split(`{0}`).join(getFullPath(baseUrl)),
         { resetFlg: `title` }
@@ -1404,7 +1404,7 @@ const createMultipleSprite = (_baseName, _num, { x = 0 } = {}) => {
  * - イベントリスナー作成時にリスナーキー(key)を発行する
  * - 削除時は発行したリスナーキーを指定して削除する
  */
-const g_handler = ((_) => {
+const g_handler = (() => {
   const events = {};
   let key = 0;
 
@@ -1464,7 +1464,7 @@ const deleteDiv = (_parentId, _idName) => {
 const createCss2Button = (
   _id,
   _text,
-  _func = (_) => true,
+  _func = () => true,
   {
     x = 0,
     y = g_sHeight - 100,
@@ -1475,8 +1475,8 @@ const createCss2Button = (
     title = ``,
     groupName = g_currentPage,
     initDisabledFlg = true,
-    resetFunc = (_) => true,
-    cxtFunc = (_) => true,
+    resetFunc = () => true,
+    cxtFunc = () => true,
     ...rest
   } = {},
   ..._classes
@@ -1500,7 +1500,7 @@ const createCss2Button = (
     } else {
       style.pointerEvents = C_DIS_NONE;
       setTimeout(
-        (_) => (style.pointerEvents = rest.pointerEvents ?? `auto`),
+        () => (style.pointerEvents = rest.pointerEvents ?? `auto`),
         (g_btnWaitFrame[groupName].b_frame * 1000) / g_fps
       );
     }
@@ -1590,8 +1590,8 @@ const getTitleDivLabel = (_id, _titlename, _x, _y, ..._classes) =>
 /**
  * キーコントロールの初期化
  */
-const resetKeyControl = (_) => {
-  document.onkeyup = (_) => {};
+const resetKeyControl = () => {
+  document.onkeyup = () => {};
   document.onkeydown = (evt) => {
     evt.preventDefault();
     return blockCode(transCode(evt));
@@ -1719,7 +1719,7 @@ const getCssCustomProperty = (_prop, _propData) =>
 /**
  * CSSカスタムプロパティの値をオブジェクトへ退避
  */
-const getCssCustomProperties = (_) => {
+const getCssCustomProperties = () => {
   try {
     const htmlStyle = document.documentElement.computedStyleMap();
     for (const [propertyName, value] of htmlStyle.entries()) {
@@ -2237,7 +2237,7 @@ const getQueryParamVal = (_name) => {
 /**
  * ローディング文字用ラベルの作成
  */
-const getLoadingLabel = (_) =>
+const getLoadingLabel = () =>
   createDivCss2Label(`lblLoading`, g_lblNameObj.nowLoading, {
     x: 0,
     y: g_sHeight - 40,
@@ -2490,7 +2490,7 @@ const initialControl = async () => {
 /**
  * 作品別ローカルストレージの読み込み・初期設定
  */
-const loadLocalStorage = (_) => {
+const loadLocalStorage = () => {
   // URLからscoreId, h(高さ)を削除
   const url = new URL(location.href);
   url.searchParams.delete(`scoreId`);
@@ -4598,7 +4598,7 @@ const keysConvert = (
     _key,
     _name,
     _convFunc,
-    { errCd = ``, baseCopyFlg = false, loopFunc = (_) => true } = {}
+    { errCd = ``, baseCopyFlg = false, loopFunc = () => true } = {}
   ) => {
     let tmpMinPatterns = 1;
     const keyheader = _name + _key;
@@ -4964,7 +4964,7 @@ const setKeyDfVal = (_ptnName) => {
 /**
  *  タイトル画面初期化
  */
-const titleInit = (_) => {
+const titleInit = () => {
   clearWindow(true);
   g_currentPage = `title`;
 
@@ -5167,11 +5167,11 @@ const titleInit = (_) => {
     createCss2Button(
       _id,
       _text,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj[_id], {
         siz: getLinkSiz(_text),
         whiteSpace: `normal`,
-        resetFunc: (_) => openLink(_url),
+        resetFunc: () => openLink(_url),
       }),
       g_cssObj.button_Default
     );
@@ -5184,12 +5184,12 @@ const titleInit = (_) => {
     createCss2Button(
       `btnStart`,
       g_lblNameObj.clickHere,
-      (_) => clearTimeout(g_timeoutEvtTitleId),
+      () => clearTimeout(g_timeoutEvtTitleId),
       {
         x: g_btnX(),
         w: g_btnWidth(),
         siz: g_limitObj.titleSiz,
-        resetFunc: (_) => optionInit(),
+        resetFunc: () => optionInit(),
       },
       g_cssObj.button_Start
     ),
@@ -5198,7 +5198,7 @@ const titleInit = (_) => {
     createCss2Button(
       `btnReset`,
       g_lblNameObj.dataReset,
-      (_) => {
+      () => {
         reloadFlg = false;
         if (window.confirm(g_msgObj.dataResetConfirm)) {
           g_localStorage = {
@@ -5214,7 +5214,7 @@ const titleInit = (_) => {
         }
       },
       Object.assign(g_lblPosObj.btnReset, {
-        resetFunc: (_) => {
+        resetFunc: () => {
           if (reloadFlg) {
             location.reload();
           }
@@ -5227,9 +5227,9 @@ const titleInit = (_) => {
     createCss2Button(
       `btnReload`,
       g_localeObj.val,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.btnReload, {
-        resetFunc: (_) => {
+        resetFunc: () => {
           g_localeObj.num = ++g_localeObj.num % g_localeObj.list.length;
           g_langStorage.locale = g_localeObj.list[g_localeObj.num];
           localStorage.setItem(`danoni-locale`, JSON.stringify(g_langStorage));
@@ -5243,9 +5243,9 @@ const titleInit = (_) => {
     createCss2Button(
       `btnHelp`,
       `?`,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.btnHelp, {
-        resetFunc: (_) => openLink(g_lblNameObj.helpUrl),
+        resetFunc: () => openLink(g_lblNameObj.helpUrl),
       }),
       g_cssObj.button_Setting
     ),
@@ -5268,7 +5268,7 @@ const titleInit = (_) => {
     createCss2Button(
       `lnkVersion`,
       versionName,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.lnkVersion, {
         siz: getFontSize(
           versionName,
@@ -5276,7 +5276,7 @@ const titleInit = (_) => {
           getBasicFont(),
           12
         ),
-        resetFunc: (_) => openLink(`https://github.com/cwtickle/danoniplus`),
+        resetFunc: () => openLink(`https://github.com/cwtickle/danoniplus`),
       }),
       g_cssObj.button_Tweet
     ),
@@ -5285,9 +5285,9 @@ const titleInit = (_) => {
     createCss2Button(
       `lnkComparison`,
       `&#x1f6e1;`,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.lnkComparison, {
-        resetFunc: (_) => openLink(g_lblNameObj.securityUrl),
+        resetFunc: () => openLink(g_lblNameObj.securityUrl),
       }),
       g_cssObj.button_Tweet
     )
@@ -5312,7 +5312,7 @@ const titleInit = (_) => {
         createCss2Button(
           `btnComment`,
           g_lblNameObj.comment,
-          (_) => {
+          () => {
             const lblCommentDef = lblComment.style.display;
             lblComment.style.display =
               lblCommentDef === C_DIS_NONE ? C_DIS_INHERIT : C_DIS_NONE;
@@ -5337,7 +5337,7 @@ const titleInit = (_) => {
   /**
    * タイトルのモーション設定
    */
-  const flowTitleTimeline = (_) => {
+  const flowTitleTimeline = () => {
     // ユーザカスタムイベント(フレーム毎)
     g_customJsObj.titleEnterFrame.forEach((func) => func());
 
@@ -5359,10 +5359,10 @@ const titleInit = (_) => {
   g_timeoutEvtTitleId = setTimeout(flowTitleTimeline, 1000 / g_fps);
 
   // キー操作イベント（デフォルト）
-  setShortcutEvent(g_currentPage, (_) => true, { dfEvtFlg: true });
+  setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
 
-  document.oncontextmenu = (_) => true;
-  divRoot.oncontextmenu = (_) => false;
+  document.oncontextmenu = () => true;
+  divRoot.oncontextmenu = () => false;
 
   g_skinJsObj.title.forEach((func) => func());
 };
@@ -5402,9 +5402,9 @@ const makeWarningWindow = (
       createCss2Button(
         `btnBack`,
         g_lblNameObj.b_back,
-        (_) => true,
+        () => true,
         {
-          resetFunc: (_) => titleInit(),
+          resetFunc: () => titleInit(),
         },
         g_cssObj.button_Back
       )
@@ -5524,10 +5524,10 @@ const commonSettingBtn = (_labelName) => {
     createCss2Button(
       `btnBack`,
       g_lblNameObj.b_back,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.btnBack, {
         animationName: g_initialFlg ? `` : `smallToNormalY`,
-        resetFunc: (_) => titleInit(),
+        resetFunc: () => titleInit(),
       }),
       g_cssObj.button_Back
     ),
@@ -5536,25 +5536,25 @@ const commonSettingBtn = (_labelName) => {
     createCss2Button(
       `btnKeyConfig`,
       g_lblNameObj.b_keyConfig,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.btnKeyConfig, {
         animationName: g_initialFlg ? `` : `smallToNormalY`,
-        resetFunc: (_) => keyConfigInit(`Main`),
+        resetFunc: () => keyConfigInit(`Main`),
       }),
       g_cssObj.button_Setting
     ),
 
     // プレイ開始
-    makePlayButton((_) => loadMusic()),
+    makePlayButton(() => loadMusic()),
 
     // Display設定へ移動
     createCss2Button(
       `btn${_labelName}`,
       `>`,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.btnSwitchSetting, {
         title: g_msgObj[`to${_labelName}`],
-        resetFunc: (_) => g_jumpSettingWindow[g_currentPage](),
+        resetFunc: () => g_jumpSettingWindow[g_currentPage](),
       }),
       g_cssObj.button_Mini
     ),
@@ -5581,7 +5581,7 @@ const makePlayButton = (_func) =>
   createCss2Button(
     `btnPlay`,
     g_lblNameObj.b_play,
-    (_) => true,
+    () => true,
     Object.assign(g_lblPosObj.btnPlay, {
       animationName: g_initialFlg ? `` : `smallToNormalY`,
       resetFunc: _func,
@@ -5592,7 +5592,7 @@ const makePlayButton = (_func) =>
 /**
  * 設定・オプション画面初期化
  */
-const optionInit = (_) => {
+const optionInit = () => {
   clearWindow(true);
   const divRoot = document.getElementById(`divRoot`);
   g_baseDisp = `Settings`;
@@ -5614,8 +5614,8 @@ const optionInit = (_) => {
   commonSettingBtn(`Display`);
 
   // キー操作イベント（デフォルト）
-  setShortcutEvent(g_currentPage, (_) => true, { dfEvtFlg: true });
-  document.oncontextmenu = (_) => true;
+  setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
+  document.oncontextmenu = () => true;
   g_initialFlg = true;
 
   g_skinJsObj.option.forEach((func) => func());
@@ -5672,14 +5672,14 @@ const inputSliderAppearance = (_slider, _link) => {
 /**
  * 譜面変更セレクターの削除
  */
-const resetDifWindow = (_) => {
+const resetDifWindow = () => {
   if (document.getElementById(`difList`) !== null) {
     deleteChildspriteAll(`difList`);
     [`difList`, `difCover`, `btnDifU`, `btnDifD`].forEach((obj) =>
       document.getElementById(obj).remove()
     );
     g_currentPage = `option`;
-    setShortcutEvent(g_currentPage, (_) => true, {
+    setShortcutEvent(g_currentPage, () => true, {
       displayFlg: false,
       dfEvtFlg: true,
     });
@@ -5734,7 +5734,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
           `dif${k}`,
           text,
           k,
-          (_) => nextDifficulty(j - g_stateObj.scoreId),
+          () => nextDifficulty(j - g_stateObj.scoreId),
           { btnStyle: j === g_stateObj.scoreId ? `Setting` : `Default` }
         )
       );
@@ -5779,7 +5779,7 @@ const makeDifBtn = (_scrollNum = 1) => {
   return createCss2Button(
     `btnDif${dir}`,
     g_settingBtnObj.chara[dir],
-    (_) => {
+    () => {
       do {
         g_stateObj.scoreId = getNextDifficulty(g_stateObj.scoreId, _scrollNum);
       } while (
@@ -5837,7 +5837,7 @@ const createDifWindow = (_key = ``) => {
       `difRandom`,
       `RANDOM`,
       0,
-      (_) => {
+      () => {
         nextDifficulty(
           Math.floor(Math.random() * g_headerObj.keyLabels.length)
         );
@@ -5852,7 +5852,7 @@ const createDifWindow = (_key = ``) => {
       `keyFilter`,
       `ALL`,
       1.9,
-      (_) => {
+      () => {
         resetDifWindow();
         g_stateObj.filterKeys = ``;
         createDifWindow();
@@ -5874,7 +5874,7 @@ const createDifWindow = (_key = ``) => {
           getKeyUnitName(targetKey)
         )}`,
         m,
-        (_) => {
+        () => {
           resetDifWindow();
           g_stateObj.filterKeys = targetKey;
           createDifWindow(targetKey);
@@ -6297,7 +6297,7 @@ const makeDifInfoLabels = (_scoreId) => {
       `lnkDifInfo`,
       g_lblNameObj.s_print,
       8,
-      (_) => {
+      () => {
         copyTextToClipboard(
           `****** ${g_lblNameObj.s_printTitle} [${g_version}] ******\r\n\r\n` +
             `\t${g_lblNameObj.s_printHeader}\r\n\r\n${printData}`,
@@ -6668,7 +6668,7 @@ const makeHighScore = (_scoreId) => {
         `lnkResetHighScore`,
         g_lblNameObj.s_resetResult,
         7,
-        (_) => {
+        () => {
           if (window.confirm(g_msgObj.highscResetConfirm)) {
             delete g_localStorage.highscores[scoreName];
             makeHighScore(_scoreId);
@@ -6680,7 +6680,7 @@ const makeHighScore = (_scoreId) => {
         `lnkHighScore`,
         g_lblNameObj.s_result,
         8,
-        (_) => {
+        () => {
           copyTextToClipboard(
             keyIsShift() ? resultCommon : resultText,
             g_msgInfoObj.I_0001
@@ -6966,11 +6966,11 @@ const createOptionWindow = (_sprite) => {
     `lnkDifficulty`,
     ``,
     0,
-    (_) => changeDifficulty(),
+    () => changeDifficulty(),
     {
       y: -10,
       h: g_limitObj.setLblHeight + 10,
-      cxtFunc: (_) => changeDifficulty(-1),
+      cxtFunc: () => changeDifficulty(-1),
     }
   );
 
@@ -6978,11 +6978,11 @@ const createOptionWindow = (_sprite) => {
   multiAppend(
     spriteList.difficulty,
     lnkDifficulty,
-    makeMiniCssButton(`lnkDifficulty`, `R`, 0, (_) => nextDifficulty(), {
+    makeMiniCssButton(`lnkDifficulty`, `R`, 0, () => nextDifficulty(), {
       dy: -10,
       dh: 10,
     }),
-    makeMiniCssButton(`lnkDifficulty`, `L`, 0, (_) => nextDifficulty(-1), {
+    makeMiniCssButton(`lnkDifficulty`, `L`, 0, () => nextDifficulty(-1), {
       dy: -10,
       dh: 10,
     })
@@ -7058,21 +7058,21 @@ const createOptionWindow = (_sprite) => {
       createCss2Button(
         `btnGraphB`,
         ``,
-        (_) => true,
+        () => true,
         {
           x: -25,
           y: -60,
           w: 0,
           h: 0,
           opacity: 0,
-          resetFunc: (_) => setScoreDetail(true),
+          resetFunc: () => setScoreDetail(true),
         },
         g_cssObj.button_Mini
       ),
       createCss2Button(
         `btnGraph`,
         `i`,
-        (_) => true,
+        () => true,
         {
           x: -25,
           y: -60,
@@ -7080,8 +7080,8 @@ const createOptionWindow = (_sprite) => {
           h: 30,
           siz: g_limitObj.jdgCharaSiz,
           title: g_msgObj.graph,
-          resetFunc: (_) => setScoreDetail(),
-          cxtFunc: (_) => setScoreDetail(),
+          resetFunc: () => setScoreDetail(),
+          cxtFunc: () => setScoreDetail(),
         },
         g_cssObj.button_Mini
       )
@@ -7141,7 +7141,7 @@ const createOptionWindow = (_sprite) => {
           `lnk${sd}G`,
           getStgDetailName(sd),
           j,
-          (_) => changeScoreDetail(j),
+          () => changeScoreDetail(j),
           {
             w: g_limitObj.difCoverWidth,
             h: 20,
@@ -7193,7 +7193,7 @@ const createOptionWindow = (_sprite) => {
   // リバース (Reverse) / スクロール (Scroll)
   // 縦位置: 4
   createGeneralSetting(spriteList.reverse, `reverse`, {
-    addRFunc: (_) => {
+    addRFunc: () => {
       if (g_headerObj.scrollUse && g_settings.scrolls.length > 1) {
         setReverseView(document.getElementById(`btnReverse`));
       }
@@ -7235,7 +7235,7 @@ const createOptionWindow = (_sprite) => {
     `shuffle`,
     g_settings.scoreDetails.length > 0
       ? {
-          addRFunc: (_) => makeHighScore(g_stateObj.scoreId),
+          addRFunc: () => makeHighScore(g_stateObj.scoreId),
         }
       : {}
   );
@@ -7248,7 +7248,7 @@ const createOptionWindow = (_sprite) => {
     `autoPlay`,
     g_settings.scoreDetails.length > 0
       ? {
-          addRFunc: (_) => makeHighScore(g_stateObj.scoreId),
+          addRFunc: () => makeHighScore(g_stateObj.scoreId),
         }
       : {}
   );
@@ -7266,11 +7266,11 @@ const createOptionWindow = (_sprite) => {
   if (g_headerObj.gaugeUse) {
     multiAppend(
       spriteList.gauge,
-      makeSettingLblCssButton(`lnkGauge`, ``, 0, (_) => setGauge(1), {
-        cxtFunc: (_) => setGauge(-1),
+      makeSettingLblCssButton(`lnkGauge`, ``, 0, () => setGauge(1), {
+        cxtFunc: () => setGauge(-1),
       }),
-      makeMiniCssButton(`lnkGauge`, `R`, 0, (_) => setGauge(1)),
-      makeMiniCssButton(`lnkGauge`, `L`, 0, (_) => setGauge(-1))
+      makeMiniCssButton(`lnkGauge`, `R`, 0, () => setGauge(1)),
+      makeMiniCssButton(`lnkGauge`, `L`, 0, () => setGauge(-1))
     );
     createScText(spriteList.gauge, `Gauge`);
   } else {
@@ -7319,10 +7319,10 @@ const createOptionWindow = (_sprite) => {
     scLabel: g_lblNameObj.sc_adjustment,
     roundNum: 5,
     unitName: g_lblNameObj.frame,
-    addRFunc: (_) => viewAdjustment(),
+    addRFunc: () => viewAdjustment(),
   });
 
-  const viewAdjustment = (_) => {
+  const viewAdjustment = () => {
     if (g_headerObj.playbackRate !== 1) {
       const adjustmentVal = isLocalMusicFile(g_stateObj.scoreId)
         ? Math.round(g_stateObj.adjustment / g_headerObj.playbackRate)
@@ -7367,8 +7367,8 @@ const createOptionWindow = (_sprite) => {
     spriteList.fadein,
 
     // 右回し・左回しボタン
-    makeMiniCssButton(`lnkFadein`, `R`, 0, (_) => setFadein(1)),
-    makeMiniCssButton(`lnkFadein`, `L`, 0, (_) => setFadein(-1)),
+    makeMiniCssButton(`lnkFadein`, `R`, 0, () => setFadein(1)),
+    makeMiniCssButton(`lnkFadein`, `L`, 0, () => setFadein(-1)),
 
     // フェードインのスライダー処理
     createDivCss2Label(
@@ -7381,7 +7381,7 @@ const createOptionWindow = (_sprite) => {
   const fadeinSlider = document.getElementById(`fadeinSlider`);
   fadeinSlider.addEventListener(
     `input`,
-    (_) => (g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein)),
+    () => (g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein)),
     false
   );
 
@@ -7402,7 +7402,7 @@ const createOptionWindow = (_sprite) => {
 
   // 設定画面の一通りのオブジェクトを作成後に譜面・速度・ゲージ設定をまとめて行う
   setDifficulty(false);
-  optionsprite.oncontextmenu = (_) => false;
+  optionsprite.oncontextmenu = () => false;
 };
 
 /**
@@ -7418,7 +7418,7 @@ const createGeneralSetting = (
     unitName = ``,
     skipTerms = fillArray(3, 1),
     hiddenBtn = false,
-    addRFunc = (_) => {},
+    addRFunc = () => {},
     addLFunc = addRFunc,
     settingLabel = _settingName,
     displayName = g_currentPage,
@@ -7446,29 +7446,29 @@ const createGeneralSetting = (
           g_localStorage[_settingName] === g_stateObj[_settingName] ? " *" : ""
         }`,
         0,
-        (_) => {
+        () => {
           setSetting(skipTerms[1], _settingName, unitName, roundNum, {
-            func: (_) => addRFunc(),
+            func: () => addRFunc(),
           });
         },
         {
-          cxtFunc: (_) => {
+          cxtFunc: () => {
             setSetting(skipTerms[1] * -1, _settingName, unitName, roundNum, {
-              func: (_) => addLFunc(),
+              func: () => addLFunc(),
             });
           },
         }
       ),
 
       // 右回し・左回しボタン（外側）
-      makeMiniCssButton(linkId, `R`, 0, (_) =>
+      makeMiniCssButton(linkId, `R`, 0, () =>
         setSetting(skipTerms[0], _settingName, unitName, roundNum, {
-          func: (_) => addRFunc(),
+          func: () => addRFunc(),
         })
       ),
-      makeMiniCssButton(linkId, `L`, 0, (_) =>
+      makeMiniCssButton(linkId, `L`, 0, () =>
         setSetting(skipTerms[0] * -1, _settingName, unitName, roundNum, {
-          func: (_) => addLFunc(),
+          func: () => addLFunc(),
         })
       )
     );
@@ -7477,14 +7477,14 @@ const createGeneralSetting = (
     if (skipTerms[1] > 1) {
       multiAppend(
         _obj,
-        makeMiniCssButton(linkId, `RR`, 0, (_) =>
+        makeMiniCssButton(linkId, `RR`, 0, () =>
           setSetting(skipTerms[1], _settingName, unitName, roundNum, {
-            func: (_) => addRFunc(),
+            func: () => addRFunc(),
           })
         ),
-        makeMiniCssButton(linkId, `LL`, 0, (_) =>
+        makeMiniCssButton(linkId, `LL`, 0, () =>
           setSetting(skipTerms[1] * -1, _settingName, unitName, roundNum, {
-            func: (_) => addLFunc(),
+            func: () => addLFunc(),
           })
         )
       );
@@ -7498,9 +7498,9 @@ const createGeneralSetting = (
           linkId,
           `RRR`,
           0,
-          (_) =>
+          () =>
             setSetting(skipTerms[2], _settingName, unitName, roundNum, {
-              func: (_) => addRFunc(),
+              func: () => addRFunc(),
             }),
           { dw: -g_limitObj.setMiniWidth / 2 }
         ),
@@ -7508,9 +7508,9 @@ const createGeneralSetting = (
           linkId,
           `LLL`,
           0,
-          (_) =>
+          () =>
             setSetting(skipTerms[2] * -1, _settingName, unitName, roundNum, {
-              func: (_) => addLFunc(),
+              func: () => addLFunc(),
             }),
           { dw: -g_limitObj.setMiniWidth / 2 }
         )
@@ -7525,9 +7525,9 @@ const createGeneralSetting = (
           linkId,
           `HR`,
           0,
-          (_) =>
+          () =>
             setSetting(1, _settingName, unitName, roundNum, {
-              func: (_) => addRFunc(),
+              func: () => addRFunc(),
             }),
           { visibility: `hidden` }
         ),
@@ -7535,9 +7535,9 @@ const createGeneralSetting = (
           linkId,
           `HL`,
           0,
-          (_) =>
+          () =>
             setSetting(-1, _settingName, unitName, roundNum, {
-              func: (_) => addLFunc(),
+              func: () => addLFunc(),
             }),
           { visibility: `hidden` }
         )
@@ -7607,7 +7607,7 @@ const setSetting = (
   _settingName,
   _unitName = ``,
   _roundNum = 0,
-  { func = (_) => true } = {}
+  { func = () => true } = {}
 ) => {
   let settingNum = g_settings[`${_settingName}Num`];
   const settingList = g_settings[`${_settingName}s`];
@@ -7678,7 +7678,7 @@ const getKeyReverse = (_localStorage, _extraKeyName = ``) => {
 /**
  * リバースのデフォルト化処理
  */
-const setReverseDefault = (_) => {
+const setReverseDefault = () => {
   g_stateObj.reverse = C_FLG_OFF;
   g_settings.reverseNum = 0;
 };
@@ -7984,8 +7984,8 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
     const prevPtn = g_keyObj.currentPtn;
     g_keyObj.currentPtn = -1;
     const copyPtn = `${g_keyObj.currentKey}_-1`;
-    g_keyObj[`keyCtrl${copyPtn}`] = [...Array(baseKeyNum)].map((_) => []);
-    g_keyObj[`keyCtrl${copyPtn}d`] = [...Array(baseKeyNum)].map((_) => []);
+    g_keyObj[`keyCtrl${copyPtn}`] = [...Array(baseKeyNum)].map(() => []);
+    g_keyObj[`keyCtrl${copyPtn}d`] = [...Array(baseKeyNum)].map(() => []);
 
     for (let j = 0; j < baseKeyNum; j++) {
       for (let k = 0; k < g_keyObj[`keyCtrl${basePtn}`][j].length; k++) {
@@ -8042,7 +8042,7 @@ const makeSettingLblCssButton = (
   _name,
   _heightPos,
   _func,
-  { x, y, w, h, siz, cxtFunc = (_) => true, ...rest } = {},
+  { x, y, w, h, siz, cxtFunc = () => true, ...rest } = {},
   ..._classes
 ) => {
   const tmpObj = {
@@ -8051,7 +8051,7 @@ const makeSettingLblCssButton = (
     w: w ?? g_limitObj.setLblWidth,
     h: h ?? g_limitObj.setLblHeight,
     siz: siz ?? g_limitObj.setLblSiz,
-    cxtFunc: cxtFunc ?? ((_) => true),
+    cxtFunc: cxtFunc ?? (() => true),
   };
   return createCss2Button(
     _id,
@@ -8153,7 +8153,7 @@ const resetGroupList = (_type, _keyCtrlPtn) => {
 /* Scene : SETTINGS-DISPLAY [lemon] */
 /*-----------------------------------------------------------*/
 
-const settingsDisplayInit = (_) => {
+const settingsDisplayInit = () => {
   clearWindow(true);
   const divRoot = document.getElementById(`divRoot`);
   g_baseDisp = `Display`;
@@ -8187,7 +8187,7 @@ const settingsDisplayInit = (_) => {
 
   // キー操作イベント（デフォルト）
   setShortcutEvent(g_currentPage);
-  document.oncontextmenu = (_) => true;
+  document.oncontextmenu = () => true;
 
   g_skinJsObj.settingsDisplay.forEach((func) => func());
 };
@@ -8226,12 +8226,12 @@ const createSettingsDisplayWindow = (_sprite) => {
         g_settings[`d_${_name}s`] || []
       );
 
-      const dispView = (_) =>
+      const dispView = () =>
         [C_FLG_OFF, C_FLG_ON].includes(g_stateObj[`d_${_name.toLowerCase()}`])
           ? g_lblNameObj[`d_${toCapitalize(_name)}`]
           : getStgDetailName(lbls[g_settings.displayNum[_name]]);
 
-      const withShortCutDesc = (_) =>
+      const withShortCutDesc = () =>
         createScText(
           document.getElementById(linkId),
           `${toCapitalize(_name)}`,
@@ -8293,13 +8293,13 @@ const createSettingsDisplayWindow = (_sprite) => {
           linkId,
           dispView(),
           _heightPos,
-          (_) => switchDisplay(),
+          () => switchDisplay(),
           {
             x: 30 + 180 * _widthPos,
             w: 170,
             title: g_msgObj[`d_${_name.toLowerCase()}`],
             borderStyle: `solid`,
-            cxtFunc: (_) => switchDisplay(-1),
+            cxtFunc: () => switchDisplay(-1),
           },
           `button_${cssBgList[g_settings.displayNum[_name]]}`,
           `button_${cssBarList[g_settings.displayNum[_name]]}`
@@ -8314,7 +8314,7 @@ const createSettingsDisplayWindow = (_sprite) => {
             `${linkId}R`,
             `>`,
             _heightPos,
-            (_) => switchDisplay(1, false),
+            () => switchDisplay(1, false),
             {
               x: 175 + 180 * _widthPos,
               w: 25,
@@ -8367,7 +8367,7 @@ const createSettingsDisplayWindow = (_sprite) => {
   // 矢印の見え方 (Appearance)
   // 縦位置: 7.4
   createGeneralSetting(spriteList.appearance, `appearance`, {
-    addRFunc: (_) => dispAppearanceSlider(),
+    addRFunc: () => dispAppearanceSlider(),
   });
 
   // Hidden+/Sudden+初期値用スライダー、ロックボタン
@@ -8409,7 +8409,7 @@ const createSettingsDisplayWindow = (_sprite) => {
   const appearanceSlider = document.getElementById(`appearanceSlider`);
   appearanceSlider.addEventListener(
     `input`,
-    (_) =>
+    () =>
       (g_hidSudObj.filterPos = inputSliderAppearance(
         appearanceSlider,
         lblAppearancePos
@@ -8417,7 +8417,7 @@ const createSettingsDisplayWindow = (_sprite) => {
     false
   );
 
-  const dispAppearanceSlider = (_) => {
+  const dispAppearanceSlider = () => {
     [`lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(
       (obj) =>
         ($id(obj).visibility = g_appearanceRanges.includes(
@@ -8719,13 +8719,13 @@ const keyConfigInit = (_kcType = g_kcType) => {
       createCss2Button(
         `color${j}`,
         ``,
-        (_) => changeTmpColor(j),
+        () => changeTmpColor(j),
         {
           x: keyconX,
           y: keyconY,
           w: C_ARW_WIDTH,
           h: C_ARW_WIDTH,
-          cxtFunc: (_) => changeTmpColor(j, -1),
+          cxtFunc: () => changeTmpColor(j, -1),
         },
         g_cssObj.button_Default_NoColor,
         g_cssObj.title_base
@@ -8766,7 +8766,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
         createCss2Button(
           `sArrow${j}`,
           ``,
-          (_) => changeTmpShuffleNum(j),
+          () => changeTmpShuffleNum(j),
           {
             x: keyconX,
             y: keyconY - 12,
@@ -8778,7 +8778,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
               g_settings.shuffles.filter((val) => val.endsWith(`+`)).length > 0
                 ? `auto`
                 : `none`,
-            cxtFunc: (_) => changeTmpShuffleNum(j, -1),
+            cxtFunc: () => changeTmpShuffleNum(j, -1),
           },
           g_cssObj.button_Default_NoColor,
           g_cssObj.title_base
@@ -8799,7 +8799,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
         createCss2Button(
           `keycon${j}_${k}`,
           g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k]],
-          (_) => {
+          () => {
             g_currentj = j;
             g_currentk = k;
             g_prevKey = -1;
@@ -9024,20 +9024,20 @@ const keyConfigInit = (_kcType = g_kcType) => {
           { x: baseX - 10, y: baseY },
           cssName
         ),
-        makeKCButton(`lnk${typeName}Group`, ``, (_) => setGroup(_type), {
+        makeKCButton(`lnk${typeName}Group`, ``, () => setGroup(_type), {
           x: baseX,
           y: baseY + 13,
           w: g_btnWidth(1 / 18),
           title: g_msgObj[`${_type}Group`],
-          cxtFunc: (_) => setGroup(_type, -1),
+          cxtFunc: () => setGroup(_type, -1),
         }),
         makeMiniKCButton(
           `lnk${typeName}Group`,
           `L`,
-          (_) => setGroup(_type, -1),
+          () => setGroup(_type, -1),
           { x: baseX - 10, y: baseY + 13 }
         ),
-        makeMiniKCButton(`lnk${typeName}Group`, `R`, (_) => setGroup(_type), {
+        makeMiniKCButton(`lnk${typeName}Group`, `R`, () => setGroup(_type), {
           x: baseX + g_btnWidth(1 / 18),
           y: baseY + 13,
         })
@@ -9083,15 +9083,15 @@ const keyConfigInit = (_kcType = g_kcType) => {
       { x: 10 + g_btnX() },
       g_cssObj.keyconfig_ColorType
     ),
-    makeKCButton(`lnkColorType`, g_colorType, (_) => setColorType(), {
+    makeKCButton(`lnkColorType`, g_colorType, () => setColorType(), {
       x: 20 + g_btnX(),
       title: g_msgObj.colorType,
-      cxtFunc: (_) => setColorType(-1),
+      cxtFunc: () => setColorType(-1),
     }),
-    makeMiniKCButton(`lnkColorType`, `L`, (_) => setColorType(-1), {
+    makeMiniKCButton(`lnkColorType`, `L`, () => setColorType(-1), {
       x: 10 + g_btnX(),
     }),
-    makeMiniKCButton(`lnkColorType`, `R`, (_) => setColorType(), {
+    makeMiniKCButton(`lnkColorType`, `R`, () => setColorType(), {
       x: 20 + g_btnX(1 / 6),
     })
   );
@@ -9107,17 +9107,17 @@ const keyConfigInit = (_kcType = g_kcType) => {
         { x: imgBaseX - 10, y: 37 },
         g_cssObj.keyconfig_ConfigType
       ),
-      makeKCButton(`lnkImgType`, g_imgType, (_) => setImgType(), {
+      makeKCButton(`lnkImgType`, g_imgType, () => setImgType(), {
         x: imgBaseX,
         y: imgBaseY,
         title: g_msgObj.imgType,
-        cxtFunc: (_) => setImgType(-1),
+        cxtFunc: () => setImgType(-1),
       }),
-      makeMiniKCButton(`lnkImgType`, `L`, (_) => setImgType(-1), {
+      makeMiniKCButton(`lnkImgType`, `L`, () => setImgType(-1), {
         x: imgBaseX - 10,
         y: imgBaseY,
       }),
-      makeMiniKCButton(`lnkImgType`, `R`, (_) => setImgType(), {
+      makeMiniKCButton(`lnkImgType`, `R`, () => setImgType(), {
         x: imgBaseX + g_btnWidth(1 / 6),
         y: imgBaseY,
       })
@@ -9138,7 +9138,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
   /**
    * カーソル位置の設定
    */
-  const setKeyConfigCursor = (_) => {
+  const setKeyConfigCursor = () => {
     const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
     const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
@@ -9283,7 +9283,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
   /**
    * ColorPicker（一式）の切替
    */
-  const changeColorPickers = (_) => {
+  const changeColorPickers = () => {
     lnkColorR.innerHTML = `[${g_keycons.colorCursorNum + 1} /`;
     for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
       const m = getGroupNum(j);
@@ -9347,7 +9347,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
     createCss2Button(
       `lnkColorR`,
       `[${g_keycons.colorCursorNum + 1} /`,
-      (_) => {
+      () => {
         g_keycons.colorCursorNum =
           (g_keycons.colorCursorNum + 1) %
           Math.ceil(g_headerObj.setColor.length / g_limitObj.kcColorPickerNum);
@@ -9361,7 +9361,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
     createCss2Button(
       `lnkColorCopy`,
       `↓]`,
-      (_) => {
+      () => {
         if (window.confirm(g_msgObj.colorCopyConfirm)) {
           for (let j = 0; j < g_headerObj.setColor.length; j++) {
             g_headerObj.frzColor[j] = g_headerObj[`frzColor${g_colorType}`][j] =
@@ -9399,7 +9399,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
     createCss2Button(
       `lnkColorReset`,
       g_lblNameObj.b_cReset,
-      (_) => {
+      () => {
         if (window.confirm(g_msgObj.colorResetConfirm)) {
           resetColorType({
             _from: g_colorType,
@@ -9454,7 +9454,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
     });
 
   for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
-    createColorPickWindow(j, `arrow`, (_) => {
+    createColorPickWindow(j, `arrow`, () => {
       g_headerObj[`setColor${g_colorType}`][getGroupNum(j)] =
         document.getElementById(`pickarrow${j}`).value;
       setColorType(0, false);
@@ -9463,7 +9463,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
     createColorPickWindow(
       j,
       `arrowShadow`,
-      (_) => {
+      () => {
         g_headerObj[`setShadowColor${g_colorType}`][getGroupNum(j)] = `${
           document.getElementById(`pickarrowShadow${j}`).value
         }80`;
@@ -9476,7 +9476,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
       createColorPickWindow(
         j,
         `frz${val}`,
-        (_) => {
+        () => {
           g_headerObj[`frzColor${g_colorType}`][getGroupNum(j)][k] =
             document.getElementById(`pickfrz${val}${j}`).value;
         },
@@ -9512,7 +9512,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
       ? -1
       : 0;
 
-    const searchStart = (_) => {
+    const searchStart = () => {
       if (!hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${nextPtn}`])) {
         nextPtn = 0;
         while (hasVal(g_keyObj[`keyCtrl${g_keyObj.currentKey}_${nextPtn}`])) {
@@ -9522,7 +9522,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
       }
     };
 
-    const searchNextGroup = (_) => {
+    const searchNextGroup = () => {
       while (
         nextPtn !== initialPtn &&
         g_keyObj[`transKey${g_keyObj.currentKey}_${_tempPtn}`] ===
@@ -9595,7 +9595,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
         createCss2Button(
           `key${j}`,
           `${j + 1}`,
-          (_) => appearConfigSteps(j),
+          () => appearConfigSteps(j),
           Object.assign({ y: 110 + j * 20 }, g_lblPosObj.lnkKeySwitch),
           g_cssObj.button_Mini
         )
@@ -9614,13 +9614,13 @@ const keyConfigInit = (_kcType = g_kcType) => {
     createCss2Button(
       `btnBack`,
       g_lblNameObj.b_settings,
-      (_) => {
+      () => {
         g_currentj = 0;
         g_currentk = 0;
         g_prevKey = 0;
       },
       Object.assign(g_lblPosObj.btnKcBack, {
-        resetFunc: (_) =>
+        resetFunc: () =>
           g_baseDisp === `Settings` ? optionInit() : settingsDisplayInit(),
       }),
       g_cssObj.button_Back
@@ -9638,9 +9638,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
     createCss2Button(
       `btnPtnChangeR`,
       `>`,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.btnPtnChangeR, {
-        resetFunc: (_) => changePattern(),
+        resetFunc: () => changePattern(),
       }),
       g_cssObj.button_Mini
     ),
@@ -9649,9 +9649,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
     createCss2Button(
       `btnPtnChangeL`,
       `<`,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.btnPtnChangeL, {
-        resetFunc: (_) => changePattern(-1),
+        resetFunc: () => changePattern(-1),
       }),
       g_cssObj.button_Mini
     ),
@@ -9660,9 +9660,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
     createCss2Button(
       `btnPtnChangeRR`,
       `|>`,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.btnPtnChangeRR, {
-        resetFunc: (_) => changePattern(1, true),
+        resetFunc: () => changePattern(1, true),
       }),
       g_cssObj.button_Setting
     ),
@@ -9671,9 +9671,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
     createCss2Button(
       `btnPtnChangeLL`,
       `<|`,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.btnPtnChangeLL, {
-        resetFunc: (_) => changePattern(-1, true),
+        resetFunc: () => changePattern(-1, true),
       }),
       g_cssObj.button_Setting
     ),
@@ -9682,7 +9682,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
     createCss2Button(
       `btnReset`,
       g_lblNameObj.b_reset,
-      (_) => {
+      () => {
         if (window.confirm(g_msgObj.keyResetConfirm)) {
           const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 
@@ -9715,7 +9715,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
     ),
 
     // プレイ開始
-    makePlayButton((_) => loadMusic())
+    makePlayButton(() => loadMusic())
   );
 
   // キーボード押下時処理
@@ -9780,7 +9780,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
   g_skinJsObj.keyconfig.forEach((func) => func());
   document.onkeyup = (evt) => commonKeyUp(evt);
-  document.oncontextmenu = (_) => false;
+  document.oncontextmenu = () => false;
 };
 
 /**
@@ -9796,7 +9796,7 @@ const getShadowColor = (_colorPos, _arrowColor) =>
 /**
  * キー数基礎情報の取得
  */
-const getKeyInfo = (_) => {
+const getKeyInfo = () => {
   const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
   const keyNum = g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length;
   const posMax =
@@ -9837,7 +9837,7 @@ const updateKeyInfo = (_header, _keyCtrlPtn) => {
 /**
  * 初期矢印色・フリーズアロー色の変更
  */
-const changeSetColor = (_) => {
+const changeSetColor = () => {
   const isDefault = [`Default`, `Type0`].includes(g_colorType);
   const idHeader = setScoreIdHeader(g_stateObj.scoreId);
   const defaultType = idHeader + g_colorType;
@@ -9917,7 +9917,7 @@ const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
 /* Scene : LOADING [strawberry] */
 /*-----------------------------------------------------------*/
 
-const loadMusic = (_) => {
+const loadMusic = () => {
   clearWindow(true);
   g_currentPage = `loading`;
 
@@ -9950,7 +9950,7 @@ const loadMusic = (_) => {
   request.responseType = `blob`;
 
   // 読み込み完了時
-  request.addEventListener(`load`, (_) => {
+  request.addEventListener(`load`, () => {
     if (request.status >= 200 && request.status < 300) {
       const blobUrl = URL.createObjectURL(request.response);
       createEmptySprite(divRoot, `loader`, g_windowObj.loader);
@@ -9989,10 +9989,10 @@ const loadMusic = (_) => {
   });
 
   // エラー処理
-  request.addEventListener(`timeout`, (_) =>
+  request.addEventListener(`timeout`, () =>
     makeWarningWindow(g_msgInfoObj.E_0033, { backBtnUse: true })
   );
-  request.addEventListener(`error`, (_) =>
+  request.addEventListener(`error`, () =>
     makeWarningWindow(g_msgInfoObj.E_0034, { backBtnUse: true })
   );
 
@@ -10005,7 +10005,7 @@ const loadMusic = (_) => {
  * @param {string} _url
  */
 const setAudio = async (_url) => {
-  const loadMp3 = (_) => {
+  const loadMp3 = () => {
     if (g_isFile) {
       g_audio.src = _url;
       musicAfterLoaded();
@@ -10036,13 +10036,13 @@ const setAudio = async (_url) => {
     await loadScript2(_url);
     if (typeof musicInit === C_TYP_FUNCTION) {
       musicInit();
-      readyToStart((_) => initWebAudioAPIfromBase64(g_musicdata));
+      readyToStart(() => initWebAudioAPIfromBase64(g_musicdata));
     } else {
       makeWarningWindow(g_msgInfoObj.E_0031);
       musicAfterLoaded();
     }
   } else {
-    readyToStart((_) => loadMp3());
+    readyToStart(() => loadMp3());
   }
 };
 
@@ -10063,7 +10063,7 @@ const initWebAudioAPIfromURL = async (_url) => {
   await g_audio.init(arrayBuffer);
 };
 
-const musicAfterLoaded = (_) => {
+const musicAfterLoaded = () => {
   g_audio.load();
 
   if (g_audio.readyState === 4) {
@@ -10073,7 +10073,7 @@ const musicAfterLoaded = (_) => {
     // 読込中の状態
     g_audio.addEventListener(
       `canplaythrough`,
-      ((_) =>
+      (() =>
         function f() {
           g_audio.removeEventListener(`canplaythrough`, f, false);
           loadingScoreInit();
@@ -10084,7 +10084,7 @@ const musicAfterLoaded = (_) => {
     // エラー時
     g_audio.addEventListener(
       `error`,
-      ((_) =>
+      (() =>
         function f() {
           g_audio.removeEventListener(`error`, f, false);
           makeWarningWindow(
@@ -10412,8 +10412,8 @@ const applyRandom = (_keyNum, _shuffleGroup) => {
  * @param {array} _shuffleGroup
  */
 const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
-  const tmpArrowData = [...Array(_keyNum)].map((_) => []);
-  const tmpFrzData = [...Array(_keyNum)].map((_) => []);
+  const tmpArrowData = [...Array(_keyNum)].map(() => []);
+  const tmpFrzData = [...Array(_keyNum)].map(() => []);
   const scatterFrame = 10;
 
   // シャッフルグループごとに処理
@@ -11319,7 +11319,7 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
  * Motionオプション適用時の矢印別の速度設定
  * - 矢印が表示される最大フレーム数を 縦ピクセル数×20 と定義。
  */
-const setMotionOnFrame = (_) =>
+const setMotionOnFrame = () =>
   g_motionFunc[g_stateObj.motion](
     fillArray(g_headerObj.playingHeight * 20 + 1)
   );
@@ -11612,7 +11612,7 @@ const pushArrows = (
   const calcDataTiming = (
     _type,
     _header,
-    _setFunc = (_) => true,
+    _setFunc = () => true,
     { _term = 4, _colorFlg = false, _calcFrameFlg = false, _propName = `` } = {}
   ) => {
     const camelHeader =
@@ -11819,7 +11819,7 @@ const getFrzLength = (_speedOnFrame, _startFrame, _endFrame) => {
 /**
  * キーパターン(デフォルト)に対応する矢印番号を格納
  */
-const convertReplaceNums = (_) => {
+const convertReplaceNums = () => {
   const tkObj = getKeyInfo();
   const baseCharas = g_keyObj[`chara${g_keyObj.currentKey}_0`];
   const convCharas = g_keyObj[`chara${tkObj.keyCtrlPtn}`];
@@ -12062,7 +12062,7 @@ const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir) => {
 /**
  * メイン画面前の初期化処理
  */
-const getArrowSettings = (_) => {
+const getArrowSettings = () => {
   g_attrObj = {};
   const tkObj = getKeyInfo();
   const [keyCtrlPtn, keyNum, posMax, divideCnt] = [
@@ -12097,8 +12097,8 @@ const getArrowSettings = (_) => {
   g_workObj.keyGroupList = tkObj.keyGroupList;
 
   const keyCtrlLen = g_workObj.keyCtrl.length;
-  g_workObj.keyCtrlN = [...Array(keyCtrlLen)].map((_) => []);
-  g_workObj.keyHitFlg = [...Array(keyCtrlLen)].map((_) => []);
+  g_workObj.keyCtrlN = [...Array(keyCtrlLen)].map(() => []);
+  g_workObj.keyHitFlg = [...Array(keyCtrlLen)].map(() => []);
   for (let j = 0; j < g_workObj.keyCtrl.length; j++) {
     for (let k = 0; k < g_workObj.keyCtrl[j].length; k++) {
       g_workObj.keyCtrlN[j][k] = g_kCdN[g_workObj.keyCtrl[j][k]];
@@ -12304,7 +12304,7 @@ const getArrowSettings = (_) => {
  */
 const setKeyCtrl = (_localStorage, _keyNum, _keyCtrlPtn) => {
   const localPtn = `${g_keyObj.currentKey}_-1`;
-  const keyCtrl = [...Array(_keyNum)].map((_) => []);
+  const keyCtrl = [...Array(_keyNum)].map(() => []);
   for (let j = 0; j < _keyNum; j++) {
     for (let k = 0; k < g_keyObj[`keyCtrl${_keyCtrlPtn}`][j].length; k++) {
       keyCtrl[j][k] = g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][k];
@@ -12334,10 +12334,10 @@ const setKeyCtrl = (_localStorage, _keyNum, _keyCtrlPtn) => {
 /**
  * メイン画面初期化
  */
-const mainInit = (_) => {
+const mainInit = () => {
   clearWindow(true, `Main`);
   const divRoot = document.getElementById(`divRoot`);
-  document.oncontextmenu = (_) => false;
+  document.oncontextmenu = () => false;
   g_currentPage = `main`;
 
   g_currentArrows = 0;
@@ -13191,7 +13191,7 @@ const mainInit = (_) => {
    * キーを離したときの処理
    */
   const mainKeyUpActFunc = {
-    OFF: (_) => {
+    OFF: () => {
       for (let j = 0; j < keyNum; j++) {
         if (g_workObj.keyCtrlN[j].find((key) => keyIsDown(key)) === undefined) {
           $id(`stepDiv${j}`).display = C_DIS_NONE;
@@ -13199,7 +13199,7 @@ const mainInit = (_) => {
       }
     },
 
-    ON: (_) => {},
+    ON: () => {},
   };
 
   document.onkeyup = (evt) => {
@@ -13818,7 +13818,7 @@ const mainInit = (_) => {
   /**
    * フレーム処理(譜面台)
    */
-  const flowTimeline = (_) => {
+  const flowTimeline = () => {
     const currentFrame = g_scoreObj.frameNum;
     lblframe.textContent = g_scoreObj.baseFrame;
 
@@ -14433,7 +14433,7 @@ const keyIsDown = (_keyCode) => g_inputKeyBuffer[_keyCode];
 /**
  * 押したキーがシフトキーかどうかを判定
  */
-const keyIsShift = (_) =>
+const keyIsShift = () =>
   keyIsDown(g_kCdNameObj.shiftLKey) || keyIsDown(g_kCdNameObj.shiftRKey);
 
 /**
@@ -14596,7 +14596,7 @@ const changeLifeColor = (_state = ``) => {
   );
 };
 
-const lifeRecovery = (_) => {
+const lifeRecovery = () => {
   g_workObj.lifeVal += g_workObj.lifeRcv;
 
   if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
@@ -14646,7 +14646,7 @@ const changeJudgeCharacter = (_name, _character, _fjdg = ``) => {
 /**
  * コンボの更新
  */
-const updateCombo = (_) => {
+const updateCombo = () => {
   if (++g_resultObj.combo > g_resultObj.maxCombo) {
     g_resultObj.maxCombo = g_resultObj.combo;
     lblMCombo.textContent = g_resultObj.maxCombo;
@@ -14780,7 +14780,7 @@ const makeFinishView = (_text) => {
   );
 };
 
-const finishViewing = (_) => {
+const finishViewing = () => {
   if (g_currentArrows === g_fullArrows) {
     if (g_resultObj.ii + g_resultObj.kita === g_fullArrows) {
       g_resultObj.spState = `allPerfect`;
@@ -14812,7 +14812,7 @@ const finishViewing = (_) => {
 /**
  * リザルト画面初期化
  */
-const resultInit = (_) => {
+const resultInit = () => {
   clearWindow(true);
   g_currentPage = `result`;
 
@@ -15485,7 +15485,7 @@ const resultInit = (_) => {
       );
 
     if (g_stateObj.dataSaveFlg) {
-      const setScoreData = (_) => {
+      const setScoreData = () => {
         g_localStorage.highscores[scoreName].dateTime = currentDateTime;
         g_localStorage.highscores[scoreName].rankMark = rankMark;
         g_localStorage.highscores[scoreName].rankColor = rankColor;
@@ -15811,20 +15811,20 @@ const resultInit = (_) => {
 
     tmpDiv.appendChild(canvas);
 
-    const viewResultImage = (_) => {
+    const viewResultImage = () => {
       if (document.getElementById(`tmpClose`) === null) {
-        divRoot.oncontextmenu = (_) => true;
+        divRoot.oncontextmenu = () => true;
         makeLinkButton(tmpDiv, `Tmp`);
         tmpDiv.appendChild(
           createCss2Button(
             `tmpClose`,
             g_lblNameObj.b_close,
-            (_) => true,
+            () => true,
             Object.assign(g_lblPosObj.btnRsCopyClose, {
-              resetFunc: (_) => {
+              resetFunc: () => {
                 tmpDiv.removeChild(canvas);
                 divRoot.removeChild(tmpDiv);
-                divRoot.oncontextmenu = (_) => false;
+                divRoot.oncontextmenu = () => false;
               },
             }),
             g_cssObj.button_Back
@@ -15866,7 +15866,7 @@ const resultInit = (_) => {
     createCss2Button(
       _id,
       _name,
-      (_) => {
+      () => {
         if (g_finishFlg) {
           g_audio.pause();
         }
@@ -15889,9 +15889,9 @@ const resultInit = (_) => {
       createCss2Button(
         `btnTweet${_param}`,
         g_lblNameObj.b_tweet,
-        (_) => true,
+        () => true,
         Object.assign(g_lblPosObj.btnRsTweet, {
-          resetFunc: (_) => openLink(tweetResult),
+          resetFunc: () => openLink(tweetResult),
         }),
         g_cssObj.button_Tweet
       ),
@@ -15900,9 +15900,9 @@ const resultInit = (_) => {
       createCss2Button(
         `btnGitter${_param}`,
         g_lblNameObj.b_gitter,
-        (_) => true,
+        () => true,
         Object.assign(g_lblPosObj.btnRsGitter, {
-          resetFunc: (_) => openLink(g_linkObj.discord),
+          resetFunc: () => openLink(g_linkObj.discord),
         }),
         g_cssObj.button_Discord
       )
@@ -15926,7 +15926,7 @@ const resultInit = (_) => {
     createCss2Button(
       `btnCopy`,
       g_lblNameObj.b_copy,
-      (_) =>
+      () =>
         copyTextToClipboard(
           keyIsShift() ? unEscapeHtml(resultCommonTmp) : resultText,
           g_msgInfoObj.I_0001
@@ -15950,9 +15950,9 @@ const resultInit = (_) => {
     createCss2Button(
       `btnCopyImage`,
       `📷`,
-      (_) => true,
+      () => true,
       Object.assign(g_lblPosObj.btnRsCopyImage, {
-        resetFunc: (_) => copyResultImageData(g_msgInfoObj.I_0001),
+        resetFunc: () => copyResultImageData(g_msgInfoObj.I_0001),
       }),
       g_cssObj.button_Default_NoColor
     )
@@ -15986,7 +15986,7 @@ const resultInit = (_) => {
   /**
    * タイトルのモーション設定
    */
-  const flowResultTimeline = (_) => {
+  const flowResultTimeline = () => {
     // ユーザカスタムイベント(フレーム毎)
     g_customJsObj.resultEnterFrame.forEach((func) => func());
 
@@ -16029,8 +16029,8 @@ const resultInit = (_) => {
   flowResultTimeline();
 
   // キー操作イベント（デフォルト）
-  setShortcutEvent(g_currentPage, (_) => true, { dfEvtFlg: true });
-  document.oncontextmenu = (_) => true;
+  setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
+  document.oncontextmenu = () => true;
 
   g_skinJsObj.result.forEach((func) => func());
 };
