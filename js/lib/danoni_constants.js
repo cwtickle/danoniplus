@@ -160,8 +160,20 @@ const g_windowObj = {
 
 const g_lblPosObj = {};
 
-// 可変部分のウィンドウサイズを更新
-const updateWindowSiz = _ => {
+/**
+ * 可変部分のウィンドウサイズを更新
+ * - 指定しているプロパティ名は基本的にCSSのスタイル名が使用できる
+ * - 特殊な関数及びプロパティについては下記の通り。
+ * - g_btnX() :画面横幅を意識せず自動でX座標を設定。引数を入れるとボタン幅×引数だけ位置がずれる。(Default: 0)
+ * - g_btnWidth(): 画面横幅を意識せず自動でボタン横幅を設定。引数には倍率を指定する。(Default: 1)
+ * @property {number} x
+ * @property {number} y
+ * @property {number} w
+ * @property {number} h
+ * @property {number} siz フォントサイズ
+ * @property {number} title オンマウス時のメッセージ文
+ */
+const updateWindowSiz = () => {
     Object.assign(g_windowObj, {
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
         difList: { x: 165, y: 60, w: 280, h: 270 + g_sHeight - 500, overflow: `auto` },
@@ -455,14 +467,14 @@ const updateWindowSiz = _ => {
 
 // ウィンドウ位置
 const g_windowAlign = {
-    left: _ => {
+    left: () => {
         $id(`canvas-frame`).marginLeft = `0px`;
         $id(`canvas-frame`).marginRight = `auto`;
     },
-    center: _ => {
+    center: () => {
         $id(`canvas-frame`).margin = `auto`;
     },
-    right: _ => {
+    right: () => {
         $id(`canvas-frame`).marginLeft = `auto`;
         $id(`canvas-frame`).marginRight = `0px`;
     },
@@ -550,7 +562,7 @@ const resetImgs = (_baseDir = ``, _exp = `svg`) => {
     }
 };
 
-const reloadImgObj = _ => {
+const reloadImgObj = () => {
     g_imgObj.arrow = C_IMG_ARROW;
     g_imgObj.arrowShadow = C_IMG_ARROWSD;
     g_imgObj.onigiri = C_IMG_ONIGIRI;
@@ -640,6 +652,18 @@ const C_BLOCK_KEYS = [
 /**
  * 特殊文字列の置き換えリスト
  * (置き換え元、置き換え先の組で二次元配列として定義。主にreplaceStr関数で使用)
+ * - 先に合致したものを置換するため、複雑なパターンは先に配置する必要がある
+ * 
+ * @property {array} escape 特殊文字 -> エスケープ文字列
+ * @property {array} escapeTag CW Edition定義の特殊文字列 -> エスケープ文字列
+ * @property {array} unEscapeTag エスケープ文字列 -> 特殊文字
+ * @property {array} escapeCode 使用禁止文字の無効化
+ * @property {array} musicNameSimple 曲名中の改行タグ -> 空白化
+ * @property {array} musicNameMultiLine 曲名中の特殊改行タグ -> 通常タグ化
+ * @property {array} frzName 矢印データ名 -> フリーズアローデータ名
+ * @property {array} keyCtrlName キー割当正式名 -> 略名
+ * @property {array} colorPatternName 色変化指定先略名 -> 正式名
+ * @property {array} targetPatternName 色変化指定先略名(all) -> 正式適用先(g0～g49)
  */
 const g_escapeStr = {
     escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
@@ -998,16 +1022,18 @@ g_settings.opacityNum = g_settings.opacitys.length - 1;
  * 設定画面間移動
  */
 const g_jumpSettingWindow = {
-    option: _ => settingsDisplayInit(),
-    difSelector: _ => settingsDisplayInit(),
-    settingsDisplay: _ => optionInit(),
+    option: () => settingsDisplayInit(),
+    difSelector: () => settingsDisplayInit(),
+    settingsDisplay: () => optionInit(),
 };
 
 /**
  * シャッフル適用関数
+ * @param {number} keyNum
+ * @param {array} shuffleGroup
  */
 const g_shuffleFunc = {
-    'OFF': _ => true,
+    'OFF': () => true,
     'Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup),
     'X-Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup, true),
     'Turning': (keyNum, shuffleGroup) => applyTurning(keyNum, shuffleGroup),
@@ -1033,8 +1059,7 @@ const g_shuffleFunc = {
 
 /**
  * モーション適用関数
- * - frmsはフレーム別の速度設定用配列。
- * - 配列の15がステップゾーン上、0～14は矢印の枠外管理用
+ * @param {array} frms フレーム別の速度設定用配列。配列の15がステップゾーン上、0～14は矢印の枠外管理用
  */
 const g_motionFunc = {
     'OFF': _frms => _frms,
@@ -1088,7 +1113,7 @@ let g_canDisabledSettings = [`motion`, `scroll`, `reverse`, `shuffle`, `autoPlay
 
 const g_hidSudFunc = {
     filterPos: _filterPos => `${_filterPos}${g_lblNameObj.percent}`,
-    range: _ => `${Math.round(g_posObj.arrowHeight - g_posObj.stepY)}px`,
+    range: () => `${Math.round(g_posObj.arrowHeight - g_posObj.stepY)}px`,
     hidden: _filterPos => `${Math.min(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100), g_posObj.arrowHeight - g_posObj.stepY)}`,
     sudden: _filterPos => `${Math.max(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100) - g_posObj.stepY, 0)}`,
 };
@@ -1124,10 +1149,10 @@ const g_hidSudObj = {
         'Hid&Sud+': { OFF: 1, ON: 0, },
     },
     distH: {
-        'Visible': _ => ``,
-        'Hidden': _ => `${g_hidSudFunc.filterPos(50)} (${g_hidSudFunc.hidden(50)} / ${g_hidSudFunc.range()})`,
+        'Visible': () => ``,
+        'Hidden': () => `${g_hidSudFunc.filterPos(50)} (${g_hidSudFunc.hidden(50)} / ${g_hidSudFunc.range()})`,
         'Hidden+': (_filterPos) => `${g_hidSudFunc.filterPos(_filterPos)} (${g_hidSudFunc.hidden(_filterPos)} / ${g_hidSudFunc.range()})`,
-        'Sudden': _ => `${g_hidSudFunc.filterPos(40)} (${g_hidSudFunc.sudden(40)} / ${g_hidSudFunc.range()})`,
+        'Sudden': () => `${g_hidSudFunc.filterPos(40)} (${g_hidSudFunc.sudden(40)} / ${g_hidSudFunc.range()})`,
         'Sudden+': (_filterPos) => `${g_hidSudFunc.filterPos(_filterPos)} (${g_hidSudFunc.sudden(_filterPos)} / ${g_hidSudFunc.range()})`,
         'Hid&Sud+': (_filterPos) => `${g_hidSudFunc.filterPos(_filterPos)} (${Math.max(g_hidSudFunc.sudden(_filterPos)
             - (g_posObj.arrowHeight - g_posObj.stepY - g_hidSudFunc.hidden(_filterPos)), 0)} / ${g_hidSudFunc.range()})`,
@@ -1165,6 +1190,7 @@ for (let j = 0; j < 260; j++) {
     g_kCdN[j] = ``;
 }
 
+// キーボード配列の言語設定
 const g_lang_kCd = {
     Ja: {
         48: `0`,
@@ -1447,7 +1473,16 @@ const g_kCdObj = {
     shiftRAltKey: 260,
 };
 
-// 画面別ショートカット
+/**
+ * 画面別ショートカット
+ * - 画面別にオブジェクトを定義し、KeyboardEvent.code別(略記可)にプロパティを定義し処理をidにて割り当てる
+ * - 複数キーの同時押しで反応させる場合は間を"_"で挟む。3つ押しの場合も同様
+ * - 上から順に適用されるため、複数キーのショートカットは先に定義するようにする
+ * @property {string} id 実行対象のボタンのId
+ * @property {boolean} reset リンク先にジャンプする場合でonKeyUpが利かないとき、"true"を指定することで回避
+ * @property {string} dfId 実行対象のボタンのId(デフォルト)
+ * @property {string} exId 実行対象のボタンのId(別パターン)
+ */
 const g_shortcutObj = {
     title: {
         Enter: { id: `btnStart` },
@@ -3408,212 +3443,75 @@ const g_skinJsObj = {
 };
 
 /** 過去関数の互換 */
-const convertreplaceNums = _ => convertReplaceNums();
-const MainInit = _ => mainInit();
+const convertreplaceNums = () => {
+    console.warn('convertreplaceNums is deprecated. Use convertReplaceNums instead.');
+    convertReplaceNums();
+};
+const MainInit = () => {
+    console.warn('MainInit is deprecated. Use mainInit instead.');
+    mainInit();
+};
 
 /**
  * 従来のカスタム関数をg_customJsObj, g_skinJsObjへ追加
  * - customjsファイルを読み込んだ直後にこの関数を呼び出している
  */
-const loadLegacyCustomFunc = _ => {
+const loadLegacyCustomFunc = () => {
 
-    // タイトル
-    if (typeof customTitleInit === C_TYP_FUNCTION) {
-        g_customJsObj.title.push(customTitleInit);
-    }
-    if (typeof customTitleInit2 === C_TYP_FUNCTION) {
-        g_customJsObj.title.push(customTitleInit2);
-    }
-    if (typeof customTitleEnterFrame === C_TYP_FUNCTION) {
-        g_customJsObj.titleEnterFrame.push(customTitleEnterFrame);
-    }
-    if (typeof customTitleEnterFrame2 === C_TYP_FUNCTION) {
-        g_customJsObj.titleEnterFrame.push(customTitleEnterFrame2);
-    }
-    if (typeof skinTitleInit === C_TYP_FUNCTION) {
-        g_skinJsObj.title.push(skinTitleInit);
-    }
-    if (typeof skinTitleInit2 === C_TYP_FUNCTION) {
-        g_skinJsObj.title.push(skinTitleInit2);
-    }
+    const customFuncMap = {
+        title: [`customTitleInit`, `customTitleInit2`],
+        titleEnterFrame: [`customTitleEnterFrame`, `customTitleEnterFrame2`],
+        option: [`customOptionInit`, `customOptionInit2`],
+        difficulty: [`customSetDifficulty`, `customSetDifficulty2`],
+        settingsDisplay: [`customSettingsDisplayInit`, `customSettingsDisplayInit2`],
+        keyconfig: [`customKeyConfigInit`, `customKeyConfigInit2`],
+        preloading: [`customPreloadingInit`, `customPreloadingInit2`],
+        loading: [`customLoadingInit`, `customLoadingInit2`],
+        progress: [`customLoadingProgress`, `customLoadingProgress2`],
+        main: [`customMainInit`, `customMainInit2`],
+        dummyArrow: [`customJudgeDummyArrow`, `customJudgeDummyArrow2`],
+        dummyFrz: [`customJudgeDummyFrz`, `customJudgeDummyFrz2`],
+        mainEnterFrame: [`customMainEnterFrame`, `customMainEnterFrame2`],
+        judg_ii: [`customJudgeIi`, `customJudgeIi2`],
+        judg_shakin: [`customJudgeShakin`, `customJudgeShakin2`],
+        judg_matari: [`customJudgeMatari`, `customJudgeMatari2`],
+        judg_shobon: [`customJudgeShobon`, `customJudgeShobon2`],
+        judg_uwan: [`customJudgeUwan`, `customJudgeUwan2`],
+        judg_kita: [`customJudgeKita`, `customJudgeKita2`],
+        judg_iknai: [`customJudgeIknai`, `customJudgeIknai2`],
+        result: [`customResultInit`, `customResultInit2`],
+        resultEnterFrame: [`customResultEnterFrame`, `customResultEnterFrame2`],
+    };
 
-    // 主要設定
-    if (typeof customOptionInit === C_TYP_FUNCTION) {
-        g_customJsObj.option.push(customOptionInit);
-    }
-    if (typeof customOptionInit2 === C_TYP_FUNCTION) {
-        g_customJsObj.option.push(customOptionInit2);
-    }
-    if (typeof skinOptionInit === C_TYP_FUNCTION) {
-        g_skinJsObj.option.push(skinOptionInit);
-    }
-    if (typeof skinOptionInit2 === C_TYP_FUNCTION) {
-        g_skinJsObj.option.push(skinOptionInit2);
-    }
+    const skinFuncMap = {
+        title: [`skinTitleInit`, `skinTitleInit2`],
+        option: [`skinOptionInit`, `skinOptionInit2`],
+        settingsDisplay: [`skinSettingsDisplayInit`, `skinSettingsDisplayInit2`],
+        keyconfig: [`skinKeyConfigInit`, `skinKeyConfigInit2`],
+        preloading: [`skinPreloadingInit`, `skinPreloadingInit2`],
+        main: [`skinMainInit`, `skinMainInit2`],
+        result: [`skinResultInit`, `skinResultInit2`],
+    };
 
-    if (typeof customSetDifficulty === C_TYP_FUNCTION) {
-        g_customJsObj.difficulty.push(customSetDifficulty);
-    }
-    if (typeof customSetDifficulty2 === C_TYP_FUNCTION) {
-        g_customJsObj.difficulty.push(customSetDifficulty2);
-    }
-
-    // ディスプレイ設定
-    if (typeof customSettingsDisplayInit === C_TYP_FUNCTION) {
-        g_customJsObj.settingsDisplay.push(customSettingsDisplayInit);
-    }
-    if (typeof customSettingsDisplayInit2 === C_TYP_FUNCTION) {
-        g_customJsObj.settingsDisplay.push(customSettingsDisplayInit2);
-    }
-    if (typeof skinSettingsDisplayInit === C_TYP_FUNCTION) {
-        g_skinJsObj.settingsDisplay.push(skinSettingsDisplayInit);
-    }
-    if (typeof skinSettingsDisplayInit2 === C_TYP_FUNCTION) {
-        g_skinJsObj.settingsDisplay.push(skinSettingsDisplayInit2);
+    const loadFunctions = (_funcMap, _targetObj) => {
+        Object.entries(_funcMap).forEach(([category, funcNames]) => {
+            funcNames.forEach(funcName => {
+                if (typeof window[funcName] === C_TYP_FUNCTION) {
+                    _targetObj[category].push(window[funcName]);
+                }
+            });
+        });
     }
 
-    // キーコンフィグ
-    if (typeof customKeyConfigInit === C_TYP_FUNCTION) {
-        g_customJsObj.keyconfig.push(customKeyConfigInit);
-    }
-    if (typeof customKeyConfigInit2 === C_TYP_FUNCTION) {
-        g_customJsObj.keyconfig.push(customKeyConfigInit2);
-    }
-    if (typeof skinKeyConfigInit === C_TYP_FUNCTION) {
-        g_skinJsObj.keyconfig.push(skinKeyConfigInit);
-    }
-    if (typeof skinKeyConfigInit2 === C_TYP_FUNCTION) {
-        g_skinJsObj.keyconfig.push(skinKeyConfigInit2);
-    }
-
-    // ローディング
-    if (typeof customPreloadingInit === C_TYP_FUNCTION) {
-        g_customJsObj.preloading.push(customPreloadingInit);
-    }
-    if (typeof customPreloadingInit2 === C_TYP_FUNCTION) {
-        g_customJsObj.preloading.push(customPreloadingInit2);
-    }
-    if (typeof skinPreloadingInit === C_TYP_FUNCTION) {
-        g_skinJsObj.preloading.push(skinPreloadingInit);
-    }
-    if (typeof skinPreloadingInit2 === C_TYP_FUNCTION) {
-        g_skinJsObj.preloading.push(skinPreloadingInit2);
-    }
-    if (typeof customLoadingInit === C_TYP_FUNCTION) {
-        g_customJsObj.loading.push(customLoadingInit);
-    }
-    if (typeof customLoadingInit2 === C_TYP_FUNCTION) {
-        g_customJsObj.loading.push(customLoadingInit2);
-    }
-    if (typeof customLoadingProgress === C_TYP_FUNCTION) {
-        g_customJsObj.progress.push(customLoadingProgress);
-    }
-    if (typeof customLoadingProgress2 === C_TYP_FUNCTION) {
-        g_customJsObj.progress.push(customLoadingProgress2);
-    }
-
-    // メイン
-    if (typeof customMainInit === C_TYP_FUNCTION) {
-        g_customJsObj.main.push(customMainInit);
-    }
-    if (typeof customMainInit2 === C_TYP_FUNCTION) {
-        g_customJsObj.main.push(customMainInit2);
-    }
-    if (typeof customJudgeDummyArrow === C_TYP_FUNCTION) {
-        g_customJsObj.dummyArrow.push(customJudgeDummyArrow);
-    }
-    if (typeof customJudgeDummyArrow2 === C_TYP_FUNCTION) {
-        g_customJsObj.dummyArrow.push(customJudgeDummyArrow2);
-    }
-    if (typeof customJudgeDummyFrz === C_TYP_FUNCTION) {
-        g_customJsObj.dummyFrz.push(customJudgeDummyFrz);
-    }
-    if (typeof customJudgeDummyFrz2 === C_TYP_FUNCTION) {
-        g_customJsObj.dummyFrz.push(customJudgeDummyFrz2);
-    }
-    if (typeof customMainEnterFrame === C_TYP_FUNCTION) {
-        g_customJsObj.mainEnterFrame.push(customMainEnterFrame);
-    }
-    if (typeof customMainEnterFrame2 === C_TYP_FUNCTION) {
-        g_customJsObj.mainEnterFrame.push(customMainEnterFrame2);
-    }
-    if (typeof skinMainInit === C_TYP_FUNCTION) {
-        g_skinJsObj.main.push(skinMainInit);
-    }
-    if (typeof skinMainInit2 === C_TYP_FUNCTION) {
-        g_skinJsObj.main.push(skinMainInit2);
-    }
-
-    // 判定
-    if (typeof customJudgeIi === C_TYP_FUNCTION) {
-        g_customJsObj.judg_ii.push(customJudgeIi);
-    }
-    if (typeof customJudgeIi2 === C_TYP_FUNCTION) {
-        g_customJsObj.judg_ii.push(customJudgeIi2);
-    }
-    if (typeof customJudgeShakin === C_TYP_FUNCTION) {
-        g_customJsObj.judg_shakin.push(customJudgeShakin);
-    }
-    if (typeof customJudgeShakin2 === C_TYP_FUNCTION) {
-        g_customJsObj.judg_shakin.push(customJudgeShakin2);
-    }
-    if (typeof customJudgeMatari === C_TYP_FUNCTION) {
-        g_customJsObj.judg_matari.push(customJudgeMatari);
-    }
-    if (typeof customJudgeMatari2 === C_TYP_FUNCTION) {
-        g_customJsObj.judg_matari.push(customJudgeMatari2);
-    }
-    if (typeof customJudgeShobon === C_TYP_FUNCTION) {
-        g_customJsObj.judg_shobon.push(customJudgeShobon);
-    }
-    if (typeof customJudgeShobon2 === C_TYP_FUNCTION) {
-        g_customJsObj.judg_shobon.push(customJudgeShobon2);
-    }
-    if (typeof customJudgeUwan === C_TYP_FUNCTION) {
-        g_customJsObj.judg_uwan.push(customJudgeUwan);
-    }
-    if (typeof customJudgeUwan2 === C_TYP_FUNCTION) {
-        g_customJsObj.judg_uwan.push(customJudgeUwan2);
-    }
-    if (typeof customJudgeKita === C_TYP_FUNCTION) {
-        g_customJsObj.judg_kita.push(customJudgeKita);
-    }
-    if (typeof customJudgeKita2 === C_TYP_FUNCTION) {
-        g_customJsObj.judg_kita.push(customJudgeKita2);
-    }
-    if (typeof customJudgeIknai === C_TYP_FUNCTION) {
-        g_customJsObj.judg_iknai.push(customJudgeIknai);
-    }
-    if (typeof customJudgeIknai2 === C_TYP_FUNCTION) {
-        g_customJsObj.judg_iknai.push(customJudgeIknai2);
-    }
-
-    // リザルト
-    if (typeof customResultInit === C_TYP_FUNCTION) {
-        g_customJsObj.result.push(customResultInit);
-    }
-    if (typeof customResultInit2 === C_TYP_FUNCTION) {
-        g_customJsObj.result.push(customResultInit2);
-    }
-    if (typeof customResultEnterFrame === C_TYP_FUNCTION) {
-        g_customJsObj.resultEnterFrame.push(customResultEnterFrame);
-    }
-    if (typeof customResultEnterFrame2 === C_TYP_FUNCTION) {
-        g_customJsObj.resultEnterFrame.push(customResultEnterFrame2);
-    }
-    if (typeof skinResultInit === C_TYP_FUNCTION) {
-        g_skinJsObj.result.push(skinResultInit);
-    }
-    if (typeof skinResultInit2 === C_TYP_FUNCTION) {
-        g_skinJsObj.result.push(skinResultInit2);
-    }
+    loadFunctions(customFuncMap, g_customJsObj);
+    loadFunctions(skinFuncMap, g_skinJsObj);
 };
 
 /**
  * 従来の共通設定変数をg_presetObjへ移動 
  * - settingjsファイルを読み込んだ直後にこの関数を呼び出している
  */
-const loadLegacySettingFunc = _ => {
+const loadLegacySettingFunc = () => {
 
     if (typeof g_presetTuning === C_TYP_STRING) {
         g_presetObj.tuning = g_presetTuning;
