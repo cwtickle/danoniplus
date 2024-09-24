@@ -3447,7 +3447,7 @@ const updateImgType = (_imgType, _initFlg = false) => {
 	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
 	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
-	if (_imgType[1] === undefined && g_presetObj.overrideExtension !== undefined) {
+	if (_imgType.extension === undefined && g_presetObj.overrideExtension !== undefined) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetObj.overrideExtension}`);
 	}
 	if (!g_isFile) {
