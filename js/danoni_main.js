@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/08/14
+ * Revised : 2024/09/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.4.13`;
-const g_revisedDate = `2024/08/14`;
+const g_version = `Ver 29.4.14`;
+const g_revisedDate = `2024/09/25`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3073,7 +3073,7 @@ const updateImgType = _imgType => {
 	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
 	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
-	if (_imgType[1] === undefined && g_presetObj.overrideExtension !== undefined) {
+	if (_imgType.extension === undefined && g_presetObj.overrideExtension !== undefined) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetObj.overrideExtension}`);
 	}
 	if (!g_isFile) {
