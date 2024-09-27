@@ -3676,8 +3676,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	/**
 	 * ゲージ別個別配列への値格納
 	 * @param {number} _scoreId 
-	 * @param {array} _gaugeDetails 
-	 * @param {boolean} _loopFlg
+	 * @param {array} _gaugeDetails
 	 */
 	const setGaugeDetails = (_scoreId, _gaugeDetails) => {
 		if (_gaugeDetails[0] === `x`) {
@@ -6814,7 +6813,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {string} _id 
 	 * @param {string} _directionFlg 
 	 * @param {function} _func 
-	 * @param {number} object.x (x, y, w, h, siz)
+	 * @param {number} object.x
 	 * @param {number} object.y
 	 * @param {number} object.w
 	 * @param {number} object.h
@@ -8655,6 +8654,19 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	/** Motionの適用フレーム数 */
 	g_workObj.motionFrame = [];
 
+	/**
+	 * 矢印・フリーズアローのデータ格納処理
+	 * @param {number} _j 
+	 * @param {number} _k 
+	 * @param {array} _data 
+	 * @param {number} _startPoint 
+	 * @param {string} _header 
+	 * @param {boolean} _frzFlg 
+	 * @param {number} object.initY
+	 * @param {number} object.initBoostY
+	 * @param {number} object.arrivalFrame
+	 * @param {number} object.motionFrame 
+	 */
 	const setNotes = (_j, _k, _data, _startPoint, _header, _frzFlg = false, { initY, initBoostY, arrivalFrame, motionFrame } = {}) => {
 		if (_startPoint >= 0) {
 			const arrowAttrs = { pos: _j, initY, initBoostY, arrivalFrame, motionFrame };
@@ -9174,8 +9186,8 @@ const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev) => {
  * スクロール変化情報の格納
  * @param {string} _header 
  * @param {number} _frameArrow 
- * @param {number} _frameStep 
  * @param {number} _val 
+ * @param {number} _frameStep 
  * @param {number} _scrollDir 
  */
 const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir) => {
