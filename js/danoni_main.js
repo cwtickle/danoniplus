@@ -437,6 +437,7 @@ const fillArray = (_length, _val = 0) => [...Array(_length)].fill(_val);
  * @param {any[]} _array 
  * @param {number} _minLength 
  * @param {number} _defaultVal
+ * @returns {string[]|number[]}
  */
 const makeBaseArray = (_array = [], _minLength, _defaultVal) => padArray(_array, fillArray(_minLength, _defaultVal));
 
@@ -444,6 +445,7 @@ const makeBaseArray = (_array = [], _minLength, _defaultVal) => padArray(_array,
  * ベースとする配列に対して別の配列で上書き
  * @param {string[]|number[]} _array 
  * @param {string[]|number[]} _baseArray ベースとする配列
+ * @returns {string[]|number[]}
  */
 const padArray = (_array, _baseArray) => {
 	_array?.filter(val => hasVal(val)).forEach((val, j) => _baseArray[j] = val);
@@ -458,7 +460,7 @@ const padArray = (_array, _baseArray) => {
  *     [9, 6, 9, 9, 8, 7, 5] -> [[0, 2, 3]]
  * @param {number[]} _array 
  * @param {number} [_num=1]
- * @return {number}
+ * @returns {number[][]}
  */
 const getMaxValIdxs = (_array, _num = 1) => {
 	let baseArray = _array.concat();
