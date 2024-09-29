@@ -298,6 +298,7 @@ const g_convFunc = {
  * @param {string} _checkStr 
  * @param {string} _default 
  * @param {string} [_type='string'] 
+ * @returns 
  */
 const setVal = (_checkStr, _default, _type = C_TYP_STRING) =>
 	hasValN(_checkStr) ? g_convFunc[_type](_checkStr, _default) : _default;
@@ -305,6 +306,7 @@ const setVal = (_checkStr, _default, _type = C_TYP_STRING) =>
 /**
  * ブール値からON/OFFへ変換
  * @param {boolean} _condition 
+ * @returns {string}
  */
 const boolToSwitch = _condition => _condition ? C_FLG_ON : C_FLG_OFF;
 
@@ -495,14 +497,21 @@ const getMaxValIdxs = (_array, _num = 1) => {
 const listMatching = (_str, _list, { prefix = ``, suffix = `` } = {}) =>
 	_list.findIndex(value => _str.toLowerCase().match(new RegExp(String.raw`${prefix}${value}${suffix}`, 'i'))) !== -1;
 
+/**
+ * 前方・後方一致検索の組み合わせ（あいまい検索）
+ * @param {string} _str 検索文字
+ * @param {string[]} _headerList 前方一致させるリスト
+ * @param {string[]} _footerList 後方一致させるリスト
+ * @returns {boolean}
+ */
 const fuzzyListMatching = (_str, _headerList, _footerList) =>
 	listMatching(_str, _headerList, { prefix: `^` }) || listMatching(_str, _footerList, { suffix: `$` });
 
 /**
  * 文字列の置換
  * @param {string} _str 
- * @param {string[][]} _pairs 
- * @returns {string}
+ * @param {string[][]} _pairs 置換ペア配列。[[置換前A,置換後A],[置換前B,置換後B]]の形式で指定
+ * @returns {string} 置換後文字列
  */
 const replaceStr = (_str, _pairs) => {
 	let tmpStr = _str || ``;
@@ -622,7 +631,7 @@ const commonKeyDown = (_evt, _displayName, _func = _code => { }, _dfEvtFlg) => {
 
 /**
  * キーを離したときの動作（汎用）
- * @param {object} _evt 
+ * @param {KeyboardEvent} _evt 
  */
 const commonKeyUp = _evt => {
 	g_inputKeyBuffer[g_kCdNameObj.metaLKey] = false;
@@ -837,10 +846,9 @@ const loadMultipleFiles2 = async (_fileData, _loadType) => {
 
 /**
  * 与えられたパスより、キーワードとディレクトリに分割
- * 返却値：[ファイルキーワード, ルートディレクトリ]
  * @param {string} _fileName 
  * @param {string} [_directory='']
- * @returns {string[]}
+ * @returns {string[]} [ファイルキーワード, ルートディレクトリ]
  */
 const getFilePath = (_fileName, _directory = ``) => {
 	let fullPath;
@@ -1044,8 +1052,8 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 /*-----------------------------------------------------------*/
 
 /**
- * 画面共通のフォント設定
- * @param {string} _priorityFont 
+ * 画面共通のフォント設定 (font-family設定を作成)
+ * @param {string} [_priorityFont=''] 優先させるフォント名 
  * @returns {string}
  */
 const getBasicFont = (_priorityFont = ``) =>
@@ -1086,8 +1094,8 @@ const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64,
  * 補足説明部分のラベル作成
  * @param {string} _id 
  * @param {string} _str 
- * @param {string} object.altId 
- * @param {number} object.siz 
+ * @param {string} [object.altId=_id]
+ * @param {number} [object.siz=g_limitObj.mainSiz] 
  * @returns {HTMLDivElement}
  */
 const createDescDiv = (_id, _str, { altId = _id, siz = g_limitObj.mainSiz } = {}) =>
@@ -1100,9 +1108,8 @@ const createDescDiv = (_id, _str, { altId = _id, siz = g_limitObj.mainSiz } = {}
 /*-----------------------------------------------------------*/
 
 /**
- * 図形の描画
- * - div子要素の作成。呼び出しただけでは使用できないので、親divよりappendChildすること。
- * - 詳細は @see {@link createButton} も参照のこと。 
+ * 図形の描画 (div要素)
+ * - 親divに対してこの関数の返却値に対してappendすることで描画される
  * @param {string} _id
  * @param {number} _x 
  * @param {number} _y 
@@ -1142,13 +1149,13 @@ const setUserSelect = (_style, _value = C_DIS_NONE) => {
  * 子div要素のラベル文字作成 (CSS版・拡張属性対応)
  * @param {string} _id 
  * @param {string} _text 
- * @param {number} object.x
- * @param {number} object.y
- * @param {number} object.w
- * @param {number} object.h
- * @param {number} object.siz
- * @param {number} object.align
- * @param {...any} object.rest
+ * @param {number} [object.x=0]
+ * @param {number} [object.y=0]
+ * @param {number} [object.w=g_limitObj.setLblWidth]
+ * @param {number} [object.h=g_limitObj.setLblHeight]
+ * @param {number} [object.siz=g_limitObj.setLblSiz]
+ * @param {number} [object.align='center']
+ * @param {...any} [object.rest]
  * @param {...any} _classes 
  * @returns {HTMLDivElement}
  */
@@ -1188,8 +1195,8 @@ const createImg = (_id, _imgPath, _x, _y, _width, _height) => {
  * @param {string} _parentObj
  * @param {string} _id
  * @param {function} _func 
- * @param {number} object.x
- * @param {number} object.y
+ * @param {number} [object.x=0]
+ * @param {number} [object.y=0]
  * @returns {HTMLInputElement}
  */
 const createColorPicker = (_parentObj, _id, _func, { x = 0, y = 0 } = {}) => {
@@ -1207,14 +1214,13 @@ const createColorPicker = (_parentObj, _id, _func, { x = 0, y = 0 } = {}) => {
 /**
  * 色付きオブジェクトの作成 (拡張属性対応)
  * @param {string} _id 
- * @param {number} object.x
- * @param {number} object.y
- * @param {number} object.w
- * @param {number} object.h
- * @param {number} object.color
- * @param {string} object.rotate
- * @param {string} object.styleName
- * @param {...any} object.rest
+ * @param {number} [object.x=0]
+ * @param {number} [object.y=0]
+ * @param {number} [object.w=C_ARW_WIDTH]
+ * @param {number} [object.h=C_ARW_WIDTH]
+ * @param {string} [object.rotate='']
+ * @param {string} [object.styleName='']
+ * @param {...any} [object.rest]
  * @param {...any} _classes 
  * @returns {HTMLDivElement}
  */
@@ -1250,12 +1256,12 @@ const createColorObject2 = (_id,
  * - 作成済みの場合はすでに作成済のスプライトを返却する
  * @param {HTMLDivElement} _parentObj 親スプライト
  * @param {string} _newObjId 作成する子スプライト名
- * @param {number} object.x
- * @param {number} object.y
- * @param {number} object.w
- * @param {number} object.h
- * @param {string} object.title
- * @param {...any} object.rest
+ * @param {number} [object.x=0]
+ * @param {number} [object.y=0]
+ * @param {number} [object.w=g_sWidth]
+ * @param {number} [object.h=g_sHeight]
+ * @param {string} [object.title]
+ * @param {...any} [object.rest]
  * @param  {...any} _classes
  * @returns {HTMLDivElement}
  */
@@ -1277,8 +1283,8 @@ const createEmptySprite = (_parentObj, _newObjId, { x = 0, y = 0, w = g_sWidth, 
 /**
  * 階層スプライト（全体）の作成
  * @param {string} _baseName 
- * @param {number} _num 
- * @param {number} object.x
+ * @param {number} _num 階層数
+ * @param {number} [object.x=0]
  * @returns {HTMLDivElement}
  */
 const createMultipleSprite = (_baseName, _num, { x = 0 } = {}) => {
@@ -1502,7 +1508,7 @@ const resetKeyControl = () => {
 
 /**
  * Canvasのベース背景を作成
- * @param {object} _ctx
+ * @param {CanvasRenderingContext2D} _ctx
  * @param {number} [object.w=g_sWidth]
  * @param {number} [object.h=g_sHeight] 
  */
@@ -1594,7 +1600,6 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 
 		Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
 			document.documentElement.style.setProperty(prop, getCssCustomProperty(prop, g_headerObj[prop])));
-
 	}
 };
 
@@ -1602,6 +1607,7 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
  * CSSカスタムプロパティの値を作成
  * @param {string} _prop 
  * @param {string} _propData 
+ * @returns {string}
  */
 const getCssCustomProperty = (_prop, _propData) =>
 	document.documentElement.style.getPropertyValue(_propData) || (g_cssBkProperties[_propData] ?? (
@@ -1656,6 +1662,7 @@ const getCssCustomProperties = () => {
  * @param {string} _obj.animationName アニメーション名
  * @param {string} _obj.animationDuration アニメーションを動かす間隔(秒)
  * @param {number} _obj.opacity 画像の不透明度
+ * @returns {string}
  */
 const makeSpriteImage = _obj => {
 	let tmpInnerHTML = `<img src=${_obj.path} class="${_obj.class}"	style="position:absolute;left:${wUnit(_obj.left)};top:${wUnit(_obj.top)}`;
@@ -1681,6 +1688,7 @@ const makeSpriteImage = _obj => {
  * @param {string} _obj.animationName アニメーション名
  * @param {string} _obj.animationDuration アニメーションを動かす間隔(秒)
  * @param {number} _obj.opacity テキストの不透明度
+ * @returns {string}
  */
 const makeSpriteText = _obj => {
 	let tmpInnerHTML = `<span class="${_obj.class}"	style="display:inline-block;position:absolute;left:${wUnit(_obj.left)};top:${wUnit(_obj.top)}`;
@@ -1702,7 +1710,7 @@ const makeSpriteText = _obj => {
  * 多重配列の存在をチェックし、
  * 存在しない場合は作成、存在する場合は重複を避けて配列を新規作成
  * @param {any[][]} _obj 
- * @returns
+ * @returns [多重配列(初期化済),配列初期化済数]
  */
 const checkDuplicatedObjects = _obj => {
 	let dataCnts = 0;
@@ -1725,7 +1733,7 @@ const checkDuplicatedObjects = _obj => {
  * 多層スプライトデータの作成処理
  * @param {string} _data 
  * @param {function} _calcFrame 
- * @returns
+ * @returns [多層スプライトデータ, 最大深度]
  */
 const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 
@@ -1813,7 +1821,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
  * スタイル変更データの作成処理
  * @param {string} _data 
  * @param {function} _calcFrame 
- * @returns 
+ * @returns [多層スプライトデータ, 1(固定)]
  */
 const makeStyleData = (_data, _calcFrame = _frame => _frame) => {
 	const spriteData = [];
@@ -1859,7 +1867,7 @@ const getSpriteJumpFrame = _frames => {
  * 背景・マスクモーションの表示（共通処理）
  * @param {object} _spriteData 
  * @param {string} _name 
- * @param {boolean} _condition 
+ * @param {boolean} [_condition=true] 
  */
 const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
 	const baseSprite = document.getElementById(`${_name}Sprite${_spriteData.depth}`);
@@ -2071,6 +2079,7 @@ const copyTextToClipboard = async (_textVal, _msg) => {
 /**
  * 現在URLのクエリパラメータから指定した値を取得
  * @param {string} _name
+ * @returns {string}
  */
 const getQueryParamVal = _name => {
 	const param = new URL(location.href).searchParams.get(_name);
@@ -2079,6 +2088,7 @@ const getQueryParamVal = _name => {
 
 /**
  * ローディング文字用ラベルの作成
+ * @returns {HTMLDivElement}
  */
 const getLoadingLabel = () => createDivCss2Label(`lblLoading`, g_lblNameObj.nowLoading, {
 	x: 0, y: g_sHeight - 40, w: g_sWidth, h: g_limitObj.setLblHeight,
@@ -2755,13 +2765,14 @@ const getHeader = (_obj, ..._params) => {
 /**
  * ヘッダー名の互換設定
  * @param {string} _param 
- * @returns
+ * @returns {string[]}
  */
 const getHname = _param => [_param, _param.toLowerCase()];
 
 /**
  * 譜面ヘッダーの分解（スキン、jsファイルなどの設定）
  * @param {object} _dosObj
+ * @returns
  */
 const preheaderConvert = _dosObj => {
 
@@ -2813,6 +2824,7 @@ const preheaderConvert = _dosObj => {
 /**
  * 譜面ヘッダーの分解（その他の設定）
  * @param {object} _dosObj 譜面データオブジェクト
+ * @returns
  */
 const headerConvert = _dosObj => {
 
@@ -3554,7 +3566,7 @@ const addGaugeFulls = _obj => _obj.map(key => g_gaugeOptionObj.customFulls[key] 
  * 矢印・フリーズアロー色のデータ変換
  * @param {object} _baseObj 
  * @param {object} _dosObj
- * @param {string} object.scoreId 
+ * @param {string} [object.scoreId=''] 
  * @returns オブジェクト ※Object.assign(obj, resetBaseColorList(...))の形で呼び出しが必要
  */
 const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
@@ -3635,6 +3647,7 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
  * @param {boolean} [object._defaultFrzColorUse=true]
  * @param {string} [object._objType='normal']
  * @param {boolean} [object._shadowFlg=false]
+ * @returns {string[][]}
  */
 const setColorList = (_data, _colorInit, _colorInitLength,
 	{ _defaultColorgrd = g_headerObj.defaultColorgrd, _colorCdPaddingUse = false,
@@ -3766,6 +3779,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	 * ゲージ別個別配列への値格納
 	 * @param {number} _scoreId 
 	 * @param {string[]} _gaugeDetails
+	 * @returns {boolean}
 	 */
 	const setGaugeDetails = (_scoreId, _gaugeDetails) => {
 		if (_gaugeDetails[0] === `x`) {
@@ -3788,6 +3802,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	 * gaugeNormal2, gaugeEasy2などの個別設定があった場合にその値から配列を作成
 	 * @param {number} _scoreId 
 	 * @param {number[]} _defaultGaugeList
+	 * @returns {number[]}
 	 */
 	const getGaugeDetailList = (_scoreId, _defaultGaugeList) => {
 		if (_scoreId > 0) {
@@ -3860,7 +3875,7 @@ const getKeyCtrlVal = _kCdN => {
  * 一時的な追加キーの設定
  * @param {object} _dosObj 
  * @param {string[]} object.keyExtraList
- * @returns
+ * @returns {string[]}
  */
 const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) } = {}) => {
 
@@ -4597,6 +4612,7 @@ const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff` } =
  * @param {number} [object._x=g_btnX()]
  * @param {number} [object._y=0]
  * @param {number} [object._w=g_btnWidth()]
+ * @returns {HTMLDivElement}
  */
 const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x = g_btnX(), _y = 0, _w = g_btnWidth() } = {}) => {
 
@@ -4733,10 +4749,10 @@ const setSpriteList = _settingList => {
 };
 
 /**
- * スライダー共通処理
+ * スライダー共通処理 (Fadein)
  * @param {HTMLInputElement} _slider 
  * @param {HTMLDivElement} _link 
- * @returns {number}
+ * @returns {string}
  */
 const inputSlider = (_slider, _link) => {
 	const value = parseInt(_slider.value);
@@ -4745,10 +4761,10 @@ const inputSlider = (_slider, _link) => {
 };
 
 /**
- * スライダー共通処理
+ * スライダー共通処理 (Appearance)
  * @param {HTMLInputElement} _slider 
  * @param {HTMLDivElement} _link 
- * @returns {number}
+ * @returns {string}
  */
 const inputSliderAppearance = (_slider, _link) => {
 	const value = parseInt(_slider.value);
@@ -4847,7 +4863,7 @@ const makeDifBtn = (_scrollNum = 1) => {
 
 /**
  * 譜面変更セレクターの作成・再作成
- * @param {string} _key
+ * @param {string} [_key=''] 絞り込みするキー名(無指定で絞り込みしない)
  */
 const createDifWindow = (_key = ``) => {
 	g_currentPage = `difSelector`;
@@ -4896,7 +4912,7 @@ const createDifWindow = (_key = ``) => {
 
 /**
  * 譜面変更ボタンを押したときの処理
- * @param {number} _num 
+ * @param {number} [_num=1] 
  */
 const changeDifficulty = (_num = 1) => {
 	if (g_headerObj.difSelectorUse) {
@@ -4915,7 +4931,7 @@ const changeDifficulty = (_num = 1) => {
 /**
  * 譜面基礎データの取得
  * @param {number} _scoreId 
- * @returns
+ * @returns {{ arrowCnts: number, frzCnts: number, apm: number, playingTime: string }}
  */
 const getScoreBaseData = _scoreId => {
 	const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
@@ -6250,7 +6266,7 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
  * @param {number} _dmg 
  * @param {number} _init 
  * @param {number} _allCnt 
- * @returns
+ * @returns {string[]}
  */
 const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
 	const justPoint = _rcv + _dmg > 0 ? Math.max(_border - _init + _dmg * _allCnt, 0) / (_rcv + _dmg) : 0;
@@ -6874,6 +6890,11 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			}
 		}
 	};
+	/**
+	 * カラー・シャッフルグループ設定
+	 * @param {string} _type 
+	 * @param {number} [_scrollNum=1] 
+	 */
 	const setGroup = (_type, _scrollNum = 1) => {
 		g_keycons[`${_type}GroupNum`] = g_keycons[`${_type}Groups`][getNextNum(_scrollNum, `${_type}Groups`, g_keycons[`${_type}GroupNum`])];
 		g_keyObj[`${_type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${_type}${keyCtrlPtn}_${g_keycons[`${_type}GroupNum`]}`]);
@@ -6895,7 +6916,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {string} [object.align='left']
 	 * @param {...any} [object.rest]
 	 * @param {...any} _classes 
-	 * @returns {HTMLDivElement} ラベル
+	 * @returns {HTMLDivElement}
 	 */
 	const makeKCButtonHeader = (_id, _name, {
 		x = g_btnX(5 / 6) - 30, y = 0, w = g_btnWidth(1 / 6), h = 20, siz = 12, align = C_ALIGN_LEFT, ...rest
@@ -6916,7 +6937,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @param {...any} [object.rest]
 	 * @param {string} [_mainClass=g_cssObj.button_RevOFF] 
 	 * @param  {...any} _classes 
-	 * @returns ボタン
+	 * @returns {HTMLDivElement}
 	 */
 	const makeKCButton = (_id, _text, _func, { x = g_btnX(5 / 6) - 20, y = 15, w = g_btnWidth(1 / 6), h = 18,
 		siz = g_limitObj.jdgCntsSiz, borderStyle = `solid`, cxtFunc, ...rest } = {}, _mainClass = g_cssObj.button_RevOFF, ..._classes) =>
@@ -7019,7 +7040,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 	/**
 	 * カーソル位置の変更
-	 * @param {number} [_nextj] 
+	 * @param {number} [_nextj] 次のカーソル位置
 	 */
 	const changeConfigCursor = (_nextj = ++g_keycons.cursorNum % g_keycons.cursorNumList.length) => {
 		g_keycons.cursorNum = _nextj;
@@ -7045,6 +7066,13 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		setKeyConfigCursor();
 	};
 
+	/**
+	 * 次のカーソル位置の取得
+	 * @param {number} _scrollNum 
+	 * @param {string} _groupName 
+	 * @param {string} _target 
+	 * @returns {number}
+	 */
 	const getNextNum = (_scrollNum, _groupName, _target) =>
 		nextPos(g_keycons[_groupName].findIndex(value => value === _target), _scrollNum, g_keycons[_groupName].length);
 
@@ -7460,6 +7488,10 @@ const getShadowColor = (_colorPos, _arrowColor) => g_headerObj.setShadowColor[_c
 
 /**
  * キー数基礎情報の取得
+ * @returns {{ 
+ * 	keyCtrlPtn: string, keyNum: number, posMax: number,
+ * 	divideCnt: number, keyGroupMaps: string[], keyGroupList: string[] 
+ * }}
  */
 const getKeyInfo = () => {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
@@ -7854,8 +7886,8 @@ const setScoreIdHeader = (_scoreId = 0, _scoreLockFlg = false) => {
 
 /**
  * 譜面ファイル番号の取得
- * @param {number} _scoreId 
- * @param {boolean} _scoreLockFlg 
+ * @param {number} [_scoreId=0] 
+ * @param {boolean} [_scoreLockFlg=false] 
  * @returns {number|string}
  */
 const setDosIdHeader = (_scoreId = 0, _scoreLockFlg = false) => {
@@ -7896,7 +7928,7 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
  * Mirrorの適用
  * @param {number} _keyNum
  * @param {number[][]} _shuffleGroup
- * @param {boolean} _swapFlg
+ * @param {boolean} [_swapFlg=false]
  */
 const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
 
@@ -8056,7 +8088,7 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
  * @param {number} _preblankFrame 補完フレーム数
  * @param {string} [_dummyNo] ダミー用譜面番号添え字
  * @param {string} [_keyCtrlPtn] 選択キー及びパターン
- * @param {boolean} [_scoreAnalyzeFlg] (default : false)
+ * @param {boolean} [_scoreAnalyzeFlg=false] 譜面詳細データのために必要分で読込を中断
  * @returns
  */
 const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
@@ -9097,7 +9129,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
  * @param {number} _frame 
  * @param {object} _speedOnFrame 
  * @param {object} _motionOnFrame 
- * @returns
+ * @returns {{ frm: number, startY: number, arrivalFrm: number, motionFrm: number }}
  */
 const getArrowStartFrame = (_frame, _speedOnFrame, _motionOnFrame) => {
 
@@ -10905,7 +10937,8 @@ const changeAppearanceFilter = (_appearance, _num = 10) => {
  * @param {string} _class 
  * @param {number} _heightPos 
  * @param {string|number} _text
- * @param {string} _display 表示有無 (inherit: 表示 / none: 非表示)
+ * @param {string} [_display='inherit'] 表示有無 (inherit: 表示 / none: 非表示)
+ * @returns {HTMLDivElement}
  */
 const makeCounterSymbol = (_id, _x, _class, _heightPos, _text, _display = C_DIS_INHERIT) => {
 	return createDivCss2Label(_id, _text, {
@@ -10919,7 +10952,7 @@ const makeCounterSymbol = (_id, _x, _class, _heightPos, _text, _display = C_DIS_
  * ステップゾーンの表示・非表示切替
  * @param {number} _j
  * @param {string} _display
- * @param {number} _alpha 
+ * @param {number} [_alpha=1] 
  */
 const appearStepZone = (_j, _display, _alpha = 1) => {
 	$id(`stepRoot${_j}`).display = _display;
@@ -10930,7 +10963,7 @@ const appearStepZone = (_j, _display, _alpha = 1) => {
  * 部分キーのステップゾーン出現処理
  * @param {number} _j 
  * @param {string[]} _targets
- * @param {number[]} _alphas ステップゾーン毎の可視状況 (style.opacity の値)
+ * @param {number[]} [_alphas] ステップゾーン毎の可視状況 (style.opacity の値)
  */
 const appearKeyTypes = (_j, _targets, _alphas = fillArray(_targets.length, 1)) => {
 	appearStepZone(_j, C_DIS_NONE);
@@ -11006,7 +11039,7 @@ const changeStepY = (_frameNum) =>
  * @param {number} _j 
  * @param {number} _k 
  * @param {string} _name
- * @param {number} _difFrame
+ * @param {number} [_difFrame=0]
  */
 const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	const frzNo = `${_j}_${_k}`;
@@ -11043,6 +11076,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	 * フリーズアロー(ヒット時)の色変更
 	 * - 生成時以降で全体色変化がある場合はその値へ置き換える
 	 * @param {string} _type 
+	 * @returns {string}
 	 */
 	const getColor = (_type) => {
 		const cColor = g_workObj[`${_name}${_type}Colors`][_j];
@@ -11250,7 +11284,7 @@ const lifeRecovery = () => {
 
 /**
  * ゲージダメージ処理
- * @param {boolean} _excessive 空押し判定有無
+ * @param {boolean} [_excessive=false] 空押し判定有無
  */
 const lifeDamage = (_excessive = false) => {
 	g_workObj.lifeVal -= g_workObj.lifeDmg * (_excessive ? 0.25 : 1);
@@ -11267,7 +11301,7 @@ const lifeDamage = (_excessive = false) => {
  * 判定キャラクタの表示、判定済矢印数・判定数のカウンタ
  * @param {string} _name 
  * @param {string} _character 
- * @param {string} _fjdg 
+ * @param {string} [_fjdg=''] 
  */
 const changeJudgeCharacter = (_name, _character, _fjdg = ``) => {
 	g_resultObj[_name]++;
@@ -12100,7 +12134,7 @@ const resultInit = () => {
  * @param {string} object.tweetFrzJdg フリーズアロー判定状況
  * @param {string} object.tweetMaxCombo コンボ数状況
  * @param {string} object.baseTwitUrl X投稿用URL
- * @returns 
+ * @returns {string}
  */
 const makeResultText = (_format, {
 	hashTag, musicTitle, tweetDifData, tuning, rankMark, playStyleData,
