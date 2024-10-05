@@ -10436,13 +10436,29 @@ const mainInit = () => {
 		const stepRoot = createEmptySprite(arrowSprite[dividePos], arrowName, {
 			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
 		});
+		/**
+		 * 矢印毎の属性情報
+		 */
 		g_attrObj[arrowName] = {
+			// 生存フレーム数
 			cnt: _attrs.arrivalFrame + 1,
+			// 生存フレーム数 (ストップ分除去、個別加速/Motionオプション用)
 			boostCnt: _attrs.motionFrame,
-			boostSpd: g_workObj.boostSpd, dividePos: dividePos,
-			dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
-			prevY: firstPosY, y: firstPosY,
+			// 個別加速量
+			boostSpd: g_workObj.boostSpd,
+			// ステップゾーン位置 (0: デフォルト, 1: リバース)
+			dividePos: dividePos,
+			// スクロール方向 (1: デフォルト, -1: リバース)
+			dir: g_workObj.scrollDir[_j],
+			// 個別加速方向 (1: 順方向加速, -1: 逆方向加速)
+			boostDir: g_workObj.boostDir,
+			// 前フレーム時の位置 (判定で使用)
+			prevY: firstPosY,
+			// 現フレーム時の位置
+			y: firstPosY,
 		};
+		// 矢印色の設定
+		// - 枠/塗りつぶし色: g_attrObj[arrowName].Arrow / ArrowShadow
 		g_typeLists.arrowColor.forEach(val => g_attrObj[arrowName][`Arrow${val}`] = g_workObj[`${_name}${val}Colors`][_j]);
 		arrowSprite[dividePos].appendChild(stepRoot);
 
@@ -10451,12 +10467,13 @@ const mainInit = () => {
 			stepRoot.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
 		}
 
-		// 内側塗りつぶし矢印は、下記の順で作成する。
-		// 後に作成するほど前面に表示される。
-
+		/**
+		 * 矢印オブジェクトの生成
+		 * - 後で生成されたものが手前に表示されるため、塗りつぶし ⇒ 枠の順で作成
+		 */
 		// 矢印の内側を塗りつぶすか否か
 		if (g_headerObj.setShadowColor[colorPos] !== ``) {
-			// 矢印の塗り部分
+			// 矢印 (塗りつぶし)
 			const arrShadow = createColorObject2(`${_name}Shadow${_j}_${_arrowCnt}`, {
 				background: _shadowColor === `Default` ? _color : _shadowColor,
 				rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
@@ -10467,7 +10484,7 @@ const mainInit = () => {
 			stepRoot.appendChild(arrShadow);
 		}
 
-		// 矢印
+		// 矢印 (枠)
 		stepRoot.appendChild(createColorObject2(`${_name}Top${_j}_${_arrowCnt}`, {
 			background: _color, rotate: g_workObj.arrowRtn[_j],
 		}));
@@ -10522,13 +10539,40 @@ const mainInit = () => {
 		const frzRoot = createEmptySprite(arrowSprite[dividePos], frzName, {
 			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
 		});
+		/**
+		 * フリーズアロー毎の属性情報
+		 */
 		g_attrObj[frzName] = {
+			// 生存フレーム数
 			cnt: _attrs.arrivalFrame + 1,
+			// 生存フレーム数 (ストップ分除去、個別加速/Motionオプション用)
 			boostCnt: _attrs.motionFrame,
-			judgEndFlg: false, isMoving: true, frzBarLength: firstBarLength, keyUpFrame: 0,
-			boostSpd: g_workObj.boostSpd, dividePos: dividePos, dir: g_workObj.scrollDir[_j], boostDir: g_workObj.boostDir,
-			y: firstPosY, barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos, btmY: firstBarLength * g_workObj.scrollDir[_j],
+			// 判定終了フラグ (false: 未判定, true: 判定済)
+			judgEndFlg: false,
+			// 移動中フラグ (false: 押しっぱなしの状態, true: 移動中)
+			isMoving: true,
+			// フリーズアローの長さ
+			frzBarLength: firstBarLength,
+			// キーを離していたフレーム数 (基準値超えでNG判定)
+			keyUpFrame: 0,
+			// 個別加速量
+			boostSpd: g_workObj.boostSpd,
+			// ステップゾーン位置 (0: デフォルト, 1: リバース)
+			dividePos: dividePos,
+			// スクロール方向 (1: デフォルト, -1: リバース)
+			dir: g_workObj.scrollDir[_j],
+			// 個別加速方向 (1: 順方向加速, -1: 逆方向加速)
+			boostDir: g_workObj.boostDir,
+			// 現フレーム時のフリーズアロー本体の位置
+			y: firstPosY,
+			// フリーズアロー(帯)の相対位置
+			barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos,
+			// フリーズアロー(対矢印)の相対位置
+			btmY: firstBarLength * g_workObj.scrollDir[_j],
 		};
+		// フリーズアロー色の設定
+		// - 通常時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Normal / NormalShadow / NormalBar
+		// - ヒット時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Hit / HitShadow / HitBar
 		g_typeLists.frzColor.forEach(val => g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j]);
 		arrowSprite[dividePos].appendChild(frzRoot);
 
@@ -10538,8 +10582,10 @@ const mainInit = () => {
 		}
 		let shadowColor = _shadowColor === `Default` ? _normalColor : _shadowColor;
 
-		// フリーズアローは、下記の順で作成する。
-		// 後に作成するほど前面に表示される。
+		/**
+		 * フリーズアローオブジェクトの生成
+		 * - 後で生成されたものが手前に表示されるため、以下の順で作成
+		 */
 		multiAppend(frzRoot,
 
 			// フリーズアロー帯(frzBar)
