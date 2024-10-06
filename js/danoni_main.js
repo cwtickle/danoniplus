@@ -6356,11 +6356,8 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 const makeSettingLblCssButton = (_id, _name, _heightPos, _func, {
 	x = g_limitObj.setLblLeft, y = g_limitObj.setLblHeight * _heightPos,
 	w = g_limitObj.setLblWidth, h = g_limitObj.setLblHeight, siz = g_limitObj.setLblSiz,
-	cxtFunc = () => true, ...rest } = {}, ..._classes) => {
-
-	const tmpObj = { x, y, w, h, siz, cxtFunc };
-	return createCss2Button(_id, _name, _func, { ...tmpObj, ...rest }, g_cssObj.button_Default, ..._classes);
-};
+	cxtFunc = () => true, ...rest } = {}, ..._classes) =>
+	createCss2Button(_id, _name, _func, { x, y, w, h, siz, cxtFunc, ...rest }, g_cssObj.button_Default, ..._classes);
 
 /**
  * 譜面変更セレクター用ボタン
