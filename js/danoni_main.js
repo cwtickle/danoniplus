@@ -6366,15 +6366,18 @@ const makeSettingLblCssButton = (_id, _name, _heightPos, _func, {
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  * @param {number} [object.x]
- * @param {number} [object.w]
  * @param {number} [object.h]
+ * @param {number} [object.y=h*_heightPos]
+ * @param {number} [object.w]
+ * @param {number} [object.siz]
  * @param {string} [object.btnStyle='Default']
  * @returns {HTMLDivElement}
  */
-const makeDifLblCssButton = (_id, _name, _heightPos, _func,
-	{ x = 0, w = g_limitObj.difSelectorWidth, h = g_limitObj.setLblHeight, btnStyle = `Default` } = {}) =>
+const makeDifLblCssButton = (_id, _name, _heightPos, _func, {
+	x = 0, h = g_limitObj.setLblHeight, y = h * _heightPos,
+	w = g_limitObj.difSelectorWidth, siz = g_limitObj.difSelectorSiz, btnStyle = `Default` } = {}) =>
 	createCss2Button(_id, _name, _func, {
-		x, y: h * _heightPos, w, h, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`, title: g_msgObj[_id] ?? ``,
+		x, y, w, h, siz, borderStyle: `solid`, title: g_msgObj[_id] ?? ``,
 	}, g_cssObj[`button_${btnStyle}`], g_cssObj.button_ON);
 
 /**
