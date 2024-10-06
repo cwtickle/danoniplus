@@ -10053,17 +10053,15 @@ const mainInit = () => {
 
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
+			g_audio.pause();
+			clearTimeout(g_timeoutEvtId);
 
 			if (g_isMac && keyIsShift()) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
-				g_audio.pause();
-				clearTimeout(g_timeoutEvtId);
 				titleInit();
 
 			} else {
 				// その他の環境では単にRetryに対応するキーのみで適用
-				g_audio.pause();
-				clearTimeout(g_timeoutEvtId);
 				clearWindow();
 				musicAfterLoaded();
 			}
