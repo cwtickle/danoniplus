@@ -9604,8 +9604,6 @@ const mainInit = () => {
 	g_workObj.fadeOutNo = fillArray(wordMaxLen);
 	g_workObj.lastFadeFrame = fillArray(wordMaxLen);
 	g_workObj.wordFadeFrame = fillArray(wordMaxLen);
-	const MAX_FILTER_POS = 100;
-	const MIN_FILTER_POS = 0;
 
 	// 背景スプライトを作成
 	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth, { x: g_workObj.backX });
@@ -10084,6 +10082,8 @@ const mainInit = () => {
 			}
 
 		} else if (g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_OFF) {
+			const MAX_FILTER_POS = 100;
+			const MIN_FILTER_POS = 0;
 			if (setCode === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
 				changeAppearanceFilter(Math.min(g_hidSudObj.filterPos + 1, MAX_FILTER_POS));
 			} else if (setCode === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
