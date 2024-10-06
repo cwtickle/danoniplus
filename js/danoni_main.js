@@ -9604,6 +9604,8 @@ const mainInit = () => {
 	g_workObj.fadeOutNo = fillArray(wordMaxLen);
 	g_workObj.lastFadeFrame = fillArray(wordMaxLen);
 	g_workObj.wordFadeFrame = fillArray(wordMaxLen);
+	const MAX_FILTER_POS = 100;
+	const MIN_FILTER_POS = 0;
 
 	// 背景スプライトを作成
 	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth, { x: g_workObj.backX });
@@ -10083,9 +10085,9 @@ const mainInit = () => {
 
 		} else if (g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_OFF) {
 			if (setCode === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(Math.min(g_hidSudObj.filterPos + 1, 100));
+				changeAppearanceFilter(Math.min(g_hidSudObj.filterPos + 1, MAX_FILTER_POS));
 			} else if (setCode === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(Math.max(g_hidSudObj.filterPos - 1, 0));
+				changeAppearanceFilter(Math.max(g_hidSudObj.filterPos - 1, MIN_FILTER_POS));
 			}
 		}
 		return blockCode(setCode);
@@ -10942,21 +10944,22 @@ const mainInit = () => {
  * @param {number} _num 
  */
 const changeAppearanceFilter = (_num = 10) => {
+	const MAX_FILTER_POS = 100;
 	const topNum = g_hidSudObj[g_stateObj.appearance];
 	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
-	if (g_stateObj.appearance === `Hid&Sud+` && _num > 50) {
-		_num = 50;
+	if (g_stateObj.appearance === `Hid&Sud+` && _num > MAX_FILTER_POS / 2) {
+		_num = MAX_FILTER_POS / 2;
 	}
 
-	const numPlus = (g_stateObj.appearance === `Hid&Sud+` ? _num : `0`);
+	const numPlus = (g_stateObj.appearance === `Hid&Sud+` ? _num : 0);
 	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
 
 	$id(`arrowSprite${topNum}`).clipPath = topShape;
 	$id(`arrowSprite${bottomNum}`).clipPath = bottomShape;
 
-	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / 100 + g_stateObj.hitPosition);
-	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (100 - _num) / 100 - g_stateObj.hitPosition);
+	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / MAX_FILTER_POS + g_stateObj.hitPosition);
+	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS - g_stateObj.hitPosition);
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		$id(`filterView`).top =
