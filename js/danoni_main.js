@@ -6353,17 +6353,11 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
  * @param {...any} _classes 追加するクラス
  * @returns {HTMLDivElement}
  */
-const makeSettingLblCssButton = (_id, _name, _heightPos, _func, { x, y, w, h, siz, cxtFunc = () => true, ...rest } = {}, ..._classes) => {
-	const tmpObj = {
-		x: x ?? g_limitObj.setLblLeft,
-		y: y ?? g_limitObj.setLblHeight * _heightPos,
-		w: w ?? g_limitObj.setLblWidth,
-		h: h ?? g_limitObj.setLblHeight,
-		siz: siz ?? g_limitObj.setLblSiz,
-		cxtFunc: cxtFunc ?? (() => true),
-	};
-	return createCss2Button(_id, _name, _func, { ...tmpObj, ...rest }, g_cssObj.button_Default, ..._classes);
-};
+const makeSettingLblCssButton = (_id, _name, _heightPos, _func, {
+	x = g_limitObj.setLblLeft, y = g_limitObj.setLblHeight * _heightPos,
+	w = g_limitObj.setLblWidth, h = g_limitObj.setLblHeight, siz = g_limitObj.setLblSiz,
+	cxtFunc = () => true, ...rest } = {}, ..._classes) =>
+	createCss2Button(_id, _name, _func, { x, y, w, h, siz, cxtFunc, ...rest }, g_cssObj.button_Default, ..._classes);
 
 /**
  * 譜面変更セレクター用ボタン
@@ -6372,15 +6366,18 @@ const makeSettingLblCssButton = (_id, _name, _heightPos, _func, { x, y, w, h, si
  * @param {number} _heightPos 上からの配置順
  * @param {function} _func
  * @param {number} [object.x]
- * @param {number} [object.w]
  * @param {number} [object.h]
+ * @param {number} [object.y=h*_heightPos]
+ * @param {number} [object.w]
+ * @param {number} [object.siz]
  * @param {string} [object.btnStyle='Default']
  * @returns {HTMLDivElement}
  */
-const makeDifLblCssButton = (_id, _name, _heightPos, _func,
-	{ x = 0, w = g_limitObj.difSelectorWidth, h = g_limitObj.setLblHeight, btnStyle = `Default` } = {}) =>
+const makeDifLblCssButton = (_id, _name, _heightPos, _func, {
+	x = 0, h = g_limitObj.setLblHeight, y = h * _heightPos,
+	w = g_limitObj.difSelectorWidth, siz = g_limitObj.difSelectorSiz, btnStyle = `Default` } = {}) =>
 	createCss2Button(_id, _name, _func, {
-		x, y: h * _heightPos, w, h, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`, title: g_msgObj[_id] ?? ``,
+		x, y, w, h, siz, borderStyle: `solid`, title: g_msgObj[_id] ?? ``,
 	}, g_cssObj[`button_${btnStyle}`], g_cssObj.button_ON);
 
 /**
@@ -9736,7 +9733,7 @@ const mainInit = () => {
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
-	changeAppearanceFilter(g_stateObj.appearance, g_appearanceRanges.includes(g_stateObj.appearance) ?
+	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
 		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance]);
 
 	for (let j = 0; j < keyNum; j++) {
@@ -10056,17 +10053,15 @@ const mainInit = () => {
 
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
+			g_audio.pause();
+			clearTimeout(g_timeoutEvtId);
 
 			if (g_isMac && keyIsShift()) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
-				g_audio.pause();
-				clearTimeout(g_timeoutEvtId);
 				titleInit();
 
 			} else {
 				// その他の環境では単にRetryに対応するキーのみで適用
-				g_audio.pause();
-				clearTimeout(g_timeoutEvtId);
 				clearWindow();
 				musicAfterLoaded();
 			}
@@ -10085,12 +10080,12 @@ const mainInit = () => {
 			}
 
 		} else if (g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_OFF) {
+			const MAX_FILTER_POS = 100;
+			const MIN_FILTER_POS = 0;
 			if (setCode === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos < 100 ?
-					g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
+				changeAppearanceFilter(Math.min(g_hidSudObj.filterPos + 1, MAX_FILTER_POS));
 			} else if (setCode === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos > 0 ?
-					g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
+				changeAppearanceFilter(Math.max(g_hidSudObj.filterPos - 1, MIN_FILTER_POS));
 			}
 		}
 		return blockCode(setCode);
@@ -10944,32 +10939,32 @@ const mainInit = () => {
 
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
- * @param {string} _appearance
  * @param {number} _num 
  */
-const changeAppearanceFilter = (_appearance, _num = 10) => {
+const changeAppearanceFilter = (_num = 10) => {
+	const MAX_FILTER_POS = 100;
 	const topNum = g_hidSudObj[g_stateObj.appearance];
 	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
-	if (_appearance === `Hid&Sud+` && _num > 50) {
-		_num = 50;
+	if (g_stateObj.appearance === `Hid&Sud+` && _num > MAX_FILTER_POS / 2) {
+		_num = MAX_FILTER_POS / 2;
 	}
 
-	const numPlus = (_appearance === `Hid&Sud+` ? _num : `0`);
+	const numPlus = (g_stateObj.appearance === `Hid&Sud+` ? _num : 0);
 	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
 
 	$id(`arrowSprite${topNum}`).clipPath = topShape;
 	$id(`arrowSprite${bottomNum}`).clipPath = bottomShape;
 
-	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / 100 + g_stateObj.hitPosition);
-	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (100 - _num) / 100 - g_stateObj.hitPosition);
+	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / MAX_FILTER_POS + g_stateObj.hitPosition);
+	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS - g_stateObj.hitPosition);
 
-	if (g_appearanceRanges.includes(_appearance)) {
+	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		$id(`filterView`).top =
 			$id(`filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).top;
 		filterView.textContent = `${_num}%`;
 
-		if (_appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
+		if (g_stateObj.appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
 			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).display = C_DIS_NONE;
 		}
 		g_hidSudObj.filterPos = _num;
