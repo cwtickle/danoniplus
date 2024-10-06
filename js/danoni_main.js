@@ -6353,15 +6353,12 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
  * @param {...any} _classes 追加するクラス
  * @returns {HTMLDivElement}
  */
-const makeSettingLblCssButton = (_id, _name, _heightPos, _func, { x, y, w, h, siz, cxtFunc = () => true, ...rest } = {}, ..._classes) => {
-	const tmpObj = {
-		x: x ?? g_limitObj.setLblLeft,
-		y: y ?? g_limitObj.setLblHeight * _heightPos,
-		w: w ?? g_limitObj.setLblWidth,
-		h: h ?? g_limitObj.setLblHeight,
-		siz: siz ?? g_limitObj.setLblSiz,
-		cxtFunc: cxtFunc ?? (() => true),
-	};
+const makeSettingLblCssButton = (_id, _name, _heightPos, _func, {
+	x = g_limitObj.setLblLeft, y = g_limitObj.setLblHeight * _heightPos,
+	w = g_limitObj.setLblWidth, h = g_limitObj.setLblHeight, siz = g_limitObj.setLblSiz,
+	cxtFunc = () => true, ...rest } = {}, ..._classes) => {
+
+	const tmpObj = { x, y, w, h, siz, cxtFunc };
 	return createCss2Button(_id, _name, _func, { ...tmpObj, ...rest }, g_cssObj.button_Default, ..._classes);
 };
 
@@ -9736,7 +9733,7 @@ const mainInit = () => {
 	];
 
 	// Appearanceのオプション適用時は一部描画を隠す
-	changeAppearanceFilter(g_stateObj.appearance, g_appearanceRanges.includes(g_stateObj.appearance) ?
+	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
 		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance]);
 
 	for (let j = 0; j < keyNum; j++) {
@@ -10086,11 +10083,9 @@ const mainInit = () => {
 
 		} else if (g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_OFF) {
 			if (setCode === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos < 100 ?
-					g_hidSudObj.filterPos + 1 : g_hidSudObj.filterPos);
+				changeAppearanceFilter(Math.min(g_hidSudObj.filterPos + 1, 100));
 			} else if (setCode === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(g_stateObj.appearance, g_hidSudObj.filterPos > 0 ?
-					g_hidSudObj.filterPos - 1 : g_hidSudObj.filterPos);
+				changeAppearanceFilter(Math.max(g_hidSudObj.filterPos - 1, 0));
 			}
 		}
 		return blockCode(setCode);
@@ -10944,17 +10939,16 @@ const mainInit = () => {
 
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
- * @param {string} _appearance
  * @param {number} _num 
  */
-const changeAppearanceFilter = (_appearance, _num = 10) => {
+const changeAppearanceFilter = (_num = 10) => {
 	const topNum = g_hidSudObj[g_stateObj.appearance];
 	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
-	if (_appearance === `Hid&Sud+` && _num > 50) {
+	if (g_stateObj.appearance === `Hid&Sud+` && _num > 50) {
 		_num = 50;
 	}
 
-	const numPlus = (_appearance === `Hid&Sud+` ? _num : `0`);
+	const numPlus = (g_stateObj.appearance === `Hid&Sud+` ? _num : `0`);
 	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
 
@@ -10964,12 +10958,12 @@ const changeAppearanceFilter = (_appearance, _num = 10) => {
 	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / 100 + g_stateObj.hitPosition);
 	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (100 - _num) / 100 - g_stateObj.hitPosition);
 
-	if (g_appearanceRanges.includes(_appearance)) {
+	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		$id(`filterView`).top =
 			$id(`filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).top;
 		filterView.textContent = `${_num}%`;
 
-		if (_appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
+		if (g_stateObj.appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
 			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).display = C_DIS_NONE;
 		}
 		g_hidSudObj.filterPos = _num;
