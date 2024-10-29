@@ -99,6 +99,11 @@ let C_CLR_SETTING = `#999900`;
 let C_CLR_RESET = `#009900`;
 let C_CLR_TWEET = `#009999`;
 
+let C_CLR_TEXT = `#ffffff`;
+let C_CLR_TITLE = `#cccccc`;
+let C_CLR_LOADING_BAR = `#eeeeee`;
+let C_CLR_LNK = `#111111`;
+
 const C_CLR_II = `#66ffff`;
 const C_CLR_SHAKIN = `#99ff99`;
 const C_CLR_MATARI = `#ff9966`;
