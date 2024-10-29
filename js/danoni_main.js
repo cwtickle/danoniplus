@@ -2169,6 +2169,9 @@ const initialControl = async () => {
 	loadLegacySettingFunc();
 	deleteDiv(divRoot, `lblLoading`);
 
+	// 古い関数の読込 (ファイルがある場合のみ)
+	await loadScript2(`${g_rootPath}../js/lib/legacy_functions.js?${g_randTime}`, false);
+
 	// クエリで譜面番号が指定されていればセット
 	g_stateObj.scoreId = setIntVal(getQueryParamVal(`scoreId`));
 
