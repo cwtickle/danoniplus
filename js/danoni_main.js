@@ -56,6 +56,7 @@ window.onload = async () => {
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	await loadScript2(`${g_rootPath}../js/lib/danoni_localbinary.js?${g_randTime}`, false);
 	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${g_randTime}`);
+	await loadScript2(`${g_rootPath}../js/lib/legacy_functions.js?${g_randTime}`, false);
 	initialControl();
 };
 
@@ -2168,9 +2169,6 @@ const initialControl = async () => {
 	await loadScript2(`${settingRoot}danoni_setting${settingType}.js?${g_randTime}`, false);
 	loadLegacySettingFunc();
 	deleteDiv(divRoot, `lblLoading`);
-
-	// 古い関数の読込 (ファイルがある場合のみ)
-	await loadScript2(`${g_rootPath}../js/lib/legacy_functions.js?${g_randTime}`, false);
 
 	// クエリで譜面番号が指定されていればセット
 	g_stateObj.scoreId = setIntVal(getQueryParamVal(`scoreId`));
