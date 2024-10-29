@@ -67,13 +67,13 @@ const makeResultSymbol = (_id, _x, _color, _heightPos, _text, _align) => {
 }
 
 const checkArrayVal = (_checkArray, _type, _minLength) => {
-    const checkFlg = hasArrayList(_data, _minLength);
+    const checkFlg = hasArrayList(_checkArray, _minLength);
     if (_type === C_TYP_FLOAT) {
-        if (isNaN(parseFloat(_checkArray[0]))) {
+        if (Number.isNaN(parseFloat(_checkArray[0]))) {
             return false;
         }
     } else if (_type === C_TYP_NUMBER) {
-        if (isNaN(parseInt(_checkArray[0]))) {
+        if (Number.isNaN(parseInt(_checkArray[0]))) {
             return false;
         }
     }
