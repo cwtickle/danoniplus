@@ -73,7 +73,7 @@ const checkArrayVal = (_checkArray, _type, _minLength) => {
             return false;
         }
     } else if (_type === C_TYP_NUMBER) {
-        if (Number.isNaN(parseInt(_checkArray[0]))) {
+        if (Number.isNaN(parseInt(_checkArray[0], 10))) {
             return false;
         }
     }
