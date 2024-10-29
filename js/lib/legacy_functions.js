@@ -64,7 +64,7 @@ const makeResultSymbol = (_id, _x, _color, _heightPos, _text, _align) => {
     const div = makeCssResultSymbol(_id, _x, ``, _heightPos, _text, _align);
     div.style.color = _color;
     return div;
-}
+};
 
 const checkArrayVal = (_checkArray, _type, _minLength) => {
     const checkFlg = hasArrayList(_checkArray, _minLength);
