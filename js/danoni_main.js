@@ -56,6 +56,7 @@ window.onload = async () => {
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
 	await loadScript2(`${g_rootPath}../js/lib/danoni_localbinary.js?${g_randTime}`, false);
 	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${g_randTime}`);
+	await loadScript2(`${g_rootPath}../js/lib/legacy_functions.js?${g_randTime}`, false);
 	initialControl();
 };
 

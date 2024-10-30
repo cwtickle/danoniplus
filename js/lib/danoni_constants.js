@@ -3442,16 +3442,6 @@ const g_skinJsObj = {
     result: [],
 };
 
-/** 過去関数の互換 */
-const convertreplaceNums = () => {
-    console.warn('convertreplaceNums is deprecated. Use convertReplaceNums instead.');
-    convertReplaceNums();
-};
-const MainInit = () => {
-    console.warn('MainInit is deprecated. Use mainInit instead.');
-    mainInit();
-};
-
 /**
  * 従来のカスタム関数をg_customJsObj, g_skinJsObjへ追加
  * - customjsファイルを読み込んだ直後にこの関数を呼び出している
