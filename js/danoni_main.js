@@ -233,6 +233,7 @@ const getNumAttr = (_baseObj, _attrkey) => parseFloat(_baseObj.getAttribute(_att
  * @returns {string} 埋め込み後の変数
  */
 const convertStrToVal = _str => {
+	if (!_str) return _str;
 	const strs = _str.split(`}`).join(`{`).split(`{`);
 	let convStrs = ``;
 	for (let j = 0; j < strs.length; j += 2) {
@@ -2290,9 +2291,12 @@ const initialControl = async () => {
 			// 譜面ファイルが分割されている場合、譜面詳細情報取得のために譜面をロード
 			if (g_stateObj.dosDivideFlg) {
 				await loadChartFile(j);
-				resetColorAndGauge(j);
+				resetColor(j);
 			}
 			getScoreDetailData(j);
+			if (j === 0 || g_stateObj.dosDivideFlg) {
+				resetGauge(j);
+			}
 		}
 	}
 	g_customJsObj.preTitle.forEach(func => func());
@@ -2441,16 +2445,22 @@ const loadChartFile = async (_scoreId = g_stateObj.scoreId) => {
 };
 
 /**
- * 譜面をファイルで分割している場合に初期色やゲージ情報を追加取得
+ * 譜面をファイルで分割している場合に初期色を追加取得
  * @param {string} _scoreId 
  */
-const resetColorAndGauge = _scoreId => {
+const resetColor = _scoreId => {
 	// 初期矢印・フリーズアロー色の再定義
 	if (g_stateObj.scoreLockFlg) {
 		Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
 	}
 	Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
+};
 
+/**
+ * 譜面をファイルで分割している場合にゲージ情報を追加取得
+ * @param {string} _scoreId 
+ */
+const resetGauge = _scoreId => {
 	// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
 	Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
 	Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
@@ -3023,7 +3033,8 @@ const headerConvert = _dosObj => {
 		difs.forEach(dif => {
 			const difDetails = dif.split(`,`);
 			const lifeData = (_type, _default) =>
-				setVal(difDetails[difpos[_type]] || g_presetObj.gauge?.[_type], _default, C_TYP_FLOAT);
+				setVal(convertStrToVal(difDetails[difpos[_type]]),
+					setVal(g_presetObj.gauge?.[_type], _default, C_TYP_FLOAT), C_TYP_CALC);
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
 			obj.lifeBorders.push(lifeData(`Border`, `x`));
@@ -3152,9 +3163,6 @@ const headerConvert = _dosObj => {
 		Object.assign(g_gaugeOptionObj, resetCustomGauge(_dosObj, { scoreId: j }));
 		Object.assign(obj, resetBaseColorList(obj, _dosObj, { scoreId: j }));
 	}
-
-	// ライフ設定のカスタム部分取得（譜面ヘッダー加味）
-	Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(_dosObj, gaugePtn, obj.difLabels.length));
 
 	// ダミー譜面の設定
 	if (hasVal(_dosObj.dummyId)) {
@@ -3786,11 +3794,11 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 		if (_gaugeDetails[0] === `x`) {
 			obj.lifeBorders[_scoreId] = `x`;
 		} else {
-			obj.lifeBorders[_scoreId] = setVal(_gaugeDetails[0], ``, C_TYP_FLOAT);
+			obj.lifeBorders[_scoreId] = setVal(convertStrToVal(_gaugeDetails[0]), ``, C_TYP_CALC);
 		}
-		obj.lifeRecoverys[_scoreId] = setVal(_gaugeDetails[1], ``, C_TYP_FLOAT);
-		obj.lifeDamages[_scoreId] = setVal(_gaugeDetails[2], ``, C_TYP_FLOAT);
-		obj.lifeInits[_scoreId] = setVal(_gaugeDetails[3], ``, C_TYP_FLOAT);
+		obj.lifeRecoverys[_scoreId] = setVal(convertStrToVal(_gaugeDetails[1]), ``, C_TYP_CALC);
+		obj.lifeDamages[_scoreId] = setVal(convertStrToVal(_gaugeDetails[2]), ``, C_TYP_CALC);
+		obj.lifeInits[_scoreId] = setVal(convertStrToVal(_gaugeDetails[3]), ``, C_TYP_CALC);
 
 		if (gaugeUpdateFlg && hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
 			Object.keys(obj).forEach(key => Object.assign(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
