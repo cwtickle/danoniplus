@@ -709,7 +709,11 @@ const g_escapeStr = {
     ],
     targetPatternName: [
         [`all`, [...Array(50).keys()].map(i => `g${i}`).join(`/`)],
-    ]
+    ],
+    gaugeParamName: [
+        [`Arrow[]`, `sumData(g_detailObj.arrowCnt[{0}])`],
+        [`Frz[]`, `sumData(g_detailObj.frzCnt[{0}])`],
+    ],
 };
 
 /** 設定・オプション画面用共通 */

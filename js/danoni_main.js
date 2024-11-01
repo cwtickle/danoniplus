@@ -233,7 +233,7 @@ const getNumAttr = (_baseObj, _attrkey) => parseFloat(_baseObj.getAttribute(_att
  * @returns {string} 埋め込み後の変数
  */
 const convertStrToVal = _str => {
-	if (!_str) return _str;
+	if (!hasVal(_str)) return _str;
 	const strs = _str.split(`}`).join(`{`).split(`{`);
 	let convStrs = ``;
 	for (let j = 0; j < strs.length; j += 2) {
@@ -2294,8 +2294,11 @@ const initialControl = async () => {
 				resetColor(j);
 			}
 			getScoreDetailData(j);
-			if (j === 0 || g_stateObj.dosDivideFlg) {
-				resetGauge(j);
+		}
+		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
+			resetGauge(j);
+			if (!g_stateObj.dosDivideFlg) {
+				break;
 			}
 		}
 	}
@@ -3791,14 +3794,22 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	 * @returns {boolean}
 	 */
 	const setGaugeDetails = (_scoreId, _gaugeDetails) => {
-		if (_gaugeDetails[0] === `x`) {
-			obj.lifeBorders[_scoreId] = `x`;
-		} else {
-			obj.lifeBorders[_scoreId] = setVal(convertStrToVal(_gaugeDetails[0]), ``, C_TYP_CALC);
-		}
-		obj.lifeRecoverys[_scoreId] = setVal(convertStrToVal(_gaugeDetails[1]), ``, C_TYP_CALC);
-		obj.lifeDamages[_scoreId] = setVal(convertStrToVal(_gaugeDetails[2]), ``, C_TYP_CALC);
-		obj.lifeInits[_scoreId] = setVal(convertStrToVal(_gaugeDetails[3]), ``, C_TYP_CALC);
+
+		/**
+		 * 数式からゲージ値に変換
+		 * Arrow[] -> 矢印数, Frz[] -> フリーズアロー数に置換する
+		 * @param {string} _val 
+		 * @returns {number|string}
+		 */
+		const getGaugeVal = _val => {
+			return setVal(convertStrToVal(
+				replaceStr(_val, g_escapeStr.gaugeParamName)?.split(`{0}`).join(_scoreId)
+			), ``, C_TYP_CALC);
+		};
+		obj.lifeBorders[_scoreId] = _gaugeDetails[0] === `x` ? `x` : getGaugeVal(_gaugeDetails[0]);
+		obj.lifeRecoverys[_scoreId] = getGaugeVal(_gaugeDetails[1]);
+		obj.lifeDamages[_scoreId] = getGaugeVal(_gaugeDetails[2]);
+		obj.lifeInits[_scoreId] = getGaugeVal(_gaugeDetails[3]);
 
 		if (gaugeUpdateFlg && hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
 			Object.keys(obj).forEach(key => Object.assign(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
