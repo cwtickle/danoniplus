@@ -517,7 +517,7 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
  */
 const replaceStr = (_str, _pairs) => {
 	let tmpStr = _str;
-	_pairs.forEach(pair => tmpStr = tmpStr?.split(pair[0]).join(pair[1]));
+	_pairs.forEach(pair => tmpStr = String(tmpStr)?.split(pair[0]).join(pair[1]));
 	return tmpStr;
 };
 
