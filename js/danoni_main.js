@@ -2295,11 +2295,9 @@ const initialControl = async () => {
 			}
 			getScoreDetailData(j);
 		}
-		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
+		const loopCount = g_stateObj.dosDivideFlg ? g_headerObj.keyLabels.length : 1;
+		for (let j = 0; j < loopCount; j++) {
 			resetGauge(j);
-			if (!g_stateObj.dosDivideFlg) {
-				break;
-			}
 		}
 	}
 	g_customJsObj.preTitle.forEach(func => func());
