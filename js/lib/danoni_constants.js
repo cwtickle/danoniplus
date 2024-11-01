@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/09/25 (v37.6.1)
+ * Revised : 2024/11/01 (v37.8.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3440,6 +3440,17 @@ const g_skinJsObj = {
     loading: [],
     main: [],
     result: [],
+};
+
+/** @deprecated */
+const convertreplaceNums = () => {
+    console.warn('convertreplaceNums is deprecated. Use convertReplaceNums instead.');
+    convertReplaceNums();
+};
+/** @deprecated */
+const MainInit = () => {
+    console.warn('MainInit is deprecated. Use mainInit instead.');
+    mainInit();
 };
 
 /**

@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2024/10/29 
- * Revised : ----/--/--
+ * Revised : 2024/11/01 (v37.8.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -93,16 +93,6 @@ const checkArrayVal = (_checkArray, _type, _minLength) => {
 /** @deprecated */
 const paddingLeft = (_str, _length, _chr) => String(_str)?.padStart(_length, _chr);
 
-/** @deprecated */
-const convertreplaceNums = () => {
-    console.warn('convertreplaceNums is deprecated. Use convertReplaceNums instead.');
-    convertReplaceNums();
-};
-/** @deprecated */
-const MainInit = () => {
-    console.warn('MainInit is deprecated. Use mainInit instead.');
-    mainInit();
-};
 /** @deprecated */
 let C_CLR_DEFAULT = `#333333`;
 /** @deprecated */
