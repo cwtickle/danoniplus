@@ -711,8 +711,9 @@ const g_escapeStr = {
         [`all`, [...Array(50).keys()].map(i => `g${i}`).join(`/`)],
     ],
     gaugeParamName: [
-        [`Arrow[]`, `sumData(g_detailObj.arrowCnt[{0}])`],
-        [`Frz[]`, `sumData(g_detailObj.frzCnt[{0}])`],
+        [`arrow[]`, `sumData(g_detailObj.arrowCnt[{0}])`],
+        [`frz[]`, `sumData(g_detailObj.frzCnt[{0}])`],
+        [`all[]`, `sumData(g_detailObj.arrowCnt[{0}]) + sumData(g_detailObj.frzCnt[{0}])`],
     ],
 };
 
