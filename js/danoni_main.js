@@ -2291,13 +2291,13 @@ const initialControl = async () => {
 			// 譜面ファイルが分割されている場合、譜面詳細情報取得のために譜面をロード
 			if (g_stateObj.dosDivideFlg) {
 				await loadChartFile(j);
-				resetColor(j);
+				resetColorSetting(j);
 			}
 			getScoreDetailData(j);
 		}
 		const loopCount = g_stateObj.dosDivideFlg ? g_headerObj.keyLabels.length : 1;
 		for (let j = 0; j < loopCount; j++) {
-			resetGauge(j);
+			resetGaugeSetting(j);
 		}
 	}
 	g_customJsObj.preTitle.forEach(func => func());
@@ -2449,7 +2449,7 @@ const loadChartFile = async (_scoreId = g_stateObj.scoreId) => {
  * 譜面をファイルで分割している場合に初期色を追加取得
  * @param {string} _scoreId 
  */
-const resetColor = _scoreId => {
+const resetColorSetting = _scoreId => {
 	// 初期矢印・フリーズアロー色の再定義
 	if (g_stateObj.scoreLockFlg) {
 		Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
@@ -2461,7 +2461,7 @@ const resetColor = _scoreId => {
  * 譜面をファイルで分割している場合にゲージ情報を追加取得
  * @param {string} _scoreId 
  */
-const resetGauge = _scoreId => {
+const resetGaugeSetting = _scoreId => {
 	// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
 	Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
 	Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
