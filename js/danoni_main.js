@@ -6103,7 +6103,7 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 	 * arrow[] -> 矢印数, frz[] -> フリーズアロー数, all[] -> 矢印＋フリーズアロー数に置換する
 	 * @param {string} _val 
 	 * @param {string} _defaultVal
-	 * @returns {number|string}
+	 * @returns {number}
 	 */
 	const getGaugeCalc = (_val, _defaultVal) => {
 		return setVal(convertStrToVal(
