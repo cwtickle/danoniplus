@@ -654,16 +654,17 @@ const C_BLOCK_KEYS = [
  * (置き換え元、置き換え先の組で二次元配列として定義。主にreplaceStr関数で使用)
  * - 先に合致したものを置換するため、複雑なパターンは先に配置する必要がある
  * 
- * @property {array} escape 特殊文字 -> エスケープ文字列
- * @property {array} escapeTag CW Edition定義の特殊文字列 -> エスケープ文字列
- * @property {array} unEscapeTag エスケープ文字列 -> 特殊文字
- * @property {array} escapeCode 使用禁止文字の無効化
- * @property {array} musicNameSimple 曲名中の改行タグ -> 空白化
- * @property {array} musicNameMultiLine 曲名中の特殊改行タグ -> 通常タグ化
- * @property {array} frzName 矢印データ名 -> フリーズアローデータ名
- * @property {array} keyCtrlName キー割当正式名 -> 略名
- * @property {array} colorPatternName 色変化指定先略名 -> 正式名
- * @property {array} targetPatternName 色変化指定先略名(all) -> 正式適用先(g0～g49)
+ * @property {string[][]} escape 特殊文字 -> エスケープ文字列
+ * @property {string[][]} escapeTag CW Edition定義の特殊文字列 -> エスケープ文字列
+ * @property {string[][]} unEscapeTag エスケープ文字列 -> 特殊文字
+ * @property {string[][]} escapeCode 使用禁止文字の無効化
+ * @property {string[][]} musicNameSimple 曲名中の改行タグ -> 空白化
+ * @property {string[][]} musicNameMultiLine 曲名中の特殊改行タグ -> 通常タグ化
+ * @property {string[][]} frzName 矢印データ名 -> フリーズアローデータ名
+ * @property {string[][]} keyCtrlName キー割当正式名 -> 略名
+ * @property {string[][]} colorPatternName 色変化指定先略名 -> 正式名
+ * @property {string[][]} targetPatternName 色変化指定先略名(all) -> 正式適用先(g0～g49)
+ * @property {string[][]} gaugeParamName ゲージ数式用略名 -> 計算式 ({0}にはscoreIdが入る)
  */
 const g_escapeStr = {
     escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
