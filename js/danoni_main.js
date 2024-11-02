@@ -6104,10 +6104,10 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 	 * @param {string} _val 
 	 * @returns {number|string}
 	 */
-	const getGaugeCalc = _val => {
+	const getGaugeCalc = (_val, _defaultVal) => {
 		return setVal(convertStrToVal(
 			replaceStr(_val, g_escapeStr.gaugeParamName)?.split(`{0}`).join(g_stateObj.scoreId)
-		), ``, C_TYP_CALC);
+		), _defaultVal, C_TYP_CALC);
 	};
 	/**
 	 * ゲージ詳細一括変更
@@ -6118,13 +6118,13 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 	 */
 	const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
 		if (hasVal(_baseObj.lifeInits[g_stateObj.scoreId])) {
-			g_stateObj.lifeInit = getGaugeCalc(_baseObj.lifeInits[g_stateObj.scoreId]) * _magInit;
+			g_stateObj.lifeInit = getGaugeCalc(_baseObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit) * _magInit;
 		}
 		if (hasVal(_baseObj.lifeRecoverys[g_stateObj.scoreId])) {
-			g_stateObj.lifeRcv = getGaugeCalc(_baseObj.lifeRecoverys[g_stateObj.scoreId]) * _magRcv;
+			g_stateObj.lifeRcv = getGaugeCalc(_baseObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv) * _magRcv;
 		}
 		if (hasVal(_baseObj.lifeDamages[g_stateObj.scoreId])) {
-			g_stateObj.lifeDmg = getGaugeCalc(_baseObj.lifeDamages[g_stateObj.scoreId]) * _magDmg;
+			g_stateObj.lifeDmg = getGaugeCalc(_baseObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg) * _magDmg;
 		}
 	};
 
@@ -6137,7 +6137,7 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 			g_stateObj.lifeBorder = 0;
 			g_stateObj.lifeMode = C_LFE_SURVIVAL;
 		} else {
-			g_stateObj.lifeBorder = getGaugeCalc(_baseObj.lifeBorders[g_stateObj.scoreId]);
+			g_stateObj.lifeBorder = getGaugeCalc(_baseObj.lifeBorders[g_stateObj.scoreId], g_stateObj.lifeBorder);
 			g_stateObj.lifeMode = C_LFE_BORDER;
 		}
 	};
