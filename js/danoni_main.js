@@ -6118,15 +6118,9 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 	 * @param {number} object.magDmg
 	 */
 	const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
-		if (hasVal(_baseObj.lifeInits[g_stateObj.scoreId])) {
-			g_stateObj.lifeInit = getGaugeCalc(_baseObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit) * _magInit;
-		}
-		if (hasVal(_baseObj.lifeRecoverys[g_stateObj.scoreId])) {
-			g_stateObj.lifeRcv = getGaugeCalc(_baseObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv) * _magRcv;
-		}
-		if (hasVal(_baseObj.lifeDamages[g_stateObj.scoreId])) {
-			g_stateObj.lifeDmg = getGaugeCalc(_baseObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg) * _magDmg;
-		}
+		g_stateObj.lifeInit = getGaugeCalc(_baseObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit) * _magInit;
+		g_stateObj.lifeRcv = getGaugeCalc(_baseObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv) * _magRcv;
+		g_stateObj.lifeDmg = getGaugeCalc(_baseObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg) * _magDmg;
 	};
 
 	/**
