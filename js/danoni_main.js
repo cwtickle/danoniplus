@@ -3034,8 +3034,7 @@ const headerConvert = _dosObj => {
 		difs.forEach(dif => {
 			const difDetails = dif.split(`,`);
 			const lifeData = (_type, _default) =>
-				setVal(convertStrToVal(difDetails[difpos[_type]]),
-					setVal(g_presetObj.gauge?.[_type], _default, C_TYP_FLOAT), C_TYP_CALC);
+				difDetails[difpos[_type]] || g_presetObj.gauge?.[_type] || _default;
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
 			obj.lifeBorders.push(lifeData(`Border`, `x`));
@@ -3787,27 +3786,17 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 
 	/**
 	 * ゲージ別個別配列への値格納
+	 * この時点では各種ゲージ設定は文字列のまま。setGauge関数にて数式に変換される
 	 * @param {number} _scoreId 
 	 * @param {string[]} _gaugeDetails
 	 * @returns {boolean}
 	 */
 	const setGaugeDetails = (_scoreId, _gaugeDetails) => {
 
-		/**
-		 * 数式からゲージ値に変換
-		 * Arrow[] -> 矢印数, Frz[] -> フリーズアロー数に置換する
-		 * @param {string} _val 
-		 * @returns {number|string}
-		 */
-		const getGaugeVal = _val => {
-			return setVal(convertStrToVal(
-				replaceStr(_val, g_escapeStr.gaugeParamName)?.split(`{0}`).join(_scoreId)
-			), ``, C_TYP_CALC);
-		};
-		obj.lifeBorders[_scoreId] = _gaugeDetails[0] === `x` ? `x` : getGaugeVal(_gaugeDetails[0]);
-		obj.lifeRecoverys[_scoreId] = getGaugeVal(_gaugeDetails[1]);
-		obj.lifeDamages[_scoreId] = getGaugeVal(_gaugeDetails[2]);
-		obj.lifeInits[_scoreId] = getGaugeVal(_gaugeDetails[3]);
+		obj.lifeBorders[_scoreId] = _gaugeDetails[0] === `x` ? `x` : _gaugeDetails[0];
+		obj.lifeRecoverys[_scoreId] = _gaugeDetails[1];
+		obj.lifeDamages[_scoreId] = _gaugeDetails[2];
+		obj.lifeInits[_scoreId] = _gaugeDetails[3];
 
 		if (gaugeUpdateFlg && hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
 			Object.keys(obj).forEach(key => Object.assign(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
@@ -6110,6 +6099,17 @@ const setReverseView = _btn => {
 const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 
 	/**
+	 * 数式からゲージ値に変換
+	 * Arrow[] -> 矢印数, Frz[] -> フリーズアロー数に置換する
+	 * @param {string} _val 
+	 * @returns {number|string}
+	 */
+	const getGaugeCalc = _val => {
+		return setVal(convertStrToVal(
+			replaceStr(_val, g_escapeStr.gaugeParamName)?.split(`{0}`).join(g_stateObj.scoreId)
+		), ``, C_TYP_CALC);
+	};
+	/**
 	 * ゲージ詳細一括変更
 	 * @param {object} _baseObj 
 	 * @param {number} object.magInit
@@ -6118,13 +6118,13 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 	 */
 	const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
 		if (hasVal(_baseObj.lifeInits[g_stateObj.scoreId])) {
-			g_stateObj.lifeInit = _baseObj.lifeInits[g_stateObj.scoreId] * _magInit;
+			g_stateObj.lifeInit = getGaugeCalc(_baseObj.lifeInits[g_stateObj.scoreId]) * _magInit;
 		}
 		if (hasVal(_baseObj.lifeRecoverys[g_stateObj.scoreId])) {
-			g_stateObj.lifeRcv = _baseObj.lifeRecoverys[g_stateObj.scoreId] * _magRcv;
+			g_stateObj.lifeRcv = getGaugeCalc(_baseObj.lifeRecoverys[g_stateObj.scoreId]) * _magRcv;
 		}
 		if (hasVal(_baseObj.lifeDamages[g_stateObj.scoreId])) {
-			g_stateObj.lifeDmg = _baseObj.lifeDamages[g_stateObj.scoreId] * _magDmg;
+			g_stateObj.lifeDmg = getGaugeCalc(_baseObj.lifeDamages[g_stateObj.scoreId]) * _magDmg;
 		}
 	};
 
@@ -6137,7 +6137,7 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
 			g_stateObj.lifeBorder = 0;
 			g_stateObj.lifeMode = C_LFE_SURVIVAL;
 		} else {
-			g_stateObj.lifeBorder = _baseObj.lifeBorders[g_stateObj.scoreId];
+			g_stateObj.lifeBorder = getGaugeCalc(_baseObj.lifeBorders[g_stateObj.scoreId]);
 			g_stateObj.lifeMode = C_LFE_BORDER;
 		}
 	};
