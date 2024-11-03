@@ -11604,7 +11604,7 @@ const resultInit = () => {
 		rankMark = g_rankObj.rankMarkF;
 		rankColor = g_rankObj.rankColorF;
 		g_resultObj.spState = `failed`;
-	} else if (playingArrows === g_fullArrows && g_stateObj.autoAll === C_FLG_OFF && !(g_headerObj.excessiveJdgUse && g_stateObj.excessive === C_FLG_OFF)) {
+	} else if (allArrowsPlayed && g_stateObj.autoAll === C_FLG_OFF && !(g_headerObj.excessiveJdgUse && g_stateObj.excessive === C_FLG_OFF)) {
 		if (g_resultObj.spState === ``) {
 			g_resultObj.spState = `cleared`;
 		}
@@ -11628,6 +11628,7 @@ const resultInit = () => {
 			mTitleForView[j] = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][j] + (j === 1 ? playbackView : ``));
 	}
 
+	const allArrowsPlayed = playingArrows === g_fullArrows;
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
 	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
@@ -11778,7 +11779,7 @@ const resultInit = () => {
 	divRoot.appendChild(lblResultPre);
 
 	divRoot.appendChild(createDivCss2Label(`lblResultPre2`,
-		resultViewText(g_gameOverFlg ? `failed` : (playingArrows === g_fullArrows ? g_resultObj.spState : ``)),
+		resultViewText(g_gameOverFlg ? `failed` : (allArrowsPlayed ? g_resultObj.spState : ``)),
 		g_lblPosObj.lblResultPre2, g_cssObj.result_Cleared));
 
 	// プレイデータは Cleared & Failed に合わせて表示
@@ -11876,7 +11877,9 @@ const resultInit = () => {
 			if (![``, `failed`, `cleared`].includes(g_resultObj.spState)) {
 				g_localStorage.highscores[scoreName][g_resultObj.spState] = true;
 			}
-			if (!g_gameOverFlg && g_finishFlg && g_workObj.requiredAccuracy !== `----`) {
+			const isGameCompleted = !g_gameOverFlg && g_finishFlg;
+			const hasValidAccuracy = g_workObj.requiredAccuracy !== `----`;
+			if (isGameCompleted && hasValidAccuracy && allArrowsPlayed) {
 				if (g_localStorage.highscores[scoreName].clearLamps === undefined) {
 					g_localStorage.highscores[scoreName].clearLamps = [];
 				}
