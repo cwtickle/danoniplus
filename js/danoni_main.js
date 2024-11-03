@@ -11876,7 +11876,7 @@ const resultInit = () => {
 			if (![``, `failed`, `cleared`].includes(g_resultObj.spState)) {
 				g_localStorage.highscores[scoreName][g_resultObj.spState] = true;
 			}
-			if (!g_gameOverFlg && g_finishFlg && g_workObj.requiredAccuracy !== `----`) {
+			if (!g_gameOverFlg && g_finishFlg && g_workObj.requiredAccuracy !== `----` && playingArrows === g_fullArrows) {
 				if (g_localStorage.highscores[scoreName].clearLamps === undefined) {
 					g_localStorage.highscores[scoreName].clearLamps = [];
 				}
