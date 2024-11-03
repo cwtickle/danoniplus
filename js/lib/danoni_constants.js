@@ -715,6 +715,7 @@ const g_escapeStr = {
         [`arrow[]`, `sumData(g_detailObj.arrowCnt[{0}])`],
         [`frz[]`, `sumData(g_detailObj.frzCnt[{0}])`],
         [`all[]`, `sumData(g_detailObj.arrowCnt[{0}]) + sumData(g_detailObj.frzCnt[{0}])`],
+        [`maxlife[]`, `g_headerObj.maxLifeVal`],
     ],
 };
 
