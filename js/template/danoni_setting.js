@@ -98,7 +98,7 @@ g_presetObj.gaugeCustom = {
 	SuddenDeath: {
 		Border: `x`,
 		Recovery: 0,
-		Damage: setVal(g_rootObj.maxLifeVal, C_VAL_MAXLIFE, C_TYP_FLOAT),
+		Damage: `{maxlife[]}`,
 		Init: 100,
 	},
 	Practice: {

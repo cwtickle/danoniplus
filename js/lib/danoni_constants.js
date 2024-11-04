@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/09/25 (v37.6.1)
+ * Revised : 2024/11/04 (v38.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -654,16 +654,17 @@ const C_BLOCK_KEYS = [
  * (置き換え元、置き換え先の組で二次元配列として定義。主にreplaceStr関数で使用)
  * - 先に合致したものを置換するため、複雑なパターンは先に配置する必要がある
  * 
- * @property {array} escape 特殊文字 -> エスケープ文字列
- * @property {array} escapeTag CW Edition定義の特殊文字列 -> エスケープ文字列
- * @property {array} unEscapeTag エスケープ文字列 -> 特殊文字
- * @property {array} escapeCode 使用禁止文字の無効化
- * @property {array} musicNameSimple 曲名中の改行タグ -> 空白化
- * @property {array} musicNameMultiLine 曲名中の特殊改行タグ -> 通常タグ化
- * @property {array} frzName 矢印データ名 -> フリーズアローデータ名
- * @property {array} keyCtrlName キー割当正式名 -> 略名
- * @property {array} colorPatternName 色変化指定先略名 -> 正式名
- * @property {array} targetPatternName 色変化指定先略名(all) -> 正式適用先(g0～g49)
+ * @property {string[][]} escape 特殊文字 -> エスケープ文字列
+ * @property {string[][]} escapeTag CW Edition定義の特殊文字列 -> エスケープ文字列
+ * @property {string[][]} unEscapeTag エスケープ文字列 -> 特殊文字
+ * @property {string[][]} escapeCode 使用禁止文字の無効化
+ * @property {string[][]} musicNameSimple 曲名中の改行タグ -> 空白化
+ * @property {string[][]} musicNameMultiLine 曲名中の特殊改行タグ -> 通常タグ化
+ * @property {string[][]} frzName 矢印データ名 -> フリーズアローデータ名
+ * @property {string[][]} keyCtrlName キー割当正式名 -> 略名
+ * @property {string[][]} colorPatternName 色変化指定先略名 -> 正式名
+ * @property {string[][]} targetPatternName 色変化指定先略名(all) -> 正式適用先(g0～g49)
+ * @property {string[][]} gaugeParamName ゲージ数式用略名 -> 計算式 ({0}にはscoreIdが入る)
  */
 const g_escapeStr = {
     escape: [[`&`, `&amp;`], [`<`, `&lt;`], [`>`, `&gt;`], [`"`, `&quot;`]],
@@ -709,7 +710,13 @@ const g_escapeStr = {
     ],
     targetPatternName: [
         [`all`, [...Array(50).keys()].map(i => `g${i}`).join(`/`)],
-    ]
+    ],
+    gaugeParamName: [
+        [`arrow[]`, `sumData(g_detailObj.arrowCnt[{0}])`],
+        [`frz[]`, `sumData(g_detailObj.frzCnt[{0}])`],
+        [`all[]`, `sumData(g_detailObj.arrowCnt[{0}]) + sumData(g_detailObj.frzCnt[{0}])`],
+        [`maxlife[]`, `g_headerObj.maxLifeVal`],
+    ],
 };
 
 /** 設定・オプション画面用共通 */
@@ -827,7 +834,7 @@ const g_rankObj = {
 };
 
 const g_templateObj = {
-    resultFormatDf: `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`,
+    resultFormatDf: `【 #danoni[hashTag] 】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`,
 };
 
 const g_pointAllocation = {
@@ -3440,16 +3447,6 @@ const g_skinJsObj = {
     loading: [],
     main: [],
     result: [],
-};
-
-/** 過去関数の互換 */
-const convertreplaceNums = () => {
-    console.warn('convertreplaceNums is deprecated. Use convertReplaceNums instead.');
-    convertReplaceNums();
-};
-const MainInit = () => {
-    console.warn('MainInit is deprecated. Use mainInit instead.');
-    mainInit();
 };
 
 /**
