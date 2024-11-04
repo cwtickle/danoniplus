@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/09/25
+ * Revised : 2024/11/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 36.6.5`;
-const g_revisedDate = `2024/09/25`;
+const g_version = `Ver 36.6.6`;
+const g_revisedDate = `2024/11/04`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -11347,7 +11347,7 @@ const resultInit = _ => {
 			if (![``, `failed`, `cleared`].includes(g_resultObj.spState)) {
 				g_localStorage.highscores[scoreName][g_resultObj.spState] = true;
 			}
-			if (!g_gameOverFlg && g_finishFlg && g_workObj.requiredAccuracy !== `----`) {
+			if (!g_gameOverFlg && g_finishFlg && g_workObj.requiredAccuracy !== `----` && playingArrows === g_fullArrows) {
 				if (g_localStorage.highscores[scoreName].clearLamps === undefined) {
 					g_localStorage.highscores[scoreName].clearLamps = [];
 				}
