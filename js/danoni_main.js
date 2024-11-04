@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/09/25
+ * Revised : 2024/11/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 29.4.14`;
-const g_revisedDate = `2024/09/25`;
+const g_version = `Ver 29.4.15`;
+const g_revisedDate = `2024/11/04`;
 const g_alphaVersion = ``;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3003,7 +3003,7 @@ const headerConvert = _dosObj => {
 	obj.justFrames = (g_isLocal) ? 0 : 1;
 
 	// リザルトデータのカスタマイズ
-	const resultFormatDefault = `【#danoni[hashTag]】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
+	const resultFormatDefault = `【 #danoni[hashTag] 】[musicTitle]([keyLabel]) /[maker] /Rank:[rank]/Score:[score]/Playstyle:[playStyle]/[arrowJdg]/[frzJdg]/[maxCombo] [url]`;
 	obj.resultFormat = escapeHtmlForEnabledTag(_dosObj.resultFormat ?? g_presetObj.resultFormat ?? resultFormatDefault);
 
 	// フェードイン時にそれ以前のデータを蓄積しない種別(word, back, mask)を指定
