@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/11/04
+ * Revised : 2024/11/05
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 38.0.0`;
-const g_revisedDate = `2024/11/04`;
+const g_version = `Ver 38.0.1`;
+const g_revisedDate = `2024/11/05`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -11596,6 +11596,7 @@ const resultInit = () => {
 	const allScore = g_fullArrows * 10;
 	const resultScore = Math.round(scoreTmp / allScore * g_maxScore) || 0;
 	g_resultObj.score = resultScore;
+	const allArrowsPlayed = playingArrows === g_fullArrows;
 
 	// ランク計算
 	let rankMark = g_rankObj.rankMarkX;
@@ -11628,7 +11629,6 @@ const resultInit = () => {
 			mTitleForView[j] = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][j] + (j === 1 ? playbackView : ``));
 	}
 
-	const allArrowsPlayed = playingArrows === g_fullArrows;
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
 	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
