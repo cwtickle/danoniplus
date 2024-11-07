@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2024/10/29 
- * Revised : ----/--/--
+ * Revised : 2024/11/07 (v38.0.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -37,7 +37,7 @@ const createColorObject = (_id, color, x, y, w, h, rotate = ``, styleName = ``) 
 /** @deprecated */
 const createButton = (_obj, _func) => {
     const div = createCss2Button(_obj.id, _obj.name, _func, {
-        x: _obj.x, y: _obj.y, w: _obj.w, h: _obj.h,
+        x: _obj.x, y: _obj.y, w: _obj.width, h: _obj.height,
         siz: _obj?.fontsize, align: _obj?.align, animationName: _obj?.animationName,
         backgroundColor: _obj?.normalColor,
     });
@@ -48,7 +48,7 @@ const createButton = (_obj, _func) => {
 /** @deprecated */
 const createCssButton = (_obj, _func) =>
     createCss2Button(_obj.id, _obj.name, _func, {
-        x: _obj?.x, y: _obj?.y, w: _obj?.w, h: _obj?.h,
+        x: _obj?.x, y: _obj?.y, w: _obj?.width, h: _obj?.height,
         siz: _obj?.fontsize, align: _obj?.align, animationName: _obj?.animationName
     }, _obj?.class);
 
