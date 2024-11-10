@@ -516,6 +516,9 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
  * @returns {string} 置換後文字列
  */
 const replaceStr = (_str, _pairs) => {
+	if (_str === undefined) {
+		return _str;
+	}
 	let tmpStr = _str;
 	_pairs.forEach(pair => tmpStr = String(tmpStr)?.split(pair[0]).join(pair[1]));
 	return tmpStr;
@@ -8264,7 +8267,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const pos = tmpColorData[1]?.indexOf(`:`);
 				const patternStr = pos > 0 ? [trimStr(tmpColorData[1].substring(0, pos)), trimStr(tmpColorData[1].substring(pos + 1))]
 					: [tmpColorData[1]];
-				const patterns = replaceStr(trimStr(patternStr[1]), g_escapeStr.colorPatternName)?.split(`/`) || [`Arrow`];
+				const patterns = replaceStr(trimStr(patternStr[1] || `Arrow`), g_escapeStr.colorPatternName).split(`/`);
 
 				// 矢印番号の組み立て
 				const colorVals = [];
