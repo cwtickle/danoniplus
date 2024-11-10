@@ -516,6 +516,9 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
  * @returns {string} 置換後文字列
  */
 const replaceStr = (_str, _pairs) => {
+	if (_str === undefined) {
+		return _str;
+	}
 	let tmpStr = _str;
 	_pairs.forEach(pair => tmpStr = String(tmpStr)?.split(pair[0]).join(pair[1]));
 	return tmpStr;
