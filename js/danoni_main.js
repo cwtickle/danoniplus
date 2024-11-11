@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/11/07
+ * Revised : 2024/11/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 38.0.2`;
-const g_revisedDate = `2024/11/07`;
+const g_version = `Ver 38.0.3`;
+const g_revisedDate = `2024/11/11`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -516,6 +516,9 @@ const fuzzyListMatching = (_str, _headerList, _footerList) =>
  * @returns {string} 置換後文字列
  */
 const replaceStr = (_str, _pairs) => {
+	if (_str === undefined) {
+		return _str;
+	}
 	let tmpStr = _str;
 	_pairs.forEach(pair => tmpStr = String(tmpStr)?.split(pair[0]).join(pair[1]));
 	return tmpStr;
@@ -8264,7 +8267,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const pos = tmpColorData[1]?.indexOf(`:`);
 				const patternStr = pos > 0 ? [trimStr(tmpColorData[1].substring(0, pos)), trimStr(tmpColorData[1].substring(pos + 1))]
 					: [tmpColorData[1]];
-				const patterns = replaceStr(trimStr(patternStr[1]), g_escapeStr.colorPatternName)?.split(`/`) || [`Arrow`];
+				const patterns = replaceStr(trimStr(patternStr[1] || `Arrow`), g_escapeStr.colorPatternName).split(`/`);
 
 				// 矢印番号の組み立て
 				const colorVals = [];
