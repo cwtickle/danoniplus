@@ -2816,7 +2816,7 @@ const preheaderConvert = _dosObj => {
 	const tmpSkinType = _dosObj.skinType ?? g_presetObj.skinType ?? `default`;
 	const tmpSkinTypes = tmpSkinType.split(`,`);
 	obj.defaultSkinFlg = tmpSkinTypes.includes(`default`) && setBoolVal(_dosObj.bgCanvasUse ?? g_presetObj.bgCanvasUse, true);
-	setJsFiles(tmpSkinTypes.map(file => convLocalPath(file, `skin`)), C_DIR_SKIN, `skin`);
+	setJsFiles(tmpSkinTypes, C_DIR_SKIN, `skin`);
 
 	// 外部jsファイルの指定
 	const tmpCustomjs = getHeader(_dosObj, ...getHname(`customJs`)) ?? g_presetObj.customJs ?? C_JSF_CUSTOM;
