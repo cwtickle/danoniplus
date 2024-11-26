@@ -39,7 +39,8 @@ const current = () => {
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
-const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
+const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null ||
+	g_rootPath.match(/danoniplus.netlify.app/) !== null;
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
@@ -2809,6 +2810,9 @@ const preheaderConvert = _dosObj => {
 			obj.jsData.push([_type === `skin` ? `danoni_skin_${jsFile}.js` : jsFile, jsDir]);
 		});
 
+	const convLocalPath = (_file, _type) =>
+		g_remoteFlg && !_file.includes(`(..)`) ? `(..)../${_type}/${_file}` : _file;
+
 	// 外部スキンファイルの指定
 	const tmpSkinType = _dosObj.skinType ?? g_presetObj.skinType ?? `default`;
 	const tmpSkinTypes = tmpSkinType.split(`,`);
@@ -2817,11 +2821,13 @@ const preheaderConvert = _dosObj => {
 
 	// 外部jsファイルの指定
 	const tmpCustomjs = getHeader(_dosObj, ...getHname(`customJs`)) ?? g_presetObj.customJs ?? C_JSF_CUSTOM;
-	setJsFiles(tmpCustomjs.replaceAll(`*`, g_presetObj.customJs).split(`,`), C_DIR_JS);
+	setJsFiles(tmpCustomjs.replaceAll(`*`, g_presetObj.customJs).split(`,`)
+		.map(file => convLocalPath(file, `js`)), C_DIR_JS);
 
 	// 外部cssファイルの指定
 	const tmpCustomcss = getHeader(_dosObj, ...getHname(`customCss`)) ?? g_presetObj.customCss ?? ``;
-	setJsFiles(tmpCustomcss.replaceAll(`*`, g_presetObj.customCss).split(`,`), C_DIR_CSS);
+	setJsFiles(tmpCustomcss.replaceAll(`*`, g_presetObj.customCss).split(`,`)
+		.map(file => convLocalPath(file, `css`)), C_DIR_CSS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
 	g_titleLists.init.forEach(objName => {
