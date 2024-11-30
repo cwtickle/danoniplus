@@ -8800,6 +8800,25 @@ const getBrakeTrace = _frms => {
 };
 
 /**
+ * Fountain用の適用関数
+ * - 反対側から出現し、画面中央付近で折り返す。タイミングは初期速度により変化。
+ * @param {number[]} _frms 
+ * @param {number} _spd
+ * @returns {number[]}
+ */
+const getFountainTrace = (_frms, _spd) => {
+	const minj = C_MOTION_STD_POS + 1;
+	const maxj = C_MOTION_STD_POS + Math.ceil(400 / _spd) + 1;
+	const diff = 50 / (maxj - minj);
+	const factor = 0.5 + _spd / 40;
+
+	for (let j = minj; j < maxj; j++) {
+		_frms[j] = Math.floor((10 - (j - C_MOTION_STD_POS - 1) * diff) * factor);
+	}
+	return _frms;
+}
+
+/**
  * 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
  * @param {number} _startFrame 
  * @param {object} _speedOnFrame 
