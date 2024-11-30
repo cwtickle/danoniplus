@@ -16,13 +16,13 @@ let g_localVersion = ``;
 let g_localVersion2 = ``;
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
-//  共通:water　初期化:peach　タイトル:melon  設定:lime　ディスプレイ:lemon  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
+//  共通:water 初期化:peach タイトル:melon 設定:lime ディスプレイ:lemon キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
 //  シーンジャンプ:Scene
 
 /**
  * ▽ 画面の構成
  *  [タイトル]-[設定]-[ディスプレイ]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]
- *  ⇒　各画面に Init がついたものが画面の基本構成(ルート)を表す。
+ *  ⇒ 各画面に Init がついたものが画面の基本構成(ルート)を表す。
  * 
  * ▽ スプライトの親子関係
  *  基本的にdiv要素で管理。最下層を[divRoot]とし、createEmptySprite()でdiv子要素を作成。
@@ -44,7 +44,7 @@ const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) 
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
-const isLocalMusicFile = _scoreId => g_isFile && !listMatching(getMusicUrl(g_stateObj.scoreId), [`.js`, `.txt`], { suffix: `$` });
+const isLocalMusicFile = _scoreId => g_isFile && !listMatching(getMusicUrl(_scoreId), [`.js`, `.txt`], { suffix: `$` });
 
 window.onload = async () => {
 	g_loadObj.main = true;
@@ -1009,7 +1009,7 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	}
 
 	// 矢印の塗りつぶしの場合：透明度を50%にする
-	// 背景矢印の場合　　　　：透明度を25%にする
+	// 背景矢印の場合       ：透明度を25%にする
 	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : (_objType === `titleArrow` ? `40` : ``);
 
 	let convertColorStr = ``;
@@ -5455,7 +5455,7 @@ const setDifficulty = (_initFlg) => {
 
 		if (!g_stateObj.extraKeyFlg) {
 
-			// キー別のローカルストレージの初期設定　※特殊キーは除く
+			// キー別のローカルストレージの初期設定 ※特殊キーは除く
 			g_localKeyStorage = hasKeyStorage ? JSON.parse(hasKeyStorage) : {
 				reverse: C_FLG_OFF,
 				keyCtrl: [[]],
@@ -5809,7 +5809,7 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 7.5
 	spriteList.gauge.appendChild(createLblSetting(`Gauge`));
 
-	// ゲージ設定詳細　縦位置: ゲージ設定+1
+	// ゲージ設定詳細 縦位置: ゲージ設定+1
 	spriteList.gauge.appendChild(createDivCss2Label(`lblGauge2`, ``, g_lblPosObj.lblGauge2));
 
 	if (g_headerObj.gaugeUse) {
@@ -8287,7 +8287,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 							}
 						}
 					} else if (val.indexOf(`...`) > 0) {
-						// 範囲指定表記の補完　例. 0...3 -> 0/1/2/3
+						// 範囲指定表記の補完 例. 0...3 -> 0/1/2/3
 						const [valMin, valMax] = [val.split(`...`)[0], val.split(`...`)[1]].map(val => setIntVal(val));
 						for (let k = valMin; k <= valMax; k++) {
 							colorVals.push(setIntVal(k));
