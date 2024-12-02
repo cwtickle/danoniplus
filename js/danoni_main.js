@@ -4,25 +4,25 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/11/11
+ * Revised : 2024/12/02
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 38.0.3`;
-const g_revisedDate = `2024/11/11`;
+const g_version = `Ver 38.1.0`;
+const g_revisedDate = `2024/12/02`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
 let g_localVersion2 = ``;
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
-//  共通:water　初期化:peach　タイトル:melon  設定:lime　ディスプレイ:lemon  キーコンフィグ:orange  譜面読込:strawberry  メイン:banana  結果:grape
+//  共通:water 初期化:peach タイトル:melon 設定:lime ディスプレイ:lemon キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
 //  シーンジャンプ:Scene
 
 /**
  * ▽ 画面の構成
  *  [タイトル]-[設定]-[ディスプレイ]-[キーコンフィグ]-[譜面読込]-[メイン]-[リザルト]
- *  ⇒　各画面に Init がついたものが画面の基本構成(ルート)を表す。
+ *  ⇒ 各画面に Init がついたものが画面の基本構成(ルート)を表す。
  * 
  * ▽ スプライトの親子関係
  *  基本的にdiv要素で管理。最下層を[divRoot]とし、createEmptySprite()でdiv子要素を作成。
@@ -39,11 +39,12 @@ const current = () => {
 };
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
-const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null;
+const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null ||
+	g_rootPath.match(/danoniplus.netlify.app/) !== null;
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
-const isLocalMusicFile = _scoreId => g_isFile && !listMatching(getMusicUrl(g_stateObj.scoreId), [`.js`, `.txt`], { suffix: `$` });
+const isLocalMusicFile = _scoreId => g_isFile && !listMatching(getMusicUrl(_scoreId), [`.js`, `.txt`], { suffix: `$` });
 
 window.onload = async () => {
 	g_loadObj.main = true;
@@ -1008,7 +1009,7 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 	}
 
 	// 矢印の塗りつぶしの場合：透明度を50%にする
-	// 背景矢印の場合　　　　：透明度を25%にする
+	// 背景矢印の場合       ：透明度を25%にする
 	const alphaVal = (_shadowFlg && _objType !== `frz`) ? `80` : (_objType === `titleArrow` ? `40` : ``);
 
 	let convertColorStr = ``;
@@ -2809,6 +2810,9 @@ const preheaderConvert = _dosObj => {
 			obj.jsData.push([_type === `skin` ? `danoni_skin_${jsFile}.js` : jsFile, jsDir]);
 		});
 
+	const convLocalPath = (_file, _type) =>
+		g_remoteFlg && !_file.includes(`(..)`) ? `(..)../${_type}/${_file}` : _file;
+
 	// 外部スキンファイルの指定
 	const tmpSkinType = _dosObj.skinType ?? g_presetObj.skinType ?? `default`;
 	const tmpSkinTypes = tmpSkinType.split(`,`);
@@ -2817,11 +2821,13 @@ const preheaderConvert = _dosObj => {
 
 	// 外部jsファイルの指定
 	const tmpCustomjs = getHeader(_dosObj, ...getHname(`customJs`)) ?? g_presetObj.customJs ?? C_JSF_CUSTOM;
-	setJsFiles(tmpCustomjs.replaceAll(`*`, g_presetObj.customJs).split(`,`), C_DIR_JS);
+	setJsFiles(tmpCustomjs.replaceAll(`*`, g_presetObj.customJs).split(`,`)
+		.map(file => convLocalPath(file, `js`)), C_DIR_JS);
 
 	// 外部cssファイルの指定
 	const tmpCustomcss = getHeader(_dosObj, ...getHname(`customCss`)) ?? g_presetObj.customCss ?? ``;
-	setJsFiles(tmpCustomcss.replaceAll(`*`, g_presetObj.customCss).split(`,`), C_DIR_CSS);
+	setJsFiles(tmpCustomcss.replaceAll(`*`, g_presetObj.customCss).split(`,`)
+		.map(file => convLocalPath(file, `css`)), C_DIR_CSS);
 
 	// デフォルト曲名表示、背景、Ready表示の利用有無
 	g_titleLists.init.forEach(objName => {
@@ -5449,7 +5455,7 @@ const setDifficulty = (_initFlg) => {
 
 		if (!g_stateObj.extraKeyFlg) {
 
-			// キー別のローカルストレージの初期設定　※特殊キーは除く
+			// キー別のローカルストレージの初期設定 ※特殊キーは除く
 			g_localKeyStorage = hasKeyStorage ? JSON.parse(hasKeyStorage) : {
 				reverse: C_FLG_OFF,
 				keyCtrl: [[]],
@@ -5803,7 +5809,7 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 7.5
 	spriteList.gauge.appendChild(createLblSetting(`Gauge`));
 
-	// ゲージ設定詳細　縦位置: ゲージ設定+1
+	// ゲージ設定詳細 縦位置: ゲージ設定+1
 	spriteList.gauge.appendChild(createDivCss2Label(`lblGauge2`, ``, g_lblPosObj.lblGauge2));
 
 	if (g_headerObj.gaugeUse) {
@@ -8281,7 +8287,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 							}
 						}
 					} else if (val.indexOf(`...`) > 0) {
-						// 範囲指定表記の補完　例. 0...3 -> 0/1/2/3
+						// 範囲指定表記の補完 例. 0...3 -> 0/1/2/3
 						const [valMin, valMax] = [val.split(`...`)[0], val.split(`...`)[1]].map(val => setIntVal(val));
 						for (let k = valMin; k <= valMax; k++) {
 							colorVals.push(setIntVal(k));
@@ -8792,6 +8798,25 @@ const getBrakeTrace = _frms => {
 	}
 	return _frms;
 };
+
+/**
+ * Fountain用の適用関数
+ * - 反対側から出現し、画面中央付近で折り返す。タイミングは初期速度により変化。
+ * @param {number[]} _frms 
+ * @param {number} _spd
+ * @returns {number[]}
+ */
+const getFountainTrace = (_frms, _spd) => {
+	const minj = C_MOTION_STD_POS + 1;
+	const maxj = C_MOTION_STD_POS + Math.ceil(400 / _spd) + 1;
+	const diff = 50 / (maxj - minj);
+	const factor = 0.5 + _spd / 40;
+
+	for (let j = minj; j < maxj; j++) {
+		_frms[j] = Math.floor((10 - (j - C_MOTION_STD_POS - 1) * diff) * factor);
+	}
+	return _frms;
+}
 
 /**
  * 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得

@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/11/04 (v38.0.0)
+ * Revised : 2024/12/02 (v38.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -952,7 +952,7 @@ const g_settings = {
     speedNum: 0,
     speedTerms: [20, 5, 1],
 
-    motions: [C_FLG_OFF, `Boost`, `Hi-Boost`, `Brake`],
+    motions: [C_FLG_OFF, `Boost`, `Hi-Boost`, `Brake`, `Compress`, `Fountain`],
     motionNum: 0,
 
     reverses: [C_FLG_OFF, C_FLG_ON],
@@ -1073,6 +1073,8 @@ const g_motionFunc = {
     'Boost': _frms => getBoostTrace(_frms, 3),
     'Hi-Boost': _frms => getBoostTrace(_frms, g_stateObj.speed * 2),
     'Brake': _frms => getBrakeTrace(_frms),
+    'Compress': _frms => getBoostTrace(_frms, g_stateObj.speed * 5 / 8, -1),
+    'Fountain': _frms => getFountainTrace(_frms, g_stateObj.speed * 2),
 };
 
 const g_keycons = {
