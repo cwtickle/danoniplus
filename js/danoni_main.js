@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/11/27
+ * Revised : 2024/12/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 34.7.12`;
-const g_revisedDate = `2024/11/27`;
+const g_version = `Ver 34.7.13`;
+const g_revisedDate = `2024/12/07`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8057,7 +8057,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		g_workObj.initY[frmPrev] = tmpObj.startY;
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 		g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-		g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
+		g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j <= g_workObj.motionFrame[frmPrev]));
 
 		if (_frzFlg) {
 			g_workObj[`mk${camelHeader}Length`][_j] = [];
@@ -8085,7 +8085,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
 				g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
 				g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
-				g_workObj.initBoostY[tmpFrame] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
+				g_workObj.initBoostY[tmpFrame] = sumData(g_workObj.motionOnFrames.filter((val, j) => j <= g_workObj.motionFrame[frmPrev]));
 
 			} else {
 
@@ -8102,7 +8102,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj.initY[frmPrev] = tmpObj.startY;
 				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 				g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-				g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
+				g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j <= g_workObj.motionFrame[frmPrev]));
 			}
 
 			// 出現タイミングを保存
