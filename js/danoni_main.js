@@ -8809,10 +8809,11 @@ const getBrakeTrace = _frms => {
 const getFountainTrace = (_frms, _spd) => {
 	const minj = C_MOTION_STD_POS + 1;
 	const maxj = C_MOTION_STD_POS + Math.ceil(400 / _spd) + 1;
+	const maxMotionFrm = Math.max(maxj, C_MOTION_STD_POS + 200);
 	const diff = 50 / (maxj - minj);
 	const factor = 0.5 + _spd / 40;
 
-	for (let j = minj; j < maxj; j++) {
+	for (let j = minj; j < maxMotionFrm; j++) {
 		_frms[j] = Math.floor((10 - (j - C_MOTION_STD_POS - 1) * diff) * factor);
 	}
 	return _frms;
