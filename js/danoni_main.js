@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 38.1.1`;
+const g_version = `Ver 38.1.2`;
 const g_revisedDate = `2024/12/07`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -8809,7 +8809,7 @@ const getBrakeTrace = _frms => {
 const getFountainTrace = (_frms, _spd) => {
 	const minj = C_MOTION_STD_POS + 1;
 	const maxj = C_MOTION_STD_POS + Math.ceil(400 / _spd) + 1;
-	const maxMotionFrm = Math.max(maxj, C_MOTION_STD_POS + 200);
+	const maxMotionFrm = Math.max(maxj, C_MOTION_STD_POS + g_sHeight / 2);
 	const diff = 50 / (maxj - minj);
 	const factor = 0.5 + _spd / 40;
 
@@ -8910,6 +8910,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 			return;
 		}
 
+		const calcInitBoostY = _frm => sumData(g_workObj.motionOnFrames.filter((val, j) => j <= g_workObj.motionFrame[_frm]));
 		const camelHeader = toCapitalize(_header);
 		const setcnt = (_frzFlg ? 2 : 1);
 		if (_frzFlg && _data.length % 2 !== 0) {
@@ -8931,7 +8932,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		g_workObj.initY[frmPrev] = tmpObj.startY;
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 		g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-		g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
+		g_workObj.initBoostY[frmPrev] = calcInitBoostY(frmPrev);
 
 		if (_frzFlg) {
 			g_workObj[`mk${camelHeader}Length`][_j] = [];
@@ -8960,7 +8961,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
 				g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
 				g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
-				g_workObj.initBoostY[tmpFrame] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
+				g_workObj.initBoostY[tmpFrame] = calcInitBoostY(tmpFrame);
 
 			} else {
 
@@ -8977,7 +8978,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj.initY[frmPrev] = tmpObj.startY;
 				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 				g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-				g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
+				g_workObj.initBoostY[frmPrev] = calcInitBoostY(frmPrev);
 			}
 
 			// 出現タイミングを保存
