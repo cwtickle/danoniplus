@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/12/02
+ * Revised : 2024/12/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 38.1.0`;
-const g_revisedDate = `2024/12/02`;
+const g_version = `Ver 38.1.1`;
+const g_revisedDate = `2024/12/07`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8809,10 +8809,11 @@ const getBrakeTrace = _frms => {
 const getFountainTrace = (_frms, _spd) => {
 	const minj = C_MOTION_STD_POS + 1;
 	const maxj = C_MOTION_STD_POS + Math.ceil(400 / _spd) + 1;
+	const maxMotionFrm = Math.max(maxj, C_MOTION_STD_POS + 200);
 	const diff = 50 / (maxj - minj);
 	const factor = 0.5 + _spd / 40;
 
-	for (let j = minj; j < maxj; j++) {
+	for (let j = minj; j < maxMotionFrm; j++) {
 		_frms[j] = Math.floor((10 - (j - C_MOTION_STD_POS - 1) * diff) * factor);
 	}
 	return _frms;
