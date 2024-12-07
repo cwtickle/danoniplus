@@ -8961,7 +8961,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
 				g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
 				g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
-				g_workObj.initBoostY[tmpFrame] = calcInitBoostY(frmPrev);
+				g_workObj.initBoostY[tmpFrame] = calcInitBoostY(tmpFrame);
 
 			} else {
 
