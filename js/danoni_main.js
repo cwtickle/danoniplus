@@ -8809,7 +8809,7 @@ const getBrakeTrace = _frms => {
 const getFountainTrace = (_frms, _spd) => {
 	const minj = C_MOTION_STD_POS + 1;
 	const maxj = C_MOTION_STD_POS + Math.ceil(400 / _spd) + 1;
-	const maxMotionFrm = Math.max(maxj, C_MOTION_STD_POS + 200);
+	const maxMotionFrm = Math.max(maxj, C_MOTION_STD_POS + g_sHeight / 2);
 	const diff = 50 / (maxj - minj);
 	const factor = 0.5 + _spd / 40;
 
@@ -8931,7 +8931,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		g_workObj.initY[frmPrev] = tmpObj.startY;
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 		g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-		g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
+		g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j <= g_workObj.motionFrame[frmPrev]));
 
 		if (_frzFlg) {
 			g_workObj[`mk${camelHeader}Length`][_j] = [];
@@ -8960,7 +8960,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
 				g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
 				g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
-				g_workObj.initBoostY[tmpFrame] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
+				g_workObj.initBoostY[tmpFrame] = sumData(g_workObj.motionOnFrames.filter((val, j) => j <= g_workObj.motionFrame[frmPrev]));
 
 			} else {
 
@@ -8977,7 +8977,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				g_workObj.initY[frmPrev] = tmpObj.startY;
 				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 				g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-				g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j < g_workObj.motionFrame[frmPrev]));
+				g_workObj.initBoostY[frmPrev] = sumData(g_workObj.motionOnFrames.filter((val, j) => j <= g_workObj.motionFrame[frmPrev]));
 			}
 
 			// 出現タイミングを保存
