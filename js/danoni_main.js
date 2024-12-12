@@ -8054,25 +8054,28 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 		// 通常矢印の配置
 		const allArrows = _group.map(_key => g_scoreObj[`${_arrowHeader}Data`][_key]).flat();
 		allArrows.sort((_a, _b) => _a - _b);
-		let prev2Num = 0, prevNum = 0;
+		let prev2Num = 0, prevNum = 0, sameFlg = true;
 		allArrows.forEach(_arrow => {
 
 			// 直前の矢印のフレーム数を取得
+			sameFlg = true;
 			if (prev2Num !== _arrow) {
 				if (prevNum !== _arrow) {
 					prev2Num = prevNum;
 					prevNum = _arrow;
+					sameFlg = false;
 				}
 			}
 
 			// 置ける場所を検索
+			const scatterFrame2 = scatterFrame * (sameFlg ? 0 : 1);
 			const freeSpacesFlat = _group.filter(_key =>
 				// フリーズと重ならない (前後10フレーム)
-				tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin - scatterFrame && _arrow <= _freeze.end + scatterFrame) === undefined
+				tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin - scatterFrame2 && _arrow <= _freeze.end + scatterFrame2) === undefined
 				// 通常矢印と重ならない (前後10フレーム)
-				&& tmpArrowData[_key].find(_other => _arrow >= _other - scatterFrame && _arrow <= _other + scatterFrame) === undefined
+				&& tmpArrowData[_key].find(_other => _arrow >= _other - scatterFrame2 && _arrow <= _other + scatterFrame2) === undefined
 				// 直前の矢印と重ならない
-				&& tmpArrowData[_key].find(_other => prev2Num === _other) === undefined
+				&& (sameFlg || (!sameFlg && tmpArrowData[_key].find(_other => prev2Num === _other) === undefined))
 			);
 			const freeSpaces = _group.filter(_key =>
 				// フリーズと重ならない
