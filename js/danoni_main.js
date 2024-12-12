@@ -8059,12 +8059,10 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 
 			// 直前の矢印のフレーム数を取得
 			sameFlg = true;
-			if (prev2Num !== _arrow) {
-				if (prevNum !== _arrow) {
-					prev2Num = prevNum;
-					prevNum = _arrow;
-					sameFlg = false;
-				}
+			if (prev2Num !== _arrow && prevNum !== _arrow) {
+				prev2Num = prevNum;
+				prevNum = _arrow;
+				sameFlg = false;
 			}
 
 			// 置ける場所を検索
