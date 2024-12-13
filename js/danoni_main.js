@@ -8065,25 +8065,21 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 				sameFlg = false;
 			}
 
+			const getFreeSpaces = ({ scatterFrame = 0, frzFlg = false, prevFlg = false } = {}) =>
+				_group.filter(_key =>
+					// 通常矢印と重ならない
+					tmpArrowData[_key].find(_other => _arrow >= _other - scatterFrame && _arrow <= _other + scatterFrame) === undefined
+					// フリーズと重ならない
+					&& (!frzFlg || (frzFlg && tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin - scatterFrame && _arrow <= _freeze.end + scatterFrame) === undefined))
+					// 直前の矢印と重ならない
+					&& (!prevFlg || (prevFlg && tmpArrowData[_key].find(_other => prev2Num === _other) === undefined))
+				);
+
 			// 置ける場所を検索
-			const freeSpacesFlat = _group.filter(_key =>
-				// フリーズと重ならない (前後10フレーム)
-				tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin - scatterFrame && _arrow <= _freeze.end + scatterFrame) === undefined
-				// 通常矢印と重ならない (前後10フレーム)
-				&& tmpArrowData[_key].find(_other => _arrow >= _other - scatterFrame && _arrow <= _other + scatterFrame) === undefined
-				// 直前の矢印と重ならない
-				&& tmpArrowData[_key].find(_other => prev2Num === _other) === undefined
-			);
-			const freeSpaces = _group.filter(_key =>
-				// フリーズと重ならない
-				tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin && _arrow <= _freeze.end) === undefined
-				// 通常矢印と重ならない
-				&& tmpArrowData[_key].find(_other => _arrow === _other) === undefined
-			);
-			const freeSpacesAlt = _group.filter(_key =>
-				// 通常矢印と重ならない
-				tmpArrowData[_key].find(_other => _arrow === _other) === undefined
-			);
+			const freeSpacesFlat = getFreeSpaces({ scatterFrame, frzFlg: true, prevFlg: true });
+			const freeSpaces = getFreeSpaces({ frzFlg: true });
+			const freeSpacesAlt = getFreeSpaces();
+
 			// ランダムに配置
 			let currentFreeSpaces = freeSpaces.length > 0 ? freeSpaces : freeSpacesAlt;
 			if (g_stateObj.shuffle.startsWith(`Scatter`)) {
