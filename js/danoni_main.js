@@ -8070,9 +8070,9 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 					// 通常矢印と重ならない
 					tmpArrowData[_key].find(_other => _arrow >= _other - scatterFrame && _arrow <= _other + scatterFrame) === undefined
 					// フリーズと重ならない
-					&& (!frzFlg || (frzFlg && tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin - scatterFrame && _arrow <= _freeze.end + scatterFrame) === undefined))
+					&& (!frzFlg || tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin - scatterFrame && _arrow <= _freeze.end + scatterFrame) === undefined)
 					// 直前の矢印と重ならない
-					&& (!prevFlg || (prevFlg && tmpArrowData[_key].find(_other => prev2Num === _other) === undefined))
+					&& (!prevFlg || tmpArrowData[_key].find(_other => prev2Num === _other) === undefined)
 				);
 
 			// 置ける場所を検索
