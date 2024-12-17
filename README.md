@@ -3,7 +3,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/9558f21e17a47a4dc987/maintainability)](https://codeclimate.com/github/cwtickle/danoniplus/maintainability)
 [![CodeQL](https://github.com/cwtickle/danoniplus/workflows/CodeQL/badge.svg)](https://github.com/cwtickle/danoniplus/actions?query=workflow%3ACodeQL)
 [![GitLab Community](https://img.shields.io/gitlab/issues/open/cwtickle/danonicw?gitlab_url=https%3A%2F%2Fgitlab.com%2F&label=Community&logo=gitlab)](https://gitlab.com/cwtickle/danonicw/-/issues)  
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cwtickle/danoniplus?sort=semver)](https://github.com/cwtickle/danoniplus/security/policy)
+[![GitHub release](https://img.shields.io/github/package-json/v/cwtickle/danoniplus/support%2Fv34)](https://github.com/cwtickle/danoniplus/security/policy)
 [![GitHub All Releases](https://img.shields.io/github/downloads/cwtickle/danoniplus/total?color=%23ff3399&label=downloads%20%28recently%29)](https://github.com/cwtickle/danoniplus/releases)
 [![GitHub](https://img.shields.io/github/license/cwtickle/danoniplus)](https://github.com/cwtickle/danoniplus/blob/develop/LICENSE)  
 ![AboutDanOni](http://cw7.sakura.ne.jp/danoni/wiki/danonitop.png)
