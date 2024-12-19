@@ -9207,6 +9207,9 @@ const getFrzLength = (_speedOnFrame, _startFrame, _endFrame) => {
 
 /**
  * キーパターン(デフォルト)に対応する矢印番号を格納
+ * - 色変化(旧仕様)、矢印・フリーズアローモーション、スクロール変化で
+ *   矢印グループをキーパターンごとに切り替える際に使用
+ * - 色変化(ncolor_data)ではsetColor2Dataにて同様の処理を行っているため使用しない
  */
 const convertReplaceNums = () => {
 	const tkObj = getKeyInfo();
@@ -9284,7 +9287,7 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg, _pattern = ``) => 
 			allUseTypes.push(`Frz`);
 		}
 		// 色変化情報の格納
-		baseHeaders.forEach(baseHeader => pushColor(baseHeader, g_workObj.replaceNums[_val] + addAll));
+		baseHeaders.forEach(baseHeader => pushColor(baseHeader, _val + addAll));
 	};
 
 	/**
