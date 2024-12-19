@@ -8278,7 +8278,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 						// g付きの場合は矢印グループから対象の矢印番号を検索
 						const groupVal = setIntVal(val.slice(1));
 						for (let j = 0; j < keyNum; j++) {
-							if (g_keyObj[`color${_keyCtrlPtn}`][j] === groupVal) {
+							if (g_keyObj[`color${g_keyObj.currentKey}_0`][j] === groupVal) {
 								colorVals.push(j);
 							}
 						}
@@ -9287,7 +9287,7 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg, _pattern = ``) => 
 			allUseTypes.push(`Frz`);
 		}
 		// 色変化情報の格納
-		baseHeaders.forEach(baseHeader => pushColor(baseHeader, _val + addAll));
+		baseHeaders.forEach(baseHeader => pushColor(baseHeader, g_workObj.replaceNums[_val] + addAll));
 	};
 
 	/**
