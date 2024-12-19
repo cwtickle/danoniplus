@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 38.2.1`;
+const g_version = `Ver 38.2.2`;
 const g_revisedDate = `2024/12/19`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -8274,22 +8274,14 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				// 矢印番号の組み立て
 				const colorVals = [];
 				replaceStr(patternStr[0], g_escapeStr.targetPatternName)?.split(`/`)?.forEach(val => {
-					if (val.startsWith('g')) {
-						// g付きの場合は矢印グループから対象の矢印番号を検索
-						const groupVal = setIntVal(val.slice(1));
-						for (let j = 0; j < keyNum; j++) {
-							if (g_keyObj[`color${g_keyObj.currentKey}_0`][j] === groupVal) {
-								colorVals.push(j);
-							}
-						}
-					} else if (val.indexOf(`...`) > 0) {
+					if (val.indexOf(`...`) > 0) {
 						// 範囲指定表記の補完 例. 0...3 -> 0/1/2/3
 						const [valMin, valMax] = [val.split(`...`)[0], val.split(`...`)[1]].map(val => setIntVal(val));
 						for (let k = valMin; k <= valMax; k++) {
-							colorVals.push(setIntVal(k));
+							colorVals.push(String(k));
 						}
 					} else {
-						colorVals.push(setIntVal(val));
+						colorVals.push(val);
 					}
 				});
 
@@ -9287,7 +9279,17 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg, _pattern = ``) => 
 			allUseTypes.push(`Frz`);
 		}
 		// 色変化情報の格納
-		baseHeaders.forEach(baseHeader => pushColor(baseHeader, g_workObj.replaceNums[_val] + addAll));
+		if (_val.startsWith('g')) {
+			// g付きの場合は矢印グループから対象の矢印番号を検索
+			const groupVal = setIntVal(_val.slice(1));
+			for (let j = 0; j < tkObj.keyNum; j++) {
+				if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === groupVal) {
+					baseHeaders.forEach(baseHeader => pushColor(baseHeader, j + addAll));
+				}
+			}
+		} else {
+			baseHeaders.forEach(baseHeader => pushColor(baseHeader, g_workObj.replaceNums[setIntVal(_val)] + addAll));
+		}
 	};
 
 	/**
