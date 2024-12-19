@@ -9207,9 +9207,8 @@ const getFrzLength = (_speedOnFrame, _startFrame, _endFrame) => {
 
 /**
  * キーパターン(デフォルト)に対応する矢印番号を格納
- * - 色変化(旧仕様)、矢印・フリーズアローモーション、スクロール変化で
+ * - 色変化、矢印・フリーズアローモーション、スクロール変化で
  *   矢印グループをキーパターンごとに切り替える際に使用
- * - 色変化(ncolor_data)ではsetColor2Dataにて同様の処理を行っているため使用しない
  */
 const convertReplaceNums = () => {
 	const tkObj = getKeyInfo();
