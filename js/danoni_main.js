@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/12/07
+ * Revised : 2024/12/19
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 36.6.8`;
-const g_revisedDate = `2024/12/07`;
+const g_version = `Ver 36.6.9`;
+const g_revisedDate = `2024/12/19`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7900,7 +7900,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 						// g付きの場合は矢印グループから対象の矢印番号を検索
 						const groupVal = setIntVal(val.slice(1));
 						for (let j = 0; j < keyNum; j++) {
-							if (g_keyObj[`color${_keyCtrlPtn}`][j] === groupVal) {
+							if (g_keyObj[`color${g_keyObj.currentKey}_0`][j] === groupVal) {
 								colorVals.push(j);
 							}
 						}
