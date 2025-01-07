@@ -7003,7 +7003,8 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		viewGroup(_type);
 	};
 
-	const kcSub = parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2) - parseFloat(keyconSprite.style.height);
+	const kcSubX = parseFloat(keyconSprite.style.width) * ((1 - g_keyObj.scale) / 4);
+	const kcSubY = parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2) - parseFloat(keyconSprite.style.height);
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
@@ -7011,15 +7012,15 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 		// タイトルバックのショートカットキー変更
 		createCss2Button(`scTitleBack`, getScMsg.TitleBack(), () => {
-			cursor.style.left = wUnit(g_btnX(1 / 4));
-			cursor.style.top = wUnit(g_sHeight - 160 + kcSub);
+			cursor.style.left = wUnit(g_btnX(1 / 4) - kcSubX);
+			cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
 			selectedKc = `TitleBack`;
 		}, g_lblPosObj.scTitleBack, g_cssObj.button_Default_NoColor, g_cssObj.title_base),
 
 		// リトライのショートカットキー変更
 		createCss2Button(`scRetry`, getScMsg.Retry(), () => {
-			cursor.style.left = wUnit(g_btnX(5 / 8));
-			cursor.style.top = wUnit(g_sHeight - 160 + kcSub);
+			cursor.style.left = wUnit(g_btnX(5 / 8) + kcSubX);
+			cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
 			selectedKc = `Retry`;
 		}, g_lblPosObj.scRetry, g_cssObj.button_Default_NoColor, g_cssObj.title_base),
 
