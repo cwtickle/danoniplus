@@ -159,6 +159,8 @@ const g_windowObj = {
 };
 
 const g_lblPosObj = {};
+const getScMsg1 = () => g_lblNameObj.kcShortcutDesc1.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack]);
+const getScMsg2 = () => g_lblNameObj.kcShortcutDesc2.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]);
 
 /**
  * 可変部分のウィンドウサイズを更新
@@ -379,6 +381,14 @@ const updateWindowSiz = () => {
             x: g_btnX(), y: g_sHeight - 75,
             w: g_btnWidth(1 / 3), h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
             title: g_msgObj.kcReset,
+        },
+        scTitleBack: {
+            x: g_btnX() + 20, y: g_sHeight - 50, align: C_ALIGN_RIGHT,
+            w: g_btnWidth(5 / 8) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize(getScMsg1(), g_btnWidth(1 / 2) - 20, getBasicFont(), 13),
+        },
+        scRetry: {
+            x: g_btnX(5 / 8) + 20, y: g_sHeight - 50, align: C_ALIGN_LEFT,
+            w: g_btnWidth(3 / 8) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize(getScMsg2(), g_btnWidth(1 / 2) - 20, getBasicFont(), 13),
         },
 
         /** メイン画面 */
@@ -3158,7 +3168,8 @@ const g_lang_lblNameObj = {
         kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを変更`,
         kcNoShuffleDesc: `矢印をクリックでカラーグループを変更`,
         sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
-        kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
+        kcShortcutDesc1: `プレイ中ショートカット：「{0}」タイトルバック /`,
+        kcShortcutDesc2: `「{1}」リトライ`,
         transKeyDesc: `別キーモードではキーコンフィグ、ColorType等は保存されません`,
         sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
         resultImageDesc: `画像を右クリックしてコピーできます`,
@@ -3197,7 +3208,8 @@ const g_lang_lblNameObj = {
         kcShuffleDesc: `Click the number to change the shuffle group, and click the arrow to change the color.`,
         kcNoShuffleDesc: `Click the arrow to change the color group.`,
         sdDesc: `[Click to switch, gray to OFF]`,
-        kcShortcutDesc: `Shortcut during play: "{0}" Return to title / "{1}" Retry the game`,
+        kcShortcutDesc1: `Shortcut during play: "{0}" Return to title /`,
+        kcShortcutDesc2: `"{1}" Retry the game`,
         transKeyDesc: `Key config, Color type, etc. are not saved in another key mode`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
         resultImageDesc: `You can copy the image by right-clicking on it.`,

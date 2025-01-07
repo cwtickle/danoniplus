@@ -1107,6 +1107,7 @@ const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64,
 const createDescDiv = (_id, _str, { altId = _id, siz = g_limitObj.mainSiz } = {}) =>
 	createDivCss2Label(_id, _str, Object.assign(g_lblPosObj[altId], {
 		siz: getFontSize(_str, g_lblPosObj[altId]?.w || g_sWidth, getBasicFont(), siz),
+		pointerEvents: C_DIS_NONE,
 	}));
 
 /*-----------------------------------------------------------*/
@@ -6680,6 +6681,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const divRoot = document.getElementById(`divRoot`);
 	g_kcType = _kcType;
 	g_currentPage = `keyConfig`;
+	let selectedKc = `Default`;
 
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = false;
@@ -6845,6 +6847,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 					g_currentj = j;
 					g_currentk = k;
 					g_prevKey = -1;
+					selectedKc = `Default`;
 					g_keycons.cursorNum = g_keycons.cursorNumList.findIndex(val => val === g_currentj);
 					setKeyConfigCursor();
 				}, {
@@ -7000,12 +7003,22 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		viewGroup(_type);
 	};
 
+	const kcSub = parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2) - parseFloat(keyconSprite.style.height);
 	multiAppend(divRoot,
 
-		// ショートカットキーメッセージ
-		createDescDiv(`scMsg`, g_lblNameObj.kcShortcutDesc.split(`{0}`)
-			.join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
-			.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]), { altId: `scKcMsg` }),
+		// タイトルバックのショートカットキー変更
+		createCss2Button(`scTitleBack`, getScMsg1(), () => {
+			cursor.style.left = wUnit(g_btnX());
+			cursor.style.top = wUnit(g_sHeight - 160 + kcSub);
+			selectedKc = `TitleBack`;
+		}, g_lblPosObj.scTitleBack, g_cssObj.button_Default_NoColor, g_cssObj.title_base),
+
+		// リトライのショートカットキー変更
+		createCss2Button(`scRetry`, getScMsg2(), () => {
+			cursor.style.left = wUnit(g_btnX(5 / 8));
+			cursor.style.top = wUnit(g_sHeight - 160 + kcSub);
+			selectedKc = `Retry`;
+		}, g_lblPosObj.scRetry, g_cssObj.button_Default_NoColor, g_cssObj.title_base),
 
 		// 別キーモード警告メッセージ
 		createDivCss2Label(
@@ -7458,6 +7471,15 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
 			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
 			return;
+
+		} else if (selectedKc === `TitleBack` || selectedKc === `Retry`) {
+			// プレイ中ショートカットキー変更
+			g_headerObj[`key${selectedKc}`] = setKey;
+			g_headerObj[`key${selectedKc}Def`] = setKey;
+			scTitleBack.textContent = getScMsg1();
+			scRetry.textContent = getScMsg2();
+			return;
+
 		} else if ((setKey === C_KEY_TITLEBACK && g_currentk === 0) ||
 			((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) && keyIsShift())) {
 			return;
