@@ -7006,15 +7006,18 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const kcSub = parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2) - parseFloat(keyconSprite.style.height);
 	multiAppend(divRoot,
 
+		// ショートカットキーメッセージ
+		createDescDiv(`scMsg`, g_lblNameObj.kcShortcutDesc, { altId: `scKcMsg` }),
+
 		// タイトルバックのショートカットキー変更
-		createCss2Button(`scTitleBack`, getScMsg1(), () => {
-			cursor.style.left = wUnit(g_btnX());
+		createCss2Button(`scTitleBack`, getScMsg.TitleBack(), () => {
+			cursor.style.left = wUnit(g_btnX(1 / 4));
 			cursor.style.top = wUnit(g_sHeight - 160 + kcSub);
 			selectedKc = `TitleBack`;
 		}, g_lblPosObj.scTitleBack, g_cssObj.button_Default_NoColor, g_cssObj.title_base),
 
 		// リトライのショートカットキー変更
-		createCss2Button(`scRetry`, getScMsg2(), () => {
+		createCss2Button(`scRetry`, getScMsg.Retry(), () => {
 			cursor.style.left = wUnit(g_btnX(5 / 8));
 			cursor.style.top = wUnit(g_sHeight - 160 + kcSub);
 			selectedKc = `Retry`;
@@ -7465,21 +7468,26 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
 		const disabledKeys = [240, 242, 243, 244, 91, 29, 28, 27, 259, g_prevKey];
+
+		if (selectedKc === `TitleBack` || selectedKc === `Retry`) {
+			// プレイ中ショートカットキー変更
+			if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
+				makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
+				return;
+			}
+			g_headerObj[`key${selectedKc}`] = setKey;
+			g_headerObj[`key${selectedKc}Def`] = setKey;
+			document.getElementById(`sc${selectedKc}`).textContent = getScMsg[selectedKc]();
+			document.getElementById(`sc${selectedKc}`).style.fontSize = `${getFontSize(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, getBasicFont(), 13)}px`;
+			return;
+		}
+
 		if (g_localeObj.val === `Ja`) {
 			disabledKeys.unshift(229);
 		}
 		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
 			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
 			return;
-
-		} else if (selectedKc === `TitleBack` || selectedKc === `Retry`) {
-			// プレイ中ショートカットキー変更
-			g_headerObj[`key${selectedKc}`] = setKey;
-			g_headerObj[`key${selectedKc}Def`] = setKey;
-			scTitleBack.textContent = getScMsg1();
-			scRetry.textContent = getScMsg2();
-			return;
-
 		} else if ((setKey === C_KEY_TITLEBACK && g_currentk === 0) ||
 			((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) && keyIsShift())) {
 			return;
