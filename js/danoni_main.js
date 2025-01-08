@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/12/19
+ * Revised : 2025/01/08
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 38.2.2`;
-const g_revisedDate = `2024/12/19`;
+const g_version = `Ver 38.3.0`;
+const g_revisedDate = `2025/01/08`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1107,6 +1107,7 @@ const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64,
 const createDescDiv = (_id, _str, { altId = _id, siz = g_limitObj.mainSiz } = {}) =>
 	createDivCss2Label(_id, _str, Object.assign(g_lblPosObj[altId], {
 		siz: getFontSize(_str, g_lblPosObj[altId]?.w || g_sWidth, getBasicFont(), siz),
+		pointerEvents: C_DIS_NONE,
 	}));
 
 /*-----------------------------------------------------------*/
@@ -2988,8 +2989,10 @@ const headerConvert = _dosObj => {
 	// プレイ中のショートカットキー
 	obj.keyRetry = setIntVal(getKeyCtrlVal(_dosObj.keyRetry), C_KEY_RETRY);
 	obj.keyRetryDef = obj.keyRetry;
+	obj.keyRetryDef2 = obj.keyRetry;
 	obj.keyTitleBack = setIntVal(getKeyCtrlVal(_dosObj.keyTitleBack), C_KEY_TITLEBACK);
 	obj.keyTitleBackDef = obj.keyTitleBack;
+	obj.keyTitleBackDef2 = obj.keyTitleBack;
 
 	// フリーズアローの許容フレーム数設定
 	obj.frzAttempt = setIntVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT);
@@ -6680,6 +6683,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const divRoot = document.getElementById(`divRoot`);
 	g_kcType = _kcType;
 	g_currentPage = `keyConfig`;
+	let selectedKc = `Default`;
 
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = false;
@@ -6845,6 +6849,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 					g_currentj = j;
 					g_currentk = k;
 					g_prevKey = -1;
+					selectedKc = `Default`;
 					g_keycons.cursorNum = g_keycons.cursorNumList.findIndex(val => val === g_currentj);
 					setKeyConfigCursor();
 				}, {
@@ -7000,12 +7005,32 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		viewGroup(_type);
 	};
 
+	const kcSubX = parseFloat(keyconSprite.style.width) * ((1 - g_keyObj.scale) / 4);
+	const kcSubY = parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2) - parseFloat(keyconSprite.style.height);
 	multiAppend(divRoot,
 
 		// ショートカットキーメッセージ
-		createDescDiv(`scMsg`, g_lblNameObj.kcShortcutDesc.split(`{0}`)
-			.join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack])
-			.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]), { altId: `scKcMsg` }),
+		createDescDiv(`scMsg`, g_lblNameObj.kcShortcutDesc, { altId: `scKcMsg` }),
+
+		// タイトルバックのショートカットキー変更
+		createCss2Button(`scTitleBack`, getScMsg.TitleBack(), () => {
+			if (!g_isMac) {
+				cursor.style.left = wUnit(g_btnX(1 / 4) - kcSubX);
+				cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
+				selectedKc = `TitleBack`;
+			}
+		}, g_lblPosObj.scTitleBack, g_cssObj.button_Default_NoColor,
+			g_headerObj.keyTitleBack === g_headerObj.keyTitleBackDef2 ?
+				g_cssObj.title_base : g_cssObj.keyconfig_Changekey),
+
+		// リトライのショートカットキー変更
+		createCss2Button(`scRetry`, getScMsg.Retry(), () => {
+			cursor.style.left = wUnit(g_btnX(5 / 8) + kcSubX);
+			cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
+			selectedKc = `Retry`;
+		}, g_lblPosObj.scRetry, g_cssObj.button_Default_NoColor,
+			g_headerObj.keyRetry === g_headerObj.keyRetryDef2 ?
+				g_cssObj.title_base : g_cssObj.keyconfig_Changekey),
 
 		// 別キーモード警告メッセージ
 		createDivCss2Label(
@@ -7452,6 +7477,27 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
 		const disabledKeys = [240, 242, 243, 244, 91, 29, 28, 27, 259, g_prevKey];
+
+		if (selectedKc === `TitleBack` || selectedKc === `Retry`) {
+			// プレイ中ショートカットキー変更
+			if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
+				makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
+				return;
+			}
+			g_headerObj[`key${selectedKc}`] = setKey;
+			g_headerObj[`key${selectedKc}Def`] = setKey;
+			document.getElementById(`sc${selectedKc}`).textContent = getScMsg[selectedKc]();
+			document.getElementById(`sc${selectedKc}`).style.fontSize = `${getFontSize(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, getBasicFont(), 13)}px`;
+			if (g_isMac) {
+				scTitleBack.textContent = getScMsg.TitleBack();
+				scTitleBack.style.fontSize = `${getFontSize(getScMsg.TitleBack(), g_btnWidth(5 / 12) - 40, getBasicFont(), 13)}px`;
+			}
+			changeConfigColor(document.getElementById(`sc${selectedKc}`),
+				g_headerObj[`key${selectedKc}`] === g_headerObj[`key${selectedKc}Def2`] ?
+					g_cssObj.title_base : g_cssObj.keyconfig_Changekey);
+			return;
+		}
+
 		if (g_localeObj.val === `Ja`) {
 			disabledKeys.unshift(229);
 		}
@@ -9531,6 +9577,10 @@ const getArrowSettings = () => {
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 	g_workObj.nonDefaultSc = g_headerObj.keyRetry !== C_KEY_RETRY || g_headerObj.keyTitleBack !== C_KEY_TITLEBACK;
+	if (g_headerObj.scAreaWidth === 0 && (g_headerObj.keyRetry !== g_headerObj.keyRetryDef2 || g_headerObj.keyTitleBack !== g_headerObj.keyTitleBackDef2)) {
+		g_workObj.nonDefaultSc = false;
+	}
+
 	g_workObj.backX = (g_workObj.nonDefaultSc && g_headerObj.playingLayout ? g_headerObj.scAreaWidth : 0);
 	g_workObj.playingX = g_headerObj.playingX + g_workObj.backX;
 

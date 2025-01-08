@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2024/12/02 (v38.1.0)
+ * Revised : 2025/01/08 (v38.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -159,6 +159,10 @@ const g_windowObj = {
 };
 
 const g_lblPosObj = {};
+const getScMsg = {
+    TitleBack: () => g_lblNameObj.kcShortcutDesc1.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack]),
+    Retry: () => g_lblNameObj.kcShortcutDesc2.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]),
+};
 
 /**
  * 可変部分のウィンドウサイズを更新
@@ -321,7 +325,7 @@ const updateWindowSiz = () => {
 
         /** キーコンフィグ画面 */
         scKcMsg: {
-            x: g_btnX(), y: g_sHeight - 50, w: g_btnWidth(), h: 20,
+            x: g_btnX(), y: g_sHeight - 50, w: g_btnWidth(1 / 4), h: 20,
         },
         kcMsg: {
             x: g_btnX(), y: g_sHeight - 33, w: g_btnWidth(), h: 20, siz: g_limitObj.mainSiz,
@@ -379,6 +383,14 @@ const updateWindowSiz = () => {
             x: g_btnX(), y: g_sHeight - 75,
             w: g_btnWidth(1 / 3), h: g_limitObj.btnHeight / 2, siz: g_limitObj.btnSiz * 2 / 3,
             title: g_msgObj.kcReset,
+        },
+        scTitleBack: {
+            x: g_btnX(1 / 4) + 20, y: g_sHeight - 50, align: C_ALIGN_LEFT,
+            w: g_btnWidth(5 / 12) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize(getScMsg.TitleBack(), g_btnWidth(5 / 12) - 40, getBasicFont(), 13),
+        },
+        scRetry: {
+            x: g_btnX(5 / 8) + 20, y: g_sHeight - 50, align: C_ALIGN_LEFT,
+            w: g_btnWidth(5 / 12) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize(getScMsg.Retry(), g_btnWidth(5 / 12) - 40, getBasicFont(), 13),
         },
 
         /** メイン画面 */
@@ -3158,7 +3170,9 @@ const g_lang_lblNameObj = {
         kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを変更`,
         kcNoShuffleDesc: `矢印をクリックでカラーグループを変更`,
         sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
-        kcShortcutDesc: `プレイ中ショートカット：「{0}」タイトルバック / 「{1}」リトライ`,
+        kcShortcutDesc: `プレイ中ショートカット：`,
+        kcShortcutDesc1: `タイトルバック: {0}`,
+        kcShortcutDesc2: `リトライ: {1}`,
         transKeyDesc: `別キーモードではキーコンフィグ、ColorType等は保存されません`,
         sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
         resultImageDesc: `画像を右クリックしてコピーできます`,
@@ -3197,7 +3211,9 @@ const g_lang_lblNameObj = {
         kcShuffleDesc: `Click the number to change the shuffle group, and click the arrow to change the color.`,
         kcNoShuffleDesc: `Click the arrow to change the color group.`,
         sdDesc: `[Click to switch, gray to OFF]`,
-        kcShortcutDesc: `Shortcut during play: "{0}" Return to title / "{1}" Retry the game`,
+        kcShortcutDesc: `Shortcut during play:`,
+        kcShortcutDesc1: `Return to title: {0}`,
+        kcShortcutDesc2: `Retry the game: {1}`,
         transKeyDesc: `Key config, Color type, etc. are not saved in another key mode`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
         resultImageDesc: `You can copy the image by right-clicking on it.`,
