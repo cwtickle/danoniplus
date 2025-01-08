@@ -2989,8 +2989,10 @@ const headerConvert = _dosObj => {
 	// プレイ中のショートカットキー
 	obj.keyRetry = setIntVal(getKeyCtrlVal(_dosObj.keyRetry), C_KEY_RETRY);
 	obj.keyRetryDef = obj.keyRetry;
+	obj.keyRetryDef2 = obj.keyRetry;
 	obj.keyTitleBack = setIntVal(getKeyCtrlVal(_dosObj.keyTitleBack), C_KEY_TITLEBACK);
 	obj.keyTitleBackDef = obj.keyTitleBack;
+	obj.keyTitleBackDef2 = obj.keyTitleBack;
 
 	// フリーズアローの許容フレーム数設定
 	obj.frzAttempt = setIntVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT);
@@ -9562,6 +9564,10 @@ const getArrowSettings = () => {
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 	g_workObj.nonDefaultSc = g_headerObj.keyRetry !== C_KEY_RETRY || g_headerObj.keyTitleBack !== C_KEY_TITLEBACK;
+	if (g_headerObj.scArea === 0 && (g_headerObj.keyRetry !== g_headerObj.keyRetryDef2 || g_headerObj.keyTitleBack !== g_headerObj.keyTitleBackDef2)) {
+		g_workObj.nonDefaultSc = false;
+	}
+
 	g_workObj.backX = (g_workObj.nonDefaultSc && g_headerObj.playingLayout ? g_headerObj.scAreaWidth : 0);
 	g_workObj.playingX = g_headerObj.playingX + g_workObj.backX;
 
