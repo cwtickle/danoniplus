@@ -9571,7 +9571,7 @@ const getArrowSettings = () => {
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 	g_workObj.nonDefaultSc = g_headerObj.keyRetry !== C_KEY_RETRY || g_headerObj.keyTitleBack !== C_KEY_TITLEBACK;
-	if (g_headerObj.scArea === 0 && (g_headerObj.keyRetry !== g_headerObj.keyRetryDef2 || g_headerObj.keyTitleBack !== g_headerObj.keyTitleBackDef2)) {
+	if (g_headerObj.scAreaWidth === 0 && (g_headerObj.keyRetry !== g_headerObj.keyRetryDef2 || g_headerObj.keyTitleBack !== g_headerObj.keyTitleBackDef2)) {
 		g_workObj.nonDefaultSc = false;
 	}
 
