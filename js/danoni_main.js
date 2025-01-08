@@ -7017,14 +7017,18 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			cursor.style.left = wUnit(g_btnX(1 / 4) - kcSubX);
 			cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
 			selectedKc = `TitleBack`;
-		}, g_lblPosObj.scTitleBack, g_cssObj.button_Default_NoColor, g_cssObj.title_base),
+		}, g_lblPosObj.scTitleBack, g_cssObj.button_Default_NoColor,
+			g_headerObj.keyTitleBack === g_headerObj.keyTitleBackDef2 ?
+				g_cssObj.title_base : g_cssObj.keyconfig_Changekey),
 
 		// リトライのショートカットキー変更
 		createCss2Button(`scRetry`, getScMsg.Retry(), () => {
 			cursor.style.left = wUnit(g_btnX(5 / 8) + kcSubX);
 			cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
 			selectedKc = `Retry`;
-		}, g_lblPosObj.scRetry, g_cssObj.button_Default_NoColor, g_cssObj.title_base),
+		}, g_lblPosObj.scRetry, g_cssObj.button_Default_NoColor,
+			g_headerObj.keyRetry === g_headerObj.keyRetryDef2 ?
+				g_cssObj.title_base : g_cssObj.keyconfig_Changekey),
 
 		// 別キーモード警告メッセージ
 		createDivCss2Label(
@@ -7482,6 +7486,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			g_headerObj[`key${selectedKc}Def`] = setKey;
 			document.getElementById(`sc${selectedKc}`).textContent = getScMsg[selectedKc]();
 			document.getElementById(`sc${selectedKc}`).style.fontSize = `${getFontSize(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, getBasicFont(), 13)}px`;
+			changeConfigColor(document.getElementById(`sc${selectedKc}`),
+				g_headerObj[`key${selectedKc}`] === g_headerObj[`key${selectedKc}Def2`] ?
+					g_cssObj.title_base : g_cssObj.keyconfig_Changekey);
 			return;
 		}
 
