@@ -5517,11 +5517,9 @@ const setDifficulty = (_initFlg) => {
 		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 		if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
 			g_headerObj.keyRetry = setIntVal(getKeyCtrlVal(g_keyObj[`keyRetry${keyCtrlPtn}`]), g_headerObj.keyRetryDef);
-			g_headerObj.keyRetryDef2 = g_headerObj.keyRetry;
 		}
 		if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
 			g_headerObj.keyTitleBack = setIntVal(getKeyCtrlVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`]), g_headerObj.keyTitleBackDef);
-			g_headerObj.keyTitleBackDef2 = g_headerObj.keyTitleBack;
 		}
 	}
 
