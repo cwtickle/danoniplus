@@ -5517,9 +5517,11 @@ const setDifficulty = (_initFlg) => {
 		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 		if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
 			g_headerObj.keyRetry = setIntVal(getKeyCtrlVal(g_keyObj[`keyRetry${keyCtrlPtn}`]), g_headerObj.keyRetryDef);
+			g_headerObj.keyRetryDef2 = g_headerObj.keyRetry;
 		}
 		if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
 			g_headerObj.keyTitleBack = setIntVal(getKeyCtrlVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`]), g_headerObj.keyTitleBackDef);
+			g_headerObj.keyTitleBackDef2 = g_headerObj.keyTitleBack;
 		}
 	}
 
@@ -7014,9 +7016,11 @@ const keyConfigInit = (_kcType = g_kcType) => {
 
 		// タイトルバックのショートカットキー変更
 		createCss2Button(`scTitleBack`, getScMsg.TitleBack(), () => {
-			cursor.style.left = wUnit(g_btnX(1 / 4) - kcSubX);
-			cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
-			selectedKc = `TitleBack`;
+			if (!g_isMac) {
+				cursor.style.left = wUnit(g_btnX(1 / 4) - kcSubX);
+				cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
+				selectedKc = `TitleBack`;
+			}
 		}, g_lblPosObj.scTitleBack, g_cssObj.button_Default_NoColor,
 			g_headerObj.keyTitleBack === g_headerObj.keyTitleBackDef2 ?
 				g_cssObj.title_base : g_cssObj.keyconfig_Changekey),
@@ -7486,6 +7490,10 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			g_headerObj[`key${selectedKc}Def`] = setKey;
 			document.getElementById(`sc${selectedKc}`).textContent = getScMsg[selectedKc]();
 			document.getElementById(`sc${selectedKc}`).style.fontSize = `${getFontSize(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, getBasicFont(), 13)}px`;
+			if (g_isMac) {
+				scTitleBack.textContent = getScMsg.TitleBack();
+				scTitleBack.style.fontSize = `${getFontSize(getScMsg.TitleBack(), g_btnWidth(5 / 12) - 40, getBasicFont(), 13)}px`;
+			}
 			changeConfigColor(document.getElementById(`sc${selectedKc}`),
 				g_headerObj[`key${selectedKc}`] === g_headerObj[`key${selectedKc}Def2`] ?
 					g_cssObj.title_base : g_cssObj.keyconfig_Changekey);
