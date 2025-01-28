@@ -10426,8 +10426,8 @@ const mainInit = () => {
 
 		arrowOFF: (_j, _k, _cnt) => {
 
-			// 直前のフリーズアローが未判定で、自身の判定範囲がキター(O.K.)の範囲内のとき
-			// 本来はシャキン(Great)としたいところだが、実装が複雑になるため上記条件とする
+			// 直前のフリーズアローが未判定で、自身の判定範囲がキター(O.K.)の範囲内のとき判定対象を矢印側へ移す
+			// 本来はシャキン(Great)の範囲内としたいところだが、実装が複雑になるため上記条件とする
 			judgeNextFunc.frzOFF(_j, g_workObj.judgFrzCnt[_j] + 1, _cnt);
 
 			if (g_workObj.judgArrowCnt[_j] === _k - 1 && _cnt <= g_judgObj.arrowJ[g_judgPosObj.shakin]) {
