@@ -10770,7 +10770,7 @@ const mainInit = () => {
 			judgeMotionFunc[`${_name}NG`](_j, _k, frzName, currentFrz.cnt);
 
 		} else {
-			currentFrz.frzBarLength -= movY;
+			currentFrz.frzBarLength -= movY * currentFrz.dir;
 			if (currentFrz.frzBarLength > 0) {
 				currentFrz.y -= movY;
 				$id(frzName).top = wUnit(currentFrz.y);
