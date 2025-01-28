@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2024/12/19
+ * Revised : 2025/01/28
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 36.6.9`;
-const g_revisedDate = `2024/12/19`;
+const g_version = `Ver 36.6.10`;
+const g_revisedDate = `2025/01/28`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -9902,6 +9902,10 @@ const mainInit = _ => {
 
 		arrowOFF: (_j, _k, _cnt) => {
 
+			// 直前のフリーズアローが未判定で、自身の判定範囲がキター(O.K.)の範囲内のとき判定対象を矢印側へ移す
+			// 本来はシャキン(Great)の範囲内としたいところだが、実装が複雑になるため上記条件とする
+			judgeNextFunc.frzOFF(_j, g_workObj.judgFrzCnt[_j] + 1, _cnt);
+
 			if (g_workObj.judgArrowCnt[_j] === _k - 1 && _cnt <= g_judgObj.arrowJ[g_judgPosObj.shakin]) {
 				const prevArrowName = `arrow${_j}_${g_workObj.judgArrowCnt[_j]}`;
 				const prevArrow = g_attrObj[prevArrowName];
@@ -9929,7 +9933,7 @@ const mainInit = _ => {
 				const prevFrz = g_attrObj[prevFrzName];
 
 				// 自身より前のフリーズアローが移動中かつキター(O.K.)の領域外のとき
-				if (prevFrz.isMoving && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
+				if (prevFrz && prevFrz.isMoving && prevFrz.cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.kita]) {
 
 					// 自身より前のフリーズアローが未判定の場合、強制的に枠外判定を行う
 					if (prevFrz.cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai] && !prevFrz.judgEndFlg) {
@@ -10190,7 +10194,7 @@ const mainInit = _ => {
 			judgeMotionFunc[`${_name}NG`](_j, _k, frzName, currentFrz.cnt);
 
 		} else {
-			currentFrz.frzBarLength -= g_workObj.currentSpeed;
+			currentFrz.frzBarLength -= movY * currentFrz.dir;
 			if (currentFrz.frzBarLength > 0) {
 				currentFrz.y -= movY;
 				$id(frzName).top = wUnit(currentFrz.y);
