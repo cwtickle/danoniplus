@@ -3511,7 +3511,7 @@ const g_lang_msgObj = {
         graph: `譜面密度や速度変化状況、\n譜面の難易度などの情報を表示します。`,
         dataSave: `ハイスコア、リバース設定、\nキーコンフィグの保存の有無を設定します。`,
         toDisplay: `プレイ画面上のオブジェクトの\n表示・非表示（一部透明度）を設定します。`,
-        toSettings: `SETTINGS画面へ戻ります。`,
+        toSettings: `その他の拡張設定を設定します。`,
 
         d_stepzone: `ステップゾーンの表示`,
         d_judgment: `判定キャラクタ・コンボの表示`,
@@ -3592,7 +3592,7 @@ const g_lang_msgObj = {
         graph: `Displays detailed information about the chart, such as chart's density status, sequences' velocity changes, and chart's difficulty.`,
         dataSave: `Set whether to save the high score, reverse setting, and key config.`,
         toDisplay: `Set the display or non-display (partial transparency) of objects on the play screen.`,
-        toSettings: `Return to the SETTINGS screen.`,
+        toSettings: `Set other extended settings.`,
 
         d_stepzone: `Display step zone`,
         d_judgment: `Display judgment and combo counts`,
