@@ -12087,7 +12087,23 @@ const resultInit = () => {
 		makeCssResultPlayData(`lblDisplayData`, dataRX, g_cssObj.result_style, 4, displayData),
 		makeCssResultPlayData(`lblDisplay2Data`, dataRX, g_cssObj.result_style, 5, display2Data),
 	);
-	lblStyleData.style.fontSize = `${getFontSize(lblStyleData.textContent, 350, getBasicFont(), 14)}px`;
+
+	// 設定項目が多い場合に2行に分解して表示する処理
+	let playStyleBreakNum = lblStyleData.textContent.length;
+	if (lblStyleData.textContent.length > 60) {
+		for (let j = Math.floor(lblStyleData.textContent.length / 2); j > 0; j--) {
+			if (lblStyleData.textContent[j] === `,`) {
+				playStyleBreakNum = j + 2;
+				break;
+			}
+		}
+		lblStyleData.style.top = `${parseFloat(lblStyleData.style.top) - 3}px`;
+		lblStyleData.innerHTML = `${lblStyleData.textContent.slice(0, playStyleBreakNum)}<br>` +
+			`${lblStyleData.textContent.slice(playStyleBreakNum)}`;
+		lblStyleData.style.fontSize = `${getFontSize(lblStyleData.textContent.slice(0, playStyleBreakNum), 350, getBasicFont(), 10)}px`;
+	} else {
+		lblStyleData.style.fontSize = `${getFontSize(lblStyleData.textContent, 350, getBasicFont(), 14)}px`;
+	}
 
 	/**
 	 * キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
@@ -12358,8 +12374,13 @@ const resultInit = () => {
 		drawText(unEscapeHtml(mTitleForView[1]), { hy: 2 });
 		drawText(`📝 ${unEscapeHtml(g_headerObj.tuning)} / 🎵 ${unEscapeHtml(artistName)}`, { hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
 		drawText(unEscapeHtml(difDataForImage), { hy: 4 });
-		drawText(playStyleData, { hy: 5 });
 
+		if (playStyleData.length > 60) {
+			drawText(playStyleData.slice(0, playStyleBreakNum), { hy: 5, siz: getFontSize(playStyleData.slice(0, playStyleBreakNum), 370, getBasicFont(), 14) });
+			drawText(playStyleData.slice(playStyleBreakNum), { hy: 6, siz: getFontSize(playStyleData.slice(playStyleBreakNum), 370, getBasicFont(), 14) });
+		} else {
+			drawText(playStyleData, { hy: 5, siz: getFontSize(lblStyleData.textContent, 370, getBasicFont(), 15) });
+		}
 		Object.keys(jdgScoreObj).forEach(score => {
 			drawText(g_lblNameObj[`j_${score}`], { hy: 7 + jdgScoreObj[score].pos, color: jdgScoreObj[score].dfColor });
 			drawText(g_resultObj[score], { x: 200, hy: 7 + jdgScoreObj[score].pos, align: C_ALIGN_RIGHT });
