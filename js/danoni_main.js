@@ -8086,7 +8086,6 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
  */
 const swapGroupNums = (_style, _group, _i, _divideNum) => {
 	if (_group.length % _divideNum === 0) {
-		swapUseFlg = true;
 		for (let k = 0; k < _group.length / _divideNum; k++) {
 			const swap1 = Math.floor(_divideNum * (k + 1 / 2) - 1);
 			const swap2 = Math.ceil(_divideNum * (k + 1 / 2));
@@ -8106,10 +8105,19 @@ const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
 
 	// シャッフルグループごとにミラー
 	const style = structuredClone(_shuffleGroup).map(_group => _group.reverse());
-	let swapUseFlg = false;
+	const mirStyle = structuredClone(style);
 
 	if (_swapFlg) {
 		style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(style, group, i, val)));
+		let swapUseFlg = false;
+		style.forEach((_group, j) => {
+			_group.forEach((val, k) => {
+				if (style[j][k] !== mirStyle[j][k]) {
+					swapUseFlg = true;
+					return;
+				}
+			});
+		});
 		if (!swapUseFlg) {
 			g_stateObj.shuffle = `Mirror`;
 		}
