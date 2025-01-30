@@ -3609,7 +3609,7 @@ const g_lang_msgObj = {
         d_special: `Enable setting of special effects to the work`,
 
         stepArea: `This is the setting for overall rotation of the step zone and arrow position, etc.\n[Stairs/Slope] The step zone is in a staircase shape.\n[Skew] Distorts the screen.\n[SideScroll] It becomes a side scroll mode.`,
-        sideScrollMsg: `When setting Slope or SideScroll, please make sure that the height is sufficient.<br>Can be set with query parameter ?h=600, etc.`,
+        sideScrollMsg: `When setting Slope or SideScroll, please make sure that the height is<br>sufficient. Can be set with query parameter ?h=600, etc.`,
         sideScrollDisable: `Slope, SideScroll cannot be used because <br>automatic window height expansion is disabled.`,
         frzReturn: `When the Freeze Arrow is reached, and every time the arrow's recovery judgment \nreaches a multiple of 100, it will rotate on either the X, Y, or Z axis.`,
         shaking: `This is the setting to shake the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n[Drunk] Shakes the entire screen randomly up, down, left, and right. Be careful of motion sickness.`,
