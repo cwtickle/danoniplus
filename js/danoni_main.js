@@ -1231,7 +1231,8 @@ const createColorPicker = (_parentObj, _id, _func, { x = 0, y = 0 } = {}) => {
  * @returns {HTMLDivElement}
  */
 const createColorObject2 = (_id,
-	{ x = 0, y = 0, w = C_ARW_WIDTH, h = C_ARW_WIDTH, rotate = ``, styleName = ``, ...rest } = {}, ..._classes) => {
+	{ x = 0, y = 0, w = C_ARW_WIDTH, h = C_ARW_WIDTH, rotate = ``, styleName = ``,
+		rotateEnabled = g_stateObj.rotateEnabled, ...rest } = {}, ..._classes) => {
 
 	const div = createDiv(_id, x, y, w, h, _classes);
 	const style = div.style;
@@ -1243,7 +1244,7 @@ const createColorObject2 = (_id,
 		rotate = setVal(objData[1], 0, C_TYP_FLOAT);
 		charaStyle = `${objData[0]}${styleName}`;
 	}
-	if (g_stateObj.rotateEnabled) {
+	if (rotateEnabled) {
 		style.transform = `rotate(${rotate}deg)`;
 	}
 
@@ -3401,6 +3402,8 @@ const headerConvert = _dosObj => {
 				interlockingButton(obj, defaultOption, C_FLG_OFF, C_FLG_ON);
 			}));
 	}
+	obj.arrowEffectUseOrg = obj.arrowEffectUse;
+	obj.arrowEffectSetFlg = obj.arrowEffectSet === C_FLG_ON;
 
 	// ローカルストレージに保存済みのColorType設定からDisplayのColor設定を反映
 	if (g_localStorage.colorType !== undefined) {
@@ -4337,7 +4340,7 @@ const titleInit = () => {
 		divRoot.appendChild(
 			createColorObject2(`lblArrow`, {
 				x: (g_sWidth - 500) / 2, y: -15 + (g_sHeight - 500) / 2,
-				w: 500, h: 500,
+				w: 500, h: 500, rotateEnabled: true,
 				background: makeColorGradation(g_headerObj.titlearrowgrds[0] || g_headerObj.setColorOrg[0], {
 					_defaultColorgrd: [false, `#eeeeee`],
 					_objType: `titleArrow`,
@@ -6700,9 +6703,9 @@ const exSettingInit = () => {
 	createGeneralSetting(spriteList.shaking, `shaking`);
 	createGeneralSetting(spriteList.effect, `effect`, {
 		addRFunc: () => {
-			g_stateObj.d_arroweffect = C_FLG_ON;
-			g_headerObj.arrowEffectUse = g_stateObj.effect === C_FLG_OFF;
-			g_headerObj.arrowEffectSet = boolToSwitch(g_stateObj.effect !== C_FLG_OFF);
+			g_stateObj.d_arroweffect = boolToSwitch(g_stateObj.effect !== C_FLG_OFF || g_headerObj.arrowEffectSetFlg);
+			g_headerObj.arrowEffectUse = g_stateObj.effect === C_FLG_OFF && g_headerObj.arrowEffectUseOrg;
+			g_headerObj.arrowEffectSet = g_stateObj.d_arroweffect;
 		},
 	});
 	createGeneralSetting(spriteList.camoufrage, `camoufrage`);
@@ -9722,6 +9725,16 @@ const getArrowSettings = () => {
 	g_workObj.autoRetryFlg = false;
 
 	// Camoufrageの設定
+	if (!g_stateObj.rotateEnabled) {
+
+		// 矢印の回転が無効の場合は、設定を変える
+		if (g_stateObj.camoufrage === `Arrow`) {
+			g_stateObj.camoufrage = C_FLG_OFF;
+		} else if (g_stateObj.camoufrage === C_FLG_ALL) {
+			g_stateObj.camoufrage = `Color`;
+		}
+		g_settings.camoufrageNum = g_settings.camoufrages.findIndex(val => val === g_stateObj.camoufrage);
+	}
 	if (g_stateObj.camoufrage !== C_FLG_OFF) {
 		const eachOrAll = [``, `All`];
 		const keyNum = g_keyObj[`chara${g_keyObj.currentKey}_${g_keyObj.currentPtn}`].length;
@@ -9739,7 +9752,7 @@ const getArrowSettings = () => {
 			const _copiedArray = structuredClone(_array);
 			return _array.map((_val, _i) => _array[_i] = _copiedArray[randArray[_i]]);
 		};
-		if (g_stateObj.camoufrage === `Arrow` || g_stateObj.camoufrage === `Both`) {
+		if (g_stateObj.camoufrage === `Arrow` || g_stateObj.camoufrage === C_FLG_ALL) {
 
 			// 矢印ヒット時に元の矢印がわかるようにするため、あえて g_workObj.stepHitRtn はそのままにする
 			g_workObj.stepRtn = getSwapArray(g_workObj.stepRtn);

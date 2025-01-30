@@ -1229,8 +1229,8 @@ const g_effectFunc = {
     'Dizzy': () => g_setEffect(`effects-dizzy`),
     'Spin': () => g_setEffect(`effects-spin`),
     'Wave': () => g_setEffect(`effects-wave`, `effects-wave`),
-    'Storm': () => g_setEffect(`effects-storm`, `effects-storm`),
-    'Blinking': () => g_setEffect(`effects-blinking`, `effects-blinking`),
+    'Storm': () => g_setEffect(`effects-storm`, `effects-storm`, ``),
+    'Blinking': () => g_setEffect(`effects-blinking`, `effects-blinking`, ``),
     'Squids': () => g_setEffect(`effects-squids-arrow`, `effects-squids-frz`),
 };
 
