@@ -1171,15 +1171,15 @@ const g_shakingFunc = {
     'Vertical': () => $id(`mainSprite`).top = `${(Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2}px`,
     'Drunk': () => {
         if (parseFloat($id(`mainSprite`).left) === 0 && parseFloat($id(`mainSprite`).top) === 0) {
-            g_workObj._drunkXFlg = [true, false][Math.floor(Math.random() * 2)];
-            g_workObj._drunkYFlg = [true, false][Math.floor(Math.random() * 2)];
+            g_workObj.drunkXFlg = [true, false][Math.floor(Math.random() * 2)];
+            g_workObj.drunkYFlg = [true, false][Math.floor(Math.random() * 2)];
         }
-        if (g_workObj._drunkXFlg) {
+        if (g_workObj.drunkXFlg) {
             $id(`mainSprite`).left = `${(Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1}px`;
             $id(`infoSprite`).left = $id(`mainSprite`).left;
             $id(`judgeSprite`).left = $id(`mainSprite`).left;
         }
-        if (g_workObj._drunkYFlg) {
+        if (g_workObj.drunkYFlg) {
             $id(`mainSprite`).top = `${(Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2}px`;
             $id(`infoSprite`).top = $id(`mainSprite`).top;
             $id(`judgeSprite`).top = $id(`mainSprite`).top;
