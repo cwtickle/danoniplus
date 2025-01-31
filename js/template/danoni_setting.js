@@ -247,6 +247,7 @@ g_presetObj.settingUse = {
 	//	arrowEffect: `true`,
 	//	special: `true`,
 
+	//  playWindow: `true`,
 	//  stepArea: `true`,
 	//  frzReturn : `true`,
 	//  shaking : `true`,

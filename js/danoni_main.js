@@ -2933,7 +2933,7 @@ const headerConvert = _dosObj => {
 	}
 	if (!(_dosObj.heightVariable || g_presetObj.heightVariable || false)) {
 		obj.heightLockFlg = true;
-		g_settings.stepAreas = g_settings.stepAreas.filter(val => !val.endsWith(`Slope`) && !val.endsWith(`SideScroll`));
+		g_settings.playWindows = g_settings.playWindows.filter(val => !val.endsWith(`Slope`) && !val.endsWith(`SideScroll`));
 	}
 
 	// 曲名
@@ -6011,7 +6011,7 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
  */
 const createLblSetting = (_settingName, _adjY = 0, _settingLabel = _settingName) => {
 	const lbl = createDivCss2Label(`lbl${_settingName}`, g_lblNameObj[_settingLabel], {
-		x: 0, y: _adjY, w: 100,
+		x: -5, y: _adjY, w: 110,
 	}, `settings_${_settingName}`);
 	lbl.title = g_msgObj[`${_settingName.charAt(0).toLowerCase()}${_settingName.slice(1)}`];
 	return lbl;
@@ -6698,6 +6698,9 @@ const exSettingInit = () => {
 	createEmptySprite(divRoot, `optionsprite`, g_windowObj.optionSprite);
 	const spriteList = setSpriteList(g_settingPos.exSetting);
 
+	createGeneralSetting(spriteList.playWindow, `playWindow`);
+	lblPlayWindow.title += g_headerObj.heightLockFlg ? g_msgObj.sideScrollDisable : g_msgObj.sideScrollMsg;
+
 	createGeneralSetting(spriteList.stepArea, `stepArea`);
 	createGeneralSetting(spriteList.frzReturn, `frzReturn`);
 	createGeneralSetting(spriteList.shaking, `shaking`);
@@ -6717,16 +6720,6 @@ const exSettingInit = () => {
 		}
 	});
 	createGeneralSetting(spriteList.autoRetry, `autoRetry`);
-
-	// StepArea設定の注意書きを表示
-	if (g_headerObj.stepAreaUse) {
-		multiAppend(stepAreaSprite,
-			createDivCss2Label(`lblStepAreaMsg`, g_headerObj.heightLockFlg ? g_msgObj.sideScrollDisable : g_msgObj.sideScrollMsg, {
-				x: parseFloat($id(`lblStepArea`).left), y: parseFloat($id(`lblStepArea`).top) + 22, w: 300, h: 30, siz: 12,
-				align: C_ALIGN_LEFT,
-			}),
-		);
-	}
 
 	// 判定範囲の設定を表示
 	const getJudgRangeView = () => `| ` +
@@ -9951,14 +9944,24 @@ const mainInit = () => {
 	let speedCnts = 0;
 	let boostCnts = 0;
 	let keychCnts = 0;
-	const flatMode = g_stateObj.d_stepzone === `FlatBar` || g_stateObj.scroll.endsWith(`Flat`) || g_keyObj[`flatMode${keyCtrlPtn}`];
+
+	const flatMode = g_stateObj.d_stepzone === `FlatBar` ||
+		g_stateObj.scroll.endsWith(`Flat`) ||
+		g_keyObj[`flatMode${keyCtrlPtn}`] ||
+		(g_stateObj.stepArea === `Halfway` &&
+			g_keyObj[`div${keyCtrlPtn}`] < g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length);
 	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
+
+	const stepSprite = [
+		createEmptySprite(mainSprite, `stepSprite0`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+		createEmptySprite(mainSprite, `stepSprite1`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+	];
 
 	for (let j = 0; j < keyNum; j++) {
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 
 		// ステップゾーンルート
-		const stepRoot = createEmptySprite(mainSprite, `stepRoot${j}`, {
+		const stepRoot = createEmptySprite(stepSprite[g_workObj.dividePos[j]], `stepRoot${j}`, {
 			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * g_workObj.dividePos[j],
 			w: C_ARW_WIDTH, h: C_ARW_WIDTH,
 		});
@@ -10008,7 +10011,7 @@ const mainInit = () => {
 			reverses.push(!reverses[0], !reverses[1]);
 		}
 		lineY.forEach((y, j) => {
-			mainSprite.appendChild(
+			stepSprite[Number(reverses[j])].appendChild(
 				createColorObject2(`stepBar${j}`, {
 					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(reverses[j]) + y,
 					w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
@@ -10038,14 +10041,14 @@ const mainInit = () => {
 		createEmptySprite(mainSprite, `arrowSprite1`, { y: -g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
 	];
 
-	// Appearanceのオプション適用時は一部描画を隠す
-	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
-		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance]);
-
+	const frzHitSprite = [
+		createEmptySprite(mainSprite, `frzHitSprite0`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+		createEmptySprite(mainSprite, `frzHitSprite1`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
+	];
 	for (let j = 0; j < keyNum; j++) {
 
 		// フリーズアローヒット部分
-		const frzHit = createEmptySprite(mainSprite, `frzHit${j}`, {
+		const frzHit = createEmptySprite(frzHitSprite[g_workObj.dividePos[j]], `frzHit${j}`, {
 			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * g_workObj.dividePos[j],
 			w: C_ARW_WIDTH, h: C_ARW_WIDTH, opacity: 0,
 		});
@@ -10066,6 +10069,13 @@ const mainInit = () => {
 			);
 		}
 	}
+
+	// StepArea処理
+	g_stepAreaFunc[g_stateObj.stepArea]();
+
+	// Appearanceのオプション適用時は一部描画を隠す
+	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
+		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance]);
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
@@ -10324,7 +10334,7 @@ const mainInit = () => {
 
 	// mainSpriteのtransform追加処理
 	g_workObj.transform = mainSprite.style.transform || ``;
-	g_workObj.transform += g_stepAreaFunc[g_stateObj.stepArea]();
+	g_workObj.transform += g_playWindowFunc[g_stateObj.playWindow]();
 	mainSprite.style.transform = g_workObj.transform;
 
 	// EffectのArrowEffect追加処理
@@ -11289,8 +11299,8 @@ const changeAppearanceFilter = (_num = 10) => {
 	$id(`arrowSprite${topNum}`).clipPath = topShape;
 	$id(`arrowSprite${bottomNum}`).clipPath = bottomShape;
 
-	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / MAX_FILTER_POS + g_stateObj.hitPosition);
-	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS - g_stateObj.hitPosition);
+	$id(`filterBar0`).top = wUnit(parseFloat($id(`arrowSprite${topNum}`).top) + g_posObj.arrowHeight * _num / MAX_FILTER_POS + g_stateObj.hitPosition);
+	$id(`filterBar1`).top = wUnit(parseFloat($id(`arrowSprite${bottomNum}`).top) + g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS - g_stateObj.hitPosition);
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		$id(`filterView`).top =
@@ -12046,6 +12056,7 @@ const resultInit = () => {
 			getStgDetailName(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
 		withOptions(g_stateObj.appearance, `Visible`),
 		withOptions(g_stateObj.gauge, g_settings.gauges[0]),
+		withOptions(g_stateObj.playWindow, `Default`),
 		withOptions(g_stateObj.stepArea, `Default`),
 		withOptions(g_stateObj.frzReturn, C_FLG_OFF, `FR:${g_stateObj.frzReturn}`),
 		withOptions(g_stateObj.shaking, C_FLG_OFF),

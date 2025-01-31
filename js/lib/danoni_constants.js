@@ -112,7 +112,8 @@ const g_settingPos = {
         hitPosition: { heightPos: 10, y: 10, dw: 0, dh: 0 },
     },
     exSetting: {
-        stepArea: { heightPos: 0, y: 0, dw: 0, dh: 0 },
+        playWindow: { heightPos: 0, y: 0, dw: 0, dh: 0 },
+        stepArea: { heightPos: 1, y: 0, dw: 0, dh: 0 },
         frzReturn: { heightPos: 2.5, y: 0, dw: 0, dh: 0 },
         shaking: { heightPos: 3.5, y: 0, dw: 0, dh: 0 },
         effect: { heightPos: 5, y: 0, dw: 0, dh: 0 },
@@ -926,6 +927,7 @@ const g_stateObj = {
     filterLock: C_FLG_OFF,
     opacity: 100,
 
+    playWindow: `Default`,
     stepArea: `Default`,
     frzReturn: C_FLG_OFF,
     shaking: C_FLG_OFF,
@@ -1060,7 +1062,10 @@ const g_settings = {
         special: 0,
     },
 
-    stepAreas: [`Default`, `Stairs`, `R-Stairs`, `Slope`, `R-Slope`, `Skew`, `R-Skew`, `SideScroll`, `R-SideScroll`],
+    playWindows: [`Default`, `Stairs`, `R-Stairs`, `Slope`, `R-Slope`, `Distorted`, `R-Distorted`, `SideScroll`, `R-SideScroll`],
+    playWindowNum: 0,
+
+    stepAreas: [`Default`, `Halfway`, `Mismatched`, `R-Mismatched`],
     stepAreaNum: 0,
 
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
@@ -1145,21 +1150,43 @@ const g_motionFunc = {
 };
 
 /**
- * StepArea適用関数
+ * PlayWindow適用関数
  */
 const g_changeStairs = (_rad) => ` rotate(${_rad}deg)`;
 const g_changeSkew = (_rad) => ` Skew(${_rad}deg, ${_rad}deg) scaleY(0.9)`;
 
-const g_stepAreaFunc = {
+const g_playWindowFunc = {
     'Default': () => ``,
     'Stairs': () => g_changeStairs(-8),
     'R-Stairs': () => g_changeStairs(8),
     'Slope': () => g_changeStairs(-45),
     'R-Slope': () => g_changeStairs(45),
-    'Skew': () => g_changeSkew(-15),
-    'R-Skew': () => g_changeSkew(15),
+    'Distorted': () => g_changeSkew(-15),
+    'R-Distorted': () => g_changeSkew(15),
     'SideScroll': () => g_changeStairs(-90),
     'R-SideScroll': () => g_changeStairs(90),
+};
+
+const g_stepAreaFunc = {
+    'Default': () => ``,
+    'Halfway': () => {
+        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
+            $id(`${sprite}0`).top = `${g_headerObj.playingHeight / 2 - g_posObj.stepY - C_ARW_WIDTH / 2}px`;
+            $id(`${sprite}1`).top = `-${g_headerObj.playingHeight / 2 - g_posObj.stepY - C_ARW_WIDTH / 2}px`;
+        });
+    },
+    'Mismatched': () => {
+        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
+            $id(`${sprite}0`).transform = `rotate(-15deg)`;
+            $id(`${sprite}1`).transform = `rotate(15deg)`;
+        });
+    },
+    'R-Mismatched': () => {
+        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
+            $id(`${sprite}0`).transform = `rotate(15deg)`;
+            $id(`${sprite}1`).transform = `rotate(-15deg)`;
+        });
+    },
 };
 
 /**
@@ -1276,7 +1303,7 @@ let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`
     `d_score`, `d_musicinfo`, `d_filterline`];
 
 let g_canDisabledSettings = [`motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`,
-    `excessive`, `appearance`, `stepArea`, `frzReturn`, `shaking`, `effect`, `camoufrage`,
+    `excessive`, `appearance`, `playWindow`, `stepArea`, `frzReturn`, `shaking`, `effect`, `camoufrage`,
     `swapping`, `judgRange`, `autoRetry`];
 
 const g_hidSudFunc = {
@@ -1902,6 +1929,7 @@ const g_shortcutObj = {
         Tab: { id: `btnSettings` },
     },
     exSetting: {
+        ShiftLeft_KeyP: { id: `lnkPlayWindowL` },
         ShiftLeft_KeyS: { id: `lnkStepAreaL` },
         ShiftLeft_KeyF: { id: `lnkFrzReturnL` },
         ShiftLeft_KeyH: { id: `lnkShakingL` },
@@ -1911,6 +1939,7 @@ const g_shortcutObj = {
         ShiftLeft_KeyJ: { id: `lnkJudgRangeL` },
         ShiftLeft_KeyA: { id: `lnkAutoRetryL` },
 
+        KeyP: { id: `lnkPlayWindowR` },
         KeyS: { id: `lnkStepAreaR` },
         KeyF: { id: `lnkFrzReturnR` },
         KeyH: { id: `lnkShakingR` },
@@ -3216,6 +3245,7 @@ const g_lblNameObj = {
     Opacity: `Opacity`,
     HitPosition: `HitPosition`,
 
+    PlayWindow: `PlayWindow`,
     StepArea: `StepArea`,
     FrzReturn: `FrzReturn`,
     Shaking: `Shaking`,
@@ -3284,8 +3314,8 @@ const g_lblNameObj = {
     'u_R-Stairs': `R-Stairs`,
     'u_Slope': `Slope`,
     'u_R-Slope': `R-Slope`,
-    'u_Skew': `Skew`,
-    'u_R-Skew': `R-Skew`,
+    'u_Distorted': `Distorted`,
+    'u_R-Distorted': `R-Distorted`,
     'u_SideScroll': `SideScroll`,
     'u_R-SideScroll': `R-SideScroll`,
 
@@ -3527,9 +3557,10 @@ const g_lang_msgObj = {
         d_arroweffect: `矢印・フリーズアローモーションの有効化設定`,
         d_special: `作品固有の特殊演出の有効化設定`,
 
-        stepArea: `ステップゾーン及び矢印の位置を全体的に回転する等の設定です。\n[Stairs/Slope] ステップゾーンを階段状にします\n[Skew] 画面を歪ませます\n[SideScroll] 横スクロールモードになります`,
-        sideScrollMsg: `Slope, SideScrollを設定する場合は高さが足りているかを確認してください<br>クエリパラメータ ?h=600 などで設定できます`,
-        sideScrollDisable: `ウィンドウの高さの自動拡張が無効のため、Slope, SideScrollは使用できません`,
+        playWindow: `ステップゾーン及び矢印の位置を全体的に回転する等の設定です。\n[Stairs/Slope] ステップゾーンを階段状にします\n[Distorted] 画面を歪ませます`,
+        sideScrollMsg: `\n[SideScroll] 横スクロールモードになります\n\nSlope, SideScrollを設定する場合は高さが足りているかを確認してください\nクエリパラメータ ?h=600 などで設定できます`,
+        sideScrollDisable: `\n\nウィンドウの高さの自動拡張が無効のため、Slope, SideScrollは使用できません`,
+        stepArea: `ステップゾーンの位置を変更します。\n[Halfway] ステップゾーンが中央に表示されます\n[Mismatched] スクロールの向きが上下で異なる方向に流れます`,
         frzReturn: `フリーズアロー到達時及び矢印の回復判定が100の倍数に達するごとに、X/Y/Z軸のいずれかに回転します`,
         shaking: `ステップゾーン及び矢印を揺らす設定です。\n[Horizontal] 横方向に揺らします\n[Vertical] 縦方向に揺らします\n[Drunk] 画面全体を上下左右ランダムに揺らします。画面酔いに注意してください`,
         effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
@@ -3608,9 +3639,10 @@ const g_lang_msgObj = {
         d_arroweffect: `Enable sequences' animations`,
         d_special: `Enable setting of special effects to the work`,
 
-        stepArea: `This is the setting for overall rotation of the step zone and arrow position, etc.\n[Stairs/Slope] The step zone is in a staircase shape.\n[Skew] Distorts the screen.\n[SideScroll] It becomes a side scroll mode.`,
-        sideScrollMsg: `When setting Slope or SideScroll, please make sure that the height is<br>sufficient. Can be set with query parameter ?h=600, etc.`,
-        sideScrollDisable: `Slope, SideScroll cannot be used because <br>automatic window height expansion is disabled.`,
+        playWindow: `This is the setting for overall rotation of the step zone and arrow position, etc.\n[Stairs/Slope] The step zone is in a staircase shape.\n[Distorted] Distorts the screen.`,
+        sideScrollMsg: `\n[SideScroll] It becomes a side scroll mode.\n\nWhen setting Slope or SideScroll, please make sure that the height is\nsufficient. Can be set with query parameter ?h=600, etc.`,
+        sideScrollDisable: `\n\nSlope, SideScroll cannot be used because \nautomatic window height expansion is disabled.`,
+        stepArea: `Change the position of the step zone.\n[Halfway] Step zones are centered.\n[Mismatched] Scroll direction flows in different directions up and down.`,
         frzReturn: `When the Freeze Arrow is reached, and every time the arrow's recovery judgment \nreaches a multiple of 100, it will rotate on either the X, Y, or Z axis.`,
         shaking: `This is the setting to shake the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n[Drunk] Shakes the entire screen randomly up, down, left, and right. Be careful of motion sickness.`,
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,

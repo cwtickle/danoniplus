@@ -663,8 +663,12 @@ input[type="color"] {
 	color: var(--settings-fadeinBar-x, #ffffff);
 }
 
+.settings_PlayWindow::first-letter {
+	color: var(--settings-playWindow-x, #9999ff);
+}
+
 .settings_StepArea::first-letter {
-	color: var(--settings-stepArea-x, #9999ff);
+	color: var(--settings-stepArea-x, #6699ff);
 }
 
 .settings_FrzReturn::first-letter {
@@ -709,6 +713,7 @@ input[type="color"] {
 .settings_Appearance:hover,
 .settings_Opacity:hover,
 .settings_HitPosition:hover,
+.settings_PlayWindow:hover,
 .settings_StepArea:hover,
 .settings_FrzReturn:hover,
 .settings_Shaking:hover,
