@@ -9718,7 +9718,7 @@ const getArrowSettings = () => {
 		});
 	}
 
-	// FreezeReturnの初期化
+	// FrzReturnの初期化
 	g_workObj.frzReturnFlg = false;
 
 	// AutoRetryの初期化
@@ -11349,7 +11349,7 @@ const appearKeyTypes = (_j, _targets, _alphas = fillArray(_targets.length, 1)) =
 };
 
 /**
- * FreezeReturnの追加処理
+ * FrzReturnの追加処理
  * @param {number} _rad 回転角度
  * @param {number[]} _axis 回転軸
  */
