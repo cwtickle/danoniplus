@@ -9775,7 +9775,7 @@ const getArrowSettings = () => {
 
 		// 位置変更用の配列に従い、個別・全体色変化の位置変更
 		if (g_stateObj.camoufrage === `Color` || g_stateObj.camoufrage === C_FLG_ALL) {
-			const _getSwapList = (_array) => {
+			const getSwapList = (_array) => {
 				const _copiedArray = structuredClone(_array);
 				return _array.map((_val, _i) => _array[_i] = randArray[_copiedArray[_i]]);
 			};
@@ -9785,7 +9785,7 @@ const getArrowSettings = () => {
 						if (g_workObj[type][j] === undefined) {
 							continue;
 						}
-						g_workObj[type][j] = _getSwapList(g_workObj[type][j]);
+						g_workObj[type][j] = getSwapList(g_workObj[type][j]);
 					}
 				}
 			});
