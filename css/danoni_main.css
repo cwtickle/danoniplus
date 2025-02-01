@@ -672,7 +672,7 @@ input[type="color"] {
 }
 
 .settings_FrzReturn::first-letter {
-	color: var(--settings-freezeReturn-x, #99ccff);
+	color: var(--settings-frzReturn-x, #99ccff);
 }
 
 .settings_Shaking::first-letter {
