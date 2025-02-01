@@ -8500,6 +8500,12 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 				scrollchData.push([frame, arrowNum, frame, scrollDir]);
 			});
+
+			// 個別のスクロール変化が存在する場合、StepAreaを自動リセット
+			if (scrollchData.length > 0) {
+				g_stateObj.stepArea = `Default`;
+				g_settings.stepAreaNum = 0;
+			}
 			return scrollchData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
 		return [];
