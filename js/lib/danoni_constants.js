@@ -806,7 +806,7 @@ const g_judgRanges = {
     'Normal': [[2, 4, 6, 8, 16], [2, 4, 8]],
     'Narrow': [[2, 3, 4, 8, 16], [2, 4, 8]],
     'Hard': [[1, 3, 5, 8, 16], [1, 3, 8]],
-    'Ex-Hard': [[1, 2, 3, 8, 16], [1, 2, 8]],
+    'ExHard': [[1, 2, 3, 8, 16], [1, 2, 8]],
 };
 
 const C_CLR_DUMMY = `#777777`;
@@ -1085,7 +1085,7 @@ const g_settings = {
     swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`],
     swappingNum: 0,
 
-    judgRanges: [`Normal`, `Narrow`, `Hard`, `Ex-Hard`],
+    judgRanges: [`Normal`, `Narrow`, `Hard`, `ExHard`],
     judgRangeNum: 0,
 
     autoRetrys: [C_FLG_OFF, `Miss`, `Matari(Good)`, `Shakin(Great)`, `Fast/Slow`],
@@ -3344,7 +3344,7 @@ const g_lblNameObj = {
 
     'u_Narrow': `Narrow`,
     'u_Hard': `Hard`,
-    'u_Ex-Hard': `Ex-Hard`,
+    'u_ExHard': `ExHard`,
 
     'u_Miss': `Miss`,
     'u_Matari(Good)': `Matari(Good)`,
@@ -3568,7 +3568,7 @@ const g_lang_msgObj = {
         effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
         camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
         swapping: `ステップゾーンの位置をグループ単位で入れ替えます。`,
-        judgRange: `判定の許容範囲を設定します。\n[Normal] 通常、[Narrow/Hard] 辛判定、[Ex-Hard] 激辛判定`,
+        judgRange: `判定の許容範囲を設定します。\n[Normal] 通常、[Narrow/Hard] 辛判定、[ExHard] 激辛判定`,
         autoRetry: `自動リトライの条件を設定します。\n[Miss] ミス時、[Matari] マターリ時、[Shakin] シャキン時、[FS] Fast/Slow発生時`,
 
         lnkSpeedG: `譜面の進行別の速度変化状況を表示`,
@@ -3650,7 +3650,7 @@ const g_lang_msgObj = {
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
         camoufrage: `The appearance of the steps changes randomly with the same placement.`,
         swapping: `Replaces the position of step zones on a group-by-group basis.`,
-        judgRange: `Set the allowable range of judgment.\n[Normal] Normal judgment, [Narrow/Hard] Hard judgment, [Ex-Hard] Very hard judgment`,
+        judgRange: `Set the allowable range of judgment.\n[Normal] Normal judgment, [Narrow/Hard] Hard judgment, [ExHard] Very hard judgment`,
         autoRetry: `Set the conditions for automatic retry.\n[Miss] When missed, [Matari] When good, [Shakin] When great, [FS] When Fast/Slow occurs`,
 
         lnkSpeedG: `Displays the speed change status by progression of the chart.`,
