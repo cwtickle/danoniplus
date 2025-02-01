@@ -688,7 +688,7 @@ input[type="color"] {
 }
 
 .settings_Swapping::first-letter {
-	color: var(--settings-swaping-x, #ccff99);
+	color: var(--settings-swapping-x, #ccff99);
 }
 
 .settings_JudgRange::first-letter {

@@ -11385,7 +11385,7 @@ const changeReturn = (_rad, _axis) => {
 		mainSprite.style.transform = _transform;
 
 		if (_rad < 360 && g_workObj.frzReturnFlg) {
-			setTimeout(() => changeReturn(_rad + 1, _axis), 5);
+			setTimeout(() => changeReturn(_rad + 4, _axis), 20);
 		} else {
 			g_workObj.frzReturnFlg = false;
 		}
@@ -11404,7 +11404,7 @@ const quickRetry = (_retryNum) => {
 			clearTimeout(g_timeoutEvtId);
 			clearWindow();
 			musicAfterLoaded();
-		}, 5);
+		}, 16);
 	}
 };
 
@@ -11540,7 +11540,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	// FrzReturnの設定
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		if (!g_workObj.frzReturnFlg) {
-			changeReturn(1, g_frzReturnFunc[g_stateObj.frzReturn]());
+			changeReturn(4, g_frzReturnFunc[g_stateObj.frzReturn]());
 		}
 	}
 	g_customJsObj[`judg_${_name}Hit`].forEach(func => func(_difFrame));
@@ -11565,7 +11565,7 @@ const changeFailedFrz = (_j, _k) => {
 	// FrzReturnの設定
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		if (!g_workObj.frzReturnFlg) {
-			changeReturn(1, g_frzReturnFunc[g_stateObj.frzReturn]());
+			changeReturn(4, g_frzReturnFunc[g_stateObj.frzReturn]());
 		}
 	}
 };
