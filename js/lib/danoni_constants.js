@@ -1171,8 +1171,8 @@ const g_stepAreaFunc = {
     'Default': () => ``,
     'Halfway': () => {
         [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            $id(`${sprite}0`).top = `${g_headerObj.playingHeight / 2 - g_posObj.stepY - C_ARW_WIDTH / 2}px`;
-            $id(`${sprite}1`).top = `-${g_headerObj.playingHeight / 2 - g_posObj.stepY - C_ARW_WIDTH / 2}px`;
+            $id(`${sprite}0`).top = `${g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2}px`;
+            $id(`${sprite}1`).top = `-${g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2}px`;
         });
     },
     'Mismatched': () => {
