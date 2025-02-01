@@ -1067,7 +1067,7 @@ const g_settings = {
     playWindows: [`Default`, `Stairs`, `R-Stairs`, `Slope`, `R-Slope`, `Distorted`, `R-Distorted`, `SideScroll`, `R-SideScroll`],
     playWindowNum: 0,
 
-    stepAreas: [`Default`, `Halfway`, `Mismatched`, `R-Mismatched`],
+    stepAreas: [`Default`, `Halfway`, `Mismatched`, `R-Mismatched`, `X-Flower`],
     stepAreaNum: 0,
 
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
@@ -1187,6 +1187,14 @@ const g_stepAreaFunc = {
         [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
             $id(`${sprite}0`).transform = `rotate(15deg)`;
             $id(`${sprite}1`).transform = `rotate(-15deg)`;
+        });
+    },
+    'X-Flower': () => {
+        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
+            $id(`${sprite}0`).transform = `rotate(-15deg)`;
+            $id(`${sprite}1`).transform = `rotate(15deg)`;
+            $id(`${sprite}2`).transform = `rotate(15deg)`;
+            $id(`${sprite}3`).transform = `rotate(-15deg)`;
         });
     },
 };

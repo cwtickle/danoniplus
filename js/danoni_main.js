@@ -9652,6 +9652,9 @@ const getArrowSettings = () => {
 
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
 		g_workObj.dividePos[j] = ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
+		if (g_stateObj.stepArea === `X-Flower`) {
+			g_workObj.dividePos[j] = (g_workObj.stepX[j] < (g_headerObj.playingWidth - C_ARW_WIDTH) / 2 ? 0 : 1) * 2 + g_workObj.dividePos[j] % 2;
+		}
 		g_workObj.scrollDir[j] = (posj <= divideCnt ? 1 : -1) * scrollDirOptions[j] * (g_stateObj.reverse === C_FLG_OFF ? 1 : -1);
 
 		eachOrAll.forEach(type => {
@@ -9670,6 +9673,7 @@ const getArrowSettings = () => {
 		});
 	}
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
+	g_stateObj.layerNum = Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2;
 
 	Object.keys(g_resultObj).forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 	g_resultObj.spState = ``;
@@ -10032,15 +10036,16 @@ const mainInit = () => {
 			lineY.push(lineY[0], lineY[1]);
 			reverses.push(!reverses[0], !reverses[1]);
 		}
-		lineY.forEach((y, j) => {
-			stepSprite[Number(reverses[j])].appendChild(
-				createColorObject2(`stepBar${j}`, {
-					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(reverses[j]) + y,
-					w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
-				}, g_cssObj.life_Failed)
-			);
-		});
-
+		for (let k = 0; k < g_stateObj.layerNum; k += 2) {
+			lineY.forEach((y, j) => {
+				stepSprite[Number(reverses[j]) + k].appendChild(
+					createColorObject2(`stepBar${j + k}`, {
+						x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(reverses[j]) + y,
+						w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
+					}, g_cssObj.life_Failed)
+				);
+			});
+		}
 	}
 
 	for (let j = 0; j < keyNum; j++) {
@@ -10754,7 +10759,7 @@ const mainInit = () => {
 			(_attrs.initY * g_workObj.boostSpd +
 				_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 
-		const stepRoot = createEmptySprite(arrowSprite[dividePos], arrowName, {
+		const stepRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], arrowName, {
 			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
 		});
 		/**
@@ -10781,7 +10786,7 @@ const mainInit = () => {
 		// 矢印色の設定
 		// - 枠/塗りつぶし色: g_attrObj[arrowName].Arrow / ArrowShadow
 		g_typeLists.arrowColor.forEach(val => g_attrObj[arrowName][`Arrow${val}`] = g_workObj[`${_name}${val}Colors`][_j]);
-		arrowSprite[dividePos].appendChild(stepRoot);
+		arrowSprite[g_workObj.dividePos[_j]].appendChild(stepRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			stepRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
@@ -10858,7 +10863,7 @@ const mainInit = () => {
 				_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
 
-		const frzRoot = createEmptySprite(arrowSprite[dividePos], frzName, {
+		const frzRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], frzName, {
 			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
 		});
 		/**
@@ -10896,7 +10901,7 @@ const mainInit = () => {
 		// - 通常時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Normal / NormalShadow / NormalBar
 		// - ヒット時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Hit / HitShadow / HitBar
 		g_typeLists.frzColor.forEach(val => g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j]);
-		arrowSprite[dividePos].appendChild(frzRoot);
+		arrowSprite[g_workObj.dividePos[_j]].appendChild(frzRoot);
 		let shadowColor = _shadowColor === `Default` ? _normalColor : _shadowColor;
 
 		/**
