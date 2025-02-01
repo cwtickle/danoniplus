@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/01/28
+ * Revised : 2025/02/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 36.6.10`;
-const g_revisedDate = `2025/01/28`;
+const g_version = `Ver 36.6.11`;
+const g_revisedDate = `2025/02/01`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -9285,8 +9285,8 @@ const mainInit = _ => {
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
 	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj =>
 		mainSprite.appendChild(createColorObject2(obj, g_lblPosObj.filterBar, filterCss)));
-	borderBar0.style.top = wUnit(g_posObj.stepDiffY + g_stateObj.hitPosition);
-	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight - g_stateObj.hitPosition);
+	borderBar0.style.top = wUnit(g_posObj.stepDiffY + g_workObj.hitPosition);
+	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight - g_workObj.hitPosition);
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
@@ -10478,8 +10478,8 @@ const changeAppearanceFilter = (_appearance, _num = 10) => {
 	$id(`arrowSprite${topNum}`).clipPath = topShape;
 	$id(`arrowSprite${bottomNum}`).clipPath = bottomShape;
 
-	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / 100 + g_stateObj.hitPosition);
-	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (100 - _num) / 100 - g_stateObj.hitPosition);
+	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / 100 - g_workObj.hitPosition);
+	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (100 - _num) / 100 + g_workObj.hitPosition);
 
 	if (g_appearanceRanges.includes(_appearance)) {
 		$id(`filterView`).top =
