@@ -5,7 +5,7 @@
   スキンcssファイル (skyblue)
 
   Created : 2019/11/04
-  Revised : 2024/05/18 (v36.4.1)
+  Revised : 2025/02/01 (v39.0.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -43,6 +43,15 @@
 	--settings-appearance-x: #9900ff;
 	--settings-opacity-x: #cc00ff;
 	--settings-hitPosition-x: #ff00ff;
+	--settings-playWindow-x: #000099;
+	--settings-stepArea-x: #000099;
+	--settings-frzReturn-x: #003399;
+	--settings-shaking-x: #003399;
+	--settings-effect-x: #006699;
+	--settings-camoufrage-x: #009999;
+	--settings-swapping-x: #006699;
+	--settings-judgRange-x: #003399;
+	--settings-autoRetry-x: #000099;
 
 	/* 譜面選択部分背景 */
 	--settings-difSelector: #ccddee;

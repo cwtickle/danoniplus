@@ -4,7 +4,7 @@
   本体cssファイル
 
   Created : 2018/10/08
-  Revised : 2024/06/30 (v37.2.1)
+  Revised : 2025/02/01 (v39.0.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -290,6 +290,203 @@ input[type="color"] {
 	animation-name: spinY;
 }
 
+/* Dizzy */
+@keyframes ex-dizzy {
+	0% {
+		transform: rotateZ(0deg);
+	}
+
+	100% {
+		transform: rotateZ(720deg);
+	}
+}
+
+.effects-dizzy {
+	animation-name: ex-dizzy;
+}
+
+/* Spin */
+@keyframes ex-spin {
+	0% {
+		transform: rotateY(0deg);
+	}
+
+	100% {
+		transform: rotateY(1440deg);
+	}
+}
+
+.effects-spin {
+	animation-name: ex-spin;
+}
+
+/* Wave */
+@keyframes ex-wave {
+	0% {
+		transform: translateX(0px);
+	}
+
+	20% {
+		transform: translateX(10px);
+	}
+
+	40% {
+		transform: translateX(-10px);
+	}
+
+	60% {
+		transform: translateX(10px);
+	}
+
+	80% {
+		transform: translateX(-10px);
+	}
+
+	100% {
+		transform: translateX(0px);
+	}
+}
+
+.effects-wave {
+	animation-name: ex-wave;
+}
+
+/* Storm */
+@keyframes ex-storm {
+	0% {
+		transform: translateX(0px);
+	}
+
+	30% {
+		transform: translateX(200px) translateY(-30px) rotateZ(60deg);
+	}
+
+	60% {
+		transform: translateX(-200px) rotateZ(-60deg);
+	}
+
+	100% {
+		transform: translateX(0px);
+	}
+}
+
+.effects-storm {
+	animation-name: ex-storm;
+}
+
+/* Blinking */
+@keyframes ex-blinking {
+	0% {
+		opacity: 0;
+	}
+
+	10% {
+		opacity: 1;
+	}
+
+	20% {
+		opacity: 0;
+	}
+
+	25% {
+		opacity: 0;
+	}
+
+	40% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 0;
+	}
+
+	55% {
+		opacity: 0;
+	}
+
+	70% {
+		opacity: 1;
+	}
+
+	80% {
+		opacity: 0;
+	}
+
+	85% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 1;
+	}
+}
+
+.effects-blinking {
+	animation-name: ex-blinking;
+}
+
+/* Squid (Arrow) */
+@keyframes ex-squids-arrow {
+	0% {
+		transform: scaleX(1) scaleY(1) translateY(0px);
+	}
+
+	20% {
+		transform: scaleX(0.75) scaleY(1.5) translateY(10px);
+	}
+
+	40% {
+		transform: scaleX(1.5) scaleY(0.75) translateY(-10px);
+	}
+
+	60% {
+		transform: scaleX(0.75) scaleY(1.5) translateY(10px);
+	}
+
+	80% {
+		transform: scaleX(1.5) scaleY(0.75) translateY(-10px);
+	}
+
+	100% {
+		transform: scaleX(1) scaleY(1) translateY(0px);
+	}
+}
+
+.effects-squids-arrow {
+	animation-name: ex-squids-arrow;
+}
+
+/* Squid (Frz) */
+@keyframes ex-squids-frz {
+	0% {
+		transform: scaleX(1) scaleY(1);
+	}
+
+	20% {
+		transform: scaleX(0.75) scaleY(1);
+	}
+
+	40% {
+		transform: scaleX(1.5) scaleY(0.75);
+	}
+
+	60% {
+		transform: scaleX(0.75) scaleY(1);
+	}
+
+	80% {
+		transform: scaleX(1.5) scaleY(0.75);
+	}
+
+	100% {
+		transform: scaleX(1) scaleY(1);
+	}
+}
+
+.effects-squids-frz {
+	animation-name: ex-squids-frz;
+}
+
 /* 設定画面：ゲージ設定詳細 */
 .settings_gaugeVal {
 	font-size: 12px;
@@ -466,6 +663,42 @@ input[type="color"] {
 	color: var(--settings-fadeinBar-x, #ffffff);
 }
 
+.settings_PlayWindow::first-letter {
+	color: var(--settings-playWindow-x, #9999ff);
+}
+
+.settings_StepArea::first-letter {
+	color: var(--settings-stepArea-x, #6699ff);
+}
+
+.settings_FrzReturn::first-letter {
+	color: var(--settings-frzReturn-x, #99ccff);
+}
+
+.settings_Shaking::first-letter {
+	color: var(--settings-shaking-x, #99ffff);
+}
+
+.settings_Effect::first-letter {
+	color: var(--settings-effect-x, #99ffcc);
+}
+
+.settings_Camoufrage::first-letter {
+	color: var(--settings-camoufrage-x, #99ff99);
+}
+
+.settings_Swapping::first-letter {
+	color: var(--settings-swapping-x, #ccff99);
+}
+
+.settings_JudgRange::first-letter {
+	color: var(--settings-judgRange-x, #ffff99);
+}
+
+.settings_AutoRetry::first-letter {
+	color: var(--settings-autoRetry-x, #cc99ff);
+}
+
 .settings_Difficulty:hover,
 .settings_Speed:hover,
 .settings_Motion:hover,
@@ -479,7 +712,16 @@ input[type="color"] {
 .settings_Volume:hover,
 .settings_Appearance:hover,
 .settings_Opacity:hover,
-.settings_HitPosition:hover {
+.settings_HitPosition:hover,
+.settings_PlayWindow:hover,
+.settings_StepArea:hover,
+.settings_FrzReturn:hover,
+.settings_Shaking:hover,
+.settings_Effect:hover,
+.settings_Camoufrage:hover,
+.settings_Swapping:hover,
+.settings_JudgRange:hover,
+.settings_AutoRetry:hover {
 	border-bottom: solid 1px;
 }
 

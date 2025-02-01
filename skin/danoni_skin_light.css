@@ -5,7 +5,7 @@
   スキンcssファイル (light)
 
   Created : 2019/11/04
-  Revised : 2024/05/18 (v36.4.1)
+  Revised : 2025/02/01 (v39.0.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -43,6 +43,15 @@
 	--settings-appearance-x: #9900ff;
 	--settings-opacity-x: #cc00ff;
 	--settings-hitPosition-x: #ff00ff;
+	--settings-playWindow-x: #000099;
+	--settings-stepArea-x: #222299;
+	--settings-frzReturn-x: #003377;
+	--settings-shaking-x: #007777;
+	--settings-effect-x: #337744;
+	--settings-camoufrage-x: #337733;
+	--settings-swapping-x: #557733;
+	--settings-judgRange-x: #777700;
+	--settings-autoRetry-x: #9900ff;
 
 	/* 譜面選択部分背景 */
 	--settings-difSelector: #eeeeee;

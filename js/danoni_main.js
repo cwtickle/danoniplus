@@ -4,19 +4,19 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/01/28
+ * Revised : 2025/02/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 38.3.1`;
-const g_revisedDate = `2025/01/28`;
+const g_version = `Ver 39.0.0`;
+const g_revisedDate = `2025/02/01`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
 let g_localVersion2 = ``;
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
-//  共通:water 初期化:peach タイトル:melon 設定:lime ディスプレイ:lemon キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
+//  共通:water 初期化:peach タイトル:melon 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
 //  シーンジャンプ:Scene
 
 /**
@@ -100,7 +100,6 @@ let g_currentPage = ``;
 let g_kcType = `Main`;
 let g_colorType = `Default`;
 let g_imgType = `Original`;
-let g_baseDisp = `Settings`;
 
 // ライフ・ゲームオーバー・曲終了管理
 let g_maxScore = 1000000;
@@ -1232,7 +1231,8 @@ const createColorPicker = (_parentObj, _id, _func, { x = 0, y = 0 } = {}) => {
  * @returns {HTMLDivElement}
  */
 const createColorObject2 = (_id,
-	{ x = 0, y = 0, w = C_ARW_WIDTH, h = C_ARW_WIDTH, rotate = ``, styleName = ``, ...rest } = {}, ..._classes) => {
+	{ x = 0, y = 0, w = C_ARW_WIDTH, h = C_ARW_WIDTH, rotate = ``, styleName = ``,
+		rotateEnabled = g_stateObj.rotateEnabled, ...rest } = {}, ..._classes) => {
 
 	const div = createDiv(_id, x, y, w, h, _classes);
 	const style = div.style;
@@ -1244,7 +1244,7 @@ const createColorObject2 = (_id,
 		rotate = setVal(objData[1], 0, C_TYP_FLOAT);
 		charaStyle = `${objData[0]}${styleName}`;
 	}
-	if (g_stateObj.rotateEnabled) {
+	if (rotateEnabled) {
 		style.transform = `rotate(${rotate}deg)`;
 	}
 
@@ -2931,6 +2931,10 @@ const headerConvert = _dosObj => {
 			setIntVal(getQueryParamVal(`h`), g_sHeight), g_sHeight);
 		$id(`canvas-frame`).height = wUnit(g_sHeight);
 	}
+	if (!(_dosObj.heightVariable || g_presetObj.heightVariable || false)) {
+		obj.heightLockFlg = true;
+		g_settings.playWindows = g_settings.playWindows.filter(val => !val.endsWith(`Slope`) && !val.endsWith(`SideScroll`));
+	}
 
 	// 曲名
 	obj.musicTitles = [];
@@ -3398,6 +3402,8 @@ const headerConvert = _dosObj => {
 				interlockingButton(obj, defaultOption, C_FLG_OFF, C_FLG_ON);
 			}));
 	}
+	obj.arrowEffectUseOrg = obj.arrowEffectUse;
+	obj.arrowEffectSetFlg = obj.arrowEffectSet === C_FLG_ON;
 
 	// ローカルストレージに保存済みのColorType設定からDisplayのColor設定を反映
 	if (g_localStorage.colorType !== undefined) {
@@ -4305,6 +4311,9 @@ const titleInit = () => {
 	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
 
+	// 設定画面位置初期化
+	g_settings.settingWindowNum = 0;
+
 	// タイトルアニメーション用フレーム初期化、ループカウンター設定
 	g_animationData.forEach(sprite => {
 		g_scoreObj[`${sprite}TitleFrameNum`] = 0;
@@ -4331,7 +4340,7 @@ const titleInit = () => {
 		divRoot.appendChild(
 			createColorObject2(`lblArrow`, {
 				x: (g_sWidth - 500) / 2, y: -15 + (g_sHeight - 500) / 2,
-				w: 500, h: 500,
+				w: 500, h: 500, rotateEnabled: true,
 				background: makeColorGradation(g_headerObj.titlearrowgrds[0] || g_headerObj.setColorOrg[0], {
 					_defaultColorgrd: [false, `#eeeeee`],
 					_objType: `titleArrow`,
@@ -4699,7 +4708,8 @@ const commonSettingBtn = _labelName => {
 		// Display設定へ移動
 		createCss2Button(`btn${_labelName}`, `>`, () => true,
 			Object.assign(g_lblPosObj.btnSwitchSetting, {
-				title: g_msgObj[`to${_labelName}`], resetFunc: () => g_jumpSettingWindow[g_currentPage](),
+				title: g_msgObj[`to${_labelName}`], resetFunc: () => g_moveSettingWindow(),
+				cxtFunc: () => g_moveSettingWindow(true, -1),
 			}), g_cssObj.button_Mini),
 
 		// データセーブフラグの切替
@@ -4727,7 +4737,6 @@ const optionInit = () => {
 
 	clearWindow(true);
 	const divRoot = document.getElementById(`divRoot`);
-	g_baseDisp = `Settings`;
 	g_currentPage = `option`;
 	g_stateObj.filterKeys = ``;
 
@@ -6002,7 +6011,7 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
  */
 const createLblSetting = (_settingName, _adjY = 0, _settingLabel = _settingName) => {
 	const lbl = createDivCss2Label(`lbl${_settingName}`, g_lblNameObj[_settingLabel], {
-		x: 0, y: _adjY, w: 100,
+		x: -5, y: _adjY, w: 110,
 	}, `settings_${_settingName}`);
 	lbl.title = g_msgObj[`${_settingName.charAt(0).toLowerCase()}${_settingName.slice(1)}`];
 	return lbl;
@@ -6452,7 +6461,6 @@ const settingsDisplayInit = () => {
 
 	clearWindow(true);
 	const divRoot = document.getElementById(`divRoot`);
-	g_baseDisp = `Display`;
 	g_currentPage = `settingsDisplay`;
 
 	// 譜面初期情報ロード許可フラグ
@@ -6667,6 +6675,80 @@ const interlockingButton = (_headerObj, _name, _current, _next, _buttonFlg = fal
 				interlockingButton(_headerObj, defaultOption, _next, _current, _buttonFlg);
 			});
 	}
+};
+
+/*-----------------------------------------------------------*/
+/* Scene : EX-SETTINGS [apple] */
+/*-----------------------------------------------------------*/
+
+const exSettingInit = () => {
+	clearWindow(true);
+	g_currentPage = `exSetting`;
+
+	multiAppend(divRoot,
+
+		// 画面タイトル
+		getTitleDivLabel(`lblTitle`,
+			`<div class="settings_Title">EX-</div><div class="settings_Title2">SETTINGS</div>`
+				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
+
+	);
+
+	// 各ボタン用のスプライトを作成
+	createEmptySprite(divRoot, `optionsprite`, g_windowObj.optionSprite);
+	const spriteList = setSpriteList(g_settingPos.exSetting);
+
+	createGeneralSetting(spriteList.playWindow, `playWindow`);
+	lblPlayWindow.title += g_headerObj.heightLockFlg ? g_msgObj.sideScrollDisable : g_msgObj.sideScrollMsg;
+
+	createGeneralSetting(spriteList.stepArea, `stepArea`);
+	createGeneralSetting(spriteList.frzReturn, `frzReturn`);
+	createGeneralSetting(spriteList.shaking, `shaking`);
+	createGeneralSetting(spriteList.effect, `effect`, {
+		addRFunc: () => {
+			g_stateObj.d_arroweffect = boolToSwitch(g_stateObj.effect !== C_FLG_OFF || g_headerObj.arrowEffectSetFlg);
+			g_headerObj.arrowEffectUse = g_stateObj.effect === C_FLG_OFF && g_headerObj.arrowEffectUseOrg;
+			g_headerObj.arrowEffectSet = g_stateObj.d_arroweffect;
+		},
+	});
+	createGeneralSetting(spriteList.camoufrage, `camoufrage`);
+	createGeneralSetting(spriteList.swapping, `swapping`);
+	createGeneralSetting(spriteList.judgRange, `judgRange`, {
+		addRFunc: () => {
+			[g_judgObj.arrowJ, g_judgObj.frzJ] = g_judgRanges[g_stateObj.judgRange];
+			lblJudgRangeView.innerHTML = getJudgRangeView();
+		}
+	});
+	createGeneralSetting(spriteList.autoRetry, `autoRetry`);
+
+	// 判定範囲の設定を表示
+	const getJudgRangeView = () => `| ` +
+		`<span class="common_ii">${g_lblNameObj.j_ii}</span>: ≦ <b>±${g_judgObj.arrowJ[0]} f</b> | ` +
+		`<span class="common_shakin">${g_lblNameObj.j_shakin}</span>: ≦ <b>±${g_judgObj.arrowJ[1]} f</b> | ` +
+		`<span class="common_matari">${g_lblNameObj.j_matari}</span>: ≦ <b>±${g_judgObj.arrowJ[2]} f</b> | <br>| ` +
+		`<span class="common_shobon">${g_lblNameObj.j_shobon}</span>: ≦ <b>±${g_judgObj.arrowJ[3]} f</b> | ` +
+		`<span class="common_uwan">${g_lblNameObj.j_uwan}</span>: > <b>±${g_judgObj.arrowJ[3]} f</b> | <br>| ` +
+		`<span class="common_kita">${g_lblNameObj.j_kita}</span>: ≦ <b>±${g_judgObj.frzJ[1]} f</b> | ` +
+		`<span class="common_iknai">${g_lblNameObj.j_iknai}</span>: > <b>±${g_judgObj.frzJ[1]} f</b> |`;
+
+	multiAppend(judgRangeSprite,
+		createDivCss2Label(`lblJudgRangeView`, getJudgRangeView(), {
+			x: parseFloat($id(`lblJudgRange`).left) + 10, y: parseFloat($id(`lblJudgRange`).top) + 25, w: 300, h: 30, siz: 13,
+			align: C_ALIGN_LEFT,
+		}),
+	);
+
+	// ユーザカスタムイベント(初期)
+	g_customJsObj.exSetting.forEach(func => func());
+
+	// 設定系のボタン群をまとめて作成（Data Save, Display切替, Back, KeyConfig, Playボタン）
+	commonSettingBtn(g_currentPage);
+
+	// キー操作イベント（デフォルト）
+	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
+	document.oncontextmenu = () => true;
+
+	g_skinJsObj.exSetting.forEach(func => func());
 };
 
 /*-----------------------------------------------------------*/
@@ -7422,7 +7504,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			g_currentk = 0;
 			g_prevKey = 0;
 		}, Object.assign(g_lblPosObj.btnKcBack, {
-			resetFunc: () => (g_baseDisp === `Settings` ? optionInit() : settingsDisplayInit()),
+			resetFunc: () => g_moveSettingWindow(false),
 		}), g_cssObj.button_Back),
 
 		createDivCss2Label(`lblPattern`, `${g_lblNameObj.KeyPattern}: ${g_keyObj.currentPtn === -1 ?
@@ -7883,12 +7965,12 @@ const loadingScoreInit = async () => {
 
 	// シャッフルグループを扱いやすくする
 	// [0, 0, 0, 1, 0, 0, 0] -> [[0, 1, 2, 4, 5, 6], [3]]
-	const shuffleGroupMap = {};
+	g_workObj.shuffleGroupMap = {};
 	g_keyObj[`shuffle${keyCtrlPtn}`].forEach((_val, _i) =>
-		shuffleGroupMap[_val]?.push(_i) || (shuffleGroupMap[_val] = [_i]));
+		g_workObj.shuffleGroupMap[_val]?.push(_i) || (g_workObj.shuffleGroupMap[_val] = [_i]));
 
 	// Mirror,Random,S-Randomの適用
-	g_shuffleFunc[g_stateObj.shuffle](keyNum, Object.values(shuffleGroupMap));
+	g_shuffleFunc[g_stateObj.shuffle](keyNum, Object.values(g_workObj.shuffleGroupMap));
 
 	// アシスト用の配列があれば、ダミーデータで上書き
 	if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
@@ -7990,6 +8072,26 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
 };
 
 /**
+ * X-Mirror作成用の入れ替え関数
+ * グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
+ * @param {number[][]} _style 
+ * @param {number[]} _group 
+ * @param {number} _i 
+ * @param {number} _divideNum 
+ * @returns 
+ */
+const swapGroupNums = (_style, _group, _i, _divideNum) => {
+	if (_group.length % _divideNum === 0) {
+		for (let k = 0; k < _group.length / _divideNum; k++) {
+			const swap1 = Math.floor(_divideNum * (k + 1 / 2) - 1);
+			const swap2 = Math.ceil(_divideNum * (k + 1 / 2));
+			[_style[_i][swap1], _style[_i][swap2]] = [_style[_i][swap2], _style[_i][swap1]];
+		}
+	}
+	return _style;
+};
+
+/**
  * Mirrorの適用
  * @param {number} _keyNum
  * @param {number[][]} _shuffleGroup
@@ -7999,23 +8101,19 @@ const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
 
 	// シャッフルグループごとにミラー
 	const style = structuredClone(_shuffleGroup).map(_group => _group.reverse());
-	let swapUseFlg = false;
-
-	// X-Mirror作成用の入れ替え関数
-	// グループが4の倍数のとき、4n+1, 4n+2のみ入れ替える
-	const swapGroupNums = (_group, _i, _divideNum) => {
-		if (_group.length % _divideNum === 0) {
-			swapUseFlg = true;
-			for (let k = 0; k < _group.length / _divideNum; k++) {
-				const swap1 = Math.floor(_divideNum * (k + 1 / 2) - 1);
-				const swap2 = Math.ceil(_divideNum * (k + 1 / 2));
-				[style[_i][swap1], style[_i][swap2]] = [style[_i][swap2], style[_i][swap1]];
-			}
-		}
-	};
+	const mirStyle = structuredClone(style);
 
 	if (_swapFlg) {
-		style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(group, i, val)));
+		style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(style, group, i, val)));
+		let swapUseFlg = false;
+		style.forEach((_group, j) => {
+			_group.forEach((val, k) => {
+				if (style[j][k] !== mirStyle[j][k]) {
+					swapUseFlg = true;
+					return;
+				}
+			});
+		});
 		if (!swapUseFlg) {
 			g_stateObj.shuffle = `Mirror`;
 		}
@@ -8370,6 +8468,12 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 				cssMotionData.push([frame, arrowNum, styleUp, styleDown]);
 			});
+
+			// 個別のモーションデータが存在する場合、Effect設定を自動リセット
+			if (cssMotionData.length > 0) {
+				g_stateObj.effect = C_FLG_OFF;
+				g_settings.effectNum = 0;
+			}
 			return cssMotionData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
 		return [];
@@ -8396,6 +8500,12 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 				scrollchData.push([frame, arrowNum, frame, scrollDir]);
 			});
+
+			// 個別のスクロール変化が存在する場合、StepAreaを自動リセット
+			if (scrollchData.length > 0) {
+				g_stateObj.stepArea = `Default`;
+				g_settings.stepAreaNum = 0;
+			}
 			return scrollchData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
 		return [];
@@ -9531,6 +9641,8 @@ const getArrowSettings = () => {
 
 	// モーション管理
 	g_typeLists.arrow.forEach(type => g_workObj[`${type}CssMotions`] = fillArray(keyNum, ``));
+	g_workObj.frzArrowCssMotions = fillArray(keyNum, ``);
+	g_workObj.dummyFrzArrowCssMotions = fillArray(keyNum, ``);
 
 	const scrollDirOptions = g_keyObj[`scrollDir${keyCtrlPtn}`]?.[g_stateObj.scroll] ?? fillArray(keyNum, 1);
 
@@ -9546,6 +9658,9 @@ const getArrowSettings = () => {
 
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
 		g_workObj.dividePos[j] = ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
+		if (g_stateObj.stepArea === `X-Flower`) {
+			g_workObj.dividePos[j] = (g_workObj.stepX[j] < (g_headerObj.playingWidth - C_ARW_WIDTH) / 2 ? 0 : 1) * 2 + g_workObj.dividePos[j] % 2;
+		}
 		g_workObj.scrollDir[j] = (posj <= divideCnt ? 1 : -1) * scrollDirOptions[j] * (g_stateObj.reverse === C_FLG_OFF ? 1 : -1);
 
 		eachOrAll.forEach(type => {
@@ -9564,6 +9679,7 @@ const getArrowSettings = () => {
 		});
 	}
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
+	g_stateObj.layerNum = Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2;
 
 	Object.keys(g_resultObj).forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 	g_resultObj.spState = ``;
@@ -9583,6 +9699,105 @@ const getArrowSettings = () => {
 
 	g_workObj.backX = (g_workObj.nonDefaultSc && g_headerObj.playingLayout ? g_headerObj.scAreaWidth : 0);
 	g_workObj.playingX = g_headerObj.playingX + g_workObj.backX;
+
+	// Swapping設定に応じたステップゾーンの入れ替え
+	if (g_stateObj.swapping.includes(`Mirror`)) {
+
+		let _style = structuredClone(Object.values(g_workObj.shuffleGroupMap));
+		if (g_stateObj.swapping === `Mirror`) {
+			_style.map(_group => _group.reverse());
+
+		} else if (g_stateObj.swapping === `X-Mirror`) {
+			// X-Mirrorの場合、グループの内側だけ入れ替える
+			_style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(_style, group, i, val)));
+		}
+
+		// 入れ替えた結果に合わせてX座標位置を入れ替える
+		g_workObj.stepX_df = structuredClone(g_workObj.stepX);
+		_style.forEach((_group, _i) => {
+			_group.forEach((_val, _j) => {
+				g_workObj.stepX[_group[_j]] = g_workObj.stepX_df[g_workObj.shuffleGroupMap[_i][_j]];
+			});
+		});
+	}
+
+	// FrzReturnの初期化
+	g_workObj.frzReturnFlg = false;
+
+	// AutoRetryの初期化
+	g_workObj.autoRetryFlg = false;
+
+	// Camoufrageの設定
+	if (!g_stateObj.rotateEnabled) {
+
+		// 矢印の回転が無効の場合は、設定を変える
+		if (g_stateObj.camoufrage === `Arrow`) {
+			g_stateObj.camoufrage = C_FLG_OFF;
+		} else if (g_stateObj.camoufrage === C_FLG_ALL) {
+			g_stateObj.camoufrage = `Color`;
+		}
+		g_settings.camoufrageNum = g_settings.camoufrages.findIndex(val => val === g_stateObj.camoufrage);
+	}
+	if (g_stateObj.camoufrage !== C_FLG_OFF) {
+		const eachOrAll = [``, `All`];
+		const keyNum = g_keyObj[`chara${g_keyObj.currentKey}_${g_keyObj.currentPtn}`].length;
+
+		// 位置変更用の配列を作成
+		const randArray = [...Array(keyNum).keys()].map(_i => _i);
+		let _i = randArray.length;
+		while (_i) {
+			const _j = Math.floor(Math.random() * _i--);
+			[randArray[_i], randArray[_j]] = [randArray[_j], randArray[_i]];
+		}
+
+		// 位置変更用の配列に従い、初期矢印・初期色の位置変更
+		const getSwapArray = (_array) => {
+			const _copiedArray = structuredClone(_array);
+			return _array.map((_val, _i) => _array[_i] = _copiedArray[randArray[_i]]);
+		};
+		if (g_stateObj.camoufrage === `Arrow` || g_stateObj.camoufrage === C_FLG_ALL) {
+
+			// 矢印ヒット時に元の矢印がわかるようにするため、あえて g_workObj.stepHitRtn はそのままにする
+			g_workObj.stepRtn = getSwapArray(g_workObj.stepRtn);
+			g_workObj.arrowRtn = getSwapArray(g_workObj.arrowRtn);
+		}
+		eachOrAll.forEach(type => {
+			if (g_stateObj.camoufrage === `Color` || g_stateObj.camoufrage === C_FLG_ALL) {
+
+				// ダミー矢印は対象外
+				g_workObj[`arrowColors${type}`] = getSwapArray(g_workObj[`arrowColors${type}`]);
+				g_workObj[`arrowShadowColors${type}`] = getSwapArray(g_workObj[`arrowShadowColors${type}`]);
+
+				g_typeLists.frzColor.forEach(frzType => {
+					g_workObj[`frz${frzType}Colors${type}`] = getSwapArray(g_workObj[`frz${frzType}Colors${type}`]);
+				});
+				g_workObj[`frzNormalShadowColors${type}`] = getSwapArray(g_workObj[`frzNormalShadowColors${type}`]);
+				g_workObj[`frzHitShadowColors${type}`] = getSwapArray(g_workObj[`frzHitShadowColors${type}`]);
+			}
+		});
+
+		// 位置変更用の配列に従い、個別・全体色変化の位置変更
+		if (g_stateObj.camoufrage === `Color` || g_stateObj.camoufrage === C_FLG_ALL) {
+			const getSwapList = (_array) => {
+				const _copiedArray = structuredClone(_array);
+				return _array.map((_val, _i) => _array[_i] = randArray[_copiedArray[_i]]);
+			};
+			[`mkColor`, `mkColorShadow`, `mkFColor`, `mkFColorShadow`].forEach(type => {
+				if (g_workObj[type] !== undefined) {
+					for (let j = 0; j < g_workObj[type].length; j++) {
+						if (g_workObj[type][j] === undefined) {
+							continue;
+						}
+						g_workObj[type][j] = getSwapList(g_workObj[type][j]);
+					}
+				}
+			});
+		}
+	}
+
+	// Shaking: Drunkでの画面揺れ設定 (X方向、Y方向)
+	g_workObj.drunkXFlg = false;
+	g_workObj.drunkYFlg = false;
 
 	if (g_stateObj.dataSaveFlg) {
 		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
@@ -9739,15 +9954,47 @@ const mainInit = () => {
 	let speedCnts = 0;
 	let boostCnts = 0;
 	let keychCnts = 0;
-	const flatMode = g_stateObj.d_stepzone === `FlatBar` || g_stateObj.scroll.endsWith(`Flat`) || g_keyObj[`flatMode${keyCtrlPtn}`];
+
+	const flatMode = g_stateObj.d_stepzone === `FlatBar` ||
+		g_stateObj.scroll.endsWith(`Flat`) ||
+		g_keyObj[`flatMode${keyCtrlPtn}`] ||
+		(g_stateObj.stepArea === `Halfway` &&
+			g_keyObj[`div${keyCtrlPtn}`] < g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length);
 	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
+
+	// Hidden+, Sudden+用のライン、パーセント表示
+	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
+	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj =>
+		mainSprite.appendChild(createColorObject2(obj, g_lblPosObj.filterBar, filterCss)));
+	borderBar0.style.top = wUnit(g_posObj.stepDiffY + g_stateObj.hitPosition);
+	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight - g_stateObj.hitPosition);
+
+	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
+		if (g_stateObj.d_filterline === C_FLG_ON) {
+			$id(`filterView`).opacity = g_stateObj.opacity / 100;
+			$id(`filterBar0`).opacity = g_stateObj.opacity / 100;
+			$id(`filterBar1`).opacity = g_stateObj.opacity / 100;
+		}
+	}
+
+	// mainSprite配下に層別のスプライトを作成し、ステップゾーン・矢印本体・フリーズアローヒット部分に分ける
+	const mainSpriteN = [], stepSprite = [], arrowSprite = [], frzHitSprite = [];
+	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
+	for (let j = 0; j < g_stateObj.layerNum; j++) {
+		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, mainCommonPos);
+		mainSpriteN.push(mainSpriteJ);
+		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
+		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
+		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, mainCommonPos));
+	}
 
 	for (let j = 0; j < keyNum; j++) {
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 
 		// ステップゾーンルート
-		const stepRoot = createEmptySprite(mainSprite, `stepRoot${j}`, {
-			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * g_workObj.dividePos[j],
+		const stepRoot = createEmptySprite(stepSprite[g_workObj.dividePos[j]], `stepRoot${j}`, {
+			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[j] % 2),
 			w: C_ARW_WIDTH, h: C_ARW_WIDTH,
 		});
 
@@ -9795,46 +10042,23 @@ const mainInit = () => {
 			lineY.push(lineY[0], lineY[1]);
 			reverses.push(!reverses[0], !reverses[1]);
 		}
-		lineY.forEach((y, j) => {
-			mainSprite.appendChild(
-				createColorObject2(`stepBar${j}`, {
-					x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(reverses[j]) + y,
-					w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
-				}, g_cssObj.life_Failed)
-			);
-		});
-
-	}
-
-	// Hidden+, Sudden+用のライン、パーセント表示
-	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
-	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj =>
-		mainSprite.appendChild(createColorObject2(obj, g_lblPosObj.filterBar, filterCss)));
-	borderBar0.style.top = wUnit(g_posObj.stepDiffY + g_stateObj.hitPosition);
-	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight - g_stateObj.hitPosition);
-
-	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
-		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
-		if (g_stateObj.d_filterline === C_FLG_ON) {
-			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj => $id(obj).opacity = g_stateObj.opacity / 100);
+		for (let k = 0; k < g_stateObj.layerNum; k += 2) {
+			lineY.forEach((y, j) => {
+				stepSprite[Number(reverses[j]) + k].appendChild(
+					createColorObject2(`stepBar${j + k}`, {
+						x: 0, y: C_STEP_Y + g_posObj.reverseStepY * Number(reverses[j]) + y,
+						w: g_headerObj.playingWidth - 50, h: 1, styleName: `lifeBar`,
+					}, g_cssObj.life_Failed)
+				);
+			});
 		}
 	}
-
-	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
-	const arrowSprite = [
-		createEmptySprite(mainSprite, `arrowSprite0`, { y: g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-		createEmptySprite(mainSprite, `arrowSprite1`, { y: -g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-	];
-
-	// Appearanceのオプション適用時は一部描画を隠す
-	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
-		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance]);
 
 	for (let j = 0; j < keyNum; j++) {
 
 		// フリーズアローヒット部分
-		const frzHit = createEmptySprite(mainSprite, `frzHit${j}`, {
-			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * g_workObj.dividePos[j],
+		const frzHit = createEmptySprite(frzHitSprite[g_workObj.dividePos[j]], `frzHit${j}`, {
+			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[j] % 2),
 			w: C_ARW_WIDTH, h: C_ARW_WIDTH, opacity: 0,
 		});
 		if (isNaN(parseFloat(g_workObj.arrowRtn[j]))) {
@@ -9854,6 +10078,13 @@ const mainInit = () => {
 			);
 		}
 	}
+
+	// StepArea処理
+	g_stepAreaFunc[g_stateObj.stepArea]();
+
+	// Appearanceのオプション適用時は一部描画を隠す
+	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
+		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance]);
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
@@ -10112,6 +10343,14 @@ const mainInit = () => {
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.main.forEach(func => func());
+
+	// mainSpriteのtransform追加処理
+	g_workObj.transform = mainSprite.style.transform || ``;
+	g_workObj.transform += g_playWindowFunc[g_stateObj.playWindow]();
+	mainSprite.style.transform = g_workObj.transform;
+
+	// EffectのArrowEffect追加処理
+	g_effectFunc[g_stateObj.effect]();
 
 	/**
 	 * キーを押したときの処理
@@ -10518,7 +10757,7 @@ const mainInit = () => {
 	 */
 	const makeArrow = (_attrs, _arrowCnt, _name, _color, _shadowColor) => {
 		const _j = _attrs.pos;
-		const dividePos = g_workObj.dividePos[_j];
+		const dividePos = g_workObj.dividePos[_j] % 2;
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 
 		const arrowName = `${_name}${_j}_${_arrowCnt}`;
@@ -10526,7 +10765,7 @@ const mainInit = () => {
 			(_attrs.initY * g_workObj.boostSpd +
 				_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 
-		const stepRoot = createEmptySprite(arrowSprite[dividePos], arrowName, {
+		const stepRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], arrowName, {
 			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
 		});
 		/**
@@ -10553,7 +10792,7 @@ const mainInit = () => {
 		// 矢印色の設定
 		// - 枠/塗りつぶし色: g_attrObj[arrowName].Arrow / ArrowShadow
 		g_typeLists.arrowColor.forEach(val => g_attrObj[arrowName][`Arrow${val}`] = g_workObj[`${_name}${val}Colors`][_j]);
-		arrowSprite[dividePos].appendChild(stepRoot);
+		arrowSprite[g_workObj.dividePos[_j]].appendChild(stepRoot);
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			stepRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
@@ -10581,6 +10820,7 @@ const mainInit = () => {
 		stepRoot.appendChild(createColorObject2(`${_name}Top${_j}_${_arrowCnt}`, {
 			background: _color, rotate: g_workObj.arrowRtn[_j],
 		}));
+		g_customJsObj.makeArrow.forEach(func => func(_attrs, arrowName, _name, _arrowCnt));
 	};
 
 	/**
@@ -10621,7 +10861,7 @@ const mainInit = () => {
 	 */
 	const makeFrzArrow = (_attrs, _arrowCnt, _name, _normalColor, _barColor, _shadowColor) => {
 		const _j = _attrs.pos;
-		const dividePos = g_workObj.dividePos[_j];
+		const dividePos = g_workObj.dividePos[_j] % 2;
 		const frzNo = `${_j}_${_arrowCnt}`;
 		const frzName = `${_name}${frzNo}`;
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
@@ -10629,7 +10869,7 @@ const mainInit = () => {
 				_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
 
-		const frzRoot = createEmptySprite(arrowSprite[dividePos], frzName, {
+		const frzRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], frzName, {
 			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
 		});
 		/**
@@ -10667,12 +10907,7 @@ const mainInit = () => {
 		// - 通常時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Normal / NormalShadow / NormalBar
 		// - ヒット時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Hit / HitShadow / HitBar
 		g_typeLists.frzColor.forEach(val => g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j]);
-		arrowSprite[dividePos].appendChild(frzRoot);
-
-		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
-			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
-			frzRoot.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
-		}
+		arrowSprite[g_workObj.dividePos[_j]].appendChild(frzRoot);
 		let shadowColor = _shadowColor === `Default` ? _normalColor : _shadowColor;
 
 		/**
@@ -10686,30 +10921,49 @@ const mainInit = () => {
 				x: 5, y: g_attrObj[frzName].barY, w: C_ARW_WIDTH - 10, h: firstBarLength, background: _barColor, styleName: `frzBar`,
 				opacity: 0.75,
 			}),
+		);
+		const frzTopRoot = createEmptySprite(frzRoot, `${_name}TopRoot${frzNo}`,
+			{ x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH });
+		const frzBtmRoot = createEmptySprite(frzRoot, `${_name}BtmRoot${frzNo}`,
+			{ x: 0, y: g_attrObj[frzName].btmY, w: C_ARW_WIDTH, h: C_ARW_WIDTH });
 
-			// 開始矢印の塗り部分。ヒット時は前面に出て光る。
+		multiAppend(frzTopRoot,
+
+			// 開始矢印の塗り部分。ヒット時は前面に表示
 			createColorObject2(`${_name}TopShadow${frzNo}`, {
 				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
 			}, g_cssObj.main_objShadow),
 
-			// 開始矢印。ヒット時は隠れる。
+			// 開始矢印。ヒット時は非表示
 			createColorObject2(`${_name}Top${frzNo}`, {
 				background: _normalColor, rotate: g_workObj.arrowRtn[_j],
 			}),
+		);
+
+		multiAppend(frzBtmRoot,
 
 			// 後発矢印の塗り部分
 			createColorObject2(`${_name}BtmShadow${frzNo}`, {
-				x: 0, y: g_attrObj[frzName].btmY,
 				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
 			}, g_cssObj.main_objShadow),
 
 			// 後発矢印
 			createColorObject2(`${_name}Btm${frzNo}`, {
-				x: 0, y: g_attrObj[frzName].btmY,
 				background: _normalColor, rotate: g_workObj.arrowRtn[_j],
 			}),
 
 		);
+		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
+			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
+			frzRoot.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
+		}
+		if (g_workObj[`${_name}ArrowCssMotions`][_j] !== ``) {
+			[frzTopRoot, frzBtmRoot].forEach(obj => {
+				obj.classList.add(g_workObj[`${_name}ArrowCssMotions`][_j]);
+				obj.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
+			});
+		}
+		g_customJsObj.makeFrzArrow.forEach(func => func(_attrs, frzName, _name, _arrowCnt));
 	};
 
 	/**
@@ -10755,8 +11009,7 @@ const mainInit = () => {
 
 					$id(`${_name}Bar${frzNo}`).height = wUnit(currentFrz.frzBarLength);
 					$id(`${_name}Bar${frzNo}`).top = wUnit(currentFrz.barY);
-					$id(`${_name}Btm${frzNo}`).top = wUnit(currentFrz.btmY);
-					$id(`${_name}BtmShadow${frzNo}`).top = wUnit(currentFrz.btmY);
+					$id(`${_name}BtmRoot${frzNo}`).top = wUnit(currentFrz.btmY);
 
 					if (!checkKeyUpFunc[`${_name}${g_stateObj.autoAll}`](_j)) {
 						currentFrz.keyUpFrame++;
@@ -10820,6 +11073,9 @@ const mainInit = () => {
 		} else if (isFadeOutArea) {
 			g_audio.volume = Math.max((g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000), 0);
 		}
+
+		// 画面揺れの設定
+		g_shakingFunc[g_stateObj.shaking]();
 
 		// ユーザカスタムイベント(フレーム毎)
 		g_customJsObj.mainEnterFrame.forEach(func => func());
@@ -11051,12 +11307,12 @@ const changeAppearanceFilter = (_num = 10) => {
 	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
 
-	$id(`arrowSprite${topNum}`).clipPath = topShape;
-	$id(`arrowSprite${bottomNum}`).clipPath = bottomShape;
-
-	$id(`filterBar0`).top = wUnit(g_posObj.arrowHeight * _num / MAX_FILTER_POS + g_stateObj.hitPosition);
-	$id(`filterBar1`).top = wUnit(g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS - g_stateObj.hitPosition);
-
+	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
+		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
+		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
+	}
+	$id(`filterBar0`).top = wUnit(parseFloat($id(`arrowSprite${topNum}`).top) + g_posObj.arrowHeight * _num / MAX_FILTER_POS);
+	$id(`filterBar1`).top = wUnit(parseFloat($id(`arrowSprite${bottomNum}`).top) + g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS);
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		$id(`filterView`).top =
 			$id(`filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).top;
@@ -11114,6 +11370,45 @@ const appearKeyTypes = (_j, _targets, _alphas = fillArray(_targets.length, 1)) =
 };
 
 /**
+ * FrzReturnの追加処理
+ * @param {number} _rad 回転角度
+ * @param {number[]} _axis 回転軸
+ */
+const changeReturn = (_rad, _axis) => {
+	g_workObj.frzReturnFlg = true;
+	let _transform = g_workObj.transform;
+	_transform += ` rotate${_axis[0]}(${_rad}deg)`;
+	if (_axis[1] !== undefined) {
+		_transform += ` rotate${_axis[1]}(${_rad}deg)`;
+	}
+	if (document.getElementById(`mainSprite`) !== null) {
+		mainSprite.style.transform = _transform;
+
+		if (_rad < 360 && g_workObj.frzReturnFlg) {
+			setTimeout(() => changeReturn(_rad + 4, _axis), 20);
+		} else {
+			g_workObj.frzReturnFlg = false;
+		}
+	}
+}
+
+/**
+ * AutoRetryの設定
+ * @param {number} _retryNum AutoRetryの設定位置（g_settings.autoRetryNum）
+ */
+const quickRetry = (_retryNum) => {
+	if (g_settings.autoRetryNum >= _retryNum && !g_workObj.autoRetryFlg) {
+		g_workObj.autoRetryFlg = true;
+		setTimeout(() => {
+			g_audio.pause();
+			clearTimeout(g_timeoutEvtId);
+			clearWindow();
+			musicAfterLoaded();
+		}, 16);
+	}
+};
+
+/**
  * 個別・全体色変化
  * @param {number[]} _mkColor 
  * @param {string[]} _mkColorCd 
@@ -11148,7 +11443,7 @@ const changeCssMotions = (_header, _name, _frameNum) => {
 	const camelHeader = _header === `` ? _name : `${_header}${toCapitalize(_name)}`;
 	g_workObj[`mk${toCapitalize(camelHeader)}CssMotion`][_frameNum]?.forEach((targetj, j) =>
 		g_workObj[`${camelHeader}CssMotions`][targetj] =
-		g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + g_workObj.dividePos[targetj]]);
+		g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + (g_workObj.dividePos[targetj] % 2)]);
 };
 
 /**
@@ -11158,7 +11453,8 @@ const changeCssMotions = (_header, _name, _frameNum) => {
 const changeScrollArrowDirs = (_frameNum) =>
 	g_workObj.mkScrollchArrow[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
-		g_workObj.dividePos[targetj] = (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
+		const baseLayer = Math.floor(g_workObj.dividePos[targetj] / 2) * 2;
+		g_workObj.dividePos[targetj] = baseLayer + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
 	});
 
 /**
@@ -11190,9 +11486,10 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	}
 
 	const styfrzBar = $id(`${_name}Bar${frzNo}`);
+	const styfrzBtmRoot = $id(`${_name}BtmRoot${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
+	const styfrzTopRoot = $id(`${_name}TopRoot${frzNo}`);
 	const styfrzTop = $id(`${_name}Top${frzNo}`);
-	const styfrzTopShadow = $id(`${_name}TopShadow${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
@@ -11227,11 +11524,9 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	styfrzBar.top = wUnit(currentFrz.barY);
 	styfrzBar.height = wUnit(currentFrz.frzBarLength);
 	styfrzBar.background = getColor(`HitBar`);
-	styfrzBtm.top = wUnit(currentFrz.btmY);
+	styfrzBtmRoot.top = wUnit(currentFrz.btmY);
 	styfrzBtm.background = tmpHitColor;
-	styfrzTop.top = wUnit(- hitPos);
-	styfrzTopShadow.top = styfrzTop.top;
-	styfrzBtmShadow.top = styfrzBtm.top;
+	styfrzTopRoot.top = wUnit(- hitPos);
 	if (_name === `frz`) {
 		const tmpShadowColor = getColor(`HitShadow`);
 		styfrzBtmShadow.background = tmpShadowColor === `Default` ? tmpHitColor : tmpShadowColor;
@@ -11242,6 +11537,12 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 		}
 	}
 
+	// FrzReturnの設定
+	if (g_stateObj.frzReturn !== C_FLG_OFF) {
+		if (!g_workObj.frzReturnFlg) {
+			changeReturn(4, g_frzReturnFunc[g_stateObj.frzReturn]());
+		}
+	}
 	g_customJsObj[`judg_${_name}Hit`].forEach(func => func(_difFrame));
 };
 
@@ -11260,6 +11561,13 @@ const changeFailedFrz = (_j, _k) => {
 	$id(`frzBar${frzNo}`).background = `#999999`;
 	$id(`frzBar${frzNo}`).opacity = 1;
 	$id(`frzBtm${frzNo}`).background = `#cccccc`;
+
+	// FrzReturnの設定
+	if (g_stateObj.frzReturn !== C_FLG_OFF) {
+		if (!g_workObj.frzReturnFlg) {
+			changeReturn(4, g_frzReturnFunc[g_stateObj.frzReturn]());
+		}
+	}
 };
 
 /**
@@ -11379,9 +11687,11 @@ const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames
 	} else if (_difFrame > _justFrames) {
 		diffJDisp = `<span class="common_diffFast">Fast ${difCnt} Frames</span>`;
 		g_resultObj.fast++;
+		quickRetry(4);
 	} else if (_difFrame < _justFrames * (-1)) {
 		diffJDisp = `<span class="common_diffSlow">Slow ${difCnt} Frames</span>`;
 		g_resultObj.slow++;
+		quickRetry(4);
 	}
 	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
 };
@@ -11427,6 +11737,7 @@ const lifeRecovery = () => {
  */
 const lifeDamage = (_excessive = false) => {
 	g_workObj.lifeVal -= g_workObj.lifeDmg * (_excessive ? 0.25 : 1);
+	quickRetry(1);
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
@@ -11472,6 +11783,14 @@ const judgeRecovery = (_name, _difFrame) => {
 	lifeRecovery();
 	finishViewing();
 
+	if (g_stateObj.freezeReturn !== C_FLG_OFF) {
+		if ((g_resultObj.ii + g_resultObj.shakin) % 100 === 0 && !g_workObj.frzReturnFlg) {
+			changeReturn(1, g_frzReturnFunc[g_stateObj.frzReturn]());
+		}
+	}
+	if (_name === `shakin`) {
+		quickRetry(3);
+	}
 	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
 };
 
@@ -11509,6 +11828,7 @@ const judgeMatari = _difFrame => {
 	changeJudgeCharacter(`matari`, g_lblNameObj.j_matari);
 	comboJ.textContent = ``;
 	finishViewing();
+	quickRetry(2);
 
 	g_customJsObj.judg_matari.forEach(func => func(_difFrame));
 };
@@ -11743,11 +12063,19 @@ const resultInit = () => {
 	// 設定の組み立て処理 (Ex: 4x, Brake, Reverse, Sudden+, NoRecovery)
 	let playStyleData = [
 		`${g_stateObj.speed}${g_lblNameObj.multi}`,
-		`${withOptions(g_stateObj.motion, C_FLG_OFF)}`,
+		withOptions(g_stateObj.motion, C_FLG_OFF),
 		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
 			getStgDetailName(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
-		`${withOptions(g_stateObj.appearance, `Visible`)}`,
-		`${withOptions(g_stateObj.gauge, g_settings.gauges[0])}`
+		withOptions(g_stateObj.appearance, `Visible`),
+		withOptions(g_stateObj.gauge, g_settings.gauges[0]),
+		withOptions(g_stateObj.playWindow, `Default`),
+		withOptions(g_stateObj.stepArea, `Default`),
+		withOptions(g_stateObj.frzReturn, C_FLG_OFF, `FR:${g_stateObj.frzReturn}`),
+		withOptions(g_stateObj.shaking, C_FLG_OFF),
+		withOptions(g_stateObj.effect, C_FLG_OFF),
+		withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${g_stateObj.camoufrage}`),
+		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${g_stateObj.swapping}`),
+		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${g_stateObj.judgRange}`),
 	].filter(value => value !== ``).join(`, `);
 
 	// Display設定の組み立て処理 (Ex: Step : FlatBar, Judge, Life : OFF)
@@ -11795,6 +12123,23 @@ const resultInit = () => {
 		makeCssResultPlayData(`lblDisplayData`, dataRX, g_cssObj.result_style, 4, displayData),
 		makeCssResultPlayData(`lblDisplay2Data`, dataRX, g_cssObj.result_style, 5, display2Data),
 	);
+
+	// 設定項目が多い場合に2行に分解して表示する処理
+	let playStyleBreakNum = lblStyleData.textContent.length;
+	if (lblStyleData.textContent.length > 60) {
+		for (let j = Math.floor(lblStyleData.textContent.length / 2); j > 0; j--) {
+			if (lblStyleData.textContent[j] === `,`) {
+				playStyleBreakNum = j + 2;
+				break;
+			}
+		}
+		lblStyleData.style.top = `${parseFloat(lblStyleData.style.top) - 3}px`;
+		lblStyleData.innerHTML = `${lblStyleData.textContent.slice(0, playStyleBreakNum)}<br>` +
+			`${lblStyleData.textContent.slice(playStyleBreakNum)}`;
+		lblStyleData.style.fontSize = `${getFontSize(lblStyleData.textContent.slice(0, playStyleBreakNum), 350, getBasicFont(), 10)}px`;
+	} else {
+		lblStyleData.style.fontSize = `${getFontSize(lblStyleData.textContent, 350, getBasicFont(), 14)}px`;
+	}
 
 	/**
 	 * キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
@@ -12065,8 +12410,13 @@ const resultInit = () => {
 		drawText(unEscapeHtml(mTitleForView[1]), { hy: 2 });
 		drawText(`📝 ${unEscapeHtml(g_headerObj.tuning)} / 🎵 ${unEscapeHtml(artistName)}`, { hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
 		drawText(unEscapeHtml(difDataForImage), { hy: 4 });
-		drawText(playStyleData, { hy: 5 });
 
+		if (playStyleData.length > 60) {
+			drawText(playStyleData.slice(0, playStyleBreakNum), { hy: 5, siz: getFontSize(playStyleData.slice(0, playStyleBreakNum), 370, getBasicFont(), 14) });
+			drawText(playStyleData.slice(playStyleBreakNum), { hy: 6, siz: getFontSize(playStyleData.slice(playStyleBreakNum), 370, getBasicFont(), 14) });
+		} else {
+			drawText(playStyleData, { hy: 5, siz: getFontSize(lblStyleData.textContent, 370, getBasicFont(), 15) });
+		}
 		Object.keys(jdgScoreObj).forEach(score => {
 			drawText(g_lblNameObj[`j_${score}`], { hy: 7 + jdgScoreObj[score].pos, color: jdgScoreObj[score].dfColor });
 			drawText(g_resultObj[score], { x: 200, hy: 7 + jdgScoreObj[score].pos, align: C_ALIGN_RIGHT });

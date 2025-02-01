@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/01/08 (v38.3.0)
+ * Revised : 2025/02/01 (v39.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -110,6 +110,17 @@ const g_settingPos = {
         appearance: { heightPos: 7.4, y: 10, dw: 0, dh: 0 },
         opacity: { heightPos: 9, y: 10, dw: 0, dh: 0 },
         hitPosition: { heightPos: 10, y: 10, dw: 0, dh: 0 },
+    },
+    exSetting: {
+        playWindow: { heightPos: 0, y: 0, dw: 0, dh: 0 },
+        stepArea: { heightPos: 1, y: 0, dw: 0, dh: 0 },
+        frzReturn: { heightPos: 2.5, y: 0, dw: 0, dh: 0 },
+        shaking: { heightPos: 3.5, y: 0, dw: 0, dh: 0 },
+        effect: { heightPos: 5, y: 0, dw: 0, dh: 0 },
+        camoufrage: { heightPos: 6, y: 0, dw: 0, dh: 0 },
+        swapping: { heightPos: 7, y: 0, dw: 0, dh: 0 },
+        judgRange: { heightPos: 8.5, y: 0, dw: 0, dh: 0 },
+        autoRetry: { heightPos: 12.5, y: 0, dw: 0, dh: 0 },
     },
 };
 
@@ -791,6 +802,12 @@ const g_judgPosObj = {
     ii: 0, shakin: 1, matari: 2, shobon: 3, uwan: 4,
     kita: 0, sfsf: 1, iknai: 2,
 };
+const g_judgRanges = {
+    'Normal': [[2, 4, 6, 8, 16], [2, 4, 8]],
+    'Narrow': [[2, 3, 4, 8, 16], [2, 4, 8]],
+    'Hard': [[1, 3, 5, 8, 16], [1, 3, 8]],
+    'ExHard': [[1, 2, 3, 8, 16], [1, 2, 8]],
+};
 
 const C_CLR_DUMMY = `#777777`;
 
@@ -910,8 +927,20 @@ const g_stateObj = {
     filterLock: C_FLG_OFF,
     opacity: 100,
 
+    playWindow: `Default`,
+    stepArea: `Default`,
+    frzReturn: C_FLG_OFF,
+    shaking: C_FLG_OFF,
+    effect: C_FLG_OFF,
+    camoufrage: C_FLG_OFF,
+    swapping: C_FLG_OFF,
+    judgRange: `Normal`,
+    autoRetry: C_FLG_OFF,
+
     rotateEnabled: true,
     flatStepHeight: C_ARW_WIDTH,
+
+    layerNum: 2,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -995,6 +1024,7 @@ const g_settings = {
     hitPositionTerms: [50, 10],
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
+    volumeNum: 0,
 
     appearances: [`Visible`, `Hidden`, `Hidden+`, `Sudden`, `Sudden+`, `Hid&Sud+`],
     appearanceNum: 0,
@@ -1003,6 +1033,7 @@ const g_settings = {
     filterLockNum: 0,
 
     opacitys: [10, 25, 50, 75, 100],
+    opacityNum: 0,
 
     scoreDetailDefs: [`Density`, `Speed`, `ToolDif`, `HighScore`],
     scoreDetails: [],
@@ -1032,6 +1063,36 @@ const g_settings = {
         arrowEffect: 0,
         special: 0,
     },
+
+    playWindows: [`Default`, `Stairs`, `R-Stairs`, `Slope`, `R-Slope`, `Distorted`, `R-Distorted`, `SideScroll`, `R-SideScroll`],
+    playWindowNum: 0,
+
+    stepAreas: [`Default`, `Halfway`, `Mismatched`, `R-Mismatched`, `X-Flower`],
+    stepAreaNum: 0,
+
+    frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
+    frzReturnNum: 0,
+
+    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `Drunk`],
+    shakingNum: 0,
+
+    effects: [C_FLG_OFF, `Dizzy`, `Spin`, `Wave`, `Storm`, `Blinking`, `Squids`],
+    effectNum: 0,
+
+    camoufrages: [C_FLG_OFF, `Color`, `Arrow`, `ALL`],
+    camoufrageNum: 0,
+
+    swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`],
+    swappingNum: 0,
+
+    judgRanges: [`Normal`, `Narrow`, `Hard`, `ExHard`],
+    judgRangeNum: 0,
+
+    autoRetrys: [C_FLG_OFF, `Miss`, `Matari(Good)`, `Shakin(Great)`, `Fast/Slow`],
+    autoRetryNum: 0,
+
+    settingWindows: [optionInit, settingsDisplayInit, exSettingInit],
+    settingWindowNum: 0,
 };
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
@@ -1040,10 +1101,11 @@ g_settings.opacityNum = g_settings.opacitys.length - 1;
 /**
  * 設定画面間移動
  */
-const g_jumpSettingWindow = {
-    option: () => settingsDisplayInit(),
-    difSelector: () => settingsDisplayInit(),
-    settingsDisplay: () => optionInit(),
+const g_moveSettingWindow = (_changePageFlg = true, _direction = 1) => {
+    if (_changePageFlg) {
+        g_settings.settingWindowNum = nextPos(g_settings.settingWindowNum, _direction, g_settings.settingWindows.length);
+    }
+    g_settings.settingWindows[g_settings.settingWindowNum]();
 };
 
 /**
@@ -1089,6 +1151,126 @@ const g_motionFunc = {
     'Fountain': _frms => getFountainTrace(_frms, g_stateObj.speed * 2),
 };
 
+/**
+ * PlayWindow適用関数
+ */
+const g_changeStairs = (_rad) => ` rotate(${_rad}deg)`;
+const g_changeSkew = (_rad) => ` Skew(${_rad}deg, ${_rad}deg) scaleY(0.9)`;
+
+const g_playWindowFunc = {
+    'Default': () => ``,
+    'Stairs': () => g_changeStairs(-8),
+    'R-Stairs': () => g_changeStairs(8),
+    'Slope': () => g_changeStairs(-45),
+    'R-Slope': () => g_changeStairs(45),
+    'Distorted': () => g_changeSkew(-15),
+    'R-Distorted': () => g_changeSkew(15),
+    'SideScroll': () => g_changeStairs(-90),
+    'R-SideScroll': () => g_changeStairs(90),
+};
+
+const g_stepAreaFunc = {
+    'Default': () => ``,
+    'Halfway': () => {
+        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
+            $id(`${sprite}0`).top = `${g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2}px`;
+            $id(`${sprite}1`).top = `-${g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2}px`;
+        });
+    },
+    'Mismatched': () => {
+        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
+            $id(`${sprite}0`).transform = `rotate(-15deg)`;
+            $id(`${sprite}1`).transform = `rotate(15deg)`;
+        });
+    },
+    'R-Mismatched': () => {
+        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
+            $id(`${sprite}0`).transform = `rotate(15deg)`;
+            $id(`${sprite}1`).transform = `rotate(-15deg)`;
+        });
+    },
+    'X-Flower': () => {
+        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
+            $id(`${sprite}0`).transform = `rotate(-15deg)`;
+            $id(`${sprite}1`).transform = `rotate(15deg)`;
+            $id(`${sprite}2`).transform = `rotate(15deg)`;
+            $id(`${sprite}3`).transform = `rotate(-15deg)`;
+        });
+    },
+};
+
+/**
+ * Shaking適用関数
+ */
+const g_shakingFunc = {
+    'OFF': () => true,
+    'Horizontal': () => $id(`mainSprite`).left = `${(Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1}px`,
+    'Vertical': () => $id(`mainSprite`).top = `${(Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2}px`,
+    'Drunk': () => {
+        if (parseFloat($id(`mainSprite`).left) === 0 && parseFloat($id(`mainSprite`).top) === 0) {
+            g_workObj.drunkXFlg = [true, false][Math.floor(Math.random() * 2)];
+            g_workObj.drunkYFlg = [true, false][Math.floor(Math.random() * 2)];
+        }
+        if (g_workObj.drunkXFlg) {
+            $id(`mainSprite`).left = `${(Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1}px`;
+            $id(`infoSprite`).left = $id(`mainSprite`).left;
+            $id(`judgeSprite`).left = $id(`mainSprite`).left;
+        }
+        if (g_workObj.drunkYFlg) {
+            $id(`mainSprite`).top = `${(Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2}px`;
+            $id(`infoSprite`).top = $id(`mainSprite`).top;
+            $id(`judgeSprite`).top = $id(`mainSprite`).top;
+        }
+    },
+};
+
+/**
+ * FrzReturn適用関数
+ */
+const g_frzReturnFunc = {
+    'OFF': () => true,
+    'X-Axis': () => [`X`],
+    'Y-Axis': () => [`Y`],
+    'Z-Axis': () => [`Z`],
+    'Random': () => [`X`, `Y`, `Z`][Math.floor(Math.random() * 3)],
+    'XY-Axis': () => [`X`, `Y`],
+    'XZ-Axis': () => [`X`, `Z`],
+    'YZ-Axis': () => [`Y`, `Z`],
+    'Random+': () => {
+        const axis1 = [`X`, `Y`, `Z`][Math.floor(Math.random() * 3)];
+        const axis2 = [`X`, `Y`, `Z`, undefined].filter(val => val !== axis1)[Math.floor(Math.random() * 3)];
+        return [axis1, axis2];
+    },
+};
+
+/**
+ * Effect適用関数
+ * @param {string} _arrowEffect 
+ * @param {string} _frzEffect 
+ * @param {string} _frzArrowEffect 
+ */
+const g_setEffect = (_arrowEffect, _frzEffect = ``, _frzArrowEffect = _arrowEffect) => {
+    const keyNum = g_keyObj[`${g_keyObj.defaultProp}${g_keyObj.currentKey}_${g_keyObj.currentPtn}`].length;
+    for (let j = 0; j < keyNum; j++) {
+        g_workObj.arrowCssMotions[j] = _arrowEffect;
+        if (hasVal(_frzEffect)) {
+            g_workObj.frzCssMotions[j] = _frzEffect;
+        }
+        if (hasVal(_frzArrowEffect)) {
+            g_workObj.frzArrowCssMotions[j] = _frzArrowEffect;
+        }
+    }
+};
+const g_effectFunc = {
+    'OFF': () => true,
+    'Dizzy': () => g_setEffect(`effects-dizzy`),
+    'Spin': () => g_setEffect(`effects-spin`),
+    'Wave': () => g_setEffect(`effects-wave`, `effects-wave`),
+    'Storm': () => g_setEffect(`effects-storm`, `effects-storm`, ``),
+    'Blinking': () => g_setEffect(`effects-blinking`, `effects-blinking`, ``),
+    'Squids': () => g_setEffect(`effects-squids-arrow`, `effects-squids-frz`),
+};
+
 const g_keycons = {
     configTypes: [`Main`, `Replaced`, `ALL`],
     configTypeNum: 0,
@@ -1130,7 +1312,9 @@ let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosi
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
     `d_score`, `d_musicinfo`, `d_filterline`];
 
-let g_canDisabledSettings = [`motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`, `excessive`, `appearance`];
+let g_canDisabledSettings = [`motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`,
+    `excessive`, `appearance`, `playWindow`, `stepArea`, `frzReturn`, `shaking`, `effect`, `camoufrage`,
+    `swapping`, `judgRange`, `autoRetry`];
 
 const g_hidSudFunc = {
     filterPos: _filterPos => `${_filterPos}${g_lblNameObj.percent}`,
@@ -1754,6 +1938,33 @@ const g_shortcutObj = {
         ShiftRight_Tab: { id: `btnBack` },
         Tab: { id: `btnSettings` },
     },
+    exSetting: {
+        ShiftLeft_KeyP: { id: `lnkPlayWindowL` },
+        ShiftLeft_KeyS: { id: `lnkStepAreaL` },
+        ShiftLeft_KeyF: { id: `lnkFrzReturnL` },
+        ShiftLeft_KeyH: { id: `lnkShakingL` },
+        ShiftLeft_KeyE: { id: `lnkEffectL` },
+        ShiftLeft_KeyC: { id: `lnkCamoufrageL` },
+        ShiftLeft_KeyW: { id: `lnkSwappingL` },
+        ShiftLeft_KeyJ: { id: `lnkJudgRangeL` },
+        ShiftLeft_KeyA: { id: `lnkAutoRetryL` },
+
+        KeyP: { id: `lnkPlayWindowR` },
+        KeyS: { id: `lnkStepAreaR` },
+        KeyF: { id: `lnkFrzReturnR` },
+        KeyH: { id: `lnkShakingR` },
+        KeyE: { id: `lnkEffectR` },
+        KeyC: { id: `lnkCamoufrageR` },
+        KeyW: { id: `lnkSwappingR` },
+        KeyJ: { id: `lnkJudgRangeR` },
+        KeyA: { id: `lnkAutoRetryR` },
+
+        KeyZ: { id: `btnSave` },
+        Escape: { id: `btnBack` },
+        Space: { id: `btnKeyConfig` },
+        Enter: { id: `btnPlay` },
+        Tab: { id: `btnexSetting` },
+    },
     keyConfig: {
         Escape: { id: `btnBack` },
         Backspace_Enter: { id: `btnPlay` },
@@ -1786,6 +1997,7 @@ const g_btnWaitFrame = {
     option: { b_frame: 0, s_frame: 0, initial: true },
     difSelector: { b_frame: 0, s_frame: 0 },
     settingsDisplay: { b_frame: 0, s_frame: 0 },
+    exSetting: { b_frame: 0, s_frame: 0 },
     keyConfig: { b_frame: 0, s_frame: 30 },
     loading: { b_frame: 0, s_frame: 0 },
     loadingIos: { b_frame: 0, s_frame: 0 },
@@ -1799,6 +2011,7 @@ const g_btnPatterns = {
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
     difSelector: {},
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5 },
+    exSetting: { Back: 0, KeyConfig: 0, Play: 0, exSetting: -5, Save: -10 },
     loadingIos: { Play: 0 },
     keyConfig: { Back: -3, Play: 0 },
     result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0 },
@@ -3042,6 +3255,16 @@ const g_lblNameObj = {
     Opacity: `Opacity`,
     HitPosition: `HitPosition`,
 
+    PlayWindow: `PlayWindow`,
+    StepArea: `StepArea`,
+    FrzReturn: `FrzReturn`,
+    Shaking: `Shaking`,
+    Effect: `Effect`,
+    Camoufrage: `Camoufrage`,
+    Swapping: `Swapping`,
+    JudgRange: `JudgRange`,
+    AutoRetry: `AutoRetry`,
+
     'u_x': `x`,
     'u_%': `%`,
     'u_key': `key`,
@@ -3096,6 +3319,45 @@ const g_lblNameObj = {
     'u_Sudden': `Sudden`,
     'u_Sudden+': `Sudden+`,
     'u_Hid&Sud+': `Hid&Sud+`,
+
+    'u_Stairs': `Stairs`,
+    'u_R-Stairs': `R-Stairs`,
+    'u_Slope': `Slope`,
+    'u_R-Slope': `R-Slope`,
+    'u_Distorted': `Distorted`,
+    'u_R-Distorted': `R-Distorted`,
+    'u_SideScroll': `SideScroll`,
+    'u_R-SideScroll': `R-SideScroll`,
+
+    'u_X-Axis': `X-Axis`,
+    'u_Y-Axis': `Y-Axis`,
+    'u_Z-Axis': `Z-Axis`,
+    'u_XY-Axis': `XY-Axis`,
+    'u_XZ-Axis': `XZ-Axis`,
+    'u_YZ-Axis': `YZ-Axis`,
+
+    'u_Horizontal': `Horizontal`,
+    'u_Vertical': `Vertical`,
+    'u_Drunk': `Drunk`,
+
+    'u_Dizzy': `Dizzy`,
+    'u_Spin': `Spin`,
+    'u_Wave': `Wave`,
+    'u_Storm': `Storm`,
+    'u_Blinking': `Blinking`,
+    'u_Squids': `Squids`,
+
+    'u_Color': `Color`,
+    'u_Arrow': `Arrow`,
+
+    'u_Narrow': `Narrow`,
+    'u_Hard': `Hard`,
+    'u_ExHard': `ExHard`,
+
+    'u_Miss': `Miss`,
+    'u_Matari(Good)': `Matari(Good)`,
+    'u_Shakin(Great)': `Shakin(Great)`,
+    'u_Fast/Slow': `Fast/Slow`,
 
     'u_Speed': `Velocity`,
     'u_Density': `Density`,
@@ -3289,7 +3551,7 @@ const g_lang_msgObj = {
         graph: `譜面密度や速度変化状況、\n譜面の難易度などの情報を表示します。`,
         dataSave: `ハイスコア、リバース設定、\nキーコンフィグの保存の有無を設定します。`,
         toDisplay: `プレイ画面上のオブジェクトの\n表示・非表示（一部透明度）を設定します。`,
-        toSettings: `SETTINGS画面へ戻ります。`,
+        toSettings: `その他の拡張設定を設定します。`,
 
         d_stepzone: `ステップゾーンの表示`,
         d_judgment: `判定キャラクタ・コンボの表示`,
@@ -3304,6 +3566,18 @@ const g_lang_msgObj = {
         d_background: `背景・マスクモーションの有効化設定`,
         d_arroweffect: `矢印・フリーズアローモーションの有効化設定`,
         d_special: `作品固有の特殊演出の有効化設定`,
+
+        playWindow: `ステップゾーン及び矢印の位置を全体的に回転する等の設定です。\n[Stairs/Slope] ステップゾーンを階段状にします\n[Distorted] 画面を歪ませます`,
+        sideScrollMsg: `\n[SideScroll] 横スクロールモードになります\n\nSlope, SideScrollを設定する場合は高さが足りているかを確認してください\nクエリパラメータ ?h=600 などで設定できます`,
+        sideScrollDisable: `\n\nウィンドウの高さの自動拡張が無効のため、Slope, SideScrollは使用できません`,
+        stepArea: `ステップゾーンの位置を変更します。\n[Halfway] ステップゾーンが中央に表示されます\n[Mismatched] スクロールの向きが上下で異なる方向に流れます`,
+        frzReturn: `フリーズアロー到達時及び矢印の回復判定が100の倍数に達するごとに、X/Y/Z軸のいずれかに回転します`,
+        shaking: `ステップゾーン及び矢印を揺らす設定です。\n[Horizontal] 横方向に揺らします\n[Vertical] 縦方向に揺らします\n[Drunk] 画面全体を上下左右ランダムに揺らします。画面酔いに注意してください`,
+        effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
+        camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
+        swapping: `ステップゾーンの位置をグループ単位で入れ替えます。`,
+        judgRange: `判定の許容範囲を設定します。\n[Normal] 通常、[Narrow/Hard] 辛判定、[ExHard] 激辛判定`,
+        autoRetry: `自動リトライの条件を設定します。\n[Miss] ミス時、[Matari] マターリ時、[Shakin] シャキン時、[FS] Fast/Slow発生時`,
 
         lnkSpeedG: `譜面の進行別の速度変化状況を表示`,
         lnkDensityG: `譜面の密度状況を表示`,
@@ -3359,7 +3633,7 @@ const g_lang_msgObj = {
         graph: `Displays detailed information about the chart, such as chart's density status, sequences' velocity changes, and chart's difficulty.`,
         dataSave: `Set whether to save the high score, reverse setting, and key config.`,
         toDisplay: `Set the display or non-display (partial transparency) of objects on the play screen.`,
-        toSettings: `Return to the SETTINGS screen.`,
+        toSettings: `Set other extended settings.`,
 
         d_stepzone: `Display step zone`,
         d_judgment: `Display judgment and combo counts`,
@@ -3374,6 +3648,18 @@ const g_lang_msgObj = {
         d_background: `Enable background images and animations`,
         d_arroweffect: `Enable sequences' animations`,
         d_special: `Enable setting of special effects to the work`,
+
+        playWindow: `This is the setting for overall rotation of the step zone and arrow position, etc.\n[Stairs/Slope] The step zone is in a staircase shape.\n[Distorted] Distorts the screen.`,
+        sideScrollMsg: `\n[SideScroll] It becomes a side scroll mode.\n\nWhen setting Slope or SideScroll, please make sure that the height is\nsufficient. Can be set with query parameter ?h=600, etc.`,
+        sideScrollDisable: `\n\nSlope, SideScroll cannot be used because \nautomatic window height expansion is disabled.`,
+        stepArea: `Change the position of the step zone.\n[Halfway] Step zones are centered.\n[Mismatched] Scroll direction flows in different directions up and down.`,
+        frzReturn: `When the Freeze Arrow is reached, and every time the arrow's recovery judgment \nreaches a multiple of 100, it will rotate on either the X, Y, or Z axis.`,
+        shaking: `This is the setting to shake the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n[Drunk] Shakes the entire screen randomly up, down, left, and right. Be careful of motion sickness.`,
+        effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
+        camoufrage: `The appearance of the steps changes randomly with the same placement.`,
+        swapping: `Replaces the position of step zones on a group-by-group basis.`,
+        judgRange: `Set the allowable range of judgment.\n[Normal] Normal judgment, [Narrow/Hard] Hard judgment, [ExHard] Very hard judgment`,
+        autoRetry: `Set the conditions for automatic retry.\n[Miss] When missed, [Matari] When good, [Shakin] When great, [FS] When Fast/Slow occurs`,
 
         lnkSpeedG: `Displays the speed change status by progression of the chart.`,
         lnkDensityG: `Displays the density status of the chart.`,
@@ -3426,12 +3712,17 @@ const g_customJsObj = {
     option: [],
     difficulty: [],
     settingsDisplay: [],
+    exSetting: [],
     keyconfig: [],
 
     preloading: [],
     loading: [],
     progress: [],
     main: [],
+
+    makeArrow: [],
+    makeFrzArrow: [],
+
     dummyArrow: [],
     dummyFrz: [],
 
@@ -3459,6 +3750,7 @@ const g_skinJsObj = {
     title: [],
     option: [],
     settingsDisplay: [],
+    exSetting: [],
     keyconfig: [],
 
     preloading: [],
