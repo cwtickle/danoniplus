@@ -43,6 +43,15 @@
 	--settings-appearance-x: #cc99ff;
 	--settings-opacity-x: #ee99ff;
 	--settings-hitPosition-x: #ff99ff;
+	--settings-playWindow-x: #9999ff;
+	--settings-stepArea-x: #6699ff;
+	--settings-frzReturn-x: #99ccff;
+	--settings-shaking-x: #99ffff;
+	--settings-effect-x: #99ffcc;
+	--settings-camoufrage-x: #99ff99;
+	--settings-swapping-x: #ccff99;
+	--settings-judgRange-x: #ffff99;
+	--settings-autoRetry-x: #cc99ff;
 
 	/* 譜面選択部分背景 */
 	--settings-difSelector: #111111;

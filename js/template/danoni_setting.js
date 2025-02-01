@@ -246,6 +246,16 @@ g_presetObj.settingUse = {
 	//	background: `true`,
 	//	arrowEffect: `true`,
 	//	special: `true`,
+
+	//  playWindow: `true`,
+	//  stepArea: `true`,
+	//  frzReturn : `true`,
+	//  shaking : `true`,
+	//  effect : `true`,
+	//  camoufrage : `true`,
+	//  swapping : `true`,
+	//  judgRange : `true`,
+	//  autoRetry : `true`,
 };
 
 /*
