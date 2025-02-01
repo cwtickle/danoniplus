@@ -9954,8 +9954,10 @@ const mainInit = () => {
 
 	// Hidden+, Sudden+用のライン、パーセント表示
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
-	mainSprite.appendChild(createColorObject2(`filterBar0`, g_lblPosObj.filterBar, filterCss));
-	mainSprite.appendChild(createColorObject2(`filterBar1`, g_lblPosObj.filterBar, filterCss));
+	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj =>
+		mainSprite.appendChild(createColorObject2(obj, g_lblPosObj.filterBar, filterCss)));
+	borderBar0.style.top = wUnit(g_posObj.stepDiffY + g_stateObj.hitPosition);
+	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight - g_stateObj.hitPosition);
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
