@@ -11304,19 +11304,23 @@ const changeAppearanceFilter = (_num = 10) => {
 	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
 
-	$id(`arrowSprite${topNum}`).clipPath = topShape;
-	$id(`arrowSprite${bottomNum}`).clipPath = bottomShape;
+	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
+		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
+		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
 
-	$id(`filterBar0`).top = wUnit(parseFloat($id(`arrowSprite${topNum}`).top) + g_posObj.arrowHeight * _num / MAX_FILTER_POS + g_stateObj.hitPosition);
-	$id(`filterBar1`).top = wUnit(parseFloat($id(`arrowSprite${bottomNum}`).top) + g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS - g_stateObj.hitPosition);
-
+		$id(`filterBar${j}`).top = wUnit(parseFloat($id(`arrowSprite${topNum + j}`).top) + g_posObj.arrowHeight * _num / MAX_FILTER_POS + g_stateObj.hitPosition);
+		$id(`filterBar${j + 1}`).top = wUnit(parseFloat($id(`arrowSprite${bottomNum + j}`).top) + g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS - g_stateObj.hitPosition);
+	}
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		$id(`filterView`).top =
 			$id(`filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).top;
 		filterView.textContent = `${_num}%`;
 
 		if (g_stateObj.appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
-			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).display = C_DIS_NONE;
+			for (let j = 0; j < g_stateObj.layerNum; j++) {
+				$id(`filterBar${j}`).display = C_DIS_NONE;
+			}
+			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]) % 2}`).display = C_DIS_INHERIT;
 		}
 		g_hidSudObj.filterPos = _num;
 	}
