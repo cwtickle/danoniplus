@@ -9968,12 +9968,13 @@ const mainInit = () => {
 
 	// mainSprite配下に層別のスプライトを作成し、ステップゾーン・矢印本体・フリーズアローヒット部分に分ける
 	const mainSpriteN = [], stepSprite = [], arrowSprite = [], frzHitSprite = [];
+	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
 	for (let j = 0; j < g_stateObj.layerNum; j++) {
-		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight });
+		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, mainCommonPos);
 		mainSpriteN.push(mainSpriteJ);
-		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
-		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, { y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1), w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
-		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
+		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
+		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
+		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, mainCommonPos));
 	}
 
 	for (let j = 0; j < keyNum; j++) {
@@ -9981,7 +9982,7 @@ const mainInit = () => {
 
 		// ステップゾーンルート
 		const stepRoot = createEmptySprite(stepSprite[g_workObj.dividePos[j]], `stepRoot${j}`, {
-			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * g_workObj.dividePos[j],
+			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[j] % 2),
 			w: C_ARW_WIDTH, h: C_ARW_WIDTH,
 		});
 
@@ -10044,7 +10045,7 @@ const mainInit = () => {
 
 		// フリーズアローヒット部分
 		const frzHit = createEmptySprite(frzHitSprite[g_workObj.dividePos[j]], `frzHit${j}`, {
-			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * g_workObj.dividePos[j],
+			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[j] % 2),
 			w: C_ARW_WIDTH, h: C_ARW_WIDTH, opacity: 0,
 		});
 		if (isNaN(parseFloat(g_workObj.arrowRtn[j]))) {
@@ -10743,7 +10744,7 @@ const mainInit = () => {
 	 */
 	const makeArrow = (_attrs, _arrowCnt, _name, _color, _shadowColor) => {
 		const _j = _attrs.pos;
-		const dividePos = g_workObj.dividePos[_j];
+		const dividePos = g_workObj.dividePos[_j] % 2;
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 
 		const arrowName = `${_name}${_j}_${_arrowCnt}`;
@@ -10846,7 +10847,7 @@ const mainInit = () => {
 	 */
 	const makeFrzArrow = (_attrs, _arrowCnt, _name, _normalColor, _barColor, _shadowColor) => {
 		const _j = _attrs.pos;
-		const dividePos = g_workObj.dividePos[_j];
+		const dividePos = g_workObj.dividePos[_j] % 2;
 		const frzNo = `${_j}_${_arrowCnt}`;
 		const frzName = `${_name}${frzNo}`;
 		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
@@ -11427,7 +11428,7 @@ const changeCssMotions = (_header, _name, _frameNum) => {
 	const camelHeader = _header === `` ? _name : `${_header}${toCapitalize(_name)}`;
 	g_workObj[`mk${toCapitalize(camelHeader)}CssMotion`][_frameNum]?.forEach((targetj, j) =>
 		g_workObj[`${camelHeader}CssMotions`][targetj] =
-		g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + g_workObj.dividePos[targetj]]);
+		g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + (g_workObj.dividePos[targetj] % 2)]);
 };
 
 /**
