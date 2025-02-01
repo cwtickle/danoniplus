@@ -10809,6 +10809,7 @@ const mainInit = () => {
 		stepRoot.appendChild(createColorObject2(`${_name}Top${_j}_${_arrowCnt}`, {
 			background: _color, rotate: g_workObj.arrowRtn[_j],
 		}));
+		g_customJsObj.makeArrow.forEach(func => func(_attrs, arrowName, _name, _arrowCnt));
 	};
 
 	/**
@@ -10951,6 +10952,7 @@ const mainInit = () => {
 				obj.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
 			});
 		}
+		g_customJsObj.makeFrzArrow.forEach(func => func(_attrs, frzName, _name, _arrowCnt));
 	};
 
 	/**

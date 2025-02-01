@@ -3711,6 +3711,10 @@ const g_customJsObj = {
     loading: [],
     progress: [],
     main: [],
+
+    makeArrow: [],
+    makeFrzArrow: [],
+
     dummyArrow: [],
     dummyFrz: [],
 
