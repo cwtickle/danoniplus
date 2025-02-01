@@ -9952,10 +9952,11 @@ const mainInit = () => {
 			g_keyObj[`div${keyCtrlPtn}`] < g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length);
 	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
 
-	const stepSprite = [
-		createEmptySprite(mainSprite, `stepSprite0`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-		createEmptySprite(mainSprite, `stepSprite1`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-	];
+	// ステップゾーン部分の描画スプライト
+	const stepSprite = [];
+	for (let j = 0; j < g_stateObj.layerNum; j++) {
+		stepSprite.push(createEmptySprite(mainSprite, `stepSprite${j}`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
+	}
 
 	for (let j = 0; j < keyNum; j++) {
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
@@ -10023,28 +10024,35 @@ const mainInit = () => {
 
 	// Hidden+, Sudden+用のライン、パーセント表示
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
-	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj =>
-		mainSprite.appendChild(createColorObject2(obj, g_lblPosObj.filterBar, filterCss)));
+	[`filterBar`, `borderBar`].forEach(objName => {
+		for (let k = 0; k < g_stateObj.layerNum; k++) {
+			mainSprite.appendChild(createColorObject2(`${objName}${k}`, g_lblPosObj.filterBar, filterCss));
+		}
+	});
 	borderBar0.style.top = wUnit(g_posObj.stepDiffY + g_stateObj.hitPosition);
 	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight - g_stateObj.hitPosition);
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
 		if (g_stateObj.d_filterline === C_FLG_ON) {
-			[`filterBar0`, `filterBar1`, `filterView`].forEach(obj => $id(obj).opacity = g_stateObj.opacity / 100);
+			$id(`filterView`).opacity = g_stateObj.opacity / 100;
+			for (let k = 0; k < g_stateObj.layerNum; k++) {
+				$id(`filterBar${k}`).opacity = g_stateObj.opacity / 100;
+			}
 		}
 	}
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
-	const arrowSprite = [
-		createEmptySprite(mainSprite, `arrowSprite0`, { y: g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-		createEmptySprite(mainSprite, `arrowSprite1`, { y: -g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-	];
+	const arrowSprite = [];
+	for (let j = 0; j < g_stateObj.layerNum; j++) {
+		arrowSprite.push(createEmptySprite(mainSprite, `arrowSprite${j}`, { y: -g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
+	}
 
-	const frzHitSprite = [
-		createEmptySprite(mainSprite, `frzHitSprite0`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-		createEmptySprite(mainSprite, `frzHitSprite1`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }),
-	];
+	// フリーズアローヒット部分の描画スプライト
+	const frzHitSprite = [];
+	for (let j = 0; j < g_stateObj.layerNum; j++) {
+		frzHitSprite.push(createEmptySprite(mainSprite, `frzHitSprite${j}`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
+	}
 	for (let j = 0; j < keyNum; j++) {
 
 		// フリーズアローヒット部分

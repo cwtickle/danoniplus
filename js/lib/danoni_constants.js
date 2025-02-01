@@ -939,6 +939,8 @@ const g_stateObj = {
 
     rotateEnabled: true,
     flatStepHeight: C_ARW_WIDTH,
+
+    layerNum: 2,
 };
 
 const C_VAL_MAXLIFE = 1000;
