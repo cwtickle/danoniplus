@@ -9952,10 +9952,28 @@ const mainInit = () => {
 			g_keyObj[`div${keyCtrlPtn}`] < g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length);
 	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
 
-	// ステップゾーン部分の描画スプライト
-	const stepSprite = [];
+	// Hidden+, Sudden+用のライン、パーセント表示
+	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
+	mainSprite.appendChild(createColorObject2(`filterBar0`, g_lblPosObj.filterBar, filterCss));
+	mainSprite.appendChild(createColorObject2(`filterBar1`, g_lblPosObj.filterBar, filterCss));
+
+	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
+		if (g_stateObj.d_filterline === C_FLG_ON) {
+			$id(`filterView`).opacity = g_stateObj.opacity / 100;
+			$id(`filterBar0`).opacity = g_stateObj.opacity / 100;
+			$id(`filterBar1`).opacity = g_stateObj.opacity / 100;
+		}
+	}
+
+	// mainSprite配下に層別のスプライトを作成し、ステップゾーン・矢印本体・フリーズアローヒット部分に分ける
+	const mainSpriteN = [], stepSprite = [], arrowSprite = [], frzHitSprite = [];
 	for (let j = 0; j < g_stateObj.layerNum; j++) {
-		stepSprite.push(createEmptySprite(mainSprite, `stepSprite${j}`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
+		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight });
+		mainSpriteN.push(mainSpriteJ);
+		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
+		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, { y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1), w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
+		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
 	}
 
 	for (let j = 0; j < keyNum; j++) {
@@ -10022,35 +10040,6 @@ const mainInit = () => {
 
 	}
 
-	// Hidden+, Sudden+用のライン、パーセント表示
-	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
-	[`filterBar`, `borderBar`].forEach(objName => {
-		for (let k = 0; k < g_stateObj.layerNum; k++) {
-			mainSprite.appendChild(createColorObject2(`${objName}${k}`, g_lblPosObj.filterBar, filterCss));
-		}
-	});
-	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
-		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
-		if (g_stateObj.d_filterline === C_FLG_ON) {
-			$id(`filterView`).opacity = g_stateObj.opacity / 100;
-			for (let k = 0; k < g_stateObj.layerNum; k++) {
-				$id(`filterBar${k}`).opacity = g_stateObj.opacity / 100;
-			}
-		}
-	}
-
-	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
-	const arrowSprite = [];
-	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
-		arrowSprite.push(createEmptySprite(mainSprite, `arrowSprite${j}`, { y: g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
-		arrowSprite.push(createEmptySprite(mainSprite, `arrowSprite${j + 1}`, { y: -g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
-	}
-
-	// フリーズアローヒット部分の描画スプライト
-	const frzHitSprite = [];
-	for (let j = 0; j < g_stateObj.layerNum; j++) {
-		frzHitSprite.push(createEmptySprite(mainSprite, `frzHitSprite${j}`, { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
-	}
 	for (let j = 0; j < keyNum; j++) {
 
 		// フリーズアローヒット部分
@@ -11305,20 +11294,16 @@ const changeAppearanceFilter = (_num = 10) => {
 	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
-
-		$id(`filterBar${j}`).top = wUnit(parseFloat($id(`arrowSprite${topNum + j}`).top) + g_posObj.arrowHeight * _num / MAX_FILTER_POS);
-		$id(`filterBar${j + 1}`).top = wUnit(parseFloat($id(`arrowSprite${bottomNum + j}`).top) + g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS);
 	}
+	$id(`filterBar0`).top = wUnit(parseFloat($id(`arrowSprite${topNum}`).top) + g_posObj.arrowHeight * _num / MAX_FILTER_POS);
+	$id(`filterBar1`).top = wUnit(parseFloat($id(`arrowSprite${bottomNum}`).top) + g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS);
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		$id(`filterView`).top =
 			$id(`filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).top;
 		filterView.textContent = `${_num}%`;
 
 		if (g_stateObj.appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
-			for (let j = 0; j < g_stateObj.layerNum; j++) {
-				$id(`filterBar${j}`).display = C_DIS_NONE;
-			}
-			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]) % 2}`).display = C_DIS_INHERIT;
+			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).display = C_DIS_NONE;
 		}
 		g_hidSudObj.filterPos = _num;
 	}
@@ -11452,7 +11437,8 @@ const changeCssMotions = (_header, _name, _frameNum) => {
 const changeScrollArrowDirs = (_frameNum) =>
 	g_workObj.mkScrollchArrow[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
-		g_workObj.dividePos[targetj] = (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
+		const baseLayer = Math.floor(g_workObj.dividePos[targetj] / 2) * 2;
+		g_workObj.dividePos[targetj] = baseLayer + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
 	});
 
 /**
