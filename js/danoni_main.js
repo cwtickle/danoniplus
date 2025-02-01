@@ -10332,6 +10332,9 @@ const mainInit = () => {
 		makeInfoWindow(msg.join(`<br>`), `leftToRightFade`, { _x: g_workObj.playingX, _y: g_headerObj.playingY });
 	}
 
+	// ユーザカスタムイベント(初期)
+	g_customJsObj.main.forEach(func => func());
+
 	// mainSpriteのtransform追加処理
 	g_workObj.transform = mainSprite.style.transform || ``;
 	g_workObj.transform += g_playWindowFunc[g_stateObj.playWindow]();
@@ -10339,9 +10342,6 @@ const mainInit = () => {
 
 	// EffectのArrowEffect追加処理
 	g_effectFunc[g_stateObj.effect]();
-
-	// ユーザカスタムイベント(初期)
-	g_customJsObj.main.forEach(func => func());
 
 	/**
 	 * キーを押したときの処理
