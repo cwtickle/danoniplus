@@ -10029,9 +10029,6 @@ const mainInit = () => {
 			mainSprite.appendChild(createColorObject2(`${objName}${k}`, g_lblPosObj.filterBar, filterCss));
 		}
 	});
-	borderBar0.style.top = wUnit(g_posObj.stepDiffY + g_stateObj.hitPosition);
-	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight - g_stateObj.hitPosition);
-
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
 		if (g_stateObj.d_filterline === C_FLG_ON) {
@@ -10044,8 +10041,9 @@ const mainInit = () => {
 
 	// 矢印・フリーズアロー描画スプライト（ステップゾーンの上に配置）
 	const arrowSprite = [];
-	for (let j = 0; j < g_stateObj.layerNum; j++) {
-		arrowSprite.push(createEmptySprite(mainSprite, `arrowSprite${j}`, { y: -g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
+	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
+		arrowSprite.push(createEmptySprite(mainSprite, `arrowSprite${j}`, { y: g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
+		arrowSprite.push(createEmptySprite(mainSprite, `arrowSprite${j + 1}`, { y: -g_workObj.hitPosition, w: g_headerObj.playingWidth, h: g_posObj.arrowHeight }));
 	}
 
 	// フリーズアローヒット部分の描画スプライト
@@ -11308,8 +11306,8 @@ const changeAppearanceFilter = (_num = 10) => {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
 
-		$id(`filterBar${j}`).top = wUnit(parseFloat($id(`arrowSprite${topNum + j}`).top) + g_posObj.arrowHeight * _num / MAX_FILTER_POS + g_stateObj.hitPosition);
-		$id(`filterBar${j + 1}`).top = wUnit(parseFloat($id(`arrowSprite${bottomNum + j}`).top) + g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS - g_stateObj.hitPosition);
+		$id(`filterBar${j}`).top = wUnit(parseFloat($id(`arrowSprite${topNum + j}`).top) + g_posObj.arrowHeight * _num / MAX_FILTER_POS);
+		$id(`filterBar${j + 1}`).top = wUnit(parseFloat($id(`arrowSprite${bottomNum + j}`).top) + g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS);
 	}
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		$id(`filterView`).top =
