@@ -6,8 +6,8 @@
 
 - 修正対象のバージョンは下記の通りです。
 - 基本的には、同一メジャーバージョンの最新版がサポート対象です。
-- v1 ～ v33, v35 は**更新を終了しました。**  
-  v36 の対応終了時期は v39 リリース開始時を予定しています。（変更可能性あり）  
+- v1 ～ v33, v35 ～ v36 は**更新を終了しました。**  
+  v37 の対応終了時期は v40 リリース開始時を予定しています。（変更可能性あり）  
   バージョン別の更新継続可否は現状、[ライフサイクルポリシー](https://github.com/cwtickle/danoniplus/wiki/LifecyclePolicy)に従います。
 - 各バージョンの概要は[更新情報](https://github.com/cwtickle/danoniplus/wiki/UpdateInfo)に記載しています。
 
@@ -18,7 +18,7 @@
 
 | Version      | Supported          | Latest Version                                                                 | Logs                                                                   | First Release | End of Support   |
 | ------------ | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ------------- | ---------------- |
-| v39          | :heavy_check_mark: | [v39.0.0](https://github.com/cwtickle/danoniplus/releases/tag/v39.0.0)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2025-02-01    | (At Release v48) |
+| v39 :anchor: | :heavy_check_mark: | [v39.0.0](https://github.com/cwtickle/danoniplus/releases/tag/v39.0.0)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2025-02-01    | (At Release v48) |
 | v38          | :heavy_check_mark: | [v38.3.2](https://github.com/cwtickle/danoniplus/releases/tag/v38.3.2)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2024-11-04    | (At Release v41) |
 | v37          | :warning:          | [v37.8.7](https://github.com/cwtickle/danoniplus/releases/tag/v37.8.7)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v37)    | 2024-06-15    | (At Release v40) |
 | v36          | :x:                | [v36.6.11 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v36.6.11)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v36)    | 2024-04-15    | 2025-02-01 |
