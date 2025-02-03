@@ -1173,28 +1173,30 @@ const g_stepAreaFunc = {
     'Default': () => ``,
     'Halfway': () => {
         [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            $id(`${sprite}0`).top = `${g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2}px`;
-            $id(`${sprite}1`).top = `-${g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2}px`;
+            for (let j = 0; j < g_stateObj.layerNum; j++) {
+                $id(`${sprite}${j}`).top = `${(j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2)}px`;
+            }
         });
     },
     'Mismatched': () => {
         [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            $id(`${sprite}0`).transform = `rotate(-15deg)`;
-            $id(`${sprite}1`).transform = `rotate(15deg)`;
+            for (let j = 0; j < g_stateObj.layerNum; j++) {
+                $id(`${sprite}${j}`).transform = `rotate(${(j % 2 === 0 ? 1 : -1) * -15}deg)`;
+            }
         });
     },
     'R-Mismatched': () => {
         [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            $id(`${sprite}0`).transform = `rotate(15deg)`;
-            $id(`${sprite}1`).transform = `rotate(-15deg)`;
+            for (let j = 0; j < g_stateObj.layerNum; j++) {
+                $id(`${sprite}${j}`).transform = `rotate(${(j % 2 === 0 ? 1 : -1) * 15}deg)`;
+            }
         });
     },
     'X-Flower': () => {
         [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            $id(`${sprite}0`).transform = `rotate(-15deg)`;
-            $id(`${sprite}1`).transform = `rotate(15deg)`;
-            $id(`${sprite}2`).transform = `rotate(15deg)`;
-            $id(`${sprite}3`).transform = `rotate(-15deg)`;
+            for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {
+                $id(`${sprite}${j}`).transform = `rotate(${(j % 2 === 0 ? 1 : -1) * (j % 4 < 2 ? 1 : -1) * 15}deg)`;
+            }
         });
     },
 };
