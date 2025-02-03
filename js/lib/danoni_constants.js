@@ -1195,7 +1195,7 @@ const g_stepAreaFunc = {
     'X-Flower': () => {
         [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
             for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {
-                $id(`${sprite}${j}`).transform = `rotate(${(j % 2 === 0 ? 1 : -1) * (j % 4 < 2 ? 1 : -1) * 15}deg)`;
+                $id(`${sprite}${j}`).transform = `rotate(${(j % 2 === 0 ? 1 : -1) * (j % 4 < 2 ? 1 : -1) * -15}deg)`;
             }
         });
     },
