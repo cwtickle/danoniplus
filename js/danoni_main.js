@@ -8500,12 +8500,6 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 				scrollchData.push([frame, arrowNum, frame, scrollDir]);
 			});
-
-			// 個別のスクロール変化が存在する場合、StepAreaを自動リセット
-			if (scrollchData.length > 0) {
-				g_stateObj.stepArea = `Default`;
-				g_settings.stepAreaNum = 0;
-			}
 			return scrollchData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
 		return [];
@@ -9955,12 +9949,12 @@ const mainInit = () => {
 	let boostCnts = 0;
 	let keychCnts = 0;
 
-	const flatMode = g_stateObj.d_stepzone === `FlatBar` ||
+	g_workObj.flatMode = g_stateObj.d_stepzone === `FlatBar` ||
 		g_stateObj.scroll.endsWith(`Flat`) ||
 		g_keyObj[`flatMode${keyCtrlPtn}`] ||
 		(g_stateObj.stepArea === `Halfway` &&
 			g_keyObj[`div${keyCtrlPtn}`] < g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length);
-	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
+	g_workObj.stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_workObj.flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
 
 	// Hidden+, Sudden+用のライン、パーセント表示
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
@@ -9989,48 +9983,11 @@ const mainInit = () => {
 		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, mainCommonPos));
 	}
 
+	// ステップゾーン、フリーズアローヒット部分の生成
 	for (let j = 0; j < keyNum; j++) {
-		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
-
-		// ステップゾーンルート
-		const stepRoot = createEmptySprite(stepSprite[g_workObj.dividePos[j]], `stepRoot${j}`, {
-			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[j] % 2),
-			w: C_ARW_WIDTH, h: C_ARW_WIDTH,
-		});
-
-		// 矢印の内側を塗りつぶすか否か
-		if (g_headerObj.setShadowColor[colorPos] !== ``) {
-			stepRoot.appendChild(
-				createColorObject2(`stepShadow${j}`, {
-					rotate: g_workObj.stepRtn[j], styleName: `ShadowStep`,
-					opacity: 0.7, display: stepZoneDisp,
-				}, g_cssObj.main_objStepShadow)
-			);
-		}
-
-		appearStepZone(j, C_DIS_NONE);
-
-		// ステップゾーン
-		multiAppend(stepRoot,
-
-			// 本体
-			createColorObject2(`step${j}`, {
-				rotate: g_workObj.stepRtn[j], styleName: `Step`, display: stepZoneDisp,
-			}, g_cssObj.main_stepDefault),
-
-			// 空押し
-			createColorObject2(`stepDiv${j}`, {
-				rotate: g_workObj.stepRtn[j], styleName: `Step`, display: C_DIS_NONE,
-			}, g_cssObj.main_stepKeyDown),
-
-			// ヒット時モーション
-			createColorObject2(`stepHit${j}`, Object.assign(g_lblPosObj.stepHit, {
-				rotate: g_workObj.stepHitRtn[j], styleName: `StepHit`, opacity: 0,
-			}), g_cssObj.main_stepDefault),
-
-		);
+		makeStepZone(j, keyCtrlPtn);
 	}
-	if (flatMode && g_stateObj.d_stepzone !== C_FLG_OFF) {
+	if (g_workObj.flatMode && g_stateObj.d_stepzone !== C_FLG_OFF) {
 
 		// スクロール名に`R-`が含まれていればリバースと見做す
 		const reverseFlg = g_stateObj.reverse === C_FLG_ON || g_stateObj.scroll.startsWith(`R-`);
@@ -10051,31 +10008,6 @@ const mainInit = () => {
 					}, g_cssObj.life_Failed)
 				);
 			});
-		}
-	}
-
-	for (let j = 0; j < keyNum; j++) {
-
-		// フリーズアローヒット部分
-		const frzHit = createEmptySprite(frzHitSprite[g_workObj.dividePos[j]], `frzHit${j}`, {
-			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[j] % 2),
-			w: C_ARW_WIDTH, h: C_ARW_WIDTH, opacity: 0,
-		});
-		if (isNaN(parseFloat(g_workObj.arrowRtn[j]))) {
-			multiAppend(frzHit,
-				createColorObject2(`frzHitShadow${j}`, {
-					rotate: g_workObj.arrowRtn[j], styleName: `Shadow`,
-				}, g_cssObj.main_objShadow),
-				createColorObject2(`frzHitTop${j}`, {
-					background: g_workObj.frzHitColors[j], rotate: g_workObj.arrowRtn[j],
-				})
-			);
-		} else {
-			frzHit.appendChild(
-				createColorObject2(`frzHitTop${j}`, Object.assign(g_lblPosObj.frzHitTop, {
-					rotate: g_workObj.arrowRtn[j], styleName: `Shadow`,
-				}), g_cssObj.main_frzHitTop)
-			);
 		}
 	}
 
@@ -11292,6 +11224,78 @@ const mainInit = () => {
 };
 
 /**
+ * ステップゾーン、フリーズアローヒット部分の生成
+ * @param {number} _j 
+ * @param {string} _keyCtrlPtn 
+ */
+const makeStepZone = (_j, _keyCtrlPtn) => {
+
+	const colorPos = g_keyObj[`color${_keyCtrlPtn}`][_j];
+	const stepSpriteJ = document.getElementById(`stepSprite${g_workObj.dividePos[_j]}`);
+	const frzHitSpriteJ = document.getElementById(`frzHitSprite${g_workObj.dividePos[_j]}`);
+
+	// ステップゾーンルート
+	const stepRoot = createEmptySprite(stepSpriteJ, `stepRoot${_j}`, {
+		x: g_workObj.stepX[_j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[_j] % 2),
+		w: C_ARW_WIDTH, h: C_ARW_WIDTH,
+	});
+
+	// 矢印の内側を塗りつぶすか否か
+	if (g_headerObj.setShadowColor[colorPos] !== ``) {
+		stepRoot.appendChild(
+			createColorObject2(`stepShadow${_j}`, {
+				rotate: g_workObj.stepRtn[_j], styleName: `ShadowStep`,
+				opacity: 0.7, display: g_workObj.stepZoneDisp,
+			}, g_cssObj.main_objStepShadow)
+		);
+	}
+
+	appearStepZone(_j, C_DIS_NONE);
+
+	// ステップゾーン
+	multiAppend(stepRoot,
+
+		// 本体
+		createColorObject2(`step${_j}`, {
+			rotate: g_workObj.stepRtn[_j], styleName: `Step`, display: g_workObj.stepZoneDisp,
+		}, g_cssObj.main_stepDefault),
+
+		// 空押し
+		createColorObject2(`stepDiv${_j}`, {
+			rotate: g_workObj.stepRtn[_j], styleName: `Step`, display: C_DIS_NONE,
+		}, g_cssObj.main_stepKeyDown),
+
+		// ヒット時モーション
+		createColorObject2(`stepHit${_j}`, Object.assign(g_lblPosObj.stepHit, {
+			rotate: g_workObj.stepHitRtn[_j], styleName: `StepHit`, opacity: 0,
+		}), g_cssObj.main_stepDefault),
+
+	);
+
+	// フリーズアローヒット部分
+	const frzHit = createEmptySprite(frzHitSpriteJ, `frzHit${_j}`, {
+		x: g_workObj.stepX[_j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[_j] % 2),
+		w: C_ARW_WIDTH, h: C_ARW_WIDTH, opacity: 0,
+	});
+	if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
+		multiAppend(frzHit,
+			createColorObject2(`frzHitShadow${_j}`, {
+				rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+			}, g_cssObj.main_objShadow),
+			createColorObject2(`frzHitTop${_j}`, {
+				background: g_workObj.frzHitColors[_j], rotate: g_workObj.arrowRtn[_j],
+			})
+		);
+	} else {
+		frzHit.appendChild(
+			createColorObject2(`frzHitTop${_j}`, Object.assign(g_lblPosObj.frzHitTop, {
+				rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+			}), g_cssObj.main_frzHitTop)
+		);
+	}
+};
+
+/**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
  * @param {number} _num 
  */
@@ -11464,9 +11468,19 @@ const changeScrollArrowDirs = (_frameNum) =>
 const changeStepY = (_frameNum) =>
 	g_workObj.mkScrollchStep[_frameNum]?.forEach((targetj, j) => {
 		const dividePos = (g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchStepDir[_frameNum][j] === 1 ? 0 : 1);
-		const baseY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
-		$id(`stepRoot${targetj}`).top = wUnit(baseY);
-		$id(`frzHit${targetj}`).top = wUnit(baseY);
+
+		// 移動元のステップゾーンの不透明度、表示・非表示を退避
+		const _stepOpacity = $id(`stepRoot${targetj}`).opacity;
+		const _stepDisplay = $id(`stepRoot${targetj}`).display;
+
+		// 移動元のステップゾーンを消去
+		document.getElementById(`stepRoot${targetj}`).remove();
+		document.getElementById(`frzHit${targetj}`).remove();
+
+		// レイヤーを変更しステップゾーンを再生成。移動元の不透明度、表示・非表示を反映
+		g_workObj.dividePos[targetj] = Math.floor(g_workObj.dividePos[targetj] / 2) * 2 + dividePos;
+		makeStepZone(targetj, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`);
+		appearStepZone(targetj, _stepDisplay, _stepOpacity);
 	});
 
 /**
