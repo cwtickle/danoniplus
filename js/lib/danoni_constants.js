@@ -650,7 +650,8 @@ const g_typeLists = {
     frzColor: [`Normal`, `NormalBar`, `Hit`, `HitBar`, `NormalShadow`, `HitShadow`],
     dataList: [
         `Arrow`, `FrzArrow`, `FrzLength`,
-        `Color`, `ColorCd`, `ColorShadow`, `ColorShadowCd`, `ScrollchArrow`, `ScrollchStep`, `ScrollchArrowDir`, `ScrollchStepDir`,
+        `Color`, `ColorCd`, `ColorShadow`, `ColorShadowCd`,
+        `ScrollchArrow`, `ScrollchStep`, `ScrollchArrowDir`, `ScrollchStepDir`, `ScrollchArrowLayer`, `ScrollchStepLayer`,
         `FColorNormal`, `FColorNormalCd`, `FColorNormalBar`, `FColorNormalBarCd`,
         `FColorNormalShadow`, `FColorNormalShadowCd`,
         `FColorHit`, `FColorHitCd`, `FColorHitBar`, `FColorHitBarCd`,
@@ -1109,6 +1110,54 @@ const g_moveSettingWindow = (_changePageFlg = true, _direction = 1) => {
 };
 
 /**
+ * transform管理
+ */
+const g_transforms = {};
+
+/**
+ * idごとのtransformを追加・変更
+ * - _transformIdごとに transform情報を管理
+ * @param {string} _id 
+ * @param {string} _transformId
+ * @param {string} _transform 
+ */
+const addTransform = (_id, _transformId, _transform) => {
+    if (g_transforms[_id] === undefined) {
+        g_transforms[_id] = {};
+    }
+    g_transforms[_id][_transformId] = _transform;
+    const _transforms = [];
+    Object.keys(g_transforms[_id]).forEach(transformId => _transforms.push(g_transforms[_id][transformId]));
+    $id(_id).transform = _transforms.join(` `);
+};
+
+/**
+ * idごとのtransformを追加（一時）
+ * @param {string} _id 
+ * @param {string} _transform 
+ */
+const addTempTransform = (_id, _transform) => {
+    $id(_id).transform = ($id(_id).transform || ``) + ` ` + _transform;
+};
+
+/**
+ * transformの初期化
+ */
+const resetTransform = () => {
+    Object.keys(g_transforms).forEach(_id => g_transforms[_id] = {});
+};
+
+/**
+ * id, transformIdに合致するtransform情報の取得
+ * @param {string} _id 
+ * @param {string} _transformId 
+ * @returns 
+ */
+const getTransform = (_id, _transformId) => {
+    return g_transforms[_id]?.[_transformId] || ``;
+};
+
+/**
  * シャッフル適用関数
  * @param {number} keyNum
  * @param {array} shuffleGroup
@@ -1154,8 +1203,8 @@ const g_motionFunc = {
 /**
  * PlayWindow適用関数
  */
-const g_changeStairs = (_rad) => ` rotate(${_rad}deg)`;
-const g_changeSkew = (_rad) => ` Skew(${_rad}deg, ${_rad}deg) scaleY(0.9)`;
+const g_changeStairs = (_rad) => `rotate(${_rad}deg)`;
+const g_changeSkew = (_rad) => `Skew(${_rad}deg, ${_rad}deg) scaleY(0.9)`;
 
 const g_playWindowFunc = {
     'Default': () => ``,
@@ -1173,28 +1222,30 @@ const g_stepAreaFunc = {
     'Default': () => ``,
     'Halfway': () => {
         [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            $id(`${sprite}0`).top = `${g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2}px`;
-            $id(`${sprite}1`).top = `-${g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2}px`;
+            for (let j = 0; j < g_stateObj.layerNum; j++) {
+                $id(`${sprite}${j}`).top = `${(j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2)}px`;
+            }
         });
     },
     'Mismatched': () => {
         [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            $id(`${sprite}0`).transform = `rotate(-15deg)`;
-            $id(`${sprite}1`).transform = `rotate(15deg)`;
+            for (let j = 0; j < g_stateObj.layerNum; j++) {
+                addTransform(`${sprite}${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * -15}deg)`);
+            }
         });
     },
     'R-Mismatched': () => {
         [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            $id(`${sprite}0`).transform = `rotate(15deg)`;
-            $id(`${sprite}1`).transform = `rotate(-15deg)`;
+            for (let j = 0; j < g_stateObj.layerNum; j++) {
+                addTransform(`${sprite}${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * 15}deg)`);
+            }
         });
     },
     'X-Flower': () => {
         [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            $id(`${sprite}0`).transform = `rotate(-15deg)`;
-            $id(`${sprite}1`).transform = `rotate(15deg)`;
-            $id(`${sprite}2`).transform = `rotate(15deg)`;
-            $id(`${sprite}3`).transform = `rotate(-15deg)`;
+            for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {
+                addTransform(`${sprite}${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j % 4 < 2 ? 1 : -1) * -15}deg)`);
+            }
         });
     },
 };
@@ -2813,7 +2864,7 @@ g_keycons.groups.forEach(type => {
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
     simple: [`div`, `divMax`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`, `flatMode`],
-    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroup`, `keyGroupOrder`],
+    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroup`, `keyGroupOrder`, `layerGroup`, `layerTrans`],
 };
 
 // タイトル画面関連のリスト群
