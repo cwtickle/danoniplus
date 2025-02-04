@@ -8497,8 +8497,9 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const frame = calcFrame(tmpScrollchData[0]);
 				const arrowNum = parseFloat(tmpScrollchData[1]);
 				const scrollDir = parseFloat(tmpScrollchData[2] ?? `1`);
+				const layerNo = parseFloat(tmpScrollchData[3] ?? `-1`);
 
-				scrollchData.push([frame, arrowNum, frame, scrollDir]);
+				scrollchData.push([frame, arrowNum, frame, scrollDir, layerNo]);
 			});
 			return scrollchData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
@@ -9283,7 +9284,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	g_typeLists.arrow.forEach(header =>
 		calcDataTiming(`cssMotion`, header, pushCssMotions, { _calcFrameFlg: true }));
 
-	calcDataTiming(`scrollch`, ``, pushScrollchs, { _calcFrameFlg: true });
+	calcDataTiming(`scrollch`, ``, pushScrollchs, { _term: 5, _calcFrameFlg: true });
 
 	g_fadeinStockList.forEach(type =>
 		_dataObj[`${type}Data`] = calcAnimationData(type, _dataObj[`${type}Data`]));
@@ -9549,29 +9550,32 @@ const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev) => {
  * @param {number} _frameStep 
  * @param {number} _scrollDir 
  */
-const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir) => {
+const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir, _layerNo) => {
 	const tkObj = getKeyInfo();
+	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, (_layerNo + 1) * 2);
 
 	const frameArrow = Math.max(_frameArrow, g_scoreObj.frameNum);
 	const frameStep = Math.max(_frameStep, g_scoreObj.frameNum);
 	const pushData = (_pattern, _frame, _val) =>
 		g_workObj[`mkScrollch${_pattern}`][_frame]?.push(_val) || (g_workObj[`mkScrollch${_pattern}`][_frame] = [_val]);
+	const pushScrollData = _j => {
+		pushData(`Arrow`, frameArrow, _j);
+		pushData(`ArrowDir`, frameArrow, _scrollDir);
+		pushData(`ArrowLayer`, frameArrow, _layerNo);
+		pushData(`Step`, frameStep, _j);
+		pushData(`StepDir`, frameStep, _scrollDir);
+		pushData(`StepLayer`, frameStep, _layerNo);
+	};
 
 	if (_val < 20 || _val >= 1000) {
 		const realVal = g_workObj.replaceNums[_val % 1000];
-		pushData(`Arrow`, frameArrow, realVal);
-		pushData(`ArrowDir`, frameArrow, _scrollDir);
-		pushData(`Step`, frameStep, realVal);
-		pushData(`StepDir`, frameStep, _scrollDir);
+		pushScrollData(realVal);
 
 	} else {
 		const colorNum = _val - 20;
 		for (let j = 0; j < tkObj.keyNum; j++) {
 			if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
-				pushData(`Arrow`, frameArrow, j);
-				pushData(`ArrowDir`, frameArrow, _scrollDir);
-				pushData(`Step`, frameStep, j);
-				pushData(`StepDir`, frameStep, _scrollDir);
+				pushScrollData(j);
 			}
 		}
 	}
@@ -9673,7 +9677,8 @@ const getArrowSettings = () => {
 		});
 	}
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
-	g_stateObj.layerNum = Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2;
+	g_workObj.dividePosDefault = g_workObj.dividePos.concat();
+	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
 	Object.keys(g_resultObj).forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 	g_resultObj.spState = ``;
@@ -11457,8 +11462,9 @@ const changeCssMotions = (_header, _name, _frameNum) => {
 const changeScrollArrowDirs = (_frameNum) =>
 	g_workObj.mkScrollchArrow[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
-		const baseLayer = Math.floor(g_workObj.dividePos[targetj] / 2) * 2;
-		g_workObj.dividePos[targetj] = baseLayer + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
+		const baseLayer = g_workObj.mkScrollchArrowLayer[_frameNum][j] === -1 ?
+			Math.floor(g_workObj.dividePosDefault[targetj] / 2) : g_workObj.mkScrollchArrowLayer[_frameNum][j];
+		g_workObj.dividePos[targetj] = baseLayer * 2 + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
 	});
 
 /**
@@ -11478,7 +11484,9 @@ const changeStepY = (_frameNum) =>
 		document.getElementById(`frzHit${targetj}`).remove();
 
 		// レイヤーを変更しステップゾーンを再生成。移動元の不透明度、表示・非表示を反映
-		g_workObj.dividePos[targetj] = Math.floor(g_workObj.dividePos[targetj] / 2) * 2 + dividePos;
+		const baseLayer = g_workObj.mkScrollchStepLayer[_frameNum][j] === -1 ?
+			Math.floor(g_workObj.dividePosDefault[targetj] / 2) : g_workObj.mkScrollchStepLayer[_frameNum][j];
+		g_workObj.dividePos[targetj] = baseLayer * 2 + dividePos;
 		makeStepZone(targetj, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`);
 		appearStepZone(targetj, _stepDisplay, _stepOpacity);
 	});
