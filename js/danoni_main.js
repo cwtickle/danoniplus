@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/02/01
+ * Revised : 2025/02/04
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 39.0.0`;
-const g_revisedDate = `2025/02/01`;
+const g_version = `Ver 39.1.0`;
+const g_revisedDate = `2025/02/04`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1537,6 +1537,7 @@ const makeBgCanvas = (_ctx, { w = g_sWidth, h = g_sHeight } = {}) => {
  */
 const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 	resetKeyControl();
+	resetTransform();
 
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
 	deleteChildspriteAll(`divRoot`);
@@ -3916,6 +3917,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 	const existParam = (_data, _paramName) => !hasVal(_data) && g_keyObj[_paramName] !== undefined;
 	const toString = _str => _str;
+	const toInt = _num => isNaN(parseInt(_num)) ? _num : parseInt(_num);
 	const toFloat = _num => isNaN(parseFloat(_num)) ? _num : parseFloat(_num);
 	const toKeyCtrlArray = _str =>
 		makeBaseArray(_str.split(`/`).map(n => getKeyCtrlVal(n)), g_keyObj.minKeyCtrlNum, 0);
@@ -4269,6 +4271,19 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		// アシストパターン (assistX_Y)
 		// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
 		newKeyPairParam(newKey, `assist`, `assistPos`);
+
+		// レーンごとの割当レイヤーグループ (layerGroupX_Y)
+		newKeyMultiParam(newKey, `layerGroup`, toInt);
+
+		// レイヤーごとのアニメーション情報 (layerTransX_Y)
+		if (hasVal(_dosObj[`layerTrans${newKey}`])) {
+			_dosObj[`layerTrans${newKey}`] = _dosObj[`layerTrans${newKey}`]?.replaceAll(`,`, `___`);
+			newKeyMultiParam(newKey, `layerTrans`, toSplitArrayStr, {
+				loopFunc: (k, keyheader) => {
+					g_keyObj[`${keyheader}_${k + dfPtnNum}`][0] = g_keyObj[`${keyheader}_${k + dfPtnNum}`]?.[0]?.map(val => val.replaceAll(`___`, `,`));
+				},
+			});
+		}
 
 		// keyRetry, keyTitleBackのキー名をキーコードに変換
 		const keyTypePatterns = Object.keys(g_keyObj).filter(val => val.startsWith(`keyRetry${newKey}`) || val.startsWith(`keyTitleBack${newKey}`));
@@ -6790,7 +6805,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
 
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
-	keyconSprite.style.transform = `scale(${g_keyObj.scale})`;
+	addTransform(`keyconSprite`, `root`, `scale(${g_keyObj.scale})`)
 	keyconSprite.style.height = `${parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2)}px`;
 	const kWidth = parseInt(keyconSprite.style.width);
 	changeSetColor();
@@ -8497,15 +8512,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const frame = calcFrame(tmpScrollchData[0]);
 				const arrowNum = parseFloat(tmpScrollchData[1]);
 				const scrollDir = parseFloat(tmpScrollchData[2] ?? `1`);
+				const layerGroup = parseFloat(tmpScrollchData[3] ?? `-1`);
 
-				scrollchData.push([frame, arrowNum, frame, scrollDir]);
+				scrollchData.push([frame, arrowNum, frame, scrollDir, layerGroup]);
 			});
-
-			// 個別のスクロール変化が存在する場合、StepAreaを自動リセット
-			if (scrollchData.length > 0) {
-				g_stateObj.stepArea = `Default`;
-				g_settings.stepAreaNum = 0;
-			}
 			return scrollchData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
 		return [];
@@ -9289,7 +9299,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 	g_typeLists.arrow.forEach(header =>
 		calcDataTiming(`cssMotion`, header, pushCssMotions, { _calcFrameFlg: true }));
 
-	calcDataTiming(`scrollch`, ``, pushScrollchs, { _calcFrameFlg: true });
+	calcDataTiming(`scrollch`, ``, pushScrollchs, { _term: 5, _calcFrameFlg: true });
 
 	g_fadeinStockList.forEach(type =>
 		_dataObj[`${type}Data`] = calcAnimationData(type, _dataObj[`${type}Data`]));
@@ -9555,29 +9565,32 @@ const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev) => {
  * @param {number} _frameStep 
  * @param {number} _scrollDir 
  */
-const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir) => {
+const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir, _layerGroup) => {
 	const tkObj = getKeyInfo();
+	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, (_layerGroup + 1) * 2);
 
 	const frameArrow = Math.max(_frameArrow, g_scoreObj.frameNum);
 	const frameStep = Math.max(_frameStep, g_scoreObj.frameNum);
 	const pushData = (_pattern, _frame, _val) =>
 		g_workObj[`mkScrollch${_pattern}`][_frame]?.push(_val) || (g_workObj[`mkScrollch${_pattern}`][_frame] = [_val]);
+	const pushScrollData = _j => {
+		pushData(`Arrow`, frameArrow, _j);
+		pushData(`ArrowDir`, frameArrow, _scrollDir);
+		pushData(`ArrowLayer`, frameArrow, _layerGroup);
+		pushData(`Step`, frameStep, _j);
+		pushData(`StepDir`, frameStep, _scrollDir);
+		pushData(`StepLayer`, frameStep, _layerGroup);
+	};
 
 	if (_val < 20 || _val >= 1000) {
 		const realVal = g_workObj.replaceNums[_val % 1000];
-		pushData(`Arrow`, frameArrow, realVal);
-		pushData(`ArrowDir`, frameArrow, _scrollDir);
-		pushData(`Step`, frameStep, realVal);
-		pushData(`StepDir`, frameStep, _scrollDir);
+		pushScrollData(realVal);
 
 	} else {
 		const colorNum = _val - 20;
 		for (let j = 0; j < tkObj.keyNum; j++) {
 			if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
-				pushData(`Arrow`, frameArrow, j);
-				pushData(`ArrowDir`, frameArrow, _scrollDir);
-				pushData(`Step`, frameStep, j);
-				pushData(`StepDir`, frameStep, _scrollDir);
+				pushScrollData(j);
 			}
 		}
 	}
@@ -9657,7 +9670,8 @@ const getArrowSettings = () => {
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
-		g_workObj.dividePos[j] = ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
+		const baseLayer = g_keyObj[`layerGroup${keyCtrlPtn}`]?.[j] || 0;
+		g_workObj.dividePos[j] = baseLayer * 2 + ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
 		if (g_stateObj.stepArea === `X-Flower`) {
 			g_workObj.dividePos[j] = (g_workObj.stepX[j] < (g_headerObj.playingWidth - C_ARW_WIDTH) / 2 ? 0 : 1) * 2 + g_workObj.dividePos[j] % 2;
 		}
@@ -9679,7 +9693,8 @@ const getArrowSettings = () => {
 		});
 	}
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
-	g_stateObj.layerNum = Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2;
+	g_workObj.dividePosDefault = g_workObj.dividePos.concat();
+	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
 	Object.keys(g_resultObj).forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 	g_resultObj.spState = ``;
@@ -9920,8 +9935,8 @@ const mainInit = () => {
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createEmptySprite(divRoot, `mainSprite`, {
 		x: g_workObj.playingX, y: g_posObj.stepY - C_STEP_Y + g_headerObj.playingY, w: g_headerObj.playingWidth, h: g_headerObj.playingHeight,
-		transform: `scale(${g_keyObj.scale})`,
 	});
+	addTransform(`mainSprite`, `root`, `scale(${g_keyObj.scale})`);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createEmptySprite(divRoot, `infoSprite`, { x: g_workObj.playingX, y: g_headerObj.playingY, w: g_headerObj.playingWidth, h: g_headerObj.playingHeight });
@@ -9955,12 +9970,12 @@ const mainInit = () => {
 	let boostCnts = 0;
 	let keychCnts = 0;
 
-	const flatMode = g_stateObj.d_stepzone === `FlatBar` ||
+	g_workObj.flatMode = g_stateObj.d_stepzone === `FlatBar` ||
 		g_stateObj.scroll.endsWith(`Flat`) ||
 		g_keyObj[`flatMode${keyCtrlPtn}`] ||
 		(g_stateObj.stepArea === `Halfway` &&
 			g_keyObj[`div${keyCtrlPtn}`] < g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length);
-	const stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
+	g_workObj.stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_workObj.flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
 
 	// Hidden+, Sudden+用のライン、パーセント表示
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
@@ -9984,53 +9999,18 @@ const mainInit = () => {
 	for (let j = 0; j < g_stateObj.layerNum; j++) {
 		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, mainCommonPos);
 		mainSpriteN.push(mainSpriteJ);
+		addTransform(`mainSprite${j}`, `mainSprite${j}`,
+			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(j / 2) + (j + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
 		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
 		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
 		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, mainCommonPos));
 	}
 
+	// ステップゾーン、フリーズアローヒット部分の生成
 	for (let j = 0; j < keyNum; j++) {
-		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
-
-		// ステップゾーンルート
-		const stepRoot = createEmptySprite(stepSprite[g_workObj.dividePos[j]], `stepRoot${j}`, {
-			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[j] % 2),
-			w: C_ARW_WIDTH, h: C_ARW_WIDTH,
-		});
-
-		// 矢印の内側を塗りつぶすか否か
-		if (g_headerObj.setShadowColor[colorPos] !== ``) {
-			stepRoot.appendChild(
-				createColorObject2(`stepShadow${j}`, {
-					rotate: g_workObj.stepRtn[j], styleName: `ShadowStep`,
-					opacity: 0.7, display: stepZoneDisp,
-				}, g_cssObj.main_objStepShadow)
-			);
-		}
-
-		appearStepZone(j, C_DIS_NONE);
-
-		// ステップゾーン
-		multiAppend(stepRoot,
-
-			// 本体
-			createColorObject2(`step${j}`, {
-				rotate: g_workObj.stepRtn[j], styleName: `Step`, display: stepZoneDisp,
-			}, g_cssObj.main_stepDefault),
-
-			// 空押し
-			createColorObject2(`stepDiv${j}`, {
-				rotate: g_workObj.stepRtn[j], styleName: `Step`, display: C_DIS_NONE,
-			}, g_cssObj.main_stepKeyDown),
-
-			// ヒット時モーション
-			createColorObject2(`stepHit${j}`, Object.assign(g_lblPosObj.stepHit, {
-				rotate: g_workObj.stepHitRtn[j], styleName: `StepHit`, opacity: 0,
-			}), g_cssObj.main_stepDefault),
-
-		);
+		makeStepZone(j, keyCtrlPtn);
 	}
-	if (flatMode && g_stateObj.d_stepzone !== C_FLG_OFF) {
+	if (g_workObj.flatMode && g_stateObj.d_stepzone !== C_FLG_OFF) {
 
 		// スクロール名に`R-`が含まれていればリバースと見做す
 		const reverseFlg = g_stateObj.reverse === C_FLG_ON || g_stateObj.scroll.startsWith(`R-`);
@@ -10051,31 +10031,6 @@ const mainInit = () => {
 					}, g_cssObj.life_Failed)
 				);
 			});
-		}
-	}
-
-	for (let j = 0; j < keyNum; j++) {
-
-		// フリーズアローヒット部分
-		const frzHit = createEmptySprite(frzHitSprite[g_workObj.dividePos[j]], `frzHit${j}`, {
-			x: g_workObj.stepX[j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[j] % 2),
-			w: C_ARW_WIDTH, h: C_ARW_WIDTH, opacity: 0,
-		});
-		if (isNaN(parseFloat(g_workObj.arrowRtn[j]))) {
-			multiAppend(frzHit,
-				createColorObject2(`frzHitShadow${j}`, {
-					rotate: g_workObj.arrowRtn[j], styleName: `Shadow`,
-				}, g_cssObj.main_objShadow),
-				createColorObject2(`frzHitTop${j}`, {
-					background: g_workObj.frzHitColors[j], rotate: g_workObj.arrowRtn[j],
-				})
-			);
-		} else {
-			frzHit.appendChild(
-				createColorObject2(`frzHitTop${j}`, Object.assign(g_lblPosObj.frzHitTop, {
-					rotate: g_workObj.arrowRtn[j], styleName: `Shadow`,
-				}), g_cssObj.main_frzHitTop)
-			);
 		}
 	}
 
@@ -10345,9 +10300,7 @@ const mainInit = () => {
 	g_customJsObj.main.forEach(func => func());
 
 	// mainSpriteのtransform追加処理
-	g_workObj.transform = mainSprite.style.transform || ``;
-	g_workObj.transform += g_playWindowFunc[g_stateObj.playWindow]();
-	mainSprite.style.transform = g_workObj.transform;
+	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc[g_stateObj.playWindow]());
 
 	// EffectのArrowEffect追加処理
 	g_effectFunc[g_stateObj.effect]();
@@ -11292,6 +11245,78 @@ const mainInit = () => {
 };
 
 /**
+ * ステップゾーン、フリーズアローヒット部分の生成
+ * @param {number} _j 
+ * @param {string} _keyCtrlPtn 
+ */
+const makeStepZone = (_j, _keyCtrlPtn) => {
+
+	const colorPos = g_keyObj[`color${_keyCtrlPtn}`][_j];
+	const stepSpriteJ = document.getElementById(`stepSprite${g_workObj.dividePos[_j]}`);
+	const frzHitSpriteJ = document.getElementById(`frzHitSprite${g_workObj.dividePos[_j]}`);
+
+	// ステップゾーンルート
+	const stepRoot = createEmptySprite(stepSpriteJ, `stepRoot${_j}`, {
+		x: g_workObj.stepX[_j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[_j] % 2),
+		w: C_ARW_WIDTH, h: C_ARW_WIDTH,
+	});
+
+	// 矢印の内側を塗りつぶすか否か
+	if (g_headerObj.setShadowColor[colorPos] !== ``) {
+		stepRoot.appendChild(
+			createColorObject2(`stepShadow${_j}`, {
+				rotate: g_workObj.stepRtn[_j], styleName: `ShadowStep`,
+				opacity: 0.7, display: g_workObj.stepZoneDisp,
+			}, g_cssObj.main_objStepShadow)
+		);
+	}
+
+	appearStepZone(_j, C_DIS_NONE);
+
+	// ステップゾーン
+	multiAppend(stepRoot,
+
+		// 本体
+		createColorObject2(`step${_j}`, {
+			rotate: g_workObj.stepRtn[_j], styleName: `Step`, display: g_workObj.stepZoneDisp,
+		}, g_cssObj.main_stepDefault),
+
+		// 空押し
+		createColorObject2(`stepDiv${_j}`, {
+			rotate: g_workObj.stepRtn[_j], styleName: `Step`, display: C_DIS_NONE,
+		}, g_cssObj.main_stepKeyDown),
+
+		// ヒット時モーション
+		createColorObject2(`stepHit${_j}`, Object.assign(g_lblPosObj.stepHit, {
+			rotate: g_workObj.stepHitRtn[_j], styleName: `StepHit`, opacity: 0,
+		}), g_cssObj.main_stepDefault),
+
+	);
+
+	// フリーズアローヒット部分
+	const frzHit = createEmptySprite(frzHitSpriteJ, `frzHit${_j}`, {
+		x: g_workObj.stepX[_j], y: C_STEP_Y + g_posObj.reverseStepY * (g_workObj.dividePos[_j] % 2),
+		w: C_ARW_WIDTH, h: C_ARW_WIDTH, opacity: 0,
+	});
+	if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
+		multiAppend(frzHit,
+			createColorObject2(`frzHitShadow${_j}`, {
+				rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+			}, g_cssObj.main_objShadow),
+			createColorObject2(`frzHitTop${_j}`, {
+				background: g_workObj.frzHitColors[_j], rotate: g_workObj.arrowRtn[_j],
+			})
+		);
+	} else {
+		frzHit.appendChild(
+			createColorObject2(`frzHitTop${_j}`, Object.assign(g_lblPosObj.frzHitTop, {
+				rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+			}), g_cssObj.main_frzHitTop)
+		);
+	}
+};
+
+/**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
  * @param {number} _num 
  */
@@ -11376,17 +11401,17 @@ const appearKeyTypes = (_j, _targets, _alphas = fillArray(_targets.length, 1)) =
  */
 const changeReturn = (_rad, _axis) => {
 	g_workObj.frzReturnFlg = true;
-	let _transform = g_workObj.transform;
-	_transform += ` rotate${_axis[0]}(${_rad}deg)`;
+	let _transform = `rotate${_axis[0]}(${_rad}deg)`;
 	if (_axis[1] !== undefined) {
 		_transform += ` rotate${_axis[1]}(${_rad}deg)`;
 	}
 	if (document.getElementById(`mainSprite`) !== null) {
-		mainSprite.style.transform = _transform;
+		addTransform(`mainSprite`, `frzReturn`, _transform);
 
 		if (_rad < 360 && g_workObj.frzReturnFlg) {
 			setTimeout(() => changeReturn(_rad + 4, _axis), 20);
 		} else {
+			addTransform(`mainSprite`, `frzReturn`, ``);
 			g_workObj.frzReturnFlg = false;
 		}
 	}
@@ -11453,8 +11478,9 @@ const changeCssMotions = (_header, _name, _frameNum) => {
 const changeScrollArrowDirs = (_frameNum) =>
 	g_workObj.mkScrollchArrow[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
-		const baseLayer = Math.floor(g_workObj.dividePos[targetj] / 2) * 2;
-		g_workObj.dividePos[targetj] = baseLayer + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
+		const baseLayer = g_workObj.mkScrollchArrowLayer[_frameNum][j] === -1 ?
+			Math.floor(g_workObj.dividePosDefault[targetj] / 2) : g_workObj.mkScrollchArrowLayer[_frameNum][j];
+		g_workObj.dividePos[targetj] = baseLayer * 2 + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
 	});
 
 /**
@@ -11464,9 +11490,21 @@ const changeScrollArrowDirs = (_frameNum) =>
 const changeStepY = (_frameNum) =>
 	g_workObj.mkScrollchStep[_frameNum]?.forEach((targetj, j) => {
 		const dividePos = (g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchStepDir[_frameNum][j] === 1 ? 0 : 1);
-		const baseY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
-		$id(`stepRoot${targetj}`).top = wUnit(baseY);
-		$id(`frzHit${targetj}`).top = wUnit(baseY);
+
+		// 移動元のステップゾーンの不透明度、表示・非表示を退避
+		const _stepOpacity = $id(`stepRoot${targetj}`).opacity;
+		const _stepDisplay = $id(`stepRoot${targetj}`).display;
+
+		// 移動元のステップゾーンを消去
+		document.getElementById(`stepRoot${targetj}`).remove();
+		document.getElementById(`frzHit${targetj}`).remove();
+
+		// レイヤーを変更しステップゾーンを再生成。移動元の不透明度、表示・非表示を反映
+		const baseLayer = g_workObj.mkScrollchStepLayer[_frameNum][j] === -1 ?
+			Math.floor(g_workObj.dividePosDefault[targetj] / 2) : g_workObj.mkScrollchStepLayer[_frameNum][j];
+		g_workObj.dividePos[targetj] = baseLayer * 2 + dividePos;
+		makeStepZone(targetj, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`);
+		appearStepZone(targetj, _stepDisplay, _stepOpacity);
 	});
 
 /**
