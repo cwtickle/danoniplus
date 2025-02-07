@@ -9977,22 +9977,6 @@ const mainInit = () => {
 			g_keyObj[`div${keyCtrlPtn}`] < g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length);
 	g_workObj.stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_workObj.flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
 
-	// Hidden+, Sudden+用のライン、パーセント表示
-	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
-	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj =>
-		mainSprite.appendChild(createColorObject2(obj, g_lblPosObj.filterBar, filterCss)));
-	borderBar0.style.top = wUnit(g_posObj.stepDiffY + g_stateObj.hitPosition);
-	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight - g_stateObj.hitPosition);
-
-	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
-		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
-		if (g_stateObj.d_filterline === C_FLG_ON) {
-			$id(`filterView`).opacity = g_stateObj.opacity / 100;
-			$id(`filterBar0`).opacity = g_stateObj.opacity / 100;
-			$id(`filterBar1`).opacity = g_stateObj.opacity / 100;
-		}
-	}
-
 	// mainSprite配下に層別のスプライトを作成し、ステップゾーン・矢印本体・フリーズアローヒット部分に分ける
 	const mainSpriteN = [], stepSprite = [], arrowSprite = [], frzHitSprite = [];
 	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
@@ -10004,6 +9988,29 @@ const mainInit = () => {
 		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
 		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
 		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, mainCommonPos));
+	}
+
+	// Hidden+, Sudden+用のライン、パーセント表示
+	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
+	const doubleFilterFlg = ![`Default`, `Halfway`].includes(g_stateObj.stepArea);
+	for (let j = 0; j < g_stateObj.layerNum; j++) {
+		document.getElementById(`mainSprite${j}`).appendChild(createColorObject2(`filterBar${j}`, g_lblPosObj.filterBar, filterCss));
+		if (doubleFilterFlg) {
+			document.getElementById(`mainSprite${j % 2 == 0 ? j + 1 : j - 1}`).appendChild(createColorObject2(`filterBar${j}_HS`, g_lblPosObj.filterBar, filterCss));
+		}
+	}
+
+	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
+		if (g_stateObj.d_filterline === C_FLG_ON) {
+			$id(`filterView`).opacity = g_stateObj.opacity / 100;
+			for (let j = 0; j < g_stateObj.layerNum; j++) {
+				$id(`filterBar${j}`).opacity = g_stateObj.opacity / 100;
+				if (doubleFilterFlg) {
+					$id(`filterBar${j}_HS`).opacity = g_stateObj.opacity / 100;
+				}
+			}
+		}
 	}
 
 	// ステップゾーン、フリーズアローヒット部分の生成
@@ -11331,16 +11338,24 @@ const changeAppearanceFilter = (_num = 10) => {
 	const numPlus = (g_stateObj.appearance === `Hid&Sud+` ? _num : 0);
 	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
+	const appearPers = [_num, MAX_FILTER_POS - _num];
 
 	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
+
+		$id(`filterBar${topNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS);
+		$id(`filterBar${bottomNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS);
+
+		if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
+			$id(`filterBar${bottomNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS);
+			$id(`filterBar${topNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS);
+		}
 	}
-	$id(`filterBar0`).top = wUnit(parseFloat($id(`arrowSprite${topNum}`).top) + g_posObj.arrowHeight * _num / MAX_FILTER_POS);
-	$id(`filterBar1`).top = wUnit(parseFloat($id(`arrowSprite${bottomNum}`).top) + g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS);
+
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		$id(`filterView`).top =
-			$id(`filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).top;
+			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]) % 2}`).top;
 		filterView.textContent = `${_num}%`;
 
 		if (g_stateObj.appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
