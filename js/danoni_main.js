@@ -9814,6 +9814,9 @@ const getArrowSettings = () => {
 	g_workObj.drunkXFlg = false;
 	g_workObj.drunkYFlg = false;
 
+	// AppearanceFilterの可視範囲設定
+	g_workObj.aprFilterCnt = 0;
+
 	if (g_stateObj.dataSaveFlg) {
 		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
 		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
@@ -9977,33 +9980,40 @@ const mainInit = () => {
 			g_keyObj[`div${keyCtrlPtn}`] < g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length);
 	g_workObj.stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_workObj.flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
 
+	// mainSprite配下に層別のスプライトを作成し、ステップゾーン・矢印本体・フリーズアローヒット部分に分ける
+	const mainSpriteN = [], stepSprite = [], arrowSprite = [], frzHitSprite = [];
+	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
+
 	// Hidden+, Sudden+用のライン、パーセント表示
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
-	[`filterBar0`, `filterBar1`, `borderBar0`, `borderBar1`].forEach(obj =>
-		mainSprite.appendChild(createColorObject2(obj, g_lblPosObj.filterBar, filterCss)));
-	borderBar0.style.top = wUnit(g_posObj.stepDiffY + g_stateObj.hitPosition);
-	borderBar1.style.top = wUnit(g_posObj.stepDiffY + g_posObj.arrowHeight - g_stateObj.hitPosition);
+	const doubleFilterFlg = ![`Default`, `Halfway`].includes(g_stateObj.stepArea);
+
+	for (let j = 0; j < g_stateObj.layerNum; j++) {
+		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, mainCommonPos);
+		mainSpriteN.push(mainSpriteJ);
+		mainSpriteJ.appendChild(createColorObject2(`filterBar${j}`, g_lblPosObj.filterBar, filterCss));
+		if (doubleFilterFlg) {
+			mainSpriteJ.appendChild(createColorObject2(`filterBar${j % 2 == 0 ? j + 1 : j - 1}_HS`, g_lblPosObj.filterBar, filterCss));
+		}
+		addTransform(`mainSprite${j}`, `mainSprite${j}`,
+			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(j / 2) + (j + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
+
+		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
+		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
+		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, mainCommonPos));
+	}
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
 		if (g_stateObj.d_filterline === C_FLG_ON) {
 			$id(`filterView`).opacity = g_stateObj.opacity / 100;
-			$id(`filterBar0`).opacity = g_stateObj.opacity / 100;
-			$id(`filterBar1`).opacity = g_stateObj.opacity / 100;
+			for (let j = 0; j < g_stateObj.layerNum; j++) {
+				$id(`filterBar${j}`).opacity = g_stateObj.opacity / 100;
+				if (doubleFilterFlg) {
+					$id(`filterBar${j}_HS`).opacity = g_stateObj.opacity / 100;
+				}
+			}
 		}
-	}
-
-	// mainSprite配下に層別のスプライトを作成し、ステップゾーン・矢印本体・フリーズアローヒット部分に分ける
-	const mainSpriteN = [], stepSprite = [], arrowSprite = [], frzHitSprite = [];
-	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
-	for (let j = 0; j < g_stateObj.layerNum; j++) {
-		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, mainCommonPos);
-		mainSpriteN.push(mainSpriteJ);
-		addTransform(`mainSprite${j}`, `mainSprite${j}`,
-			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(j / 2) + (j + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
-		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
-		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
-		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, mainCommonPos));
 	}
 
 	// ステップゾーン、フリーズアローヒット部分の生成
@@ -10039,7 +10049,7 @@ const mainInit = () => {
 
 	// Appearanceのオプション適用時は一部描画を隠す
 	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
-		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance]);
+		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], true);
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
@@ -11319,8 +11329,9 @@ const makeStepZone = (_j, _keyCtrlPtn) => {
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
  * @param {number} _num 
+ * @param {boolean} _shiftFlg シフトキーを押したかどうかのフラグ
  */
-const changeAppearanceFilter = (_num = 10) => {
+const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
 	const MAX_FILTER_POS = 100;
 	const topNum = g_hidSudObj[g_stateObj.appearance];
 	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
@@ -11331,16 +11342,39 @@ const changeAppearanceFilter = (_num = 10) => {
 	const numPlus = (g_stateObj.appearance === `Hid&Sud+` ? _num : 0);
 	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
+	const appearPers = [_num, MAX_FILTER_POS - _num];
 
 	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
+
+		$id(`filterBar${topNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS);
+		$id(`filterBar${bottomNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS);
+
+		if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
+			$id(`filterBar${bottomNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS);
+			$id(`filterBar${topNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS);
+		}
+
+		// 階層が多い場合はShift+pgUp/pgDownで表示する階層グループを切り替え
+		if (_shiftFlg && g_stateObj.d_filterline === C_FLG_ON) {
+			[`${topNum + j}`, `${bottomNum + j}`].forEach(type => {
+				$id(`filterBar${type}`).display = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
+
+				if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
+					$id(`filterBar${type}_HS`).display = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
+				}
+			});
+		}
 	}
-	$id(`filterBar0`).top = wUnit(parseFloat($id(`arrowSprite${topNum}`).top) + g_posObj.arrowHeight * _num / MAX_FILTER_POS);
-	$id(`filterBar1`).top = wUnit(parseFloat($id(`arrowSprite${bottomNum}`).top) + g_posObj.arrowHeight * (MAX_FILTER_POS - _num) / MAX_FILTER_POS);
+
+	if (_shiftFlg) {
+		g_workObj.aprFilterCnt = nextPos(g_workObj.aprFilterCnt, 2, g_stateObj.layerNum);
+	}
+
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		$id(`filterView`).top =
-			$id(`filterBar${g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]}`).top;
+			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]) % 2}`).top;
 		filterView.textContent = `${_num}%`;
 
 		if (g_stateObj.appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
