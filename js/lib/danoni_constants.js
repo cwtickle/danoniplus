@@ -1259,21 +1259,26 @@ const g_playWindowFunc = {
     'R-SideScroll': () => g_changeStairs(90),
 };
 
+const g_arrowGroupSprite = [`stepSprite`, `arrowSprite`, `frzHitSprite`];
 const g_stepAreaFunc = {
     'Default': () => ``,
     'Halfway': () => {
-        for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addXY(`mainSprite${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
-        }
+        g_arrowGroupSprite.forEach(sprite => {
+            for (let j = 0; j < g_stateObj.layerNum; j++) {
+                addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+            }
+        });
     },
     'Mismatched': () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * -15}deg)`);
         }
         if (g_workObj.orgFlatFlg) {
-            for (let j = 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
-                addXY(`mainSprite${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
-            }
+            g_arrowGroupSprite.forEach(sprite => {
+                for (let j = 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
+                    addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                }
+            });
         }
     },
     'R-Mismatched': () => {
@@ -1281,15 +1286,19 @@ const g_stepAreaFunc = {
             addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * 15}deg)`);
         }
         if (g_workObj.orgFlatFlg) {
-            for (let j = 0; j < Math.min(g_stateObj.layerNum, 2); j++) {
-                addXY(`mainSprite${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
-            }
+            g_arrowGroupSprite.forEach(sprite => {
+                for (let j = 0; j < Math.min(g_stateObj.layerNum, 2); j++) {
+                    addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                }
+            });
         }
     },
     '2Step': () => {
-        for (let j = Math.min(g_stateObj.layerNum, 4) / 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
-            addXY(`mainSprite${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
-        }
+        g_arrowGroupSprite.forEach(sprite => {
+            for (let j = Math.min(g_stateObj.layerNum, 4) / 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
+                addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+            }
+        });
     },
     'X-Flower': () => {
         for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {
