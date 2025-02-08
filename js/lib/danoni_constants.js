@@ -1228,25 +1228,19 @@ const g_stepAreaFunc = {
         });
     },
     'Mismatched': () => {
-        [`mainSprite`].forEach(sprite => {
-            for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addTransform(`${sprite}${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * -15}deg)`);
-            }
-        });
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * -15}deg)`);
+        }
     },
     'R-Mismatched': () => {
-        [`mainSprite`].forEach(sprite => {
-            for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addTransform(`${sprite}${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * 15}deg)`);
-            }
-        });
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * 15}deg)`);
+        }
     },
     'X-Flower': () => {
-        [`mainSprite`].forEach(sprite => {
-            for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {
-                addTransform(`${sprite}${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j % 4 < 2 ? 1 : -1) * -15}deg)`);
-            }
-        });
+        for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j % 4 < 2 ? 1 : -1) * -15}deg)`);
+        }
     },
 };
 
