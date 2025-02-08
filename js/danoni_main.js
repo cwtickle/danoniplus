@@ -9983,24 +9983,24 @@ const mainInit = () => {
 	// mainSprite配下に層別のスプライトを作成し、ステップゾーン・矢印本体・フリーズアローヒット部分に分ける
 	const mainSpriteN = [], stepSprite = [], arrowSprite = [], frzHitSprite = [];
 	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
-	for (let j = 0; j < g_stateObj.layerNum; j++) {
-		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, mainCommonPos);
-		mainSpriteN.push(mainSpriteJ);
-		addTransform(`mainSprite${j}`, `mainSprite${j}`,
-			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(j / 2) + (j + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
-		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
-		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
-		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, mainCommonPos));
-	}
 
 	// Hidden+, Sudden+用のライン、パーセント表示
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
 	const doubleFilterFlg = ![`Default`, `Halfway`].includes(g_stateObj.stepArea);
+
 	for (let j = 0; j < g_stateObj.layerNum; j++) {
-		document.getElementById(`mainSprite${j}`).appendChild(createColorObject2(`filterBar${j}`, g_lblPosObj.filterBar, filterCss));
+		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, mainCommonPos);
+		mainSpriteN.push(mainSpriteJ);
+		mainSpriteJ.appendChild(createColorObject2(`filterBar${j}`, g_lblPosObj.filterBar, filterCss));
 		if (doubleFilterFlg) {
-			document.getElementById(`mainSprite${j % 2 == 0 ? j + 1 : j - 1}`).appendChild(createColorObject2(`filterBar${j}_HS`, g_lblPosObj.filterBar, filterCss));
+			mainSpriteJ.appendChild(createColorObject2(`filterBar${j % 2 == 0 ? j + 1 : j - 1}_HS`, g_lblPosObj.filterBar, filterCss));
 		}
+		addTransform(`mainSprite${j}`, `mainSprite${j}`,
+			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(j / 2) + (j + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
+
+		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
+		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
+		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, mainCommonPos));
 	}
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
