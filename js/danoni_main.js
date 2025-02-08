@@ -11329,6 +11329,7 @@ const makeStepZone = (_j, _keyCtrlPtn) => {
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
  * @param {number} _num 
+ * @param {boolean} _shiftFlg シフトキーを押したかどうかのフラグ
  */
 const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
 	const MAX_FILTER_POS = 100;
