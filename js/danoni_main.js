@@ -9699,11 +9699,11 @@ const getArrowSettings = () => {
 	if (g_stateObj.stepArea === `2Step`) {
 		for (let j = 0; j < keyNum; j++) {
 			if (g_workObj.orgFlatFlg && g_workObj.stepX[j] >= (g_headerObj.playingWidth - C_ARW_WIDTH) / 2) {
-				g_workObj.dividePos[j] += 1;
+				g_workObj.dividePos[j] = Math.floor(g_workObj.dividePos[j] / 2) * 2 + (g_workObj.dividePos[j] + 1) % 2;
 				g_workObj.scrollDir[j] *= -1;
 			}
-			if ((g_workObj.dividePos[j] + Number(g_stateObj.reverse === C_FLG_ON)) % 2 === 1) {
-				g_workObj.dividePos[j] = g_stateObj.layerNum + g_workObj.dividePos[j] - 1;
+			if (g_workObj.dividePos[j] % 2 === (Number(g_stateObj.reverse === C_FLG_ON) + 1) % 2) {
+				g_workObj.dividePos[j] = g_stateObj.layerNum + g_workObj.dividePos[j] + Number(g_stateObj.reverse === C_FLG_ON ? 1 : -1);
 				g_workObj.scrollDir[j] *= -1;
 			}
 		}
