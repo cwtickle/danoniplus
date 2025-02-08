@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/02/04 (v39.1.0)
+ * Revised : 2025/02/08 (v39.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1228,25 +1228,19 @@ const g_stepAreaFunc = {
         });
     },
     'Mismatched': () => {
-        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addTransform(`${sprite}${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * -15}deg)`);
-            }
-        });
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * -15}deg)`);
+        }
     },
     'R-Mismatched': () => {
-        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addTransform(`${sprite}${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * 15}deg)`);
-            }
-        });
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * 15}deg)`);
+        }
     },
     'X-Flower': () => {
-        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
-            for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {
-                addTransform(`${sprite}${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j % 4 < 2 ? 1 : -1) * -15}deg)`);
-            }
-        });
+        for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j % 4 < 2 ? 1 : -1) * -15}deg)`);
+        }
     },
 };
 
