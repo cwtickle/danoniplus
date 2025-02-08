@@ -9814,6 +9814,9 @@ const getArrowSettings = () => {
 	g_workObj.drunkXFlg = false;
 	g_workObj.drunkYFlg = false;
 
+	// AppearanceFilterの可視範囲設定
+	g_workObj.aprFilterCnt = 0;
+
 	if (g_stateObj.dataSaveFlg) {
 		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
 		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
@@ -10046,7 +10049,7 @@ const mainInit = () => {
 
 	// Appearanceのオプション適用時は一部描画を隠す
 	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
-		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance]);
+		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], true);
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
@@ -11327,7 +11330,7 @@ const makeStepZone = (_j, _keyCtrlPtn) => {
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
  * @param {number} _num 
  */
-const changeAppearanceFilter = (_num = 10) => {
+const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
 	const MAX_FILTER_POS = 100;
 	const topNum = g_hidSudObj[g_stateObj.appearance];
 	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
@@ -11351,6 +11354,21 @@ const changeAppearanceFilter = (_num = 10) => {
 			$id(`filterBar${bottomNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS);
 			$id(`filterBar${topNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS);
 		}
+
+		// 階層が多い場合はShift+pgUp/pgDownで表示する階層グループを切り替え
+		if (_shiftFlg && g_stateObj.d_filterline === C_FLG_ON) {
+			[`${topNum + j}`, `${bottomNum + j}`].forEach(type => {
+				$id(`filterBar${type}`).display = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
+
+				if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
+					$id(`filterBar${type}_HS`).display = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
+				}
+			});
+		}
+	}
+
+	if (_shiftFlg) {
+		g_workObj.aprFilterCnt = nextPos(g_workObj.aprFilterCnt, 2, g_stateObj.layerNum);
 	}
 
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
