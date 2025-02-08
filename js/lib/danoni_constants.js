@@ -1068,7 +1068,7 @@ const g_settings = {
     playWindows: [`Default`, `Stairs`, `R-Stairs`, `Slope`, `R-Slope`, `Distorted`, `R-Distorted`, `SideScroll`, `R-SideScroll`],
     playWindowNum: 0,
 
-    stepAreas: [`Default`, `Halfway`, `Mismatched`, `R-Mismatched`, `X-Flower`],
+    stepAreas: [`Default`, `Halfway`, `2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`],
     stepAreaNum: 0,
 
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
@@ -1110,9 +1110,10 @@ const g_moveSettingWindow = (_changePageFlg = true, _direction = 1) => {
 };
 
 /**
- * transform管理
+ * transform, 座標管理
  */
 const g_transforms = {};
+const g_posXYs = {};
 
 /**
  * idごとのtransformを追加・変更
@@ -1145,6 +1146,46 @@ const addTempTransform = (_id, _transform) => {
  */
 const resetTransform = () => {
     Object.keys(g_transforms).forEach(_id => g_transforms[_id] = {});
+};
+
+/**
+ * 座標計算
+ * @param {string} _id 
+ * @param {string} _typeId 
+ */
+const calcXY = (_id, _typeId) => {
+    const _posXs = [], _posYs = [];
+    Object.keys(g_posXYs[_id]).forEach(typeId => {
+        _posXs.push(g_posXYs[_id][typeId][0]);
+        _posYs.push(g_posXYs[_id][typeId][1]);
+    });
+    $id(_id).left = `${sumData(_posXs)}px`;
+    $id(_id).top = `${sumData(_posYs)}px`;
+};
+
+/**
+ * 座標加算処理
+ * @param {string} _id 
+ * @param {string} _typeId 
+ * @param {number} _x 
+ * @param {number} _y 
+ */
+const addXY = (_id, _typeId, _x = 0, _y = 0) => {
+    if (g_posXYs[_id] === undefined) {
+        g_posXYs[_id] = {};
+    }
+    g_posXYs[_id][_typeId] = [_x, _y];
+    calcXY(_id, _typeId);
+};
+
+/**
+ * 座標リセット処理
+ * @param {string} _id 
+ * @param {string} _typeId 
+ */
+const delXY = (_id, _typeId) => {
+    delete g_posXYs[_id][_typeId];
+    calcXY(_id, _typeId);
 };
 
 /**
@@ -1218,12 +1259,13 @@ const g_playWindowFunc = {
     'R-SideScroll': () => g_changeStairs(90),
 };
 
+const g_arrowGroupSprite = [`stepSprite`, `arrowSprite`, `frzHitSprite`];
 const g_stepAreaFunc = {
     'Default': () => ``,
     'Halfway': () => {
-        [`stepSprite`, `arrowSprite`, `frzHitSprite`].forEach(sprite => {
+        g_arrowGroupSprite.forEach(sprite => {
             for (let j = 0; j < g_stateObj.layerNum; j++) {
-                $id(`${sprite}${j}`).top = `${(j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2)}px`;
+                addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
             }
         });
     },
@@ -1231,11 +1273,32 @@ const g_stepAreaFunc = {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * -15}deg)`);
         }
+        if (g_workObj.orgFlatFlg) {
+            g_arrowGroupSprite.forEach(sprite => {
+                for (let j = 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
+                    addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                }
+            });
+        }
     },
     'R-Mismatched': () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * 15}deg)`);
         }
+        if (g_workObj.orgFlatFlg) {
+            g_arrowGroupSprite.forEach(sprite => {
+                for (let j = 0; j < Math.min(g_stateObj.layerNum, 2); j++) {
+                    addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                }
+            });
+        }
+    },
+    '2Step': () => {
+        g_arrowGroupSprite.forEach(sprite => {
+            for (let j = Math.min(g_stateObj.layerNum, 4) / 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
+                addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+            }
+        });
     },
     'X-Flower': () => {
         for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {

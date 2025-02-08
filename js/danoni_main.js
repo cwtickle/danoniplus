@@ -9624,6 +9624,7 @@ const getArrowSettings = () => {
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
+	g_stateObj.layerNum = 2;
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
 	g_workObj.keyGroupList = tkObj.keyGroupList;
@@ -9672,9 +9673,6 @@ const getArrowSettings = () => {
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
 		const baseLayer = g_keyObj[`layerGroup${keyCtrlPtn}`]?.[j] || 0;
 		g_workObj.dividePos[j] = baseLayer * 2 + ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
-		if (g_stateObj.stepArea === `X-Flower`) {
-			g_workObj.dividePos[j] = (g_workObj.stepX[j] < (g_headerObj.playingWidth - C_ARW_WIDTH) / 2 ? 0 : 1) * 2 + g_workObj.dividePos[j] % 2;
-		}
 		g_workObj.scrollDir[j] = (posj <= divideCnt ? 1 : -1) * scrollDirOptions[j] * (g_stateObj.reverse === C_FLG_OFF ? 1 : -1);
 
 		eachOrAll.forEach(type => {
@@ -9691,6 +9689,24 @@ const getArrowSettings = () => {
 			g_workObj[`frzNormalShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][0] || ``;
 			g_workObj[`frzHitShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][1] || ``;
 		});
+	}
+	g_workObj.orgFlatFlg = g_workObj.dividePos.every(v => v === g_workObj.dividePos[0]);
+	if (g_stateObj.stepArea === `X-Flower` || (g_stateObj.stepArea.includes(`Mismatched`) && g_workObj.orgFlatFlg)) {
+		for (let j = 0; j < keyNum; j++) {
+			g_workObj.dividePos[j] = (g_workObj.stepX[j] < (g_headerObj.playingWidth - C_ARW_WIDTH) / 2 ? 0 : 1) * 2 + g_workObj.dividePos[j] % 2;
+		}
+	}
+	if (g_stateObj.stepArea === `2Step`) {
+		for (let j = 0; j < keyNum; j++) {
+			if (g_workObj.orgFlatFlg && g_workObj.stepX[j] >= (g_headerObj.playingWidth - C_ARW_WIDTH) / 2) {
+				g_workObj.dividePos[j] = Math.floor(g_workObj.dividePos[j] / 2) * 2 + (g_workObj.dividePos[j] + 1) % 2;
+				g_workObj.scrollDir[j] *= -1;
+			}
+			if (g_workObj.dividePos[j] % 2 === (Number(g_stateObj.reverse === C_FLG_ON) + 1) % 2) {
+				g_workObj.dividePos[j] = g_stateObj.layerNum + g_workObj.dividePos[j] + Number(g_stateObj.reverse === C_FLG_ON ? 1 : -1);
+				g_workObj.scrollDir[j] *= -1;
+			}
+		}
 	}
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
 	g_workObj.dividePosDefault = g_workObj.dividePos.concat();
