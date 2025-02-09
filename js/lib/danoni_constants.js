@@ -1315,7 +1315,7 @@ const g_stepAreaFunc = {
     'Halfway': () => {
         g_arrowGroupSprite.forEach(sprite => {
             for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
             }
         });
     },
@@ -1326,7 +1326,7 @@ const g_stepAreaFunc = {
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
                 for (let j = 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
-                    addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                    addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
                 }
             });
         }
@@ -1338,7 +1338,7 @@ const g_stepAreaFunc = {
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
                 for (let j = 0; j < Math.min(g_stateObj.layerNum, 2); j++) {
-                    addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                    addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
                 }
             });
         }
@@ -1346,7 +1346,7 @@ const g_stepAreaFunc = {
     '2Step': () => {
         g_arrowGroupSprite.forEach(sprite => {
             for (let j = Math.min(g_stateObj.layerNum, 4) / 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
-                addXY(`${sprite}${j}`, `stepArea`, 0, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
             }
         });
     },
