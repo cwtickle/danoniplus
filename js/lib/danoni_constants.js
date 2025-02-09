@@ -1169,8 +1169,12 @@ const calcXY = (_id, _typeId) => {
  * @param {string} _typeId 
  * @param {number} _x 
  * @param {number} _y 
+ * @param {boolean} [_overwrite=false]
  */
-const addXY = (_id, _typeId, _x = 0, _y = 0) => {
+const addXY = (_id, _typeId, _x = 0, _y = 0, _overwrite = false) => {
+    if (_overwrite) {
+        delete g_posXYs?.[_id];
+    }
     if (g_posXYs[_id] === undefined) {
         g_posXYs[_id] = {};
     }
