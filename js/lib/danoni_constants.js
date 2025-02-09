@@ -1189,6 +1189,13 @@ const delXY = (_id, _typeId) => {
 };
 
 /**
+ * 座標位置情報の初期化
+ */
+const resetXY = () => {
+    Object.keys(g_posXYs).forEach(_id => delete g_posXYs[_id]);
+};
+
+/**
  * id, transformIdに合致するtransform情報の取得
  * @param {string} _id 
  * @param {string} _transformId 
