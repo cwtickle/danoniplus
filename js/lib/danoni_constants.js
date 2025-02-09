@@ -1148,6 +1148,76 @@ const resetTransform = () => {
 };
 
 /**
+ * id, transformIdに合致するtransform情報の取得
+ * @param {string} _id 
+ * @param {string} _transformId 
+ * @returns 
+ */
+const getTransform = (_id, _transformId) => {
+    return g_transforms[_id]?.[_transformId] || ``;
+};
+
+/**
+ * 座標加算処理 (X座標)
+ * @param {string} _id 
+ * @param {string} _typeId 
+ * @param {number} [_x=0] 
+ * @param {boolean} [_overwrite=false] 
+ */
+const addX = (_id, _typeId, _x = 0, _overwrite = false) => {
+    if (_overwrite) {
+        delete g_posXs?.[_id];
+    }
+    if (g_posXs[_id] === undefined) {
+        g_posXs[_id] = new Map();
+    }
+    if (g_posXs[_id].get(_typeId) !== _x) {
+        g_posXs[_id].set(_typeId, _x);
+        $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
+    }
+};
+
+/**
+ * 座標加算処理 (Y座標)
+ * @param {string} _id 
+ * @param {string} _typeId 
+ * @param {number} [_y=0] 
+ * @param {boolean} [_overwrite=false] 
+ */
+const addY = (_id, _typeId, _y = 0, _overwrite = false) => {
+    if (_overwrite) {
+        delete g_posYs?.[_id];
+    }
+    if (g_posYs[_id] === undefined) {
+        g_posYs[_id] = new Map();
+    }
+    if (g_posYs[_id].get(_typeId) !== _y) {
+        g_posYs[_id].set(_typeId, _y);
+        $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
+    }
+};
+
+/**
+ * 座標リセット処理（X座標）
+ * @param {string} _id 
+ * @param {string} _typeId 
+ */
+const delX = (_id, _typeId) => {
+    g_posXs[_id]?.delete(_typeId);
+    $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
+};
+
+/**
+ * 座標リセット処理（Y座標）
+ * @param {string} _id 
+ * @param {string} _typeId 
+ */
+const delY = (_id, _typeId) => {
+    g_posYs[_id]?.delete(_typeId);
+    $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
+};
+
+/**
  * 座標加算処理
  * @param {string} _id 
  * @param {string} _typeId 
@@ -1156,22 +1226,8 @@ const resetTransform = () => {
  * @param {boolean} [_overwrite=false]
  */
 const addXY = (_id, _typeId, _x = 0, _y = 0, _overwrite = false) => {
-    if (_overwrite) {
-        delete g_posXs?.[_id];
-        delete g_posYs?.[_id];
-    }
-    if (g_posXs[_id] === undefined) {
-        g_posXs[_id] = new Map();
-        g_posYs[_id] = new Map();
-    }
-    g_posXs[_id].set(_typeId, _x);
-    g_posYs[_id].set(_typeId, _y);
-    if (_x !== 0) {
-        $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
-    }
-    if (_y !== 0) {
-        $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
-    }
+    addX(_id, _typeId, _x, _overwrite);
+    addY(_id, _typeId, _y, _overwrite);
 };
 
 /**
@@ -1180,10 +1236,8 @@ const addXY = (_id, _typeId, _x = 0, _y = 0, _overwrite = false) => {
  * @param {string} _typeId 
  */
 const delXY = (_id, _typeId) => {
-    g_posXs[_id]?.delete(_typeId);
-    g_posYs[_id]?.delete(_typeId);
-    $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
-    $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
+    delX(_id, _typeId);
+    delY(_id, _typeId);
 };
 
 /**
@@ -1192,16 +1246,6 @@ const delXY = (_id, _typeId) => {
 const resetXY = () => {
     Object.keys(g_posXs).forEach(_id => delete g_posXs[_id]);
     Object.keys(g_posYs).forEach(_id => delete g_posYs[_id]);
-};
-
-/**
- * id, transformIdに合致するtransform情報の取得
- * @param {string} _id 
- * @param {string} _transformId 
- * @returns 
- */
-const getTransform = (_id, _transformId) => {
-    return g_transforms[_id]?.[_transformId] || ``;
 };
 
 /**
