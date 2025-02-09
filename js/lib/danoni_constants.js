@@ -1166,8 +1166,12 @@ const addXY = (_id, _typeId, _x = 0, _y = 0, _overwrite = false) => {
     }
     g_posXs[_id].set(_typeId, _x);
     g_posYs[_id].set(_typeId, _y);
-    $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
-    $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
+    if (_x !== 0) {
+        $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
+    }
+    if (_y !== 0) {
+        $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
+    }
 };
 
 /**
