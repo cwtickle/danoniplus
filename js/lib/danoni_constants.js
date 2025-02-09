@@ -1113,7 +1113,8 @@ const g_moveSettingWindow = (_changePageFlg = true, _direction = 1) => {
  * transform, 座標管理
  */
 const g_transforms = {};
-const g_posXYs = {};
+const g_posXs = {};
+const g_posYs = {};
 
 /**
  * idごとのtransformを追加・変更
@@ -1124,12 +1125,10 @@ const g_posXYs = {};
  */
 const addTransform = (_id, _transformId, _transform) => {
     if (g_transforms[_id] === undefined) {
-        g_transforms[_id] = {};
+        g_transforms[_id] = new Map();
     }
-    g_transforms[_id][_transformId] = _transform;
-    const _transforms = [];
-    Object.keys(g_transforms[_id]).forEach(transformId => _transforms.push(g_transforms[_id][transformId]));
-    $id(_id).transform = _transforms.join(` `);
+    g_transforms[_id].set(_transformId, _transform);
+    $id(_id).transform = Array.from(g_transforms[_id].values()).join(` `);
 };
 
 /**
@@ -1145,22 +1144,7 @@ const addTempTransform = (_id, _transform) => {
  * transformの初期化
  */
 const resetTransform = () => {
-    Object.keys(g_transforms).forEach(_id => g_transforms[_id] = {});
-};
-
-/**
- * 座標計算
- * @param {string} _id 
- * @param {string} _typeId 
- */
-const calcXY = (_id, _typeId) => {
-    const _posXs = [], _posYs = [];
-    Object.keys(g_posXYs[_id]).forEach(typeId => {
-        _posXs.push(g_posXYs[_id][typeId][0]);
-        _posYs.push(g_posXYs[_id][typeId][1]);
-    });
-    $id(_id).left = `${sumData(_posXs)}px`;
-    $id(_id).top = `${sumData(_posYs)}px`;
+    Object.keys(g_transforms).forEach(_id => delete g_transforms[_id]);
 };
 
 /**
@@ -1173,13 +1157,21 @@ const calcXY = (_id, _typeId) => {
  */
 const addXY = (_id, _typeId, _x = 0, _y = 0, _overwrite = false) => {
     if (_overwrite) {
-        delete g_posXYs?.[_id];
+        delete g_posXs?.[_id];
+        delete g_posYs?.[_id];
     }
-    if (g_posXYs[_id] === undefined) {
-        g_posXYs[_id] = {};
+    if (g_posXs[_id] === undefined) {
+        g_posXs[_id] = new Map();
+        g_posYs[_id] = new Map();
     }
-    g_posXYs[_id][_typeId] = [_x, _y];
-    calcXY(_id, _typeId);
+    g_posXs[_id].set(_typeId, _x);
+    g_posYs[_id].set(_typeId, _y);
+    if (_x !== 0) {
+        $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
+    }
+    if (_y !== 0) {
+        $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
+    }
 };
 
 /**
@@ -1188,15 +1180,18 @@ const addXY = (_id, _typeId, _x = 0, _y = 0, _overwrite = false) => {
  * @param {string} _typeId 
  */
 const delXY = (_id, _typeId) => {
-    delete g_posXYs[_id][_typeId];
-    calcXY(_id, _typeId);
+    g_posXs[_id]?.delete(_typeId);
+    g_posYs[_id]?.delete(_typeId);
+    $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
+    $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
 };
 
 /**
  * 座標位置情報の初期化
  */
 const resetXY = () => {
-    Object.keys(g_posXYs).forEach(_id => delete g_posXYs[_id]);
+    Object.keys(g_posXs).forEach(_id => delete g_posXs[_id]);
+    Object.keys(g_posYs).forEach(_id => delete g_posYs[_id]);
 };
 
 /**
