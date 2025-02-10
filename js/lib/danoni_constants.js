@@ -1253,43 +1253,43 @@ const resetXY = () => {
  * @param {number} keyNum
  * @param {array} shuffleGroup
  */
-const g_shuffleFunc = {
-    'OFF': () => true,
-    'Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup),
-    'X-Mirror': (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup, true),
-    'Turning': (keyNum, shuffleGroup) => applyTurning(keyNum, shuffleGroup),
-    'Random': (keyNum, shuffleGroup) => applyRandom(keyNum, shuffleGroup),
-    'Random+': keyNum => applyRandom(keyNum, [[...Array(keyNum).keys()]]),
-    'S-Random': (keyNum, shuffleGroup) => {
+const g_shuffleFunc = new Map([
+    ['OFF', () => true],
+    ['Mirror', (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup)],
+    ['X-Mirror', (keyNum, shuffleGroup) => applyMirror(keyNum, shuffleGroup, true)],
+    ['Turning', (keyNum, shuffleGroup) => applyTurning(keyNum, shuffleGroup)],
+    ['Random', (keyNum, shuffleGroup) => applyRandom(keyNum, shuffleGroup)],
+    ['Random+', keyNum => applyRandom(keyNum, [[...Array(keyNum).keys()]])],
+    ['S-Random', (keyNum, shuffleGroup) => {
         applySRandom(keyNum, shuffleGroup, `arrow`, `frz`);
         applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
-    },
-    'S-Random+': keyNum => {
+    }],
+    ['S-Random+', keyNum => {
         applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
         applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
-    },
-    'Scatter': (keyNum, shuffleGroup) => {
+    }],
+    ['Scatter', (keyNum, shuffleGroup) => {
         applySRandom(keyNum, shuffleGroup, `arrow`, `frz`);
         applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
-    },
-    'Scatter+': keyNum => {
+    }],
+    ['Scatter+', keyNum => {
         applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
         applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
-    },
-};
+    }],
+]);
 
 /**
  * モーション適用関数
  * @param {array} frms フレーム別の速度設定用配列。配列の15がステップゾーン上、0～14は矢印の枠外管理用
  */
-const g_motionFunc = {
-    'OFF': _frms => _frms,
-    'Boost': _frms => getBoostTrace(_frms, 3),
-    'Hi-Boost': _frms => getBoostTrace(_frms, g_stateObj.speed * 2),
-    'Brake': _frms => getBrakeTrace(_frms),
-    'Compress': _frms => getBoostTrace(_frms, g_stateObj.speed * 5 / 8, -1),
-    'Fountain': _frms => getFountainTrace(_frms, g_stateObj.speed * 2),
-};
+const g_motionFunc = new Map([
+    ['OFF', _frms => _frms],
+    ['Boost', _frms => getBoostTrace(_frms, 3)],
+    ['Hi-Boost', _frms => getBoostTrace(_frms, g_stateObj.speed * 2)],
+    ['Brake', _frms => getBrakeTrace(_frms)],
+    ['Compress', _frms => getBoostTrace(_frms, g_stateObj.speed * 5 / 8, -1)],
+    ['Fountain', _frms => getFountainTrace(_frms, g_stateObj.speed * 2)],
+]);
 
 /**
  * PlayWindow適用関数
@@ -1297,109 +1297,131 @@ const g_motionFunc = {
 const g_changeStairs = (_rad) => `rotate(${_rad}deg)`;
 const g_changeSkew = (_rad) => `Skew(${_rad}deg, ${_rad}deg) scaleY(0.9)`;
 
-const g_playWindowFunc = {
-    'Default': () => ``,
-    'Stairs': () => g_changeStairs(-8),
-    'R-Stairs': () => g_changeStairs(8),
-    'Slope': () => g_changeStairs(-45),
-    'R-Slope': () => g_changeStairs(45),
-    'Distorted': () => g_changeSkew(-15),
-    'R-Distorted': () => g_changeSkew(15),
-    'SideScroll': () => g_changeStairs(-90),
-    'R-SideScroll': () => g_changeStairs(90),
-};
+const g_playWindowFunc = new Map([
+    ['Default', () => ``],
+    ['Stairs', () => g_changeStairs(-8)],
+    ['R-Stairs', () => g_changeStairs(8)],
+    ['Slope', () => g_changeStairs(-45)],
+    ['R-Slope', () => g_changeStairs(45)],
+    ['Distorted', () => g_changeSkew(-15)],
+    ['R-Distorted', () => g_changeSkew(15)],
+    ['SideScroll', () => g_changeStairs(-90)],
+    ['R-SideScroll', () => g_changeStairs(90)],
+]);
 
 const g_arrowGroupSprite = [`stepSprite`, `arrowSprite`, `frzHitSprite`];
-const g_stepAreaFunc = {
-    'Default': () => ``,
-    'Halfway': () => {
+const halfwayOffset = _j => (_j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2);
+const g_stepAreaFunc = new Map([
+    ['Default', () => ``],
+    ['Halfway', () => {
         g_arrowGroupSprite.forEach(sprite => {
             for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
             }
         });
-    },
-    'Mismatched': () => {
+    }],
+    ['Mismatched', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * -15}deg)`);
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
                 for (let j = 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
-                    addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                    addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
                 }
             });
         }
-    },
-    'R-Mismatched': () => {
+    }],
+    ['R-Mismatched', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * 15}deg)`);
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
                 for (let j = 0; j < Math.min(g_stateObj.layerNum, 2); j++) {
-                    addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                    addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
                 }
             });
         }
-    },
-    '2Step': () => {
+    }],
+    ['2Step', () => {
         g_arrowGroupSprite.forEach(sprite => {
             for (let j = Math.min(g_stateObj.layerNum, 4) / 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
-                addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
             }
         });
-    },
-    'X-Flower': () => {
+    }],
+    ['X-Flower', () => {
         for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {
             addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j % 4 < 2 ? 1 : -1) * -15}deg)`);
         }
-    },
-};
+    }],
+]);
 
 /**
  * Shaking適用関数
  */
-const g_shakingFunc = {
-    'OFF': () => true,
-    'Horizontal': () => $id(`mainSprite`).left = `${(Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1}px`,
-    'Vertical': () => $id(`mainSprite`).top = `${(Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2}px`,
-    'Drunk': () => {
-        if (parseFloat($id(`mainSprite`).left) === 0 && parseFloat($id(`mainSprite`).top) === 0) {
-            g_workObj.drunkXFlg = [true, false][Math.floor(Math.random() * 2)];
-            g_workObj.drunkYFlg = [true, false][Math.floor(Math.random() * 2)];
+const g_shakingFunc = new Map([
+    ['OFF', () => true],
+    ['Horizontal', () => addX(`mainSprite`, `shaking`, (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1)],
+    ['Vertical', () => addY(`mainSprite`, `shaking`, (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2)],
+    ['Drunk', () => {
+        if (g_posXs.mainSprite.get(`shaking`) === 0 && g_posYs.mainSprite.get(`shaking`) === 0) {
+            g_workObj.drunkXFlg = Math.random() < 0.5;
+            g_workObj.drunkYFlg = Math.random() < 0.5;
         }
         if (g_workObj.drunkXFlg) {
-            $id(`mainSprite`).left = `${(Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1}px`;
-            $id(`infoSprite`).left = $id(`mainSprite`).left;
-            $id(`judgeSprite`).left = $id(`mainSprite`).left;
+            const deltaX = (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1;
+            addX(`mainSprite`, `shaking`, deltaX);
+            addX(`infoSprite`, `shaking`, deltaX);
+            addX(`judgeSprite`, `shaking`, deltaX);
         }
         if (g_workObj.drunkYFlg) {
-            $id(`mainSprite`).top = `${(Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2}px`;
-            $id(`infoSprite`).top = $id(`mainSprite`).top;
-            $id(`judgeSprite`).top = $id(`mainSprite`).top;
+            const deltaY = (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2;
+            addY(`mainSprite`, `shaking`, deltaY);
+            addY(`infoSprite`, `shaking`, deltaY);
+            addY(`judgeSprite`, `shaking`, deltaY);
         }
-    },
+    }],
+]);
+
+/**
+ * ランダムな軸を返す補助関数
+ * @returns 軸
+ */
+const g_getRandomAxis = () => {
+    const axes = [`X`, `Y`, `Z`];
+    return axes[Math.floor(Math.random() * axes.length)];
+};
+
+/**
+ * 最初に選んだ軸を除く、次の軸を返す補助関数
+ * @param {string} _primaryAxis 
+ * @returns 軸
+ */
+const g_getSecondaryAxis = (_primaryAxis) => {
+    const remainingAxes = [`X`, `Y`, `Z`, undefined].filter(val => val !== _primaryAxis);
+    return remainingAxes[Math.floor(Math.random() * remainingAxes.length)];
 };
 
 /**
  * FrzReturn適用関数
  */
-const g_frzReturnFunc = {
-    'OFF': () => true,
-    'X-Axis': () => [`X`],
-    'Y-Axis': () => [`Y`],
-    'Z-Axis': () => [`Z`],
-    'Random': () => [`X`, `Y`, `Z`][Math.floor(Math.random() * 3)],
-    'XY-Axis': () => [`X`, `Y`],
-    'XZ-Axis': () => [`X`, `Z`],
-    'YZ-Axis': () => [`Y`, `Z`],
-    'Random+': () => {
-        const axis1 = [`X`, `Y`, `Z`][Math.floor(Math.random() * 3)];
-        const axis2 = [`X`, `Y`, `Z`, undefined].filter(val => val !== axis1)[Math.floor(Math.random() * 3)];
+const g_frzReturnFunc = new Map([
+    ['OFF', () => true],
+    ['X-Axis', () => [`X`]],
+    ['Y-Axis', () => [`Y`]],
+    ['Z-Axis', () => [`Z`]],
+    ['Random', () => g_getRandomAxis()],
+    ['XY-Axis', () => [`X`, `Y`]],
+    ['XZ-Axis', () => [`X`, `Z`]],
+    ['YZ-Axis', () => [`Y`, `Z`]],
+    ['Random+', () => {
+        const axis1 = g_getRandomAxis();
+        const axis2 = g_getSecondaryAxis(axis1);
         return [axis1, axis2];
-    },
-};
+    }],
+]);
 
 /**
  * Effect適用関数
@@ -1419,15 +1441,15 @@ const g_setEffect = (_arrowEffect, _frzEffect = ``, _frzArrowEffect = _arrowEffe
         }
     }
 };
-const g_effectFunc = {
-    'OFF': () => true,
-    'Dizzy': () => g_setEffect(`effects-dizzy`),
-    'Spin': () => g_setEffect(`effects-spin`),
-    'Wave': () => g_setEffect(`effects-wave`, `effects-wave`),
-    'Storm': () => g_setEffect(`effects-storm`, `effects-storm`, ``),
-    'Blinking': () => g_setEffect(`effects-blinking`, `effects-blinking`, ``),
-    'Squids': () => g_setEffect(`effects-squids-arrow`, `effects-squids-frz`),
-};
+const g_effectFunc = new Map([
+    ['OFF', () => true],
+    ['Dizzy', () => g_setEffect(`effects-dizzy`)],
+    ['Spin', () => g_setEffect(`effects-spin`)],
+    ['Wave', () => g_setEffect(`effects-wave`, `effects-wave`)],
+    ['Storm', () => g_setEffect(`effects-storm`, `effects-storm`, ``)],
+    ['Blinking', () => g_setEffect(`effects-blinking`, `effects-blinking`, ``)],
+    ['Squids', () => g_setEffect(`effects-squids-arrow`, `effects-squids-frz`)],
+]);
 
 const g_keycons = {
     configTypes: [`Main`, `Replaced`, `ALL`],
@@ -1474,12 +1496,12 @@ let g_canDisabledSettings = [`motion`, `scroll`, `reverse`, `shuffle`, `autoPlay
     `excessive`, `appearance`, `playWindow`, `stepArea`, `frzReturn`, `shaking`, `effect`, `camoufrage`,
     `swapping`, `judgRange`, `autoRetry`];
 
-const g_hidSudFunc = {
-    filterPos: _filterPos => `${_filterPos}${g_lblNameObj.percent}`,
-    range: () => `${Math.round(g_posObj.arrowHeight - g_posObj.stepY)}px`,
-    hidden: _filterPos => `${Math.min(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100), g_posObj.arrowHeight - g_posObj.stepY)}`,
-    sudden: _filterPos => `${Math.max(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100) - g_posObj.stepY, 0)}`,
-};
+const g_hidSudFunc = new Map([
+    ['filterPos', _filterPos => `${_filterPos}${g_lblNameObj.percent}`],
+    ['range', () => `${Math.round(g_posObj.arrowHeight - g_posObj.stepY)}px`],
+    ['hidden', _filterPos => `${Math.min(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100), g_posObj.arrowHeight - g_posObj.stepY)}`],
+    ['sudden', _filterPos => `${Math.max(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100) - g_posObj.stepY, 0)}`],
+]);
 
 const g_hidSudObj = {
     filterPos: 10,
@@ -1513,12 +1535,12 @@ const g_hidSudObj = {
     },
     distH: {
         'Visible': () => ``,
-        'Hidden': () => `${g_hidSudFunc.filterPos(50)} (${g_hidSudFunc.hidden(50)} / ${g_hidSudFunc.range()})`,
-        'Hidden+': (_filterPos) => `${g_hidSudFunc.filterPos(_filterPos)} (${g_hidSudFunc.hidden(_filterPos)} / ${g_hidSudFunc.range()})`,
-        'Sudden': () => `${g_hidSudFunc.filterPos(40)} (${g_hidSudFunc.sudden(40)} / ${g_hidSudFunc.range()})`,
-        'Sudden+': (_filterPos) => `${g_hidSudFunc.filterPos(_filterPos)} (${g_hidSudFunc.sudden(_filterPos)} / ${g_hidSudFunc.range()})`,
-        'Hid&Sud+': (_filterPos) => `${g_hidSudFunc.filterPos(_filterPos)} (${Math.max(g_hidSudFunc.sudden(_filterPos)
-            - (g_posObj.arrowHeight - g_posObj.stepY - g_hidSudFunc.hidden(_filterPos)), 0)} / ${g_hidSudFunc.range()})`,
+        'Hidden': () => `${g_hidSudFunc.get(`filterPos`)(50)} (${g_hidSudFunc.get(`hidden`)(50)} / ${g_hidSudFunc.get(`range`)()})`,
+        'Hidden+': (_filterPos) => `${g_hidSudFunc.get(`filterPos`)(_filterPos)} (${g_hidSudFunc.get(`hidden`)(_filterPos)} / ${g_hidSudFunc.get(`range`)()})`,
+        'Sudden': () => `${g_hidSudFunc.get(`filterPos`)(40)} (${g_hidSudFunc.get(`sudden`)(40)} / ${g_hidSudFunc.get(`range`)()})`,
+        'Sudden+': (_filterPos) => `${g_hidSudFunc.get(`filterPos`)(_filterPos)} (${g_hidSudFunc.get(`sudden`)(_filterPos)} / ${g_hidSudFunc.get(`range`)()})`,
+        'Hid&Sud+': (_filterPos) => `${g_hidSudFunc.get(`filterPos`)(_filterPos)} (${Math.max(g_hidSudFunc.get(`sudden`)(_filterPos)
+            - (g_posObj.arrowHeight - g_posObj.stepY - g_hidSudFunc.get(`hidden`)(_filterPos)), 0)} / ${g_hidSudFunc.get(`range`)()})`,
     },
 };
 
