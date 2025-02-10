@@ -11485,10 +11485,14 @@ const changeReturn = (_rad, _axis) => {
 
 /**
  * AutoRetryの設定
- * @param {number} _retryNum AutoRetryの設定位置（g_settings.autoRetryNum）
+ * @param {string} _retryCondition リトライ基準となるAutoRetry名
  */
-const quickRetry = (_retryNum) => {
-	if (g_settings.autoRetryNum >= _retryNum && !g_workObj.autoRetryFlg) {
+const quickRetry = (_retryCondition) => {
+	const retryNum = g_settings.autoRetrys.findIndex(val => val === _retryCondition);
+	if (retryNum < 0) {
+		return;
+	}
+	if (g_settings.autoRetryNum >= retryNum && !g_workObj.autoRetryFlg) {
 		g_workObj.autoRetryFlg = true;
 		setTimeout(() => {
 			g_audio.pause();
@@ -11790,11 +11794,11 @@ const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames
 	} else if (_difFrame > _justFrames) {
 		diffJDisp = `<span class="common_diffFast">Fast ${difCnt} Frames</span>`;
 		g_resultObj.fast++;
-		quickRetry(4);
+		quickRetry(`Fast/Slow`);
 	} else if (_difFrame < _justFrames * (-1)) {
 		diffJDisp = `<span class="common_diffSlow">Slow ${difCnt} Frames</span>`;
 		g_resultObj.slow++;
-		quickRetry(4);
+		quickRetry(`Fast/Slow`);
 	}
 	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
 };
@@ -11840,7 +11844,7 @@ const lifeRecovery = () => {
  */
 const lifeDamage = (_excessive = false) => {
 	g_workObj.lifeVal -= g_workObj.lifeDmg * (_excessive ? 0.25 : 1);
-	quickRetry(1);
+	quickRetry(`Miss`);
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
@@ -11892,7 +11896,7 @@ const judgeRecovery = (_name, _difFrame) => {
 		}
 	}
 	if (_name === `shakin`) {
-		quickRetry(3);
+		quickRetry(`Shakin(Great)`);
 	}
 	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
 };
@@ -11931,7 +11935,7 @@ const judgeMatari = _difFrame => {
 	changeJudgeCharacter(`matari`, g_lblNameObj.j_matari);
 	comboJ.textContent = ``;
 	finishViewing();
-	quickRetry(2);
+	quickRetry(`Matari(Good)`);
 
 	g_customJsObj.judg_matari.forEach(func => func(_difFrame));
 };
