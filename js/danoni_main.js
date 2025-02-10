@@ -11364,11 +11364,13 @@ const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
 		_num = MAX_FILTER_POS / 2;
 	}
 
+	// アルファマスクの位置設定
 	const numPlus = (g_stateObj.appearance === `Hid&Sud+` ? _num : 0);
 	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
-	const appearPers = [_num, MAX_FILTER_POS - _num];
 
+	// フィルターバーの位置設定
+	const appearPers = [_num, MAX_FILTER_POS - _num];
 	const topDist = g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS;
 	const bottomDist = g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS;
 
@@ -11406,6 +11408,7 @@ const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
 			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]) % 2}`).top;
 		filterView.textContent = `${_num}%`;
 
+		// スクロールが1種類でHidden+/Sudden+の場合、対面のフィルターバーは不要なため非表示にする
 		if (g_stateObj.appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
 			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).display = C_DIS_NONE;
 		}
