@@ -8,8 +8,8 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 39.3.0`;
-const g_revisedDate = `2025/02/09`;
+const g_version = `Ver 39.4.0`;
+const g_revisedDate = `2025/02/10`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7986,7 +7986,7 @@ const loadingScoreInit = async () => {
 		g_workObj.shuffleGroupMap[_val]?.push(_i) || (g_workObj.shuffleGroupMap[_val] = [_i]));
 
 	// Mirror,Random,S-Randomの適用
-	g_shuffleFunc[g_stateObj.shuffle](keyNum, Object.values(g_workObj.shuffleGroupMap));
+	g_shuffleFunc.get(g_stateObj.shuffle)(keyNum, Object.values(g_workObj.shuffleGroupMap));
 
 	// アシスト用の配列があれば、ダミーデータで上書き
 	if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
@@ -8921,7 +8921,7 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
  * Motionオプション適用時の矢印別の速度設定
  * - 矢印が表示される最大フレーム数を 縦ピクセル数×20 と定義。
  */
-const setMotionOnFrame = () => g_motionFunc[g_stateObj.motion](fillArray(g_headerObj.playingHeight * 20 + 1));
+const setMotionOnFrame = () => g_motionFunc.get(g_stateObj.motion)(fillArray(g_headerObj.playingHeight * 20 + 1));
 
 /**
  * Boost用の適用関数
@@ -9948,27 +9948,31 @@ const mainInit = () => {
 	g_workObj.fadeOutNo = fillArray(wordMaxLen);
 	g_workObj.lastFadeFrame = fillArray(wordMaxLen);
 	g_workObj.wordFadeFrame = fillArray(wordMaxLen);
+	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
 
 	// 背景スプライトを作成
-	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth, { x: g_workObj.backX });
+	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth);
+	addX(`backSprite`, `root`, g_workObj.backX);
 
 	// ステップゾーン、矢印のメインスプライトを作成
-	const mainSprite = createEmptySprite(divRoot, `mainSprite`, {
-		x: g_workObj.playingX, y: g_posObj.stepY - C_STEP_Y + g_headerObj.playingY, w: g_headerObj.playingWidth, h: g_headerObj.playingHeight,
-	});
+	const mainSprite = createEmptySprite(divRoot, `mainSprite`, mainCommonPos);
 	addTransform(`mainSprite`, `root`, `scale(${g_keyObj.scale})`);
+	addXY(`mainSprite`, `root`, g_workObj.playingX, g_posObj.stepY - C_STEP_Y + g_headerObj.playingY);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
-	const infoSprite = createEmptySprite(divRoot, `infoSprite`, { x: g_workObj.playingX, y: g_headerObj.playingY, w: g_headerObj.playingWidth, h: g_headerObj.playingHeight });
+	const infoSprite = createEmptySprite(divRoot, `infoSprite`, mainCommonPos);
+	addXY(`infoSprite`, `root`, g_workObj.playingX, g_headerObj.playingY);
 
 	// 判定系スプライトを作成（メインスプライトより上位）
-	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, { x: g_workObj.playingX, y: g_headerObj.playingY, w: g_headerObj.playingWidth, h: g_headerObj.playingHeight });
+	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, mainCommonPos);
+	addXY(`judgeSprite`, `root`, g_workObj.playingX, g_headerObj.playingY);
 
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 
 	// マスクスプライトを作成 (最上位)
-	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth, { x: g_workObj.backX });
+	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth);
+	addX(`maskSprite`, `root`, g_workObj.backX);
 
 	// カラー・モーションを適用するオブジェクトの種類
 	const objList = (g_stateObj.dummyId === `` ? [``] : [`dummy`, ``]);
@@ -9999,7 +10003,6 @@ const mainInit = () => {
 
 	// mainSprite配下に層別のスプライトを作成し、ステップゾーン・矢印本体・フリーズアローヒット部分に分ける
 	const mainSpriteN = [], stepSprite = [], arrowSprite = [], frzHitSprite = [];
-	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
 
 	// Hidden+, Sudden+用のライン、パーセント表示
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
@@ -10062,11 +10065,22 @@ const mainInit = () => {
 	}
 
 	// StepArea処理
-	g_stepAreaFunc[g_stateObj.stepArea]();
+	g_stepAreaFunc.get(g_stateObj.stepArea)();
+
+	// mainSpriteのtransform追加処理
+	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)());
+
+	// EffectのArrowEffect追加処理
+	g_effectFunc.get(g_stateObj.effect)();
 
 	// Appearanceのオプション適用時は一部描画を隠す
 	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
 		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], true);
+
+	// Shaking初期化
+	if (g_stateObj.shaking !== C_FLG_OFF) {
+		addXY(`mainSprite`, `shaking`, 0, 0);
+	}
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
@@ -10325,12 +10339,6 @@ const mainInit = () => {
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.main.forEach(func => func());
-
-	// mainSpriteのtransform追加処理
-	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc[g_stateObj.playWindow]());
-
-	// EffectのArrowEffect追加処理
-	g_effectFunc[g_stateObj.effect]();
 
 	/**
 	 * キーを押したときの処理
@@ -11055,7 +11063,7 @@ const mainInit = () => {
 		}
 
 		// 画面揺れの設定
-		g_shakingFunc[g_stateObj.shaking]();
+		g_shakingFunc.get(g_stateObj.shaking)();
 
 		// ユーザカスタムイベント(フレーム毎)
 		g_customJsObj.mainEnterFrame.forEach(func => func());
@@ -11356,30 +11364,36 @@ const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
 		_num = MAX_FILTER_POS / 2;
 	}
 
+	// アルファマスクの位置設定
 	const numPlus = (g_stateObj.appearance === `Hid&Sud+` ? _num : 0);
 	const topShape = `inset(${_num}% 0% ${numPlus}% 0%)`;
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
+
+	// フィルターバーの位置設定
 	const appearPers = [_num, MAX_FILTER_POS - _num];
+	const topDist = g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS;
+	const bottomDist = g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS;
 
 	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
 
-		$id(`filterBar${topNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS);
-		$id(`filterBar${bottomNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS);
+		$id(`filterBar${topNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + topDist);
+		$id(`filterBar${bottomNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist);
 
 		if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
-			$id(`filterBar${bottomNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS);
-			$id(`filterBar${topNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS);
+			$id(`filterBar${bottomNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + bottomDist);
+			$id(`filterBar${topNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + topDist);
 		}
 
 		// 階層が多い場合はShift+pgUp/pgDownで表示する階層グループを切り替え
 		if (_shiftFlg && g_stateObj.d_filterline === C_FLG_ON) {
 			[`${topNum + j}`, `${bottomNum + j}`].forEach(type => {
-				$id(`filterBar${type}`).display = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
+				const displayState = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
+				$id(`filterBar${type}`).display = displayState;
 
 				if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
-					$id(`filterBar${type}_HS`).display = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
+					$id(`filterBar${type}_HS`).display = displayState;
 				}
 			});
 		}
@@ -11394,6 +11408,7 @@ const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
 			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]) % 2}`).top;
 		filterView.textContent = `${_num}%`;
 
+		// スクロールが1種類でHidden+/Sudden+の場合、対面のフィルターバーは不要なため非表示にする
 		if (g_stateObj.appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
 			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).display = C_DIS_NONE;
 		}
@@ -11470,10 +11485,14 @@ const changeReturn = (_rad, _axis) => {
 
 /**
  * AutoRetryの設定
- * @param {number} _retryNum AutoRetryの設定位置（g_settings.autoRetryNum）
+ * @param {string} _retryCondition リトライ基準となるAutoRetry名
  */
-const quickRetry = (_retryNum) => {
-	if (g_settings.autoRetryNum >= _retryNum && !g_workObj.autoRetryFlg) {
+const quickRetry = (_retryCondition) => {
+	const retryNum = g_settings.autoRetrys.findIndex(val => val === _retryCondition);
+	if (retryNum < 0) {
+		return;
+	}
+	if (g_settings.autoRetryNum >= retryNum && !g_workObj.autoRetryFlg) {
 		g_workObj.autoRetryFlg = true;
 		setTimeout(() => {
 			g_audio.pause();
@@ -11578,7 +11597,6 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	const styfrzBtmRoot = $id(`${_name}BtmRoot${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
 	const styfrzTopRoot = $id(`${_name}TopRoot${frzNo}`);
-	const styfrzTop = $id(`${_name}Top${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
@@ -11629,7 +11647,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	// FrzReturnの設定
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		if (!g_workObj.frzReturnFlg) {
-			changeReturn(4, g_frzReturnFunc[g_stateObj.frzReturn]());
+			changeReturn(4, g_frzReturnFunc.get(g_stateObj.frzReturn)());
 		}
 	}
 	g_customJsObj[`judg_${_name}Hit`].forEach(func => func(_difFrame));
@@ -11654,7 +11672,7 @@ const changeFailedFrz = (_j, _k) => {
 	// FrzReturnの設定
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		if (!g_workObj.frzReturnFlg) {
-			changeReturn(4, g_frzReturnFunc[g_stateObj.frzReturn]());
+			changeReturn(4, g_frzReturnFunc.get(g_stateObj.frzReturn)());
 		}
 	}
 };
@@ -11776,11 +11794,11 @@ const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames
 	} else if (_difFrame > _justFrames) {
 		diffJDisp = `<span class="common_diffFast">Fast ${difCnt} Frames</span>`;
 		g_resultObj.fast++;
-		quickRetry(4);
+		quickRetry(`Fast/Slow`);
 	} else if (_difFrame < _justFrames * (-1)) {
 		diffJDisp = `<span class="common_diffSlow">Slow ${difCnt} Frames</span>`;
 		g_resultObj.slow++;
-		quickRetry(4);
+		quickRetry(`Fast/Slow`);
 	}
 	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
 };
@@ -11826,7 +11844,7 @@ const lifeRecovery = () => {
  */
 const lifeDamage = (_excessive = false) => {
 	g_workObj.lifeVal -= g_workObj.lifeDmg * (_excessive ? 0.25 : 1);
-	quickRetry(1);
+	quickRetry(`Miss`);
 
 	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
@@ -11874,11 +11892,11 @@ const judgeRecovery = (_name, _difFrame) => {
 
 	if (g_stateObj.freezeReturn !== C_FLG_OFF) {
 		if ((g_resultObj.ii + g_resultObj.shakin) % 100 === 0 && !g_workObj.frzReturnFlg) {
-			changeReturn(1, g_frzReturnFunc[g_stateObj.frzReturn]());
+			changeReturn(1, g_frzReturnFunc.get(g_stateObj.frzReturn)());
 		}
 	}
 	if (_name === `shakin`) {
-		quickRetry(3);
+		quickRetry(`Shakin(Great)`);
 	}
 	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
 };
@@ -11917,7 +11935,7 @@ const judgeMatari = _difFrame => {
 	changeJudgeCharacter(`matari`, g_lblNameObj.j_matari);
 	comboJ.textContent = ``;
 	finishViewing();
-	quickRetry(2);
+	quickRetry(`Matari(Good)`);
 
 	g_customJsObj.judg_matari.forEach(func => func(_difFrame));
 };
