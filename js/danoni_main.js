@@ -10067,6 +10067,12 @@ const mainInit = () => {
 	// StepArea処理
 	g_stepAreaFunc.get(g_stateObj.stepArea)();
 
+	// mainSpriteのtransform追加処理
+	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)());
+
+	// EffectのArrowEffect追加処理
+	g_effectFunc.get(g_stateObj.effect)();
+
 	// Appearanceのオプション適用時は一部描画を隠す
 	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
 		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], true);
@@ -10333,12 +10339,6 @@ const mainInit = () => {
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.main.forEach(func => func());
-
-	// mainSpriteのtransform追加処理
-	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)());
-
-	// EffectのArrowEffect追加処理
-	g_effectFunc.get(g_stateObj.effect)();
 
 	/**
 	 * キーを押したときの処理
@@ -11369,25 +11369,29 @@ const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
 	const bottomShape = `inset(${numPlus}% 0% ${_num}% 0%)`;
 	const appearPers = [_num, MAX_FILTER_POS - _num];
 
+	const topDist = g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS;
+	const bottomDist = g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS;
+
 	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
 
-		$id(`filterBar${topNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS);
-		$id(`filterBar${bottomNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS);
+		$id(`filterBar${topNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + topDist);
+		$id(`filterBar${bottomNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist);
 
 		if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
-			$id(`filterBar${bottomNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS);
-			$id(`filterBar${topNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS);
+			$id(`filterBar${bottomNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + bottomDist);
+			$id(`filterBar${topNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + topDist);
 		}
 
 		// 階層が多い場合はShift+pgUp/pgDownで表示する階層グループを切り替え
 		if (_shiftFlg && g_stateObj.d_filterline === C_FLG_ON) {
 			[`${topNum + j}`, `${bottomNum + j}`].forEach(type => {
-				$id(`filterBar${type}`).display = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
+				const displayState = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
+				$id(`filterBar${type}`).display = displayState;
 
 				if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
-					$id(`filterBar${type}_HS`).display = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
+					$id(`filterBar${type}_HS`).display = displayState;
 				}
 			});
 		}
@@ -11586,7 +11590,6 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	const styfrzBtmRoot = $id(`${_name}BtmRoot${frzNo}`);
 	const styfrzBtm = $id(`${_name}Btm${frzNo}`);
 	const styfrzTopRoot = $id(`${_name}TopRoot${frzNo}`);
-	const styfrzTop = $id(`${_name}Top${frzNo}`);
 	const styfrzBtmShadow = $id(`${_name}BtmShadow${frzNo}`);
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
