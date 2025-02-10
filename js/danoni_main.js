@@ -11660,7 +11660,7 @@ const changeFailedFrz = (_j, _k) => {
 	// FrzReturnの設定
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		if (!g_workObj.frzReturnFlg) {
-			changeReturn(4, g_frzReturnFunc[g_stateObj.frzReturn]());
+			changeReturn(4, g_frzReturnFunc.get(g_stateObj.frzReturn)());
 		}
 	}
 };
@@ -11880,7 +11880,7 @@ const judgeRecovery = (_name, _difFrame) => {
 
 	if (g_stateObj.freezeReturn !== C_FLG_OFF) {
 		if ((g_resultObj.ii + g_resultObj.shakin) % 100 === 0 && !g_workObj.frzReturnFlg) {
-			changeReturn(1, g_frzReturnFunc[g_stateObj.frzReturn]());
+			changeReturn(1, g_frzReturnFunc.get(g_stateObj.frzReturn)());
 		}
 	}
 	if (_name === `shakin`) {
