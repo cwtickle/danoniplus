@@ -7986,7 +7986,7 @@ const loadingScoreInit = async () => {
 		g_workObj.shuffleGroupMap[_val]?.push(_i) || (g_workObj.shuffleGroupMap[_val] = [_i]));
 
 	// Mirror,Random,S-Randomの適用
-	g_shuffleFunc[g_stateObj.shuffle](keyNum, Object.values(g_workObj.shuffleGroupMap));
+	g_shuffleFunc.get(g_stateObj.shuffle)(keyNum, Object.values(g_workObj.shuffleGroupMap));
 
 	// アシスト用の配列があれば、ダミーデータで上書き
 	if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
@@ -8921,7 +8921,7 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
  * Motionオプション適用時の矢印別の速度設定
  * - 矢印が表示される最大フレーム数を 縦ピクセル数×20 と定義。
  */
-const setMotionOnFrame = () => g_motionFunc[g_stateObj.motion](fillArray(g_headerObj.playingHeight * 20 + 1));
+const setMotionOnFrame = () => g_motionFunc.get(g_stateObj.motion)(fillArray(g_headerObj.playingHeight * 20 + 1));
 
 /**
  * Boost用の適用関数
@@ -10062,11 +10062,17 @@ const mainInit = () => {
 	}
 
 	// StepArea処理
-	g_stepAreaFunc[g_stateObj.stepArea]();
+	g_stepAreaFunc.get(g_stateObj.stepArea)();
 
 	// Appearanceのオプション適用時は一部描画を隠す
 	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
 		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], true);
+
+	// Shaking初期化
+	if (g_stateObj.shaking !== C_FLG_OFF) {
+		addX(`mainSprite`, `shaking`, 0);
+		addY(`mainSprite`, `shaking`, 0);
+	}
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
@@ -10327,10 +10333,10 @@ const mainInit = () => {
 	g_customJsObj.main.forEach(func => func());
 
 	// mainSpriteのtransform追加処理
-	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc[g_stateObj.playWindow]());
+	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)());
 
 	// EffectのArrowEffect追加処理
-	g_effectFunc[g_stateObj.effect]();
+	g_effectFunc.get(g_stateObj.effect)();
 
 	/**
 	 * キーを押したときの処理
@@ -11055,7 +11061,7 @@ const mainInit = () => {
 		}
 
 		// 画面揺れの設定
-		g_shakingFunc[g_stateObj.shaking]();
+		g_shakingFunc.get(g_stateObj.shaking)();
 
 		// ユーザカスタムイベント(フレーム毎)
 		g_customJsObj.mainEnterFrame.forEach(func => func());
@@ -11629,7 +11635,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	// FrzReturnの設定
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		if (!g_workObj.frzReturnFlg) {
-			changeReturn(4, g_frzReturnFunc[g_stateObj.frzReturn]());
+			changeReturn(4, g_frzReturnFunc.get(g_stateObj.frzReturn)());
 		}
 	}
 	g_customJsObj[`judg_${_name}Hit`].forEach(func => func(_difFrame));
