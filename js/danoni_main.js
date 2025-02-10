@@ -9948,27 +9948,31 @@ const mainInit = () => {
 	g_workObj.fadeOutNo = fillArray(wordMaxLen);
 	g_workObj.lastFadeFrame = fillArray(wordMaxLen);
 	g_workObj.wordFadeFrame = fillArray(wordMaxLen);
+	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
 
 	// 背景スプライトを作成
-	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth, { x: g_workObj.backX });
+	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth);
+	addX(`backSprite`, `root`, g_workObj.backX);
 
 	// ステップゾーン、矢印のメインスプライトを作成
-	const mainSprite = createEmptySprite(divRoot, `mainSprite`, {
-		x: g_workObj.playingX, y: g_posObj.stepY - C_STEP_Y + g_headerObj.playingY, w: g_headerObj.playingWidth, h: g_headerObj.playingHeight,
-	});
+	const mainSprite = createEmptySprite(divRoot, `mainSprite`, mainCommonPos);
 	addTransform(`mainSprite`, `root`, `scale(${g_keyObj.scale})`);
+	addXY(`mainSprite`, `root`, g_workObj.playingX, g_posObj.stepY - C_STEP_Y + g_headerObj.playingY);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
-	const infoSprite = createEmptySprite(divRoot, `infoSprite`, { x: g_workObj.playingX, y: g_headerObj.playingY, w: g_headerObj.playingWidth, h: g_headerObj.playingHeight });
+	const infoSprite = createEmptySprite(divRoot, `infoSprite`, mainCommonPos);
+	addXY(`infoSprite`, `root`, g_workObj.playingX, g_headerObj.playingY);
 
 	// 判定系スプライトを作成（メインスプライトより上位）
-	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, { x: g_workObj.playingX, y: g_headerObj.playingY, w: g_headerObj.playingWidth, h: g_headerObj.playingHeight });
+	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, mainCommonPos);
+	addXY(`judgeSprite`, `root`, g_workObj.playingX, g_headerObj.playingY);
 
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 
 	// マスクスプライトを作成 (最上位)
-	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth, { x: g_workObj.backX });
+	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth);
+	addX(`maskSprite`, `root`, g_workObj.backX);
 
 	// カラー・モーションを適用するオブジェクトの種類
 	const objList = (g_stateObj.dummyId === `` ? [``] : [`dummy`, ``]);
@@ -9999,7 +10003,6 @@ const mainInit = () => {
 
 	// mainSprite配下に層別のスプライトを作成し、ステップゾーン・矢印本体・フリーズアローヒット部分に分ける
 	const mainSpriteN = [], stepSprite = [], arrowSprite = [], frzHitSprite = [];
-	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
 
 	// Hidden+, Sudden+用のライン、パーセント表示
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
@@ -10070,8 +10073,7 @@ const mainInit = () => {
 
 	// Shaking初期化
 	if (g_stateObj.shaking !== C_FLG_OFF) {
-		addX(`mainSprite`, `shaking`, 0);
-		addY(`mainSprite`, `shaking`, 0);
+		addXY(`mainSprite`, `shaking`, 0, 0);
 	}
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
