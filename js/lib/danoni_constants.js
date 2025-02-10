@@ -1310,12 +1310,13 @@ const g_playWindowFunc = new Map([
 ]);
 
 const g_arrowGroupSprite = [`stepSprite`, `arrowSprite`, `frzHitSprite`];
+const halfwayOffset = _j => (_j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2);
 const g_stepAreaFunc = new Map([
     ['Default', () => ``],
     ['Halfway', () => {
         g_arrowGroupSprite.forEach(sprite => {
             for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
             }
         });
     }],
@@ -1326,7 +1327,7 @@ const g_stepAreaFunc = new Map([
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
                 for (let j = 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
-                    addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                    addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
                 }
             });
         }
@@ -1338,7 +1339,7 @@ const g_stepAreaFunc = new Map([
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
                 for (let j = 0; j < Math.min(g_stateObj.layerNum, 2); j++) {
-                    addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                    addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
                 }
             });
         }
@@ -1346,7 +1347,7 @@ const g_stepAreaFunc = new Map([
     ['2Step', () => {
         g_arrowGroupSprite.forEach(sprite => {
             for (let j = Math.min(g_stateObj.layerNum, 4) / 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
-                addY(`${sprite}${j}`, `stepArea`, (j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2));
+                addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
             }
         });
     }],
@@ -1366,8 +1367,8 @@ const g_shakingFunc = new Map([
     ['Vertical', () => addY(`mainSprite`, `shaking`, (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2)],
     ['Drunk', () => {
         if (g_posXs.mainSprite.get(`shaking`) === 0 && g_posYs.mainSprite.get(`shaking`) === 0) {
-            g_workObj.drunkXFlg = [true, false][Math.floor(Math.random() * 2)];
-            g_workObj.drunkYFlg = [true, false][Math.floor(Math.random() * 2)];
+            g_workObj.drunkXFlg = Math.random() < 0.5;
+            g_workObj.drunkYFlg = Math.random() < 0.5;
         }
         if (g_workObj.drunkXFlg) {
             const deltaX = (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1;
@@ -1385,6 +1386,25 @@ const g_shakingFunc = new Map([
 ]);
 
 /**
+ * ランダムな軸を返す補助関数
+ * @returns 軸
+ */
+const g_getRandomAxis = () => {
+    const axes = [`X`, `Y`, `Z`];
+    return axes[Math.floor(Math.random() * axes.length)];
+};
+
+/**
+ * 最初に選んだ軸を除く、次の軸を返す補助関数
+ * @param {string} _primaryAxis 
+ * @returns 軸
+ */
+const g_getSecondaryAxis = (_primaryAxis) => {
+    const remainingAxes = [`X`, `Y`, `Z`, undefined].filter(val => val !== _primaryAxis);
+    return remainingAxes[Math.floor(Math.random() * remainingAxes.length)];
+};
+
+/**
  * FrzReturn適用関数
  */
 const g_frzReturnFunc = new Map([
@@ -1392,13 +1412,13 @@ const g_frzReturnFunc = new Map([
     ['X-Axis', () => [`X`]],
     ['Y-Axis', () => [`Y`]],
     ['Z-Axis', () => [`Z`]],
-    ['Random', () => [`X`, `Y`, `Z`][Math.floor(Math.random() * 3)]],
+    ['Random', () => g_getRandomAxis()],
     ['XY-Axis', () => [`X`, `Y`]],
     ['XZ-Axis', () => [`X`, `Z`]],
     ['YZ-Axis', () => [`Y`, `Z`]],
     ['Random+', () => {
-        const axis1 = [`X`, `Y`, `Z`][Math.floor(Math.random() * 3)];
-        const axis2 = [`X`, `Y`, `Z`, undefined].filter(val => val !== axis1)[Math.floor(Math.random() * 3)];
+        const axis1 = g_getRandomAxis();
+        const axis2 = g_getSecondaryAxis(axis1);
         return [axis1, axis2];
     }],
 ]);
