@@ -1151,7 +1151,7 @@ const resetTransform = () => {
  * id, transformIdに合致するtransform情報の取得
  * @param {string} _id 
  * @param {string} _transformId 
- * @returns 
+ * @returns {string}
  */
 const getTransform = (_id, _transformId) => {
     return g_transforms[_id]?.[_transformId] || ``;
@@ -1387,7 +1387,7 @@ const g_shakingFunc = new Map([
 
 /**
  * ランダムな軸を返す補助関数
- * @returns 軸
+ * @returns {string} 軸
  */
 const g_getRandomAxis = () => {
     const axes = [`X`, `Y`, `Z`];
@@ -1397,7 +1397,7 @@ const g_getRandomAxis = () => {
 /**
  * 最初に選んだ軸を除く、次の軸を返す補助関数
  * @param {string} _primaryAxis 
- * @returns 軸
+ * @returns {string} 軸
  */
 const g_getSecondaryAxis = (_primaryAxis) => {
     const remainingAxes = [`X`, `Y`, `Z`, undefined].filter(val => val !== _primaryAxis);
