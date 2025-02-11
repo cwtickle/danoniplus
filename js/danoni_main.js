@@ -1297,7 +1297,8 @@ const createEmptySprite = (_parentObj, _newObjId, { x = 0, y = 0, w = g_sWidth, 
 const createMultipleSprite = (_baseName, _num, { x = 0 } = {}) => {
 	const sprite = createEmptySprite(divRoot, _baseName);
 	for (let j = 0; j <= _num; j++) {
-		createEmptySprite(sprite, `${_baseName}${j}`, { x });
+		createEmptySprite(sprite, `${_baseName}${j}`);
+		addX(`${_baseName}${j}`, `root`, x);
 	}
 	return sprite;
 };
@@ -9951,8 +9952,7 @@ const mainInit = () => {
 	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
 
 	// 背景スプライトを作成
-	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth);
-	addX(`backSprite`, `root`, g_workObj.backX);
+	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth, { x: g_workObj.backX });
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createEmptySprite(divRoot, `mainSprite`, mainCommonPos);
@@ -9971,8 +9971,7 @@ const mainInit = () => {
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 
 	// マスクスプライトを作成 (最上位)
-	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth);
-	addX(`maskSprite`, `root`, g_workObj.backX);
+	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth, { x: g_workObj.backX });
 
 	// カラー・モーションを適用するオブジェクトの種類
 	const objList = (g_stateObj.dummyId === `` ? [``] : [`dummy`, ``]);
