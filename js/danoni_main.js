@@ -1298,8 +1298,8 @@ const createMultipleSprite = (_baseName, _num, { x = 0 } = {}) => {
 	const sprite = createEmptySprite(divRoot, _baseName);
 	for (let j = 0; j <= _num; j++) {
 		createEmptySprite(sprite, `${_baseName}${j}`);
-		addX(`${_baseName}${j}`, `root`, x);
 	}
+	addX(_baseName, `root`, x);
 	return sprite;
 };
 
