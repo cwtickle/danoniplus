@@ -4572,7 +4572,8 @@ const titleInit = () => {
 	}
 
 	// マスクスプライトを作成
-	createMultipleSprite(`maskTitleSprite`, g_headerObj.maskTitleMaxDepth);
+	const maskTitleSprite = createMultipleSprite(`maskTitleSprite`, g_headerObj.maskTitleMaxDepth);
+	maskTitleSprite.style.pointerEvents = g_headerObj.masktitleButton ? C_DIS_AUTO : C_DIS_NONE;
 
 	/**
 	 * タイトルのモーション設定
@@ -12664,7 +12665,8 @@ const resultInit = () => {
 	);
 
 	// マスクスプライトを作成
-	createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);
+	const makeResultSprite = createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);
+	makeResultSprite.style.pointerEvents = g_headerObj.maskresultButton ? C_DIS_AUTO : C_DIS_NONE;
 
 	// リザルトモーションの0フレーム対応
 	g_animationData.filter(sprite => g_scoreObj[`${sprite}ResultFrameNum`] === 0 && g_headerObj[`${sprite}ResultData`][0] !== undefined)
