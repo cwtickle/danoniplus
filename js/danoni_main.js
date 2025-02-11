@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/02/09
+ * Revised : 2025/02/11
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 39.4.0`;
-const g_revisedDate = `2025/02/10`;
+const g_version = `Ver 39.4.1`;
+const g_revisedDate = `2025/02/11`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -89,6 +89,7 @@ const C_FLG_ON = `ON`;
 const C_FLG_OFF = `OFF`;
 const C_FLG_ALL = `ALL`;
 const C_DIS_NONE = `none`;
+const C_DIS_AUTO = `auto`;
 const C_DIS_INHERIT = `inherit`;
 
 // 初期化フラグ（ボタンアニメーション制御）
@@ -663,7 +664,7 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
 		multiAppend(_obj,
 			createDivCss2Label(`sc${_settingLabel}`,
 				g_scViewObj.format.split(`{0}`).join(dfLabel || (`${g_kCd[g_kCdN.findIndex(kCd => kCd === scKey[0])] ?? ''}`)), {
-				x, y, w, siz, fontWeight: `bold`, opacity: 0.75, pointerEvents: C_DIS_NONE,
+				x, y, w, siz, fontWeight: `bold`, opacity: 0.75,
 			})
 		);
 	}
@@ -1106,7 +1107,6 @@ const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64,
 const createDescDiv = (_id, _str, { altId = _id, siz = g_limitObj.mainSiz } = {}) =>
 	createDivCss2Label(_id, _str, Object.assign(g_lblPosObj[altId], {
 		siz: getFontSize(_str, g_lblPosObj[altId]?.w || g_sWidth, getBasicFont(), siz),
-		pointerEvents: C_DIS_NONE,
 	}));
 
 /*-----------------------------------------------------------*/
@@ -1173,6 +1173,7 @@ const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWid
 	style.fontSize = wUnit(siz);
 	style.fontFamily = getBasicFont();
 	style.textAlign = `${align}`;
+	style.pointerEvents = C_DIS_NONE;
 	div.innerHTML = _text;
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 
@@ -1212,6 +1213,7 @@ const createColorPicker = (_parentObj, _id, _func, { x = 0, y = 0 } = {}) => {
 	picker.style.left = wUnit(x);
 	picker.style.top = wUnit(y);
 	picker.style.position = `absolute`;
+	picker.style.pointerEvents = C_DIS_AUTO;
 	picker.addEventListener(`change`, _func);
 	_parentObj.appendChild(picker);
 	return picker;
@@ -1252,6 +1254,7 @@ const createColorObject2 = (_id,
 	style.maskSize = `contain`;
 	style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
 	style.webkitMaskSize = `contain`;
+	style.pointerEvents = C_DIS_NONE;
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 	setAttrs(div, { color: rest.background ?? ``, type: charaStyle, cnt: 0, });
 
@@ -1281,6 +1284,7 @@ const createEmptySprite = (_parentObj, _newObjId, { x = 0, y = 0, w = g_sWidth, 
 	div.title = title;
 
 	const style = div.style;
+	style.pointerEvents = title === `` ? C_DIS_NONE : C_DIS_AUTO;
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 	_parentObj.appendChild(div);
 
@@ -1297,8 +1301,9 @@ const createEmptySprite = (_parentObj, _newObjId, { x = 0, y = 0, w = g_sWidth, 
 const createMultipleSprite = (_baseName, _num, { x = 0 } = {}) => {
 	const sprite = createEmptySprite(divRoot, _baseName);
 	for (let j = 0; j <= _num; j++) {
-		createEmptySprite(sprite, `${_baseName}${j}`, { x });
+		createEmptySprite(sprite, `${_baseName}${j}`);
 	}
+	addX(_baseName, `root`, x);
 	return sprite;
 };
 
@@ -1403,6 +1408,7 @@ const createCss2Button = (_id, _text, _func = () => true, {
 	style.textAlign = align;
 	style.fontSize = wUnit(siz);
 	style.fontFamily = getBasicFont();
+	style.pointerEvents = C_DIS_AUTO;
 	if (rest.animationName !== undefined) {
 		style.animationDuration = `1s`;
 	}
@@ -1413,7 +1419,7 @@ const createCss2Button = (_id, _text, _func = () => true, {
 		if (g_initialFlg && g_btnWaitFrame[groupName].initial) {
 		} else {
 			style.pointerEvents = C_DIS_NONE;
-			setTimeout(() => style.pointerEvents = rest.pointerEvents ?? `auto`,
+			setTimeout(() => style.pointerEvents = rest.pointerEvents ?? C_DIS_AUTO,
 				g_btnWaitFrame[groupName].b_frame * 1000 / g_fps);
 		}
 	}
@@ -3101,7 +3107,7 @@ const headerConvert = _dosObj => {
 	g_settings.speedNum = roundZero(g_settings.speeds.findIndex(speed => speed === g_stateObj.speed));
 
 	// グラデーションのデフォルト中間色を設定
-	divRoot.appendChild(createDivCss2Label(`dummyLabel`, ``, { pointerEvents: C_DIS_NONE }));
+	divRoot.appendChild(createDivCss2Label(`dummyLabel`, ``));
 	obj.baseBrightFlg = setBoolVal(_dosObj.baseBright, checkLightOrDark(colorNameToCode(window.getComputedStyle(dummyLabel, ``).color)));
 	const intermediateColor = obj.baseBrightFlg ? `#111111` : `#eeeeee`;
 
@@ -3469,7 +3475,7 @@ const headerConvert = _dosObj => {
 	obj.commentExternal = setBoolVal(_dosObj.commentExternal);
 
 	// Reverse時の歌詞の自動反転制御
-	obj.wordAutoReverse = _dosObj.wordAutoReverse ?? g_presetObj.wordAutoReverse ?? `auto`;
+	obj.wordAutoReverse = _dosObj.wordAutoReverse ?? g_presetObj.wordAutoReverse ?? C_DIS_AUTO;
 
 	// プレイ中クレジットを表示しないエリアのサイズ(X方向)
 	obj.customViewWidth = setVal(_dosObj.customViewWidth ?? _dosObj.customCreditWidth, 0, C_TYP_FLOAT);
@@ -4567,9 +4573,7 @@ const titleInit = () => {
 
 	// マスクスプライトを作成
 	const maskTitleSprite = createMultipleSprite(`maskTitleSprite`, g_headerObj.maskTitleMaxDepth);
-	if (!g_headerObj.masktitleButton) {
-		maskTitleSprite.style.pointerEvents = C_DIS_NONE;
-	}
+	maskTitleSprite.style.pointerEvents = g_headerObj.masktitleButton ? C_DIS_AUTO : C_DIS_NONE;
 
 	/**
 	 * タイトルのモーション設定
@@ -4677,10 +4681,10 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 	const lbl = createDivCss2Label(`lblWarning`, _text, {
 		x: _x, y: 70 + _y, w: _w, h: warnHeight, siz: g_limitObj.mainSiz, backgroundColor: _bkColor,
 		opacity: 0.9, lineHeight: wUnit(15), color: _textColor, align: _align, fontFamily: getBasicFont(),
-		whiteSpace: `normal`,
+		whiteSpace: `normal`, pointerEvents: C_DIS_AUTO,
 	});
 	if (warnHeight === 150) {
-		lbl.style.overflow = `auto`;
+		lbl.style.overflow = C_DIS_AUTO;
 	}
 
 	// 一時的な枠を削除
@@ -5386,7 +5390,7 @@ const makeHighScore = _scoreId => {
 			`${g_localStorage.highscores?.[scoreName]?.fullCombo ?? '' ? '<span class="result_FullCombo">◆</span>' : ''}` +
 			`${g_localStorage.highscores?.[scoreName]?.perfect ?? '' ? '<span class="result_Perfect">◆</span>' : ''}` +
 			`${g_localStorage.highscores?.[scoreName]?.allPerfect ?? '' ? '<span class="result_AllPerfect">◆</span>' : ''}`, { xPos: 1, dx: 20, yPos: 12, w: 100, align: C_ALIGN_CENTER }),
-		createScoreLabel(`lblHClearLamps`, `Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? `---`), { yPos: 13, overflow: `auto`, w: g_sWidth / 2 + 40, h: 37 }),
+		createScoreLabel(`lblHClearLamps`, `Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? `---`), { yPos: 13, overflow: C_DIS_AUTO, w: g_sWidth / 2 + 40, h: 37 }),
 
 		createScoreLabel(`lblHShuffle`, g_stateObj.shuffle.indexOf(`Mirror`) < 0 ? `` : `Shuffle: <span class="common_iknai">${g_stateObj.shuffle}</span>`, { yPos: 11.5, dx: -130 }),
 		createScoreLabel(`lblHAssist`, g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `Assist: <span class="common_kita">${g_stateObj.autoPlay}</span>`, { yPos: 12.5, dx: -130 }),
@@ -6027,7 +6031,7 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
  */
 const createLblSetting = (_settingName, _adjY = 0, _settingLabel = _settingName) => {
 	const lbl = createDivCss2Label(`lbl${_settingName}`, g_lblNameObj[_settingLabel], {
-		x: -5, y: _adjY, w: 110,
+		x: -5, y: _adjY, w: 110, pointerEvents: C_DIS_AUTO,
 	}, `settings_${_settingName}`);
 	lbl.title = g_msgObj[`${_settingName.charAt(0).toLowerCase()}${_settingName.slice(1)}`];
 	return lbl;
@@ -6920,18 +6924,18 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			// 矢印の塗り部分
 			createColorObject2(`arrowShadow${j}`, {
 				x: keyconX, y: keyconY, background: hasVal(g_headerObj[`setShadowColor${g_colorType}`][colorPos]) ? getShadowColor(colorPos, arrowColor) : ``,
-				rotate: g_keyObj[`stepRtn${keyCtrlPtn}_${g_keycons.stepRtnGroupNum}`][j], styleName: `Shadow`, pointerEvents: `none`,
+				rotate: g_keyObj[`stepRtn${keyCtrlPtn}_${g_keycons.stepRtnGroupNum}`][j], styleName: `Shadow`,
 			}),
 			// 矢印本体
 			createColorObject2(`arrow${j}`, {
-				x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}_${g_keycons.stepRtnGroupNum}`][j], pointerEvents: `none`,
+				x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}_${g_keycons.stepRtnGroupNum}`][j],
 			}),
 		);
 		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
 			keyconSprite.appendChild(
 				createCss2Button(`sArrow${j}`, ``, () => changeTmpShuffleNum(j), {
 					x: keyconX, y: keyconY - 12, w: C_ARW_WIDTH, h: 15, siz: 12, fontWeight: `bold`,
-					pointerEvents: (g_settings.shuffles.filter(val => val.endsWith(`+`)).length > 0 ? `auto` : `none`),
+					pointerEvents: (g_settings.shuffles.filter(val => val.endsWith(`+`)).length > 0 ? C_DIS_AUTO : C_DIS_NONE),
 					cxtFunc: () => changeTmpShuffleNum(j, -1),
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
@@ -8608,7 +8612,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			// word_dataのみ指定されている場合、下記ルールに従って設定
 			if (!wordTarget.includes(`Rev`) && g_stateObj.scroll === `---`) {
 				// Reverse時の歌詞の自動反転制御設定
-				if (g_headerObj.wordAutoReverse !== `auto`) {
+				if (g_headerObj.wordAutoReverse !== C_DIS_AUTO) {
 					wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
 				} else if (keyNum === divideCnt + 1) {
 					wordReverseFlg = true;
@@ -8632,7 +8636,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		let wordReverseFlg = _reverseFlg;
 		const tmpArrayData = splitLF(_data);
 
-		if (g_headerObj.wordAutoReverse === `auto`) {
+		if (g_headerObj.wordAutoReverse === C_DIS_AUTO) {
 			tmpArrayData.filter(data => hasVal(data) && data?.indexOf(`<br>`) !== -1).forEach(() => wordReverseFlg = false);
 		}
 
@@ -9951,8 +9955,7 @@ const mainInit = () => {
 	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
 
 	// 背景スプライトを作成
-	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth);
-	addX(`backSprite`, `root`, g_workObj.backX);
+	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth, { x: g_workObj.backX });
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createEmptySprite(divRoot, `mainSprite`, mainCommonPos);
@@ -9971,8 +9974,7 @@ const mainInit = () => {
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 
 	// マスクスプライトを作成 (最上位)
-	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth);
-	addX(`maskSprite`, `root`, g_workObj.backX);
+	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth, { x: g_workObj.backX });
 
 	// カラー・モーションを適用するオブジェクトの種類
 	const objList = (g_stateObj.dummyId === `` ? [``] : [`dummy`, ``]);
@@ -12488,7 +12490,7 @@ const resultInit = () => {
 	 * @param {string} _msg 
 	 */
 	const copyResultImageData = _msg => {
-		const tmpDiv = createEmptySprite(divRoot, `tmpDiv`, { x: 0, y: 0, w: g_sWidth, h: g_sHeight });
+		const tmpDiv = createEmptySprite(divRoot, `tmpDiv`, { x: 0, y: 0, w: g_sWidth, h: g_sHeight, pointerEvents: C_DIS_AUTO });
 		tmpDiv.style.background = `#000000cc`;
 		const canvas = document.createElement(`canvas`);
 		const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
@@ -12663,10 +12665,8 @@ const resultInit = () => {
 	);
 
 	// マスクスプライトを作成
-	const maskResultSprite = createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);
-	if (!g_headerObj.maskresultButton) {
-		maskResultSprite.style.pointerEvents = C_DIS_NONE;
-	}
+	const makeResultSprite = createMultipleSprite(`maskResultSprite`, g_headerObj.maskResultMaxDepth);
+	makeResultSprite.style.pointerEvents = g_headerObj.maskresultButton ? C_DIS_AUTO : C_DIS_NONE;
 
 	// リザルトモーションの0フレーム対応
 	g_animationData.filter(sprite => g_scoreObj[`${sprite}ResultFrameNum`] === 0 && g_headerObj[`${sprite}ResultData`][0] !== undefined)
