@@ -156,14 +156,14 @@ let [g_sWidth, g_sHeight] = [
 ];
 $id(`canvas-frame`).width = `${Math.max(g_sWidth, 500)}px`;
 $id(`canvas-frame`).height = `${Math.max(g_sHeight, 500)}px`;
-$id(`canvas-frame`).margin = `auto`;
+$id(`canvas-frame`).margin = C_DIS_AUTO;
 
 const g_btnWidth = (_multi = 1) => Math.min(g_sWidth, g_limitObj.btnBaseWidth) * _multi;
 const g_btnX = (_multi = 0) => g_btnWidth(_multi) + Math.max((g_sWidth - g_limitObj.btnBaseWidth) / 2, 0);
 
 // 固定ウィンドウサイズ
 const g_windowObj = {
-    divRoot: { margin: `auto`, letterSpacing: `normal` },
+    divRoot: { margin: C_DIS_AUTO, letterSpacing: `normal`, pointerEvents: C_DIS_AUTO },
     divBack: { background: `linear-gradient(#000000, #222222)` },
 
     colorPickSprite: { x: 0, y: 90, w: 50, h: 280 },
@@ -191,13 +191,13 @@ const getScMsg = {
 const updateWindowSiz = () => {
     Object.assign(g_windowObj, {
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
-        difList: { x: 165, y: 60, w: 280, h: 270 + g_sHeight - 500, overflow: `auto` },
-        difCover: { x: 20, y: 60, w: 145, h: 270 + g_sHeight - 500, opacity: 0.95 },
-        difFilter: { x: 0, y: 66, w: 140, h: 204 + g_sHeight - 500, overflow: `auto` },
+        difList: { x: 165, y: 60, w: 280, h: 270 + g_sHeight - 500, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
+        difCover: { x: 20, y: 60, w: 145, h: 270 + g_sHeight - 500, opacity: 0.95, pointerEvents: C_DIS_AUTO },
+        difFilter: { x: 0, y: 66, w: 140, h: 204 + g_sHeight - 500, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
-        scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 245, visibility: `hidden` },
+        scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 245, visibility: `hidden`, pointerEvents: C_DIS_AUTO },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
-        keyconSprite: { y: 105, h: g_sHeight - 105, overflow: `auto` },
+        keyconSprite: { y: 105, h: g_sHeight - 105, overflow: C_DIS_AUTO },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
         resultWindow: { x: g_sWidth / 2 - 200, y: 185, w: 400, h: 210 },
@@ -232,7 +232,7 @@ const updateWindowSiz = () => {
         },
         lblComment: {
             x: g_btnX(), y: 70, w: g_btnWidth(), h: g_sHeight - 180, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
-            overflow: `auto`, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
+            overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
             whiteSpace: `normal`,
         },
         btnComment: {
@@ -304,7 +304,7 @@ const updateWindowSiz = () => {
             x: 130, y: 70, w: 200, h: 90,
         },
         dataArrowInfo2: {
-            x: 140, y: 70, w: (g_sWidth - 500) / 2 + 275, h: 150, overflow: `auto`,
+            x: 140, y: 70, w: (g_sWidth - 500) / 2 + 275, h: 150, overflow: C_DIS_AUTO,
         },
         lnkDifInfo: {
             w: g_limitObj.difCoverWidth, h: 20, borderStyle: `solid`,
@@ -340,7 +340,6 @@ const updateWindowSiz = () => {
         },
         kcMsg: {
             x: g_btnX(), y: g_sHeight - 33, w: g_btnWidth(), h: 20, siz: g_limitObj.mainSiz,
-            pointerEvents: `none`,
         },
         kcDesc: {
             x: g_btnX() + 50, y: 68, w: g_btnWidth() - 100, h: 20,
@@ -434,7 +433,7 @@ const updateWindowSiz = () => {
         },
         lblWord: {
             x: 100, w: g_headerObj.playingWidth - 200, h: 50,
-            siz: g_limitObj.mainSiz, align: C_ALIGN_LEFT, display: `block`, margin: `auto`,
+            siz: g_limitObj.mainSiz, align: C_ALIGN_LEFT, display: `block`, margin: C_DIS_AUTO,
         },
         finishView: {
             x: g_headerObj.playingWidth / 2 - 150, y: g_headerObj.playingHeight / 2 - 50, w: 300, h: 20, siz: 50,
@@ -492,13 +491,13 @@ const updateWindowSiz = () => {
 const g_windowAlign = {
     left: () => {
         $id(`canvas-frame`).marginLeft = `0px`;
-        $id(`canvas-frame`).marginRight = `auto`;
+        $id(`canvas-frame`).marginRight = C_DIS_AUTO;
     },
     center: () => {
-        $id(`canvas-frame`).margin = `auto`;
+        $id(`canvas-frame`).margin = C_DIS_AUTO;
     },
     right: () => {
-        $id(`canvas-frame`).marginLeft = `auto`;
+        $id(`canvas-frame`).marginLeft = C_DIS_AUTO;
         $id(`canvas-frame`).marginRight = `0px`;
     },
 };
