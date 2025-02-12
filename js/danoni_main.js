@@ -1174,6 +1174,9 @@ const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWid
 	style.fontFamily = getBasicFont();
 	style.textAlign = `${align}`;
 	style.pointerEvents = C_DIS_NONE;
+	if (rest?.overflow === C_DIS_AUTO) {
+		style.pointerEvents = C_DIS_AUTO;
+	}
 	div.innerHTML = _text;
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 
@@ -1255,6 +1258,9 @@ const createColorObject2 = (_id,
 	style.webkitMaskImage = `url("${g_imgObj[charaStyle]}")`;
 	style.webkitMaskSize = `contain`;
 	style.pointerEvents = C_DIS_NONE;
+	if (rest?.overflow === C_DIS_AUTO) {
+		style.pointerEvents = C_DIS_AUTO;
+	}
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 	setAttrs(div, { color: rest.background ?? ``, type: charaStyle, cnt: 0, });
 
@@ -1284,7 +1290,8 @@ const createEmptySprite = (_parentObj, _newObjId, { x = 0, y = 0, w = g_sWidth, 
 	div.title = title;
 
 	const style = div.style;
-	style.pointerEvents = title === `` ? C_DIS_NONE : C_DIS_AUTO;
+	style.pointerEvents = (title !== `` || rest?.overflow === C_DIS_AUTO)
+		? C_DIS_AUTO : C_DIS_NONE;
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 	_parentObj.appendChild(div);
 
