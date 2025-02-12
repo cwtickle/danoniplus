@@ -197,7 +197,7 @@ const updateWindowSiz = () => {
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
         scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 245, visibility: `hidden`, pointerEvents: C_DIS_AUTO },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
-        keyconSprite: { y: 105, h: g_sHeight - 105, overflow: C_DIS_AUTO },
+        keyconSprite: { y: 105, h: g_sHeight - 105, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
         resultWindow: { x: g_sWidth / 2 - 200, y: 185, w: 400, h: 210 },
@@ -232,7 +232,7 @@ const updateWindowSiz = () => {
         },
         lblComment: {
             x: g_btnX(), y: 70, w: g_btnWidth(), h: g_sHeight - 180, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
-            overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE,
+            overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`, display: C_DIS_NONE, pointerEvents: C_DIS_AUTO,
             whiteSpace: `normal`,
         },
         btnComment: {
@@ -304,7 +304,7 @@ const updateWindowSiz = () => {
             x: 130, y: 70, w: 200, h: 90,
         },
         dataArrowInfo2: {
-            x: 140, y: 70, w: (g_sWidth - 500) / 2 + 275, h: 150, overflow: C_DIS_AUTO,
+            x: 140, y: 70, w: (g_sWidth - 500) / 2 + 275, h: 150, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO,
         },
         lnkDifInfo: {
             w: g_limitObj.difCoverWidth, h: 20, borderStyle: `solid`,
