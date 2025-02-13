@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/02/11 (v39.4.1)
+ * Revised : 2025/02/13 (v39.4.3)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -274,7 +274,7 @@ const updateWindowSiz = () => {
             x: g_limitObj.setLblLeft, y: 0,
         },
         lblFadeinBar: {
-            x: g_limitObj.setLblLeft, y: 0,
+            x: g_limitObj.setLblLeft, y: 0, type: `range`,
         },
 
         /** 設定: 譜面明細子画面 */
@@ -327,7 +327,7 @@ const updateWindowSiz = () => {
             x: g_limitObj.setLblLeft, y: 20, siz: 12, align: C_ALIGN_CENTER,
         },
         lblAppearanceBar: {
-            x: g_limitObj.setLblLeft, y: 15,
+            x: g_limitObj.setLblLeft, y: 15, type: `range`,
         },
         lnkLockBtn: {
             x: g_limitObj.setLblLeft + g_limitObj.setLblWidth - 40, y: 0, w: 40, h: g_limitObj.setLblHeight, siz: 12,
@@ -1448,6 +1448,11 @@ const g_effectFunc = new Map([
     ['Storm', () => g_setEffect(`effects-storm`, `effects-storm`, ``)],
     ['Blinking', () => g_setEffect(`effects-blinking`, `effects-blinking`, ``)],
     ['Squids', () => g_setEffect(`effects-squids-arrow`, `effects-squids-frz`)],
+]);
+
+const g_sliderView = new Map([
+    ['fadein', _val => `${_val}${g_lblNameObj.percent}`],
+    ['appearance', _val => `${g_hidSudObj.distH[g_stateObj.appearance](_val)}`],
 ]);
 
 const g_keycons = {

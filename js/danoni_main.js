@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/02/12
+ * Revised : 2025/02/13
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 39.4.2`;
-const g_revisedDate = `2025/02/12`;
+const g_version = `Ver 39.4.3`;
+const g_revisedDate = `2025/02/13`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1166,7 +1166,7 @@ const setUserSelect = (_style, _value = C_DIS_NONE) => {
  * @returns {HTMLDivElement}
  */
 const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWidth, h = g_limitObj.setLblHeight,
-	siz = g_limitObj.setLblSiz, align = C_ALIGN_CENTER, ...rest } = {}, ..._classes) => {
+	siz = g_limitObj.setLblSiz, align = C_ALIGN_CENTER, type = `text`, ...rest } = {}, ..._classes) => {
 	const div = createDiv(_id, x, y, w, h, [g_cssObj.title_base, ..._classes]);
 
 	const style = div.style;
@@ -1174,7 +1174,7 @@ const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWid
 	style.fontFamily = getBasicFont();
 	style.textAlign = `${align}`;
 	style.pointerEvents = C_DIS_NONE;
-	if (rest?.overflow === C_DIS_AUTO) {
+	if (rest?.overflow === C_DIS_AUTO || type !== `text`) {
 		style.pointerEvents = C_DIS_AUTO;
 	}
 	div.innerHTML = _text;
@@ -4804,26 +4804,15 @@ const setSpriteList = _settingList => {
 };
 
 /**
- * スライダー共通処理 (Fadein)
+ * スライダー共通処理 (Fadein, Appearance)
  * @param {HTMLInputElement} _slider 
  * @param {HTMLDivElement} _link 
+ * @param {string} _type 
  * @returns {string}
  */
-const inputSlider = (_slider, _link) => {
+const inputSlider = (_slider, _link, _type) => {
 	const value = parseInt(_slider.value);
-	_link.textContent = `${value}${g_lblNameObj.percent}`;
-	return value;
-};
-
-/**
- * スライダー共通処理 (Appearance)
- * @param {HTMLInputElement} _slider 
- * @param {HTMLDivElement} _link 
- * @returns {string}
- */
-const inputSliderAppearance = (_slider, _link) => {
-	const value = parseInt(_slider.value);
-	_link.textContent = `${g_hidSudObj.distH[g_stateObj.appearance](value)}`;
+	_link.textContent = g_sliderView.get(_type)(value);
 	return value;
 };
 
@@ -5929,7 +5918,7 @@ const createOptionWindow = _sprite => {
 
 	const fadeinSlider = document.getElementById(`fadeinSlider`);
 	fadeinSlider.addEventListener(`input`, () =>
-		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein), false);
+		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein, `fadein`), false);
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
@@ -6636,12 +6625,12 @@ const createSettingsDisplayWindow = _sprite => {
 
 	const appearanceSlider = document.getElementById(`appearanceSlider`);
 	appearanceSlider.addEventListener(`input`, () =>
-		g_hidSudObj.filterPos = inputSliderAppearance(appearanceSlider, lblAppearancePos), false);
+		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos, `appearance`), false);
 
 	const dispAppearanceSlider = () => {
 		[`lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
 			$id(obj).visibility = g_appearanceRanges.includes(g_stateObj.appearance) ? `Visible` : `Hidden`);
-		inputSliderAppearance(appearanceSlider, lblAppearancePos);
+		inputSlider(appearanceSlider, lblAppearancePos, `appearance`);
 	};
 	dispAppearanceSlider();
 
