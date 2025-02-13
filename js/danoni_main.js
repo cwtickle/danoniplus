@@ -1174,7 +1174,7 @@ const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWid
 	style.fontFamily = getBasicFont();
 	style.textAlign = `${align}`;
 	style.pointerEvents = C_DIS_NONE;
-	if (rest?.overflow === C_DIS_AUTO || type === `range`) {
+	if (rest?.overflow === C_DIS_AUTO || type !== `text`) {
 		style.pointerEvents = C_DIS_AUTO;
 	}
 	div.innerHTML = _text;
