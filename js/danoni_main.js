@@ -4793,6 +4793,9 @@ const dataMgtInit = () => {
 				.replaceAll(` `, `&nbsp;`), g_lblPosObj.lblWorkDataView),
 		createDivCss2Label(`lblKeyDataView`, viewKeyStorage(g_headerObj.keyLabels[0]), g_lblPosObj.lblKeyDataView),
 	);
+	setUserSelect($id(`lblWorkDataView`), `text`);
+	setUserSelect($id(`lblKeyDataView`), `text`);
+
 	const keyList = makeDedupliArray(g_headerObj.keyLabels);
 	const keyListSprite = createEmptySprite(optionsprite, `keyListSprite`, g_windowObj.keyListSprite);
 	keyList.forEach((key, j) => {
