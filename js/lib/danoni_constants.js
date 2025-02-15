@@ -246,7 +246,10 @@ const updateWindowSiz = () => {
             x: 0, y: 65, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz,
         },
         btnResetN: {
-            x: g_btnX(1 / 3), y: g_sHeight - 100, w: g_btnWidth(2 / 3), h: g_limitObj.btnHeight,
+            x: g_btnX(1 / 3), y: g_sHeight - 100, w: g_btnWidth(1 / 3), h: g_limitObj.btnHeight,
+        },
+        btnUndo: {
+            x: g_btnX(2 / 3), y: g_sHeight - 100, w: g_btnWidth(1 / 3), h: g_limitObj.btnHeight,
         },
         lblWorkDataView: {
             x: g_btnX(5 / 12), y: 100, w: g_btnWidth(1 / 2), h: g_sHeight / 4, siz: 12, align: C_ALIGN_LEFT,
@@ -1936,9 +1939,10 @@ const g_shortcutObj = {
         KeyD: { id: `btnReset` },
     },
     dataMgt: {
-        KeyE: { id: `lnkEnvironment` },
-        KeyH: { id: `lnkHighscores` },
-        KeyO: { id: `lnkOthers` },
+        KeyE: { id: `btnEnvironment` },
+        KeyH: { id: `btnHighscores` },
+        KeyK: { id: `btnCustomKey` },
+        KeyO: { id: `btnOthers` },
         Escape: { id: `btnBack` },
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
@@ -2257,7 +2261,7 @@ const g_btnWaitFrame = {
 // 主要ボタンのリスト
 const g_btnPatterns = {
     title: { Start: 0, Comment: -10 },
-    dataMgt: { Back: 0 },
+    dataMgt: { Back: 0, Environment: -35, Highscores: -35, CustomKey: -35, Others: -35 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
     difSelector: {},
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5 },
@@ -3437,6 +3441,7 @@ const g_lblNameObj = {
     b_keyConfig: `KeyConfig`,
     b_play: `PLAY!`,
     b_reset: `Reset Key`,
+    b_undo: `Recovery`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
     b_tweet: `Post X`,

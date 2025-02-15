@@ -4741,7 +4741,7 @@ const dataMgtInit = () => {
 	 * @returns {HTMLDivElement}
 	 */
 	const createMgtButton = (_name, _heightPos, _widthPos, { w = 125, func = () => true, ...rest } = {}) => {
-		const linkId = `lnk${toCapitalize(_name)}`;
+		const linkId = `btn${toCapitalize(_name)}`;
 		return createCss2Button(linkId, getStgDetailName(toCapitalize(_name)), () => {
 			const prevDisp = g_settings.dataMgtNum[_name];
 			const [prevBarColor, prevBgColor] = [cssBarList[prevDisp], cssBgList[prevDisp]];
@@ -4766,6 +4766,15 @@ const dataMgtInit = () => {
 	 * @returns {string}
 	 */
 	const viewKeyStorage = _key => {
+
+		// キャッシュ設定
+		if (!viewKeyStorage.cache) {
+			viewKeyStorage.cache = new Map();
+		}
+		if (viewKeyStorage.cache.has(_key)) {
+			return viewKeyStorage.cache.get(_key);
+		}
+
 		let keyStorage = parseStorageData(`danonicw-${_key}k`);
 		if (Object.keys(keyStorage).length === 0) {
 
@@ -4776,7 +4785,9 @@ const dataMgtInit = () => {
 				return ``;
 			}
 		}
-		return formatObject(keyStorage);
+		const result = formatObject(keyStorage);
+		viewKeyStorage.cache.set(_key, result);
+		return result;
 	}
 
 	/**
@@ -4842,7 +4853,7 @@ const dataMgtInit = () => {
 				lblTargetKey.innerHTML = `(${getKeyName(key)})`;
 			},
 		}));
-		document.getElementById(`lnk${key}`).innerHTML = getKeyName(key);
+		document.getElementById(`btn${key}`).innerHTML = getKeyName(key);
 	});
 
 	// ユーザカスタムイベント(初期)
@@ -4856,6 +4867,7 @@ const dataMgtInit = () => {
 
 		createCss2Button(`btnReset`, g_lblNameObj.b_cReset, () => {
 			reloadFlg = false;
+			const backupData = new Map();
 
 			const selectedData = Object.keys(g_stateObj)
 				.filter(key => key.startsWith('dm_') && g_stateObj[key] === C_FLG_ON)
@@ -4865,6 +4877,7 @@ const dataMgtInit = () => {
 				`\n\n${selectedData.map(val => `- ${g_msgObj[val] || g_msgObj.keyTypes.split('{0}').join(val)}`).join(`\n`)}`)) {
 				selectedData.forEach(key => {
 					if (g_resetFunc.has(key)) {
+						backupData.set(key, JSON.parse(JSON.stringify(g_localStorage)));
 						g_resetFunc.get(key)();
 						localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 
@@ -4872,15 +4885,18 @@ const dataMgtInit = () => {
 						const storage = parseStorageData(`danonicw-${key}k`);
 
 						if (Object.keys(storage).length > 0) {
+							backupData.set(key, JSON.parse(JSON.stringify(storage)));
 							g_settings.keyStorages.forEach(val => delete storage[val]);
 							localStorage.setItem(`danonicw-${key}k`, JSON.stringify(storage));
 						} else {
+							backupData.set(`XX` + key, JSON.parse(JSON.stringify(g_localStorage)));
 							g_settings.keyStorages.forEach(val => delete g_localStorage[`${val}${key}`]);
 							localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 						}
 					}
 				});
 				reloadFlg = true;
+				sessionStorage.setItem('resetBackup', JSON.stringify(Array.from(backupData.entries())));
 			}
 		}, Object.assign(g_lblPosObj.btnResetN, {
 			resetFunc: () => {
@@ -4889,7 +4905,27 @@ const dataMgtInit = () => {
 				}
 			},
 		}), g_cssObj.button_Reset),
+
+		// リカバリー用のボタン
+		createCss2Button(`btnUndo`, g_lblNameObj.b_undo, () => {
+			const backup = JSON.parse(sessionStorage.getItem('resetBackup'));
+			if (backup) {
+				backup.forEach(([key, data]) => {
+					if (g_resetFunc.has(key) || keyList.includes(key.slice(`XX`.length))) {
+						Object.assign(g_localStorage, data);
+						localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+					} else if (keyList.includes(key)) {
+						localStorage.setItem(`danonicw-${key}k`, JSON.stringify(data));
+					}
+				});
+				sessionStorage.removeItem('resetBackup');
+				location.reload();
+			}
+		}, g_lblPosObj.btnUndo, g_cssObj.button_Tweet)
 	);
+	if (sessionStorage.getItem('resetBackup') === null) {
+		btnUndo.style.display = C_DIS_NONE;
+	}
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
