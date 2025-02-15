@@ -3776,6 +3776,10 @@ const g_lang_msgObj = {
         github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
         security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
 
+        environment: `${g_settings.environments.map(v => toCapitalize(v)).join(`, `)}の設定を初期化します。`,
+        highscores: `全譜面のハイスコアを初期化します。\n個別に初期化したい場合はSettings画面より行ってください。`,
+        others: `標準以外の保存データを消去します。`,
+
         dataResetConfirm: `選択したローカル設定をクリアします。よろしいですか？\n(例えばHighscoresでは全ての譜面のハイスコアがクリアされます)`,
         keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
         highscResetConfirm: `この譜面のハイスコアを消去します。よろしいですか？`,
@@ -3857,6 +3861,10 @@ const g_lang_msgObj = {
         dataReset: `Resets the high score, adjustment information, etc. saved in this game.`,
         github: `Go to the GitHub page of Dancing Onigiri "CW Edition".`,
         security: `Go to the support information page for Dancing Onigiri "CW Edition".`,
+
+        environment: `Initialize ${g_settings.environments.map(v => toCapitalize(v)).join(`, `)} settings.`,
+        highscores: `Initializes the high score of all charts. \nIf you want to initialize each chart individually, \nplease do so from the Highscore view in the Settings screen.`,
+        others: `Delete non-standard stored data.`,
 
         dataResetConfirm: `Delete the selected local settings. Is it OK?\n(For example, in Highscores, the high scores of all scores will be initialized)`,
         keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,

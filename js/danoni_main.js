@@ -4740,7 +4740,7 @@ const dataMgtInit = () => {
 	 * @param {function} func 
 	 * @returns {HTMLDivElement}
 	 */
-	const createMgtButton = (_name, _heightPos, _widthPos, { w = 125, func = () => true } = {}) => {
+	const createMgtButton = (_name, _heightPos, _widthPos, { w = 125, func = () => true, ...rest } = {}) => {
 		const linkId = `lnk${toCapitalize(_name)}`;
 		return createCss2Button(linkId, getStgDetailName(toCapitalize(_name)), () => {
 			const prevDisp = g_settings.dataMgtNum[_name];
@@ -4756,7 +4756,7 @@ const dataMgtInit = () => {
 			func();
 		}, {
 			x: _widthPos * (w + 5) + 20, y: g_limitObj.setLblHeight * _heightPos + 40,
-			w, h: 20, siz: g_limitObj.setLblSiz, borderStyle: `solid`,
+			w, h: 20, siz: g_limitObj.setLblSiz, borderStyle: `solid`, title: g_msgObj[_name], ...rest
 		}, g_cssObj[`button_${cssBgList[g_settings.dataMgtNum[_name]]}`], g_cssObj[`button_${cssBarList[g_settings.dataMgtNum[_name]]}`]);
 	};
 
