@@ -3778,7 +3778,7 @@ const g_lang_msgObj = {
 
         environment: `${g_settings.environments.map(v => toCapitalize(v)).join(`, `)}の設定を初期化します。`,
         highscores: `全譜面のハイスコアを初期化します。\n個別に初期化したい場合はSettings画面より行ってください。`,
-        others: `標準以外の保存データを消去します。`,
+        others: `標準以外及びカスタムキーに関する保存データを消去します。`,
         keyTypes: `Key: {0} の保存データ（個別の色設定を除く）を消去します。`,
 
         dataResetConfirm: `選択したローカル設定をクリアします。よろしいですか？`,
@@ -3865,7 +3865,7 @@ const g_lang_msgObj = {
 
         environment: `Initialize ${g_settings.environments.map(v => toCapitalize(v)).join(`, `)} settings.`,
         highscores: `Initializes the high score of all charts. \nIf you want to initialize each chart individually, \nplease do so from the Highscore view in the Settings screen.`,
-        others: `Delete non-standard stored data.`,
+        others: `Delete non-standard and custom keymode stored data.`,
         keyTypes: `Deletes the stored data (except color settings) for Key: {0}.`,
 
         dataResetConfirm: `Delete the selected local settings. Is it OK?`,

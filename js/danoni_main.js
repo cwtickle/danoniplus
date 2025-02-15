@@ -4774,23 +4774,28 @@ const dataMgtInit = () => {
 	}
 
 	/**
+	 * 画面表示用インデント処理
+	 * @param {number} _level 
+	 * @returns {string}
+	 */
+	const getIndent = (_level) => '&nbsp;'.repeat(_level * 4);
+
+	/**
 	 * オブジェクトのネスト表示処理
 	 * @param {Object} _obj 
 	 * @param {Number} _indent 
 	 * @returns {string}
 	 */
 	const formatObject = (_obj, _indent = 0) => {
-		const indentation = '&nbsp;'.repeat(_indent * 4);
-		const dfIndentation = '&nbsp;'.repeat(4);
-		return `{` + Object.entries(_obj)
+		const baseIndent = getIndent(_indent);
+		const nestedIndent = getIndent(_indent + 1);
+		const formattedEntries = Object.entries(_obj)
 			.map(([key, value]) => {
-				if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-					return `<br>${indentation}${dfIndentation}"${key}": ${formatObject(value, _indent + 1)}`;
-				} else {
-					return `<br>${indentation}${dfIndentation}"${key}": ${JSON.stringify(value)}`;
-				}
-			})
-			.join(`,`) + `<br>${indentation}}`;
+				const isNestedObject = typeof value === 'object' && value !== null && !Array.isArray(value);
+				const formattedValue = isNestedObject ? formatObject(value, _indent + 1) : JSON.stringify(value);
+				return `<br>${nestedIndent}"${key}": ${formattedValue}`;
+			}).join(`,`);
+		return `{${formattedEntries}<br>${baseIndent}}`;
 	}
 
 	multiAppend(optionsprite,
@@ -4799,7 +4804,7 @@ const dataMgtInit = () => {
 		createMgtButton(`highscores`, 2.5, 0),
 		createMgtButton(`others`, 3.5, 0),
 		createMgtLabel(`keyData`, 6),
-		createDivCss2Label(`lblTargetKey`, `(${g_headerObj.keyLabels[0]})`, {
+		createDivCss2Label(`lblTargetKey`, `(${getKeyName(g_headerObj.keyLabels[0])})`, {
 			x: 90, y: g_limitObj.setLblHeight * 6 + 40,
 			siz: g_limitObj.setLblSiz, align: C_ALIGN_LEFT,
 		})
@@ -4821,9 +4826,10 @@ const dataMgtInit = () => {
 			w: Math.max(50, getStrWidth(key, g_limitObj.setLblSiz, getBasicFont())),
 			func: () => {
 				lblKeyDataView.innerHTML = viewKeyStorage(key);
-				lblTargetKey.innerHTML = `(${key})`;
+				lblTargetKey.innerHTML = `(${getKeyName(key)})`;
 			},
-		}))
+		}));
+		document.getElementById(`lnk${key}`).innerHTML = getKeyName(key);
 	});
 
 	// ユーザカスタムイベント(初期)
