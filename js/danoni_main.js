@@ -16,7 +16,7 @@ let g_localVersion = ``;
 let g_localVersion2 = ``;
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
-//  共通:water 初期化:peach タイトル:melon 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
+//  共通:water 初期化:peach タイトル:melon データ管理:pear 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
 //  シーンジャンプ:Scene
 
 /**
@@ -405,6 +405,24 @@ const splitLF2 = (_str, _delim = `$`) => splitLF(_str)?.filter(val => val !== ``
  * @returns {string[]}
  */
 const splitComma = _str => _str?.split(`, `).join(`*comma* `).split(`,`);
+
+/**
+ * ストレージ処理のパース
+ * @param {string} _keyName 
+ * @param {Object} _default 
+ * @returns {Object}
+ */
+const parseStorageData = (_keyName, _default = {}) => {
+	const storageText = localStorage.getItem(_keyName);
+	if (storageText === null) {
+		return _default;
+	}
+	try {
+		return JSON.parse(storageText);
+	} catch (err) {
+		return _default;
+	}
+}
 
 /**
  * 重複を排除した配列の生成
@@ -2351,9 +2369,8 @@ const loadLocalStorage = () => {
 	};
 
 	// ロケールの読込、警告メッセージの入替
-	const checkLocale = localStorage.getItem(`danoni-locale`);
-	if (checkLocale) {
-		g_langStorage = JSON.parse(checkLocale);
+	g_langStorage = parseStorageData(`danoni-locale`);
+	if (g_langStorage.locale !== undefined) {
 		g_localeObj.val = g_langStorage.locale;
 		g_localeObj.num = g_localeObj.list.findIndex(val => val === g_localeObj.val);
 	}
@@ -2361,34 +2378,25 @@ const loadLocalStorage = () => {
 	Object.assign(g_kCd, g_lang_kCd[g_localeObj.val]);
 
 	// 作品別ローカルストレージの読込
-	const checkStorage = localStorage.getItem(g_localStorageUrl);
-	if (checkStorage) {
-		g_localStorage = JSON.parse(checkStorage);
+	g_localStorage = parseStorageData(g_localStorageUrl, {
+		adjustment: 0, hitPosition: 0, volume: 100, highscores: {},
+	});
 
-		// Adjustment, Volume, Appearance, Opacity, HitPosition初期値設定
-		checkLocalParam(`adjustment`, C_TYP_FLOAT, g_settings.adjustmentNum);
-		checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
-		checkLocalParam(`appearance`);
-		checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
-		checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
+	// Adjustment, Volume, Appearance, Opacity, HitPosition初期値設定
+	checkLocalParam(`adjustment`, C_TYP_FLOAT, g_settings.adjustmentNum);
+	checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
+	checkLocalParam(`appearance`);
+	checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
+	checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
 
-		// ハイスコア取得準備
-		if (g_localStorage.highscores === undefined) {
-			g_localStorage.highscores = {};
-		}
-
-		// 廃棄済みリストからデータを消去
-		g_storeSettingsEx.filter(val => g_localStorage[val] !== undefined)
-			.forEach(val => delete g_localStorage[val]);
-
-	} else {
-		g_localStorage = {
-			adjustment: 0,
-			hitPosition: 0,
-			volume: 100,
-			highscores: {},
-		};
+	// ハイスコア取得準備
+	if (g_localStorage.highscores === undefined) {
+		g_localStorage.highscores = {};
 	}
+
+	// 廃棄済みリストからデータを消去
+	g_storeSettingsEx.filter(val => g_localStorage[val] !== undefined)
+		.forEach(val => delete g_localStorage[val]);
 };
 
 /**
@@ -4477,8 +4485,6 @@ const titleInit = () => {
 	}
 	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
 	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${customVersion}${releaseDate}`;
-
-	let reloadFlg = false;
 	const getLinkSiz = _name => getFontSize(_name, g_sWidth / 2 - 20, getBasicFont(), g_limitObj.lnkSiz, 12);
 
 	/**
@@ -4502,23 +4508,9 @@ const titleInit = () => {
 
 		// Reset
 		createCss2Button(`btnReset`, g_lblNameObj.dataReset, () => {
-			reloadFlg = false;
-			if (window.confirm(g_msgObj.dataResetConfirm)) {
-				g_localStorage = {
-					adjustment: 0,
-					volume: 100,
-					highscores: {},
-				};
-				localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
-				reloadFlg = true;
-			}
-		}, Object.assign(g_lblPosObj.btnReset, {
-			resetFunc: () => {
-				if (reloadFlg) {
-					location.reload();
-				}
-			},
-		}), g_cssObj.button_Reset),
+			clearTimeout(g_timeoutEvtTitleId);
+			dataMgtInit();
+		}, g_lblPosObj.btnReset, g_cssObj.button_Reset),
 
 		// ロケール切替
 		createCss2Button(`btnReload`, g_localeObj.val, () => true,
@@ -4700,6 +4692,249 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 	return lbl;
 };
 
+/*-----------------------------------------------------------*/
+/* Scene : DATA MANAGEMENT [pear] */
+/*-----------------------------------------------------------*/
+
+const dataMgtInit = () => {
+	clearWindow(true);
+	g_currentPage = `dataMgt`;
+
+	multiAppend(divRoot,
+
+		// 画面タイトル
+		getTitleDivLabel(`lblTitle`,
+			`<div class="settings_Title">DATA</div><div class="settings_Title2">MANAGEMENT</div>`
+				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
+
+		createDescDiv(`dataDelMsg`, g_lblNameObj.dataDeleteDesc),
+	);
+
+	// 各ボタン用のスプライトを作成
+	const optionsprite = createEmptySprite(divRoot, `optionsprite`, g_windowObj.optionSprite);
+
+	let reloadFlg = false;
+	const list = [C_FLG_OFF, C_FLG_ON];
+	const cssBarList = [C_FLG_OFF, C_FLG_ON];
+	const cssBgList = [g_settings.d_cssBgName, g_settings.d_cssBgName];
+
+	/**
+	 * データ管理用ラベルの作成
+	 * @param {string} _name 
+	 * @param {number} _heightPos 
+	 * @param {number} [x=0] 
+	 * @returns {HTMLDivElement}
+	 */
+	const createMgtLabel = (_name, _heightPos, { x = 0 } = {}) =>
+		createDivCss2Label(`lbl${toCapitalize(_name)}`, getStgDetailName(toCapitalize(_name)), {
+			x, y: g_limitObj.setLblHeight * _heightPos + 40,
+			siz: g_limitObj.setLblSiz, align: C_ALIGN_LEFT,
+		});
+
+	/**
+	 * データ管理用ボタンの作成
+	 * @param {string} _name 
+	 * @param {number} _heightPos 
+	 * @param {number} _widthPos 
+	 * @param {number} [w=125]
+	 * @param {function} func 
+	 * @returns {HTMLDivElement}
+	 */
+	const createMgtButton = (_name, _heightPos, _widthPos, { w = 125, func = () => true, ...rest } = {}) => {
+		const linkId = `btn${toCapitalize(_name)}`;
+		return createCss2Button(linkId, getStgDetailName(toCapitalize(_name)), () => {
+			const prevDisp = g_settings.dataMgtNum[_name];
+			const [prevBarColor, prevBgColor] = [cssBarList[prevDisp], cssBgList[prevDisp]];
+
+			g_settings.dataMgtNum[_name] = (g_settings.dataMgtNum[_name] + 1) % 2;
+			g_stateObj[`dm_${_name}`] = list[g_settings.dataMgtNum[_name]];
+
+			const nextDisp = g_settings.dataMgtNum[_name];
+			const [nextBarColor, nextBgColor] = [cssBarList[nextDisp], cssBgList[nextDisp]];
+			document.getElementById(linkId).classList.replace(g_cssObj[`button_${prevBarColor}`], g_cssObj[`button_${nextBarColor}`]);
+			document.getElementById(linkId).classList.replace(g_cssObj[`button_${prevBgColor}`], g_cssObj[`button_${nextBgColor}`]);
+			func();
+		}, {
+			x: _widthPos * (w + 5) + 20, y: g_limitObj.setLblHeight * _heightPos + 40,
+			w, h: 20, siz: g_limitObj.setLblSiz, borderStyle: `solid`, title: g_msgObj[_name], ...rest
+		}, g_cssObj[`button_${cssBgList[g_settings.dataMgtNum[_name]]}`], g_cssObj[`button_${cssBarList[g_settings.dataMgtNum[_name]]}`]);
+	};
+
+	/**
+	 * キー別ストレージ情報の取得
+	 * @param {string} _key 
+	 * @returns {string}
+	 */
+	const viewKeyStorage = _key => {
+
+		// キャッシュ設定
+		if (!viewKeyStorage.cache) {
+			viewKeyStorage.cache = new Map();
+		}
+		if (viewKeyStorage.cache.has(_key)) {
+			return viewKeyStorage.cache.get(_key);
+		}
+
+		let keyStorage = parseStorageData(`danonicw-${_key}k`);
+		if (Object.keys(keyStorage).length === 0) {
+
+			// キー別の情報が見つからない場合は作品別の情報から検索
+			Object.keys(g_localStorage).filter(val => val.endsWith(_key))
+				.forEach(val => keyStorage[val] = g_localStorage[val]);
+			if (Object.keys(keyStorage).length === 0) {
+				return ``;
+			}
+		}
+		const result = formatObject(keyStorage);
+		viewKeyStorage.cache.set(_key, result);
+		return result;
+	}
+
+	/**
+	 * 画面表示用インデント処理
+	 * @param {number} _level 
+	 * @returns {string}
+	 */
+	const getIndent = (_level) => '&nbsp;'.repeat(_level * 4);
+
+	/**
+	 * オブジェクトのネスト表示処理
+	 * @param {Object} _obj 
+	 * @param {Number} _indent 
+	 * @returns {string}
+	 */
+	const formatObject = (_obj, _indent = 0) => {
+		const baseIndent = getIndent(_indent);
+		const nestedIndent = getIndent(_indent + 1);
+		const formattedEntries = Object.entries(_obj)
+			.map(([key, value]) => {
+				const isNestedObject = typeof value === 'object' && value !== null && !Array.isArray(value);
+				const formattedValue = isNestedObject ? formatObject(value, _indent + 1) : JSON.stringify(value);
+				return `<br>${nestedIndent}"${key}": ${formattedValue}`;
+			}).join(`,`);
+		return `{${formattedEntries}<br>${baseIndent}}`;
+	}
+
+	multiAppend(optionsprite,
+		createMgtLabel(`workData`, 0),
+		createMgtButton(`environment`, 1.5, 0),
+		createMgtButton(`highscores`, 2.5, 0),
+		createMgtButton(`customKey`, 3.5, 0),
+		createMgtButton(`others`, 4.5, 0),
+		createMgtLabel(`keyData`, 6),
+		createDivCss2Label(`lblTargetKey`, `(${getKeyName(g_headerObj.keyLabels[0])})`, {
+			x: 90, y: g_limitObj.setLblHeight * 6 + 40,
+			siz: g_limitObj.setLblSiz, align: C_ALIGN_LEFT,
+		})
+	);
+
+	// カスタムキー定義のストレージデータを表示から除去
+	const settingStorage = {};
+	Object.keys(g_localStorage).filter(val => !listMatching(val, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
+		.forEach(val => settingStorage[val] = g_localStorage[val]);
+
+	multiAppend(divRoot,
+		createDivCss2Label(`lblWorkDataView`,
+			formatObject(settingStorage), g_lblPosObj.lblWorkDataView),
+		createDivCss2Label(`lblKeyDataView`, viewKeyStorage(g_headerObj.keyLabels[0]), g_lblPosObj.lblKeyDataView),
+	);
+	setUserSelect($id(`lblWorkDataView`), `text`);
+	setUserSelect($id(`lblKeyDataView`), `text`);
+
+	const keyList = makeDedupliArray(g_headerObj.keyLabels).sort((a, b) => parseInt(a) - parseInt(b));
+	const keyListSprite = createEmptySprite(optionsprite, `keyListSprite`, g_windowObj.keyListSprite);
+	keyList.forEach((key, j) => {
+		g_stateObj[`dm_${key}`] = C_FLG_OFF;
+		g_settings.dataMgtNum[key] = 0;
+		keyListSprite.appendChild(createMgtButton(key, j - 2, 0, {
+			w: Math.max(50, getStrWidth(getKeyName(key) + `    `, g_limitObj.setLblSiz, getBasicFont())),
+			func: () => {
+				lblKeyDataView.innerHTML = viewKeyStorage(key);
+				lblTargetKey.innerHTML = `(${getKeyName(key)})`;
+			},
+		}));
+		document.getElementById(`btn${key}`).innerHTML = getKeyName(key);
+	});
+
+	// ユーザカスタムイベント(初期)
+	g_customJsObj.dataMgt.forEach(func => func());
+
+	multiAppend(divRoot,
+		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
+			Object.assign(g_lblPosObj.btnBack, {
+				animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: () => titleInit(),
+			}), g_cssObj.button_Back),
+
+		createCss2Button(`btnReset`, g_lblNameObj.b_cReset, () => {
+			reloadFlg = false;
+			const backupData = new Map();
+
+			const selectedData = Object.keys(g_stateObj)
+				.filter(key => key.startsWith('dm_') && g_stateObj[key] === C_FLG_ON)
+				.map(key => key.slice(`dm_`.length));
+
+			if (window.confirm(g_msgObj.dataResetConfirm +
+				`\n\n${selectedData.map(val => `- ${g_msgObj[val] || g_msgObj.keyTypes.split('{0}').join(val)}`).join(`\n`)}`)) {
+				selectedData.forEach(key => {
+					if (g_resetFunc.has(key)) {
+						backupData.set(key, JSON.parse(JSON.stringify(g_localStorage)));
+						g_resetFunc.get(key)();
+						localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+
+					} else if (keyList.includes(key)) {
+						const storage = parseStorageData(`danonicw-${key}k`);
+
+						if (Object.keys(storage).length > 0) {
+							backupData.set(key, JSON.parse(JSON.stringify(storage)));
+							g_settings.keyStorages.forEach(val => delete storage[val]);
+							localStorage.setItem(`danonicw-${key}k`, JSON.stringify(storage));
+						} else {
+							backupData.set(`XX` + key, JSON.parse(JSON.stringify(g_localStorage)));
+							g_settings.keyStorages.forEach(val => delete g_localStorage[`${val}${key}`]);
+							localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+						}
+					}
+				});
+				reloadFlg = true;
+				sessionStorage.setItem('resetBackup', JSON.stringify(Array.from(backupData.entries())));
+			}
+		}, Object.assign(g_lblPosObj.btnResetN, {
+			resetFunc: () => {
+				if (reloadFlg) {
+					location.reload();
+				}
+			},
+		}), g_cssObj.button_Reset),
+
+		// リカバリー用のボタン
+		createCss2Button(`btnUndo`, g_lblNameObj.b_undo, () => {
+			const backup = JSON.parse(sessionStorage.getItem('resetBackup'));
+			if (backup && window.confirm(g_msgObj.dataRestoreConfirm)) {
+				backup.forEach(([key, data]) => {
+					if (g_resetFunc.has(key) || keyList.includes(key.slice(`XX`.length))) {
+						Object.assign(g_localStorage, data);
+						localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+					} else if (keyList.includes(key)) {
+						localStorage.setItem(`danonicw-${key}k`, JSON.stringify(data));
+					}
+				});
+				sessionStorage.removeItem('resetBackup');
+				location.reload();
+			}
+		}, g_lblPosObj.btnUndo, g_cssObj.button_Tweet)
+	);
+	if (sessionStorage.getItem('resetBackup') === null) {
+		btnUndo.style.display = C_DIS_NONE;
+	}
+
+	// キー操作イベント（デフォルト）
+	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
+
+	document.oncontextmenu = () => true;
+	divRoot.oncontextmenu = () => false;
+
+	g_skinJsObj.dataMgt.forEach(func => func());
+};
 
 /*-----------------------------------------------------------*/
 /* Scene : SETTINGS [lime] */
@@ -4744,6 +4979,11 @@ const commonSettingBtn = _labelName => {
 			Object.assign(g_lblPosObj.btnSave, {
 				cxtFunc: evt => switchSave(evt),
 			}), g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF)),
+
+		// データ管理画面へ移動
+		createCss2Button(`btnReset`, g_lblNameObj.dataReset, () => {
+			dataMgtInit();
+		}, g_lblPosObj.btnReset, g_cssObj.button_Reset),
 	);
 };
 
@@ -5478,18 +5718,17 @@ const setDifficulty = (_initFlg) => {
 			g_keyObj.currentPtn = 0;
 			g_keycons.keySwitchNum = 0;
 		}
-		const hasKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
 		let storageObj, addKey = ``;
 
 		if (!g_stateObj.extraKeyFlg) {
 
 			// キー別のローカルストレージの初期設定 ※特殊キーは除く
-			g_localKeyStorage = hasKeyStorage ? JSON.parse(hasKeyStorage) : {
+			g_localKeyStorage = parseStorageData(`danonicw-${g_keyObj.currentKey}k`, {
 				reverse: C_FLG_OFF,
 				keyCtrl: [[]],
 				keyCtrlPtn: 0,
 				setColor: [],
-			};
+			});
 			storageObj = g_localKeyStorage;
 
 		} else {
