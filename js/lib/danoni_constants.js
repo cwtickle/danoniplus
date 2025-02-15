@@ -3779,8 +3779,9 @@ const g_lang_msgObj = {
         environment: `${g_settings.environments.map(v => toCapitalize(v)).join(`, `)}の設定を初期化します。`,
         highscores: `全譜面のハイスコアを初期化します。\n個別に初期化したい場合はSettings画面より行ってください。`,
         others: `標準以外の保存データを消去します。`,
+        keyTypes: `Key: {0} の保存データ（個別の色設定を除く）を消去します。`,
 
-        dataResetConfirm: `選択したローカル設定をクリアします。よろしいですか？\n(例えばHighscoresでは全ての譜面のハイスコアがクリアされます)`,
+        dataResetConfirm: `選択したローカル設定をクリアします。よろしいですか？`,
         keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
         highscResetConfirm: `この譜面のハイスコアを消去します。よろしいですか？`,
         colorCopyConfirm: `フリーズアローの配色を矢印色に置き換えます\n(通常・ヒット時双方を置き換えます)。よろしいですか？`,
@@ -3865,8 +3866,9 @@ const g_lang_msgObj = {
         environment: `Initialize ${g_settings.environments.map(v => toCapitalize(v)).join(`, `)} settings.`,
         highscores: `Initializes the high score of all charts. \nIf you want to initialize each chart individually, \nplease do so from the Highscore view in the Settings screen.`,
         others: `Delete non-standard stored data.`,
+        keyTypes: `Deletes the stored data (except individual color settings) for Key: {0}.`,
 
-        dataResetConfirm: `Delete the selected local settings. Is it OK?\n(For example, in Highscores, the high scores of all scores will be initialized)`,
+        dataResetConfirm: `Delete the selected local settings. Is it OK?`,
         keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,
         highscResetConfirm: `Erases the high score for this chart. Is it OK?`,
         colorCopyConfirm: `Replace freeze arrow color scheme with arrow color\n(replace both normal and hit). Is this OK?`,

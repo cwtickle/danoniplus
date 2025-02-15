@@ -4822,26 +4822,28 @@ const dataMgtInit = () => {
 		createCss2Button(`btnReset`, g_lblNameObj.b_cReset, () => {
 			reloadFlg = false;
 
-			if (window.confirm(g_msgObj.dataResetConfirm)) {
-				Object.keys(g_stateObj).filter(key =>
-					key.startsWith(`dm_`) && g_stateObj[key] === C_FLG_ON)
-					.forEach(key => {
-						const orgKey = key.slice(`dm_`.length);
-						if (g_resetFunc.has(orgKey)) {
-							g_resetFunc.get(orgKey)();
-							localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+			const selectedData = Object.keys(g_stateObj)
+				.filter(key => key.startsWith('dm_') && g_stateObj[key] === C_FLG_ON)
+				.map(key => key.slice(`dm_`.length));
 
-						} else if (keyList.includes(orgKey)) {
-							const storage = parseStorageData(`danonicw-${orgKey}k`);
-							delete storage.reverse;
-							delete storage.keyCtrl;
-							delete storage.keyCtrlPtn;
-							delete storage.shuffle;
-							delete storage.color;
-							delete storage.stepRtn;
-							localStorage.setItem(`danonicw-${orgKey}k`, JSON.stringify(storage));
-						}
-					});
+			if (window.confirm(g_msgObj.dataResetConfirm +
+				`\n\n${selectedData.map(val => `- ${g_msgObj[val] || g_msgObj.keyTypes.split('{0}').join(val)}`).join(`\n`)}`)) {
+				selectedData.forEach(key => {
+					if (g_resetFunc.has(key)) {
+						g_resetFunc.get(key)();
+						localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+
+					} else if (keyList.includes(key)) {
+						const storage = parseStorageData(`danonicw-${key}k`);
+						delete storage.reverse;
+						delete storage.keyCtrl;
+						delete storage.keyCtrlPtn;
+						delete storage.shuffle;
+						delete storage.color;
+						delete storage.stepRtn;
+						localStorage.setItem(`danonicw-${key}k`, JSON.stringify(storage));
+					}
+				});
 				reloadFlg = true;
 			}
 		}, Object.assign(g_lblPosObj.btnResetN, {
