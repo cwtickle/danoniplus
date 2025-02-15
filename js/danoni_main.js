@@ -4796,7 +4796,7 @@ const dataMgtInit = () => {
 	setUserSelect($id(`lblWorkDataView`), `text`);
 	setUserSelect($id(`lblKeyDataView`), `text`);
 
-	const keyList = makeDedupliArray(g_headerObj.keyLabels);
+	const keyList = makeDedupliArray(g_headerObj.keyLabels).sort((a, b) => parseInt(a) - parseInt(b));
 	const keyListSprite = createEmptySprite(optionsprite, `keyListSprite`, g_windowObj.keyListSprite);
 	keyList.forEach((key, j) => {
 		g_stateObj[`dm_${key}`] = C_FLG_OFF;
