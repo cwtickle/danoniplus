@@ -407,6 +407,24 @@ const splitLF2 = (_str, _delim = `$`) => splitLF(_str)?.filter(val => val !== ``
 const splitComma = _str => _str?.split(`, `).join(`*comma* `).split(`,`);
 
 /**
+ * ストレージ処理のパース
+ * @param {string} _keyName 
+ * @param {Object} _default 
+ * @returns {Object}
+ */
+const parseStorageData = (_keyName, _default = {}) => {
+	const storageText = localStorage.getItem(_keyName);
+	if (storageText === null) {
+		return _default;
+	}
+	try {
+		return JSON.parse(storageText);
+	} catch (err) {
+		return _default;
+	}
+}
+
+/**
  * 重複を排除した配列の生成
  * @param {any[]} _array1 
  * @param {...any} [_arrays]
@@ -2351,9 +2369,8 @@ const loadLocalStorage = () => {
 	};
 
 	// ロケールの読込、警告メッセージの入替
-	const checkLocale = localStorage.getItem(`danoni-locale`);
-	if (checkLocale) {
-		g_langStorage = JSON.parse(checkLocale);
+	g_langStorage = parseStorageData(`danoni-locale`);
+	if (g_langStorage.locale !== undefined) {
 		g_localeObj.val = g_langStorage.locale;
 		g_localeObj.num = g_localeObj.list.findIndex(val => val === g_localeObj.val);
 	}
@@ -2361,34 +2378,25 @@ const loadLocalStorage = () => {
 	Object.assign(g_kCd, g_lang_kCd[g_localeObj.val]);
 
 	// 作品別ローカルストレージの読込
-	const checkStorage = localStorage.getItem(g_localStorageUrl);
-	if (checkStorage) {
-		g_localStorage = JSON.parse(checkStorage);
+	g_localStorage = parseStorageData(g_localStorageUrl, {
+		adjustment: 0, hitPosition: 0, volume: 100, highscores: {},
+	});
 
-		// Adjustment, Volume, Appearance, Opacity, HitPosition初期値設定
-		checkLocalParam(`adjustment`, C_TYP_FLOAT, g_settings.adjustmentNum);
-		checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
-		checkLocalParam(`appearance`);
-		checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
-		checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
+	// Adjustment, Volume, Appearance, Opacity, HitPosition初期値設定
+	checkLocalParam(`adjustment`, C_TYP_FLOAT, g_settings.adjustmentNum);
+	checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
+	checkLocalParam(`appearance`);
+	checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
+	checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
 
-		// ハイスコア取得準備
-		if (g_localStorage.highscores === undefined) {
-			g_localStorage.highscores = {};
-		}
-
-		// 廃棄済みリストからデータを消去
-		g_storeSettingsEx.filter(val => g_localStorage[val] !== undefined)
-			.forEach(val => delete g_localStorage[val]);
-
-	} else {
-		g_localStorage = {
-			adjustment: 0,
-			hitPosition: 0,
-			volume: 100,
-			highscores: {},
-		};
+	// ハイスコア取得準備
+	if (g_localStorage.highscores === undefined) {
+		g_localStorage.highscores = {};
 	}
+
+	// 廃棄済みリストからデータを消去
+	g_storeSettingsEx.filter(val => g_localStorage[val] !== undefined)
+		.forEach(val => delete g_localStorage[val]);
 };
 
 /**
@@ -4710,12 +4718,28 @@ const dataMgtInit = () => {
 	const cssBarList = [C_FLG_OFF, C_FLG_ON];
 	const cssBgList = [g_settings.d_cssBgName, g_settings.d_cssBgName];
 
+	/**
+	 * データ管理用ラベルの作成
+	 * @param {string} _name 
+	 * @param {number} _heightPos 
+	 * @param {number} [x=0] 
+	 * @returns {HTMLDivElement}
+	 */
 	const createMgtLabel = (_name, _heightPos, { x = 0 } = {}) =>
 		createDivCss2Label(`lbl${toCapitalize(_name)}`, getStgDetailName(toCapitalize(_name)), {
 			x, y: g_limitObj.setLblHeight * _heightPos + 40,
 			siz: g_limitObj.setLblSiz, align: C_ALIGN_LEFT,
 		});
 
+	/**
+	 * データ管理用ボタンの作成
+	 * @param {string} _name 
+	 * @param {number} _heightPos 
+	 * @param {number} _widthPos 
+	 * @param {number} [w=125]
+	 * @param {function} func 
+	 * @returns {HTMLDivElement}
+	 */
 	const createMgtButton = (_name, _heightPos, _widthPos, { w = 125, func = () => true } = {}) => {
 		const linkId = `lnk${toCapitalize(_name)}`;
 		return createCss2Button(linkId, getStgDetailName(toCapitalize(_name)), () => {
@@ -4736,13 +4760,17 @@ const dataMgtInit = () => {
 		}, g_cssObj[`button_${cssBgList[g_settings.dataMgtNum[_name]]}`], g_cssObj[`button_${cssBarList[g_settings.dataMgtNum[_name]]}`]);
 	};
 
+	/**
+	 * キー別ストレージ情報の取得
+	 * @param {string} _key 
+	 * @returns {string}
+	 */
 	const viewKeyStorage = _key => {
-		const keyStorageText = localStorage.getItem(`danonicw-${_key}k`);
-		if (keyStorageText === null) {
+		const keyStorage = parseStorageData(`danonicw-${_key}k`);
+		if (Object.keys(keyStorage).length === 0) {
 			return ``;
 		}
-		const keyStorage = JSON.parse(keyStorageText);
-		let tmpText = JSON.stringify(keyStorage).replaceAll(`}`, `,<br>}`);
+		let tmpText = JSON.stringify(keyStorage)?.replaceAll(`}`, `,<br>}`);
 
 		Object.keys(keyStorage).forEach(key =>
 			tmpText = tmpText.replaceAll(`\"${key}\":`, `<br>&nbsp;&nbsp;&nbsp;&nbsp;"${key}":`));
@@ -4814,17 +4842,14 @@ const dataMgtInit = () => {
 							localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 
 						} else if (keyList.includes(orgKey)) {
-							const storageText = localStorage.getItem(`danonicw-${orgKey}k`);
-							if (storageText !== null) {
-								const storage = JSON.parse(storageText);
-								delete storage.reverse;
-								delete storage.keyCtrl;
-								delete storage.keyCtrlPtn;
-								delete storage.shuffle;
-								delete storage.color;
-								delete storage.stepRtn;
-								localStorage.setItem(`danonicw-${orgKey}k`, JSON.stringify(storage));
-							}
+							const storage = parseStorageData(`danonicw-${orgKey}k`);
+							delete storage.reverse;
+							delete storage.keyCtrl;
+							delete storage.keyCtrlPtn;
+							delete storage.shuffle;
+							delete storage.color;
+							delete storage.stepRtn;
+							localStorage.setItem(`danonicw-${orgKey}k`, JSON.stringify(storage));
 						}
 					});
 				reloadFlg = true;
@@ -5624,18 +5649,17 @@ const setDifficulty = (_initFlg) => {
 			g_keyObj.currentPtn = 0;
 			g_keycons.keySwitchNum = 0;
 		}
-		const hasKeyStorage = localStorage.getItem(`danonicw-${g_keyObj.currentKey}k`);
 		let storageObj, addKey = ``;
 
 		if (!g_stateObj.extraKeyFlg) {
 
 			// キー別のローカルストレージの初期設定 ※特殊キーは除く
-			g_localKeyStorage = hasKeyStorage ? JSON.parse(hasKeyStorage) : {
+			g_localKeyStorage = parseStorageData(`danonicw-${g_keyObj.currentKey}k`, {
 				reverse: C_FLG_OFF,
 				keyCtrl: [[]],
 				keyCtrlPtn: 0,
 				setColor: [],
-			};
+			});
 			storageObj = g_localKeyStorage;
 
 		} else {
