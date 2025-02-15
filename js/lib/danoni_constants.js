@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/02/13 (v39.4.3)
+ * Revised : 2025/02/15 (v39.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -93,6 +93,7 @@ const g_limitObj = {
 
 /** 設定項目の位置 */
 const g_settingPos = {
+    dataMgt: {},
     option: {
         difficulty: { heightPos: 0, y: -5, dw: 0, dh: 10 },
         speed: { heightPos: 2, y: 0, dw: 0, dh: 0 },
@@ -167,6 +168,7 @@ const g_windowObj = {
     divBack: { background: `linear-gradient(#000000, #222222)` },
 
     colorPickSprite: { x: 0, y: 90, w: 50, h: 280 },
+    keyListSprite: { x: 0, y: g_limitObj.setLblHeight * 7.5 + 40, w: 150, h: 120, overflow: C_DIS_AUTO },
 };
 
 const g_lblPosObj = {};
@@ -237,6 +239,27 @@ const updateWindowSiz = () => {
         },
         btnComment: {
             x: g_btnX(1) - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
+        },
+
+        /** データ管理 */
+        dataDelMsg: {
+            x: 0, y: 65, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz,
+        },
+        btnResetN: {
+            x: g_btnX(1 / 3), y: g_sHeight - 100, w: g_btnWidth(1 / 3), h: g_limitObj.btnHeight,
+        },
+        btnUndo: {
+            x: g_btnX(2 / 3), y: g_sHeight - 100, w: g_btnWidth(1 / 3), h: g_limitObj.btnHeight,
+        },
+        lblWorkDataView: {
+            x: g_btnX(5 / 12), y: 100, w: g_btnWidth(1 / 2), h: g_sHeight / 4, siz: 12, align: C_ALIGN_LEFT,
+            overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
+            whiteSpace: `nowrap`,
+        },
+        lblKeyDataView: {
+            x: g_btnX(5 / 12), y: 100 + g_sHeight / 4 + 10, w: g_btnWidth(1 / 2), h: g_sHeight / 3 - 10, siz: 12, align: C_ALIGN_LEFT,
+            overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
+            whiteSpace: `nowrap`,
         },
 
         /** 設定画面 */
@@ -940,6 +963,11 @@ const g_stateObj = {
     rotateEnabled: true,
     flatStepHeight: C_ARW_WIDTH,
 
+    dm_environment: C_FLG_OFF,
+    dm_highscores: C_FLG_OFF,
+    dm_customKey: C_FLG_OFF,
+    dm_others: C_FLG_OFF,
+
     layerNum: 2,
 };
 
@@ -989,6 +1017,16 @@ const makeSpeedList = (_minSpd, _maxSpd) => [...Array((_maxSpd - _minSpd) * 20 +
 
 // 設定系全般管理
 const g_settings = {
+
+    dataMgtNum: {
+        environment: 0,
+        highscores: 0,
+        customKey: 0,
+        others: 0,
+    },
+    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`],
+    keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`],
+
     speeds: makeSpeedList(C_MIN_SPEED, C_MAX_SPEED),
     speedNum: 0,
     speedTerms: [20, 5, 1],
@@ -1246,6 +1284,24 @@ const resetXY = () => {
     Object.keys(g_posXs).forEach(_id => delete g_posXs[_id]);
     Object.keys(g_posYs).forEach(_id => delete g_posYs[_id]);
 };
+
+/**
+ * データ消去用管理関数
+ */
+const g_resetFunc = new Map([
+    ['highscores', () => {
+        delete g_localStorage.highscores;
+        g_localStorage.highscores = {};
+    }],
+    ['environment', () => g_settings.environments.forEach(key => delete g_localStorage[key])],
+    [`customKey`, () => Object.keys(g_localStorage)
+        .filter(key => listMatching(key, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
+        .forEach(key => delete g_localStorage[key])],
+    [`others`, () => Object.keys(g_localStorage)
+        .filter(key => !g_settings.environments.includes(key) && key !== `highscores` &&
+            !listMatching(key, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
+        .forEach(key => delete g_localStorage[key])],
+]);
 
 /**
  * シャッフル適用関数
@@ -1880,6 +1936,16 @@ const g_shortcutObj = {
         F1: { id: `btnHelp`, reset: true },
         ControlLeft_KeyC: { id: `` },
         KeyC: { id: `btnComment` },
+        KeyD: { id: `btnReset` },
+    },
+    dataMgt: {
+        KeyE: { id: `btnEnvironment` },
+        KeyH: { id: `btnHighscores` },
+        KeyK: { id: `btnCustomKey` },
+        KeyO: { id: `btnOthers` },
+        Escape: { id: `btnBack` },
+        ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
     },
     option: {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
@@ -2147,6 +2213,8 @@ const g_shortcutObj = {
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
+        ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
         Tab: { id: `btnexSetting` },
     },
     keyConfig: {
@@ -2178,6 +2246,7 @@ const g_shortcutObj = {
 const g_btnWaitFrame = {
     initial: { b_frame: 0, s_frame: 0 },
     title: { b_frame: 0, s_frame: 0 },
+    dataMgt: { b_frame: 0, s_frame: 0 },
     option: { b_frame: 0, s_frame: 0, initial: true },
     difSelector: { b_frame: 0, s_frame: 0 },
     settingsDisplay: { b_frame: 0, s_frame: 0 },
@@ -2192,6 +2261,7 @@ const g_btnWaitFrame = {
 // 主要ボタンのリスト
 const g_btnPatterns = {
     title: { Start: 0, Comment: -10 },
+    dataMgt: { Back: 0, Environment: -35, Highscores: -35, CustomKey: -35, Others: -35 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
     difSelector: {},
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5 },
@@ -3359,7 +3429,7 @@ const g_lblNameObj = {
     maker: `Maker`,
     artist: `Artist`,
 
-    dataReset: `Data Reset`,
+    dataReset: `Data Management`,
     dataSave: `Data Save`,
     clickHere: `Click Here!!`,
     comment: `Comment`,
@@ -3371,6 +3441,7 @@ const g_lblNameObj = {
     b_keyConfig: `KeyConfig`,
     b_play: `PLAY!`,
     b_reset: `Reset Key`,
+    b_undo: `Restore`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
     b_tweet: `Post X`,
@@ -3612,6 +3683,8 @@ const g_linkObj = {
  */
 const g_lang_lblNameObj = {
     Ja: {
+        dataDeleteDesc: `消去したいデータの種類を選んで「Reset」を押してください`,
+
         kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
         kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを変更`,
         kcNoShuffleDesc: `矢印をクリックでカラーグループを変更`,
@@ -3653,6 +3726,8 @@ const g_lang_lblNameObj = {
         securityUrl: `https://github.com/cwtickle/danoniplus/security/policy`,
     },
     En: {
+        dataDeleteDesc: `Select the type of data you wish to delete and press "Reset".`,
+
         kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
         kcShuffleDesc: `Click the number to change the shuffle group, and click the arrow to change the color.`,
         kcNoShuffleDesc: `Click the arrow to change the color group.`,
@@ -3713,7 +3788,14 @@ const g_lang_msgObj = {
         github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
         security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
 
-        dataResetConfirm: `この作品のローカル設定をクリアします。よろしいですか？\n(ハイスコアやAdjustment等のデータが全てクリアされます)`,
+        environment: `${g_settings.environments.map(v => toCapitalize(v)).join(`, `)}の設定を初期化します。`,
+        highscores: `全譜面のハイスコアを初期化します。\n個別に初期化したい場合はSettings画面より行ってください。`,
+        customKey: `カスタムキーに関する全ての保存データを消去します。\n下記のKeyDataから個別に消去可能できないときに使用してください。`,
+        others: `標準以外に関する保存データを消去します。`,
+        keyTypes: `Key: {0} の保存データ（個別の色設定を除く）を消去します。`,
+
+        dataResetConfirm: `選択したローカル設定をクリアします。よろしいですか？`,
+        dataRestoreConfirm: `ローカル設定を前回の状態に戻します（１回限り）。よろしいですか？\n消去した設定によっては今の設定が上書きされることがあります。`,
         keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
         highscResetConfirm: `この譜面のハイスコアを消去します。よろしいですか？`,
         colorCopyConfirm: `フリーズアローの配色を矢印色に置き換えます\n(通常・ヒット時双方を置き換えます)。よろしいですか？`,
@@ -3795,7 +3877,14 @@ const g_lang_msgObj = {
         github: `Go to the GitHub page of Dancing Onigiri "CW Edition".`,
         security: `Go to the support information page for Dancing Onigiri "CW Edition".`,
 
-        dataResetConfirm: `Delete the local settings in this game. Is it OK?\n(High score, adjustment, volume and some settings will be initialized)`,
+        environment: `Initialize ${g_settings.environments.map(v => toCapitalize(v)).join(`, `)} settings.`,
+        highscores: `Initializes the high score of all charts. \nIf you want to initialize each chart individually, \nplease do so from the Highscore view in the Settings screen.`,
+        customKey: `Delete stored data related to all custom keymodes. Use this option when you cannot delete individual KeyData from the following KeyData`,
+        others: `Delete non-standard stored data.`,
+        keyTypes: `Deletes the stored data (except color settings) for Key: {0}.`,
+
+        dataResetConfirm: `Delete the selected local settings. Is it OK?`,
+        dataRestoreConfirm: `Restore local settings to previous state (one time only). Is it OK?\nSome deleted settings may overwrite the current settings.`,
         keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,
         highscResetConfirm: `Erases the high score for this chart. Is it OK?`,
         colorCopyConfirm: `Replace freeze arrow color scheme with arrow color\n(replace both normal and hit). Is this OK?`,
@@ -3878,8 +3967,10 @@ const g_lang_msgObj = {
  */
 const g_errMsgObj = {
     title: [],
+    dataMgt: [],
     option: [],
     settingsDisplay: [],
+    exSetting: [],
     loading: [],
     main: [],
     result: [],
@@ -3893,6 +3984,7 @@ const g_customJsObj = {
     preTitle: [],
     title: [],
     titleEnterFrame: [],
+    dataMgt: [],
     option: [],
     difficulty: [],
     settingsDisplay: [],
@@ -3932,6 +4024,7 @@ const g_customJsObj = {
  */
 const g_skinJsObj = {
     title: [],
+    dataMgt: [],
     option: [],
     settingsDisplay: [],
     exSetting: [],
