@@ -3396,7 +3396,7 @@ const g_lblNameObj = {
     maker: `Maker`,
     artist: `Artist`,
 
-    dataReset: `Data Reset`,
+    dataReset: `Data Management`,
     dataSave: `Data Save`,
     clickHere: `Click Here!!`,
     comment: `Comment`,
