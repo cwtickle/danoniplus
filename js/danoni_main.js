@@ -4766,9 +4766,15 @@ const dataMgtInit = () => {
 	 * @returns {string}
 	 */
 	const viewKeyStorage = _key => {
-		const keyStorage = parseStorageData(`danonicw-${_key}k`);
+		let keyStorage = parseStorageData(`danonicw-${_key}k`);
 		if (Object.keys(keyStorage).length === 0) {
-			return ``;
+
+			// キー別の情報が見つからない場合は作品別の情報から検索
+			Object.keys(g_localStorage).filter(val => val.endsWith(_key))
+				.forEach(val => keyStorage[val] = g_localStorage[val]);
+			if (Object.keys(keyStorage).length === 0) {
+				return ``;
+			}
 		}
 		return formatObject(keyStorage);
 	}
@@ -4802,16 +4808,23 @@ const dataMgtInit = () => {
 		createMgtLabel(`workData`, 0),
 		createMgtButton(`environment`, 1.5, 0),
 		createMgtButton(`highscores`, 2.5, 0),
-		createMgtButton(`others`, 3.5, 0),
+		createMgtButton(`customKey`, 3.5, 0),
+		createMgtButton(`others`, 4.5, 0),
 		createMgtLabel(`keyData`, 6),
 		createDivCss2Label(`lblTargetKey`, `(${getKeyName(g_headerObj.keyLabels[0])})`, {
 			x: 90, y: g_limitObj.setLblHeight * 6 + 40,
 			siz: g_limitObj.setLblSiz, align: C_ALIGN_LEFT,
 		})
 	);
+
+	// カスタムキー定義のストレージデータを表示から除去
+	const settingStorage = {};
+	Object.keys(g_localStorage).filter(val => !listMatching(val, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
+		.forEach(val => settingStorage[val] = g_localStorage[val]);
+
 	multiAppend(divRoot,
 		createDivCss2Label(`lblWorkDataView`,
-			formatObject(g_localStorage), g_lblPosObj.lblWorkDataView),
+			formatObject(settingStorage), g_lblPosObj.lblWorkDataView),
 		createDivCss2Label(`lblKeyDataView`, viewKeyStorage(g_headerObj.keyLabels[0]), g_lblPosObj.lblKeyDataView),
 	);
 	setUserSelect($id(`lblWorkDataView`), `text`);
@@ -4857,13 +4870,14 @@ const dataMgtInit = () => {
 
 					} else if (keyList.includes(key)) {
 						const storage = parseStorageData(`danonicw-${key}k`);
-						delete storage.reverse;
-						delete storage.keyCtrl;
-						delete storage.keyCtrlPtn;
-						delete storage.shuffle;
-						delete storage.color;
-						delete storage.stepRtn;
-						localStorage.setItem(`danonicw-${key}k`, JSON.stringify(storage));
+
+						if (Object.keys(storage).length > 0) {
+							g_settings.keyStorages.forEach(val => delete storage[val]);
+							localStorage.setItem(`danonicw-${key}k`, JSON.stringify(storage));
+						} else {
+							g_settings.keyStorages.forEach(val => delete g_localStorage[`${val}${key}`]);
+							localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+						}
 					}
 				});
 				reloadFlg = true;

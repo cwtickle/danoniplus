@@ -962,6 +962,7 @@ const g_stateObj = {
 
     dm_environment: C_FLG_OFF,
     dm_highscores: C_FLG_OFF,
+    dm_customKey: C_FLG_OFF,
     dm_others: C_FLG_OFF,
 
     layerNum: 2,
@@ -1017,9 +1018,11 @@ const g_settings = {
     dataMgtNum: {
         environment: 0,
         highscores: 0,
+        customKey: 0,
         others: 0,
     },
     environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`],
+    keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`],
 
     speeds: makeSpeedList(C_MIN_SPEED, C_MAX_SPEED),
     speedNum: 0,
@@ -1288,8 +1291,12 @@ const g_resetFunc = new Map([
         g_localStorage.highscores = {};
     }],
     ['environment', () => g_settings.environments.forEach(key => delete g_localStorage[key])],
+    [`customKey`, () => Object.keys(g_localStorage)
+        .filter(key => listMatching(key, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
+        .forEach(key => delete g_localStorage[key])],
     [`others`, () => Object.keys(g_localStorage)
-        .filter(key => !g_settings.environments.includes(key) && key !== `highscores`)
+        .filter(key => !g_settings.environments.includes(key) && key !== `highscores` &&
+            !listMatching(key, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
         .forEach(key => delete g_localStorage[key])],
 ]);
 
@@ -3778,7 +3785,8 @@ const g_lang_msgObj = {
 
         environment: `${g_settings.environments.map(v => toCapitalize(v)).join(`, `)}の設定を初期化します。`,
         highscores: `全譜面のハイスコアを初期化します。\n個別に初期化したい場合はSettings画面より行ってください。`,
-        others: `標準以外及びカスタムキーに関する保存データを消去します。`,
+        customKey: `カスタムキーに関する全ての保存データを消去します。\n下記のKeyDataから個別に消去可能できないときに使用してください。`,
+        others: `標準以外に関する保存データを消去します。`,
         keyTypes: `Key: {0} の保存データ（個別の色設定を除く）を消去します。`,
 
         dataResetConfirm: `選択したローカル設定をクリアします。よろしいですか？`,
@@ -3865,7 +3873,8 @@ const g_lang_msgObj = {
 
         environment: `Initialize ${g_settings.environments.map(v => toCapitalize(v)).join(`, `)} settings.`,
         highscores: `Initializes the high score of all charts. \nIf you want to initialize each chart individually, \nplease do so from the Highscore view in the Settings screen.`,
-        others: `Delete non-standard and custom keymode stored data.`,
+        customKey: `Delete stored data related to all custom keymodes. Use this option when you cannot delete individual KeyData from the following KeyData`,
+        others: `Delete non-standard stored data.`,
         keyTypes: `Deletes the stored data (except color settings) for Key: {0}.`,
 
         dataResetConfirm: `Delete the selected local settings. Is it OK?`,
