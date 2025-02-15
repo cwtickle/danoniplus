@@ -4823,7 +4823,7 @@ const dataMgtInit = () => {
 		g_stateObj[`dm_${key}`] = C_FLG_OFF;
 		g_settings.dataMgtNum[key] = 0;
 		keyListSprite.appendChild(createMgtButton(key, j - 2, 0, {
-			w: Math.max(50, getStrWidth(key, g_limitObj.setLblSiz, getBasicFont())),
+			w: Math.max(50, getStrWidth(getKeyName(key) + `    `, g_limitObj.setLblSiz, getBasicFont())),
 			func: () => {
 				lblKeyDataView.innerHTML = viewKeyStorage(key);
 				lblTargetKey.innerHTML = `(${getKeyName(key)})`;
