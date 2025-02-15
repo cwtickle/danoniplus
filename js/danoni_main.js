@@ -4814,14 +4814,17 @@ const dataMgtInit = () => {
 							localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 
 						} else if (keyList.includes(orgKey)) {
-							const storage = JSON.parse(localStorage.getItem(`danonicw-${orgKey}k`));
-							delete storage.reverse;
-							delete storage.keyCtrl;
-							delete storage.keyCtrlPtn;
-							delete storage.shuffle;
-							delete storage.color;
-							delete storage.stepRtn;
-							localStorage.setItem(`danonicw-${orgKey}k`, JSON.stringify(storage));
+							const storageText = localStorage.getItem(`danonicw-${orgKey}k`);
+							if (storageText !== null) {
+								const storage = JSON.parse(storageText);
+								delete storage.reverse;
+								delete storage.keyCtrl;
+								delete storage.keyCtrlPtn;
+								delete storage.shuffle;
+								delete storage.color;
+								delete storage.stepRtn;
+								localStorage.setItem(`danonicw-${orgKey}k`, JSON.stringify(storage));
+							}
 						}
 					});
 				reloadFlg = true;
