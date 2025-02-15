@@ -16,7 +16,7 @@ let g_localVersion = ``;
 let g_localVersion2 = ``;
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
-//  共通:water 初期化:peach タイトル:melon 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
+//  共通:water 初期化:peach タイトル:melon データ管理:pear 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
 //  シーンジャンプ:Scene
 
 /**
@@ -4477,8 +4477,6 @@ const titleInit = () => {
 	}
 	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
 	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${customVersion}${releaseDate}`;
-
-	let reloadFlg = false;
 	const getLinkSiz = _name => getFontSize(_name, g_sWidth / 2 - 20, getBasicFont(), g_limitObj.lnkSiz, 12);
 
 	/**
@@ -4502,23 +4500,9 @@ const titleInit = () => {
 
 		// Reset
 		createCss2Button(`btnReset`, g_lblNameObj.dataReset, () => {
-			reloadFlg = false;
-			if (window.confirm(g_msgObj.dataResetConfirm)) {
-				g_localStorage = {
-					adjustment: 0,
-					volume: 100,
-					highscores: {},
-				};
-				localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
-				reloadFlg = true;
-			}
-		}, Object.assign(g_lblPosObj.btnReset, {
-			resetFunc: () => {
-				if (reloadFlg) {
-					location.reload();
-				}
-			},
-		}), g_cssObj.button_Reset),
+			clearTimeout(g_timeoutEvtTitleId);
+			dataMgtInit();
+		}, g_lblPosObj.btnReset, g_cssObj.button_Reset),
 
 		// ロケール切替
 		createCss2Button(`btnReload`, g_localeObj.val, () => true,
@@ -4700,6 +4684,165 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 	return lbl;
 };
 
+/*-----------------------------------------------------------*/
+/* Scene : DATA MANAGEMENT [pear] */
+/*-----------------------------------------------------------*/
+
+const dataMgtInit = () => {
+	clearWindow(true);
+	g_currentPage = `dataMgt`;
+
+	multiAppend(divRoot,
+
+		// 画面タイトル
+		getTitleDivLabel(`lblTitle`,
+			`<div class="settings_Title">DATA</div><div class="settings_Title2">MANAGEMENT</div>`
+				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
+
+		createDescDiv(`dataDelMsg`, g_lblNameObj.dataDeleteDesc),
+	);
+
+	// 各ボタン用のスプライトを作成
+	const optionsprite = createEmptySprite(divRoot, `optionsprite`, g_windowObj.optionSprite);
+
+	let reloadFlg = false;
+	const list = [C_FLG_OFF, C_FLG_ON];
+	const cssBarList = [C_FLG_OFF, C_FLG_ON];
+	const cssBgList = [g_settings.d_cssBgName, g_settings.d_cssBgName];
+
+	const createMgtLabel = (_name, _heightPos, { x = 0 } = {}) =>
+		createDivCss2Label(`lbl${toCapitalize(_name)}`, getStgDetailName(toCapitalize(_name)), {
+			x, y: g_limitObj.setLblHeight * _heightPos + 40,
+			siz: g_limitObj.setLblSiz, align: C_ALIGN_LEFT,
+		});
+
+	const createMgtButton = (_name, _heightPos, _widthPos, { w = 125, func = () => true } = {}) => {
+		const linkId = `lnk${toCapitalize(_name)}`;
+		return createCss2Button(linkId, getStgDetailName(toCapitalize(_name)), () => {
+			const prevDisp = g_settings.dataMgtNum[_name];
+			const [prevBarColor, prevBgColor] = [cssBarList[prevDisp], cssBgList[prevDisp]];
+
+			g_settings.dataMgtNum[_name] = (g_settings.dataMgtNum[_name] + 1) % 2;
+			g_stateObj[`dm_${_name}`] = list[g_settings.dataMgtNum[_name]];
+
+			const nextDisp = g_settings.dataMgtNum[_name];
+			const [nextBarColor, nextBgColor] = [cssBarList[nextDisp], cssBgList[nextDisp]];
+			document.getElementById(linkId).classList.replace(g_cssObj[`button_${prevBarColor}`], g_cssObj[`button_${nextBarColor}`]);
+			document.getElementById(linkId).classList.replace(g_cssObj[`button_${prevBgColor}`], g_cssObj[`button_${nextBgColor}`]);
+			func();
+		}, {
+			x: _widthPos * (w + 5) + 20, y: g_limitObj.setLblHeight * _heightPos + 40,
+			w, h: 20, siz: g_limitObj.setLblSiz, borderStyle: `solid`,
+		}, g_cssObj[`button_${cssBgList[g_settings.dataMgtNum[_name]]}`], g_cssObj[`button_${cssBarList[g_settings.dataMgtNum[_name]]}`]);
+	};
+
+	const viewKeyStorage = _key => {
+		const keyStorageText = localStorage.getItem(`danonicw-${_key}k`);
+		if (keyStorageText === null) {
+			return ``;
+		}
+		const keyStorage = JSON.parse(keyStorageText);
+		let tmpText = JSON.stringify(keyStorage).replaceAll(`}`, `,<br>}`);
+
+		Object.keys(keyStorage).forEach(key =>
+			tmpText = tmpText.replaceAll(`\"${key}\":`, `<br>&nbsp;&nbsp;&nbsp;&nbsp;"${key}":`));
+		return tmpText;
+	}
+
+	multiAppend(optionsprite,
+		createMgtLabel(`workData`, 0),
+		createMgtButton(`environment`, 1.5, 0),
+		createMgtButton(`highscores`, 2.5, 0),
+		createMgtButton(`others`, 3.5, 0),
+		createMgtLabel(`keyData`, 6),
+		createDivCss2Label(`lblTargetKey`, `(${g_headerObj.keyLabels[0]})`, {
+			x: 90, y: g_limitObj.setLblHeight * 6 + 40,
+			siz: g_limitObj.setLblSiz, align: C_ALIGN_LEFT,
+		})
+	);
+	multiAppend(divRoot,
+		createDivCss2Label(`lblWorkDataView`,
+			JSON.stringify(g_localStorage, null, 4)
+				.replaceAll(`\n`, `<br>`)
+				.replaceAll(` `, `&nbsp;`), g_lblPosObj.lblWorkDataView),
+		createDivCss2Label(`lblKeyDataView`, viewKeyStorage(g_headerObj.keyLabels[0]), g_lblPosObj.lblKeyDataView),
+	);
+	const keyList = makeDedupliArray(g_headerObj.keyLabels);
+	const keyListSprite = createEmptySprite(optionsprite, `keyListSprite`, g_windowObj.keyListSprite);
+	keyList.forEach((key, j) => {
+		g_stateObj[`dm_${key}`] = C_FLG_OFF;
+		g_settings.dataMgtNum[key] = 0;
+		keyListSprite.appendChild(createMgtButton(key, j - 2, 0, {
+			w: Math.max(50, getStrWidth(key, g_limitObj.setLblSiz, getBasicFont())),
+			func: () => {
+				lblKeyDataView.innerHTML = viewKeyStorage(key);
+				lblTargetKey.innerHTML = `(${key})`;
+			},
+		}))
+	});
+
+	// ユーザカスタムイベント(初期)
+	g_customJsObj.dataMgt.forEach(func => func());
+
+	multiAppend(divRoot,
+		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
+			Object.assign(g_lblPosObj.btnBack, {
+				resetFunc: () => titleInit(),
+			}), g_cssObj.button_Back),
+
+		createCss2Button(`btnReset`, g_lblNameObj.b_cReset, () => {
+			reloadFlg = false;
+
+			const resetFunc = new Map([
+				['highscores', () => {
+					delete g_localStorage.highscores;
+					g_localStorage.highscores = {};
+				}],
+				['environment', () => g_settings.environments.forEach(key => delete g_localStorage[key])],
+				[`others`, () => Object.keys(g_localStorage)
+					.filter(key => !g_settings.environments.includes(key) && key !== `highscores`)
+					.forEach(key => delete g_localStorage[key])],
+			]);
+
+			if (window.confirm(g_msgObj.dataResetConfirm)) {
+				Object.keys(g_stateObj).filter(key =>
+					key.startsWith(`dm_`) && key !== `dm_all` && g_stateObj[key] === C_FLG_ON)
+					.forEach(key => {
+						const orgKey = key.slice(`dm_`.length);
+						if (resetFunc.has(orgKey)) {
+							resetFunc.get(orgKey)();
+							localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+
+						} else if (keyList.includes(orgKey)) {
+							const storage = JSON.parse(localStorage.getItem(`danonicw-${orgKey}k`));
+							delete storage.reverse;
+							delete storage.keyCtrl;
+							delete storage.keyCtrlPtn;
+							delete storage.shuffle;
+							delete storage.color;
+							delete storage.stepRtn;
+							localStorage.setItem(`danonicw-${orgKey}k`, JSON.stringify(storage));
+						}
+					});
+				reloadFlg = true;
+			}
+		}, Object.assign(g_lblPosObj.btnResetN, {
+			resetFunc: () => {
+				if (reloadFlg) {
+					location.reload();
+				}
+			},
+		}), g_cssObj.button_Reset),
+	);
+
+	// キー操作イベント（デフォルト）
+	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
+
+	document.oncontextmenu = () => true;
+	divRoot.oncontextmenu = () => false;
+
+	g_skinJsObj.dataMgt.forEach(func => func());
+};
 
 /*-----------------------------------------------------------*/
 /* Scene : SETTINGS [lime] */

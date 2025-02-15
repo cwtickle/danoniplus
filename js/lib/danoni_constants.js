@@ -93,6 +93,7 @@ const g_limitObj = {
 
 /** 設定項目の位置 */
 const g_settingPos = {
+    dataMgt: {},
     option: {
         difficulty: { heightPos: 0, y: -5, dw: 0, dh: 10 },
         speed: { heightPos: 2, y: 0, dw: 0, dh: 0 },
@@ -167,6 +168,7 @@ const g_windowObj = {
     divBack: { background: `linear-gradient(#000000, #222222)` },
 
     colorPickSprite: { x: 0, y: 90, w: 50, h: 280 },
+    keyListSprite: { x: 0, y: g_limitObj.setLblHeight * 7.5 + 40, w: 150, h: 120, overflow: C_DIS_AUTO },
 };
 
 const g_lblPosObj = {};
@@ -237,6 +239,24 @@ const updateWindowSiz = () => {
         },
         btnComment: {
             x: g_btnX(1) - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
+        },
+
+        /** データ管理 */
+        dataDelMsg: {
+            x: 0, y: 65, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz,
+        },
+        btnResetN: {
+            x: g_btnX(1 / 3), y: g_sHeight - 100, w: g_btnWidth(2 / 3), h: g_limitObj.btnHeight,
+        },
+        lblWorkDataView: {
+            x: g_btnX(5 / 12), y: 100, w: g_btnWidth(1 / 2), h: g_sHeight / 4, siz: 12, align: C_ALIGN_LEFT,
+            overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
+            whiteSpace: `nowrap`,
+        },
+        lblKeyDataView: {
+            x: g_btnX(5 / 12), y: 100 + g_sHeight / 4 + 10, w: g_btnWidth(1 / 2), h: g_sHeight / 3 - 10, siz: 12, align: C_ALIGN_LEFT,
+            overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
+            whiteSpace: `nowrap`,
         },
 
         /** 設定画面 */
@@ -940,6 +960,10 @@ const g_stateObj = {
     rotateEnabled: true,
     flatStepHeight: C_ARW_WIDTH,
 
+    dm_environment: C_FLG_OFF,
+    dm_highscores: C_FLG_OFF,
+    dm_others: C_FLG_OFF,
+
     layerNum: 2,
 };
 
@@ -989,6 +1013,14 @@ const makeSpeedList = (_minSpd, _maxSpd) => [...Array((_maxSpd - _minSpd) * 20 +
 
 // 設定系全般管理
 const g_settings = {
+
+    dataMgtNum: {
+        environment: 0,
+        highscores: 0,
+        others: 0,
+    },
+    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`],
+
     speeds: makeSpeedList(C_MIN_SPEED, C_MAX_SPEED),
     speedNum: 0,
     speedTerms: [20, 5, 1],
@@ -1881,6 +1913,9 @@ const g_shortcutObj = {
         ControlLeft_KeyC: { id: `` },
         KeyC: { id: `btnComment` },
     },
+    dataMgt: {
+
+    },
     option: {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
         ShiftRight_KeyD: { id: `lnkDifficultyL` },
@@ -2178,6 +2213,7 @@ const g_shortcutObj = {
 const g_btnWaitFrame = {
     initial: { b_frame: 0, s_frame: 0 },
     title: { b_frame: 0, s_frame: 0 },
+    dataMgt: { b_frame: 0, s_frame: 0 },
     option: { b_frame: 0, s_frame: 0, initial: true },
     difSelector: { b_frame: 0, s_frame: 0 },
     settingsDisplay: { b_frame: 0, s_frame: 0 },
@@ -2192,6 +2228,7 @@ const g_btnWaitFrame = {
 // 主要ボタンのリスト
 const g_btnPatterns = {
     title: { Start: 0, Comment: -10 },
+    dataMgt: { Back: 0 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
     difSelector: {},
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5 },
@@ -3612,6 +3649,8 @@ const g_linkObj = {
  */
 const g_lang_lblNameObj = {
     Ja: {
+        dataDeleteDesc: `消去したいデータの種類を選んで「Reset」を押してください`,
+
         kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
         kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを変更`,
         kcNoShuffleDesc: `矢印をクリックでカラーグループを変更`,
@@ -3653,6 +3692,8 @@ const g_lang_lblNameObj = {
         securityUrl: `https://github.com/cwtickle/danoniplus/security/policy`,
     },
     En: {
+        dataDeleteDesc: `Select the type of data you wish to delete and press "Reset".`,
+
         kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
         kcShuffleDesc: `Click the number to change the shuffle group, and click the arrow to change the color.`,
         kcNoShuffleDesc: `Click the arrow to change the color group.`,
@@ -3878,8 +3919,10 @@ const g_lang_msgObj = {
  */
 const g_errMsgObj = {
     title: [],
+    dataMgt: [],
     option: [],
     settingsDisplay: [],
+    exSetting: [],
     loading: [],
     main: [],
     result: [],
@@ -3893,6 +3936,7 @@ const g_customJsObj = {
     preTitle: [],
     title: [],
     titleEnterFrame: [],
+    dataMgt: [],
     option: [],
     difficulty: [],
     settingsDisplay: [],
@@ -3932,6 +3976,7 @@ const g_customJsObj = {
  */
 const g_skinJsObj = {
     title: [],
+    dataMgt: [],
     option: [],
     settingsDisplay: [],
     exSetting: [],
