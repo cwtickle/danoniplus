@@ -3866,7 +3866,7 @@ const g_lang_msgObj = {
         environment: `Initialize ${g_settings.environments.map(v => toCapitalize(v)).join(`, `)} settings.`,
         highscores: `Initializes the high score of all charts. \nIf you want to initialize each chart individually, \nplease do so from the Highscore view in the Settings screen.`,
         others: `Delete non-standard stored data.`,
-        keyTypes: `Deletes the stored data (except individual color settings) for Key: {0}.`,
+        keyTypes: `Deletes the stored data (except color settings) for Key: {0}.`,
 
         dataResetConfirm: `Delete the selected local settings. Is it OK?`,
         keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,
