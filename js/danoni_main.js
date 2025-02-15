@@ -4824,7 +4824,7 @@ const dataMgtInit = () => {
 
 			if (window.confirm(g_msgObj.dataResetConfirm)) {
 				Object.keys(g_stateObj).filter(key =>
-					key.startsWith(`dm_`) && key !== `dm_all` && g_stateObj[key] === C_FLG_ON)
+					key.startsWith(`dm_`) && g_stateObj[key] === C_FLG_ON)
 					.forEach(key => {
 						const orgKey = key.slice(`dm_`.length);
 						if (g_resetFunc.has(orgKey)) {
