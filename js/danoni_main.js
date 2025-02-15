@@ -4770,9 +4770,27 @@ const dataMgtInit = () => {
 		if (Object.keys(keyStorage).length === 0) {
 			return ``;
 		}
-		return `{` + Object.entries(keyStorage)
-			.map((([key, value]) => `<br>&nbsp;&nbsp;&nbsp;&nbsp;"${key}": ${JSON.stringify(value)}`))
-			.join(`,`) + `<br>}`;
+		return formatObject(keyStorage);
+	}
+
+	/**
+	 * オブジェクトのネスト表示処理
+	 * @param {Object} _obj 
+	 * @param {Number} _indent 
+	 * @returns {string}
+	 */
+	const formatObject = (_obj, _indent = 0) => {
+		const indentation = '&nbsp;'.repeat(_indent * 4);
+		const dfIndentation = '&nbsp;'.repeat(4);
+		return `{` + Object.entries(_obj)
+			.map(([key, value]) => {
+				if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+					return `<br>${indentation}${dfIndentation}"${key}": ${formatObject(value, _indent + 1)}`;
+				} else {
+					return `<br>${indentation}${dfIndentation}"${key}": ${JSON.stringify(value)}`;
+				}
+			})
+			.join(`,`) + `<br>${indentation}}`;
 	}
 
 	multiAppend(optionsprite,
@@ -4788,9 +4806,7 @@ const dataMgtInit = () => {
 	);
 	multiAppend(divRoot,
 		createDivCss2Label(`lblWorkDataView`,
-			JSON.stringify(g_localStorage, null, 4)
-				.replaceAll(`\n`, `<br>`)
-				.replaceAll(` `, `&nbsp;`), g_lblPosObj.lblWorkDataView),
+			formatObject(g_localStorage), g_lblPosObj.lblWorkDataView),
 		createDivCss2Label(`lblKeyDataView`, viewKeyStorage(g_headerObj.keyLabels[0]), g_lblPosObj.lblKeyDataView),
 	);
 	setUserSelect($id(`lblWorkDataView`), `text`);
