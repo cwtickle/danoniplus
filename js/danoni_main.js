@@ -4909,7 +4909,7 @@ const dataMgtInit = () => {
 		// リカバリー用のボタン
 		createCss2Button(`btnUndo`, g_lblNameObj.b_undo, () => {
 			const backup = JSON.parse(sessionStorage.getItem('resetBackup'));
-			if (backup) {
+			if (backup && window.confirm(g_msgObj.dataRestoreConfirm)) {
 				backup.forEach(([key, data]) => {
 					if (g_resetFunc.has(key) || keyList.includes(key.slice(`XX`.length))) {
 						Object.assign(g_localStorage, data);

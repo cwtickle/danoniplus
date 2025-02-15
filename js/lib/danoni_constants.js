@@ -3441,7 +3441,7 @@ const g_lblNameObj = {
     b_keyConfig: `KeyConfig`,
     b_play: `PLAY!`,
     b_reset: `Reset Key`,
-    b_undo: `Recovery`,
+    b_undo: `Restore`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
     b_tweet: `Post X`,
@@ -3795,6 +3795,7 @@ const g_lang_msgObj = {
         keyTypes: `Key: {0} の保存データ（個別の色設定を除く）を消去します。`,
 
         dataResetConfirm: `選択したローカル設定をクリアします。よろしいですか？`,
+        dataRestoreConfirm: `ローカル設定を前回の状態に戻します（１回限り）。よろしいですか？\n消去した設定によっては今の設定が上書きされることがあります。`,
         keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
         highscResetConfirm: `この譜面のハイスコアを消去します。よろしいですか？`,
         colorCopyConfirm: `フリーズアローの配色を矢印色に置き換えます\n(通常・ヒット時双方を置き換えます)。よろしいですか？`,
@@ -3883,6 +3884,7 @@ const g_lang_msgObj = {
         keyTypes: `Deletes the stored data (except color settings) for Key: {0}.`,
 
         dataResetConfirm: `Delete the selected local settings. Is it OK?`,
+        dataRestoreConfirm: `Restore local settings to previous state (one time only). Is it OK?\nSome deleted settings may overwrite the current settings.`,
         keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,
         highscResetConfirm: `Erases the high score for this chart. Is it OK?`,
         colorCopyConfirm: `Replace freeze arrow color scheme with arrow color\n(replace both normal and hit). Is this OK?`,
