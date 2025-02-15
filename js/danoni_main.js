@@ -4770,11 +4770,9 @@ const dataMgtInit = () => {
 		if (Object.keys(keyStorage).length === 0) {
 			return ``;
 		}
-		let tmpText = JSON.stringify(keyStorage)?.replaceAll(`}`, `,<br>}`);
-
-		Object.keys(keyStorage).forEach(key =>
-			tmpText = tmpText.replaceAll(`\"${key}\":`, `<br>&nbsp;&nbsp;&nbsp;&nbsp;"${key}":`));
-		return tmpText;
+		return `{` + Object.entries(keyStorage)
+			.map((([key, value]) => `<br>&nbsp;&nbsp;&nbsp;&nbsp;"${key}": ${JSON.stringify(value)}`))
+			.join(`,`) + `<br>}`;
 	}
 
 	multiAppend(optionsprite,
@@ -4815,30 +4813,19 @@ const dataMgtInit = () => {
 	multiAppend(divRoot,
 		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
 			Object.assign(g_lblPosObj.btnBack, {
-				resetFunc: () => titleInit(),
+				animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: () => titleInit(),
 			}), g_cssObj.button_Back),
 
 		createCss2Button(`btnReset`, g_lblNameObj.b_cReset, () => {
 			reloadFlg = false;
-
-			const resetFunc = new Map([
-				['highscores', () => {
-					delete g_localStorage.highscores;
-					g_localStorage.highscores = {};
-				}],
-				['environment', () => g_settings.environments.forEach(key => delete g_localStorage[key])],
-				[`others`, () => Object.keys(g_localStorage)
-					.filter(key => !g_settings.environments.includes(key) && key !== `highscores`)
-					.forEach(key => delete g_localStorage[key])],
-			]);
 
 			if (window.confirm(g_msgObj.dataResetConfirm)) {
 				Object.keys(g_stateObj).filter(key =>
 					key.startsWith(`dm_`) && key !== `dm_all` && g_stateObj[key] === C_FLG_ON)
 					.forEach(key => {
 						const orgKey = key.slice(`dm_`.length);
-						if (resetFunc.has(orgKey)) {
-							resetFunc.get(orgKey)();
+						if (g_resetFunc.has(orgKey)) {
+							g_resetFunc.get(orgKey)();
 							localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 
 						} else if (keyList.includes(orgKey)) {
@@ -4915,6 +4902,11 @@ const commonSettingBtn = _labelName => {
 			Object.assign(g_lblPosObj.btnSave, {
 				cxtFunc: evt => switchSave(evt),
 			}), g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF)),
+
+		// データ管理画面へ移動
+		createCss2Button(`btnReset`, g_lblNameObj.dataReset, () => {
+			dataMgtInit();
+		}, g_lblPosObj.btnReset, g_cssObj.button_Reset),
 	);
 };
 

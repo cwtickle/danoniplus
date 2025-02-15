@@ -1280,6 +1280,20 @@ const resetXY = () => {
 };
 
 /**
+ * データ消去用管理関数
+ */
+const g_resetFunc = new Map([
+    ['highscores', () => {
+        delete g_localStorage.highscores;
+        g_localStorage.highscores = {};
+    }],
+    ['environment', () => g_settings.environments.forEach(key => delete g_localStorage[key])],
+    [`others`, () => Object.keys(g_localStorage)
+        .filter(key => !g_settings.environments.includes(key) && key !== `highscores`)
+        .forEach(key => delete g_localStorage[key])],
+]);
+
+/**
  * シャッフル適用関数
  * @param {number} keyNum
  * @param {array} shuffleGroup
@@ -1912,9 +1926,15 @@ const g_shortcutObj = {
         F1: { id: `btnHelp`, reset: true },
         ControlLeft_KeyC: { id: `` },
         KeyC: { id: `btnComment` },
+        KeyD: { id: `btnReset` },
     },
     dataMgt: {
-
+        KeyE: { id: `lnkEnvironment` },
+        KeyH: { id: `lnkHighscores` },
+        KeyO: { id: `lnkOthers` },
+        Escape: { id: `btnBack` },
+        ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
     },
     option: {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
@@ -2182,6 +2202,8 @@ const g_shortcutObj = {
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
+        ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
         Tab: { id: `btnexSetting` },
     },
     keyConfig: {
