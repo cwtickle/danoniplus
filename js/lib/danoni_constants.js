@@ -242,6 +242,12 @@ const updateWindowSiz = () => {
         },
 
         /** データ管理 */
+        btnResetBack: {
+            x: g_btnX(), y: g_sHeight - 20, w: g_btnWidth(1 / 4), h: 16, siz: 12,
+        },
+        btnSafeMode: {
+            x: g_btnX(), siz: 18,
+        },
         dataDelMsg: {
             x: 0, y: 65, w: g_sWidth, h: 20, siz: g_limitObj.mainSiz,
         },
@@ -1290,17 +1296,17 @@ const resetXY = () => {
  */
 const g_resetFunc = new Map([
     ['highscores', () => {
-        delete g_localStorage.highscores;
-        g_localStorage.highscores = {};
+        delete g_localStorageMgt.highscores;
+        g_localStorageMgt.highscores = {};
     }],
-    ['environment', () => g_settings.environments.forEach(key => delete g_localStorage[key])],
-    [`customKey`, () => Object.keys(g_localStorage)
+    ['environment', () => g_settings.environments.forEach(key => delete g_localStorageMgt[key])],
+    [`customKey`, () => Object.keys(g_localStorageMgt)
         .filter(key => listMatching(key, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
-        .forEach(key => delete g_localStorage[key])],
-    [`others`, () => Object.keys(g_localStorage)
+        .forEach(key => delete g_localStorageMgt[key])],
+    [`others`, () => Object.keys(g_localStorageMgt)
         .filter(key => !g_settings.environments.includes(key) && key !== `highscores` &&
             !listMatching(key, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
-        .forEach(key => delete g_localStorage[key])],
+        .forEach(key => delete g_localStorageMgt[key])],
 ]);
 
 /**
@@ -3311,6 +3317,8 @@ const g_lang_msgInfoObj = {
         また、Fadein を使用した場合は通常よりズレが発生することがあります。<br>
         音源ファイルを js/txt 化するか、サーバー上動作とすれば解消します。(W-0012)`,
         W_0021: `クリップボードのコピーに失敗しました。`,
+        W_0031: `セーフモード適用中です。ローカルストレージ情報を使わない設定になっています。<br>
+        「Data Management」から解除が可能です。(W-0031)`,
 
         E_0011: `アーティスト名が未入力です。(E-0011)`,
         E_0012: `曲名情報が未設定です。(E-0012)<br>
@@ -3361,6 +3369,9 @@ const g_lang_msgInfoObj = {
         It can be solved by converting the sound source file to encoded data (js, txt) or 
         operating it on the server. (W-0012)`,
         W_0021: `Failed to copy the clipboard.`,
+        W_0031: `Safe Mode is being applied. <br>
+        The setting is set to not use local storage information <br>
+        and can be removed from Data Management. (W-0031)`,
 
         E_0011: `The artist name is not set. (E-0011)`,
         E_0012: `The song title information is not set. (E-0012)<br>
@@ -3441,6 +3452,7 @@ const g_lblNameObj = {
     b_keyConfig: `KeyConfig`,
     b_play: `PLAY!`,
     b_reset: `Reset Key`,
+    b_safeMode: `Safe Mode -> `,
     b_undo: `Restore`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
@@ -3683,7 +3695,8 @@ const g_linkObj = {
  */
 const g_lang_lblNameObj = {
     Ja: {
-        dataDeleteDesc: `消去したいデータの種類を選んで「Reset」を押してください`,
+        dataDeleteOFFDesc: `消去したいデータの種類を選んで「Reset」を押してください`,
+        dataDeleteONDesc: `セーフモード適用中はデータ消去は行えません。変更するにはセーフモードを解除してください`,
 
         kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
         kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを変更`,
@@ -3726,7 +3739,8 @@ const g_lang_lblNameObj = {
         securityUrl: `https://github.com/cwtickle/danoniplus/security/policy`,
     },
     En: {
-        dataDeleteDesc: `Select the type of data you wish to delete and press "Reset".`,
+        dataDeleteOFFDesc: `Select the type of data you wish to delete and press "Reset".`,
+        dataDeleteONDesc: `Data erasure cannot be performed while safe mode is applied. <br>Please deactivate the safe mode to change the data.`,
 
         kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
         kcShuffleDesc: `Click the number to change the shuffle group, and click the arrow to change the color.`,
@@ -3796,6 +3810,8 @@ const g_lang_msgObj = {
 
         dataResetConfirm: `選択したローカル設定をクリアします。よろしいですか？`,
         dataRestoreConfirm: `ローカル設定を前回の状態に戻します（１回限り）。よろしいですか？\n消去した設定によっては今の設定が上書きされることがあります。`,
+        safeModeONConfirm: `セーフモードを解除して、ローカルストレージ情報を利用します。\nよろしいですか？`,
+        safeModeOFFConfirm: `セーフモードを設定して、ローカルストレージを使わずにリロードします。\nよろしいですか？`,
         keyResetConfirm: `キーを初期配置に戻します。よろしいですか？`,
         highscResetConfirm: `この譜面のハイスコアを消去します。よろしいですか？`,
         colorCopyConfirm: `フリーズアローの配色を矢印色に置き換えます\n(通常・ヒット時双方を置き換えます)。よろしいですか？`,
@@ -3879,12 +3895,14 @@ const g_lang_msgObj = {
 
         environment: `Initialize ${g_settings.environments.map(v => toCapitalize(v)).join(`, `)} settings.`,
         highscores: `Initializes the high score of all charts. \nIf you want to initialize each chart individually, \nplease do so from the Highscore view in the Settings screen.`,
-        customKey: `Delete stored data related to all custom keymodes. Use this option when you cannot delete individual KeyData from the following KeyData`,
+        customKey: `Delete stored data related to all custom keymodes. \nUse this option when you cannot delete individual KeyData from the following KeyData.`,
         others: `Delete non-standard stored data.`,
         keyTypes: `Deletes the stored data (except color settings) for Key: {0}.`,
 
         dataResetConfirm: `Delete the selected local settings. Is it OK?`,
         dataRestoreConfirm: `Restore local settings to previous state (one time only). Is it OK?\nSome deleted settings may overwrite the current settings.`,
+        safeModeONConfirm: `Exit safe mode and use local storage information. Is it OK?`,
+        safeModeOFFConfirm: `Set safe mode and reload without local storage. Is it OK?`,
         keyResetConfirm: `Resets the assigned key to the initial state. Is it OK?`,
         highscResetConfirm: `Erases the high score for this chart. Is it OK?`,
         colorCopyConfirm: `Replace freeze arrow color scheme with arrow color\n(replace both normal and hit). Is this OK?`,
