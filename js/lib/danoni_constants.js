@@ -1310,6 +1310,37 @@ const g_resetFunc = new Map([
 ]);
 
 /**
+ * ストレージ管理関数
+ */
+const g_storageFunc = new Map([
+
+    // 作品別のストレージ情報
+    ['workStorage', (_key) => {
+        const settingStorage = {};
+
+        // カスタムキー定義のストレージデータを表示から除去
+        Object.keys(g_localStorageMgt).filter(val => !listMatching(val, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
+            .forEach(val => settingStorage[val] = g_localStorageMgt[val]);
+        return settingStorage;
+    }],
+
+    // キー別のストレージ情報
+    ['keyStorage', (_key) => {
+        let keyStorage = parseStorageData(`danonicw-${_key}k`);
+        if (Object.keys(keyStorage).length === 0) {
+
+            // キー別の情報が見つからない場合は作品別の情報から検索
+            Object.keys(g_localStorageMgt).filter(val => val.endsWith(_key))
+                .forEach(val => keyStorage[val] = g_localStorageMgt[val]);
+            if (Object.keys(keyStorage).length === 0) {
+                return ``;
+            }
+        }
+        return keyStorage;
+    }],
+]);
+
+/**
  * シャッフル適用関数
  * @param {number} keyNum
  * @param {array} shuffleGroup

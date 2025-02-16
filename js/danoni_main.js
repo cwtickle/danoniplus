@@ -1133,7 +1133,7 @@ const getStrWidth = (_str, _fontsize, _font) => {
  */
 const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64, _minFontsize = 5) => {
 	for (let siz = _maxFontsize; siz >= _minFontsize; siz--) {
-		if (_maxWidth >= getStrWidth(_str, siz, _font)) {
+		if (_maxWidth >= getStrWidth(getLongestStr(_str?.split(`<br>`)), siz, _font)) {
 			return siz;
 		}
 	}
@@ -1164,7 +1164,7 @@ const getLongestStr = _array => {
  */
 const createDescDiv = (_id, _str, { altId = _id, siz = g_limitObj.mainSiz } = {}) =>
 	createDivCss2Label(_id, _str, Object.assign(g_lblPosObj[altId], {
-		siz: getFontSize(getLongestStr(_str?.split(`<br>`)), g_lblPosObj[altId]?.w || g_sWidth, getBasicFont(), siz),
+		siz: getFontSize(_str, g_lblPosObj[altId]?.w || g_sWidth, getBasicFont(), siz),
 	}));
 
 /*-----------------------------------------------------------*/
