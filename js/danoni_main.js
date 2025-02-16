@@ -433,18 +433,45 @@ const parseStorageData = (_keyName, _default = {}) => {
 const getIndent = (_level) => '&nbsp;'.repeat(_level * 4);
 
 /**
+ * ストレージ情報の取得
+ * @param {string} _key 
+ * @returns {string}
+ */
+const viewKeyStorage = (_name, _key = ``) => {
+
+	// キャッシュ設定
+	if (!viewKeyStorage.cache) {
+		viewKeyStorage.cache = new Map();
+	}
+	if (viewKeyStorage.cache.has(_key)) {
+		return viewKeyStorage.cache.get(_key);
+	}
+	const result = formatObject(g_storageFunc.get(_name)(_key));
+	viewKeyStorage.cache.set(_key, result);
+	return result;
+}
+
+/**
  * オブジェクトのネスト表示処理
  * @param {Object} _obj 
  * @param {Number} _indent 
+ * @param {WeakSet} _seen
  * @returns {string}
  */
-const formatObject = (_obj, _indent = 0) => {
+const formatObject = (_obj, _indent = 0, _seen = new WeakSet()) => {
+	if (_obj === null || typeof _obj !== 'object') {
+		return JSON.stringify(_obj);
+	}
+	if (_seen.has(_obj)) {
+		return '[Circular]';
+	}
+	_seen.add(_obj);
 	const baseIndent = getIndent(_indent);
 	const nestedIndent = getIndent(_indent + 1);
 	const formattedEntries = Object.entries(_obj)
 		.map(([key, value]) => {
 			const isNestedObject = typeof value === 'object' && value !== null && !Array.isArray(value);
-			const formattedValue = isNestedObject ? formatObject(value, _indent + 1) : JSON.stringify(value);
+			const formattedValue = isNestedObject ? formatObject(value, _indent + 1, _seen) : JSON.stringify(value);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
 	return `{${formattedEntries}<br>${baseIndent}}`;
@@ -4810,36 +4837,6 @@ const dataMgtInit = () => {
 		}, g_cssObj[`button_${cssBgList[g_settings.dataMgtNum[_name]]}`], g_cssObj[`button_${cssBarList[g_settings.dataMgtNum[_name]]}`]);
 	};
 
-	/**
-	 * キー別ストレージ情報の取得
-	 * @param {string} _key 
-	 * @returns {string}
-	 */
-	const viewKeyStorage = _key => {
-
-		// キャッシュ設定
-		if (!viewKeyStorage.cache) {
-			viewKeyStorage.cache = new Map();
-		}
-		if (viewKeyStorage.cache.has(_key)) {
-			return viewKeyStorage.cache.get(_key);
-		}
-
-		let keyStorage = parseStorageData(`danonicw-${_key}k`);
-		if (Object.keys(keyStorage).length === 0) {
-
-			// キー別の情報が見つからない場合は作品別の情報から検索
-			Object.keys(g_localStorageMgt).filter(val => val.endsWith(_key))
-				.forEach(val => keyStorage[val] = g_localStorageMgt[val]);
-			if (Object.keys(keyStorage).length === 0) {
-				return ``;
-			}
-		}
-		const result = formatObject(keyStorage);
-		viewKeyStorage.cache.set(_key, result);
-		return result;
-	}
-
 	multiAppend(optionsprite,
 		createMgtLabel(`workData`, 0),
 		createMgtButton(`environment`, 1.5, 0),
@@ -4853,16 +4850,11 @@ const dataMgtInit = () => {
 		})
 	);
 
-	// カスタムキー定義のストレージデータを表示から除去
-	const settingStorage = {};
 	g_localStorageMgt = parseStorageData(g_localStorageUrl);
-	Object.keys(g_localStorageMgt).filter(val => !listMatching(val, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
-		.forEach(val => settingStorage[val] = g_localStorageMgt[val]);
-
 	multiAppend(divRoot,
 		createDivCss2Label(`lblWorkDataView`,
-			formatObject(settingStorage), g_lblPosObj.lblWorkDataView),
-		createDivCss2Label(`lblKeyDataView`, viewKeyStorage(g_headerObj.keyLabels[0]), g_lblPosObj.lblKeyDataView),
+			viewKeyStorage(`workStorage`), g_lblPosObj.lblWorkDataView),
+		createDivCss2Label(`lblKeyDataView`, viewKeyStorage(`keyStorage`, g_headerObj.keyLabels[0]), g_lblPosObj.lblKeyDataView),
 	);
 	setUserSelect($id(`lblWorkDataView`), `text`);
 	setUserSelect($id(`lblKeyDataView`), `text`);
@@ -4875,7 +4867,7 @@ const dataMgtInit = () => {
 		keyListSprite.appendChild(createMgtButton(key, j - 2, 0, {
 			w: Math.max(50, getStrWidth(getKeyName(key) + `    `, g_limitObj.setLblSiz, getBasicFont())),
 			func: () => {
-				lblKeyDataView.innerHTML = viewKeyStorage(key);
+				lblKeyDataView.innerHTML = viewKeyStorage(`keyStorage`, key);
 				lblTargetKey.innerHTML = `(${getKeyName(key)})`;
 			},
 		}));
