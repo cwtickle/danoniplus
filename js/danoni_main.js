@@ -434,7 +434,8 @@ const getIndent = (_level) => '&nbsp;'.repeat(_level * 4);
 
 /**
  * ストレージ情報の取得
- * @param {string} _key 
+ * @param {string} _name g_storageFuncの実行キー名
+ * @param {string} _key g_storageFuncの実行キーの引数
  * @returns {string}
  */
 const viewKeyStorage = (_name, _key = ``) => {
@@ -443,11 +444,12 @@ const viewKeyStorage = (_name, _key = ``) => {
 	if (!viewKeyStorage.cache) {
 		viewKeyStorage.cache = new Map();
 	}
-	if (viewKeyStorage.cache.has(_key)) {
-		return viewKeyStorage.cache.get(_key);
+	const cacheKey = _key + _name;
+	if (viewKeyStorage.cache.has(cacheKey)) {
+		return viewKeyStorage.cache.get(cacheKey);
 	}
 	const result = formatObject(g_storageFunc.get(_name)(_key));
-	viewKeyStorage.cache.set(_key, result);
+	viewKeyStorage.cache.set(cacheKey, result);
 	return result;
 }
 
@@ -10104,7 +10106,9 @@ const getArrowSettings = () => {
 
 	if (g_stateObj.dataSaveFlg) {
 		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
+		// 変更が確定した時点で表示用のキャッシュを解放
 		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
+		viewKeyStorage.cache = new Map();
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 	}
 
