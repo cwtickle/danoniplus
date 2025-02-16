@@ -189,6 +189,7 @@ let g_langStorage = {};
 // ローカルストレージ設定 (作品別)
 let g_localStorage;
 let g_localStorageUrl;
+let g_localStorageMgt;
 
 // ローカルストレージ設定 (ドメイン・キー別)
 let g_localKeyStorage;
@@ -422,6 +423,60 @@ const parseStorageData = (_keyName, _default = {}) => {
 	} catch (err) {
 		return _default;
 	}
+}
+
+/**
+ * 画面表示用インデント処理
+ * @param {number} _level 
+ * @returns {string}
+ */
+const getIndent = (_level) => '&nbsp;'.repeat(_level * 4);
+
+/**
+ * ストレージ情報の取得
+ * @param {string} _name g_storageFuncの実行キー名
+ * @param {string} _key g_storageFuncの実行キーの引数
+ * @returns {string}
+ */
+const viewKeyStorage = (_name, _key = ``) => {
+
+	// キャッシュ設定
+	if (!viewKeyStorage.cache) {
+		viewKeyStorage.cache = new Map();
+	}
+	const cacheKey = _key + _name;
+	if (viewKeyStorage.cache.has(cacheKey)) {
+		return viewKeyStorage.cache.get(cacheKey);
+	}
+	const result = formatObject(g_storageFunc.get(_name)(_key));
+	viewKeyStorage.cache.set(cacheKey, result);
+	return result;
+}
+
+/**
+ * オブジェクトのネスト表示処理
+ * @param {Object} _obj 
+ * @param {Number} _indent 
+ * @param {WeakSet} _seen
+ * @returns {string}
+ */
+const formatObject = (_obj, _indent = 0, _seen = new WeakSet()) => {
+	if (_obj === null || typeof _obj !== 'object') {
+		return JSON.stringify(_obj);
+	}
+	if (_seen.has(_obj)) {
+		return '[Circular]';
+	}
+	_seen.add(_obj);
+	const baseIndent = getIndent(_indent);
+	const nestedIndent = getIndent(_indent + 1);
+	const formattedEntries = Object.entries(_obj)
+		.map(([key, value]) => {
+			const isNestedObject = typeof value === 'object' && value !== null && !Array.isArray(value);
+			const formattedValue = isNestedObject ? formatObject(value, _indent + 1, _seen) : JSON.stringify(value);
+			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
+		}).join(`,`);
+	return `{${formattedEntries}<br>${baseIndent}}`;
 }
 
 /**
@@ -1107,12 +1162,26 @@ const getStrWidth = (_str, _fontsize, _font) => {
  */
 const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64, _minFontsize = 5) => {
 	for (let siz = _maxFontsize; siz >= _minFontsize; siz--) {
-		if (_maxWidth >= getStrWidth(_str, siz, _font)) {
+		if (_maxWidth >= getStrWidth(getLongestStr(_str?.split(`<br>`)), siz, _font)) {
 			return siz;
 		}
 	}
 	return _minFontsize;
 };
+
+/**
+ * 配列中から最も長い文字列を抽出
+ * @param {string[]} _array 
+ * @returns {string}
+ */
+const getLongestStr = _array => {
+	if (_array === undefined) {
+		return ``;
+	}
+	return _array.reduce((longest, current) => {
+		return current.length > longest.length ? current : longest;
+	}, ``);
+}
 
 /**
  * 補足説明部分のラベル作成
@@ -2374,13 +2443,22 @@ const loadLocalStorage = () => {
 		g_localeObj.val = g_langStorage.locale;
 		g_localeObj.num = g_localeObj.list.findIndex(val => val === g_localeObj.val);
 	}
+	if (g_langStorage.safeMode === undefined) {
+		g_langStorage.safeMode = C_FLG_OFF;
+	}
 	Object.assign(g_msgInfoObj, g_lang_msgInfoObj[g_localeObj.val]);
 	Object.assign(g_kCd, g_lang_kCd[g_localeObj.val]);
 
 	// 作品別ローカルストレージの読込
-	g_localStorage = parseStorageData(g_localStorageUrl, {
-		adjustment: 0, hitPosition: 0, volume: 100, highscores: {},
-	});
+	if (g_langStorage.safeMode === C_FLG_OFF) {
+		g_localStorage = parseStorageData(g_localStorageUrl, {
+			adjustment: 0, hitPosition: 0, volume: 100, highscores: {},
+		});
+	} else {
+		g_localStorage = {};
+		g_stateObj.dataSaveFlg = false;
+		makeWarningWindow(g_msgInfoObj.W_0031);
+	}
 
 	// Adjustment, Volume, Appearance, Opacity, HitPosition初期値設定
 	checkLocalParam(`adjustment`, C_TYP_FLOAT, g_settings.adjustmentNum);
@@ -4698,6 +4776,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 
 const dataMgtInit = () => {
 	clearWindow(true);
+	const prevPage = g_currentPage;
 	g_currentPage = `dataMgt`;
 
 	multiAppend(divRoot,
@@ -4707,7 +4786,7 @@ const dataMgtInit = () => {
 			`<div class="settings_Title">DATA</div><div class="settings_Title2">MANAGEMENT</div>`
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
-		createDescDiv(`dataDelMsg`, g_lblNameObj.dataDeleteDesc),
+		createDescDiv(`dataDelMsg`, g_lblNameObj[`dataDelete${g_langStorage.safeMode}Desc`]),
 	);
 
 	// 各ボタン用のスプライトを作成
@@ -4760,61 +4839,6 @@ const dataMgtInit = () => {
 		}, g_cssObj[`button_${cssBgList[g_settings.dataMgtNum[_name]]}`], g_cssObj[`button_${cssBarList[g_settings.dataMgtNum[_name]]}`]);
 	};
 
-	/**
-	 * キー別ストレージ情報の取得
-	 * @param {string} _key 
-	 * @returns {string}
-	 */
-	const viewKeyStorage = _key => {
-
-		// キャッシュ設定
-		if (!viewKeyStorage.cache) {
-			viewKeyStorage.cache = new Map();
-		}
-		if (viewKeyStorage.cache.has(_key)) {
-			return viewKeyStorage.cache.get(_key);
-		}
-
-		let keyStorage = parseStorageData(`danonicw-${_key}k`);
-		if (Object.keys(keyStorage).length === 0) {
-
-			// キー別の情報が見つからない場合は作品別の情報から検索
-			Object.keys(g_localStorage).filter(val => val.endsWith(_key))
-				.forEach(val => keyStorage[val] = g_localStorage[val]);
-			if (Object.keys(keyStorage).length === 0) {
-				return ``;
-			}
-		}
-		const result = formatObject(keyStorage);
-		viewKeyStorage.cache.set(_key, result);
-		return result;
-	}
-
-	/**
-	 * 画面表示用インデント処理
-	 * @param {number} _level 
-	 * @returns {string}
-	 */
-	const getIndent = (_level) => '&nbsp;'.repeat(_level * 4);
-
-	/**
-	 * オブジェクトのネスト表示処理
-	 * @param {Object} _obj 
-	 * @param {Number} _indent 
-	 * @returns {string}
-	 */
-	const formatObject = (_obj, _indent = 0) => {
-		const baseIndent = getIndent(_indent);
-		const nestedIndent = getIndent(_indent + 1);
-		const formattedEntries = Object.entries(_obj)
-			.map(([key, value]) => {
-				const isNestedObject = typeof value === 'object' && value !== null && !Array.isArray(value);
-				const formattedValue = isNestedObject ? formatObject(value, _indent + 1) : JSON.stringify(value);
-				return `<br>${nestedIndent}"${key}": ${formattedValue}`;
-			}).join(`,`);
-		return `{${formattedEntries}<br>${baseIndent}}`;
-	}
-
 	multiAppend(optionsprite,
 		createMgtLabel(`workData`, 0),
 		createMgtButton(`environment`, 1.5, 0),
@@ -4828,15 +4852,11 @@ const dataMgtInit = () => {
 		})
 	);
 
-	// カスタムキー定義のストレージデータを表示から除去
-	const settingStorage = {};
-	Object.keys(g_localStorage).filter(val => !listMatching(val, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
-		.forEach(val => settingStorage[val] = g_localStorage[val]);
-
+	g_localStorageMgt = parseStorageData(g_localStorageUrl);
 	multiAppend(divRoot,
 		createDivCss2Label(`lblWorkDataView`,
-			formatObject(settingStorage), g_lblPosObj.lblWorkDataView),
-		createDivCss2Label(`lblKeyDataView`, viewKeyStorage(g_headerObj.keyLabels[0]), g_lblPosObj.lblKeyDataView),
+			viewKeyStorage(`workStorage`), g_lblPosObj.lblWorkDataView),
+		createDivCss2Label(`lblKeyDataView`, viewKeyStorage(`keyStorage`, g_headerObj.keyLabels[0]), g_lblPosObj.lblKeyDataView),
 	);
 	setUserSelect($id(`lblWorkDataView`), `text`);
 	setUserSelect($id(`lblKeyDataView`), `text`);
@@ -4849,7 +4869,7 @@ const dataMgtInit = () => {
 		keyListSprite.appendChild(createMgtButton(key, j - 2, 0, {
 			w: Math.max(50, getStrWidth(getKeyName(key) + `    `, g_limitObj.setLblSiz, getBasicFont())),
 			func: () => {
-				lblKeyDataView.innerHTML = viewKeyStorage(key);
+				lblKeyDataView.innerHTML = viewKeyStorage(`keyStorage`, key);
 				lblTargetKey.innerHTML = `(${getKeyName(key)})`;
 			},
 		}));
@@ -4861,9 +4881,18 @@ const dataMgtInit = () => {
 
 	multiAppend(divRoot,
 		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
-			Object.assign(g_lblPosObj.btnBack, {
-				animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: () => titleInit(),
+			Object.assign(g_lblPosObj.btnResetBack, {
+				resetFunc: () => prevPage === `title` ? titleInit() : g_moveSettingWindow(false),
 			}), g_cssObj.button_Back),
+
+		createCss2Button(`btnSafeMode`, g_lblNameObj.b_safeMode +
+			(g_langStorage.safeMode === C_FLG_ON ? C_FLG_OFF : C_FLG_ON), () => {
+				if (window.confirm(g_msgObj[`safeMode${g_langStorage.safeMode}Confirm`])) {
+					g_langStorage.safeMode = g_langStorage.safeMode === C_FLG_ON ? C_FLG_OFF : C_FLG_ON;
+					localStorage.setItem(`danoni-locale`, JSON.stringify(g_langStorage));
+					location.reload();
+				}
+			}, g_lblPosObj.btnSafeMode, g_cssObj.button_Setting),
 
 		createCss2Button(`btnReset`, g_lblNameObj.b_cReset, () => {
 			reloadFlg = false;
@@ -4877,9 +4906,9 @@ const dataMgtInit = () => {
 				`\n\n${selectedData.map(val => `- ${g_msgObj[val] || g_msgObj.keyTypes.split('{0}').join(val)}`).join(`\n`)}`)) {
 				selectedData.forEach(key => {
 					if (g_resetFunc.has(key)) {
-						backupData.set(key, JSON.parse(JSON.stringify(g_localStorage)));
+						backupData.set(key, JSON.parse(JSON.stringify(g_localStorageMgt)));
 						g_resetFunc.get(key)();
-						localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+						localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorageMgt));
 
 					} else if (keyList.includes(key)) {
 						const storage = parseStorageData(`danonicw-${key}k`);
@@ -4889,9 +4918,9 @@ const dataMgtInit = () => {
 							g_settings.keyStorages.forEach(val => delete storage[val]);
 							localStorage.setItem(`danonicw-${key}k`, JSON.stringify(storage));
 						} else {
-							backupData.set(`XX` + key, JSON.parse(JSON.stringify(g_localStorage)));
-							g_settings.keyStorages.forEach(val => delete g_localStorage[`${val}${key}`]);
-							localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+							backupData.set(`XX` + key, JSON.parse(JSON.stringify(g_localStorageMgt)));
+							g_settings.keyStorages.forEach(val => delete g_localStorageMgt[`${val}${key}`]);
+							localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorageMgt));
 						}
 					}
 				});
@@ -4899,6 +4928,7 @@ const dataMgtInit = () => {
 				sessionStorage.setItem('resetBackup', JSON.stringify(Array.from(backupData.entries())));
 			}
 		}, Object.assign(g_lblPosObj.btnResetN, {
+			visibility: g_langStorage.safeMode === C_FLG_OFF ? C_DIS_INHERIT : `hidden`,
 			resetFunc: () => {
 				if (reloadFlg) {
 					location.reload();
@@ -4912,8 +4942,8 @@ const dataMgtInit = () => {
 			if (backup && window.confirm(g_msgObj.dataRestoreConfirm)) {
 				backup.forEach(([key, data]) => {
 					if (g_resetFunc.has(key) || keyList.includes(key.slice(`XX`.length))) {
-						Object.assign(g_localStorage, data);
-						localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
+						Object.assign(g_localStorageMgt, data);
+						localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorageMgt));
 					} else if (keyList.includes(key)) {
 						localStorage.setItem(`danonicw-${key}k`, JSON.stringify(data));
 					}
@@ -4978,6 +5008,7 @@ const commonSettingBtn = _labelName => {
 		createCss2Button(`btnSave`, g_lblNameObj.dataSave, evt => switchSave(evt),
 			Object.assign(g_lblPosObj.btnSave, {
 				cxtFunc: evt => switchSave(evt),
+				visibility: g_langStorage.safeMode === C_FLG_OFF ? C_DIS_INHERIT : `hidden`,
 			}), g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF)),
 
 		// データ管理画面へ移動
@@ -10075,7 +10106,9 @@ const getArrowSettings = () => {
 
 	if (g_stateObj.dataSaveFlg) {
 		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
+		// 変更が確定した時点で表示用のキャッシュを解放
 		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
+		viewKeyStorage.cache = new Map();
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 	}
 
