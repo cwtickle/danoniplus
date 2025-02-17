@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/02/01
+ * Revised : 2025/02/17
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 38.3.2`;
-const g_revisedDate = `2025/02/01`;
+const g_version = `Ver 38.3.3`;
+const g_revisedDate = `2025/02/17`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -5513,14 +5513,8 @@ const setDifficulty = (_initFlg) => {
 			});
 
 		}
-
-		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-		if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
-			g_headerObj.keyRetry = setIntVal(getKeyCtrlVal(g_keyObj[`keyRetry${keyCtrlPtn}`]), g_headerObj.keyRetryDef);
-		}
-		if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
-			g_headerObj.keyTitleBack = setIntVal(getKeyCtrlVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`]), g_headerObj.keyTitleBackDef);
-		}
+		// 曲中ショートカットキーの切り替え
+		setPlayingShortcut();
 	}
 
 	// スクロール設定用の配列を入れ替え
@@ -7386,6 +7380,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// カラーグループ、シャッフルグループの再設定
 		g_keycons.groups.forEach(type => resetGroupList(type, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`));
 
+		// 曲中ショートカットキーの切り替え
+		setPlayingShortcut();
+
 		// キーコンフィグ画面を再呼び出し
 		keyConfigInit();
 
@@ -7569,6 +7566,20 @@ const getKeyInfo = () => {
 	return {
 		keyCtrlPtn, keyNum, posMax, divideCnt, keyGroupMaps, keyGroupList,
 	};
+};
+
+/**
+ * デフォルトの曲中ショートカットをキー数・キーパターンにより切り替え
+ * - キーコンフィグ画面で個別に変えていた場合は変更しない
+ */
+const setPlayingShortcut = () => {
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
+		g_headerObj.keyRetry = setIntVal(getKeyCtrlVal(g_keyObj[`keyRetry${keyCtrlPtn}`]), g_headerObj.keyRetryDef);
+	}
+	if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
+		g_headerObj.keyTitleBack = setIntVal(getKeyCtrlVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`]), g_headerObj.keyTitleBackDef);
+	}
 };
 
 /**
