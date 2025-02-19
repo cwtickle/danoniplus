@@ -471,6 +471,20 @@ const formatObject = (_obj, _indent = 0, _seen = new WeakSet()) => {
 	const baseIndent = getIndent(_indent);
 	const nestedIndent = getIndent(_indent + 1);
 
+	// カラーコードの色付け処理
+	const colorCodePattern = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
+	const formatValue = (value) => {
+		if (typeof value === 'string' && colorCodePattern.test(value)) {
+			return `"<span style="color:${value}">◆</span>${value}"`;
+		}
+		if (Array.isArray(value)) {
+			const formattedArray = value.map(item => formatValue(item)).join(`, `);
+			return `[${formattedArray}]`;
+		}
+		return JSON.stringify(value);
+	};
+
+	// 二次元配列の整形処理
 	if (Array.isArray(_obj)) {
 		if (_obj.length === 0) {
 			return '[]';
@@ -478,18 +492,23 @@ const formatObject = (_obj, _indent = 0, _seen = new WeakSet()) => {
 		const isArrayOfArrays = _obj.every(item => Array.isArray(item));
 		const formattedArray = _obj
 			.map(item => isArrayOfArrays
-				? `${nestedIndent}${JSON.stringify(item)}`
-				: JSON.stringify(item)
+				? `${nestedIndent}${formatValue(item)}`
+				: formatValue(item)
 			).join(isArrayOfArrays ? `,<br>` : `, `);
 
 		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
 	}
 
+	// オブジェクトのネスト整形処理
 	const formattedEntries = Object.entries(_obj)
 		.map(([key, value]) => {
-			const formattedValue = formatObject(value, _indent + 1, _seen);
+			const isNestedObject = typeof value === 'object' && value !== null;
+			const formattedValue = isNestedObject
+				? formatObject(value, _indent + 1, _seen)
+				: formatValue(value);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
+
 	return `{${formattedEntries}<br>${baseIndent}}`;
 }
 
@@ -4804,7 +4823,7 @@ const dataMgtInit = () => {
 	);
 
 	// 各ボタン用のスプライトを作成
-	const optionsprite = createEmptySprite(divRoot, `optionsprite`, g_windowObj.optionSprite);
+	const optionsprite = createEmptySprite(divRoot, `optionsprite`, g_windowObj.dataSprite);
 
 	let reloadFlg = false;
 	const list = [C_FLG_OFF, C_FLG_ON];
