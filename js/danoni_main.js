@@ -457,29 +457,32 @@ const viewKeyStorage = (_name, _key = ``) => {
  * オブジェクトのネスト表示処理
  * @param {Object} _obj 
  * @param {Number} _indent 
- * @param {WeakSet} _seen
+ * @param {WeakSet} seen
+ * @param {boolean} [colorFmt=true]
  * @returns {string}
  */
-const formatObject = (_obj, _indent = 0, _seen = new WeakSet()) => {
+const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true } = {}) => {
 	if (_obj === null || typeof _obj !== 'object') {
 		return JSON.stringify(_obj);
 	}
-	if (_seen.has(_obj)) {
+	if (seen.has(_obj)) {
 		return '[Circular]';
 	}
-	_seen.add(_obj);
+	seen.add(_obj);
 	const baseIndent = getIndent(_indent);
 	const nestedIndent = getIndent(_indent + 1);
 
 	// カラーコードの色付け処理
 	const colorCodePattern = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
 	const formatValue = (value) => {
-		if (typeof value === 'string' && colorCodePattern.test(value)) {
-			return `"<span style="color:${value}">◆</span>${value}"`;
-		}
-		if (Array.isArray(value)) {
-			const formattedArray = value.map(item => formatValue(item)).join(`, `);
-			return `[${formattedArray}]`;
+		if (colorFmt) {
+			if (typeof value === 'string' && colorCodePattern.test(value)) {
+				return `"<span style="color:${value}">◆</span>${value}"`;
+			}
+			if (Array.isArray(value)) {
+				const formattedArray = value.map(item => formatValue(item)).join(`, `);
+				return `[${formattedArray}]`;
+			}
 		}
 		return JSON.stringify(value);
 	};
@@ -504,7 +507,7 @@ const formatObject = (_obj, _indent = 0, _seen = new WeakSet()) => {
 		.map(([key, value]) => {
 			const isNestedObject = typeof value === 'object' && value !== null;
 			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, _seen)
+				? formatObject(value, _indent + 1, { seen, colorFmt })
 				: formatValue(value);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
