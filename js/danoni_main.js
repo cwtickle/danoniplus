@@ -473,7 +473,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const nestedIndent = getIndent(_indent + 1);
 
 	// カラーコードの色付け処理
-	const colorCodePattern = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
+	const colorCodePattern = /^#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
 	const formatValue = (value) => {
 		if (colorFmt) {
 			if (typeof value === 'string' && colorCodePattern.test(value)) {
