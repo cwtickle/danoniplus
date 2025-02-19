@@ -470,10 +470,24 @@ const formatObject = (_obj, _indent = 0, _seen = new WeakSet()) => {
 	_seen.add(_obj);
 	const baseIndent = getIndent(_indent);
 	const nestedIndent = getIndent(_indent + 1);
+
+	if (Array.isArray(_obj)) {
+		if (_obj.length === 0) {
+			return '[]';
+		}
+		const isArrayOfArrays = _obj.every(item => Array.isArray(item));
+		const formattedArray = _obj
+			.map(item => isArrayOfArrays
+				? `${nestedIndent}${JSON.stringify(item)}`
+				: JSON.stringify(item)
+			).join(isArrayOfArrays ? `,<br>` : `, `);
+
+		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
+	}
+
 	const formattedEntries = Object.entries(_obj)
 		.map(([key, value]) => {
-			const isNestedObject = typeof value === 'object' && value !== null && !Array.isArray(value);
-			const formattedValue = isNestedObject ? formatObject(value, _indent + 1, _seen) : JSON.stringify(value);
+			const formattedValue = formatObject(value, _indent + 1, _seen);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
 	return `{${formattedEntries}<br>${baseIndent}}`;
