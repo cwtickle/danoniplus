@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/02/16 (v39.6.0)
+ * Revised : 2025/02/20 (v39.7.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -193,6 +193,7 @@ const getScMsg = {
 const updateWindowSiz = () => {
     Object.assign(g_windowObj, {
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
+        dataSprite: { x: (g_sWidth - Math.max(g_sWidth - 100, 450)) / 2, y: 65, w: Math.max(g_sWidth - 100, 450), h: 325 },
         difList: { x: 165, y: 60, w: 280, h: 270 + g_sHeight - 500, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
         difCover: { x: 20, y: 60, w: 145, h: 270 + g_sHeight - 500, opacity: 0.95, pointerEvents: C_DIS_AUTO },
         difFilter: { x: 0, y: 66, w: 140, h: 204 + g_sHeight - 500, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
@@ -258,12 +259,12 @@ const updateWindowSiz = () => {
             x: g_btnX(2 / 3), y: g_sHeight - 100, w: g_btnWidth(1 / 3), h: g_limitObj.btnHeight,
         },
         lblWorkDataView: {
-            x: g_btnX(5 / 12), y: 100, w: g_btnWidth(1 / 2), h: g_sHeight / 4, siz: 12, align: C_ALIGN_LEFT,
+            x: g_btnX(1 / 3) + 10, y: 100, w: g_btnWidth(7 / 12), h: g_sHeight / 4, siz: 12, align: C_ALIGN_LEFT,
             overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
             whiteSpace: `nowrap`,
         },
         lblKeyDataView: {
-            x: g_btnX(5 / 12), y: 100 + g_sHeight / 4 + 10, w: g_btnWidth(1 / 2), h: g_sHeight / 3 - 10, siz: 12, align: C_ALIGN_LEFT,
+            x: g_btnX(1 / 3) + 10, y: 100 + g_sHeight / 4 + 10, w: g_btnWidth(7 / 12), h: g_sHeight / 3 - 10, siz: 12, align: C_ALIGN_LEFT,
             overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
             whiteSpace: `nowrap`,
         },
