@@ -482,7 +482,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 			}
 			if (Array.isArray(_value)) {
 				let formattedArray = _value.map(item => formatValue(item));
-				if (key === `keyCtrl`) {
+				if (key.startsWith(`keyCtrl`)) {
 					formattedArray = formattedArray.filter(item => item !== `0`)
 						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
 				}
