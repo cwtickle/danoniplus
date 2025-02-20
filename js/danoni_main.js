@@ -457,25 +457,66 @@ const viewKeyStorage = (_name, _key = ``) => {
  * オブジェクトのネスト表示処理
  * @param {Object} _obj 
  * @param {Number} _indent 
- * @param {WeakSet} _seen
+ * @param {WeakSet} [seen=new WeakSet()]
+ * @param {boolean} [colorFmt=true]
+ * @param {string} [key='']
  * @returns {string}
  */
-const formatObject = (_obj, _indent = 0, _seen = new WeakSet()) => {
+const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, key } = {}) => {
 	if (_obj === null || typeof _obj !== 'object') {
 		return JSON.stringify(_obj);
 	}
-	if (_seen.has(_obj)) {
+	if (seen.has(_obj)) {
 		return '[Circular]';
 	}
-	_seen.add(_obj);
+	seen.add(_obj);
 	const baseIndent = getIndent(_indent);
 	const nestedIndent = getIndent(_indent + 1);
+
+	// カラーコード、対応キーの色付け処理
+	const colorCodePattern = /^#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4})$/;
+	const formatValue = _value => {
+		if (colorFmt) {
+			if (typeof _value === 'string' && colorCodePattern.test(_value)) {
+				return `"<span style="color:${_value}">◆</span>${_value}"`;
+			}
+			if (Array.isArray(_value)) {
+				let formattedArray = _value.map(item => formatValue(item));
+				if (key === `keyCtrl`) {
+					formattedArray = formattedArray.filter(item => item !== `0`)
+						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
+				}
+				return `[${formattedArray.join(`, `)}]`;
+			}
+		}
+		return JSON.stringify(_value);
+	};
+
+	// 二次元配列の整形処理
+	if (Array.isArray(_obj)) {
+		if (_obj.length === 0) {
+			return '[]';
+		}
+		const isArrayOfArrays = _obj.every(item => Array.isArray(item));
+		const formattedArray = _obj
+			.map(item => isArrayOfArrays
+				? `${nestedIndent}${formatValue(item)}`
+				: formatValue(item)
+			).join(isArrayOfArrays ? `,<br>` : `, `);
+
+		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
+	}
+
+	// オブジェクトのネスト整形処理
 	const formattedEntries = Object.entries(_obj)
 		.map(([key, value]) => {
-			const isNestedObject = typeof value === 'object' && value !== null && !Array.isArray(value);
-			const formattedValue = isNestedObject ? formatObject(value, _indent + 1, _seen) : JSON.stringify(value);
+			const isNestedObject = typeof value === 'object' && value !== null;
+			const formattedValue = isNestedObject
+				? formatObject(value, _indent + 1, { seen, colorFmt, key })
+				: formatValue(value);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
+
 	return `{${formattedEntries}<br>${baseIndent}}`;
 }
 
@@ -4790,7 +4831,7 @@ const dataMgtInit = () => {
 	);
 
 	// 各ボタン用のスプライトを作成
-	const optionsprite = createEmptySprite(divRoot, `optionsprite`, g_windowObj.optionSprite);
+	const optionsprite = createEmptySprite(divRoot, `optionsprite`, g_windowObj.dataSprite);
 
 	let reloadFlg = false;
 	const list = [C_FLG_OFF, C_FLG_ON];
