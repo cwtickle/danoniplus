@@ -475,13 +475,13 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 
 	// カラーコード、対応キーの色付け処理
 	const colorCodePattern = /^#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4})$/;
-	const formatValue = (value) => {
+	const formatValue = _value => {
 		if (colorFmt) {
-			if (typeof value === 'string' && colorCodePattern.test(value)) {
-				return `"<span style="color:${value}">◆</span>${value}"`;
+			if (typeof _value === 'string' && colorCodePattern.test(_value)) {
+				return `"<span style="color:${_value}">◆</span>${_value}"`;
 			}
-			if (Array.isArray(value)) {
-				let formattedArray = value.map(item => formatValue(item, key));
+			if (Array.isArray(_value)) {
+				let formattedArray = _value.map(item => formatValue(item));
 				if (key === `keyCtrl`) {
 					formattedArray = formattedArray.filter(item => item !== `0`)
 						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
@@ -489,7 +489,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 				return `[${formattedArray.join(`, `)}]`;
 			}
 		}
-		return JSON.stringify(value);
+		return JSON.stringify(_value);
 	};
 
 	// 二次元配列の整形処理
