@@ -457,11 +457,12 @@ const viewKeyStorage = (_name, _key = ``) => {
  * オブジェクトのネスト表示処理
  * @param {Object} _obj 
  * @param {Number} _indent 
- * @param {WeakSet} seen
+ * @param {WeakSet} [seen=new WeakSet()]
  * @param {boolean} [colorFmt=true]
+ * @param {string} [key='']
  * @returns {string}
  */
-const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true } = {}) => {
+const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, key } = {}) => {
 	if (_obj === null || typeof _obj !== 'object') {
 		return JSON.stringify(_obj);
 	}
@@ -472,7 +473,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const baseIndent = getIndent(_indent);
 	const nestedIndent = getIndent(_indent + 1);
 
-	// カラーコードの色付け処理
+	// カラーコード、対応キーの色付け処理
 	const colorCodePattern = /^#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4})$/;
 	const formatValue = (value) => {
 		if (colorFmt) {
@@ -480,8 +481,12 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 				return `"<span style="color:${value}">◆</span>${value}"`;
 			}
 			if (Array.isArray(value)) {
-				const formattedArray = value.map(item => formatValue(item)).join(`, `);
-				return `[${formattedArray}]`;
+				let formattedArray = value.map(item => formatValue(item, key));
+				if (key === `keyCtrl`) {
+					formattedArray = formattedArray.filter(item => item !== `0`)
+						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
+				}
+				return `[${formattedArray.join(`, `)}]`;
 			}
 		}
 		return JSON.stringify(value);
@@ -507,7 +512,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 		.map(([key, value]) => {
 			const isNestedObject = typeof value === 'object' && value !== null;
 			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, { seen, colorFmt })
+				? formatObject(value, _indent + 1, { seen, colorFmt, key })
 				: formatValue(value);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
