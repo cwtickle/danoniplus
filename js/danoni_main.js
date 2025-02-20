@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 39.7.0`;
+const g_version = `Ver 39.7.1`;
 const g_revisedDate = `2025/02/20`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -482,7 +482,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 			}
 			if (Array.isArray(_value)) {
 				let formattedArray = _value.map(item => formatValue(item));
-				if (key === `keyCtrl`) {
+				if (key.startsWith(`keyCtrl`)) {
 					formattedArray = formattedArray.filter(item => item !== `0`)
 						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
 				}
