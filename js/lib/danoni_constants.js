@@ -1033,6 +1033,7 @@ const g_settings = {
     },
     environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`],
     keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`],
+    colorStorages: [`setColor`, `setShadowColor`, `frzColor`, `frzShadowColor`],
 
     speeds: makeSpeedList(C_MIN_SPEED, C_MAX_SPEED),
     speedNum: 0,
@@ -1302,11 +1303,11 @@ const g_resetFunc = new Map([
     }],
     ['environment', () => g_settings.environments.forEach(key => delete g_localStorageMgt[key])],
     [`customKey`, () => Object.keys(g_localStorageMgt)
-        .filter(key => listMatching(key, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
+        .filter(key => listMatching(key, g_settings.keyStorages.concat(g_settings.colorStorages), { prefix: `^` }))
         .forEach(key => delete g_localStorageMgt[key])],
     [`others`, () => Object.keys(g_localStorageMgt)
         .filter(key => !g_settings.environments.includes(key) && key !== `highscores` &&
-            !listMatching(key, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
+            !listMatching(key, g_settings.keyStorages.concat(g_settings.colorStorages), { prefix: `^` }))
         .forEach(key => delete g_localStorageMgt[key])],
 ]);
 
@@ -1320,7 +1321,7 @@ const g_storageFunc = new Map([
         const settingStorage = {};
 
         // カスタムキー定義のストレージデータを表示から除去
-        Object.keys(g_localStorageMgt).filter(val => !listMatching(val, g_settings.keyStorages.concat(`setColor`), { prefix: `^` }))
+        Object.keys(g_localStorageMgt).filter(val => !listMatching(val, g_settings.keyStorages.concat(g_settings.colorStorages), { prefix: `^` }))
             .forEach(val => settingStorage[val] = g_localStorageMgt[val]);
         return settingStorage;
     }],
