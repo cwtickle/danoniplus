@@ -193,7 +193,7 @@ const getScMsg = {
 const updateWindowSiz = () => {
     Object.assign(g_windowObj, {
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
-        dataSprite: { x: (g_sWidth - Math.max(g_sWidth - 100, 450)) / 2, y: 65, w: Math.max(g_sWidth - 100, 450), h: 325 },
+        dataSprite: { x: g_btnX() + (g_sWidth - Math.max(g_sWidth - 100, 450)) / 2, y: 65, w: Math.max(g_sWidth - 100, 450), h: 325 },
         difList: { x: 165, y: 60, w: 280, h: 270 + g_sHeight - 500, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
         difCover: { x: 20, y: 60, w: 145, h: 270 + g_sHeight - 500, opacity: 0.95, pointerEvents: C_DIS_AUTO },
         difFilter: { x: 0, y: 66, w: 140, h: 204 + g_sHeight - 500, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
