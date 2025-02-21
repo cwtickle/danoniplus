@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/02/20 (v39.7.2)
+ * Revised : 2025/02/21 (v39.8.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -193,7 +193,7 @@ const getScMsg = {
 const updateWindowSiz = () => {
     Object.assign(g_windowObj, {
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
-        dataSprite: { x: (g_sWidth - Math.max(g_sWidth - 100, 450)) / 2, y: 65, w: Math.max(g_sWidth - 100, 450), h: 325 },
+        dataSprite: { x: g_btnX() + (g_sWidth - Math.max(g_sWidth - 100, 450)) / 2, y: 65, w: Math.max(g_sWidth - 100, 450), h: 325 },
         difList: { x: 165, y: 60, w: 280, h: 270 + g_sHeight - 500, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
         difCover: { x: 20, y: 60, w: 145, h: 270 + g_sHeight - 500, opacity: 0.95, pointerEvents: C_DIS_AUTO },
         difFilter: { x: 0, y: 66, w: 140, h: 204 + g_sHeight - 500, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
@@ -267,6 +267,12 @@ const updateWindowSiz = () => {
             x: g_btnX(1 / 3) + 10, y: 100 + g_sHeight / 4 + 10, w: g_btnWidth(7 / 12), h: g_sHeight / 3 - 10, siz: 12, align: C_ALIGN_LEFT,
             overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
             whiteSpace: `nowrap`,
+        },
+        btnWorkStorage: {
+            x: g_btnX(1) - 140, y: 100, w: 70, h: 20, siz: 16,
+        },
+        btnKeyStorage: {
+            x: g_btnX(1) - 140, y: 100 + g_sHeight / 4 + 10, w: 70, h: 20, siz: 16,
         },
 
         /** 設定画面 */
@@ -3390,6 +3396,7 @@ const g_lang_msgInfoObj = {
         I_0003: `各譜面の明細情報をクリップボードにコピーしました！`,
         I_0004: `musicUrlが設定されていないため、無音モードで再生します`,
         I_0005: `正規のミラー譜面で無いため、ハイスコアは保存されません`,
+        I_0006: `ローカルストレージ情報をクリップボードにコピーしました！`,
     },
     En: {
         W_0001: `Your browser is not guaranteed to work.<br>
@@ -3443,6 +3450,7 @@ const g_lang_msgInfoObj = {
         I_0003: `Charts information is copied to the clipboard!`,
         I_0004: `Play in silence mode because "musicUrl" is not set`,
         I_0005: `Highscore is not saved because not a regular mirrored chart.`,
+        I_0006: `Local storage information copied to clipboard!`,
     },
 };
 
@@ -3487,6 +3495,7 @@ const g_lblNameObj = {
     b_reset: `Reset Key`,
     b_safeMode: `Safe Mode -> `,
     b_undo: `Restore`,
+    b_copyStorage: `Copy`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
     b_tweet: `Post X`,
