@@ -268,6 +268,12 @@ const updateWindowSiz = () => {
             overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
             whiteSpace: `nowrap`,
         },
+        btnWorkStorage: {
+            x: g_btnX(1) - 140, y: 100, w: 70, h: 20, siz: 16,
+        },
+        btnKeyStorage: {
+            x: g_btnX(1) - 140, y: 100 + g_sHeight / 4 + 10, w: 70, h: 20, siz: 16,
+        },
 
         /** 設定画面 */
         btnBack: {
@@ -3390,6 +3396,7 @@ const g_lang_msgInfoObj = {
         I_0003: `各譜面の明細情報をクリップボードにコピーしました！`,
         I_0004: `musicUrlが設定されていないため、無音モードで再生します`,
         I_0005: `正規のミラー譜面で無いため、ハイスコアは保存されません`,
+        I_0006: `ローカルストレージ情報をクリップボードにコピーしました！`,
     },
     En: {
         W_0001: `Your browser is not guaranteed to work.<br>
@@ -3443,6 +3450,7 @@ const g_lang_msgInfoObj = {
         I_0003: `Charts information is copied to the clipboard!`,
         I_0004: `Play in silence mode because "musicUrl" is not set`,
         I_0005: `Highscore is not saved because not a regular mirrored chart.`,
+        I_0006: `Local storage information copied to clipboard!`,
     },
 };
 
@@ -3487,6 +3495,7 @@ const g_lblNameObj = {
     b_reset: `Reset Key`,
     b_safeMode: `Safe Mode -> `,
     b_undo: `Restore`,
+    b_copyStorage: `Copy`,
     b_settings: `To Settings`,
     b_copy: `CopyResult`,
     b_tweet: `Post X`,
