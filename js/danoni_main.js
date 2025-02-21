@@ -517,7 +517,11 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
 
-	return `{${formattedEntries}<br>${baseIndent}}`;
+	let result = `{${formattedEntries}<br>${baseIndent}}`;
+	if (!colorFmt) {
+		result = result.replaceAll(`<br>`, `\r\n`).replaceAll(`&nbsp;`, ` `);
+	}
+	return result;
 }
 
 /**
@@ -4819,6 +4823,7 @@ const dataMgtInit = () => {
 	clearWindow(true);
 	const prevPage = g_currentPage;
 	g_currentPage = `dataMgt`;
+	let selectedKey = g_keyObj.currentKey;
 
 	multiAppend(divRoot,
 
@@ -4887,17 +4892,28 @@ const dataMgtInit = () => {
 		createMgtButton(`customKey`, 3.5, 0),
 		createMgtButton(`others`, 4.5, 0),
 		createMgtLabel(`keyData`, 6),
-		createDivCss2Label(`lblTargetKey`, `(${getKeyName(g_headerObj.keyLabels[0])})`, {
+		createDivCss2Label(`lblTargetKey`, `(${getKeyName(selectedKey)})`, {
 			x: 90, y: g_limitObj.setLblHeight * 6 + 40,
 			siz: g_limitObj.setLblSiz, align: C_ALIGN_LEFT,
 		})
 	);
 
 	g_localStorageMgt = parseStorageData(g_localStorageUrl);
+
 	multiAppend(divRoot,
+
+		// 保存データの表示
 		createDivCss2Label(`lblWorkDataView`,
 			viewKeyStorage(`workStorage`), g_lblPosObj.lblWorkDataView),
-		createDivCss2Label(`lblKeyDataView`, viewKeyStorage(`keyStorage`, g_headerObj.keyLabels[0]), g_lblPosObj.lblKeyDataView),
+		createDivCss2Label(`lblKeyDataView`, viewKeyStorage(`keyStorage`, selectedKey), g_lblPosObj.lblKeyDataView),
+
+		// 保存データの出力ボタン
+		createCss2Button(`btnWorkStorage`, g_lblNameObj.b_copyStorage, () =>
+			copyTextToClipboard(formatObject(g_storageFunc.get(`workStorage`)(), 0, { colorFmt: false }), g_msgInfoObj.I_0006),
+			g_lblPosObj.btnWorkStorage, g_cssObj.button_Default, g_cssObj.button_ON),
+		createCss2Button(`btnKeyStorage`, g_lblNameObj.b_copyStorage, () =>
+			copyTextToClipboard(formatObject(g_storageFunc.get(`keyStorage`)(selectedKey), 0, { colorFmt: false }), g_msgInfoObj.I_0006),
+			g_lblPosObj.btnKeyStorage, g_cssObj.button_Default, g_cssObj.button_ON),
 	);
 	setUserSelect($id(`lblWorkDataView`), `text`);
 	setUserSelect($id(`lblKeyDataView`), `text`);
@@ -4910,6 +4926,7 @@ const dataMgtInit = () => {
 		keyListSprite.appendChild(createMgtButton(key, j - 2, 0, {
 			w: Math.max(50, getStrWidth(getKeyName(key) + `    `, g_limitObj.setLblSiz, getBasicFont())),
 			func: () => {
+				selectedKey = key;
 				lblKeyDataView.innerHTML = viewKeyStorage(`keyStorage`, key);
 				lblTargetKey.innerHTML = `(${getKeyName(key)})`;
 			},
