@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/02/17
+ * Revised : 2025/02/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 37.8.8`;
-const g_revisedDate = `2025/02/17`;
+const g_version = `Ver 37.8.9`;
+const g_revisedDate = `2025/02/24`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -6710,6 +6710,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const getKeyConfigColor = (_j, _colorPos) => {
 		let arrowColor = g_headerObj.setColor[_colorPos];
 		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
+			g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay] !== undefined &&
 			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
 			if (g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay][_j] === 1) {
 				arrowColor = g_headerObj.setDummyColor[_colorPos];
