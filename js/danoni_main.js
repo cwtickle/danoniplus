@@ -7160,6 +7160,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const getKeyConfigColor = (_j, _colorPos) => {
 		let arrowColor = g_headerObj.setColor[_colorPos];
 		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
+			g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay] !== undefined &&
 			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
 			if (g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay][_j] === 1) {
 				arrowColor = g_headerObj.setDummyColor[_colorPos];
