@@ -16,7 +16,7 @@ let g_localVersion = ``;
 let g_localVersion2 = ``;
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
-//  共通:water 初期化:peach タイトル:melon データ管理:pear 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
+//  共通:water 初期化:peach タイトル:melon データ管理:pear 前提条件表示:mango 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
 //  シーンジャンプ:Scene
 
 /**
@@ -474,11 +474,11 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const nestedIndent = getIndent(_indent + 1);
 
 	// カラーコード、対応キーの色付け処理
-	const colorCodePattern = /^#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4})$/;
+	const colorCodePattern = /#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4})/g;
 	const formatValue = _value => {
 		if (colorFmt) {
 			if (typeof _value === 'string' && colorCodePattern.test(_value)) {
-				return `"<span style="color:${_value}">◆</span>${_value}"`;
+				return _value.replace(colorCodePattern, (match) => `<span style="color:${match}">◆</span>${match}`);
 			}
 			if (Array.isArray(_value)) {
 				let formattedArray = _value.map(item => formatValue(item));
@@ -499,10 +499,14 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 		}
 		const isArrayOfArrays = _obj.every(item => Array.isArray(item));
 		const formattedArray = _obj
-			.map(item => isArrayOfArrays
-				? `${nestedIndent}${formatValue(item)}`
-				: formatValue(item)
-			).join(isArrayOfArrays ? `,<br>` : `, `);
+			.map(value => {
+				const isNestedObject = typeof value === 'object' && value !== null;
+				return isArrayOfArrays
+					? `${nestedIndent}${formatValue(value)}`
+					: isNestedObject
+						? formatObject(value, _indent + 1, { seen, colorFmt })
+						: formatValue(value)
+			}).join(isArrayOfArrays ? `,<br>` : `, `);
 
 		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
 	}
@@ -4943,6 +4947,11 @@ const dataMgtInit = () => {
 				resetFunc: () => prevPage === `title` ? titleInit() : g_moveSettingWindow(false),
 			}), g_cssObj.button_Back),
 
+		createCss2Button(`btnPrecond`, g_lblNameObj.b_precond, () => true,
+			Object.assign(g_lblPosObj.btnPrecond, {
+				resetFunc: () => preconditionInit(),
+			}), g_cssObj.button_Setting),
+
 		createCss2Button(`btnSafeMode`, g_lblNameObj.b_safeMode +
 			(g_langStorage.safeMode === C_FLG_ON ? C_FLG_OFF : C_FLG_ON), () => {
 				if (window.confirm(g_msgObj[`safeMode${g_langStorage.safeMode}Confirm`])) {
@@ -5022,6 +5031,45 @@ const dataMgtInit = () => {
 	divRoot.oncontextmenu = () => false;
 
 	g_skinJsObj.dataMgt.forEach(func => func());
+};
+
+
+/*-----------------------------------------------------------*/
+/* Scene : PRECONDITION [mango] */
+/*-----------------------------------------------------------*/
+
+const preconditionInit = () => {
+	clearWindow(true);
+	g_currentPage = `precondition`;
+
+	multiAppend(divRoot,
+
+		// 画面タイトル
+		getTitleDivLabel(`lblTitle`,
+			`<div class="settings_Title">PRECONDITION</div>`
+				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
+
+		createDivCss2Label(`lblWorkDataView`,
+			formatObject(g_headerObj), g_lblPosObj.lblPrecondView),
+	);
+	setUserSelect($id(`lblWorkDataView`), `text`);
+
+	// ユーザカスタムイベント(初期)
+	g_customJsObj.precondition.forEach(func => func());
+
+	multiAppend(divRoot,
+		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
+			Object.assign(g_lblPosObj.btnPrecond, {
+				resetFunc: () => dataMgtInit(),
+			}), g_cssObj.button_Back),
+	);
+	// キー操作イベント（デフォルト）
+	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
+
+	document.oncontextmenu = () => true;
+	divRoot.oncontextmenu = () => false;
+
+	g_skinJsObj.precondition.forEach(func => func());
 };
 
 /*-----------------------------------------------------------*/

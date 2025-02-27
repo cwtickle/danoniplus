@@ -246,6 +246,10 @@ const updateWindowSiz = () => {
         btnResetBack: {
             x: g_btnX(), y: g_sHeight - 20, w: g_btnWidth(1 / 4), h: 16, siz: 12,
         },
+        btnPrecond: {
+            x: g_btnX(1 / 4), y: g_sHeight - 20, w: g_btnWidth(1 / 4), h: 16, siz: 12,
+            visibility: getQueryParamVal(`debug`) === `true` ? `visible` : `hidden`,
+        },
         btnSafeMode: {
             x: g_btnX(), siz: 18,
         },
@@ -265,6 +269,11 @@ const updateWindowSiz = () => {
         },
         lblKeyDataView: {
             x: g_btnX(1 / 3) + 10, y: 100 + g_sHeight / 4 + 10, w: g_btnWidth(7 / 12), h: g_sHeight * 3 / 4 - 215, siz: 12, align: C_ALIGN_LEFT,
+            overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
+            whiteSpace: `nowrap`,
+        },
+        lblPrecondView: {
+            x: g_btnX(), y: 70, w: g_btnWidth(1), h: g_sHeight - 100, siz: 12, align: C_ALIGN_LEFT,
             overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
             whiteSpace: `nowrap`,
         },
@@ -2292,6 +2301,7 @@ const g_btnWaitFrame = {
     initial: { b_frame: 0, s_frame: 0 },
     title: { b_frame: 0, s_frame: 0 },
     dataMgt: { b_frame: 0, s_frame: 0 },
+    precondition: { b_frame: 0, s_frame: 0 },
     option: { b_frame: 0, s_frame: 0, initial: true },
     difSelector: { b_frame: 0, s_frame: 0 },
     settingsDisplay: { b_frame: 0, s_frame: 0 },
@@ -3494,6 +3504,7 @@ const g_lblNameObj = {
     b_play: `PLAY!`,
     b_reset: `Reset Key`,
     b_safeMode: `Safe Mode -> `,
+    b_precond: `Precondition`,
     b_undo: `Restore`,
     b_copyStorage: `Copy`,
     b_settings: `To Settings`,
@@ -4045,6 +4056,7 @@ const g_customJsObj = {
     title: [],
     titleEnterFrame: [],
     dataMgt: [],
+    precondition: [],
     option: [],
     difficulty: [],
     settingsDisplay: [],
@@ -4085,6 +4097,7 @@ const g_customJsObj = {
 const g_skinJsObj = {
     title: [],
     dataMgt: [],
+    precondition: [],
     option: [],
     settingsDisplay: [],
     exSetting: [],
