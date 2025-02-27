@@ -477,8 +477,11 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const colorCodePattern = /#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4})/g;
 	const formatValue = _value => {
 		if (colorFmt) {
-			if (typeof _value === 'string' && colorCodePattern.test(_value)) {
-				return _value.replace(colorCodePattern, (match) => `<span style="color:${match}">◆</span>${match}`);
+			if (typeof _value === 'string') {
+				_value = escapeHtml(_value);
+				if (colorCodePattern.test(_value)) {
+					return _value.replace(colorCodePattern, (match) => `<span style="color:${match}">◆</span>${match}`);
+				}
 			}
 			if (Array.isArray(_value)) {
 				let formattedArray = _value.map(item => formatValue(item));
@@ -488,6 +491,9 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 				}
 				return `[${formattedArray.join(`, `)}]`;
 			}
+			if (typeof _value === 'object' && _value !== null) {
+				return formatObject(_value, _indent + 1, { seen, colorFmt, key });
+			}
 		}
 		return JSON.stringify(_value);
 	};
@@ -496,6 +502,15 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	if (Array.isArray(_obj)) {
 		if (_obj.length === 0) {
 			return '[]';
+		}
+		if (colorFmt && _obj.length > 100) {
+			const filteredArray = _obj.reduce((result, value, index) => {
+				if (hasVal(value)) {
+					result.push(`${index}: ${formatValue(value)}`);
+				}
+				return result;
+			}, []);
+			return `{<br>${baseIndent}[<br>${filteredArray.join(',<br>')}<br>]<br>}`;
 		}
 		const isArrayOfArrays = _obj.every(item => Array.isArray(item));
 		const formattedArray = _obj

@@ -2001,6 +2001,10 @@ const g_shortcutObj = {
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
     },
+    precondition: {
+        Escape: { id: `btnBack` },
+        ShiftLeft_Tab: { id: `btnBack` },
+    },
     option: {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
         ShiftRight_KeyD: { id: `lnkDifficultyL` },
@@ -2317,6 +2321,7 @@ const g_btnWaitFrame = {
 const g_btnPatterns = {
     title: { Start: 0, Comment: -10 },
     dataMgt: { Back: 0, Environment: -35, Highscores: -35, CustomKey: -35, Others: -35 },
+    precondition: { Back: 0 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
     difSelector: {},
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5 },
