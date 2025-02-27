@@ -474,7 +474,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const nestedIndent = getIndent(_indent + 1);
 
 	// カラーコード、対応キーの色付け処理
-	const colorCodePattern = /#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4})/g;
+	const colorCodePattern = /#(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 	const formatValue = _value => {
 		if (colorFmt) {
 			if (typeof _value === 'string') {
@@ -2479,10 +2479,11 @@ const initialControl = async () => {
  * 作品別ローカルストレージの読み込み・初期設定
  */
 const loadLocalStorage = () => {
-	// URLからscoreId, h(高さ)を削除
+	// URLからscoreId, h(高さ), debugを削除
 	const url = new URL(location.href);
 	url.searchParams.delete(`scoreId`);
 	url.searchParams.delete(`h`);
+	url.searchParams.delete(`debug`);
 	g_localStorageUrl = url.toString();
 
 	/**
