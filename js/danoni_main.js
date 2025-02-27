@@ -5083,7 +5083,7 @@ const preconditionInit = () => {
 	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
 
 	document.oncontextmenu = () => true;
-	divRoot.oncontextmenu = () => false;
+	divRoot.oncontextmenu = () => true;
 
 	g_skinJsObj.precondition.forEach(func => func());
 };
