@@ -487,7 +487,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 
 	// カラーコード、対応キーの色付け処理
 	const colorCodePattern = /#(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
-	const formatValue = _value => {
+	const formatValue = (_value, _parent) => {
 		if (colorFmt) {
 			if (typeof _value === 'string') {
 				_value = escapeHtml(_value);
@@ -496,7 +496,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 				}
 			}
 			if (Array.isArray(_value)) {
-				let formattedArray = _value.map(item => formatValue(item));
+				let formattedArray = _value.map(item => formatValue(item, _value));
 				if (key.startsWith(`keyCtrl`)) {
 					formattedArray = formattedArray.filter(item => item !== `0`)
 						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
@@ -504,7 +504,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 				return `[${formattedArray.join(`, `)}]`;
 			}
 			if (typeof _value === 'object' && _value !== null) {
-				return formatObject(_value, _indent + 1, { seen, colorFmt, key });
+				return formatObject(_value, _indent + 1, { seen, colorFmt, key }, _parent);
 			}
 		}
 		return JSON.stringify(_value);
@@ -518,7 +518,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 		if (colorFmt && _obj.length > 100) {
 			const filteredArray = _obj.reduce((result, value, index) => {
 				if (hasVal(value)) {
-					result.push(`${index}: ${formatValue(value)}`);
+					result.push(`${index}: ${formatValue(value, _obj)}`);
 				}
 				return result;
 			}, []);
@@ -529,10 +529,10 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 			.map(value => {
 				const isNestedObject = typeof value === 'object' && value !== null;
 				return isArrayOfArrays
-					? `${nestedIndent}${formatValue(value)}`
+					? `${nestedIndent}${formatValue(value, _obj)}`
 					: isNestedObject
-						? formatObject(value, _indent + 1, { seen, colorFmt })
-						: formatValue(value)
+						? formatObject(value, _indent + 1, { seen, colorFmt }, _obj)
+						: formatValue(value, _obj)
 			}).join(isArrayOfArrays ? `,<br>` : `, `);
 
 		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
@@ -544,8 +544,8 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 			const isNestedObject = typeof value === 'object' && value !== null;
 			const seenNew = _parent ? seen : new WeakSet();
 			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, { seen: seenNew, colorFmt, key })
-				: formatValue(value);
+				? formatObject(value, _indent + 1, { seen: seenNew, colorFmt, key }, _obj)
+				: formatValue(value, _obj);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
 
@@ -2486,9 +2486,11 @@ const initialControl = async () => {
 		}
 	}
 	g_customJsObj.preTitle.forEach(func => func());
+	titleInit();
 
 	// 未使用のg_keyObjプロパティを削除
 	const keyProp = g_keyCopyLists.simple.concat(g_keyCopyLists.multiple, `keyCtrl`, `keyName`, `minWidth`, `ptchara`);
+	const delKeyPropList = [`ptchara7`, `keyTransPattern`];
 	Object.keys(g_keyObj).forEach(key => {
 		let type = ``;
 		keyProp.forEach(prop => {
@@ -2503,11 +2505,10 @@ const initialControl = async () => {
 				delete g_keyObj[key];
 			}
 		}
-		if (key.match(/^chara7_[a-z]/) || key === `ptchara7`) {
+		if (key.match(/^chara7_[a-z]/) || delKeyPropList.includes(key)) {
 			delete g_keyObj[key];
 		}
 	});
-	titleInit();
 };
 
 /**
