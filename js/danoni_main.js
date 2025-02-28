@@ -112,6 +112,7 @@ const g_loadObj = {};
 const g_rootObj = {};
 const g_presetObj = {
 	keysDataLib: [],
+	keysDataLocal: [],
 };
 let g_headerObj = {};
 let g_scoreObj = {};
@@ -2363,8 +2364,9 @@ const initialControl = async () => {
 	};
 	g_presetObj.keysDataLib.forEach(list => importKeysData(list));
 	if (g_presetObj.keysData !== undefined) {
-		importKeysData(g_presetObj.keysData);
+		g_presetObj.keysDataLocal.unshift(g_presetObj.keysData);
 	}
+	g_presetObj.keysDataLocal.forEach(list => importKeysData(list));
 	g_headerObj.keyExtraList = keysConvert(g_rootObj, {
 		keyExtraList: makeDedupliArray(g_headerObj.undefinedKeyLists, g_rootObj.keyExtraList?.split(`,`)),
 	});
