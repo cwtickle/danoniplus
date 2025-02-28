@@ -273,7 +273,7 @@ const updateWindowSiz = () => {
             whiteSpace: `nowrap`,
         },
         lblPrecondView: {
-            x: g_btnX(), y: 70, w: g_btnWidth(1), h: g_sHeight - 100, siz: 12, align: C_ALIGN_LEFT,
+            x: g_btnX(), y: 110, w: g_btnWidth(1), h: g_sHeight - 140, siz: 12, align: C_ALIGN_LEFT,
             overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
             whiteSpace: `nowrap`,
         },
@@ -1154,6 +1154,10 @@ const g_settings = {
 
     settingWindows: [optionInit, settingsDisplayInit, exSettingInit],
     settingWindowNum: 0,
+
+    preconditions: [`g_rootObj`, `g_headerObj`, `g_keyObj`, `g_scoreObj`, `g_workObj`,
+        `g_detailObj`, `g_stateObj`, `g_attrObj`],
+    preconditionNum: 0,
 };
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
@@ -3509,7 +3513,6 @@ const g_lblNameObj = {
     b_play: `PLAY!`,
     b_reset: `Reset Key`,
     b_safeMode: `Safe Mode -> `,
-    b_precond: `Precondition`,
     b_undo: `Restore`,
     b_copyStorage: `Copy`,
     b_settings: `To Settings`,
@@ -3519,6 +3522,7 @@ const g_lblNameObj = {
     b_retry: `Retry`,
     b_close: `Close`,
     b_cReset: `Reset`,
+    b_precond: `Precondition`,
 
     Difficulty: `Difficulty`,
     Speed: `Speed`,

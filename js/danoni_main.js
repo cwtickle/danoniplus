@@ -448,7 +448,7 @@ const viewKeyStorage = (_name, _key = ``) => {
 	if (viewKeyStorage.cache.has(cacheKey)) {
 		return viewKeyStorage.cache.get(cacheKey);
 	}
-	const result = formatObject(g_storageFunc.get(_name)(_key));
+	const result = formatObject(g_storageFunc.get(_name)?.(_key) || eval(_name));
 	viewKeyStorage.cache.set(cacheKey, result);
 	return result;
 }
@@ -5065,10 +5065,49 @@ const preconditionInit = () => {
 			`<div class="settings_Title">PRECONDITION</div>`
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
-		createDivCss2Label(`lblWorkDataView`,
-			formatObject(g_headerObj), g_lblPosObj.lblPrecondView),
+		createDivCss2Label(`lblPrecondView`, ``, g_lblPosObj.lblPrecondView),
 	);
-	setUserSelect($id(`lblWorkDataView`), `text`);
+	setUserSelect($id(`lblPrecondView`), `text`);
+
+	// 1ページあたりに表示するオブジェクト数
+	const numOfPrecs = Math.round((g_btnWidth(1) / 500) / 2 * 10) * 2;
+
+	// ボタン名切り替え
+	const switchPreconditions = () => {
+		g_settings.preconditionNum = nextPos(g_settings.preconditionNum, 1, Math.round(g_settings.preconditions.length / numOfPrecs) + 1);
+		for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
+			if (g_settings.preconditionNum * numOfPrecs + j < g_settings.preconditions.length) {
+				document.getElementById(`btnPrecond${j}`).innerHTML =
+					g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j];
+				document.getElementById(`btnPrecond${j}`).style.visibility = `visible`;
+			} else {
+				document.getElementById(`btnPrecond${j}`).style.visibility = `hidden`;
+			}
+		}
+		btnPrecond0.click();
+	};
+
+	// オブジェクト表示ボタンの作成
+	for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
+		divRoot.appendChild(createCss2Button(`btnPrecond${j}`, g_settings.preconditions[j], evt => {
+			for (let k = 0; k < Math.min(g_settings.preconditions.length, numOfPrecs); k++) {
+				document.getElementById(`btnPrecond${k}`).classList.replace(g_cssObj.button_Reset, g_cssObj.button_Default);
+			}
+			lblPrecondView.innerHTML = formatObject(setVal(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j], ``, C_TYP_CALC));
+			evt.target.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
+		}, {
+			x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
+			y: 70 + Number(j >= numOfPrecs / 2) * 20, w: g_btnWidth(1 / (numOfPrecs / 2 + 1)), h: 20, siz: 12,
+		}, g_cssObj.button_Default, g_cssObj.button_ON));
+	}
+	btnPrecond0.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
+
+	// 次のオブジェクト表示群の表示
+	divRoot.appendChild(createCss2Button(`btnPrecondNext`, `>`, () => switchPreconditions(), {
+		x: g_btnX() + g_btnWidth(numOfPrecs / 2 / (numOfPrecs / 2 + 1)),
+		y: 70, w: g_btnWidth(1 / Math.max((numOfPrecs / 2 + 1), 12)), h: 40, siz: 12,
+		visibility: (g_settings.preconditions.length > numOfPrecs ? `visible` : `hidden`),
+	}, g_cssObj.button_Setting));
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.precondition.forEach(func => func());
