@@ -9271,9 +9271,9 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
 
 /**
  * Motionオプション適用時の矢印別の速度設定
- * - 矢印が表示される最大フレーム数を 縦ピクセル数×20 と定義。
+ * - 矢印が表示される最大フレーム数を 縦ピクセル数×2 と定義。
  */
-const setMotionOnFrame = () => g_motionFunc.get(g_stateObj.motion)(fillArray(g_headerObj.playingHeight * 20 + 1));
+const setMotionOnFrame = () => g_motionFunc.get(g_stateObj.motion)(fillArray(g_headerObj.playingHeight * 2 + 1));
 
 /**
  * Boost用の適用関数
