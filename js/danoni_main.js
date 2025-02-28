@@ -8389,12 +8389,11 @@ const loadingScoreInit = async () => {
 	let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
 
 	// Motionオプション適用時の矢印別の速度を取得（配列形式）
-	const motionOnFrame = setMotionOnFrame();
-	g_workObj.motionOnFrames = structuredClone(motionOnFrame);
+	g_workObj.motionOnFrames = setMotionOnFrame();
 
 	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
 	const firstFrame = (g_scoreObj.frameNum === 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
-	let arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
+	let arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame);
 
 	// キーパターン(デフォルト)に対応する矢印番号を格納
 	convertReplaceNums();
@@ -8426,7 +8425,7 @@ const loadingScoreInit = async () => {
 			lastFrame += preblankFrame;
 			firstArrowFrame += preblankFrame;
 			speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
-			arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
+			arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame);
 			g_headerObj.blankFrame += preblankFrame;
 		}
 	}
@@ -8479,7 +8478,7 @@ const loadingScoreInit = async () => {
 	calcLifeVals(g_fullArrows);
 
 	// 矢印・フリーズアロー・速度/色変化格納処理
-	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
+	pushArrows(g_scoreObj, speedOnFrame, arrivalFrame);
 
 	// メインに入る前の最終初期化処理
 	getArrowSettings();
@@ -9377,9 +9376,9 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
 
 /**
  * Motionオプション適用時の矢印別の速度設定
- * - 矢印が表示される最大フレーム数を 縦ピクセル数×20 と定義。
+ * - 矢印が表示される最大フレーム数を 101フレーム と定義。
  */
-const setMotionOnFrame = () => g_motionFunc.get(g_stateObj.motion)(fillArray(g_headerObj.playingHeight * 20 + 1));
+const setMotionOnFrame = () => g_motionFunc.get(g_stateObj.motion)(fillArray(101));
 
 /**
  * Boost用の適用関数
@@ -9435,11 +9434,10 @@ const getFountainTrace = (_frms, _spd) => {
 /**
  * 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
  * @param {number} _startFrame 
- * @param {object} _speedOnFrame 
- * @param {object} _motionOnFrame
+ * @param {object} _speedOnFrame
  * @returns {number} 
  */
-const getFirstArrivalFrame = (_startFrame, _speedOnFrame, _motionOnFrame) => {
+const getFirstArrivalFrame = (_startFrame, _speedOnFrame) => {
 	let startY = 0;
 	let frm = _startFrame;
 
@@ -9454,10 +9452,9 @@ const getFirstArrivalFrame = (_startFrame, _speedOnFrame, _motionOnFrame) => {
  * 矢印・フリーズアロー・速度/色変化格納処理
  * @param {object} _dataObj 
  * @param {object} _speedOnFrame 
- * @param {object} _motionOnFrame 
  * @param {number} _firstArrivalFrame
  */
-const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame) => {
+const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 
 	// 矢印・フリーズアロー・速度/色変化用 フレーム別処理配列
 	[``, `Dummy`].forEach(header =>
@@ -9538,7 +9535,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		// 最後尾のデータから計算して格納
 		const lastk = _data.length - setcnt;
 		let arrowArrivalFrm = _data[lastk];
-		let tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+		let tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame);
 
 		startPoint[lastk] = tmpObj.frm;
 		let frmPrev = tmpObj.frm;
@@ -9584,7 +9581,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 					spdNext = spdPrev;
 					spdPrev = _dataObj.speedData[spdk];
 				}
-				tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+				tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame);
 
 				startPoint[k] = tmpObj.frm;
 				frmPrev = tmpObj.frm;
@@ -9617,7 +9614,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		if (hasArrayList(_data, 2)) {
 			let delIdx = 0;
 			for (let k = _data.length - 2; k >= 0; k -= 2) {
-				const tmpObj = getArrowStartFrame(_data[k], _speedOnFrame, _motionOnFrame);
+				const tmpObj = getArrowStartFrame(_data[k], _speedOnFrame);
 				if (tmpObj.frm < g_scoreObj.frameNum) {
 					_data[k] = g_scoreObj.frameNum;
 					delIdx = k;
@@ -9666,7 +9663,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 			} else {
 				if (calcFrameFlg) {
-					const tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame, _motionOnFrame);
+					const tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame);
 					if (tmpObj.frm < g_scoreObj.frameNum) {
 						const diff = g_scoreObj.frameNum - tmpObj.frm;
 						tmpObj.frm = g_scoreObj.frameNum;
@@ -9780,11 +9777,10 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 /**
  * ステップゾーン到達地点から逆算して開始フレームを取得
  * @param {number} _frame 
- * @param {object} _speedOnFrame 
- * @param {object} _motionOnFrame 
+ * @param {object} _speedOnFrame
  * @returns {{ frm: number, startY: number, arrivalFrm: number, motionFrm: number }}
  */
-const getArrowStartFrame = (_frame, _speedOnFrame, _motionOnFrame) => {
+const getArrowStartFrame = (_frame, _speedOnFrame) => {
 
 	const obj = {
 		frm: _frame,
@@ -11286,7 +11282,8 @@ const mainInit = () => {
 		if (g_workObj.currentSpeed !== 0) {
 			const boostCnt = currentArrow.boostCnt;
 			currentArrow.prevY = currentArrow.y;
-			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd + g_workObj.motionOnFrames[boostCnt] * currentArrow.boostDir) * currentArrow.dir;
+			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd +
+				(g_workObj.motionOnFrames[boostCnt] || 0) * currentArrow.boostDir) * currentArrow.dir;
 			$id(arrowName).top = wUnit(currentArrow.y);
 			currentArrow.boostCnt--;
 		}
@@ -11432,7 +11429,7 @@ const mainInit = () => {
 
 				// 移動
 				if (g_workObj.currentSpeed !== 0) {
-					currentFrz.y -= movY + g_workObj.motionOnFrames[currentFrz.boostCnt] * currentFrz.dir * currentFrz.boostDir;
+					currentFrz.y -= movY + (g_workObj.motionOnFrames[currentFrz.boostCnt] || 0) * currentFrz.dir * currentFrz.boostDir;
 					$id(frzName).top = wUnit(currentFrz.y);
 					currentFrz.boostCnt--;
 				}
