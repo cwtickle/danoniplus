@@ -426,6 +426,16 @@ const parseStorageData = (_keyName, _default = {}) => {
 }
 
 /**
+ * オブジェクトをキー名でソート
+ * @param {Object} _obj 
+ * @returns {Object}
+ */
+const sortObjectByKeys = _obj => Object.keys(_obj).sort().reduce((acc, key) => {
+	acc[key] = _obj[key];
+	return acc;
+}, {});
+
+/**
  * 画面表示用インデント処理
  * @param {number} _level 
  * @returns {string}
@@ -4898,7 +4908,7 @@ const dataMgtInit = () => {
 		})
 	);
 
-	g_localStorageMgt = parseStorageData(g_localStorageUrl);
+	g_localStorageMgt = sortObjectByKeys(parseStorageData(g_localStorageUrl));
 
 	multiAppend(divRoot,
 
