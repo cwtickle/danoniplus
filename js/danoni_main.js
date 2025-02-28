@@ -448,7 +448,7 @@ const viewKeyStorage = (_name, _key = ``) => {
 	if (viewKeyStorage.cache.has(cacheKey)) {
 		return viewKeyStorage.cache.get(cacheKey);
 	}
-	const result = formatObject(g_storageFunc.get(_name)?.(_key) || eval(_name));
+	const result = formatObject(g_storageFunc.get(_name)?.(_key) || setVal(_name, ``, C_TYP_CALC));
 	viewKeyStorage.cache.set(cacheKey, result);
 	return result;
 }
@@ -5065,7 +5065,7 @@ const preconditionInit = () => {
 			`<div class="settings_Title">PRECONDITION</div>`
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
-		createDivCss2Label(`lblPrecondView`, ``, g_lblPosObj.lblPrecondView),
+		createDivCss2Label(`lblPrecondView`, viewKeyStorage(`g_rootObj`), g_lblPosObj.lblPrecondView),
 	);
 	setUserSelect($id(`lblPrecondView`), `text`);
 
@@ -5093,7 +5093,7 @@ const preconditionInit = () => {
 			for (let k = 0; k < Math.min(g_settings.preconditions.length, numOfPrecs); k++) {
 				document.getElementById(`btnPrecond${k}`).classList.replace(g_cssObj.button_Reset, g_cssObj.button_Default);
 			}
-			lblPrecondView.innerHTML = formatObject(setVal(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j], ``, C_TYP_CALC));
+			lblPrecondView.innerHTML = viewKeyStorage(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j]);
 			evt.target.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
 		}, {
 			x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
@@ -5115,7 +5115,10 @@ const preconditionInit = () => {
 	multiAppend(divRoot,
 		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
 			Object.assign(g_lblPosObj.btnPrecond, {
-				resetFunc: () => dataMgtInit(),
+				resetFunc: () => {
+					viewKeyStorage.cache = new Map();
+					dataMgtInit();
+				},
 			}), g_cssObj.button_Back),
 	);
 	// キー操作イベント（デフォルト）
