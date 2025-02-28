@@ -471,9 +471,10 @@ const viewKeyStorage = (_name, _key = ``) => {
  * @param {WeakSet} [seen=new WeakSet()]
  * @param {boolean} [colorFmt=true]
  * @param {string} [key='']
+ * @param {Object} [_parent=null]
  * @returns {string}
  */
-const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, key } = {}) => {
+const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, key = `` } = {}, _parent = null) => {
 	if (_obj === null || typeof _obj !== 'object') {
 		return JSON.stringify(_obj);
 	}
@@ -541,8 +542,9 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const formattedEntries = Object.entries(_obj)
 		.map(([key, value]) => {
 			const isNestedObject = typeof value === 'object' && value !== null;
+			const seenNew = _parent ? seen : new WeakSet();
 			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, { seen, colorFmt, key })
+				? formatObject(value, _indent + 1, { seen: seenNew, colorFmt, key })
 				: formatValue(value);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
@@ -2484,6 +2486,27 @@ const initialControl = async () => {
 		}
 	}
 	g_customJsObj.preTitle.forEach(func => func());
+
+	// 未使用のg_keyObjプロパティを削除
+	const keyProp = g_keyCopyLists.simple.concat(g_keyCopyLists.multiple, `keyCtrl`, `keyName`, `minWidth`, `ptchara`);
+	Object.keys(g_keyObj).forEach(key => {
+		let type = ``;
+		keyProp.forEach(prop => {
+			if (key.startsWith(prop)) {
+				type = prop;
+				return;
+			}
+		});
+		if (type !== ``) {
+			const keyName = String(key.split(`_`)[0].slice(type.length));
+			if (!g_headerObj.keyLists.includes(keyName) && keyName !== `` && keyName !== `Default`) {
+				delete g_keyObj[key];
+			}
+		}
+		if (key.match(/^chara7_[a-z]/) || key === `ptchara7`) {
+			delete g_keyObj[key];
+		}
+	});
 	titleInit();
 };
 
