@@ -1347,7 +1347,7 @@ const g_storageFunc = new Map([
 
     // キー別のストレージ情報
     ['keyStorage', (_key) => {
-        let keyStorage = parseStorageData(`danonicw-${_key}k`);
+        let keyStorage = sortObjectByKeys(parseStorageData(`danonicw-${_key}k`));
         if (Object.keys(keyStorage).length === 0) {
 
             // キー別の情報が見つからない場合は作品別の情報から検索
