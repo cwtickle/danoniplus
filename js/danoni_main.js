@@ -16,7 +16,7 @@ let g_localVersion = ``;
 let g_localVersion2 = ``;
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
-//  共通:water 初期化:peach タイトル:melon データ管理:pear 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
+//  共通:water 初期化:peach タイトル:melon データ管理:pear 前提条件表示:mango 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
 //  シーンジャンプ:Scene
 
 /**
@@ -459,7 +459,7 @@ const viewKeyStorage = (_name, _key = ``) => {
 	if (viewKeyStorage.cache.has(cacheKey)) {
 		return viewKeyStorage.cache.get(cacheKey);
 	}
-	const result = formatObject(g_storageFunc.get(_name)(_key));
+	const result = formatObject(g_storageFunc.get(_name)?.(_key) || setVal(_name, ``, C_TYP_CALC));
 	viewKeyStorage.cache.set(cacheKey, result);
 	return result;
 }
@@ -485,11 +485,14 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const nestedIndent = getIndent(_indent + 1);
 
 	// カラーコード、対応キーの色付け処理
-	const colorCodePattern = /^#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4})$/;
+	const colorCodePattern = /#(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 	const formatValue = _value => {
 		if (colorFmt) {
-			if (typeof _value === 'string' && colorCodePattern.test(_value)) {
-				return `"<span style="color:${_value}">◆</span>${_value}"`;
+			if (typeof _value === 'string') {
+				_value = escapeHtml(_value);
+				if (colorCodePattern.test(_value)) {
+					return _value.replace(colorCodePattern, (match) => `<span style="color:${match}">◆</span>${match}`);
+				}
 			}
 			if (Array.isArray(_value)) {
 				let formattedArray = _value.map(item => formatValue(item));
@@ -498,6 +501,9 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
 				}
 				return `[${formattedArray.join(`, `)}]`;
+			}
+			if (typeof _value === 'object' && _value !== null) {
+				return formatObject(_value, _indent + 1, { seen, colorFmt, key });
 			}
 		}
 		return JSON.stringify(_value);
@@ -508,12 +514,25 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 		if (_obj.length === 0) {
 			return '[]';
 		}
+		if (colorFmt && _obj.length > 100) {
+			const filteredArray = _obj.reduce((result, value, index) => {
+				if (hasVal(value)) {
+					result.push(`${index}: ${formatValue(value)}`);
+				}
+				return result;
+			}, []);
+			return `{<br>${baseIndent}[<br>${filteredArray.join(',<br>')}<br>]<br>}`;
+		}
 		const isArrayOfArrays = _obj.every(item => Array.isArray(item));
 		const formattedArray = _obj
-			.map(item => isArrayOfArrays
-				? `${nestedIndent}${formatValue(item)}`
-				: formatValue(item)
-			).join(isArrayOfArrays ? `,<br>` : `, `);
+			.map(value => {
+				const isNestedObject = typeof value === 'object' && value !== null;
+				return isArrayOfArrays
+					? `${nestedIndent}${formatValue(value)}`
+					: isNestedObject
+						? formatObject(value, _indent + 1, { seen, colorFmt })
+						: formatValue(value)
+			}).join(isArrayOfArrays ? `,<br>` : `, `);
 
 		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
 	}
@@ -2472,10 +2491,11 @@ const initialControl = async () => {
  * 作品別ローカルストレージの読み込み・初期設定
  */
 const loadLocalStorage = () => {
-	// URLからscoreId, h(高さ)を削除
+	// URLからscoreId, h(高さ), debugを削除
 	const url = new URL(location.href);
 	url.searchParams.delete(`scoreId`);
 	url.searchParams.delete(`h`);
+	url.searchParams.delete(`debug`);
 	g_localStorageUrl = url.toString();
 
 	/**
@@ -4955,6 +4975,11 @@ const dataMgtInit = () => {
 				resetFunc: () => prevPage === `title` ? titleInit() : g_moveSettingWindow(false),
 			}), g_cssObj.button_Back),
 
+		createCss2Button(`btnPrecond`, g_lblNameObj.b_precond, () => true,
+			Object.assign(g_lblPosObj.btnPrecond, {
+				resetFunc: () => preconditionInit(),
+			}), g_cssObj.button_Setting),
+
 		createCss2Button(`btnSafeMode`, g_lblNameObj.b_safeMode +
 			(g_langStorage.safeMode === C_FLG_ON ? C_FLG_OFF : C_FLG_ON), () => {
 				if (window.confirm(g_msgObj[`safeMode${g_langStorage.safeMode}Confirm`])) {
@@ -5034,6 +5059,87 @@ const dataMgtInit = () => {
 	divRoot.oncontextmenu = () => false;
 
 	g_skinJsObj.dataMgt.forEach(func => func());
+};
+
+
+/*-----------------------------------------------------------*/
+/* Scene : PRECONDITION [mango] */
+/*-----------------------------------------------------------*/
+
+const preconditionInit = () => {
+	clearWindow(true);
+	g_currentPage = `precondition`;
+
+	multiAppend(divRoot,
+
+		// 画面タイトル
+		getTitleDivLabel(`lblTitle`,
+			`<div class="settings_Title">PRECONDITION</div>`
+				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
+
+		createDivCss2Label(`lblPrecondView`, viewKeyStorage(`g_rootObj`), g_lblPosObj.lblPrecondView),
+	);
+	setUserSelect($id(`lblPrecondView`), `text`);
+
+	// 1ページあたりに表示するオブジェクト数
+	const numOfPrecs = Math.round((g_btnWidth(1) / 500) / 2 * 10) * 2;
+
+	// ボタン名切り替え
+	const switchPreconditions = () => {
+		g_settings.preconditionNum = nextPos(g_settings.preconditionNum, 1, Math.round(g_settings.preconditions.length / numOfPrecs) + 1);
+		for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
+			if (g_settings.preconditionNum * numOfPrecs + j < g_settings.preconditions.length) {
+				document.getElementById(`btnPrecond${j}`).innerHTML =
+					g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j];
+				document.getElementById(`btnPrecond${j}`).style.visibility = `visible`;
+			} else {
+				document.getElementById(`btnPrecond${j}`).style.visibility = `hidden`;
+			}
+		}
+		btnPrecond0.click();
+	};
+
+	// オブジェクト表示ボタンの作成
+	for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
+		divRoot.appendChild(createCss2Button(`btnPrecond${j}`, g_settings.preconditions[j], evt => {
+			for (let k = 0; k < Math.min(g_settings.preconditions.length, numOfPrecs); k++) {
+				document.getElementById(`btnPrecond${k}`).classList.replace(g_cssObj.button_Reset, g_cssObj.button_Default);
+			}
+			lblPrecondView.innerHTML = viewKeyStorage(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j]);
+			evt.target.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
+		}, {
+			x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
+			y: 70 + Number(j >= numOfPrecs / 2) * 20, w: g_btnWidth(1 / (numOfPrecs / 2 + 1)), h: 20, siz: 12,
+		}, g_cssObj.button_Default, g_cssObj.button_ON));
+	}
+	btnPrecond0.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
+
+	// 次のオブジェクト表示群の表示
+	divRoot.appendChild(createCss2Button(`btnPrecondNext`, `>`, () => switchPreconditions(), {
+		x: g_btnX() + g_btnWidth(numOfPrecs / 2 / (numOfPrecs / 2 + 1)),
+		y: 70, w: g_btnWidth(1 / Math.max((numOfPrecs / 2 + 1), 12)), h: 40, siz: 12,
+		visibility: (g_settings.preconditions.length > numOfPrecs ? `visible` : `hidden`),
+	}, g_cssObj.button_Setting));
+
+	// ユーザカスタムイベント(初期)
+	g_customJsObj.precondition.forEach(func => func());
+
+	multiAppend(divRoot,
+		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
+			Object.assign(g_lblPosObj.btnPrecond, {
+				resetFunc: () => {
+					viewKeyStorage.cache = new Map();
+					dataMgtInit();
+				},
+			}), g_cssObj.button_Back),
+	);
+	// キー操作イベント（デフォルト）
+	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
+
+	document.oncontextmenu = () => true;
+	divRoot.oncontextmenu = () => true;
+
+	g_skinJsObj.precondition.forEach(func => func());
 };
 
 /*-----------------------------------------------------------*/
