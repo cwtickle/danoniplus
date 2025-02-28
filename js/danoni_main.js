@@ -2492,13 +2492,7 @@ const initialControl = async () => {
 	const keyProp = g_keyCopyLists.simple.concat(g_keyCopyLists.multiple, `keyCtrl`, `keyName`, `minWidth`, `ptchara`);
 	const delKeyPropList = [`ptchara7`, `keyTransPattern`];
 	Object.keys(g_keyObj).forEach(key => {
-		let type = ``;
-		keyProp.forEach(prop => {
-			if (key.startsWith(prop)) {
-				type = prop;
-				return;
-			}
-		});
+		const type = keyProp.find(prop => key.startsWith(prop)) || ``;
 		if (type !== ``) {
 			const keyName = String(key.split(`_`)[0].slice(type.length));
 			if (!g_headerObj.keyLists.includes(keyName) && keyName !== `` && keyName !== `Default`) {
