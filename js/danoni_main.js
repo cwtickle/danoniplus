@@ -471,9 +471,10 @@ const viewKeyStorage = (_name, _key = ``) => {
  * @param {WeakSet} [seen=new WeakSet()]
  * @param {boolean} [colorFmt=true]
  * @param {string} [key='']
+ * @param {Object} [_parent=null]
  * @returns {string}
  */
-const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, key } = {}) => {
+const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, key = `` } = {}, _parent = null) => {
 	if (_obj === null || typeof _obj !== 'object') {
 		return JSON.stringify(_obj);
 	}
@@ -485,17 +486,18 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const nestedIndent = getIndent(_indent + 1);
 
 	// カラーコード、対応キーの色付け処理
-	const colorCodePattern = /#(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
-	const formatValue = _value => {
+	const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
+	const formatValue = (_value, _parent) => {
 		if (colorFmt) {
 			if (typeof _value === 'string') {
 				_value = escapeHtml(_value);
 				if (colorCodePattern.test(_value)) {
-					return _value.replace(colorCodePattern, (match) => `<span style="color:${match}">◆</span>${match}`);
+					return _value.replace(colorCodePattern, (match) =>
+						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
 				}
 			}
 			if (Array.isArray(_value)) {
-				let formattedArray = _value.map(item => formatValue(item));
+				let formattedArray = _value.map(item => formatValue(item, _value));
 				if (key.startsWith(`keyCtrl`)) {
 					formattedArray = formattedArray.filter(item => item !== `0`)
 						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
@@ -503,7 +505,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 				return `[${formattedArray.join(`, `)}]`;
 			}
 			if (typeof _value === 'object' && _value !== null) {
-				return formatObject(_value, _indent + 1, { seen, colorFmt, key });
+				return formatObject(_value, _indent + 1, { seen, colorFmt, key }, _parent);
 			}
 		}
 		return JSON.stringify(_value);
@@ -517,7 +519,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 		if (colorFmt && _obj.length > 100) {
 			const filteredArray = _obj.reduce((result, value, index) => {
 				if (hasVal(value)) {
-					result.push(`${index}: ${formatValue(value)}`);
+					result.push(`${index}: ${formatValue(value, _obj)}`);
 				}
 				return result;
 			}, []);
@@ -528,10 +530,10 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 			.map(value => {
 				const isNestedObject = typeof value === 'object' && value !== null;
 				return isArrayOfArrays
-					? `${nestedIndent}${formatValue(value)}`
+					? `${nestedIndent}${formatValue(value, _obj)}`
 					: isNestedObject
-						? formatObject(value, _indent + 1, { seen, colorFmt })
-						: formatValue(value)
+						? formatObject(value, _indent + 1, { seen, colorFmt }, _obj)
+						: formatValue(value, _obj)
 			}).join(isArrayOfArrays ? `,<br>` : `, `);
 
 		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
@@ -541,9 +543,10 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const formattedEntries = Object.entries(_obj)
 		.map(([key, value]) => {
 			const isNestedObject = typeof value === 'object' && value !== null;
+			const seenNew = _parent ? seen : new WeakSet();
 			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, { seen, colorFmt, key })
-				: formatValue(value);
+				? formatObject(value, _indent + 1, { seen: seenNew, colorFmt, key }, _obj)
+				: formatValue(value, _obj);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
 
@@ -2485,6 +2488,22 @@ const initialControl = async () => {
 	}
 	g_customJsObj.preTitle.forEach(func => func());
 	titleInit();
+
+	// 未使用のg_keyObjプロパティを削除
+	const keyProp = g_keyCopyLists.simple.concat(g_keyCopyLists.multiple, `keyCtrl`, `keyName`, `minWidth`, `ptchara`);
+	const delKeyPropList = [`ptchara7`, `keyTransPattern`];
+	Object.keys(g_keyObj).forEach(key => {
+		const type = keyProp.find(prop => key.startsWith(prop)) || ``;
+		if (type !== ``) {
+			const keyName = String(key.split(`_`)[0].slice(type.length));
+			if (!g_headerObj.keyLists.includes(keyName) && keyName !== `` && keyName !== `Default`) {
+				delete g_keyObj[key];
+			}
+		}
+		if (key.match(/^chara7_[a-z]/) || delKeyPropList.includes(key)) {
+			delete g_keyObj[key];
+		}
+	});
 };
 
 /**
