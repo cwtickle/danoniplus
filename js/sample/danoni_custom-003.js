@@ -20,7 +20,7 @@
 /**
  * タイトル画面
  */
-function customTitleInit() {
+g_customJsObj.title.push(() => {
 
 	multiAppend(divRoot,
 		// 背景の矢印オブジェクトを表示
@@ -35,7 +35,7 @@ function customTitleInit() {
 			resetFunc: _ => customCommentInit(),
 		}, g_cssObj.button_Tweet)
 	);
-}
+});
 
 /**
  * カスタム画面(コメントとか)
@@ -71,39 +71,4 @@ function customCommentInit() {
 		// 戻るボタン描画
 		createCss2Button(`btnBack`, g_lblNameObj.b_back, _ => true, { resetFunc: _ => titleInit() }, g_cssObj.button_Back),
 	)
-}
-
-/**
- * オプション画面(初期表示)
- */
-function customOptionInit() {
-
-}
-
-/**
- * キーコンフィグ画面(初期表示)
- */
-function customKeyConfigInit() {
-
-}
-
-/**
- * メイン画面(初期表示)
- */
-function customMainInit() {
-
-}
-
-/**
- * メイン画面(フレーム毎表示)
- */
-function customMainEnterFrame() {
-
-}
-
-/**
- * 結果画面(初期表示)
- */
-function customResultInit() {
-
 }
