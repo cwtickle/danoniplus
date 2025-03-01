@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/03/01 (v40.0.0)
+ * Revised : 2025/03/01 (v40.0.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3148,10 +3148,11 @@ g_keycons.groups.forEach(type => {
 });
 
 // 特殊キーのコピー種 (simple: 代入、multiple: 配列ごと代入)
+// 後でプロパティ削除に影響するため、先頭文字が全く同じ場合は長い方を先に定義する (例: divMax, div)
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
-    simple: [`div`, `divMax`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`, `flatMode`],
-    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroup`, `keyGroupOrder`, `layerGroup`, `layerTrans`],
+    simple: [`divMax`, `div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`, `flatMode`],
+    multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroupOrder`, `keyGroup`, `layerGroup`, `layerTrans`],
 };
 
 // タイトル画面関連のリスト群
