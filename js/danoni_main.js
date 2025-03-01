@@ -2491,7 +2491,7 @@ const initialControl = async () => {
 
 	// 未使用のg_keyObjプロパティを削除
 	const keyProp = g_keyCopyLists.simple.concat(g_keyCopyLists.multiple, `keyCtrl`, `keyName`, `minWidth`, `ptchara`);
-	const delKeyPropList = [`ptchara7`, `keyTransPattern`];
+	const delKeyPropList = [`ptchara7`, `keyTransPattern`, `dfPtnNum`, `minKeyCtrlNum`, `minPatterns`];
 	Object.keys(g_keyObj).forEach(key => {
 		const type = keyProp.find(prop => key.startsWith(prop)) || ``;
 		if (type !== ``) {
@@ -2500,7 +2500,7 @@ const initialControl = async () => {
 				delete g_keyObj[key];
 			}
 		}
-		if (key.match(/^chara7_[a-z]/) || delKeyPropList.includes(key)) {
+		if (key.match(/^chara7_[a-z]/) || delKeyPropList.includes(key) || g_keyObj[key] === undefined) {
 			delete g_keyObj[key];
 		}
 	});
@@ -4974,16 +4974,30 @@ const dataMgtInit = () => {
 	keyList.forEach((key, j) => {
 		g_stateObj[`dm_${key}`] = C_FLG_OFF;
 		g_settings.dataMgtNum[key] = 0;
+
 		keyListSprite.appendChild(createMgtButton(key, j - 2, 0, {
 			w: Math.max(50, getStrWidth(getKeyName(key) + `    `, g_limitObj.setLblSiz, getBasicFont())),
-			func: () => {
-				selectedKey = key;
-				lblKeyDataView.innerHTML = viewKeyStorage(`keyStorage`, key);
-				lblTargetKey.innerHTML = `(${getKeyName(key)})`;
-			},
 		}));
 		document.getElementById(`btn${key}`).innerHTML = getKeyName(key);
+
+		keyListSprite.appendChild(createCss2Button(`btnView${key}`, ``, evt => {
+			keyList.forEach(keyx => {
+				document.getElementById(`btnView${keyx}`).classList.replace(g_cssObj.button_Next, g_cssObj.button_Default);
+				document.getElementById(`btnView${keyx}`).classList.replace(g_cssObj.button_ON, g_cssObj.button_OFF);
+				document.getElementById(`btnView${keyx}`).textContent = ``;
+			});
+			document.getElementById(`btnView${key}`).classList.replace(g_cssObj.button_Default, g_cssObj.button_Next);
+			document.getElementById(`btnView${key}`).classList.replace(g_cssObj.button_OFF, g_cssObj.button_ON);
+			selectedKey = key;
+			evt.target.textContent = `x`;
+			lblKeyDataView.innerHTML = viewKeyStorage(`keyStorage`, key);
+			lblKeyDataView.scrollTop = 0;
+			lblTargetKey.innerHTML = `(${getKeyName(key)})`;
+		}, {
+			x: 0, y: g_limitObj.setLblHeight * (j - 2) + 40, w: 16, h: 20, siz: 12, borderStyle: `solid`
+		}, g_cssObj.button_Default, g_cssObj.button_OFF));
 	});
+	document.getElementById(`btnView${selectedKey}`).click();
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.dataMgt.forEach(func => func());
@@ -5131,7 +5145,7 @@ const preconditionInit = () => {
 		}, {
 			x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
 			y: 70 + Number(j >= numOfPrecs / 2) * 20, w: g_btnWidth(1 / (numOfPrecs / 2 + 1)), h: 20, siz: 12,
-		}, g_cssObj.button_Default, g_cssObj.button_ON));
+		}, g_cssObj.button_Default));
 	}
 	btnPrecond0.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
 
