@@ -248,7 +248,7 @@ const updateWindowSiz = () => {
         },
         btnPrecond: {
             x: g_btnX(1 / 4), y: g_sHeight - 20, w: g_btnWidth(1 / 4), h: 16, siz: 12,
-            visibility: getQueryParamVal(`debug`) === `true` ? `visible` : `hidden`,
+            visibility: g_isDebug ? `visible` : `hidden`,
         },
         btnSafeMode: {
             x: g_btnX(), siz: 18,
