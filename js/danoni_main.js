@@ -5126,6 +5126,7 @@ const preconditionInit = () => {
 				document.getElementById(`btnPrecond${k}`).classList.replace(g_cssObj.button_Reset, g_cssObj.button_Default);
 			}
 			lblPrecondView.innerHTML = viewKeyStorage(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j]);
+			lblPrecondView.scrollTop = 0;
 			evt.target.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
 		}, {
 			x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
