@@ -37,6 +37,17 @@ const current = () => {
 	const targetScript = scripts.find(file => file.src.endsWith(`danoni_main.js`));
 	return targetScript.src;
 };
+
+/**
+ * 現在URLのクエリパラメータから指定した値を取得
+ * @param {string} _name
+ * @returns {string}
+ */
+const getQueryParamVal = _name => {
+	const param = new URL(location.href).searchParams.get(_name);
+	return param !== null ? decodeURIComponent(param.replace(/\+/g, ` `)) : null;
+};
+
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
 const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null ||
@@ -44,6 +55,7 @@ const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) 
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
+const g_isDebug = g_isLocal || getQueryParamVal(`debug`) === `true`;
 const isLocalMusicFile = _scoreId => g_isFile && !listMatching(getMusicUrl(_scoreId), [`.js`, `.txt`], { suffix: `$` });
 
 window.onload = async () => {
@@ -2261,16 +2273,6 @@ const copyTextToClipboard = async (_textVal, _msg) => {
 	} finally {
 		makeInfoWindow(_msg, `leftToRightFade`);
 	}
-};
-
-/**
- * 現在URLのクエリパラメータから指定した値を取得
- * @param {string} _name
- * @returns {string}
- */
-const getQueryParamVal = _name => {
-	const param = new URL(location.href).searchParams.get(_name);
-	return param !== null ? decodeURIComponent(param.replace(/\+/g, ` `)) : null;
 };
 
 /**
@@ -10791,8 +10793,8 @@ const mainInit = () => {
 		[`lblCredit`, `lblDifName`].forEach(labelName => changeStyle(labelName, g_lblPosObj.musicInfoOFF));
 	}
 
-	// ローカル時のみフレーム数を残す
-	if (!g_isLocal) {
+	// デバッグ時のみフレーム数を残す
+	if (!g_isDebug) {
 		lblframe.style.display = C_DIS_NONE;
 	}
 
