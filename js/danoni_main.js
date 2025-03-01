@@ -2496,7 +2496,8 @@ const initialControl = async () => {
 		const type = keyProp.find(prop => key.startsWith(prop)) || ``;
 		if (type !== ``) {
 			const keyName = String(key.split(`_`)[0].slice(type.length));
-			if (!g_headerObj.keyLists.includes(keyName) && keyName !== `` && keyName !== `Default`) {
+			if (!g_headerObj.keyLists.includes(keyName) &&
+				keyName !== `` && keyName !== `Default` && !keyName.startsWith(`Max`)) {
 				delete g_keyObj[key];
 			}
 		}
