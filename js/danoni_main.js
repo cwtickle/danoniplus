@@ -5087,6 +5087,7 @@ const dataMgtInit = () => {
 
 const preconditionInit = () => {
 	clearWindow(true);
+	const prevPage = g_currentPage;
 	g_currentPage = `precondition`;
 
 	multiAppend(divRoot,
@@ -5148,7 +5149,7 @@ const preconditionInit = () => {
 			Object.assign(g_lblPosObj.btnPrecond, {
 				resetFunc: () => {
 					viewKeyStorage.cache = new Map();
-					dataMgtInit();
+					prevPage === `dataMgt` ? dataMgtInit() : g_moveSettingWindow(false);
 				},
 			}), g_cssObj.button_Back),
 	);
@@ -5210,6 +5211,12 @@ const commonSettingBtn = _labelName => {
 		createCss2Button(`btnReset`, g_lblNameObj.dataReset, () => {
 			dataMgtInit();
 		}, g_lblPosObj.btnReset, g_cssObj.button_Reset),
+
+		// 前提条件表示用画面へ移動（debug=trueの場合のみ）
+		createCss2Button(`btnPrecond`, g_lblNameObj.b_precond, () => true,
+			Object.assign(g_lblPosObj.btnPrecond, {
+				resetFunc: () => preconditionInit(),
+			}), g_cssObj.button_Setting),
 	);
 };
 
