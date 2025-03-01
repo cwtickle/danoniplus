@@ -4,19 +4,19 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/02/24
+ * Revised : 2025/03/01
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 39.8.2`;
-const g_revisedDate = `2025/02/24`;
+const g_version = `Ver 40.0.0`;
+const g_revisedDate = `2025/03/01`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
 let g_localVersion2 = ``;
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
-//  共通:water 初期化:peach タイトル:melon データ管理:pear 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
+//  共通:water 初期化:peach タイトル:melon データ管理:pear 前提条件表示:mango 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
 //  シーンジャンプ:Scene
 
 /**
@@ -112,6 +112,7 @@ const g_loadObj = {};
 const g_rootObj = {};
 const g_presetObj = {
 	keysDataLib: [],
+	keysDataLocal: [],
 };
 let g_headerObj = {};
 let g_scoreObj = {};
@@ -426,6 +427,16 @@ const parseStorageData = (_keyName, _default = {}) => {
 }
 
 /**
+ * オブジェクトをキー名でソート
+ * @param {Object} _obj 
+ * @returns {Object}
+ */
+const sortObjectByKeys = _obj => Object.keys(_obj).sort().reduce((acc, key) => {
+	acc[key] = _obj[key];
+	return acc;
+}, {});
+
+/**
  * 画面表示用インデント処理
  * @param {number} _level 
  * @returns {string}
@@ -448,7 +459,7 @@ const viewKeyStorage = (_name, _key = ``) => {
 	if (viewKeyStorage.cache.has(cacheKey)) {
 		return viewKeyStorage.cache.get(cacheKey);
 	}
-	const result = formatObject(g_storageFunc.get(_name)(_key));
+	const result = formatObject(g_storageFunc.get(_name)?.(_key) || setVal(_name, ``, C_TYP_CALC));
 	viewKeyStorage.cache.set(cacheKey, result);
 	return result;
 }
@@ -460,9 +471,10 @@ const viewKeyStorage = (_name, _key = ``) => {
  * @param {WeakSet} [seen=new WeakSet()]
  * @param {boolean} [colorFmt=true]
  * @param {string} [key='']
+ * @param {Object} [_parent=null]
  * @returns {string}
  */
-const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, key } = {}) => {
+const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, key = `` } = {}, _parent = null) => {
 	if (_obj === null || typeof _obj !== 'object') {
 		return JSON.stringify(_obj);
 	}
@@ -474,19 +486,26 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const nestedIndent = getIndent(_indent + 1);
 
 	// カラーコード、対応キーの色付け処理
-	const colorCodePattern = /^#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4})$/;
-	const formatValue = _value => {
+	const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
+	const formatValue = (_value, _parent) => {
 		if (colorFmt) {
-			if (typeof _value === 'string' && colorCodePattern.test(_value)) {
-				return `"<span style="color:${_value}">◆</span>${_value}"`;
+			if (typeof _value === 'string') {
+				_value = escapeHtml(_value);
+				if (colorCodePattern.test(_value)) {
+					return _value.replace(colorCodePattern, (match) =>
+						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
+				}
 			}
 			if (Array.isArray(_value)) {
-				let formattedArray = _value.map(item => formatValue(item));
+				let formattedArray = _value.map(item => formatValue(item, _value));
 				if (key.startsWith(`keyCtrl`)) {
 					formattedArray = formattedArray.filter(item => item !== `0`)
 						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
 				}
 				return `[${formattedArray.join(`, `)}]`;
+			}
+			if (typeof _value === 'object' && _value !== null) {
+				return formatObject(_value, _indent + 1, { seen, colorFmt, key }, _parent);
 			}
 		}
 		return JSON.stringify(_value);
@@ -497,12 +516,25 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 		if (_obj.length === 0) {
 			return '[]';
 		}
+		if (colorFmt && _obj.length > 100) {
+			const filteredArray = _obj.reduce((result, value, index) => {
+				if (hasVal(value)) {
+					result.push(`${index}: ${formatValue(value, _obj)}`);
+				}
+				return result;
+			}, []);
+			return `{<br>${baseIndent}[<br>${filteredArray.join(',<br>')}<br>]<br>}`;
+		}
 		const isArrayOfArrays = _obj.every(item => Array.isArray(item));
 		const formattedArray = _obj
-			.map(item => isArrayOfArrays
-				? `${nestedIndent}${formatValue(item)}`
-				: formatValue(item)
-			).join(isArrayOfArrays ? `,<br>` : `, `);
+			.map(value => {
+				const isNestedObject = typeof value === 'object' && value !== null;
+				return isArrayOfArrays
+					? `${nestedIndent}${formatValue(value, _obj)}`
+					: isNestedObject
+						? formatObject(value, _indent + 1, { seen, colorFmt }, _obj)
+						: formatValue(value, _obj)
+			}).join(isArrayOfArrays ? `,<br>` : `, `);
 
 		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
 	}
@@ -511,9 +543,10 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const formattedEntries = Object.entries(_obj)
 		.map(([key, value]) => {
 			const isNestedObject = typeof value === 'object' && value !== null;
+			const seenNew = _parent ? seen : new WeakSet();
 			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, { seen, colorFmt, key })
-				: formatValue(value);
+				? formatObject(value, _indent + 1, { seen: seenNew, colorFmt, key }, _obj)
+				: formatValue(value, _obj);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
 
@@ -2353,8 +2386,9 @@ const initialControl = async () => {
 	};
 	g_presetObj.keysDataLib.forEach(list => importKeysData(list));
 	if (g_presetObj.keysData !== undefined) {
-		importKeysData(g_presetObj.keysData);
+		g_presetObj.keysDataLocal.unshift(g_presetObj.keysData);
 	}
+	g_presetObj.keysDataLocal.forEach(list => importKeysData(list));
 	g_headerObj.keyExtraList = keysConvert(g_rootObj, {
 		keyExtraList: makeDedupliArray(g_headerObj.undefinedKeyLists, g_rootObj.keyExtraList?.split(`,`)),
 	});
@@ -2454,16 +2488,33 @@ const initialControl = async () => {
 	}
 	g_customJsObj.preTitle.forEach(func => func());
 	titleInit();
+
+	// 未使用のg_keyObjプロパティを削除
+	const keyProp = g_keyCopyLists.simple.concat(g_keyCopyLists.multiple, `keyCtrl`, `keyName`, `minWidth`, `ptchara`);
+	const delKeyPropList = [`ptchara7`, `keyTransPattern`, `dfPtnNum`, `minKeyCtrlNum`, `minPatterns`];
+	Object.keys(g_keyObj).forEach(key => {
+		const type = keyProp.find(prop => key.startsWith(prop)) || ``;
+		if (type !== ``) {
+			const keyName = String(key.split(`_`)[0].slice(type.length));
+			if (!g_headerObj.keyLists.includes(keyName) && keyName !== `` && keyName !== `Default`) {
+				delete g_keyObj[key];
+			}
+		}
+		if (key.match(/^chara7_[a-z]/) || delKeyPropList.includes(key) || g_keyObj[key] === undefined) {
+			delete g_keyObj[key];
+		}
+	});
 };
 
 /**
  * 作品別ローカルストレージの読み込み・初期設定
  */
 const loadLocalStorage = () => {
-	// URLからscoreId, h(高さ)を削除
+	// URLからscoreId, h(高さ), debugを削除
 	const url = new URL(location.href);
 	url.searchParams.delete(`scoreId`);
 	url.searchParams.delete(`h`);
+	url.searchParams.delete(`debug`);
 	g_localStorageUrl = url.toString();
 
 	/**
@@ -4898,7 +4949,7 @@ const dataMgtInit = () => {
 		})
 	);
 
-	g_localStorageMgt = parseStorageData(g_localStorageUrl);
+	g_localStorageMgt = sortObjectByKeys(parseStorageData(g_localStorageUrl));
 
 	multiAppend(divRoot,
 
@@ -4923,16 +4974,30 @@ const dataMgtInit = () => {
 	keyList.forEach((key, j) => {
 		g_stateObj[`dm_${key}`] = C_FLG_OFF;
 		g_settings.dataMgtNum[key] = 0;
+
 		keyListSprite.appendChild(createMgtButton(key, j - 2, 0, {
 			w: Math.max(50, getStrWidth(getKeyName(key) + `    `, g_limitObj.setLblSiz, getBasicFont())),
-			func: () => {
-				selectedKey = key;
-				lblKeyDataView.innerHTML = viewKeyStorage(`keyStorage`, key);
-				lblTargetKey.innerHTML = `(${getKeyName(key)})`;
-			},
 		}));
 		document.getElementById(`btn${key}`).innerHTML = getKeyName(key);
+
+		keyListSprite.appendChild(createCss2Button(`btnView${key}`, ``, evt => {
+			keyList.forEach(keyx => {
+				document.getElementById(`btnView${keyx}`).classList.replace(g_cssObj.button_Next, g_cssObj.button_Default);
+				document.getElementById(`btnView${keyx}`).classList.replace(g_cssObj.button_ON, g_cssObj.button_OFF);
+				document.getElementById(`btnView${keyx}`).textContent = ``;
+			});
+			document.getElementById(`btnView${key}`).classList.replace(g_cssObj.button_Default, g_cssObj.button_Next);
+			document.getElementById(`btnView${key}`).classList.replace(g_cssObj.button_OFF, g_cssObj.button_ON);
+			selectedKey = key;
+			evt.target.textContent = `x`;
+			lblKeyDataView.innerHTML = viewKeyStorage(`keyStorage`, key);
+			lblKeyDataView.scrollTop = 0;
+			lblTargetKey.innerHTML = `(${getKeyName(key)})`;
+		}, {
+			x: 0, y: g_limitObj.setLblHeight * (j - 2) + 40, w: 16, h: 20, siz: 12, borderStyle: `solid`
+		}, g_cssObj.button_Default, g_cssObj.button_OFF));
 	});
+	document.getElementById(`btnView${selectedKey}`).click();
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.dataMgt.forEach(func => func());
@@ -4942,6 +5007,11 @@ const dataMgtInit = () => {
 			Object.assign(g_lblPosObj.btnResetBack, {
 				resetFunc: () => prevPage === `title` ? titleInit() : g_moveSettingWindow(false),
 			}), g_cssObj.button_Back),
+
+		createCss2Button(`btnPrecond`, g_lblNameObj.b_precond, () => true,
+			Object.assign(g_lblPosObj.btnPrecond, {
+				resetFunc: () => preconditionInit(),
+			}), g_cssObj.button_Setting),
 
 		createCss2Button(`btnSafeMode`, g_lblNameObj.b_safeMode +
 			(g_langStorage.safeMode === C_FLG_ON ? C_FLG_OFF : C_FLG_ON), () => {
@@ -5024,6 +5094,89 @@ const dataMgtInit = () => {
 	g_skinJsObj.dataMgt.forEach(func => func());
 };
 
+
+/*-----------------------------------------------------------*/
+/* Scene : PRECONDITION [mango] */
+/*-----------------------------------------------------------*/
+
+const preconditionInit = () => {
+	clearWindow(true);
+	const prevPage = g_currentPage;
+	g_currentPage = `precondition`;
+
+	multiAppend(divRoot,
+
+		// 画面タイトル
+		getTitleDivLabel(`lblTitle`,
+			`<div class="settings_Title">PRECONDITION</div>`
+				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
+
+		createDivCss2Label(`lblPrecondView`, viewKeyStorage(`g_rootObj`), g_lblPosObj.lblPrecondView),
+	);
+	setUserSelect($id(`lblPrecondView`), `text`);
+
+	// 1ページあたりに表示するオブジェクト数
+	const numOfPrecs = Math.round((g_btnWidth(1) / 500) / 2 * 10) * 2;
+
+	// ボタン名切り替え
+	const switchPreconditions = () => {
+		g_settings.preconditionNum = nextPos(g_settings.preconditionNum, 1, Math.round(g_settings.preconditions.length / numOfPrecs) + 1);
+		for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
+			if (g_settings.preconditionNum * numOfPrecs + j < g_settings.preconditions.length) {
+				document.getElementById(`btnPrecond${j}`).innerHTML =
+					g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j];
+				document.getElementById(`btnPrecond${j}`).style.visibility = `visible`;
+			} else {
+				document.getElementById(`btnPrecond${j}`).style.visibility = `hidden`;
+			}
+		}
+		btnPrecond0.click();
+	};
+
+	// オブジェクト表示ボタンの作成
+	for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
+		divRoot.appendChild(createCss2Button(`btnPrecond${j}`, g_settings.preconditions[j], evt => {
+			for (let k = 0; k < Math.min(g_settings.preconditions.length, numOfPrecs); k++) {
+				document.getElementById(`btnPrecond${k}`).classList.replace(g_cssObj.button_Reset, g_cssObj.button_Default);
+			}
+			lblPrecondView.innerHTML = viewKeyStorage(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j]);
+			lblPrecondView.scrollTop = 0;
+			evt.target.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
+		}, {
+			x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
+			y: 70 + Number(j >= numOfPrecs / 2) * 20, w: g_btnWidth(1 / (numOfPrecs / 2 + 1)), h: 20, siz: 12,
+		}, g_cssObj.button_Default));
+	}
+	btnPrecond0.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
+
+	// 次のオブジェクト表示群の表示
+	divRoot.appendChild(createCss2Button(`btnPrecondNext`, `>`, () => switchPreconditions(), {
+		x: g_btnX() + g_btnWidth(numOfPrecs / 2 / (numOfPrecs / 2 + 1)),
+		y: 70, w: g_btnWidth(1 / Math.max((numOfPrecs / 2 + 1), 12)), h: 40, siz: 12,
+		visibility: (g_settings.preconditions.length > numOfPrecs ? `visible` : `hidden`),
+	}, g_cssObj.button_Setting));
+
+	// ユーザカスタムイベント(初期)
+	g_customJsObj.precondition.forEach(func => func());
+
+	multiAppend(divRoot,
+		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
+			Object.assign(g_lblPosObj.btnPrecond, {
+				resetFunc: () => {
+					viewKeyStorage.cache = new Map();
+					prevPage === `dataMgt` ? dataMgtInit() : g_moveSettingWindow(false);
+				},
+			}), g_cssObj.button_Back),
+	);
+	// キー操作イベント（デフォルト）
+	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
+
+	document.oncontextmenu = () => true;
+	divRoot.oncontextmenu = () => true;
+
+	g_skinJsObj.precondition.forEach(func => func());
+};
+
 /*-----------------------------------------------------------*/
 /* Scene : SETTINGS [lime] */
 /*-----------------------------------------------------------*/
@@ -5073,6 +5226,12 @@ const commonSettingBtn = _labelName => {
 		createCss2Button(`btnReset`, g_lblNameObj.dataReset, () => {
 			dataMgtInit();
 		}, g_lblPosObj.btnReset, g_cssObj.button_Reset),
+
+		// 前提条件表示用画面へ移動（debug=trueの場合のみ）
+		createCss2Button(`btnPrecond`, g_lblNameObj.b_precond, () => true,
+			Object.assign(g_lblPosObj.btnPrecond, {
+				resetFunc: () => preconditionInit(),
+			}), g_cssObj.button_Setting),
 	);
 };
 
@@ -8271,12 +8430,11 @@ const loadingScoreInit = async () => {
 	let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
 
 	// Motionオプション適用時の矢印別の速度を取得（配列形式）
-	const motionOnFrame = setMotionOnFrame();
-	g_workObj.motionOnFrames = structuredClone(motionOnFrame);
+	g_workObj.motionOnFrames = setMotionOnFrame();
 
 	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
 	const firstFrame = (g_scoreObj.frameNum === 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
-	let arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
+	let arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame);
 
 	// キーパターン(デフォルト)に対応する矢印番号を格納
 	convertReplaceNums();
@@ -8308,7 +8466,7 @@ const loadingScoreInit = async () => {
 			lastFrame += preblankFrame;
 			firstArrowFrame += preblankFrame;
 			speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
-			arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame, motionOnFrame);
+			arrivalFrame = getFirstArrivalFrame(firstFrame, speedOnFrame);
 			g_headerObj.blankFrame += preblankFrame;
 		}
 	}
@@ -8361,7 +8519,7 @@ const loadingScoreInit = async () => {
 	calcLifeVals(g_fullArrows);
 
 	// 矢印・フリーズアロー・速度/色変化格納処理
-	pushArrows(g_scoreObj, speedOnFrame, motionOnFrame, arrivalFrame);
+	pushArrows(g_scoreObj, speedOnFrame, arrivalFrame);
 
 	// メインに入る前の最終初期化処理
 	getArrowSettings();
@@ -9259,9 +9417,9 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
 
 /**
  * Motionオプション適用時の矢印別の速度設定
- * - 矢印が表示される最大フレーム数を 縦ピクセル数×20 と定義。
+ * - 矢印が表示される最大フレーム数を 101フレーム と定義。
  */
-const setMotionOnFrame = () => g_motionFunc.get(g_stateObj.motion)(fillArray(g_headerObj.playingHeight * 20 + 1));
+const setMotionOnFrame = () => g_motionFunc.get(g_stateObj.motion)(fillArray(101));
 
 /**
  * Boost用の適用関数
@@ -9317,11 +9475,10 @@ const getFountainTrace = (_frms, _spd) => {
 /**
  * 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
  * @param {number} _startFrame 
- * @param {object} _speedOnFrame 
- * @param {object} _motionOnFrame
+ * @param {object} _speedOnFrame
  * @returns {number} 
  */
-const getFirstArrivalFrame = (_startFrame, _speedOnFrame, _motionOnFrame) => {
+const getFirstArrivalFrame = (_startFrame, _speedOnFrame) => {
 	let startY = 0;
 	let frm = _startFrame;
 
@@ -9336,10 +9493,9 @@ const getFirstArrivalFrame = (_startFrame, _speedOnFrame, _motionOnFrame) => {
  * 矢印・フリーズアロー・速度/色変化格納処理
  * @param {object} _dataObj 
  * @param {object} _speedOnFrame 
- * @param {object} _motionOnFrame 
  * @param {number} _firstArrivalFrame
  */
-const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame) => {
+const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 
 	// 矢印・フリーズアロー・速度/色変化用 フレーム別処理配列
 	[``, `Dummy`].forEach(header =>
@@ -9420,7 +9576,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		// 最後尾のデータから計算して格納
 		const lastk = _data.length - setcnt;
 		let arrowArrivalFrm = _data[lastk];
-		let tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+		let tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame);
 
 		startPoint[lastk] = tmpObj.frm;
 		let frmPrev = tmpObj.frm;
@@ -9466,7 +9622,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 					spdNext = spdPrev;
 					spdPrev = _dataObj.speedData[spdk];
 				}
-				tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame, _motionOnFrame);
+				tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame);
 
 				startPoint[k] = tmpObj.frm;
 				frmPrev = tmpObj.frm;
@@ -9499,7 +9655,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 		if (hasArrayList(_data, 2)) {
 			let delIdx = 0;
 			for (let k = _data.length - 2; k >= 0; k -= 2) {
-				const tmpObj = getArrowStartFrame(_data[k], _speedOnFrame, _motionOnFrame);
+				const tmpObj = getArrowStartFrame(_data[k], _speedOnFrame);
 				if (tmpObj.frm < g_scoreObj.frameNum) {
 					_data[k] = g_scoreObj.frameNum;
 					delIdx = k;
@@ -9548,7 +9704,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 				}
 			} else {
 				if (calcFrameFlg) {
-					const tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame, _motionOnFrame);
+					const tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame);
 					if (tmpObj.frm < g_scoreObj.frameNum) {
 						const diff = g_scoreObj.frameNum - tmpObj.frm;
 						tmpObj.frm = g_scoreObj.frameNum;
@@ -9662,11 +9818,10 @@ const pushArrows = (_dataObj, _speedOnFrame, _motionOnFrame, _firstArrivalFrame)
 /**
  * ステップゾーン到達地点から逆算して開始フレームを取得
  * @param {number} _frame 
- * @param {object} _speedOnFrame 
- * @param {object} _motionOnFrame 
+ * @param {object} _speedOnFrame
  * @returns {{ frm: number, startY: number, arrivalFrm: number, motionFrm: number }}
  */
-const getArrowStartFrame = (_frame, _speedOnFrame, _motionOnFrame) => {
+const getArrowStartFrame = (_frame, _speedOnFrame) => {
 
 	const obj = {
 		frm: _frame,
@@ -11168,7 +11323,8 @@ const mainInit = () => {
 		if (g_workObj.currentSpeed !== 0) {
 			const boostCnt = currentArrow.boostCnt;
 			currentArrow.prevY = currentArrow.y;
-			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd + g_workObj.motionOnFrames[boostCnt] * currentArrow.boostDir) * currentArrow.dir;
+			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd +
+				(g_workObj.motionOnFrames[boostCnt] || 0) * currentArrow.boostDir) * currentArrow.dir;
 			$id(arrowName).top = wUnit(currentArrow.y);
 			currentArrow.boostCnt--;
 		}
@@ -11314,7 +11470,7 @@ const mainInit = () => {
 
 				// 移動
 				if (g_workObj.currentSpeed !== 0) {
-					currentFrz.y -= movY + g_workObj.motionOnFrames[currentFrz.boostCnt] * currentFrz.dir * currentFrz.boostDir;
+					currentFrz.y -= movY + (g_workObj.motionOnFrames[currentFrz.boostCnt] || 0) * currentFrz.dir * currentFrz.boostDir;
 					$id(frzName).top = wUnit(currentFrz.y);
 					currentFrz.boostCnt--;
 				}

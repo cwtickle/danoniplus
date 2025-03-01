@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/02/22 (v39.8.1)
+ * Revised : 2025/03/01 (v40.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -246,6 +246,10 @@ const updateWindowSiz = () => {
         btnResetBack: {
             x: g_btnX(), y: g_sHeight - 20, w: g_btnWidth(1 / 4), h: 16, siz: 12,
         },
+        btnPrecond: {
+            x: g_btnX(1 / 4), y: g_sHeight - 20, w: g_btnWidth(1 / 4), h: 16, siz: 12,
+            visibility: getQueryParamVal(`debug`) === `true` ? `visible` : `hidden`,
+        },
         btnSafeMode: {
             x: g_btnX(), siz: 18,
         },
@@ -265,6 +269,11 @@ const updateWindowSiz = () => {
         },
         lblKeyDataView: {
             x: g_btnX(1 / 3) + 10, y: 100 + g_sHeight / 4 + 10, w: g_btnWidth(7 / 12), h: g_sHeight * 3 / 4 - 215, siz: 12, align: C_ALIGN_LEFT,
+            overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
+            whiteSpace: `nowrap`,
+        },
+        lblPrecondView: {
+            x: g_btnX(), y: 110, w: g_btnWidth(1), h: g_sHeight - 140, siz: 12, align: C_ALIGN_LEFT,
             overflow: C_DIS_AUTO, background: `#222222`, color: `#cccccc`,
             whiteSpace: `nowrap`,
         },
@@ -1145,6 +1154,10 @@ const g_settings = {
 
     settingWindows: [optionInit, settingsDisplayInit, exSettingInit],
     settingWindowNum: 0,
+
+    preconditions: [`g_rootObj`, `g_headerObj`, `g_keyObj`, `g_scoreObj`, `g_workObj`,
+        `g_detailObj`, `g_stateObj`, `g_attrObj`],
+    preconditionNum: 0,
 };
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
@@ -1334,7 +1347,7 @@ const g_storageFunc = new Map([
 
     // キー別のストレージ情報
     ['keyStorage', (_key) => {
-        let keyStorage = parseStorageData(`danonicw-${_key}k`);
+        let keyStorage = sortObjectByKeys(parseStorageData(`danonicw-${_key}k`));
         if (Object.keys(keyStorage).length === 0) {
 
             // キー別の情報が見つからない場合は作品別の情報から検索
@@ -1992,6 +2005,30 @@ const g_shortcutObj = {
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
     },
+    precondition: {
+        Digit1: { id: `btnPrecond0` },
+        Digit2: { id: `btnPrecond1` },
+        Digit3: { id: `btnPrecond2` },
+        Digit4: { id: `btnPrecond3` },
+        Digit5: { id: `btnPrecond4` },
+        Digit6: { id: `btnPrecond5` },
+        Digit7: { id: `btnPrecond6` },
+        Digit8: { id: `btnPrecond7` },
+        Digit9: { id: `btnPrecond8` },
+        Digit0: { id: `btnPrecond9` },
+        Numpad1: { id: `btnPrecond0` },
+        Numpad2: { id: `btnPrecond1` },
+        Numpad3: { id: `btnPrecond2` },
+        Numpad4: { id: `btnPrecond3` },
+        Numpad5: { id: `btnPrecond4` },
+        Numpad6: { id: `btnPrecond5` },
+        Numpad7: { id: `btnPrecond6` },
+        Numpad8: { id: `btnPrecond7` },
+        Numpad9: { id: `btnPrecond8` },
+        Numpad0: { id: `btnPrecond9` },
+        Escape: { id: `btnBack` },
+        ShiftLeft_Tab: { id: `btnBack` },
+    },
     option: {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
         ShiftRight_KeyD: { id: `lnkDifficultyL` },
@@ -2292,6 +2329,7 @@ const g_btnWaitFrame = {
     initial: { b_frame: 0, s_frame: 0 },
     title: { b_frame: 0, s_frame: 0 },
     dataMgt: { b_frame: 0, s_frame: 0 },
+    precondition: { b_frame: 0, s_frame: 0 },
     option: { b_frame: 0, s_frame: 0, initial: true },
     difSelector: { b_frame: 0, s_frame: 0 },
     settingsDisplay: { b_frame: 0, s_frame: 0 },
@@ -2307,6 +2345,7 @@ const g_btnWaitFrame = {
 const g_btnPatterns = {
     title: { Start: 0, Comment: -10 },
     dataMgt: { Back: 0, Environment: -35, Highscores: -35, CustomKey: -35, Others: -35 },
+    precondition: { Back: 0 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
     difSelector: {},
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5 },
@@ -3503,6 +3542,7 @@ const g_lblNameObj = {
     b_retry: `Retry`,
     b_close: `Close`,
     b_cReset: `Reset`,
+    b_precond: `Precondition`,
 
     Difficulty: `Difficulty`,
     Speed: `Speed`,
@@ -4045,6 +4085,7 @@ const g_customJsObj = {
     title: [],
     titleEnterFrame: [],
     dataMgt: [],
+    precondition: [],
     option: [],
     difficulty: [],
     settingsDisplay: [],
@@ -4085,6 +4126,7 @@ const g_customJsObj = {
 const g_skinJsObj = {
     title: [],
     dataMgt: [],
+    precondition: [],
     option: [],
     settingsDisplay: [],
     exSetting: [],
