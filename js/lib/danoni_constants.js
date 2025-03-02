@@ -2348,7 +2348,6 @@ Object.keys(g_btnWaitFrame).forEach(key => {
         g_btnWaitFrame[key].s_frame = 0;
     }
 });
-console.log(g_btnWaitFrame)
 
 // 主要ボタンのリスト
 // - btn + プロパティ名に合致するボタンid名に対して、
