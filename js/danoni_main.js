@@ -49,8 +49,8 @@ const getQueryParamVal = _name => {
 };
 
 const g_reservedDomains = [
-	`danonicw.skr.jp/`,
-	`tickle.cloudfree.jp/`
+	`danonicw.skr.jp`,
+	`tickle.cloudfree.jp`,
 ];
 Object.freeze(g_reservedDomains);
 
@@ -62,7 +62,7 @@ const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
 const g_isDebug = g_isLocal ||
-	g_reservedDomains.some(domain => location.href.match(`^https://${domain}`) !== null) ||
+	g_reservedDomains.some(domain => location.href.match(`^https://${domain}/`) !== null) ||
 	getQueryParamVal(`debug`) === `true`;
 const isLocalMusicFile = _scoreId => g_isFile && !listMatching(getMusicUrl(_scoreId), [`.js`, `.txt`], { suffix: `$` });
 
