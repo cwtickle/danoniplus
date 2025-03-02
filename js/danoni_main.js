@@ -6878,7 +6878,8 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 		const isUpdate = prevPtn !== -1 && g_keyObj.prevKey !== g_keyObj.currentKey;
 		g_keyCopyLists.multiple.filter(header => g_keyObj[`${header}${basePtn}`] !== undefined && isUpdate)
 			.forEach(header => g_keyObj[`${header}${copyPtn}`] = structuredClone(g_keyObj[`${header}${basePtn}`]));
-		g_keyCopyLists.simple.forEach(header => g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`]);
+		g_keyCopyLists.simple.filter(header => g_keyObj[`${header}${basePtn}`] !== undefined && isUpdate)
+			.forEach(header => g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`]);
 
 		g_keycons.groups.forEach(type => {
 			let maxPtn = 0;
