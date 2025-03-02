@@ -1623,7 +1623,7 @@ const createCss2Button = (_id, _text, _func = () => true, {
 	if (initDisabledFlg) {
 		if (!g_btnWaitFrame[groupName] ||
 			g_btnWaitFrame[groupName].b_frame === 0 ||
-			g_initialFlg && g_btnWaitFrame[groupName].initial) {
+			(g_initialFlg && g_btnWaitFrame[groupName].initial)) {
 		} else {
 			style.pointerEvents = C_DIS_NONE;
 			setTimeout(() => style.pointerEvents = rest.pointerEvents ?? C_DIS_AUTO,
