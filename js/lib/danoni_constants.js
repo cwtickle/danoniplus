@@ -2326,22 +2326,33 @@ const g_shortcutObj = {
 // b_frame: ボタンの有効化フレーム数、s_frame: ショートカットキーの有効化フレーム数
 // initial: 初回のみ有効化時間を設定する場合、trueを設定
 const g_btnWaitFrame = {
-    initial: { b_frame: 0, s_frame: 0 },
-    title: { b_frame: 0, s_frame: 0 },
-    dataMgt: { b_frame: 0, s_frame: 0 },
-    precondition: { b_frame: 0, s_frame: 0 },
-    option: { b_frame: 0, s_frame: 0, initial: true },
-    difSelector: { b_frame: 0, s_frame: 0 },
-    settingsDisplay: { b_frame: 0, s_frame: 0 },
-    exSetting: { b_frame: 0, s_frame: 0 },
-    keyConfig: { b_frame: 0, s_frame: 30 },
-    loading: { b_frame: 0, s_frame: 0 },
-    loadingIos: { b_frame: 0, s_frame: 0 },
-    main: { b_frame: 0, s_frame: 0 },
-    result: { b_frame: 0, s_frame: 120 },
+    initial: {},
+    title: {},
+    dataMgt: {},
+    precondition: {},
+    option: { initial: true },
+    difSelector: {},
+    settingsDisplay: {},
+    exSetting: {},
+    keyConfig: { s_frame: 30 },
+    loading: {},
+    loadingIos: {},
+    main: {},
+    result: { s_frame: 120 },
 };
+Object.keys(g_btnWaitFrame).forEach(key => {
+    if (!g_btnWaitFrame[key].b_frame) {
+        g_btnWaitFrame[key].b_frame = 0;
+    }
+    if (!g_btnWaitFrame[key].s_frame) {
+        g_btnWaitFrame[key].s_frame = 0;
+    }
+});
+console.log(g_btnWaitFrame)
 
 // 主要ボタンのリスト
+// - btn + プロパティ名に合致するボタンid名に対して、
+//   どの位置(X方向)にショートカット名を表示するかを設定
 const g_btnPatterns = {
     title: { Start: 0, Comment: -10 },
     dataMgt: { Back: 0, Environment: -35, Highscores: -35, CustomKey: -35, Others: -35 },

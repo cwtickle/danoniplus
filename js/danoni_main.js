@@ -853,14 +853,17 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
  * 各画面の汎用ショートカットキー表示
  * @param {string} _displayName 
  */
-const createScTextCommon = _displayName =>
-	Object.keys(g_btnPatterns[_displayName]).filter(target => document.getElementById(`btn${target}`) !== null)
-		.forEach(target =>
-			createScText(document.getElementById(`btn${target}`), target, {
-				displayName: _displayName, targetLabel: `btn${target}`,
-				dfLabel: g_lblNameObj[`sc_${_displayName}${target}`] ?? ``,
-				x: g_btnPatterns[_displayName][target],
-			}));
+const createScTextCommon = _displayName => {
+	if (g_btnPatterns[_displayName]) {
+		Object.keys(g_btnPatterns[_displayName]).filter(target => document.getElementById(`btn${target}`) !== null)
+			.forEach(target =>
+				createScText(document.getElementById(`btn${target}`), target, {
+					displayName: _displayName, targetLabel: `btn${target}`,
+					dfLabel: g_lblNameObj[`sc_${_displayName}${target}`] ?? ``,
+					x: g_btnPatterns[_displayName][target],
+				}));
+	}
+};
 
 /**
  * ショートカットキー有効化
@@ -877,7 +880,9 @@ const setShortcutEvent = (_displayName, _func = () => true, { displayFlg = true,
 		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func, dfEvtFlg);
 		document.onkeyup = evt => commonKeyUp(evt);
 	};
-	if (g_initialFlg && g_btnWaitFrame[_displayName].initial) {
+	if (!g_btnWaitFrame[_displayName] ||
+		g_btnWaitFrame[_displayName].s_frame === 0 ||
+		(g_initialFlg && g_btnWaitFrame[_displayName].initial)) {
 		evList();
 	} else {
 		setTimeout(() => {
@@ -1616,7 +1621,9 @@ const createCss2Button = (_id, _text, _func = () => true, {
 
 	// ボタン有効化操作
 	if (initDisabledFlg) {
-		if (g_initialFlg && g_btnWaitFrame[groupName].initial) {
+		if (!g_btnWaitFrame[groupName] ||
+			g_btnWaitFrame[groupName].b_frame === 0 ||
+			g_initialFlg && g_btnWaitFrame[groupName].initial) {
 		} else {
 			style.pointerEvents = C_DIS_NONE;
 			setTimeout(() => style.pointerEvents = rest.pointerEvents ?? C_DIS_AUTO,
