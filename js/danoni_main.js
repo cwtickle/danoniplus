@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/03/01
+ * Revised : 2025/03/02
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 40.0.1`;
-const g_revisedDate = `2025/03/01`;
+const g_version = `Ver 40.1.0`;
+const g_revisedDate = `2025/03/02`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -37,13 +37,41 @@ const current = () => {
 	const targetScript = scripts.find(file => file.src.endsWith(`danoni_main.js`));
 	return targetScript.src;
 };
+
+/**
+ * 現在URLのクエリパラメータから指定した値を取得
+ * @param {string} _name
+ * @returns {string}
+ */
+const getQueryParamVal = _name => {
+	const param = new URL(location.href).searchParams.get(_name);
+	return param !== null ? decodeURIComponent(param.replace(/\+/g, ` `)) : null;
+};
+
+// 常時デバッグを許可するドメイン
+const g_reservedDomains = [
+	`danonicw.skr.jp`,
+	`tickle.cloudfree.jp`,
+];
+Object.freeze(g_reservedDomains);
+
+// 外部参照を許可するドメイン
+const g_referenceDomains = [
+	`cwtickle.github.io/danoniplus`,
+	`support-v\\d+--danoniplus.netlify.app`,
+];
+Object.freeze(g_referenceDomains);
+
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
-const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null ||
-	g_rootPath.match(/danoniplus.netlify.app/) !== null;
+const g_remoteFlg = g_referenceDomains.some(domain => g_rootPath.match(`^https://${domain}/`) !== null);
+
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
+const g_isDebug = g_isLocal ||
+	g_reservedDomains.some(domain => location.href.match(`^https://${domain}/`) !== null) ||
+	getQueryParamVal(`debug`) === `true`;
 const isLocalMusicFile = _scoreId => g_isFile && !listMatching(getMusicUrl(_scoreId), [`.js`, `.txt`], { suffix: `$` });
 
 window.onload = async () => {
@@ -825,14 +853,17 @@ const createScText = (_obj, _settingLabel, { displayName = `option`, dfLabel = `
  * 各画面の汎用ショートカットキー表示
  * @param {string} _displayName 
  */
-const createScTextCommon = _displayName =>
-	Object.keys(g_btnPatterns[_displayName]).filter(target => document.getElementById(`btn${target}`) !== null)
-		.forEach(target =>
-			createScText(document.getElementById(`btn${target}`), target, {
-				displayName: _displayName, targetLabel: `btn${target}`,
-				dfLabel: g_lblNameObj[`sc_${_displayName}${target}`] ?? ``,
-				x: g_btnPatterns[_displayName][target],
-			}));
+const createScTextCommon = _displayName => {
+	if (g_btnPatterns[_displayName]) {
+		Object.keys(g_btnPatterns[_displayName]).filter(target => document.getElementById(`btn${target}`) !== null)
+			.forEach(target =>
+				createScText(document.getElementById(`btn${target}`), target, {
+					displayName: _displayName, targetLabel: `btn${target}`,
+					dfLabel: g_lblNameObj[`sc_${_displayName}${target}`] ?? ``,
+					x: g_btnPatterns[_displayName][target],
+				}));
+	}
+};
 
 /**
  * ショートカットキー有効化
@@ -849,7 +880,9 @@ const setShortcutEvent = (_displayName, _func = () => true, { displayFlg = true,
 		document.onkeydown = evt => commonKeyDown(evt, _displayName, _func, dfEvtFlg);
 		document.onkeyup = evt => commonKeyUp(evt);
 	};
-	if (g_initialFlg && g_btnWaitFrame[_displayName].initial) {
+	if (!g_btnWaitFrame[_displayName] ||
+		g_btnWaitFrame[_displayName].s_frame === 0 ||
+		(g_initialFlg && g_btnWaitFrame[_displayName].initial)) {
 		evList();
 	} else {
 		setTimeout(() => {
@@ -1588,7 +1621,9 @@ const createCss2Button = (_id, _text, _func = () => true, {
 
 	// ボタン有効化操作
 	if (initDisabledFlg) {
-		if (g_initialFlg && g_btnWaitFrame[groupName].initial) {
+		if (!g_btnWaitFrame[groupName] ||
+			g_btnWaitFrame[groupName].b_frame === 0 ||
+			(g_initialFlg && g_btnWaitFrame[groupName].initial)) {
 		} else {
 			style.pointerEvents = C_DIS_NONE;
 			setTimeout(() => style.pointerEvents = rest.pointerEvents ?? C_DIS_AUTO,
@@ -2261,16 +2296,6 @@ const copyTextToClipboard = async (_textVal, _msg) => {
 	} finally {
 		makeInfoWindow(_msg, `leftToRightFade`);
 	}
-};
-
-/**
- * 現在URLのクエリパラメータから指定した値を取得
- * @param {string} _name
- * @returns {string}
- */
-const getQueryParamVal = _name => {
-	const param = new URL(location.href).searchParams.get(_name);
-	return param !== null ? decodeURIComponent(param.replace(/\+/g, ` `)) : null;
 };
 
 /**
@@ -6853,7 +6878,8 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 		const isUpdate = prevPtn !== -1 && g_keyObj.prevKey !== g_keyObj.currentKey;
 		g_keyCopyLists.multiple.filter(header => g_keyObj[`${header}${basePtn}`] !== undefined && isUpdate)
 			.forEach(header => g_keyObj[`${header}${copyPtn}`] = structuredClone(g_keyObj[`${header}${basePtn}`]));
-		g_keyCopyLists.simple.forEach(header => g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`]);
+		g_keyCopyLists.simple.filter(header => g_keyObj[`${header}${basePtn}`] !== undefined && isUpdate)
+			.forEach(header => g_keyObj[`${header}${copyPtn}`] = g_keyObj[`${header}${basePtn}`]);
 
 		g_keycons.groups.forEach(type => {
 			let maxPtn = 0;
@@ -10791,8 +10817,8 @@ const mainInit = () => {
 		[`lblCredit`, `lblDifName`].forEach(labelName => changeStyle(labelName, g_lblPosObj.musicInfoOFF));
 	}
 
-	// ローカル時のみフレーム数を残す
-	if (!g_isLocal) {
+	// デバッグ時のみフレーム数を残す
+	if (!g_isDebug) {
 		lblframe.style.display = C_DIS_NONE;
 	}
 
