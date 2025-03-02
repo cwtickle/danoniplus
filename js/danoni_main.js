@@ -48,6 +48,12 @@ const getQueryParamVal = _name => {
 	return param !== null ? decodeURIComponent(param.replace(/\+/g, ` `)) : null;
 };
 
+const g_reservedDomains = [
+	`danonicw.skr.jp/`,
+	`tickle.cloudfree.jp/`
+];
+Object.freeze(g_reservedDomains);
+
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
 const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null ||
@@ -55,7 +61,9 @@ const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) 
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
-const g_isDebug = g_isLocal || getQueryParamVal(`debug`) === `true`;
+const g_isDebug = g_isLocal ||
+	g_reservedDomains.some(domain => location.href.match(`^https://${domain}`) !== null) ||
+	getQueryParamVal(`debug`) === `true`;
 const isLocalMusicFile = _scoreId => g_isFile && !listMatching(getMusicUrl(_scoreId), [`.js`, `.txt`], { suffix: `$` });
 
 window.onload = async () => {
