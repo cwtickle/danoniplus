@@ -48,16 +48,24 @@ const getQueryParamVal = _name => {
 	return param !== null ? decodeURIComponent(param.replace(/\+/g, ` `)) : null;
 };
 
+// 常時デバッグを許可するドメイン
 const g_reservedDomains = [
 	`danonicw.skr.jp`,
 	`tickle.cloudfree.jp`,
 ];
 Object.freeze(g_reservedDomains);
 
+// 外部参照を許可するドメイン
+const g_referenceDomains = [
+	`cwtickle.github.io/danoniplus`,
+	`support-v\\d+--danoniplus.netlify.app`,
+];
+Object.freeze(g_referenceDomains);
+
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
-const g_remoteFlg = g_rootPath.match(`^https://cwtickle.github.io/danoniplus/`) !== null ||
-	g_rootPath.match(/danoniplus.netlify.app/) !== null;
+const g_remoteFlg = g_referenceDomains.some(domain => g_rootPath.match(`^https://${domain}/`) !== null);
+
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
