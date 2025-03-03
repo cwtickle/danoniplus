@@ -5030,7 +5030,7 @@ const dataMgtInit = () => {
 	multiAppend(divRoot,
 		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
 			Object.assign(g_lblPosObj.btnResetBack, {
-				resetFunc: () => prevPage === `title` ? titleInit() : g_moveSettingWindow(false),
+				resetFunc: () => [`title`, `precondition`].includes(prevPage) ? titleInit() : g_moveSettingWindow(false),
 			}), g_cssObj.button_Back),
 
 		createCss2Button(`btnPrecond`, g_lblNameObj.b_precond, () => true,
