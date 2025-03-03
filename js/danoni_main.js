@@ -5185,6 +5185,12 @@ const preconditionInit = () => {
 	g_customJsObj.precondition.forEach(func => func());
 
 	multiAppend(divRoot,
+
+		// データ管理画面へ移動
+		createCss2Button(`btnReset`, g_lblNameObj.dataReset, () => {
+			dataMgtInit();
+		}, g_lblPosObj.btnReset, g_cssObj.button_Reset),
+
 		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
 			Object.assign(g_lblPosObj.btnPrecond, {
 				resetFunc: () => {
