@@ -502,7 +502,7 @@ const viewKeyStorage = (_name, _key = ``) => {
  * @param {Object} [_parent=null]
  * @returns {string}
  */
-const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, key = `` } = {}, _parent = null) => {
+const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, baseKey = ``, rootKey = `` } = {}, _parent = null) => {
 	if (_obj === null || typeof _obj !== 'object') {
 		return JSON.stringify(_obj);
 	}
@@ -523,19 +523,22 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 					return _value.replace(colorCodePattern, (match) =>
 						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
 				}
-			} else if (typeof _value === 'boolean') {
+			} else if (typeof _value === C_TYP_BOOLEAN) {
 				return _value ? `<span style="color:#66ff66">true</span>` : `<span style="color:#ff9999">false</span>`;
+			} else if (rootKey.startsWith(`scrollDir`) && typeof _value === C_TYP_NUMBER) {
+				return _value === 1 ? `1|<span style="color:#ff9999">↑</span>` : `-1|<span style="color:#66ff66">↓</span>`;
 			}
+
 			if (Array.isArray(_value)) {
 				let formattedArray = _value.map(item => formatValue(item, _value));
-				if (key.startsWith(`keyCtrl`)) {
+				if (baseKey.startsWith(`keyCtrl`)) {
 					formattedArray = formattedArray.filter(item => item !== `0`)
 						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
 				}
 				return `[${formattedArray.join(`, `)}]`;
 			}
 			if (typeof _value === 'object' && _value !== null) {
-				return formatObject(_value, _indent + 1, { seen, colorFmt, key }, _parent);
+				return formatObject(_value, _indent + 1, { seen, colorFmt, baseKey, rootKey }, _parent);
 			}
 		}
 		return JSON.stringify(_value);
@@ -562,7 +565,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 				return isArrayOfArrays
 					? `${nestedIndent}${formatValue(value, _obj)}`
 					: isNestedObject
-						? formatObject(value, _indent + 1, { seen, colorFmt }, _obj)
+						? formatObject(value, _indent + 1, { seen, colorFmt, rootKey }, _obj)
 						: formatValue(value, _obj)
 			}).join(isArrayOfArrays ? `,<br>` : `, `);
 
@@ -575,7 +578,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 			const isNestedObject = typeof value === 'object' && value !== null;
 			const seenNew = _parent ? seen : new WeakSet();
 			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, { seen: seenNew, colorFmt, key }, _obj)
+				? formatObject(value, _indent + 1, { seen: seenNew, colorFmt, baseKey: key, rootKey: rootKey === `` ? baseKey : rootKey }, _obj)
 				: formatValue(value, _obj);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
