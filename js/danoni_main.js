@@ -523,6 +523,8 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 					return _value.replace(colorCodePattern, (match) =>
 						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
 				}
+			} else if (typeof _value === 'boolean') {
+				return _value ? `<span style="color:#66ff66">true</span>` : `<span style="color:#ff9999">false</span>`;
 			}
 			if (Array.isArray(_value)) {
 				let formattedArray = _value.map(item => formatValue(item, _value));
