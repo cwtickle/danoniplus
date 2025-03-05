@@ -496,13 +496,13 @@ const viewKeyStorage = (_name, _key = ``) => {
  * オブジェクトのネスト表示処理
  * @param {Object} _obj 
  * @param {Number} _indent 
- * @param {WeakSet} [seen=new WeakSet()]
- * @param {boolean} [colorFmt=true]
- * @param {string} [key='']
+ * @param {WeakSet} [seen=new WeakSet()] 
+ * @param {boolean} [colorFmt=true] フォーマット加工フラグ
+ * @param {string} [rootKey=''] オブジェクトの最上位プロパティ名
  * @param {Object} [_parent=null]
  * @returns {string}
  */
-const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, baseKey = ``, rootKey = `` } = {}, _parent = null) => {
+const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, rootKey = `` } = {}, _parent = null) => {
 	if (_obj === null || typeof _obj !== 'object') {
 		return JSON.stringify(_obj);
 	}
@@ -531,14 +531,14 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 
 			if (Array.isArray(_value)) {
 				let formattedArray = _value.map(item => formatValue(item, _value));
-				if (baseKey.startsWith(`keyCtrl`)) {
+				if (rootKey.startsWith(`keyCtrl`)) {
 					formattedArray = formattedArray.filter(item => item !== `0`)
 						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
 				}
 				return `[${formattedArray.join(`, `)}]`;
 			}
 			if (typeof _value === 'object' && _value !== null) {
-				return formatObject(_value, _indent + 1, { seen, colorFmt, baseKey, rootKey }, _parent);
+				return formatObject(_value, _indent + 1, { seen, colorFmt, rootKey }, _parent);
 			}
 		}
 		return JSON.stringify(_value);
@@ -578,7 +578,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 			const isNestedObject = typeof value === 'object' && value !== null;
 			const seenNew = _parent ? seen : new WeakSet();
 			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, { seen: seenNew, colorFmt, baseKey: key, rootKey: rootKey === `` ? baseKey : rootKey }, _obj)
+				? formatObject(value, _indent + 1, { seen: seenNew, colorFmt, rootKey: rootKey === `` ? key : rootKey }, _obj)
 				: formatValue(value, _obj);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 		}).join(`,`);
