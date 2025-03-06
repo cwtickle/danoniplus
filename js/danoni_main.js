@@ -518,7 +518,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			if (typeof _value === C_TYP_STRING) {
 
 				// カラーコードの色付け処理
-				_value = escapeHtml(_value);
+				_value = escapeHtml(_value).replaceAll(`\n`, `<br>`);
 				const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 				if (colorCodePattern.test(_value)) {
 					return _value.replace(colorCodePattern, (match) =>
