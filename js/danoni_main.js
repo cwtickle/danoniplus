@@ -496,44 +496,51 @@ const viewKeyStorage = (_name, _key = ``) => {
  * オブジェクトのネスト表示処理
  * @param {Object} _obj 
  * @param {Number} _indent 
- * @param {WeakSet} [seen=new WeakSet()]
- * @param {boolean} [colorFmt=true]
- * @param {string} [key='']
+ * @param {boolean} [colorFmt=true] フォーマット加工フラグ
+ * @param {string} [rootKey=''] オブジェクトの最上位プロパティ名
  * @param {Object} [_parent=null]
  * @returns {string}
  */
-const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, key = `` } = {}, _parent = null) => {
+const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {}) => {
 	if (_obj === null || typeof _obj !== 'object') {
 		return JSON.stringify(_obj);
 	}
-	if (seen.has(_obj)) {
-		return '[Circular]';
-	}
-	seen.add(_obj);
 	const baseIndent = getIndent(_indent);
 	const nestedIndent = getIndent(_indent + 1);
 
-	// カラーコード、対応キーの色付け処理
-	const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
-	const formatValue = (_value, _parent) => {
+	/**
+	 * データの装飾処理
+	 * @param {string|boolean|number|Object} _value 
+	 * @returns {string}
+	 */
+	const formatValue = (_value) => {
 		if (colorFmt) {
-			if (typeof _value === 'string') {
-				_value = escapeHtml(_value);
+			if (typeof _value === C_TYP_STRING) {
+
+				// カラーコードの色付け処理
+				_value = escapeHtml(_value).replaceAll(`\n`, `<br>`);
+				const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 				if (colorCodePattern.test(_value)) {
 					return _value.replace(colorCodePattern, (match) =>
 						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
 				}
-			}
-			if (Array.isArray(_value)) {
-				let formattedArray = _value.map(item => formatValue(item, _value));
-				if (key.startsWith(`keyCtrl`)) {
-					formattedArray = formattedArray.filter(item => item !== `0`)
-						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
+			} else if (typeof _value === C_TYP_BOOLEAN) {
+
+				// boolean値の色付け処理
+				return _value ? `<span style="color:#66ff66">&#x2714; true</span>` : `<span style="color:#ff9999">&#x274c; false</span>`;
+
+			} else if (typeof _value === C_TYP_NUMBER) {
+
+				if (rootKey.startsWith(`scrollDir`)) {
+					// scrollDirXのスクロール方向表示処理
+					return _value === 1 ? `1|<span style="color:#ff9999">↑</span>` : `-1|<span style="color:#66ff66">↓</span>`;
+
+				} else if (rootKey.startsWith(`keyCtrl`)) {
+					// keyCtrlXの対応キー表示処理
+					return (g_kCd[_value] && _value !== 0) ? `${_value}|<span style="color:#ffff66">${g_kCd[_value]}</span>` : `----`;
 				}
-				return `[${formattedArray.join(`, `)}]`;
-			}
-			if (typeof _value === 'object' && _value !== null) {
-				return formatObject(_value, _indent + 1, { seen, colorFmt, key }, _parent);
+			} else if (typeof _value === C_TYP_OBJECT && _value !== null) {
+				return formatObject(_value, _indent + 1, { colorFmt, rootKey });
 			}
 		}
 		return JSON.stringify(_value);
@@ -560,9 +567,9 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 				return isArrayOfArrays
 					? `${nestedIndent}${formatValue(value, _obj)}`
 					: isNestedObject
-						? formatObject(value, _indent + 1, { seen, colorFmt }, _obj)
+						? formatObject(value, _indent + 1, { colorFmt, rootKey })
 						: formatValue(value, _obj)
-			}).join(isArrayOfArrays ? `,<br>` : `, `);
+			}).filter(val => !hasVal(val) || val !== `----`).join(isArrayOfArrays ? `,<br>` : `, `);
 
 		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
 	}
@@ -571,12 +578,11 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const formattedEntries = Object.entries(_obj)
 		.map(([key, value]) => {
 			const isNestedObject = typeof value === 'object' && value !== null;
-			const seenNew = _parent ? seen : new WeakSet();
 			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, { seen: seenNew, colorFmt, key }, _obj)
+				? formatObject(value, _indent + 1, { colorFmt, rootKey: rootKey === `` ? key : rootKey }, _obj)
 				: formatValue(value, _obj);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
-		}).join(`,`);
+		}).filter(val => !hasVal(val) || val !== `----`).join(`,`);
 
 	let result = `{${formattedEntries}<br>${baseIndent}}`;
 	if (!colorFmt) {
