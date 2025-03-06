@@ -514,11 +514,11 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const nestedIndent = getIndent(_indent + 1);
 
 	// カラーコード、対応キーの色付け処理
-	const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 	const formatValue = (_value, _parent) => {
 		if (colorFmt) {
-			if (typeof _value === 'string') {
+			if (typeof _value === C_TYP_STRING) {
 				_value = escapeHtml(_value);
+				const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 				if (colorCodePattern.test(_value)) {
 					return _value.replace(colorCodePattern, (match) =>
 						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
@@ -537,7 +537,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 				}
 				return `[${formattedArray.join(`, `)}]`;
 			}
-			if (typeof _value === 'object' && _value !== null) {
+			if (typeof _value === C_TYP_OBJECT && _value !== null) {
 				return formatObject(_value, _indent + 1, { seen, colorFmt, rootKey }, _parent);
 			}
 		}
