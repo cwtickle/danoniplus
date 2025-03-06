@@ -524,7 +524,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
 				}
 			} else if (typeof _value === C_TYP_BOOLEAN) {
-				return _value ? `<span style="color:#66ff66">true</span>` : `<span style="color:#ff9999">false</span>`;
+				return _value ? `<span style="color:#66ff66">&#x2714; true</span>` : `<span style="color:#ff9999">&#x274c; false</span>`;
 			} else if (rootKey.startsWith(`scrollDir`) && typeof _value === C_TYP_NUMBER) {
 				return _value === 1 ? `1|<span style="color:#ff9999">↑</span>` : `-1|<span style="color:#66ff66">↓</span>`;
 			}
