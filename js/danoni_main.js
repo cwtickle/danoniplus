@@ -537,7 +537,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 
 				} else if (rootKey.startsWith(`keyCtrl`)) {
 					// keyCtrlXの対応キー表示処理
-					return (g_kCd[_value] && _value !== 0) ? `${_value}|<span style="color:#ffff66">${g_kCd[_value]}</span>` : undefined;
+					return (g_kCd[_value] && _value !== 0) ? `${_value}|<span style="color:#ffff66">${g_kCd[_value]}</span>` : `----`;
 				}
 			} else if (typeof _value === C_TYP_OBJECT && _value !== null) {
 				return formatObject(_value, _indent + 1, { colorFmt, rootKey });
@@ -569,7 +569,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 					: isNestedObject
 						? formatObject(value, _indent + 1, { colorFmt, rootKey })
 						: formatValue(value, _obj)
-			}).filter(val => val !== undefined).join(isArrayOfArrays ? `,<br>` : `, `);
+			}).filter(val => !hasVal(val) || val !== `----`).join(isArrayOfArrays ? `,<br>` : `, `);
 
 		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
 	}
@@ -582,7 +582,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 				? formatObject(value, _indent + 1, { colorFmt, rootKey: rootKey === `` ? key : rootKey }, _obj)
 				: formatValue(value, _obj);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
-		}).filter(val => val !== undefined).join(`,`);
+		}).filter(val => !hasVal(val) || val !== `----`).join(`,`);
 
 	let result = `{${formattedEntries}<br>${baseIndent}}`;
 	if (!colorFmt) {
