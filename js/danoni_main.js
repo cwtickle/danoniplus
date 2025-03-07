@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/03/02
+ * Revised : 2025/03/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 40.1.0`;
-const g_revisedDate = `2025/03/02`;
+const g_version = `Ver 40.2.0`;
+const g_revisedDate = `2025/03/07`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -496,44 +496,53 @@ const viewKeyStorage = (_name, _key = ``) => {
  * オブジェクトのネスト表示処理
  * @param {Object} _obj 
  * @param {Number} _indent 
- * @param {WeakSet} [seen=new WeakSet()]
- * @param {boolean} [colorFmt=true]
- * @param {string} [key='']
+ * @param {boolean} [colorFmt=true] フォーマット加工フラグ
+ * @param {string} [rootKey=''] オブジェクトの最上位プロパティ名
  * @param {Object} [_parent=null]
  * @returns {string}
  */
-const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true, key = `` } = {}, _parent = null) => {
+const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {}) => {
 	if (_obj === null || typeof _obj !== 'object') {
 		return JSON.stringify(_obj);
 	}
-	if (seen.has(_obj)) {
-		return '[Circular]';
-	}
-	seen.add(_obj);
 	const baseIndent = getIndent(_indent);
 	const nestedIndent = getIndent(_indent + 1);
 
-	// カラーコード、対応キーの色付け処理
-	const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
-	const formatValue = (_value, _parent) => {
+	/**
+	 * データの装飾処理
+	 * @param {string|boolean|number|Object} _value 
+	 * @param {string} _rootKey
+	 * @returns {string}
+	 */
+	const formatValue = (_value, _rootKey) => {
 		if (colorFmt) {
-			if (typeof _value === 'string') {
-				_value = escapeHtml(_value);
+			if (typeof _value === C_TYP_STRING) {
+
+				// カラーコードの色付け処理
+				_value = escapeHtml(_value).replaceAll(`\n`, `<br>`);
+				const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 				if (colorCodePattern.test(_value)) {
 					return _value.replace(colorCodePattern, (match) =>
 						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
 				}
-			}
-			if (Array.isArray(_value)) {
-				let formattedArray = _value.map(item => formatValue(item, _value));
-				if (key.startsWith(`keyCtrl`)) {
-					formattedArray = formattedArray.filter(item => item !== `0`)
-						.map(item => g_kCd[item] ? `${item}|<span style="color:#ffff66">${g_kCd[item]}</span>` : item);
+			} else if (typeof _value === C_TYP_BOOLEAN) {
+
+				// boolean値の色付け処理
+				return (_value ? `<span style="color:#66ff66">&#x2714; true</span>` :
+					`<span style="color:#ff9999">&#x274c; false</span>`);
+
+			} else if (typeof _value === C_TYP_NUMBER) {
+
+				if (_rootKey.startsWith(`scrollDir`)) {
+					// scrollDirXのスクロール方向表示処理
+					return _value === 1 ? `1|<span style="color:#ff9999">↑</span>` : `-1|<span style="color:#66ff66">↓</span>`;
+
+				} else if (_rootKey.startsWith(`keyCtrl`) && !_rootKey.startsWith(`keyCtrlPtn`)) {
+					// keyCtrlXの対応キー表示処理
+					return (g_kCd[_value] && _value !== 0) ? `${_value}|<span style="color:#ffff66">${g_kCd[_value]}</span>` : `----`;
 				}
-				return `[${formattedArray.join(`, `)}]`;
-			}
-			if (typeof _value === 'object' && _value !== null) {
-				return formatObject(_value, _indent + 1, { seen, colorFmt, key }, _parent);
+			} else if (typeof _value === C_TYP_OBJECT && _value !== null) {
+				return formatObject(_value, _indent + 1, { colorFmt, rootKey: _rootKey });
 			}
 		}
 		return JSON.stringify(_value);
@@ -547,7 +556,7 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 		if (colorFmt && _obj.length > 100) {
 			const filteredArray = _obj.reduce((result, value, index) => {
 				if (hasVal(value)) {
-					result.push(`${index}: ${formatValue(value, _obj)}`);
+					result.push(`${index}: ${formatValue(value, rootKey)}`);
 				}
 				return result;
 			}, []);
@@ -558,11 +567,11 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 			.map(value => {
 				const isNestedObject = typeof value === 'object' && value !== null;
 				return isArrayOfArrays
-					? `${nestedIndent}${formatValue(value, _obj)}`
+					? `${nestedIndent}${formatValue(value, rootKey)}`
 					: isNestedObject
-						? formatObject(value, _indent + 1, { seen, colorFmt }, _obj)
-						: formatValue(value, _obj)
-			}).join(isArrayOfArrays ? `,<br>` : `, `);
+						? formatObject(value, _indent + 1, { colorFmt, rootKey })
+						: formatValue(value, rootKey)
+			}).filter(val => !hasVal(val) || val !== `----`).join(isArrayOfArrays ? `,<br>` : `, `);
 
 		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
 	}
@@ -571,12 +580,12 @@ const formatObject = (_obj, _indent = 0, { seen = new WeakSet(), colorFmt = true
 	const formattedEntries = Object.entries(_obj)
 		.map(([key, value]) => {
 			const isNestedObject = typeof value === 'object' && value !== null;
-			const seenNew = _parent ? seen : new WeakSet();
+			const baseKey = rootKey === `` ? key : rootKey;
 			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, { seen: seenNew, colorFmt, key }, _obj)
-				: formatValue(value, _obj);
+				? formatObject(value, _indent + 1, { colorFmt, rootKey: baseKey }, _obj)
+				: formatValue(value, baseKey);
 			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
-		}).join(`,`);
+		}).filter(val => !hasVal(val) || val !== `----`).join(`,`);
 
 	let result = `{${formattedEntries}<br>${baseIndent}}`;
 	if (!colorFmt) {
@@ -5030,7 +5039,7 @@ const dataMgtInit = () => {
 	multiAppend(divRoot,
 		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
 			Object.assign(g_lblPosObj.btnResetBack, {
-				resetFunc: () => prevPage === `title` ? titleInit() : g_moveSettingWindow(false),
+				resetFunc: () => [`title`, `precondition`].includes(prevPage) ? titleInit() : g_moveSettingWindow(false),
 			}), g_cssObj.button_Back),
 
 		createCss2Button(`btnPrecond`, g_lblNameObj.b_precond, () => true,
@@ -5185,6 +5194,12 @@ const preconditionInit = () => {
 	g_customJsObj.precondition.forEach(func => func());
 
 	multiAppend(divRoot,
+
+		// データ管理画面へ移動
+		createCss2Button(`btnReset`, g_lblNameObj.dataReset, () => {
+			dataMgtInit();
+		}, g_lblPosObj.btnReset, g_cssObj.button_Reset),
+
 		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true,
 			Object.assign(g_lblPosObj.btnPrecond, {
 				resetFunc: () => {
