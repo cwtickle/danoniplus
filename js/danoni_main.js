@@ -5009,10 +5009,12 @@ const dataMgtInit = () => {
 		g_stateObj[`dm_${key}`] = C_FLG_OFF;
 		g_settings.dataMgtNum[key] = 0;
 
+		const keyWidth = Math.min(Math.max(50, getStrWidth(getKeyName(key), g_limitObj.setLblSiz, getBasicFont())), 80);
 		keyListSprite.appendChild(createMgtButton(key, j - 2, 0, {
-			w: Math.max(50, getStrWidth(getKeyName(key) + `    `, g_limitObj.setLblSiz, getBasicFont())),
+			w: keyWidth,
+			siz: getFontSize(getKeyName(key), keyWidth, getBasicFont(), g_limitObj.setLblSiz, 10),
 		}));
-		document.getElementById(`btn${key}`).innerHTML = getKeyName(key);
+		document.getElementById(`btn${toCapitalize(key)}`).innerHTML = getKeyName(key);
 
 		keyListSprite.appendChild(createCss2Button(`btnView${key}`, ``, evt => {
 			keyList.forEach(keyx => {
