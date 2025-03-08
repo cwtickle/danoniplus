@@ -18,8 +18,8 @@
 
 | Version      | Supported          | Latest Version                                                                 | Logs                                                                   | First Release | End of Support   |
 | ------------ | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ------------- | ---------------- |
-| v40          | :heavy_check_mark: | [v40.2.0](https://github.com/cwtickle/danoniplus/releases/tag/v40.2.0)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2025-03-01    | (At Release v43) |
-| v39 :anchor: | :heavy_check_mark: | [v39.8.2](https://github.com/cwtickle/danoniplus/releases/tag/v39.8.2)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v39) | 2025-02-01    | (At Release v48) |
+| v40          | :heavy_check_mark: | [v40.3.0](https://github.com/cwtickle/danoniplus/releases/tag/v40.3.0)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2025-03-01    | (At Release v43) |
+| v39 :anchor: | :heavy_check_mark: | [v39.8.3](https://github.com/cwtickle/danoniplus/releases/tag/v39.8.3)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v39) | 2025-02-01    | (At Release v48) |
 | v38          | :warning:          | [v38.3.4](https://github.com/cwtickle/danoniplus/releases/tag/v38.3.4)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v38) | 2024-11-04    | (At Release v41) |
 | v37          | :x:                | [v37.8.9 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v37.8.9)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v37)    | 2024-06-15    | 2025-03-01 |
 | v36          | :x:                | [v36.6.11 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v36.6.11)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v36)    | 2024-04-15    | 2025-02-01 |
