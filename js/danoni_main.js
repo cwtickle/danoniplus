@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/03/07
+ * Revised : 2025/03/08
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 40.2.0`;
-const g_revisedDate = `2025/03/07`;
+const g_version = `Ver 40.3.0`;
+const g_revisedDate = `2025/03/08`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -475,19 +475,20 @@ const getIndent = (_level) => '&nbsp;'.repeat(_level * 4);
  * ストレージ情報の取得
  * @param {string} _name g_storageFuncの実行キー名
  * @param {string} _key g_storageFuncの実行キーの引数
+ * @param {boolean} [_colorFmt=true]
  * @returns {string}
  */
-const viewKeyStorage = (_name, _key = ``) => {
+const viewKeyStorage = (_name, _key = ``, _colorFmt = true) => {
 
 	// キャッシュ設定
 	if (!viewKeyStorage.cache) {
 		viewKeyStorage.cache = new Map();
 	}
-	const cacheKey = _key + _name;
+	const cacheKey = _key + _name + String(_colorFmt);
 	if (viewKeyStorage.cache.has(cacheKey)) {
 		return viewKeyStorage.cache.get(cacheKey);
 	}
-	const result = formatObject(g_storageFunc.get(_name)?.(_key) || setVal(_name, ``, C_TYP_CALC));
+	const result = formatObject(g_storageFunc.get(_name)?.(_key) || setVal(_name, ``, C_TYP_CALC), 0, { colorFmt: _colorFmt });
 	viewKeyStorage.cache.set(cacheKey, result);
 	return result;
 }
@@ -2537,6 +2538,44 @@ const initialControl = async () => {
 		if (key.match(/^chara7_[a-z]/) || delKeyPropList.includes(key) || g_keyObj[key] === undefined) {
 			delete g_keyObj[key];
 		}
+	});
+
+	// エディター用のフォーマッター作成
+	const customKeyList = g_headerObj.keyLists.filter(val =>
+		g_keyObj.defaultKeyList.findIndex(key => key === val) < 0);
+
+	customKeyList.forEach(key => {
+		const keyBase = `${key}_0`;
+		const keyCtrlPtn = `${g_keyObj.defaultProp}${keyBase}`;
+		const keyGroup = g_keyObj[`keyGroup${keyBase}`];
+		const keyGroupList = makeDedupliArray(keyGroup.flat());
+		const orgKeyNum = g_keyObj[keyCtrlPtn].length;
+		const baseX = Math.floor(Math.random() * (100 - keyGroupList.length));
+
+		keyGroupList.forEach((keyGroupNo, j) => {
+			const keyN = keyGroupNo === `0` ? key : `${key}_${j + 1}`;
+			const filterCond = (j) => keyGroup[j].findIndex(val => val === keyGroupNo) >= 0;
+			const keyCtrlList = g_keyObj[keyCtrlPtn].filter((val, j) => filterCond(j));
+			const charaList = g_keyObj[`chara${keyBase}`].filter((val, j) => filterCond(j));
+			const colorList = g_keyObj[`color${keyBase}_0`].filter((val, j) => filterCond(j));
+			const keyNum = g_keyObj[keyCtrlPtn].filter((val, j) => filterCond(j)).length;
+
+			g_editorTmp[keyN] = {};
+			g_editorTmp[keyN].id = orgKeyNum * 100 + baseX + j;
+			g_editorTmp[keyN].num = keyNum;
+			g_editorTmp[keyN].chars = keyCtrlList.map(val => g_kCd[val[0]]);
+			g_editorTmp[keyN].keys = keyCtrlList.map(val => g_kCdN[val[0]]).map(val => replaceStr(val, g_escapeStr.editorKey));
+			g_editorTmp[keyN].alternativeKeys = keyCtrlList.map(val => val[1] === 0 ? `` : g_kCdN[val[1]]).map(val => replaceStr(val, g_escapeStr.editorKey));
+			g_editorTmp[keyN].noteNames = charaList.map(val => `${val}_data`);
+			g_editorTmp[keyN].freezeNames = charaList.map(val => {
+				let frzName = replaceStr(val, g_escapeStr.frzName);
+				if (frzName.indexOf(`frz`) === -1 && frzName.indexOf(`foni`) === -1) {
+					frzName = frzName.replaceAll(frzName, `frz${toCapitalize(frzName)}`);
+				}
+				return `${frzName}_data`;
+			});
+			g_editorTmp[keyN].colorGroup = colorList.map(val => val % 3);
+		});
 	});
 };
 
@@ -5009,10 +5048,12 @@ const dataMgtInit = () => {
 		g_stateObj[`dm_${key}`] = C_FLG_OFF;
 		g_settings.dataMgtNum[key] = 0;
 
+		const keyWidth = Math.min(Math.max(50, getStrWidth(getKeyName(key), g_limitObj.setLblSiz, getBasicFont())), 80);
 		keyListSprite.appendChild(createMgtButton(key, j - 2, 0, {
-			w: Math.max(50, getStrWidth(getKeyName(key) + `    `, g_limitObj.setLblSiz, getBasicFont())),
+			w: keyWidth,
+			siz: getFontSize(getKeyName(key), keyWidth, getBasicFont(), g_limitObj.setLblSiz, 10),
 		}));
-		document.getElementById(`btn${key}`).innerHTML = getKeyName(key);
+		document.getElementById(`btn${toCapitalize(key)}`).innerHTML = getKeyName(key);
 
 		keyListSprite.appendChild(createCss2Button(`btnView${key}`, ``, evt => {
 			keyList.forEach(keyx => {
@@ -5146,6 +5187,11 @@ const preconditionInit = () => {
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
 		createDivCss2Label(`lblPrecondView`, viewKeyStorage(`g_rootObj`), g_lblPosObj.lblPrecondView),
+		createCss2Button(`btnPrecondView`, g_lblNameObj.b_copyStorage, () =>
+			copyTextToClipboard(
+				viewKeyStorage(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + g_settings.preconditionNumSub], ``, false),
+				g_msgInfoObj.I_0007),
+			g_lblPosObj.btnPrecondView, g_cssObj.button_Default, g_cssObj.button_ON),
 	);
 	setUserSelect($id(`lblPrecondView`), `text`);
 
@@ -5175,6 +5221,7 @@ const preconditionInit = () => {
 			}
 			lblPrecondView.innerHTML = viewKeyStorage(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j]);
 			lblPrecondView.scrollTop = 0;
+			g_settings.preconditionNumSub = j;
 			evt.target.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
 		}, {
 			x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
