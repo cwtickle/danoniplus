@@ -283,6 +283,9 @@ const updateWindowSiz = () => {
         btnKeyStorage: {
             x: g_btnX(1) - 140, y: 100 + g_sHeight / 4 + 10, w: 70, h: 20, siz: 16,
         },
+        btnPrecondView: {
+            x: g_btnX(1) - 90, y: 110, w: 70, h: 20, siz: 16,
+        },
 
         /** 設定画面 */
         btnBack: {
@@ -785,6 +788,18 @@ const g_escapeStr = {
         [`all[]`, `sumData(g_detailObj.arrowCnt[{0}]) + sumData(g_detailObj.frzCnt[{0}])`],
         [`maxlife[]`, `g_headerObj.maxLifeVal`],
     ],
+    editorKey: [
+        [`ArrowLeft`, `KeyU`],
+        [`ArrowDown`, `KeyI`],
+        [`ArrowUp`, `Digit8`],
+        [`ArrowRight`, `KeyO`],
+        [`Space`, `KeyG`],
+        [`KeyB`, `KeyH`],
+        [`Enter`, `BackSlash`],
+        [`ShiftLeft`, `KeyZ`],
+        [`ShiftRight`, `Slash`],
+        [`Tab`, `KeyQ`],
+    ]
 };
 
 /** 設定・オプション画面用共通 */
@@ -1156,8 +1171,9 @@ const g_settings = {
     settingWindowNum: 0,
 
     preconditions: [`g_rootObj`, `g_headerObj`, `g_keyObj`, `g_scoreObj`, `g_workObj`,
-        `g_detailObj`, `g_stateObj`, `g_attrObj`],
+        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_editorTmp`],
     preconditionNum: 0,
+    preconditionNumSub: 0,
 };
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
@@ -2487,6 +2503,7 @@ const g_keyObj = {
     dfPtnNum: 0,
 
     minKeyCtrlNum: 2,
+    defaultKeyList: [],
 
     // キー別ヘッダー
     // - 譜面データ中に出てくる矢印(ノーツ)の種類と順番(ステップゾーン表示順)を管理する
@@ -3023,6 +3040,11 @@ const g_keyObj = {
 // g_keyObj.defaultProp の上書きを禁止
 Object.defineProperty(g_keyObj, `defaultProp`, { writable: false });
 
+// 既定のキー定義リストを動的に作成
+Object.keys(g_keyObj)
+    .filter(key => key.startsWith(g_keyObj.defaultProp) && key.endsWith(`_0`))
+    .forEach(key => g_keyObj.defaultKeyList.push(key.split(`_`)[0].slice(g_keyObj.defaultProp.length)));
+
 // キーパターンのコピーリスト
 // ・コピー先：コピー元の順に指定する
 // ・上から順に処理する
@@ -3156,6 +3178,8 @@ g_keycons.groups.forEach(type => {
     const tmpName = Object.keys(g_keyObj).filter(val => val.startsWith(type) && val.endsWith(`_0`));
     tmpName.forEach(property => g_keyObj[`${property.slice(0, -2)}`] = g_keyObj[property].concat());
 });
+
+const g_editorTmp = {};
 
 // 特殊キーのコピー種 (simple: 代入、multiple: 配列ごと代入)
 // 後でプロパティ削除に影響するため、先頭文字が全く同じ場合は長い方を先に定義する (例: divMax, div)
@@ -3447,6 +3471,7 @@ const g_lang_msgInfoObj = {
         I_0004: `musicUrlが設定されていないため、無音モードで再生します`,
         I_0005: `正規のミラー譜面で無いため、ハイスコアは保存されません`,
         I_0006: `ローカルストレージ情報をクリップボードにコピーしました！`,
+        I_0007: `オブジェクト情報をクリップボードにコピーしました！`,
     },
     En: {
         W_0001: `Your browser is not guaranteed to work.<br>
@@ -3501,6 +3526,7 @@ const g_lang_msgInfoObj = {
         I_0004: `Play in silence mode because "musicUrl" is not set`,
         I_0005: `Highscore is not saved because not a regular mirrored chart.`,
         I_0006: `Local storage information copied to clipboard!`,
+        I_0007: `Object information copied to clipboard!`,
     },
 };
 
