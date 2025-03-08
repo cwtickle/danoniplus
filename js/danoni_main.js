@@ -2551,6 +2551,10 @@ const initialControl = async () => {
 		[`ArrowRight`, `KeyO`],
 		[`Space`, `KeyG`],
 		[`KeyB`, `KeyH`],
+		[`Enter`, `BackSlash`],
+		[`ShiftLeft`, `KeyZ`],
+		[`ShiftRight`, `Slash`],
+		[`Tab`, `KeyQ`],
 	]);
 
 	customKeyList.forEach(key => {
