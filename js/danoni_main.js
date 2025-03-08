@@ -2544,19 +2544,6 @@ const initialControl = async () => {
 	const customKeyList = g_headerObj.keyLists.filter(val =>
 		g_keyObj.defaultKeyList.findIndex(key => key === val) < 0);
 
-	const arrowMaps = new Map([
-		[`ArrowLeft`, `KeyU`],
-		[`ArrowDown`, `KeyI`],
-		[`ArrowUp`, `Digit8`],
-		[`ArrowRight`, `KeyO`],
-		[`Space`, `KeyG`],
-		[`KeyB`, `KeyH`],
-		[`Enter`, `BackSlash`],
-		[`ShiftLeft`, `KeyZ`],
-		[`ShiftRight`, `Slash`],
-		[`Tab`, `KeyQ`],
-	]);
-
 	customKeyList.forEach(key => {
 		const keyBase = `${key}_0`;
 		const keyCtrlPtn = `${g_keyObj.defaultProp}${keyBase}`;
@@ -2577,8 +2564,8 @@ const initialControl = async () => {
 			g_editorTmp[keyN].id = orgKeyNum * 100 + baseX + j;
 			g_editorTmp[keyN].num = keyNum;
 			g_editorTmp[keyN].chars = keyCtrlList.map(val => g_kCd[val[0]]);
-			g_editorTmp[keyN].keys = keyCtrlList.map(val => g_kCdN[val[0]]).map(val => arrowMaps.get(val) || val);
-			g_editorTmp[keyN].alternativeKeys = keyCtrlList.map(val => val[1] === 0 ? `` : g_kCdN[val[1]]).map(val => arrowMaps.get(val) || val);
+			g_editorTmp[keyN].keys = keyCtrlList.map(val => g_kCdN[val[0]]).map(val => replaceStr(val, g_escapeStr.editorKey));
+			g_editorTmp[keyN].alternativeKeys = keyCtrlList.map(val => val[1] === 0 ? `` : g_kCdN[val[1]]).map(val => replaceStr(val, g_escapeStr.editorKey));
 			g_editorTmp[keyN].noteNames = charaList.map(val => `${val}_data`);
 			g_editorTmp[keyN].freezeNames = charaList.map(val => {
 				let frzName = replaceStr(val, g_escapeStr.frzName);

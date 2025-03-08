@@ -788,6 +788,18 @@ const g_escapeStr = {
         [`all[]`, `sumData(g_detailObj.arrowCnt[{0}]) + sumData(g_detailObj.frzCnt[{0}])`],
         [`maxlife[]`, `g_headerObj.maxLifeVal`],
     ],
+    editorKey: [
+        [`ArrowLeft`, `KeyU`],
+        [`ArrowDown`, `KeyI`],
+        [`ArrowUp`, `Digit8`],
+        [`ArrowRight`, `KeyO`],
+        [`Space`, `KeyG`],
+        [`KeyB`, `KeyH`],
+        [`Enter`, `BackSlash`],
+        [`ShiftLeft`, `KeyZ`],
+        [`ShiftRight`, `Slash`],
+        [`Tab`, `KeyQ`],
+    ]
 };
 
 /** 設定・オプション画面用共通 */
