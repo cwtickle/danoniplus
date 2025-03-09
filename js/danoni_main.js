@@ -549,46 +549,99 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 		return JSON.stringify(_value);
 	};
 
-	// 二次元配列の整形処理
-	if (Array.isArray(_obj)) {
-		if (_obj.length === 0) {
-			return '[]';
-		}
-		if (colorFmt && _obj.length > 100) {
-			const filteredArray = _obj.reduce((result, value, index) => {
-				if (hasVal(value)) {
-					result.push(`${index}: ${formatValue(value, rootKey)}`);
+	/**
+	 * 配列の装飾処理
+	 * @param {number[]|string[]} _obj 
+	 * @param {string} _rootKey 
+	 * @returns {string}
+	 */
+	const formatArrayValue = (_obj, _rootKey) => {
+
+		const formatSetArray = (_list, _numOfSet = 2) => {
+			if (_list.findIndex(val => val === _rootKey) >= 0) {
+				let result = `[`;
+				for (let j = 0; j < _obj.length; j += _numOfSet) {
+					result += `<br>${nestedIndent}${_obj[j]}: ${_obj[j + 1]}`;
+					for (let k = 0; k < _numOfSet - 2; k++) {
+						result += `, ${formatValue(_obj[j + k + 2], _rootKey)}`;
+					}
 				}
+				result += (_obj.length === 0 ? `` : `<br>${baseIndent}`) + `]`;
 				return result;
-			}, []);
-			return `{<br>${baseIndent}[<br>${filteredArray.join(',<br>')}<br>]<br>}`;
+			}
+			return ``;
+		};
+		if (colorFmt) {
+			if (typeof _obj[0] === C_TYP_NUMBER) {
+				let result = formatSetArray([`speedData`, `boostData`], 2) ||
+					formatSetArray([`colorData`, `acolorData`], 4) ||
+					formatSetArray([`ncolorData`], 5);
+				if (result !== ``) {
+					return result;
+				}
+			}
+			if (_obj.length > 100) {
+				const filteredArray = _obj.reduce((result, value, index) => {
+					if (hasVal(value)) {
+						result.push(`${index}: ${formatValue(value, rootKey)}`);
+					}
+					return result;
+				}, []);
+				return `[<br>${nestedIndent}${filteredArray.join(`,<br>${nestedIndent}`)}<br>${baseIndent}]`;
+			}
 		}
-		const isArrayOfArrays = _obj.every(item => Array.isArray(item));
-		const formattedArray = _obj
-			.map(value => {
-				const isNestedObject = typeof value === 'object' && value !== null;
-				return isArrayOfArrays
-					? `${nestedIndent}${formatValue(value, rootKey)}`
-					: isNestedObject
-						? formatObject(value, _indent + 1, { colorFmt, rootKey })
-						: formatValue(value, rootKey)
-			}).filter(val => !hasVal(val) || val !== `----`).join(isArrayOfArrays ? `,<br>` : `, `);
+		return ``;
+	};
 
-		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
-	}
+	/**
+	 * 配列・オブジェクトのネスト整形処理
+	 * @param {any} _correction 
+	 * @param {number} _indent 
+	 * @param {boolean} colorFmt
+	 * @param {string} rootKey 
+	 * @returns {string}
+	 */
+	const formatCollection = (_correction, _indent, { colorFmt, rootKey }) => {
+		const baseIndent = getIndent(_indent);
+		const nestedIndent = getIndent(_indent + 1);
+		const isArrayOfArrays = Array.isArray(_correction) && _correction.every(item => Array.isArray(item));
 
-	// オブジェクトのネスト整形処理
-	const formattedEntries = Object.entries(_obj)
-		.map(([key, value]) => {
-			const isNestedObject = typeof value === 'object' && value !== null;
-			const baseKey = rootKey === `` ? key : rootKey;
-			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, { colorFmt, rootKey: baseKey }, _obj)
-				: formatValue(value, baseKey);
-			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
-		}).filter(val => !hasVal(val) || val !== `----`).join(`,`);
+		if (Array.isArray(_correction)) {
+			let result = formatArrayValue(_correction, rootKey);
+			if (result !== ``) {
+				return result;
+			}
+		}
 
-	let result = `{${formattedEntries}<br>${baseIndent}}`;
+		// 配列またはオブジェクトの各要素をフォーマット
+		const formattedEntries = (Array.isArray(_correction)
+			? _correction.map(item => {
+				const formattedValue = isArrayOfArrays
+					? `<br>${nestedIndent}${formatValue(item, rootKey)}`
+					: typeof item === 'object' && item !== null
+						? formatObject(item, _indent + 1, { colorFmt, rootKey })
+						: formatValue(item, rootKey);
+				return formattedValue;
+			})
+			: Object.entries(_correction).map(([key, value]) => {
+				const baseKey = rootKey === `` ? key : rootKey;
+				const formattedValue = typeof value === 'object' && value !== null
+					? formatObject(value, _indent + 1, { colorFmt, rootKey: baseKey })
+					: formatValue(value, key);
+				return `<br>${nestedIndent}"${key}": ${formattedValue}`;
+			})).filter(val => !hasVal(val) || val !== `----`);
+
+		// 配列なら[]で囲む、オブジェクトなら{}で囲む
+		if (Array.isArray(_correction)) {
+			return _correction.length === 0
+				? '[]'
+				: `[${formattedEntries.join(', ')}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
+		} else {
+			return `{${formattedEntries.join(',')}<br>${baseIndent}}`;
+		}
+	};
+
+	let result = formatCollection(_obj, _indent, { colorFmt, rootKey });
 	if (!colorFmt) {
 		result = result.replaceAll(`<br>`, `\r\n`).replaceAll(`&nbsp;`, ` `);
 	}
