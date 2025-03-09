@@ -576,9 +576,9 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 		};
 		if (colorFmt) {
 			if (typeof _obj[0] === C_TYP_NUMBER) {
-				let result = formatSetArray([`speedData`, `boostData`], 2) ||
-					formatSetArray([`colorData`, `acolorData`], 4) ||
-					formatSetArray([`ncolorData`], 5);
+				let result;
+				Object.keys(g_dataSetObj).forEach(key =>
+					result ||= formatSetArray(g_dataSetObj[key], Number(key)));
 				if (result !== ``) {
 					return result;
 				}
@@ -598,27 +598,21 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 
 	/**
 	 * 配列・オブジェクトのネスト整形処理
-	 * @param {any} _correction 
-	 * @param {number} _indent 
-	 * @param {boolean} colorFmt
-	 * @param {string} rootKey 
 	 * @returns {string}
 	 */
-	const formatCollection = (_correction, _indent, { colorFmt, rootKey }) => {
-		const baseIndent = getIndent(_indent);
-		const nestedIndent = getIndent(_indent + 1);
-		const isArrayOfArrays = Array.isArray(_correction) && _correction.every(item => Array.isArray(item));
+	const formatCollection = () => {
+		const isArrayOfArrays = Array.isArray(_obj) && _obj.every(item => Array.isArray(item));
 
-		if (Array.isArray(_correction)) {
-			let result = formatArrayValue(_correction, rootKey);
+		if (Array.isArray(_obj)) {
+			let result = formatArrayValue(_obj, rootKey);
 			if (result !== ``) {
 				return result;
 			}
 		}
 
 		// 配列またはオブジェクトの各要素をフォーマット
-		const formattedEntries = (Array.isArray(_correction)
-			? _correction.map(item => {
+		const formattedEntries = (Array.isArray(_obj)
+			? _obj.map(item => {
 				const formattedValue = isArrayOfArrays
 					? `<br>${nestedIndent}${formatValue(item, rootKey)}`
 					: typeof item === 'object' && item !== null
@@ -626,7 +620,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 						: formatValue(item, rootKey);
 				return formattedValue;
 			})
-			: Object.entries(_correction).map(([key, value]) => {
+			: Object.entries(_obj).map(([key, value]) => {
 				const baseKey = rootKey === `` ? key : rootKey;
 				const formattedValue = typeof value === 'object' && value !== null
 					? formatObject(value, _indent + 1, { colorFmt, rootKey: baseKey })
@@ -635,8 +629,8 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			})).filter(val => !hasVal(val) || val !== `----`);
 
 		// 配列なら[]で囲む、オブジェクトなら{}で囲む
-		if (Array.isArray(_correction)) {
-			return _correction.length === 0
+		if (Array.isArray(_obj)) {
+			return _obj.length === 0
 				? '[]'
 				: `[${formattedEntries.join(', ')}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
 		} else {
