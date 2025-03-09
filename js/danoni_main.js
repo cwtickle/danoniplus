@@ -563,7 +563,10 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 				for (let j = 0; j < _obj.length; j += _numOfSet) {
 					result += `<br>${nestedIndent}${_obj[j]}: ${_obj[j + 1]}`;
 					for (let k = 0; k < _numOfSet - 2; k++) {
-						result += `, ${formatValue(_obj[j + k + 2], _rootKey)}`;
+						const idx = j + k + 2;
+						if (idx < _obj.length) {
+							result += `, ${formatValue(_obj[idx], _rootKey)}`;
+						}
 					}
 				}
 				result += (_obj.length === 0 ? `` : `<br>${baseIndent}`) + `]`;
