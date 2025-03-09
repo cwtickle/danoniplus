@@ -552,20 +552,19 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 	/**
 	 * 配列の装飾処理
 	 * @param {number[]|string[]} _obj 
-	 * @param {string} _rootKey 
 	 * @returns {string}
 	 */
-	const formatArrayValue = (_obj, _rootKey) => {
+	const formatArrayValue = (_obj) => {
 
 		const formatSetArray = (_list, _numOfSet = 2) => {
-			if (_list.findIndex(val => val === _rootKey) >= 0) {
+			if (_list.findIndex(val => val === rootKey) >= 0) {
 				let result = `[`;
 				for (let j = 0; j < _obj.length; j += _numOfSet) {
 					result += `<br>${nestedIndent}${_obj[j]}: ${_obj[j + 1]}`;
 					for (let k = 0; k < _numOfSet - 2; k++) {
 						const idx = j + k + 2;
 						if (idx < _obj.length) {
-							result += `, ${formatValue(_obj[idx], _rootKey)}`;
+							result += `, ${formatValue(_obj[idx], rootKey)}`;
 						}
 					}
 				}
@@ -604,7 +603,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 		const isArrayOfArrays = Array.isArray(_obj) && _obj.every(item => Array.isArray(item));
 
 		if (Array.isArray(_obj)) {
-			let result = formatArrayValue(_obj, rootKey);
+			let result = formatArrayValue(_obj);
 			if (result !== ``) {
 				return result;
 			}
@@ -638,7 +637,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 		}
 	};
 
-	let result = formatCollection(_obj, _indent, { colorFmt, rootKey });
+	let result = formatCollection();
 	if (!colorFmt) {
 		result = result.replaceAll(`<br>`, `\r\n`).replaceAll(`&nbsp;`, ` `);
 	}
