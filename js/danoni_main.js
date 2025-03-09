@@ -600,9 +600,10 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 	 * @returns {string}
 	 */
 	const formatCollection = () => {
-		const isArrayOfArrays = Array.isArray(_obj) && _obj.every(item => Array.isArray(item));
+		const isArray = Array.isArray(_obj);
+		const isArrayOfArrays = isArray && _obj.every(item => Array.isArray(item));
 
-		if (Array.isArray(_obj)) {
+		if (isArray) {
 			let result = formatArrayValue(_obj);
 			if (result !== ``) {
 				return result;
@@ -610,25 +611,25 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 		}
 
 		// 配列またはオブジェクトの各要素をフォーマット
-		const formattedEntries = (Array.isArray(_obj)
+		const formattedEntries = (isArray
 			? _obj.map(item => {
 				const formattedValue = isArrayOfArrays
 					? `<br>${nestedIndent}${formatValue(item, rootKey)}`
-					: typeof item === 'object' && item !== null
+					: typeof item === C_TYP_OBJECT && item !== null
 						? formatObject(item, _indent + 1, { colorFmt, rootKey })
 						: formatValue(item, rootKey);
 				return formattedValue;
 			})
 			: Object.entries(_obj).map(([key, value]) => {
 				const baseKey = rootKey === `` ? key : rootKey;
-				const formattedValue = typeof value === 'object' && value !== null
+				const formattedValue = typeof value === C_TYP_OBJECT && value !== null
 					? formatObject(value, _indent + 1, { colorFmt, rootKey: baseKey })
-					: formatValue(value, key);
+					: formatValue(value, baseKey);
 				return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 			})).filter(val => !hasVal(val) || val !== `----`);
 
 		// 配列なら[]で囲む、オブジェクトなら{}で囲む
-		if (Array.isArray(_obj)) {
+		if (isArray) {
 			return _obj.length === 0
 				? '[]'
 				: `[${formattedEntries.join(', ')}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
