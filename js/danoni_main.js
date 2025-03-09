@@ -503,7 +503,8 @@ const viewKeyStorage = (_name, _key = ``, _colorFmt = true) => {
  * @returns {string}
  */
 const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {}) => {
-	if (_obj === null || typeof _obj !== 'object') {
+	const isObj = _obj => typeof _obj === C_TYP_OBJECT && _obj !== null;
+	if (!isObj(_obj)) {
 		return JSON.stringify(_obj);
 	}
 	const baseIndent = getIndent(_indent);
@@ -542,7 +543,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 					// keyCtrlXの対応キー表示処理
 					return (g_kCd[_value] && _value !== 0) ? `${_value}|<span style="color:#ffff66">${g_kCd[_value]}</span>` : `----`;
 				}
-			} else if (typeof _value === C_TYP_OBJECT && _value !== null) {
+			} else if (isObj(_value)) {
 				return formatObject(_value, _indent + 1, { colorFmt, rootKey: _rootKey });
 			}
 		}
@@ -602,10 +603,9 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 	const formatCollection = () => {
 		const isArray = Array.isArray(_obj);
 		const isArrayOfArrays = isArray && _obj.every(item => Array.isArray(item));
-		const getNextObject = (_item, _rootKey) =>
-			typeof _item === C_TYP_OBJECT && _item !== null
-				? formatObject(_item, _indent + 1, { colorFmt, rootKey: _rootKey })
-				: formatValue(_item, _rootKey);
+		const getNextObject = (_item, _rootKey) => isObj(_item)
+			? formatObject(_item, _indent + 1, { colorFmt, rootKey: _rootKey })
+			: formatValue(_item, _rootKey);
 
 		if (isArray) {
 			let result = formatArrayValue(_obj);
