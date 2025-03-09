@@ -602,6 +602,10 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 	const formatCollection = () => {
 		const isArray = Array.isArray(_obj);
 		const isArrayOfArrays = isArray && _obj.every(item => Array.isArray(item));
+		const getNextObject = (_item, _rootKey) =>
+			typeof _item === C_TYP_OBJECT && _item !== null
+				? formatObject(_item, _indent + 1, { colorFmt, rootKey: _rootKey })
+				: formatValue(_item, _rootKey);
 
 		if (isArray) {
 			let result = formatArrayValue(_obj);
@@ -615,16 +619,11 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			? _obj.map(item => {
 				const formattedValue = isArrayOfArrays
 					? `<br>${nestedIndent}${formatValue(item, rootKey)}`
-					: typeof item === C_TYP_OBJECT && item !== null
-						? formatObject(item, _indent + 1, { colorFmt, rootKey })
-						: formatValue(item, rootKey);
+					: getNextObject(item, rootKey);
 				return formattedValue;
 			})
 			: Object.entries(_obj).map(([key, value]) => {
-				const baseKey = rootKey === `` ? key : rootKey;
-				const formattedValue = typeof value === C_TYP_OBJECT && value !== null
-					? formatObject(value, _indent + 1, { colorFmt, rootKey: baseKey })
-					: formatValue(value, baseKey);
+				const formattedValue = getNextObject(value, rootKey === `` ? key : rootKey);
 				return `<br>${nestedIndent}"${key}": ${formattedValue}`;
 			})).filter(val => !hasVal(val) || val !== `----`);
 
