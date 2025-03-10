@@ -499,11 +499,11 @@ const viewKeyStorage = (_name, _key = ``, _colorFmt = true) => {
  * @param {Number} _indent 
  * @param {boolean} [colorFmt=true] フォーマット加工フラグ
  * @param {string} [rootKey=''] オブジェクトの最上位プロパティ名
- * @param {Object} [_parent=null]
  * @returns {string}
  */
 const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {}) => {
-	if (_obj === null || typeof _obj !== 'object') {
+	const isObj = _obj => typeof _obj === C_TYP_OBJECT && _obj !== null;
+	if (!isObj(_obj)) {
 		return JSON.stringify(_obj);
 	}
 	const baseIndent = getIndent(_indent);
@@ -542,53 +542,101 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 					// keyCtrlXの対応キー表示処理
 					return (g_kCd[_value] && _value !== 0) ? `${_value}|<span style="color:#ffff66">${g_kCd[_value]}</span>` : `----`;
 				}
-			} else if (typeof _value === C_TYP_OBJECT && _value !== null) {
+			} else if (isObj(_value)) {
 				return formatObject(_value, _indent + 1, { colorFmt, rootKey: _rootKey });
 			}
 		}
 		return JSON.stringify(_value);
 	};
 
-	// 二次元配列の整形処理
-	if (Array.isArray(_obj)) {
-		if (_obj.length === 0) {
-			return '[]';
-		}
-		if (colorFmt && _obj.length > 100) {
-			const filteredArray = _obj.reduce((result, value, index) => {
-				if (hasVal(value)) {
-					result.push(`${index}: ${formatValue(value, rootKey)}`);
+	/**
+	 * 配列の装飾処理
+	 * @param {number[]|string[]} _obj 
+	 * @returns {string}
+	 */
+	const formatArrayValue = (_obj) => {
+
+		const formatSetArray = (_list, _numOfSet = 2) => {
+			if (_list.findIndex(val => val === rootKey) >= 0) {
+				let result = `[`;
+				for (let j = 0; j < _obj.length; j += _numOfSet) {
+					result += `<br>${nestedIndent}${_obj[j]}: ${_obj[j + 1]}`;
+					for (let k = 0; k < _numOfSet - 2; k++) {
+						const idx = j + k + 2;
+						if (idx < _obj.length) {
+							result += `, ${formatValue(_obj[idx], rootKey)}`;
+						}
+					}
 				}
+				result += (_obj.length === 0 ? `` : `<br>${baseIndent}`) + `]`;
 				return result;
-			}, []);
-			return `{<br>${baseIndent}[<br>${filteredArray.join(',<br>')}<br>]<br>}`;
+			}
+			return ``;
+		};
+		if (colorFmt) {
+			if (typeof _obj[0] === C_TYP_NUMBER) {
+				let result;
+				Object.keys(g_dataSetObj).forEach(key =>
+					result ||= formatSetArray(g_dataSetObj[key], Number(key)));
+				if (result !== ``) {
+					return result;
+				}
+			}
+			if (_obj.length > 100) {
+				const filteredArray = _obj.reduce((result, value, index) => {
+					if (hasVal(value)) {
+						result.push(`${index}: ${formatValue(value, rootKey)}`);
+					}
+					return result;
+				}, []);
+				return `[<br>${nestedIndent}${filteredArray.join(`,<br>${nestedIndent}`)}<br>${baseIndent}]`;
+			}
 		}
-		const isArrayOfArrays = _obj.every(item => Array.isArray(item));
-		const formattedArray = _obj
-			.map(value => {
-				const isNestedObject = typeof value === 'object' && value !== null;
-				return isArrayOfArrays
-					? `${nestedIndent}${formatValue(value, rootKey)}`
-					: isNestedObject
-						? formatObject(value, _indent + 1, { colorFmt, rootKey })
-						: formatValue(value, rootKey)
-			}).filter(val => !hasVal(val) || val !== `----`).join(isArrayOfArrays ? `,<br>` : `, `);
+		return ``;
+	};
 
-		return `[${isArrayOfArrays ? `<br>` : ``}${formattedArray}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
-	}
+	/**
+	 * 配列・オブジェクトのネスト整形処理
+	 * @returns {string}
+	 */
+	const formatCollection = () => {
+		const isArray = Array.isArray(_obj);
+		const isArrayOfArrays = isArray && _obj.every(item => Array.isArray(item));
+		const getNextObject = (_item, _rootKey) => isObj(_item)
+			? formatObject(_item, _indent + 1, { colorFmt, rootKey: _rootKey })
+			: formatValue(_item, _rootKey);
 
-	// オブジェクトのネスト整形処理
-	const formattedEntries = Object.entries(_obj)
-		.map(([key, value]) => {
-			const isNestedObject = typeof value === 'object' && value !== null;
-			const baseKey = rootKey === `` ? key : rootKey;
-			const formattedValue = isNestedObject
-				? formatObject(value, _indent + 1, { colorFmt, rootKey: baseKey }, _obj)
-				: formatValue(value, baseKey);
-			return `<br>${nestedIndent}"${key}": ${formattedValue}`;
-		}).filter(val => !hasVal(val) || val !== `----`).join(`,`);
+		if (isArray) {
+			let result = formatArrayValue(_obj);
+			if (result !== ``) {
+				return result;
+			}
+		}
 
-	let result = `{${formattedEntries}<br>${baseIndent}}`;
+		// 配列またはオブジェクトの各要素をフォーマット
+		const formattedEntries = (isArray
+			? _obj.map(item => {
+				const formattedValue = isArrayOfArrays
+					? `<br>${nestedIndent}${formatValue(item, rootKey)}`
+					: getNextObject(item, rootKey);
+				return formattedValue;
+			})
+			: Object.entries(_obj).map(([key, value]) => {
+				const formattedValue = getNextObject(value, rootKey === `` ? key : rootKey);
+				return `<br>${nestedIndent}"${key}": ${formattedValue}`;
+			})).filter(val => !hasVal(val) || val !== `----`);
+
+		// 配列なら[]で囲む、オブジェクトなら{}で囲む
+		if (isArray) {
+			return _obj.length === 0
+				? '[]'
+				: `[${formattedEntries.join(', ')}${isArrayOfArrays ? `<br>${baseIndent}` : ''}]`;
+		} else {
+			return `{${formattedEntries.join(',')}<br>${baseIndent}}`;
+		}
+	};
+
+	let result = formatCollection();
 	if (!colorFmt) {
 		result = result.replaceAll(`<br>`, `\r\n`).replaceAll(`&nbsp;`, ` `);
 	}

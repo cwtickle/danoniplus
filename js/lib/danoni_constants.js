@@ -3259,6 +3259,17 @@ const g_dataMinObj = {
     style: 1,
 };
 
+/**
+ * データフォーマット管理用
+ * - セット数: 対象の配列名の組で記述
+ */
+const g_dataSetObj = {
+    2: [`speedData`, `boostData`],
+    4: [`colorData`, `arrowCssMotionData`, `frzCssMotionData`,
+        `dummyArrowCssMotionData`, `dummyFrzCssMotionData`],
+    5: [`ncolorData`, `scrollchData`],
+}
+
 const g_dfColorObj = {
 
     // 矢印初期色情報
