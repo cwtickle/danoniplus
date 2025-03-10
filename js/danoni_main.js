@@ -499,7 +499,6 @@ const viewKeyStorage = (_name, _key = ``, _colorFmt = true) => {
  * @param {Number} _indent 
  * @param {boolean} [colorFmt=true] フォーマット加工フラグ
  * @param {string} [rootKey=''] オブジェクトの最上位プロパティ名
- * @param {Object} [_parent=null]
  * @returns {string}
  */
 const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {}) => {
