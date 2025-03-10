@@ -3265,8 +3265,7 @@ const g_dataMinObj = {
  */
 const g_dataSetObj = {
     2: [`speedData`, `boostData`],
-    4: [`colorData`, `acolorData`,
-        `arrowCssMotionData`, `frzCssMotionData`,
+    4: [`colorData`, `arrowCssMotionData`, `frzCssMotionData`,
         `dummyArrowCssMotionData`, `dummyFrzCssMotionData`],
     5: [`ncolorData`, `scrollchData`],
 }
