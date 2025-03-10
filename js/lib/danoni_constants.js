@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/03/08 (v40.3.0)
+ * Revised : 2025/03/10 (v40.3.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3258,6 +3258,17 @@ const g_dataMinObj = {
     back: 1,
     style: 1,
 };
+
+/**
+ * データフォーマット管理用
+ * - セット数: 対象の配列名の組で記述
+ */
+const g_dataSetObj = {
+    2: [`speedData`, `boostData`],
+    4: [`colorData`, `arrowCssMotionData`, `frzCssMotionData`,
+        `dummyArrowCssMotionData`, `dummyFrzCssMotionData`],
+    5: [`ncolorData`, `scrollchData`],
+}
 
 const g_dfColorObj = {
 
