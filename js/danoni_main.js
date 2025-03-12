@@ -2431,7 +2431,7 @@ const initialControl = async () => {
 
 	// 共通設定ファイルの指定
 	let tmpSettingType = g_rootObj.settingType ?? ``;
-	if (g_remoteFlg && hasVal(tmpSettingType) && !tmpSettingType.includes(`(..)`)) {
+	if (g_remoteFlg && !tmpSettingType.includes(`(..)`)) {
 		tmpSettingType = `(..)../js/${tmpSettingType}`;
 	};
 	let [settingType, settingRoot] = getFilePath(tmpSettingType);
