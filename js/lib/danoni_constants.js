@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/03/12 (v40.4.0)
+ * Revised : 2025/03/12 (v40.5.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -585,6 +585,13 @@ const C_DIR_SKIN = `../skin/`;
 // カレントディレクトリマーク
 const C_MRK_CURRENT_DIRECTORY = `(..)`;
 
+// デフォルトセット（リモート取得対象）
+const g_defaultSets = {
+    skinType: [`default`, `light`, `skyblue`],
+    imgType: [``, `classic`, `classic-thin`, `note`],
+    imgList: [],
+};
+
 /**
  * カスタム画像セットの設定（サーバ上の場合のみ有効）
  * 
@@ -679,6 +686,7 @@ const reloadImgObj = () => {
     g_imgObj.titleArrow = C_IMG_TITLE_ARROW;
 };
 reloadImgObj();
+Object.keys(g_imgObj).forEach(key => g_defaultSets.imgList.push(key));
 
 // g_imgObjのうち、初期読込するリスト
 const g_imgInitList = [
@@ -3201,9 +3209,6 @@ const g_titleLists = {
     animation: [`Name`, `Duration`, `Delay`, `TimingFunction`],
 
 };
-
-// デフォルトスキンセット（リモート取得対象）
-const g_defaultSkinSet = [`default`, `light`, `skyblue`];
 
 const g_animationData = [`back`, `mask`, `style`];
 const g_animationFunc = {

@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 40.4.3`;
+const g_version = `Ver 40.5.2`;
 const g_revisedDate = `2025/03/12`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3146,7 +3146,7 @@ const preheaderConvert = _dosObj => {
 		const skinName = match[1] || match[2] || match[3];
 
 		// デフォルトセット以外はリモート先のデータを使用しない
-		return g_defaultSkinSet.findIndex(val => val === skinName) < 0 ?
+		return g_defaultSets.skinType.findIndex(val => val === skinName) < 0 ?
 			convLocalPath(file, `skin`) : file;
 	});
 	obj.defaultSkinFlg = tmpSkinTypes.includes(`default`) && setBoolVal(_dosObj.bgCanvasUse ?? g_presetObj.bgCanvasUse, true);
@@ -3906,7 +3906,16 @@ const updateImgType = (_imgType, _initFlg = false) => {
 	}
 	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
-	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
+	const orgImgObj = structuredClone(g_imgObj);
+	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${orgImgObj[key]}`);
+
+	// リモート時は作品ページ側にある画像を優先し、リモートに存在するもののみリモートから取得する
+	if (g_remoteFlg) {
+		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_workPath}${orgImgObj[key]}`);
+		if (g_defaultSets.imgType.findIndex(val => val === _imgType.name) >= 0) {
+			g_defaultSets.imgList.forEach(key => g_imgObj[key] = `${g_rootPath}${orgImgObj[key]}`);
+		}
+	}
 	if (_imgType.extension === undefined && g_presetObj.overrideExtension !== undefined) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetObj.overrideExtension}`);
 	}
