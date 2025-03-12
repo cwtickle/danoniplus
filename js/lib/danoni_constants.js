@@ -3202,6 +3202,9 @@ const g_titleLists = {
 
 };
 
+// デフォルトスキンセット（リモート取得対象）
+const g_defaultSkinSet = [`default`, `light`, `skyblue`];
+
 const g_animationData = [`back`, `mask`, `style`];
 const g_animationFunc = {
     make: {
