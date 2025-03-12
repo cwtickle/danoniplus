@@ -58,6 +58,7 @@ Object.freeze(g_reservedDomains);
 // 外部参照を許可するドメイン
 const g_referenceDomains = [
 	`cwtickle.github.io/danoniplus`,
+	`cdn.jsdelivr.net/npm`,
 	`support-v\\d+--danoniplus.netlify.app`,
 ];
 Object.freeze(g_referenceDomains);
@@ -1086,7 +1087,7 @@ const loadMultipleFiles2 = async (_fileData, _loadType) => {
 		if (_loadType === `js`) {
 			await loadScript2(filePath, false);
 		} else if (_loadType === `css`) {
-			const cssPath = filePath.split(`.js`).join(`.css`);
+			const cssPath = filePath.split(`.js?`).join(`.css?`);
 			await importCssFile2(cssPath);
 		}
 	}));
