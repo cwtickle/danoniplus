@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 40.4.1`;
+const g_version = `Ver 40.4.2`;
 const g_revisedDate = `2025/03/12`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -2430,7 +2430,11 @@ const initialControl = async () => {
 	await loadChartFile(0);
 
 	// 共通設定ファイルの指定
-	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType ?? ``);
+	let tmpSettingType = g_rootObj.settingType ?? ``;
+	if (g_remoteFlg && hasVal(tmpSettingType) && !tmpSettingType.includes(`(..)`)) {
+		tmpSettingType = `(..)../js/${tmpSettingType}`;
+	};
+	let [settingType, settingRoot] = getFilePath(tmpSettingType);
 	if (settingType !== ``) {
 		settingType = `_${settingType}`;
 	}
