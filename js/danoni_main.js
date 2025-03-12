@@ -2430,7 +2430,11 @@ const initialControl = async () => {
 	await loadChartFile(0);
 
 	// 共通設定ファイルの指定
-	let [settingType, settingRoot] = getFilePath(g_rootObj.settingType ?? ``);
+	let tmpSettingType = g_rootObj.settingType ?? ``;
+	if (g_remoteFlg && hasVal(tmpSettingType) && !tmpSettingType.includes(`(..)`)) {
+		tmpSettingType = `(..)../js/${tmpSettingType}`;
+	};
+	let [settingType, settingRoot] = getFilePath(tmpSettingType);
 	if (settingType !== ``) {
 		settingType = `_${settingType}`;
 	}
