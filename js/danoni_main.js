@@ -3131,7 +3131,7 @@ const preheaderConvert = _dosObj => {
 		});
 
 	const convLocalPath = (_file, _type) =>
-		g_remoteFlg && !_file.includes(`(..)`) ? `(..)../${_type}/${_file}` : _file;
+		g_remoteFlg && hasVal(_file) && !_file.includes(`(..)`) ? `(..)../${_type}/${_file}` : _file;
 
 	// 外部スキンファイルの指定
 	const tmpSkinType = _dosObj.skinType ?? g_presetObj.skinType ?? `default`;
