@@ -3146,7 +3146,7 @@ const preheaderConvert = _dosObj => {
 		const skinName = match[1] || match[2] || match[3];
 
 		// デフォルトセット以外はリモート先のデータを使用しない
-		return g_defaultSkinSet.findIndex(val => val === skinName) < 0 ?
+		return g_defaultSets.skinType.findIndex(val => val === skinName) < 0 ?
 			convLocalPath(file, `skin`) : file;
 	});
 	obj.defaultSkinFlg = tmpSkinTypes.includes(`default`) && setBoolVal(_dosObj.bgCanvasUse ?? g_presetObj.bgCanvasUse, true);
@@ -3907,6 +3907,14 @@ const updateImgType = (_imgType, _initFlg = false) => {
 	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
 	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
+
+	// リモート時は作品ページ側にある画像を優先し、リモートに存在するもののみリモートから取得する
+	if (g_remoteFlg) {
+		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_workPath}${g_imgObj[key]}`);
+		if (g_defaultSets.imgType.findIndex(val => val === _imgType.name) >= 0) {
+			Object.keys(g_defaultSets.imgList).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
+		}
+	}
 	if (_imgType.extension === undefined && g_presetObj.overrideExtension !== undefined) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_imgObj[key].slice(0, -3)}${g_presetObj.overrideExtension}`);
 	}
