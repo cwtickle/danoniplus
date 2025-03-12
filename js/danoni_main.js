@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 40.4.0`;
+const g_version = `Ver 40.4.1`;
 const g_revisedDate = `2025/03/12`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3131,7 +3131,7 @@ const preheaderConvert = _dosObj => {
 		});
 
 	const convLocalPath = (_file, _type) =>
-		g_remoteFlg && !_file.includes(`(..)`) ? `(..)../${_type}/${_file}` : _file;
+		g_remoteFlg && hasVal(_file) && !_file.includes(`(..)`) ? `(..)../${_type}/${_file}` : _file;
 
 	// 外部スキンファイルの指定
 	const tmpSkinType = _dosObj.skinType ?? g_presetObj.skinType ?? `default`;
