@@ -3906,13 +3906,14 @@ const updateImgType = (_imgType, _initFlg = false) => {
 	}
 	resetImgs(_imgType.name, _imgType.extension);
 	reloadImgObj();
-	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
+	const orgImgObj = structuredClone(g_imgObj);
+	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${orgImgObj[key]}`);
 
 	// リモート時は作品ページ側にある画像を優先し、リモートに存在するもののみリモートから取得する
 	if (g_remoteFlg) {
-		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_workPath}${g_imgObj[key]}`);
+		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_workPath}${orgImgObj[key]}`);
 		if (g_defaultSets.imgType.findIndex(val => val === _imgType.name) >= 0) {
-			Object.keys(g_defaultSets.imgList).forEach(key => g_imgObj[key] = `${g_rootPath}${g_imgObj[key]}`);
+			g_defaultSets.imgList.forEach(key => g_imgObj[key] = `${g_rootPath}${orgImgObj[key]}`);
 		}
 	}
 	if (_imgType.extension === undefined && g_presetObj.overrideExtension !== undefined) {
