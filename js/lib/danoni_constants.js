@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/03/10 (v40.3.1)
+ * Revised : 2025/03/12 (v40.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3201,6 +3201,9 @@ const g_titleLists = {
     animation: [`Name`, `Duration`, `Delay`, `TimingFunction`],
 
 };
+
+// デフォルトスキンセット（リモート取得対象）
+const g_defaultSkinSet = [`default`, `light`, `skyblue`];
 
 const g_animationData = [`back`, `mask`, `style`];
 const g_animationFunc = {
