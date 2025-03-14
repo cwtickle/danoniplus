@@ -59,6 +59,7 @@ Object.freeze(g_reservedDomains);
 const g_referenceDomains = [
 	`cwtickle.github.io/danoniplus`,
 	`cdn.jsdelivr.net/npm`,
+	`unpkg.com`,
 	`support-v\\d+--danoniplus.netlify.app`,
 ];
 Object.freeze(g_referenceDomains);
