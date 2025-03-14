@@ -11,8 +11,7 @@
 const __version = `40.5.2`;
 
 // バージョン情報を取得してスクリプトタグを生成
-const randTime = Date.now();
-const script = document.createElement('script');
-script.src = `https://cdn.jsdelivr.net/npm/danoniplus@${__version}/js/danoni_main.min.js`;
-document.head.appendChild(script); // スクリプトをヘッダーに追加
+const __script = document.createElement('script');
+__script.src = `https://cdn.jsdelivr.net/npm/danoniplus@${__version}/js/danoni_main.min.js`;
+document.head.appendChild(__script); // スクリプトをヘッダーに追加
 console.log(`Loaded version: ${__version}`);
