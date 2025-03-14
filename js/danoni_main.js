@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/03/12
+ * Revised : 2025/03/14
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 40.5.2`;
-const g_revisedDate = `2025/03/12`;
+const g_version = `Ver 40.5.4`;
+const g_revisedDate = `2025/03/14`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -59,6 +59,7 @@ Object.freeze(g_reservedDomains);
 const g_referenceDomains = [
 	`cwtickle.github.io/danoniplus`,
 	`cdn.jsdelivr.net/npm`,
+	`unpkg.com`,
 	`support-v\\d+--danoniplus.netlify.app`,
 ];
 Object.freeze(g_referenceDomains);
