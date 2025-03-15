@@ -540,8 +540,9 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 					// scrollDirXのスクロール方向表示処理
 					return _value === 1 ? `1|<span style="color:#ff9999">↑</span>` : `-1|<span style="color:#66ff66">↓</span>`;
 
-				} else if (_rootKey.startsWith(`keyCtrl`) && !_rootKey.startsWith(`keyCtrlPtn`)) {
-					// keyCtrlXの対応キー表示処理
+				} else if (listMatching(_rootKey, [`keyCtrl`, `keyRetry`, `keyTitleBack`], { prefix: `^` })
+					&& !_rootKey.startsWith(`keyCtrlPtn`)) {
+					// keyCtrlX, keyRetryX, keyTitleBackX の対応キー表示処理
 					return (g_kCd[_value] && _value !== 0) ? `${_value}|<span style="color:#ffff66">${g_kCd[_value]}</span>` : `----`;
 				}
 			} else if (isObj(_value)) {
