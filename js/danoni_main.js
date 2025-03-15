@@ -58,7 +58,7 @@ Object.freeze(g_reservedDomains);
 // 外部参照を許可するドメイン
 const g_referenceDomains = [
 	`cwtickle.github.io/danoniplus`,
-	`cdn.jsdelivr.net/npm`,
+	`cdn.jsdelivr.net`,
 	`unpkg.com`,
 	`support-v\\d+--danoniplus.netlify.app`,
 ];
