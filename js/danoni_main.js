@@ -66,7 +66,8 @@ Object.freeze(g_referenceDomains);
 
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
-const g_remoteFlg = g_referenceDomains.some(domain => g_rootPath.match(`^https://${domain}/`) !== null);
+const hasRemoteDomain = _path => g_referenceDomains.some(domain => _path.match(`^https://${domain}/`) !== null);
+const g_remoteFlg = hasRemoteDomain(g_rootPath);
 
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
@@ -1104,6 +1105,9 @@ const loadMultipleFiles2 = async (_fileData, _loadType) => {
  * @returns {string[]} [ファイルキーワード, ルートディレクトリ]
  */
 const getFilePath = (_fileName, _directory = ``) => {
+	if (_fileName.startsWith(`https://`)) {
+		return [_fileName, ``];
+	}
 	let fullPath;
 	if (_fileName.startsWith(C_MRK_CURRENT_DIRECTORY)) {
 		fullPath = `${g_workPath}${_fileName.slice(C_MRK_CURRENT_DIRECTORY.length)}`;
@@ -3139,7 +3143,8 @@ const preheaderConvert = _dosObj => {
 		});
 
 	const convLocalPath = (_file, _type) =>
-		g_remoteFlg && hasVal(_file) && !_file.includes(`(..)`) ? `(..)../${_type}/${_file}` : _file;
+		g_remoteFlg && hasVal(_file) && !_file.includes(`(..)`)
+			&& !hasRemoteDomain(_file) ? `(..)../${_type}/${_file}` : _file;
 
 	// 外部スキンファイルの指定
 	const tmpSkinType = _dosObj.skinType ?? g_presetObj.skinType ?? `default`;
