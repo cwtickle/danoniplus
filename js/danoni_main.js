@@ -66,7 +66,8 @@ Object.freeze(g_referenceDomains);
 
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
-const g_remoteFlg = g_referenceDomains.some(domain => g_rootPath.match(`^https://${domain}/`) !== null);
+const hasRemoteDomain = _path => g_referenceDomains.some(domain => _path.match(`^https://${domain}/`) !== null);
+const g_remoteFlg = hasRemoteDomain(g_rootPath);
 
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
@@ -1104,6 +1105,9 @@ const loadMultipleFiles2 = async (_fileData, _loadType) => {
  * @returns {string[]} [ファイルキーワード, ルートディレクトリ]
  */
 const getFilePath = (_fileName, _directory = ``) => {
+	if (_fileName.startsWith(`https://`)) {
+		return [_fileName, ``];
+	}
 	let fullPath;
 	if (_fileName.startsWith(C_MRK_CURRENT_DIRECTORY)) {
 		fullPath = `${g_workPath}${_fileName.slice(C_MRK_CURRENT_DIRECTORY.length)}`;
@@ -3139,7 +3143,9 @@ const preheaderConvert = _dosObj => {
 		});
 
 	const convLocalPath = (_file, _type) =>
-		g_remoteFlg && hasVal(_file) && !_file.includes(`(..)`) ? `(..)../${_type}/${_file}` : _file;
+		g_remoteFlg && hasVal(_file) && !_file.includes(`(..)`) && !hasRemoteDomain(_file)
+			? `(..)../${_type}/${_file}`
+			: _file;
 
 	// 外部スキンファイルの指定
 	const tmpSkinType = _dosObj.skinType ?? g_presetObj.skinType ?? `default`;
@@ -3222,6 +3228,7 @@ const headerConvert = _dosObj => {
 				extension: imgTypes[1] || `svg`,
 				rotateEnabled: setBoolVal(imgTypes[2], true),
 				flatStepHeight: setVal(imgTypes[3], C_ARW_WIDTH, C_TYP_FLOAT),
+				remoteDir: imgTypes[4] || ``,
 			};
 			g_keycons.imgTypes[j] = (imgTypes[0] === `` ? `Original` : imgTypes[0]);
 		});
@@ -3229,7 +3236,7 @@ const headerConvert = _dosObj => {
 
 	// 末尾にデフォルト画像セットが入るよう追加
 	if (obj.imgType.findIndex(imgSets => imgSets.name === ``) === -1) {
-		obj.imgType.push({ name: ``, extension: `svg`, rotateEnabled: true, flatStepHeight: C_ARW_WIDTH });
+		obj.imgType.push({ name: ``, extension: `svg`, rotateEnabled: true, flatStepHeight: C_ARW_WIDTH, remoteDir: `` });
 		g_keycons.imgTypes.push(`Original`);
 	}
 	g_imgType = g_keycons.imgTypes[0];
@@ -3901,6 +3908,7 @@ const getMusicNameMultiLine = _musicName => {
  * @param {object} _imgType
  * @param {string} _imgType.name
  * @param {string} _imgType.extension
+ * @param {string} _imgType.remoteDir
  * @param {boolean} _initFlg  
  */
 const updateImgType = (_imgType, _initFlg = false) => {
@@ -3914,9 +3922,13 @@ const updateImgType = (_imgType, _initFlg = false) => {
 	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${orgImgObj[key]}`);
 
 	// リモート時は作品ページ側にある画像を優先し、リモートに存在するもののみリモートから取得する
+	// titleArrowについては他のImgTypeから取得するため、remoteDir属性には依存させない
 	if (g_remoteFlg) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_workPath}${orgImgObj[key]}`);
-		if (g_defaultSets.imgType.findIndex(val => val === _imgType.name) >= 0) {
+		if (_imgType.remoteDir !== `` && hasRemoteDomain(_imgType.remoteDir)) {
+			g_defaultSets.imgList.filter(val => val !== `titleArrow`)
+				.forEach(key => g_imgObj[key] = `${_imgType.remoteDir}img/${orgImgObj[key]}`);
+		} else if (g_defaultSets.imgType.findIndex(val => val === _imgType.name) >= 0) {
 			g_defaultSets.imgList.forEach(key => g_imgObj[key] = `${g_rootPath}${orgImgObj[key]}`);
 		}
 	}
