@@ -3926,7 +3926,8 @@ const updateImgType = (_imgType, _initFlg = false) => {
 	if (g_remoteFlg) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_workPath}${orgImgObj[key]}`);
 		if (_imgType.remoteDir !== `` && hasRemoteDomain(_imgType.remoteDir)) {
-			g_defaultSets.imgList.filter(val => val !== `titleArrow`).forEach(key => g_imgObj[key] = `${_imgType.remoteDir}img/${orgImgObj[key]}`);
+			g_defaultSets.imgList.filter(val => val !== `titleArrow`)
+				.forEach(key => g_imgObj[key] = `${_imgType.remoteDir}img/${orgImgObj[key]}`);
 		} else if (g_defaultSets.imgType.findIndex(val => val === _imgType.name) >= 0) {
 			g_defaultSets.imgList.forEach(key => g_imgObj[key] = `${g_rootPath}${orgImgObj[key]}`);
 		}
