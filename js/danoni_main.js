@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/03/14
+ * Revised : 2025/03/16
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 40.5.4`;
-const g_revisedDate = `2025/03/14`;
+const g_version = `Ver 40.6.0`;
+const g_revisedDate = `2025/03/16`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -58,7 +58,7 @@ Object.freeze(g_reservedDomains);
 // 外部参照を許可するドメイン
 const g_referenceDomains = [
 	`cwtickle.github.io/danoniplus`,
-	`cdn.jsdelivr.net/npm`,
+	`cdn.jsdelivr.net`,
 	`unpkg.com`,
 	`support-v\\d+--danoniplus.netlify.app`,
 ];
@@ -66,7 +66,8 @@ Object.freeze(g_referenceDomains);
 
 const g_rootPath = current().match(/(^.*\/)/)[0];
 const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
-const g_remoteFlg = g_referenceDomains.some(domain => g_rootPath.match(`^https://${domain}/`) !== null);
+const hasRemoteDomain = _path => g_referenceDomains.some(domain => _path.match(`^https://${domain}/`) !== null);
+const g_remoteFlg = hasRemoteDomain(g_rootPath);
 
 const g_randTime = Date.now();
 const g_isFile = location.href.match(/^file/);
@@ -524,7 +525,9 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 				// カラーコードの色付け処理
 				_value = escapeHtml(_value).replaceAll(`\n`, `<br>`);
 				const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
-				if (colorCodePattern.test(_value)) {
+				if (_value === C_FLG_ON) {
+					return `<span style="color:#66ff66">&#x2714; ON</span>`;
+				} else if (colorCodePattern.test(_value)) {
 					return _value.replace(colorCodePattern, (match) =>
 						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
 				}
@@ -540,8 +543,9 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 					// scrollDirXのスクロール方向表示処理
 					return _value === 1 ? `1|<span style="color:#ff9999">↑</span>` : `-1|<span style="color:#66ff66">↓</span>`;
 
-				} else if (_rootKey.startsWith(`keyCtrl`) && !_rootKey.startsWith(`keyCtrlPtn`)) {
-					// keyCtrlXの対応キー表示処理
+				} else if (listMatching(_rootKey, [`keyCtrl`, `keyRetry`, `keyTitleBack`], { prefix: `^` })
+					&& !_rootKey.startsWith(`keyCtrlPtn`)) {
+					// keyCtrlX, keyRetryX, keyTitleBackX の対応キー表示処理
 					return (g_kCd[_value] && _value !== 0) ? `${_value}|<span style="color:#ffff66">${g_kCd[_value]}</span>` : `----`;
 				}
 			} else if (isObj(_value)) {
@@ -1101,6 +1105,9 @@ const loadMultipleFiles2 = async (_fileData, _loadType) => {
  * @returns {string[]} [ファイルキーワード, ルートディレクトリ]
  */
 const getFilePath = (_fileName, _directory = ``) => {
+	if (_fileName.startsWith(`https://`)) {
+		return [_fileName, ``];
+	}
 	let fullPath;
 	if (_fileName.startsWith(C_MRK_CURRENT_DIRECTORY)) {
 		fullPath = `${g_workPath}${_fileName.slice(C_MRK_CURRENT_DIRECTORY.length)}`;
@@ -3136,7 +3143,9 @@ const preheaderConvert = _dosObj => {
 		});
 
 	const convLocalPath = (_file, _type) =>
-		g_remoteFlg && hasVal(_file) && !_file.includes(`(..)`) ? `(..)../${_type}/${_file}` : _file;
+		g_remoteFlg && hasVal(_file) && !_file.includes(`(..)`) && !hasRemoteDomain(_file)
+			? `(..)../${_type}/${_file}`
+			: _file;
 
 	// 外部スキンファイルの指定
 	const tmpSkinType = _dosObj.skinType ?? g_presetObj.skinType ?? `default`;
@@ -3219,6 +3228,7 @@ const headerConvert = _dosObj => {
 				extension: imgTypes[1] || `svg`,
 				rotateEnabled: setBoolVal(imgTypes[2], true),
 				flatStepHeight: setVal(imgTypes[3], C_ARW_WIDTH, C_TYP_FLOAT),
+				remoteDir: imgTypes[4] || ``,
 			};
 			g_keycons.imgTypes[j] = (imgTypes[0] === `` ? `Original` : imgTypes[0]);
 		});
@@ -3226,7 +3236,7 @@ const headerConvert = _dosObj => {
 
 	// 末尾にデフォルト画像セットが入るよう追加
 	if (obj.imgType.findIndex(imgSets => imgSets.name === ``) === -1) {
-		obj.imgType.push({ name: ``, extension: `svg`, rotateEnabled: true, flatStepHeight: C_ARW_WIDTH });
+		obj.imgType.push({ name: ``, extension: `svg`, rotateEnabled: true, flatStepHeight: C_ARW_WIDTH, remoteDir: `` });
 		g_keycons.imgTypes.push(`Original`);
 	}
 	g_imgType = g_keycons.imgTypes[0];
@@ -3898,6 +3908,7 @@ const getMusicNameMultiLine = _musicName => {
  * @param {object} _imgType
  * @param {string} _imgType.name
  * @param {string} _imgType.extension
+ * @param {string} _imgType.remoteDir
  * @param {boolean} _initFlg  
  */
 const updateImgType = (_imgType, _initFlg = false) => {
@@ -3911,9 +3922,13 @@ const updateImgType = (_imgType, _initFlg = false) => {
 	Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_rootPath}${orgImgObj[key]}`);
 
 	// リモート時は作品ページ側にある画像を優先し、リモートに存在するもののみリモートから取得する
+	// titleArrowについては他のImgTypeから取得するため、remoteDir属性には依存させない
 	if (g_remoteFlg) {
 		Object.keys(g_imgObj).forEach(key => g_imgObj[key] = `${g_workPath}${orgImgObj[key]}`);
-		if (g_defaultSets.imgType.findIndex(val => val === _imgType.name) >= 0) {
+		if (_imgType.remoteDir !== `` && hasRemoteDomain(_imgType.remoteDir)) {
+			g_defaultSets.imgList.filter(val => val !== `titleArrow`)
+				.forEach(key => g_imgObj[key] = `${_imgType.remoteDir}img/${orgImgObj[key]}`);
+		} else if (g_defaultSets.imgType.findIndex(val => val === _imgType.name) >= 0) {
 			g_defaultSets.imgList.forEach(key => g_imgObj[key] = `${g_rootPath}${orgImgObj[key]}`);
 		}
 	}
