@@ -524,7 +524,9 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 				// カラーコードの色付け処理
 				_value = escapeHtml(_value).replaceAll(`\n`, `<br>`);
 				const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
-				if (colorCodePattern.test(_value)) {
+				if (_value === C_FLG_ON) {
+					return `<span style="color:#66ff66">&#x2714; ON</span>`;
+				} else if (colorCodePattern.test(_value)) {
 					return _value.replace(colorCodePattern, (match) =>
 						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
 				}
@@ -540,8 +542,9 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 					// scrollDirXのスクロール方向表示処理
 					return _value === 1 ? `1|<span style="color:#ff9999">↑</span>` : `-1|<span style="color:#66ff66">↓</span>`;
 
-				} else if (_rootKey.startsWith(`keyCtrl`) && !_rootKey.startsWith(`keyCtrlPtn`)) {
-					// keyCtrlXの対応キー表示処理
+				} else if (listMatching(_rootKey, [`keyCtrl`, `keyRetry`, `keyTitleBack`], { prefix: `^` })
+					&& !_rootKey.startsWith(`keyCtrlPtn`)) {
+					// keyCtrlX, keyRetryX, keyTitleBackX の対応キー表示処理
 					return (g_kCd[_value] && _value !== 0) ? `${_value}|<span style="color:#ffff66">${g_kCd[_value]}</span>` : `----`;
 				}
 			} else if (isObj(_value)) {
