@@ -2605,6 +2605,10 @@ const initialControl = async () => {
 	const customKeyList = g_headerObj.keyLists.filter(val =>
 		g_keyObj.defaultKeyList.findIndex(key => key === val) < 0);
 
+	if (customKeyList.length === 0) {
+		g_settings.preconditions = g_settings.preconditions.filter(val => !val.includes(`g_editorTmp`));
+	}
+
 	const addNewOrderGroup = (_orgList, _sortRule) => {
 		// インデックスを保持した配列を作成、ルールに従ってソート
 		const indexedList = _orgList.map((value, idx) => ({ value, idx }));
