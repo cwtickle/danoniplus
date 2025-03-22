@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/03/12 (v40.5.2)
+ * Revised : 2025/03/22 (v40.7.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3187,6 +3187,9 @@ g_keycons.groups.forEach(type => {
     tmpName.forEach(property => g_keyObj[`${property.slice(0, -2)}`] = g_keyObj[property].concat());
 });
 
+// 外部エディター用テンプレート
+// g_editorTmp: Dancing☆Onigiriエディター (CW Edition対応)
+// g_editorTmp2: ダンおに譜面作成エディタ ver3.x
 const g_editorTmp = {};
 let g_editorTmp2 = ``;
 
