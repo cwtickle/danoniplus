@@ -1179,7 +1179,7 @@ const g_settings = {
     settingWindowNum: 0,
 
     preconditions: [`g_rootObj`, `g_headerObj`, `g_keyObj`, `g_scoreObj`, `g_workObj`,
-        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_editorTmp`],
+        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_editorTmp`, `g_editorTmp2`],
     preconditionNum: 0,
     preconditionNumSub: 0,
 };
@@ -3188,6 +3188,7 @@ g_keycons.groups.forEach(type => {
 });
 
 const g_editorTmp = {};
+let g_editorTmp2 = ``;
 
 // 特殊キーのコピー種 (simple: 代入、multiple: 配列ごと代入)
 // 後でプロパティ削除に影響するため、先頭文字が全く同じ場合は長い方を先に定義する (例: divMax, div)

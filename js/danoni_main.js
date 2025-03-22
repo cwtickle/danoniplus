@@ -2619,8 +2619,10 @@ const initialControl = async () => {
 			const keyCtrlList = g_keyObj[keyCtrlPtn].filter((val, j) => filterCond(j));
 			const charaList = g_keyObj[`chara${keyBase}`].filter((val, j) => filterCond(j));
 			const colorList = g_keyObj[`color${keyBase}_0`].filter((val, j) => filterCond(j));
+			const stepRtnList = g_keyObj[`stepRtn${keyBase}_0`].filter((val, j) => filterCond(j));
 			const keyNum = g_keyObj[keyCtrlPtn].filter((val, j) => filterCond(j)).length;
 
+			// Dancing☆Onigiri (CW Edition対応)のフォーマット
 			g_editorTmp[keyN] = {};
 			g_editorTmp[keyN].id = orgKeyNum * 100 + baseX + j;
 			g_editorTmp[keyN].num = keyNum;
@@ -2636,6 +2638,62 @@ const initialControl = async () => {
 				return `${frzName}_data`;
 			});
 			g_editorTmp[keyN].colorGroup = colorList.map(val => val % 3);
+
+			// ダンおに譜面作成エディタ ver3フォーマット
+			g_editorTmp2 += `<br>`;
+			g_editorTmp2 += `\$key=${keyN}<br>`;
+			g_editorTmp2 += `\$map=${colorList.map(val => val < 3 ? (val + 1) % 3 : val % 7).join(',')}<br>`;
+			g_editorTmp2 += `\$pos=${fillArray(keyNum).map((val, j) =>
+				isNaN(parseFloat(stepRtnList[j])) ? 28 : 24)}<br>`;
+			g_editorTmp2 += `\$txt=${g_editorTmp[keyN].chars.map(val => val.replace(`, `, ``)).join(`,`)}<br>`;
+
+			let k = 0, n = 0;
+			let prevMirrorList = [];
+			while (g_keyObj[`shuffle${keyBase}_${k}`] !== undefined) {
+				// 既存のシャッフルグループからミラー配列を自動生成
+				const orgTmpList = []
+				const mirrorTmpList = [];
+				const mirrorList = [];
+				g_keyObj[`shuffle${keyBase}_${k}`].filter((val, m) => filterCond(m))
+					.forEach((_val, _i) => orgTmpList[_val]?.push(_i) || (orgTmpList[_val] = [_i]));
+				orgTmpList.forEach((list, idx) => mirrorTmpList[idx] = list.toReversed());
+				orgTmpList?.forEach((list, a) => list?.forEach((val, b) => mirrorList[orgTmpList[a][b]] = mirrorTmpList[a][b]));
+				if (!mirrorList.every((val, p) => val === prevMirrorList[p])) {
+					g_editorTmp2 += `\$conv${n + 1}=Mirror${n + 1},${mirrorList.join(',')}<br>`;
+					prevMirrorList = mirrorList.concat();
+					n++;
+				}
+				k++;
+			}
+			g_editorTmp2 += `<br>`;
+
+			g_editorTmp2 += `\$dosformat=<br>function externalDosInit() {[E]<br>`;
+			g_editorTmp2 += `[E]<br>`;
+			g_editorTmp2 += `&nbsp;&nbsp;g_externalDos = \`[E]<br>`;
+			g_editorTmp2 += `[E]<br>`;
+			g_editorTmp2 += `[header][E]<br>`;
+			g_editorTmp2 += `[E]<br>`;
+
+			g_editorTmp2 += `[notestart]<br>`;
+			g_editorTmp[keyN].noteNames.forEach((val, j) =>
+				g_editorTmp2 += `|${val.slice(0, -(`_data`.length))}[i]_data=[a${String(j).padStart(2, `0`)}]|[E]<br>`);
+			g_editorTmp2 += `<br>`;
+
+			g_editorTmp[keyN].freezeNames.forEach((val, j) =>
+				g_editorTmp2 += `|${val.slice(0, -(`_data`.length))}[i]_data=[f${String(j).padStart(2, `0`)}]|[E]<br>`);
+			g_editorTmp2 += `<br>`;
+
+			g_editorTmp2 += `|speed[i]_data=[speed]|[E]<br>`;
+			g_editorTmp2 += `|boost[i]_data=[boost]|[E]<br>`;
+			g_editorTmp2 += `[datatext][E]<br>`;
+			g_editorTmp2 += `|edit[i]_info=[edit]|[E][E]<br>`;
+			g_editorTmp2 += `[noteend]<br>`;
+			g_editorTmp2 += `<br>`;
+
+			g_editorTmp2 += `[footer]<br>`;
+			g_editorTmp2 += `&nbsp;&nbsp;\`;[E]<br>`;
+			g_editorTmp2 += `}<br>`;
+			g_editorTmp2 += `<br>`;
 		});
 	});
 };
@@ -5275,9 +5333,14 @@ const preconditionInit = () => {
 
 		createDivCss2Label(`lblPrecondView`, viewKeyStorage(`g_rootObj`), g_lblPosObj.lblPrecondView),
 		createCss2Button(`btnPrecondView`, g_lblNameObj.b_copyStorage, () =>
-			copyTextToClipboard(
-				viewKeyStorage(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + g_settings.preconditionNumSub], ``, false),
-				g_msgInfoObj.I_0007),
+			copyTextToClipboard((() => {
+				const key = g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + g_settings.preconditionNumSub];
+				if (key === `g_editorTmp2`) {
+					return g_editorTmp2.replaceAll(`<br>`, `\r\n`).replaceAll(`&nbsp;`, ` `);
+				} else {
+					return viewKeyStorage(key, ``, false);
+				}
+			})(), g_msgInfoObj.I_0007),
 			g_lblPosObj.btnPrecondView, g_cssObj.button_Default, g_cssObj.button_ON),
 	);
 	setUserSelect($id(`lblPrecondView`), `text`);
