@@ -2660,8 +2660,9 @@ const initialControl = async () => {
 
 				// 上下を入れ替えてグループ間でソート
 				const upDownIdxs = addNewOrderGroup(orgPosList, (a, b) => {
-					if (a.value >= divPos && b.value < divPos) return -1;
-					if (a.value < divPos && b.value >= divPos) return 1;
+					const aAbove = a.value < divPos;
+					const bAbove = b.value < divPos;
+					if (aAbove !== bAbove) return Number(aAbove) - Number(bAbove);
 					return a.value - b.value;
 				});
 				if (upDownIdxs !== undefined) {
