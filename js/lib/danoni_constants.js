@@ -3190,6 +3190,37 @@ g_keycons.groups.forEach(type => {
 const g_editorTmp = {};
 let g_editorTmp2 = ``;
 
+const g_editorTmp2Template = `
+<br>
+\$key=[__KEY__]<br>
+\$map=[__MAP__]<br>
+\$pos=[__POS__]<br>
+\$txt=[__TXT__]<br>
+[__CONV__]
+<br>
+\$dosformat=<br>function externalDosInit() {[E]<br>
+[E]<br>
+&nbsp;&nbsp;g_externalDos = \`[E]<br>
+[E]<br>
+[header][E]<br>
+[E]<br>
+[notestart]<br>
+[__NOTE__]
+<br>
+[__FREEZE__]
+<br>
+|speed[i]_data=[speed]|[E]<br>
+|boost[i]_data=[boost]|[E]<br>
+[datatext][E]<br>
+|edit[i]_info=[edit]|[E][E]<br>
+[noteend]<br>
+<br>
+[footer]<br>
+&nbsp;&nbsp;\`;[E]<br>
+}<br>
+<br>
+`;
+
 // 特殊キーのコピー種 (simple: 代入、multiple: 配列ごと代入)
 // 後でプロパティ削除に影響するため、先頭文字が全く同じ場合は長い方を先に定義する (例: divMax, div)
 const g_keyCopyLists = {
