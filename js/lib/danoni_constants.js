@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/03/12 (v40.5.2)
+ * Revised : 2025/03/22 (v40.7.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1179,7 +1179,7 @@ const g_settings = {
     settingWindowNum: 0,
 
     preconditions: [`g_rootObj`, `g_headerObj`, `g_keyObj`, `g_scoreObj`, `g_workObj`,
-        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_editorTmp`],
+        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_editorTmp`, `g_editorTmp2`],
     preconditionNum: 0,
     preconditionNumSub: 0,
 };
@@ -3187,7 +3187,42 @@ g_keycons.groups.forEach(type => {
     tmpName.forEach(property => g_keyObj[`${property.slice(0, -2)}`] = g_keyObj[property].concat());
 });
 
+// 外部エディター用テンプレート
+// g_editorTmp: Dancing☆Onigiriエディター (CW Edition対応)
+// g_editorTmp2: ダンおに譜面作成エディタ ver3.x
 const g_editorTmp = {};
+let g_editorTmp2 = ``;
+
+const g_editorTmp2Template = `
+<br>
+\$key=[__KEY__]<br>
+\$map=[__MAP__]<br>
+\$pos=[__POS__]<br>
+\$txt=[__TXT__]<br>
+[__CONV__]
+<br>
+\$dosformat=<br>function externalDosInit() {[E]<br>
+[E]<br>
+&nbsp;&nbsp;g_externalDos = \`[E]<br>
+[E]<br>
+[header][E]<br>
+[E]<br>
+[notestart]<br>
+[__NOTE__]
+<br>
+[__FREEZE__]
+<br>
+|speed[i]_data=[speed]|[E]<br>
+|boost[i]_data=[boost]|[E]<br>
+[datatext][E]<br>
+|edit[i]_info=[edit]|[E][E]<br>
+[noteend]<br>
+<br>
+[footer]<br>
+&nbsp;&nbsp;\`;[E]<br>
+}<br>
+<br>
+`;
 
 // 特殊キーのコピー種 (simple: 代入、multiple: 配列ごと代入)
 // 後でプロパティ削除に影響するため、先頭文字が全く同じ場合は長い方を先に定義する (例: divMax, div)
