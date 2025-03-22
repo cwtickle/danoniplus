@@ -2605,6 +2605,13 @@ const initialControl = async () => {
 	const customKeyList = g_headerObj.keyLists.filter(val =>
 		g_keyObj.defaultKeyList.findIndex(key => key === val) < 0);
 
+	const addNewOrderGroup = (_orgList, _sortRule) => {
+		const indexedList = _orgList.map((value, idx) => ({ value, idx }));
+		const sortedList = [...indexedList].sort(_sortRule);
+		const newIdxs = sortedList.map(({ idx }) => indexedList.findIndex(({ idx: originalIdx }) => originalIdx === idx));
+		return !newIdxs.every((val, j) => val === j) ? newIdxs : undefined;
+	};
+
 	customKeyList.forEach(key => {
 		const keyBase = `${key}_0`;
 		const keyCtrlPtn = `${g_keyObj.defaultProp}${keyBase}`;
@@ -2612,6 +2619,11 @@ const initialControl = async () => {
 		const keyGroupList = makeDedupliArray(keyGroup.flat());
 		const orgKeyNum = g_keyObj[keyCtrlPtn].length;
 		const baseX = Math.floor(Math.random() * (100 - keyGroupList.length));
+
+		const divPos = g_keyObj[`div${keyBase}`];
+		const divMaxPos = g_keyObj[`divMax${keyBase}`] ?? Math.max(...g_keyObj[`pos${keyBase}`]) + 1;
+		const stdPos = Math.max(divPos, divMaxPos - divPos);
+		const [deltaX1, deltaX2] = [(divPos - stdPos) / 2, (divMaxPos - divPos - stdPos) / 2];
 
 		keyGroupList.forEach((keyGroupNo, j) => {
 			const keyN = keyGroupNo === `0` ? key : `${key}_${j + 1}`;
@@ -2622,7 +2634,7 @@ const initialControl = async () => {
 			const stepRtnList = g_keyObj[`stepRtn${keyBase}_0`].filter((val, j) => filterCond(j));
 			const keyNum = g_keyObj[keyCtrlPtn].filter((val, j) => filterCond(j)).length;
 
-			// Dancing☆Onigiri (CW Edition対応)のフォーマット
+			// ---- Dancing☆Onigiri (CW Edition対応)のフォーマット
 			g_editorTmp[keyN] = {};
 			g_editorTmp[keyN].id = orgKeyNum * 100 + baseX + j;
 			g_editorTmp[keyN].num = keyNum;
@@ -2639,7 +2651,34 @@ const initialControl = async () => {
 			});
 			g_editorTmp[keyN].colorGroup = colorList.map(val => val % 3);
 
-			// ダンおに譜面作成エディタ ver3フォーマット
+			// orderGroupsのカスタマイズ
+			if (divMaxPos > divPos) {
+				const orgPosList = g_keyObj[`pos${keyBase}`].filter((val, j) => filterCond(j));
+				const posList = orgPosList.map(val => val < divPos ? val - deltaX1 : val - divPos - deltaX2);
+
+				g_editorTmp[keyN].orderGroups = [];
+
+				// 上下を入れ替えてグループ間でソート
+				const upDownIdxs = addNewOrderGroup(orgPosList, (a, b) => {
+					if (a.value >= divPos && b.value < divPos) return -1;
+					if (a.value < divPos && b.value >= divPos) return 1;
+					return a.value - b.value;
+				});
+				if (upDownIdxs !== undefined) {
+					g_editorTmp[keyN].orderGroups.push(upDownIdxs);
+				}
+
+				// posXの小さい順に並び替え
+				const sortedIdxs = addNewOrderGroup(posList, (a, b) => a.value - b.value);
+				if (sortedIdxs !== undefined) {
+					g_editorTmp[keyN].orderGroups.push(sortedIdxs);
+				}
+				if (g_editorTmp[keyN].orderGroups.length === 0) {
+					delete g_editorTmp[keyN].orderGroups;
+				}
+			}
+
+			// ---- ダンおに譜面作成エディタ ver3フォーマット
 			g_editorTmp2 += `<br>`;
 			g_editorTmp2 += `\$key=${keyN}<br>`;
 			g_editorTmp2 += `\$map=${colorList.map(val => val < 3 ? (val + 1) % 3 : val % 7).join(',')}<br>`;
