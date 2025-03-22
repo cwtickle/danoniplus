@@ -2606,8 +2606,10 @@ const initialControl = async () => {
 		g_keyObj.defaultKeyList.findIndex(key => key === val) < 0);
 
 	const addNewOrderGroup = (_orgList, _sortRule) => {
+		// インデックスを保持した配列を作成、ルールに従ってソート
 		const indexedList = _orgList.map((value, idx) => ({ value, idx }));
 		const sortedList = [...indexedList].sort(_sortRule);
+		// ソート後の配列のインデックスに基づいて、元のインデックスを取得
 		const newIdxs = sortedList.map(({ idx }) => indexedList.findIndex(({ idx: originalIdx }) => originalIdx === idx));
 		return !newIdxs.every((val, j) => val === j) ? newIdxs : undefined;
 	};
@@ -2623,7 +2625,7 @@ const initialControl = async () => {
 		const divPos = g_keyObj[`div${keyBase}`];
 		const divMaxPos = g_keyObj[`divMax${keyBase}`] ?? Math.max(...g_keyObj[`pos${keyBase}`]) + 1;
 		const stdPos = Math.max(divPos, divMaxPos - divPos);
-		const [deltaX1, deltaX2] = [(divPos - stdPos) / 2, (divMaxPos - divPos - stdPos) / 2];
+		const [deltaXAbove, deltaXBelow] = [(divPos - stdPos) / 2, (divMaxPos - divPos - stdPos) / 2];
 
 		keyGroupList.forEach((keyGroupNo, j) => {
 			const keyN = keyGroupNo === `0` ? key : `${key}_${j + 1}`;
@@ -2653,12 +2655,14 @@ const initialControl = async () => {
 
 			// orderGroupsのカスタマイズ
 			if (divMaxPos > divPos) {
+
+				// posXの実際の相対位置を計算
 				const orgPosList = g_keyObj[`pos${keyBase}`].filter((val, j) => filterCond(j));
-				const posList = orgPosList.map(val => val < divPos ? val - deltaX1 : val - divPos - deltaX2);
+				const posList = orgPosList.map(val => val < divPos ? val - deltaXAbove : val - divPos - deltaXBelow);
 
 				g_editorTmp[keyN].orderGroups = [];
 
-				// 上下を入れ替えてグループ間でソート
+				// パターン1: 上下グループ分けして各グループ内で位置順にソート（上下反転）
 				const upDownIdxs = addNewOrderGroup(orgPosList, (a, b) => {
 					const aAbove = a.value < divPos;
 					const bAbove = b.value < divPos;
@@ -2669,7 +2673,7 @@ const initialControl = async () => {
 					g_editorTmp[keyN].orderGroups.push(upDownIdxs);
 				}
 
-				// posXの小さい順に並び替え
+				// パターン2: 単純にステップゾーンのX座標が小さい順にソート
 				const sortedIdxs = addNewOrderGroup(posList, (a, b) => a.value - b.value);
 				if (sortedIdxs !== undefined) {
 					g_editorTmp[keyN].orderGroups.push(sortedIdxs);
