@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/03/22
+ * Revised : 2025/03/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 40.7.0`;
-const g_revisedDate = `2025/03/22`;
+const g_version = `Ver 40.7.1`;
+const g_revisedDate = `2025/03/24`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -77,7 +77,19 @@ const g_isDebug = g_isLocal ||
 	getQueryParamVal(`debug`) === `true`;
 const isLocalMusicFile = _scoreId => g_isFile && !listMatching(getMusicUrl(_scoreId), [`.js`, `.txt`], { suffix: `$` });
 
-window.onload = async () => {
+// 50msごとにdocument.readyStateをチェックしてcompleteになったらresolve
+const waitUntilLoaded = () => {
+	return new Promise(resolve => {
+		const checkReadyState = setInterval(() => {
+			if (document.readyState === 'complete') {
+				clearInterval(checkReadyState);
+				resolve();
+			}
+		}, 50);
+	});
+};
+(async () => {
+	await waitUntilLoaded();
 	g_loadObj.main = true;
 	g_currentPage = `initial`;
 	const links = document.querySelectorAll(`link`);
@@ -90,7 +102,7 @@ window.onload = async () => {
 	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${g_randTime}`);
 	await loadScript2(`${g_rootPath}../js/lib/legacy_functions.js?${g_randTime}`, false);
 	initialControl();
-};
+})();
 
 /*-----------------------------------------------------------*/
 /* Scene : COMMON [water] */
