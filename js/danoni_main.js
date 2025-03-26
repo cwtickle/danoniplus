@@ -60,6 +60,7 @@ const g_referenceDomains = [
 	`cwtickle.github.io/danoniplus`,
 	`cdn.jsdelivr.net`,
 	`unpkg.com`,
+	`www.unpkg.com`,
 	`support-v\\d+--danoniplus.netlify.app`,
 ];
 Object.freeze(g_referenceDomains);
