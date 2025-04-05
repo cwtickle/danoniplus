@@ -2452,8 +2452,8 @@ const initialControl = async () => {
 
 	// 共通設定ファイルの指定
 	let tmpSettingType = g_rootObj.settingType ?? ``;
-	if (g_remoteFlg && !tmpSettingType.includes(`(..)`)) {
-		tmpSettingType = `(..)../js/${tmpSettingType}`;
+	if (g_remoteFlg && !tmpSettingType.includes(C_MRK_CURRENT_DIRECTORY)) {
+		tmpSettingType = `${C_MRK_CURRENT_DIRECTORY}../js/${tmpSettingType}`;
 	};
 	let [settingType, settingRoot] = getFilePath(tmpSettingType);
 	if (settingType !== ``) {
@@ -3247,8 +3247,8 @@ const preheaderConvert = _dosObj => {
 		});
 
 	const convLocalPath = (_file, _type) =>
-		g_remoteFlg && hasVal(_file) && !_file.includes(`(..)`) && !hasRemoteDomain(_file)
-			? `(..)../${_type}/${_file}`
+		g_remoteFlg && hasVal(_file) && !_file.includes(C_MRK_CURRENT_DIRECTORY) && !hasRemoteDomain(_file)
+			? `${C_MRK_CURRENT_DIRECTORY}../${_type}/${_file}`
 			: _file;
 
 	// 外部スキンファイルの指定
@@ -3692,7 +3692,7 @@ const headerConvert = _dosObj => {
 	g_diffObj.frzJdgY = (isNaN(parseFloat(_dosObj.frzJdgY)) ? 0 : parseFloat(_dosObj.frzJdgY));
 
 	// musicフォルダ設定
-	obj.musicFolder = _dosObj.musicFolder ?? (g_remoteFlg ? `(..)../music` : `music`);
+	obj.musicFolder = _dosObj.musicFolder ?? (g_remoteFlg ? `${C_MRK_CURRENT_DIRECTORY}../music` : `music`);
 
 	// 楽曲URL
 	if (hasVal(_dosObj.musicUrl)) {
@@ -10492,6 +10492,41 @@ const getArrowSettings = () => {
 	g_workObj.dividePosDefault = g_workObj.dividePos.concat();
 	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
+	// g_workObjの不要なプロパティを削除
+	if (g_stateObj.dummyId === ``) {
+		Object.keys(g_workObj).filter(key => key.startsWith(`dummy`) || key.startsWith(`mkDummy`))
+			.forEach(key => delete g_workObj[key]);
+	}
+	const targetColorKeys = [`mkColor`, `mkColorShadow`];
+	const usedColorKeys = [];
+	targetColorKeys.push(...g_typeLists.frzColor.map(type => `mkFColor${type}`));
+	targetColorKeys.forEach(key => {
+		if (g_workObj[key].length === 0) {
+			delete g_workObj[key];
+			delete g_workObj[`${key}Cd`];
+		} else {
+			usedColorKeys.push(key);
+		}
+	});
+	[`Arrow`, `Step`].forEach(type => {
+		[``, `Dir`, `Layer`].forEach(type2 => {
+			if (g_workObj[`mkScrollch${type}${type2}`].length === 0) {
+				delete g_workObj[`mkScrollch${type}${type2}`];
+			}
+		});
+	});
+	[`Arrow`, `Frz`].forEach(type => {
+		if (g_workObj[`mk${type}ColorChangeAll`].length === 0) {
+			delete g_workObj[`mk${type}ColorChangeAll`];
+		}
+		[``, `Name`].forEach(type2 => {
+			if (g_workObj[`mk${type}CssMotion${type2}`].length === 0) {
+				delete g_workObj[`mk${type}CssMotion${type2}`];
+			}
+		});
+	});
+
+	// 初期位置、ライフ設定の初期化
 	Object.keys(g_resultObj).forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 	g_resultObj.spState = ``;
 
@@ -10593,7 +10628,7 @@ const getArrowSettings = () => {
 				const _copiedArray = structuredClone(_array);
 				return _array.map((_val, _i) => _array[_i] = randArray[_copiedArray[_i]]);
 			};
-			[`mkColor`, `mkColorShadow`, `mkFColor`, `mkFColorShadow`].forEach(type => {
+			usedColorKeys.forEach(type => {
 				if (g_workObj[type] !== undefined) {
 					for (let j = 0; j < g_workObj[type].length; j++) {
 						if (g_workObj[type][j] === undefined) {
@@ -11219,7 +11254,7 @@ const mainInit = () => {
 	 * @param {string} _name 通常, ダミー
 	 */
 	const changeArrowColor = (_j, _k, _name) => {
-		if (g_workObj[`mk${toCapitalize(_name)}ColorChangeAll`][g_scoreObj.frameNum]) {
+		if (g_workObj[`mk${toCapitalize(_name)}ColorChangeAll`]?.[g_scoreObj.frameNum]) {
 
 			/**
 			 * 全体色の変更処理
@@ -11257,7 +11292,7 @@ const mainInit = () => {
 	 */
 	const changeFrzColor = (_j, _k, _name, _state) => {
 
-		if (g_workObj[`mk${toCapitalize(_name)}ColorChangeAll`][g_scoreObj.frameNum]) {
+		if (g_workObj[`mk${toCapitalize(_name)}ColorChangeAll`]?.[g_scoreObj.frameNum]) {
 			const frzNo = `${_j}_${_k}`;
 			const frzTop = document.getElementById(`${_name}Top${frzNo}`);
 			const frzBar = document.getElementById(`${_name}Bar${frzNo}`);
@@ -11864,13 +11899,13 @@ const mainInit = () => {
 
 			// 個別・全体色変化 (矢印)
 			g_typeLists.arrowColor.forEach(ctype =>
-				changeColors(g_workObj[`mk${headerU}Color${ctype}`][currentFrame],
-					g_workObj[`mk${headerU}Color${ctype}Cd`][currentFrame], header, `arrow${ctype}`));
+				changeColors(g_workObj[`mk${headerU}Color${ctype}`]?.[currentFrame],
+					g_workObj[`mk${headerU}Color${ctype}Cd`]?.[currentFrame], header, `arrow${ctype}`));
 
 			// 個別・全体色変化（フリーズアロー）
 			g_typeLists.frzColor.forEach(ctype =>
-				changeColors(g_workObj[`mk${headerU}FColor${ctype}`][currentFrame],
-					g_workObj[`mk${headerU}FColor${ctype}Cd`][currentFrame], header, `frz${ctype}`));
+				changeColors(g_workObj[`mk${headerU}FColor${ctype}`]?.[currentFrame],
+					g_workObj[`mk${headerU}FColor${ctype}Cd`]?.[currentFrame], header, `frz${ctype}`));
 
 			// 矢印モーション
 			changeCssMotions(header, `arrow`, currentFrame);
@@ -11893,7 +11928,7 @@ const mainInit = () => {
 		changeStepY(currentFrame);
 
 		// ダミー矢印生成（背面に表示するため先に処理）
-		g_workObj.mkDummyArrow[currentFrame]?.forEach(data =>
+		g_workObj.mkDummyArrow?.[currentFrame]?.forEach(data =>
 			makeArrow(data, ++dummyArrowCnts[data.pos], `dummyArrow`, g_workObj.dummyArrowColors[data.pos], g_workObj.dummyArrowShadowColors[data.pos]));
 
 		// 矢印生成
@@ -11901,7 +11936,7 @@ const mainInit = () => {
 			makeArrow(data, ++arrowCnts[data.pos], `arrow`, g_workObj.arrowColors[data.pos], g_workObj.arrowShadowColors[data.pos]));
 
 		// ダミーフリーズアロー生成
-		g_workObj.mkDummyFrzArrow[currentFrame]?.forEach(data =>
+		g_workObj.mkDummyFrzArrow?.[currentFrame]?.forEach(data =>
 			makeFrzArrow(data, ++dummyFrzCnts[data.pos], `dummyFrz`, g_workObj.dummyFrzNormalColors[data.pos],
 				g_workObj.dummyFrzNormalBarColors[data.pos], g_workObj.dummyFrzNormalShadowColors[data.pos]));
 
@@ -12316,7 +12351,7 @@ const changeColors = (_mkColor, _mkColorCd, _header, _name) => {
  */
 const changeCssMotions = (_header, _name, _frameNum) => {
 	const camelHeader = _header === `` ? _name : `${_header}${toCapitalize(_name)}`;
-	g_workObj[`mk${toCapitalize(camelHeader)}CssMotion`][_frameNum]?.forEach((targetj, j) =>
+	g_workObj[`mk${toCapitalize(camelHeader)}CssMotion`]?.[_frameNum]?.forEach((targetj, j) =>
 		g_workObj[`${camelHeader}CssMotions`][targetj] =
 		g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + (g_workObj.dividePos[targetj] % 2)]);
 };
@@ -12326,7 +12361,7 @@ const changeCssMotions = (_header, _name, _frameNum) => {
  * @param {number} _frameNum 
  */
 const changeScrollArrowDirs = (_frameNum) =>
-	g_workObj.mkScrollchArrow[_frameNum]?.forEach((targetj, j) => {
+	g_workObj.mkScrollchArrow?.[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
 		const baseLayer = g_workObj.mkScrollchArrowLayer[_frameNum][j] === -1 ?
 			Math.floor(g_workObj.dividePosDefault[targetj] / 2) : g_workObj.mkScrollchArrowLayer[_frameNum][j];
@@ -12338,7 +12373,7 @@ const changeScrollArrowDirs = (_frameNum) =>
  * @param {number} _frameNum 
  */
 const changeStepY = (_frameNum) =>
-	g_workObj.mkScrollchStep[_frameNum]?.forEach((targetj, j) => {
+	g_workObj.mkScrollchStep?.[_frameNum]?.forEach((targetj, j) => {
 		const dividePos = (g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchStepDir[_frameNum][j] === 1 ? 0 : 1);
 
 		// 移動元のステップゾーンの不透明度、表示・非表示を退避
