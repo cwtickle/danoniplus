@@ -2081,7 +2081,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 		[spriteData[tmpFrame], dataCnts] =
 			checkDuplicatedObjects(spriteData[tmpFrame]);
 
-		const emptyPatterns = [``, `[loop]`, `[jump]`];
+		const emptyPatterns = [`[loop]`, `[jump]`];
 		const colorObjFlg = tmpSpriteData[2]?.startsWith(`[c]`) || false;
 		const spriteFrameData = spriteData[tmpFrame][dataCnts] = {
 			depth: tmpDepth,
@@ -2103,8 +2103,10 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 				spriteFrameData.colorObjInfo.animationFillMode = tmpObj.animationFillMode;
 			}
 
+		} else if (tmpObj.path === ``) {
+			spriteFrameData.command = ``;
 		} else if (emptyPatterns.includes(tmpObj.path)) {
-			// ループ、フレームジャンプ、空の場合の処理
+			// ループ、フレームジャンプの場合の処理
 			spriteFrameData.command = tmpObj.path;
 			spriteFrameData.jumpFrame = tmpObj.class;
 			spriteFrameData.maxLoop = tmpObj.left;
@@ -9144,6 +9146,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	const mergeColorData = (_header = ``) => {
 		if (obj[`color${_header}Data`] === undefined) return [];
 		const tmpArr = obj[`color${_header}Data`].concat(obj[`acolor${_header}Data`]);
+		delete obj[`acolor${_header}Data`];
 		return tmpArr.sort((_a, _b) => _a[0] - _b[0]).flat();
 	};
 
