@@ -191,6 +191,8 @@ const getScMsg = {
  */
 const updateWindowSiz = () => {
     Object.assign(g_windowObj, {
+        keyTitleSprite: { x: g_btnX(1 / 4), y: g_sHeight / 2 + 25, w: g_btnWidth(1 / 2), h: 16 },
+        mSelectTitleSprite: { x: g_btnX(), y: 0, w: g_btnWidth(), h: g_sHeight, opacity: 0.7, background: `#000000`, clipPath: `inset(20% 0 20% 0)` },
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
         dataSprite: { x: g_btnX() + (g_sWidth - Math.max(g_sWidth - 100, 450)) / 2, y: 65, w: Math.max(g_sWidth - 100, 450), h: 325 },
         keyListSprite: { x: 0, y: g_limitObj.setLblHeight * 7.5 + 40, w: 150, h: g_sHeight - 380, overflow: C_DIS_AUTO },
@@ -240,6 +242,38 @@ const updateWindowSiz = () => {
         },
         btnComment: {
             x: g_btnX(1) - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
+        },
+
+        lblMusicSelect: {
+            x: g_btnX(1 / 4), y: g_sHeight / 2 - 60,
+            w: g_btnWidth(5 / 8), h: 146, siz: 14, border: `solid 1px #006666`,
+            align: C_ALIGN_LEFT, padding: `0 10px`, display: `inline-block`,
+        },
+        lblMusicSelectDetail: {
+            x: g_btnX(1 / 4), y: g_sHeight / 2 - 15,
+            w: g_btnWidth(5 / 8), h: 50, siz: 14,
+            align: C_ALIGN_LEFT, padding: `0 10px`, display: `inline-block`,
+            pointerEvents: C_DIS_INHERIT,
+        },
+        btnStart_music: {
+            x: g_btnX(13 / 16), y: g_sHeight / 2 - 60,
+            w: g_btnWidth(1 / 16), h: 146, siz: 24, padding: `0 10px`,
+            border: `solid 1px #006666`,
+        },
+        btnMusicSelectPrev: {
+            x: g_btnX(1 / 4), y: g_sHeight / 2 - 104,
+            w: 30, h: 40, siz: 20, padding: `0 10px`,
+            border: `solid 1px #666600`,
+        },
+        btnMusicSelectNext: {
+            x: g_btnX(1 / 4), y: g_sHeight / 2 + 90,
+            w: 30, h: 40, siz: 20, padding: `0 10px`,
+            border: `solid 1px #666600`,
+        },
+        btnMusicSelectRandom: {
+            x: g_btnX(1 / 4) - 80, y: g_sHeight / 2 - 104,
+            w: 55, h: 40, siz: 14, padding: `0 10px`,
+            border: `solid 1px #666666`,
         },
 
         /** データ管理 */
@@ -948,6 +982,7 @@ let C_WOD_FRAME = 30;
 
 // 譜面データ持ち回り用
 const g_stateObj = {
+    keyInitial: false,
     dosDivideFlg: false,
     scoreLockFlg: false,
     scoreId: 0,
@@ -1063,6 +1098,7 @@ const makeSpeedList = (_minSpd, _maxSpd) => [...Array((_maxSpd - _minSpd) * 20 +
 // 設定系全般管理
 const g_settings = {
 
+    musicIdxNum: 0,
     dataMgtNum: {
         environment: 0,
         highscores: 0,
@@ -2019,6 +2055,8 @@ const g_shortcutObj = {
         ControlLeft_KeyC: { id: `` },
         KeyC: { id: `btnComment` },
         KeyD: { id: `btnReset` },
+        ArrowUp: { id: `btnMusicSelectPrev` },
+        ArrowDown: { id: `btnMusicSelectNext` },
     },
     dataMgt: {
         KeyE: { id: `btnEnvironment` },
