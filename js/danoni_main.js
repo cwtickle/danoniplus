@@ -234,6 +234,7 @@ let g_langStorage = {};
 // ローカルストレージ設定 (作品別)
 let g_localStorage;
 let g_localStorageUrl;
+let g_localStorageUrlOrg;
 let g_localStorageMgt;
 
 // ローカルストレージ設定 (ドメイン・キー別)
@@ -2601,7 +2602,7 @@ const initialControl = async () => {
 	titleInit(roundZero(
 		(getQueryParamVal(`musicId`) !== null ? [Number(getQueryParamVal(`musicId`))] :
 			g_headerObj.musicNos).find((val, j) => j === g_stateObj.scoreId)
-	));
+	), true);
 
 	// 未使用のg_keyObjプロパティを削除
 	const keyProp = g_keyCopyLists.simple.concat(g_keyCopyLists.multiple, `keyCtrl`, `keyName`, `minWidth`, `ptchara`);
@@ -2754,7 +2755,7 @@ const initialControl = async () => {
 /**
  * 作品別ローカルストレージの読み込み・初期設定
  */
-const loadLocalStorage = () => {
+const loadLocalStorage = (_musicId = ``) => {
 	// URLからscoreId, h(高さ), debugを削除
 	const url = new URL(location.href);
 	url.searchParams.delete(`scoreId`);
@@ -2762,6 +2763,15 @@ const loadLocalStorage = () => {
 	url.searchParams.delete(`debug`);
 	url.searchParams.delete(`musicId`);
 	g_localStorageUrl = url.toString();
+	g_localStorageUrlOrg = g_localStorageUrl;
+
+	if (_musicId !== ``) {
+		url.searchParams.append(`musicId`, _musicId);
+		g_localStorageUrl = url.toString();
+		if (g_langStorage.safeMode === C_FLG_ON) {
+			return;
+		}
+	}
 
 	/**
 	 * ローカルストレージの初期値設定
@@ -3922,6 +3932,11 @@ const headerConvert = _dosObj => {
 	const tmpComment = (_dosObj[`commentVal${g_localeObj.val}`] ?? _dosObj.commentVal ?? ``).split(`\r\n`).join(`\n`);
 	obj.commentVal = tmpComment.split(`\n`).join(newlineTag);
 
+	const maxMusicNo = Math.max(...obj.musicNos);
+	for (let j = 1; j <= maxMusicNo + 1; j++) {
+		obj[`commentVal${j}`] = (_dosObj[`commentVal${j}`] || ``).split(`\n`).join(`<br>`).replace(`<br>`, ``);
+	}
+
 	// クレジット表示
 	if (document.getElementById(`webMusicTitle`) !== null) {
 		webMusicTitle.innerHTML =
@@ -4797,8 +4812,9 @@ const setKeyDfVal = _ptnName => {
 /**
  * タイトル画面初期化
  * @param {number} _musicId 曲番号
+ * @param {boolean} _initFlg 初期化フラグ
  */
-const titleInit = (_musicId = 0) => {
+const titleInit = (_musicId = 0, _initFlg = false) => {
 
 	clearWindow(true);
 	g_currentPage = `title`;
@@ -4935,16 +4951,18 @@ const titleInit = (_musicId = 0) => {
 	let wheelHandler;
 	if (g_headerObj.musicSelectUse) {
 
+		const selectableTerms = 3;
+
 		const musicSelectBtn = (_heightPos) => createCss2Button(`btnMusicSelect${_heightPos}`,
 			``, () => changeSelectBtn(_heightPos), {
 			x: g_btnX(1 / 3) + Math.abs(_heightPos) * 10,
-			y: g_sHeight / 2 + _heightPos * 30 + (_heightPos > 0 ? 1 : -1) * 60,
+			y: g_sHeight / 2 + _heightPos * 30 + (_heightPos > 0 ? 1 : -1) * 90,
 			w: g_btnWidth(1 / 2), h: 27, siz: 14, border: `solid 1px #666666`,
 			align: C_ALIGN_LEFT, padding: `0 10px`,
 		}, g_cssObj.button_Default_NoColor);
 
 		const changeSelectBtn = (_num) => {
-			for (let j = -4; j <= 4; j++) {
+			for (let j = -selectableTerms; j <= selectableTerms; j++) {
 				const idx = (j + _num + g_settings.musicIdxNum + musicIdxTmpList.length * 10) % musicIdxTmpList.length;
 				if (j === 0) {
 					document.getElementById(`lblMusicSelect`).innerHTML =
@@ -4996,12 +5014,21 @@ const titleInit = (_musicId = 0) => {
 					)
 				});
 
+			lblMusicCnt.innerHTML = `${g_settings.musicIdxNum + 1} / ${musicMaxIdx + 1}`;
+			loadLocalStorage(g_settings.musicIdxNum);
+			viewKeyStorage.cache = new Map();
+
+			// コメント文の加工
+			lblComment.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum + 1}`]);
+
+			// 選曲変更時のカスタム関数実行
+			g_customJsObj.musicSelect.forEach(func => func(g_settings.musicIdxNum));
 		};
 
 		const musicMaxIdx = Math.max(...g_headerObj.musicNos);
 		const musicIdxTmpList = [...Array(musicMaxIdx + 1).keys()];
 
-		for (let j = -4; j <= 4; j++) {
+		for (let j = -selectableTerms; j <= selectableTerms; j++) {
 			if (j !== 0) {
 				divRoot.appendChild(musicSelectBtn(j));
 			}
@@ -5025,6 +5052,8 @@ const titleInit = (_musicId = 0) => {
 			createCss2Button(`btnMusicSelectRandom`, `Random`, () =>
 				changeSelectBtn(Math.floor(Math.random() * musicIdxTmpList.length)),
 				g_lblPosObj.btnMusicSelectRandom, g_cssObj.button_Default),
+			createDivCss2Label(`lblMusicCnt`, ``, g_lblPosObj.lblMusicCnt),
+			createDivCss2Label(`lblComment`, ``, g_lblPosObj.lblComment_music),
 		);
 		changeSelectBtn(_musicId);
 
@@ -5035,7 +5064,7 @@ const titleInit = (_musicId = 0) => {
 			}
 		});
 
-		if (!g_initialFlg) {
+		if (_initFlg) {
 			const mSelectTitleSprite = createEmptySprite(divRoot, `mSelectTitleSprite`, g_windowObj.mSelectTitleSprite);
 			multiAppend(mSelectTitleSprite,
 				drawBackArrow(),
@@ -5479,7 +5508,7 @@ const dataMgtInit = () => {
 					}
 				});
 				reloadFlg = true;
-				sessionStorage.setItem('resetBackup', JSON.stringify(Array.from(backupData.entries())));
+				sessionStorage.setItem(`resetBackup${g_settings.musicIdxNum}`, JSON.stringify(Array.from(backupData.entries())));
 			}
 		}, Object.assign(g_lblPosObj.btnResetN, {
 			visibility: g_langStorage.safeMode === C_FLG_OFF ? C_DIS_INHERIT : `hidden`,
@@ -5492,7 +5521,7 @@ const dataMgtInit = () => {
 
 		// リカバリー用のボタン
 		createCss2Button(`btnUndo`, g_lblNameObj.b_undo, () => {
-			const backup = JSON.parse(sessionStorage.getItem('resetBackup'));
+			const backup = JSON.parse(sessionStorage.getItem(`resetBackup${g_settings.musicIdxNum}`));
 			if (backup && window.confirm(g_msgObj.dataRestoreConfirm)) {
 				backup.forEach(([key, data]) => {
 					if (g_resetFunc.has(key) || keyList.includes(key.slice(`XX`.length))) {
@@ -5502,12 +5531,12 @@ const dataMgtInit = () => {
 						localStorage.setItem(`danonicw-${key}k`, JSON.stringify(data));
 					}
 				});
-				sessionStorage.removeItem('resetBackup');
+				sessionStorage.removeItem(`resetBackup${g_settings.musicIdxNum}`);
 				location.reload();
 			}
 		}, g_lblPosObj.btnUndo, g_cssObj.button_Tweet)
 	);
-	if (sessionStorage.getItem('resetBackup') === null) {
+	if (sessionStorage.getItem(`resetBackup${g_settings.musicIdxNum}`) === null) {
 		btnUndo.style.display = C_DIS_NONE;
 	}
 

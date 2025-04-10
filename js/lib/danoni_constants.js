@@ -191,8 +191,8 @@ const getScMsg = {
  */
 const updateWindowSiz = () => {
     Object.assign(g_windowObj, {
-        keyTitleSprite: { x: g_btnX(1 / 4), y: g_sHeight / 2 + 25, w: g_btnWidth(1 / 2), h: 16 },
-        mSelectTitleSprite: { x: g_btnX(), y: 0, w: g_btnWidth(), h: g_sHeight, opacity: 0.7, background: `#000000`, clipPath: `inset(20% 0 20% 0)` },
+        keyTitleSprite: { x: g_btnX(1 / 4), y: g_sHeight / 2 - 5, w: g_btnWidth(1 / 2), h: 16 },
+        mSelectTitleSprite: { x: g_btnX(), y: 0, w: g_btnWidth(), h: g_sHeight, opacity: 0.7, background: `#000000`, clipPath: `inset(12% 0 8% 0)` },
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
         dataSprite: { x: g_btnX() + (g_sWidth - Math.max(g_sWidth - 100, 450)) / 2, y: 65, w: Math.max(g_sWidth - 100, 450), h: 325 },
         keyListSprite: { x: 0, y: g_limitObj.setLblHeight * 7.5 + 40, w: 150, h: g_sHeight - 380, overflow: C_DIS_AUTO },
@@ -245,35 +245,44 @@ const updateWindowSiz = () => {
         },
 
         lblMusicSelect: {
-            x: g_btnX(1 / 4), y: g_sHeight / 2 - 60,
-            w: g_btnWidth(5 / 8), h: 146, siz: 14, border: `solid 1px #006666`,
+            x: g_btnX(1 / 4), y: g_sHeight / 2 - 90,
+            w: g_btnWidth(5 / 8), h: 206, siz: 14, border: `solid 1px #006666`,
             align: C_ALIGN_LEFT, padding: `0 10px`, display: `inline-block`,
         },
         lblMusicSelectDetail: {
-            x: g_btnX(1 / 4), y: g_sHeight / 2 - 15,
+            x: g_btnX(1 / 4), y: g_sHeight / 2 - 45,
             w: g_btnWidth(5 / 8), h: 50, siz: 14,
             align: C_ALIGN_LEFT, padding: `0 10px`, display: `inline-block`,
             pointerEvents: C_DIS_INHERIT,
         },
         btnStart_music: {
-            x: g_btnX(13 / 16), y: g_sHeight / 2 - 60,
-            w: g_btnWidth(1 / 16), h: 146, siz: 24, padding: `0 10px`,
+            x: g_btnX(27 / 32), y: g_sHeight / 2 - 90,
+            w: g_btnWidth(1 / 16), h: 206, siz: 24, padding: `0 10px`,
             border: `solid 1px #006666`,
         },
         btnMusicSelectPrev: {
-            x: g_btnX(1 / 4), y: g_sHeight / 2 - 104,
+            x: g_btnX(1 / 4), y: g_sHeight / 2 - 134,
             w: 30, h: 40, siz: 20, padding: `0 10px`,
             border: `solid 1px #666600`,
         },
         btnMusicSelectNext: {
-            x: g_btnX(1 / 4), y: g_sHeight / 2 + 90,
+            x: g_btnX(1 / 4), y: g_sHeight / 2 + 120,
             w: 30, h: 40, siz: 20, padding: `0 10px`,
             border: `solid 1px #666600`,
         },
         btnMusicSelectRandom: {
-            x: g_btnX(1 / 4) - 80, y: g_sHeight / 2 - 104,
+            x: g_btnX(1 / 4) - 80, y: g_sHeight / 2 - 134,
             w: 55, h: 40, siz: 14, padding: `0 10px`,
             border: `solid 1px #666666`,
+        },
+        lblMusicCnt: {
+            x: g_btnX(1 / 4) - 80, y: g_sHeight / 2 - 90,
+            w: 80, h: 20, siz: 14, align: C_ALIGN_CENTER,
+        },
+        lblComment_music: {
+            x: g_btnX(1 / 4) + 10, y: g_sHeight / 2 + 15, w: g_btnWidth(7 / 12) - 5, h: 100,
+            siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+            overflow: C_DIS_AUTO, whiteSpace: `normal`,
         },
 
         /** データ管理 */
@@ -4213,6 +4222,7 @@ const g_customJsObj = {
     preTitle: [],
     title: [],
     titleEnterFrame: [],
+    musicSelect: [],
     dataMgt: [],
     precondition: [],
     option: [],
