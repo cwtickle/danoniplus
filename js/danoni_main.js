@@ -2755,6 +2755,7 @@ const initialControl = async () => {
 
 /**
  * 作品別ローカルストレージの読み込み・初期設定
+ * @param {string} _musicId 楽曲ID
  */
 const loadLocalStorage = (_musicId = ``) => {
 	// URLからscoreId, h(高さ), debugを削除
@@ -4954,21 +4955,24 @@ const titleInit = (_initFlg = false) => {
 			);
 
 			let spriteOpacity = 1;
+			let fadeOpacity = null;
+			const fadeStartOpacity = setInterval(() => {
+				clearInterval(fadeStartOpacity);
+				setOpacity(spriteOpacity);
+			}, 2000);
+
 			const setOpacity = (_opacity) => {
 				if (_opacity <= 0) {
+					clearInterval(fadeOpacity);
 					mSelectTitleSprite.style.display = C_DIS_NONE;
 				} else {
 					mSelectTitleSprite.style.opacity = _opacity;
-					setInterval(() => {
+					fadeOpacity = setInterval(() => {
 						spriteOpacity -= 0.1;
 						setOpacity(spriteOpacity);
 					}, 50);
 				}
 			};
-			setInterval(() => {
-				spriteOpacity -= 0.1;
-				setOpacity(spriteOpacity);
-			}, 2000);
 		}
 	} else if (!g_headerObj.customTitleUse) {
 		// 曲名文字描画（曲名は譜面データから取得）
