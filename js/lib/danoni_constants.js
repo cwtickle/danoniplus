@@ -1118,6 +1118,8 @@ const g_settings = {
     keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`],
     colorStorages: [`setColor`, `setShadowColor`, `frzColor`, `frzShadowColor`],
 
+    mSelectableTerms: 3,
+
     speeds: makeSpeedList(C_MIN_SPEED, C_MAX_SPEED),
     speedNum: 0,
     speedTerms: [20, 5, 1],
