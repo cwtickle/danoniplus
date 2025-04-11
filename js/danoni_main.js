@@ -3941,7 +3941,7 @@ const headerConvert = _dosObj => {
 	obj.commentVal = tmpComment.split(`\n`).join(newlineTag);
 
 	const maxMusicNo = Math.max(...obj.musicNos);
-	for (let j = 1; j <= maxMusicNo + 1; j++) {
+	for (let j = 0; j <= maxMusicNo; j++) {
 		obj[`commentVal${j}`] = (_dosObj[`commentVal${j}`] || ``).split(`\n`).join(`<br>`).replace(`<br>`, ``);
 	}
 
@@ -5056,7 +5056,7 @@ const titleInit = (_initFlg = false) => {
 			viewKeyStorage.cache = new Map();
 
 			// コメント文の加工
-			lblComment.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum + 1}`]);
+			lblComment.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
 
 			// 選曲変更時のカスタム関数実行
 			g_customJsObj.musicSelect.forEach(func => func(g_settings.musicIdxNum));
