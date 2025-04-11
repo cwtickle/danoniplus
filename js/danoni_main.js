@@ -5055,6 +5055,12 @@ const titleInit = (_initFlg = false) => {
 			loadLocalStorage(g_settings.musicIdxNum);
 			viewKeyStorage.cache = new Map();
 
+			// 初期化もしくは楽曲変更時に速度を初期化
+			if (_initFlg || _num !== 0) {
+				g_stateObj.speed = g_headerObj.initSpeeds[g_headerObj.viewLists[0]];
+				g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
+			}
+
 			// コメント文の加工
 			lblComment.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
 
@@ -5104,7 +5110,7 @@ const titleInit = (_initFlg = false) => {
 		});
 
 		// 初期表示用 (2秒後に選曲画面を表示)
-		if (_initFlg && !g_headerObj.customTitleArrowUse) {
+		if (_initFlg && !g_headerObj.customTitleUse) {
 			const mSelectTitleSprite = createEmptySprite(divRoot, `mSelectTitleSprite`,
 				g_windowObj.mSelectTitleSprite, g_cssObj.settings_DifSelector);
 			multiAppend(mSelectTitleSprite,
