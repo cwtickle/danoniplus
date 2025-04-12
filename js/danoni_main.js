@@ -5303,14 +5303,11 @@ const changeMSelect = (_num, _initFlg = false) => {
 	// 選択した楽曲で使われているキー種の一覧を作成
 	deleteChildspriteAll(`keyTitleSprite`);
 	makeDedupliArray(tmpKeyList).sort((a, b) => parseInt(a) - parseInt(b))
-		.forEach((val, j) => {
-			keyTitleSprite.appendChild(
-				createDivCss2Label(`btnKeyTitle${val}`, val, {
-					x: 10 + j * 40, y: 0, w: 35, h: 16, siz: 14,
-					border: `solid 1px #666666`,
-				})
-			)
-		});
+		.forEach((val, j) => keyTitleSprite.appendChild(
+			createDivCss2Label(`btnKeyTitle${val}`, val,
+				Object.assign({ x: 10 + j * 40 }, g_lblPosObj.btnKeyTitle)
+			)));
+
 
 	// 選択した楽曲の選択位置を表示
 	lblMusicCnt.innerHTML = `${g_settings.musicIdxNum + 1} / ${musicMaxIdx + 1}`;

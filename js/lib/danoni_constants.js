@@ -275,6 +275,10 @@ const updateWindowSiz = () => {
             w: 55, h: 40, siz: 14, padding: `0 10px`,
             border: `solid 1px #666666`,
         },
+        btnKeyTitle: {
+            y: 0, w: 35, h: 16, siz: 14,
+            border: `solid 1px #666666`,
+        },
         lblMusicCnt: {
             x: g_btnX(1 / 4) - 80, y: g_sHeight / 2 - 90,
             w: 80, h: 20, siz: 14, align: C_ALIGN_CENTER,
