@@ -348,8 +348,11 @@ const updateWindowSiz = () => {
             title: g_msgObj.dataSave, borderStyle: `solid`,
         },
 
+        lblMusicInfo: {
+            x: g_btnX(1 / 4), y: 0, w: g_btnWidth(3 / 4), h: 20, align: C_ALIGN_RIGHT
+        },
         lblBaseSpd: {
-            x: g_sWidth - 100, y: 0, w: 100, h: 20, siz: 14,
+            x: g_sWidth - 100, y: 11, w: 100, h: 20, siz: 13, align: C_ALIGN_RIGHT
         },
         btnReverse: {
             x: 160, y: 0, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,

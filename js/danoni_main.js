@@ -3848,8 +3848,9 @@ const headerConvert = _dosObj => {
 	g_stateObj.excessive = boolToSwitch(obj.excessiveJdgUse);
 	g_settings.excessiveNum = Number(obj.excessiveJdgUse);
 
-	// 譜面名に制作者名を付加するかどうかのフラグ
+	// 譜面名に制作者名を付加するかどうかのフラグ（選曲用に初期値を退避）
 	obj.makerView = setBoolVal(_dosObj.makerView);
+	obj.makerViewOrg = obj.makerView;
 
 	// shuffleUse=group 時のみshuffle用配列を組み替える
 	if (_dosObj.shuffleUse === `group`) {
@@ -5242,7 +5243,7 @@ const drawTitle = (_titleName = g_headerObj.musicTitleForView, _scoreId = ``) =>
  */
 const getCreatorInfo = (_creatorList) => {
 	const creatorName = makeDedupliArray(_creatorList).length === 1 ? _creatorList[0] : `Various`;
-	g_headerObj.makerView = creatorName === `Various`;
+	g_headerObj.makerView = g_headerObj.makerViewOrg ? true : creatorName === `Various`;
 	const creatorIdx = g_headerObj.tuningNames.findIndex(val => val === creatorName);
 	const creatorUrl = creatorIdx >= 0 ? g_headerObj.tuningUrls[creatorIdx] : ``;
 	return [creatorName, creatorUrl, creatorIdx];
@@ -5828,6 +5829,15 @@ const optionInit = () => {
 	const divRoot = document.getElementById(`divRoot`);
 	g_currentPage = `option`;
 	g_stateObj.filterKeys = ``;
+
+	// 楽曲データの表示
+	let text = `♪` + (g_headerObj.musicSelectUse ? `${g_headerObj.musicTitles[g_settings.musicIdxNum]} / ` : ``) +
+		`BPM: ${g_headerObj.bpms[g_settings.musicIdxNum]}`;
+	if (!g_headerObj.musicSelectUse && g_headerObj.bpms[g_settings.musicIdxNum] === `----`) {
+		text = ``;
+	}
+	divRoot.appendChild(createDivCss2Label(`lblMusicInfo`, text,
+		Object.assign({ siz: getFontSize(text, g_btnWidth(3 / 4), getBasicFont(), 12) }, g_lblPosObj.lblMusicInfo)));
 
 	// タイトル文字描画
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, g_lblNameObj.settings, 0, 15, `settings_Title`));
