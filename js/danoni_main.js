@@ -3435,6 +3435,7 @@ const headerConvert = _dosObj => {
 				obj.bpms[j] = musics[4] || obj.bpms[0] || `----`;
 			}
 
+			// 選曲ではなく、単一作品用の項目としての管理変数を定義
 			if (j === 0) {
 				obj.musicTitle = obj.musicTitles[0];
 				obj.musicTitleForView = obj.musicTitlesForView[0];
@@ -5257,6 +5258,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 	const musicMaxIdx = Math.max(...g_headerObj.musicNos);
 	const musicIdxTmpList = [...Array(musicMaxIdx + 1).keys()];
 
+	// 選択方向に合わせて楽曲リスト情報を再取得
 	for (let j = -g_settings.mSelectableTerms; j <= g_settings.mSelectableTerms; j++) {
 		const idx = (j + _num + g_settings.musicIdxNum + musicIdxTmpList.length * 10) % musicIdxTmpList.length;
 		if (j === 0) {
@@ -5268,9 +5270,10 @@ const changeMSelect = (_num, _initFlg = false) => {
 				`<span style="font-size:0.7em;line-height:9px"> / ${g_headerObj.artistNames[idx]}</span>`;
 		}
 	}
+	// 現在選択中の楽曲IDを再設定
 	g_settings.musicIdxNum = (g_settings.musicIdxNum + _num + musicIdxTmpList.length) % musicIdxTmpList.length;
 
-	// 選択した曲に対応する譜面番号を取得
+	// 選択した楽曲に対応する譜面番号、製作者情報、曲長を取得
 	g_headerObj.viewLists = [];
 	const tmpKeyList = [], tmpCreatorList = [], tmpPlayingFrameList = [];
 	g_headerObj.musicNos.forEach((val, j) => {
@@ -5287,6 +5290,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 	const creatorLink = creatorIdx >= 0 ?
 		`<a href="${creatorUrl}" target="_blank">${creatorName}</a>` : creatorName;
 
+	// 選択した楽曲の情報表示
 	const idx = g_settings.musicIdxNum;
 	document.getElementById(`lblMusicSelect`).innerHTML =
 		`<span style="font-size:${getFontSize(g_headerObj.musicTitlesForView[idx].join(`<br>`), g_btnWidth(1 / 2), getBasicFont(), 18)}px;` +
@@ -5295,6 +5299,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 		`Maker: ${creatorLink} / Artist: <a href="${g_headerObj.artistUrls[idx]}" target="_blank">` +
 		`${g_headerObj.artistNames[idx]}</a><br>Duration: ${playingFrames} / BPM: ${g_headerObj.bpms[idx]}`;
 
+	// 選択した楽曲で使われているキー種の一覧を作成
 	deleteChildspriteAll(`keyTitleSprite`);
 	makeDedupliArray(tmpKeyList).sort((a, b) => parseInt(a) - parseInt(b))
 		.forEach((val, j) => {
@@ -5306,7 +5311,10 @@ const changeMSelect = (_num, _initFlg = false) => {
 			)
 		});
 
+	// 選択した楽曲の選択位置を表示
 	lblMusicCnt.innerHTML = `${g_settings.musicIdxNum + 1} / ${musicMaxIdx + 1}`;
+
+	// 楽曲別のローカルストレージを再取得
 	loadLocalStorage(g_settings.musicIdxNum);
 	viewKeyStorage.cache = new Map();
 
