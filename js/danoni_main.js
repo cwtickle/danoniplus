@@ -2599,7 +2599,8 @@ const initialControl = async () => {
 		}
 	}
 	g_customJsObj.preTitle.forEach(func => func());
-	g_settings.musicIdxNum = getQueryParamVal(`musicId`) !== null ? Number(getQueryParamVal(`musicId`)) :
+	const queryMusicId = getQueryParamVal(`musicId`);
+	g_settings.musicIdxNum = queryMusicId !== null ? Number(queryMusicId) :
 		g_headerObj.musicNos[g_stateObj.scoreId] || g_headerObj.musicNos[0];
 	titleInit(true);
 
