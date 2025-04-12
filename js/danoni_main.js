@@ -2758,13 +2758,18 @@ const initialControl = async () => {
  * @param {string} _musicId 楽曲ID
  */
 const loadLocalStorage = (_musicId = ``) => {
-	// URLからscoreId, h(高さ), debugを削除
+
+	// 作品別ローカルストレージのキー(URL)取得のため、
+	// scoreId, h, debug, musicIdを削除
+	// 選択中の楽曲ID(_musicId)がある場合は、キーとして区別するため追加
 	const url = new URL(location.href);
 	url.searchParams.delete(`scoreId`);
 	url.searchParams.delete(`h`);
 	url.searchParams.delete(`debug`);
 	url.searchParams.delete(`musicId`);
 	g_localStorageUrl = url.toString();
+
+	// リザルト表示用のURL組み立てのため、_musicIdのないURLを保存
 	g_localStorageUrlOrg = g_localStorageUrl;
 
 	if (_musicId !== ``) {
@@ -3429,19 +3434,21 @@ const headerConvert = _dosObj => {
 				obj.artistUrls[j] = musics[2] || obj.artistUrls[0] || ``;
 				obj.bpms[j] = musics[4] || obj.bpms[0] || `----`;
 			}
-		}
-		const musics = splitComma(musicData[0]);
-		obj.musicTitle = obj.musicTitles[0];
-		obj.musicTitleForView = obj.musicTitlesForView[0];
-		obj.artistName = obj.artistNames[0] ?? ``;
-		if (obj.artistName === ``) {
-			makeWarningWindow(g_msgInfoObj.E_0011);
-			obj.artistName = `artistName`;
-		}
-		obj.artistUrl = musics[2] ?? ``;
-		if (hasVal(musics[3])) {
-			obj.musicTitles[0] = escapeHtml(getMusicNameSimple(musics[3]));
-			obj.musicTitlesForView[0] = escapeHtmlForArray(getMusicNameMultiLine(musics[3]));
+
+			if (j === 0) {
+				obj.musicTitle = obj.musicTitles[0];
+				obj.musicTitleForView = obj.musicTitlesForView[0];
+				obj.artistName = obj.artistNames[0];
+				if (obj.artistName === ``) {
+					makeWarningWindow(g_msgInfoObj.E_0011);
+					obj.artistName = `artistName`;
+				}
+				obj.artistUrl = obj.artistUrls[0];
+				if (hasVal(musics[3])) {
+					obj.musicTitles[0] = escapeHtml(getMusicNameSimple(musics[3]));
+					obj.musicTitlesForView[0] = escapeHtmlForArray(getMusicNameMultiLine(musics[3]));
+				}
+			}
 		}
 
 	} else {
@@ -3944,13 +3951,6 @@ const headerConvert = _dosObj => {
 	const maxMusicNo = Math.max(...obj.musicNos);
 	for (let j = 0; j <= maxMusicNo; j++) {
 		obj[`commentVal${j}`] = (_dosObj[`commentVal${j}`] || ``).split(`\n`).join(`<br>`).replace(`<br>`, ``);
-	}
-
-	// クレジット表示
-	if (document.getElementById(`webMusicTitle`) !== null) {
-		webMusicTitle.innerHTML =
-			`<span style="font-size:${wUnit(32)}">${obj.musicTitleForView.join(`<br>`)}</span><br>
-			<span style="font-size:${wUnit(16)}">(Artist: <a href="${obj.artistUrl}" target="_blank">${obj.artistName}</a>)</span>`;
 	}
 
 	// コメントの外部化設定
@@ -4980,6 +4980,9 @@ const titleInit = (_initFlg = false) => {
 			g_headerObj.musicSelectUse ? g_headerObj.viewLists[0] + 1 : ``))
 	}
 
+	// クレジット表示
+	externalWebTitle();
+
 	if (g_errMsgObj.title !== ``) {
 		makeWarningWindow();
 	}
@@ -5128,6 +5131,17 @@ const titleInit = (_initFlg = false) => {
 	divRoot.oncontextmenu = () => false;
 
 	g_skinJsObj.title.forEach(func => func());
+};
+
+/**
+ * 外部のタイトル表示
+ */
+const externalWebTitle = () => {
+	if (document.getElementById(`webMusicTitle`) !== null) {
+		webMusicTitle.innerHTML =
+			`<span style="font-size:${wUnit(32)}">${g_headerObj.musicTitlesForView[g_settings.musicIdxNum].join(`<br>`)}</span><br>
+			<span style="font-size:${wUnit(16)}">(Artist: <a href="${g_headerObj.artistUrls[g_settings.musicIdxNum]}" target="_blank">${g_headerObj.artistNames[g_settings.musicIdxNum]}</a>)</span>`;
+	}
 };
 
 /**
