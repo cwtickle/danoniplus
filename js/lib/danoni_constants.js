@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/03/22 (v40.7.0)
+ * Revised : 2025/04/12 (v41.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -191,6 +191,8 @@ const getScMsg = {
  */
 const updateWindowSiz = () => {
     Object.assign(g_windowObj, {
+        keyTitleSprite: { x: g_btnX(1 / 4), y: g_sHeight / 2 - 5, w: g_btnWidth(1 / 2), h: 16 },
+        mSelectTitleSprite: { x: g_btnX(), y: 0, w: g_btnWidth(), h: g_sHeight, clipPath: `inset(12% 0 8% 0)` },
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
         dataSprite: { x: g_btnX() + (g_sWidth - Math.max(g_sWidth - 100, 450)) / 2, y: 65, w: Math.max(g_sWidth - 100, 450), h: 325 },
         keyListSprite: { x: 0, y: g_limitObj.setLblHeight * 7.5 + 40, w: 150, h: g_sHeight - 380, overflow: C_DIS_AUTO },
@@ -240,6 +242,51 @@ const updateWindowSiz = () => {
         },
         btnComment: {
             x: g_btnX(1) - 160, y: (g_sHeight / 2) + 150, w: 140, h: 50, siz: 20, border: `solid 1px #999999`,
+        },
+
+        lblMusicSelect: {
+            x: g_btnX(1 / 4), y: g_sHeight / 2 - 90,
+            w: g_btnWidth(5 / 8), h: 206, siz: 14, border: `solid 1px #006666`,
+            align: C_ALIGN_LEFT, padding: `0 10px`, display: `inline-block`,
+        },
+        lblMusicSelectDetail: {
+            x: g_btnX(1 / 4), y: g_sHeight / 2 - 45,
+            w: g_btnWidth(5 / 8), h: 50, siz: 14,
+            align: C_ALIGN_LEFT, padding: `0 10px`, display: `inline-block`,
+            pointerEvents: C_DIS_INHERIT,
+        },
+        btnStart_music: {
+            x: g_btnX(27 / 32), y: g_sHeight / 2 - 90,
+            w: g_btnWidth(1 / 16), h: 206, siz: 24, padding: `0 10px`,
+            border: `solid 1px #006666`,
+        },
+        btnMusicSelectPrev: {
+            x: g_btnX(1 / 4), y: g_sHeight / 2 - 134,
+            w: 30, h: 40, siz: 20, padding: `0 10px`,
+            border: `solid 1px #666600`,
+        },
+        btnMusicSelectNext: {
+            x: g_btnX(1 / 4), y: g_sHeight / 2 + 120,
+            w: 30, h: 40, siz: 20, padding: `0 10px`,
+            border: `solid 1px #666600`,
+        },
+        btnMusicSelectRandom: {
+            x: g_btnX(1 / 4) - 80, y: g_sHeight / 2 - 134,
+            w: 55, h: 40, siz: 14, padding: `0 10px`,
+            border: `solid 1px #666666`,
+        },
+        btnKeyTitle: {
+            y: 0, w: 35, h: 16, siz: 14,
+            border: `solid 1px #666666`,
+        },
+        lblMusicCnt: {
+            x: g_btnX(1 / 4) - 80, y: g_sHeight / 2 - 90,
+            w: 80, h: 20, siz: 14, align: C_ALIGN_CENTER,
+        },
+        lblComment_music: {
+            x: g_btnX(1 / 4) + 10, y: g_sHeight / 2 + 15, w: g_btnWidth(7 / 12) - 5, h: 100,
+            siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+            overflow: C_DIS_AUTO, whiteSpace: `normal`,
         },
 
         /** データ管理 */
@@ -305,8 +352,11 @@ const updateWindowSiz = () => {
             title: g_msgObj.dataSave, borderStyle: `solid`,
         },
 
+        lblMusicInfo: {
+            x: g_btnX(1 / 4), y: 0, w: g_btnWidth(3 / 4), h: 20, align: C_ALIGN_RIGHT
+        },
         lblBaseSpd: {
-            x: g_sWidth - 100, y: 0, w: 100, h: 20, siz: 14,
+            x: g_sWidth - 100, y: 11, w: 100, h: 20, siz: 13, align: C_ALIGN_RIGHT
         },
         btnReverse: {
             x: 160, y: 0, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
@@ -948,6 +998,7 @@ let C_WOD_FRAME = 30;
 
 // 譜面データ持ち回り用
 const g_stateObj = {
+    keyInitial: false,
     dosDivideFlg: false,
     scoreLockFlg: false,
     scoreId: 0,
@@ -1063,6 +1114,7 @@ const makeSpeedList = (_minSpd, _maxSpd) => [...Array((_maxSpd - _minSpd) * 20 +
 // 設定系全般管理
 const g_settings = {
 
+    musicIdxNum: 0,
     dataMgtNum: {
         environment: 0,
         highscores: 0,
@@ -1072,6 +1124,8 @@ const g_settings = {
     environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`],
     keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`],
     colorStorages: [`setColor`, `setShadowColor`, `frzColor`, `frzShadowColor`],
+
+    mSelectableTerms: 3,
 
     speeds: makeSpeedList(C_MIN_SPEED, C_MAX_SPEED),
     speedNum: 0,
@@ -2019,6 +2073,8 @@ const g_shortcutObj = {
         ControlLeft_KeyC: { id: `` },
         KeyC: { id: `btnComment` },
         KeyD: { id: `btnReset` },
+        ArrowUp: { id: `btnMusicSelectPrev` },
+        ArrowDown: { id: `btnMusicSelectNext` },
     },
     dataMgt: {
         KeyE: { id: `btnEnvironment` },
@@ -3486,6 +3542,7 @@ const g_lang_msgInfoObj = {
         W_0021: `クリップボードのコピーに失敗しました。`,
         W_0031: `セーフモード適用中です。ローカルストレージ情報を使わない設定になっています。<br>
         「Data Management」から解除が可能です。(W-0031)`,
+        W_0041: `選曲単品モードが有効になっています。<br><a href="{0}">[ 選曲画面へ戻る ]</a>`,
 
         E_0011: `アーティスト名が未入力です。(E-0011)`,
         E_0012: `曲名情報が未設定です。(E-0012)<br>
@@ -3541,6 +3598,7 @@ const g_lang_msgInfoObj = {
         W_0031: `Safe Mode is being applied. <br>
         The setting is set to not use local storage information <br>
         and can be removed from Data Management. (W-0031)`,
+        W_0041: `The single music selection mode is enabled.<br><a href="{0}">[ Return to the original page ]</a>`,
 
         E_0011: `The artist name is not set. (E-0011)`,
         E_0012: `The song title information is not set. (E-0012)<br>
@@ -4175,6 +4233,7 @@ const g_customJsObj = {
     preTitle: [],
     title: [],
     titleEnterFrame: [],
+    musicSelect: [],
     dataMgt: [],
     precondition: [],
     option: [],
