@@ -2599,10 +2599,8 @@ const initialControl = async () => {
 		}
 	}
 	g_customJsObj.preTitle.forEach(func => func());
-	g_settings.musicIdxNum = roundZero(
-		(getQueryParamVal(`musicId`) !== null ? [Number(getQueryParamVal(`musicId`))] :
-			g_headerObj.musicNos).find((val, j) => j === g_stateObj.scoreId)
-	);
+	g_settings.musicIdxNum = getQueryParamVal(`musicId`) !== null ? Number(getQueryParamVal(`musicId`)) :
+		g_headerObj.musicNos[g_stateObj.scoreId] || g_headerObj.musicNos[0];
 	titleInit(true);
 
 	// 未使用のg_keyObjプロパティを削除
@@ -3952,7 +3950,8 @@ const headerConvert = _dosObj => {
 
 	const maxMusicNo = Math.max(...obj.musicNos);
 	for (let j = 0; j <= maxMusicNo; j++) {
-		obj[`commentVal${j}`] = (_dosObj[`commentVal${j}`] || ``).split(`\n`).join(`<br>`).replace(`<br>`, ``);
+		obj[`commentVal${j}`] = (_dosObj[`commentVal${j}`] || ``).split(`\n`)
+			.filter((val, k) => k !== 0 || val !== ``).join(`<br>`);
 	}
 
 	// コメントの外部化設定
@@ -5016,6 +5015,7 @@ const titleInit = (_initFlg = false) => {
 			Object.assign(g_lblPosObj[_id], { siz: getLinkSiz(_text), whiteSpace: `normal`, resetFunc: () => openLink(_url) }), g_cssObj.button_Default);
 
 	if (g_headerObj.musicSelectUse && getQueryParamVal(`scoreId`) === null) {
+		// 選曲モードではクレジット表示は別で行われているため表示しない
 	} else {
 		if (tmpCreatorList.length === 0) {
 			tmpCreatorList.push(g_headerObj.creatorNames[0]);
