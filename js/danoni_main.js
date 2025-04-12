@@ -4957,19 +4957,19 @@ const titleInit = (_initFlg = false) => {
 
 			let spriteOpacity = 1;
 			let fadeOpacity = null;
-			const fadeStartOpacity = setInterval(() => {
-				clearInterval(fadeStartOpacity);
+			const fadeStartOpacity = setTimeout(() => {
+				clearTimeout(fadeStartOpacity);
 				setOpacity(spriteOpacity);
 			}, 2000);
 
 			const setOpacity = (_opacity) => {
 				if (_opacity <= 0) {
-					clearInterval(fadeOpacity);
+					clearTimeout(fadeOpacity);
 					mSelectTitleSprite.style.display = C_DIS_NONE;
 				} else {
 					mSelectTitleSprite.style.opacity = _opacity;
-					fadeOpacity = setInterval(() => {
-						spriteOpacity -= 0.1;
+					fadeOpacity = setTimeout(() => {
+						spriteOpacity -= 0.25;
 						setOpacity(spriteOpacity);
 					}, 50);
 				}
