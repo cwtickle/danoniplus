@@ -5034,7 +5034,7 @@ const titleInit = (_initFlg = false) => {
 			}, g_cssObj.button_Start),
 
 			// 製作者表示
-			createCreditBtn(`lnkMaker`, `${g_lblNameObj.maker}: ${creatorName}`, creatorUrl),
+			createCreditBtn(`lnkMaker`, `${g_lblNameObj.maker}: ${g_headerObj.musicSelectUse ? creatorName : g_headerObj.tuningInit}`, creatorUrl),
 
 			// アーティスト表示
 			createCreditBtn(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistNames[g_settings.musicIdxNum]}`, g_headerObj.artistUrls[g_settings.musicIdxNum]),
