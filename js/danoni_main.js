@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/03/08
+ * Revised : 2025/04/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 39.8.3`;
-const g_revisedDate = `2025/03/08`;
+const g_version = `Ver 39.8.4`;
+const g_revisedDate = `2025/04/21`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -6623,7 +6623,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
 				${dmgText}
 			</div>
-			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" title="${allowableCntsText}">
+			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" 
+				title="${allowableCntsText}" style="pointer-events: auto;">
 				${rateText}
 			</div>
 		</div>
