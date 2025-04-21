@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/04/16
+ * Revised : 2025/04/21
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 41.0.1`;
-const g_revisedDate = `2025/04/16`;
+const g_version = `Ver 41.0.2`;
+const g_revisedDate = `2025/04/21`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7333,6 +7333,7 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
 	g_workObj.requiredAccuracy = rateText;
 
+	// 許容ミス数のみ、オンマウスで表示するためpointer-eventsを有効にする
 	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
 			<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
@@ -7364,7 +7365,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
 				${dmgText}
 			</div>
-			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" title="${allowableCntsText}">
+			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" 
+				title="${allowableCntsText}" style="pointer-events: auto;">
 				${rateText}
 			</div>
 		</div>

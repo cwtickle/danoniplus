@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/04/12 (v41.0.0)
+ * Revised : 2025/04/21 (v41.0.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -251,7 +251,7 @@ const updateWindowSiz = () => {
         },
         lblMusicSelectDetail: {
             x: g_btnX(1 / 4), y: g_sHeight / 2 - 45,
-            w: g_btnWidth(5 / 8), h: 50, siz: 14,
+            w: g_btnWidth(5 / 8), h: 35, siz: 14,
             align: C_ALIGN_LEFT, padding: `0 10px`, display: `inline-block`,
             pointerEvents: C_DIS_INHERIT,
         },
