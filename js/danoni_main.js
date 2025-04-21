@@ -7364,7 +7364,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
 				${dmgText}
 			</div>
-			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" title="${allowableCntsText}">
+			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" 
+				title="${allowableCntsText}" style="pointer-events: auto;">
 				${rateText}
 			</div>
 		</div>
