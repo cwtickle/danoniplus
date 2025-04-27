@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/04/21
+ * Revised : 2025/04/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 41.0.2`;
-const g_revisedDate = `2025/04/21`;
+const g_version = `Ver 41.0.3`;
+const g_revisedDate = `2025/04/27`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -5034,7 +5034,8 @@ const titleInit = (_initFlg = false) => {
 			}, g_cssObj.button_Start),
 
 			// 製作者表示
-			createCreditBtn(`lnkMaker`, `${g_lblNameObj.maker}: ${g_headerObj.musicSelectUse ? creatorName : g_headerObj.tuningInit}`, creatorUrl),
+			createCreditBtn(`lnkMaker`, `${g_lblNameObj.maker}: ${g_headerObj.musicSelectUse ? creatorName : g_headerObj.tuningInit}`,
+				g_headerObj.musicSelectUse ? creatorUrl : g_headerObj.creatorUrl),
 
 			// アーティスト表示
 			createCreditBtn(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistNames[g_settings.musicIdxNum]}`, g_headerObj.artistUrls[g_settings.musicIdxNum]),
