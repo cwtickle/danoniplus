@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/04/27
+ * Revised : 2025/05/05
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 41.0.3`;
-const g_revisedDate = `2025/04/27`;
+const g_version = `Ver 41.1.0`;
+const g_revisedDate = `2025/05/05`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2601,7 +2601,8 @@ const initialControl = async () => {
 	g_customJsObj.preTitle.forEach(func => func());
 	const queryMusicId = getQueryParamVal(`musicId`);
 	g_settings.musicIdxNum = queryMusicId !== null ? Number(queryMusicId) :
-		g_headerObj.musicNos[g_stateObj.scoreId] || g_headerObj.musicNos[0];
+		g_headerObj.musicGroups?.[g_headerObj.musicNos[g_stateObj.scoreId]] ??
+		g_headerObj.musicNos[g_stateObj.scoreId] ?? g_headerObj.musicNos[0];
 	titleInit(true);
 
 	// 未使用のg_keyObjプロパティを削除
@@ -3581,6 +3582,19 @@ const headerConvert = _dosObj => {
 	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
 	if (obj.musicNos.length === 0) {
 		obj.musicNos = fillArray(obj.keyLabels.length);
+	}
+
+	// 楽曲別のグループ化設定（選曲モードのみ）
+	if (hasVal(_dosObj.musicGroup)) {
+		obj.musicGroups = _dosObj.musicGroup.split(`,`)
+			.map((val, j) => setVal(val, j, C_TYP_NUMBER))
+			.map((val, j) => val < 0 ? j + val : val);
+		for (let k = obj.musicGroups.length; k <= Math.max(...obj.musicNos); k++) {
+			obj.musicGroups[k] = k;
+		}
+		obj.musicIdxList = makeDedupliArray(obj.musicGroups);
+	} else {
+		obj.musicIdxList = [...Array(Math.max(...obj.musicNos) + 1).keys()];
 	}
 
 	// 譜面変更セレクターの利用有無
@@ -4874,7 +4888,7 @@ const titleInit = (_initFlg = false) => {
 		if (getQueryParamVal(`scoreId`) !== null) {
 			g_headerObj.viewLists = [];
 			g_headerObj.musicNos.forEach((val, j) => {
-				if (val === g_settings.musicIdxNum) {
+				if ((g_headerObj.musicGroups?.[val] ?? val) === g_settings.musicIdxNum) {
 					g_headerObj.viewLists.push(j);
 					tmpCreatorList.push(g_headerObj.creatorNames[j]);
 				}
@@ -4893,8 +4907,6 @@ const titleInit = (_initFlg = false) => {
 
 		// 選曲画面の初期化
 		const wheelCycle = 2;
-		const musicMaxIdx = Math.max(...g_headerObj.musicNos);
-		const musicIdxTmpList = [...Array(musicMaxIdx + 1).keys()];
 
 		/**
 		 * メイン以外の選曲ボタンの作成
@@ -4931,7 +4943,7 @@ const titleInit = (_initFlg = false) => {
 			createCss2Button(`btnMusicSelectNext`, `↓`, () => changeMSelect(1),
 				g_lblPosObj.btnMusicSelectNext, g_cssObj.button_Setting),
 			createCss2Button(`btnMusicSelectRandom`, `Random`, () =>
-				changeMSelect(Math.floor(Math.random() * musicIdxTmpList.length)),
+				changeMSelect(g_headerObj.musicIdxList[Math.floor(Math.random() * g_headerObj.musicIdxList.length)]),
 				g_lblPosObj.btnMusicSelectRandom, g_cssObj.button_Default),
 			createDivCss2Label(`lblMusicCnt`, ``, g_lblPosObj.lblMusicCnt),
 			createDivCss2Label(`lblComment`, ``, g_lblPosObj.lblComment_music),
@@ -4940,8 +4952,23 @@ const titleInit = (_initFlg = false) => {
 
 		let wheelCnt = 0;
 		wheelHandler = g_handler.addListener(divRoot, `wheel`, e => {
+
+			// コメント欄（lblComment）のスクロール可能性をチェック
+			const isScrollable = lblComment.scrollHeight > lblComment.clientHeight;
+
+			// マウスがコメント欄上にあり、スクロールが可能ならイベントをスキップ
+			if (lblComment.contains(e.target) && isScrollable) {
+				// スクロール位置の判定
+				const atTop = lblComment.scrollTop === 0 && e.deltaY < 0;
+				const atBottom = (lblComment.scrollTop + lblComment.clientHeight >= lblComment.scrollHeight) && e.deltaY > 0;
+
+				// スクロール可能＆上端または下端ではないなら処理をスキップ
+				if (!atTop && !atBottom) {
+					return;
+				}
+			}
+			e.preventDefault();
 			if (g_stateObj.keyInitial && wheelCnt === 0) {
-				e.preventDefault();
 				changeMSelect(e.deltaY > 0 ? 1 : -1);
 			}
 			wheelCnt = (wheelCnt + 1) % wheelCycle;
@@ -5258,12 +5285,10 @@ const getCreatorInfo = (_creatorList) => {
  */
 const changeMSelect = (_num, _initFlg = false) => {
 	const limitedMLength = 35;
-	const musicMaxIdx = Math.max(...g_headerObj.musicNos);
-	const musicIdxTmpList = [...Array(musicMaxIdx + 1).keys()];
 
 	// 選択方向に合わせて楽曲リスト情報を再取得
 	for (let j = -g_settings.mSelectableTerms; j <= g_settings.mSelectableTerms; j++) {
-		const idx = (j + _num + g_settings.musicIdxNum + musicIdxTmpList.length * 10) % musicIdxTmpList.length;
+		const idx = g_headerObj.musicIdxList[(j + _num + g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 10) % g_headerObj.musicIdxList.length];
 		if (j === 0) {
 		} else {
 			document.getElementById(`btnMusicSelect${j}`).style.fontSize =
@@ -5274,33 +5299,35 @@ const changeMSelect = (_num, _initFlg = false) => {
 		}
 	}
 	// 現在選択中の楽曲IDを再設定
-	g_settings.musicIdxNum = (g_settings.musicIdxNum + _num + musicIdxTmpList.length) % musicIdxTmpList.length;
+	g_settings.musicIdxNum = (g_settings.musicIdxNum + _num + g_headerObj.musicIdxList.length) % g_headerObj.musicIdxList.length;
 
 	// 選択した楽曲に対応する譜面番号、製作者情報、曲長を取得
 	g_headerObj.viewLists = [];
-	const tmpKeyList = [], tmpCreatorList = [], tmpPlayingFrameList = [];
+	const tmpKeyList = [], tmpCreatorList = [], tmpPlayingFrameList = [], tmpBpmList = [];
+	const targetIdx = g_headerObj.musicIdxList[(g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 20) % g_headerObj.musicIdxList.length];
 	g_headerObj.musicNos.forEach((val, j) => {
-		if (val === (g_settings.musicIdxNum + musicIdxTmpList.length * 20) %
-			musicIdxTmpList.length) {
+		if ((g_headerObj.musicGroups?.[val] ?? val) === targetIdx) {
 			g_headerObj.viewLists.push(j);
 			tmpKeyList.push(g_headerObj.keyLabels[j]);
 			tmpCreatorList.push(g_headerObj.creatorNames[j]);
 			tmpPlayingFrameList.push(g_detailObj.playingFrameWithBlank[j]);
+			tmpBpmList.push(g_headerObj.bpms[g_headerObj.musicNos[j]]);
 		}
 	});
-	const playingFrames = makeDedupliArray(tmpPlayingFrameList.sort((a, b) => a - b).map(val => transFrameToTimer(val))).join(`, `);
+	const playingFrames = makeDedupliArray(tmpPlayingFrameList.map(val => transFrameToTimer(val))).join(`, `);
+	const bpm = makeDedupliArray(tmpBpmList).join(`, `);
 	const [creatorName, creatorUrl, creatorIdx] = getCreatorInfo(tmpCreatorList);
 	const creatorLink = creatorIdx >= 0 ?
 		`<a href="${creatorUrl}" target="_blank">${creatorName}</a>` : creatorName;
 
 	// 選択した楽曲の情報表示
-	const idx = g_settings.musicIdxNum;
+	const idx = g_headerObj.musicIdxList[g_settings.musicIdxNum];
 	document.getElementById(`lblMusicSelect`).innerHTML =
 		`<span style="font-size:${getFontSize(g_headerObj.musicTitlesForView[idx].join(`<br>`), g_btnWidth(1 / 2), getBasicFont(), 18)}px;` +
 		`font-weight:bold">${g_headerObj.musicTitlesForView[idx].join(`<br>`)}</span>`;
 	document.getElementById(`lblMusicSelectDetail`).innerHTML =
 		`Maker: ${creatorLink} / Artist: <a href="${g_headerObj.artistUrls[idx]}" target="_blank">` +
-		`${g_headerObj.artistNames[idx]}</a><br>Duration: ${playingFrames} / BPM: ${g_headerObj.bpms[idx]}`;
+		`${g_headerObj.artistNames[idx]}</a><br>Duration: ${playingFrames} / BPM: ${bpm}`;
 
 	// 選択した楽曲で使われているキー種の一覧を作成
 	deleteChildspriteAll(`keyTitleSprite`);
@@ -5312,7 +5339,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 
 
 	// 選択した楽曲の選択位置を表示
-	lblMusicCnt.innerHTML = `${g_settings.musicIdxNum + 1} / ${musicMaxIdx + 1}`;
+	lblMusicCnt.innerHTML = `${g_settings.musicIdxNum + 1} / ${g_headerObj.musicIdxList.length}`;
 
 	// 楽曲別のローカルストレージを再取得
 	loadLocalStorage(g_settings.musicIdxNum);
@@ -5830,11 +5857,7 @@ const optionInit = () => {
 	g_stateObj.filterKeys = ``;
 
 	// 楽曲データの表示
-	let text = `♪` + (g_headerObj.musicSelectUse ? `${g_headerObj.musicTitles[g_settings.musicIdxNum]} / ` : ``) +
-		`BPM: ${g_headerObj.bpms[g_settings.musicIdxNum]}`;
-	if (!g_headerObj.musicSelectUse && g_headerObj.bpms[g_settings.musicIdxNum] === `----`) {
-		text = ``;
-	}
+	const text = getMusicInfoView();
 	divRoot.appendChild(createDivCss2Label(`lblMusicInfo`, text,
 		Object.assign({ siz: getFontSize(text, g_btnWidth(3 / 4), getBasicFont(), 12) }, g_lblPosObj.lblMusicInfo)));
 
@@ -5856,6 +5879,20 @@ const optionInit = () => {
 	g_initialFlg = true;
 
 	g_skinJsObj.option.forEach(func => func());
+};
+
+/**
+ * 設定画面に表示する楽曲・BPM情報の取得
+ * @returns {string}
+ */
+const getMusicInfoView = () => {
+	const idx = g_headerObj.musicNos[g_stateObj.scoreId];
+	let text = `♪` + (g_headerObj.musicSelectUse ? `${g_headerObj.musicTitles[idx]} / ` : ``) +
+		`BPM: ${g_headerObj.bpms[idx]}`;
+	if (!g_headerObj.musicSelectUse && g_headerObj.bpms[idx] === `----`) {
+		text = ``;
+	}
+	return text;
 };
 
 /**
@@ -6685,6 +6722,10 @@ const setDifficulty = (_initFlg) => {
 		makeDifInfo(g_stateObj.scoreId);
 		makeHighScore(g_stateObj.scoreId);
 	}
+
+	// 楽曲データの表示
+	lblMusicInfo.textContent = getMusicInfoView();
+	lblMusicInfo.style.fontSize = wUnit(getFontSize(lblMusicInfo.textContent, g_btnWidth(3 / 4), getBasicFont(), 12));
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
