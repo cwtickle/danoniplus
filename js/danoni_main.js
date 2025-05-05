@@ -4940,8 +4940,8 @@ const titleInit = (_initFlg = false) => {
 
 		let wheelCnt = 0;
 		wheelHandler = g_handler.addListener(divRoot, `wheel`, e => {
+			e.preventDefault();
 			if (g_stateObj.keyInitial && wheelCnt === 0) {
-				e.preventDefault();
 				changeMSelect(e.deltaY > 0 ? 1 : -1);
 			}
 			wheelCnt = (wheelCnt + 1) % wheelCycle;
