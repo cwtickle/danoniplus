@@ -4952,6 +4952,21 @@ const titleInit = (_initFlg = false) => {
 
 		let wheelCnt = 0;
 		wheelHandler = g_handler.addListener(divRoot, `wheel`, e => {
+
+			// コメント欄（lblComment）のスクロール可能性をチェック
+			const isScrollable = lblComment.scrollHeight > lblComment.clientHeight;
+
+			// マウスがコメント欄上にあり、スクロールが可能ならイベントをスキップ
+			if (lblComment.contains(e.target) && isScrollable) {
+				// スクロール位置の判定
+				const atTop = lblComment.scrollTop === 0 && e.deltaY < 0;
+				const atBottom = (lblComment.scrollTop + lblComment.clientHeight >= lblComment.scrollHeight) && e.deltaY > 0;
+
+				// スクロール可能＆上端または下端ではないなら処理をスキップ
+				if (!atTop && !atBottom) {
+					return;
+				}
+			}
 			e.preventDefault();
 			if (g_stateObj.keyInitial && wheelCnt === 0) {
 				changeMSelect(e.deltaY > 0 ? 1 : -1);
