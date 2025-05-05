@@ -5303,7 +5303,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 
 	// 選択した楽曲に対応する譜面番号、製作者情報、曲長を取得
 	g_headerObj.viewLists = [];
-	const tmpKeyList = [], tmpCreatorList = [], tmpPlayingFrameList = [];
+	const tmpKeyList = [], tmpCreatorList = [], tmpPlayingFrameList = [], tmpBpmList = [];
 	const targetIdx = g_headerObj.musicIdxList[(g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 20) % g_headerObj.musicIdxList.length];
 	g_headerObj.musicNos.forEach((val, j) => {
 		if ((g_headerObj.musicGroups?.[val] ?? val) === targetIdx) {
@@ -5311,9 +5311,11 @@ const changeMSelect = (_num, _initFlg = false) => {
 			tmpKeyList.push(g_headerObj.keyLabels[j]);
 			tmpCreatorList.push(g_headerObj.creatorNames[j]);
 			tmpPlayingFrameList.push(g_detailObj.playingFrameWithBlank[j]);
+			tmpBpmList.push(g_headerObj.bpms[g_headerObj.musicNos[j]]);
 		}
 	});
-	const playingFrames = makeDedupliArray(tmpPlayingFrameList.sort((a, b) => a - b).map(val => transFrameToTimer(val))).join(`, `);
+	const playingFrames = makeDedupliArray(tmpPlayingFrameList.map(val => transFrameToTimer(val))).join(`, `);
+	const bpm = makeDedupliArray(tmpBpmList).join(`, `);
 	const [creatorName, creatorUrl, creatorIdx] = getCreatorInfo(tmpCreatorList);
 	const creatorLink = creatorIdx >= 0 ?
 		`<a href="${creatorUrl}" target="_blank">${creatorName}</a>` : creatorName;
@@ -5325,7 +5327,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 		`font-weight:bold">${g_headerObj.musicTitlesForView[idx].join(`<br>`)}</span>`;
 	document.getElementById(`lblMusicSelectDetail`).innerHTML =
 		`Maker: ${creatorLink} / Artist: <a href="${g_headerObj.artistUrls[idx]}" target="_blank">` +
-		`${g_headerObj.artistNames[idx]}</a><br>Duration: ${playingFrames} / BPM: ${g_headerObj.bpms[idx]}`;
+		`${g_headerObj.artistNames[idx]}</a><br>Duration: ${playingFrames} / BPM: ${bpm}`;
 
 	// 選択した楽曲で使われているキー種の一覧を作成
 	deleteChildspriteAll(`keyTitleSprite`);
