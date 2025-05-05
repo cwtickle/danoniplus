@@ -3586,7 +3586,12 @@ const headerConvert = _dosObj => {
 
 	// 楽曲別のグループ化設定（選曲モードのみ）
 	if (hasVal(_dosObj.musicGroup)) {
-		obj.musicGroups = _dosObj.musicGroup.split(`,`).map((val, j) => setVal(val, j, C_TYP_NUMBER));
+		obj.musicGroups = _dosObj.musicGroup.split(`,`)
+			.map((val, j) => setVal(val, j, C_TYP_NUMBER))
+			.map((val, j) => val < 0 ? j + val : val);
+		for (let k = obj.musicGroups.length; k <= Math.max(...obj.musicNos); k++) {
+			obj.musicGroups[k] = k;
+		}
 		obj.musicIdxList = makeDedupliArray(obj.musicGroups);
 	} else {
 		obj.musicIdxList = [...Array(Math.max(...obj.musicNos) + 1).keys()];
