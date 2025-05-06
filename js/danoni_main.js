@@ -5436,7 +5436,7 @@ const changeMSelect = async (_num, _initFlg = false) => {
 			g_audio.volume = g_stateObj.bgmVolume / 100;
 
 			const timeupdate = setInterval(() => {
-				if (g_audio.readyState === 4) {
+				if (g_audio.readyState === 4 && g_stateObj.bgmLoaded !== null) {
 					g_audio.currentTime = g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0;
 					g_audio.play();
 					clearInterval(timeupdate);
@@ -5463,7 +5463,8 @@ const changeMSelect = async (_num, _initFlg = false) => {
 			const repeatCheck = setInterval((num = g_settings.musicIdxNum) => {
 				try {
 					const elapsedTime = g_audio._context.currentTime - g_audio._startTime + g_audio._fadeinPosition;
-					if ((elapsedTime >= g_headerObj.musicEnds?.[g_settings.musicIdxNum] && g_stateObj.bgmLoaded === null) || num !== g_settings.musicIdxNum) {
+					if (((elapsedTime >= g_headerObj.musicEnds?.[g_settings.musicIdxNum] && g_stateObj.bgmLoaded === null) ||
+						num !== g_settings.musicIdxNum) && g_stateObj.bgmLooped !== null) {
 						clearInterval(repeatCheck);
 						g_stateObj.bgmLooped = null;
 						fadeOutAndSeek(g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0);
