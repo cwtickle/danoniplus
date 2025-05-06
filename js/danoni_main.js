@@ -5436,7 +5436,7 @@ const changeMSelect = async (_num, _initFlg = false) => {
 			g_audio.volume = g_stateObj.bgmVolume / 100;
 
 			const timeupdate = setInterval(() => {
-				if (g_audio.readyState === 4 && g_stateObj.bgmLoaded !== null) {
+				if (g_audio.readyState === 4 && g_stateObj.bgmLoaded !== null && g_currentPage === `title`) {
 					g_audio.currentTime = g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0;
 					g_audio.play();
 					clearInterval(timeupdate);
