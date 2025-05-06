@@ -3597,6 +3597,18 @@ const headerConvert = _dosObj => {
 		obj.musicIdxList = [...Array(Math.max(...obj.musicNos) + 1).keys()];
 	}
 
+	// 楽曲別の再生区間の設定（選曲モードのみ）
+	if (hasVal(_dosObj.musicTerms)) {
+		const musicTerms = _dosObj.musicTerms.split(`,`);
+		obj.musicStarts = [], obj.musicEnds = [];
+		musicTerms.forEach((terms, j) => {
+			const musicStart = terms.split(`-`)[0];
+			obj.musicStarts[j] = Math.floor(transTimerToFrame(musicStart) / g_fps);
+			const musicEnd = terms.split(`-`)[1] || `0`;
+			obj.musicEnds[j] = Math.floor(transTimerToFrame(musicEnd) / g_fps);
+		});
+	}
+
 	// 譜面変更セレクターの利用有無
 	obj.difSelectorUse = getDifSelectorUse(_dosObj.difSelectorUse, obj.viewLists);
 
@@ -4933,6 +4945,7 @@ const titleInit = (_initFlg = false) => {
 			createCss2Button(`btnStart`,
 				`>`, () => {
 					clearTimeout(g_timeoutEvtTitleId);
+					g_audio.pause();
 					g_handler.removeListener(wheelHandler);
 					g_keyObj.prevKey = `Dummy${g_settings.musicIdxNum}`;
 				}, Object.assign({
@@ -4976,6 +4989,7 @@ const titleInit = (_initFlg = false) => {
 
 		// 初期表示用 (2秒後に選曲画面を表示)
 		if (_initFlg && !g_headerObj.customTitleUse) {
+			g_audio.muted = true;
 			const mSelectTitleSprite = createEmptySprite(divRoot, `mSelectTitleSprite`,
 				g_windowObj.mSelectTitleSprite, g_cssObj.settings_DifSelector);
 			multiAppend(mSelectTitleSprite,
@@ -4994,6 +5008,8 @@ const titleInit = (_initFlg = false) => {
 				if (_opacity <= 0) {
 					clearTimeout(fadeOpacity);
 					mSelectTitleSprite.style.display = C_DIS_NONE;
+					g_audio.muted = false;
+					g_audio.currentTime = g_headerObj.musicStarts[g_settings.musicIdxNum] ?? 0;
 				} else {
 					mSelectTitleSprite.style.opacity = _opacity;
 					fadeOpacity = setTimeout(() => {
@@ -5283,8 +5299,9 @@ const getCreatorInfo = (_creatorList) => {
  * @param {number} _num 
  * @param {boolean} _initFlg 
  */
-const changeMSelect = (_num, _initFlg = false) => {
+const changeMSelect = async (_num, _initFlg = false) => {
 	const limitedMLength = 35;
+	g_audio.pause();
 
 	// 選択方向に合わせて楽曲リスト情報を再取得
 	for (let j = -g_settings.mSelectableTerms; j <= g_settings.mSelectableTerms; j++) {
@@ -5353,6 +5370,86 @@ const changeMSelect = (_num, _initFlg = false) => {
 
 	// コメント文の加工
 	lblComment.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
+
+	// BGM再生処理
+	const musicUrl = getMusicUrl(g_headerObj.viewLists[0]);
+	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${musicUrl}`;
+	if (musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+		url = musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
+	} else if (g_headerObj.musicFolder.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
+		url = `${g_headerObj.musicFolder.split(C_MRK_CURRENT_DIRECTORY)[1]}/${musicUrl}`;
+	}
+	const encodeFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
+	if (encodeFlg) {
+		await loadScript2(url);
+		musicInit();
+		g_audio = new AudioPlayer();
+		const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0))
+		await g_audio.init(array.buffer);
+		g_audio.volume = 25 / 100;
+
+		const timeupdate = setInterval(() => {
+			if (g_audio.readyState === 4) {
+				g_audio.currentTime = g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0;
+				g_audio.play();
+				clearInterval(timeupdate);
+			}
+		}, 100);
+
+	} else {
+		g_audio = new Audio();
+		g_audio.src = url;
+		g_audio.autoplay = true;
+		g_audio.volume = 50 / 100;
+		g_audio.currentTime = g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0;
+	}
+
+	const repeatBgm = () => {
+		if (encodeFlg) {
+			// base64エンコード時はループ処理をしない
+		} else {
+			g_handler.addListener(g_audio, "timeupdate", () => {
+				if (g_audio.currentTime >= g_headerObj.musicEnds?.[g_settings.musicIdxNum]) {
+					fadeOutAndSeek(g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0);
+				}
+			});
+		}
+	};
+	if (g_headerObj.musicEnds?.[g_settings.musicIdxNum]) {
+		repeatBgm();
+	}
+
+	const fadeOutAndSeek = _targetTime => {
+		let volume = g_audio.volume;
+		const fadeInterval = setInterval(() => {
+			if (volume > 0.05) {
+				volume -= 0.05;
+				g_audio.volume = Math.max(volume, 0);
+			} else {
+				clearInterval(fadeInterval);
+				g_audio.pause();
+				g_audio.currentTime = _targetTime;
+
+				// フェードイン開始
+				setTimeout(() => {
+					fadeIn();
+				}, 100);
+			}
+		}, 100);
+	};
+
+	const fadeIn = () => {
+		let volume = 0;
+		g_audio.play();
+		const fadeInterval = setInterval(() => {
+			if (volume < 50 / 100) {
+				volume += 0.05;
+				g_audio.volume = Math.min(volume, 1);
+			} else {
+				clearInterval(fadeInterval);
+			}
+		}, 100);
+	};
 
 	// 選曲変更時のカスタム関数実行
 	g_customJsObj.musicSelect.forEach(func => func(g_settings.musicIdxNum));
