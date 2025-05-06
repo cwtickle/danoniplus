@@ -5459,11 +5459,15 @@ const changeMSelect = async (_num, _initFlg = false) => {
 		g_audio.currentTime = g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0;
 	}
 
+	const FADE_STEP = 0.05;
+	const FADE_INTERVAL_MS = 100;
+	const FADE_DELAY_MS = 500;
+
 	const fadeOutAndSeek = _targetTime => {
 		let volume = g_audio.volume;
 		const fadeInterval = setInterval(() => {
-			if (volume > 0.05) {
-				volume -= 0.05;
+			if (volume > FADE_STEP) {
+				volume -= FADE_STEP;
 				g_audio.volume = Math.max(volume, 0);
 			} else {
 				clearInterval(fadeInterval);
@@ -5477,9 +5481,9 @@ const changeMSelect = async (_num, _initFlg = false) => {
 						// base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
 						repeatBgm();
 					}
-				}, 500);
+				}, FADE_DELAY_MS);
 			}
-		}, 100);
+		}, FADE_INTERVAL_MS);
 	};
 
 	const fadeIn = () => {
@@ -5487,12 +5491,12 @@ const changeMSelect = async (_num, _initFlg = false) => {
 		g_audio.play();
 		const fadeInterval = setInterval(() => {
 			if (volume < g_stateObj.bgmVolume / 100) {
-				volume += 0.05;
+				volume += FADE_STEP;
 				g_audio.volume = Math.min(volume, 1);
 			} else {
 				clearInterval(fadeInterval);
 			}
-		}, 100);
+		}, FADE_INTERVAL_MS);
 	};
 
 	const repeatBgm = () => {
@@ -5511,7 +5515,7 @@ const changeMSelect = async (_num, _initFlg = false) => {
 					clearInterval(repeatCheck);
 					g_stateObj.bgmLooped = null;
 				}
-			}, 100);
+			}, FADE_INTERVAL_MS);
 			g_stateObj.bgmLooped = repeatCheck;
 
 		} else {
