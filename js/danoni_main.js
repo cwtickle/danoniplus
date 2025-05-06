@@ -5427,8 +5427,8 @@ const changeMSelect = async (_num, _initFlg = false) => {
 	const url = getLoadMusicUrl(musicUrl);
 	const encodeFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
 	if (encodeFlg) {
-		await loadScript2(url);
 		try {
+			await loadScript2(url);
 			musicInit();
 			g_audio = new AudioPlayer();
 			const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0))
@@ -5514,7 +5514,7 @@ const changeMSelect = async (_num, _initFlg = false) => {
 		let volume = 0;
 		g_audio.play();
 		const fadeInterval = setInterval(() => {
-			if (volume < 50 / 100) {
+			if (volume < g_stateObj.bgmVolume / 100) {
 				volume += 0.05;
 				g_audio.volume = Math.min(volume, 1);
 			} else {
