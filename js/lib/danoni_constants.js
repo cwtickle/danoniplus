@@ -1257,7 +1257,7 @@ const g_settings = {
 };
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
-g_settings.bgmVolumeNum = g_settings.volumes.findIndex(v => v === g_stateObj.bgmVolume);
+g_settings.bgmVolumeNum = roundZero(g_settings.volumes.findIndex(v => v === g_stateObj.bgmVolume));
 g_settings.opacityNum = g_settings.opacitys.length - 1;
 
 /**
