@@ -5337,14 +5337,12 @@ const pauseBgm = () => {
 	if (g_audio) {
 		g_audio.pause();
 	}
-	if (g_stateObj.bgmLoaded) {
-		clearInterval(g_stateObj.bgmLoaded);
-		g_stateObj.bgmLoaded = null;
-	}
-	if (g_stateObj.bgmLooped) {
-		clearInterval(g_stateObj.bgmLooped);
-		g_stateObj.bgmLooped = null;
-	}
+	[`bgmLoaded`, `bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
+		if (g_stateObj[id]) {
+			clearInterval(g_stateObj[id]);
+			g_stateObj[id] = null;
+		}
+	});
 };
 
 /**
@@ -5463,6 +5461,10 @@ const changeMSelect = async (_num, _initFlg = false) => {
 	const FADE_INTERVAL_MS = 100;
 	const FADE_DELAY_MS = 500;
 
+	/**
+	 * BGMのフェードアウトとシーク
+	 * @param {number} _targetTime 
+	 */
 	const fadeOutAndSeek = _targetTime => {
 		let volume = g_audio.volume;
 		const fadeInterval = setInterval(() => {
@@ -5471,6 +5473,7 @@ const changeMSelect = async (_num, _initFlg = false) => {
 				g_audio.volume = Math.max(volume, 0);
 			} else {
 				clearInterval(fadeInterval);
+				g_stateObj.bgmFadeOut = null;
 				g_audio.pause();
 				g_audio.currentTime = _targetTime;
 
@@ -5484,8 +5487,12 @@ const changeMSelect = async (_num, _initFlg = false) => {
 				}, FADE_DELAY_MS);
 			}
 		}, FADE_INTERVAL_MS);
+		g_stateObj.bgmFadeOut = fadeInterval;
 	};
 
+	/**
+	 * BGMのフェードイン
+	 */
 	const fadeIn = () => {
 		let volume = 0;
 		g_audio.play();
@@ -5495,10 +5502,15 @@ const changeMSelect = async (_num, _initFlg = false) => {
 				g_audio.volume = Math.min(volume, 1);
 			} else {
 				clearInterval(fadeInterval);
+				g_stateObj.bgmFadeIn = null;
 			}
 		}, FADE_INTERVAL_MS);
+		g_stateObj.bgmFadeIn = fadeInterval;
 	};
 
+	/**
+	 * BGMのループ処理
+	 */
 	const repeatBgm = () => {
 		if (encodeFlg) {
 			// base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
