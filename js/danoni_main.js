@@ -2310,6 +2310,17 @@ class AudioPlayer {
 		}
 	}
 
+	close() {
+		if (this._context) {
+			this._context.close();
+			this._buffer = null;
+		}
+		if (this._source) {
+			this._source.disconnect(this._gain);
+			this._source = null;
+		}
+	}
+
 	get elapsedTime() {
 		return this._context.currentTime - this._startTime + this._fadeinPosition;
 	}
@@ -5362,8 +5373,7 @@ const pauseBGM = () => {
  * @param {number} _num 
  * @param {number} _currentLoopNum
  */
-const playBGM = async (_num, _currentLoopNum) => {
-	g_stateObj.bgmLockedFlg = true;
+const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	const FADE_STEP = 0.05 * g_stateObj.bgmVolume / 100;
 	const FADE_INTERVAL_MS = 100;
 	const FADE_DELAY_MS = 500;
@@ -5373,46 +5383,10 @@ const playBGM = async (_num, _currentLoopNum) => {
 	const encodeFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
 	const musicStart = g_headerObj.musicStarts?.[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
 	const musicEnd = g_headerObj.musicEnds?.[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
-	if (encodeFlg) {
-		try {
-			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
-			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
-				await loadScript2(url);
-				musicInit();
-				g_audio = new AudioPlayer();
-				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
-				await g_audio.init(array.buffer);
-				if (_currentLoopNum !== g_settings.musicLoopNum) {
-					return;
-				}
-			}
-			g_audio.volume = g_stateObj.bgmVolume / 100;
-			if (g_currentPage === `title`) {
-				g_audio.currentTime = musicStart;
-				g_audio.play();
-			}
-		} catch (e) {
-			// 音源の読み込みに失敗した場合、エラーを表示
-			console.warn(`BGM load error: ${e}`);
-		}
-
-	} else {
-		g_audio = new Audio();
-		g_audio.src = url;
-		g_audio.autoplay = false;
-		g_audio.volume = g_stateObj.bgmVolume / 100;
-		g_handler.addListener(g_audio, `loadedmetadata`, () => {
-			if (_currentLoopNum !== g_settings.musicLoopNum) {
-				return;
-			}
-			g_audio.currentTime = musicStart;
-			g_audio.play();
-		}, { once: true });
-	}
 
 	/**
 	 * BGMのフェードアウトとシーク
-	 * @param {number} _targetTime 
+	 * @param {number} _targetTime
 	 */
 	const fadeOutAndSeek = _targetTime => {
 		let volume = g_audio.volume;
@@ -5489,6 +5463,45 @@ const playBGM = async (_num, _currentLoopNum) => {
 			});
 		}
 	};
+
+	if (encodeFlg) {
+		try {
+			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
+			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
+				await loadScript2(url);
+				musicInit();
+				const tmpAudio = new AudioPlayer();
+				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
+				await tmpAudio.init(array.buffer);
+				if (_currentLoopNum !== g_settings.musicLoopNum) {
+					tmpAudio.close();
+					return;
+				}
+				g_audio = tmpAudio;
+			}
+			g_audio.volume = g_stateObj.bgmVolume / 100;
+			if (g_currentPage === `title`) {
+				g_audio.currentTime = musicStart;
+				g_audio.play();
+			}
+		} catch (e) {
+			// 音源の読み込みに失敗した場合、エラーを表示
+			console.warn(`BGM load error: ${e}`);
+		}
+
+	} else {
+		g_audio = new Audio();
+		g_audio.src = url;
+		g_audio.autoplay = false;
+		g_audio.volume = g_stateObj.bgmVolume / 100;
+		g_handler.addListener(g_audio, `loadedmetadata`, () => {
+			if (_currentLoopNum !== g_settings.musicLoopNum) {
+				return;
+			}
+			g_audio.currentTime = musicStart;
+			g_audio.play();
+		}, { once: true });
+	}
 	if (musicEnd > 0) {
 		repeatBGM();
 	}
@@ -5575,7 +5588,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 
 	// BGM再生処理
 	if (_initFlg) {
-		playBGM(_num, currentLoopNum);
+		playBGM(_num);
 	} else {
 		setTimeout(() => {
 			if (currentLoopNum === g_settings.musicLoopNum) {
