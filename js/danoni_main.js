@@ -2962,7 +2962,7 @@ const getMusicUrl = _scoreId =>
  * @param {string} _musicUrl 
  * @returns {string}
  */
-const getLoadMusicUrl = (_musicUrl = ``) => {
+const getFullMusicUrl = (_musicUrl = ``) => {
 	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${_musicUrl}`;
 	if (_musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
 		url = _musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
@@ -5356,7 +5356,7 @@ const playBGM = async (_num = 0) => {
 	const FADE_DELAY_MS = 500;
 
 	const musicUrl = getMusicUrl(g_headerObj.viewLists[0]);
-	const url = getLoadMusicUrl(musicUrl);
+	const url = getFullMusicUrl(musicUrl);
 	const encodeFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
 	const musicStart = g_headerObj.musicStarts?.[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
 	const musicEnd = g_headerObj.musicEnds?.[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
@@ -9083,7 +9083,7 @@ const loadMusic = () => {
 	g_currentPage = `loading`;
 
 	const musicUrl = getMusicUrl(g_stateObj.scoreId);
-	const url = getLoadMusicUrl(musicUrl);
+	const url = getFullMusicUrl(musicUrl);
 	g_headerObj.musicUrl = musicUrl;
 	g_musicEncodedFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
 
