@@ -5389,14 +5389,15 @@ const playBGM = async (_num = 0) => {
 		}
 
 	} else {
-		g_audio = new Audio();
-		g_audio.src = url;
-		g_audio.autoplay = true;
-		g_audio.volume = g_stateObj.bgmVolume / 100;
-		g_handler.addListener(g_audio, `loadedmetadata`, () => {
-			g_audio.currentTime = musicStart;
-		}, { once: true });
-	}
+        g_audio = new Audio();
+        g_audio.src = url;
+        g_audio.autoplay = false;
+        g_audio.volume = g_stateObj.bgmVolume / 100;
+        g_handler.addListener(g_audio, `loadedmetadata`, () => {
+            g_audio.currentTime = musicStart;
+            g_audio.play();
+        }, { once: true });
+    }
 
 	/**
 	 * BGMのフェードアウトとシーク
