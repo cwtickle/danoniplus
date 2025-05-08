@@ -5347,90 +5347,6 @@ const pauseBgm = () => {
 };
 
 /**
- * 選曲ボタンを押したときの処理
- * @param {number} _num 
- * @param {boolean} _initFlg 
- */
-const changeMSelect = (_num, _initFlg = false) => {
-	const limitedMLength = 35;
-	pauseBgm();
-
-	// 選択方向に合わせて楽曲リスト情報を再取得
-	for (let j = -g_settings.mSelectableTerms; j <= g_settings.mSelectableTerms; j++) {
-		const idx = g_headerObj.musicIdxList[(j + _num + g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 10) % g_headerObj.musicIdxList.length];
-		if (j === 0) {
-		} else {
-			document.getElementById(`btnMusicSelect${j}`).style.fontSize =
-				getFontSize(g_headerObj.musicTitles[idx].slice(0, limitedMLength), g_btnWidth(1 / 2), getBasicFont(), 14);
-			document.getElementById(`btnMusicSelect${j}`).innerHTML =
-				`${g_headerObj.musicTitles[idx].slice(0, limitedMLength)}${g_headerObj.musicTitles[idx].length > limitedMLength ? '...' : ''}<br>` +
-				`<span style="font-size:0.7em;line-height:9px"> / ${g_headerObj.artistNames[idx]}</span>`;
-		}
-	}
-	// 現在選択中の楽曲IDを再設定
-	g_settings.musicIdxNum = (g_settings.musicIdxNum + _num + g_headerObj.musicIdxList.length) % g_headerObj.musicIdxList.length;
-
-	// 選択した楽曲に対応する譜面番号、製作者情報、曲長を取得
-	g_headerObj.viewLists = [];
-	const tmpKeyList = [], tmpCreatorList = [], tmpPlayingFrameList = [], tmpBpmList = [];
-	const targetIdx = g_headerObj.musicIdxList[(g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 20) % g_headerObj.musicIdxList.length];
-	g_headerObj.musicNos.forEach((val, j) => {
-		if ((g_headerObj.musicGroups?.[val] ?? val) === targetIdx) {
-			g_headerObj.viewLists.push(j);
-			tmpKeyList.push(g_headerObj.keyLabels[j]);
-			tmpCreatorList.push(g_headerObj.creatorNames[j]);
-			tmpPlayingFrameList.push(g_detailObj.playingFrameWithBlank[j]);
-			tmpBpmList.push(g_headerObj.bpms[g_headerObj.musicNos[j]]);
-		}
-	});
-	const playingFrames = makeDedupliArray(tmpPlayingFrameList.map(val => transFrameToTimer(val))).join(`, `);
-	const bpm = makeDedupliArray(tmpBpmList).join(`, `);
-	const [creatorName, creatorUrl, creatorIdx] = getCreatorInfo(tmpCreatorList);
-	const creatorLink = creatorIdx >= 0 ?
-		`<a href="${creatorUrl}" target="_blank">${creatorName}</a>` : creatorName;
-
-	// 選択した楽曲の情報表示
-	const idx = g_headerObj.musicIdxList[g_settings.musicIdxNum];
-	document.getElementById(`lblMusicSelect`).innerHTML =
-		`<span style="font-size:${getFontSize(g_headerObj.musicTitlesForView[idx].join(`<br>`), g_btnWidth(1 / 2), getBasicFont(), 18)}px;` +
-		`font-weight:bold">${g_headerObj.musicTitlesForView[idx].join(`<br>`)}</span>`;
-	document.getElementById(`lblMusicSelectDetail`).innerHTML =
-		`Maker: ${creatorLink} / Artist: <a href="${g_headerObj.artistUrls[idx]}" target="_blank">` +
-		`${g_headerObj.artistNames[idx]}</a><br>Duration: ${playingFrames} / BPM: ${bpm}`;
-
-	// 選択した楽曲で使われているキー種の一覧を作成
-	deleteChildspriteAll(`keyTitleSprite`);
-	makeDedupliArray(tmpKeyList).sort((a, b) => parseInt(a) - parseInt(b))
-		.forEach((val, j) => keyTitleSprite.appendChild(
-			createDivCss2Label(`btnKeyTitle${val}`, val,
-				Object.assign({ x: 10 + j * 40 }, g_lblPosObj.btnKeyTitle)
-			)));
-
-
-	// 選択した楽曲の選択位置を表示
-	lblMusicCnt.innerHTML = `${g_settings.musicIdxNum + 1} / ${g_headerObj.musicIdxList.length}`;
-
-	// 楽曲別のローカルストレージを再取得
-	loadLocalStorage(g_settings.musicIdxNum);
-	viewKeyStorage.cache = new Map();
-
-	// 初期化もしくは楽曲変更時に速度を初期化
-	if (_initFlg || _num % g_headerObj.musicIdxList.length !== 0) {
-		g_stateObj.speed = g_headerObj.initSpeeds[g_headerObj.viewLists[0]];
-		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
-	}
-
-	// コメント文の加工
-	lblComment.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
-
-	// BGM再生処理
-	playBGM(_num);
-
-	// 選曲変更時のカスタム関数実行
-	g_customJsObj.musicSelect.forEach(func => func(g_settings.musicIdxNum));
-};
-
-/**
  * BGM再生処理
  * @param {number} _num 
  */
@@ -5562,6 +5478,90 @@ const playBGM = async (_num = 0) => {
 	if (g_headerObj.musicEnds?.[g_settings.musicIdxNum]) {
 		repeatBgm(encodeFlg);
 	}
+};
+
+/**
+ * 選曲ボタンを押したときの処理
+ * @param {number} _num 
+ * @param {boolean} _initFlg 
+ */
+const changeMSelect = (_num, _initFlg = false) => {
+	const limitedMLength = 35;
+	pauseBgm();
+
+	// 選択方向に合わせて楽曲リスト情報を再取得
+	for (let j = -g_settings.mSelectableTerms; j <= g_settings.mSelectableTerms; j++) {
+		const idx = g_headerObj.musicIdxList[(j + _num + g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 10) % g_headerObj.musicIdxList.length];
+		if (j === 0) {
+		} else {
+			document.getElementById(`btnMusicSelect${j}`).style.fontSize =
+				getFontSize(g_headerObj.musicTitles[idx].slice(0, limitedMLength), g_btnWidth(1 / 2), getBasicFont(), 14);
+			document.getElementById(`btnMusicSelect${j}`).innerHTML =
+				`${g_headerObj.musicTitles[idx].slice(0, limitedMLength)}${g_headerObj.musicTitles[idx].length > limitedMLength ? '...' : ''}<br>` +
+				`<span style="font-size:0.7em;line-height:9px"> / ${g_headerObj.artistNames[idx]}</span>`;
+		}
+	}
+	// 現在選択中の楽曲IDを再設定
+	g_settings.musicIdxNum = (g_settings.musicIdxNum + _num + g_headerObj.musicIdxList.length) % g_headerObj.musicIdxList.length;
+
+	// 選択した楽曲に対応する譜面番号、製作者情報、曲長を取得
+	g_headerObj.viewLists = [];
+	const tmpKeyList = [], tmpCreatorList = [], tmpPlayingFrameList = [], tmpBpmList = [];
+	const targetIdx = g_headerObj.musicIdxList[(g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 20) % g_headerObj.musicIdxList.length];
+	g_headerObj.musicNos.forEach((val, j) => {
+		if ((g_headerObj.musicGroups?.[val] ?? val) === targetIdx) {
+			g_headerObj.viewLists.push(j);
+			tmpKeyList.push(g_headerObj.keyLabels[j]);
+			tmpCreatorList.push(g_headerObj.creatorNames[j]);
+			tmpPlayingFrameList.push(g_detailObj.playingFrameWithBlank[j]);
+			tmpBpmList.push(g_headerObj.bpms[g_headerObj.musicNos[j]]);
+		}
+	});
+	const playingFrames = makeDedupliArray(tmpPlayingFrameList.map(val => transFrameToTimer(val))).join(`, `);
+	const bpm = makeDedupliArray(tmpBpmList).join(`, `);
+	const [creatorName, creatorUrl, creatorIdx] = getCreatorInfo(tmpCreatorList);
+	const creatorLink = creatorIdx >= 0 ?
+		`<a href="${creatorUrl}" target="_blank">${creatorName}</a>` : creatorName;
+
+	// 選択した楽曲の情報表示
+	const idx = g_headerObj.musicIdxList[g_settings.musicIdxNum];
+	document.getElementById(`lblMusicSelect`).innerHTML =
+		`<span style="font-size:${getFontSize(g_headerObj.musicTitlesForView[idx].join(`<br>`), g_btnWidth(1 / 2), getBasicFont(), 18)}px;` +
+		`font-weight:bold">${g_headerObj.musicTitlesForView[idx].join(`<br>`)}</span>`;
+	document.getElementById(`lblMusicSelectDetail`).innerHTML =
+		`Maker: ${creatorLink} / Artist: <a href="${g_headerObj.artistUrls[idx]}" target="_blank">` +
+		`${g_headerObj.artistNames[idx]}</a><br>Duration: ${playingFrames} / BPM: ${bpm}`;
+
+	// 選択した楽曲で使われているキー種の一覧を作成
+	deleteChildspriteAll(`keyTitleSprite`);
+	makeDedupliArray(tmpKeyList).sort((a, b) => parseInt(a) - parseInt(b))
+		.forEach((val, j) => keyTitleSprite.appendChild(
+			createDivCss2Label(`btnKeyTitle${val}`, val,
+				Object.assign({ x: 10 + j * 40 }, g_lblPosObj.btnKeyTitle)
+			)));
+
+
+	// 選択した楽曲の選択位置を表示
+	lblMusicCnt.innerHTML = `${g_settings.musicIdxNum + 1} / ${g_headerObj.musicIdxList.length}`;
+
+	// 楽曲別のローカルストレージを再取得
+	loadLocalStorage(g_settings.musicIdxNum);
+	viewKeyStorage.cache = new Map();
+
+	// 初期化もしくは楽曲変更時に速度を初期化
+	if (_initFlg || _num % g_headerObj.musicIdxList.length !== 0) {
+		g_stateObj.speed = g_headerObj.initSpeeds[g_headerObj.viewLists[0]];
+		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
+	}
+
+	// コメント文の加工
+	lblComment.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
+
+	// BGM再生処理
+	playBGM(_num);
+
+	// 選曲変更時のカスタム関数実行
+	g_customJsObj.musicSelect.forEach(func => func(g_settings.musicIdxNum));
 };
 
 /**
