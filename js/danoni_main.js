@@ -2310,6 +2310,10 @@ class AudioPlayer {
 		}
 	}
 
+	get elapsedTime() {
+		return this._context.currentTime - this._startTime + this._fadeinPosition;
+	}
+
 	set currentTime(_currentTime) {
 		this._fadeinPosition = _currentTime;
 	}
@@ -3776,8 +3780,9 @@ const headerConvert = _dosObj => {
 			const musicUrlPair = val.split(`,`);
 			obj.musicUrls[j] = musicUrlPair[0] || ``;
 			if (musicUrlPair[1] !== undefined) {
-				obj.musicStarts[j] = Math.floor(transTimerToFrame(musicUrlPair[1].split(`-`)[0]) / g_fps);
-				obj.musicEnds[j] = Math.floor(transTimerToFrame(musicUrlPair[1].split(`-`)[1] || `20`) / g_fps);
+				const musicBGMTime = musicUrlPair[1].split(`-`).map(str => str.trim());
+				obj.musicStarts[j] = Math.floor(transTimerToFrame(musicBGMTime[0] ?? `0:00`) / g_fps);
+				obj.musicEnds[j] = Math.floor(transTimerToFrame(musicBGMTime[1] ?? `0:20`) / g_fps);
 			} else {
 				obj.musicStarts[j] = 0;
 				obj.musicEnds[j] = 20;
@@ -5337,6 +5342,9 @@ const pauseBGM = () => {
 	if (g_audio) {
 		g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
 		g_audio.pause();
+		if (!(g_audio instanceof AudioPlayer)) {
+			g_audio.src = ``;
+		}
 	}
 	[`bgmLoaded`, `bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
 		if (g_stateObj[id]) {
@@ -5363,7 +5371,7 @@ const playBGM = async (_num = 0) => {
 	if (encodeFlg) {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
-			if (!hasVal(g_musicdata) || _num % g_headerObj.musicIdxList.length !== 0) {
+			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
 				await loadScript2(url);
 				musicInit();
 				g_audio = new AudioPlayer();
@@ -5389,15 +5397,15 @@ const playBGM = async (_num = 0) => {
 		}
 
 	} else {
-        g_audio = new Audio();
-        g_audio.src = url;
-        g_audio.autoplay = false;
-        g_audio.volume = g_stateObj.bgmVolume / 100;
-        g_handler.addListener(g_audio, `loadedmetadata`, () => {
-            g_audio.currentTime = musicStart;
-            g_audio.play();
-        }, { once: true });
-    }
+		g_audio = new Audio();
+		g_audio.src = url;
+		g_audio.autoplay = false;
+		g_audio.volume = g_stateObj.bgmVolume / 100;
+		g_handler.addListener(g_audio, `loadedmetadata`, () => {
+			g_audio.currentTime = musicStart;
+			g_audio.play();
+		}, { once: true });
+	}
 
 	/**
 	 * BGMのフェードアウトとシーク
@@ -5457,8 +5465,7 @@ const playBGM = async (_num = 0) => {
 			// base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
 			const repeatCheck = setInterval((num = g_settings.musicIdxNum) => {
 				try {
-					const elapsedTime = g_audio._context.currentTime - g_audio._startTime + g_audio._fadeinPosition;
-					if (((elapsedTime >= musicEnd && g_stateObj.bgmLoaded === null) ||
+					if (((g_audio.elapsedTime >= musicEnd && g_stateObj.bgmLoaded === null) ||
 						num !== g_settings.musicIdxNum) && g_stateObj.bgmLooped !== null) {
 						clearInterval(repeatCheck);
 						g_stateObj.bgmLooped = null;
@@ -5480,7 +5487,7 @@ const playBGM = async (_num = 0) => {
 		}
 	};
 	if (musicEnd > 0) {
-		repeatBGM(encodeFlg);
+		repeatBGM();
 	}
 };
 
@@ -5553,7 +5560,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 	viewKeyStorage.cache = new Map();
 
 	// 初期化もしくは楽曲変更時に速度を初期化
-	if (_initFlg || _num % g_headerObj.musicIdxList.length !== 0) {
+	if (_initFlg || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
 		g_stateObj.speed = g_headerObj.initSpeeds[g_headerObj.viewLists[0]];
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
 	}
