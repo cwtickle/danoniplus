@@ -5419,7 +5419,8 @@ const playBGM = async (_num = 0) => {
 					setTimeout(() => {
 						fadeIn();
 						if (encodeFlg) {
-							// base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
+							// base64エンコード時はtimeupdateイベントが発火しないため、
+							// setIntervalで時間を取得する
 							repeatBGM();
 						}
 					}, FADE_DELAY_MS);
