@@ -5346,7 +5346,7 @@ const pauseBGM = () => {
 			g_audio.src = ``;
 		}
 	}
-	[`bgmLoaded`, `bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
+	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
 		if (g_stateObj[id]) {
 			clearInterval(g_stateObj[id]);
 			g_stateObj[id] = null;
@@ -5379,18 +5379,10 @@ const playBGM = async (_num = 0) => {
 				await g_audio.init(array.buffer);
 			}
 			g_audio.volume = g_stateObj.bgmVolume / 100;
-
-			const timeupdate = setInterval(() => {
-				if (g_audio.readyState === 4 && g_stateObj.bgmLoaded !== null) {
-					if (g_currentPage === `title`) {
-						g_audio.currentTime = musicStart;
-						g_audio.play();
-					}
-					clearInterval(timeupdate);
-					g_stateObj.bgmLoaded = null;
-				}
-			}, 100);
-			g_stateObj.bgmLoaded = timeupdate;
+			if (g_currentPage === `title`) {
+				g_audio.currentTime = musicStart;
+				g_audio.play();
+			}
 		} catch (e) {
 			// 音源の読み込みに失敗した場合、エラーを表示
 			console.warn(`BGM load error: ${e}`);
@@ -5465,7 +5457,7 @@ const playBGM = async (_num = 0) => {
 			// base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
 			const repeatCheck = setInterval((num = g_settings.musicIdxNum) => {
 				try {
-					if (((g_audio.elapsedTime >= musicEnd && g_stateObj.bgmLoaded === null) ||
+					if (((g_audio.elapsedTime >= musicEnd) ||
 						num !== g_settings.musicIdxNum) && g_stateObj.bgmLooped !== null) {
 						clearInterval(repeatCheck);
 						g_stateObj.bgmLooped = null;

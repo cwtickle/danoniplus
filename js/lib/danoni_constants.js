@@ -1012,7 +1012,6 @@ let C_WOD_FRAME = 30;
 const g_stateObj = {
     keyInitial: false,
     bgmVolume: 50,
-    bgmLoaded: null,
     bgmLooped: null,
     bgmFadeIn: null,
     bgmFadeOut: null,
