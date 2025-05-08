@@ -1016,6 +1016,7 @@ const g_stateObj = {
     bgmLooped: null,
     bgmFadeIn: null,
     bgmFadeOut: null,
+    bgmTimeupdateEvtId: null,
 
     dosDivideFlg: false,
     scoreLockFlg: false,

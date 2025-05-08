@@ -5335,6 +5335,7 @@ const getCreatorInfo = (_creatorList) => {
  */
 const pauseBgm = () => {
 	if (g_audio) {
+		g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
 		g_audio.pause();
 	}
 	[`bgmLoaded`, `bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
@@ -5430,7 +5431,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 };
 
 /**
- * BPM再生処理
+ * BGM再生処理
  * @param {number} _num 
  */
 const playBGM = async (_num = 0) => {
@@ -5444,14 +5445,14 @@ const playBGM = async (_num = 0) => {
 	if (encodeFlg) {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
-			if (_num % g_headerObj.musicIdxList.length !== 0) {
+			if (!hasVal(g_musicdata) || _num % g_headerObj.musicIdxList.length !== 0) {
 				await loadScript2(url);
 				musicInit();
 				g_audio = new AudioPlayer();
 				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
 				await g_audio.init(array.buffer);
-				g_audio.volume = g_stateObj.bgmVolume / 100;
 			}
+			g_audio.volume = g_stateObj.bgmVolume / 100;
 
 			const timeupdate = setInterval(() => {
 				if (g_audio.readyState === 4 && g_stateObj.bgmLoaded !== null) {
@@ -5474,7 +5475,9 @@ const playBGM = async (_num = 0) => {
 		g_audio.src = url;
 		g_audio.autoplay = true;
 		g_audio.volume = g_stateObj.bgmVolume / 100;
-		g_audio.currentTime = g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0;
+		g_handler.addListener(g_audio, `loadedmetadata`, () => {
+			g_audio.currentTime = g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0;
+		}, { once: true });
 	}
 
 	/**
@@ -5549,7 +5552,7 @@ const playBGM = async (_num = 0) => {
 			g_stateObj.bgmLooped = repeatCheck;
 
 		} else {
-			g_handler.addListener(g_audio, "timeupdate", () => {
+			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audio, "timeupdate", () => {
 				if (g_audio.currentTime >= g_headerObj.musicEnds?.[g_settings.musicIdxNum]) {
 					fadeOutAndSeek(g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0);
 				}
@@ -9140,6 +9143,7 @@ const setAudio = async (_url) => {
 
 	const loadMp3 = () => {
 		if (g_isFile) {
+			g_audio = new Audio();
 			g_audio.src = _url;
 			musicAfterLoaded();
 		} else {
