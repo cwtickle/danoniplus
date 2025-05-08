@@ -3782,7 +3782,9 @@ const headerConvert = _dosObj => {
 			if (musicUrlPair[1] !== undefined) {
 				const musicBGMTime = musicUrlPair[1].split(`-`).map(str => str.trim());
 				obj.musicStarts[j] = Math.floor(transTimerToFrame(musicBGMTime[0] ?? 0) / g_fps);
-				obj.musicEnds[j] = Math.floor((transTimerToFrame(musicBGMTime[1] ?? 0) + transTimerToFrame(`0:20`)) / g_fps);
+				obj.musicEnds[j] = musicBGMTime[1] !== undefined ?
+					Math.floor((transTimerToFrame(musicBGMTime[1] ?? 0)) / g_fps) :
+					Math.floor((transTimerToFrame(musicBGMTime[0] ?? 0) + transTimerToFrame(`0:20`)) / g_fps);
 			} else {
 				obj.musicStarts[j] = 0;
 				obj.musicEnds[j] = 20;
