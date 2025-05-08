@@ -4952,7 +4952,7 @@ const titleInit = (_initFlg = false) => {
 		 * 選曲画面上の音量調整
 		 * @param {number} _num 
 		 */
-		const setBgmVolume = (_num = 1) => {
+		const setBGMVolume = (_num = 1) => {
 			g_settings.bgmVolumeNum = nextPos(g_settings.bgmVolumeNum, _num, g_settings.volumes.length);
 			g_stateObj.bgmVolume = g_settings.volumes[g_settings.bgmVolumeNum];
 			g_audio.volume = g_stateObj.bgmVolume / 100;
@@ -4971,7 +4971,7 @@ const titleInit = (_initFlg = false) => {
 			createCss2Button(`btnStart`,
 				`>`, () => {
 					clearTimeout(g_timeoutEvtTitleId);
-					pauseBgm();
+					pauseBGM();
 					g_handler.removeListener(wheelHandler);
 					g_keyObj.prevKey = `Dummy${g_settings.musicIdxNum}`;
 				}, Object.assign({
@@ -4988,13 +4988,13 @@ const titleInit = (_initFlg = false) => {
 			createDivCss2Label(`lblComment`, ``, g_lblPosObj.lblComment_music),
 
 			createDivCss2Label(`lblBgmVolume`, `BGM Volume`, g_lblPosObj.lblBgmVolume),
-			createCss2Button(`btnBgmVolume`, `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`, () => setBgmVolume(),
+			createCss2Button(`btnBgmVolume`, `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`, () => setBGMVolume(),
 				Object.assign({
-					cxtFunc: () => setBgmVolume(-1),
+					cxtFunc: () => setBGMVolume(-1),
 				}, g_lblPosObj.btnBgmVolume), g_cssObj.button_Default),
-			createCss2Button(`btnBgmVolumeL`, `<`, () => setBgmVolume(-1),
+			createCss2Button(`btnBgmVolumeL`, `<`, () => setBGMVolume(-1),
 				g_lblPosObj.btnBgmVolumeL, g_cssObj.button_Setting),
-			createCss2Button(`btnBgmVolumeR`, `>`, () => setBgmVolume(),
+			createCss2Button(`btnBgmVolumeR`, `>`, () => setBGMVolume(),
 				g_lblPosObj.btnBgmVolumeR, g_cssObj.button_Setting),
 		);
 		changeMSelect(0, _initFlg);
@@ -5333,7 +5333,7 @@ const getCreatorInfo = (_creatorList) => {
 /**
  * BGMの停止
  */
-const pauseBgm = () => {
+const pauseBGM = () => {
 	if (g_audio) {
 		g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
 		g_audio.pause();
@@ -5418,7 +5418,7 @@ const playBGM = async (_num = 0) => {
 						fadeIn();
 						if (encodeFlg) {
 							// base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
-							repeatBgm();
+							repeatBGM();
 						}
 					}, FADE_DELAY_MS);
 				}
@@ -5448,7 +5448,7 @@ const playBGM = async (_num = 0) => {
 	/**
 	 * BGMのループ処理
 	 */
-	const repeatBgm = () => {
+	const repeatBGM = () => {
 		if (encodeFlg) {
 			// base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
 			const repeatCheck = setInterval((num = g_settings.musicIdxNum) => {
@@ -5476,7 +5476,7 @@ const playBGM = async (_num = 0) => {
 		}
 	};
 	if (g_headerObj.musicEnds?.[g_settings.musicIdxNum]) {
-		repeatBgm(encodeFlg);
+		repeatBGM(encodeFlg);
 	}
 };
 
@@ -5487,7 +5487,7 @@ const playBGM = async (_num = 0) => {
  */
 const changeMSelect = (_num, _initFlg = false) => {
 	const limitedMLength = 35;
-	pauseBgm();
+	pauseBGM();
 
 	// 選択方向に合わせて楽曲リスト情報を再取得
 	for (let j = -g_settings.mSelectableTerms; j <= g_settings.mSelectableTerms; j++) {
