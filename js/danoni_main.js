@@ -2312,12 +2312,16 @@ class AudioPlayer {
 
 	close() {
 		if (this._context) {
-			this._context.close();
+			this._context.close()?.catch(() => {/* ignore double-close */ });
 			this._buffer = null;
 		}
 		if (this._source) {
 			this._source.disconnect(this._gain);
 			this._source = null;
+		}
+		if (this._gain) {
+			this._gain.disconnect();
+			this._gain = null;
 		}
 	}
 
@@ -5470,6 +5474,9 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
 				await loadScript2(url);
 				musicInit();
+				if (_currentLoopNum !== g_settings.musicLoopNum) {
+					return;
+				}
 				const tmpAudio = new AudioPlayer();
 				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
 				await tmpAudio.init(array.buffer);
