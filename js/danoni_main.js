@@ -4941,6 +4941,7 @@ const titleInit = (_initFlg = false) => {
 
 		// 選曲画面の初期化
 		const wheelCycle = 2;
+		g_settings.musicLoopNum = 0;
 
 		/**
 		 * メイン以外の選曲ボタンの作成
@@ -5359,8 +5360,10 @@ const pauseBGM = () => {
 /**
  * BGM再生処理
  * @param {number} _num 
+ * @param {number} _currentLoopNum
  */
-const playBGM = async (_num = 0) => {
+const playBGM = async (_num, _currentLoopNum) => {
+	g_stateObj.bgmLockedFlg = true;
 	const FADE_STEP = 0.05 * g_stateObj.bgmVolume / 100;
 	const FADE_INTERVAL_MS = 100;
 	const FADE_DELAY_MS = 500;
@@ -5379,6 +5382,9 @@ const playBGM = async (_num = 0) => {
 				g_audio = new AudioPlayer();
 				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
 				await g_audio.init(array.buffer);
+				if (_currentLoopNum !== g_settings.musicLoopNum) {
+					return;
+				}
 			}
 			g_audio.volume = g_stateObj.bgmVolume / 100;
 			if (g_currentPage === `title`) {
@@ -5396,6 +5402,9 @@ const playBGM = async (_num = 0) => {
 		g_audio.autoplay = false;
 		g_audio.volume = g_stateObj.bgmVolume / 100;
 		g_handler.addListener(g_audio, `loadedmetadata`, () => {
+			if (_currentLoopNum !== g_settings.musicLoopNum) {
+				return;
+			}
 			g_audio.currentTime = musicStart;
 			g_audio.play();
 		}, { once: true });
@@ -5508,6 +5517,8 @@ const changeMSelect = (_num, _initFlg = false) => {
 	}
 	// 現在選択中の楽曲IDを再設定
 	g_settings.musicIdxNum = (g_settings.musicIdxNum + _num + g_headerObj.musicIdxList.length) % g_headerObj.musicIdxList.length;
+	g_settings.musicLoopNum++;
+	const currentLoopNum = g_settings.musicLoopNum;
 
 	// 選択した楽曲に対応する譜面番号、製作者情報、曲長を取得
 	g_headerObj.viewLists = [];
@@ -5563,7 +5574,15 @@ const changeMSelect = (_num, _initFlg = false) => {
 	lblComment.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
 
 	// BGM再生処理
-	playBGM(_num);
+	if (_initFlg) {
+		playBGM(_num, currentLoopNum);
+	} else {
+		setTimeout(() => {
+			if (currentLoopNum === g_settings.musicLoopNum) {
+				playBGM(_num, currentLoopNum);
+			}
+		}, 500);
+	}
 
 	// 選曲変更時のカスタム関数実行
 	g_customJsObj.musicSelect.forEach(func => func(g_settings.musicIdxNum));
