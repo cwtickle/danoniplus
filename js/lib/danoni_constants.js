@@ -2097,6 +2097,8 @@ const g_shortcutObj = {
         KeyD: { id: `btnReset` },
         ArrowUp: { id: `btnMusicSelectPrev` },
         ArrowDown: { id: `btnMusicSelectNext` },
+        ArrowLeft: { id: `btnBgmVolumeL` },
+        ArrowRight: { id: `btnBgmVolumeR` },
     },
     dataMgt: {
         KeyE: { id: `btnEnvironment` },
