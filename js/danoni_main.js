@@ -5361,7 +5361,7 @@ const pauseBGM = () => {
  * @param {number} _num 
  */
 const playBGM = async (_num = 0) => {
-	const FADE_STEP = 0.05;
+	const FADE_STEP = 0.05 * g_stateObj.bgmVolume / 100;
 	const FADE_INTERVAL_MS = 100;
 	const FADE_DELAY_MS = 500;
 
