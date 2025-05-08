@@ -3612,18 +3612,6 @@ const headerConvert = _dosObj => {
 		obj.musicIdxList = [...Array(Math.max(...obj.musicNos) + 1).keys()];
 	}
 
-	// 楽曲別の再生区間の設定（選曲モードのみ）
-	if (hasVal(_dosObj.musicTerms)) {
-		const musicTerms = _dosObj.musicTerms.split(`,`);
-		obj.musicStarts = [], obj.musicEnds = [];
-		musicTerms.forEach((terms, j) => {
-			const musicStart = terms.split(`-`)[0];
-			obj.musicStarts[j] = Math.floor(transTimerToFrame(musicStart) / g_fps);
-			const musicEnd = terms.split(`-`)[1] || `0`;
-			obj.musicEnds[j] = Math.floor(transTimerToFrame(musicEnd) / g_fps);
-		});
-	}
-
 	// 譜面変更セレクターの利用有無
 	obj.difSelectorUse = getDifSelectorUse(_dosObj.difSelectorUse, obj.viewLists);
 
@@ -3782,7 +3770,19 @@ const headerConvert = _dosObj => {
 
 	// 楽曲URL
 	if (hasVal(_dosObj.musicUrl)) {
-		obj.musicUrls = splitLF2(_dosObj.musicUrl);
+		const musicUrls = splitLF2(_dosObj.musicUrl);
+		obj.musicUrls = [], obj.musicStarts = [], obj.musicEnds = [];
+		musicUrls.forEach((val, j) => {
+			const musicUrlPair = val.split(`,`);
+			obj.musicUrls[j] = musicUrlPair[0] || ``;
+			if (musicUrlPair[1] !== undefined) {
+				obj.musicStarts[j] = Math.floor(transTimerToFrame(musicUrlPair[1].split(`-`)[0]) / g_fps);
+				obj.musicEnds[j] = Math.floor(transTimerToFrame(musicUrlPair[1].split(`-`)[1] || `20`) / g_fps);
+			} else {
+				obj.musicStarts[j] = 0;
+				obj.musicEnds[j] = 20;
+			}
+		});
 	} else {
 		makeWarningWindow(g_msgInfoObj.E_0031);
 	}
@@ -5045,7 +5045,7 @@ const titleInit = (_initFlg = false) => {
 					clearTimeout(fadeOpacity);
 					mSelectTitleSprite.style.display = C_DIS_NONE;
 					g_audio.muted = false;
-					g_audio.currentTime = g_headerObj.musicStarts[g_settings.musicIdxNum] ?? 0;
+					g_audio.currentTime = g_headerObj.musicStarts[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
 				} else {
 					mSelectTitleSprite.style.opacity = _opacity;
 					fadeOpacity = setTimeout(() => {
@@ -5358,6 +5358,8 @@ const playBGM = async (_num = 0) => {
 	const musicUrl = getMusicUrl(g_headerObj.viewLists[0]);
 	const url = getLoadMusicUrl(musicUrl);
 	const encodeFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
+	const musicStart = g_headerObj.musicStarts?.[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
+	const musicEnd = g_headerObj.musicEnds?.[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
 	if (encodeFlg) {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
@@ -5373,7 +5375,7 @@ const playBGM = async (_num = 0) => {
 			const timeupdate = setInterval(() => {
 				if (g_audio.readyState === 4 && g_stateObj.bgmLoaded !== null) {
 					if (g_currentPage === `title`) {
-						g_audio.currentTime = g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0;
+						g_audio.currentTime = musicStart;
 						g_audio.play();
 					}
 					clearInterval(timeupdate);
@@ -5392,7 +5394,7 @@ const playBGM = async (_num = 0) => {
 		g_audio.autoplay = true;
 		g_audio.volume = g_stateObj.bgmVolume / 100;
 		g_handler.addListener(g_audio, `loadedmetadata`, () => {
-			g_audio.currentTime = g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0;
+			g_audio.currentTime = musicStart;
 		}, { once: true });
 	}
 
@@ -5454,11 +5456,11 @@ const playBGM = async (_num = 0) => {
 			const repeatCheck = setInterval((num = g_settings.musicIdxNum) => {
 				try {
 					const elapsedTime = g_audio._context.currentTime - g_audio._startTime + g_audio._fadeinPosition;
-					if (((elapsedTime >= g_headerObj.musicEnds?.[g_settings.musicIdxNum] && g_stateObj.bgmLoaded === null) ||
+					if (((elapsedTime >= musicEnd && g_stateObj.bgmLoaded === null) ||
 						num !== g_settings.musicIdxNum) && g_stateObj.bgmLooped !== null) {
 						clearInterval(repeatCheck);
 						g_stateObj.bgmLooped = null;
-						fadeOutAndSeek(g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0);
+						fadeOutAndSeek(musicStart);
 					}
 				} catch (e) {
 					clearInterval(repeatCheck);
@@ -5469,13 +5471,13 @@ const playBGM = async (_num = 0) => {
 
 		} else {
 			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audio, "timeupdate", () => {
-				if (g_audio.currentTime >= g_headerObj.musicEnds?.[g_settings.musicIdxNum]) {
-					fadeOutAndSeek(g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0);
+				if (g_audio.currentTime >= musicEnd) {
+					fadeOutAndSeek(musicStart);
 				}
 			});
 		}
 	};
-	if (g_headerObj.musicEnds?.[g_settings.musicIdxNum]) {
+	if (musicEnd > 0) {
 		repeatBGM(encodeFlg);
 	}
 };
