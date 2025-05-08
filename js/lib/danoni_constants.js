@@ -288,6 +288,18 @@ const updateWindowSiz = () => {
             siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
             overflow: C_DIS_AUTO, whiteSpace: `normal`,
         },
+        lblBgmVolume: {
+            x: g_btnX(), y: g_sHeight - 85, w: g_btnWidth(1 / 4), h: 20, siz: 12, align: C_ALIGN_LEFT,
+        },
+        btnBgmVolume: {
+            x: g_btnX() + 20, y: g_sHeight - 70, w: g_btnWidth(1 / 4) - 40, h: 20, siz: 14,
+        },
+        btnBgmVolumeL: {
+            x: g_btnX(), y: g_sHeight - 70, w: 20, h: 20, siz: 12,
+        },
+        btnBgmVolumeR: {
+            x: g_btnX() + g_btnWidth(1 / 4) - 20, y: g_sHeight - 70, w: 20, h: 20, siz: 12,
+        },
 
         /** データ管理 */
         btnResetBack: {
@@ -999,6 +1011,12 @@ let C_WOD_FRAME = 30;
 // 譜面データ持ち回り用
 const g_stateObj = {
     keyInitial: false,
+    bgmVolume: 50,
+    bgmLooped: null,
+    bgmFadeIn: null,
+    bgmFadeOut: null,
+    bgmTimeupdateEvtId: null,
+
     dosDivideFlg: false,
     scoreLockFlg: false,
     scoreId: 0,
@@ -1015,6 +1033,7 @@ const g_stateObj = {
     hitPosition: 0,
     fadein: 0,
     volume: 100,
+
     lifeRcv: 2,
     lifeDmg: 7,
     lifeMode: `Border`,
@@ -1163,6 +1182,7 @@ const g_settings = {
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
     volumeNum: 0,
+    bgmVolumeNum: 0,
 
     appearances: [`Visible`, `Hidden`, `Hidden+`, `Sudden`, `Sudden+`, `Hid&Sud+`],
     appearanceNum: 0,
@@ -1239,6 +1259,7 @@ const g_settings = {
 };
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
+g_settings.bgmVolumeNum = roundZero(g_settings.volumes.findIndex(v => v === g_stateObj.bgmVolume));
 g_settings.opacityNum = g_settings.opacitys.length - 1;
 
 /**
@@ -2075,6 +2096,8 @@ const g_shortcutObj = {
         KeyD: { id: `btnReset` },
         ArrowUp: { id: `btnMusicSelectPrev` },
         ArrowDown: { id: `btnMusicSelectNext` },
+        ArrowLeft: { id: `btnBgmVolumeL` },
+        ArrowRight: { id: `btnBgmVolumeR` },
     },
     dataMgt: {
         KeyE: { id: `btnEnvironment` },
