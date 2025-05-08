@@ -5350,7 +5350,7 @@ const pauseBgm = () => {
  * @param {number} _num 
  * @param {boolean} _initFlg 
  */
-const changeMSelect = async (_num, _initFlg = false) => {
+const changeMSelect = (_num, _initFlg = false) => {
 	const limitedMLength = 35;
 	pauseBgm();
 
@@ -5423,6 +5423,21 @@ const changeMSelect = async (_num, _initFlg = false) => {
 	lblComment.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
 
 	// BGM再生処理
+	playBGM(_num);
+
+	// 選曲変更時のカスタム関数実行
+	g_customJsObj.musicSelect.forEach(func => func(g_settings.musicIdxNum));
+};
+
+/**
+ * BPM再生処理
+ * @param {number} _num 
+ */
+const playBGM = async (_num = 0) => {
+	const FADE_STEP = 0.05;
+	const FADE_INTERVAL_MS = 100;
+	const FADE_DELAY_MS = 500;
+
 	const musicUrl = getMusicUrl(g_headerObj.viewLists[0]);
 	const url = getLoadMusicUrl(musicUrl);
 	const encodeFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
@@ -5461,10 +5476,6 @@ const changeMSelect = async (_num, _initFlg = false) => {
 		g_audio.volume = g_stateObj.bgmVolume / 100;
 		g_audio.currentTime = g_headerObj.musicStarts?.[g_settings.musicIdxNum] ?? 0;
 	}
-
-	const FADE_STEP = 0.05;
-	const FADE_INTERVAL_MS = 100;
-	const FADE_DELAY_MS = 500;
 
 	/**
 	 * BGMのフェードアウトとシーク
@@ -5548,9 +5559,6 @@ const changeMSelect = async (_num, _initFlg = false) => {
 	if (g_headerObj.musicEnds?.[g_settings.musicIdxNum]) {
 		repeatBgm(encodeFlg);
 	}
-
-	// 選曲変更時のカスタム関数実行
-	g_customJsObj.musicSelect.forEach(func => func(g_settings.musicIdxNum));
 };
 
 /**
