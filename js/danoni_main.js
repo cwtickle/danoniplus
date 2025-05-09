@@ -5361,7 +5361,8 @@ const pauseBGM = () => {
 		g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
 		g_audio.pause();
 		if (!(g_audio instanceof AudioPlayer)) {
-			g_audio.src = ``;
+			g_audio.removeAttribute('src');
+			g_audio.load();
 		}
 	}
 	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
@@ -5425,6 +5426,9 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	 * BGMのフェードイン
 	 */
 	const fadeIn = () => {
+		if (!(g_audio instanceof AudioPlayer) && !g_audio.src) {
+			return;
+		}
 		let volume = 0;
 		g_audio.play();
 		const fadeInterval = setInterval(() => {
@@ -5539,6 +5543,8 @@ const changeMSelect = (_num, _initFlg = false) => {
 	}
 	// 現在選択中の楽曲IDを再設定
 	g_settings.musicIdxNum = (g_settings.musicIdxNum + _num + g_headerObj.musicIdxList.length) % g_headerObj.musicIdxList.length;
+
+	// 楽曲の多重読込防止（この値が変化していれば読み込まない）
 	g_settings.musicLoopNum++;
 	const currentLoopNum = g_settings.musicLoopNum;
 
