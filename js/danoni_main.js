@@ -5390,9 +5390,8 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 
 	/**
 	 * BGMのフェードアウトとシーク
-	 * @param {number} _targetTime
 	 */
-	const fadeOutAndSeek = _targetTime => {
+	const fadeOutAndSeek = () => {
 		let volume = g_audio.volume;
 		const fadeInterval = setInterval(() => {
 			if (volume > FADE_STEP && g_currentPage === `title`) {
@@ -5402,7 +5401,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				clearInterval(fadeInterval);
 				g_stateObj.bgmFadeOut = null;
 				g_audio.pause();
-				g_audio.currentTime = _targetTime;
+				g_audio.currentTime = musicStart;
 
 				// フェードイン開始
 				if (g_currentPage === `title`) {
@@ -5414,6 +5413,8 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 							repeatBGM();
 						}
 					}, FADE_DELAY_MS);
+				} else {
+					pauseBGM();
 				}
 			}
 		}, FADE_INTERVAL_MS);
@@ -5450,7 +5451,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 						num !== g_settings.musicIdxNum) && g_stateObj.bgmLooped !== null) {
 						clearInterval(repeatCheck);
 						g_stateObj.bgmLooped = null;
-						fadeOutAndSeek(musicStart);
+						fadeOutAndSeek();
 					}
 				} catch (e) {
 					clearInterval(repeatCheck);
@@ -5462,7 +5463,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		} else {
 			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audio, "timeupdate", () => {
 				if (g_audio.currentTime >= musicEnd) {
-					fadeOutAndSeek(musicStart);
+					fadeOutAndSeek();
 				}
 			});
 		}
@@ -5501,7 +5502,8 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		g_audio.src = url;
 		g_audio.autoplay = false;
 		g_audio.volume = g_stateObj.bgmVolume / 100;
-		g_handler.addListener(g_audio, `loadedmetadata`, () => {
+		const loadedMeta = g_handler.addListener(g_audio, `loadedmetadata`, () => {
+			g_handler.removeListener(loadedMeta);
 			if (_currentLoopNum !== g_settings.musicLoopNum) {
 				return;
 			}
