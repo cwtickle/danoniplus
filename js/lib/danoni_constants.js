@@ -288,6 +288,9 @@ const updateWindowSiz = () => {
             siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
             overflow: C_DIS_AUTO, whiteSpace: `normal`,
         },
+        btnBgmMute: {
+            x: g_btnX() + 90, y: g_sHeight - 105, w: 40, h: 35, siz: 30,
+        },
         lblBgmVolume: {
             x: g_btnX(), y: g_sHeight - 85, w: g_btnWidth(1 / 4), h: 20, siz: 12, align: C_ALIGN_LEFT,
         },
@@ -1016,6 +1019,7 @@ const g_stateObj = {
     bgmFadeIn: null,
     bgmFadeOut: null,
     bgmTimeupdateEvtId: null,
+    bgmMuteFlg: false,
 
     dosDivideFlg: false,
     scoreLockFlg: false,
@@ -2099,6 +2103,8 @@ const g_shortcutObj = {
         ArrowDown: { id: `btnMusicSelectNext` },
         ArrowLeft: { id: `btnBgmVolumeL` },
         ArrowRight: { id: `btnBgmVolumeR` },
+        KeyM: { id: `btnBgmMute` },
+        KeyR: { id: `btnMusicSelectRandom` },
     },
     dataMgt: {
         KeyE: { id: `btnEnvironment` },
@@ -2457,7 +2463,7 @@ Object.keys(g_btnWaitFrame).forEach(key => {
 // - btn + プロパティ名に合致するボタンid名に対して、
 //   どの位置(X方向)にショートカット名を表示するかを設定
 const g_btnPatterns = {
-    title: { Start: 0, Comment: -10 },
+    title: { Start: 0, Comment: -10, MusicSelectRandom: -10 },
     dataMgt: { Back: 0, Environment: -35, Highscores: -35, CustomKey: -35, Others: -35 },
     precondition: { Back: 0 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },

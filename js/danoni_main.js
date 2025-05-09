@@ -5011,6 +5011,11 @@ const titleInit = (_initFlg = false) => {
 			createDivCss2Label(`lblComment`, ``, g_lblPosObj.lblComment_music),
 
 			createDivCss2Label(`lblBgmVolume`, `BGM Volume`, g_lblPosObj.lblBgmVolume),
+			createCss2Button(`btnBgmMute`, g_stateObj.bgmMuteFlg ? `&#x1f507;` : `&#x1f50a;`, evt => {
+				g_stateObj.bgmMuteFlg = !g_stateObj.bgmMuteFlg;
+				g_stateObj.bgmMuteFlg ? pauseBGM() : playBGM(0);
+				evt.target.innerHTML = g_stateObj.bgmMuteFlg ? `&#x1f507;` : `&#x1f50a;`;
+			}, g_lblPosObj.btnBgmMute, g_cssObj.button_Default),
 			createCss2Button(`btnBgmVolume`, `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`, () => setBGMVolume(),
 				Object.assign({
 					cxtFunc: () => setBGMVolume(-1),
@@ -5602,14 +5607,16 @@ const changeMSelect = (_num, _initFlg = false) => {
 	lblComment.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
 
 	// BGM再生処理
-	if (_initFlg) {
-		playBGM(_num);
-	} else {
-		setTimeout(() => {
-			if (currentLoopNum === g_settings.musicLoopNum) {
-				playBGM(_num, currentLoopNum);
-			}
-		}, 500);
+	if (!g_stateObj.bgmMuteFlg) {
+		if (_initFlg) {
+			playBGM(_num);
+		} else {
+			setTimeout(() => {
+				if (currentLoopNum === g_settings.musicLoopNum) {
+					playBGM(_num, currentLoopNum);
+				}
+			}, 500);
+		}
 	}
 
 	// 選曲変更時のカスタム関数実行
