@@ -6152,7 +6152,7 @@ const optionInit = () => {
  */
 const getMusicInfoView = () => {
 	const idx = g_headerObj.musicNos[g_stateObj.scoreId];
-	let text = `♪` + (g_headerObj.musicSelectUse ? `${g_headerObj.musicTitles[idx]} / ` : ``) +
+	let text = `♪` + (g_headerObj.musicSelectUse ? `${unEscapeHtml(g_headerObj.musicTitles[idx])} / ` : ``) +
 		`BPM: ${g_headerObj.bpms[idx]}`;
 	if (!g_headerObj.musicSelectUse && g_headerObj.bpms[idx] === `----`) {
 		text = ``;
