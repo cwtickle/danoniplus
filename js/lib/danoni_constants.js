@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/04/21 (v41.0.2)
+ * Revised : 2025/05/09 (v41.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -287,6 +287,21 @@ const updateWindowSiz = () => {
             x: g_btnX(1 / 4) + 10, y: g_sHeight / 2 + 15, w: g_btnWidth(7 / 12) - 5, h: 100,
             siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
             overflow: C_DIS_AUTO, whiteSpace: `normal`,
+        },
+        btnBgmMute: {
+            x: g_btnX() + 90, y: g_sHeight - 105, w: 40, h: 35, siz: 30,
+        },
+        lblBgmVolume: {
+            x: g_btnX(), y: g_sHeight - 85, w: g_btnWidth(1 / 4), h: 20, siz: 12, align: C_ALIGN_LEFT,
+        },
+        btnBgmVolume: {
+            x: g_btnX() + 20, y: g_sHeight - 70, w: g_btnWidth(1 / 4) - 40, h: 20, siz: 14,
+        },
+        btnBgmVolumeL: {
+            x: g_btnX(), y: g_sHeight - 70, w: 20, h: 20, siz: 12,
+        },
+        btnBgmVolumeR: {
+            x: g_btnX() + g_btnWidth(1 / 4) - 20, y: g_sHeight - 70, w: 20, h: 20, siz: 12,
         },
 
         /** データ管理 */
@@ -999,6 +1014,13 @@ let C_WOD_FRAME = 30;
 // 譜面データ持ち回り用
 const g_stateObj = {
     keyInitial: false,
+    bgmVolume: 50,
+    bgmLooped: null,
+    bgmFadeIn: null,
+    bgmFadeOut: null,
+    bgmTimeupdateEvtId: null,
+    bgmMuteFlg: false,
+
     dosDivideFlg: false,
     scoreLockFlg: false,
     scoreId: 0,
@@ -1015,6 +1037,7 @@ const g_stateObj = {
     hitPosition: 0,
     fadein: 0,
     volume: 100,
+
     lifeRcv: 2,
     lifeDmg: 7,
     lifeMode: `Border`,
@@ -1115,6 +1138,7 @@ const makeSpeedList = (_minSpd, _maxSpd) => [...Array((_maxSpd - _minSpd) * 20 +
 const g_settings = {
 
     musicIdxNum: 0,
+    musicLoopNum: 0,
     dataMgtNum: {
         environment: 0,
         highscores: 0,
@@ -1163,6 +1187,7 @@ const g_settings = {
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
     volumeNum: 0,
+    bgmVolumeNum: 0,
 
     appearances: [`Visible`, `Hidden`, `Hidden+`, `Sudden`, `Sudden+`, `Hid&Sud+`],
     appearanceNum: 0,
@@ -1239,6 +1264,7 @@ const g_settings = {
 };
 
 g_settings.volumeNum = g_settings.volumes.length - 1;
+g_settings.bgmVolumeNum = roundZero(g_settings.volumes.findIndex(v => v === g_stateObj.bgmVolume));
 g_settings.opacityNum = g_settings.opacitys.length - 1;
 
 /**
@@ -2075,6 +2101,10 @@ const g_shortcutObj = {
         KeyD: { id: `btnReset` },
         ArrowUp: { id: `btnMusicSelectPrev` },
         ArrowDown: { id: `btnMusicSelectNext` },
+        ArrowLeft: { id: `btnBgmVolumeL` },
+        ArrowRight: { id: `btnBgmVolumeR` },
+        KeyM: { id: `btnBgmMute` },
+        KeyR: { id: `btnMusicSelectRandom` },
     },
     dataMgt: {
         KeyE: { id: `btnEnvironment` },
@@ -2433,7 +2463,7 @@ Object.keys(g_btnWaitFrame).forEach(key => {
 // - btn + プロパティ名に合致するボタンid名に対して、
 //   どの位置(X方向)にショートカット名を表示するかを設定
 const g_btnPatterns = {
-    title: { Start: 0, Comment: -10 },
+    title: { Start: 0, Comment: -10, MusicSelectRandom: -10 },
     dataMgt: { Back: 0, Environment: -35, Highscores: -35, CustomKey: -35, Others: -35 },
     precondition: { Back: 0 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
