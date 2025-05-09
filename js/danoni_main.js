@@ -5361,7 +5361,7 @@ const pauseBGM = () => {
 		g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
 		g_audio.pause();
 		if (!(g_audio instanceof AudioPlayer)) {
-			g_audio.src = ``;
+			delete g_audio.src;
 		}
 	}
 	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
@@ -5425,6 +5425,9 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	 * BGMのフェードイン
 	 */
 	const fadeIn = () => {
+		if (!g_audio.src) {
+			return;
+		}
 		let volume = 0;
 		g_audio.play();
 		const fadeInterval = setInterval(() => {
