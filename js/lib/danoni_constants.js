@@ -1134,6 +1134,7 @@ const makeSpeedList = (_minSpd, _maxSpd) => [...Array((_maxSpd - _minSpd) * 20 +
 const g_settings = {
 
     musicIdxNum: 0,
+    musicLoopNum: 0,
     dataMgtNum: {
         environment: 0,
         highscores: 0,
