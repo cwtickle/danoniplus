@@ -5425,9 +5425,9 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	 * BGMのフェードイン
 	 */
 	const fadeIn = () => {
-		if (!g_audio.src) {
-			return;
-		}
+        if (!(g_audio instanceof AudioPlayer) && !g_audio.src) {
+            return;
+        }
 		let volume = 0;
 		g_audio.play();
 		const fadeInterval = setInterval(() => {
