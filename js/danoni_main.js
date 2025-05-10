@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/05/09
+ * Revised : 2025/05/10
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 41.2.1`;
-const g_revisedDate = `2025/05/09`;
+const g_version = `Ver 41.3.0`;
+const g_revisedDate = `2025/05/10`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2824,6 +2824,11 @@ const loadLocalStorage = (_musicId = ``) => {
 	if (g_langStorage.safeMode === undefined) {
 		g_langStorage.safeMode = C_FLG_OFF;
 	}
+	if (g_langStorage.bgmVolume === undefined) {
+		g_langStorage.bgmVolume = 50;
+	}
+	g_stateObj.bgmVolume = g_langStorage.bgmVolume;
+	g_settings.bgmVolumeNum = g_settings.volumes.findIndex(val => val === g_stateObj.bgmVolume);
 	Object.assign(g_msgInfoObj, g_lang_msgInfoObj[g_localeObj.val]);
 	Object.assign(g_kCd, g_lang_kCd[g_localeObj.val]);
 
@@ -4997,6 +5002,8 @@ const titleInit = (_initFlg = false) => {
 					pauseBGM();
 					g_handler.removeListener(wheelHandler);
 					g_keyObj.prevKey = `Dummy${g_settings.musicIdxNum}`;
+					g_langStorage.bgmVolume = g_stateObj.bgmVolume;
+					localStorage.setItem(`danoni-locale`, JSON.stringify(g_langStorage));
 				}, Object.assign({
 					resetFunc: () => optionInit(),
 				}, g_lblPosObj.btnStart_music), g_cssObj.button_Tweet),
@@ -5478,19 +5485,20 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		}
 	};
 
+	const musicPlayCheck = () => _currentLoopNum !== g_settings.musicLoopNum || g_currentPage !== `title`;
 	if (encodeFlg) {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
 			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
 				await loadScript2(url);
 				musicInit();
-				if (_currentLoopNum !== g_settings.musicLoopNum) {
+				if (musicPlayCheck()) {
 					return;
 				}
 				const tmpAudio = new AudioPlayer();
 				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
 				await tmpAudio.init(array.buffer);
-				if (_currentLoopNum !== g_settings.musicLoopNum) {
+				if (musicPlayCheck()) {
 					tmpAudio.close();
 					return;
 				}
@@ -5513,7 +5521,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		g_audio.volume = g_stateObj.bgmVolume / 100;
 		const loadedMeta = g_handler.addListener(g_audio, `loadedmetadata`, () => {
 			g_handler.removeListener(loadedMeta);
-			if (_currentLoopNum !== g_settings.musicLoopNum) {
+			if (musicPlayCheck()) {
 				return;
 			}
 			g_audio.currentTime = musicStart;
