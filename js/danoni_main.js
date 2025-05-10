@@ -2824,6 +2824,11 @@ const loadLocalStorage = (_musicId = ``) => {
 	if (g_langStorage.safeMode === undefined) {
 		g_langStorage.safeMode = C_FLG_OFF;
 	}
+	if (g_langStorage.bgmVolume === undefined) {
+		g_langStorage.bgmVolume = 50;
+	}
+	g_stateObj.bgmVolume = g_langStorage.bgmVolume;
+	g_settings.bgmVolumeNum = g_settings.volumes.findIndex(val => val === g_stateObj.bgmVolume);
 	Object.assign(g_msgInfoObj, g_lang_msgInfoObj[g_localeObj.val]);
 	Object.assign(g_kCd, g_lang_kCd[g_localeObj.val]);
 
@@ -4997,6 +5002,8 @@ const titleInit = (_initFlg = false) => {
 					pauseBGM();
 					g_handler.removeListener(wheelHandler);
 					g_keyObj.prevKey = `Dummy${g_settings.musicIdxNum}`;
+					g_langStorage.bgmVolume = g_stateObj.bgmVolume;
+					localStorage.setItem(`danoni-locale`, JSON.stringify(g_langStorage));
 				}, Object.assign({
 					resetFunc: () => optionInit(),
 				}, g_lblPosObj.btnStart_music), g_cssObj.button_Tweet),
