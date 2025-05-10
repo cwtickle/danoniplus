@@ -5478,7 +5478,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		}
 	};
 
-	const musicPlayCheck = () => _currentLoopNum !== g_settings.musicLoopNum && g_currentPage !== `title`;
+	const musicPlayCheck = () => _currentLoopNum !== g_settings.musicLoopNum || g_currentPage !== `title`;
 	if (encodeFlg) {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
