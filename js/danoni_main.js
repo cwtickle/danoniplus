@@ -5478,19 +5478,20 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		}
 	};
 
+	const musicPlayCheck = () => _currentLoopNum !== g_settings.musicLoopNum || g_currentPage !== `title`;
 	if (encodeFlg) {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
 			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
 				await loadScript2(url);
 				musicInit();
-				if (_currentLoopNum !== g_settings.musicLoopNum) {
+				if (musicPlayCheck()) {
 					return;
 				}
 				const tmpAudio = new AudioPlayer();
 				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
 				await tmpAudio.init(array.buffer);
-				if (_currentLoopNum !== g_settings.musicLoopNum) {
+				if (musicPlayCheck()) {
 					tmpAudio.close();
 					return;
 				}
@@ -5513,7 +5514,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		g_audio.volume = g_stateObj.bgmVolume / 100;
 		const loadedMeta = g_handler.addListener(g_audio, `loadedmetadata`, () => {
 			g_handler.removeListener(loadedMeta);
-			if (_currentLoopNum !== g_settings.musicLoopNum) {
+			if (musicPlayCheck()) {
 				return;
 			}
 			g_audio.currentTime = musicStart;
