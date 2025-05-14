@@ -3462,7 +3462,8 @@ const headerConvert = _dosObj => {
 	if (hasVal(dosMusicTitle)) {
 		const musicData = splitLF2(dosMusicTitle);
 
-		for (let j = 0; j <= Math.max(...obj.musicNos, musicData.length - 1); j++) {
+		const lastIdx = Math.max(...obj.musicNos, musicData.length - 1);
+		for (let j = 0; j <= lastIdx; j++) {
 			const musics = splitComma(musicData[j]);
 
 			obj.musicTitles[j] = musics[0] !== undefined
