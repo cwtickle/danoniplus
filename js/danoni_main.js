@@ -3448,55 +3448,51 @@ const headerConvert = _dosObj => {
 	}
 
 	// 曲名
-	obj.musicTitles = [];
-	obj.musicTitlesForView = [];
-	obj.artistNames = [];
-	obj.artistUrls = [];
-	obj.musicNos = [];
-	obj.bpms = [];
+	obj.musicTitles = [`musicName`];
+	obj.musicTitlesForView = [[`musicName`]];
+	obj.artistNames = [``];
+	obj.artistUrls = [``];
+	obj.bpms = [`----`];
+	obj.musicNos = hasVal(_dosObj.musicNo)
+		? splitLF2(_dosObj.musicNo).map(val => Number(val))
+		: fillArray(_dosObj.difData?.split(`$`).length ?? 1);
 
 	const dosMusicTitle = getHeader(_dosObj, `musicTitle`);
+	let alternativeTitle;
 	if (hasVal(dosMusicTitle)) {
 		const musicData = splitLF2(dosMusicTitle);
 
-		if (hasVal(_dosObj.musicNo)) {
-			obj.musicNos = splitLF2(_dosObj.musicNo).map(val => Number(val));
-		}
-
-		for (let j = 0; j < musicData.length; j++) {
+		for (let j = 0; j <= Math.max(...obj.musicNos, musicData.length - 1); j++) {
 			const musics = splitComma(musicData[j]);
 
-			if (obj.musicNos.length >= j) {
-				obj.musicTitles[j] = escapeHtml(getMusicNameSimple(musics[0]));
-				obj.musicTitlesForView[j] = escapeHtmlForArray(getMusicNameMultiLine(musics[0]));
-				obj.artistNames[j] = escapeHtml(musics[1] || obj.artistNames[0] || ``);
-				obj.artistUrls[j] = musics[2] || obj.artistUrls[0] || ``;
-				obj.bpms[j] = musics[4] || obj.bpms[0] || `----`;
-			}
+			obj.musicTitles[j] = escapeHtml(getMusicNameSimple(musics[0] || obj.musicTitles[0]));
+			obj.musicTitlesForView[j] = escapeHtmlForArray(getMusicNameMultiLine(musics[0] || obj.musicTitlesForView[0]));
+			obj.artistNames[j] = escapeHtml(musics[1] || obj.artistNames[0]);
+			obj.artistUrls[j] = musics[2] || obj.artistUrls[0];
+			obj.bpms[j] = musics[4] || obj.bpms[0];
 
-			// 選曲ではなく、単一作品用の項目としての管理変数を定義
+			// 代替タイトル名
 			if (j === 0) {
-				obj.musicTitle = obj.musicTitles[0];
-				obj.musicTitleForView = obj.musicTitlesForView[0];
-				obj.artistName = obj.artistNames[0];
-				if (obj.artistName === ``) {
-					makeWarningWindow(g_msgInfoObj.E_0011);
-					obj.artistName = `artistName`;
-				}
-				obj.artistUrl = obj.artistUrls[0];
-				if (hasVal(musics[3])) {
-					obj.musicTitles[0] = escapeHtml(getMusicNameSimple(musics[3]));
-					obj.musicTitlesForView[0] = escapeHtmlForArray(getMusicNameMultiLine(musics[3]));
-				}
+				alternativeTitle = musics[3];
 			}
 		}
 
 	} else {
 		makeWarningWindow(g_msgInfoObj.E_0012);
-		obj.musicTitle = `musicName`;
-		obj.musicTitleForView = [`musicName`];
+	}
+
+	// 単一作品用の項目としての管理変数
+	obj.musicTitle = obj.musicTitles[0];
+	obj.musicTitleForView = obj.musicTitlesForView[0];
+	obj.artistName = obj.artistNames[0];
+	if (obj.artistName === ``) {
+		makeWarningWindow(g_msgInfoObj.E_0011);
 		obj.artistName = `artistName`;
-		obj.artistUrl = ``;
+	}
+	obj.artistUrl = obj.artistUrls[0];
+	if (hasVal(alternativeTitle)) {
+		obj.musicTitles[0] = escapeHtml(getMusicNameSimple(alternativeTitle));
+		obj.musicTitlesForView[0] = escapeHtmlForArray(getMusicNameMultiLine(alternativeTitle));
 	}
 
 	// 選曲機能の利用有無
@@ -3619,9 +3615,6 @@ const headerConvert = _dosObj => {
 	obj.viewLists = [...Array(obj.keyLabels.length).keys()];
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
-	if (obj.musicNos.length === 0) {
-		obj.musicNos = fillArray(obj.keyLabels.length);
-	}
 
 	// 楽曲別のグループ化設定（選曲モードのみ）
 	if (hasVal(_dosObj.musicGroup)) {
