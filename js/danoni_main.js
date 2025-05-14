@@ -3469,7 +3469,7 @@ const headerConvert = _dosObj => {
 			obj.musicTitles[j] = musics[0] !== undefined
 				? escapeHtml(getMusicNameSimple(musics[0]))
 				: obj.musicTitles[0];
-			obj.musicTitlesForView[j] = obj.musicTitlesForView[j] = musics[0] !== undefined
+			obj.musicTitlesForView[j] = musics[0] !== undefined
 				? escapeHtmlForArray(getMusicNameMultiLine(musics[0]))
 				: obj.musicTitlesForView[0];
 			obj.artistNames[j] = musics[1] !== undefined
