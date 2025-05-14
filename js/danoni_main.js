@@ -3454,7 +3454,7 @@ const headerConvert = _dosObj => {
 	obj.artistUrls = [``];
 	obj.bpms = [`----`];
 	obj.musicNos = hasVal(_dosObj.musicNo)
-		? splitLF2(_dosObj.musicNo).map(val => Number(val))
+		? splitLF2(_dosObj.musicNo).map(Number).map(val => isNaN(val) ? 0 : val)
 		: fillArray(_dosObj.difData?.split(`$`).length ?? 1);
 
 	const dosMusicTitle = getHeader(_dosObj, `musicTitle`);
@@ -3466,7 +3466,9 @@ const headerConvert = _dosObj => {
 			const musics = splitComma(musicData[j]);
 
 			obj.musicTitles[j] = escapeHtml(getMusicNameSimple(musics[0] || obj.musicTitles[0]));
-			obj.musicTitlesForView[j] = escapeHtmlForArray(getMusicNameMultiLine(musics[0] || obj.musicTitlesForView[0]));
+			obj.musicTitlesForView[j] = obj.musicTitlesForView[j] = musics[0] !== undefined
+				? escapeHtmlForArray(getMusicNameMultiLine(musics[0]))
+				: obj.musicTitlesForView[0];
 			obj.artistNames[j] = escapeHtml(musics[1] || obj.artistNames[0]);
 			obj.artistUrls[j] = musics[2] || obj.artistUrls[0];
 			obj.bpms[j] = musics[4] || obj.bpms[0];
@@ -3490,6 +3492,8 @@ const headerConvert = _dosObj => {
 		obj.artistName = `artistName`;
 	}
 	obj.artistUrl = obj.artistUrls[0];
+
+	// 代替タイトル名は曲名定義の後に設定する（複数曲を束ねる名前であり、曲名ではないため）
 	if (hasVal(alternativeTitle)) {
 		obj.musicTitles[0] = escapeHtml(getMusicNameSimple(alternativeTitle));
 		obj.musicTitlesForView[0] = escapeHtmlForArray(getMusicNameMultiLine(alternativeTitle));
