@@ -3465,11 +3465,15 @@ const headerConvert = _dosObj => {
 		for (let j = 0; j <= Math.max(...obj.musicNos, musicData.length - 1); j++) {
 			const musics = splitComma(musicData[j]);
 
-			obj.musicTitles[j] = escapeHtml(getMusicNameSimple(musics[0] || obj.musicTitles[0]));
+			obj.musicTitles[j] = musics[0] !== undefined
+				? escapeHtml(getMusicNameSimple(musics[0]))
+				: obj.musicTitles[0];
 			obj.musicTitlesForView[j] = obj.musicTitlesForView[j] = musics[0] !== undefined
 				? escapeHtmlForArray(getMusicNameMultiLine(musics[0]))
 				: obj.musicTitlesForView[0];
-			obj.artistNames[j] = escapeHtml(musics[1] || obj.artistNames[0]);
+			obj.artistNames[j] = musics[1] !== undefined
+				? escapeHtml(musics[1])
+				: obj.artistNames[0];
 			obj.artistUrls[j] = musics[2] || obj.artistUrls[0];
 			obj.bpms[j] = musics[4] || obj.bpms[0];
 
