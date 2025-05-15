@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 41.3.1`;
+const g_version = `Ver 41.3.2`;
 const g_revisedDate = `2025/05/15`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -3464,7 +3464,8 @@ const headerConvert = _dosObj => {
 
 		const lastIdx = Math.max(...obj.musicNos, musicData.length - 1);
 		for (let j = 0; j <= lastIdx; j++) {
-			const musics = splitComma(musicData[j]);
+			const tmpMusicData = musicData[j] ?? ``;
+			const musics = splitComma(tmpMusicData);
 
 			obj.musicTitles[j] = hasVal(musics[0])
 				? escapeHtml(getMusicNameSimple(musics[0]))
