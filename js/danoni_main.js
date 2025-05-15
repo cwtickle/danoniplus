@@ -3464,8 +3464,8 @@ const headerConvert = _dosObj => {
 
 		const lastIdx = Math.max(...obj.musicNos, musicData.length - 1);
 		for (let j = 0; j <= lastIdx; j++) {
-			musicData[j] ??= ``;
-			const musics = splitComma(musicData[j]);
+			const tmpMusicData = musicData[j] ?? ``;
+			const musics = splitComma(tmpMusicData);
 
 			obj.musicTitles[j] = hasVal(musics[0])
 				? escapeHtml(getMusicNameSimple(musics[0]))
