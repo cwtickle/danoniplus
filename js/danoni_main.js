@@ -3466,13 +3466,13 @@ const headerConvert = _dosObj => {
 		for (let j = 0; j <= lastIdx; j++) {
 			const musics = splitComma(musicData[j]);
 
-			obj.musicTitles[j] = musics[0] !== undefined
+			obj.musicTitles[j] = hasVal(musics[0])
 				? escapeHtml(getMusicNameSimple(musics[0]))
 				: obj.musicTitles[0];
-			obj.musicTitlesForView[j] = musics[0] !== undefined
+			obj.musicTitlesForView[j] = hasVal(musics[0])
 				? escapeHtmlForArray(getMusicNameMultiLine(musics[0]))
 				: obj.musicTitlesForView[0];
-			obj.artistNames[j] = musics[1] !== undefined
+			obj.artistNames[j] = hasVal(musics[1])
 				? escapeHtml(musics[1])
 				: obj.artistNames[0];
 			obj.artistUrls[j] = musics[2] || obj.artistUrls[0];
