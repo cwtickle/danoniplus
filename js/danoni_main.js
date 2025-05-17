@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 41.4.0`;
+const g_version = `Ver 41.4.1`;
 const g_revisedDate = `2025/05/17`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1102,7 +1102,7 @@ const loadMultipleFiles2 = async (_fileData, _loadType) => {
 	await Promise.all(_fileData.map(async filePart => {
 
 		// ファイルが属するドメインがリモートの場合は、キャッシュが使えるようにする
-		const urlCacheName = listMatching(filePart[1], g_referenceDomains, { prefix: `^`, suffix: `$` })
+		const urlCacheName = listMatching(filePart[1], g_referenceDomains)
 			? g_versionForUrl : g_randTime;
 		const filePath = `${filePart[1]}${filePart[0]}?${urlCacheName}`;
 		if (filePart[0].endsWith(`.css`)) {
