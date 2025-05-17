@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/05/15
+ * Revised : 2025/05/17
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 41.3.2`;
-const g_revisedDate = `2025/05/15`;
+const g_version = `Ver 41.4.0`;
+const g_revisedDate = `2025/05/17`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -71,6 +71,8 @@ const hasRemoteDomain = _path => g_referenceDomains.some(domain => _path.match(`
 const g_remoteFlg = hasRemoteDomain(g_rootPath);
 
 const g_randTime = Date.now();
+const g_versionForUrl = g_version.slice(4);    // URL用に先頭の"Ver "を削除
+
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
 const g_isDebug = g_isLocal ||
@@ -95,13 +97,14 @@ const waitUntilLoaded = () => {
 	g_currentPage = `initial`;
 	const links = document.querySelectorAll(`link`);
 	if (Array.from(links).filter(elem => elem.getAttribute(`href`).indexOf(`danoni_main.css`) !== -1).length === 0) {
-		await importCssFile2(`${g_rootPath}../css/danoni_main.css?${g_randTime}`);
+		await importCssFile2(`${g_rootPath}../css/danoni_main.css?${g_versionForUrl}`);
 	}
 
 	// ロード直後に定数・初期化ファイル、旧バージョン定義関数を読込
-	await loadScript2(`${g_rootPath}../js/lib/danoni_localbinary.js?${g_randTime}`, false);
-	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${g_randTime}`);
-	await loadScript2(`${g_rootPath}../js/lib/legacy_functions.js?${g_randTime}`, false);
+	// 旧バージョン定義関数はメジャーバージョンが変わった場合にのみ再ロードが掛かるようにする
+	await loadScript2(`${g_rootPath}../js/lib/danoni_localbinary.js`, false);
+	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${g_versionForUrl}`);
+	await loadScript2(`${g_rootPath}../js/lib/legacy_functions.js?${g_versionForUrl.split(`.`)[0]}`, false);
 	initialControl();
 })();
 
@@ -1097,7 +1100,11 @@ const importCssFile2 = (_href, { crossOrigin = `anonymous` } = {}) => {
  */
 const loadMultipleFiles2 = async (_fileData, _loadType) => {
 	await Promise.all(_fileData.map(async filePart => {
-		const filePath = `${filePart[1]}${filePart[0]}?${g_randTime}`;
+
+		// ファイルが属するドメインがリモートの場合は、キャッシュが使えるようにする
+		const urlCacheName = listMatching(filePart[1], g_referenceDomains, { prefix: `^`, suffix: `$` })
+			? g_versionForUrl : g_randTime;
+		const filePath = `${filePart[1]}${filePart[0]}?${urlCacheName}`;
 		if (filePart[0].endsWith(`.css`)) {
 			_loadType = `css`;
 		}
