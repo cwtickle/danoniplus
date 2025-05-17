@@ -1102,7 +1102,7 @@ const loadMultipleFiles2 = async (_fileData, _loadType) => {
 	await Promise.all(_fileData.map(async filePart => {
 
 		// ファイルが属するドメインがリモートの場合は、キャッシュが使えるようにする
-		const urlCacheName = listMatching(filePart[1], g_referenceDomains, { prefix: `^`, suffix: `$` })
+		const urlCacheName = listMatching(filePart[1], g_referenceDomains)
 			? g_versionForUrl : g_randTime;
 		const filePath = `${filePart[1]}${filePart[0]}?${urlCacheName}`;
 		if (filePart[0].endsWith(`.css`)) {
