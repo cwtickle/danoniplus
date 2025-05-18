@@ -2609,6 +2609,7 @@ const g_keyObj = {
     chara9A_0: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
     chara9B_0: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
     chara9i_0: [`sleft`, `sdown`, `sup`, `sright`, `left`, `down`, `up`, `right`, `space`],
+    chara9h_0: [`1x`, `yx`, `ux`, `ix`, `ax`, `zx`, `sx`, `hx`, `mx`],
     chara11_0: [`sleft`, `sdown`, `sup`, `sright`,
         `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
     chara11L_0: [`sleft`, `sdown`, `sup`, `sright`,
@@ -2634,14 +2635,13 @@ const g_keyObj = {
     chara23_0: [`aleft`, `adown`, `aup`, `aright`, `bleft`, `bdown`, `bup`, `bright`,
         `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`, `oni`,
         `sleft`, `sleftdia`, `sdown`, `sspace`, `sup`, `srightdia`, `sright`],
-    charahimsiyauz_0: [`1x`, `yx`, `ux`, `ix`, `ax`, `zx`, `sx`, `hx`, `mx`],
 
     chara5_1: [`space`, `left`, `down`, `up`, `right`],
     chara8_1: [`sleft`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
     chara9i_1: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
+    chara9h_1: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
     chara17_1: [`aleft`, `adown`, `aup`, `aright`, `space`, `dleft`, `ddown`, `dup`, `dright`,
         `bleft`, `bdown`, `bup`, `bright`, `cleft`, `cdown`, `cup`, `cright`],
-    charahimsiyauz_1: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
 
     chara5_2: [`left`, `down`, `space`, `up`, `right`],
     chara8_2: [`sleft`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
@@ -2664,6 +2664,7 @@ const g_keyObj = {
     color9A_0_0: [0, 0, 0, 0, 2, 3, 3, 3, 3],
     color9B_0_0: [1, 0, 1, 0, 2, 0, 1, 0, 1],
     color9i_0_0: [0, 0, 0, 0, 2, 2, 2, 2, 2],
+    color9h_0_0: [2, 3, 3, 3, 1, 0, 1, 1, 0],
     color11_0_0: [3, 3, 3, 3, 0, 1, 0, 2, 0, 1, 0],
     color11L_0_0: [3, 3, 3, 3, 0, 1, 0, 2, 0, 1, 0],
     color11W_0_0: [2, 3, 3, 2, 0, 1, 0, 2, 0, 1, 0],
@@ -2676,14 +2677,13 @@ const g_keyObj = {
     color16i_0_0: [2, 2, 2, 3, 3, 3, 3, 1, 0, 1, 0, 2, 0, 1, 0, 1],
     color17_0_0: [1, 0, 1, 0, 1, 0, 1, 0, 2, 0, 1, 0, 1, 0, 1, 0, 1],
     color23_0_0: [3, 3, 3, 3, 4, 4, 4, 4, 0, 1, 0, 1, 0, 1, 0, 2, 0, 1, 0, 1, 0, 1, 0],
-    colorhimsiyauz_0_0: [2, 3, 3, 3, 1, 0, 1, 1, 0],
 
     color5_1_0: [2, 0, 0, 0, 0],
     color8_1_0: [2, 0, 1, 0, 2, 0, 1, 0],
     color9B_1_0: [0, 0, 0, 0, 2, 1, 1, 1, 1],
     color9i_1_0: [2, 2, 2, 2, 2, 0, 0, 0, 0],
+    color9h_1_0: [0, 3, 3, 3, 0, 0, 0, 2, 3],
     color17_1_0: [0, 0, 0, 0, 2, 4, 4, 4, 4, 1, 1, 1, 1, 3, 3, 3, 3],
-    colorhimsiyauz_1_0: [0, 3, 3, 3, 0, 0, 0, 2, 3],
 
     color5_2_0: [0, 0, 2, 0, 0],
     color7_2_0: [2, 2, 2, 0, 0, 0, 0],
@@ -2691,16 +2691,16 @@ const g_keyObj = {
     color9A_2_0: [3, 0, 3, 0, 2, 0, 3, 0, 3],
     color9B_2_0: [0, 0, 0, 0, 2, 1, 1, 1, 1],
 
-    colorhimsiyauz_3_0: [1, 0, 1, 1, 0, 1, 0, 2, 0],
+    color9h_3_0: [1, 0, 1, 1, 0, 1, 0, 2, 0],
 
     color9A_4_0: [2, 3, 3, 3, 1, 0, 1, 1, 0],
 
     // ColorGroup - 2
     color9A_0_1: [0, 0, 3, 0, 2, 0, 0, 3, 0],
     color9B_0_1: [4, 3, 1, 0, 2, 0, 1, 3, 4],
+    color9h_1_1: [0, 3, 3, 3, 0, 0, 0, 2, 3],
     color13_0_1: [4, 4, 3, 4, 0, 0, 3, 0, 2, 0, 0, 3, 0],
     color17_0_1: [0, 1, 0, 1, 0, 1, 0, 1, 2, 3, 4, 3, 4, 3, 4, 3, 4],
-    colorhimsiyauz_1_1: [0, 3, 3, 3, 0, 0, 0, 2, 3],
 
     color9B_1_1: [0, 0, 1, 0, 2, 0, 0, 1, 0],
     color17_1_1: [1, 1, 1, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2708,7 +2708,7 @@ const g_keyObj = {
     color9A_2_1: [4, 1, 3, 0, 2, 0, 3, 1, 4],
     color9B_2_1: [0, 0, 1, 0, 2, 0, 0, 1, 0],
 
-    colorhimsiyauz_3_1: [0, 0, 1, 0, 3, 1, 0, 2, 3],
+    color9h_3_1: [0, 0, 1, 0, 3, 1, 0, 2, 3],
 
     // ColorGroup - 3
     color17_0_2: [1, 4, 0, 3, 1, 4, 0, 3, 2, 3, 0, 4, 1, 3, 0, 4, 1],
@@ -2728,6 +2728,7 @@ const g_keyObj = {
     shuffle9A_0_0: [0, 0, 0, 0, 1, 0, 0, 0, 0],
     shuffle9B_0_0: [0, 0, 0, 0, 1, 0, 0, 0, 0],
     shuffle9i_0_0: [0, 0, 0, 0, 1, 1, 1, 1, 1],
+    shuffle9h_0_0: [1, 0, 0, 0, 1, 1, 1, 0, 0],
     shuffle11_0_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
     shuffle11L_0_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
     shuffle11W_0_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
@@ -2740,13 +2741,12 @@ const g_keyObj = {
     shuffle16i_0_0: [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 2, 2, 2, 2],
     shuffle17_0_0: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
     shuffle23_0_0: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 4, 4, 4, 4, 4, 4, 4],
-    shufflehimsiyauz_0_0: [1, 0, 0, 0, 1, 1, 1, 0, 0],
 
     shuffle5_1_0: [1, 0, 0, 0, 0],
     shuffle8_1_0: [2, 0, 0, 0, 1, 0, 0, 0],
     shuffle9i_1_0: [0, 0, 0, 0, 0, 1, 1, 1, 1],
+    shuffle9h_1_0: [0, 0, 0, 0, 0, 0, 0, 1, 0],
     shuffle17_1_0: [0, 0, 0, 0, 1, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 2],
-    shufflehimsiyauz_1_0: [0, 0, 0, 0, 0, 0, 0, 1, 0],
 
     shuffle5_2_0: [0, 0, 1, 0, 0],
     shuffle8_2_0: [1, 0, 0, 0, 0, 0, 0, 0],
@@ -2762,8 +2762,8 @@ const g_keyObj = {
     shuffle17_0_1: [0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2],
     shuffle23_0_1: [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2],
 
+    shuffle9h_1_1: [0, 0, 0, 0, 0, 0, 0, 1, 0],
     shuffle17_1_1: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    shufflehimsiyauz_1_1: [0, 0, 0, 0, 0, 0, 0, 1, 0],
 
     // ShuffleGroup - 3
     shuffle15A_0_2: [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 2, 2, 2],
@@ -2779,6 +2779,7 @@ const g_keyObj = {
     stepRtn9A_0_0: [0, -90, 90, 180, `onigiri`, 0, -90, 90, 180],
     stepRtn9B_0_0: [45, 0, -45, -90, `onigiri`, 90, 135, 180, 225],
     stepRtn9i_0_0: [0, -90, 90, 180, `monar`, `giko`, `c`, `morara`, `onigiri`],
+    stepRtn9h_0_0: [`giko`, 0, -90, 180, 45, -90, 135, -45, -90],
     stepRtn11_0_0: [0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
     stepRtn11L_0_0: [0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
     stepRtn11W_0_0: [`giko`, 135, 45, `iyo`, 0, -45, -90, `onigiri`, 90, 135, 180],
@@ -2791,16 +2792,15 @@ const g_keyObj = {
     stepRtn16i_0_0: [`giko`, `onigiri`, `iyo`, 0, -90, 90, 180, 45, 0, -45, -90, `onigiri`, 90, 135, 180, 225],
     stepRtn17_0_0: [0, -22.5, -45, -67.5, -90, -112.5, -135, -157.5, `onigiri`, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180],
     stepRtn23_0_0: [0, -90, 90, 180, 0, -90, 90, 180, 0, 30, 60, 90, 120, 150, 180, `onigiri`, 0, 30, 60, 90, 120, 150, 180],
-    stepRtnhimsiyauz_0_0: [`giko`, 0, -90, 180, 45, -90, 135, -45, -90],
 
     stepRtn5_1_0: [`onigiri`, 0, -90, 90, 180],
     stepRtn8_1_0: [`onigiri`, 0, -45, -90, `onigiri`, 90, 135, 180],
     stepRtn9i_1_0: [`monar`, `giko`, `c`, `morara`, `onigiri`, 0, -90, 90, 180],
+    stepRtn9h_1_0: [0, 0, -90, 180, -90, 90, 180, `onigiri`, 90],
     stepRtn17_1_0: [0, -45, -90, -135, `onigiri`, 45, 90, 135, 180,
         -22.5, -67.5, -112.5, -157.5, 22.5, 67.5, 112.5, 157.5],
-    stepRtnhimsiyauz_1_0: [0, 0, -90, 180, -90, 90, 180, `onigiri`, 90],
 
-    stepRtnhimsiyauz_3_0: [45, 90, 135, 225, 0, -45, -90, `onigiri`, 180],
+    stepRtn9h_3_0: [45, 90, 135, 225, 0, -45, -90, `onigiri`, 180],
 
     stepRtn9A_4_0: [`giko`, 0, -90, 180, 45, -90, 135, -45, -90],
 
@@ -2826,6 +2826,7 @@ const g_keyObj = {
     // 各キーの区切り位置
     // - 未指定の場合は下段への折り返し無し
     div9i_0: 6,
+    div9h_0: 7,
     div11_0: 6,
     div11L_0: 6,
     div11W_0: 6,
@@ -2836,18 +2837,18 @@ const g_keyObj = {
     div15A_0: 8,
     div16i_0: 8,
     div23_0: 12,
-    divhimsiyauz_0: 7,
 
     div17_1: 9,
     div9A_4: 7,
 
     // 各キーの下段最終位置
-    divMaxhimsiyauz_0: 15,
+    divMax9h_0: 15,
     divMax9A_4: 15,
 
     // 各キーの位置関係
     // - 未指定の場合は0からの連番が入る
     pos9i_0: [2, 3, 4, 5, 6, 7, 8, 9, 10],
+    pos9h_0: [0, 4, 5, 6, 8, 9, 10, 11.75, 13],
     pos11_0: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     pos11L_0: [0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12],
     pos11W_0: [0, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -2857,9 +2858,8 @@ const g_keyObj = {
     pos14i_0: [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14],
     pos16i_0: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
     pos23_0: [0, 1, 2, 3, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
-    poshimsiyauz_0: [0, 4, 5, 6, 8, 9, 10, 11.75, 13],
 
-    poshimsiyauz_1: [0, 5, 6, 8, 1, 2, 3, 4, 7],
+    pos9h_1: [0, 5, 6, 8, 1, 2, 3, 4, 7],
 
     pos9A_4: [0, 4, 5, 6, 8, 9, 10, 11.75, 13],
 
@@ -2873,6 +2873,7 @@ const g_keyObj = {
     keyCtrl9A_0: [[`S`], [`D`], [`E`, `R`], [`F`], [`Space`], [`J`], [`K`], [`I`], [`L`]],
     keyCtrl9B_0: [[`A`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`;`]],
     keyCtrl9i_0: [[`Left`], [`Down`], [`Up`], [`Right`], [`A`], [`S`], [`D`], [`F`], [`Space`]],
+    keyCtrl9h_0: [[`D1`], [`Y`], [`U`], [`I`], [`A`], [`Z`], [`S`], [`H`], [`M`]],
     keyCtrl11_0: [[`Left`], [`Down`], [`Up`], [`Right`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
     keyCtrl11L_0: [[`W`], [`E`], [`D3`, `D4`], [`R`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
     keyCtrl11W_0: [[`D1`, `D2`], [`T`], [`Y`], [`D0`, `Minus`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
@@ -2887,7 +2888,6 @@ const g_keyObj = {
     keyCtrl17_0: [[`A`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`], [`Space`], [`N`], [`J`], [`M`], [`K`], [`Comma`], [`L`], [`Period`], [`;`]],
     keyCtrl23_0: [[`W`], [`E`], [`D3`, `D4`], [`R`], [`U`], [`I`], [`D8`, `D9`], [`O`],
     [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`], [`Space`], [`N`], [`J`], [`M`], [`K`], [`Comma`], [`L`], [`Period`]],
-    keyCtrlhimsiyauz_0: [[`D1`], [`Y`], [`U`], [`I`], [`A`], [`Z`], [`S`], [`H`], [`M`]],
 
     // 変則パターン (キーコンフィグ)
     // - _0 の数字部分をカウントアップすることで実現できる。
@@ -2896,21 +2896,21 @@ const g_keyObj = {
     keyCtrl8_1: [[`Enter`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
     keyCtrl9A_1: [[`S`], [`D`], [`E`, `R`], [`F`], [`Space`], [`Left`], [`Down`], [`Up`], [`Right`]],
     keyCtrl9i_1: [[`A`], [`S`], [`D`], [`F`], [`Space`], [`Left`], [`Down`], [`Up`], [`Right`]],
+    keyCtrl9h_1: [[`S`], [`J`], [`K`], [`L`], [`D`], [`E`, `R`], [`F`], [`Space`], [`I`]],
     keyCtrl12_1: [[`Y`], [`U`, `I`], [`D8`, `D7`, `D9`], [`O`], [`Space`], [`B`], [`H`], [`N`, `M`], [`J`, `K`], [`Comma`], [`L`], [`Period`]],
     keyCtrl14_1: [[`R`, `T`], [`Y`], [`U`, `I`], [`D8`, `D6`, `D7`, `D9`, `D0`], [`O`], [`BracketLeft`, `P`], [`Space`], [`B`], [`H`], [`N`, `M`], [`J`, `K`], [`Comma`], [`L`], [`Period`]],
     keyCtrl17_1: [[`A`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`;`], [`Z`], [`X`], [`C`], [`V`], [`N`], [`M`], [`Comma`], [`Period`]],
-    keyCtrlhimsiyauz_1: [[`S`], [`J`], [`K`], [`L`], [`D`], [`E`, `R`], [`F`], [`Space`], [`I`]],
 
     keyCtrl5_2: [[`D`], [`F`], [`Space`], [`J`], [`K`]],
     keyCtrl8_2: [[`Space`], [`N`], [`J`], [`M`], [`K`], [`Comma`], [`L`], [`Period`]],
+    keyCtrl9h_2: [[`S`], [`Left`], [`Down`], [`Right`], [`D`], [`E`, `R`], [`F`], [`Space`], [`Up`]],
     keyCtrl12_2: [[`W`], [`E`], [`D3`, `D4`], [`R`], [`Shift`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`]],
     keyCtrl14_2: [[`Tab`, `Q`], [`W`], [`E`], [`D3`, `D2`, `D4`, `D5`], [`R`], [`Y`, `T`], [`Shift`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`]],
-    keyCtrlhimsiyauz_2: [[`S`], [`Left`], [`Down`], [`Right`], [`D`], [`E`, `R`], [`F`], [`Space`], [`Up`]],
 
     keyCtrl8_3: [[`Space`], [`B`], [`H`], [`N`, `M`], [`J`, `K`], [`Comma`], [`L`], [`Period`]],
+    keyCtrl9h_3: [[`A`], [`J`], [`K`], [`Semicolon`], [`S`], [`D`], [`F`], [`Space`], [`L`]],
     keyCtrl12_3: [[`W`], [`E`, `R`], [`D3`, `D4`, `D5`], [`T`], [`Shift`], [`Z`], [`S`], [`X`, `C`], [`D`, `F`], [`V`], [`G`], [`B`]],
     keyCtrl14_3: [[`Tab`, `Q`], [`W`], [`E`, `R`], [`D3`, `D2`, `D4`, `D5`, `D6`], [`T`], [`U`, `Y`], [`Shift`], [`Z`], [`S`], [`X`, `C`], [`D`, `F`], [`V`], [`G`], [`B`]],
-    keyCtrlhimsiyauz_3: [[`A`], [`J`], [`K`], [`Semicolon`], [`S`], [`D`], [`F`], [`Space`], [`L`]],
 
     keyCtrl8_4: [[`Shift`], [`Z`], [`S`], [`X`], [`D`], [`C`], [`F`], [`V`]],
     keyCtrl9A_4: [[`D1`], [`Y`], [`U`], [`I`], [`A`], [`Z`], [`S`], [`H`], [`M`]],
@@ -2957,9 +2957,9 @@ const g_keyObj = {
     transKey15A_1: '',
     transKey15B_0: '',
     transKey15B_1: '',
-    transKey9A_4: 'himsiyauz',
-    transKeyhimsiyauz_1: '9A',
-    transKeyhimsiyauz_3: '9B',
+    transKey9A_4: '9h',
+    transKey9h_1: '9A',
+    transKey9h_3: '9B',
 
     // キー置換用(ParaFla版との互換)
     keyTransPattern: {
@@ -2969,6 +2969,7 @@ const g_keyObj = {
         '9A-2': '9A',
         '9B-1': '9B',
         '9B-2': '9B',
+        'himsiyauz': '9h',
         'TP': '13',
         '15': '15A',
         '15R': '15B',
@@ -3064,6 +3065,15 @@ const g_keyObj = {
         'Asymmetry': [1, -1, -1, 1, -1, -1, 1, 1, -1],
     },
 
+    scrollDir9h_1: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, -1, -1, 1, 1, -1, -1, -1, 1],
+        'Split': [1, -1, -1, -1, 1, 1, 1, -1, -1],
+        'Alternate': [1, -1, 1, 1, -1, 1, -1, 1, -1],
+        'Twist': [1, 1, 1, -1, 1, -1, -1, -1, -1],
+        'Asymmetry': [1, -1, 1, -1, -1, -1, 1, -1, 1],
+    },
+
     scrollDir11_0: {
         '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
@@ -3125,14 +3135,6 @@ const g_keyObj = {
         'Twist': [1, 1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1, -1, -1, -1, 1, 1, 1, 1, 1, -1],
         'Asymmetry': [-1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, 1, -1, -1, 1, 1, 1, 1, 1, -1],
     },
-    scrollDirhimsiyauz_1: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
-        'Cross': [1, -1, -1, 1, 1, -1, -1, -1, 1],
-        'Split': [1, -1, -1, -1, 1, 1, 1, -1, -1],
-        'Alternate': [1, -1, 1, 1, -1, 1, -1, 1, -1],
-        'Twist': [1, 1, 1, -1, 1, -1, -1, -1, -1],
-        'Asymmetry': [1, -1, 1, -1, -1, -1, 1, -1, 1],
-    },
 
     // プレイアシスト設定
     assistPos5_0: {
@@ -3180,9 +3182,6 @@ const g_keyObj = {
     minWidth16i: 650,
     minWidth17: 825,
     minWidth23: 900,
-
-    // キー名
-    keyNamehimsiyauz: [`himsiyauz`, ``],
 
 };
 
@@ -3248,8 +3247,8 @@ const g_copyKeyPtn = {
     '15A_1': `15B_0`,
     '15B_1': `15A_0`,
 
-    'himsiyauz_2': `himsiyauz_1`,
-    'himsiyauz_3': `himsiyauz_1`,
+    '9h_2': `9h_1`,
+    '9h_3': `9h_1`,
 };
 
 // charaX_Y, posX_Y, keyGroupX_Y, divX_Y, divMaxX_Yが未定義のときに0からの連番で補完する処理 (charaX_Yが定義されていることが前提)
