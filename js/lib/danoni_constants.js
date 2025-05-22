@@ -2609,6 +2609,7 @@ const g_keyObj = {
     chara9A_0: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
     chara9B_0: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
     chara9i_0: [`sleft`, `sdown`, `sup`, `sright`, `left`, `down`, `up`, `right`, `space`],
+    chara9d_0: [`left`, `down`, `up`, `right`, `space`, `sleft`, `sdown`, `sup`, `sright`],
     chara9h_0: [`1x`, `yx`, `ux`, `ix`, `ax`, `zx`, `sx`, `hx`, `mx`],
     chara11_0: [`sleft`, `sdown`, `sup`, `sright`,
         `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
@@ -2645,12 +2646,19 @@ const g_keyObj = {
 
     chara5_2: [`left`, `down`, `space`, `up`, `right`],
     chara8_2: [`sleft`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
+    chara9h_2: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
     chara11_2: [`left`, `sleft`, `sdown`, `leftdia`, `down`, `space`,
         `up`, `sup`, `sright`, `rightdia`, `right`],
     chara11L_2: [`left`, `sleft`, `sdown`, `leftdia`, `down`, `space`,
         `up`, `sup`, `sright`, `rightdia`, `right`],
 
-    chara9A_4: [`left`, `sleft`, `sdown`, `sright`, `down`, `up`, `right`, `space`, `sup`],
+    chara9h_3: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
+    chara9h_4: [`1x`, `ax`, `gor`, `zx`, `sx`, `hx`, `yx`, `ux`, `siyo`, `mx`, `ix`],
+    chara9h_5: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
+    chara9h_6: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
+
+    chara9A_7: [`left`, `sleft`, `sdown`, `sright`, `down`, `up`, `right`, `space`, `sup`],
+    chara9h_7: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
 
     // 頻度の高い譜面データ名パターン
     // 後で chara4A, chara4A_a, chara4A_b, ... に変換する
@@ -2668,6 +2676,7 @@ const g_keyObj = {
     color9A_0_0: [0, 0, 0, 0, 2, 3, 3, 3, 3],
     color9B_0_0: [1, 0, 1, 0, 2, 0, 1, 0, 1],
     color9i_0_0: [0, 0, 0, 0, 2, 2, 2, 2, 2],
+    color9d_0_0: [0, 1, 0, 2, 2, 2, 0, 1, 0],
     color9h_0_0: [2, 3, 3, 3, 1, 0, 1, 1, 0],
     color11_0_0: [3, 3, 3, 3, 0, 1, 0, 2, 0, 1, 0],
     color11L_0_0: [3, 3, 3, 3, 0, 1, 0, 2, 0, 1, 0],
@@ -2693,6 +2702,8 @@ const g_keyObj = {
     color8_2_0: [2, 0, 1, 0, 1, 0, 1, 0],
     color9A_2_0: [3, 0, 3, 0, 2, 0, 3, 0, 3],
     color9B_2_0: [0, 0, 0, 0, 2, 1, 1, 1, 1],
+
+    color9B_3_0: [0, 0, 2, 0, 0, 2, 1, 1, 2, 1, 1],
 
     // ColorGroup - 2
     color9A_0_1: [0, 0, 3, 0, 2, 0, 0, 3, 0],
@@ -2724,6 +2735,7 @@ const g_keyObj = {
     shuffle9A_0_0: [0, 0, 0, 0, 1, 0, 0, 0, 0],
     shuffle9B_0_0: [0, 0, 0, 0, 1, 0, 0, 0, 0],
     shuffle9i_0_0: [0, 0, 0, 0, 1, 1, 1, 1, 1],
+    shuffle9d_0_0: [0, 0, 0, 1, 1, 1, 2, 2, 2],
     shuffle9h_0_0: [1, 0, 0, 0, 1, 1, 1, 0, 0],
     shuffle11_0_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
     shuffle11L_0_0: [0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1],
@@ -2771,6 +2783,7 @@ const g_keyObj = {
     stepRtn9A_0_0: [0, -90, 90, 180, `onigiri`, 0, -90, 90, 180],
     stepRtn9B_0_0: [45, 0, -45, -90, `onigiri`, 90, 135, 180, 225],
     stepRtn9i_0_0: [0, -90, 90, 180, `monar`, `giko`, `c`, `morara`, `onigiri`],
+    stepRtn9d_0_0: [0, -45, -90, `giko`, `onigiri`, `iyo`, 90, 135, 180],
     stepRtn9h_0_0: [`giko`, 0, -90, 180, 45, -90, 135, -45, -90],
     stepRtn11_0_0: [0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
     stepRtn11L_0_0: [0, -90, 90, 180, 0, -45, -90, `onigiri`, 90, 135, 180],
@@ -2854,6 +2867,7 @@ const g_keyObj = {
     keyCtrl9A_0: [[`S`], [`D`], [`E`, `R`], [`F`], [`Space`], [`J`], [`K`], [`I`], [`L`]],
     keyCtrl9B_0: [[`A`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`;`]],
     keyCtrl9i_0: [[`Left`], [`Down`], [`Up`], [`Right`], [`A`], [`S`], [`D`], [`F`], [`Space`]],
+    keyCtrl9d_0: [[`S`], [`D`], [`F`], [`V`], [`B`], [`N`], [`J`], [`K`], [`L`]],
     keyCtrl9h_0: [[`D1`], [`Y`], [`U`], [`I`], [`A`], [`Z`], [`S`], [`H`], [`M`]],
     keyCtrl11_0: [[`Left`], [`Down`], [`Up`], [`Right`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
     keyCtrl11L_0: [[`W`], [`E`], [`D3`, `D4`], [`R`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
@@ -2915,6 +2929,8 @@ const g_keyObj = {
     blank5_2: 57.5,
     blank9A_0: 52.5,
     blank9B_0: 52.5,
+    blank9d_0: 52.5,
+    blank9i_1: 52.5,
     blank23_0: 50,
 
     // 矢印群の倍率指定
@@ -2934,9 +2950,6 @@ const g_keyObj = {
     transKey15A_1: '',
     transKey15B_0: '',
     transKey15B_1: '',
-    transKey9A_4: '9h',
-    transKey9h_1: '9A',
-    transKey9h_3: '9B',
 
     // キー置換用(ParaFla版との互換)
     keyTransPattern: {
@@ -3039,6 +3052,15 @@ const g_keyObj = {
         'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
         'Twist': [1, 1, -1, -1, 1, 1, 1, -1, -1],
+        'Asymmetry': [1, -1, -1, 1, -1, -1, 1, 1, -1],
+    },
+
+    scrollDir9d_0: {
+        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'Cross': [1, 1, 1, -1, -1, -1, 1, 1, 1],
+        'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
+        'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
+        'Twist': [1, 1, -1, -1, -1, 1, 1, -1, -1],
         'Asymmetry': [1, -1, -1, 1, -1, -1, 1, 1, -1],
     },
 
@@ -3165,7 +3187,7 @@ Object.keys(g_keyObj)
 // ・コピー先：コピー元の順に指定する
 // ・上から順に処理する
 const g_copyKeyPtn = {
-    '8_3': `8_2`,
+    '8_3': `8_2`, // 12key下部はマッピングが異なるため、8_2を流用
     '8_4': `8_2`,
     '8_5': `8_2`,
     '7_1': `7_0`,
@@ -3185,30 +3207,61 @@ const g_copyKeyPtn = {
     '9A_1': `9A_0`,
     '9A_2': `9B_0`,
     '9A_3': `11i_0`,
-    '9A_4': `9h_0`,
+    '9A_4': `9i_0`,
+    '9A_5': `9i_1`,
+    '9A_6': `9d_0`,
+    '9A_7': `9h_0`,
+
     '9B_1': `9A_0`,
     '9B_2': `9A_1`,
-    '9B_3': `9A_4`,
+    '9B_3': `11i_0`,
+    '9B_4': `9i_0`,
+    '9B_5': `9i_1`,
+    '9B_6': `9d_0`,
+    '9B_7': `9A_7`, // 9hはcharaX_Yのマッピングが異なるため、9A_7を流用
 
+    '9i_2': `9A_0`,
+    '9i_3': `9A_1`,
+    '9i_4': `9B_0`,
+    '9i_5': `11i_0`,
+    '9i_6': `9d_0`,
+    '9i_7': `9A_7`, // 9hはcharaX_Yのマッピングが異なるため、9A_7を流用
+
+    '9d_1': `9A_0`,
+    '9d_2': `9A_1`,
+    '9d_3': `9B_0`,
+    '9d_4': `11i_0`,
+    '9d_5': `9i_0`,
+    '9d_6': `9i_1`,
+    '9d_7': `9A_7`, // 9hはcharaX_Yのマッピングが異なるため、9A_7を流用
+
+    // 9hはcharaX_Yのマッピングが異なるため、既存パターンをコピーしたうえでcharaX_Yを入れ替え
     '9h_1': `9A_0`,
     '9h_2': `9A_1`,
     '9h_3': `9B_0`,
+    '9h_4': `11i_0`,
+    '9h_5': `9i_0`,
+    '9h_6': `9i_1`,
+    '9h_7': `9d_0`,
 
     '12_1': `12_0`,
     '12_2': `12_0`,
     '12_3': `12_0`,
+
     '11_1': `11L_0`,
     '11_2': `11i_0`,
     '11_3': `12_0`,
     '11_4': `12_1`,
     '11_5': `12_2`,
     '11_6': `12_3`,
+
     '11L_1': `11_0`,
-    '11L_2': `11i_0`,
+    '11L_2': `11_2`, // 1iiはcharaX_Yのマッピングが異なるため、11_2を流用
     '11L_3': `12_0`,
     '11L_4': `12_1`,
     '11L_5': `12_2`,
     '11L_6': `12_3`,
+
     '11W_1': `12_0`,
     '11W_2': `12_1`,
     '11W_3': `12_2`,
