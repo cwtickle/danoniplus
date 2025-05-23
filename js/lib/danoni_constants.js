@@ -3363,8 +3363,7 @@ Object.keys(g_copyKeyPtn).forEach(keyPtnTo => {
     copyKeyPtnVal(`keyRetry`);
     copyKeyPtnVal(`keyTitleBack`);
 
-    if (g_keyObj[`transKey${keyPtnTo}`] !== undefined && !g_keyObj[`transKey${keyPtnTo}`].includes(`_`)) {
-    } else {
+    if (g_keyObj[`transKey${keyPtnTo}`] === undefined || g_keyObj[`transKey${keyPtnTo}`].includes(`_`)) {
         if (g_keyObj[`transKey${keyPtnFrom}`] !== undefined) {
             g_keyObj[`transKey${keyPtnTo}`] = g_keyObj[`transKey${keyPtnFrom}`];
         } else if (g_keyObj[`transKey${keyPtnTo}`] === undefined && keyPtnFrom.split(`_`)[0] !== keyPtnTo.split(`_`)[0]) {
