@@ -11124,7 +11124,7 @@ const getArrowSettings = () => {
 	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
 	// g_workObjの不要なプロパティを削除
-	if (g_stateObj.dummyId === ``) {
+	if (g_stateObj.dummyId === `` && g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
 		Object.keys(g_workObj).filter(key => key.startsWith(`dummy`) || key.startsWith(`mkDummy`))
 			.forEach(key => delete g_workObj[key]);
 	}
@@ -11420,7 +11420,8 @@ const mainInit = () => {
 	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth, { x: g_workObj.backX });
 
 	// カラー・モーションを適用するオブジェクトの種類
-	const objList = (g_stateObj.dummyId === `` ? [``] : [`dummy`, ``]);
+	const objList = (g_stateObj.dummyId === `` && g_autoPlaysBase.includes(g_stateObj.autoPlay)
+		? [``] : [`dummy`, ``]);
 
 	// 背景・マスクモーション、スキン変更(0フレーム指定)
 	if (g_scoreObj.frameNum === 0) {
