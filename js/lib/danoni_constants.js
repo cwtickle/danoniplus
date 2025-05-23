@@ -2956,13 +2956,13 @@ const g_keyObj = {
     scale17_0: 0.95,
 
     // ショートカットキーコード
-    keyRetry: 8,
-    keyRetry8_0: 9,
+    keyRetry: 8,            // 8: Backspace
+    keyRetry8_0: 9,         // 9: Tab
     keyRetry8_1: 9,
-    keyRetry11j_0: 123,
+    keyRetry11j_0: 123,     // 123: F12
 
-    keyTitleBack: 46,
-    keyTitleBack11j_0: 27,
+    keyTitleBack: 46,       // 46: Delete
+    keyTitleBack11j_0: 27,  // 27: Escape
 
     // 別キー
     transKey8_2: '12',
