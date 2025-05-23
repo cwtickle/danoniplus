@@ -11598,7 +11598,8 @@ const mainInit = () => {
 	const checkMusicSiz = (_text, _siz) => getFontSize(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, getBasicFont(), _siz);
 
 	const makerView = g_headerObj.makerView ? ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})` : ``;
-	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${shuffleName}${makerView}]`;
+	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? ` (${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
+	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${shuffleName}${makerView}]`;
 	let creditName = `${musicTitle} / ${artistName}`;
 	if (checkMusicSiz(creditName, g_limitObj.musicTitleSiz) < 12) {
 		creditName = `${musicTitle}`;
