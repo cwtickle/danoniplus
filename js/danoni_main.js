@@ -4468,6 +4468,14 @@ const getKeyName = _key => unEscapeHtml(escapeHtml(g_keyObj[`keyName${_key}`]?.[
 const getKeyUnitName = _key => unEscapeHtml(escapeHtml(g_keyObj[`keyName${_key}`]?.[1] ?? `key`));
 
 /**
+ * 別キーモード時の表示名の取得
+ * @param {boolean} _spaceFlg
+ * @returns {string} 別キー名
+ */
+const getTransKeyName = (_spaceFlg = false) => hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])
+	? (_spaceFlg ? ` ` : ``) + `(${g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]})` : ``;
+
+/**
  * KeyBoardEvent.code の値をCW Edition用のキーコードに変換
  * 簡略指定ができるように、以下の記述を許容
  * 例) KeyD -> D, ArrowDown -> Down, AltLeft -> Alt
@@ -6713,7 +6721,7 @@ const makeHighScore = _scoreId => {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
 	const mirrorName = (g_stateObj.shuffle === C_FLG_OFF ? `` : `-${g_stateObj.shuffle}`);
-	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
+	const transKeyName = getTransKeyName();
 	let scoreName = `${g_headerObj.keyLabels[_scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[_scoreId]}${assistFlg}${mirrorName}`;
 	if (g_headerObj.makerView) {
 		scoreName += `-${g_headerObj.creatorNames[_scoreId]}`;
@@ -6959,8 +6967,9 @@ const setDifficulty = (_initFlg) => {
 
 	// 譜面名設定 (Difficulty)
 	const difWidth = parseFloat(lnkDifficulty.style.width);
+	const transKeyName = getTransKeyName();
 	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
-	const difNames = [`${getKeyName(g_keyObj.currentKey)} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
+	const difNames = [`${getKeyName(g_keyObj.currentKey)}${transKeyName} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
 	lnkDifficulty.style.fontSize = wUnit(getFontSize(difNames[0], difWidth, getBasicFont(), g_limitObj.setLblSiz));
 
 	if (g_headerObj.makerView) {
@@ -11598,7 +11607,7 @@ const mainInit = () => {
 	const checkMusicSiz = (_text, _siz) => getFontSize(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, getBasicFont(), _siz);
 
 	const makerView = g_headerObj.makerView ? ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})` : ``;
-	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? ` (${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
+	const transKeyName = getTransKeyName();
 	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${shuffleName}${makerView}]`;
 	let creditName = `${musicTitle} / ${artistName}`;
 	if (checkMusicSiz(creditName, g_limitObj.musicTitleSiz) < 12) {
@@ -13580,7 +13589,7 @@ const resultInit = () => {
 	}
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
+	const transKeyName = getTransKeyName();
 	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
 	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
 
