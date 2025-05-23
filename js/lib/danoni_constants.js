@@ -2959,8 +2959,10 @@ const g_keyObj = {
     keyRetry: 8,
     keyRetry8_0: 9,
     keyRetry8_1: 9,
+    keyRetry11j_0: 123,
 
     keyTitleBack: 46,
+    keyTitleBack11j_0: 27,
 
     // 別キー
     transKey8_2: '12',
@@ -3200,6 +3202,7 @@ const g_keyObj = {
     minWidth7i: 550,
     minWidth9A: 650,
     minWidth11i: 650,
+    minWidth11j: 650,
     minWidth12i: 675,
     minWidth13: 650,
     minWidth16i: 650,
