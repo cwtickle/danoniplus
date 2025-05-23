@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/05/17
+ * Revised : 2025/05/23
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 41.4.1`;
-const g_revisedDate = `2025/05/17`;
+const g_version = `Ver 41.4.2`;
+const g_revisedDate = `2025/05/23`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -6169,7 +6169,7 @@ const optionInit = () => {
  * @returns {string}
  */
 const getMusicInfoView = () => {
-	const idx = g_headerObj.musicNos[g_stateObj.scoreId];
+	const idx = g_headerObj.musicNos[g_stateObj.scoreId] || 0;
 	let text = `♪` + (g_headerObj.musicSelectUse ? `${unEscapeHtml(g_headerObj.musicTitles[idx])} / ` : ``) +
 		`BPM: ${g_headerObj.bpms[idx]}`;
 	if (!g_headerObj.musicSelectUse && g_headerObj.bpms[idx] === `----`) {
@@ -11115,7 +11115,7 @@ const getArrowSettings = () => {
 	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
 	// g_workObjの不要なプロパティを削除
-	if (g_stateObj.dummyId === ``) {
+	if (g_stateObj.dummyId === `` && g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
 		Object.keys(g_workObj).filter(key => key.startsWith(`dummy`) || key.startsWith(`mkDummy`))
 			.forEach(key => delete g_workObj[key]);
 	}
@@ -11411,7 +11411,8 @@ const mainInit = () => {
 	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth, { x: g_workObj.backX });
 
 	// カラー・モーションを適用するオブジェクトの種類
-	const objList = (g_stateObj.dummyId === `` ? [``] : [`dummy`, ``]);
+	const objList = (g_stateObj.dummyId === `` && g_autoPlaysBase.includes(g_stateObj.autoPlay)
+		? [``] : [`dummy`, ``]);
 
 	// 背景・マスクモーション、スキン変更(0フレーム指定)
 	if (g_scoreObj.frameNum === 0) {
