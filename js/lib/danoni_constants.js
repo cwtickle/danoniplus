@@ -2944,8 +2944,8 @@ const g_keyObj = {
     blank5_2: 57.5,
     blank9A_0: 52.5,
     blank9B_0: 52.5,
-    blank9d_0: 52.5,
     blank9i_1: 52.5,
+    blank9d_0: 52.5,
     blank11j_0: 50,
     blank12i_0: 50,
     blank23_0: 50,
@@ -2956,11 +2956,13 @@ const g_keyObj = {
     scale17_0: 0.95,
 
     // ショートカットキーコード
-    keyRetry: 8,
-    keyRetry8_0: 9,
+    keyRetry: 8,            // 8: Backspace
+    keyRetry8_0: 9,         // 9: Tab
     keyRetry8_1: 9,
+    keyRetry11j_0: 123,     // 123: F12
 
-    keyTitleBack: 46,
+    keyTitleBack: 46,       // 46: Delete
+    keyTitleBack11j_0: 27,  // 27: Escape
 
     // 別キー
     transKey8_2: '12',
@@ -3199,7 +3201,12 @@ const g_keyObj = {
     minWidth5: 500,
     minWidth7i: 550,
     minWidth9A: 650,
+    minWidth9B: 650,
+    minWidth9i: 650,
+    minWidth9d: 650,
+    minWidth9h: 650,
     minWidth11i: 650,
+    minWidth11j: 650,
     minWidth12i: 675,
     minWidth13: 650,
     minWidth16i: 650,
