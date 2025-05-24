@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/05/17
+ * Revised : 2025/05/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 41.4.1`;
-const g_revisedDate = `2025/05/17`;
+const g_version = `Ver 42.0.0`;
+const g_revisedDate = `2025/05/24`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1354,18 +1354,18 @@ const getStrWidth = (_str, _fontsize, _font) => {
  * 指定した横幅に合ったフォントサイズを取得
  * @param {string} _str 
  * @param {number} _maxWidth 
- * @param {string} _font 
- * @param {number} _maxFontsize
- * @param {number} _minFontsize
+ * @param {string} [object.font=getBasicFont()]
+ * @param {number} [object.maxSiz=14]
+ * @param {number} [object.minSiz=5]
  * @returns {number}
  */
-const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64, _minFontsize = 5) => {
-	for (let siz = _maxFontsize; siz >= _minFontsize; siz--) {
-		if (_maxWidth >= getStrWidth(getLongestStr(_str?.split(`<br>`)), siz, _font)) {
+const getFontSize2 = (_str, _maxWidth, { font = getBasicFont(), maxSiz = 14, minSiz = 5 } = {}) => {
+	for (let siz = maxSiz; siz >= minSiz; siz--) {
+		if (_maxWidth >= getStrWidth(getLongestStr(_str?.split(`<br>`)), siz, font)) {
 			return siz;
 		}
 	}
-	return _minFontsize;
+	return minSiz;
 };
 
 /**
@@ -1392,7 +1392,7 @@ const getLongestStr = _array => {
  */
 const createDescDiv = (_id, _str, { altId = _id, siz = g_limitObj.mainSiz } = {}) =>
 	createDivCss2Label(_id, _str, Object.assign(g_lblPosObj[altId], {
-		siz: getFontSize(_str, g_lblPosObj[altId]?.w || g_sWidth, getBasicFont(), siz),
+		siz: getFontSize2(_str, g_lblPosObj[altId]?.w || g_sWidth, { maxSiz: siz }),
 	}));
 
 /*-----------------------------------------------------------*/
@@ -4468,6 +4468,14 @@ const getKeyName = _key => unEscapeHtml(escapeHtml(g_keyObj[`keyName${_key}`]?.[
 const getKeyUnitName = _key => unEscapeHtml(escapeHtml(g_keyObj[`keyName${_key}`]?.[1] ?? `key`));
 
 /**
+ * 別キーモード時の表示名の取得
+ * @param {boolean} _spaceFlg
+ * @returns {string} 別キー名
+ */
+const getTransKeyName = (_spaceFlg = false) => hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])
+	? (_spaceFlg ? ` ` : ``) + `(${g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]})` : ``;
+
+/**
  * KeyBoardEvent.code の値をCW Edition用のキーコードに変換
  * 簡略指定ができるように、以下の記述を許容
  * 例) KeyD -> D, ArrowDown -> Down, AltLeft -> Alt
@@ -5126,7 +5134,7 @@ const titleInit = (_initFlg = false) => {
 	}
 	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
 	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${customVersion}${releaseDate}`;
-	const getLinkSiz = _name => getFontSize(_name, g_sWidth / 2 - 20, getBasicFont(), g_limitObj.lnkSiz, 12);
+	const getLinkSiz = _name => getFontSize2(_name, g_sWidth / 2 - 20, { maxSiz: g_limitObj.lnkSiz, minSiz: 12 });
 
 	/**
 	 * クレジット用リンク作成
@@ -5195,7 +5203,7 @@ const titleInit = (_initFlg = false) => {
 		// バージョン描画
 		createCss2Button(`lnkVersion`, versionName, () => true,
 			Object.assign(g_lblPosObj.lnkVersion, {
-				siz: getFontSize(versionName, g_sWidth * 3 / 4 - 20, getBasicFont(), 12),
+				siz: getFontSize2(versionName, g_sWidth * 3 / 4 - 20, { maxSiz: 12 }),
 				resetFunc: () => openLink(`https://github.com/cwtickle/danoniplus`),
 			}), g_cssObj.button_Tweet),
 
@@ -5308,7 +5316,7 @@ const drawTitle = (_titleName = g_headerObj.musicTitleForView, _scoreId = ``) =>
 	let titlefontsize = 64;
 	for (let j = 0; j < _titleName.length; j++) {
 		if (_titleName[j] !== ``) {
-			titlefontsize = getFontSize(_titleName[j], g_sWidth - 100, g_headerObj.titlefonts[j], titlefontsize);
+			titlefontsize = getFontSize2(_titleName[j], g_sWidth - 100, { font: g_headerObj.titlefonts[j], maxSiz: titlefontsize });
 		}
 	}
 
@@ -5558,7 +5566,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 		if (j === 0) {
 		} else {
 			document.getElementById(`btnMusicSelect${j}`).style.fontSize =
-				getFontSize(g_headerObj.musicTitles[idx].slice(0, limitedMLength), g_btnWidth(1 / 2), getBasicFont(), 14);
+				getFontSize2(g_headerObj.musicTitles[idx].slice(0, limitedMLength), g_btnWidth(1 / 2));
 			document.getElementById(`btnMusicSelect${j}`).innerHTML =
 				`${g_headerObj.musicTitles[idx].slice(0, limitedMLength)}${g_headerObj.musicTitles[idx].length > limitedMLength ? '...' : ''}<br>` +
 				`<span style="font-size:0.7em;line-height:9px"> / ${g_headerObj.artistNames[idx]}</span>`;
@@ -5593,7 +5601,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 	// 選択した楽曲の情報表示
 	const idx = g_headerObj.musicIdxList[g_settings.musicIdxNum];
 	document.getElementById(`lblMusicSelect`).innerHTML =
-		`<span style="font-size:${getFontSize(g_headerObj.musicTitlesForView[idx].join(`<br>`), g_btnWidth(1 / 2), getBasicFont(), 18)}px;` +
+		`<span style="font-size:${getFontSize2(g_headerObj.musicTitlesForView[idx].join(`<br>`), g_btnWidth(1 / 2), { maxSiz: 18 })}px;` +
 		`font-weight:bold">${g_headerObj.musicTitlesForView[idx].join(`<br>`)}</span>`;
 	document.getElementById(`lblMusicSelectDetail`).innerHTML =
 		`Maker: ${creatorLink} / Artist: <a href="${g_headerObj.artistUrls[idx]}" target="_blank">` +
@@ -5843,7 +5851,7 @@ const dataMgtInit = () => {
 		const keyWidth = Math.min(Math.max(50, getStrWidth(getKeyName(key), g_limitObj.setLblSiz, getBasicFont())), 80);
 		keyListSprite.appendChild(createMgtButton(key, j - 2, 0, {
 			w: keyWidth,
-			siz: getFontSize(getKeyName(key), keyWidth, getBasicFont(), g_limitObj.setLblSiz, 10),
+			siz: getFontSize2(getKeyName(key), keyWidth, { maxSiz: g_limitObj.setLblSiz, minSiz: 10 }),
 		}));
 		document.getElementById(`btn${toCapitalize(key)}`).innerHTML = getKeyName(key);
 
@@ -6142,7 +6150,7 @@ const optionInit = () => {
 	// 楽曲データの表示
 	const text = getMusicInfoView();
 	divRoot.appendChild(createDivCss2Label(`lblMusicInfo`, text,
-		Object.assign({ siz: getFontSize(text, g_btnWidth(3 / 4), getBasicFont(), 12) }, g_lblPosObj.lblMusicInfo)));
+		Object.assign({ siz: getFontSize2(text, g_btnWidth(3 / 4), { maxSiz: 12 }) }, g_lblPosObj.lblMusicInfo)));
 
 	// タイトル文字描画
 	divRoot.appendChild(getTitleDivLabel(`lblTitle`, g_lblNameObj.settings, 0, 15, `settings_Title`));
@@ -6169,7 +6177,7 @@ const optionInit = () => {
  * @returns {string}
  */
 const getMusicInfoView = () => {
-	const idx = g_headerObj.musicNos[g_stateObj.scoreId];
+	const idx = g_headerObj.musicNos[g_stateObj.scoreId] || 0;
 	let text = `♪` + (g_headerObj.musicSelectUse ? `${unEscapeHtml(g_headerObj.musicTitles[idx])} / ` : ``) +
 		`BPM: ${g_headerObj.bpms[idx]}`;
 	if (!g_headerObj.musicSelectUse && g_headerObj.bpms[idx] === `----`) {
@@ -6713,7 +6721,7 @@ const makeHighScore = _scoreId => {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
 	const mirrorName = (g_stateObj.shuffle === C_FLG_OFF ? `` : `-${g_stateObj.shuffle}`);
-	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
+	const transKeyName = getTransKeyName();
 	let scoreName = `${g_headerObj.keyLabels[_scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[_scoreId]}${assistFlg}${mirrorName}`;
 	if (g_headerObj.makerView) {
 		scoreName += `-${g_headerObj.creatorNames[_scoreId]}`;
@@ -6959,14 +6967,15 @@ const setDifficulty = (_initFlg) => {
 
 	// 譜面名設定 (Difficulty)
 	const difWidth = parseFloat(lnkDifficulty.style.width);
+	const transKeyName = getTransKeyName();
 	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
-	const difNames = [`${getKeyName(g_keyObj.currentKey)} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
-	lnkDifficulty.style.fontSize = wUnit(getFontSize(difNames[0], difWidth, getBasicFont(), g_limitObj.setLblSiz));
+	const difNames = [`${getKeyName(g_keyObj.currentKey)}${transKeyName} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
+	lnkDifficulty.style.fontSize = wUnit(getFontSize2(difNames[0], difWidth, { maxSiz: g_limitObj.setLblSiz }));
 
 	if (g_headerObj.makerView) {
 		difNames.push(`(${g_headerObj.creatorNames[g_stateObj.scoreId]})`);
 		difNames.forEach((difName, j) => {
-			const tmpSize = getFontSize(difName, difWidth, getBasicFont(), 14);
+			const tmpSize = getFontSize2(difName, difWidth);
 			difNames[j] = `<span style="font-size:${wUnit(tmpSize)}">${difName}</span>`;
 		});
 	}
@@ -7008,7 +7017,7 @@ const setDifficulty = (_initFlg) => {
 
 	// 楽曲データの表示
 	lblMusicInfo.textContent = getMusicInfoView();
-	lblMusicInfo.style.fontSize = wUnit(getFontSize(lblMusicInfo.textContent, g_btnWidth(3 / 4), getBasicFont(), 12));
+	lblMusicInfo.style.fontSize = wUnit(getFontSize2(lblMusicInfo.textContent, g_btnWidth(3 / 4), { maxSiz: 12 }));
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
@@ -8980,10 +8989,10 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			g_headerObj[`key${selectedKc}`] = setKey;
 			g_headerObj[`key${selectedKc}Def`] = setKey;
 			document.getElementById(`sc${selectedKc}`).textContent = getScMsg[selectedKc]();
-			document.getElementById(`sc${selectedKc}`).style.fontSize = `${getFontSize(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, getBasicFont(), 13)}px`;
+			document.getElementById(`sc${selectedKc}`).style.fontSize = `${getFontSize2(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, { maxSiz: 13 })}px`;
 			if (g_isMac) {
 				scTitleBack.textContent = getScMsg.TitleBack();
-				scTitleBack.style.fontSize = `${getFontSize(getScMsg.TitleBack(), g_btnWidth(5 / 12) - 40, getBasicFont(), 13)}px`;
+				scTitleBack.style.fontSize = `${getFontSize2(getScMsg.TitleBack(), g_btnWidth(5 / 12) - 40, { maxSiz: 13 })}px`;
 			}
 			changeConfigColor(document.getElementById(`sc${selectedKc}`),
 				g_headerObj[`key${selectedKc}`] === g_headerObj[`key${selectedKc}Def2`] ?
@@ -11115,7 +11124,7 @@ const getArrowSettings = () => {
 	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
 	// g_workObjの不要なプロパティを削除
-	if (g_stateObj.dummyId === ``) {
+	if (g_stateObj.dummyId === `` && g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
 		Object.keys(g_workObj).filter(key => key.startsWith(`dummy`) || key.startsWith(`mkDummy`))
 			.forEach(key => delete g_workObj[key]);
 	}
@@ -11411,7 +11420,8 @@ const mainInit = () => {
 	createMultipleSprite(`maskSprite`, g_scoreObj.maskMaxDepth, { x: g_workObj.backX });
 
 	// カラー・モーションを適用するオブジェクトの種類
-	const objList = (g_stateObj.dummyId === `` ? [``] : [`dummy`, ``]);
+	const objList = (g_stateObj.dummyId === `` && g_autoPlaysBase.includes(g_stateObj.autoPlay)
+		? [``] : [`dummy`, ``]);
 
 	// 背景・マスクモーション、スキン変更(0フレーム指定)
 	if (g_scoreObj.frameNum === 0) {
@@ -11595,10 +11605,11 @@ const mainInit = () => {
 	const shuffleName = (g_stateObj.shuffle !== C_FLG_OFF ? `: ${getStgDetailName(g_stateObj.shuffle)}` : ``);
 
 	// 曲名・アーティスト名、譜面名のサイズ調整
-	const checkMusicSiz = (_text, _siz) => getFontSize(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, getBasicFont(), _siz);
+	const checkMusicSiz = (_text, _siz) => getFontSize2(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, { maxSiz: _siz });
 
 	const makerView = g_headerObj.makerView ? ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})` : ``;
-	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${shuffleName}${makerView}]`;
+	const transKeyName = getTransKeyName();
+	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${shuffleName}${makerView}]`;
 	let creditName = `${musicTitle} / ${artistName}`;
 	if (checkMusicSiz(creditName, g_limitObj.musicTitleSiz) < 12) {
 		creditName = `${musicTitle}`;
@@ -13579,7 +13590,7 @@ const resultInit = () => {
 	}
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const transKeyName = (hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `(${g_keyObj[`transKey${keyCtrlPtn}`]})` : ``);
+	const transKeyName = getTransKeyName();
 	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
 	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
 
@@ -13680,9 +13691,9 @@ const resultInit = () => {
 		lblStyleData.style.top = `${parseFloat(lblStyleData.style.top) - 3}px`;
 		lblStyleData.innerHTML = `${lblStyleData.textContent.slice(0, playStyleBreakNum)}<br>` +
 			`${lblStyleData.textContent.slice(playStyleBreakNum)}`;
-		lblStyleData.style.fontSize = `${getFontSize(lblStyleData.textContent.slice(0, playStyleBreakNum), 350, getBasicFont(), 10)}px`;
+		lblStyleData.style.fontSize = `${getFontSize2(lblStyleData.textContent.slice(0, playStyleBreakNum), 350, { maxSiz: 10 })}px`;
 	} else {
-		lblStyleData.style.fontSize = `${getFontSize(lblStyleData.textContent, 350, getBasicFont(), 14)}px`;
+		lblStyleData.style.fontSize = `${getFontSize2(lblStyleData.textContent, 350)}px`;
 	}
 
 	/**
@@ -13956,10 +13967,10 @@ const resultInit = () => {
 		drawText(unEscapeHtml(difDataForImage), { hy: 4 });
 
 		if (playStyleData.length > 60) {
-			drawText(playStyleData.slice(0, playStyleBreakNum), { hy: 5, siz: getFontSize(playStyleData.slice(0, playStyleBreakNum), 370, getBasicFont(), 14) });
-			drawText(playStyleData.slice(playStyleBreakNum), { hy: 6, siz: getFontSize(playStyleData.slice(playStyleBreakNum), 370, getBasicFont(), 14) });
+			drawText(playStyleData.slice(0, playStyleBreakNum), { hy: 5, siz: getFontSize2(playStyleData.slice(0, playStyleBreakNum), 370) });
+			drawText(playStyleData.slice(playStyleBreakNum), { hy: 6, siz: getFontSize2(playStyleData.slice(playStyleBreakNum), 370) });
 		} else {
-			drawText(playStyleData, { hy: 5, siz: getFontSize(lblStyleData.textContent, 370, getBasicFont(), 15) });
+			drawText(playStyleData, { hy: 5, siz: getFontSize2(lblStyleData.textContent, 370, { maxSiz: 15 }) });
 		}
 		Object.keys(jdgScoreObj).forEach(score => {
 			drawText(g_lblNameObj[`j_${score}`], { hy: 7 + jdgScoreObj[score].pos, color: jdgScoreObj[score].dfColor });

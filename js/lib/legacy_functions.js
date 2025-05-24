@@ -5,10 +5,14 @@
  *
  * Source by tickle
  * Created : 2024/10/29 
- * Revised : 2024/11/07 (v38.0.2)
+ * Revised : 2025/05/24 (v42.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
+
+/** @deprecated */
+const getFontSize = (_str, _maxWidth, _font = getBasicFont(), _maxFontsize = 64, _minFontsize = 5) =>
+    getFontSize2(_str, _maxWidth, { font: _font, maxSiz: _maxFontsize, minSiz: _minFontsize });
 
 /** @deprecated */
 const createSprite = (_parentObjName, _newObjName, x, y, w, h, _options = {}) =>
