@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/05/24
+ * Revised : 2025/06/07
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.0.0`;
-const g_revisedDate = `2025/05/24`;
+const g_version = `Ver 42.1.0`;
+const g_revisedDate = `2025/06/07`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -66,7 +66,7 @@ const g_referenceDomains = [
 Object.freeze(g_referenceDomains);
 
 const g_rootPath = current().match(/(^.*\/)/)[0];
-const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
+let g_workPath;
 const hasRemoteDomain = _path => g_referenceDomains.some(domain => _path.match(`^https://${domain}/`) !== null);
 const g_remoteFlg = hasRemoteDomain(g_rootPath);
 
@@ -820,6 +820,26 @@ const unEscapeHtml = _str => unEscapeEmoji(replaceStr(_str, g_escapeStr.unEscape
  * @returns {string[]}
  */
 const escapeHtmlForArray = _array => _array.map(str => escapeHtml(str));
+
+/**
+ * URLのパスを検証し、絶対URLまたは相対パスであればその値を返す
+ * @param {string} _input 
+ * @param {string} _defaultUrl 
+ * @returns {string}
+ */
+const validatePath = (_input, _defaultUrl = ``) => {
+	// 絶対 URL（http, https, ftp, fileなど）
+	const absoluteUrlPattern = /^(https?:\/\/|ftp:\/\/|file:\/\/)/;
+
+	// 相対パス（ルート相対 `/path/to/file` もしくは `./file`, `../file` ）
+	const relativePathPattern = /^\/|^\.{1,2}\//;
+
+	const raw = _input && (absoluteUrlPattern.test(_input) || relativePathPattern.test(_input))
+		? encodeURI(_input) : _defaultUrl;
+
+	// URL または相対パスが合致すればその値を返し、そうでなければデフォルト URL を返す
+	return raw.endsWith(`/`) ? raw : raw + `/`;
+};
 
 /**
  * 次のカーソルへ移動
@@ -2454,6 +2474,8 @@ const initialControl = async () => {
 
 	const stage = document.getElementById(`canvas-frame`);
 	const divRoot = createEmptySprite(stage, `divRoot`, g_windowObj.divRoot);
+	g_workPath = validatePath(document.getElementById(`jsRootUrl`)?.value,
+		new URL(location.href).href.match(/(^.*\/)/)[0]);
 
 	// 背景の表示
 	if (document.getElementById(`layer0`) !== null) {
