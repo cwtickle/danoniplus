@@ -834,11 +834,11 @@ const validatePath = (_input, _defaultUrl = ``) => {
 	// 相対パス（ルート相対 `/path/to/file` もしくは `./file`, `../file` ）
 	const relativePathPattern = /^\/|^\.{1,2}\//;
 
-	if (_input && (absoluteUrlPattern.test(_input) || relativePathPattern.test(_input))) {
-		return encodeURI(_input);	// URL または相対パスが合致すればその値を返す
-	} else {
-		return _defaultUrl;			// 合致しなければ代替文字列を返す
-	}
+	const raw = _input && (absoluteUrlPattern.test(_input) || relativePathPattern.test(_input))
+		? encodeURI(_input) : _defaultUrl;
+
+	// URL または相対パスが合致すればその値を返し、そうでなければデフォルト URL を返す
+	return raw.endsWith(`/`) ? raw : raw + `/`;
 };
 
 /**
