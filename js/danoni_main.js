@@ -61,7 +61,7 @@ const validatePath = (_input, _defaultUrl = ``) => {
 	// 相対パス（ルート相対 `/path/to/file` もしくは `./file`, `../file` ）
 	const relativePathPattern = /^\/|^\.{1,2}\//;
 
-	if (absoluteUrlPattern.test(_input) || relativePathPattern.test(_input)) {
+	if (_input && (absoluteUrlPattern.test(_input) || relativePathPattern.test(_input))) {
 		return _input;		// URL または相対パスが合致すればその値を返す
 	} else {
 		return _defaultUrl;	// 合致しなければ代替文字列を返す
@@ -86,7 +86,8 @@ const g_referenceDomains = [
 Object.freeze(g_referenceDomains);
 
 const g_rootPath = current().match(/(^.*\/)/)[0];
-const g_workPath = validatePath(getQueryParamVal(`baseUrl`), new URL(location.href).href.match(/(^.*\/)/)[0]);
+const g_workPath = validatePath(document.getElementById(`baseUrl`)?.value,
+	new URL(location.href).href.match(/(^.*\/)/)[0]);
 const hasRemoteDomain = _path => g_referenceDomains.some(domain => _path.match(`^https://${domain}/`) !== null);
 const g_remoteFlg = hasRemoteDomain(g_rootPath);
 
