@@ -48,6 +48,26 @@ const getQueryParamVal = _name => {
 	return param !== null ? decodeURIComponent(param.replace(/\+/g, ` `)) : null;
 };
 
+/**
+ * URLのパスを検証し、絶対URLまたは相対パスであればその値を返す
+ * @param {string} _input 
+ * @param {string} _defaultUrl 
+ * @returns {string}
+ */
+const validatePath = (_input, _defaultUrl = ``) => {
+	// 絶対 URL（http, https, ftp, fileなど）
+	const absoluteUrlPattern = /^(https?:\/\/|ftp:\/\/|file:\/\/)/;
+
+	// 相対パス（ルート相対 `/path/to/file` もしくは `./file`, `../file` ）
+	const relativePathPattern = /^\/|^\.{1,2}\//;
+
+	if (absoluteUrlPattern.test(_input) || relativePathPattern.test(_input)) {
+		return _input;		// URL または相対パスが合致すればその値を返す
+	} else {
+		return _defaultUrl;	// 合致しなければ代替文字列を返す
+	}
+};
+
 // 常時デバッグを許可するドメイン
 const g_reservedDomains = [
 	`danonicw.skr.jp`,
@@ -66,7 +86,7 @@ const g_referenceDomains = [
 Object.freeze(g_referenceDomains);
 
 const g_rootPath = current().match(/(^.*\/)/)[0];
-const g_workPath = new URL(location.href).href.match(/(^.*\/)/)[0];
+const g_workPath = validatePath(getQueryParamVal(`baseUrl`), new URL(location.href).href.match(/(^.*\/)/)[0]);
 const hasRemoteDomain = _path => g_referenceDomains.some(domain => _path.match(`^https://${domain}/`) !== null);
 const g_remoteFlg = hasRemoteDomain(g_rootPath);
 
