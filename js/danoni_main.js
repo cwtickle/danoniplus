@@ -2474,7 +2474,7 @@ const initialControl = async () => {
 
 	const stage = document.getElementById(`canvas-frame`);
 	const divRoot = createEmptySprite(stage, `divRoot`, g_windowObj.divRoot);
-	g_workPath = validatePath(document.getElementById(`baseUrl`)?.value,
+	g_workPath = validatePath(document.getElementById(`jsRootUrl`)?.value,
 		new URL(location.href).href.match(/(^.*\/)/)[0]);
 
 	// 背景の表示
