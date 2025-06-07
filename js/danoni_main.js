@@ -48,26 +48,6 @@ const getQueryParamVal = _name => {
 	return param !== null ? decodeURIComponent(param.replace(/\+/g, ` `)) : null;
 };
 
-/**
- * URLのパスを検証し、絶対URLまたは相対パスであればその値を返す
- * @param {string} _input 
- * @param {string} _defaultUrl 
- * @returns {string}
- */
-const validatePath = (_input, _defaultUrl = ``) => {
-	// 絶対 URL（http, https, ftp, fileなど）
-	const absoluteUrlPattern = /^(https?:\/\/|ftp:\/\/|file:\/\/)/;
-
-	// 相対パス（ルート相対 `/path/to/file` もしくは `./file`, `../file` ）
-	const relativePathPattern = /^\/|^\.{1,2}\//;
-
-	if (_input && (absoluteUrlPattern.test(_input) || relativePathPattern.test(_input))) {
-		return _input;		// URL または相対パスが合致すればその値を返す
-	} else {
-		return _defaultUrl;	// 合致しなければ代替文字列を返す
-	}
-};
-
 // 常時デバッグを許可するドメイン
 const g_reservedDomains = [
 	`danonicw.skr.jp`,
@@ -86,8 +66,7 @@ const g_referenceDomains = [
 Object.freeze(g_referenceDomains);
 
 const g_rootPath = current().match(/(^.*\/)/)[0];
-const g_workPath = validatePath(document.getElementById(`baseUrl`)?.value,
-	new URL(location.href).href.match(/(^.*\/)/)[0]);
+let g_workPath;
 const hasRemoteDomain = _path => g_referenceDomains.some(domain => _path.match(`^https://${domain}/`) !== null);
 const g_remoteFlg = hasRemoteDomain(g_rootPath);
 
@@ -841,6 +820,26 @@ const unEscapeHtml = _str => unEscapeEmoji(replaceStr(_str, g_escapeStr.unEscape
  * @returns {string[]}
  */
 const escapeHtmlForArray = _array => _array.map(str => escapeHtml(str));
+
+/**
+ * URLのパスを検証し、絶対URLまたは相対パスであればその値を返す
+ * @param {string} _input 
+ * @param {string} _defaultUrl 
+ * @returns {string}
+ */
+const validatePath = (_input, _defaultUrl = ``) => {
+	// 絶対 URL（http, https, ftp, fileなど）
+	const absoluteUrlPattern = /^(https?:\/\/|ftp:\/\/|file:\/\/)/;
+
+	// 相対パス（ルート相対 `/path/to/file` もしくは `./file`, `../file` ）
+	const relativePathPattern = /^\/|^\.{1,2}\//;
+
+	if (_input && (absoluteUrlPattern.test(_input) || relativePathPattern.test(_input))) {
+		return encodeURI(_input);	// URL または相対パスが合致すればその値を返す
+	} else {
+		return _defaultUrl;			// 合致しなければ代替文字列を返す
+	}
+};
 
 /**
  * 次のカーソルへ移動
@@ -2475,6 +2474,8 @@ const initialControl = async () => {
 
 	const stage = document.getElementById(`canvas-frame`);
 	const divRoot = createEmptySprite(stage, `divRoot`, g_windowObj.divRoot);
+	g_workPath = validatePath(document.getElementById(`baseUrl`)?.value,
+		new URL(location.href).href.match(/(^.*\/)/)[0]);
 
 	// 背景の表示
 	if (document.getElementById(`layer0`) !== null) {
