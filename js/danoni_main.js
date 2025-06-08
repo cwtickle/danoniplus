@@ -1357,6 +1357,7 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 const getBasicFont = (_priorityFont = ``) =>
 	[_priorityFont, g_headerObj.customFont, C_LBL_BASICFONT].filter(value => value !== ``).join(`,`);
 
+const g_ctx = document.createElement(`canvas`).getContext(`2d`);
 /**
  * フォントサイズに応じた横幅を取得
  * @param {string} _str 
@@ -1365,9 +1366,8 @@ const getBasicFont = (_priorityFont = ``) =>
  * @returns {number}
  */
 const getStrWidth = (_str, _fontsize, _font) => {
-	const ctx = document.createElement(`canvas`).getContext(`2d`);
-	ctx.font = `${wUnit(_fontsize)} ${_font}`;
-	return ctx.measureText(unEscapeHtml(_str)).width;
+	g_ctx.font = `${wUnit(_fontsize)} ${_font}`;
+	return g_ctx.measureText(unEscapeHtml(_str)).width;
 };
 
 /**
