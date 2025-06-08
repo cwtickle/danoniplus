@@ -18,7 +18,7 @@
 
 | Version      | Supported          | Latest Version                                                                 | Logs                                                                   | First Release | End of Support   |
 | ------------ | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ------------- | ---------------- |
-| v42          | :heavy_check_mark: | [v42.1.0](https://github.com/cwtickle/danoniplus/releases/tag/v42.1.0)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2025-05-24    | (At Release v45) |
+| v42          | :heavy_check_mark: | [v42.1.1](https://github.com/cwtickle/danoniplus/releases/tag/v42.1.1)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2025-05-24    | (At Release v45) |
 | v41          | :heavy_check_mark: | [v41.4.2](https://github.com/cwtickle/danoniplus/releases/tag/v41.4.2)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v41) | 2025-04-12    | (At Release v44) |
 | v40          | :warning:          | [v40.7.3](https://github.com/cwtickle/danoniplus/releases/tag/v40.7.3)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v40) | 2025-03-01    | (At Release v43) |
 | v39 :anchor: | :heavy_check_mark: | [v39.8.4](https://github.com/cwtickle/danoniplus/releases/tag/v39.8.4)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v39) | 2025-02-01    | (At Release v48) |
