@@ -1370,17 +1370,12 @@ const getStrWidth = (_str, _fontsize, _font) => {
 	return ctx.measureText(unEscapeHtml(_str)).width;
 };
 
-/**
- * Canvas上で使用する絵文字を取得
- * - HTML上で使用する絵文字は、Canvas上では正しく表示されないため、div要素を作成して取得する
- * @param {string} _str 
- * @returns {string}
- */
 const getEmojiForCanvas = _str => {
-	const id = `tmp${Math.floor(Math.random() * 1000000)}`;
-	const div = createDiv(id, 0, 0, 0, 0);
+	const div = document.createElement('div');
 	div.innerHTML = _str;
-	return div.innerHTML;
+	const result = div.innerHTML;
+	div.remove();
+	return result;
 }
 
 /**
