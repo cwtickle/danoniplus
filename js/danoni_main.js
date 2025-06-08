@@ -3018,9 +3018,16 @@ const getMusicUrl = _scoreId =>
 const getFullMusicUrl = (_musicUrl = ``) => {
 	let baseMusicUrl = _musicUrl;
 	let baseDir = `../${g_headerObj.musicFolder}/`;
+
 	if (_musicUrl.includes(C_MRK_CURRENT_DIRECTORY)) {
+		// musicUrl, musicFolder両方にカレントパス指定がある場合は、musicUrlの値を優先
+
 	} else if (g_headerObj.musicFolder.includes(C_MRK_CURRENT_DIRECTORY)) {
+		// musicFolderにカレントパス指定がある場合は、ファイル名にmusicFolderの値も含める
 		baseMusicUrl = `${g_headerObj.musicFolder}/${_musicUrl}`;
+	}
+	if (g_headerObj.musicFolder.includes(C_MRK_CURRENT_DIRECTORY)) {
+		// musicFolderにカレントパス指定がある場合は、ディレクトリは指定しない
 		baseDir = ``;
 	}
 	const [musicFile, musicPath] = getFilePath(baseMusicUrl, baseDir);
