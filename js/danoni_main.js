@@ -1370,8 +1370,14 @@ const getStrWidth = (_str, _fontsize, _font) => {
 	return ctx.measureText(unEscapeHtml(_str)).width;
 };
 
+/**
+ * Canvas上で使用する絵文字を取得
+ * - HTMLのdiv要素に絵文字を設定することで、Canvas上で使用できるようにする
+ * @param {string} _str 
+ * @returns {string}
+ */
 const getEmojiForCanvas = _str => {
-	const div = document.createElement('div');
+	const div = document.createElement(`div`);
 	div.innerHTML = _str;
 	const result = div.innerHTML;
 	div.remove();
