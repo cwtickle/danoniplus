@@ -3016,13 +3016,15 @@ const getMusicUrl = _scoreId =>
  * @returns {string}
  */
 const getFullMusicUrl = (_musicUrl = ``) => {
-	let url = `${g_rootPath}../${g_headerObj.musicFolder}/${_musicUrl}`;
-	if (_musicUrl.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-		url = _musicUrl.split(C_MRK_CURRENT_DIRECTORY)[1];
-	} else if (g_headerObj.musicFolder.indexOf(C_MRK_CURRENT_DIRECTORY) !== -1) {
-		url = `${g_headerObj.musicFolder.split(C_MRK_CURRENT_DIRECTORY)[1]}/${_musicUrl}`;
+	let baseMusicUrl = _musicUrl;
+	let baseDir = `../${g_headerObj.musicFolder}/`;
+	if (_musicUrl.includes(C_MRK_CURRENT_DIRECTORY)) {
+	} else if (g_headerObj.musicFolder.includes(C_MRK_CURRENT_DIRECTORY)) {
+		baseMusicUrl = `${g_headerObj.musicFolder}/${_musicUrl}`;
+		baseDir = ``;
 	}
-	return url;
+	const [musicFile, musicPath] = getFilePath(baseMusicUrl, baseDir);
+	return `${musicPath}${musicFile}`;
 }
 
 /**
