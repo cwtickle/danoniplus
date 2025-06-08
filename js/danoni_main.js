@@ -1206,6 +1206,7 @@ const reviseCssText = _str => {
 /*-----------------------------------------------------------*/
 /* 色・グラデーション設定                                      */
 /*-----------------------------------------------------------*/
+const g_ctx = document.createElement(`canvas`).getContext(`2d`);
 
 /**
  * 対象のカラーコードが明暗どちらかを判定 (true: 明色, false: 暗色)
@@ -1225,9 +1226,8 @@ const checkLightOrDark = _colorStr => {
  * @returns {string}
  */
 const colorNameToCode = _color => {
-	const cxt = document.createElement(`canvas`).getContext(`2d`);
-	cxt.fillStyle = _color;
-	return cxt.fillStyle;
+	g_ctx.fillStyle = _color;
+	return g_ctx.fillStyle;
 };
 
 /**
@@ -1357,7 +1357,6 @@ const makeColorGradation = (_colorStr, { _defaultColorgrd = g_headerObj.defaultC
 const getBasicFont = (_priorityFont = ``) =>
 	[_priorityFont, g_headerObj.customFont, C_LBL_BASICFONT].filter(value => value !== ``).join(`,`);
 
-const g_ctx = document.createElement(`canvas`).getContext(`2d`);
 /**
  * フォントサイズに応じた横幅を取得
  * @param {string} _str 
