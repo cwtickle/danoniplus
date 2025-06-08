@@ -1371,6 +1371,19 @@ const getStrWidth = (_str, _fontsize, _font) => {
 };
 
 /**
+ * Canvas上で使用する絵文字を取得
+ * - HTML上で使用する絵文字は、Canvas上では正しく表示されないため、div要素を作成して取得する
+ * @param {string} _str 
+ * @returns {string}
+ */
+const getEmojiForCanvas = _str => {
+	const id = `tmp${Math.floor(Math.random() * 1000000)}`;
+	const div = createDiv(id, 0, 0, 0, 0);
+	div.innerHTML = _str;
+	return div.innerHTML;
+}
+
+/**
  * 指定した横幅に合ったフォントサイズを取得
  * @param {string} _str 
  * @param {number} _maxWidth 
@@ -13994,7 +14007,7 @@ const resultInit = () => {
 			{ x: 280, dy: -15, hy: 0, siz: 20, color: `#999999`, align: C_ALIGN_CENTER });
 		drawText(unEscapeHtml(mTitleForView[0]), { hy: 1 });
 		drawText(unEscapeHtml(mTitleForView[1]), { hy: 2 });
-		drawText(`📝 ${unEscapeHtml(g_headerObj.tuning)} / 🎵 ${unEscapeHtml(artistName)}`, { hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
+		drawText(`${getEmojiForCanvas(`&#x1f4dd;`)} ${unEscapeHtml(g_headerObj.tuning)} / ${getEmojiForCanvas(`&#x1f3b5;`)} ${unEscapeHtml(artistName)}`, { hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
 		drawText(unEscapeHtml(difDataForImage), { hy: 4 });
 
 		if (playStyleData.length > 60) {
@@ -14135,7 +14148,7 @@ const resultInit = () => {
 		// リトライ
 		resetCommonBtn(`btnRetry`, g_lblNameObj.b_retry, g_lblPosObj.btnRsRetry, loadMusic, g_cssObj.button_Reset),
 
-		createCss2Button(`btnCopyImage`, `📷`, () => true,
+		createCss2Button(`btnCopyImage`, `&#x1f4f7;`, () => true,
 			Object.assign(g_lblPosObj.btnRsCopyImage, {
 				resetFunc: () => copyResultImageData(g_msgInfoObj.I_0001),
 			}), g_cssObj.button_Default_NoColor),
