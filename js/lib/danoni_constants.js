@@ -875,6 +875,18 @@ const g_escapeStr = {
     ]
 };
 
+/** 絵文字管理用 */
+const g_emojiObj = {
+    checkmark: `&#x2714;`,    // チェックマーク (check mark)
+    crossmark: `&#x274c;`,    // バツマーク (cross mark)
+    muted: `&#x1f507;`,       // 無音のスピーカー (muted speaker)
+    speaker: `&#x1f50a;`,     // 音量大のスピーカー (speaker high volume)
+    shield: `&#x1f6e1;`,      // 盾 (shield)
+    memo: `&#x1f4dd;`,        // メモ (memo)
+    musical: `&#x1f3b5;`,     // 音符 (musical note)
+    camera: `&#x1f4f7;`,      // カメラ (camera)
+};
+
 /** 設定・オプション画面用共通 */
 const g_graphColorObj = {
     max: `#993333cc`,
