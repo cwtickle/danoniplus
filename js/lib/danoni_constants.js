@@ -877,8 +877,8 @@ const g_escapeStr = {
 
 /** 絵文字管理用 */
 const g_emojiObj = {
-    checkmark: `&#x2714;`,    // チェックマーク (check mark)
-    crossmark: `&#x274c;`,    // バツマーク (cross mark)
+    checkMark: `&#x2714;`,    // チェックマーク (check mark)
+    crossMark: `&#x274c;`,    // バツ (cross mark)
     muted: `&#x1f507;`,       // 無音のスピーカー (muted speaker)
     speaker: `&#x1f50a;`,     // 音量大のスピーカー (speaker high volume)
     shield: `&#x1f6e1;`,      // 盾 (shield)

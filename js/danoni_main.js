@@ -543,7 +543,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 				_value = escapeHtml(_value).replaceAll(`\n`, `<br>`);
 				const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 				if (_value === C_FLG_ON) {
-					return `<span style="color:#66ff66">${g_emojiObj.checkmark} ON</span>`;
+					return `<span style="color:#66ff66">${g_emojiObj.checkMark} ON</span>`;
 				} else if (colorCodePattern.test(_value)) {
 					return _value.replace(colorCodePattern, (match) =>
 						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
@@ -551,8 +551,8 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			} else if (typeof _value === C_TYP_BOOLEAN) {
 
 				// boolean値の色付け処理
-				return (_value ? `<span style="color:#66ff66">${g_emojiObj.checkmark} true</span>` :
-					`<span style="color:#ff9999">${g_emojiObj.crossmark} false</span>`);
+				return (_value ? `<span style="color:#66ff66">${g_emojiObj.checkMark} true</span>` :
+					`<span style="color:#ff9999">${g_emojiObj.crossMark} false</span>`);
 
 			} else if (typeof _value === C_TYP_NUMBER) {
 
