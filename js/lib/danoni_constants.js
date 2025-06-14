@@ -3215,7 +3215,6 @@ const g_keyObj = {
     minWidthDefault: 600,
 
     minWidth5: 500,
-    minWidth7i: 550,
     minWidth9A: 650,
     minWidth9B: 650,
     minWidth9i: 650,
