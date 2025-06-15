@@ -2573,10 +2573,21 @@ const initialControl = async () => {
 
 	// 自動横幅拡張設定
 	if (g_headerObj.autoSpread) {
-		const widthList = [g_sWidth, g_presetObj.autoMinWidth ?? g_keyObj.minWidth];
-		g_headerObj.keyLists.forEach(key => widthList.push(g_keyObj[`minWidth${key}`] ?? g_keyObj.minWidthDefault));
+		g_sWidth = Math.max(g_sWidth, g_presetObj.autoMinWidth ?? g_keyObj.minWidth);
+		g_headerObj.keyLists.forEach(key => {
+			g_sWidth = Math.max(g_sWidth, g_keyObj[`minWidth${key}`] ?? g_keyObj.minWidthDefault);
 
-		g_sWidth = Math.max(...widthList);
+			// 別キーモード有効時は、別キーモード毎の横幅を拡張対象へ追加
+			if (g_headerObj.transKeyUse) {
+				for (let k = 1; hasVal(g_keyObj[`keyCtrl${key}_${k}`]); k++) {
+					const anotherKey = g_keyObj[`transKey${key}_${k}`] ?? ``;
+					if (anotherKey !== ``) {
+						g_sWidth = Math.max(g_sWidth, g_keyObj[`minWidth${anotherKey}`] ?? g_keyObj.minWidthDefault);
+					}
+				}
+			}
+		});
+
 		$id(`canvas-frame`).width = wUnit(g_sWidth);
 		$id(`divRoot`).width = wUnit(g_sWidth);
 	}
