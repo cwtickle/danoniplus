@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/05/24 (v42.0.0)
+ * Revised : 2025/06/15 (v42.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -873,6 +873,18 @@ const g_escapeStr = {
         [`ShiftRight`, `Slash`],
         [`Tab`, `KeyQ`],
     ]
+};
+
+/** 絵文字管理用 */
+const g_emojiObj = {
+    checkMark: `&#x2714;`,    // チェックマーク (check mark)
+    crossMark: `&#x274c;`,    // バツ (cross mark)
+    muted: `&#x1f507;`,       // 無音のスピーカー (muted speaker)
+    speaker: `&#x1f50a;`,     // 音量大のスピーカー (speaker high volume)
+    shield: `&#x1f6e1;`,      // 盾 (shield)
+    memo: `&#x1f4dd;`,        // メモ (memo)
+    musical: `&#x1f3b5;`,     // 音符 (musical note)
+    camera: `&#x1f4f7;`,      // カメラ (camera)
 };
 
 /** 設定・オプション画面用共通 */
@@ -3208,12 +3220,8 @@ const g_keyObj = {
     minWidth9B: 650,
     minWidth9i: 650,
     minWidth9d: 650,
-    minWidth9h: 650,
-    minWidth11: 650,
-    minWidth11L: 650,
     minWidth11i: 650,
     minWidth11j: 650,
-    minWidth12: 675,
     minWidth12i: 675,
     minWidth13: 650,
     minWidth16i: 650,

@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/06/08
+ * Revised : 2025/06/15
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.1.2`;
-const g_revisedDate = `2025/06/08`;
+const g_version = `Ver 42.2.0`;
+const g_revisedDate = `2025/06/15`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -543,7 +543,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 				_value = escapeHtml(_value).replaceAll(`\n`, `<br>`);
 				const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 				if (_value === C_FLG_ON) {
-					return `<span style="color:#66ff66">&#x2714; ON</span>`;
+					return `<span style="color:#66ff66">${g_emojiObj.checkMark} ON</span>`;
 				} else if (colorCodePattern.test(_value)) {
 					return _value.replace(colorCodePattern, (match) =>
 						`<span style="color:${match.replace(`0x`, `#`)}">◆</span>${match.replace(`0x`, `#`)}`);
@@ -551,8 +551,8 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			} else if (typeof _value === C_TYP_BOOLEAN) {
 
 				// boolean値の色付け処理
-				return (_value ? `<span style="color:#66ff66">&#x2714; true</span>` :
-					`<span style="color:#ff9999">&#x274c; false</span>`);
+				return (_value ? `<span style="color:#66ff66">${g_emojiObj.checkMark} true</span>` :
+					`<span style="color:#ff9999">${g_emojiObj.crossMark} false</span>`);
 
 			} else if (typeof _value === C_TYP_NUMBER) {
 
@@ -2573,10 +2573,21 @@ const initialControl = async () => {
 
 	// 自動横幅拡張設定
 	if (g_headerObj.autoSpread) {
-		const widthList = [g_sWidth, g_presetObj.autoMinWidth ?? g_keyObj.minWidth];
-		g_headerObj.keyLists.forEach(key => widthList.push(g_keyObj[`minWidth${key}`] ?? g_keyObj.minWidthDefault));
+		g_sWidth = Math.max(g_sWidth, g_presetObj.autoMinWidth ?? g_keyObj.minWidth);
+		g_headerObj.keyLists.forEach(key => {
+			g_sWidth = Math.max(g_sWidth, g_keyObj[`minWidth${key}`] ?? g_keyObj.minWidthDefault);
 
-		g_sWidth = Math.max(...widthList);
+			// 別キーモード有効時は、別キーモード毎の横幅を拡張対象へ追加
+			if (g_headerObj.transKeyUse) {
+				for (let k = 1; hasVal(g_keyObj[`keyCtrl${key}_${k}`]); k++) {
+					const anotherKey = g_keyObj[`transKey${key}_${k}`] ?? ``;
+					if (anotherKey !== ``) {
+						g_sWidth = Math.max(g_sWidth, g_keyObj[`minWidth${anotherKey}`] ?? g_keyObj.minWidthDefault);
+					}
+				}
+			}
+		});
+
 		$id(`canvas-frame`).width = wUnit(g_sWidth);
 		$id(`divRoot`).width = wUnit(g_sWidth);
 	}
@@ -5080,10 +5091,10 @@ const titleInit = (_initFlg = false) => {
 			createDivCss2Label(`lblComment`, ``, g_lblPosObj.lblComment_music),
 
 			createDivCss2Label(`lblBgmVolume`, `BGM Volume`, g_lblPosObj.lblBgmVolume),
-			createCss2Button(`btnBgmMute`, g_stateObj.bgmMuteFlg ? `&#x1f507;` : `&#x1f50a;`, evt => {
+			createCss2Button(`btnBgmMute`, g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker, evt => {
 				g_stateObj.bgmMuteFlg = !g_stateObj.bgmMuteFlg;
 				g_stateObj.bgmMuteFlg ? pauseBGM() : playBGM(0);
-				evt.target.innerHTML = g_stateObj.bgmMuteFlg ? `&#x1f507;` : `&#x1f50a;`;
+				evt.target.innerHTML = g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker;
 			}, g_lblPosObj.btnBgmMute, g_cssObj.button_Default),
 			createCss2Button(`btnBgmVolume`, `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`, () => setBGMVolume(),
 				Object.assign({
@@ -5252,7 +5263,7 @@ const titleInit = (_initFlg = false) => {
 			}), g_cssObj.button_Tweet),
 
 		// セキュリティリンク
-		createCss2Button(`lnkComparison`, `&#x1f6e1;`, () => true,
+		createCss2Button(`lnkComparison`, g_emojiObj.shield, () => true,
 			Object.assign(g_lblPosObj.lnkComparison, {
 				resetFunc: () => openLink(g_lblNameObj.securityUrl),
 			}), g_cssObj.button_Tweet),
@@ -14007,7 +14018,8 @@ const resultInit = () => {
 			{ x: 280, dy: -15, hy: 0, siz: 20, color: `#999999`, align: C_ALIGN_CENTER });
 		drawText(unEscapeHtml(mTitleForView[0]), { hy: 1 });
 		drawText(unEscapeHtml(mTitleForView[1]), { hy: 2 });
-		drawText(`${getEmojiForCanvas(`&#x1f4dd;`)} ${unEscapeHtml(g_headerObj.tuning)} / ${getEmojiForCanvas(`&#x1f3b5;`)} ${unEscapeHtml(artistName)}`, { hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
+		drawText(`${getEmojiForCanvas(g_emojiObj.memo)} ${unEscapeHtml(g_headerObj.tuning)} / ${getEmojiForCanvas(g_emojiObj.musical)} ${unEscapeHtml(artistName)}`,
+			{ hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
 		drawText(unEscapeHtml(difDataForImage), { hy: 4 });
 
 		if (playStyleData.length > 60) {
@@ -14148,7 +14160,7 @@ const resultInit = () => {
 		// リトライ
 		resetCommonBtn(`btnRetry`, g_lblNameObj.b_retry, g_lblPosObj.btnRsRetry, loadMusic, g_cssObj.button_Reset),
 
-		createCss2Button(`btnCopyImage`, `&#x1f4f7;`, () => true,
+		createCss2Button(`btnCopyImage`, g_emojiObj.camera, () => true,
 			Object.assign(g_lblPosObj.btnRsCopyImage, {
 				resetFunc: () => copyResultImageData(g_msgInfoObj.I_0001),
 			}), g_cssObj.button_Default_NoColor),
