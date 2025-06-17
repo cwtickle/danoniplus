@@ -3731,20 +3731,12 @@ const g_lang_msgInfoObj = {
         &lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>`,
         E_0031: `楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>
         |musicUrl=****.mp3|`,
-        E_0032: `楽曲ファイルの読み込みに失敗しました。(E-0032)`,
         E_0033: `楽曲ファイルの読み込み中に接続がタイムアウトしました。(E-0033)`,
         E_0034: `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`,
-        E_0035: `お使いのOSでは指定された楽曲フォーマットに対応していません。(E-0035)`,
         E_0041: `ファイル:{0}の読み込みに失敗しました。(E-0041)<br>`,
         E_0042: `{0}は0より大きい値を指定する必要があります。(E-0042)`,
         E_0051: `Displayオプションのデフォルト設定(XXXXChainOFF)で、<br>指定できない組み合わせが設定されています。(E-0051)`,
 
-        E_0101: `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
-        |color{0}=0,1,0,1,0,2|`,
-        E_0102: `新しいキー:{0}の[chara]が未定義です。(E-0102)<br>
-        |chara{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|`,
-        E_0103: `新しいキー:{0}の[stepRtn]が未定義です。(E-0103)<br>
-        |stepRtn{0}=0,45,-90,135,180,onigiri|`,
         E_0104: `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
         |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|`,
 
@@ -3787,20 +3779,12 @@ const g_lang_msgInfoObj = {
         &lt;input type="hidden" name="dos" id="dos" value="(Chart data)"&gt;<br>`,
         E_0031: `The music file is not set or the format is incorrect.(E-0031)<br>
         |musicUrl=****.mp3|`,
-        E_0032: `Failed to read the music file. (E-0032)`,
         E_0033: `The connection timed out while loading a music file. (E-0033)`,
         E_0034: `An error occurred while reading the music file. (E-0034)`,
-        E_0035: `Your OS does not support the specified music format. (E-0035)`,
         E_0041: `Failed to read file: {0}. (E-0041)<br>`,
         E_0042: `{0} must be greater than 0. (E-0042)`,
         E_0051: `In the default setting (XXXXChainOFF) of the Display option, <br>a combination that cannot be specified is set. (E-0051)`,
 
-        E_0101: `New key: {0} [color] is not set. (E-0101)<br>
-        |color{0}=0,1,0,1,0,2|`,
-        E_0102: `New key: {0} [chara] is not set. (E-0102)<br>
-        |chara{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|`,
-        E_0103: `New key: {0} [stepRtn] is not set. (E-0103)<br>
-        |stepRtn{0}=0,45,-90,135,180,onigiri|`,
         E_0104: `New key: {0} [keyCtrl] is not set. (E-0104)<br>
         |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|`,
 
