@@ -3713,7 +3713,6 @@ const g_lang_msgInfoObj = {
         W_0012: `現在の設定では音源再生方法により小数の Adjustment が利用できません。<br>
         また、Fadein を使用した場合は通常よりズレが発生することがあります。<br>
         音源ファイルを js/txt 化するか、サーバー上動作とすれば解消します。(W-0012)`,
-        W_0021: `クリップボードのコピーに失敗しました。`,
         W_0031: `セーフモード適用中です。ローカルストレージ情報を使わない設定になっています。<br>
         「Data Management」から解除が可能です。(W-0031)`,
         W_0041: `選曲単品モードが有効になっています。<br><a href="{0}">[ 選曲画面へ戻る ]</a>`,
@@ -3731,20 +3730,12 @@ const g_lang_msgInfoObj = {
         &lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>`,
         E_0031: `楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>
         |musicUrl=****.mp3|`,
-        E_0032: `楽曲ファイルの読み込みに失敗しました。(E-0032)`,
         E_0033: `楽曲ファイルの読み込み中に接続がタイムアウトしました。(E-0033)`,
         E_0034: `楽曲ファイルの読み込み中にエラーが発生しました。(E-0034)`,
-        E_0035: `お使いのOSでは指定された楽曲フォーマットに対応していません。(E-0035)`,
         E_0041: `ファイル:{0}の読み込みに失敗しました。(E-0041)<br>`,
         E_0042: `{0}は0より大きい値を指定する必要があります。(E-0042)`,
         E_0051: `Displayオプションのデフォルト設定(XXXXChainOFF)で、<br>指定できない組み合わせが設定されています。(E-0051)`,
 
-        E_0101: `新しいキー:{0}の[color]が未定義です。(E-0101)<br>
-        |color{0}=0,1,0,1,0,2|`,
-        E_0102: `新しいキー:{0}の[chara]が未定義です。(E-0102)<br>
-        |chara{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|`,
-        E_0103: `新しいキー:{0}の[stepRtn]が未定義です。(E-0103)<br>
-        |stepRtn{0}=0,45,-90,135,180,onigiri|`,
         E_0104: `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
         |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|`,
 
@@ -3768,7 +3759,6 @@ const g_lang_msgInfoObj = {
         Also, if you use "Fadein", it may be out of alignment.<br>
         It can be solved by converting the sound source file to encoded data (js, txt) or 
         operating it on the server. (W-0012)`,
-        W_0021: `Failed to copy the clipboard.`,
         W_0031: `Safe Mode is being applied. <br>
         The setting is set to not use local storage information <br>
         and can be removed from Data Management. (W-0031)`,
@@ -3787,20 +3777,12 @@ const g_lang_msgInfoObj = {
         &lt;input type="hidden" name="dos" id="dos" value="(Chart data)"&gt;<br>`,
         E_0031: `The music file is not set or the format is incorrect.(E-0031)<br>
         |musicUrl=****.mp3|`,
-        E_0032: `Failed to read the music file. (E-0032)`,
         E_0033: `The connection timed out while loading a music file. (E-0033)`,
         E_0034: `An error occurred while reading the music file. (E-0034)`,
-        E_0035: `Your OS does not support the specified music format. (E-0035)`,
         E_0041: `Failed to read file: {0}. (E-0041)<br>`,
         E_0042: `{0} must be greater than 0. (E-0042)`,
         E_0051: `In the default setting (XXXXChainOFF) of the Display option, <br>a combination that cannot be specified is set. (E-0051)`,
 
-        E_0101: `New key: {0} [color] is not set. (E-0101)<br>
-        |color{0}=0,1,0,1,0,2|`,
-        E_0102: `New key: {0} [chara] is not set. (E-0102)<br>
-        |chara{0}=arrowA,arrowB,arrowC,arrowD,arrowE,arrowF|`,
-        E_0103: `New key: {0} [stepRtn] is not set. (E-0103)<br>
-        |stepRtn{0}=0,45,-90,135,180,onigiri|`,
         E_0104: `New key: {0} [keyCtrl] is not set. (E-0104)<br>
         |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|`,
 
@@ -3901,8 +3883,6 @@ const g_lblNameObj = {
     s_speed: `Overall`,
     s_boost: `Boost`,
     s_avg: `Avg.`,
-    s_avgDspeed: `AvgO)`,
-    s_avgDboost: `AvgB)`,
 
     s_apm: `APM`,
     s_time: `Time`,
@@ -4036,9 +4016,6 @@ const g_lblNameObj = {
     'u_ToolDif': `DifLevel`,
     'u_HighScore': `HighScore`,
 
-    'u_Main': `Main`,
-    'u_Replaced': `Replaced`,
-
     'u_Default': `Default`,
     'u_Type0': `Type0`,
     'u_Type1': `Type1`,
@@ -4046,7 +4023,6 @@ const g_lblNameObj = {
     'u_Type3': `Type3`,
     'u_Type4': `Type4`,
 
-    ConfigType: `ConfigType`,
     ColorType: `ColorType`,
     ImgType: `ImgType`,
     ColorGroup: `ColorGr.`,
@@ -4278,7 +4254,6 @@ const g_lang_msgObj = {
         opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
         hitPosition: `判定位置にズレを感じる場合、\n数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
 
-        configType: `キーコンフィグ対象を切り替えます。\n[Main] メインキーのみ, [Replaced] 代替キーのみ, [ALL] 全て`,
         colorType: `矢印・フリーズアローの配色セットをあらかじめ定義されたリストから選択できます。\nType1～4選択時は色変化が自動でOFFになり、カラーピッカーから好きな色に変更できます。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
         imgType: `矢印・フリーズアローなどのオブジェクトの見た目を変更します。`,
         colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
@@ -4369,7 +4344,6 @@ const g_lang_msgObj = {
         opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,
         hitPosition: `If you feel a discrepancy in the judgment position, \nyou can adjust the center position of the judgment in 1px increments \n (plus: in front, minus: at the back) by changing the numerical value. \nUse this function when there is a tendency to push too fast or too slow.`,
 
-        configType: `Switch the key config target.\n[Main] main keys only, [Replaced] alternate keys only, [ALL] all keys`,
         colorType: `Change the color scheme set for arrows and freeze-arrows from the predefined set.\nWhen Type1 to 4 is selected, color change is automatically turned off and can be changed to any color from the color picker.\n[Type0] Switch the sequences color gradations, [Type1～4] default color scheme`,
         imgType: `Change the appearance of sequences.`,
         colorGroup: `Change the sequences color group assignment pattern.`,
