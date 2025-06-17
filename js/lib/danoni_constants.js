@@ -3901,8 +3901,6 @@ const g_lblNameObj = {
     s_speed: `Overall`,
     s_boost: `Boost`,
     s_avg: `Avg.`,
-    s_avgDspeed: `AvgO)`,
-    s_avgDboost: `AvgB)`,
 
     s_apm: `APM`,
     s_time: `Time`,
@@ -4036,9 +4034,6 @@ const g_lblNameObj = {
     'u_ToolDif': `DifLevel`,
     'u_HighScore': `HighScore`,
 
-    'u_Main': `Main`,
-    'u_Replaced': `Replaced`,
-
     'u_Default': `Default`,
     'u_Type0': `Type0`,
     'u_Type1': `Type1`,
@@ -4046,7 +4041,6 @@ const g_lblNameObj = {
     'u_Type3': `Type3`,
     'u_Type4': `Type4`,
 
-    ConfigType: `ConfigType`,
     ColorType: `ColorType`,
     ImgType: `ImgType`,
     ColorGroup: `ColorGr.`,
