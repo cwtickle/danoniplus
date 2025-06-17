@@ -3713,7 +3713,6 @@ const g_lang_msgInfoObj = {
         W_0012: `現在の設定では音源再生方法により小数の Adjustment が利用できません。<br>
         また、Fadein を使用した場合は通常よりズレが発生することがあります。<br>
         音源ファイルを js/txt 化するか、サーバー上動作とすれば解消します。(W-0012)`,
-        W_0021: `クリップボードのコピーに失敗しました。`,
         W_0031: `セーフモード適用中です。ローカルストレージ情報を使わない設定になっています。<br>
         「Data Management」から解除が可能です。(W-0031)`,
         W_0041: `選曲単品モードが有効になっています。<br><a href="{0}">[ 選曲画面へ戻る ]</a>`,
@@ -3760,7 +3759,6 @@ const g_lang_msgInfoObj = {
         Also, if you use "Fadein", it may be out of alignment.<br>
         It can be solved by converting the sound source file to encoded data (js, txt) or 
         operating it on the server. (W-0012)`,
-        W_0021: `Failed to copy the clipboard.`,
         W_0031: `Safe Mode is being applied. <br>
         The setting is set to not use local storage information <br>
         and can be removed from Data Management. (W-0031)`,
