@@ -4272,7 +4272,6 @@ const g_lang_msgObj = {
         opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
         hitPosition: `判定位置にズレを感じる場合、\n数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
 
-        configType: `キーコンフィグ対象を切り替えます。\n[Main] メインキーのみ, [Replaced] 代替キーのみ, [ALL] 全て`,
         colorType: `矢印・フリーズアローの配色セットをあらかじめ定義されたリストから選択できます。\nType1～4選択時は色変化が自動でOFFになり、カラーピッカーから好きな色に変更できます。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
         imgType: `矢印・フリーズアローなどのオブジェクトの見た目を変更します。`,
         colorGroup: `矢印・フリーズアロー色グループの割り当てパターンを変更します。`,
@@ -4363,7 +4362,6 @@ const g_lang_msgObj = {
         opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,
         hitPosition: `If you feel a discrepancy in the judgment position, \nyou can adjust the center position of the judgment in 1px increments \n (plus: in front, minus: at the back) by changing the numerical value. \nUse this function when there is a tendency to push too fast or too slow.`,
 
-        configType: `Switch the key config target.\n[Main] main keys only, [Replaced] alternate keys only, [ALL] all keys`,
         colorType: `Change the color scheme set for arrows and freeze-arrows from the predefined set.\nWhen Type1 to 4 is selected, color change is automatically turned off and can be changed to any color from the color picker.\n[Type0] Switch the sequences color gradations, [Type1～4] default color scheme`,
         imgType: `Change the appearance of sequences.`,
         colorGroup: `Change the sequences color group assignment pattern.`,
