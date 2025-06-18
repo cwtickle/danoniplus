@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/06/15
- * 
+ * Revised : 2025/06/18
+ *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.2.1`;
-const g_revisedDate = `2025/06/17`;
+const g_version = `Ver 42.2.2`;
+const g_revisedDate = `2025/06/18`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -5468,11 +5468,13 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	const FADE_INTERVAL_MS = 100;
 	const FADE_DELAY_MS = 500;
 
+	const currentIdx = g_headerObj.musicIdxList[g_settings.musicIdxNum];
 	const musicUrl = getMusicUrl(g_headerObj.viewLists[0]);
 	const url = getFullMusicUrl(musicUrl);
 	const encodeFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
-	const musicStart = g_headerObj.musicStarts?.[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
-	const musicEnd = g_headerObj.musicEnds?.[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
+	const musicStart = g_headerObj.musicStarts?.[currentIdx] ?? 0;
+	const musicEnd = g_headerObj.musicEnds?.[currentIdx] ?? 0;
+	const isTitle = () => g_currentPage === `title`;
 
 	/**
 	 * BGMのフェードアウトとシーク
@@ -5480,7 +5482,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	const fadeOutAndSeek = () => {
 		let volume = g_audio.volume;
 		const fadeInterval = setInterval(() => {
-			if (volume > FADE_STEP && g_currentPage === `title`) {
+			if (volume > FADE_STEP && isTitle()) {
 				volume -= FADE_STEP;
 				g_audio.volume = Math.max(volume, 0);
 			} else {
@@ -5490,7 +5492,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				g_audio.currentTime = musicStart;
 
 				// フェードイン開始
-				if (g_currentPage === `title`) {
+				if (isTitle()) {
 					setTimeout(() => {
 						fadeIn();
 						if (encodeFlg) {
@@ -5517,10 +5519,17 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		let volume = 0;
 		g_audio.play();
 		const fadeInterval = setInterval(() => {
-			if (volume < g_stateObj.bgmVolume / 100 && g_currentPage === `title`) {
+			if (volume < g_stateObj.bgmVolume / 100 && isTitle()) {
 				volume += FADE_STEP;
 				g_audio.volume = Math.min(volume, 1);
 			} else {
+				clearInterval(fadeInterval);
+				g_stateObj.bgmFadeIn = null;
+			}
+
+			// フェードイン中に楽曲が変更された場合は停止
+			if (currentIdx !== g_headerObj.musicIdxList[g_settings.musicIdxNum]) {
+				pauseBGM();
 				clearInterval(fadeInterval);
 				g_stateObj.bgmFadeIn = null;
 			}
