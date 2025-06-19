@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/06/18
+ * Revised : 2025/06/20
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.2.2`;
-const g_revisedDate = `2025/06/18`;
+const g_version = `Ver 42.2.3`;
+const g_revisedDate = `2025/06/20`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -5088,7 +5088,7 @@ const titleInit = (_initFlg = false) => {
 				changeMSelect(Math.floor(Math.random() * (g_headerObj.musicIdxList.length - 1)) + 1),
 				g_lblPosObj.btnMusicSelectRandom, g_cssObj.button_Default),
 			createDivCss2Label(`lblMusicCnt`, ``, g_lblPosObj.lblMusicCnt),
-			createDivCss2Label(`lblComment`, ``, g_lblPosObj.lblComment_music),
+			createDivCss2Label(`lblCommentM`, ``, g_lblPosObj.lblComment_music),
 
 			createDivCss2Label(`lblBgmVolume`, `BGM Volume`, g_lblPosObj.lblBgmVolume),
 			createCss2Button(`btnBgmMute`, g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker, evt => {
@@ -5110,14 +5110,17 @@ const titleInit = (_initFlg = false) => {
 		let wheelCnt = 0;
 		wheelHandler = g_handler.addListener(divRoot, `wheel`, e => {
 
-			// コメント欄（lblComment）のスクロール可能性をチェック
-			const isScrollable = lblComment.scrollHeight > lblComment.clientHeight;
+			if (document.getElementById(`lblComment`) !== null && lblComment.style.display === C_DIS_INHERIT) {
+				return;
+			}
+			// コメント欄（lblCommentM）のスクロール可能性をチェック
+			const isScrollable = lblCommentM.scrollHeight > lblCommentM.clientHeight;
 
 			// マウスがコメント欄上にあり、スクロールが可能ならイベントをスキップ
-			if (lblComment.contains(e.target) && isScrollable) {
+			if (lblCommentM.contains(e.target) && isScrollable) {
 				// スクロール位置の判定
-				const atTop = lblComment.scrollTop === 0 && e.deltaY < 0;
-				const atBottom = (lblComment.scrollTop + lblComment.clientHeight >= lblComment.scrollHeight) && e.deltaY > 0;
+				const atTop = lblCommentM.scrollTop === 0 && e.deltaY < 0;
+				const atBottom = (lblCommentM.scrollTop + lblCommentM.clientHeight >= lblCommentM.scrollHeight) && e.deltaY > 0;
 
 				// スクロール可能＆上端または下端ではないなら処理をスキップ
 				if (!atTop && !atBottom) {
@@ -5286,6 +5289,9 @@ const titleInit = (_initFlg = false) => {
 					lblComment.style.display = (lblCommentDef === C_DIS_NONE ? C_DIS_INHERIT : C_DIS_NONE);
 				}, g_lblPosObj.btnComment, g_cssObj.button_Default),
 			);
+			if (g_headerObj.musicSelectUse && getQueryParamVal(`scoreId`) === null) {
+				lblComment.style.height = `${g_sHeight - 100}px`;
+			}
 			setUserSelect(lblComment.style, `text`);
 		}
 	}
@@ -5621,6 +5627,9 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
  * @param {boolean} _initFlg 
  */
 const changeMSelect = (_num, _initFlg = false) => {
+	if (document.getElementById(`lblComment`) !== null && lblComment.style.display === C_DIS_INHERIT) {
+		return;
+	}
 	const limitedMLength = 35;
 	pauseBGM();
 
@@ -5694,7 +5703,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 	}
 
 	// コメント文の加工
-	lblComment.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
+	lblCommentM.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
 
 	// BGM再生処理
 	if (!g_stateObj.bgmMuteFlg) {
