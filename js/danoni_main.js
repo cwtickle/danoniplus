@@ -5110,6 +5110,9 @@ const titleInit = (_initFlg = false) => {
 		let wheelCnt = 0;
 		wheelHandler = g_handler.addListener(divRoot, `wheel`, e => {
 
+			if (lblComment.style.display === C_DIS_INHERIT) {
+				return;
+			}
 			// コメント欄（lblCommentM）のスクロール可能性をチェック
 			const isScrollable = lblCommentM.scrollHeight > lblCommentM.clientHeight;
 
@@ -5624,6 +5627,9 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
  * @param {boolean} _initFlg 
  */
 const changeMSelect = (_num, _initFlg = false) => {
+	if (document.getElementById(`lblComment`) !== null && lblComment.style.display === C_DIS_INHERIT) {
+		return;
+	}
 	const limitedMLength = 35;
 	pauseBGM();
 
