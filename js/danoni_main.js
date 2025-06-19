@@ -5110,7 +5110,7 @@ const titleInit = (_initFlg = false) => {
 		let wheelCnt = 0;
 		wheelHandler = g_handler.addListener(divRoot, `wheel`, e => {
 
-			if (lblComment.style.display === C_DIS_INHERIT) {
+			if (document.getElementById(`lblComment`) !== null && lblComment.style.display === C_DIS_INHERIT) {
 				return;
 			}
 			// コメント欄（lblCommentM）のスクロール可能性をチェック
