@@ -11535,7 +11535,7 @@ const mainInit = () => {
 			mainSpriteJ.appendChild(createColorObject2(`filterBar${j % 2 == 0 ? j + 1 : j - 1}_HS`, g_lblPosObj.filterBar, filterCss));
 		}
 		addTransform(`mainSprite${j}`, `mainSprite${j}`,
-			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(j / 2) + (j + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
+			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(j / 2) * 2 + (j + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
 
 		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
 		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
