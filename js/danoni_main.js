@@ -8,7 +8,7 @@
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.2.3`;
+const g_version = `Ver 42.2.4`;
 const g_revisedDate = `2025/06/20`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
