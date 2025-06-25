@@ -1100,6 +1100,7 @@ const g_stateObj = {
     dm_others: C_FLG_OFF,
 
     layerNum: 2,
+    layerNumDf: 2,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -1555,7 +1556,7 @@ const g_stepAreaFunc = new Map([
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
-                for (let j = 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
+                for (let j = g_stateObj.layerNumDf; j < g_stateObj.layerNum; j++) {
                     addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
                 }
             });
@@ -1567,7 +1568,7 @@ const g_stepAreaFunc = new Map([
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
-                for (let j = 0; j < Math.min(g_stateObj.layerNum, 2); j++) {
+                for (let j = 0; j < g_stateObj.layerNumDf; j++) {
                     addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
                 }
             });
@@ -1575,14 +1576,14 @@ const g_stepAreaFunc = new Map([
     }],
     ['2Step', () => {
         g_arrowGroupSprite.forEach(sprite => {
-            for (let j = Math.min(g_stateObj.layerNum, 4) / 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
+            for (let j = g_stateObj.layerNumDf; j < g_stateObj.layerNum; j++) {
                 addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
             }
         });
     }],
     ['X-Flower', () => {
-        for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j % 4 < 2 ? 1 : -1) * -15}deg)`);
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * -15}deg)`);
         }
     }],
 ]);

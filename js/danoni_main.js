@@ -11108,7 +11108,8 @@ const getArrowSettings = () => {
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
-	g_stateObj.layerNum = 2;
+	g_stateObj.layerNumDf = 2;
+	const getLayerNum = _num => Math.max(_num, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
 	g_workObj.keyGroupList = tkObj.keyGroupList;
@@ -11175,9 +11176,14 @@ const getArrowSettings = () => {
 		});
 	}
 	g_workObj.orgFlatFlg = g_workObj.dividePos.every(v => v === g_workObj.dividePos[0]);
+	g_stateObj.layerNumDf = getLayerNum(g_stateObj.layerNumDf);
+
+	// StepArea(Default, Halfway以外)によるレイヤー移動
+	// ずらした位置に表示するため、レイヤーを倍化して倍化した先に割り当てる
 	if (g_stateObj.stepArea === `X-Flower` || (g_stateObj.stepArea.includes(`Mismatched`) && g_workObj.orgFlatFlg)) {
 		for (let j = 0; j < keyNum; j++) {
-			g_workObj.dividePos[j] = (g_workObj.stepX[j] < (g_headerObj.playingWidth - C_ARW_WIDTH) / 2 ? 0 : 1) * 2 + g_workObj.dividePos[j] % 2;
+			g_workObj.dividePos[j] = (g_workObj.stepX[j] < (g_headerObj.playingWidth - C_ARW_WIDTH) / 2 ? 0 : 1) *
+				g_stateObj.layerNumDf + g_workObj.dividePos[j];
 		}
 	}
 	if (g_stateObj.stepArea === `2Step`) {
@@ -11187,14 +11193,14 @@ const getArrowSettings = () => {
 				g_workObj.scrollDir[j] *= -1;
 			}
 			if (g_workObj.dividePos[j] % 2 === (Number(g_stateObj.reverse === C_FLG_ON) + 1) % 2) {
-				g_workObj.dividePos[j] = g_stateObj.layerNum + g_workObj.dividePos[j] + Number(g_stateObj.reverse === C_FLG_ON ? 1 : -1);
+				g_workObj.dividePos[j] = g_stateObj.layerNumDf + g_workObj.dividePos[j] + Number(g_stateObj.reverse === C_FLG_ON ? 1 : -1);
 				g_workObj.scrollDir[j] *= -1;
 			}
 		}
 	}
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
 	g_workObj.dividePosDefault = g_workObj.dividePos.concat();
-	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
+	g_stateObj.layerNum = getLayerNum(g_stateObj.layerNumDf);
 
 	// g_workObjの不要なプロパティを削除
 	if (g_stateObj.dummyId === `` && g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
@@ -11534,8 +11540,12 @@ const mainInit = () => {
 		if (doubleFilterFlg) {
 			mainSpriteJ.appendChild(createColorObject2(`filterBar${j % 2 == 0 ? j + 1 : j - 1}_HS`, g_lblPosObj.filterBar, filterCss));
 		}
+
+		// レイヤーごとのTransition設定
+		// StepAreaオプションにより、レイヤーが倍化される場合があるため基準レイヤー数ごとに設定
+		const transj = j % g_stateObj.layerNumDf;
 		addTransform(`mainSprite${j}`, `mainSprite${j}`,
-			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(j / 2) * 2 + (j + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
+			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(transj / 2) * 2 + (transj + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
 
 		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
 		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
@@ -13063,14 +13073,16 @@ const changeCssMotions = (_header, _name, _frameNum) => {
 };
 
 /**
- * スクロール方向の変更（矢印・フリーズアロー）
+ * スクロール方向、レイヤーの変更（矢印・フリーズアロー）
+ * StepAreaがDefault/Halfway以外の場合はレイヤー数が倍化するため、その設定にも追従する
  * @param {number} _frameNum 
  */
 const changeScrollArrowDirs = (_frameNum) =>
 	g_workObj.mkScrollchArrow?.[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
-		const baseLayer = g_workObj.mkScrollchArrowLayer[_frameNum][j] === -1 ?
-			Math.floor(g_workObj.dividePosDefault[targetj] / 2) : g_workObj.mkScrollchArrowLayer[_frameNum][j];
+		const baseLayer = g_workObj.mkScrollchArrowLayer[_frameNum][j] === -1
+			? Math.floor(g_workObj.dividePosDefault[targetj] / 2)
+			: g_workObj.mkScrollchArrowLayer[_frameNum][j] + (g_workObj.dividePosDefault[targetj] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
 		g_workObj.dividePos[targetj] = baseLayer * 2 + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
 	});
 
