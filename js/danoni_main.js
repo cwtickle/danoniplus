@@ -9989,7 +9989,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	const setScrollchData = (_scoreNo) => {
 		const dosScrollchData = getRefData(`scrollch`, `${_scoreNo}_data`) || _dosObj.scrollch_data;
 		const scrollchData = [];
-		const layerGroups = [];
+		let maxLayerGroup = 0;
 
 		if (hasVal(dosScrollchData)) {
 			splitLF(dosScrollchData).filter(data => hasVal(data)).forEach(tmpData => {
@@ -10002,11 +10002,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const scrollDir = parseFloat(tmpScrollchData[2] ?? `1`);
 				const layerGroup = parseFloat(tmpScrollchData[3] ?? `-1`);
 				const layerTrans = tmpScrollchData[4] ?? ``;
-				layerGroups.push(layerGroup);
+				maxLayerGroup = Math.max(maxLayerGroup, layerGroup);
 
 				scrollchData.push([frame, arrowNum, frame, scrollDir, layerGroup, layerTrans]);
 			});
-			g_stateObj.layerNumDf = Math.max((Math.max(...layerGroups) + 1) * 2, 2);
+			g_stateObj.layerNumDf = Math.max((maxLayerGroup + 1) * 2, 2);
 			return scrollchData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
 		return [];
