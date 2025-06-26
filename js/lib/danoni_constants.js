@@ -771,7 +771,8 @@ const g_typeLists = {
     dataList: [
         `Arrow`, `FrzArrow`, `FrzLength`,
         `Color`, `ColorCd`, `ColorShadow`, `ColorShadowCd`,
-        `ScrollchArrow`, `ScrollchStep`, `ScrollchArrowDir`, `ScrollchStepDir`, `ScrollchArrowLayer`, `ScrollchStepLayer`,
+        `ScrollchArrow`, `ScrollchStep`, `ScrollchArrowDir`, `ScrollchStepDir`,
+        `ScrollchArrowLayerGroup`, `ScrollchStepLayerGroup`, `ScrollchArrowLayerTrans`, `ScrollchStepLayerTrans`,
         `FColorNormal`, `FColorNormalCd`, `FColorNormalBar`, `FColorNormalBarCd`,
         `FColorNormalShadow`, `FColorNormalShadowCd`,
         `FColorHit`, `FColorHitCd`, `FColorHitBar`, `FColorHitBarCd`,
@@ -1099,7 +1100,8 @@ const g_stateObj = {
     dm_customKey: C_FLG_OFF,
     dm_others: C_FLG_OFF,
 
-    layerNum: 2,
+    layerNum: 2,    // オプションを加味した実際のレイヤー数
+    layerNumDf: 2,  // 基準レイヤー数
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -1243,6 +1245,7 @@ const g_settings = {
     playWindowNum: 0,
 
     stepAreas: [`Default`, `Halfway`, `2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`],
+    stepAreaLayers: [`2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`],
     stepAreaNum: 0,
 
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
@@ -1555,7 +1558,7 @@ const g_stepAreaFunc = new Map([
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
-                for (let j = 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
+                for (let j = g_stateObj.layerNumDf; j < g_stateObj.layerNum; j++) {
                     addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
                 }
             });
@@ -1567,7 +1570,7 @@ const g_stepAreaFunc = new Map([
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
-                for (let j = 0; j < Math.min(g_stateObj.layerNum, 2); j++) {
+                for (let j = 0; j < g_stateObj.layerNumDf; j++) {
                     addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
                 }
             });
@@ -1575,14 +1578,14 @@ const g_stepAreaFunc = new Map([
     }],
     ['2Step', () => {
         g_arrowGroupSprite.forEach(sprite => {
-            for (let j = Math.min(g_stateObj.layerNum, 4) / 2; j < Math.min(g_stateObj.layerNum, 4); j++) {
+            for (let j = g_stateObj.layerNumDf; j < g_stateObj.layerNum; j++) {
                 addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
             }
         });
     }],
     ['X-Flower', () => {
-        for (let j = 0; j < Math.min(g_stateObj.layerNum, 4); j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j % 4 < 2 ? 1 : -1) * -15}deg)`);
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * -15}deg)`);
         }
     }],
 ]);
