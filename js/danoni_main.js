@@ -13082,6 +13082,17 @@ const changeCssMotions = (_header, _name, _frameNum) => {
 };
 
 /**
+ * 基準となる階層グループの取得
+ * @param {number} _layerGroup 
+ * @param {number} _j 
+ * @returns {number}
+ */
+const getBaseLayerGroup = (_layerGroup, _j) =>
+	_layerGroup === -1
+		? Math.floor(g_workObj.dividePosDefault[_j] / 2)
+		: _layerGroup + (g_workObj.dividePosDefault[_j] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
+
+/**
  * スクロール方向、レイヤーの変更（矢印・フリーズアロー）
  * StepAreaがDefault/Halfway以外の場合はレイヤー数が倍化するため、その設定にも追従する
  * @param {number} _frameNum 
@@ -13094,11 +13105,8 @@ const changeScrollArrowDirs = (_frameNum) => {
 	g_workObj.mkScrollchArrow?.[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
 
-		// 基準となる階層グループを設定（changeStepYとほぼ同じ）
-		const baseLayer = g_workObj.mkScrollchArrowLayerGroup[_frameNum][j] === -1
-			? Math.floor(g_workObj.dividePosDefault[targetj] / 2)
-			: g_workObj.mkScrollchArrowLayerGroup[_frameNum][j]
-			+ (g_workObj.dividePosDefault[targetj] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
+		// レイヤー変更
+		const baseLayer = getBaseLayerGroup(g_workObj.mkScrollchArrowLayerGroup[_frameNum][j], targetj);
 		g_workObj.dividePos[targetj] = baseLayer * 2 + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
 
 		// 対象の矢印が属するレイヤーに対するTransitionを設定
@@ -13127,10 +13135,7 @@ const changeStepY = (_frameNum) =>
 		document.getElementById(`frzHit${targetj}`).remove();
 
 		// レイヤーを変更しステップゾーンを再生成。移動元の不透明度、表示・非表示を反映
-		const baseLayer = g_workObj.mkScrollchStepLayerGroup[_frameNum][j] === -1
-			? Math.floor(g_workObj.dividePosDefault[targetj] / 2)
-			: g_workObj.mkScrollchStepLayerGroup[_frameNum][j]
-			+ (g_workObj.dividePosDefault[targetj] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
+		const baseLayer = getBaseLayerGroup(g_workObj.mkScrollchStepLayerGroup[_frameNum][j], targetj);
 		g_workObj.dividePos[targetj] = baseLayer * 2 + dividePos;
 		makeStepZone(targetj, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`);
 		appearStepZone(targetj, _stepDisplay, _stepOpacity);
