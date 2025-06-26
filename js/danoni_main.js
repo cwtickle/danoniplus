@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/06/20
+ * Revised : 2025/06/26
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.2.4`;
-const g_revisedDate = `2025/06/20`;
+const g_version = `Ver 42.3.0`;
+const g_revisedDate = `2025/06/26`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -9989,6 +9989,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	const setScrollchData = (_scoreNo) => {
 		const dosScrollchData = getRefData(`scrollch`, `${_scoreNo}_data`) || _dosObj.scrollch_data;
 		const scrollchData = [];
+		let maxLayerGroup = 0;
 
 		if (hasVal(dosScrollchData)) {
 			splitLF(dosScrollchData).filter(data => hasVal(data)).forEach(tmpData => {
@@ -10000,9 +10001,12 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const arrowNum = parseFloat(tmpScrollchData[1]);
 				const scrollDir = parseFloat(tmpScrollchData[2] ?? `1`);
 				const layerGroup = parseFloat(tmpScrollchData[3] ?? `-1`);
+				const layerTrans = tmpScrollchData[4] ?? ``;
+				maxLayerGroup = Math.max(maxLayerGroup, layerGroup);
 
-				scrollchData.push([frame, arrowNum, frame, scrollDir, layerGroup]);
+				scrollchData.push([frame, arrowNum, frame, scrollDir, layerGroup, layerTrans]);
 			});
+			g_stateObj.layerNumDf = Math.max((maxLayerGroup + 1) * 2, 2);
 			return scrollchData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
 		return [];
@@ -10217,6 +10221,9 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	obj.colorData = mergeColorData();
 	obj.dummyColorData = mergeColorData(`Dummy`);
+
+	// レイヤー数の初期値設定（譜面ごとに設定のため）
+	g_stateObj.layerNumDf = 2;
 
 	// 矢印モーション（個別）データの分解（3～4つで1セット, セット毎の改行区切り）
 	obj.arrowCssMotionData = setCssMotionData(`arrow`, scoreIdHeader);
@@ -10784,7 +10791,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 	g_typeLists.arrow.forEach(header =>
 		calcDataTiming(`cssMotion`, header, pushCssMotions, { _calcFrameFlg: true }));
 
-	calcDataTiming(`scrollch`, ``, pushScrollchs, { _term: 5, _calcFrameFlg: true });
+	calcDataTiming(`scrollch`, ``, pushScrollchs, { _term: 6, _calcFrameFlg: true });
 
 	g_fadeinStockList.forEach(type =>
 		_dataObj[`${type}Data`] = calcAnimationData(type, _dataObj[`${type}Data`]));
@@ -11048,8 +11055,10 @@ const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev) => {
  * @param {number} _val 
  * @param {number} _frameStep 
  * @param {number} _scrollDir 
+ * @param {number} _layerGroup
+ * @param {number} _layerTrans
  */
-const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir, _layerGroup) => {
+const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir, _layerGroup, _layerTrans) => {
 	const tkObj = getKeyInfo();
 	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, (_layerGroup + 1) * 2);
 
@@ -11060,10 +11069,12 @@ const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir, _laye
 	const pushScrollData = _j => {
 		pushData(`Arrow`, frameArrow, _j);
 		pushData(`ArrowDir`, frameArrow, _scrollDir);
-		pushData(`ArrowLayer`, frameArrow, _layerGroup);
+		pushData(`ArrowLayerGroup`, frameArrow, _layerGroup);
+		pushData(`ArrowLayerTrans`, frameArrow, _layerTrans);
 		pushData(`Step`, frameStep, _j);
 		pushData(`StepDir`, frameStep, _scrollDir);
-		pushData(`StepLayer`, frameStep, _layerGroup);
+		pushData(`StepLayerGroup`, frameStep, _layerGroup);
+		pushData(`StepLayerTrans`, frameStep, _layerTrans);
 	};
 
 	if (_val < 20 || _val >= 1000) {
@@ -11108,7 +11119,6 @@ const getArrowSettings = () => {
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
-	g_stateObj.layerNum = 2;
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
 	g_workObj.keyGroupList = tkObj.keyGroupList;
@@ -11175,9 +11185,14 @@ const getArrowSettings = () => {
 		});
 	}
 	g_workObj.orgFlatFlg = g_workObj.dividePos.every(v => v === g_workObj.dividePos[0]);
+	g_stateObj.layerNumDf = Math.max(g_stateObj.layerNumDf, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
+
+	// StepArea(Default, Halfway以外)によるレイヤー移動
+	// ずらした位置に表示するため、レイヤーを倍化して倍化した先に割り当てる
 	if (g_stateObj.stepArea === `X-Flower` || (g_stateObj.stepArea.includes(`Mismatched`) && g_workObj.orgFlatFlg)) {
 		for (let j = 0; j < keyNum; j++) {
-			g_workObj.dividePos[j] = (g_workObj.stepX[j] < (g_headerObj.playingWidth - C_ARW_WIDTH) / 2 ? 0 : 1) * 2 + g_workObj.dividePos[j] % 2;
+			g_workObj.dividePos[j] = (g_workObj.stepX[j] < (g_headerObj.playingWidth - C_ARW_WIDTH) / 2 ? 0 : 1) *
+				g_stateObj.layerNumDf + g_workObj.dividePos[j];
 		}
 	}
 	if (g_stateObj.stepArea === `2Step`) {
@@ -11187,14 +11202,14 @@ const getArrowSettings = () => {
 				g_workObj.scrollDir[j] *= -1;
 			}
 			if (g_workObj.dividePos[j] % 2 === (Number(g_stateObj.reverse === C_FLG_ON) + 1) % 2) {
-				g_workObj.dividePos[j] = g_stateObj.layerNum + g_workObj.dividePos[j] + Number(g_stateObj.reverse === C_FLG_ON ? 1 : -1);
+				g_workObj.dividePos[j] = g_stateObj.layerNumDf + g_workObj.dividePos[j] + Number(g_stateObj.reverse === C_FLG_ON ? 1 : -1);
 				g_workObj.scrollDir[j] *= -1;
 			}
 		}
 	}
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
 	g_workObj.dividePosDefault = g_workObj.dividePos.concat();
-	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
+	g_stateObj.layerNum = g_stateObj.layerNumDf * (g_settings.stepAreaLayers.includes(g_stateObj.stepArea) ? 2 : 1);
 
 	// g_workObjの不要なプロパティを削除
 	if (g_stateObj.dummyId === `` && g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
@@ -11213,7 +11228,7 @@ const getArrowSettings = () => {
 		}
 	});
 	[`Arrow`, `Step`].forEach(type => {
-		[``, `Dir`, `Layer`].forEach(type2 => {
+		[``, `Dir`, `LayerGroup`, `LayerTrans`].forEach(type2 => {
 			if (g_workObj[`mkScrollch${type}${type2}`].length === 0) {
 				delete g_workObj[`mkScrollch${type}${type2}`];
 			}
@@ -11534,8 +11549,12 @@ const mainInit = () => {
 		if (doubleFilterFlg) {
 			mainSpriteJ.appendChild(createColorObject2(`filterBar${j % 2 == 0 ? j + 1 : j - 1}_HS`, g_lblPosObj.filterBar, filterCss));
 		}
+
+		// レイヤーごとのTransition設定
+		// StepAreaオプションにより、レイヤーが倍化される場合があるため基準レイヤー数ごとに設定
+		const transj = j % g_stateObj.layerNumDf;
 		addTransform(`mainSprite${j}`, `mainSprite${j}`,
-			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(j / 2) * 2 + (j + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
+			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(transj / 2) * 2 + (transj + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
 
 		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
 		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
@@ -13063,16 +13082,41 @@ const changeCssMotions = (_header, _name, _frameNum) => {
 };
 
 /**
- * スクロール方向の変更（矢印・フリーズアロー）
+ * 基準となる階層グループの取得
+ * @param {number} _layerGroup 
+ * @param {number} _j 
+ * @returns {number}
+ */
+const getBaseLayerGroup = (_layerGroup, _j) =>
+	_layerGroup === -1
+		? Math.floor(g_workObj.dividePosDefault[_j] / 2)
+		: _layerGroup + (g_workObj.dividePosDefault[_j] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
+
+/**
+ * スクロール方向、レイヤーの変更（矢印・フリーズアロー）
+ * StepAreaがDefault/Halfway以外の場合はレイヤー数が倍化するため、その設定にも追従する
  * @param {number} _frameNum 
  */
-const changeScrollArrowDirs = (_frameNum) =>
+const changeScrollArrowDirs = (_frameNum) => {
+	if (g_workObj.mkScrollchArrow?.[_frameNum] === undefined) {
+		return;
+	}
+	const tmpObj = new Map();
 	g_workObj.mkScrollchArrow?.[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
-		const baseLayer = g_workObj.mkScrollchArrowLayer[_frameNum][j] === -1 ?
-			Math.floor(g_workObj.dividePosDefault[targetj] / 2) : g_workObj.mkScrollchArrowLayer[_frameNum][j];
+
+		// レイヤー変更
+		const baseLayer = getBaseLayerGroup(g_workObj.mkScrollchArrowLayerGroup[_frameNum][j], targetj);
 		g_workObj.dividePos[targetj] = baseLayer * 2 + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
+
+		// 対象の矢印が属するレイヤーに対するTransitionを設定
+		// ステップゾーンの移動よりも矢印・フリーズアローの方が早く変わるため、この関数のみ適用
+		if (g_workObj.mkScrollchArrowLayerTrans[_frameNum][j] !== ``) {
+			tmpObj.set(g_workObj.dividePos[targetj], g_workObj.mkScrollchArrowLayerTrans[_frameNum][j]);
+		}
 	});
+	tmpObj.forEach((val, key, map) => addTransform(`mainSprite${key}`, `scrollch`, val));
+};
 
 /**
  * ステップゾーンの位置反転
@@ -13091,8 +13135,7 @@ const changeStepY = (_frameNum) =>
 		document.getElementById(`frzHit${targetj}`).remove();
 
 		// レイヤーを変更しステップゾーンを再生成。移動元の不透明度、表示・非表示を反映
-		const baseLayer = g_workObj.mkScrollchStepLayer[_frameNum][j] === -1 ?
-			Math.floor(g_workObj.dividePosDefault[targetj] / 2) : g_workObj.mkScrollchStepLayer[_frameNum][j];
+		const baseLayer = getBaseLayerGroup(g_workObj.mkScrollchStepLayerGroup[_frameNum][j], targetj);
 		g_workObj.dividePos[targetj] = baseLayer * 2 + dividePos;
 		makeStepZone(targetj, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`);
 		appearStepZone(targetj, _stepDisplay, _stepOpacity);
