@@ -9989,6 +9989,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	const setScrollchData = (_scoreNo) => {
 		const dosScrollchData = getRefData(`scrollch`, `${_scoreNo}_data`) || _dosObj.scrollch_data;
 		const scrollchData = [];
+		const layerGroups = [];
 
 		if (hasVal(dosScrollchData)) {
 			splitLF(dosScrollchData).filter(data => hasVal(data)).forEach(tmpData => {
@@ -10000,9 +10001,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const arrowNum = parseFloat(tmpScrollchData[1]);
 				const scrollDir = parseFloat(tmpScrollchData[2] ?? `1`);
 				const layerGroup = parseFloat(tmpScrollchData[3] ?? `-1`);
+				layerGroups.push(layerGroup);
 
 				scrollchData.push([frame, arrowNum, frame, scrollDir, layerGroup]);
 			});
+			g_stateObj.layerNumDf = Math.max((Math.max(...layerGroups) + 1) * 2, 2);
 			return scrollchData.sort((_a, _b) => _a[0] - _b[0]).flat();
 		}
 		return [];
@@ -10217,6 +10220,9 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	obj.colorData = mergeColorData();
 	obj.dummyColorData = mergeColorData(`Dummy`);
+
+	// レイヤー数の初期値設定（譜面ごとに設定のため）
+	g_stateObj.layerNumDf = 2;
 
 	// 矢印モーション（個別）データの分解（3～4つで1セット, セット毎の改行区切り）
 	obj.arrowCssMotionData = setCssMotionData(`arrow`, scoreIdHeader);
@@ -11108,7 +11114,6 @@ const getArrowSettings = () => {
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
-	g_stateObj.layerNumDf = 2;
 	const getLayerNum = _num => Math.max(_num, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
