@@ -771,7 +771,8 @@ const g_typeLists = {
     dataList: [
         `Arrow`, `FrzArrow`, `FrzLength`,
         `Color`, `ColorCd`, `ColorShadow`, `ColorShadowCd`,
-        `ScrollchArrow`, `ScrollchStep`, `ScrollchArrowDir`, `ScrollchStepDir`, `ScrollchArrowLayer`, `ScrollchStepLayer`,
+        `ScrollchArrow`, `ScrollchStep`, `ScrollchArrowDir`, `ScrollchStepDir`,
+        `ScrollchArrowLayerGroup`, `ScrollchStepLayerGroup`, `ScrollchArrowLayerTrans`, `ScrollchStepLayerTrans`,
         `FColorNormal`, `FColorNormalCd`, `FColorNormalBar`, `FColorNormalBarCd`,
         `FColorNormalShadow`, `FColorNormalShadowCd`,
         `FColorHit`, `FColorHitCd`, `FColorHitBar`, `FColorHitBarCd`,
@@ -1244,6 +1245,7 @@ const g_settings = {
     playWindowNum: 0,
 
     stepAreas: [`Default`, `Halfway`, `2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`],
+    stepAreaLayers: [`2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`],
     stepAreaNum: 0,
 
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],

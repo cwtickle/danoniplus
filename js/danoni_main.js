@@ -10001,9 +10001,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const arrowNum = parseFloat(tmpScrollchData[1]);
 				const scrollDir = parseFloat(tmpScrollchData[2] ?? `1`);
 				const layerGroup = parseFloat(tmpScrollchData[3] ?? `-1`);
+				const layerTrans = tmpScrollchData[4] ?? ``;
 				layerGroups.push(layerGroup);
 
-				scrollchData.push([frame, arrowNum, frame, scrollDir, layerGroup]);
+				scrollchData.push([frame, arrowNum, frame, scrollDir, layerGroup, layerTrans]);
 			});
 			g_stateObj.layerNumDf = Math.max((Math.max(...layerGroups) + 1) * 2, 2);
 			return scrollchData.sort((_a, _b) => _a[0] - _b[0]).flat();
@@ -10790,7 +10791,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 	g_typeLists.arrow.forEach(header =>
 		calcDataTiming(`cssMotion`, header, pushCssMotions, { _calcFrameFlg: true }));
 
-	calcDataTiming(`scrollch`, ``, pushScrollchs, { _term: 5, _calcFrameFlg: true });
+	calcDataTiming(`scrollch`, ``, pushScrollchs, { _term: 6, _calcFrameFlg: true });
 
 	g_fadeinStockList.forEach(type =>
 		_dataObj[`${type}Data`] = calcAnimationData(type, _dataObj[`${type}Data`]));
@@ -11054,8 +11055,10 @@ const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev) => {
  * @param {number} _val 
  * @param {number} _frameStep 
  * @param {number} _scrollDir 
+ * @param {number} _layerGroup
+ * @param {number} _layerTrans
  */
-const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir, _layerGroup) => {
+const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir, _layerGroup, _layerTrans) => {
 	const tkObj = getKeyInfo();
 	g_stateObj.layerNum = Math.max(g_stateObj.layerNum, (_layerGroup + 1) * 2);
 
@@ -11066,10 +11069,12 @@ const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir, _laye
 	const pushScrollData = _j => {
 		pushData(`Arrow`, frameArrow, _j);
 		pushData(`ArrowDir`, frameArrow, _scrollDir);
-		pushData(`ArrowLayer`, frameArrow, _layerGroup);
+		pushData(`ArrowLayerGroup`, frameArrow, _layerGroup);
+		pushData(`ArrowLayerTrans`, frameArrow, _layerTrans);
 		pushData(`Step`, frameStep, _j);
 		pushData(`StepDir`, frameStep, _scrollDir);
-		pushData(`StepLayer`, frameStep, _layerGroup);
+		pushData(`StepLayerGroup`, frameStep, _layerGroup);
+		pushData(`StepLayerTrans`, frameStep, _layerTrans);
 	};
 
 	if (_val < 20 || _val >= 1000) {
@@ -11114,7 +11119,6 @@ const getArrowSettings = () => {
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
-	const getLayerNum = _num => Math.max(_num, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
 	g_workObj.keyGroupList = tkObj.keyGroupList;
@@ -11181,7 +11185,7 @@ const getArrowSettings = () => {
 		});
 	}
 	g_workObj.orgFlatFlg = g_workObj.dividePos.every(v => v === g_workObj.dividePos[0]);
-	g_stateObj.layerNumDf = getLayerNum(g_stateObj.layerNumDf);
+	g_stateObj.layerNumDf = Math.max(g_stateObj.layerNumDf, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
 	// StepArea(Default, Halfway以外)によるレイヤー移動
 	// ずらした位置に表示するため、レイヤーを倍化して倍化した先に割り当てる
@@ -11205,7 +11209,7 @@ const getArrowSettings = () => {
 	}
 	g_workObj.scrollDirDefault = g_workObj.scrollDir.concat();
 	g_workObj.dividePosDefault = g_workObj.dividePos.concat();
-	g_stateObj.layerNum = getLayerNum(g_stateObj.layerNumDf);
+	g_stateObj.layerNum = g_stateObj.layerNumDf * (g_settings.stepAreaLayers.includes(g_stateObj.stepArea) ? 2 : 1);
 
 	// g_workObjの不要なプロパティを削除
 	if (g_stateObj.dummyId === `` && g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
@@ -11224,7 +11228,7 @@ const getArrowSettings = () => {
 		}
 	});
 	[`Arrow`, `Step`].forEach(type => {
-		[``, `Dir`, `Layer`].forEach(type2 => {
+		[``, `Dir`, `LayerGroup`, `LayerTrans`].forEach(type2 => {
 			if (g_workObj[`mkScrollch${type}${type2}`].length === 0) {
 				delete g_workObj[`mkScrollch${type}${type2}`];
 			}
@@ -13082,14 +13086,21 @@ const changeCssMotions = (_header, _name, _frameNum) => {
  * StepAreaがDefault/Halfway以外の場合はレイヤー数が倍化するため、その設定にも追従する
  * @param {number} _frameNum 
  */
-const changeScrollArrowDirs = (_frameNum) =>
+const changeScrollArrowDirs = (_frameNum) => {
+	const tmpObj = new Map();
 	g_workObj.mkScrollchArrow?.[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
-		const baseLayer = g_workObj.mkScrollchArrowLayer[_frameNum][j] === -1
+		const baseLayer = g_workObj.mkScrollchArrowLayerGroup[_frameNum][j] === -1
 			? Math.floor(g_workObj.dividePosDefault[targetj] / 2)
-			: g_workObj.mkScrollchArrowLayer[_frameNum][j] + (g_workObj.dividePosDefault[targetj] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
+			: g_workObj.mkScrollchArrowLayerGroup[_frameNum][j] + (g_workObj.dividePosDefault[targetj] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
 		g_workObj.dividePos[targetj] = baseLayer * 2 + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
+
+		if (g_workObj.mkScrollchArrowLayerTrans[_frameNum][j] !== ``) {
+			tmpObj.set(g_workObj.dividePos[targetj], g_workObj.mkScrollchArrowLayerTrans[_frameNum][j]);
+		}
 	});
+	tmpObj.forEach((val, key, map) => addTransform(`mainSprite${key}`, `scrollch`, val));
+};
 
 /**
  * ステップゾーンの位置反転
@@ -13108,8 +13119,9 @@ const changeStepY = (_frameNum) =>
 		document.getElementById(`frzHit${targetj}`).remove();
 
 		// レイヤーを変更しステップゾーンを再生成。移動元の不透明度、表示・非表示を反映
-		const baseLayer = g_workObj.mkScrollchStepLayer[_frameNum][j] === -1 ?
-			Math.floor(g_workObj.dividePosDefault[targetj] / 2) : g_workObj.mkScrollchStepLayer[_frameNum][j];
+		const baseLayer = g_workObj.mkScrollchStepLayerGroup[_frameNum][j] === -1
+			? Math.floor(g_workObj.dividePosDefault[targetj] / 2)
+			: g_workObj.mkScrollchStepLayerGroup[_frameNum][j] + (g_workObj.dividePosDefault[targetj] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
 		g_workObj.dividePos[targetj] = baseLayer * 2 + dividePos;
 		makeStepZone(targetj, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`);
 		appearStepZone(targetj, _stepDisplay, _stepOpacity);
