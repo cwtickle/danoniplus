@@ -13092,7 +13092,8 @@ const changeScrollArrowDirs = (_frameNum) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
 		const baseLayer = g_workObj.mkScrollchArrowLayerGroup[_frameNum][j] === -1
 			? Math.floor(g_workObj.dividePosDefault[targetj] / 2)
-			: g_workObj.mkScrollchArrowLayerGroup[_frameNum][j] + (g_workObj.dividePosDefault[targetj] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
+			: g_workObj.mkScrollchArrowLayerGroup[_frameNum][j]
+			+ (g_workObj.dividePosDefault[targetj] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
 		g_workObj.dividePos[targetj] = baseLayer * 2 + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
 
 		if (g_workObj.mkScrollchArrowLayerTrans[_frameNum][j] !== ``) {
@@ -13121,7 +13122,8 @@ const changeStepY = (_frameNum) =>
 		// レイヤーを変更しステップゾーンを再生成。移動元の不透明度、表示・非表示を反映
 		const baseLayer = g_workObj.mkScrollchStepLayerGroup[_frameNum][j] === -1
 			? Math.floor(g_workObj.dividePosDefault[targetj] / 2)
-			: g_workObj.mkScrollchStepLayerGroup[_frameNum][j] + (g_workObj.dividePosDefault[targetj] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
+			: g_workObj.mkScrollchStepLayerGroup[_frameNum][j]
+			+ (g_workObj.dividePosDefault[targetj] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
 		g_workObj.dividePos[targetj] = baseLayer * 2 + dividePos;
 		makeStepZone(targetj, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`);
 		appearStepZone(targetj, _stepDisplay, _stepOpacity);

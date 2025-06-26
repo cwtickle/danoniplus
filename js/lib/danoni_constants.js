@@ -1100,8 +1100,8 @@ const g_stateObj = {
     dm_customKey: C_FLG_OFF,
     dm_others: C_FLG_OFF,
 
-    layerNum: 2,
-    layerNumDf: 2,
+    layerNum: 2,    // オプションを加味した実際のレイヤー数
+    layerNumDf: 2,  // 基準レイヤー数
 };
 
 const C_VAL_MAXLIFE = 1000;
