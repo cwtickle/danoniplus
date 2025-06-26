@@ -13087,6 +13087,9 @@ const changeCssMotions = (_header, _name, _frameNum) => {
  * @param {number} _frameNum 
  */
 const changeScrollArrowDirs = (_frameNum) => {
+	if (g_workObj.mkScrollchArrow?.[_frameNum] === undefined) {
+		return;
+	}
 	const tmpObj = new Map();
 	g_workObj.mkScrollchArrow?.[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
