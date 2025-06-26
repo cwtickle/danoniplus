@@ -13090,12 +13090,16 @@ const changeScrollArrowDirs = (_frameNum) => {
 	const tmpObj = new Map();
 	g_workObj.mkScrollchArrow?.[_frameNum]?.forEach((targetj, j) => {
 		g_workObj.scrollDir[targetj] = g_workObj.scrollDirDefault[targetj] * g_workObj.mkScrollchArrowDir[_frameNum][j];
+
+		// 基準となる階層グループを設定（changeStepYとほぼ同じ）
 		const baseLayer = g_workObj.mkScrollchArrowLayerGroup[_frameNum][j] === -1
 			? Math.floor(g_workObj.dividePosDefault[targetj] / 2)
 			: g_workObj.mkScrollchArrowLayerGroup[_frameNum][j]
 			+ (g_workObj.dividePosDefault[targetj] > g_stateObj.layerNumDf ? g_stateObj.layerNumDf / 2 : 0);
 		g_workObj.dividePos[targetj] = baseLayer * 2 + (g_workObj.scrollDir[targetj] === 1 ? 0 : 1);
 
+		// 対象の矢印が属するレイヤーに対するTransitionを設定
+		// ステップゾーンの移動よりも矢印・フリーズアローの方が早く変わるため、この関数のみ適用
 		if (g_workObj.mkScrollchArrowLayerTrans[_frameNum][j] !== ``) {
 			tmpObj.set(g_workObj.dividePos[targetj], g_workObj.mkScrollchArrowLayerTrans[_frameNum][j]);
 		}
