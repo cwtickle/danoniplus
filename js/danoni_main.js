@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/06/26
+ * Revised : 2025/06/28
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.3.0`;
-const g_revisedDate = `2025/06/26`;
+const g_version = `Ver 42.3.1`;
+const g_revisedDate = `2025/06/28`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -11184,7 +11184,7 @@ const getArrowSettings = () => {
 			g_workObj[`frzHitShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][1] || ``;
 		});
 	}
-	g_workObj.orgFlatFlg = g_workObj.dividePos.every(v => v === g_workObj.dividePos[0]);
+	g_workObj.orgFlatFlg = g_workObj.dividePos.every(v => v % 2 === g_workObj.dividePos[0] % 2);
 	g_stateObj.layerNumDf = Math.max(g_stateObj.layerNumDf, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
 	// StepArea(Default, Halfway以外)によるレイヤー移動
