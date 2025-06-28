@@ -11184,7 +11184,7 @@ const getArrowSettings = () => {
 			g_workObj[`frzHitShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][1] || ``;
 		});
 	}
-	g_workObj.orgFlatFlg = g_workObj.dividePos.every(v => v === g_workObj.dividePos[0]);
+	g_workObj.orgFlatFlg = g_workObj.dividePos.every(v => v % 2 === g_workObj.dividePos[0] % 2);
 	g_stateObj.layerNumDf = Math.max(g_stateObj.layerNumDf, Math.ceil((Math.max(...g_workObj.dividePos) + 1) / 2) * 2);
 
 	// StepArea(Default, Halfway以外)によるレイヤー移動
