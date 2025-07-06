@@ -2804,12 +2804,11 @@ const initialControl = async () => {
 			}
 
 			// 矢印・フリーズアローのヘッダー情報を定義
-			let noteTxt = ``, freezeTxt = ``;
-			g_editorTmp[keyN].noteNames.forEach((val, r) =>
-				noteTxt += `|${val.slice(0, -(`_data`.length))}[i]_data=[a${String(r).padStart(2, `0`)}]|[E]<br>`);
+			const noteTxt = g_editorTmp[keyN].noteNames.map((val, r) =>
+				`|${val.slice(0, -(`_data`.length))}[i]_data=[a${String(r).padStart(2, `0`)}]|[E]<br>`).join(``);
 
-			g_editorTmp[keyN].freezeNames.forEach((val, r) =>
-				freezeTxt += `|${val.slice(0, -(`_data`.length))}[i]_data=[f${String(r).padStart(2, `0`)}]|[E]<br>`);
+			const freezeTxt = g_editorTmp[keyN].freezeNames.map((val, r) =>
+				`|${val.slice(0, -(`_data`.length))}[i]_data=[f${String(r).padStart(2, `0`)}]|[E]<br>`).join(``);
 
 			g_editorTmp2 += g_editorTmp2Template
 				.replace(`[__KEY__]`, keyN)
@@ -4160,7 +4159,7 @@ const resetColorType = ({ _from = ``, _to = ``, _fromObj = g_headerObj, _toObj =
 /**
  * 配列に対象がいない場合、配列の先頭にその対象を追加
  * @param {string[]|number[]} _arr 検索対象の配列
- * @param {string} _target 検索対象
+ * @param {string|number} _target 検索対象
  * @returns {string[]|number[]}
  */
 const addValtoArray = (_arr, _target) => {
