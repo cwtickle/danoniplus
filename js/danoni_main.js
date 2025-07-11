@@ -2727,12 +2727,12 @@ const initialControl = async () => {
 
 		keyGroupList.forEach((keyGroupNo, j) => {
 			const keyN = keyGroupNo === `0` ? key : `${key}_${j + 1}`;
-			const filterCond = (j) => keyGroup[j].findIndex(val => val === keyGroupNo) >= 0;
-			const keyCtrlList = g_keyObj[keyCtrlPtn].filter((val, j) => filterCond(j));
-			const charaList = g_keyObj[`chara${keyBase}`].filter((val, j) => filterCond(j));
-			const colorList = g_keyObj[`color${keyBase}_0`].filter((val, j) => filterCond(j));
-			const stepRtnList = g_keyObj[`stepRtn${keyBase}_0`].filter((val, j) => filterCond(j));
-			const keyNum = g_keyObj[keyCtrlPtn].filter((val, j) => filterCond(j)).length;
+			const filterCond = (r) => keyGroup[r].findIndex(val => val === keyGroupNo) >= 0;
+			const keyCtrlList = g_keyObj[keyCtrlPtn].filter((val, r) => filterCond(r));
+			const charaList = g_keyObj[`chara${keyBase}`].filter((val, r) => filterCond(r));
+			const colorList = g_keyObj[`color${keyBase}_0`].filter((val, r) => filterCond(r));
+			const stepRtnList = g_keyObj[`stepRtn${keyBase}_0`].filter((val, r) => filterCond(r));
+			const keyNum = g_keyObj[keyCtrlPtn].filter((val, r) => filterCond(r)).length;
 
 			// ---- Dancing☆Onigiri (CW Edition対応)のフォーマット
 			g_editorTmp[keyN] = {};
@@ -2755,7 +2755,7 @@ const initialControl = async () => {
 			if (divMaxPos > divPos) {
 
 				// posXの実際の相対位置を計算
-				const orgPosList = g_keyObj[`pos${keyBase}`].filter((val, j) => filterCond(j));
+				const orgPosList = g_keyObj[`pos${keyBase}`].filter((val, r) => filterCond(r));
 				const posList = orgPosList.map(val => val < divPos ? val - deltaXAbove : val - divPos - deltaXBelow);
 
 				g_editorTmp[keyN].orderGroups = [];
@@ -2804,18 +2804,17 @@ const initialControl = async () => {
 			}
 
 			// 矢印・フリーズアローのヘッダー情報を定義
-			let noteTxt = ``, freezeTxt = ``;
-			g_editorTmp[keyN].noteNames.forEach((val, j) =>
-				noteTxt += `|${val.slice(0, -(`_data`.length))}[i]_data=[a${String(j).padStart(2, `0`)}]|[E]<br>`);
+			const noteTxt = g_editorTmp[keyN].noteNames.map((val, r) =>
+				`|${val.slice(0, -(`_data`.length))}[i]_data=[a${String(r).padStart(2, `0`)}]|[E]<br>`).join(``);
 
-			g_editorTmp[keyN].freezeNames.forEach((val, j) =>
-				freezeTxt += `|${val.slice(0, -(`_data`.length))}[i]_data=[f${String(j).padStart(2, `0`)}]|[E]<br>`);
+			const freezeTxt = g_editorTmp[keyN].freezeNames.map((val, r) =>
+				`|${val.slice(0, -(`_data`.length))}[i]_data=[f${String(r).padStart(2, `0`)}]|[E]<br>`).join(``);
 
 			g_editorTmp2 += g_editorTmp2Template
 				.replace(`[__KEY__]`, keyN)
 				.replace(`[__MAP__]`, colorList.map(val => val < 3 ? (val + 1) % 3 : val % 7).join(','))
-				.replace(`[__POS__]`, fillArray(keyNum).map((val, j) =>
-					isNaN(parseFloat(stepRtnList[j])) ? 28 : 24).join(`,`))
+				.replace(`[__POS__]`, fillArray(keyNum).map((val, r) =>
+					isNaN(parseFloat(stepRtnList[r])) ? 28 : 24).join(`,`))
 				.replace(`[__TXT__]`, g_editorTmp[keyN].chars.map(val => val.replace(`, `, ``)).join(`,`))
 				.replace(`[__CONV__]`, convTxt)
 				.replace(`[__NOTE__]`, noteTxt)
@@ -3164,8 +3163,9 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 /**
  * ツール計算
  * @param {object} _scoreObj 
- * @param {number[][]} _scoreObj.arrowData
- * @param {number[][]} _scoreObj.frzData
+ * @param {number[][]} _scoreObj.arrowData 矢印データ
+ * @param {number[][]} _scoreObj.frzData フリーズデータ
+ * @returns {{tool: string, tate: number, douji: number, push3Cnt: number, push3: number[]}}
  */
 const calcLevel = _scoreObj => {
 	//--------------------------------------------------------------
@@ -3330,6 +3330,7 @@ const calcLevel = _scoreObj => {
  * ロケールを含んだヘッダーの優先度設定
  * @param {object} _obj 
  * @param {...any} [_params]
+ * @returns {string}
  */
 const getHeader = (_obj, ..._params) => {
 	let headerLocale, headerDf;
@@ -3350,7 +3351,7 @@ const getHname = _param => [_param, _param.toLowerCase()];
 /**
  * 譜面ヘッダーの分解（スキン、jsファイルなどの設定）
  * @param {object} _dosObj
- * @returns
+ * @returns {object}
  */
 const preheaderConvert = _dosObj => {
 
@@ -3418,7 +3419,7 @@ const preheaderConvert = _dosObj => {
 /**
  * 譜面ヘッダーの分解（その他の設定）
  * @param {object} _dosObj 譜面データオブジェクト
- * @returns
+ * @returns {object}
  */
 const headerConvert = _dosObj => {
 
@@ -4156,9 +4157,9 @@ const resetColorType = ({ _from = ``, _to = ``, _fromObj = g_headerObj, _toObj =
 };
 
 /**
- * 配列にデータを先頭に追加
- * @param {string[]|number[]} _arr 
- * @param {string} _target 
+ * 配列に対象がいない場合、配列の先頭にその対象を追加
+ * @param {string[]|number[]} _arr 検索対象の配列
+ * @param {string|number} _target 検索対象
  * @returns {string[]|number[]}
  */
 const addValtoArray = (_arr, _target) => {
@@ -4233,7 +4234,7 @@ const addGaugeFulls = _obj => _obj.map(key => g_gaugeOptionObj.customFulls[key] 
  * @param {object} _baseObj 
  * @param {object} _dosObj
  * @param {string} [object.scoreId=''] 
- * @returns オブジェクト ※Object.assign(obj, resetBaseColorList(...))の形で呼び出しが必要
+ * @returns {object} ※Object.assign(obj, resetBaseColorList(...))の形で呼び出しが必要
  */
 const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 
@@ -4384,7 +4385,7 @@ const setColorList = (_data, _colorInit, _colorInitLength,
  * |customGauge=Original::F,Normal::V,Escape::V|
  * @param {object} _dosObj 
  * @param {string} [object.scoreId=0]
- * @returns オブジェクト ※Object.assign(obj, resetCustomGauge(...))の形で呼び出しが必要
+ * @returns {object} ※Object.assign(obj, resetCustomGauge(...))の形で呼び出しが必要
  */
 const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 
@@ -4545,6 +4546,7 @@ const getKeyCtrlVal = _kCdN => {
 
 /**
  * 一時的な追加キーの設定
+ * - keyExtraListの指定がない場合は、_dosObj.keyCtrlXに合致するXを追加キーとして追加
  * @param {object} _dosObj 
  * @param {string[]} object.keyExtraList
  * @returns {string[]}
@@ -4640,6 +4642,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 	/**
 	 * キーパターンの略名から実際のデータへ展開
+	 * - charaX の場合に限り、a>5_0 の形式を aleft, adown, aup, aright, aspace に変換する
 	 * @param {string} _str 
 	 * @param {string} _name 
 	 * @param {function} _convFunc
@@ -5434,7 +5437,7 @@ const drawTitle = (_titleName = g_headerObj.musicTitleForView, _scoreId = ``) =>
 /**
  * 製作者情報の取得
  * @param {string[]} _creatorList 
- * @returns [string, string, number]
+ * @returns {[string, string, number]}
  */
 const getCreatorInfo = (_creatorList) => {
 	const creatorName = makeDedupliArray(_creatorList).length === 1 ? _creatorList[0] : `Various`;
@@ -11484,6 +11487,7 @@ const mainInit = () => {
 	g_workObj.lastFadeFrame = fillArray(wordMaxLen);
 	g_workObj.wordFadeFrame = fillArray(wordMaxLen);
 	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
+	const objOpacity = g_stateObj.opacity / 100;
 
 	// 背景スプライトを作成
 	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth, { x: g_workObj.backX });
@@ -11564,11 +11568,11 @@ const mainInit = () => {
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
 		if (g_stateObj.d_filterline === C_FLG_ON) {
-			$id(`filterView`).opacity = g_stateObj.opacity / 100;
+			$id(`filterView`).opacity = objOpacity;
 			for (let j = 0; j < g_stateObj.layerNum; j++) {
-				$id(`filterBar${j}`).opacity = g_stateObj.opacity / 100;
+				$id(`filterBar${j}`).opacity = objOpacity;
 				if (doubleFilterFlg) {
-					$id(`filterBar${j}_HS`).opacity = g_stateObj.opacity / 100;
+					$id(`filterBar${j}_HS`).opacity = objOpacity;
 				}
 			}
 		}
@@ -11680,13 +11684,11 @@ const mainInit = () => {
 
 	// ライフ(数字)部作成
 	const intLifeVal = Math.floor(g_workObj.lifeVal);
-	let lblInitColor;
+	let lblInitColor = g_cssObj.life_Failed;
 	if (g_workObj.lifeVal === g_headerObj.maxLifeVal) {
 		lblInitColor = g_cssObj.life_Max;
 	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
 		lblInitColor = g_cssObj.life_Cleared;
-	} else {
-		lblInitColor = g_cssObj.life_Failed;
 	}
 
 	// 曲名・アーティスト名、譜面名表示
@@ -11792,7 +11794,7 @@ const mainInit = () => {
 		const charaJ = createDivCss2Label(`chara${jdg}`, ``, {
 			x: jdgX[j], y: jdgY[j],
 			w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.jdgCharaSiz,
-			opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
+			opacity: objOpacity, display: g_workObj.judgmentDisp,
 		}, g_cssObj.common_ii);
 		charaJ.setAttribute(`cnt`, 0);
 
@@ -11805,14 +11807,14 @@ const mainInit = () => {
 			createDivCss2Label(`combo${jdg}`, ``, {
 				x: jdgX[j] + 170, y: jdgY[j],
 				w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.jdgCharaSiz,
-				opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
+				opacity: objOpacity, display: g_workObj.judgmentDisp,
 			}, g_cssObj[`common_combo${jdg}`]),
 
 			// Fast/Slow表示
 			createDivCss2Label(`diff${jdg}`, ``, {
 				x: jdgX[j] + 170, y: jdgY[j] + 25,
 				w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.mainSiz,
-				opacity: g_stateObj.opacity / 100, display: g_workObj.fastslowDisp,
+				opacity: objOpacity, display: g_workObj.fastslowDisp,
 			}, g_cssObj.common_combo),
 
 		);
