@@ -5483,7 +5483,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	const encodeFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
 	const musicStart = g_headerObj.musicStarts?.[currentIdx] ?? 0;
 	const musicEnd = g_headerObj.musicEnds?.[currentIdx] ?? 0;
-	const isTitle = () => g_currentPage === `title`;
+	const isTitle = () => g_currentPage === `title` && _currentLoopNum === g_settings.musicLoopNum;
 
 	/**
 	 * BGMのフェードアウトとシーク
@@ -5576,20 +5576,19 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		}
 	};
 
-	const musicPlayCheck = () => _currentLoopNum !== g_settings.musicLoopNum || g_currentPage !== `title`;
 	if (encodeFlg) {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
 			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
 				await loadScript2(url);
 				musicInit();
-				if (musicPlayCheck()) {
+				if (!isTitle()) {
 					return;
 				}
 				const tmpAudio = new AudioPlayer();
 				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
 				await tmpAudio.init(array.buffer);
-				if (musicPlayCheck()) {
+				if (!isTitle()) {
 					tmpAudio.close();
 					return;
 				}
@@ -5612,7 +5611,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		g_audio.volume = g_stateObj.bgmVolume / 100;
 		const loadedMeta = g_handler.addListener(g_audio, `loadedmetadata`, () => {
 			g_handler.removeListener(loadedMeta);
-			if (musicPlayCheck()) {
+			if (!isTitle()) {
 				return;
 			}
 			g_audio.currentTime = musicStart;
