@@ -3016,8 +3016,8 @@ const resetGaugeSetting = _scoreId => {
  */
 const copySetColor = (_baseObj, _scoreId) => {
 	const obj = {};
-	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg);
-	const idHeader = setScoreIdHeader(_scoreId);
+	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, true);
+	const idHeader = setScoreIdHeader(_scoreId, false, true);
 	[``, `Shadow`].forEach(pattern =>
 		[`set`, `frz`].filter(arrow => hasVal(_baseObj[`${arrow}${pattern}Color`]))
 			.forEach(arrow => obj[`${arrow}${pattern}Color${idHeader}`] =
@@ -4391,7 +4391,7 @@ const setColorList = (_data, _colorInit, _colorInitLength,
 const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 
 	const obj = {};
-	const scoreIdHeader = setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg);
+	const scoreIdHeader = setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg, false);
 	const dosCustomGauge = _dosObj[`customGauge${scoreIdHeader}`];
 	if (hasVal(dosCustomGauge)) {
 		if (g_gaugeOptionObj.defaultPlusList.includes(dosCustomGauge)) {
@@ -4472,7 +4472,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	 */
 	const getGaugeDetailList = (_scoreId, _defaultGaugeList) => {
 		if (_scoreId > 0) {
-			const headerName = `gauge${_name}${setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg)}`;
+			const headerName = `gauge${_name}${setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false)}`;
 			if (hasVal(_dosObj[headerName])) {
 				return _dosObj[headerName].split(`,`);
 			}
@@ -8856,7 +8856,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				resetColorType({ _from: g_colorType, _to: g_colorType, _fromObj: g_dfColorObj });
 
 				// 影矢印が未指定の場合はType1, Type2の影矢印指定を無くす
-				if (!hasVal(g_headerObj[`setShadowColor${setScoreIdHeader(g_stateObj.scoreId)}Default`][0]) &&
+				if (!hasVal(g_headerObj[`setShadowColor${setScoreIdHeader(g_stateObj.scoreId, false, true)}Default`][0]) &&
 					[`Type1`, `Type2`].includes(g_colorType)) {
 
 					g_headerObj.setShadowColor = fillArray(g_headerObj.setColorInit.length, ``);
@@ -9175,6 +9175,7 @@ const updateKeyInfo = (_header, _keyCtrlPtn) => {
 
 /**
  * 初期矢印色・フリーズアロー色の変更
+ * - ここでのID管理は1譜面目も区別して設定する (setScoreIdHeaderの第三引数を使用)
  */
 const changeSetColor = () => {
 	const isDefault = [`Default`, `Type0`].includes(g_colorType);
@@ -9524,7 +9525,7 @@ const loadingScoreInit = async () => {
  * 譜面番号の取得
  * @param {number} _scoreId 
  * @param {boolean} _scoreLockFlg 
- * @param {boolean} _useOne
+ * @param {boolean} _useOne 1譜面目指定有無フラグ (初期色に関する箇所のみ指定)
  * @returns {number|string}
  */
 const setScoreIdHeader = (_scoreId = 0, _scoreLockFlg = false, _useOne = false) => {
@@ -9761,7 +9762,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	// 矢印群の格納先
 	const obj = {};
 
-	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg);
+	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false);
 	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${_keyCtrlPtn}`].length;
 	obj.arrowData = [];
 	obj.frzData = [];
@@ -13625,7 +13626,7 @@ const resultInit = () => {
 	} else {
 		// ゲームオーバー時は失敗時のリザルトモーションを適用
 		if (!g_finishFlg) {
-			const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg);
+			const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg, false);
 
 			g_animationData.forEach(sprite => {
 				const failedData = g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] ?? g_rootObj[`${sprite}failedS_data`];
