@@ -3016,12 +3016,12 @@ const resetGaugeSetting = _scoreId => {
  */
 const copySetColor = (_baseObj, _scoreId) => {
 	const obj = {};
-	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, true);
-	const idHeader = setScoreIdHeader(_scoreId, false, true);
+	const srcIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, true);
+	const targetIdHeader = setScoreIdHeader(_scoreId, false, true);
 	[``, `Shadow`].forEach(pattern =>
 		[`set`, `frz`].filter(arrow => hasVal(_baseObj[`${arrow}${pattern}Color`]))
-			.forEach(arrow => obj[`${arrow}${pattern}Color${idHeader}`] =
-				(_baseObj[`${arrow}${pattern}Color${scoreIdHeader}`] ?? _baseObj[`${arrow}${pattern}Color`]).concat()));
+			.forEach(arrow => obj[`${arrow}${pattern}Color${targetIdHeader}`] =
+				(_baseObj[`${arrow}${pattern}Color${srcIdHeader}`] ?? _baseObj[`${arrow}${pattern}Color`]).concat()));
 	return obj;
 };
 
