@@ -3786,6 +3786,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// カスタムゲージ設定、初期色設定（譜面ヘッダー）の譜面別設定
+	Object.assign(obj, resetBaseColorList(obj, _dosObj));
 	for (let j = 0; j < obj.difLabels.length; j++) {
 		Object.assign(g_gaugeOptionObj, resetCustomGauge(_dosObj, { scoreId: j }));
 		Object.assign(obj, resetBaseColorList(obj, _dosObj, { scoreId: j }));
@@ -4239,8 +4240,7 @@ const addGaugeFulls = _obj => _obj.map(key => g_gaugeOptionObj.customFulls[key] 
 const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 
 	const obj = {};
-	const idHeader = setScoreIdHeader(scoreId);
-	const orgId = Number(scoreId || 0) + 1;
+	const idHeader = setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg, scoreId !== ``);
 	const getRefData = (_header, _dataName) => {
 		const data = _dosObj[`${_header}${_dataName}`];
 		return data?.startsWith(_header) ? _dosObj[data] : data;
@@ -4255,8 +4255,8 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 		const _arrowInit = `${_arrowCommon}Init`;
 		const _frzInit = `${_frzCommon}Init`;
 
-		const arrowColorTxt = getRefData(_arrowCommon, orgId) || _dosObj[_arrowCommon];
-		const frzColorTxt = getRefData(_frzCommon, orgId) || _dosObj[_frzCommon];
+		const arrowColorTxt = getRefData(_arrowCommon, idHeader) || _dosObj[_arrowCommon];
+		const frzColorTxt = getRefData(_frzCommon, idHeader) || _dosObj[_frzCommon];
 
 		// 矢印色
 		Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
@@ -9178,7 +9178,7 @@ const updateKeyInfo = (_header, _keyCtrlPtn) => {
  */
 const changeSetColor = () => {
 	const isDefault = [`Default`, `Type0`].includes(g_colorType);
-	const idHeader = setScoreIdHeader(g_stateObj.scoreId);
+	const idHeader = setScoreIdHeader(g_stateObj.scoreId, false, true);
 	const defaultType = idHeader + g_colorType;
 	const currentTypes = {
 		'': (isDefault ? defaultType : g_colorType),
@@ -9524,15 +9524,16 @@ const loadingScoreInit = async () => {
  * 譜面番号の取得
  * @param {number} _scoreId 
  * @param {boolean} _scoreLockFlg 
+ * @param {boolean} _useOne
  * @returns {number|string}
  */
-const setScoreIdHeader = (_scoreId = 0, _scoreLockFlg = false) => {
+const setScoreIdHeader = (_scoreId = 0, _scoreLockFlg = false, _useOne = false) => {
 	if (!_scoreLockFlg && _scoreId > 0) {
 		return Number(_scoreId) + 1;
 	} else if (_scoreLockFlg && g_headerObj.scoreNos?.[_scoreId] > 1) {
 		return g_headerObj.scoreNos[_scoreId];
 	}
-	return ``;
+	return _useOne ? 1 : ``;
 };
 
 /**
