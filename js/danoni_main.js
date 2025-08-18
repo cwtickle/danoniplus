@@ -8856,7 +8856,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				resetColorType({ _from: g_colorType, _to: g_colorType, _fromObj: g_dfColorObj });
 
 				// 影矢印が未指定の場合はType1, Type2の影矢印指定を無くす
-				if (!hasVal(g_headerObj[`setShadowColor${setScoreIdHeader(g_stateObj.scoreId, false, true)}Default`][0]) &&
+				const _idHeader = setScoreIdHeader(g_stateObj.scoreId, false, true);
+				const _shadowDefault = g_headerObj[`setShadowColor${_idHeader}Default`];
+				if ((!Array.isArray(_shadowDefault) || !hasVal(_shadowDefault[0])) &&
 					[`Type1`, `Type2`].includes(g_colorType)) {
 
 					g_headerObj.setShadowColor = fillArray(g_headerObj.setColorInit.length, ``);
