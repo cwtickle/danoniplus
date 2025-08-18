@@ -4240,6 +4240,7 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 
 	const obj = {};
 	const idHeader = setScoreIdHeader(scoreId);
+	const orgId = Number(scoreId || 0) + 1;
 	const getRefData = (_header, _dataName) => {
 		const data = _dosObj[`${_header}${_dataName}`];
 		return data?.startsWith(_header) ? _dosObj[data] : data;
@@ -4254,8 +4255,8 @@ const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 		const _arrowInit = `${_arrowCommon}Init`;
 		const _frzInit = `${_frzCommon}Init`;
 
-		const arrowColorTxt = getRefData(_arrowCommon, idHeader) || _dosObj[_arrowCommon];
-		const frzColorTxt = getRefData(_frzCommon, idHeader) || _dosObj[_frzCommon];
+		const arrowColorTxt = getRefData(_arrowCommon, orgId) || _dosObj[_arrowCommon];
+		const frzColorTxt = getRefData(_frzCommon, orgId) || _dosObj[_frzCommon];
 
 		// 矢印色
 		Object.keys(_baseObj.dfColorgrdSet).forEach(type => {
