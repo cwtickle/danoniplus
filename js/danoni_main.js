@@ -723,7 +723,7 @@ const padArray = (_array, _baseArray) => {
  * @param {string[]|number[]} _baseArray
  * @returns {string[]|number[]}
  */
-const overrideArray = (_array = [], _baseArray = []) => {
+const fillMissingArrayElem = (_array = [], _baseArray = []) => {
 	const maxLen = Math.max(_baseArray.length, _array.length);
 	const res = _baseArray.slice();
 	for (let j = 0; j < maxLen; j++) {
@@ -4474,7 +4474,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 
 		if (gaugeUpdateFlg && hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
 			Object.keys(obj).forEach(key =>
-				g_gaugeOptionObj[`gauge${_name}s`][key] = overrideArray(obj[key], g_gaugeOptionObj[`gauge${_name}s`][key] || []));
+				g_gaugeOptionObj[`gauge${_name}s`][key] = fillMissingArrayElem(obj[key], g_gaugeOptionObj[`gauge${_name}s`][key] || []));
 			return false;
 		}
 		return true;
