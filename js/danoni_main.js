@@ -4473,8 +4473,9 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 		obj.lifeInits[_scoreId] = _gaugeDetails[3];
 
 		if (gaugeUpdateFlg && hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
-			Object.keys(obj).forEach(key =>
-				g_gaugeOptionObj[`gauge${_name}s`][key] = fillMissingArrayElem(obj[key], g_gaugeOptionObj[`gauge${_name}s`][key] || []));
+			// ゲージ上書き時は_gaugeDetails(obj)の値を優先し、デフォルト値で穴埋めする
+			Object.keys(obj).forEach(key => g_gaugeOptionObj[`gauge${_name}s`][key] =
+				fillMissingArrayElem(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
 			return false;
 		}
 		return true;
