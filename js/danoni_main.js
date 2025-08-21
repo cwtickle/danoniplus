@@ -723,13 +723,13 @@ const padArray = (_array, _baseArray) => {
  * @param {string[]|number[]} _baseArray
  * @returns {string[]|number[]}
  */
-const overrideArray = (_array, _baseArray) => {
-	_baseArray?.forEach((val, j) => {
-		if (!hasVal(_baseArray[j]) && hasVal(_array[j])) {
-			_baseArray[j] = _array[j];
-		}
-	});
-	return _baseArray;
+const overrideArray = (_array = [], _baseArray = []) => {
+	const maxLen = Math.max(_baseArray.length, _array.length);
+	const res = _baseArray.slice();
+	for (let j = 0; j < maxLen; j++) {
+		if (!hasVal(res[j]) && hasVal(_array[j])) res[j] = _array[j];
+	}
+	return res;
 }
 
 /**
@@ -4489,9 +4489,11 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	const getGaugeDetailList = (_scoreId, _defaultGaugeList) => {
 		if (_scoreId > 0) {
 			const idHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false);
+			const dosId = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, true) - 1;
 			const headerName = `gauge${_name}${idHeader}`;
 			if (hasVal(_dosObj[headerName])) {
-				return splitLF2(_dosObj[headerName])[idHeader || 0].split(`,`);
+				const gauges = splitLF2(_dosObj[headerName]);
+				return (gauges[dosId] || gauges[0])?.split(`,`);
 			}
 		}
 		return _defaultGaugeList;
