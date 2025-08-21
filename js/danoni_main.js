@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/06/28
+ * Revised : 2025/08/21
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.3.1`;
-const g_revisedDate = `2025/06/28`;
+const g_version = `Ver 42.4.0`;
+const g_revisedDate = `2025/08/21`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -716,6 +716,21 @@ const padArray = (_array, _baseArray) => {
 	_array?.filter(val => hasVal(val)).forEach((val, j) => _baseArray[j] = val);
 	return _baseArray;
 };
+
+/**
+ * ベース配列(_baseArray)の空要素のみ、別配列(_array)の対応要素で補完する（既存値は上書きしない）
+ * @param {string[]|number[]} _array     補完元（ソース）
+ * @param {string[]|number[]} _baseArray ベース（既存値を優先）
+ * @returns {string[]|number[]}
+ */
+const fillMissingArrayElem = (_array = [], _baseArray = []) => {
+	const maxLen = Math.max(_baseArray.length, _array.length);
+	const res = _baseArray.slice();
+	for (let j = 0; j < maxLen; j++) {
+		if (!hasVal(res[j]) && hasVal(_array[j])) res[j] = _array[j];
+	}
+	return res;
+}
 
 /**
  * 配列から上位N番目までに一致する位置を取得
@@ -2656,6 +2671,9 @@ const initialControl = async () => {
 		g_stateObj.dosDivideFlg = setBoolVal(document.getElementById(`externalDosDivide`)?.value ?? getQueryParamVal(`dosDivide`));
 		g_stateObj.scoreLockFlg = setBoolVal(document.getElementById(`externalDosLock`)?.value ?? getQueryParamVal(`dosLock`));
 
+		// 非分割時は resetGaugeSetting が全難易度を一括構築するため、初回のみで十分
+		const loopCount = g_stateObj.dosDivideFlg ? g_headerObj.keyLabels.length : 1;
+
 		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
 
 			// 譜面ファイルが分割されている場合、譜面詳細情報取得のために譜面をロード
@@ -2664,10 +2682,10 @@ const initialControl = async () => {
 				resetColorSetting(j);
 			}
 			getScoreDetailData(j);
-		}
-		const loopCount = g_stateObj.dosDivideFlg ? g_headerObj.keyLabels.length : 1;
-		for (let j = 0; j < loopCount; j++) {
-			resetGaugeSetting(j);
+			if (j < loopCount) {
+				// 分割時は各譜面ごとに上書き・補完、非分割時は初回のみ実行
+				resetGaugeSetting(j);
+			}
 		}
 	}
 	g_customJsObj.preTitle.forEach(func => func());
@@ -2727,12 +2745,12 @@ const initialControl = async () => {
 
 		keyGroupList.forEach((keyGroupNo, j) => {
 			const keyN = keyGroupNo === `0` ? key : `${key}_${j + 1}`;
-			const filterCond = (j) => keyGroup[j].findIndex(val => val === keyGroupNo) >= 0;
-			const keyCtrlList = g_keyObj[keyCtrlPtn].filter((val, j) => filterCond(j));
-			const charaList = g_keyObj[`chara${keyBase}`].filter((val, j) => filterCond(j));
-			const colorList = g_keyObj[`color${keyBase}_0`].filter((val, j) => filterCond(j));
-			const stepRtnList = g_keyObj[`stepRtn${keyBase}_0`].filter((val, j) => filterCond(j));
-			const keyNum = g_keyObj[keyCtrlPtn].filter((val, j) => filterCond(j)).length;
+			const filterCond = (r) => keyGroup[r].findIndex(val => val === keyGroupNo) >= 0;
+			const keyCtrlList = g_keyObj[keyCtrlPtn].filter((val, r) => filterCond(r));
+			const charaList = g_keyObj[`chara${keyBase}`].filter((val, r) => filterCond(r));
+			const colorList = g_keyObj[`color${keyBase}_0`].filter((val, r) => filterCond(r));
+			const stepRtnList = g_keyObj[`stepRtn${keyBase}_0`].filter((val, r) => filterCond(r));
+			const keyNum = g_keyObj[keyCtrlPtn].filter((val, r) => filterCond(r)).length;
 
 			// ---- Dancing☆Onigiri (CW Edition対応)のフォーマット
 			g_editorTmp[keyN] = {};
@@ -2755,7 +2773,7 @@ const initialControl = async () => {
 			if (divMaxPos > divPos) {
 
 				// posXの実際の相対位置を計算
-				const orgPosList = g_keyObj[`pos${keyBase}`].filter((val, j) => filterCond(j));
+				const orgPosList = g_keyObj[`pos${keyBase}`].filter((val, r) => filterCond(r));
 				const posList = orgPosList.map(val => val < divPos ? val - deltaXAbove : val - divPos - deltaXBelow);
 
 				g_editorTmp[keyN].orderGroups = [];
@@ -2804,18 +2822,17 @@ const initialControl = async () => {
 			}
 
 			// 矢印・フリーズアローのヘッダー情報を定義
-			let noteTxt = ``, freezeTxt = ``;
-			g_editorTmp[keyN].noteNames.forEach((val, j) =>
-				noteTxt += `|${val.slice(0, -(`_data`.length))}[i]_data=[a${String(j).padStart(2, `0`)}]|[E]<br>`);
+			const noteTxt = g_editorTmp[keyN].noteNames.map((val, r) =>
+				`|${val.slice(0, -(`_data`.length))}[i]_data=[a${String(r).padStart(2, `0`)}]|[E]<br>`).join(``);
 
-			g_editorTmp[keyN].freezeNames.forEach((val, j) =>
-				freezeTxt += `|${val.slice(0, -(`_data`.length))}[i]_data=[f${String(j).padStart(2, `0`)}]|[E]<br>`);
+			const freezeTxt = g_editorTmp[keyN].freezeNames.map((val, r) =>
+				`|${val.slice(0, -(`_data`.length))}[i]_data=[f${String(r).padStart(2, `0`)}]|[E]<br>`).join(``);
 
 			g_editorTmp2 += g_editorTmp2Template
 				.replace(`[__KEY__]`, keyN)
 				.replace(`[__MAP__]`, colorList.map(val => val < 3 ? (val + 1) % 3 : val % 7).join(','))
-				.replace(`[__POS__]`, fillArray(keyNum).map((val, j) =>
-					isNaN(parseFloat(stepRtnList[j])) ? 28 : 24).join(`,`))
+				.replace(`[__POS__]`, fillArray(keyNum).map((val, r) =>
+					isNaN(parseFloat(stepRtnList[r])) ? 28 : 24).join(`,`))
 				.replace(`[__TXT__]`, g_editorTmp[keyN].chars.map(val => val.replace(`, `, ``)).join(`,`))
 				.replace(`[__CONV__]`, convTxt)
 				.replace(`[__NOTE__]`, noteTxt)
@@ -3017,12 +3034,12 @@ const resetGaugeSetting = _scoreId => {
  */
 const copySetColor = (_baseObj, _scoreId) => {
 	const obj = {};
-	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg);
-	const idHeader = setScoreIdHeader(_scoreId);
+	const srcIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, true);
+	const targetIdHeader = setScoreIdHeader(_scoreId, false, true);
 	[``, `Shadow`].forEach(pattern =>
 		[`set`, `frz`].filter(arrow => hasVal(_baseObj[`${arrow}${pattern}Color`]))
-			.forEach(arrow => obj[`${arrow}${pattern}Color${idHeader}`] =
-				(_baseObj[`${arrow}${pattern}Color${scoreIdHeader}`] ?? _baseObj[`${arrow}${pattern}Color`]).concat()));
+			.forEach(arrow => obj[`${arrow}${pattern}Color${targetIdHeader}`] =
+				(_baseObj[`${arrow}${pattern}Color${srcIdHeader}`] ?? _baseObj[`${arrow}${pattern}Color`]).concat()));
 	return obj;
 };
 
@@ -3164,8 +3181,9 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 /**
  * ツール計算
  * @param {object} _scoreObj 
- * @param {number[][]} _scoreObj.arrowData
- * @param {number[][]} _scoreObj.frzData
+ * @param {number[][]} _scoreObj.arrowData 矢印データ
+ * @param {number[][]} _scoreObj.frzData フリーズデータ
+ * @returns {{tool: string, tate: number, douji: number, push3Cnt: number, push3: number[]}}
  */
 const calcLevel = _scoreObj => {
 	//--------------------------------------------------------------
@@ -3330,6 +3348,7 @@ const calcLevel = _scoreObj => {
  * ロケールを含んだヘッダーの優先度設定
  * @param {object} _obj 
  * @param {...any} [_params]
+ * @returns {string}
  */
 const getHeader = (_obj, ..._params) => {
 	let headerLocale, headerDf;
@@ -3350,7 +3369,7 @@ const getHname = _param => [_param, _param.toLowerCase()];
 /**
  * 譜面ヘッダーの分解（スキン、jsファイルなどの設定）
  * @param {object} _dosObj
- * @returns
+ * @returns {object}
  */
 const preheaderConvert = _dosObj => {
 
@@ -3418,7 +3437,7 @@ const preheaderConvert = _dosObj => {
 /**
  * 譜面ヘッダーの分解（その他の設定）
  * @param {object} _dosObj 譜面データオブジェクト
- * @returns
+ * @returns {object}
  */
 const headerConvert = _dosObj => {
 
@@ -3785,6 +3804,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// カスタムゲージ設定、初期色設定（譜面ヘッダー）の譜面別設定
+	Object.assign(obj, resetBaseColorList(obj, _dosObj));
 	for (let j = 0; j < obj.difLabels.length; j++) {
 		Object.assign(g_gaugeOptionObj, resetCustomGauge(_dosObj, { scoreId: j }));
 		Object.assign(obj, resetBaseColorList(obj, _dosObj, { scoreId: j }));
@@ -4156,9 +4176,9 @@ const resetColorType = ({ _from = ``, _to = ``, _fromObj = g_headerObj, _toObj =
 };
 
 /**
- * 配列にデータを先頭に追加
- * @param {string[]|number[]} _arr 
- * @param {string} _target 
+ * 配列に対象がいない場合、配列の先頭にその対象を追加
+ * @param {string[]|number[]} _arr 検索対象の配列
+ * @param {string|number} _target 検索対象
  * @returns {string[]|number[]}
  */
 const addValtoArray = (_arr, _target) => {
@@ -4233,12 +4253,12 @@ const addGaugeFulls = _obj => _obj.map(key => g_gaugeOptionObj.customFulls[key] 
  * @param {object} _baseObj 
  * @param {object} _dosObj
  * @param {string} [object.scoreId=''] 
- * @returns オブジェクト ※Object.assign(obj, resetBaseColorList(...))の形で呼び出しが必要
+ * @returns {object} ※Object.assign(obj, resetBaseColorList(...))の形で呼び出しが必要
  */
 const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
 
 	const obj = {};
-	const idHeader = setScoreIdHeader(scoreId);
+	const idHeader = setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg, scoreId !== ``);
 	const getRefData = (_header, _dataName) => {
 		const data = _dosObj[`${_header}${_dataName}`];
 		return data?.startsWith(_header) ? _dosObj[data] : data;
@@ -4384,12 +4404,12 @@ const setColorList = (_data, _colorInit, _colorInitLength,
  * |customGauge=Original::F,Normal::V,Escape::V|
  * @param {object} _dosObj 
  * @param {string} [object.scoreId=0]
- * @returns オブジェクト ※Object.assign(obj, resetCustomGauge(...))の形で呼び出しが必要
+ * @returns {object} ※Object.assign(obj, resetCustomGauge(...))の形で呼び出しが必要
  */
 const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 
 	const obj = {};
-	const scoreIdHeader = setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg);
+	const scoreIdHeader = setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg, false);
 	const dosCustomGauge = _dosObj[`customGauge${scoreIdHeader}`];
 	if (hasVal(dosCustomGauge)) {
 		if (g_gaugeOptionObj.defaultPlusList.includes(dosCustomGauge)) {
@@ -4456,7 +4476,9 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 		obj.lifeInits[_scoreId] = _gaugeDetails[3];
 
 		if (gaugeUpdateFlg && hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
-			Object.keys(obj).forEach(key => Object.assign(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
+			// ゲージ上書き時は_gaugeDetails(obj)の値を優先し、デフォルト値で穴埋めする
+			Object.keys(obj).forEach(key => g_gaugeOptionObj[`gauge${_name}s`][key] =
+				fillMissingArrayElem(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
 			return false;
 		}
 		return true;
@@ -4470,9 +4492,12 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	 */
 	const getGaugeDetailList = (_scoreId, _defaultGaugeList) => {
 		if (_scoreId > 0) {
-			const headerName = `gauge${_name}${setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg)}`;
+			const idHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false);
+			const dosId = (idHeader || 0) - 1;
+			const headerName = `gauge${_name}${idHeader}`;
 			if (hasVal(_dosObj[headerName])) {
-				return _dosObj[headerName].split(`,`);
+				const gauges = splitLF2(_dosObj[headerName]);
+				return (gauges[dosId] || gauges[0])?.split(`,`);
 			}
 		}
 		return _defaultGaugeList;
@@ -4480,12 +4505,12 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 
 	if (hasVal(_dosObj[`gauge${_name}`])) {
 
+		const gauges = splitLF2(_dosObj[`gauge${_name}`]);
 		if (gaugeUpdateFlg) {
-			gaugeCreateFlg = setGaugeDetails(scoreId, _dosObj[`gauge${_name}`].split(`,`));
+			gaugeCreateFlg = setGaugeDetails(scoreId, (gauges[scoreId] || gauges[0])?.split(`,`));
 		} else {
-			const gauges = splitLF2(_dosObj[`gauge${_name}`]);
 			for (let j = 0; j < _difLength; j++) {
-				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, (gauges[j] ?? gauges[0]).split(`,`)));
+				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, (gauges[j] || gauges[0]).split(`,`)));
 			}
 		}
 
@@ -4545,6 +4570,7 @@ const getKeyCtrlVal = _kCdN => {
 
 /**
  * 一時的な追加キーの設定
+ * - keyExtraListの指定がない場合は、_dosObj.keyCtrlXに合致するXを追加キーとして追加
  * @param {object} _dosObj 
  * @param {string[]} object.keyExtraList
  * @returns {string[]}
@@ -4640,6 +4666,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 	/**
 	 * キーパターンの略名から実際のデータへ展開
+	 * - charaX の場合に限り、a>5_0 の形式を aleft, adown, aup, aright, aspace に変換する
 	 * @param {string} _str 
 	 * @param {string} _name 
 	 * @param {function} _convFunc
@@ -5434,7 +5461,7 @@ const drawTitle = (_titleName = g_headerObj.musicTitleForView, _scoreId = ``) =>
 /**
  * 製作者情報の取得
  * @param {string[]} _creatorList 
- * @returns [string, string, number]
+ * @returns {[string, string, number]}
  */
 const getCreatorInfo = (_creatorList) => {
 	const creatorName = makeDedupliArray(_creatorList).length === 1 ? _creatorList[0] : `Various`;
@@ -5480,7 +5507,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	const encodeFlg = listMatching(musicUrl, [`.js`, `.txt`], { suffix: `$` });
 	const musicStart = g_headerObj.musicStarts?.[currentIdx] ?? 0;
 	const musicEnd = g_headerObj.musicEnds?.[currentIdx] ?? 0;
-	const isTitle = () => g_currentPage === `title`;
+	const isTitle = () => g_currentPage === `title` && _currentLoopNum === g_settings.musicLoopNum;
 
 	/**
 	 * BGMのフェードアウトとシーク
@@ -5573,20 +5600,19 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		}
 	};
 
-	const musicPlayCheck = () => _currentLoopNum !== g_settings.musicLoopNum || g_currentPage !== `title`;
 	if (encodeFlg) {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
 			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
 				await loadScript2(url);
 				musicInit();
-				if (musicPlayCheck()) {
+				if (!isTitle()) {
 					return;
 				}
 				const tmpAudio = new AudioPlayer();
 				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
 				await tmpAudio.init(array.buffer);
-				if (musicPlayCheck()) {
+				if (!isTitle()) {
 					tmpAudio.close();
 					return;
 				}
@@ -5609,7 +5635,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		g_audio.volume = g_stateObj.bgmVolume / 100;
 		const loadedMeta = g_handler.addListener(g_audio, `loadedmetadata`, () => {
 			g_handler.removeListener(loadedMeta);
-			if (musicPlayCheck()) {
+			if (!isTitle()) {
 				return;
 			}
 			g_audio.currentTime = musicStart;
@@ -8853,7 +8879,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 				resetColorType({ _from: g_colorType, _to: g_colorType, _fromObj: g_dfColorObj });
 
 				// 影矢印が未指定の場合はType1, Type2の影矢印指定を無くす
-				if (!hasVal(g_headerObj[`setShadowColor${setScoreIdHeader(g_stateObj.scoreId)}Default`][0]) &&
+				const _idHeader = setScoreIdHeader(g_stateObj.scoreId, false, true);
+				const _shadowDefault = g_headerObj[`setShadowColor${_idHeader}Default`];
+				if ((!Array.isArray(_shadowDefault) || !hasVal(_shadowDefault[0])) &&
 					[`Type1`, `Type2`].includes(g_colorType)) {
 
 					g_headerObj.setShadowColor = fillArray(g_headerObj.setColorInit.length, ``);
@@ -9172,10 +9200,11 @@ const updateKeyInfo = (_header, _keyCtrlPtn) => {
 
 /**
  * 初期矢印色・フリーズアロー色の変更
+ * - ここでのID管理は1譜面目も区別して設定する (setScoreIdHeaderの第三引数を使用)
  */
 const changeSetColor = () => {
 	const isDefault = [`Default`, `Type0`].includes(g_colorType);
-	const idHeader = setScoreIdHeader(g_stateObj.scoreId);
+	const idHeader = setScoreIdHeader(g_stateObj.scoreId, false, true);
 	const defaultType = idHeader + g_colorType;
 	const currentTypes = {
 		'': (isDefault ? defaultType : g_colorType),
@@ -9521,15 +9550,16 @@ const loadingScoreInit = async () => {
  * 譜面番号の取得
  * @param {number} _scoreId 
  * @param {boolean} _scoreLockFlg 
+ * @param {boolean} _useOne 1譜面目指定有無フラグ (初期色に関する箇所のみ指定)
  * @returns {number|string}
  */
-const setScoreIdHeader = (_scoreId = 0, _scoreLockFlg = false) => {
+const setScoreIdHeader = (_scoreId = 0, _scoreLockFlg = false, _useOne = false) => {
 	if (!_scoreLockFlg && _scoreId > 0) {
 		return Number(_scoreId) + 1;
 	} else if (_scoreLockFlg && g_headerObj.scoreNos?.[_scoreId] > 1) {
 		return g_headerObj.scoreNos[_scoreId];
 	}
-	return ``;
+	return _useOne ? 1 : ``;
 };
 
 /**
@@ -9757,7 +9787,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	// 矢印群の格納先
 	const obj = {};
 
-	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg);
+	const scoreIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false);
 	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${_keyCtrlPtn}`].length;
 	obj.arrowData = [];
 	obj.frzData = [];
@@ -11484,6 +11514,7 @@ const mainInit = () => {
 	g_workObj.lastFadeFrame = fillArray(wordMaxLen);
 	g_workObj.wordFadeFrame = fillArray(wordMaxLen);
 	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
+	const objOpacity = g_stateObj.opacity / 100;
 
 	// 背景スプライトを作成
 	createMultipleSprite(`backSprite`, g_scoreObj.backMaxDepth, { x: g_workObj.backX });
@@ -11564,11 +11595,11 @@ const mainInit = () => {
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
 		if (g_stateObj.d_filterline === C_FLG_ON) {
-			$id(`filterView`).opacity = g_stateObj.opacity / 100;
+			$id(`filterView`).opacity = objOpacity;
 			for (let j = 0; j < g_stateObj.layerNum; j++) {
-				$id(`filterBar${j}`).opacity = g_stateObj.opacity / 100;
+				$id(`filterBar${j}`).opacity = objOpacity;
 				if (doubleFilterFlg) {
-					$id(`filterBar${j}_HS`).opacity = g_stateObj.opacity / 100;
+					$id(`filterBar${j}_HS`).opacity = objOpacity;
 				}
 			}
 		}
@@ -11680,13 +11711,11 @@ const mainInit = () => {
 
 	// ライフ(数字)部作成
 	const intLifeVal = Math.floor(g_workObj.lifeVal);
-	let lblInitColor;
+	let lblInitColor = g_cssObj.life_Failed;
 	if (g_workObj.lifeVal === g_headerObj.maxLifeVal) {
 		lblInitColor = g_cssObj.life_Max;
 	} else if (g_workObj.lifeVal >= g_workObj.lifeBorder) {
 		lblInitColor = g_cssObj.life_Cleared;
-	} else {
-		lblInitColor = g_cssObj.life_Failed;
 	}
 
 	// 曲名・アーティスト名、譜面名表示
@@ -11792,7 +11821,7 @@ const mainInit = () => {
 		const charaJ = createDivCss2Label(`chara${jdg}`, ``, {
 			x: jdgX[j], y: jdgY[j],
 			w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.jdgCharaSiz,
-			opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
+			opacity: objOpacity, display: g_workObj.judgmentDisp,
 		}, g_cssObj.common_ii);
 		charaJ.setAttribute(`cnt`, 0);
 
@@ -11805,14 +11834,14 @@ const mainInit = () => {
 			createDivCss2Label(`combo${jdg}`, ``, {
 				x: jdgX[j] + 170, y: jdgY[j],
 				w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.jdgCharaSiz,
-				opacity: g_stateObj.opacity / 100, display: g_workObj.judgmentDisp,
+				opacity: objOpacity, display: g_workObj.judgmentDisp,
 			}, g_cssObj[`common_combo${jdg}`]),
 
 			// Fast/Slow表示
 			createDivCss2Label(`diff${jdg}`, ``, {
 				x: jdgX[j] + 170, y: jdgY[j] + 25,
 				w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.mainSiz,
-				opacity: g_stateObj.opacity / 100, display: g_workObj.fastslowDisp,
+				opacity: objOpacity, display: g_workObj.fastslowDisp,
 			}, g_cssObj.common_combo),
 
 		);
@@ -13622,7 +13651,7 @@ const resultInit = () => {
 	} else {
 		// ゲームオーバー時は失敗時のリザルトモーションを適用
 		if (!g_finishFlg) {
-			const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg);
+			const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg, false);
 
 			g_animationData.forEach(sprite => {
 				const failedData = g_rootObj[`${sprite}failedS${scoreIdHeader}_data`] ?? g_rootObj[`${sprite}failedS_data`];
