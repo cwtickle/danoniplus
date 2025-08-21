@@ -718,9 +718,9 @@ const padArray = (_array, _baseArray) => {
 };
 
 /**
- * ベースとなる配列の要素が空のときに、別の配列の要素で上書き
- * @param {string[]|number[]} _array
- * @param {string[]|number[]} _baseArray
+ * ベース配列(_baseArray)の空要素のみ、別配列(_array)の対応要素で補完する（既存値は上書きしない）
+ * @param {string[]|number[]} _array     補完元（ソース）
+ * @param {string[]|number[]} _baseArray ベース（既存値を優先）
  * @returns {string[]|number[]}
  */
 const fillMissingArrayElem = (_array = [], _baseArray = []) => {
@@ -2670,6 +2670,8 @@ const initialControl = async () => {
 		// 譜面分割、譜面番号固定かどうかをチェック
 		g_stateObj.dosDivideFlg = setBoolVal(document.getElementById(`externalDosDivide`)?.value ?? getQueryParamVal(`dosDivide`));
 		g_stateObj.scoreLockFlg = setBoolVal(document.getElementById(`externalDosLock`)?.value ?? getQueryParamVal(`dosLock`));
+
+		// 非分割時は resetGaugeSetting が全難易度を一括構築するため、初回のみで十分
 		const loopCount = g_stateObj.dosDivideFlg ? g_headerObj.keyLabels.length : 1;
 
 		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
@@ -2681,6 +2683,7 @@ const initialControl = async () => {
 			}
 			getScoreDetailData(j);
 			if (j < loopCount) {
+				// 分割時は各譜面ごとに上書き・補完、非分割時は初回のみ実行
 				resetGaugeSetting(j);
 			}
 		}
