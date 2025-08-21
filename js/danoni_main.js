@@ -718,6 +718,21 @@ const padArray = (_array, _baseArray) => {
 };
 
 /**
+ * ベース配列(_baseArray)の空要素のみ、別配列(_array)の対応要素で補完する（既存値は上書きしない）
+ * @param {string[]|number[]} _array     補完元（ソース）
+ * @param {string[]|number[]} _baseArray ベース（既存値を優先）
+ * @returns {string[]|number[]}
+ */
+const fillMissingArrayElem = (_array = [], _baseArray = []) => {
+	const maxLen = Math.max(_baseArray.length, _array.length);
+	const res = _baseArray.slice();
+	for (let j = 0; j < maxLen; j++) {
+		if (!hasVal(res[j]) && hasVal(_array[j])) res[j] = _array[j];
+	}
+	return res;
+}
+
+/**
  * 配列から上位N番目までに一致する位置を取得
  * 
  * ex. 上位3番目 (_num = 3) の場合
@@ -2656,6 +2671,9 @@ const initialControl = async () => {
 		g_stateObj.dosDivideFlg = setBoolVal(document.getElementById(`externalDosDivide`)?.value ?? getQueryParamVal(`dosDivide`));
 		g_stateObj.scoreLockFlg = setBoolVal(document.getElementById(`externalDosLock`)?.value ?? getQueryParamVal(`dosLock`));
 
+		// 非分割時は resetGaugeSetting が全難易度を一括構築するため、初回のみで十分
+		const loopCount = g_stateObj.dosDivideFlg ? g_headerObj.keyLabels.length : 1;
+
 		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
 
 			// 譜面ファイルが分割されている場合、譜面詳細情報取得のために譜面をロード
@@ -2664,10 +2682,10 @@ const initialControl = async () => {
 				resetColorSetting(j);
 			}
 			getScoreDetailData(j);
-		}
-		const loopCount = g_stateObj.dosDivideFlg ? g_headerObj.keyLabels.length : 1;
-		for (let j = 0; j < loopCount; j++) {
-			resetGaugeSetting(j);
+			if (j < loopCount) {
+				// 分割時は各譜面ごとに上書き・補完、非分割時は初回のみ実行
+				resetGaugeSetting(j);
+			}
 		}
 	}
 	g_customJsObj.preTitle.forEach(func => func());
@@ -4458,7 +4476,9 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 		obj.lifeInits[_scoreId] = _gaugeDetails[3];
 
 		if (gaugeUpdateFlg && hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
-			Object.keys(obj).forEach(key => Object.assign(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
+			// ゲージ上書き時は_gaugeDetails(obj)の値を優先し、デフォルト値で穴埋めする
+			Object.keys(obj).forEach(key => g_gaugeOptionObj[`gauge${_name}s`][key] =
+				fillMissingArrayElem(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
 			return false;
 		}
 		return true;
@@ -4472,9 +4492,12 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	 */
 	const getGaugeDetailList = (_scoreId, _defaultGaugeList) => {
 		if (_scoreId > 0) {
-			const headerName = `gauge${_name}${setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false)}`;
+			const idHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false);
+			const dosId = (idHeader || 0) - 1;
+			const headerName = `gauge${_name}${idHeader}`;
 			if (hasVal(_dosObj[headerName])) {
-				return _dosObj[headerName].split(`,`);
+				const gauges = splitLF2(_dosObj[headerName]);
+				return (gauges[dosId] || gauges[0])?.split(`,`);
 			}
 		}
 		return _defaultGaugeList;
@@ -4482,12 +4505,12 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 
 	if (hasVal(_dosObj[`gauge${_name}`])) {
 
+		const gauges = splitLF2(_dosObj[`gauge${_name}`]);
 		if (gaugeUpdateFlg) {
-			gaugeCreateFlg = setGaugeDetails(scoreId, _dosObj[`gauge${_name}`].split(`,`));
+			gaugeCreateFlg = setGaugeDetails(scoreId, (gauges[scoreId] || gauges[0])?.split(`,`));
 		} else {
-			const gauges = splitLF2(_dosObj[`gauge${_name}`]);
 			for (let j = 0; j < _difLength; j++) {
-				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, (gauges[j] ?? gauges[0]).split(`,`)));
+				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, (gauges[j] || gauges[0]).split(`,`)));
 			}
 		}
 
