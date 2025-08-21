@@ -4490,7 +4490,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	const getGaugeDetailList = (_scoreId, _defaultGaugeList) => {
 		if (_scoreId > 0) {
 			const idHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false);
-			const dosId = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, true) - 1;
+			const dosId = (idHeader || 0) - 1;
 			const headerName = `gauge${_name}${idHeader}`;
 			if (hasVal(_dosObj[headerName])) {
 				const gauges = splitLF2(_dosObj[headerName]);
