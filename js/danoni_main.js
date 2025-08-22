@@ -3017,7 +3017,7 @@ const resetColorSetting = _scoreId => {
 		[``, `Shadow`].forEach(pattern =>
 			[`set`, `frz`].forEach(arrow => {
 				// frzShadowColorStrのみ、空で構成された初期配列があるためその条件を追加して除外条件とする
-				if (!hasVal(g_rootObj[`${arrow}${pattern}Color${_scoreId + 1}`]) && !g_headerObj[`${arrow}${pattern}ColorStr`].join(``).includes(`,,`)) {
+				if (!hasVal(g_rootObj[`${arrow}${pattern}Color${_scoreId + 1}`]) && !g_headerObj[`${arrow}${pattern}ColorStr`].flat().join(`,`).includes(`,,`)) {
 					g_rootObj[`${arrow}${pattern}Color`] = g_headerObj[`${arrow}${pattern}ColorStr`].join(`,`);
 				}
 			})
