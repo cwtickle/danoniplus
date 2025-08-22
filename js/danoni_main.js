@@ -3012,8 +3012,19 @@ const resetColorSetting = _scoreId => {
 	// 初期矢印・フリーズアロー色の再定義
 	if (g_stateObj.scoreLockFlg) {
 		Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
+
+		// 分割先のファイルで初期色が未定義の場合はデフォルト値を適用
+		[``, `Shadow`].forEach(pattern =>
+			[`set`, `frz`].forEach(arrow => {
+				// frzShadowColorStrのみ、空で構成された初期配列があるためその条件を追加して除外条件とする
+				if (!hasVal(g_rootObj[`${arrow}${pattern}Color${_scoreId + 1}`])
+					&& g_headerObj[`${arrow}${pattern}ColorStr`]?.flat()?.some(val => hasVal(val))) {
+					g_rootObj[`${arrow}${pattern}Color`] = g_headerObj[`${arrow}${pattern}ColorStr`].join(`,`);
+				}
+			})
+		);
 	}
-	Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId }));
+	Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId, scoreLockFlg: false }));
 };
 
 /**
@@ -3037,9 +3048,9 @@ const copySetColor = (_baseObj, _scoreId) => {
 	const srcIdHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, true);
 	const targetIdHeader = setScoreIdHeader(_scoreId, false, true);
 	[``, `Shadow`].forEach(pattern =>
-		[`set`, `frz`].filter(arrow => hasVal(_baseObj[`${arrow}${pattern}Color`]))
+		[`set`, `frz`].filter(arrow => hasVal(_baseObj[`${arrow}${pattern}Color${srcIdHeader}`] || _baseObj[`${arrow}${pattern}Color`]))
 			.forEach(arrow => obj[`${arrow}${pattern}Color${targetIdHeader}`] =
-				(_baseObj[`${arrow}${pattern}Color${srcIdHeader}`] ?? _baseObj[`${arrow}${pattern}Color`]).concat()));
+				_baseObj[`${arrow}${pattern}Color${srcIdHeader}`] || _baseObj[`${arrow}${pattern}Color`]));
 	return obj;
 };
 
@@ -4253,12 +4264,13 @@ const addGaugeFulls = _obj => _obj.map(key => g_gaugeOptionObj.customFulls[key] 
  * @param {object} _baseObj 
  * @param {object} _dosObj
  * @param {string} [object.scoreId=''] 
+ * @param {boolean} [object.scoreLockFlg=g_stateObj.scoreLockFlg]
  * @returns {object} ※Object.assign(obj, resetBaseColorList(...))の形で呼び出しが必要
  */
-const resetBaseColorList = (_baseObj, _dosObj, { scoreId = `` } = {}) => {
+const resetBaseColorList = (_baseObj, _dosObj, { scoreId = ``, scoreLockFlg = g_stateObj.scoreLockFlg } = {}) => {
 
 	const obj = {};
-	const idHeader = setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg, scoreId !== ``);
+	const idHeader = setScoreIdHeader(scoreId, scoreLockFlg, scoreId !== ``);
 	const getRefData = (_header, _dataName) => {
 		const data = _dosObj[`${_header}${_dataName}`];
 		return data?.startsWith(_header) ? _dosObj[data] : data;
