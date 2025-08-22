@@ -3695,7 +3695,7 @@ const g_checkStr = {
 
     // 譜面分割あり、譜面番号固定時のみ譜面データを一時クリアする際の条件
     resetDosHeader: [`gauge`],
-    resetDosFooter: [`_data`, `_change`, `Color`, `customGauge`],
+    resetDosFooter: [`_data`, `_change`, `Color`, `Color1`, `customGauge`],
 };
 
 /** 
