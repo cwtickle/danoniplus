@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/06/26 (v42.3.0)
+ * Revised : 2025/08/22 (v42.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3695,7 +3695,7 @@ const g_checkStr = {
 
     // 譜面分割あり、譜面番号固定時のみ譜面データを一時クリアする際の条件
     resetDosHeader: [`gauge`],
-    resetDosFooter: [`_data`, `_change`, `Color`, `customGauge`],
+    resetDosFooter: [`_data`, `_change`, `Color`, `Color1`, `customGauge`],
 };
 
 /** 
