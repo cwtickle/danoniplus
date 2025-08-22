@@ -3012,6 +3012,16 @@ const resetColorSetting = _scoreId => {
 	// 初期矢印・フリーズアロー色の再定義
 	if (g_stateObj.scoreLockFlg) {
 		Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
+
+		// 分割先のファイルで初期色が未定義の場合はデフォルト値を適用
+		[``, `Shadow`].forEach(pattern =>
+			[`set`, `frz`].forEach(arrow => {
+				// frzShadowColorStrのみ、空で構成された初期配列があるためその条件を追加して除外条件とする
+				if (!hasVal(g_rootObj[`${arrow}${pattern}Color${_scoreId + 1}`]) && !g_headerObj[`${arrow}${pattern}ColorStr`].join(``).includes(`,,`)) {
+					g_rootObj[`${arrow}${pattern}Color`] = g_headerObj[`${arrow}${pattern}ColorStr`].join(`,`);
+				}
+			})
+		);
 	}
 	Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId, scoreLockFlg: false }));
 };
