@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/08/21
+ * Revised : 2025/08/25
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 40.7.5`;
-const g_revisedDate = `2025/08/21`;
+const g_version = `Ver 40.7.6`;
+const g_revisedDate = `2025/08/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -10479,20 +10479,33 @@ const getArrowSettings = () => {
 		g_workObj.dividePos[j] = baseLayer * 2 + ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
 		g_workObj.scrollDir[j] = (posj <= divideCnt ? 1 : -1) * scrollDirOptions[j] * (g_stateObj.reverse === C_FLG_OFF ? 1 : -1);
 
-		eachOrAll.forEach(type => {
-			g_workObj[`arrowColors${type}`][j] = g_headerObj.setColor[colorj];
-			g_workObj[`dummyArrowColors${type}`][j] = g_headerObj.setDummyColor[colorj];
-			g_workObj[`arrowShadowColors${type}`][j] = g_headerObj.setShadowColor[colorj] || ``;
-			g_workObj[`dummyArrowShadowColors${type}`][j] = g_headerObj.setDummyColor[colorj] || ``;
+		// 個別色設定
+		g_workObj.arrowColors[j] = g_headerObj.setColor[colorj];
+		g_workObj.dummyArrowColors[j] = g_headerObj.setDummyColor[colorj];
+		g_workObj.arrowShadowColors[j] = g_headerObj.setShadowColor[colorj] || ``;
+		g_workObj.dummyArrowShadowColors[j] = g_headerObj.setDummyColor[colorj] || ``;
 
-			g_typeLists.frzColor.forEach((frzType, k) => {
-				g_workObj[`frz${frzType}Colors${type}`][j] = g_headerObj.frzColor[colorj][k] || ``;
-				g_workObj[`dummyFrz${frzType}Colors${type}`][j] =
-					frzType.includes(`Shadow`) ? `` : g_headerObj.setDummyColor[colorj] || ``;
-			});
-			g_workObj[`frzNormalShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][0] || ``;
-			g_workObj[`frzHitShadowColors${type}`][j] = g_headerObj.frzShadowColor[colorj][1] || ``;
+		g_typeLists.frzColor.forEach((frzType, k) => {
+			g_workObj[`frz${frzType}Colors`][j] = g_headerObj.frzColor[colorj][k] || ``;
+			g_workObj[`dummyFrz${frzType}Colors`][j] =
+				frzType.includes(`Shadow`) ? `` : g_headerObj.setDummyColor[colorj] || ``;
 		});
+		g_workObj.frzNormalShadowColors[j] = g_headerObj.frzShadowColor[colorj][0] || ``;
+		g_workObj.frzHitShadowColors[j] = g_headerObj.frzShadowColor[colorj][1] || ``;
+
+		// 全体色設定
+		g_workObj.arrowColorsAll[j] = ``;
+		g_workObj.dummyArrowColorsAll[j] = ``;
+		g_workObj.arrowShadowColorsAll[j] = ``;
+		g_workObj.dummyArrowShadowColorsAll[j] = ``;
+
+		g_typeLists.frzColor.forEach((frzType, k) => {
+			g_workObj[`frz${frzType}ColorsAll`][j] = ``;
+			g_workObj[`dummyFrz${frzType}ColorsAll`][j] = ``;
+		});
+		g_workObj.frzNormalShadowColorsAll[j] = ``;
+		g_workObj.frzHitShadowColorsAll[j] = ``;
+
 	}
 	g_workObj.orgFlatFlg = g_workObj.dividePos.every(v => v === g_workObj.dividePos[0]);
 	if (g_stateObj.stepArea === `X-Flower` || (g_stateObj.stepArea.includes(`Mismatched`) && g_workObj.orgFlatFlg)) {
