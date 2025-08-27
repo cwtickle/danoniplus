@@ -12490,9 +12490,12 @@ const mainInit = () => {
 		// フリーズアロー色の設定
 		// - 通常時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Normal / NormalShadow / NormalBar
 		// - ヒット時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Hit / HitShadow / HitBar
+		// - ヒット時（矢印枠/矢印塗りつぶし/帯別の生成時全体色）: g_attrObj[frzName].HitAll / HitShadowAll / HitBarAll
 		g_typeLists.frzColor.forEach(val => {
 			g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j];
-			g_attrObj[frzName][`${val}All`] = g_workObj[`${_name}${val}ColorsAll`][_j];
+			if (val.startsWith(`Hit`)) {
+				g_attrObj[frzName][`${val}All`] = g_workObj[`${_name}${val}ColorsAll`][_j];
+			}
 		});
 		arrowSprite[g_workObj.dividePos[_j]].appendChild(frzRoot);
 		let shadowColor = _shadowColor === `Default` ? _normalColor : _shadowColor;
