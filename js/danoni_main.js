@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/08/25
+ * Revised : 2025/08/27
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 39.8.7`;
-const g_revisedDate = `2025/08/25`;
+const g_version = `Ver 39.8.8`;
+const g_revisedDate = `2025/08/27`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -11271,7 +11271,13 @@ const mainInit = () => {
 		// フリーズアロー色の設定
 		// - 通常時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Normal / NormalShadow / NormalBar
 		// - ヒット時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Hit / HitShadow / HitBar
-		g_typeLists.frzColor.forEach(val => g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j]);
+		// - ヒット時（矢印枠/矢印塗りつぶし/帯別の生成時全体色）: g_attrObj[frzName].HitAll / HitShadowAll / HitBarAll
+		g_typeLists.frzColor.forEach(val => {
+			g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j];
+			if (val.startsWith(`Hit`)) {
+				g_attrObj[frzName][`${val}All`] = g_workObj[`${_name}${val}ColorsAll`][_j];
+			}
+		});
 		arrowSprite[g_workObj.dividePos[_j]].appendChild(frzRoot);
 		let shadowColor = _shadowColor === `Default` ? _normalColor : _shadowColor;
 
@@ -11999,9 +12005,9 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	 * @returns {string}
 	 */
 	const getColor = (_type) => {
-		const cColor = g_workObj[`${_name}${_type}Colors`][_j];
 		const cColorAll = g_workObj[`${_name}${_type}ColorsAll`][_j];
-		return currentFrz[_type] !== cColor && cColorAll === cColor ? cColorAll : currentFrz[_type];
+		return currentFrz[_type] !== cColorAll && currentFrz[`${_type}All`] !== cColorAll
+			? cColorAll : currentFrz[_type];
 	};
 
 	const tmpHitColor = getColor(`Hit`);
