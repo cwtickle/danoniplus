@@ -12490,7 +12490,10 @@ const mainInit = () => {
 		// フリーズアロー色の設定
 		// - 通常時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Normal / NormalShadow / NormalBar
 		// - ヒット時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Hit / HitShadow / HitBar
-		g_typeLists.frzColor.forEach(val => g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j]);
+		g_typeLists.frzColor.forEach(val => {
+			g_attrObj[frzName][val] = g_workObj[`${_name}${val}Colors`][_j];
+			g_attrObj[frzName][`${val}All`] = g_workObj[`${_name}${val}ColorsAll`][_j];
+		});
 		arrowSprite[g_workObj.dividePos[_j]].appendChild(frzRoot);
 		let shadowColor = _shadowColor === `Default` ? _normalColor : _shadowColor;
 
@@ -13242,9 +13245,9 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	 * @returns {string}
 	 */
 	const getColor = (_type) => {
-		const cColor = g_workObj[`${_name}${_type}Colors`][_j];
 		const cColorAll = g_workObj[`${_name}${_type}ColorsAll`][_j];
-		return currentFrz[_type] !== cColor && cColorAll === cColor ? cColorAll : currentFrz[_type];
+		return currentFrz[_type] !== cColorAll && currentFrz[`${_type}All`] !== cColorAll
+			? cColorAll : currentFrz[_type];
 	};
 
 	const tmpHitColor = getColor(`Hit`);
