@@ -18,8 +18,8 @@
 
 | Version      | Supported          | Latest Version                                                                 | Logs                                                                   | First Release | End of Support   |
 | ------------ | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ------------- | ---------------- |
-| v42          | :heavy_check_mark: | [v42.5.2](https://github.com/cwtickle/danoniplus/releases/tag/v42.5.2)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2025-05-24    | (At Release v45) |
-| v41          | :heavy_check_mark: | [v41.4.8](https://github.com/cwtickle/danoniplus/releases/tag/v41.4.8)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v41) | 2025-04-12    | (At Release v44) |
+| v42          | :heavy_check_mark: | [v42.5.3](https://github.com/cwtickle/danoniplus/releases/tag/v42.5.3)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2025-05-24    | (At Release v45) |
+| v41          | :heavy_check_mark: | [v41.4.9](https://github.com/cwtickle/danoniplus/releases/tag/v41.4.9)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v41) | 2025-04-12    | (At Release v44) |
 | v40          | :warning:          | [v40.7.7](https://github.com/cwtickle/danoniplus/releases/tag/v40.7.7)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v40) | 2025-03-01    | (At Release v43) |
 | v39 :anchor: | :heavy_check_mark: | [v39.8.8](https://github.com/cwtickle/danoniplus/releases/tag/v39.8.8)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v39) | 2025-02-01    | (At Release v48) |
 | v38          | :x:                | [v38.3.4 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v38.3.4)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v38) | 2024-11-04    | 2025-04-12 |
