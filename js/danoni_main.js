@@ -3574,7 +3574,7 @@ const headerConvert = _dosObj => {
 			obj.bpms[j] = musics[4] || obj.bpms[0];
 
 			// 代替タイトル名
-			if (j === 0) {
+			if (j === 0 && hasVal(_dosObj.musicNo)) {
 				alternativeTitle = musics[3];
 			}
 		}
@@ -5209,8 +5209,11 @@ const titleInit = (_initFlg = false) => {
 		}
 	} else if (!g_headerObj.customTitleUse) {
 		// 曲名文字描画（曲名は譜面データから取得）
-		divRoot.appendChild(drawTitle(g_headerObj.musicTitlesForView[g_settings.musicIdxNum],
-			g_headerObj.musicSelectUse ? g_headerObj.viewLists[0] + 1 : ``))
+		divRoot.appendChild(
+			g_headerObj.musicSelectUse
+				? drawTitle(g_headerObj.musicTitlesForView[g_settings.musicIdxNum], g_headerObj.viewLists[0] + 1)
+				: drawTitle()
+		);
 	}
 
 	// クレジット表示
