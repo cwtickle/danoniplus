@@ -4,7 +4,7 @@
 - 開発にご協力いただける方は、[How to Contribute](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)をご覧ください。
 - 名前(Name)は昇順で表記しています。
 
-|Name|GitHub|X(Twitter)|Contribution|
+|Name|GitHub|X|Contribution|
 |----|----|----|----|
 |aconite||[@aconite_ac](https://x.com/aconite_ac)|機能提案、不具合報告、事象解析|
 |apoi||[@kwbredda3](https://x.com/kwbredda3)|機能提案、不具合報告|
