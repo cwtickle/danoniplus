@@ -376,6 +376,9 @@ const updateWindowSiz = () => {
         btnReverse: {
             x: 160, y: 0, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
         },
+        lblExcessive: {
+            x: 5, y: 27, w: 90, h: 18, siz: 12,
+        },
         btnExcessive: {
             x: 5, y: 25, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
         },
