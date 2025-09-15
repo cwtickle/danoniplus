@@ -7147,14 +7147,14 @@ const setDifficulty = (_initFlg) => {
 	lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
 
 	// 譜面毎のExcessive再設定
-	g_stateObj.excessive = g_headerObj.excessiveJdgUses[g_stateObj.scoreId];
+	g_stateObj.excessive = boolToSwitch(g_headerObj.excessiveJdgUses[g_stateObj.scoreId]);
 	g_headerObj.excessiveUse = g_headerObj.excessiveUses[g_stateObj.scoreId];
 	g_headerObj.excessiveJdgUse = g_headerObj.excessiveJdgUses[g_stateObj.scoreId];
 	if (g_headerObj.excessiveUse) {
-		setExcessive(document.getElementById(`lnkExcessive`), g_stateObj.excessive);
+		setExcessive(document.getElementById(`lnkExcessive`), g_stateObj.excessive === C_FLG_ON);
 		lnkExcessive.style.display = C_DIS_INHERIT;
 	} else {
-		lblExcessive.style.display = (g_stateObj.excessive ? C_DIS_INHERIT : C_DIS_NONE);
+		lblExcessive.style.display = (g_stateObj.excessive === C_FLG_ON ? C_DIS_INHERIT : C_DIS_NONE);
 		lnkExcessive.style.display = C_DIS_NONE;
 	}
 
