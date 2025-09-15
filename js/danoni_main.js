@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/08/31
+ * Revised : 2025/09/15
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.5.3`;
-const g_revisedDate = `2025/08/31`;
+const g_version = `Ver 43.0.0`;
+const g_revisedDate = `2025/09/15`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -4008,8 +4008,31 @@ const headerConvert = _dosObj => {
 	// フリーズアローの始点で通常矢印の判定を行うか(dotさんソース方式)
 	obj.frzStartjdgUse = setBoolVal(_dosObj.frzStartjdgUse ?? g_presetObj.frzStartjdgUse);
 
-	// 空押し判定を行うか
-	obj.excessiveJdgUse = setBoolVal(_dosObj.excessiveJdgUse ?? g_presetObj.excessiveJdgUse);
+	// 空押し判定の設定
+	// excessiveUses   : 譜面毎の空押し有効化設定
+	// excessiveJdgUses: 譜面毎の空押し初期設定
+	obj.excessiveUses = [];
+	obj.excessiveJdgUses = [];
+	splitLF2(_dosObj.excessiveUse)?.forEach(val => {
+		const tmpVal = val.split(`,`);
+		obj.excessiveUses.push(setBoolVal(tmpVal[0]));
+		obj.excessiveJdgUses.push(setVal(tmpVal[1], C_FLG_OFF, C_TYP_SWITCH) === C_FLG_ON);
+	});
+	if ((obj.excessiveUses?.length || 0) < obj.difLabels.length) {
+		obj.excessiveUses = makeBaseArray(obj.excessiveUses, obj.difLabels.length,
+			setBoolVal(obj.excessiveUses?.[0] ?? _dosObj.excessiveUse ?? g_presetObj.excessiveUse, true));
+		obj.excessiveJdgUses = makeBaseArray(obj.excessiveJdgUses, obj.difLabels.length,
+			setBoolVal(obj.excessiveJdgUses?.[0] ?? g_presetObj.excessiveJdgUse ?? false));
+	}
+
+	// excessiveJdgUseが有効な場合は全譜面に対して強制的に上書き
+	if (_dosObj.excessiveJdgUse !== undefined) {
+		const excessiveJdg = setBoolVal(_dosObj.excessiveJdgUse);
+		if (excessiveJdg) {
+			obj.excessiveJdgUses = obj.excessiveJdgUses.map(val => true);
+		}
+	}
+	obj.excessiveJdgUse = obj.excessiveJdgUses[0];
 	g_stateObj.excessive = boolToSwitch(obj.excessiveJdgUse);
 	g_settings.excessiveNum = Number(obj.excessiveJdgUse);
 
@@ -7123,6 +7146,18 @@ const setDifficulty = (_initFlg) => {
 	g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
 	lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
 
+	// 譜面毎のExcessive再設定
+	g_stateObj.excessive = boolToSwitch(g_headerObj.excessiveJdgUses[g_stateObj.scoreId]);
+	g_headerObj.excessiveUse = g_headerObj.excessiveUses[g_stateObj.scoreId];
+	g_headerObj.excessiveJdgUse = g_headerObj.excessiveJdgUses[g_stateObj.scoreId];
+	if (g_headerObj.excessiveUse) {
+		setExcessive(document.getElementById(`lnkExcessive`), g_stateObj.excessive === C_FLG_ON);
+		lnkExcessive.style.display = C_DIS_INHERIT;
+	} else {
+		lblExcessive.style.display = (g_stateObj.excessive === C_FLG_ON ? C_DIS_INHERIT : C_DIS_NONE);
+		lnkExcessive.style.display = C_DIS_NONE;
+	}
+
 	// 譜面明細画面の再描画
 	if (g_settings.scoreDetails.length > 0) {
 		drawSpeedGraph(g_stateObj.scoreId);
@@ -7366,20 +7401,17 @@ const createOptionWindow = _sprite => {
 	}
 
 	// 空押し判定設定 (Excessive)
-	if (g_headerObj.excessiveUse) {
-		spriteList.gauge.appendChild(
-			createCss2Button(`lnkExcessive`, g_lblNameObj.Excessive, evt => setExcessive(evt.target),
-				Object.assign(g_lblPosObj.btnExcessive, {
-					title: g_msgObj.excessive, cxtFunc: evt => setExcessive(evt.target),
-				}), g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`])
-		);
-	} else if (g_headerObj.excessiveJdgUse) {
-		spriteList.gauge.appendChild(
-			createDivCss2Label(`lnkExcessive`, `${g_lblNameObj.Excessive}:${C_FLG_ON}`,
-				Object.assign(g_lblPosObj.btnExcessive, { x: 0, w: 100, border: C_DIS_NONE }), g_cssObj[`button_Disabled${C_FLG_ON}`]
-			)
-		);
-	}
+	spriteList.gauge.appendChild(
+		createDivCss2Label(`lblExcessive`, `${g_lblNameObj.Excessive}:${C_FLG_ON}`,
+			g_lblPosObj.lblExcessive, g_cssObj[`button_Disabled${C_FLG_ON}`]
+		)
+	);
+	spriteList.gauge.appendChild(
+		createCss2Button(`lnkExcessive`, g_lblNameObj.Excessive, evt => setExcessive(evt.target),
+			Object.assign(g_lblPosObj.btnExcessive, {
+				title: g_msgObj.excessive, cxtFunc: evt => setExcessive(evt.target),
+			}), g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`])
+	);
 
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
@@ -7854,11 +7886,15 @@ const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
  * 空押し判定の設定
  * @param {HTMLDivElement} _btn
  */
-const setExcessive = _btn => {
-	g_settings.excessiveNum = (g_settings.excessiveNum + 1) % 2;
+const setExcessive = (_btn, _val) => {
+	const curExcessive = Number(g_settings.excessiveNum);
+	g_settings.excessiveNum = _val ?? (curExcessive + 1) % 2;
+
 	g_stateObj.excessive = g_settings.excessives[g_settings.excessiveNum];
-	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.excessives[(g_settings.excessiveNum + 1) % 2]}`],
-		g_cssObj[`button_Rev${g_settings.excessives[g_settings.excessiveNum]}`]);
+	if ((curExcessive + g_settings.excessiveNum) % 2 !== 0) {
+		_btn.classList.replace(g_cssObj[`button_Rev${g_settings.excessives[curExcessive]}`],
+			g_cssObj[`button_Rev${g_settings.excessives[Number(g_settings.excessiveNum)]}`]);
+	}
 };
 
 /**

@@ -6,8 +6,8 @@
 
 - 修正対象のバージョンは下記の通りです。
 - 基本的には、同一メジャーバージョンの最新版がサポート対象です。
-- v1 ～ v33, v35 ～ v38 は**更新を終了しました。**  
-  v34, v40 の対応終了時期は v43 リリース開始時を予定しています。（変更可能性あり）  
+- v1 ～ v38, v40 は**更新を終了しました。**  
+  v41 の対応終了時期は v44 リリース開始時を予定しています。（変更可能性あり）  
   バージョン別の更新継続可否は現状、[ライフサイクルポリシー](https://github.com/cwtickle/danoniplus/wiki/LifecyclePolicy)に従います。
 - 各バージョンの概要は[更新情報](https://github.com/cwtickle/danoniplus/wiki/UpdateInfo)に記載しています。
 
@@ -18,21 +18,22 @@
 
 | Version      | Supported          | Latest Version                                                                 | Logs                                                                   | First Release | End of Support   |
 | ------------ | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ------------- | ---------------- |
-| v42          | :heavy_check_mark: | [v42.5.3](https://github.com/cwtickle/danoniplus/releases/tag/v42.5.3)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2025-05-24    | (At Release v45) |
-| v41          | :heavy_check_mark: | [v41.4.9](https://github.com/cwtickle/danoniplus/releases/tag/v41.4.9)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v41) | 2025-04-12    | (At Release v44) |
-| v40          | :warning:          | [v40.7.7](https://github.com/cwtickle/danoniplus/releases/tag/v40.7.7)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v40) | 2025-03-01    | (At Release v43) |
+| v43          | :heavy_check_mark: | [v43.0.0](https://github.com/cwtickle/danoniplus/releases/tag/v43.0.0)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2025-09-15    | (At Release v46) |
+| v42          | :heavy_check_mark: | [v42.5.3](https://github.com/cwtickle/danoniplus/releases/tag/v42.5.3)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v42) | 2025-05-24    | (At Release v45) |
+| v41          | :warning:          | [v41.4.9](https://github.com/cwtickle/danoniplus/releases/tag/v41.4.9)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v41) | 2025-04-12    | (At Release v44) |
+| v40          | :x:          | [v40.7.7 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v40.7.7)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v40) | 2025-03-01    | 2025-09-15 |
 | v39 :anchor: | :heavy_check_mark: | [v39.8.8](https://github.com/cwtickle/danoniplus/releases/tag/v39.8.8)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v39) | 2025-02-01    | (At Release v48) |
-| v38          | :x:                | [v38.3.4 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v38.3.4)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v38) | 2024-11-04    | 2025-04-12 |
-| v37          | :x:                | [v37.8.9 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v37.8.9)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v37)    | 2024-06-15    | 2025-03-01 |
-| v36          | :x:                | [v36.6.11 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v36.6.11)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v36)    | 2024-04-15    | 2025-02-01 |
-| v35          | :x:                | [v35.5.7 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v35.5.7) | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v35)    | 2024-01-28    | 2024-11-04       |
-| v34 :anchor: | :warning:          | [v34.7.17](https://github.com/cwtickle/danoniplus/releases/tag/v34.7.17)       | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v34)    | 2023-09-24    | (At Release v43) |
 
 <details>
 <summary>End of support version / 過去バージョン</summary>
 
 | Version      | Supported | Latest Version                                                                   | Logs                                                                | First Release | End of Support |
 | ------------ | --------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------- | -------------- |
+| v38          | :x:                | [v38.3.4 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v38.3.4)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v38) | 2024-11-04    | 2025-04-12 |
+| v37          | :x:                | [v37.8.9 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v37.8.9)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v37)    | 2024-06-15    | 2025-03-01 |
+| v36          | :x:                | [v36.6.11 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v36.6.11)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v36)    | 2024-04-15    | 2025-02-01 |
+| v35          | :x:                | [v35.5.7 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v35.5.7) | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v35)    | 2024-01-28    | 2024-11-04       |
+| v34 :anchor: | :x:          | [v34.7.17 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v34.7.17)       | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v34)    | 2023-09-24    | 2025-09-15 |
 | v33          | :x:       | [v33.7.8 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v33.7.8)   | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v33) | 2023-07-29    | 2024-04-15     |
 | v32          | :x:       | [v32.7.7 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v32.7.7)   | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v32) | 2023-05-07    | 2024-01-28     |
 | v31          | :x:       | [v31.7.7 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v31.7.7)   | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v31) | 2023-03-20    | 2023-09-24     |

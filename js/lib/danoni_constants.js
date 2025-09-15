@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/08/22 (v42.5.0)
+ * Revised : 2025/09/15 (v43.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -375,6 +375,9 @@ const updateWindowSiz = () => {
         },
         btnReverse: {
             x: 160, y: 0, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
+        },
+        lblExcessive: {
+            x: 5, y: 27, w: 90, h: 18, siz: 12,
         },
         btnExcessive: {
             x: 5, y: 25, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
