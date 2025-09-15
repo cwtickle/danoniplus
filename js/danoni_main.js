@@ -4020,7 +4020,7 @@ const headerConvert = _dosObj => {
 	});
 	if ((obj.excessiveUses?.length || 0) < obj.difLabels.length) {
 		obj.excessiveUses = makeBaseArray(obj.excessiveUses, obj.difLabels.length,
-			setBoolVal(obj.excessiveUses?.[0] ?? setBoolVal(obj.excessiveUse, g_presetObj.excessiveUse) ?? true));
+			setBoolVal(obj.excessiveUses?.[0] ?? _dosObj.excessiveUse ?? g_presetObj.excessiveUse, true));
 		obj.excessiveJdgUses = makeBaseArray(obj.excessiveJdgUses, obj.difLabels.length,
 			setBoolVal(obj.excessiveJdgUses?.[0] ?? g_presetObj.excessiveJdgUse ?? false));
 	}
@@ -7889,7 +7889,6 @@ const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
 const setExcessive = (_btn, _val) => {
 	const curExcessive = Number(g_settings.excessiveNum);
 	g_settings.excessiveNum = _val ?? (curExcessive + 1) % 2;
-	console.log(_val)
 
 	g_stateObj.excessive = g_settings.excessives[g_settings.excessiveNum];
 	if ((curExcessive + g_settings.excessiveNum) % 2 !== 0) {
