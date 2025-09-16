@@ -7891,14 +7891,14 @@ const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
  */
 const setExcessive = (_btn, _val) => {
 	const curExcessive = Number(g_settings.excessiveNum);
-	g_settings.excessiveNum = _val ?? (curExcessive + 1) % 2;
+	g_settings.excessiveNum = _val !== undefined ? Number(_val) : (curExcessive + 1) % 2;
 	g_stateObj.excessiveChgFlg = _val === undefined;
 	if (g_stateObj.excessiveChgFlg) {
 		g_stateObj.excessiveScoreId = g_stateObj.scoreId;
 	}
-	g_stateObj.excessive = g_settings.excessives[Number(g_settings.excessiveNum)];
+	g_stateObj.excessive = g_settings.excessives[g_settings.excessiveNum];
 	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.excessives[curExcessive]}`],
-		g_cssObj[`button_Rev${g_settings.excessives[Number(g_settings.excessiveNum)]}`]);
+		g_cssObj[`button_Rev${g_settings.excessives[g_settings.excessiveNum]}`]);
 };
 
 /**
