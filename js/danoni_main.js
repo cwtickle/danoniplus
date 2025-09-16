@@ -7146,14 +7146,17 @@ const setDifficulty = (_initFlg) => {
 	g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
 	lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
 
-	// 譜面毎のExcessive再設定
-	g_stateObj.excessive = boolToSwitch(g_headerObj.excessiveJdgUses[g_stateObj.scoreId]);
+	// 譜面毎のExcessive再設定（意図的に変更した場合のみ元に戻さない）
+	if (g_canLoadDifInfoFlg && (g_stateObj.excessiveScoreId !== g_stateObj.scoreId)) {
+		g_headerObj.excessiveJdgUse = g_headerObj.excessiveJdgUses[g_stateObj.scoreId];
+		g_stateObj.excessive = boolToSwitch(g_headerObj.excessiveJdgUse);
+	}
 	g_headerObj.excessiveUse = g_headerObj.excessiveUses[g_stateObj.scoreId];
-	g_headerObj.excessiveJdgUse = g_headerObj.excessiveJdgUses[g_stateObj.scoreId];
 	if (g_headerObj.excessiveUse) {
 		setExcessive(document.getElementById(`lnkExcessive`), g_stateObj.excessive === C_FLG_ON);
 		lnkExcessive.style.display = C_DIS_INHERIT;
 	} else {
+		g_stateObj.excessiveChgFlg = false;
 		lblExcessive.style.display = (g_stateObj.excessive === C_FLG_ON ? C_DIS_INHERIT : C_DIS_NONE);
 		lnkExcessive.style.display = C_DIS_NONE;
 	}
@@ -7889,12 +7892,13 @@ const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
 const setExcessive = (_btn, _val) => {
 	const curExcessive = Number(g_settings.excessiveNum);
 	g_settings.excessiveNum = _val ?? (curExcessive + 1) % 2;
-
-	g_stateObj.excessive = g_settings.excessives[g_settings.excessiveNum];
-	if ((curExcessive + g_settings.excessiveNum) % 2 !== 0) {
-		_btn.classList.replace(g_cssObj[`button_Rev${g_settings.excessives[curExcessive]}`],
-			g_cssObj[`button_Rev${g_settings.excessives[Number(g_settings.excessiveNum)]}`]);
+	g_stateObj.excessiveChgFlg = _val === undefined;
+	if (g_stateObj.excessiveChgFlg) {
+		g_stateObj.excessiveScoreId = g_stateObj.scoreId;
 	}
+	g_stateObj.excessive = g_settings.excessives[Number(g_settings.excessiveNum)];
+	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.excessives[curExcessive]}`],
+		g_cssObj[`button_Rev${g_settings.excessives[Number(g_settings.excessiveNum)]}`]);
 };
 
 /**
