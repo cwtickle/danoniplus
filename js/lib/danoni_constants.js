@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/09/15 (v43.0.0)
+ * Revised : 2025/09/16 (v43.0.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1049,6 +1049,9 @@ const g_stateObj = {
     autoPlay: C_FLG_OFF,
     autoAll: C_FLG_OFF,
     gauge: `Normal`,
+    excessive: C_FLG_OFF,
+    excessiveChgFlg: false,
+    excessiveScoreId: 0,
     adjustment: 0,
     hitPosition: 0,
     fadein: 0,
