@@ -1605,7 +1605,7 @@ const g_shakingFunc = new Map([
     ['Vertical', () => addY(`mainSprite`, `shaking`, getShakingDist() / 2)],
     ['X-Horizontal', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addX(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist() / 0.75);
+            addX(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist() * (4 / 3));
         }
     }],
     ['X-Vertical', () => {
@@ -4011,6 +4011,8 @@ const g_lblNameObj = {
 
     'u_Horizontal': `Horizontal`,
     'u_Vertical': `Vertical`,
+    'u_X-Horizontal': `X-Horizontal`,
+    'u_X-Vertical': `X-Vertical`,
     'u_Drunk': `Drunk`,
 
     'u_Dizzy': `Dizzy`,
