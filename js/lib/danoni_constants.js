@@ -1257,7 +1257,7 @@ const g_settings = {
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
     frzReturnNum: 0,
 
-    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `Drunk`],
+    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`],
     shakingNum: 0,
 
     effects: [C_FLG_OFF, `Dizzy`, `Spin`, `Wave`, `Storm`, `Blinking`, `Squids`],
@@ -1601,27 +1601,39 @@ const g_stepAreaFunc = new Map([
  */
 const g_shakingFunc = new Map([
     ['OFF', () => true],
-    ['Horizontal', () => addX(`mainSprite`, `shaking`, (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1)],
-    ['Vertical', () => addY(`mainSprite`, `shaking`, (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2)],
+    ['Horizontal', () => addX(`mainSprite`, `shaking`, getShakingDist())],
+    ['Vertical', () => addY(`mainSprite`, `shaking`, getShakingDist() / 2)],
+    ['X-Horizontal', () => {
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addX(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist() / 0.75);
+        }
+    }],
+    ['X-Vertical', () => {
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addY(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist());
+        }
+    }],
     ['Drunk', () => {
         if (g_posXs.mainSprite.get(`shaking`) === 0 && g_posYs.mainSprite.get(`shaking`) === 0) {
             g_workObj.drunkXFlg = Math.random() < 0.5;
             g_workObj.drunkYFlg = Math.random() < 0.5;
         }
         if (g_workObj.drunkXFlg) {
-            const deltaX = (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1;
+            const deltaX = getShakingDist();
             addX(`mainSprite`, `shaking`, deltaX);
             addX(`infoSprite`, `shaking`, deltaX);
             addX(`judgeSprite`, `shaking`, deltaX);
         }
         if (g_workObj.drunkYFlg) {
-            const deltaY = (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2;
+            const deltaY = getShakingDist() / 2;
             addY(`mainSprite`, `shaking`, deltaY);
             addY(`infoSprite`, `shaking`, deltaY);
             addY(`judgeSprite`, `shaking`, deltaY);
         }
     }],
 ]);
+
+const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25);
 
 /**
  * ランダムな軸を返す補助関数
