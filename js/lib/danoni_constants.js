@@ -1614,7 +1614,9 @@ const g_shakingFunc = new Map([
         }
     }],
     ['Drunk', () => {
-        if (g_posXs.mainSprite.get(`shaking`) === 0 && g_posYs.mainSprite.get(`shaking`) === 0) {
+        const shakeX = g_posXs.mainSprite?.get(`shaking`) ?? 0;
+        const shakeY = g_posYs.mainSprite?.get(`shaking`) ?? 0;
+        if (shakeX === 0 && shakeY === 0) {
             g_workObj.drunkXFlg = Math.random() < 0.5;
             g_workObj.drunkYFlg = Math.random() < 0.5;
         }
