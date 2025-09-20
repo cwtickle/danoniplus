@@ -1257,7 +1257,7 @@ const g_settings = {
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
     frzReturnNum: 0,
 
-    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `Drunk`],
+    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`],
     shakingNum: 0,
 
     effects: [C_FLG_OFF, `Dizzy`, `Spin`, `Wave`, `Storm`, `Blinking`, `Squids`],
@@ -1601,27 +1601,41 @@ const g_stepAreaFunc = new Map([
  */
 const g_shakingFunc = new Map([
     ['OFF', () => true],
-    ['Horizontal', () => addX(`mainSprite`, `shaking`, (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1)],
-    ['Vertical', () => addY(`mainSprite`, `shaking`, (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2)],
+    ['Horizontal', () => addX(`mainSprite`, `shaking`, getShakingDist())],
+    ['Vertical', () => addY(`mainSprite`, `shaking`, getShakingDist() / 2)],
+    ['X-Horizontal', () => {
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addX(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist() * (4 / 3));
+        }
+    }],
+    ['X-Vertical', () => {
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addY(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist());
+        }
+    }],
     ['Drunk', () => {
-        if (g_posXs.mainSprite.get(`shaking`) === 0 && g_posYs.mainSprite.get(`shaking`) === 0) {
+        const shakeX = g_posXs.mainSprite?.get(`shaking`) ?? 0;
+        const shakeY = g_posYs.mainSprite?.get(`shaking`) ?? 0;
+        if (shakeX === 0 && shakeY === 0) {
             g_workObj.drunkXFlg = Math.random() < 0.5;
             g_workObj.drunkYFlg = Math.random() < 0.5;
         }
         if (g_workObj.drunkXFlg) {
-            const deltaX = (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 1;
+            const deltaX = getShakingDist();
             addX(`mainSprite`, `shaking`, deltaX);
             addX(`infoSprite`, `shaking`, deltaX);
             addX(`judgeSprite`, `shaking`, deltaX);
         }
         if (g_workObj.drunkYFlg) {
-            const deltaY = (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25) / 2;
+            const deltaY = getShakingDist() / 2;
             addY(`mainSprite`, `shaking`, deltaY);
             addY(`infoSprite`, `shaking`, deltaY);
             addY(`judgeSprite`, `shaking`, deltaY);
         }
     }],
 ]);
+
+const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25);
 
 /**
  * ランダムな軸を返す補助関数
@@ -3999,6 +4013,8 @@ const g_lblNameObj = {
 
     'u_Horizontal': `Horizontal`,
     'u_Vertical': `Vertical`,
+    'u_X-Horizontal': `X-Horizontal`,
+    'u_X-Vertical': `X-Vertical`,
     'u_Drunk': `Drunk`,
 
     'u_Dizzy': `Dizzy`,
@@ -4244,7 +4260,7 @@ const g_lang_msgObj = {
         sideScrollDisable: `\n\nウィンドウの高さの自動拡張が無効のため、Slope, SideScrollは使用できません`,
         stepArea: `ステップゾーンの位置を変更します。\n[Halfway] ステップゾーンが中央に表示されます\n[Mismatched] スクロールの向きが上下で異なる方向に流れます`,
         frzReturn: `フリーズアロー到達時及び矢印の回復判定が100の倍数に達するごとに、X/Y/Z軸のいずれかに回転します`,
-        shaking: `ステップゾーン及び矢印を揺らす設定です。\n[Horizontal] 横方向に揺らします\n[Vertical] 縦方向に揺らします\n[Drunk] 画面全体を上下左右ランダムに揺らします。画面酔いに注意してください`,
+        shaking: `ステップゾーン及び矢印を揺らす設定です。\n[Horizontal] 横方向に揺らします\n[Vertical] 縦方向に揺らします\n[X-Horizontal] レイヤーごとに左右交互の向きで横に揺らします\n[X-Vertical] レイヤーごとに上下交互の向きで縦に揺らします\n[Drunk] 画面全体を上下左右ランダムに揺らします。画面酔いに注意してください`,
         effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
         camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
         swapping: `ステップゾーンの位置をグループ単位で入れ替えます。`,
@@ -4334,7 +4350,7 @@ const g_lang_msgObj = {
         sideScrollDisable: `\n\nSlope, SideScroll cannot be used because \nautomatic window height expansion is disabled.`,
         stepArea: `Change the position of the step zone.\n[Halfway] Step zones are centered.\n[Mismatched] Scroll direction flows in different directions up and down.`,
         frzReturn: `When the Freeze Arrow is reached, and every time the arrow's recovery judgment \nreaches a multiple of 100, it will rotate on either the X, Y, or Z axis.`,
-        shaking: `This is the setting to shake the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n[Drunk] Shakes the entire screen randomly up, down, left, and right. Be careful of motion sickness.`,
+        shaking: `This sets shaking for the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n[X-Horizontal] Per-layer shaking with alternating left/right direction by layer.\n[X-Vertical] Per-layer shaking with alternating up/down direction by layer.\n[Drunk] Shakes the entire screen randomly in all directions (may cause motion sickness).`,
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
         camoufrage: `The appearance of the steps changes randomly with the same placement.`,
         swapping: `Replaces the position of step zones on a group-by-group basis.`,
