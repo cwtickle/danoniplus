@@ -1546,6 +1546,7 @@ const g_playWindowFunc = new Map([
  */
 const g_arrowGroupSprite = [`stepSprite`, `arrowSprite`, `frzHitSprite`];
 const halfwayOffset = _j => (_j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2);
+const getDirFromLayer = _j => (_j % 2 === 0 ? 1 : -1) * (_j < g_stateObj.layerNumDf ? 1 : -1);
 const g_stepAreaFunc = new Map([
     ['Default', () => ``],
     ['Halfway', () => {
@@ -1557,7 +1558,7 @@ const g_stepAreaFunc = new Map([
     }],
     ['Mismatched', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * -15}deg)`);
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -15}deg)`);
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
@@ -1569,7 +1570,7 @@ const g_stepAreaFunc = new Map([
     }],
     ['R-Mismatched', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * 15}deg)`);
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * 15}deg)`);
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
@@ -1588,13 +1589,13 @@ const g_stepAreaFunc = new Map([
     }],
     ['X-Flower', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * -15}deg)`);
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -15}deg)`);
         }
     }],
     ['Alt-Crossing', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * -10}deg) ` +
-                `translateX(${(j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * 20}px)`);
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -10}deg) ` +
+                `translateX(${getDirFromLayer(j) * 20}px)`);
         }
     }],
 ]);
@@ -1609,12 +1610,12 @@ const g_shakingFunc = new Map([
     ['Vertical', () => addY(`mainSprite`, `shaking`, getShakingDist() / 2)],
     ['X-Horizontal', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addX(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist() * (4 / 3));
+            addX(`mainSprite${j}`, `shaking`, getDirFromLayer(j) * (4 / 3) * getShakingDist());
         }
     }],
     ['X-Vertical', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addY(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist());
+            addY(`mainSprite${j}`, `shaking`, getDirFromLayer(j) * getShakingDist());
         }
     }],
     ['Drunk', () => {
