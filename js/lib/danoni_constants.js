@@ -1634,29 +1634,12 @@ const g_shakingFunc = new Map([
         }
     }],
     ['S-Drunk', () => {
-        const shakeX = g_posXs.mainSprite?.get(`shaking`) ?? 0;
-        const shakeY = g_posYs.mainSprite?.get(`shaking`) ?? 0;
-        if (shakeX === 0 && shakeY === 0) {
-            g_workObj.drunkXFlg = Math.random() < 0.5;
-            g_workObj.drunkYFlg = Math.random() < 0.5;
-        }
+        g_shakingFunc.get(`Drunk`)();
         if (g_workObj.drunkXFlg) {
-            const deltaX = getShakingDist();
-            addX(`mainSprite`, `shaking`, deltaX);
-            addX(`infoSprite`, `shaking`, deltaX);
-            addX(`judgeSprite`, `shaking`, deltaX);
-            for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addY(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist());
-            }
+            g_shakingFunc.get(`X-Vertical`)();
         }
         if (g_workObj.drunkYFlg) {
-            const deltaY = getShakingDist() / 2;
-            addY(`mainSprite`, `shaking`, deltaY);
-            addY(`infoSprite`, `shaking`, deltaY);
-            addY(`judgeSprite`, `shaking`, deltaY);
-            for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addX(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist() * (4 / 3));
-            }
+            g_shakingFunc.get(`X-Horizontal`)();
         }
     }],
 ]);
