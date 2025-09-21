@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/09/16
+ * Revised : 2025/09/21
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 43.0.1`;
-const g_revisedDate = `2025/09/16`;
+const g_version = `Ver 43.1.0`;
+const g_revisedDate = `2025/09/21`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -11289,11 +11289,15 @@ const getArrowSettings = () => {
 
 	// StepArea(Default, Halfway以外)によるレイヤー移動
 	// ずらした位置に表示するため、レイヤーを倍化して倍化した先に割り当てる
-	if (g_stateObj.stepArea === `X-Flower` || (g_stateObj.stepArea.includes(`Mismatched`) && g_workObj.orgFlatFlg)) {
+	const assignLayer = _func => {
 		for (let j = 0; j < keyNum; j++) {
-			g_workObj.dividePos[j] = (g_workObj.stepX[j] < (g_headerObj.playingWidth - C_ARW_WIDTH) / 2 ? 0 : 1) *
-				g_stateObj.layerNumDf + g_workObj.dividePos[j];
+			g_workObj.dividePos[j] = (_func(j) ? 0 : 1) * g_stateObj.layerNumDf + g_workObj.dividePos[j];
 		}
+	}
+	if (g_stateObj.stepArea === `X-Flower` || (g_stateObj.stepArea.includes(`Mismatched`) && g_workObj.orgFlatFlg)) {
+		assignLayer(j => g_workObj.stepX[j] < (g_headerObj.playingWidth - C_ARW_WIDTH) / 2);
+	} else if (g_stateObj.stepArea === `Alt-Crossing`) {
+		assignLayer(j => Math.round(g_keyObj[`pos${keyCtrlPtn}`][j]) % 2 === 0);
 	}
 	if (g_stateObj.stepArea === `2Step`) {
 		for (let j = 0; j < keyNum; j++) {
