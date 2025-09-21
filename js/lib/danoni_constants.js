@@ -4278,7 +4278,8 @@ const g_lang_msgObj = {
         playWindow: `ステップゾーン及び矢印の位置を全体的に回転する等の設定です。\n[Stairs/Slope] ステップゾーンを階段状にします\n[Distorted] 画面を歪ませます`,
         sideScrollMsg: `\n[SideScroll] 横スクロールモードになります\n\nSlope, SideScrollを設定する場合は高さが足りているかを確認してください\nクエリパラメータ ?h=600 などで設定できます`,
         sideScrollDisable: `\n\nウィンドウの高さの自動拡張が無効のため、Slope, SideScrollは使用できません`,
-        stepArea: `ステップゾーンの位置を変更します。\n[Halfway] ステップゾーンが中央に表示されます\n[Mismatched] スクロールの向きが上下で異なる方向に流れます\n` +
+        stepArea: `ステップゾーンの位置を変更します。\n[Halfway] ステップゾーンが中央に表示されます\n[2Step] ステップゾーンが2段に分かれて流れてきます\n` +
+            `[Mismatched/R-Mismatched] スクロールの向きが上下で異なる方向に流れます\n` +
             `[X-Flower] レーンが花びらのように広がります\n[Alt-Crossing] レーンが交互に違う方向から流れます`,
         frzReturn: `フリーズアロー到達時及び矢印の回復判定が100の倍数に達するごとに、X/Y/Z軸のいずれかに回転します`,
         shaking: `ステップゾーン及び矢印を揺らす設定です。\n[Horizontal] 横方向に揺らします\n[Vertical] 縦方向に揺らします\n` +
@@ -4371,7 +4372,8 @@ const g_lang_msgObj = {
         playWindow: `This is the setting for overall rotation of the step zone and arrow position, etc.\n[Stairs/Slope] The step zone is in a staircase shape.\n[Distorted] Distorts the screen.`,
         sideScrollMsg: `\n[SideScroll] It becomes a side scroll mode.\n\nWhen setting Slope or SideScroll, please make sure that the height is\nsufficient. Can be set with query parameter ?h=600, etc.`,
         sideScrollDisable: `\n\nSlope, SideScroll cannot be used because \nautomatic window height expansion is disabled.`,
-        stepArea: `Change the position of the step zone.\n[Halfway] Step zones are centered.\n[Mismatched] Scroll direction flows in different directions up and down.\n` +
+        stepArea: `Change the position of the step zone.\n[Halfway] Step zones are centered.\n[2Step] Step zones are divided into two layers.\n` +
+            `[Mismatched/R-Mismatched] Scroll direction flows in different directions up and down.\n` +
             `[X-Flower] Lanes spread out like flower petals.\n[Alt-Crossing] Lanes flow from different directions alternately.`,
         frzReturn: `When the Freeze Arrow is reached, and every time the arrow's recovery judgment \nreaches a multiple of 100, it will rotate on either the X, Y, or Z axis.`,
         shaking: `This sets shaking for the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n` +
