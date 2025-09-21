@@ -1506,14 +1506,8 @@ const g_shuffleFunc = new Map([
         applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
         applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
     }],
-    ['Scatter', (keyNum, shuffleGroup) => {
-        applySRandom(keyNum, shuffleGroup, `arrow`, `frz`);
-        applySRandom(keyNum, shuffleGroup, `dummyArrow`, `dummyFrz`);
-    }],
-    ['Scatter+', keyNum => {
-        applySRandom(keyNum, [[...Array(keyNum).keys()]], `arrow`, `frz`);
-        applySRandom(keyNum, [[...Array(keyNum).keys()]], `dummyArrow`, `dummyFrz`);
-    }],
+    ['Scatter', (keyNum, shuffleGroup) => g_shuffleFunc.get(`S-Random`)(keyNum, shuffleGroup)],
+    ['Scatter+', keyNum => g_shuffleFunc.get(`S-Random+`)(keyNum)],
 ]);
 
 /**
@@ -1547,6 +1541,9 @@ const g_playWindowFunc = new Map([
     ['R-SideScroll', () => g_changeStairs(90)],
 ]);
 
+/**
+ * StepArea適用関数
+ */
 const g_arrowGroupSprite = [`stepSprite`, `arrowSprite`, `frzHitSprite`];
 const halfwayOffset = _j => (_j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2);
 const g_stepAreaFunc = new Map([
@@ -1599,6 +1596,7 @@ const g_stepAreaFunc = new Map([
 /**
  * Shaking適用関数
  */
+const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25);
 const g_shakingFunc = new Map([
     ['OFF', () => true],
     ['Horizontal', () => addX(`mainSprite`, `shaking`, getShakingDist())],
@@ -1643,8 +1641,6 @@ const g_shakingFunc = new Map([
         }
     }],
 ]);
-
-const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25);
 
 /**
  * ランダムな軸を返す補助関数
