@@ -1257,7 +1257,7 @@ const g_settings = {
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
     frzReturnNum: 0,
 
-    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`],
+    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`],
     shakingNum: 0,
 
     effects: [C_FLG_OFF, `Dizzy`, `Spin`, `Wave`, `Storm`, `Blinking`, `Squids`],
@@ -1631,6 +1631,32 @@ const g_shakingFunc = new Map([
             addY(`mainSprite`, `shaking`, deltaY);
             addY(`infoSprite`, `shaking`, deltaY);
             addY(`judgeSprite`, `shaking`, deltaY);
+        }
+    }],
+    ['S-Drunk', () => {
+        const shakeX = g_posXs.mainSprite?.get(`shaking`) ?? 0;
+        const shakeY = g_posYs.mainSprite?.get(`shaking`) ?? 0;
+        if (shakeX === 0 && shakeY === 0) {
+            g_workObj.drunkXFlg = Math.random() < 0.5;
+            g_workObj.drunkYFlg = Math.random() < 0.5;
+        }
+        if (g_workObj.drunkXFlg) {
+            const deltaX = getShakingDist();
+            addX(`mainSprite`, `shaking`, deltaX);
+            addX(`infoSprite`, `shaking`, deltaX);
+            addX(`judgeSprite`, `shaking`, deltaX);
+            for (let j = 0; j < g_stateObj.layerNum; j++) {
+                addY(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist());
+            }
+        }
+        if (g_workObj.drunkYFlg) {
+            const deltaY = getShakingDist() / 2;
+            addY(`mainSprite`, `shaking`, deltaY);
+            addY(`infoSprite`, `shaking`, deltaY);
+            addY(`judgeSprite`, `shaking`, deltaY);
+            for (let j = 0; j < g_stateObj.layerNum; j++) {
+                addX(`mainSprite${j}`, `shaking`, (j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * getShakingDist() * (4 / 3));
+            }
         }
     }],
 ]);
@@ -4016,6 +4042,7 @@ const g_lblNameObj = {
     'u_X-Horizontal': `X-Horizontal`,
     'u_X-Vertical': `X-Vertical`,
     'u_Drunk': `Drunk`,
+    'u_S-Drunk': `S-Drunk`,
 
     'u_Dizzy': `Dizzy`,
     'u_Spin': `Spin`,
