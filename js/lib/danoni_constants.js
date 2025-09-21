@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2025/02/22 (v39.8.1)
+ * Revised : 2025/09/21 (v39.8.9)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3637,6 +3637,12 @@ const g_lblNameObj = {
     'u_R-Distorted': `R-Distorted`,
     'u_SideScroll': `SideScroll`,
     'u_R-SideScroll': `R-SideScroll`,
+
+    'u_Halfway': `Halfway`,
+    'u_2Step': `2Step`,
+    'u_Mismatched': `Mismatched`,
+    'u_R-Mismatched': `R-Mismatched`,
+    'u_X-Flower': `X-Flower`,
 
     'u_X-Axis': `X-Axis`,
     'u_Y-Axis': `Y-Axis`,
