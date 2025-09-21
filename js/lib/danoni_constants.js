@@ -1250,8 +1250,8 @@ const g_settings = {
     playWindows: [`Default`, `Stairs`, `R-Stairs`, `Slope`, `R-Slope`, `Distorted`, `R-Distorted`, `SideScroll`, `R-SideScroll`],
     playWindowNum: 0,
 
-    stepAreas: [`Default`, `Halfway`, `2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`],
-    stepAreaLayers: [`2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`],
+    stepAreas: [`Default`, `Halfway`, `2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`, `Alt-Crossing`],
+    stepAreaLayers: [`2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`, `Alt-Crossing`],
     stepAreaNum: 0,
 
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
@@ -1589,6 +1589,12 @@ const g_stepAreaFunc = new Map([
     ['X-Flower', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * -15}deg)`);
+        }
+    }],
+    ['Alt-Crossing', () => {
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${(j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * -10}deg) ` +
+                `translateX(${(j % 2 === 0 ? 1 : -1) * (j < g_stateObj.layerNumDf ? 1 : -1) * 20}px)`);
         }
     }],
 ]);
