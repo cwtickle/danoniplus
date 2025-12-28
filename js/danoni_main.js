@@ -14068,23 +14068,28 @@ const resultInit = () => {
 
 	if (highscoreCondition) {
 
-		if (!hasVal(g_localStorage.highscores?.[scoreName])) {
+		// 古いキー定義の情報を検索
+		const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
+			.filter(([key, value]) => value === g_headerObj.keyLabels[g_stateObj.scoreId])
+			.map(([key]) => key);
 
-			// 古いキー定義のハイスコアを新しいキー定義に移行する処理
-			const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
-				.filter(([key, value]) => value === g_headerObj.keyLabels[g_stateObj.scoreId])
-				.map(([key]) => key);
-
-			// 古いキー定義のスコアデータを新しいキー定義に移行
-			for (const legacyKey of relatedKeys) {
-				let tmpScoreName = getStorageKeyName(legacyKey, transKeyName, assistFlg, mirrorName, g_stateObj.scoreId);
-				const src = g_localStorage.highscores?.[tmpScoreName];
-				if (hasVal(src)) {
-					g_localStorage.highscores[scoreName] = structuredClone(src);
-					delete g_localStorage.highscores[tmpScoreName];
-					break;
-				}
+		// 古いキー定義のスコアデータを現行キー定義に移行
+		for (const legacyKey of relatedKeys) {
+			let tmpScoreName = getStorageKeyName(
+				legacyKey, transKeyName, assistFlg, mirrorName, g_stateObj.scoreId
+			);
+			const src = g_localStorage.highscores?.[tmpScoreName];
+			if (!hasVal(src)) {
+				continue;
 			}
+
+			// 現行キー定義にスコアデータが存在しない場合、移行元のスコアデータをコピー
+			if (!hasVal(g_localStorage.highscores?.[scoreName])) {
+				g_localStorage.highscores[scoreName] = structuredClone(src);
+			}
+
+			// 古いキー定義は見つかった最初の1件のみ移行し、以降は削除
+			delete g_localStorage.highscores[tmpScoreName];
 		}
 
 		Object.keys(jdgScoreObj).filter(judge => judge !== ``)
