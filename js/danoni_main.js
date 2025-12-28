@@ -4593,6 +4593,23 @@ const getTransKeyName = (_spaceFlg = false) => hasVal(g_keyObj[`transKey${g_keyO
 	? (_spaceFlg ? ` ` : ``) + `(${g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]})` : ``;
 
 /**
+ * ハイスコア定義を行う際のストレージキー名の取得
+ * @param {string} _key 
+ * @param {string} _transName 
+ * @param {string} _assistFlg 
+ * @param {string} _mirrorName 
+ * @param {string} _scoreId 
+ * @returns {string}
+ */
+const getStorageKeyName = (_key, _transName, _assistFlg, _mirrorName, _scoreId) => {
+	let scoreName = `${_key}${_transName}${getStgDetailName('k-')}${g_headerObj.difLabels[_scoreId]}${_assistFlg}${_mirrorName}`;
+	if (g_headerObj.makerView) {
+		scoreName += `-${g_headerObj.creatorNames[_scoreId]}`;
+	}
+	return scoreName;
+};
+
+/**
  * KeyBoardEvent.code の値をCW Edition用のキーコードに変換
  * 簡略指定ができるように、以下の記述を許容
  * 例) KeyD -> D, ArrowDown -> Down, AltLeft -> Alt
@@ -6861,29 +6878,19 @@ const makeHighScore = _scoreId => {
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
 	const mirrorName = (g_stateObj.shuffle === C_FLG_OFF ? `` : `-${g_stateObj.shuffle}`);
 	const transKeyName = getTransKeyName();
-	const getStorageKeyName = (_key) => {
-		let scoreName = `${_key}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[_scoreId]}${assistFlg}${mirrorName}`;
-		if (g_headerObj.makerView) {
-			scoreName += `-${g_headerObj.creatorNames[_scoreId]}`;
-		}
-		return scoreName;
-	}
 
 	// 古いキー定義の情報を検索
-	console.log(g_keyObj.keyTransPattern)
 	const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
 		.filter(([key, value]) => value === g_headerObj.keyLabels[_scoreId])
 		.map(([key]) => key);
 
-	// 古いキー定義のハイスコアがいる場合は、現行キー定義に移行（次回ハイスコア更新時に反映）
-	// ただし、すでに現行キー定義のハイスコアがいる場合は何もしない
-	let scoreName = getStorageKeyName(g_headerObj.keyLabels[_scoreId]);
+	// 古いキー定義のハイスコアがいる場合は、現行キー定義として表示
+	let scoreName = getStorageKeyName(g_headerObj.keyLabels[_scoreId], transKeyName, assistFlg, mirrorName, _scoreId);
 	relatedKeys.unshift(g_headerObj.keyLabels[_scoreId]); // 現行キー定義も追加
 	relatedKeys.forEach((key => {
-		let tmpScoreName = getStorageKeyName(key);
+		let tmpScoreName = getStorageKeyName(key, transKeyName, assistFlg, mirrorName, _scoreId);
 		if (hasVal(g_localStorage.highscores?.[tmpScoreName])) {
 			g_localStorage.highscores[scoreName] = structuredClone(g_localStorage.highscores[tmpScoreName]);
-			delete g_localStorage.highscores[tmpScoreName];
 			return;
 		}
 	}));
@@ -14026,10 +14033,8 @@ const resultInit = () => {
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
 	const mirrorName = (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 ? `-${g_stateObj.shuffle}` : ``);
-	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${mirrorName}`;
-	if (g_headerObj.makerView) {
-		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
-	}
+	let scoreName = getStorageKeyName(g_headerObj.keyLabels[g_stateObj.scoreId], transKeyName, assistFlg, mirrorName, g_stateObj.scoreId);
+
 	const highscoreDfObj = {
 		ii: 0, shakin: 0, matari: 0, shobon: 0, uwan: 0,
 		kita: 0, iknai: 0,
@@ -14059,6 +14064,20 @@ const resultInit = () => {
 	g_customJsObj.result.forEach(func => func());
 
 	if (highscoreCondition) {
+
+		// 古いキー定義のハイスコアを新しいキー定義に移行する処理
+		const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
+			.filter(([key, value]) => value === g_headerObj.keyLabels[_scoreId])
+			.map(([key]) => key);
+		relatedKeys.unshift(g_headerObj.keyLabels[_scoreId]);
+		relatedKeys.forEach(((key, index) => {
+			let tmpScoreName = getStorageKeyName(key, transKeyName, assistFlg, mirrorName, g_stateObj.scoreId);
+			if (hasVal(g_localStorage.highscores?.[tmpScoreName]) && index > 0) {
+				g_localStorage.highscores[scoreName] = structuredClone(g_localStorage.highscores[tmpScoreName]);
+				delete g_localStorage.highscores[tmpScoreName];
+				return;
+			}
+		}));
 
 		Object.keys(jdgScoreObj).filter(judge => judge !== ``)
 			.forEach(judge => highscoreDfObj[judge] = g_resultObj[judge] -
