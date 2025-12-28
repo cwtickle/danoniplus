@@ -2697,7 +2697,7 @@ const initialControl = async () => {
 
 	// 未使用のg_keyObjプロパティを削除
 	const keyProp = g_keyCopyLists.simple.concat(g_keyCopyLists.multiple, `keyCtrl`, `keyName`, `minWidth`, `ptchara`);
-	const delKeyPropList = [`ptchara7`, `keyTransPattern`, `dfPtnNum`, `minKeyCtrlNum`, `minPatterns`];
+	const delKeyPropList = [`ptchara7`, `dfPtnNum`, `minKeyCtrlNum`, `minPatterns`];
 	Object.keys(g_keyObj).forEach(key => {
 		const type = keyProp.find(prop => key.startsWith(prop)) || ``;
 		if (type !== ``) {
@@ -4591,6 +4591,23 @@ const getKeyUnitName = _key => unEscapeHtml(escapeHtml(g_keyObj[`keyName${_key}`
  */
 const getTransKeyName = (_spaceFlg = false) => hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])
 	? (_spaceFlg ? ` ` : ``) + `(${g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]})` : ``;
+
+/**
+ * ハイスコア定義を行う際のストレージキー名の取得
+ * @param {string} _key 
+ * @param {string} _transName 
+ * @param {string} _assistFlg 
+ * @param {string} _mirrorName 
+ * @param {string} _scoreId 
+ * @returns {string}
+ */
+const getStorageKeyName = (_key, _transName, _assistFlg, _mirrorName, _scoreId) => {
+	let scoreName = `${_key}${_transName}${getStgDetailName('k-')}${g_headerObj.difLabels[_scoreId]}${_assistFlg}${_mirrorName}`;
+	if (g_headerObj.makerView) {
+		scoreName += `-${g_headerObj.creatorNames[_scoreId]}`;
+	}
+	return scoreName;
+};
 
 /**
  * KeyBoardEvent.code の値をCW Edition用のキーコードに変換
@@ -6861,9 +6878,24 @@ const makeHighScore = _scoreId => {
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
 	const mirrorName = (g_stateObj.shuffle === C_FLG_OFF ? `` : `-${g_stateObj.shuffle}`);
 	const transKeyName = getTransKeyName();
-	let scoreName = `${g_headerObj.keyLabels[_scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[_scoreId]}${assistFlg}${mirrorName}`;
-	if (g_headerObj.makerView) {
-		scoreName += `-${g_headerObj.creatorNames[_scoreId]}`;
+	let scoreName = getStorageKeyName(g_headerObj.keyLabels[_scoreId], transKeyName, assistFlg, mirrorName, _scoreId);
+
+	if (!hasVal(g_localStorage.highscores?.[scoreName])) {
+
+		// 古いキー定義の情報を検索
+		const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
+			.filter(([key, value]) => value === g_headerObj.keyLabels[_scoreId])
+			.map(([key]) => key);
+
+		// 古いキー定義のハイスコアがいる場合は、現行キー定義として表示
+		for (const legacyKey of relatedKeys) {
+			let tmpScoreName = getStorageKeyName(legacyKey, transKeyName, assistFlg, mirrorName, _scoreId);
+			const src = g_localStorage.highscores?.[tmpScoreName];
+			if (hasVal(src)) {
+				g_localStorage.highscores[scoreName] = structuredClone(src);
+				break;
+			}
+		}
 	}
 
 	const createScoreLabel = (_id, _text, { xPos = 0, yPos = 0, dx = 0, w = 150, h = 17, colorName = _id, align = C_ALIGN_LEFT, overflow = `visible` } = {}) =>
@@ -14004,10 +14036,8 @@ const resultInit = () => {
 	// ハイスコア差分計算
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${g_stateObj.autoPlay}less`);
 	const mirrorName = (g_stateObj.shuffle.indexOf(`Mirror`) !== -1 ? `-${g_stateObj.shuffle}` : ``);
-	let scoreName = `${g_headerObj.keyLabels[g_stateObj.scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${mirrorName}`;
-	if (g_headerObj.makerView) {
-		scoreName += `-${g_headerObj.creatorNames[g_stateObj.scoreId]}`;
-	}
+	let scoreName = getStorageKeyName(g_headerObj.keyLabels[g_stateObj.scoreId], transKeyName, assistFlg, mirrorName, g_stateObj.scoreId);
+
 	const highscoreDfObj = {
 		ii: 0, shakin: 0, matari: 0, shobon: 0, uwan: 0,
 		kita: 0, iknai: 0,
@@ -14037,6 +14067,30 @@ const resultInit = () => {
 	g_customJsObj.result.forEach(func => func());
 
 	if (highscoreCondition) {
+
+		// 古いキー定義の情報を検索
+		const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
+			.filter(([key, value]) => value === g_headerObj.keyLabels[g_stateObj.scoreId])
+			.map(([key]) => key);
+
+		// 古いキー定義のスコアデータを現行キー定義に移行
+		for (const legacyKey of relatedKeys) {
+			let tmpScoreName = getStorageKeyName(
+				legacyKey, transKeyName, assistFlg, mirrorName, g_stateObj.scoreId
+			);
+			const src = g_localStorage.highscores?.[tmpScoreName];
+			if (!hasVal(src)) {
+				continue;
+			}
+
+			// 現行キー定義にスコアデータが存在しない場合、移行元のスコアデータをコピー
+			if (!hasVal(g_localStorage.highscores?.[scoreName])) {
+				g_localStorage.highscores[scoreName] = structuredClone(src);
+			}
+
+			// 古いキー定義は見つかった最初の1件のみ移行し、以降は削除
+			delete g_localStorage.highscores[tmpScoreName];
+		}
 
 		Object.keys(jdgScoreObj).filter(judge => judge !== ``)
 			.forEach(judge => highscoreDfObj[judge] = g_resultObj[judge] -
