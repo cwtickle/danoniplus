@@ -14067,9 +14067,9 @@ const resultInit = () => {
 
 		// 古いキー定義のハイスコアを新しいキー定義に移行する処理
 		const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
-			.filter(([key, value]) => value === g_headerObj.keyLabels[_scoreId])
+			.filter(([key, value]) => value === g_headerObj.keyLabels[g_stateObj.scoreId])
 			.map(([key]) => key);
-		relatedKeys.unshift(g_headerObj.keyLabels[_scoreId]);
+		relatedKeys.unshift(g_headerObj.keyLabels[g_stateObj.scoreId]);
 		relatedKeys.forEach(((key, index) => {
 			let tmpScoreName = getStorageKeyName(key, transKeyName, assistFlg, mirrorName, g_stateObj.scoreId);
 			if (hasVal(g_localStorage.highscores?.[tmpScoreName]) && index > 0) {
