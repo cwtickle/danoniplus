@@ -6878,22 +6878,25 @@ const makeHighScore = _scoreId => {
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
 	const mirrorName = (g_stateObj.shuffle === C_FLG_OFF ? `` : `-${g_stateObj.shuffle}`);
 	const transKeyName = getTransKeyName();
-
-	// 古いキー定義の情報を検索
-	const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
-		.filter(([key, value]) => value === g_headerObj.keyLabels[_scoreId])
-		.map(([key]) => key);
-
-	// 古いキー定義のハイスコアがいる場合は、現行キー定義として表示
 	let scoreName = getStorageKeyName(g_headerObj.keyLabels[_scoreId], transKeyName, assistFlg, mirrorName, _scoreId);
-	relatedKeys.unshift(g_headerObj.keyLabels[_scoreId]); // 現行キー定義も追加
-	relatedKeys.forEach((key => {
-		let tmpScoreName = getStorageKeyName(key, transKeyName, assistFlg, mirrorName, _scoreId);
-		if (hasVal(g_localStorage.highscores?.[tmpScoreName])) {
-			g_localStorage.highscores[scoreName] = structuredClone(g_localStorage.highscores[tmpScoreName]);
-			return;
+
+	if (!hasVal(g_localStorage.highscores?.[scoreName])) {
+
+		// 古いキー定義の情報を検索
+		const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
+			.filter(([key, value]) => value === g_headerObj.keyLabels[_scoreId])
+			.map(([key]) => key);
+
+		// 古いキー定義のハイスコアがいる場合は、現行キー定義として表示
+		for (const legacyKey of relatedKeys) {
+			let tmpScoreName = getStorageKeyName(legacyKey, transKeyName, assistFlg, mirrorName, _scoreId);
+			const src = g_localStorage.highscores?.[tmpScoreName];
+			if (hasVal(src)) {
+				g_localStorage.highscores[scoreName] = structuredClone(src);
+				break;
+			}
 		}
-	}));
+	}
 
 	const createScoreLabel = (_id, _text, { xPos = 0, yPos = 0, dx = 0, w = 150, h = 17, colorName = _id, align = C_ALIGN_LEFT, overflow = `visible` } = {}) =>
 		createDivCss2Label(`lblH${toCapitalize(_id)}`, _text, {
@@ -14065,19 +14068,24 @@ const resultInit = () => {
 
 	if (highscoreCondition) {
 
-		// 古いキー定義のハイスコアを新しいキー定義に移行する処理
-		const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
-			.filter(([key, value]) => value === g_headerObj.keyLabels[g_stateObj.scoreId])
-			.map(([key]) => key);
-		relatedKeys.unshift(g_headerObj.keyLabels[g_stateObj.scoreId]);
-		relatedKeys.forEach(((key, index) => {
-			let tmpScoreName = getStorageKeyName(key, transKeyName, assistFlg, mirrorName, g_stateObj.scoreId);
-			if (hasVal(g_localStorage.highscores?.[tmpScoreName]) && index > 0) {
-				g_localStorage.highscores[scoreName] = structuredClone(g_localStorage.highscores[tmpScoreName]);
-				delete g_localStorage.highscores[tmpScoreName];
-				return;
+		if (!hasVal(g_localStorage.highscores?.[scoreName])) {
+
+			// 古いキー定義のハイスコアを新しいキー定義に移行する処理
+			const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
+				.filter(([key, value]) => value === g_headerObj.keyLabels[g_stateObj.scoreId])
+				.map(([key]) => key);
+
+			// 古いキー定義のスコアデータを新しいキー定義に移行
+			for (const legacyKey of relatedKeys) {
+				let tmpScoreName = getStorageKeyName(legacyKey, transKeyName, assistFlg, mirrorName, g_stateObj.scoreId);
+				const src = g_localStorage.highscores?.[tmpScoreName];
+				if (hasVal(src)) {
+					g_localStorage.highscores[scoreName] = structuredClone(src);
+					delete g_localStorage.highscores[tmpScoreName];
+					break;
+				}
 			}
-		}));
+		}
 
 		Object.keys(jdgScoreObj).filter(judge => judge !== ``)
 			.forEach(judge => highscoreDfObj[judge] = g_resultObj[judge] -
