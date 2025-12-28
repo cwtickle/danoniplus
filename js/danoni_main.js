@@ -2697,7 +2697,7 @@ const initialControl = async () => {
 
 	// 未使用のg_keyObjプロパティを削除
 	const keyProp = g_keyCopyLists.simple.concat(g_keyCopyLists.multiple, `keyCtrl`, `keyName`, `minWidth`, `ptchara`);
-	const delKeyPropList = [`ptchara7`, `keyTransPattern`, `dfPtnNum`, `minKeyCtrlNum`, `minPatterns`];
+	const delKeyPropList = [`ptchara7`, `dfPtnNum`, `minKeyCtrlNum`, `minPatterns`];
 	Object.keys(g_keyObj).forEach(key => {
 		const type = keyProp.find(prop => key.startsWith(prop)) || ``;
 		if (type !== ``) {
@@ -6861,10 +6861,32 @@ const makeHighScore = _scoreId => {
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
 	const mirrorName = (g_stateObj.shuffle === C_FLG_OFF ? `` : `-${g_stateObj.shuffle}`);
 	const transKeyName = getTransKeyName();
-	let scoreName = `${g_headerObj.keyLabels[_scoreId]}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[_scoreId]}${assistFlg}${mirrorName}`;
-	if (g_headerObj.makerView) {
-		scoreName += `-${g_headerObj.creatorNames[_scoreId]}`;
+	const getStorageKeyName = (_key) => {
+		let scoreName = `${_key}${transKeyName}${getStgDetailName('k-')}${g_headerObj.difLabels[_scoreId]}${assistFlg}${mirrorName}`;
+		if (g_headerObj.makerView) {
+			scoreName += `-${g_headerObj.creatorNames[_scoreId]}`;
+		}
+		return scoreName;
 	}
+
+	// 古いキー定義の情報を検索
+	console.log(g_keyObj.keyTransPattern)
+	const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
+		.filter(([key, value]) => value === g_headerObj.keyLabels[_scoreId])
+		.map(([key]) => key);
+
+	// 古いキー定義のハイスコアがいる場合は、現行キー定義に移行（次回ハイスコア更新時に反映）
+	// ただし、すでに現行キー定義のハイスコアがいる場合は何もしない
+	let scoreName = getStorageKeyName(g_headerObj.keyLabels[_scoreId]);
+	relatedKeys.unshift(g_headerObj.keyLabels[_scoreId]); // 現行キー定義も追加
+	relatedKeys.forEach((key => {
+		let tmpScoreName = getStorageKeyName(key);
+		if (hasVal(g_localStorage.highscores?.[tmpScoreName])) {
+			g_localStorage.highscores[scoreName] = structuredClone(g_localStorage.highscores[tmpScoreName]);
+			delete g_localStorage.highscores[tmpScoreName];
+			return;
+		}
+	}));
 
 	const createScoreLabel = (_id, _text, { xPos = 0, yPos = 0, dx = 0, w = 150, h = 17, colorName = _id, align = C_ALIGN_LEFT, overflow = `visible` } = {}) =>
 		createDivCss2Label(`lblH${toCapitalize(_id)}`, _text, {
