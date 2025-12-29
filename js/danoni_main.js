@@ -10403,7 +10403,7 @@ const calcLifeVals = _allArrows => {
  * @param {number} _val 
  * @param {number} _allArrows 
  */
-const calcLifeVal = (_val, _allArrows) => Math.round(_val * g_headerObj.maxLifeVal * 100 / _allArrows) / 100;
+const calcLifeVal = (_val, _allArrows) => _val * g_headerObj.maxLifeVal / _allArrows;
 
 /**
  * 最終フレーム数の取得
