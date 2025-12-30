@@ -5576,6 +5576,14 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	 * @returns {number} timeoutId
 	 */
 	const fadeVolume = (startVolume, endVolume, step, onEnd, isValid) => {
+
+		// 開始時点で終了音量とイコールの場合は終了
+		if (startVolume === endVolume || step === 0) {
+			g_audio.volume = endVolume;
+			onEnd(true);
+			return null;
+		}
+
 		let volume = startVolume;
 		g_audio.volume = startVolume;
 
