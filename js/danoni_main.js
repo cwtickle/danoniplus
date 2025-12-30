@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/12/28
+ * Revised : 2025/12/30
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 43.2.0`;
-const g_revisedDate = `2025/12/28`;
+const g_version = `Ver 43.2.1`;
+const g_revisedDate = `2025/12/30`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2350,13 +2350,28 @@ class AudioPlayer {
 		this._eventListeners[`canplaythrough`]?.forEach(_listener => _listener());
 	}
 
+	/**
+	 * 再生処理
+	 * @param {number} _adjustmentTime
+	 * - 実際の再生開始時間は、scheduleLead + _adjustmentTime から開始される
+	 * - ただしゲーム内での経過時間計算は _adjustmentTime を基準に行う
+	 * - scheduleLead は安定した再生タイミングを確保するための内部マージン
+	 */
 	play(_adjustmentTime = 0) {
 		this._source = this._context.createBufferSource();
 		this._source.buffer = this._buffer;
 		this._source.playbackRate.value = this.playbackRate;
 		this._source.connect(this._gain);
-		this._startTime = this._context.currentTime;
-		this._source.start(this._context.currentTime + _adjustmentTime, this._fadeinPosition);
+
+		// 内部スケジューリング用のマージン時間(100ms)
+		const scheduleLead = 0.1;
+
+		// 実際の予約時刻（内部スケジューリング用のマージンを含む）
+		const startAt = this._context.currentTime + scheduleLead + _adjustmentTime;
+		this._source.start(startAt, this._fadeinPosition);
+
+		// ゲーム側の論理的開始時刻（scheduleLead を含めない）
+		this._startTime = this._context.currentTime + _adjustmentTime;
 	}
 
 	pause() {
@@ -5542,7 +5557,7 @@ const pauseBGM = () => {
 	}
 	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
 		if (g_stateObj[id]) {
-			clearInterval(g_stateObj[id]);
+			clearTimeout(g_stateObj[id]);
 			g_stateObj[id] = null;
 		}
 	});
@@ -5567,94 +5582,176 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	const isTitle = () => g_currentPage === `title` && _currentLoopNum === g_settings.musicLoopNum;
 
 	/**
+	 * 汎用フェード処理
+	 * @param {number} startVolume - 開始音量 (0〜1)
+	 * @param {number} endVolume - 終了音量 (0〜1)
+	 * @param {number} step - 1ステップの増減量
+	 * @param {function} onEnd - フェード完了時の処理
+	 * @param {function} isValid - フェード継続条件（true: 継続, false: 中断）
+	 * @returns {number} timeoutId
+	 */
+	const fadeVolume = (startVolume, endVolume, step, onEnd, isValid) => {
+
+		// 開始時点で終了音量とイコールの場合は終了
+		if (startVolume === endVolume || step === 0) {
+			g_audio.volume = endVolume;
+			onEnd(true);
+			return null;
+		}
+
+		let volume = startVolume;
+		g_audio.volume = startVolume;
+
+		const stepFunc = () => {
+			// 継続条件チェック
+			if (!isValid()) {
+				onEnd(false); // 中断
+				return;
+			}
+
+			// 終了判定
+			const reached =
+				(startVolume < endVolume && volume >= endVolume) ||
+				(startVolume > endVolume && volume <= endVolume);
+
+			if (reached) {
+				g_audio.volume = endVolume;
+				onEnd(true); // 正常終了
+				return;
+			}
+
+			// 音量更新
+			volume += step;
+			g_audio.volume = Math.min(Math.max(volume, 0), 1);
+
+			// 次のステップへ
+			setTimeout(stepFunc, FADE_INTERVAL_MS);
+		};
+
+		return setTimeout(stepFunc, FADE_INTERVAL_MS);
+	};
+
+	/**
+	 * 汎用ポーリング（監視）処理
+	 * @param {function} check - 条件チェック関数（true なら終了）
+	 * @param {function} onEnd - 終了時の処理
+	 * @param {function} isValid - 継続条件（true: 継続, false: 中断）
+	 * @returns {number} timeoutId
+	 */
+	const poll = (check, onEnd, isValid) => {
+		const step = () => {
+			// 継続条件チェック
+			if (!isValid()) {
+				onEnd(false); // 中断
+				return;
+			}
+
+			// 条件成立
+			if (check()) {
+				onEnd(true); // 正常終了
+				return;
+			}
+
+			// 次のチェックへ
+			setTimeout(step, FADE_INTERVAL_MS);
+		};
+
+		return setTimeout(step, FADE_INTERVAL_MS);
+	};
+
+	/**
 	 * BGMのフェードアウトとシーク
 	 */
 	const fadeOutAndSeek = () => {
-		let volume = g_audio.volume;
-		const fadeInterval = setInterval(() => {
-			if (volume > FADE_STEP && isTitle()) {
-				volume -= FADE_STEP;
-				g_audio.volume = Math.max(volume, 0);
-			} else {
-				clearInterval(fadeInterval);
+		const start = g_audio.volume;
+		const end = 0;
+
+		g_stateObj.bgmFadeOut = fadeVolume(
+			start,
+			end,
+			-FADE_STEP,
+			/* onEnd */
+			(finished) => {
 				g_stateObj.bgmFadeOut = null;
+
+				if (!finished) return; // 中断された
+
 				g_audio.pause();
 				g_audio.currentTime = musicStart;
 
-				// フェードイン開始
 				if (isTitle()) {
 					setTimeout(() => {
 						fadeIn();
-						if (encodeFlg) {
-							// base64エンコード時はtimeupdateイベントが発火しないため、
-							// setIntervalで時間を取得する
-							repeatBGM();
-						}
+						if (encodeFlg) repeatBGM();
 					}, FADE_DELAY_MS);
 				} else {
 					pauseBGM();
 				}
-			}
-		}, FADE_INTERVAL_MS);
-		g_stateObj.bgmFadeOut = fadeInterval;
+			},
+			/* isValid */
+			() =>
+				isTitle() &&
+				g_stateObj.bgmFadeOut !== null
+		);
 	};
 
 	/**
 	 * BGMのフェードイン
 	 */
 	const fadeIn = () => {
-		if (!(g_audio instanceof AudioPlayer) && !g_audio.src) {
-			return;
-		}
-		let volume = 0;
-		g_audio.play();
-		const fadeInterval = setInterval(() => {
-			if (volume < g_stateObj.bgmVolume / 100 && isTitle()) {
-				volume += FADE_STEP;
-				g_audio.volume = Math.min(volume, 1);
-			} else {
-				clearInterval(fadeInterval);
-				g_stateObj.bgmFadeIn = null;
-			}
+		if (!(g_audio instanceof AudioPlayer) && !g_audio.src) return;
 
-			// フェードイン中に楽曲が変更された場合は停止
-			if (currentIdx !== g_headerObj.musicIdxList[g_settings.musicIdxNum]) {
-				pauseBGM();
-				clearInterval(fadeInterval);
+		const start = 0;
+		const end = g_stateObj.bgmVolume / 100;
+
+		g_audio.volume = 0;
+		g_audio.play();
+
+		g_stateObj.bgmFadeIn = fadeVolume(
+			start,
+			end,
+			FADE_STEP,
+			/* onEnd */
+			() => {
 				g_stateObj.bgmFadeIn = null;
-			}
-		}, FADE_INTERVAL_MS);
-		g_stateObj.bgmFadeIn = fadeInterval;
+			},
+			/* isValid */
+			() =>
+				isTitle() &&
+				g_stateObj.bgmFadeIn !== null &&
+				currentIdx === g_headerObj.musicIdxList[g_settings.musicIdxNum]
+		);
 	};
 
 	/**
-	 * BGMのループ処理
+	 * BGMのループ処理 (base64エンコード時用)
+	 * - base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
 	 */
 	const repeatBGM = () => {
-		if (encodeFlg) {
-			// base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
-			const repeatCheck = setInterval((num = g_settings.musicIdxNum) => {
-				try {
-					if (((g_audio.elapsedTime >= musicEnd) ||
-						num !== g_settings.musicIdxNum) && g_stateObj.bgmLooped !== null) {
-						clearInterval(repeatCheck);
-						g_stateObj.bgmLooped = null;
-						fadeOutAndSeek();
-					}
-				} catch (e) {
-					clearInterval(repeatCheck);
-					g_stateObj.bgmLooped = null;
-				}
-			}, FADE_INTERVAL_MS);
-			g_stateObj.bgmLooped = repeatCheck;
+		const numAtStart = g_settings.musicIdxNum;
 
-		} else {
-			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audio, "timeupdate", () => {
-				if (g_audio.currentTime >= musicEnd) {
+		g_stateObj.bgmLooped = poll(
+			/* check */
+			() => {
+				try {
+					return (
+						g_audio.elapsedTime >= musicEnd ||
+						numAtStart !== g_settings.musicIdxNum
+					);
+				} catch {
+					return true; // エラー時は終了扱い
+				}
+			},
+			/* onEnd */
+			(finished) => {
+				g_stateObj.bgmLooped = null;
+				if (finished) {
 					fadeOutAndSeek();
 				}
-			});
-		}
+			},
+			/* isValid */
+			() => g_stateObj.bgmLooped !== null
+		);
 	};
 
 	if (encodeFlg) {
@@ -5676,9 +5773,10 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				g_audio = tmpAudio;
 			}
 			g_audio.volume = g_stateObj.bgmVolume / 100;
-			if (g_currentPage === `title`) {
+			if (g_currentPage === `title` && musicEnd > 0) {
 				g_audio.currentTime = musicStart;
 				g_audio.play();
+				repeatBGM();
 			}
 		} catch (e) {
 			// 音源の読み込みに失敗した場合、エラーを表示
@@ -5698,9 +5796,14 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 			g_audio.currentTime = musicStart;
 			g_audio.play();
 		}, { once: true });
-	}
-	if (musicEnd > 0) {
-		repeatBGM();
+
+		if (musicEnd > 0) {
+			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audio, "timeupdate", () => {
+				if (g_audio.currentTime >= musicEnd) {
+					fadeOutAndSeek();
+				}
+			});
+		}
 	}
 };
 
@@ -7824,26 +7927,28 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const initVal = g_headerObj.maxLifeVal * _init / 100;
 	const borderVal = g_headerObj.maxLifeVal * _border / 100;
 
-	// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
+	// 整形用にライフ初期値を整数、回復・ダメージ量を小数第2位に丸める
 	const init = Math.round(initVal);
 	const borderText = (_mode === C_LFE_BORDER && _border !== 0 ? Math.round(borderVal) : `-`);
-	const toFixed2 = _val => Math.round(_val * 100) / 100;
+	const round2 = _val => Math.round(_val * 100) / 100;
 
-	let rcvText = toFixed2(_rcv), dmgText = toFixed2(_dmg);
+	let rcvText = round2(_rcv), dmgText = round2(_dmg);
 	let realRcv = _rcv, realDmg = _dmg;
 	const allCnt = sumData(g_detailObj.arrowCnt[g_stateObj.scoreId]) +
 		(g_headerObj.frzStartjdgUse ? 2 : 1) * sumData(g_detailObj.frzCnt[g_stateObj.scoreId]);
 
+	// ゲージ設定が矢印数依存の場合、実際の値に変換して表示する
+	// 表示上、計算した値は小数第二位までの表示とする（それ以外はそのまま）
 	if (_lifeValFlg === C_FLG_ON) {
 		rcvText = ``, dmgText = ``;
 		if (allCnt > 0) {
 			realRcv = Math.min(calcLifeVal(_rcv, allCnt), g_headerObj.maxLifeVal);
 			realDmg = Math.min(calcLifeVal(_dmg, allCnt), g_headerObj.maxLifeVal);
-			rcvText = `${toFixed2(realRcv)}<br>`;
-			dmgText = `${toFixed2(realDmg)}<br>`;
+			rcvText = `${realRcv.toFixed(2)}<br>`;
+			dmgText = `${realDmg.toFixed(2)}<br>`;
 		}
-		rcvText += `<span class="settings_lifeVal">(${toFixed2(_rcv)})</span>`;
-		dmgText += `<span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
+		rcvText += `<span class="settings_lifeVal">(${round2(_rcv)})</span>`;
+		dmgText += `<span class="settings_lifeVal">(${round2(_dmg)})</span>`;
 	}
 
 	// 達成率(Accuracy)・許容ミス数の計算
@@ -10435,7 +10540,7 @@ const calcLifeVals = _allArrows => {
  * @param {number} _val 
  * @param {number} _allArrows 
  */
-const calcLifeVal = (_val, _allArrows) => Math.round(_val * g_headerObj.maxLifeVal * 100 / _allArrows) / 100;
+const calcLifeVal = (_val, _allArrows) => _val * g_headerObj.maxLifeVal / _allArrows;
 
 /**
  * 最終フレーム数の取得
