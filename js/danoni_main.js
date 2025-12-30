@@ -2350,14 +2350,24 @@ class AudioPlayer {
 		this._eventListeners[`canplaythrough`]?.forEach(_listener => _listener());
 	}
 
+	/**
+	 * 再生処理
+	 * @param {number} _adjustmentTime
+	 * - 実際の再生開始時間は、scheduleLead + _adjustmentTime から開始される
+	 * - ただしゲーム内での経過時間計算は _adjustmentTime を基準に行う
+	 * - scheduleLead は安定した再生タイミングを確保するための内部マージン
+	 */
 	play(_adjustmentTime = 0) {
 		this._source = this._context.createBufferSource();
 		this._source.buffer = this._buffer;
 		this._source.playbackRate.value = this.playbackRate;
 		this._source.connect(this._gain);
 
-		// 100ms 先に予約して開始
-		const startAt = this._context.currentTime + 0.1 + _adjustmentTime;
+		// 内部スケジューリング用のマージン時間(100ms)
+		const scheduleLead = 0.1;
+
+		// マージンした分を先に予約して開始
+		const startAt = this._context.currentTime + scheduleLead + _adjustmentTime;
 
 		this._startTime = startAt;
 		this._source.start(startAt, this._fadeinPosition);
