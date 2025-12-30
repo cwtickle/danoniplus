@@ -2355,8 +2355,12 @@ class AudioPlayer {
 		this._source.buffer = this._buffer;
 		this._source.playbackRate.value = this.playbackRate;
 		this._source.connect(this._gain);
-		this._startTime = this._context.currentTime;
-		this._source.start(this._context.currentTime + _adjustmentTime, this._fadeinPosition);
+
+		// 100ms 先に予約して開始
+		const startAt = this._context.currentTime + 0.1 + _adjustmentTime;
+
+		this._startTime = startAt;
+		this._source.start(startAt, this._fadeinPosition);
 	}
 
 	pause() {
