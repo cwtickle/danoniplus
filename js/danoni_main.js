@@ -7824,7 +7824,7 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const initVal = g_headerObj.maxLifeVal * _init / 100;
 	const borderVal = g_headerObj.maxLifeVal * _border / 100;
 
-	// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
+	// 整形用にライフ初期値を整数、回復・ダメージ量を小数第2位に丸める
 	const init = Math.round(initVal);
 	const borderText = (_mode === C_LFE_BORDER && _border !== 0 ? Math.round(borderVal) : `-`);
 	const round2 = _val => Math.round(_val * 100) / 100;
@@ -7834,6 +7834,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const allCnt = sumData(g_detailObj.arrowCnt[g_stateObj.scoreId]) +
 		(g_headerObj.frzStartjdgUse ? 2 : 1) * sumData(g_detailObj.frzCnt[g_stateObj.scoreId]);
 
+	// ゲージ設定が矢印数依存の場合、実際の値に変換して表示する
+	// 表示上、計算した値は小数第二位までの表示とする（それ以外はそのまま）
 	if (_lifeValFlg === C_FLG_ON) {
 		rcvText = ``, dmgText = ``;
 		if (allCnt > 0) {
