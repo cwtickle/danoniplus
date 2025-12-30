@@ -5567,94 +5567,165 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	const isTitle = () => g_currentPage === `title` && _currentLoopNum === g_settings.musicLoopNum;
 
 	/**
+	 * 汎用フェード処理
+	 * @param {number} startVolume - 開始音量 (0〜1)
+	 * @param {number} endVolume - 終了音量 (0〜1)
+	 * @param {number} step - 1ステップの増減量
+	 * @param {function} onEnd - フェード完了時の処理
+	 * @param {function} isValid - フェード継続条件（true: 継続, false: 中断）
+	 * @returns {number} timeoutId
+	 */
+	const fadeVolume = (startVolume, endVolume, step, onEnd, isValid) => {
+		let volume = startVolume;
+		g_audio.volume = startVolume;
+
+		const stepFunc = () => {
+			// 継続条件チェック
+			if (!isValid()) {
+				onEnd(false); // 中断
+				return;
+			}
+
+			// 終了判定
+			const reached =
+				(startVolume < endVolume && volume >= endVolume) ||
+				(startVolume > endVolume && volume <= endVolume);
+
+			if (reached) {
+				g_audio.volume = endVolume;
+				onEnd(true); // 正常終了
+				return;
+			}
+
+			// 音量更新
+			volume += step;
+			g_audio.volume = Math.min(Math.max(volume, 0), 1);
+
+			// 次のステップへ
+			setTimeout(stepFunc, FADE_INTERVAL_MS);
+		};
+
+		return setTimeout(stepFunc, FADE_INTERVAL_MS);
+	};
+
+	/**
+	 * 汎用ポーリング（監視）処理
+	 * @param {function} check - 条件チェック関数（true なら終了）
+	 * @param {function} onEnd - 終了時の処理
+	 * @param {function} isValid - 継続条件（true: 継続, false: 中断）
+	 * @returns {number} timeoutId
+	 */
+	const poll = (check, onEnd, isValid) => {
+		const step = () => {
+			// 継続条件チェック
+			if (!isValid()) {
+				onEnd(false); // 中断
+				return;
+			}
+
+			// 条件成立
+			if (check()) {
+				onEnd(true); // 正常終了
+				return;
+			}
+
+			// 次のチェックへ
+			setTimeout(step, FADE_INTERVAL_MS);
+		};
+
+		return setTimeout(step, FADE_INTERVAL_MS);
+	};
+
+	/**
 	 * BGMのフェードアウトとシーク
 	 */
 	const fadeOutAndSeek = () => {
-		let volume = g_audio.volume;
-		const fadeInterval = setInterval(() => {
-			if (volume > FADE_STEP && isTitle()) {
-				volume -= FADE_STEP;
-				g_audio.volume = Math.max(volume, 0);
-			} else {
-				clearInterval(fadeInterval);
+		const start = g_audio.volume;
+		const end = 0;
+
+		g_stateObj.bgmFadeOut = fadeVolume(
+			start,
+			end,
+			-FADE_STEP,
+			/* onEnd */
+			(finished) => {
 				g_stateObj.bgmFadeOut = null;
+
+				if (!finished) return; // 中断された
+
 				g_audio.pause();
 				g_audio.currentTime = musicStart;
 
-				// フェードイン開始
 				if (isTitle()) {
 					setTimeout(() => {
 						fadeIn();
-						if (encodeFlg) {
-							// base64エンコード時はtimeupdateイベントが発火しないため、
-							// setIntervalで時間を取得する
-							repeatBGM();
-						}
+						if (encodeFlg) repeatBGM();
 					}, FADE_DELAY_MS);
 				} else {
 					pauseBGM();
 				}
-			}
-		}, FADE_INTERVAL_MS);
-		g_stateObj.bgmFadeOut = fadeInterval;
+			},
+			/* isValid */
+			() => isTitle()
+		);
 	};
 
 	/**
 	 * BGMのフェードイン
 	 */
 	const fadeIn = () => {
-		if (!(g_audio instanceof AudioPlayer) && !g_audio.src) {
-			return;
-		}
-		let volume = 0;
-		g_audio.play();
-		const fadeInterval = setInterval(() => {
-			if (volume < g_stateObj.bgmVolume / 100 && isTitle()) {
-				volume += FADE_STEP;
-				g_audio.volume = Math.min(volume, 1);
-			} else {
-				clearInterval(fadeInterval);
-				g_stateObj.bgmFadeIn = null;
-			}
+		if (!(g_audio instanceof AudioPlayer) && !g_audio.src) return;
 
-			// フェードイン中に楽曲が変更された場合は停止
-			if (currentIdx !== g_headerObj.musicIdxList[g_settings.musicIdxNum]) {
-				pauseBGM();
-				clearInterval(fadeInterval);
+		const start = 0;
+		const end = g_stateObj.bgmVolume / 100;
+
+		g_audio.volume = 0;
+		g_audio.play();
+
+		g_stateObj.bgmFadeIn = fadeVolume(
+			start,
+			end,
+			FADE_STEP,
+			/* onEnd */
+			() => {
 				g_stateObj.bgmFadeIn = null;
-			}
-		}, FADE_INTERVAL_MS);
-		g_stateObj.bgmFadeIn = fadeInterval;
+			},
+			/* isValid */
+			() =>
+				isTitle() &&
+				currentIdx === g_headerObj.musicIdxList[g_settings.musicIdxNum]
+		);
 	};
 
 	/**
-	 * BGMのループ処理
+	 * BGMのループ処理 (base64エンコード時用)
+	 * - base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
 	 */
 	const repeatBGM = () => {
-		if (encodeFlg) {
-			// base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
-			const repeatCheck = setInterval((num = g_settings.musicIdxNum) => {
-				try {
-					if (((g_audio.elapsedTime >= musicEnd) ||
-						num !== g_settings.musicIdxNum) && g_stateObj.bgmLooped !== null) {
-						clearInterval(repeatCheck);
-						g_stateObj.bgmLooped = null;
-						fadeOutAndSeek();
-					}
-				} catch (e) {
-					clearInterval(repeatCheck);
-					g_stateObj.bgmLooped = null;
-				}
-			}, FADE_INTERVAL_MS);
-			g_stateObj.bgmLooped = repeatCheck;
+		const numAtStart = g_settings.musicIdxNum;
 
-		} else {
-			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audio, "timeupdate", () => {
-				if (g_audio.currentTime >= musicEnd) {
+		g_stateObj.bgmLooped = poll(
+			/* check */
+			() => {
+				try {
+					return (
+						g_audio.elapsedTime >= musicEnd ||
+						numAtStart !== g_settings.musicIdxNum
+					);
+				} catch {
+					return true; // エラー時は終了扱い
+				}
+			},
+			/* onEnd */
+			(finished) => {
+				g_stateObj.bgmLooped = null;
+				if (finished) {
 					fadeOutAndSeek();
 				}
-			});
-		}
+			},
+			/* isValid */
+			() => g_stateObj.bgmLooped !== null
+		);
 	};
 
 	if (encodeFlg) {
@@ -5676,9 +5747,10 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				g_audio = tmpAudio;
 			}
 			g_audio.volume = g_stateObj.bgmVolume / 100;
-			if (g_currentPage === `title`) {
+			if (g_currentPage === `title` && musicEnd > 0) {
 				g_audio.currentTime = musicStart;
 				g_audio.play();
+				repeatBGM();
 			}
 		} catch (e) {
 			// 音源の読み込みに失敗した場合、エラーを表示
@@ -5698,9 +5770,14 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 			g_audio.currentTime = musicStart;
 			g_audio.play();
 		}, { once: true });
-	}
-	if (musicEnd > 0) {
-		repeatBGM();
+
+		if (musicEnd > 0) {
+			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audio, "timeupdate", () => {
+				if (g_audio.currentTime >= musicEnd) {
+					fadeOutAndSeek();
+				}
+			});
+		}
 	}
 };
 
