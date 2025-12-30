@@ -5542,7 +5542,7 @@ const pauseBGM = () => {
 	}
 	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
 		if (g_stateObj[id]) {
-			clearInterval(g_stateObj[id]);
+			clearTimeout(g_stateObj[id]);
 			g_stateObj[id] = null;
 		}
 	});
@@ -5674,7 +5674,9 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				}
 			},
 			/* isValid */
-			() => isTitle()
+			() =>
+				isTitle() &&
+				g_stateObj.bgmFadeOut !== null
 		);
 	};
 
@@ -5701,6 +5703,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 			/* isValid */
 			() =>
 				isTitle() &&
+				g_stateObj.bgmFadeIn !== null &&
 				currentIdx === g_headerObj.musicIdxList[g_settings.musicIdxNum]
 		);
 	};
