@@ -2366,11 +2366,12 @@ class AudioPlayer {
 		// 内部スケジューリング用のマージン時間(100ms)
 		const scheduleLead = 0.1;
 
-		// マージンした分を先に予約して開始
+		// 実際の予約時刻（内部スケジューリング用のマージンを含む）
 		const startAt = this._context.currentTime + scheduleLead + _adjustmentTime;
-
-		this._startTime = startAt;
 		this._source.start(startAt, this._fadeinPosition);
+
+		// ゲーム側の論理的開始時刻（scheduleLead を含めない）
+		this._startTime = this._context.currentTime + _adjustmentTime;
 	}
 
 	pause() {
