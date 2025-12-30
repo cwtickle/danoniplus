@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/09/21
+ * Revised : 2025/12/30
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.5.4`;
-const g_revisedDate = `2025/09/21`;
+const g_version = `Ver 42.5.5`;
+const g_revisedDate = `2025/12/30`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2350,13 +2350,28 @@ class AudioPlayer {
 		this._eventListeners[`canplaythrough`]?.forEach(_listener => _listener());
 	}
 
+	/**
+	 * 再生処理
+	 * @param {number} _adjustmentTime
+	 * - 実際の再生開始時間は、scheduleLead + _adjustmentTime から開始される
+	 * - ただしゲーム内での経過時間計算は _adjustmentTime を基準に行う
+	 * - scheduleLead は安定した再生タイミングを確保するための内部マージン
+	 */
 	play(_adjustmentTime = 0) {
 		this._source = this._context.createBufferSource();
 		this._source.buffer = this._buffer;
 		this._source.playbackRate.value = this.playbackRate;
 		this._source.connect(this._gain);
-		this._startTime = this._context.currentTime;
-		this._source.start(this._context.currentTime + _adjustmentTime, this._fadeinPosition);
+
+		// 内部スケジューリング用のマージン時間(100ms)
+		const scheduleLead = 0.1;
+
+		// 実際の予約時刻（内部スケジューリング用のマージンを含む）
+		const startAt = this._context.currentTime + scheduleLead + _adjustmentTime;
+		this._source.start(startAt, this._fadeinPosition);
+
+		// ゲーム側の論理的開始時刻（scheduleLead を含めない）
+		this._startTime = this._context.currentTime + _adjustmentTime;
 	}
 
 	pause() {
