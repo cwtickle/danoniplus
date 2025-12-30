@@ -7827,9 +7827,9 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	// 整形用にライフ初期値を整数、回復・ダメージ量を小数第1位で丸める
 	const init = Math.round(initVal);
 	const borderText = (_mode === C_LFE_BORDER && _border !== 0 ? Math.round(borderVal) : `-`);
-	const toFixed2 = _val => Math.round(_val * 100) / 100;
+	const round2 = _val => Math.round(_val * 100) / 100;
 
-	let rcvText = toFixed2(_rcv), dmgText = toFixed2(_dmg);
+	let rcvText = round2(_rcv), dmgText = round2(_dmg);
 	let realRcv = _rcv, realDmg = _dmg;
 	const allCnt = sumData(g_detailObj.arrowCnt[g_stateObj.scoreId]) +
 		(g_headerObj.frzStartjdgUse ? 2 : 1) * sumData(g_detailObj.frzCnt[g_stateObj.scoreId]);
@@ -7839,11 +7839,11 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 		if (allCnt > 0) {
 			realRcv = Math.min(calcLifeVal(_rcv, allCnt), g_headerObj.maxLifeVal);
 			realDmg = Math.min(calcLifeVal(_dmg, allCnt), g_headerObj.maxLifeVal);
-			rcvText = `${toFixed2(realRcv)}<br>`;
-			dmgText = `${toFixed2(realDmg)}<br>`;
+			rcvText = `${realRcv.toFixed(2)}<br>`;
+			dmgText = `${realDmg.toFixed(2)}<br>`;
 		}
-		rcvText += `<span class="settings_lifeVal">(${toFixed2(_rcv)})</span>`;
-		dmgText += `<span class="settings_lifeVal">(${toFixed2(_dmg)})</span>`;
+		rcvText += `<span class="settings_lifeVal">(${round2(_rcv)})</span>`;
+		dmgText += `<span class="settings_lifeVal">(${round2(_dmg)})</span>`;
 	}
 
 	// 達成率(Accuracy)・許容ミス数の計算
