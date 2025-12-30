@@ -8,7 +8,7 @@
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 41.4.11`;
+const g_version = `Ver 41.4.12`;
 const g_revisedDate = `2025/12/30`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -114,6 +114,9 @@ const waitUntilLoaded = () => {
 
 // fps(デフォルトは60)
 let g_fps = 60;
+
+// プレイ画面再生時の内部スケジューリング用のマージン時間(100ms)
+let g_scheduleLead = 0.1;
 
 // 譜面データの&区切りを有効にするか
 let g_enableAmpersandSplit = true;
@@ -2320,9 +2323,9 @@ class AudioPlayer {
 	/**
 	 * 再生処理
 	 * @param {number} _adjustmentTime
-	 * - 実際の再生開始時間は、scheduleLead + _adjustmentTime から開始される
+	 * - 実際の再生開始時間は、g_scheduleLead + _adjustmentTime から開始される
 	 * - ただしゲーム内での経過時間計算は _adjustmentTime を基準に行う
-	 * - scheduleLead は安定した再生タイミングを確保するための内部マージン
+	 * - g_scheduleLead は安定した再生タイミングを確保するための内部マージン
 	 */
 	play(_adjustmentTime = 0) {
 		this._source = this._context.createBufferSource();
@@ -2330,14 +2333,11 @@ class AudioPlayer {
 		this._source.playbackRate.value = this.playbackRate;
 		this._source.connect(this._gain);
 
-		// 内部スケジューリング用のマージン時間(100ms)
-		const scheduleLead = 0.1;
-
 		// 実際の予約時刻（内部スケジューリング用のマージンを含む）
-		const startAt = this._context.currentTime + scheduleLead + _adjustmentTime;
+		const startAt = this._context.currentTime + g_scheduleLead + _adjustmentTime;
 		this._source.start(startAt, this._fadeinPosition);
 
-		// ゲーム側の論理的開始時刻（scheduleLead を含めない）
+		// ゲーム側の論理的開始時刻（g_scheduleLead を含めない）
 		this._startTime = this._context.currentTime + _adjustmentTime;
 	}
 
@@ -11517,7 +11517,7 @@ const mainInit = () => {
 			mainSpriteJ.appendChild(createColorObject2(`filterBar${j % 2 == 0 ? j + 1 : j - 1}_HS`, g_lblPosObj.filterBar, filterCss));
 		}
 		addTransform(`mainSprite${j}`, `mainSprite${j}`,
-			_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(j / 2) * 2 + (j + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
+			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(j / 2) * 2 + (j + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
 
 		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
 		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
@@ -12780,7 +12780,7 @@ const mainInit = () => {
 	// WebAudioAPIが使用できる場合は小数フレーム分だけ音源位置を調整
 	if (g_audio instanceof AudioPlayer) {
 		const musicStartAdjustment = (g_headerObj.blankFrame - g_stateObj.decimalAdjustment + 1) / g_fps;
-		musicStartTime = performance.now() + musicStartAdjustment * 1000;
+		musicStartTime = performance.now() + (musicStartAdjustment + g_scheduleLead) * 1000;
 		g_audio.play(musicStartAdjustment);
 	}
 
