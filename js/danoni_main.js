@@ -14067,7 +14067,7 @@ const resultInit = () => {
 	}
 
 	divRoot.appendChild(createCss2Button(`btnGaugeTransition`, `i`, () => true, {
-		x: 65, y: 185, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz, title: g_msgObj.graph,
+		x: 65, y: 185, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz,
 		resetFunc: () => changeGaugeTransition(), cxtFunc: () => changeGaugeTransition(),
 	}, g_cssObj.button_Mini));
 	g_stateObj.gaugeTransitionViewFlg = false;
