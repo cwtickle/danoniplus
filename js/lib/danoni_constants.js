@@ -75,6 +75,10 @@ const g_limitObj = {
     graphHeight: 240,
     graphMiniSiz: 12,
 
+    // ゲージ推移グラフ表示部分の幅、高さ
+    gaugeTransitionWidth: 450,
+    gaugeTransitionHeight: 210,
+
     // その他のフォントサイズ
     titleSiz: 32,
     mainSiz: 14,
@@ -206,6 +210,7 @@ const updateWindowSiz = () => {
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
         resultWindow: { x: g_sWidth / 2 - 200, y: 185, w: 400, h: 210 },
+        gaugeTransition: { x: g_sWidth / 2 - 225, y: 185, w: 450, h: 210, visibility: `hidden` },
     });
 
     Object.assign(g_lblPosObj, {
@@ -902,6 +907,9 @@ const g_graphColorObj = {
 
     speed: `#cc3333`,
     boost: `#999900`,
+
+    clear: `#33cc33`,
+    failed: `#cc3333`,
 };
 
 const g_settingBtnObj = {
@@ -984,6 +992,8 @@ const g_resultObj = {
     excessive: 0,
 
     spState: ``,
+
+    gaugeTransition: [],
 };
 
 const C_RLT_BRACKET_L = 210;
