@@ -75,6 +75,10 @@ const g_limitObj = {
     graphHeight: 240,
     graphMiniSiz: 12,
 
+    // ゲージ推移グラフ表示部分の幅、高さ
+    gaugeTransitionWidth: 430,
+    gaugeTransitionHeight: 210,
+
     // その他のフォントサイズ
     titleSiz: 32,
     mainSiz: 14,
@@ -206,6 +210,7 @@ const updateWindowSiz = () => {
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
         resultWindow: { x: g_sWidth / 2 - 200, y: 185, w: 400, h: 210 },
+        gaugeTransition: { x: g_sWidth / 2 - g_limitObj.gaugeTransitionWidth / 2, y: 185, w: g_limitObj.gaugeTransitionWidth, h: g_limitObj.gaugeTransitionHeight, visibility: `hidden` },
     });
 
     Object.assign(g_lblPosObj, {
@@ -902,6 +907,9 @@ const g_graphColorObj = {
 
     speed: `#cc3333`,
     boost: `#999900`,
+
+    clear: `#33cc33`,
+    failed: `#cc3333`,
 };
 
 const g_settingBtnObj = {
@@ -984,6 +992,8 @@ const g_resultObj = {
     excessive: 0,
 
     spState: ``,
+
+    gaugeTransition: [],
 };
 
 const C_RLT_BRACKET_L = 210;
@@ -2471,6 +2481,7 @@ const g_shortcutObj = {
         ShiftRight_Tab: { id: `btnBack` },
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
+        KeyI: { id: `btnGaugeTransition` },
         KeyC: { id: `btnCopy`, reset: true },
         KeyX: { id: `btnTweet`, reset: true }, // x
         KeyD: { id: `btnGitter`, reset: true }, // Discord
@@ -2519,7 +2530,7 @@ const g_btnPatterns = {
     exSetting: { Back: 0, KeyConfig: 0, Play: 0, exSetting: -5, Save: -10 },
     loadingIos: { Play: 0 },
     keyConfig: { Back: -3, Play: 0 },
-    result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0 },
+    result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0, GaugeTransition: -15 },
 };
 
 // メイン画面以外でキーリピートを許可しないキーを設定
