@@ -13536,7 +13536,6 @@ const changeLifeColor = (_state = ``) => {
  */
 const lifeRecovery = () => {
 	g_workObj.lifeVal += g_workObj.lifeRcv;
-	g_resultObj.gaugeTransition.push([g_scoreObj.baseFrame, g_workObj.lifeVal]);
 
 	if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
 		g_workObj.lifeVal = g_headerObj.maxLifeVal;
@@ -13544,6 +13543,7 @@ const lifeRecovery = () => {
 	} else {
 		changeLifeColor(g_workObj.lifeVal >= g_workObj.lifeBorder ? `Cleared` : ``);
 	}
+	g_resultObj.gaugeTransition.push([g_scoreObj.baseFrame, g_workObj.lifeVal]);
 };
 
 /**
@@ -13552,7 +13552,6 @@ const lifeRecovery = () => {
  */
 const lifeDamage = (_excessive = false) => {
 	g_workObj.lifeVal -= g_workObj.lifeDmg * (_excessive ? 0.25 : 1);
-	g_resultObj.gaugeTransition.push([g_scoreObj.baseFrame, g_workObj.lifeVal]);
 	quickRetry(`Miss`);
 
 	if (g_workObj.lifeVal <= 0) {
@@ -13561,6 +13560,7 @@ const lifeDamage = (_excessive = false) => {
 	} else {
 		changeLifeColor(g_workObj.lifeVal < g_workObj.lifeBorder ? `Failed` : `Cleared`);
 	}
+	g_resultObj.gaugeTransition.push([g_scoreObj.baseFrame, g_workObj.lifeVal]);
 };
 
 /**
@@ -14125,7 +14125,10 @@ const resultInit = () => {
 			context.moveTo(preX, preY);
 			context.lineTo(x, preY);
 
-			if (life[i - 1] >= g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
+			if (life[i - 1] === 0 && life[i] === 0) {
+				context.strokeStyle = g_graphColorObj.failed;
+
+			} else if (life[i - 1] >= g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
 				context.lineTo(x, y);
 				context.strokeStyle = g_graphColorObj.clear;
 
