@@ -13536,6 +13536,7 @@ const changeLifeColor = (_state = ``) => {
  */
 const lifeRecovery = () => {
 	g_workObj.lifeVal += g_workObj.lifeRcv;
+	g_resultObj.gaugeTransition.push([g_scoreObj.baseFrame, g_workObj.lifeVal]);
 
 	if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
 		g_workObj.lifeVal = g_headerObj.maxLifeVal;
@@ -13551,6 +13552,7 @@ const lifeRecovery = () => {
  */
 const lifeDamage = (_excessive = false) => {
 	g_workObj.lifeVal -= g_workObj.lifeDmg * (_excessive ? 0.25 : 1);
+	g_resultObj.gaugeTransition.push([g_scoreObj.baseFrame, g_workObj.lifeVal]);
 	quickRetry(`Miss`);
 
 	if (g_workObj.lifeVal <= 0) {
@@ -13605,7 +13607,6 @@ const judgeRecovery = (_name, _difFrame) => {
 	if (_name === `shakin`) {
 		quickRetry(`Shakin(Great)`);
 	}
-	g_resultObj.gaugeTransition.push([g_scoreObj.baseFrame, g_workObj.lifeVal]);
 	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
 };
 
@@ -13620,7 +13621,6 @@ const judgeDamage = (_name, _difFrame) => {
 	comboJ.textContent = ``;
 	diffJ.textContent = ``;
 	lifeDamage();
-	g_resultObj.gaugeTransition.push([g_scoreObj.baseFrame, g_workObj.lifeVal]);
 	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
 };
 
@@ -14067,18 +14067,18 @@ const resultInit = () => {
 	}
 
 	divRoot.appendChild(createCss2Button(`btnGaugeTransition`, `i`, () => true, {
-		x: 65, y: 185, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz,
+		x: g_sWidth / 2 - 250, y: 185, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz,
 		resetFunc: () => changeGaugeTransition(), cxtFunc: () => changeGaugeTransition(),
 	}, g_cssObj.button_Mini));
 	g_stateObj.gaugeTransitionViewFlg = false;
 
 	const changeGaugeTransition = () => {
 		if (g_stateObj.gaugeTransitionViewFlg) {
-			resultWindow.style.visibility = `visible`;
+			resultWindow.style.opacity = `1`;
 			gaugeTransitionWindow.style.visibility = `hidden`;
 			g_stateObj.gaugeTransitionViewFlg = false;
 		} else {
-			resultWindow.style.visibility = `hidden`;
+			resultWindow.style.opacity = `0.3`;
 			gaugeTransitionWindow.style.visibility = `visible`;
 			g_stateObj.gaugeTransitionViewFlg = true;
 		}
@@ -14092,8 +14092,8 @@ const resultInit = () => {
 
 	createEmptySprite(divRoot, `gaugeTransitionWindow`, g_windowObj.gaugeTransition, g_cssObj.result_PlayDataWindow).appendChild(gaugeTransitionCanvas);
 
-	const startFrame = g_detailObj.startFrame[0];
-	const playingFrame = g_detailObj.playingFrameWithBlank[0];
+	const startFrame = g_detailObj.startFrame[g_stateObj.scoreId];
+	const playingFrame = g_detailObj.playingFrameWithBlank[g_stateObj.scoreId];
 	const transitionObj = { frame: [0], life: [g_workObj.lifeInit] };
 
 	const frame = transitionObj.frame;
