@@ -210,7 +210,7 @@ const updateWindowSiz = () => {
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
         resultWindow: { x: g_sWidth / 2 - 200, y: 185, w: 400, h: 210 },
-        gaugeTransition: { x: g_sWidth / 2 - g_limitObj.gaugeTransitionWidth / 2, y: 185, w: 430, h: 210, visibility: `hidden` },
+        gaugeTransition: { x: g_sWidth / 2 - g_limitObj.gaugeTransitionWidth / 2, y: 185, w: g_limitObj.gaugeTransitionWidth, h: g_limitObj.gaugeTransitionHeight, visibility: `hidden` },
     });
 
     Object.assign(g_lblPosObj, {
