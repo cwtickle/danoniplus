@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/12/30
+ * Revised : 2026/01/02
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 43.2.2`;
-const g_revisedDate = `2025/12/30`;
+const g_version = `Ver 43.3.0`;
+const g_revisedDate = `2026/01/02`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -11489,6 +11489,7 @@ const getArrowSettings = () => {
 	// 初期位置、ライフ設定の初期化
 	Object.keys(g_resultObj).forEach(judgeCnt => g_resultObj[judgeCnt] = 0);
 	g_resultObj.spState = ``;
+	g_resultObj.gaugeTransition = [];
 
 	g_displays.forEach(_disp => {
 		const lowerDisp = _disp.toLowerCase();
@@ -12173,6 +12174,7 @@ const mainInit = () => {
 				if (g_currentArrows !== g_fullArrows || g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 					g_gameOverFlg = true;
 					g_finishFlg = false;
+					g_resultObj.gaugeTransition.push([g_scoreObj.baseFrame, 0]);
 				}
 				resultInit();
 			} else {
@@ -13646,6 +13648,7 @@ const lifeRecovery = () => {
 	} else {
 		changeLifeColor(g_workObj.lifeVal >= g_workObj.lifeBorder ? `Cleared` : ``);
 	}
+	g_resultObj.gaugeTransition.push([g_scoreObj.baseFrame, g_workObj.lifeVal]);
 };
 
 /**
@@ -13662,6 +13665,7 @@ const lifeDamage = (_excessive = false) => {
 	} else {
 		changeLifeColor(g_workObj.lifeVal < g_workObj.lifeBorder ? `Failed` : `Cleared`);
 	}
+	g_resultObj.gaugeTransition.push([g_scoreObj.baseFrame, g_workObj.lifeVal]);
 };
 
 /**
@@ -14165,6 +14169,102 @@ const resultInit = () => {
 		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 215, g_cssObj.result_noRecord, 4, `(No Record)`));
 		const lblAutoView = document.getElementById(`lblAutoView`);
 		lblAutoView.style.fontSize = wUnit(20);
+	}
+
+	divRoot.appendChild(createCss2Button(`btnGaugeTransition`, `i`, () => true, {
+		x: g_sWidth / 2 - 250, y: 185, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz,
+		resetFunc: () => changeGaugeTransition(), cxtFunc: () => changeGaugeTransition(),
+	}, g_cssObj.button_Mini));
+	g_stateObj.gaugeTransitionViewFlg = false;
+
+	const changeGaugeTransition = () => {
+		if (g_stateObj.gaugeTransitionViewFlg) {
+			resultWindow.style.opacity = `1`;
+			gaugeTransitionWindow.style.visibility = `hidden`;
+			g_stateObj.gaugeTransitionViewFlg = false;
+		} else {
+			resultWindow.style.opacity = `0.3`;
+			gaugeTransitionWindow.style.visibility = `visible`;
+			g_stateObj.gaugeTransitionViewFlg = true;
+		}
+	};
+
+	// ゲージ推移グラフの描画
+	const gaugeTransitionCanvas = document.createElement(`canvas`);
+	gaugeTransitionCanvas.id = `graphGaugeTransition`;
+	gaugeTransitionCanvas.width = g_limitObj.gaugeTransitionWidth;
+	gaugeTransitionCanvas.height = g_limitObj.gaugeTransitionHeight;
+
+	createEmptySprite(divRoot, `gaugeTransitionWindow`, g_windowObj.gaugeTransition, g_cssObj.result_PlayDataWindow).appendChild(gaugeTransitionCanvas);
+
+	const startFrame = g_detailObj.startFrame[g_stateObj.scoreId];
+	const playingFrame = g_detailObj.playingFrameWithBlank[g_stateObj.scoreId];
+	const transitionObj = { frame: [0], life: [g_workObj.lifeInit] };
+
+	const frame = transitionObj.frame;
+	const life = transitionObj.life;
+	const transitionData = g_resultObj.gaugeTransition;
+
+	for (let i = 0; i < transitionData?.length; i++) {
+		frame.push(transitionData[i][0] - startFrame);
+		life.push(transitionData[i][1]);
+	}
+
+	frame.push(playingFrame);
+	life.push(life.at(-1));
+
+	const context = gaugeTransitionCanvas.getContext(`2d`);
+	context.lineWidth = 2;
+	let preY, preX;
+	const borderY = g_limitObj.gaugeTransitionHeight - g_workObj.lifeBorder * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
+
+	for (let i = 0; i < frame.length; i++) {
+		const x = frame[i] * g_limitObj.gaugeTransitionWidth / playingFrame;
+		const y = g_limitObj.gaugeTransitionHeight - life[i] * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
+
+		if (i === 0) {
+			context.beginPath();
+			context.moveTo(x, y);
+
+		} else {
+			context.moveTo(preX, preY);
+			context.lineTo(x, preY);
+
+			if (life[i - 1] === 0 && life[i] === 0) {
+				context.strokeStyle = g_graphColorObj.failed;
+
+			} else if (life[i - 1] >= g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
+				context.lineTo(x, y);
+				context.strokeStyle = g_graphColorObj.clear;
+
+			} else if (life[i - 1] < g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
+				context.lineTo(x, borderY);
+				context.strokeStyle = g_graphColorObj.failed;
+				context.stroke();
+				context.beginPath();
+				context.moveTo(x, borderY);
+				context.lineTo(x, y);
+				context.strokeStyle = g_graphColorObj.clear;
+
+			} else if (life[i - 1] >= g_workObj.lifeBorder && life[i] < g_workObj.lifeBorder) {
+				context.lineTo(x, borderY);
+				context.strokeStyle = g_graphColorObj.clear;
+				context.stroke();
+				context.beginPath();
+				context.moveTo(x, borderY);
+				context.lineTo(x, y);
+				context.strokeStyle = g_graphColorObj.failed;
+
+			} else {
+				context.lineTo(x, y);
+				context.strokeStyle = g_graphColorObj.failed;
+			}
+
+			context.stroke();
+			context.beginPath();
+		}
+		preX = x;
+		preY = y;
 	}
 
 	// ユーザカスタムイベント(初期)
