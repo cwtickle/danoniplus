@@ -14210,7 +14210,10 @@ const resultInit = () => {
 	};
 
 	const startFrame = g_detailObj.startFrame[g_stateObj.scoreId];
-	const playingFrame = g_detailObj.playingFrameWithBlank[g_stateObj.scoreId];
+	let playingFrame = g_detailObj.playingFrameWithBlank[g_stateObj.scoreId];
+	if (playingFrame <= 0) {
+		playingFrame = 1;
+	}
 	const transitionObj = { frame: [0], life: [g_workObj.lifeInit] };
 
 	const frame = transitionObj.frame;
@@ -14290,8 +14293,8 @@ const resultInit = () => {
 		drawOverlay();
 	};
 
-	const frameToX = (frame) => {
-		return frame / playingFrame * gaugeTransitionCanvas.width;
+	const frameToX = (_frame) => {
+		return _frame / playingFrame * gaugeTransitionCanvas.width;
 	};
 
 	// 既存のグラフを再描画しつつ縦線と時間を重ねる
@@ -14312,10 +14315,14 @@ const resultInit = () => {
 
 		// 時間表示
 		const timer = transFrameToTimer(cursorFrame + startFrame);
-		ctx.font = "14px sans-serif";
+		ctx.font = `14px ${getBasicFont()}`;
 		ctx.fillStyle = "#009999";
-		ctx.fillText(`${timer}`, x + 5, g_limitObj.gaugeTransitionHeight - 30);
-
+		ctx.textAlign = x > gaugeTransitionCanvas.width * 0.8 ? C_ALIGN_RIGHT : C_ALIGN_LEFT;
+		ctx.fillText(
+			`${timer}`,
+			x > gaugeTransitionCanvas.width * 0.8 ? x - 5 : x + 5,
+			g_limitObj.gaugeTransitionHeight - 35
+		);
 	};
 	drawOverlay();
 
