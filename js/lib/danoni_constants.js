@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/01/02 (v43.3.0)
+ * Revised : 2026/01/04 (v43.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2486,6 +2486,8 @@ const g_shortcutObj = {
         KeyX: { id: `btnTweet`, reset: true }, // x
         KeyD: { id: `btnGitter`, reset: true }, // Discord
         KeyP: { id: `btnCopyImage` },
+        ArrowLeft: { id: `btnGaugeTrL` },
+        ArrowRight: { id: `btnGaugeTrR` },
         Backspace: { id: `btnRetry` },
     },
 };
