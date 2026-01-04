@@ -2486,6 +2486,8 @@ const g_shortcutObj = {
         KeyX: { id: `btnTweet`, reset: true }, // x
         KeyD: { id: `btnGitter`, reset: true }, // Discord
         KeyP: { id: `btnCopyImage` },
+        ArrowLeft: { id: `btnGaugeTrL` },
+        ArrowRight: { id: `btnGaugeTrR` },
         Backspace: { id: `btnRetry` },
     },
 };
