@@ -14171,10 +14171,30 @@ const resultInit = () => {
 		lblAutoView.style.fontSize = wUnit(20);
 	}
 
-	divRoot.appendChild(createCss2Button(`btnGaugeTransition`, `i`, () => true, {
-		x: g_sWidth / 2 - 250, y: 185, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz,
-		resetFunc: () => changeGaugeTransition(), cxtFunc: () => changeGaugeTransition(),
-	}, g_cssObj.button_Mini));
+	// ゲージ推移グラフの描画
+	const gaugeTransitionCanvas = document.createElement(`canvas`);
+	gaugeTransitionCanvas.id = `graphGaugeTransition`;
+	gaugeTransitionCanvas.width = g_limitObj.gaugeTransitionWidth;
+	gaugeTransitionCanvas.height = g_limitObj.gaugeTransitionHeight;
+
+	createEmptySprite(divRoot, `gaugeTransitionWindow`, g_windowObj.gaugeTransition, g_cssObj.result_PlayDataWindow).appendChild(gaugeTransitionCanvas);
+
+	multiAppend(divRoot,
+		createCss2Button(`btnGaugeTransition`, `i`, () => true, {
+			x: g_sWidth / 2 - 250, y: 185, w: 30, h: 30, siz: g_limitObj.jdgCharaSiz,
+			resetFunc: () => changeGaugeTransition(), cxtFunc: () => changeGaugeTransition(),
+		}, g_cssObj.button_Mini),
+	);
+	multiAppend(gaugeTransitionWindow,
+		createCss2Button(`btnGaugeTrL`, `<`, () => true, {
+			x: -45, y: 35, w: 20, h: 30, siz: g_limitObj.jdgCharaSiz,
+			resetFunc: () => moveCursor(keyIsShift() ? -10 : -1),
+		}, g_cssObj.button_Setting),
+		createCss2Button(`btnGaugeTrR`, `>`, () => true, {
+			x: -25, y: 35, w: 20, h: 30, siz: g_limitObj.jdgCharaSiz,
+			resetFunc: () => moveCursor(keyIsShift() ? 10 : 1),
+		}, g_cssObj.button_Setting),
+	);
 	g_stateObj.gaugeTransitionViewFlg = false;
 
 	const changeGaugeTransition = () => {
@@ -14189,16 +14209,11 @@ const resultInit = () => {
 		}
 	};
 
-	// ゲージ推移グラフの描画
-	const gaugeTransitionCanvas = document.createElement(`canvas`);
-	gaugeTransitionCanvas.id = `graphGaugeTransition`;
-	gaugeTransitionCanvas.width = g_limitObj.gaugeTransitionWidth;
-	gaugeTransitionCanvas.height = g_limitObj.gaugeTransitionHeight;
-
-	createEmptySprite(divRoot, `gaugeTransitionWindow`, g_windowObj.gaugeTransition, g_cssObj.result_PlayDataWindow).appendChild(gaugeTransitionCanvas);
-
 	const startFrame = g_detailObj.startFrame[g_stateObj.scoreId];
-	const playingFrame = g_detailObj.playingFrameWithBlank[g_stateObj.scoreId];
+	let playingFrame = g_detailObj.playingFrameWithBlank[g_stateObj.scoreId];
+	if (playingFrame <= 0) {
+		playingFrame = 1;
+	}
 	const transitionObj = { frame: [0], life: [g_workObj.lifeInit] };
 
 	const frame = transitionObj.frame;
@@ -14215,57 +14230,101 @@ const resultInit = () => {
 
 	const context = gaugeTransitionCanvas.getContext(`2d`);
 	context.lineWidth = 2;
-	let preY, preX;
-	const borderY = g_limitObj.gaugeTransitionHeight - g_workObj.lifeBorder * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
 
-	for (let i = 0; i < frame.length; i++) {
-		const x = frame[i] * g_limitObj.gaugeTransitionWidth / playingFrame;
-		const y = g_limitObj.gaugeTransitionHeight - life[i] * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
+	const drawGaugeGraph = () => {
+		context.clearRect(0, 0, gaugeTransitionCanvas.width, gaugeTransitionCanvas.height);
 
-		if (i === 0) {
-			context.beginPath();
-			context.moveTo(x, y);
+		let preX, preY;
+		const borderY = g_limitObj.gaugeTransitionHeight - g_workObj.lifeBorder * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
 
-		} else {
-			context.moveTo(preX, preY);
-			context.lineTo(x, preY);
+		for (let i = 0; i < frame.length; i++) {
+			const x = frame[i] * g_limitObj.gaugeTransitionWidth / playingFrame;
+			const y = g_limitObj.gaugeTransitionHeight - life[i] * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
 
-			if (life[i - 1] === 0 && life[i] === 0) {
-				context.strokeStyle = g_graphColorObj.failed;
-
-			} else if (life[i - 1] >= g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
-				context.lineTo(x, y);
-				context.strokeStyle = g_graphColorObj.clear;
-
-			} else if (life[i - 1] < g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
-				context.lineTo(x, borderY);
-				context.strokeStyle = g_graphColorObj.failed;
-				context.stroke();
+			if (i === 0) {
 				context.beginPath();
-				context.moveTo(x, borderY);
-				context.lineTo(x, y);
-				context.strokeStyle = g_graphColorObj.clear;
-
-			} else if (life[i - 1] >= g_workObj.lifeBorder && life[i] < g_workObj.lifeBorder) {
-				context.lineTo(x, borderY);
-				context.strokeStyle = g_graphColorObj.clear;
-				context.stroke();
-				context.beginPath();
-				context.moveTo(x, borderY);
-				context.lineTo(x, y);
-				context.strokeStyle = g_graphColorObj.failed;
-
+				context.moveTo(x, y);
 			} else {
-				context.lineTo(x, y);
-				context.strokeStyle = g_graphColorObj.failed;
-			}
+				context.moveTo(preX, preY);
+				context.lineTo(x, preY);
 
-			context.stroke();
-			context.beginPath();
+				if (life[i - 1] === 0 && life[i] === 0) {
+					context.strokeStyle = g_graphColorObj.failed;
+
+				} else if (life[i - 1] >= g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
+					context.lineTo(x, y);
+					context.strokeStyle = g_graphColorObj.clear;
+
+				} else if (life[i - 1] < g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
+					context.lineTo(x, borderY);
+					context.strokeStyle = g_graphColorObj.failed;
+					context.stroke();
+					context.beginPath();
+					context.moveTo(x, borderY);
+					context.lineTo(x, y);
+					context.strokeStyle = g_graphColorObj.clear;
+
+				} else if (life[i - 1] >= g_workObj.lifeBorder && life[i] < g_workObj.lifeBorder) {
+					context.lineTo(x, borderY);
+					context.strokeStyle = g_graphColorObj.clear;
+					context.stroke();
+					context.beginPath();
+					context.moveTo(x, borderY);
+					context.lineTo(x, y);
+					context.strokeStyle = g_graphColorObj.failed;
+
+				} else {
+					context.lineTo(x, y);
+					context.strokeStyle = g_graphColorObj.failed;
+				}
+
+				context.stroke();
+				context.beginPath();
+			}
+			preX = x;
+			preY = y;
 		}
-		preX = x;
-		preY = y;
 	}
+	drawGaugeGraph();
+
+	let cursorFrame = 0;   // 現在のカーソル位置（frame）
+	const moveCursor = (sec = 1) => {
+		cursorFrame = Math.max(0, Math.min(playingFrame, cursorFrame + sec * g_fps));
+		drawOverlay();
+	};
+
+	const frameToX = (_frame) => {
+		return _frame / playingFrame * gaugeTransitionCanvas.width;
+	};
+
+	// 既存のグラフを再描画しつつ縦線と時間を重ねる
+	const drawOverlay = () => {
+		// 既存のグラフを再描画
+		drawGaugeGraph();
+
+		const ctx = context;
+		const x = frameToX(cursorFrame);
+
+		// 縦線
+		ctx.beginPath();
+		ctx.moveTo(x, 0);
+		ctx.lineTo(x, gaugeTransitionCanvas.height);
+		ctx.strokeStyle = "#009999";
+		ctx.lineWidth = 1.5;
+		ctx.stroke();
+
+		// 時間表示
+		const timer = transFrameToTimer(cursorFrame + startFrame);
+		ctx.font = `14px ${getBasicFont()}`;
+		ctx.fillStyle = "#009999";
+		ctx.textAlign = x > gaugeTransitionCanvas.width * 0.8 ? C_ALIGN_RIGHT : C_ALIGN_LEFT;
+		ctx.fillText(
+			`${timer}`,
+			x > gaugeTransitionCanvas.width * 0.8 ? x - 5 : x + 5,
+			g_limitObj.gaugeTransitionHeight - 35
+		);
+	};
+	drawOverlay();
 
 	// ユーザカスタムイベント(初期)
 	const currentDateTime = new Date().toLocaleString();
