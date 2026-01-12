@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/01/04 (v43.4.0)
+ * Revised : 2026/01/12 (v43.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -165,6 +165,10 @@ $id(`canvas-frame`).margin = C_DIS_AUTO;
 
 const g_btnWidth = (_multi = 1) => Math.min(g_sWidth, g_limitObj.btnBaseWidth) * _multi;
 const g_btnX = (_multi = 0) => g_btnWidth(_multi) + Math.max((g_sWidth - g_limitObj.btnBaseWidth) / 2, 0);
+const g_slopeAngle = () => (Math.atan2(
+    g_sHeight,
+    g_keyObj[`minWidth${g_headerObj.keyLabels[g_stateObj.scoreId]}`] || g_keyObj.minWidthDefault
+) * 180) / Math.PI * 2 - 40;
 
 // 固定ウィンドウサイズ
 const g_windowObj = {
@@ -1543,8 +1547,8 @@ const g_playWindowFunc = new Map([
     ['Default', () => ``],
     ['Stairs', () => g_changeStairs(-8)],
     ['R-Stairs', () => g_changeStairs(8)],
-    ['Slope', () => g_changeStairs(-45)],
-    ['R-Slope', () => g_changeStairs(45)],
+    ['Slope', () => g_changeStairs(-g_slopeAngle())],
+    ['R-Slope', () => g_changeStairs(g_slopeAngle())],
     ['Distorted', () => g_changeSkew(-15)],
     ['R-Distorted', () => g_changeSkew(15)],
     ['SideScroll', () => g_changeStairs(-90)],
@@ -4288,9 +4292,8 @@ const g_lang_msgObj = {
         d_arroweffect: `矢印・フリーズアローモーションの有効化設定`,
         d_special: `作品固有の特殊演出の有効化設定`,
 
-        playWindow: `ステップゾーン及び矢印の位置を全体的に回転する等の設定です。\n[Stairs/Slope] ステップゾーンを階段状にします\n[Distorted] 画面を歪ませます`,
-        sideScrollMsg: `\n[SideScroll] 横スクロールモードになります\n\nSlope, SideScrollを設定する場合は高さが足りているかを確認してください\nクエリパラメータ ?h=600 などで設定できます`,
-        sideScrollDisable: `\n\nウィンドウの高さの自動拡張が無効のため、Slope, SideScrollは使用できません`,
+        playWindow: `ステップゾーン及び矢印の位置を全体的に回転する等の設定です。\n[Stairs/Slope] ステップゾーンを階段状にします\n[Distorted] 画面を歪ませます\n` +
+            `[SideScroll] 横スクロールモードになります`,
         stepArea: `ステップゾーンの位置を変更します。\n[Halfway] ステップゾーンが中央に表示されます\n[2Step] ステップゾーンが2段に分かれて流れてきます\n` +
             `[Mismatched/R-Mismatched] スクロールの向きが上下で異なる方向に流れます\n` +
             `[X-Flower] レーンが花びらのように広がります\n[Alt-Crossing] レーンが交互に違う方向から流れます`,
@@ -4382,9 +4385,8 @@ const g_lang_msgObj = {
         d_arroweffect: `Enable sequences' animations`,
         d_special: `Enable setting of special effects to the work`,
 
-        playWindow: `This is the setting for overall rotation of the step zone and arrow position, etc.\n[Stairs/Slope] The step zone is in a staircase shape.\n[Distorted] Distorts the screen.`,
-        sideScrollMsg: `\n[SideScroll] It becomes a side scroll mode.\n\nWhen setting Slope or SideScroll, please make sure that the height is\nsufficient. Can be set with query parameter ?h=600, etc.`,
-        sideScrollDisable: `\n\nSlope, SideScroll cannot be used because \nautomatic window height expansion is disabled.`,
+        playWindow: `This is the setting for overall rotation of the step zone and arrow position, etc.\n[Stairs/Slope] The step zone is in a staircase shape.\n[Distorted] Distorts the screen.\n` +
+            `[SideScroll] It becomes a side scroll mode.`,
         stepArea: `Change the position of the step zone.\n[Halfway] Step zones are centered.\n[2Step] Step zones are divided into two layers.\n` +
             `[Mismatched/R-Mismatched] Scroll direction flows in different directions up and down.\n` +
             `[X-Flower] Lanes spread out like flower petals.\n[Alt-Crossing] Lanes flow from different directions alternately.`,

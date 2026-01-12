@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/01/04
+ * Revised : 2026/01/12
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 43.4.0`;
-const g_revisedDate = `2026/01/04`;
+const g_version = `Ver 43.5.0`;
+const g_revisedDate = `2026/01/12`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3550,10 +3550,6 @@ const headerConvert = _dosObj => {
 		g_sHeight = Math.max(setIntVal(_dosObj.windowHeight, g_presetObj.autoMinHeight ?? g_sHeight),
 			setIntVal(getQueryParamVal(`h`), g_sHeight), g_sHeight);
 		$id(`canvas-frame`).height = wUnit(g_sHeight);
-	}
-	if (!(_dosObj.heightVariable || g_presetObj.heightVariable || false)) {
-		obj.heightLockFlg = true;
-		g_settings.playWindows = g_settings.playWindows.filter(val => !val.endsWith(`Slope`) && !val.endsWith(`SideScroll`));
 	}
 
 	// 曲名
@@ -8408,8 +8404,6 @@ const exSettingInit = () => {
 	const spriteList = setSpriteList(g_settingPos.exSetting);
 
 	createGeneralSetting(spriteList.playWindow, `playWindow`);
-	lblPlayWindow.title += g_headerObj.heightLockFlg ? g_msgObj.sideScrollDisable : g_msgObj.sideScrollMsg;
-
 	createGeneralSetting(spriteList.stepArea, `stepArea`);
 	createGeneralSetting(spriteList.frzReturn, `frzReturn`);
 	createGeneralSetting(spriteList.shaking, `shaking`);
@@ -11337,12 +11331,41 @@ const getArrowSettings = () => {
 	g_workObj.scrollDir = [];
 	g_workObj.scrollDirDefault = [];
 	g_workObj.dividePos = [];
+	g_workObj.scale = g_keyObj.scale;
 	g_workObj.stepRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.stepHitRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.arrowRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
+
+	const rotateBy = (val, delta) => {
+		// numeric
+		const n = Number(val);
+		if (Number.isFinite(n)) return n + delta;
+
+		// "type:deg"
+		const [type, degStr = `0`] = String(val).split(`:`);
+		const deg = Number(degStr);
+		return Number.isFinite(deg) ? `${type}:${deg + delta}` : val;
+	};
+	const changeStepRtn = (_name, _angle) =>
+		g_workObj[_name] = g_workObj[_name].map(v => rotateBy(v, _angle));
+
+	if (g_stateObj.playWindow.endsWith(`SideScroll`)) {
+		if (g_stateObj.rotateEnabled) {
+			const sign = g_stateObj.playWindow === `SideScroll` ? 1 : -1;
+			changeStepRtn(`stepRtn`, 90 * sign);
+			changeStepRtn(`stepHitRtn`, 90 * sign);
+			changeStepRtn(`arrowRtn`, 90 * sign);
+		}
+		const div = g_keyObj[`div${keyCtrlPtn}`];
+		const divMax = g_keyObj[`divMax${keyCtrlPtn}`] ?? posMax;
+		const denom = (Math.max(div, divMax - div) + 1) * g_keyObj.blank;
+		if (Number.isFinite(denom) && denom > 0) {
+			g_workObj.scale *= Math.min(g_sHeight / denom, 1);
+		}
+	}
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
 	g_workObj.keyGroupList = tkObj.keyGroupList;
@@ -11733,7 +11756,7 @@ const mainInit = () => {
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createEmptySprite(divRoot, `mainSprite`, mainCommonPos);
-	addTransform(`mainSprite`, `root`, `scale(${g_keyObj.scale})`);
+	addTransform(`mainSprite`, `root`, `scale(${g_workObj.scale})`);
 	addXY(`mainSprite`, `root`, g_workObj.playingX, g_posObj.stepY - C_STEP_Y + g_headerObj.playingY);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
