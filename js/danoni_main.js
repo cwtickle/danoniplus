@@ -3551,10 +3551,6 @@ const headerConvert = _dosObj => {
 			setIntVal(getQueryParamVal(`h`), g_sHeight), g_sHeight);
 		$id(`canvas-frame`).height = wUnit(g_sHeight);
 	}
-	if (!(_dosObj.heightVariable || g_presetObj.heightVariable || false)) {
-		obj.heightLockFlg = true;
-		g_settings.playWindows = g_settings.playWindows.filter(val => !val.endsWith(`Slope`) && !val.endsWith(`SideScroll`));
-	}
 
 	// 曲名
 	obj.musicTitles = [`musicName`];
@@ -8408,7 +8404,7 @@ const exSettingInit = () => {
 	const spriteList = setSpriteList(g_settingPos.exSetting);
 
 	createGeneralSetting(spriteList.playWindow, `playWindow`);
-	lblPlayWindow.title += g_headerObj.heightLockFlg ? g_msgObj.sideScrollDisable : g_msgObj.sideScrollMsg;
+	lblPlayWindow.title += g_msgObj.sideScrollMsg;
 
 	createGeneralSetting(spriteList.stepArea, `stepArea`);
 	createGeneralSetting(spriteList.frzReturn, `frzReturn`);
@@ -11337,12 +11333,31 @@ const getArrowSettings = () => {
 	g_workObj.scrollDir = [];
 	g_workObj.scrollDirDefault = [];
 	g_workObj.dividePos = [];
+	g_workObj.scale = g_keyObj.scale;
 	g_workObj.stepRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.stepHitRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.arrowRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
+
+	const changeStepRtn = (_name, _angle) =>
+		g_workObj[_name] = g_workObj[_name].map(val => isNaN(val) ? `${val}:${_angle}` : val + _angle);
+
+	if (g_stateObj.playWindow.endsWith(`SideScroll`)) {
+		if (g_stateObj.rotateEnabled) {
+			const sign = g_stateObj.playWindow === `SideScroll` ? 1 : -1;
+			changeStepRtn(`stepRtn`, 90 * sign);
+			changeStepRtn(`stepHitRtn`, 90 * sign);
+			changeStepRtn(`arrowRtn`, 90 * sign);
+		}
+		g_workObj.scale *= Math.min(g_sHeight / ((
+			Math.max(
+				g_keyObj[`div${keyCtrlPtn}`],
+				g_keyObj[`divMax${keyCtrlPtn}`] - g_keyObj[`div${keyCtrlPtn}`]
+			) + 1
+		) * g_keyObj.blank), 1);
+	}
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
 	g_workObj.keyGroupList = tkObj.keyGroupList;
@@ -11733,7 +11748,7 @@ const mainInit = () => {
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createEmptySprite(divRoot, `mainSprite`, mainCommonPos);
-	addTransform(`mainSprite`, `root`, `scale(${g_keyObj.scale})`);
+	addTransform(`mainSprite`, `root`, `scale(${g_workObj.scale})`);
 	addXY(`mainSprite`, `root`, g_workObj.playingX, g_posObj.stepY - C_STEP_Y + g_headerObj.playingY);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
