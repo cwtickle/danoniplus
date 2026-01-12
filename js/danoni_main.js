@@ -8404,8 +8404,6 @@ const exSettingInit = () => {
 	const spriteList = setSpriteList(g_settingPos.exSetting);
 
 	createGeneralSetting(spriteList.playWindow, `playWindow`);
-	lblPlayWindow.title += g_msgObj.sideScrollMsg;
-
 	createGeneralSetting(spriteList.stepArea, `stepArea`);
 	createGeneralSetting(spriteList.frzReturn, `frzReturn`);
 	createGeneralSetting(spriteList.shaking, `shaking`);
@@ -11341,8 +11339,18 @@ const getArrowSettings = () => {
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
 
+	const rotateBy = (val, delta) => {
+		// numeric
+		const n = Number(val);
+		if (Number.isFinite(n)) return n + delta;
+
+		// "type:deg"
+		const [type, degStr = `0`] = String(val).split(`:`);
+		const deg = Number(degStr);
+		return Number.isFinite(deg) ? `${type}:${deg + delta}` : val;
+	};
 	const changeStepRtn = (_name, _angle) =>
-		g_workObj[_name] = g_workObj[_name].map(val => isNaN(val) ? `${val}:${_angle}` : val + _angle);
+		g_workObj[_name] = g_workObj[_name].map(v => rotateBy(v, _angle));
 
 	if (g_stateObj.playWindow.endsWith(`SideScroll`)) {
 		if (g_stateObj.rotateEnabled) {
@@ -11351,12 +11359,12 @@ const getArrowSettings = () => {
 			changeStepRtn(`stepHitRtn`, 90 * sign);
 			changeStepRtn(`arrowRtn`, 90 * sign);
 		}
-		g_workObj.scale *= Math.min(g_sHeight / ((
-			Math.max(
-				g_keyObj[`div${keyCtrlPtn}`],
-				g_keyObj[`divMax${keyCtrlPtn}`] - g_keyObj[`div${keyCtrlPtn}`]
-			) + 1
-		) * g_keyObj.blank), 1);
+		const div = g_keyObj[`div${keyCtrlPtn}`];
+		const divMax = g_keyObj[`divMax${keyCtrlPtn}`] ?? posMax;
+		const denom = (Math.max(div, divMax - div) + 1) * g_keyObj.blank;
+		if (Number.isFinite(denom) && denom > 0) {
+			g_workObj.scale *= Math.min(g_sHeight / denom, 1);
+		}
 	}
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
