@@ -6674,57 +6674,123 @@ const drawSpeedGraph = _scoreId => {
 	const context = canvas.getContext(`2d`);
 	const [_a, _b] = [-75, 100];
 	const [_min, _max] = [-0.2, 2.2];
-	drawBaseLine(context, { _fixed: 1, _mark: `x`, _a, _b, _min, _max });
-
-	const avgX = [0, 0];
-	const avgSubX = [0, 0];
 	const lineX = [0, 150], lineY = 208;
-	Object.keys(speedObj).forEach((speedType, j) => {
-		const frame = speedObj[speedType].frame;
-		const speed = speedObj[speedType].speed;
 
-		context.beginPath();
-		let preY;
-		let avgSubFrame = 0;
+	const draw = () => {
+		const avgX = [0, 0];
+		const avgSubX = [0, 0];
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		drawBaseLine(context, { _fixed: 1, _mark: `x`, _a, _b, _min, _max });
 
-		for (let i = 0; i < frame.length; i++) {
-			const x = frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
-			const y = (Math.min(Math.max(speed[i], _min - 0.05), _max + 0.05) - 1) * _a + _b;
+		Object.keys(speedObj).forEach((speedType, j) => {
+			const frame = speedObj[speedType].frame;
+			const speed = speedObj[speedType].speed;
 
-			context.lineTo(x, preY);
-			context.lineTo(x, y);
-			preY = y;
+			context.beginPath();
+			let preY;
+			let avgSubFrame = 0;
 
-			const deltaFrame = frame[i] - (frame[i - 1] ?? startFrame);
-			avgX[j] += deltaFrame * (speed[i - 1] ?? 1);
-			if ((speed[i - 1] ?? 1) !== 1) {
-				avgSubFrame += deltaFrame;
-				avgSubX[j] += deltaFrame * (speed[i - 1]);
+			for (let i = 0; i < frame.length; i++) {
+				const x = frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
+				const y = (Math.min(Math.max(speed[i], _min - 0.05), _max + 0.05) - 1) * _a + _b;
+
+				context.lineTo(x, preY);
+				context.lineTo(x, y);
+				preY = y;
+
+				const deltaFrame = frame[i] - (frame[i - 1] ?? startFrame);
+				avgX[j] += deltaFrame * (speed[i - 1] ?? 1);
+				if ((speed[i - 1] ?? 1) !== 1) {
+					avgSubFrame += deltaFrame;
+					avgSubX[j] += deltaFrame * (speed[i - 1]);
+				}
 			}
+			avgX[j] /= playingFrame;
+			avgSubX[j] /= Math.max(avgSubFrame, 1);
+
+			context.lineWidth = 2;
+			context.strokeStyle = speedObj[speedType].strokeColor;
+			context.stroke();
+
+			context.beginPath();
+			context.moveTo(lineX[j], lineY);
+			context.lineTo(lineX[j] + 25, lineY);
+			context.stroke();
+			context.font = `${wUnit(g_limitObj.mainSiz)} ${getBasicFont()}`;
+			context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, lineY + 3);
+
+			const maxSpeed = Math.max(...speed);
+			const minSpeed = Math.min(...speed);
+			context.font = `${wUnit(g_limitObj.graphMiniSiz)} ${getBasicFont()}`;
+			context.fillText(`(${minSpeed.toFixed(2)}x` + (minSpeed === maxSpeed ? `` : ` -- ${Math.max(...speed).toFixed(2)}x`) + `)`, lineX[j] + 30, lineY + 16);
+			context.fillText(`Avg. ` + (avgX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`), lineX[j] + 30, lineY + 29);
+			updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
+		});
+		updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
+	};
+
+	const movePointer = (offsetX) => {
+		const x = ((offsetX - 30)  * playingFrame) / (g_limitObj.graphWidth - 30);
+		const speed = {speed: 0, boost: 0};
+		draw();
+		
+		Object.keys(speedObj).forEach(speedType => {
+			const speedIndex = speedObj[speedType].frame.findIndex((frame, i) => frame <= x && speedObj[speedType].frame[i + 1] >= x);
+			speed[speedType] = speedObj[speedType].speed[speedIndex];
+			const y = (Math.min(Math.max(speed[speedType], _min - 0.05), _max + 0.05) - 1) * _a + _b;
+
+			context.beginPath();
+			context.fillStyle = g_graphColorObj[speedType];
+			context.arc(offsetX, y, 3, 0, 360);
+			context.closePath();
+			context.fill();
+		});
+
+		calculateTotalSpeed(speed.speed, speed.boost);
+	};
+
+	graphSpeed.onmousemove = (e => {
+		if (e.offsetX < 30 || e.offsetX > 286) {
+			return;
 		}
-		avgX[j] /= playingFrame;
-		avgSubX[j] /= Math.max(avgSubFrame, 1);
-
-		context.lineWidth = 2;
-		context.strokeStyle = speedObj[speedType].strokeColor;
-		context.stroke();
-
-		context.beginPath();
-		context.moveTo(lineX[j], lineY);
-		context.lineTo(lineX[j] + 25, lineY);
-		context.stroke();
-		context.font = `${wUnit(g_limitObj.mainSiz)} ${getBasicFont()}`;
-		context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, lineY + 3);
-
-		const maxSpeed = Math.max(...speed);
-		const minSpeed = Math.min(...speed);
-		context.font = `${wUnit(g_limitObj.graphMiniSiz)} ${getBasicFont()}`;
-		context.fillText(`(${minSpeed.toFixed(2)}x` + (minSpeed === maxSpeed ? `` : ` -- ${Math.max(...speed).toFixed(2)}x`) + `)`, lineX[j] + 30, lineY + 16);
-		context.fillText(`Avg. ` + (avgX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`), lineX[j] + 30, lineY + 29);
-		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
+		movePointer(e.offsetX);
 	});
-	updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
+
+	movePointer(30);
 };
+
+const calculateTotalSpeed = (speed = Number(datatotal3.textContent), boost = Number(datatotal5.textContent)) => {
+	if (document.getElementById(`datatotal`) === null) {	
+		multiAppend(detailSpeed,
+			createDivCss2Label(`datatotal`, `${g_stateObj.speed.toFixed(2)}`, {
+				x: 10, y: 180, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+			}),
+			createDivCss2Label(`datatotal2`, `x`, {
+				x: 50, y: 180, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+			}),
+			createDivCss2Label(`datatotal3`, `${speed.toFixed(2)}`, {
+				x: 70, y: 180, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT, color: g_graphColorObj.speed,
+			}),
+			createDivCss2Label(`datatotal4`, `x`, {
+				x: 110, y: 180, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+			}),
+			createDivCss2Label(`datatotal5`, `${boost.toFixed(2)}`, {
+				x: 10, y: 200, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT, color: g_graphColorObj.boost,
+			}),
+			createDivCss2Label(`datatotal6`, `=`, {
+				x: 50, y: 200, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+			}),
+			createDivCss2Label(`datatotal7`, `${(g_stateObj.speed * speed * boost).toFixed(2)}`, {
+				x: 70, y: 200, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT, fontWeight: `bold`,
+			}),
+		);
+	} else {
+		document.getElementById(`datatotal`).textContent = `${g_stateObj.speed.toFixed(2)}`;
+		document.getElementById(`datatotal3`).textContent = `${speed.toFixed(2)}`;
+		document.getElementById(`datatotal5`).textContent = `${boost.toFixed(2)}`;
+		document.getElementById(`datatotal7`).textContent = `${(g_stateObj.speed * speed * boost).toFixed(2)}`;
+	}
+}
 
 /**
  * 譜面密度グラフの描画
@@ -7353,7 +7419,7 @@ const createOptionWindow = _sprite => {
 	// 縦位置: 2  短縮ショートカットあり
 	createGeneralSetting(spriteList.speed, `speed`, {
 		skipTerms: g_settings.speedTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_speed, roundNum: 5,
-		unitName: ` ${g_lblNameObj.multi}`,
+		unitName: ` ${g_lblNameObj.multi}`, addRFunc: () => calculateTotalSpeed(),
 	});
 	if (g_headerObj.baseSpeed !== 1) {
 		divRoot.appendChild(
