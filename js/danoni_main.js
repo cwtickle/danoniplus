@@ -6756,7 +6756,7 @@ const drawSpeedGraph = _scoreId => {
 	movePointer(30);
 };
 
-const calculateTotalSpeed = (speed = Number(datatotal3.textContent), boost = Number(datatotal5.textContent)) => {
+const calculateTotalSpeed = (speed = 1, boost = 1) => {
 	if (document.getElementById(`lblSpdHeader`) === null) {
 		multiAppend(detailSpeed,
 			createDivCss2Label(`lblSpdHeader`, `TotalSpeed`, g_lblPosObj.lblSpdHeader),
