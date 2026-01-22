@@ -440,6 +440,24 @@ const updateWindowSiz = () => {
         lblHRank: {
             x: 290, y: 145, w: 120, h: 20, siz: 50, align: C_ALIGN_CENTER,
         },
+        lblSpdHeader: {
+            x: 5, y: 180, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+        },
+        lblSpdBase: {
+            x: 0, y: 200, w: 40, h: 20, siz: 11.5, fontWeight: `bold`,
+        },
+        lblSpdOverall: {
+            x: 40, y: 200, w: 40, h: 20, siz: 11.5,
+            color: g_graphColorObj.speed, fontWeight: `bold`,
+        },
+        lblSpdBoost: {
+            x: 80, y: 200, w: 40, h: 20, siz: 11.5,
+            color: g_graphColorObj.boost, fontWeight: `bold`,
+        },
+        lblSpdTotal: {
+            x: 5, y: 215, w: 100, h: 20, siz: g_limitObj.difSelectorSiz,
+            align: C_ALIGN_LEFT, fontWeight: `bold`,
+        },
 
         /** ディスプレイ画面 */
         scMsg: {

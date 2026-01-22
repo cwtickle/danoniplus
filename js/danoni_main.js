@@ -6676,11 +6676,14 @@ const drawSpeedGraph = _scoreId => {
 	const [_min, _max] = [-0.2, 2.2];
 	const lineX = [0, 150], lineY = 208;
 
-	const draw = () => {
+	const movePointer = (offsetX) => {
 		const avgX = [0, 0];
 		const avgSubX = [0, 0];
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		drawBaseLine(context, { _fixed: 1, _mark: `x`, _a, _b, _min, _max });
+
+		const x = ((offsetX - 30) * playingFrame) / (g_limitObj.graphWidth - 30);
+		const speed = { speed: 0, boost: 0 };
 
 		Object.keys(speedObj).forEach((speedType, j) => {
 			const frame = speedObj[speedType].frame;
@@ -6727,13 +6730,7 @@ const drawSpeedGraph = _scoreId => {
 			updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 		});
 		updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
-	};
 
-	const movePointer = (offsetX) => {
-		const x = ((offsetX - 30)  * playingFrame) / (g_limitObj.graphWidth - 30);
-		const speed = {speed: 0, boost: 0};
-		draw();
-		
 		Object.keys(speedObj).forEach(speedType => {
 			const speedIndex = speedObj[speedType].frame.findIndex((frame, i) => frame <= x && speedObj[speedType].frame[i + 1] >= x);
 			speed[speedType] = speedObj[speedType].speed[speedIndex];
@@ -6749,7 +6746,7 @@ const drawSpeedGraph = _scoreId => {
 		calculateTotalSpeed(speed.speed, speed.boost);
 	};
 
-	graphSpeed.onmousemove = (e => {
+	canvas.onmousemove = (e => {
 		if (e.offsetX < 30 || e.offsetX > 286) {
 			return;
 		}
@@ -6760,36 +6757,19 @@ const drawSpeedGraph = _scoreId => {
 };
 
 const calculateTotalSpeed = (speed = Number(datatotal3.textContent), boost = Number(datatotal5.textContent)) => {
-	if (document.getElementById(`datatotal`) === null) {	
+	if (document.getElementById(`lblSpdHeader`) === null) {
 		multiAppend(detailSpeed,
-			createDivCss2Label(`datatotal`, `${g_stateObj.speed.toFixed(2)}`, {
-				x: 10, y: 180, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
-			}),
-			createDivCss2Label(`datatotal2`, `x`, {
-				x: 50, y: 180, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
-			}),
-			createDivCss2Label(`datatotal3`, `${speed.toFixed(2)}`, {
-				x: 70, y: 180, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT, color: g_graphColorObj.speed,
-			}),
-			createDivCss2Label(`datatotal4`, `x`, {
-				x: 110, y: 180, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
-			}),
-			createDivCss2Label(`datatotal5`, `${boost.toFixed(2)}`, {
-				x: 10, y: 200, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT, color: g_graphColorObj.boost,
-			}),
-			createDivCss2Label(`datatotal6`, `=`, {
-				x: 50, y: 200, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
-			}),
-			createDivCss2Label(`datatotal7`, `${(g_stateObj.speed * speed * boost).toFixed(2)}`, {
-				x: 70, y: 200, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT, fontWeight: `bold`,
-			}),
+			createDivCss2Label(`lblSpdHeader`, `TotalSpeed`, g_lblPosObj.lblSpdHeader),
+			createDivCss2Label(`lblSpdBase`, ``, g_lblPosObj.lblSpdBase),
+			createDivCss2Label(`lblSpdOverall`, ``, g_lblPosObj.lblSpdOverall),
+			createDivCss2Label(`lblSpdBoost`, ``, g_lblPosObj.lblSpdBoost),
+			createDivCss2Label(`lblSpdTotal`, ``, g_lblPosObj.lblSpdTotal),
 		);
-	} else {
-		document.getElementById(`datatotal`).textContent = `${g_stateObj.speed.toFixed(2)}`;
-		document.getElementById(`datatotal3`).textContent = `${speed.toFixed(2)}`;
-		document.getElementById(`datatotal5`).textContent = `${boost.toFixed(2)}`;
-		document.getElementById(`datatotal7`).textContent = `${(g_stateObj.speed * speed * boost).toFixed(2)}`;
 	}
+	lblSpdBase.textContent = `${g_stateObj.speed.toFixed(2)}`;
+	lblSpdOverall.textContent = `x${speed.toFixed(2)}`;
+	lblSpdBoost.textContent = `x${boost.toFixed(2)}`;
+	lblSpdTotal.textContent = `=${(g_stateObj.speed * speed * boost).toFixed(2)}`;
 }
 
 /**
