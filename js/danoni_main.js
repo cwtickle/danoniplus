@@ -6654,6 +6654,7 @@ const drawSpeedGraph = _scoreId => {
 		boost: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.boost }
 	};
 
+	const tmpSpeedPoint = [0];
 	Object.keys(speedObj).forEach(speedType => {
 		const frame = speedObj[speedType].frame;
 		const speed = speedObj[speedType].speed;
@@ -6663,12 +6664,20 @@ const drawSpeedGraph = _scoreId => {
 			if (speedData[i] >= startFrame) {
 				frame.push(speedData[i] - startFrame);
 				speed.push(speedData[i + 1]);
+				tmpSpeedPoint.push(speedData[i] - startFrame);
 			}
 			speedObj[speedType].cnt++;
 		}
 		frame.push(playingFrame);
 		speed.push(speed.at(-1));
+		tmpSpeedPoint.push(playingFrame);
 	});
+	if (g_detailObj.speedPoints === undefined) {
+		g_detailObj.speedPoints = [];
+		g_detailObj.speedPointIdx = [];
+	}
+	const speedPoints = makeDedupliArray(tmpSpeedPoint).sort((a, b) => a - b);
+	let speedPointIdx = 0;
 
 	const canvas = document.getElementById(`graphSpeed`);
 	const context = canvas.getContext(`2d`);
@@ -6676,101 +6685,143 @@ const drawSpeedGraph = _scoreId => {
 	const [_min, _max] = [-0.2, 2.2];
 	const lineX = [0, 150], lineY = 208;
 
-	const movePointer = (offsetX) => {
-		const avgX = [0, 0];
-		const avgSubX = [0, 0];
-		context.clearRect(0, 0, canvas.width, canvas.height);
-		drawBaseLine(context, { _fixed: 1, _mark: `x`, _a, _b, _min, _max });
+	const avgX = [0, 0];
+	const avgSubX = [0, 0];
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	drawBaseLine(context, { _fixed: 1, _mark: `x`, _a, _b, _min, _max });
 
-		const x = ((offsetX - 30) * playingFrame) / (g_limitObj.graphWidth - 30);
-		const speed = { speed: 0, boost: 0 };
+	Object.keys(speedObj).forEach((speedType, j) => {
+		const frame = speedObj[speedType].frame;
+		const speed = speedObj[speedType].speed;
 
-		Object.keys(speedObj).forEach((speedType, j) => {
-			const frame = speedObj[speedType].frame;
-			const speed = speedObj[speedType].speed;
+		context.beginPath();
+		let preY;
+		let avgSubFrame = 0;
 
-			context.beginPath();
-			let preY;
-			let avgSubFrame = 0;
+		for (let i = 0; i < frame.length; i++) {
+			const x = frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
+			const y = (Math.min(Math.max(speed[i], _min - 0.05), _max + 0.05) - 1) * _a + _b;
 
-			for (let i = 0; i < frame.length; i++) {
-				const x = frame[i] * (g_limitObj.graphWidth - 30) / playingFrame + 30;
-				const y = (Math.min(Math.max(speed[i], _min - 0.05), _max + 0.05) - 1) * _a + _b;
+			context.lineTo(x, preY);
+			context.lineTo(x, y);
+			preY = y;
 
-				context.lineTo(x, preY);
-				context.lineTo(x, y);
-				preY = y;
-
-				const deltaFrame = frame[i] - (frame[i - 1] ?? startFrame);
-				avgX[j] += deltaFrame * (speed[i - 1] ?? 1);
-				if ((speed[i - 1] ?? 1) !== 1) {
-					avgSubFrame += deltaFrame;
-					avgSubX[j] += deltaFrame * (speed[i - 1]);
-				}
+			const deltaFrame = frame[i] - (frame[i - 1] ?? startFrame);
+			avgX[j] += deltaFrame * (speed[i - 1] ?? 1);
+			if ((speed[i - 1] ?? 1) !== 1) {
+				avgSubFrame += deltaFrame;
+				avgSubX[j] += deltaFrame * (speed[i - 1]);
 			}
-			avgX[j] /= playingFrame;
-			avgSubX[j] /= Math.max(avgSubFrame, 1);
-
-			context.lineWidth = 2;
-			context.strokeStyle = speedObj[speedType].strokeColor;
-			context.stroke();
-
-			context.beginPath();
-			context.moveTo(lineX[j], lineY);
-			context.lineTo(lineX[j] + 25, lineY);
-			context.stroke();
-			context.font = `${wUnit(g_limitObj.mainSiz)} ${getBasicFont()}`;
-			context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, lineY + 3);
-
-			const maxSpeed = Math.max(...speed);
-			const minSpeed = Math.min(...speed);
-			context.font = `${wUnit(g_limitObj.graphMiniSiz)} ${getBasicFont()}`;
-			context.fillText(`(${minSpeed.toFixed(2)}x` + (minSpeed === maxSpeed ? `` : ` -- ${Math.max(...speed).toFixed(2)}x`) + `)`, lineX[j] + 30, lineY + 16);
-			context.fillText(`Avg. ` + (avgX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`), lineX[j] + 30, lineY + 29);
-			updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
-		});
-		updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
-
-		Object.keys(speedObj).forEach(speedType => {
-			const speedIndex = speedObj[speedType].frame.findIndex((frame, i) => frame <= x && speedObj[speedType].frame[i + 1] >= x);
-			speed[speedType] = speedObj[speedType].speed[speedIndex];
-			const y = (Math.min(Math.max(speed[speedType], _min - 0.05), _max + 0.05) - 1) * _a + _b;
-
-			context.beginPath();
-			context.fillStyle = g_graphColorObj[speedType];
-			context.arc(offsetX, y, 3, 0, 360);
-			context.closePath();
-			context.fill();
-		});
-
-		calculateTotalSpeed(speed.speed, speed.boost);
-	};
-
-	canvas.onmousemove = (e => {
-		if (e.offsetX < 30 || e.offsetX > 286) {
-			return;
 		}
-		movePointer(e.offsetX);
+		avgX[j] /= playingFrame;
+		avgSubX[j] /= Math.max(avgSubFrame, 1);
+
+		context.lineWidth = 2;
+		context.strokeStyle = speedObj[speedType].strokeColor;
+		context.stroke();
+
+		context.beginPath();
+		context.moveTo(lineX[j], lineY);
+		context.lineTo(lineX[j] + 25, lineY);
+		context.stroke();
+		context.font = `${wUnit(g_limitObj.mainSiz)} ${getBasicFont()}`;
+		context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, lineY + 3);
+
+		const maxSpeed = Math.max(...speed);
+		const minSpeed = Math.min(...speed);
+		context.font = `${wUnit(g_limitObj.graphMiniSiz)} ${getBasicFont()}`;
+		context.fillText(`(${minSpeed.toFixed(2)}x` + (minSpeed === maxSpeed ? `` : ` -- ${Math.max(...speed).toFixed(2)}x`) + `)`, lineX[j] + 30, lineY + 16);
+		context.fillText(`Avg. ` + (avgX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`), lineX[j] + 30, lineY + 29);
+		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 	});
+	updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
 
-	movePointer(30);
-};
+	/**
+	 * 速度計算用ラベルの作成
+	 */
+	const createBaseLabel = () => {
+		deleteDiv(detailSpeed, `lblSpdHeader`);
+		deleteDiv(detailSpeed, `lblSpdBase`);
+		deleteDiv(detailSpeed, `lblSpdOverall`);
+		deleteDiv(detailSpeed, `lblSpdBoost`);
+		deleteDiv(detailSpeed, `lblSpdTotal`);
+		deleteDiv(detailSpeed, `lblSpdFrame`);
+		deleteDiv(detailSpeed, `btnSpdCursorL`);
+		deleteDiv(detailSpeed, `btnSpdCursorR`);
 
-const calculateTotalSpeed = (speed = 1, boost = 1) => {
-	if (document.getElementById(`lblSpdHeader`) === null) {
 		multiAppend(detailSpeed,
 			createDivCss2Label(`lblSpdHeader`, `TotalSpeed`, g_lblPosObj.lblSpdHeader),
 			createDivCss2Label(`lblSpdBase`, ``, g_lblPosObj.lblSpdBase),
 			createDivCss2Label(`lblSpdOverall`, ``, g_lblPosObj.lblSpdOverall),
 			createDivCss2Label(`lblSpdBoost`, ``, g_lblPosObj.lblSpdBoost),
 			createDivCss2Label(`lblSpdTotal`, ``, g_lblPosObj.lblSpdTotal),
+			createDivCss2Label(`lblSpdFrame`, ``, g_lblPosObj.lblSpdFrame),
+			createCss2Button(`btnSpdCursorL`, `<`, () => changeSpdCursor(-1),
+				g_lblPosObj.btnSpdCursorL, g_cssObj.button_Mini),
+			createCss2Button(`btnSpdCursorR`, `>`, () => changeSpdCursor(),
+				g_lblPosObj.btnSpdCursorR, g_cssObj.button_Mini),
 		);
+	};
+
+	/**
+	 * 速度ポインタ位置の変更
+	 * @param {number} _num 
+	 */
+	const changeSpdCursor = (_num = 1) => {
+		speedPointIdx = nextPos(speedPointIdx, _num, speedPoints.length);
+		movePointer(speedPoints[speedPointIdx]);
+	}
+
+	/**
+	 * 速度ポインタの移動
+	 * @param {number} _frame 
+	 */
+	const movePointer = _frame => {
+		const canvasP = document.getElementById(`graphSpeed2`);
+		const contextP = canvasP.getContext(`2d`);
+		contextP.clearRect(0, 0, canvas.width, canvas.height);
+
+		const offsetX = _frame * (g_limitObj.graphWidth - 30) / playingFrame + 30;
+		const speed = { speed: 0, boost: 0 };
+
+		Object.keys(speedObj).forEach(speedType => {
+			const speedIndex = speedObj[speedType].frame.findIndex((frame, i) => frame <= _frame && speedObj[speedType].frame[i + 1] >= _frame);
+			speed[speedType] = speedObj[speedType].speed[speedIndex];
+			const y = (Math.min(Math.max(speed[speedType], _min - 0.05), _max + 0.05) - 1) * _a + _b;
+
+			contextP.beginPath();
+			contextP.fillStyle = g_graphColorObj[speedType];
+			contextP.arc(offsetX, y, 5, 0, 360);
+			contextP.closePath();
+			contextP.fill();
+		});
+		calculateTotalSpeed(speed.speed, speed.boost, _frame);
+	};
+	createBaseLabel();
+	movePointer(0);
+};
+
+/**
+ * 合計速度の表示更新
+ * @param {number} _speed 
+ * @param {number} _boost 
+ * @param {number} _frame 
+ */
+const calculateTotalSpeed = (_speed = null, _boost = null, _frame = 0) => {
+	let speed, boost;
+	if (_speed !== null && _boost !== null) {
+		speed = _speed;
+		boost = _boost;
+		lblSpdOverall.textContent = `x${_speed.toFixed(2)}`;
+		lblSpdBoost.textContent = `x${_boost.toFixed(2)}`;
+	} else {
+		speed = Number(lblSpdOverall.textContent.slice(1));
+		boost = Number(lblSpdBoost.textContent.slice(1));
 	}
 	lblSpdBase.textContent = `${g_stateObj.speed.toFixed(2)}`;
-	lblSpdOverall.textContent = `x${speed.toFixed(2)}`;
-	lblSpdBoost.textContent = `x${boost.toFixed(2)}`;
 	lblSpdTotal.textContent = `=${(g_stateObj.speed * speed * boost).toFixed(2)}`;
-}
+	lblSpdFrame.textContent = `[${transFrameToTimer(_frame + g_detailObj.startFrame[g_stateObj.scoreId])}]`;
+};
 
 /**
  * 譜面密度グラフの描画
@@ -7413,24 +7464,26 @@ const createOptionWindow = _sprite => {
 	 * @param {boolean} _graphUseFlg
 	 * @returns {HTMLDivElement}
 	 */
-	const createScoreDetail = (_name, _graphUseFlg = true) => {
+	const createScoreDetail = (_name, _graphUseFlg = true, _graphNum = 1) => {
 		const detailObj = createEmptySprite(scoreDetail, `detail${_name}`, g_windowObj.detailObj);
 
 		if (_graphUseFlg) {
-			const graphObj = document.createElement(`canvas`);
-			const textBaseObj = document.getElementById(`lnkDifficulty`);
-			const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
+			for (let j = 0; j < _graphNum; j++) {
+				const graphObj = document.createElement(`canvas`);
+				const textBaseObj = document.getElementById(`lnkDifficulty`);
+				const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
 
-			graphObj.id = `graph${_name}`;
-			graphObj.width = g_limitObj.graphWidth;
-			graphObj.height = g_limitObj.graphHeight;
-			graphObj.style.left = wUnit(125);
-			graphObj.style.top = wUnit(0);
-			graphObj.style.position = `absolute`;
-			graphObj.style.background = bkColor;
-			graphObj.style.border = `dotted ${wUnit(2)}`;
+				graphObj.id = `graph${_name}${j > 0 ? j + 1 : ``}`;
+				graphObj.width = g_limitObj.graphWidth;
+				graphObj.height = g_limitObj.graphHeight;
+				graphObj.style.left = wUnit(125);
+				graphObj.style.top = wUnit(0);
+				graphObj.style.position = `absolute`;
+				graphObj.style.background = j === 0 ? bkColor : `#ffffff00`;
+				graphObj.style.border = `dotted ${wUnit(2)}`;
 
-			detailObj.appendChild(graphObj);
+				detailObj.appendChild(graphObj);
+			}
 		}
 
 		return detailObj;
@@ -7474,7 +7527,7 @@ const createOptionWindow = _sprite => {
 		};
 
 		multiAppend(scoreDetail,
-			createScoreDetail(`Speed`),
+			createScoreDetail(`Speed`, true, 2),
 			createScoreDetail(`Density`),
 			createScoreDetail(`ToolDif`, false),
 			createScoreDetail(`HighScore`, false),

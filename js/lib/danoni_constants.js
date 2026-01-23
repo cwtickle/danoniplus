@@ -458,6 +458,15 @@ const updateWindowSiz = () => {
             x: 5, y: 215, w: 100, h: 20, siz: g_limitObj.difSelectorSiz,
             align: C_ALIGN_LEFT, fontWeight: `bold`,
         },
+        lblSpdFrame: {
+            x: 70, y: 218, w: 50, h: 20, siz: 12, fontWeight: `bold`,
+        },
+        btnSpdCursorL: {
+            x: 85, y: 180, w: 15, h: 20, siz: 12,
+        },
+        btnSpdCursorR: {
+            x: 100, y: 180, w: 15, h: 20, siz: 12,
+        },
 
         /** ディスプレイ画面 */
         scMsg: {
@@ -2311,6 +2320,8 @@ const g_shortcutObj = {
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `lnkHighScore`, reset: true },
+        Comma: { id: `btnSpdCursorL` },
+        Period: { id: `btnSpdCursorR` },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
