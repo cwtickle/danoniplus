@@ -6706,11 +6706,13 @@ const drawSpeedGraph = _scoreId => {
 			context.lineTo(x, y);
 			preY = y;
 
-			const deltaFrame = frame[i] - (frame[i - 1] ?? startFrame);
-			avgX[j] += deltaFrame * (speed[i - 1] ?? 1);
-			if ((speed[i - 1] ?? 1) !== 1) {
+			const prevFrame = (i > 0 ? frame[i - 1] : 0);   // frame[] は startFrame 相対。初回は 0 起点
+			const deltaFrame = frame[i] - prevFrame;
+			const prevSpeed = (i > 0 ? speed[i - 1] : 1);
+			avgX[j] += deltaFrame * prevSpeed;
+			if (prevSpeed !== 1) {
 				avgSubFrame += deltaFrame;
-				avgSubX[j] += deltaFrame * (speed[i - 1]);
+				avgSubX[j] += deltaFrame * prevSpeed;
 			}
 		}
 		avgX[j] /= playingFrame;
