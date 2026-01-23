@@ -6735,33 +6735,6 @@ const drawSpeedGraph = _scoreId => {
 	updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
 
 	/**
-	 * 速度計算用ラベルの作成
-	 */
-	const createBaseLabel = () => {
-		deleteDiv(detailSpeed, `lblSpdHeader`);
-		deleteDiv(detailSpeed, `lblSpdBase`);
-		deleteDiv(detailSpeed, `lblSpdOverall`);
-		deleteDiv(detailSpeed, `lblSpdBoost`);
-		deleteDiv(detailSpeed, `lblSpdTotal`);
-		deleteDiv(detailSpeed, `lblSpdFrame`);
-		deleteDiv(detailSpeed, `btnSpdCursorL`);
-		deleteDiv(detailSpeed, `btnSpdCursorR`);
-
-		multiAppend(detailSpeed,
-			createDivCss2Label(`lblSpdHeader`, `TotalSpeed`, g_lblPosObj.lblSpdHeader),
-			createDivCss2Label(`lblSpdBase`, ``, g_lblPosObj.lblSpdBase),
-			createDivCss2Label(`lblSpdOverall`, ``, g_lblPosObj.lblSpdOverall),
-			createDivCss2Label(`lblSpdBoost`, ``, g_lblPosObj.lblSpdBoost),
-			createDivCss2Label(`lblSpdTotal`, ``, g_lblPosObj.lblSpdTotal),
-			createDivCss2Label(`lblSpdFrame`, ``, g_lblPosObj.lblSpdFrame),
-			createCss2Button(`btnSpdCursorL`, `<`, () => changeSpdCursor(-1),
-				g_lblPosObj.btnSpdCursorL, g_cssObj.button_Mini),
-			createCss2Button(`btnSpdCursorR`, `>`, () => changeSpdCursor(),
-				g_lblPosObj.btnSpdCursorR, g_cssObj.button_Mini),
-		);
-	};
-
-	/**
 	 * 速度ポインタ位置の変更
 	 * @param {number} _num 
 	 */
@@ -6796,7 +6769,29 @@ const drawSpeedGraph = _scoreId => {
 		});
 		calculateTotalSpeed(speed.speed, speed.boost, _frame);
 	};
-	createBaseLabel();
+
+	// 速度計算用ラベルの再作成
+	deleteDiv(detailSpeed, `lblSpdHeader`);
+	deleteDiv(detailSpeed, `lblSpdBase`);
+	deleteDiv(detailSpeed, `lblSpdOverall`);
+	deleteDiv(detailSpeed, `lblSpdBoost`);
+	deleteDiv(detailSpeed, `lblSpdTotal`);
+	deleteDiv(detailSpeed, `lblSpdFrame`);
+	deleteDiv(detailSpeed, `btnSpdCursorL`);
+	deleteDiv(detailSpeed, `btnSpdCursorR`);
+
+	multiAppend(detailSpeed,
+		createDivCss2Label(`lblSpdHeader`, `TotalSpeed`, g_lblPosObj.lblSpdHeader),
+		createDivCss2Label(`lblSpdBase`, ``, g_lblPosObj.lblSpdBase),
+		createDivCss2Label(`lblSpdOverall`, ``, g_lblPosObj.lblSpdOverall),
+		createDivCss2Label(`lblSpdBoost`, ``, g_lblPosObj.lblSpdBoost),
+		createDivCss2Label(`lblSpdTotal`, ``, g_lblPosObj.lblSpdTotal),
+		createDivCss2Label(`lblSpdFrame`, ``, g_lblPosObj.lblSpdFrame),
+		createCss2Button(`btnSpdCursorL`, `<`, () => changeSpdCursor(-1),
+			g_lblPosObj.btnSpdCursorL, g_cssObj.button_Mini),
+		createCss2Button(`btnSpdCursorR`, `>`, () => changeSpdCursor(),
+			g_lblPosObj.btnSpdCursorR, g_cssObj.button_Mini),
+	);
 	movePointer(0);
 };
 
