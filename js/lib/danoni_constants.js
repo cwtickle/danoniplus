@@ -448,11 +448,11 @@ const updateWindowSiz = () => {
         },
         lblSpdOverall: {
             x: 40, y: 200, w: 40, h: 20, siz: 11.5,
-            color: g_graphColorObj.speed, fontWeight: `bold`,
+            color: g_graphColorObj.speedChara, fontWeight: `bold`,
         },
         lblSpdBoost: {
             x: 80, y: 200, w: 40, h: 20, siz: 11.5,
-            color: g_graphColorObj.boost, fontWeight: `bold`,
+            color: g_graphColorObj.boostChara, fontWeight: `bold`,
         },
         lblSpdTotal: {
             x: 5, y: 215, w: 100, h: 20, siz: g_limitObj.difSelectorSiz,
@@ -937,7 +937,9 @@ const g_graphColorObj = {
     default3Push: `#555555cc`,
 
     speed: `#cc3333`,
+    speedChara: `#cc6666`,
     boost: `#999900`,
+    boostChara: `#999966`,
 
     clear: `#33cc33`,
     failed: `#cc3333`,

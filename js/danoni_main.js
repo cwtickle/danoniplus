@@ -6811,6 +6811,9 @@ const drawSpeedGraph = _scoreId => {
  * @param {number} _frame 
  */
 const calculateTotalSpeed = (_speed = null, _boost = null, _frame = 0) => {
+	if (document.getElementById(`lblSpdOverall`) === null) {
+		return;
+	}
 	let speed, boost;
 	if (_speed !== null && _boost !== null) {
 		speed = _speed;
