@@ -209,7 +209,7 @@ const updateWindowSiz = () => {
         difFilter: { x: 0, y: 66, w: 140, h: 204 + g_sHeight - 500, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
         scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 245, visibility: `hidden`, pointerEvents: C_DIS_AUTO },
-        detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden`, pointerEvents: C_DIS_AUTO },
+        detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
         keyconSprite: { y: 105, h: g_sHeight - 105, overflow: C_DIS_AUTO },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
         playDataWindow: { x: g_sWidth / 2 - 225, y: 70, w: 450, h: 110 },
@@ -439,6 +439,33 @@ const updateWindowSiz = () => {
         },
         lblHRank: {
             x: 290, y: 145, w: 120, h: 20, siz: 50, align: C_ALIGN_CENTER,
+        },
+        lblSpdHeader: {
+            x: 5, y: 180, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+        },
+        lblSpdBase: {
+            x: 0, y: 200, w: 40, h: 20, siz: 11.5, fontWeight: `bold`,
+        },
+        lblSpdOverall: {
+            x: 40, y: 200, w: 40, h: 20, siz: 11.5,
+            color: g_graphColorObj.speedChara, fontWeight: `bold`,
+        },
+        lblSpdBoost: {
+            x: 80, y: 200, w: 40, h: 20, siz: 11.5,
+            color: g_graphColorObj.boostChara, fontWeight: `bold`,
+        },
+        lblSpdTotal: {
+            x: 5, y: 215, w: 100, h: 20, siz: g_limitObj.difSelectorSiz,
+            align: C_ALIGN_LEFT, fontWeight: `bold`,
+        },
+        lblSpdFrame: {
+            x: 70, y: 218, w: 50, h: 20, siz: 12, fontWeight: `bold`,
+        },
+        btnSpdCursorL: {
+            x: 85, y: 180, w: 15, h: 20, siz: 12,
+        },
+        btnSpdCursorR: {
+            x: 100, y: 180, w: 15, h: 20, siz: 12,
         },
 
         /** ディスプレイ画面 */
@@ -910,7 +937,9 @@ const g_graphColorObj = {
     default3Push: `#555555cc`,
 
     speed: `#cc3333`,
+    speedChara: `#cc6666`,
     boost: `#999900`,
+    boostChara: `#999966`,
 
     clear: `#33cc33`,
     failed: `#cc3333`,
@@ -2293,6 +2322,8 @@ const g_shortcutObj = {
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `lnkHighScore`, reset: true },
+        Comma: { id: `btnSpdCursorL` },
+        Period: { id: `btnSpdCursorR` },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
