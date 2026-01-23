@@ -6786,7 +6786,7 @@ const drawSpeedGraph = _scoreId => {
 
 		Object.keys(speedObj).forEach(speedType => {
 			const speedFrames = speedObj[speedType].frame.concat(Infinity);
-			const speedIndex = speedObj[speedType].frame.findIndex((frame, i) => frame <= _frame && speedFrames[i + 1] >= _frame);
+			const speedIndex = speedObj[speedType].frame.findIndex((frame, i) => frame <= _frame && _frame < speedFrames[i + 1]);
 			speed[speedType] = speedObj[speedType].speed[speedIndex];
 			const y = (Math.min(Math.max(speed[speedType], _min - 0.05), _max + 0.05) - 1) * _a + _b;
 
