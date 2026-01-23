@@ -6672,10 +6672,6 @@ const drawSpeedGraph = _scoreId => {
 		speed.push(speed.at(-1));
 		tmpSpeedPoint.push(playingFrame);
 	});
-	if (g_detailObj.speedPoints === undefined) {
-		g_detailObj.speedPoints = [];
-		g_detailObj.speedPointIdx = [];
-	}
 	const speedPoints = makeDedupliArray(tmpSpeedPoint).sort((a, b) => a - b);
 	let speedPointIdx = 0;
 
