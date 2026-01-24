@@ -14291,9 +14291,15 @@ const resultInit = () => {
 	const gaugeTransitionWindow = createEmptySprite(divRoot, `gaugeTransitionWindow`, g_windowObj.gaugeTransition, g_cssObj.result_PlayDataWindow);
 	for (let j = 0; j < 2; j++) {
 		const canvas = document.createElement(`canvas`);
-		canvas.id = `graphGaugeTransition${j === 0 ? `` : j + 1}`;
+		canvas.id = `graphGaugeTransition${j > 0 ? j + 1 : ``}`;
 		canvas.width = g_limitObj.gaugeTransitionWidth;
 		canvas.height = g_limitObj.gaugeTransitionHeight;
+		canvas.style.left = wUnit(0);
+		canvas.style.top = wUnit(0);
+		canvas.style.position = `absolute`;
+		if (j > 0) {
+			canvas.style.pointerEvents = C_DIS_NONE;
+		}
 		gaugeTransitionWindow.appendChild(canvas);
 	}
 
