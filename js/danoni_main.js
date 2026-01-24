@@ -7164,7 +7164,7 @@ const makeHighScore = _scoreId => {
 
 		let tweetFrzJdg = ``;
 		let tweetMaxCombo = `${g_localStorage.highscores?.[scoreName]?.maxCombo}`;
-		if (g_allFrz > 0) {
+		if (sumData(g_detailObj.frzCnt[_scoreId]) > 0) {
 			tweetFrzJdg = `${g_localStorage.highscores?.[scoreName]?.kita}-${g_localStorage.highscores?.[scoreName]?.iknai}`;
 			tweetMaxCombo += `-${g_localStorage.highscores?.[scoreName]?.fmaxCombo}`;
 		}
