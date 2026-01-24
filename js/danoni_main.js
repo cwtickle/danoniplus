@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2025/12/30
+ * Revised : 2026/01/24
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 41.4.12`;
-const g_revisedDate = `2025/12/30`;
+const g_version = `Ver 41.4.13`;
+const g_revisedDate = `2026/01/24`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -6843,7 +6843,7 @@ const makeHighScore = _scoreId => {
 
 		let tweetFrzJdg = ``;
 		let tweetMaxCombo = `${g_localStorage.highscores?.[scoreName]?.maxCombo}`;
-		if (g_allFrz > 0) {
+		if (sumData(g_detailObj.frzCnt[_scoreId]) > 0) {
 			tweetFrzJdg = `${g_localStorage.highscores?.[scoreName]?.kita}-${g_localStorage.highscores?.[scoreName]?.iknai}`;
 			tweetMaxCombo += `-${g_localStorage.highscores?.[scoreName]?.fmaxCombo}`;
 		}
