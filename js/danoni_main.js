@@ -14407,16 +14407,12 @@ const resultInit = () => {
 		drawOverlay();
 	};
 
-	const frameToX = (_canvas, _frame) => {
-		return _frame / playingFrame * _canvas.width;
-	};
-
 	// 既存のグラフの上から縦線と時間を重ねる
 	const drawOverlay = () => {
 
 		const canvas = document.getElementById(`graphGaugeTransition2`);
 		const ctx = canvas.getContext(`2d`);
-		const x = frameToX(canvas, cursorFrame);
+		const x = cursorFrame / playingFrame * canvas.width;
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 		// 縦線
