@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/01/24
+ * Revised : 2026/01/25
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 43.6.1`;
-const g_revisedDate = `2026/01/24`;
+const g_version = `Ver 43.6.2`;
+const g_revisedDate = `2026/01/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -223,6 +223,7 @@ const g_wordObj = {
 
 // オーディオ設定・タイマー管理
 let g_audio = new Audio();
+let g_audioForMS = new Audio();
 let g_timeoutEvtId = 0;
 let g_timeoutEvtTitleId = 0;
 let g_timeoutEvtResultId = 0;
@@ -2342,6 +2343,8 @@ class AudioPlayer {
 		this._fadeinPosition = 0;
 		this._eventListeners = {};
 		this.playbackRate = 1;
+		this._muted = false;
+		this._savedVolume = 1;
 	}
 
 	async init(_arrayBuffer) {
@@ -2404,11 +2407,17 @@ class AudioPlayer {
 	}
 
 	get volume() {
-		return this._gain.gain.value;
+		// ミュート中でも設定されている音量を返す
+		return this._muted ? this._savedVolume : this._gain.gain.value;
 	}
 
 	set volume(_volume) {
-		this._gain.gain.value = _volume;
+		if (this._muted) {
+			// ミュート中でも音量設定は保存
+			this._savedVolume = _volume;
+		} else {
+			this._gain.gain.value = _volume;
+		}
 	}
 
 	get duration() {
@@ -2420,6 +2429,26 @@ class AudioPlayer {
 			return 4;
 		} else {
 			return 0;
+		}
+	}
+
+	get muted() {
+		return this._muted;
+	}
+
+	set muted(_muted) {
+		if (this._muted === _muted) {
+			return;
+		}
+		this._muted = _muted;
+
+		if (_muted) {
+			// ミュート時：現在の音量を保存してゲインを0に
+			this._savedVolume = this._gain.gain.value;
+			this._gain.gain.value = 0;
+		} else {
+			// ミュート解除時：保存した音量を復元
+			this._gain.gain.value = this._savedVolume;
 		}
 	}
 
@@ -5148,7 +5177,7 @@ const titleInit = (_initFlg = false) => {
 		const setBGMVolume = (_num = 1) => {
 			g_settings.bgmVolumeNum = nextPos(g_settings.bgmVolumeNum, _num, g_settings.volumes.length);
 			g_stateObj.bgmVolume = g_settings.volumes[g_settings.bgmVolumeNum];
-			g_audio.volume = g_stateObj.bgmVolume / 100;
+			g_audioForMS.volume = g_stateObj.bgmVolume / 100;
 			btnBgmVolume.textContent = `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`;
 		};
 
@@ -5228,7 +5257,7 @@ const titleInit = (_initFlg = false) => {
 
 		// 初期表示用 (2秒後に選曲画面を表示)
 		if (_initFlg && !g_headerObj.customTitleUse) {
-			g_audio.muted = true;
+			g_audioForMS.muted = true;
 			const mSelectTitleSprite = createEmptySprite(divRoot, `mSelectTitleSprite`,
 				g_windowObj.mSelectTitleSprite, g_cssObj.settings_DifSelector);
 			multiAppend(mSelectTitleSprite,
@@ -5247,8 +5276,15 @@ const titleInit = (_initFlg = false) => {
 				if (_opacity <= 0) {
 					clearTimeout(fadeOpacity);
 					mSelectTitleSprite.style.display = C_DIS_NONE;
-					g_audio.muted = false;
-					g_audio.currentTime = g_headerObj.musicStarts[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
+					if (!g_stateObj.bgmMuteFlg) {
+						g_audioForMS.muted = false;
+						g_audioForMS.currentTime = g_headerObj.musicStarts[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
+						if (g_audioForMS instanceof AudioPlayer) {
+							// AudioPlayerはシークを適用するために再起動が必要
+							g_audioForMS.pause();
+							g_audioForMS.play();
+						}
+					}
 				} else {
 					mSelectTitleSprite.style.opacity = _opacity;
 					fadeOpacity = setTimeout(() => {
@@ -5543,12 +5579,12 @@ const getCreatorInfo = (_creatorList) => {
  * BGMの停止
  */
 const pauseBGM = () => {
-	if (g_audio) {
+	if (g_audioForMS) {
 		g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
-		g_audio.pause();
-		if (!(g_audio instanceof AudioPlayer)) {
-			g_audio.removeAttribute('src');
-			g_audio.load();
+		g_audioForMS.pause();
+		if (!(g_audioForMS instanceof AudioPlayer)) {
+			g_audioForMS.removeAttribute('src');
+			g_audioForMS.load();
 		}
 	}
 	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
@@ -5590,13 +5626,13 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 
 		// 開始時点で終了音量とイコールの場合は終了
 		if (startVolume === endVolume || step === 0) {
-			g_audio.volume = endVolume;
+			g_audioForMS.volume = endVolume;
 			onEnd(true);
 			return null;
 		}
 
 		let volume = startVolume;
-		g_audio.volume = startVolume;
+		g_audioForMS.volume = startVolume;
 
 		const stepFunc = () => {
 			// 継続条件チェック
@@ -5611,14 +5647,14 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				(startVolume > endVolume && volume <= endVolume);
 
 			if (reached) {
-				g_audio.volume = endVolume;
+				g_audioForMS.volume = endVolume;
 				onEnd(true); // 正常終了
 				return;
 			}
 
 			// 音量更新
 			volume += step;
-			g_audio.volume = Math.min(Math.max(volume, 0), 1);
+			g_audioForMS.volume = Math.min(Math.max(volume, 0), 1);
 
 			// 次のステップへ
 			setTimeout(stepFunc, FADE_INTERVAL_MS);
@@ -5659,7 +5695,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	 * BGMのフェードアウトとシーク
 	 */
 	const fadeOutAndSeek = () => {
-		const start = g_audio.volume;
+		const start = g_audioForMS.volume;
 		const end = 0;
 
 		g_stateObj.bgmFadeOut = fadeVolume(
@@ -5672,8 +5708,8 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 
 				if (!finished) return; // 中断された
 
-				g_audio.pause();
-				g_audio.currentTime = musicStart;
+				g_audioForMS.pause();
+				g_audioForMS.currentTime = musicStart;
 
 				if (isTitle()) {
 					setTimeout(() => {
@@ -5695,13 +5731,13 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	 * BGMのフェードイン
 	 */
 	const fadeIn = () => {
-		if (!(g_audio instanceof AudioPlayer) && !g_audio.src) return;
+		if (!(g_audioForMS instanceof AudioPlayer) && !g_audioForMS.src) return;
 
 		const start = 0;
 		const end = g_stateObj.bgmVolume / 100;
 
-		g_audio.volume = 0;
-		g_audio.play();
+		g_audioForMS.volume = 0;
+		g_audioForMS.play();
 
 		g_stateObj.bgmFadeIn = fadeVolume(
 			start,
@@ -5731,7 +5767,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 			() => {
 				try {
 					return (
-						g_audio.elapsedTime >= musicEnd ||
+						g_audioForMS.elapsedTime >= musicEnd ||
 						numAtStart !== g_settings.musicIdxNum
 					);
 				} catch {
@@ -5754,6 +5790,9 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
 			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
+				if (g_audioForMS instanceof AudioPlayer) {
+					g_audioForMS.close();
+				}
 				await loadScript2(url);
 				musicInit();
 				if (!isTitle()) {
@@ -5766,12 +5805,12 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 					tmpAudio.close();
 					return;
 				}
-				g_audio = tmpAudio;
+				g_audioForMS = tmpAudio;
 			}
-			g_audio.volume = g_stateObj.bgmVolume / 100;
+			g_audioForMS.volume = g_stateObj.bgmVolume / 100;
 			if (g_currentPage === `title` && musicEnd > 0) {
-				g_audio.currentTime = musicStart;
-				g_audio.play();
+				g_audioForMS.currentTime = musicStart;
+				g_audioForMS.play();
 				repeatBGM();
 			}
 		} catch (e) {
@@ -5780,22 +5819,30 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		}
 
 	} else {
-		g_audio = new Audio();
-		g_audio.src = url;
-		g_audio.autoplay = false;
-		g_audio.volume = g_stateObj.bgmVolume / 100;
-		const loadedMeta = g_handler.addListener(g_audio, `loadedmetadata`, () => {
+		// 既存の監視を解除し、AudioPlayer を確実にクローズ
+		if (g_stateObj.bgmTimeupdateEvtId) {
+			g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
+			g_stateObj.bgmTimeupdateEvtId = null;
+		}
+		if (g_audioForMS instanceof AudioPlayer) {
+			g_audioForMS.close();
+		}
+		g_audioForMS = new Audio();
+		g_audioForMS.src = url;
+		g_audioForMS.autoplay = false;
+		g_audioForMS.volume = g_stateObj.bgmVolume / 100;
+		const loadedMeta = g_handler.addListener(g_audioForMS, `loadedmetadata`, () => {
 			g_handler.removeListener(loadedMeta);
 			if (!isTitle()) {
 				return;
 			}
-			g_audio.currentTime = musicStart;
-			g_audio.play();
+			g_audioForMS.currentTime = musicStart;
+			g_audioForMS.play();
 		}, { once: true });
 
 		if (musicEnd > 0) {
-			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audio, "timeupdate", () => {
-				if (g_audio.currentTime >= musicEnd) {
+			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audioForMS, "timeupdate", () => {
+				if (g_audioForMS.currentTime >= musicEnd) {
 					fadeOutAndSeek();
 				}
 			});
@@ -6771,22 +6818,19 @@ const drawSpeedGraph = _scoreId => {
 	};
 
 	// 速度計算用ラベルの再作成
-	deleteDiv(detailSpeed, `lblSpdHeader`);
-	deleteDiv(detailSpeed, `lblSpdBase`);
-	deleteDiv(detailSpeed, `lblSpdOverall`);
-	deleteDiv(detailSpeed, `lblSpdBoost`);
-	deleteDiv(detailSpeed, `lblSpdTotal`);
-	deleteDiv(detailSpeed, `lblSpdFrame`);
 	deleteDiv(detailSpeed, `btnSpdCursorL`);
 	deleteDiv(detailSpeed, `btnSpdCursorR`);
-
+	if (document.getElementById(`lblSpdHeader`) === null) {
+		multiAppend(detailSpeed,
+			createDivCss2Label(`lblSpdHeader`, `TotalSpeed`, g_lblPosObj.lblSpdHeader),
+			createDivCss2Label(`lblSpdBase`, ``, g_lblPosObj.lblSpdBase),
+			createDivCss2Label(`lblSpdOverall`, ``, g_lblPosObj.lblSpdOverall),
+			createDivCss2Label(`lblSpdBoost`, ``, g_lblPosObj.lblSpdBoost),
+			createDivCss2Label(`lblSpdTotal`, ``, g_lblPosObj.lblSpdTotal),
+			createDivCss2Label(`lblSpdFrame`, ``, g_lblPosObj.lblSpdFrame),
+		);
+	}
 	multiAppend(detailSpeed,
-		createDivCss2Label(`lblSpdHeader`, `TotalSpeed`, g_lblPosObj.lblSpdHeader),
-		createDivCss2Label(`lblSpdBase`, ``, g_lblPosObj.lblSpdBase),
-		createDivCss2Label(`lblSpdOverall`, ``, g_lblPosObj.lblSpdOverall),
-		createDivCss2Label(`lblSpdBoost`, ``, g_lblPosObj.lblSpdBoost),
-		createDivCss2Label(`lblSpdTotal`, ``, g_lblPosObj.lblSpdTotal),
-		createDivCss2Label(`lblSpdFrame`, ``, g_lblPosObj.lblSpdFrame),
 		createCss2Button(`btnSpdCursorL`, `<`, () => changeSpdCursor(-1),
 			g_lblPosObj.btnSpdCursorL, g_cssObj.button_Mini),
 		createCss2Button(`btnSpdCursorR`, `>`, () => changeSpdCursor(),
@@ -6802,7 +6846,7 @@ const drawSpeedGraph = _scoreId => {
  * @param {number} _frame 
  */
 const calculateTotalSpeed = (_speed = null, _boost = null, _frame = 0) => {
-	if (document.getElementById(`lblSpdOverall`) === null) {
+	if (document.getElementById(`lblSpdHeader`) === null) {
 		return;
 	}
 	let speed, boost;
@@ -9550,6 +9594,7 @@ const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
 const loadMusic = () => {
 
 	clearWindow(true);
+	g_audioForMS.pause();
 	g_currentPage = `loading`;
 
 	const musicUrl = getMusicUrl(g_stateObj.scoreId);
@@ -14291,12 +14336,20 @@ const resultInit = () => {
 	}
 
 	// ゲージ推移グラフの描画
-	const gaugeTransitionCanvas = document.createElement(`canvas`);
-	gaugeTransitionCanvas.id = `graphGaugeTransition`;
-	gaugeTransitionCanvas.width = g_limitObj.gaugeTransitionWidth;
-	gaugeTransitionCanvas.height = g_limitObj.gaugeTransitionHeight;
-
-	createEmptySprite(divRoot, `gaugeTransitionWindow`, g_windowObj.gaugeTransition, g_cssObj.result_PlayDataWindow).appendChild(gaugeTransitionCanvas);
+	const gaugeTransitionWindow = createEmptySprite(divRoot, `gaugeTransitionWindow`, g_windowObj.gaugeTransition, g_cssObj.result_PlayDataWindow);
+	for (let j = 0; j < 2; j++) {
+		const canvas = document.createElement(`canvas`);
+		canvas.id = `graphGaugeTransition${j > 0 ? j + 1 : ``}`;
+		canvas.width = g_limitObj.gaugeTransitionWidth;
+		canvas.height = g_limitObj.gaugeTransitionHeight;
+		canvas.style.left = wUnit(0);
+		canvas.style.top = wUnit(0);
+		canvas.style.position = `absolute`;
+		if (j > 0) {
+			canvas.style.pointerEvents = C_DIS_NONE;
+		}
+		gaugeTransitionWindow.appendChild(canvas);
+	}
 
 	multiAppend(divRoot,
 		createCss2Button(`btnGaugeTransition`, `i`, () => true, {
@@ -14347,64 +14400,60 @@ const resultInit = () => {
 	frame.push(playingFrame);
 	life.push(life.at(-1));
 
-	const context = gaugeTransitionCanvas.getContext(`2d`);
+	// グラフ本体の描画
+	const context = document.getElementById(`graphGaugeTransition`).getContext(`2d`);
 	context.lineWidth = 2;
 
-	const drawGaugeGraph = () => {
-		context.clearRect(0, 0, gaugeTransitionCanvas.width, gaugeTransitionCanvas.height);
+	let preX, preY;
+	const borderY = g_limitObj.gaugeTransitionHeight - g_workObj.lifeBorder * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
 
-		let preX, preY;
-		const borderY = g_limitObj.gaugeTransitionHeight - g_workObj.lifeBorder * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
+	for (let i = 0; i < frame.length; i++) {
+		const x = frame[i] * g_limitObj.gaugeTransitionWidth / playingFrame;
+		const y = g_limitObj.gaugeTransitionHeight - life[i] * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
 
-		for (let i = 0; i < frame.length; i++) {
-			const x = frame[i] * g_limitObj.gaugeTransitionWidth / playingFrame;
-			const y = g_limitObj.gaugeTransitionHeight - life[i] * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
+		if (i === 0) {
+			context.beginPath();
+			context.moveTo(x, y);
+		} else {
+			context.moveTo(preX, preY);
+			context.lineTo(x, preY);
 
-			if (i === 0) {
-				context.beginPath();
-				context.moveTo(x, y);
-			} else {
-				context.moveTo(preX, preY);
-				context.lineTo(x, preY);
+			if (life[i - 1] === 0 && life[i] === 0) {
+				context.strokeStyle = g_graphColorObj.failed;
 
-				if (life[i - 1] === 0 && life[i] === 0) {
-					context.strokeStyle = g_graphColorObj.failed;
+			} else if (life[i - 1] >= g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
+				context.lineTo(x, y);
+				context.strokeStyle = g_graphColorObj.clear;
 
-				} else if (life[i - 1] >= g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
-					context.lineTo(x, y);
-					context.strokeStyle = g_graphColorObj.clear;
-
-				} else if (life[i - 1] < g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
-					context.lineTo(x, borderY);
-					context.strokeStyle = g_graphColorObj.failed;
-					context.stroke();
-					context.beginPath();
-					context.moveTo(x, borderY);
-					context.lineTo(x, y);
-					context.strokeStyle = g_graphColorObj.clear;
-
-				} else if (life[i - 1] >= g_workObj.lifeBorder && life[i] < g_workObj.lifeBorder) {
-					context.lineTo(x, borderY);
-					context.strokeStyle = g_graphColorObj.clear;
-					context.stroke();
-					context.beginPath();
-					context.moveTo(x, borderY);
-					context.lineTo(x, y);
-					context.strokeStyle = g_graphColorObj.failed;
-
-				} else {
-					context.lineTo(x, y);
-					context.strokeStyle = g_graphColorObj.failed;
-				}
-
+			} else if (life[i - 1] < g_workObj.lifeBorder && life[i] >= g_workObj.lifeBorder) {
+				context.lineTo(x, borderY);
+				context.strokeStyle = g_graphColorObj.failed;
 				context.stroke();
 				context.beginPath();
+				context.moveTo(x, borderY);
+				context.lineTo(x, y);
+				context.strokeStyle = g_graphColorObj.clear;
+
+			} else if (life[i - 1] >= g_workObj.lifeBorder && life[i] < g_workObj.lifeBorder) {
+				context.lineTo(x, borderY);
+				context.strokeStyle = g_graphColorObj.clear;
+				context.stroke();
+				context.beginPath();
+				context.moveTo(x, borderY);
+				context.lineTo(x, y);
+				context.strokeStyle = g_graphColorObj.failed;
+
+			} else {
+				context.lineTo(x, y);
+				context.strokeStyle = g_graphColorObj.failed;
 			}
-			preX = x;
-			preY = y;
+
+			context.stroke();
+			context.beginPath();
 		}
+		preX = x;
+		preY = y;
 	}
-	drawGaugeGraph();
 
 	let cursorFrame = 0;   // 現在のカーソル位置（frame）
 	const moveCursor = (sec = 1) => {
@@ -14412,22 +14461,18 @@ const resultInit = () => {
 		drawOverlay();
 	};
 
-	const frameToX = (_frame) => {
-		return _frame / playingFrame * gaugeTransitionCanvas.width;
-	};
-
-	// 既存のグラフを再描画しつつ縦線と時間を重ねる
+	// 既存のグラフの上から縦線と時間を重ねる
 	const drawOverlay = () => {
-		// 既存のグラフを再描画
-		drawGaugeGraph();
 
-		const ctx = context;
-		const x = frameToX(cursorFrame);
+		const canvas = document.getElementById(`graphGaugeTransition2`);
+		const ctx = canvas.getContext(`2d`);
+		const x = cursorFrame / playingFrame * canvas.width;
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 		// 縦線
 		ctx.beginPath();
 		ctx.moveTo(x, 0);
-		ctx.lineTo(x, gaugeTransitionCanvas.height);
+		ctx.lineTo(x, canvas.height);
 		ctx.strokeStyle = "#009999";
 		ctx.lineWidth = 1.5;
 		ctx.stroke();
@@ -14436,10 +14481,10 @@ const resultInit = () => {
 		const timer = transFrameToTimer(cursorFrame + startFrame);
 		ctx.font = `14px ${getBasicFont()}`;
 		ctx.fillStyle = "#009999";
-		ctx.textAlign = x > gaugeTransitionCanvas.width * 0.8 ? C_ALIGN_RIGHT : C_ALIGN_LEFT;
+		ctx.textAlign = x > canvas.width * 0.8 ? C_ALIGN_RIGHT : C_ALIGN_LEFT;
 		ctx.fillText(
 			`${timer}`,
-			x > gaugeTransitionCanvas.width * 0.8 ? x - 5 : x + 5,
+			x > canvas.width * 0.8 ? x - 5 : x + 5,
 			g_limitObj.gaugeTransitionHeight - 35
 		);
 	};
