@@ -5817,6 +5817,14 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		}
 
 	} else {
+		// 既存の監視を解除し、AudioPlayer を確実にクローズ
+		if (g_stateObj.bgmTimeupdateEvtId) {
+			g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
+			g_stateObj.bgmTimeupdateEvtId = null;
+		}
+		if (g_audioForMS instanceof AudioPlayer) {
+			g_audioForMS.close();
+		}
 		g_audioForMS = new Audio();
 		g_audioForMS.src = url;
 		g_audioForMS.autoplay = false;
