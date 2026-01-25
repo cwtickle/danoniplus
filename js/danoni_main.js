@@ -2343,6 +2343,8 @@ class AudioPlayer {
 		this._fadeinPosition = 0;
 		this._eventListeners = {};
 		this.playbackRate = 1;
+		this._muted = false;
+		this._savedVolume = 1;
 	}
 
 	async init(_arrayBuffer) {
@@ -2405,11 +2407,17 @@ class AudioPlayer {
 	}
 
 	get volume() {
-		return this._gain.gain.value;
+		// ミュート中でも設定されている音量を返す
+		return this._muted ? this._savedVolume : this._gain.gain.value;
 	}
 
 	set volume(_volume) {
-		this._gain.gain.value = _volume;
+		if (this._muted) {
+			// ミュート中でも音量設定は保存
+			this._savedVolume = _volume;
+		} else {
+			this._gain.gain.value = _volume;
+		}
 	}
 
 	get duration() {
@@ -2421,6 +2429,26 @@ class AudioPlayer {
 			return 4;
 		} else {
 			return 0;
+		}
+	}
+
+	get muted() {
+		return this._muted;
+	}
+
+	set muted(_muted) {
+		if (this._muted === _muted) {
+			return;
+		}
+		this._muted = _muted;
+
+		if (_muted) {
+			// ミュート時：現在の音量を保存してゲインを0に
+			this._savedVolume = this._gain.gain.value;
+			this._gain.gain.value = 0;
+		} else {
+			// ミュート解除時：保存した音量を復元
+			this._gain.gain.value = this._savedVolume;
 		}
 	}
 
