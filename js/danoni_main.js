@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/01/24
+ * Revised : 2026/01/25
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.5.7`;
-const g_revisedDate = `2026/01/24`;
+const g_version = `Ver 42.5.8`;
+const g_revisedDate = `2026/01/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -223,6 +223,7 @@ const g_wordObj = {
 
 // オーディオ設定・タイマー管理
 let g_audio = new Audio();
+let g_audioForMS = new Audio();
 let g_timeoutEvtId = 0;
 let g_timeoutEvtTitleId = 0;
 let g_timeoutEvtResultId = 0;
@@ -2342,6 +2343,8 @@ class AudioPlayer {
 		this._fadeinPosition = 0;
 		this._eventListeners = {};
 		this.playbackRate = 1;
+		this._muted = false;
+		this._savedVolume = 1;
 	}
 
 	async init(_arrayBuffer) {
@@ -2404,11 +2407,17 @@ class AudioPlayer {
 	}
 
 	get volume() {
-		return this._gain.gain.value;
+		// ミュート中でも設定されている音量を返す
+		return this._muted ? this._savedVolume : this._gain.gain.value;
 	}
 
 	set volume(_volume) {
-		this._gain.gain.value = _volume;
+		if (this._muted) {
+			// ミュート中でも音量設定は保存
+			this._savedVolume = _volume;
+		} else {
+			this._gain.gain.value = _volume;
+		}
 	}
 
 	get duration() {
@@ -2420,6 +2429,26 @@ class AudioPlayer {
 			return 4;
 		} else {
 			return 0;
+		}
+	}
+
+	get muted() {
+		return this._muted;
+	}
+
+	set muted(_muted) {
+		if (this._muted === _muted) {
+			return;
+		}
+		this._muted = _muted;
+
+		if (_muted) {
+			// ミュート時：現在の音量を保存してゲインを0に
+			this._savedVolume = this._gain.gain.value;
+			this._gain.gain.value = 0;
+		} else {
+			// ミュート解除時：保存した音量を復元
+			this._gain.gain.value = this._savedVolume;
 		}
 	}
 
@@ -5112,7 +5141,7 @@ const titleInit = (_initFlg = false) => {
 		const setBGMVolume = (_num = 1) => {
 			g_settings.bgmVolumeNum = nextPos(g_settings.bgmVolumeNum, _num, g_settings.volumes.length);
 			g_stateObj.bgmVolume = g_settings.volumes[g_settings.bgmVolumeNum];
-			g_audio.volume = g_stateObj.bgmVolume / 100;
+			g_audioForMS.volume = g_stateObj.bgmVolume / 100;
 			btnBgmVolume.textContent = `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`;
 		};
 
@@ -5192,7 +5221,7 @@ const titleInit = (_initFlg = false) => {
 
 		// 初期表示用 (2秒後に選曲画面を表示)
 		if (_initFlg && !g_headerObj.customTitleUse) {
-			g_audio.muted = true;
+			g_audioForMS.muted = true;
 			const mSelectTitleSprite = createEmptySprite(divRoot, `mSelectTitleSprite`,
 				g_windowObj.mSelectTitleSprite, g_cssObj.settings_DifSelector);
 			multiAppend(mSelectTitleSprite,
@@ -5211,8 +5240,15 @@ const titleInit = (_initFlg = false) => {
 				if (_opacity <= 0) {
 					clearTimeout(fadeOpacity);
 					mSelectTitleSprite.style.display = C_DIS_NONE;
-					g_audio.muted = false;
-					g_audio.currentTime = g_headerObj.musicStarts[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
+					if (!g_stateObj.bgmMuteFlg) {
+						g_audioForMS.muted = false;
+						g_audioForMS.currentTime = g_headerObj.musicStarts[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
+						if (g_audioForMS instanceof AudioPlayer) {
+							// AudioPlayerはシークを適用するために再起動が必要
+							g_audioForMS.pause();
+							g_audioForMS.play();
+						}
+					}
 				} else {
 					mSelectTitleSprite.style.opacity = _opacity;
 					fadeOpacity = setTimeout(() => {
@@ -5507,17 +5543,17 @@ const getCreatorInfo = (_creatorList) => {
  * BGMの停止
  */
 const pauseBGM = () => {
-	if (g_audio) {
+	if (g_audioForMS) {
 		g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
-		g_audio.pause();
-		if (!(g_audio instanceof AudioPlayer)) {
-			g_audio.removeAttribute('src');
-			g_audio.load();
+		g_audioForMS.pause();
+		if (!(g_audioForMS instanceof AudioPlayer)) {
+			g_audioForMS.removeAttribute('src');
+			g_audioForMS.load();
 		}
 	}
 	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
 		if (g_stateObj[id]) {
-			clearInterval(g_stateObj[id]);
+			clearTimeout(g_stateObj[id]);
 			g_stateObj[id] = null;
 		}
 	});
@@ -5542,100 +5578,186 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	const isTitle = () => g_currentPage === `title` && _currentLoopNum === g_settings.musicLoopNum;
 
 	/**
+	 * 汎用フェード処理
+	 * @param {number} startVolume - 開始音量 (0〜1)
+	 * @param {number} endVolume - 終了音量 (0〜1)
+	 * @param {number} step - 1ステップの増減量
+	 * @param {function} onEnd - フェード完了時の処理
+	 * @param {function} isValid - フェード継続条件（true: 継続, false: 中断）
+	 * @returns {number} timeoutId
+	 */
+	const fadeVolume = (startVolume, endVolume, step, onEnd, isValid) => {
+
+		// 開始時点で終了音量とイコールの場合は終了
+		if (startVolume === endVolume || step === 0) {
+			g_audioForMS.volume = endVolume;
+			onEnd(true);
+			return null;
+		}
+
+		let volume = startVolume;
+		g_audioForMS.volume = startVolume;
+
+		const stepFunc = () => {
+			// 継続条件チェック
+			if (!isValid()) {
+				onEnd(false); // 中断
+				return;
+			}
+
+			// 終了判定
+			const reached =
+				(startVolume < endVolume && volume >= endVolume) ||
+				(startVolume > endVolume && volume <= endVolume);
+
+			if (reached) {
+				g_audioForMS.volume = endVolume;
+				onEnd(true); // 正常終了
+				return;
+			}
+
+			// 音量更新
+			volume += step;
+			g_audioForMS.volume = Math.min(Math.max(volume, 0), 1);
+
+			// 次のステップへ
+			setTimeout(stepFunc, FADE_INTERVAL_MS);
+		};
+
+		return setTimeout(stepFunc, FADE_INTERVAL_MS);
+	};
+
+	/**
+	 * 汎用ポーリング（監視）処理
+	 * @param {function} check - 条件チェック関数（true なら終了）
+	 * @param {function} onEnd - 終了時の処理
+	 * @param {function} isValid - 継続条件（true: 継続, false: 中断）
+	 * @returns {number} timeoutId
+	 */
+	const poll = (check, onEnd, isValid) => {
+		const step = () => {
+			// 継続条件チェック
+			if (!isValid()) {
+				onEnd(false); // 中断
+				return;
+			}
+
+			// 条件成立
+			if (check()) {
+				onEnd(true); // 正常終了
+				return;
+			}
+
+			// 次のチェックへ
+			setTimeout(step, FADE_INTERVAL_MS);
+		};
+
+		return setTimeout(step, FADE_INTERVAL_MS);
+	};
+
+	/**
 	 * BGMのフェードアウトとシーク
 	 */
 	const fadeOutAndSeek = () => {
-		let volume = g_audio.volume;
-		const fadeInterval = setInterval(() => {
-			if (volume > FADE_STEP && isTitle()) {
-				volume -= FADE_STEP;
-				g_audio.volume = Math.max(volume, 0);
-			} else {
-				clearInterval(fadeInterval);
+
+		const start = g_audioForMS.volume;
+		const end = 0;
+
+		g_stateObj.bgmFadeOut = fadeVolume(
+			start,
+			end,
+			-FADE_STEP,
+			/* onEnd */
+			(finished) => {
 				g_stateObj.bgmFadeOut = null;
-				g_audio.pause();
-				g_audio.currentTime = musicStart;
+
+				if (!finished) return; // 中断された
+
+				g_audioForMS.pause();
+				g_audioForMS.currentTime = musicStart;
 
 				// フェードイン開始
 				if (isTitle()) {
 					setTimeout(() => {
 						fadeIn();
-						if (encodeFlg) {
-							// base64エンコード時はtimeupdateイベントが発火しないため、
-							// setIntervalで時間を取得する
-							repeatBGM();
-						}
+						if (encodeFlg) repeatBGM();
 					}, FADE_DELAY_MS);
 				} else {
 					pauseBGM();
 				}
-			}
-		}, FADE_INTERVAL_MS);
-		g_stateObj.bgmFadeOut = fadeInterval;
+			},
+			/* isValid */
+			() =>
+				isTitle() &&
+				g_stateObj.bgmFadeOut !== null
+		);
 	};
 
 	/**
 	 * BGMのフェードイン
 	 */
 	const fadeIn = () => {
-		if (!(g_audio instanceof AudioPlayer) && !g_audio.src) {
-			return;
-		}
-		let volume = 0;
-		g_audio.play();
-		const fadeInterval = setInterval(() => {
-			if (volume < g_stateObj.bgmVolume / 100 && isTitle()) {
-				volume += FADE_STEP;
-				g_audio.volume = Math.min(volume, 1);
-			} else {
-				clearInterval(fadeInterval);
-				g_stateObj.bgmFadeIn = null;
-			}
+		if (!(g_audioForMS instanceof AudioPlayer) && !g_audioForMS.src) return;
 
-			// フェードイン中に楽曲が変更された場合は停止
-			if (currentIdx !== g_headerObj.musicIdxList[g_settings.musicIdxNum]) {
-				pauseBGM();
-				clearInterval(fadeInterval);
+		const start = 0;
+		const end = g_stateObj.bgmVolume / 100;
+
+		g_audioForMS.volume = 0;
+		g_audioForMS.play();
+		g_stateObj.bgmFadeIn = fadeVolume(
+			start,
+			end,
+			FADE_STEP,
+			/* onEnd */
+			() => {
 				g_stateObj.bgmFadeIn = null;
-			}
-		}, FADE_INTERVAL_MS);
-		g_stateObj.bgmFadeIn = fadeInterval;
+			},
+			/* isValid */
+			() =>
+				isTitle() &&
+				g_stateObj.bgmFadeIn !== null &&
+				currentIdx === g_headerObj.musicIdxList[g_settings.musicIdxNum]
+		);
 	};
 
 	/**
-	 * BGMのループ処理
+	 * BGMのループ処理 (base64エンコード時用)
+	 * - base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
 	 */
 	const repeatBGM = () => {
-		if (encodeFlg) {
-			// base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
-			const repeatCheck = setInterval((num = g_settings.musicIdxNum) => {
-				try {
-					if (((g_audio.elapsedTime >= musicEnd) ||
-						num !== g_settings.musicIdxNum) && g_stateObj.bgmLooped !== null) {
-						clearInterval(repeatCheck);
-						g_stateObj.bgmLooped = null;
-						fadeOutAndSeek();
-					}
-				} catch (e) {
-					clearInterval(repeatCheck);
-					g_stateObj.bgmLooped = null;
-				}
-			}, FADE_INTERVAL_MS);
-			g_stateObj.bgmLooped = repeatCheck;
+		const numAtStart = g_settings.musicIdxNum;
 
-		} else {
-			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audio, "timeupdate", () => {
-				if (g_audio.currentTime >= musicEnd) {
+		g_stateObj.bgmLooped = poll(
+			/* check */
+			() => {
+				try {
+					return (
+						g_audioForMS.elapsedTime >= musicEnd ||
+						numAtStart !== g_settings.musicIdxNum
+					);
+				} catch {
+					return true; // エラー時は終了扱い
+				}
+			},
+			/* onEnd */
+			(finished) => {
+				g_stateObj.bgmLooped = null;
+				if (finished) {
 					fadeOutAndSeek();
 				}
-			});
-		}
+			},
+			/* isValid */
+			() => g_stateObj.bgmLooped !== null
+		);
 	};
 
 	if (encodeFlg) {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
 			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
+				if (g_audioForMS instanceof AudioPlayer) {
+					g_audioForMS.close();
+				}
 				await loadScript2(url);
 				musicInit();
 				if (!isTitle()) {
@@ -5648,12 +5770,13 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 					tmpAudio.close();
 					return;
 				}
-				g_audio = tmpAudio;
+				g_audioForMS = tmpAudio;
 			}
-			g_audio.volume = g_stateObj.bgmVolume / 100;
+			g_audioForMS.volume = g_stateObj.bgmVolume / 100;
 			if (g_currentPage === `title`) {
-				g_audio.currentTime = musicStart;
-				g_audio.play();
+				g_audioForMS.currentTime = musicStart;
+				g_audioForMS.play();
+				repeatBGM();
 			}
 		} catch (e) {
 			// 音源の読み込みに失敗した場合、エラーを表示
@@ -5661,21 +5784,34 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		}
 
 	} else {
-		g_audio = new Audio();
-		g_audio.src = url;
-		g_audio.autoplay = false;
-		g_audio.volume = g_stateObj.bgmVolume / 100;
-		const loadedMeta = g_handler.addListener(g_audio, `loadedmetadata`, () => {
+		// 既存の監視を解除し、AudioPlayer を確実にクローズ
+		if (g_stateObj.bgmTimeupdateEvtId) {
+			g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
+			g_stateObj.bgmTimeupdateEvtId = null;
+		}
+		if (g_audioForMS instanceof AudioPlayer) {
+			g_audioForMS.close();
+		}
+		g_audioForMS = new Audio();
+		g_audioForMS.src = url;
+		g_audioForMS.autoplay = false;
+		g_audioForMS.volume = g_stateObj.bgmVolume / 100;
+		const loadedMeta = g_handler.addListener(g_audioForMS, `loadedmetadata`, () => {
 			g_handler.removeListener(loadedMeta);
 			if (!isTitle()) {
 				return;
 			}
-			g_audio.currentTime = musicStart;
-			g_audio.play();
+			g_audioForMS.currentTime = musicStart;
+			g_audioForMS.play();
 		}, { once: true });
-	}
-	if (musicEnd > 0) {
-		repeatBGM();
+
+		if (musicEnd > 0) {
+			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audioForMS, "timeupdate", () => {
+				if (g_audioForMS.currentTime >= musicEnd) {
+					fadeOutAndSeek();
+				}
+			});
+		}
 	}
 };
 
@@ -9298,6 +9434,7 @@ const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
 const loadMusic = () => {
 
 	clearWindow(true);
+	g_audioForMS.pause();
 	g_currentPage = `loading`;
 
 	const musicUrl = getMusicUrl(g_stateObj.scoreId);
