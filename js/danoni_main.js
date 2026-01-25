@@ -223,6 +223,7 @@ const g_wordObj = {
 
 // オーディオ設定・タイマー管理
 let g_audio = new Audio();
+let g_audioForMS = new Audio();
 let g_timeoutEvtId = 0;
 let g_timeoutEvtTitleId = 0;
 let g_timeoutEvtResultId = 0;
@@ -5148,7 +5149,7 @@ const titleInit = (_initFlg = false) => {
 		const setBGMVolume = (_num = 1) => {
 			g_settings.bgmVolumeNum = nextPos(g_settings.bgmVolumeNum, _num, g_settings.volumes.length);
 			g_stateObj.bgmVolume = g_settings.volumes[g_settings.bgmVolumeNum];
-			g_audio.volume = g_stateObj.bgmVolume / 100;
+			g_audioForMS.volume = g_stateObj.bgmVolume / 100;
 			btnBgmVolume.textContent = `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`;
 		};
 
@@ -5228,7 +5229,7 @@ const titleInit = (_initFlg = false) => {
 
 		// 初期表示用 (2秒後に選曲画面を表示)
 		if (_initFlg && !g_headerObj.customTitleUse) {
-			g_audio.muted = true;
+			g_audioForMS.muted = true;
 			const mSelectTitleSprite = createEmptySprite(divRoot, `mSelectTitleSprite`,
 				g_windowObj.mSelectTitleSprite, g_cssObj.settings_DifSelector);
 			multiAppend(mSelectTitleSprite,
@@ -5247,8 +5248,8 @@ const titleInit = (_initFlg = false) => {
 				if (_opacity <= 0) {
 					clearTimeout(fadeOpacity);
 					mSelectTitleSprite.style.display = C_DIS_NONE;
-					g_audio.muted = false;
-					g_audio.currentTime = g_headerObj.musicStarts[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
+					g_audioForMS.muted = false;
+					g_audioForMS.currentTime = g_headerObj.musicStarts[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
 				} else {
 					mSelectTitleSprite.style.opacity = _opacity;
 					fadeOpacity = setTimeout(() => {
@@ -5543,12 +5544,12 @@ const getCreatorInfo = (_creatorList) => {
  * BGMの停止
  */
 const pauseBGM = () => {
-	if (g_audio) {
+	if (g_audioForMS) {
 		g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
-		g_audio.pause();
-		if (!(g_audio instanceof AudioPlayer)) {
-			g_audio.removeAttribute('src');
-			g_audio.load();
+		g_audioForMS.pause();
+		if (!(g_audioForMS instanceof AudioPlayer)) {
+			g_audioForMS.removeAttribute('src');
+			g_audioForMS.load();
 		}
 	}
 	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
@@ -5590,13 +5591,13 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 
 		// 開始時点で終了音量とイコールの場合は終了
 		if (startVolume === endVolume || step === 0) {
-			g_audio.volume = endVolume;
+			g_audioForMS.volume = endVolume;
 			onEnd(true);
 			return null;
 		}
 
 		let volume = startVolume;
-		g_audio.volume = startVolume;
+		g_audioForMS.volume = startVolume;
 
 		const stepFunc = () => {
 			// 継続条件チェック
@@ -5611,14 +5612,14 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				(startVolume > endVolume && volume <= endVolume);
 
 			if (reached) {
-				g_audio.volume = endVolume;
+				g_audioForMS.volume = endVolume;
 				onEnd(true); // 正常終了
 				return;
 			}
 
 			// 音量更新
 			volume += step;
-			g_audio.volume = Math.min(Math.max(volume, 0), 1);
+			g_audioForMS.volume = Math.min(Math.max(volume, 0), 1);
 
 			// 次のステップへ
 			setTimeout(stepFunc, FADE_INTERVAL_MS);
@@ -5659,7 +5660,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	 * BGMのフェードアウトとシーク
 	 */
 	const fadeOutAndSeek = () => {
-		const start = g_audio.volume;
+		const start = g_audioForMS.volume;
 		const end = 0;
 
 		g_stateObj.bgmFadeOut = fadeVolume(
@@ -5672,8 +5673,8 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 
 				if (!finished) return; // 中断された
 
-				g_audio.pause();
-				g_audio.currentTime = musicStart;
+				g_audioForMS.pause();
+				g_audioForMS.currentTime = musicStart;
 
 				if (isTitle()) {
 					setTimeout(() => {
@@ -5695,13 +5696,13 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	 * BGMのフェードイン
 	 */
 	const fadeIn = () => {
-		if (!(g_audio instanceof AudioPlayer) && !g_audio.src) return;
+		if (!(g_audioForMS instanceof AudioPlayer) && !g_audioForMS.src) return;
 
 		const start = 0;
 		const end = g_stateObj.bgmVolume / 100;
 
-		g_audio.volume = 0;
-		g_audio.play();
+		g_audioForMS.volume = 0;
+		g_audioForMS.play();
 
 		g_stateObj.bgmFadeIn = fadeVolume(
 			start,
@@ -5731,7 +5732,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 			() => {
 				try {
 					return (
-						g_audio.elapsedTime >= musicEnd ||
+						g_audioForMS.elapsedTime >= musicEnd ||
 						numAtStart !== g_settings.musicIdxNum
 					);
 				} catch {
@@ -5766,12 +5767,12 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 					tmpAudio.close();
 					return;
 				}
-				g_audio = tmpAudio;
+				g_audioForMS = tmpAudio;
 			}
-			g_audio.volume = g_stateObj.bgmVolume / 100;
+			g_audioForMS.volume = g_stateObj.bgmVolume / 100;
 			if (g_currentPage === `title` && musicEnd > 0) {
-				g_audio.currentTime = musicStart;
-				g_audio.play();
+				g_audioForMS.currentTime = musicStart;
+				g_audioForMS.play();
 				repeatBGM();
 			}
 		} catch (e) {
@@ -5780,22 +5781,22 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		}
 
 	} else {
-		g_audio = new Audio();
-		g_audio.src = url;
-		g_audio.autoplay = false;
-		g_audio.volume = g_stateObj.bgmVolume / 100;
-		const loadedMeta = g_handler.addListener(g_audio, `loadedmetadata`, () => {
+		g_audioForMS = new Audio();
+		g_audioForMS.src = url;
+		g_audioForMS.autoplay = false;
+		g_audioForMS.volume = g_stateObj.bgmVolume / 100;
+		const loadedMeta = g_handler.addListener(g_audioForMS, `loadedmetadata`, () => {
 			g_handler.removeListener(loadedMeta);
 			if (!isTitle()) {
 				return;
 			}
-			g_audio.currentTime = musicStart;
-			g_audio.play();
+			g_audioForMS.currentTime = musicStart;
+			g_audioForMS.play();
 		}, { once: true });
 
 		if (musicEnd > 0) {
-			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audio, "timeupdate", () => {
-				if (g_audio.currentTime >= musicEnd) {
+			g_stateObj.bgmTimeupdateEvtId = g_handler.addListener(g_audioForMS, "timeupdate", () => {
+				if (g_audioForMS.currentTime >= musicEnd) {
 					fadeOutAndSeek();
 				}
 			});
@@ -9547,6 +9548,7 @@ const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
 const loadMusic = () => {
 
 	clearWindow(true);
+	g_audioForMS.pause();
 	g_currentPage = `loading`;
 
 	const musicUrl = getMusicUrl(g_stateObj.scoreId);
