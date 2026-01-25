@@ -5278,6 +5278,11 @@ const titleInit = (_initFlg = false) => {
 					mSelectTitleSprite.style.display = C_DIS_NONE;
 					g_audioForMS.muted = false;
 					g_audioForMS.currentTime = g_headerObj.musicStarts[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
+					if (g_audioForMS instanceof AudioPlayer) {
+						// AudioPlayerはシークを適用するために再起動が必要
+						g_audioForMS.pause();
+						g_audioForMS.play();
+					}
 				} else {
 					mSelectTitleSprite.style.opacity = _opacity;
 					fadeOpacity = setTimeout(() => {
@@ -5783,6 +5788,9 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
 			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
+				if (g_audioForMS instanceof AudioPlayer) {
+					g_audioForMS.close();
+				}
 				await loadScript2(url);
 				musicInit();
 				if (!isTitle()) {
