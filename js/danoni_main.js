@@ -5276,12 +5276,14 @@ const titleInit = (_initFlg = false) => {
 				if (_opacity <= 0) {
 					clearTimeout(fadeOpacity);
 					mSelectTitleSprite.style.display = C_DIS_NONE;
-					g_audioForMS.muted = false;
-					g_audioForMS.currentTime = g_headerObj.musicStarts[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
-					if (g_audioForMS instanceof AudioPlayer) {
-						// AudioPlayerはシークを適用するために再起動が必要
-						g_audioForMS.pause();
-						g_audioForMS.play();
+					if (!g_stateObj.bgmMuteFlg) {
+						g_audioForMS.muted = false;
+						g_audioForMS.currentTime = g_headerObj.musicStarts[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
+						if (g_audioForMS instanceof AudioPlayer) {
+							// AudioPlayerはシークを適用するために再起動が必要
+							g_audioForMS.pause();
+							g_audioForMS.play();
+						}
 					}
 				} else {
 					mSelectTitleSprite.style.opacity = _opacity;
