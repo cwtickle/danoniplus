@@ -5632,7 +5632,6 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				g_stateObj.bgmFadeIn !== null &&
 				currentIdx === g_headerObj.musicIdxList[g_settings.musicIdxNum]
 		);
-		g_stateObj.bgmFadeIn = fadeInterval;
 	};
 
 	/**
@@ -5666,7 +5665,6 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		);
 	};
 
-	const musicPlayCheck = () => _currentLoopNum !== g_settings.musicLoopNum || g_currentPage !== `title`;
 	if (encodeFlg) {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
@@ -5714,7 +5712,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		g_audioForMS.volume = g_stateObj.bgmVolume / 100;
 		const loadedMeta = g_handler.addListener(g_audioForMS, `loadedmetadata`, () => {
 			g_handler.removeListener(loadedMeta);
-			if (musicPlayCheck()) {
+			if (!isTitle()) {
 				return;
 			}
 			g_audioForMS.currentTime = musicStart;
