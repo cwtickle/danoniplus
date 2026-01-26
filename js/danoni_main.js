@@ -223,7 +223,7 @@ const g_wordObj = {
 
 // オーディオ設定・タイマー管理
 let g_audio = new Audio();
-let g_audioForMS = new Audio();
+let g_audioForMS = null;
 let g_timeoutEvtId = 0;
 let g_timeoutEvtTitleId = 0;
 let g_timeoutEvtResultId = 0;
@@ -5193,7 +5193,6 @@ const titleInit = (_initFlg = false) => {
 			createCss2Button(`btnStart`,
 				`>`, () => {
 					clearTimeout(g_timeoutEvtTitleId);
-					pauseBGM();
 					g_handler.removeListener(wheelHandler);
 					g_keyObj.prevKey = `Dummy${g_settings.musicIdxNum}`;
 					g_langStorage.bgmVolume = g_stateObj.bgmVolume;
@@ -6047,6 +6046,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 
 const dataMgtInit = () => {
 	clearWindow(true);
+	pauseBGM();
 	const prevPage = g_currentPage;
 	g_currentPage = `dataMgt`;
 	let selectedKey = g_keyObj.currentKey;
@@ -6278,6 +6278,7 @@ const dataMgtInit = () => {
 
 const preconditionInit = () => {
 	clearWindow(true);
+	pauseBGM();
 	const prevPage = g_currentPage;
 	g_currentPage = `precondition`;
 
@@ -6445,6 +6446,7 @@ const makePlayButton = _func => createCss2Button(`btnPlay`, g_lblNameObj.b_play,
 const optionInit = () => {
 
 	clearWindow(true);
+	pauseBGM();
 	const divRoot = document.getElementById(`divRoot`);
 	g_currentPage = `option`;
 	g_stateObj.filterKeys = ``;
@@ -9594,7 +9596,7 @@ const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
 const loadMusic = () => {
 
 	clearWindow(true);
-	g_audioForMS.pause();
+	pauseBGM();
 	g_currentPage = `loading`;
 
 	const musicUrl = getMusicUrl(g_stateObj.scoreId);
