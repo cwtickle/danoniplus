@@ -5177,7 +5177,9 @@ const titleInit = (_initFlg = false) => {
 		const setBGMVolume = (_num = 1) => {
 			g_settings.bgmVolumeNum = nextPos(g_settings.bgmVolumeNum, _num, g_settings.volumes.length);
 			g_stateObj.bgmVolume = g_settings.volumes[g_settings.bgmVolumeNum];
-			g_audioForMS.volume = g_stateObj.bgmVolume / 100;
+			if (g_audioForMS) {
+				g_audioForMS.volume = g_stateObj.bgmVolume / 100;
+			}
 			btnBgmVolume.textContent = `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`;
 		};
 
@@ -5256,7 +5258,9 @@ const titleInit = (_initFlg = false) => {
 
 		// 初期表示用 (2秒後に選曲画面を表示)
 		if (_initFlg && !g_headerObj.customTitleUse) {
-			g_audioForMS.muted = true;
+			if (g_audioForMS) {
+				g_audioForMS.muted = true;
+			}
 			const mSelectTitleSprite = createEmptySprite(divRoot, `mSelectTitleSprite`,
 				g_windowObj.mSelectTitleSprite, g_cssObj.settings_DifSelector);
 			multiAppend(mSelectTitleSprite,
@@ -5275,7 +5279,7 @@ const titleInit = (_initFlg = false) => {
 				if (_opacity <= 0) {
 					clearTimeout(fadeOpacity);
 					mSelectTitleSprite.style.display = C_DIS_NONE;
-					if (!g_stateObj.bgmMuteFlg) {
+					if (!g_stateObj.bgmMuteFlg && g_audioForMS) {
 						g_audioForMS.muted = false;
 						g_audioForMS.currentTime = g_headerObj.musicStarts[g_headerObj.musicIdxList[g_settings.musicIdxNum]] ?? 0;
 						if (g_audioForMS instanceof AudioPlayer) {
