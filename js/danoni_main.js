@@ -5793,7 +5793,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	 * 既存のAudio/AudioPlayerをクローズ
 	 */
 	const closeExistingAudio = () => {
-		if (g_stateObj.bgmTimeupdateEvtId) {
+		if (g_stateObj.bgmTimeupdateEvtId !== null && g_stateObj.bgmTimeupdateEvtId !== undefined) {
 			g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
 			g_stateObj.bgmTimeupdateEvtId = null;
 		}
