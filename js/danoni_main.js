@@ -5798,6 +5798,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 			g_stateObj.bgmTimeupdateEvtId = null;
 		}
 		if (g_audioForMS instanceof AudioPlayer) {
+			g_musicdata = ``;
 			g_audioForMS.close();
 		}
 	};
@@ -5810,12 +5811,14 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				await loadScript2(url);
 				musicInit();
 				if (!isTitle()) {
+					g_musicdata = ``;
 					return;
 				}
 				const tmpAudio = new AudioPlayer();
 				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
 				await tmpAudio.init(array.buffer);
 				if (!isTitle()) {
+					g_musicdata = ``;
 					tmpAudio.close();
 					return;
 				}
