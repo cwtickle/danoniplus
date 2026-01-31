@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/01/26
+ * Revised : 2026/01/31
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 43.6.3`;
-const g_revisedDate = `2026/01/26`;
+const g_version = `Ver 43.6.4`;
+const g_revisedDate = `2026/01/31`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -5760,7 +5760,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 
 	/**
 	 * BGMのループ処理 (base64エンコード時用)
-	 * - base64エンコード時はtimeupdateイベントが発火しないため、setIntervalで時間を取得する
+	 * - base64エンコード時はtimeupdateイベントが発火しないため、監視しながらループ処理を行う
 	 */
 	const repeatBGM = () => {
 		const numAtStart = g_settings.musicIdxNum;
@@ -5789,22 +5789,36 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 		);
 	};
 
+	/**
+	 * 既存のAudio/AudioPlayerをクローズ
+	 */
+	const closeExistingAudio = () => {
+		if (g_stateObj.bgmTimeupdateEvtId !== null && g_stateObj.bgmTimeupdateEvtId !== undefined) {
+			g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
+			g_stateObj.bgmTimeupdateEvtId = null;
+		}
+		if (g_audioForMS instanceof AudioPlayer) {
+			g_musicdata = ``;
+			g_audioForMS.close();
+		}
+	};
+
 	if (encodeFlg) {
 		try {
 			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
 			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
-				if (g_audioForMS instanceof AudioPlayer) {
-					g_audioForMS.close();
-				}
+				closeExistingAudio();
 				await loadScript2(url);
 				musicInit();
 				if (!isTitle()) {
+					g_musicdata = ``;
 					return;
 				}
 				const tmpAudio = new AudioPlayer();
 				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
 				await tmpAudio.init(array.buffer);
 				if (!isTitle()) {
+					g_musicdata = ``;
 					tmpAudio.close();
 					return;
 				}
@@ -5823,13 +5837,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 
 	} else {
 		// 既存の監視を解除し、AudioPlayer を確実にクローズ
-		if (g_stateObj.bgmTimeupdateEvtId) {
-			g_handler.removeListener(g_stateObj.bgmTimeupdateEvtId);
-			g_stateObj.bgmTimeupdateEvtId = null;
-		}
-		if (g_audioForMS instanceof AudioPlayer) {
-			g_audioForMS.close();
-		}
+		closeExistingAudio();
 		g_audioForMS = new Audio();
 		g_audioForMS.src = url;
 		g_audioForMS.autoplay = false;
