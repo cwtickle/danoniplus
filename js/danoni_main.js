@@ -9796,14 +9796,13 @@ const loadingScoreInit = async () => {
 		? 0
 		: (
 			g_stateObj.speed * g_headerObj.baseSpeed - g_settings.motionBoostFactorMinSpd > 0 && maxBoost > 1
-				? Math.min(maxBoost / 4, 4) : 0
+				? Math.min(maxBoost / 4, 1) : 0
 		)
 	);
 
 	g_scoreObj.distY = Math.max(
 		g_headerObj.stretchYRate[g_stateObj.scoreId], g_settings.motionDistRates[g_settings.motionNum] * boostFactor
 	) * g_posObj.distY;
-
 	// 最終フレーム数の取得
 	let lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
 
