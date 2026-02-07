@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/01/31
+ * Revised : 2026/02/07
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 43.6.4`;
-const g_revisedDate = `2026/01/31`;
+const g_version = `Ver 44.0.0`;
+const g_revisedDate = `2026/02/07`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3969,6 +3969,12 @@ const headerConvert = _dosObj => {
 		}
 	});
 
+	// 縦伸縮率の設定
+	const stretchYRate = [];
+	_dosObj.stretchYRate?.split(`$`).forEach((val, j) => {
+		stretchYRate[j] = hasVal(val) ? setVal(val, 1, C_TYP_FLOAT) : 1;
+	});
+	obj.stretchYRate = makeBaseArray(stretchYRate, obj.difLabels.length, 1);
 	// 最終演出表示有無（noneで無効化）
 	obj.finishView = _dosObj.finishView ?? ``;
 
@@ -9776,6 +9782,28 @@ const loadingScoreInit = async () => {
 	}
 	g_scoreObj = scoreConvert(g_rootObj, g_stateObj.scoreId, 0, dummyIdHeader);
 
+	// Motionオプション適用時の矢印別の速度を取得（配列形式）
+	g_workObj.motionOnFrames = setMotionOnFrame();
+	g_workObj.motionReverseFlg = g_workObj.motionOnFrames.filter(val => g_stateObj.speed + val < 0).length > 0;
+
+	// 矢印描画時間の引き伸ばし設定（個別加速がある場合かつ逆走を伴うモーションは初期倍速によりさらに引き伸ばしを行う）
+	// ただし、速度による引き伸ばし(boostFactor)の上限は描画の関係で2倍までとする
+	let maxBoost = 1;
+	for (let j = 0; j < g_scoreObj.boostData.length; j += 2) {
+		maxBoost = Math.max(maxBoost, g_scoreObj.boostData[j + 1]);
+	}
+	const boostFactor = 1 + (
+		(g_settings.motionDistRates[g_settings.motionNum] === 1 || !g_workObj.motionReverseFlg)
+			? 0
+			: (
+				g_stateObj.speed * g_headerObj.baseSpeed - g_settings.motionBoostFactorMinSpd > 0 && maxBoost > 1
+					? Math.min(maxBoost / 4, 1) : 0
+			)
+	);
+	g_scoreObj.distY = Math.max(
+		g_headerObj.stretchYRate[g_stateObj.scoreId], g_settings.motionDistRates[g_settings.motionNum] * boostFactor
+	) * g_posObj.distY;
+
 	// 最終フレーム数の取得
 	let lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
 
@@ -9787,9 +9815,6 @@ const loadingScoreInit = async () => {
 
 	// フレームごとの速度を取得（配列形式）
 	let speedOnFrame = setSpeedOnFrame(g_scoreObj.speedData, lastFrame);
-
-	// Motionオプション適用時の矢印別の速度を取得（配列形式）
-	g_workObj.motionOnFrames = setMotionOnFrame();
 
 	// 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
 	const firstFrame = (g_scoreObj.frameNum === 0 ? 0 : g_scoreObj.frameNum + g_headerObj.blankFrame);
@@ -10838,7 +10863,7 @@ const getFountainTrace = (_frms, _spd) => {
 		_frms[j] = Math.floor((10 - (j - C_MOTION_STD_POS - 1) * diff) * factor);
 	}
 	return _frms;
-}
+};
 
 /**
  * 最初のフレームで出現する矢印が、ステップゾーンに到達するまでのフレーム数を取得
@@ -10850,7 +10875,7 @@ const getFirstArrivalFrame = (_startFrame, _speedOnFrame) => {
 	let startY = 0;
 	let frm = _startFrame;
 
-	while (g_posObj.distY - startY > 0) {
+	while (g_scoreObj.distY - startY > 0) {
 		startY += _speedOnFrame[frm];
 		frm++;
 	}
@@ -11198,7 +11223,7 @@ const getArrowStartFrame = (_frame, _speedOnFrame) => {
 		motionFrm: C_MOTION_STD_POS
 	};
 
-	while (g_posObj.distY - obj.startY > 0) {
+	while (g_scoreObj.distY - obj.startY > 0) {
 		obj.startY += _speedOnFrame[obj.frm - 1];
 
 		if (_speedOnFrame[obj.frm - 1] !== 0) {
@@ -12790,6 +12815,7 @@ const mainInit = () => {
 			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd +
 				(g_workObj.motionOnFrames[boostCnt] || 0) * currentArrow.boostDir) * currentArrow.dir;
 			$id(arrowName).top = wUnit(currentArrow.y);
+			g_motionAlphaFunc.get(g_stateObj.motion)(arrowName, currentArrow);
 			currentArrow.boostCnt--;
 		}
 		judgeMotionFunc[`${_name}${g_stateObj.autoAll}`](_j, arrowName, --currentArrow.cnt);
@@ -12940,8 +12966,10 @@ const mainInit = () => {
 
 				// 移動
 				if (g_workObj.currentSpeed !== 0) {
+					currentFrz.prevY = currentFrz.y;
 					currentFrz.y -= movY + (g_workObj.motionOnFrames[currentFrz.boostCnt] || 0) * currentFrz.dir * currentFrz.boostDir;
 					$id(frzName).top = wUnit(currentFrz.y);
+					g_motionAlphaFunc.get(g_stateObj.motion)(frzName, currentFrz);
 					currentFrz.boostCnt--;
 				}
 				currentFrz.cnt--;

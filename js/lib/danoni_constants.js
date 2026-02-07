@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/01/23 (v43.6.0)
+ * Revised : 2026/02/07 (v44.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1218,8 +1218,15 @@ const g_settings = {
     speedNum: 0,
     speedTerms: [20, 5, 1],
 
-    motions: [C_FLG_OFF, `Boost`, `Hi-Boost`, `Brake`, `Compress`, `Fountain`],
+    motions: [C_FLG_OFF, `Boost`, `Hi-Boost`, `Brake`, `Compress`, `Fountain`, `Magnet`],
     motionNum: 0,
+
+    // 移動距離倍率 (Compress, Fountain, Magnetのみ倍率を変更)
+    motionDistRates: [1, 1, 1, 1, 1.25, 3, 1.5],
+    // 速度が逆転するときのアルファ値 (g_motionAlphaFuncで使用)
+    motionAlpha: 0.625,
+    // 移動距離倍率の補正を行う最小の初期倍速
+    motionBoostFactorMinSpd: 5,
 
     reverses: [C_FLG_OFF, C_FLG_ON],
     reverseNum: 0,
@@ -1563,8 +1570,33 @@ const g_motionFunc = new Map([
     ['Hi-Boost', _frms => getBoostTrace(_frms, g_stateObj.speed * 2)],
     ['Brake', _frms => getBrakeTrace(_frms)],
     ['Compress', _frms => getBoostTrace(_frms, g_stateObj.speed * 5 / 8, -1)],
-    ['Fountain', _frms => getFountainTrace(_frms, g_stateObj.speed * 2)],
+    ['Fountain', _frms => getFountainTrace(_frms, g_stateObj.speed)],
+    ['Magnet', _frms => getFountainTrace(_frms, g_stateObj.speed * 2)],
 ]);
+
+/**
+ * モーション適用中のアルファ値制御関数
+ * @param {object} _obj 対象オブジェクト
+ * @param {object} _property 対象オブジェクトのプロパティ情報 (g_attrObj[オブジェクト名])
+ */
+const g_motionAlphaFunc = new Map([
+    ['OFF', () => ``],
+    ['Boost', () => ``],
+    ['Hi-Boost', () => ``],
+    ['Brake', () => ``],
+    ['Compress', () => ``],
+    ['Fountain', (_obj, _property) => motionAlphaToggle(_obj, _property)],
+    ['Magnet', (_obj, _property) => motionAlphaToggle(_obj, _property)],
+]);
+
+const motionAlphaToggle = (_obj, _property) => {
+    const dir = (_property.y - _property.prevY) * _property.dir;
+    if (($id(_obj).opacity === ``) && dir > 0) {
+        $id(_obj).opacity = g_settings.motionAlpha;
+    } else if (Number($id(_obj).opacity) === g_settings.motionAlpha && dir < 0) {
+        $id(_obj).opacity = ``;
+    }
+};
 
 /**
  * PlayWindow適用関数
