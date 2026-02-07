@@ -1222,7 +1222,7 @@ const g_settings = {
     motionNum: 0,
 
     // 移動距離倍率 (Compress, Fountain, Magnetのみ倍率を変更)
-    motionDistRates: [1, 1, 1, 1, 1.5, 3, 1.5],
+    motionDistRates: [1, 1, 1, 1, 1.25, 3, 1.5],
     // 速度が逆転するときのアルファ値 (g_motionAlphaFuncで使用)
     motionAlpha: 0.625,
     // 移動距離倍率の補正を行う最小の初期倍速
