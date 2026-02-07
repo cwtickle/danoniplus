@@ -9787,8 +9787,8 @@ const loadingScoreInit = async () => {
 	g_workObj.motionOnFrames = setMotionOnFrame();
 	g_workObj.motionReverseFlg = g_workObj.motionOnFrames.filter(val => g_stateObj.speed + val < 0).length > 0;
 
-	// 矢印描画時間の引き延ばし設定（個別加速がある場合かつ逆走を伴うモーションは初期倍速によりさらに引き延ばしを行う）
-	// ただし、速度による引き延ばし(boostFactor)の上限は描画の関係で2倍までとする
+	// 矢印描画時間の引き伸ばし設定（個別加速がある場合かつ逆走を伴うモーションは初期倍速によりさらに引き伸ばしを行う）
+	// ただし、速度による引き伸ばし(boostFactor)の上限は描画の関係で2倍までとする
 	let maxBoost = 1;
 	for (let j = 0; j < g_scoreObj.boostData.length; j += 2) {
 		maxBoost = Math.max(maxBoost, g_scoreObj.boostData[j + 1]);
