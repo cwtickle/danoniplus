@@ -3972,10 +3972,9 @@ const headerConvert = _dosObj => {
 	// 縦伸縮率の設定
 	const stretchYRate = [];
 	_dosObj.stretchYRate?.split(`$`).forEach((val, j) => {
-		stretchYRate[j] = hasVal(val) ? 1 : setVal(val, 1, C_TYP_FLOAT);
+		stretchYRate[j] = hasVal(val) ? setVal(val, 1, C_TYP_FLOAT) : 1;
 	});
 	obj.stretchYRate = makeBaseArray(stretchYRate, obj.difLabels.length, 1);
-
 	// 最終演出表示有無（noneで無効化）
 	obj.finishView = _dosObj.finishView ?? ``;
 
