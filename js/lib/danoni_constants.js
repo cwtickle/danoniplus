@@ -1585,23 +1585,18 @@ const g_motionAlphaFunc = new Map([
     ['Hi-Boost', () => ``],
     ['Brake', () => ``],
     ['Compress', () => ``],
-    ['Fountain', (_obj, _property) => {
-        const dir = (_property.y - _property.prevY) * _property.dir;
-        if (($id(_obj).opacity === ``) && dir > 0) {
-            $id(_obj).opacity = g_settings.motionAlpha;
-        } else if (Number($id(_obj).opacity) === g_settings.motionAlpha && dir < 0) {
-            $id(_obj).opacity = ``;
-        }
-    }],
-    ['Magnet', (_obj, _property) => {
-        const dir = (_property.y - _property.prevY) * _property.dir;
-        if (($id(_obj).opacity === ``) && dir > 0) {
-            $id(_obj).opacity = g_settings.motionAlpha;
-        } else if (Number($id(_obj).opacity) === g_settings.motionAlpha && dir < 0) {
-            $id(_obj).opacity = ``;
-        }
-    }],
+    ['Fountain', (_obj, _property) => motionAlphaToggle(_obj, _property)],
+    ['Magnet', (_obj, _property) => motionAlphaToggle(_obj, _property)],
 ]);
+
+const motionAlphaToggle = (_obj, _property) => {
+    const dir = (_property.y - _property.prevY) * _property.dir;
+    if (($id(_obj).opacity === ``) && dir > 0) {
+        $id(_obj).opacity = g_settings.motionAlpha;
+    } else if (Number($id(_obj).opacity) === g_settings.motionAlpha && dir < 0) {
+        $id(_obj).opacity = ``;
+    }
+};
 
 /**
  * PlayWindow適用関数
