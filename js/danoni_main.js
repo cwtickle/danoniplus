@@ -14248,7 +14248,7 @@ const resultInit = () => {
 		const displayList = displayData.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
 		displayData = displayList.join(`, `);
 		if (!displayList.at(-1).includes(`:`)) {
-			displayData += ` : OFF`;
+			displayData += ` : ${getStgDetailName(C_FLG_OFF)}`;
 		}
 	}
 
@@ -14265,7 +14265,7 @@ const resultInit = () => {
 		const display2List = display2Data.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
 		display2Data = display2List.join(`, `);
 		if (!display2List.at(-1).includes(`:`)) {
-			display2Data += ` : OFF`;
+			display2Data += ` : ${getStgDetailName(C_FLG_OFF)}`;
 		}
 	}
 
