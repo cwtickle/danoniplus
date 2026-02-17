@@ -1281,6 +1281,7 @@ const g_settings = {
 
     // Display設定の拡張リスト
     d_stepZones: [`FlatBar`],
+    d_speeds: [`Extreme`, `Soft`],
 
     displayNum: {
         stepZone: 0,
@@ -4120,6 +4121,8 @@ const g_lblNameObj = {
     'u_Easy': `Easy`,
 
     'u_FlatBar': `FlatBar`,
+    'u_Extreme': `Extreme`,
+    'u_Soft': `Soft`,
 
     'u_Visible': `Visible`,
     'u_Hidden': `Hidden`,
