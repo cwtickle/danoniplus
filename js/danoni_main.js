@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/01/31
+ * Revised : 2026/02/18
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.5.10`;
-const g_revisedDate = `2026/01/31`;
+const g_version = `Ver 42.5.11`;
+const g_revisedDate = `2026/02/18`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8225,7 +8225,7 @@ const createSettingsDisplayWindow = _sprite => {
 				const prevDisp = g_settings.displayNum[_name];
 				const [prevBarColor, prevBgColor] = [cssBarList[prevDisp], cssBgList[prevDisp]];
 
-				g_settings.displayNum[_name] = (prevDisp + _scrollNum) % (_filterFlg ? 2 : list.length);
+				g_settings.displayNum[_name] = nextPos(prevDisp, _scrollNum, _filterFlg ? 2 : list.length);
 				const nextDisp = g_settings.displayNum[_name];
 				const [nextBarColor, nextBgColor] = [cssBarList[nextDisp], cssBgList[nextDisp]];
 
@@ -13951,6 +13951,10 @@ const resultInit = () => {
 	const withOptions = (_flg, _defaultSet, _displayText = _flg) =>
 		(_flg !== _defaultSet ? getStgDetailName(_displayText) : ``);
 
+	const withDisplays = (_flg, _defaultSet, _displayText = _flg) =>
+	(_flg !== _defaultSet
+		? getStgDetailName(_displayText) + (_flg === C_FLG_OFF ? `` : ` : ${getStgDetailName(_flg)}`) : ``);
+
 	// 譜面名の組み立て処理 (Ex: 9Akey / Normal-Leftless (maker) [X-Mirror])
 	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
 	const difDatas = [
@@ -13982,34 +13986,40 @@ const resultInit = () => {
 
 	// Display設定の組み立て処理 (Ex: Step : FlatBar, Judge, Life : OFF)
 	let displayData = [
-		withOptions(g_stateObj.d_stepzone, C_FLG_ON, g_lblNameObj.rd_StepZone +
-			`${g_stateObj.d_stepzone === C_FLG_OFF ? `` : ` : ${g_stateObj.d_stepzone}`}`),
-		withOptions(g_stateObj.d_judgment, C_FLG_ON, g_lblNameObj.rd_Judgment),
-		withOptions(g_stateObj.d_fastslow, C_FLG_ON, g_lblNameObj.rd_FastSlow),
-		withOptions(g_stateObj.d_lifegauge, C_FLG_ON, g_lblNameObj.rd_LifeGauge),
-		withOptions(g_stateObj.d_score, C_FLG_ON, g_lblNameObj.rd_Score),
-		withOptions(g_stateObj.d_musicinfo, C_FLG_ON, g_lblNameObj.rd_MusicInfo),
-		withOptions(g_stateObj.d_filterline, C_FLG_ON, g_lblNameObj.rd_FilterLine),
+		withDisplays(g_stateObj.d_stepzone, C_FLG_ON, g_lblNameObj.rd_StepZone),
+		withDisplays(g_stateObj.d_judgment, C_FLG_ON, g_lblNameObj.rd_Judgment),
+		withDisplays(g_stateObj.d_fastslow, C_FLG_ON, g_lblNameObj.rd_FastSlow),
+		withDisplays(g_stateObj.d_lifegauge, C_FLG_ON, g_lblNameObj.rd_LifeGauge),
+		withDisplays(g_stateObj.d_score, C_FLG_ON, g_lblNameObj.rd_Score),
+		withDisplays(g_stateObj.d_musicinfo, C_FLG_ON, g_lblNameObj.rd_MusicInfo),
+		withDisplays(g_stateObj.d_filterline, C_FLG_ON, g_lblNameObj.rd_FilterLine),
 	].filter(value => value !== ``).join(`, `);
 	if (displayData === ``) {
 		displayData = `All Visible`;
 	} else {
-		if (!displayData.includes(`,`) && g_stateObj.d_stepzone !== C_FLG_OFF) {
-		} else {
-			displayData += ` : OFF`;
+		// 表示設定のOFF項目を末尾にまとめる
+		const displayList = displayData.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
+		displayData = displayList.join(`, `);
+		if (!displayList.at(-1).includes(`:`)) {
+			displayData += ` : ${getStgDetailName(C_FLG_OFF)}`;
 		}
 	}
 
 	let display2Data = [
-		withOptions(g_stateObj.d_speed, C_FLG_ON, g_lblNameObj.rd_Speed),
-		withOptions(g_stateObj.d_color, C_FLG_ON, g_lblNameObj.rd_Color),
-		withOptions(g_stateObj.d_lyrics, C_FLG_ON, g_lblNameObj.rd_Lyrics),
-		withOptions(g_stateObj.d_background, C_FLG_ON, g_lblNameObj.rd_Background),
-		withOptions(g_stateObj.d_arroweffect, C_FLG_ON, g_lblNameObj.rd_ArrowEffect),
-		withOptions(g_stateObj.d_special, C_FLG_ON, g_lblNameObj.rd_Special),
+		withDisplays(g_stateObj.d_speed, C_FLG_ON, g_lblNameObj.rd_Speed),
+		withDisplays(g_stateObj.d_color, C_FLG_ON, g_lblNameObj.rd_Color),
+		withDisplays(g_stateObj.d_lyrics, C_FLG_ON, g_lblNameObj.rd_Lyrics),
+		withDisplays(g_stateObj.d_background, C_FLG_ON, g_lblNameObj.rd_Background),
+		withDisplays(g_stateObj.d_arroweffect, C_FLG_ON, g_lblNameObj.rd_ArrowEffect),
+		withDisplays(g_stateObj.d_special, C_FLG_ON, g_lblNameObj.rd_Special),
 	].filter(value => value !== ``).join(`, `);
 	if (display2Data !== ``) {
-		display2Data += ` : OFF`;
+		// 表示設定のOFF項目を末尾にまとめる
+		const display2List = display2Data.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
+		display2Data = display2List.join(`, `);
+		if (!display2List.at(-1).includes(`:`)) {
+			display2Data += ` : ${getStgDetailName(C_FLG_OFF)}`;
+		}
 	}
 
 	const [lblRX, dataRX] = [20, 60];
