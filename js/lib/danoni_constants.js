@@ -4121,6 +4121,8 @@ const g_lblNameObj = {
     'u_Easy': `Easy`,
 
     'u_FlatBar': `FlatBar`,
+    'u_Extreme': `Extreme`,
+    'u_Soft': `Soft`,
 
     'u_Visible': `Visible`,
     'u_Hidden': `Hidden`,

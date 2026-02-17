@@ -14198,7 +14198,7 @@ const resultInit = () => {
 
 	const withDisplays = (_flg, _defaultSet, _displayText = _flg) =>
 	(_flg !== _defaultSet
-		? getStgDetailName(_displayText) + (_flg === C_FLG_OFF ? `` : ` : ${_flg}`) : ``);
+		? getStgDetailName(_displayText) + (_flg === C_FLG_OFF ? `` : ` : ${getStgDetailName(_flg)}`) : ``);
 
 	// 譜面名の組み立て処理 (Ex: 9Akey / Normal-Leftless (maker) [X-Mirror])
 	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
