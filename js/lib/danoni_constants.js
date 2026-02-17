@@ -1281,6 +1281,7 @@ const g_settings = {
 
     // Display設定の拡張リスト
     d_stepZones: [`FlatBar`],
+    d_speeds: [`Extreme`, `Soft`],
 
     displayNum: {
         stepZone: 0,
