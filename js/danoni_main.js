@@ -10793,17 +10793,19 @@ const getStartFrame = (_lastFrame, _fadein = 0, _scoreId = g_stateObj.scoreId) =
  * @returns {number}
  */
 const getSpeedFactor = _speed => {
-	let speedFactor = 1;
-	if (Math.abs(_speed) !== 1) {
-		if (g_stateObj.d_speed === `Extreme`) {
-			speedFactor *= _speed * (Math.abs(_speed) > 1 ? 1.5 : 0.75);
-		} else if (g_stateObj.d_speed === `Soft`) {
-			speedFactor *= (1 + Math.abs(_speed)) / 2 * Math.sign(_speed);
-		} else {
-			speedFactor *= _speed;
-		}
+	if (Math.abs(_speed) === 1) {
+		// ±1 はそのまま返して符号を保持
+		return _speed;
 	}
-	return speedFactor;
+	if (g_stateObj.d_speed === `Extreme`) {
+		// |speed|>1 を強めに、<1 を弱めに
+		return _speed * (Math.abs(_speed) > 1 ? 1.5 : 0.75);
+	}
+	if (g_stateObj.d_speed === `Soft`) {
+		// 変化幅を緩和（符号は維持）
+		return (1 + Math.abs(_speed)) / 2 * Math.sign(_speed);
+	}
+	return _speed;
 }
 
 /**
