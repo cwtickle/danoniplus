@@ -6730,7 +6730,7 @@ const drawSpeedGraph = _scoreId => {
 		for (let i = 0; i < speedData?.length; i += 2) {
 			if (speedData[i] >= startFrame) {
 				frame.push(speedData[i] - startFrame);
-				speed.push(speedData[i + 1]);
+				speed.push(getSpeedFactor(speedData[i + 1]));
 				tmpSpeedPoint.push(speedData[i] - startFrame);
 			}
 			speedObj[speedType].cnt++;
