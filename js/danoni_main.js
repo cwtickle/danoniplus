@@ -14243,8 +14243,13 @@ const resultInit = () => {
 	].filter(value => value !== ``).join(`, `);
 	if (displayData === ``) {
 		displayData = `All Visible`;
-	} else if (!displayData.split(`,`).at(-1).includes(`:`)) {
-		displayData += ` : OFF`;
+	} else {
+		// 表示設定のOFF項目を末尾にまとめる
+		const displayList = displayData.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
+		displayData = displayList.join(`, `);
+		if (!displayList.at(-1).includes(`:`)) {
+			displayData += ` : OFF`;
+		}
 	}
 
 	let display2Data = [
@@ -14255,8 +14260,13 @@ const resultInit = () => {
 		withDisplays(g_stateObj.d_arroweffect, C_FLG_ON, g_lblNameObj.rd_ArrowEffect),
 		withDisplays(g_stateObj.d_special, C_FLG_ON, g_lblNameObj.rd_Special),
 	].filter(value => value !== ``).join(`, `);
-	if (display2Data !== `` && !display2Data.split(`,`).at(-1).includes(`:`)) {
-		display2Data += ` : OFF`;
+	if (display2Data !== ``) {
+		// 表示設定のOFF項目を末尾にまとめる
+		const display2List = display2Data.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
+		display2Data = display2List.join(`, `);
+		if (!display2List.at(-1).includes(`:`)) {
+			display2Data += ` : OFF`;
+		}
 	}
 
 	const [lblRX, dataRX] = [20, 60];
