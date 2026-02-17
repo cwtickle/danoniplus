@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/02/15 (v44.1.1)
+ * Revised : 2026/02/18 (v44.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1281,6 +1281,7 @@ const g_settings = {
 
     // Display設定の拡張リスト
     d_stepZones: [`FlatBar`],
+    d_speeds: [`Extreme`, `Soft`],
 
     displayNum: {
         stepZone: 0,
@@ -4120,6 +4121,8 @@ const g_lblNameObj = {
     'u_Easy': `Easy`,
 
     'u_FlatBar': `FlatBar`,
+    'u_Extreme': `Extreme`,
+    'u_Soft': `Soft`,
 
     'u_Visible': `Visible`,
     'u_Hidden': `Hidden`,
