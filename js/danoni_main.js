@@ -8111,8 +8111,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
 	g_workObj.requiredAccuracy = rateText;
 
-	// 許容ミス数のみ、オンマウスで表示するためpointer-eventsを有効にする
-	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
+	// このテーブルのみpointer-eventsを有効にする（オンマウス許可）
+	return `<div id="gaugeDivCover" class="settings_gaugeDivCover" style="pointer-events: auto;">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
 			<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
 				${g_lblNameObj.g_start}
