@@ -8111,8 +8111,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
 	g_workObj.requiredAccuracy = rateText;
 
-	// 許容ミス数のみ、オンマウスで表示するためpointer-eventsを有効にする
-	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
+	// このテーブルのみpointer-eventsを有効にする（オンマウス許可）
+	return `<div id="gaugeDivCover" class="settings_gaugeDivCover" style="pointer-events: auto;">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
 			<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
 				${g_lblNameObj.g_start}
@@ -8143,9 +8143,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
 				${dmgText}
 			</div>
-			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" 
-				title="${allowableCntsText}" style="pointer-events: auto;">
-				${rateText}
+			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" style="line-height: 12px;">
+				${rateText}<br><span style="font-size: 10px;">${allowableCntsText}</span>
 			</div>
 		</div>
 	</div>
@@ -8169,7 +8168,7 @@ const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
 
 	// 許容ミス数の計算
 	const allowableCnts = Math.min(_allCnt - minRecovery, _allCnt);
-	let allowableCntsText = _allCnt > 0 ? (allowableCnts >= 0 ? `${allowableCnts}miss↓` : `Impossible (${allowableCnts}miss)`) : ``;
+	let allowableCntsText = _allCnt > 0 && allowableCnts !== 0 ? (allowableCnts > 0 ? `${allowableCnts}miss↓` : `(${allowableCnts}miss)`) : ``;
 
 	if ((_rcv === 0 && _dmg === 0) || _rcv < 0 || _dmg < 0) {
 		rateText = `----`;
