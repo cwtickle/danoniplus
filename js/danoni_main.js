@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/02/18
+ * Revised : 2026/02/20
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 44.2.0`;
-const g_revisedDate = `2026/02/18`;
+const g_version = `Ver 44.3.0`;
+const g_revisedDate = `2026/02/20`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1895,6 +1895,8 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
 	deleteChildspriteAll(`divRoot`);
+	divRoot.style.perspective = ``;
+	divRoot.style.perspectiveOrigin = ``;
 
 	// 拡張範囲を取得
 	const diffX = (_customDisplayName === `Main` && g_workObj.nonDefaultSc ?
@@ -8111,8 +8113,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
 	g_workObj.requiredAccuracy = rateText;
 
-	// 許容ミス数のみ、オンマウスで表示するためpointer-eventsを有効にする
-	return `<div id="gaugeDivCover" class="settings_gaugeDivCover">
+	// このテーブルのみpointer-eventsを有効にする（オンマウス許可）
+	return `<div id="gaugeDivCover" class="settings_gaugeDivCover" style="pointer-events: auto;">
 		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
 			<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
 				${g_lblNameObj.g_start}
@@ -8143,9 +8145,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
 				${dmgText}
 			</div>
-			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" 
-				title="${allowableCntsText}" style="pointer-events: auto;">
-				${rateText}
+			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" style="line-height: 12px;">
+				${rateText}<br><span style="font-size: 10px;">${allowableCntsText}</span>
 			</div>
 		</div>
 	</div>
@@ -8169,7 +8170,7 @@ const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
 
 	// 許容ミス数の計算
 	const allowableCnts = Math.min(_allCnt - minRecovery, _allCnt);
-	let allowableCntsText = _allCnt > 0 ? (allowableCnts >= 0 ? `${allowableCnts}miss↓` : `Impossible (${allowableCnts}miss)`) : ``;
+	let allowableCntsText = _allCnt > 0 && allowableCnts !== 0 ? (allowableCnts > 0 ? `${allowableCnts}miss↓` : `(${allowableCnts}miss)`) : ``;
 
 	if ((_rcv === 0 && _dmg === 0) || _rcv < 0 || _dmg < 0) {
 		rateText = `----`;
@@ -11958,6 +11959,12 @@ const mainInit = () => {
 
 	// ステップゾーン、矢印のメインスプライトを作成
 	const mainSprite = createEmptySprite(divRoot, `mainSprite`, mainCommonPos);
+	if (g_stateObj.frzReturn !== C_FLG_OFF) {
+		divRoot.style.perspective = `1400px`;
+		divRoot.style.perspectiveOrigin = `center 60%`;
+		mainSprite.style.transformOrigin = `center 55%`;
+	}
+
 	addTransform(`mainSprite`, `root`, `scale(${g_workObj.scale})`);
 	addXY(`mainSprite`, `root`, g_workObj.playingX, g_posObj.stepY - C_STEP_Y + g_headerObj.playingY);
 
@@ -13487,7 +13494,32 @@ const changeReturn = (_rad, _axis) => {
 	if (_axis[1] !== undefined) {
 		_transform += ` rotate${_axis[1]}(${_rad}deg)`;
 	}
-	if (document.getElementById(`mainSprite`) !== null) {
+	const sprite = document.getElementById(`mainSprite`);
+	if (sprite !== null) {
+		sprite.style.transformStyle = `preserve-3d`;
+		const rad360 = _rad % 360;
+
+		let isBack = false;
+
+		// 単軸回転
+		if (_axis.length === 1) {
+			const axis = _axis[0];
+			if (axis === 'Y' || axis === 'X') {
+				isBack = rad360 > 90 && rad360 < 270;
+			}
+			// Z軸は平面回転なので「裏側」は存在しない
+		}
+
+		// 2軸回転（XZ / XY / YZ）
+		if (_axis.length === 2) {
+			// 2軸回転は「どちらかの軸が裏側なら裏側」とみなす
+			const [a1, a2] = _axis;
+			const back1 = (a1 === 'Y' || a1 === 'X') && (rad360 > 90 && rad360 < 270);
+			const back2 = (a2 === 'Y' || a2 === 'X') && (rad360 > 90 && rad360 < 270);
+			isBack = back1 || back2;
+		}
+		sprite.style.opacity = isBack ? 0.7 : 1;
+
 		addTransform(`mainSprite`, `frzReturn`, _transform);
 
 		if (_rad < 360 && g_workObj.frzReturnFlg) {
