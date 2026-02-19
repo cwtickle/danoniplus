@@ -1895,6 +1895,8 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 
 	// ボタン、オブジェクトをクリア (divRoot配下のもの)
 	deleteChildspriteAll(`divRoot`);
+	divRoot.style.perspective = ``;
+	divRoot.style.perspectiveOrigin = ``;
 
 	// 拡張範囲を取得
 	const diffX = (_customDisplayName === `Main` && g_workObj.nonDefaultSc ?
