@@ -121,9 +121,13 @@ If you would like to cooperate with the development, please see below. Even if y
 - [Dancing☆Onigiri エディター(CW Edition 対応)](https://github.com/superkuppabros/danoni-editor) @superkuppabros
 - [ダンおに曲データjs化ツール](https://github.com/suzme/danoni-base64) @suzme
 - [ダンおに矢印色ツール](https://github.com/suzme/danoni-colorpicker) @suzme
+- [ダンおにゲージ計算機 (Gauge Calculator)](http://www.omission0.com/other/gauge_calculator/) @goe0
+- [ダンおに波形解析ツール](https://github.com/suzme/danoni-waveform) @suzme
+
+#### Conversion Tool from Legacy Flash Environments / 旧Flashからの変換ツール
+
 - [Dancing☆Onigiri Chart Reverser](https://github.com/cwtickle/danoniplus-reverser) @cwtickle
 - [Dancing☆Onigiri Chart Converter](https://github.com/cwtickle/danoniplus-converter) @cwtickle
-- [ダンおにゲージ計算機 (Gauge Calculator)](http://www.omission0.com/other/gauge_calculator/) @goe0
 
 ### Kirizma / キリズマ
 
