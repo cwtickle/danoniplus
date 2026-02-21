@@ -65,10 +65,20 @@ const g_referenceDomains = [
 ];
 Object.freeze(g_referenceDomains);
 
+// ドメイン管理リスト
+const g_domainList = [`github`, `jsdelivr`, `unpkg`, `netlify`];
+
 const g_rootPath = current().match(/(^.*\/)/)[0];
 let g_workPath;
 const hasRemoteDomain = _path => g_referenceDomains.some(domain => _path.match(`^https://${domain}/`) !== null);
+const detectDomain = _url => {
+	const host = new URL(_url).hostname; // 例: "cdn.jsdelivr.net"
+
+	// ドメインリストのどれかが hostname に含まれていれば返す
+	return g_domainList.find(domain => host.includes(domain)) ?? null;
+}
 const g_remoteFlg = hasRemoteDomain(g_rootPath);
+const g_remoteDomain = detectDomain(g_rootPath);
 
 const g_randTime = Date.now();
 const g_versionForUrl = g_version.slice(4);    // URL用に先頭の"Ver "を削除
@@ -5333,7 +5343,8 @@ const titleInit = (_initFlg = false) => {
 		customVersion += ` / ${g_localVersion2}`;
 	}
 	const releaseDate = (g_headerObj.releaseDate !== `` ? ` @${g_headerObj.releaseDate}` : ``);
-	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${customVersion}${releaseDate}`;
+	const remoteDomainInfo = g_remoteDomain !== null ? ` (${g_remoteDomain})` : ``;
+	const versionName = `&copy; 2018-${g_revisedDate.slice(0, 4)} ティックル, CW ${g_version}${remoteDomainInfo}${customVersion}${releaseDate}`;
 	const getLinkSiz = _name => getFontSize2(_name, g_sWidth / 2 - 20, { maxSiz: g_limitObj.lnkSiz, minSiz: 12 });
 
 	/**
