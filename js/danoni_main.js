@@ -66,7 +66,7 @@ const g_referenceDomains = [
 Object.freeze(g_referenceDomains);
 
 // ドメイン管理リスト
-const g_domainList = [`github`, `jsdelivr`, `unpkg`, `netlify`];
+const g_domainList = [`jsdelivr`, `unpkg`];
 
 const g_rootPath = current().match(/(^.*\/)/)[0];
 let g_workPath;
