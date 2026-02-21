@@ -12104,7 +12104,7 @@ const mainInit = () => {
 	g_effectFunc.get(g_stateObj.effect)();
 
 	// Appearanceのオプション適用時は一部描画を隠す
-	changeAppearanceFilterDir(g_appearanceRanges.includes(g_stateObj.appearance)
+	changeAppearanceBar(g_appearanceRanges.includes(g_stateObj.appearance)
 		? g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], 0);
 
 	// Shaking初期化
@@ -12436,11 +12436,11 @@ const mainInit = () => {
 
 			if (setCode === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
 				keyIsShift()
-					? changeAppearanceFilterDir(g_hidSudObj.filterPos, 2)
+					? changeAppearanceBar(g_hidSudObj.filterPos, 2)
 					: changeAppearanceFilter(Math.min(g_hidSudObj.filterPos + 1, MAX_FILTER_POS));
 			} else if (setCode === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
 				keyIsShift()
-					? changeAppearanceFilterDir(g_hidSudObj.filterPos, -2)
+					? changeAppearanceBar(g_hidSudObj.filterPos, -2)
 					: changeAppearanceFilter(Math.max(g_hidSudObj.filterPos - 1, MIN_FILTER_POS));
 			}
 		}
@@ -13397,15 +13397,15 @@ const makeStepZone = (_j, _keyCtrlPtn) => {
 };
 
 /**
- * フィルターバーの位置変更
+ * フィルターバーの対象表示変更
  * @param {number} _num 
  * @param {number} _dirPlus 
  */
-const changeAppearanceFilterDir = (_num = 10, _dirPlus = 2) => {
+const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 	if (_dirPlus !== 0) {
 		g_workObj.aprFilterCnt = nextPos(g_workObj.aprFilterCnt, _dirPlus, g_stateObj.layerNum);
 	}
-	changeAppearanceFilter(_num, true);
+	changeAppearanceFilter(_num);
 
 	// フィルターバーを使用するオプションのみ以下を適用
 	if (g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.d_filterline === C_FLG_ON) {
@@ -13487,6 +13487,9 @@ const changeAppearanceFilter = (_num = 10) => {
 		filterView.textContent = `${_num}%`;
 		g_hidSudObj.filterPos = _num;
 	}
+
+	// ユーザカスタムイベント(アルファマスクの再描画)
+	g_customJsObj.appearanceFilter.forEach(func => func(_num));
 };
 
 /**

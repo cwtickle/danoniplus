@@ -4577,6 +4577,8 @@ const g_customJsObj = {
     dummyArrow: [],
     dummyFrz: [],
 
+    appearanceFilter: [],
+
     judg_ii: [],
     judg_shakin: [],
     judg_matari: [],
