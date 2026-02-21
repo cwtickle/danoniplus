@@ -66,16 +66,22 @@ const g_referenceDomains = [
 Object.freeze(g_referenceDomains);
 
 // ドメイン管理リスト
-const g_domainList = [`jsdelivr`, `unpkg`];
+const g_domainList = [
+	{ label: `jsdelivr`, hosts: [`cdn.jsdelivr.net`] },
+	{ label: `unpkg`, hosts: [`unpkg.com`, `www.unpkg.com`] },
+];
+Object.freeze(g_domainList);
 
 const g_rootPath = current().match(/(^.*\/)/)[0];
 let g_workPath;
 const hasRemoteDomain = _path => g_referenceDomains.some(domain => _path.match(`^https://${domain}/`) !== null);
 const detectDomain = _url => {
-	const host = new URL(_url).hostname; // 例: "cdn.jsdelivr.net"
-
-	// ドメインリストのどれかが hostname に含まれていれば返す
-	return g_domainList.find(domain => host.includes(domain)) ?? null;
+	try {
+		const host = new URL(_url).hostname; // 例: "cdn.jsdelivr.net"
+		return g_domainList.find(({ hosts }) => hosts.some(h => host === h || host.endsWith(`.${h}`)))?.label ?? null;
+	} catch {
+		return null;
+	}
 }
 const g_remoteFlg = hasRemoteDomain(g_rootPath);
 const g_remoteDomain = detectDomain(g_rootPath);
