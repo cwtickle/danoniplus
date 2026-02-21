@@ -13403,7 +13403,8 @@ const makeStepZone = (_j, _keyCtrlPtn) => {
  */
 const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 	if (_dirPlus !== 0) {
-		g_workObj.aprFilterCnt = nextPos(g_workObj.aprFilterCnt, _dirPlus, g_stateObj.layerNum);
+		const step = Math.trunc(_dirPlus / 2) * 2;
+		g_workObj.aprFilterCnt = nextPos(g_workObj.aprFilterCnt, step, g_stateObj.layerNum);
 	}
 	changeAppearanceFilter(_num);
 
