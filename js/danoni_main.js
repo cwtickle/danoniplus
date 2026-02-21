@@ -12104,8 +12104,8 @@ const mainInit = () => {
 	g_effectFunc.get(g_stateObj.effect)();
 
 	// Appearanceのオプション適用時は一部描画を隠す
-	changeAppearanceFilter(g_appearanceRanges.includes(g_stateObj.appearance) ?
-		g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], true);
+	changeAppearanceBar(g_appearanceRanges.includes(g_stateObj.appearance)
+		? g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], 0);
 
 	// Shaking初期化
 	if (g_stateObj.shaking !== C_FLG_OFF) {
@@ -12433,10 +12433,15 @@ const mainInit = () => {
 		} else if (g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_OFF) {
 			const MAX_FILTER_POS = 100;
 			const MIN_FILTER_POS = 0;
+
 			if (setCode === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(Math.min(g_hidSudObj.filterPos + 1, MAX_FILTER_POS));
+				keyIsShift()
+					? changeAppearanceBar(g_hidSudObj.filterPos, 2)
+					: changeAppearanceFilter(Math.min(g_hidSudObj.filterPos + 1, MAX_FILTER_POS));
 			} else if (setCode === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
-				changeAppearanceFilter(Math.max(g_hidSudObj.filterPos - 1, MIN_FILTER_POS));
+				keyIsShift()
+					? changeAppearanceBar(g_hidSudObj.filterPos, -2)
+					: changeAppearanceFilter(Math.max(g_hidSudObj.filterPos - 1, MIN_FILTER_POS));
 			}
 		}
 		return blockCode(setCode);
@@ -13392,11 +13397,60 @@ const makeStepZone = (_j, _keyCtrlPtn) => {
 };
 
 /**
+ * フィルターバーの対象表示変更
+ * @param {number} _num 
+ * @param {number} _dirPlus 
+ */
+const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
+	if (_dirPlus !== 0) {
+		const step = Math.trunc(_dirPlus / 2) * 2;
+		g_workObj.aprFilterCnt = nextPos(g_workObj.aprFilterCnt, step, g_stateObj.layerNum);
+	}
+	changeAppearanceFilter(_num);
+
+	// フィルターバーを使用するオプションのみ以下を適用
+	if (g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.d_filterline === C_FLG_ON) {
+
+		// 階層が多い場合はShift+pgUp/pgDownで表示する階層グループを切り替え
+		const topNum = g_hidSudObj[g_stateObj.appearance];
+		const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
+
+		for (let j = 0; j < g_stateObj.layerNum; j += 2) {
+			[`${topNum + j}`, `${bottomNum + j}`].forEach(type => {
+				const displayState = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
+				$id(`filterBar${type}`).display = displayState;
+
+				if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
+					$id(`filterBar${type}_HS`).display = displayState;
+				}
+			});
+		}
+
+		// スクロールが1種類でHidden+/Sudden+の場合、対面のフィルターバーは不要なため非表示にする
+		const baseLayer = g_workObj.aprFilterCnt;
+		const dividePosPart = g_workObj.dividePos.filter(v => Math.floor(v / 2) === g_workObj.aprFilterCnt / 2);
+		const currentBarNum = g_hidSudObj.std[g_stateObj.appearance][
+			dividePosPart.length > 0
+				? dividePosPart[0] % 2 === 0 ? C_FLG_OFF : C_FLG_ON
+				: g_stateObj.reverse
+		];
+
+		if (g_stateObj.appearance !== `Hid&Sud+`
+			&& dividePosPart.length > 0
+			&& dividePosPart.every(v => v % 2 === dividePosPart[0] % 2)) {
+			$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}`).display = C_DIS_NONE;
+			if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
+				$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
+			}
+		}
+	}
+}
+
+/**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
  * @param {number} _num 
- * @param {boolean} _shiftFlg シフトキーを押したかどうかのフラグ
  */
-const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
+const changeAppearanceFilter = (_num = 10) => {
 	const MAX_FILTER_POS = 100;
 	const topNum = g_hidSudObj[g_stateObj.appearance];
 	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
@@ -13425,35 +13479,18 @@ const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
 			$id(`filterBar${bottomNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + bottomDist);
 			$id(`filterBar${topNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + topDist);
 		}
-
-		// 階層が多い場合はShift+pgUp/pgDownで表示する階層グループを切り替え
-		if (_shiftFlg && g_stateObj.d_filterline === C_FLG_ON) {
-			[`${topNum + j}`, `${bottomNum + j}`].forEach(type => {
-				const displayState = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
-				$id(`filterBar${type}`).display = displayState;
-
-				if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
-					$id(`filterBar${type}_HS`).display = displayState;
-				}
-			});
-		}
 	}
 
-	if (_shiftFlg) {
-		g_workObj.aprFilterCnt = nextPos(g_workObj.aprFilterCnt, 2, g_stateObj.layerNum);
-	}
-
+	// フィルターバーのパーセント表示（フィルターバーが複数表示されるなど複雑なため、最初の階層グループの位置に追従）
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
-		$id(`filterView`).top =
-			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse]) % 2}`).top;
+		const currentBarNum = g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse];
+		$id(`filterView`).top = $id(`filterBar${currentBarNum % 2}`).top;
 		filterView.textContent = `${_num}%`;
-
-		// スクロールが1種類でHidden+/Sudden+の場合、対面のフィルターバーは不要なため非表示にする
-		if (g_stateObj.appearance !== `Hid&Sud+` && g_workObj.dividePos.every(v => v === g_workObj.dividePos[0])) {
-			$id(`filterBar${(g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse] + 1) % 2}`).display = C_DIS_NONE;
-		}
 		g_hidSudObj.filterPos = _num;
 	}
+
+	// ユーザカスタムイベント(アルファマスクの再描画)
+	g_customJsObj.appearanceFilter.forEach(func => func(topNum, bottomNum));
 };
 
 /**
