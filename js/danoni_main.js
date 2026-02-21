@@ -13489,7 +13489,7 @@ const changeAppearanceFilter = (_num = 10) => {
 	}
 
 	// ユーザカスタムイベント(アルファマスクの再描画)
-	g_customJsObj.appearanceFilter.forEach(func => func(_num));
+	g_customJsObj.appearanceFilter.forEach(func => func(topNum, bottomNum));
 };
 
 /**
