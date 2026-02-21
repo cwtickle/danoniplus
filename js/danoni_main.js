@@ -8,7 +8,7 @@
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 44.4.0`;
+const g_version = `Ver 44.4.1`;
 const g_revisedDate = `2026/02/21`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -13472,12 +13472,12 @@ const changeAppearanceFilter = (_num = 10) => {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
 
-		$id(`filterBar${topNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + topDist);
-		$id(`filterBar${bottomNum + j}`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist);
+		addY(`filterBar${topNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + topDist);
+		addY(`filterBar${bottomNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist);
 
 		if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
-			$id(`filterBar${bottomNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j}`).top) + bottomDist);
-			$id(`filterBar${topNum + j}_HS`).top = wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + topDist);
+			addY(`filterBar${bottomNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + topDist);
+			addY(`filterBar${topNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist);
 		}
 	}
 
