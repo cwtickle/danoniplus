@@ -12436,11 +12436,11 @@ const mainInit = () => {
 
 			if (setCode === g_hidSudObj.pgDown[g_stateObj.appearance][g_stateObj.reverse]) {
 				keyIsShift()
-					? changeAppearanceFilterDir(g_hidSudObj.filterPos)
+					? changeAppearanceFilterDir(g_hidSudObj.filterPos, 2)
 					: changeAppearanceFilter(Math.min(g_hidSudObj.filterPos + 1, MAX_FILTER_POS));
 			} else if (setCode === g_hidSudObj.pgUp[g_stateObj.appearance][g_stateObj.reverse]) {
 				keyIsShift()
-					? changeAppearanceFilterDir(g_hidSudObj.filterPos)
+					? changeAppearanceFilterDir(g_hidSudObj.filterPos, -2)
 					: changeAppearanceFilter(Math.max(g_hidSudObj.filterPos - 1, MIN_FILTER_POS));
 			}
 		}
@@ -13434,7 +13434,9 @@ const changeAppearanceFilterDir = (_num = 10, _dirPlus = 2) => {
 				: g_stateObj.reverse
 		];
 
-		if (g_stateObj.appearance !== `Hid&Sud+` && dividePosPart.every(v => v % 2 === dividePosPart[0] % 2)) {
+		if (g_stateObj.appearance !== `Hid&Sud+`
+			&& dividePosPart.length > 0
+			&& dividePosPart.every(v => v % 2 === dividePosPart[0] % 2)) {
 			$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}`).display = C_DIS_NONE;
 			if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
 				$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
@@ -13446,9 +13448,8 @@ const changeAppearanceFilterDir = (_num = 10, _dirPlus = 2) => {
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
  * @param {number} _num 
- * @param {boolean} _shiftFlg シフトキーを押したかどうかのフラグ
  */
-const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
+const changeAppearanceFilter = (_num = 10) => {
 	const MAX_FILTER_POS = 100;
 	const topNum = g_hidSudObj[g_stateObj.appearance];
 	const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
@@ -13479,7 +13480,7 @@ const changeAppearanceFilter = (_num = 10, _shiftFlg = keyIsShift()) => {
 		}
 	}
 
-	// フィルターバーを使用するオプションのみ以下を適用
+	// フィルターバーのパーセント表示（フィルターバーが複数表示されるなど複雑なため、最初の階層グループの位置に追従）
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		const currentBarNum = g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse];
 		$id(`filterView`).top = $id(`filterBar${currentBarNum % 2}`).top;
