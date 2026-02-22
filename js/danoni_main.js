@@ -6504,6 +6504,7 @@ const visibleSettingSummary = _visible => {
 };
 
 const updateSettingSummary = () => {
+	if (document.getElementById(`settingSumSprite`) === null) return;
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
 	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
