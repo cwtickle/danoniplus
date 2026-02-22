@@ -8549,9 +8549,9 @@ const createSettingsDisplayWindow = _sprite => {
 
 	const appearanceSlider = document.getElementById(`appearanceSlider`);
 	appearanceSlider.addEventListener(`input`, () => {
-		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos, `appearance`), false;
+		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos, `appearance`);
 		updateSettingSummary();
-	});
+	}, false);
 
 	const dispAppearanceSlider = () => {
 		[`lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
