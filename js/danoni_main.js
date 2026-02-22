@@ -5114,6 +5114,7 @@ const titleInit = (_initFlg = false) => {
 
 	clearWindow(true);
 	g_currentPage = `title`;
+	g_stateObj.settingSummaryVisible = false;
 
 	// タイトル用フレーム初期化
 	g_scoreObj.titleFrameNum = 0;
@@ -6423,6 +6424,23 @@ const commonSettingBtn = _labelName => {
 		evt.target.classList.replace(g_cssObj[`button_${from}`], g_cssObj[`button_${to}`]);
 	};
 
+	const makeSettingSummary = () => {
+		const tmpDiv = createEmptySprite(divRoot, `settingSumSprite`, {
+			x: g_btnX() + 25, y: g_sHeight - 200, w: g_btnWidth() - 50, h: 100, pointerEvents: C_DIS_AUTO, overflow: C_DIS_AUTO
+		});
+		tmpDiv.style.background = `#000000cc`;
+
+		multiAppend(tmpDiv,
+			createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
+			createDivCss2Label(`lblSummaryEnvironment`, ``, g_lblPosObj.lblSummaryEnvironment),
+			createDivCss2Label(`lblSummaryDifInfo`, ``, g_lblPosObj.lblSummaryDifInfo),
+			createDivCss2Label(`lblSummaryPlaystyleInfo`, ``, g_lblPosObj.lblSummaryPlaystyleInfo),
+			createDivCss2Label(`lblSummaryDisplayInfo`, ``, g_lblPosObj.lblSummaryDisplayInfo),
+			createDivCss2Label(`lblSummaryDisplay2Info`, ``, g_lblPosObj.lblSummaryDisplay2Info),
+		);
+		tmpDiv.style.visibility = g_stateObj.settingSummaryVisible ? `visible` : `hidden`;
+	};
+
 	multiAppend(divRoot,
 
 		// タイトル画面へ戻る
@@ -6464,7 +6482,38 @@ const commonSettingBtn = _labelName => {
 			Object.assign(g_lblPosObj.btnPrecond, {
 				resetFunc: () => preconditionInit(),
 			}), g_cssObj.button_Setting),
+
+		// 設定内容サマリを表示
+		createCss2Button(`btnSettingSummary`, `>`, () => true,
+			Object.assign(g_lblPosObj.btnSettingSummary, {
+				resetFunc: () => {
+					g_stateObj.settingSummaryVisible = !g_stateObj.settingSummaryVisible;
+					visibleSettingSummary(g_stateObj.settingSummaryVisible);
+				},
+			}), g_cssObj.button_Mini),
 	);
+	makeSettingSummary();
+};
+
+const visibleSettingSummary = _visible => {
+	const summaryDiv = document.getElementById(`settingSumSprite`);
+	if (summaryDiv) {
+		summaryDiv.style.visibility = _visible ? `visible` : `hidden`;
+		updateSettingSummary();
+	}
+};
+
+const updateSettingSummary = () => {
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
+	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
+	const settingData = makeSettingList(shuffleName);
+
+	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData;
+	document.getElementById(`lblSummaryPlaystyleInfo`).innerHTML = settingData.playStyleData;
+	document.getElementById(`lblSummaryDisplayInfo`).innerHTML = settingData.displayData;
+	document.getElementById(`lblSummaryDisplay2Info`).innerHTML = settingData.display2Data;
+	document.getElementById(`lblSummaryEnvironment`).innerHTML = `(Adj: ${g_stateObj.adjustment} f, Volume: ${g_stateObj.volume}%, ColorType: ${g_colorType})`;
 };
 
 /**
@@ -7931,6 +7980,10 @@ const setSetting = (_scrollNum, _settingName, _unitName = ``, _roundNum = 0, { f
 	document.getElementById(`lnk${toCapitalize(_settingName)}`).textContent =
 		`${getStgDetailName(g_stateObj[_settingName])}${_unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
 	func();
+
+	if (document.getElementById(`settingSumSprite`) !== null) {
+		updateSettingSummary();
+	}
 };
 
 /**
@@ -7972,6 +8025,7 @@ const setReverse = _btn => {
 		g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
 		g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
 		setReverseView(_btn);
+		updateSettingSummary();
 	}
 };
 
@@ -8422,6 +8476,7 @@ const createSettingsDisplayWindow = _sprite => {
 
 				withShortCutDesc();
 				interlockingButton(g_headerObj, _name, nextBarColor, prevBarColor, true);
+				updateSettingSummary();
 			};
 
 			// Displayボタン初期化
@@ -8488,11 +8543,14 @@ const createSettingsDisplayWindow = _sprite => {
 
 		_btn.classList.replace(g_cssObj[`button_Rev${prevLock}`],
 			g_cssObj[`button_Rev${g_stateObj.filterLock}`]);
+		updateSettingSummary();
 	};
 
 	const appearanceSlider = document.getElementById(`appearanceSlider`);
-	appearanceSlider.addEventListener(`input`, () =>
-		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos, `appearance`), false);
+	appearanceSlider.addEventListener(`input`, () => {
+		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos, `appearance`), false;
+		updateSettingSummary();
+	});
 
 	const dispAppearanceSlider = () => {
 		[`lblAppearanceBar`, `lnkLockBtn`, `lnkfilterLine`].forEach(obj =>
@@ -14273,88 +14331,7 @@ const resultInit = () => {
 	const transKeyName = getTransKeyName();
 	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
 	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
-
-	/**
-	 * プレイスタイルのカスタム有無
-	 * @param {string} _flg 
-	 * @param {string|boolean} _defaultSet デフォルト値
-	 * @param {string} _displayText 
-	 * @returns {string}
-	 */
-	const withOptions = (_flg, _defaultSet, _displayText = _flg) =>
-		(_flg !== _defaultSet ? getStgDetailName(_displayText) : ``);
-
-	const withDisplays = (_flg, _defaultSet, _displayText = _flg) =>
-	(_flg !== _defaultSet
-		? getStgDetailName(_displayText) + (_flg === C_FLG_OFF ? `` : ` : ${getStgDetailName(_flg)}`) : ``);
-
-	// 譜面名の組み立て処理 (Ex: 9Akey / Normal-Leftless (maker) [X-Mirror])
-	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
-	const difDatas = [
-		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
-		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
-		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
-		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${shuffleName}]`)}`
-	];
-	let difData = difDatas.filter(value => value !== ``).join(` `);
-	const difDataForImage = difDatas.filter((value, j) => value !== `` && j !== 2).join(` `);
-
-	// 設定の組み立て処理 (Ex: 4x, Brake, Reverse, Sudden+, NoRecovery)
-	let playStyleData = [
-		`${g_stateObj.speed}${g_lblNameObj.multi}`,
-		withOptions(g_stateObj.motion, C_FLG_OFF),
-		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
-			getStgDetailName(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
-		withOptions(g_stateObj.appearance, `Visible`) +
-		((g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_ON) ? `(${g_hidSudObj.filterPos}%)` : ``),
-		withOptions(g_stateObj.gauge, g_settings.gauges[0]),
-		withOptions(g_stateObj.playWindow, `Default`),
-		withOptions(g_stateObj.stepArea, `Default`),
-		withOptions(g_stateObj.frzReturn, C_FLG_OFF, `FR:${g_stateObj.frzReturn}`),
-		withOptions(g_stateObj.shaking, C_FLG_OFF),
-		withOptions(g_stateObj.effect, C_FLG_OFF),
-		withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${g_stateObj.camoufrage}`),
-		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${g_stateObj.swapping}`),
-		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${g_stateObj.judgRange}`),
-	].filter(value => value !== ``).join(`, `);
-
-	// Display設定の組み立て処理 (Ex: Step : FlatBar, Judge, Life : OFF)
-	let displayData = [
-		withDisplays(g_stateObj.d_stepzone, C_FLG_ON, g_lblNameObj.rd_StepZone),
-		withDisplays(g_stateObj.d_judgment, C_FLG_ON, g_lblNameObj.rd_Judgment),
-		withDisplays(g_stateObj.d_fastslow, C_FLG_ON, g_lblNameObj.rd_FastSlow),
-		withDisplays(g_stateObj.d_lifegauge, C_FLG_ON, g_lblNameObj.rd_LifeGauge),
-		withDisplays(g_stateObj.d_score, C_FLG_ON, g_lblNameObj.rd_Score),
-		withDisplays(g_stateObj.d_musicinfo, C_FLG_ON, g_lblNameObj.rd_MusicInfo),
-		withDisplays(g_stateObj.d_filterline, C_FLG_ON, g_lblNameObj.rd_FilterLine),
-	].filter(value => value !== ``).join(`, `);
-	if (displayData === ``) {
-		displayData = `All Visible`;
-	} else {
-		// 表示設定のOFF項目を末尾にまとめる
-		const displayList = displayData.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
-		displayData = displayList.join(`, `);
-		if (!displayList.at(-1).includes(`:`)) {
-			displayData += ` : ${getStgDetailName(C_FLG_OFF)}`;
-		}
-	}
-
-	let display2Data = [
-		withDisplays(g_stateObj.d_speed, C_FLG_ON, g_lblNameObj.rd_Speed),
-		withDisplays(g_stateObj.d_color, C_FLG_ON, g_lblNameObj.rd_Color),
-		withDisplays(g_stateObj.d_lyrics, C_FLG_ON, g_lblNameObj.rd_Lyrics),
-		withDisplays(g_stateObj.d_background, C_FLG_ON, g_lblNameObj.rd_Background),
-		withDisplays(g_stateObj.d_arroweffect, C_FLG_ON, g_lblNameObj.rd_ArrowEffect),
-		withDisplays(g_stateObj.d_special, C_FLG_ON, g_lblNameObj.rd_Special),
-	].filter(value => value !== ``).join(`, `);
-	if (display2Data !== ``) {
-		// 表示設定のOFF項目を末尾にまとめる
-		const display2List = display2Data.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
-		display2Data = display2List.join(`, `);
-		if (!display2List.at(-1).includes(`:`)) {
-			display2Data += ` : ${getStgDetailName(C_FLG_OFF)}`;
-		}
-	}
+	const settingData = makeSettingList(shuffleName);
 
 	const [lblRX, dataRX] = [20, 60];
 	multiAppend(playDataWindow,
@@ -14362,12 +14339,12 @@ const resultInit = () => {
 		makeCssResultPlayData(`lblMusicData`, dataRX, g_cssObj.result_style, 0, mTitleForView[0]),
 		makeCssResultPlayData(`lblMusicData2`, dataRX, g_cssObj.result_style, 1, mTitleForView[1]),
 		makeCssResultPlayData(`lblDifficulty`, lblRX, g_cssObj.result_lbl, 2, g_lblNameObj.rt_Difficulty, C_ALIGN_LEFT),
-		makeCssResultPlayData(`lblDifData`, dataRX, g_cssObj.result_style, 2, difData),
+		makeCssResultPlayData(`lblDifData`, dataRX, g_cssObj.result_style, 2, settingData.difData),
 		makeCssResultPlayData(`lblStyle`, lblRX, g_cssObj.result_lbl, 3, g_lblNameObj.rt_Style, C_ALIGN_LEFT),
-		makeCssResultPlayData(`lblStyleData`, dataRX, g_cssObj.result_style, 3, playStyleData),
+		makeCssResultPlayData(`lblStyleData`, dataRX, g_cssObj.result_style, 3, settingData.playStyleData),
 		makeCssResultPlayData(`lblDisplay`, lblRX, g_cssObj.result_lbl, 4, g_lblNameObj.rt_Display, C_ALIGN_LEFT),
-		makeCssResultPlayData(`lblDisplayData`, dataRX, g_cssObj.result_style, 4, displayData),
-		makeCssResultPlayData(`lblDisplay2Data`, dataRX, g_cssObj.result_style, 5, display2Data),
+		makeCssResultPlayData(`lblDisplayData`, dataRX, g_cssObj.result_style, 4, settingData.displayData),
+		makeCssResultPlayData(`lblDisplay2Data`, dataRX, g_cssObj.result_style, 5, settingData.display2Data),
 	);
 
 	// 設定項目が多い場合に2行に分解して表示する処理
@@ -14691,7 +14668,7 @@ const resultInit = () => {
 				g_localStorage.highscores[scoreName].dateTime = currentDateTime;
 				g_localStorage.highscores[scoreName].rankMark = rankMark;
 				g_localStorage.highscores[scoreName].rankColor = rankColor;
-				g_localStorage.highscores[scoreName].playStyle = playStyleData;
+				g_localStorage.highscores[scoreName].playStyle = settingData.playStyleData;
 
 				g_localStorage.highscores[scoreName].fast = g_resultObj.fast;
 				g_localStorage.highscores[scoreName].slow = g_resultObj.slow;
@@ -14765,6 +14742,7 @@ const resultInit = () => {
 	// X (Twitter)用リザルト
 	// スコアを上塗りする可能性があるため、カスタムイベント後に配置
 	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
+	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
 	const keyUnitAbbName = keyUnitName.slice(0, 1) || ``;
 	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName}${getStgDetailName(keyUnitAbbName + '-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
@@ -14786,7 +14764,8 @@ const resultInit = () => {
 	const resultParams = {
 		tuning: g_headerObj.tuning,
 		highscore: g_resultObj,
-		hashTag, musicTitle, tweetDifData, playStyleData, rankMark,
+		playStyleData: settingData.playStyleData,
+		hashTag, musicTitle, tweetDifData, rankMark,
 		tweetExcessive, tweetFrzJdg, tweetMaxCombo, baseTwitUrl
 	};
 	let tweetResultTmp = makeResultText(g_headerObj.resultFormat, resultParams);
@@ -14833,13 +14812,13 @@ const resultInit = () => {
 		drawText(unEscapeHtml(mTitleForView[1]), { hy: 2 });
 		drawText(`${getEmojiForCanvas(g_emojiObj.memo)} ${unEscapeHtml(g_headerObj.tuning)} / ${getEmojiForCanvas(g_emojiObj.musical)} ${unEscapeHtml(artistName)}`,
 			{ hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
-		drawText(unEscapeHtml(difDataForImage), { hy: 4 });
+		drawText(unEscapeHtml(settingData.difDataForImage), { hy: 4 });
 
-		if (playStyleData.length > 60) {
-			drawText(playStyleData.slice(0, playStyleBreakNum), { hy: 5, siz: getFontSize2(playStyleData.slice(0, playStyleBreakNum), 370) });
-			drawText(playStyleData.slice(playStyleBreakNum), { hy: 6, siz: getFontSize2(playStyleData.slice(playStyleBreakNum), 370) });
+		if (settingData.playStyleData.length > 60) {
+			drawText(settingData.playStyleData.slice(0, playStyleBreakNum), { hy: 5, siz: getFontSize2(settingData.playStyleData.slice(0, playStyleBreakNum), 370) });
+			drawText(settingData.playStyleData.slice(playStyleBreakNum), { hy: 6, siz: getFontSize2(settingData.playStyleData.slice(playStyleBreakNum), 370) });
 		} else {
-			drawText(playStyleData, { hy: 5, siz: getFontSize2(lblStyleData.textContent, 370, { maxSiz: 15 }) });
+			drawText(settingData.playStyleData, { hy: 5, siz: getFontSize2(settingData.playStyleData, 370, { maxSiz: 15 }) });
 		}
 		Object.keys(jdgScoreObj).forEach(score => {
 			drawText(g_lblNameObj[`j_${score}`], { hy: 7 + jdgScoreObj[score].pos, color: jdgScoreObj[score].dfColor });
@@ -15031,6 +15010,94 @@ const resultInit = () => {
 	document.oncontextmenu = () => true;
 
 	g_skinJsObj.result.forEach(func => func());
+};
+
+const makeSettingList = (_shuffleName) => {
+
+	const transKeyName = getTransKeyName();
+	/**
+	 * プレイスタイルのカスタム有無
+	 * @param {string} _flg 
+	 * @param {string|boolean} _defaultSet デフォルト値
+	 * @param {string} _displayText 
+	 * @returns {string}
+	 */
+	const withOptions = (_flg, _defaultSet, _displayText = _flg) =>
+		(_flg !== _defaultSet ? getStgDetailName(_displayText) : ``);
+
+	const withDisplays = (_flg, _defaultSet, _displayText = _flg) =>
+	(_flg !== _defaultSet
+		? getStgDetailName(_displayText) + (_flg === C_FLG_OFF ? `` : ` : ${getStgDetailName(_flg)}`) : ``);
+
+	// 譜面名の組み立て処理 (Ex: 9Akey / Normal-Leftless (maker) [X-Mirror])
+	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
+	const difDatas = [
+		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
+		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
+		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${_shuffleName}]`)}`
+	];
+	let difData = difDatas.filter(value => value !== ``).join(` `);
+	const difDataForImage = difDatas.filter((value, j) => value !== `` && j !== 2).join(` `);
+
+	// 設定の組み立て処理 (Ex: 4x, Brake, Reverse, Sudden+, NoRecovery)
+	let playStyleData = [
+		`${g_stateObj.speed}${g_lblNameObj.multi}`,
+		withOptions(g_stateObj.motion, C_FLG_OFF),
+		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
+			getStgDetailName(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
+		withOptions(g_stateObj.appearance, `Visible`) +
+		((g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_ON) ? `(${g_hidSudObj.filterPos}%)` : ``),
+		withOptions(g_stateObj.gauge, g_settings.gauges[0]),
+		withOptions(g_stateObj.playWindow, `Default`),
+		withOptions(g_stateObj.stepArea, `Default`),
+		withOptions(g_stateObj.frzReturn, C_FLG_OFF, `FR:${g_stateObj.frzReturn}`),
+		withOptions(g_stateObj.shaking, C_FLG_OFF),
+		withOptions(g_stateObj.effect, C_FLG_OFF),
+		withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${g_stateObj.camoufrage}`),
+		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${g_stateObj.swapping}`),
+		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${g_stateObj.judgRange}`),
+	].filter(value => value !== ``).join(`, `);
+
+	// Display設定の組み立て処理 (Ex: Step : FlatBar, Judge, Life : OFF)
+	let displayData = [
+		withDisplays(g_stateObj.d_stepzone, C_FLG_ON, g_lblNameObj.rd_StepZone),
+		withDisplays(g_stateObj.d_judgment, C_FLG_ON, g_lblNameObj.rd_Judgment),
+		withDisplays(g_stateObj.d_fastslow, C_FLG_ON, g_lblNameObj.rd_FastSlow),
+		withDisplays(g_stateObj.d_lifegauge, C_FLG_ON, g_lblNameObj.rd_LifeGauge),
+		withDisplays(g_stateObj.d_score, C_FLG_ON, g_lblNameObj.rd_Score),
+		withDisplays(g_stateObj.d_musicinfo, C_FLG_ON, g_lblNameObj.rd_MusicInfo),
+		withDisplays(g_stateObj.d_filterline, C_FLG_ON, g_lblNameObj.rd_FilterLine),
+	].filter(value => value !== ``).join(`, `);
+	if (displayData === ``) {
+		displayData = `All Visible`;
+	} else {
+		// 表示設定のOFF項目を末尾にまとめる
+		const displayList = displayData.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
+		displayData = displayList.join(`, `);
+		if (!displayList.at(-1).includes(`:`)) {
+			displayData += ` : ${getStgDetailName(C_FLG_OFF)}`;
+		}
+	}
+
+	let display2Data = [
+		withDisplays(g_stateObj.d_speed, C_FLG_ON, g_lblNameObj.rd_Speed),
+		withDisplays(g_stateObj.d_color, C_FLG_ON, g_lblNameObj.rd_Color),
+		withDisplays(g_stateObj.d_lyrics, C_FLG_ON, g_lblNameObj.rd_Lyrics),
+		withDisplays(g_stateObj.d_background, C_FLG_ON, g_lblNameObj.rd_Background),
+		withDisplays(g_stateObj.d_arroweffect, C_FLG_ON, g_lblNameObj.rd_ArrowEffect),
+		withDisplays(g_stateObj.d_special, C_FLG_ON, g_lblNameObj.rd_Special),
+	].filter(value => value !== ``).join(`, `);
+	if (display2Data !== ``) {
+		// 表示設定のOFF項目を末尾にまとめる
+		const display2List = display2Data.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
+		display2Data = display2List.join(`, `);
+		if (!display2List.at(-1).includes(`:`)) {
+			display2Data += ` : ${getStgDetailName(C_FLG_OFF)}`;
+		}
+	}
+
+	return { difData, difDataForImage, playStyleData, displayData, display2Data };
 };
 
 /**
