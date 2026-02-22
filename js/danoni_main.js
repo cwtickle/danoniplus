@@ -13476,8 +13476,8 @@ const changeAppearanceFilter = (_num = 10) => {
 		addY(`filterBar${bottomNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist);
 
 		if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
-			addY(`filterBar${bottomNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + topDist);
-			addY(`filterBar${topNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist);
+			addY(`filterBar${bottomNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + bottomDist);
+			addY(`filterBar${topNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + topDist);
 		}
 	}
 
