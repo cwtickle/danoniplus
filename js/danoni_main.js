@@ -6507,7 +6507,7 @@ const updateSettingSummary = () => {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
 	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
-	const settingData = makeSettingList(shuffleName);
+	const settingData = getSelectedSettingList(shuffleName);
 
 	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData;
 	document.getElementById(`lblSummaryPlaystyleInfo`).innerHTML = settingData.playStyleData;
@@ -14331,7 +14331,7 @@ const resultInit = () => {
 	const transKeyName = getTransKeyName();
 	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
 	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
-	const settingData = makeSettingList(shuffleName);
+	const settingData = getSelectedSettingList(shuffleName);
 
 	const [lblRX, dataRX] = [20, 60];
 	multiAppend(playDataWindow,
@@ -14963,7 +14963,7 @@ const resultInit = () => {
 	makeResultSprite.style.pointerEvents = g_headerObj.maskresultButton ? C_DIS_AUTO : C_DIS_NONE;
 
 	// リザルトモーションの0フレーム対応
-	g_animationData.filter(sprite => g_scoreObj[`${sprite}ResultFrameNum`] === 0 && g_headerObj[`${sprite}ResultData`][0] !== undefined)
+	g_animationData.filter(sprite => g_scoreObj[`${sprite}ResultFrameNum`] === 0 && g_headerObj[`${sprite}ResultData`]?.[0] !== undefined)
 		.forEach(sprite => {
 			g_scoreObj[`${sprite}ResultFrameNum`] = g_animationFunc.draw[sprite](0, `result`, sprite);
 			g_headerObj[`${sprite}ResultData`][0] = undefined;
@@ -15012,7 +15012,12 @@ const resultInit = () => {
 	g_skinJsObj.result.forEach(func => func());
 };
 
-const makeSettingList = (_shuffleName) => {
+/**
+ * 選択した設定の情報を取得
+ * @param {string} _shuffleName 
+ * @returns {object}
+ */
+const getSelectedSettingList = (_shuffleName) => {
 
 	const transKeyName = getTransKeyName();
 	/**
