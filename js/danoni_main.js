@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/02/18
+ * Revised : 2026/02/23
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 43.6.5`;
-const g_revisedDate = `2026/02/18`;
+const g_version = `Ver 43.6.6`;
+const g_revisedDate = `2026/02/23`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7437,6 +7437,7 @@ const setDifficulty = (_initFlg) => {
 	g_headerObj.excessiveUse = g_headerObj.excessiveUses[g_stateObj.scoreId];
 	if (g_headerObj.excessiveUse) {
 		setExcessive(document.getElementById(`lnkExcessive`), g_stateObj.excessive === C_FLG_ON);
+		lblExcessive.style.display = C_DIS_NONE;
 		lnkExcessive.style.display = C_DIS_INHERIT;
 	} else {
 		g_stateObj.excessiveChgFlg = false;
