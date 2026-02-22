@@ -6428,7 +6428,7 @@ const commonSettingBtn = _labelName => {
 		const tmpDiv = createEmptySprite(divRoot, `settingSumSprite`, {
 			x: g_btnX() + 25, y: g_sHeight - 200, w: g_btnWidth() - 50, h: 100, pointerEvents: C_DIS_AUTO, overflow: C_DIS_AUTO
 		});
-		tmpDiv.style.background = `#000000cc`;
+		tmpDiv.style.background = g_headerObj.baseBrightFlg ? `#ffffffcc` : `#000000cc`;
 
 		multiAppend(tmpDiv,
 			createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
@@ -7512,6 +7512,7 @@ const setDifficulty = (_initFlg) => {
 	g_headerObj.excessiveUse = g_headerObj.excessiveUses[g_stateObj.scoreId];
 	if (g_headerObj.excessiveUse) {
 		setExcessive(document.getElementById(`lnkExcessive`), g_stateObj.excessive === C_FLG_ON);
+		lblExcessive.style.display = C_DIS_NONE;
 		lnkExcessive.style.display = C_DIS_INHERIT;
 	} else {
 		g_stateObj.excessiveChgFlg = false;
@@ -7642,6 +7643,7 @@ const createOptionWindow = _sprite => {
 			}
 			g_stateObj.scoreDetailViewFlg = true;
 			scoreDetail.style.visibility = `visible`;
+			visibleSettingSummary(false);
 
 			// 表示内容を非表示化、ボタン色をデフォルトに戻す
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `hidden`;
@@ -7690,6 +7692,7 @@ const createOptionWindow = _sprite => {
 		g_stateObj.scoreDetailViewFlg = !g_stateObj.scoreDetailViewFlg;
 		scoreDetail.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
 		detailObj.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
+		visibleSettingSummary(g_stateObj.scoreDetailViewFlg ? false : g_stateObj.settingSummaryVisible);
 
 		// Qキーを押したときのカーソル位置を先頭に初期化
 		if (_resetFlg) {
