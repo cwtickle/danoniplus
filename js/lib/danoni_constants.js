@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/02/21 (v44.4.0)
+ * Revised : 2026/02/23 (v44.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -374,6 +374,27 @@ const updateWindowSiz = () => {
         btnSave: {
             x: g_btnX(), y: 5, w: g_btnWidth(1 / 5), h: 16, siz: 12,
             title: g_msgObj.dataSave, borderStyle: `solid`,
+        },
+        btnSettingSummary: {
+            x: g_btnX(), y: g_sHeight - 200, w: g_limitObj.setMiniWidth / 2, h: 100,
+        },
+        lblSummaryHeader: {
+            x: 0, y: 0, w: 150, h: 20, siz: 16, align: C_ALIGN_LEFT,
+        },
+        lblSummaryEnvironment: {
+            x: 150, y: 5, w: g_btnWidth() - 200, h: 20, siz: 12, align: C_ALIGN_LEFT,
+        },
+        lblSummaryDifInfo: {
+            x: 0, y: 20, w: g_btnWidth() - 50, h: 20, siz: 12, align: C_ALIGN_LEFT,
+        },
+        lblSummaryPlaystyleInfo: {
+            x: 0, y: 35, w: g_btnWidth() - 50, h: 20, siz: 12, align: C_ALIGN_LEFT,
+        },
+        lblSummaryDisplayInfo: {
+            x: 0, y: 50, w: g_btnWidth() - 50, h: 20, siz: 12, align: C_ALIGN_LEFT,
+        },
+        lblSummaryDisplay2Info: {
+            x: 0, y: 65, w: g_btnWidth() - 50, h: 20, siz: 12, align: C_ALIGN_LEFT,
         },
 
         lblMusicInfo: {
@@ -1112,6 +1133,7 @@ const g_stateObj = {
     dataSaveFlg: true,
     scoreDetailViewFlg: false,
     scoreDetail: `Speed`,
+    settingSummaryVisible: false,
 
     d_stepzone: C_FLG_ON,
     d_judgment: C_FLG_ON,
@@ -1347,6 +1369,7 @@ const g_moveSettingWindow = (_changePageFlg = true, _direction = 1) => {
         g_settings.settingWindowNum = nextPos(g_settings.settingWindowNum, _direction, g_settings.settingWindows.length);
     }
     g_settings.settingWindows[g_settings.settingWindowNum]();
+    updateSettingSummary();
 };
 
 /**
@@ -2365,6 +2388,7 @@ const g_shortcutObj = {
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
+        KeyU: { id: `btnSettingSummary` },
     },
     difSelector: {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
@@ -2397,6 +2421,7 @@ const g_shortcutObj = {
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
+        KeyU: { id: `btnSettingSummary` },
     },
     settingsDisplay: {
         ShiftLeft_KeyA: { id: `lnkAppearanceL` },
@@ -2504,6 +2529,7 @@ const g_shortcutObj = {
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
         Tab: { id: `btnSettings` },
+        KeyU: { id: `btnSettingSummary` },
     },
     exSetting: {
         ShiftLeft_KeyP: { id: `lnkPlayWindowL` },
@@ -2533,6 +2559,7 @@ const g_shortcutObj = {
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
         Tab: { id: `btnexSetting` },
+        KeyU: { id: `btnSettingSummary` },
     },
     keyConfig: {
         Escape: { id: `btnBack` },
@@ -2594,10 +2621,10 @@ const g_btnPatterns = {
     title: { Start: 0, Comment: -10, MusicSelectRandom: -10 },
     dataMgt: { Back: 0, Environment: -35, Highscores: -35, CustomKey: -35, Others: -35 },
     precondition: { Back: 0 },
-    option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25 },
-    difSelector: {},
-    settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5 },
-    exSetting: { Back: 0, KeyConfig: 0, Play: 0, exSetting: -5, Save: -10 },
+    option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25, SettingSummary: -10 },
+    difSelector: { SettingSummary: -10 },
+    settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5, SettingSummary: -10 },
+    exSetting: { Back: 0, KeyConfig: 0, Play: 0, exSetting: -5, Save: -10, SettingSummary: -10 },
     loadingIos: { Play: 0 },
     keyConfig: { Back: -3, Play: 0 },
     result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0, GaugeTransition: -15 },
@@ -4024,6 +4051,7 @@ const g_lblNameObj = {
     percent: `%`,
     pixel: `px`,
     filterLock: `Lock`,
+    settingSummary: `Setting Summary`,
 
     sc_speed: `←→`,
     sc_scroll: `R/<br>↑↓`,
