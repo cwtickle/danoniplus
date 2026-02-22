@@ -14305,7 +14305,8 @@ const resultInit = () => {
 		withOptions(g_stateObj.motion, C_FLG_OFF),
 		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
 			getStgDetailName(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
-		withOptions(g_stateObj.appearance, `Visible`),
+		withOptions(g_stateObj.appearance, `Visible`) +
+		((g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_ON) ? `(${g_hidSudObj.filterPos}%)` : ``),
 		withOptions(g_stateObj.gauge, g_settings.gauges[0]),
 		withOptions(g_stateObj.playWindow, `Default`),
 		withOptions(g_stateObj.stepArea, `Default`),
