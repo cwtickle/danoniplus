@@ -8,7 +8,7 @@
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 44.5.1`;
+const g_version = `Ver 44.5.2`;
 const g_revisedDate = `2026/02/23`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -1535,6 +1535,34 @@ const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWid
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
 
 	return div;
+};
+
+/**
+ * divをドラッグ可能にする関数
+ * @param {string} _divName divのid名
+ * @param {number} [minX=0]	ドラッグ可能な範囲の左端
+ * @param {number} [minY=0]	ドラッグ可能な範囲の上端
+ * @param {number} [maxX=g_sWidth]	ドラッグ可能な範囲の右端
+ * @param {number} [maxY=g_sHeight]	ドラッグ可能な範囲の下端 
+ */
+const dragDiv = (_divName, { minX = 0, minY = 0, maxX = g_sWidth, maxY = g_sHeight } = {}) => {
+	if (document.getElementById(_divName) === null) return;
+	const div = document.getElementById(_divName);
+	div.onpointermove = evt => {
+		if (evt.buttons) {
+			const nextX = div.offsetLeft + evt.movementX;
+			const nextY = div.offsetTop + evt.movementY;
+			const clampMaxX = (maxX === minX) ? maxX : (maxX - div.offsetWidth);
+			const clampMaxY = (maxY === minY) ? maxY : (maxY - div.offsetHeight);
+			div.style.left = Math.min(Math.max(nextX, minX), clampMaxX) + 'px';
+			div.style.top = Math.min(Math.max(nextY, minY), clampMaxY) + 'px';
+			div.style.position = 'absolute';
+			div.draggable = false;
+			div.setPointerCapture(evt.pointerId);
+
+			g_posObj[_divName] = { x: div.offsetLeft, y: div.offsetTop };
+		}
+	};
 };
 
 /**
@@ -6424,23 +6452,6 @@ const commonSettingBtn = _labelName => {
 		evt.target.classList.replace(g_cssObj[`button_${from}`], g_cssObj[`button_${to}`]);
 	};
 
-	const makeSettingSummary = () => {
-		const tmpDiv = createEmptySprite(divRoot, `settingSumSprite`, {
-			x: g_btnX() + 25, y: g_sHeight - 200, w: g_btnWidth() - 50, h: 100, pointerEvents: C_DIS_AUTO, overflow: C_DIS_AUTO
-		});
-		tmpDiv.style.background = g_headerObj.baseBrightFlg ? `#ffffffcc` : `#000000cc`;
-
-		multiAppend(tmpDiv,
-			createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
-			createDivCss2Label(`lblSummaryEnvironment`, ``, g_lblPosObj.lblSummaryEnvironment),
-			createDivCss2Label(`lblSummaryDifInfo`, ``, g_lblPosObj.lblSummaryDifInfo),
-			createDivCss2Label(`lblSummaryPlaystyleInfo`, ``, g_lblPosObj.lblSummaryPlaystyleInfo),
-			createDivCss2Label(`lblSummaryDisplayInfo`, ``, g_lblPosObj.lblSummaryDisplayInfo),
-			createDivCss2Label(`lblSummaryDisplay2Info`, ``, g_lblPosObj.lblSummaryDisplay2Info),
-		);
-		tmpDiv.style.visibility = g_stateObj.settingSummaryVisible ? `visible` : `hidden`;
-	};
-
 	multiAppend(divRoot,
 
 		// タイトル画面へ戻る
@@ -6495,6 +6506,30 @@ const commonSettingBtn = _labelName => {
 	makeSettingSummary();
 };
 
+const makeSettingSummary = () => {
+	const tmpDiv = createEmptySprite(divRoot, `settingSumSprite`, g_windowObj.settingSumSprite);
+	tmpDiv.style.background = g_headerObj.baseBrightFlg ? `#ffffffcc` : `#000000cc`;
+
+	multiAppend(tmpDiv,
+		createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
+		createDivCss2Label(`lblSummaryEnvironment`, ``, g_lblPosObj.lblSummaryEnvironment),
+		createDivCss2Label(`lblSummaryDifHeader`, g_lblNameObj.rt_Difficulty, g_lblPosObj.lblSummaryDifHeader),
+		createDivCss2Label(`lblSummaryDifInfo`, ``, g_lblPosObj.lblSummaryDifInfo),
+		createDivCss2Label(`lblSummaryPlaystyleHeader`, g_lblNameObj.rt_Style, g_lblPosObj.lblSummaryPlaystyleHeader),
+		createDivCss2Label(`lblSummaryPlaystyleInfo`, ``, g_lblPosObj.lblSummaryPlaystyleInfo),
+		createDivCss2Label(`lblSummaryDisplayHeader`, g_lblNameObj.rt_Display, g_lblPosObj.lblSummaryDisplayHeader),
+		createDivCss2Label(`lblSummaryDisplayInfo`, ``, g_lblPosObj.lblSummaryDisplayInfo),
+		createDivCss2Label(`lblSummaryDisplay2Info`, ``, g_lblPosObj.lblSummaryDisplay2Info),
+	);
+	tmpDiv.style.visibility = g_stateObj.settingSummaryVisible ? `visible` : `hidden`;
+	dragDiv(`settingSumSprite`, {
+		minX: g_btnX() + 25, maxX: g_btnX() + 25, minY: 10, maxY: g_sHeight - 10,
+	});
+	if (g_posObj.settingSumSprite?.y !== undefined) {
+		document.getElementById(`settingSumSprite`).style.top = wUnit(g_posObj.settingSumSprite.y);
+	}
+};
+
 const visibleSettingSummary = _visible => {
 	const summaryDiv = document.getElementById(`settingSumSprite`);
 	if (summaryDiv) {
@@ -6514,7 +6549,9 @@ const updateSettingSummary = () => {
 	document.getElementById(`lblSummaryPlaystyleInfo`).innerHTML = settingData.playStyleData;
 	document.getElementById(`lblSummaryDisplayInfo`).innerHTML = settingData.displayData;
 	document.getElementById(`lblSummaryDisplay2Info`).innerHTML = settingData.display2Data;
-	document.getElementById(`lblSummaryEnvironment`).innerHTML = `(Adj: ${g_stateObj.adjustment} f, Volume: ${g_stateObj.volume}%, ColorType: ${g_colorType})`;
+	document.getElementById(`lblSummaryEnvironment`).innerHTML =
+		`(Adj: ${g_stateObj.adjustment} f, Volume: ${g_stateObj.volume}%, ` +
+		`ColorType: ${g_colorType}, KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1})`;
 };
 
 /**
@@ -15079,7 +15116,7 @@ const getSelectedSettingList = (_shuffleName) => {
 		withDisplays(g_stateObj.d_filterline, C_FLG_ON, g_lblNameObj.rd_FilterLine),
 	].filter(value => value !== ``).join(`, `);
 	if (displayData === ``) {
-		displayData = `All Visible`;
+		displayData = getStgDetailName(`All Visible`);
 	} else {
 		// 表示設定のOFF項目を末尾にまとめる
 		const displayList = displayData.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
