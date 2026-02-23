@@ -9706,12 +9706,6 @@ const loadMusic = () => {
 	const lblLoading = getLoadingLabel();
 	divRoot.appendChild(lblLoading);
 
-	// 設定サマリーの表示
-	makeSettingSummary();
-	visibleSettingSummary(true);
-	updateSettingSummary();
-	settingSumSprite.style.top = wUnit(60);
-
 	// ローカル動作時
 	if (g_isFile) {
 		setAudio(url);
