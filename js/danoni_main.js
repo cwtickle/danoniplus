@@ -1552,8 +1552,10 @@ const dragDiv = (_divName, { minX = 0, minY = 0, maxX = g_sWidth, maxY = g_sHeig
 		if (evt.buttons) {
 			const nextX = div.offsetLeft + evt.movementX;
 			const nextY = div.offsetTop + evt.movementY;
-			div.style.left = Math.min(Math.max(nextX, minX), maxX - div.offsetWidth) + 'px';
-			div.style.top = Math.min(Math.max(nextY, minY), maxY - div.offsetHeight) + 'px';
+			const clampMaxX = (maxX === minX) ? maxX : (maxX - div.offsetWidth);
+			const clampMaxY = (maxY === minY) ? maxY : (maxY - div.offsetHeight);
+			div.style.left = Math.min(Math.max(nextX, minX), clampMaxX) + 'px';
+			div.style.top = Math.min(Math.max(nextY, minY), clampMaxY) + 'px';
 			div.style.position = 'absolute';
 			div.draggable = false;
 			div.setPointerCapture(evt.pointerId);
@@ -6521,7 +6523,7 @@ const makeSettingSummary = () => {
 	);
 	tmpDiv.style.visibility = g_stateObj.settingSummaryVisible ? `visible` : `hidden`;
 	dragDiv(`settingSumSprite`, {
-		minX: g_btnWidth() - 25, maxX: g_btnWidth() - 25, minY: 10, maxY: g_sHeight - 10,
+		minX: g_btnX() + 25, maxX: g_btnX() + 25, minY: 10, maxY: g_sHeight - 10,
 	});
 	if (g_posObj.settingSumSprite?.y !== undefined) {
 		document.getElementById(`settingSumSprite`).style.top = wUnit(g_posObj.settingSumSprite.y);

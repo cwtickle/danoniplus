@@ -386,7 +386,7 @@ const updateWindowSiz = () => {
             x: 150, y: 5, w: g_btnWidth() - 200, h: 20, siz: 12, align: C_ALIGN_LEFT,
         },
         lblSummaryDifHeader: {
-            x: 0, y: 20, w: 100, h: 20, siz: 12, align: C_ALIGN_LEFT, opacity: 0.75,
+            x: 0, y: 20, w: 70, h: 20, siz: 12, align: C_ALIGN_LEFT, opacity: 0.75,
         },
         lblSummaryDifInfo: {
             x: 70, y: 20, w: g_btnWidth() - 120, h: 20, siz: 12, align: C_ALIGN_LEFT,
