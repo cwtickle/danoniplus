@@ -6414,21 +6414,6 @@ const preconditionInit = () => {
 /* Scene : SETTINGS [lime] */
 /*-----------------------------------------------------------*/
 
-const makeSettingSummary = () => {
-	const tmpDiv = createEmptySprite(divRoot, `settingSumSprite`, g_windowObj.settingSumSprite);
-	tmpDiv.style.background = g_headerObj.baseBrightFlg ? `#ffffffcc` : `#000000cc`;
-
-	multiAppend(tmpDiv,
-		createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
-		createDivCss2Label(`lblSummaryEnvironment`, ``, g_lblPosObj.lblSummaryEnvironment),
-		createDivCss2Label(`lblSummaryDifInfo`, ``, g_lblPosObj.lblSummaryDifInfo),
-		createDivCss2Label(`lblSummaryPlaystyleInfo`, ``, g_lblPosObj.lblSummaryPlaystyleInfo),
-		createDivCss2Label(`lblSummaryDisplayInfo`, ``, g_lblPosObj.lblSummaryDisplayInfo),
-		createDivCss2Label(`lblSummaryDisplay2Info`, ``, g_lblPosObj.lblSummaryDisplay2Info),
-	);
-	tmpDiv.style.visibility = g_stateObj.settingSummaryVisible ? `visible` : `hidden`;
-};
-
 const commonSettingBtn = _labelName => {
 
 	const switchSave = evt => {
@@ -6491,6 +6476,21 @@ const commonSettingBtn = _labelName => {
 			}), g_cssObj.button_Mini),
 	);
 	makeSettingSummary();
+};
+
+const makeSettingSummary = () => {
+	const tmpDiv = createEmptySprite(divRoot, `settingSumSprite`, g_windowObj.settingSumSprite);
+	tmpDiv.style.background = g_headerObj.baseBrightFlg ? `#ffffffcc` : `#000000cc`;
+
+	multiAppend(tmpDiv,
+		createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
+		createDivCss2Label(`lblSummaryEnvironment`, ``, g_lblPosObj.lblSummaryEnvironment),
+		createDivCss2Label(`lblSummaryDifInfo`, ``, g_lblPosObj.lblSummaryDifInfo),
+		createDivCss2Label(`lblSummaryPlaystyleInfo`, ``, g_lblPosObj.lblSummaryPlaystyleInfo),
+		createDivCss2Label(`lblSummaryDisplayInfo`, ``, g_lblPosObj.lblSummaryDisplayInfo),
+		createDivCss2Label(`lblSummaryDisplay2Info`, ``, g_lblPosObj.lblSummaryDisplay2Info),
+	);
+	tmpDiv.style.visibility = g_stateObj.settingSummaryVisible ? `visible` : `hidden`;
 };
 
 const visibleSettingSummary = _visible => {
