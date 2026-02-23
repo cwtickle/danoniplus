@@ -6485,8 +6485,11 @@ const makeSettingSummary = () => {
 	multiAppend(tmpDiv,
 		createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
 		createDivCss2Label(`lblSummaryEnvironment`, ``, g_lblPosObj.lblSummaryEnvironment),
+		createDivCss2Label(`lblSummaryDifHeader`, g_lblNameObj.rt_Difficulty, g_lblPosObj.lblSummaryDifHeader),
 		createDivCss2Label(`lblSummaryDifInfo`, ``, g_lblPosObj.lblSummaryDifInfo),
+		createDivCss2Label(`lblSummaryPlaystyleHeader`, g_lblNameObj.rt_Style, g_lblPosObj.lblSummaryPlaystyleHeader),
 		createDivCss2Label(`lblSummaryPlaystyleInfo`, ``, g_lblPosObj.lblSummaryPlaystyleInfo),
+		createDivCss2Label(`lblSummaryDisplayHeader`, g_lblNameObj.rt_Display, g_lblPosObj.lblSummaryDisplayHeader),
 		createDivCss2Label(`lblSummaryDisplayInfo`, ``, g_lblPosObj.lblSummaryDisplayInfo),
 		createDivCss2Label(`lblSummaryDisplay2Info`, ``, g_lblPosObj.lblSummaryDisplay2Info),
 	);
