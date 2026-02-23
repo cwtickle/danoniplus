@@ -1538,6 +1538,34 @@ const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWid
 };
 
 /**
+ * divをドラッグ可能にする関数
+ * @param {string} _divName divのid名
+ * @param {number} [minX=0]	ドラッグ可能な範囲の左端
+ * @param {number} [minY=0]	ドラッグ可能な範囲の上端
+ * @param {number} [maxX=g_sWidth]	ドラッグ可能な範囲の右端
+ * @param {number} [maxY=g_sHeight]	ドラッグ可能な範囲の下端 
+ */
+const dragDiv = (_divName, { minX = 0, minY = 0, maxX = g_sWidth, maxY = g_sHeight } = {}) => {
+	if (document.getElementById(_divName) === null) return;
+	const div = document.getElementById(_divName);
+	div.onpointermove = evt => {
+		if (evt.buttons) {
+			const nextX = div.offsetLeft + evt.movementX;
+			const nextY = div.offsetTop + evt.movementY;
+			const clampMaxX = (maxX === minX) ? maxX : (maxX - div.offsetWidth);
+			const clampMaxY = (maxY === minY) ? maxY : (maxY - div.offsetHeight);
+			div.style.left = Math.min(Math.max(nextX, minX), clampMaxX) + 'px';
+			div.style.top = Math.min(Math.max(nextY, minY), clampMaxY) + 'px';
+			div.style.position = 'absolute';
+			div.draggable = false;
+			div.setPointerCapture(evt.pointerId);
+
+			g_posObj[_divName] = { x: div.offsetLeft, y: div.offsetTop };
+		}
+	};
+};
+
+/**
  * 画像表示
  * @param {string} _id 
  * @param {string} _imgPath 
@@ -6485,12 +6513,21 @@ const makeSettingSummary = () => {
 	multiAppend(tmpDiv,
 		createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
 		createDivCss2Label(`lblSummaryEnvironment`, ``, g_lblPosObj.lblSummaryEnvironment),
+		createDivCss2Label(`lblSummaryDifHeader`, g_lblNameObj.rt_Difficulty, g_lblPosObj.lblSummaryDifHeader),
 		createDivCss2Label(`lblSummaryDifInfo`, ``, g_lblPosObj.lblSummaryDifInfo),
+		createDivCss2Label(`lblSummaryPlaystyleHeader`, g_lblNameObj.rt_Style, g_lblPosObj.lblSummaryPlaystyleHeader),
 		createDivCss2Label(`lblSummaryPlaystyleInfo`, ``, g_lblPosObj.lblSummaryPlaystyleInfo),
+		createDivCss2Label(`lblSummaryDisplayHeader`, g_lblNameObj.rt_Display, g_lblPosObj.lblSummaryDisplayHeader),
 		createDivCss2Label(`lblSummaryDisplayInfo`, ``, g_lblPosObj.lblSummaryDisplayInfo),
 		createDivCss2Label(`lblSummaryDisplay2Info`, ``, g_lblPosObj.lblSummaryDisplay2Info),
 	);
 	tmpDiv.style.visibility = g_stateObj.settingSummaryVisible ? `visible` : `hidden`;
+	dragDiv(`settingSumSprite`, {
+		minX: g_btnX() + 25, maxX: g_btnX() + 25, minY: 10, maxY: g_sHeight - 10,
+	});
+	if (g_posObj.settingSumSprite?.y !== undefined) {
+		document.getElementById(`settingSumSprite`).style.top = wUnit(g_posObj.settingSumSprite.y);
+	}
 };
 
 const visibleSettingSummary = _visible => {
@@ -9705,12 +9742,6 @@ const loadMusic = () => {
 	// Now Loadingを表示
 	const lblLoading = getLoadingLabel();
 	divRoot.appendChild(lblLoading);
-
-	// 設定サマリーの表示
-	makeSettingSummary();
-	visibleSettingSummary(true);
-	updateSettingSummary();
-	settingSumSprite.style.top = wUnit(60);
 
 	// ローカル動作時
 	if (g_isFile) {
