@@ -201,6 +201,7 @@ const updateWindowSiz = () => {
     Object.assign(g_windowObj, {
         keyTitleSprite: { x: g_btnX(1 / 4), y: g_sHeight / 2 - 5, w: g_btnWidth(1 / 2), h: 16 },
         mSelectTitleSprite: { x: g_btnX(), y: 0, w: g_btnWidth(), h: g_sHeight, clipPath: `inset(12% 0 8% 0)` },
+        settingSumSprite: { x: g_btnX() + 25, y: g_sHeight - 200, w: g_btnWidth() - 50, h: 100, pointerEvents: C_DIS_AUTO, overflow: C_DIS_AUTO },
         optionSprite: { x: (g_sWidth - 450) / 2, y: 65, w: 450, h: 325 },
         dataSprite: { x: g_btnX() + (g_sWidth - Math.max(g_sWidth - 100, 450)) / 2, y: 65, w: Math.max(g_sWidth - 100, 450), h: 325 },
         keyListSprite: { x: 0, y: g_limitObj.setLblHeight * 7.5 + 40, w: 150, h: g_sHeight - 380, overflow: C_DIS_AUTO },
@@ -4219,6 +4220,8 @@ const g_lblNameObj = {
     'u_Type2': `Type2`,
     'u_Type3': `Type3`,
     'u_Type4': `Type4`,
+
+    'u_allVisible': `All Visible`,
 
     ColorType: `ColorType`,
     ImgType: `ImgType`,
