@@ -4221,7 +4221,7 @@ const g_lblNameObj = {
     'u_Type3': `Type3`,
     'u_Type4': `Type4`,
 
-    'u_allVisible': `All Visible`,
+    'u_All Visible': `All Visible`,
 
     ColorType: `ColorType`,
     ImgType: `ImgType`,
