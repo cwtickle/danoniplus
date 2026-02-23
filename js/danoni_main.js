@@ -6414,6 +6414,21 @@ const preconditionInit = () => {
 /* Scene : SETTINGS [lime] */
 /*-----------------------------------------------------------*/
 
+const makeSettingSummary = () => {
+	const tmpDiv = createEmptySprite(divRoot, `settingSumSprite`, g_windowObj.settingSumSprite);
+	tmpDiv.style.background = g_headerObj.baseBrightFlg ? `#ffffffcc` : `#000000cc`;
+
+	multiAppend(tmpDiv,
+		createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
+		createDivCss2Label(`lblSummaryEnvironment`, ``, g_lblPosObj.lblSummaryEnvironment),
+		createDivCss2Label(`lblSummaryDifInfo`, ``, g_lblPosObj.lblSummaryDifInfo),
+		createDivCss2Label(`lblSummaryPlaystyleInfo`, ``, g_lblPosObj.lblSummaryPlaystyleInfo),
+		createDivCss2Label(`lblSummaryDisplayInfo`, ``, g_lblPosObj.lblSummaryDisplayInfo),
+		createDivCss2Label(`lblSummaryDisplay2Info`, ``, g_lblPosObj.lblSummaryDisplay2Info),
+	);
+	tmpDiv.style.visibility = g_stateObj.settingSummaryVisible ? `visible` : `hidden`;
+};
+
 const commonSettingBtn = _labelName => {
 
 	const switchSave = evt => {
@@ -6422,23 +6437,6 @@ const commonSettingBtn = _labelName => {
 
 		const to = boolToSwitch(g_stateObj.dataSaveFlg);
 		evt.target.classList.replace(g_cssObj[`button_${from}`], g_cssObj[`button_${to}`]);
-	};
-
-	const makeSettingSummary = () => {
-		const tmpDiv = createEmptySprite(divRoot, `settingSumSprite`, {
-			x: g_btnX() + 25, y: g_sHeight - 200, w: g_btnWidth() - 50, h: 100, pointerEvents: C_DIS_AUTO, overflow: C_DIS_AUTO
-		});
-		tmpDiv.style.background = g_headerObj.baseBrightFlg ? `#ffffffcc` : `#000000cc`;
-
-		multiAppend(tmpDiv,
-			createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
-			createDivCss2Label(`lblSummaryEnvironment`, ``, g_lblPosObj.lblSummaryEnvironment),
-			createDivCss2Label(`lblSummaryDifInfo`, ``, g_lblPosObj.lblSummaryDifInfo),
-			createDivCss2Label(`lblSummaryPlaystyleInfo`, ``, g_lblPosObj.lblSummaryPlaystyleInfo),
-			createDivCss2Label(`lblSummaryDisplayInfo`, ``, g_lblPosObj.lblSummaryDisplayInfo),
-			createDivCss2Label(`lblSummaryDisplay2Info`, ``, g_lblPosObj.lblSummaryDisplay2Info),
-		);
-		tmpDiv.style.visibility = g_stateObj.settingSummaryVisible ? `visible` : `hidden`;
 	};
 
 	multiAppend(divRoot,
@@ -6514,7 +6512,9 @@ const updateSettingSummary = () => {
 	document.getElementById(`lblSummaryPlaystyleInfo`).innerHTML = settingData.playStyleData;
 	document.getElementById(`lblSummaryDisplayInfo`).innerHTML = settingData.displayData;
 	document.getElementById(`lblSummaryDisplay2Info`).innerHTML = settingData.display2Data;
-	document.getElementById(`lblSummaryEnvironment`).innerHTML = `(Adj: ${g_stateObj.adjustment} f, Volume: ${g_stateObj.volume}%, ColorType: ${g_colorType})`;
+	document.getElementById(`lblSummaryEnvironment`).innerHTML =
+		`(Adj: ${g_stateObj.adjustment} f, Volume: ${g_stateObj.volume}%, ` +
+		`ColorType: ${g_colorType}, KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1})`;
 };
 
 /**
@@ -15079,7 +15079,7 @@ const getSelectedSettingList = (_shuffleName) => {
 		withDisplays(g_stateObj.d_filterline, C_FLG_ON, g_lblNameObj.rd_FilterLine),
 	].filter(value => value !== ``).join(`, `);
 	if (displayData === ``) {
-		displayData = `All Visible`;
+		displayData = getStgDetailName(`allVisible`);
 	} else {
 		// 表示設定のOFF項目を末尾にまとめる
 		const displayList = displayData.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
