@@ -9706,6 +9706,12 @@ const loadMusic = () => {
 	const lblLoading = getLoadingLabel();
 	divRoot.appendChild(lblLoading);
 
+	// 設定サマリーの表示
+	makeSettingSummary();
+	visibleSettingSummary(true);
+	updateSettingSummary();
+	settingSumSprite.style.top = wUnit(60);
+
 	// ローカル動作時
 	if (g_isFile) {
 		setAudio(url);
@@ -15079,7 +15085,7 @@ const getSelectedSettingList = (_shuffleName) => {
 		withDisplays(g_stateObj.d_filterline, C_FLG_ON, g_lblNameObj.rd_FilterLine),
 	].filter(value => value !== ``).join(`, `);
 	if (displayData === ``) {
-		displayData = getStgDetailName(`allVisible`);
+		displayData = getStgDetailName(`All Visible`);
 	} else {
 		// 表示設定のOFF項目を末尾にまとめる
 		const displayList = displayData.split(`, `).sort((a, b) => b.includes(`:`) - a.includes(`:`));
