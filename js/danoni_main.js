@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/02/18
+ * Revised : 2026/02/24
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 42.5.11`;
-const g_revisedDate = `2026/02/18`;
+const g_version = `Ver 42.5.12`;
+const g_revisedDate = `2026/02/24`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7717,8 +7717,11 @@ const createLblSetting = (_settingName, _adjY = 0, _settingLabel = _settingName)
  * @returns {string}
  */
 const getStgDetailName = _name => {
-	return g_lblNameObj[`u_${_name}`] !== undefined &&
-		(g_presetObj.lblRenames === undefined || g_presetObj.lblRenames[g_currentPage]) ? g_lblNameObj[`u_${_name}`] : _name;
+	return g_lblNameObj[`u_${_name}`] !== undefined && (
+		g_presetObj.lblRenames === undefined ||
+		g_presetObj.lblRenames[g_currentPage] === undefined ||
+		g_presetObj.lblRenames[g_currentPage]
+	) ? g_lblNameObj[`u_${_name}`] : _name;
 };
 
 /**
