@@ -7982,13 +7982,16 @@ const createLblSetting = (_settingName, _adjY = 0, _settingLabel = _settingName)
 };
 
 /**
- * 設定名の置き換え処理
+ * 設定名の置き換え処理（未指定時は原則g_lblNameObjの値を使用、明示的な指定がある場合のみ元の名前を返却）
  * @param {string} _name 
  * @returns {string}
  */
 const getStgDetailName = _name => {
-	return g_lblNameObj[`u_${_name}`] !== undefined &&
-		(g_presetObj.lblRenames === undefined || g_presetObj.lblRenames[g_currentPage]) ? g_lblNameObj[`u_${_name}`] : _name;
+	return g_lblNameObj[`u_${_name}`] !== undefined && (
+		g_presetObj.lblRenames === undefined ||
+		g_presetObj.lblRenames[g_currentPage] === undefined ||
+		g_presetObj.lblRenames[g_currentPage]
+	) ? g_lblNameObj[`u_${_name}`] : _name;
 };
 
 /**
