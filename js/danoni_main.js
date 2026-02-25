@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/02/24
+ * Revised : 2026/02/26
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 43.6.7`;
-const g_revisedDate = `2026/02/24`;
+const g_version = `Ver 43.6.8`;
+const g_revisedDate = `2026/02/26`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7794,7 +7794,9 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 	const initName = `${getStgDetailName(g_stateObj[_settingName])}${unitName}`;
 	_obj.appendChild(createLblSetting(settingUpper, adjY, toCapitalize(settingLabel)));
 
-	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
+	if (_settingName === `speed` || (
+		g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]
+	)) {
 
 		multiAppend(_obj,
 			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
