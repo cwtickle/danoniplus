@@ -226,6 +226,7 @@ g_presetObj.customDesignUse = {
   Display設定の場合は `true,OFF`(設定は有効だが初期値はOFF)といったことができる
 */
 g_presetObj.settingUse = {
+	// speed : `true`,
 	motion: `true`,
 	scroll: `true`,
 	// reverse: `true`,
@@ -242,7 +243,7 @@ g_presetObj.settingUse = {
 	//	score: `true`,
 	//	musicInfo: `true`,
 	//	filterLine: `true`,
-	//	speed: `true`,
+	//	velocity: `true`,
 	//	color: `true`,
 	//	lyrics: `true`,
 	//	background: `true`,
