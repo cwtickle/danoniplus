@@ -10335,7 +10335,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		const dosSpeedData = getRefData(_header, `${_scoreNo}${_footer}`);
 		const speedData = [];
 
-		if (hasVal(dosSpeedData) && g_stateObj.d_speed !== C_FLG_OFF) {
+		if (hasVal(dosSpeedData) && g_stateObj.d_velocity !== C_FLG_OFF) {
 			const tmpArrayData = splitLF(dosSpeedData);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
@@ -10917,11 +10917,11 @@ const getSpeedFactor = _speed => {
 		// ±1 はそのまま返して符号を保持
 		return _speed;
 	}
-	if (g_stateObj.d_speed === `Extreme`) {
+	if (g_stateObj.d_velocity === `Extreme`) {
 		// |speed|>1 を強めに、<1 を弱めに
 		return _speed * (Math.abs(_speed) > 1 ? 1.5 : 0.75);
 	}
-	if (g_stateObj.d_speed === `Soft`) {
+	if (g_stateObj.d_velocity === `Soft`) {
 		// 変化幅を緩和（符号は維持）
 		return (1 + Math.abs(_speed)) / 2 * Math.sign(_speed);
 	}
@@ -15130,7 +15130,7 @@ const getSelectedSettingList = (_shuffleName) => {
 	}
 
 	let display2Data = [
-		withDisplays(g_stateObj.d_speed, C_FLG_ON, g_lblNameObj.rd_Speed),
+		withDisplays(g_stateObj.d_velocity, C_FLG_ON, g_lblNameObj.rd_Velocity),
 		withDisplays(g_stateObj.d_color, C_FLG_ON, g_lblNameObj.rd_Color),
 		withDisplays(g_stateObj.d_lyrics, C_FLG_ON, g_lblNameObj.rd_Lyrics),
 		withDisplays(g_stateObj.d_background, C_FLG_ON, g_lblNameObj.rd_Background),
