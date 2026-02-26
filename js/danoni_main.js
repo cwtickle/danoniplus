@@ -13574,12 +13574,12 @@ const changeAppearanceFilter = (_num = 10) => {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
 
-		addY(`filterBar${topNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + topDist);
-		addY(`filterBar${bottomNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist);
+		addY(`filterBar${topNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + topDist, { priority: g_transPriority.layer });
+		addY(`filterBar${bottomNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist, { priority: g_transPriority.layer });
 
 		if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
-			addY(`filterBar${bottomNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + bottomDist);
-			addY(`filterBar${topNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + topDist);
+			addY(`filterBar${bottomNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + bottomDist, { priority: g_transPriority.layer });
+			addY(`filterBar${topNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + topDist, { priority: g_transPriority.layer });
 		}
 	}
 
@@ -13682,7 +13682,7 @@ const changeReturn = (_rad, _axis) => {
 		if (_rad < 360 && g_workObj.frzReturnFlg) {
 			setTimeout(() => changeReturn(_rad + 4, _axis), 20);
 		} else {
-			addTransform(`mainSprite`, `frzReturn`, ``, g_transPriority.frzReturn);
+			delTransform(`mainSprite`, `frzReturn`);
 			g_workObj.frzReturnFlg = false;
 		}
 	}

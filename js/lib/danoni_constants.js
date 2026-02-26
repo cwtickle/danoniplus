@@ -1484,7 +1484,7 @@ const addX = (_id, _typeId, _x = 0, { overwrite = false, priority = 1000 } = {})
  * @param {string} _id 
  * @param {string} _typeId 
  * @param {number} [_y=0] 
- * @param {boolean} [_overwrite=false] 
+ * @param {boolean} [overwrite=false] 
  * @param {number} [priority=1000] transformの優先度（数値が小さいほど優先される。デフォルトは1000）
  */
 const addY = (_id, _typeId, _y = 0, { overwrite = false, priority = 1000 } = {}) => {
@@ -1506,8 +1506,14 @@ const addY = (_id, _typeId, _y = 0, { overwrite = false, priority = 1000 } = {})
  * @param {string} _typeId 
  */
 const delX = (_id, _typeId) => {
+    if (g_posXs[_id] === undefined) return;
     g_posXs[_id]?.delete(_typeId);
-    $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
+    if (g_posXs[_id].size === 0) {
+        delTransform(_id, `posX`);
+        return;
+    }
+    const priority = g_transforms[_id]?.get(`posX`)?.priority ?? 1000;
+    addTransform(_id, `posX`, `translateX(${sumData(Array.from(g_posXs[_id].values()))}px)`, priority);
 };
 
 /**
@@ -1516,8 +1522,14 @@ const delX = (_id, _typeId) => {
  * @param {string} _typeId 
  */
 const delY = (_id, _typeId) => {
+    if (g_posYs[_id] === undefined) return;
     g_posYs[_id]?.delete(_typeId);
-    $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
+    if (g_posYs[_id].size === 0) {
+        delTransform(_id, `posY`);
+        return;
+    }
+    const priority = g_transforms[_id]?.get(`posY`)?.priority ?? 1000;
+    addTransform(_id, `posY`, `translateY(${sumData(Array.from(g_posYs[_id].values()))}px)`, priority);
 };
 
 /**
@@ -1526,9 +1538,10 @@ const delY = (_id, _typeId) => {
  * @param {string} _typeId 
  * @param {number} _x 
  * @param {number} _y 
- * @param {boolean} [_overwrite=false]
+ * @param {boolean} [overwrite=false]
+ * @param {number} [priority=1000] transformの優先度（数値が小さいほど優先される。デフォルトは1000）
  */
-const addXY = (_id, _typeId, _x = 0, _y = 0, { overwrite = false, priority = 9999 } = {}) => {
+const addXY = (_id, _typeId, _x = 0, _y = 0, { overwrite = false, priority = 1000 } = {}) => {
     addX(_id, _typeId, _x, { overwrite, priority });
     addY(_id, _typeId, _y, { overwrite, priority });
 };
