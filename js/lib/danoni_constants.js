@@ -1388,6 +1388,15 @@ const g_moveSettingWindow = (_changePageFlg = true, _direction = 1) => {
 const g_transforms = {};
 const g_posXs = {};
 const g_posYs = {};
+const g_transPriority = {
+    base: 0,
+    layer: 10,
+    playWindow: 100,
+    stepArea: 110,
+    frzReturn: 120,
+    shaking: 130,
+    scale: 200,
+};
 
 /**
  * idごとのtransformを追加・変更
@@ -1395,13 +1404,32 @@ const g_posYs = {};
  * @param {string} _id 
  * @param {string} _transformId
  * @param {string} _transform 
+ * @param {number} [_priority=1000] transformの優先度（数値が小さいほど優先される。デフォルトは1000）
  */
-const addTransform = (_id, _transformId, _transform) => {
+const addTransform = (_id, _transformId, _transform, _priority = 1000) => {
     if (g_transforms[_id] === undefined) {
         g_transforms[_id] = new Map();
     }
-    g_transforms[_id].set(_transformId, _transform);
-    $id(_id).transform = Array.from(g_transforms[_id].values()).join(` `);
+    g_transforms[_id].set(_transformId, { transform: _transform, priority: _priority });
+    $id(_id).transform = Array.from(g_transforms[_id].values())
+        .sort((a, b) => b.priority - a.priority)
+        .map(v => v.transform)
+        .join(` `);
+};
+
+/**
+ * id, transformIdに合致するtransformの削除
+ * @param {string} _id 
+ * @param {string} _transformId 
+ */
+const delTransform = (_id, _transformId) => {
+    if (g_transforms[_id]) {
+        g_transforms[_id].delete(_transformId);
+        $id(_id).transform = Array.from(g_transforms[_id].values())
+            .sort((a, b) => b.priority - a.priority)
+            .map(v => v.transform)
+            .join(` `);
+    }
 };
 
 /**
@@ -1435,10 +1463,11 @@ const getTransform = (_id, _transformId) => {
  * @param {string} _id 
  * @param {string} _typeId 
  * @param {number} [_x=0] 
- * @param {boolean} [_overwrite=false] 
+ * @param {boolean} [overwrite=false] 
+ * @param {number} [priority=1000] transformの優先度（数値が小さいほど優先される。デフォルトは1000）
  */
-const addX = (_id, _typeId, _x = 0, _overwrite = false) => {
-    if (_overwrite) {
+const addX = (_id, _typeId, _x = 0, { overwrite = false, priority = 1000 } = {}) => {
+    if (overwrite) {
         delete g_posXs?.[_id];
     }
     if (g_posXs[_id] === undefined) {
@@ -1446,7 +1475,7 @@ const addX = (_id, _typeId, _x = 0, _overwrite = false) => {
     }
     if (g_posXs[_id].get(_typeId) !== _x) {
         g_posXs[_id].set(_typeId, _x);
-        $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
+        addTransform(_id, `posX`, `translateX(${sumData(Array.from(g_posXs[_id].values()))}px)`, priority);
     }
 };
 
@@ -1456,9 +1485,10 @@ const addX = (_id, _typeId, _x = 0, _overwrite = false) => {
  * @param {string} _typeId 
  * @param {number} [_y=0] 
  * @param {boolean} [_overwrite=false] 
+ * @param {number} [priority=1000] transformの優先度（数値が小さいほど優先される。デフォルトは1000）
  */
-const addY = (_id, _typeId, _y = 0, _overwrite = false) => {
-    if (_overwrite) {
+const addY = (_id, _typeId, _y = 0, { overwrite = false, priority = 1000 } = {}) => {
+    if (overwrite) {
         delete g_posYs?.[_id];
     }
     if (g_posYs[_id] === undefined) {
@@ -1466,7 +1496,7 @@ const addY = (_id, _typeId, _y = 0, _overwrite = false) => {
     }
     if (g_posYs[_id].get(_typeId) !== _y) {
         g_posYs[_id].set(_typeId, _y);
-        $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
+        addTransform(_id, `posY`, `translateY(${sumData(Array.from(g_posYs[_id].values()))}px)`, priority);
     }
 };
 
@@ -1498,9 +1528,27 @@ const delY = (_id, _typeId) => {
  * @param {number} _y 
  * @param {boolean} [_overwrite=false]
  */
-const addXY = (_id, _typeId, _x = 0, _y = 0, _overwrite = false) => {
-    addX(_id, _typeId, _x, _overwrite);
-    addY(_id, _typeId, _y, _overwrite);
+const addXY = (_id, _typeId, _x = 0, _y = 0, { overwrite = false, priority = 9999 } = {}) => {
+    addX(_id, _typeId, _x, { overwrite, priority });
+    addY(_id, _typeId, _y, { overwrite, priority });
+};
+
+/**
+ * 座標を回転させた場合の変換処理
+ * @param {number} _x 
+ * @param {number} _y 
+ * @param {number} _angleDeg 
+ * @returns {object} {x: number, y: number}
+ */
+const rotateXY = (_x, _y, _angleDeg) => {
+    const rad = _angleDeg * Math.PI / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+
+    const rx = _x * cos - _y * sin;
+    const ry = _x * sin + _y * cos;
+
+    return { x: rx, y: ry };
 };
 
 /**
@@ -1667,7 +1715,7 @@ const g_stepAreaFunc = new Map([
     }],
     ['Mismatched', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -15}deg)`);
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -15}deg)`, g_transPriority.stepArea);
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
@@ -1679,7 +1727,7 @@ const g_stepAreaFunc = new Map([
     }],
     ['R-Mismatched', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * 15}deg)`);
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * 15}deg)`, g_transPriority.stepArea);
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
@@ -1698,13 +1746,13 @@ const g_stepAreaFunc = new Map([
     }],
     ['X-Flower', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -15}deg)`);
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -15}deg)`, g_transPriority.stepArea);
         }
     }],
     ['Alt-Crossing', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -10}deg) ` +
-                `translateX(${getDirFromLayer(j) * 20}px)`);
+                `translateX(${getDirFromLayer(j) * 20}px)`, g_transPriority.stepArea);
         }
     }],
 ]);
