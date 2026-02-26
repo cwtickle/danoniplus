@@ -185,7 +185,7 @@ g_presetObj.customDesignUse = {
 	Flat時ステップ間隔：50(px) ※矢印サイズ
 	リモート時のディレクトリ：`` (指定なし。自サーバーの画像を使用する)
 */
-//g_presetObj.imageSets = [``, `classic,png`, `classic-thin,png`, `note,svg,false,0`];
+g_presetObj.imageSets = [``, `classic,png`, `classic-thin,png`, `note,svg,false,0`];
 
 /**
   デフォルト画像セット (C_IMG_XXXX, 厳密にはg_imgObj) に対して拡張子の上書きを行うか設定
@@ -404,10 +404,17 @@ g_presetObj.msg = {
  * 設定名の上書き可否設定
  */
 g_presetObj.lblRenames = {
+	//  title: true,
+	//  dataMgt: true,
+	//  precondition: true,
 	option: true,
+	difSelector: true,
 	settingsDisplay: true,
-	main: true,
+	exSetting: true,
 	keyConfig: true,
+	//  loading: true,
+	//  loadingIos: true,
+	main: true,
 	result: true,
 };
 
