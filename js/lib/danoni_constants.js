@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/02/26 (v45.0.0)
+ * Revised : 2026/02/26 (v45.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1425,6 +1425,11 @@ const addTransform = (_id, _transformId, _transform, _priority = 1000) => {
 const delTransform = (_id, _transformId) => {
     if (g_transforms[_id]) {
         g_transforms[_id].delete(_transformId);
+        if (g_transforms[_id].size === 0) {
+            delete g_transforms[_id];
+            $id(_id).transform = ``;
+            return;
+        }
         $id(_id).transform = Array.from(g_transforms[_id].values())
             .sort((a, b) => b.priority - a.priority)
             .map(v => v.transform)
