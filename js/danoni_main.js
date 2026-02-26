@@ -13832,7 +13832,6 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
 	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - currentFrz.y;
-	addTransform(frzName, `root`, `translateY(${wUnit($id(`stepRoot${_j}`).top)})`);
 
 	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
 	const delFrzMotionLength = sumData(g_workObj.motionOnFrames.slice(0, currentFrz.boostCnt + 1));
