@@ -1,7 +1,7 @@
 ﻿'use strict';
 /**
  * Dancing☆Onigiri 設定用jsファイル
- * Template Update: 2025/03/16 (v40.6.0)
+ * Template Update: 2026/02/26 (v45.0.0)
  * 
  * このファイルでは、作品全体に対しての初期設定を行うことができます。
  * 譜面データ側で個別に同様の項目が設定されている場合は、譜面データ側の設定が優先されます。
@@ -185,7 +185,7 @@ g_presetObj.customDesignUse = {
 	Flat時ステップ間隔：50(px) ※矢印サイズ
 	リモート時のディレクトリ：`` (指定なし。自サーバーの画像を使用する)
 */
-//g_presetObj.imageSets = [``, `classic,png`, `classic-thin,png`, `note,svg,false,0`];
+g_presetObj.imageSets = [``, `classic,png`, `classic-thin,png`, `note,svg,false,0`];
 
 /**
   デフォルト画像セット (C_IMG_XXXX, 厳密にはg_imgObj) に対して拡張子の上書きを行うか設定
@@ -226,6 +226,7 @@ g_presetObj.customDesignUse = {
   Display設定の場合は `true,OFF`(設定は有効だが初期値はOFF)といったことができる
 */
 g_presetObj.settingUse = {
+	// speed : `true`,
 	motion: `true`,
 	scroll: `true`,
 	// reverse: `true`,
@@ -242,7 +243,7 @@ g_presetObj.settingUse = {
 	//	score: `true`,
 	//	musicInfo: `true`,
 	//	filterLine: `true`,
-	//	speed: `true`,
+	//	velocity: `true`,
 	//	color: `true`,
 	//	lyrics: `true`,
 	//	background: `true`,
@@ -403,10 +404,17 @@ g_presetObj.msg = {
  * 設定名の上書き可否設定
  */
 g_presetObj.lblRenames = {
+	//  title: true,
+	//  dataMgt: true,
+	//  precondition: true,
 	option: true,
+	difSelector: true,
 	settingsDisplay: true,
-	main: true,
+	exSetting: true,
 	keyConfig: true,
+	//  loading: true,
+	//  loadingIos: true,
+	main: true,
 	result: true,
 };
 

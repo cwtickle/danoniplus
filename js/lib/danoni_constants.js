@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/02/23 (v44.5.2)
+ * Revised : 2026/02/26 (v45.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1154,7 +1154,7 @@ const g_stateObj = {
     d_filterline: C_FLG_ON,
 
     d_color: C_FLG_ON,
-    d_speed: C_FLG_ON,
+    d_velocity: C_FLG_ON,
     d_arroweffect: C_FLG_ON,
     d_lyrics: C_FLG_ON,
     d_background: C_FLG_ON,
@@ -1313,7 +1313,7 @@ const g_settings = {
 
     // Display設定の拡張リスト
     d_stepZones: [`FlatBar`],
-    d_speeds: [`Extreme`, `Soft`],
+    d_velocitys: [`Extreme`, `Soft`],
 
     displayNum: {
         stepZone: 0,
@@ -1322,7 +1322,7 @@ const g_settings = {
         lifeGauge: 0,
         score: 0,
         musicInfo: 0,
-        speed: 0,
+        velocity: 0,
         color: 0,
         lyrics: 0,
         background: 0,
@@ -1388,6 +1388,15 @@ const g_moveSettingWindow = (_changePageFlg = true, _direction = 1) => {
 const g_transforms = {};
 const g_posXs = {};
 const g_posYs = {};
+const g_transPriority = {
+    base: 0,
+    layer: 10,
+    playWindow: 100,
+    stepArea: 110,
+    frzReturn: 120,
+    shaking: 130,
+    scale: 200,
+};
 
 /**
  * idごとのtransformを追加・変更
@@ -1395,13 +1404,32 @@ const g_posYs = {};
  * @param {string} _id 
  * @param {string} _transformId
  * @param {string} _transform 
+ * @param {number} [_priority=1000] transformの優先度（数値が小さいほど優先される。デフォルトは1000）
  */
-const addTransform = (_id, _transformId, _transform) => {
+const addTransform = (_id, _transformId, _transform, _priority = 1000) => {
     if (g_transforms[_id] === undefined) {
         g_transforms[_id] = new Map();
     }
-    g_transforms[_id].set(_transformId, _transform);
-    $id(_id).transform = Array.from(g_transforms[_id].values()).join(` `);
+    g_transforms[_id].set(_transformId, { transform: _transform, priority: _priority });
+    $id(_id).transform = Array.from(g_transforms[_id].values())
+        .sort((a, b) => b.priority - a.priority)
+        .map(v => v.transform)
+        .join(` `);
+};
+
+/**
+ * id, transformIdに合致するtransformの削除
+ * @param {string} _id 
+ * @param {string} _transformId 
+ */
+const delTransform = (_id, _transformId) => {
+    if (g_transforms[_id]) {
+        g_transforms[_id].delete(_transformId);
+        $id(_id).transform = Array.from(g_transforms[_id].values())
+            .sort((a, b) => b.priority - a.priority)
+            .map(v => v.transform)
+            .join(` `);
+    }
 };
 
 /**
@@ -1427,7 +1455,7 @@ const resetTransform = () => {
  * @returns {string}
  */
 const getTransform = (_id, _transformId) => {
-    return g_transforms[_id]?.[_transformId] || ``;
+    return g_transforms[_id]?.get(_transformId)?.transform || ``;
 };
 
 /**
@@ -1435,10 +1463,11 @@ const getTransform = (_id, _transformId) => {
  * @param {string} _id 
  * @param {string} _typeId 
  * @param {number} [_x=0] 
- * @param {boolean} [_overwrite=false] 
+ * @param {boolean} [overwrite=false] 
+ * @param {number} [priority=1000] transformの優先度（数値が小さいほど優先される。デフォルトは1000）
  */
-const addX = (_id, _typeId, _x = 0, _overwrite = false) => {
-    if (_overwrite) {
+const addX = (_id, _typeId, _x = 0, { overwrite = false, priority = 1000 } = {}) => {
+    if (overwrite) {
         delete g_posXs?.[_id];
     }
     if (g_posXs[_id] === undefined) {
@@ -1446,7 +1475,7 @@ const addX = (_id, _typeId, _x = 0, _overwrite = false) => {
     }
     if (g_posXs[_id].get(_typeId) !== _x) {
         g_posXs[_id].set(_typeId, _x);
-        $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
+        addTransform(_id, `posX`, `translateX(${sumData(Array.from(g_posXs[_id].values()))}px)`, priority);
     }
 };
 
@@ -1455,10 +1484,11 @@ const addX = (_id, _typeId, _x = 0, _overwrite = false) => {
  * @param {string} _id 
  * @param {string} _typeId 
  * @param {number} [_y=0] 
- * @param {boolean} [_overwrite=false] 
+ * @param {boolean} [overwrite=false] 
+ * @param {number} [priority=1000] transformの優先度（数値が小さいほど優先される。デフォルトは1000）
  */
-const addY = (_id, _typeId, _y = 0, _overwrite = false) => {
-    if (_overwrite) {
+const addY = (_id, _typeId, _y = 0, { overwrite = false, priority = 1000 } = {}) => {
+    if (overwrite) {
         delete g_posYs?.[_id];
     }
     if (g_posYs[_id] === undefined) {
@@ -1466,7 +1496,7 @@ const addY = (_id, _typeId, _y = 0, _overwrite = false) => {
     }
     if (g_posYs[_id].get(_typeId) !== _y) {
         g_posYs[_id].set(_typeId, _y);
-        $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
+        addTransform(_id, `posY`, `translateY(${sumData(Array.from(g_posYs[_id].values()))}px)`, priority);
     }
 };
 
@@ -1476,8 +1506,14 @@ const addY = (_id, _typeId, _y = 0, _overwrite = false) => {
  * @param {string} _typeId 
  */
 const delX = (_id, _typeId) => {
+    if (g_posXs[_id] === undefined) return;
     g_posXs[_id]?.delete(_typeId);
-    $id(_id).left = `${sumData(Array.from(g_posXs[_id].values()))}px`;
+    if (g_posXs[_id].size === 0) {
+        delTransform(_id, `posX`);
+        return;
+    }
+    const priority = g_transforms[_id]?.get(`posX`)?.priority ?? 1000;
+    addTransform(_id, `posX`, `translateX(${sumData(Array.from(g_posXs[_id].values()))}px)`, priority);
 };
 
 /**
@@ -1486,8 +1522,14 @@ const delX = (_id, _typeId) => {
  * @param {string} _typeId 
  */
 const delY = (_id, _typeId) => {
+    if (g_posYs[_id] === undefined) return;
     g_posYs[_id]?.delete(_typeId);
-    $id(_id).top = `${sumData(Array.from(g_posYs[_id].values()))}px`;
+    if (g_posYs[_id].size === 0) {
+        delTransform(_id, `posY`);
+        return;
+    }
+    const priority = g_transforms[_id]?.get(`posY`)?.priority ?? 1000;
+    addTransform(_id, `posY`, `translateY(${sumData(Array.from(g_posYs[_id].values()))}px)`, priority);
 };
 
 /**
@@ -1496,11 +1538,30 @@ const delY = (_id, _typeId) => {
  * @param {string} _typeId 
  * @param {number} _x 
  * @param {number} _y 
- * @param {boolean} [_overwrite=false]
+ * @param {boolean} [overwrite=false]
+ * @param {number} [priority=1000] transformの優先度（数値が小さいほど優先される。デフォルトは1000）
  */
-const addXY = (_id, _typeId, _x = 0, _y = 0, _overwrite = false) => {
-    addX(_id, _typeId, _x, _overwrite);
-    addY(_id, _typeId, _y, _overwrite);
+const addXY = (_id, _typeId, _x = 0, _y = 0, { overwrite = false, priority = 1000 } = {}) => {
+    addX(_id, _typeId, _x, { overwrite, priority });
+    addY(_id, _typeId, _y, { overwrite, priority });
+};
+
+/**
+ * 座標を回転させた場合の変換処理
+ * @param {number} _x 
+ * @param {number} _y 
+ * @param {number} _angleDeg 
+ * @returns {object} {x: number, y: number}
+ */
+const rotateXY = (_x, _y, _angleDeg) => {
+    const rad = _angleDeg * Math.PI / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+
+    const rx = _x * cos - _y * sin;
+    const ry = _x * sin + _y * cos;
+
+    return { x: rx, y: ry };
 };
 
 /**
@@ -1667,7 +1728,7 @@ const g_stepAreaFunc = new Map([
     }],
     ['Mismatched', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -15}deg)`);
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -15}deg)`, g_transPriority.stepArea);
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
@@ -1679,7 +1740,7 @@ const g_stepAreaFunc = new Map([
     }],
     ['R-Mismatched', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * 15}deg)`);
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * 15}deg)`, g_transPriority.stepArea);
         }
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
@@ -1698,13 +1759,13 @@ const g_stepAreaFunc = new Map([
     }],
     ['X-Flower', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -15}deg)`);
+            addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -15}deg)`, g_transPriority.stepArea);
         }
     }],
     ['Alt-Crossing', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -10}deg) ` +
-                `translateX(${getDirFromLayer(j) * 20}px)`);
+                `translateX(${getDirFromLayer(j) * 20}px)`, g_transPriority.stepArea);
         }
     }],
 ]);
@@ -1861,7 +1922,7 @@ const g_keycons = {
 };
 
 let g_displays = [`stepZone`, `judgment`, `fastSlow`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
-    `speed`, `color`, `lyrics`, `background`, `arrowEffect`, `special`];
+    `velocity`, `color`, `lyrics`, `background`, `arrowEffect`, `special`];
 
 // ローカルストレージ保存対象
 let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`];
@@ -1870,7 +1931,7 @@ let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosi
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
     `d_score`, `d_musicinfo`, `d_filterline`];
 
-let g_canDisabledSettings = [`motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`,
+let g_canDisabledSettings = [`speed`, `motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`,
     `excessive`, `appearance`, `playWindow`, `stepArea`, `frzReturn`, `shaking`, `effect`, `camoufrage`,
     `swapping`, `judgRange`, `autoRetry`];
 
@@ -2463,8 +2524,8 @@ const g_shortcutObj = {
         ShiftRight_Digit6: { id: `lnkmusicInfoR` },
         ShiftLeft_Digit7: { id: `lnkfilterLineR` },
         ShiftRight_Digit7: { id: `lnkfilterLineR` },
-        ShiftLeft_Digit8: { id: `lnkspeedR` },
-        ShiftRight_Digit8: { id: `lnkspeedR` },
+        ShiftLeft_Digit8: { id: `lnkvelocityR` },
+        ShiftRight_Digit8: { id: `lnkvelocityR` },
         ShiftLeft_Digit9: { id: `lnkcolorR` },
         ShiftRight_Digit9: { id: `lnkcolorR` },
         ShiftLeft_Digit0: { id: `lnklyricsR` },
@@ -2483,7 +2544,7 @@ const g_shortcutObj = {
         Digit5: { id: `lnkscore` },
         Digit6: { id: `lnkmusicInfo` },
         Digit7: { id: `lnkfilterLine` },
-        Digit8: { id: `lnkspeed` },
+        Digit8: { id: `lnkvelocity` },
         Digit9: { id: `lnkcolor` },
         Digit0: { id: `lnklyrics` },
         Semicolon: { id: `lnkbackground` },
@@ -2504,8 +2565,8 @@ const g_shortcutObj = {
         ShiftRight_Numpad6: { id: `lnkmusicInfoR` },
         ShiftLeft_Numpad7: { id: `lnkfilterLineR` },
         ShiftRight_Numpad7: { id: `lnkfilterLineR` },
-        ShiftLeft_Numpad8: { id: `lnkspeedR` },
-        ShiftRight_Numpad8: { id: `lnkspeedR` },
+        ShiftLeft_Numpad8: { id: `lnkvelocityR` },
+        ShiftRight_Numpad8: { id: `lnkvelocityR` },
         ShiftLeft_Numpad9: { id: `lnkcolorR` },
         ShiftRight_Numpad9: { id: `lnkcolorR` },
         ShiftLeft_Numpad0: { id: `lnklyricsR` },
@@ -2524,7 +2585,7 @@ const g_shortcutObj = {
         Numpad5: { id: `lnkscore` },
         Numpad6: { id: `lnkmusicInfo` },
         Numpad7: { id: `lnkfilterLine` },
-        Numpad8: { id: `lnkspeed` },
+        Numpad8: { id: `lnkvelocity` },
         Numpad9: { id: `lnkcolor` },
         Numpad0: { id: `lnklyrics` },
         NumpadAdd: { id: `lnkbackground` },
@@ -4091,7 +4152,7 @@ const g_lblNameObj = {
     d_Score: `Score`,
     d_MusicInfo: `MusicInfo`,
     d_FilterLine: `FilterLine`,
-    d_Speed: `Velocity`,
+    d_Velocity: `Velocity`,
     d_Color: `Color`,
     d_Lyrics: `Lyrics`,
     d_Background: `Background`,
@@ -4218,7 +4279,7 @@ const g_lblNameObj = {
     'u_Shakin(Great)': `Shakin(Great)`,
     'u_Fast/Slow': `Fast/Slow`,
 
-    'u_Speed': `Velocity`,
+    'u_Velocity': `Velocity`,
     'u_Density': `Density`,
     'u_ToolDif': `DifLevel`,
     'u_HighScore': `HighScore`,
@@ -4264,7 +4325,7 @@ const g_lblNameObj = {
     rd_Score: `Score`,
     rd_MusicInfo: `MusicInfo`,
     rd_FilterLine: `Filter`,
-    rd_Speed: `Speed`,
+    rd_Velocity: `Velocity`,
     rd_Color: `Color`,
     rd_Lyrics: `Lyrics`,
     rd_Background: `Back`,
@@ -4432,7 +4493,7 @@ const g_lang_msgObj = {
         d_score: `現時点の判定数を表示`,
         d_musicinfo: `音楽情報（時間表示含む）`,
         d_filterline: `Hidden+, Sudden+使用時のフィルターの境界線表示`,
-        d_speed: `途中変速、個別加速の有効化設定`,
+        d_velocity: `途中変速、個別加速の有効化設定`,
         d_color: `色変化の有効化設定`,
         d_lyrics: `歌詞表示の有効化設定`,
         d_background: `背景・マスクモーションの有効化設定`,
@@ -4525,7 +4586,7 @@ const g_lang_msgObj = {
         d_score: `Display the current number of judgments`,
         d_musicinfo: `Display the music credits and current time`,
         d_filterline: `Filter border display when using "Hidden+" or "Sudden+"`,
-        d_speed: `Enable speed change settings`,
+        d_velocity: `Enable velocity change settings`,
         d_color: `Enable color change settings`,
         d_lyrics: `Enable lyrics display`,
         d_background: `Enable background images and animations`,
@@ -4548,7 +4609,7 @@ const g_lang_msgObj = {
         judgRange: `Set the allowable range of judgment.\n[Normal] Normal judgment, [Narrow/Hard] Hard judgment, [ExHard] Very hard judgment`,
         autoRetry: `Set the conditions for automatic retry.\n[Miss] When missed, [Matari] When good, [Shakin] When great, [FS] When Fast/Slow occurs`,
 
-        lnkSpeedG: `Displays the speed change status by progression of the chart.`,
+        lnkSpeedG: `Displays the velocity change status by progression of the chart.`,
         lnkDensityG: `Displays the density status of the chart.`,
         lnkToolDifG: `Displays the difficulty level of the chart and the distribution of arrows and freeze arrows.`,
         lnkHighScoreG: `Displays the high score of the chart.`,

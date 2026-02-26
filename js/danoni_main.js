@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/02/24
+ * Revised : 2026/02/26
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 44.5.3`;
-const g_revisedDate = `2026/02/24`;
+const g_version = `Ver 45.0.0`;
+const g_revisedDate = `2026/02/26`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1687,12 +1687,12 @@ const createEmptySprite = (_parentObj, _newObjId, { x = 0, y = 0, w = g_sWidth, 
  * @param {number} [object.x=0]
  * @returns {HTMLDivElement}
  */
-const createMultipleSprite = (_baseName, _num, { x = 0 } = {}) => {
+const createMultipleSprite = (_baseName, _num, { x = 0, priority = g_transPriority.layer } = {}) => {
 	const sprite = createEmptySprite(divRoot, _baseName);
 	for (let j = 0; j <= _num; j++) {
 		createEmptySprite(sprite, `${_baseName}${j}`);
 	}
-	addX(_baseName, `root`, x);
+	addX(_baseName, `root`, x, { priority });
 	return sprite;
 };
 
@@ -8773,7 +8773,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
 
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
-	addTransform(`keyconSprite`, `root`, `scale(${g_keyObj.scale})`)
+	addTransform(`keyconSprite`, `root`, `scale(${g_keyObj.scale})`, g_transPriority.scale);
 	keyconSprite.style.height = `${parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2)}px`;
 	const kWidth = parseInt(keyconSprite.style.width);
 	changeSetColor();
@@ -10335,7 +10335,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		const dosSpeedData = getRefData(_header, `${_scoreNo}${_footer}`);
 		const speedData = [];
 
-		if (hasVal(dosSpeedData) && g_stateObj.d_speed !== C_FLG_OFF) {
+		if (hasVal(dosSpeedData) && g_stateObj.d_velocity !== C_FLG_OFF) {
 			const tmpArrayData = splitLF(dosSpeedData);
 
 			tmpArrayData.filter(data => hasVal(data)).forEach(tmpData => {
@@ -10917,11 +10917,11 @@ const getSpeedFactor = _speed => {
 		// ±1 はそのまま返して符号を保持
 		return _speed;
 	}
-	if (g_stateObj.d_speed === `Extreme`) {
+	if (g_stateObj.d_velocity === `Extreme`) {
 		// |speed|>1 を強めに、<1 を弱めに
 		return _speed * (Math.abs(_speed) > 1 ? 1.5 : 0.75);
 	}
-	if (g_stateObj.d_speed === `Soft`) {
+	if (g_stateObj.d_velocity === `Soft`) {
 		// 変化幅を緩和（符号は維持）
 		return (1 + Math.abs(_speed)) / 2 * Math.sign(_speed);
 	}
@@ -12084,17 +12084,16 @@ const mainInit = () => {
 		mainSprite.style.transformOrigin = `center 55%`;
 	}
 
-	addTransform(`mainSprite`, `root`, `scale(${g_workObj.scale})`);
-	addXY(`mainSprite`, `root`, g_workObj.playingX, g_posObj.stepY - C_STEP_Y + g_headerObj.playingY);
+	addTransform(`mainSprite`, `root`, `scale(${g_workObj.scale})`, g_transPriority.scale);
+	addXY(`mainSprite`, `root`, g_workObj.playingX, g_posObj.stepY - C_STEP_Y + g_headerObj.playingY, { priority: g_transPriority.base });
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createEmptySprite(divRoot, `infoSprite`, mainCommonPos);
-	addXY(`infoSprite`, `root`, g_workObj.playingX, g_headerObj.playingY);
+	addXY(`infoSprite`, `root`, g_workObj.playingX, g_headerObj.playingY, { priority: g_transPriority.base });
 
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, mainCommonPos);
-	addXY(`judgeSprite`, `root`, g_workObj.playingX, g_headerObj.playingY);
-
+	addXY(`judgeSprite`, `root`, g_workObj.playingX, g_headerObj.playingY, { priority: g_transPriority.base });
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 
@@ -12148,7 +12147,7 @@ const mainInit = () => {
 		// StepAreaオプションにより、レイヤーが倍化される場合があるため基準レイヤー数ごとに設定
 		const transj = j % g_stateObj.layerNumDf;
 		addTransform(`mainSprite${j}`, `mainSprite${j}`,
-			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(transj / 2) * 2 + (transj + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
+			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(transj / 2) * 2 + (transj + Number(g_stateObj.reverse === C_FLG_ON)) % 2], g_transPriority.layer);
 
 		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
 		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
@@ -12200,7 +12199,7 @@ const mainInit = () => {
 	g_stepAreaFunc.get(g_stateObj.stepArea)();
 
 	// mainSpriteのtransform追加処理
-	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)());
+	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
 
 	// EffectのArrowEffect追加処理
 	g_effectFunc.get(g_stateObj.effect)();
@@ -12211,7 +12210,7 @@ const mainInit = () => {
 
 	// Shaking初期化
 	if (g_stateObj.shaking !== C_FLG_OFF) {
-		addXY(`mainSprite`, `shaking`, 0, 0);
+		addXY(`mainSprite`, `shaking`, 0, 0, { priority: g_transPriority.shaking });
 	}
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
@@ -12914,6 +12913,7 @@ const mainInit = () => {
 			// 現フレーム時の位置
 			y: firstPosY,
 		};
+
 		// 矢印色の設定
 		// - 枠/塗りつぶし色: g_attrObj[arrowName].Arrow / ArrowShadow
 		g_typeLists.arrowColor.forEach(val => g_attrObj[arrowName][`Arrow${val}`] = g_workObj[`${_name}${val}Colors`][_j]);
@@ -13574,19 +13574,20 @@ const changeAppearanceFilter = (_num = 10) => {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
 
-		addY(`filterBar${topNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + topDist);
-		addY(`filterBar${bottomNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist);
+		addY(`filterBar${topNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + topDist, { priority: g_transPriority.layer });
+		addY(`filterBar${bottomNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist, { priority: g_transPriority.layer });
 
 		if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
-			addY(`filterBar${bottomNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + bottomDist);
-			addY(`filterBar${topNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + topDist);
+			addY(`filterBar${bottomNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + bottomDist, { priority: g_transPriority.layer });
+			addY(`filterBar${topNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + topDist, { priority: g_transPriority.layer });
 		}
 	}
 
 	// フィルターバーのパーセント表示（フィルターバーが複数表示されるなど複雑なため、最初の階層グループの位置に追従）
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		const currentBarNum = g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse];
-		$id(`filterView`).top = $id(`filterBar${currentBarNum % 2}`).top;
+		addY(`filterView`, `appearance`, parseFloat($id(`arrowSprite${currentBarNum % 2}`).top) +
+			(currentBarNum % 2 === 0 ? bottomDist : topDist), { priority: g_transPriority.layer });
 		filterView.textContent = `${_num}%`;
 		g_hidSudObj.filterPos = _num;
 	}
@@ -13676,12 +13677,12 @@ const changeReturn = (_rad, _axis) => {
 		}
 		sprite.style.opacity = isBack ? 0.7 : 1;
 
-		addTransform(`mainSprite`, `frzReturn`, _transform);
+		addTransform(`mainSprite`, `frzReturn`, _transform, g_transPriority.frzReturn);
 
 		if (_rad < 360 && g_workObj.frzReturnFlg) {
 			setTimeout(() => changeReturn(_rad + 4, _axis), 20);
 		} else {
-			addTransform(`mainSprite`, `frzReturn`, ``);
+			delTransform(`mainSprite`, `frzReturn`);
 			g_workObj.frzReturnFlg = false;
 		}
 	}
@@ -13779,7 +13780,7 @@ const changeScrollArrowDirs = (_frameNum) => {
 			tmpObj.set(g_workObj.dividePos[targetj], g_workObj.mkScrollchArrowLayerTrans[_frameNum][j]);
 		}
 	});
-	tmpObj.forEach((val, key, map) => addTransform(`mainSprite${key}`, `scrollch`, val));
+	tmpObj.forEach((val, key, map) => addTransform(`mainSprite${key}`, `scrollch`, val, g_transPriority.layer));
 };
 
 /**
@@ -15130,7 +15131,7 @@ const getSelectedSettingList = (_shuffleName) => {
 	}
 
 	let display2Data = [
-		withDisplays(g_stateObj.d_speed, C_FLG_ON, g_lblNameObj.rd_Speed),
+		withDisplays(g_stateObj.d_velocity, C_FLG_ON, g_lblNameObj.rd_Velocity),
 		withDisplays(g_stateObj.d_color, C_FLG_ON, g_lblNameObj.rd_Color),
 		withDisplays(g_stateObj.d_lyrics, C_FLG_ON, g_lblNameObj.rd_Lyrics),
 		withDisplays(g_stateObj.d_background, C_FLG_ON, g_lblNameObj.rd_Background),
