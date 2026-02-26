@@ -12671,6 +12671,7 @@ const mainInit = () => {
 	const judgeObjDelete = {};
 	g_typeLists.arrow.forEach(type =>
 		judgeObjDelete[type] = (_j, _deleteName) => {
+			delTransform(_deleteName, `root`);
 			g_workObj[`judg${toCapitalize(type)}Cnt`][_j]++;
 			document.getElementById(_deleteName).remove();
 			delete g_attrObj[_deleteName];
@@ -12913,6 +12914,7 @@ const mainInit = () => {
 			// 現フレーム時の位置
 			y: firstPosY,
 		};
+		addTransform(arrowName, `root`, `translateY(${wUnit(firstPosY)})`);
 
 		// 矢印色の設定
 		// - 枠/塗りつぶし色: g_attrObj[arrowName].Arrow / ArrowShadow
@@ -13031,6 +13033,8 @@ const mainInit = () => {
 			// フリーズアロー(対矢印)の相対位置
 			btmY: firstBarLength * g_workObj.scrollDir[_j],
 		};
+		addTransform(frzName, `root`, `translateY(${wUnit(firstPosY)})`);
+
 		// フリーズアロー色の設定
 		// - 通常時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Normal / NormalShadow / NormalBar
 		// - ヒット時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Hit / HitShadow / HitBar
