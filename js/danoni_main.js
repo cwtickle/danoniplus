@@ -1692,7 +1692,7 @@ const createMultipleSprite = (_baseName, _num, { x = 0, priority = g_transPriori
 	for (let j = 0; j <= _num; j++) {
 		createEmptySprite(sprite, `${_baseName}${j}`);
 	}
-	addX(_baseName, `root`, x, { priority });
+	addTransform(_baseName, `root`, `translateX(${x}px)`, priority);
 	return sprite;
 };
 
@@ -12085,15 +12085,15 @@ const mainInit = () => {
 	}
 
 	addTransform(`mainSprite`, `root`, `scale(${g_workObj.scale})`, g_transPriority.scale);
-	addXY(`mainSprite`, `root`, g_workObj.playingX, g_posObj.stepY - C_STEP_Y + g_headerObj.playingY, { priority: g_transPriority.base });
+	addTransform(`mainSprite`, `main`, `translateX(${g_workObj.playingX}px) translateY(${g_posObj.stepY - C_STEP_Y + g_headerObj.playingY}px)`, g_transPriority.base);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createEmptySprite(divRoot, `infoSprite`, mainCommonPos);
-	addXY(`infoSprite`, `root`, g_workObj.playingX, g_headerObj.playingY, { priority: g_transPriority.base });
+	addTransform(`infoSprite`, `main`, `translateX(${g_workObj.playingX}px) translateY(${g_headerObj.playingY}px)`, g_transPriority.base);
 
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, mainCommonPos);
-	addXY(`judgeSprite`, `root`, g_workObj.playingX, g_headerObj.playingY, { priority: g_transPriority.base });
+	addTransform(`judgeSprite`, `main`, `translateX(${g_workObj.playingX}px) translateY(${g_headerObj.playingY}px)`, g_transPriority.base);
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 
@@ -12207,11 +12207,6 @@ const mainInit = () => {
 	// Appearanceのオプション適用時は一部描画を隠す
 	changeAppearanceBar(g_appearanceRanges.includes(g_stateObj.appearance)
 		? g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], 0);
-
-	// Shaking初期化
-	if (g_stateObj.shaking !== C_FLG_OFF) {
-		addXY(`mainSprite`, `shaking`, 0, 0, { priority: g_transPriority.shaking });
-	}
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
@@ -13580,20 +13575,20 @@ const changeAppearanceFilter = (_num = 10) => {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
 
-		addY(`filterBar${topNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + topDist, { priority: g_transPriority.layer });
-		addY(`filterBar${bottomNum + j}`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist, { priority: g_transPriority.layer });
+		addTransform(`filterBar${topNum + j}`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j}`).top) + topDist}px)`, g_transPriority.layer);
+		addTransform(`filterBar${bottomNum + j}`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist}px)`, g_transPriority.layer);
 
 		if (![`Default`, `Halfway`].includes(g_stateObj.stepArea)) {
-			addY(`filterBar${bottomNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j}`).top) + bottomDist, { priority: g_transPriority.layer });
-			addY(`filterBar${topNum + j}_HS`, `appearance`, parseFloat($id(`arrowSprite${j + 1}`).top) + topDist, { priority: g_transPriority.layer });
+			addTransform(`filterBar${bottomNum + j}_HS`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j}`).top) + bottomDist}px)`, g_transPriority.layer);
+			addTransform(`filterBar${topNum + j}_HS`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j + 1}`).top) + topDist}px)`, g_transPriority.layer);
 		}
 	}
 
 	// フィルターバーのパーセント表示（フィルターバーが複数表示されるなど複雑なため、最初の階層グループの位置に追従）
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		const currentBarNum = g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse];
-		addY(`filterView`, `appearance`, parseFloat($id(`arrowSprite${currentBarNum % 2}`).top) +
-			(currentBarNum % 2 === 0 ? bottomDist : topDist), { priority: g_transPriority.layer });
+		addTransform(`filterView`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${currentBarNum % 2}`).top) +
+			(currentBarNum % 2 === 0 ? bottomDist : topDist)}px)`, g_transPriority.layer);
 		filterView.textContent = `${_num}%`;
 		g_hidSudObj.filterPos = _num;
 	}
