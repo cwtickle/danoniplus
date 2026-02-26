@@ -13587,7 +13587,7 @@ const changeAppearanceFilter = (_num = 10) => {
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		const currentBarNum = g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse];
 		addY(`filterView`, `appearance`, parseFloat($id(`arrowSprite${currentBarNum % 2}`).top) +
-			(currentBarNum % 2 === 0 ? bottomDist : topDist), false);
+			(currentBarNum % 2 === 0 ? bottomDist : topDist), { priority: g_transPriority.layer });
 		filterView.textContent = `${_num}%`;
 		g_hidSudObj.filterPos = _num;
 	}

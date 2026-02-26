@@ -1455,7 +1455,7 @@ const resetTransform = () => {
  * @returns {string}
  */
 const getTransform = (_id, _transformId) => {
-    return g_transforms[_id]?.[_transformId] || ``;
+    return g_transforms[_id]?.get(_transformId)?.transform || ``;
 };
 
 /**
