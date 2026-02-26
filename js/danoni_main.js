@@ -12671,6 +12671,7 @@ const mainInit = () => {
 	const judgeObjDelete = {};
 	g_typeLists.arrow.forEach(type =>
 		judgeObjDelete[type] = (_j, _deleteName) => {
+			delTransform(_deleteName, `root`);
 			g_workObj[`judg${toCapitalize(type)}Cnt`][_j]++;
 			document.getElementById(_deleteName).remove();
 			delete g_attrObj[_deleteName];
@@ -12889,8 +12890,8 @@ const mainInit = () => {
 			(_attrs.initY * g_workObj.boostSpd +
 				_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 
-		const stepRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], arrowName, {
-			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
+		const arrowRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], arrowName, {
+			x: g_workObj.stepX[_j], y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
 		});
 		/**
 		 * 矢印毎の属性情報
@@ -12913,15 +12914,17 @@ const mainInit = () => {
 			// 現フレーム時の位置
 			y: firstPosY,
 		};
+		addTransform(arrowName, `root`, `translateY(${wUnit(firstPosY)})`);
 
 		// 矢印色の設定
 		// - 枠/塗りつぶし色: g_attrObj[arrowName].Arrow / ArrowShadow
 		g_typeLists.arrowColor.forEach(val => g_attrObj[arrowName][`Arrow${val}`] = g_workObj[`${_name}${val}Colors`][_j]);
-		arrowSprite[g_workObj.dividePos[_j]].appendChild(stepRoot);
+		arrowSprite[g_workObj.dividePos[_j]].appendChild(arrowRoot);
+		const arrowSubRoot = createEmptySprite(arrowRoot, `sub${arrowName}`, { x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH });
 
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
-			stepRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
-			stepRoot.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
+			arrowSubRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
+			arrowSubRoot.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
 		}
 
 		/**
@@ -12938,11 +12941,11 @@ const mainInit = () => {
 			if (_shadowColor === `Default`) {
 				arrShadow.style.opacity = 0.5;
 			}
-			stepRoot.appendChild(arrShadow);
+			arrowSubRoot.appendChild(arrShadow);
 		}
 
 		// 矢印 (枠)
-		stepRoot.appendChild(createColorObject2(`${_name}Top${_j}_${_arrowCnt}`, {
+		arrowSubRoot.appendChild(createColorObject2(`${_name}Top${_j}_${_arrowCnt}`, {
 			background: _color, rotate: g_workObj.arrowRtn[_j],
 		}));
 		g_customJsObj.makeArrow.forEach(func => func(_attrs, arrowName, _name, _arrowCnt));
@@ -12967,7 +12970,7 @@ const mainInit = () => {
 			currentArrow.prevY = currentArrow.y;
 			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd +
 				(g_workObj.motionOnFrames[boostCnt] || 0) * currentArrow.boostDir) * currentArrow.dir;
-			$id(arrowName).top = wUnit(currentArrow.y);
+			addTransform(arrowName, `root`, `translateY(${wUnit(currentArrow.y)})`);
 			g_motionAlphaFunc.get(g_stateObj.motion)(arrowName, currentArrow);
 			currentArrow.boostCnt--;
 		}
@@ -12997,7 +13000,7 @@ const mainInit = () => {
 		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
 
 		const frzRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], frzName, {
-			x: g_workObj.stepX[_j], y: firstPosY, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
+			x: g_workObj.stepX[_j], y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
 		});
 		/**
 		 * フリーズアロー毎の属性情報
@@ -13030,6 +13033,8 @@ const mainInit = () => {
 			// フリーズアロー(対矢印)の相対位置
 			btmY: firstBarLength * g_workObj.scrollDir[_j],
 		};
+		addTransform(frzName, `root`, `translateY(${wUnit(firstPosY)})`);
+
 		// フリーズアロー色の設定
 		// - 通常時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Normal / NormalShadow / NormalBar
 		// - ヒット時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Hit / HitShadow / HitBar
@@ -13042,12 +13047,13 @@ const mainInit = () => {
 		});
 		arrowSprite[g_workObj.dividePos[_j]].appendChild(frzRoot);
 		let shadowColor = _shadowColor === `Default` ? _normalColor : _shadowColor;
+		const frzSubRoot = createEmptySprite(frzRoot, `sub${frzName}`, { x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength });
 
 		/**
 		 * フリーズアローオブジェクトの生成
 		 * - 後で生成されたものが手前に表示されるため、以下の順で作成
 		 */
-		multiAppend(frzRoot,
+		multiAppend(frzSubRoot,
 
 			// フリーズアロー帯(frzBar)
 			createColorObject2(`${_name}Bar${frzNo}`, {
@@ -13055,9 +13061,9 @@ const mainInit = () => {
 				opacity: 0.75,
 			}),
 		);
-		const frzTopRoot = createEmptySprite(frzRoot, `${_name}TopRoot${frzNo}`,
+		const frzTopRoot = createEmptySprite(frzSubRoot, `${_name}TopRoot${frzNo}`,
 			{ x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH });
-		const frzBtmRoot = createEmptySprite(frzRoot, `${_name}BtmRoot${frzNo}`,
+		const frzBtmRoot = createEmptySprite(frzSubRoot, `${_name}BtmRoot${frzNo}`,
 			{ x: 0, y: g_attrObj[frzName].btmY, w: C_ARW_WIDTH, h: C_ARW_WIDTH });
 
 		multiAppend(frzTopRoot,
@@ -13087,8 +13093,8 @@ const mainInit = () => {
 
 		);
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
-			frzRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
-			frzRoot.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
+			frzSubRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
+			frzSubRoot.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
 		}
 		if (g_workObj[`${_name}ArrowCssMotions`][_j] !== ``) {
 			[frzTopRoot, frzBtmRoot].forEach(obj => {
@@ -13121,7 +13127,7 @@ const mainInit = () => {
 				if (g_workObj.currentSpeed !== 0) {
 					currentFrz.prevY = currentFrz.y;
 					currentFrz.y -= movY + (g_workObj.motionOnFrames[currentFrz.boostCnt] || 0) * currentFrz.dir * currentFrz.boostDir;
-					$id(frzName).top = wUnit(currentFrz.y);
+					addTransform(frzName, `root`, `translateY(${wUnit(currentFrz.y)})`);
 					g_motionAlphaFunc.get(g_stateObj.motion)(frzName, currentFrz);
 					currentFrz.boostCnt--;
 				}
@@ -13161,7 +13167,7 @@ const mainInit = () => {
 			currentFrz.frzBarLength -= movY * currentFrz.dir;
 			if (currentFrz.frzBarLength > 0) {
 				currentFrz.y -= movY;
-				$id(frzName).top = wUnit(currentFrz.y);
+				addTransform(frzName, `root`, `translateY(${wUnit(currentFrz.y)})`);
 			} else {
 				judgeObjDelete[_name](_j, frzName);
 			}
@@ -13830,7 +13836,6 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 
 	// フリーズアロー位置の修正（ステップゾーン上に来るように）
 	const delFrzLength = parseFloat($id(`stepRoot${_j}`).top) - currentFrz.y;
-	$id(frzName).top = $id(`stepRoot${_j}`).top;
 
 	// 早押ししたboostCnt分のフリーズアロー終端位置の修正
 	const delFrzMotionLength = sumData(g_workObj.motionOnFrames.slice(0, currentFrz.boostCnt + 1));
@@ -13843,6 +13848,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	currentFrz.btmY -= delFrzLength + delFrzMotionLength + hitPos;
 	currentFrz.y += delFrzLength;
 	currentFrz.isMoving = false;
+	addTransform(frzName, `root`, `translateY(${wUnit(currentFrz.y)})`);
 
 	/**
 	 * フリーズアロー(ヒット時)の色変更

@@ -1425,6 +1425,11 @@ const addTransform = (_id, _transformId, _transform, _priority = 1000) => {
 const delTransform = (_id, _transformId) => {
     if (g_transforms[_id]) {
         g_transforms[_id].delete(_transformId);
+        if (g_transforms[_id].size === 0) {
+            delete g_transforms[_id];
+            $id(_id).transform = ``;
+            return;
+        }
         $id(_id).transform = Array.from(g_transforms[_id].values())
             .sort((a, b) => b.priority - a.priority)
             .map(v => v.transform)
