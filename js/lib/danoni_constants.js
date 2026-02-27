@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/01/23 (v43.6.0)
+ * Revised : 2026/02/27 (v43.6.9)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1386,7 +1386,7 @@ const resetTransform = () => {
  * @returns {string}
  */
 const getTransform = (_id, _transformId) => {
-    return g_transforms[_id]?.[_transformId] || ``;
+    return g_transforms[_id]?.get(_transformId) || ``;
 };
 
 /**
