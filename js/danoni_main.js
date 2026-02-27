@@ -5010,6 +5010,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		// キーの最小横幅 (minWidthX)
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
+		// 移動ロック (movLockX)
+		g_keyObj[`movLock${newKey}`] = setBoolVal(_dosObj[`movLock${newKey}`] ?? g_keyObj[`movLock${newKey}`], false);
+
 		// キーコンフィグ (keyCtrlX_Y)
 		g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, {
 			errCd: `E_0104`, baseCopyFlg: true,
@@ -11954,6 +11957,11 @@ const getArrowSettings = () => {
 	// AppearanceFilterの可視範囲設定
 	g_workObj.aprFilterCnt = 0;
 
+	// 移動ロック時は矢印の移動を停止
+	if (g_keyObj[`movLock${g_keyObj.currentKey}`] !== undefined && g_keyObj[`movLock${g_keyObj.currentKey}`]) {
+		g_workObj.stepX = fillArray(g_workObj.stepX.length, 0);
+	}
+
 	if (g_stateObj.dataSaveFlg) {
 		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
 		// 変更が確定した時点で表示用のキャッシュを解放
@@ -12866,6 +12874,14 @@ const mainInit = () => {
 	};
 
 	/**
+	 * 速度に応じた移動の設定（移動ロック時は移動しない）
+	 */
+	const movArrowFunc = {
+		'false': (_name, _y) => addTransform(_name, `root`, `translateY(${wUnit(_y)})`),
+		'true': (_name, _y) => delTransform(_name, `root`),
+	};
+
+	/**
 	 * 矢印生成
 	 * @param {object} _attrs 矢印個別の属性
 	 *   (pos: 矢印種類, arrivalFrame: 到達フレーム数, initY: 初期表示位置, 
@@ -12965,7 +12981,7 @@ const mainInit = () => {
 			currentArrow.prevY = currentArrow.y;
 			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd +
 				(g_workObj.motionOnFrames[boostCnt] || 0) * currentArrow.boostDir) * currentArrow.dir;
-			addTransform(arrowName, `root`, `translateY(${wUnit(currentArrow.y)})`);
+			movArrowFunc[String(g_keyObj[`movLock${g_keyObj.currentKey}`] ?? false)](arrowName, currentArrow.y);
 			g_motionAlphaFunc.get(g_stateObj.motion)(arrowName, currentArrow);
 			currentArrow.boostCnt--;
 		}
