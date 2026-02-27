@@ -5010,6 +5010,12 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		// キーの最小横幅 (minWidthX)
 		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
+		// 移動ロック (movLockX)
+		g_keyObj[`movLock${newKey}`] = setBoolVal(_dosObj[`movLock${newKey}`] ?? g_keyObj[`movLock${newKey}`], false);
+
+		// 位置マニュアル化 (initManualX)
+		g_keyObj[`initManual${newKey}`] = setBoolVal(_dosObj[`initManual${newKey}`] ?? g_keyObj[`initManual${newKey}`], false);
+
 		// キーコンフィグ (keyCtrlX_Y)
 		g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, {
 			errCd: `E_0104`, baseCopyFlg: true,
@@ -11954,6 +11960,13 @@ const getArrowSettings = () => {
 	// AppearanceFilterの可視範囲設定
 	g_workObj.aprFilterCnt = 0;
 
+	// 位置をマニュアルで設定する際は矢印の初期位置をゼロにする
+	if (g_keyObj[`initManual${g_keyObj.currentKey}`] !== undefined && g_keyObj[`initManual${g_keyObj.currentKey}`]) {
+		g_workObj.stepX = fillArray(g_workObj.stepX.length, 0);
+	}
+	g_workObj.movLockEnabled = g_keyObj[`movLock${g_keyObj.currentKey}`] === true ? `movLock` : `default`;
+	g_workObj.initManualEnabled = g_keyObj[`initManual${g_keyObj.currentKey}`] === true ? `manual` : `auto`;
+
 	if (g_stateObj.dataSaveFlg) {
 		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
 		// 変更が確定した時点で表示用のキャッシュを解放
@@ -12881,9 +12894,9 @@ const mainInit = () => {
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][_j];
 
 		const arrowName = `${_name}${_j}_${_arrowCnt}`;
-		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
-			(_attrs.initY * g_workObj.boostSpd +
-				_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
+		const stepY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
+		const firstPosY = stepY + (_attrs.initY * g_workObj.boostSpd +
+			_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 
 		const arrowRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], arrowName, {
 			x: g_workObj.stepX[_j], y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
@@ -12909,7 +12922,7 @@ const mainInit = () => {
 			// 現フレーム時の位置
 			y: firstPosY,
 		};
-		addTransform(arrowName, `root`, `translateY(${wUnit(firstPosY)})`);
+		setArrowY.get(`${g_workObj.movLockEnabled}_${g_workObj.initManualEnabled}`)(arrowName, firstPosY, stepY);
 
 		// 矢印色の設定
 		// - 枠/塗りつぶし色: g_attrObj[arrowName].Arrow / ArrowShadow
@@ -12965,7 +12978,7 @@ const mainInit = () => {
 			currentArrow.prevY = currentArrow.y;
 			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd +
 				(g_workObj.motionOnFrames[boostCnt] || 0) * currentArrow.boostDir) * currentArrow.dir;
-			addTransform(arrowName, `root`, `translateY(${wUnit(currentArrow.y)})`);
+			movArrowY.get(g_workObj.movLockEnabled)(arrowName, currentArrow.y);
 			g_motionAlphaFunc.get(g_stateObj.motion)(arrowName, currentArrow);
 			currentArrow.boostCnt--;
 		}
@@ -12989,9 +13002,9 @@ const mainInit = () => {
 		const dividePos = g_workObj.dividePos[_j] % 2;
 		const frzNo = `${_j}_${_arrowCnt}`;
 		const frzName = `${_name}${frzNo}`;
-		const firstPosY = C_STEP_Y + g_posObj.reverseStepY * dividePos +
-			(_attrs.initY * g_workObj.boostSpd +
-				_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
+		const stepY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
+		const firstPosY = stepY + (_attrs.initY * g_workObj.boostSpd +
+			_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
 
 		const frzRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], frzName, {
@@ -13028,7 +13041,7 @@ const mainInit = () => {
 			// フリーズアロー(対矢印)の相対位置
 			btmY: firstBarLength * g_workObj.scrollDir[_j],
 		};
-		addTransform(frzName, `root`, `translateY(${wUnit(firstPosY)})`);
+		setArrowY.get(`${g_workObj.movLockEnabled}_${g_workObj.initManualEnabled}`)(frzName, firstPosY, stepY);
 
 		// フリーズアロー色の設定
 		// - 通常時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Normal / NormalShadow / NormalBar
@@ -13122,7 +13135,7 @@ const mainInit = () => {
 				if (g_workObj.currentSpeed !== 0) {
 					currentFrz.prevY = currentFrz.y;
 					currentFrz.y -= movY + (g_workObj.motionOnFrames[currentFrz.boostCnt] || 0) * currentFrz.dir * currentFrz.boostDir;
-					addTransform(frzName, `root`, `translateY(${wUnit(currentFrz.y)})`);
+					movArrowY.get(g_workObj.movLockEnabled)(frzName, currentFrz.y);
 					g_motionAlphaFunc.get(g_stateObj.motion)(frzName, currentFrz);
 					currentFrz.boostCnt--;
 				}
@@ -13162,7 +13175,7 @@ const mainInit = () => {
 			currentFrz.frzBarLength -= movY * currentFrz.dir;
 			if (currentFrz.frzBarLength > 0) {
 				currentFrz.y -= movY;
-				addTransform(frzName, `root`, `translateY(${wUnit(currentFrz.y)})`);
+				movArrowY.get(g_workObj.movLockEnabled)(frzName, currentFrz.y);
 			} else {
 				judgeObjDelete[_name](_j, frzName);
 			}
@@ -13426,6 +13439,28 @@ const mainInit = () => {
 
 	g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps);
 };
+
+/**
+ * 矢印・フリーズアローの初期位置
+ * - movLock_manual: スクロールなし/初期位置マニュアル
+ * - movLock_auto:   スクロールなし/初期位置自動
+ * - default_manual: スクロールあり/初期位置マニュアル（設定上ありえないがdefault_autoと同じにしておく）
+ * - default_auto:   スクロールあり/初期位置自動
+ */
+const setArrowY = new Map([
+	[`movLock_manual`, (_name, _startY, _stepY) => { }],
+	[`movLock_auto`, (_name, _startY, _stepY) => addTransform(_name, `root`, `translateY(${wUnit(_stepY)})`)],
+	[`default_manual`, (_name, _startY, _stepY) => addTransform(_name, `root`, `translateY(${wUnit(_startY)})`)],
+	[`default_auto`, (_name, _startY, _stepY) => addTransform(_name, `root`, `translateY(${wUnit(_startY)})`)],
+]);
+
+/**
+ * 矢印・フリーズアローの移動処理
+ */
+const movArrowY = new Map([
+	[`movLock`, (_name, _y) => { }],
+	[`default`, (_name, _y) => addTransform(_name, `root`, `translateY(${wUnit(_y)})`)],
+]);
 
 /**
  * ステップゾーン、フリーズアローヒット部分の生成
@@ -13843,7 +13878,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	currentFrz.btmY -= delFrzLength + delFrzMotionLength + hitPos;
 	currentFrz.y += delFrzLength;
 	currentFrz.isMoving = false;
-	addTransform(frzName, `root`, `translateY(${wUnit(currentFrz.y)})`);
+	movArrowY.get(g_workObj.movLockEnabled)(frzName, currentFrz.y);
 
 	/**
 	 * フリーズアロー(ヒット時)の色変更
