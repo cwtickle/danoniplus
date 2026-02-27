@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/02/26 (v45.1.0)
+ * Revised : 2026/02/27 (v45.1.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1727,7 +1727,7 @@ const g_stepAreaFunc = new Map([
     ['Halfway', () => {
         g_arrowGroupSprite.forEach(sprite => {
             for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
+                addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
             }
         });
     }],
@@ -1738,7 +1738,7 @@ const g_stepAreaFunc = new Map([
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
                 for (let j = g_stateObj.layerNumDf; j < g_stateObj.layerNum; j++) {
-                    addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
+                    addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
                 }
             });
         }
@@ -1750,7 +1750,7 @@ const g_stepAreaFunc = new Map([
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
                 for (let j = 0; j < g_stateObj.layerNumDf; j++) {
-                    addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
+                    addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
                 }
             });
         }
@@ -1758,7 +1758,7 @@ const g_stepAreaFunc = new Map([
     ['2Step', () => {
         g_arrowGroupSprite.forEach(sprite => {
             for (let j = g_stateObj.layerNumDf; j < g_stateObj.layerNum; j++) {
-                addY(`${sprite}${j}`, `stepArea`, halfwayOffset(j));
+                addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
             }
         });
     }],
@@ -1781,36 +1781,37 @@ const g_stepAreaFunc = new Map([
 const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25);
 const g_shakingFunc = new Map([
     ['OFF', () => true],
-    ['Horizontal', () => addX(`mainSprite`, `shaking`, getShakingDist())],
-    ['Vertical', () => addY(`mainSprite`, `shaking`, getShakingDist() / 2)],
+    ['Horizontal', () => addTransform(`mainSprite`, `shakingX`, `translateX(${getShakingDist()}px)`, g_transPriority.shaking)],
+    ['Vertical', () => addTransform(`mainSprite`, `shakingY`, `translateY(${getShakingDist() / 2}px)`, g_transPriority.shaking)],
     ['X-Horizontal', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addX(`mainSprite${j}`, `shaking`, getDirFromLayer(j) * (4 / 3) * getShakingDist());
+            addTransform(`mainSprite${j}`, `shakingX`, `translateX(${getDirFromLayer(j) * (4 / 3) * getShakingDist()}px)`, g_transPriority.shaking);
         }
     }],
     ['X-Vertical', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addY(`mainSprite${j}`, `shaking`, getDirFromLayer(j) * getShakingDist());
+            addTransform(`mainSprite${j}`, `shakingY`, `translateY(${getDirFromLayer(j) * getShakingDist()}px)`, g_transPriority.shaking);
         }
     }],
     ['Drunk', () => {
-        const shakeX = g_posXs.mainSprite?.get(`shaking`) ?? 0;
-        const shakeY = g_posYs.mainSprite?.get(`shaking`) ?? 0;
+        // Drunkは揺れの軸が途中で変わるため、基準位置取得のためにmainSpriteのみaddX, addYを使用
+        const shakeX = g_posXs.mainSprite?.get(`shakingX`) ?? 0;
+        const shakeY = g_posYs.mainSprite?.get(`shakingY`) ?? 0;
         if (shakeX === 0 && shakeY === 0) {
             g_workObj.drunkXFlg = Math.random() < 0.5;
             g_workObj.drunkYFlg = Math.random() < 0.5;
         }
         if (g_workObj.drunkXFlg) {
             const deltaX = getShakingDist();
-            addX(`mainSprite`, `shaking`, deltaX);
-            addX(`infoSprite`, `shaking`, deltaX);
-            addX(`judgeSprite`, `shaking`, deltaX);
+            addX(`mainSprite`, `shakingX`, deltaX, { priority: g_transPriority.shaking });
+            addTransform(`infoSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
+            addTransform(`judgeSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
         }
         if (g_workObj.drunkYFlg) {
             const deltaY = getShakingDist() / 2;
-            addY(`mainSprite`, `shaking`, deltaY);
-            addY(`infoSprite`, `shaking`, deltaY);
-            addY(`judgeSprite`, `shaking`, deltaY);
+            addY(`mainSprite`, `shakingY`, deltaY, { priority: g_transPriority.shaking });
+            addTransform(`infoSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
+            addTransform(`judgeSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
         }
     }],
     ['S-Drunk', () => {
