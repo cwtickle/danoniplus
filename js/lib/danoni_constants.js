@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/02/27 (v44.5.5)
+ * Revised : 2026/02/28 (v44.5.6)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -27,7 +27,7 @@ const C_LBL_BASICFONT = `"Meiryo UI", sans-serif`;
 const g_limitObj = {
 
     // Adjustment, HitPositionの設定幅
-    adjustment: 30,
+    adjustment: 90,
     hitPosition: 50,
 
     // playbackRate有効時のAdjustmentの設定値の文字サイズ、行幅
