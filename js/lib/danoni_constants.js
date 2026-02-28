@@ -27,7 +27,7 @@ const C_LBL_BASICFONT = `"Meiryo UI", sans-serif`;
 const g_limitObj = {
 
     // Adjustment, HitPositionの設定幅
-    adjustment: 30,
+    adjustment: 90,
     hitPosition: 50,
 
     // playbackRate有効時のAdjustmentの設定値の文字サイズ、行幅
