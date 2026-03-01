@@ -13204,7 +13204,7 @@ const mainInit = () => {
 			currentFrz.frzBarLength -= movY * currentFrz.dir;
 			if (currentFrz.frzBarLength > 0) {
 				currentFrz.y -= movY;
-				movArrowY.get(g_workObj.movLockEnabled)(frzName, currentFrz.y);
+				movArrowY.get(currentFrz.movLockFlg)(frzName, currentFrz.y);
 			} else {
 				judgeObjDelete[_name](_j, frzName);
 			}
@@ -13910,7 +13910,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	currentFrz.btmY -= delFrzLength + delFrzMotionLength + hitPos;
 	currentFrz.y += delFrzLength;
 	currentFrz.isMoving = false;
-	movArrowY.get(g_workObj.movLockEnabled)(frzName, currentFrz.y);
+	movArrowY.get(currentFrz.movLockFlg)(frzName, currentFrz.y);
 
 	/**
 	 * フリーズアロー(ヒット時)の色変更
