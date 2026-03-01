@@ -2786,7 +2786,10 @@ const initialControl = async () => {
 	titleInit(true);
 
 	// 未使用のg_keyObjプロパティを削除
-	const keyProp = g_keyCopyLists.simple.concat(g_keyCopyLists.multiple, `keyCtrl`, `keyName`, `minWidth`, `ptchara`);
+	const keyProp = g_keyCopyLists.simple.concat(
+		g_keyCopyLists.multiple,
+		`keyCtrl`, `keyName`, `minWidth`, `movLock`, `initManual`, `ptchara`
+	);
 	const delKeyPropList = [`ptchara7`, `dfPtnNum`, `minKeyCtrlNum`, `minPatterns`];
 	Object.keys(g_keyObj).forEach(key => {
 		const type = keyProp.find(prop => key.startsWith(prop)) || ``;
