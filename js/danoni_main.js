@@ -11329,7 +11329,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 
 	// 個別・全体色変化、モーションデータ・スクロール反転データのタイミング更新
 	[``, `dummy`].forEach(type => {
-		calcDataTiming(`color`, type, pushColors, { _terms: 4, _colorFlg: true });
+		calcDataTiming(`color`, type, pushColors, { _term: 4, _colorFlg: true });
 		if (_dataObj[`ncolor${type}Data`] !== undefined) {
 			Object.keys(_dataObj[`ncolor${type}Data`]).forEach(pattern =>
 				calcDataTiming(`ncolor`, type, pushColors, { _term: 5, _colorFlg: true, _propName: pattern }));
