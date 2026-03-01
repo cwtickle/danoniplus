@@ -10491,8 +10491,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const arrowNum = parseFloat(tmpcssMotionData[1]);
 				const styleUp = (tmpcssMotionData[2] === `none` ? `` : tmpcssMotionData[2]);
 				const styleDown = (tmpcssMotionData[3] === `none` ? `` : setVal(tmpcssMotionData[3], styleUp));
+				const movLock = setBoolVal(tmpcssMotionData[4] === `movLock`, false);
+				const initManual = setBoolVal(tmpcssMotionData[5] === `initManual`, false);
 
-				cssMotionData.push([frame, arrowNum, styleUp, styleDown]);
+				cssMotionData.push([frame, arrowNum, styleUp, styleDown, movLock, initManual]);
 			});
 
 			// 個別のモーションデータが存在する場合、Effect設定を自動リセット
@@ -11220,13 +11222,13 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 	 * @param {string} _type 
 	 * @param {string} _header 
 	 * @param {function} _setFunc 後続実行関数
-	 * @param {number} object._term 1セット当たりのデータ数 
+	 * @param {number} object._term 1セット当たりのデータ数(デフォルトは後続実行関数の引数の数-1, デフォルト引数・オブジェクト引数除く) 
 	 * @param {boolean} object._colorFlg 個別色変化フラグ
 	 * @param {boolean} object._calcFrameFlg 逆算を無条件で行うかどうかの可否
 	 * @param {string} object._propName 色変化種類 (Arrow, ArrowShadow, FrzNormal, FrzNormalBar, ...)
 	 */
 	const calcDataTiming = (_type, _header, _setFunc = () => true,
-		{ _term = 4, _colorFlg = false, _calcFrameFlg = false, _propName = `` } = {}) => {
+		{ _term = _setFunc.length - 1, _colorFlg = false, _calcFrameFlg = false, _propName = `` } = {}) => {
 
 		const camelHeader = _header === `` ? _type : `${_header}${toCapitalize(_type)}`;
 		const baseData = hasVal(_propName) ? _dataObj[`${camelHeader}Data`][_propName] : _dataObj[`${camelHeader}Data`];
@@ -11327,7 +11329,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 
 	// 個別・全体色変化、モーションデータ・スクロール反転データのタイミング更新
 	[``, `dummy`].forEach(type => {
-		calcDataTiming(`color`, type, pushColors, { _colorFlg: true });
+		calcDataTiming(`color`, type, pushColors, { _terms: 4, _colorFlg: true });
 		if (_dataObj[`ncolor${type}Data`] !== undefined) {
 			Object.keys(_dataObj[`ncolor${type}Data`]).forEach(pattern =>
 				calcDataTiming(`ncolor`, type, pushColors, { _term: 5, _colorFlg: true, _propName: pattern }));
@@ -11337,7 +11339,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 	g_typeLists.arrow.forEach(header =>
 		calcDataTiming(`cssMotion`, header, pushCssMotions, { _calcFrameFlg: true }));
 
-	calcDataTiming(`scrollch`, ``, pushScrollchs, { _term: 6, _calcFrameFlg: true });
+	calcDataTiming(`scrollch`, ``, pushScrollchs, { _calcFrameFlg: true });
 
 	g_fadeinStockList.forEach(type =>
 		_dataObj[`${type}Data`] = calcAnimationData(type, _dataObj[`${type}Data`]));
@@ -11567,8 +11569,10 @@ const pushColors = (_header, _frame, _val, _colorCd, _allFlg, _pattern = ``) => 
  * @param {number} _val 
  * @param {string} _styleName
  * @param {string} _styleNameRev
+ * @param {boolean|undefined} _movLock
+ * @param {boolean|undefined} _initManual
  */
-const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev) => {
+const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev, _movLock, _initManual) => {
 
 	const camelHeader = toCapitalize(_header);
 	const tkObj = getKeyInfo();
@@ -11577,11 +11581,15 @@ const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev) => {
 	if (g_workObj[`mk${camelHeader}CssMotion`][_frame] === undefined) {
 		g_workObj[`mk${camelHeader}CssMotion`][_frame] = [];
 		g_workObj[`mk${camelHeader}CssMotionName`][_frame] = [];
+		g_workObj[`mk${camelHeader}MovLock`][_frame] = [];
+		g_workObj[`mk${camelHeader}InitManual`][_frame] = [];
 	}
 	if (_val < 20 || _val >= 1000) {
 		const realVal = g_workObj.replaceNums[_val % 1000];
 		g_workObj[`mk${camelHeader}CssMotion`][_frame].push(realVal);
 		g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
+		g_workObj[`mk${camelHeader}MovLock`][_frame].push(_movLock);
+		g_workObj[`mk${camelHeader}InitManual`][_frame].push(_initManual);
 
 	} else {
 		const colorNum = _val - 20;
@@ -11589,6 +11597,8 @@ const pushCssMotions = (_header, _frame, _val, _styleName, _styleNameRev) => {
 			if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === colorNum) {
 				g_workObj[`mk${camelHeader}CssMotion`][_frame].push(j);
 				g_workObj[`mk${camelHeader}CssMotionName`][_frame].push(_styleName, _styleNameRev);
+				g_workObj[`mk${camelHeader}MovLock`][_frame].push(_movLock);
+				g_workObj[`mk${camelHeader}InitManual`][_frame].push(_initManual);
 			}
 		}
 	}
@@ -11723,7 +11733,11 @@ const getArrowSettings = () => {
 	});
 
 	// モーション管理
-	g_typeLists.arrow.forEach(type => g_workObj[`${type}CssMotions`] = fillArray(keyNum, ``));
+	g_typeLists.arrow.forEach(type => {
+		g_workObj[`${type}CssMotions`] = fillArray(keyNum, ``);
+		g_workObj[`${type}MovLock`] = fillArray(keyNum, ``);
+		g_workObj[`${type}InitManual`] = fillArray(keyNum, ``);
+	});
 	g_workObj.frzArrowCssMotions = fillArray(keyNum, ``);
 	g_workObj.dummyFrzArrowCssMotions = fillArray(keyNum, ``);
 
@@ -11960,12 +11974,10 @@ const getArrowSettings = () => {
 	// AppearanceFilterの可視範囲設定
 	g_workObj.aprFilterCnt = 0;
 
-	// 位置をマニュアルで設定する際は矢印の初期位置をゼロにする
-	if (g_keyObj[`initManual${g_keyObj.currentKey}`] !== undefined && g_keyObj[`initManual${g_keyObj.currentKey}`]) {
-		g_workObj.stepX = fillArray(g_workObj.stepX.length, 0);
-	}
-	g_workObj.movLockEnabled = g_keyObj[`movLock${g_keyObj.currentKey}`] === true ? `movLock` : `default`;
-	g_workObj.initManualEnabled = g_keyObj[`initManual${g_keyObj.currentKey}`] === true ? `manual` : `auto`;
+	// キー別の移動ロック制御、初期位置のマニュアル可否設定の初期値
+	// 矢印・フリーズアローモーションよりも優先される
+	g_workObj.movLockEnabled = g_keyObj[`movLock${g_keyObj.currentKey}`] === true;
+	g_workObj.initManualEnabled = g_keyObj[`initManual${g_keyObj.currentKey}`] === true;
 
 	if (g_stateObj.dataSaveFlg) {
 		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
@@ -12899,7 +12911,7 @@ const mainInit = () => {
 			_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
 
 		const arrowRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], arrowName, {
-			x: g_workObj.stepX[_j], y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
+			x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
 		});
 		/**
 		 * 矢印毎の属性情報
@@ -12921,8 +12933,9 @@ const mainInit = () => {
 			prevY: firstPosY,
 			// 現フレーム時の位置
 			y: firstPosY,
+			// 移動ロックフラグ(矢印モーション設定後に再設定)
+			movLockFlg: false,
 		};
-		setArrowY.get(`${g_workObj.movLockEnabled}_${g_workObj.initManualEnabled}`)(arrowName, firstPosY, stepY);
 
 		// 矢印色の設定
 		// - 枠/塗りつぶし色: g_attrObj[arrowName].Arrow / ArrowShadow
@@ -12933,6 +12946,13 @@ const mainInit = () => {
 		if (g_workObj[`${_name}CssMotions`][_j] !== ``) {
 			arrowSubRoot.classList.add(g_workObj[`${_name}CssMotions`][_j]);
 			arrowSubRoot.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
+		}
+		g_attrObj[arrowName].movLockFlg = g_workObj[`${_name}MovLock`][_j] || g_workObj.movLockEnabled;
+		const initManualFlg = g_workObj[`${_name}InitManual`][_j] || g_workObj.initManualEnabled;
+		const setArrowYCondition = `${String(g_attrObj[arrowName].movLockFlg)}_${String(initManualFlg)}`;
+		setArrowY.get(setArrowYCondition)(arrowName, firstPosY, stepY);
+		if (!initManualFlg) {
+			addTransform(arrowName, `rootX`, `translateX(${g_workObj.stepX[_j]}px)`);
 		}
 
 		/**
@@ -12978,7 +12998,7 @@ const mainInit = () => {
 			currentArrow.prevY = currentArrow.y;
 			currentArrow.y -= (g_workObj.currentSpeed * currentArrow.boostSpd +
 				(g_workObj.motionOnFrames[boostCnt] || 0) * currentArrow.boostDir) * currentArrow.dir;
-			movArrowY.get(g_workObj.movLockEnabled)(arrowName, currentArrow.y);
+			movArrowY.get(currentArrow.movLockFlg)(arrowName, currentArrow.y);
 			g_motionAlphaFunc.get(g_stateObj.motion)(arrowName, currentArrow);
 			currentArrow.boostCnt--;
 		}
@@ -13008,7 +13028,7 @@ const mainInit = () => {
 		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
 
 		const frzRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], frzName, {
-			x: g_workObj.stepX[_j], y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
+			x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
 		});
 		/**
 		 * フリーズアロー毎の属性情報
@@ -13040,8 +13060,9 @@ const mainInit = () => {
 			barY: C_ARW_WIDTH / 2 - firstBarLength * dividePos,
 			// フリーズアロー(対矢印)の相対位置
 			btmY: firstBarLength * g_workObj.scrollDir[_j],
+			// 移動ロックフラグ(矢印モーション設定後に再設定)
+			movLockFlg: false,
 		};
-		setArrowY.get(`${g_workObj.movLockEnabled}_${g_workObj.initManualEnabled}`)(frzName, firstPosY, stepY);
 
 		// フリーズアロー色の設定
 		// - 通常時 (矢印枠/矢印塗りつぶし/帯): g_attrObj[frzName].Normal / NormalShadow / NormalBar
@@ -13110,6 +13131,14 @@ const mainInit = () => {
 				obj.style.animationDuration = `${_attrs.arrivalFrame / g_fps}s`;
 			});
 		}
+		g_attrObj[frzName].movLockFlg = g_workObj[`${_name}MovLock`][_j] || g_workObj.movLockEnabled;
+		const initManualFlg = g_workObj[`${_name}InitManual`][_j] || g_workObj.initManualEnabled;
+		const setArrowYCondition = `${String(g_attrObj[frzName].movLockFlg)}_${String(initManualFlg)}`;
+		setArrowY.get(setArrowYCondition)(frzName, firstPosY, stepY);
+		if (!initManualFlg) {
+			addTransform(frzName, `rootX`, `translateX(${g_workObj.stepX[_j]}px)`);
+		}
+
 		g_customJsObj.makeFrzArrow.forEach(func => func(_attrs, frzName, _name, _arrowCnt));
 	};
 
@@ -13135,7 +13164,7 @@ const mainInit = () => {
 				if (g_workObj.currentSpeed !== 0) {
 					currentFrz.prevY = currentFrz.y;
 					currentFrz.y -= movY + (g_workObj.motionOnFrames[currentFrz.boostCnt] || 0) * currentFrz.dir * currentFrz.boostDir;
-					movArrowY.get(g_workObj.movLockEnabled)(frzName, currentFrz.y);
+					movArrowY.get(currentFrz.movLockFlg)(frzName, currentFrz.y);
 					g_motionAlphaFunc.get(g_stateObj.motion)(frzName, currentFrz);
 					currentFrz.boostCnt--;
 				}
@@ -13442,24 +13471,24 @@ const mainInit = () => {
 
 /**
  * 矢印・フリーズアローの初期位置
- * - movLock_manual: スクロールなし/初期位置マニュアル
- * - movLock_auto:   スクロールなし/初期位置自動
- * - default_manual: スクロールあり/初期位置マニュアル（設定上ありえないがdefault_autoと同じにしておく）
- * - default_auto:   スクロールあり/初期位置自動
+ * - true_true:    スクロールなし/初期位置マニュアル
+ * - true_false:   スクロールなし/初期位置自動
+ * - false_true:   スクロールあり/初期位置マニュアル（設定上ありえないがdefault_autoと同じにしておく）
+ * - false_false:  スクロールあり/初期位置自動
  */
 const setArrowY = new Map([
-	[`movLock_manual`, (_name, _startY, _stepY) => { }],
-	[`movLock_auto`, (_name, _startY, _stepY) => addTransform(_name, `root`, `translateY(${wUnit(_stepY)})`)],
-	[`default_manual`, (_name, _startY, _stepY) => addTransform(_name, `root`, `translateY(${wUnit(_startY)})`)],
-	[`default_auto`, (_name, _startY, _stepY) => addTransform(_name, `root`, `translateY(${wUnit(_startY)})`)],
+	[`true_true`, (_name, _startY, _stepY) => { }],
+	[`true_false`, (_name, _startY, _stepY) => addTransform(_name, `root`, `translateY(${wUnit(_stepY)})`)],
+	[`false_true`, (_name, _startY, _stepY) => addTransform(_name, `root`, `translateY(${wUnit(_startY)})`)],
+	[`false_false`, (_name, _startY, _stepY) => addTransform(_name, `root`, `translateY(${wUnit(_startY)})`)],
 ]);
 
 /**
  * 矢印・フリーズアローの移動処理
  */
 const movArrowY = new Map([
-	[`movLock`, (_name, _y) => { }],
-	[`default`, (_name, _y) => addTransform(_name, `root`, `translateY(${wUnit(_y)})`)],
+	[true, (_name, _y) => { }],
+	[false, (_name, _y) => addTransform(_name, `root`, `translateY(${wUnit(_y)})`)],
 ]);
 
 /**
@@ -13777,9 +13806,12 @@ const changeColors = (_mkColor, _mkColorCd, _header, _name) => {
  */
 const changeCssMotions = (_header, _name, _frameNum) => {
 	const camelHeader = _header === `` ? _name : `${_header}${toCapitalize(_name)}`;
-	g_workObj[`mk${toCapitalize(camelHeader)}CssMotion`]?.[_frameNum]?.forEach((targetj, j) =>
+	g_workObj[`mk${toCapitalize(camelHeader)}CssMotion`]?.[_frameNum]?.forEach((targetj, j) => {
 		g_workObj[`${camelHeader}CssMotions`][targetj] =
-		g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + (g_workObj.dividePos[targetj] % 2)]);
+			g_workObj[`mk${toCapitalize(camelHeader)}CssMotionName`][_frameNum][2 * j + (g_workObj.dividePos[targetj] % 2)]
+		g_workObj[`${camelHeader}MovLock`][targetj] = g_workObj[`mk${toCapitalize(camelHeader)}MovLock`][_frameNum][j];
+		g_workObj[`${camelHeader}InitManual`][targetj] = g_workObj[`mk${toCapitalize(camelHeader)}InitManual`][_frameNum][j];
+	});
 };
 
 /**

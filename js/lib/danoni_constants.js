@@ -847,8 +847,8 @@ const g_typeLists = {
         `FColorNormalShadow`, `FColorNormalShadowCd`,
         `FColorHit`, `FColorHitCd`, `FColorHitBar`, `FColorHitBarCd`,
         `FColorHitShadow`, `FColorHitShadowCd`,
-        `ArrowCssMotion`, `ArrowCssMotionName`,
-        `FrzCssMotion`, `FrzCssMotionName`,
+        `ArrowCssMotion`, `ArrowCssMotionName`, `ArrowMovLock`, `ArrowInitManual`,
+        `FrzCssMotion`, `FrzCssMotionName`, `FrzMovLock`, `FrzInitManual`,
         `ArrowColorChangeAll`, `FrzColorChangeAll`,
     ],
 };
