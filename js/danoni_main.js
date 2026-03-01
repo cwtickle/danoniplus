@@ -13473,7 +13473,7 @@ const mainInit = () => {
  * 矢印・フリーズアローの初期位置
  * - true_true:    スクロールなし/初期位置マニュアル
  * - true_false:   スクロールなし/初期位置自動
- * - false_true:   スクロールあり/初期位置マニュアル（設定上ありえないがdefault_autoと同じにしておく）
+ * - false_true:   スクロールあり/初期位置マニュアル
  * - false_false:  スクロールあり/初期位置自動
  */
 const setArrowY = new Map([
