@@ -3811,9 +3811,10 @@ const g_dataMinObj = {
  */
 const g_dataSetObj = {
     2: [`speedData`, `boostData`],
-    4: [`colorData`, `arrowCssMotionData`, `frzCssMotionData`,
-        `dummyArrowCssMotionData`, `dummyFrzCssMotionData`],
+    4: [`colorData`],
     5: [`ncolorData`, `scrollchData`],
+    6: [`arrowCssMotionData`, `frzCssMotionData`,
+        `dummyArrowCssMotionData`, `dummyFrzCssMotionData`],
 }
 
 const g_dfColorObj = {
