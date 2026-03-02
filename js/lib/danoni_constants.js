@@ -1340,7 +1340,7 @@ const g_settings = {
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
     frzReturnNum: 0,
 
-    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`],
+    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`, `H-Drunk`],
     shakingNum: 0,
 
     effects: [C_FLG_OFF, `Dizzy`, `Spin`, `Wave`, `Storm`, `Blinking`, `Squids`],
@@ -1789,19 +1789,19 @@ const g_shakingFunc = new Map([
         if (g_scoreObj.baseFrame % 2 === 0)
             addTransform(`mainSprite`, `shakingY`, `translateY(${getShakingDist() / 2}px)`, g_transPriority.shaking)
     }],
-    ['X-Horizontal', () => {
+    ['X-Horizontal', (_multi = 1) => {
         if (g_scoreObj.baseFrame % 2 === 0)
             for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addTransform(`mainSprite${j}`, `shakingX`, `translateX(${getDirFromLayer(j) * (4 / 3) * getShakingDist()}px)`, g_transPriority.shaking);
+                addTransform(`mainSprite${j}`, `shakingX`, `translateX(${getDirFromLayer(j) * (4 / 3) * getShakingDist() * _multi}px)`, g_transPriority.shaking);
             }
     }],
-    ['X-Vertical', () => {
+    ['X-Vertical', (_multi = 1) => {
         if (g_scoreObj.baseFrame % 2 === 0)
             for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addTransform(`mainSprite${j}`, `shakingY`, `translateY(${getDirFromLayer(j) * getShakingDist()}px)`, g_transPriority.shaking);
+                addTransform(`mainSprite${j}`, `shakingY`, `translateY(${getDirFromLayer(j) * getShakingDist() * _multi}px)`, g_transPriority.shaking);
             }
     }],
-    ['Drunk', () => {
+    ['Drunk', (_multi = 1) => {
         if (g_scoreObj.baseFrame % 2 === 0) {
             // Drunkは揺れの軸が途中で変わるため、基準位置取得のためにmainSpriteのみaddX, addYを使用
             const shakeX = g_posXs.mainSprite?.get(`shakingX`) ?? 0;
@@ -1811,13 +1811,13 @@ const g_shakingFunc = new Map([
                 g_workObj.drunkYFlg = Math.random() < 0.5;
             }
             if (g_workObj.drunkXFlg) {
-                const deltaX = getShakingDist();
+                const deltaX = getShakingDist() * _multi;
                 addX(`mainSprite`, `shakingX`, deltaX, { priority: g_transPriority.shaking });
                 addTransform(`infoSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
                 addTransform(`judgeSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
             }
             if (g_workObj.drunkYFlg) {
-                const deltaY = getShakingDist() / 2;
+                const deltaY = getShakingDist() / 2 * _multi;
                 addY(`mainSprite`, `shakingY`, deltaY, { priority: g_transPriority.shaking });
                 addTransform(`infoSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
                 addTransform(`judgeSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
@@ -1833,6 +1833,27 @@ const g_shakingFunc = new Map([
             if (g_workObj.drunkYFlg) {
                 g_shakingFunc.get(`X-Horizontal`)();
             }
+        }
+    }],
+    ['H-Drunk', () => {
+        if (g_scoreObj.baseFrame % 2 === 0) {
+            g_shakingFunc.get(`Drunk`)(4);
+            if (g_workObj.drunkXFlg) {
+                g_shakingFunc.get(`X-Vertical`)(2);
+            }
+            if (g_workObj.drunkYFlg) {
+                g_shakingFunc.get(`X-Horizontal`)(2);
+            }
+            if (getShakingDist() === 0) {
+                g_workObj.drunkAxisFlg = Boolean(Math.floor(Math.random() * 2));
+            }
+            if (g_workObj.drunkAxisFlg) {
+                for (let j = 0; j < g_stateObj.layerNum; j++) {
+                    addTransform(`mainSprite${j}`, `shakingR`, `rotate(${getDirFromLayer(j) * getShakingDist()}deg)`, g_transPriority.shaking);
+                }
+            }
+            addTransform(`mainSprite`, `shakingR`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shaking);
+            addTransform(`infoSprite`, `shakingR`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shaking);
         }
     }],
 ]);
@@ -4278,6 +4299,7 @@ const g_lblNameObj = {
     'u_X-Vertical': `X-Vertical`,
     'u_Drunk': `Drunk`,
     'u_S-Drunk': `S-Drunk`,
+    'u_H-Drunk': `H-Drunk`,
 
     'u_Dizzy': `Dizzy`,
     'u_Spin': `Spin`,

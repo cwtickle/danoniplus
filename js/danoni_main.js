@@ -11973,6 +11973,7 @@ const getArrowSettings = () => {
 	// Shaking: Drunkでの画面揺れ設定 (X方向、Y方向)
 	g_workObj.drunkXFlg = false;
 	g_workObj.drunkYFlg = false;
+	g_workObj.drunkAxisFlg = false;
 
 	// AppearanceFilterの可視範囲設定
 	g_workObj.aprFilterCnt = 0;
