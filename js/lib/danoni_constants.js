@@ -1799,29 +1799,25 @@ const g_shakingFunc = new Map([
         }
     }],
     ['Drunk', (_multi = 1) => {
-        // Drunkは揺れの軸が途中で変わるため、基準位置取得のためにmainSpriteのみaddX, addYを使用
-        const shakeX = g_posXs.mainSprite?.get(`shakingX`) ?? 0;
-        const shakeY = g_posYs.mainSprite?.get(`shakingY`) ?? 0;
-        if (shakeX === 0 && shakeY === 0) {
-            g_workObj.drunkXFlg = Math.random() < 0.5;
-            g_workObj.drunkYFlg = Math.random() < 0.5;
-        }
         if (g_workObj.drunkXFlg) {
             const deltaX = getShakingDist() * _multi;
-            addX(`mainSprite`, `shakingX`, deltaX, { priority: g_transPriority.shaking });
+            addTransform(`mainSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
             addTransform(`infoSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
             addTransform(`judgeSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
         }
         if (g_workObj.drunkYFlg) {
             const deltaY = getShakingDist() / 2 * _multi;
-            addY(`mainSprite`, `shakingY`, deltaY, { priority: g_transPriority.shaking });
+            addTransform(`mainSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
             addTransform(`infoSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
             addTransform(`judgeSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
         }
+        // 補正がゼロになったときに軸の移動方法をランダムで決定
+        if (getShakingDist() === 0) {
+            g_workObj.drunkXFlg = Math.random() < 0.5;
+            g_workObj.drunkYFlg = Math.random() < 0.5 || !g_workObj.drunkXFlg;
+        }
     }],
     ['S-Drunk', () => {
-        g_shakingFunc.get(`Drunk`)(2);
-
         // Drunkとはあえて異なる軸の補正を掛ける
         if (g_workObj.drunkXFlg) {
             g_shakingFunc.get(`X-Vertical`)(2);
@@ -1829,16 +1825,11 @@ const g_shakingFunc = new Map([
         if (g_workObj.drunkYFlg) {
             g_shakingFunc.get(`X-Horizontal`)(2);
         }
+        g_shakingFunc.get(`Drunk`)(2);
     }],
     ['H-Drunk', () => {
-        g_shakingFunc.get(`Drunk`)(4);
-        if (getShakingDist() === 0) {
-            // 補正がゼロになったときに軸の移動方法と回転方法をランダムで決定
-            g_workObj.drunkAxisFlg = Boolean(Math.floor(Math.random() * 3) >= 1);
-            g_workObj.drunkRotateFlg = Boolean(Math.floor(Math.random() * 3) >= 2);
-        }
         // X方向、Y方向の移動方法。S-Drunkと同様、Drunkとあえて異なる軸の補正を掛ける
-        // 本来は適用するtransform先が異なるためdelTransformを行う必要があるが、微細のため無視する
+        // 本来は適用するtransform先が異なるためdelTransformを行う必要があるが、補正ゼロ時に切り替えるため問題なし
         if (g_workObj.drunkXFlg) {
             g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Vertical`)(2);
         }
@@ -1853,6 +1844,13 @@ const g_shakingFunc = new Map([
         }
         addTransform(`mainSprite`, `shakingR`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shaking);
         addTransform(`infoSprite`, `shakingR`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shaking);
+
+        g_shakingFunc.get(`Drunk`)(4);
+        if (getShakingDist() === 0) {
+            // 補正がゼロになったときに軸の移動方法と回転方法をランダムで決定
+            g_workObj.drunkAxisFlg = Boolean(Math.floor(Math.random() * 3) >= 1);
+            g_workObj.drunkRotateFlg = Boolean(Math.floor(Math.random() * 3) >= 2);
+        }
     }],
 ]);
 
