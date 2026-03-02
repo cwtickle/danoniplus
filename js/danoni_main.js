@@ -11970,7 +11970,7 @@ const getArrowSettings = () => {
 		}
 	}
 
-	// Shaking: Drunkでの画面揺れ設定 (X方向、Y方向)
+	// Shaking: Drunkでの画面揺れ設定 (X方向、Y方向、移動軸条件、回転軸条件)
 	g_workObj.drunkXFlg = false;
 	g_workObj.drunkYFlg = false;
 	g_workObj.drunkAxisFlg = false;
