@@ -1821,11 +1821,13 @@ const g_shakingFunc = new Map([
     }],
     ['S-Drunk', () => {
         g_shakingFunc.get(`Drunk`)(2);
+
+        // Drunkとはあえて異なる軸の補正を掛ける
         if (g_workObj.drunkXFlg) {
-            g_shakingFunc.get(`X-Horizontal`)(2);
+            g_shakingFunc.get(`X-Vertical`)(2);
         }
         if (g_workObj.drunkYFlg) {
-            g_shakingFunc.get(`X-Vertical`)(2);
+            g_shakingFunc.get(`X-Horizontal`)(2);
         }
     }],
     ['H-Drunk', () => {
@@ -1835,13 +1837,13 @@ const g_shakingFunc = new Map([
             g_workObj.drunkAxisFlg = Boolean(Math.floor(Math.random() * 3) >= 1);
             g_workObj.drunkRotateFlg = Boolean(Math.floor(Math.random() * 3) >= 2);
         }
-        // X方向、Y方向の移動方法
+        // X方向、Y方向の移動方法。S-Drunkと同様、Drunkとあえて異なる軸の補正を掛ける
         // 本来は適用するtransform先が異なるためdelTransformを行う必要があるが、微細のため無視する
         if (g_workObj.drunkXFlg) {
-            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Horizontal`)(2);
+            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Vertical`)(2);
         }
         if (g_workObj.drunkYFlg) {
-            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Vertical`)(2);
+            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Horizontal`)(2);
         }
         // 軸回転の設定（判定・メイン部分は常時回転、メイン内の各層は条件式により回転するかどうかを決定）
         for (let j = 0; j < g_stateObj.layerNum; j++) {
