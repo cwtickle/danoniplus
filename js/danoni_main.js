@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/03/01
+ * Revised : 2026/03/02
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 45.3.0`;
-const g_revisedDate = `2026/03/01`;
+const g_version = `Ver 45.3.1`;
+const g_revisedDate = `2026/03/02`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2786,7 +2786,10 @@ const initialControl = async () => {
 	titleInit(true);
 
 	// 未使用のg_keyObjプロパティを削除
-	const keyProp = g_keyCopyLists.simple.concat(g_keyCopyLists.multiple, `keyCtrl`, `keyName`, `minWidth`, `ptchara`);
+	const keyProp = g_keyCopyLists.simple.concat(
+		g_keyCopyLists.multiple,
+		`keyCtrl`, `keyName`, `minWidth`, `movLock`, `initManual`, `ptchara`
+	);
 	const delKeyPropList = [`ptchara7`, `dfPtnNum`, `minKeyCtrlNum`, `minPatterns`];
 	Object.keys(g_keyObj).forEach(key => {
 		const type = keyProp.find(prop => key.startsWith(prop)) || ``;
