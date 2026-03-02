@@ -1847,10 +1847,10 @@ const g_shakingFunc = new Map([
             if (getShakingDist() === 0) {
                 g_workObj.drunkAxisFlg = Boolean(Math.floor(Math.random() * 2));
             }
-            if (g_workObj.drunkAxisFlg) {
-                for (let j = 0; j < g_stateObj.layerNum; j++) {
-                    addTransform(`mainSprite${j}`, `shakingR`, `rotate(${getDirFromLayer(j) * getShakingDist()}deg)`, g_transPriority.shaking);
-                }
+            for (let j = 0; j < g_stateObj.layerNum; j++) {
+                g_workObj.drunkAxisFlg
+                    ? addTransform(`mainSprite${j}`, `shakingR`, `rotate(${getDirFromLayer(j) * getShakingDist()}deg)`, g_transPriority.shaking)
+                    : delTransform(`mainSprite${j}`, `shakingR`);
             }
             addTransform(`mainSprite`, `shakingR`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shaking);
             addTransform(`infoSprite`, `shakingR`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shaking);
@@ -4549,7 +4549,8 @@ const g_lang_msgObj = {
         frzReturn: `フリーズアロー到達時及び矢印の回復判定が100の倍数に達するごとに、X/Y/Z軸のいずれかに回転します`,
         shaking: `ステップゾーン及び矢印を揺らす設定です。\n[Horizontal] 横方向に揺らします\n[Vertical] 縦方向に揺らします\n` +
             `[X-Horizontal] レイヤーごとに左右交互の向きで横に揺らします\n[X-Vertical] レイヤーごとに上下交互の向きで縦に揺らします\n[Drunk] 画面全体を上下左右ランダムに揺らします。画面酔いに注意してください\n` +
-            `[S-Drunk] 画面全体を上下左右ランダムに揺らし、さらにレイヤーごとに上下左右に揺らします`,
+            `[S-Drunk] 画面全体を上下左右ランダムに揺らし、さらにレイヤーごとに上下左右に揺らします\n` +
+            `[H-Drunk] S-Drunkより大きく上下に揺らし、さらに回転が掛かります`,
         effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
         camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
         swapping: `ステップゾーンの位置をグループ単位で入れ替えます。`,
@@ -4643,7 +4644,8 @@ const g_lang_msgObj = {
         shaking: `This sets shaking for the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n` +
             `[X-Horizontal] Per-layer shaking with alternating left/right direction by layer.\n[X-Vertical] Per-layer shaking with alternating up/down direction by layer.\n` +
             `[Drunk] Shakes the entire screen randomly in all directions (may cause motion sickness).\n` +
-            `[S-Drunk] Shakes the entire screen randomly in all directions, and also shakes each layer randomly in all directions.`,
+            `[S-Drunk] Shakes the entire screen randomly in all directions, and also shakes each layer randomly in all directions.\n` +
+            `[H-Drunk] Adds stronger vertical movement than S-Drunk and adds rotation.`,
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
         camoufrage: `The appearance of the steps changes randomly with the same placement.`,
         swapping: `Replaces the position of step zones on a group-by-group basis.`,
