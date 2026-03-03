@@ -13763,6 +13763,11 @@ const changeReturn = (_seq, _idx, _axis) => {
 		g_workObj.frzReturnFlg = false;
 		return;
 	}
+	const sprite = document.getElementById(`mainSprite`);
+	if (sprite === null) {
+		g_workObj.frzReturnFlg = false;
+		return;
+	}
 
 	g_workObj.frzReturnFlg = true;
 	const _rad = _seq[_idx];
@@ -13772,36 +13777,33 @@ const changeReturn = (_seq, _idx, _axis) => {
 		_transform += ` rotate${_axis[1]}(${_rad}deg)`;
 	}
 
-	const sprite = document.getElementById(`mainSprite`);
-	if (sprite !== null) {
-		sprite.style.transformStyle = `preserve-3d`;
-		const rad360 = ((_rad % 360) + 360) % 360;
+	sprite.style.transformStyle = `preserve-3d`;
+	const rad360 = ((_rad % 360) + 360) % 360;
 
-		let isBack = false;
+	let isBack = false;
 
-		// 単軸回転
-		if (_axis.length === 1) {
-			const axis = _axis[0];
-			if (axis === 'Y' || axis === 'X') {
-				isBack = rad360 > 90 && rad360 < 270;
-			}
-			// Z軸は平面回転なので「裏側」は存在しない
+	// 単軸回転
+	if (_axis.length === 1) {
+		const axis = _axis[0];
+		if (axis === 'Y' || axis === 'X') {
+			isBack = rad360 > 90 && rad360 < 270;
 		}
-
-		// 2軸回転（XZ / XY / YZ）
-		if (_axis.length === 2) {
-			// 2軸回転は「どちらかの軸が裏側なら裏側」とみなす
-			const [a1, a2] = _axis;
-			const back1 = (a1 === 'Y' || a1 === 'X') && (rad360 > 90 && rad360 < 270);
-			const back2 = (a2 === 'Y' || a2 === 'X') && (rad360 > 90 && rad360 < 270);
-			isBack = back1 || back2;
-		}
-		sprite.style.opacity = isBack ? 0.7 : 1;
-
-		addTransform(`mainSprite`, `frzReturn`, _transform, g_transPriority.frzReturn);
-
-		setTimeout(() => changeReturn(_seq, _idx + 1, _axis), 20);
+		// Z軸は平面回転なので「裏側」は存在しない
 	}
+
+	// 2軸回転（XZ / XY / YZ）
+	if (_axis.length === 2) {
+		// 2軸回転は「どちらかの軸が裏側なら裏側」とみなす
+		const [a1, a2] = _axis;
+		const back1 = (a1 === 'Y' || a1 === 'X') && (rad360 > 90 && rad360 < 270);
+		const back2 = (a2 === 'Y' || a2 === 'X') && (rad360 > 90 && rad360 < 270);
+		isBack = back1 || back2;
+	}
+	sprite.style.opacity = isBack ? 0.7 : 1;
+
+	addTransform(`mainSprite`, `frzReturn`, _transform, g_transPriority.frzReturn);
+
+	setTimeout(() => changeReturn(_seq, _idx + 1, _axis), 20);
 };
 
 /**
