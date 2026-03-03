@@ -51,6 +51,9 @@ const g_limitObj = {
     setLblHeight: 22,
     setLblSiz: 17,
 
+    setLblLeftShort: 250,
+    setLblWidthShort: 120,
+
     // 設定画面の左右移動ボタンの幅、フォントサイズ
     setMiniWidth: 40,
     setMiniSiz: 18,
@@ -1164,8 +1167,10 @@ const g_stateObj = {
     opacity: 100,
 
     playWindow: `Default`,
+    playWindowType: `---`,
     stepArea: `Default`,
     frzReturn: C_FLG_OFF,
+    frzReturnType: `60deg`,
     shaking: C_FLG_OFF,
     effect: C_FLG_OFF,
     camoufrage: C_FLG_OFF,
@@ -1330,8 +1335,11 @@ const g_settings = {
         special: 0,
     },
 
-    playWindows: [`Default`, `Stairs`, `R-Stairs`, `Slope`, `R-Slope`, `Distorted`, `R-Distorted`, `SideScroll`, `R-SideScroll`],
+    playWindows: [`Default`, `Stairs`, `Slope`, `Distorted`, `SideScroll`,],
     playWindowNum: 0,
+
+    playWindowTypes: [`---`, `Reverse`],
+    playWindowTypeNum: 0,
 
     stepAreas: [`Default`, `Halfway`, `2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`, `Alt-Crossing`],
     stepAreaLayers: [`2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`, `Alt-Crossing`],
@@ -1339,6 +1347,9 @@ const g_settings = {
 
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
     frzReturnNum: 0,
+
+    frzReturnTypes: [`60deg`, `120deg`, `360deg`],
+    frzReturnTypeNum: 0,
 
     shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`, `H-Drunk`],
     shakingNum: 0,
@@ -1703,19 +1714,16 @@ const motionAlphaToggle = (_obj, _property) => {
 /**
  * PlayWindow適用関数
  */
-const g_changeStairs = (_rad) => `rotate(${_rad}deg)`;
-const g_changeSkew = (_rad) => `Skew(${_rad}deg, ${_rad}deg) scaleY(0.9)`;
+const g_playWindowDir = () => g_stateObj.playWindowType === `Reverse` ? 1 : -1;
+const g_changeStairs = (_rad) => `rotate(${_rad * g_playWindowDir()}deg)`;
+const g_changeSkew = (_rad) => `Skew(${_rad * g_playWindowDir()}deg, ${_rad * g_playWindowDir()}deg) scaleY(0.9)`;
 
 const g_playWindowFunc = new Map([
     ['Default', () => ``],
-    ['Stairs', () => g_changeStairs(-8)],
-    ['R-Stairs', () => g_changeStairs(8)],
-    ['Slope', () => g_changeStairs(-g_slopeAngle())],
-    ['R-Slope', () => g_changeStairs(g_slopeAngle())],
-    ['Distorted', () => g_changeSkew(-15)],
-    ['R-Distorted', () => g_changeSkew(15)],
-    ['SideScroll', () => g_changeStairs(-90)],
-    ['R-SideScroll', () => g_changeStairs(90)],
+    ['Stairs', () => g_changeStairs(8)],
+    ['Slope', () => g_changeStairs(g_slopeAngle())],
+    ['Distorted', () => g_changeSkew(15)],
+    ['SideScroll', () => g_changeStairs(90)],
 ]);
 
 /**
@@ -1900,6 +1908,62 @@ const g_frzReturnFunc = new Map([
         return [axis1, axis2];
     }],
 ]);
+
+/**
+ * FrzReturnの種別ごとの移動配列を作成
+ * @param {string} _type 
+ * @returns 
+ */
+const getReturnSequence = (_type) => {
+    switch (_type) {
+
+        case '60deg': // 0 → -60 → 60 → 0
+            const stepF40 = 25;
+            return [
+                ...makeEaseSequence(0, -60, stepF40, easeInOutQuad),
+                ...makeEaseSequence(-60, 60, stepF40 * 2, easeInOutQuad),
+                ...makeEaseSequence(60, 0, stepF40, easeInOutQuad),
+            ];
+        case '120deg': // 0 → 120 → 0
+            const stepF120 = 40;
+            return [
+                ...makeEaseSequence(0, 120, stepF120, easeInOutQuad),
+                ...makeEaseSequence(120, 0, stepF120, easeInOutQuad),
+            ];
+        case '360deg': // 0 → 360
+            return Array.from({ length: 91 }, (_, i) => i * 4);
+
+        default:
+            return [0];
+    }
+};
+
+/**
+ * イージング作成関数
+ * @param {number} _t 
+ * @returns {number}
+ */
+const easeInOutQuad = _t => _t < 0.5
+    ? 2 * _t * _t
+    : 1 - Math.pow(-2 * _t + 2, 2) / 2;
+
+/**
+ * イージング用の移動配列の作成
+ * @param {number} _start 
+ * @param {number} _end 
+ * @param {number} _steps 
+ * @param {number} _easing 
+ * @returns {number[]}
+ */
+const makeEaseSequence = (_start, _end, _steps, _easing) => {
+    const seq = [];
+    for (let i = 0; i <= _steps; i++) {
+        const t = i / _steps;
+        const e = _easing(t);
+        seq.push(_start + (_end - _start) * e);
+    }
+    return seq;
+};
 
 /**
  * Effect適用関数
