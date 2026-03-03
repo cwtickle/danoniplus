@@ -1394,7 +1394,9 @@ const g_transPriority = {
     playWindow: 100,
     stepArea: 110,
     frzReturn: 120,
-    shaking: 130,
+    shakingR: 130,
+    shakingX: 140,
+    shakingY: 150,
     scale: 200,
 };
 
@@ -1783,38 +1785,42 @@ const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 
 const g_shakingFunc = new Map([
     ['OFF', () => true],
     ['Horizontal', (_multi = 1) => {
-        addTransform(`mainSprite`, `shakingX`, `translateX(${getShakingDist() * _multi}px)`, g_transPriority.shaking)
+        addTransform(`mainSprite`, `shakingX_base`, `translateX(${getShakingDist() * _multi}px)`, g_transPriority.shakingX)
     }],
     ['Vertical', (_multi = 1) => {
-        addTransform(`mainSprite`, `shakingY`, `translateY(${getShakingDist() / 2 * _multi}px)`, g_transPriority.shaking)
+        addTransform(`mainSprite`, `shakingY_base`, `translateY(${getShakingDist() / 2 * _multi}px)`, g_transPriority.shakingY)
     }],
     ['X-Horizontal', (_multi = 1) => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `shakingX`, `translateX(${getDirFromLayer(j) * (4 / 3) * getShakingDist() * _multi}px)`, g_transPriority.shaking);
+            addTransform(`mainSprite${j}`, `shakingX_layer`, `translateX(${getDirFromLayer(j) * (4 / 3) * getShakingDist() * _multi}px)`, g_transPriority.shakingX);
         }
     }],
     ['X-Vertical', (_multi = 1) => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `shakingY`, `translateY(${getDirFromLayer(j) * getShakingDist() * _multi}px)`, g_transPriority.shaking);
+            addTransform(`mainSprite${j}`, `shakingY_layer`, `translateY(${getDirFromLayer(j) * getShakingDist() * _multi}px)`, g_transPriority.shakingY);
         }
     }],
     ['Drunk', (_multi = 1) => {
         if (g_workObj.drunkXFlg) {
             const deltaX = getShakingDist() * _multi;
-            addTransform(`mainSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
-            addTransform(`infoSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
-            addTransform(`judgeSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
+            addTransform(`mainSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
+            addTransform(`infoSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
+            addTransform(`judgeSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
         }
         if (g_workObj.drunkYFlg) {
             const deltaY = getShakingDist() / 2 * _multi;
-            addTransform(`mainSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
-            addTransform(`infoSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
-            addTransform(`judgeSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
+            addTransform(`mainSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
+            addTransform(`infoSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
+            addTransform(`judgeSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
         }
-        // 補正がゼロになったときに軸の移動方法をランダムで決定
-        if (getShakingDist() === 0) {
+        // 補正がゼロ付近になったときに軸の移動方法をランダムで決定
+        if (Math.abs(getShakingDist()) < 2) {
             g_workObj.drunkXFlg = Math.random() < 0.5;
-            g_workObj.drunkYFlg = Math.random() < 0.5 || !g_workObj.drunkXFlg;
+            g_workObj.drunkYFlg = Math.random() < 0.5;
+
+            if (!g_workObj.drunkXFlg && !g_workObj.drunkYFlg) {
+                g_workObj.drunkYFlg = true;
+            }
         }
     }],
     ['S-Drunk', () => {
@@ -1831,25 +1837,25 @@ const g_shakingFunc = new Map([
         // X方向、Y方向の移動方法。S-Drunkと同様、Drunkとあえて異なる軸の補正を掛ける
         // 本来は適用するtransform先が異なるためdelTransformを行う必要があるが、補正ゼロ時に切り替えるため問題なし
         if (g_workObj.drunkXFlg) {
-            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Vertical`)(2);
+            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Vertical`)(3);
         }
         if (g_workObj.drunkYFlg) {
-            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Horizontal`)(2);
+            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Horizontal`)(3);
         }
         // 軸回転の設定（判定・メイン部分は常時回転、メイン内の各層は条件式により回転するかどうかを決定）
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             g_workObj.drunkRotateFlg
-                ? addTransform(`mainSprite${j}`, `shakingR`, `rotate(${getDirFromLayer(j) * getShakingDist()}deg)`, g_transPriority.shaking)
-                : delTransform(`mainSprite${j}`, `shakingR`);
+                ? addTransform(`mainSprite${j}`, `shakingR_layer`, `rotate(${getDirFromLayer(j) * getShakingDist()}deg)`, g_transPriority.shakingR)
+                : delTransform(`mainSprite${j}`, `shakingR_layer`);
         }
-        addTransform(`mainSprite`, `shakingR`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shaking);
-        addTransform(`infoSprite`, `shakingR`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shaking);
+        addTransform(`mainSprite`, `shakingR_base`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shakingR);
+        addTransform(`infoSprite`, `shakingR_base`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shakingR);
 
-        g_shakingFunc.get(`Drunk`)(4);
-        if (getShakingDist() === 0) {
-            // 補正がゼロになったときに軸の移動方法と回転方法をランダムで決定
-            g_workObj.drunkAxisFlg = Boolean(Math.floor(Math.random() * 3) >= 1);
-            g_workObj.drunkRotateFlg = Boolean(Math.floor(Math.random() * 3) >= 2);
+        g_shakingFunc.get(`Drunk`)(2);
+        if (Math.abs(getShakingDist()) < 2) {
+            // 補正がゼロ付近になったときに軸の移動方法と回転方法をランダムで決定
+            g_workObj.drunkAxisFlg = Math.random() >= 0.33;
+            g_workObj.drunkRotateFlg = Math.random() >= 0.66;
         }
     }],
 ]);
