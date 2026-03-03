@@ -1940,7 +1940,7 @@ const getReturnSequence = (_type) => {
 
 /**
  * イージング作成関数
- * @param {number} _t 
+ * @param {(t: number) => number} _t 
  * @returns {number}
  */
 const easeInOutQuad = _t => _t < 0.5

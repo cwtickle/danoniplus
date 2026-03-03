@@ -14240,7 +14240,7 @@ const judgeRecovery = (_name, _difFrame) => {
 	lifeRecovery();
 	finishViewing();
 
-	if (g_stateObj.freezeReturn !== C_FLG_OFF) {
+	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		if ((g_resultObj.ii + g_resultObj.shakin) % 100 === 0 && !g_workObj.frzReturnFlg) {
 			changeReturn(g_workObj.frzReturnSeq, 0, g_frzReturnFunc.get(g_stateObj.frzReturn)());
 		}
