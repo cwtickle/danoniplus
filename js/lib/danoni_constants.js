@@ -1956,6 +1956,9 @@ const easeInOutQuad = _t => _t < 0.5
  * @returns {number[]}
  */
 const makeEaseSequence = (_start, _end, _steps, _easing) => {
+    if (_steps <= 0) {
+        return [_start];
+    }
     const seq = [];
     for (let i = 0; i <= _steps; i++) {
         const t = i / _steps;
