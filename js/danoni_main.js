@@ -11938,6 +11938,10 @@ const getArrowSettings = () => {
 	// FrzReturnの初期化
 	g_workObj.frzReturnFlg = false;
 	g_workObj.frzReturnSeq = getReturnSequence(g_stateObj.frzReturnType);
+	if (g_workObj.frzReturnTimerId) {
+		clearTimeout(g_workObj.frzReturnTimerId);
+		g_workObj.frzReturnTimerId = null;
+	}
 
 	// AutoRetryの初期化
 	g_workObj.autoRetryFlg = false;
@@ -13753,19 +13757,38 @@ const appearKeyTypes = (_j, _targets, _alphas = fillArray(_targets.length, 1)) =
 };
 
 /**
- * FrzReturnの追加処理
- * @param {number} _rad 回転角度
- * @param {number[]} _axis 回転軸
+ * FrzReturnの開始条件
  */
-const changeReturn = (_seq, _idx, _axis) => {
+const startFrzReturn = () => {
+	if (!g_workObj.frzReturnFlg) {
+		if (g_workObj.frzReturnTimerId) {
+			clearTimeout(g_workObj.frzReturnTimerId);
+			g_workObj.frzReturnTimerId = null;
+		}
+		executeFrzReturn(g_workObj.frzReturnSeq, 0, g_frzReturnFunc.get(g_stateObj.frzReturn)());
+	}
+};
+
+/**
+ * FrzReturnの実行
+ * @param {number[]} _seq FrzReturnの移動配列
+ * @param {number} _idx FrzReturnの移動配列のインディクス（transformの決定に利用）
+ * @param {number[]} _axis 回転軸（X, Y, X-Yなど）
+ */
+const executeFrzReturn = (_seq, _idx, _axis) => {
+
 	if (!_seq || _idx >= _seq.length) {
+		// 移動終了時
 		delTransform(`mainSprite`, `frzReturn`);
 		g_workObj.frzReturnFlg = false;
+		g_workObj.frzReturnTimerId = null;
 		return;
 	}
 	const sprite = document.getElementById(`mainSprite`);
 	if (sprite === null) {
+		// 画面がプレイ画面から移動した場合
 		g_workObj.frzReturnFlg = false;
+		g_workObj.frzReturnTimerId = null;
 		return;
 	}
 
@@ -13803,7 +13826,7 @@ const changeReturn = (_seq, _idx, _axis) => {
 
 	addTransform(`mainSprite`, `frzReturn`, _transform, g_transPriority.frzReturn);
 
-	setTimeout(() => changeReturn(_seq, _idx + 1, _axis), 20);
+	g_workObj.frzReturnTimerId = setTimeout(() => executeFrzReturn(_seq, _idx + 1, _axis), 20);
 };
 
 /**
@@ -13996,9 +14019,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 
 	// FrzReturnの設定
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
-		if (!g_workObj.frzReturnFlg) {
-			changeReturn(g_workObj.frzReturnSeq, 0, g_frzReturnFunc.get(g_stateObj.frzReturn)());
-		}
+		startFrzReturn();
 	}
 	g_customJsObj[`judg_${_name}Hit`].forEach(func => func(_difFrame));
 };
@@ -14021,9 +14042,7 @@ const changeFailedFrz = (_j, _k) => {
 
 	// FrzReturnの設定
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
-		if (!g_workObj.frzReturnFlg) {
-			changeReturn(g_workObj.frzReturnSeq, 0, g_frzReturnFunc.get(g_stateObj.frzReturn)());
-		}
+		startFrzReturn();
 	}
 };
 
@@ -14242,10 +14261,8 @@ const judgeRecovery = (_name, _difFrame) => {
 	lifeRecovery();
 	finishViewing();
 
-	if (g_stateObj.frzReturn !== C_FLG_OFF) {
-		if ((g_resultObj.ii + g_resultObj.shakin) % 100 === 0 && !g_workObj.frzReturnFlg) {
-			changeReturn(g_workObj.frzReturnSeq, 0, g_frzReturnFunc.get(g_stateObj.frzReturn)());
-		}
+	if (g_stateObj.frzReturn !== C_FLG_OFF && (g_resultObj.ii + g_resultObj.shakin) % 100 === 0) {
+		startFrzReturn();
 	}
 	if (_name === `shakin`) {
 		quickRetry(`Shakin(Great)`);
