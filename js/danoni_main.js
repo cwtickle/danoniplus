@@ -11970,9 +11970,11 @@ const getArrowSettings = () => {
 		}
 	}
 
-	// Shaking: Drunkでの画面揺れ設定 (X方向、Y方向)
+	// Shaking: Drunkでの画面揺れ設定 (X方向、Y方向、移動軸条件、回転軸条件)
 	g_workObj.drunkXFlg = false;
 	g_workObj.drunkYFlg = false;
+	g_workObj.drunkAxisFlg = false;
+	g_workObj.drunkRotateFlg = false;
 
 	// AppearanceFilterの可視範囲設定
 	g_workObj.aprFilterCnt = 0;
@@ -13256,7 +13258,9 @@ const mainInit = () => {
 		}
 
 		// 画面揺れの設定
-		g_shakingFunc.get(g_stateObj.shaking)();
+		if (g_scoreObj.baseFrame % 2 === 0) {
+			g_shakingFunc.get(g_stateObj.shaking)();
+		}
 
 		// ユーザカスタムイベント(フレーム毎)
 		g_customJsObj.mainEnterFrame.forEach(func => func());

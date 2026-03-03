@@ -1340,7 +1340,7 @@ const g_settings = {
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
     frzReturnNum: 0,
 
-    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`],
+    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`, `H-Drunk`],
     shakingNum: 0,
 
     effects: [C_FLG_OFF, `Dizzy`, `Spin`, `Wave`, `Storm`, `Blinking`, `Squids`],
@@ -1394,7 +1394,9 @@ const g_transPriority = {
     playWindow: 100,
     stepArea: 110,
     frzReturn: 120,
-    shaking: 130,
+    shakingR: 130,
+    shakingX: 140,
+    shakingY: 150,
     scale: 200,
 };
 
@@ -1777,62 +1779,86 @@ const g_stepAreaFunc = new Map([
 
 /**
  * Shaking適用関数
+ * - Drunk系は補正座標が0になったときに判定を行い、移動方向や回転を切り替える
  */
 const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25);
 const g_shakingFunc = new Map([
     ['OFF', () => true],
-    ['Horizontal', () => {
-        if (g_scoreObj.baseFrame % 2 === 0)
-            addTransform(`mainSprite`, `shakingX`, `translateX(${getShakingDist()}px)`, g_transPriority.shaking)
+    ['Horizontal', (_multi = 1) => {
+        addTransform(`mainSprite`, `shakingX_base`, `translateX(${getShakingDist() * _multi}px)`, g_transPriority.shakingX)
     }],
-    ['Vertical', () => {
-        if (g_scoreObj.baseFrame % 2 === 0)
-            addTransform(`mainSprite`, `shakingY`, `translateY(${getShakingDist() / 2}px)`, g_transPriority.shaking)
+    ['Vertical', (_multi = 1) => {
+        addTransform(`mainSprite`, `shakingY_base`, `translateY(${getShakingDist() / 2 * _multi}px)`, g_transPriority.shakingY)
     }],
-    ['X-Horizontal', () => {
-        if (g_scoreObj.baseFrame % 2 === 0)
-            for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addTransform(`mainSprite${j}`, `shakingX`, `translateX(${getDirFromLayer(j) * (4 / 3) * getShakingDist()}px)`, g_transPriority.shaking);
-            }
+    ['X-Horizontal', (_multi = 1) => {
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addTransform(`mainSprite${j}`, `shakingX_layer`, `translateX(${getDirFromLayer(j) * (4 / 3) * getShakingDist() * _multi}px)`, g_transPriority.shakingX);
+        }
     }],
-    ['X-Vertical', () => {
-        if (g_scoreObj.baseFrame % 2 === 0)
-            for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addTransform(`mainSprite${j}`, `shakingY`, `translateY(${getDirFromLayer(j) * getShakingDist()}px)`, g_transPriority.shaking);
-            }
+    ['X-Vertical', (_multi = 1) => {
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addTransform(`mainSprite${j}`, `shakingY_layer`, `translateY(${getDirFromLayer(j) * getShakingDist() * _multi}px)`, g_transPriority.shakingY);
+        }
     }],
-    ['Drunk', () => {
-        if (g_scoreObj.baseFrame % 2 === 0) {
-            // Drunkは揺れの軸が途中で変わるため、基準位置取得のためにmainSpriteのみaddX, addYを使用
-            const shakeX = g_posXs.mainSprite?.get(`shakingX`) ?? 0;
-            const shakeY = g_posYs.mainSprite?.get(`shakingY`) ?? 0;
-            if (shakeX === 0 && shakeY === 0) {
-                g_workObj.drunkXFlg = Math.random() < 0.5;
-                g_workObj.drunkYFlg = Math.random() < 0.5;
-            }
-            if (g_workObj.drunkXFlg) {
-                const deltaX = getShakingDist();
-                addX(`mainSprite`, `shakingX`, deltaX, { priority: g_transPriority.shaking });
-                addTransform(`infoSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
-                addTransform(`judgeSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
-            }
-            if (g_workObj.drunkYFlg) {
-                const deltaY = getShakingDist() / 2;
-                addY(`mainSprite`, `shakingY`, deltaY, { priority: g_transPriority.shaking });
-                addTransform(`infoSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
-                addTransform(`judgeSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
+    ['Drunk', (_multi = 1) => {
+        const dist = getShakingDist();
+        if (g_workObj.drunkXFlg) {
+            const deltaX = dist * _multi;
+            addTransform(`mainSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
+            addTransform(`infoSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
+            addTransform(`judgeSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
+        }
+        if (g_workObj.drunkYFlg) {
+            const deltaY = dist / 2 * _multi;
+            addTransform(`mainSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
+            addTransform(`infoSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
+            addTransform(`judgeSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
+        }
+        // 補正がゼロになったときに軸の移動方法をランダムで決定
+        if (dist === 0) {
+            g_workObj.drunkXFlg = Math.random() < 0.5;
+            g_workObj.drunkYFlg = Math.random() < 0.5;
+
+            if (!g_workObj.drunkXFlg && !g_workObj.drunkYFlg) {
+                g_workObj.drunkYFlg = true;
             }
         }
     }],
     ['S-Drunk', () => {
-        if (g_scoreObj.baseFrame % 2 === 0) {
-            g_shakingFunc.get(`Drunk`)();
-            if (g_workObj.drunkXFlg) {
-                g_shakingFunc.get(`X-Vertical`)();
-            }
-            if (g_workObj.drunkYFlg) {
-                g_shakingFunc.get(`X-Horizontal`)();
-            }
+        // Drunkとはあえて異なる軸の補正を掛ける
+        if (g_workObj.drunkXFlg) {
+            g_shakingFunc.get(`X-Vertical`)(2);
+        }
+        if (g_workObj.drunkYFlg) {
+            g_shakingFunc.get(`X-Horizontal`)(2);
+        }
+        g_shakingFunc.get(`Drunk`)(2);
+    }],
+    ['H-Drunk', () => {
+        const dist = getShakingDist();
+
+        // X方向、Y方向の移動方法。S-Drunkと同様、Drunkとあえて異なる軸の補正を掛ける
+        // 本来は適用するtransform先が異なるためdelTransformを行う必要があるが、補正ゼロ時に切り替えるため問題なし
+        if (g_workObj.drunkXFlg) {
+            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Vertical`)(3);
+        }
+        if (g_workObj.drunkYFlg) {
+            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Horizontal`)(3);
+        }
+        // 軸回転の設定（判定・メイン部分は常時回転、メイン内の各層は条件式により回転するかどうかを決定）
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            g_workObj.drunkRotateFlg
+                ? addTransform(`mainSprite${j}`, `shakingR_layer`, `rotate(${getDirFromLayer(j) * dist}deg)`, g_transPriority.shakingR)
+                : delTransform(`mainSprite${j}`, `shakingR_layer`);
+        }
+        addTransform(`mainSprite`, `shakingR_base`, `rotate(${dist / 2}deg)`, g_transPriority.shakingR);
+        addTransform(`infoSprite`, `shakingR_base`, `rotate(${dist / 2}deg)`, g_transPriority.shakingR);
+
+        g_shakingFunc.get(`Drunk`)(2);
+        if (dist === 0) {
+            // 補正がゼロになったときに軸の移動方法と回転方法をランダムで決定
+            g_workObj.drunkAxisFlg = Math.random() >= 0.33;
+            g_workObj.drunkRotateFlg = Math.random() >= 0.66;
         }
     }],
 ]);
@@ -4278,6 +4304,7 @@ const g_lblNameObj = {
     'u_X-Vertical': `X-Vertical`,
     'u_Drunk': `Drunk`,
     'u_S-Drunk': `S-Drunk`,
+    'u_H-Drunk': `H-Drunk`,
 
     'u_Dizzy': `Dizzy`,
     'u_Spin': `Spin`,
@@ -4527,7 +4554,8 @@ const g_lang_msgObj = {
         frzReturn: `フリーズアロー到達時及び矢印の回復判定が100の倍数に達するごとに、X/Y/Z軸のいずれかに回転します`,
         shaking: `ステップゾーン及び矢印を揺らす設定です。\n[Horizontal] 横方向に揺らします\n[Vertical] 縦方向に揺らします\n` +
             `[X-Horizontal] レイヤーごとに左右交互の向きで横に揺らします\n[X-Vertical] レイヤーごとに上下交互の向きで縦に揺らします\n[Drunk] 画面全体を上下左右ランダムに揺らします。画面酔いに注意してください\n` +
-            `[S-Drunk] 画面全体を上下左右ランダムに揺らし、さらにレイヤーごとに上下左右に揺らします`,
+            `[S-Drunk] 画面全体を上下左右ランダムに揺らし、さらにレイヤーごとに上下左右に揺らします\n` +
+            `[H-Drunk] S-Drunkより大きく上下に揺らし、さらに回転が掛かります`,
         effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
         camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
         swapping: `ステップゾーンの位置をグループ単位で入れ替えます。`,
@@ -4621,7 +4649,8 @@ const g_lang_msgObj = {
         shaking: `This sets shaking for the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n` +
             `[X-Horizontal] Per-layer shaking with alternating left/right direction by layer.\n[X-Vertical] Per-layer shaking with alternating up/down direction by layer.\n` +
             `[Drunk] Shakes the entire screen randomly in all directions (may cause motion sickness).\n` +
-            `[S-Drunk] Shakes the entire screen randomly in all directions, and also shakes each layer randomly in all directions.`,
+            `[S-Drunk] Shakes the entire screen randomly in all directions, and also shakes each layer randomly in all directions.\n` +
+            `[H-Drunk] Adds stronger vertical movement than S-Drunk and adds rotation.`,
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
         camoufrage: `The appearance of the steps changes randomly with the same placement.`,
         swapping: `Replaces the position of step zones on a group-by-group basis.`,
