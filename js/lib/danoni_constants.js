@@ -1801,20 +1801,21 @@ const g_shakingFunc = new Map([
         }
     }],
     ['Drunk', (_multi = 1) => {
+        const dist = getShakingDist();
         if (g_workObj.drunkXFlg) {
-            const deltaX = getShakingDist() * _multi;
+            const deltaX = dist * _multi;
             addTransform(`mainSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
             addTransform(`infoSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
             addTransform(`judgeSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
         }
         if (g_workObj.drunkYFlg) {
-            const deltaY = getShakingDist() / 2 * _multi;
+            const deltaY = dist / 2 * _multi;
             addTransform(`mainSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
             addTransform(`infoSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
             addTransform(`judgeSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
         }
         // 補正がゼロになったときに軸の移動方法をランダムで決定
-        if (getShakingDist() === 0) {
+        if (dist === 0) {
             g_workObj.drunkXFlg = Math.random() < 0.5;
             g_workObj.drunkYFlg = Math.random() < 0.5;
 
@@ -1834,6 +1835,8 @@ const g_shakingFunc = new Map([
         g_shakingFunc.get(`Drunk`)(2);
     }],
     ['H-Drunk', () => {
+        const dist = getShakingDist();
+
         // X方向、Y方向の移動方法。S-Drunkと同様、Drunkとあえて異なる軸の補正を掛ける
         // 本来は適用するtransform先が異なるためdelTransformを行う必要があるが、補正ゼロ時に切り替えるため問題なし
         if (g_workObj.drunkXFlg) {
@@ -1845,14 +1848,14 @@ const g_shakingFunc = new Map([
         // 軸回転の設定（判定・メイン部分は常時回転、メイン内の各層は条件式により回転するかどうかを決定）
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             g_workObj.drunkRotateFlg
-                ? addTransform(`mainSprite${j}`, `shakingR_layer`, `rotate(${getDirFromLayer(j) * getShakingDist()}deg)`, g_transPriority.shakingR)
+                ? addTransform(`mainSprite${j}`, `shakingR_layer`, `rotate(${getDirFromLayer(j) * dist}deg)`, g_transPriority.shakingR)
                 : delTransform(`mainSprite${j}`, `shakingR_layer`);
         }
-        addTransform(`mainSprite`, `shakingR_base`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shakingR);
-        addTransform(`infoSprite`, `shakingR_base`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shakingR);
+        addTransform(`mainSprite`, `shakingR_base`, `rotate(${dist / 2}deg)`, g_transPriority.shakingR);
+        addTransform(`infoSprite`, `shakingR_base`, `rotate(${dist / 2}deg)`, g_transPriority.shakingR);
 
         g_shakingFunc.get(`Drunk`)(2);
-        if (getShakingDist() === 0) {
+        if (dist === 0) {
             // 補正がゼロになったときに軸の移動方法と回転方法をランダムで決定
             g_workObj.drunkAxisFlg = Math.random() >= 0.33;
             g_workObj.drunkRotateFlg = Math.random() >= 0.66;
