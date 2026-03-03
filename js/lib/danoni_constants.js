@@ -1813,8 +1813,8 @@ const g_shakingFunc = new Map([
             addTransform(`infoSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
             addTransform(`judgeSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
         }
-        // 補正がゼロ付近になったときに軸の移動方法をランダムで決定
-        if (Math.abs(getShakingDist()) < 2) {
+        // 補正がゼロになったときに軸の移動方法をランダムで決定
+        if (getShakingDist() === 0) {
             g_workObj.drunkXFlg = Math.random() < 0.5;
             g_workObj.drunkYFlg = Math.random() < 0.5;
 
@@ -1852,8 +1852,8 @@ const g_shakingFunc = new Map([
         addTransform(`infoSprite`, `shakingR_base`, `rotate(${getShakingDist() / 2}deg)`, g_transPriority.shakingR);
 
         g_shakingFunc.get(`Drunk`)(2);
-        if (Math.abs(getShakingDist()) < 2) {
-            // 補正がゼロ付近になったときに軸の移動方法と回転方法をランダムで決定
+        if (getShakingDist() === 0) {
+            // 補正がゼロになったときに軸の移動方法と回転方法をランダムで決定
             g_workObj.drunkAxisFlg = Math.random() >= 0.33;
             g_workObj.drunkRotateFlg = Math.random() >= 0.66;
         }
