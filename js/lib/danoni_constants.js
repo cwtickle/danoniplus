@@ -1948,7 +1948,7 @@ const g_frzReturnSeqFunc = new Map([
             Array.from({ length: 91 }, (_, i) => i * 4 * _dir)
         ];
     }],
-    [`Pendulum`, () => {
+    [`Pendulum`, (_dir = 1) => {
         const steps = 25;
         return [
             [
@@ -1957,9 +1957,9 @@ const g_frzReturnSeqFunc = new Map([
                 ...makeEaseSequence(60 * _dir, 0, steps, easeInOutQuad),
             ],
             [
-                ...makeEaseSequence(0, -90 * _dir, steps, easeInOutQuad),
-                ...makeEaseSequence(-90 * _dir, 90 * _dir, steps * 2, easeInOutQuad),
-                ...makeEaseSequence(90 * _dir, 0, steps, easeInOutQuad),
+                ...makeEaseSequence(0, -85 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(-85 * _dir, 85 * _dir, steps * 2, easeInOutQuad),
+                ...makeEaseSequence(85 * _dir, 0, steps, easeInOutQuad),
             ],
         ];
     }],
