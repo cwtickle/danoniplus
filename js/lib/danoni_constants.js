@@ -1957,9 +1957,14 @@ const g_frzReturnSeqFunc = new Map([
                 ...makeEaseSequence(60 * _dir, 0, steps, easeInOutQuad),
             ],
             [
-                ...makeEaseSequence(0, -85 * _dir, steps, easeInOutQuad),
-                ...makeEaseSequence(-85 * _dir, 85 * _dir, steps * 2, easeInOutQuad),
-                ...makeEaseSequence(85 * _dir, 0, steps, easeInOutQuad),
+                ...makeEaseSequence(0, -70 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(-70 * _dir, 70 * _dir, steps * 2, easeInOutQuad),
+                ...makeEaseSequence(70 * _dir, 0, steps, easeInOutQuad),
+            ],
+            [
+                ...makeEaseSequence(0, -80 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(-80 * _dir, 80 * _dir, steps * 2, easeInOutQuad),
+                ...makeEaseSequence(80 * _dir, 0, steps, easeInOutQuad),
             ],
         ];
     }],
