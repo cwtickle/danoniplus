@@ -8734,7 +8734,7 @@ const exSettingInit = () => {
 	 */
 	const createExpandedScView = _name =>
 		createScText(document.getElementById(`lnk${toCapitalize(_name)}Type`), `${toCapitalize(_name)}Type`, {
-			displayName: `exSetting`, targetLabel: `lnk${toCapitalize(_name)}Type`, x: -10
+			displayName: `exSetting`, targetLabel: `lnk${toCapitalize(_name)}Type`, x: -13
 		});
 
 	createGeneralSetting(spriteList.playWindow, `playWindow`, {
