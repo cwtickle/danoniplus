@@ -1170,7 +1170,7 @@ const g_stateObj = {
     playWindowType: `---`,
     stepArea: `Default`,
     frzReturn: C_FLG_OFF,
-    frzReturnType: `60deg`,
+    frzReturnType: `360deg`,
     shaking: C_FLG_OFF,
     effect: C_FLG_OFF,
     camoufrage: C_FLG_OFF,
@@ -1348,7 +1348,7 @@ const g_settings = {
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
     frzReturnNum: 0,
 
-    frzReturnTypes: [`60deg`, `120deg`, `360deg`, `Pendulum`, `±120deg`, `±360deg`],
+    frzReturnTypes: [`360deg`, `120deg`, `60deg`, `±360deg`, `±120deg`, `Pendulum`],
     frzReturnTypeNum: 0,
 
     shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`, `H-Drunk`],
@@ -4681,7 +4681,7 @@ const g_lang_msgObj = {
             `[Mismatched/R-Mismatched] スクロールの向きが上下で異なる方向に流れます\n` +
             `[X-Flower] レーンが花びらのように広がります\n[Alt-Crossing] レーンが交互に違う方向から流れます`,
         frzReturn: `フリーズアロー到達時及び矢印の回復判定が100の倍数に達するごとに、X/Y/Z軸のいずれかに回転します`,
-        frzReturnType: `[60°/120°/360°] 指定の角度まで回転します\n[Pendulum] 振り子のように左右に動きます\n[±120°/±360°] 120°/360°に加えて逆回転が掛かることがあります`,
+        frzReturnType: `[360°/120°/60°] 指定の角度まで回転します\n[±360°/±120°] 360°/120°に加えて逆回転が掛かることがあります\n[Pendulum] 振り子のように左右に動きます`,
         shaking: `ステップゾーン及び矢印を揺らす設定です。\n[Horizontal] 横方向に揺らします\n[Vertical] 縦方向に揺らします\n` +
             `[X-Horizontal] レイヤーごとに左右交互の向きで横に揺らします\n[X-Vertical] レイヤーごとに上下交互の向きで縦に揺らします\n[Drunk] 画面全体を上下左右ランダムに揺らします。画面酔いに注意してください\n` +
             `[S-Drunk] 画面全体を上下左右ランダムに揺らし、さらにレイヤーごとに上下左右に揺らします\n` +
@@ -4777,7 +4777,7 @@ const g_lang_msgObj = {
             `[Mismatched/R-Mismatched] Scroll direction flows in different directions up and down.\n` +
             `[X-Flower] Lanes spread out like flower petals.\n[Alt-Crossing] Lanes flow from different directions alternately.`,
         frzReturn: `When the Freeze Arrow is reached, and every time the arrow's recovery judgment \nreaches a multiple of 100, it will rotate on either the X, Y, or Z axis.`,
-        frzReturnType: `[60deg/120deg/360deg] Rotates to the specified angle.\n[Pendulum] Moves back and forth like a pendulum.\n[±120deg/±360deg] May rotate in the opposite direction in addition to 120deg/360deg.`,
+        frzReturnType: `[360deg/120deg/60deg] Rotates to the specified angle.\n[±360deg/±120deg] May rotate in the opposite direction in addition to 360deg/120deg.\n[Pendulum] Moves back and forth like a pendulum.`,
         shaking: `This sets shaking for the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n` +
             `[X-Horizontal] Per-layer shaking with alternating left/right direction by layer.\n[X-Vertical] Per-layer shaking with alternating up/down direction by layer.\n` +
             `[Drunk] Shakes the entire screen randomly in all directions (may cause motion sickness).\n` +
