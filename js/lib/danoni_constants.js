@@ -1170,7 +1170,7 @@ const g_stateObj = {
     playWindowType: `---`,
     stepArea: `Default`,
     frzReturn: C_FLG_OFF,
-    frzReturnType: `60deg`,
+    frzReturnType: `+60deg`,
     shaking: C_FLG_OFF,
     effect: C_FLG_OFF,
     camoufrage: C_FLG_OFF,
@@ -1335,7 +1335,7 @@ const g_settings = {
         special: 0,
     },
 
-    playWindows: [`Default`, `Stairs`, `Slope`, `Distorted`, `SideScroll`,],
+    playWindows: [`Default`, `Stairs`, `Slope`, `Distorted`, `SideScroll`],
     playWindowNum: 0,
 
     playWindowTypes: [`---`, `Reverse`],
@@ -1348,7 +1348,7 @@ const g_settings = {
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
     frzReturnNum: 0,
 
-    frzReturnTypes: [`60deg`, `120deg`, `360deg`],
+    frzReturnTypes: [`+60deg`, `+120deg`, `+360deg`, `Pendulum`, `±120deg`, `±360deg`],
     frzReturnTypeNum: 0,
 
     shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`, `H-Drunk`],
@@ -1602,6 +1602,7 @@ const resetXY = () => {
 
 /**
  * データ消去用管理関数
+ * - 対応するキー名: g_settings.dataMgtNum で定義したキー
  */
 const g_resetFunc = new Map([
     ['highscores', () => {
@@ -1651,6 +1652,7 @@ const g_storageFunc = new Map([
 
 /**
  * シャッフル適用関数
+ * - 対応するキー名: g_settings.shuffles
  * @param {number} keyNum
  * @param {array} shuffleGroup
  */
@@ -1675,6 +1677,7 @@ const g_shuffleFunc = new Map([
 
 /**
  * モーション適用関数
+ * - 対応するキー名: g_settings.motions
  * @param {array} frms フレーム別の速度設定用配列。配列の15がステップゾーン上、0～14は矢印の枠外管理用
  */
 const g_motionFunc = new Map([
@@ -1689,6 +1692,7 @@ const g_motionFunc = new Map([
 
 /**
  * モーション適用中のアルファ値制御関数
+ * - 対応するキー名: g_settings.motions
  * @param {object} _obj 対象オブジェクト
  * @param {object} _property 対象オブジェクトのプロパティ情報 (g_attrObj[オブジェクト名])
  */
@@ -1713,6 +1717,7 @@ const motionAlphaToggle = (_obj, _property) => {
 
 /**
  * PlayWindow適用関数
+ * - 対応するキー名: g_settings.playWindows
  */
 const g_playWindowDir = () => g_stateObj.playWindowType === `Reverse` ? 1 : -1;
 const g_changeStairs = (_rad) => `rotate(${_rad * g_playWindowDir()}deg)`;
@@ -1728,6 +1733,7 @@ const g_playWindowFunc = new Map([
 
 /**
  * StepArea適用関数
+ * - 対応するキー名: g_settings.stepAreas
  */
 const g_arrowGroupSprite = [`stepSprite`, `arrowSprite`, `frzHitSprite`];
 const halfwayOffset = _j => (_j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2);
@@ -1787,6 +1793,7 @@ const g_stepAreaFunc = new Map([
 
 /**
  * Shaking適用関数
+ * - 対応するキー名: g_settings.shakings
  * - Drunk系は補正座標が0になったときに判定を行い、移動方向や回転を切り替える
  */
 const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25);
@@ -1892,6 +1899,7 @@ const g_getSecondaryAxis = (_primaryAxis) => {
 
 /**
  * FrzReturn適用関数
+ * - 対応するキー名: g_settings.frzReturns
  */
 const g_frzReturnFunc = new Map([
     ['OFF', () => true],
@@ -1911,32 +1919,58 @@ const g_frzReturnFunc = new Map([
 
 /**
  * FrzReturnの種別ごとの移動配列を作成
- * @param {string} _type 
- * @returns 
+ * - 対応するキー名: g_settings.frzReturnTypes
+ * - キー: FrzReturn種別 (例: "+60deg", "±120deg")
+ * - 値: 移動配列を返す関数 (オプション引数 _dir で方向指定、デフォルト 1)
+ * @type {Map<string, (dir?: number) => number[][]>}
  */
-const getReturnSequence = (_type) => {
-    switch (_type) {
-
-        case '60deg': // 0 → -60 → 60 → 0
-            const stepF40 = 25;
-            return [
-                ...makeEaseSequence(0, -60, stepF40, easeInOutQuad),
-                ...makeEaseSequence(-60, 60, stepF40 * 2, easeInOutQuad),
-                ...makeEaseSequence(60, 0, stepF40, easeInOutQuad),
-            ];
-        case '120deg': // 0 → 120 → 0
-            const stepF120 = 40;
-            return [
-                ...makeEaseSequence(0, 120, stepF120, easeInOutQuad),
-                ...makeEaseSequence(120, 0, stepF120, easeInOutQuad),
-            ];
-        case '360deg': // 0 → 360
-            return Array.from({ length: 91 }, (_, i) => i * 4);
-
-        default:
-            return [0];
-    }
-};
+const g_frzReturnSeqFunc = new Map([
+    [`+60deg`, (_dir = 1) => {
+        const steps = 25;
+        return [
+            [
+                ...makeEaseSequence(0, 60 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(60 * _dir, 0, steps, easeInOutQuad),
+            ],
+        ];
+    }],
+    [`+120deg`, (_dir = 1) => {
+        const steps = 40;
+        return [
+            [
+                ...makeEaseSequence(0, 120 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(120 * _dir, 0, steps, easeInOutQuad),
+            ],
+        ];
+    }],
+    [`+360deg`, (_dir = 1) => {
+        return [
+            Array.from({ length: 91 }, (_, i) => i * 4 * _dir)
+        ];
+    }],
+    [`Pendulum`, (_dir = 1) => {
+        const steps = 25;
+        return [
+            [
+                ...makeEaseSequence(0, -60 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(-60 * _dir, 60 * _dir, steps * 2, easeInOutQuad),
+                ...makeEaseSequence(60 * _dir, 0, steps, easeInOutQuad),
+            ],
+            [
+                ...makeEaseSequence(0, -70 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(-70 * _dir, 70 * _dir, steps * 2, easeInOutQuad),
+                ...makeEaseSequence(70 * _dir, 0, steps, easeInOutQuad),
+            ],
+            [
+                ...makeEaseSequence(0, -80 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(-80 * _dir, 80 * _dir, steps * 2, easeInOutQuad),
+                ...makeEaseSequence(80 * _dir, 0, steps, easeInOutQuad),
+            ],
+        ];
+    }],
+    [`±120deg`, () => g_frzReturnSeqFunc.get(`+120deg`)().concat(g_frzReturnSeqFunc.get(`+120deg`)(-1))],
+    [`±360deg`, () => g_frzReturnSeqFunc.get(`+360deg`)().concat(g_frzReturnSeqFunc.get(`+360deg`)(-1))],
+]);
 
 /**
  * イージング作成関数
@@ -1986,6 +2020,10 @@ const g_setEffect = (_arrowEffect, _frzEffect = ``, _frzArrowEffect = _arrowEffe
         }
     }
 };
+/**
+ * Effect定義関数
+ * - 対応するキー名: g_settings.effects
+ */
 const g_effectFunc = new Map([
     ['OFF', () => true],
     ['Dizzy', () => g_setEffect(`effects-dizzy`)],
