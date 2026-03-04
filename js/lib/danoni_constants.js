@@ -1348,7 +1348,7 @@ const g_settings = {
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
     frzReturnNum: 0,
 
-    frzReturnTypes: [`60deg`, `120deg`, `360deg`],
+    frzReturnTypes: [`60deg`, `120deg`, `360deg`, `60deg+`, `120deg+`, `360deg+`],
     frzReturnTypeNum: 0,
 
     shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`, `H-Drunk`],
@@ -1912,31 +1912,37 @@ const g_frzReturnFunc = new Map([
 /**
  * FrzReturnの種別ごとの移動配列を作成
  * @param {string} _type 
- * @returns 
+ * @returns {number[][]}
  */
-const getReturnSequence = (_type) => {
-    switch (_type) {
-
-        case '60deg': // 0 → -60 → 60 → 0
-            const stepF40 = 25;
-            return [
-                ...makeEaseSequence(0, -60, stepF40, easeInOutQuad),
-                ...makeEaseSequence(-60, 60, stepF40 * 2, easeInOutQuad),
-                ...makeEaseSequence(60, 0, stepF40, easeInOutQuad),
-            ];
-        case '120deg': // 0 → 120 → 0
-            const stepF120 = 40;
-            return [
-                ...makeEaseSequence(0, 120, stepF120, easeInOutQuad),
-                ...makeEaseSequence(120, 0, stepF120, easeInOutQuad),
-            ];
-        case '360deg': // 0 → 360
-            return Array.from({ length: 91 }, (_, i) => i * 4);
-
-        default:
-            return [0];
-    }
-};
+const g_frzReturnSeqFunc = new Map([
+    [`60deg`, (_dir = 1) => {
+        const stepF40 = 25;
+        return [
+            [
+                ...makeEaseSequence(0, -60 * _dir, stepF40, easeInOutQuad),
+                ...makeEaseSequence(-60 * _dir, 60 * _dir, stepF40 * 2, easeInOutQuad),
+                ...makeEaseSequence(60 * _dir, 0, stepF40, easeInOutQuad),
+            ],
+        ];
+    }],
+    [`120deg`, (_dir = 1) => {
+        const stepF120 = 40;
+        return [
+            [
+                ...makeEaseSequence(0, 120 * _dir, stepF120, easeInOutQuad),
+                ...makeEaseSequence(120 * _dir, 0, stepF120, easeInOutQuad),
+            ],
+        ];
+    }],
+    [`360deg`, (_dir = 1) => {
+        return [
+            Array.from({ length: 91 }, (_, i) => i * 4 * _dir)
+        ];
+    }],
+    [`60deg+`, () => g_frzReturnSeqFunc.get(`60deg`)().concat(g_frzReturnSeqFunc.get(`60deg`)(-1))],
+    [`120deg+`, () => g_frzReturnSeqFunc.get(`120deg`)().concat(g_frzReturnSeqFunc.get(`120deg`)(-1))],
+    [`360deg+`, () => g_frzReturnSeqFunc.get(`360deg`)().concat(g_frzReturnSeqFunc.get(`360deg`)(-1))],
+]);
 
 /**
  * イージング作成関数

@@ -11955,7 +11955,7 @@ const getArrowSettings = () => {
 
 	// FrzReturnの初期化
 	g_workObj.frzReturnFlg = false;
-	g_workObj.frzReturnSeq = getReturnSequence(g_stateObj.frzReturnType);
+	g_workObj.frzReturnSeq = g_frzReturnSeqFunc.get(g_stateObj.frzReturnType)();
 	if (g_workObj.frzReturnTimerId) {
 		clearTimeout(g_workObj.frzReturnTimerId);
 		g_workObj.frzReturnTimerId = null;
@@ -13783,7 +13783,11 @@ const startFrzReturn = () => {
 			clearTimeout(g_workObj.frzReturnTimerId);
 			g_workObj.frzReturnTimerId = null;
 		}
-		executeFrzReturn(g_workObj.frzReturnSeq, 0, g_frzReturnFunc.get(g_stateObj.frzReturn)());
+		const seqLen = g_workObj.frzReturnSeq.length;
+		executeFrzReturn(
+			g_workObj.frzReturnSeq[seqLen > 1 ? Math.floor(Math.random() * seqLen) : 0], 0,
+			g_frzReturnFunc.get(g_stateObj.frzReturn)()
+		);
 	}
 };
 
