@@ -8716,7 +8716,7 @@ const exSettingInit = () => {
 	 * @returns {HTMLDivElement}
 	 */
 	const createExpandedBtn = _name =>
-		createCss2Button(`lnk${toCapitalize(_name)}Type`, g_stateObj[`${_name}Type`],
+		createCss2Button(`lnk${toCapitalize(_name)}Type`, getStgDetailName(g_stateObj[`${_name}Type`]),
 			() => {
 				setSetting(1, `${_name}Type`);
 				createExpandedScView(_name);
@@ -15261,14 +15261,15 @@ const getSelectedSettingList = (_shuffleName) => {
 		((g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_ON) ? `(${g_hidSudObj.filterPos}%)` : ``),
 		withOptions(g_stateObj.gauge, g_settings.gauges[0]),
 		withOptions(g_stateObj.playWindow, `Default`,
-			`${g_stateObj.playWindowType === `Reverse` ? `R-` : ``}${g_stateObj.playWindow}`),
+			`${getStgDetailName(g_stateObj.playWindowType === `Reverse` ? `R-` : ``)}${getStgDetailName(g_stateObj.playWindow)}`),
 		withOptions(g_stateObj.stepArea, `Default`),
-		withOptions(g_stateObj.frzReturn, C_FLG_OFF, `FR:${g_stateObj.frzReturn}(${g_stateObj.frzReturnType})`),
+		withOptions(g_stateObj.frzReturn, C_FLG_OFF,
+			`FR:${getStgDetailName(g_stateObj.frzReturn)}(${getStgDetailName(g_stateObj.frzReturnType)})`),
 		withOptions(g_stateObj.shaking, C_FLG_OFF),
 		withOptions(g_stateObj.effect, C_FLG_OFF),
-		withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${g_stateObj.camoufrage}`),
-		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${g_stateObj.swapping}`),
-		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${g_stateObj.judgRange}`),
+		withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${getStgDetailName(g_stateObj.camoufrage)}`),
+		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${getStgDetailName(g_stateObj.swapping)}`),
+		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${getStgDetailName(g_stateObj.judgRange)}`),
 	].filter(value => value !== ``).join(`, `);
 
 	// Display設定の組み立て処理 (Ex: Step : FlatBar, Judge, Life : OFF)
