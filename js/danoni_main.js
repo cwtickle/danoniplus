@@ -8692,9 +8692,66 @@ const exSettingInit = () => {
 	createEmptySprite(divRoot, `optionsprite`, g_windowObj.optionSprite);
 	const spriteList = setSpriteList(g_settingPos.exSetting);
 
-	createGeneralSetting(spriteList.playWindow, `playWindow`);
+	/**
+	 * 拡張ボタンの表示・非表示と通常ボタンの幅変更
+	 * @param {string} _name 
+	 * @param {string} _default 
+	 */
+	const setExpandedBtnSiz = (_name, _default = C_FLG_OFF) => {
+		const camelH = toCapitalize(_name);
+		if (g_stateObj[_name] === _default) {
+			$id(`lnk${camelH}Type`).display = C_DIS_NONE;
+			$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeft);
+			$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidth);
+		} else {
+			$id(`lnk${camelH}Type`).display = C_DIS_INHERIT;
+			$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeftShort);
+			$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidthShort);
+		}
+	};
+
+	/**
+	 * 拡張ボタンの作成
+	 * @param {string} _name 
+	 * @returns {HTMLDivElement}
+	 */
+	const createExpandedBtn = _name =>
+		createCss2Button(`lnk${toCapitalize(_name)}Type`, g_stateObj[`${_name}Type`],
+			() => {
+				setSetting(1, `${_name}Type`);
+				createExpandedScView(_name);
+			},
+			Object.assign(g_lblPosObj.btnReverse, {
+				cxtFunc: () => {
+					setSetting(-1, `${_name}Type`);
+					createExpandedScView(_name);
+				},
+			}), g_cssObj.button_Default, g_cssObj[`button_RevON`]);
+
+	/**
+	 * 拡張ボタンのショートカット表示
+	 * @param {string} _name 
+	 */
+	const createExpandedScView = _name =>
+		createScText(document.getElementById(`lnk${toCapitalize(_name)}Type`), `${toCapitalize(_name)}Type`, {
+			displayName: `exSetting`, targetLabel: `lnk${toCapitalize(_name)}Type`, x: -10
+		});
+
+	createGeneralSetting(spriteList.playWindow, `playWindow`, {
+		addRFunc: () => setExpandedBtnSiz(`playWindow`, `Default`),
+	});
+	spriteList.playWindow.appendChild(createExpandedBtn(`playWindow`));
+	setExpandedBtnSiz(`playWindow`, `Default`);
+	createExpandedScView(`playWindow`);
+
 	createGeneralSetting(spriteList.stepArea, `stepArea`);
-	createGeneralSetting(spriteList.frzReturn, `frzReturn`);
+	createGeneralSetting(spriteList.frzReturn, `frzReturn`, {
+		addRFunc: () => setExpandedBtnSiz(`frzReturn`),
+	});
+	spriteList.frzReturn.appendChild(createExpandedBtn(`frzReturn`));
+	setExpandedBtnSiz(`frzReturn`);
+	createExpandedScView(`frzReturn`);
+
 	createGeneralSetting(spriteList.shaking, `shaking`);
 	createGeneralSetting(spriteList.effect, `effect`, {
 		addRFunc: () => {
@@ -11695,7 +11752,7 @@ const getArrowSettings = () => {
 
 	if (g_stateObj.playWindow.endsWith(`SideScroll`)) {
 		if (g_stateObj.rotateEnabled) {
-			const sign = g_stateObj.playWindow === `SideScroll` ? 1 : -1;
+			const sign = g_stateObj.playWindowType === `Reverse` ? -1 : 1;
 			changeStepRtn(`stepRtn`, 90 * sign);
 			changeStepRtn(`stepHitRtn`, 90 * sign);
 			changeStepRtn(`arrowRtn`, 90 * sign);
@@ -11898,6 +11955,11 @@ const getArrowSettings = () => {
 
 	// FrzReturnの初期化
 	g_workObj.frzReturnFlg = false;
+	g_workObj.frzReturnSeq = getReturnSequence(g_stateObj.frzReturnType);
+	if (g_workObj.frzReturnTimerId) {
+		clearTimeout(g_workObj.frzReturnTimerId);
+		g_workObj.frzReturnTimerId = null;
+	}
 
 	// AutoRetryの初期化
 	g_workObj.autoRetryFlg = false;
@@ -13713,52 +13775,77 @@ const appearKeyTypes = (_j, _targets, _alphas = fillArray(_targets.length, 1)) =
 };
 
 /**
- * FrzReturnの追加処理
- * @param {number} _rad 回転角度
- * @param {number[]} _axis 回転軸
+ * FrzReturnの開始条件
  */
-const changeReturn = (_rad, _axis) => {
+const startFrzReturn = () => {
+	if (!g_workObj.frzReturnFlg) {
+		if (g_workObj.frzReturnTimerId) {
+			clearTimeout(g_workObj.frzReturnTimerId);
+			g_workObj.frzReturnTimerId = null;
+		}
+		executeFrzReturn(g_workObj.frzReturnSeq, 0, g_frzReturnFunc.get(g_stateObj.frzReturn)());
+	}
+};
+
+/**
+ * FrzReturnの実行
+ * @param {number[]} _seq FrzReturnの移動配列
+ * @param {number} _idx FrzReturnの移動配列のインディクス（transformの決定に利用）
+ * @param {number[]} _axis 回転軸（X, Y, X-Yなど）
+ */
+const executeFrzReturn = (_seq, _idx, _axis) => {
+
+	if (!_seq || _idx >= _seq.length) {
+		// 移動終了時
+		delTransform(`mainSprite`, `frzReturn`);
+		g_workObj.frzReturnFlg = false;
+		g_workObj.frzReturnTimerId = null;
+		return;
+	}
+	const sprite = document.getElementById(`mainSprite`);
+	if (sprite === null) {
+		// 画面がプレイ画面から移動した場合
+		g_workObj.frzReturnFlg = false;
+		g_workObj.frzReturnTimerId = null;
+		return;
+	}
+
 	g_workObj.frzReturnFlg = true;
+	const _rad = _seq[_idx];
+
 	let _transform = `rotate${_axis[0]}(${_rad}deg)`;
 	if (_axis[1] !== undefined) {
 		_transform += ` rotate${_axis[1]}(${_rad}deg)`;
 	}
-	const sprite = document.getElementById(`mainSprite`);
-	if (sprite !== null) {
-		sprite.style.transformStyle = `preserve-3d`;
-		const rad360 = _rad % 360;
 
-		let isBack = false;
+	sprite.style.transformStyle = `preserve-3d`;
+	const rad360 = ((_rad % 360) + 360) % 360;
 
-		// 単軸回転
-		if (_axis.length === 1) {
-			const axis = _axis[0];
-			if (axis === 'Y' || axis === 'X') {
-				isBack = rad360 > 90 && rad360 < 270;
-			}
-			// Z軸は平面回転なので「裏側」は存在しない
+	let isBack = false;
+
+	// 単軸回転
+	if (_axis.length === 1) {
+		const axis = _axis[0];
+		if (axis === 'Y' || axis === 'X') {
+			isBack = rad360 > 90 && rad360 < 270;
 		}
-
-		// 2軸回転（XZ / XY / YZ）
-		if (_axis.length === 2) {
-			// 2軸回転は「どちらかの軸が裏側なら裏側」とみなす
-			const [a1, a2] = _axis;
-			const back1 = (a1 === 'Y' || a1 === 'X') && (rad360 > 90 && rad360 < 270);
-			const back2 = (a2 === 'Y' || a2 === 'X') && (rad360 > 90 && rad360 < 270);
-			isBack = back1 || back2;
-		}
-		sprite.style.opacity = isBack ? 0.7 : 1;
-
-		addTransform(`mainSprite`, `frzReturn`, _transform, g_transPriority.frzReturn);
-
-		if (_rad < 360 && g_workObj.frzReturnFlg) {
-			setTimeout(() => changeReturn(_rad + 4, _axis), 20);
-		} else {
-			delTransform(`mainSprite`, `frzReturn`);
-			g_workObj.frzReturnFlg = false;
-		}
+		// Z軸は平面回転なので「裏側」は存在しない
 	}
-}
+
+	// 2軸回転（XZ / XY / YZ）
+	if (_axis.length === 2) {
+		// 2軸回転は「どちらかの軸が裏側なら裏側」とみなす
+		const [a1, a2] = _axis;
+		const back1 = (a1 === 'Y' || a1 === 'X') && (rad360 > 90 && rad360 < 270);
+		const back2 = (a2 === 'Y' || a2 === 'X') && (rad360 > 90 && rad360 < 270);
+		isBack = back1 || back2;
+	}
+	sprite.style.opacity = isBack ? 0.7 : 1;
+
+	addTransform(`mainSprite`, `frzReturn`, _transform, g_transPriority.frzReturn);
+
+	g_workObj.frzReturnTimerId = setTimeout(() => executeFrzReturn(_seq, _idx + 1, _axis), 20);
+};
 
 /**
  * AutoRetryの設定
@@ -13950,9 +14037,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 
 	// FrzReturnの設定
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
-		if (!g_workObj.frzReturnFlg) {
-			changeReturn(4, g_frzReturnFunc.get(g_stateObj.frzReturn)());
-		}
+		startFrzReturn();
 	}
 	g_customJsObj[`judg_${_name}Hit`].forEach(func => func(_difFrame));
 };
@@ -13975,9 +14060,7 @@ const changeFailedFrz = (_j, _k) => {
 
 	// FrzReturnの設定
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
-		if (!g_workObj.frzReturnFlg) {
-			changeReturn(4, g_frzReturnFunc.get(g_stateObj.frzReturn)());
-		}
+		startFrzReturn();
 	}
 };
 
@@ -14196,10 +14279,8 @@ const judgeRecovery = (_name, _difFrame) => {
 	lifeRecovery();
 	finishViewing();
 
-	if (g_stateObj.freezeReturn !== C_FLG_OFF) {
-		if ((g_resultObj.ii + g_resultObj.shakin) % 100 === 0 && !g_workObj.frzReturnFlg) {
-			changeReturn(1, g_frzReturnFunc.get(g_stateObj.frzReturn)());
-		}
+	if (g_stateObj.frzReturn !== C_FLG_OFF && (g_resultObj.ii + g_resultObj.shakin) % 100 === 0) {
+		startFrzReturn();
 	}
 	if (_name === `shakin`) {
 		quickRetry(`Shakin(Great)`);
@@ -15174,9 +15255,10 @@ const getSelectedSettingList = (_shuffleName) => {
 		withOptions(g_stateObj.appearance, `Visible`) +
 		((g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_ON) ? `(${g_hidSudObj.filterPos}%)` : ``),
 		withOptions(g_stateObj.gauge, g_settings.gauges[0]),
-		withOptions(g_stateObj.playWindow, `Default`),
+		withOptions(g_stateObj.playWindow, `Default`,
+			`${g_stateObj.playWindowType === `Reverse` ? `R-` : ``}${g_stateObj.playWindow}`),
 		withOptions(g_stateObj.stepArea, `Default`),
-		withOptions(g_stateObj.frzReturn, C_FLG_OFF, `FR:${g_stateObj.frzReturn}`),
+		withOptions(g_stateObj.frzReturn, C_FLG_OFF, `FR:${g_stateObj.frzReturn}(${g_stateObj.frzReturnType})`),
 		withOptions(g_stateObj.shaking, C_FLG_OFF),
 		withOptions(g_stateObj.effect, C_FLG_OFF),
 		withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${g_stateObj.camoufrage}`),
