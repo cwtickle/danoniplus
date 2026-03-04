@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/03/02 (v45.3.1)
+ * Revised : 2026/03/04 (v45.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -50,6 +50,9 @@ const g_limitObj = {
     setLblWidth: 210,
     setLblHeight: 22,
     setLblSiz: 17,
+
+    setLblLeftShort: 250,
+    setLblWidthShort: 120,
 
     // 設定画面の左右移動ボタンの幅、フォントサイズ
     setMiniWidth: 40,
@@ -1164,8 +1167,10 @@ const g_stateObj = {
     opacity: 100,
 
     playWindow: `Default`,
+    playWindowType: `---`,
     stepArea: `Default`,
     frzReturn: C_FLG_OFF,
+    frzReturnType: `360deg`,
     shaking: C_FLG_OFF,
     effect: C_FLG_OFF,
     camoufrage: C_FLG_OFF,
@@ -1330,8 +1335,11 @@ const g_settings = {
         special: 0,
     },
 
-    playWindows: [`Default`, `Stairs`, `R-Stairs`, `Slope`, `R-Slope`, `Distorted`, `R-Distorted`, `SideScroll`, `R-SideScroll`],
+    playWindows: [`Default`, `Stairs`, `Slope`, `Distorted`, `SideScroll`],
     playWindowNum: 0,
+
+    playWindowTypes: [`---`, `Reverse`],
+    playWindowTypeNum: 0,
 
     stepAreas: [`Default`, `Halfway`, `2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`, `Alt-Crossing`],
     stepAreaLayers: [`2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`, `Alt-Crossing`],
@@ -1340,7 +1348,10 @@ const g_settings = {
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
     frzReturnNum: 0,
 
-    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`],
+    frzReturnTypes: [`360deg`, `120deg`, `60deg`, `±360deg`, `±120deg`, `Pendulum`],
+    frzReturnTypeNum: 0,
+
+    shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`, `H-Drunk`],
     shakingNum: 0,
 
     effects: [C_FLG_OFF, `Dizzy`, `Spin`, `Wave`, `Storm`, `Blinking`, `Squids`],
@@ -1394,7 +1405,9 @@ const g_transPriority = {
     playWindow: 100,
     stepArea: 110,
     frzReturn: 120,
-    shaking: 130,
+    shakingR: 130,
+    shakingX: 140,
+    shakingY: 150,
     scale: 200,
 };
 
@@ -1589,6 +1602,7 @@ const resetXY = () => {
 
 /**
  * データ消去用管理関数
+ * - 対応するキー名: g_settings.dataMgtNum で定義したキー
  */
 const g_resetFunc = new Map([
     ['highscores', () => {
@@ -1638,6 +1652,7 @@ const g_storageFunc = new Map([
 
 /**
  * シャッフル適用関数
+ * - 対応するキー名: g_settings.shuffles
  * @param {number} keyNum
  * @param {array} shuffleGroup
  */
@@ -1662,6 +1677,7 @@ const g_shuffleFunc = new Map([
 
 /**
  * モーション適用関数
+ * - 対応するキー名: g_settings.motions
  * @param {array} frms フレーム別の速度設定用配列。配列の15がステップゾーン上、0～14は矢印の枠外管理用
  */
 const g_motionFunc = new Map([
@@ -1676,6 +1692,7 @@ const g_motionFunc = new Map([
 
 /**
  * モーション適用中のアルファ値制御関数
+ * - 対応するキー名: g_settings.motions
  * @param {object} _obj 対象オブジェクト
  * @param {object} _property 対象オブジェクトのプロパティ情報 (g_attrObj[オブジェクト名])
  */
@@ -1700,24 +1717,23 @@ const motionAlphaToggle = (_obj, _property) => {
 
 /**
  * PlayWindow適用関数
+ * - 対応するキー名: g_settings.playWindows
  */
-const g_changeStairs = (_rad) => `rotate(${_rad}deg)`;
-const g_changeSkew = (_rad) => `Skew(${_rad}deg, ${_rad}deg) scaleY(0.9)`;
+const g_playWindowDir = () => g_stateObj.playWindowType === `Reverse` ? 1 : -1;
+const g_changeStairs = (_rad) => `rotate(${_rad * g_playWindowDir()}deg)`;
+const g_changeSkew = (_rad) => `Skew(${_rad * g_playWindowDir()}deg, ${_rad * g_playWindowDir()}deg) scaleY(0.9)`;
 
 const g_playWindowFunc = new Map([
     ['Default', () => ``],
-    ['Stairs', () => g_changeStairs(-8)],
-    ['R-Stairs', () => g_changeStairs(8)],
-    ['Slope', () => g_changeStairs(-g_slopeAngle())],
-    ['R-Slope', () => g_changeStairs(g_slopeAngle())],
-    ['Distorted', () => g_changeSkew(-15)],
-    ['R-Distorted', () => g_changeSkew(15)],
-    ['SideScroll', () => g_changeStairs(-90)],
-    ['R-SideScroll', () => g_changeStairs(90)],
+    ['Stairs', () => g_changeStairs(8)],
+    ['Slope', () => g_changeStairs(g_slopeAngle())],
+    ['Distorted', () => g_changeSkew(15)],
+    ['SideScroll', () => g_changeStairs(90)],
 ]);
 
 /**
  * StepArea適用関数
+ * - 対応するキー名: g_settings.stepAreas
  */
 const g_arrowGroupSprite = [`stepSprite`, `arrowSprite`, `frzHitSprite`];
 const halfwayOffset = _j => (_j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2);
@@ -1777,62 +1793,87 @@ const g_stepAreaFunc = new Map([
 
 /**
  * Shaking適用関数
+ * - 対応するキー名: g_settings.shakings
+ * - Drunk系は補正座標が0になったときに判定を行い、移動方向や回転を切り替える
  */
 const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25);
 const g_shakingFunc = new Map([
     ['OFF', () => true],
-    ['Horizontal', () => {
-        if (g_scoreObj.baseFrame % 2 === 0)
-            addTransform(`mainSprite`, `shakingX`, `translateX(${getShakingDist()}px)`, g_transPriority.shaking)
+    ['Horizontal', (_multi = 1) => {
+        addTransform(`mainSprite`, `shakingX_base`, `translateX(${getShakingDist() * _multi}px)`, g_transPriority.shakingX)
     }],
-    ['Vertical', () => {
-        if (g_scoreObj.baseFrame % 2 === 0)
-            addTransform(`mainSprite`, `shakingY`, `translateY(${getShakingDist() / 2}px)`, g_transPriority.shaking)
+    ['Vertical', (_multi = 1) => {
+        addTransform(`mainSprite`, `shakingY_base`, `translateY(${getShakingDist() / 2 * _multi}px)`, g_transPriority.shakingY)
     }],
-    ['X-Horizontal', () => {
-        if (g_scoreObj.baseFrame % 2 === 0)
-            for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addTransform(`mainSprite${j}`, `shakingX`, `translateX(${getDirFromLayer(j) * (4 / 3) * getShakingDist()}px)`, g_transPriority.shaking);
-            }
+    ['X-Horizontal', (_multi = 1) => {
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addTransform(`mainSprite${j}`, `shakingX_layer`, `translateX(${getDirFromLayer(j) * (4 / 3) * getShakingDist() * _multi}px)`, g_transPriority.shakingX);
+        }
     }],
-    ['X-Vertical', () => {
-        if (g_scoreObj.baseFrame % 2 === 0)
-            for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addTransform(`mainSprite${j}`, `shakingY`, `translateY(${getDirFromLayer(j) * getShakingDist()}px)`, g_transPriority.shaking);
-            }
+    ['X-Vertical', (_multi = 1) => {
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            addTransform(`mainSprite${j}`, `shakingY_layer`, `translateY(${getDirFromLayer(j) * getShakingDist() * _multi}px)`, g_transPriority.shakingY);
+        }
     }],
-    ['Drunk', () => {
-        if (g_scoreObj.baseFrame % 2 === 0) {
-            // Drunkは揺れの軸が途中で変わるため、基準位置取得のためにmainSpriteのみaddX, addYを使用
-            const shakeX = g_posXs.mainSprite?.get(`shakingX`) ?? 0;
-            const shakeY = g_posYs.mainSprite?.get(`shakingY`) ?? 0;
-            if (shakeX === 0 && shakeY === 0) {
-                g_workObj.drunkXFlg = Math.random() < 0.5;
-                g_workObj.drunkYFlg = Math.random() < 0.5;
-            }
-            if (g_workObj.drunkXFlg) {
-                const deltaX = getShakingDist();
-                addX(`mainSprite`, `shakingX`, deltaX, { priority: g_transPriority.shaking });
-                addTransform(`infoSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
-                addTransform(`judgeSprite`, `shakingX`, `translateX(${deltaX}px)`, g_transPriority.shaking);
-            }
-            if (g_workObj.drunkYFlg) {
-                const deltaY = getShakingDist() / 2;
-                addY(`mainSprite`, `shakingY`, deltaY, { priority: g_transPriority.shaking });
-                addTransform(`infoSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
-                addTransform(`judgeSprite`, `shakingY`, `translateY(${deltaY}px)`, g_transPriority.shaking);
+    ['Drunk', (_multi = 1) => {
+        const dist = getShakingDist();
+        if (g_workObj.drunkXFlg) {
+            const deltaX = dist * _multi;
+            addTransform(`mainSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
+            addTransform(`infoSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
+            addTransform(`judgeSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
+        }
+        if (g_workObj.drunkYFlg) {
+            const deltaY = dist / 2 * _multi;
+            addTransform(`mainSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
+            addTransform(`infoSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
+            addTransform(`judgeSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
+        }
+        // 補正がゼロになったときに軸の移動方法をランダムで決定
+        if (dist === 0) {
+            g_workObj.drunkXFlg = Math.random() < 0.5;
+            g_workObj.drunkYFlg = Math.random() < 0.5;
+
+            if (!g_workObj.drunkXFlg && !g_workObj.drunkYFlg) {
+                g_workObj.drunkYFlg = true;
             }
         }
     }],
     ['S-Drunk', () => {
-        if (g_scoreObj.baseFrame % 2 === 0) {
-            g_shakingFunc.get(`Drunk`)();
-            if (g_workObj.drunkXFlg) {
-                g_shakingFunc.get(`X-Vertical`)();
-            }
-            if (g_workObj.drunkYFlg) {
-                g_shakingFunc.get(`X-Horizontal`)();
-            }
+        // Drunkとはあえて異なる軸の補正を掛ける
+        if (g_workObj.drunkXFlg) {
+            g_shakingFunc.get(`X-Vertical`)(2);
+        }
+        if (g_workObj.drunkYFlg) {
+            g_shakingFunc.get(`X-Horizontal`)(2);
+        }
+        g_shakingFunc.get(`Drunk`)(2);
+    }],
+    ['H-Drunk', () => {
+        const dist = getShakingDist();
+
+        // X方向、Y方向の移動方法。S-Drunkと同様、Drunkとあえて異なる軸の補正を掛ける
+        // 本来は適用するtransform先が異なるためdelTransformを行う必要があるが、補正ゼロ時に切り替えるため問題なし
+        if (g_workObj.drunkXFlg) {
+            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Vertical`)(3);
+        }
+        if (g_workObj.drunkYFlg) {
+            g_shakingFunc.get((g_workObj.drunkAxisFlg ? `X-` : ``) + `Horizontal`)(3);
+        }
+        // 軸回転の設定（判定・メイン部分は常時回転、メイン内の各層は条件式により回転するかどうかを決定）
+        for (let j = 0; j < g_stateObj.layerNum; j++) {
+            g_workObj.drunkRotateFlg
+                ? addTransform(`mainSprite${j}`, `shakingR_layer`, `rotate(${getDirFromLayer(j) * dist}deg)`, g_transPriority.shakingR)
+                : delTransform(`mainSprite${j}`, `shakingR_layer`);
+        }
+        addTransform(`mainSprite`, `shakingR_base`, `rotate(${dist / 2}deg)`, g_transPriority.shakingR);
+        addTransform(`infoSprite`, `shakingR_base`, `rotate(${dist / 2}deg)`, g_transPriority.shakingR);
+
+        g_shakingFunc.get(`Drunk`)(2);
+        if (dist === 0) {
+            // 補正がゼロになったときに軸の移動方法と回転方法をランダムで決定
+            g_workObj.drunkAxisFlg = Math.random() >= 0.33;
+            g_workObj.drunkRotateFlg = Math.random() >= 0.66;
         }
     }],
 ]);
@@ -1858,6 +1899,7 @@ const g_getSecondaryAxis = (_primaryAxis) => {
 
 /**
  * FrzReturn適用関数
+ * - 対応するキー名: g_settings.frzReturns
  */
 const g_frzReturnFunc = new Map([
     ['OFF', () => true],
@@ -1874,6 +1916,91 @@ const g_frzReturnFunc = new Map([
         return [axis1, axis2];
     }],
 ]);
+
+/**
+ * FrzReturnの種別ごとの移動配列を作成
+ * - 対応するキー名: g_settings.frzReturnTypes
+ * - キー: FrzReturn種別 (例: "60deg", "±120deg")
+ * - 値: 移動配列を返す関数 (オプション引数 _dir で方向指定、デフォルト 1)
+ * @type {Map<string, (dir?: number) => number[][]>}
+ */
+const g_frzReturnSeqFunc = new Map([
+    [`60deg`, (_dir = 1) => {
+        const steps = 25;
+        return [
+            [
+                ...makeEaseSequence(0, 60 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(60 * _dir, 0, steps, easeInOutQuad),
+            ],
+        ];
+    }],
+    [`120deg`, (_dir = 1) => {
+        const steps = 40;
+        return [
+            [
+                ...makeEaseSequence(0, 120 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(120 * _dir, 0, steps, easeInOutQuad),
+            ],
+        ];
+    }],
+    [`360deg`, (_dir = 1) => {
+        return [
+            Array.from({ length: 91 }, (_, i) => i * 4 * _dir)
+        ];
+    }],
+    [`Pendulum`, (_dir = 1) => {
+        const steps = 25;
+        return [
+            [
+                ...makeEaseSequence(0, -60 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(-60 * _dir, 60 * _dir, steps * 2, easeInOutQuad),
+                ...makeEaseSequence(60 * _dir, 0, steps, easeInOutQuad),
+            ],
+            [
+                ...makeEaseSequence(0, -70 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(-70 * _dir, 70 * _dir, steps * 2, easeInOutQuad),
+                ...makeEaseSequence(70 * _dir, 0, steps, easeInOutQuad),
+            ],
+            [
+                ...makeEaseSequence(0, -80 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(-80 * _dir, 80 * _dir, steps * 2, easeInOutQuad),
+                ...makeEaseSequence(80 * _dir, 0, steps, easeInOutQuad),
+            ],
+        ];
+    }],
+    [`±120deg`, () => g_frzReturnSeqFunc.get(`120deg`)().concat(g_frzReturnSeqFunc.get(`120deg`)(-1))],
+    [`±360deg`, () => g_frzReturnSeqFunc.get(`360deg`)().concat(g_frzReturnSeqFunc.get(`360deg`)(-1))],
+]);
+
+/**
+ * イージング作成関数
+ * @param {(t: number) => number} _t 
+ * @returns {number}
+ */
+const easeInOutQuad = _t => _t < 0.5
+    ? 2 * _t * _t
+    : 1 - Math.pow(-2 * _t + 2, 2) / 2;
+
+/**
+ * イージング用の移動配列の作成
+ * @param {number} _start 
+ * @param {number} _end 
+ * @param {number} _steps 
+ * @param {number} _easing 
+ * @returns {number[]}
+ */
+const makeEaseSequence = (_start, _end, _steps, _easing) => {
+    if (_steps <= 0) {
+        return [_start];
+    }
+    const seq = [];
+    for (let i = 0; i <= _steps; i++) {
+        const t = i / _steps;
+        const e = _easing(t);
+        seq.push(_start + (_end - _start) * e);
+    }
+    return seq;
+};
 
 /**
  * Effect適用関数
@@ -1893,6 +2020,10 @@ const g_setEffect = (_arrowEffect, _frzEffect = ``, _frzArrowEffect = _arrowEffe
         }
     }
 };
+/**
+ * Effect定義関数
+ * - 対応するキー名: g_settings.effects
+ */
 const g_effectFunc = new Map([
     ['OFF', () => true],
     ['Dizzy', () => g_setEffect(`effects-dizzy`)],
@@ -2373,6 +2504,7 @@ const g_shortcutObj = {
         Numpad0: { id: `btnPrecond9` },
         Escape: { id: `btnBack` },
         ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
     },
     option: {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
@@ -2622,18 +2754,29 @@ const g_shortcutObj = {
     },
     exSetting: {
         ShiftLeft_KeyP: { id: `lnkPlayWindowL` },
+        ShiftRight_KeyP: { id: `lnkPlayWindowL` },
         ShiftLeft_KeyS: { id: `lnkStepAreaL` },
+        ShiftRight_KeyS: { id: `lnkStepAreaL` },
         ShiftLeft_KeyF: { id: `lnkFrzReturnL` },
+        ShiftRight_KeyF: { id: `lnkFrzReturnL` },
         ShiftLeft_KeyH: { id: `lnkShakingL` },
+        ShiftRight_KeyH: { id: `lnkShakingL` },
         ShiftLeft_KeyE: { id: `lnkEffectL` },
+        ShiftRight_KeyE: { id: `lnkEffectL` },
         ShiftLeft_KeyC: { id: `lnkCamoufrageL` },
+        ShiftRight_KeyC: { id: `lnkCamoufrageL` },
         ShiftLeft_KeyW: { id: `lnkSwappingL` },
+        ShiftRight_KeyW: { id: `lnkSwappingL` },
         ShiftLeft_KeyJ: { id: `lnkJudgRangeL` },
+        ShiftRight_KeyJ: { id: `lnkJudgRangeL` },
         ShiftLeft_KeyA: { id: `lnkAutoRetryL` },
+        ShiftRight_KeyA: { id: `lnkAutoRetryL` },
 
         KeyP: { id: `lnkPlayWindowR` },
+        KeyR: { id: `lnkPlayWindowType` },
         KeyS: { id: `lnkStepAreaR` },
         KeyF: { id: `lnkFrzReturnR` },
+        KeyD: { id: `lnkFrzReturnType` },
         KeyH: { id: `lnkShakingR` },
         KeyE: { id: `lnkEffectR` },
         KeyC: { id: `lnkCamoufrageR` },
@@ -4210,6 +4353,7 @@ const g_lblNameObj = {
     'u_Asymmetry': `Asymmetry`,
     'u_Flat': `Flat`,
     'u_R-': `R-`,
+    'u_---': `---`,
     'u_Reverse': `Reverse`,
 
     'u_Mirror': `Mirror`,
@@ -4250,13 +4394,9 @@ const g_lblNameObj = {
     'u_Hid&Sud+': `Hid&Sud+`,
 
     'u_Stairs': `Stairs`,
-    'u_R-Stairs': `R-Stairs`,
     'u_Slope': `Slope`,
-    'u_R-Slope': `R-Slope`,
     'u_Distorted': `Distorted`,
-    'u_R-Distorted': `R-Distorted`,
     'u_SideScroll': `SideScroll`,
-    'u_R-SideScroll': `R-SideScroll`,
 
     'u_Halfway': `Halfway`,
     'u_2Step': `2Step`,
@@ -4278,6 +4418,7 @@ const g_lblNameObj = {
     'u_X-Vertical': `X-Vertical`,
     'u_Drunk': `Drunk`,
     'u_S-Drunk': `S-Drunk`,
+    'u_H-Drunk': `H-Drunk`,
 
     'u_Dizzy': `Dizzy`,
     'u_Spin': `Spin`,
@@ -4390,6 +4531,13 @@ const g_lang_lblNameObj = {
         s_printTitle: `Dancing☆Onigiri レベル計算ツール+++`,
         s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
 
+        'u_60deg': `60°`,
+        'u_120deg': `120°`,
+        'u_360deg': `360°`,
+        'u_Pendulum': `Pendulum`,
+        'u_±120deg': `±120°`,
+        'u_±360deg': `±360°`,
+
         j_ii: "(・∀・)ｲｲ!!",
         j_shakin: "(`・ω・)ｼｬｷﾝ",
         j_matari: "( ´∀`)ﾏﾀｰﾘ",
@@ -4433,6 +4581,13 @@ const g_lang_lblNameObj = {
         s_resetResult: `Reset`,
         s_printTitle: `Dancing☆Onigiri Level Calculator+++`,
         s_printHeader: `Level\tChords\tJack\tAll\tArrow\tFrz\tAPM\tTime`,
+
+        'u_60deg': `60deg`,
+        'u_120deg': `120deg`,
+        'u_360deg': `360deg`,
+        'u_Pendulum': `Pendulum`,
+        'u_±120deg': `±120deg`,
+        'u_±360deg': `±360deg`,
 
         j_ii: ":D Perfect!!",
         j_shakin: ":) Great!",
@@ -4521,13 +4676,16 @@ const g_lang_msgObj = {
 
         playWindow: `ステップゾーン及び矢印の位置を全体的に回転する等の設定です。\n[Stairs/Slope] ステップゾーンを階段状にします\n[Distorted] 画面を歪ませます\n` +
             `[SideScroll] 横スクロールモードになります`,
+        playWindowType: `[Reverse] ステップゾーン及び矢印の位置について逆方向の回転が掛かります`,
         stepArea: `ステップゾーンの位置を変更します。\n[Halfway] ステップゾーンが中央に表示されます\n[2Step] ステップゾーンが2段に分かれて流れてきます\n` +
             `[Mismatched/R-Mismatched] スクロールの向きが上下で異なる方向に流れます\n` +
             `[X-Flower] レーンが花びらのように広がります\n[Alt-Crossing] レーンが交互に違う方向から流れます`,
         frzReturn: `フリーズアロー到達時及び矢印の回復判定が100の倍数に達するごとに、X/Y/Z軸のいずれかに回転します`,
+        frzReturnType: `[360°/120°/60°] 指定の角度まで回転します\n[±360°/±120°] 360°/120°に加えて逆回転が掛かることがあります\n[Pendulum] 振り子のように左右に動きます`,
         shaking: `ステップゾーン及び矢印を揺らす設定です。\n[Horizontal] 横方向に揺らします\n[Vertical] 縦方向に揺らします\n` +
             `[X-Horizontal] レイヤーごとに左右交互の向きで横に揺らします\n[X-Vertical] レイヤーごとに上下交互の向きで縦に揺らします\n[Drunk] 画面全体を上下左右ランダムに揺らします。画面酔いに注意してください\n` +
-            `[S-Drunk] 画面全体を上下左右ランダムに揺らし、さらにレイヤーごとに上下左右に揺らします`,
+            `[S-Drunk] 画面全体を上下左右ランダムに揺らし、さらにレイヤーごとに上下左右に揺らします\n` +
+            `[H-Drunk] S-Drunkより大きく上下に揺らし、さらに回転が掛かります`,
         effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
         camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
         swapping: `ステップゾーンの位置をグループ単位で入れ替えます。`,
@@ -4614,14 +4772,17 @@ const g_lang_msgObj = {
 
         playWindow: `This is the setting for overall rotation of the step zone and arrow position, etc.\n[Stairs/Slope] The step zone is in a staircase shape.\n[Distorted] Distorts the screen.\n` +
             `[SideScroll] It becomes a side scroll mode.`,
+        playWindowType: `[Reverse] Applies reverse rotation to the step zone and arrow positions.`,
         stepArea: `Change the position of the step zone.\n[Halfway] Step zones are centered.\n[2Step] Step zones are divided into two layers.\n` +
             `[Mismatched/R-Mismatched] Scroll direction flows in different directions up and down.\n` +
             `[X-Flower] Lanes spread out like flower petals.\n[Alt-Crossing] Lanes flow from different directions alternately.`,
         frzReturn: `When the Freeze Arrow is reached, and every time the arrow's recovery judgment \nreaches a multiple of 100, it will rotate on either the X, Y, or Z axis.`,
+        frzReturnType: `[360deg/120deg/60deg] Rotates to the specified angle.\n[±360deg/±120deg] May rotate in the opposite direction in addition to 360deg/120deg.\n[Pendulum] Moves back and forth like a pendulum.`,
         shaking: `This sets shaking for the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n` +
             `[X-Horizontal] Per-layer shaking with alternating left/right direction by layer.\n[X-Vertical] Per-layer shaking with alternating up/down direction by layer.\n` +
             `[Drunk] Shakes the entire screen randomly in all directions (may cause motion sickness).\n` +
-            `[S-Drunk] Shakes the entire screen randomly in all directions, and also shakes each layer randomly in all directions.`,
+            `[S-Drunk] Shakes the entire screen randomly in all directions, and also shakes each layer randomly in all directions.\n` +
+            `[H-Drunk] Adds stronger vertical movement than S-Drunk and adds rotation.`,
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
         camoufrage: `The appearance of the steps changes randomly with the same placement.`,
         swapping: `Replaces the position of step zones on a group-by-group basis.`,
