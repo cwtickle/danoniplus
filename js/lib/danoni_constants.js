@@ -1335,7 +1335,7 @@ const g_settings = {
         special: 0,
     },
 
-    playWindows: [`Default`, `Stairs`, `Slope`, `Distorted`, `SideScroll`,],
+    playWindows: [`Default`, `Stairs`, `Slope`, `Distorted`, `SideScroll`],
     playWindowNum: 0,
 
     playWindowTypes: [`---`, `Reverse`],
@@ -1602,6 +1602,7 @@ const resetXY = () => {
 
 /**
  * データ消去用管理関数
+ * - 対応するキー名: g_settings.dataMgtNum で定義したキー
  */
 const g_resetFunc = new Map([
     ['highscores', () => {
@@ -1651,6 +1652,7 @@ const g_storageFunc = new Map([
 
 /**
  * シャッフル適用関数
+ * - 対応するキー名: g_settings.shuffles
  * @param {number} keyNum
  * @param {array} shuffleGroup
  */
@@ -1675,6 +1677,7 @@ const g_shuffleFunc = new Map([
 
 /**
  * モーション適用関数
+ * - 対応するキー名: g_settings.motions
  * @param {array} frms フレーム別の速度設定用配列。配列の15がステップゾーン上、0～14は矢印の枠外管理用
  */
 const g_motionFunc = new Map([
@@ -1689,6 +1692,7 @@ const g_motionFunc = new Map([
 
 /**
  * モーション適用中のアルファ値制御関数
+ * - 対応するキー名: g_settings.motions
  * @param {object} _obj 対象オブジェクト
  * @param {object} _property 対象オブジェクトのプロパティ情報 (g_attrObj[オブジェクト名])
  */
@@ -1713,6 +1717,7 @@ const motionAlphaToggle = (_obj, _property) => {
 
 /**
  * PlayWindow適用関数
+ * - 対応するキー名: g_settings.playWindows
  */
 const g_playWindowDir = () => g_stateObj.playWindowType === `Reverse` ? 1 : -1;
 const g_changeStairs = (_rad) => `rotate(${_rad * g_playWindowDir()}deg)`;
@@ -1728,6 +1733,7 @@ const g_playWindowFunc = new Map([
 
 /**
  * StepArea適用関数
+ * - 対応するキー名: g_settings.stepAreas
  */
 const g_arrowGroupSprite = [`stepSprite`, `arrowSprite`, `frzHitSprite`];
 const halfwayOffset = _j => (_j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2);
@@ -1787,6 +1793,7 @@ const g_stepAreaFunc = new Map([
 
 /**
  * Shaking適用関数
+ * - 対応するキー名: g_settings.shakings
  * - Drunk系は補正座標が0になったときに判定を行い、移動方向や回転を切り替える
  */
 const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 25);
@@ -1892,6 +1899,7 @@ const g_getSecondaryAxis = (_primaryAxis) => {
 
 /**
  * FrzReturn適用関数
+ * - 対応するキー名: g_settings.frzReturns
  */
 const g_frzReturnFunc = new Map([
     ['OFF', () => true],
@@ -1911,6 +1919,7 @@ const g_frzReturnFunc = new Map([
 
 /**
  * FrzReturnの種別ごとの移動配列を作成
+ * - 対応するキー名: g_settings.frzReturnTypes
  * @param {string} _type 
  * @returns {number[][]}
  */
@@ -1992,6 +2001,10 @@ const g_setEffect = (_arrowEffect, _frzEffect = ``, _frzArrowEffect = _arrowEffe
         }
     }
 };
+/**
+ * Effect定義関数
+ * - 対応するキー名: g_settings.effects
+ */
 const g_effectFunc = new Map([
     ['OFF', () => true],
     ['Dizzy', () => g_setEffect(`effects-dizzy`)],
