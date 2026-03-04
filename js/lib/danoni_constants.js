@@ -2725,8 +2725,10 @@ const g_shortcutObj = {
         ShiftLeft_KeyA: { id: `lnkAutoRetryL` },
 
         KeyP: { id: `lnkPlayWindowR` },
+        KeyR: { id: `lnkPlayWindowType` },
         KeyS: { id: `lnkStepAreaR` },
         KeyF: { id: `lnkFrzReturnR` },
+        KeyD: { id: `lnkFrzReturnType` },
         KeyH: { id: `lnkShakingR` },
         KeyE: { id: `lnkEffectR` },
         KeyC: { id: `lnkCamoufrageR` },

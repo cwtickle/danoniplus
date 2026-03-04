@@ -8716,16 +8716,33 @@ const exSettingInit = () => {
 	 * @returns {HTMLDivElement}
 	 */
 	const createExpandedBtn = _name =>
-		createCss2Button(`lnk${toCapitalize(_name)}Type`, g_stateObj[`${_name}Type`], () => setSetting(1, `${_name}Type`),
+		createCss2Button(`lnk${toCapitalize(_name)}Type`, g_stateObj[`${_name}Type`],
+			() => {
+				setSetting(1, `${_name}Type`);
+				createExpandedScView(_name);
+			},
 			Object.assign(g_lblPosObj.btnReverse, {
-				cxtFunc: () => setSetting(-1, `${_name}Type`),
+				cxtFunc: () => {
+					setSetting(-1, `${_name}Type`);
+					createExpandedScView(_name);
+				},
 			}), g_cssObj.button_Default, g_cssObj[`button_RevON`]);
+
+	/**
+	 * 拡張ボタンのショートカット表示
+	 * @param {string} _name 
+	 */
+	const createExpandedScView = _name =>
+		createScText(document.getElementById(`lnk${toCapitalize(_name)}Type`), `${toCapitalize(_name)}Type`, {
+			displayName: `exSetting`, targetLabel: `lnk${toCapitalize(_name)}Type`, x: -10
+		});
 
 	createGeneralSetting(spriteList.playWindow, `playWindow`, {
 		addRFunc: () => setExpandedBtnSiz(`playWindow`, `Default`),
 	});
 	spriteList.playWindow.appendChild(createExpandedBtn(`playWindow`));
 	setExpandedBtnSiz(`playWindow`, `Default`);
+	createExpandedScView(`playWindow`);
 
 	createGeneralSetting(spriteList.stepArea, `stepArea`);
 	createGeneralSetting(spriteList.frzReturn, `frzReturn`, {
@@ -8733,6 +8750,7 @@ const exSettingInit = () => {
 	});
 	spriteList.frzReturn.appendChild(createExpandedBtn(`frzReturn`));
 	setExpandedBtnSiz(`frzReturn`);
+	createExpandedScView(`frzReturn`);
 
 	createGeneralSetting(spriteList.shaking, `shaking`);
 	createGeneralSetting(spriteList.effect, `effect`, {
