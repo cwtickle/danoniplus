@@ -1170,7 +1170,7 @@ const g_stateObj = {
     playWindowType: `---`,
     stepArea: `Default`,
     frzReturn: C_FLG_OFF,
-    frzReturnType: `60deg`,
+    frzReturnType: `+60deg`,
     shaking: C_FLG_OFF,
     effect: C_FLG_OFF,
     camoufrage: C_FLG_OFF,
@@ -1348,7 +1348,7 @@ const g_settings = {
     frzReturns: [C_FLG_OFF, `X-Axis`, `Y-Axis`, `Z-Axis`, `Random`, `XY-Axis`, `XZ-Axis`, `YZ-Axis`, `Random+`],
     frzReturnNum: 0,
 
-    frzReturnTypes: [`60deg`, `120deg`, `360deg`, `60deg+`, `120deg+`, `360deg+`],
+    frzReturnTypes: [`+60deg`, `+120deg`, `+360deg`, `Pendulum`, `±120deg`, `±360deg`],
     frzReturnTypeNum: 0,
 
     shakings: [C_FLG_OFF, `Horizontal`, `Vertical`, `X-Horizontal`, `X-Vertical`, `Drunk`, `S-Drunk`, `H-Drunk`],
@@ -1920,37 +1920,51 @@ const g_frzReturnFunc = new Map([
 /**
  * FrzReturnの種別ごとの移動配列を作成
  * - 対応するキー名: g_settings.frzReturnTypes
- * @param {string} _type 
- * @returns {number[][]}
+ * - キー: FrzReturn種別 (例: "+60deg", "±120deg")
+ * - 値: 移動配列を返す関数 (オプション引数 _dir で方向指定、デフォルト 1)
+ * @type {Map<string, (dir?: number) => number[][]>}
  */
 const g_frzReturnSeqFunc = new Map([
-    [`60deg`, (_dir = 1) => {
-        const stepF40 = 25;
+    [`+60deg`, (_dir = 1) => {
+        const steps = 25;
         return [
             [
-                ...makeEaseSequence(0, -60 * _dir, stepF40, easeInOutQuad),
-                ...makeEaseSequence(-60 * _dir, 60 * _dir, stepF40 * 2, easeInOutQuad),
-                ...makeEaseSequence(60 * _dir, 0, stepF40, easeInOutQuad),
+                ...makeEaseSequence(0, 60 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(60 * _dir, 0, steps, easeInOutQuad),
             ],
         ];
     }],
-    [`120deg`, (_dir = 1) => {
-        const stepF120 = 40;
+    [`+120deg`, (_dir = 1) => {
+        const steps = 40;
         return [
             [
-                ...makeEaseSequence(0, 120 * _dir, stepF120, easeInOutQuad),
-                ...makeEaseSequence(120 * _dir, 0, stepF120, easeInOutQuad),
+                ...makeEaseSequence(0, 120 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(120 * _dir, 0, steps, easeInOutQuad),
             ],
         ];
     }],
-    [`360deg`, (_dir = 1) => {
+    [`+360deg`, (_dir = 1) => {
         return [
             Array.from({ length: 91 }, (_, i) => i * 4 * _dir)
         ];
     }],
-    [`60deg+`, () => g_frzReturnSeqFunc.get(`60deg`)().concat(g_frzReturnSeqFunc.get(`60deg`)(-1))],
-    [`120deg+`, () => g_frzReturnSeqFunc.get(`120deg`)().concat(g_frzReturnSeqFunc.get(`120deg`)(-1))],
-    [`360deg+`, () => g_frzReturnSeqFunc.get(`360deg`)().concat(g_frzReturnSeqFunc.get(`360deg`)(-1))],
+    [`Pendulum`, () => {
+        const steps = 25;
+        return [
+            [
+                ...makeEaseSequence(0, -60 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(-60 * _dir, 60 * _dir, steps * 2, easeInOutQuad),
+                ...makeEaseSequence(60 * _dir, 0, steps, easeInOutQuad),
+            ],
+            [
+                ...makeEaseSequence(0, -90 * _dir, steps, easeInOutQuad),
+                ...makeEaseSequence(-90 * _dir, 90 * _dir, steps * 2, easeInOutQuad),
+                ...makeEaseSequence(90 * _dir, 0, steps, easeInOutQuad),
+            ],
+        ];
+    }],
+    [`±120deg`, () => g_frzReturnSeqFunc.get(`+120deg`)().concat(g_frzReturnSeqFunc.get(`+120deg`)(-1))],
+    [`±360deg`, () => g_frzReturnSeqFunc.get(`+360deg`)().concat(g_frzReturnSeqFunc.get(`+360deg`)(-1))],
 ]);
 
 /**
