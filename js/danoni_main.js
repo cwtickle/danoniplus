@@ -8726,6 +8726,7 @@ const exSettingInit = () => {
 					setSetting(-1, `${_name}Type`);
 					createExpandedScView(_name);
 				},
+				title: g_msgObj[`${_name}Type`] ?? ``,
 			}), g_cssObj.button_Default, g_cssObj[`button_RevON`]);
 
 	/**

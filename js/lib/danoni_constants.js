@@ -4665,10 +4665,12 @@ const g_lang_msgObj = {
 
         playWindow: `ステップゾーン及び矢印の位置を全体的に回転する等の設定です。\n[Stairs/Slope] ステップゾーンを階段状にします\n[Distorted] 画面を歪ませます\n` +
             `[SideScroll] 横スクロールモードになります`,
+        playWindowType: `[Reverse] ステップゾーン及び矢印の位置について逆方向の回転が掛かります`,
         stepArea: `ステップゾーンの位置を変更します。\n[Halfway] ステップゾーンが中央に表示されます\n[2Step] ステップゾーンが2段に分かれて流れてきます\n` +
             `[Mismatched/R-Mismatched] スクロールの向きが上下で異なる方向に流れます\n` +
             `[X-Flower] レーンが花びらのように広がります\n[Alt-Crossing] レーンが交互に違う方向から流れます`,
         frzReturn: `フリーズアロー到達時及び矢印の回復判定が100の倍数に達するごとに、X/Y/Z軸のいずれかに回転します`,
+        frzReturnType: `[+60deg/+120deg/+360deg] 指定の角度まで回転します\n[Pendulum] 振り子のように左右に動きます\n[±120deg/±360deg] +120deg/+360degに加えて逆回転が掛かることがあります`,
         shaking: `ステップゾーン及び矢印を揺らす設定です。\n[Horizontal] 横方向に揺らします\n[Vertical] 縦方向に揺らします\n` +
             `[X-Horizontal] レイヤーごとに左右交互の向きで横に揺らします\n[X-Vertical] レイヤーごとに上下交互の向きで縦に揺らします\n[Drunk] 画面全体を上下左右ランダムに揺らします。画面酔いに注意してください\n` +
             `[S-Drunk] 画面全体を上下左右ランダムに揺らし、さらにレイヤーごとに上下左右に揺らします\n` +
@@ -4759,10 +4761,12 @@ const g_lang_msgObj = {
 
         playWindow: `This is the setting for overall rotation of the step zone and arrow position, etc.\n[Stairs/Slope] The step zone is in a staircase shape.\n[Distorted] Distorts the screen.\n` +
             `[SideScroll] It becomes a side scroll mode.`,
+        playWindowType: `[Reverse] Applies reverse rotation to the step zone and arrow positions.`,
         stepArea: `Change the position of the step zone.\n[Halfway] Step zones are centered.\n[2Step] Step zones are divided into two layers.\n` +
             `[Mismatched/R-Mismatched] Scroll direction flows in different directions up and down.\n` +
             `[X-Flower] Lanes spread out like flower petals.\n[Alt-Crossing] Lanes flow from different directions alternately.`,
         frzReturn: `When the Freeze Arrow is reached, and every time the arrow's recovery judgment \nreaches a multiple of 100, it will rotate on either the X, Y, or Z axis.`,
+        frzReturnType: `[+60deg/+120deg/+360deg] Rotates to the specified angle.\n[Pendulum] Moves back and forth like a pendulum.\n[±120deg/±360deg] May rotate in the opposite direction in addition to +120deg/+360deg.`,
         shaking: `This sets shaking for the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n` +
             `[X-Horizontal] Per-layer shaking with alternating left/right direction by layer.\n[X-Vertical] Per-layer shaking with alternating up/down direction by layer.\n` +
             `[Drunk] Shakes the entire screen randomly in all directions (may cause motion sickness).\n` +
