@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/02/28 (v39.8.17)
+ * Revised : 2026/03/06 (v39.8.18)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2235,14 +2235,23 @@ const g_shortcutObj = {
     },
     exSetting: {
         ShiftLeft_KeyP: { id: `lnkPlayWindowL` },
+        ShiftRight_KeyP: { id: `lnkPlayWindowL` },
         ShiftLeft_KeyS: { id: `lnkStepAreaL` },
+        ShiftRight_KeyS: { id: `lnkStepAreaL` },
         ShiftLeft_KeyF: { id: `lnkFrzReturnL` },
+        ShiftRight_KeyF: { id: `lnkFrzReturnL` },
         ShiftLeft_KeyH: { id: `lnkShakingL` },
+        ShiftRight_KeyH: { id: `lnkShakingL` },
         ShiftLeft_KeyE: { id: `lnkEffectL` },
+        ShiftRight_KeyE: { id: `lnkEffectL` },
         ShiftLeft_KeyC: { id: `lnkCamoufrageL` },
+        ShiftRight_KeyC: { id: `lnkCamoufrageL` },
         ShiftLeft_KeyW: { id: `lnkSwappingL` },
+        ShiftRight_KeyW: { id: `lnkSwappingL` },
         ShiftLeft_KeyJ: { id: `lnkJudgRangeL` },
+        ShiftRight_KeyJ: { id: `lnkJudgRangeL` },
         ShiftLeft_KeyA: { id: `lnkAutoRetryL` },
+        ShiftRight_KeyA: { id: `lnkAutoRetryL` },
 
         KeyP: { id: `lnkPlayWindowR` },
         KeyS: { id: `lnkStepAreaR` },
