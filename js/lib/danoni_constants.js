@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/02/28 (v43.6.10)
+ * Revised : 2026/03/06 (v43.6.11)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2228,6 +2228,7 @@ const g_shortcutObj = {
         Numpad0: { id: `btnPrecond9` },
         Escape: { id: `btnBack` },
         ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
     },
     option: {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
@@ -2474,14 +2475,23 @@ const g_shortcutObj = {
     },
     exSetting: {
         ShiftLeft_KeyP: { id: `lnkPlayWindowL` },
+        ShiftRight_KeyP: { id: `lnkPlayWindowL` },
         ShiftLeft_KeyS: { id: `lnkStepAreaL` },
+        ShiftRight_KeyS: { id: `lnkStepAreaL` },
         ShiftLeft_KeyF: { id: `lnkFrzReturnL` },
+        ShiftRight_KeyF: { id: `lnkFrzReturnL` },
         ShiftLeft_KeyH: { id: `lnkShakingL` },
+        ShiftRight_KeyH: { id: `lnkShakingL` },
         ShiftLeft_KeyE: { id: `lnkEffectL` },
+        ShiftRight_KeyE: { id: `lnkEffectL` },
         ShiftLeft_KeyC: { id: `lnkCamoufrageL` },
+        ShiftRight_KeyC: { id: `lnkCamoufrageL` },
         ShiftLeft_KeyW: { id: `lnkSwappingL` },
+        ShiftRight_KeyW: { id: `lnkSwappingL` },
         ShiftLeft_KeyJ: { id: `lnkJudgRangeL` },
+        ShiftRight_KeyJ: { id: `lnkJudgRangeL` },
         ShiftLeft_KeyA: { id: `lnkAutoRetryL` },
+        ShiftRight_KeyA: { id: `lnkAutoRetryL` },
 
         KeyP: { id: `lnkPlayWindowR` },
         KeyS: { id: `lnkStepAreaR` },

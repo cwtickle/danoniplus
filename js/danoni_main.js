@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/02/28
+ * Revised : 2026/03/06
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 43.6.10`;
-const g_revisedDate = `2026/02/28`;
+const g_version = `Ver 43.6.11`;
+const g_revisedDate = `2026/03/06`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -13888,7 +13888,7 @@ const judgeRecovery = (_name, _difFrame) => {
 	lifeRecovery();
 	finishViewing();
 
-	if (g_stateObj.freezeReturn !== C_FLG_OFF) {
+	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		if ((g_resultObj.ii + g_resultObj.shakin) % 100 === 0 && !g_workObj.frzReturnFlg) {
 			changeReturn(1, g_frzReturnFunc.get(g_stateObj.frzReturn)());
 		}
