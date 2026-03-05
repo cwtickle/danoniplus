@@ -6564,6 +6564,8 @@ const updateSettingSummary = () => {
 	document.getElementById(`lblSummaryEnvironment`).textContent =
 		`(Adj: ${g_stateObj.adjustment} f, Volume: ${g_stateObj.volume}%, ` +
 		`ColorType: ${g_colorType}, KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1})`;
+
+	g_customJsObj.settingSummary.forEach(func => func());
 };
 
 /**
