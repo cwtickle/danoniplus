@@ -6518,7 +6518,7 @@ const commonSettingBtn = _labelName => {
 
 const makeSettingSummary = () => {
 	const tmpDiv = createEmptySprite(divRoot, `settingSumSprite`, g_windowObj.settingSumSprite);
-	tmpDiv.style.background = g_headerObj.baseBrightFlg ? `#ffffffcc` : `#000000cc`;
+	tmpDiv.style.background = g_headerObj.baseBrightFlg ? `#ffffffee` : `#000000cc`;
 
 	multiAppend(tmpDiv,
 		createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
@@ -6557,7 +6557,7 @@ const updateSettingSummary = () => {
 	const estimatedHighscoreCondition = g_stateObj.dataSaveFlg && (g_stateObj.autoPlay !== C_FLG_ALL && g_headerObj.playbackRate === 1 && g_stateObj.fadein < 10 &&
 		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg)));
 
-	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData + `${estimatedHighscoreCondition ? '' : ` | <span class="common_kita">No Records</span>`}`;
+	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData + `${estimatedHighscoreCondition ? '' : ` | <span class="common_kita common_bold">No Records</span>`}`;
 	document.getElementById(`lblSummaryPlaystyleInfo`).textContent = settingData.playStyleData;
 	document.getElementById(`lblSummaryDisplayInfo`).textContent = settingData.displayData;
 	document.getElementById(`lblSummaryDisplay2Info`).textContent = settingData.display2Data;
@@ -8730,7 +8730,7 @@ const exSettingInit = () => {
 					createExpandedScView(_name);
 				},
 				title: g_msgObj[`${_name}Type`] ?? ``,
-			}), g_cssObj.button_Default, g_cssObj[`button_RevON`]);
+			}), g_cssObj.button_Default, g_cssObj.button_RevON);
 
 	/**
 	 * 拡張ボタンのショートカット表示
