@@ -4845,6 +4845,7 @@ const g_customJsObj = {
     difficulty: [],
     settingsDisplay: [],
     exSetting: [],
+    settingSummary: [],
     keyconfig: [],
 
     preloading: [],
