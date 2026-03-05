@@ -6554,10 +6554,10 @@ const updateSettingSummary = () => {
 	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
 	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
 	const settingData = getSelectedSettingList(shuffleName);
-	const highscoreCondition = g_stateObj.dataSaveFlg && (g_stateObj.autoPlay !== C_FLG_ALL && g_headerObj.playbackRate === 1 && g_stateObj.fadein < 10 &&
+	const estimatedHighscoreCondition = g_stateObj.dataSaveFlg && (g_stateObj.autoPlay !== C_FLG_ALL && g_headerObj.playbackRate === 1 && g_stateObj.fadein < 10 &&
 		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg)));
 
-	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData + `${highscoreCondition ? '' : ` | <span class="common_kita">No Records</span>`}`;
+	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData + `${estimatedHighscoreCondition ? '' : ` | <span class="common_kita">No Records</span>`}`;
 	document.getElementById(`lblSummaryPlaystyleInfo`).textContent = settingData.playStyleData;
 	document.getElementById(`lblSummaryDisplayInfo`).textContent = settingData.displayData;
 	document.getElementById(`lblSummaryDisplay2Info`).textContent = settingData.display2Data;
@@ -14664,9 +14664,9 @@ const resultInit = () => {
 		maxCombo: 0, fmaxCombo: 0, score: 0,
 	};
 
-	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && g_headerObj.playbackRate === 1 &&
-		(g_stateObj.shuffle === C_FLG_OFF || (mirrorName !== `` && orgShuffleFlg)));
-	if (highscoreCondition) {
+	const highscorePreCondition = (g_stateObj.autoAll === C_FLG_OFF && g_headerObj.playbackRate === 1 &&
+		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg)));
+	if (highscorePreCondition) {
 
 		// ハイスコア差分描画
 		Object.keys(jdgScoreObj).filter(score => score !== `score`).forEach(score =>
@@ -14841,7 +14841,7 @@ const resultInit = () => {
 	const currentDateTime = new Date().toLocaleString();
 	g_customJsObj.result.forEach(func => func());
 
-	if (highscoreCondition) {
+	if (highscorePreCondition) {
 
 		// 古いキー定義の情報を検索
 		const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
@@ -15034,7 +15034,7 @@ const resultInit = () => {
 			drawText(g_resultObj[score], { x: 200, hy: 7 + jdgScoreObj[score].pos, align: C_ALIGN_RIGHT });
 		});
 
-		if (highscoreCondition) {
+		if (highscorePreCondition) {
 			drawText(`(${highscoreDfObj.score >= 0 ? '+' : '-'} ${Math.abs(highscoreDfObj.score)})`,
 				{ x: 206, hy: 18, color: highscoreDfObj.score > 0 ? `#ffff99` : `#cccccc`, align: C_ALIGN_RIGHT });
 		}
