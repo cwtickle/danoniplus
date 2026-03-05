@@ -4439,7 +4439,7 @@ const g_lblNameObj = {
     'u_Shakin(Great)': `Shakin(Great)`,
     'u_Fast/Slow': `Fast/Slow`,
 
-    'u_Velocity': `Velocity`,
+    'u_Speed': `Velocity`,
     'u_Density': `Density`,
     'u_ToolDif': `DifLevel`,
     'u_HighScore': `HighScore`,
