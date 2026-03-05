@@ -6456,6 +6456,7 @@ const commonSettingBtn = _labelName => {
 	const switchSave = evt => {
 		const from = boolToSwitch(g_stateObj.dataSaveFlg);
 		g_stateObj.dataSaveFlg = !g_stateObj.dataSaveFlg;
+		updateSettingSummary();
 
 		const to = boolToSwitch(g_stateObj.dataSaveFlg);
 		evt.target.classList.replace(g_cssObj[`button_${from}`], g_cssObj[`button_${to}`]);
@@ -6553,12 +6554,14 @@ const updateSettingSummary = () => {
 	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
 	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
 	const settingData = getSelectedSettingList(shuffleName);
+	const highscoreCondition = g_stateObj.dataSaveFlg && (g_stateObj.autoPlay !== C_FLG_ALL && g_headerObj.playbackRate === 1 && g_stateObj.fadein < 10 &&
+		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg)));
 
-	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData;
-	document.getElementById(`lblSummaryPlaystyleInfo`).innerHTML = settingData.playStyleData;
-	document.getElementById(`lblSummaryDisplayInfo`).innerHTML = settingData.displayData;
-	document.getElementById(`lblSummaryDisplay2Info`).innerHTML = settingData.display2Data;
-	document.getElementById(`lblSummaryEnvironment`).innerHTML =
+	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData + `${highscoreCondition ? '' : ` | <span class="common_kita">No Records</span>`}`;
+	document.getElementById(`lblSummaryPlaystyleInfo`).textContent = settingData.playStyleData;
+	document.getElementById(`lblSummaryDisplayInfo`).textContent = settingData.displayData;
+	document.getElementById(`lblSummaryDisplay2Info`).textContent = settingData.display2Data;
+	document.getElementById(`lblSummaryEnvironment`).textContent =
 		`(Adj: ${g_stateObj.adjustment} f, Volume: ${g_stateObj.volume}%, ` +
 		`ColorType: ${g_colorType}, KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1})`;
 };
