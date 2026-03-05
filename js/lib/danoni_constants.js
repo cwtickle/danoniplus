@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/03/04 (v45.4.0)
+ * Revised : 2026/03/05 (v45.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -4439,7 +4439,7 @@ const g_lblNameObj = {
     'u_Shakin(Great)': `Shakin(Great)`,
     'u_Fast/Slow': `Fast/Slow`,
 
-    'u_Velocity': `Velocity`,
+    'u_Speed': `Velocity`,
     'u_Density': `Density`,
     'u_ToolDif': `DifLevel`,
     'u_HighScore': `HighScore`,
@@ -4845,6 +4845,7 @@ const g_customJsObj = {
     difficulty: [],
     settingsDisplay: [],
     exSetting: [],
+    settingSummary: [],
     keyconfig: [],
 
     preloading: [],

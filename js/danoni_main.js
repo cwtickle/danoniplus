@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/03/04
+ * Revised : 2026/03/05
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 45.4.0`;
-const g_revisedDate = `2026/03/04`;
+const g_version = `Ver 45.5.0`;
+const g_revisedDate = `2026/03/05`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -6456,6 +6456,7 @@ const commonSettingBtn = _labelName => {
 	const switchSave = evt => {
 		const from = boolToSwitch(g_stateObj.dataSaveFlg);
 		g_stateObj.dataSaveFlg = !g_stateObj.dataSaveFlg;
+		updateSettingSummary();
 
 		const to = boolToSwitch(g_stateObj.dataSaveFlg);
 		evt.target.classList.replace(g_cssObj[`button_${from}`], g_cssObj[`button_${to}`]);
@@ -6517,7 +6518,7 @@ const commonSettingBtn = _labelName => {
 
 const makeSettingSummary = () => {
 	const tmpDiv = createEmptySprite(divRoot, `settingSumSprite`, g_windowObj.settingSumSprite);
-	tmpDiv.style.background = g_headerObj.baseBrightFlg ? `#ffffffcc` : `#000000cc`;
+	tmpDiv.style.background = g_headerObj.baseBrightFlg ? `#ffffffee` : `#000000cc`;
 
 	multiAppend(tmpDiv,
 		createDivCss2Label(`lblSummaryHeader`, g_lblNameObj.settingSummary, g_lblPosObj.lblSummaryHeader),
@@ -6553,14 +6554,18 @@ const updateSettingSummary = () => {
 	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
 	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
 	const settingData = getSelectedSettingList(shuffleName);
+	const estimatedHighscoreCondition = g_stateObj.dataSaveFlg && (g_stateObj.autoPlay !== C_FLG_ALL && g_headerObj.playbackRate === 1 && g_stateObj.fadein < 10 &&
+		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg)));
 
-	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData;
-	document.getElementById(`lblSummaryPlaystyleInfo`).innerHTML = settingData.playStyleData;
-	document.getElementById(`lblSummaryDisplayInfo`).innerHTML = settingData.displayData;
-	document.getElementById(`lblSummaryDisplay2Info`).innerHTML = settingData.display2Data;
-	document.getElementById(`lblSummaryEnvironment`).innerHTML =
+	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData + `${estimatedHighscoreCondition ? '' : ` | <span class="common_kita common_bold">No Records</span>`}`;
+	document.getElementById(`lblSummaryPlaystyleInfo`).textContent = settingData.playStyleData;
+	document.getElementById(`lblSummaryDisplayInfo`).textContent = settingData.displayData;
+	document.getElementById(`lblSummaryDisplay2Info`).textContent = settingData.display2Data;
+	document.getElementById(`lblSummaryEnvironment`).textContent =
 		`(Adj: ${g_stateObj.adjustment} f, Volume: ${g_stateObj.volume}%, ` +
 		`ColorType: ${g_colorType}, KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1})`;
+
+	g_customJsObj.settingSummary.forEach(func => func());
 };
 
 /**
@@ -8727,7 +8732,7 @@ const exSettingInit = () => {
 					createExpandedScView(_name);
 				},
 				title: g_msgObj[`${_name}Type`] ?? ``,
-			}), g_cssObj.button_Default, g_cssObj[`button_RevON`]);
+			}), g_cssObj.button_Default, g_cssObj.button_RevON);
 
 	/**
 	 * 拡張ボタンのショートカット表示
@@ -14661,9 +14666,9 @@ const resultInit = () => {
 		maxCombo: 0, fmaxCombo: 0, score: 0,
 	};
 
-	const highscoreCondition = (g_stateObj.autoAll === C_FLG_OFF && g_headerObj.playbackRate === 1 &&
-		(g_stateObj.shuffle === C_FLG_OFF || (mirrorName !== `` && orgShuffleFlg)));
-	if (highscoreCondition) {
+	const highscorePreCondition = (g_stateObj.autoAll === C_FLG_OFF && g_headerObj.playbackRate === 1 &&
+		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg)));
+	if (highscorePreCondition) {
 
 		// ハイスコア差分描画
 		Object.keys(jdgScoreObj).filter(score => score !== `score`).forEach(score =>
@@ -14838,7 +14843,7 @@ const resultInit = () => {
 	const currentDateTime = new Date().toLocaleString();
 	g_customJsObj.result.forEach(func => func());
 
-	if (highscoreCondition) {
+	if (highscorePreCondition) {
 
 		// 古いキー定義の情報を検索
 		const relatedKeys = Object.entries(g_keyObj.keyTransPattern)
@@ -15031,7 +15036,7 @@ const resultInit = () => {
 			drawText(g_resultObj[score], { x: 200, hy: 7 + jdgScoreObj[score].pos, align: C_ALIGN_RIGHT });
 		});
 
-		if (highscoreCondition) {
+		if (highscorePreCondition) {
 			drawText(`(${highscoreDfObj.score >= 0 ? '+' : '-'} ${Math.abs(highscoreDfObj.score)})`,
 				{ x: 206, hy: 18, color: highscoreDfObj.score > 0 ? `#ffff99` : `#cccccc`, align: C_ALIGN_RIGHT });
 		}
