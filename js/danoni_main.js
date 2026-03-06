@@ -6558,7 +6558,7 @@ const updateSettingSummary = () => {
 		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg)));
 
 	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData + `${estimatedHighscoreCondition ? '' : ` | <span class="common_kita common_bold">No Records</span>`}`;
-	document.getElementById(`lblSummaryPlaystyleInfo`).textContent = settingData.playStyleData;
+	document.getElementById(`lblSummaryPlaystyleInfo`).textContent = settingData.playStyleData + `${g_stateObj.excessive === C_FLG_ON ? ' | Excessive' : ''}`;
 	document.getElementById(`lblSummaryDisplayInfo`).textContent = settingData.displayData;
 	document.getElementById(`lblSummaryDisplay2Info`).textContent = settingData.display2Data;
 	document.getElementById(`lblSummaryEnvironment`).textContent =
@@ -7586,6 +7586,9 @@ const setDifficulty = (_initFlg) => {
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
 
+	// 設定サマリー表示の更新
+	updateSettingSummary();
+
 	// ---------------------------------------------------
 	// 4. 譜面初期情報ロード許可フラグの設定
 	g_canLoadDifInfoFlg = true;
@@ -7864,6 +7867,7 @@ const createOptionWindow = _sprite => {
 		g_stateObj.fadein = nextPos(g_stateObj.fadein, _sign, 100);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.textContent = `${g_stateObj.fadein}${g_lblNameObj.percent}`;
+		updateSettingSummary();
 	};
 
 	multiAppend(spriteList.fadein,
@@ -7879,8 +7883,10 @@ const createOptionWindow = _sprite => {
 	);
 
 	const fadeinSlider = document.getElementById(`fadeinSlider`);
-	fadeinSlider.addEventListener(`input`, () =>
-		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein, `fadein`), false);
+	fadeinSlider.addEventListener(`input`, () => {
+		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein, `fadein`);
+		updateSettingSummary();
+	}, false);
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
@@ -8320,6 +8326,7 @@ const setExcessive = (_btn, _val) => {
 		g_stateObj.excessiveScoreId = g_stateObj.scoreId;
 	}
 	g_stateObj.excessive = g_settings.excessives[g_settings.excessiveNum];
+	updateSettingSummary();
 	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.excessives[curExcessive]}`],
 		g_cssObj[`button_Rev${g_settings.excessives[g_settings.excessiveNum]}`]);
 };
