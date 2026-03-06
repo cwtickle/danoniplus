@@ -7586,6 +7586,9 @@ const setDifficulty = (_initFlg) => {
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
 
+	// 設定サマリー表示の更新
+	updateSettingSummary();
+
 	// ---------------------------------------------------
 	// 4. 譜面初期情報ロード許可フラグの設定
 	g_canLoadDifInfoFlg = true;
@@ -7879,8 +7882,10 @@ const createOptionWindow = _sprite => {
 	);
 
 	const fadeinSlider = document.getElementById(`fadeinSlider`);
-	fadeinSlider.addEventListener(`input`, () =>
-		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein, `fadein`), false);
+	fadeinSlider.addEventListener(`input`, () => {
+		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein, `fadein`);
+		updateSettingSummary();
+	}, false);
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
