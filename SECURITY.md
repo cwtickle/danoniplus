@@ -18,8 +18,8 @@
 
 | Version      | Supported          | Latest Version                                                                 | Logs                                                                   | First Release | End of Support   |
 | ------------ | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ------------- | ---------------- |
-| v45          | :heavy_check_mark: | [v45.5.0](https://github.com/cwtickle/danoniplus/releases/tag/v45.5.0)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2026-02-26    | (At Release v48) |
-| v44 :anchor: | :heavy_check_mark: | [v44.5.7](https://github.com/cwtickle/danoniplus/releases/tag/v44.5.7)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v44) | 2026-02-07    | (At Release v53) |
+| v45          | :heavy_check_mark: | [v45.5.1](https://github.com/cwtickle/danoniplus/releases/tag/v45.5.1)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2026-02-26    | (At Release v48) |
+| v44 :anchor: | :heavy_check_mark: | [v44.5.8](https://github.com/cwtickle/danoniplus/releases/tag/v44.5.8)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v44) | 2026-02-07    | (At Release v53) |
 | v43          | :warning:          | [v43.6.11](https://github.com/cwtickle/danoniplus/releases/tag/v43.6.11)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v43) | 2025-09-15    | (At Release v46) |
 | v42          | :x:                | [v42.5.13 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v42.5.13)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v42) | 2025-05-24    | 2026-02-26 |
 | v41          | :x:                | [v41.4.16 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v41.4.16)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v41) | 2025-04-12    | 2026-02-07 |
