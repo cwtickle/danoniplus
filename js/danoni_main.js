@@ -8,7 +8,7 @@
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 44.5.7`;
+const g_version = `Ver 44.5.8`;
 const g_revisedDate = `2026/03/06`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -7571,6 +7571,9 @@ const setDifficulty = (_initFlg) => {
 
 	// ユーザカスタムイベント(初期)
 	g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
+
+	// 設定サマリー表示の更新
+	updateSettingSummary();
 
 	// ---------------------------------------------------
 	// 4. 譜面初期情報ロード許可フラグの設定
