@@ -6558,7 +6558,7 @@ const updateSettingSummary = () => {
 		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg)));
 
 	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData + `${estimatedHighscoreCondition ? '' : ` | <span class="common_kita common_bold">No Records</span>`}`;
-	document.getElementById(`lblSummaryPlaystyleInfo`).textContent = settingData.playStyleData;
+	document.getElementById(`lblSummaryPlaystyleInfo`).textContent = settingData.playStyleData + `${g_stateObj.excessive === C_FLG_ON ? ' | Excessive' : ''}`;
 	document.getElementById(`lblSummaryDisplayInfo`).textContent = settingData.displayData;
 	document.getElementById(`lblSummaryDisplay2Info`).textContent = settingData.display2Data;
 	document.getElementById(`lblSummaryEnvironment`).textContent =
@@ -8326,6 +8326,7 @@ const setExcessive = (_btn, _val) => {
 		g_stateObj.excessiveScoreId = g_stateObj.scoreId;
 	}
 	g_stateObj.excessive = g_settings.excessives[g_settings.excessiveNum];
+	updateSettingSummary();
 	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.excessives[curExcessive]}`],
 		g_cssObj[`button_Rev${g_settings.excessives[g_settings.excessiveNum]}`]);
 };
