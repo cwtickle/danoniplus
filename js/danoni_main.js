@@ -7867,6 +7867,7 @@ const createOptionWindow = _sprite => {
 		g_stateObj.fadein = nextPos(g_stateObj.fadein, _sign, 100);
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.textContent = `${g_stateObj.fadein}${g_lblNameObj.percent}`;
+		updateSettingSummary();
 	};
 
 	multiAppend(spriteList.fadein,
@@ -7882,13 +7883,6 @@ const createOptionWindow = _sprite => {
 	);
 
 	const fadeinSlider = document.getElementById(`fadeinSlider`);
-	const setFadein = _sign => {
-		g_stateObj.fadein = nextPos(g_stateObj.fadein, _sign, 100);
-		fadeinSlider.value = g_stateObj.fadein;
-		lnkFadein.textContent = `${g_stateObj.fadein}${g_lblNameObj.percent}`;
-		updateSettingSummary();
-	};
-
 	fadeinSlider.addEventListener(`input`, () => {
 		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein, `fadein`);
 		updateSettingSummary();
