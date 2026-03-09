@@ -12295,6 +12295,10 @@ const mainInit = () => {
 		}
 	}
 
+	// Appearanceのオプション適用時は一部描画を隠す
+	changeAppearanceBar(g_appearanceRanges.includes(g_stateObj.appearance)
+		? g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], 0);
+
 	// StepArea処理
 	g_stepAreaFunc.get(g_stateObj.stepArea)();
 
@@ -12303,10 +12307,6 @@ const mainInit = () => {
 
 	// EffectのArrowEffect追加処理
 	g_effectFunc.get(g_stateObj.effect)();
-
-	// Appearanceのオプション適用時は一部描画を隠す
-	changeAppearanceBar(g_appearanceRanges.includes(g_stateObj.appearance)
-		? g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], 0);
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;

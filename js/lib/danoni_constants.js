@@ -1746,6 +1746,18 @@ const g_stepAreaFunc = new Map([
                 addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
             }
         });
+
+        // Appearanceフィルターの差分適用
+        if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+            for (let j = 0; j < g_stateObj.layerNumDf; j++) {
+                addTransform(
+                    `filterBar${j}`, `stepArea`,
+                    `translateY(calc(${g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1} * ${halfwayOffset(j)}px))`,
+                    g_transPriority.stepArea
+                );
+            }
+            addTransform(`filterView`, `stepArea`, `translateY(${halfwayOffset(Number(g_settings.reverseNum))}px)`, g_transPriority.stepArea);
+        }
     }],
     ['Mismatched', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
@@ -1757,6 +1769,42 @@ const g_stepAreaFunc = new Map([
                     addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
                 }
             });
+
+            // Appearanceフィルターの差分適用
+            if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+                for (let j = 0; j < g_stateObj.layerNumDf; j++) {
+
+                    if (g_stateObj.appearance === `Hidden+`) {
+                        addTransform(
+                            `filterBar${Math.floor((j + Number(g_settings.reverseNum)) / 2) * 2 + (j + Number(g_settings.reverseNum)) % 2}_HS`,
+                            `stepArea`,
+                            `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                            g_transPriority.stepArea
+                        );
+                    } else if (g_stateObj.appearance === `Sudden+`) {
+                        addTransform(
+                            `filterBar${j}`,
+                            `stepArea`,
+                            `translateY(calc((-1) * ${halfwayOffset(j)}px))`,
+                            g_transPriority.stepArea
+                        );
+                    } else if (g_stateObj.appearance === `Hid&Sud+`) {
+                        if (j % 2 === 0) {
+                            addTransform(
+                                `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
+                                `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                                g_transPriority.stepArea
+                            );
+                        } else {
+                            addTransform(
+                                `filterBar${j - Number(g_settings.reverseNum)}`, `stepArea`,
+                                `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? -1 : 1}) * ${halfwayOffset(j)}px))`,
+                                g_transPriority.stepArea
+                            );
+                        }
+                    }
+                }
+            }
         }
     }],
     ['R-Mismatched', () => {
@@ -1769,6 +1817,42 @@ const g_stepAreaFunc = new Map([
                     addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
                 }
             });
+
+            // Appearanceフィルターの差分適用
+            if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+                for (let j = 0; j < g_stateObj.layerNumDf; j++) {
+
+                    if (g_stateObj.appearance === `Hidden+`) {
+                        addTransform(
+                            `filterBar${Math.floor((j + Number(g_settings.reverseNum)) / 2) * 2 + (j + Number(g_settings.reverseNum)) % 2}`,
+                            `stepArea`,
+                            `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                            g_transPriority.stepArea
+                        );
+                    } else if (g_stateObj.appearance === `Sudden+`) {
+                        addTransform(
+                            `filterBar${j}_HS`,
+                            `stepArea`,
+                            `translateY(calc((-1) * ${halfwayOffset(j)}px))`,
+                            g_transPriority.stepArea
+                        );
+                    } else if (g_stateObj.appearance === `Hid&Sud+`) {
+                        if (j % 2 === 0) {
+                            addTransform(
+                                `filterBar${j + Number(g_settings.reverseNum)}`, `stepArea`,
+                                `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                                g_transPriority.stepArea
+                            );
+                        } else {
+                            addTransform(
+                                `filterBar${j - Number(g_settings.reverseNum)}_HS`, `stepArea`,
+                                `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? -1 : 1}) * ${halfwayOffset(j)}px))`,
+                                g_transPriority.stepArea
+                            );
+                        }
+                    }
+                }
+            }
         }
     }],
     ['2Step', () => {
@@ -1777,6 +1861,26 @@ const g_stepAreaFunc = new Map([
                 addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
             }
         });
+
+        // Appearanceフィルターの差分適用
+        if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+            for (let j = 0; j < g_stateObj.layerNumDf; j++) {
+                addTransform(
+                    `filterBar${j}_HS`, `stepArea`,
+                    `translateY(calc((${g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                    g_transPriority.stepArea
+                );
+            }
+            if (g_workObj.orgFlatFlg && g_stateObj.appearance === `Hid&Sud+`) {
+                for (let j = 0; j < g_stateObj.layerNumDf; j += 2) {
+                    addTransform(
+                        `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
+                        `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                        g_transPriority.stepArea
+                    );
+                }
+            }
+        }
     }],
     ['X-Flower', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
