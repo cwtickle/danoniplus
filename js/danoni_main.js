@@ -13651,7 +13651,7 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 		const step = Math.trunc(_dirPlus / 2) * 2;
 		g_workObj.aprFilterCnt = nextPos(g_workObj.aprFilterCnt, step, g_stateObj.layerNum);
 	}
-	changeAppearanceFilter(_num);
+	const doubleFilterFlg = changeAppearanceFilter(_num);
 
 	// フィルターバーを使用するオプションのみ以下を適用
 	if (g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.d_filterline === C_FLG_ON) {
@@ -13659,8 +13659,6 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 		// 階層が多い場合はShift+pgUp/pgDownで表示する階層グループを切り替え
 		const topNum = g_hidSudObj[g_stateObj.appearance];
 		const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
-		const doubleFilterFlg = g_settings.stepAreaLayers.includes(g_stateObj.stepArea) ||
-			(g_stateObj.stepArea === `Halfway` && g_stateObj.appearance === `Hid&Sud+`);
 
 		for (let j = 0; j < g_stateObj.layerNum; j += 2) {
 			[`${topNum + j}`, `${bottomNum + j}`].forEach(type => {
@@ -13702,6 +13700,7 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
  * @param {number} _num 
+ * @returns {boolean} フィルターバーを複数利用するかどうかのフラグ (changeAppearanceBarで利用)
  */
 const changeAppearanceFilter = (_num = 10) => {
 	const MAX_FILTER_POS = 100;
@@ -13747,6 +13746,8 @@ const changeAppearanceFilter = (_num = 10) => {
 
 	// ユーザカスタムイベント(アルファマスクの再描画)
 	g_customJsObj.appearanceFilter.forEach(func => func(topNum, bottomNum));
+
+	return doubleFilterFlg;
 };
 
 /**
