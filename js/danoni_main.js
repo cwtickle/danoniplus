@@ -13682,16 +13682,15 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 
 		if (dividePosPart.length > 0
 			&& dividePosPart.every(v => v % 2 === dividePosPart[0] % 2)) {
-			if (g_stateObj.appearance !== `Hid&Sud+`) {
-				// スクロールが1種類でHidden+/Sudden+の場合、対面のフィルターバーは不要なため非表示にする
+			if (g_stateObj.appearance !== `Hid&Sud+` || (g_stateObj.appearance === `Hid&Sud+` && g_stateObj.stepArea === `Halfway`)) {
+				// スクロールが1種類の場合、対面のフィルターバーは不要なため非表示にする
 				$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}`).display = C_DIS_NONE;
+
 				if (g_settings.stepAreaLayers.includes(g_stateObj.stepArea)) {
 					$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
+				} else if (g_stateObj.appearance === `Hid&Sud+` && g_stateObj.stepArea === `Halfway`) {
+					$id(`filterBar${(currentBarNum) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
 				}
-			} else if (g_stateObj.appearance === `Hid&Sud+` && g_stateObj.stepArea === `Halfway`) {
-				// スクロールが1種類でHid&Sud+かつHalfwayの場合、流れてこない側のフィルターバーは不要なため非表示にする
-				$id(`filterBar${(currentBarNum) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
-				$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
 			}
 		}
 	}

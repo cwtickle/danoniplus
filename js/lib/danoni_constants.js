@@ -1750,6 +1750,8 @@ const g_stepAreaFunc = new Map([
 
         // Appearanceフィルターの差分適用
         if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+
+            // Hidden+, Sudden+の場合はレイヤー毎に座標を画面中央から見てフィルターバーを外側へシフト
             for (let j = 0; j < g_stateObj.layerNumDf; j++) {
                 addTransform(
                     `filterBar${j}`, `stepArea`,
@@ -1757,26 +1759,16 @@ const g_stepAreaFunc = new Map([
                     g_transPriority.stepArea
                 );
             }
+
+            // Hid&Sud+の場合は片側に2つのフィルターバーが必要なため、
+            // 追加したフィルターバーを元のフィルターバーに対して反転するようにシフト
             if (g_stateObj.appearance === `Hid&Sud+`) {
                 for (let j = 0; j < g_stateObj.layerNumDf; j++) {
                     addTransform(
                         `filterBar${j}_HS`, `stepArea`,
-                        `translateY(calc(${g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1} * ${halfwayOffset(j)}px))`,
+                        `translateY(calc(${(-1) * (g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1)} * ${halfwayOffset(j)}px))`,
                         g_transPriority.stepArea
                     );
-                    if (j % 2 === 0) {
-                        addTransform(
-                            `filterBar${j + Number(g_settings.reverseNum)}`, `stepArea`,
-                            `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
-                            g_transPriority.stepArea
-                        );
-                    } else {
-                        addTransform(
-                            `filterBar${j - Number(g_settings.reverseNum)}_HS`, `stepArea`,
-                            `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
-                            g_transPriority.stepArea
-                        );
-                    }
                 }
             }
             addTransform(`filterView`, `stepArea`, `translateY(${halfwayOffset(Number(g_settings.reverseNum))}px)`, g_transPriority.stepArea);
@@ -1796,35 +1788,18 @@ const g_stepAreaFunc = new Map([
             // Appearanceフィルターの差分適用
             if (g_appearanceRanges.includes(g_stateObj.appearance)) {
                 for (let j = 0; j < g_stateObj.layerNumDf; j++) {
-
-                    if (g_stateObj.appearance === `Hidden+`) {
+                    if (j % 2 === 0) {
                         addTransform(
-                            `filterBar${Math.floor(j / 2) * 2 + (j + Number(g_settings.reverseNum)) % 2}_HS`,
-                            `stepArea`,
+                            `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
                             `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                             g_transPriority.stepArea
                         );
-                    } else if (g_stateObj.appearance === `Sudden+`) {
+                    } else {
                         addTransform(
-                            `filterBar${j}`,
-                            `stepArea`,
-                            `translateY(calc((-1) * ${halfwayOffset(j)}px))`,
+                            `filterBar${j - Number(g_settings.reverseNum)}`, `stepArea`,
+                            `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                             g_transPriority.stepArea
                         );
-                    } else if (g_stateObj.appearance === `Hid&Sud+`) {
-                        if (j % 2 === 0) {
-                            addTransform(
-                                `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
-                                `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
-                                g_transPriority.stepArea
-                            );
-                        } else {
-                            addTransform(
-                                `filterBar${j - Number(g_settings.reverseNum)}`, `stepArea`,
-                                `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
-                                g_transPriority.stepArea
-                            );
-                        }
                     }
                 }
             }
@@ -1844,35 +1819,18 @@ const g_stepAreaFunc = new Map([
             // Appearanceフィルターの差分適用
             if (g_appearanceRanges.includes(g_stateObj.appearance)) {
                 for (let j = 0; j < g_stateObj.layerNumDf; j++) {
-
-                    if (g_stateObj.appearance === `Hidden+`) {
+                    if (j % 2 === 0) {
                         addTransform(
-                            `filterBar${Math.floor(j / 2) * 2 + (j + Number(g_settings.reverseNum)) % 2}`,
-                            `stepArea`,
+                            `filterBar${j + Number(g_settings.reverseNum)}`, `stepArea`,
                             `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                             g_transPriority.stepArea
                         );
-                    } else if (g_stateObj.appearance === `Sudden+`) {
+                    } else {
                         addTransform(
-                            `filterBar${j}_HS`,
-                            `stepArea`,
-                            `translateY(calc((-1) * ${halfwayOffset(j)}px))`,
+                            `filterBar${j - Number(g_settings.reverseNum)}_HS`, `stepArea`,
+                            `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                             g_transPriority.stepArea
                         );
-                    } else if (g_stateObj.appearance === `Hid&Sud+`) {
-                        if (j % 2 === 0) {
-                            addTransform(
-                                `filterBar${j + Number(g_settings.reverseNum)}`, `stepArea`,
-                                `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
-                                g_transPriority.stepArea
-                            );
-                        } else {
-                            addTransform(
-                                `filterBar${j - Number(g_settings.reverseNum)}_HS`, `stepArea`,
-                                `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
-                                g_transPriority.stepArea
-                            );
-                        }
                     }
                 }
             }
@@ -1894,7 +1852,7 @@ const g_stepAreaFunc = new Map([
                     g_transPriority.stepArea
                 );
             }
-            if (g_workObj.orgFlatFlg && g_stateObj.appearance === `Hid&Sud+`) {
+            if (g_stateObj.appearance === `Hid&Sud+`) {
                 for (let j = 0; j < g_stateObj.layerNumDf; j += 2) {
                     addTransform(
                         `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
