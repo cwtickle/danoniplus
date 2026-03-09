@@ -1789,12 +1789,14 @@ const g_stepAreaFunc = new Map([
             if (g_appearanceRanges.includes(g_stateObj.appearance)) {
                 for (let j = 0; j < g_stateObj.layerNumDf; j++) {
                     if (j % 2 === 0) {
+                        // Hidden+用のフィルターバー補正
                         addTransform(
                             `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
                             `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                             g_transPriority.stepArea
                         );
                     } else {
+                        // Sudden+用のフィルターバー補正
                         addTransform(
                             `filterBar${j - Number(g_settings.reverseNum)}`, `stepArea`,
                             `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
@@ -1820,12 +1822,14 @@ const g_stepAreaFunc = new Map([
             if (g_appearanceRanges.includes(g_stateObj.appearance)) {
                 for (let j = 0; j < g_stateObj.layerNumDf; j++) {
                     if (j % 2 === 0) {
+                        // Hidden+用のフィルターバー補正
                         addTransform(
                             `filterBar${j + Number(g_settings.reverseNum)}`, `stepArea`,
                             `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                             g_transPriority.stepArea
                         );
                     } else {
+                        // Sudden+用のフィルターバー補正
                         addTransform(
                             `filterBar${j - Number(g_settings.reverseNum)}_HS`, `stepArea`,
                             `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
@@ -1853,6 +1857,7 @@ const g_stepAreaFunc = new Map([
                 );
             }
             if (g_stateObj.appearance === `Hid&Sud+`) {
+                // 2Stepは逆方向スクロールが存在しないため、2つごとに設定
                 for (let j = 0; j < g_stateObj.layerNumDf; j += 2) {
                     addTransform(
                         `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,

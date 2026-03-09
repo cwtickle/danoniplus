@@ -12233,8 +12233,7 @@ const mainInit = () => {
 
 	// Hidden+, Sudden+用のライン、パーセント表示
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
-	const doubleFilterFlg = g_settings.stepAreaLayers.includes(g_stateObj.stepArea) ||
-		(g_stateObj.stepArea === `Halfway` && g_stateObj.appearance === `Hid&Sud+`);
+	const doubleFilterFlg = getDoubleFilterFlg();
 
 	for (let j = 0; j < g_stateObj.layerNum; j++) {
 		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, mainCommonPos);
@@ -13642,6 +13641,14 @@ const makeStepZone = (_j, _keyCtrlPtn) => {
 };
 
 /**
+ * フィルターバーが同一層で複数必要かを確認
+ * @returns {boolean}
+ */
+const getDoubleFilterFlg = () =>
+	g_settings.stepAreaLayers.includes(g_stateObj.stepArea) ||
+	(g_stateObj.stepArea === `Halfway` && g_stateObj.appearance === `Hid&Sud+`);
+
+/**
  * フィルターバーの対象表示変更
  * @param {number} _num 
  * @param {number} _dirPlus 
@@ -13718,8 +13725,7 @@ const changeAppearanceFilter = (_num = 10) => {
 	const appearPers = [_num, MAX_FILTER_POS - _num];
 	const topDist = g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS;
 	const bottomDist = g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS;
-	const doubleFilterFlg = g_settings.stepAreaLayers.includes(g_stateObj.stepArea) ||
-		(g_stateObj.stepArea === `Halfway` && g_stateObj.appearance === `Hid&Sud+`);
+	const doubleFilterFlg = getDoubleFilterFlg();
 
 	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
