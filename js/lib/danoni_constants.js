@@ -1757,6 +1757,28 @@ const g_stepAreaFunc = new Map([
                     g_transPriority.stepArea
                 );
             }
+            if (g_stateObj.appearance === `Hid&Sud+`) {
+                for (let j = 0; j < g_stateObj.layerNumDf; j++) {
+                    addTransform(
+                        `filterBar${j}_HS`, `stepArea`,
+                        `translateY(calc(${g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1} * ${halfwayOffset(j)}px))`,
+                        g_transPriority.stepArea
+                    );
+                    if (j % 2 === 0) {
+                        addTransform(
+                            `filterBar${j + Number(g_settings.reverseNum)}`, `stepArea`,
+                            `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                            g_transPriority.stepArea
+                        );
+                    } else {
+                        addTransform(
+                            `filterBar${j - Number(g_settings.reverseNum)}_HS`, `stepArea`,
+                            `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                            g_transPriority.stepArea
+                        );
+                    }
+                }
+            }
             addTransform(`filterView`, `stepArea`, `translateY(${halfwayOffset(Number(g_settings.reverseNum))}px)`, g_transPriority.stepArea);
         }
     }],

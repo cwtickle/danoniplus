@@ -12233,7 +12233,8 @@ const mainInit = () => {
 
 	// Hidden+, Sudden+用のライン、パーセント表示
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
-	const doubleFilterFlg = g_settings.stepAreaLayers.includes(g_stateObj.stepArea);
+	const doubleFilterFlg = g_settings.stepAreaLayers.includes(g_stateObj.stepArea) ||
+		(g_stateObj.stepArea === `Halfway` && g_stateObj.appearance === `Hid&Sud+`);
 
 	for (let j = 0; j < g_stateObj.layerNum; j++) {
 		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, mainCommonPos);
@@ -13658,19 +13659,21 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 		// 階層が多い場合はShift+pgUp/pgDownで表示する階層グループを切り替え
 		const topNum = g_hidSudObj[g_stateObj.appearance];
 		const bottomNum = (g_hidSudObj[g_stateObj.appearance] + 1) % 2;
+		const doubleFilterFlg = g_settings.stepAreaLayers.includes(g_stateObj.stepArea) ||
+			(g_stateObj.stepArea === `Halfway` && g_stateObj.appearance === `Hid&Sud+`);
 
 		for (let j = 0; j < g_stateObj.layerNum; j += 2) {
 			[`${topNum + j}`, `${bottomNum + j}`].forEach(type => {
 				const displayState = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
 				$id(`filterBar${type}`).display = displayState;
 
-				if (g_settings.stepAreaLayers.includes(g_stateObj.stepArea)) {
+				if (doubleFilterFlg) {
 					$id(`filterBar${type}_HS`).display = displayState;
 				}
 			});
 		}
 
-		// スクロールが1種類でHidden+/Sudden+の場合、対面のフィルターバーは不要なため非表示にする
+		// フィルターバーの非表示条件
 		const baseLayer = g_workObj.aprFilterCnt;
 		const dividePosPart = g_workObj.dividePos.filter(v => Math.floor(v / 2) === g_workObj.aprFilterCnt / 2);
 		const currentBarNum = g_hidSudObj.std[g_stateObj.appearance][
@@ -13679,11 +13682,17 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 				: g_stateObj.reverse
 		];
 
-		if (g_stateObj.appearance !== `Hid&Sud+`
-			&& dividePosPart.length > 0
+		if (dividePosPart.length > 0
 			&& dividePosPart.every(v => v % 2 === dividePosPart[0] % 2)) {
-			$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}`).display = C_DIS_NONE;
-			if (g_settings.stepAreaLayers.includes(g_stateObj.stepArea)) {
+			if (g_stateObj.appearance !== `Hid&Sud+`) {
+				// スクロールが1種類でHidden+/Sudden+の場合、対面のフィルターバーは不要なため非表示にする
+				$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}`).display = C_DIS_NONE;
+				if (g_settings.stepAreaLayers.includes(g_stateObj.stepArea)) {
+					$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
+				}
+			} else if (g_stateObj.appearance === `Hid&Sud+` && g_stateObj.stepArea === `Halfway`) {
+				// スクロールが1種類でHid&Sud+かつHalfwayの場合、流れてこない側のフィルターバーは不要なため非表示にする
+				$id(`filterBar${(currentBarNum) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
 				$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
 			}
 		}
@@ -13711,6 +13720,8 @@ const changeAppearanceFilter = (_num = 10) => {
 	const appearPers = [_num, MAX_FILTER_POS - _num];
 	const topDist = g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS;
 	const bottomDist = g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS;
+	const doubleFilterFlg = g_settings.stepAreaLayers.includes(g_stateObj.stepArea) ||
+		(g_stateObj.stepArea === `Halfway` && g_stateObj.appearance === `Hid&Sud+`);
 
 	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
@@ -13719,7 +13730,7 @@ const changeAppearanceFilter = (_num = 10) => {
 		addTransform(`filterBar${topNum + j}`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j}`).top) + topDist}px)`, g_transPriority.layer);
 		addTransform(`filterBar${bottomNum + j}`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist}px)`, g_transPriority.layer);
 
-		if (g_settings.stepAreaLayers.includes(g_stateObj.stepArea)) {
+		if (doubleFilterFlg) {
 			addTransform(`filterBar${bottomNum + j}_HS`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j}`).top) + bottomDist}px)`, g_transPriority.layer);
 			addTransform(`filterBar${topNum + j}_HS`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j + 1}`).top) + topDist}px)`, g_transPriority.layer);
 		}
