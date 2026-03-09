@@ -1738,6 +1738,7 @@ const g_playWindowFunc = new Map([
 const g_arrowGroupSprite = [`stepSprite`, `arrowSprite`, `frzHitSprite`];
 const halfwayOffset = _j => (_j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2);
 const getDirFromLayer = _j => (_j % 2 === 0 ? 1 : -1) * (_j < g_stateObj.layerNumDf ? 1 : -1);
+const getDirFromRev = () => g_stateObj.reverse === C_FLG_OFF ? 1 : -1;
 const g_stepAreaFunc = new Map([
     ['Default', () => ``],
     ['Halfway', () => {
@@ -1776,9 +1777,9 @@ const g_stepAreaFunc = new Map([
 
                     if (g_stateObj.appearance === `Hidden+`) {
                         addTransform(
-                            `filterBar${Math.floor((j + Number(g_settings.reverseNum)) / 2) * 2 + (j + Number(g_settings.reverseNum)) % 2}_HS`,
+                            `filterBar${Math.floor(j / 2) * 2 + (j + Number(g_settings.reverseNum)) % 2}_HS`,
                             `stepArea`,
-                            `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                            `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                             g_transPriority.stepArea
                         );
                     } else if (g_stateObj.appearance === `Sudden+`) {
@@ -1792,13 +1793,13 @@ const g_stepAreaFunc = new Map([
                         if (j % 2 === 0) {
                             addTransform(
                                 `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
-                                `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                                `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                                 g_transPriority.stepArea
                             );
                         } else {
                             addTransform(
                                 `filterBar${j - Number(g_settings.reverseNum)}`, `stepArea`,
-                                `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? -1 : 1}) * ${halfwayOffset(j)}px))`,
+                                `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                                 g_transPriority.stepArea
                             );
                         }
@@ -1824,9 +1825,9 @@ const g_stepAreaFunc = new Map([
 
                     if (g_stateObj.appearance === `Hidden+`) {
                         addTransform(
-                            `filterBar${Math.floor((j + Number(g_settings.reverseNum)) / 2) * 2 + (j + Number(g_settings.reverseNum)) % 2}`,
+                            `filterBar${Math.floor(j / 2) * 2 + (j + Number(g_settings.reverseNum)) % 2}`,
                             `stepArea`,
-                            `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                            `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                             g_transPriority.stepArea
                         );
                     } else if (g_stateObj.appearance === `Sudden+`) {
@@ -1840,13 +1841,13 @@ const g_stepAreaFunc = new Map([
                         if (j % 2 === 0) {
                             addTransform(
                                 `filterBar${j + Number(g_settings.reverseNum)}`, `stepArea`,
-                                `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                                `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                                 g_transPriority.stepArea
                             );
                         } else {
                             addTransform(
                                 `filterBar${j - Number(g_settings.reverseNum)}_HS`, `stepArea`,
-                                `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? -1 : 1}) * ${halfwayOffset(j)}px))`,
+                                `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                                 g_transPriority.stepArea
                             );
                         }
@@ -1875,7 +1876,7 @@ const g_stepAreaFunc = new Map([
                 for (let j = 0; j < g_stateObj.layerNumDf; j += 2) {
                     addTransform(
                         `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
-                        `translateY(calc((${g_stateObj.reverse === C_FLG_OFF ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                        `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
                         g_transPriority.stepArea
                     );
                 }
