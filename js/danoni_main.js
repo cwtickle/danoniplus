@@ -8804,17 +8804,27 @@ const createExpandedScView = _name =>
 
 /**
  * 拡張設定込みの標準設定
+ * @param {any[]} _spriteList
  * @param {string} _name 
- * @param {string} [_default=OFF] デフォルト値
+ * @param {string} [_default=OFF] デフォルト値。nullを指定すると拡張設定が常時表示になる（XXXTypeUse=true時）
  */
 const createGeneralSettingEx = (_spriteList, _name, _default = C_FLG_OFF) => {
 	if (_spriteList?.[_name] === undefined) return;
+
+	// TypeUse 未定義時は true 扱いにする
+	const typeEnabled = setBoolVal(g_headerObj[`${_name}TypeUse`], true);
 	createGeneralSetting(_spriteList[_name], _name, {
-		addRFunc: () => setExpandedBtnSiz(_name, _default),
+		addRFunc: () => {
+			if (typeEnabled) {
+				setExpandedBtnSiz(_name, _default);
+			}
+		},
 	});
-	_spriteList[_name].appendChild(createExpandedBtn(_name));
-	setExpandedBtnSiz(_name, _default);
-	createExpandedScView(_name);
+	if (typeEnabled) {
+		_spriteList[_name].appendChild(createExpandedBtn(_name));
+		setExpandedBtnSiz(_name, _default);
+		createExpandedScView(_name);
+	}
 }
 
 /*-----------------------------------------------------------*/
@@ -11742,6 +11752,8 @@ const getArrowSettings = () => {
 	delete g_workObj.arrivalFrame;
 	delete g_workObj.motionFrame;
 
+	// 各種初期化
+	// g_workObj.frzArrowRtnはフリーズアロー(初期表示)としての利用に限定
 	g_workObj.stepX = [];
 	g_workObj.scrollDir = [];
 	g_workObj.scrollDirDefault = [];
@@ -11774,6 +11786,7 @@ const getArrowSettings = () => {
 			changeStepRtn(`stepRtn`, 90 * sign);
 			changeStepRtn(`stepHitRtn`, 90 * sign);
 			changeStepRtn(`arrowRtn`, 90 * sign);
+			changeStepRtn(`frzArrowRtn`, 90 * sign);
 		}
 		const div = g_keyObj[`div${keyCtrlPtn}`];
 		const divMax = g_keyObj[`divMax${keyCtrlPtn}`] ?? posMax;
@@ -11783,7 +11796,7 @@ const getArrowSettings = () => {
 		}
 	}
 
-	// CamoufrageType: FrzArrowの場合のみ、フリーズアローの矢印を180度回転
+	// CamoufrageType: FrzArrowの場合のみ、フリーズアロー(初期)の矢印を180度回転
 	if (g_stateObj.rotateEnabled && g_stateObj.camoufrageType === `FrzArrow`) {
 		changeStepRtn(`frzArrowRtn`, 180);
 	}
@@ -15309,7 +15322,8 @@ const getSelectedSettingList = (_shuffleName) => {
 		withOptions(g_stateObj.shaking, C_FLG_OFF),
 		withOptions(g_stateObj.effect, C_FLG_OFF),
 		withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${getStgDetailName(g_stateObj.camoufrage)}`),
-		withOptions(g_stateObj.camoufrageType, `---`, `Cmf2:${getStgDetailName(g_stateObj.camoufrageType)}`),
+		withOptions(g_stateObj.camoufrageType, `---`,
+			`${g_stateObj.camoufrage !== C_FLG_OFF ? '' : 'Cmf:'}${getStgDetailName(g_stateObj.camoufrageType)}`),
 		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${getStgDetailName(g_stateObj.swapping)}`),
 		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${getStgDetailName(g_stateObj.judgRange)}`),
 	].filter(value => value !== ``).join(`, `);

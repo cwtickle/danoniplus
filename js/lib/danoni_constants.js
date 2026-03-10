@@ -2175,7 +2175,7 @@ let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`
     `d_score`, `d_musicinfo`, `d_filterline`];
 
 let g_canDisabledSettings = [`speed`, `motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`,
-    `excessive`, `appearance`, `playWindow`, `stepArea`, `frzReturn`, `shaking`, `effect`, `camoufrage`,
+    `excessive`, `appearance`, `playWindow`, `stepArea`, `frzReturn`, `shaking`, `effect`, `camoufrage`, `camoufrageType`,
     `swapping`, `judgRange`, `autoRetry`];
 
 const g_hidSudFunc = new Map([
@@ -4524,6 +4524,7 @@ const g_lblNameObj = {
 
     'u_Color': `Color`,
     'u_Arrow': `Arrow`,
+    'u_FrzArrow': `FrzArrow`,
 
     'u_Narrow': `Narrow`,
     'u_Hard': `Hard`,
@@ -4783,6 +4784,7 @@ const g_lang_msgObj = {
             `[H-Drunk] S-Drunkより大きく上下に揺らし、さらに回転が掛かります`,
         effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
         camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
+        camoufrageType: `[FrzArrow] フリーズアローの帯部分を非表示にし、矢印のみで表示します`,
         swapping: `ステップゾーンの位置をグループ単位で入れ替えます。`,
         judgRange: `判定の許容範囲を設定します。\n[Normal] 通常、[Narrow/Hard] 辛判定、[ExHard] 激辛判定`,
         autoRetry: `自動リトライの条件を設定します。\n[Miss] ミス時、[Matari] マターリ時、[Shakin] シャキン時、[FS] Fast/Slow発生時`,
@@ -4880,6 +4882,7 @@ const g_lang_msgObj = {
             `[H-Drunk] Adds stronger vertical movement than S-Drunk and adds rotation.`,
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
         camoufrage: `The appearance of the steps changes randomly with the same placement.`,
+        camoufrageType: `[FrzArrow] Hides freeze-arrow bars and displays only the arrow portion`,
         swapping: `Replaces the position of step zones on a group-by-group basis.`,
         judgRange: `Set the allowable range of judgment.\n[Normal] Normal judgment, [Narrow/Hard] Hard judgment, [ExHard] Very hard judgment`,
         autoRetry: `Set the conditions for automatic retry.\n[Miss] When missed, [Matari] When good, [Shakin] When great, [FS] When Fast/Slow occurs`,
