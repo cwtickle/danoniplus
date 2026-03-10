@@ -217,6 +217,7 @@ const g_workObj = {
 	stepRtn: [],
 	stepHitRtn: [],
 	arrowRtn: [],
+	frzArrowRtn: [],
 	keyCtrl: [],
 	keyCtrlN: [],
 	keyHitFlg: [],
@@ -8750,21 +8751,23 @@ const exSettingInit = () => {
 			displayName: `exSetting`, targetLabel: `lnk${toCapitalize(_name)}Type`, x: -13
 		});
 
-	createGeneralSetting(spriteList.playWindow, `playWindow`, {
-		addRFunc: () => setExpandedBtnSiz(`playWindow`, `Default`),
-	});
-	spriteList.playWindow.appendChild(createExpandedBtn(`playWindow`));
-	setExpandedBtnSiz(`playWindow`, `Default`);
-	createExpandedScView(`playWindow`);
+	/**
+	 * 拡張設定込みの標準設定
+	 * @param {string} _name 
+	 * @param {string} [_default=OFF] デフォルト値
+	 */
+	const createGeneralSettingEx = (_name, _default = C_FLG_OFF) => {
+		createGeneralSetting(spriteList[_name], _name, {
+			addRFunc: () => setExpandedBtnSiz(_name, _default),
+		});
+		spriteList[_name].appendChild(createExpandedBtn(_name));
+		setExpandedBtnSiz(_name, _default);
+		createExpandedScView(_name);
+	}
 
+	createGeneralSettingEx(`playWindow`, `Default`);
 	createGeneralSetting(spriteList.stepArea, `stepArea`);
-	createGeneralSetting(spriteList.frzReturn, `frzReturn`, {
-		addRFunc: () => setExpandedBtnSiz(`frzReturn`),
-	});
-	spriteList.frzReturn.appendChild(createExpandedBtn(`frzReturn`));
-	setExpandedBtnSiz(`frzReturn`);
-	createExpandedScView(`frzReturn`);
-
+	createGeneralSettingEx(`frzReturn`);
 	createGeneralSetting(spriteList.shaking, `shaking`);
 	createGeneralSetting(spriteList.effect, `effect`, {
 		addRFunc: () => {
@@ -8773,7 +8776,7 @@ const exSettingInit = () => {
 			g_headerObj.arrowEffectSet = g_stateObj.d_arroweffect;
 		},
 	});
-	createGeneralSetting(spriteList.camoufrage, `camoufrage`);
+	createGeneralSettingEx(`camoufrage`, null);  // デフォルトでも拡張設定を表示するため、第2引数はnullを指定
 	createGeneralSetting(spriteList.swapping, `swapping`);
 	createGeneralSetting(spriteList.judgRange, `judgRange`, {
 		addRFunc: () => {
@@ -11746,6 +11749,7 @@ const getArrowSettings = () => {
 	g_workObj.stepRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.stepHitRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.arrowRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.frzArrowRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
@@ -11776,6 +11780,11 @@ const getArrowSettings = () => {
 		if (Number.isFinite(denom) && denom > 0) {
 			g_workObj.scale *= Math.min(g_sHeight / denom, 1);
 		}
+	}
+
+	// CamoufrageType: FrzArrowの場合のみ、フリーズアローの矢印を180度回転
+	if (g_stateObj.rotateEnabled && g_stateObj.camoufrageType === `FrzArrow`) {
+		changeStepRtn(`frzArrowRtn`, 180);
 	}
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
@@ -12010,6 +12019,7 @@ const getArrowSettings = () => {
 			// 矢印ヒット時に元の矢印がわかるようにするため、あえて g_workObj.stepHitRtn はそのままにする
 			g_workObj.stepRtn = getSwapArray(g_workObj.stepRtn);
 			g_workObj.arrowRtn = getSwapArray(g_workObj.arrowRtn);
+			g_workObj.frzArrowRtn = getSwapArray(g_workObj.frzArrowRtn);
 		}
 		if ([`Color`, C_FLG_ALL].includes(g_stateObj.camoufrage)) {
 			eachOrAll.forEach(type => {
@@ -13105,6 +13115,12 @@ const mainInit = () => {
 		const frzRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], frzName, {
 			x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
 		});
+
+		// CamoufrageType: FrzArrowの場合のみ、フリーズアローの帯を隠す
+		if (g_stateObj.camoufrageType === `FrzArrow`) {
+			_barColor = `#00000000`;
+		}
+
 		/**
 		 * フリーズアロー毎の属性情報
 		 */
@@ -13174,12 +13190,12 @@ const mainInit = () => {
 
 			// 開始矢印の塗り部分。ヒット時は前面に表示
 			createColorObject2(`${_name}TopShadow${frzNo}`, {
-				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: shadowColor, rotate: g_workObj.frzArrowRtn[_j], styleName: `Shadow`,
 			}, g_cssObj.main_objShadow),
 
 			// 開始矢印。ヒット時は非表示
 			createColorObject2(`${_name}Top${frzNo}`, {
-				background: _normalColor, rotate: g_workObj.arrowRtn[_j],
+				background: _normalColor, rotate: g_workObj.frzArrowRtn[_j],
 			}),
 		);
 
@@ -13187,12 +13203,12 @@ const mainInit = () => {
 
 			// 後発矢印の塗り部分
 			createColorObject2(`${_name}BtmShadow${frzNo}`, {
-				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: shadowColor, rotate: g_workObj.frzArrowRtn[_j], styleName: `Shadow`,
 			}, g_cssObj.main_objShadow),
 
 			// 後発矢印
 			createColorObject2(`${_name}Btm${frzNo}`, {
-				background: _normalColor, rotate: g_workObj.arrowRtn[_j],
+				background: _normalColor, rotate: g_workObj.frzArrowRtn[_j],
 			}),
 
 		);
@@ -13914,7 +13930,7 @@ const changeColors = (_mkColor, _mkColorCd, _header, _name) => {
 		g_workObj[`${camelHeader}Colors`][targetj] = _mkColorCd[j];
 		if (tempj >= 1000) {
 			g_workObj[`${camelHeader}ColorsAll`][targetj] = _mkColorCd[j];
-			if (camelHeader.indexOf(`frzHitBar`) !== -1 && isNaN(Number(g_workObj.arrowRtn[targetj]))) {
+			if (camelHeader.indexOf(`frzHitBar`) !== -1 && isNaN(Number(g_workObj.frzArrowRtn[targetj]))) {
 				$id(`frzHitTop${targetj}`).background = _mkColorCd[j];
 			}
 		}
@@ -14059,7 +14075,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 		styfrzBtmShadow.background = tmpShadowColor === `Default` ? tmpHitColor : tmpShadowColor;
 		$id(`frzHit${_j}`).opacity = 0.9;
 		$id(`frzTop${frzNo}`).display = C_DIS_NONE;
-		if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
+		if (isNaN(parseFloat(g_workObj.frzArrowRtn[_j]))) {
 			$id(`frzHitTop${_j}`).background = tmpHitColor;
 		}
 	}
@@ -15292,6 +15308,7 @@ const getSelectedSettingList = (_shuffleName) => {
 		withOptions(g_stateObj.shaking, C_FLG_OFF),
 		withOptions(g_stateObj.effect, C_FLG_OFF),
 		withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${getStgDetailName(g_stateObj.camoufrage)}`),
+		withOptions(g_stateObj.camoufrageType, `---`, `Cmf2:${getStgDetailName(g_stateObj.camoufrageType)}`),
 		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${getStgDetailName(g_stateObj.swapping)}`),
 		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${getStgDetailName(g_stateObj.judgRange)}`),
 	].filter(value => value !== ``).join(`, `);

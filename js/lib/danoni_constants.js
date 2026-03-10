@@ -1174,6 +1174,7 @@ const g_stateObj = {
     shaking: C_FLG_OFF,
     effect: C_FLG_OFF,
     camoufrage: C_FLG_OFF,
+    camoufrageType: `---`,
     swapping: C_FLG_OFF,
     judgRange: `Normal`,
     autoRetry: C_FLG_OFF,
@@ -1359,6 +1360,9 @@ const g_settings = {
 
     camoufrages: [C_FLG_OFF, `Color`, `Arrow`, `ALL`],
     camoufrageNum: 0,
+
+    camoufrageTypes: [`---`, `FrzArrow`],
+    camoufrageTypeNum: 0,
 
     swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`],
     swappingNum: 0,
@@ -2870,6 +2874,7 @@ const g_shortcutObj = {
         KeyH: { id: `lnkShakingR` },
         KeyE: { id: `lnkEffectR` },
         KeyC: { id: `lnkCamoufrageR` },
+        KeyG: { id: `lnkCamoufrageType` },
         KeyW: { id: `lnkSwappingR` },
         KeyJ: { id: `lnkJudgRangeR` },
         KeyA: { id: `lnkAutoRetryR` },
