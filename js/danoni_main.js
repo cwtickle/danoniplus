@@ -217,7 +217,7 @@ const g_workObj = {
 	stepRtn: [],
 	stepHitRtn: [],
 	arrowRtn: [],
-	frzArrowRtn: [],
+	frzArrowInitRtn: [],
 	keyCtrl: [],
 	keyCtrlN: [],
 	keyHitFlg: [],
@@ -11753,7 +11753,7 @@ const getArrowSettings = () => {
 	delete g_workObj.motionFrame;
 
 	// 各種初期化
-	// g_workObj.frzArrowRtnはフリーズアロー(初期表示)としての利用に限定
+	// g_workObj.frzArrowInitRtnはフリーズアロー(初期表示)としての利用に限定
 	g_workObj.stepX = [];
 	g_workObj.scrollDir = [];
 	g_workObj.scrollDirDefault = [];
@@ -11762,7 +11762,7 @@ const getArrowSettings = () => {
 	g_workObj.stepRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.stepHitRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.arrowRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
-	g_workObj.frzArrowRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.frzArrowInitRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
@@ -11786,7 +11786,7 @@ const getArrowSettings = () => {
 			changeStepRtn(`stepRtn`, 90 * sign);
 			changeStepRtn(`stepHitRtn`, 90 * sign);
 			changeStepRtn(`arrowRtn`, 90 * sign);
-			changeStepRtn(`frzArrowRtn`, 90 * sign);
+			changeStepRtn(`frzArrowInitRtn`, 90 * sign);
 		}
 		const div = g_keyObj[`div${keyCtrlPtn}`];
 		const divMax = g_keyObj[`divMax${keyCtrlPtn}`] ?? posMax;
@@ -11798,7 +11798,7 @@ const getArrowSettings = () => {
 
 	// CamoufrageType: FrzArrowの場合のみ、フリーズアロー(初期)の矢印を180度回転
 	if (g_stateObj.rotateEnabled && g_stateObj.camoufrageType === `FrzArrow`) {
-		changeStepRtn(`frzArrowRtn`, 180);
+		changeStepRtn(`frzArrowInitRtn`, 180);
 	}
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
@@ -12006,7 +12006,7 @@ const getArrowSettings = () => {
 		// 矢印の回転が無効の場合は、設定を変える
 		if (g_stateObj.camoufrage === `Arrow`) {
 			g_stateObj.camoufrage = C_FLG_OFF;
-		} else if (g_stateObj.camoufrage === C_FLG_ALL) {
+		} else if (g_stateObj.camoufrage === `Color+Arrow`) {
 			g_stateObj.camoufrage = `Color`;
 		}
 		g_settings.camoufrageNum = g_settings.camoufrages.findIndex(val => val === g_stateObj.camoufrage);
@@ -12028,14 +12028,14 @@ const getArrowSettings = () => {
 			const _copiedArray = structuredClone(_array);
 			return _array.map((_val, _i) => _array[_i] = _copiedArray[randArray[_i]]);
 		};
-		if ([`Arrow`, C_FLG_ALL].includes(g_stateObj.camoufrage)) {
+		if ([`Arrow`, `Color+Arrow`].includes(g_stateObj.camoufrage)) {
 
 			// 矢印ヒット時に元の矢印がわかるようにするため、あえて g_workObj.stepHitRtn はそのままにする
 			g_workObj.stepRtn = getSwapArray(g_workObj.stepRtn);
 			g_workObj.arrowRtn = getSwapArray(g_workObj.arrowRtn);
-			g_workObj.frzArrowRtn = getSwapArray(g_workObj.frzArrowRtn);
+			g_workObj.frzArrowInitRtn = getSwapArray(g_workObj.frzArrowInitRtn);
 		}
-		if ([`Color`, C_FLG_ALL].includes(g_stateObj.camoufrage)) {
+		if ([`Color`, `Color+Arrow`].includes(g_stateObj.camoufrage)) {
 			eachOrAll.forEach(type => {
 				// ダミー矢印は対象外
 				g_workObj[`arrowColors${type}`] = getSwapArray(g_workObj[`arrowColors${type}`]);
@@ -13204,12 +13204,12 @@ const mainInit = () => {
 
 			// 開始矢印の塗り部分。ヒット時は前面に表示
 			createColorObject2(`${_name}TopShadow${frzNo}`, {
-				background: shadowColor, rotate: g_workObj.frzArrowRtn[_j], styleName: `Shadow`,
+				background: shadowColor, rotate: g_workObj.frzArrowInitRtn[_j], styleName: `Shadow`,
 			}, g_cssObj.main_objShadow),
 
 			// 開始矢印。ヒット時は非表示
 			createColorObject2(`${_name}Top${frzNo}`, {
-				background: _normalColor, rotate: g_workObj.frzArrowRtn[_j],
+				background: _normalColor, rotate: g_workObj.frzArrowInitRtn[_j],
 			}),
 		);
 
@@ -13217,12 +13217,12 @@ const mainInit = () => {
 
 			// 後発矢印の塗り部分
 			createColorObject2(`${_name}BtmShadow${frzNo}`, {
-				background: shadowColor, rotate: g_workObj.frzArrowRtn[_j], styleName: `Shadow`,
+				background: shadowColor, rotate: g_workObj.frzArrowInitRtn[_j], styleName: `Shadow`,
 			}, g_cssObj.main_objShadow),
 
 			// 後発矢印
 			createColorObject2(`${_name}Btm${frzNo}`, {
-				background: _normalColor, rotate: g_workObj.frzArrowRtn[_j],
+				background: _normalColor, rotate: g_workObj.frzArrowInitRtn[_j],
 			}),
 
 		);
@@ -13944,7 +13944,7 @@ const changeColors = (_mkColor, _mkColorCd, _header, _name) => {
 		g_workObj[`${camelHeader}Colors`][targetj] = _mkColorCd[j];
 		if (tempj >= 1000) {
 			g_workObj[`${camelHeader}ColorsAll`][targetj] = _mkColorCd[j];
-			if (camelHeader.indexOf(`frzHitBar`) !== -1 && isNaN(Number(g_workObj.frzArrowRtn[targetj]))) {
+			if (camelHeader.indexOf(`frzHitBar`) !== -1 && isNaN(Number(g_workObj.arrowRtn[targetj]))) {
 				$id(`frzHitTop${targetj}`).background = _mkColorCd[j];
 			}
 		}
@@ -14089,7 +14089,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 		styfrzBtmShadow.background = tmpShadowColor === `Default` ? tmpHitColor : tmpShadowColor;
 		$id(`frzHit${_j}`).opacity = 0.9;
 		$id(`frzTop${frzNo}`).display = C_DIS_NONE;
-		if (isNaN(parseFloat(g_workObj.frzArrowRtn[_j]))) {
+		if (isNaN(parseFloat(g_workObj.arrowRtn[_j]))) {
 			$id(`frzHitTop${_j}`).background = tmpHitColor;
 		}
 	}
@@ -15321,9 +15321,11 @@ const getSelectedSettingList = (_shuffleName) => {
 			`FR:${getStgDetailName(g_stateObj.frzReturn)}(${getStgDetailName(g_stateObj.frzReturnType)})`),
 		withOptions(g_stateObj.shaking, C_FLG_OFF),
 		withOptions(g_stateObj.effect, C_FLG_OFF),
-		withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${getStgDetailName(g_stateObj.camoufrage)}`),
-		withOptions(g_stateObj.camoufrageType, `---`,
-			`${g_stateObj.camoufrage !== C_FLG_OFF ? '' : 'Cmf:'}${getStgDetailName(g_stateObj.camoufrageType)}`),
+		[
+			withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${getStgDetailName(g_stateObj.camoufrage)}`),
+			withOptions(g_stateObj.camoufrageType, `---`,
+				`${g_stateObj.camoufrage !== C_FLG_OFF ? '' : 'Cmf:'}${getStgDetailName(g_stateObj.camoufrageType)}`)
+		].filter(value => value !== ``).join(`+`),
 		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${getStgDetailName(g_stateObj.swapping)}`),
 		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${getStgDetailName(g_stateObj.judgRange)}`),
 	].filter(value => value !== ``).join(`, `);
