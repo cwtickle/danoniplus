@@ -8797,10 +8797,14 @@ const createExpandedBtn = _name =>
  * 拡張ボタンのショートカット表示
  * @param {string} _name 
  */
-const createExpandedScView = _name =>
-	createScText(document.getElementById(`lnk${toCapitalize(_name)}Type`), `${toCapitalize(_name)}Type`, {
-		displayName: `exSetting`, targetLabel: `lnk${toCapitalize(_name)}Type`, x: -13
-	});
+const createExpandedScView = _name => {
+	const settingLabel = `${toCapitalize(_name)}Type`;
+	if (document.getElementById(`sc${settingLabel}`) === null) {
+		createScText(document.getElementById(`lnk${settingLabel}`), settingLabel, {
+			displayName: `exSetting`, targetLabel: `lnk${settingLabel}`, x: -13
+		});
+	}
+};
 
 /**
  * 拡張設定込みの標準設定
