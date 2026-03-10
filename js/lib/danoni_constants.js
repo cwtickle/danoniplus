@@ -1738,6 +1738,7 @@ const g_playWindowFunc = new Map([
 const g_arrowGroupSprite = [`stepSprite`, `arrowSprite`, `frzHitSprite`];
 const halfwayOffset = _j => (_j % 2 === 0 ? 1 : -1) * (g_headerObj.playingHeight / 2 - g_posObj.stepY + (g_posObj.stepYR - C_ARW_WIDTH) / 2);
 const getDirFromLayer = _j => (_j % 2 === 0 ? 1 : -1) * (_j < g_stateObj.layerNumDf ? 1 : -1);
+const getDirFromRev = () => g_stateObj.reverse === C_FLG_OFF ? 1 : -1;
 const g_stepAreaFunc = new Map([
     ['Default', () => ``],
     ['Halfway', () => {
@@ -1746,6 +1747,32 @@ const g_stepAreaFunc = new Map([
                 addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
             }
         });
+
+        // Appearanceフィルターの差分適用
+        if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+
+            // Hidden+, Sudden+の場合はレイヤー毎に座標を画面中央から見てフィルターバーを外側へシフト
+            for (let j = 0; j < g_stateObj.layerNumDf; j++) {
+                addTransform(
+                    `filterBar${j}`, `stepArea`,
+                    `translateY(calc(${g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1} * ${halfwayOffset(j)}px))`,
+                    g_transPriority.stepArea
+                );
+            }
+
+            // Hid&Sud+の場合は片側に2つのフィルターバーが必要なため、
+            // 追加したフィルターバーを元のフィルターバーに対して反転するようにシフト
+            if (g_stateObj.appearance === `Hid&Sud+`) {
+                for (let j = 0; j < g_stateObj.layerNumDf; j++) {
+                    addTransform(
+                        `filterBar${j}_HS`, `stepArea`,
+                        `translateY(calc(${(-1) * (g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1)} * ${halfwayOffset(j)}px))`,
+                        g_transPriority.stepArea
+                    );
+                }
+            }
+            addTransform(`filterView`, `stepArea`, `translateY(${halfwayOffset(Number(g_settings.reverseNum))}px)`, g_transPriority.stepArea);
+        }
     }],
     ['Mismatched', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
@@ -1757,6 +1784,27 @@ const g_stepAreaFunc = new Map([
                     addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
                 }
             });
+
+            // Appearanceフィルターの差分適用
+            if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+                for (let j = 0; j < g_stateObj.layerNumDf; j++) {
+                    if (j % 2 === 0) {
+                        // Hidden+用のフィルターバー補正
+                        addTransform(
+                            `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
+                            `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                            g_transPriority.stepArea
+                        );
+                    } else {
+                        // Sudden+用のフィルターバー補正
+                        addTransform(
+                            `filterBar${j - Number(g_settings.reverseNum)}`, `stepArea`,
+                            `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                            g_transPriority.stepArea
+                        );
+                    }
+                }
+            }
         }
     }],
     ['R-Mismatched', () => {
@@ -1769,6 +1817,27 @@ const g_stepAreaFunc = new Map([
                     addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
                 }
             });
+
+            // Appearanceフィルターの差分適用
+            if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+                for (let j = 0; j < g_stateObj.layerNumDf; j++) {
+                    if (j % 2 === 0) {
+                        // Hidden+用のフィルターバー補正
+                        addTransform(
+                            `filterBar${j + Number(g_settings.reverseNum)}`, `stepArea`,
+                            `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                            g_transPriority.stepArea
+                        );
+                    } else {
+                        // Sudden+用のフィルターバー補正
+                        addTransform(
+                            `filterBar${j - Number(g_settings.reverseNum)}_HS`, `stepArea`,
+                            `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                            g_transPriority.stepArea
+                        );
+                    }
+                }
+            }
         }
     }],
     ['2Step', () => {
@@ -1777,6 +1846,27 @@ const g_stepAreaFunc = new Map([
                 addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
             }
         });
+
+        // Appearanceフィルターの差分適用
+        if (g_appearanceRanges.includes(g_stateObj.appearance)) {
+            for (let j = 0; j < g_stateObj.layerNumDf; j++) {
+                addTransform(
+                    `filterBar${j}_HS`, `stepArea`,
+                    `translateY(calc((${g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                    g_transPriority.stepArea
+                );
+            }
+            if (g_stateObj.appearance === `Hid&Sud+`) {
+                // 2Stepは逆方向スクロールが存在しないため、2つごとに設定
+                for (let j = 0; j < g_stateObj.layerNumDf; j += 2) {
+                    addTransform(
+                        `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
+                        `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                        g_transPriority.stepArea
+                    );
+                }
+            }
+        }
     }],
     ['X-Flower', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {

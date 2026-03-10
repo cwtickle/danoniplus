@@ -12233,7 +12233,7 @@ const mainInit = () => {
 
 	// Hidden+, Sudden+用のライン、パーセント表示
 	const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
-	const doubleFilterFlg = g_settings.stepAreaLayers.includes(g_stateObj.stepArea);
+	const doubleFilterFlg = getDoubleFilterFlg();
 
 	for (let j = 0; j < g_stateObj.layerNum; j++) {
 		const mainSpriteJ = createEmptySprite(mainSprite, `mainSprite${j}`, mainCommonPos);
@@ -12295,6 +12295,10 @@ const mainInit = () => {
 		}
 	}
 
+	// Appearanceのオプション適用時は一部描画を隠す
+	changeAppearanceBar(g_appearanceRanges.includes(g_stateObj.appearance)
+		? g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], 0);
+
 	// StepArea処理
 	g_stepAreaFunc.get(g_stateObj.stepArea)();
 
@@ -12303,10 +12307,6 @@ const mainInit = () => {
 
 	// EffectのArrowEffect追加処理
 	g_effectFunc.get(g_stateObj.effect)();
-
-	// Appearanceのオプション適用時は一部描画を隠す
-	changeAppearanceBar(g_appearanceRanges.includes(g_stateObj.appearance)
-		? g_hidSudObj.filterPos : g_hidSudObj.filterPosDefault[g_stateObj.appearance], 0);
 
 	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
@@ -13641,6 +13641,14 @@ const makeStepZone = (_j, _keyCtrlPtn) => {
 };
 
 /**
+ * フィルターバーが同一層で複数必要かを確認
+ * @returns {boolean}
+ */
+const getDoubleFilterFlg = () =>
+	g_settings.stepAreaLayers.includes(g_stateObj.stepArea) ||
+	(g_stateObj.stepArea === `Halfway` && g_stateObj.appearance === `Hid&Sud+`);
+
+/**
  * フィルターバーの対象表示変更
  * @param {number} _num 
  * @param {number} _dirPlus 
@@ -13650,7 +13658,7 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 		const step = Math.trunc(_dirPlus / 2) * 2;
 		g_workObj.aprFilterCnt = nextPos(g_workObj.aprFilterCnt, step, g_stateObj.layerNum);
 	}
-	changeAppearanceFilter(_num);
+	const doubleFilterFlg = changeAppearanceFilter(_num);
 
 	// フィルターバーを使用するオプションのみ以下を適用
 	if (g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.d_filterline === C_FLG_ON) {
@@ -13664,13 +13672,13 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 				const displayState = (j === g_workObj.aprFilterCnt ? C_DIS_INHERIT : C_DIS_NONE);
 				$id(`filterBar${type}`).display = displayState;
 
-				if (g_settings.stepAreaLayers.includes(g_stateObj.stepArea)) {
+				if (doubleFilterFlg) {
 					$id(`filterBar${type}_HS`).display = displayState;
 				}
 			});
 		}
 
-		// スクロールが1種類でHidden+/Sudden+の場合、対面のフィルターバーは不要なため非表示にする
+		// フィルターバーの非表示条件
 		const baseLayer = g_workObj.aprFilterCnt;
 		const dividePosPart = g_workObj.dividePos.filter(v => Math.floor(v / 2) === g_workObj.aprFilterCnt / 2);
 		const currentBarNum = g_hidSudObj.std[g_stateObj.appearance][
@@ -13679,12 +13687,17 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 				: g_stateObj.reverse
 		];
 
-		if (g_stateObj.appearance !== `Hid&Sud+`
-			&& dividePosPart.length > 0
+		if (dividePosPart.length > 0
 			&& dividePosPart.every(v => v % 2 === dividePosPart[0] % 2)) {
-			$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}`).display = C_DIS_NONE;
-			if (g_settings.stepAreaLayers.includes(g_stateObj.stepArea)) {
-				$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
+			if (g_stateObj.appearance !== `Hid&Sud+` || (g_stateObj.appearance === `Hid&Sud+` && g_stateObj.stepArea === `Halfway`)) {
+				// スクロールが1種類の場合、対面のフィルターバーは不要なため非表示にする
+				$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}`).display = C_DIS_NONE;
+
+				if (g_settings.stepAreaLayers.includes(g_stateObj.stepArea)) {
+					$id(`filterBar${(currentBarNum + 1) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
+				} else if (g_stateObj.appearance === `Hid&Sud+` && g_stateObj.stepArea === `Halfway`) {
+					$id(`filterBar${(currentBarNum) % 2 + baseLayer}_HS`).display = C_DIS_NONE;
+				}
 			}
 		}
 	}
@@ -13693,6 +13706,7 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
  * @param {number} _num 
+ * @returns {boolean} フィルターバーを複数利用するかどうかのフラグ (changeAppearanceBarで利用)
  */
 const changeAppearanceFilter = (_num = 10) => {
 	const MAX_FILTER_POS = 100;
@@ -13711,6 +13725,7 @@ const changeAppearanceFilter = (_num = 10) => {
 	const appearPers = [_num, MAX_FILTER_POS - _num];
 	const topDist = g_posObj.arrowHeight * appearPers[topNum] / MAX_FILTER_POS;
 	const bottomDist = g_posObj.arrowHeight * appearPers[bottomNum] / MAX_FILTER_POS;
+	const doubleFilterFlg = getDoubleFilterFlg();
 
 	for (let j = 0; j < g_stateObj.layerNum; j += 2) {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
@@ -13719,7 +13734,7 @@ const changeAppearanceFilter = (_num = 10) => {
 		addTransform(`filterBar${topNum + j}`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j}`).top) + topDist}px)`, g_transPriority.layer);
 		addTransform(`filterBar${bottomNum + j}`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist}px)`, g_transPriority.layer);
 
-		if (g_settings.stepAreaLayers.includes(g_stateObj.stepArea)) {
+		if (doubleFilterFlg) {
 			addTransform(`filterBar${bottomNum + j}_HS`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j}`).top) + bottomDist}px)`, g_transPriority.layer);
 			addTransform(`filterBar${topNum + j}_HS`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j + 1}`).top) + topDist}px)`, g_transPriority.layer);
 		}
@@ -13736,6 +13751,8 @@ const changeAppearanceFilter = (_num = 10) => {
 
 	// ユーザカスタムイベント(アルファマスクの再描画)
 	g_customJsObj.appearanceFilter.forEach(func => func(topNum, bottomNum));
+
+	return doubleFilterFlg;
 };
 
 /**
