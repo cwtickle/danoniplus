@@ -8765,8 +8765,9 @@ const exSettingInit = () => {
  * 拡張設定込みの標準設定
  * @param {any[]} _spriteList
  * @param {string} _name 
- * @param {string[]} [defaultList=[OFF]] 拡張設定未使用の設定リスト
- * @param {string} displayName
+ * @param {{ defaultList?: string[], displayName?: string }} [options={}]
+ * @param {string[]} [options.defaultList=[C_FLG_OFF]] 拡張設定未使用の設定リスト
+ * @param {string} [options.displayName='exSetting']
  */
 const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF], displayName = `exSetting` } = {}) => {
 	if (_spriteList?.[_name] === undefined) return;
