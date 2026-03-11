@@ -8710,7 +8710,7 @@ const exSettingInit = () => {
 	createEmptySprite(divRoot, `optionsprite`, g_windowObj.optionSprite);
 	const spriteList = setSpriteList(g_settingPos.exSetting);
 
-	createGeneralSettingEx(spriteList, `playWindow`, `Default`);
+	createGeneralSettingEx(spriteList, `playWindow`, [`Default`]);
 	createGeneralSetting(spriteList.stepArea, `stepArea`);
 	createGeneralSettingEx(spriteList, `frzReturn`);
 	createGeneralSetting(spriteList.shaking, `shaking`);
@@ -8721,7 +8721,7 @@ const exSettingInit = () => {
 			g_headerObj.arrowEffectSet = g_stateObj.d_arroweffect;
 		},
 	});
-	createGeneralSettingEx(spriteList, `camoufrage`, null);  // デフォルトでも拡張設定を表示するため、第2引数はnullを指定
+	createGeneralSettingEx(spriteList, `camoufrage`, []);
 	createGeneralSetting(spriteList.swapping, `swapping`);
 	createGeneralSetting(spriteList.judgRange, `judgRange`, {
 		addRFunc: () => {
@@ -8764,11 +8764,11 @@ const exSettingInit = () => {
 /**
  * 拡張ボタンの表示・非表示と通常ボタンの幅変更
  * @param {string} _name 
- * @param {string} _default 
+ * @param {string[]} _defaultList 
  */
-const setExpandedBtnSiz = (_name, _default = C_FLG_OFF) => {
+const setExpandedBtnSiz = (_name, _defaultList) => {
 	const camelH = toCapitalize(_name);
-	if (g_stateObj[_name] === _default) {
+	if (_defaultList.includes(g_stateObj[_name])) {
 		$id(`lnk${camelH}Type`).display = C_DIS_NONE;
 		$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeft);
 		$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidth);
@@ -8816,9 +8816,9 @@ const createExpandedScView = _name => {
  * 拡張設定込みの標準設定
  * @param {any[]} _spriteList
  * @param {string} _name 
- * @param {string} [_default=OFF] デフォルト値。nullを指定すると拡張設定が常時表示になる（XXXTypeUse=true時）
+ * @param {string[]} [_defaultList=[OFF]] 拡張設定未使用の設定リスト
  */
-const createGeneralSettingEx = (_spriteList, _name, _default = C_FLG_OFF) => {
+const createGeneralSettingEx = (_spriteList, _name, _defaultList = [C_FLG_OFF]) => {
 	if (_spriteList?.[_name] === undefined) return;
 
 	// TypeUse 未定義時は true 扱いにする
@@ -8826,13 +8826,13 @@ const createGeneralSettingEx = (_spriteList, _name, _default = C_FLG_OFF) => {
 	createGeneralSetting(_spriteList[_name], _name, {
 		addRFunc: () => {
 			if (typeEnabled) {
-				setExpandedBtnSiz(_name, _default);
+				setExpandedBtnSiz(_name, _defaultList);
 			}
 		},
 	});
 	if (typeEnabled) {
 		_spriteList[_name].appendChild(createExpandedBtn(_name));
-		setExpandedBtnSiz(_name, _default);
+		setExpandedBtnSiz(_name, _defaultList);
 		createExpandedScView(_name);
 	}
 }
