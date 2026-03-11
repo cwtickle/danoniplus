@@ -1358,8 +1358,11 @@ const g_settings = {
     effects: [C_FLG_OFF, `Dizzy`, `Spin`, `Wave`, `Storm`, `Blinking`, `Squids`],
     effectNum: 0,
 
-    camoufrages: [C_FLG_OFF, `Color`, `Arrow`, `Color+Arrow`],
+    camoufrages: [C_FLG_OFF, `Color`, `Arrow`, `Step+Arrow`, `Color+Arrow`, `Color+Step+Arrow`],
     camoufrageNum: 0,
+
+    camoufrageRotates: [C_FLG_OFF, `Color`, `Arrow`, `Step+Arrow`, `Color+Arrow`, `Color+Step+Arrow`],
+    camoufrageNoRotates: [C_FLG_OFF, `Color`],
 
     camoufrageTypes: [`---`, `FrzArrow`],
     camoufrageTypeNum: 0,
