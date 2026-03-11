@@ -153,6 +153,7 @@ const C_ARW_WIDTH = 50;
 // ON/OFFスイッチ
 const C_FLG_ON = `ON`;
 const C_FLG_OFF = `OFF`;
+const C_FLG_HYPHEN = `---`;
 const C_FLG_ALL = `ALL`;
 const C_DIS_NONE = `none`;
 const C_DIS_AUTO = `auto`;
@@ -5096,7 +5097,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 		// スクロールパターン (scrollX_Y)
 		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
-		newKeyPairParam(newKey, `scroll`, `scrollDir`, `---`, 1);
+		newKeyPairParam(newKey, `scroll`, `scrollDir`, C_FLG_HYPHEN, 1);
 
 		// アシストパターン (assistX_Y)
 		// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
@@ -7295,13 +7296,13 @@ const makeHighScore = _scoreId => {
 		}
 		multiAppend(detailHighScore,
 			createScoreLabel(chara, g_lblNameObj[`j_${chara}`], { yPos: j }),
-			createScoreLabel(`${chara}S`, g_localStorage.highscores?.[scoreName]?.[chara] ?? `---`,
+			createScoreLabel(`${chara}S`, g_localStorage.highscores?.[scoreName]?.[chara] ?? C_FLG_HYPHEN,
 				{ xPos: 0, yPos: j, align: C_ALIGN_RIGHT }),
 		);
 	});
 	// Fast, Slow, 推定Adj, Excessive (値が無ければスキップ)
 	Object.keys(extData).forEach((chara, j) => {
-		if (!hasVal(g_localStorage.highscores?.[scoreName]?.[chara], `---`)) {
+		if (!hasVal(g_localStorage.highscores?.[scoreName]?.[chara], C_FLG_HYPHEN)) {
 			return;
 		}
 		multiAppend(detailHighScore,
@@ -7335,7 +7336,7 @@ const makeHighScore = _scoreId => {
 			`${g_localStorage.highscores?.[scoreName]?.fullCombo ?? '' ? '<span class="result_FullCombo">◆</span>' : ''}` +
 			`${g_localStorage.highscores?.[scoreName]?.perfect ?? '' ? '<span class="result_Perfect">◆</span>' : ''}` +
 			`${g_localStorage.highscores?.[scoreName]?.allPerfect ?? '' ? '<span class="result_AllPerfect">◆</span>' : ''}`, { xPos: 1, dx: 20, yPos: 12, w: 100, align: C_ALIGN_CENTER }),
-		createScoreLabel(`lblHClearLamps`, `Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? `---`), { yPos: 13, overflow: C_DIS_AUTO, w: g_sWidth / 2 + 40, h: 37 }),
+		createScoreLabel(`lblHClearLamps`, `Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? C_FLG_HYPHEN), { yPos: 13, overflow: C_DIS_AUTO, w: g_sWidth / 2 + 40, h: 37 }),
 
 		createScoreLabel(`lblHShuffle`, g_stateObj.shuffle.indexOf(`Mirror`) < 0 ? `` : `Shuffle: <span class="common_iknai">${g_stateObj.shuffle}</span>`, { yPos: 11.5, dx: -130 }),
 		createScoreLabel(`lblHAssist`, g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `Assist: <span class="common_kita">${g_stateObj.autoPlay}</span>`, { yPos: 12.5, dx: -130 }),
@@ -7367,7 +7368,7 @@ const makeHighScore = _scoreId => {
 			rankMark: g_localStorage.highscores?.[scoreName]?.rankMark || `--`,
 			playStyleData: g_localStorage.highscores[scoreName]?.playStyle || `--`,
 			highscore: g_localStorage.highscores[scoreName],
-			tweetExcessive: hasVal(g_localStorage.highscores[scoreName]?.excessive, `---`) ? `(+${g_resultObj.excessive})` : ``,
+			tweetExcessive: hasVal(g_localStorage.highscores[scoreName]?.excessive, C_FLG_HYPHEN) ? `(+${g_resultObj.excessive})` : ``,
 			musicTitle, tweetDifData, tweetFrzJdg, tweetMaxCombo, baseTwitUrl,
 		};
 		const resultCommon = unEscapeHtml(makeResultText(g_templateObj.resultFormatDf, resultParams));
@@ -8808,7 +8809,7 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 			}), g_cssObj.button_Default, g_cssObj.button_RevON);
 
 	/**
-	 * 拡張ボタンのショートカット表示
+	 * 拡張ボタンのショートカット表示、拡張ボタンのCSS切り替え
 	 */
 	const createExpandedScView = () => {
 		const settingLabel = `${toCapitalize(_name)}Type`;
@@ -8817,6 +8818,8 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 				displayName, targetLabel: `lnk${settingLabel}`, x: -13
 			});
 		}
+		document.getElementById(`lnk${settingLabel}`).classList.remove(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
+		document.getElementById(`lnk${settingLabel}`).classList.add(g_cssObj[`button_Rev${boolToSwitch(g_stateObj[`${_name}Type`] !== C_FLG_HYPHEN)}`]);
 	};
 
 	// TypeUse 未定義時は true 扱いにする
@@ -10693,7 +10696,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		const ptnName = `${(g_keyObj.currentPtn === -1 ? g_keyObj.storagePtn : g_keyObj.currentPtn) + 1}`;
 		const keyName = setVal(g_keyObj[`transKey${_keyCtrlPtn}`], g_keyObj.currentKey);
 		let type = ``;
-		if (g_stateObj.scroll !== `---`) {
+		if (g_stateObj.scroll !== C_FLG_HYPHEN) {
 			type = `Alt`;
 		} else if (g_stateObj.reverse === C_FLG_ON) {
 			type = `Rev`;
@@ -10735,7 +10738,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 			// wordRev_dataが指定されている場合はそのままの位置を採用
 			// word_dataのみ指定されている場合、下記ルールに従って設定
-			if (!wordTarget.includes(`Rev`) && g_stateObj.scroll === `---`) {
+			if (!wordTarget.includes(`Rev`) && g_stateObj.scroll === C_FLG_HYPHEN) {
 				// Reverse時の歌詞の自動反転制御設定
 				if (g_headerObj.wordAutoReverse !== C_DIS_AUTO) {
 					wordReverseFlg = g_headerObj.wordAutoReverse === C_FLG_ON;
@@ -14953,7 +14956,7 @@ const resultInit = () => {
 				g_localStorage.highscores[scoreName].slow = g_resultObj.slow;
 				g_localStorage.highscores[scoreName].adj = estimatedAdj;
 				g_localStorage.highscores[scoreName].excessive = g_stateObj.excessive === C_FLG_ON ?
-					g_resultObj.excessive : `---`;
+					g_resultObj.excessive : C_FLG_HYPHEN;
 
 				if (g_presetObj.resultVals !== undefined) {
 					Object.keys(g_presetObj.resultVals).forEach(key =>
@@ -15329,7 +15332,7 @@ const getSelectedSettingList = (_shuffleName) => {
 		`${g_stateObj.speed}${g_lblNameObj.multi}`,
 		withOptions(g_stateObj.motion, C_FLG_OFF),
 		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
-			getStgDetailName(g_stateObj.scroll !== '---' ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, '---')}`,
+			getStgDetailName(g_stateObj.scroll !== C_FLG_HYPHEN ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, C_FLG_HYPHEN)}`,
 		withOptions(g_stateObj.appearance, `Visible`) +
 		((g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_ON) ? `(${g_hidSudObj.filterPos}%)` : ``),
 		withOptions(g_stateObj.gauge, g_settings.gauges[0]),
@@ -15342,7 +15345,7 @@ const getSelectedSettingList = (_shuffleName) => {
 		withOptions(g_stateObj.effect, C_FLG_OFF),
 		[
 			withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${getStgDetailName(g_stateObj.camoufrage)}`),
-			withOptions(g_stateObj.camoufrageType, `---`,
+			withOptions(g_stateObj.camoufrageType, C_FLG_HYPHEN,
 				`${g_stateObj.camoufrage !== C_FLG_OFF ? '' : 'Cmf:'}${getStgDetailName(g_stateObj.camoufrageType)}`)
 		].filter(value => value !== ``).join(`+`),
 		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${getStgDetailName(g_stateObj.swapping)}`),
