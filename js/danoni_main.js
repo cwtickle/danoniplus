@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/03/06
+ * Revised : 2026/03/12
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 39.8.18`;
-const g_revisedDate = `2026/03/06`;
+const g_version = `Ver 39.8.19`;
+const g_revisedDate = `2026/03/12`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -5779,13 +5779,14 @@ const makeHighScore = _scoreId => {
 			tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
 		}
 
+		const storedExcessive = g_localStorage.highscores[scoreName]?.excessive;
 		const resultParams = {
 			hashTag: (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``),
 			tuning: g_headerObj.creatorNames[_scoreId],
 			rankMark: g_localStorage.highscores?.[scoreName]?.rankMark || `--`,
 			playStyleData: g_localStorage.highscores[scoreName]?.playStyle || `--`,
 			highscore: g_localStorage.highscores[scoreName],
-			tweetExcessive: hasVal(g_localStorage.highscores[scoreName]?.excessive, `---`) ? `(+${g_resultObj.excessive})` : ``,
+			tweetExcessive: hasVal(storedExcessive, `---`) ? `(+${storedExcessive})` : ``,
 			musicTitle, tweetDifData, tweetFrzJdg, tweetMaxCombo, baseTwitUrl,
 		};
 		const resultCommon = unEscapeHtml(makeResultText(g_templateObj.resultFormatDf, resultParams));
