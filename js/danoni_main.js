@@ -12045,12 +12045,12 @@ const getArrowSettings = () => {
 			const _copiedArray = structuredClone(_array);
 			return _array.map((_val, _i) => _array[_i] = _copiedArray[randArray[_i]]);
 		};
-		if (g_stateObj.camoufrage.includes(`Arrow`)) {
 
-			// 矢印ヒット時に元の矢印がわかるようにするため、あえて g_workObj.stepHitRtn はそのままにする
-			if (g_stateObj.camoufrage.includes(`Step`)) {
-				g_workObj.stepRtn = getSwapArray(g_workObj.stepRtn);
-			}
+		// 矢印ヒット時に元の矢印がわかるようにするため、あえて g_workObj.stepHitRtn はそのままにする
+		if (g_stateObj.camoufrage.includes(`Step`)) {
+			g_workObj.stepRtn = getSwapArray(g_workObj.stepRtn);
+		}
+		if (g_stateObj.camoufrage.includes(`Arrow`)) {
 			g_workObj.arrowRtn = getSwapArray(g_workObj.arrowRtn);
 			g_workObj.frzArrowInitRtn = getSwapArray(g_workObj.frzArrowInitRtn);
 		}
