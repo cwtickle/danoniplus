@@ -8710,7 +8710,7 @@ const exSettingInit = () => {
 	createEmptySprite(divRoot, `optionsprite`, g_windowObj.optionSprite);
 	const spriteList = setSpriteList(g_settingPos.exSetting);
 
-	createGeneralSettingEx(spriteList, `playWindow`, [`Default`]);
+	createGeneralSettingEx(spriteList, `playWindow`, { defaultList: [`Default`] });
 	createGeneralSetting(spriteList.stepArea, `stepArea`);
 	createGeneralSettingEx(spriteList, `frzReturn`);
 	createGeneralSetting(spriteList.shaking, `shaking`);
@@ -8721,7 +8721,7 @@ const exSettingInit = () => {
 			g_headerObj.arrowEffectSet = g_stateObj.d_arroweffect;
 		},
 	});
-	createGeneralSettingEx(spriteList, `camoufrage`, []);
+	createGeneralSettingEx(spriteList, `camoufrage`, { defaultList: [] });
 	createGeneralSetting(spriteList.swapping, `swapping`);
 	createGeneralSetting(spriteList.judgRange, `judgRange`, {
 		addRFunc: () => {
@@ -8762,77 +8762,78 @@ const exSettingInit = () => {
 };
 
 /**
- * 拡張ボタンの表示・非表示と通常ボタンの幅変更
- * @param {string} _name 
- * @param {string[]} _defaultList 
- */
-const setExpandedBtnSiz = (_name, _defaultList) => {
-	const camelH = toCapitalize(_name);
-	if (_defaultList.includes(g_stateObj[_name])) {
-		$id(`lnk${camelH}Type`).display = C_DIS_NONE;
-		$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeft);
-		$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidth);
-	} else {
-		$id(`lnk${camelH}Type`).display = C_DIS_INHERIT;
-		$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeftShort);
-		$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidthShort);
-	}
-	$id(`lnk${camelH}`).fontSize = wUnit(getFontSize2(getStgDetailName(g_stateObj[_name]), g_limitObj.setLblWidthShort, { maxSiz: g_limitObj.setLblSiz }));
-};
-
-/**
- * 拡張ボタンの作成
- * @param {string} _name 
- * @returns {HTMLDivElement}
- */
-const createExpandedBtn = _name =>
-	createCss2Button(`lnk${toCapitalize(_name)}Type`, getStgDetailName(g_stateObj[`${_name}Type`]),
-		() => {
-			setSetting(1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
-			createExpandedScView(_name);
-		},
-		Object.assign(g_lblPosObj.btnReverse, {
-			cxtFunc: () => {
-				setSetting(-1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
-				createExpandedScView(_name);
-			},
-			title: g_msgObj[`${_name}Type`] ?? ``,
-		}), g_cssObj.button_Default, g_cssObj.button_RevON);
-
-/**
- * 拡張ボタンのショートカット表示
- * @param {string} _name 
- */
-const createExpandedScView = _name => {
-	const settingLabel = `${toCapitalize(_name)}Type`;
-	if (document.getElementById(`sc${settingLabel}`) === null) {
-		createScText(document.getElementById(`lnk${settingLabel}`), settingLabel, {
-			displayName: `exSetting`, targetLabel: `lnk${settingLabel}`, x: -13
-		});
-	}
-};
-
-/**
  * 拡張設定込みの標準設定
  * @param {any[]} _spriteList
  * @param {string} _name 
- * @param {string[]} [_defaultList=[OFF]] 拡張設定未使用の設定リスト
+ * @param {string[]} [defaultList=[OFF]] 拡張設定未使用の設定リスト
+ * @param {string} displayName
  */
-const createGeneralSettingEx = (_spriteList, _name, _defaultList = [C_FLG_OFF]) => {
+const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF], displayName = `exSetting` } = {}) => {
 	if (_spriteList?.[_name] === undefined) return;
+
+	/**
+	 * 拡張ボタンの表示・非表示と通常ボタンの幅変更
+	 * @param {string} _name 
+	 * @param {string[]} _defaultList 
+	 */
+	const setExpandedBtnSiz = (_name, _defaultList) => {
+		const camelH = toCapitalize(_name);
+		if (_defaultList.includes(g_stateObj[_name])) {
+			$id(`lnk${camelH}Type`).display = C_DIS_NONE;
+			$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeft);
+			$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidth);
+		} else {
+			$id(`lnk${camelH}Type`).display = C_DIS_INHERIT;
+			$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeftShort);
+			$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidthShort);
+		}
+		$id(`lnk${camelH}`).fontSize = wUnit(getFontSize2(getStgDetailName(g_stateObj[_name]), g_limitObj.setLblWidthShort, { maxSiz: g_limitObj.setLblSiz }));
+	};
+
+	/**
+	 * 拡張ボタンの作成
+	 * @param {string} _name 
+	 * @returns {HTMLDivElement}
+	 */
+	const createExpandedBtn = _name =>
+		createCss2Button(`lnk${toCapitalize(_name)}Type`, getStgDetailName(g_stateObj[`${_name}Type`]),
+			() => {
+				setSetting(1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
+				createExpandedScView(_name);
+			},
+			Object.assign(g_lblPosObj.btnReverse, {
+				cxtFunc: () => {
+					setSetting(-1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
+					createExpandedScView(_name);
+				},
+				title: g_msgObj[`${_name}Type`] ?? ``,
+			}), g_cssObj.button_Default, g_cssObj.button_RevON);
+
+	/**
+	 * 拡張ボタンのショートカット表示
+	 * @param {string} _name 
+	 */
+	const createExpandedScView = _name => {
+		const settingLabel = `${toCapitalize(_name)}Type`;
+		if (document.getElementById(`sc${settingLabel}`) === null) {
+			createScText(document.getElementById(`lnk${settingLabel}`), settingLabel, {
+				displayName, targetLabel: `lnk${settingLabel}`, x: -13
+			});
+		}
+	};
 
 	// TypeUse 未定義時は true 扱いにする
 	const typeEnabled = setBoolVal(g_headerObj[`${_name}TypeUse`], true);
 	createGeneralSetting(_spriteList[_name], _name, {
 		addRFunc: () => {
 			if (typeEnabled) {
-				setExpandedBtnSiz(_name, _defaultList);
+				setExpandedBtnSiz(_name, defaultList);
 			}
 		},
 	});
 	if (typeEnabled) {
 		_spriteList[_name].appendChild(createExpandedBtn(_name));
-		setExpandedBtnSiz(_name, _defaultList);
+		setExpandedBtnSiz(_name, defaultList);
 		createExpandedScView(_name);
 	}
 }
