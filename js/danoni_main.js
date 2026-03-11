@@ -12029,6 +12029,8 @@ const getArrowSettings = () => {
 
 	// Camoufrageの設定
 	if (g_stateObj.camoufrage !== C_FLG_OFF) {
+		changeSettingListsForImg();
+
 		const eachOrAll = [``, `All`];
 		const keyNum = g_keyObj[`chara${g_keyObj.currentKey}_${g_keyObj.currentPtn}`].length;
 
