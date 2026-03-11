@@ -8773,12 +8773,10 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 
 	/**
 	 * 拡張ボタンの表示・非表示と通常ボタンの幅変更
-	 * @param {string} _name 
-	 * @param {string[]} _defaultList 
 	 */
-	const setExpandedBtnSiz = (_name, _defaultList) => {
+	const setExpandedBtnSiz = () => {
 		const camelH = toCapitalize(_name);
-		if (_defaultList.includes(g_stateObj[_name])) {
+		if (defaultList.includes(g_stateObj[_name])) {
 			$id(`lnk${camelH}Type`).display = C_DIS_NONE;
 			$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeft);
 			$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidth);
@@ -8792,10 +8790,9 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 
 	/**
 	 * 拡張ボタンの作成
-	 * @param {string} _name 
 	 * @returns {HTMLDivElement}
 	 */
-	const createExpandedBtn = _name =>
+	const createExpandedBtn = () =>
 		createCss2Button(`lnk${toCapitalize(_name)}Type`, getStgDetailName(g_stateObj[`${_name}Type`]),
 			() => {
 				setSetting(1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
@@ -8811,9 +8808,8 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 
 	/**
 	 * 拡張ボタンのショートカット表示
-	 * @param {string} _name 
 	 */
-	const createExpandedScView = _name => {
+	const createExpandedScView = () => {
 		const settingLabel = `${toCapitalize(_name)}Type`;
 		if (document.getElementById(`sc${settingLabel}`) === null) {
 			createScText(document.getElementById(`lnk${settingLabel}`), settingLabel, {
@@ -8827,14 +8823,14 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 	createGeneralSetting(_spriteList[_name], _name, {
 		addRFunc: () => {
 			if (typeEnabled) {
-				setExpandedBtnSiz(_name, defaultList);
+				setExpandedBtnSiz();
 			}
 		},
 	});
 	if (typeEnabled) {
-		_spriteList[_name].appendChild(createExpandedBtn(_name));
-		setExpandedBtnSiz(_name, defaultList);
-		createExpandedScView(_name);
+		_spriteList[_name].appendChild(createExpandedBtn());
+		setExpandedBtnSiz();
+		createExpandedScView();
 	}
 }
 
