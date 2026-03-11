@@ -7362,13 +7362,14 @@ const makeHighScore = _scoreId => {
 			tweetDifData += `:${getStgDetailName(g_stateObj.shuffle)}`;
 		}
 
+		const storedExcessive = g_localStorage.highscores[scoreName]?.excessive;
 		const resultParams = {
 			hashTag: (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``),
 			tuning: g_headerObj.creatorNames[_scoreId],
 			rankMark: g_localStorage.highscores?.[scoreName]?.rankMark || `--`,
 			playStyleData: g_localStorage.highscores[scoreName]?.playStyle || `--`,
 			highscore: g_localStorage.highscores[scoreName],
-			tweetExcessive: hasVal(g_localStorage.highscores[scoreName]?.excessive, C_FLG_HYPHEN) ? `(+${g_resultObj.excessive})` : ``,
+			tweetExcessive: hasVal(storedExcessive, C_FLG_HYPHEN) ? `(+${storedExcessive})` : ``,
 			musicTitle, tweetDifData, tweetFrzJdg, tweetMaxCombo, baseTwitUrl,
 		};
 		const resultCommon = unEscapeHtml(makeResultText(g_templateObj.resultFormatDf, resultParams));
