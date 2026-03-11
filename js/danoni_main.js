@@ -3598,6 +3598,7 @@ const headerConvert = _dosObj => {
 	g_imgType = g_keycons.imgTypes[0];
 	g_stateObj.rotateEnabled = obj.imgType[0].rotateEnabled;
 	g_stateObj.flatStepHeight = obj.imgType[0].flatStepHeight;
+	changeSettingListsForImg();
 
 	const [titleArrowName, titleArrowRotate] = padArray(_dosObj.titleArrowName?.split(`:`), [`Original`, 180]);
 	obj.titleArrowNo = roundZero(g_keycons.imgTypes.findIndex(imgType => imgType === titleArrowName));
@@ -12029,7 +12030,6 @@ const getArrowSettings = () => {
 
 	// Camoufrageの設定
 	if (g_stateObj.camoufrage !== C_FLG_OFF) {
-		changeSettingListsForImg();
 
 		const eachOrAll = [``, `All`];
 		const keyNum = g_keyObj[`chara${g_keyObj.currentKey}_${g_keyObj.currentPtn}`].length;
