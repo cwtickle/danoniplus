@@ -1121,7 +1121,7 @@ const g_stateObj = {
     speed: 3.5,
     motion: C_FLG_OFF,
     reverse: C_FLG_OFF,
-    scroll: `---`,
+    scroll: C_FLG_OFF2,
     shuffle: C_FLG_OFF,
     autoPlay: C_FLG_OFF,
     autoAll: C_FLG_OFF,
@@ -1167,14 +1167,14 @@ const g_stateObj = {
     opacity: 100,
 
     playWindow: `Default`,
-    playWindowType: `---`,
+    playWindowType: C_FLG_OFF2,
     stepArea: `Default`,
     frzReturn: C_FLG_OFF,
     frzReturnType: `360deg`,
     shaking: C_FLG_OFF,
     effect: C_FLG_OFF,
     camoufrage: C_FLG_OFF,
-    camoufrageType: `---`,
+    camoufrageType: C_FLG_OFF2,
     swapping: C_FLG_OFF,
     judgRange: `Normal`,
     autoRetry: C_FLG_OFF,
@@ -1339,7 +1339,7 @@ const g_settings = {
     playWindows: [`Default`, `Stairs`, `Slope`, `Distorted`, `SideScroll`],
     playWindowNum: 0,
 
-    playWindowTypes: [`---`, `Reverse`],
+    playWindowTypes: [C_FLG_OFF2, `Reverse`],
     playWindowTypeNum: 0,
 
     stepAreas: [`Default`, `Halfway`, `2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`, `Alt-Crossing`],
@@ -1364,7 +1364,7 @@ const g_settings = {
     camoufrageRotates: [C_FLG_OFF, `Color`, `Arrow`, `Step+Arrow`, `Color+Arrow`, `Color+Step+Arrow`],
     camoufrageNoRotates: [C_FLG_OFF, `Color`],
 
-    camoufrageTypes: [`---`, `FrzArrow`],
+    camoufrageTypes: [C_FLG_OFF2, `FrzArrow`],
     camoufrageTypeNum: 0,
 
     swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`],
@@ -3492,7 +3492,7 @@ const g_keyObj = {
     },
 
     // スクロール拡張オプション
-    scrollName_def: [`---`],
+    scrollName_def: [C_FLG_OFF2],
     scrollDir5_0: {
         '---': [1, 1, 1, 1, 1],
         'Cross': [1, -1, -1, 1, 1],
