@@ -217,6 +217,7 @@ const g_workObj = {
 	stepRtn: [],
 	stepHitRtn: [],
 	arrowRtn: [],
+	frzArrowInitRtn: [],
 	keyCtrl: [],
 	keyCtrlN: [],
 	keyHitFlg: [],
@@ -8704,67 +8705,9 @@ const exSettingInit = () => {
 	createEmptySprite(divRoot, `optionsprite`, g_windowObj.optionSprite);
 	const spriteList = setSpriteList(g_settingPos.exSetting);
 
-	/**
-	 * 拡張ボタンの表示・非表示と通常ボタンの幅変更
-	 * @param {string} _name 
-	 * @param {string} _default 
-	 */
-	const setExpandedBtnSiz = (_name, _default = C_FLG_OFF) => {
-		const camelH = toCapitalize(_name);
-		if (g_stateObj[_name] === _default) {
-			$id(`lnk${camelH}Type`).display = C_DIS_NONE;
-			$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeft);
-			$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidth);
-		} else {
-			$id(`lnk${camelH}Type`).display = C_DIS_INHERIT;
-			$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeftShort);
-			$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidthShort);
-		}
-	};
-
-	/**
-	 * 拡張ボタンの作成
-	 * @param {string} _name 
-	 * @returns {HTMLDivElement}
-	 */
-	const createExpandedBtn = _name =>
-		createCss2Button(`lnk${toCapitalize(_name)}Type`, getStgDetailName(g_stateObj[`${_name}Type`]),
-			() => {
-				setSetting(1, `${_name}Type`);
-				createExpandedScView(_name);
-			},
-			Object.assign(g_lblPosObj.btnReverse, {
-				cxtFunc: () => {
-					setSetting(-1, `${_name}Type`);
-					createExpandedScView(_name);
-				},
-				title: g_msgObj[`${_name}Type`] ?? ``,
-			}), g_cssObj.button_Default, g_cssObj.button_RevON);
-
-	/**
-	 * 拡張ボタンのショートカット表示
-	 * @param {string} _name 
-	 */
-	const createExpandedScView = _name =>
-		createScText(document.getElementById(`lnk${toCapitalize(_name)}Type`), `${toCapitalize(_name)}Type`, {
-			displayName: `exSetting`, targetLabel: `lnk${toCapitalize(_name)}Type`, x: -13
-		});
-
-	createGeneralSetting(spriteList.playWindow, `playWindow`, {
-		addRFunc: () => setExpandedBtnSiz(`playWindow`, `Default`),
-	});
-	spriteList.playWindow.appendChild(createExpandedBtn(`playWindow`));
-	setExpandedBtnSiz(`playWindow`, `Default`);
-	createExpandedScView(`playWindow`);
-
+	createGeneralSettingEx(spriteList, `playWindow`, `Default`);
 	createGeneralSetting(spriteList.stepArea, `stepArea`);
-	createGeneralSetting(spriteList.frzReturn, `frzReturn`, {
-		addRFunc: () => setExpandedBtnSiz(`frzReturn`),
-	});
-	spriteList.frzReturn.appendChild(createExpandedBtn(`frzReturn`));
-	setExpandedBtnSiz(`frzReturn`);
-	createExpandedScView(`frzReturn`);
-
+	createGeneralSettingEx(spriteList, `frzReturn`);
 	createGeneralSetting(spriteList.shaking, `shaking`);
 	createGeneralSetting(spriteList.effect, `effect`, {
 		addRFunc: () => {
@@ -8773,7 +8716,7 @@ const exSettingInit = () => {
 			g_headerObj.arrowEffectSet = g_stateObj.d_arroweffect;
 		},
 	});
-	createGeneralSetting(spriteList.camoufrage, `camoufrage`);
+	createGeneralSettingEx(spriteList, `camoufrage`, null);  // デフォルトでも拡張設定を表示するため、第2引数はnullを指定
 	createGeneralSetting(spriteList.swapping, `swapping`);
 	createGeneralSetting(spriteList.judgRange, `judgRange`, {
 		addRFunc: () => {
@@ -8812,6 +8755,81 @@ const exSettingInit = () => {
 
 	g_skinJsObj.exSetting.forEach(func => func());
 };
+
+/**
+ * 拡張ボタンの表示・非表示と通常ボタンの幅変更
+ * @param {string} _name 
+ * @param {string} _default 
+ */
+const setExpandedBtnSiz = (_name, _default = C_FLG_OFF) => {
+	const camelH = toCapitalize(_name);
+	if (g_stateObj[_name] === _default) {
+		$id(`lnk${camelH}Type`).display = C_DIS_NONE;
+		$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeft);
+		$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidth);
+	} else {
+		$id(`lnk${camelH}Type`).display = C_DIS_INHERIT;
+		$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeftShort);
+		$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidthShort);
+	}
+};
+
+/**
+ * 拡張ボタンの作成
+ * @param {string} _name 
+ * @returns {HTMLDivElement}
+ */
+const createExpandedBtn = _name =>
+	createCss2Button(`lnk${toCapitalize(_name)}Type`, getStgDetailName(g_stateObj[`${_name}Type`]),
+		() => {
+			setSetting(1, `${_name}Type`);
+			createExpandedScView(_name);
+		},
+		Object.assign(g_lblPosObj.btnReverse, {
+			cxtFunc: () => {
+				setSetting(-1, `${_name}Type`);
+				createExpandedScView(_name);
+			},
+			title: g_msgObj[`${_name}Type`] ?? ``,
+		}), g_cssObj.button_Default, g_cssObj.button_RevON);
+
+/**
+ * 拡張ボタンのショートカット表示
+ * @param {string} _name 
+ */
+const createExpandedScView = _name => {
+	const settingLabel = `${toCapitalize(_name)}Type`;
+	if (document.getElementById(`sc${settingLabel}`) === null) {
+		createScText(document.getElementById(`lnk${settingLabel}`), settingLabel, {
+			displayName: `exSetting`, targetLabel: `lnk${settingLabel}`, x: -13
+		});
+	}
+};
+
+/**
+ * 拡張設定込みの標準設定
+ * @param {any[]} _spriteList
+ * @param {string} _name 
+ * @param {string} [_default=OFF] デフォルト値。nullを指定すると拡張設定が常時表示になる（XXXTypeUse=true時）
+ */
+const createGeneralSettingEx = (_spriteList, _name, _default = C_FLG_OFF) => {
+	if (_spriteList?.[_name] === undefined) return;
+
+	// TypeUse 未定義時は true 扱いにする
+	const typeEnabled = setBoolVal(g_headerObj[`${_name}TypeUse`], true);
+	createGeneralSetting(_spriteList[_name], _name, {
+		addRFunc: () => {
+			if (typeEnabled) {
+				setExpandedBtnSiz(_name, _default);
+			}
+		},
+	});
+	if (typeEnabled) {
+		_spriteList[_name].appendChild(createExpandedBtn(_name));
+		setExpandedBtnSiz(_name, _default);
+		createExpandedScView(_name);
+	}
+}
 
 /*-----------------------------------------------------------*/
 /* Scene : KEYCONFIG [orange] */
@@ -11738,6 +11756,8 @@ const getArrowSettings = () => {
 	delete g_workObj.arrivalFrame;
 	delete g_workObj.motionFrame;
 
+	// 各種初期化
+	// g_workObj.frzArrowInitRtnはフリーズアロー(初期表示)としての利用に限定
 	g_workObj.stepX = [];
 	g_workObj.scrollDir = [];
 	g_workObj.scrollDirDefault = [];
@@ -11746,6 +11766,7 @@ const getArrowSettings = () => {
 	g_workObj.stepRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.stepHitRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.arrowRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
+	g_workObj.frzArrowInitRtn = structuredClone(g_keyObj[`stepRtn${keyCtrlPtn}`]);
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
@@ -11769,6 +11790,7 @@ const getArrowSettings = () => {
 			changeStepRtn(`stepRtn`, 90 * sign);
 			changeStepRtn(`stepHitRtn`, 90 * sign);
 			changeStepRtn(`arrowRtn`, 90 * sign);
+			changeStepRtn(`frzArrowInitRtn`, 90 * sign);
 		}
 		const div = g_keyObj[`div${keyCtrlPtn}`];
 		const divMax = g_keyObj[`divMax${keyCtrlPtn}`] ?? posMax;
@@ -11776,6 +11798,11 @@ const getArrowSettings = () => {
 		if (Number.isFinite(denom) && denom > 0) {
 			g_workObj.scale *= Math.min(g_sHeight / denom, 1);
 		}
+	}
+
+	// CamoufrageType: FrzArrowの場合のみ、フリーズアロー(初期)の矢印を180度回転
+	if (g_stateObj.rotateEnabled && g_stateObj.camoufrageType === `FrzArrow`) {
+		changeStepRtn(`frzArrowInitRtn`, 180);
 	}
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
@@ -11983,7 +12010,7 @@ const getArrowSettings = () => {
 		// 矢印の回転が無効の場合は、設定を変える
 		if (g_stateObj.camoufrage === `Arrow`) {
 			g_stateObj.camoufrage = C_FLG_OFF;
-		} else if (g_stateObj.camoufrage === C_FLG_ALL) {
+		} else if (g_stateObj.camoufrage === `Color+Arrow`) {
 			g_stateObj.camoufrage = `Color`;
 		}
 		g_settings.camoufrageNum = g_settings.camoufrages.findIndex(val => val === g_stateObj.camoufrage);
@@ -12005,13 +12032,14 @@ const getArrowSettings = () => {
 			const _copiedArray = structuredClone(_array);
 			return _array.map((_val, _i) => _array[_i] = _copiedArray[randArray[_i]]);
 		};
-		if ([`Arrow`, C_FLG_ALL].includes(g_stateObj.camoufrage)) {
+		if ([`Arrow`, `Color+Arrow`].includes(g_stateObj.camoufrage)) {
 
 			// 矢印ヒット時に元の矢印がわかるようにするため、あえて g_workObj.stepHitRtn はそのままにする
 			g_workObj.stepRtn = getSwapArray(g_workObj.stepRtn);
 			g_workObj.arrowRtn = getSwapArray(g_workObj.arrowRtn);
+			g_workObj.frzArrowInitRtn = getSwapArray(g_workObj.frzArrowInitRtn);
 		}
-		if ([`Color`, C_FLG_ALL].includes(g_stateObj.camoufrage)) {
+		if ([`Color`, `Color+Arrow`].includes(g_stateObj.camoufrage)) {
 			eachOrAll.forEach(type => {
 				// ダミー矢印は対象外
 				g_workObj[`arrowColors${type}`] = getSwapArray(g_workObj[`arrowColors${type}`]);
@@ -13105,6 +13133,12 @@ const mainInit = () => {
 		const frzRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], frzName, {
 			x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
 		});
+
+		// CamoufrageType: FrzArrowの場合のみ、フリーズアローの帯を隠す
+		if (g_stateObj.camoufrageType === `FrzArrow`) {
+			_barColor = `#00000000`;
+		}
+
 		/**
 		 * フリーズアロー毎の属性情報
 		 */
@@ -13174,12 +13208,12 @@ const mainInit = () => {
 
 			// 開始矢印の塗り部分。ヒット時は前面に表示
 			createColorObject2(`${_name}TopShadow${frzNo}`, {
-				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: shadowColor, rotate: g_workObj.frzArrowInitRtn[_j], styleName: `Shadow`,
 			}, g_cssObj.main_objShadow),
 
 			// 開始矢印。ヒット時は非表示
 			createColorObject2(`${_name}Top${frzNo}`, {
-				background: _normalColor, rotate: g_workObj.arrowRtn[_j],
+				background: _normalColor, rotate: g_workObj.frzArrowInitRtn[_j],
 			}),
 		);
 
@@ -13187,12 +13221,12 @@ const mainInit = () => {
 
 			// 後発矢印の塗り部分
 			createColorObject2(`${_name}BtmShadow${frzNo}`, {
-				background: shadowColor, rotate: g_workObj.arrowRtn[_j], styleName: `Shadow`,
+				background: shadowColor, rotate: g_workObj.frzArrowInitRtn[_j], styleName: `Shadow`,
 			}, g_cssObj.main_objShadow),
 
 			// 後発矢印
 			createColorObject2(`${_name}Btm${frzNo}`, {
-				background: _normalColor, rotate: g_workObj.arrowRtn[_j],
+				background: _normalColor, rotate: g_workObj.frzArrowInitRtn[_j],
 			}),
 
 		);
@@ -15291,7 +15325,11 @@ const getSelectedSettingList = (_shuffleName) => {
 			`FR:${getStgDetailName(g_stateObj.frzReturn)}(${getStgDetailName(g_stateObj.frzReturnType)})`),
 		withOptions(g_stateObj.shaking, C_FLG_OFF),
 		withOptions(g_stateObj.effect, C_FLG_OFF),
-		withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${getStgDetailName(g_stateObj.camoufrage)}`),
+		[
+			withOptions(g_stateObj.camoufrage, C_FLG_OFF, `Cmf:${getStgDetailName(g_stateObj.camoufrage)}`),
+			withOptions(g_stateObj.camoufrageType, `---`,
+				`${g_stateObj.camoufrage !== C_FLG_OFF ? '' : 'Cmf:'}${getStgDetailName(g_stateObj.camoufrageType)}`)
+		].filter(value => value !== ``).join(`+`),
 		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${getStgDetailName(g_stateObj.swapping)}`),
 		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${getStgDetailName(g_stateObj.judgRange)}`),
 	].filter(value => value !== ``).join(`, `);
