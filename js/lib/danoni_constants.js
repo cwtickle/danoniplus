@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/03/10 (v45.5.2)
+ * Revised : 2026/03/12 (v46.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1121,7 +1121,7 @@ const g_stateObj = {
     speed: 3.5,
     motion: C_FLG_OFF,
     reverse: C_FLG_OFF,
-    scroll: `---`,
+    scroll: C_FLG_HYPHEN,
     shuffle: C_FLG_OFF,
     autoPlay: C_FLG_OFF,
     autoAll: C_FLG_OFF,
@@ -1167,13 +1167,14 @@ const g_stateObj = {
     opacity: 100,
 
     playWindow: `Default`,
-    playWindowType: `---`,
+    playWindowType: C_FLG_HYPHEN,
     stepArea: `Default`,
     frzReturn: C_FLG_OFF,
     frzReturnType: `360deg`,
     shaking: C_FLG_OFF,
     effect: C_FLG_OFF,
     camoufrage: C_FLG_OFF,
+    camoufrageType: C_FLG_HYPHEN,
     swapping: C_FLG_OFF,
     judgRange: `Normal`,
     autoRetry: C_FLG_OFF,
@@ -1338,7 +1339,7 @@ const g_settings = {
     playWindows: [`Default`, `Stairs`, `Slope`, `Distorted`, `SideScroll`],
     playWindowNum: 0,
 
-    playWindowTypes: [`---`, `Reverse`],
+    playWindowTypes: [C_FLG_HYPHEN, `Reverse`],
     playWindowTypeNum: 0,
 
     stepAreas: [`Default`, `Halfway`, `2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`, `Alt-Crossing`],
@@ -1357,8 +1358,14 @@ const g_settings = {
     effects: [C_FLG_OFF, `Dizzy`, `Spin`, `Wave`, `Storm`, `Blinking`, `Squids`],
     effectNum: 0,
 
-    camoufrages: [C_FLG_OFF, `Color`, `Arrow`, `ALL`],
+    camoufrages: [C_FLG_OFF, `Color`, `Arrow`, `Step+Arrow`, `Color+Arrow`, `Color+Step+Arrow`],
     camoufrageNum: 0,
+
+    camoufrageRotates: [C_FLG_OFF, `Color`, `Arrow`, `Step+Arrow`, `Color+Arrow`, `Color+Step+Arrow`],
+    camoufrageNoRotates: [C_FLG_OFF, `Color`],
+
+    camoufrageTypes: [C_FLG_HYPHEN, `FrzArrow`],
+    camoufrageTypeNum: 0,
 
     swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`],
     swappingNum: 0,
@@ -2171,7 +2178,7 @@ let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`
     `d_score`, `d_musicinfo`, `d_filterline`];
 
 let g_canDisabledSettings = [`speed`, `motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`,
-    `excessive`, `appearance`, `playWindow`, `stepArea`, `frzReturn`, `shaking`, `effect`, `camoufrage`,
+    `excessive`, `appearance`, `playWindow`, `stepArea`, `frzReturn`, `shaking`, `effect`, `camoufrage`, `camoufrageType`,
     `swapping`, `judgRange`, `autoRetry`];
 
 const g_hidSudFunc = new Map([
@@ -2870,6 +2877,7 @@ const g_shortcutObj = {
         KeyH: { id: `lnkShakingR` },
         KeyE: { id: `lnkEffectR` },
         KeyC: { id: `lnkCamoufrageR` },
+        KeyG: { id: `lnkCamoufrageType` },
         KeyW: { id: `lnkSwappingR` },
         KeyJ: { id: `lnkJudgRangeR` },
         KeyA: { id: `lnkAutoRetryR` },
@@ -3484,28 +3492,28 @@ const g_keyObj = {
     },
 
     // スクロール拡張オプション
-    scrollName_def: [`---`],
+    scrollName_def: [C_FLG_HYPHEN],
     scrollDir5_0: {
-        '---': [1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1],
         'Cross': [1, -1, -1, 1, 1],
         'Split': [1, 1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1],
     },
     scrollDir5_1: {
-        '---': [1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, 1],
         'Split': [1, 1, 1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1],
     },
     scrollDir5_2: {
-        '---': [1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1],
         'Cross': [1, -1, -1, -1, 1],
         'Split': [1, 1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1],
     },
 
     scrollDir7_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1],
@@ -3514,7 +3522,7 @@ const g_keyObj = {
     },
 
     scrollDir7i_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1],
@@ -3523,7 +3531,7 @@ const g_keyObj = {
     },
 
     scrollDir8_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, 1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1],
@@ -3531,7 +3539,7 @@ const g_keyObj = {
         'Asymmetry': [1, -1, 1, -1, -1, 1, -1, 1],
     },
     scrollDir8_1: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, 1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1],
         'Alternate': [-1, 1, -1, 1, -1, 1, -1, 1],
@@ -3539,7 +3547,7 @@ const g_keyObj = {
         'Asymmetry': [1, -1, 1, -1, -1, 1, -1, 1],
     },
     scrollDir8_2: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, 1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, 1, 1, -1, -1, -1],
         'Alternate': [-1, 1, -1, 1, -1, 1, -1, 1],
@@ -3548,7 +3556,7 @@ const g_keyObj = {
     },
 
     scrollDir9A_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -3556,7 +3564,7 @@ const g_keyObj = {
         'Asymmetry': [1, -1, -1, 1, -1, -1, 1, 1, -1],
     },
     scrollDir9B_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -3564,7 +3572,7 @@ const g_keyObj = {
         'Asymmetry': [1, -1, -1, 1, -1, -1, 1, 1, -1],
     },
     scrollDir9i_1: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, -1, -1, -1, -1, -1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -3572,7 +3580,7 @@ const g_keyObj = {
         'Asymmetry': [1, -1, -1, 1, -1, -1, 1, 1, -1],
     },
     scrollDir9d_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, 1, -1, -1, -1, 1, 1, 1],
         'Split': [1, 1, 1, 1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -3580,16 +3588,16 @@ const g_keyObj = {
         'Asymmetry': [1, -1, -1, 1, -1, -1, 1, 1, -1],
     },
     scrollDir9h_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1],
     },
 
     scrollDir11_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
     },
     scrollDir11_1: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
         'Split': [-1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -3597,15 +3605,15 @@ const g_keyObj = {
         'Asymmetry': [1, -1, 1, -1, -1, 1, -1, -1, 1, 1, -1],
     },
     scrollDir11L_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
     },
     scrollDir11W_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
     },
     scrollDir11i_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, 1, -1, -1, -1, -1, -1, 1, 1, 1],
         'Split': [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -3613,7 +3621,7 @@ const g_keyObj = {
         'Asymmetry': [1, -1, 1, -1, 1, -1, -1, 1, -1, 1, -1],
     },
     scrollDir11j_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, 1, -1, -1, -1, -1, -1, 1, 1, 1],
         'Split': [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -3621,23 +3629,23 @@ const g_keyObj = {
     },
 
     scrollDir12_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1],
         'Twist': [1, 1, 1, 1, -1, -1, 1, 1, 1, 1, 1, -1],
     },
     scrollDir12i_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
         'Split': [1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1],
     },
     scrollDir13_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
         'Cross': [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, -1],
     },
     scrollDir13_1: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, 1, 1, -1, -1, -1, -1, -1, 1, 1, 1, 1],
         'Split': [-1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -3645,30 +3653,30 @@ const g_keyObj = {
         'Asymmetry': [1, -1, -1, 1, -1, -1, 1, 1, -1, 1, -1, -1, 1],
     },
     scrollDir14_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1],
     },
 
     scrollDir14i_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
     },
     scrollDir15A_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1],
     },
     scrollDir16i_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
     },
     scrollDir17_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Cross': [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1],
         'Split': [1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
         'Alternate': [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
     },
     scrollDir23_0: {
-        '---': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [C_FLG_HYPHEN]: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Flat': [1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
         'Cross': [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1],
         'Twist': [1, 1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1, -1, -1, -1, 1, 1, 1, 1, 1, -1],
@@ -4519,6 +4527,8 @@ const g_lblNameObj = {
 
     'u_Color': `Color`,
     'u_Arrow': `Arrow`,
+    'u_Color+Arrow': `Color+Arrow`,
+    'u_FrzArrow': `FrzArrow`,
 
     'u_Narrow': `Narrow`,
     'u_Hard': `Hard`,
@@ -4778,6 +4788,7 @@ const g_lang_msgObj = {
             `[H-Drunk] S-Drunkより大きく上下に揺らし、さらに回転が掛かります`,
         effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
         camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
+        camoufrageType: `[FrzArrow] フリーズアローの帯部分を初期表示のみ非表示にし、矢印のみで表示します（ヒット/失敗時は帯を再表示）`,
         swapping: `ステップゾーンの位置をグループ単位で入れ替えます。`,
         judgRange: `判定の許容範囲を設定します。\n[Normal] 通常、[Narrow/Hard] 辛判定、[ExHard] 激辛判定`,
         autoRetry: `自動リトライの条件を設定します。\n[Miss] ミス時、[Matari] マターリ時、[Shakin] シャキン時、[FS] Fast/Slow発生時`,
@@ -4875,6 +4886,7 @@ const g_lang_msgObj = {
             `[H-Drunk] Adds stronger vertical movement than S-Drunk and adds rotation.`,
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
         camoufrage: `The appearance of the steps changes randomly with the same placement.`,
+        camoufrageType: `[FrzArrow] Initially hides freeze-arrow bars and displays only the arrow portion (bars reappear on hit/failure)`,
         swapping: `Replaces the position of step zones on a group-by-group basis.`,
         judgRange: `Set the allowable range of judgment.\n[Normal] Normal judgment, [Narrow/Hard] Hard judgment, [ExHard] Very hard judgment`,
         autoRetry: `Set the conditions for automatic retry.\n[Miss] When missed, [Matari] When good, [Shakin] When great, [FS] When Fast/Slow occurs`,
