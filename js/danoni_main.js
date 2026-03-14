@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/03/12
+ * Revised : 2026/03/14
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 46.0.0`;
-const g_revisedDate = `2026/03/12`;
+const g_version = `Ver 46.0.1`;
+const g_revisedDate = `2026/03/14`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7781,9 +7781,9 @@ const createOptionWindow = _sprite => {
 
 		spriteList.scroll.appendChild(
 			createCss2Button(`btnReverse`, `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`, evt => setReverse(evt.target),
-				Object.assign(g_lblPosObj.btnReverse, {
+				Object.assign({
 					cxtFunc: evt => setReverse(evt.target),
-				}), g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`])
+				}, g_lblPosObj.btnReverse), g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`])
 		);
 		spriteList[g_settings.scrolls.length > 1 ? `reverse` : `scroll`].style.display = C_DIS_NONE;
 	} else {
@@ -8801,13 +8801,13 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 				setSetting(1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
 				createExpandedScView(_name);
 			},
-			Object.assign(g_lblPosObj.btnReverse, {
+			Object.assign({
 				cxtFunc: () => {
 					setSetting(-1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
 					createExpandedScView(_name);
 				},
 				title: g_msgObj[`${_name}Type`] ?? ``,
-			}), g_cssObj.button_Default, g_cssObj.button_RevON);
+			}, g_lblPosObj.btnReverse), g_cssObj.button_Default, g_cssObj.button_RevON);
 
 	/**
 	 * 拡張ボタンのショートカット表示、拡張ボタンのCSS切り替え
