@@ -1367,7 +1367,7 @@ const g_settings = {
     camoufrageTypes: [C_FLG_HYPHEN, `FrzArrow`],
     camoufrageTypeNum: 0,
 
-    swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`],
+    swappings: [C_FLG_OFF, `Mirror+`, `Mirror`, `X-Mirror`],
     swappingNum: 0,
 
     judgRanges: [`Normal`, `Narrow`, `Hard`, `ExHard`],

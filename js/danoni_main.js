@@ -11801,6 +11801,7 @@ const getArrowSettings = () => {
 	// 各種初期化
 	// g_workObj.frzArrowInitRtnはフリーズアロー(初期表示)としての利用に限定
 	g_workObj.stepX = [];
+	g_workObj.stepX_df = [];
 	g_workObj.scrollDir = [];
 	g_workObj.scrollDirDefault = [];
 	g_workObj.dividePos = [];
@@ -11893,7 +11894,12 @@ const getArrowSettings = () => {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const colorj = g_keyObj[`color${keyCtrlPtn}`][j];
-		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
+		let stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
+
+		if (g_stateObj.swapping === `Mirror+`) {
+			g_workObj.stepX_df[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
+			stdPos = -stdPos;
+		}
 
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
 		const baseLayer = g_keyObj[`layerGroup${keyCtrlPtn}`]?.[j] || 0;
@@ -12015,8 +12021,11 @@ const getArrowSettings = () => {
 	g_workObj.playingX = g_headerObj.playingX + g_workObj.backX;
 
 	// Swapping設定に応じたステップゾーンの入れ替え
-	g_workObj.stepX_df = structuredClone(g_workObj.stepX);
-	if (g_stateObj.swapping.includes(`Mirror`)) {
+	// Mirror+のみ事前にオリジナルの位置を設定済みのためスキップする
+	if (g_workObj.stepX_df.length === 0) {
+		g_workObj.stepX_df = structuredClone(g_workObj.stepX);
+	}
+	if (g_stateObj.swapping.endsWith(`Mirror`)) {
 
 		let _style = structuredClone(Object.values(g_workObj.shuffleGroupMap));
 		if (g_stateObj.swapping === `Mirror`) {
@@ -13672,7 +13681,8 @@ const makeStepZone = (_j, _keyCtrlPtn) => {
 		// 本体
 		createColorObject2(`step${_j}`, {
 			rotate: g_workObj.stepRtn[_j], styleName: `Step`, display: g_workObj.stepZoneDisp,
-		}, g_cssObj[`main_step${g_workObj.stepX[_j] === g_workObj.stepX_df[_j] ? 'Default' : 'Matari'}`]),
+		}, g_cssObj[`main_step${g_workObj.stepX[_j] === g_workObj.stepX_df[_j] ? 'Default'
+			: g_stateObj.swapping === 'Mirror+' ? 'Shobon' : 'Matari'}`]),
 
 		// 空押し
 		createColorObject2(`stepDiv${_j}`, {
@@ -15364,7 +15374,8 @@ const getSelectedSettingList = (_orgShuffleFlg) => {
 			withOptions(g_stateObj.camoufrageType, C_FLG_HYPHEN,
 				`${g_stateObj.camoufrage !== C_FLG_OFF ? '' : 'Cmf:'}${getStgDetailName(g_stateObj.camoufrageType)}`)
 		].filter(value => value !== ``).join(`+`),
-		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${getStgDetailName(g_stateObj.swapping)}${!_orgShuffleFlg ? getStgDetailName(`(S)`) : ``}`),
+		withOptions(g_stateObj.swapping, C_FLG_OFF,
+			`Swap:${getStgDetailName(g_stateObj.swapping)}${!_orgShuffleFlg && !g_stateObj.swapping.endsWith(`+`) ? getStgDetailName(`(S)`) : ``}`),
 		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${getStgDetailName(g_stateObj.judgRange)}`),
 	].filter(value => value !== ``).join(`, `);
 
