@@ -4683,6 +4683,24 @@ const getKeyName = _key => unEscapeHtml(escapeHtml(g_keyObj[`keyName${_key}`]?.[
 const getKeyUnitName = _key => unEscapeHtml(escapeHtml(g_keyObj[`keyName${_key}`]?.[1] ?? `key`));
 
 /**
+ * シャッフル名の取得
+ * @returns {string}
+ */
+const getShuffleName = () => {
+	const orgShuffleFlg = getOrgShuffleFlg();
+	return `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
+};
+
+/**
+ * シャッフルカスタムフラグの取得
+ * @returns {boolean}
+ */
+const getOrgShuffleFlg = () => {
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	return g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
+};
+
+/**
  * 別キーモード時の表示名の取得
  * @param {boolean} _spaceFlg
  * @returns {string} 別キー名
@@ -6553,10 +6571,8 @@ const visibleSettingSummary = _visible => {
 
 const updateSettingSummary = () => {
 	if (document.getElementById(`settingSumSprite`) === null) return;
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
-	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
-	const settingData = getSelectedSettingList(shuffleName);
+	const orgShuffleFlg = getOrgShuffleFlg();
+	const settingData = getSelectedSettingList(orgShuffleFlg);
 	const estimatedHighscoreCondition = g_stateObj.dataSaveFlg && (g_stateObj.autoPlay !== C_FLG_ALL && g_headerObj.playbackRate === 1 && g_stateObj.fadein < 10 &&
 		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg)));
 
@@ -11999,6 +12015,7 @@ const getArrowSettings = () => {
 	g_workObj.playingX = g_headerObj.playingX + g_workObj.backX;
 
 	// Swapping設定に応じたステップゾーンの入れ替え
+	g_workObj.stepX_df = structuredClone(g_workObj.stepX);
 	if (g_stateObj.swapping.includes(`Mirror`)) {
 
 		let _style = structuredClone(Object.values(g_workObj.shuffleGroupMap));
@@ -12011,7 +12028,6 @@ const getArrowSettings = () => {
 		}
 
 		// 入れ替えた結果に合わせてX座標位置を入れ替える
-		g_workObj.stepX_df = structuredClone(g_workObj.stepX);
 		_style.forEach((_group, _i) => {
 			_group.forEach((_val, _j) => {
 				g_workObj.stepX[_group[_j]] = g_workObj.stepX_df[g_workObj.shuffleGroupMap[_i][_j]];
@@ -12427,7 +12443,7 @@ const mainInit = () => {
 	const musicTitle = (g_headerObj.musicTitles[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.musicTitle) + playbackView;
 	const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 	const assistFlg = (g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`);
-	const shuffleName = (g_stateObj.shuffle !== C_FLG_OFF ? `: ${getStgDetailName(g_stateObj.shuffle)}` : ``);
+	const shuffleName = (g_stateObj.shuffle !== C_FLG_OFF ? `: ${getShuffleName()}` : ``);
 
 	// 曲名・アーティスト名、譜面名のサイズ調整
 	const checkMusicSiz = (_text, _siz) => getFontSize2(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, { maxSiz: _siz });
@@ -13656,7 +13672,7 @@ const makeStepZone = (_j, _keyCtrlPtn) => {
 		// 本体
 		createColorObject2(`step${_j}`, {
 			rotate: g_workObj.stepRtn[_j], styleName: `Step`, display: g_workObj.stepZoneDisp,
-		}, g_cssObj.main_stepDefault),
+		}, g_cssObj[`main_step${g_workObj.stepX[_j] === g_workObj.stepX_df[_j] ? 'Default' : 'Matari'}`]),
 
 		// 空押し
 		createColorObject2(`stepDiv${_j}`, {
@@ -14610,11 +14626,10 @@ const resultInit = () => {
 			mTitleForView[j] = g_headerObj.musicTitlesForView[g_headerObj.musicNos[g_stateObj.scoreId]][j] + (j === 1 ? playbackView : ``));
 	}
 
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 	const transKeyName = getTransKeyName();
-	const orgShuffleFlg = g_keyObj[`shuffle${keyCtrlPtn}`].filter((shuffleGr, j) => shuffleGr !== g_keyObj[`shuffle${keyCtrlPtn}_0d`][j]).length === 0;
-	const shuffleName = `${getStgDetailName(g_stateObj.shuffle)}${!orgShuffleFlg && !g_stateObj.shuffle.endsWith(`+`) ? getStgDetailName('(S)') : ''}`;
-	const settingData = getSelectedSettingList(shuffleName);
+	const orgShuffleFlg = getOrgShuffleFlg();
+	const shuffleName = getShuffleName();
+	const settingData = getSelectedSettingList(orgShuffleFlg);
 
 	const [lblRX, dataRX] = [20, 60];
 	multiAppend(playDataWindow,
@@ -15297,10 +15312,10 @@ const resultInit = () => {
 
 /**
  * 選択した設定の情報を取得
- * @param {string} _shuffleName 
+ * @param {boolean} _orgShuffleFlg
  * @returns {object}
  */
-const getSelectedSettingList = (_shuffleName) => {
+const getSelectedSettingList = (_orgShuffleFlg) => {
 
 	const transKeyName = getTransKeyName();
 	/**
@@ -15323,7 +15338,7 @@ const getSelectedSettingList = (_shuffleName) => {
 		`${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`,
 		`${withOptions(g_autoPlaysBase.includes(g_stateObj.autoPlay), true, `-${getStgDetailName(g_stateObj.autoPlay)}${getStgDetailName('less')}`)}`,
 		`${withOptions(g_headerObj.makerView, false, `(${g_headerObj.creatorNames[g_stateObj.scoreId]})`)}`,
-		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${_shuffleName}]`)}`
+		`${withOptions(g_stateObj.shuffle, C_FLG_OFF, `[${getShuffleName()}]`)}`
 	];
 	let difData = difDatas.filter(value => value !== ``).join(` `);
 	const difDataForImage = difDatas.filter((value, j) => value !== `` && j !== 2).join(` `);
@@ -15349,7 +15364,7 @@ const getSelectedSettingList = (_shuffleName) => {
 			withOptions(g_stateObj.camoufrageType, C_FLG_HYPHEN,
 				`${g_stateObj.camoufrage !== C_FLG_OFF ? '' : 'Cmf:'}${getStgDetailName(g_stateObj.camoufrageType)}`)
 		].filter(value => value !== ``).join(`+`),
-		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${getStgDetailName(g_stateObj.swapping)}`),
+		withOptions(g_stateObj.swapping, C_FLG_OFF, `Swap:${getStgDetailName(g_stateObj.swapping)}${!_orgShuffleFlg ? getStgDetailName(`(S)`) : ``}`),
 		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${getStgDetailName(g_stateObj.judgRange)}`),
 	].filter(value => value !== ``).join(`, `);
 
