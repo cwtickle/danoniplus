@@ -12027,19 +12027,30 @@ const getArrowSettings = () => {
 	}
 	if (g_stateObj.swapping.endsWith(`Mirror`)) {
 
+		// Swappingにおけるグループ単位での入れ替えでは、上下でステップゾーンが分かれている場合は分離してシャッフルする
 		let _style = structuredClone(Object.values(g_workObj.shuffleGroupMap));
+		const _styleTrans = _style.flatMap(arr => {
+			const small = arr.filter(n => g_keyObj[`pos${keyCtrlPtn}`][n] < g_keyObj[`div${keyCtrlPtn}`]);
+			const large = arr.filter(n => g_keyObj[`pos${keyCtrlPtn}`][n] >= g_keyObj[`div${keyCtrlPtn}`]);
+			return [
+				...(small.length ? [small] : []),
+				...(large.length ? [large] : [])
+			];
+		});
+		const _styleTransDf = structuredClone(Object.values(_styleTrans));
+
 		if (g_stateObj.swapping === `Mirror`) {
-			_style.map(_group => _group.reverse());
+			_styleTrans.map(_group => _group.reverse());
 
 		} else if (g_stateObj.swapping === `X-Mirror`) {
 			// X-Mirrorの場合、グループの内側だけ入れ替える
-			_style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(_style, group, i, val)));
+			_styleTrans.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(_styleTrans, group, i, val)));
 		}
 
 		// 入れ替えた結果に合わせてX座標位置を入れ替える
-		_style.forEach((_group, _i) => {
+		_styleTrans.forEach((_group, _i) => {
 			_group.forEach((_val, _j) => {
-				g_workObj.stepX[_group[_j]] = g_workObj.stepX_df[g_workObj.shuffleGroupMap[_i][_j]];
+				g_workObj.stepX[_group[_j]] = g_workObj.stepX_df[_styleTransDf[_i][_j]];
 			});
 		});
 	}
