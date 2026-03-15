@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/03/12 (v46.0.0)
+ * Revised : 2026/03/15 (v46.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1367,7 +1367,7 @@ const g_settings = {
     camoufrageTypes: [C_FLG_HYPHEN, `FrzArrow`],
     camoufrageTypeNum: 0,
 
-    swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`],
+    swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`, `Mirror+`],
     swappingNum: 0,
 
     judgRanges: [`Normal`, `Narrow`, `Hard`, `ExHard`],
@@ -4461,6 +4461,7 @@ const g_lblNameObj = {
     'u_Random+': `Random+`,
     'u_S-Random': `S-Random`,
     'u_S-Random+': `S-Random+`,
+    'u_Mirror+': `Mirror+`,
     'u_(S)': `(S)`,
 
     'u_ALL': `ALL`,
@@ -4749,7 +4750,7 @@ const g_lang_msgObj = {
         scroll: `各レーンのスクロール方向をパターンに沿って設定します。\nReverse:ONでスクロール方向を反転します。`,
         shuffle: `譜面を左右反転したり、ランダムにします。\nランダムにした場合は別譜面扱いとなり、ハイスコアは保存されません。`,
         autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
-        gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量, [Accuracy] クリアに必要な正確率(オンマウスで許容ミス数表示)`,
+        gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量, [Accuracy] クリアに必要な正確率、許容ミス数`,
         excessive: `空押し判定を行うか設定します。`,
         adjustment: `曲とのタイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
         fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
@@ -4789,7 +4790,7 @@ const g_lang_msgObj = {
         effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
         camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
         camoufrageType: `[FrzArrow] フリーズアローの帯部分を初期表示のみ非表示にし、矢印のみで表示します（ヒット/失敗時は帯を再表示）`,
-        swapping: `ステップゾーンの位置をグループ単位で入れ替えます。`,
+        swapping: `ステップゾーンの位置を入れ替える設定です。\n[Mirror] ステップゾーンの位置をグループ単位で入れ替えます。\n[X-Mirror] ステップゾーンの中央部分のみグループ単位で入れ替えます。\n[Mirror+] ステップゾーンの位置をグループに関係なく全体的に反転します。`,
         judgRange: `判定の許容範囲を設定します。\n[Normal] 通常、[Narrow/Hard] 辛判定、[ExHard] 激辛判定`,
         autoRetry: `自動リトライの条件を設定します。\n[Miss] ミス時、[Matari] マターリ時、[Shakin] シャキン時、[FS] Fast/Slow発生時`,
 
@@ -4846,7 +4847,7 @@ const g_lang_msgObj = {
         scroll: `Set the scroll direction for each lane according to the pattern.\nIf "Reverse:ON" sets, reverse the scroll direction.`,
         shuffle: `Flip the chart left and right or make it random.\nIf you make it random, it will be treated as other charts and the high score will not be saved.`,
         autoPlay: `Set to auto play and to hit some keys automatically.\nHigh score is not saved during auto play.`,
-        gauge: `Set the clear condition.\n[Start] initial value, [Border] borderline value (hyphen means zero),\n[Recovery] recovery amount, [Damage] damage amount,\n[Accuracy] accuracy required to clear (mouseover to see the number of allowed mistakes)`,
+        gauge: `Set the clear condition.\n[Start] initial value, [Border] borderline value (hyphen means zero),\n[Recovery] recovery amount, [Damage] damage amount,\n[Accuracy] accuracy required to clear and the number of allowed mistakes`,
         excessive: `Set whether to use excessive miss judgment.`,
         adjustment: `If you feel that the timing is out of sync with the music, \nyou can correct the shift in frame units by changing the value.\nThe outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, \nand the inner button in 0.5 frame increments.`,
         fadein: `Plays the chart from the middle.\nIf you start in the middle, the high score will not be saved.`,
@@ -4887,7 +4888,7 @@ const g_lang_msgObj = {
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
         camoufrage: `The appearance of the steps changes randomly with the same placement.`,
         camoufrageType: `[FrzArrow] Initially hides freeze-arrow bars and displays only the arrow portion (bars reappear on hit/failure)`,
-        swapping: `Replaces the position of step zones on a group-by-group basis.`,
+        swapping: `This setting allows you to swap the positions of the step zones.\n[Mirror] Swaps the positions of step zones within each shuffle group. \n[X-Mirror] Swaps only the central portion of step zones within each shuffle group.\n[Mirror+] Flips the position of all step zones, regardless of shuffle groups. `,
         judgRange: `Set the allowable range of judgment.\n[Normal] Normal judgment, [Narrow/Hard] Hard judgment, [ExHard] Very hard judgment`,
         autoRetry: `Set the conditions for automatic retry.\n[Miss] When missed, [Matari] When good, [Shakin] When great, [FS] When Fast/Slow occurs`,
 
