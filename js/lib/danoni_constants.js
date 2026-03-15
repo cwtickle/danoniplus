@@ -1367,7 +1367,7 @@ const g_settings = {
     camoufrageTypes: [C_FLG_HYPHEN, `FrzArrow`],
     camoufrageTypeNum: 0,
 
-    swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`],
+    swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`, `Mirror+`],
     swappingNum: 0,
 
     judgRanges: [`Normal`, `Narrow`, `Hard`, `ExHard`],
@@ -4461,6 +4461,7 @@ const g_lblNameObj = {
     'u_Random+': `Random+`,
     'u_S-Random': `S-Random`,
     'u_S-Random+': `S-Random+`,
+    'u_Mirror+': `Mirror+`,
     'u_(S)': `(S)`,
 
     'u_ALL': `ALL`,
@@ -4789,7 +4790,7 @@ const g_lang_msgObj = {
         effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
         camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
         camoufrageType: `[FrzArrow] フリーズアローの帯部分を初期表示のみ非表示にし、矢印のみで表示します（ヒット/失敗時は帯を再表示）`,
-        swapping: `ステップゾーンの位置をグループ単位で入れ替えます。`,
+        swapping: `ステップゾーンの位置を入れ替える設定です。\n[Mirror] ステップゾーンの位置をグループ単位で入れ替えます。\n[X-Mirror] ステップゾーンの中央部分のみグループ単位で入れ替えます。\n[Mirror+] ステップゾーンの位置をグループに関係なく全体的に反転します。`,
         judgRange: `判定の許容範囲を設定します。\n[Normal] 通常、[Narrow/Hard] 辛判定、[ExHard] 激辛判定`,
         autoRetry: `自動リトライの条件を設定します。\n[Miss] ミス時、[Matari] マターリ時、[Shakin] シャキン時、[FS] Fast/Slow発生時`,
 
@@ -4887,7 +4888,7 @@ const g_lang_msgObj = {
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
         camoufrage: `The appearance of the steps changes randomly with the same placement.`,
         camoufrageType: `[FrzArrow] Initially hides freeze-arrow bars and displays only the arrow portion (bars reappear on hit/failure)`,
-        swapping: `Replaces the position of step zones on a group-by-group basis.`,
+        swapping: `This setting allows you to swap the positions of the step zones.\n[Mirror] Swaps the positions of step zones within each shuffle group. \n[X-Mirror] Swaps only the central portion of step zones within each shuffle group.\n[Mirror+] Flips the position of all step zones, regardless of shuffle groups. `,
         judgRange: `Set the allowable range of judgment.\n[Normal] Normal judgment, [Narrow/Hard] Hard judgment, [ExHard] Very hard judgment`,
         autoRetry: `Set the conditions for automatic retry.\n[Miss] When missed, [Matari] When good, [Shakin] When great, [FS] When Fast/Slow occurs`,
 
