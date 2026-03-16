@@ -10262,7 +10262,11 @@ const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
 	const mirStyle = structuredClone(style);
 
 	if (_swapFlg) {
-		style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(style, group, i, val)));
+		style.forEach((group, i) => {
+			g_settings.swapPattern.forEach(val => {
+				swapGroupNums(style, group, i, val);
+			});
+		});
 		let swapUseFlg = false;
 		style.forEach((_group, j) => {
 			_group.forEach((val, k) => {
@@ -12044,7 +12048,11 @@ const getArrowSettings = () => {
 
 		} else if (g_stateObj.swapping === `X-Mirror`) {
 			// X-Mirrorの場合、グループの内側だけ入れ替える
-			_styleTrans.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(_styleTrans, group, i, val)));
+			_styleTrans.forEach((group, i) => {
+				g_settings.swapPattern.forEach(val => {
+					swapGroupNums(_styleTrans, group, i, val);
+				});
+			});
 		}
 
 		// 入れ替えた結果に合わせてX座標位置を入れ替える
