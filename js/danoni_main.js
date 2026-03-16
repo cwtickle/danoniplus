@@ -12054,6 +12054,11 @@ const getArrowSettings = () => {
 				});
 			});
 		}
+		// オリジナルと同一の場合、設定をOFFに戻す
+		if (JSON.stringify(_styleTransDf) === JSON.stringify(_styleTrans)) {
+			g_stateObj.swapping = C_FLG_OFF;
+			g_settings.swappingNum = 0;
+		}
 
 		// 入れ替えた結果に合わせてX座標位置を入れ替える
 		_styleTrans.forEach((_group, _i) => {
