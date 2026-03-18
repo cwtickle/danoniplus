@@ -8786,9 +8786,11 @@ const exSettingInit = () => {
  * @param {{ defaultList?: string[], displayName?: string }} [options={}]
  * @param {string[]} [options.defaultList=[C_FLG_OFF]] 拡張設定未使用の設定リスト
  * @param {string} [options.displayName='exSetting']
- * @param {function} [options.func=()=>true]
+ * @param {function} [options.func=()=>true] 通常ボタン用追加関数
+ * @param {function} [options.funcEx=()=>true] 拡張ボタン用追加関数
  */
-const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF], displayName = `exSetting`, func = () => true } = {}) => {
+const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF], displayName = `exSetting`,
+	func = () => true, funcEx = () => true } = {}) => {
 	if (_spriteList?.[_name] === undefined) return;
 
 	/**
@@ -8816,11 +8818,13 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 		createCss2Button(`lnk${toCapitalize(_name)}Type`, getStgDetailName(g_stateObj[`${_name}Type`]),
 			() => {
 				setSetting(1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
+				funcEx();
 				createExpandedScView(_name);
 			},
 			Object.assign({
 				cxtFunc: () => {
 					setSetting(-1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
+					funcEx();
 					createExpandedScView(_name);
 				},
 				title: g_msgObj[`${_name}Type`] ?? ``,
