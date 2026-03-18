@@ -8783,7 +8783,7 @@ const exSettingInit = () => {
  * 拡張設定込みの標準設定
  * @param {any[]} _spriteList
  * @param {string} _name 
- * @param {{ defaultList?: string[], displayName?: string }} [options={}]
+ * @param {{ defaultList?: string[], displayName?: string, func?: function, funcEx?: function }} [options={}]
  * @param {string[]} [options.defaultList=[C_FLG_OFF]] 拡張設定未使用の設定リスト
  * @param {string} [options.displayName='exSetting']
  * @param {function} [options.func=()=>true] 通常ボタン用追加関数
