@@ -8846,8 +8846,9 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 		addRFunc: () => {
 			if (typeEnabled) {
 				setExpandedBtnSiz();
-				func();
 			}
+			func();
+		},
 		},
 	});
 	if (typeEnabled) {
