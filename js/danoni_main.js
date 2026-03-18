@@ -8849,7 +8849,6 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 			}
 			func();
 		},
-		},
 	});
 	if (typeEnabled) {
 		_spriteList[_name].appendChild(createExpandedBtn());
