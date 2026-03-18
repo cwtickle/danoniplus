@@ -8786,8 +8786,9 @@ const exSettingInit = () => {
  * @param {{ defaultList?: string[], displayName?: string }} [options={}]
  * @param {string[]} [options.defaultList=[C_FLG_OFF]] 拡張設定未使用の設定リスト
  * @param {string} [options.displayName='exSetting']
+ * @param {function} [options.func=()=>true]
  */
-const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF], displayName = `exSetting` } = {}) => {
+const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF], displayName = `exSetting`, func = () => true } = {}) => {
 	if (_spriteList?.[_name] === undefined) return;
 
 	/**
@@ -8845,6 +8846,7 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 		addRFunc: () => {
 			if (typeEnabled) {
 				setExpandedBtnSiz();
+				func();
 			}
 		},
 	});
