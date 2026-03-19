@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/03/15
+ * Revised : 2026/03/19
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 46.1.0`;
-const g_revisedDate = `2026/03/15`;
+const g_version = `Ver 46.2.0`;
+const g_revisedDate = `2026/03/19`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8783,11 +8783,14 @@ const exSettingInit = () => {
  * 拡張設定込みの標準設定
  * @param {any[]} _spriteList
  * @param {string} _name 
- * @param {{ defaultList?: string[], displayName?: string }} [options={}]
+ * @param {{ defaultList?: string[], displayName?: string, func?: function, funcEx?: function }} [options={}]
  * @param {string[]} [options.defaultList=[C_FLG_OFF]] 拡張設定未使用の設定リスト
  * @param {string} [options.displayName='exSetting']
+ * @param {function} [options.func=()=>true] 通常ボタン用追加関数
+ * @param {function} [options.funcEx=()=>true] 拡張ボタン用追加関数
  */
-const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF], displayName = `exSetting` } = {}) => {
+const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF], displayName = `exSetting`,
+	func = () => true, funcEx = () => true } = {}) => {
 	if (_spriteList?.[_name] === undefined) return;
 
 	/**
@@ -8815,11 +8818,13 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 		createCss2Button(`lnk${toCapitalize(_name)}Type`, getStgDetailName(g_stateObj[`${_name}Type`]),
 			() => {
 				setSetting(1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
+				funcEx();
 				createExpandedScView(_name);
 			},
 			Object.assign({
 				cxtFunc: () => {
 					setSetting(-1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
+					funcEx();
 					createExpandedScView(_name);
 				},
 				title: g_msgObj[`${_name}Type`] ?? ``,
@@ -8846,6 +8851,7 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 			if (typeEnabled) {
 				setExpandedBtnSiz();
 			}
+			func();
 		},
 	});
 	if (typeEnabled) {
@@ -10262,7 +10268,11 @@ const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
 	const mirStyle = structuredClone(style);
 
 	if (_swapFlg) {
-		style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(style, group, i, val)));
+		style.forEach((group, i) => {
+			g_settings.swapPattern.forEach(val => {
+				swapGroupNums(style, group, i, val);
+			});
+		});
 		let swapUseFlg = false;
 		style.forEach((_group, j) => {
 			_group.forEach((val, k) => {
@@ -12027,19 +12037,39 @@ const getArrowSettings = () => {
 	}
 	if (g_stateObj.swapping.endsWith(`Mirror`)) {
 
+		// Swappingにおけるグループ単位での入れ替えでは、上下でステップゾーンが分かれている場合は分離してシャッフルする
 		let _style = structuredClone(Object.values(g_workObj.shuffleGroupMap));
+		const _styleTrans = _style.flatMap(arr => {
+			const small = arr.filter(n => g_keyObj[`pos${keyCtrlPtn}`][n] < g_keyObj[`div${keyCtrlPtn}`]);
+			const large = arr.filter(n => g_keyObj[`pos${keyCtrlPtn}`][n] >= g_keyObj[`div${keyCtrlPtn}`]);
+			return [
+				...(small.length ? [small] : []),
+				...(large.length ? [large] : [])
+			];
+		});
+		const _styleTransDf = structuredClone(Object.values(_styleTrans));
+
 		if (g_stateObj.swapping === `Mirror`) {
-			_style.map(_group => _group.reverse());
+			_styleTrans.map(_group => _group.reverse());
 
 		} else if (g_stateObj.swapping === `X-Mirror`) {
 			// X-Mirrorの場合、グループの内側だけ入れ替える
-			_style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(_style, group, i, val)));
+			_styleTrans.forEach((group, i) => {
+				g_settings.swapPattern.forEach(val => {
+					swapGroupNums(_styleTrans, group, i, val);
+				});
+			});
+		}
+		// オリジナルと同一の場合、設定をOFFに戻す
+		if (JSON.stringify(_styleTransDf) === JSON.stringify(_styleTrans)) {
+			g_stateObj.swapping = C_FLG_OFF;
+			g_settings.swappingNum = 0;
 		}
 
 		// 入れ替えた結果に合わせてX座標位置を入れ替える
-		_style.forEach((_group, _i) => {
+		_styleTrans.forEach((_group, _i) => {
 			_group.forEach((_val, _j) => {
-				g_workObj.stepX[_group[_j]] = g_workObj.stepX_df[g_workObj.shuffleGroupMap[_i][_j]];
+				g_workObj.stepX[_group[_j]] = g_workObj.stepX_df[_styleTransDf[_i][_j]];
 			});
 		});
 	}
