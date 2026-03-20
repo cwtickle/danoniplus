@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/03/12
+ * Revised : 2026/03/20
  * 
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 39.8.19`;
-const g_revisedDate = `2026/03/12`;
+const g_version = `Ver 39.8.20`;
+const g_revisedDate = `2026/03/20`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -10089,6 +10089,47 @@ const getArrowSettings = () => {
 		g_workObj.frzHitShadowColorsAll[j] = ``;
 
 	}
+
+	// Swapping設定に応じたステップゾーンの入れ替え
+	if (g_stateObj.swapping.includes(`Mirror`)) {
+
+		let _style = structuredClone(Object.values(g_workObj.shuffleGroupMap));
+		const _styleTrans = _style.flatMap(arr => {
+			// g_workObj.devidePosの値ごとにグループ化する
+			const groups = {};
+
+			arr.forEach(n => {
+				const div = g_workObj.dividePos[n];
+				if (!groups[div]) groups[div] = [];
+				groups[div].push(n);
+			});
+
+			// groups は {0:[...], 1:[...], 2:[...]} のような形になるので
+			// これを配列に変換して返す
+			return Object.values(groups);
+		});
+		const _styleTransDf = structuredClone(Object.values(_styleTrans));
+		if (g_stateObj.swapping === `Mirror`) {
+			_styleTrans.map(_group => _group.reverse());
+
+		} else if (g_stateObj.swapping === `X-Mirror`) {
+			// X-Mirrorの場合、グループの内側だけ入れ替える
+			_styleTrans.forEach((group, i) => {
+				g_settings.swapPattern.forEach(val => {
+					swapGroupNums(_styleTrans, group, i, val);
+				});
+			});
+		}
+
+		// 入れ替えた結果に合わせてX座標位置を入れ替える
+		g_workObj.stepX_df = structuredClone(g_workObj.stepX);
+		_styleTrans.forEach((_group, _i) => {
+			_group.forEach((_val, _j) => {
+				g_workObj.stepX[_group[_j]] = g_workObj.stepX_df[_styleTransDf[_i][_j]];
+			});
+		});
+	}
+
 	g_workObj.orgFlatFlg = g_workObj.dividePos.every(v => v === g_workObj.dividePos[0]);
 	if (g_stateObj.stepArea === `X-Flower` || (g_stateObj.stepArea.includes(`Mismatched`) && g_workObj.orgFlatFlg)) {
 		for (let j = 0; j < keyNum; j++) {
@@ -10129,27 +10170,6 @@ const getArrowSettings = () => {
 
 	g_workObj.backX = (g_workObj.nonDefaultSc && g_headerObj.playingLayout ? g_headerObj.scAreaWidth : 0);
 	g_workObj.playingX = g_headerObj.playingX + g_workObj.backX;
-
-	// Swapping設定に応じたステップゾーンの入れ替え
-	if (g_stateObj.swapping.includes(`Mirror`)) {
-
-		let _style = structuredClone(Object.values(g_workObj.shuffleGroupMap));
-		if (g_stateObj.swapping === `Mirror`) {
-			_style.map(_group => _group.reverse());
-
-		} else if (g_stateObj.swapping === `X-Mirror`) {
-			// X-Mirrorの場合、グループの内側だけ入れ替える
-			_style.forEach((group, i) => g_settings.swapPattern.forEach(val => swapGroupNums(_style, group, i, val)));
-		}
-
-		// 入れ替えた結果に合わせてX座標位置を入れ替える
-		g_workObj.stepX_df = structuredClone(g_workObj.stepX);
-		_style.forEach((_group, _i) => {
-			_group.forEach((_val, _j) => {
-				g_workObj.stepX[_group[_j]] = g_workObj.stepX_df[g_workObj.shuffleGroupMap[_i][_j]];
-			});
-		});
-	}
 
 	// FrzReturnの初期化
 	g_workObj.frzReturnFlg = false;
