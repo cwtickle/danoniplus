@@ -12070,6 +12070,7 @@ const getArrowSettings = () => {
 	});
 
 	g_workObj.lifeVal = Math.floor(g_workObj.lifeInit * 100) / 100;
+	g_workObj.arrowReturnVal = 0;
 	g_gameOverFlg = false;
 	g_finishFlg = true;
 	g_workObj.nonDefaultSc = g_headerObj.keyRetry !== C_KEY_RETRY || g_headerObj.keyTitleBack !== C_KEY_TITLEBACK;
@@ -12542,18 +12543,22 @@ const mainInit = () => {
 		createDivCss2Label(`lblTime2`, `/ ${fullTime}`, Object.assign(g_lblPosObj.lblTime2, { display: g_workObj.musicinfoDisp })),
 	);
 
+	if (g_stateObj.frzReturn !== C_FLG_OFF) {
+		multiAppend(infoSprite,
+			// FrzReturnゲージ
+			createColorObject2(`lifeBarFrz`, {
+				x: 0, y: 50, w: 5, h: 0, styleName: `lifeBarFrz`,
+				display: g_workObj.lifegaugeDisp,
+			}, g_cssObj.main_stepShobon),
+		)
+	}
+
 	if (g_workObj.nonDefaultSc) {
 		multiAppend(infoSprite,
 			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, Object.assign(g_lblPosObj.lblMainScHeader, { y: g_headerObj.playingHeight - 65 })),
-		);
-		multiAppend(infoSprite,
 			createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry],
 				Object.assign(g_lblPosObj.lblMainScKey, { y: g_headerObj.playingHeight - 50, fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold` })),
-		);
-		multiAppend(infoSprite,
 			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, Object.assign(g_lblPosObj.lblMainScHeader, { y: g_headerObj.playingHeight - 35 })),
-		);
-		multiAppend(infoSprite,
 			createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack],
 				Object.assign(g_lblPosObj.lblMainScKey, { y: g_headerObj.playingHeight - 20, fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold` })),
 		);
@@ -14423,8 +14428,13 @@ const judgeRecovery = (_name, _difFrame) => {
 	lifeRecovery();
 	finishViewing();
 
-	if (g_stateObj.frzReturn !== C_FLG_OFF && (g_resultObj.ii + g_resultObj.shakin) % 100 === 0) {
-		startFrzReturn();
+	if (g_stateObj.frzReturn !== C_FLG_OFF) {
+		g_workObj.arrowReturnVal = (g_resultObj.ii + g_resultObj.shakin) % 100;
+		$id(`lifeBarFrz`).top = wUnit(50 + (g_headerObj.playingHeight - 100) * (100 - g_workObj.arrowReturnVal) / 100);
+		$id(`lifeBarFrz`).height = wUnit((g_headerObj.playingHeight - 100) * g_workObj.arrowReturnVal / 100);
+		if (g_workObj.arrowReturnVal === 0) {
+			startFrzReturn();
+		}
 	}
 	if (_name === `shakin`) {
 		quickRetry(`Shakin(Great)`);
