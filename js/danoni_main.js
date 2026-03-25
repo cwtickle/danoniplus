@@ -13928,6 +13928,8 @@ const startFrzReturn = () => {
 			clearTimeout(g_workObj.frzReturnTimerId);
 			g_workObj.frzReturnTimerId = null;
 		}
+		lifeBarFrz.classList.remove(g_cssObj.main_stepShobon, g_cssObj.main_stepMatari);
+		lifeBarFrz.classList.add(g_cssObj.main_stepMatari);
 		const seqLen = g_workObj.frzReturnSeq.length;
 		executeFrzReturn(
 			g_workObj.frzReturnSeq[seqLen > 1 ? Math.floor(Math.random() * seqLen) : 0], 0,
@@ -13949,6 +13951,8 @@ const executeFrzReturn = (_seq, _idx, _axis) => {
 		delTransform(`mainSprite`, `frzReturn`);
 		g_workObj.frzReturnFlg = false;
 		g_workObj.frzReturnTimerId = null;
+		lifeBarFrz.classList.remove(g_cssObj.main_stepShobon, g_cssObj.main_stepMatari);
+		lifeBarFrz.classList.add(g_cssObj.main_stepShobon);
 		return;
 	}
 	const sprite = document.getElementById(`mainSprite`);
