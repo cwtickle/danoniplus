@@ -12546,9 +12546,11 @@ const mainInit = () => {
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		multiAppend(infoSprite,
 			// FrzReturnゲージ
+			createColorObject2(`lifeBackFrzObj`, {
+				x: 0, y: 50, w: 5, h: g_headerObj.playingHeight - 100, styleName: `lifeBarFrz`, display: g_workObj.scoreDisp,
+			}, g_cssObj.life_Background),
 			createColorObject2(`lifeBarFrz`, {
-				x: 0, y: 50, w: 5, h: 0, styleName: `lifeBarFrz`,
-				display: g_workObj.lifegaugeDisp,
+				x: 0, y: 50, w: 5, h: 0, styleName: `lifeBarFrz`, display: g_workObj.scoreDisp,
 			}, g_cssObj.main_stepShobon),
 		)
 	}
@@ -13928,6 +13930,8 @@ const startFrzReturn = () => {
 			clearTimeout(g_workObj.frzReturnTimerId);
 			g_workObj.frzReturnTimerId = null;
 		}
+		lifeBarFrz.classList.remove(g_cssObj.main_stepShobon, g_cssObj.main_stepMatari);
+		lifeBarFrz.classList.add(g_cssObj.main_stepMatari);
 		const seqLen = g_workObj.frzReturnSeq.length;
 		executeFrzReturn(
 			g_workObj.frzReturnSeq[seqLen > 1 ? Math.floor(Math.random() * seqLen) : 0], 0,
@@ -13944,18 +13948,22 @@ const startFrzReturn = () => {
  */
 const executeFrzReturn = (_seq, _idx, _axis) => {
 
-	if (!_seq || _idx >= _seq.length) {
-		// 移動終了時
-		delTransform(`mainSprite`, `frzReturn`);
-		g_workObj.frzReturnFlg = false;
-		g_workObj.frzReturnTimerId = null;
-		return;
-	}
 	const sprite = document.getElementById(`mainSprite`);
 	if (sprite === null) {
 		// 画面がプレイ画面から移動した場合
 		g_workObj.frzReturnFlg = false;
 		g_workObj.frzReturnTimerId = null;
+		return;
+	}
+
+	if (!_seq || _idx >= _seq.length) {
+		// 移動終了時
+		delTransform(`mainSprite`, `frzReturn`);
+		g_workObj.frzReturnFlg = false;
+		g_workObj.frzReturnTimerId = null;
+		const frzReturnGauge = document.getElementById(`lifeBarFrz`);
+		frzReturnGauge.classList.remove(g_cssObj.main_stepShobon, g_cssObj.main_stepMatari);
+		frzReturnGauge.classList.add(g_cssObj.main_stepShobon);
 		return;
 	}
 
