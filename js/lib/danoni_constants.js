@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/03/15 (v46.1.0)
+ * Revised : 2026/03/25 (v46.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -819,6 +819,7 @@ const reloadImgObj = () => {
     g_imgObj.cursor = C_IMG_CURSOR;
     g_imgObj.frzBar = C_IMG_FRZBAR;
     g_imgObj.lifeBar = C_IMG_LIFEBAR;
+    g_imgObj.lifeBarFrz = C_IMG_LIFEBAR;
     g_imgObj.lifeBorder = C_IMG_LIFEBORDER;
 
     g_imgObj.titleArrow = C_IMG_TITLE_ARROW;
