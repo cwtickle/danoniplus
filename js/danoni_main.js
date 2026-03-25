@@ -13949,7 +13949,6 @@ const startFrzReturn = () => {
 const executeFrzReturn = (_seq, _idx, _axis) => {
 
 	const sprite = document.getElementById(`mainSprite`);
-	const frzReturnGauge = document.getElementById(`lifeBarFrz`);
 	if (sprite === null) {
 		// 画面がプレイ画面から移動した場合
 		g_workObj.frzReturnFlg = false;
@@ -13962,6 +13961,7 @@ const executeFrzReturn = (_seq, _idx, _axis) => {
 		delTransform(`mainSprite`, `frzReturn`);
 		g_workObj.frzReturnFlg = false;
 		g_workObj.frzReturnTimerId = null;
+		const frzReturnGauge = document.getElementById(`lifeBarFrz`);
 		frzReturnGauge.classList.remove(g_cssObj.main_stepShobon, g_cssObj.main_stepMatari);
 		frzReturnGauge.classList.add(g_cssObj.main_stepShobon);
 		return;
