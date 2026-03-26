@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/03/20
+ * Revised : 2026/03/26
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 45.5.6`;
-const g_revisedDate = `2026/03/20`;
+const g_version = `Ver 45.5.7`;
+const g_revisedDate = `2026/03/26`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8843,7 +8843,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		createDescDiv(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
 			.split(`{1}:`).join(g_isMac ? `` : `Delete:`)),
 
-		createDescDiv(`kcShuffleDesc`, g_headerObj.shuffleUse ? g_lblNameObj.kcShuffleDesc : g_lblNameObj.kcNoShuffleDesc),
+		createDescDiv(`kcShuffleDesc`,
+			g_headerObj.shuffleUse && g_settings.shuffles.filter(val => val.endsWith(`+`)).length > 0
+				? g_lblNameObj.kcShuffleDesc : g_lblNameObj.kcNoShuffleDesc),
 	);
 
 	// キーの一覧を表示
@@ -9629,12 +9631,17 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
 		const disabledKeys = [240, 242, 243, 244, 91, 29, 28, 27, 259, g_prevKey];
 
+		if (g_localeObj.val === `Ja`) {
+			disabledKeys.unshift(229);
+		}
+		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
+			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
+			return;
+		} else if ((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) && keyIsShift()) {
+			return;
+		}
 		if (selectedKc === `TitleBack` || selectedKc === `Retry`) {
 			// プレイ中ショートカットキー変更
-			if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
-				makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
-				return;
-			}
 			g_headerObj[`key${selectedKc}`] = setKey;
 			g_headerObj[`key${selectedKc}Def`] = setKey;
 			document.getElementById(`sc${selectedKc}`).textContent = getScMsg[selectedKc]();
@@ -9649,14 +9656,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			return;
 		}
 
-		if (g_localeObj.val === `Ja`) {
-			disabledKeys.unshift(229);
-		}
-		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
-			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
-			return;
-		} else if ((setKey === C_KEY_TITLEBACK && g_currentk === 0) ||
-			((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) && keyIsShift())) {
+		if (setKey === C_KEY_TITLEBACK && g_currentk === 0) {
 			return;
 		}
 
