@@ -9434,7 +9434,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		keyConfigInit(g_kcType);
 	};
 
-	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, Object.assign({ title: g_msgObj.pickArrow }, g_windowObj.colorPickSprite));
+	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, { ...g_windowObj.colorPickSprite, title: g_msgObj.pickArrow });
 	if ([`Default`, `Type0`].includes(g_colorType)) {
 		colorPickSprite.style.display = C_DIS_NONE;
 	}
@@ -12356,7 +12356,7 @@ const mainInit = () => {
 			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(transj / 2) * 2 + (transj + Number(g_stateObj.reverse === C_FLG_ON)) % 2], g_transPriority.layer);
 
 		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
-		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
+		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, { ...mainCommonPos, y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }));
 		frzHitSprite.push(createEmptySprite(mainSpriteJ, `frzHitSprite${j}`, mainCommonPos));
 	}
 
@@ -15274,7 +15274,7 @@ const resultInit = () => {
 			}
 			clearTimeout(g_timeoutEvtId);
 			clearTimeout(g_timeoutEvtResultId);
-		}, Object.assign(_posObj, { resetFunc: () => _func() }), _cssClass);
+		}, { ..._posObj, resetFunc: () => _func() }, _cssClass);
 
 	/**
 	 * 外部リンクボタンを作成
