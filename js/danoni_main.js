@@ -9675,6 +9675,15 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
 		const disabledKeys = [240, 242, 243, 244, 91, 29, 28, 27, 259, g_prevKey];
 
+		if (g_localeObj.val === `Ja`) {
+			disabledKeys.unshift(229);
+		}
+		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
+			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
+			return;
+		} else if ((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) && keyIsShift()) {
+			return;
+		}
 		if (selectedKc === `TitleBack` || selectedKc === `Retry`) {
 			// プレイ中ショートカットキー変更
 			if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
@@ -9695,14 +9704,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			return;
 		}
 
-		if (g_localeObj.val === `Ja`) {
-			disabledKeys.unshift(229);
-		}
-		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
-			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
-			return;
-		} else if ((setKey === C_KEY_TITLEBACK && g_currentk === 0) ||
-			((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) && keyIsShift())) {
+		if (setKey === C_KEY_TITLEBACK && g_currentk === 0) {
 			return;
 		}
 
