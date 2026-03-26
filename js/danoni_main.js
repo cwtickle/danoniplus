@@ -14374,7 +14374,7 @@ const changeLifeColor = (_state = ``) => {
 const lifeRecovery = () => {
 	g_workObj.lifeVal += g_workObj.lifeRcv;
 
-	if (g_workObj.lifeVal > g_headerObj.maxLifeVal) {
+	if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
 		g_workObj.lifeVal = g_headerObj.maxLifeVal;
 		changeLifeColor(`Max`);
 	} else {
@@ -14391,7 +14391,7 @@ const lifeDamage = (_excessive = false) => {
 	g_workObj.lifeVal -= g_workObj.lifeDmg * (_excessive ? 0.25 : 1);
 	quickRetry(`Miss`);
 
-	if (g_workObj.lifeVal < 0) {
+	if (g_workObj.lifeVal <= 0) {
 		g_workObj.lifeVal = 0;
 		changeLifeColor();
 	} else {
