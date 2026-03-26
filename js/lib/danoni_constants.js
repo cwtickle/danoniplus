@@ -617,6 +617,9 @@ const updateWindowSiz = () => {
         lblTime2: {
             x: 60, y: g_headerObj.playingHeight - 30, w: 60, h: 20, siz: g_limitObj.mainSiz,
         },
+        lifeBackObj: {
+            x: 5, y: 50, w: 15, h: g_headerObj.playingHeight - 100, styleName: `lifeBar`,
+        },
         lifeBackFrzObj: {
             x: 0, y: 50, w: 3.5, h: g_headerObj.playingHeight - 100, styleName: `lifeBarFrz`,
         },
