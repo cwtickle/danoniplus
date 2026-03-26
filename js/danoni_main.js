@@ -12546,12 +12546,8 @@ const mainInit = () => {
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		multiAppend(infoSprite,
 			// FrzReturnゲージ
-			createColorObject2(`lifeBackFrzObj`, {
-				x: 0, y: 50, w: 5, h: g_headerObj.playingHeight - 100, styleName: `lifeBarFrz`, display: g_workObj.scoreDisp,
-			}, g_cssObj.life_Background),
-			createColorObject2(`lifeBarFrz`, {
-				x: 0, y: 50, w: 5, h: 0, styleName: `lifeBarFrz`, display: g_workObj.scoreDisp,
-			}, g_cssObj.main_stepShobon),
+			createColorObject2(`lifeBackFrzObj`, Object.assign(g_lblPosObj.lifeBackFrzObj, { display: g_workObj.scoreDisp }), g_cssObj.life_Background),
+			createColorObject2(`lifeBarFrz`, Object.assign(g_lblPosObj.lifeBarFrz, { display: g_workObj.scoreDisp }), g_cssObj.main_stepShobon),
 		)
 	}
 
