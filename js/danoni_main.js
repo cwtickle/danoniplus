@@ -11823,6 +11823,7 @@ const getArrowSettings = () => {
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
+	g_workObj.currentLifeState = ``;
 
 	const rotateBy = (val, delta) => {
 		// numeric
@@ -12511,9 +12512,7 @@ const mainInit = () => {
 		}, lblInitColor),
 
 		// ライフ背景
-		createColorObject2(`lifeBackObj`, {
-			x: 5, y: 50, w: 15, h: g_headerObj.playingHeight - 100, styleName: `lifeBar`, display: g_workObj.lifegaugeDisp,
-		}, g_cssObj.life_Background),
+		createColorObject2(`lifeBackObj`, Object.assign(g_lblPosObj.lifeBackObj, { display: g_workObj.lifegaugeDisp }), g_cssObj.life_Background),
 
 		// ライフ本体
 		createColorObject2(`lifeBar`, {
@@ -14350,18 +14349,23 @@ const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames
 const changeLifeColor = (_state = ``) => {
 	const lblLife = document.getElementById(`lblLife`);
 	const lifeBar = document.getElementById(`lifeBar`);
-	if (_state !== ``) {
+
+	if (_state !== `` && _state !== g_workObj.currentLifeState) {
 		const lifeCss = g_cssObj[`life_${_state}`];
 		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared, g_cssObj.life_Failed);
 		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared, g_cssObj.life_Failed);
 		lblLife.classList.add(lifeCss);
 		lifeBar.classList.add(lifeCss);
+
+		g_workObj.currentLifeState = _state;
 	}
 
 	const intLifeVal = Math.floor(g_workObj.lifeVal);
 	lblLife.textContent = intLifeVal;
-	lifeBar.style.top = wUnit(50 + (g_headerObj.playingHeight - 100) * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal);
-	lifeBar.style.height = wUnit((g_headerObj.playingHeight - 100) * intLifeVal / g_headerObj.maxLifeVal);
+
+	const playableHeight = g_headerObj.playingHeight - 100;
+	lifeBar.style.top = wUnit(50 + playableHeight * (g_headerObj.maxLifeVal - intLifeVal) / g_headerObj.maxLifeVal);
+	lifeBar.style.height = wUnit(playableHeight * intLifeVal / g_headerObj.maxLifeVal);
 };
 
 /**
@@ -14370,7 +14374,7 @@ const changeLifeColor = (_state = ``) => {
 const lifeRecovery = () => {
 	g_workObj.lifeVal += g_workObj.lifeRcv;
 
-	if (g_workObj.lifeVal >= g_headerObj.maxLifeVal) {
+	if (g_workObj.lifeVal > g_headerObj.maxLifeVal) {
 		g_workObj.lifeVal = g_headerObj.maxLifeVal;
 		changeLifeColor(`Max`);
 	} else {
@@ -14387,7 +14391,7 @@ const lifeDamage = (_excessive = false) => {
 	g_workObj.lifeVal -= g_workObj.lifeDmg * (_excessive ? 0.25 : 1);
 	quickRetry(`Miss`);
 
-	if (g_workObj.lifeVal <= 0) {
+	if (g_workObj.lifeVal < 0) {
 		g_workObj.lifeVal = 0;
 		changeLifeColor();
 	} else {
@@ -14434,8 +14438,9 @@ const judgeRecovery = (_name, _difFrame) => {
 
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		g_workObj.arrowReturnVal = (g_resultObj.ii + g_resultObj.shakin) % 100;
-		$id(`lifeBarFrz`).top = wUnit(50 + (g_headerObj.playingHeight - 100) * (100 - g_workObj.arrowReturnVal) / 100);
-		$id(`lifeBarFrz`).height = wUnit((g_headerObj.playingHeight - 100) * g_workObj.arrowReturnVal / 100);
+		const playableHeight = g_headerObj.playingHeight - 100;
+		$id(`lifeBarFrz`).top = wUnit(50 + playableHeight * (100 - g_workObj.arrowReturnVal) / 100);
+		$id(`lifeBarFrz`).height = wUnit(playableHeight * g_workObj.arrowReturnVal / 100);
 		if (g_workObj.arrowReturnVal === 0) {
 			startFrzReturn();
 		}
