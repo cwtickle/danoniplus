@@ -9686,10 +9686,6 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		}
 		if (selectedKc === `TitleBack` || selectedKc === `Retry`) {
 			// プレイ中ショートカットキー変更
-			if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
-				makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
-				return;
-			}
 			g_headerObj[`key${selectedKc}`] = setKey;
 			g_headerObj[`key${selectedKc}Def`] = setKey;
 			document.getElementById(`sc${selectedKc}`).textContent = getScMsg[selectedKc]();
