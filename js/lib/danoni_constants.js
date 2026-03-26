@@ -617,6 +617,12 @@ const updateWindowSiz = () => {
         lblTime2: {
             x: 60, y: g_headerObj.playingHeight - 30, w: 60, h: 20, siz: g_limitObj.mainSiz,
         },
+        lifeBackFrzObj: {
+            x: 0, y: 50, w: 3.5, h: g_headerObj.playingHeight - 100, styleName: `lifeBarFrz`,
+        },
+        lifeBarFrz: {
+            x: 0, y: 50, w: 4, h: 0, styleName: `lifeBarFrz`,
+        },
         lblWord: {
             x: 100, w: g_headerObj.playingWidth - 200, h: 50,
             siz: g_limitObj.mainSiz, align: C_ALIGN_LEFT, display: `block`, margin: C_DIS_AUTO,
