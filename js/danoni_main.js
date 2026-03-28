@@ -1197,13 +1197,13 @@ const safeExecuteCustomHooks = (_hookName, _funcArray, ...args) => {
 
 			if (!errorCache) {
 				// ループしない場合のエラー処理
-				console.group(`${unEscapeEmoji(g_emojiObj.crossMark)} Custom Function Error: [${_hookName}] (Index: ${index}, Func: ${func.name || 'anonymous'})`);
+				console.group(`${unEscapeEmoji(g_emojiObj.crossMark)} Custom Function Error: [${_hookName}] (Index: ${index}${func.name ? `, Func: ${func.name}` : ``})`);
 				console.error(e);
 				console.groupEnd();
 
 			} else if (errorCache && !errorCache[index]?.has(func)) {
 				// ループがある場合のエラー処理（初回のみ）
-				console.group(`${unEscapeEmoji(g_emojiObj.crossMark)} Custom Function Error: [${_hookName}] (Index: ${index}, Func: ${func.name || 'anonymous'})`);
+				console.group(`${unEscapeEmoji(g_emojiObj.crossMark)} Custom Function Error: [${_hookName}] (Index: ${index}${func.name ? `, Func: ${func.name}` : ``})`);
 				console.error(`${unEscapeEmoji(g_emojiObj.policeLight)} [${g_scoreObj.baseFrame} Frame] ${g_msgObj.customFunctionError}`, e);
 				console.groupEnd();
 				errorCache[index] = new Set();
