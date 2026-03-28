@@ -963,6 +963,7 @@ const g_escapeStr = {
 const g_emojiObj = {
     checkMark: `&#x2714;`,    // チェックマーク (check mark)
     crossMark: `&#x274c;`,    // バツ (cross mark)
+    policeLight: `&#x1f6a8;`, // パトランプ (police car light)
     muted: `&#x1f507;`,       // 無音のスピーカー (muted speaker)
     speaker: `&#x1f50a;`,     // 音量大のスピーカー (speaker high volume)
     shield: `&#x1f6e1;`,      // 盾 (shield)
@@ -4827,6 +4828,8 @@ const g_lang_msgObj = {
         pickColorR: `設定する矢印色の種類を切り替えます。`,
         pickColorCopy: `このボタンを押すと、フリーズアローの配色を矢印（枠）の色で上書きします。\nヒット時のフリーズアローの色も上書きします。`,
         pickColorReset: `矢印・フリーズアローの配色を元に戻します。`,
+
+        customFunctionError: `初回の実行エラーが発生しました。修正されるまでこの処理は無視されます。`,
     },
 
     En: {
@@ -4925,6 +4928,8 @@ const g_lang_msgObj = {
         pickColorR: `Switches the arrow color type to be set.`,
         pickColorCopy: `Pressing this button will override the color scheme of the freeze arrow with the frame color of the arrow. \nIt also overrides the color of the freeze arrow on hit.`,
         pickColorReset: `Restore the color scheme for arrows and freeze arrows.`,
+
+        customFunctionError: `An error occurred during the first execution. This process will be ignored until the error is resolved.`,
     },
 
 };
@@ -5007,6 +5012,12 @@ const g_skinJsObj = {
     loading: [],
     main: [],
     result: [],
+};
+
+const g_errorCache = {
+    'g_customJsObj.titleEnterFrame': new Set(),
+    'g_customJsObj.mainEnterFrame': new Set(),
+    'g_customJsObj.resultEnterFrame': new Set(),
 };
 
 /**

@@ -1177,6 +1177,41 @@ const loadMultipleFiles2 = async (_fileData, _loadType) => {
 };
 
 /**
+ * ユーザー定義のカスタム関数配列を安全に実行する共通関数
+ * @param {string} _hookName - 識別名
+ * @param {Function[]} _funcArray - カスタム関数の配列
+ * @param {...any} args - 関数に渡したい引数（可変長）
+ */
+const safeExecuteCustomHooks = (_hookName, _funcArray, ...args) => {
+	if (!Array.isArray(_funcArray)) return true;
+
+	for (const [index, func] of _funcArray.entries()) {
+		if (typeof func !== C_TYP_FUNCTION) continue; // 関数以外が入っていた場合の自衛
+
+		try {
+			// ...args で受け取った引数をそのまま横流しして実行
+			func(...args);
+		} catch (e) {
+
+			if (!g_errorCache[_hookName]) {
+				// ループしない場合のエラー処理
+				console.group(`${unEscapeEmoji(g_emojiObj.crossMark)} Custom Function Error: [${_hookName}] (Index: ${index})`);
+				console.error(e);
+				console.groupEnd();
+			}
+
+			if (g_errorCache[_hookName] && !g_errorCache[_hookName].has(func)) {
+				// ループがある場合のエラー処理
+				console.group(`${unEscapeEmoji(g_emojiObj.crossMark)} Custom Function Error: [${_hookName}] (Index: ${index})`);
+				console.error(`${unEscapeEmoji(g_emojiObj.policeLight)} [${g_scoreObj.baseFrame} Frame] ${g_msgObj.customFunctionError}`, e);
+				console.groupEnd();
+				g_errorCache[_hookName].add(func);
+			}
+		}
+	}
+}
+
+/**
  * 与えられたパスより、キーワードとディレクトリに分割
  * @param {string} _fileName 
  * @param {string} [_directory='']
@@ -2781,7 +2816,7 @@ const initialControl = async () => {
 			}
 		}
 	}
-	g_customJsObj.preTitle.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.preTitle`, g_customJsObj.preTitle);
 	const queryMusicId = getQueryParamVal(`musicId`);
 	g_settings.musicIdxNum = queryMusicId !== null ? Number(queryMusicId) :
 		g_headerObj.musicGroups?.[g_headerObj.musicNos[g_stateObj.scoreId]] ??
@@ -5395,7 +5430,7 @@ const titleInit = (_initFlg = false) => {
 	}
 
 	// ユーザカスタムイベント(初期)
-	g_customJsObj.title.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.title`, g_customJsObj.title);
 
 	// バージョン情報取得
 	let customVersion = ``;
@@ -5522,7 +5557,7 @@ const titleInit = (_initFlg = false) => {
 	const flowTitleTimeline = () => {
 
 		// ユーザカスタムイベント(フレーム毎)
-		g_customJsObj.titleEnterFrame.forEach(func => func());
+		safeExecuteCustomHooks(`g_customJsObj.titleEnterFrame`, g_customJsObj.titleEnterFrame);
 
 		// 背景・マスクモーション、スキン変更
 		drawTitleResultMotion(g_currentPage);
@@ -5543,7 +5578,7 @@ const titleInit = (_initFlg = false) => {
 	document.oncontextmenu = () => true;
 	divRoot.oncontextmenu = () => false;
 
-	g_skinJsObj.title.forEach(func => func());
+	safeExecuteCustomHooks(`g_skinJsObj.title`, g_skinJsObj.title);
 };
 
 /**
@@ -6038,7 +6073,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 	}
 
 	// 選曲変更時のカスタム関数実行
-	g_customJsObj.musicSelect.forEach(func => func(g_settings.musicIdxNum));
+	safeExecuteCustomHooks(`g_customJsObj.musicSelect`, g_customJsObj.musicSelect, g_settings.musicIdxNum);
 };
 
 /**
@@ -6268,7 +6303,7 @@ const dataMgtInit = () => {
 	document.getElementById(`btnView${selectedKey}`).click();
 
 	// ユーザカスタムイベント(初期)
-	g_customJsObj.dataMgt.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.dataMgt`, g_customJsObj.dataMgt);
 
 	multiAppend(divRoot,
 		createCss2Button(`btnBack`, g_lblNameObj.b_back, () => true, {
@@ -6360,7 +6395,7 @@ const dataMgtInit = () => {
 	document.oncontextmenu = () => true;
 	divRoot.oncontextmenu = () => false;
 
-	g_skinJsObj.dataMgt.forEach(func => func());
+	safeExecuteCustomHooks(`g_skinJsObj.dataMgt`, g_skinJsObj.dataMgt);
 };
 
 
@@ -6438,7 +6473,7 @@ const preconditionInit = () => {
 	}, g_cssObj.button_Setting));
 
 	// ユーザカスタムイベント(初期)
-	g_customJsObj.precondition.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.precondition`, g_customJsObj.precondition);
 
 	multiAppend(divRoot,
 
@@ -6461,7 +6496,7 @@ const preconditionInit = () => {
 	document.oncontextmenu = () => true;
 	divRoot.oncontextmenu = () => true;
 
-	g_skinJsObj.precondition.forEach(func => func());
+	safeExecuteCustomHooks(`g_skinJsObj.precondition`, g_skinJsObj.precondition);
 };
 
 /*-----------------------------------------------------------*/
@@ -6580,7 +6615,7 @@ const updateSettingSummary = () => {
 		`(Adj: ${g_stateObj.adjustment} f, Volume: ${g_stateObj.volume}%, ` +
 		`ColorType: ${g_colorType}, KeyPattern: ${g_keyObj.currentPtn === -1 ? 'Self' : g_keyObj.currentPtn + 1})`;
 
-	g_customJsObj.settingSummary.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.settingSummary`, g_customJsObj.settingSummary);
 };
 
 /**
@@ -6615,7 +6650,7 @@ const optionInit = () => {
 	createOptionWindow(divRoot);
 
 	// ユーザカスタムイベント(初期)
-	g_customJsObj.option.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.option`, g_customJsObj.option);
 
 	// ボタン描画
 	commonSettingBtn(`Display`);
@@ -6625,7 +6660,7 @@ const optionInit = () => {
 	document.oncontextmenu = () => true;
 	g_initialFlg = true;
 
-	g_skinJsObj.option.forEach(func => func());
+	safeExecuteCustomHooks(`g_skinJsObj.option`, g_skinJsObj.option);
 };
 
 /**
@@ -7600,7 +7635,7 @@ const setDifficulty = (_initFlg) => {
 	lblMusicInfo.style.fontSize = wUnit(getFontSize2(lblMusicInfo.textContent, g_btnWidth(3 / 4), { maxSiz: 12 }));
 
 	// ユーザカスタムイベント(初期)
-	g_customJsObj.difficulty.forEach(func => func(_initFlg, g_canLoadDifInfoFlg));
+	safeExecuteCustomHooks(`g_customJsObj.difficulty`, g_customJsObj.difficulty, _initFlg, g_canLoadDifInfoFlg);
 
 	// 設定サマリー表示の更新
 	updateSettingSummary();
@@ -8498,7 +8533,7 @@ const settingsDisplayInit = () => {
 	divRoot.appendChild(createDescDiv(`scMsg`, g_lblNameObj.sdShortcutDesc));
 
 	// ユーザカスタムイベント(初期)
-	g_customJsObj.settingsDisplay.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.settingsDisplay`, g_customJsObj.settingsDisplay);
 
 	// ボタン描画
 	commonSettingBtn(`Settings`);
@@ -8507,7 +8542,7 @@ const settingsDisplayInit = () => {
 	setShortcutEvent(g_currentPage);
 	document.oncontextmenu = () => true;
 
-	g_skinJsObj.settingsDisplay.forEach(func => func());
+	safeExecuteCustomHooks(`g_skinJsObj.settingsDisplay`, g_skinJsObj.settingsDisplay);
 };
 
 /**
@@ -8762,7 +8797,7 @@ const exSettingInit = () => {
 	);
 
 	// ユーザカスタムイベント(初期)
-	g_customJsObj.exSetting.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.exSetting`, g_customJsObj.exSetting);
 
 	// 設定系のボタン群をまとめて作成（Data Save, Display切替, Back, KeyConfig, Playボタン）
 	commonSettingBtn(g_currentPage);
@@ -8771,7 +8806,7 @@ const exSettingInit = () => {
 	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
 	document.oncontextmenu = () => true;
 
-	g_skinJsObj.exSetting.forEach(func => func());
+	safeExecuteCustomHooks(`g_skinJsObj.exSetting`, g_skinJsObj.exSetting);
 };
 
 /**
@@ -9594,7 +9629,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	};
 
 	// ユーザカスタムイベント(初期)
-	g_customJsObj.keyconfig.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.keyconfig`, g_customJsObj.keyconfig);
 
 	// 部分キー表示用ボタン描画
 	if (configKeyGroupList.length > 1) {
@@ -9732,7 +9767,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		}
 	});
 
-	g_skinJsObj.keyconfig.forEach(func => func());
+	safeExecuteCustomHooks(`g_skinJsObj.keyconfig`, g_skinJsObj.keyconfig);
 	document.onkeyup = evt => commonKeyUp(evt);
 	document.oncontextmenu = () => false;
 };
@@ -9922,7 +9957,7 @@ const loadMusic = () => {
 			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${_event.loaded}Bytes`;
 		}
 		// ユーザカスタムイベント
-		g_customJsObj.progress.forEach(func => func(_event));
+		safeExecuteCustomHooks(`g_customJsObj.progress`, g_customJsObj.progress, _event);
 	});
 
 	// エラー処理
@@ -10030,8 +10065,8 @@ const loadingScoreInit = async () => {
 	g_headerObj.blankFrame = g_headerObj.blankFrameDef;
 
 	// ユーザカスタムイベント
-	g_customJsObj.preloading.forEach(func => func());
-	g_skinJsObj.preloading.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.preloading`, g_customJsObj.preloading);
+	safeExecuteCustomHooks(`g_skinJsObj.preloading`, g_skinJsObj.preloading);
 
 	let dummyIdHeader = ``;
 	if (g_stateObj.dummyId !== ``) {
@@ -10170,7 +10205,7 @@ const loadingScoreInit = async () => {
 	getArrowSettings();
 
 	// ユーザカスタムイベント
-	g_customJsObj.loading.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.loading`, g_customJsObj.loading);
 
 	mainInit();
 };
@@ -12669,7 +12704,7 @@ const mainInit = () => {
 	}
 
 	// ユーザカスタムイベント(初期)
-	g_customJsObj.main.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.main`, g_customJsObj.main);
 
 	/**
 	 * キーを押したときの処理
@@ -12917,7 +12952,7 @@ const mainInit = () => {
 			if (_cnt === 0) {
 				const stepDivHit = document.getElementById(`stepHit${_j}`);
 
-				g_customJsObj.dummyArrow.forEach(func => func());
+				safeExecuteCustomHooks(`g_customJsObj.dummyArrow`, g_customJsObj.dummyArrow);
 				stepDivHit.style.top = wUnit(-15);
 				stepDivHit.style.opacity = 1;
 				stepDivHit.classList.value = ``;
@@ -12937,7 +12972,7 @@ const mainInit = () => {
 
 		// ダミーフリーズアロー(成功時)
 		dummyFrzOK: (_j, _k, _frzName, _cnt) => {
-			g_customJsObj.dummyFrz.forEach(func => func());
+			safeExecuteCustomHooks(`g_customJsObj.dummyFrz`, g_customJsObj.dummyFrz);
 			$id(`frzHit${_j}`).opacity = 0;
 			g_attrObj[_frzName].judgEndFlg = true;
 			judgeObjDelete.dummyFrz(_j, _frzName);
@@ -13157,7 +13192,7 @@ const mainInit = () => {
 		arrowSubRoot.appendChild(createColorObject2(`${_name}Top${_j}_${_arrowCnt}`, {
 			background: _color, rotate: g_workObj.arrowRtn[_j],
 		}));
-		g_customJsObj.makeArrow.forEach(func => func(_attrs, arrowName, _name, _arrowCnt));
+		safeExecuteCustomHooks(`g_customJsObj.makeArrow`, g_customJsObj.makeArrow, _attrs, arrowName, _name, _arrowCnt);
 	};
 
 	/**
@@ -13326,7 +13361,7 @@ const mainInit = () => {
 			addTransform(frzName, `rootX`, `translateX(${g_workObj.stepX[_j]}px)`);
 		}
 
-		g_customJsObj.makeFrzArrow.forEach(func => func(_attrs, frzName, _name, _arrowCnt));
+		safeExecuteCustomHooks(`g_customJsObj.makeFrzArrow`, g_customJsObj.makeFrzArrow, _attrs, frzName, _name, _arrowCnt);
 	};
 
 	/**
@@ -13445,7 +13480,7 @@ const mainInit = () => {
 		}
 
 		// ユーザカスタムイベント(フレーム毎)
-		g_customJsObj.mainEnterFrame.forEach(func => func());
+		safeExecuteCustomHooks(`g_customJsObj.mainEnterFrame`, g_customJsObj.mainEnterFrame);
 
 		// 速度変化 (途中変速, 個別加速)
 		while (currentFrame >= g_workObj.speedData?.[speedCnts]) {
@@ -13643,7 +13678,7 @@ const mainInit = () => {
 			g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps - buffTime);
 		}
 	};
-	g_skinJsObj.main.forEach(func => func());
+	safeExecuteCustomHooks(`g_skinJsObj.main`, g_skinJsObj.main);
 
 	g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
 	g_audio.playbackRate = g_headerObj.playbackRate;
@@ -13863,7 +13898,7 @@ const changeAppearanceFilter = (_num = 10) => {
 	}
 
 	// ユーザカスタムイベント(アルファマスクの再描画)
-	g_customJsObj.appearanceFilter.forEach(func => func(topNum, bottomNum));
+	safeExecuteCustomHooks(`g_customJsObj.appearanceFilter`, g_customJsObj.appearanceFilter, topNum, bottomNum);
 
 	return doubleFilterFlg;
 };
@@ -14444,7 +14479,7 @@ const judgeRecovery = (_name, _difFrame) => {
 	if (_name === `shakin`) {
 		quickRetry(`Shakin(Great)`);
 	}
-	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
+	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}`, g_customJsObj[`judg_${_name}`], _difFrame);
 };
 
 /**
@@ -14458,7 +14493,7 @@ const judgeDamage = (_name, _difFrame) => {
 	comboJ.textContent = ``;
 	diffJ.textContent = ``;
 	lifeDamage();
-	g_customJsObj[`judg_${_name}`].forEach(func => func(_difFrame));
+	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}`, g_customJsObj[`judg_${_name}`], _difFrame);
 };
 
 /**
@@ -14483,7 +14518,7 @@ const judgeMatari = _difFrame => {
 	finishViewing();
 	quickRetry(`Matari(Good)`);
 
-	g_customJsObj.judg_matari.forEach(func => func(_difFrame));
+	safeExecuteCustomHooks(`g_customJsObj.judg_matari`, g_customJsObj.judg_matari, _difFrame);
 };
 
 /**
@@ -14514,7 +14549,7 @@ const judgeKita = _difFrame => {
 	lifeRecovery();
 	finishViewing();
 
-	g_customJsObj.judg_kita.forEach(func => func(_difFrame));
+	safeExecuteCustomHooks(`g_customJsObj.judg_kita`, g_customJsObj.judg_kita, _difFrame);
 };
 
 /**
@@ -14528,7 +14563,7 @@ const judgeIknai = _difFrame => {
 
 	lifeDamage();
 
-	g_customJsObj.judg_iknai.forEach(func => func(_difFrame));
+	safeExecuteCustomHooks(`g_customJsObj.judg_iknai`, g_customJsObj.judg_iknai, _difFrame);
 };
 
 const jdgList = [`ii`, `shakin`, `matari`, `shobon`].map(jdg => toCapitalize(jdg));
@@ -14990,7 +15025,7 @@ const resultInit = () => {
 
 	// ユーザカスタムイベント(初期)
 	const currentDateTime = new Date().toLocaleString();
-	g_customJsObj.result.forEach(func => func());
+	safeExecuteCustomHooks(`g_customJsObj.result`, g_customJsObj.result);
 
 	if (highscorePreCondition) {
 
@@ -15334,7 +15369,7 @@ const resultInit = () => {
 	const flowResultTimeline = () => {
 
 		// ユーザカスタムイベント(フレーム毎)
-		g_customJsObj.resultEnterFrame.forEach(func => func());
+		safeExecuteCustomHooks(`g_customJsObj.resultEnterFrame`, g_customJsObj.resultEnterFrame);
 
 		// 背景・マスクモーション、スキン変更
 		drawTitleResultMotion(g_currentPage);
@@ -15368,7 +15403,7 @@ const resultInit = () => {
 	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
 	document.oncontextmenu = () => true;
 
-	g_skinJsObj.result.forEach(func => func());
+	safeExecuteCustomHooks(`g_skinJsObj.result`, g_skinJsObj.result);
 };
 
 /**
