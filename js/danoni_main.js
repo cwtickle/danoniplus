@@ -1184,28 +1184,30 @@ const loadMultipleFiles2 = async (_fileData, _loadType) => {
  */
 const safeExecuteCustomHooks = (_hookName, _funcArray, ...args) => {
 	if (!Array.isArray(_funcArray)) return true;
+	const errorCache = g_errorCache[_hookName];
 
 	for (const [index, func] of _funcArray.entries()) {
-		if (typeof func !== C_TYP_FUNCTION) continue; // 関数以外が入っていた場合の自衛
+		if (typeof func !== C_TYP_FUNCTION) continue;      // 関数以外が入っていた場合の自衛
+		if (errorCache && errorCache[index]?.has(func)) continue;  // エラー検知済みの場合は以後スキップ
 
 		try {
 			// ...args で受け取った引数をそのまま横流しして実行
 			func(...args);
 		} catch (e) {
 
-			if (!g_errorCache[_hookName]) {
+			if (!errorCache) {
 				// ループしない場合のエラー処理
 				console.group(`${unEscapeEmoji(g_emojiObj.crossMark)} Custom Function Error: [${_hookName}] (Index: ${index})`);
 				console.error(e);
 				console.groupEnd();
-			}
 
-			if (g_errorCache[_hookName] && !g_errorCache[_hookName].has(func)) {
-				// ループがある場合のエラー処理
+			} else if (errorCache && !errorCache[index]?.has(func)) {
+				// ループがある場合のエラー処理（初回のみ）
 				console.group(`${unEscapeEmoji(g_emojiObj.crossMark)} Custom Function Error: [${_hookName}] (Index: ${index})`);
 				console.error(`${unEscapeEmoji(g_emojiObj.policeLight)} [${g_scoreObj.baseFrame} Frame] ${g_msgObj.customFunctionError}`, e);
 				console.groupEnd();
-				g_errorCache[_hookName].add(func);
+				errorCache[index] = new Set();
+				errorCache[index].add(func);
 			}
 		}
 	}

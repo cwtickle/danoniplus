@@ -5015,9 +5015,9 @@ const g_skinJsObj = {
 };
 
 const g_errorCache = {
-    'g_customJsObj.titleEnterFrame': new Set(),
-    'g_customJsObj.mainEnterFrame': new Set(),
-    'g_customJsObj.resultEnterFrame': new Set(),
+    'g_customJsObj.titleEnterFrame': [],
+    'g_customJsObj.mainEnterFrame': [],
+    'g_customJsObj.resultEnterFrame': [],
 };
 
 /**
