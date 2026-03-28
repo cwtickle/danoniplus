@@ -14224,7 +14224,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		startFrzReturn();
 	}
-	g_customJsObj[`judg_${_name}Hit`].forEach(func => func(_difFrame));
+	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}Hit`, g_customJsObj[`judg_${_name}Hit`], _difFrame);
 };
 
 /**
