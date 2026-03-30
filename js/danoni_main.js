@@ -9725,6 +9725,11 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			return;
 		}
 		if (selectedKc === `TitleBack` || selectedKc === `Retry`) {
+			// タイトルバックキー、リトライキーはプレイ中の操作キーと重複しないようにする（簡易的）
+			if (g_keyObj[`keyCtrl${keyCtrlPtn}`].flat().includes(setKey)) {
+				makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
+				return;
+			}
 			// プレイ中ショートカットキー変更
 			g_headerObj[`key${selectedKc}`] = setKey;
 			g_headerObj[`key${selectedKc}Def`] = setKey;
