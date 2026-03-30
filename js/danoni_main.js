@@ -919,7 +919,7 @@ const blockCode = _setCode => !C_BLOCK_KEYS.includes(_setCode);
  * キーを押したときの動作（汎用）
  * @param {KeyboardEvent} _evt 
  * @param {string} _displayName 
- * @param {function} _func
+ * @param {Function} _func
  * @param {boolean} _dfEvtFlg
  * @returns {boolean}
  */
@@ -1006,7 +1006,7 @@ const createScTextCommon = _displayName => {
 /**
  * ショートカットキー有効化
  * @param {string} _displayName
- * @param {function} _func 
+ * @param {Function} _func 
  * @param {boolean} [object.displayFlg=true]
  * @param {boolean} [object.dfEvtFlg=false] 
  */
@@ -1626,7 +1626,7 @@ const createImg = (_id, _imgPath, _x, _y, _width, _height) => {
  * ColorPickerの作成
  * @param {string} _parentObj
  * @param {string} _id
- * @param {function} _func 
+ * @param {Function} _func 
  * @param {number} [object.x=0]
  * @param {number} [object.y=0]
  * @returns {HTMLInputElement}
@@ -1809,7 +1809,7 @@ const deleteDiv = (_parentId, _idName) => {
  * ボタンの作成 (CSS版・拡張属性対応)
  * @param {string} _id 
  * @param {string} _text
- * @param {function} _func
+ * @param {Function} _func
  * @param {number} [object.x]
  * @param {number} [object.y]
  * @param {number} [object.w=g_btnWidth() / 3]
@@ -1819,8 +1819,8 @@ const deleteDiv = (_parentId, _idName) => {
  * @param {string} [object.title] ボタンオンマウス時のコメント
  * @param {string} [object.groupName] 画面名 (g_btnWaitFrameで定義しているプロパティ名を指定)
  * @param {boolean} [object.initDisabledFlg=true] ボタン有効化までの時間を設けるかどうか
- * @param {function} [object.resetFunc] カスタム処理後に実行する処理
- * @param {function} [object.cxtFunc] 右クリック時に実行する処理
+ * @param {Function} [object.resetFunc] カスタム処理後に実行する処理
+ * @param {Function} [object.cxtFunc] 右クリック時に実行する処理
  * @param {...any} [object.rest]
  * @param {...any} _classes 
  */
@@ -2180,7 +2180,7 @@ const checkDuplicatedObjects = _obj => {
 /**
  * 多層スプライトデータの作成処理
  * @param {string} _data 
- * @param {function} _calcFrame 
+ * @param {Function} _calcFrame 
  * @returns [多層スプライトデータ, 最大深度]
  */
 const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
@@ -2270,7 +2270,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 /**
  * スタイル変更データの作成処理
  * @param {string} _data 
- * @param {function} _calcFrame 
+ * @param {Function} _calcFrame 
  * @returns [多層スプライトデータ, 1(固定)]
  */
 const makeStyleData = (_data, _calcFrame = _frame => _frame) => {
@@ -4877,7 +4877,7 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	 * - charaX の場合に限り、a>5_0 の形式を aleft, adown, aup, aright, aspace に変換する
 	 * @param {string} _str 
 	 * @param {string} _name 
-	 * @param {function} _convFunc
+	 * @param {Function} _convFunc
 	 * @returns {string[]|number[]}
 	 */
 	const expandKeyPtn = (_str, _name, _convFunc) => {
@@ -4896,10 +4896,10 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 	 * 新キー用複合パラメータ
 	 * @param {string} _key キー数
 	 * @param {string} _name 名前
-	 * @param {function} _convFunc マッピング関数
+	 * @param {Function} _convFunc マッピング関数
 	 * @param {string} object.errCd エラーコード
 	 * @param {boolean} object.baseCopyFlg コピー配列の準備可否
-	 * @param {function} object.loopFunc パターン別に処理する個別関数
+	 * @param {Function} object.loopFunc パターン別に処理する個別関数
 	 * @returns {number} 最小パターン数
 	 */
 	const newKeyMultiParam = (_key, _name, _convFunc, { errCd = ``, baseCopyFlg = false, loopFunc = () => true } = {}) => {
@@ -5740,8 +5740,8 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	 * @param {number} startVolume - 開始音量 (0〜1)
 	 * @param {number} endVolume - 終了音量 (0〜1)
 	 * @param {number} step - 1ステップの増減量
-	 * @param {function} onEnd - フェード完了時の処理
-	 * @param {function} isValid - フェード継続条件（true: 継続, false: 中断）
+	 * @param {Function} onEnd - フェード完了時の処理
+	 * @param {Function} isValid - フェード継続条件（true: 継続, false: 中断）
 	 * @returns {number} timeoutId
 	 */
 	const fadeVolume = (startVolume, endVolume, step, onEnd, isValid) => {
@@ -5787,9 +5787,9 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 
 	/**
 	 * 汎用ポーリング（監視）処理
-	 * @param {function} check - 条件チェック関数（true なら終了）
-	 * @param {function} onEnd - 終了時の処理
-	 * @param {function} isValid - 継続条件（true: 継続, false: 中断）
+	 * @param {Function} check - 条件チェック関数（true なら終了）
+	 * @param {Function} onEnd - 終了時の処理
+	 * @param {Function} isValid - 継続条件（true: 継続, false: 中断）
 	 * @returns {number} timeoutId
 	 */
 	const poll = (check, onEnd, isValid) => {
@@ -6216,7 +6216,7 @@ const dataMgtInit = () => {
 	 * @param {number} _heightPos 
 	 * @param {number} _widthPos 
 	 * @param {number} [w=125]
-	 * @param {function} func 
+	 * @param {Function} func 
 	 * @returns {HTMLDivElement}
 	 */
 	const createMgtButton = (_name, _heightPos, _widthPos, { w = 125, func = () => true, ...rest } = {}) => {
@@ -6622,7 +6622,7 @@ const updateSettingSummary = () => {
 
 /**
  * PLAYボタンの作成
- * @param {function} _func 
+ * @param {Function} _func 
  * @returns {HTMLDivElement}
  */
 const makePlayButton = _func => createCss2Button(`btnPlay`, g_lblNameObj.b_play, () => true, {
@@ -7964,8 +7964,8 @@ const createOptionWindow = _sprite => {
  * @param {string} [object.unitName=''] 設定名の単位
  * @param {number[]} [object.skipTerms] ボタンの設定スキップ間隔(デフォルト:[1(外側), 1(内側), 1(最内側)])
  * @param {boolean} [object.hiddenBtn=false] 隠しボタン(ショートカットキーのみ)の利用有無
- * @param {function} [object.addRFunc] 右側のボタンを押したときの追加処理
- * @param {function} [object.addLFunc] 左側のボタンを押したときの追加処理
+ * @param {Function} [object.addRFunc] 右側のボタンを押したときの追加処理
+ * @param {Function} [object.addLFunc] 左側のボタンを押したときの追加処理
  * @param {string} [object.settingLabel=_settingName] 設定名
  * @param {string} [object.displayName] 画面名
  * @param {string} [object.scLabel=''] ショートカットキーの表示名
@@ -8071,7 +8071,7 @@ const getStgDetailName = _name => {
  * 設定メイン・汎用
  * @param {number} _scrollNum 
  * @param {string} _settingName
- * @param {function} [func=()=>true] 設定ボタンを押した後の追加処理
+ * @param {Function} [func=()=>true] 設定ボタンを押した後の追加処理
  * @param {string} [unitName=''] 設定の単位名
  * @param {number} [roundNum=0] 設定スキップ間隔の丸め基準数
  */
@@ -8435,13 +8435,13 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
  * @param {string} _id 
  * @param {string} _name 初期設定文字
  * @param {number} _heightPos 上からの配置順
- * @param {function} _func 通常ボタン処理
+ * @param {Function} _func 通常ボタン処理
  * @param {number} [object.x]
  * @param {number} [object.y]
  * @param {number} [object.w]
  * @param {number} [object.h]
  * @param {number} [object.siz]
- * @param {function} [object.cxtFunc] 右クリック時の処理
+ * @param {Function} [object.cxtFunc] 右クリック時の処理
  * @param {...any} [object.rest]
  * @param {...any} _classes 追加するクラス
  * @returns {HTMLDivElement}
@@ -8457,7 +8457,7 @@ const makeSettingLblCssButton = (_id, _name, _heightPos, _func, {
  * @param {string} _id
  * @param {string} _name 初期設定文字
  * @param {number} _heightPos 上からの配置順
- * @param {function} _func
+ * @param {Function} _func
  * @param {number} [object.x]
  * @param {number} [object.h]
  * @param {number} [object.y=h*_heightPos]
@@ -8478,7 +8478,7 @@ const makeDifLblCssButton = (_id, _name, _heightPos, _func, {
  * @param {string} _id 
  * @param {string} _directionFlg 表示用ボタンのどちら側に置くかを設定。(R, RR:右、L, LL:左)
  * @param {number} _heightPos 上からの配置順
- * @param {function} _func 
+ * @param {Function} _func 
  * @param {number} [object.dx=0]
  * @param {number} [object.dy=0]
  * @param {number} [object.dw=0]
@@ -8815,11 +8815,11 @@ const exSettingInit = () => {
  * 拡張設定込みの標準設定
  * @param {any[]} _spriteList
  * @param {string} _name 
- * @param {{ defaultList?: string[], displayName?: string, func?: function, funcEx?: function }} [options={}]
+ * @param {{ defaultList?: string[], displayName?: string, func?: Function, funcEx?: Function }} [options={}]
  * @param {string[]} [options.defaultList=[C_FLG_OFF]] 拡張設定未使用の設定リスト
  * @param {string} [options.displayName='exSetting']
- * @param {function} [options.func=()=>true] 通常ボタン用追加関数
- * @param {function} [options.funcEx=()=>true] 拡張ボタン用追加関数
+ * @param {Function} [options.func=()=>true] 通常ボタン用追加関数
+ * @param {Function} [options.funcEx=()=>true] 拡張ボタン用追加関数
  */
 const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF], displayName = `exSetting`,
 	func = () => true, funcEx = () => true } = {}) => {
@@ -9178,14 +9178,14 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * キーコンフィグ用設定ボタン
 	 * @param {string} _id 
 	 * @param {string} _text 
-	 * @param {function} _func 
+	 * @param {Function} _func 
 	 * @param {number} [object.x=g_btnX(5 / 6) - 20]
 	 * @param {number} [object.y=15]
 	 * @param {number} [object.w=g_btnWidth(1 / 6)]
 	 * @param {number} [object.h=18]
 	 * @param {number} [object.siz=g_limitObj.jdgCntsSiz]
 	 * @param {string} [object.borderStyle='solid']
-	 * @param {function} [object.cxtFunc]
+	 * @param {Function} [object.cxtFunc]
 	 * @param {...any} [object.rest]
 	 * @param {string} [_mainClass=g_cssObj.button_RevOFF] 
 	 * @param  {...any} _classes 
@@ -9199,7 +9199,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * キーコンフィグ用ミニボタン
 	 * @param {string} _id 
 	 * @param {string} _directionFlg 
-	 * @param {function} _func 
+	 * @param {Function} _func 
 	 * @param {number} [object.x=g_btnX(5 / 6) - 30]
 	 * @param {number} [object.y=15]
 	 * @param {number} [object.w=15]
@@ -9529,7 +9529,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * ColorPicker部分の作成
 	 * @param {number} _j 
 	 * @param {string} _type 
-	 * @param {function} _func 
+	 * @param {Function} _func 
 	 * @param {number} [object.x=0]
 	 * @param {number} [object.y=15] 
 	 */
@@ -11413,7 +11413,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 	 * - この関数を使用する場合、配列グループの先頭2つが「フレーム数、矢印番号」となっていないと動作しない
 	 * @param {string} _type 
 	 * @param {string} _header 
-	 * @param {function} _setFunc 後続実行関数
+	 * @param {Function} _setFunc 後続実行関数
 	 * @param {number} object._term 1セット当たりのデータ数(デフォルトは後続実行関数の引数の数-1, デフォルト引数・オブジェクト引数除く) 
 	 * @param {boolean} object._colorFlg 個別色変化フラグ
 	 * @param {boolean} object._calcFrameFlg 逆算を無条件で行うかどうかの可否
@@ -15316,7 +15316,7 @@ const resultInit = () => {
 	 * @param {string} _id 
 	 * @param {string} _name 
 	 * @param {object} _posObj 
-	 * @param {function} _func 
+	 * @param {Function} _func 
 	 * @param {...any} _cssClass 
 	 * @returns {HTMLDivElement}
 	 */
