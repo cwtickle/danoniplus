@@ -2903,7 +2903,7 @@ const g_shortcutObj = {
         KeyU: { id: `btnSettingSummary` },
     },
     keyConfig: {
-        Escape: { id: `btnBack` },
+        //Escape: { id: `btnBack` },  // Escapeを別用途でも使用するため、ここではコメントアウト
         Backspace_Enter: { id: `btnPlay` },
         Backspace_NumpadEnter: { id: `btnPlay` },
     },
@@ -4399,6 +4399,7 @@ const g_lblNameObj = {
     sc_scroll: `R/<br>↑↓`,
     sc_adjustment: `- +`,
     sc_hitPosition: `T B`,
+    sc_keyConfigBack: `Esc`,
     sc_keyConfigPlay: g_isMac ? `Del+Enter` : `BS+Enter`,
 
     g_start: `Start`,

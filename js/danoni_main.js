@@ -9708,12 +9708,15 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		const keyCdObj = document.getElementById(`keycon${g_currentj}_${g_currentk}`);
 		let setKey = g_kCdN.findIndex(kCd => kCd === kbCode);
 
+		const C_KEY_ESCAPE = 27;
+		const C_KEY_IME = 229;
+
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
-		const disabledKeys = [240, 242, 243, 244, 91, 29, 28, 27, 259, g_prevKey];
+		const disabledKeys = [240, 242, 243, 244, 91, 29, 28, 259, g_prevKey];
 
 		if (g_localeObj.val === `Ja`) {
-			disabledKeys.unshift(229);
+			disabledKeys.unshift(C_KEY_IME);
 		}
 		if (disabledKeys.includes(setKey) || g_kCdN[setKey] === undefined) {
 			makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
@@ -9726,10 +9729,11 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			g_headerObj[`key${selectedKc}`] = setKey;
 			g_headerObj[`key${selectedKc}Def`] = setKey;
 			document.getElementById(`sc${selectedKc}`).textContent = getScMsg[selectedKc]();
-			document.getElementById(`sc${selectedKc}`).style.fontSize = `${getFontSize2(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, { maxSiz: 13 })}px`;
+			document.getElementById(`sc${selectedKc}`).style.fontSize =
+				`${getFontSize2(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, { maxSiz: g_limitObj.mainSiz })}px`;
 			if (g_isMac) {
 				scTitleBack.textContent = getScMsg.TitleBack();
-				scTitleBack.style.fontSize = `${getFontSize2(getScMsg.TitleBack(), g_btnWidth(5 / 12) - 40, { maxSiz: 13 })}px`;
+				scTitleBack.style.fontSize = `${getFontSize2(getScMsg.TitleBack(), g_btnWidth(5 / 12) - 40, { maxSiz: g_limitObj.mainSiz })}px`;
 			}
 			changeConfigColor(document.getElementById(`sc${selectedKc}`),
 				g_headerObj[`key${selectedKc}`] === g_headerObj[`key${selectedKc}Def2`] ?
@@ -9737,7 +9741,12 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			return;
 		}
 
-		if (setKey === C_KEY_TITLEBACK && g_currentk === 0) {
+		if (setKey === C_KEY_ESCAPE) {
+			// リトライキー、タイトルバックキーにEscキーを割り当て可能にするため、
+			// 例外的にEscキーで戻る対応をここで処理
+			btnBack.click();
+			return;
+		} else if (setKey === C_KEY_TITLEBACK && g_currentk === 0) {
 			return;
 		}
 
@@ -9768,6 +9777,13 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			changeConfigCursor();
 		}
 	});
+
+	// 戻るボタンのショートカットキー表示
+	multiAppend(btnBack,
+		createDivCss2Label(`scKeyConfigBack`, `${g_lblNameObj.sc_keyConfigBack})`, {
+			x: 0, siz: 12, fontWeight: `bold`, opacity: 0.75, align: C_ALIGN_LEFT,
+		})
+	);
 
 	safeExecuteCustomHooks(`g_skinJsObj.keyconfig`, g_skinJsObj.keyconfig);
 	document.onkeyup = evt => commonKeyUp(evt);
