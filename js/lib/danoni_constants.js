@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/03/29 (v46.5.0)
+ * Revised : 2026/03/30 (v46.5.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2903,7 +2903,7 @@ const g_shortcutObj = {
         KeyU: { id: `btnSettingSummary` },
     },
     keyConfig: {
-        Escape: { id: `btnBack` },
+        //Escape: { id: `btnBack` },  // Escapeを別用途でも使用するため、ここではコメントアウト
         Backspace_Enter: { id: `btnPlay` },
         Backspace_NumpadEnter: { id: `btnPlay` },
     },
@@ -4399,6 +4399,7 @@ const g_lblNameObj = {
     sc_scroll: `R/<br>↑↓`,
     sc_adjustment: `- +`,
     sc_hitPosition: `T B`,
+    sc_keyConfigBack: `Esc`,
     sc_keyConfigPlay: g_isMac ? `Del+Enter` : `BS+Enter`,
 
     g_start: `Start`,
