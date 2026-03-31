@@ -1350,7 +1350,7 @@ const g_settings = {
     playWindows: [`Default`, `Stairs`, `Slope`, `Distorted`, `SideScroll`],
     playWindowNum: 0,
 
-    playWindowTypes: [C_FLG_HYPHEN, `Reverse`],
+    playWindowTypes: [C_FLG_HYPHEN, C_FLG_REVERSE2],
     playWindowTypeNum: 0,
 
     stepAreas: [`Default`, `Halfway`, `2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`, `Alt-Crossing`],
@@ -1737,7 +1737,7 @@ const motionAlphaToggle = (_obj, _property) => {
  * PlayWindow適用関数
  * - 対応するキー名: g_settings.playWindows
  */
-const g_playWindowDir = () => g_stateObj.playWindowType === `Reverse` ? 1 : -1;
+const g_playWindowDir = () => g_stateObj.playWindowType === C_FLG_REVERSE2 ? 1 : -1;
 const g_changeStairs = (_rad) => `rotate(${_rad * g_playWindowDir()}deg)`;
 const g_changeSkew = (_rad) => `Skew(${_rad * g_playWindowDir()}deg, ${_rad * g_playWindowDir()}deg) scaleY(0.9)`;
 
@@ -4465,6 +4465,7 @@ const g_lblNameObj = {
     'u_R-': `R-`,
     'u_---': `---`,
     'u_Reverse': `Reverse`,
+    'u_Rev': `Reverse`,
 
     'u_Mirror': `Mirror`,
     'u_X-Mirror': `X-Mirror`,
