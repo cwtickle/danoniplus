@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/03/29
+ * Revised : 2026/03/31
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 46.5.1`;
-const g_revisedDate = `2026/03/30`;
+const g_version = `Ver 46.5.2`;
+const g_revisedDate = `2026/03/31`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -155,6 +155,8 @@ const C_FLG_ON = `ON`;
 const C_FLG_OFF = `OFF`;
 const C_FLG_HYPHEN = `---`;
 const C_FLG_ALL = `ALL`;
+const C_FLG_REVERSE = `Reverse`;
+const C_FLG_REVERSE2 = `Rev`;
 const C_DIS_NONE = `none`;
 const C_DIS_AUTO = `auto`;
 const C_DIS_INHERIT = `inherit`;
@@ -7593,7 +7595,7 @@ const setDifficulty = (_initFlg) => {
 		document.getElementById(`${hiddenScr}Sprite`).style.display = C_DIS_NONE;
 		setSetting(0, visibleScr);
 
-		g_shortcutObj.option.KeyR.id = g_settings.scrolls.includes(`Reverse`) ?
+		g_shortcutObj.option.KeyR.id = g_settings.scrolls.includes(C_FLG_REVERSE) ?
 			g_shortcutObj.option.KeyR.exId : g_shortcutObj.option.KeyR.dfId;
 
 		if (g_settings.scrolls.length > 1) {
@@ -8142,7 +8144,7 @@ const setReverseDefault = () => {
 };
 
 const setReverse = _btn => {
-	if (!g_settings.scrolls.includes(`Reverse`) && g_headerObj.reverseUse) {
+	if (!g_settings.scrolls.includes(C_FLG_REVERSE) && g_headerObj.reverseUse) {
 		g_settings.reverseNum = (g_settings.reverseNum + 1) % 2;
 		g_stateObj.reverse = g_settings.reverses[g_settings.reverseNum];
 		setReverseView(_btn);
@@ -8153,7 +8155,7 @@ const setReverse = _btn => {
 const setReverseView = _btn => {
 	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
 		g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
-	if (!g_settings.scrolls.includes(`Reverse`) && g_headerObj.reverseUse) {
+	if (!g_settings.scrolls.includes(C_FLG_REVERSE) && g_headerObj.reverseUse) {
 		_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
 	} else {
 		_btn.textContent = `X`;
@@ -11894,7 +11896,7 @@ const getArrowSettings = () => {
 
 	if (g_stateObj.playWindow === `SideScroll`) {
 		if (g_stateObj.rotateEnabled) {
-			const sign = g_stateObj.playWindowType === `Reverse` ? -1 : 1;
+			const sign = g_stateObj.playWindowType === C_FLG_REVERSE2 ? -1 : 1;
 			changeStepRtn(`stepRtn`, 90 * sign);
 			changeStepRtn(`stepHitRtn`, 90 * sign);
 			changeStepRtn(`arrowRtn`, 90 * sign);
@@ -15467,12 +15469,12 @@ const getSelectedSettingList = (_orgShuffleFlg) => {
 		`${g_stateObj.speed}${g_lblNameObj.multi}`,
 		withOptions(g_stateObj.motion, C_FLG_OFF),
 		`${withOptions(g_stateObj.reverse, C_FLG_OFF,
-			getStgDetailName(g_stateObj.scroll !== C_FLG_HYPHEN ? 'R-' : 'Reverse'))}${withOptions(g_stateObj.scroll, C_FLG_HYPHEN)}`,
+			getStgDetailName(g_stateObj.scroll !== C_FLG_HYPHEN ? 'R-' : C_FLG_REVERSE))}${withOptions(g_stateObj.scroll, C_FLG_HYPHEN)}`,
 		withOptions(g_stateObj.appearance, `Visible`) +
 		((g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_ON) ? `(${g_hidSudObj.filterPos}%)` : ``),
 		withOptions(g_stateObj.gauge, g_settings.gauges[0]),
 		withOptions(g_stateObj.playWindow, `Default`,
-			`${getStgDetailName(g_stateObj.playWindowType === `Reverse` ? `R-` : ``)}${getStgDetailName(g_stateObj.playWindow)}`),
+			`${getStgDetailName(g_stateObj.playWindowType === C_FLG_REVERSE2 ? `R-` : ``)}${getStgDetailName(g_stateObj.playWindow)}`),
 		withOptions(g_stateObj.stepArea, `Default`),
 		withOptions(g_stateObj.frzReturn, C_FLG_OFF,
 			`FR:${getStgDetailName(g_stateObj.frzReturn)}(${getStgDetailName(g_stateObj.frzReturnType)})`),
