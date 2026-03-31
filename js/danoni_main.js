@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/03/26
+ * Revised : 2026/03/31
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 45.5.7`;
-const g_revisedDate = `2026/03/26`;
+const g_version = `Ver 45.5.8`;
+const g_revisedDate = `2026/03/31`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -11766,7 +11766,7 @@ const getArrowSettings = () => {
 
 	if (g_stateObj.playWindow === `SideScroll`) {
 		if (g_stateObj.rotateEnabled) {
-			const sign = g_stateObj.playWindowType === `Reverse` ? -1 : 1;
+			const sign = g_stateObj.playWindowType === `Rev` ? -1 : 1;
 			changeStepRtn(`stepRtn`, 90 * sign);
 			changeStepRtn(`stepHitRtn`, 90 * sign);
 			changeStepRtn(`arrowRtn`, 90 * sign);
@@ -15305,7 +15305,7 @@ const getSelectedSettingList = (_shuffleName) => {
 		((g_appearanceRanges.includes(g_stateObj.appearance) && g_stateObj.filterLock === C_FLG_ON) ? `(${g_hidSudObj.filterPos}%)` : ``),
 		withOptions(g_stateObj.gauge, g_settings.gauges[0]),
 		withOptions(g_stateObj.playWindow, `Default`,
-			`${getStgDetailName(g_stateObj.playWindowType === `Reverse` ? `R-` : ``)}${getStgDetailName(g_stateObj.playWindow)}`),
+			`${getStgDetailName(g_stateObj.playWindowType === `Rev` ? `R-` : ``)}${getStgDetailName(g_stateObj.playWindow)}`),
 		withOptions(g_stateObj.stepArea, `Default`),
 		withOptions(g_stateObj.frzReturn, C_FLG_OFF,
 			`FR:${getStgDetailName(g_stateObj.frzReturn)}(${getStgDetailName(g_stateObj.frzReturnType)})`),

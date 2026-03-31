@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/03/15 (v45.5.5)
+ * Revised : 2026/03/31 (v45.5.8)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1338,7 +1338,7 @@ const g_settings = {
     playWindows: [`Default`, `Stairs`, `Slope`, `Distorted`, `SideScroll`],
     playWindowNum: 0,
 
-    playWindowTypes: [`---`, `Reverse`],
+    playWindowTypes: [`---`, `Rev`],
     playWindowTypeNum: 0,
 
     stepAreas: [`Default`, `Halfway`, `2Step`, `Mismatched`, `R-Mismatched`, `X-Flower`, `Alt-Crossing`],
@@ -1719,7 +1719,7 @@ const motionAlphaToggle = (_obj, _property) => {
  * PlayWindow適用関数
  * - 対応するキー名: g_settings.playWindows
  */
-const g_playWindowDir = () => g_stateObj.playWindowType === `Reverse` ? 1 : -1;
+const g_playWindowDir = () => g_stateObj.playWindowType === `Rev` ? 1 : -1;
 const g_changeStairs = (_rad) => `rotate(${_rad * g_playWindowDir()}deg)`;
 const g_changeSkew = (_rad) => `Skew(${_rad * g_playWindowDir()}deg, ${_rad * g_playWindowDir()}deg) scaleY(0.9)`;
 
@@ -4445,6 +4445,7 @@ const g_lblNameObj = {
     'u_R-': `R-`,
     'u_---': `---`,
     'u_Reverse': `Reverse`,
+    'u_Rev': `Reverse`,
 
     'u_Mirror': `Mirror`,
     'u_X-Mirror': `X-Mirror`,
