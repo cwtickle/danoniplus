@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/03/26
+ * Revised : 2026/04/05
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 44.5.12`;
-const g_revisedDate = `2026/03/26`;
+const g_version = `Ver 44.5.13`;
+const g_revisedDate = `2026/04/05`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -4181,9 +4181,10 @@ const headerConvert = _dosObj => {
 
 	// ローカルストレージに保存済みのColorType設定からDisplayのColor設定を反映
 	if (g_localStorage.colorType !== undefined) {
-		g_colorType = g_localStorage.colorType;
+		g_colorType = g_keycons.colorTypes.concat(g_keycons.colorSelf).includes(g_localStorage.colorType)
+			? g_localStorage.colorType : `Default`;
 		if (obj.colorUse) {
-			g_stateObj.d_color = boolToSwitch(g_keycons.colorDefTypes.findIndex(val => val === g_colorType) !== -1);
+			g_stateObj.d_color = boolToSwitch(g_keycons.colorDefTypes.includes(g_colorType));
 		}
 	}
 
