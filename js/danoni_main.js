@@ -4228,7 +4228,7 @@ const headerConvert = _dosObj => {
 	// ローカルストレージに保存済みのColorType設定からDisplayのColor設定を反映
 	if (g_localStorage.colorType !== undefined) {
 		g_colorType = g_keycons.colorTypes.concat(g_keycons.colorSelf).includes(g_localStorage.colorType)
-			? g_localStorage.colorType : g_keycons.colorTypes[0];
+			? g_localStorage.colorType : `Default`;
 		if (obj.colorUse) {
 			g_stateObj.d_color = boolToSwitch(g_keycons.colorDefTypes.includes(g_colorType));
 		}
