@@ -492,13 +492,7 @@ const parseStorageData = (_keyName, _default = {}) => {
 		return _default;
 	}
 	try {
-		return JSON.parse(storageText, (key, value) => {
-			// 値が文字列の場合のみエスケープを実行
-			if (typeof value === 'string') {
-				return escapeHtml(value, g_escapeStr.escape.concat(g_escapeStr.escapeCode));
-			}
-			return value; // 文字列以外（数値、真偽値、null等）はそのまま返す
-		});
+		return JSON.parse(storageText);
 	} catch (err) {
 		return _default;
 	}
@@ -570,7 +564,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			if (typeof _value === C_TYP_STRING) {
 
 				// カラーコードの色付け処理
-				_value = escapeHtml(_value).replaceAll(`\n`, `<br>`);
+				_value = escapeHtml(_value, g_escapeStr.escape.concat(g_escapeStr.escapeCode)).replaceAll(`\n`, `<br>`);
 				const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 				if (_value === C_FLG_ON) {
 					return `<span style="color:#66ff66">${g_emojiObj.checkMark} ON</span>`;
@@ -4233,9 +4227,10 @@ const headerConvert = _dosObj => {
 
 	// ローカルストレージに保存済みのColorType設定からDisplayのColor設定を反映
 	if (g_localStorage.colorType !== undefined) {
-		g_colorType = g_localStorage.colorType;
+		g_colorType = g_keycons.colorTypes.concat(g_keycons.colorSelf).includes(g_localStorage.colorType)
+			? g_localStorage.colorType : g_keycons.colorTypes[0];
 		if (obj.colorUse) {
-			g_stateObj.d_color = boolToSwitch(g_keycons.colorDefTypes.findIndex(val => val === g_colorType) !== -1);
+			g_stateObj.d_color = boolToSwitch(g_keycons.colorDefTypes.includes(g_colorType));
 		}
 	}
 
