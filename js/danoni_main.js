@@ -492,7 +492,13 @@ const parseStorageData = (_keyName, _default = {}) => {
 		return _default;
 	}
 	try {
-		return JSON.parse(storageText);
+		return JSON.parse(storageText, (key, value) => {
+			// 値が文字列の場合のみエスケープを実行
+			if (typeof value === 'string') {
+				return escapeHtml(value, g_escapeStr.escape.concat(g_escapeStr.escapeCode));
+			}
+			return value; // 文字列以外（数値、真偽値、null等）はそのまま返す
+		});
 	} catch (err) {
 		return _default;
 	}
