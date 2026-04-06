@@ -3732,8 +3732,14 @@ const headerConvert = _dosObj => {
 	}
 
 	// 選曲機能の利用有無
-	obj.packageNames = (_dosObj.packageName || ``).split(`<br>`);
+	const [packageName, bgmUseInitial] = (_dosObj.packageName || ``).split(`,`);
+	obj.packageNames = (packageName || ``).split(`<br>`);
 	obj.musicSelectUse = _dosObj.packageName !== undefined;
+	obj.bgmUseFlg = setVal(bgmUseInitial, C_FLG_OFF, C_TYP_SWITCH) === C_FLG_ON;
+
+	if (!obj.bgmUseFlg) {
+		g_stateObj.bgmMuteFlg = true;
+	}
 
 	// 最小・最大速度の設定
 	obj.minSpeed = Math.round(setVal(_dosObj.minSpeed, C_MIN_SPEED, C_TYP_FLOAT) * 4) / 4;
@@ -5333,21 +5339,29 @@ const titleInit = (_initFlg = false) => {
 				g_lblPosObj.btnMusicSelectRandom, g_cssObj.button_Default),
 			createDivCss2Label(`lblMusicCnt`, ``, g_lblPosObj.lblMusicCnt),
 			createDivCss2Label(`lblCommentM`, ``, g_lblPosObj.lblComment_music),
-
-			createDivCss2Label(`lblBgmVolume`, `BGM Volume`, g_lblPosObj.lblBgmVolume),
-			createCss2Button(`btnBgmMute`, g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker, evt => {
-				g_stateObj.bgmMuteFlg = !g_stateObj.bgmMuteFlg;
-				g_stateObj.bgmMuteFlg ? pauseBGM() : playBGM(0);
-				evt.target.innerHTML = g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker;
-			}, g_lblPosObj.btnBgmMute, g_cssObj.button_Default),
-			createCss2Button(`btnBgmVolume`, `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`, () => setBGMVolume(), {
-				...g_lblPosObj.btnBgmVolume, cxtFunc: () => setBGMVolume(-1),
-			}, g_cssObj.button_Default),
-			createCss2Button(`btnBgmVolumeL`, `<`, () => setBGMVolume(-1),
-				g_lblPosObj.btnBgmVolumeL, g_cssObj.button_Setting),
-			createCss2Button(`btnBgmVolumeR`, `>`, () => setBGMVolume(),
-				g_lblPosObj.btnBgmVolumeR, g_cssObj.button_Setting),
 		);
+
+		if (g_headerObj.bgmUseFlg) {
+			multiAppend(divRoot,
+				createDivCss2Label(`lblBgmVolume`, `BGM Volume`, g_lblPosObj.lblBgmVolume),
+				createCss2Button(`btnBgmMute`, g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker, evt => {
+					g_stateObj.bgmMuteFlg = !g_stateObj.bgmMuteFlg;
+					g_stateObj.bgmMuteFlg ? pauseBGM() : playBGM(0);
+					evt.target.innerHTML = g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker;
+				}, g_lblPosObj.btnBgmMute, g_cssObj.button_Default),
+				createCss2Button(`btnBgmVolume`, `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`, () => setBGMVolume(), {
+					...g_lblPosObj.btnBgmVolume, cxtFunc: () => setBGMVolume(-1),
+				}, g_cssObj.button_Default),
+				createCss2Button(`btnBgmVolumeL`, `<`, () => setBGMVolume(-1),
+					g_lblPosObj.btnBgmVolumeL, g_cssObj.button_Setting),
+				createCss2Button(`btnBgmVolumeR`, `>`, () => setBGMVolume(),
+					g_lblPosObj.btnBgmVolumeR, g_cssObj.button_Setting),
+			);
+		} else {
+			multiAppend(divRoot,
+				createDivCss2Label(`lblBgmVolume`, `BGM Muted ${g_emojiObj.muted}`, g_lblPosObj.btnBgmVolume),
+			);
+		}
 		changeMSelect(0, _initFlg);
 
 		let wheelCnt = 0;
