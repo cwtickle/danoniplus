@@ -6130,7 +6130,8 @@ const changeMSelect = (_num, _initFlg = false) => {
 		lblDiffiInfoM.innerHTML += `${diffiList[j]}<br>`;
 		lblNotesInfoM.innerHTML += `[${notesList[j]}]<br>`;
 	}
-	lblDifNameInfoM.style.fontSize = wUnit(getFontSize2(lblDifNameInfoM.innerHTML, 180, { maxSiz: 12, minSiz: 5 }));
+	lblDifNameInfoM.style.fontSize = wUnit(getFontSize2(lblDifNameInfoM.innerHTML,
+		g_lblPosObj.lblDifNameInfoM.w, { maxSiz: g_lblPosObj.lblDifNameInfoM.siz }));
 	lblDiffiInfoM.style.fontSize = lblDifNameInfoM.style.fontSize;
 	lblCommentInfoM.style.top = `${getStrHeight(lblDifNameInfoM.innerHTML, parseFloat(lblDifNameInfoM.style.fontSize))}px`;
 	lblCommentInfoM.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
