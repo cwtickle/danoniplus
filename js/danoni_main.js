@@ -1445,6 +1445,32 @@ const getStrWidth = (_str, _fontsize, _font) => {
 	return g_ctx.measureText(unEscapeHtml(_str)).width;
 };
 
+const getStrHeight = (_str, _fontsize, _font = getBasicFont()) => {
+	g_ctx.font = `${wUnit(_fontsize)} ${_font}`;
+	const lines = unEscapeHtml(_str).split(`<br>`);
+
+	let totalHeight = 0;
+	const lineGap = 1;
+
+	lines.forEach((line, index) => {
+		const metrics = g_ctx.measureText(line);
+
+		// 基本の高さ（フォントサイズ）を取得
+		// fontBoundingBox が使えれば正確ですが、なければ _fontsize を使用
+		const h = metrics.fontBoundingBoxAscent
+			? (metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent)
+			: _fontsize;
+
+		if (index < lines.length - 1) {
+			totalHeight += h * lineGap; // 途中の行は行間を足す
+		} else {
+			totalHeight += h; // 最終行
+		}
+	});
+
+	return totalHeight;
+};
+
 /**
  * Canvas上で使用する絵文字を取得
  * - HTMLのdiv要素に絵文字を設定することで、Canvas上で使用できるようにする
@@ -3817,6 +3843,7 @@ const headerConvert = _dosObj => {
 		obj.lifeDamages = [];
 		obj.lifeInits = [];
 		obj.creatorNames = [];
+		obj.difficulties = [];
 		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
 
 		difs.forEach(dif => {
@@ -3838,7 +3865,8 @@ const headerConvert = _dosObj => {
 			if (hasVal(difDetails[difpos.Name])) {
 				const difNameInfo = difDetails[difpos.Name].split(`::`);
 				obj.difLabels.push(escapeHtml(difNameInfo[0] ?? `Normal`));
-				obj.creatorNames.push(difNameInfo.length > 1 ? escapeHtml(difNameInfo[1]) : obj.tuning);
+				obj.creatorNames.push(setVal(escapeHtml(difNameInfo[1]), obj.tuning));
+				obj.difficulties.push(setIntVal(difNameInfo[2], `-`));
 			} else {
 				obj.difLabels.push(`Normal`);
 				obj.creatorNames.push(obj.tuning);
@@ -5343,7 +5371,13 @@ const titleInit = (_initFlg = false) => {
 				changeMSelect(Math.floor(Math.random() * (g_headerObj.musicIdxList.length - 1)) + 1),
 				g_lblPosObj.btnMusicSelectRandom, g_cssObj.button_Default),
 			createDivCss2Label(`lblMusicCnt`, ``, g_lblPosObj.lblMusicCnt),
-			createDivCss2Label(`lblCommentM`, ``, g_lblPosObj.lblComment_music),
+		);
+		createEmptySprite(divRoot, `lblCommentM`, g_lblPosObj.lblComment_music);
+		multiAppend(lblCommentM,
+			createDivCss2Label(`lblDifNameInfoM`, ``, g_lblPosObj.lblDifNameInfoM),
+			createDivCss2Label(`lblDiffiInfoM`, ``, g_lblPosObj.lblDiffiInfoM),
+			createDivCss2Label(`lblNotesInfoM`, ``, g_lblPosObj.lblNotesInfoM),
+			createDivCss2Label(`lblCommentInfoM`, ``, g_lblPosObj.lblCommentInfoM),
 		);
 
 		if (g_headerObj.bgmUseFlg) {
@@ -6035,20 +6069,23 @@ const changeMSelect = (_num, _initFlg = false) => {
 
 	// 選択した楽曲に対応する譜面番号、製作者情報、曲長を取得
 	g_headerObj.viewLists = [];
-	const tmpKeyList = [], tmpCreatorList = [], tmpPlayingFrameList = [], tmpBpmList = [];
+	const keyList = [], creatorList = [], playingFrameList = [], bpmList = [], difNameList = [], diffiList = [], notesList = [];
 	const targetIdx = g_headerObj.musicIdxList[(g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 20) % g_headerObj.musicIdxList.length];
 	g_headerObj.musicNos.forEach((val, j) => {
 		if ((g_headerObj.musicGroups?.[val] ?? val) === targetIdx) {
 			g_headerObj.viewLists.push(j);
-			tmpKeyList.push(g_headerObj.keyLabels[j]);
-			tmpCreatorList.push(g_headerObj.creatorNames[j]);
-			tmpPlayingFrameList.push(g_detailObj.playingFrameWithBlank[j]);
-			tmpBpmList.push(g_headerObj.bpms[g_headerObj.musicNos[j]]);
+			keyList.push(g_headerObj.keyLabels[j]);
+			creatorList.push(g_headerObj.creatorNames[j]);
+			playingFrameList.push(g_detailObj.playingFrameWithBlank[j]);
+			bpmList.push(g_headerObj.bpms[g_headerObj.musicNos[j]]);
+			difNameList.push(`${g_headerObj.keyLabels[j]} / ${g_headerObj.difLabels[j]}`);
+			diffiList.push(g_headerObj.difficulties[j]);
+			notesList.push(`Arrows: ${sumData(g_detailObj.arrowCnt[j])}+${sumData(g_detailObj.frzCnt[j])}`);
 		}
 	});
-	const playingFrames = makeDedupliArray(tmpPlayingFrameList.map(val => transFrameToTimer(val))).join(`, `);
-	const bpm = makeDedupliArray(tmpBpmList).join(`, `);
-	const [creatorName, creatorUrl, creatorIdx] = getCreatorInfo(tmpCreatorList);
+	const playingFrames = makeDedupliArray(playingFrameList.map(val => transFrameToTimer(val))).join(`, `);
+	const bpm = makeDedupliArray(bpmList).join(`, `);
+	const [creatorName, creatorUrl, creatorIdx] = getCreatorInfo(creatorList);
 	const creatorLink = creatorIdx >= 0 ?
 		`<a href="${creatorUrl}" target="_blank">${creatorName}</a>` : creatorName;
 
@@ -6063,7 +6100,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 
 	// 選択した楽曲で使われているキー種の一覧を作成
 	deleteChildspriteAll(`keyTitleSprite`);
-	makeDedupliArray(tmpKeyList).sort((a, b) => parseInt(a) - parseInt(b))
+	makeDedupliArray(keyList).sort((a, b) => parseInt(a) - parseInt(b))
 		.forEach((val, j) => keyTitleSprite.appendChild(
 			createDivCss2Label(`btnKeyTitle${val}`, val, { ...g_lblPosObj.btnKeyTitle, x: 10 + j * 40 })));
 
@@ -6080,8 +6117,23 @@ const changeMSelect = (_num, _initFlg = false) => {
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
 	}
 
-	// コメント文の加工
-	lblCommentM.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
+	// 譜面情報、コメント文の加工
+	lblDifNameInfoM.innerHTML = ``;
+	lblDiffiInfoM.innerHTML = ``;
+	lblNotesInfoM.innerHTML = ``;
+	for (let j = 0; j < difNameList.length; j++) {
+		lblDifNameInfoM.innerHTML += `${difNameList[j]}`;
+		if (makeDedupliArray(creatorList).length > 1) {
+			lblDifNameInfoM.innerHTML += ` (${creatorList[j]})`;
+		}
+		lblDifNameInfoM.innerHTML += `<br>`;
+		lblDiffiInfoM.innerHTML += `${diffiList[j]}<br>`;
+		lblNotesInfoM.innerHTML += `[${notesList[j]}]<br>`;
+	}
+	lblDifNameInfoM.style.fontSize = wUnit(getFontSize2(lblDifNameInfoM.innerHTML, 180, { maxSiz: 12, minSiz: 5 }));
+	lblDiffiInfoM.style.fontSize = lblDifNameInfoM.style.fontSize;
+	lblCommentInfoM.style.top = `${getStrHeight(lblDifNameInfoM.innerHTML, parseFloat(lblDifNameInfoM.style.fontSize))}px`;
+	lblCommentInfoM.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
 
 	// BGM再生処理
 	if (!g_stateObj.bgmMuteFlg) {
