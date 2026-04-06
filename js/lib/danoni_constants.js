@@ -4355,6 +4355,8 @@ const g_lblNameObj = {
     dataSave: `Data Save`,
     clickHere: `Click Here!!`,
     comment: `Comment`,
+    bgmVolume: `BGM Volume`,
+    bgmMuted: `BGM Muted`,
 
     nowLoading: `Now Loading...`,
     pleaseWait: `Please Wait...`,

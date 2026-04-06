@@ -3731,11 +3731,16 @@ const headerConvert = _dosObj => {
 		obj.musicTitlesForView[0] = escapeHtmlForArray(getMusicNameMultiLine(alternativeTitle));
 	}
 
-	// 選曲機能の利用有無
-	const [packageName, bgmUseInitial] = (_dosObj.packageName || ``).split(`,`);
+	// 選曲機能の利用有無（最後のカンマ後の文字をBGM利用フラグとして利用）
+	const rawPackageName = _dosObj.packageName || ``;
+	const packageNameParts = rawPackageName.split(`,`);
+	const bgmUseSwitch = setVal(trimStr(packageNameParts.at(-1)), ``, C_TYP_SWITCH);
+	const packageName = bgmUseSwitch === ``
+		? rawPackageName
+		: packageNameParts.slice(0, -1).join(`,`);
 	obj.packageNames = (packageName || ``).split(`<br>`);
 	obj.musicSelectUse = _dosObj.packageName !== undefined;
-	obj.bgmUseFlg = setVal(bgmUseInitial, C_FLG_OFF, C_TYP_SWITCH) === C_FLG_ON;
+	obj.bgmUseFlg = bgmUseSwitch === C_FLG_ON;
 
 	if (!obj.bgmUseFlg) {
 		g_stateObj.bgmMuteFlg = true;
@@ -5343,7 +5348,7 @@ const titleInit = (_initFlg = false) => {
 
 		if (g_headerObj.bgmUseFlg) {
 			multiAppend(divRoot,
-				createDivCss2Label(`lblBgmVolume`, `BGM Volume`, g_lblPosObj.lblBgmVolume),
+				createDivCss2Label(`lblBgmVolume`, g_lblNameObj.bgmVolume, g_lblPosObj.lblBgmVolume),
 				createCss2Button(`btnBgmMute`, g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker, evt => {
 					g_stateObj.bgmMuteFlg = !g_stateObj.bgmMuteFlg;
 					g_stateObj.bgmMuteFlg ? pauseBGM() : playBGM(0);
@@ -5359,7 +5364,7 @@ const titleInit = (_initFlg = false) => {
 			);
 		} else {
 			multiAppend(divRoot,
-				createDivCss2Label(`lblBgmVolume`, `BGM Muted ${g_emojiObj.muted}`, g_lblPosObj.btnBgmVolume),
+				createDivCss2Label(`lblBgmVolume`, `${g_lblNameObj.bgmMuted} ${g_emojiObj.muted}`, g_lblPosObj.btnBgmVolume),
 			);
 		}
 		changeMSelect(0, _initFlg);
