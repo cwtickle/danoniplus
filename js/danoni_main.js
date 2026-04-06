@@ -1213,7 +1213,7 @@ const safeExecuteCustomHooks = (_hookName, _funcArray, ...args) => {
 			}
 		}
 	}
-}
+};
 
 /**
  * 与えられたパスより、キーワードとディレクトリに分割
@@ -1233,7 +1233,7 @@ const getFilePath = (_fileName, _directory = ``) => {
 	}
 	const dirPos = fullPath.lastIndexOf(`/`);
 	return [fullPath.slice(dirPos + 1), fullPath.slice(0, dirPos + 1)];
-}
+};
 
 /**
  * 画像ファイルの存在チェック後、プリロードする処理
@@ -1457,7 +1457,7 @@ const getEmojiForCanvas = _str => {
 	const result = div.innerHTML;
 	div.remove();
 	return result;
-}
+};
 
 /**
  * 指定した横幅に合ったフォントサイズを取得
@@ -1489,7 +1489,7 @@ const getLongestStr = _array => {
 	return _array.reduce((longest, current) => {
 		return current.length > longest.length ? current : longest;
 	}, ``);
-}
+};
 
 /**
  * 補足説明部分のラベル作成
@@ -2098,7 +2098,7 @@ const getCssCustomProperties = () => {
 			// 上記でもNGの場合は何もしない
 		}
 	}
-}
+};
 
 /**
  * 背景・マスク用画像の描画
@@ -3221,7 +3221,7 @@ const getFullMusicUrl = (_musicUrl = ``) => {
 	}
 	const [musicFile, musicPath] = getFilePath(baseMusicUrl, baseDir);
 	return `${musicPath}${musicFile}`;
-}
+};
 
 /**
  * 譜面ファイル読込後処理（譜面詳細情報取得用）
@@ -5698,7 +5698,7 @@ const getCreatorInfo = (_creatorList) => {
 	const creatorIdx = g_headerObj.tuningNames.findIndex(val => val === creatorName);
 	const creatorUrl = creatorIdx >= 0 ? g_headerObj.tuningUrls[creatorIdx] : ``;
 	return [creatorName, creatorUrl, creatorIdx];
-}
+};
 
 /**
  * BGMの停止
@@ -8895,7 +8895,7 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 		setExpandedBtnSiz();
 		createExpandedScView();
 	}
-}
+};
 
 /*-----------------------------------------------------------*/
 /* Scene : KEYCONFIG [orange] */
@@ -10751,7 +10751,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		splitLF(data)?.filter(val => val?.startsWith(_header) && _dosObj[val] !== undefined)
 			.forEach(val => dataStr = dataStr.replace(val, _dosObj[val]));
 		return dataStr;
-	}
+	};
 
 	/**
 	 * 譜面データの優先順配列パターンの取得
@@ -11134,7 +11134,7 @@ const getSpeedFactor = _speed => {
 		return (1 + Math.abs(_speed)) / 2 * Math.sign(_speed);
 	}
 	return _speed;
-}
+};
 
 /**
  * 各フレームごとの速度を格納
@@ -13875,7 +13875,7 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 			}
 		}
 	}
-}
+};
 
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
@@ -14311,7 +14311,7 @@ const judgeArrow = _j => {
 			stepDivHit.classList.value = ``;
 			stepDivHit.classList.add(g_cssObj[`main_step${_resultJdg}`]);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-		}
+		};
 
 		if (g_stateObj.excessive === C_FLG_ON && _difFrame <= g_judgObj.arrowJ[g_judgPosObj.uwan] && _difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
 			// 空押し判定（有効かつ早押し時のみ）
@@ -15354,7 +15354,7 @@ const resultInit = () => {
 				...g_lblPosObj.btnRsGitter, resetFunc: () => openLink(g_linkObj.discord),
 			}, g_cssObj.button_Discord),
 		);
-	}
+	};
 
 	// ボタン描画
 	multiAppend(divRoot,
