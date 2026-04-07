@@ -3907,22 +3907,50 @@ const headerConvert = _dosObj => {
 	}
 
 	// 難易度配色の設定（選曲画面でのみ使用）
+	const normalizeCssColor = _color => {
+		const tmp = document.createElement(`span`);
+		tmp.style.color = ``;
+		tmp.style.color = trimStr(_color ?? ``);
+		return tmp.style.color;
+	};
 	obj.difColorList = [
 		{ threshold: Infinity, color: `` }
 	];
 	if (hasVal(_dosObj.difColor)) {
 		_dosObj.difColor.split(`,`).forEach(val => {
 			const difColorSet = val.split(`/`);
-			obj.difColorList.push({ threshold: setIntVal(difColorSet[0]), color: setVal(difColorSet[1], ``) });
+			obj.difColorList.push({
+				threshold: setIntVal(difColorSet[0]),
+				color: hasVal(difColorSet[1]) ? normalizeCssColor(difColorSet[1]) : ``
+			});
 		})
 	}
 	obj.difColorList.sort((a, b) => a.threshold - b.threshold);
 
+	const sanitizeCustomLink = _link => {
+		try {
+			const raw = trimStr(_link);
+			if (!hasVal(raw)) return undefined;
+			const url = new URL(raw, location.href); // allows relative inputs
+			const allowed = g_isFile ? [`http:`, `https:`, `file:`] : [`http:`, `https:`];
+			return allowed.includes(url.protocol) ? url.href : undefined;
+		} catch {
+			return undefined;
+		}
+	};
 	obj.difCustomLink = [];
 	if (hasVal(_dosObj.difCustomLink)) {
 		splitLF2(_dosObj.difCustomLink).forEach(val => {
-			const linkPair = val.split(`,`);
-			obj.difCustomLink[roundZero(setIntVal(linkPair[0]))] = linkPair[1];
+			const commaPos = val.indexOf(`,`);
+			if (commaPos < 0) return;
+			const idxStr = trimStr(val.slice(0, commaPos));
+			const linkStr = val.slice(commaPos + 1);
+			const idx = setIntVal(idxStr, -1);
+			if (!Number.isFinite(idx) || idx < 0 || idx >= obj.difLabels.length) return;
+			const safeHref = sanitizeCustomLink(linkStr);
+			if (safeHref !== undefined) {
+				obj.difCustomLink[idx] = safeHref;
+			}
 		});
 	}
 
@@ -6167,6 +6195,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 	lblNotesInfoM.style.fontSize = lblDifNameInfoM.style.fontSize;
 	lblCommentInfoM.style.top = `${getStrHeight(lblDifNameInfoM.innerHTML, parseFloat(lblDifNameInfoM.style.fontSize))}px`;
 	lblCommentInfoM.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
+	lblCommentM.scrollTop = 0;
 
 	// BGM再生処理
 	if (!g_stateObj.bgmMuteFlg) {

@@ -302,13 +302,13 @@ const updateWindowSiz = () => {
             overflow: C_DIS_AUTO, whiteSpace: `normal`,
         },
         lblDifNameInfoM: {
-            w: 180, siz: 12, align: C_ALIGN_LEFT, pointerEvents: C_DIS_AUTO,
+            w: 180, siz: 12, align: C_ALIGN_LEFT, pointerEvents: C_DIS_AUTO, lineHeight: `16px`,
         },
         lblDiffiInfoM: {
-            x: 180, w: 20, siz: 12, align: C_ALIGN_RIGHT,
+            x: 180, w: 20, siz: 12, align: C_ALIGN_RIGHT, lineHeight: `16px`,
         },
         lblNotesInfoM: {
-            x: 220, w: 150, siz: 12, align: C_ALIGN_LEFT,
+            x: 220, w: 150, siz: 12, align: C_ALIGN_LEFT, lineHeight: `16px`,
         },
         lblCommentInfoM: {
             siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT, pointerEvents: C_DIS_AUTO,
