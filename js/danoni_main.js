@@ -3866,7 +3866,7 @@ const headerConvert = _dosObj => {
 				const difNameInfo = difDetails[difpos.Name].split(`::`);
 				obj.difLabels.push(escapeHtml(difNameInfo[0] ?? `Normal`));
 				obj.creatorNames.push(setVal(escapeHtml(difNameInfo[1]), obj.tuning));
-				obj.difficulties.push(setIntVal(difNameInfo[2], `-`));
+				obj.difficulties.push(setIntVal(difNameInfo[2], 0));
 			} else {
 				obj.difLabels.push(`Normal`);
 				obj.creatorNames.push(obj.tuning);
@@ -3903,6 +3903,18 @@ const headerConvert = _dosObj => {
 	} else {
 		obj.musicIdxList = [...Array(Math.max(...obj.musicNos) + 1).keys()];
 	}
+
+	// 難易度配色の設定（選曲画面でのみ使用）
+	obj.difColorList = [
+		{ threshold: Infinity, color: `` }
+	];
+	if (hasVal(_dosObj.difColor)) {
+		_dosObj.difColor.split(`,`).forEach(val => {
+			const difColorSet = val.split(`/`);
+			obj.difColorList.push({ threshold: setIntVal(difColorSet[0]), color: setVal(difColorSet[1], ``) });
+		})
+	}
+	obj.difColorList.sort((a, b) => a.threshold - b.threshold);
 
 	// 譜面変更セレクターの利用有無
 	obj.difSelectorUse = getDifSelectorUse(_dosObj.difSelectorUse, obj.viewLists);
@@ -6127,8 +6139,12 @@ const changeMSelect = (_num, _initFlg = false) => {
 			lblDifNameInfoM.innerHTML += ` (${creatorList[j]})`;
 		}
 		lblDifNameInfoM.innerHTML += `<br>`;
-		lblDiffiInfoM.innerHTML += `${diffiList[j]}<br>`;
-		lblNotesInfoM.innerHTML += `[${notesList[j]}]<br>`;
+
+		const difColorPart = g_headerObj.difColorList.find(val => diffiList[j] < val.threshold);
+		lblDiffiInfoM.innerHTML += `${diffiList[j] > 0
+			? `<span style="color:${difColorPart?.color || ''}">${diffiList[j]}</span>`
+			: `-`}<br>`;
+		lblNotesInfoM.innerHTML += `/ ${notesList[j]}<br>`;
 	}
 	lblDifNameInfoM.style.fontSize = wUnit(getFontSize2(lblDifNameInfoM.innerHTML,
 		g_lblPosObj.lblDifNameInfoM.w, { maxSiz: g_lblPosObj.lblDifNameInfoM.siz }));
