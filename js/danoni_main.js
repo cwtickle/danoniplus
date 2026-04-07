@@ -3885,6 +3885,7 @@ const headerConvert = _dosObj => {
 		obj.lifeDamages = [40];
 		obj.lifeInits = [25];
 		obj.creatorNames = [obj.tuning];
+		obj.difficulties = [0];
 	}
 	const keyLists = makeDedupliArray(obj.keyLabels);
 	obj.viewLists = [...Array(obj.keyLabels.length).keys()];
