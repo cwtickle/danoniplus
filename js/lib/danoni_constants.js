@@ -302,7 +302,7 @@ const updateWindowSiz = () => {
             overflow: C_DIS_AUTO, whiteSpace: `normal`,
         },
         lblDifNameInfoM: {
-            w: 180, siz: 12, align: C_ALIGN_LEFT,
+            w: 180, siz: 12, align: C_ALIGN_LEFT, pointerEvents: C_DIS_AUTO,
         },
         lblDiffiInfoM: {
             x: 180, w: 20, siz: 12, align: C_ALIGN_RIGHT,
@@ -311,7 +311,7 @@ const updateWindowSiz = () => {
             x: 220, w: 150, siz: 12, align: C_ALIGN_LEFT,
         },
         lblCommentInfoM: {
-            siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+            siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT, pointerEvents: C_DIS_AUTO,
         },
         btnBgmMute: {
             x: g_btnX() + 90, y: g_sHeight - 105, w: 40, h: 35, siz: 30,

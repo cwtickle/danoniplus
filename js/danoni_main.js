@@ -3918,6 +3918,14 @@ const headerConvert = _dosObj => {
 	}
 	obj.difColorList.sort((a, b) => a.threshold - b.threshold);
 
+	obj.difCustomLink = [];
+	if (hasVal(_dosObj.difCustomLink)) {
+		splitLF2(_dosObj.difCustomLink).forEach(val => {
+			const linkPair = val.split(`,`);
+			obj.difCustomLink[roundZero(setIntVal(linkPair[0]))] = linkPair[1];
+		});
+	}
+
 	// 譜面変更セレクターの利用有無
 	obj.difSelectorUse = getDifSelectorUse(_dosObj.difSelectorUse, obj.viewLists);
 
@@ -6135,12 +6143,17 @@ const changeMSelect = (_num, _initFlg = false) => {
 	lblDifNameInfoM.innerHTML = ``;
 	lblDiffiInfoM.innerHTML = ``;
 	lblNotesInfoM.innerHTML = ``;
+	let notesInfo = ``;
 	for (let j = 0; j < difNameList.length; j++) {
-		lblDifNameInfoM.innerHTML += `${difNameList[j]}`;
+		let noteInfo = `${difNameList[j]}`;
 		if (makeDedupliArray(creatorList).length > 1) {
-			lblDifNameInfoM.innerHTML += ` (${creatorList[j]})`;
+			noteInfo += ` (${creatorList[j]})`;
 		}
+		lblDifNameInfoM.innerHTML += g_headerObj.difCustomLink[g_headerObj.viewLists[j]] !== undefined
+			? `<a href="${g_headerObj.difCustomLink[g_headerObj.viewLists[j]]}" target="_blank">${noteInfo}</a>`
+			: noteInfo;
 		lblDifNameInfoM.innerHTML += `<br>`;
+		notesInfo += `${noteInfo}<br>`;
 
 		const difColorPart = g_headerObj.difColorList.find(val => diffiList[j] < val.threshold);
 		lblDiffiInfoM.innerHTML += `${diffiList[j] > 0
@@ -6148,9 +6161,10 @@ const changeMSelect = (_num, _initFlg = false) => {
 			: `-`}<br>`;
 		lblNotesInfoM.innerHTML += `/ ${notesList[j]}<br>`;
 	}
-	lblDifNameInfoM.style.fontSize = wUnit(getFontSize2(lblDifNameInfoM.innerHTML,
+	lblDifNameInfoM.style.fontSize = wUnit(getFontSize2(notesInfo,
 		g_lblPosObj.lblDifNameInfoM.w, { maxSiz: g_lblPosObj.lblDifNameInfoM.siz }));
 	lblDiffiInfoM.style.fontSize = lblDifNameInfoM.style.fontSize;
+	lblNotesInfoM.style.fontSize = lblDifNameInfoM.style.fontSize;
 	lblCommentInfoM.style.top = `${getStrHeight(lblDifNameInfoM.innerHTML, parseFloat(lblDifNameInfoM.style.fontSize))}px`;
 	lblCommentInfoM.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
 
