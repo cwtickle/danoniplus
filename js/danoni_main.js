@@ -3870,6 +3870,7 @@ const headerConvert = _dosObj => {
 			} else {
 				obj.difLabels.push(`Normal`);
 				obj.creatorNames.push(obj.tuning);
+				obj.difficulties.push(0);
 			}
 
 			// 初期速度
