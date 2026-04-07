@@ -6178,7 +6178,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 			noteInfo += ` (${creatorList[j]})`;
 		}
 		lblDifNameInfoM.innerHTML += g_headerObj.difCustomLink[g_headerObj.viewLists[j]] !== undefined
-			? `<a href="${g_headerObj.difCustomLink[g_headerObj.viewLists[j]]}" target="_blank">${noteInfo}</a>`
+			? `<a href="${g_headerObj.difCustomLink[g_headerObj.viewLists[j]]}" target="_blank" rel="noopener noreferrer">${noteInfo}</a>`
 			: noteInfo;
 		lblDifNameInfoM.innerHTML += `<br>`;
 		notesInfo += `${noteInfo}<br>`;
