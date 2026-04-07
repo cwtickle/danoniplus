@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/04/05
+ * Revised : 2026/04/07
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 46.5.3`;
-const g_revisedDate = `2026/04/05`;
+const g_version = `Ver 46.6.0`;
+const g_revisedDate = `2026/04/07`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1213,7 +1213,7 @@ const safeExecuteCustomHooks = (_hookName, _funcArray, ...args) => {
 			}
 		}
 	}
-}
+};
 
 /**
  * 与えられたパスより、キーワードとディレクトリに分割
@@ -1233,7 +1233,7 @@ const getFilePath = (_fileName, _directory = ``) => {
 	}
 	const dirPos = fullPath.lastIndexOf(`/`);
 	return [fullPath.slice(dirPos + 1), fullPath.slice(0, dirPos + 1)];
-}
+};
 
 /**
  * 画像ファイルの存在チェック後、プリロードする処理
@@ -1445,6 +1445,32 @@ const getStrWidth = (_str, _fontsize, _font) => {
 	return g_ctx.measureText(unEscapeHtml(_str)).width;
 };
 
+const getStrHeight = (_str, _fontsize, _font = getBasicFont()) => {
+	g_ctx.font = `${wUnit(_fontsize)} ${_font}`;
+	const lines = unEscapeHtml(_str).split(`<br>`);
+
+	let totalHeight = 0;
+	const lineGap = 1;
+
+	lines.forEach((line, index) => {
+		const metrics = g_ctx.measureText(line);
+
+		// 基本の高さ（フォントサイズ）を取得
+		// fontBoundingBox が使えれば正確ですが、なければ _fontsize を使用
+		const h = metrics.fontBoundingBoxAscent
+			? (metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent)
+			: _fontsize;
+
+		if (index < lines.length - 1) {
+			totalHeight += h * lineGap; // 途中の行は行間を足す
+		} else {
+			totalHeight += h; // 最終行
+		}
+	});
+
+	return totalHeight;
+};
+
 /**
  * Canvas上で使用する絵文字を取得
  * - HTMLのdiv要素に絵文字を設定することで、Canvas上で使用できるようにする
@@ -1457,7 +1483,7 @@ const getEmojiForCanvas = _str => {
 	const result = div.innerHTML;
 	div.remove();
 	return result;
-}
+};
 
 /**
  * 指定した横幅に合ったフォントサイズを取得
@@ -1489,7 +1515,7 @@ const getLongestStr = _array => {
 	return _array.reduce((longest, current) => {
 		return current.length > longest.length ? current : longest;
 	}, ``);
-}
+};
 
 /**
  * 補足説明部分のラベル作成
@@ -2098,7 +2124,7 @@ const getCssCustomProperties = () => {
 			// 上記でもNGの場合は何もしない
 		}
 	}
-}
+};
 
 /**
  * 背景・マスク用画像の描画
@@ -3221,7 +3247,7 @@ const getFullMusicUrl = (_musicUrl = ``) => {
 	}
 	const [musicFile, musicPath] = getFilePath(baseMusicUrl, baseDir);
 	return `${musicPath}${musicFile}`;
-}
+};
 
 /**
  * 譜面ファイル読込後処理（譜面詳細情報取得用）
@@ -3731,9 +3757,20 @@ const headerConvert = _dosObj => {
 		obj.musicTitlesForView[0] = escapeHtmlForArray(getMusicNameMultiLine(alternativeTitle));
 	}
 
-	// 選曲機能の利用有無
-	obj.packageNames = (_dosObj.packageName || ``).split(`<br>`);
+	// 選曲機能の利用有無（最後のカンマ後の文字をBGM利用フラグとして利用）
+	const rawPackageName = _dosObj.packageName || ``;
+	const packageNameParts = rawPackageName.split(`,`);
+	const bgmUseSwitch = setVal(trimStr(packageNameParts.at(-1)), ``, C_TYP_SWITCH);
+	const packageName = bgmUseSwitch === ``
+		? rawPackageName
+		: packageNameParts.slice(0, -1).join(`,`);
+	obj.packageNames = (packageName || ``).split(`<br>`);
 	obj.musicSelectUse = _dosObj.packageName !== undefined;
+	obj.bgmUseFlg = bgmUseSwitch === C_FLG_ON;
+
+	if (!obj.bgmUseFlg) {
+		g_stateObj.bgmMuteFlg = true;
+	}
 
 	// 最小・最大速度の設定
 	obj.minSpeed = Math.round(setVal(_dosObj.minSpeed, C_MIN_SPEED, C_TYP_FLOAT) * 4) / 4;
@@ -3806,6 +3843,7 @@ const headerConvert = _dosObj => {
 		obj.lifeDamages = [];
 		obj.lifeInits = [];
 		obj.creatorNames = [];
+		obj.difficulties = [];
 		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
 
 		difs.forEach(dif => {
@@ -3827,10 +3865,12 @@ const headerConvert = _dosObj => {
 			if (hasVal(difDetails[difpos.Name])) {
 				const difNameInfo = difDetails[difpos.Name].split(`::`);
 				obj.difLabels.push(escapeHtml(difNameInfo[0] ?? `Normal`));
-				obj.creatorNames.push(difNameInfo.length > 1 ? escapeHtml(difNameInfo[1]) : obj.tuning);
+				obj.creatorNames.push(setVal(escapeHtml(difNameInfo[1]), obj.tuning));
+				obj.difficulties.push(setIntVal(difNameInfo[2], 0));
 			} else {
 				obj.difLabels.push(`Normal`);
 				obj.creatorNames.push(obj.tuning);
+				obj.difficulties.push(0);
 			}
 
 			// 初期速度
@@ -3846,6 +3886,7 @@ const headerConvert = _dosObj => {
 		obj.lifeDamages = [40];
 		obj.lifeInits = [25];
 		obj.creatorNames = [obj.tuning];
+		obj.difficulties = [0];
 	}
 	const keyLists = makeDedupliArray(obj.keyLabels);
 	obj.viewLists = [...Array(obj.keyLabels.length).keys()];
@@ -3863,6 +3904,54 @@ const headerConvert = _dosObj => {
 		obj.musicIdxList = makeDedupliArray(obj.musicGroups);
 	} else {
 		obj.musicIdxList = [...Array(Math.max(...obj.musicNos) + 1).keys()];
+	}
+
+	// 難易度配色の設定（選曲画面でのみ使用）
+	const normalizeCssColor = _color => {
+		const tmp = document.createElement(`span`);
+		tmp.style.color = ``;
+		tmp.style.color = trimStr(_color ?? ``);
+		return tmp.style.color;
+	};
+	obj.difColorList = [
+		{ threshold: Infinity, color: `` }
+	];
+	if (hasVal(_dosObj.difColor)) {
+		_dosObj.difColor.split(`,`).forEach(val => {
+			const difColorSet = val.split(`/`);
+			obj.difColorList.push({
+				threshold: setIntVal(difColorSet[0]),
+				color: hasVal(difColorSet[1]) ? normalizeCssColor(difColorSet[1]) : ``
+			});
+		})
+	}
+	obj.difColorList.sort((a, b) => a.threshold - b.threshold);
+
+	const sanitizeCustomLink = _link => {
+		try {
+			const raw = trimStr(_link);
+			if (!hasVal(raw)) return undefined;
+			const url = new URL(raw, location.href); // allows relative inputs
+			const allowed = g_isFile ? [`http:`, `https:`, `file:`] : [`http:`, `https:`];
+			return allowed.includes(url.protocol) ? url.href : undefined;
+		} catch {
+			return undefined;
+		}
+	};
+	obj.difCustomLink = [];
+	if (hasVal(_dosObj.difCustomLink)) {
+		splitLF2(_dosObj.difCustomLink).forEach(val => {
+			const commaPos = val.indexOf(`,`);
+			if (commaPos < 0) return;
+			const idxStr = trimStr(val.slice(0, commaPos));
+			const linkStr = val.slice(commaPos + 1);
+			const idx = setIntVal(idxStr, -1);
+			if (!Number.isFinite(idx) || idx < 0 || idx >= obj.difLabels.length) return;
+			const safeHref = sanitizeCustomLink(linkStr);
+			if (safeHref !== undefined) {
+				obj.difCustomLink[idx] = safeHref;
+			}
+		});
 	}
 
 	// 譜面変更セレクターの利用有無
@@ -5332,22 +5421,36 @@ const titleInit = (_initFlg = false) => {
 				changeMSelect(Math.floor(Math.random() * (g_headerObj.musicIdxList.length - 1)) + 1),
 				g_lblPosObj.btnMusicSelectRandom, g_cssObj.button_Default),
 			createDivCss2Label(`lblMusicCnt`, ``, g_lblPosObj.lblMusicCnt),
-			createDivCss2Label(`lblCommentM`, ``, g_lblPosObj.lblComment_music),
-
-			createDivCss2Label(`lblBgmVolume`, `BGM Volume`, g_lblPosObj.lblBgmVolume),
-			createCss2Button(`btnBgmMute`, g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker, evt => {
-				g_stateObj.bgmMuteFlg = !g_stateObj.bgmMuteFlg;
-				g_stateObj.bgmMuteFlg ? pauseBGM() : playBGM(0);
-				evt.target.innerHTML = g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker;
-			}, g_lblPosObj.btnBgmMute, g_cssObj.button_Default),
-			createCss2Button(`btnBgmVolume`, `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`, () => setBGMVolume(), {
-				...g_lblPosObj.btnBgmVolume, cxtFunc: () => setBGMVolume(-1),
-			}, g_cssObj.button_Default),
-			createCss2Button(`btnBgmVolumeL`, `<`, () => setBGMVolume(-1),
-				g_lblPosObj.btnBgmVolumeL, g_cssObj.button_Setting),
-			createCss2Button(`btnBgmVolumeR`, `>`, () => setBGMVolume(),
-				g_lblPosObj.btnBgmVolumeR, g_cssObj.button_Setting),
 		);
+		createEmptySprite(divRoot, `lblCommentM`, g_lblPosObj.lblComment_music);
+		multiAppend(lblCommentM,
+			createDivCss2Label(`lblDifNameInfoM`, ``, g_lblPosObj.lblDifNameInfoM),
+			createDivCss2Label(`lblDiffiInfoM`, ``, g_lblPosObj.lblDiffiInfoM),
+			createDivCss2Label(`lblNotesInfoM`, ``, g_lblPosObj.lblNotesInfoM),
+			createDivCss2Label(`lblCommentInfoM`, ``, g_lblPosObj.lblCommentInfoM),
+		);
+
+		if (g_headerObj.bgmUseFlg) {
+			multiAppend(divRoot,
+				createDivCss2Label(`lblBgmVolume`, g_lblNameObj.bgmVolume, g_lblPosObj.lblBgmVolume),
+				createCss2Button(`btnBgmMute`, g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker, evt => {
+					g_stateObj.bgmMuteFlg = !g_stateObj.bgmMuteFlg;
+					g_stateObj.bgmMuteFlg ? pauseBGM() : playBGM(0);
+					evt.target.innerHTML = g_stateObj.bgmMuteFlg ? g_emojiObj.muted : g_emojiObj.speaker;
+				}, g_lblPosObj.btnBgmMute, g_cssObj.button_Default),
+				createCss2Button(`btnBgmVolume`, `${g_stateObj.bgmVolume}${g_lblNameObj.percent}`, () => setBGMVolume(), {
+					...g_lblPosObj.btnBgmVolume, cxtFunc: () => setBGMVolume(-1),
+				}, g_cssObj.button_Default),
+				createCss2Button(`btnBgmVolumeL`, `<`, () => setBGMVolume(-1),
+					g_lblPosObj.btnBgmVolumeL, g_cssObj.button_Setting),
+				createCss2Button(`btnBgmVolumeR`, `>`, () => setBGMVolume(),
+					g_lblPosObj.btnBgmVolumeR, g_cssObj.button_Setting),
+			);
+		} else {
+			multiAppend(divRoot,
+				createDivCss2Label(`lblBgmVolume`, `${g_lblNameObj.bgmMuted} ${g_emojiObj.muted}`, g_lblPosObj.btnBgmVolume),
+			);
+		}
 		changeMSelect(0, _initFlg);
 
 		let wheelCnt = 0;
@@ -5698,7 +5801,7 @@ const getCreatorInfo = (_creatorList) => {
 	const creatorIdx = g_headerObj.tuningNames.findIndex(val => val === creatorName);
 	const creatorUrl = creatorIdx >= 0 ? g_headerObj.tuningUrls[creatorIdx] : ``;
 	return [creatorName, creatorUrl, creatorIdx];
-}
+};
 
 /**
  * BGMの停止
@@ -6016,20 +6119,23 @@ const changeMSelect = (_num, _initFlg = false) => {
 
 	// 選択した楽曲に対応する譜面番号、製作者情報、曲長を取得
 	g_headerObj.viewLists = [];
-	const tmpKeyList = [], tmpCreatorList = [], tmpPlayingFrameList = [], tmpBpmList = [];
+	const keyList = [], creatorList = [], playingFrameList = [], bpmList = [], difNameList = [], diffiList = [], notesList = [];
 	const targetIdx = g_headerObj.musicIdxList[(g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 20) % g_headerObj.musicIdxList.length];
 	g_headerObj.musicNos.forEach((val, j) => {
 		if ((g_headerObj.musicGroups?.[val] ?? val) === targetIdx) {
 			g_headerObj.viewLists.push(j);
-			tmpKeyList.push(g_headerObj.keyLabels[j]);
-			tmpCreatorList.push(g_headerObj.creatorNames[j]);
-			tmpPlayingFrameList.push(g_detailObj.playingFrameWithBlank[j]);
-			tmpBpmList.push(g_headerObj.bpms[g_headerObj.musicNos[j]]);
+			keyList.push(g_headerObj.keyLabels[j]);
+			creatorList.push(g_headerObj.creatorNames[j]);
+			playingFrameList.push(g_detailObj.playingFrameWithBlank[j]);
+			bpmList.push(g_headerObj.bpms[g_headerObj.musicNos[j]]);
+			difNameList.push(`${g_headerObj.keyLabels[j]} / ${g_headerObj.difLabels[j]}`);
+			diffiList.push(g_headerObj.difficulties[j]);
+			notesList.push(`Arrows: ${sumData(g_detailObj.arrowCnt[j])}+${sumData(g_detailObj.frzCnt[j])}`);
 		}
 	});
-	const playingFrames = makeDedupliArray(tmpPlayingFrameList.map(val => transFrameToTimer(val))).join(`, `);
-	const bpm = makeDedupliArray(tmpBpmList).join(`, `);
-	const [creatorName, creatorUrl, creatorIdx] = getCreatorInfo(tmpCreatorList);
+	const playingFrames = makeDedupliArray(playingFrameList.map(val => transFrameToTimer(val))).join(`, `);
+	const bpm = makeDedupliArray(bpmList).join(`, `);
+	const [creatorName, creatorUrl, creatorIdx] = getCreatorInfo(creatorList);
 	const creatorLink = creatorIdx >= 0 ?
 		`<a href="${creatorUrl}" target="_blank">${creatorName}</a>` : creatorName;
 
@@ -6044,7 +6150,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 
 	// 選択した楽曲で使われているキー種の一覧を作成
 	deleteChildspriteAll(`keyTitleSprite`);
-	makeDedupliArray(tmpKeyList).sort((a, b) => parseInt(a) - parseInt(b))
+	makeDedupliArray(keyList).sort((a, b) => parseInt(a) - parseInt(b))
 		.forEach((val, j) => keyTitleSprite.appendChild(
 			createDivCss2Label(`btnKeyTitle${val}`, val, { ...g_lblPosObj.btnKeyTitle, x: 10 + j * 40 })));
 
@@ -6061,8 +6167,35 @@ const changeMSelect = (_num, _initFlg = false) => {
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
 	}
 
-	// コメント文の加工
-	lblCommentM.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
+	// 譜面情報、コメント文の加工
+	lblDifNameInfoM.innerHTML = ``;
+	lblDiffiInfoM.innerHTML = ``;
+	lblNotesInfoM.innerHTML = ``;
+	let notesInfo = ``;
+	for (let j = 0; j < difNameList.length; j++) {
+		let noteInfo = `${difNameList[j]}`;
+		if (makeDedupliArray(creatorList).length > 1) {
+			noteInfo += ` (${creatorList[j]})`;
+		}
+		lblDifNameInfoM.innerHTML += g_headerObj.difCustomLink[g_headerObj.viewLists[j]] !== undefined
+			? `<a href="${g_headerObj.difCustomLink[g_headerObj.viewLists[j]]}" target="_blank" rel="noopener noreferrer">${noteInfo}</a>`
+			: noteInfo;
+		lblDifNameInfoM.innerHTML += `<br>`;
+		notesInfo += `${noteInfo}<br>`;
+
+		const difColorPart = g_headerObj.difColorList.find(val => diffiList[j] < val.threshold);
+		lblDiffiInfoM.innerHTML += `${diffiList[j] > 0
+			? `<span style="color:${difColorPart?.color || ''}">${diffiList[j]}</span>`
+			: `-`}<br>`;
+		lblNotesInfoM.innerHTML += `/ ${notesList[j]}<br>`;
+	}
+	lblDifNameInfoM.style.fontSize = wUnit(getFontSize2(notesInfo,
+		g_lblPosObj.lblDifNameInfoM.w, { maxSiz: g_lblPosObj.lblDifNameInfoM.siz }));
+	lblDiffiInfoM.style.fontSize = lblDifNameInfoM.style.fontSize;
+	lblNotesInfoM.style.fontSize = lblDifNameInfoM.style.fontSize;
+	lblCommentInfoM.style.top = `${getStrHeight(lblDifNameInfoM.innerHTML, parseFloat(lblDifNameInfoM.style.fontSize))}px`;
+	lblCommentInfoM.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
+	lblCommentM.scrollTop = 0;
 
 	// BGM再生処理
 	if (!g_stateObj.bgmMuteFlg) {
@@ -8895,7 +9028,7 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 		setExpandedBtnSiz();
 		createExpandedScView();
 	}
-}
+};
 
 /*-----------------------------------------------------------*/
 /* Scene : KEYCONFIG [orange] */
@@ -10751,7 +10884,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		splitLF(data)?.filter(val => val?.startsWith(_header) && _dosObj[val] !== undefined)
 			.forEach(val => dataStr = dataStr.replace(val, _dosObj[val]));
 		return dataStr;
-	}
+	};
 
 	/**
 	 * 譜面データの優先順配列パターンの取得
@@ -11134,7 +11267,7 @@ const getSpeedFactor = _speed => {
 		return (1 + Math.abs(_speed)) / 2 * Math.sign(_speed);
 	}
 	return _speed;
-}
+};
 
 /**
  * 各フレームごとの速度を格納
@@ -13875,7 +14008,7 @@ const changeAppearanceBar = (_num = 10, _dirPlus = 2) => {
 			}
 		}
 	}
-}
+};
 
 /**
  * アルファマスクの再描画 (Appearance: Hidden+, Sudden+ 用)
@@ -14311,7 +14444,7 @@ const judgeArrow = _j => {
 			stepDivHit.classList.value = ``;
 			stepDivHit.classList.add(g_cssObj[`main_step${_resultJdg}`]);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
-		}
+		};
 
 		if (g_stateObj.excessive === C_FLG_ON && _difFrame <= g_judgObj.arrowJ[g_judgPosObj.uwan] && _difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
 			// 空押し判定（有効かつ早押し時のみ）
@@ -15354,7 +15487,7 @@ const resultInit = () => {
 				...g_lblPosObj.btnRsGitter, resetFunc: () => openLink(g_linkObj.discord),
 			}, g_cssObj.button_Discord),
 		);
-	}
+	};
 
 	// ボタン描画
 	multiAppend(divRoot,

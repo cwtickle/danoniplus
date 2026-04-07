@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/03/31 (v46.5.2)
+ * Revised : 2026/04/07 (v46.6.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -300,6 +300,18 @@ const updateWindowSiz = () => {
             x: g_btnX(1 / 4) + 10, y: g_sHeight / 2 + 15, w: g_btnWidth(7 / 12) - 5, h: 100,
             siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
             overflow: C_DIS_AUTO, whiteSpace: `normal`,
+        },
+        lblDifNameInfoM: {
+            w: 180, siz: 12, align: C_ALIGN_LEFT, pointerEvents: C_DIS_AUTO, lineHeight: `16px`,
+        },
+        lblDiffiInfoM: {
+            x: 180, w: 20, siz: 12, align: C_ALIGN_RIGHT, lineHeight: `16px`, fontWeight: `bold`,
+        },
+        lblNotesInfoM: {
+            x: 220, w: 150, siz: 12, align: C_ALIGN_LEFT, lineHeight: `16px`,
+        },
+        lblCommentInfoM: {
+            siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT, pointerEvents: C_DIS_AUTO,
         },
         btnBgmMute: {
             x: g_btnX() + 90, y: g_sHeight - 105, w: 40, h: 35, siz: 30,
@@ -4355,6 +4367,8 @@ const g_lblNameObj = {
     dataSave: `Data Save`,
     clickHere: `Click Here!!`,
     comment: `Comment`,
+    bgmVolume: `BGM Volume`,
+    bgmMuted: `BGM Muted`,
 
     nowLoading: `Now Loading...`,
     pleaseWait: `Please Wait...`,
