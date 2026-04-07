@@ -305,7 +305,7 @@ const updateWindowSiz = () => {
             w: 180, siz: 12, align: C_ALIGN_LEFT, pointerEvents: C_DIS_AUTO, lineHeight: `16px`,
         },
         lblDiffiInfoM: {
-            x: 180, w: 20, siz: 12, align: C_ALIGN_RIGHT, lineHeight: `16px`,
+            x: 180, w: 20, siz: 12, align: C_ALIGN_RIGHT, lineHeight: `16px`, fontWeight: `bold`,
         },
         lblNotesInfoM: {
             x: 220, w: 150, siz: 12, align: C_ALIGN_LEFT, lineHeight: `16px`,
