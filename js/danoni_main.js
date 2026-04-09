@@ -15085,8 +15085,10 @@ const resultInit = () => {
 	const transitionData = g_resultObj.gaugeTransition;
 
 	for (let i = 0; i < transitionData?.length; i++) {
-		frame.push(transitionData[i][0] - startFrame);
-		life.push(transitionData[i][1]);
+		if (i === 0 || transitionData[i - 1][1] !== transitionData[i][1]) {
+			frame.push(transitionData[i][0] - startFrame);
+			life.push(transitionData[i][1]);
+		}
 	}
 
 	frame.push(playingFrame);
@@ -15097,11 +15099,11 @@ const resultInit = () => {
 	context.lineWidth = 2;
 
 	let preX, preY;
-	const borderY = g_limitObj.gaugeTransitionHeight - g_workObj.lifeBorder * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
+	const borderY = (g_limitObj.gaugeTransitionHeight - 2) - g_workObj.lifeBorder * (g_limitObj.gaugeTransitionHeight - 2) / g_headerObj.maxLifeVal + 1;
 
 	for (let i = 0; i < frame.length; i++) {
 		const x = frame[i] * g_limitObj.gaugeTransitionWidth / playingFrame;
-		const y = g_limitObj.gaugeTransitionHeight - life[i] * g_limitObj.gaugeTransitionHeight / g_headerObj.maxLifeVal;
+		const y = (g_limitObj.gaugeTransitionHeight - 2) - life[i] * (g_limitObj.gaugeTransitionHeight - 2) / g_headerObj.maxLifeVal + 1;
 
 		if (i === 0) {
 			context.beginPath();
