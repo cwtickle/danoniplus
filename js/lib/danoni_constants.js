@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/04/07 (v46.6.0)
+ * Revised : 2026/04/12 (v46.6.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -5034,6 +5034,12 @@ const g_errorCache = {
     'g_customJsObj.titleEnterFrame': [],
     'g_customJsObj.mainEnterFrame': [],
     'g_customJsObj.resultEnterFrame': [],
+};
+
+const g_errorFrames = {
+    'g_customJsObj.titleEnterFrame': () => g_scoreObj.titleFrameNum,
+    'g_customJsObj.mainEnterFrame': () => g_scoreObj.baseFrame,
+    'g_customJsObj.resultEnterFrame': () => g_scoreObj.resultFrameNum,
 };
 
 /**

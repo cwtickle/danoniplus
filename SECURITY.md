@@ -18,8 +18,8 @@
 
 | Version      | Supported          | Latest Version                                                                 | Logs                                                                   | First Release | End of Support   |
 | ------------ | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ------------- | ---------------- |
-| v46          | :heavy_check_mark: | [v46.6.1](https://github.com/cwtickle/danoniplus/releases/tag/v46.6.1)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2026-03-12    | (At Release v49) |
-| v45          | :heavy_check_mark: | [v45.5.10](https://github.com/cwtickle/danoniplus/releases/tag/v45.5.10)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v45) | 2026-02-26    | (At Release v48) |
+| v46          | :heavy_check_mark: | [v46.6.2](https://github.com/cwtickle/danoniplus/releases/tag/v46.6.2)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2026-03-12    | (At Release v49) |
+| v45          | :heavy_check_mark: | [v45.5.11](https://github.com/cwtickle/danoniplus/releases/tag/v45.5.11)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v45) | 2026-02-26    | (At Release v48) |
 | v44 :anchor: | :heavy_check_mark: | [v44.5.14](https://github.com/cwtickle/danoniplus/releases/tag/v44.5.14)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v44) | 2026-02-07    | (At Release v53) |
 | v43          | :x:                | [v43.6.12 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v43.6.12)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v43) | 2025-09-15    | 2026-03-12 |
 | v42          | :x:                | [v42.5.13 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v42.5.13)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v42) | 2025-05-24    | 2026-02-26 |
