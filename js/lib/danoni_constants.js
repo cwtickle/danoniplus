@@ -5036,6 +5036,12 @@ const g_errorCache = {
     'g_customJsObj.resultEnterFrame': [],
 };
 
+const g_errorFrames = {
+    'g_customJsObj.titleEnterFrame': () => g_scoreObj.titleFrameNum,
+    'g_customJsObj.mainEnterFrame': () => g_scoreObj.baseFrame,
+    'g_customJsObj.resultEnterFrame': () => g_scoreObj.resultFrameNum,
+};
+
 /**
  * 従来のカスタム関数をg_customJsObj, g_skinJsObjへ追加
  * - customjsファイルを読み込んだ直後にこの関数を呼び出している
