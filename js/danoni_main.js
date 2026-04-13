@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/04/12
+ * Revised : 2026/04/13
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 46.6.2`;
-const g_revisedDate = `2026/04/12`;
+const g_version = `Ver 46.7.0`;
+const g_revisedDate = `2026/04/13`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1202,6 +1202,7 @@ const safeExecuteCustomHooks = (_hookName, _funcArray, ...args) => {
 				console.group(`${unEscapeEmoji(g_emojiObj.crossMark)} Custom Function Error: [${_hookName}] (Index: ${index}${func.name ? `, Func: ${func.name}` : ``})`);
 				console.error(e);
 				console.groupEnd();
+				makeInfoWindow(g_msgInfoObj.W_0051, `leftToRightFade`);
 
 			} else if (errorCache && !errorCache[index]?.has(func)) {
 				// ループがある場合のエラー処理（初回のみ）
@@ -1210,6 +1211,7 @@ const safeExecuteCustomHooks = (_hookName, _funcArray, ...args) => {
 				console.groupEnd();
 				errorCache[index] = new Set();
 				errorCache[index].add(func);
+				makeInfoWindow(g_msgInfoObj.W_0051, `leftToRightFade`);
 			}
 		}
 	}
@@ -12014,6 +12016,7 @@ const getArrowSettings = () => {
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
 	g_workObj.currentLifeState = ``;
+	g_errorCache['g_customJsObj.mainEnterFrame'] = [];
 
 	const rotateBy = (val, delta) => {
 		// numeric
