@@ -4254,6 +4254,7 @@ const g_lang_msgInfoObj = {
         W_0031: `セーフモード適用中です。ローカルストレージ情報を使わない設定になっています。<br>
         「Data Management」から解除が可能です。(W-0031)`,
         W_0041: `選曲単品モードが有効になっています。<br><a href="{0}">[ 選曲画面へ戻る ]</a>`,
+        W_0051: `カスタムJS実行中にエラーが発生しました。処理は続行します。<br>繰り返し発生する場合はサイト管理者へ連絡してください。`,
 
         E_0011: `アーティスト名が未入力です。(E-0011)`,
         E_0012: `曲名情報が未設定です。(E-0012)<br>
@@ -4301,6 +4302,7 @@ const g_lang_msgInfoObj = {
         The setting is set to not use local storage information <br>
         and can be removed from Data Management. (W-0031)`,
         W_0041: `The single music selection mode is enabled.<br><a href="{0}">[ Return to the original page ]</a>`,
+        W_0051: `An error occurred while executing custom JavaScript. Processing will continue.<br> If this error persists, please contact the site owner.`,
 
         E_0011: `The artist name is not set. (E-0011)`,
         E_0012: `The song title information is not set. (E-0012)<br>
