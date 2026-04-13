@@ -4302,7 +4302,7 @@ const g_lang_msgInfoObj = {
         The setting is set to not use local storage information <br>
         and can be removed from Data Management. (W-0031)`,
         W_0041: `The single music selection mode is enabled.<br><a href="{0}">[ Return to the original page ]</a>`,
-        W_0051: `An error occurred while executing custom JavaScript. Processing will continue.<br> If this error persists, please contact the site owner.`,
+        W_0051: `An error occurred while executing custom JavaScript. Processing will continue.<br>If this error persists, please contact the site owner.`,
 
         E_0011: `The artist name is not set. (E-0011)`,
         E_0012: `The song title information is not set. (E-0012)<br>
