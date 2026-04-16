@@ -4393,8 +4393,8 @@ const headerConvert = _dosObj => {
 		obj.playingLayout = g_presetObj.playingLayout ?? true;
 	}
 
-	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
-	obj.justFrames = (g_isLocal) ? 0 : 1;
+	// ジャストフレームの設定 (ローカル/デバッグ時: 0フレーム, 通常時: 1フレーム以内)
+	obj.justFrames = g_isDebug ? 0 : 1;
 
 	// リザルトデータのカスタマイズ
 	obj.resultFormat = escapeHtmlForEnabledTag(_dosObj.resultFormat ?? g_presetObj.resultFormat ?? g_templateObj.resultFormatDf);
