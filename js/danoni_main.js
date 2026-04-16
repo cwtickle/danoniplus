@@ -4394,7 +4394,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
-	obj.justFrames = (g_isLocal) ? 0 : 1;
+	obj.justFrames = (g_isLocal || g_remoteFlg) ? 0 : 1;
 
 	// リザルトデータのカスタマイズ
 	obj.resultFormat = escapeHtmlForEnabledTag(_dosObj.resultFormat ?? g_presetObj.resultFormat ?? g_templateObj.resultFormatDf);
