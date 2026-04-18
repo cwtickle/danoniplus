@@ -3422,11 +3422,11 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 				const x = timeMargin + j * laneWidth;
 
 				// 始点から終点までを矩形（帯）で描画
-				ctx.fillRect(x + 4, yStart, laneWidth - 8, yEnd - yStart);
+				ctx.fillRect(x + 2, yStart, laneWidth - 3, yEnd - yStart);
 
 				// 終点側のライン（任意：終点であることを分かりやすくする）
 				ctx.strokeStyle = 'rgba(0, 200, 255, 0.8)';
-				ctx.strokeRect(x + 4, yStart, laneWidth - 8, yEnd - yStart);
+				ctx.strokeRect(x + 2, yStart, laneWidth - 3, yEnd - yStart);
 			}
 		}
 
@@ -3437,7 +3437,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 				if (isNaN(parseFloat(note))) return;
 				const y = ((note - firstArrowFrame) / playingFrame) * mmHeight + mmMarginY;
 				const x = timeMargin + j * laneWidth;
-				ctx.fillRect(x + 2, y - 1, laneWidth - 4, 1.5); // 視認性のため厚み1.5px
+				ctx.fillRect(x + 1, y - 1, laneWidth - 1, 1.5); // 視認性のため厚み1.5px
 			});
 		}
 
